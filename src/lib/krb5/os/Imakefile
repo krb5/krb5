@@ -9,6 +9,7 @@ OBJS= \
 	get_krbhst.o	\
 	hst_realm.o	\
 	ktdefname.o	\
+	kuserok.o	\
 	localaddr.o	\
 	locate_kdc.o	\
 	lock_file.o	\
@@ -30,6 +31,7 @@ SRCS= \
 	get_krbhst.c	\
 	hst_realm.c	\
 	ktdefname.c	\
+	kuserok.c	\
 	localaddr.c	\
 	locate_kdc.c	\
 	lock_file.c	\
