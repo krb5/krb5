@@ -1,3 +1,7 @@
+Sat Dec 23 01:04:40 1995    <tytso@rsts-11.mit.edu>
+
+	* configure.in: Add check for DBM/db libraries
+
 Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
  
         * kdb5_mkdums.c : Remove mkvno from krb5_db_entry
