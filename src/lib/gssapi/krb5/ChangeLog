@@ -1,4 +1,10 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * accept_sec_context.c, init_sec_context.c, util_seed.c : 
+		Remove krb5_enctype references, and replace with 
+		krb5_keytype where appropriate.
+
 Thu Aug 31 11:50:34 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gssapiP_krb5.h - Add new V2 dispatch prototypes.  Update arguments
 		to be compatible with V2 API.  Add tokens for V2 integrity
