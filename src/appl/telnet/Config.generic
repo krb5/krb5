@@ -1,0 +1,586 @@
+#
+# Copyright (c) 1991 The Regents of the University of California.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms are permitted provided
+# that: (1) source distributions retain this entire copyright notice and
+# comment, and (2) distributions including binaries display the following
+# acknowledgement:  ``This product includes software developed by the
+# University of California, Berkeley and its contributors'' in the
+# documentation or other materials provided with the distribution and in
+# all advertising materials mentioning features or use of this software.
+# Neither the name of the University nor the names of its contributors may
+# be used to endorse or promote products derived from this software without
+# specific prior written permission.
+# THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#	@(#)Config.generic	5.5 (Berkeley) 3/1/91
+#
+
+# This is the configuration file for building all of
+# telnet/telnetd/libtelnet.  If you want to add your
+# own local configuration for a specific machine that
+# is already listed here, it is best to create a new
+# file called "Config.local", and put the definitions
+# there.  If you are adding definitions for a new system
+# type, you can add them here.  In this case, please send
+# the new definition, and any changes you have to make to
+# the code, back to "dab@cray.com" so that your changes
+# can be put into the next release.
+#
+# Each definition must have the form:
+#
+#	<target>:
+#		make -f Makefile.generic ${WHAT} \
+#			<definitions>
+
+# DEFINES=
+#
+#    Variables to be defined when actually compiling the source.  Defined
+#    as: DEFINES="-D<var> -D<var2> ... -D<varn>"
+#
+#    TELNET/TELNETD CONFIGURATION
+#
+# 	LINEMODE	Turns on support in telnetd for the linemode option.
+#			(Linemode is always on in the client).
+#
+#	KLUDGELINEMODE	Define this to get the kludged up version of linemode
+#			that was in 4.3BSD.  This is a good thing to have
+#			around for talking to older systems.  This has no
+#			effect on telnetd if LINEMODE has not been defined.
+#
+#	DIAGNOSTICS	Turns on diagnostic code in telnetd; adds extra
+#			logic and checks, and debuging output if started
+#			with the -D option.
+#
+#	NO_URGENT	Define this if you don't want telnetd to send
+#			IAC DM in urgent mode when the pty output queue
+#			is flushed.
+#
+#	GENERATE_GA	Turns on code to allow the generation of Go Ahead(GA)
+#			if the server is WONT SGA.  This code is imprecise,
+#			it generates the GA when two seconds have elapsed
+#			and no input or output has occurred.
+#
+#	AUTHENTICATION	Enable the AUTHENTICATION option.
+#
+#	ENCRYPTION	Enable the ENCRYPT option.
+#
+#	KRB4		Enable Kerberos Version 4 Authentication code
+#			in libtelnet/libtelnet.a
+#
+#	KRB5		Enable Kerberos Version 5 Authentication code
+#			in libtelnet/libtelnet.a
+#
+#	SIMPLE_AUTH
+#
+#	DES_ENCRYPTION	Enable DES encryption/decryption, requires
+#			getting a the initial key from Kerberos.  This
+#			works with both Kerberos Version 4 and 5.
+#
+#    LOCAL SYSYTEM PARAMATERS
+#
+#	TERMCAP		Define this if your system is termcap based,
+#			otherwise a terminfo based system is assumed.
+#
+#	SYSV_TERMIO	Use the System V termio structure. (implies USE_TERMIO)
+#
+#	NO_CC_T		Define this if your termio.h file does not have
+#			a typedef for cc_t.
+#
+#	USE_TERMIO	Define this if you have the POSIX termios structures.
+#			This code works under the BSD 4.4 terminal driver.
+#
+#	HAS_GETTOS	Define this if you have the setsockopt() option for
+#			setting the IP Type Of Service bits, (IP_TOS) and
+#			you have the gettosbyname() function.
+#
+#	NEWINIT		Turns on the new init code for UNICOS systems.
+#
+#	STREAMS		This system needs <sys/stream.h> for <sys/tty.h>
+#			(Sun 4.0.3)
+#
+#	FILIO_H		This system should use <sys/fileo.h> instead
+#			of <sys/ioctl.h> (Sun 4.0.3)
+#
+#	HAVE_fd_set	This system has a typedef for fd_set, but does
+#			not have FDSET() defined.
+#
+#	NO_STRING_H	If you don't have <string.h>, but have <strings.h>
+#
+#	NO_LOGIN_P	If /bin/login doesn't understand the "-p"
+#			(preserve environment) option.
+#
+#	STREAMS		If the system has streams; causes <sys/stream.h>
+#			to be included instead of <sys/tty.h>
+#
+#	MUST_ALIGN	If !KRB & !HAVE_KRB4_DES_LIB and your words
+#			must be word aligned.
+#
+#	STREAMSPTY	Use /dev/ptmx to get a clean pty.  Uses
+#			streams packet mode rather than Berkeley.
+#			Appropriate for SVr4 derivatives.
+#
+#	UTMPX		System has /etc/utmpx as well as /etc/utmp.
+#			Use makeutx and modutx to update utmp/x and wtmp/x.
+#			Appropriate for SVr4 derivatives.
+
+# LIB_OBJ=
+#    This is a list of object files that are needed but are not in
+#    the standard C library.
+#
+# 	    strcasecmp.o	If you don't have strncasecmp(3)
+#	    strdup.o		If you don't have strdup(3)
+#	    setenv.o		If you don't have setenv(3) and unsetenv(3)
+#	    setsid.o		If you don't have the POSIX setsid() call
+#	    strerror.o		If you don't have strerror(3)
+#	    strftime.o		If you don't have strftime(3)
+#	    getopt.o		If you don't have getopt(3)
+#	    herror.o		If you don't have herror(3)
+#	    gettytab.o		If you can get gettytab.c from getty source.
+#	    getent.o		If you can't get gettytab.c
+#	    kerberos.o		If you have Kerberos Version 4
+#	    kerberos5.o		If you have Kerberos Version 5
+#	    mem.o		If you don't have mem*(3) routines.
+
+# LIB_SRC=
+#    This is a list of source modules for specificed in LIB_OBJ.
+#    This information is used by make for checking dependencies.
+
+
+# LIBS=
+#    This is a list of libraries to be included.  This will always
+#    include the telnet library, and will also include either -lcurses
+#    or -ltermcap, -lutil for 4.4bsd, and -lnet for UNICOS5.0 and earlier.
+#    Also -lkrb & -ldes if Kerberos.
+
+# LIBPATH=
+#    This is a list of the paths to all the libraries listed in LIBS.
+#    This information is used by make for checking dependencies.
+#    Don't forget libc.a
+
+# VPATH=
+#    Directory where gettytab.c can be found, if you have it.
+
+# LIBEXEC=
+#    Directory where the telnetd executable should be installed.
+
+# LCCFLAGS=
+#    Local flags for ${CC} (like -O)
+
+# AR=
+#    Name of "ar" program, usually just "ar".
+
+# ARFLAGS
+#    Flags to pass to ${AR}
+
+# RANLIB
+#    Name of "ranlib" program, set it to "NONE" if you don't
+#    have a "ranlib".
+
+all:
+	@echo "you must specify what type of system you are on,"
+	@echo "or modify the makefile for your system."
+	@echo "Known system types are:"
+	@echo " 4.4bsd 4.3reno 4.3tahoe 4.3bsd"
+	@echo " unicos5.0 unicos5.1 unicos6.0 unicos6.1 unicos7.0 unicos8.0"
+	@echo " sun3.5 sun4.0 sun4.0.3c sun4.1 sol2.0"
+	@echo " dynix3.0.12 dynix3.0.17"
+	@echo " ultrix3.1 ultrix4.0"
+	@echo " next1.0"
+
+4.4bsd:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+		    -DDEFAULT_IM='\"\r\n4.4 BSD UNIX (%h) (%t)\r\n\r\r\n\r\"' \
+			-DUSE_TERMIO -DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="gettytab.o" \
+		LIB_SRC="gettytab.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		VPATH=/usr/src/libexec/getty \
+		LIBEXEC=${DESTDIR}/usr/libexec \
+		CC="${CC}" LCCFLAGS="-O"
+
+4.3reno:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+	-DDEFAULT_IM='\"\r\n4.3BSD-Reno UNIX (%h) (%t)\r\n\r\r\n\r\"' \
+			-DUSE_TERMIO -DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="gettytab.o" \
+		LIB_SRC="gettytab.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		VPATH=/usr/src/libexec/getty \
+		LIBEXEC=${DESTDIR}/usr/libexec \
+		CC="${CC}" LCCFLAGS="-O"
+
+4.3tahoe:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+		 -DDEFAULT_IM='\"\r\n4.3BSD-Tahoe UNIX (%h) (%t)\r\n\r\r\n\r\"'\
+			-DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="strdup.o setsid.o strftime.o gettytab.o" \
+		LIB_SRC="strdup.c setsid.c strftime.c gettytab.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		VPATH=/usr/src/etc/getty \
+		LIBEXEC=${DESTDIR}/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+4.3bsd:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+		    -DDEFAULT_IM='\"\r\n4.3BSD UNIX (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="strdup.o setsid.o strftime.o \
+			gettytab.o getopt.o herror.o" \
+		LIB_SRC="strdup.c setsid.c strftime.c \
+			gettytab.c getopt.c herror.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		VPATH=/usr/src/etc/getty \
+		LIBEXEC=${DESTDIR}/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+unicos8.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet -lkrb -ldes" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a \
+				/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
+			-DLINEMODE -DKLUDGELINEMODE \
+			-DSYSV_TERMIO -DHAS_GETTOS \
+			-D_ANSI_PROTO \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 8.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
+		CC="${CC}" LCCFLAGS="-O"
+
+unicos7.0 unicos7.C:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet -lkrb -ldes" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a \
+				/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
+			-DLINEMODE -DKLUDGELINEMODE \
+			-DSYSV_TERMIO -DHAS_GETTOS \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 7.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
+		CC="${CC}" LCCFLAGS="-O"
+
+unicos6.1:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
+			-DKLUDGELINEMODE -DUSE_TERMIO -DHAS_GETTOS \
+			-DLINEMODE -DSYSV_TERMIO -DNEWINIT \
+			-DNO_LOGIN_F -DNO_LOGIN_P \
+			-DAUTHENTICATION -DENCRYPTION \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 6.1 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
+		CC="${CC}" LCCFLAGS="-O"
+
+unicos6.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
+			-DKLUDGELINEMODE -DUSE_TERMIO -DHAS_GETTOS \
+			-DLINEMODE -DSYSV_TERMIO -DNEWINIT \
+			-DNO_LOGIN_F -DNO_LOGIN_P \
+			-DAUTHENTICATION -DENCRYPTION \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 6.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
+		CC="${CC}" LCCFLAGS="-O"
+
+unicos5.1:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lnet -lcurses -L../libtelnet -ltelnet" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=sigset \
+			-DKLUDGELINEMODE -DSYSV_TERMIO -DNO_CC_T \
+			-DUNICOS5 -DLINEMODE -DSYSV_TERMIO \
+			-DNEWINIT -DNO_LOGIN_F -DNO_LOGIN_P \
+			-DAUTHENTICATION -DENCRYPTION \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 5.1 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strerror.o setsid.o strftime.o" \
+		LIB_SRC="getent.c strerror.c setsid.c strftime.c" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+unicos5.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lnet -lcurses -L../libtelnet -ltelnet" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=sigset \
+			-DKLUDGELINEMODE -DSYSV_TERMIO -DNO_CC_T \
+			-DUNICOS5 -DUNICOS50 -DLINEMODE -DSYSV_TERMIO \
+			-DNEWINIT -DNO_LOGIN_F -DNO_LOGIN_P \
+			-DAUTHENTICATION -DENCRYPTION \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 5.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strerror.o setsid.o strftime.o" \
+		LIB_SRC="getent.c strerror.c setsid.c strftime.c" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+sun3.5:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+			-DHAVE_fd_set \
+			-DDIAGNOSTICS \
+		   -DDEFAULT_IM='\"\r\nSunOS UNIX 3.5 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DNO_LOGIN_P" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strdup.o strerror.o setsid.o \
+			setenv.o strftime.o strcasecmp.o herror.o" \
+		LIB_SRC="getent.c strdup.c strerror.c setsid.c \
+			setenv.c strftime.c strcasecmp.c herror.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
+		CC="${CC}" LCCFLAGS="-O"
+
+sun4.0.3c sun4.0:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DFILIO_H -DTERMCAP -DUSE_TERMIO -DNO_CC_T \
+			-DKLUDGELINEMODE \
+		   -DDEFAULT_IM='\"\r\nSunOS UNIX 4.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DSTREAMS -DDIAGNOSTICS \
+			" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strerror.o setsid.o setenv.o \
+				strcasecmp.o strftime.o herror.o" \
+		LIB_SRC="getent.c strerror.c setsid.c setenv.c \
+				strcasecmp.c strftime.c herror.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
+		CC="${CC}" LCCFLAGS="-O"
+
+sun4.1:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DFILIO_H -DTERMCAP -DUSE_TERMIO \
+			-DKLUDGELINEMODE -DSTREAMS \
+			-DAUTHENTICATION -DENCRYPTION \
+		   -DDEFAULT_IM='\"\r\nSunOS UNIX 4.1 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS " \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strerror.o setenv.o herror.o" \
+		LIB_SRC="getent.c strerror.c setenv.c herror.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
+		CC="${CC}" LCCFLAGS="-O"
+
+sol2.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="/usr/ccs/lib/libtermcap.a ../libtelnet/libtelnet.a \
+			-lc /usr/ucblib/libucb.a -lsocket -lnsl" \
+		LIBPATH="/usr/ccs/lib/libtermcap.a ../libtelnet/libtelnet.a \
+			/usr/lib/libc.a /usr/ucblib/libucb.a \
+			/usr/lib/libsocket.a /usr/lib/libnsl.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES="-DFILIO_H -DTERMCAP -DUSE_TERMIO \
+			-DKLUDGELINEMODE -DSTREAMS -DSTREAMSPTY \
+			-DDIAGNOSTICS -DNO_LOGIN_P -DUTMPX" \
+		INCLUDES="-I.. -I/opt/cygnus/lib/ucbinclude \
+			-I/usr/ucbinclude" \
+		LIB_OBJ="getent.o strerror.o setenv.o herror.o" \
+		LIB_SRC="getent.c strerror.c setenv.c herror.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
+		CC="${CC}" LCCFLAGS="-O"
+
+dynix3.0.12:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+		 -DDEFAULT_IM='\"\r\nDYNIX(R) V3.0.12 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS -DNO_STRING_H " \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strchr.o strrchr.o strdup.o strerror.o \
+			setsid.o setenv.o strcasecmp.o strftime.o getopt.o \
+			mem.o" \
+		LIB_SRC="getent.c strchr.c strrchr.c strdup.c strerror.c \
+			setsid.c setenv.c strcasecmp.c strftime.c getopt.c \
+			mem.o" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+dynix3.0.17:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a -lseq" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+			../libtelnet/libtelnet.a /usr/lib/libseq.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+			-DDIAGNOSTICS -DNO_STRING_H \
+		 -DDEFAULT_IM='\"\r\nDYNIX(R) V3.0.17 (%h) (%t)\r\n\r\r\n\r\"' \
+			" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strchr.o strrchr.o strdup.o strerror.o \
+			setsid.o strftime.o mem.o" \
+		LIB_SRC="getent.c strchr.c strrchr.c strdup.c strerror.c \
+			setsid.c strftime.c mem.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+ultrix3.1:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+			-DDIAGNOSTICS -DUSE_TERMIO \
+		    -DDEFAULT_IM='\"\r\nULTRIX V3.1 (%h) (%t)\r\n\r\r\n\r\"' \
+			-YPOSIX" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strdup.o strerror.o setenv.o \
+			strftime.o herror.o" \
+		LIB_SRC="getent.c strdup.c strerror.c setenv.c \
+			strftime.c herror.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+ultrix4.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DUSE_TERMIO -DTERMCAP \
+		    -DDEFAULT_IM='\"\r\nULTRIX V4.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DKLUDGELINEMODE -DDIAGNOSTICS " \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strdup.o strerror.o setsid.o \
+			setenv.o strftime.o" \
+		LIB_SRC="getent.c strdup.c strerror.c setsid.c \
+			setenv.c strftime.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc \
+		CC="${CC}" LCCFLAGS="-O"
+next1.0:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="../libtelnet/libtelnet.a -ltermcap -lsys_s" \
+		LIBPATH="/lib/libc.a /lib/libsys_s.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-bsd -DTERMCAP -DKLUDGELINEMODE \
+			-DDEFAULT_IM='\"\r\nNeXT 1.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS -DNO_STRING_H \
+			-Dgetenv=getenv_" \
+		INCLUDES="-I.." \
+		LIB_OBJ="strdup.o setenv.o setsid.o strftime.o \
+			strcasecmp.o gettytab.o" \
+		LIB_SRC=s"trdup.c setenv.c setsid.c strftime.c \
+			strcasecmp.c gettytab.c" \
+		CC="${CC}" LCCFLAGS="-O" \
+		VPATH=../../getty \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc
+
+#
+# For the convex, make symbolic links to the tc[sg]getattr.c routines,
+# because we are using posix stuff, but not the posix library...
+# Pass the stuff to Makefile.generic by passing the object/source names
+# in through LIB_OBJ and LIB_SRC
+#
+convex:
+	@echo $@ is untested... it may or may not work..."
+	ln -s ../../rel_usr/src/lib/libc/posix/tcsetattr.c tcsetattr.c
+	ln -s ../../rel_usr/src/lib/libc/posix/tcgetattr.c tcgetattr.c
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="../libtelnet/libtelnet.a" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
+		CC="${CC}" LCCFLAGS="-g ${OPTLEV} -Dconvex" \
+		DEFINES=${ODEFS}"-DUSE_TERMIO -DLINEMODE \
+			-DDEFAULT_IM='\"\r\nConvex (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o setsid.o strftime.o \
+			tcsetattr.o tcgetattr.o" \
+		LIB_SRC="getent.c setsid.c strftime.c \
+			tcsetattr.c tcgetattr.c"
+
+clean cleandir:
+	make -f Makefile.generic $@
