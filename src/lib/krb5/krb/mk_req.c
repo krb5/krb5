@@ -66,15 +66,11 @@ krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
     krb5_creds 		  creds;
     char	       ** realm;
 
-    /* get realm */
-    if (retval = krb5_get_host_realm(context, hostname, &realm)) 
-	return retval;
+    retval = krb5_sname_to_principal(context, hostname, service, 
+				     KRB5_NT_SRV_HST, &server);
+    if (retval)
+      return retval;
 
-    /* build principal */
-    if (retval = krb5_build_principal(context, &server, strlen(realm[0]),
-				      realm[0], service, hostname, NULL))
-	goto cleanup_realm;
-				      
     /* obtain ticket & session key */
     memset((char *)&creds, 0, sizeof(creds));
     if (retval = krb5_copy_principal(context, server, &creds.server))
@@ -98,7 +94,5 @@ cleanup_creds:
 cleanup_princ:
     krb5_free_principal(context, server);
 
-cleanup_realm:
-    krb5_free_host_realm(context, realm);
     return retval;
 }

@@ -79,6 +79,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 {
     krb5_error_code 	  retval;
     krb5_checksum	  checksum;
+    krb5_checksum	  *checksump = 0;
     krb5_auth_context	* new_auth_context;
 
     krb5_ap_req request;
@@ -131,34 +132,29 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	    goto cleanup;
 
 
-    /* Generate checksum, XXX What should the seed be? */
-    if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(context,
-			     (*auth_context)->cksumtype))) == NULL) {
-	retval = ENOMEM;
-	goto cleanup;
+    if (in_data) {
+      if ((*auth_context)->cksumtype == 0x8003) {
+	/* XXX Special hack for GSSAPI */
+	checksum.checksum_type = 0x8003;
+	checksum.length = in_data->length;
+	checksum.contents = (krb5_octet *) in_data->data;
+      } else  {
+	/* Generate checksum, XXX What should the seed be? */
+	if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(context,
+				 (*auth_context)->cksumtype))) == NULL) {
+	  retval = ENOMEM;
+	  goto cleanup;
+	}
+	if (retval = krb5_calculate_checksum(context, 
+					     (*auth_context)->cksumtype, 
+					     in_data->data, in_data->length,
+					     (*auth_context)->keyblock->contents,
+					     (*auth_context)->keyblock->length,
+					     &checksum))
+	  goto cleanup_cksum;
+      }
+      checksump = &checksum;
     }
-
-    if (in_data == NULL) {
-    	if (retval = krb5_calculate_checksum(context, 
-					   (*auth_context)->cksumtype, 0, 0,
-					   (*auth_context)->keyblock->contents,
-                                           (*auth_context)->keyblock->length,
-                                           &checksum))
-	    goto cleanup_cksum;
-    } else 
-        if ((*auth_context)->cksumtype == 0x8003) {
-    	    /* XXX Special hack for GSSAPI */
-	    checksum.checksum_type = 0x8003;
-	    checksum.length = in_data->length;
-	    checksum.contents = (krb5_octet *) in_data->data;
-        } else 
-    	    if (retval = krb5_calculate_checksum(context, 
-					    (*auth_context)->cksumtype, 
-					    in_data->data, in_data->length,
-					    (*auth_context)->keyblock->contents,
-					    (*auth_context)->keyblock->length,
-					    &checksum))
-	        goto cleanup_cksum;
 
     /* Generate authenticator */
     if (((*auth_context)->authentp = (krb5_authenticator *)malloc(sizeof(
@@ -168,7 +164,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     }
 
     if (retval = krb5_generate_authenticator(context, (*auth_context)->authentp,
-					     (in_creds)->client, &checksum,
+					     (in_creds)->client, checksump,
 					     (*auth_context)->local_subkey,
 					     (*auth_context)->local_seq_number,
 					     (in_creds)->authdata))
@@ -229,7 +225,8 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     krb5_xfree(toutbuf);
 
 cleanup_cksum:
-    free(checksum.contents);
+    if (checksump && checksump->checksum_type != 0x8003)
+      free(checksump->contents);
 
 cleanup:
     if (request.ticket)
