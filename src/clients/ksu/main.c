@@ -933,20 +933,20 @@ va_list ap;
 }
 
 
-char * get_dir_of_file( char * path){     
+char *get_dir_of_file(char * path)
+{
+    char * temp_path;      
+    char * ptr;
 
-char * temp_path;      
-char * ptr;
+    temp_path =  strdup(path);
 
-temp_path =  strdup(path);
-
-if (ptr = strrchr( temp_path, '/')){   
+    if (ptr = strrchr( temp_path, '/')) {
 	*ptr = '\0';  
-}else{
+    } else {
 	free (temp_path);
-	temp_path = (char *) calloc(MAXPATHLEN, sizeof(char));  
-	temp_path = (char *) getwd(temp_path);
-}
-
-return temp_path;  
+	temp_path = malloc(MAXPATHLEN);
+	if (temp_path)
+	    getcwd(temp_path, MAXPATHLEN);
+    }
+    return temp_path;  
 }
