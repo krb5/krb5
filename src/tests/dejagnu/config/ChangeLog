@@ -1,4 +1,12 @@
 
+Mon Jul 17 15:25:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Add handling of kdc.conf which has the KDC profile.
+		Remove parameters from command lines of admin utilities because
+		they're not needed anymore since we have the KDC profile.  Also
+		remove prompting for the master key since we have usage of the
+		stash file.
+
+
 Wed Jul 12 14:10:09 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Correctly set LD_LIBRARY_PATH.  Also set it before
 		using RESOLVE.

@@ -40,7 +40,7 @@ if ![info exists KEY] {
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
-catch "exec rm -f tmpdir/db.ok tmpdir/srvtab tmpdir/krb5.conf tmpdir/cpw_srvtab"
+catch "exec rm -f tmpdir/db.ok tmpdir/srvtab tmpdir/krb5.conf tmpdir/kdc.conf tmpdir/cpw_srvtab"
 
 # Put the installed kerberos directories on PATH.
 # This needs to be fixed for V5.
@@ -264,6 +264,33 @@ proc setup_kerberos_files { } {
     close $conffile
     }
 
+    # Create a kdc.conf file.
+    # The magic principal expiration number is supposed to be 31/12/99 23:59:59
+    # the flags are disallow_postated, disallow_renewable.
+    if ![file exists tmpdir/kdc.conf] {
+	set conffile [open tmpdir/kdc.conf w]
+	puts $conffile "\[kdcdefaults\]"
+	puts $conffile "	primary_ports = 3085,3086,3087,3088,3089"
+	puts $conffile "	secondary_ports = -1"
+	puts $conffile ""
+	puts $conffile "\[realms\]"
+	puts $conffile "	KRBTEST.COM = \{"
+	puts $conffile "		profile = $tmppwd/krb5.conf"
+	puts $conffile "		database_name = $tmppwd/db"
+	puts $conffile "		master_key_name = master/key"
+	puts $conffile "		encryption_type = 3"
+	puts $conffile "		port = 3088"
+	puts $conffile "		kadmind_port = 3750"
+	puts $conffile "		key_stash_file = $tmppwd/stash"
+	puts $conffile "		max_life = 1:0:0"
+	puts $conffile "		max_renewable_life = 3:0:0"
+	puts $conffile "		default_principal_expiration = 946699199"
+	puts $conffile "		default_principal_flags = 9"
+	puts $conffile "	\}"
+	puts $conffile ""
+	close $conffile
+    }
+
     # Create ACL file.
     if ![file exists tmpdir/acl] {
 	set aclfile [open tmpdir/acl w]
@@ -347,6 +374,10 @@ proc setup_kerberos_env { } {
 	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
     }
     verbose "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
+
+    # Set our kdc config file.
+    set env(KRB5_KDC_PROFILE) $tmppwd/kdc.conf
+    verbose "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
     return 1
 }
 
@@ -395,7 +426,7 @@ proc setup_kadmind_srvtab {  } {
     global tmppwd
 
     catch "exec rm -f tmpdir/cpw_srvtab"
-    spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+    spawn $KDB5_EDIT -r KRBTEST.COM
     expect_after {
 	timeout {
 	    fail "kdb5_edit cpw_srvtab"
@@ -410,8 +441,6 @@ proc setup_kadmind_srvtab {  } {
 	    return 0
 	}
     }
-    expect "Enter KDC database master key"
-    send "masterkey$KEY\r"
     expect "kdb5_edit:"
     send "xst KRBTEST.COM changepw\r"
     expect "'changepw/KRBTEST.COM@KRBTEST.COM' added to keytab"
@@ -465,7 +494,7 @@ proc setup_kerberos_db { standalone } {
 	return 0
     }
 
-    spawn $KDB5_CREATE -r KRBTEST.COM -d $tmppwd/db
+    spawn $KDB5_CREATE -r KRBTEST.COM
     expect {
 	"Enter KDC database master key:" {
 	    verbose "kdb5_create started"
@@ -513,7 +542,7 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Stash the master key in a file.
-    spawn $KDB5_STASH -f $tmppwd/stash -d $tmppwd/db -r KRBTEST.COM
+    spawn $KDB5_STASH -r KRBTEST.COM
     expect {
 	"Enter KDC database master key:" {
 	    verbose "kdb5_stash started"
@@ -553,7 +582,7 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Add an admin user.
-    spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+    spawn $KDB5_EDIT -r KRBTEST.COM
     expect_after {
 	timeout {
 	    catch "expect_after"
@@ -572,12 +601,6 @@ proc setup_kerberos_db { standalone } {
 	    return 0
 	}
     }
-    expect {
-	"Enter KDC database master key" {
-	    verbose "kdb5_edit started"
-	}
-    }
-    send "masterkey$KEY\r"
     expect "kdb5_edit:"
     send "ank krbtest/admin@KRBTEST.COM\r"
     expect "Enter password:"
@@ -636,32 +659,11 @@ proc start_kerberos_daemons { standalone } {
     }
 
     # Start up the kerberos daemon
-    spawn $KRB5KDC -p 3088 -d $tmppwd/db -m -n -r KRBTEST.COM
+    spawn $KRB5KDC -r KRBTEST.COM -n
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
     expect {
-	"Enter KDC database master key" {
-	    send "masterkey$KEY\r"
-	}
-	timeout {
-	    fail "krb5kdc"
-	    stop_kerberos_daemons
-	    return 0
-	}
-	eof {
-	    fail "krb5kdc"
-	    stop_kerberos_daemons
-	    return 0
-	}
-    }
-    expect {
-	"\r" { }
-	timeout {
-	    fail "krb5kdc"
-	    stop_kerberos_daemons
-	    return 0
-	}
-	eof {
+	-re ".+" {
 	    fail "krb5kdc"
 	    stop_kerberos_daemons
 	    return 0
@@ -676,24 +678,9 @@ proc start_kerberos_daemons { standalone } {
     catch "exec sleep 2"
 
     # Start up the kadmind daemon
-    spawn $KADMIND -d $tmppwd/db -p 3750 -a $tmppwd/acl -T tmpdir/cpw_srvtab -m -r KRBTEST.COM -n
+    spawn $KADMIND -a $tmppwd/acl -r KRBTEST.COM -n
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
-    expect {
-	"Enter KDC database master key:" {
-	    send "masterkey$KEY\r"
-	}
-	timeout {
-	    fail "kadmind"
-	    stop_kerberos_daemons
-	    return 0
-	}
-	eof {
-	    fail "kadmind"
-	    stop_kerberos_daemons
-	    return 0
-	}
-    }
     expect {
 	"cannot bind to network address" {
 	    fail "kadmind"
@@ -881,7 +868,7 @@ proc setup_srvtab { standalone {id host} } {
 
     catch "exec rm -f $hostname-new-srvtab"
 
-    spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+    spawn $KDB5_EDIT -r KRBTEST.COM
     expect_after {
 	timeout {
 	    fail "kdb5_edit srvtab"
@@ -900,8 +887,6 @@ proc setup_srvtab { standalone {id host} } {
 	    return 0
 	}
     }
-    expect "Enter KDC database master key"
-    send "masterkey$KEY\r"
     expect "kdb5_edit:"
     send "xst $hostname $id\r"
     expect "'$id/$hostname@KRBTEST.COM' added to keytab"
