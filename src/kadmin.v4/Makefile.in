@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS)
-LDFLAGS = -g
 
 all::
 

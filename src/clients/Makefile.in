@@ -1,3 +1,2 @@
 CFLAGS = $(CCOPTS)
-LDFLAGS = -g
 

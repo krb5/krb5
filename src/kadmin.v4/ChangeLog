@@ -1,3 +1,7 @@
+
+Fri Jul 7 16:04:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS
+
 Fri Jun  9 19:07:13 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
