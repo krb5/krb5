@@ -45,6 +45,9 @@ krb5_init_context(context)
 	if ((retval = krb5_set_default_in_tkt_ktypes(ctx, NULL)))
 		goto cleanup;
 
+	if ((retval = krb5_set_default_tgs_ktypes(ctx, NULL)))
+		goto cleanup;
+
 	if ((retval = krb5_os_init_context(ctx)))
 		goto cleanup;
 
@@ -74,8 +77,11 @@ krb5_free_context(ctx)
 {
      krb5_os_free_context(ctx);
 
-     if (ctx->ktypes)
-          free(ctx->ktypes);
+     if (ctx->in_tkt_ktypes)
+          free(ctx->in_tkt_ktypes);
+
+     if (ctx->tgs_ktypes)
+          free(ctx->tgs_ktypes);
 
      if (ctx->default_realm)
 	  free(ctx->default_realm);
@@ -111,21 +117,22 @@ krb5_set_default_in_tkt_ktypes(context, ktypes)
 	    return ENOMEM;
 
     } else {
-	i = 2;
+	i = 3;
 
 	/* Should reset the list to the runtime defaults */
 	if ((new_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i))) {
-	    new_ktypes[0] = ENCTYPE_DES_CBC_MD5;
-	    new_ktypes[1] = ENCTYPE_DES_CBC_CRC;
+	    new_ktypes[0] = ENCTYPE_DES3_CBC_MD5;
+	    new_ktypes[1] = ENCTYPE_DES_CBC_MD5;
+	    new_ktypes[2] = ENCTYPE_DES_CBC_CRC;
 	} else {
 	    return ENOMEM;
 	}
     }
 
-    if (context->ktypes) 
-        free(context->ktypes);
-    context->ktypes = new_ktypes;
-    context->ktype_count = i;
+    if (context->in_tkt_ktypes) 
+        free(context->in_tkt_ktypes);
+    context->in_tkt_ktypes = new_ktypes;
+    context->in_tkt_ktype_count = i;
     return 0;
 }
 
@@ -137,15 +144,126 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
     krb5_enctype * old_ktypes;
 
     if ((old_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-					     (context->ktype_count + 1)))) {
-	memcpy(old_ktypes, context->ktypes, sizeof(krb5_enctype) * 
-		  		context->ktype_count);
-	old_ktypes[context->ktype_count] = 0;
+					     (context->in_tkt_ktype_count + 1)))) {
+	memcpy(old_ktypes, context->in_tkt_ktypes, sizeof(krb5_enctype) * 
+		  		context->in_tkt_ktype_count);
+	old_ktypes[context->in_tkt_ktype_count] = 0;
     } else {
 	return ENOMEM;
     }
 
     *ktypes = old_ktypes;
     return 0;
+}
+
+krb5_error_code
+krb5_set_default_tgs_ktypes(context, ktypes)
+	krb5_context context;
+	const krb5_enctype *ktypes;
+{
+    krb5_enctype * new_ktypes;
+    int i;
+
+    if (ktypes) {
+	for (i = 0; ktypes[i]; i++) {
+	    if (!valid_enctype(ktypes[i])) 
+		return KRB5_PROG_ETYPE_NOSUPP;
+	}
+
+	/* Now copy the default ktypes into the context pointer */
+	if ((new_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)))
+	    memcpy(new_ktypes, ktypes, sizeof(krb5_enctype) * i);
+	else
+	    return ENOMEM;
+
+    } else {
+	i = 0;
+	new_ktypes = (krb5_enctype *)NULL;
+    }
+
+    if (context->tgs_ktypes) 
+        free(context->tgs_ktypes);
+    context->tgs_ktypes = new_ktypes;
+    context->tgs_ktype_count = i;
+    return 0;
+}
+
+krb5_error_code
+krb5_get_tgs_ktypes(context, princ, ktypes)
+    krb5_context context;
+    krb5_const_principal princ;
+    krb5_enctype **ktypes;
+{
+    krb5_enctype * old_ktypes;
+
+    if (context->tgs_ktype_count) {
+
+	/* Application-set defaults */
+
+	if ((old_ktypes =
+	     (krb5_enctype *)malloc(sizeof(krb5_enctype) *
+				    (context->tgs_ktype_count + 1)))) {
+	    memcpy(old_ktypes, context->tgs_ktypes, sizeof(krb5_enctype) * 
+		   context->tgs_ktype_count);
+	    old_ktypes[context->tgs_ktype_count] = 0;
+	} else {
+	    return ENOMEM;
+	}
+    } else {
+	/*
+	   XXX - For now, we only support libdefaults
+	   Perhaps this should be extended to allow for per-host / per-realm
+	   session key types.
+	 */
+
+	char *retval;
+	char *sp, *ep;
+	int i, j, count;
+	krb5_error_code code;
+
+	code = profile_get_string(context->profile,
+				  "libdefaults", "default_tgs_enctypes", NULL,
+				  "des3-cbc-md5 des-cbc-md5 des-cbc-crc",
+				  &retval);
+	if (code)
+	    return code;
+
+	count = 0;
+	sp = retval;
+	while (sp) {
+	    for (ep = sp; *ep && (*ep != ',') && !isspace(*ep); ep++)
+		;
+	    if (*ep) {
+		*ep++ = '\0';
+		while (isspace(*ep))
+		    ep++;
+	    } else
+		ep = (char *) NULL;
+
+	    count++;
+	    sp = ep;
+	}
 	
+	if ((old_ktypes =
+	     (krb5_enctype *)malloc(sizeof(krb5_enctype) * (count + 1))) ==
+	    (krb5_enctype *) NULL)
+	    return ENOMEM;
+	
+	sp = retval;
+	j = 0;
+	for (i = 0; i < count; i++) {
+	    if (! krb5_string_to_enctype(sp, &old_ktypes[j]))
+		j++;
+
+	    /* skip to next token */
+	    while (*sp) sp++;
+	    while (! *sp) sp++;
+	}
+
+	old_ktypes[j] = (krb5_enctype) 0;
+	free(retval);
+    }
+
+    *ktypes = old_ktypes;
+    return 0;
 }
