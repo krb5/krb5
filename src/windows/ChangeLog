@@ -1,5 +1,7 @@
 1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
 
+	* readme, README: readme renamed to README.
+
 	* version.rc: Boost version to 1.1.  Include 1998 & 1999 in copyright
 	years.
 
