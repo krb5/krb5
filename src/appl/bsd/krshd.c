@@ -1960,10 +1960,10 @@ recvauth(netf, peersin, valid_checksum)
 	    fatal (netf, "Server can't get session subkey");
 	if (!key && do_encrypt)
 	    fatal (netf, "No session subkey sent");
-	rcmd_stream_init_krb5 (key, do_encrypt, 0);
+	rcmd_stream_init_krb5 (key, do_encrypt, 0, 0);
     } else
 	/* old way */
-	rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 0);
+	rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 0, 0);
 
     /* Null out the "session" because kcmd.c references the session
      * key here, and we do not want krb5_free_ticket() to destroy it. */

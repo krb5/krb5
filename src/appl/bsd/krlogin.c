@@ -676,7 +676,7 @@ main(argc, argv)
 	if (key == 0)
 	    key = &cred->keyblock;
 
-	rcmd_stream_init_krb5(key, encrypt_flag, 1);
+	rcmd_stream_init_krb5(key, encrypt_flag, 1, 1);
     }
 	
     rem = sock;

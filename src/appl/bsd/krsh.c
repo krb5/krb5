@@ -407,7 +407,7 @@ main(argc, argv0)
 		try_normal(argv0);
 	}
 
-	rcmd_stream_init_krb5(key, encrypt_flag, 0);
+	rcmd_stream_init_krb5(key, encrypt_flag, 0, 1);
     }
 
 #ifdef HAVE_ISATTY

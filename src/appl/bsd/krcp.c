@@ -463,7 +463,7 @@ krb5_creds *cred;
 			if (key == 0)
 			    key = &cred->keyblock;
 
-			rcmd_stream_init_krb5(key, encryptflag, 0);
+			rcmd_stream_init_krb5(key, encryptflag, 0, 1);
 		    }
 		    rem = sock;
 #else
@@ -529,7 +529,7 @@ krb5_creds *cred;
 		}
 		(void) sprintf(buf, "%s -f %s", cmd, src);
 #ifdef KERBEROS
-		authopts = AP_OPTS_MUTUAL_REQUIRED;
+		authopts = AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY;
 		status = kcmd(&sock, &host,
 			      port,
 			      pwd->pw_name,  suser,
@@ -564,8 +564,28 @@ krb5_creds *cred;
 #else
 			try_normal(orig_argv);
 #endif
-		} else
-		    rcmd_stream_init_krb5(&cred->keyblock, encryptflag, 0);
+		} else {
+		    krb5_boolean similar;
+		    krb5_keyblock *key = &cred->keyblock;
+
+		    if (status = krb5_c_enctype_compare(bsd_context,
+							ENCTYPE_DES_CBC_CRC,
+							cred->keyblock.enctype,
+							&similar))
+			try_normal(orig_argv); /* doesn't return */
+
+		    if (!similar) {
+			status = krb5_auth_con_getlocalsubkey (bsd_context,
+							       auth_context,
+							       &key);
+			if ((status || !key) && encryptflag)
+			    try_normal(orig_argv);
+		    }
+		    if (key == 0)
+			key = &cred->keyblock;
+
+		    rcmd_stream_init_krb5(key, encryptflag, 0, 1);
+		}
 		rem = sock; 
 				   
 		euid = geteuid();
@@ -1336,7 +1356,7 @@ void
 	exit(1);
     }
     
-    rcmd_stream_init_krb5(&new_creds->keyblock, encryptflag, 0);
+    rcmd_stream_init_krb5(&new_creds->keyblock, encryptflag, 0, 0);
     
     /* cleanup */
     krb5_free_cred_contents(bsd_context, &creds);

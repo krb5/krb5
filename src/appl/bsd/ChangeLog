@@ -1,5 +1,15 @@
 2000-05-15  Ken Raeburn  <raeburn@mit.edu>
 
+	* kcmd.c (encivec_i, encivec_o): New variables replace old single
+	variable encivec.
+	(rcmd_stream_init_krb5): New argument am_client, used to
+	initialize both ivec values.
+	* krcp.c (main, answer_auth): Pass new argument.
+	* krlogin.c (main): Ditto.
+	* krlogind.c (recvauth): Ditto.
+	* krsh.c (main): Ditto.
+	* krshd.c (recvauth): Ditto.
+
 	* defines.h (OPTS_FORWARD_CREDS, OPTS_FORWARDABLE_CREDS): Change
 	numbers so they don't conflict with AP_OPTS_USE_SUBKEY.
 	* kcmd.c (kcmd): New argument authconp, used to return the auth

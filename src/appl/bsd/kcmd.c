@@ -117,7 +117,7 @@ static char des_inbuf[2*RCMD_BUFSIZ];	 /* needs to be > largest read size */
 static char des_outpkt[2*RCMD_BUFSIZ+4]; /* needs to be > largest write size */
 static krb5_data desinbuf;
 static krb5_data desoutbuf;
-static krb5_data encivec;
+static krb5_data encivec_i, encivec_o;
 static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
 static int (*input)();
 static int (*output)();
@@ -744,10 +744,11 @@ void rcmd_stream_init_normal()
     output = twrite;
 }
 
-void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
+void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client)
      krb5_keyblock *in_keyblock;
      int encrypt_flag;
      int lencheck;
+     int am_client;
 {
     krb5_error_code status;
     size_t blocksize;
@@ -773,7 +774,7 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
     }
 
     if (similar) {
-	encivec.length = 0;
+	encivec_i.length = encivec_o.length = 0;
 	return;
     }
 
@@ -783,15 +784,17 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
 	abort();
     }
 
-    encivec.length = blocksize;
+    encivec_i.length = encivec_o.length = blocksize;
 
-    if ((encivec.data = malloc(encivec.length)) == NULL) {
+    if ((encivec_i.data = malloc(encivec_i.length * 2)) == NULL) {
 	/* XXX what do I do? */
 	abort();
     }
+    encivec_o.data = encivec_i.data + encivec_i.length;
 
     /* is there a better way to initialize this? */
-    memset(encivec.data, '\0', blocksize);
+    memset(encivec_i.data, am_client, blocksize);
+    memset(encivec_o.data, 1 - am_client, blocksize);
 }
 
 #ifdef KRB5_KRB4_COMPAT
@@ -908,7 +911,7 @@ static int v5_des_read(fd, buf, len)
 
     /* decrypt info */
     if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
-		       encivec.length?&encivec:0,
+		       encivec_i.length?&encivec_i:0,
 		       &cipher, &plain)) {
 	/* probably out of sync */
 	errno = EIO;
@@ -948,7 +951,7 @@ static int v5_des_write(fd, buf, len)
     cipher.ciphertext.data = desoutbuf.data;
 
     if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
-		       encivec.length?&encivec:0,
+		       encivec_o.length?&encivec_o:0,
 		       &plain, &cipher)) {
 	errno = EIO;
 	return(-1);
