@@ -321,7 +321,7 @@ HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
 
 CLEANUP= $(ETOUT) $(HOUT) \
 	include/profile.h include/krb5/osconf.h \
-	winfile.list macfile.list \
+	winfile.list macfile.list
 
 
 kerbsrc.win: kerbsrc.zip
