@@ -92,15 +92,17 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__)
-#include <KerberosSupport/KerberosConditionalMacros.h>
-#endif
-
-#if defined(_MSDOS) || defined(_WIN32) || TARGET_API_MAC_OS8
-#include "win-mac.h"
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <KerberosSupport/KerberosConditionalMacros.h>
+	
+	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
+		#include <Kerberos5/win-mac.h>
+	#endif
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
+#include "win-mac.h"
+
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI	"kerberos.ini"
 #define INI_FILES	"Files"
