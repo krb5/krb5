@@ -1,3 +1,8 @@
+2004-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* implementor.texinfo, thread-safe.txt, threads.txt: Various
+	updates relating to thread support.
+
 2004-09-07  Tom Yu  <tlyu@mit.edu>
 
 	* install.texinfo (Propagate the Database to Each Slave KDC):

@@ -21,7 +21,7 @@ means, within the krb5 library.)
    //   POSIX: partial initializer is PTHREAD_MUTEX_INITIALIZER,
    //          finish does nothing
    //   Windows: partial initializer is zero/empty,
-   //            finish does the actual work
+   //            finish does the actual work and runs at load time
    //   debug: partial initializer sets one magic value,
    //          finish verifies, sets a new magic value
    k5_mutex_t foo_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
@@ -46,6 +46,9 @@ means, within the krb5 library.)
    // 
    int k5_mutex_lock(k5_mutex_t *);
    int k5_mutex_unlock(k5_mutex_t *);
+   // Optional (always defined, but need not do anything):
+   void k5_mutex_assert_locked(k5_mutex_t *);
+   void k5_mutex_assert_unlocked(k5_mutex_t *);
 
 
    k5_key_t key;
@@ -53,5 +56,26 @@ means, within the krb5 library.)
    void *k5_getspecific(k5_key_t);
    int k5_setspecific(k5_key_t, const void *);
    ... stuff to signal library termination ...
+
+
+On many platforms with weak reference support, we can declare certain
+symbols to be weak, and test the addresses before calling them.  The
+references generally will be non-null if the application pulls in the
+pthread support.  Sometimes stubs are present in the C library for
+some of these routines, and sometimes they're not functional; if so,
+we need to figure out which ones, and check for the presence of some
+*other* routines.
+
+AIX 4.3.3 doesn't support weak references.  However, it looks like
+calling dlsym(NULL) causes the pthread library to get loaded, so we're
+going to just go ahead and link against it anyways.
+
+
+For now, the basic model is:
+
+  If weak references supported, use them.
+  Else, assume support is present.
+
+
 
 See also notes in src/include/k5-thread.h.

@@ -474,18 +474,21 @@ another thread at the same time.
 
 A credentials cache, key table, or replay cache object, once the C
 object is created, may be used in multiple threads simultaneously;
-internal locking is done by the implementations of those objects.
-(Iterators?  Probably okay now, but needs review.)  However, this
-doesn't mean that we've fixed any problems there may be regarding
-simultaneous access to on-disk files from multiple processes, and in
-fact if a process opens a disk file multiple times, the same problems
-may come up.
+internal locking is done by the implementations of those objects.  (We
+assume that object destructors are invoked only when all other threads
+are finished with the object.)  @i{(Iterators?  Probably okay now, but
+needs review.)}  However, this doesn't mean that we've fixed any
+problems there may be regarding simultaneous access to on-disk files
+from multiple processes, and in fact if a process opens a disk file
+multiple times, the same problems may come up.
 
 Any file locking issues may become worse, actually.  UNIX file locking
 with @code{flock} is done on a per-process basis, and closing a file
 descriptor that was opened on a file releases any locks the process
 may have on that file, even if they were obtained using other,
-still-open file descriptors.
+still-open file descriptors.  UNIX file locks are used for credentials
+caches and keytab files; the replay cache implementation is already
+known to be unsafe in not using file locking.
 
 We MAY implement --- but haven't yet --- a ``fix'' whereby open files
 are tracked by name (and per object type), and a new attempt to open
@@ -495,6 +498,46 @@ problem of getting the same file via two names that look different,
 but it may be ``good enough.''
 
 GSSAPI ....
+
+Strictly speaking, the GSSAPI specification says nothing about thread
+safety, so for best portability, a GSSAPI application probably should
+not assume that a GSSAPI implementation is thread-safe in any way.  On
+the other hand, the GSSAPI specification doesn't explicitly say that
+it's safe to use in a program that uses the Berkeley sockets API,
+either; at some point, you have to start making some assumptions.
+
+A GSSAPI security context, like a @code{krb5_context}, may be used
+only in one thread at a time.  The GSSAPI specification gives precise
+definitions of C data structures for buffers, object identifiers, OID
+sets, and channel bindings, that do not allow for the addition of a
+mutex.  Thus, these objects must not be modified by one thread while
+in use by another.  (All of the GSSAPI functions that modify these
+types of objects should be obvious; they're listed as ``modify''
+parameters in the specification.  In fact, aside from the case of
+@code{gss_add_oid_set_member}, they're generally output arguments,
+with the previous value ignored.)
+
+The function @code{gss_add_cred} can modify the
+@code{input_cred_handle} object, if a null @code{output_cred_handle}
+argument is supplied.  Thus, all @code{gss_cred_id_t} objects must
+have mutexes, and all accesses (except in the functions creating or
+destroying them) must acquire the mutex first.
+
+Note that the use of @code{const} in the GSSAPI C bindings is not a
+useful guide to when an object might or might not be modified.  In
+most cases, @code{const} is applied to handle arguments, which are
+defined as arithmetic or pointer types.  It applies to the argument
+itself, not the data pointed to @i{if} the type is a pointer; this
+would mean that the GSSAPI function in question cannot modify the
+value of its handle parameter, and puts no constraints on
+modifications to the object indicated by the handle.  And according to
+the C type compatibility rules, the function definition can omit those
+@code{const} qualifiers anyways.@footnote{If you're thinking that this
+means the use of @code{const} in the GSSAPI C bindings is confusing
+and/or useless, you're right.}
+
+
+
 
 @node Thread System Requirements, Internal Thread API, Kerberos API Thread Safety, Thread Safety
 @section Thread System Requirements
