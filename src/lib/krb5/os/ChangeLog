@@ -1,3 +1,8 @@
+2000-09-23  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_us_time.c: Added modifications to Mac OS Microseconds timing
+	to work properly under Carbon.
+
 2000-06-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (foreach_localaddr): Use SIOCGSIZIFCONF ioctl if

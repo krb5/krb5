@@ -68,6 +68,13 @@ void AbsoluteToSecsNanosecs (
       UInt32			*residualNanoseconds    /* Fractional second  */
    );
 
+/* Convert Microseconds to date and time */
+void MicrosecondsToSecsMicrosecs (
+      UnsignedWide		eventTime,              /* Value to convert   */
+      UInt32			*eventSeconds,         /* Result goes here   */
+      UInt32			*residualMicroseconds    /* Fractional second  */
+   );
+
 /*
  * The Unix epoch is 1/1/70, the Mac epoch is 1/1/04.
  *
@@ -125,6 +132,7 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 #if TARGET_CPU_PPC	    						/* Only PPC has accurate time */
     if (HaveAccurateTime ()) {					/* Does hardware support accurate time? */
     
+    #if TARGET_API_MAC_CARBON
     	AbsoluteTime 	absoluteTime;
     	UInt32			nanoseconds;
     	
@@ -132,6 +140,12 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     	AbsoluteToSecsNanosecs (absoluteTime, &sec, &nanoseconds);
     	
     	usec = nanoseconds / 1000;
+    #else
+    	UnsignedWide			microseconds;
+		Microseconds (&microseconds);
+    	
+    	MicrosecondsToSecsMicrosecs (microseconds, &sec, &usec);
+    #endif
     } else
 #endif /* TARGET_CPU_PPC */
     {
@@ -180,7 +194,7 @@ Boolean HaveAccurateTime ()
 	if (!alreadyChecked) {
 		alreadyChecked = true;
 		haveAccurateTime = false;
-#if TARGET_CPU_PPC
+#if TARGET_CPU_PPC && !TARGET_API_MAC_CARBON
 		if ((Ptr) UpTime != (Ptr) kUnresolvedCFragSymbolAddress) {
 			UInt32	minAbsoluteTimeDelta;
 			UInt32	theAbsoluteTimeToNanosecondNumerator;
@@ -203,6 +217,8 @@ Boolean HaveAccurateTime ()
 				haveAccurateTime = true;
 			}
 		}
+#else if TARGET_CPU_PPA && TARGET_API_MAC_CARBON
+		haveAccurateTime = true;
 #endif /* TARGET_CPU_PPC */
 	}
 	
@@ -253,6 +269,43 @@ void AbsoluteToSecsNanosecs (
    eventNanoseconds = U64Subtract (eventNanoseconds, U64Multiply (eventSeconds64, kTenE9));
    *eventSeconds = (UInt64ToUnsignedWide (eventSeconds64)).lo;
    *residualNanoseconds = (UInt64ToUnsignedWide (eventNanoseconds)).lo;
+}
+
+/* Convert microseconds to date and time */
+
+void MicrosecondsToSecsMicrosecs (
+      UnsignedWide		eventTime,              /* Value to convert   */
+      UInt32			*eventSeconds,         /* Result goes here   */
+      UInt32			*residualMicroseconds    /* Fractional second  */
+   )
+{
+   UInt64					eventMicroseconds;
+   static UInt32			gMicrosecondsAtStart = 0;
+
+   /*
+    * If this is the first call, compute the offset between
+    * GetDateTime and UpTime.
+    */
+   if (gMicrosecondsAtStart == 0) {
+      UInt32				secondsAtStart;
+      UInt32				microsecondsAtStart;
+
+      GetDateTime (&secondsAtStart);
+      Microseconds (&microsecondsAtStart);
+	  gMicrosecondsAtStart = 1000000 * secondsAtStart - microsecondsAtStart;
+   }
+   /*
+    * Add the local time epoch to the event time
+    */
+   eventMicroseconds = UnsignedWideToUInt64 (gMicrosecondsAtStart) + UnsignedWideToUInt64 (eventTime);
+
+   /*
+    * eventSeconds = eventMicroseconds / 10e6;
+    * residualMicroseconds = eventMicroseconds % 10e6;
+    * Finally, compute the local time (seconds) and fraction.
+    */
+   *eventSeconds = eventMicroseconds / 1000000;
+   *residualMicroseconds = eventMicroseconds - *eventSeconds * 100000;
 }
 #elif defined(_WIN32)
 
