@@ -1,4 +1,0 @@
-Mon Jul 15 17:09:01 1996  Marc Horowitz  <marc@mit.edu>
-
-	* keytab-spec.exp: use /krb5/v5srvtab, since /krb5 is the test
- 	dir.
