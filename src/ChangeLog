@@ -1,3 +1,10 @@
+Mon Jan 15 02:35:02 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (WITH_DBM_LNAME): add --with-dbm-lname for callers of
+	an_to_ln routines that have USE_DBM_LNAME set.
+	* aclocal.m4 (WITH_DBM_KDB): avoid duplicating --with-dbm code all
+	over the place.
+
 Sun Dec 17 19:53:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* acconfig.h: Add blank line to work around a misfeature of

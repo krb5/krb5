@@ -959,6 +959,41 @@ else
 fi
 AC_SUBST(LDARGS)
 ])dnl
+dnl
+dnl --with-dbm uses native DBM for the KDC database.
+dnl
+define(WITH_DBM_KDB,[
+AC_ARG_WITH([dbm],
+[  --with-dbm		use native dbm for kdc database
+  --without-dbm		use included version of Berkeley db (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using native dbm)
+	AC_CHECK_LIB(ndbm,main)
+	AC_CHECK_LIB(dbm,main)
+else
+	AC_MSG_RESULT(Using Berkeley db)
+fi
+])dnl
+dnl
+dnl --with-dbm-lname uses native DBM for the aname to lname conversion
+dnl
+define(WITH_DBM_LNAME,[
+AC_ARG_WITH([dbm-lname],
+[  --with-dbm-lname              use native dbm for aname to lname conversion
+  --without-dbm-lname           use included version of Berkeley db (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using native dbm)
+	AC_CHECK_LIB(ndbm,main)
+	AC_CHECK_LIB(dbm,main)
+else
+	AC_MSG_RESULT(Using Berkeley db)
+fi
+])dnl
+dnl
 
 
 
