@@ -1,0 +1,6 @@
+Fri Jul 15 23:36:50 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* kerberos5.c (kerberos5_is): Avoid coredump caused by freeing of
+	an unitialized variable.  Also make sure we don't try to free name
+	if it is NULL.
+

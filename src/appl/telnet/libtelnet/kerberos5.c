@@ -354,7 +354,6 @@ kerberos5_is(ap, data, cnt)
 				printf("%s\r\n", errbuf);
 			return;
 		}
-		free(name);
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 		    /* do ap_rep stuff here */
 		    reply.ctime = authdat->authenticator->ctime;
@@ -382,7 +381,8 @@ kerberos5_is(ap, data, cnt)
 		}
                 auth_finished(ap, AUTH_USER);
 		
-		free(name);
+		if (name)
+		    free(name);
 	    	if (authdat->authenticator->subkey &&
 		    authdat->authenticator->subkey->keytype == KEYTYPE_DES) {
 		    if (session_key.contents)
