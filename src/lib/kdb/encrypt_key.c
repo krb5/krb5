@@ -79,8 +79,8 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
 	return ENOMEM;
     }
 
-    *ptr++ = len & 0xff;
-    *ptr++ = (len >> 8) & 0xff;
+    krb5_kdb_encode_int16(len, ptr);
+    ptr += 2;
     if (retval = krb5_encrypt(context, (krb5_pointer) tmp.contents,
 			     (krb5_pointer)(ptr), tmp.length, eblock, 0)) {
 	krb5_xfree(key_data->key_data_contents[0]);

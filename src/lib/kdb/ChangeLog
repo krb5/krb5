@@ -1,4 +1,9 @@
 
+Fri Aug 4 16:22:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_xdr,{de,en}crypt_key.c - Use encode/decode macros to [de]serialize
+		data going in and out of the database.
+
+
 Thu Aug 3 11:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* encrypt_key.c - Actually copy in the salt data which we allocated
 		space for in krb5_dbekd_encrypt_key_data().

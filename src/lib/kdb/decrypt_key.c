@@ -54,8 +54,8 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 
     keyblock->length = 0;
     ptr = key_data->key_data_contents[0];
-    *(((krb5_octet *)(&keyblock->length))) = *ptr++;
-    *(((krb5_octet *)(&keyblock->length)) + 1) = *ptr++;
+    krb5_kdb_decode_int16(ptr, keyblock->length);
+    ptr += 2;
     if (retval = krb5_decrypt(context, (krb5_pointer) ptr,
 			      (krb5_pointer)keyblock->contents,
 			      key_data->key_data_length[0] - 2, 
@@ -69,7 +69,7 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 	if (key_data->key_data_ver == 2) {
 	    keysalt->type = key_data->key_data_type[1];
 	    keysalt->data.length = key_data->key_data_length[1];
-	    if (!(keysalt->data.data = (krb5_octet *)malloc(keysalt->data.length))){
+	    if (!(keysalt->data.data = (char *)malloc(keysalt->data.length))){
     	        krb5_xfree(keyblock->contents);
 	        return ENOMEM;
 	    }

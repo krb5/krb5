@@ -91,10 +91,8 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
 	(*tl_data)->tl_data_contents = nextloc;
 
 	/* Mod Date */
-    	*nextloc++ = (krb5_octet)(mod_princ->mod_date & 0xff);
-    	*nextloc++ = (krb5_octet)((mod_princ->mod_date >> 8) & 0xff);
-    	*nextloc++ = (krb5_octet)((mod_princ->mod_date >> 16) & 0xff);
-    	*nextloc++ = (krb5_octet)((mod_princ->mod_date >> 24) & 0xff);
+	krb5_kdb_encode_int32(mod_princ->mod_date, nextloc);
+	nextloc += 4;
 
 	/* Mod Princ */
 	memcpy(nextloc, unparse_mod_princ, unparse_mod_princ_size);
@@ -122,16 +120,15 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
 	    nextloc = tl_data->tl_data_contents;
 
 	    /* Mod Date */
-    	    *(((krb5_octet *)(&(*mod_princ)->mod_date))) = *nextloc++;
-    	    *(((krb5_octet *)(&(*mod_princ)->mod_date)) + 1) = *nextloc++;
-    	    *(((krb5_octet *)(&(*mod_princ)->mod_date)) + 2) = *nextloc++;
-    	    *(((krb5_octet *)(&(*mod_princ)->mod_date)) + 3) = *nextloc++;
+	    krb5_kdb_decode_int32(nextloc, (*mod_princ)->mod_date);
+	    nextloc += 4;
 
 	    /* Mod Princ */
     	    if (retval = krb5_parse_name(context, (const char *) nextloc, 
 					 &((*mod_princ)->mod_princ))) 
 		break;
-    	    if ((strlen(nextloc) + 1 + 4) != tl_data->tl_data_length) {
+    	    if ((strlen((char *) nextloc) + 1 + 4) !=
+		tl_data->tl_data_length) {
 		retval = KRB5_KDB_TRUNCATED_RECORD;
 		break;
 	    }
@@ -181,6 +178,7 @@ krb5_encode_princ_contents(context, content, entry)
     char		* nextloc;
     krb5_tl_data	* tl_data;
     krb5_error_code 	  retval;
+    krb5_int16		  psize16;
 
     krb5_db_entry copy_princ;
 
@@ -245,70 +243,52 @@ krb5_encode_princ_contents(context, content, entry)
     nextloc = content->dptr;
 
 	/* Base Length */
-    *nextloc++ = (krb5_octet)(entry->len & 0xff);
-    *nextloc++ = (krb5_octet)((entry->len >> 8) & 0xff);
+    krb5_kdb_encode_int16(entry->len, nextloc);
+    nextloc += 2;
 
 	/* Master Key Version */
-    *nextloc++ = (krb5_octet)(entry->mkvno & 0xff);
-    *nextloc++ = (krb5_octet)((entry->mkvno >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->mkvno >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->mkvno >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->mkvno, nextloc);
+    nextloc += 4;
 
 	/* Attributes */
-    *nextloc++ = (krb5_octet)(entry->attributes & 0xff);
-    *nextloc++ = (krb5_octet)((entry->attributes >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->attributes >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->attributes >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->attributes, nextloc);
+    nextloc += 4;
   
 	/* Max Life */
-    *nextloc++ = (krb5_octet)(entry->max_life & 0xff);
-    *nextloc++ = (krb5_octet)((entry->max_life >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->max_life >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->max_life >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->max_life, nextloc);
+    nextloc += 4;
   
 	/* Max Renewable Life */
-    *nextloc++ = (krb5_octet)(entry->max_renewable_life & 0xff);
-    *nextloc++ = (krb5_octet)((entry->max_renewable_life >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->max_renewable_life >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->max_renewable_life >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->max_renewable_life, nextloc);
+    nextloc += 4;
   
 	/* When the client expires */
-    *nextloc++ = (krb5_octet)(entry->expiration & 0xff);
-    *nextloc++ = (krb5_octet)((entry->expiration >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->expiration >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->expiration >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->expiration, nextloc);
+    nextloc += 4;
   
 	/* When its passwd expires */
-    *nextloc++ = (krb5_octet)(entry->pw_expiration & 0xff);
-    *nextloc++ = (krb5_octet)((entry->pw_expiration >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->pw_expiration >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->pw_expiration >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->pw_expiration, nextloc);
+    nextloc += 4;
   
 	/* Last successful passwd */
-    *nextloc++ = (krb5_octet)(entry->last_success & 0xff);
-    *nextloc++ = (krb5_octet)((entry->last_success >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->last_success >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->last_success >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->last_success, nextloc);
+    nextloc += 4;
   
 	/* Last failed passwd attempt */
-    *nextloc++ = (krb5_octet)(entry->last_failed & 0xff);
-    *nextloc++ = (krb5_octet)((entry->last_failed >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->last_failed >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->last_failed >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->last_failed, nextloc);
+    nextloc += 4;
   
 	/* # of failed passwd attempt */
-    *nextloc++ = (krb5_octet)(entry->fail_auth_count & 0xff);
-    *nextloc++ = (krb5_octet)((entry->fail_auth_count >> 8) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->fail_auth_count >> 16) & 0xff);
-    *nextloc++ = (krb5_octet)((entry->fail_auth_count >> 24) & 0xff);
+    krb5_kdb_encode_int32(entry->fail_auth_count, nextloc);
+    nextloc += 4;
 
 	/* # tl_data strutures */
-    *nextloc++ = (krb5_octet)(entry->n_tl_data & 0xff);
-    *nextloc++ = (krb5_octet)((entry->n_tl_data >> 8) & 0xff);
+    krb5_kdb_encode_int16(entry->n_tl_data, nextloc);
+    nextloc += 2;
   
 	/* # key_data strutures */
-    *nextloc++ = (krb5_octet)(entry->n_key_data & 0xff);
-    *nextloc++ = (krb5_octet)((entry->n_key_data >> 8) & 0xff);
+    krb5_kdb_encode_int16(entry->n_key_data, nextloc);
+    nextloc += 2;
   
     	/* Put extended fields here */
     if (entry->len != KRB5_KDB_V1_BASE_LENGTH)
@@ -325,18 +305,18 @@ krb5_encode_princ_contents(context, content, entry)
 	 * To squeze a few extra bytes out it is always assumed to come
 	 * after the base type.
 	 */
-    *nextloc++ = (krb5_octet)(unparse_princ_size & 0xff);
-    *nextloc++ = (krb5_octet)((unparse_princ_size >> 8) & 0xff);
+    psize16 = (krb5_int16) unparse_princ_size;
+    krb5_kdb_encode_int16(psize16, nextloc);
+    nextloc += 2;
     (void) memcpy(nextloc, unparse_princ, unparse_princ_size);
     nextloc += unparse_princ_size;
 
     	/* tl_data is a linked list, of type, legth, contents */
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
-    	*nextloc++ = (krb5_octet)(tl_data->tl_data_type & 0xff);
-    	*nextloc++ = (krb5_octet)((tl_data->tl_data_type >> 8) & 0xff);
-
-    	*nextloc++ = (krb5_octet)(tl_data->tl_data_length & 0xff);
-    	*nextloc++ = (krb5_octet)((tl_data->tl_data_length >> 8) & 0xff);
+	krb5_kdb_encode_int16(tl_data->tl_data_type, nextloc);
+	nextloc += 2;
+	krb5_kdb_encode_int16(tl_data->tl_data_length, nextloc);
+	nextloc += 2;
 
 	memcpy(nextloc, tl_data->tl_data_contents, tl_data->tl_data_length);
 	nextloc += tl_data->tl_data_length;
@@ -344,20 +324,19 @@ krb5_encode_princ_contents(context, content, entry)
 
     	/* key_data is an array */
     for (i = 0; i < entry->n_key_data; i++) {
-       *nextloc++ = (krb5_octet)(entry->key_data[i].key_data_ver & 0xff);
-       *nextloc++ = (krb5_octet)((entry->key_data[i].key_data_ver >> 8)&0xff);
-       *nextloc++ = (krb5_octet)(entry->key_data[i].key_data_kvno & 0xff);
-       *nextloc++ = (krb5_octet)((entry->key_data[i].key_data_kvno >> 8)&0xff);
+	krb5_kdb_encode_int16(entry->key_data[i].key_data_ver, nextloc);
+	nextloc += 2;
+	krb5_kdb_encode_int16(entry->key_data[i].key_data_kvno, nextloc);
+	nextloc += 2;
 
 	for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
 	    krb5_int16 type = entry->key_data[i].key_data_type[j];
 	    krb5_int16 length = entry->key_data[i].key_data_length[j];
 
-    	    *nextloc++ = (krb5_octet)(type & 0xff);
-    	    *nextloc++ = (krb5_octet)((type >> 8) & 0xff);
-
-    	    *nextloc++ = (krb5_octet)(length & 0xff);
-    	    *nextloc++ = (krb5_octet)((length >> 8) & 0xff);
+    	    krb5_kdb_encode_int16(type, nextloc);
+	    nextloc += 2;
+    	    krb5_kdb_encode_int16(length, nextloc);
+	    nextloc += 2;
 
 	    if (length) {
 	        memcpy(nextloc, entry->key_data[i].key_data_contents[j],length);
@@ -391,6 +370,7 @@ krb5_decode_princ_contents(context, content, entry)
     int			  sizeleft, i;
     char 		* nextloc;
     krb5_tl_data       ** tl_data;
+    krb5_int16		  i16;
 
     krb5_principal princ;
     krb5_error_code retval;
@@ -415,73 +395,55 @@ krb5_decode_princ_contents(context, content, entry)
 	return KRB5_KDB_TRUNCATED_RECORD;
 
 	/* Base Length */
-    *(((krb5_octet *)(&entry->len))) = *nextloc++;
-    *(((krb5_octet *)(&entry->len)) + 1) = *nextloc++;
+    krb5_kdb_decode_int16(nextloc, entry->len);
+    nextloc += 2;
 
 	/* Master Key Version */
-    *(((krb5_octet *)(&entry->mkvno))) = *nextloc++;
-    *(((krb5_octet *)(&entry->mkvno)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->mkvno)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->mkvno)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->mkvno);
+    nextloc += 4;
 
 	/* Attributes */
-    *(((krb5_octet *)(&entry->attributes))) = *nextloc++;
-    *(((krb5_octet *)(&entry->attributes)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->attributes)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->attributes)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->attributes);
+    nextloc += 4;
 
 	/* Max Life */
-    *(((krb5_octet *)(&entry->max_life))) = *nextloc++;
-    *(((krb5_octet *)(&entry->max_life)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->max_life)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->max_life)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->max_life);
+    nextloc += 4;
 
 	/* Max Renewable Life */
-    *(((krb5_octet *)(&entry->max_renewable_life))) = *nextloc++;
-    *(((krb5_octet *)(&entry->max_renewable_life)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->max_renewable_life)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->max_renewable_life)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->max_renewable_life);
+    nextloc += 4;
 
 	/* When the client expires */
-    *(((krb5_octet *)(&entry->expiration))) = *nextloc++;
-    *(((krb5_octet *)(&entry->expiration)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->expiration)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->expiration)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->expiration);
+    nextloc += 4;
 
 	/* When its passwd expires */
-    *(((krb5_octet *)(&entry->pw_expiration))) = *nextloc++;
-    *(((krb5_octet *)(&entry->pw_expiration)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->pw_expiration)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->pw_expiration)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->pw_expiration);
+    nextloc += 4;
 
 	/* Last successful passwd */
-    *(((krb5_octet *)(&entry->last_success))) = *nextloc++;
-    *(((krb5_octet *)(&entry->last_success)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->last_success)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->last_success)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->last_success);
+    nextloc += 4;
 
 	/* Last failed passwd attempt */
-    *(((krb5_octet *)(&entry->last_failed))) = *nextloc++;
-    *(((krb5_octet *)(&entry->last_failed)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->last_failed)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->last_failed)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->last_failed);
+    nextloc += 4;
 
 	/* # of failed passwd attempt */
-    *(((krb5_octet *)(&entry->fail_auth_count))) = *nextloc++;
-    *(((krb5_octet *)(&entry->fail_auth_count)) + 1) = *nextloc++;
-    *(((krb5_octet *)(&entry->fail_auth_count)) + 2) = *nextloc++;
-    *(((krb5_octet *)(&entry->fail_auth_count)) + 3) = *nextloc++;
+    krb5_kdb_decode_int32(nextloc, entry->fail_auth_count);
+    nextloc += 4;
 
 	/* # tl_data strutures */
-    *(((krb5_octet *)(&entry->n_tl_data))) = *nextloc++;
-    *(((krb5_octet *)(&entry->n_tl_data)) + 1) = *nextloc++;
+    krb5_kdb_decode_int16(nextloc, entry->n_tl_data);
+    nextloc += 2;
 
     if (entry->n_tl_data < 0)
 	return KRB5_KDB_TRUNCATED_RECORD;
 
 	/* # key_data strutures */
-    *(((krb5_octet *)(&entry->n_key_data))) = *nextloc++;
-    *(((krb5_octet *)(&entry->n_key_data)) + 1) = *nextloc++;
+    krb5_kdb_decode_int16(nextloc, entry->n_key_data);
+    nextloc += 2;
 
     if (entry->n_key_data < 0)
 	return KRB5_KDB_TRUNCATED_RECORD;
@@ -507,8 +469,9 @@ krb5_decode_princ_contents(context, content, entry)
     }
 
     i = 0;
-    *(((krb5_octet *)(&i))) = *nextloc++;
-    *(((krb5_octet *)(&i)) + 1) = *nextloc++;
+    krb5_kdb_decode_int16(nextloc, i16);
+    i = (int) i16;
+    nextloc += 2;
 
     if (retval = krb5_parse_name(context, nextloc, &(entry->princ))) 
 	goto error_out;
@@ -533,10 +496,10 @@ krb5_decode_princ_contents(context, content, entry)
 	}
 	(*tl_data)->tl_data_next = NULL;
 	(*tl_data)->tl_data_contents = NULL;
-    	*(((krb5_octet *)(&(*tl_data)->tl_data_type))) = *nextloc++;
-    	*(((krb5_octet *)(&(*tl_data)->tl_data_type)) + 1) = *nextloc++;
-    	*(((krb5_octet *)(&(*tl_data)->tl_data_length))) = *nextloc++;
-    	*(((krb5_octet *)(&(*tl_data)->tl_data_length)) + 1) = *nextloc++;
+	krb5_kdb_decode_int16(nextloc, (*tl_data)->tl_data_type);
+	nextloc += 2;
+	krb5_kdb_decode_int16(nextloc, (*tl_data)->tl_data_length);
+	nextloc += 2;
 
     	if ((sizeleft -= (*tl_data)->tl_data_length) < 0) {
 	    retval = KRB5_KDB_TRUNCATED_RECORD;
@@ -567,10 +530,10 @@ krb5_decode_princ_contents(context, content, entry)
 	    goto error_out;
 	}
 	key_data = entry->key_data + i;
-    	*(((krb5_octet *)(&key_data->key_data_ver))) = *nextloc++;
-    	*(((krb5_octet *)(&key_data->key_data_ver)) + 1) = *nextloc++;
-    	*(((krb5_octet *)(&key_data->key_data_kvno))) = *nextloc++;
-    	*(((krb5_octet *)(&key_data->key_data_kvno)) + 1) = *nextloc++;
+	krb5_kdb_decode_int16(nextloc, key_data->key_data_ver);
+	nextloc += 2;
+	krb5_kdb_decode_int16(nextloc, key_data->key_data_kvno);
+	nextloc += 2;
 
 	/* key_data_ver determins number of elements and how to unparse them. */
 	if (key_data->key_data_ver <= KRB5_KDB_V1_KEY_DATA_ARRAY) {
@@ -579,10 +542,10 @@ krb5_decode_princ_contents(context, content, entry)
 	            retval = KRB5_KDB_TRUNCATED_RECORD;
 	            goto error_out;
 	        }
-    	        *(((krb5_octet *)(&key_data->key_data_type[j]))) = *nextloc++;
-    	        *(((krb5_octet *)(&key_data->key_data_type[j]))+1) = *nextloc++;
-    	        *(((krb5_octet *)(&key_data->key_data_length[j]))) = *nextloc++;
-    	        *(((krb5_octet *)(&key_data->key_data_length[j]))+1)=*nextloc++;
+		krb5_kdb_decode_int16(nextloc, key_data->key_data_type[j]);
+		nextloc += 2;
+		krb5_kdb_decode_int16(nextloc, key_data->key_data_length[j]);
+		nextloc += 2;
 
     	        if ((sizeleft -= key_data->key_data_length[j]) < 0) {
 	            retval = KRB5_KDB_TRUNCATED_RECORD;
