@@ -35,9 +35,9 @@ int g_make_string_buffer(str, buffer)
      const char *str;
      gss_buffer_t buffer;
 {
-   buffer->length = strlen(str)+1;
+   buffer->length = strlen(str);
 
-   if ((buffer->value = (void *) xmalloc(buffer->length)) == NULL) {
+   if ((buffer->value = (void *) xmalloc(buffer->length + 1)) == NULL) {
       buffer->length = 0;
       return(0);
    }

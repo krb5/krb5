@@ -1,3 +1,8 @@
+Sun May 24 22:01:29 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_buffer.c (g_make_string_buffer): Don't include the trailing
+		NULL of the string in the gss buffer's length.
+
 1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* util_ordering.c (g_order_free): 
