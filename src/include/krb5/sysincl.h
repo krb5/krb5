@@ -48,6 +48,7 @@
 #include <sys/file.h>			/* prototypes for file-related
 					   syscalls; flags for open &
 					   friends */
+/* this doesn't work under solaris. Use SEEK_* instead anyway... */
 #ifndef L_SET
 #define L_SET           0       /* absolute offset */
 #define L_INCR          1       /* relative to current offset */
@@ -65,6 +66,9 @@
 
 #if defined(SYSV) || defined(_AIX)
 #include <fcntl.h>
+#endif
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
 #endif
 
 #endif /* KRB5_SYSINCL__ */
