@@ -72,7 +72,7 @@ register int *error;
 	if (!rv2->element_KRB5_13) {
 	  errout:
 	    if (retval)
-		free_KRB5_AuthorizationData(retval);
+		free_KRB5_EncKrbCredPart(retval);
 	    *error = ENOMEM;
 	    return(0);
 	} 
