@@ -1,4 +1,10 @@
 
+Mon Aug 7 17:34:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin.c - Fix key list merging so that key version numbers are
+		generated and merged correctly.
+	* srv_key.c - Handle V4 salttype correctly.
+
+
 Fri Aug 4 16:14:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin.c - Add support for "ADD-KEY" and "DELETE-KEY" protocol requests
 		as well as adding the ability to keep previous random keys
