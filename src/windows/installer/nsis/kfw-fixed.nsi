@@ -2,7 +2,7 @@
 ; KfW defines and functionality
 ; Copyright (c) 2004 Massachusetts Institute of Technology
 
-!define KFW_VERSION "${KFW_MAJORVERSION}.${KFW_MINORVERSION}"
+!define KFW_VERSION "${KFW_MAJORVERSION}.${KFW_MINORVERSION}.${KFW_PATCHLEVEL}"
 
 !define PROGRAM_NAME "Kerberos for Windows"
 !ifdef RELEASE
@@ -165,13 +165,14 @@ Section "KfW Client" secClient
   ; Stop any running services or we can't replace the files
   ; Stop the running processes
   GetTempFileName $R0
-  File /oname=$R0 "Killer.exe"   ; Might not have the C Runtime Library to run
+  File /oname=$R0 "Killer.exe"
   nsExec::Exec '$R0 leash32.exe'
   nsExec::Exec '$R0 krbcc32s.exe'
   nsExec::Exec '$R0 k95.exe'
   nsExec::Exec '$R0 k95g.exe'
   nsExec::Exec '$R0 krb5.exe'
   nsExec::Exec '$R0 gss.exe'
+  nsExec::Exec '$R0 afscreds.exe'
 
   RMDir /r "$INSTDIR\bin"
 
@@ -180,12 +181,15 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\aklog.exe"
   File "${KFW_BIN_DIR}\comerr32.dll"
   File "${KFW_BIN_DIR}\gss.exe"
+  File "${KFW_BIN_DIR}\gss-client.exe"
+  File "${KFW_BIN_DIR}\gss-server.exe"
   File "${KFW_BIN_DIR}\gssapi32.dll"
   File "${KFW_BIN_DIR}\k524init.exe"
   File "${KFW_BIN_DIR}\kclnt32.dll"
   File "${KFW_BIN_DIR}\kdestroy.exe"
   File "${KFW_BIN_DIR}\kinit.exe"
   File "${KFW_BIN_DIR}\klist.exe"
+  File "${KFW_BIN_DIR}\kvno.exe"
   File "${KFW_BIN_DIR}\krb5_32.dll"
   File "${KFW_BIN_DIR}\krb524.dll"
   File "${KFW_BIN_DIR}\krbcc32.dll"
@@ -206,12 +210,15 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\aklog.pdb"
   File "${KFW_BIN_DIR}\comerr32.pdb"
   File "${KFW_BIN_DIR}\gss.pdb"
+  File "${KFW_BIN_DIR}\gss-client.pdb"
+  File "${KFW_BIN_DIR}\gss-server.pdb"
   File "${KFW_BIN_DIR}\gssapi32.pdb"
   File "${KFW_BIN_DIR}\k524init.pdb"
   File "${KFW_BIN_DIR}\kclnt32.pdb"
   File "${KFW_BIN_DIR}\kdestroy.pdb"
   File "${KFW_BIN_DIR}\kinit.pdb"
   File "${KFW_BIN_DIR}\klist.pdb"
+  File "${KFW_BIN_DIR}\kvno.pdb"
   File "${KFW_BIN_DIR}\krb5_32.pdb"
   File "${KFW_BIN_DIR}\krb524.pdb"
   File "${KFW_BIN_DIR}\krbcc32.pdb"
@@ -833,12 +840,15 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\aklog.exe"
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\gss.exe"
+   Delete /REBOOTOK "$INSTDIR\bin\gss-client.exe"
+   Delete /REBOOTOK "$INSTDIR\bin\gss-server.exe"
    Delete /REBOOTOK "$INSTDIR\bin\gssapi32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\k524init.exe"
    Delete /REBOOTOK "$INSTDIR\bin\kclnt32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\kdestroy.exe"
    Delete /REBOOTOK "$INSTDIR\bin\kinit.exe"
    Delete /REBOOTOK "$INSTDIR\bin\klist.exe"   
+   Delete /REBOOTOK "$INSTDIR\bin\kvno.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.dll"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
@@ -858,12 +868,15 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\aklog.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\gss-client.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\gss-server.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gssapi32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\k524init.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\kclnt32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\kdestroy.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\kinit.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\klist.pdb"   
+   Delete /REBOOTOK "$INSTDIR\bin\kvno.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.pdb" 
