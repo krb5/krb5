@@ -1,3 +1,8 @@
+2004-01-30  Alexandra Ellwood  <lxs@mit.edu>
+
+    * prof-int.h: prof-int.h should include pthread.h when USE_PTHREADS 
+    is defined.
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_get.c (profile_iterator_create): NAMES argument points to
