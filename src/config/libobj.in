@@ -9,7 +9,7 @@
 
 .SUFFIXES: .c .so .po
 .c.so:
-	$(CC) $(PICFLAGS) $(ALL_CFLAGS) -c $< -o $*.so.o && $(MV) $*.so.o $*.so
+	$(CC) $(PICFLAGS) -DSHARED $(ALL_CFLAGS) -c $< -o $*.so.o && $(MV) $*.so.o $*.so
 .c.po:
 	$(CC) $(PROFFLAGS) $(ALL_CFLAGS) -c $< -o $*.po.o && $(MV) $*.po.o $*.po
 
