@@ -629,7 +629,7 @@ void kadmin_cpw(argc, argv)
 	free(canon);
 	return;
     } else if (argc == 1) {
-	int i = sizeof (newpw) - 1;
+	unsigned int i = sizeof (newpw) - 1;
 	
 	sprintf(prompt1, "Enter password for principal \"%.900s\": ",
 		*argv);
@@ -954,7 +954,7 @@ void kadmin_addprinc(argc, argv)
 	mask |= KADM5_ATTRIBUTES;
 	pass = dummybuf;
     } else if (pass == NULL) {
-	int i = sizeof (newpw) - 1;
+	unsigned int i = sizeof (newpw) - 1;
 	
 	sprintf(prompt1, "Enter password for principal \"%.900s\": ",
 		canon);
