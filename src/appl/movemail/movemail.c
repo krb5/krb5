@@ -558,6 +558,7 @@ char *host;
     krb5_context context;
     krb5_principal client, server;
     krb5_error *err_ret = NULL;
+    krb5_auth_context * auth_context;
     char *hostname;
 #endif /* KRB5 */
 #endif /* KERBEROS */
@@ -641,16 +642,14 @@ char *host;
 	goto krb5error;
     }
 
-    retval = krb5_sendauth(context, (krb5_pointer) &s, "KPOPV1.0", 
-			   client, server,
+    retval = krb5_sendauth(context, &auth_context, (krb5_pointer) &s, 
+			   "KPOPV1.0", client, server,
 			   AP_OPTS_MUTUAL_REQUIRED,
-			   0,		/* no checksum */
+			   NULL,	/* no data to checksum */
 			   0,		/* no creds, use ccache instead */
 			   ccdef,
-			   0,		/* don't need seq # */
-			   0,		/* don't need a subsession key */
-			   &err_ret,
-			   0, NULL);	/* don't need reply */
+			   &err_ret, 0,
+			   NULL);	/* don't need reply */
     krb5_free_principal(context, server);
     if (retval) {
 	if (err_ret && err_ret->text.length) {

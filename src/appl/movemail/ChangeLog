@@ -1,3 +1,8 @@
+
+Mon Mar 27 09:17:06 1995 Chris Provenzano  (proven@mit.edu)
+
+	* movemail.c: Fixups to get movemail to compile.
+
 Thu Mar  2 12:28:04 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
