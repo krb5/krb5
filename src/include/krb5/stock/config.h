@@ -46,6 +46,10 @@ typedef int krb5_sigtype;
 #define NO_STDLIB_H
 #endif
 
+#ifdef ForceStdlibH
+#define	HAS_STDLIB_H
+#endif
+
 #ifdef ProvidePrototypes
 #define KRB5_PROVIDE_PROTOTYPES
 #endif
