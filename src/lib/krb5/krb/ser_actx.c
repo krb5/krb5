@@ -56,7 +56,6 @@ krb5_error_code krb5_ser_authdata_init KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_ser_address_init KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_ser_authenticator_init KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_ser_checksum_init KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_ser_encrypt_block_init KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_ser_keyblock_init KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_ser_principal_init KRB5_PROTOTYPE((krb5_context));
 
@@ -95,17 +94,20 @@ krb5_auth_context_size(kcontext, arg, sizep)
      */
     kret = EINVAL;
     if ((auth_context = (krb5_auth_context) arg)) {
-	required = sizeof(krb5_int32)*8;
-
 	kret = 0;
+
 	/* Calculate size required by i_vector - ptooey */
-	if (auth_context->i_vector && auth_context->keyblock)
-	    required += (size_t)
-		krb5_enctype_array[auth_context->keyblock->enctype]->
-		    system->block_length;
+	if (auth_context->i_vector && auth_context->keyblock) {
+	    kret = krb5_c_block_size(kcontext, auth_context->keyblock->enctype,
+				     &required);
+	} else {
+	    required = 0;
+	}
+
+	required += sizeof(krb5_int32)*8;
 
 	/* Calculate size required by remote_addr, if appropriate */
-	if (auth_context->remote_addr) {
+	if (!kret && auth_context->remote_addr) {
 	    kret = krb5_size_opaque(kcontext,
 				    KV5M_ADDRESS,
 				    (krb5_pointer) auth_context->remote_addr,
@@ -226,18 +228,25 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
 	    (void) krb5_ser_pack_int32((krb5_int32) auth_context->safe_cksumtype,
 				       &bp, &remain);
 
+	    kret = 0;
+
 	    /* Now figure out the number of bytes for i_vector and write it */
-	    obuf = (!auth_context->i_vector) ? 0 : (krb5_int32)
-		krb5_enctype_array[auth_context->keyblock->enctype]->
-		    system->block_length;
-	    (void) krb5_ser_pack_int32(obuf, &bp, &remain);
+	    if (auth_context->i_vector) {
+		kret = krb5_c_block_size(kcontext,
+					 auth_context->keyblock->enctype,
+					 &obuf);
+	    } else {
+		obuf = 0;
+	    }
+		
+	    if (!kret)
+		(void) krb5_ser_pack_int32(obuf, &bp, &remain);
 
 	    /* Now copy i_vector */
-	    if (auth_context->i_vector)
+	    if (!kret && auth_context->i_vector)
 		(void) krb5_ser_pack_bytes(auth_context->i_vector,
 					   (size_t) obuf,
 					   &bp, &remain);
-	    kret = 0;
 
 	    /* Now handle remote_addr, if appropriate */
 	    if (!kret && auth_context->remote_addr) {
@@ -555,8 +564,6 @@ krb5_ser_auth_context_init(kcontext)
 	kret = krb5_ser_authenticator_init(kcontext);
     if (!kret)
 	kret = krb5_ser_checksum_init(kcontext);
-    if (!kret)
-	kret = krb5_ser_encrypt_block_init(kcontext);
     if (!kret)
 	kret = krb5_ser_keyblock_init(kcontext);
     if (!kret)
