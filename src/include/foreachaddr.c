@@ -383,6 +383,20 @@ foreach_localaddr (/*@null@*/ void *data,
 	if ((ifp->ifa_flags & IFF_UP) == 0)
 	    continue;
 	if (ifp->ifa_flags & IFF_LOOPBACK) {
+	    /* Pretend it's not up, so the second pass will skip
+	       it.  */
+	    ifp->ifa_flags &= ~IFF_UP;
+	    continue;
+	}
+	if (ifp->ifa_addr == NULL) {
+	    /* Can't use an interface without an address.  Linux
+	       apparently does this sometimes.  [RT ticket 1770 from
+	       Maurice Massar, also Debian bug 206851, shows the
+	       problem with a PPP link on a newer kernel than I'm
+	       running.]
+
+	       Pretend it's not up, so the second pass will skip
+	       it.  */
 	    ifp->ifa_flags &= ~IFF_UP;
 	    continue;
 	}

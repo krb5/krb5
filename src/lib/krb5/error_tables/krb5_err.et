@@ -336,4 +336,8 @@ error_code KRB5_ERR_NUMERIC_REALM, "Cannot determine realm for numeric host addr
 
 error_code KRB5_ERR_BAD_S2K_PARAMS, "Invalid key generation parameters from KDC"
 
+error_code KRB5_ERR_NO_SERVICE,	"service not available"
+
+error_code KRB5_CC_READONLY,    "Ccache function not supported: read-only ccache type"
+error_code KRB5_CC_NOSUPP,      "Ccache function not supported: not implemented"
 end
