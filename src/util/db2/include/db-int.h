@@ -48,11 +48,22 @@
 #ifdef HAVE_ENDIAN_H
 # include <endian.h>
 #endif
+#ifdef HAVE_MACHINE_ENDIAN_H
+# include <machine/endian.h>
+#endif
 /* Handle both BIG and LITTLE defined and BYTE_ORDER matches one, or
    just one defined; both with and without leading underscores.
 
    Ignore "PDP endian" machines, this code doesn't support them
    anyways.  */
+#if !defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) && !defined(BYTE_ORDER)
+# ifdef __LITTLE_ENDIAN__
+#  define LITTLE_ENDIAN __LITTLE_ENDIAN__
+# endif
+# ifdef __BIG_ENDIAN__
+#  define BIG_ENDIAN __BIG_ENDIAN__
+# endif
+#endif
 #if !defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) && !defined(BYTE_ORDER)
 # ifdef _LITTLE_ENDIAN
 #  define LITTLE_ENDIAN _LITTLE_ENDIAN
@@ -75,6 +86,14 @@
 #  define BYTE_ORDER __BYTE_ORDER
 # endif
 #endif
+
+#if defined(_MIPSEL) && !defined(LITTLE_ENDIAN)
+# define LITTLE_ENDIAN
+#endif
+#if defined(_MIPSEB) && !defined(BIG_ENDIAN)
+# define BIG_ENDIAN
+#endif
+
 #if defined(LITTLE_ENDIAN) && defined(BIG_ENDIAN) && defined(BYTE_ORDER)
 # if LITTLE_ENDIAN == BYTE_ORDER
 #  define DB_BYTE_ORDER DB_LITTLE_ENDIAN
