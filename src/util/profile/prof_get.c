@@ -304,15 +304,17 @@ profile_parse_boolean(s, ret_boolean)
     	return PROF_EINVAL;
 
     for(p=conf_yes; *p; p++) {
-	if (!strcasecmp(*p,s))
-		*ret_boolean = 1;
-	    return 0;
+		if (!strcasecmp(*p,s)) {
+			*ret_boolean = 1;
+	    	return 0;
+		}
     }
 
     for(p=conf_no; *p; p++) {
-	if (!strcasecmp(*p,s))
-		*ret_boolean = 0;
-	    return 0;
+		if (!strcasecmp(*p,s)) {
+			*ret_boolean = 0;
+			return 0;
+		}
     }
 	
 	return PROF_BAD_BOOLEAN;

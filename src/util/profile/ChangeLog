@@ -1,3 +1,9 @@
+2000-05-15	Alexandra Ellwood <lxs@mit.edu>
+		* prof_get.c:
+			prof_parse_boolean () was missing some curly brackets
+			and was failing to check all the values in the list of
+			possible strings.
+
 2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
 
         * prof_get.c: 
