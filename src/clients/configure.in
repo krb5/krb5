@@ -3,7 +3,7 @@ CONFIG_RULES
 AC_PROG_INSTALL
 KRB5_BUILD_PROGRAM
 AC_HEADER_STDARG
-AC_CHECK_FUNCS(getusershell lstat setenv)
+AC_CHECK_FUNCS(getusershell lstat setenv inet_ntop getipnodebyaddr)
 if test $ac_cv_func_setenv = no ; then
   SETENVOBJ=setenv.o
 else

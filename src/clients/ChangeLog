@@ -1,3 +1,8 @@
+2000-02-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for inet_ntop and getipnodebyaddr, both used
+	in klist.
+
 1999-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for setenv.  Set SETENVOBJ to setenv.o if
