@@ -55,6 +55,7 @@ BOOL alert;		       	       /* Actions on ticket expiration */
 BOOL beep;
 static BOOL alerted;		       /* TRUE when user already alerted */
 BOOL isblocking = FALSE;	       /* TRUE when blocked in WinSock */
+static DWORD blocking_timeout;	       /* Blocking timeout */
 static DWORD blocking_end_time;	       /* Ending count for blocking timeout */
 static FARPROC hook_instance;	       /* handle for blocking hook function */
 
@@ -75,13 +76,21 @@ krb5_ccache k5_ccache;
  *
  * Returns: TRUE if we got and dispatched a message, FALSE otherwise.
  */
-BOOL CALLBACK
+BOOL __export CALLBACK
 blocking_hook_proc(void)
 {
   MSG msg;
   BOOL rc;
+  DWORD now;
 
-  if (GetTickCount() > blocking_end_time) {
+  /*
+   * The additional timeout logic is required because GetTickCount will
+   * wrap approximately every 49.7 days.
+   */
+  now = GetTickCount();
+  if (now >= blocking_end_time &&
+      (blocking_end_time >= blocking_end_time - blocking_timeout ||
+       now < blocking_end_time - blocking_timeout)) {
     WSACancelBlockingCall();
     return FALSE;
   }
@@ -118,7 +127,8 @@ start_blocking_hook(int timeout)
     return;
 
   isblocking = TRUE;
-  blocking_end_time = GetTickCount() + (1000 * timeout);
+  blocking_timeout = 1000 * timeout;
+  blocking_end_time = GetTickCount() + blocking_timeout;
 #ifdef _WIN32
   proc = WSASetBlockingHook(blocking_hook_proc);
 #else

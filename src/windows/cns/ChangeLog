@@ -1,3 +1,9 @@
+Fri Feb  7 08:08:39 1997  Richard Basch  <basch@lehman.com>
+
+	* cns.c (blocking_hook_proc): Additional logic is required to
+		prevent instantaneous timeouts when GetTickCount()
+		wraps every 49.7 days.
+
 Sun Feb  2 11:22:57 1997  Richard Basch  <basch@lehman.com>
 
 	* cns.c (k5_name_from_ccache):
