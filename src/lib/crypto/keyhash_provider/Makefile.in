@@ -19,7 +19,7 @@ STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o
 
 OBJS= descbc.$(OBJEXT) k5_md4des.$(OBJEXT) k5_md5des.$(OBJEXT)
 
-SRCS= $(srcdir)/descbc.c $(srcdir)/k6_md4des.c $(srcdir)/k5_md5des.c
+SRCS= $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
