@@ -244,7 +244,7 @@ getaddrinfo("kerberos.mit.edu", "echo", 0, &ai);
 ], ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no)])
 AC_MSG_RESULT($ac_cv_func_getaddrinfo)
 if test $ac_cv_func_getaddrinfo = yes; then
-  AC_DEFINE(HAVE_GETADDRINFO)
+  AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 dnl
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])

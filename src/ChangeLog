@@ -1,3 +1,9 @@
+2002-07-05  Ezra Peisach  <epeisach@bu.edu>
+
+	* aclocal.m4 (KRB5_AC_INET6): Use the three argument form of
+	AC_DEFINE so that comment will be added to autoconf.h.in without
+	requiring acconfig.h change.
+
 2002-07-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_INET6): Include netdb.h when checking for
