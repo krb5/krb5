@@ -420,9 +420,6 @@ int main(argc, argv)
 	syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
 #endif
 
-    if (!checksum_required && !checksum_ignored)
-	checksum_ignored = 1;
-
     if (checksum_required&&checksum_ignored) {
 	syslog(LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
 	fatal(fd, "Configuration error: mutually exclusive options specified");
@@ -1830,7 +1827,7 @@ recvauth(netf, peersin, valid_checksum)
 						 &authenticator)))
       return status;
     
-    if (authenticator->checksum && checksum_required) {
+    if (authenticator->checksum && !checksum_ignored) {
 	struct sockaddr_in adr;
 	int adr_length = sizeof(adr);
 	char * chksumbuf = (char *) malloc(strlen(cmdbuf)+strlen(locuser)+32);

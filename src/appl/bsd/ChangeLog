@@ -1,3 +1,9 @@
+Mon Nov 17 20:55:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krshd.c: Don't set checksum_ignored to 1 if checksum_required is
+	0; also, if a krb5 client passes in a checksum, check it
+	regardless of whether checksum_required is true. [krb5-appl/500]
+
 Wed Nov 12 19:03:02 1997  Tom Yu  <tlyu@mit.edu>
 
 	* forward.c (rd_and_store_for_creds): Don't do the chown.  Avoids
