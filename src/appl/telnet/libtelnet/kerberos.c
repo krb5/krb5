@@ -89,6 +89,7 @@
    so this is how it's going to work. --marc */
 #include <krb5.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <arpa/telnet.h>
 #include <stdio.h>
 #include <des.h>        /* BSD wont include this in krb.h, so we do it here */
