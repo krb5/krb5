@@ -1,3 +1,7 @@
+Wed Feb  7 14:16:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* g_initialize.c: Need to include stdio.h, errno.h all the time.
+
 Tue Feb  6 23:59:49 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* g_initialize.c (gss_initialize): Added code to try to

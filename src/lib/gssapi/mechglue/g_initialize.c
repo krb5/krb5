@@ -31,11 +31,12 @@
 #include <stdlib.h>
 #endif
 
-#ifdef USE_SOLARIS_SHARED_LIBRARIES
 #include <stdio.h>
 #include <ctype.h>
-#include <dlfcn.h>
 #include <errno.h>
+
+#ifdef USE_SOLARIS_SHARED_LIBRARIES
+#include <dlfcn.h>
 
 #define MECH_CONF "/etc/mech.conf"
 #define MECH_SYM "gss_mech_initialize"
