@@ -1,3 +1,12 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* client_init.c (_kadm5_init_any): try the krb5 v2 mechanism
+	first, and if that fails, try the krb5 v1 mech.
+
+Sun Jul 26 18:11:56 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (LIBMAJOR): bump libmajor
+
 Wed Apr 15 18:05:57 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): 

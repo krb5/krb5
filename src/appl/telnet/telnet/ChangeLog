@@ -1,3 +1,10 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* commands.c: remove calls to setuid(getuid()).  This looks like
+	it was once an attempt to make it safe to run setuid, but it's not
+	safe for a number of other reasons, so there's no reason to
+	pretend.
+
 Sat Oct 10 06:24:55 1998  Geoffrey King  <gjking@mit.edu>
 
 	* telnet.c (telnet): Cosmetic change: Put a newline after "Waiting

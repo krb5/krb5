@@ -1,4 +1,30 @@
 /*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
+/*
  * slave/kpropd.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
@@ -91,10 +117,12 @@ void	kerberos_authenticate
 	PROTOTYPE((krb5_context,
 		   int,
 		   krb5_principal *,
+		   krb5_enctype *,
 		   struct sockaddr_in));
 krb5_boolean authorized_principal
 	PROTOTYPE((krb5_context,
-    		   krb5_principal));
+    		   krb5_principal,
+		   krb5_enctype));
 void	recv_database
 	PROTOTYPE((krb5_context,
 		   int,
@@ -237,6 +265,7 @@ void doit(fd)
 	krb5_data confmsg;
 	int lock_fd;
 	int omask;
+	krb5_enctype etype;
 
 	fromlen = sizeof (from);
 	if (getpeername(fd, (struct sockaddr *) &from, &fromlen) < 0) {
@@ -266,8 +295,9 @@ void doit(fd)
 	/*
 	 * Now do the authentication
 	 */
-	kerberos_authenticate(kpropd_context, fd, &client, from);
-	if (!authorized_principal(kpropd_context, client)) {
+	kerberos_authenticate(kpropd_context, fd, &client, &etype, from);
+
+	if (!authorized_principal(kpropd_context, client, etype)) {
 		char	*name;
 
 		if (retval = krb5_unparse_name(kpropd_context, client, &name)) {
@@ -495,10 +525,11 @@ void PRS(argv)
  * Figure out who's calling on the other end of the connection....
  */
 void
-kerberos_authenticate(context, fd, clientp, sin)
+kerberos_authenticate(context, fd, clientp, etype, sin)
     krb5_context 	  context;
     int		 	  fd;
     krb5_principal	* clientp;
+    krb5_enctype	* etype;
     struct sockaddr_in	  sin;
 {
     krb5_error_code	  retval;
@@ -577,29 +608,42 @@ kerberos_authenticate(context, fd, clientp, sin)
 	exit(1);
     }
 
+    *etype = ticket->enc_part.enctype;
+
     if (debug) {
 	char * name;
+	char etypebuf[100];
 
 	if (retval = krb5_unparse_name(context, *clientp, &name)) {
 	    com_err(progname, retval, "While unparsing client name");
 	    exit(1);
 	}
-	printf("authenticated client: %s\n", name);
+
+	if (retval = krb5_enctype_to_string(*etype, etypebuf,
+					    sizeof(etypebuf))) {
+	    com_err(progname, retval, "While unparsing ticket etype");
+	    exit(1);
+	}
+
+	printf("authenticated client: %s (etype == %s)\n", name, etypebuf);
 	free(name);
     }
+
     krb5_free_ticket(context, ticket);
 }
 
 krb5_boolean
-authorized_principal(context, p)
+authorized_principal(context, p, auth_etype)
     krb5_context context;
     krb5_principal p;
+    krb5_enctype auth_etype;
 {
-    char		*name;
+    char		*name, *ptr;
     char		buf[1024];
     krb5_error_code	retval;
     FILE		*acl_file;
     int			end;
+    krb5_enctype	acl_etype;
     
     retval = krb5_unparse_name(context, p, &name);
     if (retval)
@@ -615,7 +659,27 @@ authorized_principal(context, p)
 	end = strlen(buf) - 1;
 	if (buf[end] == '\n')
 	    buf[end] = '\0';
-	if (!strcmp(name, buf)) {
+	if (!strncmp(name, buf, strlen(name))) {
+	    ptr = buf+strlen(name);
+
+	    /* if the next character is not whitespace or nul, then
+	       the match is only partial.  continue on to new lines. */
+	    if (*ptr && !isspace(*ptr))
+		continue;
+
+	    /* otherwise, skip trailing whitespace */
+	    for (; *ptr && isspace(*ptr); ptr++) ;
+
+	    /* now, look for an etype string. if there isn't one,
+	       return true.  if there is an invalid string, continue.
+	       If there is a valid string, return true only if it
+	       matches the etype passed in, otherwise continue */
+
+	    if ((*ptr) &&
+		((retval = krb5_string_to_enctype(ptr, &acl_etype)) ||
+		 (acl_etype != auth_etype)))
+		continue;
+
 	    free(name);
 	    fclose(acl_file);
 	    return TRUE;

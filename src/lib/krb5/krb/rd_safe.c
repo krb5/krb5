@@ -59,6 +59,7 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
     krb5_checksum our_cksum, *his_cksum;
     krb5_octet zero_octet = 0;
     krb5_data *scratch;
+    krb5_boolean valid;
 
     if (!krb5_is_krb_safe(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -122,14 +123,14 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 
     message->checksum = his_cksum;
 			 
-    retval = krb5_verify_checksum(context, his_cksum->checksum_type,
-				  his_cksum, scratch->data, scratch->length,
-				  (krb5_pointer) keyblock->contents,
-				  keyblock->length);
+    retval = krb5_c_verify_checksum(context, keyblock,
+				    KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
+				    scratch, his_cksum, &valid);
+
     (void) memset((char *)scratch->data, 0, scratch->length);
     krb5_free_data(context, scratch);
     
-    if (retval) {
+    if (!valid) {
 	retval = KRB5KRB_AP_ERR_MODIFIED;
 	goto cleanup;
     }

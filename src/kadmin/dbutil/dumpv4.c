@@ -24,6 +24,32 @@
  * Dump a KDC database into a V4 slave dump.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #ifdef KRB5_KRB4_COMPAT
 
 #include "k5-int.h"
@@ -45,14 +71,13 @@
 struct dump_record {
 	char	*comerr_name;
 	FILE	*f;
-	krb5_encrypt_block *v5master;
+	krb5_keyblock *v5mkey;
 	C_Block		v4_master_key;
 	Key_schedule	v4_master_key_schedule;
 	long	master_key_version;
 	char	*realm;
 };
 
-extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
 extern krb5_boolean dbactive;
@@ -226,7 +251,7 @@ found_one:;
 	    principal->key_version,
 	    principal->attributes);
 
-    handle_one_key(arg, arg->v5master, &entry->key_data[ok_key], v4key);
+    handle_one_key(arg, arg->v5mkey, &entry->key_data[ok_key], v4key);
 
     for (i = 0; i < 8; i++) {
 	fprintf(arg->f, "%02x", ((unsigned char*)v4key)[i]);
@@ -363,26 +388,20 @@ int handle_keys(arg)
 	exit(1);
     }
 
-    krb5_use_enctype(util_context, &master_encblock, DEFAULT_KDC_ENCTYPE);
     if (retval = krb5_db_fetch_mkey(util_context, master_princ, 
-				    &master_encblock, 0,
+				    master_keyblock.enctype, 0,
 				    0, global_params.stash_file, 0,
 				    &master_keyblock)) { 
 	com_err(arg->comerr_name, retval, "while reading master key");
 	exit(1);
     }
-    if (retval = krb5_process_key(util_context, &master_encblock, 
-				    &master_keyblock)) {
-	com_err(arg->comerr_name, retval, "while processing master key");
-	exit(1);
-    }
-    arg->v5master = &master_encblock;
+    arg->v5mkey = &master_keyblock;
     return(0);
 }
 
-handle_one_key(arg, v5master, v5key, v4key)
+handle_one_key(arg, v5mkey, v5key, v4key)
     struct dump_record *arg;
-    krb5_encrypt_block *v5master;
+    krb5_keyblock *v5mkey;
     krb5_key_data *v5key;
     des_cblock v4key;
 {
@@ -392,7 +411,7 @@ handle_one_key(arg, v5master, v5key, v4key)
     krb5_keyblock v5plainkey;
     /* v4key is the actual v4 key from the file. */
 
-    if (retval = krb5_dbekd_decrypt_key_data(util_context, v5master, v5key, 
+    if (retval = krb5_dbekd_decrypt_key_data(util_context, v5mkey, v5key, 
 				             &v5plainkey, NULL)) 
 	return retval;
 

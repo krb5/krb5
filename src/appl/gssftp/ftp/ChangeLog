@@ -1,3 +1,10 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* ftp.c (login): *always* encrypt the password, regardless
+	of the default command mode.
+	(do_auth): Try the new krb5 mech, and if that fails, try the
+	old one.
+
 1998-10-26  Geoffrey King  <gjking@mit.edu>
 
 	* ftp.M: Add documentation for new ccc and cprotect commands.

@@ -1,8 +1,0 @@
-ignore fp.c
-ignore ip.c
-ignore key_perm.h
-ignore odd.h
-ignore p.c
-ignore p_table.h
-ignore s_table.h
-ignore doc

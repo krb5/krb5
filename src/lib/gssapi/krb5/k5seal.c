@@ -20,15 +20,269 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "gssapiP_krb5.h"
 
 static krb5_error_code
-make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
-		signalg, cksum_size, sealalg, encrypt, toktype,
-		bigend, oid)
+make_priv_token_v2 PROTOTYPE((krb5_context context,
+			      krb5_keyblock *subkey,
+			      krb5_int32 *seqnum,
+			      int direction,
+			      gss_buffer_t text,
+			      gss_buffer_t token,
+			      gss_OID oid));
+
+static krb5_error_code
+make_priv_token_v2(context, subkey, seqnum, direction, text, token, oid)
      krb5_context context;
-     krb5_gss_enc_desc *enc_ed;
-     krb5_gss_enc_desc *seq_ed;
+     krb5_keyblock *subkey;
+     krb5_int32 *seqnum;
+     int direction;
+     gss_buffer_t text;
+     gss_buffer_t token;
+     gss_OID oid;
+{
+   krb5_data plain;
+   krb5_enc_data cipher;
+   krb5_error_code code;
+   size_t enclen;
+   int tlen;
+   unsigned char *t, *ptr;
+
+   plain.data = 0;
+   cipher.ciphertext.data = 0;
+   t = 0;
+
+   plain.length = 7+text->length;
+   if ((plain.data = (void *) malloc(plain.length)) == NULL) {
+       code = ENOMEM;
+       goto cleanup;
+   }
+
+   plain.data[0] = (*seqnum >> 24) & 0xff;
+   plain.data[1] = (*seqnum >> 16) & 0xff;
+   plain.data[2] = (*seqnum >> 8) & 0xff;
+   plain.data[3] = *seqnum & 0xff;
+
+   plain.data[4] = direction?0:0xff;
+   
+   plain.data[5] = (text->length >> 8) & 0xff;
+   plain.data[6] = text->length & 0xff;
+
+   memcpy(plain.data+7, text->value, text->length);
+
+   if (code = krb5_c_encrypt_length(context, subkey->enctype, 
+				    plain.length, &enclen))
+       goto cleanup;
+
+   tlen = g_token_size((gss_OID) oid, 2+enclen);
+
+   if ((t = (unsigned char *) xmalloc(tlen)) == NULL)
+      return(ENOMEM);
+
+   ptr = t;
+
+   g_make_token_header((gss_OID) oid, 2+enclen, &ptr,
+		       KG2_TOK_WRAP_PRIV);
+
+   ptr[0] = (enclen >> 8) & 0xff;
+   ptr[1] = enclen & 0xff;
+
+   cipher.ciphertext.length = enclen;
+   cipher.ciphertext.data = ptr+2;
+
+   if (code = krb5_c_encrypt(context, subkey,
+			     KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV,
+			     0, &plain, &cipher))
+       goto cleanup;
+
+   /* that's it.  return the token */
+
+   (*seqnum)++;
+
+   token->length = tlen;
+   token->value = (void *) t;
+
+   code = 0;
+
+cleanup:
+   if (plain.data)
+       free(plain.data);
+   if (code) {
+       if (t)
+	   free(t);
+   }
+
+   return(code);
+}
+
+static krb5_error_code
+make_integ_token_v2 PROTOTYPE((krb5_context context,
+			       krb5_keyblock *subkey,
+			       krb5_cksumtype ctype,
+			       krb5_int32 *seqnum,
+			       int direction,
+			       gss_buffer_t text,
+			       gss_buffer_t token,
+			       int toktype,
+			       gss_OID oid));
+
+static krb5_error_code
+make_integ_token_v2(context, subkey, ctype, seqnum, direction, text, token, 
+		    toktype, oid)
+     krb5_context context;
+     krb5_keyblock *subkey;
+     krb5_cksumtype ctype;
+     krb5_int32 *seqnum;
+     int direction;
+     gss_buffer_t text;
+     gss_buffer_t token;
+     int toktype;
+     gss_OID oid;
+{
+    krb5_error_code code;
+    int tmp, tlen;
+    unsigned char *t, *ptr;
+    krb5_data plain;
+    krb5_checksum cksum;
+
+    plain.data = 0;
+    t = 0;
+    cksum.contents = 0;
+
+    /* assemble the checksum buffer and compute the checksum */
+
+    plain.length = 7+text->length;
+
+    if ((plain.data = (char *) malloc(plain.length)) == NULL)
+	goto cleanup;
+
+    plain.data[0] = (*seqnum >> 24) & 0xff;
+    plain.data[1] = (*seqnum >> 16) & 0xff;
+    plain.data[2] = (*seqnum >> 8) & 0xff;
+    plain.data[3] = *seqnum & 0xff;
+
+    plain.data[4] = direction?0:0xff;
+
+    plain.data[5] = (text->length >> 8) & 0xff;
+    plain.data[6] = text->length & 0xff;
+
+    memcpy(plain.data+7, text->value, text->length);
+
+    if (code = krb5_c_make_checksum(context, ctype, subkey,
+				    (toktype == KG2_TOK_WRAP_INTEG)?
+				    KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG:
+				    KRB5_KEYUSAGE_GSS_TOK_MIC,
+				    &plain, &cksum))
+	goto cleanup;
+
+    /* assemble the token itself */
+
+    if (toktype == KG2_TOK_WRAP_INTEG)
+	tmp = 4+(7+text->length)+2+cksum.length;
+    else
+	tmp = 4+(5)+2+cksum.length;
+
+    tlen = g_token_size((gss_OID) oid, tmp);
+
+    if ((t = (unsigned char *) xmalloc(tlen)) == NULL)
+	return(ENOMEM);
+
+    ptr = t;
+
+    g_make_token_header((gss_OID) oid, tmp, &ptr, toktype);
+
+    ptr[0] = (ctype >> 24) & 0xff;
+    ptr[1] = (ctype >> 16) & 0xff;
+    ptr[2] = (ctype >> 8) & 0xff;
+    ptr[3] = ctype & 0xff;
+
+    ptr += 4;
+
+    if (toktype == KG2_TOK_WRAP_INTEG) {
+	memcpy(ptr, plain.data, 7+text->length);
+	ptr += 7+text->length;
+    } else {
+	memcpy(ptr, plain.data, 5);
+	ptr += 5;
+    }
+
+    ptr[0] = (cksum.length >> 8) & 0xff;
+    ptr[1] = cksum.length & 0xff;
+    ptr += 2;
+
+    memcpy(ptr, cksum.contents, cksum.length);
+
+    /* that's it.  return the token */
+
+    (*seqnum)++;
+
+    token->length = tlen;
+    token->value = (void *) t;
+
+    code = 0;
+
+cleanup:
+    if (plain.data)
+	free(plain.data);
+    if (cksum.contents)
+	krb5_free_checksum_contents(context, &cksum);
+    if (code) {
+	if (t)
+	    free(t);
+    }
+
+   return(code);
+}
+
+static krb5_error_code
+make_seal_token_v1 PROTOTYPE((krb5_context context,
+			      krb5_keyblock *enc,
+			      krb5_keyblock *seq,
+			      krb5_int32 *seqnum,
+			      int direction,
+			      gss_buffer_t text,
+			      gss_buffer_t token,
+			      int signalg,
+			      int cksum_size,
+			      int sealalg,
+			      int encrypt,
+			      int toktype,
+			      int bigend,
+			      gss_OID oid));
+
+static krb5_error_code
+make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
+		   signalg, cksum_size, sealalg, encrypt, toktype,
+		   bigend, oid)
+     krb5_context context;
+     krb5_keyblock *enc;
+     krb5_keyblock *seq;
      krb5_int32 *seqnum;
      int direction;
      gss_buffer_t text;
@@ -42,7 +296,9 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
      gss_OID oid;
 {
    krb5_error_code code;
+   size_t sumlen;
    char *data_ptr;
+   krb5_data plaind;
    krb5_checksum md5cksum;
    krb5_checksum cksum;
    int conflen=0, tmsglen, tlen;
@@ -54,7 +310,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       if (bigend && !encrypt) {
 	 tmsglen = text->length;
       } else {
-	 conflen = kg_confounder_size(enc_ed);
+	 conflen = kg_confounder_size(context, enc);
 	 /* XXX knows that des block size is 8 */
 	 tmsglen = (conflen+text->length+8)&(~7);
       }
@@ -96,27 +352,24 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* pad the plaintext, encrypt if needed, and stick it in the token */
 
-   /* initialize the the cksum and allocate the contents buffer */
+   /* initialize the the cksum */
+   if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
+       return(code);
+
    md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
-   md5cksum.length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
-   if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL) {
-      return(ENOMEM);
-   }
- 
+   md5cksum.length = sumlen;
    if (toktype == KG_TOK_SEAL_MSG) {
       unsigned char *plain;
       unsigned char pad;
 
       if (!bigend || encrypt) {
 	 if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
-	    xfree(md5cksum.contents);
 	    xfree(t);
 	    return(ENOMEM);
 	 }
 
-	 if ((code = kg_make_confounder(enc_ed, plain))) {
+	 if ((code = kg_make_confounder(context, enc, plain))) {
 	    xfree(plain);
-	    xfree(md5cksum.contents);
 	    xfree(t);
 	    return(code);
 	 }
@@ -133,12 +386,11 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       }
 
       if (encrypt) {
-	 if ((code = kg_encrypt(context, enc_ed, NULL, (krb5_pointer) plain,
+	 if ((code = kg_encrypt(context, enc, NULL, (krb5_pointer) plain,
 				(krb5_pointer) (ptr+cksum_size+14),
 				tmsglen))) {
 	    if (plain)
 	       xfree(plain);
-	    xfree(md5cksum.contents);
 	    xfree(t);
 	    return(code);
 	 }
@@ -156,7 +408,6 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	     (char *) xmalloc(8 + (bigend ? text->length : tmsglen)))) {
 	  if (plain)
 	      xfree(plain);
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(ENOMEM);
       }
@@ -165,15 +416,15 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	  (void) memcpy(data_ptr+8, text->value, text->length);
       else
 	  (void) memcpy(data_ptr+8, plain, tmsglen);
-      code = krb5_calculate_checksum(context, md5cksum.checksum_type, data_ptr,
-				     8 + (bigend ? text->length : tmsglen),
-				     0, 0, &md5cksum);
+      plaind.length = 8 + (bigend ? text->length : tmsglen);
+      plaind.data = data_ptr;
+      code = krb5_c_make_checksum(context, md5cksum.checksum_type,
+				  0, 0, &plaind, &md5cksum);
       xfree(data_ptr);
 
       if (code) {
 	  if (plain)
 	      xfree(plain);
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(code);
 	  memcpy(ptr+14+cksum_size, plain, tmsglen);
@@ -185,18 +436,17 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       /* compute the checksum */
 
       if (! (data_ptr = (char *) xmalloc(8 + text->length))) {
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(ENOMEM);
       }
       (void) memcpy(data_ptr, ptr-2, 8);
       (void) memcpy(data_ptr+8, text->value, text->length);
-      code = krb5_calculate_checksum(context, md5cksum.checksum_type, data_ptr,
-				     8 + text->length,
-				     0, 0, &md5cksum);
+      plaind.length = 8 + text->length;
+      plaind.data = data_ptr;
+      code = krb5_c_make_checksum(context, md5cksum.checksum_type, 0, 0,
+				  &plaind, &md5cksum);
       xfree(data_ptr);
       if (code) {
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(code);
       }
@@ -214,16 +464,19 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	  DES encryption the long way, and keep the last block
 	  as the MAC */
 
+       /* XXX not converted to new api since it's inside an #if 0 */
+
        /* initialize the the cksum and allocate the contents buffer */
        cksum.checksum_type = CKSUMTYPE_DESCBC;
        cksum.length = krb5_checksum_size(context, CKSUMTYPE_DESCBC);
        if ((cksum.contents = (krb5_octet *) xmalloc(cksum.length)) == NULL)
 	   return(ENOMEM);
 
+       /* XXX not converted to new api since it's inside an #if 0 */
        if (code = krb5_calculate_checksum(context, cksum.checksum_type,
 					  md5cksum.contents, 16,
-					  seq_ed->key->contents, 
-					  seq_ed->key->length,
+					  seq->contents, 
+					  seq->length,
 					  &cksum)) {
 	  xfree(cksum.contents);
 	  xfree(md5cksum.contents);
@@ -235,9 +488,9 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
        xfree(cksum.contents);
 #else
-       if ((code = kg_encrypt(context, seq_ed,
+       if ((code = kg_encrypt(context, seq,
 			      (g_OID_equal(oid, gss_mech_krb5_old) ?
-			       seq_ed->key->contents : NULL),
+			       seq->contents : NULL),
 			      md5cksum.contents, md5cksum.contents, 16))) {
 	  xfree(md5cksum.contents);
 	  xfree(t);
@@ -257,7 +510,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* create the seq_num */
 
-   if ((code = kg_make_seq_num(context, seq_ed, direction?0:0xff, *seqnum,
+   if ((code = kg_make_seq_num(context, seq, direction?0:0xff, *seqnum,
 			       ptr+14, ptr+6))) {
       xfree(t);
       return(code);
@@ -320,17 +573,42 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_FAILURE);
    }
 
-   if ((code = make_seal_token(context, &ctx->enc, &ctx->seq,
-			       &ctx->seq_send, ctx->initiate,
-			       input_message_buffer, output_message_buffer,
-			       ctx->signalg, ctx->cksum_size, ctx->sealalg,
-			       conf_req_flag, toktype, ctx->big_endian,
-			       ctx->mech_used))) {
+   if (ctx->gsskrb5_version == 2000) {
+       if (toktype == KG_TOK_WRAP_MSG) {
+	   if (conf_req_flag)
+	       toktype = KG2_TOK_WRAP_PRIV;
+	   else
+	       toktype = KG2_TOK_WRAP_INTEG;
+       } else {
+	   toktype = KG2_TOK_MIC;
+       }
+
+       if (conf_req_flag) {
+	   code = make_priv_token_v2(context, ctx->subkey, &ctx->seq_send,
+				     ctx->initiate, input_message_buffer,
+				     output_message_buffer, ctx->mech_used);
+       } else {
+	   code = make_integ_token_v2(context, ctx->subkey, ctx->ctypes[0],
+				      &ctx->seq_send, ctx->initiate,
+				      input_message_buffer,
+				      output_message_buffer, toktype,
+				      ctx->mech_used);
+       }
+   } else {
+       code = make_seal_token_v1(context, ctx->enc, ctx->seq,
+				 &ctx->seq_send, ctx->initiate,
+				 input_message_buffer, output_message_buffer,
+				 ctx->signalg, ctx->cksum_size, ctx->sealalg,
+				 conf_req_flag, toktype, ctx->big_endian,
+				 ctx->mech_used);
+   }
+
+   if (code) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if ((toktype == KG_TOK_SEAL_MSG) && conf_state)
+   if (conf_state)
       *conf_state = conf_req_flag;
 
    *minor_status = 0;

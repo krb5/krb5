@@ -24,6 +24,31 @@
  * KDC Database interface definitions.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
 
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
@@ -208,8 +233,7 @@ krb5_error_code krb5_db_iterate
 krb5_error_code krb5_db_verify_master_key
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal, 
-		   krb5_keyblock *, 
-		   krb5_encrypt_block *));
+		   krb5_keyblock *));
 krb5_error_code krb5_db_store_mkey 
 	KRB5_PROTOTYPE((krb5_context,
 		   char *,
@@ -224,10 +248,10 @@ krb5_error_code krb5_db_setup_mkey_name
 		   krb5_principal *));
 
 krb5_error_code krb5_db_set_mkey
-        KRB5_PROTOTYPE((krb5_context, krb5_encrypt_block *));
+        KRB5_PROTOTYPE((krb5_context, krb5_keyblock *));
 
 krb5_error_code krb5_db_get_mkey
-        KRB5_PROTOTYPE((krb5_context, krb5_encrypt_block **));
+        KRB5_PROTOTYPE((krb5_context, krb5_keyblock **));
 krb5_error_code krb5_db_destroy 
 	KRB5_PROTOTYPE((krb5_context,
 		   char * ));
@@ -246,7 +270,7 @@ krb5_boolean krb5_db_set_lockmode
 krb5_error_code	krb5_db_fetch_mkey
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal, 
-		   krb5_encrypt_block *, 
+		   krb5_enctype, 
 		   krb5_boolean,
 		   krb5_boolean, 
 		   char *,
@@ -260,14 +284,14 @@ krb5_error_code krb5_db_close_database
 
 krb5_error_code krb5_dbekd_encrypt_key_data
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_encrypt_block *,
+		   const krb5_keyblock *,
 		   const krb5_keyblock *,
 		   const krb5_keysalt *,
 		   int,
 		   krb5_key_data *));
 krb5_error_code krb5_dbekd_decrypt_key_data
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_encrypt_block *,
+		   const krb5_keyblock *,
 		   const krb5_key_data *,
 		   krb5_keyblock *,
 		   krb5_keysalt *));
@@ -343,7 +367,7 @@ struct __krb5_key_salt_tuple;
 
 krb5_error_code krb5_dbe_cpw
         KRB5_PROTOTYPE((krb5_context,
-			krb5_encrypt_block  *,
+			krb5_keyblock  *,
 			struct __krb5_key_salt_tuple *,
 			int,
 			char *,
@@ -351,20 +375,20 @@ krb5_error_code krb5_dbe_cpw
 			krb5_db_entry *));
 krb5_error_code krb5_dbe_apw
         KRB5_PROTOTYPE((krb5_context,
-                   krb5_encrypt_block  *,
+                   krb5_keyblock  *,
                    struct __krb5_key_salt_tuple *,
                    int,
                    char *,
                    krb5_db_entry *));
 krb5_error_code krb5_dbe_crk
         KRB5_PROTOTYPE((krb5_context,
-                   krb5_encrypt_block  *,
+                   krb5_keyblock  *,
                    struct __krb5_key_salt_tuple *,
                    int,
                    krb5_db_entry *));
 krb5_error_code krb5_dbe_ark
         KRB5_PROTOTYPE((krb5_context,
-                   krb5_encrypt_block  *,
+                   krb5_keyblock  *,
                    struct __krb5_key_salt_tuple *,
                    int,
                    krb5_db_entry *));

@@ -1,7 +1,6 @@
 thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-# -I$(srcdir) is needed to pull in $(srcdir)/rsa-md4.h for ./t_mddriver.c.
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
+CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md4
@@ -11,15 +10,21 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-RUN_SETUP=@KRB5_RUN_ENV@
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS=md4.o md4glue.o md4crypto.o
-OBJS=	md4.$(OBJEXT) md4glue.$(OBJEXT) md4crypto.$(OBJEXT)
-SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
+STLIBOBJS= md4.o
+
+OBJS= md4.$(OBJEXT) 
+
+SRCS= $(srcdir)/md4.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
 
 t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
 	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
@@ -35,24 +40,13 @@ t_mddriver.exe:
 	$(CC) -DMD=4 $(CFLAGS2) -o t_mddriver t_mddriver.c md4.c
 	$(RM) md4.obj
 
-t_cksum.c: $(srcdir)/../md5/t_cksum.c
-	$(CP) $(srcdir)/../md5/t_cksum.c t_cksum.c
-
-t_cksum.o: t_cksum.c
-	$(CC) -DMD=4 $(CFLAGS) -c  t_cksum.c
-
-t_cksum: t_cksum.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_cksum t_cksum.o $(KRB5_BASE_LIBS)
-
-check-unix:: t_mddriver t_cksum
+check-unix:: t_mddriver
 	$(RUN_SETUP) $(C)t_mddriver -x
-	$(RUN_SETUP) $(C)t_cksum "this is a test"
 
 check-windows:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x
 
 clean:: 
 	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT) t_mddriver.c
-	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT) t_cksum.c
 
 clean-unix:: clean-libobjs

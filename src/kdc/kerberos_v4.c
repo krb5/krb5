@@ -65,10 +65,12 @@
 
 extern int errno;
 
-int compat_decrypt_key PROTOTYPE((krb5_key_data *, C_Block));
-int kerb_get_principal PROTOTYPE((char *, char *, Principal *, int,
-				  int *));
-int check_princ PROTOTYPE((char *, char *, unsigned, Principal *));
+static int compat_decrypt_key PROTOTYPE((krb5_key_data *, C_Block,
+					 krb5_keyblock *, int));
+static int kerb_get_principal PROTOTYPE((char *, char *, Principal *, int,
+				  int *, krb5_keyblock *, krb5_kvno, int));
+static int check_princ PROTOTYPE((char *, char *, unsigned, Principal *,
+			   krb5_keyblock *, int));
 
 #ifdef HAVE_STDARG_H
 char * v4_klog KRB5_PROTOTYPE((int, const char *, ...));
@@ -144,8 +146,8 @@ static krb5_data *response;
 
 void kerberos_v4 PROTOTYPE((struct sockaddr_in *, KTEXT));
 void kerb_err_reply PROTOTYPE((struct sockaddr_in *, KTEXT, long, char *));
-int set_tgtkey PROTOTYPE((char *));
- 
+static int set_tgtkey PROTOTYPE((char *, krb5_kvno));
+
 /* Attributes converted from V5 to V4 - internal representation */
 #define V4_KDB_REQUIRES_PREAUTH  0x1
 #define V4_KDB_DISALLOW_ALL_TIX  0x2
@@ -334,36 +336,59 @@ hang()
 }
 #define kdb_encrypt_key( in, out, mk, mks, e_d_flag)
 #define LONGLEN 4
+#define K4KDC_ENCTYPE_OK(e)			\
+((e) == ENCTYPE_DES_CBC_CRC			\
+ || (e) == ENCTYPE_DES_CBC_MD4			\
+ || (e) == ENCTYPE_DES_CBC_MD5			\
+ || (e) == ENCTYPE_DES_CBC_RAW)
 
 /* take a v5 keyblock, masquerading as a v4 key,
  * decrypt it, and convert the resulting v5 keyblock
  * to a real v4 key.
  * this is ugly, but it saves changing more v4 code.
+ *
+ * Also, keep old krb5_keyblock around in case we want to use it later.
  */
-int compat_decrypt_key (in5, out4)
-     krb5_key_data *in5;
-     C_Block out4;
+static int
+compat_decrypt_key (in5, out4, out5, issrv)
+    krb5_key_data *in5;
+    C_Block out4;
+    krb5_keyblock *out5;
+    int issrv;			/* whether it's a server key */
 {
-    krb5_keyblock out5;
-    int retval = -1;
+    krb5_error_code retval;
 
-    out5.contents = NULL;
-    if (krb5_dbekd_decrypt_key_data(kdc_context,&master_encblock,in5,&out5,NULL)){
+    out5->contents = NULL;
+    memset(out4, 0, sizeof(out4));
+    retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
+					 in5, out5, NULL);
+    if (retval) {
 	lt = klog(L_DEATH_REQ, "KDC can't decrypt principal's key.");
+	out5->contents = NULL;
 	return(retval);
     }
-    if (out5.length != KRB5_MIT_DES_KEYSIZE)
-	lt = klog(L_DEATH_REQ, "internal keysize error in kdc");
-    else if ((out5.enctype != ENCTYPE_DES_CBC_CRC) &&
-	     (out5.enctype != ENCTYPE_DES_CBC_MD4) &&
-	     (out5.enctype != ENCTYPE_DES_CBC_MD5) &&
-	     (out5.enctype != ENCTYPE_DES_CBC_RAW))
-	lt = klog(L_DEATH_REQ, "incompatible principal key type.");
-    else {
-	memcpy(out4, out5.contents, out5.length);
-	retval = 0;
+    if (K4KDC_ENCTYPE_OK(out5->enctype)) {
+	if (out5->length == KRB5_MIT_DES_KEYSIZE) 
+	    memcpy(out4, out5->contents, out5->length);
+	else {
+	    lt = klog(L_DEATH_REQ, "internal keysize error in kdc");
+	    krb5_free_keyblock_contents(kdc_context, out5);
+	    out5->contents = NULL;
+	    retval = -1;
+	}
+    } else {
+	if (!issrv) {
+	    lt = klog(L_DEATH_REQ, "incompatible principal key type.");
+	    krb5_free_keyblock_contents(kdc_context, out5);
+	    out5->contents = NULL;
+	    retval = -1;
+	} else {
+	    /* KLUDGE! If it's a non-raw des3 key, bash its enctype */
+	    if (out5->enctype == ENCTYPE_DES3_HMAC_SHA1 ||
+		out5->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
+		out5->enctype = ENCTYPE_DES3_CBC_RAW;
+	}
     }
-    krb5_free_keyblock_contents(kdc_context, &out5);
     return(retval);
 }
 
@@ -372,13 +397,16 @@ int compat_decrypt_key (in5, out4)
 #define MIN5 300
 #define HR21 255
 
-int
-kerb_get_principal(name, inst, principal, maxn, more)
+static int
+kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
     char   *name;               /* could have wild card */
     char   *inst;               /* could have wild card */
     Principal *principal;
     int maxn;          /* max number of name structs to return */
     int    *more;               /* more tuples than room for */
+    krb5_keyblock *k5key;
+    krb5_kvno kvno;
+    int issrv;			/* true if retrieving a service key */
 {
     /* Note that this structure should not be passed to the
        krb5_free* functions, because the pointers within it point
@@ -430,27 +458,52 @@ kerb_get_principal(name, inst, principal, maxn, more)
         return(nprinc);
     } 
 
-    if (krb5_dbe_find_enctype(kdc_context,
-			       &entries,
-			       ENCTYPE_DES_CBC_CRC,
-			       KRB5_KDB_SALTTYPE_V4,
-			       -1,
-			       &pkey) &&
-	krb5_dbe_find_enctype(kdc_context,
-			       &entries,
-			       ENCTYPE_DES_CBC_CRC,
-			       -1,
-			       -1,
-			       &pkey))
-    {
-	lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s isn't V4 compatible",
-		  name, inst);
-	krb5_db_free_principal(kdc_context, &entries, nprinc);
-	return(0);
+    if (!issrv) {
+	if (krb5_dbe_find_enctype(kdc_context,
+				  &entries,
+				  ENCTYPE_DES_CBC_CRC,
+				  KRB5_KDB_SALTTYPE_V4,
+				  kvno,
+				  &pkey) &&
+	    krb5_dbe_find_enctype(kdc_context,
+				  &entries,
+				  ENCTYPE_DES_CBC_CRC,
+				  -1,
+				  kvno,
+				  &pkey)) {
+	    lt = klog(L_KRB_PERR,
+		      "KDC V4: principal %s.%s isn't V4 compatible",
+		      name, inst);
+	    krb5_db_free_principal(kdc_context, &entries, nprinc);
+	    return(0);
+	}
+    } else {
+	/* XXX yes I know this is a hardcoded search order */
+	if (krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_DES3_CBC_RAW,
+				  -1, kvno, &pkey) &&
+	    krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_LOCAL_DES3_HMAC_SHA1,
+				  -1, kvno, &pkey) &&
+	    krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_DES3_HMAC_SHA1,
+				  -1, kvno, &pkey) &&
+	    krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_DES_CBC_CRC,
+				  KRB5_KDB_SALTTYPE_V4, kvno, &pkey) &&
+	    krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_DES_CBC_CRC,
+				  -1, kvno, &pkey)) {
+	    lt = klog(L_KRB_PERR,
+		      "KDC V4: failed to find key for %s.%s",
+		      name, inst);
+	    krb5_db_free_principal(kdc_context, &entries, nprinc);
+	    return(0);
+	}
     }
 
-    if (! compat_decrypt_key( pkey, k)) {
- 	memcpy( &principal->key_low,           k,     LONGLEN);
+    if (!compat_decrypt_key(pkey, k, k5key, issrv)) {
+ 	memcpy( &principal->key_low, k, LONGLEN);
        	memcpy( &principal->key_high, (krb5_ui_4 *) k + 1, LONGLEN);
     }
     /* convert v5's entries struct to v4's Principal struct:
@@ -550,7 +603,11 @@ kerberos_v4(client, pkt)
     Key_schedule key_s;
     char   *ptr;
 
+    krb5_keyblock k5key;
+    krb5_kvno kvno;
 
+
+    k5key.contents = NULL;	/* in case we have to free it */
 
     ciph->length = 0;
 
@@ -639,11 +696,14 @@ kerberos_v4(client, pkt)
 	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
 
 	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
-				 &a_name_data))) {
+				 &a_name_data, &k5key, 0))) {
 		kerb_err_reply(client, pkt, i, lt);
 		a_name_data.key_low = a_name_data.key_high = 0;
+		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
 	    }
+	    /* don't use k5key for client */
+	    krb5_free_keyblock_contents(kdc_context, &k5key);
 	    tk->length = 0;	/* init */
 	    if (strcmp(service, "krbtgt"))
 		klog(L_NTGT_INTK,
@@ -651,10 +711,11 @@ kerberos_v4(client, pkt)
 		    req_inst_ptr, service, instance, 0);
 	    /* this does all the checking */
 	    if ((i = check_princ(service, instance, lifetime,
-				 &s_name_data))) {
+				 &s_name_data, &k5key, 1))) {
 		kerb_err_reply(client, pkt, i, lt);
 		a_name_data.key_high = a_name_data.key_low = 0;
 		s_name_data.key_high = s_name_data.key_low = 0;
+		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
 	    }
 	    /* Bound requested lifetime with service and user */
@@ -675,10 +736,22 @@ kerberos_v4(client, pkt)
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
 	    /* construct and seal the ticket */
-	    krb_create_ticket(tk, k_flags, a_name_data.name,
-		a_name_data.instance, local_realm,
-		 client_host.s_addr, (char *) session_key, lifetime, kerb_time.tv_sec,
-			 s_name_data.name, s_name_data.instance, key);
+	    if (K4KDC_ENCTYPE_OK(k5key.enctype)) {
+		krb_create_ticket(tk, k_flags, a_name_data.name,
+				  a_name_data.instance, local_realm,
+				  client_host.s_addr, (char *) session_key,
+				  lifetime, kerb_time.tv_sec,
+				  s_name_data.name, s_name_data.instance,
+				  key);
+	    } else {
+		krb_cr_tkt_krb5(tk, k_flags, a_name_data.name,
+				a_name_data.instance, local_realm,
+				client_host.s_addr, (char *) session_key,
+				lifetime, kerb_time.tv_sec,
+				s_name_data.name, s_name_data.instance,
+				&k5key);
+	    }
+	    krb5_free_keyblock_contents(kdc_context, &k5key);
 	    memset(key, 0, sizeof(key));
 	    memset(key_s, 0, sizeof(key_s));
 
@@ -737,14 +810,15 @@ kerberos_v4(client, pkt)
 	    memcpy(auth->dat, pkt->dat, auth->length);
 
 	    strncpy(tktrlm, (char *)auth->dat + 3, REALM_SZ);
-	    if (set_tgtkey(tktrlm)) {
+	    kvno = (krb5_kvno)auth->dat[2];
+	    if (set_tgtkey(tktrlm, kvno)) {
 		lt = klog(L_ERR_UNK,
-		    "FAILED realm %s unknown. Host: %s ",
-			  tktrlm, inet_ntoa(client_host));
+			  "FAILED set_tgtkey realm %s, kvno %d. Host: %s ",
+			  tktrlm, kvno, inet_ntoa(client_host));
 		kerb_err_reply(client, pkt, kerno, lt);
 		return;
 	    }
-	    kerno = krb_rd_req(auth, "ktbtgt", tktrlm, client_host.s_addr,
+	    kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
 		ad, 0);
 
 	    if (kerno) {
@@ -784,9 +858,11 @@ kerberos_v4(client, pkt)
 		return;
 	    }
 	    kerno = check_princ(service, instance, req_life,
-		&s_name_data);
+				&s_name_data, &k5key, 1);
 	    if (kerno) {
 		kerb_err_reply(client, pkt, kerno, lt);
+		s_name_data.key_high = s_name_data.key_low = 0;
+		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
 	    }
 	    /* Bound requested lifetime with service and user */
@@ -910,18 +986,21 @@ static char *krb4_stime(t)
     return st;
 }
 
-int check_princ(p_name, instance, lifetime, p)
+static int
+check_princ(p_name, instance, lifetime, p, k5key, issrv)
     char   *p_name;
     char   *instance;
     unsigned lifetime;
 
     Principal *p;
+    krb5_keyblock *k5key;
+    int issrv;			/* whether this is a server key */
 {
     static int n;
     static int more;
  /* long trans; */
 
-    n = kerb_get_principal(p_name, instance, p, 1, &more);
+    n = kerb_get_principal(p_name, instance, p, 1, &more, k5key, 0, issrv);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
 	 p_name, instance, lifetime, n, 0);
@@ -986,11 +1065,13 @@ int check_princ(p_name, instance, lifetime, p)
     }
 
     /* If the user's key is null, we want to return an error */
-    if ((p->key_low == 0) && (p->key_high == 0)) {
-	/* User has a null key */
-	lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
-	    instance, 0);
-	return KERB_ERR_NULL_KEY;
+    if (k5key->contents != NULL && K4KDC_ENCTYPE_OK(k5key->enctype)) {
+	if ((p->key_low == 0) && (p->key_high == 0)) {
+	    /* User has a null key */
+	    lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
+		      instance, 0);
+	    return KERB_ERR_NULL_KEY;
+	}
     }
     /* make sure the service hasn't expired */
     if (((u_long) p->exp_date != 0)&&
@@ -1007,31 +1088,44 @@ int check_princ(p_name, instance, lifetime, p)
 
 
 /* Set the key for krb_rd_req so we can check tgt */
-int set_tgtkey(r)
+static int
+set_tgtkey(r, kvno)
     char   *r;			/* Realm for desired key */
+    krb5_kvno kvno;
 {
     int     n;
     static char lastrealm[REALM_SZ] = "";
+    static int last_kvno = 0;
     Principal p_st;
     Principal *p = &p_st;
     C_Block key;
+    krb5_keyblock k5key;
 
-    if (!strcmp(lastrealm, r))
+    k5key.contents = NULL;
+    if (!strcmp(lastrealm, r) && last_kvno == kvno)
 	return (KSUCCESS);
 
 /*  log("Getting key for %s", r); */
 
-    n = kerb_get_principal("krbtgt", r, p, 1, &more);
+    n = kerb_get_principal("krbtgt", r, p, 1, &more, &k5key, kvno, 1);
     if (n == 0)
 	return (KFAILURE);
 
-    /* unseal tgt key from master key */
-    memcpy(key,                &p->key_low,  4);
-    memcpy(((krb5_ui_4 *) key) + 1, &p->key_high, 4);
-    kdb_encrypt_key(key, key, master_key,
-		    master_key_schedule, DECRYPT);
-    krb_set_key((char *) key, 0);
-    strcpy(lastrealm, r);
+    if (!K4KDC_ENCTYPE_OK(k5key.enctype)) {
+	krb_set_key_krb5(kdc_context, &k5key);
+	strcpy(lastrealm, r);
+	last_kvno = kvno;
+    } else {
+	/* unseal tgt key from master key */
+	memcpy(key,                &p->key_low,  4);
+	memcpy(((krb5_ui_4 *) key) + 1, &p->key_high, 4);
+	kdb_encrypt_key(key, key, master_key,
+			master_key_schedule, DECRYPT);
+	krb_set_key((char *) key, 0);
+	strcpy(lastrealm, r);
+	last_kvno = kvno;
+    }
+    krb5_free_keyblock_contents(kdc_context, &k5key);
     return (KSUCCESS);
 }
 

@@ -84,7 +84,6 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
     krb5_ap_req request;
     krb5_data *scratch = 0;
-    krb5_encrypt_block eblock;
     krb5_data *toutbuf;
 
     request.ap_options = ap_req_options & AP_OPTS_WIRE_MASK;
@@ -98,12 +97,6 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
 	return(retval);
     
-    /* verify a valid enctype is available */
-    if (!valid_enctype(in_creds->keyblock.enctype)) {
-	retval = KRB5_PROG_ETYPE_NOSUPP;
-	goto cleanup;
-    }
-
     /* verify that the ticket is not expired */
     if ((retval = krb5_validate_times(context, &in_creds->times)) != 0)
 	goto cleanup;
@@ -135,27 +128,18 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 					   &(*auth_context)->local_subkey)))
 	    goto cleanup;
 
-
     if (in_data) {
 	if ((*auth_context)->req_cksumtype == 0x8003) {
 	    /* XXX Special hack for GSSAPI */
 	    checksum.checksum_type = 0x8003;
 	    checksum.length = in_data->length;
 	    checksum.contents = (krb5_octet *) in_data->data;
-	} else  {
-	    /* Generate checksum, XXX What should the seed be? */
-	    checksum.length =
-		krb5_checksum_size(context, (*auth_context)->req_cksumtype);
-	    if ((checksum.contents = (krb5_octet *)malloc(checksum.length)) == NULL) {
-		retval = ENOMEM;
-		goto cleanup;
-	    }
-	    if ((retval = krb5_calculate_checksum(context, 
-					(*auth_context)->req_cksumtype, 
-					in_data->data, in_data->length,
-					(*auth_context)->keyblock->contents,
-					(*auth_context)->keyblock->length,
-					&checksum)))
+	} else {
+	    if ((retval = krb5_c_make_checksum(context, 
+					       (*auth_context)->req_cksumtype,
+					       (*auth_context)->keyblock,
+					       KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
+					       in_data, &checksum)))
 		goto cleanup_cksum;
 	}
 	checksump = &checksum;
@@ -188,43 +172,12 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     (*auth_context)->authentp->checksum = NULL;
     (*auth_context)->authentp->authorization_data = NULL;
 
-    /* put together an eblock for this encryption */
-
-    krb5_use_enctype(context, &eblock, in_creds->keyblock.enctype);
-    request.authenticator.enctype = in_creds->keyblock.enctype;
-    request.authenticator.kvno = 0;
-    request.authenticator.ciphertext.length =
-	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
-    /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data,
-				  request.authenticator.ciphertext.length))) {
-	/* may destroy scratch->data */
-	retval = ENOMEM;
-	goto cleanup_cksum;
-    }
-    memset(scratch->data + scratch->length, 0,
-	  request.authenticator.ciphertext.length - scratch->length);
-    if (!(request.authenticator.ciphertext.data =
-	  malloc(request.authenticator.ciphertext.length))) {
-	retval = ENOMEM;
-	goto cleanup_cksum;
-    }
-
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, &(in_creds)->keyblock)))
-	goto cleanup;
-
     /* call the encryption routine */
-    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-			       (krb5_pointer) request.authenticator.ciphertext.data,
-			       scratch->length, &eblock, 0))) {
-        krb5_finish_key(context, &eblock);
+    if ((retval = krb5_encrypt_helper(context, &in_creds->keyblock,
+				      KRB5_KEYUSAGE_AP_REQ_AUTH,
+				      scratch, &request.authenticator)))
 	goto cleanup_cksum;
-    }
 
-    if ((retval = krb5_finish_key(context, &eblock)))
-	goto cleanup_cksum;
-    
     if ((retval = encode_krb5_ap_req(&request, &toutbuf)))
 	goto cleanup_cksum;
 #ifdef HAVE_C_STRUCTURE_ASSIGNMENT

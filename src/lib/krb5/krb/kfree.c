@@ -149,6 +149,16 @@ krb5_free_checksum(context, val)
 }
 
 KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_checksum_contents(context, val)
+    krb5_context context;
+    register krb5_checksum *val;
+{
+    if (val->contents)
+	krb5_xfree(val->contents);
+    return;
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_cred(context, val)
     krb5_context context;
     register krb5_cred FAR *val;
@@ -572,3 +582,4 @@ krb5_free_unparsed_name(context, val)
 	krb5_xfree(val);
     return;
 }
+

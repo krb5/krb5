@@ -45,14 +45,11 @@ krb5_mk_rep(context, auth_context, outbuf)
     krb5_error_code 	  retval;
     krb5_enctype 	  enctype;
     krb5_ap_rep_enc_part  repl;
-    krb5_encrypt_block 	  eblock;
     krb5_ap_rep 	  reply;
     krb5_data 		* scratch;
     krb5_data 		* toutbuf;
 
-    /* verify a valid enctype is available */
-    if (!valid_enctype(enctype = auth_context->keyblock->enctype))
-	return KRB5_PROG_ETYPE_NOSUPP;
+    enctype = auth_context->keyblock->enctype;
 
     /* Make the reply */
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
@@ -72,49 +69,16 @@ krb5_mk_rep(context, auth_context, outbuf)
     if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
 	return retval;
 
-    /* put together an eblock for this encryption */
-    krb5_use_enctype(context, &eblock, enctype);
-    reply.enc_part.enctype = enctype;
-    reply.enc_part.kvno = 0;		/* XXX user set? */
-
-    reply.enc_part.ciphertext.length = krb5_encrypt_size(scratch->length,
-							 eblock.crypto_entry);
-    /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data,
-				  reply.enc_part.ciphertext.length))) {
-	/* may destroy scratch->data */
-	krb5_xfree(scratch);
-	return ENOMEM;
-    }
-    memset(scratch->data + scratch->length, 0,
-	  reply.enc_part.ciphertext.length - scratch->length);
-    if (!(reply.enc_part.ciphertext.data =
-	  malloc(reply.enc_part.ciphertext.length))) {
-	retval = ENOMEM;
+    if ((retval = krb5_encrypt_helper(context, auth_context->keyblock,
+				      KRB5_KEYUSAGE_AP_REP_ENCPART,
+				      scratch, &reply.enc_part)))
 	goto cleanup_scratch;
-    }
-
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, auth_context->keyblock)))
-	goto cleanup_encpart;
-
-    /* call the encryption routine */
-    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-			       (krb5_pointer) reply.enc_part.ciphertext.data,
-			       scratch->length, &eblock, 0))) {
-	krb5_finish_key(context, &eblock);
-	goto cleanup_encpart;
-    }
-
-    if ((retval = krb5_finish_key(context, &eblock)))
-	goto cleanup_encpart;
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {
 	*outbuf = *toutbuf;
 	krb5_xfree(toutbuf);
     }
 
-cleanup_encpart:
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data); 
     reply.enc_part.ciphertext.length = 0; 

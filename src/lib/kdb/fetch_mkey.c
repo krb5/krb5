@@ -25,6 +25,32 @@
  * Fetch a database master key from somewhere.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 
 /* these are available to other funcs, and the pointers may be reassigned */
@@ -52,10 +78,11 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 #endif
 
 krb5_error_code
-krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, key)
+krb5_db_fetch_mkey(context, mname, etype, fromkeyboard, twice, keyfile,
+		   salt, key)
     krb5_context context;
     krb5_principal mname;
-    krb5_encrypt_block * eblock;
+    krb5_enctype etype;
     krb5_boolean fromkeyboard;
     krb5_boolean twice;
     char *keyfile;
@@ -66,7 +93,6 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
     char password[BUFSIZ];
     krb5_data pwd;
     int size = sizeof(password);
-
 
     if (fromkeyboard) {
 	krb5_data scratch;
@@ -83,8 +109,9 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 		if (retval)
 			return retval;
 	}
-	retval = krb5_string_to_key(context, eblock, key, &pwd,
-				    salt ? salt : &scratch);
+	retval = krb5_c_string_to_key(context, etype, &pwd, salt?salt:&scratch,
+				      key);
+
 	if (!salt)
 		krb5_xfree(scratch.data);
 	memset(password, 0, sizeof(password)); /* erase it */
@@ -142,7 +169,8 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 	    key->contents = 0;
 	} else
 	    retval = 0;
-	krb5_use_enctype(context, eblock, key->enctype);
+
+	key->enctype = etype;
 	
     errout:
 	(void) fclose(kf);

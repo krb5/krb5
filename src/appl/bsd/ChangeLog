@@ -1,3 +1,17 @@
+1998-10-24  Marc Horowitz  <marc@mit.edu>
+
+	* login.c: update to new get_creds API
+	
+	* krlogin.c (main, oob, server_message, control), krlogind.c
+		(sendoob, protocol, recvauth): If the enctype is not
+		similar to DES, use an inband signalling protocol instead
+		of MSG_OOB data to indicate status changes.
+
+	* kcmd.c (rcmd_stream_init_krb5, v5_des_read, v5_des_write):
+		update to new crypto API.  Add ivec chaining to
+		encryption when the enctype is not similar to DES as part
+		of the new protocol.
+
 1998-10-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krshd.c (doit): Apply ghudson's patch so that rshd passes the
@@ -7,6 +21,10 @@
 		KRB5LOCALPORT and KRB5REMOTEPORT are set, use them to set
 		the foreign and local ports so that encrypted rcp for the
 		same machine.  [krb5-appl/638]
+
+Tue Aug 18 16:48:02 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krlogin.c: Add <sys/filio.h> for FIONREAD.
 
 Sat Aug 15 00:01:15 1998  Geoffrey King  <gjking@mit.edu>
 
@@ -18,6 +36,11 @@ Mon Jul 27 00:06:20 1998  Geoffrey King  <gjking@mit.edu>
 
 	* krlogin.c (main): Apply ghudson's patch so that rlogin -a
 	no longer dumps core. [krb5-appl/612]
+
+Sun Jul 26 23:46:36 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* login.c (main): Allow krb524 conversion for forwarded tickets
+	(try_convert524): Don't check to see if we have tickets here; caller  does that and actually gets it right.
 
 1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 

@@ -28,11 +28,7 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
     krb5_enc_data 	* pencdata;
 {
     krb5_error_code 	  retval;
-    krb5_encrypt_block 	  eblock;
     krb5_data 		* scratch;
-
-    if (pkeyblock && !valid_enctype(pkeyblock->enctype))
-    	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* start by encoding to-be-encrypted part of the message */
     if ((retval = encode_krb5_enc_cred_part(pcredpart, &scratch)))
@@ -49,47 +45,11 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
 	    return 0;
     }
 
-    /* put together an eblock for this encryption */
-
-    pencdata->kvno = 0;
-    pencdata->enctype = pkeyblock->enctype;
-
-    krb5_use_enctype(context, &eblock, pkeyblock->enctype);
-    pencdata->ciphertext.length = krb5_encrypt_size(scratch->length, 
-						    eblock.crypto_entry);
-
-    /* add padding area, and zero it */
-    if (!(scratch->data = (char *)realloc(scratch->data,
-                                          pencdata->ciphertext.length))) {
-    	/* may destroy scratch->data */
-    	krb5_xfree(scratch);
-    	return ENOMEM;
-    }
-
-    memset(scratch->data + scratch->length, 0,
-           pencdata->ciphertext.length - scratch->length);
-    if (!(pencdata->ciphertext.data =
-          (char *)malloc(pencdata->ciphertext.length))) {
-    	retval = ENOMEM;
-    	goto clean_scratch;
-    }
-
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, pkeyblock))) {
-    	goto clean_encpart;
-    }
-
     /* call the encryption routine */
-    if ((retval = krb5_encrypt(context, (krb5_pointer)scratch->data,
-			       (krb5_pointer)pencdata->ciphertext.data, 
-			       scratch->length, &eblock, 0))) {
-	krb5_finish_key(context, &eblock);
-	goto clean_encpart;
-    }
-    
-    retval = krb5_finish_key(context, &eblock);
+    retval = krb5_encrypt_helper(context, pkeyblock,
+				 KRB5_KEYUSAGE_KRB_CRED_ENCPART,
+				 scratch, pencdata);
 
-clean_encpart:
     if (retval) {
     	memset(pencdata->ciphertext.data, 0, pencdata->ciphertext.length);
         free(pencdata->ciphertext.data);
@@ -97,7 +57,6 @@ clean_encpart:
         pencdata->ciphertext.data = 0;
     }
 
-clean_scratch:
     memset(scratch->data, 0, scratch->length); 
     krb5_free_data(context, scratch);
 

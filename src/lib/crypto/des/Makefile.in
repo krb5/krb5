@@ -13,77 +13,41 @@ PROG_RPATH=$(KRB5_LIBDIR)
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS=\
-	afsstring2key.o \
-	cbc_cksum.o	\
-	finish_key.o	\
-	fin_rndkey.o	\
-	init_rkey.o	\
-	process_ky.o	\
-	random_key.o	\
-	string2key.o	\
-	key_sched.o	\
-	weak_key.o	\
-	f_cbc.o 	\
-	f_cksum.o 	\
-	f_sched.o 	\
-	f_ecb.o 	\
-	f_parity.o 	\
-	f_tables.o	\
-	d3_cbc.o 	\
-	d3_ecb.o	\
+	afsstring2key.o	\
+	d3_cbc.o	\
 	d3_kysched.o	\
-	d3_procky.o 	\
-	d3_str2ky.o	\
-	u_nfold.o	\
-	u_rn_key.o
+	f_cbc.o 	\
+	f_cksum.o	\
+	f_parity.o 	\
+	f_sched.o 	\
+	f_tables.o	\
+	key_sched.o	\
+	string2key.o	\
+	weak_key.o
 
-OBJS=	afsstring2key.$(OBJEXT) \
-	cbc_cksum.$(OBJEXT)	\
-	finish_key.$(OBJEXT)	\
-	fin_rndkey.$(OBJEXT)	\
-	init_rkey.$(OBJEXT)	\
-	process_ky.$(OBJEXT)	\
-	random_key.$(OBJEXT)	\
-	string2key.$(OBJEXT)	\
-	key_sched.$(OBJEXT)	\
-	weak_key.$(OBJEXT)	\
-	f_cbc.$(OBJEXT) 	\
-	f_cksum.$(OBJEXT) 	\
-	f_sched.$(OBJEXT) 	\
-	f_ecb.$(OBJEXT) 	\
-	f_parity.$(OBJEXT) 	\
-	f_tables.$(OBJEXT)	\
-	d3_cbc.$(OBJEXT) 	\
-	d3_ecb.$(OBJEXT)	\
+OBJS=	afsstring2key.$(OBJEXT)	\
+	d3_cbc.$(OBJEXT)	\
 	d3_kysched.$(OBJEXT)	\
-	d3_procky.$(OBJEXT) 	\
-	d3_str2ky.$(OBJEXT)	\
-	u_nfold.$(OBJEXT)	\
-	u_rn_key.$(OBJEXT)
+	f_cbc.$(OBJEXT) 	\
+	f_cksum.$(OBJEXT)	\
+	f_parity.$(OBJEXT) 	\
+	f_sched.$(OBJEXT) 	\
+	f_tables.$(OBJEXT)	\
+	key_sched.$(OBJEXT)	\
+	string2key.$(OBJEXT)	\
+	weak_key.$(OBJEXT)
 
-SRCS=	$(srcdir)/afsstring2key.c \
-	$(srcdir)/cbc_cksum.c	\
-	$(srcdir)/finish_key.c	\
-	$(srcdir)/fin_rndkey.c	\
-	$(srcdir)/init_rkey.c	\
-	$(srcdir)/process_ky.c	\
-	$(srcdir)/random_key.c	\
-	$(srcdir)/string2key.c	\
+SRCS=	$(srcdir)/afsstring2key.c	\
+	$(srcdir)/d3_cbc.c	\
+	$(srcdir)/d3_kysched.c	\
+	$(srcdir)/f_cbc.c	\
+	$(srcdir)/f_cksum.c	\
+	$(srcdir)/f_parity.c	\
+	$(srcdir)/f_sched.c	\
+	$(srcdir)/f_tables.c	\
 	$(srcdir)/key_sched.c	\
 	$(srcdir)/weak_key.c	\
-	$(srcdir)/f_cbc.c \
-	$(srcdir)/f_cksum.c \
-	$(srcdir)/f_sched.c \
-	$(srcdir)/f_ecb.c \
-	$(srcdir)/f_parity.c \
-	$(srcdir)/f_tables.c \
-	$(srcdir)/d3_cbc.c \
-	$(srcdir)/d3_ecb.c \
-	$(srcdir)/d3_kysched.c \
-	$(srcdir)/d3_procky.c \
-	$(srcdir)/d3_str2ky.c \
-	$(srcdir)/u_nfold.c \
-	$(srcdir)/u_rn_key.c
+	$(srcdir)/string2key.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -93,22 +57,18 @@ includes:: depend
 
 depend:: $(SRCS)
 
-# FIXME, this is left from the previous DES implementation.
-clean::
-	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
+TOBJS = key_sched.$(OBJEXT) f_sched.$(OBJEXT) f_cbc.$(OBJEXT) \
+	f_tables.$(OBJEXT) f_cksum.$(OBJEXT)
 
-verify$(EXEEXT): t_verify.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_verify.$(OBJEXT) process_ky.o  key_sched.o \
-	../cryptoconf.o ../des_crc.o $(KRB5_BASE_LIBS)
+verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+	$(COM_ERR_DEPLIB)
+	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+		-lcom_err
 
-destest$(EXEEXT): destest.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ destest.$(OBJEXT) process_ky.o key_sched.o \
-	../cryptoconf.o ../des_crc.o $(KRB5_BASE_LIBS)
+destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS)
+	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS)
 
-t_random$(EXEEXT): t_random.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_random.$(OBJEXT) $(KRB5_BASE_LIBS)
-
-check-unix:: destest verify
+check-unix:: verify destest
 	$(RUN_SETUP) ./verify -z
 	$(RUN_SETUP) ./verify -m
 	$(RUN_SETUP) ./verify
@@ -118,6 +78,6 @@ check-windows::
 
 clean:: 
 	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) \
-	t_verify.$(OBJEXT) t_random.$(OBJEXT) t_random$(EXEEXT)
+	t_verify.$(OBJEXT)
 
 clean-unix:: clean-libobjs

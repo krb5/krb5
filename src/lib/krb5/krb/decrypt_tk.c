@@ -42,43 +42,27 @@ krb5_decrypt_tkt_part(context, srv_key, ticket)
     register krb5_ticket FAR *ticket;
 {
     krb5_enc_tkt_part *dec_tkt_part;
-    krb5_encrypt_block eblock;
     krb5_data scratch;
     krb5_error_code retval;
 
     if (!valid_enctype(ticket->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
-    /* put together an eblock for this encryption */
-    krb5_use_enctype(context, &eblock, ticket->enc_part.enctype);
-
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))
 	return(ENOMEM);
 
-    /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, srv_key)) {
-	free(scratch.data);
-	return(retval);
-    }
-
     /* call the encryption routine */
-    if (retval = krb5_decrypt(context, 
-			      (krb5_pointer) ticket->enc_part.ciphertext.data,
-			      (krb5_pointer) scratch.data, scratch.length, 
-			      &eblock, 0)) {
-	(void) krb5_finish_key(context, &eblock);
+    if (retval = krb5_c_decrypt(context, srv_key,
+				KRB5_KEYUSAGE_KDC_REP_TICKET, 0,
+				&ticket->enc_part, &scratch)) {
 	free(scratch.data);
 	return retval;
     }
+
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    retval = krb5_finish_key(context, &eblock);
-    if (retval) {
 
-	clean_scratch();
-	return retval;
-    }
     /*  now decode the decrypted stuff */
     retval = decode_krb5_enc_tkt_part(&scratch, &dec_tkt_part);
     if (!retval) {

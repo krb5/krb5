@@ -22,6 +22,32 @@
  * 
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -325,9 +351,9 @@ krb5_db2_db_close_database(context)
  * Set/Get the master key associated with the database
  */
 krb5_error_code
-krb5_db2_db_set_mkey(context, eblock)
+krb5_db2_db_set_mkey(context, key)
     krb5_context context;
-    krb5_encrypt_block *eblock;
+    krb5_keyblock *key;
 {
     krb5_db2_context *db_ctx;
 
@@ -335,14 +361,14 @@ krb5_db2_db_set_mkey(context, eblock)
 	return(KRB5_KDB_DBNOTINITED);
 
     db_ctx = context->db_context;
-    db_ctx->db_master_key = eblock;
+    db_ctx->db_master_key = key;
     return 0;
 }
 
 krb5_error_code
-krb5_db2_db_get_mkey(context, eblock)
+krb5_db2_db_get_mkey(context, key)
     krb5_context context;
-    krb5_encrypt_block **eblock;
+    krb5_keyblock **key;
 {
     krb5_db2_context *db_ctx;
 
@@ -350,7 +376,7 @@ krb5_db2_db_get_mkey(context, eblock)
 	return(KRB5_KDB_DBNOTINITED);
 
     db_ctx = context->db_context;
-    *eblock = db_ctx->db_master_key;
+    *key = db_ctx->db_master_key;
 
     return 0;
 }

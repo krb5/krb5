@@ -25,19 +25,42 @@
  */
 
 
-#include "k5-int.h"
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "des_int.h"
 #include "com_err.h"
 
-extern int errno;
-extern mit_des_ecb_encrypt();
-
 #include <stdio.h>
-
 
 void convert PROTOTYPE((char *, unsigned char []));
 
 void des_cblock_print_file PROTOTYPE((mit_des_cblock, FILE *));
+
+char zeroblock[8] = {0,0,0,0,0,0,0,0};
 
 void
 main(argc, argv)
@@ -46,38 +69,23 @@ char *argv[];
 {
     char block1[17], block2[17], block3[17];
 
-    krb5_encrypt_block eblock;
-    krb5_keyblock keyblock;
-    krb5_context context;
     mit_des_cblock key, input, output, output2;
-    krb5_error_code retval;
+    mit_des_key_schedule sched;
     int num = 0;
+    int retval;
 
     int error = 0;
-    /* This is a crock and we know it... We win because 
-       none of these tests rely on a valid context pointer */
-    context = 0;
-
-    /* do some initialisation */
-    initialize_krb5_error_table();
-
-    krb5_use_enctype(context, &eblock, ENCTYPE_DES_CBC_CRC);
-    keyblock.magic = KV5M_KEYBLOCK;
-    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-    keyblock.length = sizeof (mit_des_cblock);
-    keyblock.contents = (krb5_octet *)key;
 
     while (scanf("%16s %16s %16s", block1, block2, block3) == 3) {
 	convert(block1, key);
 	convert(block2, input);
 	convert(block3, output);
 
-        if (retval = krb5_process_key(context, &eblock,&keyblock)) {
-            com_err("des test", retval, "can't process key");
-            exit(-1);
+	if (retval = mit_des_key_sched(key, sched)) {
+            fprintf(stderr, "des test: can't process key");
+            exit(1);
         }
-	mit_des_ecb_encrypt(&input, &output2,
-			    (struct mit_des_ks_struct *)eblock.priv,1);
+	mit_des_cbc_encrypt(&input, &output2, 8, sched, zeroblock, 1);
 
 	if (memcmp((char *)output2, (char *)output, 8)) {
 	    fprintf(stderr, 
@@ -91,8 +99,7 @@ char *argv[];
 	/*
 	 * Now try decrypting....
 	 */
-	mit_des_ecb_encrypt(&output, &output2,
-			    (struct mit_des_ks_struct *)eblock.priv,0);
+	mit_des_cbc_encrypt(&output, &output2, 8, sched, zeroblock, 0);
 
 	if (memcmp((char *)output2, (char *)input, 8)) {
 	    fprintf(stderr, 
@@ -103,10 +110,6 @@ char *argv[];
 	    error++;
 	}
 
-        if (retval = krb5_finish_key(context, &eblock)) {
-            com_err("des verify", retval, "can't finish key");
-            exit(-1);
-        }
 	num++;
     }
 
@@ -157,7 +160,6 @@ unsigned char cblock[];
  * Fake out the DES library, for the purposes of testing.
  */
 
-#include "des.h"
 #include "des_int.h"
 
 int

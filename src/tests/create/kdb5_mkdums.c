@@ -65,7 +65,6 @@ int status;
 krb5_keyblock master_keyblock;
 krb5_principal master_princ;
 krb5_db_entry master_entry;
-krb5_encrypt_block master_encblock;
 krb5_pointer master_random;
 krb5_context test_context;
 
@@ -175,8 +174,6 @@ char *argv[];
 	exit(1);
     }
 
-    krb5_use_enctype(test_context, &master_encblock, master_keyblock.enctype);
-
     if (!dbname)
 	dbname = DEFAULT_KDB_FILE;	/* XXX? */
 
@@ -206,9 +203,6 @@ char *argv[];
 	add_princ(test_context, str_newprinc);
       }
     }
-
-    krb5_finish_random_key(test_context, &master_encblock, &master_random);
-    krb5_finish_key(test_context, &master_encblock);
 
     retval = krb5_db_fini(test_context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
@@ -280,8 +274,8 @@ add_princ(context, str_newprinc)
 
     	pwd.length = strlen(princ_name);
     	pwd.data = princ_name;  /* must be able to regenerate */
-    	if ((retval = krb5_string_to_key(context, &master_encblock, 
-				        &key, &pwd, &salt))) {
+    	if ((retval = krb5_c_string_to_key(context, master_keyblock.enctype, 
+					   &pwd, &salt, &key))) {
 	    com_err(progname,retval,"while converting password to key for '%s'",
 		    princ_name);
 	    krb5_free_data_contents(context, &salt);
@@ -296,7 +290,7 @@ add_princ(context, str_newprinc)
 	    goto error;
         }
 
-        if ((retval = krb5_dbekd_encrypt_key_data(context,&master_encblock, 
+        if ((retval = krb5_dbekd_encrypt_key_data(context,&master_keyblock, 
 						  &key, NULL, 1, 
 						  newentry.key_data))) {
     	    com_err(progname, retval, "while encrypting key for '%s'", 
@@ -357,8 +351,10 @@ char *dbname;
 	    com_err(pname, retval, "while calculated master key salt");
 	    return(1);
 	}
-	if ((retval = krb5_string_to_key(test_context, &master_encblock, 
-				    &master_keyblock, &pwd, &scratch))) {
+	if ((retval = krb5_c_string_to_key(test_context,
+					   master_keyblock.enctype,
+					   &pwd, &scratch,
+					   &master_keyblock))) {
 	    com_err(pname, retval,
 		    "while transforming master key from password");
 	    return(1);
@@ -366,7 +362,7 @@ char *dbname;
 	free(scratch.data);
     } else {
 	if ((retval = krb5_db_fetch_mkey(test_context, master_princ, 
-					&master_encblock, manual_mkey, 
+					master_keyblock.enctype, manual_mkey, 
 					FALSE, 0, NULL, &master_keyblock))) {
 	    com_err(pname, retval, "while reading master key");
 	    return(1);
@@ -377,7 +373,7 @@ char *dbname;
 	return(1);
     }
     if ((retval = krb5_db_verify_master_key(test_context, master_princ, 
-					   &master_keyblock, &master_encblock))){
+					   &master_keyblock))){
 	com_err(pname, retval, "while verifying master key");
 	(void) krb5_db_fini(test_context);
 	return(1);
@@ -399,20 +395,6 @@ char *dbname;
 	return(1);
     }
 
-    if ((retval = krb5_process_key(test_context,
-				  &master_encblock, &master_keyblock))) {
-	com_err(pname, retval, "while processing master key");
-	(void) krb5_db_fini(test_context);
-	return(1);
-    }
-    if ((retval = krb5_init_random_key(test_context,
-				      &master_encblock, &master_keyblock,
-				      &master_random))) {
-	com_err(pname, retval, "while initializing random key generator");
-	krb5_finish_key(test_context, &master_encblock);
-	(void) krb5_db_fini(test_context);
-	return(1);
-    }
     mblock.max_life = master_entry.max_life;
     mblock.max_rlife = master_entry.max_renewable_life;
     mblock.expiration = master_entry.expiration;

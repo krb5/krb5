@@ -1,3 +1,10 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* asn1buf.c (asn1buf_sync): interoperation testing against heimdal
+	revealed a bug.  if extra fields are present in a SEQUENCE, they
+	are not ignored and skipped.  This caused the decoder to get out
+	of sync.
+
 Thu Jul  2 15:30:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* asn1_encode.c: Make the magic Macintosh EPOCH offset be 70 years

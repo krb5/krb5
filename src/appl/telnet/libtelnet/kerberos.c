@@ -53,7 +53,38 @@
  * or implied warranty.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #ifdef	KRB4
+/* this code must be compiled in the krb5 tree.  disgustingly, there
+   is code in here which declares structures which happen to mirror
+   the krb4 des structures.  I didn't want to rototill this *completely*
+   so this is how it's going to work. --marc */
+#include <krb5.h>
 #include <sys/types.h>
 #include <arpa/telnet.h>
 #include <stdio.h>
@@ -73,6 +104,7 @@
 #include "misc.h"
 
 extern auth_debug_mode;
+extern krb5_context telnet_context;
 
 static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V4, };
@@ -93,6 +125,7 @@ static	AUTH_DAT adat = { 0 };
 #ifdef	ENCRYPTION
 static Block	session_key	= { 0 };
 static Schedule sched;
+static krb5_keyblock krbkey;
 static Block	challenge	= { 0 };
 #endif	/* ENCRYPTION */
 
@@ -146,6 +179,9 @@ kerberos4_init(ap, server)
 	} else {
 		str_data[3] = TELQUAL_IS;
 	}
+
+	kerberos5_init(NULL, server);
+
 	return(1);
 }
 
@@ -157,15 +193,18 @@ kerberos4_send(ap)
 	Authenticator *ap;
 {
 	KTEXT_ST auth;
-#ifdef	ENCRYPTION
-	Block enckey;
-#endif	/* ENCRYPTION */
 	char instance[INST_SZ];
 	char *realm;
 	char *krb_realmofhost();
 	char *krb_get_phost();
 	CREDENTIALS cred;
 	int r;
+#ifdef ENCRYPTION
+	krb5_data data;
+	krb5_enc_data encdata;
+	krb5_error_code code;
+	krb5_keyblock random_key;
+#endif
 
 	printf("[ Trying KERBEROS4 ... ]\r\n");	
 	if (!UserNameRequested) {
@@ -216,11 +255,56 @@ kerberos4_send(ap)
 	if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 		register int i;
 
-		des_key_sched(cred.session, sched);
-		des_init_random_number_generator(cred.session);
-		des_new_random_key(session_key);
-		des_ecb_encrypt(session_key, session_key, sched, 0);
-		des_ecb_encrypt(session_key, challenge, sched, 0);
+		data.data = cred.session;
+		data.length = 8; /* sizeof(cred.session) */;
+
+		if (code = krb5_c_random_seed(telnet_context, &data)) {
+		    com_err("libtelnet", code,
+			    "while seeding random number generator");
+		    return(0);
+		}
+
+		if (code = krb5_c_make_random_key(telnet_context,
+						  ENCTYPE_DES_CBC_RAW,
+						  &random_key)) {
+		    com_err("libtelnet", code,
+			    "while creating random session key");
+		    return(0);
+		}
+
+		/* the krb4 code uses ecb mode, but on a single block
+		   with a zero ivec, ecb and cbc are the same */
+		krbkey.enctype = ENCTYPE_DES_CBC_RAW;
+		krbkey.length = 8;
+		krbkey.contents = cred.session;
+
+		encdata.ciphertext.data = random_key.contents;
+		encdata.ciphertext.length = random_key.length;
+		encdata.enctype = ENCTYPE_UNKNOWN;
+
+		data.data = session_key;
+		data.length = 8;
+
+		code = krb5_c_decrypt(telnet_context, &krbkey, 0, 0,
+				      &encdata, &data);
+
+		krb5_free_keyblock_contents(telnet_context, &random_key);
+
+		if (code) {
+		    com_err("libtelnet", code, "while encrypting random key");
+		    return(0);
+		}
+
+		encdata.ciphertext.data = session_key;
+		encdata.ciphertext.length = 8;
+		encdata.enctype = ENCTYPE_UNKNOWN;
+
+		data.data = challenge;
+		data.length = 8;
+
+		code = krb5_c_decrypt(telnet_context, &krbkey, 0, 0,
+				      &encdata, &data);
+
 		/*
 		 * Increment the challenge by 1, and encrypt it for
 		 * later comparison.
@@ -232,7 +316,19 @@ kerberos4_send(ap)
 			if (x < 256)		/* if no overflow, all done */
 				break;
 		}
-		des_ecb_encrypt(challenge, challenge, sched, 1);
+
+		data.data = challenge;
+		data.length = 8;
+
+		encdata.ciphertext.data = challenge;
+		encdata.ciphertext.length = 8;
+		encdata.enctype = ENCTYPE_UNKNOWN;
+
+		if (code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0, &data,
+					  &encdata)) {
+		    com_err("libtelnet", code, "while encrypting random key");
+		    return(0);
+		}
 	}
 #endif	/* ENCRYPTION */
 	
@@ -253,7 +349,10 @@ kerberos4_is(ap, data, cnt)
 {
 #ifdef	ENCRYPTION
 	Session_Key skey;
-	Block datablock;
+	Block datablock, tmpkey;
+	krb5_data kdata;
+	krb5_enc_data encdata;
+	krb5_error_code code;
 #endif	/* ENCRYPTION */
 	char realm[REALM_SZ];
 	char instance[INST_SZ];
@@ -317,24 +416,60 @@ kerberos4_is(ap, data, cnt)
 		 * Initialize the random number generator since it's
 		 * used later on by the encryption routine.
 		 */
-		des_init_random_number_generator(session_key);
-		des_key_sched(session_key, sched);
+
+		kdata.data = session_key;
+		kdata.length = 8;
+
+		if (code = krb5_c_random_seed(telnet_context, &kdata)) {
+		    com_err("libtelnet", code,
+			    "while seeding random number generator");
+		    return;
+		}
+
 		memcpy((void *)datablock, (void *)data, sizeof(Block));
 		/*
 		 * Take the received encrypted challenge, and encrypt
 		 * it again to get a unique session_key for the
 		 * ENCRYPT option.
 		 */
-		des_ecb_encrypt(datablock, session_key, sched, 1);
+		krbkey.enctype = ENCTYPE_DES_CBC_RAW;
+		krbkey.length = 8;
+		krbkey.contents = session_key;
+
+		kdata.data = datablock;
+		kdata.length = 8;
+
+		encdata.ciphertext.data = tmpkey;
+		encdata.ciphertext.length = 8;
+		encdata.enctype = ENCTYPE_UNKNOWN;
+
+		if (code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0,
+					  &kdata, &encdata)) {
+		    com_err("libtelnet", code, "while encrypting random key");
+		    return;
+		}
+
 		skey.type = SK_DES;
 		skey.length = 8;
-		skey.data = session_key;
+		skey.data = tmpkey;
 		encrypt_session_key(&skey, 1);
 		/*
 		 * Now decrypt the received encrypted challenge,
 		 * increment by one, re-encrypt it and send it back.
 		 */
-		des_ecb_encrypt(datablock, challenge, sched, 0);
+		encdata.ciphertext.data = datablock;
+		encdata.ciphertext.length = 8;
+		encdata.enctype = ENCTYPE_UNKNOWN;
+
+		kdata.data = challenge;
+		kdata.length = 8;
+
+		if (code = krb5_c_decrypt(telnet_context, &krbkey, 0, 0, 
+					  &encdata, &kdata)) {
+		    com_err("libtelnet", code, "while decrypting challenge");
+		    return;
+		}
+
 		for (r = 7; r >= 0; r--) {
 			register int t;
 			t = (unsigned int)challenge[r] + 1;
@@ -342,7 +477,20 @@ kerberos4_is(ap, data, cnt)
 			if (t < 256)		/* if no overflow, all done */
 				break;
 		}
-		des_ecb_encrypt(challenge, challenge, sched, 1);
+
+		kdata.data = challenge;
+		kdata.length = 8;
+
+		encdata.ciphertext.data = challenge;
+		encdata.ciphertext.length = 8;
+		encdata.enctype = ENCTYPE_UNKNOWN;
+
+		if (code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0,
+					  &kdata, &encdata)) {
+		    com_err("libtelnet", code, "while decrypting challenge");
+		    return;
+		}
+
 		Data(ap, KRB_RESPONSE, (void *)challenge, sizeof(challenge));
 #endif	/* ENCRYPTION */
 		break;
@@ -363,6 +511,10 @@ kerberos4_reply(ap, data, cnt)
 {
 #ifdef	ENCRYPTION
 	Session_Key skey;
+	krb5_data kdata;
+	krb5_enc_data encdata;
+	krb5_error_code code;
+
 #endif	/* ENCRYPTION */
 
 	if (cnt-- < 1)
@@ -387,7 +539,21 @@ kerberos4_reply(ap, data, cnt)
 #else	/* ENCRYPTION */
 			Data(ap, KRB_CHALLENGE, (void *)session_key,
 						sizeof(session_key));
-			des_ecb_encrypt(session_key, session_key, sched, 1);
+
+			kdata.data = session_key;
+			kdata.length = 8;
+
+			encdata.ciphertext.data = session_key;
+			encdata.ciphertext.length = 8;
+			encdata.enctype = ENCTYPE_UNKNOWN;
+
+			if (code = krb5_c_encrypt(telnet_context, &krbkey,
+						  0, 0, &kdata, &encdata)) {
+				com_err("libtelnet", code,
+					"while encrypting session_key");
+				return;
+			}
+
 			skey.type = SK_DES;
 			skey.length = 8;
 			skey.data = session_key;

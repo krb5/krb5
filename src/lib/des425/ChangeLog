@@ -1,6 +1,12 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* random_key.c, new_rnd_key.c: make the v4 compat random key code
+	use the krb5 crypto interface, instead of the des implementation
+	internals.
+
 Wed Apr 15 18:03:43 1998  Tom Yu  <tlyu@mit.edu>
 
-	* Makefile.in (SHLIB_EXPDEPS): 
+	* Makefile.in (SHLIB_EXPDEPS):
 	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
 
 Tue Mar  3 08:59:03 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>

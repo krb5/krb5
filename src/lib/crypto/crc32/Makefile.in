@@ -7,25 +7,23 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOS##OBJFILE=..\crc32.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
-STLIBOBJS=crc.o
-OBJS=	crc.$(OBJEXT)
-SRCS=	$(srcdir)/crc.c
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS= crc32.o
+
+OBJS= crc32.$(OBJEXT) 
+
+SRCS= $(srcdir)/crc32.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
-crctest: crctest.$(OBJEXT) $(OBJS)
-	$(RM) crctest
-	$(CC) -o crctest crctest.$(OBJEXT) $(CFLAGS) $(LDFLAGS) $(OBJS)
+includes:: depend
 
-crctest.exe:
-	$(CC) -o crctest.exe $(CFLAGS2) $(SRCS)
-
-check:: crctest$(EXEEXT)
-	$(C)crctest$(EXEEXT) < $(srcdir)$(S)crc-test
-
-clean:: 
-	$(RM) crctest$(EXEEXT) crctest.$(OBJEXT)
+depend:: $(SRCS)
 
 clean-unix:: clean-libobjs

@@ -12,6 +12,7 @@ AC_CHECK_FUNCS(flock fchmod chmod strftime strptime geteuid setenv unsetenv gete
 AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon getuid sscanf syslog)
 KRB5_AC_REGEX_FUNCS
 dnl
+KRB5_SOCKADDR_SA_LEN
 KRB5_BUILD_LIBRARY_WITH_DEPS
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_PROGRAM

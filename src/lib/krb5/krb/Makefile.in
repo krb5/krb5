@@ -32,6 +32,7 @@ STLIBOBJS= \
 	cp_key_cnt.o	\
 	decode_kdc.o	\
 	decrypt_tk.o	\
+        enc_helper.o	\
 	encode_kdc.o	\
 	encrypt_tk.o	\
 	free_rtree.o	\
@@ -114,6 +115,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	cp_key_cnt.$(OBJEXT)	\
 	decode_kdc.$(OBJEXT)	\
 	decrypt_tk.$(OBJEXT)	\
+        enc_helper.$(OBJEXT)	\
 	encode_kdc.$(OBJEXT)	\
 	encrypt_tk.$(OBJEXT)	\
 	free_rtree.$(OBJEXT)	\
@@ -197,6 +199,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/cp_key_cnt.c	\
 	$(srcdir)/decode_kdc.c	\
 	$(srcdir)/decrypt_tk.c	\
+	$(srcdir)/enc_helper.c	\
 	$(srcdir)/encode_kdc.c	\
 	$(srcdir)/encrypt_tk.c	\
 	$(srcdir)/free_rtree.c	\

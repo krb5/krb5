@@ -58,7 +58,7 @@ typedef struct _krb5_db2_context {
     int                 db_locks_held;  /* Number of times locked       */
     int                 db_lock_mode;   /* Last lock mode, e.g. greatest*/
     krb5_boolean        db_nb_locks;    /* [Non]Blocking lock modes     */
-    krb5_encrypt_block *db_master_key;  /* Master key of database       */
+    krb5_keyblock      *db_master_key;  /* Master key of database       */
 } krb5_db2_context;
 
 #define KRB5_DB2_MAX_RETRY 5

@@ -13,7 +13,7 @@
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
-
+#include <krb5.h>
 /*
  * Create ticket takes as arguments information that should be in a
  * ticket, and the KTEXT object in which the ticket should be
@@ -69,9 +69,9 @@
  * <=7 bytes		null		   null pad to 8 byte multiple
  *
  */
-
-int krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
-		  session, life, time_sec, sname, sinstance, key)
+int
+krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
+		  session, life, time_sec, sname, sinstance, key, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
     unsigned char flags;        /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
@@ -84,6 +84,51 @@ int krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
     C_Block key;                /* Service's secret key */
+{
+    return krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
+			  session, life, time_sec, sname, sinstance,
+			  key, NULL);
+}
+
+int
+krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
+		  session, life, time_sec, sname, sinstance, k5key)
+    KTEXT   tkt;                /* Gets filled in by the ticket */
+    unsigned char flags;        /* Various Kerberos flags */
+    char    *pname;             /* Principal's name */
+    char    *pinstance;         /* Principal's instance */
+    char    *prealm;            /* Principal's authentication domain */
+    long    paddress;           /* Net address of requesting entity */
+    char    *session;           /* Session key inserted in ticket */
+    short   life;               /* Lifetime of the ticket */
+    long    time_sec;           /* Issue time and date */
+    char    *sname;             /* Service Name */
+    char    *sinstance;         /* Instance Name */
+    krb5_keyblock *k5key;	/* NULL if not present */
+{
+    C_Block key;
+
+    return krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
+			  session, life, time_sec, sname, sinstance,
+			  key, k5key);
+}
+
+static int
+krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
+	       session, life, time_sec, sname, sinstance, key, k5key)
+    KTEXT   tkt;                /* Gets filled in by the ticket */
+    unsigned char flags;        /* Various Kerberos flags */
+    char    *pname;             /* Principal's name */
+    char    *pinstance;         /* Principal's instance */
+    char    *prealm;            /* Principal's authentication domain */
+    long    paddress;           /* Net address of requesting entity */
+    char    *session;           /* Session key inserted in ticket */
+    short   life;               /* Lifetime of the ticket */
+    long    time_sec;           /* Issue time and date */
+    char    *sname;             /* Service Name */
+    char    *sinstance;         /* Instance Name */
+    C_Block key;                /* Service's secret key */
+    krb5_keyblock *k5key;	/* NULL if not present */
 {
     Key_schedule key_s;
     register char *data;        /* running index into ticket */
@@ -124,10 +169,43 @@ int krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
     }
 
 #ifndef NOENCRYPTION
-    /* Encrypt the ticket in the services key */        
-    key_sched(key,key_s);
-    pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
-                 (long) tkt->length,key_s,(C_Block *)key,1);
+    /* Encrypt the ticket in the services key */
+    if (k5key != NULL) {
+	/* block locals */
+	krb5_data in;
+	krb5_enc_data out;
+	krb5_error_code ret;
+	size_t enclen;
+
+	in.length = tkt->length;
+	in.data = tkt->dat;
+	/* XXX assumes context arg is ignored */
+	ret = krb5_c_encrypt_length(NULL, k5key->enctype,
+				    (size_t)in.length, &enclen);
+	if (ret)
+	    return KFAILURE;
+	out.ciphertext.length = enclen;
+	out.ciphertext.data = malloc(enclen);
+	if (out.ciphertext.data == NULL)
+	    return KFAILURE;	/* XXX maybe ENOMEM? */
+
+	/* XXX assumes context arg is ignored */
+	ret = krb5_c_encrypt(NULL, k5key, KRB5_KEYUSAGE_KDC_REP_TICKET,
+			     NULL, &in, &out);
+	if (ret) {
+	    free(out.ciphertext.data);
+	    return KFAILURE;
+	} else {
+	    tkt->length = out.ciphertext.length;
+	    memcpy(tkt->dat, out.ciphertext.data, out.ciphertext.length);
+	    memset(out.ciphertext.data, 0, out.ciphertext.length);
+	    free(out.ciphertext.data);
+	}
+    } else {
+	key_sched(key,key_s);
+	pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
+		     (long) tkt->length,key_s,(C_Block *)key,1);
+    }
 #endif /* !NOENCRYPTION */
     return 0;
 }

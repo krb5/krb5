@@ -24,6 +24,32 @@
  * Store the master database key in a file.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 #include "com_err.h"
 #include <kadm5/admin.h>
@@ -33,7 +59,6 @@ extern int errno;
 
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
-extern krb5_encrypt_block master_encblock;
 extern kadm5_config_params global_params;
 
 extern int exit_status;
@@ -93,8 +118,6 @@ char *argv[];
 	exit_status++; return; 
     }
 
-    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
-
     if (retval = krb5_db_set_name(context, dbname)) {
 	com_err(argv[0], retval, "while setting active database to '%s'",
 		dbname);
@@ -116,7 +139,8 @@ char *argv[];
     }
 
     /* TRUE here means read the keyboard, but only once */
-    if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
+    if (retval = krb5_db_fetch_mkey(context, master_princ,
+				    master_keyblock.enctype,
 				    TRUE, FALSE, (char *) NULL,
 				    0, &master_keyblock)) {
 	com_err(argv[0], retval, "while reading master key");
@@ -124,7 +148,7 @@ char *argv[];
 	exit_status++; return; 
     }
     if (retval = krb5_db_verify_master_key(context, master_princ, 
-					   &master_keyblock,&master_encblock)) {
+					   &master_keyblock)) {
 	com_err(argv[0], retval, "while verifying master key");
 	(void) krb5_db_fini(context);
 	exit_status++; return; 

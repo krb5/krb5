@@ -24,6 +24,32 @@
  * krb5_kdb_encrypt_key(), krb5_kdb_decrypt_key functions
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 
 /*
@@ -33,40 +59,53 @@
  */
 
 krb5_error_code
-krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
+krb5_dbekd_decrypt_key_data(context, mkey, key_data, dbkey, keysalt)
     krb5_context 	  context;
-    krb5_encrypt_block 	* eblock;
+    const krb5_keyblock	* mkey;
     const krb5_key_data	* key_data;
-    krb5_keyblock 	* keyblock;
+    krb5_keyblock 	* dbkey;
     krb5_keysalt 	* keysalt;
 {
     krb5_error_code 	  retval = 0;
     krb5_int16		  tmplen;
     krb5_octet		* ptr;
+    krb5_enc_data	  cipher;
+    krb5_data		  plain;
 
-    keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->enctype = key_data->key_data_type[0];
-
-    /* Decrypt key_data_contents */
-    if ((keyblock->contents = (krb5_octet *)malloc(krb5_encrypt_size(
-      key_data->key_data_length[0] - 2, eblock->crypto_entry))) == NULL)
-	return ENOMEM;
-
-    keyblock->length = 0;
     ptr = key_data->key_data_contents[0];
+
     if (ptr) {
 	krb5_kdb_decode_int16(ptr, tmplen);
 	ptr += 2;
-	keyblock->length = (int) tmplen;
-	if ((retval = krb5_decrypt(context, (krb5_pointer) ptr,
-				   (krb5_pointer)keyblock->contents,
-				   key_data->key_data_length[0] - 2, 
-				   eblock, 0))) {
-	    krb5_xfree(keyblock->contents);
-	    keyblock->contents = 0;
-	    keyblock->length = 0;
+
+	cipher.enctype = ENCTYPE_UNKNOWN;
+	cipher.ciphertext.length = key_data->key_data_length[0]-2;
+	cipher.ciphertext.data = ptr;
+	plain.length = key_data->key_data_length[0]-2;
+	if ((plain.data = (krb5_octet *) malloc(plain.length)) == NULL)
+	    return(ENOMEM);
+
+	if ((retval = krb5_c_decrypt(context, mkey, 0 /* XXX */, 0,
+				     &cipher, &plain))) {
+	    krb5_xfree(plain.data);
 	    return retval;
 	}
+
+	/* tmplen is the true length of the key.  plain.data is the
+	   plaintext data length, but it may be padded, since the
+	   old-style etypes didn't store the real length.  I can check
+	   to make sure that there are enough bytes, but I can't do
+	   any better than that. */
+
+	if (tmplen > plain.length) {
+	    krb5_xfree(plain.data);
+	    return(KRB5_CRYPTO_INTERNAL);
+	}
+
+	dbkey->magic = KV5M_KEYBLOCK;
+	dbkey->enctype = key_data->key_data_type[0];
+	dbkey->length = tmplen;
+	dbkey->contents = plain.data;
     }
 
     /* Decode salt data */
@@ -75,9 +114,11 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 	    keysalt->type = key_data->key_data_type[1];
 	    if ((keysalt->data.length = key_data->key_data_length[1])) {
 		if (!(keysalt->data.data=(char *)malloc(keysalt->data.length))){
-		    krb5_xfree(keyblock->contents);
-		    keyblock->contents = 0;
-		    keyblock->length = 0;
+		    if (key_data->key_data_contents[0]) {
+			krb5_xfree(dbkey->contents);
+			dbkey->contents = 0;
+			dbkey->length = 0;
+		    }
 		    return ENOMEM;
 		}
 		memcpy(keysalt->data.data, key_data->key_data_contents[1],
@@ -90,5 +131,6 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 	    keysalt->data.length = 0;
 	}
     }
+
     return retval;
 }

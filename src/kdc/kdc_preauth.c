@@ -23,6 +23,32 @@
  * Preauthentication routines for the KDC.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 #include "kdc_util.h"
 #include "extern.h"
@@ -365,11 +391,16 @@ verify_enc_timestamp(context, client, request, enc_tkt_reply, pa)
     krb5_int32			start;
     krb5_timestamp		timenow;
     
-    enc_ts_data.data = 0;
     scratch.data = pa->contents;
     scratch.length = pa->length;
+
+    enc_ts_data.data = 0;
     
     if ((retval = decode_krb5_enc_data(&scratch, &enc_data)) != 0)
+	goto cleanup;
+
+    enc_ts_data.length = enc_data->ciphertext.length;
+    if ((enc_ts_data.data = (char *) malloc(enc_ts_data.length)) == NULL)
 	goto cleanup;
 
     start = 0;
@@ -379,12 +410,14 @@ verify_enc_timestamp(context, client, request, enc_tkt_reply, pa)
 					      -1, 0, &client_key)))
 	    goto cleanup;
 
-	if ((retval = krb5_dbekd_decrypt_key_data(context, &master_encblock, 
+	if ((retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock, 
 						  client_key, &key, NULL)))
 	    goto cleanup;
+
 	key.enctype = enc_data->enctype;
 
-	retval = krb5_decrypt_data(context, &key, 0, enc_data, &enc_ts_data);
+	retval = krb5_c_decrypt(context, &key, KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS,
+				0, enc_data, &enc_ts_data);
 	krb5_free_keyblock_contents(context, &key);
 	if (retval == 0)
 	    break;
@@ -492,6 +525,7 @@ get_etype_info(context, request, client, server, pa_data)
 	goto cleanup;
     pa_data->contents = scratch->data;
     pa_data->length = scratch->length;
+    free(scratch);
 
     retval = 0;
 
@@ -615,7 +649,6 @@ get_sam_edata(context, request, client, server, pa_data)
     krb5_predicted_sam_response	psr;
     krb5_data *			scratch;
     int 			i = 0;
-    krb5_encrypt_block		eblock;
     krb5_keyblock encrypting_key;
     char response[9];
     char inputblock[8];
@@ -666,6 +699,13 @@ get_sam_edata(context, request, client, server, pa_data)
 	  break;
 	}
       }
+
+      krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
+      krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
+      krb5_princ_size(context, newp)--;
+
+      krb5_free_principal(kdc_context, newp);
+
       /* if sc.sam_type is set, it worked */
       if (sc.sam_type) {
 	/* so use assoc to get the key out! */
@@ -678,14 +718,15 @@ get_sam_edata(context, request, client, server, pa_data)
 					 &assoc_key);
 	  if (retval) {
 	    char *sname;
-	    krb5_unparse_name(kdc_context, newp, &sname);
+	    krb5_unparse_name(kdc_context, request->client, &sname);
 	    com_err("krb5kdc", retval, 
 		    "snk4 finding the enctype and key <%s>", sname);
+	    free(sname);
 	    return retval;
 	  }
 	  /* convert server.key into a real key */
 	  retval = krb5_dbekd_decrypt_key_data(kdc_context,
-					       &master_encblock, 
+					       &master_keyblock, 
 					       assoc_key, &encrypting_key,
 					       NULL);
 	  if (retval) {
@@ -695,14 +736,10 @@ get_sam_edata(context, request, client, server, pa_data)
 	  }
 	  /* now we can use encrypting_key... */
 	}
-      } else
+      } else {
 	/* SAM is not an option - so don't return as hint */
 	return KRB5_PREAUTH_BAD_TYPE;
-
-      krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
-      krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
-      krb5_princ_size(context, newp)--;
-      krb5_free_principal(kdc_context, newp);
+      }
     }
     sc.magic = KV5M_SAM_CHALLENGE;
     sc.sam_flags = KRB5_SAM_USE_SAD_AS_KEY;
@@ -721,21 +758,35 @@ get_sam_edata(context, request, client, server, pa_data)
       /* eblock is just to set the enctype */
       {
 	const krb5_enctype type = ENCTYPE_DES_CBC_MD5;
-	if (!valid_enctype(type)) return KRB5_PROG_ETYPE_NOSUPP;
-	krb5_use_enctype(context, &eblock, type);
-	retval = krb5_string_to_key(context, &eblock, 
-				    &psr.sam_key, &sc.sam_challenge, 
-				    0 /* salt */);
-	retval = encode_krb5_predicted_sam_response(&psr, &scratch);
-	if (retval) goto cleanup;
+
+	if ((retval = krb5_c_string_to_key(context, type, &sc.sam_challenge,
+					   0 /* salt */, &psr.sam_key)))
+	    goto cleanup;
+
+	if ((retval = encode_krb5_predicted_sam_response(&psr, &scratch)))
+	    goto cleanup;
 	
 	{
-	  krb5_enc_data tmpdata;
-	  retval = krb5_encrypt_data(context, master_encblock.key, 0, 
-				     scratch, &tmpdata);
-	  sc.sam_track_id = tmpdata.ciphertext;
+	    size_t enclen;
+	    krb5_enc_data tmpdata;
+
+	    if ((retval = krb5_c_encrypt_length(context,
+						master_keyblock.enctype,
+						scratch->length, &enclen)))
+		goto cleanup;
+
+	    if ((tmpdata.ciphertext.data = (char *) malloc(enclen)) == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    tmpdata.ciphertext.length = enclen;
+
+	    if ((retval = krb5_c_encrypt(context, &master_keyblock,
+					 /* XXX */ 0, 0, scratch, &tmpdata)))
+		goto cleanup;
+
+	    sc.sam_track_id = tmpdata.ciphertext;
 	}
-	if (retval) goto cleanup;
       }
 
       sc.sam_response_prompt.data = "response prompt";
@@ -779,15 +830,17 @@ get_sam_edata(context, request, client, server, pa_data)
       /* generate digit string, take it mod 1000000 (six digits.) */
       {
 	int j;
-	krb5_encrypt_block eblock;
-	krb5_keyblock *session_key = 0;
+	krb5_keyblock session_key;
 	char outputblock[8];
 	int i;
+
+	session_key.contents = 0;
+
 	memset(inputblock, 0, 8);
-	krb5_use_enctype(kdc_context, &eblock, ENCTYPE_DES_CBC_CRC);
-	retval = krb5_random_key(kdc_context, &eblock, 
-				 krb5_enctype_array[ENCTYPE_DES_CBC_CRC]->random_sequence,
-				 &session_key);
+
+	retval = krb5_c_make_random_key(kdc_context, ENCTYPE_DES_CBC_CRC,
+					&session_key);
+
 	if (retval) {
 	  /* random key failed */
 	  com_err("krb5kdc", retval,"generating random challenge for preauth");
@@ -795,41 +848,48 @@ get_sam_edata(context, request, client, server, pa_data)
 	}
 	/* now session_key has a key which we can pick bits out of */
 	/* we need six decimal digits. Grab 6 bytes, div 2, mod 10 each. */
-	if (session_key->length != 8) {
+	if (session_key.length != 8) {
 	  com_err("krb5kdc", retval = KRB5KDC_ERR_ETYPE_NOSUPP,
 		  "keytype didn't match code expectations");
 	  return retval;
 	}
 	for(i = 0; i<6; i++) {
-	  inputblock[i] = '0' + ((session_key->contents[i]/2) % 10);
+	  inputblock[i] = '0' + ((session_key.contents[i]/2) % 10);
 	}
-	if (session_key)
-	  krb5_free_keyblock(kdc_context, session_key);
+	if (session_key.contents)
+	  krb5_free_keyblock_contents(kdc_context, &session_key);
 
 	/* retval = krb5_finish_key(kdc_context, &eblock); */
 	/* now we have inputblock containing the 8 byte input to DES... */
 	sc.sam_challenge.data = inputblock;
 	sc.sam_challenge.length = 6;
 
-	krb5_use_enctype(kdc_context, &eblock, ENCTYPE_DES_CBC_RAW);
 	encrypting_key.enctype = ENCTYPE_DES_CBC_RAW;
-	/* do any necessary key pre-processing */
-	retval= krb5_process_key(kdc_context, &eblock, &encrypting_key);
 
 	if (retval) {
 	  com_err("krb5kdc", retval, "snk4 processing key");
 	}
 
 	{
-	  char ivec[8];
-	  memset(ivec,0,8);
-	  retval = krb5_encrypt(kdc_context, inputblock, outputblock, 8,
-				&eblock, ivec);
+	    krb5_data plain;
+	    krb5_enc_data cipher;
+
+	    plain.length = 8;
+	    plain.data = inputblock;
+
+	    /* XXX I know this is enough because of the fixed raw enctype.
+	       if it's not, the underlying code will return a reasonable
+	       error, which should never happen */
+	    cipher.ciphertext.length = 8;
+	    cipher.ciphertext.data = outputblock;
+
+	    if ((retval = krb5_c_encrypt(kdc_context, &encrypting_key,
+					 /* XXX */ 0, 0, &plain, &cipher))) {
+		com_err("krb5kdc", retval, "snk4 response generation failed");
+		return retval;
+	    }
 	}
-	if (retval) {
-	  com_err("krb5kdc", retval, "snk4 response generation failed");
-	  return retval;
-	}
+
 	/* now output block is the raw bits of the response; convert it
 	   to display form */
 	for (j=0; j<4; j++) {
@@ -863,20 +923,34 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
       /* string2key on sc.sam_challenge goes in here */
       /* eblock is just to set the enctype */
       {
-	const krb5_enctype type = ENCTYPE_DES_CBC_MD5;
-	if (!valid_enctype(type)) return KRB5_PROG_ETYPE_NOSUPP;
-	krb5_use_enctype(context, &eblock, type);
-	retval = krb5_string_to_key(context, &eblock, 
-				    &psr.sam_key, &predict_response, 
-				    0 /* salt */);
+	retval = krb5_c_string_to_key(context, ENCTYPE_DES_CBC_MD5,
+				      &predict_response, 0 /* salt */,
+				      &psr.sam_key);
+	if (retval) goto cleanup;
+
 	retval = encode_krb5_predicted_sam_response(&psr, &scratch);
 	if (retval) goto cleanup;
 	
 	{
-	  krb5_enc_data tmpdata;
-	  retval = krb5_encrypt_data(context, master_encblock.key, 0, 
-				     scratch, &tmpdata);
-	  sc.sam_track_id = tmpdata.ciphertext;
+	    size_t enclen;
+	    krb5_enc_data tmpdata;
+
+	    if ((retval = krb5_c_encrypt_length(context,
+						master_keyblock.enctype,
+						scratch->length, &enclen)))
+		goto cleanup;
+
+	    if ((tmpdata.ciphertext.data = (char *) malloc(enclen)) == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    tmpdata.ciphertext.length = enclen;
+
+	    if ((retval = krb5_c_encrypt(context, &master_keyblock,
+					 /* XXX */ 0, 0, scratch, &tmpdata)))
+		goto cleanup;
+
+	    sc.sam_track_id = tmpdata.ciphertext;
 	}
 	if (retval) goto cleanup;
       }
@@ -937,37 +1011,64 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
     scratch.data = pa->contents;
     scratch.length = pa->length;
     
-    retval = decode_krb5_sam_response(&scratch, &sr);
-    if (retval) com_err("krb5kdc", retval, "decode_krb5_sam_response failed");
-    if (retval) goto cleanup;
+    if ((retval = decode_krb5_sam_response(&scratch, &sr))) {
+	scratch.data = 0;
+	com_err("krb5kdc", retval, "decode_krb5_sam_response failed");
+	goto cleanup;
+    }
 
     {
       krb5_enc_data tmpdata;
+
+      tmpdata.enctype = ENCTYPE_UNKNOWN;
       tmpdata.ciphertext = sr->sam_track_id;
-      retval = krb5_decrypt_data(context, master_encblock.key, 0, 
-				 &tmpdata, &scratch);
-      if (retval) com_err("krb5kdc", retval, "decrypt track_id failed");
+
+      scratch.length = tmpdata.ciphertext.length;
+      if ((scratch.data = (char *) malloc(scratch.length)) == NULL) {
+	  retval = ENOMEM;
+	  goto cleanup;
+      }
+
+      if ((retval = krb5_c_decrypt(context, &master_keyblock, /* XXX */ 0, 0,
+				   &tmpdata, &scratch))) {
+	  com_err("krb5kdc", retval, "decrypt track_id failed");
+	  goto cleanup;
+      }
     }
-    if (retval) goto cleanup;
-    retval = decode_krb5_predicted_sam_response(&scratch, &psr);
-    if (retval) com_err("krb5kdc", retval, "decode_krb5_predicted_sam_response failed");
-    if (retval) goto cleanup;
+
+    if ((retval = decode_krb5_predicted_sam_response(&scratch, &psr))) {
+	com_err("krb5kdc", retval,
+		"decode_krb5_predicted_sam_response failed");
+	goto cleanup;
+    }
+
     {
-      /* now psr.sam_key is what we said to use... */
-      retval = krb5_decrypt_data(context, &psr->sam_key, 0, 
-				 &sr->sam_enc_nonce_or_ts, &scratch);
-      if (retval) com_err("krb5kdc", retval, "decrypt nonce_or_ts failed");
+	free(scratch.data);
+	scratch.length = sr->sam_enc_nonce_or_ts.ciphertext.length;
+	if ((scratch.data = (char *) malloc(scratch.length)) == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+
+	if ((retval = krb5_c_decrypt(context, &psr->sam_key, /* XXX */ 0,
+				     0, &sr->sam_enc_nonce_or_ts, &scratch))) {
+	    com_err("krb5kdc", retval, "decrypt nonce_or_ts failed");
+	    goto cleanup;
+	}
     }
-    if (retval) goto cleanup;
-    retval = decode_krb5_enc_sam_response_enc(&scratch, &esre);
-    if (retval) com_err("krb5kdc", retval, "decode_krb5_enc_sam_response_enc failed");
-    if (retval) goto cleanup;
+
+    if ((retval = decode_krb5_enc_sam_response_enc(&scratch, &esre))) {
+	com_err("krb5kdc", retval, "decode_krb5_enc_sam_response_enc failed");
+	goto cleanup;
+    }
+
     if (esre->sam_timestamp != sr->sam_patimestamp) {
       retval = KRB5KDC_ERR_PREAUTH_FAILED;
       goto cleanup;
     }
-    retval = krb5_timeofday(context, &timenow);
-    if (retval) goto cleanup;
+
+    if ((retval = krb5_timeofday(context, &timenow)))
+	goto cleanup;
     
     if (labs(timenow - sr->sam_patimestamp) > context->clockskew) {
 	retval = KRB5KRB_AP_ERR_SKEW;
@@ -975,8 +1076,11 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
     }
 
     setflag(enc_tkt_reply->flags, TKT_FLG_HW_AUTH);
+
   cleanup:
-    if (retval) com_err("krb5kdc", retval, "sam verify failure");
+    if (retval)
+	com_err("krb5kdc", retval, "sam verify failure");
+    if (scratch.data) free(scratch.data);
     if (sr) free(sr);
     if (psr) free(psr);
     if (esre) free(esre);

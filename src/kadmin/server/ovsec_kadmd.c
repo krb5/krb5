@@ -3,6 +3,32 @@
  *
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include    <stdio.h>
 #include    <signal.h>
 #include    <syslog.h>
@@ -64,7 +90,7 @@ void *global_server_handle;
  * it also restricts us to linking against the Kv5 GSS-API library.
  * Since this is *k*admind, that shouldn't be a problem.
  */
-extern 	char *krb5_defkeyname;
+extern 	char *krb5_overridekeyname;
 
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,
@@ -315,7 +341,7 @@ int main(int argc, char *argv[])
 		      htons(addr.sin_port));
 	  }
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close();
 	  exit(1);
      }
      memset(&addr, 0, sizeof(addr));
@@ -386,9 +412,10 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     /* XXX krb5_defkeyname is an internal library global and should
-        go away */
-     krb5_defkeyname = params.admin_keytab;
+     /* XXX krb5_overridekeyname is an internal library global and should
+        go away.  This is an awful hack. */
+
+     krb5_overridekeyname = params.admin_keytab;
 
      /*
       * Try to acquire creds for the old OV services as well as the
@@ -402,6 +429,7 @@ int main(int argc, char *argv[])
 			   "failing.");
 	  fprintf(stderr, "%s: Cannot set GSS-API authentication names.\n",
 		  whoami);
+	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();	  
 	  exit(1);
@@ -428,6 +456,7 @@ int main(int argc, char *argv[])
 		 error_message(ret));
 	  fprintf(stderr, "%s: Cannot initialize acl file: %s\n",
 		  whoami, error_message(ret));
+	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();
 	  exit(1);
@@ -438,6 +467,7 @@ int main(int argc, char *argv[])
 	  krb5_klog_syslog(LOG_ERR, "Cannot detach from tty: %s", error_message(ret));
 	  fprintf(stderr, "%s: Cannot detach from tty: %s\n",
 		  whoami, error_message(ret));
+	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();
 	  exit(1);
@@ -449,6 +479,7 @@ int main(int argc, char *argv[])
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
      /* Clean up memory, etc */
+     _svcauth_gssapi_unset_names();
      kadm5_destroy(global_server_handle);
      close(s);
      acl_finish(context, 0);
@@ -934,6 +965,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 			 error_message(errno));
 	fprintf(stderr, "Cannot create connecting socket: %s",
 		error_message(errno));
+	_svcauth_gssapi_unset_names();
 	kadm5_destroy(global_server_handle);
 	krb5_klog_close();	  
 	exit(1);

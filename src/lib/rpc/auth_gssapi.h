@@ -111,8 +111,10 @@ PROTOTYPE((CLIENT *clnt, char *service_name));
 void auth_gssapi_display_status
 PROTOTYPE((char *msg, OM_uint32 major,
 	   OM_uint32 minor)); 
-bool_t _svcauth_gssapi_set_name
-PROTOTYPE((char *name, gss_OID name_type));
+bool_t _svcauth_gssapi_set_names
+PROTOTYPE((auth_gssapi_name *names, int num));
+void _svcauth_gssapi_unset_names
+PROTOTYPE(());
 
 void _svcauth_set_log_badauth_func
 PROTOTYPE((auth_gssapi_log_badauth_func func,

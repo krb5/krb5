@@ -23,6 +23,32 @@
  * krb5_init_contex()
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 #include <ctype.h>
 #include "brand.c"
@@ -37,6 +63,8 @@ krb5_init_context(context)
 {
 	krb5_context ctx = 0;
 	krb5_error_code retval;
+	krb5_timestamp now;
+	krb5_data seed;
 	int tmp;
 
 	/* Initialize error tables */
@@ -68,6 +96,14 @@ krb5_init_context(context)
 		goto cleanup;
 
 	if ((retval = krb5_os_init_context(ctx)))
+		goto cleanup;
+
+	/* initialize the prng (not well, but passable) */
+	if ((retval = krb5_timeofday(ctx, &now)))
+		goto cleanup;
+	seed.length = sizeof(now);
+	seed.data = (char *) &now;
+	if ((retval = krb5_c_random_seed(ctx, &seed)))
 		goto cleanup;
 
 	ctx->default_realm = 0;
@@ -197,26 +233,27 @@ krb5_set_default_in_tkt_ktypes(context, ktypes)
     return 0;
 }
 
-krb5_error_code
-krb5_get_default_in_tkt_ktypes(context, ktypes)
-    krb5_context context;
-    krb5_enctype **ktypes;
+static krb5_error_code
+get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
+     krb5_context context;
+     krb5_enctype **ktypes;
+     char *profstr;
+     int ctx_count;
+     krb5_enctype FAR *ctx_list;
 {
-    krb5_enctype * old_ktypes;
+    krb5_enctype *old_ktypes;
 
     if (context->in_tkt_ktype_count) {
-      /* application-set defaults */
-      if ((old_ktypes = 
-	   (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-				  (context->in_tkt_ktype_count + 1)))) {
-	memcpy(old_ktypes, context->in_tkt_ktypes, sizeof(krb5_enctype) * 
-	       context->in_tkt_ktype_count);
-	old_ktypes[context->in_tkt_ktype_count] = 0;
-      } else {
-	return ENOMEM;
-      }
+	/* application-set defaults */
+	if ((old_ktypes = 
+	     (krb5_enctype *)malloc(sizeof(krb5_enctype) *
+				    (ctx_count + 1)))) {
+	    memcpy(old_ktypes, ctx_list, sizeof(krb5_enctype) * ctx_count);
+	    old_ktypes[ctx_count] = 0;
+	} else {
+	    return ENOMEM;
+	}
     } else {
-	/* taken directly from krb5_get_tgs_ktypes... */
         /*
 	   XXX - For now, we only support libdefaults
 	   Perhaps this should be extended to allow for per-host / per-realm
@@ -228,9 +265,9 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 	int i, j, count;
 	krb5_error_code code;
 
-	code = profile_get_string(context->profile,
-				  "libdefaults", "default_tkt_enctypes", NULL,
-				  "des-cbc-md5 des-cbc-crc",
+	code = profile_get_string(context->profile, "libdefaults", profstr,
+				  NULL,
+				  "des3-hmac-sha1 des-cbc-md5 des-cbc-crc",
 				  &retval);
 	if (code)
 	    return code;
@@ -277,6 +314,16 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 
     *ktypes = old_ktypes;
     return 0;
+}
+
+krb5_error_code
+krb5_get_default_in_tkt_ktypes(context, ktypes)
+    krb5_context context;
+    krb5_enctype **ktypes;
+{
+    return(get_profile_etype_list(context, ktypes, "default_tkt_enctypes",
+				  context->in_tkt_ktype_count,
+				  context->in_tkt_ktypes));
 }
 
 krb5_error_code
@@ -317,80 +364,40 @@ krb5_get_tgs_ktypes(context, princ, ktypes)
     krb5_const_principal princ;
     krb5_enctype **ktypes;
 {
-    krb5_enctype * old_ktypes;
+    return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
+				  context->tgs_ktype_count,
+				  context->tgs_ktypes));
+}
 
-    if (context->tgs_ktype_count) {
+krb5_error_code
+krb5_get_permitted_enctypes(context, ktypes)
+    krb5_context context;
+    krb5_enctype **ktypes;
+{
+    return(get_profile_etype_list(context, ktypes, "permitted_enctypes",
+				  context->tgs_ktype_count,
+				  context->tgs_ktypes));
+}
 
-	/* Application-set defaults */
+krb5_boolean
+krb5_is_permitted_enctype(context, etype)
+     krb5_context context;
+     krb5_enctype etype;
+{
+    krb5_enctype *list, *ptr;
+    krb5_boolean ret;
 
-	if ((old_ktypes =
-	     (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-				    (context->tgs_ktype_count + 1)))) {
-	    memcpy(old_ktypes, context->tgs_ktypes, sizeof(krb5_enctype) * 
-		   context->tgs_ktype_count);
-	    old_ktypes[context->tgs_ktype_count] = 0;
-	} else {
-	    return ENOMEM;
-	}
-    } else {
-	/*
-	   XXX - For now, we only support libdefaults
-	   Perhaps this should be extended to allow for per-host / per-realm
-	   session key types.
-	 */
+    if (krb5_get_permitted_enctypes(context, &list))
+	return(0);
 
-	char *retval;
-	char *sp, *ep;
-	int i, j, count;
-	krb5_error_code code;
+    
+    ret = 0;
 
-	code = profile_get_string(context->profile,
-				  "libdefaults", "default_tgs_enctypes", NULL,
-				  "des-cbc-md5 des-cbc-crc",
-				  &retval);
-	if (code)
-	    return code;
+    for (ptr = list; *ptr; ptr++)
+	if (*ptr == etype)
+	    ret = 1;
 
-	count = 0;
-	sp = retval;
-	while (sp) {
-	    for (ep = sp; *ep && (*ep != ',') && !isspace(*ep); ep++)
-		;
-	    if (*ep) {
-		*ep++ = '\0';
-		while (isspace(*ep))
-		    ep++;
-	    } else
-		ep = (char *) NULL;
+    krb5_xfree(list);
 
-	    count++;
-	    sp = ep;
-	}
-	
-	if ((old_ktypes =
-	     (krb5_enctype *)malloc(sizeof(krb5_enctype) * (count + 1))) ==
-	    (krb5_enctype *) NULL)
-	    return ENOMEM;
-	
-	sp = retval;
-	j = 0;
-	i = 1;
-	while (1) {
-	    if (! krb5_string_to_enctype(sp, &old_ktypes[j]))
-		j++;
-
-	    if (i++ >= count)
-		break;
-
-	    /* skip to next token */
-	    while (*sp) sp++;
-	    while (! *sp) sp++;
-	}
-
-	old_ktypes[j] = (krb5_enctype) 0;
-	free(retval);
-    }
-
-    *ktypes = old_ktypes;
-    return 0;
+    return(ret);
 }

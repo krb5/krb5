@@ -1,3 +1,42 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in, accept_sec_context.c, acquire_cred.c, canon_name.c,
+	delete_sec_context.c, disp_status.c, gssapiP_krb5.h,
+	gssapi_err_krb5.et, gssapi_krb5.c, gssapi_krb5.h,
+	init_sec_context.c, inq_cred.c, inq_names.c, k5seal.c, k5unseal.c,
+	rel_oid.c, ser_sctx.c, util_cksum.c, util_crypt.c, util_seed.c,
+	util_seqnum.c, wrap_size_limit.c: convert to new crypto api.
+	Implement new krb5 v2 gssapi mechanism.
+
+	* add_cred.c, util_ctxsetup.c: New files needed to implement the
+	krb5 v2 mech.
+
+Mon Sep 21 00:32:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Free authdat
+	even on success to avoid a memory leak.
+
+	* util_cksum.c (kg_checksum_channel_bindings): Fix memory leak by
+ 	not allocating cksum->contents unless we have to return a
+ 	zero-filled one.
+
+	* k5unseal.c (kg_unseal_v1): Fix memorly leak by not allocating
+	md5cksum.contents.
+
+	* k5seal.c (make_seal_token_v1): Fix memory leak by not allocating
+	md5cksum.contents.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Only free
+	ap_req.data if it was allocated by kg2_parse_token(), otherwise we
+	lose very badly trying to free the middle of a potentially
+	malloc()'ed block, possibly coredumping.
+
+Thu Sep  3 19:35:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Fix typo;
+	bash the enctype in ctx->subkey->enctype rather than just
+	"enctype", which nothing checks.
+
 Fri Jul 24 21:13:53 1998  Tom Yu  <tlyu@mit.edu>
 
 	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix to round down

@@ -19,6 +19,32 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 /* derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88 */
      
 #ifdef HAVE_UNISTD_H
@@ -76,6 +102,8 @@ extern Key_schedule v4_schedule;
 #define START_PORT      5120     /* arbitrary */
 char *default_service = "host";
 
+#define KCMD_KEYUSAGE	1026
+
 /*
  * Note that the encrypted rlogin packets take the form of a four-byte
  * length followed by encrypted data.  On writing the data out, a significant
@@ -89,7 +117,8 @@ static char des_inbuf[2*RCMD_BUFSIZ];	 /* needs to be > largest read size */
 static char des_outpkt[2*RCMD_BUFSIZ+4]; /* needs to be > largest write size */
 static krb5_data desinbuf;
 static krb5_data desoutbuf;
-static krb5_encrypt_block eblock;	 /* eblock for encrypt/decrypt */
+static krb5_data encivec;
+static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
 static int (*input)();
 static int (*output)();
 static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
@@ -713,12 +742,14 @@ void rcmd_stream_init_normal()
     output = twrite;
 }
 
-void rcmd_stream_init_krb5(keyblock, encrypt_flag, lencheck)
-     krb5_keyblock *keyblock;
+void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
+     krb5_keyblock *in_keyblock;
      int encrypt_flag;
      int lencheck;
 {
     krb5_error_code status;
+    size_t blocksize;
+    krb5_boolean similar;
 
     if (!encrypt_flag) {
 	rcmd_stream_init_normal();
@@ -726,15 +757,39 @@ void rcmd_stream_init_krb5(keyblock, encrypt_flag, lencheck)
     }
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outpkt+4;	/* Set up des buffers */
-    krb5_use_enctype(bsd_context, &eblock, keyblock->enctype);
-    if ( status = krb5_process_key(bsd_context, &eblock, keyblock)) {
-	fprintf(stderr, "rcmd: Cannot process session key: %s\n",
-		error_message(status));
-	exit(1);
-    }
+    keyblock = in_keyblock;
+
     do_lencheck = lencheck;
     input = v5_des_read;
     output = v5_des_write;
+
+    if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
+					keyblock->enctype,
+					&similar)) {
+	/* XXX what do I do? */
+	abort();
+    }
+
+    if (similar) {
+	encivec.length = 0;
+	return;
+    }
+
+    if (status = krb5_c_block_size(bsd_context, keyblock->enctype,
+				   &blocksize)) {
+	/* XXX what do I do? */
+	abort();
+    }
+
+    encivec.length = blocksize;
+
+    if ((encivec.data = malloc(encivec.length)) == NULL) {
+	/* XXX what do I do? */
+	abort();
+    }
+
+    /* is there a better way to initialize this? */
+    memset(encivec.data, '\0', blocksize);
 }
 
 #ifdef KRB5_KRB4_COMPAT
@@ -787,9 +842,12 @@ static int v5_des_read(fd, buf, len)
      int len;
 {
     int nreturned = 0;
-    long net_len,rd_len;
+    size_t net_len,rd_len;
     int cc;
     unsigned char c;
+    krb5_error_code ret;
+    krb5_data plain;
+    krb5_enc_data cipher;
     
     if (nstored >= len) {
 	memcpy(buf, store_ptr, len);
@@ -823,7 +881,12 @@ static int v5_des_read(fd, buf, len)
     if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
     rd_len = (rd_len << 8) | c;
 
-    net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
+    if (ret = krb5_c_encrypt_length(bsd_context, keyblock->enctype,
+				  rd_len, &net_len)) {
+	errno = ret;
+	return(-1);
+    }
+
     if ((net_len <= 0) || (net_len > sizeof(des_inbuf))) {
 	/* preposterous length, probably out of sync */
 	errno = EIO;
@@ -834,11 +897,17 @@ static int v5_des_read(fd, buf, len)
 	errno = EIO;
 	return(-1);
     }
+
+    cipher.enctype = ENCTYPE_UNKNOWN;
+    cipher.ciphertext.length = net_len;
+    cipher.ciphertext.data = desinbuf.data;
+    plain.length = sizeof(storage);
+    plain.data = storage;
+
     /* decrypt info */
-    if ((krb5_decrypt(bsd_context, desinbuf.data,
-		      (krb5_pointer) storage,
-		      net_len,
-		      &eblock, 0))) {
+    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+		       encivec.length?&encivec:0,
+		       &cipher, &plain)) {
 	/* probably out of sync */
 	errno = EIO;
 	return(-1);
@@ -867,20 +936,23 @@ static int v5_des_write(fd, buf, len)
      int len;
 {
     unsigned char *len_buf = (unsigned char *) des_outpkt;
-    
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outpkt)-4){
+    krb5_data plain;
+    krb5_enc_data cipher;
+
+    plain.data = buf;
+    plain.length = len;
+
+    cipher.ciphertext.length = sizeof(des_outpkt)-4;
+    cipher.ciphertext.data = desoutbuf.data;
+
+    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+		       encivec.length?&encivec:0,
+		       &plain, &cipher)) {
 	errno = EIO;
 	return(-1);
     }
-    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf,
-		      desoutbuf.data,
-		      len,
-		      &eblock,
-		      0))){
-	errno = EIO;
-	return(-1);
-    }
+
+    desoutbuf.length = cipher.ciphertext.length;
 
     len_buf[0] = (len & 0xff000000) >> 24;
     len_buf[1] = (len & 0xff0000) >> 16;
@@ -891,6 +963,7 @@ static int v5_des_write(fd, buf, len)
 	errno = EIO;
 	return(-1);
     }
+
     else return(len);
 }
 

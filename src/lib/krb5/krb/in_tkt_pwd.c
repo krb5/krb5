@@ -47,15 +47,9 @@ pwd_keyproc(context, type, salt, keyseed, key)
     krb5_keyblock ** key;
 {
     krb5_error_code retval;
-    krb5_encrypt_block eblock;
     krb5_data * password;
     int pwsize;
 
-    if (!valid_enctype(type))
-	return KRB5_PROG_ETYPE_NOSUPP;
-
-    krb5_use_enctype(context, &eblock, type);
-    
     password = (krb5_data *)keyseed;
 
     if (!password->length) {
@@ -73,8 +67,9 @@ pwd_keyproc(context, type, salt, keyseed, key)
     if (!(*key = (krb5_keyblock *)malloc(sizeof(**key))))
 	return ENOMEM;
 
-    if ((retval = krb5_string_to_key(context, &eblock, *key, password, salt)))
+    if ((retval = krb5_c_string_to_key(context, type, password, salt, *key)))
 	krb5_xfree(*key);
+
     return(retval);
 }
 

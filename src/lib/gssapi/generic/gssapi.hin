@@ -307,11 +307,10 @@ typedef	int		gss_cred_usage_t;
 #define GSS_S_BAD_QOP (((OM_uint32) 14ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 #define GSS_S_UNAUTHORIZED (((OM_uint32) 15ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 #define GSS_S_UNAVAILABLE (((OM_uint32) 16ul) << GSS_C_ROUTINE_ERROR_OFFSET)
-/*
- * XXX new functions.  Check to get official error number assigments?
- */
 #define GSS_S_DUPLICATE_ELEMENT \
      (((OM_uint32) 17ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_NAME_NOT_MN \
+     (((OM_uint32) 18ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 
 /*
  * Supplementary info bits:
@@ -320,9 +319,6 @@ typedef	int		gss_cred_usage_t;
 #define GSS_S_DUPLICATE_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 1))
 #define GSS_S_OLD_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 2))
 #define GSS_S_UNSEQ_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 3))
-/*
- * XXX not in the cbindings yet.  remove this comment when it is
- */
 #define GSS_S_GAP_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 4))
 
 

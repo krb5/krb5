@@ -41,6 +41,7 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
     krb5_keytab_entry cur_entry, new_entry;
     krb5_error_code kerror = 0;
     int found_wrong_kvno = 0;
+    krb5_boolean similar;
 
     /* Open the keyfile for reading */
     if ((kerror = krb5_ktfileint_openr(context, id)))
@@ -53,53 +54,69 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
     cur_entry.principal = 0;
     cur_entry.vno = 0;
     cur_entry.key.contents = 0;
+
     while (TRUE) {
-	krb5_enctype entry_type;
-	
 	if ((kerror = krb5_ktfileint_read_entry(context, id, &new_entry)))
 	    break;
 
-	switch (enctype) {
-	case ENCTYPE_DES_CBC_CRC:
-	case ENCTYPE_DES_CBC_MD5:
-	case ENCTYPE_DES_CBC_MD4:
-	case ENCTYPE_DES_CBC_RAW:
-	    enctype = ENCTYPE_DES_CBC_CRC;
-	    break;
-	}
+	/* by the time this loop exits, it must either free cur_entry,
+	   and copy new_entry there, or free new_entry.  Otherwise, it
+	   leaks. */
 
-	entry_type = new_entry.key.enctype;
-	switch(entry_type) {
-	case ENCTYPE_DES_CBC_CRC:
-	case ENCTYPE_DES_CBC_MD5:
-	case ENCTYPE_DES_CBC_MD4:
-	case ENCTYPE_DES_CBC_RAW:
-	    entry_type = ENCTYPE_DES_CBC_CRC;
-	    break;
-	}
+	/* if the enctype is not ignored and doesn't match, free new_entry
+	   and continue to the next */
 
-	if (((enctype == IGNORE_ENCTYPE)||
-	    (entry_type == enctype))&&
-	    krb5_principal_compare(context, principal, new_entry.principal)) {
-		if (kvno == IGNORE_VNO) {
-			if (! cur_entry.principal ||
-			    (cur_entry.vno < new_entry.vno))
-			{
-			    krb5_kt_free_entry(context, &cur_entry);
-			    cur_entry = new_entry;
-			}
-		} else {
-			if (new_entry.vno == kvno) {
-			    krb5_kt_free_entry(context, &cur_entry);
-			    cur_entry = new_entry;
-			    break;
-			} else
-			     found_wrong_kvno++;
-		}
-	} else {
+	if (enctype != IGNORE_ENCTYPE) {
+	    if ((kerror = krb5_c_enctype_compare(context, enctype, 
+						 new_entry.key.enctype,
+						 &similar))) {
 		krb5_kt_free_entry(context, &new_entry);
+		break;
+	    }
+
+	    if (!similar) {
+		krb5_kt_free_entry(context, &new_entry);
+		continue;
+	    }
+	}
+
+	/* if the principal isn't the one requested, free new_entry
+	   and continue to the next. */
+
+	if (!krb5_principal_compare(context, principal, new_entry.principal)) {
+	    krb5_kt_free_entry(context, &new_entry);
+	    continue;
+	}
+
+	if (kvno == IGNORE_VNO) {
+	    /* if this is the first match, or if the new vno is
+	       bigger, free the current and keep the new.  Otherwise,
+	       free the new. */
+	       
+	    if (! cur_entry.principal ||
+		(new_entry.vno > cur_entry.vno)) {
+		krb5_kt_free_entry(context, &cur_entry);
+		cur_entry = new_entry;
+	    } else {
+		krb5_kt_free_entry(context, &new_entry);
+	    }
+	} else {
+	    /* if this kvno matches, free the current (will there ever
+	       be one?), keep the new, and break out.  Otherwise, remember
+	       that we were here so we can return the right error, and
+	       free the new */
+
+	    if (new_entry.vno == kvno) {
+		krb5_kt_free_entry(context, &cur_entry);
+		cur_entry = new_entry;
+		break;
+	    } else {
+		found_wrong_kvno++;
+		krb5_kt_free_entry(context, &new_entry);
+	    }
 	}
     }
+
     if (kerror == KRB5_KT_END) {
 	 if (cur_entry.principal)
 	      kerror = 0;

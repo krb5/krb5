@@ -30,11 +30,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 extern int optind;
 extern char *optarg;
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
-int show_etype = 0;
+int show_etype = 0, show_addresses = 0, no_resolve = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -50,6 +52,7 @@ void show_credential KRB5_PROTOTYPE((char *,
 void do_ccache KRB5_PROTOTYPE((char *));
 void do_keytab KRB5_PROTOTYPE((char *));
 void printtime KRB5_PROTOTYPE((time_t));
+void one_addr KRB5_PROTOTYPE((krb5_address *));
 void fillit KRB5_PROTOTYPE((FILE *, int, int));
 	
 #define DEFAULT 0
@@ -58,7 +61,7 @@ void fillit KRB5_PROTOTYPE((FILE *, int, int));
 
 void usage()
 {
-     fprintf(stderr, "Usage: %s [[-c] [-f] [-e] [-s]] [-k [-t] [-K]] [name]\n",
+     fprintf(stderr, "Usage: %s [[-c] [-f] [-e] [-s] [-a] [-n]] [-k [-t] [-K]] [name]\n",
 	     progname); 
      fprintf(stderr, "\t-c specifies credentials cache, -k specifies keytab");
      fprintf(stderr, ", -c is default\n");
@@ -66,6 +69,8 @@ void usage()
      fprintf(stderr, "\t\t-f shows credentials flags\n");
      fprintf(stderr, "\t\t-e shows the encryption type\n");
      fprintf(stderr, "\t\t-s sets exit status based on valid tgt existence\n");
+     fprintf(stderr, "\t\t-a displays the address list\n");
+     fprintf(stderr, "\t\t\t-n do not reverse-resolve\n");
      fprintf(stderr, "\toptions for keytabs:\n");
      fprintf(stderr, "\t\t-t shows keytab entry timestamps\n");
      fprintf(stderr, "\t\t-K shows keytab entry DES keys\n");
@@ -113,6 +118,12 @@ main(argc, argv)
 	    break;
 	case 's':
 	    status_only = 1;
+	    break;
+	case 'n':
+	    no_resolve = 1;
+	    break;
+	case 'a':
+	    show_addresses = 1;
 	    break;
 	case 'c':
 	    if (mode != DEFAULT) usage();
@@ -220,8 +231,8 @@ void do_keytab(name)
 	       printf(" ");
 	  }
 	  printf("%s", pname);
-if (show_etype)
-    printf(" (%s) " , etype_string(entry.key.enctype));
+	  if (show_etype)
+	      printf(" (%s) " , etype_string(entry.key.enctype));
 	  if (show_keys) {
 	       printf(" (0x");
 	       {
@@ -352,26 +363,15 @@ char *
 etype_string(enctype)
     krb5_enctype enctype;
 {
-    static char buf[12];
+    static char buf[100];
+    krb5_error_code retval;
     
-    switch (enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-	return "DES-CBC-CRC";
-	break;
-    case ENCTYPE_DES_CBC_MD4:
-	return "DES-CBC-MD4";
-	break;
-    case ENCTYPE_DES_CBC_MD5:
-	return "DES-CBC-MD5";
-	break;
-    case ENCTYPE_DES3_CBC_SHA:
-	return "DES3-CBC-SHA";
-	break;
-    default:
+    if ((retval = krb5_enctype_to_string(enctype, buf, sizeof(buf)))) {
+	/* XXX if there's an error != EINVAL, I should probably report it */
 	sprintf(buf, "etype %d", enctype);
-	return buf;
-	break;
     }
+
+    return buf;
 }
 
 char *
@@ -498,8 +498,9 @@ show_credential(progname, kcontext, cred)
 	    fputs("\t",stdout);
 	else
 	    fputs(", ",stdout);
-	printf("Etype (skey, tkt): %s, %s ",
-	       etype_string(cred->keyblock.enctype), 
+	printf("Etype (skey, tkt): %s, ",
+	       etype_string(cred->keyblock.enctype));
+	printf("%s ",
 	       etype_string(tkt->enc_part.enctype));
 	krb5_free_ticket(kcontext, tkt);
 	extra_field++;
@@ -508,8 +509,50 @@ show_credential(progname, kcontext, cred)
     /* if any additional info was printed, extra_field is non-zero */
     if (extra_field)
 	putchar('\n');
+
+
+    if (show_addresses) {
+	if (!cred->addresses || !cred->addresses[0]) {
+	    printf("\tAddresses: (none)\n");
+	} else {
+	    int i;
+
+	    printf("\tAddresses: ");
+	    one_addr(cred->addresses[0]);
+
+	    for (i=1; cred->addresses[i]; i++) {
+		printf(", ");
+		one_addr(cred->addresses[1]);
+	    }
+
+	    printf("\n");
+	}
+    }
+
     free(name);
     free(sname);
+}
+
+void one_addr(a)
+    krb5_address *a;
+{
+    struct hostent *h;
+
+    if ((a->addrtype == ADDRTYPE_INET) &&
+	(a->length == 4)) {
+	if (!no_resolve) {
+	    h = gethostbyaddr(a->contents, 4, AF_INET);
+	    if (h) {
+		printf("%s", h->h_name);
+	    }
+	}
+	if (no_resolve || !h) {
+	    printf("%d.%d.%d.%d", a->contents[0], a->contents[1],
+		   a->contents[2], a->contents[3]);
+	}
+    } else {
+	printf("unknown addr type %d", a->addrtype);
+    }
 }
 
 void

@@ -38,71 +38,15 @@ krb5_generate_seq_number(context, key, seqno)
     const krb5_keyblock *key;
     krb5_int32 *seqno;
 {
-    krb5_pointer random_state;
-    krb5_encrypt_block eblock;
-    krb5_keyblock *subkey = 0;
+    krb5_data seed;
     krb5_error_code retval;
-    struct tval {
-	krb5_int32 seconds;
-	krb5_int32 microseconds;
-    } timenow;
-    krb5_octet *intmp = 0, *outtmp = 0;
-    int esize;
 
-    if (!valid_enctype(key->enctype))
-	return KRB5_PROG_ETYPE_NOSUPP;
-
-    krb5_use_enctype(context, &eblock, key->enctype);
-
-    if ((retval = krb5_init_random_key(context, &eblock, key, &random_state)))
+    seed.length = key->length;
+    seed.data = key->contents;
+    if ((retval = krb5_c_random_seed(context, &seed)))
 	return(retval);
-	
-    if ((retval = krb5_random_key(context, &eblock, random_state, &subkey))) {
-	(void) krb5_finish_random_key(context, &eblock, &random_state);
-	return retval;
-    }	
-    /* ignore the error if any, since we've already gotten the key out */
-    if ((retval = krb5_finish_random_key(context, &eblock, &random_state))) {
-	krb5_free_keyblock(context, subkey);
-	return retval;
-    }
 
-    esize = krb5_encrypt_size(sizeof(timenow), eblock.crypto_entry);
-    intmp = (krb5_octet *)malloc(esize);
-    if (!intmp) {
-	    retval = ENOMEM;
-	    goto cleanup;
-    }
-    outtmp = (krb5_octet *)malloc(esize);
-    if (!outtmp) {
-	    retval = ENOMEM;
-	    goto cleanup;
-    }
-    if ((retval = krb5_process_key(context, &eblock, subkey))) {
-	goto cleanup;
-    }
-
-    if ((retval = krb5_us_timeofday(context, &timenow.seconds,
-				    &timenow.microseconds))) {
-	goto cleanup;
-    }
-    memcpy((char *)intmp, (char *)&timenow, sizeof(timenow));
-
-    retval = krb5_encrypt(context, (krb5_pointer)intmp, (krb5_pointer)outtmp,
-			  sizeof(timenow), &eblock, 0);
-    (void) krb5_finish_key(context, &eblock);
-    if (retval)
-	    goto cleanup;
-
-    memcpy((char *) seqno, (char *)outtmp, sizeof(krb5_int32));
-    
-cleanup:
-    if (subkey)
-	    krb5_free_keyblock(context, subkey);
-    if (intmp)
-	    krb5_xfree(intmp);
-    if (outtmp)
-	    krb5_xfree(outtmp);
-    return retval;
+    seed.length = sizeof(*seqno);
+    seed.data = (char *) seqno;
+    return(krb5_c_random_make_octets(context, &seed));
 }
-

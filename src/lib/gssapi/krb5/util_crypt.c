@@ -20,6 +20,32 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 #include "gssapiP_krb5.h"
 #include <memory.h>
@@ -31,103 +57,126 @@
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
 int
-kg_confounder_size(ed)
-     krb5_gss_enc_desc *ed;
+kg_confounder_size(context, key)
+     krb5_context context;
+     krb5_keyblock *key;
 {
-   /* XXX Abstraction violation!!! */
+   krb5_error_code code;
+   size_t blocksize;
 
-   return(ed->eblock.crypto_entry->block_length);
+   if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+      return(-1); /* XXX */
+
+   return(blocksize);
 }
 
 krb5_error_code
-kg_make_confounder(ed, buf)
-     krb5_gss_enc_desc *ed;
+kg_make_confounder(context, key, buf)
+     krb5_context context;
+     krb5_keyblock *key;
      unsigned char *buf;
 {
-   /* XXX Abstraction violation!!! */
+   krb5_error_code code;
+   size_t blocksize;
+   krb5_data random;
 
-   return(krb5_random_confounder(ed->eblock.crypto_entry->block_length, buf));
+   if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+       return(code);
+
+   random.length = blocksize;
+   random.data = buf;
+
+   return(krb5_c_random_make_octets(context, &random));
 }
 
 int
-kg_encrypt_size(ed, n)
-     krb5_gss_enc_desc *ed;
+kg_encrypt_size(context, key, n)
+     krb5_context context;
+     krb5_keyblock *key;
      int n;
 {
-   return(krb5_encrypt_size(n, ed->eblock.crypto_entry));
+   krb5_error_code code;
+   size_t enclen;
+
+   if (code = krb5_c_encrypt_length(context, key->enctype, n, &enclen))
+      return(-1); /* XXX */
+
+   return(enclen);
 }
 
 krb5_error_code
-kg_encrypt(context, ed, iv, in, out, length)
+kg_encrypt(context, key, iv, in, out, length)
      krb5_context context;
-     krb5_gss_enc_desc *ed;
+     krb5_keyblock *key;
      krb5_pointer iv;
      krb5_pointer in;
      krb5_pointer out;
      int length;
 {
    krb5_error_code code;
-   krb5_pointer tmp;
+   size_t blocksize;
+   krb5_data ivd, *pivd, inputd;
+   krb5_enc_data outputd;
 
-   if (! ed->processed) {
-      if (code = krb5_process_key(context, &ed->eblock, ed->key))
-	 return(code);
-      ed->processed = 1;
+   if (iv) {
+       if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+	   return(code);
+
+       ivd.length = blocksize;
+       ivd.data = iv;
+       pivd = &ivd;
+   } else {
+       pivd = NULL;
    }
 
-   /* this is lame.  the krb5 encryption interfaces no longer allow
-      you to encrypt in place.  perhaps this should be fixed, but
-      dealing here is easier for now --marc */
+   inputd.length = length;
+   inputd.data = in;
 
-   if ((tmp = (krb5_pointer) xmalloc(length)) == NULL)
-      return(ENOMEM);
+   outputd.ciphertext.length = length;
+   outputd.ciphertext.data = out;
 
-   memcpy(tmp, in, length);
-
-   code = krb5_encrypt(context, tmp, out, length, &ed->eblock, 
-		       iv?iv:(krb5_pointer)zeros);
-
-   xfree(tmp);
-
-   if (code)
-      return(code);
-
-   return(0);
+   return(krb5_c_encrypt(context, key,
+			 /* XXX this routine is only used for the old
+			    bare-des stuff which doesn't use the
+			    key usage */ 0, pivd, &inputd, &outputd));
 }
 
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt(context, ed, iv, in, out, length)
+kg_decrypt(context, key, iv, in, out, length)
      krb5_context context;
-     krb5_gss_enc_desc *ed;
+     krb5_keyblock *key;
      krb5_pointer iv;
      krb5_pointer in;
      krb5_pointer out;
      int length;
 {
    krb5_error_code code;
-   int elen;
-   char *buf;
+   size_t blocksize, enclen;
+   krb5_data ivd, *pivd, outputd;
+   krb5_enc_data inputd;
 
-   if (! ed->processed) {
-      if (code = krb5_process_key(context, &ed->eblock, ed->key))
-	 return(code);
-      ed->processed = 1;
+   if (iv) {
+       if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+	   return(code);
+
+       ivd.length = blocksize;
+       ivd.data = iv;
+       pivd = &ivd;
+   } else {
+       pivd = NULL;
    }
 
-   elen = krb5_encrypt_size(length, ed->eblock.crypto_entry);
-   if ((buf = (char *) xmalloc(elen)) == NULL)
-      return(ENOMEM);
+   inputd.enctype = ENCTYPE_UNKNOWN;
+   inputd.ciphertext.length = length;
+   inputd.ciphertext.data = in;
 
-   if (code = krb5_decrypt(context, in, buf, elen, &ed->eblock, 
-			   iv?iv:(krb5_pointer)zeros)) {
-      xfree(buf);
-      return(code);
-   }
+   outputd.length = length;
+   outputd.data = out;
 
-   memcpy(out, buf, length);
-   xfree(buf);
-
-   return(0);
+   return(krb5_c_decrypt(context, key,
+			 /* XXX this routine is only used for the old
+			    bare-des stuff which doesn't use the
+			    key usage */ 0, pivd, &inputd, &outputd));
 }

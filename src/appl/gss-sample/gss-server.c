@@ -393,9 +393,10 @@ int sign_server(s, server_creds)
 
      fprintf(log, "Received message: ");
      cp = msg_buf.value;
-     if (isprint(cp[0]) && isprint(cp[1]))
-	fprintf(log, "\"%s\"\n", cp);
-     else {
+     if ((isprint(cp[0]) || isspace(cp[0])) &&
+	 (isprint(cp[1]) || isspace(cp[1]))) {
+	fprintf(log, "\"%.*s\"\n", msg_buf.length, msg_buf.value);
+     } else {
 	printf("\n");
 	print_token(&msg_buf);
      }
@@ -488,20 +489,21 @@ main(argc, argv)
      } else {
 	 int stmp;
 
-	 if ((stmp = create_socket(port))) {
+	 if ((stmp = create_socket(port)) >= 0) {
 	     do {
 		 /* Accept a TCP connection */
 		 if ((s = accept(stmp, NULL, 0)) < 0) {
 		     perror("accepting connection");
-		 } else {
-		     /* this return value is not checked, because there's
-			not really anything to do if it fails */
-		     sign_server(s, server_creds);
+		     continue;
 		 }
+		 /* this return value is not checked, because there's
+		    not really anything to do if it fails */
+		 sign_server(s, server_creds);
+		 close(s);
 	     } while (!once);
-	 }
 
-	 close(stmp);
+	     close(stmp);
+	 }
      }
 
      (void) gss_release_cred(&min_stat, &server_creds);

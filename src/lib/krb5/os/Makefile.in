@@ -12,6 +12,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS= \
 	an_to_ln.o	\
+	c_ustime.o	\
 	def_realm.o	\
 	DNR.o	\
 	ccdefname.o	\
@@ -54,6 +55,7 @@ STLIBOBJS= \
 
 OBJS= \
 	an_to_ln.$(OBJEXT)	\
+	c_ustime.$(OBJEXT)	\
 	def_realm.$(OBJEXT)	\
 	DNR.$(OBJEXT)	\
 	ccdefname.$(OBJEXT)	\
@@ -96,6 +98,7 @@ OBJS= \
 
 SRCS= \
 	$(srcdir)/an_to_ln.c	\
+	$(srcdir)/c_ustime.c	\
 	$(srcdir)/def_realm.c	\
 	$(srcdir)/DNR.c	\
 	$(srcdir)/ccdefname.c	\

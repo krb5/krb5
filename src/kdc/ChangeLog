@@ -1,3 +1,56 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, extern.h, kdc_preauth.c, kdc_util.c,
+	kerberos_v4.c, main.c: conver to new crypto api.
+
+Fri Sep 25 19:47:26 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (check_princ): Re-order if statements that check
+	for null keys to make Purify shut up.
+
+Thu Sep 17 18:21:51 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (kdc_get_server_key): Fix to not use cached tgs key
+	to prevent lossage when it might be out of date by always fetching
+	the correct kvno for the ticket out of the database.
+
+Tue Sep  1 19:34:30 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (compat_decrypt_key): Add
+ 	ENCTYPE_LOCAL_DES3_HMAC_SHA1 to the list of keytypes to bash.
+	(kerb_get_principal): Add ENCTYPE_LOCAL_DES3_HMAC_SHA1 to the list
+ 	of searched enctypes.
+
+Wed Aug 19 13:37:00 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (set_tgtkey): Add kvno arg to fetch an explicit
+	kvno.  Also compare kvno as well as realm when caching the TGT
+	key.  Declare as static.
+	(kerb_get_principal): Add kvno argument to permit searching for
+	an explicit kvno.
+	(kerberos_v4): Extract the kvno directly out of the krb_req, since
+	we know what the format is.
+
+Wed Aug 12 18:40:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Add macro K4KDC_ENCTYPE_OK to determine whether a
+	given enctype is compatible with single-DES krb4.
+	(compat_decrypt_key): Declare as static.  Change call signature to
+	include an output krb5_keyblock as well as an input to determine
+	whether the principal should be treated as a service principal.
+	Bash the enctype of the keyblock to raw des3 if it's full-blown
+	des3.
+	(kerb_get_principal): Add k5key and issrv arguments as in
+	compat_decrypt_key, mostly to pass them on there.  Hardcode a
+	search order that includes des3 for looking up service keys.
+	(kerberos_v4): Call krb_create_ticket or krb_cr_tkt_krb5 as
+	appropriate to the key type.  While we're at it, s/ktbtgt/krbtgt/
+	just to avoid confusing people.
+	(check_princ): Add k5key and issrv args for as in
+	compat_decrypt_key.  Fix up null key detection to only operate if
+	it's a single-des key.
+	(set_tgtkey): Call krb_set_key_krb5 if appropriate.
+
 Tue Jul 21 20:29:38 1998  Tom Yu  <tlyu@mit.edu>
 
 	* replay.c (kdc_check_lookaside):

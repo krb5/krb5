@@ -1,3 +1,8 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* kdb_dbc.h, kdb.h: update kdb api to be compatible with the new
+	crypto api.
+
 Wed Jul  8 04:30:22 1998  Geoffrey King  <gjking@mit.edu>
 
 	* adm_proto.h: Added prototype for new function krb5_klog_reopen()

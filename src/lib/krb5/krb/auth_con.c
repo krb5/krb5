@@ -1,4 +1,3 @@
-
 #include "k5-int.h"
 #include "auth_con.h"
 
@@ -71,6 +70,8 @@ krb5_auth_con_free(context, auth_context)
 	krb5_free_keyblock(context, auth_context->remote_subkey);
     if (auth_context->rcache)
 	krb5_rc_close(context, auth_context->rcache);
+    if (auth_context->permitted_etypes)
+	krb5_xfree(auth_context->permitted_etypes);
     free(auth_context);
     return 0;
 }
@@ -274,12 +275,16 @@ krb5_auth_con_initivector(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
 {
-    if (auth_context->keyblock) {
-	int size = krb5_enctype_array[auth_context->keyblock->enctype]->
-		      system->block_length;
+    krb5_error_code ret;
 
-	if ((auth_context->i_vector = (krb5_pointer)malloc(size))) {
-	    memset(auth_context->i_vector, 0, size);
+    if (auth_context->keyblock) {
+	size_t blocksize;
+
+	if ((ret = krb5_c_block_size(context, auth_context->keyblock->enctype,
+				    &blocksize)))
+	    return(ret);
+	if ((auth_context->i_vector = (krb5_pointer)malloc(blocksize))) {
+	    memset(auth_context->i_vector, 0, blocksize);
 	    return 0;
 	}
 	return ENOMEM;
@@ -347,3 +352,58 @@ krb5_auth_con_getrcache(context, auth_context, rcache)
     return 0;
 }
     
+krb5_error_code
+krb5_auth_con_setpermetypes(context, auth_context, permetypes)
+    krb5_context      	  context;
+    krb5_auth_context 	  auth_context;
+    const krb5_enctype	* permetypes;
+{
+    krb5_enctype	* newpe;
+    int i;
+
+    for (i=0; permetypes[i]; i++)
+	;
+    i++; /* include the zero */
+
+    if ((newpe = (krb5_enctype *) malloc(i*sizeof(krb5_enctype)))
+	== NULL)
+	return(ENOMEM);
+
+    if (auth_context->permitted_etypes)
+	krb5_xfree(auth_context->permitted_etypes);
+
+    auth_context->permitted_etypes = newpe;
+
+    memcpy(newpe, permetypes, i*sizeof(krb5_enctype));
+
+    return 0;
+}
+
+krb5_error_code
+krb5_auth_con_getpermetypes(context, auth_context, permetypes)
+    krb5_context      	  context;
+    krb5_auth_context 	  auth_context;
+    krb5_enctype       ** permetypes;
+{
+    krb5_enctype	* newpe;
+    int i;
+
+    if (! auth_context->permitted_etypes) {
+	*permetypes = NULL;
+	return(0);
+    }
+
+    for (i=0; auth_context->permitted_etypes[i]; i++)
+	;
+    i++; /* include the zero */
+
+    if ((newpe = (krb5_enctype *) malloc(i*sizeof(krb5_enctype)))
+	== NULL)
+	return(ENOMEM);
+
+    *permetypes = newpe;
+
+    memcpy(newpe, auth_context->permitted_etypes, i*sizeof(krb5_enctype));
+
+    return(0);
+}

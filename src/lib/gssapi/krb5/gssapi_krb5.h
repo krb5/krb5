@@ -32,9 +32,12 @@
 
 extern const gss_OID_desc * const gss_mech_krb5;
 extern const gss_OID_desc * const gss_mech_krb5_old;
+extern const gss_OID_desc * const gss_mech_krb5_v2;
 extern const gss_OID_set_desc * const gss_mech_set_krb5;
 extern const gss_OID_set_desc * const gss_mech_set_krb5_old;
 extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
+extern const gss_OID_set_desc * const gss_mech_set_krb5_v2;
+extern const gss_OID_set_desc * const gss_mech_set_krb5_v1v2;
 
 extern const gss_OID_desc * const gss_nt_krb5_name;
 extern const gss_OID_desc * const gss_nt_krb5_principal;

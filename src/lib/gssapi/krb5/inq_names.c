@@ -43,10 +43,11 @@ krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
      * We only know how to handle our own mechanism.
      */
     if ((mechanism != GSS_C_NULL_OID) &&
+	!g_OID_equal(gss_mech_krb5_v2, mechanism) &&
 	!g_OID_equal(gss_mech_krb5, mechanism) &&
 	!g_OID_equal(gss_mech_krb5_old, mechanism)) {
 	*minor_status = 0;
-	return(GSS_S_FAILURE);
+	return(GSS_S_BAD_MECH);
     }
 
     /* We're okay.  Create an empty OID set */

@@ -90,18 +90,11 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
     if ((retval = encode_krb5_safe(&safemsg, &scratch1)))
 	return retval;
 
-    safe_checksum.length = krb5_checksum_size(context, sumtype);
-    if (!(safe_checksum.contents = (krb5_octet *) malloc(safe_checksum.length))) {
-
-	retval = ENOMEM;
-	goto cleanup_scratch;
-    }
-    if ((retval = krb5_calculate_checksum(context, sumtype, scratch1->data,
-					  scratch1->length,
-					  (krb5_pointer) keyblock->contents,
-					  keyblock->length, &safe_checksum))) {
+    if ((retval = krb5_c_make_checksum(context, sumtype, keyblock,
+				       KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
+				       scratch1, &safe_checksum)))
 	goto cleanup_checksum;
-    }
+
     safemsg.checksum = &safe_checksum;
     if ((retval = encode_krb5_safe(&safemsg, &scratch2))) {
 	goto cleanup_checksum;

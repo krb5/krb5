@@ -1,3 +1,16 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* c_ustime.c, localaddr.c: moved here from lib/crypto
+
+	* ktdefname.c (krb5_kt_default_name): there is code in the tree
+	(notably, the admin server code) which uses globals to set the
+	keytab which will be used by gssapi.  this is gross, and we need a
+	better answer.  However, even that didn't work if there was an env
+	var or krb5.conf variable, since those override krb5_defkeyname.
+	Add a new global, krb5_overridekeyname, which really does override
+	all the other keytab locators.  While I'm at it, make the buffer
+	overflow checks sane.
+
 Fri Sep 25 22:32:16 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ccdefname.c: We shouldn't try to use the CCache API on Unix

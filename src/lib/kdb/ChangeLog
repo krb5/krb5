@@ -1,3 +1,33 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* kdb_xdr.c, kdb_cpw.c: remove the special knowledge of ENCTYPE
+	string-to-key equivalances.  the crypto api has a function for
+	this now.
+
+	* decrypt_key.c, encrypt_key.c, fetch_mkey.c, kdb_cpw.c,
+	kdb_db2.c, kdb_db2.h, kdb_dbm.c, keytab.c, verify_mky.c: change or
+	remove all the places krb5_encrypt_block was used
+	(this is mostly relevant to kdb manipulations).  It was usually
+	used to specify an enctype (which is now implied by the keyblock),
+	or to store or pass in a processed key (now the api just takes a
+	key directly, so these structures and functions do, too).  The kdb
+	key manuipulation functions also need to be made to use the new
+	api.
+
+Fri Sep 25 19:42:10 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_search_enctype): Re-order booleans so that
+	similar doesn't get checked unless (ktype >= 0) to avoid it being
+	stack garbage.
+
+Sun Aug 16 16:52:10 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (SHLIB_EXPLIBS): Include $(LIBS) so building on AIX works
+
+Sun Jul 26 18:12:22 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (LIBMAJOR): bump libmajor
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* t_kdb.c (main): POSIX states that getopt returns -1

@@ -7,14 +7,14 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 LIB=kdb5
-LIBMAJOR=2
+LIBMAJOR=3
 LIBMINOR=0
 RELDIR=kdb
 # Depends on libk5crypto and libkrb5
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto
+SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 

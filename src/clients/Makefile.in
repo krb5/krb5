@@ -1,7 +1,7 @@
 thisconfigdir=.
 BUILDTOP=$(REL)$(U)
 
-LOCAL_SUBDIRS= klist kinit kdestroy kpasswd ksu
+LOCAL_SUBDIRS= klist kinit kdestroy kpasswd ksu kvno
 
 ##WIN32##all-windows::
 ##WIN32##	@echo Making all in clients\klist

@@ -1,3 +1,9 @@
+Thu Sep 17 18:23:26 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb_db.h: ifdef out the declarations for kerb_get_* and
+	kerb_db_* to avoid problems with krb4 compat code in the kdc,
+	which declares some of these static.
+
 Wed Feb 18 15:51:41 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

@@ -6,6 +6,10 @@
 		problem where an insertion into the middle of the linked
 		list didn't update a previous link.  [krb5-libs/615]
 
+1998-07-12  Sam Hartman  <hartmans@fundsxpress.com>
+
+	* Makefile.in: Add dependency on -lcom_err
+
 Mon Mar  2 16:19:58 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: Integrate in the krb5 build tree rules.

@@ -104,11 +104,13 @@ typedef struct {
 }
         Dba;
 
+#if 0
 extern int kerb_get_principal();
 extern int kerb_put_principal();
 extern int kerb_db_get_stat();
 extern int kerb_db_put_stat();
 extern int kerb_get_dba();
 extern int kerb_db_get_dba();
+#endif
 
 #endif /* KRB_DB_DEFS */

@@ -41,13 +41,10 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
     krb5_data         	* outbuf; 
 {
     krb5_error_code 	retval;
-    krb5_encrypt_block 	eblock;
     krb5_priv 		privmsg;
     krb5_priv_enc_part 	privmsg_enc_part;
-    krb5_data 		*scratch1, *scratch2;
-
-    if (!valid_enctype(keyblock->enctype))
-	return KRB5_PROG_ETYPE_NOSUPP;
+    krb5_data 		*scratch1, *scratch2, ivdata;
+    size_t		blocksize, enclen;
 
     privmsg.enc_part.kvno = 0;	/* XXX allow user-set? */
     privmsg.enc_part.enctype = keyblock->enctype; 
@@ -66,52 +63,42 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
 	return retval;
 
     /* put together an eblock for this encryption */
-    krb5_use_enctype(context, &eblock, keyblock->enctype);
-    privmsg.enc_part.ciphertext.length = krb5_encrypt_size(scratch1->length,
-						eblock.crypto_entry);
-    /* add padding area, and zero it */
-    if (!(scratch1->data = realloc(scratch1->data,
-				  privmsg.enc_part.ciphertext.length))) {
-	/* may destroy scratch1->data */
-	krb5_xfree(scratch1);
-	return ENOMEM;
-    }
+    if ((retval = krb5_c_encrypt_length(context, keyblock->enctype,
+					scratch1->length, &enclen)))
+	goto clean_scratch;
 
-    memset(scratch1->data + scratch1->length, 0,
-	  privmsg.enc_part.ciphertext.length - scratch1->length);
+    privmsg.enc_part.ciphertext.length = enclen;
     if (!(privmsg.enc_part.ciphertext.data =
 	  malloc(privmsg.enc_part.ciphertext.length))) {
         retval = ENOMEM;
         goto clean_scratch;
     }
 
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, keyblock)))
-        goto clean_encpart;
-
     /* call the encryption routine */
-    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch1->data,
-			       (krb5_pointer) privmsg.enc_part.ciphertext.data,
-			       scratch1->length, &eblock, i_vector))) {
-    	krb5_finish_key(context, &eblock);
-        goto clean_encpart;
+    if (i_vector) {
+	if ((retval = krb5_c_block_size(context, keyblock->enctype,
+					&blocksize)))
+	    goto clean_encpart;
+
+	ivdata.length = blocksize;
+	ivdata.data = i_vector;
     }
 
+    if ((retval = krb5_c_encrypt(context, keyblock,
+				 KRB5_KEYUSAGE_KRB_PRIV_ENCPART,
+				 i_vector?&ivdata:0,
+				 scratch1, &privmsg.enc_part)))
+	goto clean_encpart;
+
     /* put last block into the i_vector */
+
     if (i_vector)
 	memcpy(i_vector,
 	       privmsg.enc_part.ciphertext.data +
-	       (privmsg.enc_part.ciphertext.length -
-	        eblock.crypto_entry->block_length),
-	       eblock.crypto_entry->block_length);
+	       (privmsg.enc_part.ciphertext.length - blocksize),
+	       blocksize);
 	   
-    if ((retval = encode_krb5_priv(&privmsg, &scratch2)))  {
-    	krb5_finish_key(context, &eblock);
-        goto clean_encpart;
-    }
-
-    /* encode private message */
-    if ((retval = krb5_finish_key(context, &eblock)))
+    if ((retval = encode_krb5_priv(&privmsg, &scratch2)))
         goto clean_encpart;
 
     *outbuf = *scratch2;

@@ -31,7 +31,11 @@ struct krb5_cc_typelist
   krb5_cc_ops *ops;
   struct krb5_cc_typelist *next;
  };
-static struct krb5_cc_typelist *cc_typehead = 0;
+extern krb5_cc_ops krb5_mcc_ops;
+
+static struct krb5_cc_typelist cc_entry = { &krb5_mcc_ops, NULL };
+
+static struct krb5_cc_typelist *cc_typehead = &cc_entry;
 
 /*
  * Register a new credentials cache type

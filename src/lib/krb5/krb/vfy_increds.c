@@ -68,12 +68,7 @@ krb5_verify_init_creds(krb5_context context,
    krb5_creds in_creds, *out_creds;
    krb5_auth_context authcon;
    krb5_data ap_req;
-   int keytab_key_exists, rd_req_succeeds, nofail;
    
-   keytab_key_exists = 0;
-   rd_req_succeeds = 0;
-   nofail = 0;
-
    /* KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN */
 
    server = NULL;
@@ -103,11 +98,31 @@ krb5_verify_init_creds(krb5_context context,
 	 goto cleanup;
    }
 
-   if (ret = krb5_kt_get_entry(context, keytab, server, 0, 0, &kte))
-      goto cleanup;
+   if (ret = krb5_kt_get_entry(context, keytab, server, 0, 0, &kte)) {
+       /* this means there is no keying material.  This is ok, as long as
+	  it is not prohibited by the configuration */
+
+       krb5_error_code ret2;
+       int nofail;
+
+       if (options &&
+	   (options->flags & KRB5_VERIFY_INIT_CREDS_OPT_AP_REQ_NOFAIL)) {
+	   if (options->ap_req_nofail)
+	       goto cleanup;
+       } else if ((ret2 = krb5_appdefault_boolean(context,
+						  &creds->client->realm,
+						  "verify_ap_req_nofail",
+						  &nofail))
+		  == 0) {
+	   if (nofail)
+	       goto cleanup;
+       }
+
+       ret = 0;
+       goto cleanup;
+   }
 
    krb5_kt_free_entry(context, &kte);
-   keytab_key_exists = 1;
 
    /* If the creds are for the server principal, we're set, just do
       a mk_req.	 Otherwise, do a get_credentials first. */
@@ -166,61 +181,37 @@ krb5_verify_init_creds(krb5_context context,
 			 NULL, NULL))
       goto cleanup;
 
-   rd_req_succeeds = 1;   
+   /* if we get this far, then the verification succeeded.  We can
+      still fail if the library stuff here fails, but that's it */
+
+   if (ccache_arg && ccache) {
+       if (*ccache_arg == NULL) {
+	   krb5_ccache retcc;
+
+	   retcc = NULL;
+
+	   if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req2", &retcc)) ||
+	       (ret = krb5_cc_initialize(context, retcc, creds->client)) ||
+	       (ret = krb5_cc_copy_creds_except(context, ccache, retcc,
+						creds->server))) {
+	       if (retcc)
+		   krb5_cc_destroy(context, retcc);
+	   } else {
+	       *ccache_arg = retcc;
+	   }
+       } else {
+	   ret = krb5_cc_copy_creds_except(context, ccache, *ccache_arg,
+					   server);
+       }
+   }
+
+   /* if any of the above paths returned an errors, then ret is set
+      accordingly.  either that, or it's zero, which is fine, too */
 
 cleanup:
-   /* I could test the error case first, but then there would be a
-      chance that the verification would succeed when there was
-      actually a significant failure (some transient condition could
-      make rd_req fail, and this would not be a problem if nofail was
-      not set */
-
-   if (!keytab_key_exists) {
-      krb5_error_code ret2;
-
-      if (options &&
-	  (options->flags & KRB5_VERIFY_INIT_CREDS_OPT_AP_REQ_NOFAIL))
-	 nofail = options->ap_req_nofail;
-      else if ((ret2 = krb5_appdefault_boolean(context, &creds->client->realm,
-					       "verify_ap_req_nofail",
-					       &nofail))
-	       == 0)
-	    ;
-      else
-	 nofail = 0;
-   }
-
-   if ((keytab_key_exists && rd_req_succeeds) ||
-       (!keytab_key_exists && !nofail)) {
-      ret = 0;
-
-      if (ccache_arg && ccache) {
-	 if (*ccache_arg == NULL) {
-	    krb5_ccache retcc;
-
-	    retcc = NULL;
-
-	    if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req2", &retcc)) ||
-		(ret = krb5_cc_initialize(context, retcc, creds->client)) ||
-		(ret = krb5_cc_copy_creds_except(context, ccache, retcc,
-						 creds->server))) {
-	       if (retcc)
-		  krb5_cc_destroy(context, retcc);
-	    } else {
-	       *ccache_arg = retcc;
-	    }
-	 } else {
-	    /* if this returns an error, then that's the return
-	       from this function */
-	    ret = krb5_cc_copy_creds_except(context, ccache, *ccache_arg,
-					    server);
-	 }
-      }
-   }
-
-   if (!server_arg)
+   if (!server_arg && server)
       krb5_free_principal(context, server);
-   if (!keytab_arg)
+   if (!keytab_arg && keytab)
       krb5_kt_close(context, keytab);
    if (ccache)
       krb5_cc_destroy(context, ccache);
@@ -233,6 +224,3 @@ cleanup:
 
    return(ret);
 }
-
-
-   

@@ -22,6 +22,32 @@
  * 
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 #include "krb5/adm.h"
 #include <stdio.h>
@@ -61,32 +87,23 @@ cleanup_key_data(context, count, data)
     free(data);
 }
 
-/*
- * Currently we can only generate random keys for preinitialized
- * krb5_encrypt_block with a seed. This is bogus but currently
- * necessary to insure that we don't generate two keys with the 
- * same data.
- */
 static krb5_error_code
-add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
+add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_context	  context;
-    krb5_encrypt_block  * master_eblock;
+    krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     krb5_db_entry	* db_entry;
     int			  kvno;
 {
     krb5_principal	  krbtgt_princ;
-    krb5_keyblock	  krbtgt_key, * key;
-    krb5_pointer 	  krbtgt_seed;	
-    krb5_encrypt_block	  krbtgt_eblock;
+    krb5_keyblock	  key;
     krb5_db_entry	  krbtgt_entry;
     krb5_key_data	* krbtgt_kdata;
-    krb5_boolean	  more, found;
+    krb5_boolean	  more;
     int			  max_kvno, one, i, j;
     krb5_error_code	  retval;
 
-    memset(&krbtgt_key, 0, sizeof(krbtgt_key));
     retval = krb5_build_principal_ext(context, &krbtgt_princ,
 				      db_entry->princ->realm.length,
 				      db_entry->princ->realm.data,
@@ -119,17 +136,9 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     }
 
     for (i = 0; i < ks_tuple_count; i++) {
-	krb5_enctype new_enctype, old_enctype;
+	krb5_boolean similar;
 
-	switch (new_enctype = ks_tuple[i].ks_enctype) {
-	case ENCTYPE_DES_CBC_MD4:
-	case ENCTYPE_DES_CBC_MD5:
-	case ENCTYPE_DES_CBC_RAW:
-	    new_enctype = ENCTYPE_DES_CBC_CRC;
-	default:
-	    break;
-	}
-	found = 0;
+	similar = 0;
 
 	/*
 	 * We could use krb5_keysalt_iterate to replace this loop, or use
@@ -137,74 +146,44 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 	 * circular library dependencies.
 	 */
 	for (j = 0; j < i; j++) {
-	    switch (old_enctype = ks_tuple[j].ks_enctype) {
-	    case ENCTYPE_DES_CBC_MD4:
-	    case ENCTYPE_DES_CBC_MD5:
-	    case ENCTYPE_DES_CBC_RAW:
-	        old_enctype = ENCTYPE_DES_CBC_CRC;
-	    default:
-	    	break;
-	    }
-	    if (old_enctype == new_enctype) {
-		found = 1;
+	    if ((retval = krb5_c_enctype_compare(context,
+						 ks_tuple[i].ks_enctype,
+						 ks_tuple[j].ks_enctype,
+						 &similar)))
+		return(retval);
+
+	    if (similar)
 		break;
-	    }
 	}
-	if (found)
+
+	if (similar)
 	    continue;
+
         if (retval = krb5_dbe_create_key_data(context, db_entry)) 
 	    goto add_key_rnd_err;
 
-	if (retval = krb5_dbe_find_enctype(context, &krbtgt_entry,
-					   ks_tuple[i].ks_enctype,
-				  	   -1, 0, &krbtgt_kdata)) 
+	/* there used to be code here to extract the old key, and derive
+	   a new key from it.  Now that there's a unified prng, that isn't
+	   necessary. */
+
+	/* make new key */
+	if ((retval = krb5_c_make_random_key(context, ks_tuple[i].ks_enctype,
+					     &key)))
 	    goto add_key_rnd_err;
 
-	/* Decrypt key */
-    	if (retval = krb5_dbekd_decrypt_key_data(context, master_eblock, 
-						 krbtgt_kdata,&krbtgt_key,NULL))
+    	retval = krb5_dbekd_encrypt_key_data(context, master_key, 
+					     &key, NULL, kvno, 
+					     &db_entry->key_data[db_entry->n_key_data-1]);
+
+	krb5_free_keyblock_contents(context, &key);
+
+	if (retval)
 	    goto add_key_rnd_err;
-
-	/* Init key */
-	krbtgt_key.enctype = ks_tuple[i].ks_enctype;
-	krb5_use_enctype(context, &krbtgt_eblock, ks_tuple[i].ks_enctype);
-	if (retval = krb5_process_key(context, &krbtgt_eblock, &krbtgt_key)) {
-	    goto add_key_rnd_err;
-	}
-
-	/* Init random generator */
-	if (retval = krb5_init_random_key(context, &krbtgt_eblock,
-					  &krbtgt_key, &krbtgt_seed)) {
-	    krb5_finish_key(context, &krbtgt_eblock);
-	    goto add_key_rnd_err;
-	}
-
-    	if (retval = krb5_random_key(context,&krbtgt_eblock,krbtgt_seed,&key)) {
-	    krb5_finish_random_key(context, &krbtgt_eblock, &krbtgt_seed);
-	    krb5_finish_key(context, &krbtgt_eblock);
-	    goto add_key_rnd_err;
-	}
-
-	krb5_finish_random_key(context, &krbtgt_eblock, &krbtgt_seed);
-	krb5_finish_key(context, &krbtgt_eblock);
-
-    	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, 
-						 key, NULL, kvno, 
-						 &db_entry->key_data[db_entry->n_key_data-1])) {
-    	    krb5_free_keyblock(context, key);
-	    goto add_key_rnd_err;
-	}
-
-	/* Finish random key */
-    	krb5_free_keyblock(context, key);
     }
 
-add_key_rnd_err:;
+add_key_rnd_err:
     krb5_db_free_principal(context, &krbtgt_entry, one);
-    if (krbtgt_key.contents && krbtgt_key.length) {
-	memset(krbtgt_key.contents, 0, krbtgt_key.length);
-	krb5_xfree(krbtgt_key.contents);
-    }
+
     return(retval);
 }
 
@@ -215,9 +194,9 @@ add_key_rnd_err:;
  * As a side effect all old keys are nuked.
  */
 krb5_error_code
-krb5_dbe_crk(context, master_eblock, ks_tuple, ks_tuple_count, db_entry)
+krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, db_entry)
     krb5_context	  context;
-    krb5_encrypt_block  * master_eblock;
+    krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     krb5_db_entry	* db_entry;
@@ -237,7 +216,7 @@ krb5_dbe_crk(context, master_eblock, ks_tuple, ks_tuple_count, db_entry)
     /* increment the kvno */
     kvno++;
 
-    if (retval = add_key_rnd(context, master_eblock, ks_tuple, 
+    if (retval = add_key_rnd(context, master_key, ks_tuple, 
 			     ks_tuple_count, db_entry, kvno)) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
@@ -255,9 +234,9 @@ krb5_dbe_crk(context, master_eblock, ks_tuple, ks_tuple_count, db_entry)
  * As a side effect all old keys older than the max kvno are nuked.
  */
 krb5_error_code
-krb5_dbe_ark(context, master_eblock, ks_tuple, ks_tuple_count, db_entry)
+krb5_dbe_ark(context, master_key, ks_tuple, ks_tuple_count, db_entry)
     krb5_context	  context;
-    krb5_encrypt_block  * master_eblock;
+    krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     krb5_db_entry	* db_entry;
@@ -278,7 +257,7 @@ krb5_dbe_ark(context, master_eblock, ks_tuple, ks_tuple_count, db_entry)
     /* increment the kvno */
     kvno++;
 
-    if (retval = add_key_rnd(context, master_eblock, ks_tuple, 
+    if (retval = add_key_rnd(context, master_key, ks_tuple, 
 			     ks_tuple_count, db_entry, kvno)) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
@@ -307,10 +286,10 @@ krb5_dbe_ark(context, master_eblock, ks_tuple, ks_tuple_count, db_entry)
  * If passwd is NULL the assumes that the caller wants a random password.
  */
 static krb5_error_code
-add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd, 
+add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd, 
 	    db_entry, kvno)
     krb5_context	  context;
-    krb5_encrypt_block  * master_eblock;
+    krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     char 		* passwd;
@@ -318,7 +297,6 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     int			  kvno;
 {
     krb5_error_code	  retval;
-    krb5_encrypt_block    key_eblock;
     krb5_keysalt	  key_salt;
     krb5_keyblock	  key;
     krb5_data	  	  pwd;
@@ -328,40 +306,30 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     retval = 0;
 
     for (i = 0; i < ks_tuple_count; i++) {
-	krb5_enctype new_enctype, old_enctype;
+	krb5_boolean similar;
 
-	switch (new_enctype = ks_tuple[i].ks_enctype) {
-	case ENCTYPE_DES_CBC_MD4:
-	case ENCTYPE_DES_CBC_MD5:
-	case ENCTYPE_DES_CBC_RAW:
-	    new_enctype = ENCTYPE_DES_CBC_CRC;
-	default:
-	    break;
-	}
+	similar = 0;
+
 	/*
 	 * We could use krb5_keysalt_iterate to replace this loop, or use
 	 * krb5_keysalt_is_present for the loop below, but we want to avoid
 	 * circular library dependencies.
 	 */
-	for (found = j = 0; j < i; j++) {
-	    if (ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype) {
-		switch (old_enctype = ks_tuple[j].ks_enctype) {
-		case ENCTYPE_DES_CBC_MD4:
-		case ENCTYPE_DES_CBC_MD5:
-		case ENCTYPE_DES_CBC_RAW:
-	    	    old_enctype = ENCTYPE_DES_CBC_CRC;
-		default:
-	    	    break;
-		}
-	        if (old_enctype == new_enctype) {
-		    found = 1;
-		    break;
-		}
-	    }
+	for (j = 0; j < i; j++) {
+	    if ((retval = krb5_c_enctype_compare(context,
+						 ks_tuple[i].ks_enctype,
+						 ks_tuple[j].ks_enctype,
+						 &similar)))
+		return(retval);
+
+	    if (similar &&
+		(ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype))
+		break;
 	}
-	if (found)
+
+	if (j < i)
 	    continue;
-	krb5_use_enctype(context, &key_eblock, ks_tuple[i].ks_enctype);
+
 	if (retval = krb5_dbe_create_key_data(context, db_entry)) 
 	    return(retval);
 
@@ -422,8 +390,9 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 
     	pwd.data = passwd;
     	pwd.length = strlen(passwd);
-	if (retval = krb5_string_to_key(context, &key_eblock, &key, &pwd, 
-					&key_salt.data)) {
+
+	if ((retval = krb5_c_string_to_key(context, ks_tuple[i].ks_enctype,
+					   &pwd, &key_salt.data, &key))) {
 	     if (key_salt.data.data)
 		  free(key_salt.data.data);
 	     return(retval);
@@ -433,7 +402,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	    key_salt.data.length = 
 	      krb5_princ_realm(context, db_entry->princ)->length;
 
-	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, &key,
+	if (retval = krb5_dbekd_encrypt_key_data(context, master_key, &key,
 		     (const krb5_keysalt *)&key_salt,
 		     kvno, &db_entry->key_data[db_entry->n_key_data-1])) {
 	    if (key_salt.data.data)
@@ -455,10 +424,10 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
  * As a side effect all old keys are nuked.
  */
 krb5_error_code
-krb5_dbe_cpw(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
+krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	     new_kvno, db_entry)
     krb5_context	  context;
-    krb5_encrypt_block  * master_eblock;
+    krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     char 		* passwd;
@@ -483,7 +452,7 @@ krb5_dbe_cpw(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     if (new_kvno < old_kvno+1)
        new_kvno = old_kvno+1;
 
-    if (retval = add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count,
+    if (retval = add_key_pwd(context, master_key, ks_tuple, ks_tuple_count,
 			     passwd, db_entry, new_kvno)) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
@@ -501,9 +470,9 @@ krb5_dbe_cpw(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
  * As a side effect all old keys older than the max kvno are nuked.
  */
 krb5_error_code
-krb5_dbe_apw(context, master_eblock, ks_tuple, ks_tuple_count, passwd, db_entry)
+krb5_dbe_apw(context, master_key, ks_tuple, ks_tuple_count, passwd, db_entry)
     krb5_context	  context;
-    krb5_encrypt_block  * master_eblock;
+    krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     char 		* passwd;
@@ -526,7 +495,7 @@ krb5_dbe_apw(context, master_eblock, ks_tuple, ks_tuple_count, passwd, db_entry)
     /* increment the kvno */
     new_kvno = old_kvno+1;
 
-    if (retval = add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count,
+    if (retval = add_key_pwd(context, master_key, ks_tuple, ks_tuple_count,
 			     passwd, db_entry, new_kvno)) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;

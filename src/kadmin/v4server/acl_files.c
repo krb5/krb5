@@ -332,7 +332,7 @@ char *el;
 
     hv = hashval(el) % h->size;
     while(h->tbl[hv] != NULL && strcmp(h->tbl[hv], el)) hv = (hv+1) % h->size;
-    s = malloc(strlen(el)+1);
+    s = (char *) malloc(strlen(el)+1);
     strcpy(s, el);
     h->tbl[hv] = s;
     h->entries++;

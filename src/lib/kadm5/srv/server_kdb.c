@@ -15,12 +15,10 @@ static char *rcsid = "$Header$";
 #include "server_internal.h"
 
 krb5_principal	    master_princ;
-krb5_encrypt_block  master_encblock;
 krb5_keyblock	    master_keyblock;
 krb5_db_entry	    master_db;
 
 krb5_principal	    hist_princ;
-krb5_encrypt_block  hist_encblock;
 krb5_keyblock	    hist_key;
 krb5_db_entry	    hist_db;
 krb5_kvno	    hist_kvno;
@@ -49,11 +47,8 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 
     master_keyblock.enctype = handle->params.enctype;
 
-    krb5_use_enctype(handle->context, &master_encblock,
-		     master_keyblock.enctype);
-
     if (ret = krb5_db_fetch_mkey(handle->context, master_princ,
-				 &master_encblock, from_keyboard,
+				 master_keyblock.enctype, from_keyboard,
 				 FALSE /* only prompt once */,
 				 handle->params.stash_file,
 				 NULL /* I'm not sure about this,
@@ -65,19 +60,9 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 	goto done;
 
     if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
-					 &master_keyblock,
-					 &master_encblock))) {
+					 &master_keyblock))) {
 	  krb5_db_fini(handle->context);
 	  return ret;
-    }
-
-    /* the kdc gets the db mkvno here.  The admin server never uses this
-       bit of information, so there's no reason to retrieve it. */
-
-    if ((ret = krb5_process_key(handle->context, &master_encblock,
-				&master_keyblock))) {
-          krb5_db_fini(handle->context);
-	  goto done;
     }
 
 done:
@@ -190,16 +175,10 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 				    &key_data))
 	goto done;
 
-    if (ret = krb5_dbekd_decrypt_key_data(handle->context, &master_encblock,
+    if (ret = krb5_dbekd_decrypt_key_data(handle->context, &master_keyblock,
 					  key_data, &hist_key, NULL))
 	goto done;
 
-    krb5_use_enctype(handle->context, &hist_encblock, hist_key.enctype);
-
-    if ((ret = krb5_process_key(handle->context, &hist_encblock,
-				&hist_key)) != KSUCCESS)
-	goto done;
-    
     hist_kvno = key_data->key_data_kvno;
 
 done:

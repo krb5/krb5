@@ -1,3 +1,34 @@
+Tue Sep 22 21:19:01 1998  Tom Yu  <tlyu@mit.edu>
+
+	* prng.c (krb5_c_random_make_octets): Fix to nfold into 15 bytes,
+	not one byte.
+
+Mon Sep 21 15:23:19 1998  Tom Yu  <tlyu@mit.edu>
+
+	* prng.c (krb5_c_random_seed): Fix memory leak.
+
+Mon Sep 14 23:21:17 1998  Tom Yu  <tlyu@mit.edu>
+
+	* old/decrypt.c (krb5_old_decrypt): Fix memory leak.
+
+Tue Sep  1 19:33:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* etypes.c: Add ETYPE_LOCAL_DES3_HMAC_SHA1 to deal with marc's
+	des3 code.  ETYPE_DES3_HMAC_SHA1 remains the same for now.
+
+Mon Aug 17 23:40:11 1998  Tom Yu  <tlyu@mit.edu>
+
+	* keyhash_provider/k5_md4des.c (k5_md4des_verify): Add
+	compatibility for krb5-beta5 checksums.
+
+	* keyhash_provider/k5_md5des.c (k5_md5des_verify): Add
+	compatibility for krb5-beta5 checksums.  Fix typos similar to
+	those corrected in k5_md4des.c.
+
+Sun Jul 19 12:00:00 1998  Marc Horowitz <marc@mit.edu>
+
+	* *.c: replace the crypto layer.
+
 Wed Apr 15 18:02:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LIB): Rename to k5crypto.

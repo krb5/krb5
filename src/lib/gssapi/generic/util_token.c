@@ -205,9 +205,12 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize)
    if ((toksize-=2) < 0)
       return(G_BAD_TOK_HEADER);
 
+   if (ret)
+       return(ret);
+
    if ((*buf++ != ((tok_type>>8)&0xff)) ||
-       (*buf++ != (tok_type&0xff)))
-      return(G_BAD_TOK_HEADER);
+       (*buf++ != (tok_type&0xff))) 
+      return(G_WRONG_TOKID);
 
    if (!ret) {
 	*buf_in = buf;

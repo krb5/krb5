@@ -1,7 +1,24 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* dumpv4, loadv4.c, kdb5_create.c, kdb5_stash.c, kdb5_util.c,
+	kadm5_create.c: convert to new crypto api
+
 Wed Sep 30 00:02:01 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* dump.c: Add support for changing the master key for a database
 		as part of creating a dump of the database.
+
+Thu Aug 20 16:50:00 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.c (add_random_key): Fixes to deal with absence of "-e"
+	flag.
+
+Wed Aug 19 14:52:40 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.c (add_random_key): New function to create a new
+ 	random key for a principal while retaining the previous kvno's
+ 	keys.  This is only temporary until a reasonable kadm5 interface
+	is made.
 
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 

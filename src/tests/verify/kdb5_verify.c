@@ -272,7 +272,7 @@ check_princ(context, str_princ)
       goto errout;
     }
 
-    if ((retval = krb5_dbekd_decrypt_key_data(context, &master_encblock, 
+    if ((retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock, 
 				       	     kdbe.key_data, &db_key, NULL))) {
 	com_err(progname, retval, "while decrypting key for '%s'", princ_name);
 	goto errout;
@@ -386,7 +386,8 @@ set_dbname_help(context, pname, dbname)
 	}
 	free(scratch.data);
     } else {
-	if ((retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
+	if ((retval = krb5_db_fetch_mkey(context, master_princ,
+					 master_keyblock.enctype,
 					manual_mkey, FALSE, (char *) NULL, 0,
 					&master_keyblock))) {
 	    com_err(pname, retval, "while reading master key");
@@ -398,8 +399,7 @@ set_dbname_help(context, pname, dbname)
 	return(1);
     }
     if ((retval = krb5_db_verify_master_key(context, master_princ, 
-					    &master_keyblock,
-					    &master_encblock))) {
+					    &master_keyblock))) {
 	com_err(pname, retval, "while verifying master key");
 	(void) krb5_db_fini(context);
 	return(1);

@@ -20,6 +20,32 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "gssapiP_krb5.h"
 
 OM_uint32
@@ -39,6 +65,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    krb5_deltat lifetime;
    krb5_principal ret_name;
    gss_OID_set mechs;
+   OM_uint32 ret;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
@@ -84,12 +111,26 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
       }
    }
 
-   if (mechanisms)
-      if (! g_copy_OID_set(cred->actual_mechs, &mechs)) {
-	 krb5_free_principal(context, ret_name);
-	 *minor_status = ENOMEM;
-	 return(GSS_S_FAILURE);
-      }
+   if (mechanisms) {
+       if (GSS_ERROR(ret = generic_gss_create_empty_oid_set(minor_status,
+							    &mechs)) ||
+	   (cred->prerfc_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5_old,
+							   &mechs))) ||
+	   (cred->rfc_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5,
+							   &mechs))) ||
+	   (cred->rfcv2_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5_v2,
+							   &mechs)))) {
+	   krb5_free_principal(context, ret_name);
+	   /* *minor_status set above */
+	   return(ret);
+       }
+   }
 
    if (name) {
       if (! kg_save_name((gss_name_t) ret_name)) {
@@ -139,7 +180,9 @@ krb5_gss_inquire_cred_by_mech(minor_status, cred_handle,
      * We only know how to handle our own creds.
      */
     if ((mech_type != GSS_C_NULL_OID) &&
-	!g_OID_equal(gss_mech_krb5, mech_type)) {
+	!g_OID_equal(gss_mech_krb5_old, mech_type) &&
+	!g_OID_equal(gss_mech_krb5, mech_type) &&
+	!g_OID_equal(gss_mech_krb5_v2, mech_type)) {
 	*minor_status = 0;
 	return(GSS_S_NO_CRED);
     }

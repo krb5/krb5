@@ -24,6 +24,32 @@
  * krb5_kdb_encrypt_key(), krb5_kdb_decrypt_key functions
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "k5-int.h"
 
 /*
@@ -33,10 +59,10 @@
  */
 
 krb5_error_code
-krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
+krb5_dbekd_encrypt_key_data(context, mkey, dbkey, keysalt, keyver, key_data)
     krb5_context 		  context;
-    krb5_encrypt_block 		* eblock;
-    const krb5_keyblock 	* keyblock;
+    const krb5_keyblock		* mkey;
+    const krb5_keyblock 	* dbkey;
     const krb5_keysalt		* keysalt;
     int				  keyver;
     krb5_key_data	        * key_data;
@@ -44,8 +70,10 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
     krb5_error_code 		  retval;
     krb5_keyblock 		  tmp;
     krb5_octet			* ptr;
-    krb5_int16			  len;
+    size_t			  len;
     int				  i;
+    krb5_data			  plain;
+    krb5_enc_data		  cipher;
 
     for (i = 0; i < key_data->key_data_ver; i++)
 	if (key_data->key_data_contents[i])
@@ -58,38 +86,31 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
      * The First element of the type/length/contents 
      * fields is the key type/length/contents
      */
-    key_data->key_data_type[0] = keyblock->enctype;
-    key_data->key_data_length[0] = krb5_encrypt_size(keyblock->length, 
-						     eblock->crypto_entry) + 2;
+    if ((retval = krb5_c_encrypt_length(context, mkey->enctype, dbkey->length,
+					&len)))
+	return(retval);
 
-    /* 
-     * because of checksum space requirements imposed by the encryption
-     * interface, we need to copy the input key into a larger area. 
-     */
-    tmp.contents = (krb5_octet *)malloc(key_data->key_data_length[0] - 2);
-    len = tmp.length = keyblock->length;
-    if (tmp.contents == NULL)
-	return ENOMEM;
+    if ((ptr = (krb5_octet *) malloc(2 + len)) == NULL)
+	return(ENOMEM);
 
-    memcpy((char *)tmp.contents, (const char *)keyblock->contents, tmp.length);
-    key_data->key_data_contents[0] = ptr = (krb5_octet *)malloc(
-					key_data->key_data_length[0]);
-    if (key_data->key_data_contents[0] == NULL) {
-	krb5_xfree(tmp.contents);
-	return ENOMEM;
-    }
+    key_data->key_data_type[0] = dbkey->enctype;
+    key_data->key_data_length[0] = 2 + len;
+    key_data->key_data_contents[0] = ptr;
 
-    krb5_kdb_encode_int16(len, ptr);
+    krb5_kdb_encode_int16(dbkey->length, ptr);
     ptr += 2;
-    if ((retval = krb5_encrypt(context, (krb5_pointer) tmp.contents,
-			       (krb5_pointer)(ptr), tmp.length,
-			       eblock, 0))) {
+
+    plain.length = dbkey->length;
+    plain.data = dbkey->contents;
+
+    cipher.ciphertext.length = len;
+    cipher.ciphertext.data = ptr;
+
+    if ((retval = krb5_c_encrypt(context, mkey, /* XXX */ 0, 0,
+				 &plain, &cipher))) {
 	krb5_xfree(key_data->key_data_contents[0]);
-    	krb5_xfree(tmp.contents);
 	return retval;
     }
-
-    krb5_xfree(tmp.contents);
 
     /* After key comes the salt in necessary */
     if (keysalt) {
@@ -108,5 +129,6 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
 	    }
 	}
     }
+
     return retval;
 }

@@ -48,18 +48,28 @@ krb5_decode_kdc_rep(context, enc_rep, key, dec_rep)
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
+    krb5_keyusage usage;
 
-    if (krb5_is_as_rep(enc_rep))
+    if (krb5_is_as_rep(enc_rep)) {
+	usage = KRB5_KEYUSAGE_AS_REP_ENCPART;
 	retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
-    else if (krb5_is_tgs_rep(enc_rep))
+    } else if (krb5_is_tgs_rep(enc_rep)) {
+	usage = KRB5_KEYUSAGE_TGS_REP_ENCPART_SESSKEY;
+	/* KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY would go here, except
+	   that this client code base doesn't ever put a subkey in the
+	   tgs_req authenticator, so the tgs_rep is never encrypted in
+	   one.  (Check send_tgs.c:krb5_send_tgs_basic(), near the top
+	   where authent.subkey is set to 0) */
 	retval = decode_krb5_tgs_rep(enc_rep, &local_dec_rep);
-    else
+    } else {
 	return KRB5KRB_AP_ERR_MSG_TYPE;
+    }
 
     if (retval)
 	return retval;
 
-    if (retval = krb5_kdc_rep_decrypt_proc(context, key, 0, local_dec_rep)) 
+    if (retval = krb5_kdc_rep_decrypt_proc(context, key, &usage,
+					   local_dec_rep)) 
 	krb5_free_kdc_rep(context, local_dec_rep);
     else
     	*dec_rep = local_dec_rep;

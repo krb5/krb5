@@ -160,12 +160,6 @@ krb5_get_credentials_val_renew_core(context, options, ccache,
     krb5_creds **tgts = 0;
     krb5_flags fields;
 
-    retval = krb5_get_credentials_core(context, options, ccache, 
-				       in_creds, out_creds, 
-				       &mcreds, &fields);
-
-    if (retval) return retval;
-
     switch(which) {
     case INT_GC_VALIDATE:
 	    retval = krb5_get_cred_from_kdc_validate(context, ccache, 
@@ -218,4 +212,105 @@ krb5_get_credentials_renew(context, options, ccache, in_creds, out_creds)
     return(krb5_get_credentials_val_renew_core(context, options, ccache, 
 					       in_creds, out_creds, 
 					       INT_GC_RENEW));
+}
+
+static krb5_error_code
+krb5_validate_or_renew_creds(context, creds, client, ccache, in_tkt_service,
+			     validate)
+     krb5_context context;
+     krb5_creds *creds;
+     krb5_principal client;
+     krb5_ccache ccache;
+     char *in_tkt_service;
+     int validate;
+{
+    krb5_error_code ret;
+    krb5_creds in_creds; /* only client and server need to be filled in */
+    krb5_creds *out_creds;
+    krb5_creds **tgts;
+
+    memset((char *)&in_creds, 0, sizeof(krb5_creds));
+
+    in_creds.server = NULL;
+    tgts = NULL;
+
+    in_creds.client = client;
+
+    if (in_tkt_service) {
+	/* this is ugly, because so are the data structures involved.  I'm
+	   in the library, so I'm going to manipulate the data structures
+	   directly, otherwise, it will be worse. */
+
+	if (ret = krb5_parse_name(context, in_tkt_service, &in_creds.server))
+	    goto cleanup;
+
+	/* stuff the client realm into the server principal.
+	   realloc if necessary */
+	if (in_creds.server->realm.length < in_creds.client->realm.length)
+	    if ((in_creds.server->realm.data =
+		 (char *) realloc(in_creds.server->realm.data,
+				  in_creds.client->realm.length)) == NULL) {
+		ret = ENOMEM;
+		goto cleanup;
+	    }
+
+	in_creds.server->realm.length = in_creds.client->realm.length;
+	memcpy(in_creds.server->realm.data, in_creds.client->realm.data,
+	       in_creds.client->realm.length);
+    } else {
+	if (ret = krb5_build_principal_ext(context, &in_creds.server,
+					   in_creds.client->realm.length,
+					   in_creds.client->realm.data,
+					   KRB5_TGS_NAME_SIZE,
+					   KRB5_TGS_NAME,
+					   in_creds.client->realm.length,
+					   in_creds.client->realm.data,
+					   0))
+	    goto cleanup;
+    }
+
+    if (validate)
+	ret = krb5_get_cred_from_kdc_validate(context, ccache, 
+					      &in_creds, &out_creds, &tgts);
+    else
+	ret = krb5_get_cred_from_kdc_renew(context, ccache, 
+					   &in_creds, &out_creds, &tgts);
+   
+    /* ick.  copy the struct contents, free the container */
+
+    *creds = *out_creds;
+    krb5_xfree(out_creds);
+
+cleanup:
+
+    if (in_creds.server)
+	krb5_free_principal(context, in_creds.server);
+    if (tgts)
+	krb5_free_tgt_creds(context, tgts);
+
+    return(ret);
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_validated_creds(context, creds, client, ccache, in_tkt_service)
+     krb5_context context;
+     krb5_creds *creds;
+     krb5_principal client;
+     krb5_ccache ccache;
+     char *in_tkt_service;
+{
+    return(krb5_validate_or_renew_creds(context, creds, client, ccache,
+					in_tkt_service, 1));
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_renewed_creds(context, creds, client, ccache, in_tkt_service)
+     krb5_context context;
+     krb5_creds *creds;
+     krb5_principal client;
+     krb5_ccache ccache;
+     char *in_tkt_service;
+{
+    return(krb5_validate_or_renew_creds(context, creds, client, ccache,
+					in_tkt_service, 0));
 }

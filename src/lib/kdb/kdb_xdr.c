@@ -735,40 +735,27 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 	}
     }
 
-    /*
-     * ENCTYPE_DES_CBC_CRC, ENCTYPE_DES_CBC_MD4, ENCTYPE_DES_CBC_MD5,
-     * ENCTYPE_DES_CBC_RAW all use the same key.
-     */
-    switch (ktype) {
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_DES_CBC_RAW:
-	ktype = ENCTYPE_DES_CBC_CRC;
-	break;
-    default:
-	break;
-    }
-
     maxkvno = -1;
     datap = (krb5_key_data *) NULL;
     for (i = *start; i < dbentp->n_key_data; i++) {
-        krb5_enctype db_ktype;
-        krb5_int32   db_stype;
+        krb5_boolean    similar;
+	krb5_error_code ret;
+        krb5_int32      db_stype;
 
-	switch (db_ktype = dbentp->key_data[i].key_data_type[0]) {
-    	case ENCTYPE_DES_CBC_MD4:
-    	case ENCTYPE_DES_CBC_MD5:
-    	case ENCTYPE_DES_CBC_RAW:
-	    db_ktype = ENCTYPE_DES_CBC_CRC;
-	default:
-	    break;
-	}
 	if (dbentp->key_data[i].key_data_ver > 1) {
 	    db_stype = dbentp->key_data[i].key_data_type[1];
 	} else {
 	    db_stype = KRB5_KDB_SALTTYPE_NORMAL;
 	}
-	if (((db_ktype == (krb5_enctype) ktype) || (ktype < 0)) && 
+	
+	if (ktype >= 0) {
+	    if ((ret = krb5_c_enctype_compare(kcontext, (krb5_enctype) ktype,
+					      dbentp->key_data[i].key_data_type[0],
+					      &similar)))
+		return(ret);
+	}
+
+	if (((ktype < 0) || similar) &&
 	    ((db_stype == stype) || (stype < 0))) {
 	    if (kvno >= 0) {
 		if (kvno == dbentp->key_data[i].key_data_kvno) {

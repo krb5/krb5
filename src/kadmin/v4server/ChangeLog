@@ -1,3 +1,18 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* admin_server.c, kadm_funcs.c, kadm_ser_wrap.c, kadm_server.h:
+	convert to new crypto api
+
+Fri Jul 31 18:17:16 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_ser_wrap.c (kadm_ser_init): Remove references to
+ 	master_encblock, as it's no longer needed in the new crypto API,
+ 	adjusting kdb calls accordingly.  Also punt calls to use_enctype,
+ 	process_key, etc.
+
+	* admin_server.c (clear_secrets): Remove references to
+	master_encblock, due to new crypto API.
+
 Mon Jul 20 11:20:32 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* acl_files.c: Include stdlib.h if present.

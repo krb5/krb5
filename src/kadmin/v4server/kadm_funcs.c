@@ -591,6 +591,8 @@ des_cblock newpw;
     sblock.data.length = 0;
     sblock.data.data = (char *) NULL;
     retval = krb5_dbekd_encrypt_key_data(kadm_context,
+					 /* XXX but I'm ifdef'd out here,
+					    so I can't really test this. */
 					 &server_parm.master_encblock,
 					 &localpw,
 					 &sblock,
