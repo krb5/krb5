@@ -345,7 +345,9 @@ GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
 PR  = util/profile/
 
-ETOUT =	$(INC)asn1_err.h $(ET)asn1_err.c \
+ETOUT =	\
+	krb524\krb524_err.h krb524\krb524_err.c \
+	$(INC)asn1_err.h $(ET)asn1_err.c \
 	$(INC)kdb5_err.h $(ET)kdb5_err.c \
 	$(INC)krb5_err.h $(ET)krb5_err.c \
 	$(INC)kv5m_err.h $(ET)kv5m_err.c \
@@ -442,6 +444,11 @@ kerbsrc.mac.tar: awk-windows-mac macfile.list mac-bin-dirs Macfile
 	rm -f $(CLEANUP)
 	rm -rf bin
 	rm -f include/autoconf.h Makefile macsrc* macfile.maclist
+
+krb524/krb524_err.h: $(AH) krb524/krb524_err.et
+	$(AWK) -f $(AH) outfile=$@ krb524/krb524_err.et
+krb524/krb524_err.c: $(AC) krb524/krb524_err.et
+	$(AWK) -f $(AC) outfile=$@ krb524/krb524_err.et
 
 $(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)asn1_err.et

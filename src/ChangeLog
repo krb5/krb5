@@ -1,5 +1,9 @@
 2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
 
+	* Makefile.in: Compile .et file for krb524.
+
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
 	* Makefile.in: Remove references to now defunct directories
 	lib/krb5/ccache/{file,memory,stdio}.
 
