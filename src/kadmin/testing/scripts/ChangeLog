@@ -1,3 +1,8 @@
+Thu Sep 26 17:48:32 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* env-setup.sh, init_db, start_servers_local: use K5ROOT instead
+ 	of /krb5
+
 Thu Sep 26 11:45:56 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* qualname.pl.in: Renamed old qualname to here as perl path needs

@@ -81,13 +81,13 @@ $INITDB "$keysalts" || exit 1
 # Post-process the config files based on our arguments
 if [ "$keysalts" != "" ]; then
 	sedcmd="s/\([ 	]*supported_enctypes =\).*/\1 $keysalts/"
-	sed -e "$sedcmd" < /krb5/kdc.conf > /krb5/kdc.conf.new
-	mv /krb5/kdc.conf.new /krb5/kdc.conf
+	sed -e "$sedcmd" < $K5ROOT/kdc.conf > $K5ROOT/kdc.conf.new
+	mv $K5ROOT/kdc.conf.new $K5ROOT/kdc.conf
 fi
 if [ "$kdcport" != "" ] ; then
 	sedcmd="s/\(kdc_ports = .*\)[ 	]*/\1, $kdcport/"
-	sed -e "$sedcmd" < /krb5/kdc.conf > /krb5/kdc.conf.new
-	mv /krb5/kdc.conf.new /krb5/kdc.conf
+	sed -e "$sedcmd" < $K5ROOT/kdc.conf > $K5ROOT/kdc.conf.new
+	mv $K5ROOT/kdc.conf.new $K5ROOT/kdc.conf
 fi
 
 # allow admin to krlogin as root (for cleanup)

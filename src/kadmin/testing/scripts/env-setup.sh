@@ -16,6 +16,11 @@ if [ "$TOP" = "" ]; then
 	exit 1
 fi
 
+if [ "$K5ROOT" = "" ]; then
+	# XXX this should default to --prefix, no?
+	K5ROOT="/krb5"; export K5ROOT
+fi
+
 TESTDIR=$TOP/testing; export TESTDIR
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl
@@ -43,9 +48,9 @@ export STOP_SERVERS
 STOP_SERVERS_LOCAL=$TESTDIR/scripts/stop_servers_local
 export STOP_SERVERS_LOCAL
 
-KRB5_CONFIG=/krb5/krb5.conf; export KRB5_CONFIG
-KRB5_KDC_PROFILE=/krb5/kdc.conf; export KRB5_KDC_PROFILE
-KRB5_KTNAME=/krb5/ovsec_adm.srvtab; export KRB5_KTNAME
+KRB5_CONFIG=$K5ROOT/krb5.conf; export KRB5_CONFIG
+KRB5_KDC_PROFILE=$K5ROOT/kdc.conf; export KRB5_KDC_PROFILE
+KRB5_KTNAME=$K5ROOT/ovsec_adm.srvtab; export KRB5_KTNAME
 
 if [ "$TEST_SERVER" != "" ]; then
 	MAKE_KEYTAB="$MAKE_KEYTAB -server $TEST_SERVER"

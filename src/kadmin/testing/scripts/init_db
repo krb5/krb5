@@ -11,7 +11,7 @@ else
 	REDIRECT='>/dev/null'
 fi
 
-# Requires that /krb5, /etc/krb.conf, and .k5.$REALM be world-writeable.
+# Requires that $K5ROOT, /etc/krb.conf, and .k5.$REALM be world-writeable.
 
 if [ "$TOP" = "" ]; then
 	echo "init_db: Environment variable \$TOP must point to top of build tree" 1>&2
@@ -32,14 +32,14 @@ DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
 PATH=$ADMIN:$BIN:$ETC:$SBIN:$PATH; export PATH
 
-rm -rf /krb5/*
-if [ -d /krb5 ]; then
+rm -rf $K5ROOT/*
+if [ -d $K5ROOT ]; then
 	true
 else
-	mkdir /krb5
+	mkdir $K5ROOT
 fi
 
-# touch /krb5/syslog
+# touch $K5ROOT/syslog
 # for pid in `$PS_ALL | awk '/syslogd/ && !/awk/  {print $2}'` ; do
 # 	case "$pid" in
 # 		xxx) ;;
@@ -50,16 +50,23 @@ fi
 # 	esac
 # done
 
-sed -e "s/__REALM__/$REALM/" < $TESTDIR/proto/krb5.conf.proto > /krb5/krb5.conf
-sed -e "s/__REALM__/$REALM/" < $TESTDIR/proto/kdc.conf.proto > /krb5/kdc.conf
+sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
+	< $TESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
+sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
+	< $TESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf
 
 kdb5_util -r $REALM create -P mrroot -s $REDIRECT
 
-cp $TESTDIR/proto/ovsec_adm.dict /krb5/ovsec_adm.dict
+cp $TESTDIR/proto/ovsec_adm.dict $K5ROOT/ovsec_adm.dict
 
 eval $SRVTCL <<'EOF' $REDIRECT
 source $env(TCLUTIL)
 set r $env(REALM)
+if {[info exists env(USER)]} {
+    set whoami $env(USER)
+} else {
+    set whoami [exec whoami]
+}
 
 set cmds {
     {ovsec_kadm_init $env(SRVTCL) mrroot null $r $OVSEC_KADM_STRUCT_VERSION \
@@ -132,6 +139,10 @@ set cmds {
 	    [simple_principal changepw/kerberos] \
             {OVSEC_KADM_PRINCIPAL} {XXX THIS IS WRONG}}
 
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal $whoami] \
+	    {OVSEC_KADM_PRINCIPAL} $whoami}
+
     {ovsec_kadm_destroy $server_handle}
 }
 
@@ -150,7 +161,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-cat > /krb5/ovsec_adm.acl <<EOF
+cat > $K5ROOT/ovsec_adm.acl <<EOF
 admin@$REALM			admcil
 admin/get@$REALM		il
 admin/modify@$REALM		mc
@@ -169,11 +180,11 @@ changepw/kerberos@$REALM	cil
 
 EOF
 
-eval $LOCAL_MAKE_KEYTAB -princ kadmin/admin -princ kadmin/changepw -princ ovsec_adm/admin -princ ovsec_adm/changepw /krb5/ovsec_adm.srvtab $REDIRECT
+eval $LOCAL_MAKE_KEYTAB -princ kadmin/admin -princ kadmin/changepw -princ ovsec_adm/admin -princ ovsec_adm/changepw $K5ROOT/ovsec_adm.srvtab $REDIRECT
 
-# Create /krb5/setup.csh to make it easy to run other programs against
+# Create $K5ROOT/setup.csh to make it easy to run other programs against
 # the test db
-cat > /krb5/setup.csh <<EOF
+cat > $K5ROOT/setup.csh <<EOF
 setenv KRB5_CONFIG $KRB5_CONFIG
 setenv KRB5_KDC_PROFILE $KRB5_KDC_PROFILE
 setenv KRB5_KTNAME $KRB5_KTNAME
