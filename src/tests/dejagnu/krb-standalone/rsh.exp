@@ -220,7 +220,6 @@ proc rsh_test { } {
 
     stop_rsh_daemon
 
-
     # Check stderr
     start_rsh_daemon -k
     set testname "rsh to stderr"
@@ -242,6 +241,8 @@ proc rsh_test { } {
     }
 
     pass $testname
+
+    stop_rsh_daemon
 
     start_rsh_daemon -e
     set testname "encrypted rsh to stderr"

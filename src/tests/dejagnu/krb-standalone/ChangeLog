@@ -1,3 +1,8 @@
+2001-10-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* rsh.exp (rsh_test): Add stop_rsh_daemon before invoking
+	start_rsh_daemon again to prevent running out of ptys.
+
 2001-10-24  Mitchell Berger  <mitchb@mit.edu>
 
 	* kadmin.exp: Corrected a couple of unimportant typos.  Added procedures
