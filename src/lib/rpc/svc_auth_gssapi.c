@@ -271,7 +271,6 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 			    &call_arg)) {
 	       PRINTF(("svcauth_gssapi: cannot decode args\n"));
 	       LOG_MISCERR("protocol error in procedure arguments");
-	       xdr_free(xdr_authgssapi_init_arg, &call_arg);
 	       ret = AUTH_BADCRED;
 	       goto error;
 	  }

@@ -283,6 +283,15 @@ call_again:
 			return (ct->ct_error.re_status);
 		/* now decode and validate the response header */
 		if (! xdr_replymsg(xdrs, &reply_msg)) {
+			/*
+			 * Free some stuff allocated by xdr_replymsg()
+			 * to avoid leaks, since it may allocate
+			 * memory from partially successful decodes.
+			 */
+			int op = xdrs->x_op;
+			xdrs->x_op = XDR_FREE;
+			xdr_replymsg(xdrs, &reply_msg);
+			xdrs->x_op = op;
 			if (ct->ct_error.re_status == RPC_SUCCESS)
 				continue;
 			return (ct->ct_error.re_status);

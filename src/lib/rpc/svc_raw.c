@@ -141,7 +141,11 @@ svcraw_getargs(xprt, xdr_args, args_ptr)
 
 	if (srp == 0)
 		return (FALSE);
-	return ((*xdr_args)(&srp->xdr_stream, args_ptr));
+	if (! (*xdr_args)(&srp->xdr_stream, args_ptr)) {
+		(void)svcraw_freeargs(xprt, xdr_args, args_ptr);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 static bool_t

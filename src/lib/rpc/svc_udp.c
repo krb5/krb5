@@ -272,8 +272,12 @@ svcudp_getargs(xprt, xdr_args, args_ptr)
 	xdrproc_t xdr_args;
 	caddr_t args_ptr;
 {
-     return (SVCAUTH_UNWRAP(xprt->xp_auth, &(su_data(xprt)->su_xdrs),
-			 xdr_args, args_ptr));
+	if (! SVCAUTH_UNWRAP(xprt->xp_auth, &(su_data(xprt)->su_xdrs),
+			     xdr_args, args_ptr)) {
+		(void)svcudp_freeargs(xprt, xdr_args, args_ptr);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 static bool_t
