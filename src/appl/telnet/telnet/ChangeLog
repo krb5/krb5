@@ -1,3 +1,9 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* commands.c: Cast argument to isspace() to int.
+
+	* telnet.c (mklist): Cast argument to islower()/toupper() to int.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c: Include unistd.h (if present) for getopt() prototype.

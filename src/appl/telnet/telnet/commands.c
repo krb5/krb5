@@ -158,7 +158,7 @@ makeargv()
     }
     while ((c = *cp)) {
 	register int inquote = 0;
-	while (isspace(c))
+	while (isspace((int) c))
 	    c = *++cp;
 	if (c == '\0')
 	    break;
@@ -180,7 +180,7 @@ makeargv()
 		} else if (c == '\'') {
 		    inquote = '\'';
 		    continue;
-		} else if (isspace(c))
+		} else if (isspace((int) c))
 		    break;
 	    }
 	    *cp2++ = c;
@@ -2906,11 +2906,11 @@ cmdrc(m1, m2)
 	if (line[0] == '#')
 	    continue;
 	if (gotmachine) {
-	    if (!isspace(line[0]))
+	    if (!isspace((int) line[0]))
 		gotmachine = 0;
 	}
 	if (gotmachine == 0) {
-	    if (isspace(line[0]))
+	    if (isspace((int) line[0]))
 		continue;
 	    if (strncasecmp(line, m1, l1) == 0)
 		strncpy(line, &line[l1], sizeof(line) - l1);
