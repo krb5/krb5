@@ -1,3 +1,9 @@
+2002-08-16  Tom Yu  <tlyu@mit.edu>
+
+	* string2key.c: Work around possible bug with AFS salts;
+	[krb5-clients/1146] from <Wolfgang.Friebel@cern.ch>.
+	[port from trunk]
+
 2002-03-14 Alexandra Ellwood <lxs@mit.edu>
     * afsstring2key.c: made static data const to improve load time 
     on Mach-O
