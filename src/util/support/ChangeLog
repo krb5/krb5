@@ -10,3 +10,5 @@
 	* threads.c (k5_key_register, destructors, k5_setspecific)
 	[!ENABLE_THREADS]: Update to fit declarations.
 
+	* Makefile.in (SHLIB_EXPLIBS): Include $(LIBS).
+	(SHLIB_RDIRS): Use $(KRB5_LIBDIR), for lack of anything better.
