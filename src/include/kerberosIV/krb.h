@@ -441,6 +441,8 @@ typedef int (KRB5_CALLCONV *decrypt_tkt_type)
 		    char FAR *, key_proc_type, KTEXT FAR *));
 #define DECRYPT_TKT_TYPE_DEFINED
 
+extern struct _krb5_context FAR * krb5__krb4_context;
+
 /*
  * Function Prototypes for Kerberos V4.
  */

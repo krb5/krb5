@@ -1,3 +1,9 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb.h: Add a declaration for the global variable
+		krb5__krb4_context, which is used by the krb4 routines
+		that need to call krb5 library routines.
+
 Thu Sep 17 18:23:26 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krb_db.h: ifdef out the declarations for kerb_get_* and
