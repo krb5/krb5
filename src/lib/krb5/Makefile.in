@@ -2,8 +2,7 @@ thisconfigdir=.
 myfulldir=lib/krb5
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-LOCAL_SUBDIRS= error_tables asn.1 ccache keytab keytab/file keytab/srvtab krb \
-	os rcache posix
+LOCAL_SUBDIRS= error_tables asn.1 ccache keytab krb os rcache posix
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)krb5.lib
@@ -13,21 +12,6 @@ LOCAL_SUBDIRS= error_tables asn.1 ccache keytab keytab/file keytab/srvtab krb \
 TST=if test -n "`cat DONE`" ; then
 
 MAC_SUBDIRS = error_tables asn.1 ccache keytab krb rcache os posix 
-
-LIB_SUBDIRS= error_tables asn.1 ccache \
-	keytab keytab/file keytab/srvtab krb rcache os posix \
-        $(BUILDTOP)/util/profile
-LIBUPDATE= $(BUILDTOP)/util/libupdate
-LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE \
-		keytab/DONE \
-		keytab/file/DONE keytab/srvtab/DONE krb/DONE rcache/DONE \
-		os/DONE posix/DONE $(BUILDTOP)/util/profile/DONE
-
-#
-#SHLIB_LIBS=-lcrypto -lcom_err @SHLIB_GEN@
-#SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
-#	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
-#SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 STLIBOBJS=krb5_libinit.o
 
