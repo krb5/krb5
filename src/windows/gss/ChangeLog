@@ -1,3 +1,7 @@
+2002-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SYSLIBS): Use ws2_32.lib instead of wsock32.lib.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* gss.c, gss.h: Don't declare functions FAR any more.

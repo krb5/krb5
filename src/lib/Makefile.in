@@ -51,7 +51,7 @@ K4DEF = krb4_32.def
 KRB5RC = krb5.rc
 VERSIONRC = $(BUILDTOP)\windows\version.rc
 
-WINLIBS = kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib \
+WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib \
 	version.lib advapi32.lib gdi32.lib
 WINDLLFLAGS = $(DLL_LINKOPTS) -base:0x1c000000
 

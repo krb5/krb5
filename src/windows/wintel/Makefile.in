@@ -27,7 +27,7 @@ RCFLAGS	= $(RFLAGS) -D_WIN32 -DTELNET_APP
 ##### Linker
 LINK	= link
 LIBS	= $(KLIB) $(CLIB) $(WLIB)
-SYSLIBS	= kernel32.lib wsock32.lib user32.lib gdi32.lib comdlg32.lib
+SYSLIBS	= kernel32.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib
 LFLAGS	= /nologo $(LOPTS)
 
 all:: Makefile $(OUTPRE)telnet.exe

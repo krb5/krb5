@@ -1,3 +1,7 @@
+2002-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (WINLIBS): Use ws2_32.lib instead of wsock32.lib.
+
 2001-11-16  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5_32.def: Export krb5_set_default_tgs_enctypes

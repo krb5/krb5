@@ -1,3 +1,7 @@
+2002-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (WINLIBS): Use ws2_32.lib instead of wsock32.lib.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Windows fix for updated win-pre.in.

@@ -1,3 +1,8 @@
+2002-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(OUTPRE)ftp.exe): Use ws2_32.lib instead of
+	wsock32.lib.
+
 2002-04-11  Sam Hartman  <hartmans@mit.edu>
 
 	* radix.c : Initialize c and D to suppress warning; code was already correct

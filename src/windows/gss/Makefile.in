@@ -17,7 +17,7 @@ RCFLAGS	= $(RFLAGS) -D_WIN32 -DGSS_APP
 ##### Linker
 LINK	= link
 LIBS	= $(GLIB) $(CLIB) $(WLIB)
-SYSLIBS	= kernel32.lib wsock32.lib user32.lib gdi32.lib comdlg32.lib
+SYSLIBS	= kernel32.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib
 LFLAGS	= /nologo $(LOPTS)
 
 all:: Makefile $(OUTPRE)gss.exe
