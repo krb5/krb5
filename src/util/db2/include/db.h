@@ -166,8 +166,10 @@ typedef struct {
 #endif
 
 #define dbopen	kdb2_dbopen
+#define bt_rseq		kdb2_bt_rseq /* XXX kludge */
 __BEGIN_DECLS
 DB *dbopen __P((const char *, int, int, DBTYPE, const void *));
+int	 bt_rseq(const DB*, DBT *, DBT *, void **, u_int); /* XXX kludge */
 __END_DECLS
 
 #endif /* !_DB_H_ */
