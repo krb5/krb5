@@ -12,6 +12,8 @@ des-cbc-crc         1            8              4              8
 des-cbc-md4         2            8              0              8
 des-cbc-md5         3            8              0              8
 <reserved>          4
+des3-cbc-md5        5            8              0              8     
+<reserved>          0x8003
 
 -------------------------------+-------------------+-------------
 Checksum type                  |sumtype value      |checksum size
@@ -24,6 +26,7 @@ des-mac-k                       5                   8
 rsa-md4-des-k                   6                   16
 rsa-md5                         7                   16
 rsa-md5-des                     8                   24
+rsa-md5-des3                    9                   24
 
 -------------------------------+-----------------
 padata type                    |padata-type value
@@ -37,6 +40,8 @@ PA-SANDIA-SECUREID              6
 PA-SESAME                       7
 PA-OSF-DCE                      8
 PA-CYBERSAFE-SECUREID           9
+PA-AFS3-SALT			10
+PA-ETYPE-INFO                   11
 
 -------------------------------+-------------
 authorization data type        |ad-type value
