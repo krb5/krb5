@@ -850,7 +850,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 #endif
 
 	for (cp = *iter, next = 0; *cp; cp = next) {
-	    while (isspace (*cp) || *cp == ',')
+	    while (isspace ((int) *cp) || *cp == ',')
 		cp++;
 	    if (*cp == 0)
 		break;
@@ -859,7 +859,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 	    fprintf (stderr, "    addr found in '%s'\n", cp);
 #endif
 	    this = cp;
-	    while (*cp != 0 && !isspace(*cp) && *cp != ',')
+	    while (*cp != 0 && !isspace((int) *cp) && *cp != ',')
 		cp++;
 	    if (*cp != 0) {
 		next = cp + 1;
