@@ -7,14 +7,17 @@ test "init 100"
 proc test100 {} {
     global test
 
+    # We used to check for ENOENT, but kadm5_get_config_params no
+    # longer fails if it cannot find the file---it just provides
+    # defaults instead.... XXX will fail on srv test!
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_PROFILE} /does-not-exist] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
-    } "ENOENT"
+    } "BADFORMAT"
 }
-test100
+if {$RPC} test100
 
 test "init 101"
 proc test101 {} {
