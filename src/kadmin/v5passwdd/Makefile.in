@@ -1,18 +1,42 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
-SRCS = main.c srv_net.c proto_serv.c adm_rw.c
-OBJS = main.o srv_net.o proto_serv.o adm_rw.o
 
-PROG = v5passwdd
+COMMON_SRCS = adm_rw.c
+COMMON_OBJS = adm_rw.o
+SERV_SRCS = main.c srv_net.c proto_serv.c 
+SERV_OBJS = main.o srv_net.o proto_serv.o 
+CLI_SRCS = kpasswd.c adm_conn.c
+CLI_OBJS = kpasswd.o adm_conn.o
 
-all:: $(PROG)
+SRCS=$(SERV_SRCS) $(COMMON_SRCS) $(CLI_SRCS)
+OBJS=$(SERV_OBJS) $(COMMON_OBJS) $(CLI_OBJS)
 
-$(PROG): $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+SERV = v5passwdd
+CLI = v5passwd
+
+all:: $(SERV) $(CLI)
+
+$(SERV): $(SERV_OBJS) $(COMMON_OBJS) $(SRVDEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $(SERV) $(SERV_OBJS) \
+		$(COMMON_OBJS) $(SRVLIBS)
+
+
+$(CLI): $(CLI_OBJS) $(COMMON_OBJS) $(CLNTDEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $(CLI) $(CLI_OBJS) \
+		$(COMMON_OBJS) $(CLNTLIBS)
 
 install::
-	$(INSTALL_PROGRAM) $(C)$(PROG) ${DESTDIR}$(SERVER_BINDIR)$(S)$(PROG)
+	for f in v5passwd; do \
+	  $(INSTALL_PROGRAM) $(C)$$f \
+		$(DESTDIR)$(CLIENT_BINDIR)$(S)`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)$(S)$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)$(S)`echo $$f|sed '$(transform)'`.1; \
+	done
+	for f in v5passwdd; do \
+	  $(INSTALL_PROGRAM) $(C)$$f \
+		$(DESTDIR)$(SERVER_BINDIR)$(S)`echo $$f|sed '$(transform)'`; \
+	done
 
 clean::
-	$(RM) $(PROG)
+	$(RM) $(SERV) $(CLI)
 

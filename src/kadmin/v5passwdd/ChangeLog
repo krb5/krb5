@@ -1,3 +1,10 @@
+Sun Aug 18 18:29:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Compile v5passwd - the old passwd changing client. 
+
+	* adm_conn.c, kpasswd.c, v5passwd.M: Added the pieces required to
+		build a v5b6 simple password changing client. 
+
 Thu Jul 25 17:01:32 1996  Marc Horowitz  <marc@mit.edu>
 
 	* Makefile.in, configure.in, adm_rw.c, kadm5_defs.h, main.c,
