@@ -447,6 +447,7 @@ expired.
 \item[OVSEC_KADM_POLICY_REF] Policy reference count is not zero.
 \item[OVSEC_KADM_INIT] Connection to server already initialized.
 \item[OVSEC_KADM_BAD_PASSWORD] Incorrect password.
+\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change protected principal."
 \end{description}
 
 \subsection{Authentication and Authorization}
@@ -860,6 +861,8 @@ set in the principal's aux_attributes field.
 \item If caller does not have modify privilege, (now - last_pwd_change) $<$
 pw_min_life, and the KRB5_KDB_REQUIRES_PWCHANGE bit is not set in the
 principal's attributes, return OVSEC_KADM_PASS_TOOSOON.
+\item If the principal your are trying to change is ovsec_adm/history
+return OVSEC_KADM_PROTECT_PRINCIPAL.
 \item If the password does not meet the quality
 standards, return the appropriate OVSEC_KADM_PASS_Q_* error code.
 \item Convert password to key.  The key is generated with
@@ -887,8 +890,8 @@ RETURN CODES:
 standards. 
 \item[OVSEC_KADM_PASS_REUSE] Requested password is in user's
 password history. 
-\item[OVSEC_KADM_PASS_TOOSOON] Current password has not reached minimum
-life. 
+\item[OVSEC_KADM_PASS_TOOSOON] Current password has not reached minimum life
+\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change the password of a special principal
 \end{description}
 
 
@@ -1026,6 +1029,8 @@ if verification fails.
 \item If caller does not have modify privilege, (now - last_pwd_change) $<$
 pw_min_life, and the KRB5_KDB_REQUIRES_PWCHANGE bit is not set in the
 principal's attributes, return OVSEC_KADM_PASS_TOOSOON.
+\item If the principal you are trying to change is ovsec_adm/history return
+OVSEC_KADM_PROTECT_PRINCIPAL.
 \item Store old key in history.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
@@ -1043,6 +1048,8 @@ RETURN CODES:
 \item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
 \item[OVSEC_KADM_PASS_TOOSOON] The minimum lifetime for the current
 key has not expired.
+\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change the password of a special
+principal
 \end{description}
 
 This function can also be used as part of a sequence to create a new
