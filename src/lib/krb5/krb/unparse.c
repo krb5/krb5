@@ -69,12 +69,17 @@ int	*size;
 	register char *cp, *q;
 	register int i,j;
 	int	length, nelem;
-	register int totalsize = krb5_princ_realm(principal)->length + 1;
+	register int totalsize = 0;
 
-	for (cp = krb5_princ_realm(principal)->data; *cp; cp++)
+	cp = krb5_princ_realm(principal)->data;
+	length = krb5_princ_realm(principal)->length;
+	totalsize += length;
+	for (j = 0; j < length; j++,cp++)
 		if (*cp == REALM_SEP  || *cp == COMPONENT_SEP ||
-		    *cp == '\\' || *cp == '\t')
+		    *cp == '\0' || *cp == '\\' || *cp == '\t' ||
+		    *cp == '\n' || *cp == '\b')
 			totalsize++;
+	totalsize++;		/* This is for the separator */
 
 	nelem = krb5_princ_size(principal);
 	for (i = 0; i < nelem; i++) {
@@ -83,14 +88,18 @@ int	*size;
 		totalsize += length;
 		for (j=0; j < length; j++,cp++)
 			if (*cp == REALM_SEP || *cp == COMPONENT_SEP ||
-			    *cp == '\0' || *cp == '\\' || *cp == '\t')
+			    *cp == '\0' || *cp == '\\' || *cp == '\t' ||
+			    *cp == '\n' || *cp == '\b')
 				totalsize++;
 		totalsize++;	/* This is for the separator */
 	}
 
 	/*
-	 *  we need only n-1 seps for n components, but we need an
-	 * extra byte for the NULL at the end
+	 * Allocate space for the ascii string; if space has been
+	 * provided, use it, realloc'ing it if necessary.
+	 * 
+	 * We need only n-1 seperators for n components, but we need
+	 * an extra byte for the NULL at the end.
 	 */
 	if (*name) {
 		if (*size < (totalsize)) {
@@ -98,7 +107,7 @@ int	*size;
 			*name = realloc(*name, totalsize);
 		}
 	} else {
-		*name = malloc(totalsize);	/* room for null */
+		*name = malloc(totalsize);
 		if (size)
 			*size = totalsize;
 	}
@@ -112,21 +121,32 @@ int	*size;
 		cp = krb5_princ_component(principal, i)->data;
 		length = krb5_princ_component(principal, i)->length;
 		for (j=0; j < length; j++,cp++) {
-			switch (*cp) {
-			case COMPONENT_SEP:
-			case REALM_SEP:
-			case '\t':
-			case '\\':
-				*q++ = '\\';
-				*q++ = *cp;
-				break;
-			case '\0':
-				*q++ = '\\';
-				*q++ = '0';
-				break;
-			default:
-				*q++ = *cp;
-			}
+		    switch (*cp) {
+		    case COMPONENT_SEP:
+		    case REALM_SEP:
+		    case '\0':
+			*q++ = '\\';
+			*q++ = '0';
+			break;
+		    case '\\':
+			*q++ = '\\';
+			*q++ = '\\';
+			break;
+		    case '\t':
+			*q++ = '\\';
+			*q++ = 't';
+			break;
+		    case '\n':
+			*q++ = '\\';
+			*q++ = 'n';
+			break;
+		    case '\b':
+			*q++ = '\\';
+			*q++ = 'b';
+			break;
+		    default:
+			*q++ = *cp;
+		    }
 		}
 		*q++ = COMPONENT_SEP;
 	}
