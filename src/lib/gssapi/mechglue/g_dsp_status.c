@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_display_status (minor_status,
                     status_value,
                     status_type,

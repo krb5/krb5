@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32
+OM_uint32 INTERFACE 
 gss_delete_sec_context (minor_status,
                         context_handle,
                         output_token)

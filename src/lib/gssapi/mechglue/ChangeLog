@@ -1,5 +1,45 @@
 Sat Feb 24 16:19:30 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* g_acquire_cred.c (gss_add_cred): New GSSAPI V2 function.
+
+	* g_inquire_cred.c (gss_inquire_cred_by_mech): New GSSAPI V2
+		function. 
+
+	* g_init_sec_context.c (gss_init_sec_context): Make sure we
+		convert the union credential into a mechanism specific
+		credential.
+
+	* g_glue.c (__gss_get_mechanism_cred): New function for returning
+		the mechanism-specific credential from a union credential.
+
+	* g_inquire_names.c (gss_inquire_names_for_mech): 
+	* g_oid_ops.c (gss_str_to_oid, gss_oid_to_str, 
+		gss_test_oid_set_member, gss_add_oid_set_member,
+		gss_create_empty_oid_set, gss_release_oid): 
+	* g_imp_sec_context.c (gss_import_sec_context): 
+	* g_exp_sec_context.c (gss_export_sec_context):
+	* g_inquire_cred.c (gss_inquire_cred): 
+	* g_rel_oid_set.c (gss_release_oid_set): 
+	* g_rel_buffer.c (gss_release_buffer): 
+	* g_rel_name.c (gss_release_name): 
+	* g_imp_name.c (gss_import_name): 
+	* g_dsp_name.c (gss_display_name): 
+	* g_compare_name.c (gss_compare_name):
+	* g_indicate_mechs.c (gss_indicate_mechs):
+	* g_dsp_status.c (gss_display_status): 
+	* g_unseal.c (gss_unseal, gss_unwrap): 
+	* g_seal.c (gss_seal, gss_wrap):
+	* g_verify.c (gss_verify, gss_verify_mic): 
+	* g_sign.c (gss_sign, gss_get_mic):
+	* g_context_time.c (gss_context_time): 
+	* g_delete_sec_context.c (gss_delete_sec_context): 
+	* g_process_context.c (gss_process_context): 
+	* g_accept_sec_context.c (gss_accept_sec_context): 
+	* g_init_sec_context.c (gss_init_sec_context): 
+	* g_rel_cred.c (gss_release_cred): 
+	* g_acquire_cred.c (gss_acquire_cred): Added INTERFACE keyword for
+		Windows.
+
 	* mglueP.h:
 	* g_seal.c: Add support for new V2 call gss_wrap_size_limit()
 

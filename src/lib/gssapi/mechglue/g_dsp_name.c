@@ -33,7 +33,7 @@
 #endif
 #include <string.h>
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_display_name (minor_status,
                   input_name,
                   output_name_buffer,

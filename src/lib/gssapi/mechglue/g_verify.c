@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_verify (minor_status,
             context_handle,
             message_buffer,
@@ -77,7 +77,7 @@ int *			qop_state;
     return(GSS_S_NO_CONTEXT);
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_verify_mic (minor_status,
             context_handle,
             message_buffer,

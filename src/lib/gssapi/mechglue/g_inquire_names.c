@@ -30,10 +30,8 @@
 #include "mglueP.h"
 
 /* Last argument new for V2 */
-OM_uint32 gss_inquire_names_for_mech(
-	    minor_status,
-	    mechanism,
-	    name_types)
+OM_uint32 INTERFACE
+gss_inquire_names_for_mech(minor_status, mechanism, name_types)
 
 OM_uint32 *	minor_status;
 gss_OID 	mechanism;

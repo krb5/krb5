@@ -36,7 +36,7 @@
    (((o1)->length == (o2)->length) && \
     (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_init_sec_context (minor_status,
                       claimant_cred_handle,
                       context_handle,
@@ -68,10 +68,12 @@ OM_uint32 FAR *		time_rec;
 {
     OM_uint32		status, temp_status, temp_minor_status;
     gss_union_name_t	union_name;
+    gss_union_cred_t	union_cred;
     gss_name_t		internal_name;
     gss_union_ctx_id_t	union_ctx_id;
     gss_OID		mech_type = (gss_OID) req_mech_type;
     gss_mechanism	mech;
+    gss_cred_id_t	input_cred_handle;
 
     gss_initialize();
 
@@ -145,6 +147,14 @@ OM_uint32 FAR *		time_rec;
     } else
 	union_ctx_id = *context_handle;
     
+    /* 
+     * get the appropriate cred handle from the union cred struct.
+     * defaults to GSS_C_NO_CREDENTIAL if there is no cred, which will
+     * use the default credential.
+     */
+    union_cred = (gss_union_cred_t) claimant_cred_handle;
+    input_cred_handle = __gss_get_mechanism_cred(union_cred, mech_type);
+    
     /*
      * now call the approprate underlying mechanism routine 
      */
@@ -153,7 +163,7 @@ OM_uint32 FAR *		time_rec;
 	status = mech->gss_init_sec_context(
 					    mech->context,
 					    minor_status,
-					    claimant_cred_handle,
+					    input_cred_handle,
 					    &union_ctx_id->internal_ctx_id,
 					    internal_name,
 					    mech_type,

@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_export_sec_context(minor_status,
                        context_handle,
                        interprocess_token)

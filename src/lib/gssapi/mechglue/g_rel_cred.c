@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_release_cred(minor_status,
                  cred_handle)
 

@@ -31,12 +31,45 @@
 #include <stdlib.h>
 #endif
 #include <string.h>
+#include <errno.h>
 
 #define g_OID_equal(o1,o2) \
    (((o1)->length == (o2)->length) && \
     (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
 
-OM_uint32
+static gss_OID_set
+create_actual_mechs(creds)
+    gss_union_cred_t	creds;
+{
+    gss_OID_set 	actual_mechs;
+    int			i;
+
+    actual_mechs = (gss_OID_set) malloc(sizeof(gss_OID_set_desc));
+    if (!actual_mechs)
+	return NULL;
+
+    actual_mechs->elements = (gss_OID)
+	    malloc(sizeof(gss_OID_desc) * creds->count);
+    if (!actual_mechs->elements) {
+	free(actual_mechs);
+	return NULL;
+    }
+    
+    actual_mechs->count = creds->count;
+
+    for (i=0; i < creds->count; i++) {
+	actual_mechs->elements[i].length = creds->mechs_array[i].length;
+	actual_mechs->elements[i].elements = (void *)
+	    malloc(creds->mechs_array[i].length);
+	memcpy(actual_mechs->elements[i].elements,
+	       creds->mechs_array[i].elements, creds->mechs_array[i].length);
+    }
+
+    return actual_mechs;
+}
+
+
+OM_uint32 INTERFACE
 gss_acquire_cred(minor_status,
                  desired_name,
                  time_req,
@@ -299,4 +332,148 @@ OM_uint32 *		time_rec;
     
     *output_cred_handle = (gss_cred_id_t) creds;
     return(GSS_S_COMPLETE);
+}
+
+/* V2 interface */
+OM_uint32 INTERFACE
+gss_add_cred(minor_status, input_cred_handle,
+		  desired_name, desired_mech, cred_usage,
+		  initiator_time_req, acceptor_time_req,
+		  output_cred_handle, actual_mechs, 
+		  initiator_time_rec, acceptor_time_rec)
+    OM_uint32		*minor_status;
+    gss_cred_id_t	input_cred_handle;
+    gss_name_t		desired_name;
+    gss_OID		desired_mech;
+    gss_cred_usage_t	cred_usage;
+    OM_uint32		initiator_time_req;
+    OM_uint32		acceptor_time_req;
+    gss_cred_id_t	*output_cred_handle;
+    gss_OID_set		*actual_mechs;
+    OM_uint32		*initiator_time_rec;
+    OM_uint32		*acceptor_time_rec;
+{
+    OM_uint32		status, temp_minor_status;
+    OM_uint32		time_req, time_rec;
+    gss_union_name_t	union_name;
+    gss_union_cred_t	new_union_cred, union_cred;
+    gss_name_t		internal_name;
+    gss_mechanism	mech;
+    gss_cred_id_t	cred;
+    gss_OID		new_mechs_array;
+    gss_cred_id_t *	new_cred_array;
+
+    if (input_cred_handle == GSS_C_NO_CREDENTIAL)
+	return GSS_S_NO_CRED;
+
+    union_cred = (gss_union_cred_t) input_cred_handle;
+
+    mech = __gss_get_mechanism(desired_mech);
+    if (!mech)
+	return GSS_S_BAD_MECH;
+
+    if (__gss_get_mechanism_cred(union_cred, desired_mech) !=
+	GSS_C_NO_CREDENTIAL)
+	return GSS_S_DUPLICATE_ELEMENT;
+
+    union_name = (gss_union_name_t) desired_name;
+    if (union_name->mech_type) {
+	if (!g_OID_equal(desired_mech, union_name->mech_type))
+	    return GSS_S_BAD_NAMETYPE;
+	internal_name = union_name->mech_name;
+    } else {
+	if (__gss_import_internal_name(minor_status, desired_mech,
+				       union_name, &internal_name))
+	    return (GSS_S_BAD_NAME);
+    }
+
+    if (cred_usage == GSS_C_ACCEPT)
+	time_req = acceptor_time_req;
+    else if (cred_usage == GSS_C_INITIATE)
+	time_req = initiator_time_req;
+    else if (cred_usage == GSS_C_BOTH)
+	time_req = (acceptor_time_req > initiator_time_req) ?
+	    acceptor_time_req : initiator_time_req;
+
+    status = mech->gss_acquire_cred(mech->context, minor_status,
+				    internal_name, time_req,
+				    GSS_C_NULL_OID_SET, cred_usage,
+				    &cred, NULL, &time_rec);
+    if (status != GSS_S_COMPLETE)
+	goto errout;
+
+    new_mechs_array = (gss_OID)
+	malloc(sizeof(gss_OID_desc) * (union_cred->count+1));
+    
+    new_cred_array = (gss_cred_id_t *)
+	malloc(sizeof(gss_cred_id_t) * (union_cred->count+1));
+
+    if (!new_mechs_array || !new_cred_array) {
+	*minor_status = ENOMEM;
+	status = GSS_S_FAILURE;
+	goto errout;
+    }
+
+
+    if (acceptor_time_rec)
+	if (cred_usage == GSS_C_ACCEPT || cred_usage == GSS_C_BOTH)
+	    *acceptor_time_rec = time_rec;
+    if (initiator_time_rec)
+	if (cred_usage == GSS_C_INITIATE || cred_usage == GSS_C_BOTH)
+	    *initiator_time_rec = time_rec;
+
+    /*
+     * OK, expand the mechanism array in the union credentials
+     * (Look for the union label...)
+     */
+    memcpy(new_mechs_array, union_cred->mechs_array,
+	   sizeof(gss_OID_desc) * union_cred->count);
+    memcpy(new_cred_array, union_cred->cred_array,
+	   sizeof(gss_cred_id_t) * union_cred->count);
+    
+    new_cred_array[union_cred->count] = cred;
+    new_mechs_array[union_cred->count].length = desired_mech->length;
+    new_mechs_array[union_cred->count].elements = malloc(desired_mech->length);
+    if (!new_mechs_array[union_cred->count].elements) {
+	*minor_status = ENOMEM;
+	goto errout;
+    }
+    memcpy(new_mechs_array[union_cred->count].elements, desired_mech->elements,
+	   desired_mech->length);
+
+    if (output_cred_handle == NULL) {
+	free(union_cred->mechs_array);
+	free(union_cred->cred_array);
+	new_union_cred = union_cred;
+    } else {
+	new_union_cred = malloc(sizeof(gss_union_cred_desc));
+	if (new_union_cred == NULL) {
+	    *minor_status = ENOMEM;
+	    goto errout;
+	}
+	*new_union_cred = *union_cred;
+	*output_cred_handle = new_union_cred;
+    }
+    new_union_cred->mechs_array = new_mechs_array;
+    new_union_cred->cred_array = new_cred_array;
+    new_union_cred->count++;
+    new_mechs_array = 0;
+    new_cred_array = 0;
+
+    if (actual_mechs)
+	*actual_mechs = create_actual_mechs(new_union_cred);
+    
+    status = GSS_S_COMPLETE;
+    
+errout:
+    if (new_mechs_array)
+	free(new_mechs_array);
+    if (new_cred_array)
+	free(new_cred_array);
+    if (!union_name->mech_type) {
+	(void) __gss_release_internal_name(&temp_minor_status,
+					   desired_mech, &internal_name);
+    }
+
+    return(status);
 }

@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_context_time (minor_status,
                   context_handle,
                   time_rec)

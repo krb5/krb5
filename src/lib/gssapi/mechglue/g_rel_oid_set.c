@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_release_oid_set (minor_status,
 		     set)
 

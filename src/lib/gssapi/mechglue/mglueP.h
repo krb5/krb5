@@ -359,6 +359,10 @@ PROTOTYPE((OM_uint32 *,		/* minor_status */
 	   gss_name_t,		/* internal_name */
 	   gss_name_t *		/* external_name */
 	   ));
+gss_cred_id_t __gss_get_mechanism_cred
+PROTOTYPE((gss_union_cred_t,	/* union_cred */
+	   gss_OID		/* mech_type */
+	   ));
 
 OM_uint32 generic_gss_release_oid
 PROTOTYPE( (OM_uint32 *,	/* minor_status */

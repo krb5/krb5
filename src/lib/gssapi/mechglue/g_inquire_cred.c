@@ -32,7 +32,7 @@
 #endif
 #include <string.h>
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_inquire_cred(minor_status,
                  cred_handle,
                  name,
@@ -48,7 +48,7 @@ int *			cred_usage;
 gss_OID_set *		mechanisms;
 
 {
-    OM_uint32		status, elapsed_time, temp_minor_status;
+    OM_uint32		elapsed_time, temp_minor_status;
     gss_union_cred_t	union_cred;
     int			i;
     
@@ -126,3 +126,34 @@ gss_OID_set *		mechanisms;
     
     return(GSS_S_COMPLETE);
 }
+
+OM_uint32 INTERFACE
+gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
+			 initiator_lifetime, acceptor_lifetime, cred_usage)
+    OM_uint32		*minor_status;
+    gss_cred_id_t	cred_handle;
+    gss_OID		mech_type;
+    gss_name_t		*name;
+    OM_uint32		*initiator_lifetime;
+    OM_uint32		*acceptor_lifetime;
+    gss_cred_usage_t *cred_usage;
+{
+    gss_union_cred_t	union_cred;
+    gss_cred_id_t	mech_cred;
+    gss_mechanism	mech;
+
+    mech = __gss_get_mechanism (mech_type);
+    if (!mech)
+	return (GSS_S_BAD_MECH);
+    if (!mech->gss_inquire_cred_by_mech)
+	return (GSS_S_BAD_BINDINGS);
+     
+    union_cred = (gss_union_cred_t) cred_handle;
+    mech_cred = __gss_get_mechanism_cred(union_cred, mech_type);
+
+    return (mech->gss_inquire_cred_by_mech(mech->context, minor_status,
+					   mech_cred, mech_type,
+					   name, initiator_lifetime,
+					   acceptor_lifetime, cred_usage));
+}
+

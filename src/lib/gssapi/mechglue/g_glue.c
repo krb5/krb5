@@ -29,6 +29,10 @@
 #endif
 #include <errno.h>
 
+#define g_OID_equal(o1,o2) \
+   (((o1)->length == (o2)->length) && \
+    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
+
 extern gss_mechanism *__gss_mechs_array;
 
 /*
@@ -277,3 +281,26 @@ allocation_failure:
     }
     return (major_status);
 }
+
+/*
+ * Glue routine for returning the mechanism-specific credential from a
+ * external union credential.
+ */
+gss_cred_id_t
+__gss_get_mechanism_cred(union_cred, mech_type)
+    gss_union_cred_t	union_cred;
+    gss_OID		mech_type;
+{
+    int		i;
+    
+    if (union_cred == GSS_C_NO_CREDENTIAL)
+	return GSS_C_NO_CREDENTIAL;
+    
+    for (i=0; i < union_cred->count; i++) {
+	if (g_OID_equal(mech_type, &union_cred->mechs_array[i]))
+	    return union_cred->cred_array[i];
+    }
+    return GSS_C_NO_CREDENTIAL;
+}
+
+    

@@ -32,7 +32,7 @@
 #endif
 #include <string.h>
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_accept_sec_context (minor_status,
                         context_handle,
                         verifier_cred_handle,
@@ -114,21 +114,8 @@ gss_cred_id_t *		delegated_cred_handle;
      * defaults to GSS_C_NO_CREDENTIAL if there is no cred, which will
      * use the default credential.
      */
-    
     union_cred = (gss_union_cred_t) verifier_cred_handle;
-    
-    if (verifier_cred_handle != GSS_C_NO_CREDENTIAL) 
-	for (i=0; i < union_cred->count; i++) {
-	    if((union_cred->mechs_array[i].length == token_mech_type->length)
-	       &&
-	       (memcmp(union_cred->mechs_array[i].elements,
-		       token_mech_type->elements, 
-		       token_mech_type->length) == 0)) {
-		
-		input_cred_handle = union_cred->cred_array[i];
-		break;
-	    }
-	}
+    input_cred_handle = __gss_get_mechanism_cred(union_cred, token_mech_type);
     
     /*
      * now select the approprate underlying mechanism routine and
