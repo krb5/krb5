@@ -15,6 +15,15 @@ all-windows::
 	$(MAKE) -$(MFLAGS)
 	cd ..
 
+all-unix:: maybe-make-db.h-@DB_HEADER_VERSION@
+
+maybe-make-db.h-k5:
+	: db.h will be installed by util/db2
+maybe-make-db.h-sys:
+	: fall back to system db.h 
+maybe-make-db.h-redirect:
+	test -r db.h || echo '#include <@DB_HEADER@>' > db.h
+
 krb5/autoconf.h: $(srcdir)/krb5/autoconf.h.in
 	(cd krb5; $(MAKE) autoconf.h)
 $(srcdir)/krb5/autoconf.h.in: $(srcdir)/krb5/autoconf.stmp

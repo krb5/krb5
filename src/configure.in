@@ -86,7 +86,11 @@ fi
 if test "$SS_VERSION" = k5 ; then
   AC_CONFIG_SUBDIRS(util/ss)
 fi
-AC_CONFIG_SUBDIRS(util/profile util/pty util/db2 include lib/crypto lib/krb5 lib/des425)
+AC_CONFIG_SUBDIRS(util/profile util/pty)
+if test "$DB_VERSION" = k5 ; then
+  AC_CONFIG_SUBDIRS(util/db2)
+fi
+AC_CONFIG_SUBDIRS(include lib/crypto lib/krb5 lib/des425)
 if test -n "$KRB4_LIB"; then
   AC_CONFIG_SUBDIRS(lib/krb4)
 fi

@@ -203,7 +203,9 @@ DEPLIBEXT=@DEPLIBEXT@
 KADMCLNT_DEPLIB	= $(TOPLIBD)/libkadm5clnt$(DEPLIBEXT)
 KADMSRV_DEPLIB	= $(TOPLIBD)/libkadm5srv$(DEPLIBEXT)
 KDB5_DEPLIB	= $(TOPLIBD)/libkdb5$(DEPLIBEXT)
-DB_DEPLIB	= $(TOPLIBD)/libdb$(DEPLIBEXT)
+DB_DEPLIB	= $(DB_DEPLIB-@DB_VERSION@)
+DB_DEPLIB-k5	= $(TOPLIBD)/libdb$(DEPLIBEXT)
+DB_DEPLIB-sys	=
 GSSRPC_DEPLIB	= $(TOPLIBD)/libgssrpc$(DEPLIBEXT)
 GSS_DEPLIB	= $(TOPLIBD)/libgssapi_krb5$(DEPLIBEXT)
 KRB4_DEPLIB	= @KRB4_DEPLIB@		# $(TOPLIBD)/libkrb4$(DEPLIBEXT)
@@ -231,14 +233,23 @@ KADM_COMM_DEPLIBS	= $(GSSRPC_DEPLIBS) $(KDB5_DEPLIBS) $(GSSRPC_DEPLIBS)
 KADMSRV_DEPLIBS		= $(KADMSRV_DEPLIB) $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS)
 KADMCLNT_DEPLIBS	= $(KADMCLNT_DEPLIB) $(KADM_COMM_DEPLIBS)
 
-# Header file dependencies we might override someday.
+# Header file dependencies we might override.
 # See util/depfix.sed.
+# Also see depend-verify-* in post.in, which wants to confirm that we're using
+# the in-tree versions.
+COM_ERR_VERSION = @COM_ERR_VERSION@
 COM_ERR_DEPS	= $(COM_ERR_DEPS-@COM_ERR_VERSION@)
-COM_ERR_DEPS-sys = # empty
+COM_ERR_DEPS-sys =
 COM_ERR_DEPS-k5	= $(BUILDTOP)/include/com_err.h
+SS_VERSION	= @SS_VERSION@
 SS_DEPS		= $(SS_DEPS-@SS_VERSION@)
 SS_DEPS-sys	=
 SS_DEPS-k5	= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
+DB_VERSION	= @DB_VERSION@
+DB_DEPS		= $(DB_DEPS-@DB_HEADER_VERSION@)
+DB_DEPS-sys	=
+DB_DEPS-k5	= $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
+DB_DEPS-redirect = $(BUILDTOP)/include/db.h
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
@@ -249,7 +260,7 @@ SS_LIB		= $(SS_LIB-@SS_VERSION@)
 SS_LIB-sys	= @SS_LIB@
 SS_LIB-k5	= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
-DB_LIB		= -ldb
+DB_LIB		= @DB_LIB@
 
 KRB5_LIB			= $(KRB5_LIB_@LIB_LINK_OPT@)
 KRB5_LIB_libopt			= -lkrb5

@@ -3,6 +3,8 @@
 	* aclocal.m4 (KRB5_AC_CHOOSE_DB): New macro.
 	(CONFIG_RULES): Invoke it.
 
+	* configure.in: Configure util/db2 only if we're going to use it.
+
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB_INCLUDE): Put in-tree include dirs before

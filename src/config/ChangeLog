@@ -1,3 +1,11 @@
+2002-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (DB_DEPLIB-k5, DB_DEPLIB-sys, DB_DEPS-sys, DB_DEPS-k5,
+	DB_DEPS-redirect): New variables.
+	(DB_DEPLIB, DB_DEPS): Select from them.
+	(DB_LIB): Substitute from configure script.
+	(COM_ERR_VERSION, SS_VERSION, DB_VERSION): New variables.
+
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (depfix2.sed): Pass srcdir and BUILDTOP as additional
