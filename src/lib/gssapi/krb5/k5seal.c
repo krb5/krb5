@@ -274,7 +274,7 @@ make_seal_token_v1 (krb5_context context,
 			       (g_OID_equal(oid, gss_mech_krb5_old) ?
 				seq->contents : NULL),
 			       md5cksum.contents, md5cksum.contents, 16))) {
-	    xfree(md5cksum.contents);
+	    krb5_free_checksum_contents(context, &md5cksum);
 	    xfree(t);
 	    return code;
 	}
@@ -296,7 +296,7 @@ make_seal_token_v1 (krb5_context context,
 	break;
     }
 
-    xfree(md5cksum.contents);
+    krb5_free_checksum_contents(context, &md5cksum);
 
     /* create the seq_num */
 

@@ -191,7 +191,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    size_t md5len;
    int bigend;
    krb5_gss_cred_id_t cred = 0;
-   krb5_data ap_rep, ap_req, mic;
+   krb5_data ap_rep, ap_req;
    int i;
    krb5_error_code code;
    krb5_address addr, *paddr;
@@ -206,14 +206,13 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_auth_context auth_context = NULL;
    krb5_ticket * ticket = NULL;
    int option_id;
-   krb5_data option, cksumdata;
+   krb5_data option;
    const gss_OID_desc *mech_used = NULL;
    OM_uint32 major_status = GSS_S_FAILURE;
    krb5_error krb_error_data;
    krb5_data scratch;
    gss_cred_id_t cred_handle = NULL;
    krb5_gss_cred_id_t deleg_cred = NULL;
-   krb5_cksumtype *ctypes = 0;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
@@ -226,10 +225,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    output_token->value = NULL;
    token.value = 0;
    reqcksum.contents = 0;
-   mic.data = 0;
    ap_req.data = 0;
    ap_rep.data = 0;
-   cksumdata.data = 0;
    
    if (mech_type)
       *mech_type = GSS_C_NULL_OID;
@@ -738,8 +735,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    major_status = GSS_S_COMPLETE;
 
  fail:
-   if (ctypes)
-       free(ctypes);
    if (authdat)
        krb5_free_authenticator(context, authdat);
    /* The ctx structure has the handle of the auth_context */
@@ -750,11 +745,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (reqcksum.contents)
        xfree(reqcksum.contents);
    if (ap_rep.data)
-       xfree(ap_rep.data);
-   if (mic.data)
-       xfree(mic.data);
-   if (cksumdata.data)
-       xfree(cksumdata.data);
+       krb5_free_data_contents(context, &ap_rep);
 
    if (!GSS_ERROR(major_status))
        return(major_status);
@@ -830,7 +821,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        g_make_token_header((gss_OID) mech_used, tmsglen, &ptr, toktype);
 
        TWRITE_STR(ptr, scratch.data, scratch.length);
-       xfree(scratch.data);
+       krb5_free_data_contents(context, &scratch);
 
        *output_token = token;
    }

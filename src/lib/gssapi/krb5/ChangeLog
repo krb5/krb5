@@ -1,3 +1,32 @@
+2001-06-22  Danilo Almeida  <dalmeida@mit.edu>
+
+	* util_crypt.c (kg_encrypt, kg_decrypt): Use free() instead of
+	krb5_free_data_contents().
+
+	* util_cksum.c (kg_checksum_channel_bindings): Make sure that
+	returned memory is allocated with xmalloc() so that caller can use
+	xfree() on it.
+
+	* k5unseal.c (kg_unseal_v1):  Use krb5_free_data_contents()
+	instead of xfree().
+
+	* k5seal.c (make_seal_token_v1): Use krb5_free_data_contents()
+	instead of xfree().
+
+	* init_sec_context.c (make_ap_req_v1): Use xfree() instead of
+	free() to be consistent with xmalloc() usage.  Use
+	krb5_free_data_contents() instead of xfree().
+
+	* disp_name.c (krb5_gss_display_name): Use
+	krb5_free_unparsed_name() instead of xfree().
+
+	* add_cred.c (krb5_gss_add_cred): Use xfree() instead of free() to
+	be consistent with xmalloc() usage.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Remove
+	variables that were effectively unused.  Use
+	krb5_free_data_contents() instead of xfree() where appropriate.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* acquire_cred.c (acquire_init_cred): Include "k5-int.h" for

@@ -52,13 +52,13 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
    }
 
    if (! g_make_string_buffer(str, output_name_buffer)) {
-      xfree(str);
+      krb5_free_unparsed_name(context, str);
 
       *minor_status = (OM_uint32) G_BUFFER_ALLOC;
       return(GSS_S_FAILURE);
    }
 
-   xfree(str);
+   krb5_free_unparsed_name(context, str);
 
    *minor_status = 0;
    if (output_name_type)

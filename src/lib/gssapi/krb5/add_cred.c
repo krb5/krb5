@@ -184,7 +184,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
 	code = krb5_copy_principal(context, cred->princ, &new_cred->princ);
 	if (code) {
-	    free(new_cred);
+	    xfree(new_cred);
 
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
@@ -194,7 +194,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    kttype = krb5_kt_get_type(context, cred->keytab);
 	    if ((strlen(kttype)+2) > sizeof(ktboth)) {
 		krb5_free_principal(context, new_cred->princ);
-		free(new_cred);
+		xfree(new_cred);
 
 		*minor_status = ENOMEM;
 		return(GSS_S_FAILURE);
@@ -209,7 +209,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 				    sizeof(ktboth)-strlen(ktboth));
 	    if (code) {
 		krb5_free_principal(context, new_cred->princ);
-		free(new_cred);
+		xfree(new_cred);
 
 		*minor_status = code;
 		return(GSS_S_FAILURE);
@@ -218,7 +218,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    code = krb5_kt_resolve(context, ktboth, &new_cred->keytab);
 	    if (code) {
 		krb5_free_principal(context, new_cred->princ);
-		free(new_cred);
+		xfree(new_cred);
 
 		*minor_status = code;
 		return(GSS_S_FAILURE);
@@ -235,7 +235,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
 		krb5_free_principal(context, new_cred->princ);
-		free(new_cred);
+		xfree(new_cred);
 
 		*minor_status = code;
 		return(GSS_S_FAILURE);
@@ -254,7 +254,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
 		krb5_free_principal(context, new_cred->princ);
-		free(new_cred);
+		xfree(new_cred);
 
 		*minor_status = ENOMEM;
 		return(GSS_S_FAILURE);
@@ -272,7 +272,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
 		krb5_free_principal(context, new_cred->princ);
-		free(new_cred);
+		xfree(new_cred);
 
 		*minor_status = code;
 		return(GSS_S_FAILURE);
@@ -291,7 +291,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    if (new_cred->keytab)
 		krb5_kt_close(context, new_cred->keytab);
 	    krb5_free_principal(context, new_cred->princ);
-	    free(new_cred);
+	    xfree(new_cred);
 
 	    *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	    return(GSS_S_FAILURE);

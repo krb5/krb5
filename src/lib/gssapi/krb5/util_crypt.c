@@ -141,7 +141,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
 
    code = krb5_c_encrypt(context, key, usage, pivd, &inputd, &outputd);
    if (pivd != NULL)
-       krb5_free_data_contents(context, pivd);
+       free(pivd->data);
    return code;
 }
 
@@ -186,6 +186,6 @@ kg_decrypt(context, key, usage, iv, in, out, length)
 
    code = krb5_c_decrypt(context, key, usage, pivd, &inputd, &outputd);
    if (pivd != NULL)
-       krb5_free_data_contents(context, pivd);
+       free(pivd->data);
    return code;
 }

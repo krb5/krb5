@@ -264,7 +264,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 			       (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
 				ctx->seq->contents : NULL),
 			       md5cksum.contents, md5cksum.contents, 16))) {
-	    xfree(md5cksum.contents);
+	    krb5_free_checksum_contents(context, &md5cksum);
 	    if (toktype == KG_TOK_SEAL_MSG)
 		xfree(token.value);
 	    *minor_status = code;
@@ -283,7 +283,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     case SGN_ALG_MD2_5:
 	if (!ctx->seed_init &&
 	    (code = kg_make_seed(context, ctx->subkey, ctx->seed))) {
-	    xfree(md5cksum.contents);
+	    krb5_free_checksum_contents(context, &md5cksum);
 	    if (sealalg != 0xffff)
 		xfree(plain);
 	    if (toktype == KG_TOK_SEAL_MSG)
@@ -295,7 +295,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	if (! (data_ptr = (void *)
 	       xmalloc(sizeof(ctx->seed) + 8 +
 		       (ctx->big_endian ? token.length : plainlen)))) {
-	    xfree(md5cksum.contents);
+	    krb5_free_checksum_contents(context, &md5cksum);
 	    if (sealalg == 0)
 		xfree(plain);
 	    if (toktype == KG_TOK_SEAL_MSG)
@@ -314,7 +314,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	plaind.length = 8 + sizeof(ctx->seed) +
 	    (ctx->big_endian ? token.length : plainlen);
 	plaind.data = data_ptr;
-	xfree(md5cksum.contents);
+	krb5_free_checksum_contents(context, &md5cksum);
 	code = krb5_c_make_checksum(context, md5cksum.checksum_type,
 				    ctx->seq, KG_USAGE_SIGN,
 				    &plaind, &md5cksum);
@@ -376,7 +376,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	break;
     }
 
-    xfree(md5cksum.contents);
+    krb5_free_checksum_contents(context, &md5cksum);
     if (sealalg != 0xffff)
 	xfree(plain);
 
