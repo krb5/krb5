@@ -64,6 +64,7 @@ static struct krb_convert sconv_list[] = {
     {"pop",	"pop",		DO_REALM_CONVERSION},
     {"sis",	"sis",		DO_REALM_CONVERSION},
     {"rfs",	"rfs",		DO_REALM_CONVERSION},
+    {"imap",	"imap",		DO_REALM_CONVERSION},
     {0,		0,		0},
 };
 
