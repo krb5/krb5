@@ -5,6 +5,8 @@
 	addresses, and skip duplicates, in case multiple interfaces have
 	the same address.  If called functions fail, drop out of loop and
 	return nonzero.
+	(krb5_os_localaddr): Increment count of addresses to include null
+	pointer terminator.  Delete check for zero count.
 
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 

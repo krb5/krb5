@@ -403,10 +403,9 @@ krb5_os_localaddr(context, addr)
 	    return r;
     }
 
+    data.cur_idx++; /* null termination */
     if (data.mem_err)
 	return ENOMEM;
-    else if (data.cur_idx == 0)
-	abort ();
     else if (data.cur_idx == data.count)
 	*addr = data.addr_temp;
     else {
