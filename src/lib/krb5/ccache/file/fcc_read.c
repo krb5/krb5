@@ -82,8 +82,10 @@ krb5_fcc_read_principal(id, princ)
       * krb5_data.
       */
 
-     /* Make *princ able to hold length pointers to krb5_data structs */
-     *princ = (krb5_principal) malloc(sizeof(krb5_data *)*length);
+     /* Make *princ able to hold length pointers to krb5_data structs
+      * Add one extra for a null-terminated list
+      */
+     *princ = (krb5_principal) calloc(length+1, sizeof(krb5_data *));
      if (*princ == NULL)
 	  return KRB5_NOMEM;
 
@@ -117,7 +119,7 @@ krb5_fcc_read_keyblock(id, keyblock)
      if (keyblock->contents == NULL)
 	  return KRB5_NOMEM;
      
-     ret = read(((krb5_fcc_data *) id->data)->fd, keyblock->contents,
+     ret = read(((krb5_fcc_data *) id->data)->fd, (char *)keyblock->contents,
 		(keyblock->length)*sizeof(krb5_octet));
 
      if (ret < 0)
