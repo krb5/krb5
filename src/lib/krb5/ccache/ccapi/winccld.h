@@ -114,7 +114,7 @@ FUNC_INFO krbcc_fi[] = {
 #define cc_initialize pcc_initialize
 #define cc_shutdown pcc_shutdown
 #define cc_get_change_time pcc_get_change_time
-#define cc_creat pcc_creat
+#define cc_create pcc_create
 #define cc_open pcc_open
 #define cc_close pcc_close
 #define cc_destroy pcc_destroy
