@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
-CONFIG_DIRS(create destroy edit stash aname)
+CONFIG_DIRS(create destroy edit stash aname convert)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 CONFIG_RULES
