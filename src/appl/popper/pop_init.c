@@ -23,10 +23,26 @@ static char SccsId[] = "@(#)pop_init.c  1.12    8/16/90";
 #include "popper.h"
 
 #ifdef KERBEROS
+#ifdef KRB4
+#ifdef KRB5
+ #error you can only use one of KRB4, KRB5
+#endif
 #include <krb.h>
-    
 AUTH_DAT kdata;
+#endif /* KRB4 */
+#ifdef KRB5    
+#include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
+#include <com_err.h>
+#include <ctype.h>
+krb5_principal ext_client;
+char *client_name;
+#endif /* KRB5 */
 #endif /* KERBEROS */
+#ifdef BIND43
+#include <arpa/nameser.h>
+#include <resolv.h>
+#endif
 
 extern int      errno;
 
@@ -43,6 +59,7 @@ char    **      argmessage;
     struct sockaddr_in      cs;                 /*  Communication parameters */
     struct hostent      *   ch;                 /*  Client host information */
     int                     errflag = 0;
+    int standalone = 0;
     int                     c;
     int                     len;
     extern char         *   optarg;
@@ -67,7 +84,7 @@ char    **      argmessage;
 #endif
 
     /*  Process command line arguments */
-    while ((c = getopt(argcount,argmessage,"dt:")) != EOF)
+    while ((c = getopt(argcount,argmessage,"dst:")) != EOF)
         switch (c) {
 
             /*  Debugging requested */
@@ -87,7 +104,9 @@ char    **      argmessage;
                 }
                 trace_file_name = optarg;
                 break;
-
+	    case 's':
+		standalone++;
+		break;
             /*  Unknown option received */
             default:
                 errflag++;
@@ -97,6 +116,49 @@ char    **      argmessage;
     if (errflag) {
         (void)fprintf(stderr,"Usage: %s [-d]\n",argmessage[0]);
         exit(-1);
+    }
+
+    if (standalone) {
+	int acc, sock;
+	struct sockaddr_in sin;
+	struct servent *spr;
+
+	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+	    syslog(LOG_ERR, "socket: %m");
+	    exit(3);
+	}
+
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = 0;
+
+#ifdef KERBEROS
+	if (!(spr = getservbyname("kpop", "tcp"))) {
+	    syslog(LOG_ERR, "kpop/tcp: unknown service");
+	    exit(3);
+	}
+#else
+	if (!(spr = getservbyname("pop", "tcp"))) {
+	    syslog(LOG_ERR, "kpop/tcp: unknown service");
+	    exit(3);
+	}
+#endif
+	sin.sin_port = spr->s_port;
+	if (bind(sock, &sin, sizeof(sin))) {
+	    syslog(LOG_ERR, "bind: %m");
+	    exit(3);
+	}
+	if (listen(sock, 1) == -1) {
+	    syslog(LOG_ERR, "listen: %m");
+	    exit(3);
+	}
+	len = sizeof(cs);
+	if ((acc = accept(sock, (struct sockaddr *)&cs, &len)) == -1) {
+	    syslog(LOG_ERR, "accept: %m");
+	    exit(3);
+	}
+	dup2(acc, sp);
+	close(sock);
+	close(acc);
     }
 
     /*  Get the address and socket of the client to whom I am speaking */
@@ -129,8 +191,6 @@ char    **      argmessage;
 #ifndef BIND43
         p->client = ch->h_name;
 #else
-#       include <arpa/nameser.h>
-#       include <resolv.h>
 
         /*  Distrust distant nameservers */
         extern struct state     _res;
@@ -205,6 +265,7 @@ authenticate(p, addr)
      struct sockaddr_in *addr;
 {
 #ifdef KERBEROS
+#ifdef KRB4
     Key_schedule schedule;
     KTEXT_ST ticket;
     char instance[INST_SZ];  
@@ -229,6 +290,85 @@ authenticate(p, addr)
 	    kdata.pinst, kdata.prealm, inet_ntoa(addr->sin_addr));
 #endif /* DEBUG */
 
+#endif /* KRB4 */
+#ifdef KRB5
+    krb5_error_code retval;
+    krb5_data aserver[3], *server[4];
+    char *remote_host, *def_realm;
+    register char *cp;
+    struct hostent *hp;
+    extern struct state     _res;
+    int sock = 0;			/* socket fd # */
+
+    krb5_init_ets();
+
+    if (retval = krb5_get_default_realm(&def_realm)) {
+	pop_msg(p, POP_FAILURE, "server mis-configured, no local realm--%s",
+		error_message(retval));
+	pop_log(p, POP_WARNING,  "%s: mis-configured, no local realm--%s",
+		p->client, error_message(retval));
+	exit(-1);
+    }
+#ifdef BIND43
+    /*undo some damage*/
+    _res.options |= RES_DEFNAMES;
+#endif
+
+    if (!(hp = gethostbyname(p->myhost))) {
+	pop_msg(p, POP_FAILURE,
+		"server mis-configured, can't resolve its own name.");
+	pop_log(p, POP_WARNING, "%s: can't resolve hostname '%s'",
+		p->client, p->myhost);
+	exit(-1);
+    }
+    /* copy the hostname into non-volatile storage */
+    remote_host = malloc(strlen(hp->h_name) + 1);
+    (void) strcpy(remote_host, hp->h_name);
+
+    /* lower-case to get name for "instance" part of service name */
+    for (cp = remote_host; *cp; cp++)
+	if (isupper(*cp))
+	    *cp = tolower(*cp);
+
+    aserver[0].length = strlen(def_realm);
+    aserver[0].data = def_realm;
+    aserver[1].length = strlen("pop");
+    aserver[1].data = "pop";
+    aserver[2].length = strlen(remote_host);
+    aserver[2].data = remote_host;
+    server[0] = &aserver[0];
+    server[1] = &aserver[1];
+    server[2] = &aserver[2];
+    server[3] = 0;
+
+    if (retval = krb5_recvauth((krb5_pointer)&sock,
+			       "KPOPV1.0",
+			       server,
+			       0,	/* ignore peer address */
+			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
+			       0,	/* default rc type */
+			       0,	/* don't need seq number */
+			       &ext_client,
+			       0, 0	/* don't care about ticket or
+					   authenticator */
+			       )) {
+	pop_msg(p, POP_FAILURE, "recvauth failed--%s", error_message(retval));
+	pop_log(p, POP_WARNING, "%s: recvauth failed--%s",
+		p->client, error_message(retval));
+	exit(-1);
+    }
+    if (retval = krb5_unparse_name(ext_client, &client_name)) {
+	pop_msg(p, POP_FAILURE, "name not parsable--%s",
+		error_message(retval));
+	pop_log(p, POP_DEBUG, "name not parsable (%s)",
+		inet_ntoa(addr->sin_addr));
+	exit(-1);
+    }
+#ifdef DEBUG
+    pop_log(p, POP_DEBUG, "%s (%s): ok", client_name, inet_ntoa(addr->sin_addr));
+#endif /* DEBUG */
+
+#endif /* KRB5 */
 #endif /* KERBEROS */
 
     return(POP_SUCCESS);
