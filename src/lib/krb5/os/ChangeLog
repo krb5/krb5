@@ -1,5 +1,8 @@
 Wed Nov 13 02:53:31 1996  Tom Yu  <tlyu@mit.edu>
 
+	* ktdefname.c, osconfig.c: Revert previous kt_default_name
+	changes.
+
 	* ktdefname.c (krb5_kt_default_name): Fix a few memory-leak type
 	problems in previous changes.
 

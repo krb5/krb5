@@ -1551,9 +1551,6 @@ krb5_error_code krb5_kt_default_name
 	KRB5_PROTOTYPE((krb5_context,
 		   char *,
 		   int ));
-krb5_error_code krb5_kt_set_default_name
-	KRB5_PROTOTYPE((krb5_context,
-		   char *));
 krb5_error_code krb5_kt_default
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_keytab * ));

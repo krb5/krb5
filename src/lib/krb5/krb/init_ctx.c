@@ -68,7 +68,6 @@ krb5_init_context(context)
 		goto cleanup;
 
 	ctx->default_realm = 0;
-	ctx->kt_default_name = 0;
 	profile_get_integer(ctx->profile, "libdefaults", "clockskew",
 			    0, 5 * 60, &tmp);
 	ctx->clockskew = tmp;
@@ -155,8 +154,6 @@ krb5_free_context(ctx)
      if (ctx->ser_ctx_count && ctx->ser_ctx)
 	 free(ctx->ser_ctx);
 
-     if (ctx->kt_default_name)
-         free(ctx->kt_default_name);
      ctx->magic = 0;
      free(ctx);
 }

@@ -926,7 +926,6 @@ struct _krb5_context {
 	krb5_boolean	profile_secure;
 	int		fcc_default_format;
 	int		scc_default_format;
-	char	        FAR *kt_default_name;
 };
 
 #define KRB5_LIBOPT_SYNC_KDCTIME	0x0001

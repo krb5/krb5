@@ -1,3 +1,7 @@
+Wed Nov 13 14:28:08 1996  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h, krb5.hin: Revert kt_default_name changes.
+
 Tue Nov 12 22:04:41 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Add definition for krb5_kt_set_default_name().

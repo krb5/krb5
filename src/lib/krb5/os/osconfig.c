@@ -26,6 +26,8 @@
 
 #include "k5-int.h"
 
+char *krb5_defkeyname  = DEFAULT_KEYTAB_NAME;
+
 int krb5_max_dgram_size = MAX_DGRAM_SIZE;
 int krb5_max_skdc_timeout = MAX_SKDC_TIMEOUT;
 int krb5_skdc_timeout_shift = SKDC_TIMEOUT_SHIFT;
