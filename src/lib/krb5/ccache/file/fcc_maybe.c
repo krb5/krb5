@@ -198,7 +198,8 @@ krb5_fcc_open_file (id, mode)
 	     (void) close(fd);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if ((fcc_fvno != htons(KRB5_FCC_FVNO)) &&
+	 if ((fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
+	     (fcc_fvno != htons(KRB5_FCC_FVNO_2)) &&
 	     (fcc_fvno != htons(KRB5_FCC_FVNO_1))) {
 	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 	     (void) close(fd);

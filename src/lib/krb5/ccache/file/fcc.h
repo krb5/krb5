@@ -42,18 +42,24 @@
 
 /*
  * FCC version 2 contains type information for principals.  FCC
- * version 1 does not.  The code will accept either, and depending on
- * what KRB5_FCC_DEFAULT_FVNO is set to, it will create version 1 or
- * version 2 FCC caches.
+ * version 1 does not.
+ *  
+ * FCC version 3 contains keyblock encryption type information, and is
+ * architecture independent.  Previous versions are not.
  *
- * KRB5_FCC_DEFAULT_FVNO should be set to version 2, unless there is
+ * The code will accept version 1, 2, and 3 ccaches, and depending 
+ * what KRB5_FCC_DEFAULT_FVNO is set to, it will create version 1, 2,
+ * or 3 FCC caches.
+ * 
+ * KRB5_FCC_DEFAULT_FVNO should be set to version 3, unless there is
  * some overriding compatibility reasons not to do so.
  */
 
-#define KRB5_FCC_FVNO_1 0x0501		/* krb v5, fcc v1 */
-#define KRB5_FCC_FVNO   0x0502		/* krb5 v5, fcc v2 */
+#define KRB5_FCC_FVNO_1 0x0501		/* krb5 v5, fcc v1 */
+#define KRB5_FCC_FVNO_2 0x0502		/* krb5 v5, fcc v2 */
+#define KRB5_FCC_FVNO_3 0x0503		/* krb5 v5, fcc v3 */
 
-#define KRB5_FCC_DEFAULT_FVNO KRB5_FCC_FVNO
+#define KRB5_FCC_DEFAULT_FVNO KRB5_FCC_FVNO_3
 
 #define	FCC_OPEN_AND_ERASE	1
 #define	FCC_OPEN_RDWR		2

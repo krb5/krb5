@@ -1,3 +1,19 @@
+Wed Nov 16 23:31:49 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+        * fcc-proto.h, fcc.h, fcc_maybe.c (krb5_fcc_open_file), fcc_nseq.c
+	(krb5_fcc_next_cred), fcc_store.c (krb5_fcc_store), fcc_read.c,
+	fcc_write.c:  Changes to implement FCC format version #3, which
+		is architecture independent, and includes the key
+		encryption type information.
+
+	* fcc_gennew.c (krb5_fcc_generate_new): Generate new ccaches using
+		whatever version is marked as the default.
+
+	* fcc_read.c (krb5_fcc_read_keyblock): Insert keyblock magic
+		number and initialize etype value.  Also add magic numbers
+		for the krb5_principal, krb5_data, krb5_address, and
+		krb5_authdata structures.
+
 Mon Oct 31 17:02:04 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_maybe.c: Back out POSIX_FILE_LOCKS change.  (Should be

@@ -103,7 +103,7 @@ krb5_fcc_generate_new (id)
 	  retcode = krb5_fcc_interpret(errno);
           goto err_out;
      } else {
-	  krb5_int16 fcc_fvno = htons(KRB5_FCC_FVNO);
+	  krb5_int16 fcc_fvno = htons(KRB5_FCC_DEFAULT_FVNO);
 	  int errsave, cnt;
 
 	  /* Ignore user's umask, set mode = 0600 */
