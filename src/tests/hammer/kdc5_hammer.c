@@ -88,8 +88,8 @@ int status;
     exit(status);
 }
 
+static krb5_preauthtype * patype = NULL, patypedata[2] = { 0, -1 };
 static krb5_enctype etype = 0xffff;
-static krb5_preauthtype patype = KRB5_PADATA_NONE;
 static krb5_context test_context;
 static krb5_keytype keytype;
 
@@ -158,7 +158,8 @@ main(argc, argv)
 	    etype = atoi(optarg);
 	    break;
 	case 'P':
-	    patype = atoi(optarg);
+	    patypedata[0] = atoi(optarg);
+	    patype = patypedata;
 	    break;
 	case 'c':
 	    if (ccache == NULL) {
@@ -444,11 +445,7 @@ int get_tgt (context, p_client_str, p_client, ccache)
     my_creds.times.renew_till = 0;
 
     code = krb5_get_in_tkt_with_password(context, options, my_addresses,
-					 patype,
-					 etype,
-					 keytype,
-					 p_client_str,
-					 ccache,
+					 NULL, patype, p_client_str, ccache,
 					 &my_creds, 0);
     my_creds.server = my_creds.client = 0;
     krb5_free_principal(context, tgt_server);
