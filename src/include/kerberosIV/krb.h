@@ -379,6 +379,10 @@ extern struct _krb5_context * krb5__krb4_context;
 
 struct sockaddr_in;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* dest_tkt.c */
 int KRB5_CALLCONV dest_tkt
 	(void);
@@ -651,6 +655,10 @@ char * KRB5_CALLCONV krb_get_default_user(void);
 int KRB5_CALLCONV krb_set_default_user(char *);
 unsigned KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *);
 long win_time_get_epoch(void);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif	/* KRB_DEFS */
