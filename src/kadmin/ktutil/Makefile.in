@@ -16,8 +16,8 @@ SRCS= 	$(srcdir)/ktutil.c \
 
 all:: ktutil
 
-ktutil: ktutil.o $(OBJS) $(SS_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o ktutil $(OBJS) $(SS_LIB) $(KRB4COMPAT_LIBS)
+ktutil: ktutil.o $(OBJS) $(SS_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o ktutil $(OBJS) $(SS_LIB) $(KRB5_BASE_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) ktutil ${DESTDIR}$(ADMIN_BINDIR)/ktutil

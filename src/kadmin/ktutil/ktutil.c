@@ -65,7 +65,7 @@ int main(argc, argv)
 	ss_perror(sci_idx, retval, "creating invocation");
 	exit(1);
     }
-    ss_listen(sci_idx, &retval);
+    retval = ss_listen(sci_idx);
     ktutil_free_kt_list(kcontext, ktlist);
     exit(0);
 }

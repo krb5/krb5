@@ -286,7 +286,7 @@ krb5_error_code ktutil_read_keytab(context, name, list)
     }
     if (entry)
 	free((char *)entry);
-    if (retval)
+    if (retval) {
 	if (retval == KRB5_KT_END)
 	    retval = 0;
 	else {
@@ -295,6 +295,7 @@ krb5_error_code ktutil_read_keytab(context, name, list)
 	    if (back)
 		back->next = NULL;
 	}
+    }
     if (!*list)
 	*list = tail;
     krb5_kt_end_seq_get(context, kt, &cursor);
@@ -348,7 +349,7 @@ int getstr(fp, s, n)
     register char *s;
     int n;
 {
-    register count = n;
+    register int count = n;
     while (fread(s, 1, 1, fp) > 0 && --count)
         if (*s++ == '\0')
             return (n - count);

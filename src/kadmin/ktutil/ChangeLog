@@ -1,3 +1,15 @@
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (ktutil): Do not link with the V4
+	libraries. Although the program can write out a v4 srvtab, the one
+	necessary function is here.
+
+	* ktutil_funcs.c (ktutil_read_keytab): Add explicit braces to
+	avoid ambiguous `else'.
+	(getstr): register count -> register int count
+
+	* ktutil.c (main): ss_listen() takes only one argument.
+
 2000-05-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktutil_funcs.c (ktutil_write_keytab): Reject a filename that's
