@@ -173,7 +173,6 @@ register int *error;
 		*error = ENOMEM;
 		goto errout;
 	    }
-	    xbzero(adtk, sizeof(*adtk));
 	    if (rv1)
 		rv1->next = rv2;
 	    xbzero((char *)rv2, sizeof (*rv2));
