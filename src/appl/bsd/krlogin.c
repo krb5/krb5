@@ -1295,7 +1295,7 @@ return;
  */
 reader(oldmask)
 #ifdef POSIX_SIGNALS
-     sigset_t *oldmask;
+    sigset_t *oldmask;
 #else
      int oldmask;
 #endif
@@ -1305,7 +1305,7 @@ reader(oldmask)
 #else
     int pid = -getpid();
 #endif
-fd_set readset, excset;
+fd_set readset, excset, writeset;
     int n, remaining;
     char *bufp = rcvbuf;
 
@@ -1324,6 +1324,7 @@ fd_set readset, excset;
     ppid = getppid();
 FD_ZERO(&readset);
     FD_ZERO(&excset);
+    FD_ZERO(&writeset);
 #ifdef POSIX_SIGNALS
     sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
 #else
@@ -1333,24 +1334,33 @@ FD_ZERO(&readset);
 #endif /* POSIX_SIGNALS */
 
     for (;;) {
-	while ((remaining = rcvcnt - (bufp - rcvbuf)) > 0) {
+	if ((remaining = rcvcnt - (bufp - rcvbuf)) > 0)
+	{
+	    FD_SET(1,&writeset1);
 	    rcvstate = WRITING;
-	    n = write(1, bufp, remaining);
+	    FD_CLR(rem, &readset);
+	}
+	else {
+	    
+	bufp = rcvbuf;
+	rcvcnt = 0;
+	 rcvstate = READING;
+FD_SET(rem,&readset);
+	FD_CLR(1,&writeset);
+	}
+	FD_SET(rem,&excset);
+	if (select(rem+1, &readset, 0, &excset, 0) > 0 ) {
+	    if (FD_ISSET(rem, &excset))
+  oob();
+	    if (FD_ISSET(1,&writeset)) {
+    	    n = write(1, bufp, remaining);
 	    if (n < 0) {
 		if (errno != EINTR)
 		  return (-1);
 		continue;
 	    }
 	    bufp += n;
-	}
-	bufp = rcvbuf;
-	rcvcnt = 0;
-	 rcvstate = READING;
-FD_SET(rem,&readset);
-	FD_SET(rem,&excset);
-	if (select(rem+1, &readset, 0, &excset, 0) > 0 ) {
-if (FD_ISSET(rem, &excset))
-  oob();
+}
 if (FD_ISSET(rem, &readset)) {
 	  	rcvcnt = des_read(rem, rcvbuf, sizeof (rcvbuf));
 	if (rcvcnt == 0)
