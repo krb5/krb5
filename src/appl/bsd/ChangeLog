@@ -1,3 +1,10 @@
+Tue Jan  9 22:51:16 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* forward.c (get_for_creds): Removed no longer used function.
+
+	* kcmd.c (kcmd): Convert from using get_for_creds() from forward.c
+		to using the official library routine, krb5_fwd_tgt_creds().
+
 Fri Dec 22 17:42:11 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* login.c (main): If HAVE_SHADOW is defined, and no shadow
