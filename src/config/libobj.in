@@ -1,0 +1,72 @@
+### config/libobj.in
+#
+# Makefile fragment that builds object files for libraries.
+#
+# The following variables must be set in Makefile.in:
+#
+# STLIBOBJS	list of .o objects; this must not contain variable
+#		references.
+
+# Set to "OBJS.ST OBJS.SH OBJS.PF" or some subset thereof by
+# configure; determines which types of object files get built.
+OBJLISTS=@OBJLISTS@
+
+# Note that $(LIBSRCS) *cannot* contain any variable references, or
+# the suffix substitution will break on some platforms!
+SHLIBOBJS=$(STLIBOBJS:.o=@SHOBJEXT@)
+PFLIBOBJS=$(STLIBOBJS:.o=@PFOBJEXT@)
+
+# "$(CC) -G", "$(LD) -Bshareable", etc.
+LDCOMBINE=@LDCOMBINE@
+
+# "-h $@", "-h lib$(LIBNAME).$(LIBMAJOR)", etc.
+SONAME=@SONAME@
+
+#
+# rules to make various types of object files
+#
+PICFLAGS=@PICFLAGS@
+PROFFLAGS=@PROFFLAGS@
+.SUFFIXES: .c .o .so .po
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.c.so:
+	$(CC) $(PICFLAGS) $(CFLAGS) -c $< -o $*.so
+.c.po:
+	$(CC) $(PROFFLAGS) $(CFLAGS) -c $< -o $*.po
+
+# rules to generate object file lists
+#
+# The "STAMP.*" files are there in case the object list happens to be
+# empty.
+OBJS.ST: STAMP.ST
+STAMP.ST: $(STLIBOBJS)
+	@echo $(STLIBOBJS) > OBJS.ST
+	touch $@
+
+OBJS.SH: STAMP.SH
+STAMP.SH: $(SHLIBOBJS)
+	@echo $(SHLIBOBJS) > OBJS.SH
+	touch $@
+
+OBJS.PF: STAMP.PF
+STAMP.PF: $(PFLIBOBJS)
+	@echo $(PFLIBOBJS) > OBJS.PF
+	touch $@
+
+all-libobjs: $(OBJLISTS)
+
+clean-libobjs:
+	$(RM) OBJS.ST OBJS.SH OBJS.PF
+	$(RM) STAMP.ST STAMP.SH STAMP.PF
+	$(RM) $(STLIBOBJS)
+	$(RM) $(SHLIBOBJS)
+	$(RM) $(PFLIBOBJS)
+
+Makefile: $(SRCTOP)/config/libobj.in
+
+# clean-unix:: clean-libobjs
+# all-unix:: all-libobjs
+
+###
+### end config/libobj.in

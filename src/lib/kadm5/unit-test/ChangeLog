@@ -1,3 +1,8 @@
+Wed Feb  5 23:10:56 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Mon Dec  9 15:57:55 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* api.0/init.exp, api.2/init.exp: use spawn/expect instead of exec

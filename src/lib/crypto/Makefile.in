@@ -8,12 +8,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$
 
 MAC_SUBDIRS = des sha md4 md5 crc32 os
 
-TST=if test -n "`cat DONE`" ; then
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
-
 OBJS=	cryptoconf.$(OBJEXT) \
 	encrypt_data.$(OBJEXT) \
 	decrypt_data.$(OBJEXT) \
@@ -32,9 +26,15 @@ SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/des3_raw.c \
 	$(srcdir)/raw_des.c 
 
-LIB_SUBDIRS= des md4 md5 sha crc32 os .
-LIBUPDATE= $(BUILDTOP)/util/libupdate
-LIBDONE= ./des/DONE ./md4/DONE ./md5/DONE ./sha/DONE ./crc32/DONE ./os/DONE ./DONE
+LIB=crypto
+LIBMAJOR=1
+LIBMINOR=0
+RELDIR=crypto
+STLIBOBJS=cryptoconf.o encrypt_data.o decrypt_data.o \
+	des_crc.o des_md5.o des3_sha.o des3_raw.o raw_des.o
+
+STOBJLISTS=des/OBJS.ST md4/OBJS.ST md5/OBJS.ST sha/OBJS.ST crc32/OBJS.ST \
+	os/OBJS.ST OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target
 # link editor and loader support it.
@@ -43,13 +43,7 @@ SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all-unix:: shared
-
-shared: 
-	mkdir shared
-
 # FIXME, need to build the library too...
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -57,21 +51,13 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
 
-libcrypto.$(STEXT): $(LIBDONE)
-	@if test -f $@ ; then \
-		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
-	else \
-		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
-	fi
-	$(RANLIB) $@
-	touch libcrypto.stamp
+all-unix:: all-liblinks
+install-unix:: install-libs
 
 libcrypto.lib:
 	libdir crypto.lib
 
-clean-unix::
-	$(RM) libcrypto.a libcrypto.stamp shared/*
-
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 clean-windows::
 	$(RM) crypto.lib crypto.bak $(OBJFILE)
 

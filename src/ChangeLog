@@ -8,6 +8,86 @@ Mon Dec 30 13:39:46 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 	* aclocal.m4: Add AC_PREREQ(2.12) as we now require autoconf 2.12.
 		[krb5-build/289]
 
+Sun Feb  9 01:01:32 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Fix up RUN_ENV for alpha-dec-osf*
+	so that we don't try to set _RLD_ROOT before setting
+	LD_LIBRARY_PATH (which needs to call sed).
+
+Sat Feb  8 15:39:08 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix up AC_KRB5_TCL somewhat to deal with
+	--with-tcl=pathname properly.
+
+	* aclocal.m4 (KRB5_RUN_FLAGS): Convert to no longer use old cache
+	variable kludge.
+	(KRB5_LIB_AUX): Set CC_LINK to CC_LINK_SHARED or CC_LINK_STATIC,
+	depending on whether we're building with shared libraries.
+
+Wed Feb  5 21:03:41 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL): Fix up to work better with new program
+	build procedure.
+
+	* aclocal.m4 (WITH_KRB4): Fix up KRB4_INCLUDES to look in the
+	build tree as well.
+
+Mon Feb  3 23:27:57 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Check for -lgen properly.
+
+Sat Feb  1 08:27:19 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4: CC_LINK for alpha changed -R to -Wl,-rpath....
+
+Fri Jan 31 21:48:08 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Some WITH_KRB4 tweaks.
+
+Mon Jan 27 17:12:13 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add KRB5_BUILD_PROGRAM and
+	KRB5_BUILD_LIBRARY_STATIC.
+
+Sun Jan 26 22:37:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4:: Remove V5_MAKE_SHARED_LIB, V5_SHARED_LIB_OBJS
+
+Fri Jan  3 22:30:05 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Alter conventions for libraries with dependencies;
+	make a separate macro, KRB5_BUILD_LIBRARY_WITH_DEPS, that adds in
+	the flags for explicit library dependencies.
+
+Thu Jan  2 18:21:22 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add SunOS support (untested yet); add support for
+	explicit dependencies in libraries.
+
+Wed Jan  1 23:31:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Add linux shared library
+		support. Fix Solaris cc soname naming.
+
+Mon Dec 30 12:58:37 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4: For alpha*, update the local copy of the
+		so_locations registry.  
+
+Sun Dec 29 21:22:21 1996  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add support for installing libraries.
+
+Fri Dec 27 16:54:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix up solaris shared lib generation flags.
+
+	* aclocal.m4: Many changes.  Add KRB5_LIB_PARAMS,
+	KRB5_BUILD_LIBRARY, KRB5_BUILD_LIBOBJS, which do the obvious
+	things.  Change V5_AC_OUTPUT_MAKEFILE to use $krb5_prepend_frags
+	and $krb5_append_frags to make life easier when we have multiple
+	frags that aren't pre.in or post.in.
+
 Tue Dec 24 16:08:05 1996  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (V5_AC_OUTPUT_MAKEFILE): Fix to deal with the

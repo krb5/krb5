@@ -1,14 +1,18 @@
 CFLAGS	= $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I.
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 OBJS= client.o rpc_test_clnt.o rpc_test_svc.o server.o
 
 all:: client server
 
-client: client.o rpc_test_clnt.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o client client.o rpc_test_clnt.o $(LIBS)
+client: client.o rpc_test_clnt.o $(GSSRPC_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o client client.o rpc_test_clnt.o \
+		$(GSSRPC_LIBS) $(KRB5_BASE_LIBS)
 
-server: server.o rpc_test_svc.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o server server.o rpc_test_svc.o $(LIBS)
+server: server.o rpc_test_svc.o $(GSSRPC_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o server server.o rpc_test_svc.o \
+		$(GSSRPC_LIBS) $(KRB5_BASE_LIBS)
 
 client.o server.o: rpc_test.h
 

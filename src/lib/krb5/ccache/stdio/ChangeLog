@@ -1,3 +1,8 @@
+Thu Jan  2 17:03:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Thu Aug 15 16:44:32 1996  Tom Yu  <tlyu@mit.edu>
 
 	* scc_retrv.c: Fix def'n of flags_match to be properly

@@ -12,7 +12,6 @@ fi
 AC_PROG_INSTALL
 dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(util,main)
-USE_ANAME
 AC_CHECK_LIB(crypt,crypt)
 dnl
 dnl AIX has them all; SCO might too
@@ -218,10 +217,6 @@ KRB5_CHECK_PROTOS
 dnl
 ADD_DEF(-DKERBEROS)
 AC_CONST
-USE_KRB4_LIBRARY
-USE_KRB5UTIL_LIBRARY
-KRB5_LIBRARIES
-V5_USE_SHARED_LIB
 if test "$krb5_cv_build_krb4_libs" = yes; then
 	AC_DEFINE(HAVE_KRB_GET_ERR_TEXT)
 	AC_DEFINE(HAVE_KRB_SAVE_CREDENTIALS)
@@ -233,4 +228,6 @@ else
 fi
 
 AC_CHECK_HEADERS(krb4-proto.h)
+
+KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

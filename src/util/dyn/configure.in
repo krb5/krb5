@@ -5,10 +5,7 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_CHECK_FUNCS(memmove)
-V5_SHARED_LIB_OBJS
-V5_MAKE_SHARED_LIB(libdyn,1.0,../../lib, ../util/dyn)
-dnl DEPLIBS is normally set by KRB5_LIBRARIES, but that makes assumptions
-dnl which fail for libdyn.
-AC_SUBST(DEPLIBS)
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY
 CopySrcHeader(dyn.h,[$](BUILDTOP)/include)
 V5_AC_OUTPUT_MAKEFILE

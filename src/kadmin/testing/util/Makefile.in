@@ -1,7 +1,7 @@
-TCLINC=@TCL_INC@
-TCLLIB=@TCL_LIB@ -lm
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(TCL_INCLUDES)
 
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(TCLINC)
+PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
 
 SRCS	=	tcl_ovsec_kadm.c tcl_kadm5.c test.c
 OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
@@ -18,14 +18,16 @@ all-::
 
 all-tcl:: $(CLNTPROG) $(SRVPROG)
 
-$(SRVPROG): $(OBJS) $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $(SRVPROG) $(OBJS) $(SRVLIBS) $(TCLLIB)
+$(SRVPROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(SRVPROG) $(OBJS) \
+		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS) $(TCL_LIBS)
 
-$(CLNTPROG): $(OBJS) $(CLNTDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $(CLNTPROG) $(OBJS) $(CLNTLIBS) $(TCLLIB)
+$(CLNTPROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(CLNTPROG) $(OBJS) \
+		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS) $(TCL_LIBS)
 
 bsddb_dump: bsddb_dump.o
-	$(LD) $(LDFLAGS) $(LDARGS) -o bsddb_dump bsddb_dump.o $(SRVLIBS)
+	$(CC_LINK) -o bsddb_dump bsddb_dump.o $(KADMSRV_LIBS)
 
 clean:: 
 	$(RM) $(CLNTPROG) $(SRVPROG)

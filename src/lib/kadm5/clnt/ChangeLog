@@ -1,3 +1,8 @@
+Wed Jan 15 20:49:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Wed Nov 13 19:20:11 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (clean-unix): Remove shared/*.

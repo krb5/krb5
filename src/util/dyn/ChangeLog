@@ -1,3 +1,7 @@
+Tue Dec 31 13:02:06 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in, Makefile.in: Update to new library build procedure.
+
 Mon Jul 22 21:37:52 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* dyn.h: If __STDC__ is not defined, generate prototypes implying

@@ -42,12 +42,8 @@ fi
 AC_DEFINE(KRB4_USE_KEYTAB)
 AC_HAVE_FUNCS(strsave seteuid setreuid setresuid)
 AC_PROG_AWK
-V5_SHARED_LIB_OBJS
-SubdirLibraryRule([$(OBJS)])
-V5_MAKE_SHARED_LIB(libkrb4,1.0,.., ./krb4)
 CopyHeader(krb_err.h,$(EHDRDIR))
-CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
-AC_SUBST(CRYPTO_SH_VERS)
-KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
-AC_SUBST(KRB5_SH_VERS)
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
 V5_AC_OUTPUT_MAKEFILE
+

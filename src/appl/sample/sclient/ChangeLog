@@ -1,3 +1,8 @@
+Tue Feb  4 20:44:24 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Nov  7 15:25:03 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sclient.c (argv): Check the error return from

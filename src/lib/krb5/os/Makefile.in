@@ -1,5 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSDBFLAGS=
@@ -7,9 +9,45 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 ##DOSOBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS= \
+	an_to_ln.o	\
+	def_realm.o	\
+	DNR.o	\
+	ccdefname.o	\
+	free_krbhs.o	\
+	free_hstrl.o	\
+	full_ipadr.o	\
+	get_krbhst.o	\
+	gen_port.o	\
+	genaddrs.o	\
+	gen_rname.o	\
+	gmt_mktime.o	\
+	hostaddr.o	\
+	hst_realm.o	\
+	init_os_ctx.o	\
+	krbfileio.o	\
+	ktdefname.o	\
+	kuserok.o	\
+	mk_faddr.o	\
+	localaddr.o	\
+	locate_kdc.o	\
+	lock_file.o	\
+	macsock.o	\
+	net_read.o	\
+	net_write.o	\
+	osconfig.o	\
+	port2ip.o	\
+	promptusr.o	\
+	read_msg.o	\
+	read_pwd.o	\
+	realm_dom.o	\
+	sendto_kdc.o	\
+	sn2princ.o	\
+	timeofday.o	\
+	toffset.o	\
+	unlck_file.o	\
+	ustime.o	\
+	write_msg.o
 
 OBJS= \
 	an_to_ln.$(OBJEXT)	\
@@ -91,14 +129,14 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
 ##DOS	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+
+all-unix:: all-libobjs
 
 shared:
 	mkdir shared
@@ -110,11 +148,11 @@ T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
 
 T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 
-t_std_conf: $(T_STD_CONF_OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
+t_std_conf: $(T_STD_CONF_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_std_conf $(T_STD_CONF_OBJS) $(KRB5_BASE_LIBS)
 
-t_an_to_ln: $(T_AN_TO_LN_OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
+t_an_to_ln: $(T_AN_TO_LN_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(KRB5_BASE_LIBS)
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
@@ -156,8 +194,6 @@ check-unix::
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
 
-clean-unix::
-	$(RM) shared/*
-clean-mac::
+clean-unix:: clean-libobjs
 clean-windows::
 	$(RM) $(OBJFILE)

@@ -1,3 +1,8 @@
+Wed Feb  5 20:34:38 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Tue Nov 12 00:04:00 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (ftpd_userok): Don't undconditionally return -1.

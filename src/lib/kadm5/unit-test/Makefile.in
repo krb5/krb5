@@ -1,4 +1,6 @@
 CFLAGS  =	$(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_KADM5_API_VERSION=1
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: init-test destroy-test client-handle-test client-iter-test
 all:: randkey-test server-handle-test lock-test server-iter-test 
@@ -7,40 +9,44 @@ all:: randkey-test server-handle-test lock-test server-iter-test
 # The client-side test programs.
 #
 
-init-test: init-test.o client_init.o $(CLNTDEPLIPS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o init-test init-test.o client_init.o \
-		$(CLNTLIBS)
+init-test: init-test.o client_init.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o init-test init-test.o client_init.o \
+		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
 client_init.o: $(SRCTOP)/lib/kadm5/clnt/client_init.c
 	$(CC) $(CFLAGS) -UUSE_KADM5_API_VERSION -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I$(SRCTOP)/lib/kadm5 $(SRCTOP)/lib/kadm5/clnt/client_init.c
 
-destroy-test: destroy-test.o $(CLNTDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o destroy-test destroy-test.o $(CLNTLIBS)
+destroy-test: destroy-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o destroy-test destroy-test.o \
+		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
-client-handle-test: handle-test.o $(CLNTDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o client-handle-test handle-test.o \
-		$(CLNTLIBS)
+client-handle-test: handle-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o client-handle-test handle-test.o \
+		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
-client-iter-test: iter-test.o $(CLNTDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o client-iter-test iter-test.o \
-		$(CLNTLIBS)
+client-iter-test: iter-test.o $(KADMLCNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o client-iter-test iter-test.o \
+		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
 #
 # The server-side test programs.
 #
 
-randkey-test: randkey-test.o $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o randkey-test randkey-test.o $(SRVLIBS)
+randkey-test: randkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o randkey-test randkey-test.o \
+		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
-server-handle-test: handle-test.o $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o server-handle-test handle-test.o \
-		$(SRVLIBS)
+server-handle-test: handle-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o server-handle-test handle-test.o \
+		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
-lock-test: lock-test.o $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o lock-test lock-test.o $(SRVLIBS)
+lock-test: lock-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o lock-test lock-test.o \
+		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
-server-iter-test: iter-test.o $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o server-iter-test iter-test.o $(SRVLIBS)
+server-iter-test: iter-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o server-iter-test iter-test.o \
+		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
 #
 # The unit-test targets

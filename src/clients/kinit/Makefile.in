@@ -1,14 +1,11 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-
-all::
-
-kinit: kinit.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) $(LDFLAGS) -o kinit kinit.o $(LIBS)
-
-kinit.o:	$(srcdir)/kinit.c
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: kinit
 
+kinit: kinit.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kinit.o $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) kinit.o kinit

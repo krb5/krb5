@@ -5,6 +5,11 @@ Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 	* ccbase.c, ccdefault.c:
 	DLL export basic ccache functions
 
+Thu Jan  2 16:57:35 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new lib build procedure.
+
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command

@@ -1,3 +1,8 @@
+Mon Jan 27 16:56:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Sun Nov 10 20:10:53 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* krb_auth_su.c (path_passwd;): If you don't have a srvtab, always

@@ -1,4 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_AUTOCONF_H -DGSSAPI_V2
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS= gss-client.c gss-misc.c gss-server.c
 
@@ -6,17 +8,11 @@ OBJS= gss-client.o gss-misc.o gss-server.o
 
 all:: gss-server gss-client
 
-gss-server: gss-server.o gss-misc.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o gss-server gss-server.o gss-misc.o $(LIBS)
+gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
-gss-client: gss-client.o gss-misc.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o gss-client gss-client.o gss-misc.o $(LIBS)
-
-gss-client.o:	$(srcdir)/gss-client.c
-
-gss-misc.o:	$(srcdir)/gss-misc.c
-
-gss-server.o:	$(srcdir)/gss-server.c
+gss-client: gss-client.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) gss-server gss-client

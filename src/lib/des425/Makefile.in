@@ -8,9 +8,35 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/k
 
 RUN_SETUP=@KRB5_RUN_ENV@
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+LIB=des425
+LIBMAJOR=1
+LIBMINOR=0
+RELDIR=des425
+# Depends on libcrypto and libkrb5
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS=-lkrb5 -lcom_err 
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+STOBJLISTS=OBJS.ST
+STLIBOBJS=cksum.o	\
+	des.o		\
+	enc_dec.o	\
+	key_parity.o	\
+	key_sched.o	\
+	new_rnd_key.o	\
+	pcbc_encrypt.o	\
+	quad_cksum.o	\
+	random_key.o	\
+	read_passwd.o  \
+	str_to_key.o	\
+	unix_time.o     \
+	util.o		\
+	weak_key.o	\
+	k4_glue.o
+
 
 OBJS=	cksum.$(OBJEXT)		\
 	des.$(OBJEXT)		\
@@ -44,22 +70,11 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/weak_key.c	\
 	$(srcdir)/k4_glue.c
 
-LIB_SUBDIRS= .
-LIBDONE= DONE
-#
-# Depends on libcrypto.
-#
-CRYPTO_VER=@CRYPTO_SH_VERS@
-KRB5_VER=@KRB5_SH_VERS@
-DEPLIBS=$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) $(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER)
-SHLIB_LIBS=-lkrb5 -lcrypto
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
-SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
-
+# For test programs
 EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
 DEPKLIB= $(TOPLIBD)/libcrypto.a
 
-all-unix:: shared $(OBJS)
+all-unix:: all-liblinks
 all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
@@ -84,9 +99,7 @@ check-windows::
 clean:: 
 	$(RM) verify$(EXEEXT) verify.$(OBJEXT)
 
-clean-unix::
-	$(RM) shared/*
-
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 clean-mac::
 clean-windows::
 	$(RM) des425.lib des425.bak $(OBJFILE)
@@ -103,3 +116,4 @@ install:: libdes425.a
 clean::
 	$(RM) libdes425.$(LIBEXT) libdes425.bak
 
+install-unix:: install-libs

@@ -1,5 +1,3 @@
-TST=if test -n "`cat DONE`" ; then
-
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=gssapi.lib
 ##DOSOBJFILELIST=@generic.lst @krb5.lst
@@ -7,41 +5,24 @@ TST=if test -n "`cat DONE`" ; then
 
 MAC_SUBDIRS = generic krb5
 
-CRYPTO_VER=@CRYPTO_SH_VERS@
-COMERR_VER=@COMERR_SH_VERS@
-KRB5_VER=@KRB5_SH_VERS@
-DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
-	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER) \
-	$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER)
-LIB_SUBDIRS= generic krb5
-LIBDONE= generic/DONE krb5/DONE # mechglue/DONE
-LIBUPDATE= $(BUILDTOP)/util/libupdate
+LIB=gssapi_krb5
+LIBMAJOR=1
+LIBMINOR=0
+STOBJLISTS=generic/OBJS.ST krb5/OBJS.ST
+SHLIB_EXPDEPS=\
+	$(TOPLIBD)/libkrb5.so \
+	$(TOPLIBD)/libcrypto.so \
+	$(TOPLIBD)/libcom_err.so
+SHLIB_EXPLIBS=-lkrb5 -lcrypto -lcom_err
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+RELDIR=gssapi
 
-SHLIB_LIBS=-lkrb5 -lcrypto -lcom_err
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
-SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+all-unix:: all-liblinks
 
-all-unix::
-all-mac::
+install-unix:: install-libs
 
-libgssapi_krb5.$(STEXT): $(LIBDONE)
-	@if test -f $@ ; then \
-		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
-	else \
-		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
-	fi
-	$(RANLIB) libgssapi_krb5.$(STEXT)
-	touch libgssapi_krb5.stamp
-
-install:: libgssapi_krb5.a
-	$(INSTALL_DATA) libgssapi_krb5.a $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
-
-clean-unix::
-	$(RM) libgssapi_krb5.a libgssapi_krb5.stamp
-
-clean-mac::
-	$(RM) libgssapi_krb5.a
+clean-unix:: clean-liblinks clean-libs
 
 clean-windows::
 	$(RM) gssapi.lib gssapi.bak

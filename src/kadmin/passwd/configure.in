@@ -4,10 +4,6 @@ AC_CONFIG_SUBDIRS(unit-test)
 DO_SUBDIRS
 AC_PROG_INSTALL
 AC_PROG_AWK
-USE_KADMCLNT_LIBRARY
-USE_GSSAPI_LIBRARY
-USE_GSSRPC_LIBRARY
-USE_DYN_LIBRARY
 
 dnl 
 dnl The following is a kludge to get around a shared library problem
@@ -15,7 +11,10 @@ dnl for NetBSD and Linux.  We have to include -lkdb5 under Linux, and
 dnl we can't include -lkdb5 under NetBSD, due to various breakages in
 dnl each system's shared library implementation
 dnl
-AC_MSG_CHECKING([for build host])
+
+dnl commented out for now --tlyu
+dnl
+ifelse([AC_MSG_CHECKING([for build host])
 AC_CACHE_VAL(krb5_cv_host, [export CC
 AC_CANONICAL_HOST
 krb5_cv_host=$host])
@@ -27,8 +26,7 @@ case $krb5_cv_host in
 *)
   USE_KDB5_LIBRARY
   ;;
-esac
+esac])
 
-KRB5_LIBRARIES
-V5_USE_SHARED_LIB
+KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

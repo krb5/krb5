@@ -1,15 +1,17 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 PROG = kadmin
 OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o keytab.o
 
 all:: $(PROG).local $(PROG)
 
-$(PROG).local: $(OBJS) $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG).local $(OBJS) $(SRVLIBS)
+$(PROG).local: $(OBJS) $(SS_DEPLIB) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG).local $(OBJS) $(SS_LIB) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
-$(PROG): $(OBJS) $(CLNTDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
+$(PROG): $(OBJS) $(SS_DEPLIB) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(SS_LIB) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
 kadmin_ct.o: kadmin_ct.c
 

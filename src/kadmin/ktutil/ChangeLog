@@ -1,3 +1,8 @@
+Tue Feb  4 21:11:33 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Nov  7 15:42:17 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* ktutil.c (main): Check the error return from

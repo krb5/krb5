@@ -8,16 +8,12 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 
 RUN_SETUP=@KRB5_RUN_ENV@
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS=md4.o md4glue.o md4crypto.o
 
 OBJS=	md4.$(OBJEXT) md4glue.$(OBJEXT) md4crypto.$(OBJEXT)
 
 SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
 
-all-unix:: shared $(OBJS) 
-all-mac:: shared $(OBJS) 
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -25,8 +21,7 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
 
 t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
 	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
@@ -62,9 +57,6 @@ clean::
 	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT) t_mddriver.c
 	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT) t_cksum.c
 
-clean-unix::
-	$(RM) shared/*
-clean-mac::
-	$(RM) shared/*
+clean-unix:: clean-libobjs
 clean-windows::
 	$(RM) $(OBJFILE)

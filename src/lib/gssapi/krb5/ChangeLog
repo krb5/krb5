@@ -10,6 +10,11 @@ Tue Feb  4 15:56:01 1997  Richard Basch  <basch@lehman.com>
 	* Makefile.in: Only override the object build of the error table
 		under Unix
 
+Tue Jan 14 20:20:10 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Wed Dec  4 13:06:13 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* acquire_cred.c (acquire_accept_cred): use krb5_kt_get_entry

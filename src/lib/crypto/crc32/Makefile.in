@@ -5,16 +5,12 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSOBJFILE=..\crc32.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS=crc.o
 
 OBJS=	crc.$(OBJEXT)
 
 SRCS=	$(srcdir)/crc.c
 
-all-unix:: shared $(OBJS) 
-all-mac:: shared $(OBJS) 
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -22,8 +18,7 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
 
 crctest: crctest.$(OBJEXT) $(OBJS)
 	$(RM) crctest
@@ -38,9 +33,6 @@ check:: crctest$(EXEEXT)
 clean:: 
 	$(RM) crctest$(EXEEXT) crctest.$(OBJEXT)
 
-clean-unix::
-	$(RM) shared/*
-clean-mac::
-	$(RM) shared/*
+clean-unix:: clean-libobjs
 clean-windows::
 	$(RM) $(OBJFILE)

@@ -1,12 +1,12 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
 
-KRB4INCLUDES=-I$(SRCTOP)/include/kerberosIV
-
-all::
+all:: krb5kdc
 
 DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
-LOCALINCLUDE = $(KRB4INCLUDES) -I.
+LOCALINCLUDE = @KRB4_INCLUDES@ -I.
 SRCS= \
 	kdc5_err.c \
 	$(srcdir)/dispatch.c \
@@ -24,7 +24,7 @@ SRCS= \
 
 OBJS= \
 	kdc5_err.o \
- 	dispatch.o \
+	dispatch.o \
 	do_as_req.o \
 	do_tgs_req.o \
 	kdc_util.o \
@@ -36,8 +36,6 @@ OBJS= \
 	extern.o \
 	replay.o \
 	kerberos_v4.o
-
-all::	krb5kdc
 
 depend:: kdc5_err.c
 
@@ -53,8 +51,8 @@ kdc5_err.h: kdc5_err.et
 
 kdc5_err.o: kdc5_err.h
 
-krb5kdc: $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o krb5kdc $(OBJS) $(LIBS)
+krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc

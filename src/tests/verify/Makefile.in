@@ -1,13 +1,11 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: kdb5_verify
 
-kdb5_verify: kdb5_verify.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_verify kdb5_verify.o $(LIBS)
-
-kdb5_verify.o:	$(srcdir)/kdb5_verify.c
-
-all:: kdb5_verify
+kdb5_verify: kdb5_verify.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kdb5_verify kdb5_verify.o $(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
 install::
 

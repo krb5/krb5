@@ -1,3 +1,21 @@
+Thu Jan 16 18:47:12 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Cause "clean" to dtrt.
+	
+	* configure.in: Punt spurious call to KRB5_LIB_PARAMS.
+
+Sun Dec 29 21:32:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Update to set STLIBOBJS instead of LIBSRCS; also
+	clean up a little bit.
+
+Fri Dec 27 17:09:46 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix to use OBJS.ST rather than ./OBJS.ST.
+
+	* Makefile.in:
+	* configure.in: Changes to use new library build system.
+
 Thu Dec  5 22:43:35 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Apply platform specific patch

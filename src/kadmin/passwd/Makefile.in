@@ -1,4 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I. -DUSE_KADM5_API_VERSION=1
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 PROG = kpasswd
 OBJS = tty_kpasswd.o kpasswd.o kpasswd_strings.o
@@ -9,8 +11,8 @@ kpasswd_strings.c kpasswd_strings.h: $(srcdir)/kpasswd_strings.et
 
 $(OBJS): kpasswd_strings.h
 
-$(PROG): $(OBJS) $(CLNTDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
+$(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(CLIENT_BINDIR)/$(PROG)

@@ -1,3 +1,8 @@
+Sun Feb  9 01:31:00 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Nov 14 14:13:41 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5_encode_test.c (PRS): Add the -p option to krb5_encode_test

@@ -3,9 +3,13 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..\..\..\..
 ##DOSLIBNAME=..\..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS = \
+	mcc_close.o mcc_destry.o mcc_eseq.o \
+	mcc_gennew.o mcc_getnam.o mcc_gprin.o \
+	mcc_init.o mcc_nseq.o \
+	mcc_reslv.o mcc_retrv.o mcc_sseq.o \
+	mcc_store.o mcc_ops.o \
+	mcc_sflags.o
 
 OBJS    = mcc_close.$(OBJEXT) mcc_destry.$(OBJEXT) mcc_eseq.$(OBJEXT) \
 	mcc_gennew.$(OBJEXT) mcc_getnam.$(OBJEXT) mcc_gprin.$(OBJEXT) \
@@ -21,15 +25,9 @@ SRCS    = $(srcdir)/mcc_close.c $(srcdir)/mcc_destry.c $(srcdir)/mcc_eseq.c \
 	$(srcdir)/mcc_store.c $(srcdir)/mcc_ops.c \
 	$(srcdir)/mcc_sflags.c
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
+all-unix:: all-libobjs
 all-windows:: $(OBJS)
 
-shared: 
-	mkdir shared
+clean-unix:: clean-libobjs
 
-clean-unix::
-	$(RM) shared/*
-
-clean-mac::
 clean-windows::

@@ -26,6 +26,9 @@ LOCALINCLUDES=-I.. -I$(srcdir)/..
 CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
 SRCS=	authenc.c commands.c main.c network.c ring.c \
 	sys_bsd.c telnet.c terminal.c \
 	utilities.c $(GETOPT_SRC)
@@ -38,8 +41,8 @@ OBJS=	authenc.o commands.o main.o network.o ring.o sys_bsd.o \
 
 all:: telnet
 
-telnet:	$(OBJS) $(DEPLIBS) ../libtelnet/libtelnet.a
-	$(LD) -o $@ $(LDFLAGS) $(LDARGS) $(OBJS) ../libtelnet/libtelnet.a $(LIBS)
+telnet:	$(OBJS) $(KRB4COMPAT_DEPLIBS) ../libtelnet/libtelnet.a
+	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) telnet

@@ -10,6 +10,15 @@ Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
 		krb5_db_get_principal. Also if SAM is not an option, do
 		not return as a possible type to client. [krb5-kdc/310]
 
+Fri Jan 31 21:39:04 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (LOCALINCLUDE): Change  KRB4_INCLUDE to KRB4_INCLUDES
+
+Fri Jan 31 19:45:13 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Sat Nov 23 17:26:22 1996  Mark Eichin  <eichin@kitten.gen.ma.us>
 
 	* [krb5-libs/149] only generate requests that you can actually

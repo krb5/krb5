@@ -20,30 +20,41 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		posix/DONE $(BUILDTOP)/util/profile/DONE
 
 #
-CRYPTO_VER=@CRYPTO_SH_VERS@
-COMERR_VER=@COMERR_SH_VERS@
-DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
-	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER) \
-	$(ANAME_DBDEP)
-SHLIB_LIBS=-lcrypto -lcom_err $(ANAME_DBLIB) @SHLIB_GEN@
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
+#SHLIB_LIBS=-lcrypto -lcom_err $(ANAME_DBLIB) @SHLIB_GEN@
+#SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 #	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
-SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+#SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all-unix::
+LIB=krb5
+LIBMAJOR=1
+LIBMINOR=0
+
+STOBJLISTS= \
+	error_tables/OBJS.ST \
+	asn.1/OBJS.ST \
+	ccache/OBJS.ST ccache/stdio/OBJS.ST ccache/file/OBJS.ST \
+	ccache/memory/OBJS.ST \
+	keytab/OBJS.ST keytab/file/OBJS.ST \
+	krb/OBJS.ST \
+	rcache/OBJS.ST \
+	free/OBJS.ST \
+	os/OBJS.ST \
+	posix/OBJS.ST \
+	$(BUILDTOP)/util/profile/OBJS.ST
+
+RELDIR=krb5
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libcom_err$(SHLIBEXT)
+SHLIB_EXPLIBS=-lcrypto -lcom_err @SHLIB_GEN@
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+all-unix:: all-liblinks
+
 all-windows::
 
-libkrb5.$(STEXT): $(LIBDONE)
-	@if test -f $@ ; then \
-		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
-	else \
-		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
-	fi
-	$(RANLIB) libkrb5.$(STEXT)
-	touch libkrb5.stamp
-
-clean-unix::
-	$(RM) libkrb5.$(LIBEXT) libkrb5.stamp
+clean-unix:: clean-liblinks clean-libs
 
 clean-windows::
 	$(RM) krb5.lib krb5.bak
@@ -109,3 +120,4 @@ clean-windows::
 	cd ..
 	@echo Making clean locally
 
+install-unix:: install-libs

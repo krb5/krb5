@@ -1,12 +1,15 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
 PROG = kadmind
 OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o misc.o server_glue_v1.o
 
 all:: $(PROG)
 
-$(PROG): $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)

@@ -7,6 +7,11 @@ Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 		Change the functions declarations to include FAR pointers
 		and KRB5_CALLCONV so that they can be utilized by a DLL.
 	
+Thu Jan  2 17:13:26 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Tue Nov 19 17:06:59 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* ktf_g_ent.c (krb5_ktfile_get_entry): return KRB5_KT_KVNONOTFOUND

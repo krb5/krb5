@@ -1,14 +1,87 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSMYNAME=krb
 ##DOSOBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS= \
+	addr_comp.o	\
+	addr_order.o	\
+	addr_srch.o	\
+	auth_con.o	\
+	bld_pr_ext.o	\
+	bld_princ.o	\
+	chk_trans.o	\
+	conv_princ.o	\
+	copy_addrs.o	\
+	copy_auth.o	\
+	copy_athctr.o	\
+	copy_cksum.o    \
+	copy_creds.o	\
+	copy_data.o	\
+	copy_key.o	\
+	copy_princ.o	\
+	copy_tick.o	\
+	cp_key_cnt.o	\
+	crypto_glue.o	\
+	decode_kdc.o	\
+	decrypt_tk.o	\
+	encode_kdc.o	\
+	encrypt_tk.o	\
+	free_rtree.o	\
+	fwd_tgt.o	\
+	gc_frm_kdc.o	\
+	gc_via_tkt.o	\
+	gen_seqnum.o	\
+	gen_subkey.o	\
+	get_creds.o	\
+	get_in_tkt.o	\
+	in_tkt_ktb.o	\
+	in_tkt_pwd.o	\
+	in_tkt_sky.o	\
+	init_ctx.o	\
+	kdc_rep_dc.o	\
+	mk_cred.o	\
+	mk_error.o	\
+	mk_priv.o	\
+	mk_rep.o	\
+	mk_req.o	\
+	mk_req_ext.o	\
+	mk_safe.o	\
+	parse.o		\
+	pr_to_salt.o	\
+	preauth.o	\
+	princ_comp.o	\
+	rd_cred.o	\
+	rd_error.o	\
+	rd_priv.o	\
+	rd_rep.o	\
+	rd_req.o	\
+	rd_req_dec.o	\
+	rd_safe.o	\
+	recvauth.o	\
+	sendauth.o	\
+	send_tgs.o	\
+	ser_actx.o	\
+	ser_adata.o	\
+	ser_addr.o	\
+	ser_auth.o	\
+	ser_cksum.o	\
+	ser_ctx.o	\
+	ser_eblk.o	\
+	ser_key.o	\
+	ser_princ.o	\
+	serialize.o	\
+	srv_rcache.o	\
+	str_conv.o	\
+	tgtname.o	\
+	unparse.o	\
+	valid_times.o	\
+	walk_rtree.o
 
 OBJS=	addr_comp.$(OBJEXT)	\
 	addr_order.$(OBJEXT)	\
@@ -159,8 +232,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/valid_times.c	\
 	$(srcdir)/walk_rtree.c
 
-all-unix:: shared $(OBJS)
-all-mac:: shared $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -168,8 +239,7 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
 
 COMERRLIB=$(TOPLIBD)/libcom_err.a
 
@@ -181,14 +251,17 @@ T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o 
 
-t_walk_rtree: $(T_WALK_RTREE_OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(LIBS)
+t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) \
+		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
-t_kerb: $(T_KERB_OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_kerb $(T_KERB_OBJS) $(LIBS)
+t_kerb: $(T_KERB_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_kerb $(T_KERB_OBJS) \
+		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
-t_ser: $(T_SER_OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_ser $(T_SER_OBJS) $(LIBS)
+t_ser: $(T_SER_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_ser $(T_SER_OBJS) \
+		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
 TEST_PROGS= t_walk_rtree t_kerb t_ser
 
@@ -217,18 +290,13 @@ check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 		$(RUN_SETUP) ./t_ser
 
-check-mac:: $(TEST_PROGS)
-
 check-windows::
 
-clean:: 
+clean::
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
 	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
 	$(RM) t_ser$(EXEEXT) t_ser.$(OBJEXT)
 
-clean-unix::
-	$(RM) shared/*
-clean-mac::
-	$(RM) shared/*
+clean-unix:: clean-libobjs
 clean-windows::
 	$(RM) $(OBJFILE)

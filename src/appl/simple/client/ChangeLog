@@ -1,3 +1,8 @@
+Tue Feb  4 20:38:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Nov 22 15:48:30 1996  unknown  <bjaspan@mit.edu>
 
 	* sim_client.c (main): use sizeof instead of h_length to determine

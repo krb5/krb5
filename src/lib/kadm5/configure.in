@@ -10,27 +10,6 @@ AC_PROG_LEX
 AC_PROG_AWK
 AC_CHECK_HEADERS(syslog.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
-V5_SHARED_LIB_OBJS
-
-dnl V5_MAKE_SHARED_LIB(libkadm5srv,1.0,.., ./kadm5,srv)
-dnl V5_MAKE_SHARED_LIB(libkadm5clnt,1.0,.., ./kadm5,clnt)
-dnl GSSRPC_SH_VERS=$krb5_cv_shlib_version_libgssrpc
-dnl AC_SUBST(GSSRPC_SH_VERS)
-dnl GSSAPI_KRB5_SH_VERS=$krb5_cv_shlib_version_libgssapi_krb5
-dnl AC_SUBST(GSSAPI_KRB5_SH_VERS)
-dnl KDB5_SH_VERS=$krb5_cv_shlib_version_libkdb5
-dnl AC_SUBST(KDB5_SH_VERS)
-dnl KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
-dnl AC_SUBST(KRB5_SH_VERS)
-dnl CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
-dnl AC_SUBST(CRYPTO_SH_VERS)
-dnl COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
-dnl AC_SUBST(COMERR_SH_VERS)
-dnl DYN_SH_VERS=$krb5_cv_shlib_version_libdyn
-dnl AC_SUBST(DYN_SH_VERS)
-
-SubdirLibraryRule([$(OBJS)])
-
 CopySrcHeader(adb.h,[$](BUILDTOP)/include/kadm5)
 CopySrcHeader(admin.h,[$](BUILDTOP)/include/kadm5)
 CopySrcHeader(admin_internal.h,[$](BUILDTOP)/include/kadm5)
@@ -42,6 +21,5 @@ CopySrcHeader(server_internal.h,[$](BUILDTOP)/include/kadm5)
 CopyHeader(adb_err.h,[$](BUILDTOP)/include/kadm5)
 CopyHeader(chpass_util_strings.h,[$](BUILDTOP)/include/kadm5)
 CopyHeader(kadm_err.h,[$](BUILDTOP)/include/kadm5)
-AppendRule([all:: all-$(WHAT)])
-ALL_RECURSE=
+KRB5_BUILD_LIBOBJS
 V5_AC_OUTPUT_MAKEFILE

@@ -20,15 +20,15 @@
 # 
 
 CFLAGS = $(CCOPTS) -DUSE_MASTER  $(DEFS) $(LOCALINCLUDE)
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all::
 
+KRB524_DEPLIB	= libkrb524.a
+KRB524_LIB	= libkrb524.a
 
-LOCAL_LIBRARIES = libkrb524.a
-DEPLOCAL_LIBRARIES = libkrb524.a
-
-LOCALINCLUDE= -I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV \
-	-I. -I$(srcdir)
+LOCALINCLUDE= $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 # Library sources
 SRCS	= conv_creds.c conv_princ.c conv_tkt.c cnv_tkt_skey.c \
@@ -44,14 +44,14 @@ libkrb524.a: $(OBJS)
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
-krb524test: libkrb524.a test.o $(DEPLIBS)
-	$(LD) -o krb524test $(LDFLAGS) $(LDARGS) test.o $(LIBS)
+krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o krb524test test.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
-krb524d: krb524d.o $(DEPLIBS)
-	$(LD) -o krb524d krb524d.o $(LDFLAGS) $(LDARGS) $(LIBS)
+krb524d: krb524d.o $(KADMSRV_DEPLIBS) $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o krb524d krb524d.o $(KADMSRV_LIBS) $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
-k524init: k524init.o $(DEPLIBS)
-	$(LD) -o k524init $(LDFLAGS) $(LDARGS) k524init.o $(LIBS)
+k524init: k524init.o  $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o k524init k524init.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
 install::
 	$(INSTALL_DATA) libkrb524.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb524.a
@@ -62,4 +62,3 @@ install::
 clean::
 	$(RM) libkrb524.a $(OBJS) $(GENS) core *~ *.bak #*
 	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o
-

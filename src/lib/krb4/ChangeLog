@@ -1,3 +1,11 @@
+Sat Feb  1 08:44:00 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (STOBJLISTS): Fix up des425 reference.
+
+Wed Jan  8 01:34:30 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in, configure.in: Convert to new build procedure.
+
 Mon Nov 18 20:40:39 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Set shared library version to 1.0. [krb5-libs/201]

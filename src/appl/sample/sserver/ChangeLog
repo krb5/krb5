@@ -1,3 +1,8 @@
+Tue Feb  4 20:47:55 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Dec  5 19:44:05 1996  Tom Yu  <tlyu@mit.edu>
 
 	* sserver.M: remove ref's to "/krb5" [PR 279]

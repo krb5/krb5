@@ -12,6 +12,15 @@ Thu Nov 21 11:55:16 EST 1996	Richard Basch	<basch@lehman.com>
 		DLL export several more common functions (see lib/krb5.def
 		for the full list of functions exported)
 
+Thu Feb  6 15:46:24 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Thu Jan  2 17:19:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Update to new library build procedure.
+
 Wed Nov 13 02:53:31 1996  Tom Yu  <tlyu@mit.edu>
 
 	* osconfig.c: Add warning re: global variables.

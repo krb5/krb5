@@ -1,4 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) -DKDB4_DISABLE -I. $(LOCALINCLUDE) @KRB4_INCLUDES@ 
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 PROG = kdb5_util
 OBJS	= kdb5_util.o dump.o dumpv4.o loadv4.o \
@@ -7,8 +9,8 @@ OBJS	= kdb5_util.o dump.o dumpv4.o loadv4.o \
 
 all:: $(PROG)
 
-$(PROG): $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS)
 
 import_err.c import_err.h: $(srcdir)/import_err.et
 

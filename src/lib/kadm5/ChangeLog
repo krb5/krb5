@@ -1,3 +1,12 @@
+Thu Jan 16 19:01:00 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Update to use double-colon rules.
+
+Wed Jan 15 20:43:01 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new libarary build procedure.
+
 Mon Nov 11 17:01:40 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadm_rpc_xdr.c: fix memory leak handling key_data and tl_data

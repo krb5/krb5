@@ -1,13 +1,12 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
-all::
-
-klist: klist.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o klist klist.o $(LIBS)
-
-klist.o:	$(srcdir)/klist.c
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: klist
+
+klist: klist.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) klist.o klist

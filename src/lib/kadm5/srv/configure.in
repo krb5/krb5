@@ -26,25 +26,8 @@ case $krb5_cv_host in
 	;;
 esac
 
-V5_SHARED_LIB_OBJS
-V5_MAKE_SHARED_LIB(libkadm5srv, 1.0, ../.., ./kadm5/srv)
-
-GSSRPC_SH_VERS=$krb5_cv_shlib_version_libgssrpc
-AC_SUBST(GSSRPC_SH_VERS)
-GSSAPI_KRB5_SH_VERS=$krb5_cv_shlib_version_libgssapi_krb5
-AC_SUBST(GSSAPI_KRB5_SH_VERS)
-KDB5_SH_VERS=$krb5_cv_shlib_version_libkdb5
-AC_SUBST(KDB5_SH_VERS)
-KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
-AC_SUBST(KRB5_SH_VERS)
-CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
-AC_SUBST(CRYPTO_SH_VERS)
-COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
-AC_SUBST(COMERR_SH_VERS)
-DYN_SH_VERS=$krb5_cv_shlib_version_libdyn
-AC_SUBST(DYN_SH_VERS)
-
-SubdirLibraryRule([$(OBJS)])
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
 
 CopySrcHeader(server_acl.h,[$](BUILDTOP)/include/kadm5)
 V5_AC_OUTPUT_MAKEFILE

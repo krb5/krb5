@@ -16,6 +16,11 @@ Wed Feb  5 20:18:33 1997  Richard Basch  <basch@lehman.com>
 		Fixed typo (all-max -> all-mac)
 		Inconsistent colon usage; all-windows needed :: not :
 
+Thu Jan  2 17:36:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Mon Nov  4 17:04:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* prof_parse.c (parse_std_line): Accept either ';' or '#' on the

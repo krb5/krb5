@@ -23,6 +23,16 @@ Thu Jan 30 21:44:37 1997  Richard Basch  <basch@lehman.com>
 		krb5_process_key, krb5_finish_key, krb5_string_to_key,
 		krb5_init_random_key, krb5_finish_random_key, krb5_random_key
 
+Sat Feb  8 18:41:42 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Thu Jan  2 17:16:18 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Mon Dec 23 17:20:03 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (SRCS): Add brand.c to the SRCS line so that the

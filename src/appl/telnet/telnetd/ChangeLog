@@ -1,3 +1,8 @@
+Wed Feb  5 22:08:58 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Nov  7 15:32:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* telnetd.c (main): Check the error return from

@@ -12,19 +12,40 @@ install:: install-$(WHAT)
 
 check:: check-$(WHAT)
 
-#
-# set up some variables for use in recursion
-#
-ALL_RECURSE=@ALL_RECURSE@
-CLEAN_RECURSE=@CLEAN_RECURSE@
-INSTALL_RECURSE=@INSTALL_RECURSE@
-CHECK_RECURSE=@CHECK_RECURSE@
-MAKEFILES_RECURSE=@MAKEFILES_RECURSE@
+all-unix:: all-prerecurse
+all-unix:: all-recurse
+all-unix:: all-postrecurse
 
-all-unix:: $(ALL_RECURSE)
-clean-unix:: $(CLEAN_RECURSE)
-install-unix:: $(INSTALL_RECURSE)
-check-unix:: $(CHECK_RECURSE)
+all-prerecurse::
+all-postrecurse::
+
+clean-unix:: clean-prerecurse
+clean-unix:: clean-recurse
+clean-unix:: clean-postrecurse
+
+clean-prerecurse::
+clean-postrecurse::
+
+install-unix:: install-prerecurse
+install-unix:: install-recurse
+install-unix:: install-postrecurse
+
+install-prerecurse::
+install-postrecurse::
+
+check-unix:: check-prerecurse
+check-unix:: check-recurse
+check-unix:: check-postrecurse
+
+check-prerecurse::
+check-postrecurse::
+
+Makefiles:: Makefiles-prerecurse
+Makefiles:: Makefiles-recurse
+Makefiles:: Makefiles-postrecurse
+
+Makefiles-prerecurse::
+Makefiles-postrecurse::
 
 # Directory syntax:
 R=/
@@ -142,6 +163,96 @@ OBJEXT = o
 LIBEXT = a
 EXEEXT =
 
+#
+# variables for libraries, for use in linking programs
+# -- this may want to get broken out into a separate frag later
+#
+#
+# Note: the following variables must be set in any Makefile.in that
+# uses KRB5_BUILD_PROGRAM
+#
+# PROG_LIBPATH	list of dirs, in -Ldir form, to search for libraries at link
+# PROG_RPATH	list of dirs, in dir1:dir2 form, for rpath purposes
+#
+# invocation is like:
+# prog: foo.o bar.o $(KRB5_BASE_DEPLIBS)
+# 	$(CC_LINK) -o $@ foo.o bar.o $(KRB5_BASE_LIBS)
+
+
+CC_LINK=@CC_LINK@
+
+# this gets set by configure to either $(STLIBEXT) or $(SHLIBEXT),
+# depending on whether we're building with shared libraries.
+DEPLIBEXT=@DEPLIBEXT@
+
+KADMCLNT_DEPLIB	= $(TOPLIBD)/libkadm5clnt$(DEPLIBEXT)
+KADMSRV_DEPLIB	= $(TOPLIBD)/libkadm5srv$(DEPLIBEXT)
+KDB5_DEPLIB	= $(TOPLIBD)/libkdb5$(DEPLIBEXT)
+GSSRPC_DEPLIB	= $(TOPLIBD)/libgssrpc$(DEPLIBEXT)
+GSS_DEPLIB	= $(TOPLIBD)/libgssapi_krb5$(DEPLIBEXT)
+KRB4_DEPLIB	= @KRB4_DEPLIB@		# $(TOPLIBD)/libkrb4$(DEPLIBEXT)
+DES425_DEPLIB	= @DES425_DEPLIB@	# $(TOPLIBD)/libdes425$(DEPLIBEXT)
+KRB5_DEPLIB	= $(TOPLIBD)/libkrb5$(DEPLIBEXT)
+CRYPTO_DEPLIB	= $(TOPLIBD)/libcrypto$(DEPLIBEXT)
+COM_ERR_DEPLIB	= $(TOPLIBD)/libcom_err$(DEPLIBEXT)
+DYN_DEPLIB	= $(TOPLIBD)/libdyn$(DEPLIBEXT)
+
+PTY_DEPLIB	= $(TOPLIBD)/libpty$(DEPLIBEXT)
+
+# These are forced to use ".a" as an extension because they're never
+# built shared.
+UTIL_DEPLIB	= $(TOPLIBD)/libkrb5util.a
+SS_DEPLIB	= $(TOPLIBD)/libss.a
+DB_DEPLIB	= $(TOPLIBD)/libdb.a
+
+KRB5_BASE_DEPLIBS	= $(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(COM_ERR_DEPLIB)
+KRB4COMPAT_DEPLIBS	= $(KRB4_DEPLIB) $(DES425_DEPLIB) $(KRB5_BASE_DEPLBS)
+KDB5_DEPLIBS		= $(KDB5_DEPLIB) $(DB_DEPLIB)
+GSS_DEPLIBS		= $(GSS_DEPLIB)
+GSSRPC_DEPLIBS		= $(GSSRPC_DEPLIB) $(DYN_DEPLIB) $(GSS_DEPLIBS)
+KADM_COMM_DEPLIBS	= $(UTIL_DEPLIB) $(KDB5_DEPLIBS) $(GSSRPC_DEPLIBS)
+KADMSRV_DEPLIBS		= $(KADMSRV_DEPLIB) $(KADM_COMM_DEPLIBS)
+KADMCLNT_DEPLIBS	= $(KADMCLNT_DEPLIB) $(KADM_COMM_DEPLIBS)
+
+# LIBS gets substituted in... e.g. -lnsl -lsocket
+
+# GEN_LIB is -lgen if needed for regexp
+GEN_LIB		= @GEN_LIB@
+
+DB_LIB		= $(TOPLIBD)/libdb.a
+SS_LIB		= $(TOPLIBD)/libss.a
+KDB5_LIB	= -lkdb5
+
+# KRB4_LIB is -lkrb4 if building --with-krb4
+KRB4_LIB	= @KRB4_LIB@
+
+# DES425_LIB is -ldes425 if building --with-krb4
+DES425_LIB	= @DES425_LIB@
+
+KRB5_BASE_LIBS	= -lkrb5 -lcrypto -lcom_err $(GEN_LIB) $(LIBS)
+KRB4COMPAT_LIBS	= $(KRB4_LIB) -lkrb5 $(DES425_LIB) -lcrypto -lcom_err $(GEN_LIB) $(LIBS)
+KDB5_LIBS	= $(KDB5_LIB) $(DB_LIB)
+GSS_LIBS	= -lgssapi_krb5
+GSSRPC_LIBS	= -lgssrpc -ldyn $(GSS_LIBS)
+KADM_COMM_LIBS	= -lkrb5util  $(KDB5_LIBS) $(GSSRPC_LIBS)
+KADMSRV_LIBS	= -lkadm5srv $(KADM_COMM_LIBS)
+KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
+
+UTIL_LIB	= -lkrb5util
+PTY_LIB		= -lpty
+
+#
+# some more stuff for --with-krb4
+KRB4_LIBPATH	= @KRB4_LIBPATH@
+KRB4_INCLUDES	= @KRB4_INCLUDES@
+
+#
+# variables for --with-tcl=
+TCL_LIBS	= @TCL_LIBS@
+TCL_LIBPATH	= @TCL_LIBPATH@
+TCL_RPATH	= @TCL_RPATH@
+TCL_INCLUDES	= @TCL_INCLUDES@
+
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
@@ -166,11 +277,6 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 	else \
 		(set -x; $(MAKE_COMMANDS) "$*.ct") || exit 1; \
 	fi
-
-all::
-clean::
-install::
-check::
 
 #
 # end of pre.in

@@ -1,11 +1,8 @@
+RELDIR=../util/dyn
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libdyn.lib
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
 
 SRCS = $(srcdir)/dyn_create.c \
 	$(srcdir)/dyn_put.c \
@@ -29,37 +26,22 @@ OBJS = dyn_create.$(OBJEXT) \
 	dyn_insert.$(OBJEXT) \
 	dyn_initzero.$(OBJEXT)
 
-LIB_SUBDIRS= .
-LIBDONE= DONE
+STLIBOBJS=$(OBJS)
+STOBJLISTS=OBJS.ST
+LIB=dyn
+LIBMAJOR=1
+LIBMINOR=0
 
-all-unix:: shared includes $(OBJS)
+
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
-shared:
-	mkdir shared
+all-unix:: includes
 
 check-windows::
-
-clean-unix::
-	$(RM) shared/*
-
 clean-mac::
 clean-windows::
-
-DONE:: $(OBJS)
-	 $(RM) DONE
-	 echo $(OBJS) >DONE
-
-libdyn.$(STEXT): $(OBJS)
-	$(RM) $@
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
-
-install:: libdyn.a
-	$(INSTALL_DATA) libdyn.a $(DESTDIR)$(KRB5_LIBDIR)/libdyn.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdyn.a
-
-clean::
-	$(RM) libdyn.$(LIBEXT) libdyn.bak DONE
 

@@ -1,3 +1,8 @@
+Sun Feb  9 01:48:01 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Mon Mar 18 21:49:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add KRB5_RUN_FLAGS

@@ -1,3 +1,8 @@
+Sun Feb  9 01:45:03 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Jan 19 23:00:37 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdc5_hammer.c: Remove krb5_kdc_default_options.

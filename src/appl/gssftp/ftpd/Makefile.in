@@ -2,6 +2,8 @@
 # appl/gssftp/ftpd/Makefile.in
 #
 CFLAGS = -DGSSAPI -DFTP_BUFSIZ=10240 $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
@@ -17,17 +19,13 @@ SRCS	= ftpd.c ftpcmd.y logwtmp.c popen.c vers.c \
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
-KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
-		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
-
 LOCALINCLUDE = -I$(srcdir)/..
 DEFINES = -DGSSAPI -DNOCONFIDENTIAL
 
 all::	ftpd
 
-ftpd:	$(OBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o $@ $(OBJS) $(KLIB) $(LIBS)
+ftpd:	$(OBJS) $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) ftpd ftpcmd.c

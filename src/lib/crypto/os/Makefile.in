@@ -5,19 +5,13 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSOBJFILE=..\os.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
-LIBOBJS = @LIBOBJS@
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS = rnd_confoun.o c_localaddr.o c_ustime.o @LIBOBJS@
 
 COBJS=	rnd_confoun.$(OBJEXT) c_localaddr.$(OBJEXT) c_ustime.$(OBJEXT) 
 OBJS= $(COBJS) $(LIBOBJS)
 
 SRCS=	rnd_confoun.c c_localaddr.c c_ustime.c
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(COBJS)
@@ -25,23 +19,16 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
-	
+all-unix:: all-libobjs
+
 memmove.c: $(SRCTOP)$(S)lib$(S)krb5$(S)posix$(S)memmove.c
 	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)posix$(S)memmove.c $@
 
 memmove.o: memmove.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
-	
 
+clean-unix:: clean-libobjs
 clean:: 
 	$(RM) memmove.c
 
-clean-unix::
-	$(RM) shared/*
-clean-mac::
-	$(RM) shared/*
 clean-windows::
 	$(RM) $(OBJFILE)

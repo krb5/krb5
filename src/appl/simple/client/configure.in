@@ -5,6 +5,5 @@ AC_CHECK_HEADERS(stdlib.h)
 if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
 	AC_DEFINE(BROKEN_STREAMS_SOCKETS)
 fi
-KRB5_LIBRARIES
-V5_USE_SHARED_LIB
+KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

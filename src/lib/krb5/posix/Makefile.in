@@ -5,33 +5,23 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSOBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
-
+STLIBOBJS=setenv.o @LIBOBJS@
 MACSRCS = getuid.c strcasecmp.c strdup.c
 
 OBJS = setenv.$(OBJEXT)	@LIBOBJS@
 
-all-unix:: shared $(OBJS)
-all-mac: $(OBJS)
 all-windows:: $(OBJFILE)
+all-unix:: all-libobjs
 
 ##WIN16##$(OBJFILE): syslog.obj sscanf.obj
 ##WIN16##	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 
+clean-unix:: clean-libobjs
+
 ##WIN32##$(OBJFILE): syslog.obj
 ##WIN32##	$(RM) $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
-
-clean-unix::
-	$(RM) shared/*
-
-clean-mac::
 clean-windows::
 	$(RM) $(OBJFILE)
-

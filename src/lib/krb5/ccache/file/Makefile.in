@@ -5,9 +5,14 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSOBJFILE = file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS = \
+	fcc_close.o fcc_destry.o fcc_eseq.o \
+	fcc_gennew.o fcc_getnam.o fcc_gprin.o \
+	fcc_init.o fcc_nseq.o fcc_read.o \
+	fcc_reslv.o fcc_retrv.o fcc_sseq.o \
+	fcc_store.o fcc_skip.o fcc_ops.o \
+	fcc_write.o fcc_sflags.o fcc_defops.o \
+	fcc_errs.o fcc_maybe.o
 
 OBJS 	= fcc_close.$(OBJEXT) fcc_destry.$(OBJEXT) fcc_eseq.$(OBJEXT) \
 	fcc_gennew.$(OBJEXT) fcc_getnam.$(OBJEXT) fcc_gprin.$(OBJEXT) \
@@ -25,8 +30,6 @@ SRCS 	= $(srcdir)/fcc_close.c $(srcdir)/fcc_destry.c $(srcdir)/fcc_eseq.c \
 	$(srcdir)/fcc_write.c $(srcdir)/fcc_sflags.c $(srcdir)/fcc_defops.c \
 	$(srcdir)/fcc_errs.c $(srcdir)/fcc_maybe.c
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -34,12 +37,10 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared: 
-	mkdir shared
+all-unix:: all-libobjs
+all-windows:: $(OBJS)
 
-clean-unix::
-	$(RM) shared/*
+clean-unix:: clean-libobjs
 
-clean-mac::
 clean-windows::
 	$(RM) $(OBJFILE)

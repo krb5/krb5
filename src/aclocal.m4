@@ -17,8 +17,8 @@ case "$ac_reltopdir" in
 esac
 ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
-ac_prepend=$ac_config_fragdir/pre.in
-ac_postpend=$ac_config_fragdir/post.in
+krb5_prepend_frags=$ac_config_fragdir/pre.in
+krb5_append_frags=$ac_config_fragdir/post.in
 BUILDTOP=$ac_reltopdir
 SRCTOP=$srcdir/$ac_reltopdir
 if test -d "$srcdir/$ac_config_fragdir"; then
@@ -60,16 +60,15 @@ case "$ac_cv_path_install" in
 	;;
 esac
 ])dnl
+
 dnl
 dnl DO_SUBDIRS
 dnl recurse into subdirs by specifying the recursion targets
 dnl the rules are in post.in but the target needs substitution
 AC_DEFUN([DO_SUBDIRS],
-[ALL_RECURSE="all-recurse"
-CLEAN_RECURSE="clean-recurse"
-INSTALL_RECURSE="install-recurse"
-CHECK_RECURSE="check-recurse"
-MAKEFILES_RECURSE="Makefiles-recurse"])
+[# this is a noop now
+])
+
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
@@ -86,11 +85,7 @@ AC_CONST dnl
 WITH_NETLIB dnl
 KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
-AC_SUBST(ALL_RECURSE)
-AC_SUBST(CLEAN_RECURSE)
-AC_SUBST(INSTALL_RECURSE)
-AC_SUBST(CHECK_RECURSE)
-AC_SUBST(MAKEFILES_RECURSE)
+AC_SUBST(subdirs)
 ])dnl
 
 dnl This is somewhat gross and should go away when the build system
@@ -234,44 +229,41 @@ withval=yes
 if test $withval = no; then
 	AC_MSG_RESULT(no krb4 support)
 	KRB4_LIB=
-	DEPKRB4_LIB=
-	KRB4_CRYPTO_LIB=
-	DEPKRB4_CRYPTO_LIB=
+	KRB4_DEPLIB=
+	DES425_LIB=
+	DES425_DEPLIB=
 	KRB4_INCLUDES=
-	LDARGS=
+	KRB4_LIBPATH=
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir=
 else 
  ADD_DEF(-DKRB5_KRB4_COMPAT)
+ DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
+ DES425_LIB=-ldes425
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
-	KRB4_INCLUDE="-I$SRCTOP/include/kerberosIV"
-	KRB4_LIB='-lkrb4'
-	DEPKRB4_LIB='$(TOPLIBD)/libkrb4.a'
-	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
-	KRB4_INCLUDES='-I$(SRCTOP)/include/kerberosIV'
-	LDARGS=
+	KRB4_DEPLIB='$(TOPLIBD)/libkrb4$(DEPLIBEXT)'
+	KRB4_LIB=-lkrb4
+	KRB4_INCLUDES='-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV'
+	KRB4_LIBPATH=
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
  else
 	AC_MSG_RESULT(preinstalled krb4 in $withval)
-	KRB4_INCLUDE="-I$withval/include"
 	KRB4_LIB="-lkrb"
-	DEPKRB4_LIB="$withval/lib/libkrb.a"
-	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+dnl	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_INCLUDES="-I$withval/include"
-	LDARGS="-L$withval/lib"
+	KRB4_LIBPATH="-L$withval/lib"
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir="$withval/lib"
  fi
 fi
 AC_SUBST(KRB4_INCLUDES)
+AC_SUBST(KRB4_LIBPATH)
 AC_SUBST(KRB4_LIB)
-AC_SUBST(KRB4_CRYPTO_LIB)
-AC_SUBST(DEPKRB4_LIB)
-AC_SUBST(DEPKRB4_CRYPTO_LIB)
+AC_SUBST(KRB4_DEPLIB)
+AC_SUBST(DES425_DEPLIB)
+AC_SUBST(DES425_LIB)
 ])dnl
 dnl
 dnl set $(CC) from --with-cc=value
@@ -507,7 +499,7 @@ define(V5_AC_OUTPUT_MAKEFILE,
 ifelse($2, , filelist="", filelist="$2")
 dnl OPTIMIZE THIS FOR COMMON CASE!!
 for x in $ac_v5_makefile_dirs; do
-  filelist="$filelist $x/Makefile.tmp:$ac_prepend:$x/Makefile.in:$ac_postpend"
+  filelist="$filelist $x/Makefile.tmp:$krb5_prepend_frags:$x/Makefile.in:$krb5_append_frags"
 done
 AC_OUTPUT($filelist,
 [EOF
@@ -825,151 +817,6 @@ AC_SUBST(SRVLIBS)
 AC_SUBST(CLNTDEPLIBS)
 AC_SUBST(CLNTLIBS)])
 dnl
-dnl This rule supports the generation of the shared library object files
-dnl
-define(V5_SHARED_LIB_OBJS,[
-if test ${krb5_cv_shlibs_dir}x != x; then
-SHARED_RULE="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$""<"
-SHARED_RULE_LOCAL="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$""<"
-else
-SHARED_RULE=
-SHARED_RULE_LOCAL=
-fi
-AC_SUBST(SHARED_RULE)
-AC_SUBST(SHARED_RULE_LOCAL)
-])dnl
-dnl
-dnl
-dnl This rule adds the additional Makefile fragment necessary to actually 
-dnl create the shared library
-dnl
-dnl V5_MAKE_SHARED_LIB(libname, version, libdir, dirname_relative_to_libdir,
-dnl		       lib_subdirs)
-dnl
-define(V5_MAKE_SHARED_LIB,[
-if test "[$]krb5_cv_staticlibs_enabled" = yes
-	then
-	SHLIB_STATIC_TARGET="$1.[\$](STEXT)"
-	else
-	SHLIB_STATIC_TARGET=
-	fi
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build with shared libraries],[
-SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
-AC_SUBST(SHLIB_TAIL_COMP)
-LD_UNRESOLVED_PREFIX=$krb5_cv_shlibs_sym_ufo
-AC_SUBST(LD_UNRESOLVED_PREFIX)
-LD_SHLIBDIR_PREFIX=$krb5_cv_shlibs_dirhead
-AC_SUBST(LD_SHLIBDIR_PREFIX)
-SHLIB_RPATH_DIRS=
-if test $krb5_cv_shlibs_use_dirs = yes ; then
-	if test $krb5_cv_shlibs_use_colon_dirs = yes ; then
-		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}$(KRB5_SHLIBDIR)"
-	else
-		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR)"
-	fi
-fi
-AC_SUBST(SHLIB_RPATH_DIRS)
-SHLIB_LIBDIRS="-L\$(TOPLIBD)"
-if test X$krb5_cv_krb4_libdir != X ; then
-	SHLIB_LIBDIRS="$SHLIB_LIBDIRS -L$krb5_cv_krb4_libdir"
-fi
-AC_SUBST(SHLIB_LIBDIRS)
-HOST_TYPE=$krb5_cv_host
-AC_SUBST(HOST_TYPE)
-if test "$krb5_cv_shlibs_ext" = ""; then
-  AC_MSG_ERROR(Library building info can't be determined by this lame configure
-script; try reconfiguring again from the top of the tree.)
-fi
-SHEXT=$krb5_cv_shlibs_ext
-AC_SUBST(SHEXT)
-STEXT=$krb5_cv_noshlibs_ext
-AC_SUBST(STEXT)
-if test "$krb5_cv_shlibs_versioned_filenames" = "yes" ; then
-VEXT=".$2" # Version of library goes in archive name
-if test "$krb5_cv_shlibs_need_nover" = yes; then
-	DO_MAKE_SHLIB="$1.\$""(SHEXT).$2 $1.\$""(SHEXT)"
-else
-	DO_MAKE_SHLIB="$1.\$""(SHEXT).$2"
-fi
-else # $krb5_cv_shlibs_versioned_filenames
-VEXT=
-	DO_MAKE_SHLIB="$1.\$""(SHEXT)"
-fi
-AC_SUBST(VEXT)
-dnl export the version of the library....
-krb5_cv_shlib_version_$1=$2
-AC_SUBST(SHLIB_NAME)
-AC_PUSH_MAKEFILE()dnl
-
-all-unix:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
-
-clean-unix:: 
-	$(RM) $1.[$](SHEXT)$(VEXT) $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
-
-$1.[$](SHEXT)$(VEXT): [$](LIBDONE) [$](DEPLIBS)
-	[$](BUILDTOP)/util/makeshlib [$]@	\
-		"[$](SHLIB_LIBDIRS)" \
-		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" "$2" [$](LIB_SUBDIRS) $5
-AC_POP_MAKEFILE()dnl
-if test "$krb5_cv_shlibs_versioned_filenames" = "yes" ; then
-LinkFile($1.[$](SHEXT),$1.[$](SHEXT).$2)
-fi
-],[
-STEXT=$krb5_cv_noshlibs_ext
-AC_SUBST(STEXT)
-DO_MAKE_SHLIB=
-AC_PUSH_MAKEFILE()
-all-unix:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
-
-clean-unix:: 
-	$(RM) $1.[$](STEXT)
-AC_POP_MAKEFILE()
-])dnl
-AC_SUBST(DO_MAKE_SHLIB)
-AC_SUBST(SHLIB_STATIC_TARGET)
-
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build shared libraries],[
-# Note that even if we aren't installing versions of the library with
-# Version identifiers in the file name, we still need to make the links
-# in ${BUILDTOP}/lib for dependencies.
-# The following makes sure that the path of symlinks traces back to the real library; it is
-# not an error that $2 is used in some places and $VEXT in others.
-LinkFileDir($3/$1.[$](SHEXT).$2, $1.[$](SHEXT)[$](VEXT), $4)
-AppendRule([$3/$1.[$](SHEXT): $3/$1.[$](SHEXT).$2
-	[$](RM) $3/$1.[$](SHEXT)
-	[$](LN) $1.[$](SHEXT).$2 $3/$1.[$](SHEXT)
-])
-AppendRule(clean::[
-	[$](RM) $3/$1.[$](SHEXT).$2 $3/$1.[$](SHEXT)
-])
-if test "$krb5_cv_shlibs_need_nover" = "yes" ; then
-AppendRule([all-unix:: $3/$1.$(SHEXT).$2 $3/$1.$(SHEXT)])
-else
-AppendRule([all-unix:: $3/$1.$(SHEXT)[$](VEXT)])
-fi
-AppendRule([install::	$1.[$](SHEXT)[$](VEXT)
-	[$](RM) [$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)[$](VEXT)
-	[$](INSTALL_DATA) $1.[$](SHEXT)[$](VEXT)	\
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)[$](VEXT)
-])
-if test "$krb5_cv_shlibs_need_nover" = "yes" ; then
-AppendRule([install::	$1.[$](SHEXT).$2
-	[$](RM) [$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)
-	[$](LN) $1.[$](SHEXT).$2 \
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)])
-])
-fi
-if test -n "$krb5_cv_staticlibs_enabled" ; then
-        AppendRule([install:: $1.[$](STEXT)
-	[$](INSTALL_DATA) $1.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)$1.[$](STEXT)
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)[$](S)$1.[$](STEXT)])
-        LinkFileDir($3/$1.[$](STEXT),$1.[$](STEXT),$4)
-        AppendRule([all-unix:: $3/$1.[$](STEXT)])
-fi
-])dnl
-dnl
 dnl Defines LDARGS correctly so that we actually link with the shared library
 dnl
 define(V5_USE_SHARED_LIB,[
@@ -1058,68 +905,314 @@ fi
 fi dnl stdarg test failure
 
 ])dnl
-dnl
-dnl Set environment variables so that shared library executables can run
-dnl in the build tree.
-dnl
-define(KRB5_RUN_FLAGS,[
-if test "$krb5_cv_shlibs_enabled" = yes ; then
-	KRB5_RUN_ENV=
-	if test "$krb5_cv_shlibs_run_ldpath" = default ; then
-		KRB5_RUN_ENV="$KRB5_RUN_ENV LD_LIBRARY_PATH=\$(TOPLIBD) ;  export LD_LIBRARY_PATH;"
-	elif test "$krb5_cv_shlibs_run_ldpath" != no ; then
-		KRB5_RUN_ENV="$KRB5_RUN_ENV LD_LIBRARY_PATH=\$(TOPLIBD):$krb5_cv_shlibs_run_ldpath ; export LD_LIBRARY_PATH;"
-	fi
-	# For OSF/1 this commits us to ignore built in rpath libraries
-	if test "$krb5_cv_shlibs_run_rldroot" = dummy ; then
-		KRB5_RUN_ENV="$KRB5_RUN_ENV _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;"
-	fi
-	# For AIX
-	if test "$krb5_cv_shlibs_run_libpath" != no ; then
-		KRB5_RUN_ENV="$KRB5_RUN_ENV LIBPATH=\$(TOPLIBD):$krb5_cv_shlibs_run_libpath ; export LIBPATH;"
-	fi
-else
-	KRB5_RUN_ENV=
-fi
-AC_SUBST(KRB5_RUN_ENV)
-])dnl
+
 dnl
 dnl AC_KRB5_TCL - determine if the TCL library is present on system
 dnl
 AC_DEFUN(AC_KRB5_TCL,[
-TCL_INC=
-TCL_LIB=
+TCL_INCLUDES=
+TCL_LIBPATH=
+TCL_RPATH=
+TCL_LIBS=
 TCL_WITH=
 AC_ARG_WITH(tcl,
 [  --with-tcl=path         where Tcl resides],
 	TCL_WITH=$withval
 	if test "$withval" != yes -a "$withval" != no ; then
-		TCL_INC=-I$withval/include
-		TCL_LIB=-L$withval/lib
+		TCL_INCLUDES=-I$withval/include
+		TCL_LIBPATH=-L$withval/lib
+		TCL_RPATH=:$withval/lib
 	fi)
-AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
 if test "$TCL_WITH" != no ; then
-	hold_cflags=$CPPFLAGS
-	hold_ldflags=$LDFLAGS
-	CPPFLAGS="$CPPFLAGS $TCL_INC"
-	LDFLAGS="$CPPFLAGS $TCL_LIB"
+	AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
+	AC_CHECK_LIB(ld, main, DL_LIB=-lld)
+	krb5_save_CPPFLAGS="$CPPFLAGS"
+	krb5_save_LDFLAGS="$LDFLAGS"
+	CPPFLAGS="$TCL_INCLUDES $CPPFLAGS"
+	LDFLAGS="$TCL_LIBPATH $LDFLAGS"
 	AC_CHECK_HEADER(tcl.h,dnl
 		AC_CHECK_LIB(tcl7.5, Tcl_CreateCommand, 
-			TCL_LIB="$TCL_LIB -ltcl7.5 $DL_LIB",
+			TCL_LIBS="$TCL_LIBS -ltcl7.5 -lm $DL_LIB",
 			AC_CHECK_LIB(tcl, Tcl_CreateCommand, 
-				TCL_LIB="$TCL_LIB -ltcl $DL_LIB",
+				TCL_LIBS="$TCL_LIBS -ltcl -lm $DL_LIB",
 				AC_MSG_WARN("tcl.h found but not library"),
 				-lm $DL_LIB),
-			-lm $DL_LIB)
-	,dnl If tcl.h not found
+			-lm $DL_LIB),dnl tcl.h not found
 	AC_MSG_WARN(Could not find Tcl which is needed for the kadm5 tests)
-	TCL_LIB=
-	)
-	CPPFLAGS=$hold_cflags
-	LDFLAGS=$hold_ldflags
-	AC_SUBST(TCL_LIB)
-	AC_SUBST(TCL_INC)
+	TCL_LIBS=)
+	CPPFLAGS="$krb5_save_CPPFLAGS"
+	LDFLAGS="$krb5_save_LDFLAGS"
+	AC_SUBST(TCL_INCLUDES)
+	AC_SUBST(TCL_LIBS)
+	AC_SUBST(TCL_LIBPATH)
+	AC_SUBST(TCL_RPATH)
 else
 	AC_MSG_RESULT("Not looking for Tcl library")
 fi
 ])dnl
+
+dnl
+dnl KRB5_BUILD_LIBRARY
+dnl
+dnl Pull in the necessary stuff to create the libraries.
+
+AC_DEFUN(KRB5_BUILD_LIBRARY,
+[AC_REQUIRE([KRB5_LIB_AUX])
+AC_REQUIRE([AC_LN_S])
+AC_REQUIRE([AC_PROG_RANLIB])
+AC_CHECK_PROG(AR, ar, ar, false)
+# add frag for building libraries
+krb5_append_frags=$ac_config_fragdir/lib.in:$krb5_append_frags
+# null out SHLIB_EXPFLAGS because we lack any dependencies
+SHLIB_EXPFLAGS=
+AC_SUBST(LIBLIST)
+AC_SUBST(LIBLINKS)
+AC_SUBST(LDCOMBINE)
+AC_SUBST(LDCOMBINE_TAIL)
+AC_SUBST(SHLIB_EXPFLAGS)
+AC_SUBST(STLIBEXT)
+AC_SUBST(SHLIBEXT)
+AC_SUBST(SHLIBVEXT)
+AC_SUBST(PFLIBEXT)
+AC_SUBST(LIBINSTLIST)])
+
+dnl
+dnl KRB5_BUILD_LIBRARY_STATIC
+dnl
+dnl Force static library build.
+
+AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
+[krb5_force_static=yes
+KRB5_BUILD_LIBRARY])
+
+dnl
+dnl KRB5_BUILD_LIBRARY_WITH_DEPS
+dnl
+dnl Like KRB5_BUILD_LIBRARY, but adds in explicit dependencies in the
+dnl generated shared library.
+
+AC_DEFUN(KRB5_BUILD_LIBRARY_WITH_DEPS,
+[AC_REQUIRE([KRB5_LIB_AUX])
+AC_REQUIRE([AC_LN_S])
+AC_REQUIRE([AC_PROG_RANLIB])
+AC_CHECK_PROG(AR, ar, ar, false)
+# add frag for building libraries
+krb5_append_frags=$ac_config_fragdir/lib.in:$krb5_append_frags
+AC_SUBST(LIBLIST)
+AC_SUBST(LIBLINKS)
+AC_SUBST(LDCOMBINE)
+AC_SUBST(LDCOMBINE_TAIL)
+AC_SUBST(SHLIB_EXPFLAGS)
+AC_SUBST(STLIBEXT)
+AC_SUBST(SHLIBEXT)
+AC_SUBST(SHLIBVEXT)
+AC_SUBST(PFLIBEXT)
+AC_SUBST(LIBINSTLIST)])
+
+dnl
+dnl KRB5_BUILD_LIBOBJS
+dnl
+dnl Pull in the necessary stuff to build library objects.
+
+AC_DEFUN(KRB5_BUILD_LIBOBJS,
+[AC_REQUIRE([KRB5_LIB_AUX])
+# add frag for building library objects
+krb5_append_frags=$ac_config_fragdir/libobj.in:$krb5_append_frags
+AC_SUBST(OBJLISTS)
+AC_SUBST(STOBJEXT)
+AC_SUBST(SHOBJEXT)
+AC_SUBST(PFOBJEXT)
+AC_SUBST(PICFLAGS)
+AC_SUBST(PROFFLAGS)])
+
+dnl
+dnl KRB5_BUILD_PROGRAM
+dnl
+dnl Set variables to build a program.
+
+AC_DEFUN(KRB5_BUILD_PROGRAM,
+[AC_REQUIRE([KRB5_LIB_AUX])
+AC_CHECK_LIB(gen, compile, GEN_LIB=-lgen, GEN_LIB=)
+AC_SUBST(GEN_LIB)
+AC_SUBST(CC_LINK)
+AC_SUBST(DEPLIBEXT)])
+
+dnl
+dnl KRB5_RUN_FLAGS
+dnl
+dnl Set up environment for running dynamic execuatbles out of build tree
+
+AC_DEFUN(KRB5_RUN_FLAGS,
+[AC_REQUIRE([KRB5_LIB_AUX])
+KRB5_RUN_ENV="$RUN_ENV"
+AC_SUBST(KRB5_RUN_ENV)])
+
+dnl
+dnl KRB5_LIB_AUX
+dnl
+dnl Parse configure options related to library building.
+
+AC_DEFUN(KRB5_LIB_AUX,
+[AC_REQUIRE([KRB5_LIB_PARAMS])
+# Check whether to build static libraries.
+AC_ARG_ENABLE([static],
+[  --disable-static        don't build static libraries], ,
+[enableval=yes])
+
+if test "$enableval" = no && test "$krb5_force_static" != yes; then
+	AC_MSG_RESULT([Disabling static libraries.])
+	LIBLINKS=
+	LIBLIST=
+	OBJLISTS=
+else
+	LIBLIST='lib$(LIB)$(STLIBEXT)'
+	LIBLINKS='$(TOPLIBD)/lib$(LIB)$(STLIBEXT)'
+	OBJLISTS=OBJS.ST
+	LIBINSTLIST=install-static
+	DEPLIBEXT=$STLIBEXT
+fi
+
+# Check whether to build shared libraries.
+AC_ARG_ENABLE([shared],
+[  --enable-shared         build shared libraries],
+[if test "$enableval" = yes && test "$krb5_force_static" != yes; then
+	case "$SHLIBEXT" in
+	.so-nobuild)
+		AC_MSG_WARN([shared libraries not supported on this architecture])
+		RUN_ENV=
+		CC_LINK="$CC_LINK_STATIC"
+		;;
+	*)
+		AC_MSG_RESULT([Enabling shared libraries.])
+		LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
+		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
+		OBJLISTS="$OBJLISTS OBJS.SH"
+		LIBINSTLIST="$LIBINSTLIST install-shared"
+		DEPLIBEXT=$SHLIBEXT
+		CC_LINK="$CC_LINK_SHARED"
+		;;
+	esac
+else
+	RUN_ENV=
+	CC_LINK="$CC_LINK_STATIC"
+fi])dnl
+
+if test -z "$LIBLIST"; then
+	AC_MSG_ERROR([must enable one of shared or static libraries])
+fi
+
+# Check whether to build profiled libraries.
+AC_ARG_ENABLE([profiled],
+[  --enable-profiled       build profiled libraries],
+[if test "$enableval" = yes; then
+	case $PFLIBEXT in
+	.po-nobuild)
+		AC_MSG_RESULT([Profiled libraries not supported on this architecture.])
+		;;
+	*)
+		AC_MSG_RESULT([Enabling profiled libraries.])
+		LIBLIST="$LIBLIST "'lib$(LIB)$(PFLIBEXT)'
+		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(PFLIBEXT)'
+		OBJLISTS="$OBJLISTS OBJS.PF"
+		LIBINSTLIST="$LIBINSTLIST install-profiled"
+		;;
+	esac
+fi])])
+
+dnl
+dnl KRB5_LIB_PARAMS
+dnl
+dnl Determine parameters related to libraries, e.g. various extensions.
+
+AC_DEFUN(KRB5_LIB_PARAMS,
+[AC_CHECKING([host system type])
+AC_CACHE_VAL(krb5_cv_host,
+[AC_CANONICAL_HOST
+krb5_cv_host=$host])
+AC_MSG_RESULT($krb5_cv_host)
+AC_REQUIRE([AC_PROG_CC])
+#
+# Set up some defaults.
+#
+STLIBEXT=.a
+# Default to being unable to build shared libraries.
+SHLIBEXT=.so-nobuild
+SHLIBVEXT=.so.v-nobuild
+# Most systems support profiled libraries.
+PFLIBEXT=_p.a
+
+STOBJEXT=.o
+SHOBJEXT=.so
+PFOBJEXT=.po
+# Set up architecture-specific variables.
+case $krb5_cv_host in
+alpha-dec-osf*)
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	# Alpha OSF/1 doesn't need separate PIC objects
+	SHOBJEXT=.o
+	LDCOMBINE='ld -shared -expect_unresolved \* -update_registry $(BUILDTOP)/so_locations'
+	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	PROFFLAGS=-pg
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	# $(PROG_RPATH) is here to handle things like a shared tcl library
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
+	;;
+*-*-netbsd*)
+	PICFLAGS=-fpic
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	LDCOMBINE='ld -Bshareable'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	PROFFLAGS=-pg
+	;;
+*-*-solaris*)
+	if test "$GCC" = yes; then
+		PICFLAGS=-fpic
+		LDCOMBINE='$(CC) -shared'
+	else
+		PICFLAGS=-Kpic
+		# Solaris cc doesn't default to stuffing the SONAME field...
+		LDCOMBINE='$(CC) -dy -G -z text -h lib$(LIB)$(SHLIBEXT).$(LIBMAJOR).$(LIBMINOR)'
+	fi
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	PROFFLAGS=-pg
+	CC_LINK_SHARED='$(PURE) $(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(PURE) $(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	;;
+*-*-sunos*)
+	PICFLAGS=-fpic
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	# The following grossness is to prevent relative paths from
+	# creeping into the RPATH of an executable or library built
+	# under SunOS; the explicit setting of LD_LIBRARY_PATH does
+	# does not make it into the output file, while directories
+	# passed by "-Ldirname" do.
+	LDCOMBINE='LD_LIBRARY_PATH=`echo $(SHLIB_DIRS) | sed -e "s/-L//g" -e "s/ /:/g"` ld -dp -assert pure-text'
+	SHLIB_EXPFLAGS='-L$(SHLIB_RDIRS) $(SHLIB_EXPLIBS)'
+	PROFFLAGS=-pg
+	CC_LINK_SHARED='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"` $(PURE) $(CC) -L$(PROG_RPATH)'
+	CC_LINK_STATIC='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g` $(PURE) $(CC)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	;;
+*-*-linux*)
+	PICFLAGS=-fPIC
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	# Linux ld doesn't default to stuffing the SONAME field...
+	# Use objdump -x to examine the fields of the library
+	LDCOMBINE='ld -shared -h lib$(LIB)$(SHLIBEXT).$(LIBMAJOR).$(LIBMINOR)'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	PROFFLAGS=-pg
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	;;
+esac])

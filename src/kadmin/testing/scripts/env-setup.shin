@@ -18,14 +18,23 @@ export STOP
 
 # The shared library run time setup
 TOPLIBD=@RBUILD@/lib
+PROG_LIBPATH=-L@RBUILD@/lib
+# XXX kludge!
+PROG_RPATH=@RBUILD@/lib
 # This converts $(TOPLIBD) to $TOPLIBD
-foo=`echo '@KRB5_RUN_ENV@' | sed -e 's/(//' -e 's/)//'` 
+cat > /tmp/env_setup$$ <<\EOF
+@KRB5_RUN_ENV@
+EOF
+
+foo=`sed -e 's/(//g' -e 's/)//g' /tmp/env_setup$$`
 eval $foo
 
 # This will get put in setup.csh for convenience
 KRB5_RUN_ENV_CSH=`eval echo "$foo" | \
-	sed -e 's/\([^=]*\)=\(.*\)/setenv \1 \2/g'`
+	sed -e 's/\([^=]*\)=\(.*\)/setenv \1 \2/g' \
+	-e 's/export [^ ;]*;//g'`
 export KRB5_RUN_ENV_CSH
+rm /tmp/env_setup$$
 
 TESTDIR=$TOP/testing; export TESTDIR
 STESTDIR=$STOP/testing; export STESTDIR

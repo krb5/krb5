@@ -1,3 +1,8 @@
+Tue Feb  4 20:35:45 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Nov 22 15:49:09 1996  unknown  <bjaspan@mit.edu>
 
 	* client.c (argv): use sizeof instead of h_length to determine

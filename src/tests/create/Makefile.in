@@ -1,11 +1,11 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: kdb5_mkdums
 
-kdb5_mkdums: kdb5_mkdums.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_mkdums kdb5_mkdums.o $(LIBS)
-
-kdb5_mkdums.o:	$(srcdir)/kdb5_mkdums.c
+kdb5_mkdums: kdb5_mkdums.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kdb5_mkdums kdb5_mkdums.o $(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
 all:: kdb5_mkdums
 

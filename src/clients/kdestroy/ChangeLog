@@ -1,3 +1,8 @@
+Mon Jan 27 16:38:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Wed Nov  6 12:02:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdestroy.c (main): Check the error return from

@@ -1,14 +1,11 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-
-all::
-
-sserver: sserver.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o sserver sserver.o $(LIBS)
-
-sserver.o:	$(srcdir)/sserver.c
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: sserver
 
+sserver: sserver.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o sserver sserver.o $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) sserver.o sserver

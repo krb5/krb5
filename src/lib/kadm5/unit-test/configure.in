@@ -5,18 +5,10 @@ dnl The following are tests for the presence of programs required for testing
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)
 AC_KRB5_TCL	
-if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIB" != ""; then
+if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
  	DO_TEST=ok
 fi
 AC_SUBST(DO_TEST) 
 dnl
-USE_KADMCLNT_LIBRARY
-USE_GSSAPI_LIBRARY
-USE_KADMSRV_LIBRARY
-USE_GSSRPC_LIBRARY
-USE_DYN_LIBRARY
-USE_KDB5_LIBRARY
-USE_SS_LIBRARY
-V5_USE_SHARED_LIB
-KRB5_LIBRARIES
+KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

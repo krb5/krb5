@@ -1,3 +1,8 @@
+Sun Dec 29 21:52:44 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to use new library build procedure.
+
 Sat Nov 23 00:22:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* cryptoconf.c: Also zero out the entries in cryptoconf, to make

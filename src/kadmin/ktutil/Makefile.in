@@ -1,6 +1,6 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-
-all::
+CFLAGS = $(CCOPTS) $(DEFS) $(KRB4_INCLUDES)
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 OBJS= 	ktutil.o \
 	ktutil_ct.o \
@@ -12,8 +12,8 @@ SRCS= 	$(srcdir)/ktutil.c \
 
 all:: ktutil
 
-ktutil: ktutil.o $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o ktutil $(OBJS) $(LIBS)
+ktutil: ktutil.o $(OBJS) $(SS_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o ktutil $(OBJS) $(SS_LIB) $(KRB4COMPAT_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) ktutil ${DESTDIR}$(ADMIN_BINDIR)/ktutil

@@ -73,17 +73,6 @@ AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent)
 
 DECLARE_SYS_ERRLIST
 
-V5_SHARED_LIB_OBJS
-V5_MAKE_SHARED_LIB(libgssrpc,1.0,.., ./rpc)
-GSSAPI_KRB5_SH_VERS=$krb5_cv_shlib_version_libgssapi_krb5
-AC_SUBST(GSSAPI_KRB5_SH_VERS)
-KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
-AC_SUBST(KRB5_SH_VERS)
-CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
-AC_SUBST(CRYPTO_SH_VERS)
-COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
-AC_SUBST(COMERR_SH_VERS)
-
 CopySrcHeader(auth.h,[$](BUILDTOP)/include/rpc)
 CopySrcHeader(auth_gssapi.h,[$](BUILDTOP)/include/rpc)
 CopySrcHeader(auth_unix.h,[$](BUILDTOP)/include/rpc)
@@ -99,9 +88,6 @@ CopySrcHeader(svc_auth.h,[$](BUILDTOP)/include/rpc)
 CopyHeader(types.h,[$](BUILDTOP)/include/rpc)
 CopySrcHeader(xdr.h,[$](BUILDTOP)/include/rpc)
 
-dnl
-dnl This is gross but necessary because of the way we build shared libs
-dnl
-ALL_RECURSE=
-AppendRule([all-unix:: all-recurse])
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
 V5_AC_OUTPUT_MAKEFILE( ,types.h:types.hin)

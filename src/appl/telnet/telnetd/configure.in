@@ -71,11 +71,9 @@ dnl Fix post beta-6
 withval=no
 AC_ARG_WITH([krb4],[],,withval=yes)
 if test $withval = no; then
-	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+	DES425_LIB=-ldes425
+	DES425_DEPLIB='$(TOPLIBD)/libdes425.a'
 fi
 dnl
-USE_KRB4_LIBRARY
-KRB5_LIBRARIES
-V5_USE_SHARED_LIB
+KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

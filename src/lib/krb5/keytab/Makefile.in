@@ -7,9 +7,13 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 MAC_SUBDIRS = file
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS= \
+	ktadd.o		\
+	ktbase.o	\
+	ktdefault.o	\
+	ktfr_entry.o	\
+	ktremove.o	\
+	read_servi.o
 
 OBJS=	\
 	ktadd.$(OBJEXT)		\
@@ -27,11 +31,6 @@ SRCS=	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/read_servi.c
 
-shared:
-	mkdir shared
-
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: subdirs $(OBJFILE)
 
 ##DOSsubdirs:: file\file.lst
@@ -46,10 +45,10 @@ all-windows:: subdirs $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj file\*.obj > $(OBJFILE)
 
-clean-unix::
-	$(RM) shared/*
+all-unix:: all-libobjs
 
-clean-mac::
+clean-unix:: clean-libobjs
+
 clean-windows::
 	cd file
 	@echo Making clean in krb5\keytab\file

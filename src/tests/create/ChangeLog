@@ -1,3 +1,8 @@
+Sun Feb  9 01:35:19 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Tue Sep 10 14:20:09 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_mkdums.M: remove ".so man1/header.doc"

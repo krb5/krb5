@@ -1,3 +1,8 @@
+Tue Feb  4 20:41:49 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Nov 22 15:48:42 1996  unknown  <bjaspan@mit.edu>
 
 	* sim_server.c (argv): use sizeof instead of h_length to determine

@@ -2,21 +2,9 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
-
 kadm_err.$(OBJEXT): kadm_err.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
-
 adb_err.$(OBJEXT): adb_err.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
-
 chpass_util_strings.$(OBJEXT): chpass_util_strings.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
 
 kadm_err.c kadm_err.h: $(srcdir)/kadm_err.et
 adb_err.c adb_err.h: $(srcdir)/adb_err.et
@@ -49,6 +37,18 @@ OBJS =	kadm_err.$(OBJEXT) \
 	str_conv.$(OBJEXT) \
 	logger.$(OBJEXT)
 
+STLIBOBJS = \
+	kadm_err.o \
+	adb_err.o \
+	chpass_util_strings.o \
+	ovsec_glue.o \
+	misc_free.o \
+	kadm_rpc_xdr.o \
+	chpass_util.o \
+	alt_prof.o \
+	str_conv.o \
+	logger.o
+
 HDRDIR=$(BUILDTOP)/include/kadm5
 HDRS =	$(HDRDIR)/adb.h \
 	$(HDRDIR)/admin.h \
@@ -60,21 +60,14 @@ HDRS =	$(HDRDIR)/adb.h \
 	$(HDRDIR)/chpass_util_strings.h \
 	$(HDRDIR)/kadm_err.h
 
-$(OBJS): $(HDRS)
-all-unix:: shared
-all-unix:: $(OBJS) DONE
-all-unix:: all-recurse
-all-mac:: $(OBJS)
-all-windows:: $(OBJS)
+all-prerecurse:: includes
+all-prerecurse:: all-libobjs
 
-shared:
-	mkdir shared
+all-windows:: $(OBJS)
 
 check-windows::
 
-clean-unix::
-	$(RM) shared/*
-	-rmdir shared
+clean-unix:: clean-libobjs
 
 clean-mac::
 clean-windows::

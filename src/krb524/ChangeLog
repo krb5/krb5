@@ -1,3 +1,11 @@
+Tue Feb  4 20:13:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix up krb4 library handling properly (hopefully).
+
+Sun Feb  2 10:06:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in, Makefile.in: Update to new build system rules
+
 Thu Dec  5 23:27:00 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb524d.c (main): Ignore SIGHUP for now. [27]

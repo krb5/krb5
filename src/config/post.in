@@ -1,9 +1,5 @@
 # config/post.in
-# put all:: first just in case no other rules occur here
-#
-all::
 
-check::
 check-windows::
 
 .depend: $(SRCS) $(SRCTOP)/util/depfix.sed
@@ -36,8 +32,7 @@ clean-windows::
 	$(RM) *.$(OBJEXT)
 	$(RM) msvc.pdb *.err
 
-Makefiles:: Makefile
-Makefiles:: $(MAKEFILES_RECURSE)
+Makefiles-prerecurse:: Makefile
 
 Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
 		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
@@ -52,16 +47,21 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 			--macrodir=$(BUILDTOP)/util/autoconf
 
 all-recurse clean-recurse install-recurse check-recurse Makefiles-recurse:
-	@case "`echo '$(MFLAGS)'|sed -e 's/ --.*$$//'`" in \
-		*[ik]*) e=:;; *) e="exit 1";; esac; \
-	for i in $(SUBDIRS) ; do \
+	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
+		in *[ik]*) e=:;; *) e="exit 1";; esac; \
+	if test -n "$(SUBDIRS)"; then \
+	for i in . $(SUBDIRS) ; do \
 		if test -d $$i ; then \
+		case $$i in .);; *) \
 			target=`echo $@|sed s/-recurse//`; \
 			echo "making $$target in $(CURRENT_DIR)$$i..."; \
 			if (cd $$i ; $(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
 			    CURRENT_DIR=$(CURRENT_DIR)$$i/ $$target) then :; \
 			else $$e; fi; \
+			;; \
+		esac; \
 		else \
 			echo "Skipping missing directory $(CURRENT_DIR)$$i" ; \
-		fi \
-	done
+		fi; \
+	done; \
+	fi

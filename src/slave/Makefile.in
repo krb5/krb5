@@ -1,6 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
-all::
+all::	kprop kpropd
 
 CLIENTSRCS= $(srcdir)/kprop.c 
 CLIENTOBJS= kprop.o 
@@ -10,13 +12,12 @@ SERVEROBJS= kpropd.o
 
 SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 
-all::	kprop kpropd
 
-kprop: $(CLIENTOBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kprop $(CLIENTOBJS) $(LIBS)
+kprop: $(CLIENTOBJS) $(KDB5_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kprop $(CLIENTOBJS) $(KRB5_BASE_LIBS)
 
-kpropd: $(SERVEROBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kpropd $(SERVEROBJS) $(LIBS)
+kpropd: $(SERVEROBJS) $(KDB5_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kpropd $(SERVEROBJS) $(KDB5_LIB) $(KRB5_BASE_LIBS)
 
 install::
 	for f in kprop kpropd; do \

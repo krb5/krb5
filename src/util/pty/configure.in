@@ -2,7 +2,7 @@ AC_INIT(getpty.c)
 CONFIG_RULES
 AC_PROG_AWK
 CopySrcHeader(libpty.h,[$](BUILDTOP)/include)
-LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
+dnl LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
 AC_PROG_INSTALL
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
@@ -150,6 +150,6 @@ fi
 dnl
 ADD_DEF(-DKERBEROS)
 AC_CONST
-V5_USE_SHARED_LIB
-SubdirLibraryRule([$(LIBOBJS)])
+KRB5_BUILD_LIBRARY
+KRB5_BUILD_LIBOBJS
 V5_AC_OUTPUT_MAKEFILE

@@ -1,3 +1,12 @@
+Thu Jan 16 19:02:22 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Update to use double-colon rules.
+
+Tue Jan 14 19:22:42 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
 Wed Dec  4 12:42:49 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* Various changes to allow channel bindings to work with both UDP

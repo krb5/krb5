@@ -7,9 +7,17 @@ CFLAGS=$(CCOPTS) $(DEFS)
 
 EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS= \
+	asn1_decode.o\
+	asn1_k_decode.o\
+	asn1_encode.o\
+	asn1_get.o\
+	asn1_make.o\
+	asn1buf.o\
+	krb5_decode.o\
+	krb5_encode.o\
+	asn1_k_encode.o\
+	asn1_misc.o
 
 SRCS= \
 	$(srcdir)asn1_decode.c\
@@ -35,23 +43,15 @@ OBJS= \
 	asn1_k_encode.$(OBJEXT)\
 	asn1_misc.$(OBJEXT)
 
-all-unix:: shared $(OBJS)
-all-mac::  $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
 ##DOS	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYDIR)\ *.obj > $(OBJFILE)
+all-unix:: all-libobjs
 
-shared:
-	mkdir shared
-
-clean-unix::
-	$(RM) shared/* $(OBJS)
-
-clean-mac::
-	$(RM) $(OBJS)
+clean-unix:: clean-libobjs
 
 clean-windows::
 	$(RM) $(OBJFILE)

@@ -1,3 +1,8 @@
+Wed Feb  5 22:57:53 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Dec  6 00:04:10 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* test.c: Change test looking for tcl 7.05 and greater to be tcl

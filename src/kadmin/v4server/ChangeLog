@@ -1,3 +1,12 @@
+Thu Feb  6 14:49:45 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (LOCALINCLUDE): Repair lack of -I. and -I$(srcdir)
+
+Tue Feb  4 21:23:16 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Nov 22 15:49:27 1996  unknown  <bjaspan@mit.edu>
 
 	* kadm_ser_wrap.c (endif ): use sizeof instead of h_length to

@@ -3,9 +3,20 @@ CFLAGS = $(CCOPTS) $(DEFS) -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libgssrpc.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+LIB=gssrpc
+LIBMAJOR=1
+LIBMINOR=0
+STOBJLISTS=OBJS.ST
+SHLIB_EXPDEPS= \
+	$(TOPLIBD)/libgssapi_krb5.so \
+	$(TOPLIBD)/libkrb5.so \
+	$(TOPLIBD)/libcrypto.so \
+	$(TOPLIBD)/libcom_err.so \
+	$(TOPLIBD)/libdyn.so
+SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+RELDIR=rpc
 
 SRCS = $(srcdir)/auth_none.c \
 	$(srcdir)/auth_unix.c \
@@ -97,6 +108,52 @@ OBJS = auth_none.$(OBJEXT) \
 	xdr_stdio.$(OBJEXT) \
 	xdr_alloc.$(OBJEXT)
 
+STLIBOBJS = \
+	auth_none.o \
+	auth_unix.o \
+	auth_any.o \
+	authunix_prot.o \
+	auth_gssapi.o \
+	auth_gssapi_misc.o \
+	bindresvport.o \
+	clnt_generic.o \
+	clnt_perror.o \
+	clnt_raw.o \
+	clnt_simple.o \
+	clnt_tcp.o \
+	clnt_udp.o \
+	rpc_dtablesize.o \
+	get_myaddress.o \
+	getrpcent.o \
+	getrpcport.o \
+	pmap_clnt.o \
+	pmap_getmaps.o \
+	pmap_getport.o \
+	pmap_prot.o \
+	pmap_prot2.o \
+	pmap_rmt.o \
+	rpc_prot.o \
+	rpc_commondata.o \
+	rpc_callmsg.o \
+	svc.o \
+	svc_auth.o \
+	svc_auth_unix.o \
+	svc_auth_any.o \
+	svc_auth_gssapi.o \
+	svc_raw.o \
+	svc_run.o \
+	svc_simple.o \
+	svc_tcp.o \
+	svc_udp.o \
+	xdr.o \
+	xdr_array.o \
+	xdr_float.o \
+	xdr_mem.o \
+	xdr_rec.o \
+	xdr_reference.o \
+	xdr_stdio.o \
+	xdr_alloc.o
+
 HDRDIR=$(BUILDTOP)/include/rpc
 
 HDRS=	$(HDRDIR)/auth.h \
@@ -114,57 +171,15 @@ HDRS=	$(HDRDIR)/auth.h \
 	$(HDRDIR)/types.h \
 	$(HDRDIR)/xdr.h
 
-$(OBJS): $(HDRS)
+all-prerecurse:: includes
+all-prerecurse:: all-liblinks
 
-LIB_SUBDIRS= .
-LIBDONE= DONE
-#
-# Depends on libgssapi_krb5, libkrb5, libcrypto, libcom_err
-#
-GSSAPI_KRB5_VER=@GSSAPI_KRB5_SH_VERS@
-KRB5_VER=@KRB5_SH_VERS@
-CRYPTO_VER=@CRYPTO_SH_VERS@
-COMERR_VER=@COMERR_SH_VERS@
-DEPLIBS=$(TOPLIBD)/libgssapi_krb5.$(SHEXT).$(GSSAPI_KRB5_VER) \
-	$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) \
-	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
-	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER)
-
-SHLIB_LIBS=-lgssapi_krb5 -lkrb5 -lcrypto -lcom_err -ldyn
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
-SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
-
-all-unix:: shared
-all-unix:: $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
-shared:
-	mkdir shared
+install-unix:: install-libs
 
 check-windows::
 
-clean-unix::
-	$(RM) shared/* $(HDRS)
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-clean-mac::
 clean-windows::
-
-DONE: $(OBJS)
-	$(RM) DONE
-	echo $(OBJS) > DONE
-
-libgssrpc.$(STEXT): $(OBJS)
-	$(RM) $@
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
-
-install:: libgssrpc.a
-	$(INSTALL_DATA) libgssrpc.a $(DESTDIR)$(KRB5_LIBDIR)/libgssrpc.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssrpc.a
-
-clean::
-	$(RM) libgssrpc.$(LIBEXT) libgssrpc.bak DONE
-
-# hack to force libs to get built before recursing into subdirs
-all-recurse: libgssrpc.$(STEXT)

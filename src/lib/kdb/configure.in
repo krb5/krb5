@@ -17,13 +17,8 @@ case $krb5_cv_host in
 	;;
 esac
 KRB5_RUN_FLAGS
-V5_USE_SHARED_LIB
-KRB5_LIBRARIES
-V5_SHARED_LIB_OBJS
-V5_MAKE_SHARED_LIB(libkdb5,1.0,.., ./kdb)
-AppendRule([all-unix:: ../libkdb5.a])
-KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
-AC_SUBST(KRB5_SH_VERS)
-CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
-AC_SUBST(CRYPTO_SH_VERS)
+dnl The following is for check...
+KRB5_BUILD_PROGRAM
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
 V5_AC_OUTPUT_MAKEFILE

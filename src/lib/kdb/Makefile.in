@@ -1,22 +1,22 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
-KRB5_VER=@KRB5_SH_VERS@
-CRYPTO_VER=@CRYPTO_SH_VERS@
-DEPLIBS=$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) \
-	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER)
+LIB=kdb5
+LIBMAJOR=1
+LIBMINOR=0
+RELDIR=kdb
+# Depends on libcrypto and libkrb5
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS=-lkrb5 -lcom_err 
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-SHLIB_LIBS=$(LIBS)
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ 
-SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-
-
-all:: $(OBJS)
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+all:: 
 
 SRCS= \
 	$(srcdir)/keytab.c \
@@ -30,7 +30,8 @@ SRCS= \
 	$(srcdir)/setup_mkey.c \
 	$(srcdir)/store_mkey.c
 
-OBJS= \
+STOBJLISTS=OBJS.ST
+STLIBOBJS= \
 	keytab.o \
 	encrypt_key.o \
 	decrypt_key.o \
@@ -42,33 +43,12 @@ OBJS= \
 	setup_mkey.o \
 	store_mkey.o
 
-LIB_SUBDIRS= .
-LIBDONE = DONE
+all-unix:: all-liblinks
+install-unix:: install-libs
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-all-unix:: shared
-
-shared:
-	mkdir shared
-
-clean-unix::
-	$(RM) shared/*
-	-rmdir shared
-
-DONE: $(OBJS)
-	$(RM) DONE
-	echo $(OBJS) > DONE
-
-libkdb5.$(STEXT): $(OBJS)
-	$(RM) $@
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
-
-
-clean::
-	$(RM) libkdb5.a DONE
-
-t_kdb:	t_kdb.o $(OBJS) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(TOPLIBD)/libcom_err.a $(TOPLIBD)/libdb.a
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(OBJS) $(LIBS) $(TOPLIBD)/libdb.a
+t_kdb:	t_kdb.o $(OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_kdb t_kdb.o $(OBJS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
 check::	t_kdb
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\

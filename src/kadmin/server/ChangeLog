@@ -1,3 +1,8 @@
+Tue Feb  4 20:59:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Wed Dec  4 15:29:30 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* ovsec_kadmd.c (main): fix duplicated error strings

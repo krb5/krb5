@@ -6,6 +6,14 @@ Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 	read_passwd.c, unix_time.c:
 		DLL export various functions (mostly for wintel)
 
+Wed Jan  8 01:31:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix, install-unix): Properly install and clean.
+
+Mon Jan  6 07:47:56 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in, Makefile.in: Update to new library building procedure.
+
 Mon Nov 18 20:39:02 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Set shared library version to 1.0. [krb5-libs/201]

@@ -1,3 +1,8 @@
+Fri Jan 31 19:22:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Dec  5 21:15:27 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kslave_update: Update script for new filename conventions. [PR

@@ -5,9 +5,39 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSOBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS= \
+	f_addr.o	\
+	f_address.o	\
+	f_ap_rep.o	\
+	f_ap_req.o	\
+	f_arep_enc.o	\
+	f_authdata.o	\
+	f_authent.o	\
+	f_auth_cnt.o	\
+	f_chksum.o	\
+	f_creds.o	\
+	f_cred_cnt.o	\
+	f_enc_kdc.o	\
+	f_enc_tkt.o	\
+	f_einfo.o	\
+	f_error.o	\
+	f_kdc_rp.o	\
+	f_kdc_rq.o	\
+	f_keyblock.o	\
+	f_last_req.o	\
+	f_padata.o	\
+	f_princ.o	\
+	f_priv.o	\
+	f_priv_enc.o	\
+	f_safe.o	\
+	f_tckt.o	\
+	f_tckts.o	\
+	f_tgt_cred.o	\
+	f_tkt_auth.o	\
+	f_pwd_data.o	\
+	f_pwd_seq.o	\
+	f_cred.o	\
+	f_cred_enc.o
 
 OBJS=	\
 	f_addr.$(OBJEXT)	\
@@ -77,8 +107,6 @@ SRCS=	\
 	$(srcdir)/f_cred.c	\
 	$(srcdir)/f_cred_enc.c
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -86,13 +114,9 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
 
-clean-unix::
-	$(RM) shared/*
+clean-unix:: clean-libobjs
 
-clean-mac::
 clean-windows::
 	$(RM) $(OBJFILE)
-

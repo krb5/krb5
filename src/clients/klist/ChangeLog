@@ -1,3 +1,8 @@
+Mon Jan 27 16:51:50 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Thu Dec  5 21:59:34 1996  Tom Yu  <tlyu@mit.edu>
 
 	* klist.M: v5srvtab -> krb5.keytab [279]

@@ -1,14 +1,15 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
 RUN_SETUP = @KRB5_RUN_ENV@
-
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 OBJS=resolve.o
 SRCS=$(srcdir)/resolve.c
 
 all:: resolve
 
-resolve: $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o resolve $(OBJS) $(LIBS)
+resolve: $(OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o resolve $(OBJS) $(KRB5_BASE_LIBS)
 
 check:: resolve
 	$(RUN_SETUP) ./resolve

@@ -1,24 +1,17 @@
 CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
-all::
+all:: uuclient uuserver
 
-uuclient: client.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o uuclient client.o $(LIBS)
-
-client.o:	$(srcdir)/client.c
-
-all:: uuclient
-
+uuclient: client.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o uuclient client.o $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) client.o uuclient
 
-uuserver: server.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o uuserver server.o $(LIBS)
-
-server.o:	$(srcdir)/server.c
-
-all:: uuserver
+uuserver: server.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o uuserver server.o $(KRB5_BASE_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) uuclient $(DESTDIR)$(CLIENT_BINDIR)/uuclient
@@ -26,4 +19,3 @@ install::
 
 clean::
 	$(RM) server.o uuserver
-

@@ -1,14 +1,12 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
-all::
-
-kdestroy: kdestroy.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kdestroy kdestroy.o $(LIBS)
-
-kdestroy.o:	$(srcdir)/kdestroy.c
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: kdestroy
 
+kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) kdestroy.o kdestroy

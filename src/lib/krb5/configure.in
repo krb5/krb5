@@ -1,9 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
 CONFIG_DIRS(error_tables asn.1 ccache keytab krb rcache free os posix)
-AC_PROG_ARCHIVE
-AC_PROG_ARCHIVE_ADD
-AC_PROG_RANLIB
 AC_PROG_INSTALL
 DO_SUBDIRS
 dnl
@@ -16,10 +13,5 @@ dnl
 AC_CHECK_LIB(gen,compile,SHLIB_GEN=-lgen,SHLIB_GEN='')
 AC_SUBST(SHLIB_GEN)
 dnl
-V5_MAKE_SHARED_LIB(libkrb5,1.0,.., ./krb5)
-CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
-AC_SUBST(CRYPTO_SH_VERS)
-COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
-AC_SUBST(COMERR_SH_VERS)
-AppendRule([all::	all-$(WHAT)])
+KRB5_BUILD_LIBRARY_WITH_DEPS
 V5_AC_OUTPUT_MAKEFILE

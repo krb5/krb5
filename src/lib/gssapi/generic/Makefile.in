@@ -5,14 +5,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 ##DOSOBJFILE=..\generic.lst
 ##WIN16##LIBNAME=..\gssapi.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
-
 all-windows:: $(OBJS)
-
-shared:
-	mkdir shared
 
 ETSRCS= gssapi_err_generic.c
 ETOBJS= gssapi_err_generic.$(OBJEXT)
@@ -27,11 +20,6 @@ $(EHDRDIR)$(S)gssapi.h: gssapi.h
 	$(CP) gssapi.h $@
 $(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h
 	$(CP) $(srcdir)$(S)gssapi_generic.h $@
-
-gssapi_err_generic.o: gssapi_err_generic.c
-	$(CC) $(CFLAGS) -c $*.c
-
-@SHARED_RULE_LOCAL@
 
 gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
@@ -89,13 +77,32 @@ OBJS = \
 	util_validate.$(OBJEXT) \
 	gssapi_err_generic.$(OBJEXT)
 
+STLIBOBJS = \
+	disp_com_err_status.o \
+	disp_major_status.o \
+	gssapi_generic.o \
+	oid_ops.o \
+	rel_buffer.o \
+	rel_oid_set.o \
+	util_buffer.o \
+	util_canonhost.o \
+	util_dup.o \
+	util_oid.o \
+	util_ordering.o \
+	util_set.o \
+	util_token.o \
+	util_validate.o \
+	gssapi_err_generic.o
+
 EXPORTED_HEADERS= gssapi_generic.h
 EXPORTED_BUILT_HEADERS= gssapi.h
 
 $(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
 
-all-unix:: shared includes-unix $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
-all-mac:: $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
+all-unix:: includes-unix
+all-unix:: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
+all-unix:: all-libobjs
+
 all-windows:: win-include $(HDRS) $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -108,11 +115,8 @@ win-include::
 
 unixmac: $(SRCS) $(ETHDRS)
 
-clean-unix::
-	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/* $(EXPORTED_BUILT_HEADERS) 
-
-clean-mac::
-	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/*
+clean-unix:: clean-libobjs
+	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS)
 
 clean-windows::
 	$(RM) $(HDRS) $(OBJFILE)

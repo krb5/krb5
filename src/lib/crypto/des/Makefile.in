@@ -4,16 +4,35 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSMYNAME=des
 ##DOSOBJFILE=..\des.lst
 ##WIN16##LIBNAME=..\crypto.lib
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.$(LIBEXT)
-
-KLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 RUN_SETUP = @KRB5_RUN_ENV@
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS=\
+	afsstring2key.o \
+	cbc_cksum.o	\
+	finish_key.o	\
+	fin_rndkey.o	\
+	init_rkey.o	\
+	process_ky.o	\
+	random_key.o	\
+	string2key.o	\
+	key_sched.o	\
+	weak_key.o	\
+	f_cbc.o 	\
+	f_cksum.o 	\
+	f_sched.o 	\
+	f_ecb.o 	\
+	f_parity.o 	\
+	f_tables.o	\
+	d3_cbc.o 	\
+	d3_ecb.o	\
+	d3_kysched.o	\
+	d3_procky.o 	\
+	d3_str2ky.o	\
+	u_nfold.o	\
+	u_rn_key.o
 
 OBJS=	afsstring2key.$(OBJEXT) \
 	cbc_cksum.$(OBJEXT)	\
@@ -63,9 +82,6 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/u_nfold.c \
 	$(srcdir)/u_rn_key.c
 
-
-all-unix:: shared $(OBJS)
-all-mac:: shared $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -73,8 +89,7 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
 
 includes:: depend
 
@@ -84,18 +99,16 @@ depend:: $(SRCS)
 clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
-verify$(EXEEXT): t_verify.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ t_verify.$(OBJEXT) process_ky.o  key_sched.o \
-	../cryptoconf.o ../des_crc.o $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
+verify$(EXEEXT): t_verify.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_verify.$(OBJEXT) process_ky.o  key_sched.o \
+	../cryptoconf.o ../des_crc.o $(KRB5_BASE_LIBS)
 
-destest$(EXEEXT): destest.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ destest.$(OBJEXT) process_ky.o key_sched.o \
-	../cryptoconf.o ../des_crc.o  $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
+destest$(EXEEXT): destest.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ destest.$(OBJEXT) process_ky.o key_sched.o \
+	../cryptoconf.o ../des_crc.o $(KRB5_BASE_LIBS)
 
-t_random$(EXEEXT): t_random.$(OBJEXT) $(DEPKLIB)
-	$(LD) -o $@ t_random.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
-
-check-mac: check-unix
+t_random$(EXEEXT): t_random.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_random.$(OBJEXT) $(KRB5_BASE_LIBS)
 
 check-unix:: destest verify
 	$(RUN_SETUP) ./verify -z
@@ -109,9 +122,7 @@ clean::
 	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) \
 	t_verify.$(OBJEXT) t_random.$(OBJEXT) t_random$(EXEEXT)
 
-clean-unix::
-	$(RM) shared/*
-clean-mac::
-	$(RM) shared/*
 clean-windows::
 	$(RM) $(OBJFILE)
+
+clean-unix:: clean-libobjs

@@ -3,6 +3,11 @@ Thu Feb  6 00:28:54 1997  Richard Basch  <basch@lehman.com>
 	* adm_conn.c adm_rw.c:
 		Replace the INTERFACE keyword with KRB5_CALLCONV
 
+Tue Feb  4 21:28:57 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedcure.
+
 Thu Oct 31 11:20:22 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c (main): Add -T keyfile and -D debug_level

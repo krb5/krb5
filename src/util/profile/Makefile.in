@@ -6,9 +6,12 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DOSDEFS)
 
 LOCALINCLUDE=-I. -I$(srcdir)/../et
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS = \
+	prof_tree.o \
+	prof_file.o \
+	prof_parse.o \
+	prof_err.o \
+	prof_init.o
 
 OBJS = prof_tree.$(OBJEXT) \
 	prof_file.$(OBJEXT) \
@@ -24,13 +27,13 @@ SRCS = $(srcdir)/prof_tree.c \
 
 LIBS = ../et/libcom_err.$(LIBEXT)
 
-install::
+LIB=profile
+LIBMAJOR=1
+LIBMINOR=0
+STOBJLISTS=OBJS.ST
 
-all-mac:: all-unix
-all-unix:: shared includes libprofile.a test_parse test_profile
-
-shared:
-	mkdir shared
+all-unix:: includes test_parse test_profile
+all-unix:: all-libs
 
 all-windows:: $(OBJS)
 
@@ -39,10 +42,6 @@ awk-windows:
 	$(AWK) -f $(BUILDTOP)/util/et/et_c.awk outfile=prof_err.c prof_err.et
 	if exist prof_err.h copy profile.hin+prof_err.h profile.h
 	if exist profile.h copy profile.h $(BUILDTOP)\include\profile.h
-
-libprofile.a: $(OBJS)
-	$(ARCHIVE) $@ $(OBJS)
-	$(RANLIB) $@
 
 test_parse: test_parse.$(OBJEXT) $(OBJS) $(LIBS)
 	$(CC) -o test_parse test_parse.$(OBJEXT) $(OBJS) $(LIBS)
@@ -66,19 +65,14 @@ prof_err.h: $(srcdir)/prof_err.et
 prof_err.c: $(srcdir)/prof_err.et
 
 prof_err.o: prof_err.c
-	$(CC) $(CFLAGS) -c prof_err.c
-@SHARED_RULE_LOCAL@
 
-clean-mac:: clean-unix
-clean-unix::
-	rm -f $(PROGS) *.o *~ test_parse core libprofile.a prof_err.h \
-		prof_err.c test_profile profile.h shared/*
+clean-unix:: clean-libs clean-libobjs
+	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
+		prof_err.c test_profile profile.h
 
 clean-windows::
 	$(RM) profile.lib profile.bak test_parse.exe test_profile.exe
 
-check-mac::
-check-unix::
 check-windows:: test_profile.exe test_parse.exe
 	$(RM) *.obj
 	test_parse test.ini

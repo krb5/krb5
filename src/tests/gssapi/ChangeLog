@@ -1,3 +1,8 @@
+Sun Feb  9 01:40:15 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Sat Mar 16 07:24:03 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Add USE_ANAME

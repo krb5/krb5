@@ -1,16 +1,18 @@
+RELDIR=../util/pty
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+
 SED = sed
 
+LIB=pty
+LIBMAJOR=1
+LIBMINOR=0
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+STLIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
+	update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o \
+	logwtmp.o init.o
 
+STOBJLISTS=OBJS.ST
 
-LIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
-   update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o logwtmp.o init.o
-LIBUPDATE= $(BUILDTOP)/util/libupdate
-LIBDONE=DONE
-LIB_SUBDIRS=.
 INSTALLFILE = cp
 
 # for pty-int.h
@@ -28,41 +30,28 @@ SRCS=pty_err.h $(CFILES)
 DEPLIBS=
 
 #
-all-unix:: includes pty_err.h libpty.a $(TOPLIBD)/libpty.a
+all-unix:: includes pty_err.h
+
+all-unix:: all-liblinks
+
+install-unix:: install-libs
 
 clean-unix::
 	$(RM) libpty.a $(BUILDTOP)/include/libpty.h pty_err.c pty_err.h
-
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 depend:: 
 
 install:: libpty.h
 	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
 
-
-
-libpty.a: DONE
-	@if test -f $@ ; then \
-		(set -x; $(LIBUPDATE) $@ DONE .) \
-	else \
-		(set -x; $(LIBUPDATE) --force $@ DONE .) \
-	fi
-	$(RANLIB) $@
-	touch libpty.stamp
-
-clean-unix::
-	$(RM) $(LIBOBJS) libpty.stamp
-
 clean-mac::
 	$(RM) libpty.a
 	$(RM) $(LIBOBJS)
 
-install::
-	$(INSTALL_DATA) libpty.a $(DESTDIR)$(KRB5_LIBDIR)/libpty.a
-	$(RANLIB)    $(DESTDIR)$(KRB5_LIBDIR)/libpty.a
 ## 
 
-clean-unix:: clean-files
+clean-unix:: clean-liblinks clean-libs clean-libobjs clean-files
 
 clean-mac:: clean-files
 
@@ -78,7 +67,5 @@ clean-files::
 		eddep makedep *.ln
 
 pty_err.o: pty_err.c
-	$(CC) $(CFLAGS) -c $*.c
-
-pty_err.h:: pty_err.et
-pty_err.c:: pty_err.et
+pty_err.h: pty_err.et
+pty_err.c: pty_err.et

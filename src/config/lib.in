@@ -1,0 +1,163 @@
+### config/lib.in
+#
+# Makefile fragment that creates static, shared, and profiled libraries.
+#
+# The following variables must be set in the Makefile.in:
+#
+# LIB		library name without "lib" or extension
+# LIBMAJOR	library major version
+# LIBMINOR	library minor version
+# STOBJLISTS	list of files, each of which is an OBJS.ST created by
+#			libobj.in; *DO NOT* use ./OBJS.ST for the current
+#			directory as that will cause some makes to lose.
+# SHLIB_EXPDEPS	list of libraries that this one has explicit
+#			dependencies on, pref. in the form libfoo$(SHLIBEXT)
+# SHLIB_EXPLIBS	list of libraries that this one has explicit
+#			dependencies on, in "-lfoo" form.
+# SHLIB_DIRS	list of directories where $(SHLIB_EXPLIBS) can be
+#			found, in the form -Ldir1 -Ldir2 ...
+#			since there are very few systems where -L is the
+#			wrong thing (notable exception of SunOS but we
+#			deal with it...)
+# SHLIB_RDIRS	rpath directories to search; given in the
+#			form dir1:dir2 ...
+# RELDIR	path to this directory relative to $(TOPLIBD)
+
+## Parameters to be set by configure:
+##
+
+LN_S=@LN_S@
+AR=@AR@
+
+# Set to "lib$(LIB)$(STEXT) lib$(LIB)$(SHEXT) lib$(LIB)$(PFEXT)" or
+# some subset thereof by configure; determines which types of libs get
+# built.
+LIBLIST=@LIBLIST@
+
+# Set by configure; list of library symlinks to make to $(TOPLIBD)
+LIBLINKS=@LIBLINKS@
+
+# Set by configure; list of install targets
+LIBINSTLIST=@LIBINSTLIST@
+
+# Some of these should really move to pre.in, since programs will need
+# it too. (e.g. stuff that has dependencies on the libraries)
+
+# usually .a
+STLIBEXT=@STLIBEXT@
+
+# usually .so.$(LIBMAJOR).$(LIBMINOR)
+SHLIBVEXT=@SHLIBVEXT@
+
+# usually .so
+SHLIBEXT=@SHLIBEXT@
+
+# usually _p.a
+PFLIBEXT=@PFLIBEXT@
+
+# "cc -G", "ld -Bshareable", etc.
+LDCOMBINE=@LDCOMBINE@
+
+# Misc args to tack on the tail of LDCOMBINE
+LDCOMBINE_TAIL=@LDCOMBINE_TAIL@
+
+# flags for explicit libraries depending on this one,
+# e.g. "-R$(SHLIB_RPATH) $(SHLIB_SHLIB_DIRFLAGS) $(SHLIB_EXPLIBS)"
+SHLIB_EXPFLAGS=@SHLIB_EXPFLAGS@
+
+# STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
+SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
+PFOBJLISTS=$(STOBJLISTS:.ST=.PF)
+
+lib$(LIB)$(STLIBEXT): $(STOBJLISTS)
+	$(RM) $@
+	@echo "building static $(LIB) library"
+	@dirs=`echo $(STOBJLISTS) | \
+		sed -e 's%/OBJS.ST%%g' -e 's%OBJS.ST%.%'`; \
+		$(AR) cq $@ `for d in $$dirs; do \
+			sed -e "s%^%$$d/%" -e "s% % $$d/%g" \
+				$$d/OBJS.ST; done`
+	$(RANLIB) $@
+
+lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS)
+	$(RM) $@
+	@echo "building shared $(LIB) library ($(LIBMAJOR).$(LIBMINOR))"
+	@dirs=`echo $(SHOBJLISTS) | \
+		sed -e 's%/OBJS.SH%%g' -e 's%OBJS.SH%.%'`; \
+		$(LDCOMBINE) -o $@ `for d in $$dirs; do \
+			sed -e "s%^%$$d/%" -e "s% % $$d/%g" \
+				$$d/OBJS.SH; done` \
+			$(SHLIB_EXPFLAGS) \
+			$(LDCOMBINE_TAIL)
+lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBVEXT)
+	$(RM) $@
+	$(LN_S) lib$(LIB)$(SHLIBVEXT) $@
+
+lib$(LIB)$(PFLIBEXT): $(PFOBJLISTS)
+	$(RM) $@
+	@echo "building profiled $(LIB) library"
+	@dirs=`echo $(PFOBJLISTS) | \
+		sed -e 's%/OBJS.PF%%g' -e 's%OBJS.PF%.%'`; \
+		$(AR) cq $@ `for d in $$dirs; do \
+			sed -e "s%^%$$d/%" -e "s% % $$d/%g" \
+				$$d/OBJS.PF; done`
+	$(RANLIB) $@
+
+$(TOPLIBD)/lib$(LIB)$(STLIBEXT): lib$(LIB)$(STLIBEXT)
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(STLIBEXT) .)
+$(TOPLIBD)/lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBEXT)
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBEXT) .)
+$(TOPLIBD)/lib$(LIB)$(SHLIBVEXT): lib$(LIB)$(SHLIBVEXT)
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBVEXT) .)
+$(TOPLIBD)/lib$(LIB)$(PFLIBEXT): lib$(LIB)$(PFLIBEXT)
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(PFLIBEXT) .)
+
+all-libs: $(LIBLIST)
+all-liblinks: $(LIBLINKS)
+
+clean-libs:
+	$(RM) lib$(LIB)$(STLIBEXT)
+	$(RM) lib$(LIB)$(SHLIBVEXT)
+	$(RM) lib$(LIB)$(SHLIBEXT)
+	$(RM) lib$(LIB)$(PFLIBEXT)
+
+clean-liblinks:
+	$(RM) $(TOPLIBD)/lib$(LIB)$(STLIBEXT)
+	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)
+	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBEXT)
+	$(RM) $(TOPLIBD)/lib$(LIB)$(PFLIBEXT)
+
+install-libs: $(LIBINSTLIST)
+install-static:
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(STLIBEXT)
+	$(INSTALL_DATA) lib$(LIB)$(STLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(STLIBEXT)
+install-shared:
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBVEXT)
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBEXT)
+	$(INSTALL_DATA) lib$(LIB)$(SHLIBVEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIB)$(SHLIBVEXT) \
+		lib$(LIB)$(SHLIBEXT))
+install-profiled:
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
+	$(INSTALL_DATA) lib$(LIB)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
+
+Makefile: $(SRCTOP)/config/lib.in
+
+# Use the following if links need to be made to $(TOPLIBD):
+# all-unix:: all-liblinks
+# install-unix:: install-libs
+# clean-unix:: clean-liblinks clean-libs
+
+# Use the following if links need not be made:
+# all-unix:: all-libs
+# install-unix:: install-libs
+# clean-unix:: clean-libs
+
+###
+### end config/lib.in

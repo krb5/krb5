@@ -1,3 +1,8 @@
+Wed Feb  5 20:29:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Fri Nov 22 15:48:19 1996  unknown  <bjaspan@mit.edu>
 
 	* ftp.c (hookup): use sizeof instead of h_length to determine

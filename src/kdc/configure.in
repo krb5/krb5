@@ -33,23 +33,5 @@ if test "$withval" = yes; then
 fi
 dnl
 
-dnl
-dnl This is a horrible hack, based on the fact that we have to drag 
-dnl stuff from alt_prof.c, which depends on str_conv.c, which depends on
-dnl far too much other stuff!  The problem is that shared libraries require
-dnl that you link in all other libraries that depend on it.
-dnl
-dnl XXX we need to rethink where things go.
-dnl 
-USE_DYN_LIBRARY
-USE_KADMSRV_LIBRARY
-USE_GSSRPC_LIBRARY
-USE_GSSAPI_LIBRARY
-USE_DYN_LIBRARY
-dnl
-dnl
-USE_KDB5_LIBRARY
-USE_KRB4_LIBRARY
-KRB5_LIBRARIES
-V5_USE_SHARED_LIB
+KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

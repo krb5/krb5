@@ -19,9 +19,8 @@ EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 #SRCTOP2 = $(BUILDTOP2)
 #EHDRDIR2=$(BUILDTOP2)/include/krb5
 
-.c.o:
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
+STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
+      kv5m_err.o adm_err.o init_ets.o
 
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
@@ -30,8 +29,6 @@ ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c \
 	$(srcdir)/init_ets.c
 
-all-unix:: $(HDRS) shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -39,8 +36,8 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
+all-libobjs: $(HDRS)
 
 unixmac: $(HDRS) $(SRCS)
 
@@ -71,26 +68,6 @@ krb5_err.$(OBJEXT): krb5_err.c
 adm_err.$(OBJEXT): adm_err.c
 kv5m_err.$(OBJEXT): kv5m_err.c
 
-clean-unix::
-	$(RM) $(HDRS) $(ETSRCS) shared/*
-clean-mac::
+clean-unix:: clean-libobjs
 	$(RM) $(HDRS) $(ETSRCS)
 clean-windows::
-
-init_ets.o: $(srcdir)/init_ets.c
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
-
-# 
-# This stuff is already dropped in by the autoconf generated configure scripts.
-# (Blame Mark, not me for that; this was before we had pre.in and post.in, 
-# we should probably move the error table rules from aclocal.m4 to pre.in)
-#
-#.SUFFIXES:  .h .c .et .ct
-#
-#.et.h:
-#	awk -f $(SRCTOP2)/util/et/et_h.awk outfile=$*.h $<
-#
-#.et.c:
-#	awk -f $(SRCTOP2)/util/et/et_c.awk outfile=$*.c $<
-#

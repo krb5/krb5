@@ -1,3 +1,8 @@
+Wed Feb  5 22:03:35 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Tue Nov 26 20:41:31 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: Check for apra/inet.h

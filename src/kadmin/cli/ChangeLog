@@ -1,3 +1,8 @@
+Tue Feb  4 20:56:47 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
 Tue Dec 17 17:08:04 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadmin.c (kadmin_startup): Do not compare an int to NULL.

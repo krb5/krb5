@@ -5,9 +5,13 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSOBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS = \
+	rc_base.o	\
+	rc_dfl.o 	\
+	rc_io.o		\
+	rcdef.o		\
+	rc_conv.o	\
+	ser_rc.o
 
 OBJS=	\
 	rc_base.$(OBJEXT)	\
@@ -25,8 +29,6 @@ SRCS=	\
 	$(srcdir)/rc_conv.c	\
 	$(srcdir)/ser_rc.c
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
@@ -34,11 +36,9 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
-shared:
-	mkdir shared
+all-unix:: all-libobjs
 
-clean-mac::
 clean-windows::
 	$(RM) $(OBJFILE)
-clean-unix::
-	$(RM) shared/*
+
+clean-unix:: clean-libobjs

@@ -1,3 +1,4 @@
+RELDIR=../util/et
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
 
@@ -6,13 +7,15 @@ SED = sed
 ##DOSXTRA=
 ##DOSOBJFILE=comerr.lst
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS=error_message.o et_name.o init_et.o com_err.o
+STOBJLISTS=OBJS.ST
+LIB=com_err
+LIBMAJOR=1
+LIBMINOR=0
 
-LIBDONE=DONE
-LIB_SUBDIRS=.
-INSTALLFILE = cp
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
 
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
@@ -94,10 +97,7 @@ com_err.o: com_err.c
 # real entries...
 #
 
-all-unix:: compile_et includes shared
-all-mac:: libcom_err.a
-shared:
-	 mkdir shared
+all-unix:: compile_et includes
 
 # The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )
@@ -120,10 +120,7 @@ et_h.awk: $(srcdir)/et_h.awk
 	$(CP) $(srcdir)/et_h.awk et_h.awk
 
 clean-unix::
-	$(RM) compile_et compile_et.o error_table.o
-	$(RM) shared/*
-
-clean-mac:: clean-unix
+	$(RM) compile_et
 
 depend:: 
 
@@ -140,32 +137,7 @@ install:: mit-sipb-copyright.h
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
 
-
-all-mac:: libcom_err.$(STEXT)
-
-libcom_err.$(STEXT): $(LIBOBJS)
-	$(ARCHIVE) $@ $(LIBOBJS)
-	$(RANLIB) $@
-
-DONE:: $(LIBOBJS)
-	 $(RM) DONE
-	 echo $(LIBOBJS) >DONE
-
-clean-unix::
-	$(RM) $(LIBOBJS) DONE
-
-clean-mac::
-	$(RM) libcom_err.a
-	$(RM) $(LIBOBJS)
-
-install::
-	$(INSTALL_DATA) libcom_err.a $(DESTDIR)$(KRB5_LIBDIR)/libcom_err.a
-	$(RANLIB)    $(DESTDIR)$(KRB5_LIBDIR)/libcom_err.a
-## 
-
 clean-unix:: clean-files
-
-clean-mac:: clean-files
 
 clean-files::
 	rm -f *~ \#* *.bak \
@@ -187,7 +159,6 @@ com_err.dvi: com_err.texinfo
 libcom_err.o:	$(LIBOBJS)
 	ld -r -s -o libcom_err.o $(LIBOBJS)
 	chmod -x libcom_err.o
-
 
 archive:	et.tar
 

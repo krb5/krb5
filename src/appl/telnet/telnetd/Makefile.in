@@ -20,13 +20,14 @@
 #	@(#)Makefile.generic	5.5 (Berkeley) 3/1/91
 #
 
-LOCAL_LIBRARIES=-lpty
-DEPLOCAL_LIBRARIES=$(TOPLIBD)/../util/pty/libpty.a
 AUTH_DEF=-DAUTHENTICATION -DENCRYPTION -DKRB5 -DFORWARD -UNO_LOGIN_F -DLOGIN_CAP_F -DLOGIN_PROGRAM=KRB5_PATH_LOGIN
 OTHERDEFS=-DKLUDGELINEMODE -DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON
 LOCALINCLUDES=-I.. -I$(srcdir)/..
 CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
+
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS=	$(srcdir)/telnetd.c \
 	$(srcdir)/termio-tn.c \
@@ -53,8 +54,8 @@ OBJS=	telnetd.o \
 
 all:: telnetd
 
-telnetd: $(OBJS) $(DEPLIBS) ../libtelnet/libtelnet.a
-	$(LD) -o $@ $(LDFLAGS) $(LDARGS) $(OBJS) ../libtelnet/libtelnet.a $(LIBS)
+telnetd: $(OBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS) ../libtelnet/libtelnet.a
+	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(PTY_LIB) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) telnetd
