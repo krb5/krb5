@@ -725,26 +725,26 @@ again.  A reference count of open locks is maintained by this function
 and osa_adb_release_lock so the functions can be called multiple
 times; the actual lock is not released until the final
 osa_adb_release_lock.  Note, however, that once a lock is upgraded
-from shared to exclusive it is not downgraded again until released
-completely.  In other words, get_lock(SHARED), get_lock(EXCLUSIVE),
-release_lock() leaves the process with an exclusive lock with a
-reference count of one.  An attempt to get a shared or exclusive lock
-that conflicts with another process results in the OSA_ADB_CANLOCK_DB
-error code.
+from shared to exclusive, or from exclusive to permanent, it is not
+downgraded again until released completely.  In other words,
+get_lock(SHARED), get_lock(EXCLUSIVE), release_lock() leaves the
+process with an exclusive lock with a reference count of one.  An
+attempt to get a shared or exclusive lock that conflicts with another
+process results in the OSA_ADB_CANLOCK_DB error code.
 
 This function and osa_adb_release_lock are called automatically as
 needed by all other osa_adb functions to acquire shared and exclusive
 locks and so are not normally needed.  They can be used explicitly by
 a program that wants to perform multiple osa_adb functions within the
-context of a single lock (ie: ovsec_adm_export).
+context of a single lock.
 
 Acquiring an OSA_ADB_PERMANENT lock is different.  A permanent lock
 consists of first acquiring an exclusive lock and then {\it deleting
 the lock file}.  Any subsequent attempt to acquire a lock by a
 different process will fail with OSA_ADB_NOLOCKFILE instead of
 OSA_ADB_CANTLOCK_DB (attempts in the same process will ``succeed''
-because only the reference count gets incremented).  Releasing a
-permanent lock re-creates the lock file.
+because only the reference count gets incremented).  The lock file is
+recreated by osa_adb_release_lock when the last pending lock is released.
 
 The purpose of a permanent lock is to absolutely ensure that the
 database remain locked during non-atomic operations.  If the locking
@@ -760,10 +760,10 @@ can clean it up.
 osa_adb_ret_t osa_adb_release_lock(osa_adb_T_t db)
 \end{verbatim}
 
-Releases a shared or exclusive lock acquired with osa_adb_get_lock, or
-decrements the reference count if multiple locks have been requested.
-Releasing a permanent lock re-creates the lock file and releases all
-of the processes locks (ie: the reference count is set back to zero).
+Releases a shared, exclusive, or permanent lock acquired with
+osa_adb_get_lock, or just decrements the reference count if multiple
+locks are held.  When a permanent lock is released, the lock file is
+re-created.
 
 All of a process' shared or exclusive database locks are released when
 the process terminates.  A permanent lock is {\it not} released when
