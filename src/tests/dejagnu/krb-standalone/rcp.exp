@@ -15,6 +15,9 @@ if ![info exists KRSHD] {
     set KRSHD [findfile $objdir/../../appl/bsd/kshd]
 }
 
+# Remove old wrapper script
+    catch "exec rm -f $tmppwd/rcp"
+
 # Make sure .k5login is reasonable.
 if ![check_k5login rcp] {
     return
@@ -38,16 +41,12 @@ proc start_rsh_daemon { } {
     global tmppwd
     global krshd_spawn_id
     global krshd_pid
-    global krb5_init_vars
 
-    set opt(0) ""
-    set opt(1) ""
-    set opt(2) ""
-    set opt(3) ""
-    for {set i 0} {$i < [llength $krb5_init_vars]} {incr i} {
-	regexp "^(\[^=\]*)=(.*)" [lindex $krb5_init_vars $i] foo evar evalue
-	set opt($i) "-L$evar"
+    # Setup the shared library wrapper for login.krb5
+    if ![file exists $tmppwd/rcp] {
+	    setup_wrapper $tmppwd/rcp "$RCP $*"
     }
+
 
     # The -D argument tells it to accept a single connection, so we
     # don't need to use inetd.  The 3544 is the port to listen at.
@@ -58,7 +57,7 @@ proc start_rsh_daemon { } {
     #	a users shell might be sh...
     #	Later a proper fix would be to have kshd exec rcp directly
     #   shell indirection...
-    spawn $KRSHD -k -c -D 3544 -P [file dirname $RCP] -S $tmppwd/srvtab -M $REALMNAME -L ENV_SET $opt(0) $opt(1) $opt(2) $opt(3) 
+    spawn $KRSHD -k -c -D 3544 -P $tmppwd -S $tmppwd/srvtab -M $REALMNAME -L ENV_SET
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 

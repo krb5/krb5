@@ -1,5 +1,8 @@
 Mon May  6 08:05:33 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* rcp.exp: Use a wrapper script to set up the remote rcp as
+		started from kshd. 
+
 	* rsh.exp: Setup a wrapper script in executing klist in the remote
 		shell so that environment variables are properly set.
 
