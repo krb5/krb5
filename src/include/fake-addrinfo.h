@@ -42,6 +42,7 @@
 #ifndef FAI_DEFINED
 #define FAI_DEFINED
 #include "port-sockets.h"
+#include "socket-utils.h"
 
 #if !defined (HAVE_GETADDRINFO) || defined (BROKEN_GETADDRINFO)
 
