@@ -51,9 +51,7 @@ OLDDECLARG(krb5_keyblock *,keyblock)
 OLDDECLARG(const krb5_data *,data)
 OLDDECLARG(const krb5_data *, salt)
 {
-    char copystr[512];
-
-    register char *str = copystr;
+    register char *str, *copystr;
     register krb5_octet *key;
 
     register unsigned temp,i;
@@ -73,25 +71,26 @@ OLDDECLARG(const krb5_data *, salt)
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
-#define cleanup() {memset(keyblock->contents, 0, sizeof(mit_des_cblock));\
-		       xfree(keyblock->contents);}
-
     keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
 
-    /* XXX todo: make it work in face of embedded NUL's */
-    memset(copystr, 0, sizeof(copystr));
-    j = min(data->length, 511);
-    (void) strncpy(copystr, data->data, j);
-    if (salt) {
-	strncpy (copystr + j, salt->data, min(salt->length, 511-j));
-    }
+    if (salt)
+	length = data->length + salt->length;
+    else
+	length = data->length;
 
-    /* convert copystr to des key */
+    copystr = malloc(length);
+    if (!copystr)
+	return ENOMEM;
+
+    memcpy(copystr, (char *) data->data, data->length);
+    if (salt)
+	memcpy(copystr + data->length, (char *)salt->data, salt->length);
+
+    /* convert to des key */
     forward = 1;
     p_char = k_char;
-    length = strlen(str);
 
     /* init key array for bits */
     memset(k_char,0,sizeof(k_char));
@@ -99,9 +98,11 @@ OLDDECLARG(const krb5_data *, salt)
 #ifdef DEBUG
     if (mit_des_debug)
 	fprintf(stdout,
-		"\n\ninput str length = %d  string = %s\nstring = 0x ",
-		length,str);
+		"\n\ninput str length = %d  string = %*s\nstring = 0x ",
+		length,length,str);
 #endif
+
+    str = copystr;
 
     /* get next 8 bytes, strip parity, xor */
     for (i = 1; i <= length; i++) {
@@ -144,6 +145,10 @@ OLDDECLARG(const krb5_data *, salt)
     (void) mit_des_cbc_cksum((krb5_octet *)copystr, key, length, key_sked, key);
     /* erase key_sked */
     memset((char *)key_sked, 0, sizeof(key_sked));
+
+    /* clean & free the input string */
+    memset(copystr, 0, length);
+    xfree(copystr);
 
     /* now fix up key parity again */
     mit_des_fixup_key_parity(key);
