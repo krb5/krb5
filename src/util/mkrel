@@ -134,7 +134,7 @@ EOF
 
 echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
-	-o -name BADSYMS -o -name .Sanitize \) -print \
+	-o -name BADSYMS -o -name .Sanitize -o -name .rconf \) -print \
 	| xargs rm -f
 
 if test $dodoc = t; then

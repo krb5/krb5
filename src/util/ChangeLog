@@ -1,3 +1,7 @@
+2003-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Exclude .rconf files.
+
 2002-12-23  Tom Yu  <tlyu@mit.edu>
 
 	* depfix.sed: Convert dependencies on generated krb524 and krb4
