@@ -294,7 +294,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 
       /* the encryption key is the session key XOR 0xf0f0f0f0f0f0f0f0 */
 
-      krb5_use_cstype(context, &ctx->enc.eblock, ETYPE_RAW_DES_CBC);
+      krb5_use_enctype(context, &ctx->enc.eblock, ENCTYPE_DES_CBC_RAW);
       ctx->enc.processed = 0;
       if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key))
 	 return(code); 
@@ -302,7 +302,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	 /*SUPPRESS 113*/
 	 ctx->enc.key->contents[i] ^= 0xf0;
 
-      krb5_use_cstype(context, &ctx->seq.eblock, ETYPE_RAW_DES_CBC);
+      krb5_use_enctype(context, &ctx->seq.eblock, ENCTYPE_DES_CBC_RAW);
       ctx->seq.processed = 0;
       ctx->seq.key = ctx->subkey;
 
