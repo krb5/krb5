@@ -1,3 +1,9 @@
+Thu Jul  6 17:26:03 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* localaddr.c: moved to lib/crypto/os; just a stub here.
+
+	* ustime.c: moved to lib/crypto/os; just a stub here.
+
 Thu Jul  6 09:56:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Remove t_an_to_ln.o
