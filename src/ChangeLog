@@ -1,3 +1,7 @@
+2004-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (INSTALLMKDIRS): Add EXAMPLEDIR.
+
 2004-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): On HP-UX, define some

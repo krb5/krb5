@@ -1,3 +1,7 @@
+2004-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (datadir, EXAMPLEDIR): Add directory for examples.
+
 2004-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib.in (binutils.versions, osf1.exports): New file targets.

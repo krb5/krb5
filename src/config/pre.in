@@ -189,6 +189,9 @@ INSTALL_EXEC_PREFIX=@exec_prefix@
 exec_prefix=@exec_prefix@
 SHLIB_TAIL_COMP=@SHLIB_TAIL_COMP@
 
+datadir = @datadir@
+EXAMPLEDIR = $(datadir)/examples/krb5
+
 KRB5MANROOT = @mandir@
 ADMIN_BINDIR = @sbindir@
 SERVER_BINDIR = @sbindir@
