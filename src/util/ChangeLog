@@ -1,3 +1,8 @@
+2001-10-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* reconf: Require autoconf 2.13. Remove support for local autoconf
+	tree.
+
 2001-10-17  Danilo Almeida  <dalmeida@mit.edu>
 
 	* def-check.pl: Provide a little bit of usage info.  More
