@@ -213,12 +213,12 @@ __get_item_next(hashp, cursorp, key, val, item_info)
 	DBT *key, *val;
 	ITEM_INFO *item_info;
 {
-	int stat;
+	int status;
 
-	stat = __get_item(hashp, cursorp, key, val, item_info);
+	status = __get_item(hashp, cursorp, key, val, item_info);
 	cursorp->ndx++;
 	cursorp->pgndx++;
-	return (stat);
+	return (status);
 }
 
 /*

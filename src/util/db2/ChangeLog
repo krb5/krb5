@@ -1,3 +1,11 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* btree/bt_delete.c, btree/bt_put.c, recno/rec_delete.c,
+ 	recno/rec_put.c: Change local variable index to idx.
+
+	* hash/hash_page.c: Change local variable stat to status to
+	prevent shadowing system function.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in (AC_COMPILE_TYPE): Declare with AC_DEFUN() instead
