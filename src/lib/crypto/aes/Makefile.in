@@ -73,5 +73,4 @@ aestab.so aestab.po $(OUTPRE)aestab.$(OBJEXT): aestab.c aesopt.h aes.h \
   uitypes.h
 aeskey.so aeskey.po $(OUTPRE)aeskey.$(OBJEXT): aeskey.c aesopt.h aes.h \
   uitypes.h
-aess2k.so aess2k.po $(OUTPRE)aess2k.$(OBJEXT): aess2k.c aesopt.h aes.h \
-  uitypes.h
+
