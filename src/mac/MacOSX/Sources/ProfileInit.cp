@@ -17,15 +17,23 @@
  */
  
 #include <Kerberos/com_err.h>
+#include <Kerberos/KerberosDebug.h>
 
 #include "KerberosProfileInit.h"
-#include "profile.h"
+#include "prof_int.h"
 #include "prof_err.h"
 
 void KerberosProfileInit (CFStringRef inBundleID)
 {
+    int err = 0;
+    
 #if USE_HARDCODED_FALLBACK_ERROR_TABLES
 	/* Initialize the error tables */
 	add_error_table(&et_prof_error_table);
 #endif
+
+    err = prof_mutex_init (&g_shared_trees_mutex);
+    if (err) {
+        dprintf ("prof_mutex_init returned %ld\n", err);
+    }
 }
