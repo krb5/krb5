@@ -1,3 +1,10 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (TKT_FLG_TRANSIT_POLICY_CHECKED,
+	TKT_FLG_OK_AS_DELEGATE, TKT_FLG_ANONYMOUS): New macros.
+	(KDC_OPT_REQUEST_ANONYMOUS, KDC_OPT_DISABLE_TRANSITED_CHECK):
+	Likewise.
+
 2000-10-16  Miro Jurisic  <meeroh@mit.edu>
 
 	* win-mac.h: #include <KerberosConditionalMacros.h> on Mac OS

@@ -520,6 +520,12 @@ flags_string(cred)
 	buf[i++] = 'H';
     if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
 	buf[i++] = 'A';
+    if (cred->ticket_flags & TKT_FLG_TRANSIT_POLICY_CHECKED)
+	buf[i++] = 'T';
+    if (cred->ticket_flags & TKT_FLG_OK_AS_DELEGATE)
+	buf[i++] = 'O';		/* D/d are taken.  Use short strings?  */
+    if (cred->ticket_flags & TKT_FLG_ANONYMOUS)
+	buf[i++] = 'a';
     buf[i] = '\0';
     return(buf);
 }
