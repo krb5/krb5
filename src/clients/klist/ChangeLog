@@ -1,3 +1,8 @@
+Thu Jun  8 17:46:51 1995    <tytso@rsx-11.mit.edu>
+
+	* klist.c: Integrated patch from OpenVision which allows klist to
+		list keytabs as well as ccache's.
+
 Thu May 11 07:31:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* klist.c (main): Update usage message to include -e and -f.
