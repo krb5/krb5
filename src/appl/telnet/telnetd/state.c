@@ -1084,7 +1084,8 @@ static int
 envvarok(varp)
 	char *varp;
 {
-	if (strncmp(varp, "LD_", strlen("LD_")) &&
+	if ((strchr(varp, '=') == 0) &&
+	    strncmp(varp, "LD_", strlen("LD_")) &&
 	    strncmp(varp, "_RLD_", strlen("_RLD_")) &&
 	    strcmp(varp, "LIBPATH") &&
 	    strcmp(varp, "IFS")) {

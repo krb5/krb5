@@ -1,3 +1,7 @@
+Sat Oct 21 15:37:55 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* state.c (envvarok): Also check for variables involving =.
+
 Thu Oct 19 01:28:23 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* state.c (envvarok): New function, checks environment variables
