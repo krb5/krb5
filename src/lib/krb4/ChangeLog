@@ -1,3 +1,8 @@
+Sun Apr  5 19:51:21 1998  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Fix up to not free context
+	unless it is valid.
+
 Wed Apr  9 23:15:39 1997  Tom Yu  <tlyu@mit.edu>
 
 	* realmofhost.c (krb_realmofhost): Add bounds checking to various
