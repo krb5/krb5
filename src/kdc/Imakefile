@@ -1,5 +1,5 @@
 SRCS= \
-	kdc5_err.et \
+	kdc5_err.c \
 	dispatch.c \
 	do_as_req.c \
 	do_tgs_req.c \
