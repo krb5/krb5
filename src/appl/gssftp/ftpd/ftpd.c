@@ -882,10 +882,10 @@ checkuser(name)
 			     int i = strlen(name) + 1;
 			     
 			     /* Make sure foo doesn't match foobar */
-			     if (line[i] == '\0' || !isspace(line[i]))
+			     if (line[i] == '\0' || !isspace((int) line[i]))
 			          continue;
 			     /* Ignore whitespace */
-			     while (isspace(line[++i]));
+			     while (isspace((int) line[++i]));
 
 			     if (strcmp(&line[i], "restrict") == 0)
 			          return (-1);

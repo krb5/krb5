@@ -1,3 +1,10 @@
+2001-06-15  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpcmd.y, ftpd.c: Cast argument to isspace()/isdigit() to int.
+
+	* secure.h (SESSION): Pass pointer to C_Block as expected by
+	krb5_mk_priv().
+
 2001-06-08  Mitchell Berger  <mitchb@mit.edu>
 
 	* pathnames.h: _PATH_FTPUSERS renamed to _PATH_FTPUSERS_DEFAULT.

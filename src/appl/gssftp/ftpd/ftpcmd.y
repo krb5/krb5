@@ -1316,9 +1316,9 @@ yylex()
 				cpos++;
 				return (SP);
 			}
-			if (isdigit(cbuf[cpos])) {
+			if (isdigit((int) cbuf[cpos])) {
 				cp = &cbuf[cpos];
-				while (isdigit(cbuf[++cpos]))
+				while (isdigit((int) cbuf[++cpos]))
 					;
 				c = cbuf[cpos];
 				cbuf[cpos] = '\0';
@@ -1331,9 +1331,9 @@ yylex()
 			goto dostr1;
 
 		case ARGS:
-			if (isdigit(cbuf[cpos])) {
+			if (isdigit((int) cbuf[cpos])) {
 				cp = &cbuf[cpos];
-				while (isdigit(cbuf[++cpos]))
+				while (isdigit((int) cbuf[++cpos]))
 					;
 				c = cbuf[cpos];
 				cbuf[cpos] = '\0';
@@ -1418,8 +1418,8 @@ upper(s)
 	register char *s;
 {
 	while (*s != '\0') {
-		if (islower(*s))
-			*s = toupper(*s);
+		if (islower((int) (*s)))
+			*s = toupper((int) (*s));
 		s++;
 	}
 }
