@@ -83,7 +83,7 @@ __initialize_Kerberos5GlobalsLib (
 	if (err != noErr)
 		return err;
 		
-	ccErr = cc_initialize (&gCCContext, 2, NULL, NULL);
+	ccErr = cc_initialize (&gCCContext, CC_API_VER_2, NULL, NULL);
 	if (ccErr != CC_NOERROR)
 		return memFullErr;
 		

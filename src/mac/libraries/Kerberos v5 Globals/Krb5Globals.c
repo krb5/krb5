@@ -84,10 +84,11 @@ Krb5GlobalsSetUniqueDefaultCacheName ()
 	
 	/* Infinite loop! I presume you won't have 2^32 ccaches... */
 	for (i = 0; ;i++) {
-		sprintf ("%d", i, name);
+		sprintf (name, "%d", i);
 		ccErr = cc_open (gCCContext, name, CC_CRED_V5, 0L, &ccache);
 		if (ccErr == CC_NO_EXIST) {
 			err = Krb5GlobalsSetDefaultCacheName (name);
+			break;
 		} else if (ccErr == CC_NOERROR) {
 			cc_close (gCCContext, &ccache);
 		} else {

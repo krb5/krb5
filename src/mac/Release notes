@@ -24,3 +24,7 @@ Changes in 1.1a3:
 1.1b5
  preliminary version of ccache v2 library and headers
  Mac changes for cc_set_cache_name, including addition of Krb5GlobalsLib
+ 
+1.1b6
+ Fixed debug vs. non-debug import mistakes in GSSLib and globals lib.
+ Fixed ccache API_VER_1 vs. API_VER_2 bug
