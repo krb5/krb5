@@ -30,12 +30,12 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_get_entry(context, id, principal, kvno, keytype, entry)
+krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
    krb5_context context;
    krb5_keytab id;
    krb5_principal principal;
    krb5_kvno kvno;
-   krb5_keytype keytype;
+   krb5_enctype enctype;
    krb5_keytab_entry * entry;
 {
     krb5_keytab_entry cur_entry, new_entry;

@@ -63,7 +63,7 @@
  * sizeof(krb5_int32) for the principal type (for KEYTAB V2 and higher)
  * sizeof(krb5_int32) bytes for the timestamp
  * sizeof(krb5_octet) bytes for the key version number
- * sizeof(krb5_int16) bytes for the keytype
+ * sizeof(krb5_int16) bytes for the enctype
  * sizeof(krb5_int32) bytes for the key length, followed by the key
  */
 
@@ -252,7 +252,7 @@ krb5_int32 *delete_point;
 {
     krb5_octet vno;
     krb5_int16 count;
-    krb5_int16 keytype;
+    krb5_int16 enctype;
     krb5_int16 princ_size;
     register int i;
     krb5_int32 size;
@@ -396,14 +396,14 @@ krb5_int32 *delete_point;
     ret_entry->vno = (krb5_kvno)vno;
     
     /* key type */
-    if (!xfread(&keytype, sizeof(keytype), 1, KTFILEP(id))) {
+    if (!xfread(&enctype, sizeof(enctype), 1, KTFILEP(id))) {
 	error = KRB5_KT_END;
 	goto fail;
     }
-    ret_entry->key.keytype = (krb5_keytype)keytype;
+    ret_entry->key.enctype = (krb5_enctype)enctype;
 
     if (KTVERSION(id) != KRB5_KT_VNO_1)
-	ret_entry->key.keytype = ntohs(ret_entry->key.keytype);
+	ret_entry->key.enctype = ntohs(ret_entry->key.enctype);
     
     /* key contents */
     ret_entry->key.magic = KV5M_KEYBLOCK;
@@ -469,7 +469,7 @@ krb5_keytab_entry *entry;
 {
     krb5_octet vno;
     krb5_data *princ;
-    krb5_int16 count, size, keytype;
+    krb5_int16 count, size, enctype;
     krb5_error_code retval = 0;
     krb5_timestamp timestamp;
     krb5_int32	princ_type;
@@ -561,10 +561,10 @@ krb5_keytab_entry *entry;
     }
     /* key type */
     if (KTVERSION(id) == KRB5_KT_VNO_1)
-	    keytype = entry->key.keytype;
+	    enctype = entry->key.enctype;
     else
-	    keytype = htons(entry->key.keytype);
-    if (!xfwrite(&keytype, sizeof(keytype), 1, KTFILEP(id))) {
+	    enctype = htons(entry->key.enctype);
+    if (!xfwrite(&enctype, sizeof(enctype), 1, KTFILEP(id))) {
 	goto abend;
     }
     /* key length */
