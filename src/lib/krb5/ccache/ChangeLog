@@ -1,3 +1,9 @@
+2004-11-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_retr.c (krb5_cc_retrieve_cred_seq): Temporarily clear the
+	KRB5_TC_OPENCLOSE flag on the credentials cache while reading
+	multiple entries from it.
+
 2004-11-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (krb5_fcc_get_flags): New function.

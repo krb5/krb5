@@ -193,7 +193,9 @@ krb5int_cc_creds_match_request(krb5_context context, krb5_flags whichfields, krb
 }
 
 static krb5_error_code
-krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds, int nktypes, krb5_enctype *ktypes)
+krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id,
+			   krb5_flags whichfields, krb5_creds *mcreds,
+			   krb5_creds *creds, int nktypes, krb5_enctype *ktypes)
 {
      /* This function could be considerably faster if it kept indexing */
      /* information.. sounds like a "next version" idea to me. :-) */
@@ -206,11 +208,20 @@ krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id, krb5_flags whic
        int pref;
      } fetched, best;
      int have_creds = 0;
+     krb5_flags oflags = 0;
 #define fetchcreds (fetched.creds)
 
-     kret = krb5_cc_start_seq_get(context, id, &cursor);
+     kret = krb5_cc_get_flags(context, id, &oflags);
      if (kret != KRB5_OK)
 	  return kret;
+     if (oflags & KRB5_TC_OPENCLOSE)
+	 (void) krb5_cc_set_flags(context, id, oflags & ~KRB5_TC_OPENCLOSE);
+     kret = krb5_cc_start_seq_get(context, id, &cursor);
+     if (kret != KRB5_OK) {
+	  if (oflags & KRB5_TC_OPENCLOSE)
+	       krb5_cc_set_flags(context, id, oflags);
+	  return kret;
+     }
 
      while ((kret = krb5_cc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
       if (krb5int_cc_creds_match_request(context, whichfields, mcreds, &fetchcreds))
@@ -231,6 +242,8 @@ krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id, krb5_flags whic
 	      } else {
 		  krb5_cc_end_seq_get(context, id, &cursor);
 		  *creds = fetchcreds;
+		  if (oflags & KRB5_TC_OPENCLOSE)
+		      krb5_cc_set_flags(context, id, oflags);
 		  return KRB5_OK;
 	      }
 	  }
@@ -241,6 +254,8 @@ krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id, krb5_flags whic
 
      /* If we get here, a match wasn't found */
      krb5_cc_end_seq_get(context, id, &cursor);
+     if (oflags & KRB5_TC_OPENCLOSE)
+	 krb5_cc_set_flags(context, id, oflags);
      if (have_creds) {
 	 *creds = best.creds;
 	 return KRB5_OK;
