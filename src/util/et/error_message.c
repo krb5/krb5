@@ -38,8 +38,6 @@ extern char const * const sys_errlist[];
 extern const int sys_nerr;
 #endif
 
-static char buffer[ET_EBUFSIZ];
-
 /*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 /*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
 static k5_mutex_t et_list_lock = K5_MUTEX_PARTIAL_INITIALIZER;
@@ -49,7 +47,14 @@ MAKE_FINI_FUNCTION(com_err_terminate);
 
 int com_err_initialize(void)
 {
-    return k5_mutex_finish_init(&et_list_lock);
+    int err;
+    err = k5_mutex_finish_init(&et_list_lock);
+    if (err)
+	return err;
+    err = k5_key_register(K5_KEY_COM_ERR, free);
+    if (err)
+	return err;
+    return 0;
 }
 
 void com_err_terminate(void)
@@ -81,7 +86,7 @@ error_message(long code)
 	unsigned long table_num;
 	int started = 0;
 	unsigned int divisor = 100;
-	char *cp;
+	char *cp, *cp1;
 	const struct error_table *table;
 	int merr;
 
@@ -221,8 +226,20 @@ oops:
 		return (strerror (code));
 	}
 #endif
-	
-	cp = buffer;
+
+	cp = k5_getspecific(K5_KEY_COM_ERR);
+	if (cp == NULL) {
+	    cp = malloc(ET_EBUFSIZ);
+	    if (cp == NULL) {
+	    no_specific:
+		return "Unknown error code";
+	    }
+	    if (k5_setspecific(K5_KEY_COM_ERR, cp) != 0) {
+		free(cp);
+		goto no_specific;
+	    }
+	}
+	cp1 = cp;
 	strcpy(cp, "Unknown code ");
 	cp += sizeof("Unknown code ") - 1;
 	if (table_num != 0L) {
@@ -241,7 +258,7 @@ oops:
 	}
 	*cp++ = '0' + offset;
 	*cp = '\0';
-	return(buffer);
+	return(cp1);
 }
 
 /*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */

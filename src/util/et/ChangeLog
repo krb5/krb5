@@ -1,3 +1,19 @@
+2004-05-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* error_message.c (buffer): Static variable deleted.
+	(com_err_initialize): Register cleanup support for com_err
+	thread-specific data key.
+	(error_message): Use a per-thread dynamically-allocated buffer
+	instead of static storage, for the case where an unknown error
+	code is given.  If any errors occur allocating or tracking the
+	buffer, return a fixed message.
+
+	* t_com_err.c: Include stdlib.h.  If TEST_THREADS is defined,
+	include pthread.h.
+	(run): Renamed from main, changed signature.
+	(main): New function.  Just call run, or if TEST_THREADS is
+	defined, create a thread to call it.
+
 2004-05-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Invoke KRB5_BUILD_PROGRAM and KRB5_RUN_FLAGS.

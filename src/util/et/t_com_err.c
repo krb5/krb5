@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "com_err.h"
 #include "et1.h"
 #include "et2.h"
@@ -59,7 +60,7 @@ try_em_1 (int t1_known, int t2_known, int lineno)
 }
 #define try_em(A,B) try_em_1(A,B,__LINE__)
 
-int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
+static void *run(/*@unused@*/ void *x)
 {
     try_em (0, 0);
     (void) add_error_table (&et_et1_error_table);
@@ -110,5 +111,33 @@ int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) remove_error_table (&et_et2_error_table);
     try_em (0, 0);
 
+    return 0;
+}
+
+#ifdef TEST_THREADS
+#include <pthread.h>
+#endif
+
+int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
+{
+#ifdef TEST_THREADS
+    pthread_t t;
+    int err;
+    void *t_retval;
+
+    err = pthread_create(&t, 0, run, 0);
+    if (err) {
+	fprintf(stderr, "pthread_create error: %s\n", strerror(err));
+	exit(1);
+    }
+    err = pthread_join(t, &t_retval);
+    if (err) {
+	fprintf(stderr, "pthread_join error: %s\n", strerror(err));
+	exit(1);
+    }
     return fail;
+#else
+    run(0);
+    return fail;
+#endif
 }
