@@ -141,8 +141,15 @@ char *canon;
 	    return;
 	}
     } else if(krb_get_lrealm(realm, 1) != KSUCCESS) {
-        if(canon + strlen(realm) < canon_save + MAX_PRINCIPAL_SIZE) {
+        if(canon + strlen(KRB_REALM) < canon_save + MAX_PRINCIPAL_SIZE) {
 	    strcpy(canon, KRB_REALM);
+	} else {
+	    strcpy(canon, "");
+	    return;
+	}
+    } else {
+	if (canon + strlen(realm) < canon_save + MAX_PRINCIPAL_SIZE) {
+	    strcpy(canon, realm);
 	} else {
 	    strcpy(canon, "");
 	    return;
