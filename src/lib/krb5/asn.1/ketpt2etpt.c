@@ -90,16 +90,19 @@ register int *error;
     if (!retval->endtime) {
 	goto errout;
     }
-    if (val->flags & TKT_FLG_RENEWABLE) {
+    if (val->times.renew_till) {
 	retval->renew__till = unix2gentime(val->times.renew_till, error);
 	if (!retval->renew__till) {
 	    goto errout;
 	}
     }
-    retval->caddr = krb5_address2KRB5_HostAddresses(val->caddrs, error);
-    if (!retval->caddr) {
-	goto errout;
-    }
+    if (val->caddrs) {
+	    retval->caddr = krb5_address2KRB5_HostAddresses(val->caddrs,
+							    error);
+	    if (!retval->caddr) {
+		    goto errout;
+	    }
+    } 
     if (val->authorization_data && *val->authorization_data) {
 	retval->authorization__data =
 	    krb5_authdata2KRB5_AuthorizationData(val->authorization_data, error);
