@@ -1,8 +1,15 @@
+Wed Jun 28 10:43:10 1995    <tytso@rsx-11.mit.edu>
+
+	* aclocal.m4 (INSTALL_VARIABLE_HACKSRCTOP): Work around bug in
+		autoconf which causes a relative path for dnl
+		AC_PROG_INSTALL to be cached.  We workaround this by
+		unsetting the cache variable if it contains a relative
+		pathname.
 
 Tue Jun 27 16:28:23 EDT 1995	Paul Park	(pjpark@mit.edu)
-	* acconfig.h - Reinstate KRB5_PROVIDE_PROTOTYPES.  This is needed for
-		compilers which recognize prototypes but don't set __STDC__
-		or _WINDOWS.
+	* acconfig.h - Reinstate KRB5_PROVIDE_PROTOTYPES.  This is needed
+		for compilers which recognize prototypes but don't set
+		__STDC__ or _WINDOWS.
 
 Fri Jun 23 20:14:45 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 

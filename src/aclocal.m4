@@ -63,6 +63,21 @@ define(AC_POP_MAKEFILE,[dnl
 PUSHEOF
 ])dnl
 dnl
+dnl Work around bug in autoconf which causes a relative path for 
+dnl AC_PROG_INSTALL to be cached.
+dnl
+define(INSTALL_VARIABLE_HACK,[dnl
+#
+# Work around a bug in autoconf; unset the cache variable for the install 
+# program if it is a relative path.
+#
+case "$ac_cv_path_install" in
+../*|./*|[[a-zA-Z]]*)
+	unset ac_cv_path_install
+	;;
+esac
+])dnl
+dnl
 dnl append subdir rule -- MAKE_SUBDIRS("making",all)
 dnl
 define(_MAKE_SUBDIRS,[dnl
@@ -123,12 +138,13 @@ dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[dnl
 V5_SET_TOPDIR dnl
+INSTALL_VARIABLE_HACK dnl
 WITH_CC dnl
 WITH_CCOPTS dnl
 WITH_LINKER dnl
 WITH_CPPOPTS dnl
 WITH_KRB4 dnl
-AC_CONST
+AC_CONST dnl
 WITH_NETLIB dnl
 KRB_INCLUDE dnl
 AC_PUSH_MAKEFILE()dnl
