@@ -40,14 +40,12 @@ OLDDECLARG(krb5_cksumtype, sumtype)
 OLDDECLARG(krb5_address **, addrs)
 OLDDECLARG(krb5_creds *, cred)
 {
-    krb5_tgs_req tgsreq;
-    krb5_real_tgs_req realreq;
     krb5_error_code retval;
     krb5_principal tempprinc;
-    krb5_data *scratch, reply;
-    krb5_checksum ap_checksum;
+    krb5_data *scratch;
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
+    krb5_response tgsrep;
 
     /* tgt->client must be equal to cred->client */
     /* tgt->server must be equal to krbtgt/realmof(cred->client) */
@@ -67,92 +65,41 @@ OLDDECLARG(krb5_creds *, cred)
     krb5_free_principal(tempprinc);
 
 
-    bzero((char *)&realreq, sizeof(realreq));
-
-    realreq.kdc_options = kdcoptions;
-    realreq.from = cred->times.starttime;
-    realreq.till = cred->times.endtime;
-    realreq.rtime = cred->times.renew_till;
-    
-    if (retval = krb5_timeofday(&realreq.ctime))
-	return(retval);
-    realreq.etype = etype;
-    realreq.server = cred->server;
-    realreq.addresses = addrs;
-    /* enc_part & enc_part2 are left blank for the moment. */
-
-    if (retval = encode_krb5_real_tgs_req(&realreq, &scratch))
-	return(retval);
-
-    /* xxx choose a checksum type */
-    if (retval = (*(krb5_cksumarray[sumtype]->
-		    sum_func))(scratch->data,
-			       0, /* XXX? */
-			       (krb5_pointer) cred->keyblock.contents,
-			       scratch->length,
-			       cred->keyblock.length,
-			       &ap_checksum)) {
-	krb5_free_data(scratch);
+    if (retval = krb5_send_tgs(kdcoptions, &cred->times, etype, sumtype,
+			       cred->server,
+			       addrs,
+			       0,	/* no authorization data */
+			       0,		/* no second ticket */
+			       tgt, &tgsrep))
 	return retval;
-    }
-    tgsreq.tgs_request = *scratch;
-    xfree(scratch);
 
-#define cleanup() {(void) free((char *)tgsreq.tgs_request.data); \
-		   (void) free((char *)ap_checksum.contents);}
-
-    /*
-     * Now get an ap_req.
-     */
-    if (retval = krb5_mk_req_extended (0L /* no ap options */,
-				       &ap_checksum,
-				       0, /* don't need times */
-				       0L, /* don't need kdc_options for this */
-				       0, /* XXX no ccache */
-				       tgt,
-				       &tgsreq.header)) {
-	cleanup();
-	return retval;
-    }
-
-    /* now the TGS_REQ is assembled in tgsreq */
-    if (retval = encode_krb5_tgs_req(&tgsreq, &scratch)) {
-	cleanup();
-	return(retval);
-    }
 #undef cleanup
-#define cleanup() {(void) free(tgsreq.header.data); \
-		   (void) free(tgsreq.tgs_request.data);}
+#define cleanup() {(void) free(tgsrep.response.data);}
 
-    /* now send request & get response from KDC */
-    retval = krb5_sendto_kdc(scratch, krb5_princ_realm(tgt->server),
-			     &reply);
-    krb5_free_data(scratch);
-    cleanup();
-    if (retval) {
-	return retval;
-    }
-#undef cleanup
-#define cleanup() {(void) free(reply.data);}
-
-    /* we expect *reply to be either an error or a proper reply */
-    if (retval = krb5_decode_kdc_rep(&reply,
-				     &tgt->keyblock,
-				     realreq.etype, /* enctype */
-				     &dec_rep)) {
-	if (decode_krb5_error(&reply, &err_reply)) {
+    switch (tgsrep.message_type) {
+    case KRB5_TGS_REP:
+	break;
+    case KRB5_ERROR:
+    default:
+	if (decode_krb5_error(&tgsrep.response, &err_reply)) {
 	    cleanup();
 	    return retval;		/* neither proper reply nor error! */
 	}
-
 	/* XXX check to make sure the timestamps match, etc. */
 
 	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 	krb5_free_error(err_reply);
 	cleanup();
 	return retval;
+	break;				/* not strictly necessary... */
     }
+    retval = krb5_decode_kdc_rep(&tgsrep.response,
+				 &tgt->keyblock,
+				 etype, /* enctype */
+				 &dec_rep);
     cleanup();
+    if (retval)
+	return retval;
 #undef cleanup
 #define cleanup() krb5_free_kdc_rep(dec_rep)
 
