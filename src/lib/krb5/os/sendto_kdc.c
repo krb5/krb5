@@ -164,7 +164,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 				  portbuf, sizeof (portbuf),
 				  NI_NUMERICHOST | NI_NUMERICSERV))
 		strcpy (addrbuf, "??"), strcpy (portbuf, "??");
-	    fprintf (stderr, "%s %s.%s",
+	    fprintf (out, "%s %s.%s",
 		     (ai->ai_socktype == SOCK_DGRAM
 		      ? "udp"
 		      : ai->ai_socktype == SOCK_STREAM
@@ -181,6 +181,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 	}
     }
     va_end(args);
+    fflush(out);
 #endif
 }
 
@@ -313,7 +314,6 @@ static char *bogus_strerror (int xerr)
 #ifdef _WIN32
 #define dperror(MSG) \
 	 dprint("%s: an error occurred ... "			\
-		"wouldn't you like to know more?\n"		\
 		"\tline=%d errno=%m socketerrno=%m\n",		\
 		(MSG), __LINE__, errno, SOCKET_ERRNO)
 #else
@@ -497,15 +497,12 @@ start_connection (struct conn_state *state, struct select_state *selstate)
     int fd, e;
     struct addrinfo *ai = state->addr;
 
-    dprint("start_connection(@%p)\ngetting %s socket in family %d...",
-	   state,
-	   ai->ai_socktype == SOCK_STREAM ? "stream" : "dgram",
-	   ai->ai_family);
+    dprint("start_connection(@%p)\ngetting %s socket in family %d...", state,
+	   ai->ai_socktype == SOCK_STREAM ? "stream" : "dgram", ai->ai_family);
     fd = socket(ai->ai_family, ai->ai_socktype, 0);
     if (fd == INVALID_SOCKET) {
 	state->err = SOCKET_ERRNO;
-	dfprintf((stderr, "socket: %s creating with af %d\n",
-		  strerror (state->err), ai->ai_family));
+	dprint("socket: %m creating with af %d\n", state->err, ai->ai_family);
 	return -1;		/* try other hosts */
     }
     /* Make it non-blocking.  */
@@ -691,9 +688,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	    if (e != 0) {
 		/* What to do now?  */
 		e = SOCKET_ERRNO;
-		dfprintf((stderr,
-			  "getsockopt(SO_ERROR) on exception fd failed: %d\n",
-			  e));
+		dprint("getsockopt(SO_ERROR) on exception fd failed: %m\n", e);
 		goto kill_conn;
 	    }
 	    /* Okay, got the error back.  Either way, kill the
@@ -723,19 +718,19 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	    goto handle_exception;
 
     try_writing:
-	dfprintf((stderr, "trying to writev %d (%d bytes) to fd %d\n",
-		  conn->x.out.sg_count,
-		  ((conn->x.out.sg_count == 2 ? SG_LEN(&conn->x.out.sgp[1]) : 0)
-		   + SG_LEN(&conn->x.out.sgp[0])),
-		  conn->fd));
+	dprint("trying to writev %d (%d bytes) to fd %d\n",
+	       conn->x.out.sg_count,
+	       ((conn->x.out.sg_count == 2 ? SG_LEN(&conn->x.out.sgp[1]) : 0)
+		+ SG_LEN(&conn->x.out.sgp[0])),
+	       conn->fd);
 	nwritten = SOCKET_WRITEV(conn->fd, conn->x.out.sgp,
 				 conn->x.out.sg_count, tmp);
 	if (nwritten < 0) {
 	    e = SOCKET_ERRNO;
-	    dfprintf((stderr, "failed: %s\n", strerror(e)));
+	    dprint("failed: %m\n", e);
 	    goto kill_conn;
 	}
-	dfprintf((stderr, "wrote %d bytes\n", nwritten));
+	dprint("wrote %d bytes\n", nwritten);
 	while (nwritten) {
 	    sg_buf *sgp = conn->x.out.sgp;
 	    if (nwritten < SG_LEN(sgp)) {
@@ -757,7 +752,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	    /* Q: How do we detect failures to send the remaining data
 	       to the remote side, since we're in non-blocking mode?
 	       Will we always get errors on the reading side?  */
-	    dfprintf((stderr, "switching fd %d to READING\n", conn->fd));
+	    dprint("switching fd %d to READING\n", conn->fd);
 	    conn->state = READING;
 	    conn->x.in.bufsizebytes_read = 0;
 	    conn->x.in.bufsize = 0;
@@ -778,8 +773,8 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 
 	if (conn->x.in.bufsizebytes_read == 4) {
 	    /* Reading data.  */
-	    dfprintf((stderr, "reading %lu bytes of data from fd %d\n",
-		      (unsigned long) conn->x.in.n_left, conn->fd));
+	    dprint("reading %d bytes of data from fd %d\n",
+		   (int) conn->x.in.n_left, conn->fd);
 	    nread = SOCKET_READ(conn->fd, conn->x.in.pos, conn->x.in.n_left);
 	    if (nread <= 0) {
 		e = nread ? SOCKET_ERRNO : ECONNRESET;
@@ -809,8 +804,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 		len = (len << 8) + conn->x.in.bufsizebytes[1];
 		len = (len << 8) + conn->x.in.bufsizebytes[2];
 		len = (len << 8) + conn->x.in.bufsizebytes[3];
-		dfprintf((stderr, "received length on fd %d is %lu\n",
-			  conn->fd, len));
+		dprint("received length on fd %d is %d\n", conn->fd, (int)len);
 		/* Arbitrary 1M cap.  */
 		if (len > 1 * 1024 * 1024) {
 		    e = E2BIG;
@@ -818,8 +812,8 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 		}
 		conn->x.in.bufsize = conn->x.in.n_left = len;
 		conn->x.in.buf = conn->x.in.pos = malloc(len);
-		dfprintf((stderr, "allocated %lu byte buffer at %p\n",
-			  len, conn->x.in.buf));
+		dprint("allocated %d byte buffer at %p\n", (int) len,
+		       conn->x.in.buf);
 		if (conn->x.in.buf == 0) {
 		    /* allocation failure */
 		    e = errno;
@@ -867,8 +861,7 @@ service_fds (struct select_state *selstate,
 	   && (e = call_select(selstate, &sel_results, &selret)) == 0) {
 	int i;
 
-	dfprintf((stderr, "service_fds examining results, selret=%d\n",
-		  selret));
+	dprint("service_fds examining results, selret=%d\n", selret);
 
 	if (selret == 0)
 	    /* Timeout, return to caller.  */
@@ -897,7 +890,11 @@ service_fds (struct select_state *selstate,
 		   conns[i].fd, conns[i].addr,
 		   state_strings[(int) conns[i].state]);
 
-	    conns[i].service (&conns[i], selstate, ssflags);
+	    if (conns[i].service (&conns[i], selstate, ssflags)) {
+		dprint("fd service routine says we're done\n");
+		*winning_conn = i;
+		return 1;
+	    }
 	}
     }
     if (e != 0) {
@@ -1035,8 +1032,8 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     /* Success!  */
     reply->data = conns[winning_conn].x.in.buf;
     reply->length = conns[winning_conn].x.in.bufsize;
-    dfprintf((stderr, "returning %lu bytes in buffer %p\n",
-	      (unsigned long) reply->length, reply->data));
+    dprint("returning %d bytes in buffer %p\n",
+	   (int) reply->length, reply->data);
     retval = 0;
     conns[winning_conn].x.in.buf = 0;
     if (localaddr != 0 && localaddrlen != 0 && *localaddrlen > 0)
