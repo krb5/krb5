@@ -1,3 +1,7 @@
+
+	* krlogin.c (speeds): Added some comments from net recommending
+	not extending the list to higher values.
+
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* login.c (k_init): Call krb5_init_secure_context instead of

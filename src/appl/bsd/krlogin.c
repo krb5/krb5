@@ -226,6 +226,18 @@ char	*speeds[] =
     "900", "1200", "1800", "2400", "3600", "4800", "7200", "9600",
     "19200", "38400", "EXTA", "EXTB" };
 #else
+/* Solaris note: There are higher values we could use.  But Casper Dik
+   <Casper.Dik@Holland.Sun.Com> mentions in article
+   <casper.938167062@uk-usenet.uk.sun.com> in comp.protocols.kerberos
+   on 1999-09-24 some problems in sending higher values to remote
+   systems (for non-Kerberos rlogind?).  So let's stick with this
+   list.  Even if our current klogind doesn't have the problems, older
+   versions are likely to.
+
+   Daniel S. Riley <dsr@mail.lns.cornell.edu> gives 57600, 76800,
+   115200, 153600, 230400, 307200, 460800 as the higher values.
+   (article <sh6711s713.fsf@lnscu4.lns.cornell.edu> in
+   comp.protocols.kerberos, 1999-09-23) */
 char    *speeds[] =
 { "0", "50", "75", "110", "134", "150", "200", "300",
     "600", "1200", "1800", "2400", "4800", "9600", "19200", "38400" };
