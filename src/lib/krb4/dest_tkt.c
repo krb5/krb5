@@ -17,10 +17,7 @@
 #include <sys/param.h>
 #endif
 #include <errno.h>
-#ifdef NEED_SYS_FCNTL_H
-/* for sconix, to get O_RDWR */
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 
 #ifndef O_SYNC
 #define O_SYNC 0

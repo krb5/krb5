@@ -13,10 +13,7 @@
 #include <string.h>
 #include "krb.h"
 #include <sys/file.h>
-#ifdef NEED_SYS_FCNTL_H
-/* just for O_RDWR for sco */
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 #include <sys/stat.h>
 #ifdef TKT_SHMEM
 #include <sys/param.h>

@@ -20,10 +20,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/file.h>
-#ifdef NEED_SYS_FCNTL_H
-/* just for O_* for sco */
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>	/* just for O_* for sco */
 
 long kdb_get_master_key_from(prompt, master_key, master_key_sched, verify,
 			     kfilename)

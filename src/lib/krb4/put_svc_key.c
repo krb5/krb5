@@ -26,9 +26,7 @@
 #include <string.h>
 #include <sys/file.h>
 #include <stdio.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 #ifdef HAS_UNISTD_H
 #include <unistd.h>
 #endif

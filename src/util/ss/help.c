@@ -7,10 +7,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/file.h>
-#ifdef NEED_SYS_FCNTL_H
-/* just for O_* */
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>	/* just for O_* */
 #include <sys/wait.h>
 #include "ss_internal.h"
 #include "copyright.h"
