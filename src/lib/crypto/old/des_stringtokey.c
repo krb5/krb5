@@ -1,4 +1,3 @@
-/* THIS FILE DOESN'T GET COMPILED.  AUDIT BEFORE USE.  */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  * 
