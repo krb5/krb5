@@ -29,4 +29,6 @@
 #define BITS32
 #endif
 
+#define PROVIDE_DES_CBC_CRC
+
 #endif /* KRB5_CONFIG__ */
