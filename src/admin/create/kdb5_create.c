@@ -118,7 +118,6 @@ char *argv[];
     char defrealm[BUFSIZ];
     int keytypedone = 0;
     krb5_enctype etype = -1;
-    register krb5_cryptosystem_entry *csentry;
 
     initialize_krb5_error_table();
     initialize_kdb5_error_table();
@@ -169,8 +168,7 @@ char *argv[];
 		"while setting up etype %d", etype);
 	exit(1);
     }
-    master_encblock.crypto_entry = krb5_csarray[etype]->system;
-    csentry = master_encblock.crypto_entry;
+    krb5_use_cstype(&master_encblock, etype);
 
     if (!dbname)
 	dbname = DEFAULT_DBM_FILE;	/* XXX? */
@@ -218,22 +216,21 @@ master key name '%s'\n",
 	com_err(argv[0], retval, "while reading master key");
 	exit(1);
     }
-    if (retval = (*csentry->process_key)(&master_encblock,
-					 &master_keyblock)) {
+    if (retval = krb5_process_key(&master_encblock, &master_keyblock)) {
 	com_err(argv[0], retval, "while processing master key");
 	exit(1);
     }
 
     rblock.eblock = &master_encblock;
-    if (retval = (*csentry->init_random_key)(&master_keyblock,
-					     &rblock.rseed)) {
+    if (retval = krb5_init_random_key(&master_encblock, &master_keyblock,
+				      &rblock.rseed)) {
 	com_err(argv[0], retval, "while initializing random key generator");
-	(void) (*csentry->finish_key)(&master_encblock);
+	(void) krb5_finish_key(&master_encblock);
 	exit(1);
     }
     if (retval = krb5_db_init()) {
-	(void) (*csentry->finish_key)(&master_encblock);
-	(void) (*csentry->finish_random_key)(&rblock.rseed);
+	(void) krb5_finish_key(&master_encblock);
+	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	com_err(argv[0], retval, "while initializing the database '%s'",
 		dbname);
 	exit(1);
@@ -242,15 +239,15 @@ master key name '%s'\n",
     if ((retval = add_principal(master_princ, MASTER_KEY, &rblock)) ||
 	(retval = add_principal(tgt_princ, RANDOM_KEY, &rblock))) {
 	(void) krb5_db_fini();
-	(void) (*csentry->finish_key)(&master_encblock);
-	(void) (*csentry->finish_random_key)(&rblock.rseed);
+	(void) krb5_finish_key(&master_encblock);
+	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	com_err(argv[0], retval, "while adding entries to the database");
 	exit(1);
     }
     /* clean up */
     (void) krb5_db_fini();
-    (void) (*csentry->finish_key)(&master_encblock);
-    (void) (*csentry->finish_random_key)(&rblock.rseed);
+    (void) krb5_finish_key(&master_encblock);
+    (void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     exit(0);
 
