@@ -1,0 +1,9 @@
+#
+# Exports for accessors for globally shared data used by Kerberos v5 library
+#
+# $Header$
+#
+
+Krb5GlobalsSetDefaultCacheName
+Krb5GlobalsGetDefaultCacheName
+Krb5GlobalsSetUniqueDefaultCacheName

@@ -1,0 +1,8 @@
+#
+# Exports for globally shared data used by Kerberos v5 library
+#
+# $Header$
+#
+
+gKerberos5GlobalsRefCount
+gKerberos5SystemDefaultCacheName
