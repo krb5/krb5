@@ -773,5 +773,6 @@ main(argc, argv)
     exit(0);
 fail:
     com_err(argv[0], kret, "--- test %cfailed", ch_err);
+    krb5_free_context(kcontext);
     exit(1);
 }

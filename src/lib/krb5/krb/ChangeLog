@@ -1,3 +1,7 @@
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_ser.c (main): Free context on failure exit route.
+
  2001-11-24  Sam Hartman  <hartmans@mit.edu>
  
  	* fwd_tgt.c (krb5_fwd_tgt_creds): Get a session key for the
