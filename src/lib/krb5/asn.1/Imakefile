@@ -10,6 +10,8 @@
 PepyPosyRules()
 NormalLibraryObjectRule()
 
+EHDRDIR=$(TOP)/include/krb5/asn.1
+
 SRCS= \
 	$(TYPESSRCS)	\
 	encode.c 	\
@@ -128,6 +130,8 @@ OBJS= \
 	tkt2ktkt.o	\
 	u2gen.o
 
+all:: headers
+
 #if HavePerl
 #ifdef TypesObjs
 #include "KRB5-oflist"
@@ -163,9 +167,12 @@ KRB5-pt0.c KRB5-cflist KRB5-oflist:	KRB5-types.c process.perl
 #endif
 
 KRB5-types.c: KRB5-types.py
+KRB5-types.h: KRB5-types.c
 
 KRB5-types.py:	KRB5-asn.py
 	$(POSY) $(POFLAGS) -o $@ KRB5-asn.py
+
+CopyHeader(KRB5-types.h,$(EHDRDIR))
 
 clean::
 	$(RM) KRB5-types.c KRB5.ph KRB5-types.py KRB5-types.h KRB5-pt*.c KRB5-oflist
