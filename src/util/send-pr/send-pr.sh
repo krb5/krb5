@@ -55,22 +55,30 @@ GNATS_SITE=mit
 
 # What mailer to use.  This must come after the config file, since it is
 # host-dependent.
-MAIL_AGENT="/usr/sbin/sendmail -oi -t"
-if [ ! -x `echo $MAIL_AGENT|sed 's/ .*//'` ] ; then
-    ( [ -x /usr/lib/sendmail ] && MAIL_AGENT="/usr/lib/sendmail -oi -t" ) || \
-     ( [ -x /usr/sbin/sendmail ] && MAIL_AGENT="/usr/sbin/sendmail -oi -t " ) || \
-     MAIL_AGENT="sendmail -oi -t "
-fi
+for dir in /usr/lib /usr/sbin /usr/ucblib; do
+  if test -f $dir/sendmail; then
+    MAIL_AGENT="$dir/sendmail -oi -t"
+    break
+  fi
+done
 
 # How to read the passwd database.
 PASSWD="cat /etc/passwd"
+if test -f /bin/domainname && test -n "`/bin/domainname`"; then
+  if test -f /usr/bin/niscat && 
+     /usr/bin/niscat passwd.org_dir > /dev/null 2>&1; then
+    PASSWD="/usr/bin/niscat passwd.org_dir"
+  elif test -f /usr/bin/ypcat && /usr/bin/ypcat passwd > /dev/null 2>&1; then
+    PASSWD="/usr/bin/ypcat passwd"
+  fi
+fi
 
-ECHON=bsd
+# Figure out how to do "echo -n"
 
-if [ $ECHON = bsd ] ; then
+if test "`echo -n foo`" = foo; then
   ECHON1="echo -n"
   ECHON2=
-elif [ $ECHON = sysv ] ; then
+elif test "`echo 'foo\c'`" = foo; then
   ECHON1=echo
   ECHON2='\c'
 else

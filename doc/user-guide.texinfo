@@ -14,7 +14,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION b7-1
+@set EDITION 1.0
 
 @finalout                               @c don't print black warning boxes
 
@@ -67,9 +67,15 @@ This file describes how to use the @value{PRODUCT} client programs.
 @node Introduction, Kerberos V5 Tutorial, Copyright, Top
 @chapter Introduction
 
+@ifset CYGNUS
 @value{PRODUCT} is based on the Kerberos V5 authentication system
-developed at MIT.  Kerberos is named for the three-headed watchdog from
-Greek mythology, who guarded the entrance to the underworld.
+developed at MIT.
+@end ifset
+@ifset MIT
+Kerberos V5 is an authentication system developed at MIT.
+@end ifset
+Kerberos is named for the three-headed watchdog from Greek mythology,
+who guarded the entrance to the underworld.
 
 Under Kerberos, a client (generally either a user or a service) sends a
 request for a ticket to the @i{Key Distribution Center} (KDC).  The KDC
@@ -98,10 +104,6 @@ used to.  @value{PRODUCT} is a @dfn{single-sign-on} system, which means
 that you have to type your password only once per session, and Kerberos
 does the authenticating and encrypting transparently.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @menu
 * What is a Ticket?::           
 * What is a Kerberos Principal?::  
@@ -130,10 +132,6 @@ new resort.  The difference is that the @value{PRODUCT} programs notice
 that you have the weekend ski pass, and get the lift ticket for you, so
 you don't have to perform the transactions yourself.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node What is a Kerberos Principal?,  , What is a Ticket?, Introduction
 @section What is a Kerberos Principal?
 
@@ -166,7 +164,7 @@ the realm @code{@value{PRIMARYREALM}}.
 @end itemize
 
 @node Kerberos V5 Tutorial, Kerberos V5 Reference, Introduction, Top
-@chapter @value{PRODUCT} Tutorial
+@chapter Kerberos V5 Tutorial
 
 This tutorial is intended to familiarize you with the @value{PRODUCT}
 client programs.  We will represent your prompt as ``@code{shell%}''.
@@ -215,7 +213,7 @@ versions, when you type their command names.
 
 On many systems, Kerberos is built into the login program, and you get
 tickets automatically when you log in.  Other programs, such as
-/@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
+@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
 copies of your tickets to the remote host.  Most of these programs also
 automatically destroy your tickets when they exit.  However,
 @value{COMPANY} recommends that you explicitly destroy your Kerberos
@@ -336,10 +334,6 @@ in an error.  Note also that most systems specify a maximum ticket
 lifetime.  If you request a longer ticket lifetime, it will be
 automatically truncated to the maximum lifetime.
 
-@iftex
-@vfil
-@end iftex
-@need 3000
 @node Viewing Your Tickets with klist, Destroying Your Tickets with kdestroy, Obtaining Tickets with kinit, Ticket Management
 @subsection Viewing Your Tickets with klist
 
@@ -397,9 +391,6 @@ host ticket for the host
 ticket, which telnet then presented to the host
 @code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}, and she was allowed to
 log in without typing her password.
-@iftex
-@vfil
-@end iftex
 
 @need 3000
 Suppose your Kerberos tickets allow you to log into a host in another
@@ -488,10 +479,6 @@ shell%}
 @end group
 @end smallexample
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node Destroying Your Tickets with kdestroy,  , Viewing Your Tickets with klist, Ticket Management
 @subsection Destroying Your Tickets with kdestroy
 
@@ -524,10 +511,6 @@ shell%}
 @end group
 @end smallexample
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node Password Management, Kerberos V5 Applications, Ticket Management, Kerberos V5 Tutorial
 @section Password Management
 
@@ -544,10 +527,6 @@ administrator, for any reason.  You should change your password
 frequently, particularly any time you think someone may have found out
 what it is.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @menu
 * Changing Your Password::      
 * Password Advice::             
@@ -613,11 +592,7 @@ this might be anywhere from a few minutes to an hour or more.  If you
 need to get new Kerberos tickets shortly after changing your password,
 try the new password.  If the new password doesn't work, try again using
 the old one.
-@iftex
-@vfil
-@end iftex
 
-@need 2000
 @node Password Advice, Granting Access to Your Account, Changing Your Password, Password Management
 @subsection Password Advice
 
@@ -650,9 +625,6 @@ listed in this manual include:
 @noindent Note:  don't actually use any of the above passwords.  They're
 only meant to show you how to make up a good password.  Passwords that
 appear in a manual are the first ones intruders will try.
-@iftex
-@vfil
-@end iftex
 
 @need 3800
 @value{PRODUCT} allows your system administrators to automatically
@@ -683,10 +655,6 @@ shell%}
 displayed if you choose a bad password, so the message you see may be
 different from the above example.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node Granting Access to Your Account,  , Password Advice, Password Management
 @subsection Granting Access to Your Account
 
@@ -736,13 +704,8 @@ users to become root locally, or to log in remotely as @code{root},
 without their having to give out the root password, and without anyone
 having to type the root password over the network.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
-
 @node Kerberos V5 Applications,  , Password Management, Kerberos V5 Tutorial
-@section @value{PRODUCT} Applications
+@section Kerberos V5 Applications
 
 @value{PRODUCT} is a @dfn{single-sign-on} system.  This means that you
 only have to type your password once, and the @value{PRODUCT} programs
@@ -758,10 +721,6 @@ space of a few seconds.
 The @value{PRODUCT} applications are versions of existing UNIX network
 programs with the Kerberos features added.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @menu
 * Overview of Additional Features::  
 * telnet::                      
@@ -795,10 +754,6 @@ This section of the tutorial assumes you are familiar with the
 non-Kerberos versions of these programs, and highlights the Kerberos
 functions added in the @value{PRODUCT} package.
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node telnet, rlogin, Overview of Additional Features, Kerberos V5 Applications
 @subsection telnet
 
@@ -841,10 +796,6 @@ turns on encryption.
 turns off encryption.
 @end table
 
-@iftex
-@vfil
-@end iftex
-
 @need 4000
 For example, if @code{@value{RANDOMUSER2}} wanted to use the standard
 UNIX telnet to connect to the machine
@@ -879,9 +830,6 @@ was sent over the network unencrypted.  If an intruder were watching
 network traffic at the time, that intruder would know
 @code{@value{RANDOMUSER2}}'s password.
 
-@iftex
-@vfil
-@end iftex
 @need 4000
 If, on the other hand, @code{@value{RANDOMUSER1}} wanted to use the
 @value{PRODUCT} telnet to connect to the machine
@@ -915,9 +863,6 @@ destroys them when it exits.  The full set of options to @value{PRODUCT}
 @code{telnet} are discussed in the Reference section of this manual.
 (@pxref{telnet Reference})
 
-@iftex
-@vfil
-@end iftex
 @need 2000
 @node rlogin, FTP, telnet, Kerberos V5 Applications
 @subsection rlogin
@@ -981,9 +926,6 @@ was sent over the network unencrypted.  If an intruder were watching
 network traffic at the time, that intruder would know
 @code{@value{RANDOMUSER2}}'s password.
 
-@iftex
-@vfil
-@end iftex
 @need 4000
 If, on the other hand, @code{@value{RANDOMUSER1}} wanted to use
 @value{PRODUCT} rlogin to connect to the machine
@@ -1013,10 +955,6 @@ destroys them when it exits.  The full set of options to @value{PRODUCT}
 @code{rlogin} are discussed in the Reference section of this manual.
 (@pxref{rlogin Reference})
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node FTP, rsh, rlogin, Kerberos V5 Applications
 @subsection FTP
 
@@ -1077,14 +1015,9 @@ ftp> quit
 The full set of options to @value{PRODUCT} @code{FTP} are discussed
 in the Reference section of this manual.  (@pxref{FTP Reference})
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node rsh, rcp, FTP, Kerberos V5 Applications
 @subsection rsh
 
-@need 1000
 The @value{PRODUCT} @code{rsh} program works exactly like the standard
 UNIX rlogin program, with the following Kerberos features added:
 
@@ -1118,7 +1051,7 @@ turns off encryption.
 
 @need 1800
 For example, if your Kerberos tickets allowed you to run programs on the
-host @code{@value{RANDOMHOST2}@@@value{SECONDDOMAIN}} as root, you could
+host @* @code{@value{RANDOMHOST2}@@@value{SECONDDOMAIN}} as root, you could
 run the @samp{date} program as follows:
 
 @smallexample
@@ -1135,10 +1068,6 @@ destroys them when it exits.  The full set of options to @value{PRODUCT}
 @code{rsh} are discussed in the Reference section of this manual.
 (@pxref{rsh Reference})
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node rcp, ksu, rsh, Kerberos V5 Applications
 @subsection rcp
 
@@ -1170,10 +1099,6 @@ transparently.  The full set of options to @value{PRODUCT} @code{rcp}
 are discussed in the Reference section of this manual.  (@pxref{rcp
 Reference})
 
-@iftex
-@vfil
-@end iftex
-@need 2000
 @node ksu,  , rcp, Kerberos V5 Applications
 @subsection ksu
 
@@ -1353,7 +1278,7 @@ The full set of options to @value{PRODUCT} @code{ksu} are discussed
 in the Reference section of this manual.  (@pxref{ksu Reference})
 
 @node Kerberos V5 Reference, Kerberos Glossary, Kerberos V5 Tutorial, Top
-@chapter @value{PRODUCT} Reference
+@chapter Kerberos V5 Reference
 
 This section will include copies of the manual pages for the
 @value{PRODUCT} client programs.  You can read the manual entry for any

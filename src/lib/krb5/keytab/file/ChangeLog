@@ -1,3 +1,8 @@
+Tue Nov 19 17:06:59 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* ktf_g_ent.c (krb5_ktfile_get_entry): return KRB5_KT_KVNONOTFOUND
+ 	when appropriate [krb5-libs/198]
+
 Wed Jul 24 17:10:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ktf_g_name.c (krb5_ktfile_get_name): Use the error code

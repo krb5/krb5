@@ -721,7 +721,9 @@ initialize_realms(kcontext, argc, argv)
 	hierarchy[2] = (char *) NULL;
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_ports))
 	    default_ports = 0;
-	krb5_aprof_finish(aprof);
+	/* aprof_init can return 0 with aprof == NULL */
+	if (aprof)
+	     krb5_aprof_finish(aprof);
     }
     if (default_ports == 0)
 	default_ports = strdup(DEFAULT_KDC_PORTLIST);

@@ -40,6 +40,7 @@ long ptyint_update_wtmp (ent , host, user)
     struct utmp ut;
     struct stat statb;
     int fd;
+    time_t uttime;
 #ifdef HAVE_UPDWTMPX
     struct utmpx utx;
 
@@ -71,7 +72,8 @@ long ptyint_update_wtmp (ent , host, user)
 #ifndef NO_UT_HOST
 	  (void)strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
 #endif
-	  (void)time(&ut.ut_time);
+	  (void)time(&uttime);
+	  ut.ut_time = uttime;
 #if defined(HAVE_GETUTENT) && defined(USER_PROCESS)
 	  if (ent->ut_name) {
 	    if (!ut.ut_pid)

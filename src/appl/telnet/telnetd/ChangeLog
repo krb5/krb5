@@ -1,3 +1,14 @@
+Thu Oct 23 13:59:32 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* state.c (envvarok): Prohibit the passing of TERMCAP, TERMPATH,
+		TERMINFO, and HOME, since they can be used to exploit a
+		security in tgetent.
+
+Wed Apr  9 23:46:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* sys_term.c (start_login): Bounds check the constructed "speed"
+	passed in to login.
+
 Thu Nov  7 15:32:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* telnetd.c (main): Check the error return from
