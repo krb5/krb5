@@ -1,3 +1,11 @@
+2004-08-27  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (make_ap_req_v1): Free checksum data
+	allocated by make_gss_checksum() to avoid leak.
+
+	* k5sealv3.c (gss_krb5int_unseal_token_v3): Free plain.data after
+	checksum is verified, to avoid leak.
+
 2004-08-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* acquire_cred.c (krb5_gss_acquire_cred): Call

@@ -477,14 +477,14 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	sum.checksum_type = ctx->cksumtype;
 	err = krb5_c_verify_checksum(context, key, key_usage,
 				     &plain, &sum, &valid);
+	free(plain.data);
+	plain.data = NULL;
 	if (err) {
 	error:
-	    free(plain.data);
 	    *minor_status = err;
 	    return GSS_S_BAD_SIG; /* XXX */
 	}
 	if (!valid) {
-	    free(plain.data);
 	    *minor_status = 0;
 	    return GSS_S_BAD_SIG;
 	}

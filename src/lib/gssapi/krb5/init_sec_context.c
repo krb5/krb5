@@ -301,8 +301,10 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
 	mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED;
 
-    if ((code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
-				     checksum_data, k_cred, &ap_req)))
+    code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
+				checksum_data, k_cred, &ap_req);
+    krb5_free_data_contents(context, &cksum_struct.checksum_data);
+    if (code)
 	goto cleanup;
 
    /* store the interesting stuff from creds and authent */
