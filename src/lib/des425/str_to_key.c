@@ -150,8 +150,6 @@ des_string_to_key(str,key)
 				/* can do dumb things sometimes */
 }
 
-char *mit_afs_crypt (const char *, const char *, const char *);
-
 void afs_string_to_key(char *str, char *cell, des_cblock key)
 {
     krb5_data str_data;
@@ -168,24 +166,3 @@ void afs_string_to_key(char *str, char *cell, des_cblock key)
 
     mit_afs_string_to_key(&keyblock, &str_data, &cell_data);
 }
-
-#if TARGET_OS_MAC
-char *des_crypt(const char *str, const char *salt)
-{
-    char afs_buf[16];
-
-    return des_fcrypt(str, salt, afs_buf);
-}
-
-char *des_fcrypt(const char *str, const char *salt, char *buf)
-{
-    return mit_afs_crypt(str, salt, buf);
-}
-
-/* Is this correct? */
-int des_set_key(des_cblock *key, des_key_schedule schedule)
-{
-    return make_key_sched(key, schedule);
-}
-
-#endif /* TARGET_OS_MAC */

@@ -1,3 +1,12 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * mac_des_glue.c, des.c, enc_dec.c, key_sched.c, str_to_key.c: 
+    Move KfM des functions into their own file.  They are all 
+    deprecated on KfM and shouldn't even get built on stock krb5 builds.
+    
+    * read_passwd.c:  Added warning comment that des_read_pw_string 
+    is an exported function on KfM, so we should not change its ABI.
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* str_to_key.c (afs_string_to_key): Move out from under

@@ -102,6 +102,7 @@ des_read_password(k,prompt,verify)
     return ok;
 }
 
+/* Note: this function is exported on KfM.  Do not change its ABI. */
 int KRB5_CALLCONV
 des_read_pw_string(s, max, prompt, verify)
     char *s;

@@ -44,15 +44,3 @@ des_cbc_encrypt(in,out,length,key,iv,enc)
 				    (const unsigned char *)iv, /* YUCK! */
 				    enc));
 }
-
-#if TARGET_OS_MAC
-void des_3cbc_encrypt(des_cblock *in, des_cblock *out, long length,
-		      des_key_schedule ks1, des_key_schedule ks2,
-		      des_key_schedule ks3, des_cblock *iv, int enc)
-{
-    mit_des3_cbc_encrypt((const des_cblock *)in, out, (unsigned long)length,
-			 ks1, ks2, ks3,
-			 (const unsigned char *)iv, /* YUCK! */
-			 enc);
-}
-#endif
