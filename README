@@ -1,5 +1,5 @@
 
-		  Kerberos Version 5, Release 1.2.6
+		  Kerberos Version 5, Release 1.2.7
 
 			    Release Notes
 
@@ -9,7 +9,7 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.2.6.tar.gz.  Instruction on how to extract the entire
+krb5-1.2.7.tar.gz.  Instruction on how to extract the entire
 distribution follow.  These directions assume that you want to extract
 into a directory called DIST.
 
@@ -17,17 +17,17 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.6.tar.gz
+	gtar zxpf krb5-1.2.7.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.6.tar.gz | tar xpf -
+	gzcat krb5-1.2.7.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2.6/src
-and the documentation into DIST/krb5-1.2.6/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.7/src
+and the documentation into DIST/krb5-1.2.7/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,48 @@ V5 (or if you have installed one of our binary distributions).
 If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
+
+Notes, Major Changes, and Known Bugs for 1.2.7
+----------------------------------------------
+
+Notes:
+
+* This release includes a significant security patch.  If you are
+  running kadmind4 from an earlier release, you are highly encouraged
+  to update, as an exploit is believed to be circulating.
+
+Major Changes:
+
+* [1238] The exploitable buffer overflow in kadmind4
+  [MITKRB5-SA-2002-002] has been patched.  Thanks to Johan Danielsson,
+  Love Hornquist-Astrand, and Assar Westerlund.
+
+* [1230, 1236] Hierarchical cross-realm has been repaired somewhat.
+  Terminating NUL characters are no longer generated, and are ignored
+  on receipt.
+
+Minor Changes:
+
+* [1206] Fixed memory leak in padata handling in KDC.  Thanks to Ben
+  Cox.
+
+* [1207] Clients can now successfully specify explicit keysalt tuples
+  to password-changing kadm5 functions.  Thanks to Ben Cox.
+
+* [1216] Fixed client-side read overruns in calls to res_search().
+  Thanks to Nalin Dahyabhai.
+
+* [1241] The test suite has been stabilized somewhat to work better
+  with modern versions of tcl and expect.
+
+Known Bugs:
+
+* [1228] If tcl is built shared, and krb5 is built static, some
+  utility programs used by the test suite may fail to run due to RPATH
+  issues. (long-standing but recently acknowledged)
+
+* Most of the other known bugs noted in earlier 1.2.x releases (other
+  than those listed as fixed above) are still present.
 
 Notes, Major Changes, and Known Bugs for 1.2.6
 ----------------------------------------------
@@ -563,7 +605,7 @@ Minor changes
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-2001 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2002 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
