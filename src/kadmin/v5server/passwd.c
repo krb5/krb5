@@ -34,10 +34,10 @@
 /*
  * These defines turn on various checking in passwd_check_npass_ok.
  */
-#define	KPWD_CHECK_LENGTH	1
+#define	KPWD_CHECK_LENGTH	0
 #define	KPWD_CHECK_WEAKNESS	1
 
-#define	KPWD_MIN_PWD_LENGTH	8
+#define	KPWD_MIN_PWD_LENGTH	6
 
 extern char *programname;
 static const char *pwd_bad_old_pwd = "\004incorrect old password for %s";

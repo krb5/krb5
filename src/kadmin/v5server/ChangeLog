@@ -1,3 +1,11 @@
+Wed Sep 13 22:08:56 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* srv_key.c (key_decrypt_keys):  Keys are encrypted in the key of
+		the master key encryption type, not in the keytype of the
+		key!!!  Removed erroneous krb5_use_enctype() call.
+
+		Fixed -Wall flames all over the file.
+
 Thu Sep  7 17:52:24 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* srv_key.c: Globally change use of ENCTYPE_DES_CBC_MD5 to
