@@ -1,4 +1,8 @@
 
+Tue Aug 29 13:24:50 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gss-{client,server}.c - Test gss_{ex,im}port_sec_context().
+
+
 Fri Jul 7 15:41:47 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling.
 	* configure.in - Add KRB5_LIBRARIES.

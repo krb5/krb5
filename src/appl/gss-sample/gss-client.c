@@ -110,7 +110,7 @@ int call_server(host, port, service_name, msg)
      char *msg;
 {
      gss_ctx_id_t context;
-     gss_buffer_desc in_buf, out_buf;
+     gss_buffer_desc in_buf, out_buf, context_token;
      int s, state;
      OM_uint32 maj_stat, min_stat;
 
@@ -121,6 +121,25 @@ int call_server(host, port, service_name, msg)
      /* Establish context */
      if (client_establish_context(s, service_name, &context) < 0)
 	  return -1;
+
+     /*
+      * Attempt to save and then restore the context.
+      */
+     maj_stat = gss_export_sec_context(&min_stat,
+				       &context,
+				       &context_token);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("exporting context", maj_stat, min_stat);
+	 return -1;
+     }
+     maj_stat = gss_import_sec_context(&min_stat,
+				       &context_token,
+				       &context);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("importing context", maj_stat, min_stat);
+	 return -1;
+     }
+     (void) gss_release_buffer(&min_stat, &context_token);
 
      /* Seal the message */
      in_buf.value = msg;

@@ -180,7 +180,7 @@ int sign_server(s, service_name)
      char *service_name;
 {
      gss_cred_id_t server_creds;     
-     gss_buffer_desc client_name, xmit_buf, msg_buf;
+     gss_buffer_desc client_name, xmit_buf, msg_buf, context_token;
      gss_ctx_id_t context;
      OM_uint32 maj_stat, min_stat;
      int s2;
@@ -208,6 +208,25 @@ int sign_server(s, service_name)
 	  fprintf(log, "Accepted connection: \"%s\" at %s", 
 		  client_name.value, ctime(&now));
 	  (void) gss_release_buffer(&min_stat, &client_name);
+
+	  /*
+	   * Attempt to save and then restore the context.
+	   */
+	  maj_stat = gss_export_sec_context(&min_stat,
+					    &context,
+					    &context_token);
+	  if (maj_stat != GSS_S_COMPLETE) {
+	       display_status("exporting context", maj_stat, min_stat);
+	       break;
+	  }
+	  maj_stat = gss_import_sec_context(&min_stat,
+					    &context_token,
+					    &context);
+	  if (maj_stat != GSS_S_COMPLETE) {
+	       display_status("importing context", maj_stat, min_stat);
+	       break;
+	  }
+	  (void) gss_release_buffer(&min_stat, &context_token);
 
 	  /* Receive the sealed message token */
 	  if (recv_token(s2, &xmit_buf) < 0)
