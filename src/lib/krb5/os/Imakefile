@@ -33,12 +33,13 @@ OBJS= \
 	rnd_confoun.o	\
 	read_msg.o	\
 	read_pwd.o	\
-	send_msg.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
 	timeofday.o	\
 	unlck_file.o	\
-	ustime.o
+	ustime.o	\
+	write_msg.o
+
 
 SRCS= \
 	an_to_ln.c	\
@@ -63,12 +64,11 @@ SRCS= \
 	read_pwd.c	\
 	port2ip.c	\
 	rnd_confoun.c	\
-	send_msg.c	\
 	sendto_kdc.c	\
 	sn2princ.c	\
 	timeofday.c	\
 	unlck_file.c	\
-	ustime.c
-
+	ustime.c	\
+	write_msg.c
 
 Krb5LibraryTarget(os,${OBJS})
