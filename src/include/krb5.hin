@@ -1092,7 +1092,7 @@ typedef struct _krb5_cc_ops {
 #define krb5_cc_remove_cred(context, cache, flags, creds) krb5_x((cache)->ops->remove_cred,(context, cache,flags, creds))
 #define krb5_cc_set_flags(context, cache, flags) krb5_x((cache)->ops->set_flags,(context, cache, flags))
 #define krb5_cc_get_name(context, cache) krb5_xc((cache)->ops->get_name,(context, cache))
-#define krb5_cc_get_type(context, cache) (*(cache)->ops->prefix)
+#define krb5_cc_get_type(context, cache) ((cache)->ops->prefix)
 
 extern krb5_cc_ops FAR *krb5_cc_dfl_ops;
 

@@ -11,7 +11,7 @@ all-windows::
 	copy $(BUILDTOP)\lib\gssapi\generic\gssapi_generic.h gssapi
 	cd krb5
 	@echo Making in include\krb5
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 krb5/autoconf.h:
