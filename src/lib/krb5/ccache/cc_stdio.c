@@ -199,19 +199,19 @@ static krb5_error_code krb5_fcc_open_file
 /*
  * SCC version 2 contains type information for principals.  SCC
  * version 1 does not.  The code will accept either, and depending on
- * what KRB5_SCC_DEFAULT_FVNO is set to, it will create version 1 or
+ * what KRB5_FCC_DEFAULT_FVNO is set to, it will create version 1 or
  * version 2 SCC caches.
  *
  */
 
-#define KRB5_SCC_FVNO_1   0x0501	/* krb v5, scc v1 */
-#define KRB5_SCC_FVNO_2   0x0502	/* krb v5, scc v2 */
-#define KRB5_SCC_FVNO_3   0x0503	/* krb v5, scc v3 */
-#define KRB5_SCC_FVNO_4   0x0504	/* krb v5, scc v4 */
+#define KRB5_FCC_FVNO_1   0x0501	/* krb v5, fcc v1 */
+#define KRB5_FCC_FVNO_2   0x0502	/* krb v5, fcc v2 */
+#define KRB5_FCC_FVNO_3   0x0503	/* krb v5, fcc v3 */
+#define KRB5_FCC_FVNO_4   0x0504	/* krb v5, fcc v4 */
 
-#define	SCC_OPEN_AND_ERASE	1
-#define	SCC_OPEN_RDWR		2
-#define	SCC_OPEN_RDONLY		3
+#define	FCC_OPEN_AND_ERASE	1
+#define	FCC_OPEN_RDWR		2
+#define	FCC_OPEN_RDONLY		3
 
 /* Credential file header tags.
  * The header tags are constructed as:
@@ -221,23 +221,23 @@ static krb5_error_code krb5_fcc_open_file
  * This format allows for older versions of the fcc processing code to skip
  * past unrecognized tag formats.
  */
-#define SCC_TAG_DELTATIME	1
+#define FCC_TAG_DELTATIME	1
 
 #ifndef TKT_ROOT
 #define TKT_ROOT "/tmp/tkt"
 #endif
 
 /* macros to make checking flags easier */
-#define OPENCLOSE(id) (((krb5_scc_data *)id->data)->flags & KRB5_TC_OPENCLOSE)
+#define OPENCLOSE(id) (((krb5_fcc_data *)id->data)->flags & KRB5_TC_OPENCLOSE)
 
-typedef struct _krb5_scc_data {
+typedef struct _krb5_fcc_data {
      char *filename;
      FILE *file;
-     krb5_flags flags;
      char stdio_buffer[BUFSIZ];
-     int version;
-     int mode;
-} krb5_scc_data;
+     krb5_flags flags;
+     int mode;			/* needed for locking code */
+     int version;		/* version number of the file */
+} krb5_fcc_data;
 
 /* An off_t can be arbitrarily complex */
 typedef struct _krb5_fcc_cursor {
@@ -276,7 +276,7 @@ krb5_fcc_read(context, id, buf, len)
      int ret;
 
      errno = 0;
-     ret = fread((char *) buf, 1, len, ((krb5_scc_data *) id->data)->file);
+     ret = fread((char *) buf, 1, len, ((krb5_fcc_data *) id->data)->file);
      if ((ret == 0) && errno)
 	  return krb5_fcc_interpret(context, errno);
      else if (ret != len)
@@ -308,13 +308,13 @@ krb5_fcc_read_principal(context, id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code kret;
     register krb5_principal tmpprinc;
     krb5_int32 length, type;
     int i;
 
-    if (data->version == KRB5_SCC_FVNO_1) {
+    if (data->version == KRB5_FCC_FVNO_1) {
 	type = KRB5_NT_UNKNOWN;
     } else {
         /* Read principal type */
@@ -332,7 +332,7 @@ krb5_fcc_read_principal(context, id, princ)
      * DCE includes the principal's realm in the count; the new format
      * does not.
      */
-    if (data->version == KRB5_SCC_FVNO_1)
+    if (data->version == KRB5_FCC_FVNO_1)
 	length--;
 
     tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
@@ -417,7 +417,7 @@ krb5_fcc_read_keyblock(context, id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
-     krb5_scc_data *data = (krb5_scc_data *)id->data;
+     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      krb5_error_code kret;
      krb5_ui_2 ui2;
      krb5_int32 int32;
@@ -428,7 +428,7 @@ krb5_fcc_read_keyblock(context, id, keyblock)
      kret = krb5_fcc_read_ui_2(context, id, &ui2);
      keyblock->enctype = ui2;
      CHECK(kret);
-     if (data->version == KRB5_SCC_FVNO_3) {
+     if (data->version == KRB5_FCC_FVNO_3) {
 		/* This works because the old etype is the same as the new enctype. */
 	     kret = krb5_fcc_read_ui_2(context, id, &ui2);
 	     /* keyblock->enctype = ui2; */
@@ -542,12 +542,12 @@ krb5_fcc_read_int32(context, id, i)
    krb5_ccache id;
    krb5_int32 *i;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
     unsigned char buf[4];
 
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2)) 
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2)) 
 	return krb5_fcc_read(context, id, (krb5_pointer) i, sizeof(krb5_int32));
     else {
 	retval = krb5_fcc_read(context, id, buf, 4);
@@ -564,12 +564,12 @@ krb5_fcc_read_ui_2(context, id, i)
    krb5_ccache id;
    krb5_ui_2 *i;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
     unsigned char buf[2];
     
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2))
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2))
 	return krb5_fcc_read(context, id, (krb5_pointer) i, sizeof(krb5_ui_2));
     else {
 	retval = krb5_fcc_read(context, id, buf, 2);
@@ -596,12 +596,12 @@ krb5_fcc_read_times(context, id, t)
    krb5_ccache id;
    krb5_ticket_times *t;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
     krb5_int32 i;
     
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2))
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2))
 	return krb5_fcc_read(context, id, (krb5_pointer) t, sizeof(krb5_ticket_times));
     else {
 	retval = krb5_fcc_read_int32(context, id, &i);
@@ -732,7 +732,7 @@ krb5_fcc_write(context, id, buf, len)
 {
      int ret;
      errno = 0;
-     ret = fwrite((char *) buf, 1, len, ((krb5_scc_data *)id->data)->file);
+     ret = fwrite((char *) buf, 1, len, ((krb5_fcc_data *)id->data)->file);
      if ((ret == 0) && errno) {
 	  return krb5_fcc_interpret (context, errno);
      } else if (ret != len)
@@ -744,7 +744,7 @@ krb5_fcc_write(context, id, buf, len)
  * FOR ALL OF THE FOLLOWING FUNCTIONS:
  * 
  * Requires:
- * ((krb5_scc_data *) id->data)->file is open and at the right position.
+ * ((krb5_fcc_data *) id->data)->file is open and at the right position.
  * 
  * Effects:
  * Stores an encoded version of the second argument in the
@@ -760,14 +760,14 @@ krb5_fcc_store_principal(context, id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code ret;
     krb5_int32 i, length, tmp, type;
 
     type = krb5_princ_type(context, princ);
     tmp = length = krb5_princ_size(context, princ);
 
-    if (data->version == KRB5_SCC_FVNO_1) {
+    if (data->version == KRB5_FCC_FVNO_1) {
 	/*
 	 * DCE-compatible format means that the length count
 	 * includes the realm.  (It also doesn't include the
@@ -827,12 +827,12 @@ krb5_fcc_store_keyblock(context, id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
-     krb5_scc_data *data = (krb5_scc_data *)id->data;
+     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      krb5_error_code ret;
 
      ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
      CHECK(ret);
-     if (data->version == KRB5_SCC_FVNO_3) {
+     if (data->version == KRB5_FCC_FVNO_3) {
 	 ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
 	 CHECK(ret);
      }
@@ -876,11 +876,11 @@ krb5_fcc_store_int32(context, id, i)
    krb5_ccache id;
    krb5_int32 i;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     unsigned char buf[4];
 
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2)) 
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2)) 
 	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
 	buf[3] = i & 0xFF;
@@ -901,11 +901,11 @@ krb5_fcc_store_ui_4(context, id, i)
    krb5_ccache id;
    krb5_ui_4 i;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     unsigned char buf[4];
 
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2)) 
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2)) 
 	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
 	buf[3] = i & 0xFF;
@@ -926,12 +926,12 @@ krb5_fcc_store_ui_2(context, id, i)
     krb5_ccache id;
     krb5_int32 i;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_ui_2 ibuf;
     unsigned char buf[2];
     
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2)) {
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2)) {
 	ibuf = i;
 	return krb5_fcc_write(context, id, (char *) &ibuf, sizeof(krb5_ui_2));
     } else {
@@ -961,11 +961,11 @@ krb5_fcc_store_times(context, id, t)
    krb5_ccache id;
    krb5_ticket_times *t;
 {
-    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
 
-    if ((data->version == KRB5_SCC_FVNO_1) ||
-	(data->version == KRB5_SCC_FVNO_2))
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2))
 	return krb5_fcc_write(context, id, (char *) t, sizeof(krb5_ticket_times));
     else {
 	retval = krb5_fcc_store_int32(context, id, t->authtime);
@@ -1061,29 +1061,18 @@ krb5_fcc_close_file (context, id)
    krb5_context context;
     krb5_ccache id;
 {
-     krb5_scc_data *data;
+     krb5_fcc_data *data;
      int ret;
      krb5_error_code retval;
 
-     data = (krb5_scc_data *) id->data;
+     data = (krb5_fcc_data *) id->data;
      if (data->file == (FILE *) NULL)
 	 return KRB5_FCC_INTERNAL;
-#ifdef ultrix
-     errno = 0;
-#endif
-     ret = fflush (data->file);
-#ifdef ultrix
-     /* their LIBC refuses to allow an fflush() of a read-only buffer!
-	We patch around it by only calling it an error if errno is set by a
-	(failed) syscall */
-     if (ret == EOF && !errno) ret = 0;
-#endif
-     /*
-      * NetBSD returns EBADF on fflush of a read-only file.
-      */
-     if (ret == EOF && errno == EBADF
-	 && data->mode == SCC_OPEN_RDONLY)
-	  ret = 0;
+     /* Calling fflush on a read-only file is undefined.  */
+     if (data->mode != FCC_OPEN_RDONLY)
+	 ret = fflush (data->file);
+     else
+	 ret = 0;
      memset (data->stdio_buffer, 0, sizeof (data->stdio_buffer));
      if (ret == EOF) {
 	  int errsave = errno;
@@ -1108,11 +1097,11 @@ krb5_fcc_open_file (context, id, mode)
     int mode;
 {
     krb5_os_context os_ctx = (krb5_os_context) context->os_context;
-    krb5_scc_data *data = (krb5_scc_data *) id->data;
+    krb5_fcc_data *data = (krb5_fcc_data *) id->data;
     char fvno_bytes[2];		/* In nework byte order */
-    krb5_ui_2 scc_tag;
-    krb5_ui_2 scc_taglen;
-    krb5_ui_2 scc_hlen;
+    krb5_ui_2 fcc_flen;
+    krb5_ui_2 fcc_tag;
+    krb5_ui_2 fcc_taglen;
     FILE *f;
     char *open_flag;
     krb5_error_code retval = 0;
@@ -1125,32 +1114,32 @@ krb5_fcc_open_file (context, id, mode)
     }
 #ifdef ANSI_STDIO
     switch(mode) {
-    case SCC_OPEN_AND_ERASE:
+    case FCC_OPEN_AND_ERASE:
 	unlink(data->filename);
 	/* XXX should do an exclusive open here, but no way to do */
 	/* this under stdio */
 	open_flag = "wb+";
 	break;
-    case SCC_OPEN_RDWR:
+    case FCC_OPEN_RDWR:
 	open_flag = "rb+";
 	break;
-    case SCC_OPEN_RDONLY:
+    case FCC_OPEN_RDONLY:
     default:
 	open_flag = "rb";
 	break;
     }
 #else
     switch(mode) {
-    case SCC_OPEN_AND_ERASE:
+    case FCC_OPEN_AND_ERASE:
 	unlink(data->filename);
 	/* XXX should do an exclusive open here, but no way to do */
 	/* this under stdio */
 	open_flag = "w+";
 	break;
-    case SCC_OPEN_RDWR:
+    case FCC_OPEN_RDWR:
 	open_flag = "r+";
 	break;
-    case SCC_OPEN_RDONLY:
+    case FCC_OPEN_RDONLY:
     default:
 	open_flag = "r";
 	break;
@@ -1171,14 +1160,14 @@ krb5_fcc_open_file (context, id, mode)
     setbuf (f, data->stdio_buffer);
 #endif
     switch (mode) {
-    case SCC_OPEN_RDONLY:
+    case FCC_OPEN_RDONLY:
 	if ((retval = krb5_lock_file(context,fileno(f),KRB5_LOCKMODE_SHARED))){
 	    (void) fclose(f);
 	    return retval;
 	}
 	break;
-    case SCC_OPEN_RDWR:
-    case SCC_OPEN_AND_ERASE:
+    case FCC_OPEN_RDWR:
+    case FCC_OPEN_AND_ERASE:
 	if ((retval = krb5_lock_file(context, fileno(f), 
 				     KRB5_LOCKMODE_EXCLUSIVE))) {
 	    (void) fclose(f);
@@ -1186,7 +1175,7 @@ krb5_fcc_open_file (context, id, mode)
 	}
 	break;
     }
-    if (mode == SCC_OPEN_AND_ERASE) {
+    if (mode == FCC_OPEN_AND_ERASE) {
 	/* write the version number */
 
 	data->file = f;
@@ -1194,24 +1183,24 @@ krb5_fcc_open_file (context, id, mode)
 	retval = krb5_fcc_store_ui_2(context, id, data->version);
 	if (retval) goto done;
 
-	if (data->version == KRB5_SCC_FVNO_4) {
-	    scc_hlen = 0;
+	if (data->version == KRB5_FCC_FVNO_4) {
+	    fcc_flen = 0;
 
 	    if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
-                 scc_hlen += (2*sizeof(krb5_ui_2) + 2*sizeof(krb5_int32));
+                 fcc_flen += (2*sizeof(krb5_ui_2) + 2*sizeof(krb5_int32));
  
 	    /* Write header length */
-	    retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)scc_hlen);
+	    retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_flen);
 	    if (retval) goto done;
  
 	    if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
 		/* Write time offset tag */
-		scc_tag = SCC_TAG_DELTATIME;
-		scc_taglen = 2*sizeof(krb5_int32);
+		fcc_tag = FCC_TAG_DELTATIME;
+		fcc_taglen = 2*sizeof(krb5_int32);
                  
-		retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)scc_tag);
+		retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)fcc_tag);
 		if (retval) goto done;
-		retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)scc_taglen);
+		retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)fcc_taglen);
 		if (retval) goto done;
 		retval = krb5_fcc_store_int32(context,id,os_ctx->time_offset);
 		if (retval) goto done;
@@ -1229,10 +1218,10 @@ krb5_fcc_open_file (context, id, mode)
 	goto done;
     }
     data->version = (fvno_bytes[0] << 8) + fvno_bytes[1];
-    if ((data->version != KRB5_SCC_FVNO_1) &&
-	(data->version != KRB5_SCC_FVNO_2) &&
-	(data->version != KRB5_SCC_FVNO_3) &&
-	(data->version != KRB5_SCC_FVNO_4))
+    if ((data->version != KRB5_FCC_FVNO_1) &&
+	(data->version != KRB5_FCC_FVNO_2) &&
+	(data->version != KRB5_FCC_FVNO_3) &&
+	(data->version != KRB5_FCC_FVNO_4))
     {
 	retval = KRB5_CCACHE_BADVNO;
 	goto done;
@@ -1240,36 +1229,36 @@ krb5_fcc_open_file (context, id, mode)
 
     data->file = f;
     
-    if (data->version == KRB5_SCC_FVNO_4) {
+    if (data->version == KRB5_FCC_FVNO_4) {
 	char buf[1024];
 
-	if (krb5_fcc_read_ui_2(context, id, &scc_hlen) ||
-	    (scc_hlen > sizeof(buf)))
+	if (krb5_fcc_read_ui_2(context, id, &fcc_flen) ||
+	    (fcc_flen > sizeof(buf)))
 	{
 	    retval = KRB5_CC_FORMAT;
 	    goto done;
 	}
 	
-	while (scc_hlen) {
-	    if ((scc_hlen < (2*sizeof(krb5_ui_2))) ||
-		krb5_fcc_read_ui_2(context, id, &scc_tag) ||
-		krb5_fcc_read_ui_2(context, id, &scc_taglen) ||
-		(scc_taglen > (scc_hlen - 2*sizeof(krb5_ui_2))))
+	while (fcc_flen) {
+	    if ((fcc_flen < (2*sizeof(krb5_ui_2))) ||
+		krb5_fcc_read_ui_2(context, id, &fcc_tag) ||
+		krb5_fcc_read_ui_2(context, id, &fcc_taglen) ||
+		(fcc_taglen > (fcc_flen - 2*sizeof(krb5_ui_2))))
 	    {
 		retval = KRB5_CC_FORMAT;
 		goto done;
 	    }
 
-	    switch (scc_tag) {
-	    case SCC_TAG_DELTATIME:
-		if (scc_taglen != 2*sizeof(krb5_int32)) {
+	    switch (fcc_tag) {
+	    case FCC_TAG_DELTATIME:
+		if (fcc_taglen != 2*sizeof(krb5_int32)) {
 		    retval = KRB5_CC_FORMAT;
 		    goto done;
 		}
                  if (!(context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) ||
                      (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID))
                  {
-                     if (krb5_fcc_read(context, id, buf, scc_taglen)) {
+                     if (krb5_fcc_read(context, id, buf, fcc_taglen)) {
                          retval = KRB5_CC_FORMAT;
                          goto done;
                      }
@@ -1286,13 +1275,13 @@ krb5_fcc_open_file (context, id, mode)
                       KRB5_OS_TOFFSET_VALID);
                  break;
 	    default:
-                 if (scc_taglen && krb5_fcc_read(context,id,buf,scc_taglen)) {
+                 if (fcc_taglen && krb5_fcc_read(context,id,buf,fcc_taglen)) {
                      retval = KRB5_CC_FORMAT;
                      goto done;
                  }
                  break;
 	    }
-	    scc_hlen -= (2*sizeof(krb5_ui_2) + scc_taglen);
+	    fcc_flen -= (2*sizeof(krb5_ui_2) + fcc_taglen);
 	}
     }
 
@@ -1312,15 +1301,15 @@ krb5_fcc_skip_header(context, id)
    krb5_ccache id;
 {
      krb5_error_code kret;
-     krb5_scc_data *data = (krb5_scc_data *) id->data;
-     krb5_ui_2 scc_flen;
+     krb5_fcc_data *data = (krb5_fcc_data *) id->data;
+     krb5_ui_2 fcc_flen;
 
      if (fseek(data->file, sizeof(krb5_ui_2), SEEK_SET))
 	 return errno;
-     if (data->version == KRB5_SCC_FVNO_4) {
-	 kret = krb5_fcc_read_ui_2(context, id, &scc_flen);
+     if (data->version == KRB5_FCC_FVNO_4) {
+	 kret = krb5_fcc_read_ui_2(context, id, &fcc_flen);
 	 if (kret) return kret;
-	 if (fseek(data->file, scc_flen, SEEK_CUR))
+	 if (fseek(data->file, fcc_flen, SEEK_CUR))
 	     return errno;
      }
      return KRB5_OK;
@@ -1354,8 +1343,7 @@ krb5_fcc_skip_principal(context, id)
  * system errors
  * permission errors
  */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_initialize(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -1363,17 +1351,17 @@ krb5_fcc_initialize(context, id, princ)
 {
      krb5_error_code kret;
 
-     kret = krb5_fcc_open_file (context, id, SCC_OPEN_AND_ERASE);
+     kret = krb5_fcc_open_file (context, id, FCC_OPEN_AND_ERASE);
      if (kret < 0)
 	  return krb5_fcc_interpret(context, errno);
 
 #if 0
-     kret = fchmod(((krb5_scc_data *) id->data)->fd, S_IREAD | S_IWRITE);
+     kret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
      if (kret == -1) {
 	 kret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
-	     close(((krb5_scc_data *)id->data)->fd);
-	     ((krb5_scc_data *) id->data)->fd = -1;
+	     close(((krb5_fcc_data *)id->data)->fd);
+	     ((krb5_fcc_data *) id->data)->fd = -1;
 	 }
 	 return kret;
      }
@@ -1400,7 +1388,7 @@ krb5_fcc_close(context, id)
    krb5_ccache id;
 {
      register int closeval = KRB5_OK;
-     register krb5_scc_data *data = (krb5_scc_data *) id->data;
+     register krb5_fcc_data *data = (krb5_fcc_data *) id->data;
 
      if (!OPENCLOSE(id)) {
 	 closeval = fclose (data->file);
@@ -1439,7 +1427,7 @@ krb5_fcc_destroy(context, id)
      unsigned long size;
      char zeros[BUFSIZ];
 #endif
-     krb5_scc_data *data = (krb5_scc_data *) id->data;
+     krb5_fcc_data *data = (krb5_fcc_data *) id->data;
      register int ret;
      
      if (!OPENCLOSE(id)) {
@@ -1545,27 +1533,27 @@ krb5_fcc_resolve (context, id, residual)
 
      lid->ops = &krb5_scc_ops;
      
-     lid->data = (krb5_pointer) malloc(sizeof(krb5_scc_data));
+     lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
 	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 
-     ((krb5_scc_data *) lid->data)->filename = (char *)
+     ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(residual) + 1);
 
-     if (((krb5_scc_data *) lid->data)->filename == NULL) {
-	  krb5_xfree(((krb5_scc_data *) lid->data));
+     if (((krb5_fcc_data *) lid->data)->filename == NULL) {
+	  krb5_xfree(((krb5_fcc_data *) lid->data));
 	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 
      /* default to open/close on every trn */
-     ((krb5_scc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
-     ((krb5_scc_data *) lid->data)->file = 0;
+     ((krb5_fcc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
+     ((krb5_fcc_data *) lid->data)->file = 0;
      
      /* Set up the filename */
-     strcpy(((krb5_scc_data *) lid->data)->filename, residual);
+     strcpy(((krb5_fcc_data *) lid->data)->filename, residual);
 
      lid->magic = KV5M_CCACHE;
 
@@ -1603,14 +1591,14 @@ krb5_fcc_start_seq_get(context, id, cursor)
 	  return KRB5_CC_NOMEM;
 
      /* Make sure we start reading right after the primary principal */
-     MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
+     MAYBE_OPEN (context, id, FCC_OPEN_RDONLY);
 
      ret = krb5_fcc_skip_header(context, id);
      if (ret) goto done;
      ret = krb5_fcc_skip_principal(context, id);
      if (ret) goto done;
      
-     fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
+     fcursor->pos = ftell(((krb5_fcc_data *) id->data)->file);
      *cursor = (krb5_cc_cursor) fcursor;
 
 done:
@@ -1639,8 +1627,7 @@ done:
  * Errors:
  * system errors
  */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_next_cred(context, id, cursor, creds)
    krb5_context context;
    krb5_ccache id;
@@ -1664,10 +1651,10 @@ krb5_fcc_next_cred(context, id, cursor, creds)
      Z (addresses);
 #undef Z
 
-     MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
+     MAYBE_OPEN (context, id, FCC_OPEN_RDONLY);
 
      fcursor = (krb5_fcc_cursor *) *cursor;
-     ret = fseek(((krb5_scc_data *) id->data)->file, fcursor->pos, 0);
+     ret = fseek(((krb5_fcc_data *) id->data)->file, fcursor->pos, 0);
      if (ret < 0) {
 	 ret = krb5_fcc_interpret(context, errno);
 	 MAYBE_CLOSE (context, id, ret);
@@ -1697,7 +1684,7 @@ krb5_fcc_next_cred(context, id, cursor, creds)
      kret = krb5_fcc_read_data(context, id, &creds->second_ticket);
      TCHECK(kret);
      
-     fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
+     fcursor->pos = ftell(((krb5_fcc_data *) id->data)->file);
      cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
@@ -1721,8 +1708,7 @@ lose:
  * and invalidates the cursor (it must never be used after this call).
  */
 /* ARGSUSED */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_end_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;
@@ -1753,8 +1739,7 @@ extern krb5_cc_ops krb5_scc_ops;
  * 		krb5_ccache.  id is undefined.
  * system errors (from open)
  */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_generate_new (context, id)
    krb5_context context;
    krb5_ccache *id;
@@ -1776,16 +1761,16 @@ krb5_fcc_generate_new (context, id)
      (void) strcat(scratch, "XXXXXX");
      mktemp(scratch);
 
-     lid->data = (krb5_pointer) malloc(sizeof(krb5_scc_data));
+     lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
 	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 
-     ((krb5_scc_data *) lid->data)->filename = (char *)
+     ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(scratch) + 1);
-     if (((krb5_scc_data *) lid->data)->filename == NULL) {
-	  krb5_xfree(((krb5_scc_data *) lid->data));
+     if (((krb5_fcc_data *) lid->data)->filename == NULL) {
+	  krb5_xfree(((krb5_fcc_data *) lid->data));
 	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
@@ -1793,56 +1778,56 @@ krb5_fcc_generate_new (context, id)
      /* default to open/close on every trn - otherwise cc_destroy 
       gets confused as to state
      */
-     ((krb5_scc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
-     ((krb5_scc_data *) lid->data)->file = 0;
+     ((krb5_fcc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
+     ((krb5_fcc_data *) lid->data)->file = 0;
      
      /* Set up the filename */
-     strcpy(((krb5_scc_data *) lid->data)->filename, scratch);
+     strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is useable */
 #if defined(__STDC__) || defined(_WIN32)
-     f = fopen (((krb5_scc_data *) lid->data)->filename, "wb+");
+     f = fopen (((krb5_fcc_data *) lid->data)->filename, "wb+");
 #else
-     f = fopen (((krb5_scc_data *) lid->data)->filename, "w+");
+     f = fopen (((krb5_fcc_data *) lid->data)->filename, "w+");
 #endif
      if (!f) {
 	     retcode = krb5_fcc_interpret (context, errno);
 	     goto err_out;
      } else {
-	 unsigned char scc_fvno[2];
+	 unsigned char fcc_fvno[2];
 
-	 scc_fvno[0] = (unsigned char) ((context->scc_default_format >> 8) & 0xFF);
-	 scc_fvno[1] = (unsigned char) (context->scc_default_format & 0xFF);
+	 fcc_fvno[0] = (unsigned char) ((context->scc_default_format >> 8) & 0xFF);
+	 fcc_fvno[1] = (unsigned char) (context->scc_default_format & 0xFF);
 
-	 if (!fwrite((char *)scc_fvno, sizeof(scc_fvno), 1, f)) {
+	 if (!fwrite((char *)fcc_fvno, sizeof(fcc_fvno), 1, f)) {
 	     retcode = krb5_fcc_interpret(context, errno);
 	     (void) fclose(f);
-	     (void) remove(((krb5_scc_data *) lid->data)->filename);
+	     (void) remove(((krb5_fcc_data *) lid->data)->filename);
 	     goto err_out;
 	 }
  	 /* For version 4 we save a length for the rest of the header */
-          if (context->scc_default_format == KRB5_SCC_FVNO_4) {
-	     unsigned char scc_flen[2];
-	     scc_flen[0] = 0;
-	     scc_flen[1] = 0;
-	     if (!fwrite((char *)scc_flen, sizeof(scc_flen), 1, f)) {
+          if (context->scc_default_format == KRB5_FCC_FVNO_4) {
+	     unsigned char fcc_flen[2];
+	     fcc_flen[0] = 0;
+	     fcc_flen[1] = 0;
+	     if (!fwrite((char *)fcc_flen, sizeof(fcc_flen), 1, f)) {
 	        retcode = krb5_fcc_interpret(context, errno);
 	        (void) fclose(f);
-	        (void) remove(((krb5_scc_data *) lid->data)->filename);
+	        (void) remove(((krb5_fcc_data *) lid->data)->filename);
                 goto err_out;
             }
 	 }
 	 if (fclose(f) == EOF) {
 	     retcode = krb5_fcc_interpret(context, errno);
-	     (void) remove(((krb5_scc_data *) lid->data)->filename);
+	     (void) remove(((krb5_fcc_data *) lid->data)->filename);
 	     goto err_out;
 	 }
 	 *id = lid;
 	 return KRB5_OK;
      }
 err_out:
-     krb5_xfree(((krb5_scc_data *) lid->data)->filename);
-     krb5_xfree(((krb5_scc_data *) lid->data));
+     krb5_xfree(((krb5_fcc_data *) lid->data)->filename);
+     krb5_xfree(((krb5_fcc_data *) lid->data));
      krb5_xfree(lid);
      return retcode;
 }
@@ -1854,13 +1839,12 @@ err_out:
  * Returns:
  * The name of the file cred cache id.
  */
-static const char *
-KRB5_CALLCONV
+static const char * KRB5_CALLCONV
 krb5_fcc_get_name (context, id)
    krb5_context context;
    krb5_ccache id;
 {
-     return (char *) ((krb5_scc_data *) id->data)->filename;
+     return (char *) ((krb5_fcc_data *) id->data)->filename;
 }
 
 /*
@@ -1876,8 +1860,7 @@ krb5_fcc_get_name (context, id)
  * system errors
  * KRB5_CC_NOMEM
  */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_get_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -1885,7 +1868,7 @@ krb5_fcc_get_principal(context, id, princ)
 {
      krb5_error_code kret;
 
-     MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
+     MAYBE_OPEN (context, id, FCC_OPEN_RDONLY);
 
      kret = krb5_fcc_skip_header(context, id);
      if (kret) goto done;
@@ -1897,8 +1880,7 @@ done:
      return kret;
 }
 
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
    krb5_context context;
    krb5_ccache id;
@@ -1921,8 +1903,7 @@ krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
  * system errors
  * storage failure errors
  */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_store(context, id, creds)
    krb5_context context;
    krb5_ccache id;
@@ -1932,9 +1913,9 @@ krb5_fcc_store(context, id, creds)
      krb5_error_code ret;
 
      /* Make sure we are writing to the end of the file */
-     MAYBE_OPEN (context, id, SCC_OPEN_RDWR);
+     MAYBE_OPEN (context, id, FCC_OPEN_RDWR);
 
-     ret = fseek(((krb5_scc_data *) id->data)->file, 0, 2);
+     ret = fseek(((krb5_fcc_data *) id->data)->file, 0, 2);
      if (ret < 0)
 	  return krb5_fcc_interpret(context, errno);
 
@@ -1977,8 +1958,7 @@ lose:
  * Effects:
  * Sets the operational flags of id to flags.
  */
-static krb5_error_code
-KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_fcc_set_flags(context, id, flags)
    krb5_context context;
    krb5_ccache id;
@@ -1995,11 +1975,11 @@ krb5_fcc_set_flags(context, id, flags)
 	/* asking to turn off OPENCLOSE mode, meaning it must be
 	   left open.  We open if it's not yet open */
 	if (OPENCLOSE(id)) {
-	    ret = krb5_fcc_open_file (context, id, SCC_OPEN_RDWR);
+	    ret = krb5_fcc_open_file (context, id, FCC_OPEN_RDWR);
 	}
     }
 
-    ((krb5_scc_data *) id->data)->flags = flags;
+    ((krb5_fcc_data *) id->data)->flags = flags;
     return ret;
 }
 
