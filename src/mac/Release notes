@@ -302,3 +302,8 @@ Removed version strings from the Mac OS X project
 3.2b6
 from tag Mac_GSSKerberos5_3_2b6
 Fixed resource fork handling in profile lib
+
+3.2b7
+from tag Mac_GSSKerberos5_3_2b7
+Fixed GSS FTP forwarding
+Fixed profile library handling unreadable files
