@@ -7,6 +7,7 @@ OBJS=	addr_comp.o	\
 	copy_data.o	\
 	copy_key.o	\
 	copy_princ.o	\
+	copy_tick.o	\
 	decode_kdc.o	\
 	decode_tkt.o	\
 	decrypt_tk.o	\
@@ -48,6 +49,7 @@ SRCS=	addr_comp.c	\
 	copy_data.c	\
 	copy_key.c	\
 	copy_princ.c	\
+	copy_tick.c	\
 	decode_kdc.c	\
 	decode_tkt.c	\
 	decrypt_tk.c	\
