@@ -233,7 +233,7 @@ our_getpwnam(user)
       
       p.pw_name = strdup(buf);
 
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
       if (!(d = (char *) strchr(c, ':')))
          return(&p);
 #else 
