@@ -36,17 +36,17 @@
 extern krb5_error_code
 krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 				       krb5_data *),
-		size_t hlen, const char *pass, const char *salt,
-		unsigned long count, size_t dklen, char *output);
+		size_t hlen, const krb5_data *pass, const krb5_data *salt,
+		unsigned long count, krb5_data *output);
 extern krb5_error_code
-krb5int_pbkdf2_hmac_sha1 (char *out, size_t len, unsigned long count,
-			  const char *pass, const char *salt);
+krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
+			  const krb5_data *pass, const krb5_data *salt);
 extern krb5_error_code
 krb5int_pbkdf2_hmac_sha1_128 (char *out, unsigned long count,
-			      const char *pass, const char *salt);
+			      const krb5_data *pass, const krb5_data *salt);
 extern krb5_error_code
 krb5int_pbkdf2_hmac_sha1_256 (char *out, unsigned long count,
-			      const char *pass, const char *salt);
+			      const krb5_data *pass, const krb5_data *salt);
 
 
 
@@ -84,7 +84,7 @@ static krb5_error_code
 F(char *output, char *u_tmp1, char *u_tmp2,
   krb5_error_code (*prf)(krb5_keyblock *, krb5_data *, krb5_data *),
   size_t hlen,
-  const char *pass, const char *salt,
+  const krb5_data *pass, const krb5_data *salt,
   unsigned long count, int i)
 {
     unsigned char ibytes[4];
@@ -95,11 +95,12 @@ F(char *output, char *u_tmp1, char *u_tmp2,
     krb5_data out;
     krb5_error_code err;
 
-    pdata.contents = pass;
-    pdata.length = strlen(pass);
+    pdata.contents = pass->data;
+    pdata.length = pass->length;
 
 #if 0
-    printf("F(i=%d, count=%lu, pass=%s)\n", i, count, pass);
+    printf("F(i=%d, count=%lu, pass=%d:%s)\n", i, count,
+	   pass->length, pass->data);
     printk("F password", &pdata);
 #endif
 
@@ -109,8 +110,8 @@ F(char *output, char *u_tmp1, char *u_tmp2,
     ibytes[1] = (i >> 16) & 0xff;
     ibytes[0] = (i >> 24) & 0xff;
 
-    tlen = strlen(salt);
-    memcpy(u_tmp2, salt, tlen);
+    tlen = salt->length;
+    memcpy(u_tmp2, salt->data, tlen);
     memcpy(u_tmp2 + tlen, ibytes, 4);
     tlen += 4;
     sdata.data = u_tmp2;
@@ -164,30 +165,23 @@ krb5_error_code
 krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 				       krb5_data *),
 		size_t hlen,
-		const char *pass, const char *salt,
-		unsigned long count, size_t dklen,
-		char *output)
+		const krb5_data *pass, const krb5_data *salt,
+		unsigned long count, krb5_data *output)
 {
     int l, r, i;
     char *utmp1, *utmp2;
 
-    if (dklen == 0 || hlen == 0)
+    if (output->length == 0 || hlen == 0)
 	abort();
     /* Step 1 & 2.  */
-    if (dklen / hlen > 0xffffffff)
+    if (output->length / hlen > 0xffffffff)
 	abort();
     /* Step 2.  */
-    l = (dklen + hlen - 1) / hlen;
-    r = dklen - (l - 1) * hlen;
+    l = (output->length + hlen - 1) / hlen;
+    r = output->length - (l - 1) * hlen;
 
-#if 0
-    output = malloc(dklen + hlen + strlen(salt) + 4 + hlen);
-    if (output == NULL) {
-	abort();
-    }
-#endif
     utmp1 = /*output + dklen; */ malloc(hlen);
-    utmp2 = /*utmp1 + hlen; */ malloc(strlen(salt) + 4 + hlen);
+    utmp2 = /*utmp1 + hlen; */ malloc(salt->length + 4 + hlen);
 
     /* Step 3.  */
     for (i = 1; i <= l; i++) {
@@ -196,15 +190,15 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 #endif
 	krb5_error_code err;
 
-	err = F(output + (i-1) * hlen, utmp1, utmp2, prf, hlen,
+	err = F(output->data + (i-1) * hlen, utmp1, utmp2, prf, hlen,
 		pass, salt, count, i);
 	if (err)
 	    return err;
 
 #if 0
-	printf("after F(%d), @%p:\n", i, output);
+	printf("after F(%d), @%p:\n", i, output->data);
 	for (j = (i-1) * hlen; j < i * hlen; j++)
-	    printf(" %02x", 0xff & output[j]);
+	    printf(" %02x", 0xff & output->data[j]);
 	printf ("\n");
 #endif
     }
@@ -259,22 +253,28 @@ foo(krb5_keyblock *pass, krb5_data *salt, krb5_data *out)
 }
 
 krb5_error_code
-krb5int_pbkdf2_hmac_sha1 (char *out, size_t len, unsigned long count,
-			  const char *pass, const char *salt)
+krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
+			  const krb5_data *pass, const krb5_data *salt)
 {
-    return krb5int_pbkdf2 (foo, 20, pass, salt, count, len, out);
+    return krb5int_pbkdf2 (foo, 20, pass, salt, count, out);
 }
 
 krb5_error_code
 krb5int_pbkdf2_hmac_sha1_128 (char *out, unsigned long count,
-			      const char *pass, const char *salt)
+			      const krb5_data *pass, const krb5_data *salt)
 {
-    return krb5int_pbkdf2 (foo, 20, pass, salt, count, 16, out);
+    krb5_data out_d;
+    out_d.data = out;
+    out_d.length = 16;
+    return krb5int_pbkdf2 (foo, 20, pass, salt, count, &out_d);
 }
 
 krb5_error_code
 krb5int_pbkdf2_hmac_sha1_256 (char *out, unsigned long count,
-			      const char *pass, const char *salt)
+			      const krb5_data *pass, const krb5_data *salt)
 {
-    return krb5int_pbkdf2 (foo, 20, pass, salt, count, 32, out);
+    krb5_data out_d;
+    out_d.data = out;
+    out_d.length = 32;
+    return krb5int_pbkdf2 (foo, 20, pass, salt, count, &out_d);
 }

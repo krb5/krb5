@@ -394,7 +394,7 @@ test_pbkdf2()
     krb5_error_code err;
     krb5_data d;
     krb5_keyblock k, dk;
-    krb5_data usage;
+    krb5_data usage, pass, salt;
 
     d.data = x;
     dk.contents = x2;
@@ -416,8 +416,11 @@ test_pbkdf2()
 	}
 
 	d.length = 16;
-	err = krb5int_pbkdf2_hmac_sha1_128 (x, test[j].count,
-					    test[j].pass, test[j].salt);
+	pass.data = test[j].pass;
+	pass.length = strlen(pass.data);
+	salt.data = test[j].salt;
+	salt.length = strlen(salt.data);
+	err = krb5int_pbkdf2_hmac_sha1 (&d, test[j].count, &pass, &salt);
 	printd("128-bit PBKDF2 output", &d);
 	enc = &krb5int_enc_aes128;
 	k.contents = d.data;
@@ -427,8 +430,7 @@ test_pbkdf2()
 	printk("128-bit AES key",&dk);
 
 	d.length = 32;
-	err = krb5int_pbkdf2_hmac_sha1_256 (x, test[j].count,
-					    test[j].pass, test[j].salt);
+	err = krb5int_pbkdf2_hmac_sha1 (&d, test[j].count, &pass, &salt);
 	printd("256-bit PBKDF2 output", &d);
 	enc = &krb5int_enc_aes256;
 	k.contents = d.data;
@@ -451,7 +453,7 @@ int main (int argc, char **argv)
     test_mit_des_s2k ();
     test_des3_s2k ();
     test_dr_dk ();
-    test_pbkdf2();
 #endif
+    test_pbkdf2();
     return 0;
 }

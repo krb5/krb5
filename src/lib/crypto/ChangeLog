@@ -1,3 +1,12 @@
+2003-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* pbkdf2.c (F): Now takes krb5_data for password and salt.
+	(krb5int_pbkdf2, krb5int_pbkdf2_hmac_sha1,
+	krb5int_pbkdf2_hmac_sha1_128, krb5int_pbkdf2_hmac_sha1_256):
+	Likewise, and for output also.
+	* vectors.c (test_pbkdf2): Calls updated.
+	(main): Run pbkdf2 tests.
+
 2003-02-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes: New directory, containing AES implementation from Brian
