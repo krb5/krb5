@@ -1,3 +1,13 @@
+2000-07-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* utility.c: Add casts on types being sent to internal functions.
+
+	* krb5_encode_test.c: Declare internal functions as static.
+
+	* ktest.c: Remove unused functions. Clean up compiler warnings.
+
+	* trval.c: Add proper prototype for declared functions.
+
 1999-11-01  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_decode_test.c (main): Add test case for zero-length

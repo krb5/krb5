@@ -105,14 +105,28 @@ int print_krb5_types = 0;
 
 int current_appl_type = -1;
 
-void print_tag_type();
-int trval(), trval2(), decode_len(), do_cons(), do_prim();
+#if (defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif
+
+
+int decode_len PROTOTYPE((FILE *, unsigned char *, int));
+int do_prim PROTOTYPE((FILE *, int, unsigned char *, int, int));
+int do_cons PROTOTYPE((FILE *, unsigned char *, int, int, int *));
+int do_prim_bitstring PROTOTYPE((FILE *, int, unsigned char *, int, int));
+int do_prim_int PROTOTYPE((FILE *, int, unsigned char *, int, int));
+int do_prim_string PROTOTYPE((FILE *, int, unsigned char *, int, int));
+void print_tag_type PROTOTYPE((FILE *, int, int));
+int trval(), trval2();
+
 
 /****************************************************************************/
 
 #ifdef STANDALONE
 
-void usage()
+static void usage()
 {
 	fprintf(stderr, "Usage: trval [--types] [--krb5] [--krb5decode] [--hex] [-notypebytes] [file]\n");
 	exit(1);
@@ -182,7 +196,7 @@ int main(argc, argv)
 }
 #endif
 
-int convert_nibble(ch)
+static int convert_nibble(ch)
 {
     if (isdigit(ch))
 	return (ch - '0');
@@ -490,7 +504,7 @@ struct typestring_table {
 	int	new_appl;
 };
 
-char *lookup_typestring(table, key1, key2)
+static char *lookup_typestring(table, key1, key2)
 	struct typestring_table *table;
 	int	key1, key2;
 {

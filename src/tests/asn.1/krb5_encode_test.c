@@ -15,7 +15,7 @@ int error_count = 0;
 int do_trval = 0;
 int trval2();
 
-void encoder_print_results(code, typestring, description)
+static void encoder_print_results(code, typestring, description)
 	krb5_data *code;
 	char	*typestring;
 	char	*description;
@@ -52,7 +52,7 @@ void encoder_print_results(code, typestring, description)
 	ktest_destroy_data(&code);
 }	
 
-void PRS(argc, argv)
+static void PRS(argc, argv)
 	int	argc;
 	char	**argv;
 {

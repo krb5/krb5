@@ -629,16 +629,7 @@ krb5_error_code ktest_make_sample_alt_method(p)
 {
     p->method = 42;
     p->data = (krb5_octet *) "secret";
-    p->length = strlen(p->data);
-    return 0;
-}
-
-krb5_error_code ktest_make_sample_etype_info_entry(p)
-     krb5_etype_info_entry * p;
-{
-    p->etype = 1;
-    p->salt = (krb5_octet *) "Morton";
-    p->length = strlen(p->salt);
+    p->length = strlen((char *) p->data);
     return 0;
 }
 
@@ -661,10 +652,10 @@ krb5_error_code ktest_make_sample_etype_info(p)
 	info[i]->etype = i;
 	sprintf(buf, "Morton's #%d", i);
 	info[i]->length = strlen(buf);
-	info[i]->salt = malloc(info[i]->length+1);
+	info[i]->salt = malloc((size_t) (info[i]->length+1));
 	if (info[i]->salt == 0)
 	    goto memfail;
-	strcpy(info[i]->salt, buf);
+	strcpy((char *) info[i]->salt, buf);
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
     }
     free(info[1]->salt);
@@ -883,12 +874,14 @@ void ktest_destroy_sequence_of_integer(soi)
   *soi = NULL;
 }
 
+#if 0
 void ktest_destroy_sequence_of_enctype(soi)
      krb5_enctype ** soi;
 {
   free(*soi);
   *soi = NULL;
 }
+#endif
 
 void ktest_destroy_sequence_of_ticket(sot)
      krb5_ticket *** sot;
