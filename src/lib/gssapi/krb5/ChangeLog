@@ -1,5 +1,8 @@
 Wed Jun 12 00:48:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* Makefile.in: Update special rule for gssapi_err_krb5.obj so that
+		it uses the right Win-32 library command.
+
 	* pname_to_uid.c: Add #ifdef _WIN32 in places where we had #ifdef
 	 	_MSDOS
 
