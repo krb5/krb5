@@ -1,5 +1,7 @@
 Wed Jul 27 12:52:04 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
+	* krcp.c (rsource): USE_DIRENT_H.
+
 	* configure.in: test for HAVE_UNISTD_H.
 	* logutil.c: use HAVE_UNISTD_H.
 

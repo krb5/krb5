@@ -43,7 +43,7 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #define _TYPES_
 #endif
 #include <sys/file.h>
-#ifdef CRAY
+#ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
 #endif
 #include <sys/stat.h>
@@ -628,14 +628,10 @@ source(argc, argv)
 
 
 
-#if defined(SYSV) && !defined(sysvimp)
-#include <dirent.h>
-#else
-#ifdef sysvimp
-#include <ufs/fsdir.h>
-#else
+#ifndef USE_DIRENT_H
 #include <sys/dir.h>
-#endif
+#else
+#include <dirent.h>
 #endif
 
 rsource(name, statp)
@@ -644,7 +640,7 @@ rsource(name, statp)
 {
     DIR *d = opendir(name);
     char *last;
-#if defined(SYSV) && !defined(sysvimp)
+#ifdef USE_DIRENT_H
     struct dirent *dp;
 #else
     struct direct *dp;
