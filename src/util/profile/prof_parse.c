@@ -146,13 +146,22 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
 	cp = strchr(cp, '=');
 	if (!cp)
 		return PROF_RELATION_SYNTAX;
+	if (cp == tag)
+	    return PROF_RELATION_SYNTAX;
 	*cp = '\0';
-	p = strchr(tag, ' ');
-	if (p) {
-		*p = '\0';
-		p = skip_over_blanks(p+1);
-		if (p != cp)
-			return PROF_RELATION_SYNTAX;
+	p = tag;
+	/* Look for whitespace on left-hand side.  */
+	while (p < cp && !isspace((int)*p))
+	    p++;
+	if (p < cp) {
+	    /* Found some sort of whitespace.  */
+	    *p++ = 0;
+	    /* If we have more non-whitespace, it's an error.  */
+	    while (p < cp) {
+		if (!isspace((int)*p))
+		    return PROF_RELATION_SYNTAX;
+		p++;
+	    }
 	}
 	cp = skip_over_blanks(cp+1);
 	value = cp;

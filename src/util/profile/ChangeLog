@@ -1,5 +1,10 @@
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* prof_parse.c (parse_std_line): Rewrite handling of whitespace in
+	and after tag, to strip trailing whitespace (per current locale,
+	not just ASCII space characters), and prohibit any internal space
+	characters in tag names.
+
 	* profile.swg: New file.
 	* configure.in: Look for Tcl.
 	* Makefile.in (profile_tcl, profile_tcl.c, profile_tcl.o): New
