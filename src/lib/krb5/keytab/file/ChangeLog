@@ -1,3 +1,8 @@
+Thu May  9 03:05:51 1996  Richard Basch  <basch@lehman.com>
+
+	* ktf_g_ent.c (krb5_ktfile_get_entry): don't skip over keytab
+		entries with kvno=0.
+
 Tue Mar 19 22:28:43 1996  Richard Basch  <basch@lehman.com>
 
 	* ktf_g_ent.c (krb5_ktfile_get_entry): all des enctypes are equivalent
