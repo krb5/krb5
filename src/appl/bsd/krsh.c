@@ -603,7 +603,6 @@ int des_read(fd, buf, len)
     if (cc = krb5_decrypt(desinbuf.data, (krb5_pointer) storage,
 			  net_len, &eblock, 0)) {
 	fprintf(stderr,"Cannot decrypt data from network\n");
-	fprintf(stderr,"eblock->key = %x\n", *((long *)eblock.key));
 	return(0);
     }
     store_ptr = storage;
