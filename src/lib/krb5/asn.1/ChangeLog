@@ -1,5 +1,10 @@
 Wed Jul  6 13:21:35 1994  Mark Eichin  (eichin@cygnus.com)
 
+	* an1buf.c: Harry saves vs. Unix again.  Making sure that anything
+	that can call calloc with a zero argument won't return ENOMEM if
+	calloc retuns NULL in this case.  This was prompted by breakage
+	under linux.
+
 	* asn1_encode.c (asn1_encode_generaltime): don't use strftime on
 	the output of gmtime -- under Solaris, it mutates it! (seems to be
 	doing a timezone offset.) Besides, sprintf is quite sufficient.

@@ -174,7 +174,7 @@ asn1_error_code asn1buf_remove_octetstring(DECLARG(asn1buf *, buf),
 
   if(buf->next + len - 1 > buf->bound) return ASN1_OVERRUN;
   *s = (asn1_octet*)calloc(len,sizeof(asn1_octet));
-  if(*s == NULL) return ENOMEM;
+  if((*s == NULL) && len) return ENOMEM;
   for(i=0; i<len; i++)
     (*s)[i] = (asn1_octet)(buf->next)[i];
   buf->next += len;
@@ -192,7 +192,7 @@ asn1_error_code asn1buf_remove_charstring(DECLARG(asn1buf *, buf),
 
   if(buf->next + len - 1 > buf->bound) return ASN1_OVERRUN;
   *s = (char*)calloc(len,sizeof(char));
-  if(*s == NULL) return ENOMEM;
+  if((*s == NULL) && len) return ENOMEM;
   for(i=0; i<len; i++)
     (*s)[i] = (char)(buf->next)[i];
   buf->next += len;
