@@ -206,7 +206,7 @@ int netf;
 #define AUTH_KRB5 (0x2)
 #define AUTH_RHOSTS (0x4)
 int auth_ok = 0, auth_sent = 0;
-int checksum_required = 0, checksum_ignored = 1;
+int checksum_required = 0, checksum_ignored = 0;
 char *progname;
 
 #define MAX_PROG_NAME 10
@@ -412,26 +412,25 @@ int main(argc, argv)
 	
 	fd = 0;
     }
-
-    if (checksum_required&&checksum_ignored) {
-      syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
-      fatal(fd, "Configuration error: mutually exclusive options specified");
-    }
     
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
 		   sizeof (on)) < 0)
-      syslog(LOG_WARNING,
+	syslog(LOG_WARNING,
 	     "setsockopt (SO_KEEPALIVE): %m");
 #if defined(BSD) && BSD+0 >= 43
     linger.l_onoff = 1;
     linger.l_linger = 60;			/* XXX */
     if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *)&linger,
 		   sizeof (linger)) < 0)
-      syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
+	syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
 #endif
+
+    if (!checksum_required && !checksum_ignored)
+	checksum_ignored = 1;
+
     if (checksum_required&&checksum_ignored) {
-      syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
-      fatal(fd, "Configuration error: mutually exclusive options specified");
+	syslog(LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
+	fatal(fd, "Configuration error: mutually exclusive options specified");
     }
 
     doit(dup(fd), &from);
