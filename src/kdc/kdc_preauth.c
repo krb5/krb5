@@ -1530,6 +1530,8 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
     if (sr) free(sr);
     if (psr) free(psr);
     if (esre) free(esre);
+    if (princ_psr) free(princ_psr);
+    if (princ_req) free(princ_req);
 
     return retval;
 }
