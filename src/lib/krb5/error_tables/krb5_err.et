@@ -329,4 +329,6 @@ error_code KRB5_EAI_NODATA,	"no data available for host/domain name"
 error_code KRB5_EAI_NONAME,	"host/domain name not found"
 error_code KRB5_EAI_SERVICE,	"service name unknown"
 
+error_code KRB5_ERR_NUMERIC_REALM, "Cannot determine realm for numeric host address"
+
 end

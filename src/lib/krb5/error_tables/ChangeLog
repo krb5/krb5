@@ -1,3 +1,7 @@
+2002-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_ERR_NUMERIC_REALM): New error code.
+
 2002-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5KRB_AP_PATH_NOT_ACCEPTED,
