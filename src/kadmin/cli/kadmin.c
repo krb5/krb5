@@ -783,7 +783,6 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    return -1;		/* nothing was parsed */
     }
     if (i != argc - 1) {
-	fprintf(stderr, "%s: parser lost count!\n", caller);
 	return -1;
     }
     retval = kadmin_parse_name(argv[i], &oprinc->principal);
@@ -794,14 +793,30 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
     return 0;
 }
 
-void kadmin_addmodprinc_usage(func)
+void kadmin_addprinc_usage(func)
    char *func;
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randpass] [-pw password]\n\t\t-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randpass] [-pw password]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
-     fprintf(stderr, "\t\tallow_tgs_req, allow_tix, needchange, password_changing_service\n");
+     fprintf(stderr, "%s%s%s",
+	     "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
+	     "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
+	     "\t\trequires_hwauth needchange allow_svr password_changing_service\n");
+}
+
+void kadmin_modprinc_usage(func)
+   char *func;
+{
+     fprintf(stderr, "usage: %s [options] principal\n", func);
+     fprintf(stderr, "\toptions are:\n");
+     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
+     fprintf(stderr, "\tattributes are:\n");
+     fprintf(stderr, "%s%s%s",
+	     "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
+	     "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
+	     "\t\trequires_hwauth needchange allow_svr password_changing_service\n");
 }
 
 void kadmin_addprinc(argc, argv)
@@ -823,7 +838,7 @@ void kadmin_addprinc(argc, argv)
     if (kadmin_parse_princ_args(argc, argv,
 				&princ, &mask, &pass, &randkey,
 				"add_principal")) {
-	 kadmin_addmodprinc_usage("add_principal");
+	 kadmin_addprinc_usage("add_principal");
 	 return;
     }
     retval = krb5_unparse_name(context, princ.principal, &canon);
@@ -903,7 +918,7 @@ void kadmin_modprinc(argc, argv)
     int randkey = 0;
 
     if (argc < 2) {
-	 kadmin_addmodprinc_usage("modify_principal");
+	 kadmin_modprinc_usage("modify_principal");
 	 return;
     }
 
@@ -938,7 +953,7 @@ void kadmin_modprinc(argc, argv)
 				     &pass, &randkey,
 				     "modify_principal");
     if (retval) {
-	kadmin_addmodprinc_usage("modify_principal");
+	kadmin_modprinc_usage("modify_principal");
 	free(canon);
 	return;
     }
