@@ -1,5 +1,9 @@
 2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
 
+	* gssapi32.def: Do no export gss_mech_krb5.
+
+2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
+
 	* gssapi32.def: Export gss_mech_krb5 as DATA.  Mark all exported
 	variables as DATA.
 

@@ -76,7 +76,3 @@ EXPORTS
 	gss_nt_machine_uid_name	DATA
 	gss_nt_string_uid_name	DATA
 	gss_nt_service_name	DATA
-;
-; Krb5 specific variables
-;
-	gss_mech_krb5		DATA
