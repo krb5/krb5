@@ -2,7 +2,7 @@
 #include "rsa-md4.h"
 #include "arcfour-int.h"
 
-static void asctouni(unsigned char *unicode, unsigned char *ascii, int len)
+static void asctouni(unsigned char *unicode, unsigned char *ascii, size_t len)
 {
 	int counter;
 	for (counter=0;counter<len;counter++) {
@@ -18,7 +18,7 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
 	krb5_const krb5_data *salt;
 	krb5_keyblock *key;
 {
-  int len,slen;
+  size_t len,slen;
   unsigned char *copystr;
   krb5_MD4_CTX md4_context;
   
@@ -37,7 +37,7 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
   slen = ((string->length)>128)?128:string->length;
   len=(slen)*2;
 
-  copystr = malloc((size_t) len);
+  copystr = malloc(len);
   if (copystr == NULL)
     return ENOMEM;
 

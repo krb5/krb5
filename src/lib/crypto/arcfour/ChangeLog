@@ -1,3 +1,9 @@
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* string_to_key.c (krb5_arcfour_string_to_key): Use size_t instead
+	of int for local variable.
+	(asctouni): Length argument now size_t instead of int.
+
 2001-11-07  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c (krb5_arcfour_encrypt): Set output length
