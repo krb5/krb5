@@ -35,9 +35,9 @@
 #include "k5-int.h"
 #include "etypes.h"
 
-krb5_error_code krb5_c_init_state
-(krb5_context context, const krb5_keyblock  *key,
- krb5_keyusage keyusage, krb5_data *new_state)
+krb5_error_code KRB5_CALLCONV
+krb5_c_init_state (krb5_context context, const krb5_keyblock *key,
+		   krb5_keyusage keyusage, krb5_data *new_state)
 {
       int i;
 
@@ -53,8 +53,9 @@ krb5_error_code krb5_c_init_state
       (key, keyusage, new_state);
 }
 
-krb5_error_code krb5_c_free_state
-(krb5_context context, const krb5_keyblock *key, krb5_data *state)
+krb5_error_code KRB5_CALLCONV
+krb5_c_free_state (krb5_context context, const krb5_keyblock *key,
+		   krb5_data *state)
 {
       int i;
 

@@ -1,3 +1,8 @@
+2001-11-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* state.c (krb5_c_init_state, krb5_c_free_state): Use
+	KRB5_CALLCONV.
+
 2001-11-06  Sam Hartman  <hartmans@tir-na-nogth.mit.edu>
 
 	* state.c: New file
