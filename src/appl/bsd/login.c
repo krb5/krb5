@@ -62,9 +62,6 @@ char copyright[] =
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
 
 #include <utmp.h>
 #include <signal.h>
@@ -90,6 +87,11 @@ char copyright[] =
 #include <setjmp.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifdef HAS_SHADOW
+#include <shadow.h>
+#endif
+
 #ifdef KRB4
 #include <krb.h>
 #include <netdb.h>
@@ -99,6 +101,7 @@ char copyright[] =
 #include <arpa/resolv.h>
 #endif /* BIND_HACK */
 #endif /* KRB4 */
+
 #include "loginpaths.h"
 
 #ifdef POSIX_TERMIOS
@@ -117,22 +120,6 @@ char copyright[] =
 #define PRIO_OFFSET 20
 #else
 #define PRIO_OFFSET 0
-#endif
-
-/* XXX -- do we ever need to test for these? */
-#define uid_type uid_t
-#define gid_type gid_t
-
-#ifndef HAVE_INITGROUPS
-/* sco has getgroups and setgroups but no initgroups */
-int initgroups(char* name, gid_t basegid) {
-  gid_t others[NGROUPS_MAX+1];
-  int ngrps;
-
-  others[0] = basegid;
-  ngrps = getgroups(NGROUPS_MAX, others+1);
-  return setgroups(ngrps+1, others);
-}
 #endif
 
 #define	TTYGRPNAME	"tty"		/* name of group to own ttys */
@@ -174,6 +161,10 @@ int initgroups(char* name, gid_t basegid) {
 int	timeout = 300;
 
 struct passwd *pwd;
+#ifdef HAVE_SHADOW
+struct spwd *spwd
+#endif
+
 char term[64], *hostname, *username;
 
 #ifndef POSIX_TERMIOS
@@ -226,6 +217,17 @@ typedef RETSIGTYPE sigtype;
 				    "login: only one of -r, -k, -K, and -h allowed.\n"); \
 				exit(1);\
 			}
+
+#ifndef HAVE_INITGROUPS
+int initgroups(char* name, gid_t basegid) {
+  gid_t others[NGROUPS_MAX+1];
+  int ngrps;
+
+  others[0] = basegid;
+  ngrps = getgroups(NGROUPS_MAX, others+1);
+  return setgroups(ngrps+1, others);
+}
+#endif
 
 main(argc, argv)
 	int argc;
@@ -513,7 +515,6 @@ main(argc, argv)
 		ioctlval = 0;
 		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
 #endif
-
 		if (username == NULL) {
 			fflag = Fflag = 0;
 			getloginname();
@@ -523,6 +524,10 @@ main(argc, argv)
 			salt = pwd->pw_passwd;
 		else
 			salt = "xx";
+#ifdef HAVE_SHADOW
+		if (spwd = getspnam(username))
+		    salt = sp_pwdp;
+#endif
 
 		/* if user not super-user, check for disabled logins */
 		if (pwd == NULL || pwd->pw_uid)
@@ -553,7 +558,10 @@ main(argc, argv)
 		 * If no remote login authentication and a password exists
 		 * for this user, prompt for one and verify it.
 		 */
-		if (!passwd_req || pwd && !*pwd->pw_passwd)
+		if (!passwd_req || pwd && !*(pwd->pw_passwd))
+#ifdef HAVE_SHADOW
+		    if (spwd && !*(spwd->sp_pwdp))
+#endif
 			break;
 
 #ifdef KRB4
@@ -576,9 +584,16 @@ main(argc, argv)
 		/* Modifications for Kerberos authentication -- asp */
 		(void) strncpy(pp, pp2, sizeof(pp));
 		pp[8]='\0';
-		namep = crypt(pp, pwd->pw_passwd);
+		namep = crypt(pp, salt);
 		memset (pp, 0, sizeof(pp));	/* To the best of my recollection, Senator... */
-		lpass_ok = !strcmp (namep, pwd->pw_passwd);
+
+#ifdef HAVE_SHADOW
+		if (spwd)
+		    lpass_ok = !strcmp(namep, spwd->sp_pwdp);
+		else
+#else
+		    lpass_ok = !strcmp (namep, pwd->pw_passwd);
+#endif
 		
 		if (pwd->pw_uid != 0) { /* Don't get tickets for root */
 
@@ -667,6 +682,9 @@ bad_login:
 		(void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 #endif
 		if (pwd && !strcmp(p, pwd->pw_passwd))
+#ifdef HAVE_SHADOW
+		    if (spwd && !strcmp(p, spwd->sp_pwdp))
+#endif
 			break;
 #endif /* KRB4 */
 
@@ -789,7 +807,7 @@ bad_login:
 	/* Fork so that we can call kdestroy */
 	dofork();
 #endif /* KRB4 */
-	(void)setgid((gid_type) pwd->pw_gid);
+	(void)setgid((gid_t) pwd->pw_gid);
 	(void) initgroups(username, pwd->pw_gid);
 
 #ifdef OQUOTA
@@ -797,13 +815,13 @@ bad_login:
 #endif
 #ifdef __SCO__
 	/* this is necessary when C2 mode is enabled, but not otherwise */
-	setluid((uid_type) pwd->pw_uid);
+	setluid((uid_t) pwd->pw_uid);
 #endif
 	/* This call MUST succeed */
 #ifdef _IBMR2
 	setuidx(ID_LOGIN, pwd->pw_uid);
 #endif
-	if(setuid((uid_type) pwd->pw_uid) < 0) {
+	if(setuid((uid_t) pwd->pw_uid) < 0) {
 	     perror("setuid");
 	     sleepexit(1);
 	}
@@ -1295,15 +1313,8 @@ doremoteterm(tp)
 		for (cpp = speeds; cpp < &speeds[NSPEEDS]; cpp++)
 			if (strcmp(*cpp, speed) == 0) {
 #ifdef POSIX_TERMIOS
-#ifdef CBAUD
-/* some otherwise-posix systems seem not to have cfset... for now, leave
-   the old code for those who can use it */
-				tp->c_cflag =
-					(tp->c_cflag & ~CBAUD) | (cpp-speeds);
-#else
 				cfsetispeed(tp, b_speeds[cpp-speeds]);
 				cfsetospeed(tp, b_speeds[cpp-speeds]);
-#endif
 #else
 				tp->sg_ispeed = tp->sg_ospeed = cpp-speeds;
 #endif
