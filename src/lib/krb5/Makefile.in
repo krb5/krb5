@@ -32,22 +32,15 @@ all-unix::
 all-windows::
 
 libkrb5.$(STEXT): $(LIBDONE)
-	if test -f $@ ; then \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) $@ $$i/DONE $$i ; \
-		done ; \
-	else \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
-		done ; \
-	fi
+	-rm -f $@ libkrb5.stamp
+	if test -f $@ ; then frc=--force ; else frc= ; fi ; \
+	for i in $(LIBDONE) ; \
+	do \
+		$(LIBUPDATE) $$frc $@ $$i `echo $$i | sed s,/DONE,,` \
+			|| exit 1 ; \
+	done
 	$(RANLIB) libkrb5.$(STEXT)
 	touch libkrb5.stamp
-
-
-
 
 clean-unix::
 	$(RM) libkrb5.$(LIBEXT) libkrb5.stamp
