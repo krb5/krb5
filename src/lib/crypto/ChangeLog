@@ -1,3 +1,8 @@
+Mon Oct  2 10:34:12 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in (V5_MAKE_SHARED_LIB): Change for version 0.1 of
+		shared library. Remove install lines which are in aclocal.m4
+
 Mon Sep 25 16:26:53 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
