@@ -1,3 +1,7 @@
+1999-09-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Treat Rhapsody like Mac OS 10.
+
 1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add install target for windows.  Remove references
