@@ -345,17 +345,17 @@ krb5_rcache id;
      case KRB5_RC_IO_EOF: FREE3; goto end_loop;
      case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
     }
-   if (alive(rep,t->lifespan) != CMP_EXPIRED)
+   if (alive(rep,t->lifespan) != CMP_EXPIRED) {
      if (store(id,rep) == CMP_MALLOC) {/* can't be a replay */
        CLOSE; 
        return KRB5_RC_MALLOC; 
-     } else {
-	 /* store() copies the server & client fields to make sure they don't get
-	    stomped on by other callers, so we need to free them */
-	 FREE(rep->server);
-	 FREE(rep->client);
-     }
-  }
+     } 
+     /* store() copies the server & client fields to make sure they don't get
+	stomped on by other callers, so we need to free them */
+     FREE(rep->server);
+     FREE(rep->client);
+   } else FREE3;			/* don't need it anymore, punt! */
+ }
  end_loop: krb5_rc_io_unmark(&t->d);
 /* An automatic expunge here could remove the need for mark/unmark but
 would be inefficient. */
