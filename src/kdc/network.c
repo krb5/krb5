@@ -126,7 +126,8 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     int est_if_count = 8, est_ifreq_size;
     char *buf = 0;
     size_t current_buf_size = 0;
-    
+    int fail = 0;
+
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
 	return SOCKET_ERRNO;
@@ -194,12 +195,14 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	    goto skip;
 
 	if ((*pass1fn) (data, &ifr->ifr_addr)) {
-	    abort ();
+	    fail = 1;
+	    goto punt;
 	}
     }
 
     if (betweenfn && (*betweenfn)(data)) {
-	abort ();
+	fail = 1;
+	goto punt;
     }
 
     if (pass2fn)
@@ -211,13 +214,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 		continue;
 
 	    if ((*pass2fn) (data, &ifr->ifr_addr)) {
-		abort ();
+		fail = 1;
+		goto punt;
 	    }
 	}
+ punt:
     closesocket(s);
     free (buf);
 
-    return 0;
+    return fail;
 }
 
 struct socksetup {
