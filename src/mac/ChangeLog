@@ -1,3 +1,7 @@
+Fri Oct 21 18:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+	* ReadMe: updated instructions to say we require CW Pro4
+	* version.r: upped to 1.1a4
+
 Fri Oct 21 17:30:00 1998  Miro Jurisic <meeroh@mit.edu>
 	* Makefile.initial: added auto-detection of CodeWarrior version
 	* Makefile.tmpl: added CodeWarrior Pro4 files and fixed -map on krb5 68k lib

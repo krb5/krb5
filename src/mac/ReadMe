@@ -11,7 +11,8 @@ To build the Macintosh version of Kerberos 5 and GSS:
 
 --- Installing tools ---
 
-	1) Install CodeWarrior Pro 2, including MPW.
+	1) Install CodeWarrior Pro 4, including MPW.
+		This build of Kerberos v5 and GSS requires CodeWarrior Pro4 MPW tools!
 
 	2) Download MacPerl and MacPerl MPW tool from
 	
@@ -32,8 +33,8 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	   (e.g. "GSS-Kerberos5-1.0.5").
 
 	6) Build target "all" in MPW.
-		This will create a new Makefile, and launch your CodeWarrior IDE 2.1 to build
-		some CodeWarrior projects. You may be asked to locate CodeWarrior IDE 2.1.
+		This will create a new Makefile, and launch your CodeWarrior IDE to build
+		some CodeWarrior projects. You may be asked to locate CodeWarrior IDE.
 	    
 --- Building libraries ---
 
