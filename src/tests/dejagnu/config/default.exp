@@ -19,7 +19,7 @@ set des3_krbtgt 0
 set supported_enctypes "des-cbc-crc:normal"
 set kdc_supported_enctypes "des-cbc-crc:normal"
 
-set MULTIPASS {
+set passes {
     {
 	des
 	des3_krbtgt=0
@@ -48,6 +48,16 @@ set MULTIPASS {
 	{kdc_supported_enctypes="des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"}
 	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
     }
+}
+
+if [info exists PASS] {
+    foreach pass $passes {
+	if { [lsearch -exact $PASS [lindex $pass 0]] >= 0 } {
+	    lappend MULTIPASS $pass
+	}
+    }
+} else {
+    set MULTIPASS $passes
 }
 
 set last_passname_conf ""
@@ -1276,14 +1286,7 @@ proc kinit { name pass standalone } {
 	}
     }
     send "$pass\r"
-    # This last expect seems useless, but without it the test hangs on
-    # AIX.
-    expect {
-        "\r" { }
-    }
-
     expect eof
-
     if ![check_exit_status kinit] {
 	return 0
     }
@@ -1506,4 +1509,6 @@ proc setup_wrapper { file command } {
     return 1
 }
 	
-
+proc krb_exit { } {
+    stop_kerberos_daemons
+}

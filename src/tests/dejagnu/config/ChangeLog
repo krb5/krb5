@@ -1,3 +1,13 @@
+2000-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add code to handle setting of PASS to constrain
+	multipass testing to particular passes.  dejagnu-1.3 doesn't have
+	support for PASS, so we kludge it here, though some later versions
+	handle it by themselves.
+	(krb_exit): Add new proc to clean up on exit.
+	(kinit): Remove "expect \r" since "expect eof" will drain the pty
+	buffer properly anyway.
+
 2000-07-02  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Add rudimentary support for multiple passes.  For
