@@ -1,0 +1,36 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
+LDFLAGS = -g
+
+ISODELIB=@ISODELIB@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+all:: krb5_encode_test krb5_decode_test
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
+
+ENCOBJS = krb5_encode_test.o ktest.o ktest_equal.o utility.o 
+krb5_encode_test: $(ENCOBJS)
+	$(CC) $(CFLAGS) -o krb5_encode_test $(ENCOBJS) $(LIBS) $(KLIB)
+
+DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
+krb5_decode_test: $(DECOBJS)
+	$(CC) $(CFLAGS) -o krb5_decode_test $(DECOBJS) $(LIBS) $(KLIB)
+
+install::
+
+clean::
+	rm -f *~ *.o krb5_encode_test krb5_decode_test
+
+
+################ Dependencies ################
+krb5_decode_test.o: ktest.h utility.h ktest_equal.h debug.h
+krb5_encode_test.o: utility.h ktest.h debug.h
+ktest.o: ktest.h utility.h
+ktest_equal.o: ktest_equal.h
+#utility.o: utility.h
+#utility.h: krbasn1.h asn1buf.h
+##############################################
+

@@ -7,7 +7,7 @@
 #include "debug.h"
 #include <string.h>
 
-/* See krb5_encode_test_body.c for explanation. */
+/* See krb5_encode_test.c for explanation. */
 /*#define ISODE_SUCKS*/
 
 void main()
