@@ -33,6 +33,8 @@
 
 #include "des.h"
 
+static krb5_context global_context = 0;
+
 /*** Routines ****************************************************** */
 int
 des_read_password/*_v4_compat_crock*/(k,prompt,verify)
@@ -41,9 +43,16 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     int	verify;
 {
     int ok;
+    krb5_error_code retval;
     char key_string[BUFSIZ];
     char prompt2[BUFSIZ];
     int string_size = sizeof(key_string);
+
+    if (!global_context) {
+	    retval = krb5_init_context(&global_context);
+	    if (retval)
+		    return retval;
+    }
 
     if (verify) {
 	strcpy(prompt2, "Verifying, please re-enter ");
