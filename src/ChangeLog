@@ -1,3 +1,14 @@
+Mon Jan 22 07:55:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add in WITH_ANAME_DB and WITH_KDB_DB so that top
+		level configure --help lists options.
+
+	* aclocal.m4 (CHECK_DB): Fix m4 quoting to allow for the autoconf
+		rules to insert the required CPP determination rules
+		automatically. 
+		(WITH_ANAME_DB): Add missing comma. Fix up spacing so
+				configure --help looks pretty.
+
 Mon Jan 15 02:35:02 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* aclocal.m4 (WITH_DBM_LNAME): add --with-dbm-lname for callers of

@@ -998,7 +998,7 @@ define(USE_ANAME,[WITH_ANAME_DB])dnl
 dnl
 define(WITH_ANAME_DB,[
 AC_ARG_WITH([aname-db],
-[  --with-aname-db=DBM	name conversion database type]
+[  --with-aname-db=DBM     name conversion database type],
 dbval="$withval",
 dbval=
 )dnl
@@ -1015,7 +1015,7 @@ dnl
 dnl
 define(WITH_KDB_DB,[
 AC_ARG_WITH([kdb-db],
-[  --with-kdb-db=DBM	kerberos database type],
+[  --with-kdb-db=DBM       kerberos database type],
 dbval="$withval",
 dbval=
 )dnl
@@ -1031,22 +1031,22 @@ dnl
 dnl
 define(CHECK_DB,[
 if test "$dbval" = "" -o "$dbval" = ndbm; then
-	AC_HEADER_CHECK(ndbm.h,dbval=ndbm
+	AC_HEADER_CHECK(ndbm.h,[dbval=ndbm
 	  AC_DEFINE(NDBM)
 	  AC_CHECK_LIB(ndbm,main,,AC_CHECK_LIB(gdbm,main))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
 		AC_DEFINE(MISSING_ERROR_PROTO))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
-		AC_DEFINE(MISSING_CLEARERR_PROTO)))
+		AC_DEFINE(MISSING_CLEARERR_PROTO))])
 fi
 if test "$dbval" = "" -o "$dbval" = dbm; then
-	AC_HEADER_CHECK(dbm.h,dbval=dbm
+	AC_HEADER_CHECK(dbm.h,[dbval=dbm
 	  AC_DEFINE(ODBM)
 	  AC_CHECK_LIB(dbm,main)
 	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
 		AC_DEFINE(MISSING_ERROR_PROTO))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
-		AC_DEFINE(MISSING_CLEARERR_PROTO)))
+		AC_DEFINE(MISSING_CLEARERR_PROTO))])
 fi
 if test "$dbval" = "" -o "$dbval" = db; then
 	  dbval=db

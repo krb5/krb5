@@ -160,6 +160,13 @@ else
 kadminv4=kadmin.v4
 krb524=krb524
 fi
+dnl
+dnl These are here so that the top level configure --help gives useful
+dnl	information. 
+dnl
+WITH_ANAME_DB
+WITH_KDB_DB
+dnl
 CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 kadmin.old $krb524 slave clients appl tests config-files)
 DO_SUBDIRS
 dnl dnl AC_OUTPUT(Makefile,[EXTRA_RULES])
