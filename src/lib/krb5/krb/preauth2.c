@@ -61,7 +61,6 @@ krb5_error_code pa_salt(krb5_context context,
 			krb5_prompter_fct prompter, void *prompter_data,
 			krb5_gic_get_as_key_fct gak_fct, void *gak_data)
 {
-    krb5_error_code ret;
     krb5_data tmp;
 
     /* screw the abstraction.  If there was a *reasonable* copy_data,
@@ -196,9 +195,9 @@ char *sam_challenge_banner(sam_type)
 /* this macro expands to the int,ptr necessary for "%.*s" in an sprintf */
 
 #define SAMDATA(kdata, str, maxsize) \
-	(kdata.length)? \
-	((((kdata.length)<=(maxsize))?(kdata.length):(strlen(str)))): \
-	strlen(str), \
+	(int)((kdata.length)? \
+	      ((((kdata.length)<=(maxsize))?(kdata.length):strlen(str))): \
+	      strlen(str)), \
 	(kdata.length)? \
 	((((kdata.length)<=(maxsize))?(kdata.data):(str))):(str)
 
@@ -229,7 +228,6 @@ krb5_error_code pa_sam(krb5_context context,
     krb5_sam_response		sam_response;
     /* these two get encrypted and stuffed in to sam_response */
     krb5_enc_sam_response_enc	enc_sam_response_enc;
-    krb5_keyblock *		sam_use_key = 0;
     krb5_data *			scratch;
     krb5_pa_data *		pa;
 
@@ -273,6 +271,7 @@ krb5_error_code pa_sam(krb5_context context,
     }
 
     enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
+    /* XXX What if more than one flag is set?  */
     if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
 	enc_sam_response_enc.sam_sad = response_data;
     } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
@@ -327,6 +326,10 @@ krb5_error_code pa_sam(krb5_context context,
 	}
 
 	enc_sam_response_enc.sam_sad.length = 0;
+    } else {
+	/* Eventually, combine SAD with long-term key to get
+	   encryption key.  */
+	return KRB5_PREAUTH_BAD_TYPE;
     }
 
     /* copy things from the challenge */

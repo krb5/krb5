@@ -1,4 +1,18 @@
-2000-02-06  Ken Raeburn  <raeburn@raeburn.org>
+2000-02-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* gic_pwd.c (krb5_get_as_key_password): If the as_key enctype is
+	already set to the correct type, do continue and ask for the
+	password anyways.  (Patch from Chas Williams, PR krb5-libs/730.)
+
+	* preauth2.c (pa_sam): If no sam_flags were set, return
+	KRB5_PREAUTH_BAD_TYPE, because we don't currently handle that
+	case.
+
+2000-02-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth2.c (pa_sam): Remove unused variable use_sam_key.
+	(SAMDATA): Cast first result to int, which is what sprintf needs.
+	(pa_salt): Delete unused variable ret.
 
 	Patches from Frank Cusack:
 	* kfree.c (krb5_free_predicted_sam_response_contents): Fix typo.
@@ -8,7 +22,7 @@
 	* preauth.c (obtain_sam_padata): Update for field name change.
 	* preauth2.c (pa_sam): Likewise.
 
-2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
+2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (get_profile_etype_list): Discard DESONLY changes
 	from 1999-09-01, and revert call sites.

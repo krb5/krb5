@@ -22,16 +22,19 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 
     password = (krb5_data *) gak_data;
 
-    /* if there's already a key of the correct etype, we're done.
-       if the etype is wrong, free the existing key, and make
-       a new one. */
+    /* If there's already a key of the correct etype, we're done.
+       If the etype is wrong, free the existing key, and make
+       a new one.
+
+       XXX This was the old behavior, and was wrong in hw preauth
+       cases.  Is this new behavior -- always asking -- correct in all
+       cases?  */
 
     if (as_key->length) {
-	if (as_key->enctype == etype)
-	    return(0);
-
-	krb5_free_keyblock_contents(context, as_key);
-	as_key->length = 0;
+	if (as_key->enctype != etype) {
+	    krb5_free_keyblock_contents (context, as_key);
+	    as_key->length = 0;
+	}
     }
 
     if (password->data[0] == '\0') {
