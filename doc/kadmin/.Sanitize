@@ -23,7 +23,8 @@ Do-first:
 
 Things-to-keep:
 
-cli.func-spec
+kpasswd.protocol
+kadmin.protocol
 
 Things-to-lose:
 
