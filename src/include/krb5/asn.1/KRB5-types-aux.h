@@ -4,6 +4,107 @@
 # define P(s) ()
 #endif
 
+/* in pepsy output, these are macros.  However, we need to pass them around
+   as function pointers, and pepsy does generate in-lined macros for the
+   functions, so we just disable the macros */
+
+#undef encode_KRB5_Realm
+#undef encode_KRB5_PrincipalName
+#undef encode_KRB5_HostAddress
+#undef encode_KRB5_HostAddresses
+#undef encode_KRB5_AuthorizationData
+#undef encode_KRB5_KDCOptions
+#undef encode_KRB5_LastReq
+#undef encode_KRB5_KerberosTime
+#undef encode_KRB5_Ticket
+#undef encode_KRB5_TransitedEncoding
+#undef encode_KRB5_EncTicketPart
+#undef encode_KRB5_Authenticator
+#undef encode_KRB5_TicketFlags
+#undef encode_KRB5_AS__REQ
+#undef encode_KRB5_TGS__REQ
+#undef encode_KRB5_PA__DATA
+#undef encode_KRB5_KDC__REQ__BODY
+#undef encode_KRB5_AS__REP
+#undef encode_KRB5_TGS__REP
+#undef encode_KRB5_EncASRepPart
+#undef encode_KRB5_EncTGSRepPart
+#undef encode_KRB5_AP__REQ
+#undef encode_KRB5_APOptions
+#undef encode_KRB5_AP__REP
+#undef encode_KRB5_EncAPRepPart
+#undef encode_KRB5_KRB__SAFE
+#undef encode_KRB5_KRB__SAFE__BODY
+#undef encode_KRB5_KRB__PRIV
+#undef encode_KRB5_EncKrbPrivPart
+#undef encode_KRB5_KRB__ERROR
+#undef encode_KRB5_EncryptedData
+#undef encode_KRB5_EncryptionKey
+#undef encode_KRB5_Checksum
+#undef encode_KRB5_METHOD__DATA
+#undef decode_KRB5_Realm
+#undef decode_KRB5_PrincipalName
+#undef decode_KRB5_HostAddress
+#undef decode_KRB5_HostAddresses
+#undef decode_KRB5_AuthorizationData
+#undef decode_KRB5_KDCOptions
+#undef decode_KRB5_LastReq
+#undef decode_KRB5_KerberosTime
+#undef decode_KRB5_Ticket
+#undef decode_KRB5_TransitedEncoding
+#undef decode_KRB5_EncTicketPart
+#undef decode_KRB5_Authenticator
+#undef decode_KRB5_TicketFlags
+#undef decode_KRB5_AS__REQ
+#undef decode_KRB5_TGS__REQ
+#undef decode_KRB5_PA__DATA
+#undef decode_KRB5_KDC__REQ__BODY
+#undef decode_KRB5_AS__REP
+#undef decode_KRB5_TGS__REP
+#undef decode_KRB5_EncASRepPart
+#undef decode_KRB5_EncTGSRepPart
+#undef decode_KRB5_AP__REQ
+#undef decode_KRB5_APOptions
+#undef decode_KRB5_AP__REP
+#undef decode_KRB5_EncAPRepPart
+#undef decode_KRB5_KRB__SAFE
+#undef decode_KRB5_KRB__SAFE__BODY
+#undef decode_KRB5_KRB__PRIV
+#undef decode_KRB5_EncKrbPrivPart
+#undef decode_KRB5_KRB__ERROR
+#undef decode_KRB5_EncryptedData
+#undef decode_KRB5_EncryptionKey
+#undef decode_KRB5_Checksum
+#undef decode_KRB5_METHOD__DATA
+#undef free_KRB5_PrincipalName
+#undef free_KRB5_HostAddress
+#undef free_KRB5_HostAddresses
+#undef free_KRB5_AuthorizationData
+#undef free_KRB5_LastReq
+#undef free_KRB5_Ticket
+#undef free_KRB5_TransitedEncoding
+#undef free_KRB5_EncTicketPart
+#undef free_KRB5_Authenticator
+#undef free_KRB5_AS__REQ
+#undef free_KRB5_TGS__REQ
+#undef free_KRB5_PA__DATA
+#undef free_KRB5_KDC__REQ__BODY
+#undef free_KRB5_AS__REP
+#undef free_KRB5_TGS__REP
+#undef free_KRB5_EncASRepPart
+#undef free_KRB5_EncTGSRepPart
+#undef free_KRB5_AP__REQ
+#undef free_KRB5_AP__REP
+#undef free_KRB5_EncAPRepPart
+#undef free_KRB5_KRB__SAFE
+#undef free_KRB5_KRB__SAFE__BODY
+#undef free_KRB5_KRB__PRIV
+#undef free_KRB5_EncKrbPrivPart
+#undef free_KRB5_KRB__ERROR
+#undef free_KRB5_EncryptedData
+#undef free_KRB5_EncryptionKey
+#undef free_KRB5_Checksum
+#undef free_KRB5_METHOD__DATA
 
 /* KRB5-types.c */
 int encode_KRB5_Realm P((PE *, int , integer , char *, struct type_KRB5_Realm *));
@@ -74,6 +175,7 @@ int decode_KRB5_EncryptedData P((PE , int , integer *, char **, struct type_KRB5
 int decode_KRB5_EncryptionKey P((PE , int , integer *, char **, struct type_KRB5_EncryptionKey **));
 int decode_KRB5_Checksum P((PE , int , integer *, char **, struct type_KRB5_Checksum **));
 int decode_KRB5_METHOD__DATA P((PE , int , integer *, char **, struct type_KRB5_METHOD__DATA **));
+
 void free_KRB5_PrincipalName P((struct type_KRB5_PrincipalName *));
 void free_KRB5_HostAddress P((struct type_KRB5_HostAddress *));
 void free_KRB5_HostAddresses P((struct type_KRB5_HostAddresses *));
