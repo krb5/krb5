@@ -336,7 +336,8 @@ free(scratch.data);}
     /*  now decode the decrypted stuff */
     if (!(retval = decode_krb5_authenticator(&scratch, &local_auth))) {
 	*authpp = local_auth;
-	local_auth->subkey->etype = request->authenticator.etype;
+	if (local_auth->subkey)
+		local_auth->subkey->etype = request->authenticator.etype;
     }
     clean_scratch();
     return retval;

@@ -1,3 +1,8 @@
+Wed Dec  7 17:52:08 1994    <tytso@localhost>
+
+	* rd_req_dec.c (decrypt_authenticator): If the subkey doesn't
+		exist, don't try to set the subkey's etype.
+
 Wed Nov 30 17:10:39 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* bld_princ.c (krb5_build_principal_va): Set the principal's type
