@@ -1,3 +1,8 @@
+Wed Jan 21 15:10:37 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kinit.c (main): returns int, not void. ANSI X3.159-1989
+	2.1.2.2.1 says so, and gcc now warns about it. (eichin@cygnus.com)
+
 Thu May 29 19:39:08 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kinit.c (main): Fix bug where kinit would core dump if given a

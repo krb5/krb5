@@ -32,7 +32,7 @@
 extern int optind;
 extern char *optarg;
 
-void
+int
 main(argc, argv)
     int argc;
     char **argv;

@@ -62,7 +62,7 @@ static krb5_error_code krb5_tgt_gen
 krb5_preauthtype * preauth = NULL;
 krb5_preauthtype preauth_list[2] = { 0, -1 };
 
-void
+int
 main(argc, argv)
     int argc;
     char **argv;
