@@ -176,7 +176,7 @@ void get_tickets()
 {
 	char   my_host_name[MAXHOSTNAMELEN];
 	char   buf[BUFSIZ];
-	char   *cp, *strcpy(), *krb_get_phost();
+	char   *cp;
 	struct hostent *hp;
 	krb5_address **my_addresses;
 	krb5_error_code retval;
@@ -408,18 +408,33 @@ open_database(data_fn, size)
 	struct stat 	stbuf, stbuf_ok;
 	char		*data_ok_fn;
 	static char ok[] = ".dump_ok";
-	
+
 	if ((fd = open(data_fn, O_RDONLY)) < 0) {
-		com_err(progname, 0, "While trying to open %s",
+		com_err(progname, errno, "while trying to open %s",
 			data_fn);
 		exit(1);
 	}
-	if (flock(fd, LOCK_SH | LOCK_NB)) {
-		com_err(progname, errno, "while trying to flock %s",
-			data_fn);
+	
+#ifdef POSIX_FILE_LOCKS
+	if (lockf(fd, LOCK_SH | LOCK_NB, 0) < 0) {
+		if (errno == EWOULDBLOCK || errno == EAGAIN)
+			com_err(progname, 0, "database locked");
+		else
+			com_err(progname, errno, "while trying to flock %s",
+				data_fn);
 		exit(1);
 	}
-	if (stat(data_fn, &stbuf)) {
+#else
+	if (flock(fd, LOCK_SH | LOCK_NB) < 0) {
+		if (errno == EWOULDBLOCK || errno == EAGAIN)
+			com_err(progname, 0, "database locked");
+		else
+			com_err(progname, errno, "while trying to flock %s",
+				data_fn);
+		exit(1);
+	}
+#endif
+	if (fstat(fd, &stbuf)) {
 		com_err(progname, errno, "while trying to stat %s",
 			data_fn);
 		exit(1);
