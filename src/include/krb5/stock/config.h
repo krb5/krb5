@@ -46,6 +46,10 @@ typedef int krb5_sigtype;
 #define NO_STDLIB_H
 #endif
 
+#ifdef UseNarrowPrototypes
+#define NARROW_PROTOTYPES
+#endif
+
 #ifdef Bitsize32
 #ifdef Bitsize64
  error: only one of BitsizeNN, please.
