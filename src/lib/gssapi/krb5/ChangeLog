@@ -1,3 +1,40 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+	    Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* k5sealv3.c: New file, implements Wrap and MIC tokens for CFX
+	extensions.
+	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Added acceptor
+	subkey, 64-bit sequence numbers, checksum type, and hooks for
+	sending a bogus initial token for CFX testing.  Changed some flags
+	into bitfields.
+	(gss_krb5int_make_seal_token_v3): Declare.
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Build it.
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Add CFX
+	support.  For G_WRONG_TOKID, send back an error token with
+	AP_ERR_MSG_TYPE code and return a CONTINUE_NEEDED indication.
+	Initialize new fields in context.
+	* delete_sec_context.c (krb5_gss_delete_sec_context): Free
+	acceptor subkey field.
+	* init_sec_context.c (get_credentials): Drop enctypes argument;
+	callers changed.
+	(get_requested_enctypes): Deleted.
+	(setup_enc): Combine some common sections.  Do CFX initialization
+	for newer enctypes.
+	(new_connection) [CFX_EXERCISE]: If doing CFX, send a bogus
+	token.  Delete the enctype list manipulation.
+	(mutual_auth): If CFX, save acceptor's subkey.
+	* k5seal.c (make_seal_token_v1): Sequence number is now 64 bits.
+	(kg_seal): Call out to _v3 code for CFX.
+	* k5unseal.c (kg_unseal): For CFX, adjust token id numbers and
+	call out to _v3 code.
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Implement CFX
+	support.
+
+	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Deleted fields
+	ctypes and nctypes.
+	* delete_sec_context.c, init_sec_context.c, ser_sctx.c: Removed
+	references.
+
 2003-12-11  Alexandra Ellwood <lxs@mit.edu>
 
 	* acquire_cred.c, gssapi_krb5.c, gssapiP_krb5.h, set_ccache.c:

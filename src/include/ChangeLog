@@ -1,3 +1,18 @@
+2003-12-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (SIZE_MAX): Provide default definition if stdint.h
+	doesn't define it.
+
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+  * win-mac.h: source code written to the C99 standard assumes there
+    are standard definitions for the MAX sizes of C types including
+    size_t.  The MAX preprocessor variables are declared in limits.h
+    but limits.h is not included by any of the other header files.
+    We will therefore include it via win-mac.h.  We must also add a
+    declaration of SIZE_MAX (for size_t) because Microsoft does not
+    provide one.  
+
 2003-12-15  Jeffrey Altman <jaltman@mit.edu>
 
   * k5-platform.h: apply casts (unsigned char) to the assignments from
@@ -47,6 +62,11 @@
 2003-07-22  Alexandra Ellwood  <lxs@mit.edu>
 
         * fake-addrinfo.h: Don't use broken getaddrinfo on Mac OS X
+
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (krb5int_zap_data, zap): New macros; call memset with
+	volatile cast for now.
 
 2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
 

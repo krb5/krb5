@@ -69,6 +69,9 @@
 #include "gssapi_krb5.h"
 #include "gssapi_err_krb5.h"
 
+/* for debugging */
+#undef CFX_EXERCISE
+
 /** constants **/
 
 #define CKSUMTYPE_KG_CB		0x8003
@@ -116,9 +119,16 @@ enum seal_alg {
   SEAL_ALG_DES3KD          = 0x0002
 };
 
+/* for 3DES */
 #define KG_USAGE_SEAL 22
 #define KG_USAGE_SIGN 23
 #define KG_USAGE_SEQ  24
+
+/* for draft-ietf-krb-wg-gssapi-cfx-01 */
+#define KG_USAGE_ACCEPTOR_SEAL	22
+#define KG_USAGE_ACCEPTOR_SIGN	23
+#define KG_USAGE_INITIATOR_SEAL	24
+#define KG_USAGE_INITIATOR_SIGN	25
 
 enum qop {
   GSS_KRB5_INTEG_C_QOP_MD5       = 0x0001, /* *partial* MD5 = "MD2.5" */
@@ -152,15 +162,21 @@ typedef struct _krb5_gss_cred_id_rec {
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t; 
 
 typedef struct _krb5_gss_ctx_id_rec {
-   int initiate;	/* nonzero if initiating, zero if accepting */
+   unsigned int initiate : 1;	/* nonzero if initiating, zero if accepting */
+   unsigned int established : 1;
+   unsigned int big_endian : 1;
+   unsigned int have_acceptor_subkey : 1;
+   unsigned int seed_init : 1;	/* XXX tested but never actually set */
+#ifdef CFX_EXERCISE
+   unsigned int testing_unknown_tokid : 1; /* for testing only */
+#endif
    OM_uint32 gss_flags;
-   int seed_init;
    unsigned char seed[16];
    krb5_principal here;
    krb5_principal there;
    krb5_keyblock *subkey;
    int signalg;
-   int cksum_size;
+   size_t cksum_size;
    int sealalg;
    krb5_keyblock *enc;
    krb5_keyblock *seq;
@@ -169,15 +185,22 @@ typedef struct _krb5_gss_ctx_id_rec {
    /* XXX these used to be signed.  the old spec is inspecific, and
       the new spec specifies unsigned.  I don't believe that the change
       affects the wire encoding. */
-   krb5_ui_4 seq_send;
-   krb5_ui_4 seq_recv;
+   gssint_uint64 seq_send;
+   gssint_uint64 seq_recv;
    void *seqstate;
-   int established;
-   int big_endian;
    krb5_auth_context auth_context;
    gss_OID_desc *mech_used;
-   int nctypes;
-   krb5_cksumtype *ctypes;
+    /* Protocol spec revision
+       0 => RFC 1964 with 3DES and RC4 enhancements
+       1 => draft-ietf-krb-wg-gssapi-cfx-01
+       No others defined so far.  */
+   int proto;
+   krb5_cksumtype cksumtype;	/* for "main" subkey */
+   krb5_keyblock *acceptor_subkey; /* CFX only */
+   krb5_cksumtype acceptor_subkey_cksumtype;
+#ifdef CFX_EXERCISE
+    gss_buffer_desc init_token;
+#endif
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern void *kg_vdb;
@@ -595,4 +618,10 @@ gss_OID krb5_gss_convert_static_mech_oid
 (gss_OID oid
 	 );
 	
+krb5_error_code gss_krb5int_make_seal_token_v3(krb5_context,
+					       krb5_gss_ctx_id_rec *,
+					       const gss_buffer_desc *,
+					       gss_buffer_t,
+					       int, int);
+
 #endif /* _GSSAPIP_KRB5_H_ */
