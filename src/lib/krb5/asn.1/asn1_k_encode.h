@@ -48,7 +48,6 @@
     asn1_encode_authorization_data
     asn1_encode_krb5_authdata_elt
     asn1_encode_kdc_rep
-    asn1_encode_enc_kdc_rep_part
     asn1_encode_ticket
     asn1_encode_encryption_key
     asn1_encode_checksum
@@ -169,10 +168,6 @@ asn1_error_code asn1_encode_transited_encoding
 
 asn1_error_code asn1_encode_last_req
 	PROTOTYPE((asn1buf *buf, const krb5_last_req_entry **val,
-		   int *retlen));
-
-asn1_error_code asn1_encode_enc_kdc_rep_part
-	PROTOTYPE((asn1buf *buf, const krb5_enc_kdc_rep_part *val,
 		   int *retlen));
 
 asn1_error_code asn1_encode_sequence_of_pa_data

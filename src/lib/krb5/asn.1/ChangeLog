@@ -1,3 +1,17 @@
+Tue Feb 21 20:11:30 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_k_decode.h(asn1_decode_kvno, asn1_decode_krb_safe_body):
+		Removed duplicate declarations.
+
+	* asn1_k_decode.h(asn1_decode_passwdsequence, 
+		asn1_decode_sequence_of_passwdsequence): Added missing
+		declarations.
+
+Thu Feb 16 19:29:59 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_k_encode.h(asn1_encode_enc_kdc_rep_part): Remove duplicate
+		declaration of asn1_encode_enc_kdc_rep_part.
+
 Fri Feb 10 15:30:45 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* asn1_k_encode.c: Remove #include of krb5_encode.h (it's not
