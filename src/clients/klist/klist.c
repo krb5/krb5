@@ -527,7 +527,7 @@ show_credential(progname, kcontext, cred)
 
 	    for (i=1; cred->addresses[i]; i++) {
 		printf(", ");
-		one_addr(cred->addresses[1]);
+		one_addr(cred->addresses[i]);
 	    }
 
 	    printf("\n");
