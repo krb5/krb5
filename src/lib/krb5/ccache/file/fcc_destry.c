@@ -60,9 +60,8 @@ krb5_error_code krb5_fcc_destroy(id)
      if (write(((krb5_fcc_data *) id->data)->fd, zeros, size % BUFSIZ) < 0)
 	  return errno;
 
-#ifdef OPENCLOSE
      close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     ((krb5_fcc_data *) id->data)->fd = -1;
 
      return KRB5_OK;
 }
