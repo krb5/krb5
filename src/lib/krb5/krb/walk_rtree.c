@@ -20,6 +20,7 @@ static char rcsid_walk_rtree_c[] =
 #include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 #include <errno.h>
+#include "int-proto.h"
 
 /* internal function, used by krb5_get_cred_from_kdc() */
 
@@ -93,32 +94,33 @@ krb5_principal **tree;
 	if (*ccp == REALM_BRANCH_CHAR) {
 	    links++;
 	    if (nocommon)
-		prevccp = ccp;
+		com_cdot = prevccp = ccp;
 	}
     }
-    if (nocommon)
-	com_cdot = prevccp;
 
     for (scp = krb5_princ_realm(server)->data; scp < com_sdot; scp++) {
 	if (*scp == REALM_BRANCH_CHAR) {
 	    links++;
 	    if (nocommon)
-		prevscp = scp;
+		com_sdot = prevscp = scp;
 	}
     }
-    if (nocommon)
-	com_sdot = prevscp;
     if (nocommon && links == 3) {
 	/* no components, and not the same */
 	com_cdot = krb5_princ_realm(client)->data;
 	com_sdot = krb5_princ_realm(server)->data;
     }
 
-    if (!(rettree = (krb5_principal *)calloc(links+1,
+    if (!(rettree = (krb5_principal *)calloc(links+2,
 					     sizeof(krb5_principal)))) {
 	return ENOMEM;
     }
-    i = 0;
+    i = 1;
+    if (retval = krb5_tgtname(krb5_princ_realm(client),
+			      krb5_princ_realm(client), &rettree[0])) {
+	xfree(rettree);
+	return retval;
+    }
     for (prevccp = ccp = krb5_princ_realm(client)->data;
 	 ccp <= com_cdot;
 	 ccp++) {
