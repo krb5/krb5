@@ -221,9 +221,8 @@ skip_wrapper:
 	   return(G_BAD_TOK_HEADER);
 
        if ((*buf++ != ((tok_type>>8)&0xff)) ||
-	   (*buf++ != (tok_type&0xff))) {
+	   (*buf++ != (tok_type&0xff)))
 	   return(G_WRONG_TOKID);
-       }
    }
    *buf_in = buf;
    *body_size = toksize;
