@@ -549,13 +549,13 @@ get_etype_info(context, request, client, server, pa_data)
 	    entry[i+1] = 0;
 	    entry[i]->magic = KV5M_ETYPE_INFO_ENTRY;
 	    entry[i]->etype = db_etype;
-	    entry[i]->length = -1;
+	    entry[i]->length = KRB5_ETYPE_NO_SALT;
 	    entry[i]->salt = 0;
 	    retval = get_salt_from_key(context, request->client,
 				       client_key, &salt);
 	    if (retval)
 		goto cleanup;
-	    if (salt.length >= 0) {
+	    if (salt.length >= 0 && salt.length != SALT_TYPE_NO_LENGTH) {
 		entry[i]->length = salt.length;
 		entry[i]->salt = salt.data;
 		salt.data = 0;

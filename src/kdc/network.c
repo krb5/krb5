@@ -468,7 +468,7 @@ void process_packet(port_fd, prog, portnum)
 	com_err(prog, retval, "while dispatching");
 	return;
     }
-    cc = sendto(port_fd, response->data, response->length, 0,
+    cc = sendto(port_fd, response->data, (int) response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
     if (cc == -1) {
 	char addrbuf[46];

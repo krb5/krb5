@@ -1476,7 +1476,7 @@ get_salt_from_key(context, client, client_key, salt)
     krb5_data *			realm;
     
     salt->data = 0;
-    salt->length = -1;
+    salt->length = SALT_TYPE_NO_LENGTH;
     
     if (client_key->key_data_ver == 1)
 	return 0;

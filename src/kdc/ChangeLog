@@ -1,3 +1,15 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Initialize length of
+	etype_info_entry to KRB5_ETYPE_NO_SALT. Before copying salt into
+	etype_info_entry, test that salt length (from get_salt_from_key())
+	is not SALT_TYPE_NO_LENGTH.
+
+	* kdc_util.c (get_salt_from_key): Initialize salt type to
+	SALT_TYPE_NO_LENGTH (instead of -1).
+
+	* network.c (process_packet): Cast length in sendto() call to int. 
+
 2000-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (kerb_get_principal): Modify to take a pointer to
