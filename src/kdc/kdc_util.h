@@ -50,9 +50,9 @@ krb5_error_code dispatch PROTOTYPE((const krb5_data *,
 				    krb5_data **));
 
 /* network.c */
-void listen_and_process PROTOTYPE((void));
-void setup_network PROTOTYPE((void));
-void closedown_network PROTOTYPE((void));
+krb5_error_code listen_and_process PROTOTYPE((const char *));
+krb5_error_code setup_network PROTOTYPE((const char *));
+krb5_error_code closedown_network PROTOTYPE((const char *));
 
 /* which way to convert key? */
 #define CONVERT_INTO_DB	0
