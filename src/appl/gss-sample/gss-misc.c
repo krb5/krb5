@@ -114,6 +114,7 @@ int recv_token(s, tok)
      gss_buffer_t tok;
 {
      int ret;
+     int readsofar;
 
      if (display_file == 0)
 	 display_file = stderr;
@@ -137,17 +138,14 @@ int recv_token(s, tok)
 	  return -1;
      }
 
-     ret = read(s, (char *) tok->value, tok->length);
-     if (ret < 0) {
-	  perror("reading token data");
-	  free(tok->value);
-	  return -1;
-     } else if (ret != tok->length) {
-	  fprintf(display_file, 
-		  "sending token data: %d of %d bytes written\n", 
-		  ret, tok->length);
-	  free(tok->value);
-	  return -1;
+     while (readsofar < tok->length) {
+	 ret = read(s, (char *) tok->value, tok->length);
+	 readsofar += ret;
+	 if (ret < 0) {
+	     perror("reading token data");
+	     free(tok->value);
+	     return -1;
+	 }
      }
 
      return 0;

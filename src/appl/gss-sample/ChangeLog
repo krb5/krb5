@@ -1,3 +1,8 @@
+Sat Jun 10 00:28:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-misc.c (recv_token): Allow for partial reads while reading
+		the token.
+
 Fri Jun  9 18:26:50 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
