@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_ENCODE_DEFS__
-#define __KRB5_ENCODE_DEFS__
+#ifndef KRB5_ENCODE_DEFS__
+#define KRB5_ENCODE_DEFS__
 
 typedef	int (*encoder_func) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
 typedef void (*free_func) PROTOTYPE((krb5_pointer ));
@@ -212,4 +212,4 @@ krb5_error_code decode_generic
 		   (free_func) free_KRB5_KRB__ERROR)
 
 
-#endif /* __KRB5_ENCODE_DEFS__ */
+#endif /* KRB5_ENCODE_DEFS__ */
