@@ -1,3 +1,8 @@
+Mon Nov 11 17:03:16 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdb_cpw.c (cleanup_key_data): fix memory leak [krb5-kdc/163]
+	(add_key_pwd): fix memory leak [krb5-kdc/164]
+
 Sat Nov  9 15:57:50 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_krb5.conf: Dummy krb5.conf file from the krb5 library. 

@@ -58,6 +58,7 @@ cleanup_key_data(context, count, data)
 	    }
 	}
     }
+    free(data);
 }
 
 /*
@@ -408,15 +409,22 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     	pwd.data = passwd;
     	pwd.length = strlen(passwd);
 	if (retval = krb5_string_to_key(context, &key_eblock, &key, &pwd, 
-					&key_salt.data))
-	    return(retval);
+					&key_salt.data)) {
+	     if (key_salt.data.data)
+		  free(key_salt.data.data);
+	     return(retval);
+	}
 
 	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, &key,
 		     (const krb5_keysalt *)&key_salt,
 		     kvno, &db_entry->key_data[db_entry->n_key_data-1])) {
+	    if (key_salt.data.data)
+		 free(key_salt.data.data);
 	    krb5_xfree(key.contents);
 	    return(retval);
 	}
+	if (key_salt.data.data)
+	     free(key_salt.data.data);
 	krb5_xfree(key.contents);
     }
     return(retval);
