@@ -1,5 +1,9 @@
 Thu Sep 29 15:52:22 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* dump.c (update_ok_file): Make sure mod time on the dump_ok file
+		is updated.  (Some systems don't update the mod-time when
+		a file is opened for writing.)
+
 	* Makefile.in: Relink executable when libraries change.
 
 	* kdb5_edit.c (show_principal): Pass variable with correct type to

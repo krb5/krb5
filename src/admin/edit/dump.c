@@ -182,6 +182,14 @@ void update_ok_file (file_name)
 		free(file_ok);
 		return;
 	}
+	if (write(fd, "", 1) != 1) {
+	    com_err(progname, errno, "while writing to 'ok' file, '%s'",
+		    file_ok);
+	     exit_status++;
+	     free(file_ok);
+	     return;
+	}
+
 	free(file_ok);
 	close(fd);
 	return;
