@@ -268,13 +268,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 				      &(ap_req.length),
 				      &ptr, KG_TOK_CTX_AP_REQ,
 				      input_token->length))) {
-#if 0	/* Don't restrict mechanisms when accepting contexts */
        if (! cred->rfc_mech) {
 	   code = G_WRONG_MECH;
 	   major_status = GSS_S_DEFECTIVE_TOKEN;
 	   goto fail;
        }
-#endif
        mech_used = gss_mech_krb5;
        gsskrb5_vers = 1000;
    } else if ((code == G_WRONG_MECH) &&
@@ -289,13 +287,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	* compatibility, and use it to decide when to use the
 	* old behavior.
 	*/
-#if 0  /* Don't restrict mechanisms when accepting contexts */
        if (! cred->prerfc_mech) {
 	   code = G_WRONG_MECH;
 	   major_status = GSS_S_DEFECTIVE_TOKEN;
 	   goto fail;
        }
-#endif
        mech_used = gss_mech_krb5_old;
        gsskrb5_vers = 1000;
    } else if ((code == G_WRONG_MECH) &&
@@ -303,13 +299,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 					     &token_length, 
 					     &ptr, KG2_TOK_INITIAL,
 					     input_token->length))) {
-#if 0  /* Don't restrict mechanisms when accepting contexts */
        if (! cred->rfcv2_mech) {
 	   code = G_WRONG_MECH;
 	   major_status = GSS_S_DEFECTIVE_TOKEN;
 	   goto fail;
        }
-#endif
        mech_used = gss_mech_krb5_v2;
        gsskrb5_vers = 2000;
    } else {
