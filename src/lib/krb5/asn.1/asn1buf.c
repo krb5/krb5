@@ -93,7 +93,7 @@ void asn1buf_sync(buf, subbuf)
      asn1buf * buf;
      asn1buf * subbuf;
 {
-  buf->next = subbuf->next;
+  buf->next = subbuf->bound + 1;
 }
 
 asn1_error_code asn1buf_destroy(buf)
