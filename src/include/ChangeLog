@@ -1,5 +1,10 @@
 Fri Sep 22 19:42:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* k5-int.h: Change length field in krb5_alt_method and
+		krb5_etype_info_entry to be an int, instead of an int32.
+		This allows the ASN.1 length parsing routines to work
+		properly. 
+
 	* k5-int.h: (from Keith Vetter's windows changes); define
 		THREEPARAMOPEN and prototype for sscanf.  Also add #define
 		for strncasecmp() to the microsoft's strnicmp() function.

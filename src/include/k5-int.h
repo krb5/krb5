@@ -462,7 +462,7 @@ int win_socket_initialize();
 typedef struct _krb5_alt_method {
 	krb5_magic	magic;
 	krb5_int32	method;
-	krb5_int32	length;
+	int		length;
 	krb5_octet	*data;
 } krb5_alt_method;
 
@@ -474,7 +474,7 @@ typedef struct _krb5_alt_method {
 typedef struct _krb5_etype_info_entry {
 	krb5_magic	magic;
 	krb5_int32	etype;
-	krb5_int32	length;
+	int		length;
 	krb5_octet	*salt;
 } krb5_etype_info_entry;
 
