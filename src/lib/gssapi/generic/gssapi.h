@@ -170,10 +170,13 @@ typedef void FAR * gss_ctx_id_t;
  */
 #if (GSS_SIZEOF_SHORT == 4)
 typedef unsigned short gss_uint32;
+typedef short gss_int32;
 #elif (GSS_SIZEOF_INT == 4)
 typedef unsigned int gss_uint32;
+typedef int gss_int32;
 #elif (GSS_SIZEOF_LONG == 4)
 typedef unsigned long gss_uint32;
+typedef long gss_int32;
 #endif
 
 #ifdef	OM_STRING

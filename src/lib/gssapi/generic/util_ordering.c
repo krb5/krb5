@@ -80,8 +80,8 @@ queue_insert(queue *q, int after, unsigned int seqnum)
    }
 }
    
-OM_uint32
-g_order_init(void **vqueue, unsigned int seqnum,
+gss_int32
+g_order_init(void **vqueue, OM_uint32 seqnum,
 	     int do_replay, int do_sequence)
 {
    queue *q;
@@ -101,8 +101,8 @@ g_order_init(void **vqueue, unsigned int seqnum,
    return(0);
 }
 
-OM_uint32
-g_order_check(void **vqueue, unsigned int seqnum)
+gss_int32
+g_order_check(void **vqueue, OM_uint32 seqnum)
 {
    queue *q;
    int i;

@@ -1,7 +1,25 @@
+Thu Jul 25 00:03:01 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_ordering.c (g_order_check): 
+	* util_ordering.c (g_order_init): Changed return code to be an int
+		32, since we return a com_err error code.  Change the type
+		of the sequence number to be an uint32.
+
+	* gssapi.h: Define gss_int32 -- needed for error code returns.
+
+	* Makefile.in (EHDRDIR): Use $(S) instead of /, so that EHDRDIR is
+		valid under windows.  Fix how the header file is copied in
+		under Windows.
+
+	* gssapiP_generic.h: Include gssapi_generic.h instead of gssapi.h,
+		so that we get the definitions of the nametype oids.
+
 Wed Jul 24 18:48:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* oid_ops.c (generic_gss_release_oid): Re-enable function.
+
 	* util_token.c (g_verify_token_header): Changed return code to be
-		an unsigned int 32, since we return a com_err error code.
+		an int 32, since we return a com_err error code.
 
 	* rel_buffer.c (generic_gss_release_buffer): 
 	* rel_oid_set.c (generic_gss_release_oid_set): Remove INTERFACE

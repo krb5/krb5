@@ -37,7 +37,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#if 0
 OM_uint32
 generic_gss_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
@@ -67,7 +66,6 @@ generic_gss_release_oid(minor_status, oid)
     *oid = GSS_C_NO_OID;
     return(GSS_S_COMPLETE);
 }
-#endif
 
 OM_uint32
 generic_gss_copy_oid(minor_status, oid, new_oid)

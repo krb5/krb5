@@ -33,9 +33,9 @@
 #include <gssapi/gssapi.h>
 #endif
 
-extern const gss_OID_desc FAR * const gss_nt_user_name;
-extern const gss_OID_desc FAR * const gss_nt_machine_uid_name;
-extern const gss_OID_desc FAR * const gss_nt_string_uid_name;
-extern const gss_OID_desc FAR * const gss_nt_service_name;
+extern gss_OID gss_nt_user_name;
+extern gss_OID gss_nt_machine_uid_name;
+extern gss_OID gss_nt_string_uid_name;
+extern gss_OID gss_nt_service_name;
 
 #endif /* _GSSAPI_GENERIC_H_ */

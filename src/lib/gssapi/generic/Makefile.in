@@ -72,7 +72,7 @@ OBJS = \
 	util_validate.$(OBJEXT) \
 	gssapi_err_generic.$(OBJEXT)
 
-EHDRDIR= $(BUILDTOP)/include/gssapi
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
 HDRS= $(ETHDRS)
@@ -81,7 +81,9 @@ all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
 
 all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
 
-all-windows:: $(SRCS) $(HDRS) includes $(OBJS)
+all-windows:: win-include $(SRCS) $(HDRS) $(OBJS)
+
+win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 	copy gssapi.h $(EHDRDIR)
 	copy gssapi_generic.h $(EHDRDIR)

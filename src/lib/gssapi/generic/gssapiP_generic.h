@@ -30,7 +30,7 @@
 #if (defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH))
 #include <k5-int.h>
 #endif
-#include "gssapi.h"
+#include "gssapi_generic.h"
 
 #include "gssapi_err_generic.h"
 #include <errno.h>
@@ -121,7 +121,7 @@ int g_token_size PROTOTYPE((gss_OID mech, unsigned int body_size));
 void g_make_token_header PROTOTYPE((gss_OID mech, int body_size,
 			  unsigned char **buf, int tok_type));
 
-gss_uint32 g_verify_token_header PROTOTYPE((gss_OID mech, int *body_size,
+gss_int32 g_verify_token_header PROTOTYPE((gss_OID mech, int *body_size,
 			  unsigned char **buf, int tok_type, int toksize));
 
 OM_uint32 g_display_major_status PROTOTYPE((OM_uint32 *minor_status,
@@ -133,10 +133,10 @@ OM_uint32 g_display_com_err_status PROTOTYPE((OM_uint32 *minor_status,
 				   OM_uint32 status_value,
 				   gss_buffer_t status_string));
 
-OM_uint32 g_order_init PROTOTYPE((void **queue, unsigned int seqnum,
+gss_int32 g_order_init PROTOTYPE((void **queue, OM_uint32 seqnum,
 				  int do_replay, int do_sequence));
 
-OM_uint32 g_order_check PROTOTYPE((void **queue, unsigned int seqnum));
+gss_int32 g_order_check PROTOTYPE((void **queue, OM_uint32 seqnum));
 
 void g_order_free PROTOTYPE((void **queue));
 
@@ -155,6 +155,11 @@ PROTOTYPE((OM_uint32*,       /* minor_status */
 OM_uint32 generic_gss_release_oid_set
 PROTOTYPE((OM_uint32*,       /* minor_status */
             gss_OID_set*      /* set */
+           ));
+
+OM_uint32 generic_gss_release_oid
+PROTOTYPE((OM_uint32*,       /* minor_status */
+            gss_OID*         /* set */
            ));
 
 OM_uint32 generic_gss_copy_oid
