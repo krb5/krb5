@@ -2,6 +2,7 @@
 
 	* default.exp (setup_root_shell): Handle error messages indicating
 	"-x" isn't supported.
+	(start_kerberos_daemons): "cannont" => "cannot".
 
 2003-06-01  Ken Raeburn  <raeburn@mit.edu>
 

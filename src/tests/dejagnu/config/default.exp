@@ -1425,7 +1425,7 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	"Seeding random number" exp_continue
-	"cannont initialize network" {
+	"cannot initialize network" {
 	    if {$standalone} {
 		verbose -log "kadmind failed network init"
 		fail "kadmind"
