@@ -1,3 +1,8 @@
+Thu Mar 2 11:45:00 1995 Keith Vetter (keithv@fusion.com)
+	
+	* compat_recv.c, get_fcre.c, recvauth.c, sendauth.c: changed
+	   NEED_WINSOCK_H to NEED_SOCKETS.
+
 Wed Mar 1 20:15:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* compat_r.c, copy_pri.c, get_fcre.c, get_in_t.c, init_ctx.c, in_tkt_p.c
