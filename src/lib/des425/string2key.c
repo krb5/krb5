@@ -29,7 +29,7 @@
  */
 
 
-#include "des425.h"
+#include "des.h"
 #include "des_int.h"
 
 #ifdef DEBUG

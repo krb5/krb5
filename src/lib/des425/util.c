@@ -13,7 +13,8 @@
 
 /* Application include files */
 #include "k5-int.h"
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 void des_cblock_print_file(x, fp)
     des_cblock *x;

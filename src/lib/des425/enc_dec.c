@@ -38,8 +38,8 @@
  *
  */
 
-
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 /*
  * This routine performs DES cipher-block-chaining operation, either

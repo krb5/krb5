@@ -34,8 +34,8 @@
  *
  */
 
-
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 /*
  * des_fixup_key_parity: Forces odd parity per byte; parity is bits

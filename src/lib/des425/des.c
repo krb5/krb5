@@ -51,15 +51,15 @@
  * originally written by Steve Miller, MIT Project Athena
  */
 
-
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 KRB5_DLLIMP int KRB5_CALLCONV
 des_ecb_encrypt(clear, cipher, schedule, encrypt)
     unsigned long *clear;
     unsigned long *cipher;
-    int encrypt;		/* 0 ==> decrypt, else encrypt */
     register mit_des_key_schedule schedule; /* r11 */
+    int encrypt;		/* 0 ==> decrypt, else encrypt */
 {
     static des_cblock iv;
 

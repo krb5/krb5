@@ -43,13 +43,23 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "des425.h"
-/*   #include "des_internal.h" */
+#include "des_int.h"
+#include "des.h"
 
 extern int mit_des_debug;
 
 /*
- * convert an arbitrary length string to a DES key
+ * Convert an arbitrary length string to a DES key.
+ */
+
+/*
+ * For krb5, a change was made to this algorithm: When each key is
+ * generated, after fixing parity, a check for weak and semi-weak keys
+ * is done.  If the key is weak or semi-weak, we XOR the last byte
+ * with 0xF0.  (In the case of the intermediate key, the weakness is
+ * probably irrelevant, but there it is.)  The odds that this will
+ * generate a different key for a random input string are pretty low,
+ * but non-zero.  So we need this different function for krb4 to use.
  */
 KRB5_DLLIMP int KRB5_CALLCONV
 des_string_to_key(str,key)
@@ -60,11 +70,11 @@ des_string_to_key(str,key)
     register unsigned temp;
     register int j;
     register long i, length;
-    static unsigned char *k_p;
-    static int forward;
+    unsigned char *k_p;
+    int forward;
     register char *p_char;
-    static char k_char[64];
-    static mit_des_key_schedule key_sked;
+    char k_char[64];
+    mit_des_key_schedule key_sked;
     extern void des_cbc_cksum();
 
     in_str = str;
@@ -97,7 +107,7 @@ des_string_to_key(str,key)
 	    else
 		*--p_char ^= (int) temp & 01;
 	    temp = temp >> 1;
-	} while (--j > 0);
+	}
 
 	/* check and flip direction */
 	if ((i%8) == 0)
@@ -119,7 +129,7 @@ des_string_to_key(str,key)
     des_fixup_key_parity(key);
 
     /* Now one-way encrypt it with the folded key */
-    (void) des_key_sched(key,key_sked);
+    (void) des_key_sched(key, *(Key_schedule *)&key_sked);
     (void) des_cbc_cksum((des_cblock *)in_str,key,length,key_sked,key);
     /* erase key_sked */
     memset((char *)key_sked, 0,sizeof(key_sked));

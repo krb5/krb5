@@ -52,8 +52,8 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 /*
  * des_init_random_number_generator:
@@ -76,7 +76,7 @@ des_init_random_number_generator(key)
     krb5_data seed;
 
     seed.length = sizeof(key);
-    seed.data = key;
+    seed.data = (char *) key;
 
     if (krb5_c_random_seed(/* XXX */ 0, &seed))
 	/* XXX */ abort();

@@ -37,8 +37,8 @@
  *	spm	8/85	MIT project athena
  */
 
-
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 /*
  * This routine performs DES cipher-block-chaining checksum operation,

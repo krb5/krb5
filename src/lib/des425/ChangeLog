@@ -1,8 +1,25 @@
 2001-04-09  Ken Raeburn  <raeburn@mit.edu>
 
-	* des425.h: Renamed from des.h to avoid confusion with the other
-	des.h in the source tree.  Adjust include directives in all other
-	files.
+	* des.h: Deleted to avoid confusion with the other des.h in the
+	tree.  All files changed to include des_int.h and
+	(the other) des.h instead.
+	* new_rnd_key.c (des_init_random_number_generator): Cast seed data
+	pointer to keep compiler happy.
+	* read_passwd.c (intr_routine, des_read_pw_string): Add
+	prototypes.
+	(des_read_password): Fix call sequence for des_string_to_key.
+	* str_to_key.c (des_string_to_key): Remove static storage in favor
+	of automatic storage.  Fix call sequence to des_key_sched.  Delete
+	no-op while loop.
+	* t_quad.c (main): Fix call sequence for des_quad_cksum.
+	* verify.c (des_string_to_key, des_key_sched, des_ecb_encrypt,
+	des_cbc_encrypt): Removed declarations.
+	(do_encrypt, do_decrypt): Prototype.  Make args point to unsigned
+	char, and return types void.
+	(main): Declare return type.  Make automatic var in_length be
+	unsigned long; discard some casts, but cast it when passing to
+	memcmp.  Remove extra arg passed to des_cbc_cksum.
+	(flip): Delete unused function.
 
 	* quad_cksum.c (des_quad_cksum): Add comments.  Force 32-bit
 	arithmetic just to be careful.

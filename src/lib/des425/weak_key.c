@@ -32,8 +32,8 @@
  * Originally written 8/85 by Steve Miller, MIT Project Athena.
  */
 
-
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 /*
  * mit_des_is_weak_key: returns true iff key is a [semi-]weak des key.

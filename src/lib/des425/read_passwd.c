@@ -32,7 +32,8 @@
 
 #if !defined(_MSDOS)&&!defined(_WIN32)
 
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
@@ -42,6 +43,9 @@
 #endif /* ECHO_PASSWORD */
 
 static jmp_buf pwd_jump;
+
+static krb5_sigtype intr_routine (int);
+krb5_error_code des_read_pw_string (char *, int, char *, char *);
 
 static krb5_sigtype
 intr_routine(signo)
@@ -177,7 +181,7 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
 			    prompt, verify ? prompt2 : 0);
     
     if (ok == 0)
-	des_string_to_key(key_string, k);
+	des_string_to_key(key_string, *k);
 
     memset(key_string, 0, sizeof (key_string));
     return ok;

@@ -34,14 +34,11 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 extern char *errmsg();
 extern int errno;
-extern int des_string_to_key();
-extern int des_key_sched();
-extern int des_ecb_encrypt();
-extern int des_cbc_encrypt();
 char *progname;
 int nflag = 2;
 int vflag;
@@ -96,18 +93,22 @@ unsigned char mresult[8] = {
     0xa3, 0x80, 0xe0, 0x2a, 0x6b, 0xe5, 0x46, 0x96
 };
 
-    
+   
 /*
  * Can also add :
  * plaintext = 0, key = 0, cipher = 0x8ca64de9c1b123a7 (or is it a 1?)
  */
 
+void do_encrypt (unsigned char *, unsigned char *);
+void do_decrypt (unsigned char *, unsigned char *);
+
+int
 main(argc,argv)
     int argc;
     char *argv[];
 {
     /* Local Declarations */
-    long in_length;
+    unsigned long in_length;
 
     progname=argv[0];		/* salt away invoking program */
 
@@ -240,7 +241,7 @@ main(argc,argv)
 
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
     in_length = strlen((char *) input);
-    des_cbc_encrypt(input,cipher_text,(long) in_length,KS,ivec,1);
+    des_cbc_encrypt(input,cipher_text, in_length,KS,ivec,1);
     printf("\tciphertext = (low to high bytes)\n");
     for (i = 0; i <= 7; i++) {
 	printf("\t\t");
@@ -249,10 +250,10 @@ main(argc,argv)
 	}
 	printf("\n");
     }
-    des_cbc_encrypt(cipher_text,clear_text,(long) in_length,KS,ivec,0);
+    des_cbc_encrypt(cipher_text,clear_text,in_length,KS,ivec,0);
     printf("\tdecrypted clear_text = \"%s\"\n",clear_text);
 
-    if ( memcmp((char *)cipher_text, (char *)cipher3, in_length) ) {
+    if ( memcmp(cipher_text, cipher3, (size_t) in_length) ) {
 	printf("verify: error in CBC encryption\n");
 	exit(-1);
     }
@@ -265,7 +266,7 @@ main(argc,argv)
     printf("\tchecksum\t58 d2 e7 7e 86 06 27 33, ");
     printf("or some part thereof\n");
     input = clear_text2;
-    des_cbc_cksum(input,cipher_text,(long) strlen((char *) input),KS,ivec,1);
+    des_cbc_cksum(input,cipher_text,(long) strlen((char *) input),KS,ivec);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
     for (j = 0; j<=7; j++)
@@ -280,37 +281,17 @@ main(argc,argv)
     exit(0);
 }
 
-flip(array)
-    char *array;
-{
-    register old,new,i,j;
-    /* flips the bit order within each byte from 0 lsb to 0 msb */
-    for (i = 0; i<=7; i++) {
-	old = *array;
-	new = 0;
-	for (j = 0; j<=7; j++) {
-	    if (old & 01)
-		new = new | 01;
-	    if (j < 7) {
-		old = old >> 1;
-		new = new << 1;
-	    }
-	}
-	*array = new;
-	array++;
-    }
-}
-
+void
 do_encrypt(in,out)
-    char *in;
-    char *out;
+    unsigned char *in;
+    unsigned char *out;
 {
     for (i =1; i<=nflag; i++) {
 	des_ecb_encrypt(in,out,KS,1);
 	if (des_debug) {
 	    printf("\nclear %s\n",in);
 	    for (j = 0; j<=7; j++)
-		printf("%02 X ",in[j] & 0xff);
+		printf("%02X ",in[j] & 0xff);
 	    printf("\tcipher ");
 	    for (j = 0; j<=7; j++)
 		printf("%02X ",out[j] & 0xff);
@@ -318,9 +299,10 @@ do_encrypt(in,out)
     }
 }
 
+void
 do_decrypt(in,out)
-    char *out;
-    char *in;
+    unsigned char *out;
+    unsigned char *in;
     /* try to invert it */
 {
     for (i =1; i<=nflag; i++) {

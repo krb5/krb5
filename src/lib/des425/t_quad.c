@@ -27,7 +27,8 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 
 extern char *errmsg();
 extern int errno;
@@ -79,7 +80,8 @@ main(argc,argv)
 
     for (i = 0; i < 3; i++) {
 	int wrong = 0, j;
-	des_quad_cksum (tests[i].text, out, 64L, 4, default_key);
+	des_quad_cksum (tests[i].text, out, 64L, 4,
+			(mit_des_cblock *) &default_key);
 	if (tests[i].text[0] == 2)
 	    printf ("quad_cksum(<binary blob 1>) = {");
 	else
