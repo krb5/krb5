@@ -116,8 +116,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 
     strcpy(host_save, hp->h_name);
 
-    *ahost = host_save;
-    
     /* If no service is given set to the default service */
     if (!service) service = default_service;
     
@@ -138,15 +136,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     }
 
     if (realm && *realm) {
-       char *copyrealm;
-       krb5_data rdata;
-
-       rdata.length = strlen(realm);
-       rdata.data = (char *) malloc(rdata.length+1);
-       strcpy(rdata.data, realm);
-       
-       /* XXX we should free the old realm first */
-       krb5_princ_set_realm(bsd_context, get_cred->server, &rdata);
+	(void) krb5_xfree(krb5_princ_realm(bsd_context,ret_cred->server)->data);
+	krb5_princ_set_realm_length(bsd_context,ret_cred->server,strlen(realm));
+	krb5_princ_set_realm_data(bsd_context,ret_cred->server,strdup(realm));
    }
 #ifdef POSIX_SIGNALS
     sigemptyset(&urgmask);
@@ -269,16 +261,18 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         goto bad2;
     }
 
-    status = krb5_cc_default(bsd_context, &cc);
-    if (status) goto bad2;
+    if (status = krb5_cc_default(bsd_context, &cc))
+    	goto bad2;
 
-    status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client);
-    if (status) goto bad2;
+    if (status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client)) {
+    	(void) krb5_cc_close(bsd_context, cc);
+    	goto bad2;
+    }
 
     /* Get ticket from credentials cache or kdc */
     status = krb5_get_credentials(bsd_context, 0, cc, get_cred, &ret_cred);
-    (void) krb5_cc_close(bsd_context, cc);
     krb5_free_creds(bsd_context, get_cred);
+    (void) krb5_cc_close(bsd_context, cc);
     if (status) goto bad2;
 
     /* Reset internal flags; these should not be sent. */

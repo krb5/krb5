@@ -1,3 +1,11 @@
+
+Mon May 01 15:56:32 1995  Chris Provenzano
+
+	* kcmd.c (kcmd()): Bug fixes from jik.
+
+	* krlogind.c (recvauth()): Changes to auth_context to better 
+		support full addresses, for rd_cred() and friends.
+
 Sat Apr 29 01:26:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (login.krb5): Link the libraries twice due to

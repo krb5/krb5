@@ -1571,7 +1571,7 @@ recvauth()
  
     /* Only need remote address for rd_cred() to verify client */
     if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
-			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR))
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
 	return status;
 
     if (status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
@@ -1656,14 +1656,10 @@ recvauth()
     if (status = krb5_read_message(bsd_context, (krb5_pointer)&netf, &inbuf))
 	fatal(netf, "Error reading message");
 
-    if (inbuf.length) { /* Forwarding being done, read creds */
-        if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
-			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
-	    fatal(netf, "Can't generate full address for client");
-
-	if (status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
-					    ticket, lusername))
-	    fatal(netf, "Can't get forwarded credentials");
+    if ((inbuf.length) && /* Forwarding being done, read creds */
+	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
+					  ticket, lusername))) {
+         fatal(netf, "Can't get forwarded credentials");
     }
     return 0;
 }
