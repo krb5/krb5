@@ -5,6 +5,8 @@ gss_krb5_ccache_name(minor_status, name, out_name)
 	OM_uint32 *minor_status;
 	const char *name, const char **out_name;
 {
+	krb5_context	contxt;
+
 	if (GSS_ERROR(kg_get_context(minor_status, &context)))
 		return (GSS_S_FAILURE);
 
