@@ -22,7 +22,7 @@ check-runtest-no::
 	@echo "+++"
 
 check-runtest-yes:: t_inetd site.exp
-	$(RUNTEST) --tool krb --srcdir $(srcdir) $(KRB4_RUNTESTFLAGS) $(RUNTESTFLAGS)
+	$(RUNTEST) --tool krb --srcdir $(srcdir) $(KRB4_RUNTESTFLAGS) PRIOCNTL_HACK=@PRIOCNTL_HACK@ $(RUNTESTFLAGS)
 
 t_inetd:: t_inetd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_inetd t_inetd.o $(KRB5_BASE_LIBS)
@@ -44,6 +44,7 @@ runenv.vals: runenv.vars
 site.exp: runenv.vals
 	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

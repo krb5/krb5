@@ -149,7 +149,8 @@ krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, regi
 		*q++ = COMPONENT_SEP;
 	}
 
-	q--;			/* Back up last component separator */
+	if (i > 0)
+	    q--;		/* Back up last component separator */
 	*q++ = REALM_SEP;
 	
 	cp = krb5_princ_realm(context, principal)->data;

@@ -37,6 +37,7 @@
 #include "profile.h"
 #include "krb.h"
 #include "krb4int.h"
+#include "k5-int.h"		/* for accessor, addrlist stuff */
 #include "port-sockets.h"
 
 #define KRB5_PRIVATE 1
@@ -142,10 +143,11 @@ krb_prof_get_nth(
     }
     if (result == KSUCCESS) {
 	/* Return error rather than truncating. */
+	/* Don't strncpy because retlen is a guess for some callers */
 	if (strlen(value) >= retlen)
 	    result = KFAILURE;
 	else
-	    strncpy(ret, value, retlen);
+	    strcpy(ret, value);
     }
 cleanup:
     if (name != NULL)
@@ -188,76 +190,112 @@ krb_get_lrealm(
     char	*realm,
     int		n)
 {
-    long	profErr = 0;
-    char	*realmString = NULL;
-    char	*realmStringV4 = NULL;
-    profile_t	profile = NULL;
-    int		result;
-    FILE	*cnffile = NULL;
-    char	scratch[SCRATCHSZ];
+    int         result = KSUCCESS;
+    profile_t   profile = NULL;
+    char       *profileDefaultRealm = NULL;
+    char      **profileV4Realms = NULL;
+    int         profileHasDefaultRealm = 0;
+    int         profileDefaultRealmIsV4RealmInProfile = 0;
+    char        krbConfLocalRealm[REALM_SZ];
+    int         krbConfHasLocalRealm = 0;
 
-    if (n != 1 || realm == NULL)
-	return KFAILURE;
+    if ((realm == NULL) || (n != 1)) { result = KFAILURE; }
 
-    result = KFAILURE;		/* Start out with failure. */
-
-    profErr = krb_get_profile(&profile);
-    if (profErr)
-	goto cleanup;
-
-    profErr = profile_get_string(profile, REALMS_V4_PROF_LIBDEFAULTS_SECTION,
-				 REALMS_V4_DEFAULT_REALM, NULL, NULL,
-				 &realmString);
-    if (profErr || realmString == NULL)
-	goto cleanup;
-
-    if (strlen(realmString) >= REALM_SZ)
-	goto cleanup;
-    strncpy(realm, realmString, REALM_SZ);
-    /*
-     * Step 2: the default realm is actually v5 realm, so we have to
-     * check for the case where v4 and v5 realms are different.
-     */
-    profErr = profile_get_string(profile, "realms", realm, "v4_realm",
-				 NULL, &realmStringV4);
-    if (profErr || realmStringV4 == NULL)
-	goto cleanup;
-
-    if (strlen(realmStringV4) >= REALM_SZ)
-	goto cleanup;
-    strncpy(realm, realmStringV4, REALM_SZ);
-    result = KSUCCESS;
-cleanup:
-    if (realmString != NULL)
-	profile_release_string(realmString);
-    if (realmStringV4 != NULL)
-	profile_release_string(realmStringV4);
-    if (profile != NULL)
-	profile_abandon(profile);
-
-    if (result == KSUCCESS)
-	return result;
-    /*
-     * Do old-style config file lookup.
-     */
-    do {
-	cnffile = krb__get_cnffile();
-	if (cnffile == NULL)
-	    break;
-	if (fscanf(cnffile, SCNSCRATCH, scratch) == 1) {
-	    if (strlen(scratch) >= REALM_SZ)
-		result = KFAILURE;
-	    else {
-		strncpy(realm, scratch, REALM_SZ);
-		result = KSUCCESS;
-	    }
-	}
-	fclose(cnffile);
-    } while (0);
-    if (result == KFAILURE && strlen(KRB_REALM) < REALM_SZ) {
-	strncpy(realm, KRB_REALM, REALM_SZ);
-	result = KSUCCESS;
+    if (result == KSUCCESS) {
+        /* Some callers don't check the return value so we initialize
+         * to an empty string in case it never gets filled in. */
+        realm [0] = '\0';  
     }
+    
+    if (result == KSUCCESS) {
+        int profileErr = krb_get_profile (&profile);
+
+        if (!profileErr) {
+            /* Get the default realm from the profile */
+            profileErr = profile_get_string(profile, REALMS_V4_PROF_LIBDEFAULTS_SECTION,
+                                            REALMS_V4_DEFAULT_REALM, NULL, NULL,
+                                            &profileDefaultRealm);
+            if (profileDefaultRealm == NULL) { profileErr = KFAILURE; }
+        }
+
+        if (!profileErr) {
+            /* If there is an equivalent v4 realm to the default realm, use that instead */
+            char *profileV4EquivalentRealm = NULL;
+
+            if (profile_get_string (profile, "realms", profileDefaultRealm, "v4_realm", NULL,
+                                    &profileV4EquivalentRealm) == 0 &&
+                profileV4EquivalentRealm != NULL) {
+
+                profile_release_string (profileDefaultRealm);
+                profileDefaultRealm = profileV4EquivalentRealm;
+            }
+        }
+
+        if (!profileErr) {
+            if (strlen (profileDefaultRealm) < REALM_SZ) {
+                profileHasDefaultRealm = 1;  /* a reasonable default realm */
+            } else {
+                profileErr = KFAILURE;
+            }
+        }
+
+        if (!profileErr) {
+            /* Walk through the v4 realms list looking for the default realm */
+            const char *profileV4RealmsList[] = { REALMS_V4_PROF_REALMS_SECTION, NULL };
+
+            if (profile_get_subsection_names (profile, profileV4RealmsList,
+                                              &profileV4Realms) == 0 &&
+                profileV4Realms != NULL) {
+
+                char **profileRealm;
+                for (profileRealm = profileV4Realms; *profileRealm != NULL; profileRealm++) {
+                    if (strcmp (*profileRealm, profileDefaultRealm) == 0) {
+                        /* default realm is a v4 realm */
+                        profileDefaultRealmIsV4RealmInProfile = 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    if (result == KSUCCESS) {
+        /* Try to get old-style config file lookup for fallback. */
+        FILE	*cnffile = NULL;
+        char	scratch[SCRATCHSZ];
+
+        cnffile = krb__get_cnffile();
+        if (cnffile != NULL) {
+            if (fscanf(cnffile, SCNSCRATCH, scratch) == 1) {
+                if (strlen(scratch) < REALM_SZ) {
+                    strncpy(krbConfLocalRealm, scratch, REALM_SZ);
+                    krbConfHasLocalRealm = 1;
+                }
+            }
+            fclose(cnffile);
+        }
+    }
+
+    if (result == KSUCCESS) {
+        /*
+         * We want to favor the profile value over the krb.conf value
+         * but not stop suppporting its use with a v5-only profile. 
+         * So we only use the krb.conf realm when the default profile
+         * realm doesn't exist in the v4 realm section of the profile.
+         */
+        if (krbConfHasLocalRealm && !profileDefaultRealmIsV4RealmInProfile) {
+            strncpy (realm, krbConfLocalRealm, REALM_SZ);
+        } else if (profileHasDefaultRealm) {
+            strncpy (realm, profileDefaultRealm, REALM_SZ);
+        } else {
+            result = KFAILURE;  /* No default realm */
+        }
+    }
+
+    if (profileDefaultRealm != NULL) { profile_release_string (profileDefaultRealm); }
+    if (profileV4Realms     != NULL) { profile_free_list (profileV4Realms); }
+    if (profile             != NULL) { profile_abandon (profile); }
+
     return result;
 }
 
@@ -359,23 +397,6 @@ krb_get_kpasswdhst(
 			    REALMS_V4_PROF_KPASSWD_KDC);
 }
 
-static int
-get_krbhst_default(h, r, n)
-    char *h;
-    char *r;
-    int n;
-{
-    if (n != 1)
-	return KFAILURE;
-    if (strlen(KRB_HOST) + 1 + strlen(r) >= MAXHOSTNAMELEN)
-	return KFAILURE;
-    /* KRB_HOST.REALM (ie. kerberos.CYGNUS.COM) */
-    strcpy(h, KRB_HOST);
-    strcat(h, ".");
-    strcat(h, r);
-    return KSUCCESS;
-}
-
 /*
  * Realm, index -> KDC mapping
  *
@@ -411,6 +432,15 @@ get_krbhst_default(h, r, n)
  * kerberos.  In the long run, this functionality will be provided by a
  * nameserver.
  */
+#ifdef KRB5_DNS_LOOKUP
+static struct {
+    time_t when;
+    char realm[REALM_SZ+1];
+    struct srv_dns_entry *srv;
+} dnscache = { 0, { 0 }, 0 };
+#define DNS_CACHE_TIMEOUT	60 /* seconds */
+#endif
+
 int KRB5_CALLCONV
 krb_get_krbhst(
     char	*host,
@@ -423,9 +453,35 @@ krb_get_krbhst(
     char	linebuf[BUFSIZ];
     char	tr[SCRATCHSZ];
     char	scratch[SCRATCHSZ];
+#ifdef KRB5_DNS_LOOKUP
+    time_t now;
+#endif
 
     if (n < 1 || host == NULL || realm == NULL)
 	return KFAILURE;
+
+#ifdef KRB5_DNS_LOOKUP
+    /* We'll only have this realm's info in the DNS cache if there is
+       no data in the local config files.
+
+       XXX The files could've been updated in the last few seconds.
+       Do we care?  */
+    if (!strncmp(dnscache.realm, realm, REALM_SZ)
+	&& (time(&now), abs(dnscache.when - now) < DNS_CACHE_TIMEOUT)) {
+	struct srv_dns_entry *entry;
+
+    get_from_dnscache:
+	/* n starts at 1, addrs indices run 0..naddrs */
+	for (i = 1, entry = dnscache.srv; i < n && entry; i++)
+	    entry = entry->next;
+	if (entry == NULL)
+	    return KFAILURE;
+	if (strlen(entry->host) + 6 >= MAXHOSTNAMELEN)
+	    return KFAILURE;
+	sprintf(host, "%s:%d", entry->host, entry->port);
+	return KSUCCESS;
+    }
+#endif
 
     result = krb_prof_get_nth(host, MAXHOSTNAMELEN, realm, n,
 			      REALMS_V4_PROF_REALMS_SECTION,
@@ -461,14 +517,43 @@ krb_get_krbhst(
 		i++;
 	}
 	fclose(cnffile);
-	if (result == KSUCCESS && strlen(scratch) < MAXHOSTNAMELEN)
+	if (result == KSUCCESS && strlen(scratch) < MAXHOSTNAMELEN) {
 	    strcpy(host, scratch);
-	else
-	    result = KFAILURE;
+	    return KSUCCESS;
+	}
+	if (i > 0)
+	    /* Found some, but not as many as requested.  */
+	    return KFAILURE;
     } while (0);
-    if (result == KFAILURE)
-	result = get_krbhst_default(host, realm, n);
-    return result;
+#ifdef KRB5_DNS_LOOKUP
+    do {
+	krb5int_access k5;
+	krb5_error_code err;
+	krb5_data realmdat;
+	struct srv_dns_entry *srv;
+
+	err = krb5int_accessor(&k5, KRB5INT_ACCESS_VERSION);
+	if (err)
+	    break;
+
+	realmdat.data = realm;
+	realmdat.length = strlen(realm);
+	err = k5.make_srv_query_realm(&realmdat, "_kerberos-iv", "_udp", &srv);
+	if (err)
+	    break;
+
+	if (srv == 0)
+	    break;
+
+	if (dnscache.srv)
+	    k5.free_srv_dns_data(dnscache.srv);
+	dnscache.srv = srv;
+	strncpy(dnscache.realm, realm, REALM_SZ);
+	dnscache.when = now;
+	goto get_from_dnscache;
+    } while (0);
+#endif
+    return KFAILURE;
 }
 
 /*
