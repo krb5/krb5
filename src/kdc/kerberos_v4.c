@@ -391,18 +391,15 @@ main(argc, argv)
 #include <krb5/wordsize.h>
 #include <krb5/mit-des.h>
 #include <krb5/kdb.h>
+#include <krb5/ext-proto.h>
+#include <krb5/los-proto.h>
+#include <com_err.h>
 #include "extern.h"		/* to pick up master_princ */
 
 static krb5_error_code retval; 
 static krb5_data *response;
-void com_err(), sleep();
+
 void kerberos_v4(), kerb_err_reply();
-#ifdef HAS_STDLIB_H
-#include <stdlib.h>
-#else
-char *free(), *malloc();
-#endif
-krb5_error_code krb5_timeofday(), krb5_get_default_realm();
  
 krb5_error_code
 process_v4( pkt, client_fulladdr, is_secondary, resp)

@@ -1,5 +1,9 @@
 Mon Nov  7 22:11:01 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kerberos_v4.c: Don't define functions manually, but pull in the
+	appropriate include files (com_err.h, krb5/ext-proto.h,
+	krb5/los-proto.h, etc.)
+
 	* kdc_util.c (kdc_process_tgs_req): Fix lineage check so that we
 		don't fail if we're cross-authenticating with a realm with
 		the same length as our own.  ('||' should have been '&&')
