@@ -1,3 +1,4 @@
+set prompt "% "
 set stty_init {-onlcr -opost intr \^C kill \^U}
 set kadmin_local $KADMIN_LOCAL
 

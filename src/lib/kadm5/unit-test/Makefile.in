@@ -87,28 +87,41 @@ unit-test-server-setup::
 unit-test-server-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS_LOCAL)
 
-capi.0: api.0
-	-rm -f capi.0
-	ln -s api.0 capi.0
-
-capi.2: api.2
-	-rm -f capi.2
-	ln -s api.2 capi.2
-
 unit-test-client-body: capi.0 capi.2 site.exp test-noauth test-destroy test-handle-client test-sizes
 	$(ENV_SETUP) $(RUNTEST) --tool capi API=$(CLNTTCL) KINIT=$(BUILDTOP)/clients/kinit/kinit KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local RPC=1
 
-sapi.0: api.0
-	-rm -f sapi.0
-	ln -s api.0 sapi.0
+#
+# This is unfortunate.  We want to have a single set of directories
+# api.* but treat them as two separate tools (capi and sapi).  We
+# specify --srcdir in $(RUNTEST) so that unit tests files do not need
+# to exist as symlinks in the source tree.  However, we can't check in
+# the capi and sapi symlinks into CVS.  Therefore, we need to create
+# them *in the source tree* at run time.
+#
+# Another alternative would be to run $(RUNTEST) without --srcdir in
+# this one directory, or just stop using a separate tool name for
+# client and server tests; that would prevent us from keeping the
+# separate log files around, and might bite us in the future.
+#
+capi.0: $(srcdir)/api.0
+	-rm -f $(srcdir)/capi.0
+	ln -s $(srcdir)/api.0 $(srcdir)/capi.0
 
-sapi.1: api.1
-	-rm -f sapi.1
-	ln -s api.1 sapi.1
+capi.2: $(srcdir)/api.2
+	-rm -f $(srcdir)/capi.2
+	ln -s $(srcdir)/api.2 $(srcdir)/capi.2
 
-sapi.2: api.2
-	-rm -f sapi.2
-	ln -s api.2 sapi.2
+sapi.0: $(srcdir)/api.0
+	-rm -f $(srcdir)/sapi.0
+	ln -s $(srcdir)/api.0 $(srcdir)/sapi.0
+
+sapi.1: $(srcdir)/api.1
+	-rm -f $(srcdir)/sapi.1
+	ln -s $(srcdir)/api.1 $(srcdir)/sapi.1
+
+sapi.2: $(srcdir)/api.2
+	-rm -f $(srcdir)/sapi.2
+	ln -s $(srcdir)/api.2 $(srcdir)/sapi.2
 
 unit-test-server-body: sapi.0 sapi.1 sapi.2 site.exp randkey-test test-handle-server lock-test test-sizes
 	$(ENV_SETUP) $(RUNTEST) --tool sapi API=$(SRVTCL) LOCKTEST=./lock-test KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local RPC=0

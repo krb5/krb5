@@ -1,3 +1,11 @@
+Mon Sep 23 16:31:24 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* changes to use runtest --srcdir:
+	- Makefile.in: rewrote [csapi].* links to work in srcdir (boo,
+ 	hiss)
+	- move lib.t to lib/lib.t
+	- api.*/*.exp: s/source lib.t/load_lib lib.t/
+	
 Fri Sep 20 16:51:26 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* created Makefile.in and configure.in

@@ -3,7 +3,7 @@
 # (whichs runs through all api tests) will still have it locked, and
 # these tests will fail.
 
-source lib.t
+load_lib lib.t
 
 api_exit
 

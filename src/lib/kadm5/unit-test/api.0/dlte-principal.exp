@@ -1,4 +1,4 @@
-source lib.t
+load_lib lib.t
 
 api_exit
 api_start
