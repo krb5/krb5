@@ -1,5 +1,7 @@
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* hst_realm.c (T_TXT): Define if not defined by header files.
+
 	* locate_kdc.c (krb5int_locate_server): New function, replaces
 	functionality of krb5_locate_srv_conf and _dns, including checking
 	whether DNS lookup is desired.

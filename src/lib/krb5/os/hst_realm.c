@@ -81,7 +81,10 @@
 #include <wshelper.h>
 #else /* WSHELPER */
 #include <arpa/inet.h>       
-#include <arpa/nameser.h>    
+#include <arpa/nameser.h>
+#ifndef T_TXT /* not defined on SunOS 4 */
+#  define T_TXT 15
+#endif
 #include <resolv.h>          
 #include <netdb.h>
 #endif /* WSHELPER */
