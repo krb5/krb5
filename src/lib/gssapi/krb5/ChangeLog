@@ -1,3 +1,14 @@
+Tue Jan  9 22:11:25 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_krb5.h (KRB5_GSS_FOR_CREDS_OPTION): New constant added
+		for delegation (forwarding) of credentials.
+
+	* init_sec_context.c (make_ap_req): Add support for sending
+		delegated credentials.  Misc lint cleanups.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Add support
+		for accepting delegated credentials.  Misc lint cleanups.
+
 Fri Dec  1 17:27:33 1995    <tytso@rsts-11.mit.edu>
 
 	* configure.in: Add rule for building shared object files.
