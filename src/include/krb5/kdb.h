@@ -135,6 +135,31 @@ typedef struct tl_data_2 {
 extern char *krb5_mkey_pwd_prompt1;
 extern char *krb5_mkey_pwd_prompt2;
 
+/*
+ * These macros specify the encoding of data within the database.
+ *
+ * Data encoding is little-endian.
+ */
+#define	krb5_kdb_decode_int16(cp, i16)	\
+	*((krb5_int16 *) &(i16)) = (((krb5_int16) ((unsigned char) (cp)[0]))| \
+			      ((krb5_int16) ((unsigned char) (cp)[1]) << 8))
+#define	krb5_kdb_decode_int32(cp, i32)	\
+	*((krb5_int32 *) &(i32)) = (((krb5_int32) ((unsigned char) (cp)[0]))| \
+			      ((krb5_int32) ((unsigned char) (cp)[1]) << 8) | \
+			      ((krb5_int32) ((unsigned char) (cp)[2]) << 16)| \
+			      ((krb5_int32) ((unsigned char) (cp)[3]) << 24))
+#define	krb5_kdb_encode_int16(i16, cp)	\
+	{							\
+	    (cp)[0] = (unsigned char) ((i16) & 0xff);		\
+	    (cp)[1] = (unsigned char) (((i16) >> 8) & 0xff);	\
+	}
+#define	krb5_kdb_encode_int32(i32, cp)	\
+	{							\
+	    (cp)[0] = (unsigned char) ((i32) & 0xff);		\
+	    (cp)[1] = (unsigned char) (((i32) >> 8) & 0xff);	\
+	    (cp)[2] = (unsigned char) (((i32) >> 16) & 0xff);	\
+	    (cp)[3] = (unsigned char) (((i32) >> 24) & 0xff);	\
+	}
 
 /* libkdb.spec */
 krb5_error_code krb5_db_set_name
