@@ -209,9 +209,9 @@ krb5_verify_init_creds(krb5_context context,
       accordingly.  either that, or it's zero, which is fine, too */
 
 cleanup:
-   if (!server_arg)
+   if (!server_arg && server)
       krb5_free_principal(context, server);
-   if (!keytab_arg)
+   if (!keytab_arg && keytab)
       krb5_kt_close(context, keytab);
    if (ccache)
       krb5_cc_destroy(context, ccache);
