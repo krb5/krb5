@@ -502,7 +502,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    int gsskrb5_vers;
    int i, err;
    krb5_ui_4 resp_flags, field_length, opt_id;
-   OM_uint32 major_status;
+   OM_uint32 major_status, dummy;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
@@ -856,8 +856,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 			kg2_parse_token(minor_status, ptr, token_length,
 					&resp_flags, &nctypes, &ctypes,
 					0, NULL, &ap_rep, &mic))) {
-	      (void)krb5_gss_delete_sec_context(minor_status, 
-						context_handle, NULL);
+	      (void)krb5_gss_delete_sec_context(&dummy, context_handle, NULL);
 	      return(major_status);
 	  }
 
@@ -961,8 +960,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  if (GSS_ERROR(major_status = 
 			krb5_gss_verify_mic(minor_status, *context_handle,
 					    &mic_data, &mic_token, NULL))) {
-	      (void)krb5_gss_delete_sec_context(minor_status, 
-						context_handle, NULL);
+   	      (void)krb5_gss_delete_sec_context(&dummy, context_handle, NULL);
 	      return(major_status);
 	  }
       }
