@@ -1,4 +1,9 @@
 2004-09-10  Jeffrey Altman <jaltman@mit.edu>
+        * cc_mslsa.c: Implement krb5_lcc_initialize()
+          Remove all tickets from the cache which have a client
+          principal that matches the input principal.
+
+2004-09-10  Jeffrey Altman <jaltman@mit.edu>
         * cc_mslsa.c: Correct test for KerbQueryTicketCacheExMessage
 
 2004-09-09  Jeffrey Altman <jaltman@mit.edu>

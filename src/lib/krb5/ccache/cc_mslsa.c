@@ -1917,19 +1917,43 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 }
 
 /*
- *  return success although we do not do anything
- *  perhaps we could purge all existing tickets but that is 
- *  probably not wise
- */
+*  return success although we do not do anything
+*  We should delete all tickets belonging to the specified principal
+*/
+
+static krb5_error_code KRB5_CALLCONV
+krb5_lcc_remove_cred(krb5_context context, krb5_ccache id, krb5_flags flags,
+                     krb5_creds *creds);
+
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
+    krb5_cc_cursor cursor;
+    krb5_error_code code;
+    krb5_creds cred;
+
     if (!is_windows_2000())
         return KRB5_FCC_NOFILE;
 
-    return KRB5_OK;
-}
+    code = krb5_cc_start_seq_get(context, id, &cursor);
+    if (code)
+        return code;
 
+    while ( !(code = krb5_cc_next_cred(context, id, &cursor, &cred)) )
+    {
+        if ( krb5_principal_compare(context, princ, cred.client) ) {
+            code = krb5_lcc_remove_cred(context, id, 0, &cred);
+        }
+        krb5_free_cred_contents(context, &cred);
+    }
+
+    if (code == KRB5_CC_END || code == KRB5_CC_NOTFOUND)
+    {
+        krb5_cc_end_seq_get(context, id, &cursor);
+        return KRB5_OK;
+    }
+    return code;
+}
 
 /*
  * Modifies:
