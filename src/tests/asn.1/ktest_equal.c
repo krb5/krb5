@@ -465,6 +465,32 @@ int ktest_equal_krb5_pwd_data(ref, var)
   return p;
 }
 
+int ktest_equal_krb5_alt_method(ref, var)
+    krb5_alt_method *ref;
+    krb5_alt_method *var;
+{
+    if (ref->method != var->method)
+	return FALSE;
+    if (ref->length != var->length)
+	return FALSE;
+    if (memcmp(ref->data, var->data, ref->length) != 0)
+	return FALSE;
+    return TRUE;
+}
+
+int ktest_equal_krb5_etype_info_entry(ref, var)
+    krb5_etype_info_entry *ref;
+    krb5_etype_info_entry *var;
+{
+    if (ref->etype != var->etype)
+	return FALSE;
+    if (ref->length != var->length)
+	return FALSE;
+    if (memcmp(ref->salt, var->salt, ref->length) != 0)
+	return FALSE;
+    return TRUE;
+}
+
 /**** arrays ****************************************************************/
 
 int ktest_equal_array_of_data(length, ref, var)
@@ -582,4 +608,11 @@ int ktest_equal_array_of_passwd_phrase_element(ref, var)
      passwd_phrase_element ** var;
 {
   array_compare(ktest_equal_passwd_phrase_element);
+}
+
+int ktest_equal_etype_info(ref, var)
+     krb5_etype_info_entry ** ref;
+     krb5_etype_info_entry ** var;
+{
+  array_compare(ktest_equal_krb5_etype_info_entry);
 }

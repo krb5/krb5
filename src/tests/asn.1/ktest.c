@@ -637,6 +637,58 @@ krb5_error_code ktest_make_sample_krb5_pwd_data(pd)
   return 0;
 }
 
+krb5_error_code ktest_make_sample_alt_method(p)
+     krb5_alt_method * p;
+{
+    p->method = 42;
+    p->data = "secret";
+    p->length = strlen(p->data);
+    return 0;
+}
+
+krb5_error_code ktest_make_sample_etype_info_entry(p)
+     krb5_etype_info_entry * p;
+{
+    p->etype = 1;
+    p->salt = "Morton";
+    p->length = strlen(p->salt);
+    return 0;
+}
+
+krb5_error_code ktest_make_sample_etype_info(p)
+     krb5_etype_info_entry *** p;
+{
+    krb5_etype_info_entry **info;
+    int	i;
+    char buf[80];
+
+    info = malloc(sizeof(krb5_etype_info_entry *) * 4);
+    if (!info)
+	return ENOMEM;
+    memset(info, 0, sizeof(krb5_etype_info_entry *) * 4);
+
+    for (i=0; i < 3; i++) {
+	info[i] = malloc(sizeof(krb5_etype_info_entry));
+	if (info[i] == 0)
+	    goto memfail;
+	info[i]->etype = i;
+	sprintf(buf, "Morton's #%d", i);
+	info[i]->length = strlen(buf);
+	info[i]->salt = malloc(info[i]->length+1);
+	if (info[i]->salt == 0)
+	    goto memfail;
+	strcpy(info[i]->salt, buf);
+	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
+    }
+    free(info[1]->salt);
+    info[1]->length = 0;
+    info[1]->salt = 0;
+    *p = info;
+    return 0;
+memfail:
+    ktest_destroy_etype_info(info);
+    return ENOMEM;
+}
 
 /****************************************************************/
 /* destructors */
@@ -814,3 +866,23 @@ void ktest_destroy_enc_data(ed)
   ktest_empty_data(&(ed->ciphertext));
   ed->kvno = 0;
 }
+
+void ktest_destroy_etype_info_entry(i)
+    krb5_etype_info_entry *i;
+{
+    if (i->salt)
+	free(i->salt);
+    free(i);
+}
+
+void ktest_destroy_etype_info(info)
+    krb5_etype_info_entry **info;
+{
+  int i;
+
+  for(i=0; info[i] != NULL; i++)
+      ktest_destroy_etype_info_entry(info[i]);
+  free(info);
+}
+    
+

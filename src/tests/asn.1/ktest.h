@@ -1,7 +1,7 @@
 #ifndef __KTEST_H__
 #define __KTEST_H__
 
-#include "krb5.h"
+#include "k5-int.h"
 
 #define SAMPLE_USEC 123456
 #define SAMPLE_TIME 771228197  /* Fri Jun 10  6:03:17 GMT 1994 */
@@ -84,6 +84,11 @@ krb5_error_code ktest_make_sample_passwd_phrase_element
 	KRB5_PROTOTYPE((passwd_phrase_element *ppe));
 krb5_error_code ktest_make_sample_krb5_pwd_data
 	KRB5_PROTOTYPE((krb5_pwd_data *pd));
+krb5_error_code ktest_make_sample_alt_method
+	KRB5_PROTOTYPE((krb5_alt_method *am));
+
+krb5_error_code ktest_make_sample_etype_info
+    KRB5_PROTOTYPE((krb5_etype_info_entry *** p));
 
 /*----------------------------------------------------------------------*/
 
@@ -128,5 +133,10 @@ void ktest_destroy_sequence_of_ticket
 	KRB5_PROTOTYPE((krb5_ticket **tkt));
 void ktest_destroy_enc_data
 	KRB5_PROTOTYPE((krb5_enc_data *ed));
+
+void ktest_destroy_etype_info_entry
+	KRB5_PROTOTYPE((krb5_etype_info_entry *i));
+void ktest_destroy_etype_info
+	KRB5_PROTOTYPE((krb5_etype_info_entry **info));
 
 #endif

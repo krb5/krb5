@@ -1837,3 +1837,50 @@ encode_krb5_padata_sequence(empty):
 
 [Sequence/Sequence Of] 
 
+encode_krb5_alt_method:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      2a                          *
+.  [1] [Octet String] <6>
+      73 65 63 72 65 74           secret
+
+encode_krb5_alt_method (no data):
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      2a                          *
+
+encode_krb5_etype_info:
+
+[Sequence/Sequence Of] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         00                          .
+.  .  [1] [Octet String] <11>
+         4d 6f 72 74 6f 6e 27 73     Morton's
+         20 23 30                     #0
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         02                          .
+.  .  [1] [Octet String] <11>
+         4d 6f 72 74 6f 6e 27 73     Morton's
+         20 23 32                     #2
+
+encode_krb5_etype_info (only 1):
+
+[Sequence/Sequence Of] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         00                          .
+.  .  [1] [Octet String] <11>
+         4d 6f 72 74 6f 6e 27 73     Morton's
+         20 23 30                     #0
+
+encode_krb5_etype_info (no info):
+
+[Sequence/Sequence Of] 
+

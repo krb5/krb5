@@ -1,7 +1,7 @@
 #ifndef __KTEST_EQUAL_H__
 #define __KTEST_EQUAL_H__
 
-#include "krb5.h"
+#include "k5-int.h"
 
 /* int ktest_equal_structure(krb5_structure *ref, *var) */
 /* effects  Returns true (non-zero) if ref and var are
@@ -52,6 +52,7 @@ generic(ktest_equal_encryption_key,krb5_keyblock);
 
 generic(ktest_equal_passwd_phrase_element,passwd_phrase_element);
 generic(ktest_equal_krb5_pwd_data,krb5_pwd_data);
+generic(ktest_equal_krb5_alt_method,krb5_alt_method);
 
 int ktest_equal_last_req
 	KRB5_PROTOTYPE((krb5_last_req_entry **ref, krb5_last_req_entry **var));
@@ -74,5 +75,13 @@ int ktest_equal_addresses
 	KRB5_PROTOTYPE((krb5_address **ref, krb5_address **var));
 int ktest_equal_array_of_char
 	KRB5_PROTOTYPE((const int length, char *ref, char *var));
+
+int ktest_equal_etype_info
+    KRB5_PROTOTYPE((krb5_etype_info_entry ** ref,
+		    krb5_etype_info_entry ** var));
+
+int ktest_equal_etype_info_entry
+    KRB5_PROTOTYPE((krb5_etype_info_entry * ref,
+		    krb5_etype_info_entry * var));
 
 #endif
