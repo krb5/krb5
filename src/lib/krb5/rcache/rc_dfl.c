@@ -381,7 +381,7 @@ krb5_rcache id;
     if (retval = krb5_rc_io_open(&t->d,t->name))
 	return retval;
  
-    max_size = krb5_rc_io_size(t->d);
+    max_size = krb5_rc_io_size(&t->d);
  
     rep = NULL;
     if (krb5_rc_io_read(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan))) {

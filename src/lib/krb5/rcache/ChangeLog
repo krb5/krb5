@@ -1,3 +1,8 @@
+Mon Oct  3 19:32:59 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rc_def.c (krb5_rc_dfl_recover): krb5_rc_io_size was being called
+		(still) with the wrong type argument.  Should have been &t->d.
+
 Fri Sep 30 21:59:08 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rc_def.c (krb5_rc_dfl_ops): Add placeholder for magic number
