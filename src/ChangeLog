@@ -1,3 +1,9 @@
+2000-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Kludge in the old test for tcl so that we have some
+	prayer of pulling in tcl from the funky installation that goes
+	along with dejagnu.
+
 2000-02-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Change test syntax a

@@ -769,6 +769,72 @@ AC_SUBST(TCL_LIBPATH)
 AC_SUBST(TCL_RPATH)
 ])dnl
 dnl
+dnl AC_KRB5_TCL_TRYOLD
+dnl attempt to use old search algorithm for locating tcl
+dnl
+AC_DEFUN(AC_KRB5_TCL_TRYOLD, [
+AC_MSG_WARN([trying old tcl search code])
+if test "$with_tcl" != yes -a "$with_tcl" != no; then
+	TCL_INCLUDES=-I$with_tcl/include
+	TCL_LIBPATH=-L$with_tcl/lib
+	TCL_RPATH=:$with_tcl/lib
+fi
+if test "$with_tcl" != no ; then
+	AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
+	AC_CHECK_LIB(ld, main, DL_LIB=-lld)
+	krb5_save_CPPFLAGS="$CPPFLAGS"
+	krb5_save_LDFLAGS="$LDFLAGS"
+	CPPFLAGS="$TCL_INCLUDES $CPPFLAGS"
+	LDFLAGS="$TCL_LIBPATH $LDFLAGS"
+	tcl_header=no
+	AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
+	if test $tcl_header=no; then
+	   AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H) tcl_header=yes)
+	fi
+
+	if test $tcl_header = yes ; then
+		tcl_lib=no
+
+		if test $tcl_lib = no; then
+			AC_CHECK_LIB(tcl8.0, Tcl_CreateCommand, 
+				TCL_LIBS="$TCL_LIBS -ltcl8.0 -lm $DL_LIB" 
+				tcl_lib=yes,,-lm $DL_LIB)
+		fi
+		if test $tcl_lib = no; then
+			AC_CHECK_LIB(tcl7.6, Tcl_CreateCommand, 
+				TCL_LIBS="$TCL_LIBS -ltcl7.6 -lm $DL_LIB" 
+				tcl_lib=yes,,-lm $DL_LIB)
+		fi
+		if test $tcl_lib = no; then
+			AC_CHECK_LIB(tcl7.5, Tcl_CreateCommand, 
+				TCL_LIBS="$TCL_LIBS -ltcl7.5 -lm $DL_LIB"
+				tcl_lib=yes,,-lm $DL_LIB)
+
+		fi
+		if test $tcl_lib = no ; then
+			AC_CHECK_LIB(tcl, Tcl_CreateCommand, 
+				TCL_LIBS="$TCL_LIBS -ltcl -lm $DL_LIB"
+				tcl_lib=yes,,-lm $DL_LIB)
+
+		fi
+		if test $tcl_lib = no ; then		
+			AC_MSG_WARN("tcl.h found but not library")
+		fi
+	else
+		AC_MSG_WARN(Could not find Tcl which is needed for the kadm5 tests)
+		TCL_LIBS=
+	fi
+	CPPFLAGS="$krb5_save_CPPFLAGS"
+	LDFLAGS="$krb5_save_LDFLAGS"
+	AC_SUBST(TCL_INCLUDES)
+	AC_SUBST(TCL_LIBS)
+	AC_SUBST(TCL_LIBPATH)
+	AC_SUBST(TCL_RPATH)
+else
+	AC_MSG_RESULT("Not looking for Tcl library")
+fi
+])dnl
+dnl
 dnl AC_KRB5_TCL - determine if the TCL library is present on system
 dnl
 AC_DEFUN(AC_KRB5_TCL,[
@@ -791,7 +857,8 @@ if test "$with_tcl" != no ; then
   AC_KRB5_TCL_FIND_CONFIG
   if test $tcl_lib = no ; then
     if test "$with_tcl" != try ; then
-      AC_MSG_ERROR(Could not find Tcl)
+      AC_KRB5_TCL_TRYOLD
+dnl      AC_MSG_ERROR(Could not find Tcl)
     else
       AC_MSG_WARN(Could not find Tcl which is needed for some tests)
     fi
