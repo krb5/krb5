@@ -30,7 +30,8 @@ OBJS=	\
 	f_priv_enc.o	\
 	f_safe.o	\
 	f_ticket.o	\
-	f_tickets.o
+	f_tickets.o	\
+	f_tgt_cred.o
 
 SRCS=	\
 	f_addr.c	\
@@ -53,6 +54,7 @@ SRCS=	\
 	f_priv_enc.c	\
 	f_safe.c	\
 	f_ticket.c	\
-	f_tickets.c
+	f_tickets.c	\
+	f_tgt_cred.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
