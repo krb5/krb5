@@ -302,8 +302,7 @@ AC_FUNC_CHECK(sigsetjmp,
 AC_MSG_CHECKING(for sigjmp_buf)
 AC_CACHE_VAL(krb5_cv_struct_sigjmp_buf,
 [AC_TRY_COMPILE(
-[#include <setjmp.h>],
-[sigjmp_buf x],
+[#include <setjmp.h>],[sigjmp_buf x],
 krb5_cv_struct_sigjmp_buf=yes,krb5_cv_struct_sigjmp_buf=no)])
 AC_MSG_RESULT($krb5_cv_struct_sigjmp_buf)
 if test $krb5_cv_struct_sigjmp_buf = yes; then
@@ -552,11 +551,9 @@ dnl
 define(V5_AC_OUTPUT_MAKEFILE,
 [AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,[EXTRA_RULES], cat pre.out Makefile.out post.out > Makefile)])dnl
 dnl
+dnl CHECK_UTMP: check utmp structure and functions
 dnl
-dnl utmp structure checks (used by appl/bsd and kadmin/kpasswd)
-dnl
-dnl check for ut_pid in struct utmp
-define(KRB5_UTPID,[
+define(CHECK_UTMP,[
 AC_MSG_CHECKING([ut_pid in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_pid,
 [AC_TRY_COMPILE(
@@ -567,11 +564,6 @@ AC_MSG_RESULT($krb5_cv_struct_ut_pid)
 if test $krb5_cv_struct_ut_pid = no; then
   AC_DEFINE(NO_UT_PID)
 fi
-])dnl
-dnl
-dnl check for ut_type in struct utmp
-dnl
-define(KRB5_UTTYPE,[
 AC_MSG_CHECKING([ut_type in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_type,
 [AC_TRY_COMPILE(
@@ -582,11 +574,6 @@ AC_MSG_RESULT($krb5_cv_struct_ut_type)
 if test $krb5_cv_struct_ut_type = no; then
   AC_DEFINE(NO_UT_TYPE)
 fi
-])dnl
-dnl
-dnl check for ut_host in struct utmp
-dnl
-define(KRB5_UTHOST,[
 AC_MSG_CHECKING([ut_host in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_host,
 [AC_TRY_COMPILE(
@@ -597,12 +584,6 @@ AC_MSG_RESULT($krb5_cv_struct_ut_host)
 if test $krb5_cv_struct_ut_host = no; then
   AC_DEFINE(NO_UT_HOST)
 fi
-])dnl
-dnl
-dnl
-dnl check for ut_exit in struct utmp
-dnl
-define(KRB5_UTEXIT,[
 AC_MSG_CHECKING([ut_exit in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_exit,
 [AC_TRY_COMPILE(
@@ -613,6 +594,10 @@ AC_MSG_RESULT($krb5_cv_struct_ut_exit)
 if test $krb5_cv_struct_ut_exit = no; then
   AC_DEFINE(NO_UT_EXIT)
 fi
+AC_FUNC_CHECK(setutent,AC_DEFINE(HAVE_SETUTENT))
+AC_FUNC_CHECK(setutxent,AC_DEFINE(HAVE_SETUTXENT))
+AC_FUNC_CHECK(updwtmp,AC_DEFINE(HAVE_UPDWTMP))
+AC_FUNC_CHECK(updwtmpx,AC_DEFINE(HAVE_UPDWTMPX))
 ])dnl
 dnl
 dnl
