@@ -1,3 +1,7 @@
+1999-08-30 16:55   Jeffrey Altman <jaltman@columbia.edu>
+
+        * kerberos5.c: Ensure that only "host" service tickets are accepted.
+
 Wed Feb  3 22:59:27 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kerberos5.c: Increase size of str_data so that we can accept

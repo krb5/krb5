@@ -378,6 +378,7 @@ kerberos5_is(ap, data, cnt)
 	Session_Key skey;
 #endif
 	char errbuf[128];
+	char princ[256];
 	char *name;
 	char *getenv();
 	krb5_data inbuf;
@@ -423,6 +424,20 @@ kerberos5_is(ap, data, cnt)
 			(void) strcat(errbuf, error_message(r));
 			goto errout;
 		}
+        if (krb5_princ_component(k5_context,k5_ticket->server,0)->length < 256) {
+            strncpy(princ,	
+				krb5_princ_component(k5_context, k5_ticket->server,0)->data,
+				krb5_princ_component(k5_context, k5_ticket->server,0)->length);
+			princ[krb5_princ_component(k5_context, 
+				k5_ticket->server,0)->length] = '\0';
+        }
+        if ( strcmp("host", princ) )
+        {
+            (void) sprintf( errbuf, "incorrect service name: %s != %s",
+                            princ, "host");
+            goto errout;
+        }
+
 		r = krb5_auth_con_getauthenticator(telnet_context,
 						   auth_context,
 						   &authenticator);
