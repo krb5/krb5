@@ -1299,7 +1299,9 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket = 0;
     krb5_creds * mcreds_noflags;
-    krb5_creds * fetchcreds;
+    krb5_creds   fetchcreds;
+
+    memset(&fetchcreds, 0, sizeof(krb5_creds));
 
     /* first try to find out if we have an existing ticket which meets the requirements */
     kret = krb5_cc_retrieve_cred_default (context, id, whichfields, mcreds, creds);
@@ -1335,15 +1337,15 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     }
 
     /* convert the ticket */
-    MSCredToMITCred(msticket, context, fetchcreds);
+    MSCredToMITCred(msticket, context, &fetchcreds);
 
     /* check to see if this ticket matches the request using logic from
      * krb5_cc_retrieve_cred_default()
      */
-    if ( krb5int_cc_creds_match_request(context, whichfields, mcreds, fetchcreds) ) {
-        creds = fetchcreds;
+    if ( krb5int_cc_creds_match_request(context, whichfields, mcreds, &fetchcreds) ) {
+        *creds = fetchcreds;
     } else {
-        krb5_free_creds(context, fetchcreds);
+        krb5_free_cred_contents(context, &fetchcreds);
         kret = KRB5_CC_NOTFOUND;
     }
 
