@@ -1,3 +1,8 @@
+Tue May 16 03:05:30 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* aclocal.m4 (_MAKE_SUBDIRS): fix rule so that MAKEFLAGS gets
+		processed correctly.
+
 Fri May  5 01:50:08 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* patchlevel.h: Update patchlevel for BETA 5 release

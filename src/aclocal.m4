@@ -97,12 +97,12 @@ AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote(<<<,>>>)dnl
 
 $2::<<<
-	@case '${MFLAGS}' in *[ik]*) set +e ;; esac; \
-	for i in $(SUBDIRS) ;\
-	do \
+	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
+		*[ik]*) set +e ;; *) set -e ;; esac; \
+	for i in $(SUBDIRS) ; do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
-			$(MAKE) $(MFLAGS) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) || exit 1; \
+			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
+			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) \
 	done>>>
 changequote([,])dnl
 AC_DIVERT_POP()dnl
