@@ -1,3 +1,7 @@
+Sat Jul  8 22:37:14 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb_dbm.c (kdb5_kdbm_db_create): Make sure the dbm context is
+		initialized before we start.
 
 Fri Jul 7 16:29:22 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS, find com_err in TOPLIBD.

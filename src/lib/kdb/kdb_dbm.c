@@ -1158,7 +1158,12 @@ krb5_dbm_db_create(context, db_name)
     register krb5_error_code retval = 0;
 #ifndef ODBM
     DBM *db;
+#endif
 
+    if ((retval = k5dbm_init_context(context)))
+	return(retval);
+    
+#ifndef ODBM
     db = KDBM_OPEN(context->db_context, db_name, O_RDWR|O_CREAT|O_EXCL, 0600);
     if (db == NULL)
 	retval = errno;
