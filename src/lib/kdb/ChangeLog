@@ -1,3 +1,7 @@
+2001-04-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb_dbm.c (destroy_file_suffix): Declare as static.
+
 2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb_xdr.c: Change the variable index to idx to prevent function

@@ -609,7 +609,7 @@ krb5_dbm_db_create(context, db_name)
 /*
  * Destroy the database.  Zero's out all of the files, just to be sure.
  */
-krb5_error_code
+static krb5_error_code
 destroy_file_suffix(dbname, suffix)
 	char	*dbname;
 	char	*suffix;
