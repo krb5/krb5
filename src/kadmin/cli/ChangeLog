@@ -1,3 +1,7 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* getdate.y: Cast argument to isalpha()/isspace()/isdigit() to int.
+
 Mon Feb 26 13:25:50 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* ss_wrapper.c: Include kadmin.h.
