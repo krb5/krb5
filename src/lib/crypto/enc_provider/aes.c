@@ -91,6 +91,8 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	xorblock(tmp, tmp3);
 	enc(tmp2, tmp, &ctx);
 	memcpy(output->data + (nblocks - 2) * BLOCK_SIZE, tmp2, BLOCK_SIZE);
+	if (ivec)
+	    memcpy(ivec->data, tmp2, BLOCK_SIZE);
     }
 
     return 0;
@@ -149,6 +151,9 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	dec(tmp3, tmp2, &ctx);
 	xorblock(tmp3, tmp);
 	memcpy(output->data + (nblocks - 2) * BLOCK_SIZE, tmp3, BLOCK_SIZE);
+	if (ivec)
+	    memcpy(ivec->data, input->data + (nblocks - 2) * BLOCK_SIZE,
+		   BLOCK_SIZE);
     }
 
     return 0;

@@ -1,3 +1,8 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (krb5int_aes_encrypt, krb5int_aes_decrypt): Copy out value
+	for new IV.
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* arcfour.c (arcfour_weakkey1, arcfour_weakkey2,
