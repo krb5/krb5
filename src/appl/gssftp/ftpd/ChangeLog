@@ -1,3 +1,9 @@
+Wed Aug 12 02:57:07 1998  Geoffrey King  <gjking@mit.edu>
+
+	* ftpcmd.y, ftpd.c: Replace global variable level with clevel and
+ 	dlevel to allow independence of command and data channel
+ 	protection levels.
+
 Tue Aug 11 04:30:59 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* ftpd.c: Add support for extended logging as per PR#481. Using 

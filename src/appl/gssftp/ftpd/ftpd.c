@@ -178,7 +178,8 @@ int	logging;
 int	authenticate;
 int	guest;
 int	type;
-int	level;
+int	clevel;			/* control protection level */
+int	dlevel;			/* data protection level */
 int	form;
 int	stru;			/* avoid C keyword */
 int	mode;
@@ -400,6 +401,7 @@ nextopt:
 #define LOG_DAEMON 0
 #endif
 	openlog("ftpd", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+
 	addrlen = sizeof (his_addr);
 	if (getpeername(0, (struct sockaddr *)&his_addr, &addrlen) < 0) {
 		syslog(LOG_ERR, "getpeername (%s): %m",argv[0]);
@@ -455,7 +457,7 @@ nextopt:
 	 * Set up default state
 	 */
 	data = -1;
-	level = PROT_C;
+	clevel = dlevel = PROT_C;
 	type = TYPE_A;
 	form = FORM_N;
 	stru = STRU_F;
@@ -564,7 +566,10 @@ path_expand(path)
 	return strcat(pathbuf, path);
 }
 
-setlevel(prot_level)
+/*
+ * Set data channel protection level
+ */
+setdlevel(prot_level)
 int prot_level;
 {
 	switch (prot_level) {
@@ -574,10 +579,10 @@ int prot_level;
 #endif
 			if (auth_type)
 		case PROT_C:
-				reply(200, "Protection level set to %s.",
-					(level = prot_level) == PROT_S ?
-						"Safe" : level == PROT_P ?
-						"Private" : "Clear");
+				reply(200, "Data channel protection level set to %s.",
+					(dlevel = prot_level) == PROT_S ?
+						"safe" : dlevel == PROT_P ?
+						"private" : "clear");
 			else
 		default:	reply(536, "%s protection level not supported.",
 					levelnames[prot_level]);
@@ -1440,7 +1445,7 @@ statcmd()
 		reply(0, "     Waiting for authentication data");
 	else
 		reply(0, "     Waiting for user name");
-	reply(0, "     PROTection level: %s", levelnames[level]);
+	reply(0, "     Protection level: %s", levelnames[dlevel]);
 	sprintf(str, "     TYPE: %s", typenames[type]);
 	if (type == TYPE_A || type == TYPE_E)
 		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
@@ -1514,16 +1519,12 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 	if (auth_type) {
 		char in[FTP_BUFSIZ], out[FTP_BUFSIZ];
 		int length, kerror;
-		/*
-		 * File protection level also determines whether
-		 * replies are 631 or 632.  Should be independent ...
-		 */
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
 		strcat(in, buf);
 #ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-			if ((length = level == PROT_P ?
+			if ((length = clevel == PROT_P ?
 			     krb_mk_priv((unsigned char *)in,
 					 (unsigned char *)out,
 					 strlen(in), schedule, &kdata.session,
@@ -1534,7 +1535,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 					   &ctrl_addr, &his_addr)) == -1) {
 				syslog(LOG_ERR,
 				       "krb_mk_%s failed for KERBEROS_V4",
-				       level == PROT_P ? "priv" : "safe");
+				       clevel == PROT_P ? "priv" : "safe");
 				fputs(in,stdout);
 			}
 		} else
@@ -1549,17 +1550,17 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 			in_buf.value = in;
 			in_buf.length = strlen(in) + 1;
 			maj_stat = gss_seal(&min_stat, gcontext,
-					    level == PROT_P, /* confidential */
+					    clevel == PROT_P, /* private */
 					    GSS_C_QOP_DEFAULT,
 					    &in_buf, &conf_state,
 					    &out_buf);
 			if (maj_stat != GSS_S_COMPLETE) {
 				/* generally need to deal */
 				secure_gss_error(maj_stat, min_stat,
-					       (level==PROT_P)?
+					       (clevel==PROT_P)?
 						 "gss_seal ENC didn't complete":
 						 "gss_seal MIC didn't complete");
-			} else if ((level == PROT_P) && !conf_state) {
+			} else if ((clevel == PROT_P) && !conf_state) {
 				secure_error("GSSAPI didn't encrypt message");
 			} else {
 				memcpy(out, out_buf.value, 
@@ -1574,7 +1575,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 					radix_error(kerror));
 			fputs(in,stdout);
 		} else
-		printf("%s%c%s", level == PROT_P ? "632" : "631",
+		printf("%s%c%s", clevel == PROT_P ? "632" : "631",
 				 n ? cont_char : '-', in);
 	} else {
 		if (n) printf("%d%c", n, cont_char);
@@ -2210,7 +2211,7 @@ char *fmt;
         va_list ap;
 
         va_start(ap, fmt);
-        if (level == PROT_C) rval = vfprintf(stream, fmt, ap);
+        if (dlevel == PROT_C) rval = vfprintf(stream, fmt, ap);
         else {
                 vsprintf(s, fmt, ap);
                 rval = secure_write(fileno(stream), s, strlen(s));
@@ -2219,7 +2220,7 @@ char *fmt;
 
         return(rval);
 #else
-        if (level == PROT_C)
+        if (dlevel == PROT_C)
                 return(fprintf(stream, fmt, p1, p2, p3, p4, p5));
         sprintf(s, fmt, p1, p2, p3, p4, p5);
         return(secure_write(fileno(stream), s, strlen(s)));

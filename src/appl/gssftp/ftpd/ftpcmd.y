@@ -114,6 +114,7 @@ extern	int guest;
 extern	int logging;
 extern	int type;
 extern	int form;
+extern	int clevel;
 extern	int debug;
 extern	int timeout;
 extern	int maxtimeout;
@@ -227,7 +228,7 @@ cmd:		USER SP username CRLF
 	|	PROT SP prot_code CRLF
 		= {
 		    if (maxbuf)
-			setlevel ($3);
+			setdlevel ($3);
 		    else
 			reply(503, "Must first set PBSZ");
 		}
@@ -1024,6 +1025,7 @@ getline(s, n, iop)
 	    }
 	    if (debug) syslog(LOG_DEBUG, "getline got %d from %s <%s>\n", 
 			      len, cs, mic?"MIC":"ENC");
+	    clevel = mic ? PROT_S : PROT_P;
 #ifdef KRB5_KRB4_COMPAT
 	    if (strcmp(auth_type, "KERBEROS_V4") == 0) {
 		if ((kerror = mic ?
