@@ -1098,7 +1098,7 @@ static void check_db_age()
  * "25-Jan-88 10:17:56"
  */
 
-#ifdef HAVE_SYS_TIME_H
+#ifdef USE_SYS_TIME_H
 #include <sys/time.h>
 #else
 #include <time.h>
