@@ -1,3 +1,8 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_aprof_init): profile_init takes a
+	profile_filespec_t as argument instad of char **.
+
 2000-06-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): Include des3 in supported

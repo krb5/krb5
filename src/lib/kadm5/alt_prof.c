@@ -67,10 +67,10 @@ krb5_aprof_init(fname, envname, acontextp)
     krb5_pointer	*acontextp;
 {
     krb5_error_code	kret;
-    const char		*namelist[2];
+    profile_filespec_t 	namelist[2];
     profile_t		profile;
     
-    namelist[1] = (char *) NULL;
+    namelist[1] = (profile_filespec_t) NULL;
     profile = (profile_t) NULL;
     if (envname) {
 	if ((namelist[0] = getenv(envname))) {
