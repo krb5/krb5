@@ -186,6 +186,10 @@ krb5_error_code krb5_parse_name
 krb5_error_code krb5_unparse_name
 	PROTOTYPE((const krb5_principal,
 		   char ** ));
+krb5_error_code krb5_unparse_name_ext
+	PROTOTYPE((const krb5_principal,
+		   char **,
+		   int *));
 krb5_boolean krb5_address_search
 	PROTOTYPE((const krb5_address *,
 		   krb5_address * const *));
@@ -308,6 +312,8 @@ void krb5_free_priv_enc_part
 void krb5_free_kdc_req
 	PROTOTYPE((krb5_kdc_req * ));
 void krb5_free_creds
+	PROTOTYPE((krb5_creds *));
+void krb5_free_cred_contents
 	PROTOTYPE((krb5_creds *));
 void krb5_free_checksum
 	PROTOTYPE((krb5_checksum *));
