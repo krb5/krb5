@@ -115,7 +115,8 @@ SHLIB_LIBS=-lgssapi_krb5 -lkrb5 -lcrypto -lcom_err -ldyn
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all-unix:: shared includes $(OBJS)
+all-unix:: shared includes
+all-unix:: $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
