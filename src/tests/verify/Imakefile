@@ -1,0 +1,13 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990 by the Massachusetts Institute of Technology.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+
+SimpleProgramTarget(kdb5_verify)
