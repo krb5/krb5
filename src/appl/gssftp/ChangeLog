@@ -1,3 +1,8 @@
+2001-07-24  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add check for getev() to avoid problems when
+	building setenv.c from appl/bsd.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in (SETENVOBJ): Define NEED_SETENV if compiling our own.
