@@ -96,14 +96,7 @@ extern gss_ctx_id_t gcontext;
 #endif
 
 #ifndef NBBY
-#ifdef linux
 #define NBBY 8
-#endif
-#ifdef __pyrsoft
-#ifdef MIPSEB
-#define NBBY 8
-#endif
-#endif
 #endif
 
 static struct sockaddr_in host_port;

@@ -1,3 +1,9 @@
+2004-11-26  Sam Hartman  <hartmans@mit.edu>
+
+	* ftpcmd.y: nbby should be 8 for anything platform we care about.
+	The previous test broke on Debian BSD, so the test has been
+	removed. 
+
 2004-11-03  Tom Yu  <tlyu@mit.edu>
 
 	* ftpcmd.y (getline): Merge Athena change to reject MICed
