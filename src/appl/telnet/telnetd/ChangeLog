@@ -1,3 +1,8 @@
+Wed Jan 11 15:23:07 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in (K4LIB): fix quoting so $(KRB4) actually survives
+	to the Makefile.
+
 Fri Nov 18 01:23:13 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install): install telnetd manpage
