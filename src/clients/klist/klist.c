@@ -36,6 +36,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#if defined(HAVE_ARPA_INET_H)
+#include <arpa/inet.h>
+#endif
 
 #ifndef _WIN32
 #define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/')+1 : (x))
@@ -110,7 +113,9 @@ void usage()
  * whether Kerberos 4 and Keberos 5 libraries are available
  */
 
+#ifdef KRB5_KRB4_COMPAT
 static int got_k4 = 0;
+#endif
 static int got_k5 = 0; 
 
 int
@@ -652,7 +657,7 @@ void one_addr(a)
 	if (no_resolve || !h) {
 #ifdef HAVE_INET_NTOP
 	    char buf[46];
-	    char *name = inet_ntop(a->addrtype, a->contents, buf, sizeof(buf));
+	    const char *name = inet_ntop(a->addrtype, a->contents, buf, sizeof(buf));
 	    if (name) {
 		printf ("%s", name);
 		return;
