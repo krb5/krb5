@@ -64,6 +64,11 @@ static krb5_cs_table_entry lucifer_crc_csentry = {
 #define LUCIFER_CRC_CSENTRY 0
 #endif
 
+/* WARNING:
+   make sure the order of entries in these tables matches the #defines in
+   <krb5/encryption.h>
+ */
+
 krb5_cs_table_entry *krb5_csarray[] = {
     0,
     DES_CBC_CRC_CSENTRY,
@@ -83,9 +88,9 @@ int krb5_max_keytype = sizeof(krb5_keytype_array)/sizeof(krb5_keytype_array[0]) 
 krb5_checksum_entry *krb5_cksumarray[] = {
     0,
     CRC32_CKENTRY,
+    MD4_CKENTRY,
     XEROX_CKENTRY,
     DES_CBC_CKENTRY,
-    MD4_CKENTRY,
 };
 
 int krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
