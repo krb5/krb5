@@ -1,5 +1,5 @@
 
-		   Kerberos Version 5, Release 1.2
+		  Kerberos Version 5, Release 1.2.2
 
 			    Release Notes
 
@@ -8,36 +8,26 @@
 Unpacking the Source Distribution
 ---------------------------------
 
-The source distribution of Kerberos 5 comes in three gzipped tarfiles,
-krb5-1.2.src.tar.gz, krb5-1.2.doc.tar.gz, and krb5-1.2.crypto.tar.gz.
-The krb5-1.2.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.2.src.tar.gz contains the src/ directory and this
-README file, except for the crypto library sources, which are in
-krb5-1.2.crypto.tar.gz.
-
-Instruction on how to extract the entire distribution follow.  These
-directions assume that you want to extract into a directory called
-DIST.
+The source distribution of Kerberos 5 comes in a gzipped tarfile,
+krb5-1.2.2.tar.gz.  Instruction on how to extract the entire
+distribution follow.  These directions assume that you want to extract
+into a directory called DIST.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.src.tar.gz
-	gtar zxpf krb5-1.2.crypto.tar.gz
-	gtar zxpf krb5-1.2.doc.tar.gz
+	gtar zxpf krb5-1.2.2.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.src.tar.gz | tar xpf -
-	gzcat krb5-1.2.crypto.tar.gz | tar xpf -
-	gzcat krb5-1.2.doc.tar.gz | tar xpf -
+	gzcat krb5-1.2.2.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2/src
-and the documentation into DIST/krb5-1.2/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.2/src
+and the documentation into DIST/krb5-1.2.2/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -70,8 +60,68 @@ If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
 
-Notes, Major Changes, and Known Bugs
-------------------------------------
+Notes, Major Changes, and Known Bugs for 1.2.2
+----------------------------------------------
+
+Notes:
+
+* This release is a patch release; some non-critical bugs and feature
+  requests have not been incorporated.
+
+Major Changes:
+
+* The KDC dump format has been updated to include per-principal policy
+  information.  This will require updating your slave KDCs before your
+  master if you want things to still work. [XXX add to admin doc]
+
+* A library bug that prevented kprop from working properly with DES3
+  keys has been fixed.
+
+* kpasswd should no longer coredump when there is no kadmin_server
+  line in krb5.conf.
+
+* ASN.1 parsing has been improved to deal with indefinite encodings,
+  such as those emitted by DCE-1.0 derived systems.
+
+* Preauthentication handling code in the initial ticket APIs has been
+  fixed to handle zero-length ETYPE_INFO sequences without causing a
+  NULL pointer dereference.
+
+* The replay cache should no longer leak temporary files.  Related
+  hard-to-analyze filename bugs in the rcache code should also be
+  fixed.
+
+* Library builds should now work on AIX.
+
+* KDC local address search code should now work on AIX.
+
+* The yacc grammar for the ftp daemon has been modified to be
+  compilable on HP/UX with Bison; namespace pollution from system
+  headers was causing trouble before.
+
+Known Bugs:
+
+* The gss-sample test application suite is known to not communicate
+  with the gss-sample suite in 1.1.x and earlier releases.  This is
+  the result of changes to increase functionality; fixes to allow for
+  backwards compatibility will occur in a later release.
+
+* Handling of utmp and utmpx updates is known to be broken on some
+  systems, such as Solaris 8.  We are investigating possible solutions
+  to this problem.
+
+* Tru64 Unix 5.0 (aka OSF/1 5.0), at least, has some problems with
+  revoke() returning ENOTTY in open_slave in the pty library.  One
+  possible workaround is to insert
+
+	vfs:
+		revoke_tty_only = 0
+
+  in /etc/sysconfigtab.  It is not known whether this workaround will
+  cause other problems.
+
+Notes, Major Changes, and Known Bugs for 1.2.1 and 1.2
+------------------------------------------------------
 
 * Triple DES support, for session keys as well as user or service
   keys, should be nearly complete in this release.  Much of the work
