@@ -88,6 +88,9 @@ krb5_sendauth(context, auth_context,
 	 * Now, read back a byte: 0 means no error, 1 means bad sendauth
 	 * version, 2 means bad application version
 	 */
+#ifndef ECONNABORTED
+#define ECONNABORTED WSAECONNABORTED
+#endif
     if ((len = krb5_net_read(context, *((int *) fd), (char *)&result, 1)) != 1)
 	return((len < 0) ? errno : ECONNABORTED);
     if (result == 1)

@@ -1,3 +1,13 @@
+Wed Jun 12 01:10:09 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sendauth.c (krb5_sendauth): If ECCONABORTED is not defined, try
+		using the Winsock equivalent (WSAECONNABORTED).
+
+Mon Jun 10 21:47:21 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* parse.c (krb5_parse_name): Change use of _WINDOWS to _MSDOS, and
+		add check for _WIN32.
+
 Thu Jun  6 00:06:18 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* get_creds.c (krb5_get_credentials_core): A static function must
