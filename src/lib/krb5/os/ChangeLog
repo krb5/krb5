@@ -1,5 +1,8 @@
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* changepw.c (krb5_locate_kpasswd): Check specifically for certain
+	errors before using fallback heuristics.
+
 	* locate_kdc.c (get_port): Replace function with macro.
 
 2003-06-03  Alexandra Ellwood  <lxs@mit.edu>
