@@ -602,7 +602,7 @@ k5_auth_send (int how)
     }
 
 
-	if (r = krb5_get_credentials(k5_context, KDC_OPT_RENEWABLE_OK,
+	if (r = krb5_get_credentials(k5_context, 0,
 				     ccache, &cred, &new_cred)) {
         com_err (NULL, r, "while authorizing.");
 		krb5_free_cred_contents(k5_context, &cred);
