@@ -14,6 +14,8 @@ D_HAVE_OPENLOG		= -DHAVE_OPENLOG
 D_HAVE_CLOSELOG		= -DHAVE_CLOSELOG
 D_HAVE_STRFTIME		= -DHAVE_STRFTIME
 
+REGEXLIB		= -lgen
+
 # libgen.a is for regcmp and regex, used in /usr/lib/libXm.a; this is
 # a different set of regexp routines than used by svr_iters.c
 XM_LIB	= /usr/lib/libXm.a /usr/lib/libgen.a
