@@ -233,8 +233,8 @@ static void test_misc(krb5_context context)
   krb5_cc_dfl_ops = ops_save;
 
 }
-extern krb5_cc_ops krb5_mcc_ops;
-extern krb5_cc_ops krb5_fcc_ops;
+extern const krb5_cc_ops krb5_mcc_ops;
+extern const krb5_cc_ops krb5_fcc_ops;
 
 int main (void)
 {

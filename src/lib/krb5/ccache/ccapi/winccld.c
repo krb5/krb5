@@ -10,7 +10,7 @@
 #include "k5-int.h"
 
 /* from fcc-proto.h */
-extern krb5_cc_ops krb5_fcc_ops;
+extern const krb5_cc_ops krb5_fcc_ops;
 
 #define KRB5_WINCCLD_C_
 #include "winccld.h"

@@ -1766,7 +1766,7 @@ krb5_fcc_destroy(krb5_context context, krb5_ccache id)
 #endif
 }
 
-extern krb5_cc_ops krb5_fcc_ops;
+extern const krb5_cc_ops krb5_fcc_ops;
 
 /*
  * Requires:
@@ -2398,7 +2398,7 @@ krb5_fcc_interpret(krb5_context context, int errnum)
     return retval;
 }
 
-krb5_cc_ops krb5_fcc_ops = {
+const krb5_cc_ops krb5_fcc_ops = {
      0,
      "FILE",
      krb5_fcc_get_name,

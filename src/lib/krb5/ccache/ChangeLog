@@ -1,10 +1,11 @@
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
-	* cc_file.c (krb5_cc_file_ops): Now const.
+	* cc_file.c (krb5_cc_file_ops, krb5_fcc_ops): Now const.
 	* fcc.h (krb5_cc_file_ops): Update decl.
 	* cc_memory.c (krb5_mcc_ops): Now const.
 	* ccbase.c (krb5_mcc_ops): Update decl.
 	* ccdefops.c (krb5_cc_dfl_ops): Now points to const.
+	* t_cc.c (krb5_fcc_ops, krb5_mcc_ops): Update decls.
 
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
