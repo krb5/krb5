@@ -5,6 +5,14 @@ USE_ANAME
 AC_HEADER_STDARG
 AC_CHECK_FUNCS(getusershell lstat )
 AC_CHECK_HEADERS(unistd.h)
+case $krb5_cv_host in
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID)
+		KSU_LIBS="$KSU_LIBS -lsecurity"
+	)
+	;;
+esac
 USE_KRB5UTIL_LIBRARY
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB

@@ -1,3 +1,11 @@
+Thu Feb 18 22:33:58 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (ksu): Add $(KSU_LIBS).
+
+	* configure.in: Add check for setluid().
+
+	* main.c (main): Add call to setluid() on systems that have it.
+
 Wed Feb  4 20:46:49 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krb_auth_su.c (krb5_verify_tkt_def): If using a pre-existing
