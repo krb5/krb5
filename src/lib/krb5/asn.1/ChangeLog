@@ -1,3 +1,8 @@
+Thu Jul 14 11:37:59 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* asn1_*.[ch]: 
+	* krb5_*.[ch]: Add MIT Copyright notices.
+
 Thu Jul 14 01:26:22 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* asn1_encode_k.c (asn1_encode_pa_data): oops still check NULL if
