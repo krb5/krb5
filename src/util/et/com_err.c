@@ -163,6 +163,8 @@ static void MacMessageBox(errbuf)
 	EventRecord	theEvent;
 	Point		localPt;
 	Boolean		done;
+	long		gestaltResult;
+	OSErr		theError;
 
 	/* Find Centered rect for window */
 	tmpRect.top	= ((mainRect.bottom + mainRect.top)/2 -
@@ -173,8 +175,13 @@ static void MacMessageBox(errbuf)
 	tmpRect.right = tmpRect.left + (errRect.right - errRect.left);
 
 	/* Create the error window - as a dialog window */
-	errWindow = NewWindow(NULL, &tmpRect, "\p", TRUE,
-			      dBoxProc, (WindowPtr) -1, FALSE, 0L);
+	/* First check if we have color QuickDraw */
+	/* (we can assume we have Gestalt because we are on system 7) */
+	theError = Gestalt (gestaltQuickdrawFeatures, &gestaltResult);
+	if ((theError == noErr) && (gestaltResult & (1 << gestaltHasColor) != 0))
+		errWindow = NewCWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
+	else
+		errWindow = NewWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
 
 	SetPort(errWindow);
 	TextFont(systemFont);
@@ -198,7 +205,7 @@ static void MacMessageBox(errbuf)
 	/* mini event loop here */
 	done = FALSE;
 	while(!done) {
-		GetNextEvent(mDownMask | mUpMask | keyDownMask, &theEvent);
+		WaitNextEvent(mDownMask | mUpMask | keyDownMask, &theEvent, 15, nil);
 		if (theEvent.what == mouseDown) {
 			localPt = theEvent.where;
 			GlobalToLocal(&localPt);
