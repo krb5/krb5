@@ -83,8 +83,8 @@ static unsigned char PADDING[64] = {
    (a) = ROTATE_LEFT ((a), (s));}
 
 void
-MD4Init (mdContext)
-MD4_CTX FAR *mdContext;
+krb5_MD4Init (mdContext)
+krb5_MD4_CTX FAR *mdContext;
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -97,8 +97,8 @@ MD4_CTX FAR *mdContext;
 }
 
 void
-MD4Update (mdContext, inBuf, inLen)
-MD4_CTX FAR *mdContext;
+krb5_MD4Update (mdContext, inBuf, inLen)
+krb5_MD4_CTX FAR *mdContext;
 unsigned char FAR *inBuf;
 unsigned int inLen;
 {
@@ -133,8 +133,8 @@ unsigned int inLen;
 }
 
 void
-MD4Final (mdContext)
-MD4_CTX FAR *mdContext;
+krb5_MD4Final (mdContext)
+krb5_MD4_CTX FAR *mdContext;
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -150,7 +150,7 @@ MD4_CTX FAR *mdContext;
 
   /* pad out to 56 mod 64 */
   padLen = (mdi < 56) ? (56 - mdi) : (120 - mdi);
-  MD4Update (mdContext, PADDING, padLen);
+  krb5_MD4Update (mdContext, PADDING, padLen);
 
   /* append length in bits and transform */
   for (i = 0, ii = 0; i < 14; i++, ii += 4)

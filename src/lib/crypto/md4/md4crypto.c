@@ -31,11 +31,11 @@
 /* Windows needs to these prototypes for the assignment below */
 
 krb5_error_code
-md4_crypto_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
+krb5_md4_crypto_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
     krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
 
 krb5_error_code
-md4_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
+krb5_md4_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
 	size_t in_length, krb5_pointer seed, size_t seed_length));
 
 /*
@@ -53,18 +53,18 @@ md4_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
  */
 
 static void
-md4_calculate_cksum(md4ctx, in, in_length, confound, confound_length)
-    MD4_CTX		*md4ctx;
+krb5_md4_calculate_cksum(md4ctx, in, in_length, confound, confound_length)
+    krb5_MD4_CTX		*md4ctx;
     krb5_pointer	in;
     size_t		in_length;
     krb5_pointer	confound;
     size_t		confound_length;
 {
-    MD4Init(md4ctx);
+    krb5_MD4Init(md4ctx);
     if (confound && confound_length)
-	MD4Update(md4ctx, confound, confound_length);
-    MD4Update(md4ctx, in, in_length);
-    MD4Final(md4ctx);
+	krb5_MD4Update(md4ctx, confound, confound_length);
+    krb5_MD4Update(md4ctx, in, in_length);
+    krb5_MD4Final(md4ctx);
 }
 
 #ifdef	MD4_K5BETA_COMPAT
@@ -73,7 +73,7 @@ md4_calculate_cksum(md4ctx, in, in_length, confound, confound_length)
  * K5 Beta implementations.  Sigh...
  */
 krb5_error_code
-md4_crypto_compat_sum_func(in, in_length, seed, seed_length, outcksum)
+krb5_md4_crypto_compat_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
 krb5_pointer seed;
@@ -86,11 +86,11 @@ krb5_checksum FAR *outcksum;
     krb5_keyblock keyblock;
     krb5_error_code retval;
 
-    MD4_CTX working;
+    krb5_MD4_CTX working;
 
-    MD4Init(&working);
-    MD4Update(&working, input, in_length);
-    MD4Final(&working);
+    krb5_MD4Init(&working);
+    krb5_MD4Update(&working, input, in_length);
+    krb5_MD4Final(&working);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD4_DES;
     outcksum->length = RSA_MD4_DES_CKSUM_LENGTH;
@@ -124,7 +124,7 @@ krb5_checksum FAR *outcksum;
  * Generate the RSA-MD4-DES checksum correctly.
  */
 krb5_error_code
-md4_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
+krb5_md4_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
 krb5_pointer seed;
@@ -140,7 +140,7 @@ krb5_checksum FAR *outcksum;
     krb5_error_code retval;
     size_t i;
 
-    MD4_CTX working;
+    krb5_MD4_CTX working;
 
     /* Generate the confounder in place */
     if (retval = krb5_random_confounder(RSA_MD4_DES_CONFOUND_LENGTH,
@@ -148,7 +148,7 @@ krb5_checksum FAR *outcksum;
 	return(retval);
 
     /* Calculate the checksum */
-    md4_calculate_cksum(&working,
+    krb5_md4_calculate_cksum(&working,
 			(krb5_pointer) outtmp,
 			(size_t) RSA_MD4_DES_CONFOUND_LENGTH,
 			in,
@@ -192,7 +192,7 @@ krb5_checksum FAR *outcksum;
 }
 
 krb5_error_code
-md4_crypto_verify_func(cksum, in, in_length, seed, seed_length)
+krb5_md4_crypto_verify_func(cksum, in, in_length, seed, seed_length)
 krb5_checksum FAR *cksum;
 krb5_pointer in;
 size_t in_length;
@@ -208,7 +208,7 @@ size_t seed_length;
     krb5_error_code retval;
     size_t i;
 
-    MD4_CTX working;
+    krb5_MD4_CTX working;
 
     retval = 0;
     if (cksum->checksum_type == CKSUMTYPE_RSA_MD4_DES) {
@@ -228,7 +228,7 @@ size_t seed_length;
 	     */
 
 	    /* Recalculate the checksum with no confounder */
-	    md4_calculate_cksum(&working,
+	    krb5_md4_calculate_cksum(&working,
 				(krb5_pointer) NULL,
 				(size_t) 0,
 				in,
@@ -301,7 +301,7 @@ size_t seed_length;
 		return(retval);
 
 	    /* Now that we have the decrypted checksum, try to regenerate it */
-	    md4_calculate_cksum(&working,
+	    krb5_md4_calculate_cksum(&working,
 				(krb5_pointer) outtmp,
 				(size_t) RSA_MD4_DES_CONFOUND_LENGTH,
 				in,
@@ -328,8 +328,8 @@ krb5_checksum_entry rsa_md4_des_cksumtable_entry =
 #if	defined(MD4_K5BETA_COMPAT) && defined(MD4_K5BETA_COMPAT_DEF)
 {
     0,
-    md4_crypto_compat_sum_func,
-    md4_crypto_verify_func,
+    krb5_md4_crypto_compat_sum_func,
+    krb5_md4_crypto_verify_func,
     RSA_MD4_DES_CKSUM_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
@@ -337,8 +337,8 @@ krb5_checksum_entry rsa_md4_des_cksumtable_entry =
 #else	/* MD4_K5BETA_COMPAT && MD4_K5BETA_COMPAT_DEF */
 {
     0,
-    md4_crypto_sum_func,
-    md4_crypto_verify_func,
+    krb5_md4_crypto_sum_func,
+    krb5_md4_crypto_verify_func,
     RSA_MD4_DES_CKSUM_LENGTH+RSA_MD4_DES_CONFOUND_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
@@ -350,16 +350,16 @@ krb5_checksum_entry rsa_md4_des_cksumtable_entry =
  * Turn on/off compatible checksum generation.
  */
 void
-md4_crypto_compat_ctl(scompat)
+krb5_md4_crypto_compat_ctl(scompat)
     krb5_boolean	scompat;
 {
     if (scompat) {
-	rsa_md4_des_cksumtable_entry.sum_func = md4_crypto_compat_sum_func;
+	rsa_md4_des_cksumtable_entry.sum_func = krb5_md4_crypto_compat_sum_func;
 	rsa_md4_des_cksumtable_entry.checksum_length =
 	    RSA_MD4_DES_CKSUM_LENGTH;
     }
     else {
-	rsa_md4_des_cksumtable_entry.sum_func = md4_crypto_sum_func;
+	rsa_md4_des_cksumtable_entry.sum_func = krb5_md4_crypto_sum_func;
 	rsa_md4_des_cksumtable_entry.checksum_length =
 	    RSA_MD4_DES_CKSUM_LENGTH + RSA_MD4_DES_CONFOUND_LENGTH;
     }

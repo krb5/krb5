@@ -33,7 +33,7 @@
    Each byte is printed with high-order hexadecimal digit first.
  */
 static void MDPrint (mdContext)
-MD4_CTX *mdContext;
+krb5_MD4_CTX *mdContext;
 {
   int i;
 
@@ -56,7 +56,7 @@ static long TEST_BYTES = (long)TEST_BLOCK_SIZE * (long)TEST_BLOCKS;
  */
 static void MDTimeTrial ()
 {
-  MD4_CTX mdContext;
+  krb5_MD4_CTX mdContext;
   time_t endTime, startTime;
   unsigned char data[TEST_BLOCK_SIZE];
   unsigned int i;
@@ -70,10 +70,10 @@ static void MDTimeTrial ()
   time (&startTime);
 
   /* digest data in TEST_BLOCK_SIZE byte blocks */
-  MD4Init (&mdContext);
+  krb5_MD4Init (&mdContext);
   for (i = TEST_BLOCKS; i > 0; i--)
-    MD4Update (&mdContext, data, TEST_BLOCK_SIZE);
-  MD4Final (&mdContext);
+    krb5_MD4Update (&mdContext, data, TEST_BLOCK_SIZE);
+  krb5_MD4Final (&mdContext);
   /* stop timer, get time difference */
   time (&endTime);
   MDPrint (&mdContext);
@@ -92,12 +92,12 @@ static void MDTimeTrial ()
 static void MDString (inString)
 char *inString;
 {
-  MD4_CTX mdContext;
+  krb5_MD4_CTX mdContext;
   unsigned int len = strlen (inString);
 
-  MD4Init (&mdContext);
-  MD4Update (&mdContext, inString, len);
-  MD4Final (&mdContext);
+  krb5_MD4Init (&mdContext);
+  krb5_MD4Update (&mdContext, inString, len);
+  krb5_MD4Final (&mdContext);
   MDPrint (&mdContext);
   printf (" \"%s\"\n\n", inString);
 }
@@ -114,7 +114,7 @@ char *filename;
 #else
   FILE *inFile = fopen (filename, "r");
 #endif
-  MD4_CTX mdContext;
+  krb5_MD4_CTX mdContext;
   int bytes;
   unsigned char data[1024];
 
@@ -123,10 +123,10 @@ char *filename;
     return;
   }
 
-  MD4Init (&mdContext);
+  krb5_MD4Init (&mdContext);
   while ((bytes = fread (data, 1, 1024, inFile)) != 0)
-    MD4Update (&mdContext, data, bytes);
-  MD4Final (&mdContext);
+    krb5_MD4Update (&mdContext, data, bytes);
+  krb5_MD4Final (&mdContext);
   MDPrint (&mdContext);
   printf (" %s\n", filename);
   fclose (inFile);
@@ -138,14 +138,14 @@ char *filename;
  */
 static void MDFilter ()
 {
-  MD4_CTX mdContext;
+  krb5_MD4_CTX mdContext;
   int bytes;
   unsigned char data[16];
 
-  MD4Init (&mdContext);
+  krb5_MD4Init (&mdContext);
   while ((bytes = fread (data, 1, 16, stdin)) != 0)
-    MD4Update (&mdContext, data, bytes);
-  MD4Final (&mdContext);
+    krb5_MD4Update (&mdContext, data, bytes);
+  krb5_MD4Final (&mdContext);
   MDPrint (&mdContext);
   printf ("\n");
 }

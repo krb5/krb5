@@ -1,3 +1,8 @@
+Fri Apr 12 21:38:33 1996  Richard Basch  <basch@lehman.com>
+
+	* md4driver.c md4glue.c md4.c rsa-md4.h md4crypto.c:
+	Renamed the functions to be preceded with krb5_
+
 Fri Oct  6 22:00:15 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

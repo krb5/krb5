@@ -29,15 +29,15 @@
 /* Windows needs to these prototypes for the assignment below */
 
 krb5_error_code
-md4_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
+krb5_md4_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
     krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
 
 krb5_error_code
-md4_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
+krb5_md4_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
 	size_t in_length, krb5_pointer seed, size_t seed_length));
 
 krb5_error_code
-md4_sum_func(in, in_length, seed, seed_length, outcksum)
+krb5_md4_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
 krb5_pointer seed;
@@ -45,11 +45,11 @@ size_t seed_length;
 krb5_checksum FAR *outcksum;
 {
     krb5_octet *input = (krb5_octet *)in;
-    MD4_CTX working;
+    krb5_MD4_CTX working;
 
-    MD4Init(&working);
-    MD4Update(&working, input, in_length);
-    MD4Final(&working);
+    krb5_MD4Init(&working);
+    krb5_MD4Update(&working, input, in_length);
+    krb5_MD4Final(&working);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD4;
     outcksum->length = RSA_MD4_CKSUM_LENGTH;
@@ -62,7 +62,7 @@ krb5_checksum FAR *outcksum;
 }
 
 krb5_error_code
-md4_verify_func(cksum, in, in_length, seed, seed_length)
+krb5_md4_verify_func(cksum, in, in_length, seed, seed_length)
 krb5_checksum FAR *cksum;
 krb5_pointer in;
 size_t in_length;
@@ -70,15 +70,15 @@ krb5_pointer seed;
 size_t seed_length;
 {
     krb5_octet *input = (krb5_octet *)in;
-    MD4_CTX working;
+    krb5_MD4_CTX working;
     krb5_error_code retval;
 
     retval = 0;
     if (cksum->checksum_type == CKSUMTYPE_RSA_MD4) {
 	if (cksum->length == RSA_MD4_CKSUM_LENGTH) {
-	    MD4Init(&working);
-	    MD4Update(&working, input, in_length);
-	    MD4Final(&working);
+	    krb5_MD4Init(&working);
+	    krb5_MD4Update(&working, input, in_length);
+	    krb5_MD4Final(&working);
 
 	    if (memcmp((char *) cksum->contents,
 		       (char *) &working.digest[0],
@@ -96,8 +96,8 @@ size_t seed_length;
 
 krb5_checksum_entry rsa_md4_cksumtable_entry = {
     0,
-    md4_sum_func,
-    md4_verify_func,
+    krb5_md4_sum_func,
+    krb5_md4_verify_func,
     RSA_MD4_CKSUM_LENGTH,
     1,					/* is collision proof */
     0,					/* doesn't use key */

@@ -80,16 +80,16 @@ typedef struct {
   krb5_ui_4 buf[4];			/* scratch buffer */
   unsigned char in[64];			/* input buffer */
   unsigned char digest[16];		/* actual digest after MD4Final call */
-} MD4_CTX;
+} krb5_MD4_CTX;
 
 #if defined(__STDC__) || defined(_WINDOWS)
-extern void MD4Init(MD4_CTX FAR *);
-extern void MD4Update(MD4_CTX FAR *, unsigned char FAR *, unsigned int);
-extern void MD4Final(MD4_CTX FAR *);
+extern void krb5_MD4Init(krb5_MD4_CTX FAR *);
+extern void krb5_MD4Update(krb5_MD4_CTX FAR *, unsigned char FAR *, unsigned int);
+extern void krb5_MD4Final(krb5_MD4_CTX FAR *);
 #else
-void MD4Init ();
-void MD4Update ();
-void MD4Final ();
+void krb5_MD4Init ();
+void krb5_MD4Update ();
+void krb5_MD4Final ();
 #endif
 
 /*
