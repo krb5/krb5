@@ -713,5 +713,8 @@ main(argc, argv)
     }
     else
 	printf("%s: usage is %s [-acekprsxvACEKPRSX]\n", argv[0], argv[0]);
+    if(kret && verbose) {
+      com_err(argv[0], kret, "-- test failed ---");
+    }
     return((kret) ? 1 : 0);
 }

@@ -204,7 +204,8 @@ check-unix:: $(TEST_PROGS)
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
-	$(RUN_SETUP) ./t_ser
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+		$(RUN_SETUP) ./t_ser
 
 check-mac:: $(TEST_PROGS)
 
