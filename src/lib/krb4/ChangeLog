@@ -1,3 +1,7 @@
+2000-10-07  Tom Yu  <tlyu@mit.edu>
+
+	* g_tkt_svc.c (CredIsExpired): Fix logic bug.
+
 2000-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* rd_req.c (krb_rd_req): Call life_to_fime().
