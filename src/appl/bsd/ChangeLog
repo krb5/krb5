@@ -1,3 +1,15 @@
+Fri Sep 20 18:23:53 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
+
+	* login.c: Update so that we try to convert krb524 tickets after
+ 	we setuid(), and so that we don't hard fail if cache writeout
+ 	fail.
+
+Fri Sep 20 17:35:22 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Check to see if we got krb5 tickets at all times,
+ 	regardless of wether we are converting to krb4.  This helps us
+ 	know when to kdestroy.
+
 Wed Sep 11 17:27:02 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* login.c: fix a security-threating race condition: chown'ing the

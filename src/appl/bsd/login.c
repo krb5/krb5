@@ -1157,6 +1157,7 @@ int main(argc, argv)
 	char *ttyname(), *stypeof(), *crypt(), *getpass();
 	time_t login_time;
 	int retval;
+int rewrite_ccache = 1; /*try to write out ccache*/
 #ifdef KRB5_GET_TICKETS
 	krb5_principal me;
 	krb5_creds save_v5creds;
@@ -1567,13 +1568,15 @@ int main(argc, argv)
 	    (gr = getgrnam(TTYGRPNAME)) ? gr->gr_gid : pwd->pw_gid);
 
 	(void)chmod(ttyn, 0620);
+#ifdef KRB5_GET_TICKETS
+		    /* Maybe telnetd got tickets for us?  */
+	if (!got_v5_tickets && have_v5_tickets (&me))
+	  got_v5_tickets = 1;
+#endif /*gET_KRB%_TICKETS/*/
 
 #ifdef KRB4_GET_TICKETS
-	if (login_krb4_get_tickets && login_krb4_convert && !got_v4_tickets) {
+	if ( login_krb4_convert && !got_v4_tickets) {
 
-	    /* Maybe telnetd got tickets for us?  */
-	    if (!got_v5_tickets && have_v5_tickets (&me))
-		got_v5_tickets = 1;
 
 	    if (got_v5_tickets)
 		try_convert524 (kcontext, me);
@@ -1677,17 +1680,18 @@ int main(argc, argv)
 		  syslog(LOG_ERR,
 			 "%s while creating V5 krbtgt principal",
 			 error_message(retval));
-		  sleepexit(1);
+		  goto skip_ccache_rewrite;
 	     }
-	     mcreds.ticket_flags = TKT_FLG_INITIAL;
+
+	       mcreds.ticket_flags =0;
 	     
 	     if (retval = krb5_cc_retrieve_cred(kcontext, ccache,
-					   KRB5_TC_MATCH_FLAGS,
+						0,
 					   &mcreds, &save_v5creds)) {
 		  syslog(LOG_ERR,
 			 "%s while retrieiving V5 initial ticket for copy",
 			 error_message(retval));
-		  sleepexit(1);
+		  goto skip_ccache_rewrite;
 	     }
 	     krb5_free_principal(kcontext, mcreds.server);
 	}
@@ -1701,12 +1705,14 @@ int main(argc, argv)
 		  syslog(LOG_ERR,
 			 "%s while retrieving V4 initial ticket for copy",
 			 error_message(retval));
-		  sleepexit(1);
+	     skip_ccache_rewrite: rewrite_ccache = 0;
+	     
 	     }
 	}
 #endif /* KRB4_GET_TICKETS */
 #if defined(KRB5_GET_TICKETS) || defined(KRB4_GET_TICKETS)
-	destroy_tickets();
+	if (got_v5_tickets || got_v4_tickets)
+	  destroy_tickets();
 #endif
 
 #ifdef OQUOTA
@@ -1731,6 +1737,7 @@ int main(argc, argv)
 #ifdef _IBMR2
 	setuidx(ID_LOGIN, pwd->pw_uid);
 #endif
+
 	if(setuid((uid_t) pwd->pw_uid) < 0) {
 	     perror("setuid");
 	     sleepexit(1);
@@ -1741,31 +1748,31 @@ int main(argc, argv)
 	 * ticket file.
 	 */
 #ifdef KRB5_GET_TICKETS
-	if (got_v5_tickets) {
+	if (got_v5_tickets && rewrite_ccache) {
 	     retval = krb5_cc_initialize (kcontext, ccache, me);
 	     if (retval) {
 		  syslog(LOG_ERR,
 			 "%s while re-initializing V5 ccache as user",
 			 error_message(retval));
-		  sleepexit(1);
+		  goto skip_ccache_output;
 	     }
 	     if (retval = krb5_cc_store_cred(kcontext, ccache, &save_v5creds)) {
 		  syslog(LOG_ERR,
 			 "%s while re-storing V5 credentials as user",
 			 error_message(retval));
-		  sleepexit(1);
+
 	     }
-	     krb5_free_cred_contents(kcontext, &save_v5creds);
+	     skip_ccache_output: krb5_free_cred_contents(kcontext, &save_v5creds);
 	}
 #endif /* KRB5_GET_TICKETS */
 #ifdef KRB4_GET_TICKETS
-	if (got_v4_tickets) {
+	if (got_v4_tickets&&rewrite_ccache) {
 	     retval = in_tkt(save_v4creds.pname, save_v4creds.pinst);
 	     if (retval != KSUCCESS) {
 		  syslog(LOG_ERR,
 			 "%s while re-initializing V4 ticket cache as user",
 			 error_message(retval));
-		  sleepexit(1);
+		  goto skip_output_tkfile;
 	     }
 	     retval = krb_save_credentials(save_v4creds.service,
 					   save_v4creds.instance,
@@ -1779,10 +1786,12 @@ int main(argc, argv)
 		  syslog(LOG_ERR,
 			 "%s while re-storing V4 tickets as user",
 			 error_message(retval));
-		  sleepexit(1);
+
 	     }
+	skip_output_tkfile: /*null*/;
 	}
 #endif /* KRB4_GET_TICKETS */
+
 
 	if (*pwd->pw_shell == '\0')
 		pwd->pw_shell = BSHELL;
