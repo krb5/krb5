@@ -29,7 +29,7 @@ krb5_error_code
 krb5_kdb_encrypt_key(eblock, in, out)
 krb5_encrypt_block *eblock;
 const krb5_keyblock *in;
-krb5_keyblock *out;
+krb5_encrypted_keyblock *out;
 {
     /* encrypted rep has the real (unencrypted) key length stored
        along with the encrypted key */
