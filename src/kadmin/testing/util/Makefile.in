@@ -26,3 +26,6 @@ $(CLNTPROG): $(OBJS) $(CLNTDEPLIBS)
 
 bsddb_dump: bsddb_dump.o
 	$(LD) $(LDFLAGS) $(LDARGS) -o bsddb_dump bsddb_dump.o $(SRVLIBS)
+
+clean:: 
+	$(RM) $(CLNTPROG) $(SRVPROG)

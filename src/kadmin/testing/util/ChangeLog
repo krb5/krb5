@@ -1,3 +1,7 @@
+Wed Nov 13 09:55:05 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean): Remove built programs.
+
 Thu Nov  7 20:53:45 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Remove spurious WITH_CCOPTS and KRB_INCLUDE.
