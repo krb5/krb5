@@ -11,6 +11,21 @@ STOBJLISTS=hash/OBJS.ST btree/OBJS.ST db/OBJS.ST mpool/OBJS.ST \
 	recno/OBJS.ST
 RELDIR=../util/db2
 
-all-unix:: all-liblinks
-clean-unix:: clean-liblinks clean-libs
+HDRDIR=$(BUILDTOP)/include
+HDRS =	$(HDRDIR)/db.h $(HDRDIR)/db-config.h $(HDRDIR)/db-ndbm.h
+
+all-unix:: all-liblinks includes
+clean-unix:: clean-liblinks clean-libs clean-includes
 install-unix:: install-libs
+
+includes:: $(HDRS)
+
+$(HDRDIR)/db.h: $(srcdir)/include/db.h
+	$(CP) $(srcdir)/include/db.h $@
+$(HDRDIR)/db-config.h: include/db-config.h
+	$(CP) include/db-config.h $@
+$(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
+	$(CP) $(srcdir)/include/db-ndbm.h $@
+
+clean-includes::
+	$(RM) $(HDRS)
