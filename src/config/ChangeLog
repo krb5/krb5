@@ -5,6 +5,11 @@
 
 	* libobj.in (config.status): Depend on shlib.conf.
 
+2001-12-18  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Fix hpux to deal with building shared libs with gcc.
+	Patch from Doug Engert; fixes krb5-build/1021.
+
 2001-10-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (DEPLIBOBJNAMEFIX): New variable.
