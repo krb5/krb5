@@ -18,6 +18,8 @@ static char fcc_nseq_c[] = "$Id$";
 
 #include "fcc.h"
 
+/* XXX Deal with kret values */
+
 /*
  * Requires:
  * cursor is a krb5_cc_cursor originally obtained from
@@ -37,26 +39,26 @@ static char fcc_nseq_c[] = "$Id$";
  * Errors:
  * system errors
  */
-krb5_error
+krb5_error_code
 krb5_fcc_next_cred(id, creds, cursor)
    krb5_ccache id;
    krb5_creds *creds;
    krb5_cc_cursor *cursor;
 {
      int ret;
-     krb5_error kret;
+     krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
 
 #ifdef OPENCLOSE
-     ret = open(id->data->filename, O_RDONLY, 0);
+     ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
      if (ret < 0)
 	  return errno;
-     id->data->fd = ret;
+     ((krb5_fcc_data *) id->data)->fd = ret;
 #endif
 
      fcursor = (krb5_fcc_cursor *) cursor;
 
-     ret = lseek(id->data->fd, fcursor->pos, L_SET);
+     ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, L_SET);
      if (ret < 0)
 	  return errno;
 
@@ -73,11 +75,11 @@ krb5_fcc_next_cred(id, creds, cursor)
      kret = krb5_fcc_read_data(&creds->ticket);
      kret = krb5_fcc_read_data(&creds->second_ticket);
 
-     fcursor->pos = tell(id->data->fd);
-     cursor = (krb5_cc_cursor) fcursor;
+     fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
+     cursor = (krb5_cc_cursor *) fcursor;
 
 #ifdef OPENCLOSE
-     close(id->data->fd);
+     close(((krb5_fcc_data *) id->data)->fd);
 #endif
 
      return KRB5_OK;

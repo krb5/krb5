@@ -29,5 +29,5 @@ char *
 krb5_fcc_get_name (id)
    krb5_ccache id;
 {
-     return (char *) id->data->filename;
+     return (char *) ((krb5_fcc_data *) id->data)->filename;
 }

@@ -30,26 +30,26 @@ static char fcc_resolve_c[] = "$Id$";
  * system errors
  * permission errors
  */
-krb5_error
+krb5_error_code
 krb5_fcc_initialize(id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
      int ret;
 
-     ret = open(id->data->filename, O_CREAT | O_TRUNC | O_RDWR, 0);
+     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_TRUNC | O_RDWR, 0);
      if (ret < 0)
 	  return errno;
-     id->data->fd = ret;
+     ((krb5_fcc_data *) id->data)->fd = ret;
 
-     ret = fchmod(id->data->fd, S_IREAD | S_IWRITE);
+     ret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
      if (ret == -1)
 	  return ret;
 
      krb5_fcc_write_principal(id, princ);
 
 #ifdef OPENCLOSE
-     close(id->data->fd);
+     close(((krb5_fcc_data *) id->data)->fd);
 #endif
 
      return KRB5_OK;

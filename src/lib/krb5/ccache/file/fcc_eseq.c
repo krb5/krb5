@@ -12,7 +12,7 @@
 
 #ifndef	lint
 static char fcc_eseq_c[] = "$Id$";
-#endif	lint
+#endif	/* lint */
 
 #include <krb5/copyright.h>
 #include "fcc.h"
@@ -29,17 +29,18 @@ static char fcc_eseq_c[] = "$Id$";
  * Finishes sequential processing of the file credentials ccache id,
  * and invalidates the cursor (it must never be used after this call).
  */
-krb5_error
+/* ARGSUSED */
+krb5_error_code
 krb5_fcc_end_seq_get(id, cursor)
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
 #ifdef OPENCLOSE
 #else
-     close(id->data->fd);
+     close(((krb5_fcc_data *) id->data)->fd);
 #endif
 
-     free((krb5_fcc_cursor) cursor);
+     free((krb5_fcc_cursor *) cursor);
 
      return KRB5_OK;
 }

@@ -30,7 +30,7 @@ static char fcc_resolve_c[] = "$Id$";
  * system errors
  * permission errors
  */
-krb5_error
+krb5_error_code
 krb5_fcc_close(id)
    krb5_ccache id;
 {
@@ -38,15 +38,15 @@ krb5_fcc_close(id)
 
 #ifdef OPENCLOSE
 #else
-     close(id->data->fd);
+     close(((krb5_fcc_data *) id->data)->fd);
 #endif
      
-     ret = unlink(id->data->filename);
+     ret = unlink(((krb5_fcc_data *) id->data)->filename);
      if (ret < 0)
 	  return errno;
 
-     free(id->data->filename);
-     free(id->data);
+     free(((krb5_fcc_data *) id->data)->filename);
+     free(((krb5_fcc_data *) id->data));
      free(id);
 
      return KRB5_OK;

@@ -19,7 +19,9 @@ static char fcc_store_c[] = "$Id$";
 #include "fcc.h"
 
 /* XXX Doesn't deal if < sizeof(o) bytes are written XXX */
-#define krb5_fcc_write(i,b,l) (write(i->data->fd,b,l)==-1 ? errno : KRB5_OK)
+#define krb5_fcc_write(i,b,l) (write(((krb5_fcc_data *)i->data)->fd,b,l) == -1\
+			       ? errno : KRB5_OK)
+
 #define krb5_fcc_store_int32(id,i) krb5_fcc_write(id, i, sizeof(krb5_int32))
 #define krb5_fcc_store_keytype(id,k) krb5_fcc_write(id,k,sizeof(krb5_keytype))
 #define krb5_fcc_store_int(id,i) krb5_fcc_write(id,i,sizeof(int))
@@ -39,21 +41,21 @@ static char fcc_store_c[] = "$Id$";
  * system errors
  * storage failure errors
  */
-krb5_error
+krb5_error_code
 krb5_fcc_store(id, creds)
    krb5_ccache id;
    krb5_creds *creds;
 {
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
-     krb5_error ret;
+     krb5_error_code ret;
 
      /* Make sure we are writing to the end of the file */
 #ifdef OPENCLOSE
-     id->data->fd = open(id->data->filename, O_APPEND, 0);
-     if (id->data->fd < 0)
+     ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->filename, O_APPEND, 0);
+     if (((krb5_fcc_data *) id->data)->fd < 0)
 	  return errno;
 #else
-     ret = lseek(id->data->fd, L_XTND, 0);
+     ret = lseek(((krb5_fcc_data *) id->data)->fd, L_XTND, 0);
      if (ret < 0)
 	  return errno;
 #endif
@@ -76,7 +78,7 @@ krb5_fcc_store(id, creds)
 lose:
           
 #ifdef OPENCLOSE
-     close(id->data->fd);
+     close(((krb5_fcc_data *) id->data)->fd);
 #endif
 
      return ret;
@@ -87,7 +89,7 @@ lose:
  * FOR ALL OF THE FOLLOWING FUNCTIONS:
  * 
  * Requires:
- * id->data->fd is open and at the right position.
+ * ((krb5_fcc_data *) id->data)->fd is open and at the right position.
  * 
  * Effects:
  * Stores an encoded version of the second argument in the
@@ -97,12 +99,12 @@ lose:
  * system errors
  */
 
-static krb5_error
+static krb5_error_code
 krb5_fcc_store_principal(id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-     krb5_error ret;
+     krb5_error_code ret;
      krb5_principal temp;
      krb5_int32 i, length = 0;
 
@@ -121,18 +123,18 @@ krb5_fcc_store_principal(id, princ)
      return KRB5_OK;
 }
 
-static krb5_error
+static krb5_error_code
 krb5_store_keyblock(id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
-     krb5_error ret;
+     krb5_error_code ret;
 
      ret = krb5_fcc_store_keytype(id, &keyblock->keytype);
      CHECK(ret);
      ret = krb5_fcc_store_int(id, &keyblock->length);
      CHECK(ret);
-     ret = write(id->data->fd, keyblock->contents,
+     ret = write(((krb5_fcc_data *) id->data)->fd, keyblock->contents,
 		 (keyblock->length)*sizeof(krb5_octet));
      CHECK(ret);
      
@@ -140,16 +142,16 @@ krb5_store_keyblock(id, keyblock)
 }
 
 
-static krb5_error
+static krb5_error_code
 krb5_fcc_store_data(id, data)
    krb5_ccache id;
    krb5_data *data;
 {
-     krb5_error ret;
+     krb5_error_code ret;
 
      ret = krb5_fcc_store_int32(id, data->length);
      CHECK(ret);
-     ret = write(id->data->fd, data->data, data->length);
+     ret = write(((krb5_fcc_data *) id->data)->fd, data->data, data->length);
      if (ret == -1)
 	  return errno;
 

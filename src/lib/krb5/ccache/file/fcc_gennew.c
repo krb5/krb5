@@ -18,6 +18,8 @@ static char fcc_resolve_c[] = "$Id$";
 
 #include <krb5/copyright.h>
 
+extern krb5_cc_ops krb5_fcc_ops;
+
 /*
  * Effects:
  * Creates a new file cred cache whose name is guaranteed to be
@@ -31,41 +33,45 @@ static char fcc_resolve_c[] = "$Id$";
  * KRB5_NOMEM - there was insufficient memory to allocate the
  * 		krb5_ccache.  id is undefined.
  */
-krb5_err
+krb5_error_code
 krb5_fcc_generate_new (id)
    krb5_ccache id;
+   
 {
+     int ret;
      char scratch[100];  /* XXX Is this large enough */
      
      /* Allocate memory */
-     id = (krb_ccache) malloc(sizeof(struct _krb5_ccache));
+     id = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
      if (id == NULL)
 	  return KRB5_NOMEM;
 
      sprintf(scratch, "%sXXXXXX", TKT_ROOT);
      mktemp(scratch);
 
-     id->data = malloc(sizeof(krb5_fcc_data));
-     if (id->data == NULL) {
+     ((krb5_fcc_data *) id->data) = (krb5_fcc_data *)
+	  malloc(sizeof(krb5_fcc_data));
+     if (((krb5_fcc_data *) id->data) == NULL) {
 	  free(id);
 	  return KRB5_NOMEM;
      }
 
-     id->data->filename = malloc(strlen(scratch) + 1);
-     if (id->data->filename == NULL) {
-	  free(id->data);
+     ((krb5_fcc_data *) id->data)->filename = (char *)
+	  malloc(strlen(scratch) + 1);
+     if (((krb5_fcc_data *) id->data)->filename == NULL) {
+	  free(((krb5_fcc_data *) id->data));
 	  free(id);
 	  return KRB5_NOMEM;
      }
 
      /* Set up the filename */
-     strcpy(id->data->filename, scratch);
+     strcpy(((krb5_fcc_data *) id->data)->filename, scratch);
 
      /* Copy the virtual operation pointers into id */
      bcopy((char *) &krb5_fcc_ops, id->ops, sizeof(struct _krb5_ccache));
 
      /* Make sure the file name is reserved */
-     ret = open(id->data->filename, O_CREAT | O_EXCL, 0);
+     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_EXCL, 0);
      if (ret == -1 && errno != EEXIST)
 	  return ret;
      else {

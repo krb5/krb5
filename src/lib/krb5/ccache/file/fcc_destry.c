@@ -12,9 +12,11 @@
 
 #ifndef	lint
 static char fcc_destry_c[] = "$Id$";
-#endif	lint
+#endif	/* lint */
 
 #include <krb5/copyright.h>
+
+#include "fcc.h"
 
 /*
  * Effects:
@@ -23,8 +25,7 @@ static char fcc_destry_c[] = "$Id$";
  * Errors:
  * system errors
  */
-krb5_error
-krb5_fcc_destroy(id)
+krb5_error_code krb5_fcc_destroy(id)
    krb5_ccache id;
 {
      struct stat buf;
@@ -33,14 +34,15 @@ krb5_fcc_destroy(id)
      int ret;
      
 #ifdef OPENCLOSE
-     id->data->fd = open(id->data->filename, O_RDWR, 0);
-     if (id->data->fd < 0)
+     ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
+					     filename, O_RDWR, 0);
+     if (((krb5_fcc_data *) id->data)->fd < 0)
 	  return errno;
 #else
-     lseek(id->data->fd, 0, L_SET);
+     lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 #endif
 
-     ret = fstat(id->data->fd, &buf);
+     ret = fstat(((krb5_fcc_data *) id->data)->fd, &buf);
      if (ret < 0)
 	  return errno;
 
@@ -49,13 +51,13 @@ krb5_fcc_destroy(id)
 
      bzero(zeros, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
-	  if (write(id->data->fd, zeros, BUFSIZ) < 0)
+	  if (write(((krb5_fcc_data *) id->data)->fd, zeros, BUFSIZ) < 0)
 	       return errno;
 
-     if (write(id->data->fd, zeros, size % BUFSIZ) < 0)
+     if (write(((krb5_fcc_data *) id->data)->fd, zeros, size % BUFSIZ) < 0)
 	  return errno;
 
 #ifdef OPENCLOSE
-     close(id->data->fd);
+     close(((krb5_fcc_data *) id->data)->fd);
 #endif
 }

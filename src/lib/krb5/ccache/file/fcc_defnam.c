@@ -41,7 +41,7 @@ static char krb5_default_name_string[KRB5_FCC_MAXLEN] = "";
 char *
 krb5_fcc_default_name ()
 {
-     char *krb5ccache;
+     char *krb5ccache, *getenv();
      int len;
 
      /* Is the environment variable defined? */

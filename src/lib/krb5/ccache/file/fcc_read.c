@@ -16,15 +16,20 @@ static char fcc_read_c[] = "$Id$";
 #endif	lint
 
 #include <krb5/copyright.h>
+#include "fcc.h"
+
+/* XXX Deal with kret return values */
 
 /* XXX Doesn't deal if < sizeof(o) bytes are written XXX */
-#define krb5_fcc_read(i,b,l) (read(i->data->fd,b,l)==-1 ? errno : KRB5_OK)
+#define krb5_fcc_read(i,b,l) (read(((krb5_fcc_data *)i->data)->fd,b,l) == -1 \
+			      ? errno : KRB5_OK)
 
 /*
  * FOR ALL OF THE FOLLOWING FUNCTIONS:
  *
  * Requires:
- * id->data->fd is open and at the right position in the file.
+ * ((krb5_fcc_data *) id->data)->fd is open and at the right position
+ * in the file.
  *
  * Effects:
  * Allocates memory for and decodes the appropriate type from the
@@ -35,13 +40,14 @@ static char fcc_read_c[] = "$Id$";
  * KRB5_NOMEM
  */
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_principal(id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-     krb5_error kret;
+     krb5_error_code kret;
      krb5_int32 length;
+     int i;
 
      /* Read the number of components */
      krb5_fcc_read_int32(id, &length);
@@ -54,17 +60,21 @@ krb5_fcc_read_principal(id, princ)
      /* Read length components */
      for (i=0; i < length; i++) {
 	  kret = krb5_fcc_read_data(id, princ[i]);
+	  if (kret != KRB5_OK) {
+	       free(princ);
+	       return kret;
+	  }
      }
 
      return KRB5_OK;
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_keyblock(id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
-     krb5_error kret;
+     krb5_error_code kret;
      int ret;
 
      keyblock = (krb5_keyblock *) malloc(sizeof(krb5_keyblock));
@@ -73,18 +83,18 @@ krb5_fcc_read_keyblock(id, keyblock)
      
      kret = krb5_fcc_read_keytype(id, &keyblock->keytype);
      kret = krb5_fcc_read_int(id, &keyblock->length);
-     ret = read(id->data->fd, keyblock->contents,
+     ret = read(((krb5_fcc_data *) id->data)->fd, keyblock->contents,
 		(keyblock->length)*sizeof(krb5_octet));
 
      return KRB5_OK;
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_data(id, data)
    krb5_ccache id;
    krb5_data *data;
 {
-     krb5_error kret;
+     krb5_error_code kret;
      int ret;
 
      data = (krb5_data *) malloc(sizeof(krb5_data));
@@ -99,14 +109,14 @@ krb5_fcc_read_data(id, data)
 	  return KRB5_NOMEM;
      }
 
-     ret = read(id->data->fd, data->data, data->length);
+     ret = read(((krb5_fcc_data *) id->data)->fd, data->data, data->length);
      if (ret == -1)
 	  return errno;
 
      return KRB5_OK;
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_int32(id, i)
    krb5_ccache id;
    krb5_int32 *i;
@@ -114,7 +124,7 @@ krb5_fcc_read_int32(id, i)
      return krb5_fcc_read(id, i, sizeof(krb5_int32));
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_keytype(id, k)
    krb5_ccache id;
    krb5_keytype *k;
@@ -122,7 +132,7 @@ krb5_fcc_read_keytype(id, k)
      return krb5_fcc_read(id, k, sizeof(krb5_keytype));
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_int(id, i)
    krb5_ccache id;
    int *i;
@@ -130,7 +140,7 @@ krb5_fcc_read_int(id, i)
      return krb5_fcc_read(id, i, sizeof(int));
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_bool(id, b)
    krb5_ccache id;
    krb5_boolean *b;
@@ -138,7 +148,7 @@ krb5_fcc_read_bool(id, b)
      return krb5_fcc_read(id, b, sizeof(krb5_boolean));
 }
 
-krb5_error
+krb5_error_code
 krb5_fcc_read_times(id, t)
    krb5_ccache id;
    krb5_ticket_times *t;

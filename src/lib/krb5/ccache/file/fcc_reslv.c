@@ -18,7 +18,7 @@ static char fcc_resolve_c[] = "$Id$";
 
 #include "fcc.h"
 
-extern struct krb5_cc_ops krb5_fcc_ops;
+extern krb5_cc_ops krb5_fcc_ops;
 
 /*
  * Requires:
@@ -39,7 +39,7 @@ extern struct krb5_cc_ops krb5_fcc_ops;
  * 		krb5_ccache.  id is undefined.
  * permission errors
  */
-krb5_error
+krb5_error_code
 krb5_fcc_resolve (id, residual)
    krb5_ccache id;
    char *residual;
@@ -50,15 +50,17 @@ krb5_fcc_resolve (id, residual)
      if (id == NULL)
 	  return KRB5_NOMEM;
 
-     id->data = (char *) malloc(sizeof(krb5_fcc_data));
-     if (id->data == NULL) {
+     ((krb5_fcc_data *) id->data) = (krb5_fcc_data *)
+	  malloc(sizeof(krb5_fcc_data));
+     if (((krb5_fcc_data *) id->data) == NULL) {
 	  free(id);
 	  return KRB5_NOMEM;
      }
 
-     id->data->filename = (char *) malloc(strlen(residual) + 1);
-     if (id->data->filename == NULL) {
-	  free(id->data);
+     ((krb5_fcc_data *) id->data)->filename = (char *)
+	  malloc(strlen(residual) + 1);
+     if (((krb5_fcc_data *) id->data)->filename == NULL) {
+	  free(((krb5_fcc_data *) id->data));
 	  free(id);
 	  return KRB5_NOMEM;
      }
@@ -67,10 +69,10 @@ krb5_fcc_resolve (id, residual)
      bcopy((char *) &krb5_fcc_ops, id->ops, sizeof(struct _krb5_ccache));
 
      /* Set up the filename */
-     strcpy(id->data->filename, residual);
+     strcpy(((krb5_fcc_data *) id->data)->filename, residual);
 
      /* Make sure the file name is reserved */
-     ret = open(id->data->filename, O_CREAT | O_EXCL, 0);
+     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_EXCL, 0);
      if (ret == -1 && errno != EEXIST)
 	  return ret;
      else {

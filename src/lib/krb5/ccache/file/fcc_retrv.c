@@ -29,7 +29,7 @@ static char fcc_retrieve_c[] = "$Id$";
  * permission errors
  * KRB5_NOMEM
  */
-krb5_error
+krb5_error_code
 krb5_fcc_retrieve(id, whichfields, mcreds, creds)
    krb5_ccache id;
    krb5_flags whichfields;

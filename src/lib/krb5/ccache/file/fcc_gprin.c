@@ -15,6 +15,7 @@ static char fcc_gprinc_c[] = "$Id$";
 #endif	lint
 
 #include <krb5/copyright.h>
+#include "fcc.h"
 
 /*
  * Modifies:
@@ -29,17 +30,18 @@ static char fcc_gprinc_c[] = "$Id$";
  * system errors
  * KRB5_NOMEM
  */
-krb5_error
+krb5_error_code
 krb5_fcc_get_principal(id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
 #ifdef OPENCLOSE
-     id->data->fd = open(id->data->filename, O_RDONLY, 0);
-     if (id->data->fd < 0)
+     ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
+					     filename, O_RDONLY, 0);
+     if (((krb5_fcc_data *) id->data)->fd < 0)
 	  return errno;
 #else
-     lseek(id->data->fd, 0, L_SET);
+     lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 #endif
 
      return (krb5_fcc_read_principal(princ));
