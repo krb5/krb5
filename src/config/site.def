@@ -85,10 +85,8 @@
 #undef XqdssServer
 #define XqdssServer     Xqdss
 #define ServerDefines StandardDefines ExtensionDefines -DX11R4
-#undef HasGcc
-#define HasGcc	YES
-#define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
 #if HasGcc
+#define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
 #ifndef CcCmd
 #ifdef UseInstalled		/* if outside the tree */
 #define CcCmd gcc -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
