@@ -1,5 +1,7 @@
 Fri Oct 14 00:40:01 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* mit-des.h: Add declaration for krb5_des_md5_cst_entry.
+
 	* mit-des.h: Change name of the des_crc cryptosystem from
 		krb5_des_cst_entry to krb5_des_crc_cst_entry.
 
