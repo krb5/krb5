@@ -22,12 +22,13 @@ void notify_recipient();
 #define POP_MAILDIR "/usr/spool/pop"
 
 char buffer[BUFSIZ];
-char tmpfile[512];           /* tmp file */
+char xtmpfile[512];           /* tmp file */
 int  newmail;                /* fd for temp message */
 int  maildrop;               /* file descriptor for drop */
 
 extern int errno;
-
+extern int sys_nerr;
+extern char *sys_errlist[];
 
 
 main (argc, argv)
@@ -61,7 +62,7 @@ main (argc, argv)
     }
   
   close(newmail);
-  unlink(tmpfile);
+  unlink(xtmpfile);
   exit(status);
 }
 
@@ -72,10 +73,10 @@ get_message()
 {
   int  nchar;        
 
-  sprintf(tmpfile, "/tmp/tpop.%d", getpid());
-  if((newmail = open(tmpfile, O_RDWR|O_CREAT, 0600)) == -1) 
+  sprintf(xtmpfile, "/tmp/tpop.%d", getpid());
+  if((newmail = open(xtmpfile, O_RDWR|O_CREAT, 0600)) == -1) 
     {
-      fprintf(stderr, "unable to open temporary file,  \"%s\".\n",  tmpfile);
+      fprintf(stderr, "unable to open temporary file,  \"%s\".\n",  xtmpfile);
       return(-1);
     }
     
@@ -88,7 +89,7 @@ get_message()
 
 
 int
-open_drop(drop)
+open_drop(name)
      char *name;
 {
   char dropfile[512];             
