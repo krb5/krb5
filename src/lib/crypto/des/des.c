@@ -42,6 +42,7 @@ static char rcsid_des_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 #include "des_int.h"
 #include "s_table.h"
 #include "p_table.h"
