@@ -1,3 +1,10 @@
+2004-07-07  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi:
+  Microsoft did not place the AllowTGTSessionKey in the same place
+  for both XP SP2 and the server platforms.  Even though they said
+  they would.  Modify the installer to set both locations.
+
 2004-05-17  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw.nsi, kfw-fixed.nsi, utils.nsi:
