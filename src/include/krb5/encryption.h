@@ -38,9 +38,15 @@ typedef struct _krb5_cryptosystem_entry {
 			   krb5_encrypt_block *block */);
     int (*process_key)(/* krb5_encrypt_block *block, krb5_keyblock *key */);
     int (*finish_key)(/* krb5_encrypt_block *block */);
+    int (*string_to_key)(/* krb5_keytype keytype, krb5_keyblock *key,
+			    char *string, krb5_principal *client */);
+    int (*random_key)(/* void *sequence */);
+    void * (*init_random_key)(/* krb5_keyblock *key */);
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
+    krb5_enctype proto_enctype;		/* encryption type,
+					   (assigned protocol number) */
 } krb5_cryptosystem_entry;
 
 typedef struct _krb5_encrypt_block {
