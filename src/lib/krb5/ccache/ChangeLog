@@ -1,3 +1,8 @@
+2000-4-26	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefault.c: Added version number to internal Kerberos Login Library 
+	routine.
+
 2000-4-13	Alexandra Ellwood <lxs@mit.edu>
 
 	* ccdefault.c: Added Kerberos Login library support (with ifdefs to control 

@@ -71,8 +71,8 @@ krb5_cc_default(context, ccache)
 		}
 		
 		/* Try to make sure a krb5 tgt is in the cache */
-		err = __KLInternalAcquireTicketsForCache (desiredPrincipal, 
-						krb5_cc_default_name(context), nil, &outCacheName);
+		err = __KLInternalAcquireTicketsForCache (desiredPrincipal, krb5_cc_default_name(context), 
+													kerberosPrincipal_V5, nil, &outCacheName);
 		if (err == klNoErr) {
 			/* This function tries to get tickets and put them in the specified 
 			   cache, however, if the cache does not exist, it may choose to put 
