@@ -22,8 +22,8 @@ ustime.c: $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)ustime.c
 	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)ustime.c $@
 
 
-memmove.c: $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)memmove.c
-	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)memmove.c $@
+memmove.c: $(SRCTOP)$(S)lib$(S)krb5$(S)posix$(S)memmove.c
+	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)posix$(S)memmove.c $@
 
 clean::
 	$(RM) ustime.c localaddr.c memmove.c

@@ -1,3 +1,7 @@
+Sat Mar 25 15:38:23 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (memmove.c): memmove.c is in krb5/posix, not krb5/os.
+
 Wed Mar 22 11:44:07 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Use $(SRCTOP) instead of $(srcdir), since Mac's
