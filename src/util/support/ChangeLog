@@ -6,6 +6,13 @@
 	interfering with the global list of thread specific data
 	(used for library termination).
 
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (k5_key_delete) [pthread case]: Reset flags and
+	destructor function pointer to unset state.
+	(krb5int_thread_support_init, krb5int_thread_support_fini): If
+	SHOW_INITFINI_FUNCS is defined, print some tracing messages.
+
 2005-01-17  Jeffrey Altman <jaltman@mit.edu>
 
         * threads.c: implement cleanup of static vars on library

@@ -1,3 +1,8 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (PROGRAM_EXITING) [__GNUC__ && !_WIN32 &&
+	CONSTRUCTOR_ATTR_WORKS]: Define as zero.
+
 2005-01-04  Jeffrey Altman <jaltman@mit.edu>
 
         * win-mac.h: define NEED_INSIXADDR_ANY for ipv6 symbol

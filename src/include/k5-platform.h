@@ -232,6 +232,8 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 	 : (abort(),0))
 # define INITIALIZER_RAN(NAME)	(JOIN__2(NAME,ran).did_run == 3 && JOIN__2(NAME, ran).error == 0)
 
+# define PROGRAM_EXITING()		(0)
+
 #elif defined(USE_LINKER_INIT_OPTION) || defined(_WIN32)
 
 /* Run initializer at load time, via linker magic, or in the
