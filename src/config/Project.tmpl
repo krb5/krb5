@@ -10,7 +10,7 @@
 #define TouchCmd touch
 #endif
 #ifndef UnifdefCmd
-#define UnifdefCmd $(UNIFDEFSRC)/unifdef
+#define UnifdefCmd unifdef
 #endif
 #ifndef CompileEtCmd
 #define CompileEtCmd $(ETSRC)/compile_et
@@ -263,7 +263,6 @@ P_PROTOS=-UUseNarrowPrototypes
        DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
-       UNIFDEFSRC = $(TOP)/util/unifdef
           TOPLIBD = $(TOP)/lib
             OSLIB = os
          OSDEPLIB = $(TOPLIBD)/libos.a
@@ -312,8 +311,4 @@ P_PROTOS=-UUseNarrowPrototypes
         COMERRLIB = ComErrLib
        COMPILE_ET = CompileEtCmd
 #endif
-#ifdef UseUnifdefInstalled
-          UNIFDEF = unifdef
-#else
           UNIFDEF = UnifdefCmd
-#endif
