@@ -261,5 +261,7 @@ error_code KRB5_KEYTAB_BADVNO,	"Unsupported key table format version number"
 
 error_code KRB5_PROG_ATYPE_NOSUPP,	"Program lacks support for address type"
 error_code KRB5_RC_REQUIRED,	"Message replay detection requires rcache parameter"
+error_code KRB5_ERR_BAD_HOSTNAME,	"Hostname cannot be canonicalized"
+error_code KRB5_ERR_HOST_REALM_UNKNOWN,	"Cannot determine realm for host"
 
 end
