@@ -1,3 +1,9 @@
+Wed Dec  4 13:06:13 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* acquire_cred.c (acquire_accept_cred): use krb5_kt_get_entry
+ 	instead of scanning through keytab to find matching principal
+ 	[krb5-libs/210]
+
 Sat Oct 19 00:38:22 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ser_sctx.c (kg_oid_externalize, kg_oid_internalize,

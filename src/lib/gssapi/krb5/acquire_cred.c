@@ -77,43 +77,15 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       princ = (krb5_principal) desired_name;
    }
 
-   /* iterate over the keytab searching for the principal */
-
-   if (code = krb5_kt_start_seq_get(context, kt, &cur)) {
-      (void) krb5_kt_close(context, kt);
-      *minor_status = code;
-      return(GSS_S_FAILURE);
+   if (code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry)) {
+	(void) krb5_kt_close(context, kt);
+	if (code == KRB5_KT_NOTFOUND)
+	     *minor_status = KG_KEYTAB_NOMATCH;
+	else
+	     *minor_status = code;
+	return(GSS_S_CRED_UNAVAIL);
    }
-
-   while (!(code = krb5_kt_next_entry(context, kt, &entry, &cur))) {
-      if (krb5_principal_compare(context, entry.principal, princ)) {
-	 code = 0;
-	 krb5_kt_free_entry(context, &entry);
-	 break;
-      } 
-      krb5_kt_free_entry(context, &entry);
-   }
-
-   if (code == KRB5_KT_END) {
-      /* this means that the principal wasn't in the keytab */
-      (void)krb5_kt_end_seq_get(context, kt, &cur);
-      (void) krb5_kt_close(context, kt);
-      *minor_status = KG_KEYTAB_NOMATCH;
-      return(GSS_S_CRED_UNAVAIL);
-   } else if (code) {
-      /* this means some error occurred reading the keytab */
-      (void)krb5_kt_end_seq_get(context, kt, &cur);
-      (void) krb5_kt_close(context, kt);
-      *minor_status = code;
-      return(GSS_S_FAILURE);
-   } else {
-      /* this means that we found a matching entry */
-      if (code = krb5_kt_end_seq_get(context, kt, &cur)) {
-	 (void) krb5_kt_close(context, kt);
-	 *minor_status = code;
-	 return(GSS_S_FAILURE);
-      }
-   }
+   krb5_kt_free_entry(context, &entry);
 
    /* hooray.  we made it */
 
