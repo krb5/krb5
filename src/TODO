@@ -1,13 +1,62 @@
+
+Major projects:
+
+1.  Run a V5 KDC on the master KDC.
+	* audit code in v4 kadmind server
+	* convert syslog -> log (to real file)
+	* save versus deletion of rcache file
+
+ 2.  API changes
+	* context changes (mostly done)
+	* narrow types (done)
+	* get_in_tkt for salt support, multi encryption
+	* keytab lookup (for multi-encryption)
+	* oracle forwarding support
+
+3.  Multi-encryption support
+	* kdb5_edit support (show princal, set attributes)
+	* test DES-MD5
+	* make DES-MD5 default, fall back to DES-CRC
+
+4.  Better Kerberos Database
+	* Design encoders/decoders
+
+5.  Configuration file
+	* write configuration file library
+
+6.  Misc Cleanup
+	* check file vs stdio ccache code; replace file code with stdio
+	* rewrite rcache code
+	* fold in krb4 library
+	* kdc support automatic fallback (done)
+	* DES glue code rewrite
+	* don't need NEED_SYS_FCNTL.H; just always include <fnctl.h>
+	* utmp configure cleanup
+	* telnet portability
+	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
+		stuff that's in every single configure.in file.
+
+7.  Future development
+	* support for realm name changes
+	* telnet rsh support
+
+8.  New applications
+	* POP
+	* FTP
+
+9.  Kadmin
+	* Password changing protocol.
+
+
+
 needed before beta4-patch2:
 
 940802		stdargs/varargs breakage of ksu under SunOS
-940802		ultrix appl/bsd stuff breaks (Mark?)
 940802		double-check make install
 
 not-quite-critical bug fixes:
 
 940808		Support for DES-MD5
-940802		linux port problems, e.g. broken linux headers, sgtty.h, etc.
 940802		double-check telnet problems, e.g. solaris pty grabbing
 940802		rethink using compile check for fopen() binary mode
 
@@ -31,7 +80,6 @@ cleanup for later:
 940802		sanity check API doc
 940802		deja gnu, testing framework
 940808		make depend 
-940808		flush imake (and MIT DES code)
 940808		make sure we're using $(MAKE) everywhere
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
