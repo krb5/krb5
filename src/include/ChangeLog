@@ -1,3 +1,9 @@
+2004-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (AI_ADDRCONFIG, AI_V4MAPPED, AI_ALL): If not
+	defined, or when completely faking getaddrinfo, define them as
+	zero.
+
 2004-10-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for struct if_laddrconf, as for struct
