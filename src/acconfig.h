@@ -23,6 +23,10 @@
 #undef HAVE_STDARG_H
 #undef HAVE_VARARGS_H
 
+/* Define if struct sockaddr and friends (sockaddr_in etc) have the
+   sa_len field.  */
+#undef HAVE_SA_LEN
+
 /* Define if MIT Project Athena default configuration should be used */
 #undef KRB5_ATHENA_COMPAT
 
