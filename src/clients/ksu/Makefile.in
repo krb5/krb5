@@ -8,6 +8,8 @@ CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+KSU_LIBS=@KSU_LIBS@
+
 SRCS = \
 	$(srcdir)/krb_auth_su.c \
 	$(srcdir)/ccache.c \
@@ -24,7 +26,7 @@ OBJS = \
 all:: ksu
 
 ksu: $(OBJS) $(KRB5_BASE_DEPLIBS) $(UTIL_DEPLIB)
-	$(CC_LINK) -o $@ $(OBJS) $(UTIL_LIB) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(UTIL_LIB) $(KRB5_BASE_LIBS) $(KSU_LIBS)
 
 clean::
 	$(RM) ksu

@@ -799,6 +799,18 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
 				target_user, target_pwd->pw_uid); 
        }
 
+#ifdef	HAVE_SETLUID
+  	/*
+  	 * If we're on a system which keeps track of login uids, then
+ 	 * set the login uid. If this fails this opens up a problem on DEC OSF
+ 	 * with C2 enabled.
+	 */
+ 	if (setluid((uid_t) pwd->pw_uid) < 0) {
+		perror("setuid");
+		sleepexit(1);
+	}
+#endif	/* HAVE_SETLUID */
+
        if (setuid(target_pwd->pw_uid) < 0) {
 		   perror("ksu: setuid");
 	           sweep_up(ksu_context, use_source_cache, cc_target);
