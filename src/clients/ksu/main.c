@@ -61,7 +61,7 @@ char * get_dir_of_file();
    ill specified arguments to commands */        
 
 void usage (){
-    fprintf(stderr, "Usage: %s [target user] [-n principal] [-c source cachename] [-C target cachename] [-k] [-D] [-r time] [-pf] [-l lifetime] [-zZ] [-q] [-e command [args... ] ] [-a [args... ] ]\n", prog_name);
+    fprintf(stderr, "Usage: %s [target user] [-n principal] [-c source cachename] [-k] [-D] [-r time] [-pf] [-l lifetime] [-zZ] [-q] [-e command [args... ] ] [-a [args... ] ]\n", prog_name);
 }
 
 /* for Ultrix and friends ... */

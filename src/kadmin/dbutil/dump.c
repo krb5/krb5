@@ -1001,7 +1001,8 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 
 /*
  * usage is:
- *	dump_db [-old] [-b6] [-b7] [-ov] [-verbose] [filename [principals...]]
+ *	dump_db [-old] [-b6] [-b7] [-ov] [-verbose] [-mkey_convert]
+ *	[-new_mkey_file] [filename [principals...]]
  */
 void
 dump_db(argc, argv)
