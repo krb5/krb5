@@ -1,3 +1,13 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (hpux10.exports): New target, constructed similar to
+	osf1.exports but with HP-UX 10.x linker options, no initializers,
+	and "errno" explicitly added to the export list.
+	* shlib.conf (*-*-hpux*): Combine PICFLAGS setting with
+	SHLIB_EXPFLAGS and LDCOMBINE setting.  Add linker option "-c
+	hpux10.exports" to LDCOMBINE.  Set SHLIB_EXPORT_FILE_DEP to
+	hpux10.exports.  Set use_linker_fini_option.
+
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib.in (config.status): Change target to be in $thisconfigdir

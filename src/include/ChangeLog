@@ -1,3 +1,10 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h: Expand on init/fini comments some more.
+	(MAKE_FINI_FUNCTION): Add an HP-UX specific variant that defines
+	an auxiliary function fitting the signature of HP-UX 10 library
+	combined initializer/finalizer functions.
+
 2005-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check return type of gmtime_r, and define
