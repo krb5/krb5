@@ -145,12 +145,12 @@
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_DES_CBC_RAW
 #define PROVIDE_DES_CBC_CKSUM
-#define PROVIDE_DES3_CBC_SHA
-#define PROVIDE_DES3_CBC_RAW
+/* #define PROVIDE_DES3_CBC_SHA */
+/* #define PROVIDE_DES3_CBC_RAW */
 #define PROVIDE_CRC32
 #define PROVIDE_RSA_MD4
 #define PROVIDE_RSA_MD5
-#define PROVIDE_NIST_SHA
+/* #define PROVIDE_NIST_SHA */
 
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;

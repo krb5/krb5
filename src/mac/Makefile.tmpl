@@ -3,11 +3,11 @@ KH68K = {KH}KerberosHeaders68K
 KHCFM-68K = {KH}KerberosHeadersCFM-68K
 KHPPC = {KH}KerberosHeadersPPC
 
-GSSRTLCFM68K = "{MW68KLibraries}ANSI (4i/8d) C.CFM68K.Lib" \
+GSSRTLCFM68K = "{MW68KLibraries}ANSI (4i%8d) C.CFM68K.Lib" \
 	{MW68KLibraries}SIOUX.CFM68K.Lib \
 	{MW68KLibraries}InterfaceLib \
 	{MW68KLibraries}MWCFM68KRuntime.Lib \
-	"{MW68KLibraries}MathLibCFM68K (4i/8d).Lib"
+	"{MW68KLibraries}MathLibCFM68K (4i%8d).Lib"
 
 GSSRTLCFMPPC = "{MWPPCLibraries}ANSI C.PPC.Lib" \
 	{MWPPCLibraries}SIOUX.PPC.Lib {MWPPCLibraries}MWCRuntime.Lib \
@@ -113,7 +113,6 @@ link-68KCFM-SAP :
 	        -sym fullpath -map libgss.68K.MAP -o GSSLibrarySAP.68K \
 		{GSSRTLCFM68K} {GSSOBJS68KCFM-SAP} {GSSOBJS68KCFM}
 	Rez "/mac/SAP/GSSforSAP.r" -a -o GSSLibrarySAP.68K
-	Rez "/mac/version.r" -a -o GSSLibrarySAP.68K
 
 link-PPC-SAP :
 	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
@@ -122,7 +121,6 @@ link-PPC-SAP :
 	        -sym fullpath -map libgss.PPC.MAP -o GSSLibrarySAP.PPC \
 		{GSSRTLCFMPPC} {GSSOBJSPPC-SAP} {GSSOBJSPPC}
 	Rez "/mac/SAP/GSSforSAP.r" -a -o GSSLibrarySAP.PPC
-	Rez "/mac/version.r" -a -o GSSLibrarySAP.PPC
 	
 link-CFMFAT-SAP : 
 	Duplicate -y GSSLibrarySAP.68K GSSLibSAP

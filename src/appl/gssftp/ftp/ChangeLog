@@ -1,3 +1,52 @@
+Tue Mar 30 22:30:14 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (KLIB): -lcom_err, not $(COMERRLIB)
+
+Thu Feb 25 23:05:03 1999  Tom Yu  <tlyu@mit.edu>
+
+	* secure.c (secure_putbuf): Revert Sam's last change; if
+ 	FUDGE_FACTOR is wrong, then badness can happen.  Also, if
+ 	out_buf.length != nbytes+FUDGE_FACTOR, heap corruption could
+ 	happen.  We really should be using gss_wrap_size_limit() or
+ 	something like that, but doing so would require substantial
+ 	amounts of reworking. [krb5-appl/685]
+
+Tue Dec  1 18:10:47 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftp.c (login): Unconditionally send password as PROT_P.
+
+Fri Aug  7 11:45:17 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftp.c (getreply): Restore proper setting of safe.  This variable
+	was previously being set to the value of code rather than to the
+	boolean expression (code == 631), which it had been previously.
+	The bug resulted in all replies from the server being parsed as
+	krb_safe messages even when they were krb_priv messages.
+
+1998-04-21  Ken Raeburn  <raeburn@cygnus.com>
+
+	* glob.c (ftpglob): Always allocate new storage, even if no magic
+	glob characters were found, because the caller will always free
+	the storage.
+
+Tue Apr  7 16:53:58 1998  Dan Winship  <danw@mit.edu>
+
+	* secure.c (secure_putbyte): Set nout = 0 *before* calling
+ 	secure_putbuf: if the transfer is aborted, the SIGURG handler will
+ 	longjmp out, so the line after the secure_putbuf will never get
+ 	executed, so nout would never be reset and the next transfer
+ 	would overrun ucbuf.
+
+Wed Apr 30 14:59:03 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* cmds.c (getit): Fix Y2K bug in the parsing of the MDTM command.
+		[krb5-appl/399]
+
+Fri Nov 22 15:48:19 1996  unknown  <bjaspan@mit.edu>
+
+	* ftp.c (hookup): use sizeof instead of h_length to determine
+ 	number of bytes of addr to copy from DNS response [krb5-misc/211]
+
 Fri Sep 27 16:05:09 1996  Tom Yu  <tlyu@mit.edu>
 
 	* cmds.c (setpeer): Apply jik's fix so "-n" actually works as

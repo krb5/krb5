@@ -5,6 +5,9 @@
 #include <sys/stream.h>
 #include <sys/ioctl.h>
 #include <termios.h>
+#if !defined(TCSETS) && defined(_AIX) /* kludge for AIX */
+#include <termio.h>
+#endif
 
 int readstream_termios(cmd, ibuf, vstop, vstart, ixon)
      int cmd;

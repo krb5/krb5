@@ -118,6 +118,15 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
    /* hooray.  we made it */
 
    cred->keytab = kt;
+
+   /* Open the replay cache for this principal. */
+   if ((code = krb5_get_server_rcache(context,
+				      krb5_princ_component(context, princ, 0),
+				      &cred->rcache))) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+
    return(GSS_S_COMPLETE);
 }
 
@@ -138,7 +147,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 {
    krb5_error_code code;
    krb5_ccache ccache;
-   krb5_principal princ;
+   krb5_principal princ, tmp_princ;
    krb5_flags flags;
    krb5_cc_cursor cur;
    krb5_creds creds;
@@ -196,12 +205,20 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    got_endtime = 0;
 
+   code = krb5_build_principal_ext(context, &tmp_princ,
+				   krb5_princ_realm(context, princ)->length,
+				   krb5_princ_realm(context, princ)->data,
+				   6, "krbtgt",
+				   krb5_princ_realm(context, princ)->length,
+				   krb5_princ_realm(context, princ)->data,
+				   0);
+   if (code) {
+      (void)krb5_cc_close(context, ccache);
+      *minor_status = code;
+      return(GSS_S_FAILURE);
+   }
    while (!(code = krb5_cc_next_cred(context, ccache, &cur, &creds))) {
-      if ((creds.server->length == 2) &&
-	  (strcmp(creds.server->realm.data, princ->realm.data) == 0) &&
-	  (strcmp((char *) creds.server->data[0].data, "krbtgt") == 0) &&
-	  (strcmp((char *) creds.server->data[1].data,
-		  princ->realm.data) == 0)) {
+      if (krb5_principal_compare(context, tmp_princ, creds.server)) {
 	 cred->tgt_expire = creds.times.endtime;
 	 got_endtime = 1;
 	 *minor_status = 0;
@@ -215,7 +232,8 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
       }
       krb5_free_cred_contents(context, &creds);
    }
-
+   krb5_free_principal(context, tmp_princ);
+   
    if (code && code != KRB5_CC_END) {
       /* this means some error occurred reading the ccache */
       (void)krb5_cc_end_seq_get(context, ccache, &cur);

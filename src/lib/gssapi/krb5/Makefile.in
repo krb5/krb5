@@ -33,11 +33,14 @@ gssapi_err_krb5.c: gssapi_err_krb5.et
 SRCS = \
 	$(srcdir)/accept_sec_context.c \
 	$(srcdir)/acquire_cred.c \
+	$(srcdir)/canon_name.c \
 	$(srcdir)/compare_name.c \
 	$(srcdir)/context_time.c \
 	$(srcdir)/delete_sec_context.c \
 	$(srcdir)/disp_name.c \
 	$(srcdir)/disp_status.c \
+	$(srcdir)/duplicate_name.c \
+	$(srcdir)/export_name.c \
 	$(srcdir)/export_sec_context.c \
 	$(srcdir)/get_tkt_flags.c \
 	$(srcdir)/gssapi_krb5.c \
@@ -73,11 +76,14 @@ SRCS = \
 OBJS = \
 	accept_sec_context.$(OBJEXT) \
 	acquire_cred.$(OBJEXT) \
+	canon_name.$(OBJEXT) \
 	compare_name.$(OBJEXT) \
 	context_time.$(OBJEXT) \
 	delete_sec_context.$(OBJEXT) \
 	disp_name.$(OBJEXT) \
 	disp_status.$(OBJEXT) \
+	duplicate_name.$(OBJEXT) \
+	export_name.$(OBJEXT) \
 	export_sec_context.$(OBJEXT) \
 	get_tkt_flags.$(OBJEXT) \
 	gssapi_krb5.$(OBJEXT) \

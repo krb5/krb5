@@ -35,14 +35,16 @@ static void display_status_1();
 static void display_buffer();
 static int test_import_name();
 
-FILE *display_file = stdout;
+FILE *display_file;
 
 int main(argc, argv)
 	int argc;
 	char **argv;
 {
 	int retval;
-	
+
+	display_file = stdout;
+
 	retval = test_import_name("host@dcl.mit.edu");
 
 	return retval;

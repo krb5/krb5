@@ -341,7 +341,17 @@ krb5_keyblock *	tkt_ses_key;
 		return(retval);
 	}
 
-
+	/* Check to make sure ticket hasn't expired */
+	if (retval = krb5_check_exp(context, tkt->enc_part2->times)) {
+		if (auth_debug && (retval == KRB5KRB_AP_ERR_TKT_EXPIRED)) {
+			fprintf(stderr,
+				"krb5_verify_tkt_def: ticket has expired");
+		}
+		krb5_free_ticket(context, tkt);	
+		krb5_kt_free_entry(context, &ktentry);
+		krb5_free_keyblock(context, tkt_key);
+		return KRB5KRB_AP_ERR_TKT_EXPIRED;
+	}
 
 	if (!krb5_principal_compare(context, client, tkt->enc_part2->client)) {
 			krb5_free_ticket(context, tkt);	
@@ -473,29 +483,26 @@ void dump_principal (context, str, p)
     krb5_context context;
     char *str;
     krb5_principal p;
-{    
-char * stname;
-krb5_error_code retval; 
+{
+    char * stname;
+    krb5_error_code retval; 
 
-		if ((retval = krb5_unparse_name(context, p, &stname))){
-			fprintf(stderr," %s while unparsing name \n",
-				error_message(retval));    	
-		}
-		fprintf(stderr, " %s: %s\n", str, stname );
+    if ((retval = krb5_unparse_name(context, p, &stname))) {
+	fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    }
+    fprintf(stderr, " %s: %s\n", str, stname);
 }
 
 void plain_dump_principal (context, p)
     krb5_context context;
     krb5_principal p;
 {    
-char * stname;
-krb5_error_code retval; 
+    char * stname;
+    krb5_error_code retval; 
 
-		if ((retval = krb5_unparse_name(context, p, &stname))){
-			fprintf(stderr," %s while unparsing name \n",
-				error_message(retval));    	
-		}
-		fprintf(stderr, "%s ",  stname );
+    if ((retval = krb5_unparse_name(context, p, &stname)))
+	fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    fprintf(stderr, "%s ", stname);
 }
 
 #if 0

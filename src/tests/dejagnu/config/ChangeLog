@@ -1,3 +1,19 @@
+2000-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Move default expiration time
+	into future again.
+
+Mon Nov 25 14:23:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* defualt.exp: Ezra's fix so that the dejagnu tests don't bomb out
+ 		if KRB5_KTNAME is set for some reason.
+
+Tue Nov 19 15:13:30 1996  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (check_k5login): Check for principal
+ 	$env(USER)@$REALMNAME rather than simply $env(USER), so that
+ 	kuser_ok dtrt, hopefully.
+
 Mon Nov 11 20:52:27 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* dejagnu: set env(TERM) dumb, find ktutil

@@ -8,16 +8,19 @@ SETENVOBJ=@SETENVOBJ@
 LIBOBJS=@LIBOBJS@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
-SRCS	= ftpd.c ftpcmd.y logwtmp.c popen.c vers.c \
+LOCAL_LIBRARIES=-lpty
+DEPLOCAL_LIBRARIES=$(TOPLIBD)/../util/pty/libpty.a
+
+SRCS	= ftpd.c ftpcmd.y popen.c vers.c \
 	  $(srcdir)../ftp/glob.c \
 	  $(srcdir)../ftp/radix.c \
 	  $(srcdir)../ftp/secure.c \
 	  $(srcdir)../../bsd/getdtablesize.c $(SETENVSRC)
 
-OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
+OBJS	= ftpd.o ftpcmd.o glob.o popen.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
-KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
+KLIB = -lgssapi_krb5 -lkrb5 -lcrypto -lcom_err
 DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
 		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
@@ -68,7 +71,6 @@ secure.o: $(srcdir)/secure.h
 ftpd.o: $(srcdir)/ftpd.c
 ftpcmd.o: ftpcmd.c
 popen.o: $(srcdir)/popen.c
-logwtmp.o: $(srcdir)/logwtmp.c
 vers.o: $(srcdir)/vers.c
 
 # NOPOSTFIX

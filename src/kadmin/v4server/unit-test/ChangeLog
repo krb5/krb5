@@ -1,3 +1,8 @@
+2000-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib/helpers.exp (unexpire): Put expiration time into the future
+	again.
+
 Mon Nov 11 20:51:58 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.

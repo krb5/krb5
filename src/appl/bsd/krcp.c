@@ -1144,8 +1144,6 @@ struct buffer *allocbuf(bp, fd, blksize)
     return (bp);
 }
 
-
-
 void
 #ifdef HAVE_STDARG_H
 error(char *fmt, ...)
@@ -1170,8 +1168,9 @@ error(fmt, va_alist)
     (void) vsprintf(cp, fmt, ap);
     va_end(ap);
 
-    (void) des_write(rem, buf, strlen(buf));
-    if (iamremote == 0)
+    if (iamremote)
+      (void) des_write(rem, buf, strlen(buf));
+    else
       (void) write(2, buf+1, strlen(buf+1));
 }
 
@@ -1260,8 +1259,10 @@ char **save_argv(argc, argv)
 #endif
 
 
-
-
+/* This function is mostly vestigial, since under normal operation
+ * the -x flag doesn't get set for the server process for encrypted
+ * rcp.  It only gets called by beta clients attempting user-to-user
+ * authentication. */
 void
   answer_auth(config_file, ccache_file)
     char *config_file;

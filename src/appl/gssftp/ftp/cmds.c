@@ -819,9 +819,9 @@ usage:
 					    &yy, &mo, &day, &hour, &min, &sec);
 					tm = gmtime(&stbuf.st_mtime);
 					tm->tm_mon++;
-					if (tm->tm_year > yy%100)
+					if (tm->tm_year > yy-1900)
 						return (1);
-					else if (tm->tm_year == yy%100) {
+					else if (tm->tm_year == yy-1900) {
 						if (tm->tm_mon > mo)
 							return (1);
 					} else if (tm->tm_mon == mo) {

@@ -49,7 +49,10 @@ server-iter-test: iter-test.o $(SRVDEPLIBS)
 check:: check-@DO_TEST@
 
 check-::
-	@echo "Either tcl, runtest, or Perl is unavailable. Kadm5 unit tests not run"
+	@echo "+++"
+	@echo "+++ WARNING: lib/kadm5 unit tests not run."
+	@echo "+++ Either tcl, runtest, or Perl is unavailable."
+	@echo "+++"
 
 check-ok unit-test:: unit-test-client unit-test-server
 

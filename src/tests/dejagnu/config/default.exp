@@ -134,6 +134,7 @@ if ![info exists SHELL_PROMPT] {
 
 proc check_k5login { testname } {
     global env
+    global REALMNAME
 
     if ![file exists ~/.k5login] {
 	return 1
@@ -141,7 +142,7 @@ proc check_k5login { testname } {
 
     set file [open ~/.k5login r]
     while { [gets $file principal] != -1 } {
-	if { $principal == $env(USER) } {
+	if { $principal == "$env(USER)@$REALMNAME" } {
 	    close $file
 	    return 1
 	}
@@ -349,7 +350,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		supported_enctypes = des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
 	puts $conffile "		kdc_ports = 3088"
-	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
+	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
 	puts $conffile "	\}"
 	puts $conffile ""
@@ -760,6 +761,7 @@ proc start_kerberos_daemons { standalone } {
     global kadmind_pid
     global kadmind_spawn_id
     global tmppwd
+    global env
 
     if ![setup_kerberos_db 0] {
 	return 0
@@ -818,6 +820,17 @@ proc start_kerberos_daemons { standalone } {
     # Give the kerberos daemon a few seconds to get set up.
     sleep 2
 
+
+    #
+    # Save setting of KRB5_KTNAME. We do not want to override kdc.conf
+    # file during kadmind startup. (this is in case user has KRB5_KTNAME
+    # set before starting make check)
+    #
+    if [info exists env(KRB5_KTNAME)] {
+	set start_save_ktname $env(KRB5_KTNAME)
+    }
+    catch "unset env(KRB5_KTNAME)"
+
     if ![file exists $kadmind_lfile] then {
 	catch [touch $kadmind_lfile]
 	sleep 1
@@ -841,8 +854,18 @@ proc start_kerberos_daemons { standalone } {
 
     if {$count >= $retry} {
 	fail "kadmin5 (starting)"
+	if [info exists start_save_ktname] {
+	   set env(KRB5_KTNAME) $start_save_ktname
+	   unset start_save_ktname
+	}
 	stop_kerberos_daemons
 	return 0
+    }
+
+    # Restore KRB5_KTNAME
+    if [info exists start_save_ktname] {
+        set env(KRB5_KTNAME) $start_save_ktname
+        unset start_save_ktname
     }
 
     switch -regexp [tail1 $kadmind_lfile] {

@@ -515,7 +515,7 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->endtime,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) ctx->flags,
+	    (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->seq_send,
 				       &bp, &remain);
@@ -632,7 +632,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->endtime = (krb5_timestamp) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    ctx->flags = (krb5_flags) ibuf;
+	    ctx->krb_flags = (krb5_flags) ibuf;
 	    (void) krb5_ser_unpack_int32(&ctx->seq_send, &bp, &remain);
 	    (void) krb5_ser_unpack_int32(&ctx->seq_recv, &bp, &remain);
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
