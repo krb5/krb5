@@ -99,7 +99,7 @@ krb5_data *outbuf;
 
     request.ap_options = ap_req_options;
     /* we need a native ticket */
-    if (retval = krb5_decode_ticket(&creds->ticket, &request.ticket))
+    if (retval = decode_krb5_ticket(&creds->ticket, &request.ticket))
 	return(retval);			/* XXX who cleans up creds? */
 
 #define cleanup_ticket() krb5_free_ticket(request.ticket)
