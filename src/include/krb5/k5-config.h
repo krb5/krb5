@@ -48,6 +48,7 @@
 #define HAS_STRDUP
 #define NO_USERID
 #define NOFCHMOD
+#define NOCHMOD
 
 #define HAS_ANSI_CONST                          /* For compiling w/o -Za */
 #define HAS_ANSI_VOLATILE
@@ -83,6 +84,10 @@ typedef unsigned char u_char;
 #define _cdecl  __cdecl
 #define _huge   __huge
 
+#ifdef NEED_WINDOWS
+#include <windows.h>
+#endif
+
 #ifdef NEED_SOCKETS
 #include <winsock.h>
 #endif
@@ -92,6 +97,8 @@ typedef unsigned char u_char;
  * routines directly. Rather, they only export the _<function> version.
  * The following defines works around this problem. 
  */
+#include <sys\types.h>
+#include <sys\stat.h>
 #include <fcntl.h>
 #include <io.h>
 #include <process.h>
@@ -117,11 +124,9 @@ typedef unsigned char u_char;
 #define close           _close
 #define read            _read
 #define fstat           _fstat
-#define chmod           _chmod
 #define mktemp          _mktemp
 
 #define getpid          _getpid
-
 #endif
 
 /* XXX these should be parameterized soon... */

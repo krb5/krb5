@@ -412,6 +412,14 @@ void INTERFACE krb5_free_pwd_sequences
    PROTOTYPE((krb5_context,
          passwd_phrase_element **));
 
+/* From krb5/os but needed but by the outside world */
+krb5_error_code INTERFACE krb5_timeofday
+	PROTOTYPE((krb5_context,
+		   krb5_int32 * ));
+		 /* get all the addresses of this host */
+krb5_error_code INTERFACE krb5_os_localaddr
+	PROTOTYPE((krb5_address ***));
+
 /* Only put things which don't have pointers to the narrow types in this
    section */
 
