@@ -1,3 +1,12 @@
+2003-05-13  Sam Hartman  <hartmans@mit.edu>
+
+	* get_in_tkt.c (krb5_get_init_creds): Free s2kparams
+
+	* preauth2.c (krb5_do_preauth): Fix memory management
+	(pa_salt): Use copy_data_contents
+
+	* copy_data.c (krb5int_copy_data_contents): New function
+
 2003-05-09  Sam Hartman  <hartmans@mit.edu>
 
 	* preauth2.c: Patch from Sun to reorganize code   for handling

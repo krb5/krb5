@@ -1053,6 +1053,7 @@ cleanup:
     if (salt.data &&
 	(!(options && (options->flags & KRB5_GET_INIT_CREDS_OPT_SALT))))
 	krb5_xfree(salt.data);
+    krb5_free_data_contents(context, &s2kparams);
     if (as_reply)
 	*as_reply = local_as_reply;
     else if (local_as_reply)

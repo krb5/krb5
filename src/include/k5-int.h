@@ -906,6 +906,8 @@ void krb5_free_etype_info
 /*
  * End "preauth.h"
  */
+krb5_error_code
+krb5int_copy_data_contents (krb5_context, const krb5_data *, krb5_data *);
 
 typedef krb5_error_code (*krb5_gic_get_as_key_fct)
     (krb5_context,
