@@ -79,7 +79,7 @@ krb5_error_code krb5_kt_resolve (name, ktid)
     
     cp = strchr (name, ':');
     if (!cp) {
-	    return (krb5_kt_dfl_ops.resolve)(name, ktid);
+	    return (*krb5_kt_dfl_ops.resolve)(name, ktid);
     }
 
     pfxlen = cp - (char *)name;
