@@ -2,7 +2,7 @@
 #	$Author$
 #	$Id$
 #
-#  Copyright 1990 by the Massachusetts Institute of Technology.
+#  Copyright 1990,,1991 by the Massachusetts Institute of Technology.
 # 
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
@@ -13,13 +13,13 @@ OBJS 	= fcc_close.o fcc_destry.o fcc_eseq.o \
 	fcc_gennew.o fcc_getnam.o fcc_gprin.o fcc_init.o \
 	fcc_nseq.o fcc_read.o fcc_reslv.o fcc_retrv.o \
 	fcc_sseq.o fcc_store.o fcc_skip.o fcc_ops.o fcc_write.o \
-	fcc_sflags.o fcc_defops.o fcc_errs.o
+	fcc_sflags.o fcc_defops.o fcc_errs.o fcc_maybe.o
 
 SRCS 	= fcc_close.c fcc_destry.c fcc_eseq.c \
 	fcc_gennew.c fcc_getnam.c fcc_gprin.c fcc_init.c \
 	fcc_nseq.c fcc_read.c fcc_reslv.c fcc_retrv.c \
 	fcc_sseq.c fcc_store.c fcc_skip.c fcc_ops.c fcc_write.c \
-	fcc_sflags.c fcc_defops.c fcc_errs.c
+	fcc_sflags.c fcc_defops.c fcc_errs.c fcc_maybe.c
 
 all:: ${OBJS}
 
