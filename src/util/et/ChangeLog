@@ -1,3 +1,10 @@
+Fri Sep 22 19:58:22 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* error_message.c (sys_nerr): Only define sys_nerr if we're on a
+		Macintosh.  On those systems which use sys_nerr, it's an
+		external variable, defined by libc.  Under Windows, it's
+		apparently an cpp macro.
+
 Mon Aug  7 19:22:52 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (compile_et): Add $(SHELL) to invocation of

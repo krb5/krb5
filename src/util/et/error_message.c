@@ -17,7 +17,9 @@
 #include "mit-sipb-copyright.h"
 #include "internal.h"
 
+#ifdef _MACINTOSH
 #define sys_nerr 100
+#endif
 
 static const char copyright[] =
     "Copyright 1986, 1987, 1988 by the Student Information Processing Board\nand the department of Information Systems\nof the Massachusetts Institute of Technology";
