@@ -902,6 +902,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    /* finally! */
 
+   if (authdat)
+       krb5_free_authenticator(context, authdat);
    *minor_status = 0;
    return(GSS_S_COMPLETE);
 

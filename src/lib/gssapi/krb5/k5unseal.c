@@ -558,18 +558,12 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
    /* compute the checksum of the message */
 
-   /* initialize the the cksum and allocate the contents buffer */
+   /* initialize the the cksum */
    if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
        return(code);
 
    md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
    md5cksum.length = sumlen;
-   if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL) {
-      if (sealalg != 0xffff)
-	 xfree(plain);
-      *minor_status = ENOMEM;
-      return(GSS_S_FAILURE);
-   }
 
    switch (signalg) {
    case 0:
@@ -580,7 +574,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
       if (! (data_ptr = (void *)
 	     xmalloc(8 + (ctx->big_endian ? token.length : plainlen)))) {
-	  xfree(md5cksum.contents);
 	  if (sealalg != 0xffff)
 	      xfree(plain);
 	  if (toktype == KG_TOK_SEAL_MSG)
@@ -603,7 +596,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
       xfree(data_ptr);
 
       if (code) {
-	  xfree(md5cksum.contents);
 	  if (toktype == KG_TOK_SEAL_MSG)
 	      xfree(token.value);
 	  *minor_status = code;
@@ -698,12 +690,12 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
       plaind.length = 8 + sizeof(ctx->seed) +
 	  (ctx->big_endian ? token.length : plainlen);
       plaind.data = data_ptr;
+      xfree(md5cksum.contents);
       code = krb5_c_make_checksum(context, md5cksum.checksum_type, 0, 0,
 				  &plaind, &md5cksum);
       xfree(data_ptr);
 
       if (code) {
-	  xfree(md5cksum.contents);
 	  if (sealalg == 0)
 	      xfree(plain);
 	  if (toktype == KG_TOK_SEAL_MSG)

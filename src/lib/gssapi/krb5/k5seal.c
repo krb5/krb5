@@ -326,29 +326,24 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
 
    /* pad the plaintext, encrypt if needed, and stick it in the token */
 
-   /* initialize the the cksum and allocate the contents buffer */
+   /* initialize the the cksum */
    if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
        return(code);
 
    md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
    md5cksum.length = sumlen;
-   if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL)
-      return(ENOMEM);
- 
    if (toktype == KG_TOK_SEAL_MSG) {
       unsigned char *plain;
       unsigned char pad;
 
       if (!bigend || encrypt) {
 	 if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
-	    xfree(md5cksum.contents);
 	    xfree(t);
 	    return(ENOMEM);
 	 }
 
 	 if ((code = kg_make_confounder(context, enc, plain))) {
 	    xfree(plain);
-	    xfree(md5cksum.contents);
 	    xfree(t);
 	    return(code);
 	 }
@@ -370,7 +365,6 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
 				tmsglen))) {
 	    if (plain)
 	       xfree(plain);
-	    xfree(md5cksum.contents);
 	    xfree(t);
 	    return(code);
 	 }
@@ -388,7 +382,6 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
 	     (char *) xmalloc(8 + (bigend ? text->length : tmsglen)))) {
 	  if (plain)
 	      xfree(plain);
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(ENOMEM);
       }
@@ -406,7 +399,6 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
       if (code) {
 	  if (plain)
 	      xfree(plain);
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(code);
 	  memcpy(ptr+14+cksum_size, plain, tmsglen);
@@ -418,7 +410,6 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
       /* compute the checksum */
 
       if (! (data_ptr = (char *) xmalloc(8 + text->length))) {
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(ENOMEM);
       }
@@ -430,7 +421,6 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
 				  &plaind, &md5cksum);
       xfree(data_ptr);
       if (code) {
-	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return(code);
       }

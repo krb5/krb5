@@ -40,21 +40,21 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
    krb5_data plaind;
    krb5_error_code code;
 
-   /* initialize the the cksum and allocate the contents buffer */
+   /* initialize the the cksum */
    if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
        return(code);
 
    cksum->checksum_type = CKSUMTYPE_RSA_MD5;
    cksum->length = sumlen;
-   if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
-      return(ENOMEM);
-   }
  
    /* generate a buffer full of zeros if no cb specified */
 
    if (cb == GSS_C_NO_CHANNEL_BINDINGS) {
-      memset(cksum->contents, '\0', cksum->length);
-      return(0);
+       if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
+	   return(ENOMEM);
+       }
+       memset(cksum->contents, '\0', cksum->length);
+       return(0);
    }
 
    /* create the buffer to checksum into */

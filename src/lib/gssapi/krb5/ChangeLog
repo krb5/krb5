@@ -1,5 +1,18 @@
 Mon Sep 21 00:32:28 1998  Tom Yu  <tlyu@mit.edu>
 
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Free authdat
+	even on success to avoid a memory leak.
+
+	* util_cksum.c (kg_checksum_channel_bindings): Fix memory leak by
+ 	not allocating cksum->contents unless we have to return a
+ 	zero-filled one.
+
+	* k5unseal.c (kg_unseal_v1): Fix memorly leak by not allocating
+	md5cksum.contents.
+
+	* k5seal.c (make_seal_token_v1): Fix memory leak by not allocating
+	md5cksum.contents.
+
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Only free
 	ap_req.data if it was allocated by kg2_parse_token(), otherwise we
 	lose very badly trying to free the middle of a potentially
