@@ -85,6 +85,7 @@ lib/**/libname.a: objlist						@@\
  */
 #ifndef OtherdirLibraryTarget
 #define	OtherdirLibraryTarget(libdir,libname,objlist)			@@\
+AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
 AllTarget(foo/**/libname)						@@\
 									@@\
