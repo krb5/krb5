@@ -40,11 +40,14 @@ static char rcsid_decode_kdc_c[] =
  */
 
 krb5_error_code
-krb5_decode_kdc_rep(enc_rep, key, etype, dec_rep)
-krb5_data *enc_rep;
-krb5_keyblock *key;
-krb5_enctype etype;
-krb5_kdc_rep **dec_rep;
+krb5_decode_kdc_rep(DECLARG(krb5_data *, enc_rep),
+		    DECLARG(krb5_keyblock *, key),
+		    DECLARG(krb5_enctype, etype),
+		    DECLARG(krb5_kdc_rep **, dec_rep))
+OLDDECLARG(krb5_data *, enc_rep)
+OLDDECLARG(krb5_keyblock *, key)
+OLDDECLARG(krb5_enctype, etype)
+OLDDECLARG(krb5_kdc_rep **, dec_rep)
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
@@ -70,7 +73,7 @@ krb5_kdc_rep **dec_rep;
     if (local_dec_rep->etype != etype) {
 	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
     }
-    if (retval = krb5_kdc_rep_decrypt_proc(local_dec_rep, key, 0)) {
+    if (retval = krb5_kdc_rep_decrypt_proc(key, 0, local_dec_rep)) {
 	krb5_free_kdc_rep(local_dec_rep);
 	return(retval);
     }
