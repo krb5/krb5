@@ -1,3 +1,9 @@
+Thu Apr 18 16:24:44 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* macsock.c (getsockname, getpeername): Correctly implement
+ 		getsockname(), so it does getsockname(), not
+ 		getpeername(), and add the function getpeername().
+
 Sat May 11 10:08:15 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Need to include sys/types.h before regexp.h in

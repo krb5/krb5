@@ -781,21 +781,46 @@ struct GetAddrParamBlock	pb;
 
 int
 getsockname(s, name, namelen)
-	SOCKET s;
-	struct sockaddr_in *name;
-	int *namelen;
+        SOCKET s;
+        struct sockaddr_in *name;
+        int *namelen;
 {
+    struct hostent *hp;
 
-	if (s == NULL)
-		return(EINVAL);
+    hp = getmyipaddr();
 
-	if (*namelen < sizeof(struct sockaddr_in))
-		return(EINVAL);
+    if (hp == NULL)
+	return -1;
 
-	*namelen = sizeof(struct sockaddr_in);
-	*name = s->connect_addr;
+    if (*namelen < sizeof(struct sockaddr_in)) {
+	SOCKET_SET_ERRNO(EIO);
+	return -1;
+    }
+    
+    name->sin_family = hp->h_addrtype;
+    memcpy((char *)&name->sin_addr, hp->h_addr, hp->h_length);
+    
+    *namelen = sizeof(struct sockaddr_in);
 
-	return(0);
+    return (0);
 }
 
+int
+getpeername(s, name, namelen)
+        SOCKET s;
+        struct sockaddr_in *name;
+        int *namelen;
+{
+
+        if (s == NULL)
+                return(EINVAL);
+
+        if (*namelen < sizeof(struct sockaddr_in))
+                return(EINVAL);
+
+        *namelen = sizeof(struct sockaddr_in);
+        *name = s->connect_addr;
+
+        return(0);
+}
 #endif /* HAVE_MACSOCK_H */
