@@ -1,3 +1,9 @@
+2004-05-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Do remember to set
+	use_linker_init_option and use_linker_fini_option.
+	(mips-sgi-irix*): Set LDCOMBINE_TAIL only if not using gcc.
+
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (alpha*-dec-osf*): Add support for export list, using
