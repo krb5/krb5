@@ -23,16 +23,24 @@
 # 
 # 
 
-        DEPLIBS = $(DEPKLIB)
+DEPLIBS = $(DEPKLIB)
+
+#ifdef Krb4ApplCompat
+K4LIB = $(KRB4LIB)
+#else
+K4LIB =
+#endif
+
+DEFINES = $(APPL_BSD_DEF) -DKERBEROS 
+
 #ifdef CrayArchitecture
 LOCAL_LIBRARIES = $(KLIB) -lshare  -lm -lrsc
 #else
 LOCAL_LIBRARIES = $(KLIB)
 #endif
-        DEFINES = $(APPL_BSD_DEF)
-
-CLIENTSRCS= krcp.c krlogin.c krsh.c kcmd.c logutil.c
-CLIENTOBJS= krcp.o krlogin.o krsh.o kcmd.o logutil.o
+        
+CLIENTSRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c setenv.c login.c
+CLIENTOBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o setenv.o login.o
 
 #ifdef CrayArchitecture
 SERVERSRCS= krshd.c
@@ -45,26 +53,29 @@ SERVEROBJS= krlogind.o krshd.o
 SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 
 #ifdef CrayArchitecture
-all::	rsh rcp rlogin krshd 
+all::	rsh rcp rlogin krshd
 #else
-all::	rsh rcp rlogin krshd krlogind
+all::	rsh rcp rlogin krshd krlogind login.krb
 #endif
 
-NormalProgramTarget(rsh,krsh.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(rsh,krsh.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
 Krb5InstallClientProgram(rsh)
 
-NormalProgramTarget(rcp,krcp.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(rcp,krcp.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
 Krb5InstallClientProgram(rcp)
 
-NormalProgramTarget(rlogin,krlogin.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(rlogin,krlogin.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
 Krb5InstallClientProgram(rlogin)
 
-NormalProgramTarget(krshd,krshd.o kcmd.o logutil.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(krshd,krshd.o kcmd.o logutil.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),$(K4LIB))
 Krb5InstallServerProgram(krshd)
 
 #ifndef CrayArchitecture
-NormalProgramTarget(krlogind,krlogind.o logutil.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
-#endif
+NormalProgramTarget(krlogind,krlogind.o logutil.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),$(K4LIB))
 Krb5InstallServerProgram(krlogind)
+
+NormalProgramTarget(login.krb,login.o logutil.o setenv.o,,,)
+InstallProgram(login.krb,$(SERVER_BINDIR))
+#endif
 
 DependTarget()
