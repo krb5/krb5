@@ -125,6 +125,7 @@ static char RCS[] =
 
 
 #define EPOCH		1970
+#define EPOCH_END	2038 /* assumes 32 bits */
 #define HOUR(x)		((time_t)(x) * 60)
 #define SECSPERDAY	(24L * 60L * 60L)
 
@@ -595,11 +596,12 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
 
     if (Year < 0)
 	Year = -Year;
-    if (Year < 100)
+    if (Year < 1900)
 	Year += 1900;
     DaysInMonth[1] = Year % 4 == 0 && (Year % 100 != 0 || Year % 400 == 0)
 		    ? 29 : 28;
     if (Year < EPOCH
+	|| Year > EPOCH_END
 	|| Month < 1 || Month > 12
 	/* Lint fluff:  "conversion from long may lose accuracy" */
 	|| Day < 1 || Day > DaysInMonth[(int)--Month])
@@ -661,6 +663,7 @@ RelativeMonth(Start, RelMonth)
     struct tm	*tm;
     time_t	Month;
     time_t	Year;
+    time_t	ret;
 
     if (RelMonth == 0)
 	return 0;
@@ -668,10 +671,12 @@ RelativeMonth(Start, RelMonth)
     Month = 12 * tm->tm_year + tm->tm_mon + RelMonth;
     Year = Month / 12;
     Month = Month % 12 + 1;
-    return DSTcorrect(Start,
-	    Convert(Month, (time_t)tm->tm_mday, Year,
-		(time_t)tm->tm_hour, (time_t)tm->tm_min, (time_t)tm->tm_sec,
-		MER24, DSTmaybe));
+    ret = Convert(Month, (time_t)tm->tm_mday, Year,
+		  (time_t)tm->tm_hour, (time_t)tm->tm_min, (time_t)tm->tm_sec,
+		  MER24, DSTmaybe);
+    if (ret == -1)
+      return ret;
+    return DSTcorrect(Start, ret);
 }
 
 
@@ -861,6 +866,7 @@ get_date(p, now)
     struct my_timeb	ftz;
     time_t		Start;
     time_t		tod;
+    time_t		delta;
 
     yyInput = p;
     if (now == NULL) {
@@ -972,7 +978,10 @@ get_date(p, now)
      * thoroughness?
      */
     Start += yyRelSeconds;
-    Start += RelativeMonth(Start, yyRelMonth);
+    delta = RelativeMonth(Start, yyRelMonth);
+    if (delta == (time_t) -1)
+      return -1;
+    Start += delta;
 
     /*
      * Now, if you specified a day of week and counter, add it in.  By
