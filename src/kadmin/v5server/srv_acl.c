@@ -373,6 +373,9 @@ acl_init(kcontext, debug_level, acl_file)
     char		*acl_file;
 {
     krb5_error_code	kret;
+#if	POSIX_SIGNALS
+    struct sigaction	s_action;
+#endif	/* POSIX_SIGNALS */
 
     kret = 0;
     acl_debug_level = debug_level;
@@ -381,7 +384,14 @@ acl_init(kcontext, debug_level, acl_file)
 	    ((acl_file) ? acl_file : "(null)")));
     acl_acl_file = (acl_file) ? acl_file : (char *) acl_default_file;
     acl_inited = acl_load_acl_file();
+#if	POSIX_SIGNALS
+    (void) sigemptyset(&s_action.sa_mask);
+    s_action.sa_flags = 0;
+    s_action.sa_handler = acl_reload_acl_file;
+    (void) sigaction(SIGALRM, &s_action, (struct sigaction *) NULL);
+#else	/* POSIX_SIGNALS */
     signal(SIGHUP, acl_reload_acl_file);
+#endif	/* POSIX_SIGNALS */
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_init() = %d\n", kret));
     return(kret);
 }

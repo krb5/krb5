@@ -87,7 +87,11 @@ static krb5_sigtype
 unhandled_signal(signo)
     int signo;
 {
+#if	POSIX_SETJMP
+    siglongjmp(terminal_jmp, signo);
+#else	/* POSIX_SETJMP */
     longjmp(terminal_jmp, signo);
+#endif	/* POSIX_SETJMP */
     /* NOTREACHED */
 }
 
@@ -279,10 +283,32 @@ main(argc, argv)
     openlog(programname, LOG_AUTH|LOG_CONS|LOG_NDELAY|LOG_PID, LOG_LOCAL6);
     (void) set_com_err_hook(kadm_com_err_proc);
 
-    if ((signal_number = setjmp(terminal_jmp)) == 0) {
+    if ((signal_number =
+#if	POSIX_SETJMP
+	 sigsetjmp(terminal_jmp, 1)
+#else	/* POSIX_SETJMP */
+	 setjmp(terminal_jmp)
+#endif	/* POSIX_SETJMP */
+	 ) == 0) {
+#if	POSIX_SIGNALS
+	struct sigaction s_action;
+#endif	/* POSIX_SIGNALS */
+
 	/*
 	 * Initialize signal handling.
 	 */
+#if	POSIX_SIGNALS
+	(void) sigemptyset(&s_action.sa_mask);
+	s_action.sa_flags = 0;
+	s_action.sa_handler = unhandled_signal;
+	(void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
+	(void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
+	(void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
+	(void) sigaction(SIGQUIT, &s_action, (struct sigaction *) NULL);
+	(void) sigaction(SIGPIPE, &s_action, (struct sigaction *) NULL);
+	(void) sigaction(SIGALRM, &s_action, (struct sigaction *) NULL);
+	(void) sigaction(SIGCHLD, &s_action, (struct sigaction *) NULL);
+#else	/* POSIX_SIGNALS */
 	signal(SIGINT, unhandled_signal);
 	signal(SIGTERM, unhandled_signal);
 	signal(SIGHUP, unhandled_signal);
@@ -290,6 +316,7 @@ main(argc, argv)
 	signal(SIGPIPE, unhandled_signal);
 	signal(SIGALRM, unhandled_signal);
 	signal(SIGCHLD, unhandled_signal);
+#endif	/* POSIX_SIGNALS */
 
 	/*
 	 * Initialize our modules.

@@ -57,7 +57,11 @@ static jmp_buf	timeout_jmp;
 static krb5_sigtype
 proto_alarmclock()
 {
+#if	POSIX_SETJMP
+    siglongjmp(timeout_jmp, 1);
+#else	/* POSIX_SETJMP */
     longjmp(timeout_jmp, 1);
+#endif	/* POSIX_SETJMP */
     /* NOTREACHED */
 }
 
@@ -108,6 +112,10 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     krb5_address	*local;
     krb5_address	*remote;
 
+#if	POSIX_SIGNALS
+    struct sigaction	s_action;
+#endif	/* POSIX_SIGNALS */
+
     char		*curr_lang = (char *) NULL;
     krb5_boolean	mime_setting = 0;
 
@@ -130,6 +138,10 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     remote = (krb5_address *) NULL;
     ticket = (krb5_ticket *) NULL;
     rcache = (krb5_rcache) NULL;
+#if	POSIX_SIGNALS
+    (void) sigemptyset(&s_action.sa_mask);
+    s_action.sa_flags = 0;
+#endif	/* POSIX_SIGNALS */
 
     /* Get memory for addresses */
     local = (krb5_address *) malloc(sizeof(krb5_address));
@@ -240,9 +252,20 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
      *
      * If enabled, the protocol times out after proto_proto_timeout seconds.
      */
-    if (setjmp(timeout_jmp) == 0) {
+    if (
+#if	POSIX_SETJMP
+	sigsetjmp(timeout_jmp, 1) == 0
+#else	/* POSIX_SETJMP */
+	setjmp(timeout_jmp) == 0
+#endif	/* POSIX_SETJMP */
+	) {
 	if (proto_proto_timeout > 0) {
+#if	POSIX_SIGNALS
+	    s_action.sa_handler = proto_alarmclock;
+	    (void) sigaction(SIGALRM, &s_action, (struct sigaction *) NULL);
+#else	/* POSIX_SIGNALS */
 	    signal(SIGALRM, proto_alarmclock);
+#endif	/* POSIX_SIGNALS */
 	}
 	/*
 	 * Loop forever - or until somebody puts us out of our misery.
