@@ -1,4 +1,19 @@
 /*
+ * **************************************
+ * Major problem:
+ * This code is really confused (meaning that I was confused when I
+ * wrote it).  The declarations are set up such that the functions
+ * below can copy data into a structure it is given a pointer to, but
+ * they are written to allocate memory and return a pointer to that.
+ * Of course, the pointer is never returned because I have one too few
+ * levels of directory, so essentially nothing will work.
+ *
+ * Have fun, Bill.
+ * **************************************
+ */
+
+
+/*
  * $Source$
  * $Author$
  *
