@@ -262,13 +262,6 @@ krb5_tkt_authent **ret_authdat;
 	       krb5_princ_realm(tgs_server)->data,
 	       krb5_princ_realm(tgs_server)->length))
 	foreign_server = TRUE;
-    {
-	char	*tmp, *tmp1;
-
-	krb5_unparse_name(apreq->ticket->server, &tmp);
-	krb5_unparse_name(tgs_server, &tmp1);
-	syslog(LOG_INFO, "server: %s, tgs_server: %s", tmp, tmp1);
-    }
 
     retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
 				 from->address,
