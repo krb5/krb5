@@ -5,7 +5,7 @@ LDFLAGS = -g
 
 ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=@DBMLIB@
+DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a
 KDB4LIB=$(KRB4)/lib/libkdb.a
 KRB4LIB=$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a

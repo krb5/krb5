@@ -1,3 +1,9 @@
+Fri Jul  8 00:41:41 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in (in all relevant subdirs):
+	* Makefile.in (in all relevant subdirs): back out changes because
+	they were causing breakage under Ultrix
+
 Wed Jul  6 23:03:16 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in (in all relevant subdirs):
