@@ -1,4 +1,8 @@
 
+Tue Aug 29 13:30:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapi.h - Add prototypes for gss_{im,ex}port_sec_context.
+
+
 Thu Jul 27 15:25:08 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gssapiP_generic.h - Include k5-int.h instead of k5-config.h and
 		conditionally k5-sockets.h.

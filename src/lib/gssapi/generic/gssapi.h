@@ -441,5 +441,15 @@ PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
 	    int FAR *           /* locally_initiated */
 	   ));
 
+OM_uint32 INTERFACE gss_export_sec_context
+PROTOTYPE( (OM_uint32 FAR *,	/* minor_status */
+	    gss_ctx_id_t FAR *,	/* context_handle */
+	    gss_buffer_t	/* interprocess_token */
+	    ));
 
+OM_uint32 INTERFACE gss_import_sec_context
+PROTOTYPE( (OM_uint32 FAR *,	/* minor_status */
+	    gss_buffer_t,	/* interprocess_token */
+	    gss_ctx_id_t FAR *	/* context_handle */
+	    ));
 #endif /* _GSSAPI_H_ */
