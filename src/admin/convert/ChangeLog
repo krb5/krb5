@@ -1,3 +1,7 @@
+Thu Apr 27 13:45:46 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCAL_LIBRARIES): use KDB4_LIB and KRB4_LIB directly.
+
 Tue Mar 28 16:41:52 1995    <tytso@rsx-11.mit.edu>
 
 	* kdb5_convert.c (fixup_database, main): Set SUPPORT_DESMD5
