@@ -383,7 +383,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_kdc_req	request;
     krb5_pa_data	**padata = 0;
     krb5_error *	err_reply;
-    krb5_kdc_rep *	as_reply;
+    krb5_kdc_rep *	as_reply = 0;
     krb5_pa_data  **	preauth_to_use = 0;
     int			loopcount = 0;
     krb5_int32		do_more = 0;

@@ -1,9 +1,15 @@
+Thu Feb 13 14:17:00 1997  Richard Basch  <basch@lehman.com>
+
+	* get_in_tkt.c (krb5_get_in_tkt): Initialize as_reply; if
+		krb5_os_localaddr() returns an error, the cleanup
+		routine may try to free a garbage pointer (as_reply).
+
 Wed Feb 12 20:47:30 1997  Tom Yu  <tlyu@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Use the client's realm rather
-	than the server's realm for constructing the tgs principal.
-	Remove TC_MATCH_SRV_NAMEONLY from call to retrieve_cred() because
-	we want to get an exact match.
+		than the server's realm for constructing the tgs principal.
+		Remove TC_MATCH_SRV_NAMEONLY from call to retrieve_cred()
+		because we want to get an exact match.
 
 Mon Feb 10 10:41:36 1997  Ezra Peisach  <epeisach@mit.edu>
 
