@@ -10,8 +10,8 @@ all-unix:: kdestroy
 all-windows:: $(OUTPRE)kdestroy.exe
 all-mac::
 
-kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
+kdestroy: kdestroy.o $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ kdestroy.o $(KRB4COMPAT_LIBS)
 
 $(OUTPRE)kdestroy.exe: $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $**

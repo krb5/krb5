@@ -13,8 +13,8 @@ all-unix:: kinit
 all-windows:: $(OUTPRE)kinit.exe
 all-mac::
 
-kinit: kinit.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ kinit.o $(KRB5_BASE_LIBS)
+kinit: kinit.o $(KRB4COMPAT_DEPLIBS) $(KRB524_DEPLIB)
+	$(CC_LINK) -o $@ kinit.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
 $(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib

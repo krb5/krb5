@@ -1,3 +1,7 @@
+2000-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (kinit): Fix to build on Unix again.
+
 2000-02-04  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kinit.c: Major revamp to support Kerberos 4 compatibility.  Code
