@@ -121,7 +121,7 @@ int display_unknown(kind, value, buffer)
 
    sprintf(str, unknown_error, kind, value);
 
-   buffer->length = len;
+   buffer->length = strlen(str);
    buffer->value = str;
 
    return(1);
