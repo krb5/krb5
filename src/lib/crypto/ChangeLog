@@ -1,3 +1,37 @@
+2003-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes: New directory, containing AES implementation from Brian
+	Gladstone, tweaked a little for the krb5 build system.
+	* configure.in: Build its makefile.
+	* Makefile.in (LOCAL_SUBDIRS, LOCALINCLUDES, STOBJLISTS,
+	SUBDIROBJLISTS): Add aes entries.
+
+	* t_cts.c: New test file.
+	* Makefile.in (EXTRADEPSRCS): Add t_cts.
+	(t_cts$(EXEEXT)): New rule.
+
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Add pbkdf2.
+	(EXTRADEPSRCS): Remove pbkdf2.c.
+	(t_pkcs5$(EXEEXT)): Don't list pbkdf2.$(OBJEXT).
+
+	* t_nfold.c (fold_kerberos): New function.
+	(main): Call it with different lengths.
+	* vectors.c: Include ctype.h and hash_provider.h.
+	(test_nfold, test_mit_des_s2k, test_s2k, test_dr_dk): Test case
+	data now static and const.
+	(test_nfold): Add "Q" and "ba" tests from Simon Josefsson.
+	(GCLEF): New macro.
+	(test_mit_des_s2k): Add GCLEF test case.  Fill in "key" at run
+	time, not as initialization.
+	(test_s2k): Added GCLEF test case.
+	(krb5int_enc_aes128, krb5int_enc_aes256): Declare.
+	(combine_keys, test_des3_combine, k5_des3_make_key): Functions
+	deleted.
+	(whoami): New variable.
+	(printd, printk): New functions.
+	(test_pbkdf2): New function.
+	(main): Initialize whoami.  Test nfold only for now.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,

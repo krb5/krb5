@@ -3,9 +3,10 @@ myfulldir=lib/crypto
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS=crc32 des dk enc_provider hash_provider keyhash_provider \
-	md4 md5 old raw sha1 arcfour yarrow
+	md4 md5 old raw sha1 arcfour yarrow aes
 LOCALINCLUDES = -I$(srcdir)/enc_provider \
 	-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider \
+	-I$(srcdir)/aes \
 	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk -I$(srcdir)/arcfour \
 	-I$(srcdir)/yarrow -I$(srcdir)/sha1
 RUN_SETUP = @KRB5_RUN_ENV@
@@ -17,8 +18,8 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_encrypt.c	\
 	$(srcdir)/t_prng.c	\
 	$(srcdir)/t_hmac.c	\
-	$(srcdir)/pbkdf2.c	\
 	$(srcdir)/t_pkcs5.c	\
+	$(srcdir)/t_cts.c	\
 	$(srcdir)/vectors.c
 
 ##DOSBUILDTOP = ..\..
@@ -55,6 +56,7 @@ STLIBOBJS=\
 	make_random_key.o	\
 	nfold.o			\
 	old_api_glue.o		\
+	pbkdf2.o		\
 	prng.o			\
 	state.o \
 	string_to_cksumtype.o	\
@@ -86,6 +88,7 @@ OBJS=\
 	$(OUTPRE)make_random_key.$(OBJEXT)	\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
+	$(OUTPRE)pbkdf2.$(OBJEXT)		\
 	$(OUTPRE)prng.$(OBJEXT)			\
 	$(OUTPRE)state.$(OBJEXT) \
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
@@ -117,6 +120,7 @@ SRCS=\
 	$(srcdir)/make_random_key.c	\
 	$(srcdir)/nfold.c		\
 	$(srcdir)/old_api_glue.c	\
+	$(srcdir)/pbkdf2.c	\
 	$(srcdir)/prng.c		\
 	$(srcdir)/state.c \
 	$(srcdir)/string_to_cksumtype.c	\
@@ -135,11 +139,13 @@ RELDIR=crypto
 STOBJLISTS=crc32/OBJS.ST des/OBJS.ST dk/OBJS.ST enc_provider/OBJS.ST \
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST md4/OBJS.ST \
 	md5/OBJS.ST old/OBJS.ST raw/OBJS.ST sha1/OBJS.ST arcfour/OBJS.ST \
+	aes/OBJS.ST \
 	yarrow/OBJS.ST \
 	OBJS.ST
 SUBDIROBJLISTS=crc32/OBJS.ST des/OBJS.ST dk/OBJS.ST enc_provider/OBJS.ST \
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST md4/OBJS.ST \
 	md5/OBJS.ST old/OBJS.ST raw/OBJS.ST sha1/OBJS.ST arcfour/OBJS.ST \
+	aes/OBJS.ST \
 	yarrow/OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target
@@ -180,12 +186,15 @@ t_prng$(EXEEXT): t_prng.$(OBJEXT)
 t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
 
-t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) pbkdf2.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) pbkdf2.$(OBJEXT) \
-		$(K5CRYPTO_LIB) $(COM_ERR_LIB)
+t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
 
 vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+
+t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB)
 
 
 clean::

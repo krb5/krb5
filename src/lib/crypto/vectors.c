@@ -35,10 +35,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <ctype.h>
 #include <krb5.h>
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
+
+const char *whoami;
 
 static void printhex (size_t len, const char *p)
 {
@@ -55,7 +57,7 @@ static void printkey (krb5_keyblock *k) { printhex (k->length, k->contents); }
 static void test_nfold ()
 {
     int i;
-    struct {
+    static const struct {
 	char *input;
 	int n;
     } tests[] = {
@@ -64,6 +66,8 @@ static void test_nfold ()
 	{ "Rough Consensus, and Running Code", 64, },
 	{ "password", 168, },
 	{ "MASSACHVSETTS INSTITVTE OF TECHNOLOGY", 192 },
+	{ "Q", 168 },
+	{ "ba", 168 },
     };
     unsigned char outbuf[192/8];
 
@@ -82,6 +86,7 @@ static void test_nfold ()
 
 #define JURISIC "Juri\305\241i\304\207" /* hi Miro */
 #define ESZETT "\303\237"
+#define GCLEF  "\360\235\204\236" /* outside BMP, woo hoo!  */
 
 /* Some weak keys:
     {0x1f,0x1f,0x1f,0x1f,0x0e,0x0e,0x0e,0x0e},
@@ -91,13 +96,14 @@ static void test_nfold ()
 static void
 test_mit_des_s2k ()
 {
-    struct {
+    static const struct {
 	const char *pass;
 	const char *salt;
     } pairs[] = {
 	{ "password", "ATHENA.MIT.EDUraeburn" },
 	{ "potatoe", "WHITEHOUSE.GOVdanny" },
 	{ "penny", "EXAMPLE.COMbuckaroo", },
+	{ GCLEF, "EXAMPLE.COMpianist" },
 	{ ESZETT, "ATHENA.MIT.EDU" JURISIC },
 	/* These two trigger weak-key fixups.  */
 	{ "11119999", "AAAAAAAA" },
@@ -111,9 +117,11 @@ test_mit_des_s2k ()
 	krb5_data pd;
 	krb5_data sd;
 	unsigned char key_contents[60];
-	krb5_keyblock key = { .contents = key_contents };
+	krb5_keyblock key;
 	krb5_error_code r;
 	char buf[80];
+
+	key.contents = key_contents;
 
 	pd.length = strlen (p);
 	pd.data = (char *) p;
@@ -138,7 +146,7 @@ test_mit_des_s2k ()
 static void
 test_s2k (krb5_enctype enctype)
 {
-    struct {
+    static const struct {
 	const char *pass;
 	const char *salt;
     } pairs[] = {
@@ -146,6 +154,7 @@ test_s2k (krb5_enctype enctype)
 	{ "potatoe", "WHITEHOUSE.GOVdanny" },
 	{ "penny", "EXAMPLE.COMbuckaroo", },
 	{ ESZETT, "ATHENA.MIT.EDU" JURISIC },
+	{ GCLEF, "EXAMPLE.COMpianist" },
     };
     int i;
 
@@ -197,8 +206,9 @@ void check_error (int r, int line) {
 }
 #define CHECK check_error(r, __LINE__)
 
-    extern struct krb5_enc_provider krb5int_enc_des3;
-    struct krb5_enc_provider *enc = &krb5int_enc_des3;
+extern struct krb5_enc_provider krb5int_enc_des3;
+struct krb5_enc_provider *enc = &krb5int_enc_des3;
+extern struct krb5_enc_provider krb5int_enc_aes128, krb5int_enc_aes256;
 
 void DK (krb5_keyblock *out, krb5_keyblock *in, const krb5_data *usage) {
     krb5_error_code r;
@@ -212,162 +222,12 @@ void DR (krb5_data *out, krb5_keyblock *in, const krb5_data *usage) {
     CHECK;
 }
 
-void combine_keys (krb5_keyblock *k1, krb5_keyblock *k2, krb5_keyblock *knew)
-{
 #define KEYBYTES  21
 #define KEYLENGTH 24
-    krb5_data Combine;
-    unsigned char keydata_t1[KEYLENGTH], keydata_t2[KEYLENGTH];
-    krb5_keyblock t1, t2;
-    unsigned char fold_in[2*KEYBYTES], fold_out[KEYBYTES];
-#define R1data (&fold_in[0])
-#define R2data (&fold_in[KEYBYTES])
-    krb5_data r1, r2;
-    krb5_data tmp;
-
-    Combine.length = 7, Combine.data = "combine";
-    t1.length = KEYLENGTH, t1.contents = keydata_t1;
-    t2.length = KEYLENGTH, t2.contents = keydata_t2;
-    r1.length = KEYBYTES, r1.data = R1data;
-    r2.length = KEYBYTES, r2.data = R2data;
-
-    DK (&t1, k1, &Combine);
-    printf ("t1:\t "); printkey (&t1); printf ("\n");
-    DK (&t2, k2, &Combine);
-    printf ("t2:\t "); printkey (&t2); printf ("\n");
-    keyToData (&t2, &tmp);
-    DR (&r1, &t1, &tmp);
-    printf ("r1:\t "); printdata (&r1); printf ("\n");
-    keyToData (&t1, &tmp);
-    DR (&r2, &t2, &tmp);
-    printf ("r2:\t "); printdata (&r2); printf ("\n");
-    krb5_nfold (sizeof (fold_in) * 8, fold_in,
-		sizeof (fold_out) * 8, fold_out);
-    tmp.length = sizeof (fold_out); tmp.data = fold_out;
-    krb5_random2key (ENCTYPE_DES3_CBC_SHA1, &tmp, knew);
-}
-
-static void
-test_des3_combine ()
-{
-    struct {
-	unsigned char k1[KEYLENGTH], k2[KEYLENGTH];
-    } keypairs[] = {
-	{
-	    {
-		0x5e, 0x13, 0xd3, 0x1c, 0x70, 0xef, 0x76, 0x57,
-		0x46, 0x57, 0x85, 0x31, 0xcb, 0x51, 0xc1, 0x5b,
-		0xf1, 0x1c, 0xa8, 0x2c, 0x97, 0xce, 0xe9, 0xf2,
-	    },
-	    {
-		0xdc, 0xe0, 0x6b, 0x1f, 0x64, 0xc8, 0x57, 0xa1,
-		0x1c, 0x3d, 0xb5, 0x7c, 0x51, 0x89, 0x9b, 0x2c,
-		0xc1, 0x79, 0x10, 0x08, 0xce, 0x97, 0x3b, 0x92,
-	    }
-	},
-	{
-	    {
-		0xdc, 0xe0, 0x6b, 0x1f, 0x64, 0xc8, 0x57, 0xa1,
-		0x1c, 0x3d, 0xb5, 0x7c, 0x51, 0x89, 0x9b, 0x2c,
-		0xc1, 0x79, 0x10, 0x08, 0xce, 0x97, 0x3b, 0x92,
-	    },
-	    {
-		0x5e, 0x13, 0xd3, 0x1c, 0x70, 0xef, 0x76, 0x57,
-		0x46, 0x57, 0x85, 0x31, 0xcb, 0x51, 0xc1, 0x5b,
-		0xf1, 0x1c, 0xa8, 0x2c, 0x97, 0xce, 0xe9, 0xf2,
-	    },
-	},
-	{
-	    {
-		0x98, 0xe6, 0xfd, 0x8a, 0x04, 0xa4, 0xb6, 0x85,
-		0x9b, 0x75, 0xa1, 0x76, 0x54, 0x0b, 0x97, 0x52,
-		0xba, 0xd3, 0xec, 0xd6, 0x10, 0xa2, 0x52, 0xbc,
-	    },
-	    {
-		0x62, 0x2a, 0xec, 0x25, 0xa2, 0xfe, 0x2c, 0xad,
-		0x70, 0x94, 0x68, 0x0b, 0x7c, 0x64, 0x94, 0x02,
-		0x80, 0x08, 0x4c, 0x1a, 0x7c, 0xec, 0x92, 0xb5,
-	    }
-	},
-	{
-	    {
-		0xd3, 0xf8, 0x29, 0x8c, 0xcb, 0x16, 0x64, 0x38,
-		0xdc, 0xb9, 0xb9, 0x3e, 0xe5, 0xa7, 0x62, 0x92,
-		0x86, 0xa4, 0x91, 0xf8, 0x38, 0xf8, 0x02, 0xfb,
-	     },
-	    {
-		0xb5, 0x5e, 0x98, 0x34, 0x67, 0xe5, 0x51, 0xb3,
-		0xe5, 0xd0, 0xe5, 0xb6, 0xc8, 0x0d, 0x45, 0x76,
-		0x94, 0x23, 0xa8, 0x73, 0xdc, 0x62, 0xb3, 0x0e,
-	    }
-	},
-	{
-	    {
-		0xc1, 0x08, 0x16, 0x49, 0xad, 0xa7, 0x43, 0x62,
-		0xe6, 0xa1, 0x45, 0x9d, 0x01, 0xdf, 0xd3, 0x0d,
-		0x67, 0xc2, 0x23, 0x4c, 0x94, 0x07, 0x04, 0xda,
-	    },
-	    {
-		0x5d, 0x15, 0x4a, 0xf2, 0x38, 0xf4, 0x67, 0x13,
-		0x15, 0x57, 0x19, 0xd5, 0x5e, 0x2f, 0x1f, 0x79,
-		0x0d, 0xd6, 0x61, 0xf2, 0x79, 0xa7, 0x91, 0x7c,
-	    }
-	},
-	{
-	    {
-		0x79, 0x85, 0x62, 0xe0, 0x49, 0x85, 0x2f, 0x57,
-		0xdc, 0x8c, 0x34, 0x3b, 0xa1, 0x7f, 0x2c, 0xa1,
-		0xd9, 0x73, 0x94, 0xef, 0xc8, 0xad, 0xc4, 0x43,
-	    },
-	    {
-		0x26, 0xdc, 0xe3, 0x34, 0xb5, 0x45, 0x29, 0x2f,
-		0x2f, 0xea, 0xb9, 0xa8, 0x70, 0x1a, 0x89, 0xa4,
-		0xb9, 0x9e, 0xb9, 0x94, 0x2c, 0xec, 0xd0, 0x16,
-	    }
-	},
-    };
-    int i;
-
-    for (i = 0; i < ASIZE (keypairs); i++) {
-	krb5_keyblock k1, k2, kn;
-	unsigned char keycontents[KEYLENGTH] = { 0 };
-
-	k1.length = KEYLENGTH, k1.contents = keypairs[i].k1;
-	k2.length = KEYLENGTH, k2.contents = keypairs[i].k2;
-	kn.length = KEYLENGTH, kn.contents = keycontents;
-
-	printf ("k1:      "); printkey (&k1); printf ("\n");
-	printf ("k2:      "); printkey (&k2); printf ("\n");
-	combine_keys (&k1, &k2, &kn);
-	printf ("new key: "); printkey (&kn); printf ("\n");
-	printf ("\n");
-    }
-}
-
-extern krb5_error_code k5_des3_make_key (const krb5_data *, krb5_keyblock *);
-void spew_keys() {
-    int i;
-    unsigned char randbytes[21];
-    unsigned char keybytes[24];
-    krb5_data d;
-    krb5_keyblock k;
-
-    d.length = 21, d.data = randbytes;
-    k.length = 24, k.contents = keybytes;
-
-    srandom(getpid());
-    for (i = 0; i < 10; i++) {
-	int j;
-	for (j = 0; j < 21; j++)
-	    randbytes[j] = random() >> 9;
-	k5_des3_make_key (&d, &k);
-	printkey (&k);
-    }
-}
 
 void test_dr_dk ()
 {
-    struct {
+    static const struct {
 	unsigned char keydata[KEYLENGTH];
 	int usage_len;
 	unsigned char usage[8];
@@ -479,17 +339,119 @@ void test_dr_dk ()
     }
 }
 
-int main ()
+
+static void printd (const char *descr, krb5_data *d) {
+    int i, j;
+    const int r = 16;
+
+    printf("%s:", descr);
+
+    for (i = 0; i < d->length; i += r) {
+	printf("\n  %04x: ", i);
+	for (j = i; j < i + r && j < d->length; j++)
+	    printf(" %02x", 0xff & d->data[j]);
+	for (; j < i + r; j++)
+	    printf("   ");
+	printf("   ");
+	for (j = i; j < i + r && j < d->length; j++) {
+	    int c = 0xff & d->data[j];
+	    printf("%c", isprint(c) ? c : '.');
+	}
+    }
+    printf("\n");
+}
+static void printk(const char *descr, krb5_keyblock *k) {
+    krb5_data d;
+    d.data = k->contents;
+    d.length = k->length;
+    printd(descr, &d);
+}
+
+
+static void
+test_pbkdf2()
 {
-#if 0
+    static struct {
+	int count;
+	char *pass;
+	char *salt;
+    } test[] = {
+	{ 1, "password", "ATHENA.MIT.EDUraeburn" },
+	{ 2, "password", "ATHENA.MIT.EDUraeburn" },
+	{ 1200, "password", "ATHENA.MIT.EDUraeburn" },
+	{ 5, "password", "\x12\x34\x56\x78\x78\x56\x34\x12" },
+	{ 1200,
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "pass phrase equals block size" },
+	{ 1200,
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "pass phrase exceeds block size" },
+	{ 50, "\xf0\x9d\x84\x9e", "EXAMPLE.COMpianist" },
+    };
+    unsigned char x[100];
+    unsigned char x2[100];
+    int j;
+    krb5_error_code err;
+    krb5_data d;
+    krb5_keyblock k, dk;
+    krb5_data usage;
+
+    d.data = x;
+    dk.contents = x2;
+
+    usage.data = "kerberos";
+    usage.length = 8;
+
+    for (j = 0; j < sizeof(test)/sizeof(test[0]); j++) {
+	printf("pkbdf2(count=%d, pass=\"%s\", salt=",
+	       test[j].count, test[j].pass);
+	if (isprint(test[j].salt[0]))
+	    printf("\"%s\")\n", test[j].salt);
+	else {
+	    char *s = test[j].salt;
+	    printf("0x");
+	    while (*s)
+		printf("%02X", 0xff & *s++);
+	    printf(")\n");
+	}
+
+	d.length = 16;
+	err = krb5int_pbkdf2_hmac_sha1_128 (x, test[j].count,
+					    test[j].pass, test[j].salt);
+	printd("128-bit PBKDF2 output", &d);
+	enc = &krb5int_enc_aes128;
+	k.contents = d.data;
+	k.length = d.length;
+	dk.length = d.length;
+	DK (&dk, &k, &usage);
+	printk("128-bit AES key",&dk);
+
+	d.length = 32;
+	err = krb5int_pbkdf2_hmac_sha1_256 (x, test[j].count,
+					    test[j].pass, test[j].salt);
+	printd("256-bit PBKDF2 output", &d);
+	enc = &krb5int_enc_aes256;
+	k.contents = d.data;
+	k.length = d.length;
+	dk.length = d.length;
+	DK (&dk, &k, &usage);
+	printk("256-bit AES key", &dk);
+
+	printf("\n");
+    }
+}
+
+#include "hash_provider.h"
+
+int main (int argc, char **argv)
+{
+    whoami = argv[0];
     test_nfold ();
-    test_mit_des_s2k ();
-#endif
-    test_des3_s2k ();
 #if 0
-    spew_keys ();
-#endif
-    test_des3_combine ();
+    test_mit_des_s2k ();
+    test_des3_s2k ();
     test_dr_dk ();
+    test_pbkdf2();
+#endif
     return 0;
 }
