@@ -4,14 +4,38 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
+
+### Check where struct rpcent is declared.
+#
+# This is necessary to determine:
+# 1. If /usr/include/netdb.h declares struct rpcent
+# 2. If /usr/include/rpc/netdb.h declares struct rpcent
+#
+# We have our own rpc/netdb.h, and if /usr/include/netdb.h includes
+# rpc/netdb.h, then nastiness could happen.
+#
+# Logic: If /usr/include/netdb.h declares struct rpcent, then check
+# rpc/netdb.h.  If /usr/include/rpc/netdb.h declares struct rpcent,
+# then define STRUCT_RPCENT_IN_RPC_NETDB_H, otherwise do not.  If
+# neither netdb.h nor rpc/netdb.h declares struct rpcent, then define
+# STRUCT_RPCENT_IN_RPC_NETDB_H anyway.
+#
+AC_MSG_CHECKING([where struct rpcent is declared])
 AC_TRY_COMPILE([#include <netdb.h>],
 [struct rpcent e;
 char c = e.r_name[0];
 int i = e.r_number;],
-[AC_CHECK_HEADER(rpc/netdb.h, rpcent_define='',
-	[rpcent_define='#define STRUCT_RPCENT_ALREADY_PROVIDED'])],
-[rpcent_define=''])
+[AC_TRY_COMPILE([#include <rpc/netdb.h>],
+[struct rpcent e;
+char c = e.r_name[0];
+int i = e.r_number;],
+[AC_MSG_RESULT([rpc/netdb.h])
+rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'],
+[AC_MSG_RESULT([netdb.h])])],
+[AC_MSG_RESULT([nowhere])
+rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'])
 AC_SUBST(rpcent_define)
+
 AC_CHECK_SIZEOF(int)
 SIZEOF_INT=$ac_cv_sizeof_int
 AC_SUBST(SIZEOF_INT)

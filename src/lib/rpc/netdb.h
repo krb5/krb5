@@ -38,7 +38,7 @@ which uses the rpcent routines must use this header file, or something
 compatible (which most <netdb.h> are) --marc */
 
 /* Really belongs in <netdb.h> */
-#ifndef STRUCT_RPCENT_ALREADY_PROVIDED
+#ifdef STRUCT_RPCENT_IN_RPC_NETDB_H
 struct rpcent {
       char    *r_name;        /* name of server for this rpc program */
       char    **r_aliases;    /* alias list */

@@ -1,3 +1,10 @@
+Thu Aug  8 15:30:01 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in, types.hin: Change search for struct rpcent yet
+		again, this time compile-checking both netdb.h and
+		rpc/netdb.h and taking action appropriately.  See the
+		comments in configure.in for details.
+
 Mon Aug  5 16:46:48 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in (CFLAGS): Change DEBUG_GSSAPI to 0 to avoid printing
