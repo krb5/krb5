@@ -258,7 +258,8 @@ char *argv[];
   retval = krb5_recvauth((krb5_pointer)&s, "???",
 			 0, /* server */
 			 &serv_addr, 0, tgt_keyproc, (krb5_pointer)&creds,
-			 0, 0);
+			 0, 0,
+			 0, 0, 0, 0);
 #endif
   if (retval) {
       com_err("uu-client", retval, "reading AP_REQ from server");

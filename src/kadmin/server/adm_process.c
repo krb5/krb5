@@ -267,6 +267,7 @@ char *prog;
 		cpw_keyproc,
 		(krb5_pointer) &cpw_key,
 		0,
+		0,
 		&send_seqno,
 		&client_server_info.client,
 		&client_creds,
