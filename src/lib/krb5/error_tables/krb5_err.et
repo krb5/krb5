@@ -165,6 +165,8 @@ error_code KRB5_CONFIG_NOTENUFSPACE,	"Insufficient space to return complete info
 error_code KRB5_BADMSGTYPE,		"Invalid message type specified for encoding"
 
 error_code KRB5_CC_BADNAME,		"Credential cache name malformed"
-error_code KRB5_CC_UNKNOWN_TYPE,	"Unknown credential cache type"
+error_code KRB5_CC_UNKNOWN_TYPE,	"Unknown credential cache type" 
+error_code KRB5_CC_NOTFOUND,		"Matching credential not found"
+error_code KRB5_CC_END,			"End of credential cache reached"
 
 end
