@@ -1,3 +1,8 @@
+1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* localaddr.c: On the macintosh, check to see if getmyipaddr
+		returns NULL, and return an error in that case.
+
 Tue Jan  5 00:11:49 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* sn2princ.c (krb5_sname_to_principal): Windows NT5's broken
