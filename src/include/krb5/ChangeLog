@@ -1,5 +1,8 @@
 Mon Oct  3 18:45:55 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: Fix install to obey ${DESTDIR}, copy conf.h and
+		osconf.h from build tree.
+
 	* Makefile.in: Fix "make install" to use $(srcdir) for header files.
 
 Thu Sep 29 15:07:30 1994  Theodore Y. Ts'o  (tytso@dcl)
