@@ -2373,7 +2373,7 @@ char *adata;
 		int found = 0;
 		gss_cred_id_t server_creds, deleg_creds;
 		gss_name_t client;
-		int ret_flags;
+		OM_uint32 ret_flags;
 		int rad_len;
 		gss_buffer_desc name_buf;
 		gss_name_t server_name;
@@ -2820,7 +2820,7 @@ char *s;
 	/* a lot of work just to report the error */
 	OM_uint32 gmaj_stat, gmin_stat;
 	gss_buffer_desc msg;
-	int msg_ctx;
+	OM_uint32 msg_ctx;
 	msg_ctx = 0;
 	while (!msg_ctx) {
 		gmaj_stat = gss_display_status(&gmin_stat, maj_stat,
