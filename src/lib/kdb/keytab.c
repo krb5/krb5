@@ -130,13 +130,15 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     krb5_db_entry 	  db_entry;
     krb5_boolean 	  more = 0;
     int 	 	  n = 0;
-    int xrealm_tgt = is_xrealm_tgt(context, principal);
+    int xrealm_tgt;
     int similar;
 
     if (ktkdb_ctx)
 	context = ktkdb_ctx;
     else
 	context = in_context;
+
+    xrealm_tgt = is_xrealm_tgt(context, principal);
 
     /* Open database */
     /* krb5_db_init(context); */
