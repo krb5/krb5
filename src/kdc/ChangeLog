@@ -1,3 +1,8 @@
+Mon Sep 18 11:16:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* main.c (init_realm): strdup KRB5_KDB_M_NAME if we use it, to
+	avoid free'ing a constant later.
+
 Fri Sep 15 01:33:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* main.c (init_realm): Stop after finding the first TGS key which

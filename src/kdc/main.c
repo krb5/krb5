@@ -392,7 +392,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		rdp->realm_mpname = strdup(rparams->realm_mkey_name);
 	    else
 		rdp->realm_mpname = (def_mpname) ? strdup(def_mpname) :
-		    KRB5_KDB_M_NAME;
+		    strdup(KRB5_KDB_M_NAME);
 
 	    /* Handle master key type */
 	    if (rparams && rparams->realm_enctype_valid)
