@@ -67,6 +67,30 @@
 #define MAX_MSG_SIZE 256
 #define MAX_MSPRINC_SIZE 1024
 
+static BOOL IsWindows2000 (void)
+{
+   static BOOL fChecked = FALSE;
+   static BOOL fIsWin2K = FALSE;
+
+   if (!fChecked)
+   {
+       OSVERSIONINFO Version;
+       fChecked = TRUE;
+
+       memset (&Version, 0x00, sizeof(Version));
+       Version.dwOSVersionInfoSize = sizeof(Version);
+
+       if (GetVersionEx (&Version))
+       {
+           if (Version.dwPlatformId == VER_PLATFORM_WIN32_NT &&
+                Version.dwMajorVersion >= 5)
+               fIsWin2K = TRUE;
+       }
+   }
+
+   return fIsWin2K;
+}
+
 static VOID
 ShowWinError(LPSTR szAPI, DWORD dwError)
 {
@@ -1099,6 +1123,9 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     ULONG  PackageId;
     KERB_EXTERNAL_TICKET *msticket;
 
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     if (!IsKerberosLogon())
         return KRB5_FCC_NOFILE;
 
@@ -1168,6 +1195,9 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     return KRB5_CC_READONLY;
 }
 
@@ -1184,13 +1214,20 @@ static krb5_error_code KRB5_CALLCONV
 krb5_lcc_close(krb5_context context, krb5_ccache id)
 {
     register int closeval = KRB5_OK;
-    register krb5_lcc_data *data = (krb5_lcc_data *) id->data;
+    register krb5_lcc_data *data;
+    
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
 
-    CloseHandle(data->LogonHandle);
+    if (id) {
+        data = (krb5_lcc_data *) id->data;
 
-    krb5_xfree(data);
-    krb5_xfree(id);
-
+        if (data) {
+            CloseHandle(data->LogonHandle);
+            krb5_xfree(data);
+        }
+        krb5_xfree(id);
+    }
     return closeval;
 }
 
@@ -1204,9 +1241,17 @@ krb5_lcc_close(krb5_context context, krb5_ccache id)
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_destroy(krb5_context context, krb5_ccache id)
 {
-    register krb5_lcc_data *data = (krb5_lcc_data *) id->data;
+    register krb5_lcc_data *data;
+    
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
 
-    return PurgeMSTGT(data->LogonHandle, data->PackageId) ? KRB5_FCC_INTERNAL : KRB5_OK;
+    if (id) { 
+        data = (krb5_lcc_data *) id->data;
+
+        return PurgeMSTGT(data->LogonHandle, data->PackageId) ? KRB5_FCC_INTERNAL : KRB5_OK;
+    }
+    return KRB5_FCC_INTERNAL;
 }
 
 /*
@@ -1228,6 +1273,9 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     krb5_lcc_cursor *lcursor;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket;
+
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
 
     lcursor = (krb5_lcc_cursor *) malloc(sizeof(krb5_lcc_cursor));
     if (lcursor == NULL) {
@@ -1277,9 +1325,14 @@ static krb5_error_code KRB5_CALLCONV
 krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor, krb5_creds *creds)
 {
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
-    krb5_lcc_data *data = (krb5_lcc_data *)id->data;
+    krb5_lcc_data *data;
     KERB_EXTERNAL_TICKET *msticket;
     krb5_error_code  retval = KRB5_OK;
+
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
+    data = (krb5_lcc_data *)id->data;
 
   next_cred:
     if ( lcursor->index >= lcursor->response->CountOfTickets ) {
@@ -1330,6 +1383,9 @@ krb5_lcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
 {
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
 
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     if ( lcursor ) {
         LsaFreeReturnBuffer(lcursor->mstgt);
         LsaFreeReturnBuffer(lcursor->response);
@@ -1348,6 +1404,9 @@ krb5_lcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_generate_new (krb5_context context, krb5_ccache *id)
 {
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     return KRB5_CC_READONLY;
 }
 
@@ -1361,6 +1420,13 @@ krb5_lcc_generate_new (krb5_context context, krb5_ccache *id)
 static const char * KRB5_CALLCONV
 krb5_lcc_get_name (krb5_context context, krb5_ccache id)
 {
+
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
+    if ( !id )
+        return "";
+
     return (char *) ((krb5_lcc_data *) id->data)->cc_name;
 }
 
@@ -1382,6 +1448,9 @@ krb5_lcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *pri
 {
     krb5_error_code kret = KRB5_OK;
 
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     /* obtain principal */
     return krb5_copy_principal(context, ((krb5_lcc_data *) id->data)->princ, princ);
 }
@@ -1396,6 +1465,9 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     KERB_EXTERNAL_TICKET *msticket = 0, *mstgt = 0;
     krb5_creds * mcreds_noflags;
     krb5_creds   fetchcreds;
+
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
 
     memset(&fetchcreds, 0, sizeof(krb5_creds));
 
@@ -1474,6 +1546,9 @@ krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
     KERB_EXTERNAL_TICKET *msticket = 0;
     krb5_creds * creds_noflags;
 
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     /* if not, we must try to get a ticket without specifying any flags or etypes */
     krb5_copy_creds(context, creds, &creds_noflags);
     creds_noflags->ticket_flags = 0;
@@ -1496,6 +1571,9 @@ static krb5_error_code KRB5_CALLCONV
 krb5_lcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
                      krb5_creds *creds)
 {
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     return KRB5_CC_READONLY;
 }
 
@@ -1507,6 +1585,9 @@ krb5_lcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
 {
+    if (!IsWindows2000())
+        return KRB5_FCC_NOFILE;
+
     return KRB5_OK;
 }
 

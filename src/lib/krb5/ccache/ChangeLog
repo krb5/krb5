@@ -1,3 +1,11 @@
+2004-03-31  Jeffrey Altman <jaltman@mit.edu>
+
+    * cc_mslsa.c: Add IsWindows2000() function and use it to return 
+      errors whenever the MSLSA: ccache type is used on platforms
+      older than Windows 2000.  This is needed to prevent calls to
+      the functions loaded from ADVAPI32.DLL and SECUR32.DLL which 
+      do not exist on the Windows 9x platforms.
+
 2004-03-18  Jeffrey Altman <jaltman@mit.edu>
 
    * cc_mslsa.c:
