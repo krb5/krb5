@@ -1,3 +1,9 @@
+2003-03-03  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Remove KRB_INCLUDE; it's now in pre.in.  Remove
+	ADD_DEF and uses thereof, thus allowing CPPFLAGS to be a user
+	parameter.
+
 2003-03-02  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* aclocal.m4 : Substitute in DEPLIBEXT into krb5_build_library_with_deps

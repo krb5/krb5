@@ -57,11 +57,10 @@ KRB5_AC_CHOOSE_ET dnl
 KRB5_AC_CHOOSE_SS dnl
 KRB5_AC_CHOOSE_DB dnl
 dnl allow stuff in tree to access deprecated/private stuff for now
-ADD_DEF([-DKRB5_PRIVATE=1]) dnl
+AC_DEFINE([KRB5_PRIVATE], 1, [Define only if building in-tree])
 AC_C_CONST dnl
 WITH_NETLIB dnl
 WITH_HESIOD dnl
-KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
 dnl
 dnl This selects the correct autoconf file; either the one in our source tree,
@@ -402,8 +401,8 @@ if test $withval = no; then
 	KRB524_ERR_H_DEP=
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir=
-else 
- ADD_DEF(-DKRB5_KRB4_COMPAT)
+else
+ AC_DEFINE([KRB5_KRB4_COMPAT], 1, [Define this if building with krb4 compat])
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
 	KRB4_DEPLIB='$(TOPLIBD)/libkrb4$(DEPLIBEXT)'
@@ -516,18 +515,6 @@ AC_REQUIRE_CPP
 AC_ARG_WITH([cppopts],
 	   AC_HELP_STRING(--with-cppopts=CPPOPTS,deprecated; use CPPFLAGS=...),
 	   AC_MSG_ERROR(option --with-cppopts is deprecated; use CPPFLAGS=...))])
-dnl
-dnl arbitrary DEFS -- ADD_DEF(value)
-dnl
-AC_DEFUN(ADD_DEF,[
-CPPFLAGS="[$]CPPFLAGS "'$1'
-])dnl
-dnl
-dnl local includes are used -- KRB_INCLUDE
-dnl
-AC_DEFUN(KRB_INCLUDE,[
-CPPFLAGS='-I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I$(SRCTOP)/include/krb5'" $CPPFLAGS"
-])dnl
 dnl
 dnl check for yylineno -- HAVE_YYLINENO
 dnl

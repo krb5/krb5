@@ -9,11 +9,9 @@
 
 .SUFFIXES: .c .so .po
 .c.so:
-	$(CC) $(DEFS) $(DEFINES) $(PICFLAGS) $(LOCALINCLUDES) $(CPPFLAGS) $(CFLAGS) -c $< -o $*.so.o && \
-		$(MV) $*.so.o $*.so
+	$(CC) $(PICFLAGS) $(ALL_CFLAGS) -c $< -o $*.so.o && $(MV) $*.so.o $*.so
 .c.po:
-	$(CC) $(DEFS) $(DEFINES) $(PROFFLAGS) $(LOCALINCLUDES) $(CPPFLAGS) $(CFLAGS) -c $< -o $*.po.o && \
-		$(MV) $*.po.o $*.po
+	$(CC) $(PROFFLAGS) $(ALL_CFLAGS) -c $< -o $*.po.o && $(MV) $*.po.o $*.po
 
 # rules to generate object file lists
 

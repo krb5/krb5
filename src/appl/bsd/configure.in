@@ -181,7 +181,6 @@ dnl
 K5_AC_CHECK_FILES(/etc/environment /etc/TIMEZONE)
 dnl
 dnl
-ADD_DEF(-DKERBEROS)
 AC_C_CONST
 if test "$krb5_cv_build_krb4_libs" = yes; then
 	AC_DEFINE(HAVE_KRB_GET_ERR_TEXT)

@@ -1,3 +1,14 @@
+2003-03-03  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in: Change .c.so and .c.po rules to use ALL_CFLAGS.
+
+	* pre.in (ALL_CFLAGS): Add KRB_INCLUDES.
+	(KRB_INCLUDES): Move from aclocal.m4, where it had been added to
+	CPPFLAGS.  This move allows CPPFLAGS to be used by the builder.
+
+	* shlib.conf: Add CFLAGS to many places where only LDFLAGS had
+	been previously.
+
 2003-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* post.in (.dtmp): Use -DDEPEND to allow source files to exclude

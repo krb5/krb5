@@ -280,7 +280,6 @@ if test $krb5_cv_setpgrp_args = two; then
 AC_DEFINE(SETPGRP_TWOARG)
 fi
 dnl
-ADD_DEF(-DKERBEROS)
 KRB5_AC_INET6
 AC_C_CONST
 dnl KRB5_BUILD_LIBRARY_WITH_DEPS
