@@ -298,11 +298,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     }
 
     if (realm && *realm) {
-	free(krb5_princ_realm(bsd_context,get_cred->server)->data);
-	/*krb5_xfree(krb5_princ_realm(bsd_context,get_cred->server)->data);*/
-
-	krb5_princ_set_realm_length(bsd_context,get_cred->server,strlen(realm));
-	krb5_princ_set_realm_data(bsd_context,get_cred->server,strdup(realm));
+        status = krb5_set_principal_realm(bsd_context, get_cred->server,
+					  realm);
+	if (status) {
+	  fprintf(stderr, "kcmd: krb5_set_principal_realm failed %s\n", 
+		  error_message(status));
+	  return(-1);
+	}
     }
     if (fd2p == 0) {
     	write(s, "", 1);

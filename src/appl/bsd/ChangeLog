@@ -1,3 +1,8 @@
+Tue Oct 10 04:59:04 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* kcmd.c (kcmd): Use krb5_set_principal_realm() instead of freeing the
+	principals realm data and mucking with it ourselves.
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* krlogin.c (main): Declare main as int.
