@@ -1,3 +1,21 @@
+Tue Apr 16 22:06:36 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* dump-utmp.c: New file.  Not automatically used by anything, but
+	may be useful for examining utmp/wtmp files when comparing
+	behavior against system software.
+
+	Sun Mar 31 02:04:28 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* update_utmp.c (pty_update_utmp): Always use id "cons" for
+	console.  For HP-UX, omit "kl" prefix.  Reindent for readability.
+	* update_wtmp.c (ptyint_update_wtmp): For HP-UX, copy ut_id and
+	ut_type from input utmp structure.  Reindent for readability.
+
+	Wed Mar 27 21:14:33 1996  Marc Horowitz <marc@mit.edu>
+
+	* init_slave.c (pty_initialize_slave): Spurious signal stuff
+		which did nothing deleted.
+
 Tue Apr 16 13:43:43 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in :  Don't use streams on HPUX.

@@ -34,9 +34,9 @@
 
 long ptyint_update_wtmp (ent , host, user)
     struct utmp *ent;
-     char *host;
-char *user;
-    {
+    char *host;
+    char *user;
+{
     struct utmp ut;
     struct stat statb;
     int fd;
@@ -44,11 +44,12 @@ char *user;
     struct utmpx utx;
 
     getutmpx(ent, &utx);
-if (host)
-    strncpy(utx.ut_host, host, sizeof(utx.ut_host) );
-else utx.ut_host[0] = 0;
-if (user)
-    strncpy(utx.ut_user, user, sizeof(utx.ut_user));
+    if (host)
+      strncpy(utx.ut_host, host, sizeof(utx.ut_host) );
+    else
+      utx.ut_host[0] = 0;
+    if (user)
+      strncpy(utx.ut_user, user, sizeof(utx.ut_user));
     updwtmpx(WTMPX_FILE, &utx);
 #endif
 
@@ -62,6 +63,9 @@ if (user)
     if ((fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) >= 0) {
 	if (!fstat(fd, &statb)) {
 	  (void)memset((char *)&ut, 0, sizeof(ut));
+#ifdef __hpux
+	  strncpy (ut.ut_id, ent->ut_id, sizeof (ut.ut_id));
+#endif
 	  (void)strncpy(ut.ut_line, ent->ut_line, sizeof(ut.ut_line));
 	  (void)strncpy(ut.ut_name, ent->ut_name, sizeof(ut.ut_name));
 #ifndef NO_UT_HOST
@@ -72,7 +76,11 @@ if (user)
 	  if (ent->ut_name) {
 	    if (!ut.ut_pid)
 	      ut.ut_pid = getpid();
+#ifndef __hpux
 	    ut.ut_type = USER_PROCESS;
+#else
+	    ut.ut_type = ent->ut_type;
+#endif
 	  } else {
 #ifdef EMPTY
 	    ut.ut_type = EMPTY;

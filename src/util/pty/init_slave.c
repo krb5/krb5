@@ -49,13 +49,6 @@ long pty_initialize_slave (fd)
     struct sgttyb b;
 #endif /* POSIX_TERMIOS */
     int pid;
-#ifdef POSIX_SIGNALS
-    struct sigaction sa;
-    /* Initialize "sa" structure. */
-    (void) sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    
-#endif
 	    
 #ifdef HAVE_STREAMS
 #ifdef HAVE_LINE_PUSH
