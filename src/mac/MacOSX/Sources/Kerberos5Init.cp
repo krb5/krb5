@@ -22,11 +22,13 @@
 extern "C" {
 #include "krb5_libinit.h"
 #include "crypto_libinit.h"
+#include "krb524_err.h"
 };
 
 void Kerberos5Init (CFStringRef inBundleID)
 {
 	krb5int_initialize_library ();
     cryptoint_initialize_library ();
+    add_error_table (&et_k524_error_table);
 }
 

@@ -15,172 +15,77 @@
 			path = cr_tkt.h;
 			refType = 4;
 		};
-		F52B1687022FDA5701120112 = {
-			isa = PBXLibraryReference;
-			path = libKerberos524.a;
-			refType = 3;
-		};
-		F52B1688022FDA5701120112 = {
-			buildPhases = (
-				F52B1689022FDA5701120112,
-				F52B168A022FDA5701120112,
-				F52B168B022FDA5701120112,
-				F52B168C022FDA5701120112,
-			);
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SYMROOT)/Kerberos4.intermediates\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosDES/Headers\"";
-				LIBRARY_STYLE = STATIC;
-				OTHER_CPLUSPLUSFLAGS = "-fno-inline";
-				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
-				PRODUCT_NAME = libKerberos524.a;
-				REZ_EXECUTABLE = YES;
-				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			dependencies = (
-				F5C44EE60231CEA101120112,
-				F5C44EE70231CEA101120112,
-			);
-			isa = PBXLibraryTarget;
-			name = Kerberos524;
-			productInstallPath = /usr/local/lib;
-			productName = Kerberos524;
-			productReference = F52B1687022FDA5701120112;
-			shouldUseHeadermap = 0;
-		};
-		F52B1689022FDA5701120112 = {
-			buildActionMask = 2147483647;
-			files = (
-				F52B168F022FDA9001120112,
-				F52B1690022FDA9001120112,
-				F52B169D022FDAF201120112,
-				F52B169F022FDB1001120112,
-				F5C44D730231643A01120112,
-				F5C2DF410240FA0D01650119,
-				F5C2DF630240FA6501650119,
-				F5C2DF640240FA6501650119,
-				F5C2DF6B0240FA8501650119,
-				F5C2DF6C0240FA8601650119,
-			);
-			isa = PBXHeadersBuildPhase;
-		};
-		F52B168A022FDA5701120112 = {
-			buildActionMask = 2147483647;
-			files = (
-				F52B1692022FDA9001120112,
-				F52B1693022FDA9001120112,
-				F52B1694022FDA9001120112,
-				F52B1695022FDA9001120112,
-				F52B1696022FDA9001120112,
-				F52B1697022FDA9001120112,
-				F52B1698022FDA9001120112,
-				F52B1699022FDA9001120112,
-				F52B169A022FDA9001120112,
-				F5C2DF400240FA0D01650119,
-			);
-			isa = PBXSourcesBuildPhase;
-		};
-		F52B168B022FDA5701120112 = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			isa = PBXFrameworksBuildPhase;
-		};
-		F52B168C022FDA5701120112 = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			isa = PBXRezBuildPhase;
-		};
 		F52B168D022FDA9001120112 = {
 			fileRef = F5CFD5C9022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B168F022FDA9001120112 = {
-			fileRef = F52B167A022FD68601120112;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F52B1690022FDA9001120112 = {
-			fileRef = F5CFD62C022D96AB01120112;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F52B1692022FDA9001120112 = {
+		F58182FE02536D4501120112 = {
 			fileRef = F5CFD59B022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1693022FDA9001120112 = {
+		F58182FF02536D4501120112 = {
 			fileRef = F5CFD59D022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1694022FDA9001120112 = {
+		F581830002536D4601120112 = {
 			fileRef = F5CFD59E022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1695022FDA9001120112 = {
+		F581830102536D4601120112 = {
 			fileRef = F5CFD59F022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1696022FDA9001120112 = {
+		F581830202536D4701120112 = {
 			fileRef = F5CFD5A1022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1697022FDA9001120112 = {
+		F581830302536D4801120112 = {
 			fileRef = F5CFD5A8022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1698022FDA9001120112 = {
+		F581830402536D4901120112 = {
 			fileRef = F5CFD5AB022D86AD01120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B1699022FDA9001120112 = {
-			fileRef = F58600F5022E7B6E01120112;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F52B169A022FDA9001120112 = {
+		F581830802536E1A01120112 = {
 			fileRef = F52B1677022FD39801120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B169D022FDAF201120112 = {
-			fileRef = F5CFD617022D911001120112;
+		F581830902536E2501120112 = {
+			fileRef = F52B167A022FD68601120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F52B169F022FDB1001120112 = {
-			fileRef = F5CFD7C6022DE7DC01120112;
+		F58183510253A2F201120112 = {
+			fileRef = F5C2DF200240F9F601650119;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F58600F5022E7B6E01120112 = {
-			isa = PBXFileReference;
-			path = Kerberos524Init.cp;
-			refType = 4;
+		F58183520253A2F301120112 = {
+			fileRef = F5C2DF210240F9F601650119;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F58602F2022EDA8301120112 = {
 			isa = PBXFileReference;
@@ -445,18 +350,6 @@
 			settings = {
 			};
 		};
-		F5C2DF400240FA0D01650119 = {
-			fileRef = F5C2DF200240F9F601650119;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5C2DF410240FA0D01650119 = {
-			fileRef = F5C2DF210240F9F601650119;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F5C2DF420240FA1301650119 = {
 			fileRef = F5C2DF1B0240F9F601650119;
 			isa = PBXBuildFile;
@@ -597,18 +490,6 @@
 			settings = {
 			};
 		};
-		F5C2DF630240FA6501650119 = {
-			fileRef = F5C2DF5D0240FA5A01650119;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5C2DF640240FA6501650119 = {
-			fileRef = F5C2DF5E0240FA5A01650119;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F5C2DF650240FA6801650119 = {
 			fileRef = F5C2DF5D0240FA5A01650119;
 			isa = PBXBuildFile;
@@ -629,18 +510,6 @@
 		};
 		F5C2DF6A0240FA7E01650119 = {
 			fileRef = F5C2DF4A0240FA3601650119;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5C2DF6B0240FA8501650119 = {
-			fileRef = F5C2DF4C0240FA3601650119;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5C2DF6C0240FA8601650119 = {
-			fileRef = F5C2DF500240FA3601650119;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -687,17 +556,6 @@
 		};
 		F5C44D71023163F601120112 = {
 			fileRef = F5C44D70023163F601120112;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5C44D720231643901120112 = {
-			isa = PBXFileReference;
-			path = Kerberos524Init.h;
-			refType = 4;
-		};
-		F5C44D730231643A01120112 = {
-			fileRef = F5C44D720231643901120112;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -1268,14 +1126,6 @@
 			settings = {
 			};
 		};
-		F5C44EE60231CEA101120112 = {
-			isa = PBXTargetDependency;
-			target = F5CFD629022D922C01120112;
-		};
-		F5C44EE70231CEA101120112 = {
-			isa = PBXTargetDependency;
-			target = F5CFD5E6022D8A9901120112;
-		};
 		F5C44EE80231CEA101120112 = {
 			isa = PBXTargetDependency;
 			target = F5CFD629022D922C01120112;
@@ -1298,7 +1148,6 @@
 				F5CFD629022D922C01120112,
 				F5CFD5CD022D86AD01120112,
 				F5CFD639022DD45401120112,
-				F52B1688022FDA5701120112,
 				F5C44E910231BD6801120112,
 			);
 		};
@@ -1307,7 +1156,6 @@
 				F5CFD5EC022D8B6001120112,
 				F5CFD5ED022D8B6001120112,
 				F5CFD5C1022D86AD01120112,
-				F5E27E3D0237108901650119,
 				F5CFD5EE022D8B6001120112,
 				F5CFD60E022D911001120112,
 				F5CFD372022D86AC01120112,
@@ -4205,7 +4053,6 @@
 				F5CFD5C8022D86AD01120112,
 				F5CFD5C9022D86AD01120112,
 				F5CFD5CA022D86AD01120112,
-				F58600F5022E7B6E01120112,
 				F52B1677022FD39801120112,
 			);
 			isa = PBXGroup;
@@ -4231,7 +4078,6 @@
 			children = (
 				F5CFD5CC022D86AD01120112,
 				F5CFD638022DD45401120112,
-				F52B1687022FDA5701120112,
 				F5C44E900231BD6801120112,
 			);
 			isa = PBXGroup;
@@ -4499,7 +4345,6 @@
 				F52B167A022FD68601120112,
 				F5C44D6E0231639F01120112,
 				F5C44D70023163F601120112,
-				F5C44D720231643901120112,
 				F5C44D740231645A01120112,
 			);
 			isa = PBXGroup;
@@ -4644,6 +4489,8 @@
 				F5C2DF5B0240FA3601650119,
 				F5C2DF5F0240FA5A01650119,
 				F5C2DF600240FA5A01650119,
+				F581830902536E2501120112,
+				F58183520253A2F301120112,
 			);
 			isa = PBXHeadersBuildPhase;
 		};
@@ -4952,6 +4799,15 @@
 				F5C2DF340240F9F601650119,
 				F5C2DF380240F9F601650119,
 				F5C2DF3A0240F9F601650119,
+				F58182FE02536D4501120112,
+				F58182FF02536D4501120112,
+				F581830002536D4601120112,
+				F581830102536D4601120112,
+				F581830202536D4701120112,
+				F581830302536D4801120112,
+				F581830402536D4901120112,
+				F581830802536E1A01120112,
+				F58183510253A2F201120112,
 			);
 			isa = PBXSourcesBuildPhase;
 		};
@@ -7143,11 +6999,6 @@
 		F5CFD7D9022DE82501120112 = {
 			isa = PBXTargetDependency;
 			target = F5CFD629022D922C01120112;
-		};
-		F5E27E3D0237108901650119 = {
-			isa = PBXFileReference;
-			path = Kerberos524.pbexp;
-			refType = 4;
 		};
 	};
 	rootObject = F5CFD36E022D854401120112;
