@@ -504,9 +504,12 @@ void PRS(argv)
 		exit(1);
 	}
 	if (realm) {
-	    (void) krb5_xfree(krb5_princ_realm(context, server)->data);
-	    krb5_princ_set_realm_length(context, server, strlen(realm));
-	    krb5_princ_set_realm_data(context, server, strdup(realm));
+	    retval = krb5_set_principal_realm(kpropd_context, server, realm);
+	    if (retval) {
+	        com_err(progname, errno, 
+			"while constructing my service realm");
+		exit(1);
+	    }
 	}
 	/*
 	 * Construct the name of the temporary file.

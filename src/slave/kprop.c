@@ -222,9 +222,12 @@ void get_tickets(context)
 	    exit(1);
 	}
 	if (realm) {
-	    (void) krb5_xfree(krb5_princ_realm(context, my_principal)->data);
-	    krb5_princ_set_realm_length(context, my_principal, strlen(realm));
-	    krb5_princ_set_realm_data(context, my_principal, strdup(realm));
+	    retval = krb5_set_principal_realm(context, my_principal, realm);
+	    if (retval) {
+	        com_err(progname, errno, 
+			"while setting client principal realm");
+		exit(1);
+	    }
 	}
 #if 0
 	krb5_princ_type(context, my_principal) = KRB5_NT_PRINCIPAL;
@@ -265,9 +268,12 @@ void get_tickets(context)
 	    exit(1);
 	}
 	if (realm) {
-	    (void) krb5_xfree(krb5_princ_realm(context, creds.server)->data);
-	    krb5_princ_set_realm_length(context, creds.server, strlen(realm));
-	    krb5_princ_set_realm_data(context, creds.server, strdup(realm));
+	    retval = krb5_set_principal_realm(context, creds.server, realm);
+	    if (retval) {
+	        com_err(progname, errno, 
+			"while setting server principal realm");
+		exit(1);
+	    }
 	}
 
 	/*

@@ -1,3 +1,8 @@
+Tue Oct 17 08:11:56 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* kprop.c, kpropd.c: Use krb5_set_principal_realm() instead of
+	freeing library generated memory using the internal krb5_xfree(). 
+
 Sat Oct 14 14:16:20 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* kpropd.c, kprop.c:  Ensure size of database sent OTW as 4 bytes
