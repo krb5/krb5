@@ -223,6 +223,8 @@ presented here.
 \item[OSA_ADB_NOENT] Named entry not in database.
 \item[OSA_ADB_MEM] Out of memory performing operation.
 \item[OSA_ADB_FAILURE] General failure.
+\item[OSA_ADB_BAD_PRINC] The krb5_principal structure is invalid.
+\item[OSA_ADB_BAD_POLICY] The specified policy name is invalid.
 \end{description}
 
 Database functions can also return system errors.  Unless otherwise
@@ -279,6 +281,13 @@ Modifies the existing entry named in entry.  All fields must be filled
 in.  Returns OSA_DB_NOENT if the named entry does not exist.  Note
 that this cannot be used to rename an entry; rename is implemented by
 deleting the old name and creating the new one (NOT ATOMIC!).
+
+\begin{verbatim}
+void osa_adb_free_T(osa_T_ent_t);
+\end{verbatim}
+
+Frees the memory associated with an osa_T_ent_t allocated by
+osa_adb_get_T.
 
 \subsection{Kerberos Database}
 
