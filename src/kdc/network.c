@@ -311,6 +311,7 @@ static void process_packet(port_fd, prog)
 	addr.addrtype = -1;
 	addr.length = 0;
 	addr.contents = 0;
+	faddr.port = 0;
 	break;
     }
     /* this address is in net order */
@@ -322,12 +323,13 @@ static void process_packet(port_fd, prog)
 		(struct sockaddr *)&saddr, saddr_len);
     if (cc == -1) {
 	char addrbuf[46];
-	int portno;
         krb5_free_data(kdc_context, response);
-	sockaddr2p ((struct sockaddr *) &saddr, addrbuf, sizeof (addrbuf),
-		    &portno);
+	if (inet_ntop(((struct sockaddr *)&saddr)->sa_family,
+		      addr.contents, addrbuf, sizeof(addrbuf)) == 0) {
+	    strcpy(addrbuf, "?");
+	}
 	com_err(prog, errno, "while sending reply to %s/%d",
-		addrbuf, ntohs(portno));
+		addrbuf, faddr.port);
 	return;
     }
     if (cc != response->length) {

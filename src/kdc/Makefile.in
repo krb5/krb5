@@ -27,7 +27,6 @@ SRCS= \
 	$(SRCTOP)/lib/kadm5/logger.c \
 	$(srcdir)/main.c \
 	$(srcdir)/network.c \
-	$(srcdir)/sock2p.c \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
@@ -43,7 +42,6 @@ OBJS= \
 	logger.o \
 	main.o \
 	network.o \
-	sock2p.o \
 	policy.o \
 	extern.o \
 	replay.o \
@@ -145,11 +143,6 @@ $(OUTPRE)network.$(OBJEXT): network.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/profile.h kdc_util.h extern.h kdc5_err.h \
   $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/syslog.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/foreachaddr.c
-$(OUTPRE)sock2p.$(OBJEXT): sock2p.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h kdc_util.h
 $(OUTPRE)policy.$(OBJEXT): policy.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
