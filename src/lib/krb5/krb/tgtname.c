@@ -20,7 +20,7 @@ static char rcsid_tgtname_c [] =
 #include <krb5/ext-proto.h>
 #include <krb5/kdb.h>
 
-static krb5_data tgtdata = {sizeof(TGTNAME), TGTNAME};
+static krb5_data tgtdata = {sizeof(TGTNAME)-1, TGTNAME};
 
 /* This is an internal-only function, used by krb5_get_cred_from_kdc() */
 
