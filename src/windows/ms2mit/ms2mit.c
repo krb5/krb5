@@ -649,12 +649,22 @@ GetMSTGT(
         case KERB_ETYPE_DES_CBC_MD5:
         case KERB_ETYPE_NULL:
         case KERB_ETYPE_RC4_HMAC_NT: {
-            FILETIME Now, EndTime, LocalEndTime;
+            FILETIME Now, MinLife, EndTime, LocalEndTime;
+            __int64  temp;
+            // FILETIME is in units of 100 nano-seconds
+            // If obtained tickets are either expired or have a lifetime
+            // less than 20 minutes, retry ...
             GetSystemTimeAsFileTime(&Now);
             EndTime.dwLowDateTime=pTicketResponse->Ticket.EndTime.LowPart;
             EndTime.dwHighDateTime=pTicketResponse->Ticket.EndTime.HighPart;
             FileTimeToLocalFileTime(&EndTime, &LocalEndTime);
-            if (CompareFileTime(&Now, &LocalEndTime) >= 0) {
+            temp = Now.dwHighDateTime;
+            temp <<= 32;
+            temp = Now.dwLowDateTime;
+            temp += 1200 * 10000;
+            MinLife.dwHighDateTime = (DWORD)((temp >> 32) & 0xFFFFFFFF);
+            MinLife.dwLowDateTime = (DWORD)(temp & 0xFFFFFFFF);
+            if (CompareFileTime(&MinLife, &LocalEndTime) >= 0) {
 #ifdef ENABLE_PURGING
                 purge_cache = 1;
 #else
