@@ -1,0 +1,5 @@
+Wed Jul 24 18:20:47 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in, configure.in: break out client lib into a
+		subdirectory
+

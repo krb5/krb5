@@ -1,0 +1,79 @@
+CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5
+
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME = libkadm5clnt.lib
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
+SRCS =	$(srcdir)/clnt_policy.c \
+	$(srcdir)/client_rpc.c \
+	$(srcdir)/client_principal.c \
+	$(srcdir)/client_init.c \
+	$(srcdir)/clnt_privs.c \
+	$(srcdir)/clnt_chpass_util.c
+
+OBJS =	@LIBOBJS@ \
+	clnt_policy.$(OBJEXT) \
+	client_rpc.$(OBJEXT) \
+	client_principal.$(OBJEXT) \
+	client_init.$(OBJEXT) \
+	clnt_privs.$(OBJEXT) \
+	clnt_chpass_util.$(OBJEXT)
+
+LIBUPDATE=$(BUILDTOP)/util/libupdate
+
+#
+# Depends on libgssrpc, libgssapi_krb5, libkdb5, libkrb5, libcrypto,
+# libcom_err, libdyn
+#
+GSSRPC_VER=@GSSRPC_SH_VERS@
+GSSAPI_KRB5_VER=@GSSAPI_KRB5_SH_VERS@
+KDB5_VER=@KDB5_SH_VERS@
+KRB5_VER=@KRB5_SH_VERS@
+CRYPTO_VER=@CRYPTO_SH_VERS@
+COMERR_VER=@COMERR_SH_VERS@
+DYN_VER=@DYN_SH_VERS@
+DEPLIBS=$(TOPLIBD)/libgssrpc.$(SHEXT).$(GSSRPC_VER) \
+	$(TOPLIBD)/libgssapi_krb5.$(SHEXT).$(GSSAPI_KRB5_VER) \
+	$(TOPLIBD)/libkdb5.$(SHEXT).$(KDB5_VER) \
+	$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) \
+	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
+	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER) \
+	$(TOPLIBD)/libdyn.$(SHEXT).$(DYN_VER)
+
+SHLIB_LIBS=-lgssrpc -lgssapi_krb5 -lkdb5 -lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+
+all-unix:: shared includes $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+LIBDONE=../DONE DONE
+LIB_SUBDIRS=.. .
+
+shared:
+	mkdir shared
+
+libkadm5clnt.$(STEXT): $(LIBDONE)
+	@if test -f $@ ; then \
+		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
+	else \
+		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
+	fi
+	$(RANLIB) $@
+	touch libkadm5clnt.stamp
+
+check-windows::
+
+clean-mac::
+clean-windows::
+
+clean-unix::
+	$(RM) libkadm5clnt.$(STEXT) libkadm5clnt.stamp
+
+install:: libkadm5clnt.a
+	$(INSTALL_DATA) libkadm5clnt.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt.a
