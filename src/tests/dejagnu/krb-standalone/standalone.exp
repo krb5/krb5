@@ -71,7 +71,7 @@ proc doit { } {
     }
 
     set keytab $tmppwd/fookeytab
-    catch {file delete $keytab}
+    catch "exec rm -f $keytab"
 
     modify_principal foo/bar -kvno 252
     foreach vno {253 254 255 256 257 258} {
@@ -121,7 +121,7 @@ proc doit { } {
 	    verbose "skipping v5kinit/srvtab tests because of non-v4 enctype"
 	}
     }
-    catch {file delete $keytab}
+    catch "exec rm -f $keytab"
     # Check that kadmin.local can actually read the correct kvno, even
     # if we don't expect kadmin to be able to.
     spawn $KADMIN_LOCAL -r $REALMNAME
