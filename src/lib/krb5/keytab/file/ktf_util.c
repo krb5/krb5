@@ -43,6 +43,7 @@ static char rcsid_ktf_util_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
+#include <krb5/krb5.h>
 
 #include "ktfile.h"
 
