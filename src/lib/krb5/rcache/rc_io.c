@@ -61,7 +61,7 @@ static void getdir()
 #if defined(_MSDOS) || defined(_WIN32)
      if (!(dir = getenv("TEMP")))
 	 if (!(dir = getenv("TMP")))
-	     dir = "C:\\";
+	     dir = "C:";
 #else
      if (!(dir = getenv("TMPDIR")))
 #ifdef RCTMPDIR
@@ -70,7 +70,7 @@ static void getdir()
        dir = "/tmp";
 #endif
 #endif
-   dirlen = strlen(dir) + sizeof(PATH_SEPARATOR);
+   dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1;
 }
 
 krb5_error_code krb5_rc_io_creat (context, d, fn)
@@ -118,7 +118,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
       }
     }
    if (fn)
-     (void) strcpy(*fn,d->fn + dirlen - 1); /* dirlen includes \0 */
+     (void) strcpy(*fn,d->fn + dirlen);
   }
  if (d->fd == -1)
     {
