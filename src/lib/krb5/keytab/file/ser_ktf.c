@@ -160,10 +160,10 @@ krb5_ktf_keytab_externalize(kcontext, arg, buffer, lenremain)
 		if (ktdata) {
 		    if (ktdata->openf) {
 			long	fpos;
-			int	fflags;
+			int	fflags = 0;
 
 			file_is_open = 1;
-#ifndef _MACINTOSH
+#if !defined( _MACINTOSH) && !defined(_MSDOS)
 			fflags = fcntl(fileno(ktdata->openf), F_GETFL, 0);
 			if (fflags > 0)
 			    file_is_open |= ((fflags & O_ACCMODE) << 1);
@@ -274,7 +274,7 @@ krb5_ktf_keytab_internalize(kcontext, argp, buffer, lenremain)
 			(void) krb5_ser_unpack_int32(&foffbuf[1],
 						     &bp, &remain);
 			(void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-			ktdata->version = ibuf;
+			ktdata->version = (int) ibuf;
 
 			(void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 			if (ibuf == KV5M_KEYTAB) {
@@ -282,7 +282,7 @@ krb5_ktf_keytab_internalize(kcontext, argp, buffer, lenremain)
 				int 	fmode;
 				long	fpos;
 
-#ifndef _MACINTOSH
+#if !defined( _MACINTOSH) && !defined(_MSDOS)
 				fmode = (file_is_open >> 1) & O_ACCMODE;
 #else
 				fmode = 0;

@@ -1,3 +1,7 @@
+Wed Sep 13 10:57:08 1995 Keith Vetter (keithv@fusion.com)
+
+	* ser_ktf.c: Added MSDOS to wherever MACINTOSH was used.
+
 Mon Sep 11 21:22:44 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ser_ktf.c (krb5_ktf_keytab_externalize): On Macintosh, keytab
