@@ -1103,7 +1103,7 @@ abortrecv(int sig)
 }
 
 void recvrequest(char *cmd, char *volatile local, char *remote, char *lmode,
-		 int printnames)
+		 int printnames, int fnameonly)
 {
 	FILE *volatile fout, *volatile din = 0, *popen();
 	int (*volatile closefunc)(), pclose(), fclose();
@@ -1149,7 +1149,7 @@ void recvrequest(char *cmd, char *volatile local, char *remote, char *lmode,
 		return;
 	}
 	oldintr = signal(SIGINT, abortrecv);
-	if (strcmp(local, "-") && *local != '|') {
+	if (fnameonly || (strcmp(local, "-") && *local != '|')) {
 		if (access(local, 2) < 0) {
 			char *dir = strrchr(local, '/');
 
@@ -1223,9 +1223,9 @@ void recvrequest(char *cmd, char *volatile local, char *remote, char *lmode,
 	din = dataconn("r");
 	if (din == NULL)
 		goto die;
-	if (strcmp(local, "-") == 0)
+	if (strcmp(local, "-") == 0 && !fnameonly)
 		fout = stdout;
-	else if (*local == '|') {
+	else if (*local == '|' && !fnameonly) {
 #ifdef SIGPIPE
 		oldintp = signal(SIGPIPE, SIG_IGN);
 #endif

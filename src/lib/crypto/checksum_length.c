@@ -45,6 +45,8 @@ krb5_c_checksum_length(context, cksumtype, length)
 
     if (krb5_cksumtypes_list[i].keyhash)
 	(*(krb5_cksumtypes_list[i].keyhash->hash_size))(length);
+    else if (krb5_cksumtypes_list[i].trunc_size)
+	*length = krb5_cksumtypes_list[i].trunc_size;
     else
 	(*(krb5_cksumtypes_list[i].hash->hash_size))(length);
 

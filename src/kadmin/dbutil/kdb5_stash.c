@@ -59,8 +59,6 @@
 #include <stdio.h>
 #include "kdb5_util.h"
 
-extern int errno;
-
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
 extern kadm5_config_params global_params;

@@ -4,10 +4,12 @@
 #include "test1.h"
 #include "test2.h"
 
-extern int sys_nerr, errno;
-
 /* XXX Not part of official public API.  */
 extern const char *error_table_name (errcode_t);
+
+#ifdef NEED_SYS_ERRLIST
+extern int sys_nerr;
+#endif
 
 int main()
 {
