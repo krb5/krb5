@@ -5,7 +5,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
-##DOS##OBJFILE=..\$(MYNAME).lst
+##DOS##OBJFILE=..\$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
@@ -128,7 +128,12 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
-##DOS##LIBOBJS = $(OBJS)
+##WIN16##LIBOBJS = $(OBJS)
+##WIN32##LIBOBJS = $(OBJS) win-pwd.obj
+
+##WIN32##.rc.obj:
+##WIN32##	$(RC) $(CPPFLAGS) /r $**
+##WIN32##	$(CVTRES) /nologo /out:$@ $*.res
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
