@@ -1,3 +1,8 @@
+Wed Nov 13 15:17:22 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* install.texinfo (kdc.conf): remove profile relation from
+ 	krb5.conf and kdc.conf [PR 124]
+
 Mon Nov 11 12:45:39 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* install.texinfo (kdc.conf): remove admin_database_name and

@@ -1333,7 +1333,7 @@ should be readable only by root.
 @node krb5.conf, kdc.conf, Files, Files
 @appendixsec krb5.conf
 
-Here is an example of a generic @code{krb5.conf} file:
+Here is an example @code{krb5.conf} file:
 
 @smallexample
 @group
@@ -1359,14 +1359,11 @@ Here is an example of a generic @code{krb5.conf} file:
 @end smallexample
 
 For the KDCs, add a section onto the end of the @code{krb5.conf} file
-telling where the @code{kdc.conf} file is located, as in the following
+telling how logging information should be stored, as in the following
 example:
 
 @smallexample
 @group
-[kdc]
-    profile = @value{ROOTDIR}/var/krb5kdc/kdc.conf
-
 [logging]
     kdc = FILE:/var/log/krb5kdc.log
     admin_server = FILE:/var/log/kadmin.log
@@ -1382,7 +1379,7 @@ example:
 @node kdc.conf,  , krb5.conf, Files
 @appendixsec kdc.conf
 
-Here's an example of a generic kdc.conf file:
+Here's an example of a kdc.conf file:
 
 @smallexample
 @group
@@ -1391,7 +1388,6 @@ Here's an example of a generic kdc.conf file:
 
 [realms]
     @value{PRIMARYREALM} = @{
-        profile = /etc/krb5.conf
         database_name = @value{ROOTDIR}/var/krb5kdc/principal
         admin_keytab = @value{ROOTDIR}/var/krb5kdc/kadm5.keytab
         acl_file = @value{ROOTDIR}/var/krb5kdc/kadm5.acl
