@@ -1,3 +1,22 @@
+2002-02-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* standalone.exp: Move setting of KLIST and KDESTROY into
+	default.exp.
+	(doit): Call do_klist instead of implementing it here.  Add a new
+	principal to the database, and test getting tickets using a
+	keytab, with multiple kvnos starting at 253 and going up past
+	256; if first supported enctype supports v4, convert the keytab to
+	a srvtab and try getting tickets using it too.  Verify that
+	kadmin.local can read the high kvno correctly.
+
+	* v4standalone.exp: Move setting of KLIST and KDESTROY into
+	default.exp.  Print correct filename in top-level error message.
+	(check_and_destroy_v4_tix): New proc.
+	(doit): Call v4kinit and check_and_destroy_v4_tix.
+
+	* gssftp.exp (ftp_test): Bump kvno past 256, with multiple entries
+	in the keytab, before running test.
+
 2001-11-06  Tom Yu  <tlyu@mit.edu>
 
 	* rsh.exp: Fix date-grabbing regexp to deal with older versions of

@@ -4,14 +4,6 @@
 
 # This mostly just calls procedures in testsuite/config/default.exp.
 
-if ![info exists KLIST] {
-    set KLIST [findfile $objdir/../../clients/klist/klist]
-}
-
-if ![info exists KDESTROY] {
-    set KDESTROY [findfile $objdir/../../clients/kdestroy/kdestroy]
-}
-
 # Set up the Kerberos files and environment.
 if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
     return
@@ -32,14 +24,32 @@ if ![setup_kerberos_db 1] {
 # the rest of the tests inside a proc, so that we can easily kill the
 # processes when the procedure ends.
 
+proc check_and_destroy_v4_tix { client server } {
+    global REALMNAME
+
+    # Make sure that klist can see the ticket.
+    if ![v4klist "$client" "$server" "v4klist"] {
+	return
+    }
+
+    # Destroy the ticket.
+    if ![v4kdestroy "v4kdestroy"] {
+	return
+    }
+
+    if ![v4klist_none "v4klist no tix 1"] {
+	return
+    }
+}
+
 proc doit { } {
     global REALMNAME
     global KLIST
     global KDESTROY
     global KEY
     global hostname
-    global tmppwd
     global spawn_id
+    global tmppwd
 
     # Start up the kerberos and kadmind daemons.
     if ![start_kerberos_daemons 1] {
@@ -57,71 +67,16 @@ proc doit { } {
     }
 
     # Use kinit to get a ticket.
-    if ![v4kinit krbtest.admin adminpass$KEY 1] {
-	return
+    if [v4kinit krbtest.admin adminpass$KEY 1] {
+	check_and_destroy_v4_tix krbtest.admin@$REALMNAME krbtgt.$REALMNAME@$REALMNAME
     }
 
-    # Make sure that klist can see the ticket.
-    spawn $KLIST -4
-    expect {
-	-re "Kerberos 4 ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*Principal:\[ 	\]*krbtest.admin@$REALMNAME.*krbtgt\.$REALMNAME@$REALMNAME\r\n" {
-	    verbose "klist started"
-	}
-	timeout {
-	    fail "v4klist"
-	    return
-	}
-	eof {
-	    fail "v4klist"
-	    return
-	}
-    }
-
-    expect {
-        "\r" { }
-	eof { }
-    }
-
-    if ![check_exit_status "klist"] {
-	return
-    }
-    pass "v4klist"
-
-    # Destroy the ticket.
-    spawn $KDESTROY -4
-    if ![check_exit_status "kdestroy"] {
-	return
-    }
-    pass "v4kdestroy"
-
-    # Double check that the ticket was destroyed.
-    spawn $KLIST -4
-    expect {
-	-re "Kerberos 4 ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*klist: You have no tickets cached.*\r\n" {
-	    verbose "v4klist started"
-	}
-	timeout {
-	    fail "v4klist after kdestroy"
-	    return
-	}
-	eof {
-	    fail "v4klist after kdestroy"
-	    return
-	}
-    }
-    # We can't use check_exit_status, because we expect an exit status
-    # of 1.
-    set status_list [wait -i $spawn_id]
-    verbose "wait -i $spawn_id returned $status_list (klist)"
-    if { [lindex $status_list 2] != 0 } {
-	fail "v4klist (bad exit status) $status_list"
-	return
-    } else { if { [lindex $status_list 3] != 1 } {
-	fail "v4klist (bad exit status) $status_list"
-	return
-    } else {
-	pass v4klist
-    } }
+    # Use kinit with srvtab to get a ticket.
+    # XXX - Currently kinit doesn't support "-4 -k"!
+#    set shorthost [string range $hostname 0 [expr [string first . $hostname] - 1]]
+#    if [v4kinit_kt host.$shorthost SRVTAB:$tmppwd/srvtab 1] {
+#	check_and_destroy_v4_tix host.$shorthost@$REALMNAME krbtgt.$REALMNAME@$REALMNAME
+#    }
 }
 
 set status [catch doit msg]
@@ -129,7 +84,7 @@ set status [catch doit msg]
 stop_kerberos_daemons
 
 if { $status != 0 } {
-    send_error "ERROR: error in standalone.exp\n"
+    send_error "ERROR: error in v4standalone.exp\n"
     send_error "$msg\n"
     exit 1
 }

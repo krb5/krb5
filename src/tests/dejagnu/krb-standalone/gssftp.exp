@@ -166,7 +166,12 @@ proc ftp_test { } {
     # ticket file.
     if {![start_kerberos_daemons 0] \
         || ![add_random_key ftp/$hostname 0] \
+	|| ![modify_principal ftp/$hostname -kvno 254] \
         || ![setup_srvtab 0 ftp] \
+	|| ![xst $tmppwd/srvtab ftp/$hostname]
+	|| ![xst $tmppwd/srvtab ftp/$hostname]
+	|| ![xst $tmppwd/srvtab ftp/$hostname]
+	|| ![do_klist_kt $tmppwd/srvtab "gssftp keytab list"]
 	|| ![add_kerberos_key $env(USER) 0] \
 	|| ![kinit $env(USER) $env(USER)$KEY 0]} {
 	return
