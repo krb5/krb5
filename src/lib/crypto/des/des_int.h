@@ -220,6 +220,46 @@ extern int mit_des3_cbc_encrypt
 	 const mit_des_cblock ivec,
 	 int enc);
 
+void
+krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
+			 mit_des_cblock *out,
+			 unsigned long length,
+			 const mit_des_key_schedule ks1,
+			 const mit_des_key_schedule ks2,
+			 const mit_des_key_schedule ks3,
+			 const mit_des_cblock ivec);
+void
+krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
+			 mit_des_cblock *out,
+			 unsigned long length,
+			 const mit_des_key_schedule ks1,
+			 const mit_des_key_schedule ks2,
+			 const mit_des_key_schedule ks3,
+			 const mit_des_cblock ivec);
+
+
+#define mit_des3_cbc_encrypt(in,out,length,ks1,ks2,ks3,ivec,enc) \
+    ((enc ? krb5int_des3_cbc_encrypt : krb5int_des3_cbc_decrypt) \
+     (in, out, length, ks1, ks2, ks3, ivec), 0)
+
+void
+krb5int_des_cbc_encrypt(const mit_des_cblock *in,
+			mit_des_cblock *out,
+			unsigned long length,
+			const mit_des_key_schedule schedule,
+			const mit_des_cblock ivec);
+void
+krb5int_des_cbc_decrypt(const mit_des_cblock *in,
+			mit_des_cblock *out,
+			unsigned long length,
+			const mit_des_key_schedule schedule,
+			const mit_des_cblock ivec);
+
+#define mit_des_cbc_encrypt(in,out,length,schedule,ivec,enc) \
+    ((enc ? krb5int_des_cbc_encrypt : krb5int_des_cbc_decrypt) \
+     (in, out, length, schedule, ivec), 0)
+
+
 /* d3_procky.c */
 extern krb5_error_code mit_des3_process_key
 	(krb5_encrypt_block * eblock,

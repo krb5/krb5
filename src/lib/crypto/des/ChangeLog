@@ -1,5 +1,15 @@
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
+	* f_cbc.c (krb5int_des_cbc_encrypt, krb5int_des_cbc_decrypt): New
+	functions broken out from mit_des_cbc_encrypt.
+	(mit_des_cbc_encrypt): Call them.
+	* d3_cbc.c (krb5int_des3_cbc_encrypt, krb5int_des3_cbc_decrypt):
+	New functions broken out from mit_des3_cbc_encrypt.
+	(mit_des3_cbc_encrypt): Call them.
+	* des_int.h (krb5int_des_cbc_encrypt, krb5int_des_cbc_decrypt,
+	krb5int_des3_cbc_encrypt, krb5int_des3_cbc_decrypt): Declare.
+	(mit_des_cbc_encrypt, mit_des3_cbc_encrypt): New macros.
+
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
 
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
