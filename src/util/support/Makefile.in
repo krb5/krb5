@@ -43,6 +43,7 @@ SRCS=\
 	$(srcdir)/init-addrinfo.c \
 	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
+# Add -lm if dumping thread stats, for sqrt.
 SHLIB_EXPLIBS= $(LIBS)
 SHLIB_DIRS=
 SHLIB_RDIRS=$(KRB5_LIBDIR)

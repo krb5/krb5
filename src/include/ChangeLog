@@ -1,3 +1,27 @@
+2004-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h [DEBUG_THREADS_STATS]: Include string.h and
+	inttypes.h.
+	(get_current_time) [DEBUG_THREADS_STATS]: Define as inline.
+	(k5_mutex_init_stats) [DEBUG_THREADS_STATS]: Save away current
+	time as creation time.
+	(k5_mutex_stats_tmp): New typedef, k5_debug_time_t if recording
+	stats, dummy int otherwise.
+	(k5_mutex_stats_start): New macro, get current time if recording,
+	zero otherwise.
+	(krb5int_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats)
+	[DEBUG_THREADS_STATS]: Declare.
+	(krb5int_mutex_report_stats) [! DEBUG_THREADS_STATS]: New macro,
+	does nothing.
+	(k5_mutex_lock_update_stats, k5_mutex_unlock_update_stats): New
+	macros, map to krb5int_ functions if recording, dummy statements
+	otherwise.
+	(k5_mutex_destroy): Call krb5int_mutex_report_stats.
+	(k5_mutex_lock, k5_mutex_lock_1): Call k5_mutex_stats_start and
+	k5_mutex_lock_update_stats.
+	(k5_mutex_unlock_1): Call k5_mutex_unlock_update_stats.
+
 2004-11-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* win-mac.h (HAVE_GETADDRINFO, HAVE_GETNAMEINFO): Define.

@@ -193,13 +193,22 @@ typedef char k5_debug_loc;
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #endif
+/* for memset */
+#include <string.h>
+/* for uint64_t */
 #include <inttypes.h>
-typedef uint64_t k5_debug_timediff_t;
+typedef uint64_t k5_debug_timediff_t; /* or long double */
 typedef struct timeval k5_debug_time_t;
 static inline k5_debug_timediff_t
 timediff(k5_debug_time_t t2, k5_debug_time_t t1)
 {
     return (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+}
+static inline k5_debug_time_t get_current_time(void)
+{
+    struct timeval tv;
+    if (gettimeofday(&tv,0) < 0) { tv.tv_sec = tv.tv_usec = 0; }
+    return tv;
 }
 struct k5_timediff_stats {
     k5_debug_timediff_t valmin, valmax, valsum, valsqsum;
@@ -209,10 +218,20 @@ typedef struct {
     k5_debug_time_t time_acquired, time_created;
     struct k5_timediff_stats lockwait, lockheld;
 } k5_debug_mutex_stats;
-#define k5_mutex_init_stats(S) \
-	(memset((S), 0, sizeof(struct k5_debug_mutex_stats)), 0)
+#define k5_mutex_init_stats(S)					\
+	(memset((S), 0, sizeof(k5_debug_mutex_stats)),	\
+	 (S)->time_created = get_current_time(),		\
+	 0)
 #define k5_mutex_finish_init_stats(S) 	(0)
 #define K5_MUTEX_STATS_INIT	{ 0, {0}, {0}, {0}, {0} }
+typedef k5_debug_time_t k5_mutex_stats_tmp;
+#define k5_mutex_stats_start()	get_current_time()
+extern void krb5int_mutex_lock_update_stats(k5_debug_mutex_stats *m,
+					    k5_mutex_stats_tmp startwait);
+extern void krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m);
+#define k5_mutex_lock_update_stats	krb5int_mutex_lock_update_stats
+#define k5_mutex_unlock_update_stats	krb5int_mutex_unlock_update_stats
+extern void krb5int_mutex_report_stats();
 
 #else
 
@@ -220,6 +239,11 @@ typedef char k5_debug_mutex_stats;
 #define k5_mutex_init_stats(S)		(*(S) = 's', 0)
 #define k5_mutex_finish_init_stats(S)	(0)
 #define K5_MUTEX_STATS_INIT		's'
+typedef int k5_mutex_stats_tmp;
+#define k5_mutex_stats_start()		(0)
+#define k5_mutex_lock_update_stats(M,S)	(S)
+#define k5_mutex_unlock_update_stats(M)	(*(M) = 's')
+#define krb5int_mutex_report_stats(M)	((M)->stats = 'd')
 
 #endif
 
@@ -614,25 +638,30 @@ static inline int k5_mutex_finish_init_1(k5_mutex_t *m, k5_debug_loc l)
 #define k5_mutex_finish_init(M)	k5_mutex_finish_init_1((M), K5_DEBUG_LOC)
 #define k5_mutex_destroy(M)			\
 	(k5_os_mutex_assert_unlocked(&(M)->os),	\
+	 krb5int_mutex_report_stats(M),		\
 	 (M)->loc_last = K5_DEBUG_LOC,		\
 	 k5_os_mutex_destroy(&(M)->os))
 #ifdef __GNUC__
-#define k5_mutex_lock(M)				\
-	__extension__ ({				\
-	    int _err = 0;				\
-	    k5_mutex_t *_m = (M);			\
-	    _err = k5_os_mutex_lock(&_m->os);		\
-	    if (_err == 0) _m->loc_last = K5_DEBUG_LOC;	\
-	    _err;					\
+#define k5_mutex_lock(M)						 \
+	__extension__ ({						 \
+	    int _err = 0;						 \
+	    k5_mutex_stats_tmp _stats = k5_mutex_stats_start();		 \
+	    k5_mutex_t *_m = (M);					 \
+	    _err = k5_os_mutex_lock(&_m->os);				 \
+	    if (_err == 0) _m->loc_last = K5_DEBUG_LOC;			 \
+	    if (_err == 0) k5_mutex_lock_update_stats(&_m->stats, _stats); \
+	    _err;							 \
 	})
 #else
 static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
 {
     int err = 0;
+    k5_mutex_stats_tmp stats = k5_mutex_stats_start();
     err = k5_os_mutex_lock(&m->os);
     if (err)
 	return err;
     m->loc_last = l;
+    k5_mutex_lock_update_stats(&m->stats, stats);
     return err;
 }
 #define k5_mutex_lock(M)	k5_mutex_lock_1(M, K5_DEBUG_LOC)
@@ -640,6 +669,7 @@ static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
 static inline int k5_mutex_unlock_1(k5_mutex_t *m, k5_debug_loc l)
 {
     int err = 0;
+    k5_mutex_unlock_update_stats(&m->stats);
     err = k5_os_mutex_unlock(&m->os);
     if (err)
 	return err;

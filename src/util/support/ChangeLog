@@ -1,3 +1,15 @@
+2004-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c [DEBUG_THREADS_STATS]: Include stdio.h.
+	(stats_logfile) [DEBUG_THREADS_STATS]: New variable.
+	(krb5int_thread_support_init) [DEBUG_THREADS_STATS]: Set it to
+	point to a file on /dev/tty or stderr.
+	(krb5int_thread_support_fini) [DEBUG_THREADS_STATS]: Flush it.
+	(k5_mutex_lock_update_stats, krb5int_mutex_unlock_update_stats,
+	get_stddev, krb5int_mutex_report_stats) [DEBUG_THREADS_STATS]: New
+	functions.
+	* libkrb5support.exports: Add krb5int_mutex_*_stats.
+
 2004-11-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c (HAVE_GETADDRINFO, HAVE_GETNAMEINFO)[_WIN32]:
