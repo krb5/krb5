@@ -109,10 +109,9 @@ char *argv[];
     krb5_enctype etype = -1;
     register krb5_cryptosystem_entry *csentry;
     int sci_idx;
+    extern krb5_kt_ops krb5_ktf_writable_ops;
 
-    initialize_krb5_error_table();
-    initialize_kdb5_error_table();
-    initialize_isod_error_table();
+    krb5_init_ets();
 
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
@@ -142,16 +141,23 @@ char *argv[];
 	    break;
 	case '?':
 	default:
-	    usage(argv[0], 1);
+	    usage(progname, 1);
 	    /*NOTREACHED*/
 	}
+    }
+
+
+    if (retval = krb5_kt_register(&krb5_ktf_writable_ops)) {
+	com_err(progname, retval,
+		"while registering writable key table functions");
+	exit(1);
     }
 
     if (!keytypedone)
 	master_keyblock.keytype = KEYTYPE_DES;
 
     if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up keytype %d", master_keyblock.keytype);
 	exit(1);
     }
@@ -160,7 +166,7 @@ char *argv[];
 	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype)) {
-	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
+	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
 		"while setting up etype %d", etype);
 	exit(1);
     }
@@ -179,12 +185,12 @@ char *argv[];
 
     if (!cur_realm) {
 	if (retval = krb5_get_default_realm(sizeof(defrealm), defrealm)) {
-	    com_err(argv[0], retval, "while retrieving default realm name");
+	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
 	cur_realm = defrealm;
     }
-    if (retval = set_dbname_help(argv[0], dbname))
+    if (retval = set_dbname_help(progname, dbname))
 	exit(retval);
 
     ss_listen(sci_idx, &retval);
