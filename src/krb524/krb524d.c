@@ -224,7 +224,7 @@ void cleanup_and_exit(ret, context)
      if (use_master && handle) {
 	  (void) kadm5_destroy(handle);
      }
-     if (use_keytab) krb5_kt_close(context, kt);
+     if (use_keytab &&kt) krb5_kt_close(context, kt);
      krb5_free_context(context);
      exit(ret);
 }

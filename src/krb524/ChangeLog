@@ -2,6 +2,8 @@
 
 	* krb524d.c: Include <krb5/adm_proto.h> for krb5_log_init()
 	prototype.
+	(cleanup_and_exit) Conditionalize krb5_kt_close on keytab being
+	non-null.
 
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
