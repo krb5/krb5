@@ -11,6 +11,32 @@ AC_PROG_INSTALL
 AC_CONST
 CHECK_FCNTL
 AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
+dnl need MSBFIRST, LSBFIRST, BITS16, BITS32
+AC_MSG_CHECKING([if system is msbfirst])
+AC_CACHE_VAL(krb5_cv_is_msbfirst,
+[AC_TRY_RUN(
+[#include <stdio.h>
+int main()
+{
+  int one = 1;
+  exit (*(char*) &one); /* MSBFIRST iff 1 */
+}],
+krb5_cv_is_msbfirst=yes, krb5_cv_is_msbfirst=no
+)])dnl fail on cross for now
+AC_MSG_RESULT($krb5_cv_is_msbfirst)
+if test $krb5_cv_is_msbfirst = yes; then
+	AC_DEFINE(MSBFIRST)
+else
+	AC_DEFINE(LSBFIRST)
+fi
+dnl
+dnl check int, set bits16/bits32 based on it
+AC_CHECK_SIZEOF(int)
+if test $ac_cv_sizeof_int = 2; then
+	AC_DEFINE(BITS16)
+else
+	AC_DEFINE(BITS32)
+fi
 ET_RULES
 SubdirLibraryRule([$(OBJS)])
 KRB_INCLUDE

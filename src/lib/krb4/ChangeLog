@@ -1,3 +1,8 @@
+Fri Apr 28 01:38:42 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* configure.in: use AC_CHECK_SIZEOF(int) to set BITS16/BITS32.
+	Use AC_TRY_RUN test to set MSBFIRST or LSBFIRST.
+
 Tue Mar 28 09:19:23 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* send_to_kdc.c (send_to_kdc): only use secondary port if entry
