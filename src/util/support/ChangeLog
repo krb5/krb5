@@ -10,6 +10,8 @@
 	functions.
 	* libkrb5support.exports: Add krb5int_mutex_*_stats.
 
+	* libkrb5support.exports: Add krb5int_in6addr_any.
+
 2004-11-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c (HAVE_GETADDRINFO, HAVE_GETNAMEINFO)[_WIN32]:

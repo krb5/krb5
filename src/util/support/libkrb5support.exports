@@ -9,3 +9,4 @@ krb5int_getaddrinfo
 krb5int_freeaddrinfo
 krb5int_gai_strerror
 krb5int_getnameinfo
+krb5int_in6addr_any
