@@ -147,7 +147,7 @@ AC_MSG_NOTICE(PTHREAD_CC = $PTHREAD_CC)
 AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
 AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
 dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
-AC_CHECK_HEADERS(pthread.h)
+dnl AC_CHECK_HEADERS(pthread.h)
 case "${host_os}" in
   aix*) LIBS="$LIBS $PTHREAD_LIBS" ;;
 esac
