@@ -263,13 +263,12 @@ krb5_ticket     *ticket = 0;
 #endif /* DO_NOT_USE_K_LOGIN */
 #endif /* LOGIN_PROGRAM */
 
-struct utmp	wtmp;
 #define MAXRETRIES 4
-#ifndef UT_NAMESIZE
-/* linux defines it directly in <utmp.h> */
+#define MAX_PROG_NAME 16
+
+#ifndef UT_NAMESIZE	/* linux defines it directly in <utmp.h> */
 #define	UT_NAMESIZE	sizeof(((struct utmp *)0)->ut_name)
 #endif
-#define MAX_PROG_NAME 16
 
 char		lusername[UT_NAMESIZE+1];
 char		rusername[UT_NAMESIZE+1];
@@ -280,9 +279,6 @@ krb5_principal  client;
 
 extern	int errno;
 int	reapchild();
-#if (!defined(__STDC__) && !defined(ultrix))
-char	*malloc();
-#endif
 char 	*progname;
 
 static	int Pfd;
@@ -586,7 +582,6 @@ void doit(f, fromp)
     if (fchmod(vfd, 0))
       fatalperror(f, line);
 #endif
-#ifndef SYSV
     if (f == 0) {  /* if operating standalone, do not reset tty!! */
 #ifdef POSIX_SIGNALS
 	sa.sa_handler = SIG_IGN;
@@ -600,7 +595,6 @@ void doit(f, fromp)
 	signal(SIGHUP, SIG_DFL);
 #endif
     }
-#endif 
 #endif /* VHANG_FIRST */
 
 #ifdef HAVE_SETSID
@@ -619,7 +613,7 @@ void doit(f, fromp)
     if(ioctl(t, TIOCSCTTY, 0) < 0) /* set controlling tty */
       fatalperror(f, "setting controlling tty");
 #endif
-#ifdef SYSV
+#if 0 /*def SYSV*/
     close(t);
 #endif
 #endif  /* sysvimp */
@@ -635,91 +629,88 @@ void doit(f, fromp)
     if (pid < 0)
       fatalperror(f, "", errno);
     if (pid == 0) {
-	{
 #ifdef POSIX_TERMIOS
-	    struct termios new_termio;
+	struct termios new_termio;
 #else
-	    struct sgttyb b;
+	struct sgttyb b;
 #endif /* POSIX_TERMIOS */
-#ifdef SYSV
-	    (void) setpgrp();
-	    /* SYSV open slave device: We closed it above so pgrp
-	       would be set correctly...*/
-	    t = open(line, O_RDWR);
-	    if (t < 0)
-	      fatalperror(f, line);
+#if 0 /*def SYSV*/
+	(void) setpgrp(0,0);
+	/* SYSV open slave. (We closed it so pgrp would be set correctly) */
+	t = open(line, O_RDWR);
+	if (t < 0)
+	  fatalperror(f, line);
 #endif
-
+	
 #ifdef HAVE_STREAMS
 #ifdef HAVE_LINE_PUSH
-	    while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
-	    if (line_push(t) < 0)
-		fatalperror(f, "IPUSH",errno);
+	while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
+	if (line_push(t) < 0)
+	  fatalperror(f, "IPUSH",errno);
 #else
 #ifdef sun
-	    while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
-	    if (ioctl(t, I_PUSH, "ptem") < 0)
-		fatalperror(f, "IPUSH-ptem",errno);
-	    if (ioctl(t, I_PUSH, "ldterm") < 0)
-		fatalperror(f, "IPUSH-ldterm",errno);
-	    if (ioctl(t, I_PUSH, "ttcompat") < 0)
-		fatalperror(f, "IPUSH-ttcompat",errno);
+	while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
+	if (ioctl(t, I_PUSH, "ptem") < 0)
+	  fatalperror(f, "IPUSH-ptem",errno);
+	if (ioctl(t, I_PUSH, "ldterm") < 0)
+	  fatalperror(f, "IPUSH-ldterm",errno);
+	if (ioctl(t, I_PUSH, "ttcompat") < 0)
+	  fatalperror(f, "IPUSH-ttcompat",errno);
 #endif /* sun */
 #endif /* HAVE_LINE_PUSH */
 #endif /* HAVE_STREAMS */
-
-	    /* Under Ultrix 3.0, the pgrp of the slave pty terminal
-	       needs to be set explicitly.  Why rlogind works at all
-	       without this on 4.3BSD is a mystery.
-	       It seems to work fine on 4.3BSD with this code enabled.
-	       IMP's need both ioctl and setpgrp..
-	       */
+	
+	/* Under Ultrix 3.0, the pgrp of the slave pty terminal
+	   needs to be set explicitly.  Why rlogind works at all
+	   without this on 4.3BSD is a mystery.
+	   It seems to work fine on 4.3BSD with this code enabled.
+	   IMP's need both ioctl and setpgrp..
+	   */
 #ifdef sysvimp
-	    pid = 0;
+	pid = 0;
 #else
 #ifdef GETGRP_ONEARG
-	    pid = getpgrp();
+	pid = getpgrp();
 #else
-	    pid = getpgrp(getpid());
+	pid = getpgrp(getpid());
 #endif
 #endif /* sysvimp */
-	    
+	
 #ifdef POSIX_TERMIOS
-	    tcsetpgrp(0, pid);
+	tcsetpgrp(0, pid);
 #else /* POSIX_TERMIOS */
 #ifdef TIOCSPGRP
-	    ioctl(0, TIOCSPGRP, &pid);
+	ioctl(0, TIOCSPGRP, &pid);
 #endif /* TIOCSPGRP */
 #endif /* POSIX_TERMIOS */
-
-	    pid = 0;			/*reset pid incase exec fails*/
+	
+	pid = 0;			/*reset pid incase exec fails*/
 	    
 #ifdef POSIX_TERMIOS
-	    tcgetattr(t,&new_termio);
-	    new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
-	    /* so that login can read the authenticator */
-	    new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
-	    /* new_termio.c_iflag = 0; */
-	    /* new_termio.c_oflag = 0; */
-	    new_termio.c_cc[VMIN] = 1;
-	    new_termio.c_cc[VTIME] = 0;
-	    tcsetattr(t,TCSANOW,&new_termio);
+	tcgetattr(t,&new_termio);
+	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
+	/* so that login can read the authenticator */
+	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
+	/* new_termio.c_iflag = 0; */
+	/* new_termio.c_oflag = 0; */
+	new_termio.c_cc[VMIN] = 1;
+	new_termio.c_cc[VTIME] = 0;
+	tcsetattr(t,TCSANOW,&new_termio);
 #else
-	    (void)ioctl(t, TIOCGETP, &b);
-	    b.sg_flags = RAW|ANYP;
-	    (void)ioctl(t, TIOCSETP, &b);
+	(void)ioctl(t, TIOCGETP, &b);
+	b.sg_flags = RAW|ANYP;
+	(void)ioctl(t, TIOCSETP, &b);
 #endif /* POSIX_TERMIOS */
-	    /*
-	     **      signal the parent that we have turned off echo
-	     **      on the slave side of the pty ... he's waiting
-	     **      because otherwise the rlogin protocol junk gets
-	     **      echo'd to the user (locuser^@remuser^@term/baud)
-	     **      and we don't get the right tty affiliation, and
-	     **      other kinds of hell breaks loose ...
-	     */
-	    (void) write(t, &c, 1);
-	    
-	}
+	/*
+	 **      signal the parent that we have turned off echo
+	 **      on the slave side of the pty ... he's waiting
+	 **      because otherwise the rlogin protocol junk gets
+	 **      echo'd to the user (locuser^@remuser^@term/baud)
+	 **      and we don't get the right tty affiliation, and
+	 **      other kinds of hell breaks loose ...
+	 */
+	(void) write(t, &c, 1);
+	
 	close(f), close(p);
 	dup2(t, 0), dup2(t, 1), dup2(t, 2);
 	if (t > 2)
@@ -738,23 +729,23 @@ void doit(f, fromp)
 	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s) ", 
 		     krusername ? krusername : "", rusername, rhost_name);
 	}
-	
-#if defined(KERBEROS) && defined(LOG_REMOTE_REALM) && !defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
+#ifdef KERBEROS
+#if defined(LOG_REMOTE_REALM) && !defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
 	/* Log if principal is from a remote realm */
         else if (client && !default_realm(client))
-#endif
+#endif /* LOG_REMOTE_REALM */
   
-#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
+#if defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
 	/* Log if principal name does not map to local username */
         else if (client && !princ_maps_to_lname(client, lusername))
 #endif /* LOG_OTHER_USERS */
-  
-#ifdef LOG_ALL_LOGINS /* Log everything */
-	else 
-#endif
-  
+
+#if defined(LOG_ALL_LOGINS)
+        else
+#endif /* LOG_ALL_LOGINS */
+
 #if defined(LOG_REMOTE_REALM) || defined(LOG_OTHER_USERS) || defined(LOG_ALL_LOGINS)
-        {
+	{
 	    if (passwd_req)
 	      syslog(LOG_NOTICE,
 		     "login by %s (%s@%s) as %s forcing password access\n",
@@ -766,7 +757,8 @@ void doit(f, fromp)
 		     krusername ? krusername : "", rusername,
 		     rhost_name, lusername); 
 	}
-#endif
+#endif /* LOG_REMOTE_REALM || LOG_OTHER_USERS || LOG_ALL_LOGINS */
+#endif /* KERBEROS */
 
 #ifdef LOGIN_PROCESS
 	{
@@ -778,7 +770,7 @@ void doit(f, fromp)
 	    ent.ut_pid = getpid();
 #endif
 	    ent.ut_type = LOGIN_PROCESS;
-	    update_utmp(&ent, "rlogin", line, (char *)0);
+	    update_utmp(&ent, "rlogin", line, ""/*host*/);
 	}
 #endif
 	
@@ -858,7 +850,6 @@ void doit(f, fromp)
 	sprintf(buferror,"Cannot write slave pty %s ",line);
 	fatalperror(f,buferror,errno);
     } 
-    
     protocol(f, p);
     signal(SIGCHLD, SIG_IGN);
     cleanup();
@@ -1018,6 +1009,7 @@ protocol(f, p)
 	      break;
 	    else if (pibuf[0] == 0)
 	      pbp++, pcc--;
+#if 0
 	    else {
 		if (pkcontrol(pibuf[0])) {
 		    pibuf[0] |= oobdata[0];
@@ -1025,6 +1017,7 @@ protocol(f, p)
 		}
 		pcc = 0;
 	    }
+#endif
 	}
 	if (FD_ISSET(f, &obits) && pcc > 0) {
 	    cc = (*des_write)(f, pbp, pcc);
@@ -1395,8 +1388,7 @@ getpty(fd,slave)
     if (*fd < 0) return 1;
 
 #ifdef sun
-    grantpt(*fd);
-    unlockpt(*fd);
+    if (grantpt(*fd) || unlockpt(*fd)) return 1;
 #endif
     
 #ifdef HAVE_PTSNAME
