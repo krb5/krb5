@@ -62,7 +62,7 @@ pmap_getport(address, program, version, protocol)
 	struct sockaddr_in *address;
 	rpc_u_int32 program;
 	rpc_u_int32 version;
-	unsigned int protocol;
+	rpc_u_int32 protocol;
 {
 	unsigned short port = 0;
 	int sock = -1;

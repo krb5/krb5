@@ -1,3 +1,10 @@
+2001-07-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* client.c: Change local variable count from int to unsigned int.
+
+	* server.c (log_badauth_display_status_1): Argument to
+	gss_display_status should be OM_uint32 * instead of int *.
+
 2001-07-09  Ezra Peisach  <epeisach@mit.edu>
 
 	* rpc_test_clnt.c, rpc_test_svc.c: Include string.h for memset

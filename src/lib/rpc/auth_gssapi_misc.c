@@ -150,7 +150,7 @@ static void auth_gssapi_display_status_1(m, code, type, rec)
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc msg;
-     int msg_ctx;
+     OM_uint32 msg_ctx;
      
      msg_ctx = 0;
      while (1) {

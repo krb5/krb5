@@ -231,9 +231,8 @@ void log_badauth_display_status(OM_uint32 major, OM_uint32 minor)
 
 void log_badauth_display_status_1(OM_uint32 code, int type, int rec)
 {
-     OM_uint32 gssstat, minor_stat;
+     OM_uint32 gssstat, minor_stat, msg_ctx;
      gss_buffer_desc msg;
-     int msg_ctx;
 
      msg_ctx = 0;
      while (1) {

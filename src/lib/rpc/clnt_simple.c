@@ -57,6 +57,7 @@ int
 gssrpc_callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 	char *host;
 	xdrproc_t inproc, outproc;
+	rpc_u_int32 prognum, versnum, procnum;
 	char *in, *out;
 {
 	register struct callrpc_private *crp = callrpc_private;

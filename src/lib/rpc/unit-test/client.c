@@ -56,7 +56,8 @@ main(argc, argv)
      CLIENT      *clnt;
      AUTH	 *tmp_auth;
      struct rpc_err e;
-     int i, count, auth_once;
+     int i, auth_once;
+     unsigned int count;
      extern int optind;
      extern char *optarg;
      extern int svc_debug_gssapi, misc_debug_gssapi, auth_debug_gssapi;

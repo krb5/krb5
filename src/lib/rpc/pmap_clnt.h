@@ -80,4 +80,4 @@ enum clnt_stat		clnt_broadcast(rpc_u_int32, rpc_u_int32, rpc_u_int32,
 				       caddr_t, resultproc_t);
 extern unsigned short		pmap_getport(struct sockaddr_in *, 
 					     rpc_u_int32, 
-					     rpc_u_int32, unsigned int);
+					     rpc_u_int32, rpc_u_int32);

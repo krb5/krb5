@@ -1,3 +1,27 @@
+2001-07-26  Ezra Peisach  <epeisach@home>
+
+	* xdr_reference.c (xdr_reference): Remove cast in argument to memset.
+
+	* svc_auth_gssapi.c: In call to gss_accept_sec_context, pass
+	OM_uint32 * instead of int *;
+
+	* pmap_clnt.h, pmap_getport.c (pmap_getport): Prototype changed
+ 	for protocol from unsigned int to rpc_u_int32 to match struct
+ 	pmap.
+
+	* getrpcport.c (gssrpc_getrpcport): Update to reflect proper
+	calling conventions.
+
+	* rpc.h (callrpc): Change prototype from expecting ints for
+	prognum, versnum and procnum to rpc_u_int32 for consistancy.
+	(getrpcport): Update arguments in similar fashion.
+	
+	* clnt_simple.c (gssrpc_callrpc): Update to reflect prototype change.
+
+	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Local
+	variable msg_ctx should be OM_uint32 instead of int as argument to
+	gss_display_status.
+
 2001-07-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* auth_gssapi.c (auth_gssapi_create): Change calling convention

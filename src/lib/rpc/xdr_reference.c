@@ -78,7 +78,7 @@ xdr_reference(xdrs, pp, size, proc)
 				    "xdr_reference: out of memory\n");
 				return (FALSE);
 			}
-			memset(loc, 0, (int)size);
+			memset(loc, 0, size);
 			break;
 
 		case XDR_ENCODE:
