@@ -609,8 +609,11 @@ main(argc, argv)
 					    cred->keyblock.enctype, &similar))
 	    try_normal(orig_argv); /* doesn't return */
 
-	if (!similar)
+	if (!similar) {
 	    do_inband = 1;
+	    if (debug_port)
+		fprintf(stderr, "DEBUG: setting do_inband\n");
+	}
     }
 	
     rem = sock;
