@@ -62,7 +62,8 @@ element_KRB5_112krb5_pa_data(val, error)
     }
     for (i = 0, rv = val; rv; rv = rv->next, i++) {
 	if (qb_pullup(rv->PA__DATA->pa__data) != OK) {
-	    krb5_xfree(retval);
+	    retval[i] = 0;
+	    krb5_free_pa_data(retval);
 	    *error = ENOMEM;
 	    return(0);
 	}
@@ -95,7 +96,7 @@ element_KRB5_112krb5_pa_data(val, error)
 
 krb5_kdc_rep *
 KRB5_KDC__REP2krb5_kdc_rep(val, error)
-const register struct type_KRB5_TGS__REP *val;
+register const struct type_KRB5_TGS__REP *val;
 register int *error;
 {
     register krb5_kdc_rep *retval;
@@ -122,7 +123,7 @@ register int *error;
 						       val->crealm,
 						       error);
     if (!retval->client) {
-	krb5_xfree(retval);
+	krb5_free_kdc_rep(retval);
 	return(0);
     }
 

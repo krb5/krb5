@@ -43,7 +43,7 @@ static char rcsid_ksafe2safe_c[] =
 
 struct type_KRB5_KRB__SAFE *
 krb5_safe2KRB5_KRB__SAFE(val, error)
-const register krb5_safe *val;
+register const krb5_safe *val;
 register int *error;
 {
     register struct type_KRB5_KRB__SAFE *retval;

@@ -43,7 +43,7 @@ static char rcsid_auth2kauth_c[] =
 
 krb5_authenticator *
 KRB5_Authenticator2krb5_authenticator(val, error)
-const register struct type_KRB5_Authenticator *val;
+register const struct type_KRB5_Authenticator *val;
 register int *error;
 {
     register krb5_authenticator *retval;

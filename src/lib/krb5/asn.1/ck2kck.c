@@ -43,7 +43,7 @@ static char rcsid_ck2kck_c[] =
 
 krb5_checksum *
 KRB5_Checksum2krb5_checksum(val, error)
-const register struct type_KRB5_Checksum *val;
+register const struct type_KRB5_Checksum *val;
 register int *error;
 {
     krb5_checksum *retval;

@@ -43,7 +43,7 @@ static char rcsid_kcrep2crep_c[] =
 
 struct type_KRB5_EncKrbCredPart *
 krb5_cred_enc_part2KRB5_EncKrbCredPart(val, error)
-const register krb5_cred_enc_part *val;
+register const krb5_cred_enc_part *val;
 register int *error;
 {
     struct type_KRB5_EncKrbCredPart *retval = 0;

@@ -43,7 +43,7 @@ static char rcsid_pwd2kpwd[] =
 
 passwd_phrase_element *
 KRB5_PWD__SEQ2krb5_pwd_seq(val, error)
-const register struct type_KRB5_PasswdSequence *val;
+register const struct type_KRB5_PasswdSequence *val;
 register int *error;
 {
     register passwd_phrase_element *retval;

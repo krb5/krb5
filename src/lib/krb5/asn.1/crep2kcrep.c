@@ -43,7 +43,7 @@ static char rcsid_crep2kcrep_c[] =
 
 krb5_cred_enc_part *
 KRB5_EncKrbCredPart2krb5_cred_enc_part(val, error)
-const register struct type_KRB5_EncKrbCredPart *val;
+register const struct type_KRB5_EncKrbCredPart *val;
 register int *error;
 {
     register krb5_cred_enc_part *retval;
@@ -64,8 +64,8 @@ register int *error;
     retval->ticket_info = (krb5_cred_info **) 
       xcalloc(i + 1, sizeof(*retval->ticket_info));
     if (!retval->ticket_info) {
-    nomem:
 	*error = ENOMEM;
+	krb5_xfree(retval);
 	return(0);
     }
     
@@ -75,19 +75,24 @@ register int *error;
       retval->nonce = 0;
     
     if (val->timestamp) {
+	if (!(val->optionals & opt_KRB5_EncKrbPrivPart_usec)) {
+	    /* must have usec if we have timestamp */
+	    *error = ISODE_50_LOCAL_ERR_BADCOMBO;
+	    goto errout;
+	}
+	
 	retval->timestamp = gentime2unix(val->timestamp, error);
 	if (*error) {
 	  errout:
 	    krb5_free_cred_enc_part(retval);
 	    return(0);
 	}
+	retval->usec = val->usec;
+    } else {
+	retval->timestamp = 0;
+	retval->usec = 0;
     }
-    
-    if (val->optionals & opt_KRB5_EncKrbCredPart_usec)
-      retval->usec = val->usec;
-    else
-      retval->timestamp = 0;
-    
+	
     if (val->s__address) {
 	retval->s_address = 
 	  KRB5_HostAddress2krb5_addr(val->s__address, 
@@ -110,8 +115,8 @@ register int *error;
 	retval->ticket_info[i] = (krb5_cred_info *) 
 	  xmalloc(sizeof(*retval->ticket_info[i]));
 	if (!retval->ticket_info[i]) {
-	    krb5_free_cred_enc_part(retval);
-	    goto nomem;
+	    *error = ENOMEM;
+	    goto errout;
 	}
 	xbzero((char *)retval->ticket_info[i], 
 	       sizeof(*retval->ticket_info[i]));

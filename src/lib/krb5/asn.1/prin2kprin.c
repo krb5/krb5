@@ -76,7 +76,6 @@ register int *error;
     for (i = 1, rv = val->name__string; rv->next; i++, rv = rv->next)
 	;
 
-    /* plus one for the realm */
     retval->length = i;
     retval->data = (krb5_data *)malloc(i * sizeof(krb5_data));
     if (retval->data == 0) {
@@ -99,6 +98,10 @@ register int *error;
 	    while (--i >= 0)
 		free(krb5_princ_component(retval, i)->data);
 	    *error = ENOMEM;
+	    if (retval->realm.data)
+		krb5_xfree(retval->realm.data);
+	    krb5_xfree(retval->data);
+	    krb5_xfree(retval);
 	    return(0);
 	}
     return(retval);

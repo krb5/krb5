@@ -44,7 +44,7 @@ static char rcsid_enck2kkey_c[] =
 
 krb5_keyblock *
 KRB5_EncryptionKey2krb5_keyblock(val, error)
-const register struct type_KRB5_EncryptionKey *val;
+register const struct type_KRB5_EncryptionKey *val;
 register int *error;
 {
     krb5_keyblock *retval;

@@ -46,7 +46,7 @@ static char rcsid_tgrq2ktgrq_c[] =
 
 krb5_kdc_req *
 KRB5_KDC__REQ__BODY2krb5_kdc_req(val, error)
-const register struct type_KRB5_KDC__REQ__BODY *val;
+register const struct type_KRB5_KDC__REQ__BODY *val;
 register int *error;
 {
     register krb5_kdc_req *retval;
@@ -253,7 +253,7 @@ element_KRB5_72krb5_pa_data(val, error)
 
 krb5_kdc_req *
 KRB5_KDC__REQ2krb5_kdc_req(val, error)
-const register struct type_KRB5_KDC__REQ *val;
+register const struct type_KRB5_KDC__REQ *val;
 register int *error;
 {
     register krb5_kdc_req *retval;

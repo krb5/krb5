@@ -92,9 +92,9 @@ struct element_KRB5_11 *krb5_pa_data2element_KRB5_11(val, error)
 }
 
 struct type_KRB5_TGS__REP *
-krb5_kdc_rep2KRB5_KDC__REP(DECLARG(const register krb5_kdc_rep *,val),
+krb5_kdc_rep2KRB5_KDC__REP(DECLARG(register const krb5_kdc_rep *,val),
 			   DECLARG(register int *,error))
-OLDDECLARG(const register krb5_kdc_rep *,val)
+OLDDECLARG(register const krb5_kdc_rep *,val)
 OLDDECLARG(register int *,error)
 {
     register struct type_KRB5_TGS__REP *retval;

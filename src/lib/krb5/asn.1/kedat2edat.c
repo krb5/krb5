@@ -43,7 +43,7 @@ static char rcsid_kedat2edat_c[] =
 
 struct type_KRB5_EncryptedData *
 krb5_enc_data2KRB5_EncryptedData(val, error)
-const register krb5_enc_data *val;
+register const krb5_enc_data *val;
 register int *error;
 {
     register struct type_KRB5_EncryptedData *retval;

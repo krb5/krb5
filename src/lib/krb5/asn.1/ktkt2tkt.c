@@ -43,7 +43,7 @@ static char rcsid_ktkt2tkt_c[] =
 
 struct type_KRB5_Ticket *
 krb5_ticket2KRB5_Ticket(val, error)
-const register krb5_ticket *val;
+register const krb5_ticket *val;
 register int *error;
 {
     register struct type_KRB5_Ticket *retval;

@@ -43,7 +43,7 @@ static char rcsid_prep2kprep_c[] =
 
 krb5_priv_enc_part *
 KRB5_EncKrbPrivPart2krb5_priv_enc_part(val, error)
-const register struct type_KRB5_EncKrbPrivPart *val;
+register const struct type_KRB5_EncKrbPrivPart *val;
 register int *error;
 {
     register krb5_priv_enc_part *retval;

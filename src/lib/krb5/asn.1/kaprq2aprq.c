@@ -43,7 +43,7 @@ static char rcsid_kaprq2aprq_c[] =
 
 struct type_KRB5_AP__REQ *
 krb5_ap_req2KRB5_AP__REQ(val, error)
-const register krb5_ap_req *val;
+register const krb5_ap_req *val;
 register int *error;
 {
     register struct type_KRB5_AP__REQ *retval;

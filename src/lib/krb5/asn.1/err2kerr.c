@@ -43,7 +43,7 @@ static char rcsid_err2kerr_c[] =
 
 krb5_error *
 KRB5_KRB__ERROR2krb5_error(val, error)
-const register struct type_KRB5_KRB__ERROR *val;
+register const struct type_KRB5_KRB__ERROR *val;
 register int *error;
 {
     register krb5_error *retval;

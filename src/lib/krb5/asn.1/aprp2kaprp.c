@@ -43,7 +43,7 @@ static char rcsid_aprp2kaprp_c[] =
 
 krb5_ap_rep *
 KRB5_AP__REP2krb5_ap_rep(val, error)
-const register struct type_KRB5_AP__REP *val;
+register const struct type_KRB5_AP__REP *val;
 register int *error;
 {
     register krb5_ap_rep *retval;

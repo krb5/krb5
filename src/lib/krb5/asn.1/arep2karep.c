@@ -43,7 +43,7 @@ static char rcsid_arep2karep_c[] =
 
 krb5_ap_rep_enc_part *
 KRB5_EncAPRepPart2krb5_ap_rep_enc_part(val, error)
-const register struct type_KRB5_EncAPRepPart *val;
+register const struct type_KRB5_EncAPRepPart *val;
 register int *error;
 {
     register krb5_ap_rep_enc_part *retval;

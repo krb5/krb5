@@ -43,7 +43,7 @@ static char rcsid_ktran2tran_c[] =
 
 struct type_KRB5_TransitedEncoding *
 krb5_transited2KRB5_TransitedEncoding(val, error)
-const register krb5_transited *val;
+register const krb5_transited *val;
 register int *error;
 {
     register struct type_KRB5_TransitedEncoding *retval;

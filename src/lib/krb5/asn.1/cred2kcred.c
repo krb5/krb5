@@ -43,7 +43,7 @@ static char rcsid_cred2kcred_c[] =
 
 krb5_cred *
 KRB5_KRB__CRED2krb5_cred(val, error)
-const register struct type_KRB5_KRB__CRED *val;
+register const struct type_KRB5_KRB__CRED *val;
 register int *error;
 {
     register krb5_cred *retval;

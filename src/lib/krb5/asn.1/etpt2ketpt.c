@@ -43,7 +43,7 @@ static char rcsid_etpt2ketpt_c[] =
 
 krb5_enc_tkt_part *
 KRB5_EncTicketPart2krb5_enc_tkt_part(val, error)
-const register struct type_KRB5_EncTicketPart *val;
+register const struct type_KRB5_EncTicketPart *val;
 register int *error;
 {
     register krb5_enc_tkt_part *retval;
