@@ -45,7 +45,7 @@ int ss_listen (sci_idx)
     register ss_data *info;
     char input[BUFSIZ];
     char buffer[BUFSIZ];
-    char *end = buffer;
+    char *volatile end = buffer;
     int code;
     jmp_buf old_jmpb;
     ss_data *old_info = current_info;
