@@ -85,8 +85,10 @@ krb5_checksum FAR *outcksum;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
-
     krb5_MD4_CTX working;
+
+    if (outcksum->length < RSA_MD4_DES_CKSUM_LENGTH)
+	return KRB5_BAD_MSIZE;
 
     krb5_MD4Init(&working);
     krb5_MD4Update(&working, input, in_length);

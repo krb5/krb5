@@ -1,3 +1,8 @@
+Tue May 14 19:31:58 1996  Richard Basch  <basch@lehman.com>
+
+	* md4crypto.c md4glue.c:
+		ensure the cksum content length is sufficient
+
 Fri Apr 12 21:38:33 1996  Richard Basch  <basch@lehman.com>
 
 	* md4driver.c md4glue.c md4.c rsa-md4.h md4crypto.c:
