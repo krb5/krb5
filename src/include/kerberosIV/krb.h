@@ -567,6 +567,15 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_recvauth
 		   struct sockaddr_in FAR *local_addr,
 		   AUTH_DAT FAR *kdata, char FAR *srvtab,
 		   Key_schedule schedule, char FAR *version);
+/* sendauth.c */
+KRB5_DLLIMP int KRB5_CALLCONV krb_sendauth
+        (long options, int fd, KTEXT ticket,
+	 char FAR *service, char FAR *inst, char FAR *realm,
+	 unsigned KRB4_32 checksum, MSG_DAT *msg_data,
+	 CREDENTIALS *cred, Key_schedule schedule, 
+	 struct sockaddr_in FAR *laddr, struct sockaddr_in *FAR faddr, 
+	 char FAR *version);
+
 /* save_creds.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_save_credentials
 	(char FAR *service, char FAR *instance, char FAR *realm,
