@@ -1,3 +1,8 @@
+2002-12-09  Sam Hartman  <hartmans@mit.edu>
+
+	* misc.h: Fix prototypes for *_wrapper_3 to be consistent with
+	sources. 
+
 2002-12-09  Ezra Peisach  <epeisach@bu.edu>
 
 	* misc.h: Rename prototypes from chpass_principal_wrapper and
