@@ -5,14 +5,27 @@ BUILDTOP=$(REL)$(U)
 
 LOCAL_SUBDIRS= klist kinit kdestroy kpasswd ksu kvno
 
-##WIN32##all-windows::
-##WIN32##	@echo Making all in clients\klist
-##WIN32##	cd klist
-##WIN32##	-$(MAKE) -$(MAKEFLAGS)
-##WIN32##	@echo Making all in clients\kdestroy
-##WIN32##	cd ..\kdestroy
-##WIN32##	-$(MAKE) -$(MAKEFLAGS)
-##WIN32##	@echo Making all in clients\kinit
-##WIN32##	cd ..\kinit
-##WIN32##	-$(MAKE) -$(MAKEFLAGS)
-##WIN32##	cd ..
+NO_OUTPRE=1
+all-windows::
+	@echo Making all in clients\klist
+	cd klist
+	-$(MAKE) -$(MAKEFLAGS)
+	@echo Making all in clients\kdestroy
+	cd ..\kdestroy
+	-$(MAKE) -$(MAKEFLAGS)
+	@echo Making all in clients\kinit
+	cd ..\kinit
+	-$(MAKE) -$(MAKEFLAGS)
+	cd ..
+
+clean-windows::
+	@echo Making clean in clients\klist
+	cd klist
+	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in clients\kdestroy
+	cd ..\kdestroy
+	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in clients\kinit
+	cd ..\kinit
+	-$(MAKE) -$(MAKEFLAGS) clean
+	cd ..
