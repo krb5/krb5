@@ -29,7 +29,7 @@ strdup(str)
 	const char *str;
 {
 	int len;
-	char *copy, *malloc();
+	char *copy;
 
 	len = strlen(str) + 1;
 	if (!(copy = malloc((u_int)len)))
