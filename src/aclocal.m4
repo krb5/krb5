@@ -162,16 +162,18 @@ AC_CHECK_FUNCS(pthread_once pthread_mutexattr_setrobust_np)
 old_CC="$CC"
 test "$PTHREAD_CC" != "" && test "$ac_cv_c_compiler_gnu" = no && CC=$PTHREAD_CC
 old_CFLAGS="$CFLAGS"
-#CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+# On Solaris, -pthreads is added to CFLAGS, no extra explicit libraries.
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AC_SUBST(PTHREAD_CFLAGS)
 old_LIBS="$LIBS"
-#LIBS="$PTHREAD_LIBS $LIBS"
+LIBS="$PTHREAD_LIBS $LIBS"
 AC_MSG_NOTICE(rechecking with PTHREAD_... options)
 AC_CHECK_LIB(c, pthread_mutexattr_setrobust_np,
   [AC_DEFINE(HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB,1,[Define if pthread_mutexattr_setrobust_np is provided in the thread library.])])
 ])
 LIBS="$old_LIBS"
 CC="$old_CC"
+CFLAGS="$old_CFLAGS"
 fi
 
 dnl This is somewhat gross and should go away when the build system
