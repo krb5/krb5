@@ -1,3 +1,9 @@
+Tue Sep 26 18:13:54 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* gss-misc.c: Include <sys/socket.h> for prototype definitions. 
+
+	* gss-client.c gss-server.c: Warning cleanups.
+
 2000-02-11  Tom Yu  <tlyu@mit.edu>
 
 	* README, gss-client.c, gss-misc.c, gss-misc.h, gss-server.c:

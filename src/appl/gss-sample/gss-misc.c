@@ -31,6 +31,7 @@ static char *rcsid = "$Header$";
 #else
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #endif
 #include <errno.h>
 #ifdef HAVE_UNISTD_H

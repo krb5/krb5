@@ -49,7 +49,7 @@ static char *rcsid = "$Header$";
 #include <strings.h>
 #endif
 
-void usage()
+static void usage()
 {
      fprintf(stderr, "Usage: gss-server [-port port] [-verbose] [-once]\n");
      fprintf(stderr, "       [-inetd] [-export] [-logfile file] [service_name]\n");
@@ -79,7 +79,7 @@ int verbose = 0;
  * fails, an error message is displayed and -1 is returned; otherwise,
  * 0 is returned.
  */
-int server_acquire_creds(service_name, server_creds)
+static int server_acquire_creds(service_name, server_creds)
      char *service_name;
      gss_cred_id_t *server_creds;
 {
@@ -132,7 +132,8 @@ int server_acquire_creds(service_name, server_creds)
  * in client_name and 0 is returned.  If unsuccessful, an error
  * message is displayed and -1 is returned.
  */
-int server_establish_context(s, server_creds, context, client_name, ret_flags)
+static int server_establish_context(s, server_creds, context, client_name, 
+				    ret_flags)
      int s;
      gss_cred_id_t server_creds;
      gss_ctx_id_t *context;
@@ -268,7 +269,7 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
  * A listening socket on the specified port and created and returned.
  * On error, an error message is displayed and -1 is returned.
  */
-int create_socket(port)
+static int create_socket(port)
      u_short port;
 {
      struct sockaddr_in saddr;
@@ -310,7 +311,7 @@ static float timeval_subtract(tv1, tv2)
  * DO NOT REMOVE THIS UNTIL A BETTER TEST HAS BEEN WRITTEN, THOUGH.
  * 					-TYT
  */
-int test_import_export_context(context)
+static int test_import_export_context(context)
 	gss_ctx_id_t *context;
 {
 	OM_uint32	min_stat, maj_stat;
@@ -378,7 +379,7 @@ int test_import_export_context(context)
  *
  * If any error occurs, -1 is returned.
  */
-int sign_server(s, server_creds, export)
+static int sign_server(s, server_creds, export)
      int s;
      gss_cred_id_t server_creds;
      int export;
@@ -458,7 +459,8 @@ int sign_server(s, server_creds, export)
 	 cp = msg_buf.value;
 	 if ((isprint(cp[0]) || isspace(cp[0])) &&
 	    (isprint(cp[1]) || isspace(cp[1]))) {
-	   fprintf(log, "\"%.*s\"\n", msg_buf.length, msg_buf.value);
+	   fprintf(log, "\"%.*s\"\n", (int) msg_buf.length, 
+		   (char *) msg_buf.value);
 	 } else {
 	   fprintf(log, "\n");
 	   print_token(&msg_buf);

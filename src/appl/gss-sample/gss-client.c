@@ -47,7 +47,7 @@ static char *rcsid = "$Header$";
 
 static int verbose = 1;
 
-void usage()
+static void usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
      fprintf(stderr, "       [-f] [-q] [-ccount count] [-mcount count]\n");
@@ -73,7 +73,7 @@ void usage()
  * opened and connected.  If an error occurs, an error message is
  * displayed and -1 is returned.
  */
-int connect_to_server(host, port)
+static int connect_to_server(host, port)
      char *host;
      u_short port;
 {
@@ -132,8 +132,8 @@ int connect_to_server(host, port)
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-int client_establish_context(s, service_name, deleg_flag, auth_flag, oid,
-			     gss_context, ret_flags)
+static int client_establish_context(s, service_name, deleg_flag, auth_flag, 
+				    oid, gss_context, ret_flags)
      int s;
      char *service_name;
      gss_OID oid;
@@ -250,11 +250,11 @@ int client_establish_context(s, service_name, deleg_flag, auth_flag, oid,
      return 0;
 }
 
-void read_file(file_name, in_buf)
+static void read_file(file_name, in_buf)
     char		*file_name;
     gss_buffer_t	in_buf;
 {
-    int fd, bytes_in, count;
+    int fd, count;
     struct stat stat_buf;
     
     if ((fd = open(file_name, O_RDONLY, 0)) < 0) {
@@ -321,9 +321,9 @@ void read_file(file_name, in_buf)
  * reads back a GSS-API signature block for msg from the server, and
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.  */
-int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
-		wrap_flag, encrypt_flag, mic_flag, msg, use_file,
-		mcount)
+static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
+		       wrap_flag, encrypt_flag, mic_flag, msg, use_file,
+		       mcount)
      char *host;
      u_short port;
      gss_OID oid;
