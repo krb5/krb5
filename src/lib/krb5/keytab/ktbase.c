@@ -78,8 +78,9 @@ krb5_error_code krb5_kt_resolve (name, ktid)
     int pfxlen;
     
     cp = strchr (name, ':');
-    if (!cp)
-	return KRB5_KT_BADNAME;
+    if (!cp) {
+	    return (krb5_kt_dfl_ops.resolve)(name, ktid);
+    }
 
     pfxlen = cp - (char *)name;
     resid = (char *)name + pfxlen + 1;

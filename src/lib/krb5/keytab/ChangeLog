@@ -1,0 +1,7 @@
+Thu Sep 29 23:19:06 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktbase.c (krb5_kt_resolve_name): If the prefix "FILE:" is not
+		given, assume the default operations list (whcih is
+		krb5_kt_dfl_ops).
+
+
