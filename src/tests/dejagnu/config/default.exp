@@ -100,6 +100,10 @@ if ![info exists SHLIBDIR] {
     set SHLIBDIR [findfile $objdir/../../lib]
 }
 
+if ![info exists T_INETD] {
+    set T_INETD [findfile $objdir/t_inetd]
+}
+
 # We use a couple of variables to hold shell prompts which may be
 # overridden by the user.
 

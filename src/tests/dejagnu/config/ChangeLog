@@ -1,3 +1,7 @@
+Sat Aug 26 17:57:47 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* default.exp - Determine location of t_inetd.
+
 
 Thu Aug 3 11:56:43 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Generate kdc.conf with new symbolic values.
