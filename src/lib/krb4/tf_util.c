@@ -130,14 +130,21 @@ static int tf_gets (char *, int), tf_read (char *, int);
  *      Where "CREDENTIAL_x" consists of the following fixed-length
  *      fields from the CREDENTIALS structure (see "krb.h"):
  *
- *              char            service[ANAME_SZ]
- *              char            instance[INST_SZ]
- *              char            realm[REALM_SZ]
+ *              string          service[ANAME_SZ]
+ *              string          instance[INST_SZ]
+ *              string          realm[REALM_SZ]
  *              C_Block         session
  *              int             lifetime
  *              int             kvno
  *              KTEXT_ST        ticket_st
  *              long            issue_date
+ *
+ * Strings are stored NUL-terminated, and read back until a NUL is
+ * found or the indicated number of bytes have been read.  (So if you
+ * try to store a string exactly that long or longer, reading them
+ * back will not work.)  The KTEXT_ST structure is stored as an int
+ * length followed by that many data bytes.  All ints are stored using
+ * host size and byte order for "int".
  *
  * Short description of routines:
  *
