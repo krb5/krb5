@@ -1,3 +1,8 @@
+Tue Aug  8 13:38:22 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* krlogin.c (read_wrapper): Copy from the current point and not
+ 	the start of the cached buffer.
+
 2000-07-21  Peter S Litwack  <plitwack@mit.edu>
 
 	* krlogin.c (writer): Improved bandwith efficiency by reading 
