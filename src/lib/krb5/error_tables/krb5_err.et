@@ -304,4 +304,8 @@ error_code KRB5_KT_KVNONOTFOUND,	"Key version number for principal in key table 
 error_code KRB5_APPL_EXPIRED,	"This application has expired"
 error_code KRB5_LIB_EXPIRED,	"This Krb5 library has expired"
 
+error_code KRB5_CHPW_PWDNULL,		"New password cannot be zero length"
+error_code KRB5_CHPW_FAIL,		"Password change failed"
+error_code KRB5_KT_FORMAT,		"Bad format in keytab"
+
 end
