@@ -265,9 +265,6 @@
 #endif /* HasGcc */
 #endif
 
-#ifdef UltrixArchitecture
-#define MakeCmd gmake
-#endif
 
 #if defined(VaxArchitecture) && defined(UltrixArchitecture)
 #undef STDCTopIncludes
