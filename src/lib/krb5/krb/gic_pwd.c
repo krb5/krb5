@@ -160,7 +160,8 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
 	 slave we were able to contact */
 
       if ((ret2 == KRB5_KDC_UNREACH) ||
-		  (ret2 == KRB5_REALM_CANT_RESOLVE))
+	  (ret2 == KRB5_REALM_CANT_RESOLVE) ||
+	  (ret2 == KRB5_REALM_UNKNOWN))
 	 goto cleanup;
 
       ret = ret2;
