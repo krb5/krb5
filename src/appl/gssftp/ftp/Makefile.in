@@ -5,8 +5,10 @@ CFLAGS = -DGSSAPI -DFTP_BUFSIZ=10240 $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS	= cmds.c cmdtab.c domacro.c ftp.c getpass.c glob.c main.c pclose.c \
-	  radix.c ruserpass.c secure.c 
+SRCS	= $(srcdir)/cmds.c $(srcdir)/cmdtab.c $(srcdir)/domacro.c \
+	  $(srcdir)/ftp.c $(srcdir)/getpass.c $(srcdir)/glob.c \
+	  $(srcdir)/main.c $(srcdir)/pclose.c $(srcdir)/radix.c \
+	  $(srcdir)/ruserpass.c $(srcdir)/secure.c 
 
 
 OBJS	= cmds.o cmdtab.o domacro.o ftp.o getpass.o glob.o main.o pclose.o \
