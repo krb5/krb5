@@ -2,3 +2,5 @@ t_nfold
 t_encrypt
 t_prng
 t_prng.output
+t_hmac
+t_pkcs5
