@@ -688,6 +688,10 @@ krb5_error_code krb5int_pbkdf2_hmac_sha1 (const krb5_data *, unsigned long,
 					  const krb5_data *,
 					  const krb5_data *);
 
+/* Make this a function eventually?  */
+#define krb5int_zap_data(ptr, len) memset((volatile void *)ptr, 0, len)
+#define zap(p,l) krb5int_zap_data(p,l)
+
 /* A definition of init_state for DES based encryption systems.
  * sets up an 8-byte IV of all zeros
  */

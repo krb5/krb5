@@ -1,3 +1,8 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (krb5int_zap_data, zap): New macros; call memset with
+	volatile cast for now.
+
 2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
 
         * krb5.hin: Export krb5_principal2salt.
