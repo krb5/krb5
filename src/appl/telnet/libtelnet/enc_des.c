@@ -272,13 +272,11 @@ fb64_start(fbp, dir, server)
 		 */
 		{
 			krb5_data d;
-			krb5_error_code code;
 
 			d.data = fbp->temp_feed;
 			d.length = sizeof(fbp->temp_feed);
 
-			if ((code = krb5_c_random_make_octets(telnet_context,
-							     &d)))
+			if (krb5_c_random_make_octets(telnet_context, &d))
 				return(FAILED);
 		}
 

@@ -1,3 +1,7 @@
+2001-07-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* enc_des.c (fb64_start): Remove variable set but never used.
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos.c (Data): Third argument now const.
