@@ -18,7 +18,7 @@ typedef short	prof_int32;
 #elif	(SIZEOF_INT == 4)
 typedef int	prof_int32;
 #elif	(SIZEOF_LONG == 4)
-typedef	int	prof_int32;
+typedef long	prof_int32;
 #else	/* SIZEOF_LONG == 4 */
 error(do not have a 4-byte integer type)
 #endif	/* SIZEOF_LONG == 4 */

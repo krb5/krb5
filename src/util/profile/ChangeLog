@@ -1,3 +1,8 @@
+2004-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_init.c (prof_int32): If long is 4 bytes and int is not,
+	then use long, not int, for prof_int32.
+
 2004-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c, prof_get.c, prof_init.c, prof_parse.c, prof_set.c,
