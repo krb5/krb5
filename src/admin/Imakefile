@@ -1,10 +1,16 @@
 DEPLIBS = $(KDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
-all::	kdb5_create kdb5_destroy kdb5_stash
+all::	kdb5_create kdb5_destroy kdb5_stash kdb5_edit
 
-SRCS= kdb_stash.c kdb_create.c kdb_destroy.c
+CmdTableObjectRule()
+
+SRCS= kdb5_stash.c kdb5_create.c kdb5_destroy.c kdb5_edit.c kdb5_ed_ct.ct
+
+# needed until we run makedepend
+kdb5_ed_ct.o: kdb5_ed_ct.c
 
 NormalProgramTarget(kdb5_create,kdb5_create.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
 NormalProgramTarget(kdb5_destroy,kdb5_destroy.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
 NormalProgramTarget(kdb5_stash,kdb5_stash.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(kdb5_edit,kdb5_edit.o kdb5_ed_ct.o,$(DEPLIBS),$(LOCAL_LIBRARIES) -lss,)
