@@ -24,7 +24,7 @@
 #endif /* NO_STDLIB_H */
 #else
 extern char *malloc(), *realloc(), *calloc();
-extern char *getenv(), *index();
+extern char *getenv();
 #endif /* ! __STDC__ */
 
 #include <string.h>
