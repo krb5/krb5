@@ -17,6 +17,14 @@ Wed Nov 12 19:03:02 1997  Tom Yu  <tlyu@mit.edu>
 	* krshd.c (recvauth): chown the ccache explicitly, as
 	rd_and_store_for_creds no longer does so. [krb5-appl/494]
 
+Thu Nov  6 22:04:26 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* v4rcp.c: Use error_message(errno) instead of using
+ 		sys_errlist[errno].  This avoids the hair of deciding
+ 		whether or not we need to declare sys_errlist or use
+ 		strerror(), etc., since com_err has all of that complexity
+ 		anyway.  Also fixed lots of -Wall nits.
+
 Mon Nov  3 15:25:48 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (doit): Fix up potential buffer overrun.
