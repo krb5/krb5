@@ -22,6 +22,12 @@ DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
 krb5_decode_test: $(DECOBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o krb5_decode_test $(DECOBJS) $(LIBS) $(KLIB)
 
+check::
+	./krb5_decode_test
+	$(RM) test.out
+	./krb5_encode_test > test.out
+	cmp test.out $(srcdir)/reference_encode.out
+
 install::
 
 clean::

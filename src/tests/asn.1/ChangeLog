@@ -1,3 +1,7 @@
+Thu Oct  6 21:42:27 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Add "make check" test case which runs the test programs.
+
 Tue Oct  4 14:32:39 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_decode_test.c (setup, decode_run):
