@@ -241,10 +241,55 @@ n_found = 0;
 
 #else /* Windows/Mac version */
 
+/*
+ * Hold on to your lunch!  Backup kludge method of obtaining your
+ * local IP address, courtesy of Windows Socket Network Programming,
+ * by Robert Quinn
+ */
+#if defined(_MSDOS) || !defined(_WIN32)
+static struct hostent *local_addr_fallback_kludge()
+{
+	static struct hostent	host;
+	static SOCKADDR_IN	addr;
+	static char *		ip_ptrs[2];
+	SOCKET			sock;
+	int			size = sizeof(SOCKADDR);
+	int			err;
+
+	sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sock == INVALID_SOCKET)
+		return NULL;
+
+	/* connect to arbitrary port and address (NOT loopback) */
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(IPPORT_ECHO);
+	addr.sin_addr.s_addr = inet_addr("204.137.220.51");
+
+	err = connect(sock, (LPSOCKADDR) &addr, sizeof(SOCKADDR));
+	if (err == SOCKET_ERROR)
+		return NULL;
+
+	err = getsockname(sock, (LPSOCKADDR) &addr, (int FAR *) size);
+	if (err == SOCKET_ERROR)
+		return NULL;
+
+	closesocket(sock);
+
+	host.h_name = 0;
+	host.h_aliases = 0;
+	host.h_addrtype = AF_INET;
+	host.h_length = 4;
+	host.h_addr_list = ip_ptrs;
+	ip_ptrs[0] = (char *) &addr.sin_addr.s_addr;
+	ip_ptrs[1] = NULL;
+
+	return &host;
+}
+#endif
+
 /* No ioctls in winsock so we just assume there is only one networking 
  * card per machine, so gethostent is good enough. 
  */
-
 krb5_error_code
 krb5_crypto_os_localaddr (krb5_address ***addr) {
     char host[64];                              /* Name of local machine */
@@ -258,15 +303,23 @@ krb5_crypto_os_localaddr (krb5_address ***addr) {
 #ifdef HAVE_MACSOCK_H
     hostrec = getmyipaddr();
 #else /* HAVE_MACSOCK_H */
+    err = 0;
+    
     if (gethostname (host, sizeof(host))) {
         err = WSAGetLastError();
-        return err;
     }
 
-    hostrec = gethostbyname (host);
-    if (hostrec == NULL) {
-        err = WSAGetLastError();
-        return err;
+    if (!err) {
+	    hostrec = gethostbyname (host);
+	    if (hostrec == NULL) {
+		    err = WSAGetLastError();
+	    }
+    }
+
+    if (err) {
+	    hostrec = local_addr_fallback_kludge();
+	    if (!hostrec)
+		    return err;
     }
 #endif /* HAVE_MACSOCK_H */
 

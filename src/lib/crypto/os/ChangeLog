@@ -1,3 +1,9 @@
+Fri Jul  4 00:13:02 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* c_localaddr.c (local_addr_fallback_kludge): Added Winsock
+	 	kludge for finding your local IP address.  May not work
+	 	for all stacks, so we use it as a fallback.
+	
 Sat Feb 22 18:54:53 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in
