@@ -1,3 +1,7 @@
+Mon Jul 29 22:37:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Determine sizeof short, int, long for secure.c
+
 Tue Jul 23 23:13:07 1996  Marc Horowitz  <marc@mit.edu>
 
 	* ftpd.c (auth_data): the logic which dealt with multiple acceptor
