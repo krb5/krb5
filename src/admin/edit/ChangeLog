@@ -1,4 +1,12 @@
 
+Mon Jul 31 15:47:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_edit.c - Use libkadm string conversion routines.  These are
+		shared by all utilities.
+	* Makefile.in - Remove getdate.y.
+	* configure.in - Remove getdate.y dependency checks.
+	* getdate.y - Sayonara.
+
+
 Thu Jul 27 15:01:01 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --with-dbm and check for already checking for dbm.
 

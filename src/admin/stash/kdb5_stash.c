@@ -82,14 +82,18 @@ char *argv[];
 	    realm = optarg;
 	    break;
 	case 'k':
-	    master_keyblock.keytype = atoi(optarg);
-	    keytypedone++;
+	    if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
+		keytypedone++;
+	    else
+		com_err(argv[0], 0, "%s is an invalid keytype", optarg);
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
 	    break;
 	case 'e':
-	    etype = atoi(optarg);
+	    if (krb5_string_to_enctype(optarg, &etype))
+		com_err(argv[0], 0, "%s is an invalid encryption type",
+			optarg);
 	    break;
 	case 'f':
 	    keyfile = optarg;
@@ -142,8 +146,12 @@ char *argv[];
 	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
 
     if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
-		"while setting up keytype %d", master_keyblock.keytype);
+	char tmp[32];
+	if (krb5_keytype_to_string(master_keyblock.keytype, tmp, sizeof(tmp)))
+	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+		    "while setting up keytype %d", master_keyblock.keytype);
+	else
+	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
 	exit(1);
     }
 
@@ -151,8 +159,13 @@ char *argv[];
 	etype = DEFAULT_KDC_ETYPE;
 
     if (!valid_etype(etype)) {
-	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
-		"while setting up etype %d", etype);
+	char tmp[32];
+
+	if (krb5_enctype_to_string(etype, tmp, sizeof(tmp)))
+	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
+		    "while setting up etype %d", etype);
+	else
+	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP, tmp);
 	exit(1);
     }
 

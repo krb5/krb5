@@ -1,4 +1,10 @@
 
+Mon Jul 31 15:45:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_create.c - Use new admin string conversion routines.
+	* kdb5_create.M - Remove "string representation of integer" for keytype
+		and etype.
+
+
 Thu Jul 27 02:59:05 1995   Chris Provenzano (proven@mit.edu)
 
 	* kdb5_create.c : Use new kdb format.

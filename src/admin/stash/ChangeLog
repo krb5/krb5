@@ -1,4 +1,8 @@
 
+Mon Jul 31 15:49:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_stash.c - Use kadm string conversion routines.
+
+
 Mon Jul 17 15:02:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add KADM library.
 	* kdb5_stash.c - Change calling sequence to krb5_db_fetch_mkey().  Add

@@ -30,33 +30,7 @@
 #include "adm_proto.h"
 #include <stdio.h>
 #include <time.h>
-/* timeb is part of the interface to get_date. */
-#if defined(HAVE_SYS_TIMEB_H)
-#include <sys/timeb.h>
-#else
-/*
-** We use the obsolete `struct timeb' as part of our interface!
-** Since the system doesn't have it, we define it here;
-** our callers must do likewise.
-*/
-struct timeb {
-    time_t		time;		/* Seconds since the epoch	*/
-    unsigned short	millitm;	/* Field not used		*/
-    short		timezone;	/* Minutes west of GMT		*/
-    short		dstflag;	/* Field not used		*/
-};
-#endif /* defined(HAVE_SYS_TIMEB_H) */
-
 #include "kdb5_edit.h"
-
-/* special struct to convert flag names for principals
-   to actual krb5_flags for a principal */
-struct pflag {
-    char *flagname;		/* name of flag as typed to CLI */
-    int flaglen;		/* length of string (not counting -,+) */
-    krb5_flags theflag;		/* actual principal flag to set/clear */
-    int set;			/* 0 means clear, 1 means set (on '-') */
-};
 
 struct mblock mblock = {				/* XXX */
     KRB5_KDB_MAX_LIFE,
@@ -170,15 +144,20 @@ char *kdb5_edit_Init(argc, argv)
 	    request = optarg;
 	    break;
 	case 'k':
-	    master_keyblock.keytype = atoi(optarg);
-	    keytypedone++;
+	    if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
+		keytypedone++;
+	    else
+		com_err(argv[0], 0, "%s is an invalid keytype", optarg);
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
 	    break;
 	case 'e':
-	    etype = atoi(optarg);
-	    etypedone++;
+	    if (krb5_string_to_enctype(optarg, &etype))
+		com_err(argv[0], 0, "%s is an invalid encryption type",
+			optarg);
+	    else
+		etypedone++;
 	    break;
 	case 'm':
 	    manual_mkey = TRUE;
@@ -259,14 +238,22 @@ char *kdb5_edit_Init(argc, argv)
 	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
 
     if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-		"while setting up keytype %d", master_keyblock.keytype);
+	char tmp[32];
+	if (krb5_keytype_to_string(master_keyblock.keytype, tmp, sizeof(tmp)))
+	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+		    "while setting up keytype %d", master_keyblock.keytype);
+	else
+	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
 	exit(1);
     }
 
     if (!valid_etype(etype)) {
-	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
-		"while setting up etype %d", etype);
+	char tmp[32];
+	if (krb5_enctype_to_string(etype, tmp, sizeof(tmp)))
+	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
+		    "while setting up etype %d", etype);
+	else
+	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP, tmp);
 	exit(1);
     }
     krb5_use_cstype(edit_context, &master_encblock, etype);
@@ -1456,22 +1443,14 @@ enter_pwd_key(cmdname, newprinc, princ, string_princ, vno, salttype)
     return;
 }
 
-char *strdur(duration)
-    time_t duration;
+static char *
+strdur(deltat)
+    krb5_deltat deltat;
 {
-    static char out[50];
-    int days, hours, minutes, seconds;
-    
-    days = duration / (24 * 3600);
-    duration %= 24 * 3600;
-    hours = duration / 3600;
-    duration %= 3600;
-    minutes = duration / 60;
-    duration %= 60;
-    seconds = duration;
-    sprintf(out, "%d %s %02d:%02d:%02d", days, days == 1 ? "day" : "days",
-	    hours, minutes, seconds);
-    return out;
+    static char deltat_buffer[128];
+
+    (void) krb5_deltat_to_string(deltat, deltat_buffer, sizeof(deltat_buffer));
+    return(deltat_buffer);
 }
 
 /*
@@ -1487,26 +1466,8 @@ void show_principal(argc, argv)
     krb5_boolean more;
     krb5_error_code retval;
     char *pr_name = 0;
-    time_t tmp_date;
     int i;
-    static char *prflags[32] = {
-	"DISALLOW_POSTDATED",	/* 0x00000001 */
-	"DISALLOW_FORWARDABLE",	/* 0x00000002 */
-	"DISALLOW_TGT_BASED",	/* 0x00000004 */
-	"DISALLOW_RENEWABLE",	/* 0x00000008 */
-	"DISALLOW_PROXIABLE",	/* 0x00000010 */
-	"DISALLOW_DUP_SKEY",	/* 0x00000020 */
-	"DISALLOW_ALL_TIX",	/* 0x00000040 */
-	"REQUIRES_PRE_AUTH",	/* 0x00000080 */
-	"REQUIRES_HW_AUTH",	/* 0x00000100 */
-	"REQUIRES_PWCHANGE",	/* 0x00000200 */
-	NULL,			/* 0x00000400 */
-	NULL,			/* 0x00000800 */
-	"DISALLOW_SVR",		/* 0x00001000 */
-	"PWCHANGE_SERVICE",	/* 0x00002000 */
-	"SUPPORT_DESMD5",	/* 0x00004000 */
-	/* yes abuse detail that rest are initialized to NULL */
-	};
+    char buffer[256];
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -1554,28 +1515,26 @@ void show_principal(argc, argv)
     printf("Maximum life: %s\n", strdur(entry.max_life));
     printf("Maximum renewable life: %s\n", strdur(entry.max_renewable_life));
     printf("Master key version: %d\n", entry.mkvno);
-    tmp_date = (time_t) entry.expiration;
-    printf("Expiration: %s", ctime(&tmp_date));
-    tmp_date = (time_t) entry.pw_expiration;
-    printf("Password expiration: %s", ctime(&tmp_date));
- /*   tmp_date = (time_t) entry.last_pwd_change; */
-    printf("Last password change: %s", ctime(&tmp_date));
-    tmp_date = (time_t) entry.last_success;
-    printf("Last successful password: %s", ctime(&tmp_date));
-    tmp_date = (time_t) entry.last_failed;
-    printf("Last failed password attempt: %s", ctime(&tmp_date));
+    (void) krb5_timestamp_to_string(entry.expiration, buffer, sizeof(buffer));
+    printf("Expiration: %s\n", buffer);
+    (void) krb5_timestamp_to_string(entry.pw_expiration,
+				    buffer, sizeof(buffer));
+    printf("Password expiration: %s\n", buffer);
+/*    (void) krb5_timestamp_to_string(entry.last_pw_change,
+				    buffer, sizeof(buffer)); */
+    printf("Last password change: %s\n", buffer);
+    (void) krb5_timestamp_to_string(entry.last_success,
+				    buffer, sizeof(buffer));
+    printf("Last successful password: %s\n", buffer);
+    (void) krb5_timestamp_to_string(entry.last_failed,
+				    buffer, sizeof(buffer));
+    printf("Last failed password attempt: %s\n", buffer);
     printf("Failed password attempts: %d\n", entry.fail_auth_count);
 /*    tmp_date = (time_t) entry.mod_date; */
 /*    printf("Last modified by %s on %s", pr_mod, ctime(&tmp_date)); */
-    printf("Attributes:");
-    for (i = 0; i < 32; i++) {
-	if (entry.attributes & (krb5_flags) 1 << i)
-	    if (prflags[i])
-		printf(" %s", prflags[i]);
-	    else
-		printf("UNKNOWN_0x%08X", (krb5_flags) 1 << i);
-    }
-    printf("\n");
+    (void) krb5_flags_to_string(entry.attributes, ", ",
+				buffer, sizeof(buffer));
+    printf("Attributes: %s\n", buffer);
  /*   printf("Salt: %d\n", entry.salt_type);
     printf("Alt salt: %d\n", entry.salt_type); */
     
@@ -1601,27 +1560,9 @@ int parse_princ_args(argc, argv, entry, pass, randkey, caller)
 {
     int i, j, attrib_set;
     time_t date;
-    struct timeb now;
     krb5_error_code retval;
     
-    static struct pflag flags[] = {
-    {"allow_postdated",	15,	KRB5_KDB_DISALLOW_POSTDATED,	1},
-    {"allow_forwardable",17,	KRB5_KDB_DISALLOW_FORWARDABLE,	1},
-    {"allow_tgs_req",	13,	KRB5_KDB_DISALLOW_TGT_BASED,	1},
-    {"allow_renewable",	15,	KRB5_KDB_DISALLOW_RENEWABLE,	1},
-    {"allow_proxiable",	15,	KRB5_KDB_DISALLOW_PROXIABLE,	1},
-    {"allow_dup_skey",	14,	KRB5_KDB_DISALLOW_DUP_SKEY,	1},
-    {"allow_tix",	9,	KRB5_KDB_DISALLOW_ALL_TIX,	1},
-    {"requires_preauth",16,	KRB5_KDB_REQUIRES_PRE_AUTH,	0},
-    {"requires_hwauth",	15,	KRB5_KDB_REQUIRES_HW_AUTH,	0},
-    {"needchange",	10,	KRB5_KDB_REQUIRES_PWCHANGE,	0},
-    {"allow_svr",	9,	KRB5_KDB_DISALLOW_SVR,		1},
-    {"password_changing_service",25,KRB5_KDB_PWCHANGE_SERVICE,	0},
-    {"support_desmd5",  14,     KRB5_KDB_SUPPORT_DESMD5,        0}
-    };
-    
     *pass = NULL;
-    ftime(&now);
     *randkey = 0;
     for (i = 1; i < argc - 1; i++) {
 	attrib_set = 0;
@@ -1641,7 +1582,7 @@ int parse_princ_args(argc, argv, entry, pass, randkey, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		entry->max_life = get_date(argv[i], now) - now.time;
+		(void) krb5_string_to_deltat(argv[i], &entry->max_life);
 		continue;
 	    }
 	}
@@ -1650,7 +1591,7 @@ int parse_princ_args(argc, argv, entry, pass, randkey, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], now);
+		(void) krb5_string_to_timestamp(argv[i], &date);
 		entry->expiration = date == (time_t) -1 ? 0 : date;
 		continue;
 	    }
@@ -1660,7 +1601,7 @@ int parse_princ_args(argc, argv, entry, pass, randkey, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], now);
+		(void) krb5_string_to_timestamp(argv[i], &date);
 		entry->pw_expiration = date == (time_t) -1 ? 0 : date;
 		continue;
 	    }
@@ -1679,25 +1620,8 @@ int parse_princ_args(argc, argv, entry, pass, randkey, caller)
 	    ++*randkey;
 	    continue;
 	}
-	for (j = 0; j < sizeof (flags) / sizeof (struct pflag); j++) {
-	    if (strlen(argv[i]) == flags[j].flaglen + 1 &&
-		!strcmp(flags[j].flagname,
-			&argv[i][1] /* strip off leading + or - */)) {
-		if (flags[j].set && argv[i][0] == '-' ||
-		    !flags[j].set && argv[i][0] == '+') {
-		    entry->attributes |= flags[j].theflag;
-		    attrib_set++;
-		    break;
-		} else if (flags[j].set && argv[i][0] == '+' ||
-			   !flags[j].set && argv[i][0] == '-') {
-		    entry->attributes &= ~flags[j].theflag;
-		    attrib_set++;
-		    break;
-		} else {
-		    return -1;
-		}
-	    }
-	}
+	if (!krb5_string_to_flags(argv[i], "+", "-", &entry->attributes))
+	    attrib_set++;
 	if (!attrib_set)
 	    return -1;		/* nothing was parsed */
     }
@@ -1862,19 +1786,3 @@ quit()
     }
     return 0;
 }
-
-#ifndef HAVE_FTIME
-ftime(tp)
-	register struct timeb *tp;
-{
-	struct timeval t;
-	struct timezone tz;
-
-	if (gettimeofday(&t, &tz) < 0)
-		return (-1);
-	tp->time = t.tv_sec;
-	tp->millitm = t.tv_usec / 1000;
-	tp->timezone = tz.tz_minuteswest;
-	tp->dstflag = tz.tz_dsttime;
-}
-#endif

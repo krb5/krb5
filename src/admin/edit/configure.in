@@ -2,8 +2,6 @@ AC_INIT(kdb5_edit.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_PROG_YACC
-AC_HAVE_HEADERS(unistd.h sys/timeb.h alloca.h)
-AC_HAVE_FUNCS(ftime timezone)
 AC_CONST
 AC_HEADER_STDC
 AC_HAVE_FUNCS(getcwd)
