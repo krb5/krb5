@@ -109,6 +109,8 @@ krb5_error_code key_string_to_keys
 	KRB5_PROTOTYPE((krb5_context,
 			krb5_db_entry *,
 			krb5_data *,
+			krb5_int32,
+			krb5_key_salt_tuple *,
 			krb5_int32 *,
 			krb5_key_data **));
 krb5_error_code key_random_key
@@ -142,6 +144,10 @@ krb5_error_code key_name_to_data KRB5_PROTOTYPE((krb5_db_entry *,
 						 krb5_key_salt_tuple *,
 						 krb5_int32,
 						 krb5_key_data **));
+krb5_error_code key_dbent_to_keysalts
+	KRB5_PROTOTYPE((krb5_db_entry *,
+			krb5_int32 *,
+			krb5_key_salt_tuple **));
 
 /* srv_acl.c */
 krb5_error_code acl_init
@@ -229,6 +235,12 @@ krb5_boolean passwd_check_npass_ok
 		   krb5_db_entry *,
 		   krb5_data *,
 		   krb5_int32 *));
+krb5_boolean passwd_check_opass_ok
+	KRB5_PROTOTYPE((krb5_context,
+		   int,
+		   krb5_principal,
+		   krb5_db_entry *,
+		   krb5_data *));
 
 /* admin.c */
 krb5_error_code admin_add_principal
@@ -280,6 +292,18 @@ krb5_error_code admin_extract_key
 		   krb5_data *,
 		   krb5_int32 *,
 		   krb5_data **));
+krb5_error_code admin_add_key
+	KRB5_PROTOTYPE((krb5_context,
+			int,
+			krb5_ticket *,
+			krb5_int32,
+			krb5_data *));
+krb5_error_code admin_delete_key
+	KRB5_PROTOTYPE((krb5_context,
+			int,
+			krb5_ticket *,
+			krb5_int32,
+			krb5_data *));
 void admin_init KRB5_PROTOTYPE((krb5_deltat,
 				krb5_deltat,
 				krb5_boolean,
