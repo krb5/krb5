@@ -5,14 +5,14 @@ LDFLAGS = -g
 TST=if test -n "`cat DONE`" ; then
 
 OBJS=	cryptoconf.o \
-	des-crc.o \
-	des-md5.o \
-	raw-des.o
+	des_crc.o \
+	des_md5.o \
+	raw_des.o
 
 SRCS=	$(srcdir)/cryptoconf.c \
-	$(srcdir)/des-crc.c \
-	$(srcdir)/des-md5.c \
-	$(srcdir)/raw-des.c 
+	$(srcdir)/des_crc.c \
+	$(srcdir)/des_md5.c \
+	$(srcdir)/raw_des.c 
 
 all::
 

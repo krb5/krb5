@@ -1,3 +1,14 @@
+Fri Feb  3 02:44:07 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files so that they work in the DOS LIB command,
+	which amazingly finds dashes in mid-name and treats them
+	like option switches.
+
+	* des-crc.c => des_crc.c
+	* des-md5.c => des_md5.c
+	* raw-des.c => raw_des.c
+	* Makefile.in:  changed to match.
+
 Thu Feb  2 02:59:58 1995  John Gilmore  <gnu@cygnus.com>
 
 	* Makefile.in (CFLAGS):  Handle $(srcdir) properly in -I options.
