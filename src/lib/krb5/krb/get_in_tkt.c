@@ -154,6 +154,7 @@ OLDDECLARG(krb5_ccache, ccache)
     }
     
     retval = (*decrypt_proc)(decrypt_key, decryptarg, as_reply);
+    bzero((char *)decrypt_key->contents, decrypt_key->length);
     krb5_free_keyblock(decrypt_key);
     if (retval) {
 	krb5_free_kdc_rep(as_reply);
@@ -181,6 +182,8 @@ OLDDECLARG(krb5_ccache, ccache)
 	    (request.till != 0) &&
 	    (as_reply->enc_part2->times.renew_till > request.till))
 	) {
+	bzero((char *)as_reply->enc_part2->session.contents,
+	      as_reply->enc_part2->session.length);
 	krb5_free_kdc_rep(as_reply);
 	return KRB5_KDCREP_MODIFIED;
     }
@@ -190,6 +193,8 @@ OLDDECLARG(krb5_ccache, ccache)
     /* fill in the credentials */
     if (retval = krb5_copy_keyblock(as_reply->enc_part2->session,
 				    &creds->keyblock)) {
+	bzero((char *)as_reply->enc_part2->session.contents,
+	      as_reply->enc_part2->session.length);
 	krb5_free_kdc_rep(as_reply);
 	return retval;
     }
