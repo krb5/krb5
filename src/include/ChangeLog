@@ -1,3 +1,11 @@
+2005-01-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-thread.h (k5_os_mutex_lock): Under Irix, invoke
+	k5_pthread_mutex_lock() with the k5_os_mutex, not the
+	pthread_mutex_t.
+	(k5_pthread_assert_locked,unlocked): If DEBUG_THREADS not use, provide
+	correct prototype. Add missing close paren.
+
 2005-01-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h [HAVE_PTHREAD && HAVE_PRAGMA_WEAK_REF]: Mark

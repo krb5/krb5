@@ -339,7 +339,7 @@ static inline int k5_os_nothread_mutex_unlock(k5_os_nothread_mutex *m) {
     return 0;
 }
 # define k5_os_nothread_mutex_assert_locked(M)		((void)0)
-# define k5_os_nothread_mutex_assert_unlocked(M)	((void(0)
+# define k5_os_nothread_mutex_assert_unlocked(M)	((void)0)
 
 #endif
 
@@ -501,7 +501,7 @@ k5_pthread_mutex_lock(k5_os_mutex *m)
 	 pthread_mutex_unlock(&(M)->p))
 #else
 # define k5_pthread_mutex_lock(M) pthread_mutex_lock(&(M)->p)
-static inline void k5_pthread_assert_locked(pthread_mutex_t *m) { }
+static inline void k5_pthread_assert_locked(k5_os_mutex *m) { }
 # define k5_pthread_mutex_unlock(M) pthread_mutex_unlock(&(M)->p)
 #endif
 
@@ -585,7 +585,7 @@ static inline int return_after_yield(int r)
 
 # define k5_os_mutex_lock(M)						\
 	return_after_yield(K5_PTHREADS_LOADED				\
-			   ? k5_pthread_mutex_lock(&(M)->p)		\
+			   ? k5_pthread_mutex_lock(M)			\
 			   : k5_os_nothread_mutex_lock(&(M)->n))
 # define k5_os_mutex_unlock(M)				\
 	(MAYBE_SCHED_YIELD(),				\
