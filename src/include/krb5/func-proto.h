@@ -218,6 +218,8 @@ krb5_error_code krb5_kt_add_entry
 		   krb5_keytab_entry * ));
 krb5_error_code krb5_principal2salt
 	PROTOTYPE((krb5_const_principal, krb5_data *));
+krb5_error_code krb5_principal2salt_norealm
+	PROTOTYPE((krb5_const_principal, krb5_data *));
 
 /* librc.spec--see rcache.h */
 
