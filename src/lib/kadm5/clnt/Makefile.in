@@ -28,7 +28,8 @@ SRCS =	$(srcdir)/clnt_policy.c \
 	$(srcdir)/client_principal.c \
 	$(srcdir)/client_init.c \
 	$(srcdir)/clnt_privs.c \
-	$(srcdir)/clnt_chpass_util.c
+	$(srcdir)/clnt_chpass_util.c \
+	$(srcdir)/clnt_generation.c
 
 OBJS =	\
 	clnt_policy.$(OBJEXT) \
@@ -36,7 +37,8 @@ OBJS =	\
 	client_principal.$(OBJEXT) \
 	client_init.$(OBJEXT) \
 	clnt_privs.$(OBJEXT) \
-	clnt_chpass_util.$(OBJEXT)
+	clnt_chpass_util.$(OBJEXT) \
+	clnt_generation.$(OBJEXT)
 
 STLIBOBJS = \
 	clnt_policy.o \
@@ -44,7 +46,8 @@ STLIBOBJS = \
 	client_principal.o \
 	client_init.o \
 	clnt_privs.o \
-	clnt_chpass_util.o
+	clnt_chpass_util.o \
+	clnt_generation.o
 
 all-unix:: includes
 all-unix:: all-liblinks

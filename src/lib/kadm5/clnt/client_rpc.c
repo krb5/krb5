@@ -277,7 +277,8 @@ get_pols_1(argp, clnt)
 	return (&res);
 }
 
-getprivs_ret *get_privs_1(argp, clnt)
+getprivs_ret *
+get_privs_1(argp, clnt)
    void *argp;
    CLIENT *clnt;
 {
@@ -286,6 +287,21 @@ getprivs_ret *get_privs_1(argp, clnt)
      memset((char *)&res, 0, sizeof(res));
      if (clnt_call(clnt, GET_PRIVS, xdr_u_int32, argp,
 		   xdr_getprivs_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+	  return (NULL);
+     }
+     return (&res);
+}
+
+getgeneration_ret *
+getgeneration_4(argp, clnt)
+   getgeneration_arg *argp;
+   CLIENT *clnt;
+{
+     static getgeneration_ret res;
+
+     memset((char *)&res, 0, sizeof(res));
+     if (clnt_call(clnt, GET_GENERATION_NUMBER, xdr_u_int32, argp,
+     		   xdr_getgeneration_ret, &res, TIMEOUT) != RPC_SUCCESS) {
 	  return (NULL);
      }
      return (&res);

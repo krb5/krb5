@@ -1,3 +1,13 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* Makefile.in: Include clnt_generation.[co] in the build.
+
+	* client_rpc.c: Minor formatting fixes on get_privs_1, added new
+	function getgeneration_4.
+
+	* clnt_generation.c: Added this new file containing the new function
+	kadm5_get_generation_number.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* client_init.c (_kadm5_init_any): Add casts to (gss_OID) in calls
