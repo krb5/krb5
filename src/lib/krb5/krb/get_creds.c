@@ -72,8 +72,9 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     mcreds.client = in_creds->client;
     
     fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
-	| KRB5_TC_MATCH_AUTHDATA | KRB5_TC_MATCH_KTYPE;
-
+	| KRB5_TC_MATCH_AUTHDATA ;
+    if (mcreds.keyblock.enctype)
+	fields |= KRB5_TC_MATCH_KTYPE;
     if (options & KRB5_GC_USER_USER) {
 	/* also match on identical 2nd tkt and tkt encrypted in a
 	   session key */

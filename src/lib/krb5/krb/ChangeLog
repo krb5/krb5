@@ -1,3 +1,13 @@
+Thu Jan 25 01:35:52 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* gc_via_tkt.c (krb5_get_cred_via_tkt): If the keyblock.enctype is
+        non-null in in_cred, then request that particular key.
+
+Wed Jan 24 21:48:53 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* get_creds.c (krb5_get_credentials): Only match against enctype
+        if it is non-null in increds.
+
 Sun Jan 21 23:32:53 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* gc_via_tkt.c (krb5_kdcrep2creds): Set is_skey so get_creds won't
