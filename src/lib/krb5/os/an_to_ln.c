@@ -36,9 +36,9 @@ static char rcsid_an_to_ln_c[] =
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 
+#include <krb5/sysincl.h>
 #ifdef USE_DBM_LNAME
 #include <krb5/dbm.h>
-#include <krb5/sysincl.h>
 #endif
 
 #ifndef min
