@@ -1,3 +1,14 @@
+Fri Feb 13 22:32:06 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* asn1buf.h (asn1buf_insert_octet): Use static inline function to
+		define asn1_insert_octet, since the GCC specific hack
+		we're using doesn't work on GCC compilers that also have 
+		Objective C enabled.
+
+	* asn1buf.c: define ASN1BUF_OMIT_INLINE_FUNCS before including
+		asn1buf.h, since we don't want inline functions declared
+		when we're defining the linkable version of the functions.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

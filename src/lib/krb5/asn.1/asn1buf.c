@@ -48,7 +48,9 @@
                      but no further.  (The bound should move out in response
 		     to being crossed by next.)) */
 
+#define ASN1BUF_OMIT_INLINE_FUNCS
 #include "asn1buf.h"
+#undef ASN1BUF_OMIT_INLINE_FUNCS
 #include <stdio.h>
 
 asn1_error_code asn1buf_create(buf)
