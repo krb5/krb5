@@ -325,18 +325,17 @@ extern int errno;
 #endif
 
 char *getenv();
-void dofork();
+void dofork(void);
 
-
-
-
-void term_init();
-int doremotelogin(), do_krb_login(), rootterm();
-void lgetstr(), getloginname(), checknologin(), sleepexit();
-void dolastlog(), motd(), check_mail();
+char *stypeof(char *);
+void term_init(int);
+int doremotelogin(char *), do_krb_login(char *, int), rootterm(char *);
+void lgetstr(char *, int, char *), getloginname(void), checknologin(void);
+void dolastlog(char *, int, char *), motd(void), check_mail(void);
+void sleepexit(int);
 
 #ifndef HAVE_STRSAVE
-char * strsave();
+char * strsave(char *);
 #endif
 
 typedef krb5_sigtype sigtype;
@@ -406,7 +405,7 @@ krb5_data tgtname = {
 #endif
 
 /* get flags (listed above) from the profile */
-void login_get_kconf(k)
+static void login_get_kconf(k)
      krb5_context k;
 {
     int i, max_i;
@@ -451,7 +450,7 @@ static char *salt;
 struct spwd *spwd;
 #endif
 
-void lookup_user (name)
+static void lookup_user (name)
     char *name;
 {
     pwd = getpwnam (name);
@@ -463,7 +462,7 @@ void lookup_user (name)
 #endif
 }
 
-int unix_needs_passwd ()
+static int unix_needs_passwd ()
 {
 #ifdef HAVE_SHADOW
     if (spwd)
@@ -474,7 +473,7 @@ int unix_needs_passwd ()
     return 1;
 }
 
-int unix_passwd_okay (pass)
+static int unix_passwd_okay (pass)
     char *pass;
 {
     char user_pwcopy[9], *namep;
@@ -514,7 +513,7 @@ char tkfile[MAXPATHLEN];
 #endif
 
 #ifdef KRB4_GET_TICKETS
-void k_init (ttyn, realm)
+static void k_init (ttyn, realm)
     char *ttyn;
     char *realm;
 #else
@@ -571,7 +570,7 @@ void k_init (ttyn)
 }
 
 #ifdef KRB5_GET_TICKETS
-int k5_get_password (user_pwstring, pwsize)
+static int k5_get_password (user_pwstring, pwsize)
     char *user_pwstring;
     unsigned int pwsize;
 {
@@ -594,7 +593,7 @@ int k5_get_password (user_pwstring, pwsize)
     return 1;
 }
 
-int try_krb5 (me_p, pass)
+static int try_krb5 (me_p, pass)
     krb5_principal *me_p;
     char *pass;
 {
@@ -628,7 +627,7 @@ int try_krb5 (me_p, pass)
     return 1;
 }
 
-int have_v5_tickets (me)
+static int have_v5_tickets (me)
     krb5_principal *me;
 {
     if (krb5_cc_default (kcontext, &ccache))
@@ -643,7 +642,7 @@ int have_v5_tickets (me)
 #endif /* KRB5_GET_TICKETS */
 
 #ifdef KRB4_CONVERT
-int
+static int
 try_convert524(kctx, me, use_ccache)
     krb5_context kctx;
     krb5_principal me;
@@ -728,7 +727,7 @@ try_convert524(kctx, me, use_ccache)
 #endif
 
 #ifdef KRB4_GET_TICKETS
-int
+static int
 try_krb4 (me, user_pwstring, realm)
     krb5_principal me;
     char *user_pwstring;
@@ -789,7 +788,7 @@ try_krb4 (me, user_pwstring, realm)
  *
  * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
  */
-int verify_krb_v4_tgt (realm)
+static int verify_krb_v4_tgt (realm)
     char *realm;
 {
     char hostname[MAXHOSTNAMELEN], phost[BUFSIZ];
@@ -875,7 +874,7 @@ EGRESS:
 }
 #endif /* KRB4_GET_TICKETS */
 
-void destroy_tickets()
+static void destroy_tickets()
 {
 #ifdef KRB5_GET_TICKETS
     krb5_ccache cache;
@@ -932,7 +931,7 @@ static int try_afscall (scall)
 #endif /* SIGSYS */
 #endif /* SETPAG */
 
-void
+static void
 afs_login ()
 {
 #if defined(KRB4_GET_TICKETS) && defined(SETPAG)
@@ -960,7 +959,7 @@ afs_login ()
 #endif /* KRB_RUN_AKLOG */
 }
 
-void
+static void
 afs_cleanup ()
 {
 #ifdef SETPAG
@@ -1048,7 +1047,7 @@ int main(argc, argv)
     sigtype timedout();
     char *domain, **envinit, *ttyn, *tty;
     char tbuf[MAXPATHLEN + 2];
-    char *ttyname(), *stypeof(), *crypt(), *getpass();
+    char *ttyname(), *crypt(), *getpass();
     time_t login_time;
     int retval;
     int rewrite_ccache = 1; /*try to write out ccache*/
@@ -1894,6 +1893,7 @@ speed_t b_speeds[] = {
 
 void
 term_init (do_rlogin)
+int do_rlogin;
 {
     int line_speed = -1;
 

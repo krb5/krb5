@@ -78,10 +78,11 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <krbports.h>
 
 
-void sink(), source(), rsource(), usage();
+void sink(int, char **), source(int, char **), 
+    rsource(char *, struct stat *), usage(void);
 /*VARARGS*/
 void	error();
-int	response();
+int	response(void);
 #if !defined(HAVE_UTIMES)
 int	utimes();
 #endif
@@ -107,7 +108,7 @@ typedef struct {
   int returned;
 } *kstream;
 
-kstream kstream_create_rcp_from_fd(read_fd, write_fd, sched, ivec)
+static kstream kstream_create_rcp_from_fd(read_fd, write_fd, sched, ivec)
      int read_fd, write_fd;
      des_key_schedule *sched;
      des_cblock *ivec;
@@ -129,7 +130,7 @@ kstream kstream_create_rcp_from_fd(read_fd, write_fd, sched, ivec)
   return tmp;
 }
 
-kstream kstream_create_from_fd(read_fd, write_fd, sched, session)
+static kstream kstream_create_from_fd(read_fd, write_fd, sched, session)
      int read_fd, write_fd;
      Key_schedule *sched;
      des_cblock *session;
@@ -146,7 +147,7 @@ kstream kstream_create_from_fd(read_fd, write_fd, sched, session)
 /* always set to 0 here anyway */
 #define kstream_set_buffer_mode(x,y)
 
-int kstream_read(krem, buf, len)
+static int kstream_read(krem, buf, len)
      kstream krem;
      char *buf;
      int len;
@@ -228,7 +229,7 @@ int kstream_read(krem, buf, len)
   }
 }
 
-int kstream_write(krem, buf, len)
+static int kstream_write(krem, buf, len)
      kstream krem;
      char *buf;
      int len;
@@ -301,15 +302,15 @@ KTEXT_ST ticket;
 AUTH_DAT kdata;
 static des_cblock crypt_session_key;
 char	krb_realm[REALM_SZ];
-char	**save_argv(), *krb_realmofhost();
+char	**save_argv(int, char **), *krb_realmofhost();
 #ifndef HAVE_STRSAVE
-static char *strsave();
+static char *strsave(char *);
 #endif
 #ifdef NOENCRYPTION
 #define	des_read	read
 #define	des_write	write
 #else /* !NOENCRYPTION */
-void	send_auth(), answer_auth();
+void	answer_auth(void);
 int	encryptflag = 0;
 #endif /* NOENCRYPTION */
 #include "rpaths.h"
@@ -334,7 +335,7 @@ char	*getenv();
 struct buffer {
 	int	cnt;
 	char	*buf;
-} *allocbuf();
+} *allocbuf(struct buffer *, int, int);
 
 #define	NULLBUF	(struct buffer *) 0
 
@@ -453,7 +454,7 @@ int main(argc, argv)
 	return 1;
 }
 
-void verifydir(cp)
+static void verifydir(cp)
 	char *cp;
 {
 	struct stat stb;
