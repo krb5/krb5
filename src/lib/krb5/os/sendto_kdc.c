@@ -564,6 +564,7 @@ start_connection (struct conn_state *state, struct select_state *selstate)
 	    state->state = CONNECTING;
 	} else {
 	    dprint("connect failed: %m\n", SOCKET_ERRNO);
+	    (void) closesocket(fd);
 	    state->err = SOCKET_ERRNO;
 	    state->state = FAILED;
 	    return -2;
