@@ -256,14 +256,16 @@ kg_ctx_size(kcontext, arg, sizep)
 				    (krb5_pointer) ctx->subkey,
 				    &required);
 
-	if (!kret)
-	    kret = kg_enc_desc_size(kcontext,
-				    (krb5_pointer) &ctx->enc,
+	if (!kret && ctx->enc)
+	    kret = krb5_size_opaque(kcontext,
+				    KV5M_KEYBLOCK,
+				    (krb5_pointer) ctx->enc,
 				    &required);
 
-	if (!kret)
-	    kret = kg_enc_desc_size(kcontext,
-				    (krb5_pointer) &ctx->seq,
+	if (!kret && ctx->seq)
+	    kret = krb5_size_opaque(kcontext,
+				    KV5M_KEYBLOCK,
+				    (krb5_pointer) ctx->seq,
 				    &required);
 
 	if (!kret)
@@ -366,14 +368,16 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 					       (krb5_pointer) ctx->subkey,
 					       &bp, &remain);
 
-	    if (!kret)
-		kret = kg_enc_desc_externalize(kcontext,
-					       (krb5_pointer) &ctx->enc,
+	    if (!kret && ctx->enc)
+		kret = krb5_externalize_opaque(kcontext,
+					       KV5M_KEYBLOCK,
+					       (krb5_pointer) ctx->enc,
 					       &bp, &remain);
 
-	    if (!kret)
-		kret = kg_enc_desc_externalize(kcontext,
-					       (krb5_pointer) &ctx->seq,
+	    if (!kret && ctx->seq)
+		kret = krb5_externalize_opaque(kcontext,
+					       KV5M_KEYBLOCK,
+					       (krb5_pointer) ctx->seq,
 					       &bp, &remain);
 
 	    if (!kret && ctx->seqstate)
