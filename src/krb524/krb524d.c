@@ -1,4 +1,25 @@
 /*
+ * Copyright (C) 2002 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  * Copyright 1994 by OpenVision Technologies, Inc.
  * 
  * Permission to use, copy, modify, distribute, and sell this software
@@ -26,6 +47,7 @@
 #include <com_err.h>
 #include <stdarg.h>
 
+#include <assert.h>
 #include <stdio.h>
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -67,6 +89,13 @@ krb5_error_code lookup_service_key(krb5_context, krb5_principal,
 krb5_error_code  kdc_get_server_key(krb5_context, krb5_principal, 
 				    krb5_keyblock *, krb5_kvno *,
 				    krb5_enctype, krb5_kvno);
+
+static krb5_error_code
+handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
+		   struct sockaddr_in *saddr,
+		   krb5_data *tktdata, krb5_kvno *v4kvno);
+static krb5_error_code 
+afs_return_v4(krb5_context, const krb5_principal , int *use_v5);
 
 static void usage(context)
      krb5_context context;
@@ -276,20 +305,16 @@ krb5_error_code do_connection(s, context)
 {
      struct sockaddr saddr;
      krb5_ticket *v5tkt = 0;
-     KTEXT_ST v4tkt;
-     krb5_keyblock v5_service_key, v4_service_key;
      krb5_data msgdata, tktdata;
      char msgbuf[MSGSIZE], tktbuf[TKT_BUFSIZ], *p;
      int ret, saddrlen;
      krb5_int32 n; /* Must be 4 bytes */
      krb5_kvno v4kvno;
 
-     /* Clear out keyblock contents so we don't accidentally free the stack.*/
-     v5_service_key.contents = v4_service_key.contents = 0;
-
      msgdata.data = msgbuf;
      msgdata.length = MSGSIZE;
-
+     tktdata.data = tktbuf;
+     tktdata.length = TKT_BUFSIZ;
      saddrlen = sizeof(struct sockaddr);
      ret = recvfrom(s, msgdata.data, (int) msgdata.length, 0, &saddr, &saddrlen);
      if (ret < 0) {
@@ -321,51 +346,41 @@ krb5_error_code do_connection(s, context)
      if (debug)
 	  printf("V5 ticket decoded\n");
      
-     if ((ret = lookup_service_key(context, v5tkt->server,
-				   v5tkt->enc_part.enctype,
-				   v5tkt->enc_part.kvno,
-				   &v5_service_key, NULL)))
-	  goto error;
-
-     if ((ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES3_CBC_RAW,
-				   0, /* highest kvno */
-				   &v4_service_key, &v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_LOCAL_DES3_HMAC_SHA1,
-				   0,
-				   &v4_service_key, &v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES3_CBC_SHA1,
-				   0,
-				   &v4_service_key, &v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES_CBC_CRC,
-				   0,
-				   &v4_service_key, &v4kvno)))
-	 goto error;
-
-     if (debug)
-	  printf("service key retrieved\n");
-
-     ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
-				   &v4_service_key,
-				   (struct sockaddr_in *)&saddr);
-     if (ret)
-	  goto error;
-
-     if (debug)
-	  printf("credentials converted\n");
-
-     tktdata.data = tktbuf;
-     tktdata.length = TKT_BUFSIZ;
-     ret = encode_v4tkt(&v4tkt, tktdata.data, &tktdata.length);
-     if (ret)
-	  goto error;
-     if (debug)
-	  printf("v4 credentials encoded\n");
-
-error:
+     if( v5tkt->server->length >= 1
+	 &&krb5_princ_component(context, v5tkt->server, 0)->length == 3
+	 &&strncmp(krb5_princ_component(context, v5tkt->server, 0)->data,
+		   "afs", 3) == 0) {
+	 krb5_data *enc_part;
+	 int use_v5;
+	 if ((ret = afs_return_v4(context, v5tkt->server,
+				  &use_v5)) != 0) 
+	     goto error;
+	 if ((ret = encode_krb5_enc_data( &v5tkt->enc_part, &enc_part)) != 0) 
+	     goto error;
+	 if (!(use_v5 )|| enc_part->length >= 344) {
+	     krb5_free_data(context, enc_part);
+	     if ((ret = handle_classic_v4(context, v5tkt,
+					 (struct sockaddr_in *) &saddr, &tktdata,
+					 &v4kvno)) != 0)
+		 goto error;
+	 } else {
+	   KTEXT_ST fake_v4tkt;
+	   fake_v4tkt.mbz = 0;
+	   fake_v4tkt.length = enc_part->length;
+	   memcpy(fake_v4tkt.dat, enc_part->data, enc_part->length);
+	     v4kvno = (0x100-0x2b); /*protocol constant indicating  v5
+				     * enc part only*/
+	     krb5_free_data(context, enc_part);
+	     ret = encode_v4tkt(&fake_v4tkt, tktdata.data, &tktdata.length);
+	 }
+     } else {
+	 if ((ret = handle_classic_v4(context, v5tkt,
+				     (struct sockaddr_in *) &saddr, &tktdata,
+				     &v4kvno)) != 0)
+	     goto error;
+     }
+     
+	error:
      /* create the reply */
      p = msgdata.data;
      msgdata.length = 0;
@@ -395,11 +410,6 @@ write_msg:
 	       ret = errno;
      if (debug)
 	  printf("reply written\n");
-     /* If we have keys to clean up, do so.*/
-     if (v5_service_key.contents)
-       krb5_free_keyblock_contents(context, &v5_service_key);
-     if (v4_service_key.contents)
-       krb5_free_keyblock_contents(context, &v4_service_key);
      if (v5tkt)
        krb5_free_ticket(context, v5tkt);
      
@@ -486,5 +496,112 @@ krb5_error_code kdc_get_server_key(context, service, key, kvnop, ktype, kvno)
     }
 
     kadm5_free_principal_ent(handle, &server);
+    return ret;
+}
+
+/*
+ * We support two  kinds of v4 credentials.  There are real v4
+ *   credentials, and  a Kerberos v5 enc part masquerading as a krb4
+ *  credential to be used by modern AFS implementations; this function
+ *  handles the classic v4 case.
+ */
+
+static krb5_error_code
+handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
+		   struct sockaddr_in *saddr,
+		   krb5_data *tktdata, krb5_kvno *v4kvno)
+{
+    krb5_error_code ret;
+    krb5_keyblock v5_service_key, v4_service_key;
+     KTEXT_ST v4tkt;
+
+    v5_service_key.contents = NULL;
+    v4_service_key.contents = NULL;
+    
+             if ((ret = lookup_service_key(context, v5tkt->server,
+				   v5tkt->enc_part.enctype,
+				   v5tkt->enc_part.kvno,
+				   &v5_service_key, NULL)))
+	  goto error;
+
+     if ((ret = lookup_service_key(context, v5tkt->server,
+				   ENCTYPE_DES3_CBC_RAW,
+				   0, /* highest kvno */
+				   &v4_service_key, v4kvno)) &&
+	 (ret = lookup_service_key(context, v5tkt->server,
+				   ENCTYPE_LOCAL_DES3_HMAC_SHA1,
+				   0,
+				   &v4_service_key, v4kvno)) &&
+	 (ret = lookup_service_key(context, v5tkt->server,
+				   ENCTYPE_DES3_CBC_SHA1,
+				   0,
+				   &v4_service_key, v4kvno)) &&
+	 (ret = lookup_service_key(context, v5tkt->server,
+				   ENCTYPE_DES_CBC_CRC,
+				   0,
+				   &v4_service_key, v4kvno)))
+	 goto error;
+
+     if (debug)
+	  printf("service key retrieved\n");
+
+     ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
+				   &v4_service_key,
+				   (struct sockaddr_in *)saddr);
+     if (ret)
+	  goto error;
+
+     if (debug)
+	  printf("credentials converted\n");
+
+     ret = encode_v4tkt(&v4tkt, tktdata->data, &tktdata->length);
+     if (ret)
+	  goto error;
+     if (debug)
+	  printf("v4 credentials encoded\n");
+
+ error:
+     if(v5_service_key.contents)
+       krb5_free_keyblock_contents(context, &v5_service_key);
+     if (v4_service_key.contents)
+	 krb5_free_keyblock_contents(context, &v4_service_key);
+     return ret;
+}
+
+/*
+ * afs_return_v4: a predicate to determine whether we want to try
+ * using the afs krb5 encrypted part encoding or whether we  just
+ * return krb4.  Takes a principal, and checks the configuration file.
+ */
+static krb5_error_code 
+afs_return_v4 (krb5_context context, const krb5_principal princ,
+	       int *use_v5)
+{
+    krb5_error_code ret;
+    char *unparsed_name;
+    char *cp;
+    krb5_data realm;
+    assert(use_v5 != NULL);
+    ret = krb5_unparse_name(context, princ, &unparsed_name);
+        if (ret != 0)
+	return ret;
+/* Trim out trailing realm component into separate string.*/
+    for (cp = unparsed_name; *cp != '\0'; cp++) {
+	if (*cp == '\\') {
+	    cp++; /* We trust unparse_name not to leave a singleton
+		   * backslash*/
+	    continue;
+	}
+	if (*cp == '@') {
+	    *cp = '\0';
+	    realm.data = cp+1;
+	    realm.length = strlen((char *) realm.data);
+	    	    break;
+	}
+    }
+     krb5_appdefault_boolean(context, "afs_krb5",
+				  &realm, unparsed_name, 1,
+				  use_v5);
+    krb5_free_unparsed_name(context, unparsed_name);
     return ret;
 }

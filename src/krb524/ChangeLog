@@ -3,6 +3,27 @@
 	* Makefile.in ($(KRB524_HDR), $(KRB524_ERR_HDR)): Quote target of
 	copy on Windows.
 
+2002-08-27  Sam Hartman  <hartmans@mit.edu>
+
+	* README: Document  new afs_krb5 configuration information
+
+	* krb524d.c (afs_return_v4): New function  to determine if we have
+	been configured to return v4 tickets for afs or use the afs
+	krb5-encpart proposal
+	(do_connection):  Call afs_return_v4 and use its result
+
+	2002-08-26  Sam Hartman  <hartmans@mit.edu>
+
+	* RELEASE_NOTES: Delete OV release notes now with 100% incorrect
+	content 
+
+2002-08-22  Sam Hartman  <hartmans@mit.edu>
+
+	* krb524d.c (do_connection): Add support for  AFS
+	krb5-encpart-only per discussion with jhutz and lha
+	(handle_classic_v4): Split out code for handling v4 tickets since
+	it needs to be called multiple times
+
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
