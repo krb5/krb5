@@ -18,9 +18,6 @@ static char fcc_read_c[] = "$Id$";
 #include <krb5/copyright.h>
 #include "fcc.h"
 
-#define krb5_fcc_skip(i,l) (lseek(((krb5_fcc_data *)i->data)->fd, l, L_INCR)\
-			    == -1 ? errno : KRB5_OK)
-
 krb5_error_code
 krb5_fcc_skip_principal(id)
    krb5_ccache id;
