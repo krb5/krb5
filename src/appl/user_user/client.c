@@ -34,6 +34,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "krb5.h"
 #include "com_err.h"

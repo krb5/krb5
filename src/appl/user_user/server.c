@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "krb5.h"
 #include "com_err.h"

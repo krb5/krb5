@@ -1,3 +1,7 @@
+2002-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* client.c, server.c: Include errno.h.
+
 2001-06-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* client.c, server.c: Cleanup assignments in conditionals.
