@@ -1,3 +1,10 @@
+2002-08-12  Tom Yu  <tlyu@mit.edu>
+
+	* dump.c (master_key_convert): Iterate over freeing
+	key_data->key_data_contents[j] rather than attempting to free
+	key_data->key_data_contents.
+	[pullup from trunk]
+
 2001-10-23  Tom Yu  <tlyu@mit.edu>
 
 	* loadv4.c (fixup_database): Don't set SUPPORT_DESMD5 anymore.
