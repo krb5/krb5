@@ -188,5 +188,8 @@ const krb5_checksum *cksum;
 {
     authent->client = creds->client;
     authent->checksum = (krb5_checksum *)cksum;
-    return(krb5_ms_timeofday(&authent->ctime, &authent->cmsec));
+
+    /* cmsec is unsigned, time is signed, hence the cast */
+    return(krb5_ms_timeofday(&authent->ctime, 
+			     (krb5_int16 *)&authent->cmsec));
 }
