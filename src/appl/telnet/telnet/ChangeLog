@@ -1,3 +1,8 @@
+Mon Jun  3 21:31:37 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Ezra's patches to allow compilation w/o krb4
+		support
+
 Mon Mar 18 20:31:44 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Added flags to turn on the encryption option.

@@ -34,6 +34,16 @@ else
 	AC_MSG_RESULT(Kerberos 4 authentication enabled)
 	AC_DEFINE(KRB4)
 fi
+dnl
+dnl For the encryption code we need libdes425
+dnl Fix post beta-6
+withval=no
+AC_ARG_WITH([krb4],[],,withval=yes)
+if test $withval = no; then
+	KRB4_CRYPTO_LIB='-ldes425'
+	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+fi
+dnl
 USE_KRB4_LIBRARY
 USE_ANAME
 KRB5_LIBRARIES
