@@ -556,7 +556,7 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 	while (1) {
 	    if (!request_contains_enctype(context,
 					  request, db_etype)) {
-		if (db_etype = ENCTYPE_DES_CBC_CRC)
+		if (db_etype == ENCTYPE_DES_CBC_CRC)
                     continue;
                 else break;
             }

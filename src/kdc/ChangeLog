@@ -1,3 +1,8 @@
+2003-02-20  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): fix typo to that caused infinite
+	look in previous change 
+
 2003-02-14  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_preauth.c (request_contains_enctype): New function
