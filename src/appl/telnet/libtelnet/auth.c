@@ -126,7 +126,6 @@ Authenticator authenticators[] = {
 				spx_printsub },
 #endif
 #ifdef	KRB5
-# ifdef	ENCRYPTION
 	{ AUTHTYPE_KERBEROS_V5, AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL,
 				kerberos5_init,
 				kerberos5_send,
@@ -134,7 +133,6 @@ Authenticator authenticators[] = {
 				kerberos5_reply,
 				kerberos5_status,
 				kerberos5_printsub },
-# endif	/* ENCRYPTION */
 	{ AUTHTYPE_KERBEROS_V5, AUTH_WHO_CLIENT|AUTH_HOW_ONE_WAY,
 				kerberos5_init,
 				kerberos5_send,

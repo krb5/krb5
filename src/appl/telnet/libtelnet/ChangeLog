@@ -1,3 +1,8 @@
+Wed Mar 29 15:08:43 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* auth.c (authenticators): Allow mutual authentication even if the
+		ENCRYPTION option is not turned on.
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
         * kerberos5.c (kerberos5_is()): Use new calling convention for 
