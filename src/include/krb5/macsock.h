@@ -19,6 +19,9 @@
  * for a Kerberos client's communication with its Key Distribution Centers.
  */
 
+#ifndef macsock_h
+#define macsock_h
+
 /* Handle ANSI C versus traditional C */
 #ifndef __STDC__
 #define const
@@ -90,7 +93,9 @@ struct socket {
 	unsigned long	fStream;		/* MacTCP socket/stream */
 	struct sockaddr_in connect_addr;	/* Address from connect call */
 #	define		UDPbuflen	4096
-	char		fRecvBuf[UDPbuflen];	/* receive buffer area */
+#	define		TCPbuflen	(8*1024)
+//	char		fRecvBuf[UDPbuflen];	/* receive buffer area */
+	char		fRecvBuf[TCPbuflen];	/* receive buffer area */
 };
 
 typedef struct socket *SOCKET;
@@ -104,10 +109,7 @@ struct    hostent {
     int  h_addrtype;    /* address type */
     int  h_length; /* length of address */
     char **h_addr_list; /* list of addresses from name server */
-#if 0
 #define	h_addr	h_addr_list[0]	/* address, for backward compatiblity */
-#endif
-#define	h_addr	h_addr_list	/* address, for backward compatiblity */
 };
 
 /*
@@ -225,3 +227,4 @@ getsockname PROTOTYPE((SOCKET, struct sockaddr_in *, int *));
 #define	WSASetLastError(x)	(errno = (x))
 
 extern int errno;
+#endif /* macsock_h */

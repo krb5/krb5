@@ -1,3 +1,9 @@
+Sun Sep 24 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
+
+	* Makefile.in: Update CLEANUP list to clean up files created
+		in the include directory rather than include/krb5
+		directory.  Remove mac/build directory.
+
 Fri Sep 22 19:39:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Exclude the MAC and DOS tar/zip files when creating

@@ -103,6 +103,11 @@ Boolean		done;
 
 	errOkButton = NewControl(errWindow,&errOkButtonRect,"\pOk",TRUE,0,0,1,pushButProc,0L);
 	DrawControls(errWindow);
+	InsetRect(&errOkButtonRect, -4, -4);
+	PenSize(3,3);
+	FrameRoundRect(&errOkButtonRect, 15,15);
+	PenSize(1,1);
+	InsetRect(&errOkButtonRect, 4, 4);
 
 	/* Draw the error text */
 	TextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
@@ -114,7 +119,7 @@ Boolean		done;
 	done = FALSE;
 	while(!done)
 	{
-		GetNextEvent(mDownMask | mUpMask, &theEvent);
+		GetNextEvent(mDownMask | mUpMask | keyDownMask, &theEvent);
 		if (theEvent.what == mouseDown)
 		{
 			localPt = theEvent.where;
@@ -123,6 +128,17 @@ Boolean		done;
 			{
 				done = TRUE;
 			}
+		} else if (theEvent.what == keyDown &&
+			(theEvent.message & 0xff) == 0x0d ||		/* CR */
+			(theEvent.message & 0xff) == 0x03 ||		/* Enter */
+			(theEvent.message & 0xff) == 0x1b 			/* Escape */
+			)
+		{
+		long t;
+			HiliteControl(errOkButton, 1);	// Hilite the button for a bit
+			Delay(5, &t);
+			HiliteControl(errOkButton, 0);	// Dehilite the button
+			done = TRUE;
 		}
 	}
 

@@ -1,0 +1,199 @@
+To Build the Macintosh version of Kerberos 5
+
+These directions assume that the source is located in ~/k5mac.
+
+
+1) Prepare Files to Move to the Mac
+
+On the unix side, after checking out the source, build the target 
+"kerbsrc.mac":
+   
+   cd ~/k5mac/src
+   make -f Makefile.in kerbsrc.mac (the product of the make is "kerbsrc.tar")
+
+
+2) Move the Source to the Mac
+
+Transfer the resulting file from the previous step (kerbsrc.tar) to the
+Macintosh.  Remember it is a tar file, and must be transferred in binary mode
+without conversion.
+
+
+3) Unpack the Source on the Mac
+
+Untar the file onto a Macintosh disk.  The final built version occupies
+on the order of 10M on disk.  If your tar expander program supports CR-LF
+translation, turn it on to avoid having to perform the conversions yourself
+in a later step.
+	
+    Programs that can perform tar translations:
+    suntar 2.0.3   available on mac.archive.umich.edu
+    untar          available on mac.archive.umich.edu
+    tar 4.0        available on mac.archive.umich.edu
+	Stuffit Deluxe (with an additional tar translator)
+	
+    suntar and stuffit deluxe can perform cr-lf translations
+
+NOTE:  Beware that all tars are not created equal.  Some tars will dump 
+the first level directory into the source file location, while others 
+will create a directory and place the contents in that, and yet others 
+will ask where the destination should start.  Suntar seems to do the 
+"right" thing more often than not.
+
+
+4) Perform CR-LF Conversion
+
+If your tar program does support CR-LF translation, or you decided not to use
+translation, you will need to convert the source files to Mac format text files.
+Again there are a selection of programs that perform this function:
+	
+   Drop Text  available on mac.archive.umich.edu
+   CRLF       available on mac.archive.umich.edu
+   Stuffit    Deluxe (with translator) from Aladdin Systems Inc.
+   BBEdit     demo version available on mac.archuve.umich.edu
+              or Bare Bones Software
+
+I would strongly recommend Drop Text, it seems to be the most flexible
+of the above programs.
+
+
+5) Unstuff .hqx Files
+
+At this point all source files are now Mac text files.  There are a number
+of special files which have been packed in binhqx format for the
+Mac to ensure the resource forks were not damaged, and that binary 
+translation did not corrupt them.  These files are located in the 
+following paths:
+
+   :mac:kconfig:kconfig.sit.hqx
+   :mac:libraries:libraries.sit.hqx
+   :mac:telnet:telnet.sit.hqx
+		
+These binhqx files each contain a Stuffit archive with metrowerks project
+files and resource files.  To convert these files, use a program 
+(listed below) to convert the file from binhqx format, then convert the 
+"xxx.sit" file which should result from the previous conversion to the 
+expanded files.  There are programs which accomplish both steps automatically.
+		
+To convert from binhqx to archive:
+   Stuffit Expander	(available on mac.archive.umich.edu)
+   Stuffit Deluxe (with binhqx translator)
+   binhqx
+   suntar 2.0.3
+		
+To convert from archive to individual files:
+   Stuffit Expander	(available on mac.archive.umich.edu)
+   Stuffit Deluxe
+   Stuffit Lite
+   DropUnstuff
+   NOW Utilities 5.0 Quickfiler
+
+
+6) Build the Kerberos Libraries
+	
+Building the static libraries:  Be sure to use "MW C/C++ 68K 1.2.2" when 
+building these projects.  Open the project (libkrb5.µ or libgss.µ) and 
+type Cmd-M, or select "Make" from the "Project" menu.  This will produce 
+"libkrb5" or "libgss" depending on the selected project. You must
+build libkrb5 before libgss.
+
+Building the CFM libraries.  Be sure the use "MW C/C++ CFM68K 1.0d1" when
+building these projects.  Open one of "cfm¥libkrb5.µ" or "cfm¥libgss.µ".
+Type Cmd-M, or select "Make" from the "Project" menu.  This will produce 
+"cfmlibkrb5" or cfmlibgss" depending on the selected project.  You 
+must build the static libraries before these projects.
+
+
+7) Build the Cygnus Network Security Application
+
+To start the build of kconfig (or CNS Config) double click on the project 
+file named :mac:kconfig:kconfig.µ or drag it onto the application/compiler
+"MW C/C++ 68K 1.2.2".  If you are doing CFM development be careful that the
+CFM compiler is not invoked when you double click on the project file.
+	
+To start the build type Cmd-M or select "Make" from the "Project" menu.
+The compiler should build the KerberosHeaders.pch file into a precompiled
+header file, then start compiling the sources, finally link the executable
+named "CNS Config" and write a symbol files for use with symbolic debugging.
+
+At this point assuming a valid configuration (see kerberos release notes for
+usage) double clicking on "CNS Config" should bring you to the main CNS 
+configuration window where you can login, logout, change passwords and the
+environment.
+
+NOTE: kconfig is presently constructed with the kerberos sources in the 
+project file directly, versus as an included static library.  This is done
+to preserve debugability and other nice properties.  In a later release, 
+this project will be changed to be more in line with how development is 
+intended with the kerberos libraries.
+
+
+8) Build Kerberized Telnet
+
+Building kerberized telnet.  To compile telnet you will need "libkrb5" built.
+Open the project "mw/68k¥--Telnet" in the :mac:telnet folder, and type Cmd-M, 
+or select "Make" from the "Project" menu.  This will build the kerberzied 
+version of telnet.  This is not an official build of telnet, but is based on
+the 2.6.1d8 sources.
+
+NOTE: Telnet is presently built as a monolithic application.  In a later 
+release of kerberos 5 for Macintosh telnet will be removed and in its 
+place a telnet authentication plug in module will be provided.
+
+
+Installation
+
+The following assumes that you have followed the steps above to build
+the Kerberos libraries.  What you now have supports both the Kerberos
+and GSS APIs.  Each is supported as both a shared library and a Code 
+Warrior static link library for 68k Macs.  Following are the binary
+components provided in this release:
+
+   * Code Fragment Manager libraries for 68k Macintosh
+     (:mac:libraries:cfm*gss and :mac:libraries:cfm*krb5)
+    
+   * Code Warrior static libraries for 68k Macintosh
+     (:mac:libraries:libgss and :mac:libraries:libkrb5)
+
+   * Cygnus Network Security Configuration program
+     (:mac:kconfig:CNS Config)
+    
+   * Sample krb5.ini file using CYGNUS.COM as the default realm
+     (:mac:krb5.ini)
+     
+   * An include directory containing the files necessary
+     for development (:include)
+
+   * A pre-compiled header file containing flags
+     necessary for development (:mac:libraries:KerberosHeaders.pch)
+
+
+   To install the Kerberos system:
+
+   1) Drop the :mac:kconfig:krb5.ini file into the "Preferences"
+   folder contained in the "System Folder".
+   
+   2) To install the shared libraries (optional), simply copy the 
+   "cfm*gss" and "cfm*krb5" files to the "Extensions" folder in 
+   the "System folder".
+
+
+Getting Started Programming
+
+You may program using either the Kerberos or GSS APIs.  As delivered, the
+libraries containing the GSS API are complete.  They do not rely on the
+krb5 library.
+
+To add Kerberos utility to a Code Warrior based application:
+
+   1) Decide on whether to use CFM or static libraries.
+
+   2) Decide on whether to use ther Kerberos or GSS APIs.
+
+   3) Drag the appropriate library into your project
+     (One of: :mac:libraries:libgss, mac:libraries:libkrb5,
+     :mac:libraries:cfm*gss or :mac:libraries:cfm*krb5).
+
+   4) Drag the KerberosHeaders.pch file into your project.
+
+   5) Set the project options to 4 byte integers and enums treated as ints.

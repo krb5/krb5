@@ -3,6 +3,11 @@ Fri Sep 22 15:57:33 1995  Mark Eichin  <eichin@cygnus.com>
 	* write_msg.c (krb5_write_message): check the real length
 	variable, not the net version.
 
+Wed Sep 20 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* macsock.c:  Added TCP streams to the emulation package.  gethostname
+		now no longer returns true cannonical hostnames.
+
 Wed Sep 13 11:01:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: had to define away DBFLAGS for the PC.

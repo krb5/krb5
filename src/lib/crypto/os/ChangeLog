@@ -1,3 +1,8 @@
+Fri Sep 22 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* c_localaddr.c:  change close on a socket to closesocket, sockets on
+		macintosh arn't files
+
 Wed Sep 13 10:33:53 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: PC builds all C files because of function name changes.

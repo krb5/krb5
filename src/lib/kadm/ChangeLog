@@ -1,3 +1,8 @@
+Fri Sep 22 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* adm_conn.c:  for sockets changed close to closesocket, sockets on
+		macintosh arn't files.
+
 Fri Sep 22 15:44:02 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* logger.c (klog_com_err_proc): pass whoami in failure messages

@@ -216,7 +216,7 @@ n_found = 0;
 	    addr_temp[n_found++] = address;
 	address = 0;
     }
-    close(s);
+    closesocket(s);
 
     *addr = (krb5_address **)malloc (sizeof (krb5_address *) * (n_found+1));
     if (*addr == 0)

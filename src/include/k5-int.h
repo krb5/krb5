@@ -218,7 +218,6 @@ int stat(const char *path, struct stat *buf);
 int fstat(int fildes, struct stat *buf);
 
 #define EFBIG 1000
-#define OLD_CONFIG_FILES
 
 #define NOFCHMOD 1
 #define NOCHMOD 1

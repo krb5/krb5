@@ -164,10 +164,11 @@ socket(af, type, protocol)
 		break;
 
 	case SOCK_STREAM:
+		memset((char *) &pb, '\0', sizeof(pb));	
 		pb.tcppb.ioCRefNum = theUDP->fMacTCPRef;
 		pb.tcppb.csCode = TCPCreate;
 		pb.tcppb.csParam.create.rcvBuff = theUDP->fRecvBuf;
-		pb.tcppb.csParam.create.rcvBuffLen = UDPbuflen;
+		pb.tcppb.csParam.create.rcvBuffLen = TCPbuflen;
 		pb.tcppb.csParam.create.notifyProc = NULL;
 		err = PBControl((ParamBlockRec *)&pb,false);
 		if (err) {
@@ -176,7 +177,7 @@ socket(af, type, protocol)
 			return INVALID_SOCKET;
 		}
 		theUDP->fStream = (unsigned long)pb.tcppb.tcpStream;
-	
+
 		theUDP->connect_addr.sin_family = 0;
 		theUDP->connect_addr.sin_port = 0;
 		theUDP->connect_addr.sin_addr.s_addr = 0;
@@ -399,21 +400,25 @@ connect (s, addr, tolen)
 	case SOCK_DGRAM:
 		break;
 	case SOCK_STREAM:
+		memset((char *) &pb, '\0', sizeof(pb));	
 		pb.tcppb.ioCRefNum = s->fMacTCPRef;
 		pb.tcppb.csCode = TCPActiveOpen;
-		pb.tcppb.csParam.open.validityFlags = timeoutValue | timeoutAction;
-		pb.tcppb.csParam.open.ulpTimeoutValue = 60 /* seconds */;
+		pb.tcppb.tcpStream = s->fStream;
+		pb.tcppb.csParam.open.ulpTimeoutValue = 15 /* seconds */;
 		pb.tcppb.csParam.open.ulpTimeoutAction = 1 /* 1:abort 0:report */;
-		pb.tcppb.csParam.open.commandTimeoutValue = 0;
+		pb.tcppb.csParam.open.validityFlags = timeoutValue | timeoutAction;
+		pb.tcppb.csParam.open.commandTimeoutValue = 0;		/* jfm timeout in 0 secs ? */
 		pb.tcppb.csParam.open.remoteHost = addr->sin_addr.s_addr;
 		pb.tcppb.csParam.open.remotePort = addr->sin_port;
 		pb.tcppb.csParam.open.localHost = 0;
 		pb.tcppb.csParam.open.localPort = 0; /* we'll get the port back later */
+		pb.tcppb.csParam.open.tosFlags = 0;	/* jfm ? */
+		pb.tcppb.csParam.open.precedence = 0;	/* jfm ? */
 		pb.tcppb.csParam.open.dontFrag = 0;
 		pb.tcppb.csParam.open.timeToLive = 0;
 		pb.tcppb.csParam.open.security = 0;
 		pb.tcppb.csParam.open.optionCnt = 0;
-		pb.tcppb.tcpStream = s->fStream;
+		pb.tcppb.csParam.open.userDataPtr = 0;	/* jfm */
 		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
 		if (err) {
 			SOCKET_SET_ERRNO (EINVAL);
@@ -615,6 +620,13 @@ gethostbyaddr (char *addr, int len, int type)
 		return 0;
 		}
 
+	/* take off a period from the end of the connonical host name */
+	{
+	int hostnamelen = strlen(host.cname);
+		if (host.cname[hostnamelen-1] == '.')
+			host.cname[hostnamelen-1] = 0;
+	}
+
 	/* Build result in hostent structure, which we will return to caller.  */
 	
 	result.h_name = host.cname;
@@ -665,7 +677,7 @@ getmyipaddr ()
 	result.h_addrtype = AF_INET;
 	result.h_length = sizeof (host.addr[0]);  /* Length of each address */
 	result.h_addr_list = ipaddr_ptrs;
-	ipaddr_ptrs[0] = (char*) ourAddr.s_addr;
+	ipaddr_ptrs[0] = (char*) &ourAddr.s_addr;	/* h_addr_list is a pointer to a list of pointers... */
 	ipaddr_ptrs[1] = 0;
 
 	closesocket (sock);

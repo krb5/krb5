@@ -429,7 +429,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 			sizeof(in_remote)) < 0) {
 		/* Failed, go to next address */
 		kret = SOCKET_ERRNO;
-		close(*sockp);
+		closesocket((SOCKET)*sockp);
 		*sockp = -1;
 		continue;
 	    }
@@ -508,7 +508,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 			    (struct sockaddr *) &in_remote,
 			    sizeof(in_remote)) < 0) {
 		    kret = SOCKET_ERRNO;
-		    close(*sockp);
+		    closesocket((SOCKET)*sockp);
 		    *sockp = -1;
 		    continue;
 		}
@@ -544,7 +544,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
  cleanup:
     if (kret) {
 	if (*sockp >= 0)
-	    close(*sockp);
+	    closesocket((SOCKET)*sockp);
 	if (*local && (*local)->contents)
 	    free((*local)->contents);
 	if (*remote && (*remote)->contents)
@@ -713,7 +713,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
 	    *ctxp = (krb5_auth_context) NULL;
 	}
 	if (*sockp >= 0) {
-	    close(*sockp);
+	    closesocket((SOCKET)*sockp);
 	    *sockp = -1;
 	}
 	if (local_addr && local_addr->contents)
@@ -755,6 +755,6 @@ krb5_adm_disconnect(kcontext, socketp, auth_context, ccache)
     if (auth_context)
 	krb5_xfree(auth_context);
     if (*socketp >= 0)
-	close(*socketp);
+	closesocket((SOCKET)*socketp);
 }
 
