@@ -1,5 +1,7 @@
 2001-10-23  Sam Hartman  <hartmans@mit.edu>
 
+	* t_cksum.c (main): Include usage argument to verify
+
 	* k5_md5des.c (k5_md5des_verify): Add usage
 
 	* k5_md4des.c (k5_md4des_verify): Add usage

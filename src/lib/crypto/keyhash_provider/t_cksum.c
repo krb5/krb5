@@ -108,7 +108,7 @@ main(argc, argv)
     }
     print_checksum("correct", MD, argv[msgindex], &newstyle_checksum);
 
-    if ((kret = (*(khp.verify))(&keyblock, 0, &plaintext, &newstyle_checksum,
+    if ((kret = (*(khp.verify))(&keyblock, 0, 0, &plaintext, &newstyle_checksum,
 				&valid))) {
       printf("verify on new checksum choked with %d\n", kret);
       break;
@@ -120,7 +120,7 @@ main(argc, argv)
     printf("Verify succeeded for \"%s\"\n", argv[msgindex]);
 
     newstyle_checksum.data[0]++;
-    if ((kret = (*(khp.verify))(&keyblock, 0, &plaintext, &newstyle_checksum,
+    if ((kret = (*(khp.verify))(&keyblock, 0, 0, &plaintext, &newstyle_checksum,
 				&valid))) {
       printf("verify on new checksum choked with %d\n", kret);
       break;

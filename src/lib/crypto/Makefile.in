@@ -7,6 +7,9 @@ LOCAL_SUBDIRS=crc32 des dk enc_provider hash_provider keyhash_provider \
 LOCALINCLUDES = -I$(srcdir)/enc_provider \
 	-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider \
 	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk -I$(srcdir)/arcfour
+RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)crypto.lib

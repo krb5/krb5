@@ -1,5 +1,7 @@
 2001-10-23  Sam Hartman  <hartmans@mit.edu>
 
+	* Makefile.in (RUN_SETUP): Include so make check works correctly
+
 	* etypes.c: Add Heimdal aliases  arcfour-hmac-md5
 
 	* cksumtypes.c: hmac-md5-rc4 keyed checksum added
