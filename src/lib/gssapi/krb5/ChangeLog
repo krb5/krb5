@@ -1,3 +1,16 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Only null
+	out the auth_context's rcache if it was provided by acceptor
+	creds; this prevents a leak.
+
+	* delete_sec_context.c (krb5_gss_delete_sec_context): Only null
+	out the auth_context's rcache if it was provided by acceptor
+	creds; this prevents a leak.
+
+	* gssapiP_krb5.h (krb5_gss_ctx_id_rec): Add cred_rcache to track
+	whether acceptor creds provided an rcache.
+
 2004-06-14  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): Fix pointer

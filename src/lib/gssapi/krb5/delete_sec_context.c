@@ -94,7 +94,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
        krb5_free_keyblock(context, ctx->acceptor_subkey);
 
    if (ctx->auth_context) {
-       (void)krb5_auth_con_setrcache(context, ctx->auth_context, NULL);
+       if (ctx->cred_rcache)
+	   (void)krb5_auth_con_setrcache(context, ctx->auth_context, NULL);
+
        krb5_auth_con_free(context, ctx->auth_context);
    }
 
