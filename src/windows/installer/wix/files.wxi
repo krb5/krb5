@@ -30,6 +30,39 @@
         <Directory Id="dirMIT" Name="MIT">
             <Directory Id="KERBEROSDIR" Name="Kerberos">
                 <Directory Id="dirbin" Name="bin" src="$(var.BinDir)">
+                
+					<!-- Kerberos IV options -->
+					<Component Id="rcm_krb4_1" Guid="34262966-9196-49D6-86C9-AE98D3116DC0" DiskId="1">
+						<Registry Id="reg_krb4_1" Root="HKLM" Key="Software\MIT\Kerberos4" Name="krb.realms" Type="string" Value="[KRB4KRBREALMS]" KeyPath="yes"/>
+						<Condition>KRB4KRBREALMS</Condition>
+					</Component>
+					<Component Id="rcm_krb4_2" Guid="812334C6-EBDF-482C-8CB3-A6398AF9EDFC" DiskId="1">
+						<Registry Id="reg_krb4_2" Root="HKLM" Key="Software\MIT\Kerberos4" Name="krb.conf" Type="string" Value="[KRB4KRBCONF]" KeyPath="yes"/>
+						<Condition>KRB4KRBCONF</Condition>
+					</Component>
+					<Component Id="rcm_krb4_3" Guid="5556ECD9-8721-41C2-846C-034C239B48F1" DiskId="1">
+						<Registry Id="reg_krb4_3" Root="HKLM" Key="Software\MIT\Kerberos4" Name="configdir" Type="string" Value="[KRB4CONFIGDIR]" KeyPath="yes"/>
+						<Condition>KRB4CONFIGDIR</Condition>
+					</Component>
+					<Component Id="rcm_krb4_4" Guid="61371A93-7F59-439D-A89C-070E100F465B" DiskId="1">
+						<Registry Id="reg_krb4_4" Root="HKLM" Key="Software\MIT\Kerberos4" Name="ticketfile" Type="string" Value="[KRB4TICKETFILE]" KeyPath="yes"/>
+						<Condition>KRB4TICKETFILE</Condition>
+					</Component>
+					
+					<!-- Kerberos V options -->
+					<Component Id="rcm_krb5_1" Guid="E190F8B9-51FA-4FB1-884C-C8AFA37F8653" DiskId="1">
+						<Registry Id="reg_krb5_1" Root="HKLM" Key="Software\MIT\kerberos5" Name="config" Type="string" Value="[KRB5CONFIG]" KeyPath="yes" />
+						<Condition>KRB5CONFIG</Condition>
+					</Component>
+					<Component Id="rcm_krb5_2" Guid="AE7D4305-6193-4094-8C82-73862AE01DCE" DiskId="1">
+						<Registry Id="reg_krb5_2" Root="HKLM" Key="Software\MIT\kerberos5" Name="ccname" Type="string" Value="[KRB5CCNAME]" KeyPath="yes" />
+						<Condition>KRB5CCNAME</Condition>
+					</Component>
+					<Component Id="rcm_krb5_3" Guid="853EE035-99AA-489A-8FB6-74C76624E92A" DiskId="1">
+						<Registry Id="reg_krb5_3" Root="HKLM" Key="Software\MIT\kerberos5" Name="PreserveInitialTicketIdentity" Type="integer" Value="[KRB5PRESERVEIDENTITY]" KeyPath="yes" />
+						<Condition>KRB5PRESERVEIDENTITY</Condition>
+					</Component>
+                
                     <Component Id="cmf_aklog_exe" Guid="38840074-3D15-45CB-8022-C4A603FC697A" DiskId="1">
 	                    <File Id="fil_aklog_exe" LongName="aklog.exe" Name="aklog.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_aklog_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -114,6 +147,34 @@
 	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
                     </Component>
+
+                    <!-- Leash32 configuration -->
+                    <Component Id="rcm_leash_1" Guid="B91648A0-26F7-43BB-A954-202FF3811E3C" DiskId="1">
+	                    <Registry Id="reg_leash_1" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AfsStatus" Type="integer" Value="[LEASHAFSSTATUS]" KeyPath="yes"/>
+	                    <Condition>LEASHAFSSTATUS</Condition>
+                    </Component>
+                    <Component Id="rcm_leash_2" Guid="0D8DCC52-F855-4C46-86A1-198E6EE0CB8A" DiskId="1">
+	                    <Registry Id="reg_leash_2" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="createmissingconfig" Type="integer" Value="[LEASHCREATEMISSINGCONFIG]" KeyPath="yes"/>
+	                    <Condition>LEASHCREATEMISSINGCONFIG</Condition>
+                    </Component>
+                    <Component Id="rcm_leash_3" Guid="9610A7E3-251F-4286-B776-1C3AF5DE7815" DiskId="1">
+	                    <Registry Id="reg_leash_3" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AutoRenewTickets" Type="integer" Value="[LEASHAUTORENEWTICKETS]" KeyPath="yes"/>
+	                    <Condition>LEASHAUTORENEWTICKETS</Condition>
+                    </Component>
+                    <!--
+                    <Component Id="rcm_leash_4" Guid="815AED84-2437-4EBC-B561-F847833DB3A5" DiskId="1">
+	                    <Registry Id="reg_leash_4" Root="HKLM" Key="Software\MIT\Leash" Action="createKey" KeyPath="yes"/>
+                    </Component>
+                    -->
+                    <Component Id="rcm_leash_5" Guid="A0D3D75F-762E-4D5C-909B-53E7396CEDB6" DiskId="1">
+	                    <Registry Id="reg_leash_5" Root="HKLM" Key="Software\MIT\Leash" Name="lock_file_locations" Type="integer" Value="[LEASHLOCKFILELOCATIONS]" KeyPath="yes"/>
+	                    <Condition>LEASHLOCKFILELOCATIONS</Condition>
+                    </Component>
+                    <Component Id="rcm_leash_6" Guid="F675C145-6F9D-4BC4-9DA0-CAFB47A96A71" DiskId="1">
+	                    <Registry Id="reg_leash_6" Root="HKLM" Key="Software\MIT\Leash" Name="MsLsaImport" Type="integer" Value="[LEASHMSLSAIMPORT]" KeyPath="yes"/>
+	                    <Condition>LEASHMSLSAIMPORT</Condition>
+                    </Component>
+                    
                     <Component Id="csc_leashStartup" Guid="3408C97D-68D6-4207-9142-BF82F7C62DC0" DiskId="1">
                         <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
                         <Shortcut Id="sc_leash32_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe"/>
@@ -130,6 +191,78 @@
                     <Component Id="cmf_leashw32_dll" Guid="8C145D48-A2FC-4C28-BC05-4368545F1184" DiskId="1">
 	                    <File Id="fil_leashw32_dll" LongName="leashw32.dll" Name="leashw32.dll" KeyPath="yes" />
                     </Component>
+                    
+                    <!-- Leash DLL configuration -->
+                    <Component Id="rcm_leashdll_1" Guid="54C949DA-AF1E-4412-81AF-F502BD5904D2" DiskId="1">
+	                    <Registry Id="reg_leashdll_1" Root="HKLM" Key="Software\MIT\Leash" Name="lifetime" Type="integer" Value="[LEASHLIFETIME]" KeyPath="yes"/>
+	                    <Condition>LEASHLIFETIME</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_2" Guid="9B553794-45E7-49FB-B6D9-1C3C9BB6E00D" DiskId="1">
+	                    <Registry Id="reg_leashdll_2" Root="HKLM" Key="Software\MIT\Leash" Name="renew_till" Type="integer" Value="[LEASHRENEWTILL]" KeyPath="yes"/>
+	                    <Condition>LEASHRENEWTILL</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_3" Guid="E3D1284C-17F6-41E3-9AA7-2ED05432060F" DiskId="1">
+	                    <Registry Id="reg_leashdll_3" Root="HKLM" Key="Software\MIT\Leash" Name="renewable" Type="integer" Value="[LEASHRENEWABLE]" KeyPath="yes"/>
+	                    <Condition>LEASHRENEWABLE</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_4" Guid="A02831D5-48B2-4E82-A670-EDCEBC197273" DiskId="1">
+	                    <Registry Id="reg_leashdll_4" Root="HKLM" Key="Software\MIT\Leash" Name="forwardable" Type="integer" Value="[LEASHFORWARDABLE]" KeyPath="yes"/>
+	                    <Condition>LEASHFORWARDABLE</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_5" Guid="5FDB0C01-6668-43E3-9C83-2CD364D97BF3" DiskId="1">
+	                    <Registry Id="reg_leashdll_5" Root="HKLM" Key="Software\MIT\Leash" Name="noaddresses" Type="integer" Value="[LEASHNOADDRESSES]" KeyPath="yes"/>
+	                    <Condition>LEASHNOADDRESSES</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_6" Guid="999BD59C-5C1E-446E-9D38-F4E26DD27D09" DiskId="1">
+	                    <Registry Id="reg_leashdll_6" Root="HKLM" Key="Software\MIT\Leash" Name="proxiable" Type="integer" Value="[LEASHPROXIABLE]" KeyPath="yes"/>
+	                    <Condition>LEASHPROXIABLE</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_7" Guid="C908AA17-DD21-4193-BA1D-535A2FD3D803" DiskId="1">
+	                    <Registry Id="reg_leashdll_7" Root="HKLM" Key="Software\MIT\Leash" Name="publicip" Type="integer" Value="[LEASHPUBLICIP]" KeyPath="yes"/>
+	                    <Condition>LEASHPUBLICIP</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_8" Guid="02926245-2327-46F9-AEF6-89E2DB0D90E1" DiskId="1">
+	                    <Registry Id="reg_leashdll_8" Root="HKLM" Key="Software\MIT\Leash" Name="usekrb4" Type="integer" Value="[LEASHUSEKRB4]" KeyPath="yes"/>
+	                    <Condition>LEASHUSEKRB4</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_9" Guid="B45BBA29-7A67-4FF7-AAA4-80044D46C451" DiskId="1">
+	                    <Registry Id="reg_leashdll_9" Root="HKLM" Key="Software\MIT\Leash" Name="hide_kinit_options" Type="integer" Value="[LEASHHIDEKINITOPTIONS]" KeyPath="yes"/>
+	                    <Condition>LEASHHIDEKINITOPTIONS</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_10" Guid="1DDC4D78-BDB4-48CD-A4E9-024FA9706100" DiskId="1">
+	                    <Registry Id="reg_leashdll_10" Root="HKLM" Key="Software\MIT\Leash" Name="life_min" Type="integer" Value="[LEASHLIFEMIN]" KeyPath="yes"/>
+	                    <Condition>LEASHLIFEMIN</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_11" Guid="39134333-58C7-4C6B-B690-2322D3AE928A" DiskId="1">
+	                    <Registry Id="reg_leashdll_11" Root="HKLM" Key="Software\MIT\Leash" Name="life_max" Type="integer" Value="[LEASHLIFEMAX]" KeyPath="yes"/>
+	                    <Condition>LEASHLIFEMAX</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_12" Guid="BBB6F5C3-290F-4A21-A630-E8630C6EAB67" DiskId="1">
+	                    <Registry Id="reg_leashdll_12" Root="HKLM" Key="Software\MIT\Leash" Name="renew_min" Type="integer" Value="[LEASHRENEWMIN]" KeyPath="yes"/>
+	                    <Condition>LEASHRENEWMIN</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_13" Guid="0F86A73E-DB31-45E7-9156-BE0EC99076A7" DiskId="1">
+	                    <Registry Id="reg_leashdll_13" Root="HKLM" Key="Software\MIT\Leash" Name="renew_max" Type="integer" Value="[LEASHRENEWMAX]" KeyPath="yes"/>
+	                    <Condition>LEASHRENEWMAX</Condition>
+                    </Component>
+                    <!--
+                    <Component Id="rcm_leashdll_14" Guid="FE0F06A2-62E7-46C1-9BFF-337C50DB78C7" DiskId="1">
+	                    <Registry Id="reg_leashdll_14" Root="HKLM" Key="Software\MIT\Leash32\Settings" Action="createKey" />
+                    </Component>
+                    -->
+                    <Component Id="rcm_leashdll_15" Guid="2DAC4693-6435-4278-A584-3D2B74BE87D5" DiskId="1">
+	                    <Registry Id="reg_leashdll_15" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="uppercaserealm" Type="integer" Value="[LEASHUPPERCASEREALM]" KeyPath="yes"/>
+	                    <Condition>LEASHUPPERCASEREALM</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_16" Guid="FE3DDD47-CCDE-44F8-8C86-97F2C3545443" DiskId="1">
+	                    <Registry Id="reg_leashdll_16" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="timehost" Type="string" Value="[LEASHTIMEHOST]" KeyPath="yes"/>
+	                    <Condition>LEASHTIMEHOST</Condition>
+                    </Component>
+                    <Component Id="rcm_leashdll_17" Guid="1B685E1B-32F2-49A5-9B7D-4288741A2C17" DiskId="1">
+	                    <Registry Id="reg_leashdll_17" Root="HKLM" Key="Software\MIT\Leash" Name="preserve_kinit_options" Type="integer" Value="[LEASHPRESERVEKINITOPTIONS]" KeyPath="yes"/>
+	                    <Condition>LEASHPRESERVEKINITOPTIONS</Condition>
+                    </Component>
+                    
                     <Component Id="cmf_ms2mit_exe" Guid="63D189DC-5EE4-49E2-B5E9-6E74A28602C8" DiskId="1">
 	                    <File Id="fil_ms2mit_exe" LongName="ms2mit.exe" Name="ms2mit.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_ms2mit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Action="createKeyAndRemoveKeyOnUninstall" />

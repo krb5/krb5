@@ -38,7 +38,7 @@
     <Property Id="ARPHELPLINK">http://web.mit.edu/kerberos</Property>
     <Property Id="INSTALLLEVEL">50</Property>
     <Property Id="ComponentDownload">http://web.mit.edu/kerberos</Property>
-    
+
     <Property Id="UPGRADENSIS">
         <RegistrySearch Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="registry" />
     </Property>
@@ -50,4 +50,37 @@
     <Property Id="CantRemoveNSISError">$(loc.CantRemoveNSIS)</Property>
     <Property Id="NoIE501Error">$(loc.IE501Required)</Property>
     <!--  Additional properties relating to the UI are in the appropriate UI.wxi file -->
+    
+    <!-- Configuration properties.  If these properties are defined, then
+         the corresponding component will be enabled. -->
+<?ifdef UseDefaultProperties?>
+    <Property Id="LEASHAFSSTATUS">$(var.LeashAfsStatus)</Property>
+    <Property Id="LEASHCREATEMISSINGCONFIG">$(var.LeashCreateMissingConfig)</Property>
+    <Property Id="LEASHAUTORENEWTICKETS">$(var.LeashAutoRenewTickets)</Property>
+    <Property Id="LEASHLOCKFILELOCATIONS">$(var.LeashLockFileLocations)</Property>
+    <Property Id="LEASHMSLSAIMPORT">$(var.LeashMsLsaImport)</Property>
+    <Property Id="LEASHLIFETIME">$(var.LeashLifetime)</Property>
+    <Property Id="LEASHRENEWTILL">$(var.LeashRenewTill)</Property>
+    <Property Id="LEASHRENEWABLE">$(var.LeashRenewable)</Property>
+    <Property Id="LEASHFORWARDABLE">$(var.LeashForwardable)</Property>
+    <Property Id="LEASHNOADDRESSES">$(var.LeashNoAddresses)</Property>
+    <Property Id="LEASHPROXIABLE">$(var.LeashProxiable)</Property>
+    <Property Id="LEASHPUBLICIP">$(var.LeashPublicIp)</Property>
+    <Property Id="LEASHUSEKRB4">$(var.LeashUseKrb4)</Property>
+    <Property Id="LEASHHIDEKINITOPTIONS">$(var.LeashHideKinitOptions)</Property>
+    <Property Id="LEASHLIFEMIN">$(var.LeashLifeMin)</Property>
+    <Property Id="LEASHLIFEMAX">$(var.LeashLifeMax)</Property>
+    <Property Id="LEASHRENEWMIN">$(var.LeashRenewMin)</Property>
+    <Property Id="LEASHRENEWMAX">$(var.LeashRenewMax)</Property>
+    <Property Id="LEASHUPPERCASEREALM">$(var.LeashUppercaseRealm)</Property>
+    <Property Id="LEASHTIMEHOST">$(var.LeashTimeHost)</Property>
+    <Property Id="LEASHPRESERVEKINITOPTIONS">$(var.LeashPreserveKinitOptions)</Property>
+    <Property Id="KRB4KRBREALMS">$(var.Krb4KrbRealms)</Property>
+    <Property Id="KRB4KRBCONF">$(var.Krb4KrbConf)</Property>
+    <Property Id="KRB4CONFIGDIR">$(var.Krb4ConfigDir)</Property>
+    <Property Id="KRB4TICKETFILE">$(var.Krb4TicketFile)</Property>
+    <Property Id="KRB5CONFIG">$(var.Krb5Config)</Property>
+    <Property Id="KRB5CCNAME">$(var.Krb5CcName)</Property>
+    <Property Id="KRB5PRESERVEIDENTITY">$(var.Krb5PreserveIdentity)</Property>
+<?endif?>
 </Include>

@@ -61,12 +61,50 @@
             <ComponentRef Id="cmf_krbcc32s_exe" />
             <ComponentRef Id="cmf_krbv4w32_dll" />
             <ComponentRef Id="cmf_leash32_exe" />
+            
+            <!-- Leash config options -->
+            <ComponentRef Id="rcm_leash_1" />
+            <ComponentRef Id="rcm_leash_2" />
+            <ComponentRef Id="rcm_leash_3" />
+            <ComponentRef Id="rcm_leash_5" />
+            <ComponentRef Id="rcm_leash_6" />
+            
+            <!-- Kerberos IV options -->
+            <ComponentRef Id="rcm_krb4_1" />
+            <ComponentRef Id="rcm_krb4_2" />
+            <ComponentRef Id="rcm_krb4_3" />
+            <ComponentRef Id="rcm_krb4_4" />
+            
+            <!-- Kerberos V options -->
+            <ComponentRef Id="rcm_krb5_1" />
+            <ComponentRef Id="rcm_krb5_2" />
+            <ComponentRef Id="rcm_krb5_3" />
+            
         <?ifdef OldHelp?>
             <ComponentRef Id="cmf_leash32_hlp" />
         <?else?>
             <ComponentRef Id="cmf_leash32_chm" />
         <?endif?>
             <ComponentRef Id="cmf_leashw32_dll" />
+            
+            <!-- Leash dll options -->
+            <ComponentRef Id="rcm_leashdll_1" />
+            <ComponentRef Id="rcm_leashdll_2" />
+            <ComponentRef Id="rcm_leashdll_3" />
+            <ComponentRef Id="rcm_leashdll_4" />
+            <ComponentRef Id="rcm_leashdll_5" />
+            <ComponentRef Id="rcm_leashdll_6" />
+            <ComponentRef Id="rcm_leashdll_7" />
+            <ComponentRef Id="rcm_leashdll_8" />
+            <ComponentRef Id="rcm_leashdll_9" />
+            <ComponentRef Id="rcm_leashdll_10" />
+            <ComponentRef Id="rcm_leashdll_11" />
+            <ComponentRef Id="rcm_leashdll_12" />
+            <ComponentRef Id="rcm_leashdll_13" />
+            <ComponentRef Id="rcm_leashdll_15" />
+            <ComponentRef Id="rcm_leashdll_16" />
+            <ComponentRef Id="rcm_leashdll_17" />
+            
             <ComponentRef Id="cmf_ms2mit_exe" />
             <ComponentRef Id="cmf_wshelp32_dll" />
             <ComponentRef Id="cmf_xpprof32_dll" />

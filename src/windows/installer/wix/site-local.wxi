@@ -6,7 +6,7 @@
     <!-- TargetDir should point to build target directory and must end with 
          a backslash.  If not specified, assume we are in TargetDir\install -->
 
-    <?define TargetDir="d:\work\kfwtest\"?>
+    <?define TargetDir="d:\work\kfwbins\"?>
 
     <!-- ConfigDir should point to directory containing configuration files 
          (krb5.ini, krb.con, krbrealm.con) to be bundled with the installer.
