@@ -40,7 +40,7 @@
 %\newcommand{\Conditions}[1]{}
 %\newcommand{\Priority}[1]{}
 
-\title{OpenV*Secure 1.0 Admin API\\
+\title{KADM5 Admin API\\
 Unit Test Description\footnote{\rcsHeader}}
 \author{Jonathan I. Kamens}
 
@@ -1386,7 +1386,8 @@ ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
 
 \numtest{14}{
 \Priority{High}
-\Reason{Succeeds for user with ``add'' and ``delete''.}
+\Reason{Succeeds for user with ``add'' and ``delete'', when that user
+has non-name-based salt.}
 \Status{Implemented}
 }
 
@@ -1408,6 +1409,12 @@ ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
 \Conditions{RPC}
 }
 
+\numtest{18}{
+\Priority{bug fix}
+\Reason{Returns NO_RENAME_SALT when asked to rename a principal whose
+salt depends on the principal name.}
+\Status{Implemented}
+}
 
 \section{ovsec_kadm_chpass_principal}
 \label{ovseckadmchpassprincipal}
