@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include "argv_parse.h"
 
 #define STATE_WHITESPACE	1
