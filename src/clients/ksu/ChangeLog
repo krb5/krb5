@@ -1,3 +1,7 @@
+Sat May 25 16:11:55 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Use aname db libs.
+
 Tue May 21 19:14:27 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install): Ignore error return from installation of
