@@ -1,3 +1,32 @@
+2002-01-07  Tom Yu  <tlyu@mit.edu>
+
+	* crc.pl: New file; perl script to do generate some test vectors
+	and CRC tables.
+
+	* CRC.pm: New file; perl module to implement CRCs in terms of
+	polynomial arithmetic (verrrry slooow).
+
+	* Poly.pm: New file; perl module to do polynomial arithmetic in
+	the field of integers mod 2.
+
+	* t_crc.c: New file; do some sanity checks (and timing checks,
+	more useful when building shift-4 as well).
+
+	* Makefile.in (check-unix): Add rules for building, running
+	t_crc.
+
+	* crc32.c (mit_crc32_shift4): Add new function, usually not
+	compiled, for shift-4 implementation of CRC32.
+
+	* crc-32.h: Add (conditionalized) prototype for the shift-4
+	function; remove checksum_entry (it's no longer used).
+
+	* crctest.c: Removed.
+
+	* crc-test: Removed.
+
+	* crc.c: Removed.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* crc.c: Make prototypes unconditional.
