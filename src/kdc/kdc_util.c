@@ -64,8 +64,9 @@ krb5_authdata ***output;
 		/* XXX clean up */
 		return ENOMEM;
 	    }
-	    bcopy((char *)(*ptr)->contents, (char *) retdata[i]->contents,
-		  retdata[i]->length);
+	    memcpy((char *) retdata[i]->contents,
+		   (char *)(*ptr)->contents,
+		   retdata[i]->length);
 
 	    ptr++;
 	    i++;
@@ -246,9 +247,9 @@ krb5_ticket **ticket;
 	return retval;
     }
     if (our_cksum.length != authdat.authenticator->checksum->length ||
-	bcmp((char *)our_cksum.contents,
-	     (char *)authdat.authenticator->checksum->contents,
-	     our_cksum.length)) {
+	memcmp((char *)our_cksum.contents,
+	       (char *)authdat.authenticator->checksum->contents,
+	       our_cksum.length)) {
 	krb5_free_authenticator(authdat.authenticator);
 	krb5_free_ticket(authdat.ticket);
 	xfree(our_cksum.contents);
