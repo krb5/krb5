@@ -1,3 +1,7 @@
+Sat Jul  8 17:40:10 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos_v4.c (v4_klog): Also log L_KRB_PERR error messages, so
+		we know when there are protocol problems.
 
 Fri Jul 7 16:05:57 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.

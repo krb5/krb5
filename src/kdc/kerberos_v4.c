@@ -228,6 +228,7 @@ char * v4_klog( type, format, va_alist)
     case L_ERR_NKY:
     case L_ERR_NUN:
     case L_ERR_UNK:
+    case L_KRB_PERR:
 	logpri = LOG_ERR;
     case L_INI_REQ:
     case L_NTGT_INTK:
