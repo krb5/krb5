@@ -30,6 +30,9 @@
 
 #include <pwd.h>
 #include <sys/param.h>
+#if defined(aix)   /* AIX needs BSD defined to some value for socket.h */
+#define _BSD 44
+#endif
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -41,6 +44,17 @@
 #define NOTOK 1
 #define MAX_USERNAME 10
 
+#ifdef unicos61
+#ifdef MAXPATHLEN
+#undef MAXPATHLEN
+#endif
+#define MAXPATHLEN PATHSIZE
+#endif  /* unicos61 */
+
+#ifndef F_OK
+#define F_OK 0
+#endif
+    
 /*
  * Given a Kerberos principal "kdata", and a local username "luser",
  * determine whether user is authorized to login according to the
@@ -62,7 +76,7 @@
  * one entry per line.
  *
  * The ATHENA_COMPAT code supports old-style Athena ~luser/.klogin
- * file entries.  See the file "kparse.c".
+ * file entries.  See the file "kn_parse.c".
  */
 
 
@@ -83,7 +97,7 @@ kuserok(kdata, luser)
     int gobble;
 
     /* no account => no access */
-    if ((pwd = getpwnam(luser)) == NULL) {
+    if ((pwd = (struct passwd *) getpwnam(luser)) == NULL) {
 	return(NOTOK);
     }
     (void) strcpy(pbuf, pwd->pw_dir);

@@ -31,7 +31,9 @@ static char rcsid_rd_safe_c[] =
 #endif	/* !lint & !SABER */
 
 #include "krb425.h"
+#ifndef hpux
 #include <arpa/inet.h>
+#endif
 
 long
 krb_rd_safe(in, in_length, key, sender, receiver, msg)

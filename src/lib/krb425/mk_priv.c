@@ -31,7 +31,9 @@ static char rcsid_mk_priv_c[] =
 #endif	/* !lint & !SABER */
 
 #include "krb425.h"
+#ifndef hpux
 #include <arpa/inet.h>
+#endif
 
 long
 krb_mk_priv(in, out, in_length, sched, key, sender, receiver)

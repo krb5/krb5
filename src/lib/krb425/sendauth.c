@@ -35,7 +35,7 @@ static char rcsid_sendauth_c[] =
 #include <syslog.h>
 #include <errno.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 #define	KRB_SENDAUTH_VERS "AUTHV0.1" /* MUST be KRB_SENDAUTH_VLEN chars */
 /*
