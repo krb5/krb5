@@ -49,7 +49,7 @@ extern const int sys_nerr;
 
 static char buffer[ET_EBUFSIZ];
 
-#if (defined(_MSDOS) || defined(_WIN32) || defined(macintosh) || defined(__MACH__))
+#if (defined(_MSDOS) || defined(_WIN32) || defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 static struct et_list * _et_list = (struct et_list *) NULL;
 #else
 /* Old interface compatibility */
@@ -157,6 +157,13 @@ oops:
 		if (GetErrorLongString(code, buffer, ET_EBUFSIZ - 1) == noErr) {
 			return buffer;
 		}
+
+#if TARGET_API_MAC_OSX
+		/* ComErr and ErrorLib don't know about this error, ask the system */
+		/* Of course there's no way to tell if it knew what error it got */
+		return (strerror (code));
+#endif
+
 	}
 #endif
 	
