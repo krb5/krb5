@@ -1,3 +1,8 @@
+Fri Jul 15 15:03:11 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* krcp.c: add utimes() emulation for systems that only have the
+		POSIX utime() call.
+
 Mon Jun 27 22:03:48 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* krlogind.c: remove spurious debugging #undef of KRB5_KRB4_COMPAT

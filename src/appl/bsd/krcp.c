@@ -737,6 +737,28 @@ krb5_sigtype
 }
 
 
+#if !defined(HAS_UTIMES)
+#include <utime.h>
+#include <sys/time.h>
+
+/*
+ * We emulate utimes() instead of utime() as necessary because
+ * utimes() is more powerful than utime(), and rcp actually tries to
+ * set the microsecond values; we don't want to take away
+ * functionality unnecessarily.
+ */
+utimes(file, tvp)
+const char *file;
+struct timeval *tvp;
+{
+	struct utimbuf times;
+
+	times.actime = tvp[0].tv_sec;
+	times.modtime = tvp[1].tv_sec;
+	return(utime(file, &times));
+}
+#endif
+
 
 sink(argc, argv)
      int argc;
