@@ -906,18 +906,18 @@ described below. 1024 bytes is recommended.  It will also return the
 new password to the caller if pw_ret is non-NULL.
 
 \begin{enumerate}
-\item If new_pw is NULL, this routine will prompt the user for
-``New Password:'' and ``New Password (again):'' and read (without
-echoing) the password input. Since it is likely that this will simply
-call krb5_read_password only terminal-based applications will make use
-of the password reading functionality. If the passwords don't match
-the string ``New passwords do not match - password not changed.'' will
-be copied into msg_ret, and the error code KRB5_LIBOS_BADPWDMATCH will
-be returned.  For other errors that ocurr while reading the new
-password, copy the string ``<com_err message$>$ occurred while trying
-to read new password.''  followed by a blank line and ``Password not
-changed.'' into msg_ret and return the error code returned by
-krb5_read_password.
+\item If new_pw is NULL, this routine will prompt the user for the new
+password (using the strings specified by OVSEC_KADM_PW_FIRST_PROMPT and
+OVSEC_KADM_PW_SECOND_PROMPT) and read (without echoing) the password input.
+Since it is likely that this will simply call krb5_read_password only
+terminal-based applications will make use of the password reading
+functionality. If the passwords don't match the string ``New passwords do
+not match - password not changed.'' will be copied into msg_ret, and the
+error code KRB5_LIBOS_BADPWDMATCH will be returned.  For other errors that
+ocurr while reading the new password, copy the string ``<com_err message$>$
+occurred while trying to read new password.'' followed by a blank line and
+the string specified by CHPASS_UTIL_PASSWORD_NOT_CHANGED into msg_ret and
+return the error code returned by krb5_read_password.
 
 \item If pw_ret is non-NULL, and the password was prompted, set *pw_ret to
 point to a static buffer containing the password.  If pw_ret is non-NULL
@@ -925,7 +925,8 @@ and the password was supplied, set *pw_ret to the supplied password.
 
 \item Call ovsec_kadm_chpass_principal with princ, and new_pw.
 
-\item If successful copy ``Password Changed.'' into msg_ret and return zero.
+\item If successful copy the string specified by CHPASS_UTIL_PASSWORD_CHANGED
+into msg_ret and return zero.
 
 \item For a policy related failure copy the appropriate message (from below) 
 followed by a newline and ``Password not changed.'' into msg_ret
@@ -1009,13 +1010,10 @@ Generate and assign a new random key to the named principal, and
 return the generated key in allocated storage.  The caller must free
 the returned krb5_keyblock * with krb5_free_keyblock.
 
-This function enforces password policy.  If the principal's POLICY bit
-is set in aux_attributes, compliance with each of the named policy
-fields is verified and an appropriate error code is returned if
-verification fails.
-
-Note that the policy checks are only be performed if the POLICY bit is
-set in the principal's aux_attributes field.
+If the principal's POLICY bit is set in aux_attributes and the caller does
+not have modify privilege , compliance with the password minimum life
+specified by the policy is verified and an appropriate error code is returned
+if verification fails. 
 
 \begin{enumerate}
 \item If the principal does not exist, return OVSEC_KADM_UNK_PRINC.
