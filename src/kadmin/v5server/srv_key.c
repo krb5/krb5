@@ -536,7 +536,7 @@ key_init(kcontext, debug_level, key_type, master_key_name, manual,
      * is none, then we want to create it.  This way, kadmind5 becomes just
      * a plug in and go kind of utility.
      */
-    kret = key_get_admin_entry(kcontext, debug_level);
+    kret = key_get_admin_entry(kcontext);
 
  cleanup:
     if (kret) {
@@ -726,6 +726,23 @@ key_string2key_keysalt(ksent, ptr)
 		krb5_xfree(xsalt);
 	    }
 		break;
+	      case KRB5_KDB_SALTTYPE_AFS3:
+		{
+		  /* use KDC-supplied realm for TransArc AFS style salt */
+		  /* malloc and copy to cover trailing 0, mit_afs_string_to_key
+		     takes care of free'ing it. */
+		  char *dat;
+		  int len;
+		  len = krb5_princ_realm(argp->context, argp->dbentry->princ)->length;
+		  dat = malloc(1+len);
+		  if (!dat) 
+		    goto done;
+		  strncpy(dat, krb5_princ_realm(argp->context, argp->dbentry->princ)->data, len);
+		  dat[len] = 0;
+		  salt.data = dat;
+		  salt.length = -1; /* in order to get around API change */
+		  break;
+		}
 	    default:
 		goto done;
 	    }
@@ -750,6 +767,9 @@ key_string2key_keysalt(ksent, ptr)
 				       argp->string,
 				       &salt)))
 	    goto done;
+
+	if (salt.length == -1)
+	  salt.length = strlen (salt.data);
 	
 	/*
 	 * Now, salt contains the salt and key contains the decrypted

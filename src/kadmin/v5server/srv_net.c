@@ -703,8 +703,9 @@ net_finish(kcontext, debug_level)
  * comes in, dispatch to net_client_connect().
  */
 krb5_error_code
-net_dispatch(kcontext)
+net_dispatch(kcontext, detached)
     krb5_context	kcontext;
+    int			detached;
 {
     krb5_error_code	kret;
     fd_set		mask, readfds;
@@ -729,14 +730,18 @@ net_dispatch(kcontext)
 #ifdef	DEBUG
     (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
 #endif	/* DEBUG */
+    if (!detached)
+      (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
 #else	/* POSIX_SIGNALS */
     /*
-     * SIGTERM (or SIGINT, if debug) shuts us down.
+     * SIGTERM (or SIGINT, if debug, or SIGHUP if not detached) shuts us down.
      */
     signal(SIGTERM, net_shutdown);
 #ifdef	DEBUG
     signal(SIGINT, net_shutdown);
 #endif	/* DEBUG */
+    if (!detached)
+      signal(SIGHUP, net_shutdown);
 #endif	/* POSIX_SIGNALS */
 
 #if	!USE_PTHREADS

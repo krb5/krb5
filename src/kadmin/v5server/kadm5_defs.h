@@ -198,7 +198,7 @@ void net_finish
 	KRB5_PROTOTYPE((krb5_context,
 		   int));
 krb5_error_code net_dispatch
-	KRB5_PROTOTYPE((krb5_context));
+	KRB5_PROTOTYPE((krb5_context, int));
 krb5_principal net_server_princ();
 
 /* proto_serv.c */

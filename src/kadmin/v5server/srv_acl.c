@@ -74,7 +74,7 @@ static int acl_debug_level = 0;
  * the case where the ACL file is not present, this entry controls what can
  * be done.  The default is that everybody can change their own password.
  */
-static const char *acl_catchall_entry = "* o";
+static const char *acl_catchall_entry = "* o ";
 
 static const char *acl_line2long_msg = "%s: line %d too long, truncated\n";
 static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s\n";
@@ -235,6 +235,7 @@ acl_free_entries()
 static int
 acl_load_acl_file()
 {
+char tmpbuf[10];
     FILE 	*afp;
     char 	*alinep;
     aent_t	**aentpp;
@@ -261,7 +262,8 @@ acl_load_acl_file()
 	    acl_list_tail = *aentpp;
 	    aentpp = &(*aentpp)->ae_next;
 	}
-	if (*aentpp = acl_parse_line(acl_catchall_entry)) {
+strcpy(tmpbuf, acl_catchall_entry);
+	if (*aentpp = acl_parse_line(tmpbuf)) {
 	    acl_list_tail = *aentpp;
 	}
 	else {

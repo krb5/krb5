@@ -324,7 +324,10 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
     if (nwrite != 1)
 	kret = KRB5KRB_ERR_GENERIC;
 
+#ifdef	USE_KDB5_CPW
+    /* it's only a copy under the new code, see memcpy above */
     (void) krb5_db_free_principal(kcontext, &entry2write, 1);
+#endif	/* USE_KDB5_CPW */
 
  cleanup:
 #ifndef	USE_KDB5_CPW

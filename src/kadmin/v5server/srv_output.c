@@ -384,7 +384,6 @@ output_krb5_errmsg(lang, mime, kval)
 {
     char *ret;
     char *ermsg;
-    int alen;
 
     DPRINT(DEBUG_CALLS, output_debug_level,
 	   ("* output_krb5_errmsg(v=%d, lang=%s, mime=%d)\n",

@@ -148,8 +148,8 @@ main(argc, argv)
     int			manual_entry = 0;
     krb5_boolean	mime_enabled = 0;
     int			debug_level = 0;
-    int			timeout = -1;
     int			nofork = 0;
+    int			timeout = -1;
     krb5_int32		service_port = -1;
     char		*acl_file = (char *) NULL;
     char		*db_file = (char *) NULL;
@@ -160,8 +160,8 @@ main(argc, argv)
     char		*stash_name = (char *) NULL;
     krb5_deltat		maxlife = -1;
     krb5_deltat		maxrlife = -1;
-    krb5_timestamp	def_expiration;
-    krb5_flags		def_flags;
+    krb5_timestamp	def_expiration = 0;
+    krb5_flags		def_flags = 0;
     krb5_boolean	exp_valid, flags_valid;
     krb5_realm_params	*rparams;
     krb5_int32		realm_num_keysalts;
@@ -450,7 +450,7 @@ main(argc, argv)
 	    /*
 	     * net_dispatch() only returns when we're done for some reason.
 	     */
-	    error = net_dispatch(kcontext);
+	    error = net_dispatch(kcontext, !nofork);
 
 	    com_err(programname, error,
 		    ((error) ? disp_err_fmt : happy_exit_fmt));
