@@ -1,3 +1,7 @@
+Fri May 10 18:48:38 EDT 1996  Richard Basch  <basch@lehman.com>
+
+	* init_ctx.c: Removed des3-cbc-md5 default support
+
 Fri May 10 02:51:17 1996  Richard Basch  <basch@lehman.com>
 
 	* str_conv.c: changes des3-md5 to des3-sha & added sha cksum types

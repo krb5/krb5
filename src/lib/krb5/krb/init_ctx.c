@@ -190,7 +190,7 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 
 	code = profile_get_string(context->profile,
 				  "libdefaults", "default_tkt_enctypes", NULL,
-				  "des3-cbc-md5 des-cbc-md5 des-cbc-crc",
+				  "des-cbc-md5 des-cbc-crc",
 				  &retval);
 	if (code)
 	    return code;
@@ -306,7 +306,7 @@ krb5_get_tgs_ktypes(context, princ, ktypes)
 
 	code = profile_get_string(context->profile,
 				  "libdefaults", "default_tgs_enctypes", NULL,
-				  "des3-cbc-md5 des-cbc-md5 des-cbc-crc",
+				  "des-cbc-md5 des-cbc-crc",
 				  &retval);
 	if (code)
 	    return code;
