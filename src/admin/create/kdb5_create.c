@@ -23,7 +23,7 @@ static char rcsid_kdb_create_c[] =
 #include <krb5/kdb5_err.h>
 #include <krb5/isode_err.h>
 #include <stdio.h>
-#include <krb5/libos-proto.h>
+#include <krb5/asn1.h>
 
 #include <com_err.h>
 #include <errno.h>
@@ -73,7 +73,8 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-n dbname] [-r realmname] [-t keytype] [-e etype]\n",
+    fprintf(stderr, "usage: %s [-n dbname] [-r realmname] [-k keytype]\n\
+\t[-e etype] [-M mkeyname]\n",
 	    who);
     exit(status);
 }
@@ -124,7 +125,7 @@ char *argv[];
     initialize_kdb5_error_table();
     initialize_isod_error_table();
 
-    while ((optchar = getopt(argc, argv, "n:r:t:M:e:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "n:r:k:M:e:")) != EOF) {
 	switch(optchar) {
 	case 'n':			/* set db name */
 	    dbname = optarg;
@@ -132,7 +133,7 @@ char *argv[];
 	case 'r':
 	    realm = optarg;
 	    break;
-	case 't':
+	case 'k':
 	    master_keyblock.keytype = atoi(optarg);
 	    keytypedone++;
 	    break;
@@ -204,7 +205,8 @@ char *argv[];
     tgt_princ[0]->data = realm;
     tgt_princ[0]->length = strlen(realm);
 
-    printf("Initializing database '%s' for realm '%s', master key name '%s'\n",
+    printf("Initializing database '%s' for realm '%s',\n\
+master key name '%s'\n",
 	   dbname, realm, mkey_fullname);
 
     printf("You will be prompted for the database Master Password.\n");
@@ -218,14 +220,14 @@ char *argv[];
 	exit(1);
     }
     if (retval = (*csentry->process_key)(&master_encblock,
-						 &master_keyblock)) {
+					 &master_keyblock)) {
 	com_err(argv[0], retval, "while processing master key");
 	exit(1);
     }
 
     rblock.eblock = &master_encblock;
     if (retval = (*csentry->init_random_key)(&master_keyblock,
-						     &rblock.rseed)) {
+					     &rblock.rseed)) {
 	com_err(argv[0], retval, "while initializing random key generator");
 	(void) (*csentry->finish_key)(&master_encblock);
 	exit(1);
@@ -233,7 +235,8 @@ char *argv[];
     if (retval = krb5_db_init()) {
 	(void) (*csentry->finish_key)(&master_encblock);
 	(void) (*csentry->finish_random_key)(&rblock.rseed);
-	com_err(argv[0], retval, "while initializing the database");
+	com_err(argv[0], retval, "while initializing the database '%s'",
+		dbname);
 	exit(1);
     }
 
@@ -289,8 +292,10 @@ struct realm_info *pblock;
 	if (retval = (*pblock->eblock->crypto_entry->random_key)(pblock->rseed,
 								 &rkey))
 	    return retval;
-	ekey = *rkey;
-	free((char *)rkey);
+	retval = krb5_kdb_encrypt_key(pblock->eblock, rkey, &ekey);
+	krb5_free_keyblock(rkey);
+	if (retval)
+	    return retval;
 	break;
     case NULL_KEY:
 	return EOPNOTSUPP;
