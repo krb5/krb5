@@ -30,7 +30,7 @@ dnl set up buildtop stuff
 dnl
 define(AC_BUILDTOP,[.])dnl
 define(AC_SET_BUILDTOP,
-[BUILDTOP=AC_BUILDTOP
+[BUILDTOP=AC_TOPDIR
 AC_SUBST(BUILDTOP)dnl
 ])dnl
 dnl
@@ -46,21 +46,20 @@ if [ -z "${norecursion}" ] ; then
 	recurse_args=
 	recur_state=
 # ok this stuff really belongs in ac_general.m4, but we'll live :-)
-	for arg do
+	for arg in $configure_args; do
 		if test -z "$recur_state" ; then
-			case $arg in
-				*\"*|*\\*|*\<<<$>>>*)
-				arg=`echo $arg|sed -e 's/\\\\/\\\\\\\\/g;s/"/\\\\"/g;s/\\$/\\\\$/g'`
-				;;
+			eval unquoted_arg="$arg"
+			case "$unquoted_arg" in
 				-srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
 				recur_state="skip"
 				continue
 				;;
 				-srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
 				;;
+				*)
+				recurse_args="$recurse_args $arg"
+				;;
 			esac
-			# yes this is gross but we need it to make sure that things don't get scrod
-			recurse_args="$recurse_args \"$arg\""
 		else
 			recur_state=
 		fi

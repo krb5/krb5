@@ -1,3 +1,8 @@
+Fri Jul  1 02:21:51 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* aclocal.m4: fixes for dealing with new version of autoconf, in
+	particular quoting and BUILDTOP
+
 Wed Jun 29 01:36:38 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* aclocal.m4: oops... fixing some problems with the quoter.
