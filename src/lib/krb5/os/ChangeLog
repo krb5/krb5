@@ -1,3 +1,8 @@
+2003-04-27  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Call
+	krb5_setpw_result_code_string not krb5_setpw_result_code_string  
+
 2003-04-24  Sam Hartman  <hartmans@mit.edu>
 
 	* changepw.c (krb5_change_set_password): return error from

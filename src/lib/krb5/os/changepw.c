@@ -314,7 +314,7 @@ krb5_change_set_password(
 
 	if (result_code_string) {
 		if( set_password_for )
-	    	code = krb5_setpw_result_code_string(context, local_result_code, (const char **)&code_string);
+	    	code = krb5int_setpw_result_code_string(context, local_result_code, (const char **)&code_string);
 		else
 	    	code = krb5_chpw_result_code_string(context, local_result_code, &code_string);
 		if(code)

@@ -1,3 +1,7 @@
+2003-04-27  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_setpw_result_code_string): Make internal 
+
 2003-04-25  Sam Hartman  <hartmans@mit.edu>
 
 	* chpw.c (krb5int_rd_setpw_rep): Fix error handling; allow
