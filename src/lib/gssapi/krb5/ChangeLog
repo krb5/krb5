@@ -1,3 +1,14 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* add_cred.c (krb5_gss_add_cred): Added constness to some char*s to make
+	them compiler with strict compilers.
+	* gssapi_krb5.h, gssapi_krb5.c: Added oids from rfc 1964 using the 
+	suggested names.
+	* gssapi_krb5.h: Added #include of KerberosSupport.h in case this header
+	is included by itself.
+	* disp-status.c, gssapiP_krb5.h, gssapi_krb5.h: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+	
 2001-10-04  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Ignore
