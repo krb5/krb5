@@ -13,9 +13,9 @@
 
 /* Saber bug doesn't allow deref through const *'s */
 #ifdef VaxArchitecture
-#define SaberDefines -I/mit/gnu/vaxlib/gcc-include -Dconst=
+#define SaberDefines -I/mit/gnu/vaxlib/gcc-include -Dconst= -DBITS32
 #else
-#define SaberDefines -Dconst=
+#define SaberDefines -Dconst= -DBITS32
 #endif
 
 #ifdef VaxArchitecture
@@ -27,6 +27,7 @@
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
-#define DesDefines -DBITS32 -DBIG -DLSBFIRST
+#define StandardDefines -DBITS32
+#define DesDefines -DBIG -DLSBFIRST
 #endif
 

@@ -18,7 +18,7 @@
 
 /* HC lies */
 #define StandardCppDefines -U__STDC__
-#define SaberDefines
-#define StandardDefines -U__STDC__
+#define SaberDefines -DBITS32
+#define StandardDefines -U__STDC__ -DBITS32
 
-#define DesDefines -DBITS32 -DBIG -DMSBFIRST -DMUSTALIGN
+#define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN

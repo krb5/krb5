@@ -15,10 +15,10 @@
 #define HasPutenv YES
 #define HasBsearch YES
 #define IsPOSIX YES
-#define StandardCppDefines -DPOSIX -D_POSIX_SOURCE
+#define StandardCppDefines -DPOSIX -D_POSIX_SOURCE -DBITS32
 /* Saber bug doesn't allow deref through const *'s */
-#define SaberDefines -DPOSIX -Dconst=
-#define StandardDefines -YPOSIX -D_POSIX_SOURCE
+#define SaberDefines -DPOSIX -DBITS32 -Dconst=
+#define StandardDefines -YPOSIX -D_POSIX_SOURCE -DBITS32
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
