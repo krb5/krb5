@@ -84,10 +84,10 @@ krb5_encrypt_block master_encblock;
 
 krb5_data tgt_princ_entries[] = {
 	{0, 0},
-	{sizeof(TGTNAME), TGTNAME} };
+	{sizeof(TGTNAME)-1, TGTNAME} };
 
 krb5_data db_creator_entries[] = {
-	{sizeof("db_creation"), "db_creation"} };
+	{sizeof("db_creation")-1, "db_creation"} };
 
 /* XXX knows about contents of krb5_principal, and that tgt names
  are of form TGT/REALM@REALM */
