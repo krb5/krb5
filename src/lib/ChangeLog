@@ -1,3 +1,7 @@
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Export krb5_kuserok.
+
 1999-07-22  Jeffrey Altman <jaltman@columbia.edu>
 
         * krb5_32.def
