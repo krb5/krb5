@@ -427,6 +427,68 @@ proc test116 {} {
     }
 }
 if {$RPC} test116
+
+test "init 117"
+proc test117 {} {
+    global test env prompt
+
+    if {[catch "exec grep max_life $env(KRB5_KDC_PROFILE)"] != 1} {
+	warning \
+	   "$test: max_life in $env(KRB5_KDC_PROFILE), cannot perform test"
+	return
+    }
+
+    if {! (( ! [principal_exists "$test/a"]) ||
+        [delete_principal "$test/a"])} {
+        error_and_restart "$test: couldn't delete principal \"$test/a\""
+	return
+    }
+
+    if {! [cmd {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    }]} {
+	fail "$test: unexpected failure in init"
+	return
+    }
+
+    if {! [cmd [format {
+	kadm5_create_principal $server_handle [simple_principal "%s/a"] \
+		{KADM5_PRINCIPAL} "%s/a"
+    } $test $test]]} {
+	error "$test: unexpected failure creating principal"
+    }
+    if {! [cmd [format {
+	kadm5_get_principal $server_handle "%s/a" principal KADM5_MAX_LIFE
+    } $test]]} {
+	error_and_restart "$test: could not retrieve principal"
+	return
+    }
+    send "lindex \$principal 4\n"
+    expect {
+	-re "(\[0-9\]+)\n$prompt" {set max_life $expect_out(1,string) }
+	timeout {
+	    error_and_restart "$test: timeout getting max_life"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting max_life"
+	    return
+	}
+    }
+    
+    if {$max_life == 36000} {
+	pass "$test"
+    } else {
+	fail "$test: max_life $max_life should be 36000"
+    }
+
+    if {! [cmd {kadm5_destroy $server_handle}]} {
+	error_and_restart "$test: couldn't close server_handle"
+    }
+}
+test117
     
 send "puts \$KADM5_ADMIN_SERVICE\n"
 expect {
