@@ -1,5 +1,10 @@
 Fri Mar 28 01:05:27 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* login.c (NO_MOTD): If we're on an SGI machine, don't do the MOTD
+		or MAILCHECK thing, since it's done by /etc/cshrc magic.
+		(SGI's don't define __SVR4, even though it's SVR4
+		derived).  [krb5-appl/158]
+
 	* krlogin.c (try_normal): When falling back to the normal rlogin,
 		clear the signal mask, so that the child rlogin handles
 		SIGUSR1 (which is used for window size changes) correctly.

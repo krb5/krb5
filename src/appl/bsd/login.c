@@ -281,7 +281,7 @@ extern int errno;
 					   passsword */
 #endif
 
-#ifdef __SVR4
+#if defined(__SVR4) || defined(sgi)
 #define NO_MOTD
 #define NO_MAILCHECK
 #endif
