@@ -69,7 +69,11 @@ extern "C" {
 #endif
 
 KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
-	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, ...));
+	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, ...))
+#if !defined (__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
+       __attribute__ ((__format__ (__printf__, 3, 4)))
+#endif
+	;
 KRB5_DLLIMP extern void KRB5_CALLCONV com_err_va
 	ET_P((const char FAR *whoami, errcode_t code, const char FAR *fmt,
 	      va_list ap));

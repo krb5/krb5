@@ -1,3 +1,8 @@
+2000-06-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* com_err.h (com_err): Declare with format attribute if using
+	gcc.
+
 2000-05-07  Miro Jurisic  <meeroh@mit.edu>
 
 	* com_err.c (default_com_err_proc): use strncpy
