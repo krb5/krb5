@@ -27,7 +27,6 @@ static char rcsid_kinit_c [] =
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
-#define KRB5_RENEWABLE_LIFE 60*60*2 /* 2 hours */
 
 extern int optind;
 extern char *optarg;
@@ -54,6 +53,7 @@ main(argc, argv)
     krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
     long lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
+    long rlife = 0;
     int options = KRB5_DEFAULT_OPTIONS;
     int option;
     int errflg = 0;
@@ -69,18 +69,26 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "rpl:c:")) != EOF) {
+    while ((option = getopt(argc, argv, "r:fpl:c:")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
+	    code = krb5_parse_lifetime(optarg, &rlife);
+	    if (code != 0 || rlife == 0) {
+		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
+		errflg++;
+	    }
 	    break;
 	case 'p':
 	    options |= KDC_OPT_PROXIABLE;
 	    break;
+	case 'f':
+	    options |= KDC_OPT_FORWARDABLE;
+	    break;
 	case 'l':
 	    code = krb5_parse_lifetime(optarg, &lifetime);
-	    if (code != 0) {
-		fprintf(stderr, "Bad lifetime value %s\n", optarg);
+	    if (code != 0 || lifetime == 0) {
+		fprintf(stderr, "Bad lifetime value (%s hours?\n", optarg);
 		errflg++;
 	    }
 	    break;
@@ -108,7 +116,7 @@ main(argc, argv)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -rpu ] [ -l lifetime ] [ -c cachename ] principal\n", argv[0]);
+	fprintf(stderr, "Usage: %s [ -r time ] [ -puf ] [ -l lifetime ] [ -c cachename ] principal\n", argv[0]);
 	exit(2);
     }
     if (ccache == NULL) {
@@ -152,8 +160,7 @@ main(argc, argv)
 					   gets to KDC */
     my_creds.times.endtime = now + lifetime;
     if (options & KDC_OPT_RENEWABLE) {
-	my_creds.times.renew_till = my_creds.times.starttime +
-	    KRB5_RENEWABLE_LIFE;
+	my_creds.times.renew_till = now + rlife;
     } else
 	my_creds.times.renew_till = 0;
 
