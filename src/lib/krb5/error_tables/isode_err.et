@@ -1,0 +1,44 @@
+#
+# $Source$
+# $Author$
+#
+# Copyright 1989 by the Massachusetts Institute of Technology.
+#
+# For copying and distribution information, please see the file
+# <krb5/mit-copyright.h>.
+#
+# The Kerberos v5/ISODE 5.0 error table mappings
+#
+# see <isode/psap.h>
+
+error_table isod
+
+error_code ISODE_50_RCSID,	"$Id$"
+
+error_code	ISODE_50_PS_ERR_NONE, "isode (ps): No error"
+error_code	ISODE_50_PS_ERR_OVERID, "isode (ps):Overflow in ID"
+error_code	ISODE_50_PS_ERR_OVERLEN, "isode (ps):Overflow in length"
+error_code	ISODE_50_PS_ERR_NMEM, "isode (ps):Out of memory"
+error_code	ISODE_50_PS_ERR_EOF, "isode (ps):End of file"
+error_code	ISODE_50_PS_ERR_EOFID, "isode (ps):End of file reading extended ID"
+error_code	ISODE_50_PS_ERR_EOFLEN, "isode (ps):End of file reading extended length"
+error_code	ISODE_50_PS_ERR_LEN, "isode (ps):Length mismatch"
+error_code	ISODE_50_PS_ERR_TRNC, "isode (ps):Truncated"
+error_code	ISODE_50_PS_ERR_INDF, "isode (ps):Indefinite length in primitive form"
+error_code	ISODE_50_PS_ERR_IO, "isode (ps):I/O error"
+error_code	ISODE_50_PS_ERR_XXX, "isode (ps):XXX"
+
+error_code	ISODE_50_PE_ERR_NONE, "isode(pe):No error"
+error_code	ISODE_50_PE_ERR_OVER, "isode(pe):Overflow"
+error_code	ISODE_50_PE_ERR_NMEM, "isode(pe):Out of memory"
+error_code	ISODE_50_PE_ERR_BIT, "isode(pe):No such bit"
+error_code	ISODE_50_PE_ERR_UTCT, "isode(pe):Malformed universal timestring"
+error_code	ISODE_50_PE_ERR_GENT, "isode(pe):Malformed generalized timestring"
+error_code	ISODE_50_PE_ERR_MBER, "isode(pe):No such member"
+error_code	ISODE_50_PE_ERR_PRIM, "isode(pe):Not a primitive form"
+error_code	ISODE_50_PE_ERR_CONS, "isode(pe):Not a constructor form"
+error_code	ISODE_50_PE_ERR_TYPE, "isode(pe):Class/ID mismatch in constructor"
+error_code	ISODE_50_PE_ERR_OID, "isode(pe):Malformed object identifier"
+error_code	ISODE_50_PE_ERR_BITS, "isode(pe):Malformed bitstring"
+
+end
