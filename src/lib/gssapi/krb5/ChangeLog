@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Do not
+	shadow local variable ptr.
+
 2001-06-22  Danilo Almeida  <dalmeida@mit.edu>
 
 	* util_crypt.c (kg_encrypt, kg_decrypt): Use free() instead of

@@ -653,7 +653,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    /* generate an AP_REP if necessary */
 
    if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
-       unsigned char * ptr;
+       unsigned char * ptr3;
        if ((code = krb5_mk_rep(context, auth_context, &ap_rep))) {
 	   major_status = GSS_S_FAILURE;
 	   goto fail;
@@ -673,11 +673,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   code = ENOMEM;
 	   goto fail;
        }
-       ptr = token.value;
+       ptr3 = token.value;
        g_make_token_header((gss_OID) mech_used, ap_rep.length,
-			   &ptr, KG_TOK_CTX_AP_REP);
+			   &ptr3, KG_TOK_CTX_AP_REP);
 
-       TWRITE_STR(ptr, ap_rep.data, ap_rep.length);
+       TWRITE_STR(ptr3, ap_rep.data, ap_rep.length);
 
        ctx->established = 1;
 
