@@ -1,3 +1,9 @@
+1998-08-24  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add support to build the lib/krb5/ccache api
+		directory and include it in the Windows kerbsrc-nt.zip
+		file.
+
 Wed Jul  8 01:10:44 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* aclocal.m4: Allow shared libraries to build properly under Irix
