@@ -1,3 +1,16 @@
+Tue Feb 27 17:33:44 1996  Richard Basch  <basch@lehman.com>
+
+	* main.c:
+	Do not repeat random number generator initializations, as memory
+	is allocated and never reclaimed.  Also fixed the V4 random number
+	generator initialization (a DES_CBC_CRC random number is generated
+	and used as a seed for the V4 routine, but the generation function
+	was being called with the wrong arguments).
+
+	* do_as_req.c:
+	Memory was occassionally being freed twice because the pointer was
+	not re-initialized to NULL after it was freed.
+
 Sun Feb 25 16:04:10 1996  Mark W. Eichin  <eichin@cygnus.com>
 
 	* main.c (initialize_realms): missing indirection for conf_val in

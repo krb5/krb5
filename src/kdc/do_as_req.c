@@ -399,6 +399,7 @@ krb5_data **response;			/* filled in with a response packet */
 				  &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
+    encrypting_key.contents = 0;
 
     if (errcode) {
 	status = "ENCODE_KDC_REP";
