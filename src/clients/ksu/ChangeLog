@@ -1,3 +1,8 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* main.c (main): Cast arguments to print_status to be consitant
+	with format string.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* setenv.c: Add prototype for _findenv to avoid inconsistancy of

@@ -738,7 +738,7 @@ main (argc, argv)
 		     target_user, (long) target_pwd->pw_uid); 
     }else{
 	print_status("Changing uid to %s (%ld)\n", 
-		     target_user, target_pwd->pw_uid); 
+		     target_user, (long) target_pwd->pw_uid); 
     }
     
 #ifdef	HAVE_SETLUID
