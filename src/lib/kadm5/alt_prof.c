@@ -471,6 +471,23 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 }
     }
     
+    /* Get the value for the kpasswd port */
+    if (! (params.mask & KADM5_CONFIG_KPASSWD_PORT)) {
+	hierarchy[2] = "kpasswd_port";
+	if (params_in->mask & KADM5_CONFIG_KPASSWD_PORT) {
+	    params.mask |= KADM5_CONFIG_KPASSWD_PORT;
+	    params.kpasswd_port = params_in->kpasswd_port;
+	} else if (aprofile &&
+		   !krb5_aprof_get_int32(aprofile, hierarchy, TRUE,
+					 &ivalue)) { 
+	    params.kpasswd_port = ivalue;
+	    params.mask |= KADM5_CONFIG_KPASSWD_PORT;
+	} else {
+	    params.kpasswd_port = DEFAULT_KPASSWD_PORT;
+	    params.mask |= KADM5_CONFIG_KPASSWD_PORT;
+	}
+    }
+    
     /* Get the value for the master key name */
 	 hierarchy[2] = "master_key_name";
     if (params_in->mask & KADM5_CONFIG_MKEY_NAME) {

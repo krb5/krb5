@@ -1,3 +1,9 @@
+Tue Jan 20 23:06:36 1998  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Add support for Cygnus chpw.
+
+	* admin.h: Add support for Cygnus chpw.
+
 Mon Oct 13 10:48:24 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): When KADM5_CONFIG_ENCTYPES

@@ -94,7 +94,8 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_ADMIN_SERVER	0x010000
 #define KADM5_CONFIG_DICT_FILE		0x020000
 #define KADM5_CONFIG_MKEY_FROM_KBD	0x040000
-   
+#define KADM5_CONFIG_KPASSWD_PORT	0x080000
+    
 /*
  * permission bits
  */
@@ -187,6 +188,7 @@ typedef struct _kadm5_config_params {
      char *		realm;
      char *		profile;
      int		kadmind_port;
+     int		kpasswd_port;
 
      char *		admin_server;
 
