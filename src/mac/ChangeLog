@@ -1,0 +1,5 @@
+Wed Feb  7 00:26:08 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.tmpl, macfiles.sh: New files, for danw's changes to
+		allow building Makefiles for the Macintosh.  We now can
+		build MPW makefiles which are interpreted by CodeWarrior.
