@@ -1,3 +1,7 @@
+2003-08-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (STLIBOBJS, OBJS): Empty.
+
 2003-08-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJS, STLIBOBJS): Drop setenv.o.

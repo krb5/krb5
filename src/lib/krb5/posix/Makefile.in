@@ -7,10 +7,10 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 ##DOS##PREFIXDIR=posix
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 
-STLIBOBJS=@LIBOBJS@
+STLIBOBJS= # empty... @LIBOBJS@
 MACSRCS = getuid.c strcasecmp.c strdup.c
 
-OBJS = @LIBOBJS@
+OBJS = # empty... @LIBOBJS@
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
