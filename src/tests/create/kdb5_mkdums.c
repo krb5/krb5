@@ -65,6 +65,7 @@ int status;
     exit(status);
 }
 
+int master_princ_set = 0;
 krb5_keyblock master_keyblock;
 krb5_principal master_princ;
 krb5_db_entry master_entry;
@@ -204,6 +205,9 @@ main(argc, argv)
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
 	exit(1);
+    }
+    if (master_princ_set) {
+	krb5_free_principal(test_context, master_princ);
     }
     krb5_free_context(test_context);
     exit(0);
@@ -345,6 +349,7 @@ char *dbname;
 	com_err(pname, retval, "while setting up master key name");
 	return(1);
     }
+    master_princ_set = 1;
     if (mkey_password) {
 	pwd.data = mkey_password;
 	pwd.length = strlen(mkey_password);
