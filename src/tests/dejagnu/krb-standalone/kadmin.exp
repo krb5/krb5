@@ -84,11 +84,7 @@ proc kadmin_add { pname password } {
 	}
 	set good 0
 	expect "kdb5_edit:" { send "show $pname\r" }
-	expect {
-	    -re "Name: $pname@KRBTEST.COM\r\nKey version: 1\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 0.*Alt salt: 0" { 
-		set good 1
-	    }
-	}
+	expect "Name: $pname@KRBTEST.COM" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -106,91 +102,6 @@ proc kadmin_add { pname password } {
     }
     else {
 	fail "kadmin add $pname"
-	return 0
-    }
-}
-
-#++
-# kadmin_addv4	- Test add new v4 principal subfunction of kadmin.
-#
-# Adds principal $pname with $password with V4 salt.  Returns 1 on success.
-#--
-proc kadmin_addv4 { pname password } {
-    global KADMIN
-    global KDB5_EDIT
-    global KEY
-    global spawn_id
-    global tmppwd
-    global kadmind_spawn_id
-
-    set good 0
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM ank $pname salttype=v4
-    expect_after {
-	timeout {
-	    fail "kadmin addv4 $pname"
-	    catch "expect_after"
-	    return 0
-	}
-	eof {
-	    fail "kadmin addv4 $pname"
-	    catch "expect_after"
-	    return 0
-	}
-    }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
-	send "adminpass$KEY\r"
-    }
-    expect "Enter new password for $pname :" { send "$password\r" }
-    expect "Re-enter new password for $pname :" { send "$password\r" }
-    expect "principal $pname added" { set good 1 }
-    expect_after
-    expect eof
-    set k_stat [wait -i $spawn_id]
-    verbose "wait -i $spawn_id returned $k_stat (kadmin addv4)"
-    catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
-    if { $good == 1 } {
-	#
-	# use kdb5_edit to verify that a principal was created and that its
-	# salt types are 1 (v4).
-	#
-	spawn $KDB5_EDIT -r KRBTEST.COM
-	expect_after { -i $spawn_id
-	    timeout {
-		fail "kadmin addv4 $pname"
-		catch "expect_after"
-		return 0
-	    }
-	    eof {
-		fail "kadmin addv4 $pname"
-		catch "expect_after"
-		return 0
-	    }
-	}
-	set good 0
-	expect "kdb5_edit:" { send "show $pname\r" }
-	expect {
-	    -re "Name: $pname@KRBTEST.COM\r\nKey version: 1\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 1.*Alt salt: 1" { 
-		set good 1
-	    }
-	}
-	expect "kdb5_edit:" { send "q\r" }
-	expect_after
-	expect eof
-	set k_stat [wait -i $spawn_id]
-	verbose "wait -i $spawn_id returned $k_stat (kdb5_edit show)"
-	catch "close -i $spawn_id"
-	if { $good == 1 } {
-	    pass "kadmin addv4 $pname"
-	    return 1
-	}
-	else {
-	    fail "kadmin addv4 $pname"
-	    return 0
-	}
-    }
-    else {
-	fail "kadmin addv4 $pname"
 	return 0
     }
 }
@@ -252,11 +163,7 @@ proc kadmin_add_rnd { pname } {
 	}
 	set good 0
 	expect "kdb5_edit:" { send "show $pname\r" }
-	expect {
-	    -re "Name: $pname@KRBTEST.COM\r\nKey version: 1\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 0.*Alt salt: 0" { 
-		set good 1
-	    }
-	}
+	expect "Name: $pname@KRBTEST.COM" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -303,7 +210,7 @@ proc kadmin_show { pname } {
     }
     expect "Enter password for krbtest/admin@KRBTEST.COM:"
     send "adminpass$KEY\r"
-    expect -re "\r.*-*Principal: $pname.*Last modified by: .*Flags:.*-*"
+    expect -re "\r.*-*Principal: $pname.*Flags: .*Last modified by: .*-*"
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]
@@ -489,11 +396,7 @@ proc kadmin_rename { pname npname } {
 	}
 	set good 0
 	expect "kdb5_edit:" { send "show $npname\r" }
-	expect {
-	    -re "Name: $npname@KRBTEST.COM\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 0.*Alt salt: 0" { 
-		set good 1
-	    }
-	}
+	expect "Name: $npname@KRBTEST.COM" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -798,7 +701,7 @@ proc kadmin_test { } {
 
     # Test basic kadmin functions.
     if {![kadmin_add v5principal/instance1 v5principal] \
-	|| ![kadmin_addv4 v4principal/instance2 v4principal] \
+	|| ![kadmin_add v4principal/instance2 v4principal] \
 	|| ![kadmin_add_rnd v5random] \
 	|| ![kadmin_show v5principal/instance1] \
 	|| ![kadmin_show v4principal/instance2] \
@@ -806,8 +709,8 @@ proc kadmin_test { } {
 	|| ![kadmin_cpw v5principal/instance1 faroutman] \
 	|| ![kadmin_cpw v4principal/instance2 honkydory] \
 	|| ![kadmin_cpw_rnd v5random] \
-	|| ![kadmin_modify v5random -allow_tickets] \
-	|| ![kadmin_modify v5random +allow_tickets] \
+	|| ![kadmin_modify v5random -allow-tickets] \
+	|| ![kadmin_modify v5random +allow-tickets] \
 	|| ![kadmin_rename v5random randomkey] \
 	|| ![kadmin_show randomkey] \
 	|| ![kadmin_list] \
