@@ -652,23 +652,23 @@ cfb64_encrypt(s, c)
 	int c;
 {
 	register struct stinfo *stp = &fb[CFB].streams[DIR_ENCRYPT-1];
-	register int index;
+	register int idx;
 
-	index = stp->str_index;
+	idx = stp->str_index;
 	while (c-- > 0) {
-		if (index == sizeof(Block)) {
+		if (idx == sizeof(Block)) {
 			Block b;
 			ecb_encrypt(stp, stp->str_output, b);
 			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
-			index = 0;
+			idx = 0;
 		}
 
 		/* On encryption, we store (feed ^ data) which is cypher */
-		*s = stp->str_output[index] = (stp->str_feed[index] ^ *s);
+		*s = stp->str_output[idx] = (stp->str_feed[idx] ^ *s);
 		s++;
-		index++;
+		idx++;
 	}
-	stp->str_index = index;
+	stp->str_index = idx;
 }
 
 	int
@@ -676,7 +676,7 @@ cfb64_decrypt(data)
 	int data;
 {
 	register struct stinfo *stp = &fb[CFB].streams[DIR_DECRYPT-1];
-	int index;
+	int idx;
 
 	if (data == -1) {
 		/*
@@ -689,18 +689,18 @@ cfb64_decrypt(data)
 		return(0);
 	}
 
-	index = stp->str_index++;
-	if (index == sizeof(Block)) {
+	idx = stp->str_index++;
+	if (idx == sizeof(Block)) {
 		Block b;
 		ecb_encrypt(stp, stp->str_output, b);
 		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
-		index = 0;		/* But now use 0 */ 
+		idx = 0;		/* But now use 0 */ 
 	}
 
 	/* On decryption we store (data) which is cypher. */
-	stp->str_output[index] = data;
-	return(data ^ stp->str_feed[index]);
+	stp->str_output[idx] = data;
+	return(data ^ stp->str_feed[idx]);
 }
 
 /*
@@ -728,20 +728,20 @@ ofb64_encrypt(s, c)
 	int c;
 {
 	register struct stinfo *stp = &fb[OFB].streams[DIR_ENCRYPT-1];
-	register int index;
+	register int idx;
 
-	index = stp->str_index;
+	idx = stp->str_index;
 	while (c-- > 0) {
-		if (index == sizeof(Block)) {
+		if (idx == sizeof(Block)) {
 			Block b;
 			ecb_encrypt(stp, stp->str_feed, b);
 			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
-			index = 0;
+			idx = 0;
 		}
-		*s++ ^= stp->str_feed[index];
-		index++;
+		*s++ ^= stp->str_feed[idx];
+		idx++;
 	}
-	stp->str_index = index;
+	stp->str_index = idx;
 }
 
 	int
@@ -749,7 +749,7 @@ ofb64_decrypt(data)
 	int data;
 {
 	register struct stinfo *stp = &fb[OFB].streams[DIR_DECRYPT-1];
-	int index;
+	int idx;
 
 	if (data == -1) {
 		/*
@@ -762,16 +762,16 @@ ofb64_decrypt(data)
 		return(0);
 	}
 
-	index = stp->str_index++;
-	if (index == sizeof(Block)) {
+	idx = stp->str_index++;
+	if (idx == sizeof(Block)) {
 		Block b;
 		ecb_encrypt(stp, stp->str_feed, b);
 		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
-		index = 0;		/* But now use 0 */ 
+		idx = 0;		/* But now use 0 */ 
 	}
 
-	return(data ^ stp->str_feed[index]);
+	return(data ^ stp->str_feed[idx]);
 }
 #  endif /* DES_ENCRYPTION */
 # endif	/* AUTHENTICATION */

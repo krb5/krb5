@@ -198,7 +198,7 @@ int dst_realm_sz = REALM_SZ;
 kerberos4_send(ap)
 	Authenticator *ap;
 {
-	KTEXT_ST auth;
+	KTEXT_ST kauth;
 	char instance[INST_SZ];
 	char *realm;
 	char *krb_realmofhost();
@@ -209,7 +209,7 @@ kerberos4_send(ap)
 	krb5_data data;
 	krb5_enc_data encdata;
 	krb5_error_code code;
-	krb5_keyblock random_key;
+	krb5_keyblock rand_key;
 #endif
 
 	printf("[ Trying KERBEROS4 ... ]\r\n");	
@@ -233,7 +233,7 @@ kerberos4_send(ap)
 		printf("Kerberos V4: no realm for %s\r\n", RemoteHostName);
 		return(0);
 	}
-	if ((r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0))) {
+	if ((r = krb_mk_req(&kauth, KRB_SERVICE_NAME, instance, realm, 0))) {
 		printf("mk_req failed: %s\r\n", krb_err_txt[r]);
 		return(0);
 	}
@@ -247,8 +247,8 @@ kerberos4_send(ap)
 		return(0);
 	}
 	if (auth_debug_mode)
-		printf("Sent %d bytes of authentication data\r\n", auth.length);
-	if (!Data(ap, KRB_AUTH, (void *)auth.dat, auth.length)) {
+		printf("Sent %d bytes of authentication data\r\n", kauth.length);
+	if (!Data(ap, KRB_AUTH, (void *)kauth.dat, kauth.length)) {
 		if (auth_debug_mode)
 			printf("Not enough room for authentication data\r\n");
 		return(0);
@@ -272,7 +272,7 @@ kerberos4_send(ap)
 
 		if ((code = krb5_c_make_random_key(telnet_context,
 						   ENCTYPE_DES_CBC_RAW,
-						   &random_key))) {
+						   &rand_key))) {
 		    com_err("libtelnet", code,
 			    "while creating random session key");
 		    return(0);
@@ -284,8 +284,8 @@ kerberos4_send(ap)
 		krbkey.length = 8;
 		krbkey.contents = cred.session;
 
-		encdata.ciphertext.data = random_key.contents;
-		encdata.ciphertext.length = random_key.length;
+		encdata.ciphertext.data = rand_key.contents;
+		encdata.ciphertext.length = rand_key.length;
 		encdata.enctype = ENCTYPE_UNKNOWN;
 
 		data.data = session_key;
@@ -294,7 +294,7 @@ kerberos4_send(ap)
 		code = krb5_c_decrypt(telnet_context, &krbkey, 0, 0,
 				      &encdata, &data);
 
-		krb5_free_keyblock_contents(telnet_context, &random_key);
+		krb5_free_keyblock_contents(telnet_context, &rand_key);
 
 		if (code) {
 		    com_err("libtelnet", code, "while encrypting random key");
@@ -339,8 +339,8 @@ kerberos4_send(ap)
 #endif	/* ENCRYPTION */
 	
 	if (auth_debug_mode) {
-		printf("CK: %d:", kerberos4_cksum(auth.dat, auth.length));
-		printd(auth.dat, auth.length);
+		printf("CK: %d:", kerberos4_cksum(kauth.dat, kauth.length));
+		printd(kauth.dat, kauth.length);
 		printf("\r\n");
 		printf("Sent Kerberos V4 credentials to server\r\n");
 	}
@@ -596,9 +596,9 @@ kerberos4_reply(ap, data, cnt)
 }
 
 	int
-kerberos4_status(ap, name, level)
+kerberos4_status(ap, kname, level)
 	Authenticator *ap;
-	char *name;
+	char *kname;
 	int level;
 {
 	if (level < AUTH_USER)
@@ -606,7 +606,7 @@ kerberos4_status(ap, name, level)
 
 	if (UserNameRequested && !kuserok(&adat, UserNameRequested)) {
 		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
-		strncpy(name, UserNameRequested, 255);
+		strncpy(kname, UserNameRequested, 255);
 		name[255] = '\0';
 		return(AUTH_VALID);
 	} else

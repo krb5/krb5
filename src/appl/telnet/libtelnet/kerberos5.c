@@ -570,12 +570,13 @@ kerberos5_is(ap, data, cnt)
 		    (r = rd_and_store_for_creds(telnet_context, auth_context,
 			   &inbuf, ticket))) {
 
-		    char errbuf[128];
+		    char kerrbuf[128];
 		    
-		    (void) strcpy(errbuf, "Read forwarded creds failed: ");
-		    errbuf[sizeof(errbuf) - 1] = '\0';
-		    (void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
-		    Data(ap, KRB_FORWARD_REJECT, errbuf, -1);
+		    (void) strcpy(kerrbuf, "Read forwarded creds failed: ");
+		    kerrbuf[sizeof(kerrbuf) - 1] = '\0';
+		    (void) strncat(kerrbuf, error_message(r), 
+			sizeof(kerrbuf) - 1 - strlen(kerrbuf));
+		    Data(ap, KRB_FORWARD_REJECT, kerrbuf, -1);
 		    if (auth_debug_mode)
 		      printf(
 			"telnetd: Could not read forwarded credentials\r\n");

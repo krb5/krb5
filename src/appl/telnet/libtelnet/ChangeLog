@@ -1,4 +1,16 @@
-2001-06-21  Ezra Peisach  <epeisach@rna.mit.edu>
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* enc_des.c: Change local variable index to idx to not shadown
+	global function.
+
+	* kerberos5.c (kerberos5_is): Change errbuf to kerrbuf to not
+	shadow previous local.
+
+	* kerberos.c (kerberos4_send): Change random_key to rand_key to
+	prevent redefine by des.h. Change auth to kauth to not shadow global.
+	(kerberos4_status): Change name to kname for same reason.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* forward.c: If NEED_SETENV defined, provide prototype for setenv.
 
