@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -60,6 +61,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     krb5_creds tgt, tgtq;
     krb5_creds **ret_tgts = 0;
     krb5_principal *tgs_list, *next_server;
+    krb5_principal final_server;
     krb5_error_code retval;
     int nservers;
     krb5_enctype etype;
@@ -88,15 +90,15 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     tgtq.client = cred->client;
 
     if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
-			      krb5_princ_realm(cred->client), &tgtq.server))
+			      krb5_princ_realm(cred->client), &final_server))
 	return retval;
+    tgtq.server = final_server;
 
     /* try to fetch it directly */
     retval = krb5_cc_retrieve_cred (ccache,
 				    0,	/* default is client & server */
 				    &tgtq,
 				    &tgt);
-    krb5_free_principal(tgtq.server);
 
     if (retval != 0) {
 	if (retval != KRB5_CC_NOTFOUND)
@@ -105,7 +107,9 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	   across realms to get the right TGT. */
 
 	/* get a list of realms to consult */
-	retval = krb5_walk_realm_tree(cred->client, cred->server, &tgs_list);
+	retval = krb5_walk_realm_tree(krb5_princ_realm(cred->client),
+				      krb5_princ_realm(cred->server),
+				      &tgs_list);
 	if (retval)
 	    goto out;
 	/* walk the list BACKWARDS until we find a cached
@@ -119,7 +123,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	for (; next_server >= tgs_list; next_server--) {
 	    tgtq.server = *next_server;
 	    retval = krb5_cc_retrieve_cred (ccache,
-					    0, /* default is client & server */
+					    KRB5_TC_MATCH_SRV_NAMEONLY,
 					    &tgtq,
 					    &tgt);
 	    if (retval) {
@@ -148,6 +152,8 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	*tgts = ret_tgts;
 	for (nservers = 0; *next_server; next_server++, nservers++) {
 
+	    krb5_data *tmpdata;
+
 	    if (!valid_keytype(tgt.keyblock.keytype)) {
 		retval = KRB5_PROG_KEYTYPE_NOSUPP;
 		krb5_free_realm_tree(tgs_list);
@@ -157,8 +163,17 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	    memset((char *)&tgtq, 0, sizeof(tgtq));
 	    tgtq.times = tgt.times;
 	    tgtq.client = tgt.client;
-	    tgtq.server = *next_server;
-	    tgtq.is_skey = FALSE;	
+
+	    /* ask each realm for a tgt to the end */
+	    if (retval = krb5_copy_data((*next_server)[0], &tmpdata)) {
+		krb5_free_realm_tree(tgs_list);
+		goto out;
+	    }
+	    krb5_free_data(final_server[0]);
+	    final_server[0] = tmpdata;
+	    tgtq.server = final_server;
+
+	    tgtq.is_skey = FALSE;
 	    tgtq.ticket_flags = tgt.ticket_flags;
 
 	    etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
@@ -170,6 +185,18 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 		krb5_free_realm_tree(tgs_list);
 		goto out;
 	    }
+	    /* make sure the returned ticket is somewhere in the remaining
+	       list, but we can tolerate different expected issuing realms */
+	    while (*++next_server &&
+		   !krb5_principal_compare(&(next_server[0])[1],
+					   &(tgtq.server[1])));
+	    if (!next_server) {
+		/* what we got back wasn't in the list! */
+		krb5_free_realm_tree(tgs_list);
+		retval = KRB5_KDCREP_MODIFIED; /* XXX? */
+		goto out;
+	    }
+							   
 	    /* save tgt in return array */
 	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers])) {
 		krb5_free_realm_tree(tgs_list);
@@ -195,5 +222,6 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 				   krb5_kdc_req_sumtype,
 				   cred);
 out:
+    krb5_free_principal(final_server);
     return retval;
 }
