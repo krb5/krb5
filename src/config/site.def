@@ -171,16 +171,16 @@
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
 
+/* Work around bug in gld; it doesn't like the at-sign in @sys */
+
 #define IsodeDir /mit/isode/isode-7.0
-#define IsodeLib -L/mit/isode/isode-7.0/@sys/lib -lisode
-#define IsodeIncls /mit/isode/isode-7.0/@sys/include
+#define IsodeLib -L/mit/isode/isode-7.0/gld-bug-sys/lib -lisode
+#define IsodeIncls /mit/isode/isode-7.0/gld-bug-sys/include
 
 /*
  * #define ISODE 7 only if you are using ISODE 7.0 or later.
  */
-#ifndef LinuxArchitecture
 #define ISODE7
-#endif
 
 /* Re-define PepsyCmd if pepsy isn't in your search path. */
 
