@@ -1,3 +1,8 @@
+Wed Jun 14 14:36:13 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* t_dbentry.c (main): option should be an int so that comparisons
+        against EOF work when char unsigned.
+
 Tue Jun 13 14:37:25 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* logger.c: Don't check to make sure unix is defined for

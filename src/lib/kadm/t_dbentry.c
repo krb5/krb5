@@ -750,7 +750,7 @@ main(argc, argv)
     krb5_boolean	verbose;
     krb5_int32		randompasses;
     krb5_int32		error;
-    char		option;
+    int		option;
     extern char		*optarg;
     char		*programname;
     int			i;
