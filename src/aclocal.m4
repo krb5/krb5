@@ -1049,8 +1049,8 @@ if test "$enableval" = no && test "$krb5_force_static" != yes; then
 	LIBLIST=
 	OBJLISTS=
 else
-	LIBLIST='lib$(LIB)$(STLIBEXT)'
-	LIBLINKS='$(TOPLIBD)/lib$(LIB)$(STLIBEXT)'
+	LIBLIST="lib\$(LIB)$STLIBEXT"
+	LIBLINKS="\$(TOPLIBD)/lib\$(LIB)$STLIBEXT"
 	OBJLISTS=OBJS.ST
 	LIBINSTLIST=install-static
 	DEPLIBEXT=$STLIBEXT
@@ -1074,6 +1074,10 @@ AC_ARG_ENABLE([shared],
 		LIBINSTLIST="$LIBINSTLIST install-shared"
 		DEPLIBEXT=$SHLIBEXT
 		CC_LINK="$CC_LINK_SHARED"
+		if test "$STLIBEXT" = "$SHLIBEXT" ; then
+		  STLIBEXT=".a-no-build"
+		  LIBINSTLIST="install-shared" #don't install static
+		fi
 		;;
 	esac
 else
@@ -1217,4 +1221,23 @@ mips-sgi-irix*)
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	;;
+*-*-aix*)
+	SHLIBVEXT='.a.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.a
+	# AIX doesn't need separate PIC objects
+	SHOBJEXT=.o
+	LDCOMBINE='$(BUILDTOP)/util/makeshlib $(LIBMAJOR).$(LIBMINOR)'
+	SHLIB_EXPFLAGS='  $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	PROFFLAGS=-pg
+	if test "$gcc" = "yes" ; then
+ 	  CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Xlinker -bex4:$(BUILDTOP)/util/aix.bincmds '
+	else
+	  CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -bex4:$(BUILDTOP)/util/aix.bincmds '
+	fi
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	# $(PROG_RPATH) is here to handle things like a shared tcl library
+	RUN_ENV='LIBPATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/lib:/usr/local/lib; export LIBPATH; '
+
 esac])
+
+
