@@ -1,3 +1,8 @@
+
+Wed Dec 13 07:09:30 1995  Chris Provenzano (proven@mit.edu)
+
+        * Makefile.in : Move db keytab routines to lib/kdb.
+
 Tue Dec  5 20:57:06 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Removed dependency on krb4 library in building
