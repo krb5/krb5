@@ -868,8 +868,8 @@ if test "$enableval" = no && test "$krb5_force_static" != yes; then
 	LIBLIST=
 	OBJLISTS=
 else
-	LIBLIST="lib\$(LIB)$STLIBEXT"
-	LIBLINKS="\$(TOPLIBD)/lib\$(LIB)$STLIBEXT"
+	LIBLIST='lib$(LIB)$(STLIBEXT)'
+	LIBLINKS='$(TOPLIBD)/lib$(LIB)$(STLIBEXT)'
 	OBJLISTS=OBJS.ST
 	LIBINSTLIST=install-static
 	DEPLIBEXT=$STLIBEXT
@@ -886,8 +886,12 @@ AC_ARG_ENABLE([shared],
 		CC_LINK="$CC_LINK_STATIC"
 		;;
 	*)
+		# set this now because some logic below may reset SHLIBEXT
+		DEPLIBEXT=$SHLIBEXT
 		if test "$krb5_force_static" = "yes"; then
 			AC_MSG_RESULT([Forcing static libraries.])
+			# avoid duplicate rules generation for AIX and such
+			SHLIBEXT=.so-nobuild
 		else
 			AC_MSG_RESULT([Enabling shared libraries.])
 			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
@@ -904,7 +908,6 @@ AC_ARG_ENABLE([shared],
 			esac
 			OBJLISTS="$OBJLISTS OBJS.SH"
 		fi
-		DEPLIBEXT=$SHLIBEXT
 		CC_LINK="$CC_LINK_SHARED"
 		if test "$STLIBEXT" = "$SHLIBEXT" ; then
 		  STLIBEXT=".a-no-build"
