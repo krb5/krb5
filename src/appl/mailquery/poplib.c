@@ -376,9 +376,9 @@ FILE *f;
 	return (DONE);
     }
 
-    *p = NULL;
-    if (*--p == '\n') *p = NULL;
-    if (*--p == '\r') *p = NULL;
+    *p = '\0';
+    if (*--p == '\n') *p = '\0';
+    if (*--p == '\r') *p = '\0';
     return(OK);
 }
 
@@ -389,7 +389,7 @@ FILE *f;
 {
     if (getline(buf, n, f) != OK) return (NOTOK);
     if (*buf == '.') {
-	if (*(buf+1) == NULL) {
+	if (*(buf+1) == '\0') {
 	    return (DONE);
 	} else {
 	    strcpy(buf, buf+1);
