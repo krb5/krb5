@@ -32,7 +32,6 @@
 	* fake-addrinfo.h (in6addr_any): If we need to define a static
 	copy, rename it with a macro first.
 
->>>>>>> 1.444
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h: Test HAVE_PTHREAD instead of HAVE_PTHREAD_H.
