@@ -77,7 +77,7 @@ enum StringToKey_Type {
 
 /* Credential version types */
 
-enum cc_cred_vers {  
+enum {  
     CC_CRED_VUNKNOWN		= 0,
     CC_CRED_V4				= 1,
     CC_CRED_V5				= 2,
@@ -107,7 +107,7 @@ typedef		cc_int32				cc_nc_flags;
 
 typedef		cc_int32				cc_result;
 typedef		cc_int32				cc_api_version;
-typedef		enum cc_cred_vers		cc_cred_vers;
+typedef		cc_int32				cc_cred_vers;
 typedef		cc_uint32				cc_flags;
 
 /* Credential structures */
@@ -171,7 +171,7 @@ typedef union cred_ptr_union_type {
 
 /* common credentials structure */
 typedef struct cred_union_type {
-    enum cc_cred_vers cred_type;
+    cc_cred_vers cred_type;
     cred_ptr_union cred;
 } cred_union;
 
@@ -179,7 +179,7 @@ typedef struct cred_union_type {
 typedef struct _infoNC  {
 	char*			name;
 	char*			principal;
-	enum	cc_cred_vers	vers;
+	cc_cred_vers	vers;
 } infoNC;
 
 /* Opaque API references */
