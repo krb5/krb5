@@ -46,6 +46,12 @@
 #include <utmp.h>
 #include <pwd.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
+
 #ifndef MAXHOSTNAME
 #define MAXHOSTNAME 64
 #endif
