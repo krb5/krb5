@@ -1278,7 +1278,8 @@ kadmin_startup(argc, argv)
     extern int		optind;
     char 		*action = (char *) NULL;
 
-    programname = argv[0];
+    programname = strrchr(argv[0], (int) '/');
+    programname = (programname) ? programname++ : argv[0];
     while ((option = getopt(argc, argv, "r:p:mt:")) != EOF) {
 	switch (option) {
 	case 'r':
@@ -1417,6 +1418,7 @@ kadmin_startup(argc, argv)
 		strcat(action, argv[i]);
 		strcat(action, " ");
 	    }
+	    action[n2alloc-1] = '\0';
 	}
     }
     return(action);

@@ -1,4 +1,10 @@
 
+Thu May 11 12:18:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.c	- Change "programname" to be the last component of
+			  argv[0].  Also correctly terminate generated
+			  argument string in kadmin_startup.
+
+
 Tue May 9 15:56:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	First checkin of new administrative client.
 
