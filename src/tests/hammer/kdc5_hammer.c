@@ -259,15 +259,13 @@ main(argc, argv)
     fprintf (stderr, "\nTried %d.  Got %d errors.\n", n_tried, errors);
   }
 
-       
-#include <krb5/widen.h>
+
 krb5_error_code get_server_key(context, keyprocarg, princ, vno, key)
     krb5_context context;
     krb5_pointer keyprocarg;
     krb5_principal princ;
     krb5_kvno vno;
     krb5_keyblock ** key;
-#include <krb5/narrow.h>
 {
   krb5_encrypt_block eblock;
   krb5_data pwd, salt;

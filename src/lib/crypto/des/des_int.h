@@ -103,10 +103,6 @@ typedef struct {
 }       sbox_out;
 #endif	/*BITS32*/
 
-
-/* widen prototypes, if needed */
-#include <krb5/widen.h>
-
 /* cbc_cksum.c */
 extern krb5_error_code mit_des_cbc_checksum
     PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum * ));
@@ -193,8 +189,5 @@ extern unsigned long swap_long_bytes_bit_number PROTOTYPE((unsigned long ));
 /* XXX depends on FILE being a #define! */
 extern void test_set PROTOTYPE((FILE *, const char *, int, const char *, int));
 #endif
-
-/* and back to normal... */
-#include <krb5/narrow.h>
 
 #endif	/*DES_INTERNAL_DEFS*/

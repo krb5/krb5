@@ -49,9 +49,6 @@
 #include <krb5/config.h>
 #include <krb5/base-defs.h>
 #include <krb5/asn.1/encode.h>
-
-#include <krb5/widen.h>
-
 #include <krb5/adm_err.h>
 #include <krb5/errors.h>
 #include <krb5/kdb5_err.h>

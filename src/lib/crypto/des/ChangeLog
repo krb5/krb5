@@ -1,3 +1,7 @@
+Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
+
+        * Removed all narrow types and references to wide.h and narrow.h
+
 Fri Nov 18 16:20:10 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* destest.c (main): Add magic numbers to keyblock structure.

@@ -62,17 +62,11 @@
  *  returns system errors, encryption errors, replay errors
  */
 
-/* widen prototypes, if needed */
-#include <krb5/widen.h>
-
 static krb5_error_code decrypt_authenticator
 	PROTOTYPE((krb5_context, const krb5_ap_req *, krb5_authenticator **));
 typedef krb5_error_code (*rdreq_key_proc)
 	PROTOTYPE((krb5_context, krb5_pointer, krb5_principal,
 		   krb5_kvno, krb5_keyblock **));
-
-/* and back to normal... */
-#include <krb5/narrow.h>
 
 extern krb5_deltat krb5_clockskew;
 #define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)

@@ -112,8 +112,6 @@ struct kparg {
  * krb5_rd_req_decoded, there's no reason to do it here, so we ignore the
  * "principal" argument.
  */
-
-#include <krb5/widen.h>
 static krb5_error_code
 kdc_rdreq_keyproc(context, keyprocarg, principal, vno, key)
     krb5_context context;
@@ -121,7 +119,6 @@ kdc_rdreq_keyproc(context, keyprocarg, principal, vno, key)
     krb5_principal principal;
     krb5_kvno vno;
     krb5_keyblock ** key;
-#include <krb5/narrow.h>
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
     char	*sname;

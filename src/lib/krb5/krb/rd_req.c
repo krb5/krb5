@@ -54,14 +54,10 @@
  *  returns system errors, encryption errors, replay errors
  */
 
-/* widen prototypes, if needed */
-#include <krb5/widen.h>
 typedef krb5_error_code (*rdreq_key_proc) PROTOTYPE((krb5_pointer, 
 						     krb5_principal,
 						     krb5_kvno,
 						     krb5_keyblock **));
-/* and back to normal... */
-#include <krb5/narrow.h>
 
 krb5_error_code
 krb5_rd_req(context, inbuf, server, sender_addr, fetchfrom, keyproc, 

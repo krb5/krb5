@@ -1144,14 +1144,12 @@ char **save_argv(argc, argv)
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
-#include <krb5/widen.h>    
 krb5_error_code tgt_keyproc(context, keyprocarg, principal, vno, key)
      krb5_context context;
      krb5_pointer keyprocarg;
      krb5_principal principal;
      krb5_kvno vno;
      krb5_keyblock ** key;
-#include <krb5/narrow.h>
 {
     krb5_creds *creds = (krb5_creds *)keyprocarg;
     

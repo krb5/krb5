@@ -1,3 +1,7 @@
+Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
+
+        * Removed all narrow types and references to wide.h and narrow.h
+
 Wed Jan 18 14:33:50 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krlogind.c (v4_des_read, v5_des_read): When reading length,

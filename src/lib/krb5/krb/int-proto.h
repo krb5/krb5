@@ -27,8 +27,6 @@
 
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__
-/* widen prototypes, if needed */
-#include <krb5/widen.h>
 
 krb5_error_code krb5_tgtname
     PROTOTYPE((krb5_context context,
@@ -42,8 +40,6 @@ krb5_error_code krb5_get_cred_via_tgt
 	       const krb5_enctype,
 	       const krb5_cksumtype,
 	       krb5_creds * ));
-/* and back to normal... */
-#include <krb5/narrow.h>
 
 #endif /* KRB5_INT_FUNC_PROTO__ */
 

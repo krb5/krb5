@@ -41,8 +41,6 @@ struct saltblock {
     krb5_data saltdata;
 };
 
-/* krb5_kvno may be narrow */
-#include <krb5/widen.h>
 void add_key 
 	PROTOTYPE((char const *, char const *, 
 		   krb5_const_principal, const krb5_keyblock *, 
@@ -53,5 +51,4 @@ void enter_pwd_key
 int set_dbname_help
 	PROTOTYPE((char *, char *));
 
-#include <krb5/narrow.h>
 char *kdb5_edit_Init PROTOTYPE((int, char **));

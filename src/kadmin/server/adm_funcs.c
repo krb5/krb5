@@ -62,9 +62,6 @@ extern krb5_keyblock master_keyblock;
 
 typedef unsigned char des_cblock[8];
 
-		/* krb5_kvno may be narrow */
-#include <krb5/widen.h>
-
 krb5_error_code adm_get_rnd_key PROTOTYPE((char *,
 			krb5_ticket *,
 			krb5_authenticator *,
@@ -83,8 +80,6 @@ static krb5_error_code adm_modify_kdb
 		   struct saltblock *,
 		   struct saltblock *,
 		   krb5_db_entry *));
-
-#include <krb5/narrow.h>
 
 
 krb5_kvno
