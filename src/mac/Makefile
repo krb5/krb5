@@ -393,11 +393,17 @@ standard-libraries-ppc-final			= ¶
 ccachelib-ppc-debug						= {mitkerberoslib-root-folder}CCacheLib:Binaries:CCacheLib.PPC.debug
 ccachelib-ppc-final						= {mitkerberoslib-root-folder}CCacheLib:Binaries:CCacheLib.PPC
 
+loginlib-ppc-debug						= {mitkerberoslib-root-folder}LoginLib:Binaries:KrbLoginLib.stub.PPC.debug
+loginlib-ppc-final						= {mitkerberoslib-root-folder}LoginLib:Binaries:KrbLoginLib.stub.PPC
+
 socketslib-ppc-debug					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC.debug
 socketslib-ppc-final					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC
 
 errorlib-ppc-debug						= {mitsupportlib-root-folder}ErrorLib:Binaries:ErrorLib.PPC.debug
 errorlib-ppc-final						= {mitsupportlib-root-folder}ErrorLib:Binaries:ErrorLib.PPC
+
+utilitieslib-ppc-debug					= {mitsupportlib-root-folder}UtilitiesLib:Binaries:UtilitiesLib.PPC.debug
+utilitieslib-ppc-final					= {mitsupportlib-root-folder}UtilitiesLib:Binaries:UtilitiesLib.PPC
 
 object-suffix-ppc-debug					= .ppcd.o
 object-suffix-ppc-final					= .ppcf.o
@@ -417,6 +423,7 @@ gss-library-libraries-ppc-final = ¶
 krb5-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
 	{ccachelib-ppc-debug} ¶
+	{loginlib-ppc-debug} ¶
 	{socketslib-ppc-debug} ¶
 	{errorlib-ppc-debug} ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug} ¶
@@ -426,6 +433,7 @@ krb5-library-libraries-ppc-debug = ¶
 krb5-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{ccachelib-ppc-final} ¶
+	{loginlib-ppc-final} ¶
 	{socketslib-ppc-final} ¶
 	{errorlib-ppc-final} ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final} ¶
@@ -435,9 +443,11 @@ krb5-library-libraries-ppc-final = ¶
 
 profile-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
+	{utilitieslib-ppc-debug} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-debug}
 profile-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
+	{utilitieslib-ppc-final} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-final}
 
 comerr-library-libraries-ppc-debug = ¶
@@ -523,6 +533,7 @@ mitsupportlib-include-paths = ¶
 
 include-paths = `catenate {include-folders-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/-i (Å)¨1/ Print '-i 'prefix¨1"` ¶
 	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
+	-i {mitkerberoslib-root-folder}LoginLib:Headers: ¶
 	{mitsupportlib-include-paths}
 		
 compiler-options-ppc-debug = {include-paths} {common-compiler-options} {ppc-compiler-options} ¶
