@@ -277,6 +277,7 @@ err:
 #ifndef KADM5
 #define faildel(code) {  (void) syslog(LOG_ERR, "FAILED deleting '%s.%s' (%s)", valsin->name, valsin->instance, error_message(code)); return code; }
 
+krb5_error_code
 kadm_del_entry (rname, rinstance, rrealm, valsin, valsout)
 char *rname;				/* requestors name */
 char *rinstance;			/* requestors instance */
@@ -531,6 +532,7 @@ err:
 #ifndef KADM5
 #define failchange(code) {  syslog(LOG_ERR, "FAILED changing key for '%s.%s@%s' (%s)", rname, rinstance, rrealm, error_message(code)); return code; }
 
+krb5_error_code
 kadm_change (rname, rinstance, rrealm, newpw)
 char *rname;
 char *rinstance;
@@ -622,6 +624,7 @@ des_cblock newpw;
 #undef failchange
 #endif /* !KADM5 */
 
+int
 check_pw(newpw, checkstr)
 	des_cblock	newpw;
 	char		*checkstr;
@@ -670,6 +673,7 @@ int lower(str)
 	return(effect);
 }
 
+int
 des_check_gecos(gecos, newpw)
 	char	*gecos;
 	des_cblock newpw;
@@ -709,6 +713,7 @@ des_check_gecos(gecos, newpw)
 	return(0);
 }
 
+int
 str_check_gecos(gecos, pwstr)
 	char	*gecos;
 	char	*pwstr;
@@ -742,6 +747,7 @@ str_check_gecos(gecos, pwstr)
 }
 
 
+krb5_error_code
 kadm_approve_pw(rname, rinstance, rrealm, newpw, pwstring)
 char *rname;
 char *rinstance;

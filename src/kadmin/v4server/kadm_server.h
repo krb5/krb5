@@ -25,6 +25,11 @@
 #include <krb.h>
 #include <des.h>
 #include "k5-int.h"
+#ifdef KADM5
+#include <kadm5/admin.h>
+#endif
+#include "kadm.h"
+#include "krb_db.h"
 
 typedef struct {
   struct sockaddr_in admin_addr;
@@ -53,5 +58,60 @@ typedef struct {
 #define STAB_HOSTS_FILE		"/v4stab_bad_hosts"
 
 extern krb5_context kadm_context;
+
+/* kadm_ser_wrap.c */
+#ifdef KADM5
+extern int kadm_ser_init(int, char *, kadm5_config_params *);
+#else
+extern int kadm_ser_init(int, char *);
+#endif
+extern int kadm_ser_in(u_char **, int *);
+
+/* kadm_server.c */
+int kadm_ser_cpw(u_char *, int, AUTH_DAT *, u_char **, int *);
+int kadm_ser_add(u_char *, int, AUTH_DAT *, u_char **, int *);
+int kadm_ser_del(u_char *, int, AUTH_DAT *, u_char **, int *);
+int kadm_ser_mod(u_char *, int, AUTH_DAT *, u_char **, int *);
+int kadm_ser_get(u_char *, int, AUTH_DAT *, u_char **, int *);
+int kadm_ser_ckpw(u_char *, int, AUTH_DAT *, u_char **, int *);
+int kadm_ser_stab(u_char *, int, AUTH_DAT *, u_char **, int *);
+
+/* kadm_funcs.c */
+krb5_error_code kadm_add_entry(char *, char *, char *, 
+			       Kadm_vals *, Kadm_vals *);
+krb5_error_code kadm_del_entry(char *, char *, char *, 
+			       Kadm_vals *, Kadm_vals *);
+krb5_error_code kadm_get_entry(char *, char *, char *, 
+			       Kadm_vals *, u_char *, Kadm_vals *);
+krb5_error_code kadm_mod_entry(char *, char *, char *, 
+			       Kadm_vals *, Kadm_vals *, Kadm_vals *);
+krb5_error_code kadm_change (char *, char *, char *, des_cblock);
+krb5_error_code kadm_approve_pw(char *, char *, char *, des_cblock, char *);
+krb5_error_code kadm_chg_srvtab(char *, char *, char *, Kadm_vals *);
+
+/* kadm_supp.c */
+void prin_vals(Kadm_vals *);
+void kadm_prin_to_vals(u_char *, Kadm_vals *, Principal *);
+void kadm_vals_to_prin(u_char *, Principal *, Kadm_vals *);
+
+/* kadm_stream.c */
+int stv_char(u_char *, u_char *, int, int);
+int stv_short(u_char *, u_short *, int, int);
+int stv_long(u_char *, krb5_ui_4 *, int, int);
+int stv_string(u_char *, char *, int, int, int);
+int stream_to_vals(u_char *, Kadm_vals *, int);
+int vals_to_stream(Kadm_vals *, u_char **);
+int vts_string(char *, u_char **, int);
+int vts_short(u_short, u_char **, int);
+int vts_long(krb5_ui_4, u_char **, int);
+int vts_char(u_char, u_char **, int);
+
+/* acl_files.c */
+int acl_check(char *, char *);
+
+/* admin_server.c */
+#ifdef KADM5
+krb5_ui_4 convert_kadm5_to_kadm(krb5_ui_4);
+#endif
 
 #endif /* KADM_SERVER_DEFS */

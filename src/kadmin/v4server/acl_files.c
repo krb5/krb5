@@ -274,7 +274,7 @@ int perm;
 
 /* Eliminate all whitespace character in buf */
 /* Modifies its argument */
-static nuke_whitespace(buf)
+static void nuke_whitespace(buf)
 char *buf;
 {
     register char *pin, *pout;
@@ -307,7 +307,7 @@ int size;
 }
 
 /* Destroy a hash table */
-static destroy_hash(h)
+static void destroy_hash(h)
 struct hashtbl *h;
 {
     int i;
@@ -332,7 +332,7 @@ register char *s;
 }
 
 /* Add an element to a hash table */
-static add_hash(h, el)
+static void add_hash(h, el)
 struct hashtbl *h;
 char *el;
 {
@@ -365,7 +365,7 @@ char *el;
 }
 
 /* Returns nonzero if el is in h */
-static check_hash(h, el)
+static int check_hash(h, el)
 struct hashtbl *h;
 char *el;
 {
@@ -468,6 +468,7 @@ char *name;
 
 /* Returns nonzero if it can be determined that acl contains principal */
 /* Principal is not canonicalized, and no wildcarding is done */
+int
 acl_exact_match(acl, principal)
 char *acl;
 char *principal;
@@ -481,6 +482,7 @@ char *principal;
 /* Returns nonzero if it can be determined that acl contains principal */
 /* Recognizes wildcards in acl of the form
    name.*@realm, *.*@realm, and *.*@* */
+int
 acl_check(acl, principal)
 char *acl;
 char *principal;
@@ -513,6 +515,7 @@ char *principal;
 
 /* Adds principal to acl */
 /* Wildcards are interpreted literally */
+int
 acl_add(acl, principal)
 char *acl;
 char *principal;
@@ -550,6 +553,7 @@ char *principal;
 
 /* Removes principal from acl */
 /* Wildcards are interpreted literally */
+int
 acl_delete(acl, principal)
 char *acl;
 char *principal;

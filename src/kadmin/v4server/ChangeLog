@@ -1,3 +1,30 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* acl_files.c, admin_server.c, kadm_funcs.c, kadm_ser_wrap.c:
+	Explicitly declare function return types and cleanup assignments
+	in conditionals.
+
+	* kadm_server.c: Include kadm_server.h and cleanup assignments in
+	conditionals.
+
+	* kadm_server.h: Include kadm5/admin.h, kadm.h, krb_db.h for
+	structure defintions so that many prototypes may be added to this
+	file.
+
+	* kadm_stream.c: Include kadm_server.h for prototypes. Explicitly
+	declare functions as ints.
+	(stream_to_vals) Assumption made that pointer to long the same
+	size as krb5_ui_4 fixed.
+
+	* kadm_supp.c: Include sys/param.h early so that MAXHOSTNAMELEN is
+	not defined by kadm.h and later redefined. In prin_vals(),
+	key_high and key_low elements of the Kadm_vals structure are longs
+	- use an appropriate format to printf.
+
+2001-06-04  Ezra Peisach  <epeisach@rna.mit.edu>
+
+	* kadm_ser_wrap.c, kadm_server.c: Cleanup assignments in conditionals.
+
 2000-10-23  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_ser_wrap.c (kadm_ser_in): Update call to mk_priv().

@@ -36,6 +36,7 @@ extern void *kadm5_handle;
 
 #include <kadm.h>
 #include <kadm_err.h>
+#include "kadm_server.h"
 
 extern krb5_context kadm_context;
 int fascist_cpw = 0;		/* Be fascist about insecure passwords? */
@@ -125,6 +126,7 @@ kadm_ser_cpw - the server side of the change_password routine
 Replaces the password (i.e. des key) of the caller with that specified in key.
 Returns no actual data from the master server, since this is called by a user
 */
+int
 kadm_ser_cpw(dat, len, ad, datout, outlen)
 u_char *dat;
 int len;
@@ -169,8 +171,9 @@ int *outlen;
     memcpy((char *)(((krb5_int32 *)newkey) + 1), (char *)&keyhigh, 4);
     memcpy((char *)newkey, (char *)&keylow, 4);
 
-    if (retval = kadm_approve_pw(ad->pname, ad->pinst, ad->prealm,
-			newkey, no_pword ? 0 : pword)) {
+    retval = kadm_approve_pw(ad->pname, ad->pinst, ad->prealm,
+			     newkey, no_pword ? 0 : pword);
+    if (retval) {
 	    if (retval == KADM_PW_MISMATCH) {
 		    /*
 		     * Very strange!!!  This means that the cleartext
@@ -183,7 +186,8 @@ int *outlen;
 	    }
 	    if (fascist_cpw) {
 		    *outlen = strlen(bad_pw_err)+strlen(pw_blurb)+1;
-		    if (*datout = (u_char *) malloc(*outlen)) {
+		    *datout = (u_char *) malloc(*outlen);
+		    if (*datout) {
 			    strcpy((char *) *datout, bad_pw_err);
 			    strcat((char *) *datout, pw_blurb);
 		    } else
@@ -198,7 +202,8 @@ int *outlen;
 		    return(retval);
 	    } else {
 		    *outlen = strlen(bad_pw_warn) + strlen(pw_blurb)+1;
-		    if (*datout = (u_char *) malloc(*outlen)) {
+		    *datout = (u_char *) malloc(*outlen);
+		    if (*datout) {
 			    strcpy((char *) *datout, bad_pw_warn);
 			    strcat((char *) *datout, pw_blurb);
 		    } else
@@ -237,7 +242,8 @@ int *outlen;
 
     *outlen = 0;
 
-    if (retval = krb5_timeofday(kadm_context, &now)) {
+    retval = krb5_timeofday(kadm_context, &now);
+    if (retval) {
 	 msg_ptr = error_message(retval);
 	 goto send_response;
     }
@@ -324,7 +330,8 @@ send_response:
 	 /* don't send message on success because kpasswd.v4 will */
 	 /* print "password changed" too */
 	 *outlen = strlen(msg_ptr)+2;
-	 if (*datout = (u_char *) malloc(*outlen)) {
+	 *datout = (u_char *) malloc(*outlen);
+	 if (*datout) {
 	      strcpy(*datout, msg_ptr);
 	      strcat(*datout, "\n");
 	 } else
@@ -428,6 +435,7 @@ Modifies all entries corresponding to the first values so they match the
    second values.
 returns the values for the changed entries
 */
+int
 kadm_ser_mod(dat,len,ad, datout, outlen)
 u_char *dat;
 int len;
@@ -464,6 +472,7 @@ gets the fields requested by flags from all entries matching values
 returns this data for each matching recipient, after a count of how many such
   matches there were
 */
+int
 kadm_ser_get(dat,len,ad, datout, outlen)
 u_char *dat;
 int len;
@@ -501,6 +510,7 @@ kadm_ser_ckpw - the server side of the check_password routine
 
 Checks to see if the des key passed from the caller is a "secure" password.
 */
+int
 kadm_ser_ckpw(dat, len, ad, datout, outlen)
 u_char *dat;
 int len;
@@ -540,7 +550,8 @@ int *outlen;
     memset(newkey, 0, sizeof(newkey));
     if (retval) {
 	    *outlen = strlen(check_pw_msg)+strlen(pw_blurb)+1;
-	    if (*datout = (u_char *) malloc(*outlen)) {
+	    *datout = (u_char *) malloc(*outlen);
+	    if (*datout) {
 		    strcpy((char *) *datout, check_pw_msg);
 		    strcat((char *) *datout, pw_blurb);
 	    } else
@@ -568,6 +579,7 @@ key, which is sent back to the client.  The key version is returned in
 the max_life field of the values structure.  It's a hack, but it's a
 backwards compatible hack....
 */
+int
 kadm_ser_stab(dat, len, ad, datout, outlen)
 u_char *dat;
 int len;

@@ -20,6 +20,10 @@
 extern char *malloc(), *calloc(), *realloc();
 #endif
 
+static int check_field_header(u_char *, u_char *, int);
+static int build_field_header(u_char *, u_char **);
+
+
 /*
   kadm_stream.c
   this holds the stream support routines for the kerberos administration server
@@ -33,6 +37,7 @@ extern char *malloc(), *calloc(), *realloc();
 */
 
 #include "kadm.h"
+#include "kadm_server.h"
 
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 
@@ -43,6 +48,7 @@ vals_to_stream
      
 this function creates a byte-stream representation of the kadm_vals structure
 */
+int
 vals_to_stream(dt_in, dt_out)
 Kadm_vals *dt_in;
 u_char **dt_out;
@@ -79,6 +85,7 @@ u_char **dt_out;
   return(stsize);
 }  
 
+static int
 build_field_header(cont, st)
 u_char *cont;			/* container for fields data */
 u_char **st;			/* stream */
@@ -88,6 +95,7 @@ u_char **st;			/* stream */
   return 4;			/* return pointer to current stream location */
 }
 
+int
 vts_string(dat, st, loc)
 char *dat;			/* a string to put on the stream */
 u_char **st;			/* base pointer to the stream */
@@ -98,6 +106,7 @@ int loc;			/* offset into the stream for current data */
   return strlen(dat)+1;
 }
 
+int
 vts_short(dat, st, loc)
 u_short dat;			/* the attributes field */
 u_char **st;			/* a base pointer to the stream */
@@ -111,6 +120,7 @@ int loc;			/* offset into the stream for current data */
   return sizeof(u_short);
 }
 
+int
 vts_long(dat, st, loc)
 krb5_ui_4 dat;			/* the attributes field */
 u_char **st;			/* a base pointer to the stream */
@@ -125,6 +135,7 @@ int loc;			/* offset into the stream for current data */
 }
 
     
+int
 vts_char(dat, st, loc)
 u_char dat;			/* the attributes field */
 u_char **st;			/* a base pointer to the stream */
@@ -142,6 +153,7 @@ stream_to_vals
      
 this decodes a byte stream represntation of a vals struct into kadm_vals
 */
+int
 stream_to_vals(dt_in, dt_out, maxlen)
 u_char *dt_in;
 Kadm_vals *dt_out;
@@ -149,6 +161,7 @@ int maxlen;				/* max length to use */
 {
   register int vsloop, stsize;		/* loop counter, stream size */
   register int status;
+  krb5_ui_4 l_trans;
 
   memset((char *) dt_out, 0, sizeof(*dt_out));
 
@@ -171,9 +184,10 @@ int maxlen;				/* max length to use */
 	  stsize += status;
 	  break;
       case KADM_EXPDATE:
-	  if ((status = stv_long(dt_in, &dt_out->exp_date, stsize,
+	  if ((status = stv_long(dt_in, &l_trans, stsize,
 				 maxlen)) < 0)
 	      return(-1);
+	  dt_out->exp_date = l_trans;
 	  stsize += status;
 	  break;
       case KADM_ATTR:
@@ -189,13 +203,15 @@ int maxlen;				/* max length to use */
 	  stsize += status;
 	  break;
       case KADM_DESKEY:
-	  if ((status = stv_long(dt_in, &dt_out->key_high, stsize,
+	  if ((status = stv_long(dt_in, &l_trans, stsize,
 				    maxlen)) < 0)
 	      return(-1);
+	  dt_out->key_high = l_trans;
 	  stsize += status;
-	  if ((status = stv_long(dt_in, &dt_out->key_low, stsize,
+	  if ((status = stv_long(dt_in, &l_trans, stsize,
 				    maxlen)) < 0)
 	      return(-1);
+	  dt_out->key_low = l_trans;
 	  stsize += status;
 	  break;
       default:
@@ -204,6 +220,7 @@ int maxlen;				/* max length to use */
   return stsize;
 }  
 
+static int
 check_field_header(st, cont, maxlen)
 u_char *st;			/* stream */
 u_char *cont;			/* container for fields data */
@@ -215,6 +232,7 @@ int maxlen;
   return 4;			/* return pointer to current stream location */
 }
 
+int
 stv_string(st, dat, loc, stlen, maxlen)
 register u_char *st;		/* base pointer to the stream */
 char *dat;			/* a string to read from the stream */
@@ -233,6 +251,7 @@ int maxlen;			/* max length of input stream */
   return strlen(dat)+1;
 }
 
+int
 stv_short(st, dat, loc, maxlen)
 u_char *st;			/* a base pointer to the stream */
 u_short *dat;			/* the attributes field */
@@ -248,6 +267,7 @@ int maxlen;
   return sizeof(u_short);
 }
 
+int
 stv_long(st, dat, loc, maxlen)
 u_char *st;			/* a base pointer to the stream */
 krb5_ui_4 *dat;			/* the attributes field */
@@ -263,6 +283,7 @@ int maxlen;			/* maximum length of st */
   return sizeof(krb5_ui_4);
 }
     
+int
 stv_char(st, dat, loc, maxlen)
 u_char *st;			/* a base pointer to the stream */
 u_char *dat;			/* the attributes field */

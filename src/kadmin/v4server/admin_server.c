@@ -71,6 +71,10 @@ extern Kadm_Server server_parm;
 krb5_context kadm_context;
 int debug;
 
+static void cleanexit(int);
+static int kadm_listen(void);
+
+
 /* close the system log file */
 void close_syslog()
 {
@@ -86,6 +90,7 @@ void byebye()			/* say goodnight gracie */
 ** Main does the logical thing, it sets up the database and RPC interface,
 **  as well as handling the creation and maintenance of the syslog file...
 */
+int
 main(argc, argv)		/* admin_server main routine */
 int argc;
 char *argv[];
@@ -168,7 +173,8 @@ char *argv[];
 	}
 
     if (krbrlm[0] == 0) {
-	if (errval = krb5_get_default_realm(kadm_context, &lrealm)) {
+	errval = krb5_get_default_realm(kadm_context, &lrealm);
+	if (errval) {
 	    com_err(argv[0], errval, "while attempting to get local realm");
 	    exit(1);
 	}
@@ -179,12 +185,15 @@ char *argv[];
     paramsin.realm = krbrlm;
     paramsin.mask |= KADM5_CONFIG_REALM;
 
-    if (errval = kadm5_get_config_params(kadm_context, NULL, NULL,
-					 &paramsin, &paramsout)) {
+    errval = kadm5_get_config_params(kadm_context, NULL, NULL,
+				     &paramsin, &paramsout);
+    if (errval) {
 	 com_err(argv[0], errval, "while retrieving kadm5 params");
 	 exit(1);
     }
-    if (errval = krb5_db_set_name(kadm_context, paramsout.dbname)) {
+
+    errval = krb5_db_set_name(kadm_context, paramsout.dbname);
+    if (errval) {
 	 com_err(argv[0], errval, "while setting dbname");
 	 exit(1);
     }
@@ -195,8 +204,8 @@ char *argv[];
     printf("regular kill instead\n\n");
 
 #ifdef KADM5
-    printf("KADM Server starting in the KADM5 mode (%sprocess id %d).\n",
-	   debug ? "" : "parent ", getpid());
+    printf("KADM Server starting in the KADM5 mode (%sprocess id %ld).\n",
+	   debug ? "" : "parent ", (long) getpid());
 #else
     printf("KADM Server starting in %s mode for the purposes for password changing\n\n", fascist_cpw ? "fascist" : "NON-FASCIST");
 #endif
@@ -211,7 +220,9 @@ char *argv[];
 	byebye();
 	exit(1);
     }
-    if (errval = krb5_db_set_lockmode(kadm_context, TRUE)) {
+
+    errval = krb5_db_set_lockmode(kadm_context, TRUE);
+    if (errval) {
 	com_err(argv[0], errval, "while setting db to nonblocking");
 	close_syslog();
 	krb5_db_fini(kadm_context);
@@ -249,7 +260,7 @@ static void clear_secrets()
     return;
 }
 
-static exit_now = 0;
+static int exit_now = 0;
 
 krb5_sigtype
 doexit(sig)
@@ -267,6 +278,7 @@ int unknown_child = 0;
 kadm_listen
 listen on the admin servers port for a request
 */
+static int
 kadm_listen()
 {
     extern int errno;
@@ -348,7 +360,7 @@ kadm_listen()
 
 	    if (debug) {
 		 process_client(peer_fd, &peer);
-	    } else if (pid = fork()) {
+	    } else if ((pid = fork())) {
 		/* parent */
 		if (pid < 0) {
 		    syslog(LOG_ERR, "fork: %s", error_message(errno));
@@ -421,7 +433,9 @@ void process_client(fd, who)
 	 cleanexit(1);
     }
     free(service_name);
-    if (retval = krb5_db_set_name(kadm_context, paramsout.dbname)) {
+
+    retval = krb5_db_set_name(kadm_context, paramsout.dbname);
+    if (retval) {
 	 syslog(LOG_ERR, "%s while setting dbname", error_message(retval));
 	 cleanexit(1);
     }
@@ -438,7 +452,8 @@ void process_client(fd, who)
 
     server_parm.recv_addr = *who;
 
-    if (retval = krb5_db_init(kadm_context)) {	/* Open as client */
+    retval = krb5_db_init(kadm_context);
+    if (retval) {	/* Open as client */
 	syslog(LOG_ERR, "can't open krb db: %s", error_message(retval));
 	cleanexit(1);
     }
@@ -605,7 +620,9 @@ do_child(sig)
     SIGNAL_RETURN;
 }
 
-cleanexit(val)
+static
+void cleanexit(val)
+    int val;
 {
     krb5_db_fini(kadm_context);
     clear_secrets();

@@ -154,6 +154,7 @@ int code;
 kadm_ser_in
 unwrap the data stored in dat, process, and return it.
 */
+int
 kadm_ser_in(dat,dat_len)
 u_char **dat;
 int *dat_len;
@@ -183,8 +184,9 @@ int *dat_len;
     memcpy((char *)authent.dat, (char *)(*dat) + in_len, authent.length);
     authent.mbz = 0;
     /* service key should be set before here */
-    if (retc = krb_rd_req(&authent, server_parm.sname, server_parm.sinst,
-			  server_parm.recv_addr.sin_addr.s_addr, &ad, (char *)0))
+    retc = krb_rd_req(&authent, server_parm.sname, server_parm.sinst,
+		      server_parm.recv_addr.sin_addr.s_addr, &ad, (char *)0);
+    if (retc)
     {
 	errpkt(dat, dat_len,retc + krb_err_base);
 	return retc + krb_err_base;
@@ -208,9 +210,11 @@ int *dat_len;
 #else
     des_key_sched(ad.session, sess_sched);
 #endif
-    if (retc = (int) krb_rd_priv(in_st, r_len, sess_sched, &ad.session, 
-				 &server_parm.recv_addr,
-				 &server_parm.admin_addr, &msg_st)) {
+
+    retc = (int) krb_rd_priv(in_st, r_len, sess_sched, &ad.session, 
+			     &server_parm.recv_addr,
+			     &server_parm.admin_addr, &msg_st);
+    if (retc) {
 	clr_cli_secrets();
 	errpkt(dat, dat_len,retc + krb_err_base);
 	return retc + krb_err_base;
