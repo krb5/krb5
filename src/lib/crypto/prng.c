@@ -109,7 +109,7 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
     return(0);
 }
 
-void prng_cleanup (void)
+void krb5int_prng_cleanup (void)
 {
   if (inited) krb5int_yarrow_final (&y_ctx);
 	inited = 0;

@@ -1,3 +1,9 @@
+2004-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* prng.c (krb5int_prng_cleanup): Renamed from prng_cleanup.
+	* crypto_libinit.c: Include k5-int.h.
+	(cryptoint_cleanup_library): Updated call.
+
 2004-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't check for --enable-athena and don't define

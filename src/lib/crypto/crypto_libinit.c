@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "crypto_libinit.h"
+/* get prng_cleanup decl */
+#include "k5-int.h"
 
 static	int		initialized = 0;
 
@@ -27,7 +29,7 @@ void cryptoint_cleanup_library (void)
 {
 	assert (initialized);
 	
-	prng_cleanup ();
+	krb5int_prng_cleanup ();
 	
 	initialized = 0;
 }
