@@ -1,3 +1,8 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (TRY_PEER_INT): Strip trailing spaces from defined
+	macros.
+
 2002-04-02  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-strip): New rule to pass "-s" to install.
