@@ -1,3 +1,9 @@
+2003-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove stamp rules.  Explicitly creates header
+	directory if needed.
+	(gssapi.h): Tweak to avoid race conditions.
+
 2003-02-11  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (gssapi-include): New rules to avoid coding
