@@ -1,3 +1,9 @@
+2000-02-07  Scott McGuire  <smcguire@mit.edu>
+
+    * changepw.c (krb5_locate_kpasswd): fixed memory trashing
+       caused by incorrect pointer arithmetic when assigning
+       DEFAULT_KPASSWD_PORT in DNS code also.
+
 2000-02-04  Scott McGuire  <smcguire@mit.edu>
 
     * changepw.c (krb5_locate_kpasswd): fixed memory trashing
