@@ -56,7 +56,8 @@ krb5_encrypt_block *eblock;
     }
     /* shift key down to beginning of contents, and ignore extra wasted
        space */
-    bcopy(out->contents, ((krb5_pointer) out->contents ) + sizeof(out->length),
+    bcopy((char *)out->contents,
+	  ((char *) out->contents ) + sizeof(out->length),
 	  out->length);
     return retval;
 }
