@@ -1,3 +1,14 @@
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* yarrow.c (yarrow_reseed_locked): Renamed from
+	krb5int_yarrow_reseed and made static.
+	(Yarrow_detect_fork, yarrow_input_maybe_locking,
+	krb5int_yarrow_output_Block): Call it.
+	(krb5int_yarrow_reseed): New function, grabs lock and calls the
+	old version.
+	(krb5int_yarrow_final): Hold the lock until after clearing the
+	Yarrow context data.
+
 2005-01-13  Ezra Peisach  <epeisach@mit.edu>
 
 	* yarrow.c: Declare yarrow_gate_locked static before first use.
