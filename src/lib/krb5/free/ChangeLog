@@ -1,0 +1,4 @@
+Tue Oct  4 22:05:04 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* f_princ.c (krb5_free_principal): Don't blow up if principal is NULL.
+

@@ -32,9 +32,13 @@ void
 krb5_free_principal(val)
 krb5_principal val;
 {
-    register int i = krb5_princ_size(val);
+    register int i;
 
+    if (!val)
+	return;
+    
     if (val->data) {
+	i = krb5_princ_size(val);
 	while(--i >= 0)
 	    free(krb5_princ_component(val, i)->data);
 	krb5_xfree(val->data);
