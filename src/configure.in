@@ -127,9 +127,9 @@ dnl
 dnl
 dnl Check for thread safety issues.
 dnl (Is there a better place for this?)
+tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
 AC_CHECK_FUNCS($tsfuncs)
 if test "$enable_thread_support" = yes; then
-  tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
   tsmissing=""
   for ts in $tsfuncs; do
     if eval "test \"\${ac_cv_func_$ts}\" != yes"; then
