@@ -2,7 +2,7 @@
 
 	* krb524.c: Fix copyright notice.
 
-2003-06-05  Tom Yu  <tlyu@mit.edu>
+2003-06-05  Jeffrey Altman  <jaltman@mit.edu>
 
 	* Makefile.in: Build krb524.dll on Windows.
 
