@@ -54,6 +54,7 @@ unit-test-body:
 		$(RUNTEST) SERVER=./server CLIENT=./client \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
+		PRIOCNTL_HACK=@PRIOCNTL_HACK@ \
 		PASS="$(PASS)" --tool rpc_test $(RUNTESTFLAGS) ; \
 	then \
 		echo Cleaning up... ; \

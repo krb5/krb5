@@ -1073,7 +1073,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 egress:
     for (i = 0; i < n_conns; i++) {
 	if (conns[i].fd != INVALID_SOCKET)
-	    close(conns[i].fd);
+	    closesocket(conns[i].fd);
 	if (conns[i].state == READING
 	    && conns[i].x.in.buf != 0
 	    && conns[i].x.in.buf != udpbuf)

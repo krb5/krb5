@@ -1537,7 +1537,7 @@ recvauth(valid_checksum)
 	return status;
 
     key = 0;
-    status = krb5_auth_con_getremotesubkey (bsd_context, auth_context, &key);
+    status = krb5_auth_con_getrecvsubkey (bsd_context, auth_context, &key);
     if (status)
 	fatal (netf, "Server can't get session subkey");
     if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)

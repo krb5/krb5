@@ -1,3 +1,30 @@
+2004-01-06  Jeffrey Altman <jaltman@mit.edu>
+
+    * krb5_err.et (KRB5_CC_NOSUPP) new ccache error code
+
+2003-12-12  Jeffrey Altman <jaltman@mit.edu>
+
+    * krb5_err.et (KRB5_CC_READONLY) new ccache error code
+
+2003-07-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* init_ets.c (krb5_init_ets): Only initialize error tables once -
+	so that init_conext/free_context loops do not result in memory
+	leaks.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_ERR_NO_SERVICE): New error code.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524_err.et: New file, moved from ../../../krb524.  Add new
+	error code KRB524_KRB4_DISABLED.
+	* Makefile.in (STLIBOBJS, HDRS, OBJS, ETSRCS, SRCS, awk-windows):
+	Add it.
+	($(OUTPRE)krb524_err.$(OBJEXT)): List dependence on .c file.
+	* init_ets.c (krb5_init_ets): Call initialize_k524_error_table.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5_ERR_BAD_S2K_PARAMS): New error code.

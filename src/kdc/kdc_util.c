@@ -150,7 +150,8 @@ realm_compare(krb5_principal princ1, krb5_principal princ2)
  */
 krb5_boolean krb5_is_tgs_principal(krb5_principal principal)
 {
-	if ((krb5_princ_component(kdc_context, principal, 0)->length ==
+	if ((krb5_princ_size(kdc_context, principal) > 0) &&
+	    (krb5_princ_component(kdc_context, principal, 0)->length ==
 	     KRB5_TGS_NAME_SIZE) &&
 	    (!memcmp(krb5_princ_component(kdc_context, principal, 0)->data,
 		     KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
@@ -312,8 +313,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	goto cleanup_auth_context;
     }
 
-    if ((retval = krb5_auth_con_getremotesubkey(kdc_context,
-						auth_context, subkey)))
+    if ((retval = krb5_auth_con_getrecvsubkey(kdc_context,
+					      auth_context, subkey)))
 	goto cleanup_auth_context;
 
     if ((retval = krb5_auth_con_getauthenticator(kdc_context, auth_context,
@@ -827,9 +828,8 @@ fail:
  * Returns a Kerberos protocol error number, which is _not_ the same
  * as a com_err error number!
  */
-#define AS_OPTIONS_HANDLED (KDC_OPT_FORWARDABLE | KDC_OPT_PROXIABLE | \
-			     KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED | \
-			     KDC_OPT_RENEWABLE | KDC_OPT_RENEWABLE_OK)
+#define AS_INVALID_OPTIONS (KDC_OPT_FORWARDED | KDC_OPT_PROXY |\
+KDC_OPT_VALIDATE | KDC_OPT_RENEW | KDC_OPT_ENC_TKT_IN_SKEY)
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
@@ -838,9 +838,9 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
     int		errcode;
     
     /*
-     * If an illegal option is set, complain.
+     * If an option is set that is only allowed in TGS requests, complain.
      */
-    if (request->kdc_options & ~(AS_OPTIONS_HANDLED)) {
+    if (request->kdc_options & AS_INVALID_OPTIONS) {
 	*status = "INVALID AS OPTIONS";
 	return KDC_ERR_BADOPTION;
     }
@@ -1113,13 +1113,10 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     int		st_idx = 0;
 
     /*
-     * If an illegal option is set, complain.
+     * If an illegal option is set, ignore it.
      */
-    if (request->kdc_options & ~(TGS_OPTIONS_HANDLED)) {
-	*status = "INVALID TGS OPTIONS";
-	return KDC_ERR_BADOPTION;
-    }
-    
+    request->kdc_options &= TGS_OPTIONS_HANDLED;
+
     /* Check to see if server has expired */
     if (server.expiration && server.expiration < kdc_time) {
 	*status = "SERVICE EXPIRED";
@@ -1162,7 +1159,8 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 	    return KRB_AP_ERR_NOT_US;
 	}
 	/* ...and that the second component matches the server realm... */
-	if ((krb5_princ_component(kdc_context, ticket->server, 1)->length !=
+	if ((krb5_princ_size(kdc_context, ticket->server) <= 1) ||
+	    (krb5_princ_component(kdc_context, ticket->server, 1)->length !=
 	     krb5_princ_realm(kdc_context, request->server)->length) ||
 	    memcmp(krb5_princ_component(kdc_context, ticket->server, 1)->data,
 		   krb5_princ_realm(kdc_context, request->server)->data,

@@ -36,36 +36,55 @@ gss_krb5_ccache_name(minor_status, name, out_name)
 	const char *name;
 	const char **out_name;
 {
-	krb5_context context;
-	krb5_error_code retval;
-	OM_uint32 foo_stat;
-	static char *oldname = NULL;
-	const char *tmpname = NULL;
+    static char *gss_out_name = NULL;
+    
+    char *old_name = NULL;
+    OM_uint32 err = 0;
+    OM_uint32 minor = 0;
 
-	if (GSS_ERROR(kg_get_context(minor_status, &context)))
-		return (GSS_S_FAILURE);
+    if (out_name) {
+        const char *tmp_name = NULL;
 
-	if (out_name) {
-		if (oldname != NULL)
-			free(oldname);
-		/*
-		 * Save copy of previous default ccname, since
-		 * cc_set_default_name will free it and we don't want
-		 * to hang on to a pointer to freed memory.
-		 */
-		tmpname = krb5_cc_default_name(context);
-		oldname = malloc(strlen(tmpname) + 1);
-		if (oldname == NULL)
-			return GSS_S_FAILURE;
-		strcpy(oldname, tmpname);
-		*out_name = oldname;
-	}
-
-	retval = krb5_cc_set_default_name(context, name);
-	if (retval) {
-		*minor_status = retval;
-		return GSS_S_FAILURE;
-	}
-	kg_release_defcred(&foo_stat);
-	return GSS_S_COMPLETE;
+        if (!err) {
+            if (GSS_ERROR(kg_get_ccache_name (&minor, &tmp_name))) {
+                err = minor;
+            }
+        }
+        
+        if (!err) {
+            old_name = malloc(strlen(tmp_name) + 1);
+            if (old_name == NULL) {
+                err = ENOMEM;
+            } else {
+                strcpy(old_name, tmp_name);
+            }
+        }
+        
+        if (!err) {
+            char *swap = NULL;
+            
+            swap = gss_out_name;
+            gss_out_name = old_name;
+            old_name = swap;
+        }            
+    }
+    
+    if (!err) {
+        if (GSS_ERROR(kg_set_ccache_name (&minor, name))) {
+            err = minor;
+        }
+    }
+    
+    if (!err) {
+        if (out_name) {
+            *out_name = gss_out_name;
+        }
+    }
+    
+    if (old_name != NULL) {
+        free (old_name);
+    }
+    
+    *minor_status = err;
+    return (*minor_status == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
 }

@@ -24,7 +24,8 @@ clean::
 #
 $(OUTPRE)kdb5_verify.$(OBJEXT): kdb5_verify.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(SS_DEPS)
+  $(SS_DEPS)
 

@@ -29,6 +29,17 @@
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
+static krb5_error_code
+krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
+				 const struct krb5_hash_provider *hash,
+				 const krb5_keyblock *key,
+				 krb5_keyusage usage,
+				 const krb5_data *ivec,
+				 const krb5_data *input,
+				 krb5_data *output,
+				 size_t hmacsize,
+				 int ivec_mode);
+
 krb5_error_code
 krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
      const struct krb5_enc_provider *enc;
@@ -38,6 +49,37 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
      const krb5_data *ivec;
      const krb5_data *input;
      krb5_data *output;
+{
+    return krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage,
+					    ivec, input, output, 0, 0);
+}
+
+krb5_error_code
+krb5int_aes_dk_decrypt(enc, hash, key, usage, ivec, input, output)
+     const struct krb5_enc_provider *enc;
+     const struct krb5_hash_provider *hash;
+     const krb5_keyblock *key;
+     krb5_keyusage usage;
+     const krb5_data *ivec;
+     const krb5_data *input;
+     krb5_data *output;
+{
+    return krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage,
+					    ivec, input, output, 96 / 8, 1);
+}
+
+static krb5_error_code
+krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage, ivec, input, output,
+				 hmacsize, ivec_mode)
+     const struct krb5_enc_provider *enc;
+     const struct krb5_hash_provider *hash;
+     const krb5_keyblock *key;
+     krb5_keyusage usage;
+     const krb5_data *ivec;
+     const krb5_data *input;
+     krb5_data *output;
+     size_t hmacsize;
+     int ivec_mode;
 {
     krb5_error_code ret;
     size_t hashsize, blocksize, keybytes, keylength, enclen, plainlen;
@@ -52,7 +94,12 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     (*(enc->block_size))(&blocksize);
     (*(enc->keysize))(&keybytes, &keylength);
 
-    enclen = input->length - hashsize;
+    if (hmacsize == 0)
+	hmacsize = hashsize;
+    else if (hmacsize > hashsize)
+	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+
+    enclen = input->length - hmacsize;
 
     if ((kedata = (unsigned char *) malloc(keylength)) == NULL)
 	return(ENOMEM);
@@ -87,7 +134,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     d1.data[2] = (usage>>8)&0xff;
     d1.data[3] = usage&0xff;
 
-    d1.data[4] = 0xAA;
+    d1.data[4] = (char) 0xAA;
 
     if ((ret = krb5_derive_key(enc, key, &ke, &d1)) != 0)
 	goto cleanup;
@@ -108,9 +155,15 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
 
-    if (ivec != NULL && ivec->length == blocksize)
-	cn = (unsigned char *) d1.data + d1.length - blocksize;
-    else
+    if (ivec != NULL && ivec->length == blocksize) {
+	if (ivec_mode == 0)
+	    cn = (unsigned char *) d1.data + d1.length - blocksize;
+	else if (ivec_mode == 1) {
+	    int nblocks = (d1.length + blocksize - 1) / blocksize;
+	    cn = d1.data + blocksize * (nblocks - 2);
+	} else
+	    abort();
+    } else
 	cn = NULL;
 
     /* verify the hash */
@@ -121,7 +174,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     if ((ret = krb5_hmac(hash, &ki, 1, &d2, &d1)) != 0)
 	goto cleanup;
 
-    if (memcmp(cksum, input->data+enclen, hashsize) != 0) {
+    if (memcmp(cksum, input->data+enclen, hmacsize) != 0) {
 	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	goto cleanup;
     }
