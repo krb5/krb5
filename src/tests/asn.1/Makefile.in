@@ -71,13 +71,6 @@ $(OUTPRE)krb5_encode_test.$(OBJEXT): krb5_encode_test.c \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
   utility.h $(SRCTOP)/lib/krb5/asn.1/krbasn1.h $(SRCTOP)/lib/krb5/asn.1/asn1buf.h \
   ktest.h debug.h
-$(OUTPRE)krb5_encode_test.$(OBJEXT): krb5_encode_test.c \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
-  utility.h $(SRCTOP)/lib/krb5/asn.1/krbasn1.h $(SRCTOP)/lib/krb5/asn.1/asn1buf.h \
-  ktest.h debug.h
 $(OUTPRE)ktest.$(OBJEXT): ktest.c ktest.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
