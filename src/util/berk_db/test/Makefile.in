@@ -25,7 +25,7 @@ clean::
 ${OBJS}: Makefile
 
 check::	dbtest
-	if [ -x /bin/sh5 ] ; then \
+	if [ -f /bin/sh5 ] ; then \
 		/bin/sh5 $(srcdir)/run.test hash ; \
 	else \
 		/bin/sh $(srcdir)/run.test hash ; \
