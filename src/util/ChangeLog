@@ -2,6 +2,8 @@
 
 	* depfix.sed: Temporarily add trailing whitespace to make
 	substitutions more regular.  Split lines before writing out.
+	Drop "$(srcdir)/" prefix for files in current directory, in favor
+	of using VPATH.
 
 2001-06-15  Ken Raeburn  <raeburn@mit.edu>
 
