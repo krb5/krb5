@@ -84,6 +84,7 @@ typedef int krb5_sigtype;
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_CRC32
 #define PROVIDE_DES_CBC_CKSUM
+#define PROVIDE_RSA_MD4
 
 #define DEFAULT_PWD_STRING1 "Enter password:"
 #define DEFAULT_PWD_STRING2 "Re-enter password for verification:"
