@@ -111,6 +111,7 @@ krb5_compat_recvauth(/* IN */
 	if ((retval = krb5_net_read(fd, vers.vers, 4)) != 4)
 		return((retval < 0) ? errno : ECONNABORTED);
 
+#ifdef KRB5_KRB4_COMPAT
 	if (!strncmp(vers.vers, KRB_V4_SENDAUTH_VERS, 4)) {
 		/*
 		 * We must be talking to a V4 sendauth; read in the
@@ -162,6 +163,7 @@ krb5_compat_recvauth(/* IN */
 		    return KRB5_SENDAUTH_BADRESPONSE;
 		}
 	}
+#endif
 
 	/*
 	 * Assume that we're talking to a V5 recvauth; read in the
@@ -208,6 +210,7 @@ krb5_compat_recvauth(/* IN */
 #define	max(a,b) (((a) > (b)) ? (a) : (b))
 #endif /* max */
 
+#ifdef KRB5_KRB4_COMPAT	
 static int
 krb_v4_recvauth(options, fd, ticket, service, instance, faddr, laddr, kdata,
 		filename, schedule, version)
@@ -311,13 +314,4 @@ mutual_fail:
     }
     return(rem);
 }
-
-		
-
-	
-
-		
-		
-		
-		
-	     
+#endif
