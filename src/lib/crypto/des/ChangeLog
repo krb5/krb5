@@ -1,3 +1,10 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* f_cbc.c (mit_des_zeroblock): Define, as a single cblock, not the
+	array of 8 that was used elsewhere.
+	* des_int.h (mit_des_zeroblock): Declare, and use a macro to stick
+	a krb5int prefix on it.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* f_cbc.c (krb5int_des_cbc_decrypt): Move declarations that were

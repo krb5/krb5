@@ -130,6 +130,9 @@ extern int mit_des_cbc_encrypt (const mit_des_cblock *in,
 				const mit_des_key_schedule schedule,
 				const mit_des_cblock ivec, int enc);
     
+#define mit_des_zeroblock krb5int_c_mit_des_zeroblock
+extern const mit_des_cblock mit_des_zeroblock;
+
 /* fin_rndkey.c */
 extern krb5_error_code mit_des_finish_random_key
     ( const krb5_encrypt_block *,

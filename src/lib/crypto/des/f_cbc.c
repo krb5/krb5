@@ -36,6 +36,8 @@
  * cleartext.
  */
 
+const mit_des_cblock mit_des_zeroblock /* = all zero */;
+
 #undef mit_des_cbc_encrypt
 int
 mit_des_cbc_encrypt(in, out, length, schedule, ivec, enc)

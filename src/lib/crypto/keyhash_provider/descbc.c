@@ -28,8 +28,6 @@
 #include "des_int.h"
 #include "keyhash_provider.h"
 
-static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
-
 static krb5_error_code
 k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)

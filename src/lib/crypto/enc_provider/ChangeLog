@@ -1,3 +1,8 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c (mit_des_zeroblock): Don't define here.
+	* des3.c (mit_des_zeroblock): Don't define here.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes.c (aes_block_size, aes128_keysize, aes256_keysize):

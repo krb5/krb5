@@ -34,8 +34,6 @@
 /* Force acceptance of krb5-beta5 md4des checksum for now. */
 #define KRB5_MD4DES_BETA5_COMPAT
 
-static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
-
 /* des-cbc(xorkey, conf | rsa-md4(conf | data)) */
 
 /* this could be done in terms of the md4 and des providers, but

@@ -27,8 +27,6 @@
 #include "k5-int.h"
 #include "des_int.h"
 
-static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
-
 static krb5_error_code
 validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
 		      const krb5_data *input, const krb5_data *output,

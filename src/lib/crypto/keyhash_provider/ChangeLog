@@ -1,3 +1,9 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* descbc.c (mit_des_zeroblock): Don't define here.
+	* k5_md4des.c (mit_des_zeroblock): Don't define here.
+	* k5_md5des.c (mit_des_zeroblock): Don't define here.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* descbc.c (k5_descbc_hash_size): Deleted.
