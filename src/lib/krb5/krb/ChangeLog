@@ -1,3 +1,6 @@
+Tue Mar 28 18:34:20 1995  John Gilmore  (gnu at toad.com)
+
+	* rd_req_sim.c:  Really remove the file.
 
 Mon Mar 27 08:34:49 1995 Chris Provenzano (proven@mit.edu)
 
