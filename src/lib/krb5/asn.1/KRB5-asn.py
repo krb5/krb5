@@ -13,25 +13,26 @@
 KRB5 DEFINITIONS ::=
 BEGIN
 
--- Define "better" names
+-- the order of stuff in this file matches the order in the draft RFC
 
 Realm ::= GeneralString
 PrincipalName ::= SEQUENCE OF GeneralString
-EncryptedData ::= OCTET STRING
 
 -- Message types from protocol spec
 
 -- Some predefined integer values for certain types of fields
-MessageType ::= INTEGER {
-	asReq(2),
-	asRep(4),
-	apReq(6),
-	tgsReq(8),
-	apRep(10),
-	tgsRep(12),
-	safe(14),
-	priv(16),
-	error(32)
+MessageType ::=	INTEGER {
+	ticket(1), -- XXX RFC draft 3 uses illegal leading capitals
+	authenticator(2),
+	asReq(10),
+	asRep(11),
+	tgsReq(12),
+	tgsRep(13),
+	apReq(14),
+	apRep(15),
+	safe(20),
+	priv(21),
+	error(30)
 }
 
 AddressType ::= INTEGER {
@@ -42,92 +43,27 @@ AddressType ::= INTEGER {
 	appletalk-ddp(16)
 }
 
-KeyType ::= INTEGER {
-	null(0),
-	des(1),
-	lucifer(2)
-}
-
-EncryptionType ::= INTEGER {
-	null(0),
-	des-cbc(1),
-	lucifer-cbc(2)
-}
-
-ChecksumType ::= INTEGER {
-	crc(1),
-	-- xxx(2),
-	snefru(3),
-	des-mac(4)
-}
-
--- EncryptionKey 
-EncryptionKey ::= SEQUENCE {
-	keytype[0]			INTEGER, -- KeyType
-	session[1]			OCTET STRING
-}
-
-Checksum ::= SEQUENCE {
-	cksumtype[0]			INTEGER, -- ChecksumType
-	checksum[1]			OCTET STRING
-}
-
--- Unencrypted authenticator
-Authenticator ::= [APPLICATION 8] SEQUENCE  {
-	authenticator-vno[0]		AuthenticatorVersion,
-	crealm[1]			Realm,
-	cname[2]			PrincipalName,
-	cksum[3]			Checksum,
-	cmsec[4]			INTEGER,
-	ctime[5]			GeneralizedTime
-}
-
-AuthenticatorVersion ::= INTEGER {krb5(5)}
-
--- Encrypted part of ticket
-EncTicketPart ::= [APPLICATION 9] SEQUENCE {
-	confounder[0]			INTEGER, -- krb5_ui_4
-	flags[1]			TicketFlags,
-	key[2]				EncryptionKey,
-	crealm[3]			Realm,
-	cname[4]			PrincipalName,
-	transited[5]			GeneralString,
-	authtime[6]			GeneralizedTime,
-	starttime[7]			GeneralizedTime,
-	endtime[8]			GeneralizedTime,
-	renew-till[9]			GeneralizedTime OPTIONAL,
-	caddr[10]			HostAddresses,
-	authorization-data[11]		AuthorizationData OPTIONAL
-}
-
-
-TicketFlags ::= BIT STRING {
-	reserved(0),
-	forwardable(1),
-	forwarded(2),
-	proxiable(3),
-	proxy(4),
-	may-postdate(5),
-	postdated(6),
-	invalid(7),
-	renewable(8),
-	initial(9),
-	duplicate-skey(10)
-}
-
-HostAddresses ::= SEQUENCE OF SEQUENCE {
-	addr-type[0]			INTEGER, -- AddressType
-	address[1]			OCTET STRING
-}
-
+-- XXX missing from RFC Draft 3
 HostAddress ::= SEQUENCE  {
 	addr-type[0]			INTEGER, -- AddressType
 	address[1]			OCTET STRING
 }
 
-AuthorizationData ::= SEQUENCE OF SEQUENCE {
-	ad-type[0]			INTEGER,
-	ad-data[1]			GeneralString
+HostAddresses ::=	SEQUENCE OF SEQUENCE {
+	addr-type[0]	INTEGER, -- AddressType
+	address[1]	OCTET STRING
+}
+
+AdType ::=	BIT STRING -- { - - AuthorizationData Type
+--	reserved(0),
+--	external(1),
+--	registered(2),
+--	field-type(3-15) - - XXX
+--}
+
+AuthorizationData ::=	SEQUENCE OF SEQUENCE {
+	ad-type[0]	INTEGER, -- XXX RFC says AdType, should be a 16-bit integer
+	ad-data[1]	GeneralString
 }
 
 KDCOptions ::= BIT STRING {
@@ -149,78 +85,159 @@ KDCOptions ::= BIT STRING {
 	validate(31)
 }
 
-Ticket ::= [APPLICATION 10] SEQUENCE {
-	tkt-vno[0]			INTEGER,
-	srealm[1]			Realm,
-	sname[2]			PrincipalName,
-	etype[3]			INTEGER, -- EncryptionType
-	skvno[4]			INTEGER,
-	enc-part[5]			EncryptedData	-- EncTicketPart
+LastReqType ::= 	BIT STRING --{
+--	this-server-only(0),
+--	interpretation(1-7) - - XXX
+--}
+
+LastReq ::=	SEQUENCE OF SEQUENCE {
+	lr-type[0]	INTEGER, -- LastReqType
+	lr-value[1]	KerberosTime -- XXX RFC draft 3 has trailing ,
 }
 
-AS-REQ ::= [APPLICATION 0] SEQUENCE {
-	pvno[0]				INTEGER,
-	msg-type[1]			INTEGER,
-	kdc-options[2]			KDCOptions,
-	ctime[3]			GeneralizedTime,
-	from[4]				GeneralizedTime,
-	till[5]				GeneralizedTime,
-	rtime[6]			GeneralizedTime OPTIONAL,
-	etype[7]			INTEGER, -- EncryptionType
-	crealm[8]			Realm,
-	cname[9]			PrincipalName,
-	addresses[10]			HostAddresses,
-	sname[11]			PrincipalName
+KerberosTime ::=	GeneralizedTime -- Specifying UTC time zone (Z)
+
+Ticket ::=	[APPLICATION 1] SEQUENCE {
+	tkt-vno[0]	INTEGER,
+	realm[1]	Realm,
+	sname[2]	PrincipalName,
+	enc-part[3]	EncryptedData	-- EncTicketPart
 }
+
+-- Encrypted part of ticket
+-- XXX needs an [APPLICATION x]
+EncTicketPart ::=	SEQUENCE {
+	flags[0]	TicketFlags,
+	key[1]		EncryptionKey,
+	crealm[2]	Realm,
+	cname[3]	PrincipalName,
+	transited[4]	GeneralString,
+	authtime[5]	KerberosTime,
+	starttime[6]	KerberosTime,
+	endtime[7]	KerberosTime,
+	renew-till[8]	KerberosTime OPTIONAL,
+	caddr[9]	HostAddresses,
+	authorization-data[10]	AuthorizationData OPTIONAL
+}
+
+-- Unencrypted authenticator
+Authenticator ::=	[APPLICATION 2] SEQUENCE  {
+	authenticator-vno[0]	AuthenticatorVersion,
+	crealm[1]	Realm,
+	cname[2]	PrincipalName,
+	cksum[3]	Checksum,
+	cmsec[4]	INTEGER,
+	ctime[5]	KerberosTime
+}
+
+AuthenticatorVersion ::= INTEGER {krb5(5)}
+
+-- XXX missing from RFC Draft 3
+TicketFlags ::= BIT STRING {
+	reserved(0),
+	forwardable(1),
+	forwarded(2),
+	proxiable(3),
+	proxy(4),
+	may-postdate(5),
+	postdated(6),
+	invalid(7),
+	renewable(8),
+	initial(9),
+	duplicate-skey(10)
+}
+
+-- XXX RFC Draft 3 needs "ClientName" changed to "PrincipalName"
+-- the following two sequences MUST be the same except for the
+-- APPLICATION identifier
+AS-REQ ::= [APPLICATION 10] SEQUENCE {
+	pvno[1]	INTEGER,
+	msg-type[2]	INTEGER,
+	padata-type[3]	INTEGER,
+	padata[4]	OCTET STRING OPTIONAL, -- encoded AP-REQ XXX optional
+	req-body[5]	SEQUENCE {
+	 kdc-options[0]	KDCOptions,
+	 cname[1]	PrincipalName OPTIONAL, -- Used only in AS-REQ
+	 realm[2]	Realm, -- Server's realm  Also client's in AS-REQ
+	 sname[3]	PrincipalName,
+	 from[4]	KerberosTime OPTIONAL,
+	 till[5]	KerberosTime,
+	 rtime[6]	KerberosTime OPTIONAL,
+	 ctime[7]	KerberosTime,
+	 nonce[8]	INTEGER,
+	 etype[9]	INTEGER, -- EncryptionType
+	 addresses[10]	HostAddresses OPTIONAL,
+	 authorization-data[11]	AuthorizationData OPTIONAL,
+	 additional-tickets[12]	SEQUENCE OF Ticket OPTIONAL
+	}
+}
+TGS-REQ ::= [APPLICATION 12] SEQUENCE {
+	pvno[1]	INTEGER,
+	msg-type[2]	INTEGER,
+	padata-type[3]	INTEGER,
+	padata[4]	OCTET STRING, -- encoded AP-REQ
+	req-body[5]	SEQUENCE {
+	 kdc-options[0]	KDCOptions,
+	 cname[1]	PrincipalName OPTIONAL, -- Used only in AS-REQ
+	 realm[2]	Realm, -- Server's realm  Also client's in AS-REQ
+	 sname[3]	PrincipalName,
+	 from[4]	KerberosTime OPTIONAL,
+	 till[5]	KerberosTime,
+	 rtime[6]	KerberosTime OPTIONAL,
+	 ctime[7]	KerberosTime,
+	 nonce[8]	INTEGER,
+	 etype[9]	INTEGER, -- EncryptionType
+	 addresses[10]	HostAddresses OPTIONAL,
+	 authorization-data[11]	AuthorizationData OPTIONAL,
+	 additional-tickets[12]	SEQUENCE OF Ticket OPTIONAL
+	}
+}
+-- the preceding two sequences MUST be the same except for the
+-- APPLICATION identifier
 
 KDC-REP ::= [APPLICATION 1] SEQUENCE {
 	pvno[0]				INTEGER,
-	msg-type[1]			INTEGER,
+	msg-type[1]			INTEGER, -- MessageType
 	crealm[2]			Realm,
 	cname[3]			PrincipalName,
-	etype[4]			INTEGER, -- EncryptionType
-	ckvno[5]			INTEGER,
-	ticket[6]			Ticket,		-- Ticket
-	enc-part[7]			EncryptedData	-- EncKDCRepPart
+	ticket[4]			Ticket,		-- Ticket
+	enc-part[5]			EncryptedData	-- EncKDCRepPart
 }
 
-EncKDCRepPart ::= [APPLICATION 11] SEQUENCE {
-	confounder[0]			INTEGER, -- krb5_ui_4
-	key[1]				EncryptionKey,
-	last-req[2]			LastReq,
-	ctime[3]			GeneralizedTime,
-	key-exp[4]			GeneralizedTime,
-	flags[5]			TicketFlags,
-	authtime[6]			GeneralizedTime,-- also known as ktime
-	starttime[7]			GeneralizedTime,
-	endtime[8]			GeneralizedTime,
-	renew-till[9]			GeneralizedTime OPTIONAL,
-	srealm[10]			Realm,
-	sname[11]			PrincipalName,
-	caddr[12]			HostAddresses
+-- the following two sequences MUST be the same except for the
+-- APPLICATION identifier
+EncASRepPart ::=	[APPLICATION 25] SEQUENCE {
+	key[0]	EncryptionKey,
+	last-req[1]	LastReq,
+	nonce[2]	INTEGER,
+	key-expiration[3]	KerberosTime OPTIONAL,
+	flags[4]	TicketFlags,
+	authtime[5]	KerberosTime,
+	starttime[6]	KerberosTime OPTIONAL,
+	endtime[7]	KerberosTime,
+	renew-till[8]	KerberosTime OPTIONAL,
+	realm[9]	Realm, -- XXX should be srealm
+	sname[10]	PrincipalName,
+	caddr[11]	HostAddresses
 }
-
-KRB-ERROR ::= [APPLICATION 2] SEQUENCE {
-	pvno[0]				INTEGER,
-	msg-type[1]			INTEGER,
-	ctime[2]			GeneralizedTime,
-	cmsec[3]			INTEGER,
-	stime[4]			GeneralizedTime,
-	smsec[5]			INTEGER,
-	error[6]			INTEGER,
-	crealm[7]			Realm,
-	cname[8]			PrincipalName,
-	srealm[9]			Realm,
-	sname[10]			PrincipalName,
-	e-text[11]			GeneralString
+EncTGSRepPart ::=	[APPLICATION 26] SEQUENCE {
+	key[0]	EncryptionKey,
+	last-req[1]	LastReq,
+	nonce[2]	INTEGER,
+	key-expiration[3]	KerberosTime OPTIONAL,
+	flags[4]	TicketFlags,
+	authtime[5]	KerberosTime,
+	starttime[6]	KerberosTime OPTIONAL,
+	endtime[7]	KerberosTime,
+	renew-till[8]	KerberosTime OPTIONAL,
+	realm[9]	Realm, -- XXX should be srealm
+	sname[10]	PrincipalName,
+	caddr[11]	HostAddresses
 }
+-- the preceding two sequences MUST be the same except for the
+-- APPLICATION identifier
 
-LastReq ::= SEQUENCE OF SEQUENCE {
-	lr-type[0]			INTEGER,
-	lr-value[1]			INTEGER
-}
-
-AP-REQ ::= [APPLICATION 3] SEQUENCE {
+AP-REQ ::= [APPLICATION 14] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	ap-options[2]			APOptions,
@@ -228,78 +245,99 @@ AP-REQ ::= [APPLICATION 3] SEQUENCE {
 	authenticator[4]		EncryptedData	-- Authenticator
 }
 
+-- XXX These appear twice in the draft 3 RFC
 APOptions ::= BIT STRING {
 	reserved(0),
 	use-session-key(1),
 	mutual-required(2)
 }
 
-AP-REP ::= [APPLICATION 4] SEQUENCE {
+AP-REP ::= [APPLICATION 15] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	enc-part[2]			EncryptedData	-- EncAPRepPart
 }
 
-EncAPRepPart ::= [APPLICATION 12] SEQUENCE {
-	ctime[0]			GeneralizedTime,
+EncAPRepPart ::= [APPLICATION 27] SEQUENCE {
+	ctime[0]			KerberosTime,
 	cmsec[1]			INTEGER
 }
 
--- Ick... due to the bogus stuff generated by this ASN.1 compiler, we
--- need to assemble the TGS request in a mutant fashion.  The checksum
--- in the authenticator in the header in the TGS-REQ must be computed
--- over the encoding of the rest of the message.
--- RealTGS-REQ is encoded and then put as an octet string into the TGS-REQ.
--- Likewise with the AP-REQ header.
-
-TGS-REQ ::= [APPLICATION 5] SEQUENCE {
-	header[0]			OCTET STRING, -- encoded AP-REQ
-	tgs-request[1]			OCTET STRING -- encoded RealTGS-REQ
-}
-
-RealTGS-REQ ::= [APPLICATION 13] SEQUENCE {
-	pvno[1]				INTEGER,
-	msg-type[2]			INTEGER,
-	kdc-options[3]			KDCOptions,
-	from[4]				GeneralizedTime,
-	till[5]				GeneralizedTime,
-	rtime[6]			GeneralizedTime OPTIONAL,
-	ctime[7]			GeneralizedTime,
-	etype[8]			INTEGER, -- EncryptionType
-	sname[9]			PrincipalName,
-	addresses[10]			HostAddresses,
-	enc-part[11]			EncryptedData OPTIONAL -- EncTgsReqPart
-}
-
-EncTgsReqPart ::= [APPLICATION 14] SEQUENCE {
-	authorization-data[0]		AuthorizationData OPTIONAL,
-	second-ticket[1]		Ticket OPTIONAL
-}
-
-KRB-SAFE ::= [APPLICATION 6] SEQUENCE {
+KRB-SAFE ::= [APPLICATION 20] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	user-data[2]			OCTET STRING,
-	timestamp[3]			GeneralizedTime,
+	timestamp[3]			KerberosTime,
 	msec[4]				INTEGER,
 	s-address[5]			HostAddress,	-- sender's addr
 	r-address[6]			HostAddress,	-- recip's addr
-	checksum[7]			Checksum			
+	cksum[7]			Checksum			
 }
 
-KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
-	pvno[0]				INTEGER,
-	msg-type[1]			INTEGER,
-	etype[2]			INTEGER, -- EncryptionType
-	enc-part[3]			EncryptedData	-- EncKrbPrivPart
+KRB-PRIV ::=	[APPLICATION 21] SEQUENCE {
+	pvno[0]		INTEGER,
+	msg-type[1]	INTEGER,
+	enc-part[3]	EncryptedData	-- EncKrbPrivPart
 }
 
-EncKrbPrivPart ::= [APPLICATION 15] SEQUENCE {
-	user-data[0]			OCTET STRING,
-	timestamp[1]			GeneralizedTime,
-	msec[2]				INTEGER,
-	s-address[3]			HostAddress,	-- sender's addr
-	r-address[4]			HostAddress	-- recip's addr
+EncKrbPrivPart ::=	[APPLICATION 28] SEQUENCE {
+	user-data[0]	OCTET STRING,
+	timestamp[1]	KerberosTime,
+	msec[2]		INTEGER,
+	s-address[3]	HostAddress,	-- sender's addr
+	r-address[4]	HostAddress	-- recip's addr
+}
+
+KRB-ERROR ::=	[APPLICATION 30] SEQUENCE {
+	pvno[0]		INTEGER,
+	msg-type[1]	INTEGER,
+	ctime[2]	KerberosTime OPTIONAL,
+	cmsec[3]	INTEGER OPTIONAL,
+	stime[4]	KerberosTime,
+	smsec[5]	INTEGER,
+	error-code[6]	INTEGER,
+	crealm[7]	Realm OPTIONAL,
+	cname[8]	PrincipalName OPTIONAL,
+	realm[9]	Realm, -- Correct realm
+	sname[10]	PrincipalName, -- Correct name
+	e-text[11]	GeneralString OPTIONAL, -- XXX should be optional
+	e-data[12]	OCTET STRING OPTIONAL
+}
+
+EncryptedData ::=	SEQUENCE {
+	etype[0]	INTEGER, -- EncryptionType
+	kvno[1]		INTEGER OPTIONAL,
+	cipher[2]	OCTET STRING -- CipherText
+}
+
+EncryptionType ::=	INTEGER {
+	null(0),
+	des-cbc-crc(1),
+	lucifer-cbc-crc(2)
+}
+
+EncryptionKey ::= SEQUENCE {
+	keytype[0]			INTEGER, -- KeyType
+	keyvalue[1]			OCTET STRING
+}
+
+KeyType ::=	INTEGER {
+	null(0),
+	des(1),
+	lucifer(2)
+}
+
+Checksum ::= SEQUENCE {
+	cksumtype[0]			INTEGER, -- ChecksumType
+	checksum[1]			OCTET STRING
+}
+
+ChecksumType ::=	INTEGER {
+	crc32(1),
+	rsa-md4(2),
+	rsa-md4-des(3),
+	snefru(4),
+	des-mac(5)
 }
 
 END
