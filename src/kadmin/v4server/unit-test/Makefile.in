@@ -1,0 +1,15 @@
+#
+# $Id$
+#
+
+check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+
+unit-test-setup::
+	$(ENV_SETUP) $(START_SERVERS_LOCAL) -v4files -kdcport 750 -keysalt des-cbc-crc:v4
+	$(ENV_SETUP) $(LOCAL_MAKE_KEYTAB) -princ changepw/kerberos /krb5/ovsec_adm.srvtab
+
+unit-test-body::
+	$(ENV_SETUP) $(RUNTEST) VFOURSERVER=../kadmind4 --tool v4server
+
+unit-test-cleanup::
+	$(ENV_SETUP) $(STOP_SERVERS_LOCAL) -v4files
