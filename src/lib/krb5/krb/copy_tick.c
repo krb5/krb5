@@ -56,17 +56,22 @@ krb5_enc_tkt_part **partto;
 	return retval;
     }
     tempto->transited = partfrom->transited;
-    tempto->transited.tr_contents.data =
-	malloc(partfrom->transited.tr_contents.length);
-    if (!tempto->transited.tr_contents.data) {
-	krb5_free_principal(tempto->client);
-	krb5_free_keyblock(tempto->session);
-	xfree(tempto);
-	return retval;
+    if (tempto->transited.tr_contents.length == 0) {
+	tempto->transited.tr_contents.data = 0;
+    } else {
+	tempto->transited.tr_contents.data =
+	  malloc(partfrom->transited.tr_contents.length);
+	if (!tempto->transited.tr_contents.data) {
+	    krb5_free_principal(tempto->client);
+	    krb5_free_keyblock(tempto->session);
+	    xfree(tempto);
+	    return retval;
+	}
+	memcpy((char *)tempto->transited.tr_contents.data,
+	       (char *)partfrom->transited.tr_contents.data,
+	       partfrom->transited.tr_contents.length);
     }
-    memcpy((char *)tempto->transited.tr_contents.data,
-	   (char *)partfrom->transited.tr_contents.data,
-	   partfrom->transited.tr_contents.length);
+
     if (retval = krb5_copy_addresses(partfrom->caddrs, &tempto->caddrs)) {
 	xfree(tempto->transited.tr_contents.data);
 	krb5_free_principal(tempto->client);
