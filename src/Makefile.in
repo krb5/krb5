@@ -1,8 +1,5 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = .
-##DOS!include $(BUILDTOP)\config\windows.in
-
 prefix = /usr/local
 exec_prefix = $(prefix)
 binprefix =
@@ -81,7 +78,7 @@ TAGS: $(SRCS)
 
 clean:: clean-$(WHAT)
 
-clean-:: clean-unix
+clean-:: clean-windows
 clean-mac:: clean-unix
 clean-unix::
 	$(RM) *.o core
@@ -108,7 +105,7 @@ dist: $(DISTFILES)
 
 # Macintosh build process...
 
-# Build all things for the Mac build, which need to be built on 
+# Build all things for the Mac build, which need to be built on
 # Unix first.
 unixmac:
 	(cd lib/krb5/error_tables; make -f Makefile.in unixmac)
@@ -116,11 +113,15 @@ unixmac:
 
 
 # Microsoft Windows build process...
+#
 
-#
-# Windows configuration
-#
-makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
+config-windows:: makefile-windows
+	@echo Making in include
+	cd include
+	-$(MAKE) -$(MAKEFLAGS)
+	cd ..
+
+makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		include\makefile.in include\krb5\makefile.in \
 		lib\makefile.in lib\crypto\makefile.in \
 		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
@@ -137,10 +138,6 @@ makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
 		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
 		lib\krb5\rcache\makefile.in \
 		util\et\makefile.in
-	SET CL=/nologo
-	$(CC) /AL wconfig.c
-	copy Makefile Makefile.bak
-	.\wconfig config <makefile.in >makefile
 	.\wconfig config <include\makefile.in >include\makefile
 	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
 	.\wconfig config <lib\makefile.in >lib\makefile
@@ -168,7 +165,11 @@ makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
 	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
 	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
 	.\wconfig config <util\et\makefile.in >util\et\makefile
-	config\rm.bat wconfig.obj wconfig.exe msvc.pdb
+	config\rm.bat wconfig.obj msvc.pdb
+
+wconfig.exe: wconfig.c
+	SET CL=/nologo
+	$(CC) /AL wconfig.c
 
 clean-windows::
 	@echo Making clean in include
@@ -189,7 +190,7 @@ clean-windows::
 
 #
 # Builds the zip file that distributes Kerberos sources for DOS sites
-# from the source tree on Unix.	
+# from the source tree on Unix.
 #
 ZIPFILES= ./* \
 	config/* include/* include/krb5/* include/krb5/asn.1/* \
@@ -213,9 +214,13 @@ ZIPEXCLUDE= LIB/KRB5.SAB \
 	*.O *.A
 
 kerbsrc.zip: awk-windows
+	rm -f Makefile.bak
+	mv Makefile Makefile.bak
+	cp Makefile.in Makefile
 	rm -f kerbsrc.zip
 	zip -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
 	zip -Dk kerbsrc.zip $(ZIPBINARYFILES)
+	cp Makefile.bak Makefile
 #
 # Part of building the PC release has to be done on Unix. This includes
 # anything the requires awk.

@@ -1,3 +1,10 @@
+Wed Apr 19 18:32:04 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: 
+           removed need for this file to be configured on the PC.
+           zipping up for PC copies makefile.in to makefile so that on
+	   the PC you just need to type 'nmake' to build it.
+
 Fri Apr 14 21:21:28 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* aclocal.m4 (_MAKE_SUBDIRS): If there is an error while making in
