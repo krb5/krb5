@@ -353,6 +353,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
+#ifdef	MOTD_SUPPORTED
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_MOTD_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:MOTD command\n", my_id));
@@ -371,6 +372,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
+#endif	/* MOTD_SUPPORTED */
+#ifdef	MIME_SUPPORTED
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_MIME_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:MIME command\n", my_id));
@@ -386,6 +389,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
+#endif	/* MIME_SUPPORTED */
+#ifdef	LANGUAGES_SUPPORTED
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_LANGUAGE_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:LANGUAGE command\n", my_id));
@@ -410,6 +415,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
+#endif	/* LANGUAGES_SUPPORTED */
 		else {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:UNKNOWN command %s\n", my_id,
