@@ -1,3 +1,11 @@
+2000-09-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5_decode_test.c (decode_run): If the ASN1 decoder returns an
+	error, add one to the error count so there will be a non-zero
+	exit. Sometimes, the decoded structure is complete enoght to pass
+	the test, even with an ASN.1 error - which can easilly get missed
+	in the output run.
+
 2000-08-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* reference_encode.out, trval_reference.out: Test encoding of

@@ -40,6 +40,7 @@ int main(argc, argv)
     retval = decoder(&code,&var);\
     if(retval){\
       com_err("krb5_decode_test", retval, "while decoding %s", typestring);\
+      error_count++;\
     }\
     assert(comparator(&ref,var),typestring);\
     printf("%s\n",description)
