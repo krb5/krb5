@@ -1351,10 +1351,16 @@ is logs the message ``starting'' at the LOG_INFO level.  When it exits
 (due to a signal, for example) it logs the message ``finished,
 exiting'' at the LOG_INFO level.
 
-If the dictionary file does not exist, the server logs the mesage
+If the dictionary file does not exist, the server logs the message
 ``WARNING: Cannot find the dictionary file $<$name$>$, continuing
 without one.'' at the LOG_ERR level and continues with dictionary
 checking disabled.
+
+If the GSS-API authentication system cannot be initialized, the server
+logs the message ``Cannot initialize GSS-API authentication,
+failing.'' at the LOG_ERR level and exits with non-zero status.  This
+error can happen if, for example, the file ovsec_adm.srvtab does not
+exist or is incorrect.
 
 \subsubsection{Request Messages}
 
