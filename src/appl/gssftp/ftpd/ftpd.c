@@ -963,12 +963,12 @@ char *name, *passwd;
 	my_creds.times.endtime = now + 60 * 60 * 10;
 	my_creds.times.renew_till = 0;
 
-	if (krb5_get_in_tkt_with_password(kcontext, 0,
-					  0, NULL, 0 /*preauth*/,
-					  passwd,
-					  ccache,
-					  &my_creds, 0))
-		goto nuke_ccache;
+	if (krb5_get_init_creds_password(kcontext, &my_creds, me,
+					 passwd, NULL, NULL, 0, NULL, NULL))
+	  goto nuke_ccache;
+
+	if (krb5_cc_store_cred(kcontext, ccache, &my_creds))
+	  goto nuke_ccache;
 
 	if (!want_creds) {
 		krb5_cc_destroy(kcontext, ccache);

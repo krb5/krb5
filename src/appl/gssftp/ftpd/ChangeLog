@@ -1,3 +1,9 @@
+2004-08-27  Sam Hartman  <hartmans@mit.edu>
+
+	* ftpd.c (passwd;): Patch from Garry Zacheiss to use
+	krb5_get_init_creds_password instead of krb5_get_in_tkt since
+	get_in_tkt is obselete 
+
 2004-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (main): Use socklen_t for the size of the address from
