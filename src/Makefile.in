@@ -194,7 +194,7 @@ ZIPFILES= ./* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
 	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
-	windows/cns/*
+	windows/* windows/cns/*
 
 ZIPBINARYFILES=windows/cns/*.ico
 

@@ -1,3 +1,7 @@
+Tue Mar 21 18:50:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: oops, missed a directory in zipping up for the PC
+
 Tue Mar 21 18:38:12 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: more PC stuff including zipping up source commands.
