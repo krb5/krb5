@@ -1,5 +1,8 @@
 Fri Nov 22 15:50:42 1996  unknown  <bjaspan@mit.edu>
 
+	* get_myaddress.c (get_myaddress): use krb5_os_localaddr instead
+ 	of ioctl() to get local IP addresses [krb5-libs/227]
+
 	* clnt_generic.c, clnt_simple.c, getrpcport.c: use sizeof instead
  	of h_length to determine number of bytes of addr to copy from DNS
  	response [krb5-misc/211]
