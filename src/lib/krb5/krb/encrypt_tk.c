@@ -19,6 +19,7 @@ static char rcsid_encrypt_tk_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
+#include <krb5/krb5_err.h>
 
 #include <errno.h>
 
@@ -26,6 +27,7 @@ static char rcsid_encrypt_tk_c[] =
 
 /* array of pointers into encryption systems */
 extern krb5_cs_table_entry *csarray[];
+extern int max_cryptosystem;		/* max entry in array */
 
 /*
  Takes unencrypted dec_ticket & dec_tkt_part, encrypts with dec_ticket->etype
@@ -38,16 +40,21 @@ extern krb5_cs_table_entry *csarray[];
 */
 
 krb5_error_code
-krb5_encrypt_tkt_part(dec_tkt_part, srv_key, dec_ticket)
-register krb5_enc_tkt_part *dec_tkt_part;
+krb5_encrypt_tkt_part(srv_key, dec_ticket)
 krb5_keyblock *srv_key;
 register krb5_ticket *dec_ticket;
 {
     krb5_data *scratch;
     krb5_error_code retval;
     krb5_encrypt_block eblock;
+    register krb5_enc_tkt_part *dec_tkt_part = dec_ticket->enc_part2;
 
     /* encrypt the encrypted part */
+
+    if (dec_ticket->etype > max_cryptosystem ||
+	dec_ticket->etype < 0 ||
+	!csarray[dec_ticket->etype])
+	return KRB5KDC_ERR_ETYPE_NOSUPP;
 
     /*  start by encoding the to-be-encrypted part. */
     if (retval = encode_krb5_enc_tkt_part(dec_tkt_part, &scratch)) {
