@@ -1,3 +1,7 @@
+2003-06-05  Sam Hartman  <hartmans@mit.edu>
+
+	* pclose.c (mypopen): use fork not vfork
+
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftp.c (hookup, initconn, dataconn): Use socklen_t when passing

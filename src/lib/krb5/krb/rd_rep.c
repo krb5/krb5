@@ -82,7 +82,15 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context, const krb5_dat
     /* Set auth subkey */
     if ((*repl)->subkey) {
 	retval = krb5_copy_keyblock(context, (*repl)->subkey,
-				    &auth_context->remote_subkey);
+				    &auth_context->recv_subkey);
+	if (retval)
+	    goto clean_scratch;
+	retval = krb5_copy_keyblock(context, (*repl)->subkey,
+				    &auth_context->send_subkey);
+	if (retval) {
+	    krb5_free_keyblock(context, auth_context->send_subkey);
+	    auth_context->send_subkey = NULL;
+	}
     }
 
     /* Get remote sequence number */

@@ -52,7 +52,7 @@ proc kadmin_add { pname password } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*:" {
 	send "adminpass$KEY\r"
     }
     expect "Enter password for principal \"$pname@$REALMNAME\":" { send "$password\r" }
@@ -155,7 +155,7 @@ proc kadmin_add_rnd { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     expect "Principal \"$pname@$REALMNAME\" created." { set good 1 }
@@ -236,7 +236,7 @@ proc kadmin_show { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:"
+    expect -re "assword\[^\r\n\]*: *"
     send "adminpass$KEY\r"
     expect -re "\r.*Principal: $pname@$REALMNAME.*Key: .*Attributes:.*Policy: .*\r"
     expect_after
@@ -277,7 +277,7 @@ proc kadmin_cpw { pname password } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
 
@@ -324,7 +324,7 @@ proc kadmin_cpw_rnd { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     # When in doubt, jam one of these in there.
@@ -368,7 +368,7 @@ proc kadmin_modify { pname flags } {
 	    return 0
 	}
     }
-    expect "Enter password:"
+    expect -re "assword\[^\r\n\]*: *"
     send "adminpass$KEY\r"
     # When in doubt, jam one of these in there.
     expect "\r"
@@ -413,7 +413,7 @@ proc kadmin_list {  } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     expect -re "\(.*@$REALMNAME\r\n\)*"
@@ -459,7 +459,7 @@ proc kadmin_extract { instance name } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
 #    expect -re "kadmin: Entry for principal $name/$instance with kvno [0-9], encryption type .* added to keytab WRFILE:$tmppwd/keytab."
@@ -504,7 +504,7 @@ proc kadmin_extract { instance name } {
 #	    return 0
 #	}
 #    }
-#    expect "Enter password:" {
+#    expect -re "assword\[^\r\n\]*: *" {
 #	send "adminpass$KEY\r"
 #    }
 #    expect "extracted entry $name to key table $instance-new-v4-srvtab"
@@ -550,7 +550,7 @@ proc kadmin_delete { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     expect "Principal \"$pname@$REALMNAME\" deleted." { set good 1 }
@@ -676,7 +676,7 @@ proc kadmin_addpol { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     expect_after
@@ -759,7 +759,7 @@ proc kadmin_delpol { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     expect_after
@@ -834,7 +834,7 @@ proc kadmin_listpols {  } {
 	    return 0
 	}
     }
-    expect "Enter password:" {
+    expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
     expect_after
@@ -875,7 +875,7 @@ proc kadmin_modpol { pname flags } {
 	    return 0
 	}
     }
-    expect "Enter password:"
+    expect -re "assword\[^\r\n\]*: *"
     send "adminpass$KEY\r"
     # When in doubt, jam one of these in there.
     expect "\r"
@@ -918,7 +918,7 @@ proc kadmin_showpol { pname } {
 	    return 0
 	}
     }
-    expect "Enter password:"
+    expect -re "assword\[^\r\n\]*: *"
     send "adminpass$KEY\r"
     expect -re "\r.*Policy: $pname.*Number of old keys kept: .*Reference count: .*\r"
     expect_after

@@ -21,7 +21,7 @@ compile_et 	"$(IntermediateErrorTables)/kadm_err.h"
 compile_et 	"$(IntermediateErrorTables)/krb524_err.h"
             "$(IntermediateErrorTables)/krb524_err.c"
             "$(IntermediateErrorTables)/krb524_err.strings" : 
-            "$(SRCROOT)/../Sources/krb524/krb524_err.et" ;
+            "$(SRCROOT)/../Sources/lib/krb5/error_tables/krb524_err.et" ;
 
 compile_et 	"$(IntermediateErrorTables)/asn1_err.h"
             "$(IntermediateErrorTables)/asn1_err.c"
