@@ -114,3 +114,4 @@ main(argc,argv)
     }
 
 void krb5_klog_syslog() {}
+kdc_realm_t *find_realm_data (char *rname, krb5_ui_4 rsize) { return 0; }

@@ -1,3 +1,12 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.h (krb5_realm_params): Add fields realm_reject_bad_transit
+	and realm_reject_bad_transit_valid; delete field realm_filler.
+	* alt_prof.c (string_to_boolean, krb5_aprof_get_boolean): New
+	functions.
+	(krb5_read_realm_params): Parse "reject_bad_transit" value as
+	boolean and save it.
+
 2001-07-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm_rpc_xdr.c: Add xdr_krb5_ui_2. 

@@ -1,3 +1,8 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (realms (kdc.conf)): Add description of
+	reject_bad_transit realm option.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* user-guide.texinfo, install.texinfo: Cleanup makeinfo warning of

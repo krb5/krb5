@@ -1,3 +1,9 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm.h (struct __krb5_realm_params): Added fields
+	realm_reject_bad_transit, realm_reject_bad_transit_valid; deleted
+	field realm_filler.
+
 2001-07-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb.h: For structs krb5_tl_data (tl_data_length), krb5_key_data

@@ -928,6 +928,38 @@ List of key:salt strings.  Specifies the permitted key/salt combinations
 of principals for this realm.  You should set this tag to
 @samp{des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4}.
 
+@itemx reject_bad_transit
+A boolean value (@code{true}, @code{false}).  If set to @code{true}, the
+KDC will check the list of transited realms for cross-realm tickets
+against the transit path computed from the realm names and the
+@code{capaths} section of its @code{krb5.conf} file; if the path in the
+ticket to be issued contains any realms not in the computed path, the
+ticket will not be issued, and an error will be returned to the client
+instead.  If this value is set to @code{false}, such tickets will be
+issued anyways, and it will be left up to the application server to
+validate the realm transit path.
+
+If the @code{disable-transited-check} flag is set in the incoming
+request, this check is not performed at all.  Having the
+@code{reject_bad_transit} option will cause such ticket requests to be
+rejected always.
+
+This transit path checking and config file option currently apply only
+to TGS requests.
+
+Earlier versions of the MIT release (before 1.2.3) had bugs in the
+application server support such that the server-side checks may not be
+performed correctly.  We recommend turning this option on, unless you
+know that all application servers in this realm have been updated to
+fixed versions of the software, and for whatever reason, you don't want
+the KDC to do the validation.
+
+This is a per-realm option so that multiple-realm KDCs may control it
+separately for each realm, in case (for example) one realm has had the
+software on its application servers updated but another has not.
+
+This option defaults to @code{true}.
+
 @end table
 
 @node Sample kdc.conf File,  , realms (kdc.conf), kdc.conf
