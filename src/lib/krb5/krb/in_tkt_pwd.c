@@ -33,10 +33,12 @@ struct pwd_keyproc_arg {
  */
 
 static krb5_error_code
-pwd_keyproc(type, key, keyseed)
-krb5_keytype type;
-krb5_keyblock **key;
-krb5_pointer keyseed;
+pwd_keyproc(DECLARG(krb5_keytype, type),
+	    DECLARG(krb5_keyblock **, key),
+	    DECLARG(krb5_pointer, keyseed))
+OLDDECLARG(krb5_keytype, type)
+OLDDECLARG(krb5_keyblock **, key)
+OLDDECLARG(krb5_pointer, keyseed)
 {
     krb5_error_code retval;
     struct pwd_keyproc_arg *arg;
@@ -79,15 +81,20 @@ krb5_pointer keyseed;
  returns system errors, encryption errors
  */
 krb5_error_code
-krb5_get_in_tkt_with_password(options, addrs, etype, keytype, password,
-			      ccache, creds)
-krb5_flags options;
-krb5_address **addrs;
-krb5_enctype etype;
-krb5_keytype keytype;
-char *password;
-krb5_ccache ccache;
-krb5_creds *creds;
+krb5_get_in_tkt_with_password(DECLARG(krb5_flags, options),
+			      DECLARG(krb5_address **, addrs),
+			      DECLARG(krb5_enctype, etype),
+			      DECLARG(krb5_keytype, keytype),
+			      DECLARG(char *, password),
+			      DECLARG(krb5_ccache, ccache),
+			      DECLARG(krb5_creds *, creds))
+OLDDECLARG(krb5_flags, options)
+OLDDECLARG(krb5_address **, addrs)
+OLDDECLARG(krb5_enctype, etype)
+OLDDECLARG(krb5_keytype, keytype)
+OLDDECLARG(char *, password)
+OLDDECLARG(krb5_ccache, ccache)
+OLDDECLARG(krb5_creds *, creds)
 {
     krb5_error_code retval;
     struct pwd_keyproc_arg keyseed;
@@ -100,8 +107,7 @@ krb5_creds *creds;
     retval = krb5_get_in_tkt(options, addrs, etype, keytype, pwd_keyproc,
 			     (krb5_pointer) &keyseed,
 			     krb5_kdc_rep_decrypt_proc, 0,
-			     creds);
-    /* XXX need to play with creds & store them ? */
+			     creds, ccache);
     return retval;
 }
 
