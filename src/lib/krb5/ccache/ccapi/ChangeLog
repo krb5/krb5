@@ -1,3 +1,10 @@
+Thu May 13 18:01:58 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* winccld.c (krb5_win_ccdll_load): Register the FILE ccache type
+		if we are using ccapi, so that we make sure the FILE
+		ccache type will work if the user specifies it in an
+		environment variable.
+
 Mon May 10 15:24:36 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

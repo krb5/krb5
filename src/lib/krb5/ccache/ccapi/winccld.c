@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include "stdcc.h"
 
+/* from fcc-proto.h */
+KRB5_DLLIMP extern krb5_cc_ops krb5_fcc_ops;
+
 #define KRB5_WINCCLD_C_
 #include "winccld.h"
 
@@ -70,8 +73,10 @@ static int LoadFuncs(const char* dll_name, FUNC_INFO fi[],
     return LF_OK;
 }
 
-void krb5_win_ccdll_load()
+void krb5_win_ccdll_load(context)
+	krb5_context	context;
 {
+	krb5_cc_register(context, &krb5_fcc_ops, 0);
 	if (krb5_win_ccdll_loaded)
 		return;
 	if (LoadFuncs(KRBCC_DLL, krbcc_fi, 0, 0))
