@@ -1,5 +1,9 @@
 Thu Nov 28 18:54:02 1996  Tom Yu  <tlyu@mit.edu>
 
+	* krb425.texinfo: Change to use "@chapternewpage odd", also frob
+	copyright page as per other docs.  Also, remove footnote claiming
+	that "Kerberos V5 is based on the MIT beta7 release".
+
 	* admin.texinfo (capaths): Fix unquoted braces.
 	(appdefaults): Fix unquoted braces.
 
