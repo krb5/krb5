@@ -471,7 +471,8 @@ extern int errno;
    to the proper types during calls.  */
 typedef int (*key_proc_type) PROTOTYPE ((char *, char *, char *,
 					     char *, C_Block));
+#define KEY_PROC_TYPE_DEFINED
 typedef int (*decrypt_tkt_type) PROTOTYPE ((char *, char *, char *, char *,
 				     key_proc_type, KTEXT *));
-
+#define DECRYPT_TKT_TYPE_DEFINED
 #endif	/* KRB_DEFS */

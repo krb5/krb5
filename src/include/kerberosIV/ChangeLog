@@ -1,3 +1,8 @@
+Thu Apr 27 14:22:10 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb.h (DECRYPT_TKT_TYPE_DEFINED, KEY_PROC_TYPE_DEFINED): needed
+	to keep secondary (readability) defines in g_in_tkt.c out.
+
 Thu Apr 27 13:32:22 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* conf-osf1alpha.h: New file
