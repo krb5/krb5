@@ -103,8 +103,6 @@ krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
 #define process_v4(foo,bar,quux,foobar)	KRB5KRB_AP_ERR_BADVERSION
 #endif
 
-#define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
-
 #ifndef	min
 #define	min(a, b)	((a) < (b) ? (a) : (b))
 #define	max(a, b)	((a) > (b) ? (a) : (b))
