@@ -72,9 +72,12 @@
 #define KG2_TOK_RESPONSE	0x0202
 #define KG2_TOK_MIC		0x0303
 #define KG2_TOK_WRAP_INTEG	0x0404
-#define KG2_TOK_WRAP_PRIVINTEG	0x0505
+#define KG2_TOK_WRAP_PRIV	0x0505
 
 #define KRB5_GSS_FOR_CREDS_OPTION 1
+
+#define KG2_RESP_FLAG_ERROR		0x0001
+#define KG2_RESP_FLAG_DELEG_OK		0x0002
 
 /** internal types **/
 
@@ -84,10 +87,9 @@ typedef struct _krb5_gss_cred_id_rec {
    /* name/type of credential */
    gss_cred_usage_t usage;
    krb5_principal princ;	/* this is not interned as a gss_name_t */
-   const gss_OID_set_desc *actual_mechs;
    int prerfc_mech;		/* these are a cache of the set above */
    int rfc_mech;
-   int k2_mech;
+   int rfcv2_mech;
 
    /* keytab (accept) data */
    krb5_keytab keytab;
@@ -113,16 +115,30 @@ typedef struct _krb5_gss_ctx_id_rec {
    krb5_keyblock *seq;
    krb5_timestamp endtime;
    krb5_flags krb_flags;
-   krb5_int32 seq_send;
-   krb5_int32 seq_recv;
+   /* XXX these used to be signed.  the old spec is inspecific, and
+      the new spec specifies unsigned.  I don't believe that the change
+      affects the wire encoding. */
+   krb5_ui_4 seq_send;
+   krb5_ui_4 seq_recv;
    void *seqstate;
    int established;
    int big_endian;
    krb5_auth_context auth_context;
    gss_OID_desc *mech_used;
+   int gsskrb5_version;
+   int nctypes;
+   krb5_cksumtype *ctypes;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern void *kg_vdb;
+
+struct kg2_option {
+    int option_id;		/* set by caller */
+    int length;			/* filled in by parser */
+    unsigned char *data;	/* filled in by parser.  points inside
+				   passed-in token, so nothing needs to
+				   be freed */
+};
 
 /* helper macros */
 
@@ -225,6 +241,23 @@ krb5_error_code kg_ctx_internalize PROTOTYPE((krb5_context kcontext,
 OM_uint32 kg_get_context PROTOTYPE((OM_uint32 *minor_status,
 				    krb5_context *context));
 	
+OM_uint32
+kg2_parse_token PROTOTYPE((OM_uint32 *minor_status,
+			   unsigned char *ptr,
+			   int length,
+			   krb5_ui_4 *flags,
+			   int *nctypes, /* OUT */
+			   krb5_cksumtype **ctypes, /* OUT */
+			   int noptions,
+			   struct kg2_option *options, /* INOUT */
+			   krb5_data *kmsg,
+			   krb5_data *mic));
+
+void kg2_intersect_ctypes PROTOTYPE((int *nc1, 
+				     krb5_cksumtype *c1,
+				     int nc2,
+				     const krb5_cksumtype *c2));
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred

@@ -27,31 +27,399 @@
  * $Id$
  */
 
-/* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
-   conf_state is only valid if SEAL.
-   */
-
-OM_uint32
-kg_unseal(context, minor_status, context_handle, input_token_buffer,
-	  message_buffer, conf_state, qop_state, toktype)
+static OM_uint32
+kg2_verify_mic(context, minor_status, ctx, ptr, bodysize,
+	       text, qop_state)
      krb5_context context;
      OM_uint32 *minor_status;
-     gss_ctx_id_t context_handle;
-     gss_buffer_t input_token_buffer;
+     krb5_gss_ctx_id_rec *ctx;
+     unsigned char *ptr;
+     int bodysize;
+     gss_buffer_t text;
+     gss_qop_t *qop_state;
+{
+    size_t cksumlen;
+    krb5_error_code code;
+    krb5_data plain;
+    krb5_cksumtype tctype;
+    krb5_ui_4 tseqnum;
+    int tdirection;
+    krb5_checksum cksum;
+    krb5_boolean ckvalid;
+    krb5_timestamp now;
+    OM_uint32 retval;
+
+    plain.data = 0;
+    cksum.contents = 0;
+
+    /* verify the header */
+
+    if (bodysize < 11) {
+	free(plain.data);
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    /* allocate the checksum buffer */
+
+    plain.length = 7+text->length;
+
+    if ((plain.data = (char *) malloc(plain.length)) == NULL) {
+	*minor_status = ENOMEM;
+	return(GSS_S_FAILURE);
+    }
+
+    /* suck out the body parts from the token */
+
+    tctype = (krb5_cksumtype) ((ptr[0]<<24) | (ptr[1]<<16) |
+			       (ptr[2]<<8) | ptr[3]);
+    ptr += 4;
+
+    memcpy(plain.data, ptr, 5);
+    tseqnum = ((ptr[0]<<24) | (ptr[1]<<16) | (ptr[2]<<8) | ptr[3]);
+    ptr += 4;
+    tdirection = ptr[0];
+    ptr += 1;
+
+    cksum.length = (ptr[0]<<8) | ptr[1];
+    ptr += 2;
+    bodysize -= 11;
+
+    if (cksum.length != bodysize) {
+	free(plain.data);
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    cksum.contents = ptr;
+    cksum.checksum_type = tctype;
+
+    /* finish assembling the checksum buffer and compute the checksum */
+
+    plain.data[5] = (text->length >> 8) & 0xff;
+    plain.data[6] = text->length & 0xff;
+
+    memcpy(plain.data+7, text->value, text->length);
+
+    if (code = krb5_c_verify_checksum(context, ctx->subkey,
+				      KRB5_KEYUSAGE_GSS_TOK_MIC,
+				      &plain, &cksum, &ckvalid)) {
+	free(plain.data);
+	*minor_status = code;
+	return(GSS_S_FAILURE);
+    }
+
+    if (!ckvalid) {
+	free(plain.data);
+	*minor_status = 0;
+	return(GSS_S_BAD_SIG);
+    }
+
+    /* check context expiry */
+
+   if ((code = krb5_timeofday(context, &now))) {
+       free(plain.data);
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+
+   if (now > ctx->endtime) {
+       free(plain.data);
+       *minor_status = 0;
+       return(GSS_S_CONTEXT_EXPIRED);
+   }
+
+   /* do sequencing checks */
+
+   if ((ctx->initiate && tdirection != 0xff) ||
+       (!ctx->initiate && tdirection != 0)) {
+       free(plain.data);
+       *minor_status = G_BAD_DIRECTION;
+       return(GSS_S_BAD_SIG);
+   }
+
+   retval = g_order_check(&(ctx->seqstate), tseqnum);
+
+   free(plain.data);
+
+   if (retval) {
+       *minor_status = 0;
+       return(retval);
+   }
+
+   if (qop_state)
+       *qop_state = GSS_C_QOP_DEFAULT;
+
+   *minor_status = 0;
+   return(GSS_S_COMPLETE);
+}
+
+static OM_uint32
+kg2_unwrap_integ(context, minor_status, ctx, ptr, bodysize, output, qop_state)
+     krb5_context context;
+     OM_uint32 *minor_status;
+     krb5_gss_ctx_id_rec *ctx;
+     unsigned char *ptr;
+     int bodysize;
+     gss_buffer_t output;
+     gss_qop_t *qop_state;
+{
+    krb5_error_code code;
+    OM_uint32 retval;
+    krb5_ui_4 tseqnum;
+    int tdirection;
+    int tmsglen;
+    unsigned char *tmsg;
+    krb5_data plain;
+    krb5_checksum tcksum;
+    krb5_boolean ckvalid;
+    krb5_timestamp now;
+
+    output->length = 0;
+    output->value = NULL;
+
+    /* read the body parts out of the message */
+
+    if (bodysize < 11) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    tcksum.checksum_type = (krb5_cksumtype) ((ptr[0]<<24) | (ptr[1]<<16) |
+					     (ptr[2]<<8) | ptr[3]);
+    ptr += 4;
+
+    plain.data = ptr;
+
+    tseqnum = ((ptr[0]<<24) | (ptr[1]<<16) | (ptr[2]<<8) | ptr[3]);
+    ptr += 4;
+    tdirection = ptr[0];
+    ptr += 1;
+
+    tmsglen = (ptr[0]<<8) | ptr[1];
+    ptr += 2;
+    bodysize -= 11;
+
+    if (bodysize < tmsglen) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    tmsg = ptr;
+    ptr += tmsglen;
+    bodysize -= tmsglen;
+
+    plain.length = ((char*)ptr) - ((char *)plain.data);
+
+    tcksum.length = (ptr[0]<<8) | ptr[1];
+    ptr += 2;
+
+    if (bodysize != tcksum.length) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    tcksum.contents = ptr;
+
+    /* verify the MIC */
+
+    if (code = krb5_c_verify_checksum(context, ctx->subkey,
+				      KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG,
+				      &plain, &tcksum, &ckvalid)) {
+	*minor_status = code;
+	return(GSS_S_FAILURE);
+    }
+
+    if (!ckvalid) {
+	*minor_status = 0;
+	return(GSS_S_BAD_SIG);
+    }
+
+    /* check context expiry */
+
+   if ((code = krb5_timeofday(context, &now))) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+
+   if (now > ctx->endtime) {
+       *minor_status = 0;
+       return(GSS_S_CONTEXT_EXPIRED);
+   }
+
+   /* do sequencing checks */
+
+   if ((ctx->initiate && tdirection != 0xff) ||
+       (!ctx->initiate && tdirection != 0)) {
+       *minor_status = G_BAD_DIRECTION;
+       return(GSS_S_BAD_SIG);
+   }
+
+   if (retval = g_order_check(&(ctx->seqstate), tseqnum)) {
+       *minor_status = 0;
+       return(retval);
+   }
+
+   if ((output->value = (void *) malloc(tmsglen)) == NULL) {
+       *minor_status = ENOMEM;
+       return(GSS_S_FAILURE);
+   }
+
+   memcpy(output->value, tmsg, tmsglen);
+   output->length = tmsglen;
+
+   if (qop_state)
+       *qop_state = GSS_C_QOP_DEFAULT;
+
+   *minor_status = 0;
+   return(GSS_S_COMPLETE);
+}
+
+static OM_uint32
+kg2_unwrap_priv(context, minor_status, ctx, ptr, bodysize, output, qop_state)
+     krb5_context context;
+     OM_uint32 *minor_status;
+     krb5_gss_ctx_id_rec *ctx;
+     unsigned char *ptr;
+     int bodysize;
+     gss_buffer_t output;
+     gss_qop_t *qop_state;
+{
+    krb5_error_code code;
+    OM_uint32 retval;
+    krb5_enc_data cipher;
+    krb5_data plain;
+    krb5_ui_4 tseqnum;
+    int tdirection;
+    int tmsglen;
+    unsigned char *tmsg;
+    krb5_timestamp now;
+
+    output->length = 0;
+    output->value = NULL;
+
+    /* read the body parts out of the message */
+
+    if (bodysize < 2) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    cipher.ciphertext.length = (ptr[0]<<8) | ptr[1];
+    ptr += 2;
+    bodysize -= 2;
+
+    if (bodysize != cipher.ciphertext.length) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    cipher.ciphertext.data = ptr;
+    cipher.enctype = ENCTYPE_UNKNOWN;
+
+    plain.length = cipher.ciphertext.length;
+    if ((plain.data = (char *) malloc(plain.length)) == NULL) {
+	*minor_status = 0;
+	return(GSS_S_FAILURE);
+    }
+
+    /* decrypt (and implicitly verify) the encrypted data */
+
+    if (code = krb5_c_decrypt(context, ctx->subkey,
+			      KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV,
+			      0, &cipher, &plain)) {
+	*minor_status = code;
+	return(GSS_S_FAILURE);
+    }
+
+    /* parse out the encrypted fields */
+
+    ptr = plain.data;
+    bodysize = plain.length;
+
+    if (bodysize < 7) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    tseqnum = ((ptr[0]<<24) | (ptr[1]<<16) | (ptr[2]<<8) | ptr[3]);
+    ptr += 4;
+    tdirection = ptr[0];
+    ptr += 1;
+
+    tmsglen = (ptr[0]<<8) | ptr[1];
+    ptr += 2;
+    bodysize -= 7;
+
+    if (bodysize != tmsglen) {
+	*minor_status = G_TOK_TRUNC;
+	return(GSS_S_DEFECTIVE_TOKEN);
+    }
+
+    tmsg = ptr;
+
+    /* check context expiry */
+
+   if ((code = krb5_timeofday(context, &now))) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+
+   if (now > ctx->endtime) {
+       *minor_status = 0;
+       return(GSS_S_CONTEXT_EXPIRED);
+   }
+
+   /* do sequencing checks */
+
+   if ((ctx->initiate && tdirection != 0xff) ||
+       (!ctx->initiate && tdirection != 0)) {
+       *minor_status = G_BAD_DIRECTION;
+       return(GSS_S_BAD_SIG);
+   }
+
+   if (retval = g_order_check(&(ctx->seqstate), tseqnum)) {
+       *minor_status = 0;
+       return(retval);
+   }
+
+   if ((output->value = (void *) malloc(tmsglen)) == NULL) {
+       *minor_status = ENOMEM;
+       return(GSS_S_FAILURE);
+   }
+
+   memcpy(output->value, tmsg, tmsglen);
+   output->length = tmsglen;
+
+   if (qop_state)
+       *qop_state = GSS_C_QOP_DEFAULT;
+
+   *minor_status = 0;
+   return(GSS_S_COMPLETE);
+}
+
+/* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
+   conf_state is only valid if SEAL. */
+
+OM_uint32
+kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
+	     conf_state, qop_state, toktype)
+     krb5_context context;
+     OM_uint32 *minor_status;
+     krb5_gss_ctx_id_rec *ctx;
+     unsigned char *ptr;
+     int bodysize;
      gss_buffer_t message_buffer;
      int *conf_state;
      int *qop_state;
      int toktype;
 {
-   krb5_gss_ctx_id_rec *ctx;
    krb5_error_code code;
-   int bodysize;
    int tmsglen;
    int conflen = 0;
    int signalg;
    int sealalg;
    gss_buffer_desc token;
-   unsigned char *ptr;
    krb5_checksum cksum;
    krb5_checksum desmac;
    krb5_checksum md5cksum;
@@ -70,32 +438,6 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    if (toktype == KG_TOK_SEAL_MSG) {
       message_buffer->length = 0;
       message_buffer->value = NULL;
-   }
-
-   /* validate the context handle */
-   if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-      return(GSS_S_NO_CONTEXT);
-   }
-
-   ctx = (krb5_gss_ctx_id_rec *) context_handle;
-
-   if (! ctx->established) {
-      *minor_status = KG_CTX_INCOMPLETE;
-      return(GSS_S_NO_CONTEXT);
-   }
-
-   /* parse the token, leave the data in message_buffer, setting conf_state */
-
-   /* verify the header */
-
-   ptr = (unsigned char *) input_token_buffer->value;
-
-   if ((err = g_verify_token_header((gss_OID) ctx->mech_used, &bodysize,
-				    &ptr, toktype,
-				    input_token_buffer->length))) {
-      *minor_status = err;
-      return(GSS_S_DEFECTIVE_TOKEN);
    }
 
    /* get the sign and seal algorithms */
@@ -422,4 +764,87 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
    *minor_status = 0;
    return(retval);
+}
+
+/* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
+   conf_state is only valid if SEAL. */
+
+OM_uint32
+kg_unseal(context, minor_status, context_handle, input_token_buffer,
+	  message_buffer, conf_state, qop_state, toktype)
+     krb5_context context;
+     OM_uint32 *minor_status;
+     gss_ctx_id_t context_handle;
+     gss_buffer_t input_token_buffer;
+     gss_buffer_t message_buffer;
+     int *conf_state;
+     int *qop_state;
+     int toktype;
+{
+   krb5_gss_ctx_id_rec *ctx;
+   unsigned char *ptr;
+   int bodysize;
+   int err;
+   OM_uint32 retval;
+
+   /* validate the context handle */
+   if (! kg_validate_ctx_id(context_handle)) {
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      return(GSS_S_NO_CONTEXT);
+   }
+
+   ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+   if (! ctx->established) {
+      *minor_status = KG_CTX_INCOMPLETE;
+      return(GSS_S_NO_CONTEXT);
+   }
+
+   /* parse the token, leave the data in message_buffer, setting conf_state */
+
+   /* verify the header */
+
+   ptr = (unsigned char *) input_token_buffer->value;
+
+   if (ctx->gsskrb5_version == 2000) {
+       if (!(err = g_verify_token_header((gss_OID) ctx->mech_used,
+					 &bodysize, &ptr, KG2_TOK_MIC,
+					 input_token_buffer->length))) {
+	   return(kg2_verify_mic(context, minor_status, ctx, ptr, bodysize,
+				 message_buffer, qop_state));
+       } else if (!(err = g_verify_token_header((gss_OID) ctx->mech_used,
+						&bodysize, &ptr,
+						KG2_TOK_WRAP_INTEG,
+						input_token_buffer->length))) {
+	   if (GSS_ERROR(retval = kg2_unwrap_integ(context, minor_status,
+						   ctx, ptr, bodysize,
+						   message_buffer, qop_state)))
+	       return(retval);
+
+	   *conf_state = 0;
+	   return(GSS_S_COMPLETE);
+       } else if (!(err = g_verify_token_header((gss_OID) ctx->mech_used,
+						&bodysize, &ptr,
+						KG2_TOK_WRAP_PRIV,
+						input_token_buffer->length))) {
+	   if (GSS_ERROR(retval = kg2_unwrap_priv(context, minor_status,
+						  ctx, ptr, bodysize,
+						  message_buffer, qop_state)))
+	       return(retval);
+
+	   *conf_state = 1;
+	   return(GSS_S_COMPLETE);
+       }
+   } else {
+       if (!(err = g_verify_token_header((gss_OID) ctx->mech_used,
+					 &bodysize, &ptr, toktype,
+					 input_token_buffer->length))) {
+	   return(kg_unseal_v1(context, minor_status, ctx, ptr, bodysize,
+			       message_buffer, conf_state, qop_state,
+			       toktype));
+       }
+   }
+
+   *minor_status = err;
+   return(GSS_S_DEFECTIVE_TOKEN);
 }

@@ -101,6 +101,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
    if (ctx->mech_used)
        gss_release_oid(minor_status, &ctx->mech_used);
    
+   if (ctx->ctypes)
+       xfree(ctx->ctypes);
+
    /* Zero out context */
    memset(ctx, 0, sizeof(*ctx));
    xfree(ctx);

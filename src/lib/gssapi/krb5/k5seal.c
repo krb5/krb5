@@ -23,9 +23,233 @@
 #include "gssapiP_krb5.h"
 
 static krb5_error_code
-make_seal_token(context, enc, seq, seqnum, direction, text, token,
-		signalg, cksum_size, sealalg, encrypt, toktype,
-		bigend, oid)
+make_priv_token_v2 PROTOTYPE((krb5_context context,
+			      krb5_keyblock *subkey,
+			      krb5_int32 *seqnum,
+			      int direction,
+			      gss_buffer_t text,
+			      gss_buffer_t token,
+			      gss_OID oid));
+
+static krb5_error_code
+make_priv_token_v2(context, subkey, seqnum, direction, text, token, oid)
+     krb5_context context;
+     krb5_keyblock *subkey;
+     krb5_int32 *seqnum;
+     int direction;
+     gss_buffer_t text;
+     gss_buffer_t token;
+     gss_OID oid;
+{
+   krb5_data plain;
+   krb5_enc_data cipher;
+   krb5_error_code code;
+   size_t enclen;
+   int tlen;
+   unsigned char *t, *ptr;
+
+   plain.data = 0;
+   cipher.ciphertext.data = 0;
+   t = 0;
+
+   plain.length = 7+text->length;
+   if ((plain.data = (void *) malloc(plain.length)) == NULL) {
+       code = ENOMEM;
+       goto cleanup;
+   }
+
+   plain.data[0] = (*seqnum >> 24) & 0xff;
+   plain.data[1] = (*seqnum >> 16) & 0xff;
+   plain.data[2] = (*seqnum >> 8) & 0xff;
+   plain.data[3] = *seqnum & 0xff;
+
+   plain.data[4] = direction?0:0xff;
+   
+   plain.data[5] = (text->length >> 8) & 0xff;
+   plain.data[6] = text->length & 0xff;
+
+   memcpy(plain.data+7, text->value, text->length);
+
+   if (code = krb5_c_encrypt_length(context, subkey->enctype, 
+				    plain.length, &enclen))
+       goto cleanup;
+
+   tlen = g_token_size((gss_OID) oid, 2+enclen);
+
+   if ((t = (unsigned char *) xmalloc(tlen)) == NULL)
+      return(ENOMEM);
+
+   ptr = t;
+
+   g_make_token_header((gss_OID) oid, 2+enclen, &ptr,
+		       KG2_TOK_WRAP_PRIV);
+
+   ptr[0] = (enclen >> 8) & 0xff;
+   ptr[1] = enclen & 0xff;
+
+   cipher.ciphertext.length = enclen;
+   cipher.ciphertext.data = ptr+2;
+
+   if (code = krb5_c_encrypt(context, subkey,
+			     KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV,
+			     0, &plain, &cipher))
+       goto cleanup;
+
+   /* that's it.  return the token */
+
+   (*seqnum)++;
+
+   token->length = tlen;
+   token->value = (void *) t;
+
+   code = 0;
+
+cleanup:
+   if (plain.data)
+       free(plain.data);
+   if (t)
+       free(t);
+
+   return(code);
+}
+
+static krb5_error_code
+make_integ_token_v2 PROTOTYPE((krb5_context context,
+			       krb5_keyblock *subkey,
+			       krb5_cksumtype ctype,
+			       krb5_int32 *seqnum,
+			       int direction,
+			       gss_buffer_t text,
+			       gss_buffer_t token,
+			       int toktype,
+			       gss_OID oid));
+
+static krb5_error_code
+make_integ_token_v2(context, subkey, ctype, seqnum, direction, text, token, 
+		    toktype, oid)
+     krb5_context context;
+     krb5_keyblock *subkey;
+     krb5_cksumtype ctype;
+     krb5_int32 *seqnum;
+     int direction;
+     gss_buffer_t text;
+     gss_buffer_t token;
+     int toktype;
+     gss_OID oid;
+{
+    krb5_error_code code;
+    int tmp, tlen;
+    unsigned char *t, *ptr;
+    krb5_data plain;
+    krb5_checksum cksum;
+
+    plain.data = 0;
+    t = 0;
+    cksum.contents = 0;
+
+    /* assemble the checksum buffer and compute the checksum */
+
+    plain.length = 7+text->length;
+
+    if ((plain.data = (char *) malloc(plain.length)) == NULL)
+	goto cleanup;
+
+    plain.data[0] = (*seqnum >> 24) & 0xff;
+    plain.data[1] = (*seqnum >> 16) & 0xff;
+    plain.data[2] = (*seqnum >> 8) & 0xff;
+    plain.data[3] = *seqnum & 0xff;
+
+    plain.data[4] = direction?0:0xff;
+
+    plain.data[5] = (text->length >> 8) & 0xff;
+    plain.data[6] = text->length & 0xff;
+
+    memcpy(plain.data+7, text->value, text->length);
+
+    if (code = krb5_c_make_checksum(context, ctype, subkey,
+				    (toktype == KG2_TOK_WRAP_INTEG)?
+				    KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG:
+				    KRB5_KEYUSAGE_GSS_TOK_MIC,
+				    &plain, &cksum))
+	goto cleanup;
+
+    /* assemble the token itself */
+
+    if (toktype == KG2_TOK_WRAP_INTEG)
+	tmp = 4+(7+text->length)+2+cksum.length;
+    else
+	tmp = 4+(5)+2+cksum.length;
+
+    tlen = g_token_size((gss_OID) oid, tmp);
+
+    if ((t = (unsigned char *) xmalloc(tlen)) == NULL)
+	return(ENOMEM);
+
+    ptr = t;
+
+    g_make_token_header((gss_OID) oid, tmp, &ptr, toktype);
+
+    ptr[0] = (ctype >> 24) & 0xff;
+    ptr[1] = (ctype >> 16) & 0xff;
+    ptr[2] = (ctype >> 8) & 0xff;
+    ptr[3] = ctype & 0xff;
+
+    ptr += 4;
+
+    if (toktype == KG2_TOK_WRAP_INTEG) {
+	memcpy(ptr, plain.data, 7+text->length);
+	ptr += 7+text->length;
+    } else {
+	memcpy(ptr, plain.data, 5);
+	ptr += 5;
+    }
+
+    ptr[0] = (cksum.length >> 8) & 0xff;
+    ptr[1] = cksum.length & 0xff;
+    ptr += 2;
+
+    memcpy(ptr, cksum.contents, cksum.length);
+
+    /* that's it.  return the token */
+
+    (*seqnum)++;
+
+    token->length = tlen;
+    token->value = (void *) t;
+
+    code = 0;
+
+cleanup:
+    if (plain.data)
+	free(plain.data);
+    if (cksum.contents)
+	krb5_free_checksum_contents(context, &cksum);
+    if (t)
+	free(t);
+
+   return(code);
+}
+
+static krb5_error_code
+make_seal_token_v1 PROTOTYPE((krb5_context context,
+			      krb5_keyblock *enc,
+			      krb5_keyblock *seq,
+			      krb5_int32 *seqnum,
+			      int direction,
+			      gss_buffer_t text,
+			      gss_buffer_t token,
+			      int signalg,
+			      int cksum_size,
+			      int sealalg,
+			      int encrypt,
+			      int toktype,
+			      int bigend,
+			      gss_OID oid));
+
+static krb5_error_code
+make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
+		   signalg, cksum_size, sealalg, encrypt, toktype,
+		   bigend, oid)
      krb5_context context;
      krb5_keyblock *enc;
      krb5_keyblock *seq;
@@ -329,17 +553,42 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_FAILURE);
    }
 
-   if ((code = make_seal_token(context, &ctx->enc, &ctx->seq,
-			       &ctx->seq_send, ctx->initiate,
-			       input_message_buffer, output_message_buffer,
-			       ctx->signalg, ctx->cksum_size, ctx->sealalg,
-			       conf_req_flag, toktype, ctx->big_endian,
-			       ctx->mech_used))) {
+   if (ctx->gsskrb5_version == 2000) {
+       if (toktype == KG_TOK_WRAP_MSG) {
+	   if (conf_req_flag)
+	       toktype = KG2_TOK_WRAP_PRIV;
+	   else
+	       toktype = KG2_TOK_WRAP_INTEG;
+       } else {
+	   toktype = KG2_TOK_MIC;
+       }
+
+       if (conf_req_flag) {
+	   code = make_priv_token_v2(context, ctx->subkey, &ctx->seq_send,
+				     ctx->initiate, input_message_buffer,
+				     output_message_buffer, ctx->mech_used);
+       } else {
+	   code = make_integ_token_v2(context, ctx->subkey, ctx->ctypes[0],
+				      &ctx->seq_send, ctx->initiate,
+				      input_message_buffer,
+				      output_message_buffer, toktype,
+				      ctx->mech_used);
+       }
+   } else {
+       code = make_seal_token_v1(context, ctx->enc, ctx->seq,
+				 &ctx->seq_send, ctx->initiate,
+				 input_message_buffer, output_message_buffer,
+				 ctx->signalg, ctx->cksum_size, ctx->sealalg,
+				 conf_req_flag, toktype, ctx->big_endian,
+				 ctx->mech_used);
+   }
+
+   if (code) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if ((toktype == KG_TOK_SEAL_MSG) && conf_state)
+   if (conf_state)
       *conf_state = conf_req_flag;
 
    *minor_status = 0;

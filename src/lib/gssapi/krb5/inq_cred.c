@@ -39,6 +39,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    krb5_deltat lifetime;
    krb5_principal ret_name;
    gss_OID_set mechs;
+   OM_uint32 ret;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
@@ -84,12 +85,26 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
       }
    }
 
-   if (mechanisms)
-      if (! g_copy_OID_set(cred->actual_mechs, &mechs)) {
-	 krb5_free_principal(context, ret_name);
-	 *minor_status = ENOMEM;
-	 return(GSS_S_FAILURE);
-      }
+   if (mechanisms) {
+       if (GSS_ERROR(ret = generic_gss_create_empty_oid_set(minor_status,
+							    &mechs)) ||
+	   (cred->prerfc_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5_old,
+							   &mechs))) ||
+	   (cred->rfc_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5,
+							   &mechs))) ||
+	   (cred->rfcv2_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5_v2,
+							   &mechs)))) {
+	   krb5_free_principal(context, ret_name);
+	   /* *minor_status set above */
+	   return(ret);
+       }
+   }
 
    if (name) {
       if (! kg_save_name((gss_name_t) ret_name)) {

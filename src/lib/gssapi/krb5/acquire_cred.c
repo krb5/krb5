@@ -248,8 +248,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    size_t i;
    krb5_gss_cred_id_t cred;
    gss_OID_set ret_mechs;
-   const gss_OID_set_desc FAR * valid_mechs;
-   int req_old, req_new;
+   int req_old, req_new, req_v2;
    OM_uint32 ret;
    krb5_error_code code;
 
@@ -277,27 +276,24 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       contains krb5 */
 
    if (desired_mechs == GSS_C_NULL_OID_SET) {
-      valid_mechs = gss_mech_set_krb5_both;
       req_old = 1;
       req_new = 1;
+      req_v2 = 1;
    } else {
       req_old = 0;
       req_new = 0;
+      req_v2 = 0;
 
       for (i=0; i<desired_mechs->count; i++) {
 	 if (g_OID_equal(gss_mech_krb5_old, &(desired_mechs->elements[i])))
 	    req_old++;
 	 if (g_OID_equal(gss_mech_krb5, &(desired_mechs->elements[i])))
 	    req_new++;
+	 if (g_OID_equal(gss_mech_krb5_v2, &(desired_mechs->elements[i])))
+	    req_v2++;
       }
 
-      if (req_old && req_new) {
-	 valid_mechs = gss_mech_set_krb5_both;
-      } else if (req_old) {
-	 valid_mechs = gss_mech_set_krb5_old;
-      } else if (req_new) {
-	 valid_mechs = gss_mech_set_krb5;
-      } else {
+      if (!req_old && !req_new && !req_v2) {
 	 *minor_status = 0;
 	 return(GSS_S_BAD_MECH);
       }
@@ -314,9 +310,9 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    cred->usage = cred_usage;
    cred->princ = NULL;
-   cred->actual_mechs = valid_mechs;
    cred->prerfc_mech = req_old;
    cred->rfc_mech = req_new;
+   cred->rfcv2_mech = req_v2;
 
    cred->keytab = NULL;
    cred->ccache = NULL;
@@ -407,17 +403,30 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    /* create mechs */
 
    if (actual_mechs) {
-      if (! g_copy_OID_set(cred->actual_mechs, &ret_mechs)) {
-	 if (cred->ccache)
-	    (void)krb5_cc_close(context, cred->ccache);
-	 if (cred->keytab)
-	    (void)krb5_kt_close(context, cred->keytab);
-	 if (cred->princ)
-	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
-	 *minor_status = ENOMEM;
-	 return(GSS_S_FAILURE);
-      }
+       if (GSS_ERROR(ret = generic_gss_create_empty_oid_set(minor_status,
+							    &ret_mechs)) ||
+	   (cred->prerfc_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5_old,
+							   &ret_mechs))) ||
+	   (cred->rfc_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5,
+							   &ret_mechs))) ||
+	   (cred->rfcv2_mech &&
+	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+							   gss_mech_krb5_v2,
+							   &ret_mechs)))) {
+	   if (cred->ccache)
+	       (void)krb5_cc_close(context, cred->ccache);
+	   if (cred->keytab)
+	       (void)krb5_kt_close(context, cred->keytab);
+	   if (cred->princ)
+	       krb5_free_principal(context, cred->princ);
+	   xfree(cred);
+	   /* *minor_status set above */
+	   return(ret);
+       }
    }
 
    /* intern the credential handle */

@@ -39,8 +39,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 {
     krb5_context	context;
     krb5_gss_ctx_id_rec	*ctx;
-    OM_uint32		cfsize;
-    OM_uint32		ohlen;
+    krb5_error_code code;
 
     if (GSS_ERROR(kg_get_context(minor_status, &context)))
        return(GSS_S_FAILURE);
@@ -63,19 +62,86 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 	return(GSS_S_NO_CONTEXT);
     }
 
-    /* Calculate the token size and subtract that from the output size */
-    cfsize = (conf_req_flag) ? kg_confounder_size(context, ctx->enc) : 0;
-    ohlen = g_token_size((gss_OID) ctx->mech_used,
-			 (unsigned int) cfsize + ctx->cksum_size + 14);
+    if (ctx->gsskrb5_version == 2000) {
+	if (conf_req_flag) {
+	    /* this is pretty gross.  take the max output, and call
+	       krb5_c_encrypt_length to see how much overhead is added
+	       on.  subtract that much, and see if it fits in the
+	       requested space.  If not, start subtracting 1 until it
+	       does.  This doesn't necessarily give us the optimal
+	       packing, but I think that's ok (I could start adding 1
+	       until I went over, but that seems like it's not worth
+	       the effort).  This is probably O(blocksize), but that's
+	       never going to be large. */
 
-    if (ohlen < req_output_size)
+	    OM_uint32 headerlen, plainlen;
+	    size_t enclen;
+
+	    headerlen = g_token_size((gss_OID) ctx->mech_used, 2);
+	    plainlen = req_output_size - headerlen;
+
+	    if (code = krb5_c_encrypt_length(context, ctx->enc->enctype,
+					     plainlen, &enclen)) {
+		*minor_status = code;
+		return(GSS_S_FAILURE);
+	    }
+
+	    plainlen -= plainlen - (enclen - plainlen);
+
+	    if (code = krb5_c_encrypt_length(context, ctx->enc->enctype,
+					     plainlen, &enclen)) {
+		*minor_status = code;
+		return(GSS_S_FAILURE);
+	    }
+
+	    while (headerlen + enclen > req_output_size) {
+		plainlen--;
+
+		if (code = krb5_c_encrypt_length(context, ctx->enc->enctype,
+						 plainlen, &enclen)) {
+		    *minor_status = code;
+		    return(GSS_S_FAILURE);
+		}
+	    }
+
+	    /* subtract off the fixed size inside the encrypted part */
+
+	    plainlen -= 7;
+
+	    *max_input_size = plainlen;
+	} else {
+	    size_t cksumlen;
+	    OM_uint32 headerlen;
+
+	    if (code = krb5_c_checksum_length(context, ctx->ctypes[0],
+					      &cksumlen)) {
+		*minor_status = code;
+		return(GSS_S_FAILURE);
+	    }
+
+	    headerlen = g_token_size((gss_OID) ctx->mech_used, 13 + cksumlen);
+
+	    *max_input_size = req_output_size - headerlen;
+	}
+    } else {
+	OM_uint32		cfsize;
+	OM_uint32		ohlen;
+
+	/* Calculate the token size and subtract that from the output size */
+	cfsize = (conf_req_flag) ? kg_confounder_size(context, ctx->enc) : 0;
+	ohlen = g_token_size((gss_OID) ctx->mech_used,
+			     (unsigned int) cfsize + ctx->cksum_size + 14);
+
+	if (ohlen < req_output_size)
 	    /*
 	     * Cannot have trailer length that will cause us to pad over
 	     * our length
 	     */
 	    *max_input_size = (req_output_size - ohlen - 1) & (~7);
-    else
+	else
 	    *max_input_size = 0;
+    }
+
     *minor_status = 0;
     return(GSS_S_COMPLETE);
 }
