@@ -11,6 +11,7 @@
  * des_cbc_cksum.c - compute an 8 byte checksum using DES in CBC mode
  */
 #include "des.h"
+#include "des_int.h"
 #include "f_tables.h"
 
 /*
@@ -30,11 +31,11 @@
 
 unsigned long
 mit_des_cbc_cksum(in, out, length, schedule, ivec)
-	des_cblock *in;
-	des_cblock *out;
+	krb5_octet FAR *in;
+	krb5_octet FAR *out;
 	long length;
-	des_key_schedule schedule;
-	des_cblock ivec;
+	mit_des_key_schedule schedule;
+	krb5_octet FAR *ivec;
 {
 	register unsigned KRB_INT32 left, right;
 	register unsigned KRB_INT32 temp;

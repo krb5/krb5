@@ -11,6 +11,7 @@
  * des_cbc_encrypt.c - an implementation of the DES cipher function in cbc mode
  */
 #include "des.h"
+#include "des_int.h"
 #include "f_tables.h"
 
 /*
@@ -38,11 +39,11 @@
 
 int
 mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
-	const des_cblock *in;
-	des_cblock *out;
+	const mit_des_cblock FAR *in;
+	mit_des_cblock FAR *out;
 	long length;
-	des_key_schedule schedule;
-	des_cblock ivec;
+	mit_des_key_schedule schedule;
+	mit_des_cblock ivec;
 	int encrypt;
 {
 	register unsigned KRB_INT32 left, right;

@@ -30,14 +30,6 @@
 #define KRB_UINT32 unsigned KRB_INT32
 #endif
 
-typedef unsigned char des_cblock[8];	/* crypto-block size */
-/* Key schedule */
-typedef struct des_ks_struct { union { KRB_INT32 pad; des_cblock _;} __; } des_key_schedule[16];
-
-#define DES_KEY_SZ 	(sizeof(des_cblock))
-#define DES_ENCRYPT	1
-#define DES_DECRYPT	0
-
 #ifndef NCOMPAT
 #define C_Block des_cblock
 #define Key_schedule des_key_schedule

@@ -11,6 +11,7 @@
  * des_ecb_encrypt.c - do an encryption in ECB mode
  */
 #include "des.h"
+#include "des_int.h"
 #include "f_tables.h"
 
 /*
@@ -18,9 +19,9 @@
  */
 int
 mit_des_ecb_encrypt(in, out, schedule, encrypt)
-	des_cblock *in;
-	des_cblock *out;
-	des_key_schedule schedule;
+	mit_des_cblock *in;
+	mit_des_cblock *out;
+	mit_des_key_schedule schedule;
 	int encrypt;
 {
 	register unsigned KRB_INT32 left, right;

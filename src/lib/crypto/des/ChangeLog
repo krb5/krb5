@@ -1,3 +1,24 @@
+Thu Aug 24 18:08:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+        * f_cksum.c: Change code to match prototypes. 
+
+	* f_cbc.c, f_ecb, f_parity, f_pcbc: Change des_cblock to
+		mit_des_cblock and  des_key_schedule to
+		mit_des_key_schedule. Also include des_int.h.
+
+	* destest.c: Change des_cblock to mit_des_cblock and add local
+		prototypes. 
+
+	* cs_entry.c: Remove prototypes for mit_des_cbc_cksum and
+		mit_des_cbc_cksum. Now in des_int.h.
+
+	* cbc_cksum.c, string2key.c:	Remove casts in call to
+		mit_des_cbc_cksum 
+
+	* des_int.h: Add prototype for mit_des_cbc_verf_cksum. Change 
+		return code for mit_des_cbc_cksum to match source.
+
+	* des.h: Remove unused structures and defines.
 
 Thu Jul 27 15:18:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* des_int.h - Inline the old contents of include/krb5/mit-des.h.  This

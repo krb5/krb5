@@ -35,7 +35,9 @@ extern mit_des_ecb_encrypt();
 #include <stdio.h>
 
 
-void convert();
+void convert PROTOTYPE((char *, unsigned char []));
+
+void des_cblock_print_file PROTOTYPE((mit_des_cblock, FILE *));
 
 void
 main(argc, argv)
@@ -154,6 +156,7 @@ unsigned char cblock[];
  */
 
 #include "des.h"
+#include "des_int.h"
 
 int
 mit_des_is_weak_key(key)
@@ -191,11 +194,11 @@ des_cblock_print_file(x, fp)
  */
 int
 mit_des_check_key_parity(key)
-     register des_cblock key;
+     register mit_des_cblock key;
 {
     int i;
     
-    for (i=0; i<sizeof(des_cblock); i++) {
+    for (i=0; i<sizeof(mit_des_cblock); i++) {
 	if ((key[i] & 1) == parity_char(0xfe&key[i])) {
 	    printf("warning: bad parity key:");
 	    des_cblock_print_file(key, stdout); 
@@ -210,10 +213,10 @@ mit_des_check_key_parity(key)
 
 void
 mit_des_fixup_key_parity(key)
-     register des_cblock key;
+     register mit_des_cblock key;
 {
     int i;
-    for (i=0; i<sizeof(des_cblock); i++) 
+    for (i=0; i<sizeof(mit_des_cblock); i++) 
       {
 	key[i] &= 0xfe;
 	key[i] |= 1^parity_char(key[i]);

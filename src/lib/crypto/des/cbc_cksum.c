@@ -80,8 +80,7 @@ mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
         return ENOMEM;
     }
 
-    mit_des_cbc_cksum((krb5_octet *)in, contents, in_length,
-		  schedule, (krb5_octet *)key);
+    mit_des_cbc_cksum(in, contents, in_length, schedule, key);
 
     cksum->checksum_type = CKSUMTYPE_DESCBC;
     cksum->length = sizeof(mit_des_cblock);
@@ -125,8 +124,7 @@ mit_des_cbc_verf_cksum(cksum, in, in_length, key, key_size)
         ;
     }
 
-    mit_des_cbc_cksum((krb5_octet *)in, contents, in_length,
-		  schedule, (krb5_octet *)key);
+    mit_des_cbc_cksum(in, contents, in_length, schedule, key);
 
     retval = 0;
     if (cksum->checksum_type == CKSUMTYPE_DESCBC) {

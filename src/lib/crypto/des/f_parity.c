@@ -10,6 +10,7 @@
 
 
 #include "des.h"
+#include "des_int.h"
 
 /*
  * des_fixup_key_parity: Forces odd parity per byte; parity is bits
@@ -22,10 +23,10 @@
 
 void
 mit_des_fixup_key_parity(key)
-     register des_cblock key;
+     register mit_des_cblock key;
 {
     int i;
-    for (i=0; i<sizeof(des_cblock); i++) 
+    for (i=0; i<sizeof(mit_des_cblock); i++) 
       {
 	key[i] &= 0xfe;
 	key[i] |= 1^parity_char(key[i]);
@@ -41,11 +42,11 @@ mit_des_fixup_key_parity(key)
  */
 int
 mit_des_check_key_parity(key)
-     register des_cblock key;
+     register mit_des_cblock key;
 {
     int i;
     
-    for (i=0; i<sizeof(des_cblock); i++) 
+    for (i=0; i<sizeof(mit_des_cblock); i++) 
       {
 	if((key[i] & 1) == parity_char(0xfe&key[i])) 
 	  {

@@ -147,7 +147,7 @@ const krb5_data FAR * salt;
 
     /* Now one-way encrypt it with the folded key */
     (void) mit_des_key_sched(key, key_sked);
-    (void) mit_des_cbc_cksum((krb5_octet *)copystr, key, length, key_sked, key);
+    (void) mit_des_cbc_cksum(copystr, key, length, key_sked, key);
     /* erase key_sked */
     memset((char *)key_sked, 0, sizeof(key_sked));
 

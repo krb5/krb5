@@ -18,11 +18,11 @@
  */
 int
 mit_des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
-	des_cblock *in;
-	des_cblock *out;
+	mit_des_cblock *in;
+	mit_des_cblock *out;
 	long length;
-	des_key_schedule schedule;
-	des_cblock ivec;
+	mit_des_key_schedule schedule;
+	mit_des_cblock ivec;
 	int encrypt;
 {
 	register unsigned KRB_INT32 left, right;
