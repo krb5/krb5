@@ -1,12 +1,25 @@
 #!/bin/sh
-: ${repository=/afs/athena.mit.edu/astaff/project/krbdev/.cvsroot}
-case $# in
-2);;
-*)
-	echo "usage: $0 release-tag release-dir"
+repository=/afs/athena.mit.edu/astaff/project/krbdev/.cvsroot
+dodoc=t
+dosrc=t
+checkout=t
+while test $# -gt 2; do
+	case $1 in
+	--srconly)
+		dodoc=nil;;
+	--doconly)
+		dosrc=nil;;
+	--repository)
+		shift; repository=$1;;
+	--nocheckout)
+		checkout=nil;;
+	esac
+	shift
+done
+if test $# -lt 2; then
+	echo "usage: $0 [opts] release-tag release-dir"
 	exit 1
-	;;
-esac
+fi
 
 reltag=$1
 reldir=$2
@@ -24,37 +37,48 @@ if test ! -d $reldir; then
 fi
 
 echo "Checking out krb5 with tag $reltag into directory $reldir..."
-(cd $reldir; cvs -q -d $repository export -r$reltag krb5)
+if test $checkout = t; then
+	(cd $reldir; cvs -q -d $repository export -r$reltag krb5)
+fi
 
-echo "Building autoconf..."
-(cd $reldir/src/util/autoconf
-	M4=gm4 ./configure
-	make)
+if test $dosrc = t; then
+	echo "Building autoconf..."
+	(cd $reldir/src/util/autoconf
+		M4=gm4 ./configure
+		make)
 
-echo "Creating configure scripts..."
-(cd $reldir/src; util/reconf)
+	echo "Creating configure scripts..."
+	(cd $reldir/src; util/reconf)
 
-echo "Cleaning src/util/autoconf..."
-(cd $reldir/src/util/autoconf; make distclean)
+	echo "Cleaning src/util/autoconf..."
+	(cd $reldir/src/util/autoconf; make distclean)
+fi
 
 echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
 	-o -name BADSYMS -o -name .Sanitize \) -print \
 	| xargs rm -f
 
-echo "Building doc..."
-(cd $reldir/doc; make)
+if test $dodoc = t; then
+	echo "Building doc..."
+	(cd $reldir/doc; make)
+fi
 
 echo "Generating tarfiles..."
-gtar --exclude $reldir/src/lib/crypto \
-	--exclude $reldir/src/lib/des425 \
-	-zcf ${reldir}.src.tar.gz $reldir
+if test $dosrc = t; then
+	gtar --exclude $reldir/src/lib/crypto \
+		--exclude $reldir/src/lib/des425 \
+		--exclude $reldir/doc \
+		-zcf ${reldir}.src.tar.gz $reldir
 
-gtar zcf ${reldir}.crypto.tar.gz \
-	$reldir/src/lib/crypto \
-	$reldir/src/lib/des425
+	gtar zcf ${reldir}.crypto.tar.gz \
+		$reldir/src/lib/crypto \
+		$reldir/src/lib/des425
+fi
 
-gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README
+if test $dodoc = t; then
+	gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README
+fi
 
 ls -l ${reldir}.*.tar.gz
 

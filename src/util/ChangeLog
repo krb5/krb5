@@ -1,3 +1,8 @@
+Mon Nov 25 21:00:24 1996  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Add support for --srconly, --doconly, --nocheckout,
+	--repository, etc.  They do the obvious things.
+
 Fri Nov 22 11:08:16 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* makeshlib.sh (VERSION): Fix SunOS shared libs [226]
