@@ -160,4 +160,10 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define krb5_finish_random_key(eblock, ptr) (*(eblock)->crypto_entry->finish_random_key)(ptr)
 #define krb5_random_key(eblock, ptr, keyblock) (*(eblock)->crypto_entry->random_key)(ptr, keyblock)
 
+/*
+ * Here's the stuff for the checksum switch:
+ */
+#define krb5_checksum_size(ctype)  (krb5_cksumarray[CKSUMTYPE_CRC32]->checksum_length)
+#define krb5_calculate_checksum(ctype, in, in_length, seed, seed_length, outcksum) ((*krb5_cksumarray[CKSUMTYPE_CRC32]->sum_func)(in, in_length, seed, seed_length, outcksum))
+
 #endif /* KRB5_ENCRYPTION__ */
