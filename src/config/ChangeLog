@@ -1,3 +1,7 @@
+2002-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (clean-unix): Delete .d files.
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Define KRB5_PRIVATE=1 so that private definitions

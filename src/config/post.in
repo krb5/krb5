@@ -51,7 +51,7 @@ clean:: clean-$(WHAT)
 
 clean-unix::
 	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
-	$(RM) .depend
+	$(RM) .depend .d
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
