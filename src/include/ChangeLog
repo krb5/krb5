@@ -1,3 +1,9 @@
+
+Fri Jul 7 15:56:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5.hin - Add checksum verifier dispatch in the checksum entry.
+		This is now the supported method for verifying checksums.  Also
+		add krb5_verify_checksum which uses this dispatch.
+
 Thu Jul  6 17:19:26 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* krb5.hin: Change definition of krb5_os_localaddr to include

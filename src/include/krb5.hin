@@ -361,9 +361,17 @@ typedef krb5_error_code  (*SUM_FUNC) KRB5_NPROTOTYPE (
 			size_t /* key/seed size */,
 			krb5_checksum FAR * /* out_cksum */));
 
+typedef krb5_error_code  (*SUM_VERF_FUNC) KRB5_NPROTOTYPE (
+			(krb5_checksum FAR * /* out_cksum */,
+			krb5_pointer /* in */,
+			size_t /* in_length */,
+			krb5_pointer /* key/seed */,
+			size_t /* key/seed size */));
+
 typedef struct _krb5_checksum_entry {
     krb5_magic magic;
-    SUM_FUNC sum_func;
+    SUM_FUNC sum_func;			/* Checksum generator */
+    SUM_VERF_FUNC sum_verf_func;	/* Verifier of checksum */
     int checksum_length;		/* length of stuff returned by
 					   sum_func */
     unsigned int is_collision_proof:1;
@@ -451,6 +459,7 @@ extern int krb5_max_cksum;		/* max entry in array */
  */
 #define krb5_checksum_size(context, ctype)  (krb5_cksumarray[ctype]->checksum_length)
 #define krb5_calculate_checksum(context, ctype, in, in_length, seed, seed_length, outcksum) ((*krb5_cksumarray[ctype]->sum_func)(in, in_length, seed, seed_length, outcksum))
+#define krb5_verify_checksum(context, ctype, cksum, in, in_length, seed, seed_length) ((*krb5_cksumarray[ctype]->sum_verf_func)(cksum, in, in_length, seed, seed_length))
 
 /*
  * end "encryption.h"
