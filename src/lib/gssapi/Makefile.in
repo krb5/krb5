@@ -12,6 +12,10 @@ LIB_SUBDIRS= generic krb5 mechglue
 LIBDONE= generic/DONE krb5/DONE mechglue/DONE
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 
+SHLIB_LIBS=-lkrb5 -lcrypto -lcom_err
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+
 all-unix::
 
 all-mac::
