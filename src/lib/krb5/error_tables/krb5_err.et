@@ -315,4 +315,6 @@ error_code KRB5_CHPW_PWDNULL,		"New password cannot be zero length"
 error_code KRB5_CHPW_FAIL,		"Password change failed"
 error_code KRB5_KT_FORMAT,		"Bad format in keytab"
 
+error_code KRB5_NOPERM_ETYPE,	"Encryption type not permitted"
+
 end
