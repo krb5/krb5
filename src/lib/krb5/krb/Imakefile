@@ -20,6 +20,7 @@ OBJS=	addr_comp.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
 	kdc_rep_dc.o	\
+	krbconfig.o	\
 	mk_error.o	\
 	mk_priv.o	\
 	mk_req.o	\
@@ -55,6 +56,7 @@ SRCS=	addr_comp.c	\
 	in_tkt_pwd.c	\
 	in_tkt_sky.c	\
 	kdc_rep_dc.c	\
+	krbconfig.c	\
 	mk_error.c	\
 	mk_priv.c	\
 	mk_req.c	\
