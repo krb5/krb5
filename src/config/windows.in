@@ -14,9 +14,9 @@ srcdir = .
 # /* The name of the C compiler for the target */
 CC=cl /nologo
 CL=
-CCOPTS=/ALw /Zpa /GD2s /Os /Zi /Od /W2 $(XTRA)
-CCOPTS2=/AL /Zpa /G2s  /Os /Zi /Od /W2 -DINTERFACE= $(XTRA)
-CPPFLAGS =  -I$(SRCTOP)/include
+CCOPTS=/ALw /Zpa /GD2s /Os /Zi /Od /W3 $(XTRA)
+CCOPTS2=/AL /Zpa /G2s  /Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
+CPPFLAGS =  -I$(SRCTOP)/include -I$(SRCTOP)/include/krb5
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
 
@@ -41,7 +41,7 @@ RM=$(BUILDTOP)\config\rm.bat
 CP=copy
 MV=ren
 LN=copy
-LIB=lib
+LIBCMD=lib
 AWK=rem
 
 ARADD=rem
@@ -57,7 +57,9 @@ MFLAGS=$(MAKEFLAGS)
 .c.obj:
 	$(CC) $(CFLAGS) /c $*.c
 !if defined(LIBNAME)
-	$(LIB) /nologo $(LIBNAME) -+$@;
+!if "$(LIBCMD)"!="rem"
+	$(LIBCMD) /nologo $(LIBNAME) -+$@;
+!endif
 !endif
 
 #
