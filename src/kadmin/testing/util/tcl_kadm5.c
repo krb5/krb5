@@ -631,7 +631,8 @@ static int parse_policy_mask(Tcl_Interp *interp, char *str, krb5_int32 *flags)
 }
 
 
-static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ)
+static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ,
+					  krb5_int32 mask)
 {
      Tcl_DString *str, *tmp_dstring;
      char *tmp;
@@ -649,14 +650,17 @@ static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ)
 	      /* code for krb5_parse_name that the pointer passed into */
 	      /* it should be initialized to 0 if I want it do be */
 	      /* allocated automatically. */
-     if (krb5_ret = krb5_unparse_name(context, princ->principal, &tmp)) {
-	  /* XXX Do we want to return an error?  Not sure. */
-	  Tcl_DStringAppendElement(str, "[unparseable principal]");
-     }
-     else {
-	  Tcl_DStringAppendElement(str, tmp);
-	  free(tmp);
-     }
+     if (mask & KADM5_PRINCIPAL) {
+	  if ( krb5_ret = krb5_unparse_name(context, princ->principal, &tmp)) {
+	       /* XXX Do we want to return an error?  Not sure. */
+	       Tcl_DStringAppendElement(str, "[unparseable principal]");
+	  }
+	  else {
+	       Tcl_DStringAppendElement(str, tmp);
+	       free(tmp);
+	  }
+     } else
+	  Tcl_DStringAppendElement(str, "null");
 
      sprintf(buf, "%d", princ->princ_expire_time);
      Tcl_DStringAppendElement(str, buf);
@@ -671,22 +675,28 @@ static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ)
      Tcl_DStringAppendElement(str, buf);
 
      tmp = 0;
-     if (krb5_ret = krb5_unparse_name(context, princ->mod_name, &tmp)) {
-	  /* XXX */
-	  Tcl_DStringAppendElement(str, "[unparseable principal]");
-     }
-     else {
-	  Tcl_DStringAppendElement(str, tmp);
-	  free(tmp);
-     }
+     if (mask & KADM5_MOD_NAME) {
+	  if (krb5_ret = krb5_unparse_name(context, princ->mod_name, &tmp)) {
+	       /* XXX */
+	       Tcl_DStringAppendElement(str, "[unparseable principal]");
+	  }
+	  else {
+	       Tcl_DStringAppendElement(str, tmp);
+	       free(tmp);
+	  }
+     } else
+	  Tcl_DStringAppendElement(str, "null");
 
      sprintf(buf, "%d", princ->mod_date);
      Tcl_DStringAppendElement(str, buf);
 
-     tmp_dstring = unparse_krb5_flags(princ->attributes);
-     Tcl_DStringAppendElement(str, tmp_dstring->string);
-     Tcl_DStringFree(tmp_dstring);
-     free(tmp_dstring);
+     if (mask & KADM5_ATTRIBUTES) {
+	  tmp_dstring = unparse_krb5_flags(princ->attributes);
+	  Tcl_DStringAppendElement(str, tmp_dstring->string);
+	  Tcl_DStringFree(tmp_dstring);
+	  free(tmp_dstring);
+     } else
+	  Tcl_DStringAppendElement(str, "null");
 
      sprintf(buf, "%d", princ->kvno);
      Tcl_DStringAppendElement(str, buf);
@@ -1887,7 +1897,7 @@ int tcl_kadm5_get_principal(ClientData clientData, Tcl_Interp *interp,
 
      if (ret == KADM5_OK) {
 	  if (ent_var) {
-	       ent_dstring = unparse_principal_ent(&ent);
+	       ent_dstring = unparse_principal_ent(&ent, mask);
 	       if (! Tcl_SetVar(interp, ent_var, ent_dstring->string,
 				TCL_LEAVE_ERR_MSG)) {
 		    Tcl_AppendElement(interp,

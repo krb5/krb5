@@ -1,3 +1,8 @@
+Fri Oct 18 13:23:46 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* tcl_kadm5.c (unparse_principal_ent): don't unparse allocated
+ 	fields that were not requested in mask to get_principal
+
 Mon Oct 14 07:01:34 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Only attempt to build programs if Tcl present.
