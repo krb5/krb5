@@ -451,33 +451,6 @@ krb5_salttype_to_string(salttype, buffer, buflen)
 }
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
-krb5_cksumtype_to_string(cksumtype, buffer, buflen)
-    krb5_cksumtype	cksumtype;
-    char		FAR * buffer;
-    size_t		buflen;
-{
-    int i;
-    const char *out;
-
-    out = (char *) NULL;
-    for (i=0; i<cksumtype_table_nents; i++) {
-	if (cksumtype ==  cksumtype_table[i].cst_cksumtype) {
-	    out = cksumtype_table[i].cst_output;
-	    break;
-	}
-    }
-    if (out) {
-	if (buflen > strlen(out))
-	    strcpy(buffer, out);
-	else
-	    out = (char *) NULL;
-	return((out) ? 0 : ENOMEM);
-    }
-    else
-	return(EINVAL);
-}
-
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_string(timestamp, buffer, buflen)
     krb5_timestamp	timestamp;
     char		FAR * buffer;
