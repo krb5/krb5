@@ -228,8 +228,8 @@ static void test_hmac()
 		0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
 		0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
 	    },
-	    73, ("Test Using Larger Than Block-Size Key and Larger "
-		 "Than One Block-Size Data"),
+	    73, 
+	    "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data",
 	    "0x6f630fad67cda0ee1fb1f562db3aa53e"
 	},
     }, sha1tests[] = {
