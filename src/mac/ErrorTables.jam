@@ -4,12 +4,15 @@ include "/Developer/Makefiles/pbx_jamfiles/Jambase" ;
 SED = /usr/bin/sed ;
 AWK = /usr/bin/awk ;
 
-GSSKRB5_TEMP_DIR = "/tmp/autogeneration" ;
+GSSKRB5_TEMP_DIR = "$(SYMROOT)/GSSKerberos5.intermediates" ;
 COMPILE_ET_SCRIPT = "$(GSSKRB5_TEMP_DIR)/compile_et" ;
 
 COMERR_DIR = "$(SRCROOT)/../util/et" ;
 COMPILE_ET_SH = "$(COMERR_DIR)/compile_et.sh" ;
 CONFIG_SCRIPT = "$(COMERR_DIR)/config_script" ;
+
+COMPILE_ET_SH_EXEC = "$(GSSKRB5_TEMP_DIR)/compile_et.sh" ;
+CONFIG_SCRIPT_EXEC = "$(GSSKRB5_TEMP_DIR)/config_script" ;
 
 PROFILE_DIR = "$(SRCROOT)/../util/profile" ;
 ERROR_TABLES_DIR = "$(SRCROOT)/../lib/krb5/error_tables" ;
@@ -73,6 +76,9 @@ actions CompileEt
 
 rule GenerateCompileEt
 {
+    DEPENDS "$(1)" : "$(2[1]:D)/et_c.awk" "$(2[1]:D)/et_h.awk" ;
+    Cp "$(2[1]:D)/et_c.awk" : "$(COMERR_DIR)/et_c.awk" ;
+    Cp "$(2[1]:D)/et_h.awk" : "$(COMERR_DIR)/et_h.awk" ;
     DEPENDS "$(1)" : "$(2)" ;
 }
 
@@ -86,8 +92,12 @@ actions GenerateCompileEt
 # Rule to make the temporary directory
 Mkdir				"$(GSSKRB5_TEMP_DIR)" ;
 
+# Copy the scripts to temp space so we can make them +x
+Cp "$(CONFIG_SCRIPT_EXEC)" : "$(CONFIG_SCRIPT)" ;
+Cp "$(COMPILE_ET_SH_EXEC)" : "$(COMPILE_ET_SH)" ;
+
 # Rule to generate compile_et, which builds the scripts
-GenerateCompileEt "$(COMPILE_ET_SCRIPT)" : "$(CONFIG_SCRIPT)" "$(COMPILE_ET_SH)" ;
+GenerateCompileEt "$(COMPILE_ET_SCRIPT)" : "$(CONFIG_SCRIPT_EXEC)" "$(COMPILE_ET_SH_EXEC)" ;
 
 # Rules to generate the error tables
 CompileEt	"$(GSSKRB5_TEMP_DIR)/prof_err.c"

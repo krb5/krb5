@@ -1,6 +1,6 @@
 include "/Developer/Makefiles/pbx_jamfiles/Jambase" ;
 
-GSSKRB5_TEMP_DIR = "/tmp/autogeneration" ;
+GSSKRB5_TEMP_DIR = "$(SYMROOT)/GSSKerberos5.intermediates" ;
 
 COM_ERR_DIR = "$(SRCROOT)/../util/et" ;
 PROFILE_DIR = "$(SRCROOT)/../util/profile" ;
@@ -25,6 +25,7 @@ DEPENDS	all : 		"$(GSSKRB5_TEMP_DIR)"
                     "$(GSSKRB5_TEMP_DIR)/krb5.h"
                     "$(GSSKRB5_TEMP_DIR)/Kerberos5.h"
                     "$(GSSKRB5_TEMP_DIR)/gssapi.h"
+                    "$(GSSKRB5_TEMP_DIR)/GSS/gssapi.h"
                     "$(GSSKRB5_TEMP_DIR)/GSS.h"
                     "$(GSSKRB5_TEMP_DIR)/autoconf.h" ;
 
@@ -178,3 +179,6 @@ gssapi.h 			"$(GSSKRB5_TEMP_DIR)/gssapi.h" : 			"$(GSS_DIR)/generic/gssapi.hin" 
 GSS.h 				"$(GSSKRB5_TEMP_DIR)/GSS.h" : 				"$(GSSKRB5_TEMP_DIR)/gssapi.h" ;
 autoconf.h 			"$(GSSKRB5_TEMP_DIR)/autoconf.h" ;
 
+Mkdir "$(GSSKRB5_TEMP_DIR)/GSS" ;
+DEPENDS "$(GSSKRB5_TEMP_DIR)/GSS/gssapi.h" : "$(GSSKRB5_TEMP_DIR)/GSS" ;
+Cp	"$(GSSKRB5_TEMP_DIR)/GSS/gssapi.h" : "$(GSSKRB5_TEMP_DIR)/gssapi.h" ;			
