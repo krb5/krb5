@@ -1,3 +1,8 @@
+2004-10-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkrb5support.exports: Export krb5int_fac, _lock_fac,
+	_unlock_fac.
+
 2004-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (GET_NO_PTHREAD_TSD) [!HAVE_PRAGMA_WEAK_REF]: Macro

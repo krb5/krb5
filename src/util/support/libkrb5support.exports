@@ -2,3 +2,6 @@ krb5int_key_register
 krb5int_key_delete
 krb5int_getspecific
 krb5int_setspecific
+krb5int_fac
+krb5int_lock_fac
+krb5int_unlock_fac
