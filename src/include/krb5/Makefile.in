@@ -26,8 +26,8 @@ includes:: autoconf.h
 # specific header file.  note that unifdef's exit status will normally be 1,
 # indicating some adjustment of the file took place.
 
-autoconf.h: $(srcdir)/configure
-	$(srcdir)/configure
+autoconf.h: $(srcdir)/autoconf.h.in config.status
+	$(SHELL) config.status
 
 clean::
 	$(RM) autoconf.h
