@@ -109,7 +109,7 @@ kg_oid_internalize(kcontext, argp, buffer, lenremain)
      return 0;
 }
 
-krb5_error_code
+static krb5_error_code
 kg_oid_size(kcontext, arg, sizep)
     krb5_context	kcontext;
     krb5_pointer	arg;
@@ -182,7 +182,7 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
      return 0;
 }
 
-krb5_error_code
+static krb5_error_code
 kg_queue_size(kcontext, arg, sizep)
     krb5_context	kcontext;
     krb5_pointer	arg;
