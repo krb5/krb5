@@ -698,7 +698,7 @@ standards.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_delete_principal(krb5_principal);
+ovsec_kadm_delete_principal(krb5_principal princ);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: delete 
@@ -720,7 +720,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_modify_principal(ovsec_kadm_principal_ent_t, u_int32);
+ovsec_kadm_modify_principal(ovsec_kadm_principal_ent_t princ, u_int32 mask);
 \end{verbatim}
 
 Modify the attributes of the principal named in
@@ -992,7 +992,7 @@ life.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_randkey_principal(krb5_principal, krb5_keyblock **,
+ovsec_kadm_randkey_principal(krb5_principal princ, krb5_keyblock **new_key,
 		int override_qual);
 \end{verbatim}
 
@@ -1094,7 +1094,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_create_policy(ovsec_kadm_policy_ent_t, u_int32); 
+ovsec_kadm_create_policy(ovsec_kadm_policy_ent_t policy, u_int32 mask); 
 \end{verbatim}
 
 Create a new policy.
@@ -1129,7 +1129,7 @@ is invalid.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_delete_policy(char *);
+ovsec_kadm_delete_policy(char *policy);
 \end{verbatim}
 
 Deletes a policy.
@@ -1156,7 +1156,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_modify_policy(ovsec_kadm_policy_ent_t, u_int32);
+ovsec_kadm_modify_policy(ovsec_kadm_policy_ent_t policy, u_int32 mask);
 \end{verbatim}
 
 Modify an existing policy.  Note that modifying a policy has no affect
@@ -1211,7 +1211,7 @@ RETURN CODES:
 \subsection{ovsec_kadm_free_principal_ent, _policy_ent}
 
 \begin{verbatim}
-void ovsec_kadm_free_principal_ent(ovsec_kadm_principal_ent_t);
+void ovsec_kadm_free_principal_ent(ovsec_kadm_principal_ent_t princ);
 \end{verbatim}
 
 Free the memory that was allocated by a call to
@@ -1221,7 +1221,7 @@ returns succesfully.
 AUTHORIZATION REQUIRED: none (local operation)
 
 \begin{verbatim}
-void ovsec_kadm_free_policy_ent(ovsec_kadm_policy_ent_t);
+void ovsec_kadm_free_policy_ent(ovsec_kadm_policy_ent_t policy);
 \end{verbatim}
 
 Free memory that was allocated by a call to ovsec_kadm_get_policy.  If
@@ -1233,7 +1233,7 @@ AUTHORIZATION REQUIRED: none (local operation)
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_get_privs(u_int32 *);
+ovsec_kadm_get_privs(u_int32 *privs);
 \end{verbatim}
 
 Return the caller's admin server privileges in the integer pointed to
