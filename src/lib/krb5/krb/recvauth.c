@@ -43,8 +43,6 @@ static char rcsid_recvauth_c [] =
 #include <string.h>
 #include <netinet/in.h>
 
-#define WORKING_RCACHE
-
 extern krb5_flags	krb5_kdc_default_options;
 
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
@@ -52,7 +50,7 @@ static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 krb5_error_code
 krb5_recvauth(/* IN */
 	      fd, appl_version, server, sender_addr, fetch_from,
-	      keyproc, keyprocarg, rc_type, 
+	      keyproc, keyprocarg, rc_type, flags,
 	      /* OUT */
 	      seq_number, client, ticket, authent)
 	krb5_pointer	fd;
@@ -62,6 +60,7 @@ krb5_recvauth(/* IN */
 	krb5_pointer	fetch_from;
 	krb5_int32	*seq_number;
 	char		*rc_type;
+	krb5_int32	flags;
 	krb5_rdreq_key_proc keyproc;
 	krb5_pointer keyprocarg;
 	krb5_principal	*client;
@@ -86,16 +85,22 @@ krb5_recvauth(/* IN */
 	 * and exit.
 	 */
 	problem = 0;
-	/*
-	 * First read the sendauth version string and check it.
-	 */
-	if (retval = krb5_read_message(fd, &inbuf))
+
+	if (!(flags & KRB5_RECVAUTH_SKIP_VERSION)) {
+	    /*
+	     * First read the sendauth version string and check it.
+	     */
+	    if (retval = krb5_read_message(fd, &inbuf))
 		return(retval);
-	if (strcmp(inbuf.data, sendauth_version)) {
+	    if (strcmp(inbuf.data, sendauth_version)) {
 		krb5_xfree(inbuf.data);
 		problem = KRB5_SENDAUTH_BADAUTHVERS;
+	    }
+	    krb5_xfree(inbuf.data);
 	}
-	krb5_xfree(inbuf.data);
+	if (flags & KRB5_RECVAUTH_BADAUTHVERS)
+	    problem = KRB5_SENDAUTH_BADAUTHVERS;
+	
 	/*
 	 * Do the same thing for the application version string.
 	 */
@@ -144,7 +149,6 @@ krb5_recvauth(/* IN */
 	if (problem)
 		return(problem);
 	rcache = NULL;
-#ifdef WORKING_RCACHE
 	/*
 	 * Setup the replay cache.
 	 */
@@ -182,16 +186,14 @@ krb5_recvauth(/* IN */
 			rcache = NULL;
 		}
 	}
-#endif
+
 	/*
 	 * Now, let's read the AP_REQ message and decode it
 	 */
 	if (retval = krb5_read_message(fd, &inbuf)) {
-#ifdef WORKING_RCACHE		
 		(void) krb5_rc_close(rcache);
 		if (cachename)
 			free(cachename);
-#endif
 		return(retval);
 	}
 	authdat = 0;			/* so we can tell if we need to
@@ -200,16 +202,12 @@ krb5_recvauth(/* IN */
 		problem = krb5_rd_req(&inbuf, server, sender_addr, fetch_from,
 				      keyproc, keyprocarg, rcache, &authdat);
 	krb5_xfree(inbuf.data);
-#ifdef WORKING_RCACHE
 	if (rcache)
 	    retval = krb5_rc_close(rcache);
-#endif
 	if (!problem && retval)
 		problem = retval;
-#ifdef WORKING_RCACHE
 	if (cachename)
 		free(cachename);
-#endif
 	
 	/*
 	 * If there was a problem, send back a krb5_error message,
