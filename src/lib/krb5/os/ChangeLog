@@ -5,6 +5,7 @@
 	invoking callback functions; knows nothing about Kerberos.
 	(count_addrs, allocate, add_addr): New callback functions.
 	(krb5_os_localaddr): Use the above.
+	(allocate): Make room for NULL value at the end.
 
 2000-02-16  Ken Raeburn  <raeburn@mit.edu>
 

@@ -120,10 +120,10 @@ allocate (void *P_data)
     struct localaddr_data *data = P_data;
     int i;
 
-    data->addr_temp = (krb5_address **) malloc (data->count * sizeof (krb5_address *));
+    data->addr_temp = (krb5_address **) malloc ((1 + data->count) * sizeof (krb5_address *));
     if (data->addr_temp == 0)
 	return 1;
-    for (i = 0; i < data->count; i++)
+    for (i = 0; i <= data->count; i++)
 	data->addr_temp[i] = 0;
     return 0;
 }
