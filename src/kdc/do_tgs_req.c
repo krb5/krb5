@@ -439,6 +439,7 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.key_exp = 0;		/* ditto */
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
+    reply_encpart.confounder = krb5_random_confounder();
 
     retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart,
 				 header_ticket->enc_part2->session,

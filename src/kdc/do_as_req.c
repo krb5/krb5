@@ -274,6 +274,8 @@ krb5_data **response;			/* filled in with a response packet */
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
 
+    reply_encpart.confounder = krb5_random_confounder();
+
     /* now encode/encrypt the response */
 
     /* convert client.key into a real key (it may be encrypted
