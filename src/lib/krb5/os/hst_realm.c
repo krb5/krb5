@@ -145,7 +145,7 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
     }
     size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
 
-    if (size < 0)
+    if ((size < sizeof(HEADER)) || (size > sizeof(answer.bytes)))
 	return KRB5_ERR_HOST_REALM_UNKNOWN;
 
     p = answer.bytes;

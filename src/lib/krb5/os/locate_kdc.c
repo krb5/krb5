@@ -570,7 +570,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 
     size = res_search(host, C_IN, T_SRV, answer.bytes, sizeof(answer.bytes));
 
-    if (size < hdrsize)
+    if ((size < hdrsize) || (size > sizeof(answer.bytes)))
 	goto out;
 
     /*
