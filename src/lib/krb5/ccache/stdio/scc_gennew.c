@@ -62,6 +62,7 @@ krb5_scc_generate_new (id)
 {
      krb5_ccache lid;
      FILE *f;
+     krb5_error_code	retcode = 0;
      char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
 					    NUL */
      
@@ -91,6 +92,7 @@ krb5_scc_generate_new (id)
      }
 
      ((krb5_scc_data *) lid->data)->flags = 0;
+     ((krb5_scc_data *) lid->data)->file = 0;
      
      /* Set up the filename */
      strcpy(((krb5_scc_data *) lid->data)->filename, scratch);
@@ -101,24 +103,29 @@ krb5_scc_generate_new (id)
 #else
      f = fopen (((krb5_scc_data *) lid->data)->filename, "w+");
 #endif
-     if (!f)
-	 return krb5_scc_interpret (errno);
-     else {
+     if (!f) {
+	     retcode = krb5_scc_interpret (errno);
+	     goto err_out;
+     } else {
 	 krb5_int16 scc_fvno = htons(KRB5_SCC_FVNO);
-	 int errsave;
 
 	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
-	     errsave = errno;
+	     retcode = krb5_scc_interpret(errno);
 	     (void) fclose(f);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
-	     return krb5_scc_interpret(errsave);
+	     goto err_out;
 	 }
 	 if (fclose(f) == EOF) {
-	     errsave = errno;
+	     retcode = krb5_scc_interpret(errno);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
-	     return krb5_scc_interpret(errsave);
+	     goto err_out;
 	 }
 	 *id = lid;
 	 return KRB5_OK;
      }
+err_out:
+     xfree(((krb5_scc_data *) lid->data)->filename);
+     xfree(((krb5_scc_data *) lid->data));
+     xfree(lid);
+     return retcode;
 }
