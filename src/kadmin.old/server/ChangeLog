@@ -1,4 +1,9 @@
 
+Tue Aug 15 14:29:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_{adm_func,fmt_inq,funcs,process,server}.c, adm_extern.h - Replace
+		adm_find_keytype() with krb5_dbe_find_keytype().
+
+
 Thu Aug 10 14:38:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_funcs.c - Rework adm_modify_kdb() to use kdb5's change-password
 		interfaces.  Gut callers of adm_modify_kdb() because most of

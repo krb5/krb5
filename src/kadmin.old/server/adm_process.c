@@ -80,10 +80,12 @@ cpw_keyproc(context, keyblock)
 	}
 
 	/* Find our key */
-	if (retval = adm_find_keytype(&cpw_entry,
-				      KEYTYPE_DES,
-				      -1,
-				      &kdatap)) {
+	if (retval = krb5_dbe_find_keytype(context,
+					   &cpw_entry,
+					   KEYTYPE_DES,
+					   -1,
+					   -1,
+					   &kdatap)) {
 	    krb5_db_free_principal(context, &cpw_entry, nprincs);
 	    syslog(LOG_ERR, "cpw_keyproc: cannot find server DES key");
 	    close(client_server_info.client_socket);
@@ -206,10 +208,12 @@ process_client(context, prog)
     }
 
     /* Find our key */
-    if (retval = adm_find_keytype(&server_entry,
-				  KEYTYPE_DES,
-				  -1,
-				  &kdatap)) {
+    if (retval = krb5_dbe_find_keytype(context,
+				       &server_entry,
+				       KEYTYPE_DES,
+				       -1,
+				       -1,
+				       &kdatap)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	syslog(LOG_ERR, 
 	       "kadmind error: cannot find server DES key");

@@ -109,12 +109,16 @@ adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     
     if (oper_type == CHGOPER || oper_type == CH4OPER) {
 	key_data = (krb5_key_data *) NULL;
-	if (adm_find_keytype(&entry,
-			     KEYTYPE_DES,
-			     ((oper_type == CHGOPER) ? 
-			      KRB5_KDB_SALTTYPE_NORMAL : KRB5_KDB_SALTTYPE_V4),
-			     &key_data)) {
+	if (krb5_dbe_find_keytype(context,
+				  &entry,
+				  KEYTYPE_DES,
+				  ((oper_type == CHGOPER) ? 
+				   KRB5_KDB_SALTTYPE_NORMAL : 
+				   KRB5_KDB_SALTTYPE_V4),
+				  -1,
+				  &key_data)) {
 	    com_err("adm_build_key", ENOENT, "finding key data");
+	    return(4);	/* Unable to get password */
 	}
 	outbuf.data[3] = key_data->key_data_type[1];
 	outbuf.length = 4;
@@ -597,25 +601,33 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 	     * We could loop through all the supported key/salt types, but
 	     * we don't have that technology yet.
 	     */
-	    if (!adm_find_keytype(&entry,
-				  KEYTYPE_DES,
-				  KRB5_KDB_SALTTYPE_NORMAL,
-				  &kdata))
+	    if (!krb5_dbe_find_keytype(context,
+				       &entry,
+				       KEYTYPE_DES,
+				       KRB5_KDB_SALTTYPE_NORMAL,
+				       -1,
+				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
-	    if (!adm_find_keytype(&entry,
-				  KEYTYPE_DES,
-				  KRB5_KDB_SALTTYPE_V4,
-				  &kdata))
+	    if (!krb5_dbe_find_keytype(context,
+				       &entry,
+				       KEYTYPE_DES,
+				       KRB5_KDB_SALTTYPE_V4,
+				       -1,
+				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
-	    if (!adm_find_keytype(&entry,
-				  KEYTYPE_DES,
-				  KRB5_KDB_SALTTYPE_NOREALM,
-				  &kdata))
+	    if (!krb5_dbe_find_keytype(context,
+				       &entry,
+				       KEYTYPE_DES,
+				       KRB5_KDB_SALTTYPE_NOREALM,
+				       -1,
+				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
-	    if (!adm_find_keytype(&entry,
-				  KEYTYPE_DES,
-				  KRB5_KDB_SALTTYPE_ONLYREALM,
-				  &kdata))
+	    if (!krb5_dbe_find_keytype(context,
+				       &entry,
+				       KEYTYPE_DES,
+				       KRB5_KDB_SALTTYPE_ONLYREALM,
+				       -1,
+				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
 	}
 	

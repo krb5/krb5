@@ -346,34 +346,6 @@ adm_enter_rnd_pwd_key(context, cmdname, change_princ, req_type, entry)
 }
 
 krb5_error_code
-adm_find_keytype(dbentp, keytype, salttype, kentp)
-    krb5_db_entry	*dbentp;
-    krb5_keytype	keytype;
-    krb5_int32		salttype;
-    krb5_key_data	**kentp;
-{
-    int			i;
-    int			maxkvno;
-    krb5_key_data	*datap;
-
-    maxkvno = -1;
-    datap = (krb5_key_data *) NULL;
-    for (i=0; i<dbentp->n_key_data; i++) {
-	if ((dbentp->key_data[i].key_data_type[0] == keytype) &&
-	    ((dbentp->key_data[i].key_data_type[1] == salttype) ||
-	     (salttype < 0))) {
-	    maxkvno = dbentp->key_data[i].key_data_kvno;
-	    datap = &dbentp->key_data[i];
-	}
-    }
-    if (maxkvno >= 0) {
-	*kentp = datap;
-	return(0);
-    }
-    return(ENOENT);    
-}
-
-krb5_error_code
 adm_update_tl_attrs(kcontext, dbentp, mod_name, is_pwchg)
     krb5_context	kcontext;
     krb5_db_entry	*dbentp;
