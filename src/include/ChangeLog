@@ -1,5 +1,12 @@
 Mon Nov 13 11:49:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* k5-int.h: Added typedef for krb5_preauth_proces_proc, and
+		changed the prototype of krb5_process_padata() to take
+		additional arguments for returning the decryption key to
+		use for decrypting the as_reply, as well as passing in the
+		decrypt_proc procedure in case some preauth types want to
+		call decrypt_proc themselves.
+
 	* krb5.hin: Add prototypes for krb5_encrypt_data(),
 		krb5_decrypt_data(). 
 
