@@ -386,9 +386,6 @@ char *crypt P((char * , char * ));
 #ifndef SYSTEM_FIVE
 void encrypt P((char * ));
 #endif
-char *ctime P((long * ));
-struct tm *localtime P((long * ));
-struct tm *gmtime P((long * ));
 #ifndef SYSTEM_FIVE
 char *timezone P((int  , int  ));
 #endif
@@ -569,7 +566,6 @@ int re_exec P((char * ));
 void openlog P((const char * , int, int  )); /* our local version... */
 void syslog P((int  , const char *, ... ));
 void closelog P((void ));
-long time P((long * ));
 char *valloc P((unsigned  ));
 int vlimit P((int  , int  ));
 #endif
@@ -655,4 +651,15 @@ void qsort P((char * , unsigned  , unsigned  , int (* )()));
 #endif
 
 #endif /* MIPS/Ultrix */
+
+#ifdef ibm032
+extern char *memcpy(char *, const char *, int);
+extern char *memset(char *, int, int);
+extern char *malloc(unsigned int);
+extern char *realloc(char *, unsigned int);
+extern void free(char *);
+extern void abort(void);
+extern char *getenv(const char *);
+#endif /* ibm032 */
+
 #undef P
