@@ -32,8 +32,8 @@
 		00CC63F100975A877F000001 = {
 			isa = PBXFileReference;
 			name = autoconf.h;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/autoconf.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/autoconf.h;
+			refType = 3;
 		};
 		00CC63F200975A877F000001 = {
 			isa = PBXExecutableFileReference;
@@ -44,20 +44,20 @@
 		00CC63F300975A877F000001 = {
 			isa = PBXFileReference;
 			name = GSS.h;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/GSS.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/GSS.h;
+			refType = 3;
 		};
 		00CC63F400975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi_err_generic.c;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/gssapi_err_generic.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/gssapi_err_generic.c;
+			refType = 3;
 		};
 		00CC63F500975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi_err_generic.h;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/gssapi_err_generic.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/gssapi_err_generic.h;
+			refType = 3;
 		};
 		00CC63F600975A877F000001 = {
 			isa = PBXFileReference;
@@ -74,8 +74,8 @@
 		00CC63F800975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi.h;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/gssapi.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/gssapi.h;
+			refType = 3;
 		};
 		00CC63F900975A877F000001 = {
 			isa = PBXFileReference;
@@ -92,8 +92,8 @@
 		00CC63FB00975A877F000001 = {
 			isa = PBXFileReference;
 			name = Kerberos5.h;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/Kerberos5.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/Kerberos5.h;
+			refType = 3;
 		};
 		00CC63FD00975A877F000001 = {
 			isa = PBXFileReference;
@@ -116,8 +116,8 @@
 		00CC640000975A877F000001 = {
 			isa = PBXFileReference;
 			name = krb5.h;
-			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/krb5.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/krb5.h;
+			refType = 3;
 		};
 		00CC640100975A877F000001 = {
 			isa = PBXFileReference;
