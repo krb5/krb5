@@ -1,3 +1,15 @@
+2002-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check return type for getservbyname_r just as for
+	gethostbyname_r.
+	* fake-addrinfo.h (GET_HOST_BY_NAME): Use plain gethostbyname if
+	THREADSAFE_GETHOSTBYNAME is defined, even if _r versions are
+	available.
+	(GET_HOST_BY_ADDR) [GETHOSTBYNAME_R_RETURNS_INT]: Add missing
+	variable declaration.
+	(GET_SERV_BY_NAME, GET_SERV_BY_PORT): New macros, in three
+	flavors, parallel to GET_HOST macros; not used yet.
+
 2002-05-24  Ken Raeburn  <raeburn@mit.edu>
 
 	Reduce build-time per-system dependencies and krb5.h namespace

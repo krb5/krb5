@@ -7,9 +7,7 @@ AC_PROG_LEX
 AC_C_CONST
 AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntoa inet_aton gethostbyname_r gethostbyaddr_r getservbyname_r getservbyport_r)
 dnl
-dnl Check what the return type for gethostbyname_r is.
-dnl I don't think we need this for getservbyname_r at the moment, but
-dnl it does have similar issues.
+dnl Check what the return types for gethostbyname_r and getservbyname_r are.
 dnl
 if test "$ac_cv_func_gethostbyname_r" = yes; then
   AC_MSG_CHECKING([if gethostbyname_r returns an int])
@@ -34,6 +32,32 @@ if test "$ac_cv_func_gethostbyname_r" = yes; then
   fi
   if test "$krb5_cv_gethostbyname_r_returns_int" = yes; then
     AC_DEFINE(GETHOSTBYNAME_R_RETURNS_INT, 1, [Define if gethostbyname_r returns int rather than struct hostent * ])
+  fi
+fi
+dnl
+if test "$ac_cv_func_getservbyname_r" = yes; then
+  AC_MSG_CHECKING([if getservbyname_r returns an int])
+  AC_CACHE_VAL(krb5_cv_getservbyname_r_returns_int,
+  [AC_TRY_COMPILE([#include <netdb.h>
+  extern int getservbyname_r ();], [1;],
+  krb5_cv_getservbyname_r_returns_int=yes,
+  krb5_cv_getservbyname_r_returns_int=no)])
+  AC_MSG_RESULT($krb5_cv_getservbyname_r_returns_int)
+
+  AC_MSG_CHECKING([if getservbyname_r returns a pointer])
+  AC_CACHE_VAL(krb5_cv_getservbyname_r_returns_ptr,
+  [AC_TRY_COMPILE([#include <netdb.h>
+  extern struct servent *getservbyname_r ();], [1;],
+  krb5_cv_getservbyname_r_returns_ptr=yes,
+  krb5_cv_getservbyname_r_returns_ptr=no)])
+  AC_MSG_RESULT($krb5_cv_getservbyname_r_returns_ptr)
+
+  if test "$krb5_cv_getservbyname_r_returns_int" = "$krb5_cv_getservbyname_r_returns_ptr"; then
+    AC_MSG_WARN(cannot determine return type of getservbyname_r -- disabling)
+    ac_cv_func_getservbyname_r=no
+  fi
+  if test "$krb5_cv_getservbyname_r_returns_int" = yes; then
+    AC_DEFINE(GETSERVBYNAME_R_RETURNS_INT, 1, [Define if getservbyname_r returns int rather than struct servent * ])
   fi
 fi
 dnl

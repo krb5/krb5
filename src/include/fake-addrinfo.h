@@ -105,7 +105,7 @@
 /* Do we actually have *any* systems we care about that don't provide
    either getaddrinfo or one of these two flavors of
    gethostbyname_r?  */
-#ifndef HAVE_GETHOSTBYNAME_R
+#if !defined(HAVE_GETHOSTBYNAME_R) || defined(THREADSAFE_GETHOSTBYNAME)
 #define GET_HOST_BY_NAME(NAME, HP, ERR) \
     { (HP) = gethostbyname (NAME); (ERR) = h_errno; }
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
@@ -126,7 +126,7 @@
     }
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
     {									\
-	struct hostent my_h_ent;					\
+	struct hostent my_h_ent, *my_hp;				\
 	int my_h_err;							\
 	char my_h_buf[8192];						\
 	(HP) = (gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
@@ -154,6 +154,62 @@
 	(HP) = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
 			       my_h_buf, sizeof (my_h_buf), &my_h_err);	\
 	(ERR) = my_h_err;						\
+    }
+#endif
+#endif
+
+/* Now do the same for getservby* functions.  */
+#ifndef HAVE_GETSERVBYNAME_R
+#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
+    ((SP) = getservbyname (NAME, PROTO), (ERR) = (SP) ? 0 : -1)
+#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
+    ((SP) = getservbyport (PORT, PROTO), (ERR) = (SP) ? 0 : -1)
+#else
+#ifdef GETSERVBYNAME_R_RETURNS_INT
+#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
+    {									\
+	struct servent my_s_ent, *my_sp;				\
+	int my_s_err;							\
+	char my_s_buf[8192];						\
+	(SP) = (getservbyname_r((NAME), (PROTO), &my_s_ent,		\
+				my_s_buf, sizeof (my_s_buf), &my_sp,	\
+				&my_s_err)				\
+		? 0							\
+		: &my_s_ent);						\
+	(ERR) = my_s_err;						\
+    }
+#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
+    {									\
+	struct servent my_s_ent, *my_sp;				\
+	int my_s_err;							\
+	char my_s_buf[8192];						\
+	(SP) = (getservbyport_r((PORT), (PROTO), &my_s_ent,		\
+				my_s_buf, sizeof (my_s_buf), &my_sp,	\
+				&my_s_err)				\
+		? 0							\
+		: &my_s_ent);						\
+	(ERR) = my_s_err;						\
+    }
+#else
+/* returns ptr */
+#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
+    {									\
+	struct servent my_s_ent;					\
+	int my_s_err;							\
+	char my_s_buf[8192];						\
+	(SP) = getservbyname_r((NAME), (PROTO), &my_s_ent,		\
+			       my_s_buf, sizeof (my_s_buf), &my_s_err);	\
+	(ERR) = my_s_err;						\
+    }
+
+#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
+    {									\
+	struct servent my_s_ent;					\
+	int my_s_err;							\
+	char my_s_buf[8192];						\
+	(SP) = getservbyport_r((PORT), (PROTO), &my_s_ent,		\
+			       my_s_buf, sizeof (my_s_buf), &my_s_err);	\
+	(ERR) = my_s_err;						\
     }
 #endif
 #endif
