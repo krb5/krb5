@@ -38,7 +38,7 @@
 /*
  * The following are the weak DES keys:
  */
-static mit_des_cblock weak[16] = {
+static const mit_des_cblock weak[16] = {
     /* weak keys */
     {0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01},
     {0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe},
@@ -75,7 +75,7 @@ mit_des_is_weak_key(key)
      mit_des_cblock key;
 {
     int i;
-    mit_des_cblock *weak_p = weak;
+    const mit_des_cblock *weak_p = weak;
 
     for (i = 0; i < (sizeof(weak)/sizeof(mit_des_cblock)); i++) {
 	if (!memcmp((char *)weak_p++,(char *)key,sizeof(mit_des_cblock)))
