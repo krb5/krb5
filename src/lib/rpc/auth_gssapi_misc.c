@@ -39,9 +39,14 @@ bool_t xdr_gss_buf(xdrs, buf)
       * to know the maximum length.  -1 effectively disables this
       * braindamage.
       */
-     return xdr_bytes(xdrs, (char **) &buf->value, (unsigned int *) &buf->length,
-		      (xdrs->x_op == XDR_DECODE && buf->value == NULL)
-		      ? (unsigned int) -1 : (unsigned int) buf->length);
+     bool_t result;
+     /* Fix type mismatches between APIs.  */
+     unsigned int length = buf->length;
+     result = xdr_bytes(xdrs, (char **) &buf->value, &length,
+			(xdrs->x_op == XDR_DECODE && buf->value == NULL)
+			? (unsigned int) -1 : (unsigned int) buf->length);
+     buf->length = length;
+     return result;
 }
 
 bool_t xdr_authgssapi_creds(xdrs, creds)
@@ -192,6 +197,7 @@ bool_t auth_gssapi_wrap_data(major, minor, context, seq_num, out_xdrs,
      gss_buffer_desc in_buf, out_buf;
      XDR temp_xdrs;
      int conf_state;
+     unsigned int length;
      
      PRINTF(("gssapi_wrap_data: starting\n"));
      
@@ -230,8 +236,9 @@ bool_t auth_gssapi_wrap_data(major, minor, context, seq_num, out_xdrs,
 	     (int) in_buf.length, (int) out_buf.length));
      
      /* write the token */
+     length = out_buf.length;
      if (! xdr_bytes(out_xdrs, (char **) &out_buf.value, 
-		     (unsigned int *) &out_buf.length,
+		     (unsigned int *) &length,
 		     out_buf.length)) {
 	  PRINTF(("gssapi_wrap_data: serializing encrypted data failed\n"));
 	  XDR_DESTROY(&temp_xdrs);
@@ -258,6 +265,7 @@ bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
      XDR temp_xdrs;
      rpc_u_int32 verf_seq_num;
      int conf, qop;
+     unsigned int length;
      
      PRINTF(("gssapi_unwrap_data: starting\n"));
      
@@ -266,15 +274,15 @@ bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
      
      in_buf.value = NULL;
      out_buf.value = NULL;
-     if (! xdr_bytes(in_xdrs, (char **) &in_buf.value, 
-		     (unsigned int *) &in_buf.length, (unsigned int) -1)) {
+     if (! xdr_bytes(in_xdrs, (char **) &in_buf.value,
+		     &length, (unsigned int) -1)) {
 	 PRINTF(("gssapi_unwrap_data: deserializing encrypted data failed\n"));
 	 temp_xdrs.x_op = XDR_FREE;
-	 (void)xdr_bytes(&temp_xdrs, (char **) &in_buf.value,
-			 (unsigned int *) &in_buf.length,
+	 (void)xdr_bytes(&temp_xdrs, (char **) &in_buf.value, &length,
 			 (unsigned int) -1);
 	 return FALSE;
      }
+     in_buf.length = length;
      
      *major = gss_unseal(minor, context, &in_buf, &out_buf, &conf,
 			 &qop);

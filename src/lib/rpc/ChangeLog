@@ -1,3 +1,10 @@
+2002-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* auth_gssapi_misc.c (xdr_gss_buf, auth_gssapi_wrap_data,
+	auth_gssapi_unwrap_data): Use temporary variables rather than
+	pointer casts when dealing with integral types of different
+	sizes.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-prerecurse): Change double colons to single
