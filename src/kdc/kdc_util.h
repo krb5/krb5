@@ -31,19 +31,25 @@ krb5_error_code kdc_convert_key PROTOTYPE((krb5_keyblock *,
 					   krb5_keyblock *,
 					   int));
 krb5_error_code decrypt_tgs_req PROTOTYPE((krb5_tgs_req *,
-					   krb5_fulladdr *));
+					   const krb5_fulladdr *));
 krb5_error_code kdc_process_tgs_req PROTOTYPE((krb5_tgs_req *,
 					       krb5_fulladdr *));
 
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_as_req *,
-					  krb5_fulladdr *,
+					  const krb5_fulladdr *,
 					  krb5_data ** ));
 
 /* do_tgs_req.c */
 krb5_error_code process_tgs_req PROTOTYPE((krb5_tgs_req *,
-					   krb5_fulladdr *,
+					   const krb5_fulladdr *,
 					   krb5_data ** ));
+/* dispatch.c */
+krb5_error_code dispatch PROTOTYPE((const krb5_data *,
+				    const krb5_fulladdr *,
+				    krb5_data **));
+
+/* network.c */
 void listen_and_process PROTOTYPE((void));
 void setup_network PROTOTYPE((void));
 void closedown_network PROTOTYPE((void));
@@ -57,6 +63,7 @@ void closedown_network PROTOTYPE((void));
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
 #define realm_of_tgt(ticket) krb5_princ_realm(ticket->server)
+#define process_v4(foo)	KRB5KRB_AP_ERR_BADVERSION
 
 #ifndef	min
 #define	min(a, b)	((a) < (b) ? (a) : (b))
