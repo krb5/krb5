@@ -809,6 +809,11 @@ proc add_kerberos_key { kkey standalone } {
     # Use kadmin to add an key.
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin $kkey lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin $kkey"
 	    catch "expect_after"
