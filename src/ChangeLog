@@ -1,3 +1,9 @@
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (update-autoconf-h): New target.  Checks that
+	include/krb5/autoconf.h is current.
+	(all-prerecurse): Depend on it.
+
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SUBDIRS): Renamed from MY_SUBDIRS.
