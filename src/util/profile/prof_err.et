@@ -60,4 +60,7 @@ error_code	PROF_EXISTS,		"Section already exists"
 error_code	PROF_BAD_BOOLEAN,		"Invalid boolean value"
 error_code	PROF_BAD_INTEGER,		"Invalid integer value"
 
+error_code	PROF_MAGIC_FILE_DATA, "Bad magic value in profile_file_data_t"
+
+
 end

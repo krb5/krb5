@@ -33,11 +33,11 @@ static errcode_t rw_setup(profile)
 		return PROF_MAGIC_PROFILE;
 
 	file = profile->first_file;
-	if (!(file->flags & PROFILE_FILE_RW))
+	if (!(file->data->flags & PROFILE_FILE_RW))
 		return PROF_READ_ONLY;
 
 	/* Don't update the file if we've already made modifications */
-	if (file->flags & PROFILE_FILE_DIRTY)
+	if (file->data->flags & PROFILE_FILE_DIRTY)
 		return 0;
 			
 	retval = profile_update_file(file);
@@ -73,7 +73,7 @@ profile_update_relation(profile, names, old_value, new_value)
 	if (!old_value || !*old_value)
 		return PROF_EINVAL;
 
-	section = profile->first_file->root;
+	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
 		retval = profile_find_node(section, *cpp, 0, 1,
@@ -94,7 +94,7 @@ profile_update_relation(profile, names, old_value, new_value)
 	if (retval)
 		return retval;
 
-	profile->first_file->flags |= PROFILE_FILE_DIRTY;
+	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
 	
 	return 0;
 }
@@ -121,7 +121,7 @@ profile_clear_relation(profile, names)
 	if (names == 0 || names[0] == 0 || names[1] == 0)
 		return PROF_BAD_NAMESET;
 
-	section = profile->first_file->root;
+	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
 		retval = profile_find_node(section, *cpp, 0, 1,
@@ -140,7 +140,7 @@ profile_clear_relation(profile, names)
 			return retval;
 	} while (state);
 
-	profile->first_file->flags |= PROFILE_FILE_DIRTY;
+	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
 	
 	return 0;
 }
@@ -169,7 +169,7 @@ profile_rename_section(profile, names, new_name)
 	if (names == 0 || names[0] == 0 || names[1] == 0)
 		return PROF_BAD_NAMESET;
 
-	section = profile->first_file->root;
+	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
 		retval = profile_find_node(section, *cpp, 0, 1,
@@ -190,7 +190,7 @@ profile_rename_section(profile, names, new_name)
 	if (retval)
 		return retval;
 
-	profile->first_file->flags |= PROFILE_FILE_DIRTY;
+	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
 	
 	return 0;
 }
@@ -222,7 +222,7 @@ profile_add_relation(profile, names, new_value)
 	if (names == 0 || names[0] == 0 || names[1] == 0)
 		return PROF_BAD_NAMESET;
 
-	section = profile->first_file->root;
+	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
 		retval = profile_find_node(section, *cpp, 0, 1,
@@ -245,7 +245,7 @@ profile_add_relation(profile, names, new_value)
 	if (retval)
 		return retval;
 
-	profile->first_file->flags |= PROFILE_FILE_DIRTY;
+	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
 	
 	return 0;
 }

@@ -73,10 +73,6 @@ profile_init(files, ret_profile)
         return 0;
 }
 
-#ifndef macintosh
-/* 
- * On MacOS, profile_init_path is the same as profile_init
- */
 errcode_t KRB5_CALLCONV
 profile_init_path(filepath, ret_profile)
 	const_profile_filespec_list_t filepath;
@@ -128,15 +124,6 @@ profile_init_path(filepath, ret_profile)
 
 	return retval;
 }
-#else
-errcode_t KRB5_CALLCONV
-profile_init_path(filelist, ret_profile)
-	profile_filespec_list_t filelist;
-	profile_t *ret_profile;
-{
-	return profile_init (filelist, ret_profile);
-}
-#endif
 
 errcode_t KRB5_CALLCONV
 profile_flush(profile)
@@ -200,8 +187,8 @@ errcode_t profile_ser_size(unused, profile, sizep)
     for (pfp = profile->first_file; pfp; pfp = pfp->next) {
 	required += sizeof(prof_int32);
 #ifdef PROFILE_USES_PATHS
-	if (pfp->filespec)
-	    required += strlen(pfp->filespec);
+	if (pfp->data->filespec)
+	    required += strlen(pfp->data->filespec);
 #else
 	required += sizeof (profile_filespec_t);
 #endif
@@ -251,18 +238,18 @@ errcode_t profile_ser_externalize(unused, profile, bufpp, remainp)
 	    pack_int32(fcount, &bp, &remain);
 	    for (pfp = profile->first_file; pfp; pfp = pfp->next) {
 #ifdef PROFILE_USES_PATHS
-		slen = (pfp->filespec) ?
-		    (prof_int32) strlen(pfp->filespec) : 0;
+		slen = (pfp->data->filespec) ?
+		    (prof_int32) strlen(pfp->data->filespec) : 0;
 		pack_int32(slen, &bp, &remain);
 		if (slen) {
-		    memcpy(bp, pfp->filespec, (size_t) slen);
+		    memcpy(bp, pfp->data->filespec, (size_t) slen);
 		    bp += slen;
 		    remain -= (size_t) slen;
 		}
 #else
 		slen = sizeof (FSSpec);
 		pack_int32(slen, &bp, &remain);
-		memcpy (bp, &(pfp->filespec), (size_t) slen);
+		memcpy (bp, &(pfp->data->filespec), (size_t) slen);
 		bp += slen;
 		remain -= (size_t) slen;
 #endif

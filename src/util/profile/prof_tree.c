@@ -481,7 +481,7 @@ errcode_t profile_node_iterator(iter_p, ret_node, ret_name, ret_value)
 	 * If the file has changed, then the node pointer is invalid,
 	 * so we'll have search the file again looking for it.
 	 */
-	if (iter->node && (iter->file->upd_serial != iter->file_serial)) {
+	if (iter->node && (iter->file->data->upd_serial != iter->file_serial)) {
 		iter->flags &= ~PROFILE_ITER_FINAL_SEEN;
 		skip_num = iter->num;
 		iter->node = 0;
@@ -510,12 +510,12 @@ get_new_file:
                 return retval;
             }
 		}
-		iter->file_serial = iter->file->upd_serial;
+		iter->file_serial = iter->file->data->upd_serial;
 		/*
 		 * Find the section to list if we are a LIST_SECTION,
 		 * or find the containing section if not.
 		 */
-		section = iter->file->root;
+		section = iter->file->data->root;
 		for (cpp = iter->names; cpp[iter->done_idx]; cpp++) {
 			for (p=section->first_child; p; p = p->next)
 				if (!strcmp(p->name, *cpp) && !p->value)

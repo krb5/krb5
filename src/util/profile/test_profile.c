@@ -61,7 +61,7 @@ static void do_batchmode(profile)
 			print_status = PRINT_VALUES;
 		} else if (!strcmp(cmd, "dump")) {
 			retval = profile_write_tree_file
-				(profile->first_file->root, stdout);
+				(profile->first_file->data->root, stdout);
 		} else if (!strcmp(cmd, "clear")) {
 			retval = profile_clear_relation(profile, names);
 		} else if (!strcmp(cmd, "update")) {
@@ -69,7 +69,7 @@ static void do_batchmode(profile)
 							 *names, *(names+1));
 		} else if (!strcmp(cmd, "verify")) {
 			retval = profile_verify_node
-				(profile->first_file->root);
+				(profile->first_file->data->root);
 		} else if (!strcmp(cmd, "rename_section")) {
 			retval = profile_rename_section(profile, names+1,
 							*names);

@@ -1,5 +1,32 @@
 2002-12-06  Ken Raeburn  <raeburn@mit.edu>
 
+	* prof_int.h: Include Mac OS X versions of header files if
+	appropriate.  Only include prof_err.h if profile.h doesn't define
+	ERROR_TABLE_BASE_prof.
+	(struct _prf_data_t): Move most of contents of _prf_file_t here.
+	Add reference count.
+	(prf_data_t): New typedef.
+	(struct _prf_file_t): Include an array of one _prf_data_t
+	structure.
+	* prof_file.c (profile_open_file): Fill in "data" field.  Drop
+	some old Mac specific code.
+	(profile_flush_file_data): Renamed from profile_flush_file, now
+	takes prf_data_t argument.
+	(profile_flush_file_data): Likewise.
+	(profile_free_file): Now calls profile_free_file_data.
+	(profile_free_file_data): New function, with most of old
+	profile_free_file code.
+	* prof_init.c (profile_init_path): Removed old Mac version.
+	(profile_ser_size, profile_ser_externalize): Get file data from
+	new "data" field.
+	* prof_set.c (rw_setup, profile_update_relation,
+	profile_clear_relation, profile_rename_section,
+	profile_add_relation): Likewise.
+	* prof_tree.c (profile_node_iterator): Likewise.
+	* test_profile.c (do_batchmode): Likewise.
+	* prof_int.h (profile_flush_file): Now a macro.
+	* prof_err.et (PROF_MAGIC_FILE_DATA): New error code value.
+
 	* prof_get.c (conf_yes, conf_no): Entries now point to const.
 	(profile_parse_boolean): Updated type of 'p' correspondingly.
 

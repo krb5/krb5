@@ -3,9 +3,19 @@
  */
 
 #include <time.h>
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#include <TargetConditionals.h>
+#include <Kerberos/com_err.h>
+#include <Kerberos/FullPOSIXPath.h>
+#include <CoreServices/CoreServices.h>
+#else
 #include "com_err.h"
-#include "prof_err.h"
+#endif
+
 #include "profile.h"
+#ifndef ERROR_TABLE_BASE_prof
+#include "prof_err.h"
+#endif
 
 #if defined(_WIN32)
 #define SIZEOF_INT      4
@@ -24,14 +34,23 @@ typedef long prf_magic_t;
  * This is the structure which stores the profile information for a
  * particular configuration file.
  */
-struct _prf_file_t {
+struct _prf_data_t {
 	prf_magic_t	magic;
 	char		*comment;
 	profile_filespec_t filespec;
 	struct profile_node *root;
-	time_t		timestamp;
-	int		flags;
-	int		upd_serial;
+	time_t		timestamp; /* time tree was last updated from file */
+	int		flags;	/* r/w, dirty */
+	int		upd_serial; /* incremented when data changes */
+	int		refcount; /* prf_file_t references */
+	struct _prf_data_t *next;
+};
+
+typedef struct _prf_data_t *prf_data_t;
+
+struct _prf_file_t {
+	prf_magic_t	magic;
+	struct _prf_data_t	data[1];
 	struct _prf_file_t *next;
 };
 
@@ -162,14 +181,17 @@ errcode_t profile_rename_node
 errcode_t profile_open_file
 	(const_profile_filespec_t file, prf_file_t *ret_prof);
 
-errcode_t profile_update_file
-	(prf_file_t profile);
+#define profile_update_file(P) profile_update_file_data((P)->data)
+errcode_t profile_update_file_data
+	(prf_data_t profile);
 
-errcode_t profile_flush_file
-	(prf_file_t profile);
+#define profile_flush_file(P) (((P) && (P)->magic == PROF_MAGIC_FILE) ? profile_flush_file_data((P)->data) : PROF_MAGIC_FILE)
+errcode_t profile_flush_file_data
+	(prf_data_t data);
 
 void profile_free_file
 	(prf_file_t profile);
+void profile_free_file_data (prf_data_t data);
 
 errcode_t profile_close_file
 	(prf_file_t profile);
