@@ -21,6 +21,9 @@
 #define SaberDefines -DPOSIX -DBITS32 -Dconst=
 #define StandardDefines -YPOSIX -D_POSIX_SOURCE -DBITS32
 
+#undef HasNdbm
+#define HasNdbm NO
+
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define HasSaberC YES
@@ -29,7 +32,14 @@
 
 #ifdef MipsArchitecture
 #define HasSaberC YES
-/* #define HasGcc YES */
+/*
+#undef HasGcc
+#define HasGcc YES
+ */
+
+#define	ArCmd ar cru
+#define LintLibFlag -o
+
 #ifdef MIPSEL
 #define DesDefines -DBITS32 -DBIG -DMUSTALIGN -DLSBFIRST
 #else

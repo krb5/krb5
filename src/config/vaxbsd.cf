@@ -21,10 +21,6 @@
 #define SaberDefines -Dconst= -DBITS32
 #endif
 
-#ifdef VaxArchitecture
-#define HasGcc YES
-#endif
-
 #define HasVoidSignalReturn NO
 #define HasSaberC YES
 
@@ -32,5 +28,18 @@
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define StandardDefines -DBITS32
 #define DesDefines -DBIG -DLSBFIRST
+#undef HasGcc
+#define HasGcc YES
+#endif
+
+#undef HasNdbm
+#define HasNdbm		YES
+
+#if HasGcc
+#define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
+#ifndef CcCmd
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
+#define STDCTopIncludes -I$(TOP)/include/stdc-incl
+#endif
 #endif
 
