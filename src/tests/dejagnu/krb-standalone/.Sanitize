@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+kadmin.exp
 rcp.exp
 rsh.exp
 sample.exp

@@ -1,3 +1,7 @@
+
+Thu May 11 12:25:38 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add kadmin.exp for kadmin tests.
+
 Wed May 10 17:00:01 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* .Sanitize (Things-to-keep): Add sample.exp
