@@ -40,10 +40,12 @@ extern int errno;
 
 static jmp_buf pwd_jump;
 
+
 sigtype
 intr_routine()
 {
     longjmp(pwd_jump, 1);
+    /*NOTREACHED*/
 }
 
 krb5_error_code
