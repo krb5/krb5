@@ -179,36 +179,42 @@ char *sfx;
 krb5_error_code
 krb5_dbm_db_init()
 {
-    if (!inited) {
-	char *filename = gen_dbsuffix (current_db_name, ".ok");
-	if (!filename)
-	    return ENOMEM;
+    char *filename = 0;
+
+    if (inited)
+	return 0;
+
+    filename = gen_dbsuffix (current_db_name, ".ok");
+    if (!filename)
+	return ENOMEM;
 #ifdef POSIX_FILE_LOCKS
-	/* needs be open read/write so that write locking can work with
-	   POSIX systems */
-	if ((dblfd = open(filename, O_RDWR, 0)) == -1) {
-	    if (errno == EACCES) {
-		if ((dblfd = open(filename, O_RDONLY, 0)) == -1)
-		    return errno;
-	    } else
-		return errno;
-	}
-#else
-	if ((dblfd = open(filename, 0, 0)) == -1) {
-	    return errno;
-	}
-#endif
-	free(filename);
-	inited++;
+    /*
+     * needs be open read/write so that write locking can work with
+     * POSIX systems
+     */
+    if ((dblfd = open(filename, O_RDWR, 0)) == -1) {
+	if (errno == EACCES) {
+	    if ((dblfd = open(filename, O_RDONLY, 0)) == -1)
+		goto err_out;
+	} else
+	    goto err_out;
     }
-    return (0);
+#else
+    if ((dblfd = open(filename, 0, 0)) == -1)
+	goto err_out;
+#endif
+    inited++;
+    errno = 0;
+    
+err_out:
+    free(filename);
+    return (errno);
 }
+
 /*
  * gracefully shut down database--must be called by ANY program that does
  * a krb5_dbm_db_init 
  */
-
-
 krb5_error_code
 krb5_dbm_db_fini()
 {
@@ -997,11 +1003,11 @@ krb5_dbm_db_rename(from, to)
     char *from;
     char *to;
 {
-    char *fromdir;
-    char *todir;
-    char *frompag;
-    char *topag;
-    char *fromok;
+    char *fromdir = 0;
+    char *todir = 0;
+    char *frompag = 0;
+    char *topag = 0;
+    char *fromok = 0;
     time_t trans;
     krb5_error_code retval;
 
@@ -1011,26 +1017,26 @@ krb5_dbm_db_rename(from, to)
     todir = gen_dbsuffix (to, ".dir");
     if (!todir) {
 	retval = ENOMEM;
-	goto freefromdir;
+	goto errout;
     }
     frompag = gen_dbsuffix (from, ".pag");
     if (!frompag) {
 	retval = ENOMEM;
-	goto freetodir;
+	goto errout;
     }
     topag = gen_dbsuffix (to, ".pag");
     if (!topag) {
 	retval = ENOMEM;
-	goto freefrompag;
+	goto errout;
     }
     fromok = gen_dbsuffix(from, ".ok");
     if (!fromok) {
 	retval = ENOMEM;
-	goto freetopag;
+	goto errout;
     }
 
     if (retval = krb5_dbm_db_start_update(to, &trans))
-	return(retval);
+	goto errout;
     
     if ((rename (fromdir, todir) == 0)
 	&& (rename (frompag, topag) == 0)) {
@@ -1039,15 +1045,17 @@ krb5_dbm_db_rename(from, to)
     } else
 	retval = errno;
     
-    free_dbsuffix (fromok);
- freetopag:
-    free_dbsuffix (topag);
- freefrompag:
-    free_dbsuffix (frompag);
- freetodir:
-    free_dbsuffix (todir);
- freefromdir:
-    free_dbsuffix (fromdir);
+errout:
+    if (fromok)
+	free_dbsuffix (fromok);
+    if (topag)
+	free_dbsuffix (topag);
+    if (frompag)
+	free_dbsuffix (frompag);
+    if (todir)
+	free_dbsuffix (todir);
+    if (fromdir)
+	free_dbsuffix (fromdir);
 
     if (retval == 0)
 	return krb5_dbm_db_end_update(to, trans);

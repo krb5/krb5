@@ -147,9 +147,12 @@ OLDDECLARG(krb5_keyblock *,key)
 	    goto errout;
 	}
 	if (fread((krb5_pointer) key->contents,
-		  sizeof(key->contents[0]), key->length, kf) != key->length)
+		  sizeof(key->contents[0]), key->length, kf) != key->length) {
 	    retval = KRB5_KDB_CANTREAD_STORED;
-	else
+	    memset(key->contents, 0, key->length);
+	    free(key->contents);
+	    key->contents = 0;
+	} else
 	    retval = 0;
     errout:
 	(void) fclose(kf);
