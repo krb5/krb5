@@ -623,7 +623,7 @@ xdr_string(xdrs, cpp, maxsize)
 	if (! xdr_u_int(xdrs, &size)) {
 		return (FALSE);
 	}
-	if (size > maxsize) {
+	if (size >= maxsize) {
 		return (FALSE);
 	}
 	nodesize = size + 1;
