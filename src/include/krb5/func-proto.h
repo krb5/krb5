@@ -312,27 +312,27 @@ krb5_error_code krb5_decode_kdc_rep
 		   const krb5_enctype,
 		   krb5_kdc_rep ** ));
 
+typedef krb5_error_code (*krb5_rdreq_key_proc) PROTOTYPE((krb5_pointer, 
+							  krb5_principal,
+							  krb5_kvno,
+							  krb5_keyblock **));
+	
 krb5_error_code krb5_rd_req
 	PROTOTYPE((const krb5_data *,
 		   krb5_const_principal,
 		   const krb5_address *,
 		   krb5_const_pointer,
-		   krb5_error_code (* )(krb5_pointer,
-					krb5_principal,
-					krb5_kvno,
-					krb5_keyblock ** ),
+		   krb5_rdreq_key_proc,
 		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent ** ));
+
 krb5_error_code krb5_rd_req_decoded
 	PROTOTYPE((const krb5_ap_req *,
 		   krb5_const_principal,
 		   const krb5_address *,
 		   krb5_const_pointer,
-		   krb5_error_code (* )(krb5_pointer,
-					krb5_principal,
-					krb5_kvno,
-					krb5_keyblock ** ),
+		   krb5_rdreq_key_proc,
 		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent ** ));
@@ -364,6 +364,34 @@ krb5_error_code krb5_mk_priv
 krb5_error_code krb5_cc_register
 	PROTOTYPE((krb5_cc_ops *,
 		   krb5_boolean ));
+
+krb5_error_code krb5_sendauth PROTOTYPE((void *,
+					 char *,
+					 krb5_principal,
+					 krb5_principal,
+					 krb5_flags,
+					 krb5_checksum *,
+					 krb5_creds *,
+					 krb5_ccache,
+					 krb5_int32 *,
+					 krb5_keyblock **,
+					 krb5_error **,
+					 krb5_ap_rep_enc_part **));
+	
+krb5_error_code krb5_recvauth PROTOTYPE((void *,
+					 char *,
+					 krb5_principal,
+					 krb5_address *,
+					 krb5_pointer,
+					 krb5_rdreq_key_proc,
+					 krb5_pointer,
+					 char *,
+					 krb5_int32 *,
+					 krb5_principal*,
+					 krb5_ticket **,
+					 krb5_authenticator **));
+
+
 
 #include <krb5/narrow.h>
 
