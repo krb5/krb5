@@ -1,3 +1,9 @@
+Wed Apr 17 14:22:10 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* conv_princ.c: Added ftp and ecat to the list of services which
+ 	 	should be converted.  This really ought to be something
+	 	that's configurable in the profile...
+
 Thu Apr 11 21:30:23 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* init_ctx.c (krb5_init_context): On a Macintosh, turn on
