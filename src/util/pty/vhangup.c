@@ -23,6 +23,7 @@
 
 void ptyint_vhangup()
 {
+#ifdef HAVE_VHANGUP
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
     /* Initialize "sa" structure. */
@@ -41,5 +42,6 @@ void ptyint_vhangup()
 	signal(SIGHUP, SIG_IGN);
 	vhangup();
 	signal(SIGHUP, SIG_DFL);
+#endif
 #endif
 }
