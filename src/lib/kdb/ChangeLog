@@ -1,3 +1,7 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_CHECK_HEADERS instead of AC_HAVE_HEADERS. 
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* fetch_mkey.c: Signed/unsigned int cleanup. 
