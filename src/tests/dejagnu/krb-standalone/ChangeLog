@@ -1,3 +1,4 @@
+2002-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* standalone.exp: Move setting of KLIST and KDESTROY into
 	default.exp.
