@@ -24,9 +24,10 @@
  * List out the contents of your credential cache.
  */
 
-#include <stdio.h>
 #include "krb5.h"
 #include "com_err.h"
+#include <string.h>
+#include <stdio.h>
 #include <time.h>
 
 extern int optind;

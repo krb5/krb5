@@ -1,3 +1,9 @@
+
+Wed May 03 20:20:48 1995  Chris Provenzano (proven@mit.edu)
+
+	* klist.c : #include <string.h>, a must for prototypes of various 
+		string routines on systems where int != void *.
+
 Thu Mar  2 12:31:29 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
