@@ -1,3 +1,7 @@
+Wed Mar 3 16:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed LIB to LIBCMD for the PC
+
 Tue Feb 28 00:59:22 1995  John Gilmore  (gnu at toad.com)
 
 	* *.c:  Avoid <krb5/...> includes.

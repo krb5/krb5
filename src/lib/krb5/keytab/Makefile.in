@@ -27,8 +27,8 @@ all-unix::
 
 all-windows::
 	cd file
-	@echo Making in ..\file
-	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
+	@echo Making in .\file
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean:: clean-$(WHAT)
@@ -37,6 +37,6 @@ clean-unix::
 
 clean-windows::
 	cd file
-	@echo Making clean in ..\file
+	@echo Making clean in .\file
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..

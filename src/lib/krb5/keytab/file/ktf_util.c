@@ -67,6 +67,8 @@
  * sizeof(krb5_int32) bytes for the key length, followed by the key
  */
 
+#define NEED_WINSOCK_H
+#include "krb5.h"
 #include "k5-int.h"
 #include <stdio.h>
 
@@ -333,7 +335,7 @@ krb5_int32 *delete_point;
 	    error = ENOMEM;
 	    goto fail;
     }
-    if (fread(tmpdata, 1, princ_size, KTFILEP(id)) != princ_size) {
+    if (fread(tmpdata, 1, princ_size, KTFILEP(id)) != (size_t) princ_size) {
 	    free(tmpdata);
 	    error = KRB5_KT_END;
 	    goto fail;
@@ -495,9 +497,9 @@ krb5_keytab_entry *entry;
     }
 
     if (KTVERSION(id) == KRB5_KT_VNO_1) {
-	    count = entry->principal->length + 1;
+	    count = (krb5_int16) entry->principal->length + 1;
     } else {
-	    count = htons(entry->principal->length);
+	    count = htons((u_short) entry->principal->length);
     }
     
     if (!xfwrite(&count, sizeof(count), 1, KTFILEP(id))) {
@@ -516,7 +518,7 @@ krb5_keytab_entry *entry;
 	    goto abend;
     }
 
-    count = entry->principal->length;
+    count = (krb5_int16) entry->principal->length;
     for (i = 0; i < count; i++) {
 	princ = krb5_princ_component(context, entry->principal, i);
 	size = princ->length;
@@ -613,25 +615,25 @@ krb5_ktfileint_size_entry(context, entry, size_needed)
 krb5_keytab_entry *entry;
 krb5_int32 *size_needed;
 {
-    krb5_int16 count, size;
+    krb5_int16 count;
     krb5_int32 total_size, i;
     krb5_error_code retval = 0;
 
-    count = entry->principal->length;
-
+    count = (krb5_int16) entry->principal->length;
+        
     total_size = sizeof(count);
-    total_size += krb5_princ_realm(context, entry->principal)->length + (sizeof(size));
+    total_size += krb5_princ_realm(context, entry->principal)->length + (sizeof(krb5_int16));
     
     for (i = 0; i < count; i++) {
 	    total_size += krb5_princ_component(context, entry->principal,i)->length
-		    + (sizeof(size));
+		    + (sizeof(krb5_int16));
     }
 
     total_size += sizeof(entry->principal->type);
     total_size += sizeof(entry->timestamp);
     total_size += sizeof(krb5_octet);
     total_size += sizeof(krb5_int16);
-    total_size += sizeof(size) + entry->key.length;
+    total_size += sizeof(krb5_int16) + entry->key.length;
 
     *size_needed = total_size;
     return retval;

@@ -1,3 +1,7 @@
+Wed Mar 1 16:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* ktf_util.c: fixed up some 16 vs 32 bit conversions.
+
 Tue Feb 28 01:01:15 1995  John Gilmore  (gnu at toad.com)
 
 	* *.c:  Avoid <krb5/...> includes.
