@@ -1,5 +1,10 @@
 2000-07-10  Tom Yu  <tlyu@mit.edu>
 
+	* coding-style: Another pass.  Add secion on namespaces.
+	Elaborate some on null pointers.
+	
+2000-07-10  Tom Yu  <tlyu@mit.edu>
+
 	* coding-style: First pass draft of coding standards.
 
 2000-06-30  Ken Raeburn  <raeburn@mit.edu>

@@ -170,12 +170,29 @@ the appropriate pointer type.  Likewise, do not cast the return value
 from malloc() and friends; the prototype should declare them properly
 as returning a void * and thus shouldn't require an explicit cast.
 
+Do not assume that realloc(NULL, size) will do the right thing, or
+that free(NULL) will do the right thing.  ANSI guarantees that it
+will, but some old libraries (hopefully becoming obsolete) don't.
+Also, don't assume that malloc(0) will return a non-NULL pointer.
+Typically, though, the output of malloc(0) will be safe to pass to
+realloc() and free().
+
+In any case, reading the secion in the C FAQ on null pointers is
+highly recommended to remove confusion regarding null pointers in C,
+since this is a subject of much confusion to even experienced
+programmers.  In particular, if you do not understand why using
+calloc() to allocate a struct that contains pointer fields or why
+calling memset() to initialize such a struct to all-bytes-zero is
+wrong, reread that section again.  (Note that there are *lots* of
+examples of code in the krb5 source tree that erroneously calls
+memset() to zero a struct, and we should fix these somehow
+eventually.)
+
 Control flow statements that have a single statement as their body
 should nevertheless have braces around ther bodies if the body is more
 than one line long, especially in the case of stacked multiple if-else
 clauses; use:
 
-	/* bad style */
 	if (x) {
 	    if (y)
 		foo();
@@ -185,6 +202,7 @@ clauses; use:
 
 instead of:
 
+	/* bad style */
 	if (x)
 	    if (y)
 		foo();
@@ -192,19 +210,22 @@ instead of:
 		bar();
 
 which, while legible to the compiler, may confuse human readers and
-make the code less maintainable.  Also, you should almost never
-intersperse conditional compilation directives with control flow
-statements, as some combination of #define'd symbols may result in
-statements getting eaten by dangling bits of control flow statements.
-When it is not possible to avoid this questionable practice (you
-really should rewrite the relevant code section), make use of
-redundant braces to ensure that a compiler error will result in
-preference to incorrect runtime behavior (such as inadvertantly
-providing someone with a root shell).  Also, do not intersperse
-conditional compilation directives with control flow statements in
-such a way that confuses emacs cc-mode.  Not only does emacs get
-confused, but the code becomes more difficult to read and
-maintain.  Therefore, avoid code like this:
+make the code less maintainable, especially if new branches get added
+to any of the clauses.
+
+Also, you should almost never intersperse conditional compilation
+directives with control flow statements, as some combination of
+#define'd symbols may result in statements getting eaten by dangling
+bits of control flow statements.  When it is not possible to avoid
+this questionable practice (you really should rewrite the relevant
+code section), make use of redundant braces to ensure that a compiler
+error will result in preference to incorrect runtime behavior (such as
+inadvertantly providing someone with a root shell).
+
+Do not intersperse conditional compilation directives with control
+flow statements in such a way that confuses emacs cc-mode.  Not only
+does emacs get confused, but the code becomes more difficult to read
+and maintain.  Therefore, avoid code like this:
 
 	    /* bad style */
 	    if (x) {
@@ -222,7 +243,7 @@ If a function is declared to return a value, do not call "return"
 without an argument or allow the flow of control to fall off the end
 of the function.
 
-Do not declare variables in an inner scope, e.g. inside a compound
+Do not declare variables in an inner scope, e.g. inside the compound
 substatement of an if statement, unless the complexity of the code
 really demands that the variables be declared that way.  In such
 situations, the function could probably stand to be broken up into
@@ -240,6 +261,17 @@ are of higher precedence than assignment operators.  Less well known
 is that the bitwise operators are of a lower precedence than equality
 and relational operators.
 
+The sizeof operator takes either a unary expression or a parenthesized
+type name.  It is not necessary to parenthesize the operand of sizeof
+if it is applied to a unary expression.  [XXX do we want to force
+parenthesization of expressions used as operands to sizeof?]  The
+sizeof operator does not evaluate its operand if it is a unary
+expression, so usages such as
+
+	s = sizeof ++foo;
+
+should be avoided for the sake of sanity and readability.
+
 Strive to make your code capable of compiling using "gcc -Wall
 -Wmissing-prototypes -Wtraditional -Wcast-qual -Wcast-align
 -Wconversion -Waggregate-return -pedantic" [XXX need to rethink this
@@ -247,6 +279,40 @@ somewhat] without generating any errors or warnings.  Do not, however,
 compile using the "-ansi" flag to gcc, since that can result in odd
 behavior with header files on some systems, causing some necessary
 symbols to not be defined.
+
+Namespaces
+----------
+
+The C standard reserves a bunch of namespaces for the implementation.
+Don't stomp on them.  For practical purposes, any identifier with a
+leading underscore should not be used.  (Technically, ^_[a-z].* are
+reserved only for file scope, so should be safe for things smaller
+than file scope, but it's better to be paranoid in this case.)
+
+POSIX reserves typedef names ending with _t as well.
+
+Recall that errno is a reserved identifier, and is permitted to be a
+macro.  Therefore, do not use errno as the name of a field.
+
+Reserved namespaces are somewhat more restricted than this; read the
+appropriate section of the C standard if you have questions.
+
+If you're writing new library code, pick a short prefix and stick with
+it for any identifier with external linkage.  If for some reason a
+library needs to have external symbols that should not be visible to
+the application, pick another (related) prefix to use for the internal
+globals.  This applies to typedef names, tag names, and preprocessor
+identifiers as well.
+
+For the krb5 library, the prefix for public global symbols is
+"krb5_".  It is a matter of debate whether to use "krb5__" or
+"krb5int_" as a prefix for library internal globals.  There are
+admittedly a number of places where we leak thing into the namespace;
+we should try to fix these.
+
+Header files should also not leak symbols.  Usually using the upcased
+version of the prefix you've picked will suffice, e.g. "KRB5_" as a
+CPP symbol prefix corresponding to "krb5_".
 
 Emacs cc-mode style
 -------------------
