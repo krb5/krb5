@@ -1643,7 +1643,8 @@ int main(argc, argv)
 	    com_err(argv[0], retval, "while storing credentials");
 	}
 
-	krb5_cc_destroy(kcontext, xtra_creds);
+	if (xtra_creds)
+	    krb5_cc_destroy(kcontext, xtra_creds);
     } else if (forwarded_v5_tickets && rewrite_ccache) {
 	if ((retval = krb5_cc_initialize (kcontext, ccache, me))) {
 	    syslog(LOG_ERR,
