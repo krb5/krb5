@@ -155,6 +155,11 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <sys/param.h>
 #include <utmp.h>
      
+#ifdef HAVE_SYS_FILIO_H
+/* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
+#include <sys/filio.h>
+#endif
+
 #ifdef NO_WINSIZE
 struct winsize {
     unsigned short ws_row, ws_col;

@@ -181,11 +181,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    krb5_free_creds(ret_cred);
 	    return (-1);
     	}
-#if defined (hpux) || defined (CRAY)  /*hpux does not handle async
-    		 			io thus setown is disabled */
-#else
+#ifdef HAVE_SETOWN
     	fcntl(s, F_SETOWN, pid);
-#endif /* hpux */
+#endif
     	sin.sin_family = hp->h_addrtype;
     	memcpy((caddr_t)&sin.sin_addr,hp->h_addr, hp->h_length);
     	sin.sin_port = rport;

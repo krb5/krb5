@@ -150,6 +150,11 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
      
 #include <syslog.h>
      
+#ifdef HAVE_SYS_FILIO_H
+/* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
+#include <sys/filio.h>
+#endif
+
 #ifdef KERBEROS
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>

@@ -503,7 +503,7 @@ main(argc, argv)
        it to the reader, and the oob() processing code in the reader will
        work properly even if it is called when no oob() data is present.
        */
-#ifndef SYSV
+#ifdef HAVE_SETOWN
     (void) fcntl(rem, F_SETOWN, getpid());
 #endif
     if (options & SO_DEBUG &&
@@ -1059,7 +1059,7 @@ reader(oldmask)
     (void) signal(SIGTTOU, SIG_IGN);
     (void) signal(SIGURG, oob);
     ppid = getppid();
-#ifndef SYSV
+#ifdef HAVE_SETOWN
     (void) fcntl(rem, F_SETOWN, pid);
 #endif
     (void) setjmp(rcvtop);
