@@ -1358,25 +1358,40 @@ AC_REQUIRE([KRB5_AC_NEED_BIND_8_COMPAT])
     AC_CHECK_LIB(socket, socket, LIBS="-lsocket -lnsl $LIBS", , -lnsl)))
   KRB5_AC_ENABLE_DNS
   if test "$enable_dns" = yes ; then
-    dnl We assume that if libresolv exists we can link against it
-    dnl This may get us a gethostby* that doesn't respect nsswitch
+    # We assume that if libresolv exists we can link against it.
+    # This may get us a gethostby* that doesn't respect nsswitch.
     AC_CHECK_LIB(resolv, main)
-    AC_CHECK_DECL(res_nsearch, 
-	AC_DEFINE(HAVE_RES_NSEARCH,,[Have the RES_NSEARCH function]),
-	[AC_CHECK_FUNC(res_search, 
-	    AC_DEFINE(HAVE_RES_SEARCH,,[Have the res_search function]), 
-	    AC_MSG_ERROR(Failed to find resolver search routine),
-	    [#include <sys/types.h>
+    krb5_res_search_found=no
+    AC_CHECK_DECL(res_nsearch,
+      [AC_DEFINE(HAVE_RES_NSEARCH, 1, [Have the res_nsearch function])
+krb5_res_search_found=yes], ,
+[[#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
-])], [#include <sys/types.h>
+]])
+    if test $krb5_res_search_found != yes; then
+      AC_CHECK_DECL(res_search,
+	[AC_DEFINE(HAVE_RES_SEARCH, 1, [Have the res_search function])
+krb5_res_search_found=yes], ,
+[[#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
-])
+]])
+    fi
+    if test $krb5_res_search_found != yes; then
+      AC_CHECK_FUNC(res_search,
+	[AC_DEFINE(HAVE_RES_SEARCH, 1, [Have the res_search function])],
+	[AC_MSG_ERROR(Failed to find resolver search routine)],
+[[#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
+]])
+    fi
   fi
-  ])
+])
 dnl
 dnl
 dnl KRB5_AC_ENABLE_DNS
