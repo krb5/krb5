@@ -138,8 +138,8 @@ typedef unsigned char	u_char;
 #endif /* HAVE_SYS_TYPES_H */
 #endif /* KRB5_SYSTYPES__ */
 
-#define DEFAULT_PWD_STRING1 "Enter password:"
-#define DEFAULT_PWD_STRING2 "Re-enter password for verification:"
+#define DEFAULT_PWD_STRING1 "Enter password"
+#define DEFAULT_PWD_STRING2 "Re-enter password for verification"
 
 #define	KRB5_KDB_MAX_LIFE	(60*60*24) /* one day */
 #define	KRB5_KDB_MAX_RLIFE	(60*60*24*7) /* one week */

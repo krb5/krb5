@@ -55,10 +55,10 @@
  * Local data.
  */
 #define kpwd_serror_head		"server"
-#define kpwd_change_prompt_1		"   Enter new password: "
-#define kpwd_change_prompt_2		"Re-enter new password: "
-#define kpwd_old_password_prompt	"   Enter old password: "
-#define kpwd_old_pwd_name_fmt		"Enter old password for %s: "
+#define kpwd_change_prompt_1		"   Enter new password"
+#define kpwd_change_prompt_2		"Re-enter new password"
+#define kpwd_old_password_prompt	"   Enter old password"
+#define kpwd_old_pwd_name_fmt		"Enter old password for %s"
 
 #ifdef	LANGUAGES_SUPPORTED
 #define kpwd_usage_error_fmt		"%s: usage is %s [-u user] [-l language]\n"

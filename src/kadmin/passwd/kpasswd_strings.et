@@ -45,7 +45,7 @@ error_code KPW_STR_NOT_IN_PASSWD_FILE,	"Unable to identify user from password fi
 error_code KPW_STR_CHANGING_PW_FOR, "Changing password for %s."
 # /* principal@realm */
 
-error_code KPW_STR_OLD_PASSWORD_PROMPT, "Old password:"
+error_code KPW_STR_OLD_PASSWORD_PROMPT, "Old password"
 error_code KPW_STR_WHILE_READING_PASSWORD, "while reading new password."
 
 # /* M4 */

@@ -1,3 +1,8 @@
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* kdb.h (KRB5_KDC_MKEY_1, KRB5_KDC_MKEY_2): Remove trailing colon,
+	as new implementation of krb5_read_password() appends it.
+
 2002-09-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm.h (struct __krb5_realm_params): New field

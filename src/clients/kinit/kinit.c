@@ -907,7 +907,7 @@ k4_kinit(opts, k4, ctx)
 	    krb5_error_code code;
 	    char prompt[1024];
 
-	    sprintf(prompt, "Password for %s: ", opts->principal_name);
+	    sprintf(prompt, "Password for %s", opts->principal_name);
 	    stash_password[0] = 0;
 	    /*
 	      Note: krb5_read_password does not actually look at the

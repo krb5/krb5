@@ -1,3 +1,9 @@
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.c (kpwd_change_prompt_1, kpwd_change_prompt_2)
+	(kpwd_old_password_prompt, kpwd_old_pwd_name_fmt): Remove trailing
+	colon, as new implementation of krb5_read_password() appends it.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

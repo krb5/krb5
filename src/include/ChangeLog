@@ -1,3 +1,9 @@
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h (DEFAULT_PWD_STRING1, DEFAULT_PWD_STRING2): Remove
+	trailing colon, as new implementation of krb5_read_password()
+	appends it.
+
 2002-10-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5_ser_handle): Now points to const.

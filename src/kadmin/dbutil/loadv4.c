@@ -464,7 +464,7 @@ char *dumpfile;
 	}
     }
     if (!ok) {
-	des_read_password(&master_key, "V4 Kerberos master key: ", 0);
+	des_read_password(&master_key, "V4 Kerberos master key", 0);
 	printf("\n");
     }
     key_sched(master_key, master_key_schedule);

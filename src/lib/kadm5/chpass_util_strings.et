@@ -7,8 +7,8 @@ error_code CHPASS_UTIL_GET_PRINC_INFO, "while getting principal info."
 error_code CHPASS_UTIL_NEW_PASSWORD_MISMATCH, 
 	"New passwords do not match - password not changed.\n"
 
-error_code CHPASS_UTIL_NEW_PASSWORD_PROMPT, "New password:"
-error_code CHPASS_UTIL_NEW_PASSWORD_AGAIN_PROMPT, "New password (again):"
+error_code CHPASS_UTIL_NEW_PASSWORD_PROMPT, "New password"
+error_code CHPASS_UTIL_NEW_PASSWORD_AGAIN_PROMPT, "New password (again)"
 error_code CHPASS_UTIL_NO_PASSWORD_READ, "You must type a password. Passwords must be at least one character long.\n"
 error_code CHPASS_UTIL_NO_POLICY_YET_Q_ERROR, 
 "yet no policy set!  Contact your system security administrator."

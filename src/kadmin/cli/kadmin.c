@@ -681,10 +681,10 @@ void kadmin_cpw(argc, argv)
     } else if (argc == 1) {
 	unsigned int i = sizeof (newpw) - 1;
 	
-	sprintf(prompt1, "Enter password for principal \"%.900s\": ",
+	sprintf(prompt1, "Enter password for principal \"%.900s\"",
 		*argv);
 	sprintf(prompt2,
-		"Re-enter password for principal \"%.900s\": ",
+		"Re-enter password for principal \"%.900s\"",
 		*argv);
 	retval = krb5_read_password(context, prompt1, prompt2,
 				    newpw, &i);
@@ -1009,10 +1009,10 @@ void kadmin_addprinc(argc, argv)
     } else if (pass == NULL) {
 	unsigned int sz = sizeof (newpw) - 1;
 	
-	sprintf(prompt1, "Enter password for principal \"%.900s\": ",
+	sprintf(prompt1, "Enter password for principal \"%.900s\"",
 		canon);
 	sprintf(prompt2,
-		"Re-enter password for principal \"%.900s\": ",
+		"Re-enter password for principal \"%.900s\"",
 		canon);
 	retval = krb5_read_password(context, prompt1, prompt2,
 				    newpw, &sz);

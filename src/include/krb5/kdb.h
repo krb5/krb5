@@ -162,8 +162,8 @@ typedef struct _krb5_db_entry_new {
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
 
 /* prompts used by default when reading the KDC password from the keyboard. */
-#define KRB5_KDC_MKEY_1	"Enter KDC database master key:"
-#define KRB5_KDC_MKEY_2	"Re-enter KDC database master key to verify:"
+#define KRB5_KDC_MKEY_1	"Enter KDC database master key"
+#define KRB5_KDC_MKEY_2	"Re-enter KDC database master key to verify"
 
 extern char *krb5_mkey_pwd_prompt1;
 extern char *krb5_mkey_pwd_prompt2;

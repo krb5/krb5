@@ -1,3 +1,8 @@
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (kadmin_addprinc, kadmin_cpw): Remove trailing colon,
+	as new implementation of krb5_read_password() appends it.
+
 2002-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.c (quit): Release exclusive lock, if acquired.

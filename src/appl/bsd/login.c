@@ -575,7 +575,7 @@ static int k5_get_password (user_pwstring, pwsize)
 {
     krb5_error_code code;
     char prompt[255];			
-    sprintf(prompt,"Password for %s: ", username);
+    sprintf(prompt,"Password for %s", username);
 
     /* reduce opportunities to be swapped out */
     code = krb5_read_password(kcontext, prompt, 0, user_pwstring, &pwsize);

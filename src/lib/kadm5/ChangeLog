@@ -1,3 +1,8 @@
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* chpass_util_strings.et: Remove trailing colons, as new
+	implementation of krb5_read_password() appends it.
+
 2002-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* adb.h (struct _osa_adb_db_ent_t): Add opencnt, which keeps track

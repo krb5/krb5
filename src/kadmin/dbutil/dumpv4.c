@@ -112,7 +112,7 @@ v4init(arg, manual)
 	}
     }
     if (!ok) {
-	des_read_password(&arg->v4_master_key, "V4 Kerberos master key: ", 1);
+	des_read_password(&arg->v4_master_key, "V4 Kerberos master key", 1);
 	printf("\n");
     }
     arg->master_key_version = 1;
