@@ -566,8 +566,8 @@ char *initstate P((unsigned  , char * , int  ));
 char *setstate P((char * ));
 char *re_comp P((char * ));
 int re_exec P((char * ));
-void openlog P((const char * , int  ));
-void syslog P((int  , char *, ... ));
+void openlog P((const char * , int, int  )); /* our local version... */
+void syslog P((int  , const char *, ... ));
 void closelog P((void ));
 long time P((long * ));
 char *valloc P((unsigned  ));
