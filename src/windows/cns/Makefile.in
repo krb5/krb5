@@ -13,8 +13,7 @@ KRB 	 = KRB$(KVERSION)
 BUILDTOP =..\..
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 
-##WIN16##XOBJS    = kpasswd.obj
-##WIN32##XOBJS    = cnsres5.obj kpasswd.obj
+##DOS##XOBJS    = kpasswd.obj
 
 CFLAGS	= $(CCOPTS2) $(INCLUDES) /D$(KRB)=1
 
@@ -34,13 +33,10 @@ all:: makefile $(NAME).exe
 $(NAME).exe: $*.def $(OBJS) $(XOBJS) $(LIBS)
 ##WIN16##	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
 ##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
-##WIN16##	$(RC) $(RFLAGS) /k cnsres5.rc $@
+##WIN16##	$(RC) $(RFLAGS) /k -DKRB5_APP cnsres5.rc $@
+##WIN32##	$(RC) $(RFLAGS) /r -D_WIN32 -DKRB5_APP cnsres5.rc
 ##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
-##WIN32##	  $(LIBS) $(SYSLIBS)
-
-##WIN32##.rc.obj:
-##WIN32##	$(RC) $(RFLAGS) /r $*.rc
-##WIN32##	$(CVTRES) /nologo /out:$*.obj $*.res
+##WIN32##	  $(LIBS) $(SYSLIBS) cnsres5.res
 
 install::
 	$(CP) $(NAME).exe $(DESTDIR)
