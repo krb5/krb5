@@ -37,6 +37,7 @@ gssapi.h: gssapi.hin
 	echo "/* It contains some choice pieces of autoconf.h */" >> $@
 	grep SIZEOF $(BUILDTOP)/include/krb5/autoconf.h >> $@
 	grep 'HAVE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
+	grep 'USE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
 	echo "/* End of gssapi.h prologue. */"
 	cat $(srcdir)/gssapi.hin >> $@
 

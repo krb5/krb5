@@ -1,3 +1,8 @@
+Tue Nov 19 16:43:16 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi.h): grep USE_.*_H out from autoconf.h as
+	well (some stuff was depending on USE_STRING_H).
+
 Mon Nov 18 12:38:34 1996  Tom Yu  <tlyu@mit.edu>
 
 	*gssapi.h: Renamed to gssapi.hin.
