@@ -139,6 +139,11 @@ main(argc, argv)
 	    com_err(argv[0], code, "while finishing ticket retrieval");
 	    exit(1);
 	}
+	flags = KRB5_TC_OPENCLOSE;	/* turns on OPENCLOSE mode */
+	if (code = krb5_cc_set_flags(cache, flags)) {
+	    com_err(argv[0], code, "while closing ccache");
+	    exit(1);
+	}
 	exit(0);
     } else {
 	com_err(argv[0], code, "while retrieving a ticket");
