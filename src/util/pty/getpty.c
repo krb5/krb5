@@ -63,7 +63,7 @@ close(slavefd);
     return 0;
 #else /*HAVE__GETPTY*/
     
-    *fd = open(" /dev/ptym/clone", O_RDWR|O_NDELAY);	/* HPUX*/
+    *fd = open("/dev/ptym/clone", O_RDWR|O_NDELAY);	/* HPUX*/
 #ifdef HAVE_STREAMS
     if (*fd < 0) *fd = open("/dev/ptmx",O_RDWR|O_NDELAY); /*Solaris*/
 #endif
