@@ -1,3 +1,9 @@
+2002-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_os_ctx.c: Don't include sys/ioctl.h or sys/filio.h.
+	(krb5_os_init_context): Drop /dev/[u]random support, the Yarrow
+	code will deal with that now.
+
 2002-06-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* toffset.c (krb5_get_time_offsets), an_to_ln.c
