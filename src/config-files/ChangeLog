@@ -1,4 +1,8 @@
 
+Fri Jun 23 10:36:48 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdc.conf[.M] - Add description of new KDC configuration file.
+
+
 Thu Jun 8 15:00:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5.conf.M - Add description of logging profile entries.
 
