@@ -4,6 +4,17 @@ Mon Feb 20 16:54:51 1995 Keith Vetter (keithv@fusion.com)
           INTERFACE keyword.
         * Makefile.in: removed isode cruft ala Feb 10 changes but for windows
 
+Mon Feb 20 12:32:34 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in:  Flip again.  Use AC_CHECK_HEADERS, but default the
+	symbol-setting.  This is Modern Autoconf Style.
+
+	* config.h:  Create from stock/config.h and stock/config.win.
+	* Makefile.in (BUILT_HEADERS):  Remove config.h.
+	(CONF_REPLACE, CONFSRC, config.h rule):  Remove.  Config.h is
+	a static header file, ever since imake died.  Now it really is.
+	(clean):  Don't remove config.new any more.
+
 Thu Feb 16 20:12:23 1995  John Gilmore  (gnu at toad.com)
 
 	* configure.in:  Use AC_HAVE_HEADER rather than AC_HEADER_CHECK.
