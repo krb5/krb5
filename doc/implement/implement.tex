@@ -12,8 +12,12 @@
 \typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
 \ifdraft
 \pagestyle{fancy}
-\lhead[\fancyplain{}\thepage]{\fancyplain{}{\sl \leftmark}}
-\rhead[\fancyplain{}{\sl \leftmark}]{\fancyplain{}\thepage}
+\makeatletter
+\renewcommand{\sectionmark}[1]{\markboth {\uppercase{\ifnum \c@secnumdepth >\z@
+    \thesection\hskip 1em\relax \fi #1}}{}}%
+\renewcommand{\subsectionmark}[1]{\markright {\ifnum \c@secnumdepth >\@ne
+          \thesubsection\hskip 1em\relax \fi #1}}
+\makeatother
 \cfoot{{\bf DRAFT---DO NOT REDISTRIBUTE}}
 \else\pagestyle{headings}\fi
 \begin{document}
@@ -41,7 +45,7 @@ programming, maintenance, and porting.
 \subsection{Key table functions}
 \input{keytab.tex}
 
-\subsection{Operating-system specific functions}
+\section{Operating-system specific functions}
 \input{libos.tex}
 
 \section{Principal database functions}
