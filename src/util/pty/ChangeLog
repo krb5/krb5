@@ -1,3 +1,8 @@
+Sat Jan 27 01:13:34 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* void_assoc.c (ptyint_void_association): if we don't have
+	TIOCNOTTY (HP/UX 9 for example) don't try to use it.
+
 Tue Jan 16 13:52:22 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* void_assoc.c (ptyint_void_association): Move setsid call from open_ctty to void_association.

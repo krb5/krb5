@@ -29,9 +29,11 @@ long ptyint_void_association()
 #endif
 
         /* Void tty association first */
+#ifdef TIOCNOTTY
         if ((con_fd = open("/dev/tty", O_RDWR)) >= 0) {
           ioctl(con_fd, TIOCNOTTY, 0);
           close(con_fd);
 	}
+#endif
 	    return 0;
 }
