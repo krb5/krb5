@@ -237,6 +237,14 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    /* decode the message */
 
+   if ((code = krb5_auth_con_init(context, &auth_context))) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+   if ((code = krb5_auth_con_setrcache(context, auth_context, cred->rcache))) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
    if ((code = krb5_rd_req(context, &auth_context, &ap_req, cred->princ,
 			  cred->keytab, NULL, &ticket))) {
       *minor_status = code;
