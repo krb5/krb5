@@ -1,3 +1,12 @@
+2001-10-29  Ezra Peisach  <epeisach@mit.edu>
+
+	* secure.c: Instead of hard wiring the FUDGE_FACTOR, new variables
+	to keep track of the total buffer length desired and the actual
+	maximum that can be fitted. Add secure_determine_constants() to
+	determine the mechanism dependent overhead. This has a hard limit
+	for krb4 - for gssapi use gss_wrap_size_limit.
+	[pullup from trunk]
+
 2001-10-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c (setpeer): Use unsigned short for port number.  Patch
