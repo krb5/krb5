@@ -31,8 +31,8 @@ static int cached_krb_udp_port = 0;
 static int cached_krbsec_udp_port = 0;
 
 static int
-send_recv PROTOTYPE ((KTEXT pkt, KTEXT rpkt, SOCKET f,
-		      struct sockaddr_in *_to, struct hostent *addrs));
+send_recv (KTEXT pkt, KTEXT rpkt, SOCKET f,
+		      struct sockaddr_in *_to, struct hostent *addrs);
 
 
 #ifdef DEBUG

@@ -50,7 +50,7 @@
 #define MAXKEY          80
 #define MAXVALUE        80
 
-static char *strutol PROTOTYPE((char *));
+static char *strutol (char *);
 
 
 #ifndef HAVE_STRDUP
