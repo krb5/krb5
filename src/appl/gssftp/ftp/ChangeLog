@@ -1,3 +1,8 @@
+2001-10-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (setpeer): Use unsigned short for port number.  Patch
+	from Garry Zacheiss.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* domacro.c (domacro): Don't overflow "line2"

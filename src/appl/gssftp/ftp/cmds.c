@@ -126,7 +126,7 @@ setpeer(argc, argv)
 	char *argv[];
 {
 	char *host, *hookup();
-	short port;
+	unsigned short port;
 
 	if (connected) {
 		printf("Already connected to %s, use close first.\n",
