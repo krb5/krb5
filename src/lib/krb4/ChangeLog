@@ -1,3 +1,8 @@
+Tue Jun 27 23:59:28 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* rd_req.c (krb_rd_req): from_addr is an address, so use unsigned
+	KRB4_32 instead of long.
+
 Tue Jun 27 23:50:08 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* rd_safe.c (krb_rd_safe): use KRB4_32 for address comparison

@@ -124,7 +124,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
     register KTEXT authent;	/* The received message */
     char *service;		/* Service name */
     char *instance;		/* Service instance */
-    long from_addr;		/* Net address of originating host */
+    unsigned KRB4_32 from_addr; /* Net address of originating host */
     AUTH_DAT *ad;		/* Structure to be filled in */
     char *fn;			/* Filename to get keys from */
 {
