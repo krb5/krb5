@@ -18,7 +18,7 @@
 /* like mktime, this ignores tm_wday and tm_yday. */
 /* unlike mktime, this does not set them... it only passes a return value. */
 
-static days_in_month[12] = {
+static const days_in_month[12] = {
 0,				/* jan 31 */
 31,				/* feb 28 */
 59,				/* mar 31 */
