@@ -12,7 +12,7 @@
 #
 
 TOP=@RBUILD@/kadmin
-STOP=@SRCTOPDIR@/kadmin
+STOP=@S_TOP@/kadmin
 export TOP
 export STOP
 

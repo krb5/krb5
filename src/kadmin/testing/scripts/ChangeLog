@@ -1,3 +1,12 @@
+Sun Mar  1 21:13:06 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (env-setup.stmp): If env-setup.stamp needs to be
+ 		rebuilt, set CONFIG_FILES so that we only regenerate that
+ 		one file.
+
+	* env-setup.shin: Rename SRCTOPDIR to S_TOP, which has been
+		fixed to deal with absolute source paths.
+
 Sat Feb 28 18:54:42 1998  Tom Yu  <tlyu@mit.edu>
 
 	* env-setup.shin (STOP): SRCTOP -> SRCTOPDIR.
