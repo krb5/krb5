@@ -434,15 +434,15 @@ extern int krb5_max_cryptosystem;		/* max entry in array */
    the same entries as krb5_csarray */
 /* XXX what if a given enctype works for several etypes? */
 extern krb5_cs_table_entry * NEAR krb5_enctype_array[];
-extern int krb5_max_enctype;		/* max entry in array */
+extern krb5_enctype krb5_max_enctype;		/* max entry in array */
 
 /* This array is indexed by checksum type */
 extern krb5_checksum_entry * NEAR krb5_cksumarray[];
-extern int krb5_max_cksum;		/* max entry in array */
+extern krb5_cksumtype krb5_max_cksum;		/* max entry in array */
 
-#define valid_enctype(ktype)     ((((int) (ktype)) <= krb5_max_enctype) && ((ktype) > 0) && krb5_enctype_array[ktype])
+#define valid_enctype(ktype)     ((((ktype)) <= krb5_max_enctype) && ((ktype) > 0) && krb5_enctype_array[ktype])
 
-#define valid_cksumtype(cktype)     ((((int) (cktype)) <= krb5_max_cksum) && ((cktype) > 0) && krb5_cksumarray[cktype])
+#define valid_cksumtype(cktype)     ((((cktype)) <= krb5_max_cksum) && ((cktype) > 0) && krb5_cksumarray[cktype])
 
 #define is_coll_proof_cksum(cktype) (krb5_cksumarray[cktype]->is_collision_proof)
 #define is_keyed_cksum(cktype) (krb5_cksumarray[cktype]->uses_key)
