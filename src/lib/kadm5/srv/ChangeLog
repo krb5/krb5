@@ -1,3 +1,13 @@
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* svr_iters.c (struct iter_data): Replace DynObject "matches" with
+	pointer, allocation size, current count, and error flag.
+	(get_either_iter): Grow array if needed, noting failures.
+	(kadm5_get_either): Set up the array before calling the iterator
+	and use their values after.
+	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Drop libdyn
+	references.
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.

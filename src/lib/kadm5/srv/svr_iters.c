@@ -22,7 +22,6 @@ static char *rcsid = "$Header$";
 #include	<string.h>
 #include	<kadm5/admin.h>
 #include	"adb.h"
-#include	<dyn.h>
 #ifdef SOLARIS_REGEXPS
 #include	<regexpr.h>
 #endif
@@ -35,7 +34,9 @@ static char *rcsid = "$Header$";
 
 struct iter_data {
      krb5_context context;
-     DynObject matches;
+     char **names;
+     int n_names, sz_names;
+     unsigned int malloc_failed;
      char *exp;
 #ifdef SOLARIS_REGEXPS
      char *expbuf;
@@ -129,19 +130,31 @@ static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
 
 static void get_either_iter(struct iter_data *data, char *name)
 {
-     if (
+     int match;
 #ifdef SOLARIS_REGEXPS
-	 (step(name, data->expbuf) != 0)
+     match = (step(name, data->expbuf) != 0);
 #endif
 #ifdef POSIX_REGEXPS
-	 (regexec(&data->preg, name, 0, NULL, 0) == 0)
+     match = (regexec(&data->preg, name, 0, NULL, 0) == 0);
 #endif
 #ifdef BSD_REGEXPS
-	 (re_exec(name) != 0)
+     match = (re_exec(name) != 0);
 #endif
-	 )
-     {
-	  (void) DynAdd(data->matches, &name);
+     if (match) {
+	  if (data->n_names == data->sz_names) {
+	       int new_sz = data->sz_names * 2;
+	       char **new_names = realloc(data->names,
+					  new_sz * sizeof(char *));
+	       if (new_names) {
+		    data->names = new_names;
+		    data->sz_names = new_sz;
+	       } else {
+		    data->malloc_failed = 1;
+		    free(name);
+		    return;
+	       }
+	  }
+	  data->names[data->n_names++] = name;
      } else
 	  free(name);
 }
@@ -176,7 +189,7 @@ static kadm5_ret_t kadm5_get_either(int princ,
      char *msg;
 #endif
      char *regexp;
-     int ret;
+     int i, ret;
      kadm5_server_handle_t handle = server_handle;
      
      *count = 0;
@@ -206,7 +219,11 @@ static kadm5_ret_t kadm5_get_either(int princ,
 	  return EINVAL;
      }
 
-     if ((data.matches = DynCreate(sizeof(char *), -4)) == NULL) {
+     data.n_names = 0;
+     data.sz_names = 10;
+     data.malloc_failed = 0;
+     data.names = malloc(sizeof(char *) * data.sz_names);
+     if (data.names == NULL) {
 	  free(regexp);
 	  return ENOMEM;
      }
@@ -218,16 +235,18 @@ static kadm5_ret_t kadm5_get_either(int princ,
 	  ret = osa_adb_iter_policy(handle->policy_db, get_pols_iter, (void *)&data);
      }
      
+     free(regexp);
+     if (ret == OSA_ADB_OK && data.malloc_failed)
+	  ret = ENOMEM;
      if (ret != OSA_ADB_OK) {
-	  free(regexp);
-	  DynDestroy(data.matches);
+	  for (i = 0; i < data.n_names; i++)
+	       free(data.names[i]);
+	  free(data.names);
 	  return ret;
      }
 
-     (*princs) = (char **) DynArray(data.matches);
-     *count = DynSize(data.matches);
-     DynRelease(data.matches);
-     free(regexp);
+     *princs = data.names;
+     *count = data.n_names;
      return KADM5_OK;
 }
 
