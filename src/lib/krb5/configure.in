@@ -6,6 +6,27 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 DO_SUBDIRS
+dnl
+dnl Determine if db library is being used
+dnl
+HASH=
+hashloc="$(BUILDTOP)/util/berk_db/hash"
+HASHDONE=
+hashdone="$(BUILDTOP)/util/berk_db/hash/DONE"
+WITH_ANAME_DB
+if test "$dbval" = db; then
+  HASH=$hashloc
+  HASHDONE=$hashdone
+else
+  WITH_KDB_DB
+  if test "$dbval" = db; then 
+     HASH=$hashloc
+     HASHDONE=$hashdone
+  fi
+fi
+AC_SUBST(HASH)
+AC_SUBST(HASHDONE)
+dnl
 V5_MAKE_SHARED_LIB(libkrb5,0.1,.., ./krb5)
 CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
 AC_SUBST(CRYPTO_SH_VERS)

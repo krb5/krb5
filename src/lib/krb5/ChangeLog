@@ -1,3 +1,9 @@
+Mon Jan 22 15:23:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Merge in berk_db library if needed.
+
+	* Makefile.in (LIB_SUBDIRS): Get location of berk_db from
+		configure if needed.
 
 Wed Dec 13 07:09:30 1995  Chris Provenzano (proven@mit.edu)
 
