@@ -1,3 +1,8 @@
+2001-10-11  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in (HOST_TYPE): Remove SHLIB_TAIL_COMP; it's no longer
+	needed.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* wconfig.c (main): Delete _MSDOS support.

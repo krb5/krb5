@@ -69,7 +69,7 @@ KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_PROGRAM
 dnl
-dnl For util/makeshlib.  (Is SHLIB_TAIL_COMP still necessary?!?)
+dnl For util/makeshlib.
 dnl
 if test $krb5_cv_prog_gcc = yes ; then
      HAVE_GCC=yes
@@ -78,8 +78,6 @@ fi
 AC_SUBST(HAVE_GCC)
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
-SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
-AC_SUBST(SHLIB_TAIL_COMP)
 dnl
 dnl
 AC_CONFIG_SUBDIRS(util/et util/ss util/profile util/pty util/db2 include lib/crypto lib/krb5 lib/des425 $libkrb4 lib/krb5util lib/kdb lib/gssapi lib/rpc lib/kadm5 $krb524 kdc kadmin slave clients appl tests)
