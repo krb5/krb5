@@ -1,3 +1,11 @@
+Sun Mar 17 20:55:41 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
+
+ 	* configure.in: Change WITH_KDB_DB to USE_KDB5_LIBRARIES and add
+		KRB5_LIBRARIES.
+
+	* Makefile.in: Use libraries as specified by configure. Set
+		LD_LIBRARY_PATH for tests.
+
 Sun Mar  3 10:41:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Change WITH_DB to WITH_KDB_DB
