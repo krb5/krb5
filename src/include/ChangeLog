@@ -1,5 +1,13 @@
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* socket-utils.h: New file.
+	* k5-int.h: Include it.
+	(socklen_t, struct krb5int_sockaddr_storage, sa2sin, sa2sin6,
+	ss2sa, ss2sin, ss2sin6, socklen): Definitions moved to
+	socket-utils.h.
+	(krb5int_get_fq_local_hostname, krb5int_translate_gai_error): New
+	decls.
+
 	* fake-addrinfo.c: New file, split off from fake-addrinfo.h.
 	* fake-addrinfo.h: Don't define implementation functions.
 	(FAI_DEFINED): New macro, used to protect against multiple
