@@ -3,14 +3,15 @@ LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 SSLIB=$(BUILDTOP)/util/ss/libss.a
-DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=-lkdb5 
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
+KADMLIB=-lkadm
+DEPKADMLIB=$(TOPLIBD)/libkadm.a
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+KLIB = $(KADMLIB) -lkrb5 -lcrypto $(SSLIB) $(COMERRLIB)
+DEPKLIB = $(DEPKADMLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB)
 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
@@ -51,7 +52,7 @@ OBJS = \
 all::	kadmind
 
 kadmind: $(KDBDEPLIB) $(OBJS) $(DEPLIBS)
-	$(LD) $(CFLAGS) -o kadmind $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kadmind $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(C)kadmind ${DESTDIR}$(SERVER_BINDIR)$(S)kadmind_old

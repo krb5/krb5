@@ -1,3 +1,9 @@
+
+Thu Jun 15 18:03:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit copying of archive library to library
+		directory.
+	* configure.in - Create symlink for archive when we build it.
+
 Wed Jun 14 14:36:13 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* t_dbentry.c (main): option should be an int so that comparisons

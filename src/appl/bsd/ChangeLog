@@ -1,3 +1,14 @@
+
+Thu Jun 15 17:32:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+		Also, remove DBMLIB, it was not used. Also, for K4, use
+		KRB4_LIB and KRB4_CRYPTO_LIB, these were
+                split out.
+	* configure.in - Remove dbm library checks, these are no longer needed
+		with the Berkeley database code.  Also, add shared library
+		usage check.
+
 Sat Jun 10 22:56:10 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* forward.c, kcmd.c, krcp.c, krlogind.c, krshd.c:

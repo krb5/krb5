@@ -1,3 +1,11 @@
+
+Thu Jun 15 15:27:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+		Also, for K4, use KRB4_LIB and KRB4_CRYPTO_LIB, these wer
+		split out.
+	* configure.in - Add shared library usage check.
+
 Fri Jun  9 18:14:06 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

@@ -1,7 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
 
 SRCS= gss-client.c gss-misc.c gss-server.c
 
@@ -9,16 +8,15 @@ OBJS= gss-client.o gss-misc.o gss-server.o
 
 all:: gss-server gss-client
 
-KLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
-		$(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
-		$(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 gss-server: gss-server.o gss-misc.o $(DEPKLIB)
-	$(LD) $(CFLAGS) -o gss-server gss-server.o gss-misc.o $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o gss-server gss-server.o gss-misc.o $(KLIB) $(LIBS)
 
 gss-client: gss-client.o gss-misc.o $(DEPKLIB)
-	$(LD) $(CFLAGS) -o gss-client gss-client.o gss-misc.o $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o gss-client gss-client.o gss-misc.o $(KLIB) $(LIBS)
 
 gss-client.o:	$(srcdir)/gss-client.c
 

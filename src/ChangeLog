@@ -1,3 +1,14 @@
+
+Thu Jun 15 18:15:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* aclocal.m4 - Separate K4 libraries; Separate library specification
+		from actual library path so we can do a dependency check
+		using the DEP_<lib> and link with the library itself.
+		- Add LinkFileDir(): a macro which generates a symlink in
+		  another directory.
+		- Figure out values for shared library parameters.
+		- Add rules for building with these shared libraries.
+	* configure.in - Add system-specific linker flags.
+
 Wed Jun 14 16:51:28 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* aclocal.m4(_MAKE_SUBDIRS): revert yet again; no workaround since

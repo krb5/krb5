@@ -40,8 +40,14 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/weak_key.c	
 
 LIB_SUBDIRS= .
-LIBDONE= ./DONE
-
+LIBDONE= DONE
+#
+# Depends on libcrypto.
+#
+DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT)
+SHLIB_LIBS=-lcrypto
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
 DEPKLIB= $(TOPLIBD)/libcrypto.a

@@ -1,3 +1,9 @@
+
+Thu Jun 15 17:45:47 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+	* configure.in - Add shared library usage check.
+
 Fri Jun  9 18:37:27 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

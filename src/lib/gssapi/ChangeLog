@@ -1,3 +1,11 @@
+
+Thu Jun 15 18:02:16 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit "all" rule at head of file, it causes
+		platform specific target to get done first.
+	* configure.in - Create symlinks for archive and shared library when
+		we build them.  Also, put explicit "all" rule at end of file
+		so that we do the subdirectory rules first.
+
 Fri Jun  9 18:55:01 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

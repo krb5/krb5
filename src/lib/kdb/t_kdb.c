@@ -237,9 +237,9 @@ gen_principal(kcontext, realm, do_rand, n, princp, namep)
 {
     static char pnamebuf[MAX_PNAME_LEN];
     static char *instnames[] = {
-	"instance1", "xxx2", "whereami3", "ABCDEFG4" };
+	"instance1", "xxx2", "whereami3", "ABCDEFG4", "foofoo5" };
     static char *princnames[] = {
-	"princ1", "user2", "service3", "RANDOM4" };
+	"princ1", "user2", "service3" };
 
     krb5_error_code	kret;
     char		*instname;
@@ -334,7 +334,7 @@ delete_principal(kcontext, principal)
 }
 
 int
-do_testing(db, passes, verbose, timing, rcases, check, save_db)
+do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
     char	*db;
     int		passes;
     int		verbose;
@@ -342,6 +342,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db)
     int		rcases;
     int		check;
     int		save_db;
+    int		dontclean;
 {
     krb5_error_code	kret;
     krb5_context	kcontext;
@@ -615,28 +616,30 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db)
 	    }
 	}
 
-	/* Clean up the remaining principals */
-	if (verbose > 1)
-	    fprintf(stdout, "%s: deleting remaining %d principals\n",
-		    programname, nvalid);
-	for (passno=0; passno<nvalid; passno++) {
-	    op = "deleting principal";
-	    if (timing) {
-		swatch_on();
+	if (!dontclean) {
+	    /* Clean up the remaining principals */
+	    if (verbose > 1)
+		fprintf(stdout, "%s: deleting remaining %d principals\n",
+			programname, nvalid);
+	    for (passno=0; passno<nvalid; passno++) {
+		op = "deleting principal";
+		if (timing) {
+		    swatch_on();
+		}
+		if (kret = delete_principal(kcontext,
+					    playback_principal(passno))) {
+		    linkage = "finally ";
+		    oparg = playback_name(passno);
+		    goto cya;
+		}
+		if (timing) {
+		    elapsed = swatch_eltime();
+		    accumulated[2].t_time += elapsed;
+		    accumulated[2].t_number++;
+		}
+		if (verbose > 4)
+		    fprintf(stderr, "XD(%s)\n", playback_name(passno));
 	    }
-	    if (kret = delete_principal(kcontext,
-					playback_principal(passno))) {
-		linkage = "finally ";
-		oparg = playback_name(passno);
-		goto cya;
-	    }
-	    if (timing) {
-		elapsed = swatch_eltime();
-		accumulated[2].t_time += elapsed;
-		accumulated[2].t_number++;
-	    }
-	    if (verbose > 4)
-		fprintf(stderr, "XD(%s)\n", playback_name(passno));
 	}
     cya:
 	if (verbose)
@@ -728,23 +731,27 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db)
 	/*
 	 * Delete principals.
 	 */
-	if (timing) {
-	    swatch_on();
+	if (!dontclean) {
+	    if (timing) {
+		swatch_on();
+	    }
+	    for (passno=passes-1; passno>=0; passno--) {
+		op = "deleting principal";
+		if (kret = delete_principal(kcontext,
+					    playback_principal(passno)))
+		    goto goodbye;
+		if (verbose > 4)
+		    fprintf(stderr, "XD(%s)\n", playback_name(passno));
+	    }
+	    if (timing) {
+		elapsed = swatch_eltime();
+		fprintf(stdout,
+			"%s: deleted %d principals in %9.4f seconds (%9.4f/delete)\n",
+			programname, passes, elapsed,
+			elapsed/((float) passes));
+	    }
 	}
-	for (passno=passes-1; passno>=0; passno--) {
-	    op = "deleting principal";
-	    if (kret = delete_principal(kcontext,
-					playback_principal(passno)))
-		goto goodbye;
-	    if (verbose > 4)
-		fprintf(stderr, "XD(%s)\n", playback_name(passno));
-	}
-	if (timing) {
-	    elapsed = swatch_eltime();
-	    fprintf(stdout,
-		    "%s: deleted %d principals in %9.4f seconds (%9.4f/delete)\n",
-		    programname, passes, elapsed, elapsed/((float) passes));
-	}
+
     }
 
  goodbye:
@@ -789,6 +796,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db)
  *		[-v]		- Verbose output.
  *		[-d <dbname>]	- Database name.
  *		[-s]		- Save database even on successful completion.
+ *		[-D]		- Leave database dirty.
  */
 int
 main(argc, argv)
@@ -799,7 +807,7 @@ main(argc, argv)
     extern char	*optarg;
 
     int		do_time, do_random, num_passes, check_cont, verbose, error;
-    int		save_db;
+    int		save_db, dont_clean;
     char	*db_name;
 
     programname = argv[0];
@@ -815,10 +823,11 @@ main(argc, argv)
     verbose = 0;
     db_name = T_KDB_DEF_DB;
     save_db = 0;
+    dont_clean = 0;
     error = 0;
 
     /* Parse argument list */
-    while ((option = getopt(argc, argv, "cd:n:rstv")) != EOF) {
+    while ((option = getopt(argc, argv, "cd:n:rstvD")) != EOF) {
 	switch (option) {
 	case 'c':
 	    check_cont = 1;
@@ -845,6 +854,9 @@ main(argc, argv)
 	case 'v':
 	    verbose++;
 	    break;
+	case 'D':
+	    dont_clean = 1;
+	    break;
 	default:
 	    error++;
 	    break;
@@ -860,6 +872,7 @@ main(argc, argv)
 			   do_time,
 			   do_random,
 			   check_cont,
-			   save_db);
+			   save_db,
+			   dont_clean);
     return(error);
 }

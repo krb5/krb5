@@ -19,11 +19,11 @@ OBJS = \
 
 all:: ksu
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+KLIB = -lkadm -lkrb5 -lcrypto $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 ksu: $(OBJS) $(DEPKLIB)
-	$(CC) $(CFLAGS) -o ksu $(OBJS) $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(KLIB) $(LIBS)
 
 clean::
 	$(RM) ksu

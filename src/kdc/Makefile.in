@@ -1,21 +1,22 @@
-KRB4_LIB = @KRB4_LIB@
+KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=-lkdb5 
 KDBDEPLIB=$(TOPLIBD)/libkdb5.a 
-KADMLIB=$(TOPLIBD)/libkadm.a
+KADMLIB=-lkadm
 KADMDEPLIB=$(TOPLIBD)/libkadm.a
 
-KLIB = $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+KLIB = -lkrb5 $(KRB4_LIB) -lcrypto $(COMERRLIB) 
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
 KRB4INCLUDES=-I$(SRCTOP)/include/kerberosIV
 
 all::
+
+DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
 LOCALINCLUDE = $(KRB4INCLUDES) -I.
 SRCS= \
@@ -55,7 +56,7 @@ kdc5_err.h: kdc5_err.et
 kdc5_err.o: kdc5_err.h
 
 krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB) $(KADMDEPLIB)
-	$(LD) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KADMLIB) $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KADMLIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc

@@ -8,4 +8,12 @@ AC_PROG_INSTALL
 DO_SUBDIRS
 AppendRule([all:: libkrb5.a])
 V5_MAKE_SHARED_LIB(libkrb5)
+AC_ARG_ENABLE([shared],
+[  --enable-shared         build shared libraries],[
+LinkFileDir(../libkrb5.[$](SHEXT), libkrb5.[$](SHEXT), ./krb5)
+AppendRule([all-unix:: ../libkrb5.$(SHEXT)])
+])dnl
+LinkFileDir(../libkrb5.a, libkrb5.a, ./krb5)
+AppendRule([all-unix:: ../libkrb5.a])
+AppendRule([all::	all-$(WHAT)])
 V5_AC_OUTPUT_MAKEFILE

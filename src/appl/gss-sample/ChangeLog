@@ -1,3 +1,10 @@
+
+Thu Jun 15 17:35:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+		Also, remove DBMLIB, it was not used.
+        * configure.in - Add shared library usage check.
+
 Sat Jun 10 19:06:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gss-misc.c (recv_token): Initialize local variable to 0.

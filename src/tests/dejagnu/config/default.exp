@@ -96,6 +96,10 @@ if ![info exists RESOLVE] {
     set RESOLVE [findfile $objdir/../resolve/resolve]
 }
 
+if ![info exists SHLIBDIR] {
+    set SHLIBDIR [findfile $objdir/../../lib]
+}
+
 # We use a couple of variables to hold shell prompts which may be
 # overridden by the user.
 
@@ -270,6 +274,15 @@ if [ info exists env(KERBEROS_SERVER)] {
     catch "unset orig_kerberos_server"
 }
 
+#
+# Set LD_LIBRARY_PATH to specify our built shared libraries.
+#
+if [info exists env(LD_LIBRARY_PATH)] {
+    set orig_ld_lib_path $env(LD_LIBRARY_PATH)
+} else {
+    catch "unset orig_ld_lib_path"
+}
+
 # setup_kerberos_env
 # Set the environment variables needed to run Kerberos programs.
 
@@ -277,6 +290,7 @@ proc setup_kerberos_env { } {
     global env
     global tmppwd
     global hostname
+    global SHLIBDIR
 
     # Set the environment variable KRB5_CONFIG to point to our krb5.conf file.
     # All the Kerberos tools check KRB5_CONFIG.
@@ -297,6 +311,9 @@ proc setup_kerberos_env { } {
     set env(KERBEROS_SERVER) "KRBTEST.COM:$hostname:3088"
     verbose "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
 
+    # Tell the dynamic loader where to get our shared libraries
+    set env(LD_LIBRARY_PATH) "$SHLIBDIR"
+    verbose "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
     return 1
 }
 
@@ -946,6 +963,7 @@ proc setup_root_shell { testname } {
     global rlogin_spawn_id
     global rlogin_pid
     global tmppwd
+    global env
 
     # Make sure we are using the original values of the environment
     # variables.  This means that the caller must call
@@ -1037,6 +1055,15 @@ proc setup_root_shell { testname } {
 	-re "$ROOT_PROMPT" { }
     }
 
+    # Set up our LD_LIBRARY_PATH
+    send "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)\r"
+    expect {
+	-re "$ROOT_PROMPT" { }
+    }
+    send "export LD_LIBRARY_PATH\r"
+    expect {
+	-re "$ROOT_PROMPT" { }
+    }
 
     # Move over to the right directory.
     set dir [pwd]

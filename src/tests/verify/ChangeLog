@@ -1,3 +1,9 @@
+
+Thu Jun 15 18:12:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove DBMLIB.
+	* configure.in - Remove check for dbm libraries, use shared library
+		linking rules.
+
 Fri Jun  9 18:58:51 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

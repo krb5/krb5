@@ -333,21 +333,46 @@ withval=yes
 if test $withval = no; then
 	AC_MSG_RESULT(no krb4 support)
 	KRB4_LIB=
+	DEPKRB4_LIB=
+	KRB4_CRYPTO_LIB=
+	DEPKRB4_CRYPTO_LIB=
 	KDB4_LIB=
+	DEPKDB4_LIB=
+	LDARGS=
+	krb5_cv_build_krb4_libs=no
+	krb5_cv_krb4_libdir=
 else 
  ADD_DEF(-DKRB5_KRB4_COMPAT)
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
-	KRB4_LIB='$(TOPLIBD)/libkrb4.a $(TOPLIBD)/libdes425.a'
-	KDB4_LIB='$(TOPLIBD)/libkdb4.a'
+	KRB4_LIB='-lkrb4'
+	DEPKRB4_LIB='$(TOPLIBD)/libkrb4.a'
+	KRB4_CRYPTO_LIB='-ldes425'
+	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+	KDB4_LIB='-lkdb4'
+	DEPKDB4_LIB='$(TOPLIBD)/libkdb4.a'
+	LDARGS=
+	krb5_cv_build_krb4_libs=yes
+	krb5_cv_krb4_libdir=
  else
 	AC_MSG_RESULT(preinstalled krb4 in $withval)
-	KRB4_LIB="$withval/lib/libkrb.a"' $(TOPLIBD)/libdes425.a'
-	KDB4_LIB="$withval/lib/libkdb.a"
+	KRB4_LIB="-lkrb"
+	DEPKRB4_LIB="$withval/lib/libkrb.a"
+	KRB4_CRYPTO_LIB='-ldes425'
+	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+	KDB4_LIB="-lkdb"
+	DEPKDB4_LIB="$withval/lib/libkdb.a"
+	LDARGS="-L$withval/lib"
+	krb5_cv_build_krb4_libs=no
+	krb5_cv_krb4_libdir="$withval/lib"
  fi
 fi
 AC_SUBST(KRB4_LIB)
 AC_SUBST(KDB4_LIB)
+AC_SUBST(KRB4_CRYPTO_LIB)
+AC_SUBST(DEPKRB4_LIB)
+AC_SUBST(DEPKDB4_LIB)
+AC_SUBST(DEPKRB4_CRYPTO_LIB)
 AC_CONST
 ])dnl
 dnl
@@ -405,6 +430,24 @@ changequote({,})dnl
 $1:: $2{
 	$(RM) $}{@
 	$(LN) $}{? $}{@
+
+}
+changequote([,])dnl
+AC_DIVERT_POP()dnl
+])dnl
+dnl
+dnl Like above, but specifies how to get from link target to source, e.g.
+dnl LinkFileDir(../foo, blotz, ./bar) issues a:
+dnl	ln -s ../foo ./bar/blotz
+dnl
+define(LinkFileDir,[
+AC_LN_S
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+changequote({,})dnl
+
+$1:: $2{
+	$(RM) $}{@
+	$(LN) }$3{$(S)$}{? $}{@
 
 }
 changequote([,])dnl
@@ -669,6 +712,22 @@ dnl
 define(V5_MAKE_SHARED_LIB,[
 AC_ARG_ENABLE([shared],
 [  --enable-shared         build with shared libraries],[
+SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
+AC_SUBST(SHLIB_TAIL_COMP)
+LD_UNRESOLVED_PREFIX=$krb5_cv_shlibs_sym_ufo
+AC_SUBST(LD_UNRESOLVED_PREFIX)
+LD_SHLIBDIR_PREFIX=$krb5_cv_shlibs_dirhead
+AC_SUBST(LD_SHLIBDIR_PREFIX)
+SHLIB_RPATH_DIRS=
+if test $krb5_cv_shlibs_use_dirs = yes ; then
+	SHLIB_RPATH_DIRS="$krb5_cv_shlibs_dirhead [$](KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`[$](S)[$](TOPLIBD)"
+fi
+AC_SUBST(SHLIB_RPATH_DIRS)
+SHLIB_LIBDIRS="-L[$](TOPLIBD)"
+if test X$krb5_cv_krb4_libdir != X ; then
+	SHLIB_LIBDIRS="$SHLIB_LIBDIRS -L$krb5_cv_krb4_libdir"
+fi
+AC_SUBST(SHLIB_LIBDIRS)
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
 SHEXT=$krb5_cv_shlibs_ext
@@ -681,8 +740,10 @@ all:: $(DO_MAKE_SHLIB)
 clean:: 
 	$(RM) $1.[$](SHEXT)
 
-$1.[$](SHEXT): [$](LIBDONE)
-	[$](SRCTOP)/util/makeshlib [$](HOST_TYPE) [$](CC) [$]@ [$](LIB_SUBDIRS)
+$1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
+	[$](SRCTOP)/util/makeshlib [$](HOST_TYPE) [$](CC) [$]@	\
+		"[$](SHLIB_LIBDIRS)" \
+		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" [$](LIB_SUBDIRS)
 
 AC_DIVERT_POP()dnl
 ],[
@@ -690,3 +751,34 @@ DO_MAKE_SHLIB=
 ])dnl
 AC_SUBST(DO_MAKE_SHLIB)
 ])dnl
+
+dnl
+dnl This rule adds the additional Makefile fragment necessary to actually
+dnl link with the shared library
+dnl
+define(V5_USE_SHARED_LIB,[
+AC_ARG_WITH([shared],
+[  --with-shared	use shared libraries (default)
+  --without-shared	don't use shared libraries],
+,
+withval=yes
+)dnl
+if test $withval = yes; then
+	AC_MSG_RESULT(Using shared libraries)
+	LDARGS="$krb5_cv_shlibs_ldflag -L[$](TOPLIBD) $LDARGS"
+	if test $krb5_cv_exe_need_dirs = yes; then
+		LDARGS="$LDARGS $krb5_cv_shlibs_dirhead [$](KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`[$](S)[$](TOPLIBD)"
+	fi
+	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
+	AC_SUBST(SHLIB_TAIL_COMP)
+else
+	AC_MSG_RESULT(Using archive libraries)
+	LDARGS="$krb5_cv_noshlibs_ldflag -L[$](TOPLIBD) $LDARGS"
+fi
+AC_SUBST(LDARGS)
+])dnl
+
+
+
+
+

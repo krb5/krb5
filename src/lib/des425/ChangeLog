@@ -1,3 +1,11 @@
+
+Thu Jun 15 18:00:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change "./DONE" target to "DONE" since we have a rule
+		for how to build it.  Also add definitions for shared library
+		building rules.
+	* configure.in - Create symlinks for archive and shared library when
+		we build them.
+
 Wed Jun 14 07:37:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (libdes425.a): Don't copy library up a level. Let

@@ -2,8 +2,6 @@ AC_INIT(krlogind.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 dnl dbm libs for use of an_to_ln
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
 AC_CHECK_LIB(util,main)
 AC_CHECK_LIB(crypt,crypt)
 dnl
@@ -136,4 +134,5 @@ dnl
 dnl
 ADD_DEF(-DKERBEROS)
 AC_CONST
+V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

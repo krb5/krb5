@@ -6,13 +6,13 @@ OBJS = movemail.o movemail-mmdf.o
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+KLIB = -lkrb5 -lcrypto $(COMERRLIB) 
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
 HESIODLIB = 
 
 movemail: movemail.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o movemail movemail.o $(KLIB) $(HESIODLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o movemail movemail.o $(KLIB) $(HESIODLIB) $(LIBS)
 
 all:: movemail
 

@@ -11,4 +11,7 @@ KRB5_POSIX_LOCKS
 AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
 ET_RULES
 SubdirLibraryRule([$(OBJS)])
+LinkFileDir(../libkdb4.a, libkdb4.a, ./kdb4)
+AppendRule([all-unix:: ../libkdb4.a])
+AppendRule([all::	all-$(WHAT)])
 V5_AC_OUTPUT_MAKEFILE

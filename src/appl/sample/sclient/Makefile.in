@@ -5,11 +5,11 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+KLIB = -lkrb5 -lcrypto $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 sclient: sclient.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o sclient sclient.o $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o sclient sclient.o $(KLIB) $(LIBS)
 
 sclient.o:	$(srcdir)/sclient.c
 

@@ -1,3 +1,9 @@
+
+Thu Jun 15 17:47:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* pre.in - Add definitions for building and using shared libraries.
+		Add KRB5_SHLIBDIR which is the destination directory for
+		shared libraries.
+
 Wed Jun 14 19:34:12 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* pre.in: DO_SUBDIRS causes make {install,clean,check,etc.} to get

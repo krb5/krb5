@@ -1,15 +1,15 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_KRB5_LOG
 LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
+KLIB = -lkadm -lkrb5 -lcrypto $(COMERRLIB) 
+DEPKLIB = $(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
 sserver: sserver.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o sserver sserver.o $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o sserver sserver.o $(KLIB) $(LIBS)
 
 sserver.o:	$(srcdir)/sserver.c
 

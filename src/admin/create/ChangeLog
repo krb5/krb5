@@ -1,3 +1,12 @@
+
+Thu Jun 15 15:29:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+		Also, remove DBMLIB, it wasn't used.
+	* configure.in - Remove checks for dbm, they are not needed any
+		more with the Berkeley database code.  Add shared library
+		usage check.
+
 Fri Jun  9 18:14:21 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

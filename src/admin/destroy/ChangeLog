@@ -1,4 +1,13 @@
 
+Thu Jun 15 15:31:59 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+		Also, remove DBMLIB, it was not used.
+	* configure.in - Remove dbm library checks, these are no longer needed
+		with the Berkeley database code.  Also, add shared library
+		usage check.
+
+
 Tue May 30 14:41:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_destroy.c: Remove knowledge of database files.  Use kdb5_db_
 		destroy to destroy the database.

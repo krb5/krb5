@@ -28,6 +28,7 @@ SRCS=	$(srcdir)/adm_conn.c	\
 all:: all-$(WHAT) $(BASE_OBJS) 
 
 all-unix:: $(DB_OBJS) $(UNIX_OBJS)
+all-unix:: libkadm.a
 all-mac:: $(DB_OBJS)
 all-windows::
 
@@ -35,9 +36,6 @@ libkadm.a: $(OBJS) $(UNIX_OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS) $(UNIX_OBJS)
 	$(RANLIB) $@
-	$(RM) $(TOPLIBD)/libkadm.a
-	$(CP) libkadm.a $(BUILDTOP)/lib/libkadm.a
-	$(RANLIB) $(BUILDTOP)/lib/libkadm.a
 
 install:: libkadm.a
 	$(INSTALL_DATA) libkadm.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a

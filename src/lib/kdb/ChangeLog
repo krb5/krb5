@@ -1,3 +1,9 @@
+
+Thu Jun 15 18:04:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit copying of archive library to library
+		directory.  Add dependency on all-$(WHAT)
+	* configure.in - Create symlink for archive when we build it.
+
 Wed Jun 14 12:37:51 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: Check for umask being defined.

@@ -1,3 +1,7 @@
+
+Thu Jun 15 18:06:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Create symlink for archive when we build it.
+
 Fri Jun  9 19:26:57 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

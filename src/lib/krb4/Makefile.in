@@ -87,6 +87,16 @@ SRCS = \
 
 LIB_SUBDIRS= .
 LIBDONE= ./DONE
+#
+# Depends on libcrypto and KRB4_CRYPTO_LIB, expect one unresolved symbol:
+#	_et_list.
+#
+KRB4_CRYPTO_LIBS=@KRB4_CRYPTO_LIB@
+DEPKRB4_LIBS=@DEPKRB4_CRYPTO_LIB@
+DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT)
+SHLIB_LIBS=$(KRB4_CRYPTO_LIBS) -lcrypto
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ $(LD_UNRESOLVED_PREFIX)_et_list
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 #
 # These objects implement ticket cacheing for Unix.  They are

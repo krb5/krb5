@@ -1,3 +1,9 @@
+
+Thu Jun 15 18:07:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add definitions for shared library build rules.
+	* configure.in - Create symlinks for archive and shared library
+		when we build them.
+
 Fri Jun  9 19:28:22 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

@@ -4,7 +4,7 @@ LDFLAGS = -g
 LIB_SUBDIRS= $(BUILDTOP)/util/berk_db/hash
 LIBUPDATE=$(BUILDTOP)/util/libupdate
 
-all:: $(OBJS)
+all:: $(OBJS) all-$(WHAT)
 
 
 SRCS= \
@@ -41,9 +41,6 @@ libkdb5.a: $(OBJS) $(BUILDTOP)/util/berk_db/hash/DONE
 		done ; \
 	fi
 	$(RANLIB) $@
-	$(RM) $(TOPLIBD)/libkdb5.a
-	$(CP) libkdb5.a $(BUILDTOP)/lib/libkdb5.a
-	$(RANLIB) $(BUILDTOP)/lib/libkdb5.a
 
 install:: libkdb5.a
 	$(INSTALL_DATA) libkdb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkdb5.a

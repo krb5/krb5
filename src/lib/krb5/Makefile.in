@@ -10,8 +10,20 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
 		rcache/DONE free/DONE os/DONE posix/DONE \
 		$(BUILDTOP)/util/profile/DONE
-
-all:: all-$(WHAT)
+#
+# Depends on KRB4_LIB, KRB4_CRYPTO_LIB and libcrypto, expect two unresolved
+# symbols:
+#	_et_list (from krb4)
+#	error_message
+#
+KRB4_LIBS=@KRB4_LIB@
+KRB4_CRYPTO_LIBS=@KRB4_CRYPTO_LIB@
+DEPKRB4_LIBS=@DEPKRB4_LIB@ @DEPKRB4_CRYPTO_LIB@
+DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT)
+SHLIB_LIBS=$(KRB4_LIBS) $(KRB4_CRYPTO_LIBS) -lcrypto
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	\
+	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 all-unix::
 

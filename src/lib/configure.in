@@ -1,27 +1,20 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(crypto des425 kdb4 krb4 krb5 kdb gssapi kadm)
+if test $krb5_cv_build_krb4_libs = yes ; then
+	AC_MSG_RESULT(building Kerberos 4 libraries)
+	kdb4=kdb4
+	krb4=krb4
+else
+	AC_MSG_RESULT(skipping Kerberos 4 libraries)
+	kdb4=
+	krb4=
+fi
+CONFIG_DIRS(crypto des425 $kdb4 $krb4 krb5 kdb gssapi kadm)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
 _MAKE_SUBDIRS("making",all-unix-subdirs,all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
 MAKE_SUBDIRS("checking",check)
-LinkFile(libkrb5.a, ./krb5/libkrb5.a)
-LinkFile(libcrypto.a, ./crypto/libcrypto.a)
-LinkFile(libgssapi_krb5.a, ./gssapi/libgssapi_krb5.a)
-LinkFile(libkrb4.a, ./krb4/libkrb4.a)
-LinkFile(libkdb4.a, ./kdb4/libkdb4.a)
-LinkFile(libdes425.a, ./des425/libdes425.a)
-AppendRule([all-unix:: all-unix-subdirs libkrb5.a libcrypto.a])
-AppendRule([all-unix:: libgssapi_krb5.a])
-AppendRule([all-unix:: libkrb4.a libkdb4.a libdes425.a])
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build with shared libraries],[
-LinkFile(libcrypto.so, ./crypto/libcrypto.so)
-LinkFile(libkrb5.so, ./krb5/libkrb5.so)
-LinkFile(libkrb4.so, ./krb4/libkrb4.so)
-LinkFile(libdes425.so, ./des425/libdes425.so)
-AppendRule([all-unix:: libkrb5.so libcrypto.so libkrb4.so libdes425.so])
-])dnl
+AppendRule([all-unix:: all-unix-subdirs])
 V5_AC_OUTPUT_MAKEFILE

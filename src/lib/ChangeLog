@@ -1,3 +1,8 @@
+
+Thu Jun 15 17:57:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Do not build K4 directories if we're not supposed to.
+		Remove LinkFile() logic and put it in each subdirectory.
+
 Wed Jun 14 07:36:46 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove shared library symlinks

@@ -2,11 +2,10 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=-lkdb5 
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+KLIB = -lkrb5 -lcrypto $(COMERRLIB) 
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
 all::
 
@@ -25,14 +24,14 @@ SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 all::	kprop kpropd
 
 kprop: $(CLIENTOBJS) $(DEPLIBS)
-	$(CC) $(CFLAGS) -o kprop $(CLIENTOBJS) $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kprop $(CLIENTOBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kprop ${DESTDIR}$(SERVER_BINDIR)/kprop
 	$(INSTALL_DATA) $(srcdir)/kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.8
 
 kpropd: $(SERVEROBJS) $(DEPLIBS)
-	$(CC) $(CFLAGS) -o kpropd $(SERVEROBJS) $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kpropd $(SERVEROBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd

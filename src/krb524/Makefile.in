@@ -24,19 +24,18 @@ CFLAGS = $(CCOPTS) -DUSE_MASTER  $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
 
 all::
 
-KRB4_LIB = @KRB4_LIB@
+KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
 
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=-lkdb5 
 KDBDEPLIB=$(TOPLIBD)/libkdb5.a 
 
-KLIB = libkrb524.a $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a \
-	$(COMERRLIB) $(DBMLIB) 
+KLIB = libkrb524.a -lkrb5 $(KRB4_LIB) -lcrypto \
+	$(COMERRLIB)  
 DEPKLIB = libkrb524.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a \
-	$(COMERRLIB) $(DBMLIB)
+	$(COMERRLIB) 
 
 LOCALINCLUDE= -I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV \
 	-I. -I$(srcdir)
@@ -56,13 +55,13 @@ libkrb524.a: $(OBJS)
 	$(RANLIB) $@
 
 test: libkrb524.a test.o $(DEPKDBLIB) $(DEPKLIB)
-	$(CC) -o test $(LDFLAGS) test.o $(KDBLIB) $(KLIB) $(LIBS)
+	$(LD) -o test $(LDFLAGS) $(LDARGS) test.o $(KDBLIB) $(KLIB) $(LIBS)
 
 krb524d: libkrb524.a krb524d.o $(DEPKDBLIB) $(DEPKLIB)
-	$(CC) -o krb524d krb524d.o $(LDFLAGS) $(KDBLIB) $(KLIB) $(LIBS)
+	$(LD) -o krb524d krb524d.o $(LDFLAGS) $(LDARGS) $(KDBLIB) $(KLIB) $(LIBS)
 
 k524init: libkrb524.a k524init.o $(DEPKLIB)
-	$(CC) -o k524init $(LDFLAGS) k524init.o $(KLIB) $(LIBS)
+	$(LD) -o k524init $(LDFLAGS) $(LDARGS) k524init.o $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_DATA) libkrb524.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb524.a

@@ -1,4 +1,4 @@
-KRB4_LIB = @KRB4_LIB@
+KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
 KDB4_LIB = @KDB4_LIB@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
@@ -6,14 +6,13 @@ LDFLAGS = -g
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 SSLIB=$(BUILDTOP)/util/ss/libss.a
 DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=-lkdb5 
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+KLIB = -lkrb5 $(KRB4_LIB) -lcrypto $(SSLIB) $(COMERRLIB) $(DBMLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
-
 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KDB4_LIB) $(KLIB)
@@ -39,7 +38,7 @@ SRCS= $(srcdir)/kdb5_edit.c \
 all:: kdb5_edit
 
 kdb5_edit: kdb5_edit.o $(DEPLIBS) $(OBJS)
-	$(CC) $(CFLAGS) -o kdb5_edit $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_edit $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 getdate.c getdate.h: getdate.y
 	$(RM) getdate.c getdate.h y.tab.*

@@ -3,12 +3,12 @@ LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=-lkdb5
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+KLIB = -lkrb5 -lcrypto $(COMERRLIB) $(DBMLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 
@@ -18,7 +18,7 @@ LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 all:: kdb5_anadd
 
 kdb5_anadd: kdb5_anadd.o $(DEPLIBS)
-	$(CC) $(CFLAGS) -o kdb5_anadd kdb5_anadd.o $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_anadd kdb5_anadd.o $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kdb5_anadd $(DESTDIR)$(ADMIN_BINDIR)/kdb5_anadd

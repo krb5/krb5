@@ -24,8 +24,6 @@ AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
 AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 AC_FUNC_CHECK(setupterm,AC_DEFINE(HAS_SETUPTERM))
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
 CHECK_SIGNALS
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)
@@ -33,4 +31,5 @@ else
 	AC_MSG_RESULT(Kerberos 4 authentication enabled)
 	AC_DEFINE(KRB4)
 fi
+V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

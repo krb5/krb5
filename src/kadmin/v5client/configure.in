@@ -5,7 +5,6 @@ AC_PROG_YACC
 AC_HAVE_HEADERS(pwd.h regex.h)
 AC_HAVE_FUNCS(strptime re_comp regcomp getcwd)
 AC_CONST
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
 SS_RULES
+V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

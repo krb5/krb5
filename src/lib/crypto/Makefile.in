@@ -24,9 +24,14 @@ LIB_SUBDIRS= des md4 md5 crc32 os .
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE= ./des/DONE ./md4/DONE ./md5/DONE ./crc32/DONE ./os/DONE ./DONE
 
-all:: all-$(WHAT)
+# No dependencies.  Record places to find this shared object if the target
+# link editor and loader support it.
+DEPLIBS=
+SHLIB_LIBS=
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all-unix:: shared
+all:: shared
 
 shared: 
 	mkdir shared
