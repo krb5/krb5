@@ -1,3 +1,7 @@
+Sat Jul 16 01:24:01 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* daemon.c: <fcntl.h>, not <sys/fcntl.h>
+
 Tue Jun 21 00:52:24 1994  Mark W. Eichin  (eichin at mit.edu)
 
 	* configure.in: add AC_CONST for v*printf.

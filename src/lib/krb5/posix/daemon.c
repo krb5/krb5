@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <sys/file.h>
 #include <unistd.h>
 #ifdef HAS_PATHS_H
