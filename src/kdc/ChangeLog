@@ -1,3 +1,8 @@
+2002-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (setup_port): Ignore AF_LINK addresses.  Log address
+	family number if unrecognized.
+
 2002-07-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdc_util.h (ADDRTYPE2FAMILY): New macro.

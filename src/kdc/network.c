@@ -174,9 +174,14 @@ setup_port(void *P_data, struct sockaddr *addr)
     break;
 #endif
 #endif
+#ifdef AF_LINK /* some BSD systems, AIX */
+    case AF_LINK:
+	return 0;
+#endif
     default:
 	krb5_klog_syslog (LOG_INFO,
-			  "skipping unrecognized local address family");
+			  "skipping unrecognized local address family %d",
+			  addr->sa_family);
 	return 0;
     }
 
