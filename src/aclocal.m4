@@ -145,15 +145,19 @@ dnl
 dnl check if union wait is defined, or if WAIT_USES_INT -- CHECK_WAIT_TYPE
 dnl
 define(CHECK_WAIT_TYPE,[
-AC_MSG_CHECKING([for union wait])
+AC_MSG_CHECKING([if argument to wait is int *])
 AC_CACHE_VAL(krb5_cv_struct_wait,
+dnl Test for prototype clash - if there is none - then assume int * works
+[AC_TRY_COMPILE([#include <sys/wait.h>
+extern pid_t wait(int *);],[], krb5_cv_struct_wait=no,dnl
+dnl Else fallback on old stuff
 [AC_TRY_COMPILE(
 [#include <sys/wait.h>], [union wait i;
 #ifdef WEXITSTATUS
   WEXITSTATUS (i);
 #endif
 ], 
-	krb5_cv_struct_wait=yes, krb5_cv_struct_wait=no)])
+	krb5_cv_struct_wait=yes, krb5_cv_struct_wait=no)])])
 AC_MSG_RESULT($krb5_cv_struct_wait)
 if test $krb5_cv_struct_wait = no; then
 	AC_DEFINE(WAIT_USES_INT)

@@ -1,3 +1,9 @@
+2001-07-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (CHECK_WAIT_TYPE): Improved testing if wait uses int
+	or struct union as an argument. Tests if a prototype conflict
+	exists with int being used, and if so, falls back on the old test.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Display test for host type and
