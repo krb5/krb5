@@ -30,8 +30,7 @@
 #include "k5-int.h"
 
 void
-krb5_init_ets (context)
-     krb5_context context;
+krb5_init_ets (krb5_context context)
 {
     initialize_krb5_error_table();
     initialize_kv5m_error_table();
@@ -40,7 +39,6 @@ krb5_init_ets (context)
 }
 
 void
-krb5_free_ets (context)
-    krb5_context context;
+krb5_free_ets (krb5_context context)
 {
 }
