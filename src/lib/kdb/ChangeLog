@@ -1,3 +1,11 @@
+Thu Aug 22 16:22:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdb_dbm.c: Remove vestigal code which was using BERK_DB_DBM
+		define.  Still need to remove kludgey database "switch"
+		code and recode to use the db interface.
+
+	* t_kdb.c: Update t_kdb to use the new libkdb interface.
+
 Mon Aug 12 14:11:29 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kdb_dbm.c (krb5_dbm_db_rename): rename should not insist that

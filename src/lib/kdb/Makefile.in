@@ -71,7 +71,8 @@ t_kdb:	t_kdb.o $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(LIBS)
 
 check::	t_kdb
-	$(KRB5_RUN_ENV) ./t_kdb
+	$(KRB5_RUN_ENV) ./t_kdb -tcv
+	$(KRB5_RUN_ENV) ./t_kdb -tcvr
 
 clean::
 	$(RM) t_kdb t_kdb.o

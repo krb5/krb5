@@ -29,7 +29,10 @@
 
 #define	KDB5_DISPATCH
 #include "k5-int.h"
+#include <ctype.h>
 #include <sys/time.h>
+#include <sys/wait.h>
+#include "com_err.h"
 
 #if	HAVE_SRAND48
 #define	RAND()		lrand48()
@@ -215,12 +218,16 @@ init_princ_recording(kcontext, nentries)
     krb5_context	kcontext;
     int 		nentries;
 {
-    if (recorded_principals = (krb5_principal *)
-	malloc(nentries * sizeof(krb5_principal)))
-	memset((char *) recorded_principals, 0,
-	       nentries * sizeof(krb5_principal));
-    if (recorded_names = (char **) malloc(nentries * sizeof(char *)))
-	memset((char *) recorded_names, 0, nentries * sizeof(char *));
+    recorded_principals = (krb5_principal *)
+	    malloc(nentries * sizeof(krb5_principal));
+    if (!recorded_principals)
+	    abort();
+    memset((char *) recorded_principals, 0,
+	   nentries * sizeof(krb5_principal));
+    recorded_names = (char **) malloc(nentries * sizeof(char *));
+    if (!recorded_names)
+	    abort();
+    memset((char *) recorded_names, 0, nentries * sizeof(char *));
 }
 
 /*
@@ -275,8 +282,8 @@ add_principal(kcontext, principal, eblock, key, rseed)
 {
     krb5_error_code	  kret;
     krb5_db_entry	  dbent;
-    krb5_tl_mod_princ	  mod_princ;
     krb5_keyblock	* rkey = NULL;
+    krb5_timestamp	  timenow;
     int			  nentries = 1;
 
     memset((char *) &dbent, 0, sizeof(dbent));
@@ -287,25 +294,25 @@ add_principal(kcontext, principal, eblock, key, rseed)
     dbent.expiration 		= KRB5_KDB_EXPIRATION;
     dbent.max_renewable_life 	= KRB5_KDB_MAX_RLIFE;
 
-    if (kret = krb5_copy_principal(kcontext, principal, &dbent.princ))
+    if ((kret = krb5_copy_principal(kcontext, principal, &dbent.princ)))
 	goto out;
 
-    mod_princ.mod_princ = principal;
-    if (kret = krb5_timeofday(kcontext, &mod_princ.mod_date))
+    if ((kret = krb5_timeofday(kcontext, &timenow)))
 	goto out;
-    if (kret = krb5_dbe_encode_mod_princ_data(kcontext, &mod_princ, &dbent))
-	goto out;
+    if ((kret = krb5_dbe_update_mod_princ_data(kcontext, &dbent,
+					       timenow, principal)))
+	    goto out;
 
     if (!key) {
-	if (kret = krb5_random_key(kcontext, eblock, rseed, &rkey))
+	if ((kret = krb5_random_key(kcontext, eblock, rseed, &rkey)))
 	    goto out;
     } else
 	rkey = key;
 
-    if (kret = krb5_dbe_create_key_data(kcontext, &dbent))
+    if ((kret = krb5_dbe_create_key_data(kcontext, &dbent)))
 	goto out;
-    if (kret = krb5_dbekd_encrypt_key_data(kcontext, eblock, rkey, NULL, 1,
-					   &dbent.key_data[0]))
+    if ((kret = krb5_dbekd_encrypt_key_data(kcontext, eblock, rkey, NULL, 1,
+					    &dbent.key_data[0])))
 	goto out;
 
     if (!key)
@@ -382,36 +389,36 @@ find_principal(kcontext, principal, docompare)
 {
     krb5_error_code	kret;
     krb5_db_entry	dbent;
-    krb5_tl_mod_princ *	mod_princ;
+    krb5_principal	mod_princ;
+    krb5_timestamp	mod_time;
     int			how_many;
     krb5_boolean	more;
 
     more = 0;
     how_many = 1;
-    if (kret = krb5_db_get_principal(kcontext, principal, &dbent,
-				     &how_many, &more))
+    if ((kret = krb5_db_get_principal(kcontext, principal, &dbent,
+				      &how_many, &more)))
 	return(kret);
     if (how_many == 0) 
 	return(KRB5_KDB_NOENTRY);
 
-    if (kret = krb5_dbe_decode_mod_princ_data(kcontext, &dbent, &mod_princ)) {
-	krb5_db_free_principal(kcontext, &dbent, how_many);
-	return(kret);
-    }
+    if ((kret = krb5_dbe_lookup_mod_princ_data(kcontext, &dbent,
+					       &mod_time, &mod_princ)))
 
+	return(kret);
+    
     if (docompare) {
 	if ((dbent.max_life != KRB5_KDB_MAX_LIFE) ||
 	    (dbent.max_renewable_life != KRB5_KDB_MAX_RLIFE) ||
 	    (dbent.expiration != KRB5_KDB_EXPIRATION) ||
 	    (dbent.attributes != KRB5_KDB_DEF_FLAGS) ||
 	    !krb5_principal_compare(kcontext, principal, dbent.princ) ||
-	    !krb5_principal_compare(kcontext, principal, mod_princ->mod_princ))
+	    !krb5_principal_compare(kcontext, principal, mod_princ))
 	    kret = KRB5_PRINC_NOMATCH;
     }
 
     krb5_db_free_principal(kcontext, &dbent, how_many);
-    krb5_free_principal(kcontext, mod_princ->mod_princ);
-    krb5_xfree(mod_princ);
+    krb5_free_principal(kcontext, mod_princ);
     if (!kret) 
         return(((how_many == 1) && (more == 0)) ? 0 : KRB5KRB_ERR_GENERIC);
     else
@@ -431,16 +438,14 @@ delete_principal(kcontext, principal)
     int			num2delete;
 
     num2delete = 1;
-    if (kret = krb5_db_delete_principal(kcontext,
-					principal,
-					&num2delete))
+    if ((kret = krb5_db_delete_principal(kcontext, principal, &num2delete)))
 	return(kret);
     return((num2delete == 1) ? 0 : KRB5KRB_ERR_GENERIC);
 }
 
 static int
 do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
-	   db_type, ptest)
+	   ptest)
     char	*db;
     int		passes;
     int		verbose;
@@ -449,7 +454,6 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     int		check;
     int		save_db;
     int		dontclean;
-    enum dbtype	db_type;
     int		ptest;
 {
     krb5_error_code	kret;
@@ -486,30 +490,6 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
 
-    switch (db_type) {
-#ifdef BERK_DB_DBM
-    case DB_BERKELEY:
-	op = "setting up Berkeley database operations";
-	if (kret = kdb5_db_set_dbops(kcontext, &berkeley_dispatch))
-	    goto goodbye;
-	break;
-#endif
-#if defined(ODBM) || defined(NDBM)
-    case DB_DBM:
-	op = "setting up DBM database operations";
-	if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
-	    goto goodbye;
-	break;
-#endif
-    case DB_DEFAULT:
-	break;
-    default:
-	op = "checking database type";
-	kret = EINVAL;
-	goto goodbye;
-	break;
-    }
-
     /* 
      * The database had better not exist.
      */
@@ -521,11 +501,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 
     /* Set up the master key name */
     op = "setting up master key name";
-    if (kret = krb5_db_setup_mkey_name(kcontext,
-				       mkey_name,
-				       realm,
-				       &mkey_fullname,
-				       &master_princ))
+    if ((kret = krb5_db_setup_mkey_name(kcontext, mkey_name, realm,
+					&mkey_fullname, &master_princ)))
 	goto goodbye;
 
     if (verbose)
@@ -533,7 +510,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		programname, db, mkey_fullname);
 
     op = "salting master key";
-    if (kret = krb5_principal2salt(kcontext, master_princ, &salt_data))
+    if ((kret = krb5_principal2salt(kcontext, master_princ, &salt_data)))
 	goto goodbye;
 
     op = "converting master key";
@@ -541,49 +518,50 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
     passwd.length = strlen(master_passwd);
     passwd.data = master_passwd;
-    if (kret = krb5_string_to_key(kcontext, &master_encblock, &master_keyblock,
-				  &passwd, &salt_data))
+    if ((kret = krb5_string_to_key(kcontext, &master_encblock,
+				   &master_keyblock, &passwd, &salt_data)))
 	goto goodbye;
     /* Clean up */
     free(salt_data.data);
 
     /* Process master key */
     op = "processing master key";
-    if (kret = krb5_process_key(kcontext, &master_encblock, &master_keyblock))
+    if ((kret = krb5_process_key(kcontext, &master_encblock,
+				 &master_keyblock)))
 	goto goodbye;
 
     /* Initialize random key generator */
     op = "initializing random key generator";
-    if (kret = krb5_init_random_key(kcontext,
-				    &master_encblock,
-				    &master_keyblock,
-				    &rseed))
+    if ((kret = krb5_init_random_key(kcontext,
+				     &master_encblock,
+				     &master_keyblock,
+				     &rseed)))
 	goto goodbye;
 
     /* Create database */
     op = "creating database";
-    if (kret = krb5_db_create(kcontext, db))
+    if ((kret = krb5_db_create(kcontext, db)))
 	goto goodbye;
 
     db_created = 1;
 
     /* Set this database as active. */
     op = "setting active database";
-    if (kret = krb5_db_set_name(kcontext, db))
+    if ((kret = krb5_db_set_name(kcontext, db)))
 	goto goodbye;
 
     /* Initialize database */
     op = "initializing database";
-    if (kret = krb5_db_init(kcontext))
+    if ((kret = krb5_db_init(kcontext)))
 	goto goodbye;
 
     db_open = 1;
     op = "adding master principal";
-    if (kret = add_principal(kcontext,
-			     master_princ,
-			     &master_encblock,
-			     &master_keyblock,
-			     rseed))
+    if ((kret = add_principal(kcontext,
+			      master_princ,
+			      &master_encblock,
+			      &master_keyblock,
+			      rseed)))
 	goto goodbye;
 
 
@@ -619,13 +597,9 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	for (passno=0; passno<passes; passno++) {
 	    op = "generating principal name";
 	    do {
-		if (kret = gen_principal(kcontext,
-					 realm,
-					 rcases,
-					 passno,
-					 &principal,
-					 &pname))
-		    goto goodbye;
+		if ((kret = gen_principal(kcontext, realm, rcases,
+					  passno, &principal, &pname)))
+			goto goodbye;
 	    } while (principal_found(passno-1, pname));
 	    record_principal(passno, principal, pname);
 	}
@@ -648,11 +622,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	    if (timing) {
 		swatch_on();
 	    }
-	    if (kret = add_principal(kcontext,
-				     playback_principal(passno),
-				     &master_encblock,
-				     kbp,
-				     rseed)) {
+	    if ((kret = add_principal(kcontext, playback_principal(passno),
+				      &master_encblock, kbp, rseed))) {
 		linkage = "initially ";
 		oparg = playback_name(passno);
 		goto cya;
@@ -681,11 +652,10 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		if (timing) {
 		    swatch_on();
 		}
-		if (kret = add_principal(kcontext,
-					 playback_principal(nvalid),
-					 &master_encblock,
-					 kbp,
-					 rseed)) {
+		if ((kret = add_principal(kcontext,
+					  playback_principal(nvalid),
+					  &master_encblock,
+					  kbp, rseed))) {
 		    oparg = playback_name(nvalid);
 		    goto cya;
 		}
@@ -706,8 +676,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		if (timing) {
 		    swatch_on();
 		}
-		if (kret = delete_principal(kcontext,
-					    playback_principal(nvalid-1))) {
+		if ((kret = delete_principal(kcontext,
+					     playback_principal(nvalid-1)))) {
 		    oparg = playback_name(nvalid-1);
 		    goto cya;
 		}
@@ -727,9 +697,9 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		if (timing) {
 		    swatch_on();
 		}
-		if (kret = find_principal(kcontext,
-					  playback_principal(passno),
-					  check)) {
+		if ((kret = find_principal(kcontext,
+					   playback_principal(passno),
+					   check))) {
 		    oparg = playback_name(passno);
 		    goto cya;
 		}
@@ -753,8 +723,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		if (timing) {
 		    swatch_on();
 		}
-		if (kret = delete_principal(kcontext,
-					    playback_principal(passno))) {
+		if ((kret = delete_principal(kcontext,
+					     playback_principal(passno)))) {
 		    linkage = "finally ";
 		    oparg = playback_name(passno);
 		    goto cya;
@@ -800,12 +770,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	 */
 	for (passno=0; passno<passes; passno++) {
 	    op = "generating principal name";
-	    if (kret = gen_principal(kcontext,
-				     realm,
-				     rcases,
-				     passno,
-				     &principal,
-				     &pname))
+	    if ((kret = gen_principal(kcontext, realm, rcases,
+				     passno, &principal, &pname)))
 		goto goodbye;
 	    record_principal(passno, principal, pname);
 	}
@@ -817,11 +783,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	}
 	for (passno=0; passno<passes; passno++) {
 	    op = "adding principal";
-	    if (kret = add_principal(kcontext,
-				     playback_principal(passno),
-				     &master_encblock,
-				     &stat_kb,
-				     rseed))
+	    if ((kret = add_principal(kcontext, playback_principal(passno),
+				     &master_encblock, &stat_kb, rseed)))
 		goto goodbye;
 	    if (verbose > 4)
 		fprintf(stderr, "*A(%s)\n", playback_name(passno));
@@ -841,9 +804,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	}
 	for (passno=0; passno<passes; passno++) {
 	    op = "looking up principal";
-	    if (kret = find_principal(kcontext,
-				      playback_principal(passno),
-				      check))
+	    if ((kret = find_principal(kcontext, playback_principal(passno),
+				       check)))
 		goto goodbye;
 	    if (verbose > 4)
 		fprintf(stderr, "-S(%s)\n", playback_name(passno));
@@ -864,8 +826,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	    }
 	    for (passno=passes-1; passno>=0; passno--) {
 		op = "deleting principal";
-		if (kret = delete_principal(kcontext,
-					    playback_principal(passno)))
+		if ((kret = delete_principal(kcontext,
+					     playback_principal(passno))))
 		    goto goodbye;
 		if (verbose > 4)
 		    fprintf(stderr, "XD(%s)\n", playback_name(passno));
@@ -908,25 +870,6 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		while (stat("./test.lock", &stbuf) == -1)
 		krb5_init_context(&ccontext);
 		krb5_init_ets(ccontext);
-		switch (db_type) {
-#ifdef BERK_DB_DBM
-		case DB_BERKELEY:
-		    if (kret = kdb5_db_set_dbops(ccontext, &berkeley_dispatch))
-			exit(1);
-		    break;
-#endif
-#if defined(ODBM) || defined(NDBM)
-		case DB_DBM:
-		    if (kret = kdb5_db_set_dbops(ccontext, &dbm_dispatch))
-			exit(1);
-		    break;
-#endif
-		case DB_DEFAULT:
-		    break;
-		default:
-		    exit(1);
-		    break;
-		}
 		if ((kret = krb5_db_set_name(ccontext, db)) ||
 		    (kret = krb5_db_init(ccontext)))
 		    exit(1);
@@ -1008,39 +951,14 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	(void) krb5_db_fini(kcontext);
     if (db_created) {
 	if (!kret && !save_db) {
-	    switch (db_type) {
-#ifdef BERK_DB_DBM
-	    case DB_BERKELEY:
-		op = "setting up Berkeley database operations";
-		if (kret = kdb5_db_set_dbops(kcontext, &berkeley_dispatch))
-		    goto goodbye1;
-		break;
-#endif
-#if defined(ODBM) || defined(NDBM)
-	    case DB_DBM:
-		op = "setting up DBM database operations";
-		if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
-		    goto goodbye1;
-		break;
-#endif
-	    case DB_DEFAULT:
-		break;
-	    default:
-		op = "checking database type";
-		kret = EINVAL;
-		goto goodbye1;
-		break;
-	    }
 	    kdb5_db_destroy(kcontext, db);
 	    krb5_db_fini(kcontext);
-	}
-	else {
+	} else {
 	    if (kret && verbose)
 		fprintf(stderr, "%s: database not deleted because of error\n",
 			programname);
 	}
     }
- goodbye1:
     return((kret) ? 1 : 0);
 }
 
@@ -1054,8 +972,6 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
  *		[-d <dbname>]	- Database name.
  *		[-s]		- Save database even on successful completion.
  *		[-D]		- Leave database dirty.
- *		[-o]		- Use dbm instead of default.
- *		[-O]		- Use Berkeley db instead of default.
  */
 int
 main(argc, argv)
@@ -1067,7 +983,6 @@ main(argc, argv)
 
     int		do_time, do_random, num_passes, check_cont, verbose, error;
     int		save_db, dont_clean, do_ptest;
-    enum dbtype	db_type;
     char	*db_name;
 
     programname = argv[0];
@@ -1084,12 +999,11 @@ main(argc, argv)
     db_name = T_KDB_DEF_DB;
     save_db = 0;
     dont_clean = 0;
-    db_type = DB_DEFAULT;
     error = 0;
     do_ptest = 0;
 
     /* Parse argument list */
-    while ((option = getopt(argc, argv, "cd:n:oprstvDO")) != EOF) {
+    while ((option = getopt(argc, argv, "cd:n:prstvD")) != EOF) {
 	switch (option) {
 	case 'c':
 	    check_cont = 1;
@@ -1122,12 +1036,6 @@ main(argc, argv)
 	case 'D':
 	    dont_clean = 1;
 	    break;
-	case 'o':
-	    db_type = DB_DBM;
-	    break;
-	case 'O':
-	    db_type = DB_BERKELEY;
-	    break;
 	default:
 	    error++;
 	    break;
@@ -1145,7 +1053,6 @@ main(argc, argv)
 			   check_cont,
 			   save_db,
 			   dont_clean,
-			   db_type,
 			   do_ptest);
     return(error);
 }

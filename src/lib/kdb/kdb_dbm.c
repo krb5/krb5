@@ -59,55 +59,6 @@ static krb5_error_code krb5_dbm_db_start_update
 static krb5_error_code krb5_dbm_db_end_update 
 	PROTOTYPE((krb5_context));
 
-#ifdef	BERK_DB_DBM
-/*
- * This module contains all of the code which directly interfaces to
- * the underlying representation of the Kerberos database; this
- * implementation uses a Berkeley hashed database file to store the
- * relations, plus a second file as a semaphore to allow the database
- * to be replaced out from underneath the KDC server.
- */
-extern DBM	*db_dbm_open PROTOTYPE((char *, int, int));
-extern void     db_dbm_close PROTOTYPE((DBM *));
-extern datum    db_dbm_fetch PROTOTYPE((DBM *, datum));
-extern datum    db_dbm_firstkey PROTOTYPE((DBM *));
-extern datum    db_dbm_nextkey PROTOTYPE((DBM *));
-extern int      db_dbm_delete PROTOTYPE((DBM *, datum));
-extern int      db_dbm_store PROTOTYPE((DBM *, datum, datum, int));
-extern int	db_dbm_error PROTOTYPE((DBM *));
-extern int	db_dbm_clearerr PROTOTYPE((DBM *));
-extern int	db_dbm_dirfno PROTOTYPE((DBM *));
-
-static kdb5_dispatch_table kdb5_default_dispatch = {
-    "Berkeley Hashed Database",
-    ".db",			/* Index file name ext	*/
-    (char *) NULL,		/* Data file name ext	*/
-    ".ok",			/* Lock file name ext	*/
-    db_dbm_open,		/* Open Database	*/
-    db_dbm_close,		/* Close Database	*/
-    db_dbm_fetch,		/* Fetch Key		*/
-    db_dbm_firstkey,		/* Fetch First Key	*/
-    db_dbm_nextkey,		/* Fetch Next Key	*/
-    db_dbm_delete,		/* Delete Key		*/
-    db_dbm_store,		/* Store Key		*/
-    db_dbm_error,		/* Get Database Error	*/
-    db_dbm_clearerr,		/* Clear Database Error	*/
-    db_dbm_dirfno,		/* Get DB index FD num	*/
-    (int (*)()) NULL		/* Get DB data FD num	*/
-};
-#else	/* BERK_DB_DBM */
-/*
- * The following prototypes are necessary in case dbm_error and
- * dbm_clearerr are in the library but not prototyped
- * (e.g. NetBSD-1.0)
- */
-#if defined(MISSING_ERROR_PROTO) && !defined(dbm_error)
-int dbm_error PROTOTYPE((DBM *));
-#endif
-#if defined(MISSING_CLEARERR_PROTO) && !defined(dbm_clearerr)
-int dbm_clearerr PROTOTYPE((DBM *));
-#endif
-
 /*
  * This module contains all of the code which directly interfaces to
  * the underlying representation of the Kerberos database; this
@@ -116,9 +67,9 @@ int dbm_clearerr PROTOTYPE((DBM *));
  * from underneath the KDC server.
  */
 static kdb5_dispatch_table kdb5_default_dispatch = {
-    "Stock [N]DBM Database",
-    ".dir",			/* Index file name ext	*/
-    ".pag",			/* Data file name ext	*/
+    "Berkeley Hashed Database w/ DBM interface",
+    ".db",			/* Index file name ext	*/
+    (char *) NULL,		/* Data file name ext	*/
     ".ok",			/* Lock file name ext	*/
     dbm_open,			/* Open Database	*/
     dbm_close,			/* Close Database	*/
@@ -131,20 +82,9 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
      * The following are #ifdef'd because they have the potential to be
      * macros rather than functions.
      */
-#ifdef	dbm_error
-    (int (*)()) NULL,		/* Get Database Error	*/
-#else	/* dbm_error */
-    dbm_error,			/* Get Database Error	*/
-#endif	/* dbm_error */
-#ifdef	dbm_clearerr
-    (int (*)()) NULL,		/* Clear Database Error	*/
-#else	/* dbm_clearerr */
-    dbm_clearerr,		/* Clear Database Error	*/
-#endif	/* dbm_clearerr */
     (int (*)()) NULL,		/* Get DB index FD num	*/
     (int (*)()) NULL,		/* Get DB data FD num	*/
 };
-#endif	/* BERK_DB_DBM */
 
 /*
  * These macros dispatch via the dispatch table.
@@ -169,18 +109,6 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
 #define	KDBM_STORE(dbc, db, key, c, f)	((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_store)) \
 					 (db, key, c, f))
-#define	KDBM_ERROR(dbc, db)		((((krb5_db_context *)dbc)->	 \
-					  db_dispatch->kdb5_dbm_error) ? \
-					 ((*(((krb5_db_context *)dbc)->	 \
-					     db_dispatch->kdb5_dbm_error)) \
-					  (db)) :			 \
-					 dbm_error(db))
-#define	KDBM_CLEARERR(dbc, db)		((((krb5_db_context *)dbc)->	 \
-					  db_dispatch->kdb5_dbm_clearerr) ? \
-					 ((*(((krb5_db_context *)dbc)->	 \
-					     db_dispatch->kdb5_dbm_clearerr)) \
-					  (db)) :			 \
-					 dbm_clearerr(db))
 #define	KDBM_INDEX_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_db_index_ext)
 #define	KDBM_DATA_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
@@ -271,7 +199,7 @@ k5dbm_init_context(context)
     krb5_db_context *	db_ctx;
 
     if (context->db_context == NULL) {
-	if (db_ctx = (krb5_db_context *) malloc(sizeof(krb5_db_context))) {
+	if ((db_ctx = (krb5_db_context *) malloc(sizeof(krb5_db_context)))) {
 	    memset((char *) db_ctx, 0, sizeof(krb5_db_context));
 	    k5dbm_clear_context((krb5_db_context *)db_ctx);
 	    context->db_context = (void *) db_ctx;
