@@ -5,7 +5,12 @@ all::
 
 check::
 
-clean::
-	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
+clean:: clean-$(WHAT)
 	$(RM) config.log pre.out post.out Makefile.out
 
+clean-unix::
+	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
+
+clean-windows::
+	$(RM) *.$(OBJEXT)
+	$(RM) msvc.pdb *.err

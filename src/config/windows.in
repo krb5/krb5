@@ -1,0 +1,65 @@
+# Microsoft Windows configuration file for Cygnus Kerberos
+# ***copy from K4***
+
+WHAT=windows
+
+# Directory syntax:
+R=\		# root
+C=.\		# current
+S=\		# seperator
+U=..\		# up one level
+
+srcdir = .
+
+# /* The name of the C compiler for the target */
+CC=cl /nologo
+CL=
+CCOPTS=/ALw /Zpa /GD2s /Os /Zi /Od /W2
+CCOPTS2=/AL /Zpa /G2s  /Os /Zi /Od /W2 -DAPI=
+CPPFLAGS =  -I$(SRCTOP)/include
+DEFS = $(CPPFLAGS)
+CFLAGS2 = $(CCOPTS2) $(DEFS)
+
+# /Zi gives debug info in each object file.
+# /Zp packs structures: Required for Windows API (but is not default!!!)
+# /Za strict ansi compliance
+# /ALw memory model:  Large model for Windows DLL (SS != DS)
+# /GD DLL code generation for Windows 3.0 and up, and defines _WINDOWS
+# /Gs Avoid stack probes (they don't seem to work anyway)
+# /Os optimize for space.  FIXME:  Do not use /Ox; it miscompiles the DES lib!
+# /G2 generate 286 instructions (it complains if you ask for 386!)
+# /Od disable optimization (for debugging)
+
+DBG_LIB=/nologo /Zp /ALw /GD /Gs /Os /G2 /Zi /Od
+# /Zi gives debug info in each object file.
+# /Zp packs structures: Required for Windows API (but is not default!!!)
+# /AL large memory model
+# /Mq quickwin ascii stdio window, and defines _WINDOWS
+DBG=/nologo /Zp /AL /Os /Mq /Zi /Od
+
+RM=$(BUILDTOP)\config\rm.bat
+CP=copy
+MV=ren
+LN=copy
+LIB=lib
+
+ARADD=rem
+RANLIB=rem
+ARCHIVE=rem
+
+LIBEXT=lib
+OBJEXT=obj
+EXEEXT=.exe
+
+MFLAGS=$(MAKEFLAGS)
+
+.c.obj:
+	$(CC) $(CFLAGS) /c $*.c
+!if defined(LIBNAME)
+	$(LIB) /nologo $(LIBNAME) -+$@;
+!endif
+
+#
+# End of Microsoft Windows config lines
+#
+

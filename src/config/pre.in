@@ -1,6 +1,14 @@
 ## config/pre.in
 ## common prefix for all Makefile.in in the Kerberos V5 tree.
 
+WHAT = unix
+
+# Directory syntax:
+R=/
+C=./
+S=/
+U=../
+
 BUILDTOP = @BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -50,5 +58,9 @@ SRCTOP = $(srcdir)/$(BUILDTOP)
 SUBDIRS = @subdirs@
 
 TOPLIBD = $(BUILDTOP)/lib
+
+OBJEXT = o
+LIBEXT = a
+EXEEXT =
 
 all::

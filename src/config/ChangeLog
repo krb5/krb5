@@ -1,3 +1,11 @@
+Mon Feb 6 19:33:57 1995 Keith Vetter (keithv@fusion.com)
+
+	* pre.in: Added macros for directory syntax, filename extensions 
+	  and what system we're building on (defaults to Unix).
+	* post.in: split clean into unix and windows branches
+	* windows.in: new file--makefile macros and rules for windows
+	* rm.bat: new file--DOS batch file to mimic Unix's rm command
+
 Wed Nov  2 21:04:18 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* pre.in: Don't actually add the $(CPPOPTS) flags to CPPFLAGS;
