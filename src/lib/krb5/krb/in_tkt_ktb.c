@@ -39,7 +39,7 @@ struct keytab_keyproc_arg {
  */
 krb5_error_code keytab_keyproc
     PROTOTYPE((krb5_context,
-               const krb5_keytype,
+               const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
                krb5_keyblock **));
@@ -47,7 +47,7 @@ krb5_error_code keytab_keyproc
 krb5_error_code
 keytab_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
-    const krb5_keytype type;
+    const krb5_enctype type;
     krb5_data * salt;
     krb5_const_pointer keyseed;
     krb5_keyblock ** key;
@@ -60,7 +60,7 @@ keytab_keyproc(context, type, salt, keyseed, key)
 
     kt_id = arg->keytab;
 
-    if (!valid_keytype(type))
+    if (!valid_enctype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     if (kt_id == NULL)
@@ -79,7 +79,7 @@ keytab_keyproc(context, type, salt, keyseed, key)
 	goto cleanup;
     }
 	
-    if (realkey->keytype != type) {
+    if (realkey->enctype != type) {
 	(void) krb5_kt_free_entry(context, &kt_ent);
 	krb5_free_keyblock(context, realkey);
 	retval = KRB5_PROG_ETYPE_NOSUPP;
@@ -118,7 +118,7 @@ krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes, pre_auth_types,
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_keytype * ktypes;
+    krb5_enctype * ktypes;
     krb5_preauthtype * pre_auth_types;
     const krb5_keytab keytab;
     krb5_ccache ccache;

@@ -46,11 +46,11 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
     krb5_priv_enc_part 	privmsg_enc_part;
     krb5_data 		*scratch1, *scratch2;
 
-    if (!valid_keytype(keyblock->keytype))
+    if (!valid_enctype(keyblock->enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     privmsg.enc_part.kvno = 0;	/* XXX allow user-set? */
-    privmsg.enc_part.keytype = keyblock->keytype; 
+    privmsg.enc_part.enctype = keyblock->enctype; 
 
     privmsg_enc_part.user_data = *userdata;
     privmsg_enc_part.s_address = local_addr;
@@ -66,7 +66,7 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
 	return retval;
 
     /* put together an eblock for this encryption */
-    krb5_use_keytype(context, &eblock, keyblock->keytype);
+    krb5_use_enctype(context, &eblock, keyblock->enctype);
     privmsg.enc_part.ciphertext.length = krb5_encrypt_size(scratch1->length,
 						eblock.crypto_entry);
     /* add padding area, and zero it */

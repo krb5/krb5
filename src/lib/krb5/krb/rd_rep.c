@@ -60,11 +60,11 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 
     /* put together an eblock for this encryption */
 
-    if (!valid_keytype(reply->enc_part.keytype)) {
+    if (!valid_enctype(reply->enc_part.enctype)) {
 	krb5_free_ap_rep(context, reply);
-	return KRB5_PROG_KEYTYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
     }
-    krb5_use_keytype(context, &eblock, reply->enc_part.keytype);
+    krb5_use_enctype(context, &eblock, reply->enc_part.enctype);
 
     scratch.length = reply->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length))) {

@@ -33,7 +33,7 @@ extern char *krb5_default_pwd_prompt1;
  */
 krb5_error_code pwd_keyproc
     PROTOTYPE((krb5_context,
-               const krb5_keytype,
+               const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
                krb5_keyblock **));
@@ -41,7 +41,7 @@ krb5_error_code pwd_keyproc
 krb5_error_code
 pwd_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
-    const krb5_keytype type;
+    const krb5_enctype type;
     krb5_data * salt;
     krb5_const_pointer keyseed;
     krb5_keyblock ** key;
@@ -52,10 +52,10 @@ pwd_keyproc(context, type, salt, keyseed, key)
     krb5_data * password;
     int pwsize = sizeof(pwdbuf);
 
-    if (!valid_keytype(type))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
+    if (!valid_enctype(type))
+	return KRB5_PROG_ETYPE_NOSUPP;
 
-    krb5_use_keytype(context, &eblock, type);
+    krb5_use_enctype(context, &eblock, type);
     
     password = (krb5_data *)keyseed;
 
@@ -101,7 +101,7 @@ krb5_get_in_tkt_with_password(context, options, addrs, ktypes, pre_auth_types,
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_keytype * ktypes;
+    krb5_enctype * ktypes;
     krb5_preauthtype * pre_auth_types;
     const char * password;
     krb5_ccache ccache;

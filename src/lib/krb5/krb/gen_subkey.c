@@ -36,10 +36,10 @@ krb5_generate_subkey(context, key, subkey)
     krb5_encrypt_block eblock;
     krb5_error_code retval;
 
-    if (!valid_keytype(key->keytype))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
+    if (!valid_enctype(key->enctype))
+	return KRB5_PROG_ETYPE_NOSUPP;
 
-    krb5_use_keytype(context, &eblock, key->keytype);
+    krb5_use_enctype(context, &eblock, key->enctype);
 
     if ((retval = krb5_init_random_key(context, &eblock, key, &random_state)))
 	return(retval);

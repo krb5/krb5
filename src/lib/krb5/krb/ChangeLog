@@ -1,3 +1,13 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * auth_con.c, decrypt_tk.c, encode_kdc.c, encrypt_tk.c,
+	* gc_frm_kdc.c, gen_seqnum.c, get_creds.c, get_in_tkt.c,
+	* in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c, init_ctx.c,
+	* kdc_rep_dc.c, mk_cred.c, mk_priv.c, mk_rep.c, mk_req._ext.c,
+	* preauth.c, rd_cred.c, rd_priv.c, rd_rep.c, rd_req_dec.c,
+	* send_tgs.c, sendauth.c, ser_actx.c, ser_ctx.c, ser_eblk.c,
+	* ser_key.c, t_ser.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
         * decode_kdc.c, decrypt_tk.c, encode_kdc.c, encrypt_tk.c, gc_frm_kdc.c

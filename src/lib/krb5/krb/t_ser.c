@@ -293,7 +293,7 @@ ser_acontext_test(kcontext, verbose)
 			      KV5M_AUTH_CONTEXT))) {
 	    memset(&ukeyblock, 0, sizeof(ukeyblock));
 	    memset(keydata, 0, sizeof(keydata));
-	    ukeyblock.keytype = KEYTYPE_DES_CBC_MD5;
+	    ukeyblock.enctype = ENCTYPE_DES_CBC_MD5;
 	    ukeyblock.length = sizeof(keydata);
 	    ukeyblock.contents = keydata;
 	    keydata[0] = 0xde;
@@ -509,7 +509,7 @@ ser_eblock_test(kcontext, verbose)
 
     memset(&eblock, 0, sizeof(krb5_encrypt_block));
     eblock.magic = KV5M_ENCRYPT_BLOCK;
-    krb5_use_keytype(kcontext, &eblock, DEFAULT_KDC_KEYTYPE);
+    krb5_use_enctype(kcontext, &eblock, DEFAULT_KDC_ENCTYPE);
     if (!(kret = ser_data(verbose, "> NULL eblock",
 			  (krb5_pointer) &eblock, KV5M_ENCRYPT_BLOCK))) {
 	eblock.priv = (krb5_pointer) ser_eblock_test;
@@ -519,7 +519,7 @@ ser_eblock_test(kcontext, verbose)
 			      KV5M_ENCRYPT_BLOCK))) {
 	    memset(&ukeyblock, 0, sizeof(ukeyblock));
 	    memset(keydata, 0, sizeof(keydata));
-	    ukeyblock.keytype = KEYTYPE_DES_CBC_MD5;
+	    ukeyblock.enctype = ENCTYPE_DES_CBC_MD5;
 	    ukeyblock.length = sizeof(keydata);
 	    ukeyblock.contents = keydata;
 	    keydata[0] = 0xde;

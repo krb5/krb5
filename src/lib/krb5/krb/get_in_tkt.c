@@ -61,7 +61,7 @@ extern krb5_deltat krb5_clockskew;
 /* some typedef's for the function args to make things look a bit cleaner */
 
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
-						   const krb5_keytype,
+						   const krb5_enctype,
 						   krb5_data *,
 						   krb5_const_pointer,
 						   krb5_keyblock **));
@@ -76,7 +76,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_keytype * ktypes;
+    krb5_enctype * ktypes;
     krb5_preauthtype * ptypes;
     git_key_proc key_proc;
     krb5_const_pointer keyseed;
@@ -86,7 +86,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_ccache ccache;
     krb5_kdc_rep ** ret_as_reply;
 {
-    krb5_keytype keytype, ktype;
+    krb5_enctype enctype, ktype;
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply = 0;
     krb5_error *err_reply;
@@ -132,7 +132,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	     * default.  But if we're changing salts, because of a
 	     * realm renaming, or some such, this won't work.
 	     */
-/*    retval = (*key_proc)(context, keytype, &decrypt_key, keyseed, 0); */
+/*    retval = (*key_proc)(context, enctype, &decrypt_key, keyseed, 0); */
 	    if (retval)
 		    return retval;
 	    request.padata = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)
@@ -249,8 +249,8 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	goto cleanup;
     }
 
-    /* Encryption type, keytype, */
-    keytype = as_reply->ticket->enc_part.keytype;
+    /* Encryption type, enctype, */
+    enctype = as_reply->ticket->enc_part.enctype;
 
     /* and salt */
     if (as_reply->padata) {
@@ -276,7 +276,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     /* it was a kdc_rep--decrypt & check */
     /* Generate the key, if we haven't done so already. */
     if (!decrypt_key) {
-	    if ((retval = (*key_proc)(context, keytype, & salt, keyseed,
+	    if ((retval = (*key_proc)(context, enctype, & salt, keyseed,
 				      &decrypt_key)))
 		goto cleanup;
     }

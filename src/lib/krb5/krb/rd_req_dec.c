@@ -70,18 +70,18 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
 
 {
     krb5_error_code 	  retval;
-    krb5_keytype 	  keytype;
+    krb5_enctype 	  enctype;
     krb5_keytab_entry 	  ktent;
 
     /*
-     * OK we know the encryption type req->ticket->enc_part.keytype, 
-     * and now we need to get the keytype
+     * OK we know the encryption type req->ticket->enc_part.enctype, 
+     * and now we need to get the enctype
      */
-    keytype = req->ticket->enc_part.keytype;
+    enctype = req->ticket->enc_part.enctype;
 
     if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
 				    req->ticket->enc_part.kvno,
-				    keytype, &ktent)))
+				    enctype, &ktent)))
 	return retval;
 
     if ((retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket)))
@@ -301,12 +301,12 @@ decrypt_authenticator(context, request, authpp)
 
     sesskey = request->ticket->enc_part2->session;
 
-    if (!valid_keytype(sesskey->keytype))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
+    if (!valid_enctype(sesskey->enctype))
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
 
-    krb5_use_keytype(context, &eblock, request->authenticator.keytype);
+    krb5_use_enctype(context, &eblock, request->authenticator.enctype);
 
     scratch.length = request->authenticator.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length)))

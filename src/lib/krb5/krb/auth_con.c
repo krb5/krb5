@@ -265,7 +265,7 @@ krb5_auth_con_initivector(context, auth_context)
     krb5_auth_context 	  auth_context;
 {
     if (auth_context->keyblock) {
-	int size = krb5_keytype_array[auth_context->keyblock->keytype]->
+	int size = krb5_enctype_array[auth_context->keyblock->enctype]->
 		      system->block_length;
 
 	if ((auth_context->i_vector = (krb5_pointer)malloc(size))) {

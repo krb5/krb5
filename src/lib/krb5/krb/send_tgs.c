@@ -30,7 +30,7 @@
  Sends a request to the TGS and waits for a response.
  options is used for the options in the KRB_TGS_REQ.
  timestruct values are used for from, till, rtime " " "
- keytype is used for keytype " " ", and to encrypt the authorization data, 
+ enctype is used for enctype " " ", and to encrypt the authorization data, 
  sname is used for sname " " "
  addrs, if non-NULL, is used for addresses " " "
  authorization_dat, if non-NULL, is used for authorization_dat " " "
@@ -105,8 +105,8 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
         goto cleanup_data;
 
     /* put together an eblock for this encryption */
-    krb5_use_keytype(context, &eblock, request.ticket->enc_part.keytype);
-    request.authenticator.keytype = request.ticket->enc_part.keytype;
+    krb5_use_enctype(context, &eblock, request.ticket->enc_part.enctype);
+    request.authenticator.enctype = request.ticket->enc_part.enctype;
     request.authenticator.ciphertext.length =
         krb5_encrypt_size(scratch->length, eblock.crypto_entry);
 
@@ -170,7 +170,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     krb5_context context;
     const krb5_flags kdcoptions;
     const krb5_ticket_times * timestruct;
-    const krb5_keytype * ktypes;
+    const krb5_enctype * ktypes;
     krb5_const_principal sname;
     krb5_address * const * addrs;
     krb5_authdata * const * authorization_data;
@@ -218,8 +218,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
 	if ((retval = encode_krb5_authdata((const krb5_authdata**)authorization_data,
 					   &scratch)))
 	    return(retval);
-	krb5_use_keytype(context, &eblock, in_cred->keyblock.keytype);
-	tgsreq.authorization_data.keytype = in_cred->keyblock.keytype;
+	krb5_use_enctype(context, &eblock, in_cred->keyblock.enctype);
+	tgsreq.authorization_data.enctype = in_cred->keyblock.enctype;
 	tgsreq.authorization_data.kvno = 0; /* ticket session key has */
 					    /* no version */
 	tgsreq.authorization_data.ciphertext.length =
@@ -263,10 +263,10 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     if (ktypes) {
 	/* Check passed ktypes and make sure they're valid. */
    	for (tgsreq.nktypes = 0; ktypes[tgsreq.nktypes]; tgsreq.nktypes++) {
-    	    if (!valid_keytype(ktypes[tgsreq.nktypes]))
-		return KRB5_PROG_KEYTYPE_NOSUPP;
+    	    if (!valid_enctype(ktypes[tgsreq.nktypes]))
+		return KRB5_PROG_ETYPE_NOSUPP;
 	}
-    	tgsreq.ktype = (krb5_keytype *)ktypes;
+    	tgsreq.ktype = (krb5_enctype *)ktypes;
     } else {
         /* Get the default ktypes */
         krb5_get_default_in_tkt_ktypes(context, &(tgsreq.ktype));

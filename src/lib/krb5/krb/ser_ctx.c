@@ -284,18 +284,18 @@ krb5_context_internalize(kcontext, argp, buffer, lenremain)
 		if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
 		    /* Reduce it to a count */
 		    context->ktype_count = ibuf;
-		    if ((context->ktypes = (krb5_keytype *)
-			 malloc(sizeof(krb5_keytype) *
+		    if ((context->ktypes = (krb5_enctype *)
+			 malloc(sizeof(krb5_enctype) *
 				(context->ktype_count+1)))) {
 			memset(context->ktypes,
 			       0,
-			       sizeof(krb5_keytype) *
+			       sizeof(krb5_enctype) *
 			       (context->ktype_count + 1));
 			for (i=0; i<context->ktype_count; i++) {
 			    if ((kret = krb5_ser_unpack_int32(&ibuf,
 							      &bp, &remain)))
 				break;
-			    context->ktypes[i] = (krb5_keytype) ibuf;
+			    context->ktypes[i] = (krb5_enctype) ibuf;
 			}
 		    }
 		}

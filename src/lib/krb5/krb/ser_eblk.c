@@ -63,13 +63,13 @@ krb5_encrypt_block_size(kcontext, arg, sizep)
     size_t		required;
 
     /*
-     * NOTE: This ASSuMES that keytype are sufficient to recreate
+     * NOTE: This ASSuMES that enctype are sufficient to recreate
      * the _krb5_cryptosystem_entry.  If this is not true, then something else
      * had better be encoded here.
      * 
      * krb5_encrypt_block base requirements:
      *	krb5_int32			for KV5M_ENCRYPT_BLOCK
-     *	krb5_int32			for keytype
+     *	krb5_int32			for enctype
      *	krb5_int32			for private length
      *	encrypt_block->priv_size	for private contents
      *	krb5_int32			for KV5M_ENCRYPT_BLOCK
@@ -122,9 +122,9 @@ krb5_encrypt_block_externalize(kcontext, arg, buffer, lenremain)
 	    /* Our identifier */
 	    (void) krb5_ser_pack_int32(KV5M_ENCRYPT_BLOCK, &bp, &remain);
 		
-	    /* Our keytype */
+	    /* Our enctype */
 	    (void) krb5_ser_pack_int32((krb5_int32) encrypt_block->
-				       crypto_entry->proto_keytype,
+				       crypto_entry->proto_enctype,
 				       &bp, &remain);
 
 	    /* Our length */
@@ -171,7 +171,7 @@ krb5_encrypt_block_internalize(kcontext, argp, buffer, lenremain)
     krb5_error_code	kret;
     krb5_encrypt_block	*encrypt_block;
     krb5_int32		ibuf;
-    krb5_keytype	ktype;
+    krb5_enctype	ktype;
     krb5_octet		*bp;
     size_t		remain;
 
@@ -190,12 +190,12 @@ krb5_encrypt_block_internalize(kcontext, argp, buffer, lenremain)
 	     malloc(sizeof(krb5_encrypt_block)))) {
 	    memset(encrypt_block, 0, sizeof(krb5_encrypt_block));
 
-	    /* Get the keytype */
+	    /* Get the enctype */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    ktype = (krb5_keytype) ibuf;
+	    ktype = (krb5_enctype) ibuf;
 
 	    /* Use the ktype to determine the crypto_system entry. */
-	    krb5_use_keytype(kcontext, encrypt_block, ktype);
+	    krb5_use_enctype(kcontext, encrypt_block, ktype);
 
 	    /* Get the length */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);

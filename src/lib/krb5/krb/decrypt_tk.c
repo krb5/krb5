@@ -46,11 +46,11 @@ krb5_decrypt_tkt_part(context, srv_key, ticket)
     krb5_data scratch;
     krb5_error_code retval;
 
-    if (!valid_keytype(ticket->enc_part.keytype))
+    if (!valid_enctype(ticket->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
-    krb5_use_keytype(context, &eblock, ticket->enc_part.keytype);
+    krb5_use_enctype(context, &eblock, ticket->enc_part.enctype);
 
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))

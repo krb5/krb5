@@ -228,8 +228,8 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	/* didn't find it in the cache so try and get one */
 	/* with current tgt.                              */
     
-	if (!valid_keytype(tgt.keyblock.keytype)) {
-	    retval = KRB5_PROG_KEYTYPE_NOSUPP;
+	if (!valid_enctype(tgt.keyblock.enctype)) {
+	    retval = KRB5_PROG_ETYPE_NOSUPP;
 	    goto cleanup;
 	}
     
@@ -289,8 +289,8 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
   
 	      /* not in the cache so try and get one with our current tgt. */
   
-	      if (!valid_keytype(tgt.keyblock.keytype)) {
-		  retval = KRB5_PROG_KEYTYPE_NOSUPP;
+	      if (!valid_enctype(tgt.keyblock.enctype)) {
+		  retval = KRB5_PROG_ETYPE_NOSUPP;
 		  goto cleanup;
 	      }
             
@@ -373,8 +373,8 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 
   /* got/finally have tgt!  try for the creds */
 
-  if (!valid_keytype(tgt.keyblock.keytype)) {
-    retval = KRB5_PROG_KEYTYPE_NOSUPP;
+  if (!valid_enctype(tgt.keyblock.enctype)) {
+    retval = KRB5_PROG_ETYPE_NOSUPP;
     goto cleanup;
   }
 
