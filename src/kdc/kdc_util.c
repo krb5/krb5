@@ -1086,8 +1086,9 @@ char **status;
     /* can not proxy ticket granting tickets */
     if (isflagset(request->kdc_options, KDC_OPT_PROXY) &&
 	(!request->server->data ||
-	 request->server->data[0].length != 6 ||
-	 memcmp(request->server->data[0].data, "krbtgt", 6))) {
+	 request->server->data[0].length != KRB5_TGS_NAME_SIZE ||
+	 memcmp(request->server->data[0].data, KRB5_TGS_NAME,
+		KRB5_TGS_NAME_SIZE))) {
 	*status = "CAN'T PROXY TGT";
 	return KDC_ERR_BADOPTION;
     }
