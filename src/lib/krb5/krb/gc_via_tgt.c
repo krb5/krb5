@@ -86,7 +86,7 @@ OLDDECLARG(krb5_creds *, cred)
 	return retval;
 
 #undef cleanup
-#define cleanup() {(void) free(tgsrep.response.data);}
+#define cleanup() free(tgsrep.response.data)
 
     switch (tgsrep.message_type) {
     case KRB5_TGS_REP:
