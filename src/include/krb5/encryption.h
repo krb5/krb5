@@ -98,4 +98,15 @@ typedef struct _krb5_checksum_entry {
 #define ETYPE_IS_LOCAL(etype) (etype & 0x8000)
 #define CKSUMTYPE_IS_LOCAL(cksumtype) (cksumtype & 0x8000)
 
+#ifndef krb5_roundup
+/* round x up to nearest multiple of y */
+#define krb5_roundup(x, y) ((((x) + (y) - 1)/(y))*(y))
+#endif /* roundup */
+
+/* macro function definitions to help clean up code */
+#define	krb5_encrypt_size(length, crypto) \
+     krb5_roundup((length)+(crypto)->pad_minimum, (crypto)->block_length)
+
+#define	krb5_keyblock_size(blockp) (sizeof(*blockp)+blockp->length-1)
+
 #endif /* __KRB5_ENCRYPTION__ */
