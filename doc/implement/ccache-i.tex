@@ -10,7 +10,7 @@ to call either \funcname{krb5_cc_resolve_internal} or
 \funcname{krb5_cc_gennew_internal}.
 
 
-\begin{funcdecl}{krb5_error_code}{krb5_cc_resolve_internal}{\funcout}
+\begin{funcdecl}{krb5_cc_resolve_internal}{krb5_error_code}{\funcout}
 \funcarg{krb5_ccache *}{id}
 \funcin
 \funcarg{char *}{residual}
@@ -20,7 +20,7 @@ Creates a credentials cache named by \funcparam{residual} (which may be
 interpreted differently by each type of ccache).  The cache is not
 opened, but the cache name is held in reserve.
 
-\begin{funcdecl}{krb5_error_code}{krb5_cc_gennew_internal}{\funcout}
+\begin{funcdecl}{krb5_cc_gennew_internal}{krb5_error_code}{\funcout}
 \funcarg{krb5_ccache *}{id}
 \end{funcdecl}
 
@@ -168,7 +168,8 @@ couldn't delete.
 \funcarg{krb5_flags}{flags}
 \end{funcdecl}
 
-Sets the flags on the cache \funcparam{id} to \funcparam{flags}.
+Sets the flags on the cache \funcparam{id} to \funcparam{flags}.  Useful
+flags are defined in {\tt <krb5/ccache.h>}.
 
 
 \subsubsection{Glue functions}
