@@ -230,6 +230,7 @@ KADMCLNT_DEPLIBS	= $(KADMCLNT_DEPLIB) $(KADM_COMM_DEPLIBS)
 # Header file dependencies we might override someday.
 # See util/depfix.sed.
 COM_ERR_DEPS  	= $(BUILDTOP)/include/com_err.h
+SS_DEPS		= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
