@@ -1,0 +1,34 @@
+Issues to be addressed for src/util/et: -*- text -*-
+
+Non-thread-safe aspects:
+
+error_message uses a static buffer for "unknown error code" messages;
+a per-thread buffer may be better, but that depends on dynamic
+allocation working.  A caller-provided buffer would be best, but
+that's a API change.
+
+initialize_foo_error_table uses a global linked list hung off an
+unprotected variable in the library.  {add,remove}_error_table do
+likewise, but can be changed without externally visible effect.
+
+Workaround: Use a global lock for all calls to error_message and
+com_err, and when adding or removing error tables.
+
+API divergence:
+
+Transarc and Heimdal both have APIs that are different from this
+version.  (Specifics?)
+
+Workaround:
+
+No reference counting:
+
+If libraries are dynamically loaded and unloaded, and the init/fini
+functions add and remove error tables for *other* libraries they
+depend on (e.g., if a dynamically loadable Zephyr library's fini
+function removes the krb4 library error table and then dlcloses the
+krb4 library, while another dlopen reference keeps the krb4 library
+around), the error table is gone, even if the library is still in use.
+
+Workaround: None.
+
