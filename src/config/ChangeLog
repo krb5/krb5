@@ -1,3 +1,8 @@
+2004-06-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-darwin*, *-*-rhapsody*): Add
+	-Wl,-search_paths_first to linker flags.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib.in (lib*, clean-*, install-*): Use $(LIBBASE) instead of
