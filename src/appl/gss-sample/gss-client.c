@@ -239,25 +239,29 @@ void read_file(file_name, in_buf)
 	exit(1);
     }
     in_buf->length = stat_buf.st_size;
-    in_buf->value = malloc(in_buf->length);
-    if (in_buf->value == 0) {
+
+    if (in_buf->length == 0) {
+	in_buf->value = NULL;
+	return;
+    }
+
+    if ((in_buf->value = malloc(in_buf->length)) == 0) {
 	fprintf(stderr, "Couldn't allocate %d byte buffer for reading file\n",
 		in_buf->length);
 	exit(1);
     }
-    memset(in_buf->value, 0, in_buf->length);
-    for (bytes_in = 0; bytes_in < in_buf->length; bytes_in += count) {
-	count = read(fd, in_buf->value, in_buf->length);
-	if (count < 0) {
-	    perror("read");
-	    exit(1);
-	}
-	if (count == 0)
-	    break;
+
+    /* this code used to check for incomplete reads, but you can't get
+       an incomplete read on any file for which fstat() is meaningful */
+
+    count = read(fd, in_buf->value, in_buf->length);
+    if (count < 0) {
+	perror("read");
+	exit(1);
     }
-    if (bytes_in != count)
+    if (count < in_buf->length)
 	fprintf(stderr, "Warning, only read in %d bytes, expected %d\n",
-		bytes_in, count);
+		count, in_buf->length);
 }
 
 /*
@@ -281,8 +285,7 @@ void read_file(file_name, in_buf)
  * seals msg in a GSS-API token with gss_seal, sends it to the server,
  * reads back a GSS-API signature block for msg from the server, and
  * verifies it with gss_verify.  -1 is returned if any step fails,
- * otherwise 0 is returned.
- */
+ * otherwise 0 is returned.  */
 int call_server(host, port, oid, service_name, deleg_flag, msg, use_file)
      char *host;
      u_short port;
@@ -410,7 +413,7 @@ int call_server(host, port, oid, service_name, deleg_flag, msg, use_file)
      } else {
 	 /* Seal the message */
 	 in_buf.value = msg;
-	 in_buf.length = strlen(msg) + 1;
+	 in_buf.length = strlen(msg);
      }
 
      maj_stat = gss_wrap(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
