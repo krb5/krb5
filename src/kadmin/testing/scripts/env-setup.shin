@@ -19,7 +19,7 @@ export STOP
 # The shared library run time setup
 TOPLIBD=@RBUILD@/lib
 # This converts $(TOPLIBD) to $TOPLIBD
-foo=`echo "@KRB5_RUN_ENV@" | sed -e 's/(//' -e 's/)//'` 
+foo=`echo '@KRB5_RUN_ENV@' | sed -e 's/(//' -e 's/)//'` 
 eval $foo
 
 # This will get put in setup.csh for convenience
