@@ -1,3 +1,13 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* krb5.hin, k5-int.h: Condintionally use cc_* macros or functions
+	* krb5.hin: Changed KerberosConditionalMacros.h to
+	KerberosSupport.h
+	* k5-int.h: Rearranged the #ifdef macintosh section to
+	work on Mac OS 9 and X
+	* win-mac.h, k5-int.h, krb5.hin: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+        
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (TKT_FLG_TRANSIT_POLICY_CHECKED,

@@ -92,14 +92,17 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
-#include "win-mac.h"
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
-#endif
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <KerberosSupport/KerberosConditionalMacros.h>
+	
+	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
+		#include <Kerberos5/win-mac.h>
+	#endif
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
+#include "win-mac.h"
+
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI	"kerberos.ini"
 #define INI_FILES	"Files"
@@ -110,9 +113,11 @@
 #endif
 
 /* Note, this may shoot us in the foot if we switch to CW compilers for Mach-o builds */
-#ifndef macintosh
-#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+#if !defined(macintosh) && (defined(__MWERKS__) || defined(applec) || defined(THINK_C))
 #define macintosh
+#endif
+
+#ifdef macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
@@ -120,15 +125,11 @@
 #define HAVE_LABS
 /*#define ENOMEM -1*/
 #define ANSI_STDIO
-#ifndef _SIZET
-typedef unsigned int size_t;
-#define _SIZET
-#endif
+#include <size_t.h>
 #include <unix.h>
 #include <ctype.h>
+#include <fcntl.h>
 #endif
-#endif
-
 
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
@@ -998,7 +999,11 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pa_enc_ts
 	KRB5_PROTOTYPE((krb5_context, krb5_pa_enc_ts FAR *));
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
+#if TARGET_OS_MAC
+#include <KerberosProfile/KerberosProfile.h>
+#else
 #include "profile.h"
+#endif
 
 struct _krb5_context {
 	krb5_magic	magic;
@@ -1530,5 +1535,47 @@ int krb5_seteuid  KRB5_PROTOTYPE((int));
 
 /* to keep lint happy */
 #define krb5_xfree(val) free((char FAR *)(val))
+
+#if KRB5_CCACHE_ACCESSOR_FUNCTIONS
+/* temporary -- this should be under lib/krb5/ccache somewhere */
+
+struct _krb5_ccache {
+    krb5_magic magic;
+    struct _krb5_cc_ops FAR *ops;
+    krb5_pointer data;
+};
+
+struct _krb5_cc_ops {
+    krb5_magic magic;
+    char FAR *prefix;
+    char FAR * (KRB5_CALLCONV *get_name) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (KRB5_CALLCONV *resolve) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *,
+					    const char FAR *));
+    krb5_error_code (KRB5_CALLCONV *gen_new) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *));
+    krb5_error_code (KRB5_CALLCONV *init) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_principal));
+    krb5_error_code (KRB5_CALLCONV *destroy) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (KRB5_CALLCONV *close) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (KRB5_CALLCONV *store) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *retrieve) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags, krb5_creds FAR *,
+					    krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *get_princ) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_principal FAR *));
+    krb5_error_code (KRB5_CALLCONV *get_first) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor FAR *));
+    krb5_error_code (KRB5_CALLCONV *get_next) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor FAR *, krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *end_get) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor FAR *));
+    krb5_error_code (KRB5_CALLCONV *remove_cred) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags, krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *set_flags) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags));
+};
+
+extern krb5_cc_ops *krb5_cc_dfl_ops;
+#endif /* KRB5_CCACHE_ACCESSOR_FUNCTIONS */
 
 #endif /* _KRB5_INT_H */
