@@ -1,3 +1,9 @@
+Thu Feb 20 17:38:23 1997  Richard Basch  <basch@lehman.com>
+
+	* configure.in: awk is required by the Makefile
+	* Makefile.in: Re-arranged build/install rules because
+		krb_err.h is a generated file.
+
 Mon Feb 17 13:59:41 1997  Richard Basch  <basch@lehman.com>
 
 	* des.h: Added various function prototypes

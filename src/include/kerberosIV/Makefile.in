@@ -1,14 +1,15 @@
-KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h \
-	krb_err.h
+KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
-all::
+all-unix:: krb_err.h
 
-clean::
-
-depend::
+krb_err.h: $(SRCTOP)/lib/krb4/krb_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$@ \
+		$(SRCTOP)/lib/krb4/krb_err.et
 
 install::
 	@set -x; for f in $(KRB4_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/$$f ; \
 	done
 
+install:: krb_err.h
+	$(INSTALL_DATA) $(C)krb_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kerberosIV$(S)krb_err.h
