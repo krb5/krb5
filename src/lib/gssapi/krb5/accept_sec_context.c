@@ -396,10 +396,14 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
-   if ((code = krb5_copy_principal(context, authdat->client, &ctx->there))) {
+   code = krb5_copy_principal(context, authdat->client, &ctx->there);
+
+   /* done with authdat */
+   krb5_free_authenticator(context, authdat);
+
+   if (code) {
       krb5_free_principal(context, ctx->here);
       xfree(ctx);
-      krb5_free_authenticator(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -409,7 +413,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       krb5_free_principal(context, ctx->there);
       krb5_free_principal(context, ctx->here);
       xfree(ctx);
-      krb5_free_authenticator(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -439,16 +442,26 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_use_enctype(context, &ctx->enc.eblock, enctype);
    ctx->enc.processed = 0;
 
-   if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key))
-      return(code); 
+   if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key)) {
+      krb5_free_principal(context, ctx->there);
+      krb5_free_principal(context, ctx->here);
+      xfree(ctx);
+      *minor_status = code;
+      return(GSS_S_FAILURE);
+   }
    for (i=0; i<ctx->enc.key->length; i++)
       /*SUPPRESS 113*/
       ctx->enc.key->contents[i] ^= 0xf0;
 
    krb5_use_enctype(context, &ctx->seq.eblock, enctype);
    ctx->seq.processed = 0;
-   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key)))
-       return(code);
+   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key))) {
+      krb5_free_principal(context, ctx->there);
+      krb5_free_principal(context, ctx->here);
+      xfree(ctx);
+      *minor_status = code;
+      return(GSS_S_FAILURE);
+   }
 
    ctx->endtime = ticket->enc_part2->times.endtime;
    ctx->flags = ticket->enc_part2->flags;
@@ -456,6 +469,22 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_free_ticket(context, ticket); /* Done with ticket */
 
    krb5_auth_con_getremoteseqnumber(context, auth_context, &ctx->seq_recv);
+
+   if ((code = krb5_timeofday(context, &now))) {
+      krb5_free_principal(context, ctx->there);
+      krb5_free_principal(context, ctx->here);
+      xfree(ctx);
+      *minor_status = code;
+      return(GSS_S_FAILURE);
+   }
+
+   if (ctx->endtime < now) {
+      krb5_free_principal(context, ctx->there);
+      krb5_free_principal(context, ctx->here);
+      xfree(ctx);
+      *minor_status = 0;
+      return(GSS_S_CREDENTIALS_EXPIRED);
+   }
 
    g_order_init(&(ctx->seqstate), ctx->seq_recv,
 		(gss_flags & GSS_C_REPLAY_FLAG) != 0,
@@ -496,9 +525,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       ctx->seq_send = ctx->seq_recv;
    }
 
-   /* done with authdat! */
-   krb5_free_authenticator(context, authdat);
-
    /* set the return arguments */
 
    if (src_name) {
@@ -515,18 +541,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (mech_type)
       *mech_type = (gss_OID) mech_used;
 
-   if (time_rec) {
-      if ((code = krb5_timeofday(context, &now))) {
-	 if (src_name)
-	    krb5_free_principal(context, name);
-	 xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(minor_status, 
-					   (gss_ctx_id_t *) &ctx, NULL);
-	 *minor_status = code;
-	 return(GSS_S_FAILURE);
-      }
+   if (time_rec)
       *time_rec = ctx->endtime - now;
-   }
 
    if (ret_flags)
       *ret_flags = KG_IMPLFLAGS(gss_flags);
