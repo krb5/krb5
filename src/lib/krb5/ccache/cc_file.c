@@ -1486,8 +1486,11 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
     assert(*fccsp != NULL);
     (*fccsp)->refcount--;
     if ((*fccsp)->refcount == 0) {
+        struct fcc_set *temp;
 	data = (*fccsp)->data;
+	temp = *fccsp;
 	*fccsp = (*fccsp)->next;
+	free(temp);
 	k5_mutex_unlock(&krb5int_cc_file_mutex);
 	free(data->filename);
 	zap(data->buf, sizeof(data->buf));
@@ -1517,6 +1520,7 @@ static krb5_error_code KRB5_CALLCONV
 krb5_fcc_close(krb5_context context, krb5_ccache id)
 {
      dereference(context, (krb5_fcc_data *) id->data);
+     krb5_xfree(id);
      return KRB5_OK;
 }
 
