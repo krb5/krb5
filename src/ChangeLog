@@ -1,0 +1,5 @@
+Fri Jun 17 19:54:00 1994  Mark Eichin  (eichin at cygnus.com)
+
+	* aclocal.m4 (MAKE_SUBDIRS): pass CCOPTS, CC in every make
+	* Makefile.in: change CFLAGS = -g ... to CFALGS = $(CCOPTS) ...
+	  in all Makefile.in's throughout the tree.

@@ -9,7 +9,7 @@ VPATH = @srcdir@
 TOPDIR = $(BUILDTOP)/
 
 OPTIONS	=	-I. -I$(HDIR) -I$(ISODEINC) $(PEPYPATH) $(KRBOPT)
-CFLAGS  =       $(OPTIONS) $(LOPTIONS) 
+CFLAGS  =       $(CCOPTS) $(OPTIONS) $(LOPTIONS) 
 
 KRBINC	=	$(TOPDIR)include/
 ISODEINCM=	$(KRBINC)isode

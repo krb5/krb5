@@ -5,7 +5,7 @@ VPATH = @srcdir@
 DEFS = @DEFS@
 LIBS = @LIBS@
  
-CFLAGS = -g $(DEFS) -DDEBUG
+CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG
 LDFLAGS = -g
 
 SRCTOP = $(srcdir)/$(BUILDTOP)

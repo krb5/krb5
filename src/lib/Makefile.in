@@ -5,7 +5,7 @@ VPATH = @srcdir@
 DEFS = @DEFS@
 LIBS = @LIBS@
 
-CFLAGS = -g
+CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
 SUBDIRS = @SUBDIRS@

@@ -133,7 +133,7 @@ $2::<<<
 	for i in $(SUBDIRS) ;\
 	do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
-			$(MAKE) $(MFLAGS) \
+			$(MAKE) $(MFLAGS) CCOPTS="$(CCOPTS)" CC="$(CC)" \
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$2<<<); \
 	done>>>
 divert(0)dnl

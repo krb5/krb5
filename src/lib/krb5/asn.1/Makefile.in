@@ -6,7 +6,7 @@ DEFS = @DEFS@
 LIBS = @LIBS@
  
 # -I. for isode/
-CFLAGS = -g $(DEFS) -DPEPSY_LINKABLE_FUNCS -I.
+CFLAGS = $(CCOPTS) $(DEFS) -DPEPSY_LINKABLE_FUNCS -I.
 LDFLAGS = -g
 
 RM = rm -f

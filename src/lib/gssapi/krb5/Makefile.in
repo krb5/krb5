@@ -7,7 +7,7 @@ VPATH = @srcdir@
 DEFS = @DEFS@
 LIBS = @LIBS@
  
-CFLAGS = -g $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 LDFLAGS = -g
 
 RM = rm -f

@@ -10,7 +10,7 @@ DEFS = @DEFS@
 TOPDIR = $(BUILDTOP)/
 
 OPTIONS	=	-I. -I$(HDIR) -I$(TOPDIR)include $(PEPYPATH) $(KRBOPT)
-CFLAGS  =       $(OPTIONS) $(LOPTIONS) $(DEFS)
+CFLAGS  =       $(CCOPTS) $(OPTIONS) $(LOPTIONS) $(DEFS)
 
 HDIR	=	$(srcdir)/$(TOPDIR)isode/h/
 UTILDIR	=	$(srcdir)/$(TOPDIR)isode/util/

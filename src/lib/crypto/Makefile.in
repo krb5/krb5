@@ -10,7 +10,7 @@ SUBDIRS = @SUBDIRS@
 DEFS = @DEFS@
 LIBS = @LIBS@
  
-CFLAGS = -g $(DEFS)
+CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
 RM = rm -f
