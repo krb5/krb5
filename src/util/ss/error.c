@@ -28,8 +28,9 @@
 
 #ifndef __STDC__
 /* we didn't get it in com_err.h if it wasn't STDC. */
-#ifndef STDARG_PROTOTYPES
-/* and we don't need it, either, if we're using stdarg.h... */
+#ifdef STDARG_PROTOTYPES
+#include <stdarg.h>
+#else
 #include <varargs.h>
 #endif
 #endif
