@@ -49,7 +49,7 @@ error_table.o: et_lex.lex.c
 # real entries...
 #
 
-all:: compile_et
+all:: compile_et includes
 
 compile_et: compile_et.o error_table.o
 	$(CC) $(CFLAGS) -o $@ compile_et.o error_table.o $(LEXLIB) $(BSDLIB)

@@ -1,5 +1,7 @@
 Tue Jun 21 00:20:44 1994  Tom Yu  (tlyu at dragons-lair)
 
+	* Makefile.in: add "includes" to "all" dependencies
+
 	* configure.in: should be CopySrcHeader
 
 Mon Jun 20 21:59:37 1994  Tom Yu  (tlyu at dragons-lair)
