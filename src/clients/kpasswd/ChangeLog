@@ -1,3 +1,7 @@
+2000-03-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpasswd.c (main): Remove unused variables.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Windows fix for 10/26/99 cleanup.

@@ -50,12 +50,8 @@ int main(int argc, char *argv[])
    krb5_get_init_creds_opt opts;
    krb5_creds creds;
 
-   krb5_timestamp now;
-   krb5_data ap_req;
-   krb5_auth_context auth_context;
    char pw[1024];
    int pwlen;
-   krb5_data chpw_req, chpw_rep;
    int result_code;
    krb5_data result_code_string, result_string;
 
