@@ -76,7 +76,7 @@ maybe_use_dns (context, name, defalt)
 
     code = profile_get_string(context->profile, "libdefaults",
                               name, 0, 0, &value);
-    if (value == 0 && code != 0)
+    if (value == 0 && code == 0)
 	code = profile_get_string(context->profile, "libdefaults",
 				  "dns_fallback", 0, 0, &value);
     if (code)
