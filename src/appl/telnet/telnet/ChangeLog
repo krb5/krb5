@@ -1,3 +1,9 @@
+Wed Feb 12 15:23:36 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: Fix DES425_LIB... missed this in libhack_branch;
+	prevents --without-krb4 from working for some odd reason, though
+	comments says "fix post beta-6".
+
 Wed Feb  5 22:03:35 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
