@@ -1,3 +1,8 @@
+Mon Sep 25 16:42:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Thu Aug 24 18:19:54 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Updated to reflect ct_c.* to ct_c.*.in filename changes.

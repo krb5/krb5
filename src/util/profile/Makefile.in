@@ -26,8 +26,6 @@ LIBS = ../et/libcom_err.$(LIBEXT)
 
 install::
 
-all:: all-$(WHAT)
-
 all-max:: all-unix
 all-unix:: shared includes libprofile.a test_parse test_profile
 
@@ -71,8 +69,6 @@ prof_err.o: prof_err.c
 	$(CC) $(CFLAGS) -c prof_err.c
 @SHARED_RULE_LOCAL@
 
-clean:: clean-$(WHAT)
-
 clean-mac:: clean-unix
 clean-unix::
 	rm -f $(PROGS) *.o *~ test_parse core libprofile.a prof_err.h \
@@ -80,8 +76,6 @@ clean-unix::
 
 clean-windows::
 	$(RM) profile.lib profile.bak test_parse.exe test_profile.exe
-
-check:: check-$(WHAT)
 
 check-mac::
 check-unix::

@@ -10,8 +10,6 @@ KRB5_HEADERS = adm.h adm_proto.h kdb.h kdb_dbm.h winsock.h
 ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
 BUILT_HEADERS = osconf.h
 
-all:: all-$(WHAT)
-
 all-unix:: autoconf.h $(BUILT_HEADERS)
 all-mac:: autoconf.h  $(BUILT_HEADERS)
 all-windows:
@@ -36,7 +34,7 @@ osconf.h: $(OSCONFSRC)
 	@if cmp -s osconf.new osconf.h ; then :; \
 	else (set -x; $(RM) osconf.h ; $(CP) osconf.new osconf.h; $(RM) osconf.new) fi
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) osconf.new $(BUILT_HEADERS)
 
 clean-unix::

@@ -63,8 +63,6 @@ FILES=	$(SRCS) $(MKCMDSFILES) $(HFILES) \
 # stuff to build
 #
 
-all:: all-$(WHAT)
-
 all-unix::	mk_cmds ct_c.awk ct_c.sed libss.a includes # libss_p.a lint
 all-mac::
 all-windows::  all-unix

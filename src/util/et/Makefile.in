@@ -37,8 +37,6 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 STEXT=@STEXT@
 
-all:: all-$(WHAT)
-
 all-windows: com_err.obj error_message.obj et_name.obj
 	copy com_err.h $(BUILDTOP)\include
 
@@ -81,8 +79,6 @@ et_c.awk: $(srcdir)/et_c.awk
 
 et_h.awk: $(srcdir)/et_h.awk
 	$(CP) $(srcdir)/et_h.awk et_h.awk
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) compile_et compile_et.o error_table.o 

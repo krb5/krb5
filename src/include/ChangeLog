@@ -1,3 +1,8 @@
+Mon Sep 25 16:39:21 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Sat Sep 23 01:37:19 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin: Added preauth numbers for KRB5_CYBERSAFE_SECUREID and

@@ -46,8 +46,6 @@ mktemp.o:	../PORT/clib/mktemp.c
 	$(CC) $(CFLAGS) -c $(srcdir)/../PORT/clib/mktemp.c
 @SHARED_RULE@
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 
 shared:

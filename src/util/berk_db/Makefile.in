@@ -12,8 +12,6 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 STEXT=a
 
-all:: all-$(WHAT)
-
 all-unix::
 
 all-windows::
@@ -33,8 +31,6 @@ libdb.$(STEXT): hash/DONE
 	fi
 	$(RANLIB) $@
 	touch libdb.stamp
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) libdb.$(LIBEXT) libdb_ranlib libdb.stamp

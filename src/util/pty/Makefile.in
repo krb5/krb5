@@ -27,14 +27,8 @@ SRCS=pty_err.h $(CFILES)
 
 DEPLIBS=
 
-all:: all-$(WHAT)
-
 #
 all-unix:: includes pty_err.h libpty.a $(TOPLIBD)/libpty.a
-
-
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) libpty.a $(BUILDTOP)/include/libpty.h pty_err.c pty_err.h
