@@ -141,17 +141,17 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     }
 
     if (!in_data &&(*auth_context)->checksum_func) {
-      
-    if (in_data) {
-      retval = (*auth_context)->checksum_func( context,
-					    *auth_context,
-					    (*auth_context)->checksum_func_data,
-					    &in_data);
-      if (retval)
-	goto cleanup_cksum;
+	retval = (*auth_context)->checksum_func( context,
+						 *auth_context,
+						 (*auth_context)->checksum_func_data,
+						 &in_data);
+	if (retval)
+	    goto cleanup_cksum;
     }
 
-	if ((*auth_context)->req_cksumtype == 0x8003) {
+    if (in_data) {
+
+      if ((*auth_context)->req_cksumtype == 0x8003) {
 	    /* XXX Special hack for GSSAPI */
 	    checksum.checksum_type = 0x8003;
 	    checksum.length = in_data->length;
