@@ -734,6 +734,8 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     salt.length = 0;
     salt.data = NULL;
 
+	local_as_reply = 0;
+
     /*
      * Set up the basic request structure
      */
