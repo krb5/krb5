@@ -1,0 +1,5 @@
+Thu Apr 27 16:46:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	Initial implementation of new kpasswd which uses new administrative
+	protocol.
+
