@@ -1488,6 +1488,8 @@ krb5_error_code krb5_encode_kdc_rep
 krb5_error_code krb5_validate_times
 	(krb5_context, 
 		krb5_ticket_times *);
+krb5_boolean krb5int_auth_con_chkseqnum
+	(krb5_context ctx, krb5_auth_context ac, krb5_ui_4 in_seq);
 /*
  * [De]Serialization Handle and operations.
  */

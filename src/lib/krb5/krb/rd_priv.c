@@ -246,7 +246,8 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context, const krb5_da
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {
-	if (auth_context->remote_seq_number != replaydata.seq) {
+	if (!krb5int_auth_con_chkseqnum(context, auth_context,
+					replaydata.seq)) {
 	    retval =  KRB5KRB_AP_ERR_BADORDER;
 	    goto error;
 	}
