@@ -165,6 +165,11 @@ extern krb5_error_code mit_des_string_to_key
 /* weak_key.c */
 extern int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));
 
+/* cmb_keys.c */
+krb5_error_code mit_des_combine_subkeys
+    PROTOTYPE((const krb5_keyblock *, const krb5_keyblock *,
+	       krb5_keyblock **));
+
 /* misc.c */
 extern void swap_bits PROTOTYPE((char *));
 extern unsigned long long_swap_bits PROTOTYPE((unsigned long ));
