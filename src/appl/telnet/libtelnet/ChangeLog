@@ -1,3 +1,7 @@
+1999-08-31 17:28   Jeffrey Altman <jaltman@columbia.edu>
+
+        * kerberos5.c: Corrections to yesterday's change.
+
 1999-08-30 16:55   Jeffrey Altman <jaltman@columbia.edu>
 
         * kerberos5.c: Ensure that only "host" service tickets are accepted.
