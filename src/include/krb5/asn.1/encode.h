@@ -211,5 +211,28 @@ krb5_error_code decode_generic
 		   (translator_func) KRB5_KRB__ERROR2krb5_error, \
 		   (free_func) free_KRB5_KRB__ERROR)
 
+/* ASN.1 encoding knowledge; KEEP IN SYNC WITH ASN.1 defs! */
+/* here we use some knowledge of ASN.1 encodings */
+/* 
+  AS_REQ is APPLICATION 0.
+  KDC_REP is APPLICATION 1.
+  KRB_ERROR is APPLICATION 2.
+  AP_REQ is APPLICATION 3.
+  AP_REP is APPLICATION 4.
+  TGS_REQ is APPLICATION 5.
+  KRB_SAFE is APPLICATION 6.
+  KRB_PRIV is APPLICATION 7.
+ */
+/* allow either constructed or primitive encoding, so check for bit 6
+   set or reset */
+#define krb5_is_as_req(data) ((data)[0] == 0x60 || (data)[0] == 0x20)
+#define krb5_is_kdc_rep(data) ((data)[0] == 0x61 || (data)[0] == 0x21)
+#define krb5_is_krb_error(data) ((data)[0] == 0x62 || (data)[0] == 0x22)
+#define krb5_is_ap_req(data) ((data)[0] == 0x63 || (data)[0] == 0x23)
+#define krb5_is_ap_rep(data) ((data)[0] == 0x64 || (data)[0] == 0x24)
+#define krb5_is_tgs_req(data) ((data)[0] == 0x65 || (data)[0] == 0x25)
+#define krb5_is_krb_safe(data) ((data)[0] == 0x66 || (data)[0] == 0x26)
+#define krb5_is_krb_priv(data) ((data)[0] == 0x67 || (data)[0] == 0x27)
+
 
 #endif /* KRB5_ENCODE_DEFS__ */
