@@ -1,3 +1,7 @@
+2001-06-27	Alexandra Ellwood <lxs@mit.edu>
+
+	* localaddr.c: Fixed typo.
+
 2001-06-26	Alexandra Ellwood <lxs@mit.edu>
 
 	* localaddr.c: Added a special krb5_os_localaddr for Mac OS 9

@@ -650,7 +650,7 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr)
 
 	// Loop over the addressed once so we know how many there are
 	for (interfaceCount = 0; err == noErr; interfaceCount++) {
-		err = OTInetGetInterfaceInfo (&info, interfaceIndex);
+		err = OTInetGetInterfaceInfo (&info, interfaceCount);
 	}
 	
 	// Allocate storage for the address list
@@ -670,7 +670,7 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr)
 			err = 0;
 			break;
 		}
-		
+        
 		addresses[interfaceIndex] = (krb5_address *) malloc (sizeof (krb5_address));
 		if (addresses[interfaceIndex] == NULL) {
 			err = ENOMEM;
