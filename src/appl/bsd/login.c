@@ -449,7 +449,9 @@ main(argc, argv)
         tc.c_cc[VWERASE] = CWERASE;
 #endif
 #ifdef VSTATUS
+#ifdef CSTATUS
         tc.c_cc[VSTATUS] = CSTATUS;
+#endif
 #endif
 #endif /* NO_INIT_CC */
 	tcsetattr(0, TCSANOW, &tc);

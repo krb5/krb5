@@ -1,3 +1,8 @@
+Thu Oct 27 20:07:03 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* login.c (main): if CSTATUS is missing, don't set c_cc[VSTATUS]
+	(for sunos.)
+
 Thu Oct 27 16:12:19 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* krlogin.c (des_write): get rid of srandom, since seeding is done
