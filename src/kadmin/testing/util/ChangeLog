@@ -1,3 +1,7 @@
+2002-11-04  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Use $(TCL_MAYBE_RPATH).
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

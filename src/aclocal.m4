@@ -752,6 +752,7 @@ dnl
 dnl AC_KRB5_TCL_FIND_CONFIG (uses tcl_dir)
 dnl
 AC_DEFUN(AC_KRB5_TCL_FIND_CONFIG,[
+AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_MSG_CHECKING(for tclConfig.sh)
 if test -r "$tcl_dir/lib/tclConfig.sh" ; then
   tcl_conf="$tcl_dir/lib/tclConfig.sh"
@@ -827,6 +828,11 @@ if test -n "$tcl_ok_conf" ; then
   eval TCL_LIBS='"'$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS'"'
   TCL_LIBPATH="-L$TCL_EXEC_PREFIX/lib"
   TCL_RPATH=":$TCL_EXEC_PREFIX/lib"
+  if test "$DEPLIBEXT" != "$SHLIBEXT" && test -n "$RPATH_FLAG"; then
+    TCL_MAYBE_RPATH='$(RPATH_FLAG)'"$TCL_EXEC_PREFIX/lib"
+  else
+    TCL_MAYBE_RPATH=
+  fi
   CPPFLAGS="$old_CPPFLAGS $TCL_INCLUDES"
   AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
   if test $tcl_header=no; then
@@ -839,6 +845,7 @@ AC_SUBST(TCL_INCLUDES)
 AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_LIBPATH)
 AC_SUBST(TCL_RPATH)
+AC_SUBST(TCL_MAYBE_RPATH)
 ])dnl
 dnl
 dnl AC_KRB5_TCL_TRYOLD
@@ -1059,6 +1066,7 @@ AC_DEFUN(KRB5_BUILD_PROGRAM,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
 AC_SUBST(CC_LINK)
+AC_SUBST(RPATH_FLAG)
 AC_SUBST(DEPLIBEXT)])
 
 dnl

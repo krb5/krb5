@@ -1,3 +1,12 @@
+2002-11-04  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: New variables RPATH_FLAG (set regardless of whether
+	we're building shared), TCL_MAYBE_RPATH (empty unless we're
+	building static and are capable of shared libs, in case there's a
+	shared tcl lib).
+
+	* shlib.conf: New variable RPATH_FLAG. 
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
 	* pre.in post.in (RECURSE_TARGETS): Add install-headers-recurse

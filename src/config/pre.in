@@ -207,6 +207,9 @@ EXEEXT =
 
 CC_LINK=@CC_LINK@
 
+# prefix (with no spaces after) for rpath flag to cc
+RPATH_FLAG=@RPATH_FLAG@
+
 # this gets set by configure to either $(STLIBEXT) or $(SHLIBEXT),
 # depending on whether we're building with shared libraries.
 DEPLIBEXT=@DEPLIBEXT@
@@ -317,6 +320,7 @@ KRB4_INCLUDES	= @KRB4_INCLUDES@
 TCL_LIBS	= @TCL_LIBS@
 TCL_LIBPATH	= @TCL_LIBPATH@
 TCL_RPATH	= @TCL_RPATH@
+TCL_MAYBE_RPATH = @TCL_MAYBE_RPATH@
 TCL_INCLUDES	= @TCL_INCLUDES@
 
 # error table rules
