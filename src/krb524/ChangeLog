@@ -1,3 +1,8 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* encode.c, cnv_tkt_skey.c: Need port-sockets.h for Win32 (now
+	that using WIN32_LEAN_AND_MEAN).
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb524d.c (lookup_service_key): Copy key block and free up

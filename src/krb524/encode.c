@@ -26,7 +26,9 @@
 #include <signal.h>
 #include <sys/types.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include "port-sockets.h"
+#else
 #include <sys/time.h>
 #include <sys/signal.h>
 #include <netinet/in.h>
