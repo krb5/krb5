@@ -34,6 +34,8 @@ SRCS=	cksum.c		\
 
 VERIFYOBJ = verify.o
 
+DESTESTOBJ = destest.o
+
 NormalLibraryTarget(des,$(OBJS))
 
 $(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
@@ -48,6 +50,8 @@ EXT_LIB = $(TOP)/error_tables/krb5_err.o \
                   libdes.a -lcom_err
 
 NormalProgramTarget(verify, $(VERIFYOBJ), ,$(EXT_LIB),)
+
+NormalProgramTarget(destest, $(DESTESTOBJ), ,$(EXT_LIB),)
 
 NormalProgramTarget(make_e, make_e.o, misc.o, misc.o, )
 
