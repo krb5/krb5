@@ -167,14 +167,6 @@ krb5_error_code krb5_rd_priv
 		   const krb5_fulladdr *,
 		   const krb5_fulladdr *,
 		   krb5_data * ));
-krb5_error_code krb5_get_default_realm
-	PROTOTYPE((const int,
-		   char * ));
-krb5_error_code krb5_get_host_realm
-	PROTOTYPE((const char *,
-		   char *** ));
-krb5_error_code krb5_free_host_realm
-	PROTOTYPE((char * const * ));
 krb5_error_code krb5_parse_name
 	PROTOTYPE((const char *,
 		   krb5_principal * ));
