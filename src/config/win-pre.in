@@ -155,7 +155,7 @@ EXE_LINKOPTS=$(LOPTS)
 
 RM=$(BUILDTOP)\config\rm.bat
 LIBECHO=$(BUILDTOP)\util\windows\$(OUTPRE)libecho
-CP=copy
+CP=copy/b nul:+
 MV=ren
 LN=copy
 LIBCMD=lib
