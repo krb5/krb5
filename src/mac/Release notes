@@ -34,3 +34,7 @@ Changes in 1.1a3:
  Added template target
  Fixed inconsistency about bugger size in globals API
  Updated to ccache 2.0b1
+
+1.1b8
+ 68K builds are back
+ Updated to ccache 2.0b2
