@@ -175,7 +175,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 		krb5_free_realm_tree(tgs_list);
 		goto out;
 	    }
-	    tgt = ret_tgts[nservers];
+	    tgt = *ret_tgts[nservers];
 	    tgtq.client = 0;
 	    tgtq.server = 0;
 	    krb5_free_cred_contents(&tgtq);
