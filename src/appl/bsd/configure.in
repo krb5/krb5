@@ -57,7 +57,7 @@ PATH=$save_path
 dnl
 AC_ARG_WITH([krb4],[include Kerberos V4 support],
 ADD_DEF(-DKRB5_KRB4_COMPAT)
-K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/lib/libdes425.a',
+K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a',
 echo "warning: no krb4 backwards compatibility support"
 K4LIB=)
 AC_SUBST(K4LIB)
