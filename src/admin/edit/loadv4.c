@@ -37,6 +37,8 @@ static C_Block master_key;
 static Key_schedule master_key_schedule;
 static long master_key_version;
 
+static char *v4_mkeyfile = "/.k";
+
 #include "k5-int.h"
 #include "com_err.h"
 #include "adm.h"
@@ -434,8 +436,21 @@ char *pname, *name;
 int manual;
 char *dumpfile;
 {
-    des_read_password(master_key, "Kerberos master key: ", 1);
-    printf("\n");
+    int fd;
+    int ok = 0;
+
+    if (!manual) {
+	fd = open(v4_mkeyfile, O_RDONLY, 0600);
+	if (fd >= 0) {
+	    if (read(fd, master_key, sizeof(master_key)) == sizeof(master_key))
+		ok = 1;
+	    close(fd);
+	}
+    }
+    if (!ok) {
+	des_read_password(master_key, "V4 Kerberos master key: ", 0);
+	printf("\n");
+    }
     key_sched(master_key, master_key_schedule);
     return 0;
 }
