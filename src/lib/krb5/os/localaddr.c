@@ -504,14 +504,13 @@ krb5_os_localaddr(context, addr)
     return 0;
 }
 
-#else /* Windows/Mac version */
+#elif defined(_MSDOS) || defined(_WIN32) /* Windows version */
 
 /*
  * Hold on to your lunch!  Backup kludge method of obtaining your
  * local IP address, courtesy of Windows Socket Network Programming,
  * by Robert Quinn
  */
-#if defined(_MSDOS) || defined(_WIN32)
 static struct hostent *local_addr_fallback_kludge()
 {
 	static struct hostent	host;
@@ -550,7 +549,6 @@ static struct hostent *local_addr_fallback_kludge()
 
 	return &host;
 }
-#endif
 
 /* No ioctls in winsock so we just assume there is only one networking 
  * card per machine, so gethostent is good enough. 
@@ -635,5 +633,80 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
         *addr = paddr;
 
     return(err);
+}
+
+#else
+
+/* Mac OS 9 version */
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_os_localaddr (krb5_context context, krb5_address ***addr) 
+{
+	// First, build the new list
+    krb5_address ** 		addresses = NULL;
+	SInt32					interfaceCount;
+	SInt32					interfaceIndex;
+	InetInterfaceInfo		info;
+	krb5_error_code			err = 0;
+
+	// Loop over the addressed once so we know how many there are
+	for (interfaceCount = 0; err == noErr; interfaceCount++) {
+		err = OTInetGetInterfaceInfo (&info, interfaceIndex);
+	}
+	
+	// Allocate storage for the address list
+	addresses = (krb5_address **) malloc( sizeof (krb5_address *) * (interfaceCount + 1));
+	if (addresses == NULL) {
+        err = ENOMEM;
+        goto cleanup;
+    }
+
+	// Set the pointers to NULL so we will have a termination pointer
+	memset (addresses, 0, sizeof (krb5_address *) * (interfaceCount + 1));
+
+	// Look up the addresses and store them in the list
+	for (interfaceIndex = 0; interfaceIndex < interfaceCount; interfaceIndex++) {
+		err = OTInetGetInterfaceInfo (&info, interfaceIndex);
+		if (err != noErr) {
+			err = 0;
+			break;
+		}
+		
+		addresses[interfaceIndex] = (krb5_address *) malloc (sizeof (krb5_address));
+		if (addresses[interfaceIndex] == NULL) {
+			err = ENOMEM;
+			goto cleanup;
+		}
+
+		addresses[interfaceIndex]->magic = KV5M_ADDRESS;
+		addresses[interfaceIndex]->addrtype = AF_INET;
+		addresses[interfaceIndex]->length = INADDRSZ;
+		addresses[interfaceIndex]->contents = (unsigned char *) malloc (addresses[interfaceIndex]->length);
+		if (addresses[interfaceIndex]->contents == NULL) {
+			err = ENOMEM;
+			goto cleanup;
+		}
+		
+		memcpy(addresses[interfaceIndex]->contents, &info.fAddress, addresses[interfaceIndex]->length);
+	}
+
+cleanup:
+	if (err) {
+		if (addresses != NULL) {
+			for (interfaceIndex = 0; interfaceIndex < interfaceCount; interfaceIndex++) {
+				if (addresses[interfaceIndex] != NULL) {
+					if (addresses[interfaceIndex]->contents != NULL) {
+						free (addresses[interfaceIndex]->contents);
+					}
+					free (addresses[interfaceIndex]);
+				}
+			}
+			free(addresses);
+		}
+	} else {
+		*addr = addresses;
+	}
+	
+    return(err);
+
 }
 #endif

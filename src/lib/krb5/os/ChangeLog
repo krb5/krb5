@@ -1,3 +1,8 @@
+2001-06-26	Alexandra Ellwood <lxs@mit.edu>
+
+	* localaddr.c: Added a special krb5_os_localaddr for Mac OS 9
+	which looks up the addresses without querying DNS synchronously
+
 2001-02-27	Alexandra Ellwood <lxs@mit.edu>
 
 	* prompter.c, promptusr.c, read_pwd.c: We now export 
