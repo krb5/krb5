@@ -1,3 +1,8 @@
+2001-02-16  Tom Yu  <tlyu@mit.edu>
+
+	* login.M: Don't include "= 0" as part of the "accept_passwd"
+	config option.
+
 2001-01-26  Tom Yu  <tlyu@mit.edu>
 
 	* krshd.c: Get path for NOLOGIN file from paths.h if present,
