@@ -86,9 +86,9 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
     return retval;
 }
 
-krb5_error_code
-krb5_rd_req_decoded(context, auth_context, req, server, keytab, 
-		    ap_req_options, ticket)
+static krb5_error_code
+krb5_rd_req_decoded_opt(context, auth_context, req, server, keytab, 
+			ap_req_options, ticket, check_valid_flag)
     krb5_context 	  context;
     krb5_auth_context   * auth_context;
     const krb5_ap_req 	* req;
@@ -96,6 +96,7 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
     krb5_keytab           keytab;
     krb5_flags          * ap_req_options;
     krb5_ticket	       ** ticket;
+    int			  check_valid_flag;
 {
     krb5_error_code 	  retval = 0;
     krb5_timestamp 	  currenttime;
@@ -235,9 +236,11 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
 	goto cleanup;
     }
 
-    if (req->ticket->enc_part2->flags & TKT_FLG_INVALID) {
+    if (check_valid_flag) {
+      if (req->ticket->enc_part2->flags & TKT_FLG_INVALID) {
 	retval = KRB5KRB_AP_ERR_TKT_INVALID;
 	goto cleanup;
+      }
     }
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
@@ -278,6 +281,44 @@ cleanup:
 	req->ticket->enc_part2 = NULL;
     }
     return retval;
+}
+
+krb5_error_code
+krb5_rd_req_decoded(context, auth_context, req, server, keytab, 
+		    ap_req_options, ticket)
+    krb5_context 	  context;
+    krb5_auth_context   * auth_context;
+    const krb5_ap_req 	* req;
+    krb5_const_principal  server;
+    krb5_keytab           keytab;
+    krb5_flags          * ap_req_options;
+    krb5_ticket	       ** ticket;
+{
+  krb5_error_code retval;
+  retval = krb5_rd_req_decoded_opt(context, auth_context,
+				   req, server, keytab, 
+				   ap_req_options, ticket,
+				   1); /* check_valid_flag */
+  return retval;
+}
+
+krb5_error_code
+krb5_rd_req_decoded_anyflag(context, auth_context, req, server, keytab, 
+			ap_req_options, ticket)
+    krb5_context 	  context;
+    krb5_auth_context   * auth_context;
+    const krb5_ap_req 	* req;
+    krb5_const_principal  server;
+    krb5_keytab           keytab;
+    krb5_flags          * ap_req_options;
+    krb5_ticket	       ** ticket;
+{
+  krb5_error_code retval;
+  retval = krb5_rd_req_decoded_opt(context, auth_context,
+				   req, server, keytab, 
+				   ap_req_options, ticket,
+				   0); /* don't check_valid_flag */
+  return retval;
 }
 
 static krb5_error_code

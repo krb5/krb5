@@ -1,3 +1,43 @@
+Fri May  3 00:15:18 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* get_creds.c (krb5_get_credentials_core): new function. Common
+	part of krb5_get_credentials and krb5_get_credentials_validate.
+	Some formerly local variables are now arguments.
+	(krb5_get_credentials): same as before, but calls _core to do some
+	of the work.
+	(krb5_get_credentials_validate): uses
+	krb5_get_cred_from_kdc_validate and only stores the returned
+	credential in the cache, instead of storing all of them.
+
+Thu May  2 22:48:56 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): new function. Same
+	body as krb5_get_cred_from_kdc, but takes one new argument,
+	kdcopts, and combines it with the other kdc options when calling
+	krb5_get_cred_via_tkt. This is static and only called by
+	(krb5_get_cred_from_kdc): a wrapper that provides the same
+	function it did before, and
+	(krb5_get_cred_from_kdc_validate): a wrapper that passes
+	KDC_OPT_VALIDATE, so that kinit can use it.
+	We'll probably need another one for renewing tickets as well.
+
+	* rd_req_dec.c (krb5_rd_req_decoded_opt): new function. Same body
+	as krb5_rd_req_decoded, but takes one new argument,
+	check_valid_flag, to determine whether or not to check if the
+	"invalid flag" is set in the ticket. Also made static, so that it
+	is only called via:
+	(krb5_rd_req_decoded): wrapper for krb5_rd_req_decoded_opt that
+	specifies the "invalid flag" gets checked, and
+	(krb5_rd_req_decoded_anyflag): wrapper for krb5_rd_req_decoded_opt
+	that specifies that the "invalid flag" doesn't get checked. (This
+	version is only called from kdc_util.c:kdc_process_tgs_req.)
+
+Wed May  1 02:26:53 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* str_conv.c (krb5_string_to_timestamp): double check that
+	strptime at least parsed *some* of the string, avoid degenerate
+	cases from GNU libc strptime.
+
 Tue Apr 30 18:19:01 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* t_ser.c (stuff): New variable.

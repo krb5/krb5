@@ -59,13 +59,14 @@
 
 #define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
 
-krb5_error_code
-krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
+static krb5_error_code
+krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
     krb5_context context;
     krb5_ccache ccache;
     krb5_creds  *in_cred;
     krb5_creds  **out_cred;
     krb5_creds  ***tgts;
+    int		kdcopt;
 {
   krb5_creds      **ret_tgts = NULL;
   int             ntgts = 0;
@@ -377,6 +378,7 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
   }
 
   retval = krb5_get_cred_via_tkt(context, &tgt, FLAGS2OPTS(tgt.ticket_flags) |
+				 kdcopt | 
   				 	(in_cred->second_ticket.length ? 
 				  	 KDC_OPT_ENC_TKT_IN_SKEY : 0),
 				 tgt.addresses, in_cred, out_cred);
@@ -395,4 +397,30 @@ cleanup:
       krb5_free_cred_contents(context, &tgt);
   }
   return(retval);
+}
+
+krb5_error_code
+krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
+    krb5_context context;
+    krb5_ccache ccache;
+    krb5_creds  *in_cred;
+    krb5_creds  **out_cred;
+    krb5_creds  ***tgts;
+{
+
+  return krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts,
+				    0);
+}
+
+krb5_error_code
+krb5_get_cred_from_kdc_validate(context, ccache, in_cred, out_cred, tgts)
+    krb5_context context;
+    krb5_ccache ccache;
+    krb5_creds  *in_cred;
+    krb5_creds  **out_cred;
+    krb5_creds  ***tgts;
+{
+
+  return krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts,
+				    KDC_OPT_VALIDATE);
 }
