@@ -1,3 +1,9 @@
+Mon Mar  3 14:57:35 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* error_message.c: Don't declare sys_nerr on Macintosh.
+
+	* com_err.c: Fix MacMessageBox prototype.
+
 Sat Mar  1 11:54:02 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
 	* com_err.h: Do not declare com_err_hook extern if you want it

@@ -27,7 +27,7 @@
 #endif
 #ifdef _MACINTOSH
 #include "icons.h"
-static void MacMessageBox(errbuf);
+static void MacMessageBox(char *errbuf);
 #endif
 
 static et_old_error_hook_func com_err_hook = 0;

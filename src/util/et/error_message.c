@@ -34,7 +34,9 @@
 
 #if !defined(HAVE_STRERROR) && !defined(SYS_ERRLIST_DECLARED)
 extern char const * const sys_errlist[];
+#ifndef _MACINTOSH
 extern const int sys_nerr;
+#endif
 #endif
 
 static char buffer[ET_EBUFSIZ];
