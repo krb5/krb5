@@ -10,10 +10,7 @@ KDBLIB=$(TOPLIBD)/libkdb5.a
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
-
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
 
 SRCS = \
 	$(srcdir)/kadmin.c \
@@ -41,7 +38,7 @@ OBJS = \
 
 all::	kadmin
 
-kadmin: $(KDBDEPLIB) $(OBJS) $(DEBKLIB)
+kadmin: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o kadmin $(OBJS) $(KLIB) $(LIBS)
 
 install::

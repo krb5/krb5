@@ -10,9 +10,7 @@ KDBLIB=$(TOPLIBD)/libkdb5.a
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
 
 SRCS = \
 	$(srcdir)/networked.c \
@@ -25,7 +23,7 @@ OBJS = \
 
 all::	kpasswd
 
-kpasswd: $(KDBDEPLIB) $(OBJS) $(DEBKLIB)
+kpasswd: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o kpasswd $(OBJS) $(KLIB) $(LIBS)
 
 install::

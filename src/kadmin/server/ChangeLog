@@ -1,3 +1,7 @@
+Thu Sep 29 22:41:08 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: relink executable if libraries change
+
 Wed Sep 14 22:33:23 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* adm_server (init_db): Save a copy of the master key database

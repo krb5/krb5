@@ -8,10 +8,11 @@ DBMLIB=
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 LOCALINCLUDE= -I.. -I$(srcdir)/..
 
-sim_client: sim_client.o
+sim_client: sim_client.o $(DEPKLIB)
 	$(CC) $(CFLAGS) -o sim_client sim_client.o $(KLIB) $(LIBS)
 
 sim_client.o:	$(srcdir)/sim_client.c
