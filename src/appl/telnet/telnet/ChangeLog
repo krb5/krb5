@@ -1,3 +1,11 @@
+Mon Aug 17 04:32:08 1998  Geoffrey King  <gjking@mit.edu>
+
+	* main.c (main): Declare dst_realm_sz as extern int instead of
+ 	extern char, to agree with its definition in libtelnet/kerberos.c.
+	This was causing dst_realm_sz to be zero unexpectedly, and so
+	strncpy was not copying the -k realm argument into dest_realm.
+	[krb5-appl/616]
+	
 Tue May 26 15:27:55 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Re-order check for setupterm to avoid lossage if
