@@ -37,7 +37,7 @@ struct dfl_data
   data stored in this cache type, namely "dfl"
 struct authlist
   multilinked list of reps
-static int store(context, krb5_rcache id,krb5_donot_replay *rep)
+static int rc_store(context, krb5_rcache id,krb5_donot_replay *rep)
   store rep in cache id; return CMP_REPLAY if replay, else CMP_MALLOC/CMP_HOHUM
 
 */
@@ -124,7 +124,7 @@ struct authlist
 /* of course, list is backwards from file */
 /* hash could be forwards since we have to search on match, but naaaah */
 
-static int store(context, id, rep)
+static int rc_store(context, id, rep)
     krb5_context context;
     krb5_rcache id;
     krb5_donot_replay *rep;
@@ -424,7 +424,7 @@ krb5_rcache id;
 
 	
 	if (alive(context, rep,t->lifespan) != CMP_EXPIRED) {
-	    if (store(context, id, rep) == CMP_MALLOC) {
+	    if (rc_store(context, id, rep) == CMP_MALLOC) {
 		retval = KRB5_RC_MALLOC; goto io_fail;
 	    } 
 	}
@@ -489,7 +489,7 @@ krb5_donot_replay *rep;
     unsigned long ret;
     struct dfl_data *t = (struct dfl_data *)id->data;
 
-    switch(store(context, id,rep)) {
+    switch(rc_store(context, id,rep)) {
     case CMP_MALLOC:
 	return KRB5_RC_MALLOC; 
     case CMP_REPLAY:

@@ -1,3 +1,8 @@
+Thu Jul 20 22:34:47 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* rc_dfl.c (rc_store): rename from store() to avoid conflict with
+	dbm function of same name (and different prototype.)
+
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* rc_io.c added HAVE_MACSOCK_H, change open to THREEPARAMOPEN
 
