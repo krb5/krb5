@@ -101,7 +101,7 @@ close(slavefd);
 
 		/* got pty */
 		slavebuf[strlen("/dev/")] = 't';
-		if ( strlen(slavebuf) < slavelength ) {
+		if ( strlen(slavebuf) > slavelength ) {
 		    close ( *fd);
 		    *fd = -1;
 return PTY_GETPTY_SLAVE_TOOLONG;
