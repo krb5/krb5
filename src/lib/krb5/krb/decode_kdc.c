@@ -48,8 +48,6 @@ OLDDECLARG(krb5_kdc_rep **, dec_rep)
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
 
-
-    /* XXX maybe caller should specify type expected? */
     if (krb5_is_as_rep(enc_rep))
 	retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
     else if (krb5_is_tgs_rep(enc_rep))
