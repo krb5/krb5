@@ -121,6 +121,4 @@ DEPENDS all : 			"$(Intermediates)/prof_err.h"
                         "$(Intermediates)/gssapi_err_krb5.c"
                         "$(Intermediates)/gssapi_err_krb5.strings" ;
 DEPENDS install : all ;
-
-NOCARE installhdrs ;
-NOTFILE installhdrs ;
+DEPENDS installhdrs : all ;

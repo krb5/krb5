@@ -85,6 +85,4 @@ Clean.Remove clean :	"$(IntermediateHeaders)/profile.h"
                         "$(IntermediateHeaders)/GSSInit.h" ;
 
 DEPENDS install : all ;
-
-NOCARE installhdrs ;
-NOTFILE installhdrs ;
+DEPENDS installhdrs : all ;
