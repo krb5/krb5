@@ -151,8 +151,8 @@ finish_realm(kdc_realm_t *rdp)
  */
 static krb5_error_code
 init_realm(char *progname, kdc_realm_t *rdp, char *realm, char *def_dbname,
-	   char *def_mpname, krb5_enctype def_enctype, char *def_ports,
-	   krb5_boolean def_manual)
+	   char *def_mpname, krb5_enctype def_enctype, char *def_udp_ports,
+	   char *def_tcp_ports, krb5_boolean def_manual)
 {
     krb5_error_code	kret;
     krb5_boolean	manual;
@@ -204,12 +204,16 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm, char *def_dbname,
 	rdp->realm_mpname = (def_mpname) ? strdup(def_mpname) :
 	    strdup(KRB5_KDB_M_NAME);
 
-    /* Handle KDC port */
+    /* Handle KDC ports */
     if (rparams && rparams->realm_kdc_ports)
 	rdp->realm_ports = strdup(rparams->realm_kdc_ports);
     else
-	rdp->realm_ports = strdup(def_ports);
-	    
+	rdp->realm_ports = strdup(def_udp_ports);
+    if (rparams && rparams->realm_kdc_tcp_ports)
+	rdp->realm_tcp_ports = strdup(rparams->realm_kdc_ports);
+    else
+	rdp->realm_tcp_ports = strdup(def_tcp_ports);
+
     /* Handle stash file */
     if (rparams && rparams->realm_stash_file) {
 	rdp->realm_stash = strdup(rparams->realm_stash_file);
@@ -560,7 +564,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     krb5_enctype	menctype = ENCTYPE_UNKNOWN;
     kdc_realm_t		*rdatap;
     krb5_boolean	manual = FALSE;
-    char		*default_ports = 0;
+    char		*default_udp_ports = 0;
+    char		*default_tcp_ports = 0;
     krb5_pointer	aprof;
     const char		*hierarchy[3];
 #ifdef KRB5_KRB4_COMPAT
@@ -576,8 +581,11 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	hierarchy[0] = "kdcdefaults";
 	hierarchy[1] = "kdc_ports";
 	hierarchy[2] = (char *) NULL;
-	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_ports))
-	    default_ports = 0;
+	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_udp_ports))
+	    default_udp_ports = 0;
+	hierarchy[1] = "kdc_tcp_ports";
+	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_tcp_ports))
+	    default_tcp_ports = 0;
 #ifdef KRB5_KRB4_COMPAT
 	hierarchy[1] = "v4_mode";
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &v4mode))
@@ -587,9 +595,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	if (aprof)
 	     krb5_aprof_finish(aprof);
     }
-#define DEFAULT_KDC_PORTLIST DEFAULT_KDC_UDP_PORTLIST
-    if (default_ports == 0)
-	default_ports = strdup(DEFAULT_KDC_PORTLIST);
+    if (default_udp_ports == 0)
+	default_udp_ports = strdup(DEFAULT_KDC_UDP_PORTLIST);
+    if (default_tcp_ports == 0)
+	default_tcp_ports = strdup(DEFAULT_KDC_TCP_PORTLIST);
     /*
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
@@ -601,7 +610,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 		if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 		    if ((retval = init_realm(argv[0], rdatap, optarg, db_name,
 					     mkey_name, menctype,
-					     default_ports, manual))) {
+					     default_udp_ports,
+					     default_tcp_ports, manual))) {
 			fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 				argv[0], optarg);
 			exit(1);
@@ -633,9 +643,14 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    rcname = optarg;
 	    break;
 	case 'p':
-	    if (default_ports)
-		free(default_ports);
-	    default_ports = strdup(optarg);
+	    if (default_udp_ports)
+		free(default_udp_ports);
+	    default_udp_ports = strdup(optarg);
+#if 0 /* not yet */
+	    if (default_tcp_ports)
+		free(default_tcp_ports);
+	    default_tcp_ports = strdup(optarg);
+#endif
 	    break;
 	case '4':
 #ifdef KRB5_KRB4_COMPAT
@@ -685,8 +700,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 	    if ((retval = init_realm(argv[0], rdatap, lrealm, db_name,
-				     mkey_name, menctype, default_ports,
-				     manual))) {
+				     mkey_name, menctype, default_udp_ports,
+				     default_tcp_ports, manual))) {
 		fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 			argv[0], lrealm);
 		exit(1);
@@ -709,8 +724,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 
     /* Ensure that this is set for our first request. */
     kdc_active_realm = kdc_realmlist[0];
-    if (default_ports)
-	free(default_ports);
+    if (default_udp_ports)
+	free(default_udp_ports);
+    if (default_tcp_ports)
+	free(default_tcp_ports);
 
     return;
 }

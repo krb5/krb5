@@ -1,7 +1,52 @@
 2002-09-19  Ken Raeburn  <raeburn@mit.edu>
 
-	* main.c (DEFAULT_KDC_PORTLIST): Define as
-	DEFAULT_KDC_UDP_PORTLIST.
+	* extern.h (struct __kdc_realm_data): New field realm_tcp_ports.
+	* main.c (init_realm): Fill it in.  New argument for default tcp
+	ports; rename old def_ports argument to def_udp_ports.
+	(initialize_realms): Get default tcp ports from "kdc_tcp_ports"
+	entry in config file, falling back to DEFAULT_KDC_TCP_PORTLIST.
+	Use DEFAULT_KDC_UDP_PORTLIST for UDP.
+	* network.c: Include port-sockets.h, socket-utils.h, cm.h.
+	(setup_tcp_listener_ports): New function, creates a TCP listener
+	socket for each port number previously specified.  Tries to do
+	both IPv6 and IPv4 if possible.
+	(setup_a_tcp_listener): New function, creates a TCP socket to
+	listen on at the supplied socket address.
+	(sstate): New variable.
+	(setup_network): Initialize sstate.  Parse TCP port number
+	specification string, and call setup_tcp_listener_ports.
+	(listen_and_process): Use krb5int_cm_call_select, and invoke the
+	service routine specified in the connection info, passing it flags
+	indicating which select fd sets listed the connection.
+	(accept_tcp_connection): New function, handles a TCP listener
+	socket and creates a TCP data connection.
+	(process_tcp_connection): New function, handles incoming or
+	outgoing data on a TCP data stream.
+	(udp_port_fds, udp_port_nums, n_udp_ports, max_udp_ports):
+	Deleted.
+	(n_sockets, max_udp_sockets, select_fds, select_nfds): Deleted.
+	(ipv6_enabled, setreuseaddr, setv6only, paddr, setnbio,
+	setnolinger): New helper functions.
+	(struct connection): New type, encapsulating all per-connection
+	data.
+	(SET, FOREACH_ELT, GROW_SET, ADD, DEL, FREE_SET_DATA): New
+	macros.
+	(connections, udp_port_data, tcp_port_data): New variables.
+	(n_sockets, conns): New macros.
+	(add_udp_port): Renamed from add_port, rewritten to use set macros
+	above.
+	(add_tcp_port): New function, parallel to udp version.
+	(add_fd): Rewritten to manage a set of connection info records
+	instead of just file descriptors.
+	(add_udp_fd, add_tcp_listener_fd, add_tcp_data_fd, delete_fd): New
+	helper functions.
+	(setup_udp_port): Renamed from setup_port.  Uses set macros.
+	(klog_handler): New function, not compiled currently.
+	(init_addr): New function, split out work of initializing a
+	krb5_fulladdr from a socket address from process_packet.
+	(process_packet): Now takes connection info pointer and select
+	flags as arguments.
+	(closedown_network): Use set macros in cleanup.
 
 2002-09-15  Tom Yu  <tlyu@mit.edu>
 

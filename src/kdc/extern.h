@@ -59,7 +59,8 @@ typedef struct __kdc_realm_data {
     /*
      * Other per-realm data.
      */
-    char		*realm_ports;	/* Per-realm KDC port */
+    char		*realm_ports;	/* Per-realm KDC UDP port */
+    char		*realm_tcp_ports; /* Per-realm KDC TCP port */
     /*
      * Per-realm parameters.
      */
