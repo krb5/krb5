@@ -248,4 +248,25 @@ typedef struct _krb5_priv_enc_part {
 #include <krb5/func-proto.h>
 #include <krb5/free.h>
 
+/* This is from Sandia */
+#ifndef FD_SET
+#define FD_SETSIZE          (sizeof (fd_set) * 8)
+
+#define FD_SET(f,s)         ((s)->fds_bits[0] |= (1 << (f)))
+#define FD_CLR(f,s)         ((s)->fds_bits[0] &= ~(1 << (f)))
+#define FD_ISSET(f,s)       ((s)->fds_bits[0] & (1 << (f)))
+#define FD_ZERO(s)          ((s)->fds_bits[0] = 0)
+#endif
+
+/* Sandia password generation structures */
+typedef struct _passwd_phrase_element {
+    krb5_data *passwd;
+    krb5_data *phrase;
+} passwd_phrase_element;
+
+typedef struct _krb5_pwd_data {
+    int sequence_count;
+    passwd_phrase_element **element;
+} krb5_pwd_data;
+
 #endif /* KRB5_GENERAL__ */
