@@ -60,6 +60,7 @@ krb5_keytab_entry *entry;
 	    /* found a match */
             found = TRUE;
             krb5_kt_free_entry(cur_entry);
+	    krb5_xfree(cur_entry);
 	    break;
 	}
 	krb5_kt_free_entry(cur_entry);
