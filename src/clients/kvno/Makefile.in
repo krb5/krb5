@@ -2,27 +2,19 @@ thisconfigdir=./..
 myfulldir=clients/kvno
 mydir=kvno
 BUILDTOP=$(REL)$(U)$(S)$(U)
-##DOS##BUILDTOP=..\..
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: kvno
-all-windows::
+all-windows:: $(OUTPRE)kvno.exe
 all-mac::
 
 kvno: kvno.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kvno.o $(KRB5_BASE_LIBS)
 
-
-##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-##WIN32##CFLAGS	= $(CCOPTS2)
-##WIN32##CPPFLAGS = $(INCLUDES)
-
-##WIN32##all-windows:: kvno.exe
-##WIN32##kvno.exe: kvno.obj $(BUILDTOP)\util\windows\getopt.obj $(KLIB) $(CLIB)
-##WIN32##	link /nologo /out:$@ $**
-
+$(OUTPRE)kvno.exe: $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) /out:$@ $**
 
 clean-unix::
 	$(RM) kvno.o kvno
