@@ -55,10 +55,10 @@ static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(pkt, from, is_secondary, response)
+process_tgs_req(pkt, from, portnum, response)
 krb5_data *pkt;
 const krb5_fulladdr *from;		/* who sent it ? */
-int	is_secondary;
+int	portnum;
 krb5_data **response;			/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
@@ -89,12 +89,6 @@ krb5_data **response;			/* filled in with a response packet */
     int firstpass = 1;
     int ok_key_data = 0;
     const char	*status = 0;
-    char	secondary_ch;
-    
-    if (is_secondary)
-	secondary_ch = ';';
-    else
-	secondary_ch = ':';
     
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
@@ -627,8 +621,8 @@ got_a_key:;
     
 cleanup:
     if (status)
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ%c %s: authtime %d, host %s, %s for %s%s%s",
-	       secondary_ch, status, authtime, fromstring,
+        krb5_klog_syslog(LOG_INFO, "TGS_REQ %d: %s: authtime %d, host %s, %s for %s%s%s",
+	       portnum, status, authtime, fromstring,
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
 	       errcode ? ", " : "",

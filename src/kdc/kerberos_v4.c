@@ -73,7 +73,7 @@
 extern int errno;
 
 int compat_decrypt_key PROTOTYPE((krb5_key_data *, C_Block));
-int kerb_get_principal PROTOTYPE((char *, char *, Principal *, unsigned int,
+int kerb_get_principal PROTOTYPE((char *, char *, Principal *, int,
 				  int *));
 int check_princ PROTOTYPE((char *, char *, unsigned, Principal *));
 
@@ -334,7 +334,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
     char   *name;               /* could have wild card */
     char   *inst;               /* could have wild card */
     Principal *principal;
-    unsigned int maxn;          /* max number of name structs to return */
+    int maxn;          /* max number of name structs to return */
     int    *more;               /* more tuples than room for */
 {
     /* Note that this structure should not be passed to the
@@ -499,7 +499,7 @@ kerberos_v4(client, pkt)
 #ifdef notdef
 	    u_long  time_ws;	/* Workstation time */
 #endif
-	    KRB4_32  req_life;	/* Requested liftime */
+	    u_long  req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 #ifdef notdef
@@ -521,7 +521,7 @@ kerberos_v4(client, pkt)
 	    }
 	    ptr = (char *) pkt_time_ws(pkt) + 4;
 
-	    req_life = (KRB4_32) (*ptr++);
+	    req_life = (u_long) (*ptr++);
 
 	    service = ptr;
 	    instance = ptr + strlen(service) + 1;
@@ -614,7 +614,7 @@ kerberos_v4(client, pkt)
     case AUTH_MSG_APPL_REQUEST:
 	{
 	    KRB4_32  time_ws;	/* Workstation time */
-	    KRB4_32 req_life;	/* Requested liftime */
+	    u_long req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 	    int     kerno = 0;	/* Kerberos error number */
@@ -653,7 +653,7 @@ kerberos_v4(client, pkt)
 	    memcpy(&time_ws, ptr, 4);
 	    ptr += 4;
 
-	    req_life = (KRB4_32) (*ptr++);
+	    req_life = (u_long) (*ptr++);
 
 	    service = ptr;
 	    instance = ptr + strlen(service) + 1;

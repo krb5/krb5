@@ -92,10 +92,10 @@ check_padata (client, src_addr, padata, pa_id, flags)
 
 /*ARGSUSED*/
 krb5_error_code
-process_as_req(request, from, is_secondary, response)
+process_as_req(request, from, portnum, response)
 register krb5_kdc_req *request;
 const krb5_fulladdr *from;		/* who sent it ? */
-int	is_secondary;
+int	portnum;
 krb5_data **response;			/* filled in with a response packet */
 {
 

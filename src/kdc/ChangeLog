@@ -1,3 +1,24 @@
+Thu Oct  5 21:23:12 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* network.c (setup_network):
+	* main.c (initialize_realms): Massive revamp of how the network
+		ports are setup.  The default port list for a realm is
+		read from [kdcdefaults]/kdc_ports from the kdc.conf file.
+		For each realm, a list of ports can be specified in 
+		[realms]/<realm>/kdc_ports.  
+
+	* extern.h (kdc_realm_t): Remove realm_pport and realm_sport, and
+		added realm_ports.
+
+	* do_tgs_req.c (process_tgs_req):
+	* do_as_req.c (process_as_req):
+	* dispatch.c (dispatch): Pass the portnumber of the incoming
+		request down to process_as_req and process_tgs_req,
+		instead of the boolean "is_secondary".
+
+	* kerberos_v4.c (kerb_get_principal, kerberos_v4): Fix gcc -Wall
+		flames, by fixing signed vs. unsigned types.
+
 Mon Sep 18 11:16:30 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* main.c (init_realm): strdup KRB5_KDB_M_NAME if we use it, to

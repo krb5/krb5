@@ -30,10 +30,10 @@
 #include "adm_proto.h"
 
 krb5_error_code
-dispatch(pkt, from, is_secondary, response)
+dispatch(pkt, from, portnum, response)
     krb5_data *pkt;
     const krb5_fulladdr *from;
-    int		is_secondary;
+    int		portnum;
     krb5_data **response;
 {
 
@@ -51,7 +51,7 @@ dispatch(pkt, from, is_secondary, response)
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
-	retval = process_tgs_req(pkt, from, is_secondary, response);
+	retval = process_tgs_req(pkt, from, portnum, response);
     } else if (krb5_is_as_req(pkt)) {
 	if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
 	    /*
@@ -59,14 +59,14 @@ dispatch(pkt, from, is_secondary, response)
 	     * pointer.
 	     */
 	    if (!(retval = setup_server_realm(as_req->server))) {
-		retval = process_as_req(as_req, from, is_secondary, response);
+		retval = process_as_req(as_req, from, portnum, response);
 	    }
 	    krb5_free_kdc_req(kdc_context, as_req);
 	}
     }
 #ifdef KRB5_KRB4_COMPAT
     else if (pkt->data[0] == 4)		/* old version */
-	retval = process_v4(pkt, from, is_secondary, response);
+	retval = process_v4(pkt, from, portnum, response);
 #endif
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;

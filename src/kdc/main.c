@@ -171,72 +171,6 @@ get_realm_port(ctx, realm, name, defport, service)
 }
 
 /*
- * Convert a string of the form <int>[,<int>]* to a list of ints.
- */
-static int *
-string2intlist(string)
-    char	*string;
-{
-    int		nints, i;
-    char	*cp;
-    int		*intlist;
-
-    for ((nints=1, cp=string); *cp; cp++)
-	if (*cp == ',')
-	    nints++;
-    if ((intlist = (int *) malloc((nints+1) * sizeof(int)))) {
-	cp = string;
-	for (i=0; i<nints; i++) {
-	    if (sscanf(cp, "%d", &intlist[i]) != 1) {
-		free(intlist);
-		intlist = (int *) NULL;
-		break;
-	    }
-	    while ((*cp != ',') && (*cp != '\0'))
-		cp++;
-	    cp++;
-	}
-	if (intlist)
-	    intlist[nints] = -1;
-    }
-    return(intlist);
-}
-
-/*
- * Get default portlists.
- */
-static void
-get_default_portlists(plistp, slistp)
-    int			**plistp;
-    int			**slistp;
-{
-    int		*plist;
-    int		*slist;
-    krb5_pointer	aprof;
-    const char	*hierarchy[3];
-    char	*liststring;
-
-    plist = slist = (int *) NULL;
-    if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
-	hierarchy[0] = "kdcdefaults";
-	hierarchy[1] = "primary_ports";
-	hierarchy[2] = (char *) NULL;
-	if (!krb5_aprof_get_string(aprof, hierarchy, TRUE, &liststring)) {
-	    plist = string2intlist(liststring);
-	    krb5_xfree(liststring);
-	}
-	hierarchy[1] = "secondary_ports";
-	if (!krb5_aprof_get_string(aprof, hierarchy, TRUE, &liststring)) {
-	    slist = string2intlist(liststring);
-	    krb5_xfree(liststring);
-	}
-	krb5_aprof_finish(aprof);
-    }
-    *plistp = plist;
-    *slistp = slist;
-}
-
-/*
  * initialize the replay cache.
  */
 krb5_error_code
@@ -342,15 +276,14 @@ finish_realm(rdp)
  */
 static krb5_error_code
 init_realm(progname, rdp, realm, def_dbname, def_mpname,
-		 def_enctype, def_port, def_sport, def_manual)
+		 def_enctype, def_ports, def_manual)
     char		*progname;
     kdc_realm_t		*rdp;
     char		*realm;
     char		*def_dbname;
     char		*def_mpname;
     krb5_enctype	def_enctype;
-    krb5_int32		def_port;
-    krb5_int32		def_sport;
+    char		*def_ports;
     krb5_boolean	def_manual;
 {
     krb5_error_code	kret;
@@ -403,25 +336,11 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		    ENCTYPE_DES_CBC_CRC;
 
 	    /* Handle KDC port */
-	    if (rparams && rparams->realm_kdc_pport_valid)
-		rdp->realm_pport = rparams->realm_kdc_pport;
+	    if (rparams && rparams->realm_kdc_ports)
+		rdp->realm_ports = strdup(rparams->realm_kdc_ports);
 	    else
-		rdp->realm_pport = get_realm_port(rdp->realm_context,
-						  realm,
-						  "kdc",
-						  def_port,
-						  KDC_PORTNAME);
-
-	    /* Handle KDC secondary port */
-	    if (rparams && rparams->realm_kdc_sport_valid)
-		rdp->realm_sport = rparams->realm_kdc_sport;
-	    else
-		rdp->realm_sport = get_realm_port(rdp->realm_context,
-						  realm,
-						  "v4kdc",
-						  def_sport,
-						  KDC_SECONDARY_PORTNAME);
-
+		rdp->realm_ports = strdup(def_ports);
+	    
 	    /* Handle stash file */
 	    if (rparams && rparams->realm_stash_file) {
 		rdp->realm_stash = strdup(rparams->realm_stash_file);
@@ -751,11 +670,22 @@ initialize_realms(kcontext, argc, argv)
     krb5_enctype	menctype = ENCTYPE_DES_CBC_CRC;
     kdc_realm_t		*rdatap;
     krb5_boolean	manual = FALSE;
-    krb5_int32		pport, sport;
-
+    char		*default_ports = 0;
+    krb5_pointer	aprof;
+    const char		*hierarchy[3];
     extern char *optarg;
 
-    pport = sport = -1;
+    if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
+	hierarchy[0] = "kdcdefaults";
+	hierarchy[1] = "kdc_ports";
+	hierarchy[2] = (char *) NULL;
+	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_ports))
+	    default_ports = 0;
+	krb5_aprof_finish(aprof);
+    }
+    if (default_ports == 0)
+	default_ports = strdup(DEFAULT_KDC_PORTLIST);
+    
     /*
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
@@ -766,8 +696,8 @@ initialize_realms(kcontext, argc, argv)
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
 		if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 		    if ((retval = init_realm(argv[0], rdatap, optarg, db_name,
-					     mkey_name, menctype, pport, sport,
-					     manual))) {
+					     mkey_name, menctype,
+					     default_ports, manual))) {
 			fprintf(stderr,"%s: cannot initialize realm %s\n",
 				argv[0], optarg);
 			exit(1);
@@ -797,11 +727,9 @@ initialize_realms(kcontext, argc, argv)
 	    rcname = optarg;
 	    break;
 	case 'p':
-	    pport = atoi(optarg);
-	    break;
-	case 's':
-	    sport = atoi(optarg);
-	    break;
+	    if (default_ports)
+		free(default_ports);
+	    default_ports = strdup(optarg);
 	case '?':
 	default:
 	    usage(argv[0]);
@@ -821,7 +749,7 @@ initialize_realms(kcontext, argc, argv)
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 	    if ((retval = init_realm(argv[0], rdatap, lrealm, db_name,
-				     mkey_name, menctype, pport, sport,
+				     mkey_name, menctype, default_ports,
 				     manual))) {
 		fprintf(stderr,"%s: cannot initialize realm %s\n",
 			argv[0], lrealm);
@@ -842,6 +770,8 @@ initialize_realms(kcontext, argc, argv)
 
     /* Ensure that this is set for our first request. */
     kdc_active_realm = kdc_realmlist[0];
+    if (default_ports)
+	free(default_ports);
     return;
 }
 
@@ -887,7 +817,7 @@ char *argv[];
 {
     krb5_error_code	retval;
     krb5_context	kcontext;
-    int			*primaries, *secondaries;
+    int			*port_list;
     int errout = 0;
 
     if (strrchr(argv[0], '/'))
@@ -900,7 +830,7 @@ char *argv[];
     }
     memset((char *) kdc_realmlist, 0,
 	   (size_t) (sizeof(kdc_realm_t *) * KRB5_KDC_MAX_REALMS));
-    primaries = secondaries = (int *) NULL;
+    port_list = NULL;
 
     /*
      * A note about Kerberos contexts: This context, "kcontext", is used
@@ -917,14 +847,9 @@ char *argv[];
      */
     initialize_realms(kcontext, argc, argv);
 
-    /*
-     * Get the default port lists.
-     */
-    get_default_portlists(&primaries, &secondaries);
-
     setup_signal_handlers();
 
-    if ((retval = setup_network(argv[0], primaries, secondaries))) {
+    if ((retval = setup_network(argv[0]))) {
 	com_err(argv[0], retval, "while initializing network");
 	finish_realms(argv[0]);
 	return 1;
@@ -946,10 +871,6 @@ char *argv[];
     krb5_klog_syslog(LOG_INFO, "shutting down");
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
-    if (primaries)
-	free(primaries);
-    if (secondaries)
-	free(secondaries);
     return errout;
 }
 
