@@ -1,3 +1,10 @@
+Mon Aug 12 14:33:31 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kpropd.c: rework to use kdb5_util instead of kdb5_edit; don't
+ 	send # bytes received until kdb5_util succeeds, so kprop won't
+ 	print SUCCESS until it is true; accept an acl_file name on the
+ 	command line
+
 Fri Mar 15 14:33:06 1996  Richard Basch  <basch@lehman.com>
 
 	* kprop.c: Corrected various memory leaks and unreferenced 

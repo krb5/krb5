@@ -72,8 +72,9 @@ krb5_auth_context auth_context;
 char	*realm = NULL;		/* Our realm */
 char	*file = KPROPD_DEFAULT_FILE;
 char	*temp_file_name;
-char	*kdb5_edit = KPROPD_DEFAULT_KDB5_EDIT;
+char	*kdb5_util = KPROPD_DEFAULT_KDB5_UTIL;
 char	*kerb_database = KPROPD_DEFAULT_KRB_DB;
+char	*acl_file_name = KPROPD_ACL_FILE;
 
 int		database_fd;
 krb5_address	sender_addr;
@@ -97,7 +98,8 @@ krb5_boolean authorized_principal
 void	recv_database
 	PROTOTYPE((krb5_context,
 		   int,
-		   int));
+		   int,
+		   krb5_data *));
 void	load_database
 	PROTOTYPE((krb5_context,
     		   char *,
@@ -116,8 +118,8 @@ static void usage()
 	fprintf(stderr,
 		"\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n",
 		progname);
-	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_edit_pathname]\n");
-	fprintf(stderr, "\t[-P port]\n");
+	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n");
+	fprintf(stderr, "\t[-P port] [-a acl_file]\n");
 	exit(1);
 }
 
@@ -232,6 +234,7 @@ void doit(fd)
 	int on = 1, fromlen;
 	struct hostent	*hp;
 	krb5_error_code	retval;
+	krb5_data confmsg;
 	int lock_fd;
 	int omask;
 
@@ -295,12 +298,7 @@ void doit(fd)
 			temp_file_name);
 		exit(1);
 	}
-	recv_database(kpropd_context, fd, database_fd);
-	if (close(fd) < 0) {
-		com_err(progname, errno,
-			"while trying to close database file");
-		exit(1);
-	}
+	recv_database(kpropd_context, fd, database_fd, &confmsg);
 	if (rename(temp_file_name, file)) {
 		com_err(progname, errno, "While renaming %s to %s",
 			temp_file_name, file);
@@ -312,13 +310,32 @@ void doit(fd)
 		    temp_file_name);
 	    exit(1);
 	}
-	load_database(kpropd_context, kdb5_edit, file);
+	load_database(kpropd_context, kdb5_util, file);
 	retval = krb5_lock_file(kpropd_context, lock_fd, KRB5_LOCKMODE_UNLOCK);
 	if (retval) {
 	    com_err(progname, retval, "while unlocking '%s'", temp_file_name);
 	    exit(1);
 	}
 	(void)close(lock_fd);
+
+	/*
+	 * Send the acknowledgement message generated in
+	 * recv_database, then close the socket.
+	 */
+	if (retval = krb5_write_message(kpropd_context, (void *) &fd,
+					&confmsg)) { 
+		krb5_xfree(confmsg.data);
+		com_err(progname, retval,
+			"while sending # of received bytes");
+		exit(1);
+	}
+	krb5_xfree(confmsg.data);
+	if (close(fd) < 0) {
+		com_err(progname, errno,
+			"while trying to close database file");
+		exit(1);
+	}
+	
 	exit(0);
 }
 
@@ -377,10 +394,10 @@ void PRS(argv)
 					break;
 				case 'p':
 					if (*word)
-						kdb5_edit = word;
+						kdb5_util = word;
 					else
-						kdb5_edit = *argv++;
-					if (!kdb5_edit)
+						kdb5_util = *argv++;
+					if (!kdb5_util)
 						usage();
 					word = 0;
 					break;
@@ -416,6 +433,15 @@ void PRS(argv)
 					break;
 				case 'S':
 					standalone++;
+					break;
+				   case 'a':
+					if (*word)
+					     acl_file_name = word;
+					else
+					     acl_file_name = *argv++;
+					if (!acl_file_name)
+					     usage();
+					word = 0;
 					break;
 				default:
 					usage();
@@ -571,7 +597,7 @@ authorized_principal(context, p)
     if (retval)
 	return FALSE;
 
-    acl_file = fopen(KPROPD_ACL_FILE, "r");
+    acl_file = fopen(acl_file_name, "r");
     if (!acl_file)
 	return FALSE;
 
@@ -593,10 +619,11 @@ authorized_principal(context, p)
 }
 
 void
-recv_database(context, fd, database_fd)
+recv_database(context, fd, database_fd, confmsg)
     krb5_context context;
     int	fd;
     int	database_fd;
+    krb5_data *confmsg;
 {
 	int	database_size;
 	int	received_size, n;
@@ -687,25 +714,19 @@ recv_database(context, fd, database_fd)
 		send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
 	}
 	/*
-	 * Send over acknowledgement of number of bytes receieved.
+	 * Create message acknowledging number of bytes received, but
+	 * don't send it until kdb5_util returns successfully.
 	 */
 	database_size = htonl(database_size);
 	inbuf.data = (char *) &database_size;
 	inbuf.length = sizeof(database_size);
-	if (retval = krb5_mk_safe(context,auth_context,&inbuf,&outbuf,NULL)) {
+	if (retval = krb5_mk_safe(context,auth_context,&inbuf,confmsg,NULL)) {
 		com_err(progname, retval,
 			"while encoding # of receieved bytes");
 		send_error(context, fd, retval,
 			   "while encoding # of received bytes");
 		exit(1);
 	}
-	if (retval = krb5_write_message(context, (void *) &fd, &outbuf)) {
-		krb5_xfree(outbuf.data);
-		com_err(progname, retval,
-			"while sending # of receeived bytes");
-		exit(1);
-	}
-	krb5_xfree(outbuf.data);
 }
 
 
@@ -782,9 +803,9 @@ recv_error(context, inbuf)
 }
 
 void
-load_database(context, kdb5_edit, database_file_name)
+load_database(context, kdb5_util, database_file_name)
     krb5_context context;
-    char *kdb5_edit;
+    char *kdb5_util;
     char *database_file_name;
 {
 	static char	*edit_av[10];
@@ -802,28 +823,27 @@ load_database(context, kdb5_edit, database_file_name)
 #else
 	int	waitb;
 #endif
-	char	request[1024];
 	krb5_error_code	retval;
 
 	if (debug)
-		printf("calling krb5_edit to load database\n");
+		printf("calling kdb5_util to load database\n");
 
-	sprintf(request, "load_db %s %s", database_file_name, kerb_database);
-	
-	edit_av[0] = kdb5_edit;
+	edit_av[0] = kdb5_util;
 	count = 1;
 	if (realm) {
 		edit_av[count++] = "-r";	
 		edit_av[count++] = realm;	
 	}
-	edit_av[count++] = "-R";	
-	edit_av[count++] = request;
+	edit_av[count++] = "load";
+	edit_av[count++] = "-d";
+	edit_av[count++] = kerb_database;
+	edit_av[count++] = database_file_name;
 	edit_av[count++] = NULL;
 
 	switch(child_pid = fork()) {
 	case -1:
 		com_err(progname, errno, "while trying to fork %s",
-			kdb5_edit);
+			kdb5_util);
 		exit(1);
 	case 0:
 		if (!debug) {
@@ -836,12 +856,12 @@ load_database(context, kdb5_edit, database_file_name)
 			dup(0);
 		}
 
-		execv(kdb5_edit, edit_av);
+		execv(kdb5_util, edit_av);
 		retval = errno;
 		if (!debug)
 			dup2(save_stderr, 2);
 		com_err(progname, retval, "while trying to exec %s",
-			kdb5_edit);
+			kdb5_util);
 		_exit(1);
 		/*NOTREACHED*/
 	default:
@@ -849,14 +869,14 @@ load_database(context, kdb5_edit, database_file_name)
 		    printf("Child PID is %d\n", child_pid);
 		if (wait(&waitb) < 0) {
 			com_err(progname, errno, "while waiting for %s",
-				kdb5_edit);
+				kdb5_util);
 			exit(1);
 		}
 	}
 	
 	if (error_ret = WEXITSTATUS(waitb)) {
 		com_err(progname, 0, "%s returned a bad exit status (%d)",
-			kdb5_edit, error_ret);
+			kdb5_util, error_ret);
 		exit(1);
 	}
 	return;
