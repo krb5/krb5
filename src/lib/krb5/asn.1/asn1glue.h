@@ -25,4 +25,7 @@
 
 #define free_krb5_string(val) { free((val)->string); free(val);}
 
+#define free_krb5_ap_rep_enc_part free
+#define free_krb5_checksum free
+
 #endif /* __KRB5_GLUE_H__ */
