@@ -363,7 +363,7 @@ location definitions:
 \item[admin service principal] ADM_PRINCIPAL (``ovsec_kadm/admin'')
 \item[admin history key] HIST_PRINCIPAL (``ovsec_kadm/history'')
 \item[change password principal] CHANGEPW_PRINCIPAL (``ovsec_kadm/changepw'')
-\item[server acl file path] ACLFILE (``/krb/ovsec_admin.acl'')
+\item[server acl file path] ACLFILE (``/krb5/ovsec_admin.acl'')
 \end{description}
 
 OVSEC_KADM errors are described in $<$ovsec_admin/kadm_err.h$>$.
@@ -391,52 +391,47 @@ omitted from the list presented with each function.
 The admin system guarantees that a function that returns an error code
 has no other side effect.
 
-The Admin system will use \v{com_err} for error codes.  Note, this
-means that \v{com_err} codes may returned from functions that the
-admin routines call (e.g. the kerberos library). Callers should not
-expect that only OVSEC errors will be returned.  The Admin system
-error code table name will be ``kadm'', and the offsets will be the
-same as the order presented here. The error table include file will be
+The Admin system will use \v{com_err} for error codes.  Note that this
+means \v{com_err} codes may returned from functions that the admin
+routines call (e.g. the kerberos library). Callers should not expect
+that only OVSEC errors will be returned.  The Admin system error code
+table name will be ``ovk'', and the offsets will be the same as the
+order presented here. The error table include file will be
 $<$ovsec_admin/kadm_err.h$>$.
 
 \begin{description}
-\item[* OVSEC_KADM_OK] Operation successful.
 \item[* OVSEC_KADM_FAILURE] Operation failed for unspecified reason.
-\item[* OVSEC_KADM_AUTH_GET] Caller is not authorized to perform
-operations requiring the ``get'' privilege.
-\item[* OVSEC_KADM_AUTH_ADD] Caller is not authorized to perform
-operations requiring the ``add'' privilege.
-\item[* OVSEC_KADM_AUTH_MODIFY] Caller is not authorized to perform
-operations requiring the ``modify'' privilege.
-\item[* OVSEC_KADM_AUTH_DELETE] Caller is not authorized to perform
-operations requiring the ``delete'' privilege.
-\item[* OVSEC_KADM_AUTH_INSUFFICIENT] Caller is not authorized to
-perform more than one of the operations required by the function.
-\item[* OVSEC_KADM_BAD_DB] A database inconsistency was detected.
-\item[OVSEC_KADM_DUP] The operation would create a duplicate principal or
-policy.
-\item[OVSEC_KADM_UNK_PRINC]  The named principal does not exist.
-\item[OVSEC_KADM_UNK_POLICY] The named policy does not exist.
-\item[OVSEC_KADM_BAD_MASK] The principal or policy field mask is invalid
-for the current operation.
-\item[OVSEC_KADM_BAD_CLASS] The number of character classes specified
-is invalid.
-\item[OVSEC_KADM_BAD_LENGTH] The specified minimum or maximum length
-is invalid; minimum lengths must be non-negative and maximum lengths
-must be positive.
-\item[OVSEC_KADM_PASS_Q_TOOSHORT] The password does not contain enough
-characters.
-\item[OVSEC_KADM_PASS_Q_CLASS] The password must contain characters
-from more character classes.
-\item[OVSEC_KADM_PASS_Q_DICT] The password is in the password
-dictionary.
-\item[OVSEC_KADM_PASS_REUSE] The specified password is in the principal's
-password history.
-\item[OVSEC_KADM_PASS_TOOSOON] The current password's minimum lifetime
-has not passed.
-\item[OVSEC_KADM_POLICY_REF] The named policy's refcnt is not zero.
-\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal
-characters.
+\item[* OVSEC_KADM_AUTH_GET] Operation requires ``get'' privilege.
+\item[* OVSEC_KADM_AUTH_ADD] Operation requires ``add'' privilege.
+\item[* OVSEC_KADM_AUTH_MODIFY] Operation requires ``modify'' privilege.
+\item[* OVSEC_KADM_AUTH_DELETE] Operation requires ``delete'' privilege.
+\item[* OVSEC_KADM_AUTH_INSUFFICIENT] Insufficient authorization for
+operation.
+\item[* OVSEC_KADM_BAD_DB] Database inconsistency detected.
+\item[OVSEC_KADM_DUP] Principal or policy already exists.
+\item[OVSEC_KADM_RPC_ERROR] Communication failure with server.
+\item[OVSEC_KADM_NO_SRV] No administration server found for realm.
+\item[OVSEC_KADM_NO_ADMIN] XXX what does this mean?
+\item[OVSEC_KADM_BAD_HIST_KEY] Password history principal key version
+mismatch.
+\item[OVSEC_KADM_NOT_INIT] Connection to server not initialized.
+\item[OVSEC_KADM_UNK_PRINC]  Principal does not exist.
+\item[OVSEC_KADM_UNK_POLICY] Policy does not exist.
+\item[OVSEC_KADM_BAD_MASK] Invalid field mask for operation.
+\item[OVSEC_KADM_BAD_CLASS] Invalid number of character classes.
+\item[OVSEC_KADM_BAD_LENGTH] Invalid password length.
+\item[OVSEC_KADM_BAD_POLICY] Illegal policy name.
+\item[OVSEC_KADM_BAD_PRINCIPAL] Illegal principal name. XXX use krb5
+error code?
+\item[OVSEC_KADM_BAD_AUX_ATTR] Invalid auxillary attributes.
+\item[OVSEC_KADM_PASS_Q_TOOSHORT] Password is too short.
+\item[OVSEC_KADM_PASS_Q_CLASS] Password does not contain enough
+character classes.
+\item[OVSEC_KADM_PASS_Q_DICT] Password is in the password dictionary.
+\item[OVSEC_KADM_PASS_REUSE] Cannot resuse password.
+\item[OVSEC_KADM_PASS_TOOSOON] Current password's minimum life has not
+expired.
+\item[OVSEC_KADM_POLICY_REF] Policy reference count is not zero.
 \end{description}
 
 \subsection{Authentication and Authorization}
@@ -556,7 +551,7 @@ called from local and remote clients.
 For remote clients, the semantics are:
 
 \begin{enumerate}
-\item Initializes all the com_err error tables defined by the Admin
+\item Initializes all the com_err error tables used by the Admin
 system.
 
 \item Acquire a Kerberos ticket for the specified service.
@@ -578,7 +573,12 @@ the tty) for a password.
 using the just-acquired Kerberos ticket.
 \end{enumerate}
 
-For local clients, the function does nothing.
+For local clients, the semantics are:
+
+\begin{enumerate}
+\item Initializes all the com_err error tables used by the Admin
+system.
+\end{enumerate}
 
 RETURN CODES: 
 
@@ -840,6 +840,8 @@ password history, return OVSEC_KADM_PASS_REUSE.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
 \item If the POLICY bit is set, set pw_expiration to now + max_pw_life.
+\item If the KRB5_KDC_REQUIRES_PWCHANGE bit is set in the principal's
+attributes, clear it.
 \item Update last_pwd_change and mod_date to now, update mod_name to
 caller.
 \end{enumerate}
@@ -1006,6 +1008,8 @@ pw_min_life, return OVSEC_KADM_PASS_TOOSOON.
 \item Increment principal's key version number by one.
 \item If the POLICY bit in aux_attributes is set, set pw_expiration to
 now + max_pw_life.
+\item If the KRB5_KDC_REQUIRES_PWCHANGE bit is set in the principal's
+attributes, clear it.
 \item Update last_pwd_change and mod_date to now, update mod_name to
 caller.
 \end{enumerate}
@@ -1181,8 +1185,7 @@ RETURN CODES:
 \subsection{ovsec_kadm_free_principal_ent, _policy_ent}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_free_principal_ent(ovsec_kadm_principal_ent_t *);
+void ovsec_kadm_free_principal_ent(ovsec_kadm_principal_ent_t);
 \end{verbatim}
 
 Free the memory that was allocated by a call to
@@ -1191,8 +1194,7 @@ ovsec_kadm_get_principal.
 AUTHORIZATION REQUIRED: none (local operation)
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_free_policy_ent(ovsec_kadm_policy_ent_t *);
+void ovsec_kadm_free_policy_ent(ovsec_kadm_policy_ent_t);
 \end{verbatim}
 
 Free memory that was allocated by a call to ovsec_kadm_get_policy.
@@ -1285,8 +1287,9 @@ The format of this file is:
 \item Blank lines or lines beginning with ``\#'' are ignored.
 
 \item ACL entry lines contain two fields separated by any number of
-spaces or tabs.  The first field is a Kerberos name and the second
-field is the privilege list.
+spaces, tabs, or newlines, and are terminated with a semi-colon.  The
+first field is a Kerberos name and the second field is the privilege
+list.
 
 \item The privilege list can contain a comma separated list of the
 words ``get'', ``add'', ``modify'', and ``delete''.
@@ -1413,6 +1416,14 @@ admin@REALM.COM, addr = 192.231.148.12
 \end{verbatim}
 
 \end{itemize}
+
+\subsection{Password Dictionary}
+
+The Admin server's password dictionary is stored in
+/krb5/ovsec_adm_dict.  It is read once when the server starts.  It
+contains a list of entries, separated by newlines.  An entry may
+include any character except a newline and NULL, including spaces.
+The dictionary does not need to be sorted.
 
 \section{Tools}
 \label{sec:tools}
