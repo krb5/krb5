@@ -44,8 +44,8 @@ krb5_data      *realm2;
   trans_length = trans->data[trans->length-1] ?
                  trans->length : trans->length - 1;
 
-  if (retval = krb5_walk_realm_tree(context, realm1, realm2, &tgs_list,
-                                    KRB5_REALM_BRANCH_CHAR)) {
+  if ((retval = krb5_walk_realm_tree(context, realm1, realm2, &tgs_list,
+                                    KRB5_REALM_BRANCH_CHAR))) {
     return(retval);
   }
 

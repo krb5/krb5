@@ -45,20 +45,20 @@ krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
 
     memset(*ppcreds, 0, sizeof(krb5_creds));
 
-    if (retval = krb5_copy_principal(context, pkdcrep->client,
-                                     &(*ppcreds)->client))
+    if ((retval = krb5_copy_principal(context, pkdcrep->client,
+                                     &(*ppcreds)->client)))
         goto cleanup;
 
-    if (retval = krb5_copy_principal(context, pkdcrep->enc_part2->server,
-                                     &(*ppcreds)->server))
+    if ((retval = krb5_copy_principal(context, pkdcrep->enc_part2->server,
+                                     &(*ppcreds)->server)))
         goto cleanup;
 
-    if (retval = krb5_copy_keyblock_contents(context, 
-					     pkdcrep->enc_part2->session,
-                                             &(*ppcreds)->keyblock))
+    if ((retval = krb5_copy_keyblock_contents(context, 
+					      pkdcrep->enc_part2->session,
+					      &(*ppcreds)->keyblock)))
         goto cleanup;
 
-    if (retval = krb5_copy_data(context, psectkt, &pdata))
+    if ((retval = krb5_copy_data(context, psectkt, &pdata)))
 	goto cleanup;
     (*ppcreds)->second_ticket = *pdata;
     krb5_xfree(pdata);
@@ -72,17 +72,17 @@ krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
     (*ppcreds)->is_skey = 0;    			/* not used */
 
     if (pkdcrep->enc_part2->caddrs) {
-	if (retval = krb5_copy_addresses(context, pkdcrep->enc_part2->caddrs,
-					 &(*ppcreds)->addresses)) 
+	if ((retval = krb5_copy_addresses(context, pkdcrep->enc_part2->caddrs,
+					  &(*ppcreds)->addresses)))
 	    goto cleanup_keyblock;
     } else {
 	/* no addresses in the list means we got what we had */
-	if (retval = krb5_copy_addresses(context, address,
-					 &(*ppcreds)->addresses)) 
+	if ((retval = krb5_copy_addresses(context, address,
+					  &(*ppcreds)->addresses)))
 	    goto cleanup_keyblock;
     }
 
-    if (retval = encode_krb5_ticket(pkdcrep->ticket, &pdata))
+    if ((retval = encode_krb5_ticket(pkdcrep->ticket, &pdata)))
 	goto cleanup_keyblock;
 
     (*ppcreds)->ticket = *pdata;
@@ -141,12 +141,12 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     }
 */
 
-    if (retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, NULL, 
-			       in_cred->server, address, in_cred->authdata,
-			       0,		/* no padata */
-			       (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
-				  &in_cred->second_ticket : NULL,
-			       tkt, &tgsrep))
+    if ((retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, NULL, 
+				in_cred->server, address, in_cred->authdata,
+				0,		/* no padata */
+				(kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
+				&in_cred->second_ticket : NULL,
+				tkt, &tgsrep)))
 	return retval;
 
     switch (tgsrep.message_type) {
@@ -177,8 +177,9 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	goto error_4;
     }
 
-    if (retval = krb5_decode_kdc_rep(context, &tgsrep.response, &tkt->keyblock,
-				     tkt->keyblock.etype, &dec_rep))
+    if ((retval = krb5_decode_kdc_rep(context, &tgsrep.response,
+				      &tkt->keyblock,
+				      tkt->keyblock.etype, &dec_rep)))
 	goto error_4;
 
     if (dec_rep->msg_type != KRB5_TGS_REP) {

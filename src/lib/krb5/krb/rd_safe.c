@@ -64,7 +64,7 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
     if (!krb5_is_krb_safe(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
 
-    if (retval = decode_krb5_safe(inbuf, &message))
+    if ((retval = decode_krb5_safe(inbuf, &message)))
 	return retval;
 
     if (!valid_cksumtype(message->checksum->checksum_type)) {
@@ -91,7 +91,7 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 	} else {
 	    krb5_address **our_addrs;
 	
-	    if (retval = krb5_os_localaddr( &our_addrs)) 
+	    if ((retval = krb5_os_localaddr( &our_addrs)))
 		goto cleanup;
 	    
 	    if (!krb5_address_search(context, message->r_address, our_addrs)) {
@@ -115,7 +115,7 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 
     message->checksum = &our_cksum;
 
-    if (retval = encode_krb5_safe(message, &scratch)) 
+    if ((retval = encode_krb5_safe(message, &scratch)))
 	goto cleanup;
 
     message->checksum = his_cksum;
@@ -226,8 +226,9 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
         }
     }
 
-    if (retval = krb5_rd_safe_basic(context, inbuf, keyblock, plocal_fulladdr, 
-				    premote_fulladdr, &replaydata, outbuf)) {
+    if ((retval = krb5_rd_safe_basic(context, inbuf, keyblock,
+				     plocal_fulladdr, premote_fulladdr,
+				     &replaydata, outbuf))) {
 	CLEANUP_DONE();
 	return retval;
     }
@@ -240,7 +241,7 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 	krb5_donot_replay replay;
     	krb5_timestamp currenttime;
 
-	if (retval = krb5_timeofday(context, &currenttime)) 
+	if ((retval = krb5_timeofday(context, &currenttime)))
 	    goto error;
 
 	if (!in_clock_skew(replaydata.timestamp)) {
@@ -248,14 +249,14 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 	    goto error;
 	}
 
-	if (retval = krb5_gen_replay_name(context, auth_context->remote_addr, 
-					  "_safe", &replay.client)) 
+	if ((retval = krb5_gen_replay_name(context, auth_context->remote_addr, 
+					   "_safe", &replay.client)))
 	    goto error;
 
 	replay.server = "";		/* XXX */
 	replay.cusec = replaydata.usec;
 	replay.ctime = replaydata.timestamp;
-	if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
+	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
 	    krb5_xfree(replay.client);
 	    goto error;
 	}

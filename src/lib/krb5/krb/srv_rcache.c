@@ -80,7 +80,7 @@ krb5_get_server_rcache(context, piece, rcptr)
     }
     cachename[p++] = '\0';
 
-    if (retval = krb5_rc_resolve(context, rcache, cachename))
+    if ((retval = krb5_rc_resolve(context, rcache, cachename)))
 	goto cleanup;
     
     /*
@@ -88,7 +88,7 @@ krb5_get_server_rcache(context, piece, rcptr)
      * initialize it.
      */
     if (krb5_rc_recover(context, rcache)) {
-	if (retval = krb5_rc_initialize(context, rcache, krb5_clockskew)) {
+	if ((retval = krb5_rc_initialize(context, rcache, krb5_clockskew))) {
 	    krb5_rc_close(context, rcache);
 	    rcache = 0;
 	    goto cleanup;

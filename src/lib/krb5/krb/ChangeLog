@@ -1,3 +1,15 @@
+Thu Jun  8 16:06:44 1995    <tytso@rsx-11.mit.edu>
+
+	* compat_recv.c, auth_con.c, chk_trans.c, encrypt_tk.c,
+		gc_frm_kdc.c, gc_via_tkt.c, gen_seqnum.c, gen_subkey.c,
+		get_creds.c, get_in_tkt.c, in_tkt_ktb.c, in_tkt_pwd.c,
+		in_tkt_skey.c, init_ctx.c, kdc_rep_dc.c, mk_cred.c,
+		mk_error.c, mk_priv.c, mk_rep.c, mk_req.c, mk_req_ext.c,
+		mk_cred.c, mk_safe.c, parse.c, preauth.c, rd_cred.c,
+		rd_rep.c, rd_req.c, rd_req_dec.c, rd_safe.c, recvauth.c,
+		sendauth.c, send_tgs.c, srv_rcache.c, walk_rtree.c: Clean
+		up GCC -Wall flames.
+
 Wed Jun  7 15:23:21 1995    <tytso@rsx-11.mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): Remove old CONFIG_FILES

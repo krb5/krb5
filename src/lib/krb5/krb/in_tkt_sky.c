@@ -61,7 +61,7 @@ skey_keyproc(context, type, salt, keyseed, key)
     if (!valid_keytype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
-    if (retval = krb5_copy_keyblock(context, keyblock, &realkey))
+    if ((retval = krb5_copy_keyblock(context, keyblock, &realkey)))
 	return retval;
 	
     if (realkey->keytype != type) {

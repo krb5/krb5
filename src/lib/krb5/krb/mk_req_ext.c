@@ -95,7 +95,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	return(KRB5_NO_TKT_SUPPLIED);
 
     /* we need a native ticket */
-    if (retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket))
+    if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
 	return(retval);
     
     /* verify a valid etype is available */
@@ -106,29 +106,29 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
     /* generate auth_context if needed */
     if (*auth_context == NULL) {
-	if (retval = krb5_auth_con_init(context, &new_auth_context))
+	if ((retval = krb5_auth_con_init(context, &new_auth_context)))
 	    goto cleanup;
 	*auth_context = new_auth_context;
     }
 
     /* set auth context keyblock */
-    if (retval = krb5_copy_keyblock(context, &in_creds->keyblock, 
-				    &((*auth_context)->keyblock))) 
+    if ((retval = krb5_copy_keyblock(context, &in_creds->keyblock, 
+				     &((*auth_context)->keyblock))))
 	goto cleanup;
 
     /* generate seq number if needed */
     if ((((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE)
      || ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE))
       && ((*auth_context)->local_seq_number == 0)) 
-	if (retval = krb5_generate_seq_number(context, &in_creds->keyblock,
-				     &(*auth_context)->local_seq_number))
+	if ((retval = krb5_generate_seq_number(context, &in_creds->keyblock,
+				     &(*auth_context)->local_seq_number)))
 	    goto cleanup;
 	
 
     /* generate subkey if needed */
     if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->local_subkey))
-	if (retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
-				          &(*auth_context)->local_subkey))
+	if ((retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
+					   &(*auth_context)->local_subkey)))
 	    goto cleanup;
 
 
@@ -145,12 +145,12 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	  retval = ENOMEM;
 	  goto cleanup;
 	}
-	if (retval = krb5_calculate_checksum(context, 
-					     (*auth_context)->cksumtype, 
-					     in_data->data, in_data->length,
-					     (*auth_context)->keyblock->contents,
-					     (*auth_context)->keyblock->length,
-					     &checksum))
+	if ((retval = krb5_calculate_checksum(context, 
+					      (*auth_context)->cksumtype, 
+					      in_data->data, in_data->length,
+					      (*auth_context)->keyblock->contents,
+					      (*auth_context)->keyblock->length,
+					      &checksum)))
 	  goto cleanup_cksum;
       }
       checksump = &checksum;
@@ -163,15 +163,17 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	goto cleanup_cksum;
     }
 
-    if (retval = krb5_generate_authenticator(context, (*auth_context)->authentp,
-					     (in_creds)->client, checksump,
-					     (*auth_context)->local_subkey,
-					     (*auth_context)->local_seq_number,
-					     (in_creds)->authdata))
+    if ((retval = krb5_generate_authenticator(context,
+					      (*auth_context)->authentp,
+					      (in_creds)->client, checksump,
+					      (*auth_context)->local_subkey,
+					      (*auth_context)->local_seq_number,
+					      (in_creds)->authdata)))
 	goto cleanup_cksum;
 	
     /* encode the authenticator */
-    if (retval = encode_krb5_authenticator((*auth_context)->authentp, &scratch))
+    if ((retval = encode_krb5_authenticator((*auth_context)->authentp,
+					    &scratch)))
 	goto cleanup_cksum;
     
     /* Null out these fields, to prevent pointer sharing problems;
@@ -204,21 +206,21 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, &(in_creds)->keyblock))
+    if ((retval = krb5_process_key(context, &eblock, &(in_creds)->keyblock)))
 	goto cleanup;
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-			      (krb5_pointer) request.authenticator.ciphertext.data,
-			      scratch->length, &eblock, 0)) {
+    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
+			       (krb5_pointer) request.authenticator.ciphertext.data,
+			       scratch->length, &eblock, 0))) {
         krb5_finish_key(context, &eblock);
 	goto cleanup_cksum;
     }
 
-    if (retval = krb5_finish_key(context, &eblock))
+    if ((retval = krb5_finish_key(context, &eblock)))
 	goto cleanup_cksum;
     
-    if (retval = encode_krb5_ap_req(&request, &toutbuf))
+    if ((retval = encode_krb5_ap_req(&request, &toutbuf)))
 	goto cleanup_cksum;
 #ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *outbuf = *toutbuf;

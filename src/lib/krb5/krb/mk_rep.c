@@ -64,8 +64,8 @@ krb5_mk_rep(context, auth_context, outbuf)
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
 	(auth_context->local_seq_number == 0)) {
-	if (retval = krb5_generate_seq_number(context, auth_context->keyblock,
-                                              &auth_context->local_seq_number))
+	if ((retval = krb5_generate_seq_number(context, auth_context->keyblock,
+					       &auth_context->local_seq_number)))
             return(retval);
     }
 
@@ -75,7 +75,7 @@ krb5_mk_rep(context, auth_context, outbuf)
     repl.seq_number = auth_context->local_seq_number;
 
     /* encode it before encrypting */
-    if (retval = encode_krb5_ap_rep_enc_part(&repl, &scratch))
+    if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
 	return retval;
 
     /* put together an eblock for this encryption */
@@ -101,18 +101,18 @@ krb5_mk_rep(context, auth_context, outbuf)
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, auth_context->keyblock)) 
+    if ((retval = krb5_process_key(context, &eblock, auth_context->keyblock)))
 	goto cleanup_encpart;
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-			      (krb5_pointer) reply.enc_part.ciphertext.data,
-			      scratch->length, &eblock, 0)) {
+    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
+			       (krb5_pointer) reply.enc_part.ciphertext.data,
+			       scratch->length, &eblock, 0))) {
 	krb5_finish_key(context, &eblock);
 	goto cleanup_encpart;
     }
 
-    if (retval = krb5_finish_key(context, &eblock)) 
+    if ((retval = krb5_finish_key(context, &eblock)))
 	goto cleanup_encpart;
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {

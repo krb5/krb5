@@ -65,16 +65,16 @@ keytab_keyproc(context, type, salt, keyseed, key)
 
     if (kt_id == NULL)
 	/* Fetch from default keytab location */
-	if (retval = krb5_kt_default(context, &kt_id))
+	if ((retval = krb5_kt_default(context, &kt_id)))
 	    return retval;
 
 
-    if (retval = krb5_kt_get_entry(context, kt_id, arg->client,
-				   0, /* don't have vno available */
-				   type, &kt_ent))
+    if ((retval = krb5_kt_get_entry(context, kt_id, arg->client,
+				    0, /* don't have vno available */
+				    type, &kt_ent)))
 	    return retval;
 
-    if (retval = krb5_copy_keyblock(context, &kt_ent.key, &realkey)) {
+    if ((retval = krb5_copy_keyblock(context, &kt_ent.key, &realkey))) {
 	(void) krb5_kt_free_entry(context, &kt_ent);
 	return retval;
     }

@@ -7,18 +7,19 @@ krb5_auth_con_init(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context  ** auth_context;
 {
-    if (*auth_context = (krb5_auth_context *)malloc(sizeof(krb5_auth_context))){
-	memset(*auth_context, 0, sizeof(krb5_auth_context));
+    *auth_context = (krb5_auth_context *)malloc(sizeof(krb5_auth_context));
+    if (!*auth_context)
+	    return ENOMEM;
+    
+    memset(*auth_context, 0, sizeof(krb5_auth_context));
 
-	/* Default flags, do time not seq */
-	(*auth_context)->auth_context_flags = 
-	  KRB5_AUTH_CONTEXT_DO_TIME |  KRB5_AUTH_CONN_INITIALIZED;
+    /* Default flags, do time not seq */
+    (*auth_context)->auth_context_flags = 
+	    KRB5_AUTH_CONTEXT_DO_TIME |  KRB5_AUTH_CONN_INITIALIZED;
 
-	(*auth_context)->cksumtype = CKSUMTYPE_RSA_MD4_DES;
-	/* (*auth_context)->cksumtype = CKSUMTYPE_CRC32; */
-	return 0;
-    }
-    return ENOMEM;
+    (*auth_context)->cksumtype = CKSUMTYPE_RSA_MD4_DES;
+    /* (*auth_context)->cksumtype = CKSUMTYPE_CRC32; */
+    return 0;
 }
 
 krb5_error_code
@@ -103,9 +104,9 @@ krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
     krb5_address	* tmp_addr;
 
     if (local_addr && auth_context->local_addr) {
-	if ((tmp_addr = (krb5_address *)malloc(sizeof(krb5_address))) == NULL)
+	if (!(tmp_addr = (krb5_address *)malloc(sizeof(krb5_address))))
 	    return ENOMEM;
-	if (tmp_addr->contents = malloc(auth_context->local_addr->length)) {
+	if ((tmp_addr->contents = malloc(auth_context->local_addr->length))) {
 	    memcpy(tmp_addr->contents, auth_context->local_addr->contents,
 		   auth_context->local_addr->length);
 	    tmp_addr->addrtype = auth_context->local_addr->addrtype;
@@ -123,7 +124,7 @@ krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
 	    }
 	    return ENOMEM;
 	}
-	if (tmp_addr->contents = malloc(auth_context->remote_addr->length)) {
+	if ((tmp_addr->contents = malloc(auth_context->remote_addr->length))) {
 	    memcpy(tmp_addr->contents, auth_context->remote_addr->contents,
 		   auth_context->remote_addr->length);
 	    tmp_addr->addrtype = auth_context->remote_addr->addrtype;
@@ -154,8 +155,8 @@ krb5_auth_con_setports(context, auth_context, local_port, remote_port)
 	free(auth_context->remote_port);
 
     if (local_port) {
-	if ((auth_context->local_port = (krb5_address *)
-		malloc(sizeof(krb5_address) + local_port->length)) == NULL) {
+	if (((auth_context->local_port = (krb5_address *)
+		malloc(sizeof(krb5_address) + local_port->length)) == NULL)) {
 	    return ENOMEM;
 	}
 	auth_context->local_port->addrtype = local_port->addrtype;
@@ -291,7 +292,7 @@ krb5_auth_con_initivector(context, auth_context)
 	int size = krb5_keytype_array[auth_context->keyblock->keytype]->
 		      system->block_length;
 
-	if (auth_context->i_vector = (krb5_pointer)malloc(size)) {
+	if ((auth_context->i_vector = (krb5_pointer)malloc(size))) {
 	    memset(auth_context->i_vector, 0, size);
 	    return 0;
 	}

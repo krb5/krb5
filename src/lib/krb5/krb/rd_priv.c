@@ -74,7 +74,7 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
 	return KRB5KRB_AP_ERR_MSG_TYPE;
 
     /* decode private message */
-    if (retval = decode_krb5_priv(inbuf, &privmsg)) 
+    if ((retval = decode_krb5_priv(inbuf, &privmsg)))
 	return retval;
     
     if (!valid_etype(privmsg->enc_part.etype)) {
@@ -92,14 +92,14 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, keyblock)) 
+    if ((retval = krb5_process_key(context, &eblock, keyblock)))
 	goto cleanup_scratch;
 
     /* call the decryption routine */
-    if (retval = krb5_decrypt(context, 
-			      (krb5_pointer) privmsg->enc_part.ciphertext.data,
-			      (krb5_pointer) scratch.data,
-			      scratch.length, &eblock, i_vector)) {
+    if ((retval = krb5_decrypt(context, 
+			       (krb5_pointer) privmsg->enc_part.ciphertext.data,
+			       (krb5_pointer) scratch.data,
+			       scratch.length, &eblock, i_vector))) {
     	krb5_finish_key(context, &eblock);
         goto cleanup_scratch;
     }
@@ -112,11 +112,11 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
 	        eblock.crypto_entry->block_length),
 	       eblock.crypto_entry->block_length);
 
-    if (retval = krb5_finish_key(context, &eblock)) 
+    if ((retval = krb5_finish_key(context, &eblock)))
         goto cleanup_scratch;
 
     /*  now decode the decrypted stuff */
-    if (retval = decode_krb5_enc_priv_part(&scratch, &privmsg_enc_part)) 
+    if ((retval = decode_krb5_enc_priv_part(&scratch, &privmsg_enc_part)))
         goto cleanup_scratch;
 
     if (!krb5_address_compare(context,remote_addr,privmsg_enc_part->s_address)){
@@ -134,7 +134,7 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
 	} else {
 	    krb5_address **our_addrs;
 	
-	    if (retval = krb5_os_localaddr(&our_addrs)) {
+	    if ((retval = krb5_os_localaddr(&our_addrs))) {
 		goto cleanup_data;
 	    }
 	    if (!krb5_address_search(context, privmsg_enc_part->r_address, 
@@ -236,9 +236,11 @@ krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
         }
     }
 
-    if (retval = krb5_rd_priv_basic(context, inbuf, keyblock, plocal_fulladdr, 
-				    premote_fulladdr, auth_context->i_vector, 
-				    &replaydata, outbuf)) {
+    if ((retval = krb5_rd_priv_basic(context, inbuf, keyblock,
+				     plocal_fulladdr,
+				     premote_fulladdr,
+				     auth_context->i_vector,
+				     &replaydata, outbuf))) {
 	CLEANUP_DONE();
 	return retval;
     }
@@ -250,7 +252,7 @@ krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
 	krb5_donot_replay replay;
     	krb5_timestamp currenttime;
 
-	if (retval = krb5_timeofday(context, &currenttime)) 
+	if ((retval = krb5_timeofday(context, &currenttime)))
 	    goto error;
 
 	if (!in_clock_skew(replaydata.timestamp)) {
@@ -258,14 +260,14 @@ krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
 	    goto error;
 	}
 
-	if (retval = krb5_gen_replay_name(context, auth_context->remote_addr, 
-					  "_priv", &replay.client)) 
+	if ((retval = krb5_gen_replay_name(context, auth_context->remote_addr, 
+					   "_priv", &replay.client)))
 	    goto error;
 
 	replay.server = "";		/* XXX */
 	replay.cusec = replaydata.usec;
 	replay.ctime = replaydata.timestamp;
-	if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
+	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
 	    krb5_xfree(replay.client);
 	    goto error;
 	}

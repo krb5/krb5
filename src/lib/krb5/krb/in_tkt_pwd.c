@@ -60,8 +60,8 @@ pwd_keyproc(context, type, salt, keyseed, key)
     password = (krb5_data *)keyseed;
 
     if (!password->length) {
-	if (retval = krb5_read_password(context, krb5_default_pwd_prompt1, 0,
-					pwdbuf, &pwsize)) {
+	if ((retval = krb5_read_password(context, krb5_default_pwd_prompt1, 0,
+					 pwdbuf, &pwsize))) {
 	    return retval;
 	}
         password->length = pwsize;
@@ -71,7 +71,7 @@ pwd_keyproc(context, type, salt, keyseed, key)
     if (!(*key = (krb5_keyblock *)malloc(sizeof(**key))))
 	return ENOMEM;
 
-    if (retval = krb5_string_to_key(context,&eblock,type,*key,password,salt))
+    if ((retval = krb5_string_to_key(context,&eblock,type,*key,password,salt)))
 	krb5_xfree(*key);
     return(retval);
 }
@@ -112,7 +112,7 @@ krb5_get_in_tkt_with_password(context, options, addrs, etypes, pre_auth_types,
     krb5_data data;
 
 
-    if (data.data = (char *)password) {
+    if ((data.data = (char *)password)) {
 	data.length = strlen(password);
     } else {
 	data.length = 0;

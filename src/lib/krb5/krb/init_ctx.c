@@ -41,10 +41,10 @@ krb5_init_context(context)
 	ctx->magic = KV5M_CONTEXT;
 
 	/* Set the default encryption types, possible defined in krb5/conf */
-	if (retval = krb5_set_default_in_tkt_etypes(ctx, NULL))
+	if ((retval = krb5_set_default_in_tkt_etypes(ctx, NULL)))
 		goto cleanup;
 
-	if (retval = krb5_os_init_context(ctx))
+	if ((retval = krb5_os_init_context(ctx)))
 		goto cleanup;
 	
 
@@ -92,7 +92,7 @@ krb5_set_default_in_tkt_etypes(context, etypes)
 	}
 
 	/* Now copy the default etypes into the context pointer */
-	if (new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i))
+	if ((new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)))
 	    memcpy(new_etypes, etypes, sizeof(krb5_enctype) * i);
 	else
 	    return ENOMEM;
@@ -101,7 +101,7 @@ krb5_set_default_in_tkt_etypes(context, etypes)
 	i = 2;
 
 	/* Should reset the list to the runtime defaults */
-	if (new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)) {
+	if ((new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i))) {
 	    new_etypes[0] = ETYPE_DES_CBC_MD5;
 	    new_etypes[1] = ETYPE_DES_CBC_CRC;
 	} else {
@@ -123,8 +123,8 @@ krb5_get_default_in_tkt_etypes(context, etypes)
 {
     krb5_enctype * old_etypes;
 
-    if (old_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-				(context->etype_count + 1))) {
+    if ((old_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
+					     (context->etype_count + 1)))) {
 	memcpy(old_etypes, context->etypes, sizeof(krb5_enctype) * 
 		  		context->etype_count);
 	old_etypes[context->etype_count] = 0;

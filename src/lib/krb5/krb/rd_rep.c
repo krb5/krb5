@@ -55,7 +55,7 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 
     /* decode it */
 
-    if (retval = decode_krb5_ap_rep(inbuf, &reply))
+    if ((retval = decode_krb5_ap_rep(inbuf, &reply)))
 	return retval;
 
     /* put together an eblock for this encryption */
@@ -73,21 +73,22 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, auth_context->keyblock)) {
+    if ((retval = krb5_process_key(context, &eblock,
+				   auth_context->keyblock))) {
 	goto errout;
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt(context, 
-			      (krb5_pointer) reply->enc_part.ciphertext.data,
-			      (krb5_pointer) scratch.data,
-			      scratch.length, &eblock, 0)) {
+    if ((retval = krb5_decrypt(context, 
+			       (krb5_pointer) reply->enc_part.ciphertext.data,
+			       (krb5_pointer) scratch.data,
+			       scratch.length, &eblock, 0))) {
 	(void) krb5_finish_key(context, &eblock);
 	goto errout;
     }
 
     /* finished with the top-level encoding of the ap_rep */
-    if (retval = krb5_finish_key(context, &eblock)) 
+    if ((retval = krb5_finish_key(context, &eblock)))
 	goto clean_scratch;
 
     /* now decode the decrypted stuff */

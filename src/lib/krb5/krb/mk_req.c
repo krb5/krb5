@@ -72,14 +72,14 @@ krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
 
     /* obtain ticket & session key */
     memset((char *)&creds, 0, sizeof(creds));
-    if (retval = krb5_copy_principal(context, server, &creds.server))
+    if ((retval = krb5_copy_principal(context, server, &creds.server)))
 	goto cleanup_princ;
 
-    if (retval = krb5_cc_get_principal(context, ccache, &creds.client))
+    if ((retval = krb5_cc_get_principal(context, ccache, &creds.client)))
 	goto cleanup_creds;
 
-    if (retval = krb5_get_credentials(context, krb5_kdc_default_options,
-				      ccache, &creds, &credsp))
+    if ((retval = krb5_get_credentials(context, krb5_kdc_default_options,
+				       ccache, &creds, &credsp)))
 	goto cleanup_creds;
 
     retval = krb5_mk_req_extended(context, auth_context, ap_req_options, 

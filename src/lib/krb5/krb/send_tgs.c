@@ -66,10 +66,11 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
 	 malloc(krb5_checksum_size(context, krb5_kdc_req_sumtype))) == NULL) 
         return(ENOMEM);
 
-    if (retval = krb5_calculate_checksum(context, krb5_kdc_req_sumtype,
-                                      in_data->data, in_data->length,
-				      (krb5_pointer) in_cred->keyblock.contents,
-				      in_cred->keyblock.length, &checksum)) {
+    if ((retval = krb5_calculate_checksum(context, krb5_kdc_req_sumtype,
+					  in_data->data, in_data->length,
+					  (krb5_pointer) in_cred->keyblock.contents,
+					  in_cred->keyblock.length,
+					  &checksum))) {
         free(checksum.contents);
 	return(retval);
     }
@@ -80,13 +81,14 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     authent.checksum = &checksum;
     authent.client = in_cred->client;
     authent.authorization_data = in_cred->authdata;
-    if (retval = krb5_us_timeofday(context, &authent.ctime, &authent.cusec)) {
+    if ((retval = krb5_us_timeofday(context, &authent.ctime,
+				    &authent.cusec))) {
         free(checksum.contents);
 	return(retval);
     }
 
     /* encode the authenticator */
-    if (retval = encode_krb5_authenticator(&authent, &scratch)) {
+    if ((retval = encode_krb5_authenticator(&authent, &scratch))) {
         free(checksum.contents);
 	return(retval);
     }
@@ -98,7 +100,7 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     request.ap_options = 0;
     request.ticket = 0;
 
-    if (retval = decode_krb5_ticket(&(in_cred)->ticket, &request.ticket))
+    if ((retval = decode_krb5_ticket(&(in_cred)->ticket, &request.ticket)))
 	/* Cleanup scratch and scratch data */
         goto cleanup_data;
 
@@ -126,18 +128,18 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, &(in_cred)->keyblock))
+    if ((retval = krb5_process_key(context, &eblock, &(in_cred)->keyblock)))
         goto cleanup;
 
     /* call the encryption routine */ 
-    if (retval=krb5_encrypt(context, (krb5_pointer) scratch->data,
-                            (krb5_pointer)request.authenticator.ciphertext.data,
-                            scratch->length, &eblock, 0)) {
+    if ((retval=krb5_encrypt(context, (krb5_pointer) scratch->data,
+			     (krb5_pointer)request.authenticator.ciphertext.data,
+			     scratch->length, &eblock, 0))) {
         krb5_finish_key(context, &eblock);
         goto cleanup;
     }
     
-    if (retval = krb5_finish_key(context, &eblock))
+    if ((retval = krb5_finish_key(context, &eblock)))
         goto cleanup;
 
     retval = encode_krb5_ap_req(&request, &toutbuf);
@@ -201,7 +203,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
     tgsreq.from = timestruct->starttime;
     tgsreq.till = timestruct->endtime;
     tgsreq.rtime = timestruct->renew_till;
-    if (retval = krb5_timeofday(context, &time_now))
+    if ((retval = krb5_timeofday(context, &time_now)))
 	return(retval);
     /* XXX we know they are the same size... */
     tgsreq.nonce = (krb5_int32) time_now;
@@ -212,8 +214,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
 	/* need to encrypt it in the request */
 	krb5_encrypt_block eblock;
 
-	if (retval = encode_krb5_authdata((const krb5_authdata**)authorization_data,
-					   &scratch))
+	if ((retval = encode_krb5_authdata((const krb5_authdata**)authorization_data,
+					   &scratch)))
 	    return(retval);
 	krb5_use_cstype(context, &eblock, in_cred->keyblock.etype);
 	tgsreq.authorization_data.etype = in_cred->keyblock.etype;
@@ -235,21 +237,22 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
 	    krb5_free_data(context, scratch);
 	    return ENOMEM;
 	}
-	if (retval = krb5_process_key(context, &eblock, &in_cred->keyblock)) {
+	if ((retval = krb5_process_key(context, &eblock,
+				       &in_cred->keyblock))) {
 	    krb5_free_data(context, scratch);
 	    return retval;
 	}
 	/* call the encryption routine */
-	if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-		  (krb5_pointer) tgsreq.authorization_data.ciphertext.data,
-				  scratch->length, &eblock, 0)) {
+	if ((retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
+		   (krb5_pointer) tgsreq.authorization_data.ciphertext.data,
+				   scratch->length, &eblock, 0))) {
 	    (void) krb5_finish_key(context, &eblock);
 	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
 	    krb5_free_data(context, scratch);
 	    return retval;
 	}	    
 	krb5_free_data(context, scratch);
-	if (retval = krb5_finish_key(context, &eblock)) {
+	if ((retval = krb5_finish_key(context, &eblock))) {
 	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
 	    return retval;
 	}
@@ -270,7 +273,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
     }
 
     if (second_ticket) {
-	if (retval = decode_krb5_ticket(second_ticket, &sec_ticket))
+	if ((retval = decode_krb5_ticket(second_ticket, &sec_ticket)))
 	    goto send_tgs_error_1;
 	sec_ticket_arr[0] = sec_ticket;
 	sec_ticket_arr[1] = 0;
@@ -279,13 +282,13 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
 	tgsreq.second_ticket = 0;
 
     /* encode the body; then checksum it */
-    if (retval = encode_krb5_kdc_req_body(&tgsreq, &scratch))
+    if ((retval = encode_krb5_kdc_req_body(&tgsreq, &scratch)))
 	goto send_tgs_error_2;
 
     /*
      * Get an ap_req.
      */
-    if (retval = krb5_send_tgs_basic(context, scratch, in_cred, &scratch2)) {
+    if ((retval = krb5_send_tgs_basic(context, scratch, in_cred, &scratch2))) {
         krb5_free_data(context, scratch);
 	goto send_tgs_error_2;
     }
@@ -323,7 +326,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
     tgsreq.padata = combined_padata;
 
     /* the TGS_REQ is assembled in tgsreq, so encode it */
-    if (retval = encode_krb5_tgs_req(&tgsreq, &scratch)) {
+    if ((retval = encode_krb5_tgs_req(&tgsreq, &scratch))) {
 	krb5_xfree(ap_req_padata.contents);
 	krb5_xfree(combined_padata);
 	goto send_tgs_error_2;

@@ -158,7 +158,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if (retval = krb5_timeofday(context, &time_now))
+    if ((retval = krb5_timeofday(context, &time_now)))
 	goto cleanup;
 
     /* XXX we know they are the same size... */
@@ -191,7 +191,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     /* now decode the reply...could be error or as_rep */
 
     if (krb5_is_krb_error(&reply)) {
-	if (retval = decode_krb5_error(&reply, &err_reply))
+	if ((retval = decode_krb5_error(&reply, &err_reply)))
 	    /* some other error code--??? */	    
 	    goto cleanup;
     
@@ -232,7 +232,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 	}
 	goto cleanup;
     }
-    if (retval = decode_krb5_as_rep(&reply, &as_reply))
+    if ((retval = decode_krb5_as_rep(&reply, &as_reply)))
 	/* some other error code ??? */
 	goto cleanup;
 
@@ -261,7 +261,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     } 
     if (!use_salt) {
         /* need to use flattened principal */
-        if (retval = krb5_principal2salt(context, creds->client, &salt))
+        if ((retval = krb5_principal2salt(context, creds->client, &salt)))
             return(retval);
         f_salt = 1;
     }
@@ -269,12 +269,12 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     /* it was a kdc_rep--decrypt & check */
     /* Generate the key, if we haven't done so already. */
     if (!decrypt_key) {
-	    if (retval = (*key_proc)(context, keytype, & salt, keyseed,
-				     &decrypt_key))
+	    if ((retval = (*key_proc)(context, keytype, & salt, keyseed,
+				      &decrypt_key)))
 		goto cleanup;
     }
     
-    if (retval = (*decrypt_proc)(context, decrypt_key, decryptarg, as_reply))
+    if ((retval = (*decrypt_proc)(context, decrypt_key, decryptarg, as_reply)))
 	goto cleanup;
 
     krb5_free_keyblock(context, decrypt_key);
@@ -315,9 +315,9 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	
     /* fill in the credentials */
-    if (retval = krb5_copy_keyblock_contents(context, 
-					     as_reply->enc_part2->session,
-					     &creds->keyblock))
+    if ((retval = krb5_copy_keyblock_contents(context, 
+					      as_reply->enc_part2->session,
+					      &creds->keyblock)))
 	goto cleanup;
     creds->keyblock.etype = as_reply->ticket->enc_part.etype;
 
@@ -325,21 +325,21 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot
 					   be encrypted in skey */
     creds->ticket_flags = as_reply->enc_part2->flags;
-    if (retval = krb5_copy_addresses(context, as_reply->enc_part2->caddrs,
-				     &creds->addresses))
+    if ((retval = krb5_copy_addresses(context, as_reply->enc_part2->caddrs,
+				      &creds->addresses)))
 	goto cred_cleanup;
 
     creds->second_ticket.length = 0;
     creds->second_ticket.data = 0;
 
-    if (retval = encode_krb5_ticket(as_reply->ticket, &packet))
+    if ((retval = encode_krb5_ticket(as_reply->ticket, &packet)))
 	goto cred_cleanup;
 
     creds->ticket = *packet;
     krb5_xfree(packet);
 
     /* store it in the ccache! */
-    if (retval = krb5_cc_store_cred(context, ccache, creds))
+    if ((retval = krb5_cc_store_cred(context, ccache, creds)))
 	goto cred_cleanup;
 
     if (ret_as_reply) {

@@ -87,7 +87,7 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
 
     safemsg.checksum = &safe_checksum;
 
-    if (retval = encode_krb5_safe(&safemsg, &scratch1))
+    if ((retval = encode_krb5_safe(&safemsg, &scratch1)))
 	return retval;
 
     if (!(safe_checksum.contents =
@@ -95,14 +95,14 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
 	retval = ENOMEM;
 	goto cleanup_scratch;
     }
-    if (retval = krb5_calculate_checksum(context, sumtype, scratch1->data,
-					 scratch1->length,
-					 (krb5_pointer) keyblock->contents,
-					 keyblock->length, &safe_checksum)) {
+    if ((retval = krb5_calculate_checksum(context, sumtype, scratch1->data,
+					  scratch1->length,
+					  (krb5_pointer) keyblock->contents,
+					  keyblock->length, &safe_checksum))) {
 	goto cleanup_checksum;
     }
     safemsg.checksum = &safe_checksum;
-    if (retval = encode_krb5_safe(&safemsg, &scratch2)) {
+    if ((retval = encode_krb5_safe(&safemsg, &scratch2))) {
 	goto cleanup_checksum;
     }
     *outbuf = *scratch2;
@@ -151,8 +151,8 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
-	if (retval = krb5_us_timeofday(context, &replaydata.timestamp,
-				       &replaydata.usec))
+	if ((retval = krb5_us_timeofday(context, &replaydata.timestamp,
+					&replaydata.usec)))
 	    return retval;
 	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
     	    outdata->timestamp = replaydata.timestamp;
@@ -207,9 +207,9 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
         }
     }
 
-    if (retval = krb5_mk_safe_basic(context, userdata, keyblock, &replaydata, 
-				    plocal_fulladdr, premote_fulladdr,
-      				    auth_context->cksumtype, outbuf)) {
+    if ((retval = krb5_mk_safe_basic(context, userdata, keyblock, &replaydata, 
+				     plocal_fulladdr, premote_fulladdr,
+				     auth_context->cksumtype, outbuf))) {
 	CLEANUP_DONE();
 	goto error;
     }
@@ -220,8 +220,8 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
 	krb5_donot_replay replay;
 
-	if (retval = krb5_gen_replay_name(context, auth_context->local_addr, 
-					  "_safe", &replay.client)) {
+	if ((retval = krb5_gen_replay_name(context, auth_context->local_addr, 
+					   "_safe", &replay.client))) {
     	    krb5_xfree(outbuf);
 	    goto error;
 	}
@@ -229,7 +229,7 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
 	replay.server = "";		/* XXX */
 	replay.cusec = replaydata.usec;
 	replay.ctime = replaydata.timestamp;
-	if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
+	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
 	    /* should we really error out here? XXX */
     	    krb5_xfree(outbuf);
 	    goto error;

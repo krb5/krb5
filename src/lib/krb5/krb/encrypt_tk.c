@@ -50,7 +50,7 @@ krb5_encrypt_tkt_part(context, eblock, srv_key, dec_ticket)
     register krb5_enc_tkt_part *dec_tkt_part = dec_ticket->enc_part2;
 
     /*  start by encoding the to-be-encrypted part. */
-    if (retval = encode_krb5_enc_tkt_part(dec_tkt_part, &scratch)) {
+    if ((retval = encode_krb5_enc_tkt_part(dec_tkt_part, &scratch))) {
 	return retval;
     }
 
@@ -82,16 +82,16 @@ dec_ticket->enc_part.ciphertext.length = 0; \
 dec_ticket->enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, eblock, srv_key)) {
+    if ((retval = krb5_process_key(context, eblock, srv_key))) {
 	goto clean_encpart;
     }
 
 #define cleanup_prockey() {(void) krb5_finish_key(context, eblock);}
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-			      (krb5_pointer) dec_ticket->enc_part.ciphertext.data,
-			      scratch->length, eblock, 0)) {
+    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
+			       (krb5_pointer) dec_ticket->enc_part.ciphertext.data,
+			       scratch->length, eblock, 0))) {
 	goto clean_prockey;
     }
 
@@ -100,7 +100,7 @@ dec_ticket->enc_part.ciphertext.data = 0;}
     /* ticket is now assembled-- do some cleanup */
     cleanup_scratch();
 
-    if (retval = krb5_finish_key(context, eblock)) {
+    if ((retval = krb5_finish_key(context, eblock))) {
 	cleanup_encpart();
 	return retval;
     }

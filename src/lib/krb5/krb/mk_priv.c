@@ -62,7 +62,7 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
     privmsg_enc_part.seq_number = replaydata->seq;
 
     /* start by encoding to-be-encrypted part of the message */
-    if (retval = encode_krb5_enc_priv_part(&privmsg_enc_part, &scratch1))
+    if ((retval = encode_krb5_enc_priv_part(&privmsg_enc_part, &scratch1)))
 	return retval;
 
     /* put together an eblock for this encryption */
@@ -86,14 +86,13 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, keyblock)) 
+    if ((retval = krb5_process_key(context, &eblock, keyblock)))
         goto clean_encpart;
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt(context, (krb5_pointer) scratch1->data,
-			      (krb5_pointer) privmsg.enc_part.ciphertext.data,
-			      scratch1->length, &eblock,
-			      i_vector)) {
+    if ((retval = krb5_encrypt(context, (krb5_pointer) scratch1->data,
+			       (krb5_pointer) privmsg.enc_part.ciphertext.data,
+			       scratch1->length, &eblock, i_vector))) {
     	krb5_finish_key(context, &eblock);
         goto clean_encpart;
     }
@@ -106,13 +105,13 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
 	        eblock.crypto_entry->block_length),
 	       eblock.crypto_entry->block_length);
 	   
-    if (retval = encode_krb5_priv(&privmsg, &scratch2))  {
+    if ((retval = encode_krb5_priv(&privmsg, &scratch2)))  {
     	krb5_finish_key(context, &eblock);
         goto clean_encpart;
     }
 
     /* encode private message */
-    if (retval = krb5_finish_key(context, &eblock))
+    if ((retval = krb5_finish_key(context, &eblock)))
         goto clean_encpart;
 
     *outbuf = *scratch2;
@@ -167,8 +166,8 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
-	if (retval = krb5_us_timeofday(context, &replaydata.timestamp,
-				       &replaydata.usec))
+	if ((retval = krb5_us_timeofday(context, &replaydata.timestamp,
+					&replaydata.usec)))
 	    return retval;
 	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
     	    outdata->timestamp = replaydata.timestamp;
@@ -223,9 +222,9 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
 	}
     }
 
-    if (retval = krb5_mk_priv_basic(context, userdata, keyblock, &replaydata, 
-				    plocal_fulladdr, premote_fulladdr,
-      				    auth_context->i_vector, outbuf)) {
+    if ((retval = krb5_mk_priv_basic(context, userdata, keyblock, &replaydata, 
+				     plocal_fulladdr, premote_fulladdr,
+				     auth_context->i_vector, outbuf))) {
 	CLEANUP_DONE();
 	goto error;
     }
@@ -236,8 +235,8 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
 	krb5_donot_replay replay;
 
-	if (retval = krb5_gen_replay_name(context, auth_context->local_addr, 
-					  "_priv", &replay.client)) {
+	if ((retval = krb5_gen_replay_name(context, auth_context->local_addr, 
+					   "_priv", &replay.client))) {
     	    krb5_xfree(outbuf);
 	    goto error;
 	}
@@ -245,7 +244,7 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
 	replay.server = "";		/* XXX */
 	replay.cusec = replaydata.usec;
 	replay.ctime = replaydata.timestamp;
-	if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
+	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
 	    /* should we really error out here? XXX */
     	    krb5_xfree(replay.client);
 	    goto error;

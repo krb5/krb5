@@ -35,7 +35,7 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
     	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* start by encoding to-be-encrypted part of the message */
-    if (retval = encode_krb5_enc_cred_part(pcredpart, &scratch))
+    if ((retval = encode_krb5_enc_cred_part(pcredpart, &scratch)))
     	return retval;
 
     /* put together an eblock for this encryption */
@@ -64,14 +64,14 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, pkeyblock)) {
+    if ((retval = krb5_process_key(context, &eblock, pkeyblock))) {
     	goto clean_encpart;
     }
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt(context, (krb5_pointer)scratch->data,
-                              (krb5_pointer)pencdata->ciphertext.data, 
-                              scratch->length, &eblock, 0)) {
+    if ((retval = krb5_encrypt(context, (krb5_pointer)scratch->data,
+			       (krb5_pointer)pencdata->ciphertext.data, 
+			       scratch->length, &eblock, 0))) {
 	krb5_finish_key(context, &eblock);
 	goto clean_encpart;
     }
@@ -142,24 +142,24 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
         credenc.ticket_info[i]->times = ppcreds[i]->times;
         credenc.ticket_info[i]->flags = ppcreds[i]->ticket_flags;
 
-    	if (retval = decode_krb5_ticket(&ppcreds[i]->ticket, 
-					&pcred->tickets[i]))
+    	if ((retval = decode_krb5_ticket(&ppcreds[i]->ticket, 
+					 &pcred->tickets[i])))
 	    goto cleanup_info_ptrs;
 
-	if (retval = krb5_copy_keyblock(context, &ppcreds[i]->keyblock,
-                                        &credenc.ticket_info[i]->session)) 
+	if ((retval = krb5_copy_keyblock(context, &ppcreds[i]->keyblock,
+					 &credenc.ticket_info[i]->session)))
             goto cleanup_info_ptrs;
 
-        if (retval = krb5_copy_principal(context, ppcreds[i]->client,
-                                         &credenc.ticket_info[i]->client))
+        if ((retval = krb5_copy_principal(context, ppcreds[i]->client,
+					  &credenc.ticket_info[i]->client)))
             goto cleanup_info_ptrs;
 
-      	if (retval = krb5_copy_principal(context, ppcreds[i]->server,
-                                         &credenc.ticket_info[i]->server))
+      	if ((retval = krb5_copy_principal(context, ppcreds[i]->server,
+					  &credenc.ticket_info[i]->server)))
             goto cleanup_info_ptrs;
 
-      	if (retval = krb5_copy_addresses(context, ppcreds[i]->addresses,
-                                         &credenc.ticket_info[i]->caddrs))
+      	if ((retval = krb5_copy_addresses(context, ppcreds[i]->addresses,
+					  &credenc.ticket_info[i]->caddrs)))
             goto cleanup_info_ptrs;
     }
 
@@ -236,8 +236,8 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
         (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
-        if (retval = krb5_us_timeofday(context, &replaydata.timestamp,
-                                       &replaydata.usec))
+        if ((retval = krb5_us_timeofday(context, &replaydata.timestamp,
+					&replaydata.usec)))
             return retval;
         if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
             outdata->timestamp = replaydata.timestamp;
@@ -297,9 +297,9 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     }
 
     /* Setup creds structure */
-    if (retval = krb5_mk_ncred_basic(context, ppcreds, ncred, keyblock,
-		     		     &replaydata, plocal_fulladdr, 
-				     premote_fulladdr, pcred)) {
+    if ((retval = krb5_mk_ncred_basic(context, ppcreds, ncred, keyblock,
+				      &replaydata, plocal_fulladdr, 
+				      premote_fulladdr, pcred))) {
 	CLEANUP_DONE();
 	goto error;
     }
@@ -310,14 +310,14 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
 
-        if (retval = krb5_gen_replay_name(context, auth_context->local_addr,
-                                          "_forw", &replay.client)) 
+        if ((retval = krb5_gen_replay_name(context, auth_context->local_addr,
+					   "_forw", &replay.client)))
             goto error;
 
         replay.server = "";             /* XXX */
         replay.cusec = replaydata.usec;
         replay.ctime = replaydata.timestamp;
-        if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
+        if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
             /* should we really error out here? XXX */
             krb5_xfree(replay.client);
             goto error;
@@ -362,7 +362,8 @@ krb5_mk_1cred(context, auth_context, pcreds, ppdata, outdata)
     ppcreds[0] = pcreds;
     ppcreds[1] = NULL;
 
-    if (retval = krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata))
+    if ((retval = krb5_mk_ncred(context, auth_context, ppcreds,
+				ppdata, outdata)))
 	free(ppcreds);
     return retval;
 }

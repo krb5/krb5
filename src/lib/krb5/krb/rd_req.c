@@ -60,7 +60,7 @@ krb5_rd_req(context, auth_context, inbuf, server, keytab,
 
     if (!krb5_is_ap_req(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
-    if (retval = decode_krb5_ap_req(inbuf, &request)) {
+    if ((retval = decode_krb5_ap_req(inbuf, &request))) {
     	switch (retval) {
 	case KRB5_BADMSGTYPE:
 	    return KRB5KRB_AP_ERR_BADVERSION; 
@@ -72,21 +72,21 @@ krb5_rd_req(context, auth_context, inbuf, server, keytab,
     /* Get an auth context if necessary. */
     new_auth_context = NULL;
     if (*auth_context == NULL) {
-	if (retval = krb5_auth_con_init(context, &new_auth_context))
+	if ((retval = krb5_auth_con_init(context, &new_auth_context)))
 	    goto cleanup_request;
         *auth_context = new_auth_context;
     }
 
     /* Get an rcache if necessary. */
     if (((*auth_context)->rcache == NULL) && server) {
-	if (retval = krb5_get_server_rcache(context,
-            krb5_princ_component(context,server,0), &(*auth_context)->rcache))
+	if ((retval = krb5_get_server_rcache(context,
+     krb5_princ_component(context,server,0), &(*auth_context)->rcache)))
 	    goto cleanup_auth_context;
     }
 
     /* Get a keytab if necessary. */
     if (keytab == NULL) {
-	if (retval = krb5_kt_default(context, &new_keytab))
+	if ((retval = krb5_kt_default(context, &new_keytab)))
 	    goto cleanup_auth_context;
 	keytab = new_keytab;
     }

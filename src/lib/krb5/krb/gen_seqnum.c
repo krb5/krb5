@@ -54,15 +54,15 @@ krb5_generate_seq_number(context, key, seqno)
 
     krb5_use_keytype(context, &eblock, key->keytype);
 
-    if (retval = krb5_init_random_key(context, &eblock, key, &random_state))
+    if ((retval = krb5_init_random_key(context, &eblock, key, &random_state)))
 	return(retval);
 	
-    if (retval = krb5_random_key(context, &eblock, random_state, &subkey)) {
+    if ((retval = krb5_random_key(context, &eblock, random_state, &subkey))) {
 	(void) krb5_finish_random_key(context, &eblock, &random_state);
 	return retval;
     }	
     /* ignore the error if any, since we've already gotten the key out */
-    if (retval = krb5_finish_random_key(context, &eblock, &random_state)) {
+    if ((retval = krb5_finish_random_key(context, &eblock, &random_state))) {
 	krb5_free_keyblock(context, subkey);
 	return retval;
     }
@@ -78,12 +78,12 @@ krb5_generate_seq_number(context, key, seqno)
 	    retval = ENOMEM;
 	    goto cleanup;
     }
-    if (retval = krb5_process_key(context, &eblock, subkey)) {
+    if ((retval = krb5_process_key(context, &eblock, subkey))) {
 	goto cleanup;
     }
 
-    if (retval = krb5_us_timeofday(context, &timenow.seconds,
-				   &timenow.microseconds)) {
+    if ((retval = krb5_us_timeofday(context, &timenow.seconds,
+				    &timenow.microseconds))) {
 	goto cleanup;
     }
     memcpy((char *)intmp, (char *)&timenow, sizeof(timenow));

@@ -84,7 +84,7 @@ krb5_parse_name(context, name, nprincipal)
 	 * and get string sizes for the first FCOMPNUM components.
 	 */
 	size = 0;
-	for (i=0,cp = name; c = *cp; cp++) {
+	for (i=0,cp = name; (c = *cp); cp++) {
 		if (c == QUOTECHAR) {
 			cp++;
 			if (!(c = *cp))
@@ -166,7 +166,7 @@ krb5_parse_name(context, name, nprincipal)
 	if (components >= FCOMPNUM) {
 		size = 0;
 		parsed_realm = NULL;
-		for (i=0,cp = name; c = *cp; cp++) {
+		for (i=0,cp = name; (c = *cp); cp++) {
 			if (c == QUOTECHAR) {
 				cp++;
 				size++;
@@ -234,7 +234,7 @@ krb5_parse_name(context, name, nprincipal)
 	 * allocated.
 	 */
 	q = krb5_princ_component(context, principal, 0)->data;
-	for (i=0,cp = name; c = *cp; cp++) {
+	for (i=0,cp = name; (c = *cp); cp++) {
 		if (c == QUOTECHAR) {
 			cp++;
 			switch (c = *cp) {

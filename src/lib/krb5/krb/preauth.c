@@ -149,9 +149,9 @@ krb5_obtain_padata(context, type, client, src_addr, encrypt_key, ret_data)
 	scratch.data[3] = data->length;
 
 	/* Encrypt preauth data in encryption key */
-	if (retval = krb5_encrypt(context, (krb5_pointer) data->contents,
-				  (char *) scratch.data + 4,
-				  data->length, &eblock, 0)) {
+	if ((retval = krb5_encrypt(context, (krb5_pointer) data->contents,
+				   (char *) scratch.data + 4,
+				   data->length, &eblock, 0))) {
 	    (void) krb5_finish_key(context, &eblock);
 	    free(scratch.data);
 	    goto error_out;

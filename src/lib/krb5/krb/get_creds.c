@@ -91,7 +91,8 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     ncreds->magic = KV5M_CREDS;
 
     /* The caller is now responsible for cleaning up in_creds */
-    if (retval = krb5_cc_retrieve_cred(context,ccache,fields,&mcreds,ncreds)) {
+    if ((retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds,
+					ncreds))) {
 	krb5_xfree(ncreds);
 	ncreds = in_creds;
     } else {
@@ -105,7 +106,7 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     if (tgts) {
 	register int i = 0;
 	while (tgts[i]) {
-	    if (rv2 = krb5_cc_store_cred(context, ccache, tgts[i])) {
+	    if ((rv2 = krb5_cc_store_cred(context, ccache, tgts[i]))) {
 		retval = rv2;
 		break;
 	    }

@@ -79,11 +79,12 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
      */
     keytype = krb5_csarray[req->ticket->enc_part.etype]->system->proto_keytype;
 
-    if (retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
-				   req->ticket->enc_part.kvno, keytype, &ktent))
+    if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
+				    req->ticket->enc_part.kvno,
+				    keytype, &ktent)))
 	return retval;
 
-    if (retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket)) 
+    if ((retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket)))
 	return retval;
 
     (void) krb5_kt_free_entry(context, &ktent);
@@ -112,18 +113,18 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
 
     /* decrypt the ticket */
     if ((*auth_context)->keyblock) { /* User to User authentication */
-    	if (retval = krb5_decrypt_tkt_part(context, (*auth_context)->keyblock,
-				           req->ticket)) 
+    	if ((retval = krb5_decrypt_tkt_part(context, (*auth_context)->keyblock,
+					    req->ticket)))
 	    return retval;
 	krb5_free_keyblock(context, (*auth_context)->keyblock);
 	(*auth_context)->keyblock = NULL;
     } else {
-    	if (retval = krb5_rd_req_decrypt_tkt_part(context, req, keytab))
+    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, keytab)))
 	    return retval;
     }
 
-    if (retval = decrypt_authenticator(context, req, 
-				       &((*auth_context)->authentp)))
+    if ((retval = decrypt_authenticator(context, req, 
+					&((*auth_context)->authentp))))
 	goto cleanup;
 
     if (!krb5_principal_compare(context, (*auth_context)->authentp->client,
@@ -270,7 +271,7 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
     }
 
     if (ticket)
-   	if (retval = krb5_copy_ticket(context, req->ticket, ticket))
+   	if ((retval = krb5_copy_ticket(context, req->ticket, ticket)))
 	    goto cleanup;
     if (ap_req_options)
     	*ap_req_options = req->ap_options;
@@ -315,23 +316,23 @@ decrypt_authenticator(context, request, authpp)
 	return(ENOMEM);
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, sesskey)) {
+    if ((retval = krb5_process_key(context, &eblock, sesskey))) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt(context, 
-			   (krb5_pointer)request->authenticator.ciphertext.data,
-			   (krb5_pointer)scratch.data,
-			   scratch.length, &eblock, 0)) {
+    if ((retval = krb5_decrypt(context, 
+			       (krb5_pointer)request->authenticator.ciphertext.data,
+			       (krb5_pointer)scratch.data,
+			       scratch.length, &eblock, 0))) {
 	(void) krb5_finish_key(context, &eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    if (retval = krb5_finish_key(context, &eblock)) {
+    if ((retval = krb5_finish_key(context, &eblock))) {
 
 	clean_scratch();
 	return retval;

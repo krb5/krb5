@@ -73,7 +73,7 @@ krb5_recvauth(context, auth_context,
 	    /*
 	     * First read the sendauth version string and check it.
 	     */
-	    if (retval = krb5_read_message(context, fd, &inbuf))
+	    if ((retval = krb5_read_message(context, fd, &inbuf)))
 		return(retval);
 	    if (strcmp(inbuf.data, sendauth_version)) {
 		krb5_xfree(inbuf.data);
@@ -87,7 +87,7 @@ krb5_recvauth(context, auth_context,
 	/*
 	 * Do the same thing for the application version string.
 	 */
-	if (retval = krb5_read_message(context, fd, &inbuf))
+	if ((retval = krb5_read_message(context, fd, &inbuf)))
 		return(retval);
 	if (strcmp(inbuf.data, appl_version)) {
 		krb5_xfree(inbuf.data);
@@ -151,7 +151,8 @@ krb5_recvauth(context, auth_context,
 	     * If the rc_recover() didn't work, then try
 	     * initializing the replay cache.
 	     */
-	    if (problem = krb5_rc_initialize(context, rcache, krb5_clockskew)) {
+	    if ((problem = krb5_rc_initialize(context, rcache,
+					      krb5_clockskew))) {
 	        krb5_rc_close(context, rcache);
 		rcache = NULL;
 	    }
@@ -161,7 +162,7 @@ krb5_recvauth(context, auth_context,
     /*
      * Now, let's read the AP_REQ message and decode it
      */
-    if (retval = krb5_read_message(context, fd, &inbuf)) {
+    if ((retval = krb5_read_message(context, fd, &inbuf))) {
 	if (problem) /* Return top level problem */
 	    retval = problem; 
 	goto cleanup;
@@ -204,7 +205,7 @@ krb5_recvauth(context, auth_context,
 	    goto cleanup;
 	}
 	strcpy(error.text.data, message);
-	if (retval = krb5_mk_error(context, &error, &outbuf)) {
+	if ((retval = krb5_mk_error(context, &error, &outbuf))) {
 	    free(error.text.data);
 	    goto cleanup;
 	}
@@ -228,7 +229,7 @@ krb5_recvauth(context, auth_context,
 
     /* Here lies the mutual authentication stuff... */
     if ((ap_option & AP_OPTS_MUTUAL_REQUIRED)) {
-	if (retval = krb5_mk_rep(context, *auth_context, &outbuf)) {
+	if ((retval = krb5_mk_rep(context, *auth_context, &outbuf))) {
 	    return(retval);
 	}
 	retval = krb5_write_message(context, fd, &outbuf);

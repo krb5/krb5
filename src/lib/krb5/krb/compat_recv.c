@@ -37,6 +37,7 @@
 #include "k5-int.h"
 #ifndef _MSDOS
 #include <kerberosIV/krb.h>
+#include <kerberosIV/krb4-proto.h>
 #include "com_err.h"
 #include <errno.h>
 
@@ -211,17 +212,15 @@ char *filename;			 /* name of file with service keys */
 Key_schedule schedule;		 /* key schedule (return) */
 char *version;			 /* version string (filled in) */
 {
-    int i, cc, old_vers = 0;
-    char krb_vers[KRB_SENDAUTH_VLEN + 1]; /* + 1 for the null terminator */
-    char *cp;
+    int cc, old_vers = 0;
     int rem;
     krb5_int32 tkt_len, priv_len;
     krb5_ui_4 cksum;
     u_char tmp_buf[MAX_KTXT_LEN+max(KRB_SENDAUTH_VLEN+1,21)];
 
     /* read the application version string */
-    if (krb_net_read(fd, version, KRB_SENDAUTH_VLEN) !=
-	KRB_SENDAUTH_VLEN)
+    if ((krb_net_read(fd, version, KRB_SENDAUTH_VLEN) !=
+	 KRB_SENDAUTH_VLEN))
 	return(errno);
     version[KRB_SENDAUTH_VLEN] = '\0';
 

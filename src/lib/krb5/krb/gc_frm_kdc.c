@@ -107,24 +107,23 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
    * (the ticket may be issued by some other intermediate
    *  realm's KDC; so we use KRB5_TC_MATCH_SRV_NAMEONLY)
    */
-  if (retval = krb5_copy_principal(context, in_cred->client, &tgtq.client))
+  if ((retval = krb5_copy_principal(context, in_cred->client, &tgtq.client)))
       goto cleanup;
 
   /* get target tgt from cache */
-  if (retval = krb5_tgtname(context, krb5_princ_realm(context, in_cred->server),
-                            krb5_princ_realm(context, in_cred->client),
-                            &int_server)) {
+  if ((retval = krb5_tgtname(context, krb5_princ_realm(context, in_cred->server),
+			     krb5_princ_realm(context, in_cred->client),
+			     &int_server))) {
       goto cleanup;
   }
 
-  if (retval = krb5_copy_principal(context, int_server, &tgtq.server)) {
+  if ((retval = krb5_copy_principal(context, int_server, &tgtq.server))) {
       goto cleanup;
   }
 
-  if (retval = krb5_cc_retrieve_cred(context, ccache,
-                                     KRB5_TC_MATCH_SRV_NAMEONLY,
-                                     &tgtq,
-                                     &tgt)) {
+  if ((retval = krb5_cc_retrieve_cred(context, ccache,
+				      KRB5_TC_MATCH_SRV_NAMEONLY,
+				      &tgtq, &tgt))) {
 
     if (retval != KRB5_CC_NOTFOUND) {
 	goto cleanup;
@@ -144,34 +143,33 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
      */
     krb5_free_principal(context, int_server);
     int_server = NULL;
-    if (retval = krb5_tgtname(context, 
-			      krb5_princ_realm(context, in_cred->client),
-                              krb5_princ_realm(context, in_cred->client),
-                              &int_server)) {
+    if ((retval = krb5_tgtname(context, 
+			       krb5_princ_realm(context, in_cred->client),
+			       krb5_princ_realm(context, in_cred->client),
+			       &int_server))) {
 	goto cleanup;
     }
   
     krb5_free_cred_contents(context, &tgtq);
     memset((char *)&tgtq, 0, sizeof(tgtq));
-    if(retval = krb5_copy_principal(context, in_cred->client, &tgtq.client))
+    if ((retval = krb5_copy_principal(context, in_cred->client, &tgtq.client)))
 	goto cleanup;
-    if(retval = krb5_copy_principal(context, int_server, &tgtq.server))
+    if ((retval = krb5_copy_principal(context, int_server, &tgtq.server)))
 	goto cleanup;
 
-    if (retval = krb5_cc_retrieve_cred(context, ccache,
-                                       KRB5_TC_MATCH_SRV_NAMEONLY,
-                                       &tgtq,
-                                       &tgt)) {
+    if ((retval = krb5_cc_retrieve_cred(context, ccache,
+					KRB5_TC_MATCH_SRV_NAMEONLY,
+					&tgtq, &tgt))) {
 	goto cleanup;
     }
   
     /* get a list of realms to consult */
   
-    if (retval = krb5_walk_realm_tree(context, 
-				      krb5_princ_realm(context,in_cred->client),
-                                      krb5_princ_realm(context,in_cred->server),
-                                      &tgs_list, 
-                                      KRB5_REALM_BRANCH_CHAR)) {
+    if ((retval = krb5_walk_realm_tree(context, 
+				       krb5_princ_realm(context,in_cred->client),
+				       krb5_princ_realm(context,in_cred->server),
+				       &tgs_list, 
+				       KRB5_REALM_BRANCH_CHAR))) {
 	goto cleanup;
     }
   
@@ -207,25 +205,24 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
     
       krb5_free_cred_contents(context, &tgtq);
       memset(&tgtq, 0, sizeof(tgtq));
-      if(retval = krb5_copy_principal(context, tgt.client, &tgtq.client))
+      if ((retval = krb5_copy_principal(context, tgt.client, &tgtq.client)))
 	  goto cleanup;
 
       krb5_free_principal(context, int_server);
       int_server = NULL;
-      if (retval = krb5_tgtname(context, 
-				krb5_princ_realm(context, in_cred->server),
-				krb5_princ_realm(context, *top_server),
-				&int_server)) {
+      if ((retval = krb5_tgtname(context, 
+				 krb5_princ_realm(context, in_cred->server),
+				 krb5_princ_realm(context, *top_server),
+				 &int_server))) {
 	  goto cleanup;
       }
     
-      if(retval = krb5_copy_principal(context, int_server, &tgtq.server))
+      if ((retval = krb5_copy_principal(context, int_server, &tgtq.server)))
 	  goto cleanup;
 
-      if (retval = krb5_cc_retrieve_cred(context, ccache,
-					 KRB5_TC_MATCH_SRV_NAMEONLY,
-					 &tgtq,
-					 &tgt)) {
+      if ((retval = krb5_cc_retrieve_cred(context, ccache,
+					  KRB5_TC_MATCH_SRV_NAMEONLY,
+					  &tgtq, &tgt))) {
     
 	if (retval != KRB5_CC_NOTFOUND) {
 	    goto cleanup;
@@ -247,16 +244,16 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	memcpy(&tgtq.times, &tgt.times, sizeof(krb5_ticket_times));
 #endif
 
-	if (retval = krb5_copy_principal(context, tgt.client, &tgtq.client))
+	if ((retval = krb5_copy_principal(context, tgt.client, &tgtq.client)))
 	    goto cleanup;
-	if(retval = krb5_copy_principal(context, int_server, &tgtq.server))
+	if ((retval = krb5_copy_principal(context, int_server, &tgtq.server)))
 	    goto cleanup;
 	tgtq.is_skey      = FALSE;
 	tgtq.ticket_flags = tgt.ticket_flags;
 	etype             = TGT_ETYPE;
-	if (retval = krb5_get_cred_via_tkt(context, &tgt,
-					   FLAGS2OPTS(tgtq.ticket_flags),
-					   tgt.addresses, &tgtq, &tgtr)) {
+	if ((retval = krb5_get_cred_via_tkt(context, &tgt,
+					    FLAGS2OPTS(tgtq.ticket_flags),
+					    tgt.addresses, &tgtq, &tgtr))) {
 	      
        /*
 	* couldn't get one so now loop backwards through the realms
@@ -270,24 +267,26 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	       next_server--) {
 	    krb5_free_cred_contents(context, &tgtq);
 	    memset(&tgtq, 0, sizeof(tgtq));
-	    if (retval = krb5_copy_principal(context, tgt.client, &tgtq.client))
+	    if ((retval = krb5_copy_principal(context, tgt.client,
+					      &tgtq.client)))
 		goto cleanup;
 
 	    krb5_free_principal(context, int_server);
 	    int_server = NULL;
-	    if (retval = krb5_tgtname(context, 
-				      krb5_princ_realm(context, *next_server),
-				      krb5_princ_realm(context, *top_server),
-				      &int_server)) {
+	    if ((retval = krb5_tgtname(context, 
+				       krb5_princ_realm(context, *next_server),
+				       krb5_princ_realm(context, *top_server),
+				       &int_server))) {
 		goto cleanup;
 	    }
     
-	    if(retval = krb5_copy_principal(context, int_server, &tgtq.server))
+	    if ((retval = krb5_copy_principal(context, int_server,
+					      &tgtq.server)))
 		goto cleanup;
 
-	    if(retval = krb5_cc_retrieve_cred(context, ccache,
-					      KRB5_TC_MATCH_SRV_NAMEONLY,
-					      &tgtq, &tgt)) {
+	    if ((retval = krb5_cc_retrieve_cred(context, ccache,
+						KRB5_TC_MATCH_SRV_NAMEONLY,
+						&tgtq, &tgt))) {
 	      if (retval != KRB5_CC_NOTFOUND) {
 		  goto cleanup;
 	      }
@@ -302,21 +301,25 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	      krb5_free_cred_contents(context, &tgtq);
 	      memset(&tgtq, 0, sizeof(tgtq));
 	      tgtq.times        = tgt.times;
-	      if (retval = krb5_copy_principal(context,tgt.client,&tgtq.client))
+	      if ((retval = krb5_copy_principal(context, tgt.client,
+						&tgtq.client)))
 		  goto cleanup;
-	      if(retval = krb5_copy_principal(context,int_server,&tgtq.server))
+	      if ((retval = krb5_copy_principal(context, int_server,
+						&tgtq.server)))
 		  goto cleanup;
 	      tgtq.is_skey      = FALSE;
 	      tgtq.ticket_flags = tgt.ticket_flags;
 	      etype             = TGT_ETYPE;
-	      if (retval = krb5_get_cred_via_tkt(context, &tgt,
-                                                 FLAGS2OPTS(tgtq.ticket_flags),
-                                                 tgt.addresses, &tgtq, &tgtr)) {
+	      if ((retval = krb5_get_cred_via_tkt(context, &tgt,
+						  FLAGS2OPTS(tgtq.ticket_flags),
+						  tgt.addresses,
+						  &tgtq, &tgtr))) {
 		  continue;
 	      }
 	      
 	      /* save tgt in return array */
-	      if (retval = krb5_copy_creds(context, tgtr, &ret_tgts[ntgts])) {
+	      if ((retval = krb5_copy_creds(context, tgtr,
+					    &ret_tgts[ntgts]))) {
 		  goto cleanup;
 	      }
 	      krb5_free_creds(context, tgtr);
@@ -358,7 +361,7 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	    goto cleanup;
 	}
 
-	if (retval = krb5_copy_creds(context, tgtr, &ret_tgts[ntgts])) {
+	if ((retval = krb5_copy_creds(context, tgtr, &ret_tgts[ntgts]))) {
 	    goto cleanup;
 	}
 	krb5_free_creds(context, tgtr);

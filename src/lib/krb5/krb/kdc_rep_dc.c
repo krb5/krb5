@@ -60,22 +60,22 @@ krb5_kdc_rep_decrypt_proc(context, key, decryptarg, dec_rep)
     krb5_use_cstype(context, &eblock, dec_rep->enc_part.etype);
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, key)) {
+    if ((retval = krb5_process_key(context, &eblock, key))) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the decryption routine */
-    if (retval = krb5_decrypt(context, (krb5_pointer) dec_rep->enc_part.ciphertext.data,
-			      (krb5_pointer) scratch.data,
-			      scratch.length, &eblock, 0)) {
+    if ((retval = krb5_decrypt(context, (krb5_pointer) dec_rep->enc_part.ciphertext.data,
+			       (krb5_pointer) scratch.data,
+			       scratch.length, &eblock, 0))) {
 	(void) krb5_finish_key(context, &eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    if (retval = krb5_finish_key(context, &eblock)) {
+    if ((retval = krb5_finish_key(context, &eblock))) {
 	clean_scratch();
 	return retval;
     }
