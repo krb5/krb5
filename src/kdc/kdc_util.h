@@ -109,7 +109,14 @@ int against_local_policy_as PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
 int against_local_policy_tgs PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
 					krb5_ticket *, char **));
 
-
+/* kdc_preauth.c */
+const char * missing_required_preauth
+    PROTOTYPE((krb5_db_entry *client, krb5_db_entry *server,
+	       krb5_enc_tkt_part *enc_tkt_reply));
+void get_preauth_hint_list PROTOTYPE((krb5_db_entry *client,
+				     krb5_db_entry *server,
+				     krb5_data *e_data));
+    
 /* replay.c */
 krb5_boolean kdc_check_lookaside PROTOTYPE((krb5_data *, krb5_data **));
 void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_data *));

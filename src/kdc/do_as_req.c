@@ -44,6 +44,7 @@
 
 static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
 						   int,
+						   krb5_data *, 
 						   krb5_data **));
 /*
  * This routine is called to verify the preauthentication information
@@ -105,7 +106,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_error_code retval;
     int c_nprincs = 0, s_nprincs = 0;
-    int pwreq, pa_id, pa_flags;
+    int pa_id, pa_flags;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime;
     krb5_keyblock *session_key = 0;
@@ -113,7 +114,6 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enctype useetype;
     krb5_pa_data *padat_tmp[2], padat_local;
     krb5_data salt_data;
-    static krb5_principal cpw = 0;
     char *status;
     krb5_encrypt_block eblock;
     krb5_key_data  *server_key, *client_key;
@@ -131,19 +131,19 @@ krb5_data **response;			/* filled in with a response packet */
 
     if (!request->client)
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
-				response));
+				0, response));
     if ((retval = krb5_unparse_name(kdc_context, request->client, &cname))) {
 	krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while unparsing client name",
 	       error_message(retval));
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
-				response));
+				0, response));
     }
     if ((retval = krb5_unparse_name(kdc_context, request->server, &sname))) {
 	free(cname);
 	krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while unparsing server name",
 	       error_message(retval));
 	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
-				response));
+				0, response));
     }
 #ifdef KRB5_USE_INET
     if (from->address->addrtype == ADDRTYPE_INET)
@@ -151,25 +151,6 @@ krb5_data **response;			/* filled in with a response packet */
 #endif
     if (!fromstring)
 	fromstring = "<unknown>";
-
-    /*
-     * Special considerations are allowed when changing passwords. Is
-     * this request for changepw?
-     *
-     * XXX This logic should be moved someplace else, perhaps the
-     * site-specific policiy file....
-     */
-    pwreq = 0;
-    if (!cpw) {
-	    retval = krb5_parse_name(kdc_context, "changepw/kerberos", &cpw);
-	    if (retval)
-		    goto errout;
-	    free(krb5_princ_realm(kdc_context, cpw)->data);
-	    krb5_princ_realm(kdc_context, cpw)->data = 0;
-    }
-    krb5_princ_realm(kdc_context, cpw)->data = krb5_princ_realm(kdc_context, request->server)->data;
-    if (krb5_principal_compare(kdc_context, request->server, cpw))
-	    pwreq++;
 
     c_nprincs = 1;
     if ((retval = krb5_db_get_principal(kdc_context, request->client, &client, 
@@ -179,14 +160,14 @@ krb5_data **response;			/* filled in with a response packet */
     }
     if (more) {
 	retval = prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE,
-				  response);
+				  0, response);
 	goto errout;
     } else if (c_nprincs != 1) {
 #ifdef KRBCONF_VAGUE_ERRORS
-	retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
+	retval = prepare_error_as(request, KRB_ERR_GENERIC, 0, response);
 #else
 	retval = prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
-				  response);
+				  0, response);
 #endif
 	goto errout;
     }
@@ -199,11 +180,11 @@ krb5_data **response;			/* filled in with a response packet */
     }
     if (more) {
 	retval = prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE,
-				  response);
+				  0, response);
 	goto errout;
     } else if (s_nprincs != 1) {
 	retval = prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
-				  response);
+				  0, response);
 	goto errout;
     }
 
@@ -218,7 +199,7 @@ krb5_data **response;			/* filled in with a response packet */
 				      kdc_time, &status))) {
 	krb5_klog_syslog(LOG_INFO, "AS_REQ: %s: host %s, %s for %s", status,
                   fromstring, cname, sname);
-	retval = prepare_error_as(request, retval, response);
+	retval = prepare_error_as(request, retval, 0, response);
 	goto errout;
     }
       
@@ -248,7 +229,7 @@ krb5_data **response;			/* filled in with a response packet */
     /* unsupported etype */
     krb5_klog_syslog(LOG_INFO,"AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
                      fromstring, cname, sname);
-    retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response);
+    retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, 0, response);
     goto errout;
 
 got_a_key:;
@@ -362,16 +343,15 @@ got_a_key:;
             krb5_klog_syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
 		   fromstring, cname, sname, error_message(retval));
 #ifdef KRBCONF_VAGUE_ERRORS
-            retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
+            retval = prepare_error_as(request, KRB_ERR_GENERIC, 0, response);
 #else
 	    retval -= ERROR_TABLE_BASE_krb5;
 	    if ((retval < 0) || (retval > 127))
 		    retval = KDC_ERR_PREAUTH_FAILED;
-            retval = prepare_error_as(request, retval, response);
+            retval = prepare_error_as(request, retval, 0, response);
 #endif
 	    goto errout;
 	} 
-
 	setflag(enc_tkt_reply.flags, TKT_FLG_PRE_AUTH);
 	/*
 	 * If pa_type is one in which additional hardware authentication
@@ -383,23 +363,23 @@ got_a_key:;
 
     /*
      * Final check before handing out ticket: If the client requires
-     * Hardware authentication, verify ticket flag is set
-     */  
-
-    if (isflagset(client.attributes, KRB5_KDB_REQUIRES_HW_AUTH) &&
-	!isflagset(enc_tkt_reply.flags, TKT_FLG_HW_AUTH)) {
-
-	  /* Of course their are always exceptions, in this case if the
-	     service requested is for changing of the key (password), then
-	     if TKT_FLG_PRE_AUTH is set allow it. */
+     * preauthentication, verify that the proper kind of
+     * preauthentication was carried out.
+     */
+    status = missing_required_preauth(&client, &server, &enc_tkt_reply);
+    if (status) {
+	krb5_data e_data;
 	
-	  if (!pwreq || !(enc_tkt_reply.flags & TKT_FLG_PRE_AUTH)){
-              krb5_klog_syslog(LOG_INFO, "AS_REQ: Needed HW preauth: host %s, %s for %s",
-		     fromstring, cname, sname);
-              retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
-	      goto errout;
-	  }
-      }
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: Needed %s: host %s, %s for %s",
+			 status, fromstring, cname, sname);
+    
+	get_preauth_hint_list(&client, &server, &e_data);
+	retval = prepare_error_as(request, KDC_ERR_PREAUTH_REQUIRED,
+				  &e_data, response);
+	if (e_data.data)
+	    free(e_data.data);
+	goto errout;
+    }
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
@@ -439,7 +419,7 @@ got_a_key:;
 	krb5_klog_syslog(LOG_INFO,
 			 "AS_REQ: CANNOT FIND CLIENT KEY: host %s, %s for %s",
 			 fromstring, cname, sname);
-	retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response);
+	retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, 0, response);
 	goto errout;
     }
 
@@ -588,9 +568,10 @@ errout:
 }
 
 static krb5_error_code
-prepare_error_as (request, error, response)
+prepare_error_as (request, error, e_data, response)
 register krb5_kdc_req *request;
 int error;
+krb5_data *e_data;
 krb5_data **response;
 {
     krb5_error errpkt;
@@ -632,8 +613,12 @@ krb5_data **response;
 	free(errpkt.text.data);
 	return ENOMEM;
     }
-    errpkt.e_data.length = 0;
-    errpkt.e_data.data = 0;
+    if (e_data) {
+	errpkt.e_data = *e_data;
+    } else {
+	errpkt.e_data.length = 0;
+	errpkt.e_data.data = 0;
+    }
 
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);

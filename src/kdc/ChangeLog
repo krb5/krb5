@@ -1,3 +1,15 @@
+Fri Sep  1 23:28:29 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_preauth.c: New file, to contain the server-side
+		preauthentication routines.
+
+	* do_as_req.c (process_as_req): Move preauthentication code to
+		kdc_preauth.c, for better modularity.
+
+	* do_as_req.c (prepare_error_as): Add new argument to this
+		function so that the e_data field may be passed in and
+		included in the KRB_ERROR messsage which is passed back to
+		the user.
 
 Mon Aug 21 17:03:53 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* main.c - Interpret -k and -e arguments as strings instead of string
