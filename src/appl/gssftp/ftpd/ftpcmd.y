@@ -1445,12 +1445,12 @@ help(ctab, s)
 	register struct tab *c;
 	register int width, NCMDS;
 	char str[80];
-	char *type;
+	char *ftype;
 
 	if (ctab == sitetab)
-		type = "SITE ";
+		ftype = "SITE ";
 	else
-		type = "";
+		ftype = "";
 	width = 0, NCMDS = 0;
 	for (c = ctab; c->name != NULL; c++) {
 		int len = strlen(c->name);
@@ -1465,7 +1465,7 @@ help(ctab, s)
 		int columns, lines;
 
 		lreply(214, "The following %scommands are recognized %s.",
-		    type, "(* =>'s unimplemented)");
+		    ftype, "(* =>'s unimplemented)");
 		columns = 76 / width;
 		if (columns == 0)
 			columns = 1;
@@ -1496,9 +1496,9 @@ help(ctab, s)
 		return;
 	}
 	if (c->implemented)
-		reply(214, "Syntax: %s%s %s", type, c->name, c->help);
+		reply(214, "Syntax: %s%s %s", ftype, c->name, c->help);
 	else
-		reply(214, "%s%-*s\t%s; unimplemented.", type, width,
+		reply(214, "%s%-*s\t%s; unimplemented.", ftype, width,
 		    c->name, c->help);
 }
 

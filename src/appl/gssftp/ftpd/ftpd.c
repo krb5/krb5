@@ -246,7 +246,7 @@ FILE	*getdatasock();
  * The following prototypes must be ANSI for systems for which
  * sizeof(off_t) > sizeof(int) to prevent stack overflow problems 
  */
-FILE	*dataconn(char *name, off_t size, char *mode);
+FILE	*dataconn(char *name, off_t size, char *mymode);
 void	send_data(FILE *instr, FILE *outstr, off_t blksize);
 #else
 void	send_data();
@@ -418,37 +418,37 @@ main(argc, argv, envp)
 
 		case 'w':
 		{
-			char *optarg;
+			char *foptarg;
 			if (*++cp != '\0')
-				optarg = cp;
+				foptarg = cp;
 			else if (argc > 1) {
 				argc--;
 				argv++;
-				optarg = *argv;
+				foptarg = *argv;
 			} else {
 				fprintf(stderr, "ftpd: -w expects arg\n");
 				exit(1);
 			}
 
-			if (!strcmp(optarg, "ip"))
+			if (!strcmp(foptarg, "ip"))
 				always_ip = 1;
 			else {
-				char *cp;
-				cp = strchr(optarg, ',');
-				if (cp == NULL)
-					maxhostlen = atoi(optarg);
-				else if (*(++cp)) {
-					if (!strcmp(cp, "striplocal"))
+				char *cp2;
+				cp2 = strchr(foptarg, ',');
+				if (cp2 == NULL)
+					maxhostlen = atoi(foptarg);
+				else if (*(++cp2)) {
+					if (!strcmp(cp2, "striplocal"))
 						stripdomain = 1;
-					else if (!strcmp(cp, "nostriplocal"))
+					else if (!strcmp(cp2, "nostriplocal"))
 						stripdomain = 0;
 					else {
 						fprintf(stderr,
 							"ftpd: bad arg to -w\n");
 						exit(1);
 					}
-					*(--cp) = '\0';
-					maxhostlen = atoi(optarg);
+					*(--cp2) = '\0';
+					maxhostlen = atoi(foptarg);
 				}
 			}
 			goto nextopt;
@@ -463,13 +463,13 @@ nextopt:
 	}
 
 	if (port != -1) {
-		struct sockaddr_in sin;
+		struct sockaddr_in sin4;
 		int s, ns, sz;
 
 		/* Accept an incoming connection on port.  */
-		sin.sin_family = AF_INET;
-		sin.sin_addr.s_addr = INADDR_ANY;
-		sin.sin_port = htons(port);
+		sin4.sin_family = AF_INET;
+		sin4.sin_addr.s_addr = INADDR_ANY;
+		sin4.sin_port = htons(port);
 		s = socket(AF_INET, SOCK_STREAM, 0);
 		if (s < 0) {
 			perror("socket");
@@ -477,7 +477,7 @@ nextopt:
 		}
 		(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
 				  (char *)&on, sizeof(on));
-		if (bind(s, (struct sockaddr *)&sin, sizeof sin) < 0) {
+		if (bind(s, (struct sockaddr *)&sin4, sizeof sin4) < 0) {
 			perror("bind");
 			exit(1);
 		}
@@ -485,8 +485,8 @@ nextopt:
 			perror("listen");
 			exit(1);
 		}
-		sz = sizeof sin;
-		ns = accept(s, (struct sockaddr *)&sin, &sz);
+		sz = sizeof sin4;
+		ns = accept(s, (struct sockaddr *)&sin4, &sz);
 		if (ns < 0) {
 			perror("accept");
 			exit(1);
@@ -1296,8 +1296,8 @@ done:
 }
 
 void
-store_file(name, mode, unique)
-	char *name, *mode;
+store_file(name, fmode, unique)
+	char *name, *fmode;
 	int unique;
 {
 	FILE *fout, *din;
@@ -1312,8 +1312,8 @@ store_file(name, mode, unique)
 		return;
 
 	if (restart_point)
-		mode = "r+w";
-	fout = fopen(name, mode);
+		fmode = "r+w";
+	fout = fopen(name, fmode);
 	closefunc = fclose;
 	if (fout == NULL) {
 		perror_reply(553, name);
@@ -1367,13 +1367,13 @@ done:
 }
 
 FILE *
-getdatasock(mode)
-	char *mode;
+getdatasock(fmode)
+	char *fmode;
 {
 	int s, on = 1, tries;
 
 	if (data >= 0)
-		return (fdopen(data, mode));
+		return (fdopen(data, fmode));
 	(void) krb5_seteuid((uid_t)0);
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	if (s < 0)
@@ -1400,7 +1400,7 @@ getdatasock(mode)
 		syslog(LOG_WARNING, "setsockopt (IP_TOS): %m");
 #endif
 #endif
-	return (fdopen(s, mode));
+	return (fdopen(s, fmode));
 bad:
 	(void) krb5_seteuid((uid_t)pw->pw_uid);
 	(void) close(s);
@@ -1408,10 +1408,10 @@ bad:
 }
 
 FILE *
-dataconn(name, size, mode)
+dataconn(name, size, fmode)
 	char *name;
 	off_t size;
-	char *mode;
+	char *fmode;
 {
 	char sizebuf[32];
 	FILE *file;
@@ -1445,18 +1445,18 @@ dataconn(name, size, mode)
 #endif
 		reply(150, "Opening %s mode data connection for %s%s.",
 		     type == TYPE_A ? "ASCII" : "BINARY", name, sizebuf);
-		return(fdopen(pdata, mode));
+		return(fdopen(pdata, fmode));
 	}
 	if (data >= 0) {
 		reply(125, "Using existing data connection for %s%s.",
 		    name, sizebuf);
 		usedefault = 1;
-		return (fdopen(data, mode));
+		return (fdopen(data, fmode));
 	}
 	if (usedefault)
 		data_dest = his_addr;
 	usedefault = 1;
-	file = getdatasock(mode);
+	file = getdatasock(fmode);
 	if (file == NULL) {
 		reply(425, "Can't create data socket (%s,%d): %s.",
 		    inet_ntoa(data_source.sin_addr),
@@ -1739,7 +1739,7 @@ statfilecmd(filename)
 void
 statcmd()
 {
-	struct sockaddr_in *sin;
+	struct sockaddr_in *sin4;
 	u_char *a, *p;
 	char str[FTP_BUFSIZ];
 
@@ -1782,14 +1782,14 @@ statcmd()
 		strcpy(str, "     Data connection open");
 	else if (pdata != -1) {
 		strcpy(str, "     in Passive mode");
-		sin = &pasv_addr;
+		sin4 = &pasv_addr;
 		goto printaddr;
 	} else if (usedefault == 0) {
 		strcpy(str, "     PORT");
-		sin = &data_dest;
+		sin4 = &data_dest;
 printaddr:
-		a = (u_char *) &sin->sin_addr;
-		p = (u_char *) &sin->sin_port;
+		a = (u_char *) &sin4->sin_addr;
+		p = (u_char *) &sin4->sin_port;
 #define UC(b) (((int) b) & 0xff)
 		sprintf(&str[strlen(str)], " (%d,%d,%d,%d,%d,%d)", UC(a[0]),
 			UC(a[1]), UC(a[2]), UC(a[3]), UC(p[0]), UC(p[1]));
@@ -2091,10 +2091,10 @@ renamecmd(from, to)
 }
 
 static void
-dolog(sin)
-	struct sockaddr_in *sin;
+dolog(sin4)
+	struct sockaddr_in *sin4;
 {
-	struct hostent *hp = gethostbyaddr((char *)&sin->sin_addr,
+	struct hostent *hp = gethostbyaddr((char *)&sin4->sin_addr,
 		sizeof (struct in_addr), AF_INET);
 	time_t t, time();
 	extern char *ctime();
@@ -2105,9 +2105,9 @@ dolog(sin)
 		remotehost[sizeof (remotehost) - 1] = '\0';
 	} else
 		remotehost[0] = '\0';
-	strncpy(rhost_addra, inet_ntoa(sin->sin_addr), sizeof (rhost_addra));
+	strncpy(rhost_addra, inet_ntoa(sin4->sin_addr), sizeof (rhost_addra));
 	rhost_addra[sizeof (rhost_addra) - 1] = '\0';
-	retval = pty_make_sane_hostname((struct sockaddr *) sin, maxhostlen,
+	retval = pty_make_sane_hostname((struct sockaddr *) sin4, maxhostlen,
 					stripdomain, always_ip, &rhost_sane);
 	if (retval) {
 		fprintf(stderr, "make_sane_hostname: %s\n",
@@ -2295,31 +2295,31 @@ perror_reply(code, string)
 }
 
 void
-auth(type)
-char *type;
+auth(atype)
+char *atype;
 {
 	if (auth_type)
 		reply(534, "Authentication type already set to %s", auth_type);
 	else
 #ifdef KRB5_KRB4_COMPAT
-	if (strcmp(type, "KERBEROS_V4") == 0)
+	if (strcmp(atype, "KERBEROS_V4") == 0)
 		reply(334, "Using authentication type %s; ADAT must follow",
-				temp_auth_type = type);
+				temp_auth_type = atype);
 	else
 #endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
-	if (strcmp(type, "GSSAPI") == 0)
+	if (strcmp(atype, "GSSAPI") == 0)
 		reply(334, "Using authentication type %s; ADAT must follow",
-				temp_auth_type = type);
+				temp_auth_type = atype);
 	else
 #endif /* GSSAPI */
 	/* Other auth types go here ... */
-		reply(504, "Unknown authentication type: %s", type);
+		reply(504, "Unknown authentication type: %s", atype);
 }
 
 int
-auth_data(data)
-char *data;
+auth_data(adata)
+char *adata;
 {
 	int kerror, length;
 #ifdef KRB5_KRB4_COMPAT
@@ -2340,7 +2340,7 @@ char *data;
 	}
 #ifdef KRB5_KRB4_COMPAT
 	if (strcmp(temp_auth_type, "KERBEROS_V4") == 0) {
-	        kerror = radix_encode(data, out_buf, &length, 1);
+	        kerror = radix_encode(adata, out_buf, &length, 1);
 		if (kerror) {
 			reply(501, "Couldn't decode ADAT (%s)",
 			      radix_error(kerror));
@@ -2412,7 +2412,7 @@ char *data;
 		u_char gout_buf[FTP_BUFSIZ];
 		char localname[MAXHOSTNAMELEN];
 		char service_name[MAXHOSTNAMELEN+10];
-		char **service;
+		char **gservice;
 		struct hostent *hp;
 
 		chan.initiator_addrtype = GSS_C_AF_INET;
@@ -2424,7 +2424,7 @@ char *data;
 		chan.application_data.length = 0;
 		chan.application_data.value = 0;
 
-		kerror = radix_encode(data, gout_buf, &length, 1);
+		kerror = radix_encode(adata, gout_buf, &length, 1);
 		if (kerror) {
 			reply(501, "Couldn't decode ADAT (%s)",
 			      radix_error(kerror));
@@ -2448,8 +2448,8 @@ char *data;
 		strncpy(localname, hp->h_name, sizeof(localname) - 1);
 		localname[sizeof(localname) - 1] = '\0';
 
-		for (service = gss_services; *service; service++) {
-			sprintf(service_name, "%s@%s", *service, localname);
+		for (gservice = gss_services; *gservice; gservice++) {
+			sprintf(service_name, "%s@%s", *gservice, localname);
 			name_buf.value = service_name;
 			name_buf.length = strlen(name_buf.value) + 1;
 			if (debug)
@@ -2902,14 +2902,14 @@ char *s;
 /* ftpd_gss_userok -- hide details of getting the name and verifying it */
 /* returns 0 for OK */
 static int
-ftpd_gss_userok(client_name, name)
-	gss_buffer_t client_name;
+ftpd_gss_userok(gclient_name, name)
+	gss_buffer_t gclient_name;
 	char *name;
 {
 	int retval = -1;
 	krb5_principal p;
 	
-	if (krb5_parse_name(kcontext, client_name->value, &p) != 0)
+	if (krb5_parse_name(kcontext, gclient_name->value, &p) != 0)
 		return -1;
 	if (krb5_kuserok(kcontext, p, name))
 		retval = 0;
