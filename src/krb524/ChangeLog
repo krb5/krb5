@@ -1,3 +1,7 @@
+Tue Jun 27 20:27:06 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* encode.c: make declarations use KRB5_PROTOTYPE, and use old
+	style definitions, per V5 coding style.
 
 Tue Jun 27 15:54:57 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* cnv_tkt_skey.c - Cast key contents argument to conform to prototype.

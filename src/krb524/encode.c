@@ -38,17 +38,21 @@
  * the wheel is hidden.
  */
 
-int  encode_v4tkt(KTEXT_ST *, char *, int *),
-     encode_ktext(char **, int *, KTEXT_ST *),
-     encode_bytes(char **, int *, char *, int),
-     encode_int32(char **, int *, krb5_int32 *);
+int  encode_v4tkt KRB5_PROTOTYPE((KTEXT_ST *, char *, int *)),
+     encode_ktext KRB5_PROTOTYPE((char **, int *, KTEXT_ST *)),
+     encode_bytes KRB5_PROTOTYPE((char **, int *, char *, int)),
+     encode_int32 KRB5_PROTOTYPE((char **, int *, krb5_int32 *));
 
-int  decode_v4tkt(KTEXT_ST *, char *, int *),
-     decode_ktext(char **, int *, KTEXT_ST *),
-     decode_bytes(char **, int *, char *, int),
-     decode_int32(char **, int *, krb5_int32 *);
+int  decode_v4tkt KRB5_PROTOTYPE((KTEXT_ST *, char *, int *)),
+     decode_ktext KRB5_PROTOTYPE((char **, int *, KTEXT_ST *)),
+     decode_bytes KRB5_PROTOTYPE((char **, int *, char *, int)),
+     decode_int32 KRB5_PROTOTYPE((char **, int *, krb5_int32 *));
 
-int encode_bytes(char **out, int *outlen, char *in, int len)
+int encode_bytes(out, outlen, in, len)
+     char **out;
+     int *outlen;
+     char *in;
+     int len;
 {
      if (len > *outlen)
 	  return KRB524_ENCFULL;
@@ -58,7 +62,10 @@ int encode_bytes(char **out, int *outlen, char *in, int len)
      return 0;
 }
 
-int encode_int32(char **out, int *outlen, krb5_int32 *v)
+int encode_int32(out, outlen, v)
+     char **out;
+     int *outlen;
+     krb5_int32 *v;
 {
      int nv;
 
@@ -66,7 +73,10 @@ int encode_int32(char **out, int *outlen, krb5_int32 *v)
      return encode_bytes(out, outlen, (char *) &nv, sizeof(nv));
 }
 
-int encode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
+int encode_v4tkt(v4tkt, buf, encoded_len)
+     KTEXT_ST *v4tkt;
+     char *buf;
+     int *encoded_len;
 {
      int buflen, ret;
 
@@ -85,7 +95,11 @@ int encode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
 
 /* decode functions */
 
-int decode_bytes(char **out, int *outlen, char *in, int len)
+int decode_bytes(out, outlen, in, len)
+     char **out;
+     int *outlen;
+     char *in; 
+     int len;
 {
      if (len > *outlen)
 	  return KRB524_DECEMPTY;
@@ -95,7 +109,10 @@ int decode_bytes(char **out, int *outlen, char *in, int len)
      return 0;
 }
 
-int decode_int32(char **out, int *outlen, krb5_int32 *v)
+int decode_int32(out, outlen, v)
+     char **out;
+     int *outlen;
+     krb5_int32 *v;
 {
      int ret;
      int nv;
@@ -106,7 +123,10 @@ int decode_int32(char **out, int *outlen, krb5_int32 *v)
      return 0;
 }
 
-int decode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
+int decode_v4tkt(v4tkt, buf, encoded_len)
+     KTEXT_ST *v4tkt;
+     char *buf;
+     int *encoded_len;
 {
      int buflen, ret;
 
