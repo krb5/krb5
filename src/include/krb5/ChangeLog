@@ -1,5 +1,9 @@
 Thu Nov  3 16:38:44 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* encryption.h (krb5_keyblock): Added a field to hold an
+		encryption type in the keyblock field --- so routines have
+		a hint of which encryption type they should use.
+
 	* error_def.h: Add support for the kv5m error table.  (For magic
 		numbers.) 
 

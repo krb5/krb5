@@ -31,6 +31,7 @@
 typedef struct _krb5_keyblock {
     krb5_magic magic;
     krb5_keytype keytype;
+    krb5_enctype enctype;	/* hint of what encryption type to use */
     int length;
     krb5_octet *contents;
 } krb5_keyblock;
@@ -127,6 +128,8 @@ typedef struct _krb5_checksum_entry {
 #define	ETYPE_DES_CBC_MD4	0x0002	/* DES cbc mode with RSA-MD4 */
 #define	ETYPE_DES_CBC_MD5	0x0003	/* DES cbc mode with RSA-MD5 */
 #define	ETYPE_RAW_DES_CBC       0x0004  /* Raw DES cbc mode */
+
+#define ETYPE_UNKNOWN		0x1FF 	/* Reserved local value */
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002
