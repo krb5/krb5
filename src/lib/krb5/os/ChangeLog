@@ -1,5 +1,8 @@
 2000-03-14  Ken Raeburn  <raeburn@mit.edu>
 
+	* init_os_ctx.c (os_get_default_config_files): Remove unused
+	variable.
+
 	* def_realm.c: Include netinet/in.h if available.
 
 2000-02-25  Ken Raeburn  <raeburn@mit.edu>

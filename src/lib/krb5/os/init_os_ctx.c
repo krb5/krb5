@@ -291,7 +291,6 @@ os_get_default_config_files(pfiles, secure)
     int n_entries, i;
     int ent_len;
     const char *s, *t;
-    errcode_t retval;
 
     if (!secure) filepath = getenv("KRB5_CONFIG");
     if (!filepath) filepath = DEFAULT_PROFILE_PATH;
