@@ -1,3 +1,10 @@
+Wed Feb 14 10:44:27 1996    <tytso@rsts-11.mit.edu>
+
+	* scc_read.c (krb5_scc_read_keyblock, krb5_scc_read_data,
+		krb5_scc_read_authdatum, krb5_scc_read_addr): For windows,
+		mask off low 16 bits because Gradient DCE does things
+		wrong.
+
 Wed Mar 20 22:50:05 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* scc-proto.h (krb5_scc_skip_header): Added prototype (to fix lint

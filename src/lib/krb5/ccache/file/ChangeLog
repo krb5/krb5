@@ -1,3 +1,10 @@
+Wed Feb 14 10:44:27 1996    <tytso@rsts-11.mit.edu>
+
+	* fcc_read.c (krb5_fcc_read_keyblock, krb5_fcc_read_data,
+		krb5_fcc_read_authdatum, krb5_fcc_read_addr): For windows,
+		mask off low 16 bits because Gradient DCE does things
+		wrong.
+
 Wed Mar 20 22:48:51 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* fcc-proto.h (krb5_fcc_skip_header): Added prototype (fix Windows
