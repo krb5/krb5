@@ -19,6 +19,8 @@
 
 #define KRB5_USE_INET		/* Support IP address family */
 
+#define	DEFAULT_CONFIG_FILENAME	"/etc/krb.conf"
+#define KDC_PORTNAME	"kerberos5"	/* for /etc/services or equiv. */
 
 #ifdef POSIX_SIGTYPE
 #define sigtype void
