@@ -87,7 +87,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
-#else
 extern char *malloc(), *realloc(), *calloc();
 extern char *getenv();
 #endif /* HAVE_STDLIB_H */
