@@ -1,3 +1,10 @@
+2002-07-29  Jen Selby <jenselby@mit.edu>
+
+	* kadmin.M: corrected documenation of "-k/-t" options.
+	Added documentation for some other options.  Updated the lists
+	of aliases for commands, some command options, and some of
+	the sample output.
+
 2002-06-06  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.M: Remove references to "rename_principal".

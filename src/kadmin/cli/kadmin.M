@@ -83,11 +83,19 @@ principal name of the default ccache, the value of the
 environment variable, or the username as obtained with getpwuid, in
 order of preference.
 .TP
-\fB\-k\fP \fIkeytab\fP
+\fB\-k\fP
+Use a keytab to decrypt the KDC response instead of prompting for a
+password on the TTY.  In this case, the default principal will be
+host/\fIhostname\fP.  If there is not a keytab specified with the
+.B\-t
+option, then the default keytab will be used.
+.TP
+\fB\-t\fP \fIkeytab\fP
 Use
 .I keytab
-to decrypt the KDC response instead of prompting for a password on the
-TTY.  In this case, the default principal will be host/\fIhostname\fP.
+to decrypt the KDC response.  This can only be used with the
+.B \-k
+option.
 .TP
 \fB\-c\fP \fIcredentials_cache\fP
 Use
@@ -118,6 +126,21 @@ directly to
 which will perform
 .I query
 and then exit.  This can be useful for writing scripts.
+.TP
+\fB\-d\fP \fIdbname\fP
+Specifies the name of the Kerberos database.
+.TP
+\fB\-s\fP \fIadmin_server[:port]\fP
+Specifies the admin server which kadmin should contact.
+.TP
+\fB\-m\fP
+Do not authenticate using a keytab.  This option will cause kadmin
+to prompt for the master database password.
+.TP
+\fB\-e\fP \fIenc:salt_list\fP
+Sets the list of encryption types and salt types to be used for any new
+keys created.
+
 .SH DATE FORMAT 
 Various commands in kadmin can take a variety of date formats,
 specifying durations or absolute times.  Examples of valid formats are:
@@ -458,7 +481,7 @@ privilege, or that the principal that is running the the program to be
 the same as the one being listed.  With the
 .B \-terse
 option, outputs fields as quoted tab-separated strings.  Alias
-.BR listprincs .
+.BR getprinc .
 .sp
 .nf
 .RS
@@ -503,7 +526,9 @@ an "@" character followed by the local realm is appended to the
 expression.  Requires the
 .I list
 priviledge.  Alias
-.BR listprincs .
+.BR listprincs ,
+.BR get_principals ,
+.BR get_princs .
 .nf
 .RS
 .TP
@@ -548,7 +573,7 @@ KADM5_DUP (policy already exists)
 .fi
 .RE
 .TP
-\fBdelete_policy\fP \fIpolicy\fB
+\fBdelete_policy [\-force]\fP \fIpolicy\fB
 deletes the named policy.  Prompts for confirmation before deletion.
 The command will fail if the policy is in use by any principals.
 Requires the
@@ -563,7 +588,6 @@ EXAMPLE:
 kadmin: del_policy guests
 Are you sure you want to delete the policy "guests"?
 (yes/no): yes
-Policy "guests" deleted.
 kadmin:
 .TP
 ERRORS:
@@ -628,7 +652,9 @@ are printed.  If no expression is provided, all existing policy names
 are printed.  Requires the
 .I list
 priviledge.  Alias
-.BR listpols .
+.BR listpols ,
+.BR get_policies ,
+.BR getpols .
 .sp
 .nf
 .RS

@@ -1,3 +1,7 @@
+2002-07-29  Jen Selby  <jenselby@mit.edu>
+
+	* kdb5_util.M: added documentation for some options.
+
 2002-07-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* dump.c (dump_ov_princ): Remove variable set but unused.

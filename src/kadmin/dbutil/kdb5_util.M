@@ -61,6 +61,12 @@ that given in
 .B \-m
 specifies that the master database password should be read from the TTY
 rather than fetched from a file on disk.
+.TP
+\fB\-sf\fP \fIstash_file\fP
+specifies the stash file of the master database password.
+.TP
+\fB\-P\fP \fIpassword\fP
+specifies the master database password.  This option is not recommended.
 .SH COMMANDS
 .TP
 \fBcreate\fP [\fB\-s\fP]
@@ -112,7 +118,7 @@ causes the name of each principal and policy to be printed as it is
 dumped.
 .RE
 .TP
-\fBload\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-ov\fP]
+\fBload\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-b7\fP] [\fB\-ov\fP] [\fB\-hash\fP]
 [\fB\-verbose\fP] [\fB\-update\fP] \fIfilename dbname\fP [\fIadmin_dbname\fP]
 .br
 Loads a database dump from the named file into the named database.
@@ -148,6 +154,12 @@ format.  Must be used with the
 .B \-update
 option.
 .TP
+.B \-hash
+requires the database to be stored as a hash.  If this option is not
+specified, the database will be stored as a binary tree.  This option
+is not recommended, as databases stored in hash format are known to
+corrupt data and lose principals.
+.TP
 .B \-verbose
 causes the name of each principal and policy to be printed as it is
 dumped.
@@ -171,7 +183,9 @@ if not specified.
 Dumps the current database into the Kerberos 4 database dump format.
 The \-S option specifies the short lifetime algorithm.
 .TP
-\fBload_v4\fP [\fB\-S\fP] [\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB\-s\ \fIstashfile\fP] \fIinputfile\fP
+\fBload_v4\fP [\fB\-T\fP] [\fB\-v\fP] [\fB\-h\fP] [\fB\-S\fP]
+[\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB\-s\ \fIstashfile\fP]
+\fIinputfile\fP
 Loads a Kerberos 4 database dump file.  Options:
 .RS
 .TP
@@ -198,6 +212,11 @@ the keys to the current database.
 .TP
 .B \-S
 Uses the short lifetime algorithm for conversion.
+.TP
+.B \-h
+Stores the database as a hash instead of a binary tree.  This option is
+not recommended, as databases stored in hash format are known to
+corrupt data and lose principals.
 .PP
 Note: if the Kerberos 4 database had a default expiration date of 12/31/1999
 or 12/31/2009 (the compiled in defaults for older or newer Kerberos
@@ -210,5 +229,8 @@ record; Version 5 stores a seperate modification time and last
 password change time.  In practice, Version 4 "modifications" were
 always password changes.  \fIload_v4\fP copies the value into both
 fields.
+.TP
+\fBark\fP
+Adds a random key.
 .SH SEE ALSO
 kadmin(8)

@@ -1,3 +1,7 @@
+2002-07-29  Jen Selby   <jenselby@mit.edu>
+
+	* kvno.M: added documentation of the "-q" and "-h" options.
+
 2002-07-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* kvno.c: Include stdlib.h.
