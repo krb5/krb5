@@ -1,5 +1,8 @@
 2001-04-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* ad_print.c (ad_print): Pass address of session key to
+	des_cblock_print_file, not the session key.
+
 	* g_tkt_svc.c (CredIsExpired): Don't use a variable named "time".
 
 2001-04-13  Danilo Almeida  <dalmeida@mit.edu>

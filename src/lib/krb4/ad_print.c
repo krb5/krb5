@@ -39,7 +39,7 @@ ad_print(x)
 #ifdef NOENCRYPTION
     placebo_cblock_print(x->session);
 #else /* Do Encryption */
-    des_cblock_print_file(x->session,stdout);
+    des_cblock_print_file(&x->session,stdout);
 #endif /* NOENCRYPTION */
     /* skip reply for now */
 }
