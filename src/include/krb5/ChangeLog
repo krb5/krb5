@@ -1,3 +1,13 @@
+Tue Mar 28 18:02:41 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (KRB5_HEADERS, install):  Account for file renames.
+	(all-mac):  Add.
+	* configure.in (CONFIG_RULES):  Remove.
+	(krb5_sigtype):  Define as either void or int.
+	* encryption.h:  Insert parentheses in macros to avoid mis-expansion.
+	* k5-config.h:  Further parameterize socket support.
+	* macsock.h:  Support connect(), recv(), send(), getmyipaddr().
+	(WSAGetLastError):  Fix typo -- there's no argument to this macro.
 
 Mon Mar 27 09:33:10 1995  Chris Provenzano (proven@mit.edu)
 

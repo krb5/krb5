@@ -2,7 +2,6 @@ AC_INIT(ext-proto.h)
 WITH_CCOPTS
 WITH_KRB5ROOT
 AC_SET_BUILDTOP
-CONFIG_RULES
 AC_CONFIG_HEADER(autoconf.h)
 AC_PROG_LEX
 AC_PROG_INSTALL
@@ -37,7 +36,11 @@ AC_MSG_RESULT($krb5_cv_has_posix_signals)
 if test $krb5_cv_has_posix_signals = yes; then
 AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)
 else
+if test $ac_cv_type_signal = void; then
+AC_DEFINE(krb5_sigtype, void)
+else
 AC_DEFINE(krb5_sigtype, int)
+fi
 fi
 dnl
 dnl

@@ -5,9 +5,9 @@ KRB5SRVTABDIR = /etc
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 KRB5_HEADERS = asn1.h base-defs.h ccache.h k5-config.h encryption.h \
-		error_def.h errors.h ext-proto.h fieldbits.h \
+		error_def.h k5-errors.h ext-proto.h fieldbits.h \
 		k5-free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
-		keytab.h krb5.h libos.h los-proto.h macros.h mit-des.h \
+		keytab.h libos.h los-proto.h macros.h mit-des.h \
 		proto.h rcache.h safepriv.h sysincl.h wordsize.h
 # these are installed here for the build from lib/krb5/error_tables but 
 # also need to be in the installed tree
@@ -17,7 +17,7 @@ BUILT_HEADERS = autoconf.h osconf.h
 all:: all-$(WHAT)
 
 all-unix:: $(BUILT_HEADERS)
-
+all-mac:: $(BUILT_HEADERS)
 all-windows:
 	copy stock\osconf.win osconf.h
 	echo /* not used in windows */ > autoconf.h
@@ -36,14 +36,14 @@ clean::
 
 depend::
 
-install:: $(KRB5_HEADERS) config.h osconf.h autoconf.h 
+install:: $(KRB5_HEADERS) osconf.h autoconf.h 
 	@set -x; for f in $(KRB5_HEADERS) ; \
 	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
 	then true; else \
 		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
 		cp $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
 	fi; done
-	@set -x; for f in config.h osconf.h autoconf.h ; \
+	@set -x; for f in osconf.h autoconf.h ; \
 	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
 	then true; else \
 		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \

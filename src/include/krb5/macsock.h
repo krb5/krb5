@@ -29,16 +29,6 @@
 #define PROTOTYPE(p) p
 #endif
 
-/* The socket data structure itself.   */
-struct socket {
-	short		fMacTCPRef;		/* refnum of MacTCP driver */
-	unsigned long	fStream;		/* MacTCP socket/stream */
-#	define		UDPbuflen	4096
-	char		fRecvBuf[UDPbuflen];	/* receive buffer area */
-};
-
-typedef struct socket *SOCKET;
-
 #define	WORD	short
 #define	LOBYTE(x)	 ((x)       & 0xFF)
 #define	HIBYTE(x)	(((x) >> 8) & 0xFF)
@@ -86,6 +76,19 @@ struct sockaddr_in {
 
 /* Socket address, other styles */
 #define	sockaddr sockaddr_in
+#define	sa_family sin_family
+
+
+/* The socket data structure itself.   */
+struct socket {
+	short		fMacTCPRef;		/* refnum of MacTCP driver */
+	unsigned long	fStream;		/* MacTCP socket/stream */
+	struct sockaddr_in connect_addr;	/* Address from connect call */
+#	define		UDPbuflen	4096
+	char		fRecvBuf[UDPbuflen];	/* receive buffer area */
+};
+
+typedef struct socket *SOCKET;
 
 /*
  * Host name<->address mapping entries
@@ -155,6 +158,10 @@ extern int
 sendto PROTOTYPE ((SOCKET theUDP, const char *buf, const int len, int flags,
 	const struct sockaddr *to, int tolen));
 
+/* Send a packet to a connected UDP peer.  */
+extern int
+send PROTOTYPE ((SOCKET theUDP, const char *buf, const int len, int flags));
+
 /* Select for sockets that are ready for I/O.
    This version just remembers the timeout for a future receive...
    It always reports that one socket is ready for I/O.  */
@@ -167,6 +174,10 @@ extern int
 recvfrom PROTOTYPE ((SOCKET theUDP, char *buf, int len, int flags,
 		     struct sockaddr *from, int *fromlen));
 
+/* Receive a packet from a connected UDP peer.  */
+extern int
+recv PROTOTYPE ((SOCKET theUDP, char *buf, int len, int flags));
+
 extern char *
 inet_ntoa PROTOTYPE ((struct in_addr ina));
 
@@ -175,6 +186,9 @@ gethostbyname PROTOTYPE ((char *));
 
 extern struct hostent *
 gethostbyaddr PROTOTYPE ((char *addr, int len, int type));
+
+extern struct hostent *
+getmyipaddr PROTOTYPE ((void));
 
 /* Bypass a few other functions we don't really need. */
 
@@ -191,7 +205,7 @@ gethostbyaddr PROTOTYPE ((char *addr, int len, int type));
  */
 #define	INVALID_SOCKET	((SOCKET)~0)
 #define	SOCKET_ERROR	(-1)
-#define	WSAGetLastError(x)	(errno)
+#define	WSAGetLastError()	(errno)
 #define	WSASetLastError(x)	(errno = (x))
 
 extern int errno;
