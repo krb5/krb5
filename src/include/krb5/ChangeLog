@@ -1,3 +1,10 @@
+Fri Feb 10 14:54:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* asn1.h: Removed ISODE cruft -- moved included .h files into
+		asn1.h, to simplify the krb5 header file structure.
+
+	* Makefile.in (ET_HEADERS): Remove isode cruft.
+
 Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
 
 	* func-proto.h (krb5_get_in_tkt()) Changed key_proc args to be the

@@ -1,5 +1,0 @@
-Tue Jun 28 23:20:58 1994  Tom Yu  (tlyu at dragons-lair)
-
-	* encode.h:
-	* krb5_is.h: ....folding in Harry's changes
-
