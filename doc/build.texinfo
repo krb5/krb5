@@ -414,10 +414,15 @@ variables when using the programs. Except where noted, multiple versions
 of the libraries may be installed on the same system and continue to
 work.
 
-Currently the supported platforms are
-@comment NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
-Solaris 2.6 (aka SunOS 5.6) and Irix 6.5.
-@comment Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
+Currently the supported platforms are Solaris 2.6 (aka SunOS 5.6) and Irix 6.5.
+
+Shared library support has been tested on the following platforms but
+not exhaustively (they have been built but not necessarily tested in an
+installed state): Tru64 (aka Alpha OSF/1 or Digital Unix) 4.0, NetBSD
+1.4.x (i386), and HP/UX 10.20.
+
+Platforms for which there is shared library support but not significant
+testing include FreeBSD, OpenBSD, MacOS 10, AIX, Linux, and SunOS 4.x.
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
@@ -500,9 +505,9 @@ NetBSD and FreeBSD.)
 
 The native (bundled) compiler for HPUX currently will not work, because
 it is not a full ANSI C compiler.  The optional compiler (c89) should
-work as long as you give it the @samp{+Olibcalls -D_HPUX_SOURCE} (this
-has only been tested for HPUX 9.0).  At this point, using GCC is
-probably your best bet.
+work as long as you give it the @samp{-D_HPUX_SOURCE} flag
+(i.e. @samp{./configure --with-cc='c89 -D_HPUX_SOURCE'}).  This has only
+been tested recently for HPUX 10.20.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3

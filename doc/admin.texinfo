@@ -16,7 +16,7 @@
 
 @include definitions.texinfo
 @set EDITION 1.0
-@set UPDATED November 27, 1996
+@set UPDATED June 16, 2000
 
 @finalout                               @c don't print black warning boxes
 
@@ -2644,7 +2644,7 @@ KRB5PLACEHOLD_126:  KRB5 error code 126
 @item
 KRB5PLACEHOLD_127:  KRB5 error code 127
 @item
-KRB5_ERR_RCSID:  $Id$
+KRB5_ERR_RCSID:  (RCS Id string for the krb5 error table)
 @item
 KRB5_LIBOS_BADLOCKFLAG:  Invalid flag for file lock mode
 @item
@@ -2859,7 +2859,7 @@ This is the Kerberos v5 database library error code table.
 @c error table numbering starts at 0
 @enumerate 0
 @item
-KRB5_KDB_RCSID:  $Id$
+KRB5_KDB_RCSID:  (RCS Id string for the kdb error table)
 @item
 KRB5_KDB_INUSE:  Entry already exists in database
 @item

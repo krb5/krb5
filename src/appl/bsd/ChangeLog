@@ -1,3 +1,15 @@
+2000-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	Patch from Donn Cave and Leonard Peirce from 1.1 release cycle:
+	* login.c (k_init): Call krb5_cc_set_default_name right after
+	setting the environment variable.
+	(main): Likewise.
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* rcp.M, rsh.M, rlogin.M: Add description of new -PO, -PN
+	options.
+
 2000-06-19  Tom Yu  <tlyu@mit.edu>
 
 	* krshd.c (recvauth): Call krb5_recvauth_version() rather than

@@ -1,3 +1,8 @@
+2000-06-30  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix up DNS build flags to correspond to new DNS
+	build flags.  Add support for not using wshelper.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Twiddle things around to support building libdb under

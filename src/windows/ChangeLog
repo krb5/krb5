@@ -1,3 +1,8 @@
+2000-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Update documentation with DNS information.  Fix up the
+	language a bit.
+
 2000-04-25  Danilo Almeida  <dalmeida@mit.edu>
 
 	* version.rc: Bump version to 1.2 beta.

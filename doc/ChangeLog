@@ -1,3 +1,14 @@
+2000-06-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (Kerberos V5 Database Library Error Codes):
+	Replace RCS Id strings with comments indicating that the RCS Id
+	string of the error table is used.
+
+2000-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (HPUX): Update note for HPUX compiler flags.
+	(Shared Library Support): Update shared lib support info.
+
 2000-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo: Update descriptions to indicate full support for

@@ -1,3 +1,8 @@
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* server.c: Include gssrpc/pmap_clnt.h in order to get renaming of
+	pmap_unset().  From Nathan Neulinger.
+
 2000-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* rpc_test_setup.sh: Error out if server_handle doesn't get set in
