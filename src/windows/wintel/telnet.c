@@ -52,7 +52,7 @@ krb5_context k5_context;
 
 /*
  *
- * FUNCTION: WinMain(HANDLE, HANDLE, LPSTR, int)
+ * FUNCTION: WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
  * 
  * PURPOSE: calls initialization function, processes message loop
  * 
@@ -72,7 +72,7 @@ krb5_context k5_context;
  */
 
 int PASCAL
-WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
   MSG msg;
 
@@ -115,7 +115,7 @@ WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 }
 
 /*
- * FUNCTION: InitApplication(HANDLE)
+ * FUNCTION: InitApplication(HINSTANCE)
  * 
  * PURPOSE: Initializes window data and registers window class
  * 
@@ -133,7 +133,7 @@ WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
  */
 
 BOOL
-InitApplication(HANDLE hInstance)
+InitApplication(HINSTANCE hInstance)
 {
   WNDCLASS  wc;
   
@@ -175,7 +175,7 @@ InitApplication(HANDLE hInstance)
  * create and display the main program window.  
  */
 BOOL
-InitInstance(HANDLE hInstance, int nCmdShow)
+InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
   int xScreen = 0;
   int yScreen = 0;
@@ -238,7 +238,7 @@ char buf[2048];
  * WM_COMMAND    - application menu (About dialog box)
  * WM_DESTROY    - destroy window
  */
-long PASCAL
+LRESULT CALLBACK
 MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   HGLOBAL hBuffer;
@@ -622,17 +622,12 @@ GetNewConnection(void)
 }
 
 
-int NEAR
-DoDialog(char *szDialog, FARPROC lpfnDlgProc)
+int
+DoDialog(char *szDialog, DLGPROC lpfnDlgProc)
 {
   int nReturn;
 	
-  lpfnDlgProc = MakeProcInstance(lpfnDlgProc, hInst);
-  if (lpfnDlgProc == NULL)
-    MessageBox(hWnd, "Couldn't make procedure instance", NULL, MB_OK);    
-	
   nReturn = DialogBox(hInst, szDialog, hWnd, lpfnDlgProc);
-  FreeProcInstance(lpfnDlgProc);
   return (nReturn);
 }
 
@@ -647,8 +642,8 @@ DoDialog(char *szDialog, FARPROC lpfnDlgProc)
  * WM_INITDIALOG - initialize dialog box
  * WM_COMMAND    - Input received
  */
-BOOL PASCAL
-OpenTelnetDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam)
+INT_PTR CALLBACK
+OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
   char szConnectName[256];
   HDC hDC;

@@ -100,9 +100,8 @@ typedef struct {
 
 #define	SK_DES		1	/* Matched Kerberos v5 ENCTYPE_DES */
 
-void encrypt_init (kstream, char *, int);
+void encrypt_init (kstream, kstream_ptr);
 Encryptions *findencryption (int);
-void encrypt_send_supprt (void);
 void encrypt_auto (int);
 void decrypt_auto (int);
 void encrypt_is (unsigned char *, int);

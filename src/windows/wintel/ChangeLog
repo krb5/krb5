@@ -1,3 +1,23 @@
+2001-10-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* intern.c (ScreenInsChar): Return BOOL.
+
+	* enc_des.h: Remove undefined encrypt_send_supprt().
+
+
+	* encrypt.h: Fix parameters in declaration for encrypt_init().
+	Remove undefined encrypt_send_supprt().
+
+	* screen.h: HANDLE -> HINSTANCE.  ScreenInsChar() returns BOOL.
+
+	* wt-proto.h: Remove WinMain declaration since that is already in
+	the standard Windows headers.  Update declarations to current
+	Microsoft Platform SDK definitions.  Remove some undefined
+	functions.
+
+	* telnet.c: Update declarations to use definitions in current
+	Microsoft Platform SDK (HANDLE -> HINSTANCE, and others).
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* enc_des.c, enc_des.h, encrypt.c, encrypt.h: Make prototypes

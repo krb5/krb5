@@ -679,7 +679,7 @@ ScreenTab(SCREEN *pScr)
 #endif
 
 
-int
+BOOL
 ScreenInsChar(SCREEN *pScr, int x)
 {
   int i;
@@ -688,7 +688,7 @@ ScreenInsChar(SCREEN *pScr, int x)
 		
   pScrLine = GetScreenLineFromY(pScr, pScr->y);
   if (pScrLine == NULL)
-    return(-1);
+    return(FALSE);
 
   for(i = pScr->width - x; i >= pScr->x; i--) {
     pScrLine->text[x+i] = pScrLine->text[i];
@@ -703,6 +703,7 @@ ScreenInsChar(SCREEN *pScr, int x)
   rc.bottom = pScr->cyChar * pScr->y;
   InvalidateRect(pScr->hWnd, &rc, TRUE);
   SendMessage(pScr->hWnd, WM_PAINT, 0, 0);
+  return(TRUE);
 }
 
 

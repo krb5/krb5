@@ -1,60 +1,63 @@
 /* wt-proto.h */
-	int PASCAL WinMain(
-		HANDLE,
-		HANDLE,
-		LPSTR,
-		int);
+BOOL
+InitApplication(
+    HINSTANCE
+    );
 
-	BOOL InitApplication(
-		HANDLE);
+BOOL
+InitInstance(
+    HINSTANCE,
+    int
+    );
 
-	BOOL InitInstance(
-		HANDLE,
-		int);
+LRESULT
+CALLBACK
+MainWndProc(
+    HWND,
+    UINT,
+    WPARAM,
+    LPARAM
+    );
 
-	long PASCAL MainWndProc(
-		HWND,
-		UINT,
-		WPARAM,
-		LPARAM);
+INT_PTR
+CALLBACK
+OpenTelnetDlg(
+    HWND,
+    UINT,
+    WPARAM,
+    LPARAM
+    );
 
-	BOOL PASCAL About(
-		HWND,
-		WORD,
-		WORD,
-		LONG);
+int
+TelnetSend(
+    kstream,
+    char *,
+    int,
+    int
+    );
 
-	BOOL PASCAL OpenTelnetDlg(
-		HWND,
-		WORD,
-		WORD,
-		LONG);
+int
+OpenTelnetConnection(
+    void
+    );
 
-	int TelnetSend(
-		kstream,
-		char *,
-		int,
-		int);
+int
+DoDialog(
+    char *szDialog,
+    DLGPROC lpfnDlgProc
+    );
 
-	BOOL PASCAL ConfigSessionDlg(
-		HWND,
-		WORD,
-		WORD,
-		LONG);
+BOOL
+parse_cmdline(
+    char *cmdline
+    );
 
-	int OpenTelnetConnection(void);
+CONNECTION *
+GetNewConnection(
+    void
+    );
 
-	int NEAR DoDialog(char *szDialog,
-		FARPROC lpfnDlgProc);
-
-	BOOL parse_cmdline(
-		char *cmdline);
-
-	CONNECTION *GetNewConnection(void);
-
-	void start_negotiation(
-		kstream ks);
-
-	/* somewhere... */
-	struct machinfo *PASCAL Shostlook(
-		char *hname);
+void
+start_negotiation(
+    kstream ks
+    );

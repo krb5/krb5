@@ -58,7 +58,6 @@
 #ifdef	ENCRYPTION
 void encrypt_init (char *, int);
 Encryptions *findencryption (int);
-void encrypt_send_supprt (void);
 void encrypt_auto (int);
 void decrypt_auto (int);
 void encrypt_is (unsigned char *, int);
