@@ -66,9 +66,7 @@ usage()
 
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
-extern krb5_encrypt_block master_encblock;
 krb5_db_entry master_entry;
-krb5_pointer master_random;
 int	valid_master_key = 0;
 int     close_policy_db = 0;
 
@@ -204,19 +202,10 @@ int main(argc, argv)
     (void) umask(077);
 
     master_keyblock.enctype = global_params.enctype;
-    if (master_keyblock.enctype != ENCTYPE_UNKNOWN) {
-	if (!valid_enctype(master_keyblock.enctype)) {
-	    char tmp[32];
-	    if (krb5_enctype_to_string(master_keyblock.enctype,
-				       tmp, sizeof(tmp)))
-		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
-			"while setting up enctype %d", master_keyblock.enctype);
-	    else
-		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
-	    exit(1);
-	}
-	krb5_use_enctype(util_context, &master_encblock,
-			 master_keyblock.enctype);
+    if ((master_keyblock.enctype != ENCTYPE_UNKNOWN) &&
+	(!valid_enctype(master_keyblock.enctype))) {
+	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+		"while setting up enctype %d", master_keyblock.enctype);
     }
 
     cmd = cmd_lookup(cmd_argv[0]);
@@ -257,12 +246,9 @@ void set_dbname(argc, argv)
 	    return;
 	}
 	if (valid_master_key) {
-		(void) krb5_finish_key(util_context, &master_encblock);
-		(void) krb5_finish_random_key(util_context, &master_encblock,
-					      &master_random);
-		krb5_free_keyblock_contents(util_context, &master_keyblock);
-		master_keyblock.contents = NULL;
-		valid_master_key = 0;
+	    krb5_free_keyblock_contents(util_context, &master_keyblock);
+	    master_keyblock.contents = NULL;
+	    valid_master_key = 0;
 	}
 	krb5_free_principal(util_context, master_princ);
 	dbactive = FALSE;
@@ -287,7 +273,7 @@ int open_db_and_mkey()
     krb5_error_code retval;
     int nentries;
     krb5_boolean more;
-    krb5_data scratch, pwd;
+    krb5_data scratch, pwd, seed;
 
     dbactive = FALSE;
     valid_master_key = 0;
@@ -355,23 +341,15 @@ int open_db_and_mkey()
 
 	/* If no encryption type is set, use the default */
 	if (master_keyblock.enctype == ENCTYPE_UNKNOWN) {
-		master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
-		if (!valid_enctype(master_keyblock.enctype)) {
-			char tmp[32];
-			if (krb5_enctype_to_string(master_keyblock.enctype,
-						   tmp, sizeof(tmp)))
-				com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-					"while setting up enctype %d", master_keyblock.enctype);
-			else
-				com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP, tmp);
-			exit(1);
-		}
-		krb5_use_enctype(util_context, &master_encblock,
-				 master_keyblock.enctype);
+	    master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
+	    if (!valid_enctype(master_keyblock.enctype))
+		com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
+			"while setting up enctype %d",
+			master_keyblock.enctype);
 	}
 
-	retval = krb5_string_to_key(util_context, &master_encblock, 
-				    &master_keyblock, &pwd, &scratch);
+	retval = krb5_c_string_to_key(util_context, master_keyblock.enctype, 
+				      &pwd, &scratch, &master_keyblock);
 	if (retval) {
 	    com_err(progname, retval,
 		    "while transforming master key from password");
@@ -380,8 +358,9 @@ int open_db_and_mkey()
 	free(scratch.data);
 	mkey_password = 0;
     } else if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
-					    &master_encblock, manual_mkey, 
-					    FALSE, global_params.stash_file,
+					    master_keyblock.enctype,
+					    manual_mkey, FALSE,
+					    global_params.stash_file,
 					    0, &master_keyblock))) {
 	com_err(progname, retval, "while reading master key");
 	com_err(progname, 0, "Warning: proceeding without master key");
@@ -389,27 +368,19 @@ int open_db_and_mkey()
 	return(0);
     }
     if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
-					    &master_keyblock,&master_encblock))
-	) {
+					    &master_keyblock))) {
 	com_err(progname, retval, "while verifying master key");
 	exit_status++;
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
     }
-    if ((retval = krb5_process_key(util_context, &master_encblock,
-				   &master_keyblock))) {
-	com_err(progname, retval, "while processing master key");
+
+    seed.length = master_keyblock.length;
+    seed.data = master_keyblock.contents;
+
+    if ((retval = krb5_c_random_seed(util_context, &seed))) {
+	com_err(progname, retval, "while seeding random number generator");
 	exit_status++;
-	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	krb5_free_keyblock_contents(util_context, &master_keyblock);
-	return(1);
-    }
-    if ((retval = krb5_init_random_key(util_context, &master_encblock,
-				       &master_keyblock,
-				       &master_random))) {
-	com_err(progname, retval, "while initializing random key generator");
-	exit_status++;
-	(void) krb5_finish_key(util_context, &master_encblock);
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
@@ -432,11 +403,6 @@ quit()
 
     if (finished)
 	return 0;
-    if (valid_master_key) {
-	    (void) krb5_finish_key(util_context, &master_encblock);
-	    (void) krb5_finish_random_key(util_context, &master_encblock, 
-					  &master_random);
-    }
     retval = krb5_db_fini(util_context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     finished = TRUE;

@@ -45,14 +45,13 @@
 struct dump_record {
 	char	*comerr_name;
 	FILE	*f;
-	krb5_encrypt_block *v5master;
+	krb5_keyblock *v5mkey;
 	C_Block		v4_master_key;
 	Key_schedule	v4_master_key_schedule;
 	long	master_key_version;
 	char	*realm;
 };
 
-extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
 extern krb5_boolean dbactive;
@@ -226,7 +225,7 @@ found_one:;
 	    principal->key_version,
 	    principal->attributes);
 
-    handle_one_key(arg, arg->v5master, &entry->key_data[ok_key], v4key);
+    handle_one_key(arg, arg->v5mkey, &entry->key_data[ok_key], v4key);
 
     for (i = 0; i < 8; i++) {
 	fprintf(arg->f, "%02x", ((unsigned char*)v4key)[i]);
@@ -363,26 +362,20 @@ int handle_keys(arg)
 	exit(1);
     }
 
-    krb5_use_enctype(util_context, &master_encblock, DEFAULT_KDC_ENCTYPE);
     if (retval = krb5_db_fetch_mkey(util_context, master_princ, 
-				    &master_encblock, 0,
+				    master_keyblock.enctype, 0,
 				    0, global_params.stash_file, 0,
 				    &master_keyblock)) { 
 	com_err(arg->comerr_name, retval, "while reading master key");
 	exit(1);
     }
-    if (retval = krb5_process_key(util_context, &master_encblock, 
-				    &master_keyblock)) {
-	com_err(arg->comerr_name, retval, "while processing master key");
-	exit(1);
-    }
-    arg->v5master = &master_encblock;
+    arg->v5mkey = &master_keyblock;
     return(0);
 }
 
-handle_one_key(arg, v5master, v5key, v4key)
+handle_one_key(arg, v5mkey, v5key, v4key)
     struct dump_record *arg;
-    krb5_encrypt_block *v5master;
+    krb5_keyblock *v5mkey;
     krb5_key_data *v5key;
     des_cblock v4key;
 {
@@ -392,7 +385,7 @@ handle_one_key(arg, v5master, v5key, v4key)
     krb5_keyblock v5plainkey;
     /* v4key is the actual v4 key from the file. */
 
-    if (retval = krb5_dbekd_decrypt_key_data(util_context, v5master, v5key, 
+    if (retval = krb5_dbekd_decrypt_key_data(util_context, v5mkey, v5key, 
 				             &v5plainkey, NULL)) 
 	return retval;
 

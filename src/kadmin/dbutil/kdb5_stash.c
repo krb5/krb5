@@ -33,7 +33,6 @@ extern int errno;
 
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
-extern krb5_encrypt_block master_encblock;
 extern kadm5_config_params global_params;
 
 extern int exit_status;
@@ -93,8 +92,6 @@ char *argv[];
 	exit_status++; return; 
     }
 
-    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
-
     if (retval = krb5_db_set_name(context, dbname)) {
 	com_err(argv[0], retval, "while setting active database to '%s'",
 		dbname);
@@ -116,7 +113,8 @@ char *argv[];
     }
 
     /* TRUE here means read the keyboard, but only once */
-    if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
+    if (retval = krb5_db_fetch_mkey(context, master_princ,
+				    master_keyblock.enctype,
 				    TRUE, FALSE, (char *) NULL,
 				    0, &master_keyblock)) {
 	com_err(argv[0], retval, "while reading master key");
@@ -124,7 +122,7 @@ char *argv[];
 	exit_status++; return; 
     }
     if (retval = krb5_db_verify_master_key(context, master_princ, 
-					   &master_keyblock,&master_encblock)) {
+					   &master_keyblock)) {
 	com_err(argv[0], retval, "while verifying master key");
 	(void) krb5_db_fini(context);
 	exit_status++; return; 

@@ -59,8 +59,7 @@ struct realm_info {
     krb5_deltat max_rlife;
     krb5_timestamp expiration;
     krb5_flags flags;
-    krb5_encrypt_block *eblock;
-    krb5_pointer rseed;
+    krb5_keyblock *key;
 };
 
 static struct realm_info rblock = { /* XXX */
@@ -92,7 +91,6 @@ static int create_local_tgt = 0;
 
 static krb5_keyblock master_keyblock;
 static krb5_principal master_princ;
-static krb5_encrypt_block master_encblock;
 
 static krb5_data tgt_princ_entries[] = {
 	{0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},
@@ -146,6 +144,7 @@ char *argv[];
     extern kadm5_config_params global_params;
     long exp_time = 0;
     krb5_int32 crflags = KRB5_KDB_CREATE_BTREE;
+    krb5_data seed;
 
     retval = krb5_init_context(&context);
     if (retval) {
@@ -218,8 +217,6 @@ char *argv[];
 	return;
     }
 
-    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
-
     /* If the user has not requested locking, don't modify an existing database. */
     if (! tempdb) {
 	retval = krb5_db_set_name(context, dbname);
@@ -281,39 +278,32 @@ master key name '%s'\n",
 	fflush(stdout);
     }
 
-    if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
+    if (retval = krb5_db_fetch_mkey(context, master_princ,
+				    master_keyblock.enctype,
 				    read_mkey, read_mkey, stash_file, 0, 
 				    &master_keyblock)) {
 	com_err(PROGNAME, retval, "while reading master key");
 	krb5_free_context(context);
 	return;
     }
-    if (retval = krb5_process_key(context, &master_encblock, &master_keyblock)) {
-	com_err(PROGNAME, retval, "while processing master key");
-	krb5_free_context(context);
-	return;
-    }
 
-    rblock.eblock = &master_encblock;
-    if (retval = krb5_init_random_key(context, &master_encblock,
-				      &master_keyblock, &rblock.rseed)) {
+    rblock.key = &master_keyblock;
+
+    seed.length = master_keyblock.length;
+    seed.data = master_keyblock.contents;
+
+    if (retval = krb5_c_random_seed(context, &seed)) {
 	com_err(PROGNAME, retval, "while initializing random key generator");
-	(void) krb5_finish_key(context, &master_encblock);
 	krb5_free_context(context);
 	return;
     }
     if (retval = krb5_db_create(context, tempdbname, crflags)) {
-	(void) krb5_finish_key(context, &master_encblock);
-	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while creating %sdatabase '%s'",
 		tempdb ? "temporary " : "", tempdbname);
 	krb5_free_context(context);
 	return;
     }
     if (retval = krb5_db_set_name(context, tempdbname)) {
-	(void) krb5_finish_key(context, &master_encblock);
-	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_db_destroy(context, tempdbname);
         com_err(PROGNAME, retval, "while setting active database to '%s'",
                 tempdbname);
@@ -321,16 +311,12 @@ master key name '%s'\n",
         return;
     }
     if (v4init(PROGNAME, v4manual, v4dumpfile)) {
-	(void) krb5_finish_key(context, &master_encblock);
-	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_db_destroy(context, tempdbname);
 	krb5_free_context(context);
 	return;
     }
     if ((retval = krb5_db_init(context)) || 
 	(retval = krb5_db_open_database(context))) {
-	(void) krb5_finish_key(context, &master_encblock);
-	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while initializing the database '%s'",
 		tempdbname);
@@ -340,8 +326,6 @@ master key name '%s'\n",
 
     if (retval = add_principal(context, master_princ, MASTER_KEY, &rblock)) {
 	(void) krb5_db_fini(context);
-	(void) krb5_finish_key(context, &master_encblock);
-	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while adding K/M to the database");
 	krb5_free_context(context);
@@ -351,8 +335,6 @@ master key name '%s'\n",
     if (create_local_tgt &&
 	(retval = add_principal(context, &tgt_princ, RANDOM_KEY, &rblock))) {
 	(void) krb5_db_fini(context);
-	(void) krb5_finish_key(context, &master_encblock);
-	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while adding TGT service to the database");
 	krb5_free_context(context);
@@ -384,8 +366,6 @@ master key name '%s'\n",
 	if (tempdb)
 		(void) krb5_db_destroy (context, tempdbname);
     }
-    (void) krb5_finish_key(context, &master_encblock);
-    (void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 
     /*
@@ -547,7 +527,7 @@ Principal *princ;
     keysalt.type = KRB5_KDB_SALTTYPE_V4;
     keysalt.data.length = 0;
     keysalt.data.data = (char *) NULL;
-    retval = krb5_dbekd_encrypt_key_data(context, rblock.eblock,
+    retval = krb5_dbekd_encrypt_key_data(context, rblock.key,
 					 &v4v5key, &keysalt, 
 					 princ->key_version,
 					 &entry.key_data[0]);
@@ -592,7 +572,7 @@ struct realm_info *pblock;
 {
     krb5_db_entry entry;
     krb5_error_code retval;
-    krb5_keyblock *rkey;
+    krb5_keyblock rkey;
     int nentries = 1;
     krb5_timestamp mod_time;
     krb5_principal mod_princ;
@@ -619,7 +599,7 @@ struct realm_info *pblock;
     switch (op) {
     case MASTER_KEY:
 	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
-	if (retval = krb5_dbekd_encrypt_key_data(context, pblock->eblock,
+	if (retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
 						 &master_keyblock,
 						 (krb5_keysalt *) NULL, 1,
 						 &entry.key_data[0])) {
@@ -628,19 +608,19 @@ struct realm_info *pblock;
 	}
 	break;
     case RANDOM_KEY:
-	if (retval = krb5_random_key(context, pblock->eblock, pblock->rseed,
-				     &rkey)) {
+	if (retval = krb5_c_make_random_key(context, pblock->key->enctype,
+					    &rkey)) {
 	    krb5_db_free_principal(context, &entry, 1);
 	    return retval;
 	}
-	if (retval = krb5_dbekd_encrypt_key_data(context, pblock->eblock,
-						 rkey,
+	if (retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
+						 &rkey,
 						 (krb5_keysalt *) NULL, 1,
 						 &entry.key_data[0])) {
 	    krb5_db_free_principal(context, &entry, 1);
 	    return(retval);
 	}
-	krb5_free_keyblock(context, rkey);
+	krb5_free_keyblock_contents(context, &rkey);
 	break;
     case NULL_KEY:
 	return EOPNOTSUPP;
