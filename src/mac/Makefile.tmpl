@@ -28,19 +28,21 @@ create-directories :
 ##
 ################################################################################
 
-GLUE_OUTPUT = /mac/K5.CFMglue.c /mac/GSS.CFMglue.c
+GLUE_OUTPUT = /K5.CFMglue.c /GSS.CFMglue.c
+GLUE_INPUT = /mac/K5.CFMglue.cin /mac/K5.CFMglue.proto.h /mac/CFMglue.c /mac/K5.moreCFMglue.cin \
+	/mac/GSS.CFMglue.cin /mac/GSS.CFMglue.proto.h /mac/GSS.moreCFMglue.cin /mac/CFMGlue.pl
 
 glue : {GLUE_OUTPUT}
 glue-clean :
 	Delete -i {GLUE_OUTPUT}
 
-/mac/K5.CFMglue.c : /mac/K5.CFMglue.cin /mac/K5.CFMglue.proto.h /mac/CFMglue.c /mac/K5.moreCFMglue.cin
-	perl /mac/CFMGlue.pl < /mac/K5.CFMglue.proto.h > /mac/K5.CFMglue.c
-	Catenate /mac/K5.CFMglue.cin /mac/CFMglue.c /mac/K5.CFMglue.c /mac/K5.moreCFMglue.cin | Catenate > /mac/K5.CFMglue.c
+/K5.CFMglue.c : /mac/K5.CFMglue.cin /mac/K5.CFMglue.proto.h /mac/CFMglue.c /mac/K5.moreCFMglue.cin
+	perl /mac/CFMGlue.pl < /mac/K5.CFMglue.proto.h > /K5.CFMglue.c
+	Catenate /mac/K5.CFMglue.cin /mac/CFMglue.c /K5.CFMglue.c /mac/K5.moreCFMglue.cin | Catenate > /K5.CFMglue.c
 
-/mac/GSS.CFMglue.c : /mac/GSS.CFMglue.cin /mac/GSS.CFMglue.proto.h /mac/CFMglue.c /mac/GSS.moreCFMglue.cin
-	perl /mac/CFMGlue.pl < /mac/GSS.CFMglue.proto.h > /mac/GSS.CFMglue.c
-	Catenate /mac/GSS.CFMglue.cin /mac/CFMglue.c /mac/GSS.CFMglue.c /mac/GSS.moreCFMglue.cin | Catenate > /mac/GSS.CFMglue.c
+/GSS.CFMglue.c : /mac/GSS.CFMglue.cin /mac/GSS.CFMglue.proto.h /mac/CFMglue.c /mac/GSS.moreCFMglue.cin
+	perl /mac/CFMGlue.pl < /mac/GSS.CFMglue.proto.h > /GSS.CFMglue.c
+	Catenate /mac/GSS.CFMglue.cin /mac/CFMglue.c /GSS.CFMglue.c /mac/GSS.moreCFMglue.cin | Catenate > /GSS.CFMglue.c
 
 ################################################################################
 ##
