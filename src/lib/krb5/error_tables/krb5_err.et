@@ -28,8 +28,8 @@ error_code KRB5KDC_ERR_CANNOT_POSTDATE,	"Ticket is ineligible for postdating"
 error_code KRB5KDC_ERR_NEVER_VALID,		"Requested effective lifetime is negative or too short"
 error_code KRB5KDC_ERR_POLICY,			"KDC policy rejects request"
 error_code KRB5KDC_ERR_BADOPTION,		"KDC can't fulfill requested option"
-# ^^ 13
-error_code KRB5PLACEHOLD_14,		"KRB5 error code 14"
+error_code KRB5KDC_ERR_ETYPE_NOSUPP,	"KDC has no support for encryption type"
+# ^^ 14
 error_code KRB5PLACEHOLD_15,		"KRB5 error code 15"
 error_code KRB5PLACEHOLD_16,		"KRB5 error code 16"
 error_code KRB5PLACEHOLD_17,		"KRB5 error code 17"
@@ -62,9 +62,9 @@ error_code KRB5KRB_AP_ERR_BADORDER,	"Message out of order"
 error_code KRB5PLACEHOLD_43,		"KRB5 error code 43"
 error_code KRB5KRB_AP_ERR_BADKEYVER,	"Key version is not available"
 error_code KRB5KRB_AP_ERR_NOKEY,	"Service key not available"
-error_code KRB5KRB_AP_ERR_ETYPE_NOSUPP,	"No support for encryption type"
 error_code KRB5KRB_AP_ERR_MUT_FAIL,	"Mutual authentication failed"
-#^^ 47
+#^^ 46
+error_code KRB5PLACEHOLD_47,		"KRB5 error code 47"
 error_code KRB5PLACEHOLD_48,		"KRB5 error code 48"
 error_code KRB5PLACEHOLD_49,		"KRB5 error code 49"
 #vv 50
