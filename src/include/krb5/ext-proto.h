@@ -16,6 +16,9 @@
 #ifndef KRB5_EXT_PROTO__
 #define KRB5_EXT_PROTO__
 
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#else
 #ifdef __STDC__
 #ifdef NO_STDLIB_H
 #include <fake-stdlib.h>
@@ -26,6 +29,7 @@
 extern char *malloc(), *realloc(), *calloc();
 extern char *getenv();
 #endif /* ! __STDC__ */
+#endif /* HAS_STDLIB_H */
 
 #ifdef USE_STRING_H
 #include <string.h>
