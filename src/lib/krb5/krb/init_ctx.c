@@ -173,7 +173,7 @@ init_common (context, secure)
 			    "kdc_default_options", 0,
 			    KDC_OPT_RENEWABLE_OK, &tmp);
 	ctx->kdc_default_options = KDC_OPT_RENEWABLE_OK;
-#if defined(macintosh) || defined(__MACH__)
+#if TARGET_OS_MAC
 #define DEFAULT_KDC_TIMESYNC 1
 #else
 #define DEFAULT_KDC_TIMESYNC 0
@@ -191,7 +191,7 @@ init_common (context, secure)
 	 * Note: DCE 1.0.3a only supports a cache type of 1
 	 * 	DCE 1.1 supports a cache type of 2.
 	 */
-#if defined(macintosh) || defined(__MACH__)
+#if TARGET_OS_MAC
 #define DEFAULT_CCACHE_TYPE 4
 #else
 #define DEFAULT_CCACHE_TYPE 3

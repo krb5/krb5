@@ -367,7 +367,6 @@ make_preauth_list(context, ptypes, nptypes, ret_list)
 {
     krb5_preauthtype *		ptypep;
     krb5_pa_data **		preauthp;
-    krb5_pa_data **		preauth_to_use;
     int				i;
 
     if (nptypes < 0) {
@@ -629,7 +628,6 @@ krb5_libdefault_string(context, realm, option, ret_value)
     char **nameval = NULL;
     krb5_error_code retval;
     char realmstr[1024];
-    char **cpp;
 
     if (realm->length > sizeof(realmstr)-1)
 	return(EINVAL);

@@ -1,3 +1,13 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * conv_princ.c: removed unused variable cpp to reduce warnings
+    * get_creds.c: removed unused variables fields and mcreds to 
+    reduce warnings
+    * get_in_tkt.c: removed unused variables cpp and preauth_to_use
+    to reduce warnings
+    * init_ctx: fixed Mac OS macros
+    * parse.c: added type in to avoid "defaults to int" warning
+    * send_tgs.c: removed unused variable enclen
+
 2001-12-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* ser_actx.c (krb5_auth_context_externalize): Pass address of a
