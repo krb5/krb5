@@ -31,7 +31,13 @@
 #ifdef GETOPT_LONG
 #include "getopt.h"
 #else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#else
+extern int optind;
+extern char *optarg;
+extern int getopt();
+#endif
 #endif
 #include "com_err.h"
 
