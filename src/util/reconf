@@ -4,7 +4,7 @@ force=
 autoreconf=./util/autoconf/autoreconf
 verbose=false
 
-usage="Usage: $0 [--recheck] [--version] [--help]"
+usage="Usage: $0 [--force] [--verbose] [--help]"
 for option
 do
   case "$option" in

@@ -1,3 +1,7 @@
+Fri Apr 28 10:59:25 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* reconf (usage): fix the whole message.
+
 Wed Apr 26 11:31:04 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* reconf (usage): fix pathname in message.
