@@ -1,3 +1,7 @@
+Thu Mar 28 17:59:43 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kadm.c: Use new MacTCP Header files.
+
 Wed Mar 27 18:51:43 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kconfig.c, getpasswd.c: Use universal procedure pointers (UPP)

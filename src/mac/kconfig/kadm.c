@@ -20,12 +20,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "MacTCPCommonTypes.h"
 #include "AddressXlation.h"
-#include "UDPPB.h"
-#include "TCPPB.h"
-#include "GetMyIPAddr.h"
-	
+#include "MacTCP.h"
+
 #include "kadm.h"
 #include "krb_driver.h"
 #include "glue.h"
