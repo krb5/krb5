@@ -51,6 +51,7 @@ main(int argc, char **argv)
 	}
 
 	krb5_free_realm_tree(context, tree);
+	krb5_free_context(context);
 
 	exit(0);
 }
