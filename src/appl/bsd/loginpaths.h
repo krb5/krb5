@@ -11,7 +11,7 @@
 #endif
 #endif
 
-#ifdef ultrix
+#ifdef __ultrix
 #define LPATH ":/usr/ucb:/bin:/usr/bin"
 #define RPATH ":/usr/ucb:/bin:/usr/bin"
 #endif
