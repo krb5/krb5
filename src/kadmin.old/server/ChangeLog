@@ -1,3 +1,7 @@
+Mon Oct  2 14:50:57 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* adm_v4_pwd.c: Changes to work under OSF/1.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * adm_adm_func.c, adm_fmt_inq.c, adm_funcs.c, adm_process.c,

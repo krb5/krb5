@@ -38,11 +38,11 @@ struct auth_dat {
     char    pname[ANAME_SZ];    /* Principal's name */
     char    pinst[INST_SZ];     /* His Instance */
     char    prealm[REALM_SZ];   /* His Realm */
-    unsigned long checksum;     /* Data checksum (opt) */
+    unsigned KRB4_32 checksum;  /* Data checksum (opt) */
     C_Block session;            /* Session Key */
     int     life;               /* Life of ticket */
-    unsigned long time_sec;     /* Time ticket issued */
-    unsigned long address;      /* Address in ticket */
+    unsigned KRB4_32 time_sec;  /* Time ticket issued */
+    unsigned KRB4_32 address;   /* Address in ticket */
     KTEXT_ST reply;             /* Auth reply (opt) */
 };
 
@@ -53,34 +53,15 @@ typedef struct auth_dat AUTH_DAT;
 
 struct msg_dat {
     unsigned char *app_data;    /* pointer to appl data */
-    unsigned long app_length;   /* length of appl data */
-    unsigned long hash;         /* hash to lookup replay */
+    unsigned KRB4_32 app_length;   /* length of appl data */
+    unsigned KRB4_32 hash;      /* hash to lookup replay */
     int     swap;               /* swap bytes? */
-    long    time_sec;           /* msg timestamp seconds */
+    KRB4_32 time_sec;           /* msg timestamp seconds */
     unsigned char time_5ms;     /* msg timestamp 5ms units */
 };
 
 typedef struct msg_dat MSG_DAT;
 
-typedef struct {
-    char    name[ANAME_SZ];
-    char    instance[INST_SZ];
- 
-    unsigned long key_low;
-    unsigned long key_high;
-    unsigned long exp_date;
-    char    exp_date_txt[DATE_SZ];
-    unsigned long mod_date;
-    char    mod_date_txt[DATE_SZ];
-    unsigned short attributes;
-    unsigned char max_life;
-    unsigned char kdc_key_ver;
-    unsigned char key_version;
- 
-    char mod_name[ANAME_SZ];
-    char mod_instance[INST_SZ];
-    char *old;
-} V4_Principal;
 
         /* V5 Definitions */
 #include "k5-int.h"
