@@ -39,6 +39,15 @@ static char rcsid_adm_listen[] =
 #include <signal.h>
 #include <com_err.h>
 
+#ifdef USE_SIGPROCMASK
+/* fake sigmask, sigblock, sigsetmask */
+#include <signal.h>
+#define sigmask(x) (1L<<(x)-1)
+#define sigsetmask(x) sigprocmask(SIG_SETMASK,&x,NULL)
+static int _fake_sigstore;
+#define sigblock(x) (_fake_sigstore=x,sigprocmask(SIG_BLOCK,&_fake_sigstore,0))
+#endif
+
 #ifndef sigmask
 #define sigmask(m)    (1 <<((m)-1))
 #endif
