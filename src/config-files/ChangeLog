@@ -1,3 +1,7 @@
+Wed Jan 28 09:02:31 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc.conf.M: Document the v4_mode option. [krb5-kdc/464]
+
 Tue Nov 26 19:24:34 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kdc.conf: Fixed paths to use the GNU standard conventions.  

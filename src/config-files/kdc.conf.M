@@ -50,6 +50,15 @@ This relation lists the ports which the Kerberos server should listen
 on, by default.  This list is a comma separated list of integers.  If
 this relation is not specified, the compiled-in default is usually
 port 88 and port 750.
+
+.IP v4_mode
+This 
+.B string
+specifies how the KDC should respond to Kerberos IV packets. If this
+relation is not specified, the compiled-in default of
+.I nopreauth 
+is used.
+
 .SH REALMS SECTION
 Each tag in the
 .I [realms]
