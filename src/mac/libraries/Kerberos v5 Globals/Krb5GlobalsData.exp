@@ -6,3 +6,4 @@
 
 gKerberos5GlobalsRefCount
 gKerberos5SystemDefaultCacheName
+gKerberos5SystemDefaultCacheNameModification

@@ -15,6 +15,7 @@
 
 extern	UInt32	gKerberos5GlobalsRefCount;
 extern	char*	gKerberos5SystemDefaultCacheName;
+extern	UInt32	gKerberos5SystemDefaultCacheNameModification;
 
 #if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #	pragma import reset

@@ -7,5 +7,6 @@
 #include "Krb5GlobalsData.h"
 
 UInt32	gKerberos5GlobalsRefCount = 0;
+UInt32	gKerberos5SystemDefaultCacheNameModification = 0;
 char*	gKerberos5SystemDefaultCacheName = nil;
 

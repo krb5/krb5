@@ -50,6 +50,7 @@ Krb5GlobalsSetDefaultCacheName (
 	if (gKerberos5SystemDefaultCacheName != nil)
 		DisposePtr (gKerberos5SystemDefaultCacheName);
 	gKerberos5SystemDefaultCacheName = newName;
+	gKerberos5SystemDefaultCacheNameModification++;
 	return noErr;
 }
 
@@ -99,4 +100,14 @@ Krb5GlobalsSetUniqueDefaultCacheName ()
 	}
 	
 	return err;
+}
+
+/* 
+ * Return the modification number 
+ */
+
+UInt32
+Krb5GlobalsGetDefaultCacheNameModification ()
+{
+	return gKerberos5SystemDefaultCacheNameModification;
 }
