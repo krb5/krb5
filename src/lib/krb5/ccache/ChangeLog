@@ -1,3 +1,25 @@
+2004-06-29  Jeffrey Altman <jaltman@mit.edu>
+
+    * cc_mslsa.c: 
+    - is_windows_2000() indicates the OS is Windows 2000 or higher
+    - is_windows_xp() indicates the OS is Windows XP or higher which
+      indicates that PKERB_QUERY_TKT_CACHE_EX_RESPONSE and 
+      PKERB_TICKET_CACHE_INFO_EX are available.
+    - does_retrieve_ticket_cache_ticket() checks to see if a Microsoft
+      private fix is available which adds a new Cache Flag,
+      KERB_RETRIEVE_TICKET_CACHE_TICKET, which when set causes the 
+      requested ticket to be stored in the LSA cache even when the
+      TicketFlags and EncType are not set to 0.
+    - KerbExternalTicketMatch() is a test to determine if two 
+      Microsoft External Tickets are identical
+    + use the KerbQueryTicketCacheExMessage LSA call on XP or higher
+    + specify the KERB_RETRIEVE_TICKET_CACHE_TICKET flag when it is
+      available
+    = The combination of both + items will cause the ClientRealm
+      to be displayed properly for all cross realm tickets obtained
+      via the MSLSA
+    
+
 2004-06-21  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c: Comment out call to FormatMessage() which fails
