@@ -1991,9 +1991,8 @@ static krb5_error_code KRB5_CALLCONV
 krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
 {
      krb5_ccache lid;
-#ifndef USE_STDIO
      int ret;
-#else
+#ifdef USE_STDIO
      FILE *f;
 #endif
      krb5_error_code    retcode = 0;
@@ -2009,7 +2008,14 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
 
      (void) strcpy(scratch, TKT_ROOT);
      (void) strcat(scratch, "XXXXXX");
+#ifdef HAVE_MKSTEMP
+     ret = mkstemp(scratch);
+     if (ret == -1) {
+	 return krb5_fcc_interpret(context, errno);
+     } else close(ret);
+#else /*HAVE_MKSTEMP*/
      mktemp(scratch);
+#endif
 
      lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
