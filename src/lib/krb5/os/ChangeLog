@@ -1,5 +1,12 @@
 2002-07-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* localaddr.c (get_localaddrs): Split out main body of
+	krb5_os_localaddr, add an argument to indicate whether addresses
+	listed in the profile should be included.
+	(krb5_os_localaddr): Call it.
+	(krb5int_local_addresses): Call get_localaddrs but skip
+	profile-listed addresses.
+
 	* sendto_kdc.c (krb5int_sendto_udp): Accept new args for optional
 	location to store local address used to contact server.
 	(krb5_sendto_kdc): Update call to pass 0.

@@ -310,12 +310,26 @@ krb5_os_localaddr(context, addr)
     krb5_context context;
     krb5_address ***addr;
 {
+    return get_localaddrs(context, addr, 1);
+}
+
+krb5_error_code
+krb5int_local_addresses(krb5_context context, krb5_address ***addr)
+{
+    return get_localaddrs(context, addr, 0);
+}
+
+static krb5_error_code
+get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
+{
     struct localaddr_data data = { 0 };
     int r;
     krb5_error_code err;
 
-    err = krb5_os_localaddr_profile (context, &data);
-    /* ignore err for now */
+    if (use_profile) {
+	err = krb5_os_localaddr_profile (context, &data);
+	/* ignore err for now */
+    }
 
     r = foreach_localaddr (&data, count_addrs, allocate, add_addr);
     if (r != 0) {
