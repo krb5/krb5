@@ -1,3 +1,11 @@
+
+Wed Apr 26 22:49:18 1995  Chris Provenzano  (proven@mit.edu)
+
+	* gc_via_tgt.c, and gc_2tgt.c : Removed.
+	* Makefile.in, gc_via_tkt.c, gc_frm_kdc.c, and, int-proto.h : 
+		Replaced get_cred_via_tgt() and get_cred_via_2tgt()
+		with more general function get_cred_via_tkt().
+
 Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
 
 	* Makefile.in : Added gc_via_tkt.c and removed get_fcreds.c

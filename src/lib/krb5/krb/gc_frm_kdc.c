@@ -254,10 +254,9 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	tgtq.is_skey      = FALSE;
 	tgtq.ticket_flags = tgt.ticket_flags;
 	etype             = TGT_ETYPE;
-	if(retval = krb5_get_cred_via_tgt(context, &tgt,
-					  FLAGS2OPTS(tgtq.ticket_flags),
-					  krb5_kdc_req_sumtype,
-					  &tgtq, &tgtr)) {
+	if (retval = krb5_get_cred_via_tkt(context, &tgt,
+					   FLAGS2OPTS(tgtq.ticket_flags),
+					   tgt.addresses, &tgtq, &tgtr)) {
 	      
        /*
 	* couldn't get one so now loop backwards through the realms
@@ -310,10 +309,9 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	      tgtq.is_skey      = FALSE;
 	      tgtq.ticket_flags = tgt.ticket_flags;
 	      etype             = TGT_ETYPE;
-	      if (retval = krb5_get_cred_via_tgt(context, &tgt,
+	      if (retval = krb5_get_cred_via_tkt(context, &tgt,
                                                  FLAGS2OPTS(tgtq.ticket_flags),
-                                                 krb5_kdc_req_sumtype,
-                                                 &tgtq, &tgtr)) {
+                                                 tgt.addresses, &tgtq, &tgtr)) {
 		  continue;
 	      }
 	      
@@ -383,16 +381,10 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
   }
 
   etype = TGT_ETYPE;
-  if (in_cred->second_ticket.length) {
-      retval = krb5_get_cred_via_2tgt(context, &tgt,
-				      KDC_OPT_ENC_TKT_IN_SKEY |
-				      FLAGS2OPTS(tgt.ticket_flags),
-				      krb5_kdc_req_sumtype, in_cred, out_cred);
-  } else {
-      retval = krb5_get_cred_via_tgt(context, &tgt,
-                                     FLAGS2OPTS(tgt.ticket_flags), 
-                                     krb5_kdc_req_sumtype, in_cred, out_cred);
-  }
+  retval = krb5_get_cred_via_tkt(context, &tgt, FLAGS2OPTS(tgt.ticket_flags) |
+  				 	(in_cred->second_ticket.length ? 
+				  	 KDC_OPT_ENC_TKT_IN_SKEY : 0),
+				 tgt.addresses, in_cred, out_cred);
 
   /* cleanup and return */
 

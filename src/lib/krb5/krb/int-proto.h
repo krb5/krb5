@@ -33,20 +33,6 @@ krb5_error_code krb5_tgtname
 	           const krb5_data *,
 	           const krb5_data *,
 	           krb5_principal *));
-krb5_error_code krb5_get_cred_via_tgt
-    	PROTOTYPE((krb5_context context,
-	           krb5_creds *,
-	           const krb5_flags,
-	           const krb5_cksumtype,
-	           krb5_creds *,
-		   krb5_creds **));
-krb5_error_code krb5_get_cred_via_2tgt
-    	PROTOTYPE((krb5_context context,
-	           krb5_creds *,
-	           const krb5_flags,
-	           const krb5_cksumtype,
-	           krb5_creds *,
-		   krb5_creds **));
 
 #endif /* KRB5_INT_FUNC_PROTO__ */
 

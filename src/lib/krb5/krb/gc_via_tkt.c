@@ -29,10 +29,11 @@
 #include "int-proto.h"
 
 static krb5_error_code
-krb5_kdcrep2creds(context, pkdcrep, address, ppcreds)
+krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
     krb5_context          context;
     krb5_kdc_rep        * pkdcrep;
     krb5_address *const * address;
+    krb5_data		* psectkt;
     krb5_creds         ** ppcreds;
 {
     krb5_error_code retval;  
@@ -57,15 +58,18 @@ krb5_kdcrep2creds(context, pkdcrep, address, ppcreds)
                                              &(*ppcreds)->keyblock))
         goto cleanup;
 
+    if (retval = krb5_copy_data(context, psectkt, &pdata))
+	goto cleanup;
+    (*ppcreds)->second_ticket = *pdata;
+    krb5_xfree(pdata);
+
     (*ppcreds)->keyblock.etype = pkdcrep->ticket->enc_part.etype;
-
-    (*ppcreds)->magic = KV5M_CREDS;
-    (*ppcreds)->is_skey = 0;    /* unused */
-    (*ppcreds)->times = pkdcrep->enc_part2->times;
     (*ppcreds)->ticket_flags = pkdcrep->enc_part2->flags;
+    (*ppcreds)->times = pkdcrep->enc_part2->times;
+    (*ppcreds)->magic = KV5M_CREDS;
 
-    (*ppcreds)->authdata = NULL;   /* not used */
-    memset(&(*ppcreds)->second_ticket, 0, sizeof((*ppcreds)->second_ticket));
+    (*ppcreds)->authdata = NULL;   			/* not used */
+    (*ppcreds)->is_skey = 0;    			/* not used */
 
     if (pkdcrep->enc_part2->caddrs) {
 	if (retval = krb5_copy_addresses(context, pkdcrep->enc_part2->caddrs,
@@ -105,7 +109,6 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     krb5_creds 	       ** out_cred;
 {
     krb5_error_code retval;
-    krb5_principal tempprinc;
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
@@ -117,19 +120,27 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     if (!tkt->ticket.length)
 	return KRB5_NO_TKT_SUPPLIED;
 
+    if ((kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) && 
+	(!in_cred->second_ticket.length))
+        return(KRB5_NO_2ND_TKT);
+
+
     /* check if we have the right TGT                    */
     /* tkt->server must be equal to                      */
     /* krbtgt/realmof(cred->server)@realmof(tgt->server) */
-
 /*
-    if (retval = krb5_tgtname(context, 
+    {
+    krb5_principal tempprinc;
+        if (retval = krb5_tgtname(context, 
 		     krb5_princ_realm(context, in_cred->server),
 		     krb5_princ_realm(context, tkt->server), &tempprinc))
-	return(retval);
+    	    return(retval);
 
-    if (!krb5_principal_compare(context, tempprinc, tkt->server)) {
-	retval = KRB5_PRINC_NOMATCH;
-	goto error_5;
+        if (!krb5_principal_compare(context, tempprinc, tkt->server)) {
+            krb5_free_principal(context, tempprinc);
+	    return (KRB5_PRINC_NOMATCH);
+        }
+    krb5_free_principal(context, tempprinc);
     }
 */
 
@@ -137,9 +148,10 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 			       krb5_kdc_req_sumtype, /* To be removed */
 			       in_cred->server, address, in_cred->authdata,
 			       0,		/* no padata */
-			       0,		/* no second ticket */
+			       (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
+				  &in_cred->second_ticket : NULL,
 			       tkt, &tgsrep))
-	goto error_5;
+	return retval;
 
     switch (tgsrep.message_type) {
     case KRB5_TGS_REP:
@@ -158,7 +170,7 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	/* XXX need access to the actual assembled request...
 	   need a change to send_tgs */
 	if ((err_reply->ctime != request.ctime) ||
-	    !krb5_principal_compare(context, err_reply->server, request.server) ||
+	    !krb5_principal_compare(context,err_reply->server,request.server) ||
 	    !krb5_principal_compare(context, err_reply->client, request.client))
 	    retval = KRB5_KDCREP_MODIFIED;
 	else
@@ -183,9 +195,6 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	retval = KRB5_KDCREP_MODIFIED;
 	goto error_3;
     }
-
-    retval = krb5_kdcrep2creds(context, dec_rep, address, out_cred);
-
 
 #if 0
     /* XXX probably need access to the request */
@@ -212,13 +221,13 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 
     if (!request.from && !in_clock_skew(dec_rep->enc_part2->times.starttime)) {
 	retval = KRB5_KDCREP_SKEW;
-	goto error_1;
+	goto error_3;
     }
     
 #endif
 
-error_1:;
-    if (retval)
+    retval = krb5_kdcrep2creds(context, dec_rep, address, 
+			       &in_cred->second_ticket,  out_cred);
 
 error_3:;
     memset(dec_rep->enc_part2->session->contents, 0,
@@ -227,8 +236,5 @@ error_3:;
 
 error_4:;
     free(tgsrep.response.data);
-
-error_5:;
-    krb5_free_principal(context, tempprinc);
     return retval;
 }

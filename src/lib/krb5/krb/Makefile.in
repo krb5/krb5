@@ -31,9 +31,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	free_rtree.$(OBJEXT)	\
 	faddr_ordr.$(OBJEXT)	\
 	gc_frm_kdc.$(OBJEXT)	\
-	gc_via_tgt.$(OBJEXT)	\
 	gc_via_tkt.$(OBJEXT)	\
-	gc_2tgt.$(OBJEXT)	\
 	gen_seqnum.$(OBJEXT)	\
 	gen_subkey.$(OBJEXT)	\
 	get_creds.$(OBJEXT)	\
@@ -97,9 +95,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/free_rtree.c	\
 	$(srcdir)/faddr_ordr.c	\
 	$(srcdir)/gc_frm_kdc.c	\
-	$(srcdir)/gc_via_tgt.c	\
 	$(srcdir)/gc_via_tkt.c	\
-	$(srcdir)/gc_2tgt.c	\
 	$(srcdir)/gen_seqnum.c	\
 	$(srcdir)/gen_subkey.c	\
 	$(srcdir)/get_creds.c	\
