@@ -14,7 +14,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION b6-1
+@set EDITION b7-1
 
 @finalout                               @c don't print black warning boxes
 
@@ -1411,11 +1411,11 @@ M-x manual-entry @emph{command}
 @section kinit Reference
 
 @iftex
-@special{psfile=kinit1.ps voffset=-1115 hoffset=-40}
+@special{psfile=kinit1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{kinit}}
 @page
 
-@special{psfile=kinit2.ps voffset=-1115 hoffset=-40}
+@special{psfile=kinit2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{kinit}}
 @page
 @end iftex
@@ -1427,7 +1427,7 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 @section klist Reference
 
 @iftex
-@special{psfile=klist1.ps voffset=-1115 hoffset=-40}
+@special{psfile=klist1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{klist}}
 @page
 @end iftex
@@ -1451,7 +1451,7 @@ Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @section kpasswd Reference
 
 @iftex
-@special{psfile=kpasswd1.ps voffset=-1115 hoffset=-40}
+@special{psfile=kpasswd1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{kpasswd}}
 @page
 @end iftex
@@ -1463,43 +1463,43 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @section telnet Reference
 
 @iftex
-@special{psfile=telnet1.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet2.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet3.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet3.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet4.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet4.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet5.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet5.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet6.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet6.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet7.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet7.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet8.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet8.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet9.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet9.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 
-@special{psfile=telnet10.ps voffset=-1115 hoffset=-40}
+@special{psfile=telnet10.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
 @end iftex
@@ -1511,11 +1511,11 @@ Type @kbd{M-x manual-entry telnet} to read this manual page.
 @section rlogin Reference
 
 @iftex
-@special{psfile=rlogin1.ps voffset=-1115 hoffset=-40}
+@special{psfile=rlogin1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{rlogin}}
 @page
 
-@special{psfile=rlogin2.ps voffset=-1115 hoffset=-40}
+@special{psfile=rlogin2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{rlogin}}
 @page
 @end iftex
@@ -1527,35 +1527,35 @@ Type @kbd{M-x manual-entry rlogin} to read this manual page.
 @section FTP Reference
 
 @iftex
-@special{psfile=ftp1.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp2.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp3.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp3.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp4.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp4.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp5.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp5.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp6.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp6.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp7.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp7.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 
-@special{psfile=ftp8.ps voffset=-1115 hoffset=-40}
+@special{psfile=ftp8.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
 @end iftex
@@ -1567,11 +1567,11 @@ Type @kbd{M-x manual-entry FTP} to read this manual page.
 @section rsh Reference
 
 @iftex
-@special{psfile=rsh1.ps voffset=-1115 hoffset=-40}
+@special{psfile=rsh1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{rsh}}
 @page
 
-@special{psfile=rsh2.ps voffset=-1115 hoffset=-40}
+@special{psfile=rsh2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{rsh}}
 @page
 @end iftex
@@ -1583,11 +1583,11 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @section rcp Reference
 
 @iftex
-@special{psfile=rcp1.ps voffset=-1115 hoffset=-40}
+@special{psfile=rcp1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{rcp}}
 @page
 
-@special{psfile=rcp2.ps voffset=-1115 hoffset=-40}
+@special{psfile=rcp2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{rcp}}
 @page
 @end iftex
@@ -1599,23 +1599,23 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 @section ksu Reference
 
 @iftex
-@special{psfile=ksu1.ps voffset=-1115 hoffset=-40}
+@special{psfile=ksu1.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{ksu}}
 @page
 
-@special{psfile=ksu2.ps voffset=-1115 hoffset=-40}
+@special{psfile=ksu2.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{ksu}}
 @page
 
-@special{psfile=ksu3.ps voffset=-1115 hoffset=-40}
+@special{psfile=ksu3.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{ksu}}
 @page
 
-@special{psfile=ksu4.ps voffset=-1115 hoffset=-40}
+@special{psfile=ksu4.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{ksu}}
 @page
 
-@special{psfile=ksu5.ps voffset=-1115 hoffset=-40}
+@special{psfile=ksu5.ps voffset=-550 hoffset=-40}
 @centerline{Reference Manual for @code{ksu}}
 @page
 @end iftex

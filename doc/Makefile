@@ -7,7 +7,8 @@ RM=rm -f
 TAR=tar -chvf
 GZIP=gzip -9
 MANPS=./man2ps
-all:: admin-guide-full install-guide-full user-guide-full
+
+all:: admin-guide-full install-guide-full user-guide-full clean-temp-ps
 
 admin-guide-full:: admin-guide admin-guide-info admin-guide-html
 
@@ -37,7 +38,7 @@ user-guide-full:: user-guide user-guide-info user-guide-html
 
 user-guide::
 	$(DVI) user-guide.texinfo
-	$(MANPS) $(SRCDIR)/appl/gssftp/ftp/ftp.M $(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $(SRCDIR)/clients/klist/klist.M $(SRCDIR)/clients/ksu/ksu.M $(SRCDIR)/appl/bsd/rcp.M $(SRCDIR)/appl/bsd/rlogin.M $(SRCDIR)/appl/bsd/rsh.M $(SRCDIR)/appl/telnet/telnet/telnet.1
+	$(MANPS) $(SRCDIR)/appl/gssftp/ftp/ftp.M $(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $(SRCDIR)/clients/klist/klist.M $(SRCDIR)/clients/ksu/ksu.M $(SRCDIR)/appl/bsd/rcp.M $(SRCDIR)/appl/bsd/rlogin.M $(SRCDIR)/appl/bsd/rsh.M $(SRCDIR)/appl/telnet/telnet/telnet.1 $(SRCDIR)/kadmin/passwd/kpasswd.M
 	$(DVIPS) user-guide
 
 user-guide-info::
@@ -61,6 +62,10 @@ clean-backup::
 
 clean-tarfiles::
 	$(RM) *.tar *.tar.gz *.tgz
+
+clean-temp-ps::
+	$(RM) ftp?.ps kinit?.ps klist?.ps kdestroy?.ps ksu?.ps rlogin?.ps \
+		rcp?.ps rsh?.ps telnet?.ps kpasswd?.ps
 
 tgz::
 	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo install.texinfo texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html

@@ -15,7 +15,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION b6-1
+@set EDITION b7-1
 
 @finalout                               @c don't print black warning boxes
 

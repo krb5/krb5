@@ -2,6 +2,22 @@
 
 com=`basename $0`
 files=$*
+ROFF=groff
+ROFF_FLAGS="-C -man -Tps"
+CSPLIT=
+
+IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+for i in $PATH; do
+  if [ -f $i/gcsplit ]; then
+	CSPLIT=$i/gcsplit
+	break
+  fi
+  if [ -f $i/csplit ]; then
+	CSPLIT=$i/csplit
+	break
+  fi
+done
+IFS="$save_ifs"
 
 if [ "$files" = "" ]; then
     echo "Usage: $com file [file2 ...]"
@@ -11,15 +27,15 @@ fi
 for file in $files
 do
     filename=`basename $file | awk -F. '{print $1}'`
-    troff -C -man -Tps $filename | grops -g > $filename.ps
+    eval $ROFF $ROFF_FLAGS $file > $filename.ps
 
     pages=`grep '%%Pages\:' $filename.ps | awk '{print $2}'`
-    pp=$(($pages - 1))
+    pp=`expr $pages - 1`
 
     echo $filename': '$pages' pages'
 
-    if [ -e csplit ]; then
-        csplit -k $filename.ps /Page:/ \{$pp\}
+    if [ "$CSPLIT"x != x ]; then
+        $CSPLIT -k $filename.ps /Page:/ \{$pp\}
 
         counter=0
 
@@ -34,7 +50,7 @@ do
                 echo 'end' >> $filename$counter.ps
                 echo '%%EOF' >> $filename$counter.ps
             fi
-            counter=$(($counter + 1))
+            counter=`expr $counter + 1`
         done
 
         rm $filename.ps $filename'0.ps' xx*

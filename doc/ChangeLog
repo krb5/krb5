@@ -1,3 +1,27 @@
+Fri Sep  6 19:59:12 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* admin.texinfo, install.texinfo: Set edition to "b7-1".
+
+	* user-guide.texinfo: Set edition to "b7-1".  Fix the hoffset and
+ 		voffsets for the included man page poscript files so that
+ 		the images are lined up correctly (at least using MIT's
+ 		dvips).
+
+	* Makefile (user-guide): Make sure the kpasswd man page's
+	 	postscript is built.  Add new target "clean-temp-ps" which
+	 	cleans up the temporary postscript files.
+
+	* man2ps: Changes to make man2ps more portable.  Remove bash
+		specific constructs, and replace with calls to expr.
+		Since the arguments to "troff" require groff, just try to
+		run groff explicitly (someone can always edit the ROFF and
+		ROFF_OPTIONS at the top of the script).  Try to
+		automatically detect whether csplit or gcsplit should be
+		used, by grovelling through the user's path.
+
+	* texinfo.tex: Check in version of texinfo.tex that has Jeff's 
+		magic doubleleft arrow hack.
+
 Fri Sep  6 12:59:43 1996  Jeff Bigler  <jcb@viola.cygnus.com>
 	
 	* install.texinfo: new name for cyg-install.texinfo
