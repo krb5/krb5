@@ -1,3 +1,8 @@
+Fri Apr 30 15:23:39 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Fix to define HAVE_SETUPTERM instead of
+	HAS_SETUPTERM (due to merge botch).
+
 1999-04-13    <tytso@rsts-11.mit.edu>
 
 	* configure.in: Check for setupterm() in libncurses in addition to
