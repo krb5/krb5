@@ -1,3 +1,8 @@
+Fri Mar 20 17:13:46 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (add_to_transited): Check lengths, fix up comma
+	quoting somewhat (though things are still way broken).
+
 Thu Feb  5 19:09:06 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c: Fix up call to klog, also delete logic to check
