@@ -127,6 +127,6 @@
 */
 #define HavePerl YES
 
-#define	AthenaEnv Yes		/* Define this if you are in the
+#define	AthenaEnv YES		/* Define this if you are in the
 				   athena environment.
 				   No one else should define this.  */
