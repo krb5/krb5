@@ -24,15 +24,16 @@ case $krb5_cv_host in
 *-*-netbsd*)
 	echo "Enabling shared libraries for NetBSD...."
 	krb5_cv_shlibs_cflags=-fpic
-	krb5_cv_shlibs_ext=so.0.0
+	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+	krb5_cv_shlibs_need_nover=no
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag=
 	krb5_cv_noshlibs_ldflag="-static"
 	krb5_cv_shlibs_sym_ufo="-u "
-	krb5_cv_shlibs_dirhead="-L"
+	krb5_cv_shlibs_dirhead="-Wl,-R -Wl,"
 	krb5_cv_exe_need_dirs=yes
-	krb5_cv_shlibs_use_dirs=yes
+	krb5_cv_shlibs_use_dirs=no
 	krb5_cv_shlibs_use_colon_dirs=no
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_shlibs_enabled=yes
@@ -43,11 +44,12 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_cflags=-fPIC
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag="-dy"
 	krb5_cv_noshlibs_ldflag="-dn"
 	krb5_cv_shlibs_sym_ufo="-u "
-	krb5_cv_shlibs_dirhead="-R"
+	krb5_cv_shlibs_dirhead="-R "
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=yes
 	krb5_cv_shlibs_use_colon_dirs=no
@@ -59,6 +61,7 @@ case $krb5_cv_host in
 	echo "Enabling shared libraries for AIX...."
 	krb5_cv_shlibs_cflags=
 	krb5_cv_shlibs_ext=a
+	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_noshlibs_ext=do-not-make
 	krb5_cv_shlibs_dir=
 	if test $krb5_cv_prog_gcc = yes ; then
@@ -86,11 +89,12 @@ fi
 	fi
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag="-dy"
 	krb5_cv_noshlibs_ldflag="-dn"
 	krb5_cv_shlibs_sym_ufo="-u "
-	krb5_cv_shlibs_dirhead="-R"
+	krb5_cv_shlibs_dirhead="-R "
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=yes
 	krb5_cv_shlibs_use_colon_dirs=no
@@ -103,11 +107,12 @@ alpha-dec-osf*)
 	krb5_cv_shlibs_cflags=
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_shlibs_dir=
 	krb5_cv_shlibs_ldflag="-call_shared"
 	krb5_cv_noshlibs_ldflag="-non_shared"
 	krb5_cv_shlibs_sym_ufo="-expect_unresolved "
-	krb5_cv_shlibs_dirhead="-rpath"
+	krb5_cv_shlibs_dirhead="-rpath "
 	krb5_cv_exe_need_dirs=no
 	krb5_cv_shlibs_use_dirs=yes
 	krb5_cv_shlibs_use_colon_dirs=yes
@@ -131,6 +136,7 @@ alpha-dec-osf*)
 esac],[krb5_cv_shlibs_cflags=
 krb5_cv_shlibs_ext=
 krb5_cv_noshlibs_ext=a
+krb5_cv_shlibs_need_nover=yes
 krb5_cv_shlibs_dir=
 krb5_cv_shlibs_ldflag=
 krb5_cv_noshlibs_ldflag=

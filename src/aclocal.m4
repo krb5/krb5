@@ -135,6 +135,7 @@ MAKE_SUBDIRS("making",all-unix, all)
 MAKE_SUBDIRS("cleaning",clean-unix, clean)
 MAKE_SUBDIRS("installing",install-unix, install)
 MAKE_SUBDIRS("checking",check-unix, check)
+MAKE_SUBDIRS("making Makefiles",Makefiles, Makefiles)
 ])dnl
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
@@ -154,6 +155,8 @@ KRB_INCLUDE dnl
 AC_PUSH_MAKEFILE()dnl
 [
 SHELL=/bin/sh
+
+Makefiles:: Makefile
 
 Makefile: $(srcdir)/Makefile.in config.status $(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
 	$(SHELL) config.status
@@ -816,8 +819,11 @@ AC_SUBST(SHARED_RULE)
 AC_SUBST(SHARED_RULE_LOCAL)
 ])dnl
 dnl
+dnl
 dnl This rule adds the additional Makefile fragment necessary to actually 
 dnl create the shared library
+dnl
+dnl V5_MAKE_SHARED_LIB(libname, version, libdir, dirname_relative_to_libdir)
 dnl
 define(V5_MAKE_SHARED_LIB,[
 if test "[$]krb5_cv_staticlibs_enabled" = yes
@@ -837,9 +843,9 @@ AC_SUBST(LD_SHLIBDIR_PREFIX)
 SHLIB_RPATH_DIRS=
 if test $krb5_cv_shlibs_use_dirs = yes ; then
 	if test $krb5_cv_shlibs_use_colon_dirs = yes ; then
-		SHLIB_RPATH_DIRS="$krb5_cv_shlibs_dirhead \$(KRB5_SHLIBDIR):`pwd`/\$(TOPLIBD)"
+		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}$(KRB5_SHLIBDIR):`pwd`/\$(TOPLIBD)"
 	else
-		SHLIB_RPATH_DIRS="$krb5_cv_shlibs_dirhead \$(KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`/\$(TOPLIBD)"
+		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR) ${krb5_cv_shlibs_dirhead}`pwd`/\$(TOPLIBD)"
 	fi
 fi
 AC_SUBST(SHLIB_RPATH_DIRS)
@@ -854,20 +860,27 @@ SHEXT=$krb5_cv_shlibs_ext
 AC_SUBST(SHEXT)
 STEXT=$krb5_cv_noshlibs_ext
 AC_SUBST(STEXT)
-DO_MAKE_SHLIB="$1.\$""(SHEXT)"
+dnl export the version of the library....
+krb5_cv_shlib_version_$1=$2
+if test "$krb5_cv_shlibs_need_nover" = yes; then
+	DO_MAKE_SHLIB="$1.\$""(SHEXT).$2 $1.\$""(SHEXT)"
+else
+	DO_MAKE_SHLIB="$1.\$""(SHEXT).$2"
+fi
+AC_SUBST(SHLIB_NAME)
 AC_PUSH_MAKEFILE()dnl
 
 all-unix:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
 
 clean-unix:: 
-	$(RM) $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
+	$(RM) $1.[$](SHEXT).$2 $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
 
-$1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
+$1.[$](SHEXT).$2: [$](LIBDONE) [$](DEPLIBS)
 	[$](BUILDTOP)/util/makeshlib [$]@	\
 		"[$](SHLIB_LIBDIRS)" \
 		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" [$](LIB_SUBDIRS)
-
 AC_POP_MAKEFILE()dnl
+LinkFile($1.[$](SHEXT),$1.[$](SHEXT).$2)
 ],[
 STEXT=$krb5_cv_noshlibs_ext
 AC_SUBST(STEXT)
@@ -880,7 +893,43 @@ clean-unix::
 AC_POP_MAKEFILE()
 ])dnl
 AC_SUBST(DO_MAKE_SHLIB)
-AC_SUBST(SHLIB_STATIC_TARGET)])dnl
+AC_SUBST(SHLIB_STATIC_TARGET)
+
+AC_ARG_ENABLE([shared],
+[  --enable-shared         build shared libraries],[
+LinkFileDir($3/$1.[$](SHEXT).$2, $1.[$](SHEXT).$2, $4)
+AppendRule([$3/$1.[$](SHEXT): $3/$1.[$](SHEXT).$2
+	[$](RM) $3/$1.[$](SHEXT)
+	[$](LN) $1.[$](SHEXT).$2 $3/$1.[$](SHEXT)
+])
+AppendRule(clean::[
+	[$](RM) $3/$1.[$](SHEXT).$2 $3/$1.[$](SHEXT)
+])
+if test "$krb5_cv_shlibs_need_nover" = "yes" ; then
+AppendRule([all-unix:: $3/$1.$(SHEXT).$2 $3/$1.$(SHEXT)])
+else
+AppendRule([all-unix:: $3/$1.$(SHEXT).$2])
+fi
+AppendRule([install::	$1.[$](SHEXT).$2
+	[$](RM) [$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT).$2
+	[$](INSTALL_DATA) $1.[$](SHEXT).$2	\
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT).$2
+])
+if test "$krb5_cv_shlibs_need_nover" = "yes" ; then
+AppendRule([install::	$1.[$](SHEXT).$2
+	[$](RM) [$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)
+	[$](LN) $1.[$](SHEXT).$2 \
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)])
+])
+fi
+if test -n "$krb5_cv_staticlibs_enabled" ; then
+        AppendRule([install:: $1.[$](STEXT)
+	[$](INSTALL_DATA) $1.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)$1.[$](STEXT)
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)[$](S)$1.[$](STEXT)])
+        LinkFileDir($3/$1.[$](STEXT),$1.[$](STEXT),$4)
+        AppendRule([all-unix:: $3/$1.[$](STEXT)])
+fi
+])dnl
 dnl
 dnl Defines LDARGS correctly so that we actually link with the shared library
 dnl
@@ -896,7 +945,7 @@ if test "$krb5_cv_shlibs_enabled" = yes ; then
 	AC_MSG_RESULT(Using shared libraries)
 	LDARGS="$krb5_cv_shlibs_ldflag -L\$(TOPLIBD) $LDARGS"
 	if test "$krb5_cv_exe_need_dirs" = yes; then
-		LDARGS="$LDARGS $krb5_cv_shlibs_dirhead \$(KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`/\$(TOPLIBD)"
+		LDARGS="$LDARGS ${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR) ${krb5_cv_shlibs_dirhead}`pwd`/\$(TOPLIBD)"
 	fi
 	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 	AC_SUBST(SHLIB_TAIL_COMP)

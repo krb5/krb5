@@ -1,3 +1,14 @@
+Sat Sep 30 04:34:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4 (DO_SUBDIRS): Add make Makefiles for broken versions
+			of make.
+		     (V5_MAKE_SHARED_LIB): Changes to support version
+		     	     numbering and library installation.
+
+	* configure.in: change shlib extentsion for netbsd and dirhead
+		rules to allow for shared library path to be included in
+		executable. 
+
 Fri Sep 29 01:39:35 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (awk-windows-mac): Copy stock/osconf.h to osconf.h
