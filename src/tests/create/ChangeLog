@@ -1,0 +1,5 @@
+Thu Sep 15 17:16:46 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_mkdums.c (add_princ): Initialize key version number to be 1.
+
+

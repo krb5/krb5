@@ -53,7 +53,7 @@ struct mblock {
     KRB5_KDB_MAX_RLIFE,
     KRB5_KDB_EXPIRATION,
     KRB5_KDB_DEF_FLAGS,
-    0
+    1
 };
 
 int set_dbname_help PROTOTYPE((char *, char *));
@@ -280,7 +280,7 @@ OLDDECLARG(char *, str_newprinc)
     free(key.contents);
 
     newentry.principal = newprinc;
-    newentry.kvno = 0;
+    newentry.kvno = 1;
     newentry.max_life = mblock.max_life;
     newentry.max_renewable_life = mblock.max_rlife;
     newentry.mkvno = mblock.mkvno;
