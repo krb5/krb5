@@ -1,3 +1,10 @@
+2004-06-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c: Reorganize code: One definition of each function,
+	with per-platform conditional tests inside, instead of
+	per-platform definitions for each function.  Combine common
+	aspects of each function across platforms.
+
 2004-06-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (key_lock): Change to a k5_mutex_t.
