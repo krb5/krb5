@@ -26,18 +26,30 @@
 
 #include "k5-int.h"
 
+static int et_init = 0;
+
 KRB5_DLLIMP void KRB5_CALLCONV
 krb5_init_ets (context)
      krb5_context context;
 {
-    static int initialized = 0;
+    if (et_init) return;
+    et_init++;
 
-    if (initialized)
-	    return;
-    
-    initialized++;
     initialize_krb5_error_table();
     initialize_kv5m_error_table();
     initialize_kdb5_error_table();
     initialize_asn1_error_table();
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_finish_ets (context)
+    krb5_context context;
+{
+    if (! et_init) return;
+    et_init--;
+
+    cleanup_krb5_error_table();
+    cleanup_kv5m_error_table();
+    cleanup_kdb5_error_table();
+    cleanup_asn1_error_table();
 }
