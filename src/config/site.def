@@ -117,12 +117,9 @@
 #endif
 #endif
 
-#ifndef DefaultCDebugFlags
-#if HasGcc
+/* With gcc, use -g -O.  Otherwise use the default (-O). */
+#if !defined(DefaultCDebugFlags) && HasGcc
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
-#else
-#define DefaultCDebugFlags DebuggableCDebugFlags
-#endif
 #endif
 
 #if HasNdbm
@@ -149,6 +146,7 @@
 #define ZephyrLibs -lzephyr
 #endif
 
+#ifndef PS2Architecture
 /* define IsodeLib to be what you pass to the loader to find the ISODE
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
@@ -159,6 +157,7 @@
 /* Re-define PepsyCmd if pepsy isn't in your search path. */
 
 #define PepsyCmd $(ISODE)/@sys/bin/pepsy
+#endif
 
 #define UseImakeInstalled /* -- turn on if you have imake installed */
 #define UseMakedependInstalled /* -- turn on if you have makedepend installed */
@@ -198,3 +197,7 @@
 #define	AthenaEnv YES		/* Define this if you are in the
 				   athena environment.
 				   No one else should define this.  */
+
+#if defined(VaxArchitecture) || defined(RtArchitecture)
+#define	STDCTopIncludes	-I$(TOP)/include/stdc-incl
+#endif
