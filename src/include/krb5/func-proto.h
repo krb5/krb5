@@ -51,10 +51,10 @@ krb5_error_code krb5_send_tgs
 		   const krb5_enctype,
 		   const krb5_cksumtype,
 		   const krb5_principal,
-		   const krb5_address **,
-		   const krb5_authdata **,
+		   krb5_address * const *,
+		   krb5_authdata * const *,
 		   const krb5_data *,
-		   const krb5_creds *,
+		   krb5_creds *,
 		   krb5_response * ));
 krb5_error_code krb5_get_cred_from_kdc
 	PROTOTYPE((krb5_ccache,		/* not const, as reading may save
@@ -69,10 +69,10 @@ krb5_error_code krb5_get_credentials
 		   krb5_creds * ));
 krb5_error_code krb5_get_in_tkt
 	PROTOTYPE((const krb5_flags,
-		   const krb5_address **,
+		   krb5_address * const *,
 		   const krb5_enctype,
 		   const krb5_keytype,
-		   krb5_error_code (* )(krb5_keytype,
+		   krb5_error_code (* )(const krb5_keytype,
 					krb5_keyblock **,
 					krb5_pointer ),
 		   const krb5_pointer,
@@ -84,7 +84,7 @@ krb5_error_code krb5_get_in_tkt
 		   krb5_ccache ));
 krb5_error_code krb5_get_in_tkt_with_password
 	PROTOTYPE((const krb5_flags,
-		   const krb5_address **,
+		   krb5_address * const *,
 		   const krb5_enctype,
 		   const krb5_keytype,
 		   const char *,
@@ -92,7 +92,7 @@ krb5_error_code krb5_get_in_tkt_with_password
 		   krb5_creds * ));
 krb5_error_code krb5_get_in_tkt_with_skey
 	PROTOTYPE((const krb5_flags,
-		   const krb5_address **,
+		   krb5_address * const *,
 		   const krb5_enctype,
 		   const krb5_keyblock *,
 		   krb5_ccache,
@@ -174,7 +174,7 @@ krb5_error_code krb5_get_host_realm
 	PROTOTYPE((const char *,
 		   char *** ));
 krb5_error_code krb5_free_host_realm
-	PROTOTYPE((const char ** ));
+	PROTOTYPE((char * const * ));
 krb5_error_code krb5_parse_name
 	PROTOTYPE((const char *,
 		   krb5_principal * ));
@@ -183,7 +183,7 @@ krb5_error_code krb5_unparse_name
 		   char ** ));
 krb5_boolean krb5_address_search
 	PROTOTYPE((const krb5_address *,
-		   const krb5_address **));
+		   krb5_address * const *));
 krb5_boolean krb5_address_compare
 	PROTOTYPE((const krb5_address *,
 		   const krb5_address *));
