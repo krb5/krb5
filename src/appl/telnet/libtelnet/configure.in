@@ -3,10 +3,14 @@ CONFIG_RULES
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
-AC_REPLACE_FUNCS([strcasecmp strdup setenv setsid strerror strftime getopt herror parsetos])
-AC_CHECK_FUNCS(gettosbyname cgetent)
+AC_REPLACE_FUNCS([strcasecmp strdup setsid strerror strftime getopt herror parsetos])
+AC_CHECK_FUNCS(setenv unsetenv getenv gettosbyname cgetent)
 AC_CHECK_HEADERS(stdlib.h string.h)
 LIBOBJS="$LIBOBJS getent.o"
+if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
+  || test $ac_cv_func_getenv = no; then
+  LIBOBJS="$LIBOBJS setenv.o"
+fi
 AC_C_CONST
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)

@@ -1,3 +1,13 @@
+2001-04-03  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for setenv, unsetenv, and getenv.  Compile
+	setenv.c if at least of these is undefined. [pullup from
+	krb5-1-2-2-branch]
+
+	* setenv.c: Add conditionals for compilation of setenv, unsetenv,
+	and getenv such that they only get compiled if they don't already
+	exist. [pullup from krb5-1-2-2-branch]
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
         * configure.in: Use AC_C_CONST instead of AC_CONST.
