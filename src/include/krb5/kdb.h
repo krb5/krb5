@@ -101,9 +101,6 @@ typedef struct _krb5_db_entry {
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
 
-#define KDB_CONVERT_KEY_TO_DB(context,in,out) krb5_kdb_encrypt_key(context,&master_encblock, in, out)
-#define KDB_CONVERT_KEY_OUTOF_DB(context,in, out) krb5_kdb_decrypt_key(context,&master_encblock, in, out)
-
 /* prompts used by default when reading the KDC password from the keyboard. */
 #define KRB5_KDC_MKEY_1	"Enter KDC database master key:"
 #define KRB5_KDC_MKEY_2	"Re-enter KDC database master key to verify:"
