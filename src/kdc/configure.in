@@ -57,8 +57,7 @@ AC_ARG_ENABLE([kdc-replay-cache],
 [  --enable-kdc-replay-cache	check for replayed/retransmitted KDC requests
 				(recommended for replay attack detection
 				 when hardware preauthentication is in use)
-  --disable-kdc-replay-cache	omit replay detection],
-enableval=yes)dnl
+  --disable-kdc-replay-cache	omit replay detection], , enableval=yes)dnl
 if test "$enableval" = yes ; then
 	AC_DEFINE(USE_RCACHE)
 else

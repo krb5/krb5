@@ -1,5 +1,8 @@
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
+	* configure.in: Fix --enable-kdc-replay-cache to actually default
+	to "yes".
+
 	* kdc_preauth.c (verify_sam_response): Declare and set rc_lifetime
 	for real.
 
