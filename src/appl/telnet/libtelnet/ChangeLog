@@ -1,3 +1,8 @@
+2001-07-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* encrypt.c (encrypt_reply): Cast arguments to printf to match
+	format in debugging statments.
+
 2001-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5forw.h: File with prototype for rd_and_store_for_creds().
