@@ -19,11 +19,35 @@ case $host in
 	do
 		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
 	done`
-
+ 
 	echo $CC -G $ldflags -o $library $FILES $libdirfl $liblist
 	$CC -G $ldflags -o $library $FILES $libdirfl $liblist
 	stat=$?
 	;;
+*-*-aix*)
+	FILES=`for i 
+	do
+		sed -e "s;^;$i/;" -e "s; ; $i/;g" $i/DONE
+	done`
+	
+ar cq $library $FILES || exit $?
+	dump -g $library | sed -e 's/^[ 	]*[0-9][0-9]*[ 	]*\([^ 	.][^ 	]*\)$/\1/p;d' | sort | uniq > ${library}.syms
+	stat=$?
+	if [ $stat -eq 0 ]
+	then
+	   ld -o shr.o $library -H512 -T512 -bM:SRE -lc $ldflags -bfilelist -bgcbypass:1 -bnodelcsect -x -bE:${library}.syms $libdirfl $liblist
+	stat=$?
+	if [ $stat -eq 0 ]
+	      then
+	      rm $library ${library}.syms
+	      ar cq $library shr.o
+	      stat=$?
+	      rm shr.o
+	     else
+	     rm -f $library
+fi
+	   fi
+;;
 alpha-*-osf*)
 	FILES=`for i 
 	do

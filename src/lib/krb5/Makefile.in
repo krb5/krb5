@@ -19,21 +19,21 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 KRB4_LIBS=@KRB4_LIB@
 KRB4_CRYPTO_LIBS=@KRB4_CRYPTO_LIB@
 DEPKRB4_LIBS=@DEPKRB4_LIB@ @DEPKRB4_CRYPTO_LIB@
-DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT)
-SHLIB_LIBS=$(KRB4_LIBS) $(KRB4_CRYPTO_LIBS) -lcrypto
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	\
-	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
+DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT) $(TOPLIBD)/libcom_err.$(SHEXT)
+SHLIB_LIBS=$(KRB4_LIBS) $(KRB4_CRYPTO_LIBS) -lcrypto -lcom_err
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
+#	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 all-unix::
 
 all-windows::
 
-libkrb5.a: $(LIBDONE)
+libkrb5.$(STEXT): $(LIBDONE)
 	if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
-			$(LIBUPDATE) $@ $$i/DONE $$i ; \
+			$(LIBUPDATE)nn $@ $$i/DONE $$i ; \
 		done ; \
 	else \
 		for i in $(LIB_SUBDIRS) ; \
@@ -41,12 +41,14 @@ libkrb5.a: $(LIBDONE)
 			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
 		done ; \
 	fi
-	$(RANLIB) libkrb5.a
+	$(RANLIB) libkrb5.$(STEXT)
 	touch libkrb5.stamp
 
-install:: 
+install-mac:: 
 	$(INSTALL_DATA) libkrb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
+
+
 
 clean:: clean-$(WHAT)
 

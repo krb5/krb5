@@ -5,6 +5,8 @@ SED = sed
 ##DOSLIBNAME=comerr.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+LIBDONE=./done
+LIB_SUBDIRS=.
 INSTALLFILE = cp
 
 LINTFLAGS=-uhvb 
@@ -24,6 +26,12 @@ CFILES=	compile_et.c error_table.c error_message.c et_name.c \
 	init_et.c com_err.c
 
 SRCS=$(CFILES)
+
+
+SHLIB_LIBS=
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+STEXT=@STEXT@
 
 all:: all-$(WHAT)
 
@@ -87,16 +95,19 @@ install:: mit-sipb-copyright.h
 #
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
-all-unix:: libcom_err.a
 
-all-mac:: libcom_err.a
 
-libcom_err.a: $(LIBOBJS)
+all-mac:: libcom_err.$(STEXT)
+
+libcom_err.$(STEXT): $(LIBOBJS)
 	$(ARCHIVE) $@ $(LIBOBJS)
 	$(RANLIB) $@
 
+done:: $(LIBOBJS)
+	 $(RM) done
+	 echo $(LIBOBJS) >done
+
 clean-unix::
-	$(RM) libcom_err.a
 	$(RM) $(LIBOBJS)
 
 clean-mac::

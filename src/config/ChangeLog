@@ -1,3 +1,6 @@
+Thu Jun 22 13:27:00 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* pre.in (STEXT): Add definitions for STEXT and STATIC_TARGET
 
 Thu Jun 15 17:47:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* pre.in - Add definitions for building and using shared libraries.

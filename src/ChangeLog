@@ -21,7 +21,21 @@ Wed Jun 21 17:38:34 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 	* aclocal.m4: Add KRB5_SIGTYPE (taken from include/krb5) so that
 		other applications may use defintion. 
 
-Wed Jun 21 14:57:55 1995    <tytso@rsx-11.mit.edu>
+
+Wed Jun 21 16:10:09 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* aclocal.m4 (SHARED_RULE_LOCAL): Add support for not making
+        static libs.  Moves the clean and all target for shared libs in
+        shared lib Makefiles into this rule instead of Makefile.in
+
+	* configure.in: Added krb5_cv_noshlibs_ext, the extension for
+        static libraries that have shared counterparts.  Also added
+        krb5_cv_staticlibs_enabled, (set by the code for --enable-shared,
+        not by any extra option) to determine whether static versions of
+        shared libs are compiled on a per-platform basis.
+
+
+ Wed Jun 21 14:57:55 1995    <tytso@rsx-11.mit.edu>
 
 	* aclocal.m4: Removed extra blank lines and added "dnl" to the end
 		of some macro definitions to get rid of extra newlines

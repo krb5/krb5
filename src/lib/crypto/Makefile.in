@@ -41,7 +41,7 @@ all-mac:: $(OBJS)
 
 all-windows:: $(OBJS)
 
-libcrypto.a: $(LIBDONE)
+libcrypto.$(STEXT): $(LIBDONE)
 	if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
@@ -58,10 +58,6 @@ libcrypto.a: $(LIBDONE)
 
 libcrypto.lib:
 	libdir crypto.lib
-
-install:: libcrypto.a
-	$(INSTALL_DATA) libcrypto.a $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 
 clean:: clean-$(WHAT)
 

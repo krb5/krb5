@@ -1,3 +1,8 @@
+Thu Jun 22 18:34:26 1995  Sam Hartman  (hartmans@tardis)
+
+	* configure.in: Changed to new scheme for static libs.
+
+
 
 Fri Jun 16 11:14:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add install target for shared library.

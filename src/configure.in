@@ -12,6 +12,7 @@ case $krb5_cv_host in
 	echo "Enabling shared libraries for Linux...."
 	krb5_cv_shlibs_cflags=-fPIC
 	krb5_cv_shlibs_ext=so
+krb5_cv_noshlibs_ext=a
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag="-dy"
 	krb5_cv_noshlibs_ldflag="-dn"
@@ -22,10 +23,27 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_shlibs_enabled=yes
 	;;
+*-*-aix*)
+	echo "Enabling shared libraries for AIX...."
+	krb5_cv_shlibs_cflags=
+	krb5_cv_shlibs_ext=a
+       krb5_cv_noshlibs_ext=do-not-make
+	krb5_cv_shlibs_dir=
+	krb5_cv_shlibs_ldflag=
+	krb5_cv_noshlibs_ldflag=
+	krb5_cv_shlibs_sym_ufo=
+	krb5_cv_shlibs_dirhead="-L"
+	krb5_cv_exe_need_dirs=yes
+	krb5_cv_shlibs_use_dirs=no
+        krb5_cv_staticlibs_enabled=
+	krb5_cv_shlibs_tail_comp=
+	krb5_cv_shlibs_enabled=yes
+;;
 *-*-solaris*)
 	echo "Enabling shared libraries for Solaris...."
 	krb5_cv_shlibs_cflags=-Kpic
 	krb5_cv_shlibs_ext=so
+       krb5_cv_noshlibs_ext=a
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag="-dy"
 	krb5_cv_noshlibs_ldflag="-dn"
@@ -34,12 +52,14 @@ case $krb5_cv_host in
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=yes
 	krb5_cv_shlibs_tail_comp=
+       krb5_cv_staticlibs_enabled=yes
 	krb5_cv_shlibs_enabled=yes
 	;;
 alpha-dec-osf*)
 	echo "Enabling shared libraries for Alpha OSF...."
 	krb5_cv_shlibs_cflags=
 	krb5_cv_shlibs_ext=so
+krb5_cv_noshlibs_ext=a
 	krb5_cv_shlibs_dir=
 	krb5_cv_shlibs_ldflag="-call_shared"
 	krb5_cv_noshlibs_ldflag="-non_shared"
@@ -48,6 +68,7 @@ alpha-dec-osf*)
 	krb5_cv_exe_need_dirs=no
 	krb5_cv_shlibs_use_dirs=yes
 	krb5_cv_shlibs_tail_comp=
+       krb5_cv_staticlibs_enabled=yes
 	krb5_cv_shlibs_enabled=yes
 	if test ! -f so_locations; then
 		cp -p /usr/shlib/so_locations .
@@ -61,12 +82,14 @@ alpha-dec-osf*)
 	;;
 esac],[krb5_cv_shlibs_cflags=
 krb5_cv_shlibs_ext=
+krb5_cv_noshlibs_ext=a
 krb5_cv_shlibs_dir=
 krb5_cv_shlibs_ldflag=
 krb5_cv_noshlibs_ldflag=
 krb5_cv_shlibs_sym_ufo=
 krb5_cv_shlibs_dirhead=
 krb5_cv_shlibs_tail_comp=
+krb5_cv_staticlibs_enabled=yes
 krb5_cv_shlibs_enabled=])
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)

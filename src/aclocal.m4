@@ -717,6 +717,12 @@ dnl This rule adds the additional Makefile fragment necessary to actually
 dnl create the shared library
 dnl
 define(V5_MAKE_SHARED_LIB,[
+if test "[$]krb5_cv_staticlibs_enabled" = yes
+	then
+	SHLIB_STATIC_TARGET="$1.[\$](STEXT)"
+	else
+	SHLIB_STATIC_TARGET=
+	fi
 AC_ARG_ENABLE([shared],
 [  --enable-shared         build with shared libraries],[
 SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
@@ -739,13 +745,15 @@ HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
 SHEXT=$krb5_cv_shlibs_ext
 AC_SUBST(SHEXT)
+STEXT=$krb5_cv_noshlibs_ext
+AC_SUBST(STEXT)
 DO_MAKE_SHLIB="$1.\$""(SHEXT)"
 AC_PUSH_MAKEFILE()dnl
 
-all:: $(DO_MAKE_SHLIB)
+all:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
 
 clean:: 
-	$(RM) $1.[$](SHEXT)
+	$(RM) $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
 
 $1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
 	[$](SRCTOP)/util/makeshlib [$](HOST_TYPE) [$](CC) [$]@	\
@@ -755,9 +763,15 @@ $1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
 AC_POP_MAKEFILE()dnl
 ],[
 DO_MAKE_SHLIB=
+AC_PUSH_MAKEFILE()
+all:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
+
+clean:: 
+	$(RM) $1.[$](STEXT)
+AC_POP_MAKEFILE()
 ])dnl
 AC_SUBST(DO_MAKE_SHLIB)
-])dnl
+AC_SUBST(SHLIB_STATIC_TARGET)])dnl
 dnl
 dnl Defines LDARGS correctly so that we actually link with the shared library
 dnl
