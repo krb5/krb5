@@ -1,3 +1,9 @@
+Fri Sep 22 19:39:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (awk-windows-mac): Build the error table header
+		files into include, not include/krb5; and construct krb5.h
+		from krb5.hin and the error table header files.
+
 Fri Sep 15 05:05:15 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (kerbsrc-nt.zip): Update production rule to be like
