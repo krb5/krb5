@@ -748,7 +748,7 @@ krb5_error_code decode_krb5_etype_info2(const krb5_data *code, krb5_etype_info_e
 {
   setup_buf_only();
   *rep = 0;
-  retval = asn1_decode_etype_info(&buf,rep);
+  retval = asn1_decode_etype_info2(&buf,rep);
   if(retval) clean_return(retval);
   cleanup_none();		/* we're not allocating anything here */
 }
