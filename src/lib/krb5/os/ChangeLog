@@ -1,3 +1,16 @@
+2000-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LCLINT, LCLINTOPTS): New variables.
+	(lclint-localaddr): New target.
+
+	* localaddr.c (grow_or_free, get_ifconf, make_addr): Split out
+	from foreach_localaddr and friends for simpler lclint analysis.
+	(socklen): New function.
+	(print_addr): Use getnameinfo if available.
+	(struct localaddr_data, count_addrs, allocate, add_addr,
+	make_addr): Define only if not testing.
+	(foreach_addr): Call new functions.  Annotate for lclint.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* changepw.c: Cast length argument to recvfrom/sendto to int.

@@ -90,154 +90,13 @@ extern int errno;
  * This uses the SIOCGIFCONF, SIOCGIFFLAGS, and SIOCGIFADDR ioctl's.
  */
 
-struct localaddr_data {
-    int count, mem_err, cur_idx;
-    krb5_address **addr_temp;
-};
-
-static int
-count_addrs (void *P_data, struct sockaddr *a)
-{
-    struct localaddr_data *data = P_data;
-    switch (a->sa_family) {
-    case AF_INET:
-#ifdef KRB5_USE_INET6
-    case AF_INET6:
-#endif
-#ifdef KRB5_USE_NS
-    case AF_XNS:
-#endif
-	data->count++;
-	break;
-    default:
-	break;
-    }
-    return 0;
-}
-
-static int
-allocate (void *P_data)
-{
-    struct localaddr_data *data = P_data;
-    int i;
-
-    data->addr_temp = (krb5_address **) malloc ((1 + data->count) * sizeof (krb5_address *));
-    if (data->addr_temp == 0)
-	return 1;
-    for (i = 0; i <= data->count; i++)
-	data->addr_temp[i] = 0;
-    return 0;
-}
-
-static int
-add_addr (void *P_data, struct sockaddr *a)
-{
-    struct localaddr_data *data = P_data;
-    krb5_address *address = 0;
-
-    switch (a->sa_family) {
-#ifdef HAVE_NETINET_IN_H
-    case AF_INET:
-    {
-	struct sockaddr_in *in = (struct sockaddr_in *) a;
-
-	address = (krb5_address *) malloc (sizeof(krb5_address));
-	if (address) {
-	    address->magic = KV5M_ADDRESS;
-	    address->addrtype = ADDRTYPE_INET;
-	    address->length = sizeof(struct in_addr);
-	    address->contents = (unsigned char *)malloc(address->length);
-	    if (!address->contents) {
-		krb5_xfree(address);
-		address = 0;
-		data->mem_err++;
-	    } else {
-		memcpy ((char *)address->contents, (char *)&in->sin_addr, 
-			address->length);
-		break;
-	    }
-	} else
-	    data->mem_err++;
-    }
-
-#ifdef KRB5_USE_INET6
-    case AF_INET6:
-    {
-	struct sockaddr_in6 *in = (struct sockaddr_in6 *) a;
-	
-	if (IN6_IS_ADDR_LINKLOCAL (&in->sin6_addr))
-	    return 0;
-	
-	address = (krb5_address *) malloc (sizeof(krb5_address));
-	if (address) {
-	    address->magic = KV5M_ADDRESS;
-	    address->addrtype = ADDRTYPE_INET6;
-	    address->length = sizeof(struct in6_addr);
-	    address->contents = (unsigned char *)malloc(address->length);
-	    if (!address->contents) {
-		krb5_xfree(address);
-		address = 0;
-		data->mem_err++;
-	    } else {
-		memcpy ((char *)address->contents, (char *)&in->sin6_addr,
-			address->length);
-		break;
-	    }
-	} else
-	    data->mem_err++;
-    }
-#endif /* KRB5_USE_INET6 */
-#endif /* netinet/in.h */
-
-#ifdef KRB5_USE_NS
-    case AF_XNS:
-    {  
-	struct sockaddr_ns *ns = (struct sockaddr_ns *) a;
-	address = (krb5_address *)
-	    malloc (sizeof (krb5_address) + sizeof (struct ns_addr));
-	if (address) {
-	    address->magic = KV5M_ADDRESS;
-	    address->addrtype = ADDRTYPE_XNS; 
-
-	    /* XXX should we perhaps use ns_host instead? */
-
-	    address->length = sizeof(struct ns_addr);
-	    address->contents = (unsigned char *)malloc(address->length);
-	    if (!address->contents) {
-		krb5_xfree(address);
-		address = 0;
-		data->mem_err++;
-	    } else {
-		memcpy ((char *)address->contents,
-			(char *)&ns->sns_addr,
-			address->length);
-		break;
-	    }
-	} else
-	    data->mem_err++;
-	break;
-    }
-#endif
-    /*
-     * Add more address families here..
-     */
-    default:
-	break;
-    }
-    if (address) {
-	data->addr_temp[data->cur_idx++] = address;
-    }
-
-    return data->mem_err;
-}
-
 /* Keep this in sync with kdc/network.c version.  */
 
 /*
  * BSD 4.4 defines the size of an ifreq to be
  * max(sizeof(ifreq), sizeof(ifreq.ifr_name)+ifreq.ifr_addr.sa_len
  * However, under earlier systems, sa_len isn't present, so the size is 
- * just sizeof(struct ifreq)
+ * just sizeof(struct ifreq).
  */
 #ifdef HAVE_SA_LEN
 #ifndef max
@@ -332,15 +191,86 @@ addr_eq (const struct sockaddr *s1, const struct sockaddr *s2)
 }
 #endif
 
+/*@-usereleased@*/ /* lclint doesn't understand realloc */
+static /*@null@*/ void *
+grow_or_free (/*@only@*/ void *ptr, size_t newsize)
+     /*@*/
+{
+    void *newptr;
+    newptr = realloc (ptr, newsize);
+    if (newptr == NULL && newsize != 0) {
+	free (ptr);		/* lclint complains but this is right */
+	return NULL;
+    }
+    return newptr;
+}
+/*@=usereleased@*/
+
 static int
-foreach_localaddr (void *data,
-		   int (*pass1fn) (void *, struct sockaddr *),
-		   int (*betweenfn) (void *),
-		   int (*pass2fn) (void *, struct sockaddr *))
+get_ifconf (int s, size_t *lenp, /*@out@*/ char *buf)
+    /*@modifies *buf,*lenp@*/
+{
+    int ret;
+    struct ifconf ifc;
+
+    /*@+matchanyintegral@*/
+    ifc.ifc_len = *lenp;
+    /*@=matchanyintegral@*/
+    ifc.ifc_buf = buf;
+    memset(buf, 0, *lenp);
+    /*@-moduncon@*/
+    ret = ioctl (s, SIOCGIFCONF, (char *)&ifc);
+    /*@=moduncon@*/
+    /*@+matchanyintegral@*/
+    *lenp = ifc.ifc_len;
+    /*@=matchanyintegral@*/
+    return ret;
+}
+
+#ifndef HAVE_SOCKLEN_T
+typedef size_t socklen_t;
+#endif
+
+static size_t
+socklen (const struct sockaddr *sa)
+     /*@*/
+{
+#ifdef HAVE_SA_LEN
+    return sa->sa_len;
+#else
+    switch (sa->sa_family) {
+    case AF_INET:
+	return sizeof (struct sockaddr_in);
+#ifdef KRB5_USE_INET6
+    case AF_INET6:
+	return sizeof (struct sockaddr_in6);
+#endif
+    default:
+	return sizeof (struct sockaddr);
+    }
+#endif
+}
+
+/* Return value is errno if internal stuff failed, otherwise zero,
+   even in the case where a called function terminated the iteration.
+
+   If one of the callback functions wants to pass back an error
+   indication, it should do it via some field pointed to by the DATA
+   argument.  */
+
+static int
+foreach_localaddr (/*@null@*/ void *data,
+		   int (*pass1fn) (/*@null@*/ void *, struct sockaddr *) /*@*/,
+		   /*@null@*/ int (*betweenfn) (/*@null@*/ void *) /*@*/,
+		   /*@null@*/ int (*pass2fn) (/*@null@*/ void *,
+					      struct sockaddr *) /*@*/)
+#if defined(DEBUG) || defined(TEST)
+     /*@modifies fileSystem@*/
+#endif
 {
 #ifdef HAVE_IFADDRS_H
     struct ifaddrs *ifp_head, *ifp, *ifp2;
-    int match, fail = 0;
+    int match;
 
     if (getifaddrs (&ifp_head) < 0)
 	return errno;
@@ -369,37 +299,31 @@ foreach_localaddr (void *data,
 	}
 	if (match)
 	    continue;
-	if ((*pass1fn) (data, ifp->ifa_addr)) {
-	    fail = 1;
+	if ((*pass1fn) (data, ifp->ifa_addr))
 	    goto punt;
-	}
     }
-    if (betweenfn && (*betweenfn)(data)) {
-	fail = 1;
+    if (betweenfn && (*betweenfn)(data))
 	goto punt;
-    }
     if (pass2fn)
 	for (ifp = ifp_head; ifp; ifp = ifp->ifa_next) {
 	    if (ifp->ifa_flags & IFF_UP)
-		if ((*pass2fn) (data, ifp->ifa_addr)) {
-		    fail = 1;
+		if ((*pass2fn) (data, ifp->ifa_addr))
 		    goto punt;
-		}
 	}
  punt:
     freeifaddrs (ifp_head);
-    return fail;
+    return 0;
 #else
     struct ifreq *ifr, ifreq, *ifr2;
-    struct ifconf ifc;
-    int s, code, n, i, j;
-    int est_if_count = 8, est_ifreq_size;
+    int s, code;
+    int est_if_count = 8;
+    size_t est_ifreq_size;
     char *buf = 0;
-    size_t current_buf_size = 0;
-    int fail = 0;
+    size_t current_buf_size = 0, size, n, i, j;
 #ifdef SIOCGSIZIFCONF
     int ifconfsize = -1;
 #endif
+    int retval = 0;
 
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
@@ -419,16 +343,18 @@ foreach_localaddr (void *data,
     if (current_buf_size == 0)
 	current_buf_size = est_ifreq_size * est_if_count;
     buf = malloc (current_buf_size);
+    if (buf == NULL)
+	return errno;
 
  ask_again:
-    memset(buf, 0, current_buf_size);
-    ifc.ifc_len = current_buf_size;
-    ifc.ifc_buf = buf;
-
-    code = ioctl (s, SIOCGIFCONF, (char *)&ifc);
+    size = current_buf_size;
+    code = get_ifconf (s, &size, buf);
     if (code < 0) {
-	int retval = errno;
+	retval = errno;
+	/*@-moduncon@*/ /* close() unknown to lclint */
 	closesocket (s);
+	/*@=moduncon@*/
+	free (buf);
 	return retval;
     }
     /* Test that the buffer was big enough that another ifreq could've
@@ -436,45 +362,42 @@ foreach_localaddr (void *data,
        the only indication we get, complicated by the fact that the
        associated address may make the required storage a little
        bigger than the size of an ifreq.  */
-    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40
+    if (current_buf_size - size < sizeof (struct ifreq) + 40
 #ifdef SIOCGSIZIFCONF
 	&& ifconfsize <= 0
 #endif
 	) {
-	int new_size;
-	char *newbuf;
+	size_t new_size;
 
 	est_if_count *= 2;
 	new_size = est_ifreq_size * est_if_count;
-	newbuf = realloc (buf, new_size);
-	if (newbuf == 0) {
-	    krb5_error_code e = errno;
-	    free (buf);
-	    return e;
-	}
+	buf = grow_or_free (buf, new_size);
+	if (buf == 0)
+	    return errno;
 	current_buf_size = new_size;
-	buf = newbuf;
 	goto ask_again;
     }
 
-    n = ifc.ifc_len;
+    n = size;
 
     for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
-	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
+	ifr = (struct ifreq *)((caddr_t) buf+i);
 
 	strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
 #ifdef TEST
 	printf ("interface %s\n", ifreq.ifr_name);
 #endif
+	/*@-moduncon@*/ /* ioctl unknown to lclint */
 	if (ioctl (s, SIOCGIFFLAGS, (char *)&ifreq) < 0) {
 	skip:
 	    /* mark for next pass */
-	    ifr->ifr_name[0] = 0;
+	    ifr->ifr_name[0] = '\0';
 	    continue;
 	}
+	/*@=moduncon@*/
 
 #ifdef IFF_LOOPBACK
-	    /* None of the current callers want loopback addresses.  */
+	/* None of the current callers want loopback addresses.  */
 	if (ifreq.ifr_flags & IFF_LOOPBACK) {
 #ifdef TEST
 	    printf ("loopback\n");
@@ -483,7 +406,7 @@ foreach_localaddr (void *data,
 	}
 #endif
 	/* Ignore interfaces that are down.  */
-	if (!(ifreq.ifr_flags & IFF_UP)) {
+	if ((ifreq.ifr_flags & IFF_UP) == 0) {
 #ifdef TEST
 	    printf ("down\n");
 #endif
@@ -492,8 +415,8 @@ foreach_localaddr (void *data,
 
 	/* Make sure we didn't process this address already.  */
 	for (j = 0; j < i; j += ifreq_size(*ifr2)) {
-	    ifr2 = (struct ifreq *)((caddr_t) ifc.ifc_buf+j);
-	    if (ifr2->ifr_name[0] == 0)
+	    ifr2 = (struct ifreq *)((caddr_t) buf+j);
+	    if (ifr2->ifr_name[0] == '\0')
 		continue;
 	    if (ifr2->ifr_addr.sa_family == ifr->ifr_addr.sa_family
 		&& ifreq_size (*ifr) == ifreq_size (*ifr2)
@@ -511,77 +434,234 @@ foreach_localaddr (void *data,
 	    }
 	}
 
-	if ((*pass1fn) (data, &ifr->ifr_addr)) {
-	    fail = 1;
+	/*@-moduncon@*/
+	if ((*pass1fn) (data, &ifr->ifr_addr))
 	    goto punt;
-	}
+	/*@=moduncon@*/
     }
 
-    if (betweenfn && (*betweenfn)(data)) {
-	fail = 1;
+    /*@-moduncon@*/
+    if (betweenfn != NULL && (*betweenfn)(data))
 	goto punt;
-    }
+    /*@=moduncon@*/
 
     if (pass2fn)
 	for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
-	    ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
+	    ifr = (struct ifreq *)((caddr_t) buf+i);
 
-	    if (ifr->ifr_name[0] == 0)
+	    if (ifr->ifr_name[0] == '\0')
 		/* Marked in first pass to be ignored.  */
 		continue;
 
-	    if ((*pass2fn) (data, &ifr->ifr_addr)) {
-		fail = 1;
+	    /*@-moduncon@*/
+	    if ((*pass2fn) (data, &ifr->ifr_addr))
 		goto punt;
-	    }
+	    /*@=moduncon@*/
 	}
  punt:
+    /*@-moduncon@*/
     closesocket(s);
+    /*@=moduncon@*/
     free (buf);
 
-    return fail;
+    return retval;
 #endif /* not HAVE_IFADDRS_H */
 }
 
 #ifdef TEST
 
-int print_addr (void *dataptr, struct sockaddr *sa)
+static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
+     /*@modifies fileSystem@*/
 {
+#ifdef HAVE_GETNAMEINFO
+    char hostbuf[NI_MAXHOST];
+    int err;
+    socklen_t len;
+    size_t len_sz;
+
+    printf ("family %2d ", sa->sa_family);
+    len_sz = socklen (sa);
+    len = (socklen_t) len_sz;
+    if ((size_t) len != len_sz)
+	abort ();
+    err = getnameinfo (sa, len, hostbuf, sizeof (hostbuf),
+		       (char *) NULL, 0, NI_NUMERICHOST);
+    if (err)
+	printf ("<getnameinfo error %d: %s>\n", err, gai_strerror (err));
+    else
+	printf ("addr %s\n", hostbuf);
+    return 0;
+#else
     char buf[50];
-    printf ("family %d", sa->sa_family);
+    printf ("family %2d ", sa->sa_family);
     switch (sa->sa_family) {
     case AF_INET:
-	printf (" addr %s\n",
+	printf ("addr %s\n",
 		inet_ntoa (((struct sockaddr_in *)sa)->sin_addr));
 	break;
     case AF_INET6:
-	printf (" addr %s\n",
+	printf ("addr %s\n",
 		inet_ntop (sa->sa_family,
 			   &((struct sockaddr_in6 *)sa)->sin6_addr,
 			   buf, sizeof (buf)));
 	break;
 #ifdef AF_LINK
     case AF_LINK:
-	printf (" linkaddr\n");
+	printf ("linkaddr\n");
 	break;
 #endif
     default:
-	printf (" don't know how to print addr\n");
+	printf ("don't know how to print addr\n");
 	break;
     }
     return 0;
+#endif
 }
 
 int main ()
 {
     int r;
 
+    (void) setvbuf (stdout, (char *)NULL, _IONBF, 0);
     r = foreach_localaddr (0, print_addr, 0, 0);
     printf ("return value = %d\n", r);
     return 0;
 }
 
 #else /* not TESTing */
+
+struct localaddr_data {
+    int count, mem_err, cur_idx;
+    krb5_address **addr_temp;
+};
+
+static int
+count_addrs (void *P_data, struct sockaddr *a)
+     /*@*/
+{
+    struct localaddr_data *data = P_data;
+    switch (a->sa_family) {
+    case AF_INET:
+#ifdef KRB5_USE_INET6
+    case AF_INET6:
+#endif
+#ifdef KRB5_USE_NS
+    case AF_XNS:
+#endif
+	data->count++;
+	break;
+    default:
+	break;
+    }
+    return 0;
+}
+
+static int
+allocate (void *P_data)
+     /*@*/
+{
+    struct localaddr_data *data = P_data;
+    int i;
+
+    if (data->addr_temp != NULL)
+	free (data->addr_temp);
+    data->addr_temp = (krb5_address **) malloc ((1 + data->count) * sizeof (krb5_address *));
+    if (data->addr_temp == 0) {
+	data->mem_err++;
+	return 1;
+    }
+    for (i = 0; i <= data->count; i++)
+	data->addr_temp[i] = 0;
+    return 0;
+}
+
+static /*@null@*/ krb5_address *
+make_addr (int type, size_t length, const void *contents)
+    /*@*/
+{
+    krb5_address *a;
+    void *data;
+
+    data = malloc (length);
+    if (data == NULL)
+	return NULL;
+    a = malloc (sizeof (krb5_address));
+    if (a == NULL) {
+	free (data);
+	return NULL;
+    }
+    memcpy (data, contents, length);
+    a->magic = KV5M_ADDRESS;
+    a->addrtype = type;
+    a->length = length;
+    a->contents = data;
+    return a;
+}
+
+static int
+add_addr (void *P_data, struct sockaddr *a)
+     /*@modifies *P_data@*/
+{
+    struct localaddr_data *data = P_data;
+    /*@null@*/ krb5_address *address = 0;
+
+    switch (a->sa_family) {
+#ifdef HAVE_NETINET_IN_H
+    case AF_INET:
+	address = make_addr (ADDRTYPE_INET, sizeof (struct in_addr),
+			     &((const struct sockaddr_in *) a)->sin_addr);
+	if (address == NULL)
+	    data->mem_err++;
+	break;
+
+#ifdef KRB5_USE_INET6
+    case AF_INET6:
+    {
+	const struct sockaddr_in6 *in = (const struct sockaddr_in6 *) a;
+	
+	if (IN6_IS_ADDR_LINKLOCAL (&in->sin6_addr))
+	    break;
+
+	address = make_addr (ADDRTYPE_INET6, sizeof (struct in6_addr),
+			     &in->sin6_addr);
+	if (address == NULL)
+	    data->mem_err++;
+	break;
+    }
+#endif /* KRB5_USE_INET6 */
+#endif /* netinet/in.h */
+
+#ifdef KRB5_USE_NS
+    case AF_XNS:
+	address = make_addr (ADDRTYPE_XNS, sizeof (struct ns_addr),
+			     &((const struct sockaddr_ns *)a)->sns_addr);
+	if (address == NULL)
+	    data->mem_err++;
+	break;
+#endif
+
+#ifdef AF_LINK
+	/* Some BSD-based systems (e.g. NetBSD 1.5) will include the
+	   ethernet address, but we don't want that, at least for now.  */
+    case AF_LINK:
+	break;
+#endif
+    /*
+     * Add more address families here..
+     */
+    default:
+	break;
+    }
+#ifdef __LCLINT__
+    /* Redundant but unconditional store un-confuses lclint.  */
+    data->addr_temp[data->cur_idx] = address;
+#endif
+    if (address) {
+	data->addr_temp[data->cur_idx++] = address;
+    }
+
+    return data->mem_err;
+}
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr(context, addr)
