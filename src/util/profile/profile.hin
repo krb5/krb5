@@ -95,6 +95,11 @@ KRB5_DLLIMP long KRB5_CALLCONV profile_get_integer
 			const char *subsubname, int def_val,
 			int *ret_default));
 
+KRB5_DLLIMP long KRB5_CALLCONV profile_get_boolean
+	PROTOTYPE((profile_t profile, const char *name, const char *subname,
+			const char *subsubname, int def_val,
+			int *ret_default));
+
 KRB5_DLLIMP long KRB5_CALLCONV profile_get_relation_names
 	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 

@@ -1,3 +1,11 @@
+2000-03-24  Miro Jurisic  <meeroh@mit.edu>
+
+	* prof_get.c: Added prof_get_boolean and changed prof_get_integer
+	to return errors for malformed input
+	* prof.hin: Added prof_get_boolean
+	* profile.exp: Added prof_get_boolean
+	* prof_err.et: Added PROF_BAD_BOOLEAN, PROF_BAD_INTEGER
+
 Fri Jan 28 16:27:01 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* argv_parse.c: Include string.h (for strlen prototype)
