@@ -45,6 +45,12 @@ extern char *krb_err_txt[MAX_KRB_ERRORS];
 #define		KSUCCESS	0
 #define		KFAILURE	255
 
+#ifndef __alpha
+#define KRB4_32	long
+#else
+#define KRB4_32	int
+#endif
+
 #ifdef NO_UIDGID_T
 typedef unsigned short uid_t;
 typedef unsigned short gid_t;
@@ -139,11 +145,11 @@ struct auth_dat {
     char    pname[ANAME_SZ];	/* Principal's name */
     char    pinst[INST_SZ];	/* His Instance */
     char    prealm[REALM_SZ];	/* His Realm */
-    unsigned long checksum;	/* Data checksum (opt) */
+    unsigned KRB4_32 checksum;	/* Data checksum (opt) */
     C_Block session;		/* Session Key */
     int     life;		/* Life of ticket */
-    unsigned long time_sec;	/* Time ticket issued */
-    unsigned long address;	/* Address in ticket */
+    unsigned KRB4_32 time_sec;	/* Time ticket issued */
+    unsigned KRB4_32 address;	/* Address in ticket */
     KTEXT_ST reply;		/* Auth reply (opt) */
 };
 
@@ -159,7 +165,7 @@ struct credentials {
     int     lifetime;		/* Lifetime */
     int     kvno;		/* Key version number */
     KTEXT_ST ticket_st;		/* The ticket itself */
-    long    issue_date;		/* The issue time */
+    KRB4_32 issue_date;		/* The issue time */
     char    pname[ANAME_SZ];	/* Principal's name */
     char    pinst[INST_SZ];	/* Principal's instance */
 };
@@ -170,10 +176,10 @@ typedef struct credentials CREDENTIALS;
 
 struct msg_dat {
     unsigned char *app_data;	/* pointer to appl data */
-    unsigned long app_length;	/* length of appl data */
-    unsigned long hash;		/* hash to lookup replay */
+    unsigned KRB4_32 app_length;	/* length of appl data */
+    unsigned KRB4_32 hash;	/* hash to lookup replay */
     int     swap;		/* swap bytes? */
-    long    time_sec;		/* msg timestamp seconds */
+    KRB4_32  time_sec;		/* msg timestamp seconds */
     unsigned char time_5ms;	/* msg timestamp 5ms units */
 };
 
