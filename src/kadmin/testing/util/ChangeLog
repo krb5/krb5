@@ -1,3 +1,9 @@
+Fri Dec  6 00:04:10 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* test.c: Change test looking for tcl 7.05 and greater to be tcl
+		7.04 and greater, since BSDI ships with tcl 7.04, and
+		needs this change.  [PR#282]
+
 Thu Dec  5 22:47:27 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* tcl_ovsec_kadm.c: 
