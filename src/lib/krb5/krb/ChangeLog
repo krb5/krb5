@@ -1,3 +1,7 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* t_kerb.c: Include string.h for strcmp prototype.
+
 2002-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_princ.c (krb5_524_conv_principal): Clean up use of "const"
