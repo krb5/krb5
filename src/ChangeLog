@@ -1,3 +1,10 @@
+Sun Mar 19 12:45:08 1995  John Gilmore  (gnu at toad.com)
+
+	* aclocal.m4 (CHECK_STDARG):  Remove; we're just using AC_HEADER_CHECK.
+	(V5_AC_OUTPUT_MAKEFILE):  Reorder the Makefile output so that it can be
+	run through `sed' for the Macintosh.
+	* acconfig.h:  Remove STDARG_PROTOTYPES.
+
 Thu Mar 16 15:15:00 1995 Keith Vetter <keithv@fusion.com>
 
 	* Makefile.in: added PC stuff so it builds the whole world.

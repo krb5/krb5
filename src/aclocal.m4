@@ -186,12 +186,6 @@ if test $krb5_cv_func_sigprocmask_use = yes; then
 fi
 ])dnl
 dnl
-dnl check for <stdarg.h> -- CHECK_STDARG
-dnl (name used for consistency with krb5/config.h)
-dnl
-define(CHECK_STDARG,[
-AC_HEADER_CHECK(stdarg.h,AC_DEFINE(STDARG_PROTOTYPES))])dnl
-dnl
 define(AC_PROG_ARCHIVE, [AC_PROGRAM_CHECK(ARCHIVE, ar, ar qv, false)])dnl
 define(AC_PROG_ARCHIVE_ADD, [AC_PROGRAM_CHECK(ARADD, ar, ar cruv, false)])dnl
 dnl
@@ -522,7 +516,12 @@ dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
-[AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,[EXTRA_RULES], cat pre.out Makefile.out post.out > Makefile; rm pre.out Makefile.out post.out)])dnl
+[AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,
+cat pre.out Makefile.out post.out > Makefile
+[EXTRA_RULES]
+# sed -f $CONF_FRAGDIR/mac-mf.sed < Makefile > MakeFile
+rm pre.out Makefile.out post.out,
+CONF_FRAGDIR=$srcdir/${ac_config_fragdir} )])dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
 dnl

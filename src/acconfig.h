@@ -22,9 +22,6 @@
 #undef POSIX_SIGTYPE
 #undef POSIX_TERMIOS
 #undef POSIX_TYPES
-#ifndef STDARG_PROTOTYPES
-#undef STDARG_PROTOTYPES
-#endif /* STDARG_PROTOTYPES -- avoid collision with com_err.h */
 #undef USE_DIRENT_H
 #undef USE_STRING_H
 #undef WAIT_USES_INT
