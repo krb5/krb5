@@ -1,3 +1,9 @@
+2003-12-14 Jeffrey Altman <jaltman@mit.edu>
+
+   * all files: move prof-int.h to be the first include file
+     in order to obtain platform specific config preprocessor
+     variables which are used to selectively include stdlib.h
+
 2003-07-03 Alexandra Ellwood <lxs@mit.edu>
 
     * profile.hin: Remove leading spaces in #define and #include 
