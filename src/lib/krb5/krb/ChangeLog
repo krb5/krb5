@@ -1,3 +1,8 @@
+Tue Dec 19 17:15:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_cred.c (krb5_rd_cred_basic): Missing parenthesis meant that
+		wrong number of bytes was being allocated.
+
 Sun Dec  3 11:49:09 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (SRCS/OBJS): Move compat_recv.c to krb5util library.
