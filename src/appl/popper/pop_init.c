@@ -140,7 +140,7 @@ char    **      argmessage;
 	}
 #endif
 	sin.sin_port = spr->s_port;
-	if (bind(sock, &sin, sizeof(sin))) {
+	if (bind(sock, (struct sockaddr *)&sin, sizeof(sin))) {
 	    syslog(LOG_ERR, "bind: %m");
 	    exit(3);
 	}
