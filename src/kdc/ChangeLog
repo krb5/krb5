@@ -1,3 +1,7 @@
+Sat May 20 22:28:52 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c: Port to OSF/1. (change longs to KRB4_32)
+
 Sat Apr 29 00:13:16 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc_util.c (kdc_process_tgs_req): Make sure apreq->ticket gets

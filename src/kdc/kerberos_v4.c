@@ -118,7 +118,7 @@ static char *req_realm_ptr;
 /*
 static u_char req_no_req;
 */
-static u_long req_time_ws;
+static krb5_ui_4 req_time_ws;
 
 int req_act_vno = KRB_PROT_VERSION; /* Temporary for version skew */
 
@@ -558,6 +558,7 @@ compat_decrypt_key (in5, out4)
     }
     memset(	out5.contents, 0,    out5.length);
     krb5_xfree(	out5.contents);
+
     return( retval);
 }
 /* array of name-components + NULL ptr
@@ -622,7 +623,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
 	goto cleanup;
     } else if ( entries.key.keytype != KEYTYPE_DES) {
 	lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s has non-DES keytype %d",
-		  (int) name, (int) inst, entries.key.keytype);
+		  name, inst, entries.key.keytype);
 	nprinc = 0;
 	goto cleanup;
     } else {
@@ -634,13 +635,13 @@ kerb_get_principal(name, inst, principal, maxn, more)
 	    entries.alt_key.length) {
  	    if (! compat_decrypt_key( &entries.alt_key,k)){
  		memcpy( &principal->key_low,           k,     LONGLEN);
-             	memcpy( &principal->key_high, (long *) k + 1, LONGLEN);
+             	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
 	    }
  	}
  	else {
  	    if (! compat_decrypt_key( &entries.key, k)) {
              	memcpy( &principal->key_low,           k,     LONGLEN);
-             	memcpy( &principal->key_high, (long *) k + 1, LONGLEN);
+             	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
 	    }
  	}
     }
@@ -744,7 +745,7 @@ kerberos_v4(client, pkt)
 #ifdef notdef
 	    u_long  time_ws;	/* Workstation time */
 #endif
-	    u_long  req_life;	/* Requested liftime */
+	    KRB4_32  req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 #ifdef notdef
@@ -766,12 +767,13 @@ kerberos_v4(client, pkt)
 	    }
 	    ptr = (char *) pkt_time_ws(pkt) + 4;
 
-	    req_life = (u_long) (*ptr++);
+	    req_life = (KRB4_32) (*ptr++);
 
 	    service = ptr;
 	    instance = ptr + strlen(service) + 1;
 
 	    rpkt = &rpkt_st;
+
 	    klog(L_INI_REQ,
 	    "Initial ticket request Host: %s User: \"%s\" \"%s\"",
 	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
@@ -785,8 +787,8 @@ kerberos_v4(client, pkt)
 	    tk->length = 0;	/* init */
 	    if (strcmp(service, "krbtgt"))
 		klog(L_NTGT_INTK,
-		    "INITIAL request from %s.%s for %s.%s", (int) req_name_ptr,
-		    (int) req_inst_ptr, (int) service, (int) instance, 0);
+		    "INITIAL request from %s.%s for %s.%s", req_name_ptr,
+		    req_inst_ptr, service, instance, 0);
 	    /* this does all the checking */
 	    if (i = check_princ(service, instance, lifetime,
 		&s_name_data)) {
@@ -807,7 +809,8 @@ kerberos_v4(client, pkt)
 
 	    /* unseal server's key from master key */
 	    memcpy( key,                &s_name_data.key_low,  4);
-	    memcpy( ((long *) key) + 1, &s_name_data.key_high, 4);
+	    memcpy( ((KRB4_32 *) key) + 1, &s_name_data.key_high, 4);
+
 	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
@@ -826,7 +829,7 @@ kerberos_v4(client, pkt)
 
 	    /* a_name_data.key_low a_name_data.key_high */
 	    memcpy( key,                &a_name_data.key_low,  4);
-	    memcpy( ((long *) key) + 1, &a_name_data.key_high, 4);
+	    memcpy( ((KRB4_32 *) key) + 1, &a_name_data.key_high, 4);
 	    a_name_data.key_low= a_name_data.key_high = 0;
 
 	    /* unseal the a_name key from the master key */
@@ -856,8 +859,8 @@ kerberos_v4(client, pkt)
 	}
     case AUTH_MSG_APPL_REQUEST:
 	{
-	    u_long  time_ws;	/* Workstation time */
-	    u_long  req_life;	/* Requested liftime */
+	    KRB4_32  time_ws;	/* Workstation time */
+	    KRB4_32 req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 	    int     kerno = 0;	/* Kerberos error number */
@@ -877,7 +880,7 @@ kerberos_v4(client, pkt)
 	    if (set_tgtkey(tktrlm)) {
 		lt = klog(L_ERR_UNK,
 		    "FAILED realm %s unknown. Host: %s ",
-			  (int) tktrlm, inet_ntoa(client_host));
+			  tktrlm, inet_ntoa(client_host));
 		kerb_err_reply(client, pkt, kerno, lt);
 		return;
 	    }
@@ -896,14 +899,14 @@ kerberos_v4(client, pkt)
 	    memcpy(&time_ws, ptr, 4);
 	    ptr += 4;
 
-	    req_life = (u_long) (*ptr++);
+	    req_life = (KRB4_32) (*ptr++);
 
 	    service = ptr;
 	    instance = ptr + strlen(service) + 1;
 
 	    klog(L_APPL_REQ, "APPL Request %s.%s@%s on %s for %s.%s",
-	     (int) ad->pname, (int) ad->pinst, (int) ad->prealm,
-	     (int) inet_ntoa(client_host), (int) service, (int) instance, 0);
+	     ad->pname, ad->pinst, ad->prealm,
+	     inet_ntoa(client_host), service, instance, 0);
 	    req_name_ptr = ad->pname;
 	    req_inst_ptr = ad->pinst;
 	    req_realm_ptr = ad->prealm;
@@ -931,7 +934,7 @@ kerberos_v4(client, pkt)
 
 	    /* unseal server's key from master key */
 	    memcpy(key,                &s_name_data.key_low,  4);
-	    memcpy(((long *) key) + 1, &s_name_data.key_high, 4);
+	    memcpy(((KRB4_32 *) key) + 1, &s_name_data.key_high, 4);
 	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
@@ -986,7 +989,7 @@ kerberos_v4(client, pkt)
 	{
 	    lt = klog(L_KRB_PERR,
 		"Unknown message type: %d from %s port %u",
-		(int) req_msg_type, (int) inet_ntoa(client_host),
+		req_msg_type, inet_ntoa(client_host),
 		ntohs(client->sin_port));
 	    break;
 	}
@@ -1093,7 +1096,7 @@ static char *krb4_stime(t)
     long *t;
 {
     static char st[40];
-    static long adjusted_time;
+    static time_t adjusted_time;
     struct tm *tm;
     char *month_sname();
 
@@ -1119,7 +1122,7 @@ int check_princ(p_name, instance, lifetime, p)
     n = kerb_get_principal(p_name, instance, p, 1, &more);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
-	 (int) p_name, (int) instance, lifetime, n, 0);
+	 p_name, instance, lifetime, n, 0);
     
     if (n < 0) {
 	lt = klog(L_KRB_PERR, "Database unavailable!");
@@ -1134,28 +1137,28 @@ int check_princ(p_name, instance, lifetime, p)
      */
     if (n == 0) {
 	/* service unknown, log error, skip to next request */
-	lt = klog(L_ERR_UNK, "UNKNOWN \"%s\" \"%s\"", (int) p_name,
-	    (int) instance, 0);
+	lt = klog(L_ERR_UNK, "UNKNOWN \"%s\" \"%s\"", p_name,
+	    instance, 0);
 	return KERB_ERR_PRINCIPAL_UNKNOWN;
     }
     if (more) {
 	/* not unique, log error */
 	lt = klog(L_ERR_NUN, "Principal NOT UNIQUE \"%s\" \"%s\"",
-		  (int) p_name, (int) instance, 0);
+		  p_name, instance, 0);
 	return KERB_ERR_PRINCIPAL_NOT_UNIQUE;
     }
     /* If the user's key is null, we want to return an error */
     if ((p->key_low == 0) && (p->key_high == 0)) {
 	/* User has a null key */
-	lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", (int) p_name,
-	    (int) instance, 0);
+	lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
+	    instance, 0);
 	return KERB_ERR_NULL_KEY;
     }
     if (master_key_version != p->kdc_key_ver) {
 	/* log error reply */
 	lt = klog(L_ERR_MKV,
 	    "Key vers incorrect, KRB = %d, \"%s\" \"%s\" = %d",
-	    master_key_version, (int)p->name, (int)p->instance, p->kdc_key_ver,
+	    master_key_version, p->name, p->instance, p->kdc_key_ver,
 	    0);
 	return KERB_ERR_NAME_MAST_KEY_VER;
     }
@@ -1163,8 +1166,8 @@ int check_princ(p_name, instance, lifetime, p)
     if ((u_long) p->exp_date < (u_long) kerb_time.tv_sec) {
 	/* service did expire, log it */
 	lt = klog(L_ERR_SEXP,
-	    "EXPIRED \"%s\" \"%s\"  %s", (int) p->name, (int) p->instance,
-	     (int) krb4_stime(&(p->exp_date)), 0);
+	    "EXPIRED \"%s\" \"%s\"  %s", p->name, p->instance,
+	     krb4_stime(&(p->exp_date)), 0);
 	return KERB_ERR_NAME_EXP;
     }
     /* ok is zero */
@@ -1193,7 +1196,7 @@ int set_tgtkey(r)
 
     /* unseal tgt key from master key */
     memcpy(key,                &p->key_low,  4);
-    memcpy(((long *) key) + 1, &p->key_high, 4);
+    memcpy(((KRB4_32 *) key) + 1, &p->key_high, 4);
     kdb_encrypt_key(key, key, master_key,
 		    master_key_schedule, DECRYPT);
     krb_set_key(key, 0);
