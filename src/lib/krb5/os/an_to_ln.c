@@ -273,7 +273,11 @@ aname_do_match(string, contextp)
  * If no regcomp() then just return the input string verbatim in the output
  * string.
  */
-static void
+#define use_bytes(x) \
+    out_used += (x); \
+    if (out_used > MAX_FORMAT_BUFFER) goto mem_err
+
+static int
 do_replacement(regexp, repl, doall, in, out)
     char	*regexp;
     char	*repl;
@@ -281,6 +285,7 @@ do_replacement(regexp, repl, doall, in, out)
     char	*in;
     char	*out;
 {
+    size_t out_used = 0;
 #if	HAVE_REGCOMP
     regex_t	match_exp;
     regmatch_t	match_match;
@@ -295,17 +300,22 @@ do_replacement(regexp, repl, doall, in, out)
 	do {
 	    if (!regexec(&match_exp, cp, 1, &match_match, 0)) {
 		if (match_match.rm_so) {
+		    use_bytes(match_match.rm_so);
 		    strncpy(op, cp, match_match.rm_so);
 		    op += match_match.rm_so;
 		}
+		use_bytes(strlen(repl));
 		strncpy(op, repl, MAX_FORMAT_BUFFER - 1 - (op - out));
 		op += strlen(op);
 		cp += match_match.rm_eo;
-		if (!doall)
+		if (!doall) {
+		    use_bytes(strlen(cp));
 		    strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
+		}
 		matched = 1;
 	    }
 	    else {
+		use_bytes(strlen(cp));
 		strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
 		matched = 0;
 	    }
@@ -330,17 +340,22 @@ do_replacement(regexp, repl, doall, in, out)
 	    sdispl = (size_t) (loc1 - cp);
 	    edispl = (size_t) (loc2 - cp);
 	    if (sdispl) {
+		use_bytes(sdispl);
 		strncpy(op, cp, sdispl);
 		op += sdispl;
 	    }
+	    use_bytes(strlen(repl));
 	    strncpy(op, repl, MAX_FORMAT_BUFFER - 1 - (op - out));
 	    op += strlen(repl);
 	    cp += edispl;
-	    if (!doall)
+	    if (!doall) {
+		use_bytes(strlen(cp));
 		strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
+	    }
 	    matched = 1;
 	}
 	else {
+	    use_bytes(strlen(cp));
 	    strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
 	    matched = 0;
 	}
@@ -348,7 +363,15 @@ do_replacement(regexp, repl, doall, in, out)
 #else	/* HAVE_REGEXP_H */
     memcpy(out, in, MAX_FORMAT_BUFFER);
 #endif	/* HAVE_REGCOMP */
+    return 1;
+mem_err:
+#ifdef HAVE_REGCMP
+    regfree(&match_exp);
+#endif
+    return 0;
+
 }
+#undef use_bytes
 
 /*
  * aname_replacer()	- Perform the specified substitutions on the input
@@ -423,7 +446,12 @@ aname_replacer(string, contextp, result)
 
 		    /* Do the replacemenbt */
 		    memset(out, '\0', MAX_FORMAT_BUFFER);
-		    do_replacement(rule, repl, doglobal, in, out);
+		    if (!do_replacement(rule, repl, doglobal, in, out)) {
+			free(rule);
+			free(repl);
+			kret = KRB5_LNAME_NOTRANS;
+			break;
+		    }
 		    free(rule);
 		    free(repl);
 
@@ -475,6 +503,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
     char		*fprincname;
     char		*selstring = 0;
     int			num_comps, compind;
+    size_t selstring_used;
     char		*cout;
     krb5_data		*datap;
     char		*outstring;
@@ -495,6 +524,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
 		     */
 		    current = strchr(current, ':');
 		    selstring = (char *) malloc(MAX_FORMAT_BUFFER);
+		    selstring_used = 0;
 		    if (current && selstring) {
 			current++;
 			cout = selstring;
@@ -509,10 +539,20 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
 			    if (*current == '$') {
 				if ((sscanf(current+1, "%d", &compind) == 1) &&
 				    (compind <= num_comps) &&
-				    (datap = krb5_princ_component(context,
-								  aname,
-								  compind-1))
+				    (datap =
+				     (compind > 0)
+				     ? krb5_princ_component(context, aname,
+							    compind-1)
+				     : krb5_princ_realm(context, aname))
 				    ) {
+				    if ((datap->length < MAX_FORMAT_BUFFER)
+					&&  (selstring_used+datap->length
+					    < MAX_FORMAT_BUFFER)) {
+					selstring_used += datap->length;
+				    } else {
+					kret = ENOMEM;
+					goto errout;
+				    }
 				    strncpy(cout,
 					    datap->data,
 					    datap->length);
@@ -543,7 +583,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
 			else
 			    kret = KRB5_CONFIG_BADFORMAT;
 
-			if (kret)
+			errout: if (kret)
 			    free(selstring);
 		    }
 		}
@@ -657,7 +697,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_aname_to_localname(context, aname, lnsize, lname)
     krb5_context context;
     krb5_const_principal aname;
-    const int lnsize;
+    const int lnsize_in;
     char *lname;
 {
     krb5_error_code	kret;
@@ -667,8 +707,14 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
     const char		*hierarchy[5];
     char		**mapping_values;
     int			i, nvalid;
-    char		*cp;
+    char		*cp, *s;
     char		*typep, *argp;
+    unsigned int        lnsize;
+
+    if (lnsize_in < 0)
+	return KRB5_CONFIG_NOTENUFSPACE;
+
+    lnsize = lnsize_in; /* Unsigned */
 
     /*
      * First get the default realm.
@@ -695,11 +741,14 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 
 		    /* Just use the last one. */
 		    /* Trim the value. */
-		    cp = &mapping_values[nvalid-1]
-			[strlen(mapping_values[nvalid-1])];
-		    while (isspace(*cp)) cp--;
-		    cp++;
-		    *cp = '\0';
+		    s = mapping_values[nvalid-1];
+		    cp = s + strlen(s);
+		    while (cp > s) {
+			cp--;
+			if (!isspace((int)(*cp)))
+			    break;
+			*cp = '\0';
+		    }
 
 		    /* Copy out the value if there's enough room */
 		    if (strlen(mapping_values[nvalid-1])+1 <= (size_t) lnsize)

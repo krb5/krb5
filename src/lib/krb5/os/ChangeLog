@@ -1,3 +1,25 @@
+2004-06-02  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (do_replacement): Patch from Bill Dodd to fix missing
+	braces in previous security patch.
+
+2004-06-01  Sam Hartman  <hartmans@mit.edu>
+
+	* an_to_ln.c (rule_an_to_ln): Fix buffer overflow when parsing
+	principal names into components. 
+	(do_replacement): likewise
+	(aname_replacer): Support error return from do_replacement
+
+2004-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* an_to_ln.c: Patch from Matt Crawford  to allow matching on
+	realms of cross-realm principals.
+
+2003-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (krb5_aname_to_localname): Don't write one byte past
+	the end of a string.  Found by Christopher Nebergall.
+
 2003-07-03 Alexandra Ellwood <lxs@mit.edu>
 	* init_os_ctx.c: removed memory leak.  Was leaking profiles on
         the Mac.  Fix for KfM 4.5.3
