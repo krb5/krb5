@@ -1,0 +1,10 @@
+Wed Apr 26 18:41:04 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Check for runtest program present on system for
+		make check. 
+
+	* Makefile.in (check): Run runtest only if present on system
+	              (install): do nothing
+
+	
+
