@@ -40,7 +40,7 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
     krb5_keyblock 	* keyblock;
     krb5_keysalt 	* keysalt;
 {
-    krb5_error_code 	  retval;
+    krb5_error_code 	  retval = 0;
     krb5_int16		  tmplen;
     krb5_octet		* ptr;
 
@@ -54,17 +54,19 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 
     keyblock->length = 0;
     ptr = key_data->key_data_contents[0];
-    krb5_kdb_decode_int16(ptr, tmplen);
-    ptr += 2;
-    keyblock->length = (int) tmplen;
-    if ((retval = krb5_decrypt(context, (krb5_pointer) ptr,
-			       (krb5_pointer)keyblock->contents,
-			       key_data->key_data_length[0] - 2, 
-			       eblock, 0))) {
-    	krb5_xfree(keyblock->contents);
-	keyblock->contents = 0;
-	keyblock->length = 0;
-	return retval;
+    if (ptr) {
+	krb5_kdb_decode_int16(ptr, tmplen);
+	ptr += 2;
+	keyblock->length = (int) tmplen;
+	if ((retval = krb5_decrypt(context, (krb5_pointer) ptr,
+				   (krb5_pointer)keyblock->contents,
+				   key_data->key_data_length[0] - 2, 
+				   eblock, 0))) {
+	    krb5_xfree(keyblock->contents);
+	    keyblock->contents = 0;
+	    keyblock->length = 0;
+	    return retval;
+	}
     }
 
     /* Decode salt data */
