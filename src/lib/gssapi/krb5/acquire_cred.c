@@ -251,7 +251,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
      gss_OID_set *actual_mechs;
      OM_uint32 *time_rec;
 {
-   int i;
+   size_t i;
    krb5_gss_cred_id_t cred;
    gss_OID_set mechs;
    OM_uint32 ret;

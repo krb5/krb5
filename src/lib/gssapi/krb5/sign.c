@@ -50,6 +50,6 @@ krb5_gss_get_mic(context, minor_status, context_handle, qop_req,
     gss_buffer_t	message_token;
 {
     return(kg_seal(context, minor_status, context_handle, 0,
-		   qop_req, message_buffer, NULL,
+		   (int) qop_req, message_buffer, NULL,
 		   message_token, KG_TOK_MIC_MSG));
 }

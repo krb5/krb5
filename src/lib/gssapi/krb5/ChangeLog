@@ -1,3 +1,13 @@
+Wed Sep 13 10:39:13 1995 Keith Vetter (keithv@fusion.com)
+
+	* acquire_.c: changed int to size_t.
+	* gssapip_.h: added prototype for kg_seal_size.
+	* k5seal.c: 16/32 bit mismatch and removed unused variables.
+	* seal.c: 16/32 bit mismatch.
+	* sign.c: 16/32 bit mismatch.
+	* ser_sctx.c: added prototypes for all functions since they get 
+		assigned into a structure that has been prototyped.
+
 Sat Sep 16 03:18:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapiP_krb5.h: Remove context and cred from the gssapi security

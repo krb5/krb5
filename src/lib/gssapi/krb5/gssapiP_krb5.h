@@ -168,6 +168,13 @@ OM_uint32 kg_unseal PROTOTYPE((krb5_context context,
 		    int *qop_state,
 		    int toktype));
 
+OM_uint32 kg_seal_size PROTOTYPE((OM_uint32 *minor_status,
+    gss_ctx_id_t	context_handle,
+    int conf_req_flag,
+    gss_qop_t qop_req,
+    OM_uint32 output_size,
+    OM_uint32 *input_size));
+
 krb5_error_code
 kg_ser_context_init PROTOTYPE((krb5_context));
 

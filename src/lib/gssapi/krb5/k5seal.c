@@ -253,7 +253,6 @@ kg_seal_size(context, minor_status, context_handle, conf_req_flag, qop_req,
     OM_uint32		*input_size;
 {
     krb5_gss_ctx_id_rec	*ctx;
-    krb5_error_code	code;
     OM_uint32		cfsize;
     OM_uint32		ohlen;
 
@@ -277,7 +276,7 @@ kg_seal_size(context, minor_status, context_handle, conf_req_flag, qop_req,
 
     /* Calculate the token size and subtract that from the output size */
     cfsize = (conf_req_flag) ? kg_confounder_size(&ctx->enc) : 0;
-    ohlen = g_token_size((gss_OID) gss_mech_krb5, cfsize + 22);
+    ohlen = g_token_size((gss_OID) gss_mech_krb5, (unsigned int) cfsize + 22);
 
     /* Cannot have trailer length that will cause us to pad over our length */
     *input_size = (output_size - ohlen) & (~7);

@@ -55,7 +55,7 @@ krb5_gss_wrap(context, minor_status, context_handle, conf_req_flag,
     gss_buffer_t	output_message_buffer;
 {
     return(kg_seal(context, minor_status, context_handle, conf_req_flag,
-		   qop_req, input_message_buffer, conf_state,
+		   (int) qop_req, input_message_buffer, conf_state,
 		   output_message_buffer, KG_TOK_WRAP_MSG));
 }
 

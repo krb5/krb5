@@ -32,6 +32,61 @@
  *	krb5_gss_enc_desc and krb5_gss_ctx_id_t.
  */
 
+
+/* Windows needs these prototypes since the structure they're assigned
+ *  into is prototyped.
+ */
+static krb5_error_code kg_cred_size
+	PROTOTYPE((krb5_context	kcontext,
+	    krb5_pointer arg,
+    	size_t *sizep));
+
+static krb5_error_code kg_cred_externalize
+	PROTOTYPE((krb5_context kcontext,
+	    krb5_pointer arg,
+    	krb5_octet **buffer,
+	    size_t *lenremain));
+
+static krb5_error_code kg_cred_internalize
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer *argp,
+        krb5_octet **buffer,
+        size_t *lenremain));
+
+static krb5_error_code kg_enc_desc_size
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer arg,
+        size_t *sizep));
+
+static krb5_error_code kg_enc_desc_externalize
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer arg,
+        krb5_octet **buffer,
+        size_t *lenremain));
+
+static krb5_error_code kg_enc_desc_internalize
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer *argp,
+        krb5_octet **buffer,
+        size_t *lenremain));
+
+static krb5_error_code kg_ctx_size
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer arg,
+        size_t *sizep));
+
+static krb5_error_code kg_ctx_externalize
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer arg,
+        krb5_octet **buffer,
+        size_t *lenremain));
+
+static krb5_error_code kg_ctx_internalize
+	PROTOTYPE((krb5_context kcontext,
+        krb5_pointer *argp,
+        krb5_octet **buffer,
+        size_t *lenremain));
+
 /*
  * Determine the size required for this krb5_gss_cred_id_t.
  */
