@@ -1,3 +1,9 @@
+Fri Jul 12 20:32:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* win_glue.c: Added TIMEBOMB_INFO string which tells the user the
+ 	 	URL to look for more information about getting the new
+ 	 	version of the product.
+
 Wed Jul 10 20:32:22 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* win_glue.c (krb5_win_do_init): New routine which does the

@@ -28,12 +28,14 @@
 #define TIMEBOMB 853304400      /* 15-Jan-97 */
 #define TIMEBOMB_PRODUCT "SAPGUI"
 #define TIMEBOMB_WARN  15
+#define TIMEBOMB_INFO "  Please see the web page at:\nhttp://web.mit.edu/reeng/www/saphelp for more information"
 #endif
 
 #ifdef KRB_TIMEBOMB
 #define TIMEBOMB 853304400      /* 15-Jan-97 */
 #define TIMEBOMB_PRODUCT "Kerberos V5"
 #define TIMEBOMB_WARN 15
+#define TIMEBOMB_INFO "  Please see the web page at:\nhttp://web.mit.edu/reeng/www/saphelp for more information"
 #endif
 
 /*
@@ -117,9 +119,10 @@ static void do_timebomb()
 		/* 
 		 * The SAP R/3 application doesn't listen to a polite
 		 * request to quit, so we hit it over the head with a
-		 * hammer.  Unfortunately, this leaves dangling system
-		 * resources that don't get freed, so the user will
-		 * have to reboot (or at least restart windows).
+		 * large club.  Unfortunately, this leaves the baby
+		 * seal with dangling system resources that don't get
+		 * freed, so the user will have to reboot (or at least
+		 * restart windows).
 		 */
 		FatalAppExit(0, "Note: you should reboot now.");
 		return;
