@@ -105,10 +105,10 @@ register int *error;
 	}
     }
     if (val->authorization_data.ciphertext.data) {
-	retval->authorization__data =
+	retval->enc__authorization__data =
 	    krb5_enc_data2KRB5_EncryptedData(&(val->authorization_data),
 						 error);
-	if (!retval->authorization__data)
+	if (!retval->enc__authorization__data)
 	    goto errout;
     }
     if (val->second_ticket) {

@@ -150,7 +150,7 @@ KDC-REQ-BODY ::=	SEQUENCE {
 	 nonce[7]	INTEGER,
 	 etype[8]	SEQUENCE OF INTEGER, -- EncryptionType, in preference order
 	 addresses[9]	HostAddresses OPTIONAL,
-	 authorization-data[10]	EncryptedData OPTIONAL, -- AuthorizationData
+	 enc-authorization-data[10]	EncryptedData OPTIONAL, -- AuthorizationData
 	 additional-tickets[11]	SEQUENCE OF Ticket OPTIONAL
 }
 

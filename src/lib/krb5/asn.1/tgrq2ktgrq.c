@@ -101,8 +101,8 @@ register int *error;
 	    goto errout;
 	}
     }
-    if (val->authorization__data) {
-	temp = KRB5_EncryptedData2krb5_enc_data(val->authorization__data,
+    if (val->enc__authorization__data) {
+	temp = KRB5_EncryptedData2krb5_enc_data(val->enc__authorization__data,
 						error);
 	if (temp) {
 	    retval->authorization_data = *temp;
