@@ -1,3 +1,7 @@
+Tue Jul 23 17:02:04 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in: add dependency for kadmin_ct.o
+
 Fri Jul 19 16:10:39 1996  Marc Horowitz  <marc@mit.edu>
 
 	* ss_wrapper.c (main): ss_execute_line was being called with three
