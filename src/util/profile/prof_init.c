@@ -83,7 +83,7 @@ profile_init_path(filepath, ret_profile)
 	profile_t *ret_profile;
 {
 	int n_entries, i;
-	int ent_len;
+	unsigned int ent_len;
 	const char *s, *t;
 	profile_filespec_t *filenames;
 	errcode_t retval;
@@ -119,7 +119,8 @@ profile_init_path(filepath, ret_profile)
 	/* cap the array */
 	filenames[i] = 0;
 
-	retval = profile_init(filenames, ret_profile);
+	retval = profile_init((const_profile_filespec_t *) filenames, 
+			      ret_profile);
 
 	/* count back down and free the entries */
 	while(--i >= 0) free(filenames[i]);
@@ -349,7 +350,8 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
 		goto cleanup;
 	}
 
-	if ((retval = profile_init(flist, profilep)))
+	if ((retval = profile_init((const_profile_filespec_t *) flist, 
+				   profilep)))
 		goto cleanup;
 	
 	*bufpp = bp;

@@ -32,7 +32,8 @@ int main(argc, argv)
 
 	retval = profile_parse_file(f, &root);
 	if (retval) {
-		printf("profile_parse_file error %s\n", error_message(retval));
+		printf("profile_parse_file error %s\n", 
+		       error_message((errcode_t) retval));
 		exit(1);
 	}
 	fclose(f);
@@ -43,7 +44,7 @@ int main(argc, argv)
 	retval = profile_verify_node(root);
 	if (retval) {
 		printf("profile_verify_node reported an error: %s\n",
-		       error_message(retval));
+		       error_message((errcode_t) retval));
 		exit(1);
 	}
 

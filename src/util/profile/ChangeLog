@@ -1,3 +1,15 @@
+2000-07-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_init.c: Cleanup internal type warnings in calls to profile_init.
+
+	* test_parse.c (main): Cast arguments to error_message. 
+
+	* prof_file.c (profile_open_file): Variable with argument to
+	malloc should be unsigned.
+
+	* profile.hin: Revert changes to const_profile_filespect_t and
+	profile_filespec_t to preserve interface.
+
 2000-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* prof_init.c (profile_init_path): Use profile_filespec_t instead

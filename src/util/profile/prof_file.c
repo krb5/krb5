@@ -73,7 +73,7 @@ errcode_t profile_open_file(filespec, ret_prof)
 	prf_file_t	prf;
 	errcode_t	retval;
 	char		*home_env = 0;
-	int		len;
+	unsigned int	len;
 
 	prf = malloc(sizeof(struct _prf_file_t));
 	if (!prf)
