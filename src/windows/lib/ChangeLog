@@ -1,3 +1,7 @@
+Mon May 17 09:22:45 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* KrbCC32.lib: Remove KrbCC32.lib since we dynamically load the DLL.
+
 Mon May 10 15:28:40 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
