@@ -29,6 +29,10 @@ krb5_error_code krb5_decode_kdc_rep
 		   krb5_keyblock *,
 		   int,			/* promotion rules require this */
 		   krb5_kdc_rep ** ));
+krb5_error_code krb5_kdc_rep_decrypt_proc
+	PROTOTYPE((krb5_kdc_rep *,
+		   krb5_keyblock *,
+		   krb5_pointer ));
 krb5_error_code krb5_encode_ticket
 	PROTOTYPE((krb5_ticket *,
 		   krb5_data ** ));
@@ -69,12 +73,11 @@ krb5_error_code krb5_get_in_tkt
 		   krb5_address **,
 		   krb5_enctype,
 		   krb5_keytype,
-		   int (* )(krb5_keytype,
-				    krb5_keyblock **,
-				    krb5_pointer ),
+		   krb5_error_code (* )(int, /* promoted krb5_keytype */
+					krb5_keyblock **,
+					krb5_pointer ),
 		   krb5_pointer,
-		   int (* )(krb5_data *,
-					krb5_kdc_rep *,
+		   krb5_error_code (* )(krb5_kdc_rep *,
 					krb5_keyblock *,
 					krb5_pointer ),
 		   krb5_pointer,
@@ -82,12 +85,11 @@ krb5_error_code krb5_get_in_tkt
 krb5_error_code krb5_get_in_tkt_with_password
 	PROTOTYPE((krb5_flags,
 		   krb5_address **,
-		   krb5_enctype,
-		   krb5_keytype,
+		   int,			/* promoted from krb5_enctype */
+		   int,			/* promoted from krb5_keytype */
 		   char *,
 		   krb5_ccache,
-		   krb5_creds *,
-		   int ));
+		   krb5_creds * ));
 krb5_error_code krb5_get_in_tkt_with_skey
 	PROTOTYPE((krb5_flags,
 		   krb5_address **,
@@ -114,10 +116,10 @@ krb5_error_code krb5_rd_req
 		   krb5_principal,
 		   krb5_address *,
 		   krb5_pointer,
-		   int (* )(krb5_pointer,
-				   krb5_principal,
-				   krb5_kvno,
-				   krb5_keyblock ** ),
+		   krb5_error_code (* )(krb5_pointer,
+					krb5_principal,
+					unsigned, /* promotion of kvno */
+					krb5_keyblock ** ),
 		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
@@ -126,10 +128,10 @@ krb5_error_code krb5_rd_req_decoded
 		   krb5_principal,
 		   krb5_address *,
 		   krb5_pointer,
-		   int (* )(krb5_pointer,
-				   krb5_principal,
-				   krb5_kvno,
-				   krb5_keyblock ** ),
+		   krb5_error_code (* )(krb5_pointer,
+					krb5_principal,
+					unsigned, /* promotion of kvno */
+					krb5_keyblock ** ),
 		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
