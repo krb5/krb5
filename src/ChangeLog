@@ -1,3 +1,7 @@
+Mon Apr 24 13:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: Fixed a PC work-around for doing a touch command.
+
 Thu Apr 20 17:55:50 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* aclocal.m4 (.ct.c): use $(RM) instead of plain rm.

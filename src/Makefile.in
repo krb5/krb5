@@ -138,7 +138,7 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
 		lib\krb5\rcache\makefile.in \
 		util\et\makefile.in
-	copy makefile.in makefile
+	type makefile.in >makefile
 	.\wconfig config <include\makefile.in >include\makefile
 	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
 	.\wconfig config <lib\makefile.in >lib\makefile
