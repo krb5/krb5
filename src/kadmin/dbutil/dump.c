@@ -39,12 +39,10 @@
  */
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
-extern krb5_encrypt_block master_encblock;
 extern int valid_master_key;
 extern void usage();
 static int			mkey_convert;
 static krb5_keyblock		new_master_keyblock;
-static krb5_encrypt_block 	new_master_encblock;
 
 /*
  * Use compile(3) if no regcomp present.
@@ -249,7 +247,7 @@ krb5_error_code master_key_convert(context, db_entry)
 	key_data = &db_entry->key_data[i];
 	if (key_data->key_data_length == 0)
 	    continue;
-	retval = krb5_dbekd_decrypt_key_data(context, &master_encblock,
+	retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock,
 					     key_data, &v5plainkey,
 					     &keysalt);
 	if (retval)
@@ -257,7 +255,7 @@ krb5_error_code master_key_convert(context, db_entry)
 
 	memset(&new_key_data, 0, sizeof(new_key_data));
 	key_ptr = is_mkey ? &new_master_keyblock : &v5plainkey;
-	retval = krb5_dbekd_encrypt_key_data(context, &new_master_encblock,
+	retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
 					     key_ptr, &keysalt,
 					     key_data->key_data_kvno,
 					     &new_key_data);
@@ -1032,42 +1030,37 @@ dump_db(argc, argv)
     if (mkey_convert) {
 	    if (!valid_master_key) {
 		    /* TRUE here means read the keyboard, but only once */
-		    if ((retval = krb5_db_fetch_mkey(util_context,
-			     master_princ, &master_encblock, TRUE, FALSE, 
-			     (char *) NULL, 0, &master_keyblock))) {
-			    com_err(argv[0], retval, "while reading master key");
+		    retval = krb5_db_fetch_mkey(util_context,
+						master_princ,
+						master_keyblock.enctype,
+						TRUE, FALSE,
+						(char *) NULL, 0,
+						&master_keyblock);
+		    if (retval) {
+			    com_err(argv[0], retval,
+				    "while reading master key");
 			    exit(1);
 		    }
-		    if ((retval = krb5_db_verify_master_key(util_context,
-	   master_princ, &master_keyblock,&master_encblock))) {
-			    com_err(argv[0], retval, "while verifying master key");
-			    exit(1);
-		    }
-		    if ((retval = krb5_process_key(util_context,
-				   &master_encblock, &master_keyblock))) {
-			    com_err(argv[0], retval, "while processing master key");
+		    retval = krb5_db_verify_master_key(util_context,
+						       master_princ,
+						       &master_keyblock);
+		    if (retval) {
+			    com_err(argv[0], retval,
+				    "while verifying master key");
 			    exit(1);
 		    }
 	    }
 	    new_master_keyblock.enctype = global_params.enctype;
 	    if (new_master_keyblock.enctype == ENCTYPE_UNKNOWN)
 		    new_master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
-	    krb5_use_enctype(util_context, &new_master_encblock,
-			     new_master_keyblock.enctype);
 	    if (!new_mkey_file)
 		    printf("Please enter new master key....\n");
 	    if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
-					     &new_master_encblock,
+					     new_master_keyblock.enctype,
 					     !new_mkey_file, TRUE, 
 					     new_mkey_file, 0,
 					     &new_master_keyblock))) { 
-		    com_err(argv[0], retval, "while reading old master key");
-		    exit(1);
-	    }
-	    if ((retval = krb5_process_key(util_context, &new_master_encblock, 
-					   &new_master_keyblock))) {
-		    com_err(argv[0], retval,
-			    "while processing old master key");
+		    com_err(argv[0], retval, "while reading new master key");
 		    exit(1);
 	    }
     }

@@ -1,3 +1,7 @@
+Tue Nov  3 16:28:23 1998  Tom Yu  <tlyu@mit.edu>
+
+	* dump.c: Fix up to work with new crypto API.
+
 1998-10-27  Marc Horowitz  <marc@mit.edu>
 
 	* dumpv4, loadv4.c, kdb5_create.c, kdb5_stash.c, kdb5_util.c,
