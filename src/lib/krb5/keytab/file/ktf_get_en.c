@@ -37,8 +37,6 @@ OLDDECLARG(krb5_keytab_entry *, entry)
     krb5_keytab_entry *cur_entry;
     krb5_error_code kerror = 0; /* XXX */
 
-    bzero((char *)&cur_entry, sizeof(krb5_keytab_entry));
-
     /* Open the keyfile for reading */
     if (kerror = krb5_ktfileint_openr(id))
 	return(kerror); /* XXX */
@@ -48,6 +46,7 @@ OLDDECLARG(krb5_keytab_entry *, entry)
      * is exited with a break statement.
      */
     while (TRUE) {
+	cur_entry = 0;
 	if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
 	    break;
 
@@ -63,8 +62,11 @@ OLDDECLARG(krb5_keytab_entry *, entry)
 	return kerror;
     }
     if (!(kerror = krb5_ktfileint_close(id))) {
-	*entry = *cur_entry;
-	xfree(cur_entry);
+	if (cur_entry) {
+	    *entry = *cur_entry;
+	    xfree(cur_entry);
+	} else
+	    kerror = KRB5_KT_NOTFOUND;
     } else
 	krb5_kt_free_entry(cur_entry);
     return kerror;
