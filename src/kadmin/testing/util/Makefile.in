@@ -3,6 +3,9 @@ myfulldir=kadmin/testing/util
 mydir=testing/util
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = $(TCL_INCLUDES)
+# Force Tcl headers to use stdarg.h, because krb5 does too, and if
+# Tcl uses varargs.h it'll just mess things up.
+DEFINES= -DHAS_STDARG
 
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
