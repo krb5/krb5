@@ -64,7 +64,7 @@ char copyright[] =
      
 /* DEFINES:
  *   KERBEROS - Define this if application is to be kerberised.
- *   SERVE_V4 - Define this if v4 rlogin clients are also to be served.
+ *   KRB5_KRB4_COMPAT - Define this if v4 rlogin clients are also to be served.
  *   ALWAYS_V5_KUSEROK - Define this if you want .k5login to be
  *              checked even for v4 clients (instead of .klogin).
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
@@ -79,7 +79,6 @@ char copyright[] =
  *       Note:  Root account access is always logged.
  */
      
-#define SERVE_V4
 #define SERVE_NON_KRB     
 #define LOG_REMOTE_REALM
 #define LOG_CMD
@@ -107,22 +106,7 @@ char copyright[] =
 #include <sys/select.h>
 #endif
      
-
-/** XXX -- this may be bogus **/
-#if defined(CRAY) || defined(sysvimp) || defined(aux20)
-#ifndef _TYPES_
-#define _TYPES_
-#endif
-#ifndef  F_OK
-#define F_OK 0
-#endif
-#endif
-/** XXX **/     
-
-/* not portable: #include <sys/resource.h> */
-     
 #include <netinet/in.h>
-     
 #include <arpa/inet.h>
      
 #include <stdio.h>
@@ -173,32 +157,20 @@ char copyright[] =
 #include <krb5/ext-proto.h>
 
 #include <com_err.h>
-
 #include "loginpaths.h"
 
-#ifndef HAVE_KILLPG
-#define killpg(pid, sig) kill(-(pid), (sig))
-#endif
-
-#ifdef __SCO__
-/* sco has getgroups and setgroups but no initgroups */
-int initgroups(char* name, gid_t basegid) {
-  gid_t others[NGROUPS_MAX+1];
-  int ngrps;
-
-  others[0] = basegid;
-  ngrps = getgroups(NGROUPS_MAX, others+1);
-  return setgroups(ngrps+1, others);
-}
-#endif
-/** XXX **/
-
 #define ARGSTR	"rRkKD:?"
+
 #else /* !KERBEROS */
+
 #define ARGSTR	"rRD:?"
      
 #endif /* KERBEROS */
      
+#ifndef HAVE_KILLPG
+#define killpg(pid, sig) kill(-(pid), (sig))
+#endif
+
 int must_pass_rhosts = 0, must_pass_k5 = 0, must_pass_one = 0;
 int failed_k5 = 0;
 char *progname;
@@ -215,6 +187,18 @@ int     errno;
 int	error();
 
 
+#ifdef __SCO__
+/* sco has getgroups and setgroups but no initgroups */
+int initgroups(char* name, gid_t basegid) {
+  gid_t others[NGROUPS_MAX+1];
+  int ngrps;
+
+  others[0] = basegid;
+  ngrps = getgroups(NGROUPS_MAX, others+1);
+  return setgroups(ngrps+1, others);
+}
+#endif
+
 
 main(argc, argv)
      int argc;
@@ -227,7 +211,8 @@ main(argc, argv)
     struct sockaddr_in from;
     extern int opterr, optind;
     extern char *optarg;
-    char *options, ch;
+    char *options;
+    int ch;
     int i;
     int fd;
     int debug_port = 0;
@@ -258,18 +243,22 @@ main(argc, argv)
 	  if (!strcmp(progname+i, "shd")) {
 	      strcpy(options, "-");
 	      strncat(options, progname, i);
-	      argc = 2;
+	      options[i+1] = '\0';
+#if 0
+	      /*
+	       * Since we are just going to break out afterwards, we'll
+	       * re-use the variable "i" to move the command line args.
+	       */
+	      for (i=argc-1; i>0; i--) argv[i+1] = argv[i];
+#endif
+	      argv[++argc] = NULL;
+
 	      argv[1] = options;
-	      argv[2] = NULL;
 	      break;
 	  }
-	if (options[0] == '\0') {
-	    usage();
-	    exit(1);
-	}
     }
     
-    /* Analyse parameters. */
+    /* Analyze parameters. */
     opterr = 0;
     while ((ch = getopt(argc, argv, ARGSTR)) != EOF)
       switch (ch) {
@@ -300,6 +289,12 @@ main(argc, argv)
 	  exit(1);
 	  break;
       }
+
+    if (optind == 0) {
+	usage();
+	exit(1);
+    }
+    
     argc -= optind;
     argv += optind;
     
@@ -373,29 +368,21 @@ char    term[64] = "TERM=network";
 char	path[128] = "PATH=";
 char	path_rest[64] = RPATH;
 
+#ifdef CRAY
+char    *envinit[] =
+{homedir, shell, path, username, "TZ=GMT0", tmpdir, term, 0};
+#define TZENV   4
+#define TMPDIRENV 5
+char    *getenv();
+#else /* CRAY */
 #ifdef KERBEROS
 char    *envinit[] =
-#ifdef CRAY
-{homedir, shell, path, username, "TZ=GMT0", tmpdir, term, 0};
-#define TZENV   4
-#define TMPDIRENV 5
-char    *getenv();
-extern
-#else
 {homedir, shell, path, username, term, 0};
-#endif /* CRAY */
-#else /* !KERBEROS */
+#else /* KERBEROS */
 char	*envinit[] =
-#ifdef CRAY
-{homedir, shell, path, username, "TZ=GMT0", tmpdir, term, 0};
-#define TZENV   4
-#define TMPDIRENV 5
-char    *getenv();
-extern
-#else
 {homedir, shell, path, username, term, 0};
-#endif /* CRAY */
 #endif /* KERBEROS */
+#endif /* CRAY */
 
 extern char	**environ;
 char ttyn[12];		/* Line string for wtmp entries */
@@ -422,7 +409,7 @@ char *kremuser;
 krb5_principal client;
 krb5_authenticator *kdata;
 
-#ifdef SERVE_V4
+#ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
 AUTH_DAT	*v4_kdata;
 KTEXT		v4_ticket;
@@ -450,11 +437,9 @@ doit(f, fromp)
     char *salt, *ttynm, *tty;
     register char *p;
     char *crypt();
+    struct passwd *pwd;
     
-#ifndef CRAY
-    struct passwd *pwd;
-#else
-    struct passwd *pwd;
+#ifdef CRAY
 #ifndef NO_UDB
     struct udb    *ue;
     struct udb ue_static;
@@ -915,18 +900,7 @@ doit(f, fromp)
 
 #ifdef KERBEROS
     if (must_pass_k5 || must_pass_one) {
-#if (defined(ALWAYS_V5_KUSEROK) || !defined(KRB5_KRB4_COMPAT))
-	if (!krb5_kuserok(client,locuser)) {
-	    syslog(LOG_ERR ,
-		   "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
-		   kremuser, remuser, hostname, locuser);
-	    if (must_pass_k5) {
-		error("Permission denied.\n");
-		goto signout_please;
-	    }
-	    failed_k5 = 1;
-	}
-#else
+#if defined(KRB5_KRB4_COMPAT) && !defined(ALWAYS_V5_KUSEROK)
 	if (auth_sys == KRB5_RECVAUTH_V4) {
 	    /* kuserok returns 0 if OK */
 	    if (kuserok(v4_kdata, locuser)){
@@ -939,8 +913,9 @@ doit(f, fromp)
 		}
 		failed_k5 = 1;
 	    }
-	}
-	else {
+	} else
+#endif
+	{
 	    /* krb5_kuserok returns 1 if OK */
 	    if (!krb5_kuserok(client, locuser)){
 		syslog(LOG_ERR ,
@@ -953,7 +928,6 @@ doit(f, fromp)
 		failed_k5 = 1;
 	    }
 	}
-#endif
     }
 	
     if (must_pass_rhosts || (failed_k5 && must_pass_one)) {
