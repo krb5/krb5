@@ -36,9 +36,13 @@ register krb5_int32 *seconds, *microseconds;
 	/* failed, return errno */
 	return (krb5_error_code) errno;
     }
-    if ((tv.tv_sec == last_tv.tv_sec) && (tv.tv_usec == last_tv.tv_usec))
-	    tv.tv_usec = ++last_tv.tv_usec;
-    else 
+    if ((tv.tv_sec == last_tv.tv_sec) && (tv.tv_usec == last_tv.tv_usec)) {
+	    if (++last_tv.tv_usec >= 1000000) {
+		    last_tv.tv_usec = 0;
+		    last_tv.tv_sec++;
+	    }
+	    tv = last_tv;
+    } else 
 	    last_tv = tv;
 	    
     *seconds = tv.tv_sec;
