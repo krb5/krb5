@@ -1,3 +1,9 @@
+2001-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* resolve.c (main): Make error message note that misconfiguration
+	of /etc/hosts, as well as problems with resolver library, are all
+	likely to cause failure.
+
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

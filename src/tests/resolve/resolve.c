@@ -137,8 +137,19 @@ main(argc, argv)
 	 */
 	ptr = strchr(host->h_name, '.');
 	if (ptr == NULL || ptr[1] == '\0') {
-		fprintf(stderr, "\nResolve library did not return a fully qualified domain name\n");
-		fprintf(stderr, "You may have to reconfigure the kerberos distribution to select a\ndifferent set of libraries using --with-netlib[=libs]\n");
+		fprintf(stderr,
+			"\nResolve library did not return a "
+			"fully qualified domain name.\n\n"
+			"If you are using /etc/hosts before DNS, "
+			"e.g. \"files\" is listed first\n"
+			"for \"hosts:\" in nsswitch.conf, ensure that "
+			"you have listed the FQDN\n"
+			"as the first name for the local host.\n\n"
+			"If this does not correct the problem, "
+			"you may have to reconfigure the kerberos\n"
+			"distribution to select a "
+			"different set of libraries using \n"
+			"--with-netlib[=libs]\n");
 		exit(3);
 	}
 
