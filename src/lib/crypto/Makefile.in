@@ -10,11 +10,15 @@ TST=if test -n "`cat DONE`" ; then
 @SHARED_RULE@
 
 OBJS=	cryptoconf.$(OBJEXT) \
+	encrypt_data.$(OBJEXT) \
+	decrypt_data.$(OBJEXT) \
 	des_crc.$(OBJEXT) \
 	des_md5.$(OBJEXT) \
 	raw_des.$(OBJEXT)
 
 SRCS=	$(srcdir)/cryptoconf.c \
+	$(srcdir)/encrypt_data.c \
+	$(srcdir)/decrypt_data.c \
 	$(srcdir)/des_crc.c \
 	$(srcdir)/des_md5.c \
 	$(srcdir)/raw_des.c 
