@@ -52,9 +52,9 @@ typedef struct _krb5_kt_ops {
 						    krb5_kt_cursor *));	
 	krb5_error_code (*get_next) PROTOTYPE((krb5_keytab,
 					       krb5_keytab_entry *,
-					       krb5_kt_cursor));
+					       krb5_kt_cursor *));
 	krb5_error_code (*end_get) PROTOTYPE((krb5_keytab,
-					      krb5_kt_cursor));
+					      krb5_kt_cursor *));
 	/* routines to be included on extended version (write routines) */
 	krb5_error_code (*add) PROTOTYPE((krb5_keytab,
 					  krb5_keytab_entry *));
