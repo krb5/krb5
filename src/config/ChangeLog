@@ -1,3 +1,11 @@
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* config.guess: Recognize Rhapsody OS.
+	* config.sub: Recognize OS name "rhapsody*".
+
+	* post.in (*-recurse): If an error occurs when using -k, report an
+	error after finishing all the subdirectories.
+
 1999-08-13  Brad Thompson  <yak@mit.edu>
 
 	* config.sub: Now recognizes MacOS 10 as a valid OS.
