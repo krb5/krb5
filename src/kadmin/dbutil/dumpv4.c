@@ -31,10 +31,13 @@
 
 #include <des.h>
 #include <krb.h>
+#ifdef HAVE_KRB_DB_H
 #include <krb_db.h>
-/* MKEYFILE is now defined in kdc.h */
+#endif /*HAVE_KRB_DB_H*/
+#ifdef HAVE_KDC_H
+;/* MKEYFILE is now defined in kdc.h */
 #include <kdc.h>
-
+#endif /*HAVE_KDC_H*/
 #include <stdio.h>
 #include <kadm5/admin.h>
 #include "kdb5_util.h"

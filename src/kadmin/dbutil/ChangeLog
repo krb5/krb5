@@ -30,11 +30,22 @@ Wed Jul 31 14:55:38 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_stash.c (kdb5_stash): Declare optind.
 
-Sat Jul 27 02:16:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Tue Jul 30 17:51:24 1996  Samuel D Hartman  (hartmans@vorlon)
 
+	* configure.in: Use gssapi library.
+
+Sat Jul 27 02:16:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 	* kdb5_create.c (kdb5_create): Ignore (expected) failure in
 		open_db_and_mkey when creating database in returning exit
 		status.
+
+Wed Jul 24 02:57:16 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* loadv4.cdumpv4.c : Fixes for Athena Kerberos
+
+Wed Jul 24 02:47:07 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Check for kdc.h and krb_db.h for Athena Kerberos.
 
 Tue Jul 23 17:03:42 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
