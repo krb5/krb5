@@ -158,6 +158,7 @@ typedef struct _krb5_kdc_req {
 
 typedef struct _krb5_enc_kdc_rep_part {
     /* encrypted part: */
+    krb5_msgtype msg_type;		/* krb5 message type */
     krb5_keyblock *session;		/* session key */
     krb5_last_req_entry **last_req;	/* array of ptrs to entries */
     krb5_int32 nonce;			/* nonce from request */
