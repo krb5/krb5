@@ -1,5 +1,6 @@
 #include <assert.h>
 
+#include "autoconf.h"
 #include "com_err.h"
 #include "krb5.h"
 #include "krb5_err.h"

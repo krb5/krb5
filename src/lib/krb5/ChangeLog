@@ -1,3 +1,7 @@
+2003-07-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_libinit.c: Include autoconf.h.
+
 2003-03-07  Alexandra Ellwood  <lxs@mit.edu>
 
     * krb5_libinit.c: Changed USE_HARDCODED_FALLBACK_ERROR_TABLES macro 
