@@ -85,6 +85,8 @@ includes:: libpty.h
 			$(BUILDTOP)/include/libpty.h) ; \
 	fi
 
+includes:: $(BUILDTOP)/include/krb5/autoconf.h
+
 clean-unix::
 	$(RM) $(BUILDTOP)/include/libpty.h
 
