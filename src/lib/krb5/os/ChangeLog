@@ -1,3 +1,9 @@
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_krbhst.c (krb5_get_krbhst): Fix double-indirection
+	confusion.  Do actually copy string contents to newly allocated
+	storage.
+
 1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
 
 	* changepw.c (krb5_change_password):
