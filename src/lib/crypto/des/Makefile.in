@@ -14,7 +14,6 @@ DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLI
 
 OBJS=	afsstring2key.$(OBJEXT) \
 	cbc_cksum.$(OBJEXT)	\
-	cs_entry.$(OBJEXT)	\
 	finish_key.$(OBJEXT)	\
 	fin_rndkey.$(OBJEXT)	\
 	init_rkey.$(OBJEXT)	\
@@ -38,7 +37,6 @@ OBJS=	afsstring2key.$(OBJEXT) \
 	u_rn_key.$(OBJEXT)
 
 SRCS=	$(srcdir)/afsstring2key.c \
-	$(srcdir)/cs_entry.c	\
 	$(srcdir)/cbc_cksum.c	\
 	$(srcdir)/finish_key.c	\
 	$(srcdir)/fin_rndkey.c	\

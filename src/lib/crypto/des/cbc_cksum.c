@@ -37,12 +37,20 @@
 	with the help of key "key" of size "key_size" (which should be 8);
 	fills out krb5_checksum structure.
 
-	caller is responsible for freeing "contents" element in 
+	caller is responsible for allocating & freeing "contents" element in 
 	krb5_checksum structure.
 
 	returns: errors
 */
-krb5_error_code
+
+static krb5_error_code mit_des_cbc_checksum
+    PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum FAR * ));
+
+static krb5_error_code mit_des_cbc_verf_cksum
+    PROTOTYPE ((krb5_checksum FAR *, krb5_pointer, size_t, krb5_pointer,
+                size_t ));
+
+static krb5_error_code
 mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
     krb5_pointer in;
     size_t in_length;
@@ -51,8 +59,9 @@ mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
     krb5_checksum FAR * cksum;
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
-    krb5_octet 	*contents;
 
+    if (cksum->length < sizeof(mit_des_cblock))
+	return KRB5_BAD_MSIZE;
     if (key_size != sizeof(mit_des_cblock))
 	return KRB5_BAD_KEYSIZE;
 
@@ -75,22 +84,17 @@ mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
         ;
     }
 
-    if (!(contents = (krb5_octet *) malloc(sizeof(mit_des_cblock)))) {
-	cleanup();
-        return ENOMEM;
-    }
-
-    mit_des_cbc_cksum(in, contents, in_length, schedule, key);
-
     cksum->checksum_type = CKSUMTYPE_DESCBC;
     cksum->length = sizeof(mit_des_cblock);
-    cksum->contents = contents;
+
+    mit_des_cbc_cksum(in, cksum->contents, in_length, schedule, key);
+
     cleanup();
 
     return 0;
 }
     
-krb5_error_code
+static krb5_error_code
 mit_des_cbc_verf_cksum(cksum, in, in_length, key, key_size)
     krb5_checksum FAR * cksum;
     krb5_pointer in;
@@ -144,3 +148,11 @@ mit_des_cbc_verf_cksum(cksum, in, in_length, key, key_size)
     return retval;
 }
 
+krb5_checksum_entry krb5_des_cbc_cksumtable_entry = {
+    0,
+    mit_des_cbc_checksum,
+    mit_des_cbc_verf_cksum,
+    sizeof(mit_des_cblock),
+    1,					/* is collision proof */
+    1,					/* is keyed */
+};

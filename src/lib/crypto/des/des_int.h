@@ -92,15 +92,6 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * End "mit-des.h"
  */
 
-/* cbc_cksum.c */
-extern krb5_error_code mit_des_cbc_checksum
-    PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum FAR * ));
-
-extern krb5_error_code mit_des_cbc_verf_cksum
-    PROTOTYPE ((krb5_checksum FAR *, krb5_pointer, size_t, krb5_pointer,
-                size_t ));
-
-
 /* f_cksum.c */
 extern unsigned long mit_des_cbc_cksum
     PROTOTYPE((krb5_octet FAR *, krb5_octet FAR *, long , mit_des_key_schedule ,

@@ -1,3 +1,15 @@
+Tue May 14 18:59:38 1996  Richard Basch  <basch@lehman.com>
+
+	* des_int.h: the cs_entry routines in cbc_cksum.c are now static.
+
+	* Makefile.in: removed cs_entry.c
+
+	* cbc_cksum.c:
+		caller is responsible for allocating cksum->contents
+		  and indicate the allocated amount in cksum->length.
+		the cs_entry routines are now static and the cs_entry
+		  structure is now in this file to enforce proper use.
+
 Fri May 10 01:46:25 1996  Richard Basch  <basch@lehman.com>
 
 	* d3_str2ky.c d3_procky.c des_int.h init_rkey.c:
