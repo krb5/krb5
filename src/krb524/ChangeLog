@@ -1,3 +1,8 @@
+Fri Jun  9 19:16:49 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Tue Jun  6 20:59:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* test.c (do_remote): Case sockaddr_in * to sockaddr * in calling
