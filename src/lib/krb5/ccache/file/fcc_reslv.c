@@ -52,8 +52,8 @@ krb5_fcc_resolve (id, residual)
 
      lid->ops = &krb5_fcc_ops;
      
-     lid->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
-     if (((krb5_fcc_data *) lid->data) == NULL) {
+     lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
+     if (lid->data == NULL) {
 	  xfree(lid);
 	  return KRB5_NOMEM;
      }
