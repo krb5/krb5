@@ -269,8 +269,8 @@ krb5_encode_princ_contents(context, content, entry)
     /* 
      * First allocate enough space for all the data. 
      * Need  2 bytes for the length of the base structure
-     * then 40 [9 * 4 + 2 * 2] bytes for the base information
-     *         [ mkvno, attributes, max_life, max_renewable_life, expiration,
+     * then 36 [ 8 * 4 + 2 * 2] bytes for the base information
+     *         [ attributes, max_life, max_renewable_life, expiration,
      *	  	 pw_expiration, last_success, last_failed, fail_auth_count ]
      *         [ n_key_data, n_tl_data ]
      * then XX bytes [ e_length ] for the extra data [ e_data ]
@@ -323,10 +323,6 @@ krb5_encode_princ_contents(context, content, entry)
 	/* Base Length */
     krb5_kdb_encode_int16(entry->len, nextloc);
     nextloc += 2;
-
-	/* Master Key Version */
-    krb5_kdb_encode_int32(entry->mkvno, nextloc);
-    nextloc += 4;
 
 	/* Attributes */
     krb5_kdb_encode_int32(entry->attributes, nextloc);
@@ -473,10 +469,6 @@ krb5_decode_princ_contents(context, content, entry)
 	/* Base Length */
     krb5_kdb_decode_int16(nextloc, entry->len);
     nextloc += 2;
-
-	/* Master Key Version */
-    krb5_kdb_decode_int32(nextloc, entry->mkvno);
-    nextloc += 4;
 
 	/* Attributes */
     krb5_kdb_decode_int32(nextloc, entry->attributes);
