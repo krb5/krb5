@@ -1,3 +1,11 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (passes): Add an AES-only pass.
+	(start_kerberos_daemons): Check for error "No principal in keytab
+	matches desired name".
+	(dump_db): New proc, for debugging.
+	(spawn_xterm): Add GSSCLIENT to list of exported variables.
+
 2003-06-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (setup_root_shell): Check for "not authorized".  Map
