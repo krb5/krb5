@@ -1,3 +1,8 @@
+2001-06-13	Miro Jurisic <meeroh@mit.edu>
+
+	* add_cred.c (krb5_gss_add_cred): Added constness to some char*s to make
+	them compiler with strict compilers.
+
 2001-04-02	Alexandra Ellwood <lxs@mit.edu>
 
 	* gssapi_krb5.h, gssapi_krb5.c: Added oids from rfc 1964 using the 
