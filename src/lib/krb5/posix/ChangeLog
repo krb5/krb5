@@ -1,6 +1,13 @@
+Mon Sep 11 20:20:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sscanf.c (sscanf): Initial version of a sscanf() replacement,
+		for those platforms (like Macroloss) that don't have
+		sscanf().
+
 Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
-	* getuid.c:  turn off getuid for metrowerks which has one (which is also
-		a farce), but leave it on for MPW.
+
+	* getuid.c:  turn off getuid for metrowerks which has one (which
+		is also a farce), but leave it on for MPW.
 
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* vfprintf.c included <stdio.h>
