@@ -1008,6 +1008,12 @@ pty_init();
 	level = getterminaltype(user_name);
 	setenv("TERM", *terminaltype ? terminaltype : "network", 1);
 
+#if defined (AUTHENTICATION)
+	if (user_name[0] == '\0') {
+		fatal (net, "No authentication provided");
+		exit (-1);
+	}
+#endif
 	/*
 	 * Start up the login process on the slave side of the terminal
 	 */

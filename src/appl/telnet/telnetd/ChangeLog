@@ -1,3 +1,9 @@
+2000-02-21  Bear Giles  <bgiles@coyotesong.com>
+	    Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.c (doit): Provide a more useful error message than
+	"authentication failed" if no authentication was even attempted.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
