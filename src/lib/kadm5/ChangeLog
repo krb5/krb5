@@ -1,3 +1,9 @@
+2001-10-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* str_conv.c (krb5_string_to_keysalts): When parsing string, allow
+	for extra separator characters (like spaces) between keysalts.
+	[pullup 1.7->1.8 from trunk]
+
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.h (krb5_realm_params): Add fields realm_reject_bad_transit
