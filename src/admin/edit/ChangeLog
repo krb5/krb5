@@ -1,4 +1,13 @@
 
+Mon Aug 21 16:45:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* dump.c - Completely rework this logic to support old (e.g. Beta 5
+		and previous) dump format and new dump format using the same
+		commands.  This is differentiated by using the "-old" command
+		qualifier.
+	* kdb5_edit.M - Add description of -R and -s.  Remove "ascii represen-
+		tation of a decimal number".  Remove "Bugs".
+
+
 Fri Aug 18 17:06:06 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* ss_wrapper.c - Change sense of fgets() check so scripts work.
 
