@@ -1,3 +1,11 @@
+2004-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Look for uint32_t, not int32_t, since some BSD-ish
+	sys/types.h headers have int32_t and u_int32_t, but only have
+	uint32_t in stdint.h.
+
+	* types.hin: Change int32_t checks to uint32_t checks.
+
 2004-08-17  Tom Yu  <tlyu@mit.edu>
 
 	* svc.c (svc_getreqset): Allocate cred and verf memory to

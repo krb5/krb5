@@ -81,44 +81,44 @@ fi
 AC_SUBST(GSSRPC__SYS_PARAM_H)
 AC_SUBST(GSSRPC__NETDB_H)
 
-AC_CACHE_CHECK([for int32_t in sys/types.h],
-  [krb5_cv_header_sys_types_h_int32_t],
+AC_CACHE_CHECK([for uint32_t in sys/types.h],
+  [krb5_cv_header_sys_types_h_uint32_t],
   [AC_TRY_COMPILE([#include <sys/types.h>],
-      [int32_t i = 0;],
-      [krb5_cv_header_sys_types_h_int32_t=yes],
-      [krb5_cv_header_sys_types_h_int32_t=no])])
-AC_CACHE_CHECK([for int32_t in stdint.h],
-  [krb5_cv_header_stdint_h_int32_t],
+      [uint32_t i = 0;],
+      [krb5_cv_header_sys_types_h_uint32_t=yes],
+      [krb5_cv_header_sys_types_h_uint32_t=no])])
+AC_CACHE_CHECK([for uint32_t in stdint.h],
+  [krb5_cv_header_stdint_h_uint32_t],
   [AC_TRY_COMPILE([#include <stdint.h>],
-      [int32_t i = 0;],
-      [krb5_cv_header_stdint_h_int32_t=yes],
-      [krb5_cv_header_stdint_h_int32_t=no])])
-AC_CACHE_CHECK([for int32_t in inttypes.h],
-  [krb5_cv_header_inttypes_h_int32_t],
+      [uint32_t i = 0;],
+      [krb5_cv_header_stdint_h_uint32_t=yes],
+      [krb5_cv_header_stdint_h_uint32_t=no])])
+AC_CACHE_CHECK([for uint32_t in inttypes.h],
+  [krb5_cv_header_inttypes_h_uint32_t],
   [AC_TRY_COMPILE([#include <inttypes.h>],
-      [int32_t i = 0;],
-      [krb5_cv_header_inttypes_h_int32_t=yes],
-      [krb5_cv_header_inttypes_h_int32_t=no])])
+      [uint32_t i = 0;],
+      [krb5_cv_header_inttypes_h_uint32_t=yes],
+      [krb5_cv_header_inttypes_h_uint32_t=no])])
 GSSRPC__STDINT_H='/* #include <stdint.h> */'
 GSSRPC__INTTYPES_H='/* #include <inttypes.h> */'
-GSSRPC__FAKE_INT32='/* #undef GSSRPC__FAKE_INT32 */'
-if test $krb5_cv_header_sys_types_h_int32_t = yes; then
+GSSRPC__FAKE_UINT32='/* #undef GSSRPC__FAKE_INT32 */'
+if test $krb5_cv_header_sys_types_h_uint32_t = yes; then
   : # already included sys/types.h
 else
-  if test $krb5_cv_header_stdint_h_int32_t = yes; then
+  if test $krb5_cv_header_stdint_h_uint32_t = yes; then
     GSSRPC__STDINT_H='#include <stdint.h>'
   else
-    if test $krb5_cv_header_inttypes_h_int_32_t = yes; then
+    if test $krb5_cv_header_inttypes_h_uint32_t = yes; then
       GSSRPC__INTTYPES_H='#include <inttypes.h>'
     else
       AC_MSG_WARN([can't find a fixed-width 32-bit type anywhere; faking it])
-      GSSRPC__FAKE_INT32='#define GSSRPC__FAKE_INT32 1'
+      GSSRPC__FAKE_UINT32='#define GSSRPC__FAKE_UINT32 1'
     fi
   fi
 fi
 AC_SUBST(GSSRPC__STDINT_H)
 AC_SUBST(GSSRPC__INTTYPES_H)
-AC_SUBST(GSSRPC__FAKE_INT32)
+AC_SUBST(GSSRPC__FAKE_UINT32)
 
 AC_CACHE_CHECK([for BSD type aliases], [krb5_cv_type_bsdaliases],
   [AC_TRY_COMPILE(
