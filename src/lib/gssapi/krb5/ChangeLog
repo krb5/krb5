@@ -1,5 +1,8 @@
 Tue Jul 23 22:35:53 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* Makefile.in (all-windows): Fix broken Windows commands to copy
+		gssapi_krb5.h to include/gssapi.
+
 	* gssapiP_krb5.h: Must include k5-int.h on Windows and Macintosh
 		builds. 
 

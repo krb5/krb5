@@ -112,7 +112,7 @@ OBJS = \
 
 HDRS= $(ETHDRS)
 
-EHDRDIR=$(TOP)/include/gssapi
+EHDRDIR=$(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= gssapi_krb5.h
 
 all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
