@@ -1,3 +1,7 @@
+Fri May 10 01:26:24 1996  Richard Basch  <basch@lehman.com>
+
+	* k5-int.h krb5.hin: Replaced 3des-md5 with 3des-sha.
+
 Tue May  7 17:19:17 1996  Richard Basch  <basch@lehman.com>
 
 	* k5-int.h: We are providing 3DES routines in libcrypto, too...
@@ -9,8 +13,8 @@ Thu May  2 18:41:00 1996  Richard Basch  <basch@lehman.com>
 
 Fri May  3 00:26:47 1996  Mark Eichin  <eichin@cygnus.com>
 
-	* krb5.hin (krb5_get_credentials_validate): declaration for new
-	function.
+	* krb5.hin
+	(krb5_get_credentials_validate): declaration for new function.
 	(krb5_get_cred_from_kdc_validate): ditto.
 
 Thu May  2 22:52:14 1996  Mark Eichin  <eichin@cygnus.com>
