@@ -1,3 +1,10 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_glue_v1.c: Include misc.h for prototypes.
+
+	* ovsec_kadmd.c: Declare usage() and display_status() static.
+	Flush out static prototype for display_status_1().
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* ovsec_kadmd.c: Change prototype for process_chpw_request

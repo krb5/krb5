@@ -128,7 +128,7 @@ krb5_error_code process_chpw_request(krb5_context context, void *server_handle,
  * Modifies:
  */
 
-void usage()
+static void usage()
 {
      fprintf(stderr, "Usage: kadmind [-r realm] [-m] [-nofork] "
 	     "[-port port-number]\n");
@@ -152,9 +152,9 @@ void usage()
  * displayed on stderr, each preceeded by "GSS-API error <msg>: " and
  * followed by a newline.
  */
-static void display_status_1();
+static void display_status_1(char *, OM_uint32, int);
 
-void display_status(msg, maj_stat, min_stat)
+static void display_status(msg, maj_stat, min_stat)
      char *msg;
      OM_uint32 maj_stat;
      OM_uint32 min_stat;

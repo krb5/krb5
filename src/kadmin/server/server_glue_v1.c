@@ -1,5 +1,6 @@
 #define USE_KADM5_API_VERSION 1
 #include <kadm5/admin.h>
+#include "misc.h"
 
 /*
  * In server_stubs.c, kadmind has to be able to call kadm5 functions
