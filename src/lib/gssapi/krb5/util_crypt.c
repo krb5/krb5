@@ -90,22 +90,6 @@ kg_make_confounder(context, key, buf)
    return(krb5_c_random_make_octets(context, &lrandom));
 }
 
-int
-kg_encrypt_size(context, key, n)
-     krb5_context context;
-     krb5_keyblock *key;
-     int n;
-{
-   krb5_error_code code;
-   size_t enclen;
-
-   code = krb5_c_encrypt_length(context, key->enctype, n, &enclen);
-   if (code)
-      return(-1); /* XXX */
-
-   return(enclen);
-}
-
 krb5_error_code
 kg_encrypt(context, key, usage, iv, in, out, length)
      krb5_context context;

@@ -39,6 +39,7 @@ int g_set_init(g_set *s)
    return(0);
 }
 
+#if 0
 int g_set_destroy(g_set *s)
 {
    g_set next;
@@ -51,6 +52,7 @@ int g_set_destroy(g_set *s)
 
    return(0);
 }
+#endif
 
 int g_set_entry_add(g_set *s, void *key, void *value)
 {

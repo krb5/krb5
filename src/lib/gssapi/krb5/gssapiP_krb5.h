@@ -185,14 +185,6 @@ typedef struct _krb5_gss_ctx_id_rec {
 
 extern void *kg_vdb;
 
-struct kg2_option {
-    int option_id;		/* set by caller */
-    int length;			/* filled in by parser */
-    unsigned char *data;	/* filled in by parser.  points inside
-				   passed-in token, so nothing needs to
-				   be freed */
-};
-
 /* helper macros */
 
 #define kg_save_name(name)		g_save_name(&kg_vdb,name)
@@ -238,9 +230,6 @@ int kg_confounder_size (krb5_context context, krb5_keyblock *key);
 
 krb5_error_code kg_make_confounder (krb5_context context, 
 	    krb5_keyblock *key, unsigned char *buf);
-
-int kg_encrypt_size (krb5_context context,
-			       krb5_keyblock *key, int n);
 
 krb5_error_code kg_encrypt (krb5_context context, 
 				      krb5_keyblock *key, int usage,
@@ -305,23 +294,6 @@ krb5_error_code kg_ctx_internalize (krb5_context kcontext,
 OM_uint32 kg_get_context (OM_uint32 *minor_status,
 				    krb5_context *context);
 	
-OM_uint32
-kg2_parse_token (OM_uint32 *minor_status,
-			   unsigned char *ptr,
-			   int length,
-			   krb5_ui_4 *flags,
-			   int *nctypes, /* OUT */
-			   krb5_cksumtype **ctypes, /* OUT */
-			   int noptions,
-			   struct kg2_option *options, /* INOUT */
-			   krb5_data *kmsg,
-			   krb5_data *mic);
-
-void kg2_intersect_ctypes (int *nc1, 
-				     krb5_cksumtype *c1,
-				     int nc2,
-				     const krb5_cksumtype *c2);
-
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred
@@ -582,11 +554,6 @@ OM_uint32 krb5_gss_import_sec_context
 	    );
 
 OM_uint32 krb5_gss_release_oid
-(OM_uint32 *,		/* minor_status */
-	    gss_OID *			/* oid */
-	   );
-
-OM_uint32 krb5_gss_internal_release_oid
 (OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */
 	   );

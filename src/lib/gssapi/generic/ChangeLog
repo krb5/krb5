@@ -1,3 +1,8 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Don't build util_dup.c.
+	* util_set.c (g_set_destroy): Don't compile this unused function.
+
 2002-07-12  Alexandra Ellwood <lxs@mit.edu>
 
 	* gssapi_generic.h: allow inclusion by C++

@@ -8,6 +8,15 @@
 	a filter on the default enctypes and use the resulting list.
 	(make_ap_req_v2): Delete unused function.
 
+	* k5mech.c, pname_to_uid.c, util_ctxsetup.c: Deleted.
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Don't compile
+	util_ctxsetup.c.
+	* rel_oid.c (krb5_gss_internal_release_oid): Now static.
+	* util_crypt.c (kg_encrypt_size): Function deleted.
+	* gssapiP_krb5.h (struct kg2_option, kg2_parse_token,
+	kg2_intersect_ctypes, krb5_gss_internal_release_oid,
+	kg_encrypt_size): Declarations deleted.
+
 2002-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi_krb5.c (gss_mech_krb5_v2, gss_mech_set_krb5_v2,

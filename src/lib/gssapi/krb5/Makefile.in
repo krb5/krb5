@@ -56,7 +56,6 @@ SRCS = \
 	$(srcdir)/unseal.c \
 	$(srcdir)/util_cksum.c \
 	$(srcdir)/util_crypt.c \
-	$(srcdir)/util_ctxsetup.c \
 	$(srcdir)/util_seed.c \
 	$(srcdir)/util_seqnum.c \
 	$(srcdir)/val_cred.c \
@@ -104,7 +103,6 @@ OBJS = \
 	$(OUTPRE)unseal.$(OBJEXT) \
 	$(OUTPRE)util_cksum.$(OBJEXT) \
 	$(OUTPRE)util_crypt.$(OBJEXT) \
-	$(OUTPRE)util_ctxsetup.$(OBJEXT) \
 	$(OUTPRE)util_seed.$(OBJEXT) \
 	$(OUTPRE)util_seqnum.$(OBJEXT) \
 	$(OUTPRE)val_cred.$(OBJEXT) \
@@ -152,7 +150,6 @@ STLIBOBJS = \
 	unseal.o \
 	util_cksum.o \
 	util_crypt.o \
-	util_ctxsetup.o \
 	util_seed.o \
 	util_seqnum.o \
 	val_cred.o \
@@ -378,10 +375,6 @@ util_crypt.so util_crypt.po $(OUTPRE)util_crypt.$(OBJEXT): util_crypt.c $(SRCTOP
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-util_ctxsetup.so util_ctxsetup.po $(OUTPRE)util_ctxsetup.$(OBJEXT): util_ctxsetup.c gssapiP_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
 util_seed.so util_seed.po $(OUTPRE)util_seed.$(OBJEXT): util_seed.c gssapiP_krb5.h \
