@@ -90,4 +90,15 @@
 #define PW_CHECK_FILE "@PREFIX/lib/krb5kdc/bad_passwd"
 
 #define DEFAULT_ACL_DIR	"@PREFIX/lib/krb5kdc"
+
+/*
+ * krb5 slave support follows
+ */
+
+#define KPROP_DEFAULT_FILE "@PREFIX/lib/krb5kdc/slave_datatrans"
+#define KPROPD_DEFAULT_FILE "@PREFIX/lib/krb5kdc/from_master"
+#define KPROPD_DEFAULT_KDB5_EDIT "@PREFIX/admin/kdb5_edit"
+#define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
+#define KPROPD_ACL_FILE "@PREFIX/lib/krb5kdc/kpropd.acl"
+
 #endif /* KRB5_OSCONF__ */
