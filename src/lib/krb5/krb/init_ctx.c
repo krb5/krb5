@@ -55,6 +55,10 @@
 #include "k5-int.h"
 #include <ctype.h>
 #include "brand.c"
+/* There has to be a better way for windows... */
+#if defined(unix) 
+#include "../krb5_libinit.h"
+#endif
 
 /* The des-mdX entries are last for now, because it's easy to
    configure KDCs to issue TGTs with des-mdX keys and then not accept
@@ -329,11 +333,11 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 	count = 0;
 	sp = retval;
 	while (sp) {
-	    for (ep = sp; *ep && (*ep != ',') && !isspace(*ep); ep++)
+	    for (ep = sp; *ep && (*ep != ',') && !isspace((int) (*ep)); ep++)
 		;
 	    if (*ep) {
 		*ep++ = '\0';
-		while (isspace(*ep) || *ep == ',')
+		while (isspace((int) (*ep)) || *ep == ',')
 		    *ep++ = '\0';
 	    } else
 		ep = (char *) NULL;

@@ -318,7 +318,7 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 		      return retval;
 		  if (domain) {
 		      for (cp = domain; *cp; cp++)
-			  if (isupper(*cp))
+			  if (isupper((int) (*cp)))
 			      *cp = tolower(*cp);
 		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
 		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));

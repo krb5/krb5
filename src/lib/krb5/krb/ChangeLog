@@ -1,3 +1,17 @@
+2001-06-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (t_walk_rtree, t_kerb): Do not link against kdb libraries
+	for these test executables. 
+
+	* srv_rcache.c (krb5_get_server_rcache): Cast argument to
+	isgraph() to int.
+
+	* init_ctx.c: Cast arguments to isspace() to int. If unix is defined, 
+	include ../krb5_libinit.h. There has to be a better was for windows.
+
+	* conv_princ.c (krb5_425_conv_principal): Cast argument to isupper().
+	to int.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* str_conv.c: If strptime() is present on system without a

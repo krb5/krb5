@@ -61,7 +61,7 @@ krb5_get_server_rcache(context, piece, rcptr)
     for (i = 0; i < piece->length; i++) {
 	if (piece->data[i] == '\\')
 	    len++;
-	else if (!isgraph(piece->data[i]))
+	else if (!isgraph((int) piece->data[i]))
 	    len += 3;
     }
 
@@ -84,7 +84,7 @@ krb5_get_server_rcache(context, piece, rcptr)
 	    cachename[p++] = '\\';
 	    continue;
 	}
-	if (!isgraph(piece->data[i])) {
+	if (!isgraph((int) piece->data[i])) {
 	    sprintf(tmp, "%03o", piece->data[i]);
 	    cachename[p++] = '\\';
 	    cachename[p++] = tmp[0];

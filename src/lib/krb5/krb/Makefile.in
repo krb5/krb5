@@ -291,13 +291,11 @@ T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 
 T_DELTAT_OBJS= t_deltat.o deltat.o
 
-t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) \
-		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
+t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)
 
-t_kerb: $(T_KERB_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_kerb $(T_KERB_OBJS) \
-		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
+t_kerb: $(T_KERB_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_kerb $(T_KERB_OBJS) $(KRB5_BASE_LIBS)
 
 t_ser: $(T_SER_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_ser $(T_SER_OBJS) \
