@@ -401,11 +401,6 @@ typedef struct _krb5_checksum_entry {
 #define	CKSUMTYPE_RSA_MD5	0x0007
 #define	CKSUMTYPE_RSA_MD5_DES	0x0008
 
-/* macros to determine if a type is a local type */
-#define KEYTYPE_IS_LOCAL(keytype) (keytype & 0x8000)
-#define ETYPE_IS_LOCAL(etype) (etype & 0x8000)
-#define CKSUMTYPE_IS_LOCAL(cksumtype) (cksumtype & 0x8000)
-
 #ifndef krb5_roundup
 /* round x up to nearest multiple of y */
 #define krb5_roundup(x, y) ((((x) + (y) - 1)/(y))*(y))
