@@ -152,8 +152,8 @@ krb5_cc_default_name(context)
 #endif
 	}
 #else
-	sprintf(name_buf, "API:default_cache_name");
-	//sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
+	/* Default for Unix systems */
+	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 #endif
 #endif
 	name = name_buf;

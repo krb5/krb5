@@ -1,3 +1,8 @@
+Fri Sep 25 22:32:16 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ccdefname.c: We shouldn't try to use the CCache API on Unix
+		systems.  (The maze of #ifdef's was confusing.)
+
 Tue Sep  1 15:44:11 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ccdefname.c (krb5_cc_default_name): Changed the PC version to
