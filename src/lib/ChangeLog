@@ -1,3 +1,8 @@
+2001-11-29  Danilo Almeida  <dalmeida@mit.edu>
+
+	* gssapi32.def: Export gss_mech_krb5 as DATA.  Mark all exported
+	variables as DATA.  [Copied over from trunk.]
+
 2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win_glue.c (GetCallingAppVerInfo, krb5_vercheck): Use
