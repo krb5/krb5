@@ -31,11 +31,12 @@ extern int krb_debug;
  * success, or KFAILURE if something goes wrong.
  */
 
-#ifdef hpux
-/* should be HAS_RESUID */
+#ifndef HAVE_SETREUID
+#ifdef HAVE_SETRESUID
+/* for hpux */
 #define setreuid(r,e) setresuid(r,e,-1)
 #else
-#ifdef __svr4__
+/* for svr4 */
 #define setreuid(r,e) setuid(r)
 #endif
 #endif
