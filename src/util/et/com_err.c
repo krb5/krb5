@@ -22,6 +22,9 @@
 #include "com_err.h"
 #include "error_table.h"
 
+#if defined(_MSDOS) || defined(_WIN32)
+#include <io.h>
+#endif
 #ifdef _MACINTOSH
 #include "icons.h"
 static void MacMessageBox(errbuf);
@@ -96,7 +99,13 @@ void KRB5_CALLCONV default_com_err_proc(ectx, priv, whoami, code, fmt, ap)
 	MacMessageBox(errbuf);
 #else
 	/* For Windows */
-	MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
+	if (_isatty(_fileno(stderr))) {
+	    fputs(errbuf, stderr);
+	    fputc('\r', stderr);
+	    fputc('\n', stderr);
+	    fflush(stderr);
+	} else
+	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
 #endif
 }
 #endif

@@ -1,3 +1,8 @@
+Tue Feb 11 13:31:49 1997  Richard Basch  <basch@lehman.com>
+
+	* com_err.c: If the application is a console application, simply
+		display the message to stderr. (win32)
+
 Mon Feb 10 21:30:41 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* com_err.c, com_err.h (com_err_va): Fix broken Windows 16
