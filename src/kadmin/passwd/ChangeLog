@@ -1,3 +1,11 @@
+Thu Aug 15 19:30:18 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add USE_KDB5_LIBRARY to pick up -ldb.  Recent
+ 		changes to db-ndbm.h and k5-int.h cause ndbm.h to no
+ 		longer be included, which means that the dbm_error and
+ 		dbm_clearerr are no longer necessarily macros (as they
+ 		often are in ndbm.h), so must be pulled in from libdb.
+
 Mon Aug 12 12:01:28 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* configure.in, Makefile.in: don't build kpasswd.local (not really
