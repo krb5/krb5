@@ -1,3 +1,7 @@
+Sat Feb 22 18:33:17 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Move list file construction to win-post.in
+
 Tue Feb 18 00:14:13 1997  Richard Basch  <basch@lehman.com>
 
 	* profile.hin prof_int.h prof_init.c:

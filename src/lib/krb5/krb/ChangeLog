@@ -1,3 +1,8 @@
+Sat Feb 22 22:39:49 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Fri Feb 21 18:38:06 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* crypto_glue.c: Move into libcrypto as krb5_glue.c; I need to

@@ -185,13 +185,8 @@ DBG=$(DBG_LIB)
 
 
 all-unix:: krb_err.h includes all-liblinks
-all-windows:: $(OBJFILE)
 
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
-
+##DOS##LIBOBJS = $(OBJS)
 
 # comp_et_depend(krb_err)
 krb_err.h:: krb_err.et

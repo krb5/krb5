@@ -1,3 +1,8 @@
+Sat Feb 22 18:53:00 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Thu Feb  6 12:46:49 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (t_cksum): Link with libkrb5.a.

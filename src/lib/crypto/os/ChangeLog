@@ -1,3 +1,8 @@
+Sat Feb 22 18:54:53 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Mon Feb 17 17:24:41 1997  Richard Basch  <basch@lehman.com>
 
 	* c_ustime.c: Fixed microsecond adjustment code (win32)

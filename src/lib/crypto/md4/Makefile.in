@@ -1,25 +1,18 @@
 # -I$(srcdir) is needed to pull in $(srcdir)/rsa-md4.h for ./t_mddriver.c.
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=md4
-##DOSOBJFILE=..\md4.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=md4
+##DOS##OBJFILE=..\md4.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 RUN_SETUP=@KRB5_RUN_ENV@
 
 STLIBOBJS=md4.o md4glue.o md4crypto.o
-
 OBJS=	md4.$(OBJEXT) md4glue.$(OBJEXT) md4crypto.$(OBJEXT)
-
 SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
@@ -58,5 +51,3 @@ clean::
 	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT) t_cksum.c
 
 clean-unix:: clean-libobjs
-clean-windows::
-	$(RM) $(OBJFILE)

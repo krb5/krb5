@@ -1,22 +1,15 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=crc32
-##DOSOBJFILE=..\crc32.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=crc32
+##DOS##OBJFILE=..\crc32.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 STLIBOBJS=crc.o
-
 OBJS=	crc.$(OBJEXT)
-
 SRCS=	$(srcdir)/crc.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
@@ -34,5 +27,3 @@ clean::
 	$(RM) crctest$(EXEEXT) crctest.$(OBJEXT)
 
 clean-unix:: clean-libobjs
-clean-windows::
-	$(RM) $(OBJFILE)

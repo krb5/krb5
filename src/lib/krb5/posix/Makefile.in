@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=posix
-##DOSOBJFILE=..\$(MYNAME).lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=posix
+##DOS##OBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS=setenv.o @LIBOBJS@
@@ -10,18 +10,8 @@ MACSRCS = getuid.c strcasecmp.c strdup.c
 
 OBJS = setenv.$(OBJEXT)	@LIBOBJS@
 
-all-windows:: $(OBJFILE)
 all-unix:: all-libobjs
-
-##WIN16##$(OBJFILE): syslog.obj sscanf.obj
-##WIN16##	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-
 clean-unix:: clean-libobjs
 
-##WIN32##$(OBJFILE): syslog.obj
-##WIN32##	$(RM) $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
-
-clean-windows::
-	$(RM) $(OBJFILE)
+##WIN16##LIBOBJS = syslog.obj sscanf.obj
+##WIN32##LIBOBJS = syslog.obj

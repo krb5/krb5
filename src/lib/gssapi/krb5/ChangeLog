@@ -1,3 +1,8 @@
+Sat Feb 22 18:59:42 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Wed Feb  5 20:27:50 1997  Richard Basch  <basch@lehman.com>
 
 	* util_crypt.c: Include k5-int.h as we need to dereference

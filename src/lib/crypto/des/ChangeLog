@@ -1,3 +1,8 @@
+Sat Feb 22 18:50:35 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Fri Feb  7 07:12:52 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in (all-unix, all-mac): Create shared directory

@@ -3,9 +3,9 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=krb
-##DOSOBJFILE=..\$(MYNAME).lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=krb
+##DOS##OBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
@@ -232,14 +232,10 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/valid_times.c	\
 	$(srcdir)/walk_rtree.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
+clean-unix:: clean-libobjs
 
 COMERRLIB=$(TOPLIBD)/libcom_err.a
 
@@ -291,13 +287,7 @@ check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 		$(RUN_SETUP) ./t_ser
 
-check-windows::
-
 clean::
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
 	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
 	$(RM) t_ser$(EXEEXT) t_ser.$(OBJEXT)
-
-clean-unix:: clean-libobjs
-clean-windows::
-	$(RM) $(OBJFILE)

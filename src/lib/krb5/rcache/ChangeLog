@@ -1,3 +1,8 @@
+Sat Feb 22 22:44:15 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 
         * Makefile.in: win32 build

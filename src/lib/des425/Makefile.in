@@ -1,10 +1,10 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
 
-##DOSBUILDTOP = ..\..
-##DOSLIBNAME=des425.lib
-##DOSOBJFILE=des425.lst
-##DOSOBJFILEDEP=des425.lst
-##DOSOBJFILELIST=@des425.lst
+##DOS##BUILDTOP = ..\..
+##DOS##LIBNAME=des425.lib
+##DOS##OBJFILE=des425.lst
+##DOS##OBJFILEDEP=des425.lst
+##DOS##OBJFILELIST=@des425.lst
 
 RUN_SETUP=@KRB5_RUN_ENV@
 
@@ -76,12 +76,8 @@ DEPKLIB= $(TOPLIBD)/libcrypto.a
 
 all-unix:: all-liblinks
 all-mac:: $(OBJS)
-all-windows:: $(OBJFILE)
 
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 shared:
 	mkdir shared
@@ -100,9 +96,6 @@ clean::
 	$(RM) verify$(EXEEXT) verify.$(OBJEXT)
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-clean-mac::
-clean-windows::
-	$(RM) des425.lib des425.bak $(OBJFILE)
 
 libdes425.$(STEXT): $(OBJS)
 	$(RM) $@

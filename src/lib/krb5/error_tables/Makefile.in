@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=error_tables
-##DOSOBJFILE=..\err_tbls.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=error_tables
+##DOS##OBJFILE=..\err_tbls.lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
@@ -29,12 +29,7 @@ ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c \
 	$(srcdir)/init_ets.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 all-libobjs: $(HDRS)
@@ -70,4 +65,3 @@ kv5m_err.$(OBJEXT): kv5m_err.c
 
 clean-unix:: clean-libobjs
 	$(RM) $(HDRS) $(ETSRCS)
-clean-windows::

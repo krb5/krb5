@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=free
-##DOSOBJFILE=..\$(MYNAME).lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=free
+##DOS##OBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
@@ -113,16 +113,7 @@ SRCS=	\
 	$(srcdir)/f_pwd_seq.c	\
 	$(srcdir)/f_unparse.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
-
 clean-unix:: clean-libobjs
-
-clean-windows::
-	$(RM) $(OBJFILE)

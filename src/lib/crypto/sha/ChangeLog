@@ -1,3 +1,8 @@
+Sat Feb 22 18:52:09 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Thu Jan 30 21:31:39 1997  Richard Basch  <basch@lehman.com>
 
 	* sha_crypto.c sha_glue.c:

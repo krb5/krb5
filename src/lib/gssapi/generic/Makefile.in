@@ -1,11 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=generic
-##DOSOBJFILE=..\generic.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=generic
+##DOS##OBJFILE=..\generic.lst
 ##WIN16##LIBNAME=..\gssapi.lib
-
-all-windows:: $(OBJS)
 
 ETSRCS= gssapi_err_generic.c
 ETOBJS= gssapi_err_generic.$(OBJEXT)
@@ -103,12 +101,10 @@ all-unix:: includes-unix
 all-unix:: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
 all-unix:: all-libobjs
 
-all-windows:: win-include $(HDRS) $(OBJFILE)
 
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
+
+all-windows:: win-include $(HDRS)
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
@@ -119,7 +115,7 @@ clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS)
 
 clean-windows::
-	$(RM) $(HDRS) $(OBJFILE)
+	$(RM) $(HDRS)
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 includes-unix::

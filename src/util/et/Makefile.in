@@ -58,11 +58,6 @@ SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 all-windows:: $(OBJFILE)
 	copy com_err.h $(BUILDTOP)\include
 
-##DOS$(OBJFILE): $(LIBOBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
-
 
 error_table.c: et_lex.lex.c 
 error_table.c: $(srcdir)/error_table.y

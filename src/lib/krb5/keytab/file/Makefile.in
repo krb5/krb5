@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..\..
-##DOSMYNAME=keytab\file
-##DOSOBJFILE= file.lst
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=keytab\file
+##DOS##OBJFILE= file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS = \
@@ -56,15 +56,7 @@ OBJS = \
 	ktf_defops.$(OBJEXT)	\
 	ser_ktf.$(OBJEXT)
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
-
-clean-windows::
-	$(RM) $(OBJFILE)

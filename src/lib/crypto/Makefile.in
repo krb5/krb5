@@ -45,13 +45,7 @@ SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-# FIXME, need to build the library too...
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-liblinks
 install-unix:: install-libs
@@ -60,8 +54,6 @@ libcrypto.lib:
 	libdir crypto.lib
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-clean-windows::
-	$(RM) crypto.lib crypto.bak $(OBJFILE)
 
 check-unix::
 

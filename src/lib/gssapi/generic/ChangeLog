@@ -1,3 +1,8 @@
+Sat Feb 22 18:57:56 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Sun Feb  9 11:41:08 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Fix includes generation for unix after

@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=md5
-##DOSOBJFILE=..\md5.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=md5
+##DOS##OBJFILE=..\md5.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 RUN_SETUP = @KRB5_RUN_ENV@
@@ -10,15 +10,9 @@ RUN_SETUP = @KRB5_RUN_ENV@
 STLIBOBJS=md5.o md5glue.o md5crypto.o
 
 OBJS=	md5.$(OBJEXT) md5glue.$(OBJEXT) md5crypto.$(OBJEXT)
-
 SRCS=	$(srcdir)/md5.c $(srcdir)/md5glue.c $(srcdir)/md5crypto.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
@@ -43,5 +37,3 @@ clean::
 	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT)
 
 clean-unix:: clean-libobjs
-clean-windows::
-	$(RM) $(OBJFILE)

@@ -1,5 +1,7 @@
 Sat Feb 22 12:18:47 1997  Richard Basch  <basch@lehman.com>
 
+	* Makefile.in: Move list file construction to win-post.in
+
 	* et_c.awk et_h.awk error_message.c com_err.c:
 		Put back #ifdef unix, and also based it on AIX.
 		We do NOT want the compatibility interface on any new

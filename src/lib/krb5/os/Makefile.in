@@ -3,10 +3,9 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-##DOSBUILDTOP = ..\..\..
-##DOSDBFLAGS=
-##DOSMYNAME=os
-##DOSOBJFILE=..\$(MYNAME).lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=os
+##DOS##OBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
@@ -129,14 +128,10 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
+clean-unix:: clean-libobjs
 
 shared:
 	mkdir shared
@@ -193,7 +188,3 @@ check-unix::
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
-
-clean-unix:: clean-libobjs
-clean-windows::
-	$(RM) $(OBJFILE)

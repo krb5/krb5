@@ -35,13 +35,9 @@ STOBJLISTS=OBJS.ST
 
 all-unix:: includes test_parse test_profile
 all-unix:: all-libs
+all-windows::
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 
 awk-windows:

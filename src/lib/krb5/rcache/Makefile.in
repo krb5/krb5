@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=rcache
-##DOSOBJFILE=..\$(MYNAME).lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=rcache
+##DOS##OBJFILE=..\$(MYNAME).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS = \
@@ -29,16 +29,7 @@ SRCS=	\
 	$(srcdir)/rc_conv.c	\
 	$(srcdir)/ser_rc.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
-
-clean-windows::
-	$(RM) $(OBJFILE)
-
 clean-unix:: clean-libobjs

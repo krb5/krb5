@@ -1,3 +1,8 @@
+Sat Feb 22 18:55:52 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Sat Feb 22 01:07:34 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* read_passwd.c: Don't base definitions on unix being defined.

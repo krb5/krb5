@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=os
-##DOSOBJFILE=..\os.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=os
+##DOS##OBJFILE=..\os.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 STLIBOBJS = rnd_confoun.o c_localaddr.o c_ustime.o @LIBOBJS@
@@ -12,12 +12,7 @@ OBJS= $(COBJS) $(LIBOBJS)
 
 SRCS=	rnd_confoun.c c_localaddr.c c_ustime.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(COBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(COBJS)
 
 all-unix:: all-libobjs
 
@@ -29,6 +24,3 @@ memmove.o: memmove.c
 clean-unix:: clean-libobjs
 clean:: 
 	$(RM) memmove.c
-
-clean-windows::
-	$(RM) $(OBJFILE)

@@ -1,9 +1,10 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=des
-##DOSOBJFILE=..\des.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=des
+##DOS##OBJFILE=..\des.lst
 ##WIN16##LIBNAME=..\crypto.lib
+
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -82,12 +83,7 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/u_nfold.c \
 	$(srcdir)/u_rn_key.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
@@ -121,8 +117,5 @@ check-windows::
 clean:: 
 	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) \
 	t_verify.$(OBJEXT) t_random.$(OBJEXT) t_random$(EXEEXT)
-
-clean-windows::
-	$(RM) $(OBJFILE)
 
 clean-unix:: clean-libobjs

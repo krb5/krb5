@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYDIR=sha
-##DOSOBJFILE=..\sha.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=sha
+##DOS##OBJFILE=..\sha.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 STLIBOBJS=shs.o hmac_sha.o sha_crypto.o sha_glue.o
@@ -18,12 +18,8 @@ SRCS=	$(srcdir)/shs.c		\
 	$(srcdir)/sha_glue.c
 
 
-all-windows:: $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYDIR)\ *.obj > $(OBJFILE)
 
 all-unix:: all-libobjs
 
@@ -43,5 +39,3 @@ clean::
 	$(RM) t_shs$(EXEEXT) t_shs.$(OBJEXT)
 
 clean-unix:: clean-libobjs
-clean-windows::
-	$(RM) $(OBJFILE)

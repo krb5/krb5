@@ -1,3 +1,8 @@
+Sat Feb 22 19:02:08 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
 Sat Feb 22 01:16:01 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (SHLIB_DIRS): Remove extra shlib_explibs

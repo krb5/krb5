@@ -1,3 +1,7 @@
+Sat Feb 22 18:46:38 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Move list file construction to win-post.in
+
 Thu Jan 30 21:30:32 1997  Richard Basch  <basch@lehman.com>
 
 	* crc.c: Declare the functions to take const pointers, where possible.

@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..\..
-##DOSMYNAME = ccache\file
-##DOSOBJFILE = file.lst
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR = ccache\file
+##DOS##OBJFILE = file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS = \
@@ -30,17 +30,7 @@ SRCS 	= $(srcdir)/fcc_close.c $(srcdir)/fcc_destry.c $(srcdir)/fcc_eseq.c \
 	$(srcdir)/fcc_write.c $(srcdir)/fcc_sflags.c $(srcdir)/fcc_defops.c \
 	$(srcdir)/fcc_errs.c $(srcdir)/fcc_maybe.c
 
-all-windows:: $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
-all-windows:: $(OBJS)
-
 clean-unix:: clean-libobjs
-
-clean-windows::
-	$(RM) $(OBJFILE)

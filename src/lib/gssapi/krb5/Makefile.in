@@ -1,8 +1,8 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 
-##DOSBUILDTOP = ..\..\..
-##DOSMYNAME=krb5
-##DOSOBJFILE = ..\krb5.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=krb5
+##DOS##OBJFILE = ..\krb5.lst
 ##WIN16##LIBNAME=..\gssapi.lib
 
 ETSRCS= gssapi_err_krb5.c
@@ -138,12 +138,9 @@ HDRS= $(ETHDRS)
 EHDRDIR=$(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= gssapi_krb5.h
 
-##DOS$(OBJFILE): $(OBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj >$(OBJFILE)
+##DOS##LIBOBJS = $(OBJS)
 
-all-windows:: win-include $(SRCS) $(HDRS) $(OBJS) $(OBJFILE)
+all-windows:: win-include $(SRCS) $(HDRS)
 
 all-unix:: $(SRCS) $(HDRS) includes
 all-unix:: all-libobjs
@@ -156,7 +153,7 @@ clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS)
 
 clean-windows::
-	$(RM) $(EHDRDIR)\gssapi_krb5.h $(OBJFILE)
+	$(RM) $(EHDRDIR)\gssapi_krb5.h
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 install::
