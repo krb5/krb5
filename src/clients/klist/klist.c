@@ -655,8 +655,8 @@ show_credential(cred)
     krb5_free_unparsed_name(kcontext, sname);
 }
 
-#define NEED_SOCKETS
-#include "k5-int.h" /* for ss2sin etc */
+#include "port-sockets.h"
+#include "socket-utils.h" /* for ss2sin etc */
 #define FAI_PREFIX klist
 #include "fake-addrinfo.c"
 
