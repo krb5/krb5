@@ -1,4 +1,7 @@
 SRCS= kdb_stash.c kdb_create.c kdb_destroy.c common.c
-all::
-	/*placebo*/
-	@echo nothing to build yet.
+
+all::	kdb5_create kdb5_destroy kdb5_stash
+
+NormalProgramTarget(kdb5_create,kdb_create.o,$(KDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
+NormalProgramTarget(kdb5_destroy,kdb_destroy.o,$(KDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
+NormalProgramTarget(kdb5_stash,kdb_stash.o,$(KDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
