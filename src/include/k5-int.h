@@ -186,6 +186,9 @@ struct sockaddr;
 #endif
 #endif
 
+/* Get mutex support; currently used only for the replay cache.  */
+#include "k5-thread.h"
+
 /* krb5/krb5.h includes many other .h files in the krb5 subdirectory.
    The ones that it doesn't include, we include below.  */
 
@@ -1809,6 +1812,7 @@ struct krb5_rc_st {
     krb5_magic magic;
     const struct _krb5_rc_ops *ops;
     krb5_pointer data;
+    k5_mutex_t lock;
 };
 
 typedef struct _krb5_donot_replay {
