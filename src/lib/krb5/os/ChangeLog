@@ -1,3 +1,12 @@
+Thu Dec 21 17:51:58 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (t_an_to_ln): Use $(LD) instead of $(CC) to link
+		final executables, so that we can more easily use purify.
+
+	* hst_realm.c (krb5_get_host_realm): Eliminate memory leak; realm
+		was already being allocated by the profile library; no
+		reason to reallocate it again.
+
 Wed Nov 15 10:53:16 1995    <tytso@rsts-11.mit.edu>
 
 	* promptusr.c: New function for doing generic tty input and output.

@@ -108,10 +108,10 @@ T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o $(TOPLIBD)/libkrb5.a	\
 		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 t_std_conf: $(T_STD_CONF_OBJS)
-	$(CC) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
+	$(LD) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
 
 t_an_to_ln: $(T_AN_TO_LN_OBJS)
-	$(CC) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
+	$(LD) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\

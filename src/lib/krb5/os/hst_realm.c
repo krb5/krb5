@@ -84,7 +84,7 @@ krb5_get_host_realm(context, host, realmsp)
     char ***realmsp;
 {
     char **retrealms;
-    char *domain, *default_realm, *realm, *cp;
+    char *default_realm, *realm, *cp;
     krb5_error_code retval;
     int l;
     char local_host[MAXHOSTNAMELEN+1];
@@ -139,35 +139,25 @@ krb5_get_host_realm(context, host, realmsp)
 	}
     }
 
-    if (realm != (char *)NULL)
-    {
-	/* We found an exact match */
-	if (!(cp = (char *)malloc(strlen(realm)+1)))
-	    return ENOMEM;
-	strcpy(cp, realm);
-	realm = cp;
-    }
-    else if (default_realm != (char *)NULL)
-    {
-	/* We are defaulting to the realm of the host */
-	if (!(cp = (char *)malloc(strlen(default_realm)+1)))
-	    return ENOMEM;
-	strcpy(cp, default_realm);
-	realm = cp;
+    if (realm == (char *)NULL) {
+	    if (default_realm != (char *)NULL) {
+		    /* We are defaulting to the realm of the host */
+		    if (!(cp = (char *)malloc(strlen(default_realm)+1)))
+			    return ENOMEM;
+		    strcpy(cp, default_realm);
+		    realm = cp;
 
-	/* Assume the realm name is upper case */
-	for (cp = realm; *cp; cp++)
-	    if (islower(*cp))
-		*cp = toupper(*cp);
-	cp = realm;
-    }
-    else
-    {
-	/* We are defaulting to the local realm */
-	retval = krb5_get_default_realm(context, &cp);
-	if (retval) {
-	    return retval;
-	}
+		    /* Assume the realm name is upper case */
+		    for (cp = realm; *cp; cp++)
+			    if (islower(*cp))
+				    *cp = toupper(*cp);
+	    } else {
+		    /* We are defaulting to the local realm */
+		    retval = krb5_get_default_realm(context, &realm);
+		    if (retval) {
+			    return retval;
+		    }
+	    }
     }
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
 	if (realm != (char *)NULL)
@@ -175,7 +165,7 @@ krb5_get_host_realm(context, host, realmsp)
 	return ENOMEM;
     }
 
-    retrealms[0] = cp;
+    retrealms[0] = realm;
     retrealms[1] = 0;
     
     *realmsp = retrealms;
