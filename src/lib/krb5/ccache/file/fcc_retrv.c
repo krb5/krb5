@@ -69,7 +69,7 @@ register const krb5_data *data1, *data2;
 }
 
 static krb5_boolean
-ktype_match(context, creds)
+ktype_reasonable(context, creds)
 register krb5_context context;
 register krb5_creds *creds;
 {
@@ -132,7 +132,7 @@ krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
 	  return kret;
 
      while ((kret = krb5_fcc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
-	  if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
+	 if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
 		   srvname_match(context, mcreds, &fetchcreds)) ||
 	       standard_fields_match(context, mcreds, &fetchcreds))
 	      &&
@@ -157,9 +157,9 @@ krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
 	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
 	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
 	      &&
-	      (! set(KRB5_TC_MATCH_KTYPE) ||
-	       ktype_match (context, &fetchcreds))
-	      )
+	     ((! set(KRB5_TC_MATCH_KTYPE)&&
+		      ktype_reasonable (context, &fetchcreds))||
+		(mcreds->keyblock.enctype == fetchcreds.keyblock.enctype)))
 	  {
 	       krb5_fcc_end_seq_get(context, id, &cursor);
 	       *creds = fetchcreds;

@@ -1,3 +1,8 @@
+Thu Jan 25 14:44:48 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* scc_retrv.c (ktype_reasonable): Rename ktype_match; see fcc  for explanation.
+	(krb5_scc_retrieve): Match exactly on enctype if requested to do so.
+
 Wed Jan 10 22:44:43 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* scc.h (KRB5_SCC_DEFAULT_VNO): Remove KRB5_SCC_DEFAULT_VNO; now

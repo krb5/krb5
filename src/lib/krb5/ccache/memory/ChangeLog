@@ -1,3 +1,8 @@
+Thu Jan 25 14:50:51 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* mcc_retrv.c (ktype_reasonable): Rename ktype_match
+	(krb5_mcc_retrieve): Match enctype exactly if requested.
+
 Sat Nov  4 00:45:42 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* mcc_ops.c: Remove excess code which is defined in fcc_ops.c

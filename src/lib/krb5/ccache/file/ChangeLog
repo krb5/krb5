@@ -1,3 +1,11 @@
+Wed Jan 24 21:36:34 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* fcc_retrv.c (ktype_reasonable): Renamed ktype_match because it
+        didn't really match enctypes.  Instead, it just determined whether
+        they were something the TGS would likely return.  When I ask for
+        an exact enctype match, I want an enctype match.
+	(krb5_fcc_retrieve): Match keytype exactly if matching enctype.
+
 Wed Jan 10 21:14:31 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* fcc.h (KRB5_FCC_DEFAULT_VNO): Remove KRB5_FCC_DEFAULT_VNO; now
