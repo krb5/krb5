@@ -1,3 +1,17 @@
+2002-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_db2.h: Add prototype and rename for
+	krb5_db2_db_iterate_ext().
+
+	* kdb_db2.c (krb5_db2_db_iterate_ext): New function; allow
+	optional backwards or recursive (if btree) traversal of the
+	database.
+
+	* Makefile.in (LIBMINOR): Bump due to addition of
+	krb5_db_iterate_ext().
+
+	[pullups from trunk]
+
 2002-08-15  Tom Yu  <tlyu@mit.edu>
 
 	* keytab.c (krb5_ktkdb_get_entry): For consistency, check for
