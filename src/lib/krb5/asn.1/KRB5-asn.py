@@ -149,7 +149,7 @@ Ticket ::= SEQUENCE {
 	sname[2]			PrincipalName,
 	etype[3]			EncryptionType,
 	skvno[4]			INTEGER,
-	enc-part[5]			EncryptedData
+	enc-part[5]			EncryptedData	-- EncTicketPart
 }
 
 AS-REQ ::= [APPLICATION 0] SEQUENCE {
@@ -174,17 +174,17 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 	cname[3]			PrincipalName,
 	etype[4]			EncryptionType,
 	ckvno[5]			INTEGER,
-	ticket[6]			Ticket,
-	enc-part[7]			EncryptedData		
+	ticket[6]			Ticket,		-- Ticket
+	enc-part[7]			EncryptedData	-- EncKDCRepPart
 }
 
 EncKDCRepPart ::= SEQUENCE {
 	key[0]				EncryptionKey,
 	last-req[1]			LastReq,
 	ctime[2]			UTCTime,
-	ktime[3]			UTCTime,
 	key-exp[4]			UTCTime,
 	flags[5]			TicketFlags,
+	authtime[3]			UTCTime,	-- also known as ktime
 	starttime[6]			UTCTime,
 	endtime[7]			UTCTime,
 	renew-till[8]			UTCTime OPTIONAL,
@@ -218,7 +218,7 @@ AP-REQ ::= [APPLICATION 3] SEQUENCE {
 	msg-type[1]			INTEGER,
 	ap-options[2]			APOptions,
 	ticket[3]			Ticket,
-	authenticator[4]		Authenticator
+	authenticator[4]		EncryptedData	-- Authenticator
 }
 
 APOptions ::= BIT STRING {
@@ -230,7 +230,7 @@ APOptions ::= BIT STRING {
 AP-REP ::= [APPLICATION 4] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
-	enc-part[2]			EncryptedData	
+	enc-part[2]			EncryptedData	-- EncAPRepPart
 }
 
 EncAPRepPart ::= SEQUENCE {
@@ -250,7 +250,7 @@ TGS-REQ ::= [APPLICATION 5] SEQUENCE {
 	etype[8]			EncryptionType,
 	sname[9]			PrincipalName,
 	addresses[10]			HostAddresses,
-	enc-part[11]			EncryptedData	
+	enc-part[11]			EncryptedData OPTIONAL -- EncTgsReqPart
 }
 
 EncTgsReqPart ::= SEQUENCE {
@@ -272,7 +272,7 @@ KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	etype[2]			EncryptionType,
-	enc-part[3]			EncryptedData
+	enc-part[3]			EncryptedData	-- EncKrbPrivPart
 }
 
 EncKrbPrivPart ::= SEQUENCE {
