@@ -1,3 +1,7 @@
+2002-08-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SUBDIROBJLISTS): New variable.
+
 2002-07-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* gss_libinit.c (gssint_cleanup_library): Remove variable set but
