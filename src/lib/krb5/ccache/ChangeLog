@@ -1,3 +1,8 @@
+1998-08-24  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add windows build instructions to build CCache API
+		Cache implementation. 
+
 Fri Aug 20 18:30:00 1998  Miro Jurisic  <meeroh@mit.edu>
 	* Added Frank's CCache API cache implementation and made
 		it default on the Mac
