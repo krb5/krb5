@@ -1,0 +1,6 @@
+Wed Jul  6 23:03:16 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in (in all relevant subdirs):
+	* Makefile.in (in all relevant subdirs): fixes to suck in -lndbm
+	or -ldbm as needed
+
