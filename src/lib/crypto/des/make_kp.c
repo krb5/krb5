@@ -4,6 +4,7 @@
  * $Locker$
  *
  * Copyright 1988,1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -16,14 +17,13 @@
  * subscripts starting at 0.
  */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <stdio.h>
 #include "des_int.h"
 
 #ifndef lint
 static char rcsid_make_kp[]=
-    "$Id$";
+"$Id$";
 #endif /* lint */
 
 char *progname;

@@ -4,6 +4,7 @@
  *
  * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
+ * All Rights Reserved.
  *
  * Under U.S. law, this software may not be exported outside the US
  * without license from the U.S. Commerce department.
@@ -20,7 +21,6 @@ static char rcsid_cbc_cksum_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1988, 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -19,7 +20,6 @@ static char rcsid_verify_c[] =
 "$Id$";
 #endif	/*lint*/
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/mit-des.h>

@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1985, 1988,1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please
  * see the file <krb5/copyright.h>.
@@ -10,7 +11,11 @@
  * This routine generates the P permutation code for the DES.
  */
 
-#include <krb5/copyright.h>
+#if !defined(lint) && !defined(SABER)
+static char rcsid_make_p_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
 #include <krb5/krb5.h>
 #include <stdio.h>
 #include "des_int.h"

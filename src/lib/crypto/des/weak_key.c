@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -20,7 +21,6 @@ static char rcsid_weak_key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include "des_int.h"

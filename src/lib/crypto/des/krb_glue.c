@@ -4,6 +4,7 @@
  *
  * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
+ * All Rights Reserved.
  *
  * These routines perform encryption and decryption using the DES
  * private key algorithm, or else a subset of it -- fewer inner loops.
@@ -32,7 +33,6 @@ static char rcsid_enc_dec_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
