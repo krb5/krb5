@@ -1,3 +1,9 @@
+Mon Mar  4 20:45:30 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Log krb5kdc to stderr so that test can detect
+		properly when server has started. Change
+		start_kerberos_daemons to take advantage of this.
+
 Sat Oct  7 08:03:43 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: Change kdc.conf ports definitions to current

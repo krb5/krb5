@@ -269,6 +269,7 @@ proc setup_kerberos_files { } {
     puts $conffile "	admin_server = STDERR"
     puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"
     puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
+    puts $conffile "	kdc = STDERR"
     puts $conffile "	default = FILE:$tmppwd/others.log"
     close $conffile
     }
@@ -692,8 +693,20 @@ proc start_kerberos_daemons { standalone } {
     spawn $KRB5KDC -r KRBTEST.COM -n
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
+
     expect {
-	-re ".+" {
+	"while.*\r" {
+	    fail "krb5kdc"
+	    stop_kerberos_daemons
+	    return 0
+	}
+	"commencing operation\r" { }
+	timeout {
+	    fail "krb5kdc"
+	    stop_kerberos_daemons
+	    return 0
+	}
+	eof {
 	    fail "krb5kdc"
 	    stop_kerberos_daemons
 	    return 0
