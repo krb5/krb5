@@ -1,3 +1,13 @@
+Fri Mar 10 09:44:29 1995 Chris Provenzano (proven@mit.edu)
+
+	* init_sec_context.c (krb5_gss_init_sec_context())
+		Use new calling convention for krb5_mk_req_ext() and
+		krb5_rd_rep().
+
+	* gssapiP_krb5.h Added a krb5_auth_context pointer to the
+		krb5_gss_ctx_id_rec structure to store the auth_context
+		between multiple calls to krb5_gss_init_sec_context().
+
 Tue Mar 7 20:48:03 1995 Keith Vetter (keithv@fusion.com)
 
 	* accept_s.c, acqire_s.c, compare_.c, context_.c, delete_s.c,
