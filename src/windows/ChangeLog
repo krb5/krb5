@@ -1,5 +1,6 @@
 2001-11-06  Danilo Almeida  <dalmeida@mit.edu>
 
+	* Makefile.in: Build ms2mit.
 	* version.rc: 1.2.3 beta 1 (pre-release)
 	* README: Note on building ms2mit.
 
