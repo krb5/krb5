@@ -60,7 +60,7 @@
 #ifndef ErrorTableObjectRule
 
 #define ErrorTableObjectRule()						@@\
-.SUFFIXES: .et								@@\
+.SUFFIXES: .et .h .c							@@\
 									@@\
 .et.h: 									@@\
 	$(COMPILE_ET) $*.et						@@\
@@ -116,6 +116,21 @@ libdir/lib/**/libname.a:						@@\
 	$(TOUCH) foo/**/libname
 /* The $(RANLIB) is done at the end by the directory itself */
 #endif /* OtherdirLibraryTarget */
+
+/*
+ * CopyHeader - generate rule to copy a generated header file to an include
+ * tree.
+ */
+#ifndef CopyHeader
+#define CopyHeader(hfile,hdir)						@@\
+headers:: hfile								@@\
+	-if cmp hfile hdir/hfile >/dev/null 2>&1; then \		@@\
+		echo ; \						@@\
+	else \								@@\
+		$(RM) hdir/hfile ; \					@@\
+		$(CP) hfile hdir/hfile; \				@@\
+	fi
+#endif /* CopyHeader */
 
 /*
  * Default Definitions.
