@@ -1,3 +1,7 @@
+Tue May 30 17:36:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_rw.c: removed INTERFACE from two routines.
+
 Tue May 30 10:35:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_conn.c: used Windows specific way of creating a temp file.

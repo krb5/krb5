@@ -183,7 +183,7 @@ krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
  *		.
  *		.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to write to	(In ) */
@@ -278,7 +278,7 @@ krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
  * It is the caller's responsibility to free the memory allocated for
  * the read in argument list.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to read from	(In ) */
