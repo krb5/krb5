@@ -292,14 +292,9 @@ error (s1, s2, s3)
 pfatal_with_name (name)
      char *name;
 {
-  extern int errno, sys_nerr;
-  extern char *sys_errlist[];
   char *s;
 
-  if (errno < sys_nerr)
-    s = concat ("", sys_errlist[errno], " for %s");
-  else
-    s = "cannot open %s";
+  s = concat ("", strerror(errno), " for %s");
   fatal (s, name);
 }
 
@@ -341,7 +336,12 @@ xmalloc (size)
 #include <netinet/in.h>
 #include <netdb.h>
 #ifdef KERBEROS
-#define	POP_SERVICE	"pop"
+#ifndef POP_SNAME
+#define	POP_SNAME	"pop"
+#endif
+#ifndef KPOP_SERVICE
+#define KPOP_SERVICE	"kpop"
+#endif
 #ifdef KRB4
 #ifdef KRB5
  #error can only use one of KRB4 or KRB5
@@ -473,6 +473,30 @@ char *outfile;
 	}
 	mbx_delimit_end(mbf);
 	fflush(mbf);
+	if (ferror(mbf)) {
+	  error("Error in fflush: %s", get_errmsg());
+	  pop_command("QUIT");
+	  close(mbfi);
+	  return(1);
+	}
+    }
+
+    /* On AFS, a call to write() only modifies the file in the local
+       workstation's AFS cache.  The changes are not written to the server
+       until a call to fsync() or close() is made.  Users with AFS home
+       directories have lost mail when over quota because these checks were
+       not made in previous versions of movemail. */
+
+    if (fsync(mbfi) < 0) {
+      error("Error in fsync: %s", get_errmsg());
+      pop_command("QUIT");
+      return(1);
+    }
+
+    if (close(mbfi) == -1) {
+      error("Error in close: %s", get_errmsg());
+      pop_command("QUIT");
+      return(1);
     }
 
     for (i = 1; i <= nmsgs; i++) {
@@ -485,7 +509,6 @@ char *outfile;
     }
 
     pop_command("QUIT");
-    close(mbfi);
     return(0);
 }
 
@@ -510,7 +533,7 @@ char *host;
     krb5_error_code retval;
     krb5_ccache ccdef;
     krb5_principal client, server;
-    krb5_error *err_ret;
+    krb5_error *err_ret = NULL;
     register char *cp;
 #endif /* KRB5 */
 #endif /* KERBEROS */
@@ -521,7 +544,7 @@ char *host;
     }
 
 #ifdef KERBEROS
-    sp = getservbyname("kpop", "tcp");
+    sp = getservbyname(KPOP_SERVICE, "tcp");
 #else
     sp = getservbyname("pop", "tcp");
 #endif
@@ -557,7 +580,7 @@ char *host;
 #ifdef KERBEROS
 #ifdef KRB4
     ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
-    rem = krb_sendauth(0L, s, ticket, POP_SERVICE, hp->h_name,
+    rem = krb_sendauth(0L, s, ticket, POP_SNAME, hp->h_name,
 		       (char *) krb_realmofhost(hp->h_name),
 		       (unsigned long)0, &msg_data, &cred, schedule,
 		       (struct sockaddr_in *)0,
@@ -582,12 +605,14 @@ char *host;
 	goto krb5error;
     }
 
+#if 0
     /* lower-case to get name for "instance" part of service name */
     for (cp = hp->h_name; *cp; cp++)
 	if (isupper(*cp))
 	    *cp = tolower(*cp);
+#endif
 
-    if (retval = krb5_sname_to_principal(hp->h_name, POP_SERVICE,
+    if (retval = krb5_sname_to_principal(hp->h_name, POP_SNAME,
 					 KRB5_NT_SRV_HST, &server)) {
 	goto krb5error;
     }
@@ -679,7 +704,7 @@ int *nmsgs, *nbytes;
 pop_retr(msgno, action, arg)
 int (*action)();
 {
-    char buf[128];
+    char buf[1024];
 
     sprintf(buf, "RETR %d", msgno);
     if (debug) fprintf(stderr, "%s\n", buf);
@@ -751,14 +776,9 @@ FILE *f;
 char *
 get_errmsg()
 {
-    extern int errno, sys_nerr;
-    extern char *sys_errlist[];
     char *s;
 
-    if (errno < sys_nerr)
-      s = sys_errlist[errno];
-    else
-      s = "unknown error";
+    s = strerror(errno);
     return(s);
 }
 
@@ -787,13 +807,21 @@ FILE *mbf;
 mbx_delimit_begin(mbf)
 FILE *mbf;
 {
+#ifdef OUTPUT_MMDF_FORMAT
+    fputs("\n", mbf);
+#else	
     fputs("\f\n0, unseen,,\n", mbf);
+#endif
 }
 
 mbx_delimit_end(mbf)
 FILE *mbf;
 {
+#ifdef OUTPUT_MMDF_FORMAT
+    fputs("\n", mbf);
+#else	
     putc('\037', mbf);
+#endif
 }
 
 #endif /* MAIL_USE_POP */

@@ -1,0 +1,24 @@
+CFLAGS = $(CCOPTS) -DKERBEROS -DKRB5 -DMAIL_USE_POP $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+OBJS = movemail.o movemail-mmdf.o
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+HESIODLIB = 
+
+movemail: movemail.o
+	$(CC) $(CFLAGS) -o movemail movemail.o $(KLIB) $(HESIODLIB)
+
+all:: movemail
+
+clean::
+	$(RM) movemail
+
+install::
+	cp movemail ${DESTDIR}$(CLIENT_BINDIR)/movemail
+
+movemail.o:	$(srcdir)/movemail.c
+
