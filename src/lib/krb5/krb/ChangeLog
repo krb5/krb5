@@ -1,3 +1,7 @@
+2002-04-02  Sam Hartman  <hartmans@mit.edu>
+
+	* init_keyblock.c: Merge from mainline
+
 2002-03-15  Sam Hartman  <hartmans@mit.edu>
 
 	* walk_rtree.c (krb5_walk_realm_tree): Fix handling of null realms
