@@ -3,7 +3,7 @@
 #include <Errors.h>
 
 #include "des.h"
-#include "deslib.CFMGlue.h"
+#include "DESlib.glue.h"
 
 /* These functions must obey CFM calling conventions. Functions which return
    pointers must return them in D0, not A0 like ThinkC static 68k does.  This way
