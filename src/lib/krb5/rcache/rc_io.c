@@ -256,7 +256,8 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 	    FREE(d->fn);
 	    d->fn = NULL;
 	}
-	(void) close(d->fd);
+	if (d->fd >= 0) 
+	     (void) close(d->fd);
     }
     return retval;
 }
