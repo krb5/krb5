@@ -1,5 +1,9 @@
 Fri Feb 27 18:00:15 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* configure.in: Move the regular expression function tests into
+		aclocal.m4, since they also need to be shared by
+		lib/kadm5's configure script.
+
 	* configure.in: Move tests from all of krb5's subdirectories into
 		this configure.in, and make it generate makefiles for all
 		of the subdirectories.
