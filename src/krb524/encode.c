@@ -41,7 +41,7 @@
 int  encode_v4tkt PROTOTYPE((KTEXT_ST *, char *, int *)),
      encode_ktext PROTOTYPE((char **, int *, KTEXT_ST *)),
      encode_bytes PROTOTYPE((char **, int *, char *, int)),
-     encode_int32 PROTOTYPE((char **, int *, int32 *));
+     encode_int32 PROTOTYPE((char **, int *, krb5_int32 *));
 
 int  decode_v4tkt PROTOTYPE((KTEXT_ST *, char *, int *)),
      decode_ktext PROTOTYPE((char **, int *, KTEXT_ST *)),
