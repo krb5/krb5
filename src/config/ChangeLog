@@ -1,0 +1,5 @@
+Sat Jul  2 00:03:24 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* pre.in: added KRB4 to the template to keep things like v4server
+	from losing
+
