@@ -350,7 +350,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		supported_enctypes = des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
 	puts $conffile "		kdc_ports = 3088"
-	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
+	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
 	puts $conffile "	\}"
 	puts $conffile ""

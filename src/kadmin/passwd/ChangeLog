@@ -1,3 +1,7 @@
+2000-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* unit-test/kpasswd.0/changing.exp (D.15): Y2K fix.
+
 Wed Nov 27 13:50:03 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in: Link against kdb5 explicitly on all systems except

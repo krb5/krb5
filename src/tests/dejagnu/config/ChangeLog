@@ -1,3 +1,8 @@
+2000-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Move default expiration time
+	into future again.
+
 Mon Nov 25 14:23:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* defualt.exp: Ezra's fix so that the dejagnu tests don't bomb out
