@@ -183,3 +183,17 @@ check-windows::
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 clean-windows::
+
+# Should only rebuild types.h here (use CONFIG_FILES=), but the weird krb5
+# makefile post-processing is unconditional and would trash the makefile.
+types.h: types.stamp
+types.stamp: $(srcdir)/types.hin config.status
+	$(SHELL) config.status
+	touch types.stamp
+
+clean-unix::
+	$(RM) types.h types.stamp
+clean-mac::
+	$(RM) types.h types.stamp
+clean-windows::
+	$(RM) types.h types.stamp

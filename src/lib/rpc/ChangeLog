@@ -1,3 +1,8 @@
+Fri Nov 21 00:37:14 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (types.h): Add rules to generate file by running
+ 	config.status. Remove on make clean.
+
 Tue Oct 21 14:31:33 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* svc_auth_gssapi.c (destroy_client): Fix to not lose entries in
