@@ -592,10 +592,11 @@ for it via the tty.
 
 \item Initializes the dictionary (if present) for dictionary checks.
 
-\item Initializes the modified-by principal to be the client_name.
-This should usually be the name of the program.
+\item Parses client_name as a Kerberos principal and initializes the
+global current_caller principal to it.  client_name should usually be
+specified as the name of the program.
 
-\item Only the client_name and realm arguments are used.
+\item The service_name argument is not used.
 \end{enumerate}
 
 RETURN CODES: 
