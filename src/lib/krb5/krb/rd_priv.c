@@ -185,6 +185,12 @@ OLDDECLARG(krb5_data *, outbuf)
 	    cleanup_mesg();
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
+	if (recv_addr && privmsg_enc_part->r_address &&
+	    !krb5_address_compare(recv_addr, privmsg_enc_part->r_address)) {
+	    cleanup_data();
+	    cleanup_mesg();
+	    return KRB5KRB_AP_ERR_BADADDR;
+	}	    
 	if (retval = krb5_gen_replay_name(sender_addr, "_priv",
 					  &replay.client)) {
 	    cleanup_data();

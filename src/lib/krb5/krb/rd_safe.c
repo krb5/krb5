@@ -105,6 +105,11 @@ krb5_data *outbuf;
 	    cleanup();
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
+	if (recv_addr && message->r_address &&
+	    !krb5_address_compare(recv_addr, message->r_address)) {
+	    cleanup();
+	    return KRB5KRB_AP_ERR_BADADDR;
+	}	    
 	if (retval = krb5_gen_replay_name(sender_addr, "_safe",
 					  &replay.client)) {
 	    cleanup();
