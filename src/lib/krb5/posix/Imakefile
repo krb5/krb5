@@ -25,30 +25,33 @@
 #define PassCDebugFlags
 NormalLibraryObjectRule()
 
-#ifdef HasVfprintf
+#if HasVfprintf
 VPOBJS=
 VPSRCS=
 #else
 VPOBJS=vfprintf.o vsprintf.o
 VPSRCS=$(SRCDIR)vfprintf.c $(SRCDIR)vsprintf.c
 #endif
-#ifdef HasVsyslog
+#if HasVsyslog
 VSOBJS=
 VSSRCS=
 #else
 VSOBJS=syslog.o
 VSSRCS=$(SRCDIR)syslog.c
 #endif
-#ifdef HasStrdup
+#if HasStrdup
 STOBJS=
 STSRCS=
 #else
 STOBJS=strdup.o
 STSRCS=$(SRCDIR)strdup.c
 #endif
-#ifndef HasStrerror
-PEOBJS=perror.o
-PESRCS=$(SRCDIR)perror.c
+#if HasStrerror
+PEOBJS=
+PESRCS=
+#else
+PEOBJS=strerror.o
+PESRCS=$(SRCDIR)strerror.c
 #endif
 
 INCLUDES=$(STDC_TOP_INCLUDES)

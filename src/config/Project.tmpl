@@ -142,6 +142,19 @@
 #endif
 #endif
 
+#ifndef HasVfprintf
+#define HasVfprintf NO
+#endif
+#ifndef HasVsyslog
+#define HasVsyslog NO
+#endif
+#ifndef HasStrdup
+#define HasStrdup NO
+#endif
+#ifndef HasStrerror
+#define HasStrerror NO
+#endif
+
 /* Hack around sun cpp bug */
   
 PEPSY_WARNING_STRING = \
