@@ -58,7 +58,6 @@ tkt_test_1()
 
     tk_in.enc_part2 = &tk_in_enc;
 
-    tk_in_enc.confounder = 52;
     tk_in_enc.flags = 0x11;
     tk_in_enc.session = &sess_k;
 
