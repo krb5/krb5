@@ -107,8 +107,10 @@ make_priv_token_v2(context, subkey, seqnum, direction, text, token, oid)
 cleanup:
    if (plain.data)
        free(plain.data);
-   if (t)
-       free(t);
+   if (code) {
+       if (t)
+	   free(t);
+   }
 
    return(code);
 }
@@ -224,8 +226,10 @@ cleanup:
 	free(plain.data);
     if (cksum.contents)
 	krb5_free_checksum_contents(context, &cksum);
-    if (t)
-	free(t);
+    if (code) {
+	if (t)
+	    free(t);
+    }
 
    return(code);
 }
