@@ -1,3 +1,44 @@
+Sun May 24 22:01:29 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_buffer.c (g_make_string_buffer): Don't include the trailing
+		NULL of the string in the gss buffer's length.
+
+1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* util_ordering.c (g_order_free): 
+	* rel_oid_set.c (generic_gss_release_oid_set): 
+	* disp_major_status.c: General lint cleanup.
+
+	* util_oid.c (g_copy_OID_set): Copy the OID set with entirely
+		dynamic memory (don't alias the contents of the OID set).
+
+Wed Apr  1 16:33:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* disp_major_status.c (g_display_major_status): Fix a typo in
+	previous.
+
+1998-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* disp_major_status.c (display_unknown): Change to not return
+		GSS_S_CONTINUE_NEEDED, per the standard C bindings
+		specification.
+
+Tue Jul 29 22:54:40 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_generic.c: Add support for the new OID value for
+		host-based service name.
+
+Fri Mar 28 03:43:58 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_generic.c, gssapi_generic.h: Added definition for the
+		generic gsspi OID type "gss_nt_exported_name".
+
+Thu Mar 27 15:36:32 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add the GSS_C_PROT_READY_FLAG and GSS_C_TRANS_FLAG
+		Add prototypes for the V2 functions gss_export_name(),
+		gss_duplicate_name(), and gss_canonicalize_name().
+
 Wed Nov 20 13:59:58 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (install): Install gssapi.h from the build tree.
