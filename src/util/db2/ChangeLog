@@ -1,3 +1,12 @@
+2001-07-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* hash/hash_func.c (hash4): Declare first argument const.
+
+	* hash/hash.h: struct HTAB fname element now const.
+
+	* hash/hash.c: Declare third argument to hash_access and init_hash
+ 	const.
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* hash/dbm.c: Include db-dbm.h for prototypes.

@@ -164,14 +164,14 @@ hash4(key, len)
 	size_t len;
 {
 	u_int32_t h, loop;
-	u_int8_t *k;
+	const u_int8_t *k;
 
 #define HASH4a   h = (h << 5) - h + *k++;
 #define HASH4b   h = (h << 5) + h + *k++;
 #define HASH4 HASH4b
 
 	h = 0;
-	k = (u_int8_t *)key;
+	k = (const u_int8_t *)key;
 	if (len > 0) {
 		loop = (len + 8 - 1) >> 3;
 

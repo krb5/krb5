@@ -57,7 +57,7 @@ static char sccsid[] = "@(#)hash.c	8.12 (Berkeley) 11/7/95";
 #include "extern.h"
 
 static int32_t flush_meta __P((HTAB *));
-static int32_t hash_access __P((HTAB *, ACTION, DBT *, DBT *));
+static int32_t hash_access __P((HTAB *, ACTION, const DBT *, DBT *));
 static int32_t hash_close __P((DB *));
 static int32_t hash_delete __P((const DB *, const DBT *, u_int32_t));
 static int32_t hash_fd __P((const DB *));
@@ -69,7 +69,7 @@ static int32_t hdestroy __P((HTAB *));
 static int32_t cursor_get __P((const DB *, CURSOR *, DBT *, DBT *, \
 	u_int32_t));
 static int32_t cursor_delete __P((const DB *, CURSOR *, u_int32_t));
-static HTAB *init_hash __P((HTAB *, const char *, HASHINFO *));
+static HTAB *init_hash __P((HTAB *, const char *, const HASHINFO *));
 static int32_t init_htab __P((HTAB *, int32_t));
 #if DB_BYTE_ORDER == DB_LITTLE_ENDIAN
 static void swap_header __P((HTAB *));
@@ -118,7 +118,7 @@ __kdb2_hash_open(file, flags, mode, info, dflags)
 	if (!file) {
 		file = tmpnam(NULL);
 		/* store the file name so that we can unlink it later */
-		hashp->fname = (char *)file;
+		hashp->fname = file;
 #ifdef DEBUG
 		fprintf(stderr, "Using file name %s.\n", file);
 #endif
@@ -147,7 +147,7 @@ __kdb2_hash_open(file, flags, mode, info, dflags)
 
 	/* Process arguments to set up hash table header. */
 	if (new_table) {
-		if (!(hashp = init_hash(hashp, file, (HASHINFO *)info)))
+		if (!(hashp = init_hash(hashp, file, info)))
 			RETURN_ERROR(errno, error1);
 	} else {
 		/* Table already exists */
@@ -308,7 +308,7 @@ static HTAB *
 init_hash(hashp, file, info)
 	HTAB *hashp;
 	const char *file;
-	HASHINFO *info;
+	const HASHINFO *info;
 {
 	struct stat statbuf;
 	int32_t nelem;
@@ -634,7 +634,7 @@ hash_get(dbp, key, data, flag)
 		hashp->local_errno = errno = EINVAL;
 		return (ERROR);
 	}
-	return (hash_access(hashp, HASH_GET, (DBT *)key, data));
+	return (hash_access(hashp, HASH_GET, key, data));
 }
 
 static int32_t
@@ -656,7 +656,7 @@ hash_put(dbp, key, data, flag)
 		return (ERROR);
 	}
 	return (hash_access(hashp, flag == R_NOOVERWRITE ?
-		HASH_PUTNEW : HASH_PUT, (DBT *)key, (DBT *)data));
+		HASH_PUTNEW : HASH_PUT, key, (DBT *)data));
 }
 
 static int32_t
@@ -677,7 +677,7 @@ hash_delete(dbp, key, flag)
 		return (ERROR);
 	}
 
-	return (hash_access(hashp, HASH_DELETE, (DBT *)key, NULL));
+	return (hash_access(hashp, HASH_DELETE, key, NULL));
 }
 
 /*
@@ -687,7 +687,8 @@ static int32_t
 hash_access(hashp, action, key, val)
 	HTAB *hashp;
 	ACTION action;
-	DBT *key, *val;
+	const DBT *key;
+	DBT *val;
 {
 	DBT page_key, page_val;
 	CURSOR cursor;
