@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,8 +16,8 @@ static char rcsid_mk_safe_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include "krb425.h"
+#include <arpa/inet.h>
 
 long
 krb_mk_safe(in, out, in_length, key, sender, receiver)
@@ -30,10 +31,11 @@ struct sockaddr_in *receiver;
 	krb5_data inbuf;
 	krb5_data out5;
 	krb5_keyblock keyb;
-	krb5_address saddr;
+	krb5_address saddr, *saddr2;
 	krb5_address raddr;
 	krb5_error_code r;
 	char sa[4], ra[4];
+	krb5_rcache rcache;
 
 	keyb.keytype = KEYTYPE_DES;
 	keyb.length = sizeof(des_cblock);
@@ -53,13 +55,55 @@ struct sockaddr_in *receiver;
 	inbuf.data = (char *)in;
 	inbuf.length = in_length;
 
-	if (r = krb5_mk_safe(&inbuf,
-			     CKSUMTYPE_CRC32,
-			     &keyb,
-			     &saddr, &raddr,
-			     0,		/* no sequence number */
-			     0,		/* default flags (none) */
-			     &out5)) {
+	if (r = krb5_gen_portaddr(&saddr, (krb5_pointer)&sender->sin_port,
+				  &saddr2)) {
+#ifdef	EBUG
+	    ERROR(r);
+#endif
+	    return(-1);
+	}
+
+	if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
+	    if (!(r = krb5_rc_resolve_type(&rcache, "dfl"))) {
+		char *cachename;
+		extern krb5_deltat krb5_clockskew;
+		char *insender;
+
+		insender = inet_ntoa(sender->sin_addr);
+
+		if (cachename = calloc(1, strlen(insender)+1+3)) {
+		    strcpy(cachename, "rc_");
+		    strcat(cachename, insender);
+
+		    if (!(r = krb5_rc_resolve(rcache, cachename))) {
+			if (!((r = krb5_rc_recover(rcache)) &&
+			      (r = krb5_rc_initialize(rcache,
+						      krb5_clockskew)))) {
+			    r = krb5_mk_safe(&inbuf,
+					     CKSUMTYPE_RSA_MD4_DES,
+					     &keyb,
+					     saddr2, &raddr,
+					     0,	/* no sequence number */
+					     0,	/* default flags (none) */
+					     rcache,
+					     &out5);
+			    krb5_rc_close(rcache);
+			}
+		    }
+		    free(cachename);
+		} else
+		    r = ENOMEM;
+	    }
+	    xfree(rcache);
+	} else {
+	    krb5_free_addr(saddr2);
+#ifdef	EBUG
+	    ERROR(ENOMEM);
+#endif
+	    return(-1);
+	}
+	krb5_free_addr(saddr2);
+	if (r) {
 #ifdef	EBUG
 		ERROR(r);
 #endif

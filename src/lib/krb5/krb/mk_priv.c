@@ -46,6 +46,7 @@ krb5_mk_priv(DECLARG(const krb5_data *, userdata),
 	     DECLARG(const krb5_address *, recv_addr),
 	     DECLARG(krb5_int32, seq_number),
 	     DECLARG(krb5_int32, priv_flags),
+	     DECLARG(krb5_rcache, rcache),
 	     DECLARG(krb5_pointer, i_vector),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, userdata)
@@ -55,6 +56,7 @@ OLDDECLARG(const krb5_address *, sender_addr)
 OLDDECLARG(const krb5_address *, recv_addr)
 OLDDECLARG(krb5_int32, seq_number)
 OLDDECLARG(krb5_int32, priv_flags)
+OLDDECLARG(krb5_rcache, rcache)
 OLDDECLARG(krb5_pointer, i_vector)
 OLDDECLARG(krb5_data *, outbuf)
 {
@@ -77,6 +79,9 @@ OLDDECLARG(krb5_data *, outbuf)
 	privmsg_enc_part.r_address = 0;
 
     if (!(priv_flags & KRB5_PRIV_NOTIME)) {
+	if (!rcache)
+	    /* gotta provide an rcache in this case... */
+	    return KRB5_RC_REQUIRED;
 	if (retval = krb5_us_timeofday(&privmsg_enc_part.timestamp,
 				       &privmsg_enc_part.usec))
 	    return retval;
@@ -114,10 +119,11 @@ OLDDECLARG(krb5_data *, outbuf)
     }
 
 #define cleanup_encpart() {\
-(void) memset(privmsg.enc_part.ciphertext.data, 0, \
+	(void) memset(privmsg.enc_part.ciphertext.data, 0, \
 	     privmsg.enc_part.ciphertext.length); \
-free(privmsg.enc_part.ciphertext.data); \
-privmsg.enc_part.ciphertext.length = 0; privmsg.enc_part.ciphertext.data = 0;}
+	free(privmsg.enc_part.ciphertext.data); \
+	privmsg.enc_part.ciphertext.length = 0; \
+	privmsg.enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, key)) {
@@ -157,6 +163,26 @@ privmsg.enc_part.ciphertext.length = 0; privmsg.enc_part.ciphertext.data = 0;}
     }
 
     cleanup_encpart();
+    if (!(priv_flags & KRB5_PRIV_NOTIME)) {
+	krb5_donot_replay replay;
+
+	if (retval = krb5_gen_replay_name(sender_addr, "_priv",
+					  &replay.client)) {
+	    cleanup_scratch();
+	    return retval;
+	}
+
+	replay.server = "";		/* XXX */
+	replay.cusec = privmsg_enc_part.usec;
+	replay.ctime = privmsg_enc_part.timestamp;
+	if (retval = krb5_rc_store(rcache, &replay)) {
+	    /* should we really error out here? XXX */
+	    cleanup_scratch();
+	    xfree(replay.client);
+	    return retval;
+	}
+	xfree(replay.client);
+    }
     *outbuf = *scratch;
     xfree(scratch);
     return 0;

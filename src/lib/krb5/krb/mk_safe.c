@@ -44,6 +44,7 @@ krb5_mk_safe(DECLARG(const krb5_data *, userdata),
 	     DECLARG(const krb5_address *, recv_addr),
 	     DECLARG(krb5_int32, seq_number),
 	     DECLARG(krb5_int32, safe_flags),
+	     DECLARG(krb5_rcache, rcache),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, userdata)
 OLDDECLARG(const krb5_cksumtype, sumtype)
@@ -52,6 +53,7 @@ OLDDECLARG(const krb5_address *, sender_addr)
 OLDDECLARG(const krb5_address *, recv_addr)
 OLDDECLARG(krb5_int32, seq_number)
 OLDDECLARG(krb5_int32, safe_flags)
+OLDDECLARG(krb5_rcache, rcache)
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;
@@ -73,6 +75,9 @@ OLDDECLARG(krb5_data *, outbuf)
 	safemsg.r_address = 0;
 
     if (!(safe_flags & KRB5_SAFE_NOTIME)) {
+	if (!rcache)
+	    /* gotta provide an rcache in this case... */
+	    return KRB5_RC_REQUIRED;
 	if (retval = krb5_us_timeofday(&safemsg.timestamp, &safemsg.usec))
 	    return retval;
     }
@@ -120,6 +125,26 @@ OLDDECLARG(krb5_data *, outbuf)
 	return retval;
     }
     xfree(safe_checksum.contents);
+    if (!(safe_flags & KRB5_SAFE_NOTIME)) {
+	krb5_donot_replay replay;
+
+	if (retval = krb5_gen_replay_name(sender_addr, "_safe",
+					  &replay.client)) {
+	    clean_scratch();
+	    return retval;
+	}
+
+	replay.server = "";		/* XXX */
+	replay.cusec = safemsg.usec;
+	replay.ctime = safemsg.timestamp;
+	if (retval = krb5_rc_store(rcache, &replay)) {
+	    /* should we really error out here? XXX */
+	    clean_scratch();
+	    xfree(replay.client);
+	    return retval;
+	}
+	xfree(replay.client);
+    }
     *outbuf = *scratch;
     xfree(scratch);
 
