@@ -1,3 +1,12 @@
+Thu Apr 18 19:48:47 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in: Fix spaces by converting to tabs.
+
+	* krlogind.c: Take patches from Doug Engert <deengert@anl.gov> to
+ 	allow login to work with vendor logins.  Also, fix packet-mode
+ 	bug; we have some hope of working on non-Solaris streams pty code.
+
+
 Wed Apr 17 13:46:57 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in (LOGINLIBS): Remove DECLARE_SYS_ERRLIST since it's
@@ -26,6 +35,7 @@ Wed Apr 17 13:46:57 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 	* krcp.c, krshd.c, krlogind.c: Miscellaneous -Wall cleanups
 
 	* krlogind.c (getpty): Removed dead code.
+
 
 Tue Apr 16 11:33:33 1996  Sam Hartman  <hartmans@mit.edu>
 

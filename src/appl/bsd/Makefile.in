@@ -23,7 +23,7 @@ BSD=	-DUCB_RLOGIN=\"$(UCB_RLOGIN)\" \
 	-DUCB_RSH=\"$(UCB_RSH)\" -DUCB_RCP=\"$(UCB_RCP)\"
 
 DEFINES= $(RSH) $(BSD) $(RPROGS) \
- 	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
+	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
 all:: rsh rcp rlogin kshd klogind login.krb5
 

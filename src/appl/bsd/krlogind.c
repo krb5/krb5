@@ -399,9 +399,7 @@ pty_init();
 	  debug_port = atoi(optarg);
 	  break;
 	case 'L':
-#ifndef DO_NOT_USE_K_LOGIN
 	  login_program = optarg;
-#endif
 	  break;
 	case '?':
 	default:
@@ -605,9 +603,14 @@ int syncpipe[2];
 
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcgetattr(t,&new_termio);
+#if !(defined(DO_NOT_USE_K_LOGIN)&&defined(USE_LOGIN_F))
 	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
-	/* so that login can read the authenticator */
-	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
+	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL);
+#else
+	new_termio.c_lflag |= (ICANON|ECHO|ISIG|IEXTEN);
+	new_termio.c_iflag|= (IXON|IXANY|BRKINT|INLCR|ICRNL);
+#endif /*Do we need binary stream?*/
+new_termio.c_iflag &= ~(ISTRIP);
 	/* new_termio.c_iflag = 0; */
 	/* new_termio.c_oflag = 0; */
 	new_termio.c_cc[VMIN] = 1;
@@ -692,7 +695,26 @@ int syncpipe[2];
 #endif
 
 #ifdef DO_NOT_USE_K_LOGIN
+#ifdef USE_LOGIN_F
+/* use the vendors login, which has -p and -f. Tested on 
+ * AIX 4.1.4 and HPUX 10 
+ */
+    {
+        char *cp;
+        if ((cp = strchr(term,'/')))
+            *cp = '\0';
+        setenv("TERM",term, 1);
+    }
+ 
+    if (passwd_req)
+        execl(login_program, "login", "-p", "-h", rhost_name,
+          lusername, 0);
+    else
+        execl(login_program, "login", "-p", "-h", rhost_name,
+             "-f", lusername, 0);
+#else /* USE_LOGIN_F */
 	execl(login_program, "login", "-r", rhost_name, 0);
+#endif /* USE_LOGIN_F */
 #else
 	if (passwd_req)
 	  execl(login_program, "login","-h", rhost_name, lusername, 0);
@@ -741,11 +763,6 @@ int syncpipe[2];
     /* FIONBIO doesn't always work on ptys, use fcntl to set O_NDELAY? */
     (void) fcntl(p,F_SETFL,fcntl(p,F_GETFL,0) | O_NDELAY);
 
-/*** XXX -- make this portable ***/
-#if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
-    ioctl(p, TIOCPKT, &on);
-#endif
-
 #ifdef POSIX_SIGNALS
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTSTP, &sa, (struct sigaction *)0);
@@ -754,11 +771,12 @@ int syncpipe[2];
 #endif
 
     
-#ifdef DO_NOT_USE_K_LOGIN
+#if defined(DO_NOT_USE_K_LOGIN)&&!defined(USE_LOGIN_F)
     /* Pass down rusername and lusername to login. */
     (void) write(p, rusername, strlen(rusername) +1);
     (void) write(p, lusername, strlen(lusername) +1);
 #endif
+#if !defined(DO_NOT_USE_K_LOGIN) || !defined(USE_LOGIN_F) 
     /* stuff term info down to login */
     if ((write(p, term, strlen(term)+1) != (int) strlen(term)+1)) {
 	/*
@@ -767,6 +785,7 @@ int syncpipe[2];
 	sprintf(buferror,"Cannot write slave pty %s ",line);
 	fatalperror(f,buferror);
     }
+#endif /* DO_NOT_USE_K_LOGIN && USE_LOGIN_F */
     protocol(f, p);
     signal(SIGCHLD, SIG_IGN);
     cleanup();
@@ -826,7 +845,20 @@ void protocol(f, p)
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
+#ifdef TIOCPKT
+	register tiocpkt_on = 0;
+	int on = 1;
+#endif
     
+#if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
+	/* if system has TIOCPKT, try to turn it on. Some drivers
+     * may not support it. Save flag for later. 
+	 */
+   if ( ioctl(p, TIOCPKT, &on) < 0)
+	tiocpkt_on = 0;
+   else tiocpkt_on = 0;
+#endif
+
     /*
      * Must ignore SIGTTOU, otherwise we'll stop
      * when we try and set slave pty's window shape
@@ -922,16 +954,18 @@ void protocol(f, p)
 	      pcc = 0;
 	    else if (pcc <= 0)
 	      break;
-	    else if (pibuf[0] == 0)
-	      pbp++, pcc--;
-#ifndef sun
-	    else {
-		if (pkcontrol(pibuf[0])) {
-		    pibuf[0] |= oobdata[0];
-		    send(f, &pibuf[0], 1, MSG_OOB);
+#ifdef TIOCPKT
+		else if (tiocpkt_on) {
+	      if (pibuf[0] == 0)
+	        pbp++, pcc--;
+	      else {
+		  if (pkcontrol(pibuf[0])) {
+		      pibuf[0] |= oobdata[0];
+		      send(f, &pibuf[0], 1, MSG_OOB);
+		  }
+		  pcc = 0;
+	      }
 		}
-		pcc = 0;
-	    }
 #endif
 	}
 	if (FD_ISSET(f, &obits) && pcc > 0) {
