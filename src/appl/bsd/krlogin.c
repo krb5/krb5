@@ -88,13 +88,11 @@ char copyright[] =
 
 /****** MWE *****/
 /* formerly __svr4__ but that's not defined by suncc */
-#if defined(HAVE_SYS_TTY_H) && defined(HAVE_SYS_TTOLD_H)
+#ifdef HAVE_STREAMS
 #include <sys/tty.h>
 #include <sys/ttold.h>
-#ifdef HAVE_SYS_PTYVAR_H
 /* solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
-#endif
 #endif
 /****** MWE *****/
 

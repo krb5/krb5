@@ -1,3 +1,9 @@
+Tue Oct 18 15:48:37 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in (HAVE_STREAMS): test for streams interface headers
+	in a way that fails on sunos but works on solaris.
+	* krlogin.c: use HAVE_STREAMS.
+
 Tue Oct  4 17:14:38 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krcp.c (tgt_keyproc): Add widen.h and narrow.h around
