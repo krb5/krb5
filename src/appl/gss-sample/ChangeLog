@@ -1,3 +1,8 @@
+Wed Apr 26 17:17:22 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use AC_CONST since we don't learn it from the krb5
+	headers and gssapi.h uses it.
+
 Thu Mar  2 12:29:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
