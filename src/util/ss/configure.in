@@ -20,4 +20,6 @@ AC_CHECK_HEADERS(stdarg.h stdlib.h)
 CopySrcHeader(ss.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
 CopyHeader(ss_err.h,$(BUILDTOP)/include/ss)
+LinkFileDir([$](TOPLIBD)/libss.a,libss.a,../util/ss)
+AppendRule([all:: [$](TOPLIBD)/libss.a])
 V5_AC_OUTPUT_MAKEFILE
