@@ -19,76 +19,132 @@
 # PERFORMANCE OF THIS SOFTWARE.
 
 This directory contains a sample GSS-API client and server
-application.  Each invocation of the client performs the following
-exchange with the server:
+application.  In addition to serving as an example of GSS-API
+programming, this application is also intended to be a tool for
+testing the performance of GSS-API implementations.
 
-	1.  The client and server establish a GSS-API context.  The
-	server prints the identity of the client.
+Each time the client is invoked, it performs one or more exchanges
+with the server.  Each exchange with the server consists primarily of
+the following steps:
 
-	2.  The client sends a sealed (encrypted) message to the
-	server.
+	1. A TCP/IP connection is established.
 
-	3.  The server decrypts the message and prints it.
+	2. (optional, on by default) The client and server establish a
+	   GSS-API context, and the server prints the identify of the
+	   client.
 
-	4.  The server produces a signature block for the message and
-	sends it to the client.
-
-	5.  The client verifies the signature block.
-
-Obviously, this exchange does not perform a tremendously valuable
-function; however, it demostrates the use of primary GSS-API
-interfaces.
-
+      /	3. The client sends a message to the server.  The message may
+     /     be plaintext, cryptographically "signed" but not encrypted,
+     |     or encrypted (default).
+     |
+0 or |  4. The server decrypts the message (if necessary), verifies
+more |     its signature (if there is one) and prints it.
+times|
+     |  5. The server sends either a signature block (the default) or an
+     |     empty token back to the client to acknowledge the message.
+     \
+      \ 6. If the server sent a signature block, the client verifies
+           it and prints a message indicating that it was verified.
+  
+	7. The client sends an empty block to the server to tell it
+	   that the exchange is finished.
+  
+	8. The client and server close the TCP/IP connection and
+	   destroy the GSS-API context.
+  
 The server's command line usage is
-
-	gss-server [-port port] [-k keytab] service_name
-
+  
+	gss-server [-port port] [-verbose] [-once] [-inetd] [-export]
+		[-logfile file] service_name
+  
 where service_name is a GSS-API service name of the form
 "service@host" (or just "service", in which case the local host name
-is used).  The server will accept TCP connections on port (default
-4444) and establish contexts as service_name.  If you compile with
-GSS_KRB5 defined and link against the MIT Kerberos libraries, the -k
-option specifies a keytab to use instead of the default one.
+is used).  The command-line options have the following meanings:
+  
+-port	The TCP port on which to accept connections.  Default is 4444.
+  
+-once	Tells the server to exit after a single exchange, rather than
+	persisting.
+  
+-inetd	Tells the server that it is running out of inetd, so it should
+	interact with the client on stdin rather than binding to a
+	network port.  Implies "-once".
+  
+-export	Tells the server to test the gss_export_sec_context function
+	after establishing a context with a client.
 
+-logfile
+	The file to which the server should append its output, rather
+	than sending it to stdout.
+  
 The client's command line usage is
 
-	gss-client [-port port] [-d] host service_name msg
+	gss-client [-port port] [-mech mechanism] [-d] [-f] [-q]
+		[-ccount count] [-mcount count] [-na] [-nw] [-nx] [-nm]
+		host service_name msg
 
 where host is the host running the server, service_name is the service
 name that the server will establish connections as (if you don't
 specify the host name in the service name when running gss-server, and
 it's running on a different machine from gss-client, make sure to
 specify the server's host name in the service name you specify to
-gss-client!) and msg is the message.  The client connects to the TCP
-on <host:port> (default 4444) and performs a context
-establishment. The "-d" option specifies delegation - a forwardable
-TGT will be sent to the server, which will put it in its credential
-cache (you must kinit -f for this to work).  The -v2 option means that
-the GSSAPI v2 calls should be used (and tested).
+gss-client!) and msg is the message.  The command-line options have
+the following meanings:
 
-If you are using this sample application with OpenVision's Kerberos 5
-GSS-API mechanism:
+-port	The TCP port to which to connect.  Default is 4444.
 
-1.  Link the client and server with -lgssapi_krb5 -lkrb5 -lcrypto
--lisode -lcom_err.
+-mech	The OID of the GSS-API mechanism to use.
 
-2.  Make sure that the principal corresponding to service_name is in
-the default or specified keytab on the server host, and that the
-gss-server process can read the keytab.  For example, the service name
-"host@server" corresponds to the Kerberos principal
-"host/server.domain.com@REALM".
+-d	Tells the client to delegate credentials to the server.  For
+	the Kerberos GSS-API mechanism, this means that a forwardable
+	TGT will be sent to the server, which will put it in its
+	credential cache (you must have acquired your tickets with
+	"kinit -f" for this to work).
+
+-f	Tells the client that the "msg" argument is actually the name
+	of a file whose contents should be used as the message.
+
+-q	Tells the client to be quiet, i.e., to only print error
+	messages.
+
+-ccount	Specifies how many sessions the client should initiate with
+	the server (the "connection count").
+
+-mcount	Specifies how many times the message should be sent to the
+	server in each session (the "message count").
+
+-na	Tells the client not to do any authentication with the
+	server.  Implies "-nw", "-nx" and "-nm".
+
+-nw	Tells the client not to "wrap" messages.  Implies "-nx".
+
+-nx	Tells the client not to encrypt messages.
+
+-nm	Tells the client not to ask the server to send back a
+	cryptographic checksum ("MIC").
+
+To run the server on a host, you need to make sure that the principal
+corresponding to service_name is in the default keytab on the server
+host, and that the gss-server process can read the keytab.  For
+example, the service name "host@server" corresponds to the Kerberos
+principal "host/server.domain.com@REALM".
 
 This sample application uses the following GSS-API functions:
 
-	gss_accept_sec_context		gss_release_buffer
-	gss_acquire_cred		gss_release_cred
-	gss_delete_sec_context		gss_release_name
-	gss_display_name		gss_seal
-	gss_display_status		gss_sign
-	gss_import_name			gss_unseal
-	gss_init_sec_context		gss_verify
-
-Barry Jaspan, bjaspan@security.ov.com
+	gss_accept_sec_context		gss_inquire_names_for_mech
+	gss_acquire_cred		gss_oid_to_str
+	gss_delete_sec_context		gss_release_buffer
+	gss_display_name		gss_release_cred
+	gss_display_status		gss_release_name
+	gss_export_sec_context		gss_release_oid
+	gss_get_mic			gss_release_oid_set
+	gss_import_name			gss_str_to_oid
+	gss_import_sec_context		gss_unwrap
+	gss_init_sec_context		gss_verify_mic
+	gss_inquire_context		gss_wrap
+  
+This application was originally written by Barry Jaspan of OpenVision
+Technologies, Inc.  It was updated significantly by Jonathan Kamens of
 OpenVision Technologies, Inc.
 
 $Id$

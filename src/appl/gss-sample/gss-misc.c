@@ -49,6 +49,9 @@ extern char *malloc();
 
 FILE *display_file;
 
+gss_buffer_desc empty_token_buf = { 0, (void *) "" };
+gss_buffer_t empty_token = &empty_token_buf;
+
 static void display_status_1
 	PROTOTYPE( (char *m, OM_uint32 code, int type) );
 
@@ -98,21 +101,32 @@ static int read_all(int fildes, char *buf, unsigned int nbyte)
  * Arguments:
  *
  * 	s		(r) an open file descriptor
+ *	flags		(r) the flags to write
  * 	tok		(r) the token to write
  *
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
  *
- * send_token writes the token length (as a network long) and then the
- * token data to the file descriptor s.  It returns 0 on success, and
- * -1 if an error occurs or if it could not write all the data.
+ * send_token writes the token flags (a single byte, even though
+ * they're passed in in an integer), then the token length (as a
+ * network long) and then the token data to the file descriptor s.  It
+ * returns 0 on success, and -1 if an error occurs or if it could not
+ * write all the data.
  */
-int send_token(s, tok)
+int send_token(s, flags, tok)
      int s;
+     int flags;
      gss_buffer_t tok;
 {
      int len, ret;
+     unsigned char char_flags = (unsigned char) flags;
+
+     ret = write_all(s, (char *)&char_flags, 1);
+     if (ret != 1) {
+       perror("sending token flags");
+       return -1;
+     }
 
      len = htonl(tok->length);
 
@@ -151,24 +165,40 @@ int send_token(s, tok)
  * Arguments:
  *
  * 	s		(r) an open file descriptor
+ *	flags		(w) the read flags
  * 	tok		(w) the read token
  *
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
  * 
- * recv_token reads the token length (as a network long), allocates
- * memory to hold the data, and then reads the token data from the
- * file descriptor s.  It blocks to read the length and data, if
- * necessary.  On a successful return, the token should be freed with
- * gss_release_buffer.  It returns 0 on success, and -1 if an error
- * occurs or if it could not read all the data.
+ * recv_token reads the token flags (a single byte, even though
+ * they're stored into an integer, then reads the token length (as a
+ * network long), allocates memory to hold the data, and then reads
+ * the token data from the file descriptor s.  It blocks to read the
+ * length and data, if necessary.  On a successful return, the token
+ * should be freed with gss_release_buffer.  It returns 0 on success,
+ * and -1 if an error occurs or if it could not read all the data.
  */
-int recv_token(s, tok)
+int recv_token(s, flags, tok)
      int s;
+     int *flags;
      gss_buffer_t tok;
 {
      int ret;
+     unsigned char char_flags;
+
+     ret = read_all(s, (char *) &char_flags, 1);
+     if (ret < 0) {
+       perror("reading token flags");
+       return -1;
+     } else if (! ret) {
+       if (display_file)
+	 fputs("reading token flags: 0 bytes read\n", display_file);
+       return -1;
+     } else {
+       *flags = (int) char_flags;
+     }
 
      ret = read_all(s, (char *) &tok->length, 4);
      if (ret < 0) {
@@ -184,7 +214,7 @@ int recv_token(s, tok)
 	  
      tok->length = ntohl(tok->length);
      tok->value = (char *) malloc(tok->length);
-     if (tok->value == NULL) {
+     if (tok->length && tok->value == NULL) {
 	 if (display_file)
 	     fprintf(display_file, 
 		     "Out of memory allocating token data\n");

@@ -1,3 +1,8 @@
+2000-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* README, gss-client.c, gss-misc.c, gss-misc.h, gss-server.c:
+	Patches from jik to make gss-sample more versatile.
+
 2000-01-31  Danilo Almeida  <dalmeida@mit.edu>
 
 	* gss-client.c, gss-server.c, gss-misc.c: Include Windows headers
