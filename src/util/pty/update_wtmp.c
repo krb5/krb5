@@ -50,10 +50,13 @@ long ptyint_update_wtmp (ent , host, user)
     char *host;
     char *user;
 {
-    struct utmp ut;
-    struct stat statb;
+#ifndef HAVE_UPDWTMP
     int fd;
     time_t uttime;
+    struct utmp ut;
+    struct stat statb;
+#endif
+
 #ifdef HAVE_UPDWTMPX
     struct utmpx utx;
 
@@ -69,7 +72,7 @@ long ptyint_update_wtmp (ent , host, user)
 
 #ifdef HAVE_UPDWTMP
 #ifndef HAVE_UPDWTMPX
-/* This is already performed byupdwtmpx if present.*/
+/* This is already performed by updwtmpx if present.*/
     updwtmp(WTMP_FILE, ent);
 #endif /* HAVE_UPDWTMPX*/
 #else /* HAVE_UPDWTMP */

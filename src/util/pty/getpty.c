@@ -28,11 +28,14 @@ long pty_getpty (fd, slave, slavelength)
     int slavelength;
     int *fd; char *slave;
 {
+#if !defined(HAVE__GETPTY)
     char *cp;
     char *p;
     int i,ptynum;
     struct stat stb;
     char slavebuf[1024];
+#endif
+
 #ifdef HAVE__GETPTY
     char *slaveret; /*Temporary to hold pointer to slave*/
 #endif /*HAVE__GETPTY*/

@@ -44,7 +44,7 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
     struct utmp ent, ut;
 #ifndef HAVE_SETUTENT
     struct stat statb;
-    int tty;
+    int tty, fd;
 #endif
 #ifdef HAVE_SETUTXENT
     struct utmpx utx;
@@ -54,7 +54,6 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
     char utmp_id[5];
 #endif
     char userbuf[32];
-    int fd;
 
     strncpy(ent.ut_line, line+sizeof("/dev/")-1, sizeof(ent.ut_line));
     ent.ut_time = time(0);

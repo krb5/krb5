@@ -1,3 +1,16 @@
+2000-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* libpty.h: If SOCK_DGRAM is not defined, provide a definition for
+	struct sockaddr_in to satisfy prototype. (based on similar 
+	code in k5-int.h).
+
+	* update_wtmp.c (ptyint_update_wtmp), update_utmp.c
+	(pty_update_utmp), open_slave.c (pty_open_slave), getpty.c
+	(pty_getpty): conditionalize definition of variables based on code
+	paths that are included.
+
+	
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for alpha*-dec-osf* instead of

@@ -44,6 +44,11 @@ long pty_update_utmp (int process_type,int pid,  char *user, char *line, char *h
 long pty_logwtmp (char *tty, char * user, char *host);
 
 long pty_cleanup(char *slave, int pid, int update_utmp);
+
+#ifndef SOCK_DGRAM
+struct sockaddr_in;
+#endif
+
 long pty_make_sane_hostname(struct sockaddr_in *, int, int, int, char **);
 #else /*__STDC__*/
 long pty_init();

@@ -29,7 +29,11 @@ long pty_open_slave ( slave, fd)
     const char *slave;
     int *fd;
 {
-    int vfd, testfd;
+#ifdef VHANG_FIRST
+    int vfd;
+#endif
+
+    int testfd;
     long retval;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
