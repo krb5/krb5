@@ -731,13 +731,20 @@ kerberos5_status(ap, name, level)
 	if (level < AUTH_USER)
 		return(level);
 
+	/*
+	 * Always copy in UserNameRequested if the authentication
+	 * is valid, because the higher level routines need it.
+	 * the name buffer comes from telnetd/telnetd{-ktd}.c
+	 */
+	if (UserNameRequested) {
+		strncpy(name, UserNameRequested, 255);
+		name[255] = '\0';
+	}
+
 	if (UserNameRequested &&
 	    krb5_kuserok(telnet_context, ticket->enc_part2->client, 
 			 UserNameRequested))
 	{
-		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
-		strncpy(name, UserNameRequested, 255);
-		name[255] = '\0';
 		return(AUTH_VALID);
 	} else
 		return(AUTH_USER);
