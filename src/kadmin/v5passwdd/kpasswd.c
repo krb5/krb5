@@ -182,8 +182,10 @@ main(argc, argv)
     int			error;
 
     char		*name;
+#ifdef	LANGUAGES_SUPPORTED
     int			mflag;
     int			lflag;
+#endif
     char 		*language;
 
     krb5_error_code	kret;
@@ -203,7 +205,10 @@ main(argc, argv)
      * Initialize.
      */
     language = name = opwd_prompt = (char *) NULL;
-    mflag = lflag = error = 0;
+    error = 0;
+#ifdef	LANGUAGES_SUPPORTED
+    mflag = lflag = 0;
+#endif
     send_quit = 0;
     ccache = (krb5_ccache) NULL;
 

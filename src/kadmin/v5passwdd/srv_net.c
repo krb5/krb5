@@ -102,12 +102,16 @@ typedef struct _net_slave_info {
 #define net_not_ready_fmt	"\004select error - no socket to read"
 #define net_dispatch_msg	"network dispatch"
 
+#ifdef DEBUG
 static int net_debug_level = 0;
+#endif
 
 static char		*net_service_name = (char *) NULL;
 static int		net_service_princ_init = 0;
 static krb5_principal	net_service_principal = (krb5_principal) NULL;
+#if 0
 static int		net_server_addr_init = 0;
+#endif
 static struct sockaddr_in	net_server_addr;
 static int		net_listen_socket = -1;
 static int		net_max_slaves = 0;
@@ -452,7 +456,9 @@ net_init(kcontext, realm, debug_level, port)
     struct hostent	*our_hostent;
     struct servent	*our_servent;
 
+#ifdef DEBUG
     net_debug_level = debug_level;
+#endif
     DPRINT(DEBUG_CALLS, net_debug_level, ("* net_init(port=%d)\n", port));
 
     /* Allocate the slave table */
@@ -625,7 +631,9 @@ net_init(kcontext, realm, debug_level, port)
 		    ntohs(our_servent->s_port)));
 	}
     }
+#if 0
     net_server_addr_init = 1;
+#endif
 
     /* Now open the listen socket */
     net_listen_socket = socket(AF_INET, SOCK_STREAM, 0);

@@ -1,3 +1,12 @@
+2002-06-19  Ezra Peisach  <epeisach@bu.edu>
+
+	* srv_net.c: Conditionalize debugging variables inside DEBUG
+	conditional.
+
+	* kpasswd.c (main): Conditionalize local variables inside
+	definition of LANGUAGES_SUPPORTED to avoid a variable being set
+	with out use warning.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_conn.c, adm_rw.c, kadm5_defs.h: Make prototypes
