@@ -40,10 +40,14 @@ struct mblock mblock = {				/* XXX */
     0
 };
 
+krb5_key_salt_tuple ks_tuple_default[] = {{ ENCTYPE_DES_CBC_CRC, 0 }};
+
+krb5_key_salt_tuple *std_ks_tuple = ks_tuple_default;
+int std_ks_tuple_count = 1;
+
 char	*Err_no_master_msg = "Master key not entered!\n";
 char	*Err_no_database = "Database not currently opened!\n";
 char	*current_dbname = NULL;
-
 
 /*
  * XXX Ick, ick, ick.  These global variables shouldn't be global....
@@ -215,6 +219,15 @@ char *kdb5_edit_Init(argc, argv)
 	/* Get the value for the default principal flags */
 	if (rparams->realm_flags_valid)
 	    mblock.flags = rparams->realm_flags;
+
+	/* Get the value of the supported key/salt pairs */
+	if (rparams->realm_num_keysalts) {
+	    std_ks_tuple_count = rparams->realm_num_keysalts;
+	    std_ks_tuple = rparams->realm_keysalts;
+	    rparams->realm_num_keysalts = 0;
+	    rparams->realm_keysalts = (krb5_key_salt_tuple *) NULL;
+	}
+
 
 	krb5_free_realm_params(edit_context, rparams);
     }

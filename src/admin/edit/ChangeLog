@@ -1,3 +1,11 @@
+Tue Oct  3 23:10:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cpw.c (enter_rnd_key, enter_pwd_key):
+	* kdb5_edit.c (kdb5_edit_Init): Use the kdc.conf file to determine
+		the default list of keysalt tuples to be used.  This is
+		stored in std_ks_tuple, and is used by cpw.c for random
+		keys and when a list of keysalts is not specified.
+
 Mon Sep 18 03:59:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb5_edit.c (show_principal): Show key version and last password

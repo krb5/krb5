@@ -51,16 +51,6 @@ extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 extern krb5_boolean dbactive;
 extern FILE *scriptfile;
 
-/*
- * XXX  This realy should be configured from kdc.conf
- */
-static krb5_key_salt_tuple ks_tuple_rnd_def[] =
-	{{ ENCTYPE_DES_CBC_CRC, 0 },
-	 { ENCTYPE_DES_CBC_MD5, 0 },
-	 { ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_V4},
-	 { ENCTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_V4}};
-static int ks_tuple_rnd_def_count = 4;
-
 static void
 enter_rnd_key(argc, argv, entry)
     int			  argc;
@@ -71,8 +61,8 @@ enter_rnd_key(argc, argv, entry)
     int 		  nprincs = 1;
     
     if ((retval = krb5_dbe_crk(edit_context, &master_encblock,
-			       ks_tuple_rnd_def,
-			       ks_tuple_rnd_def_count, entry))) {
+			       std_ks_tuple,
+			       std_ks_tuple_count, entry))) {
 	com_err(argv[0], retval, "while generating random key");
         krb5_db_free_principal(edit_context, entry, nprincs);
 	exit_status++;
@@ -187,9 +177,6 @@ void change_rnd_key(argc, argv)
     }
 }
 
-static krb5_key_salt_tuple ks_tuple_default[] = {{ ENCTYPE_DES_CBC_CRC, 0 }};
-static int ks_tuple_count_default = 1;
-
 void 
 enter_pwd_key(cmdname, princ, ks_tuple, ks_tuple_count, entry)
     char 		* cmdname;
@@ -229,8 +216,8 @@ enter_pwd_key(cmdname, princ, ks_tuple, ks_tuple_count, entry)
     }
     
     if (ks_tuple_count == 0) {
-	ks_tuple_count = ks_tuple_count_default;
-	ks_tuple = ks_tuple_default;
+	ks_tuple_count = std_ks_tuple_count;
+	ks_tuple = std_ks_tuple;
     }
     if ((retval = krb5_dbe_cpw(edit_context, &master_encblock, ks_tuple,
 			       ks_tuple_count, password, entry))) {

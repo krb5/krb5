@@ -36,6 +36,9 @@ struct mblock {
     krb5_kvno mkvno;
 };
 
+extern krb5_key_salt_tuple *std_ks_tuple;
+extern int std_ks_tuple_count;
+
 void add_key 
 	PROTOTYPE((char const *, char const *, 
 		   krb5_const_principal, const krb5_keyblock *, 
