@@ -36,11 +36,7 @@ SRCS=	cksum.c		\
 	string_to_key.c	\
 	weak_key.c	
 
-#ifdef OS_BSD
-DEFINES = $(DESDEFINES) -DBSDUNIX
-#else
 DEFINES = $(DESDEFINES)
-#endif
 
 VERIFYOBJ = verify.o
 
