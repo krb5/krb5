@@ -4,7 +4,7 @@
  * based on lib/crypto/des/string2key.c from MIT V5 
  * and on lib/des/afs_string_to_key.c from UMD.
  * constructed by Mark Eichin, Cygnus Support, 1995.
- * made thread-safe by Ken Raeburn, MIT, 2000.
+ * made thread-safe by Ken Raeburn, MIT, 2001.
  */
 
 /*
