@@ -1,3 +1,6 @@
+Thu Feb 09 17:43:47 1995  Chris Provenzano (proven@mit.edu)
+
+	* klist.c Added -e option to print out encryption types.
 
 Fri Feb 03 22:14:26 1995  Chris Provenzano (proven@mit.edu)
 

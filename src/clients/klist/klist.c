@@ -33,6 +33,7 @@
 
 extern int optind;
 extern char *optarg;
+int show_etype = 0;
 int show_flags = 0;
 char *progname;
 char *defname;
@@ -69,8 +70,11 @@ main(argc, argv)
     else
 	progname = argv[0];
 
-    while ((c = getopt(argc, argv, "fc:")) != EOF) {
+    while ((c = getopt(argc, argv, "efc:")) != EOF) {
 	switch (c) {
+	case 'e':
+	     show_etype = 1;
+	     break;
 	case 'f':
 	     show_flags = 1;
 	     break;
@@ -209,6 +213,16 @@ printtime(tv)
            stime->tm_sec);
 }
 
+/* Make sure this list matches the ETYPE order in encryption.h */
+#define ETYPE_MAX 6
+char * etype_string[ETYPE_MAX] = {
+    "ETYPE_NULL", 
+    "ETYPE_DES_CBC_CRC", 
+    "ETYPE_DES_CBC_MD4", 
+    "ETYPE_DES_CBC_MD5", 
+    "ETYPE_RAW_DES_CBC", 
+    NULL };
+
 void
 show_credential(kcontext, cred)
     krb5_context kcontext;
@@ -252,6 +266,25 @@ show_credential(kcontext, cred)
 	fputs("renew until ", stdout);
         printtime(cred->times.renew_till);
     }
+
+    if (show_etype) {
+	krb5_enctype etype = cred->keyblock.etype;
+
+	if (!first) 
+	    putchar('\n');
+
+	printf("\tEncryption type: ");
+	if (etype != ETYPE_UNKNOWN) {
+	    if ((etype < ETYPE_MAX) && etype_string[etype]) {
+		printf("%s", etype_string[etype]);
+	    } else {
+		printf("UNRECOGNIZED");
+	    }
+	} else {
+	    printf("ETYPE_UNKNOWN");
+	}
+    }
+
     if (show_flags) {
 	flags = flags_string(cred);
 	if (flags && *flags) {
@@ -263,6 +296,7 @@ show_credential(kcontext, cred)
 	    first = 0;
         }
     }
+
     putchar('\n');
     free(name);
     free(sname);
