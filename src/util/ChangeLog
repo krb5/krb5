@@ -1,3 +1,7 @@
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* reconf: Restore support for 2.52; reject older versions.
+
 2003-04-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* reconf: Drop support for 2.52 and earlier.
