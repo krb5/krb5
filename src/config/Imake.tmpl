@@ -50,6 +50,11 @@
  *	   existing .cf files for examples of what to put there.
  */
 
+#ifdef tahoe
+#define TahoeArchitecture
+#endif
+
+
 #ifdef ultrix
 #define MacroIncludeFile <ultrix.cf>
 #define MacroFile ultrix.cf
@@ -70,6 +75,11 @@
 #define MacroFile vaxbsd.cf
 #undef vax
 #define VaxArchitecture
+#endif
+
+#if defined(tahoe) && !defined(SYSV)
+#define MacroIncludeFile <tahoebsd.cf>
+#define MacroFile tahoebsd.cf
 #endif
 
 #ifdef sun
