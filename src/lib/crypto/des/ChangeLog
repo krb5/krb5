@@ -1,3 +1,15 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * des_int.h, destest.c, init_rkey.c, random_key.c, string2key.c 
+	* verify.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * destest.c, random_key.c, string2key.c, verify.c : Remove krb5_enctype
+		references, and replace with krb5_keytype where appropriate.
+	* init_rkey.c (mit_des_init_random_key()), 
+	* string2key.c (mit_des_string_to_key()) : Allow for any DES keytype.
+
 
 Tue Aug 29 13:29:19 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* process_key.c, finish_key.c - Set and use priv_size in the krb5_

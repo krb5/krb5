@@ -11,7 +11,6 @@
  * des_pcbc_encrypt.c - encrypt a string of characters in error propagation mode
  */
 #include "des.h"
-#include "des_int.h"
 #include "f_tables.h"
 
 /*

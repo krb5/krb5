@@ -26,7 +26,7 @@
 
 /*
 	converts the string pointed to by "data" into an encryption key
-	of type "keytype".  *keyblock is filled in with the key info;
+	of type "enctype".  *keyblock is filled in with the key info;
 	in particular, keyblock->contents is to be set to allocated storage.
 	It is the responsibility of the caller to release this storage
 	when the generated key no longer needed.
@@ -35,15 +35,15 @@
 	algorithm.
 
 	If the particular function called does not know how to make a
-	key of type "keytype", an error may be returned.
+	key of type "enctype", an error may be returned.
 
 	returns: errors
  */
 
 krb5_error_code
-mit_des_string_to_key (eblock, keytype, keyblock, data, salt)
+mit_des_string_to_key (eblock, enctype, keyblock, data, salt)
 const krb5_encrypt_block FAR * eblock;
-const krb5_keytype keytype;
+const krb5_enctype enctype;
 krb5_keyblock FAR * keyblock;
 const krb5_data FAR * data;
 const krb5_data FAR * salt;
@@ -65,16 +65,16 @@ const krb5_data FAR * salt;
 #define min(A, B) ((A) < (B) ? (A): (B))
 #endif
 
-    if ( keytype != KEYTYPE_DES )
-	return (KRB5_PROG_KEYTYPE_NOSUPP);
+    if ((enctype != ENCTYPE_DES_CBC_CRC) && (enctype != ENCTYPE_DES_CBC_MD4) &&
+       (enctype != ENCTYPE_DES_CBC_MD5) && (enctype != ENCTYPE_DES_CBC_RAW)) 
+	return (KRB5_PROG_ETYPE_NOSUPP);
 
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
     keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->etype = eblock->crypto_entry->proto_enctype;
-    keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
+    keyblock->enctype = eblock->crypto_entry->proto_enctype;
     key = keyblock->contents;
 
     if (salt)
