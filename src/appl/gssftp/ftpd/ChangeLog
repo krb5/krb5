@@ -1,3 +1,7 @@
+2001-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (strerror): Only define if not HAVE_STRERROR.
+
 2000-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (dolog): Cast first argument to pty_make_sane_hostname to

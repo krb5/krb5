@@ -170,9 +170,11 @@ sig_t	lostpeer();
 off_t	restart_point = 0;
 jmp_buf ptabort;
 
+#ifndef HAVE_STRERROR
 #define strerror(error) (sys_errlist[error])
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
 #endif
 
 extern int connected;

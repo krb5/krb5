@@ -1,3 +1,9 @@
+2001-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (strerror): Only define if not HAVE_STRERROR.
+	* ftp.c (strerror): Likewise.
+	* secure.c (secure_putbuf, secure_getbyte): Use strerror.
+
 2000-11-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c (globulize): Use correct address of globbed results when
