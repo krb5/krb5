@@ -1,3 +1,7 @@
+Sat Nov  2 02:24:20 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in (SHLIB_TAIL_COMP): Add send-pr
+
 Fri Nov  8 13:17:23 1996  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Fix to work with new modules definitions because cvs

@@ -18,6 +18,6 @@ esac
 SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 AC_SUBST(SHLIB_TAIL_COMP)
 
-CONFIG_DIRS(et ss profile pty dyn db2)
+CONFIG_DIRS(et ss profile pty dyn db2 send-pr)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE
