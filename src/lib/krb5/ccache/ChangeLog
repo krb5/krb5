@@ -1,3 +1,8 @@
+Thu Feb 12 16:17:46 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add commented out AC_OUTPUT to force autoreconf to
+	rebuild the configure script.
+
 Wed Feb 11 22:56:49 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

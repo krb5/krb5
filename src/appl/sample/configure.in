@@ -8,4 +8,4 @@ K5_GEN_MAKEFILE(.)
 K5_GEN_MAKEFILE(sclient)
 K5_GEN_MAKEFILE(sserver)
 K5_OUTPUT_FILES
-
+dnl AC_OUTPUT to keep autoreconf happy

@@ -8,3 +8,4 @@ K5_GEN_MAKEFILE(stdio, libobj)
 K5_GEN_MAKEFILE(file, libobj)
 K5_GEN_MAKEFILE(memory, libobj)
 K5_OUTPUT_FILES
+dnl AC_OUTPUT to keep autoreconf happy

@@ -4,4 +4,4 @@ KRB5_BUILD_LIBOBJS
 K5_GEN_MAKEFILE(., libobj)
 K5_GEN_MAKEFILE(file, libobj)
 K5_OUTPUT_FILES
-
+dnl AC_OUTPUT to keep autoreconf happy

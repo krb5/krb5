@@ -76,3 +76,4 @@ KRB5_BUILD_LIBRARY_WITH_DEPS
 K5_GEN_MAKEFILE(., lib libobj)
 K5_GEN_FILE(types.h:types.hin)
 K5_OUTPUT_FILES
+dnl AC_OUTPUT to keep autoreconf happy

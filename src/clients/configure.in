@@ -12,4 +12,4 @@ K5_GEN_MAKEFILE(kdestroy)
 K5_GEN_MAKEFILE(kpasswd)
 K5_GEN_MAKEFILE(ksu)
 K5_OUTPUT_FILES
-
+dnl AC_OUTPUT to keep autoreconf happy

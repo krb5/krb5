@@ -10,4 +10,4 @@ AC_SUBST(SRCTOP)
 K5_GEN_MAKEFILE(.)
 K5_GEN_FILE(env-setup.sh:env-setup.shin)
 K5_OUTPUT_FILES
-
+dnl AC_OUTPUT to keep autoreconf happy
