@@ -57,15 +57,16 @@ extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
 krb5_error_code
-krb5_sendto_kdc (context, message, realm, reply)
+krb5_sendto_kdc (context, message, realm, reply, master)
     krb5_context context;
     const krb5_data * message;
     const krb5_data * realm;
     krb5_data * reply;
+    int *master;
 {
     register int timeout, host, i;
     struct sockaddr *addr;
-    int naddr;
+    int naddr, master_index, nmasters;
     int sent, nready;
     krb5_error_code retval;
     SOCKET *socklist;
@@ -77,10 +78,14 @@ krb5_sendto_kdc (context, message, realm, reply)
      * find KDC location(s) for realm
      */
 
-    if (retval = krb5_locate_kdc (context, realm, &addr, &naddr))
+    if (retval = krb5_locate_kdc (context, realm, &addr, &naddr,
+				  master?&master_index:NULL,
+				  master?&nmasters:NULL))
 	return retval;
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;
+    if (master && (*master == 1) && (nmasters == 0))
+	return KRB5_KDC_UNREACH;
 
     socklist = (SOCKET *)malloc(naddr * sizeof(SOCKET));
     if (socklist == NULL) {
@@ -120,6 +125,12 @@ krb5_sendto_kdc (context, message, realm, reply)
 	 timeout <<= krb5_skdc_timeout_shift) {
 	sent = 0;
 	for (host = 0; host < naddr; host++) {
+	    /* if a master kdc is required, skip the non-master kdc's */
+
+	    if (master && (*master == 1) &&
+		((host < master_index) || (host >= (master_index+nmasters))))
+		continue;
+
 	    /* send to the host, wait timeout seconds for a response,
 	       then move on. */
 	    /* cache some sockets for each host */
@@ -196,6 +207,13 @@ krb5_sendto_kdc (context, message, realm, reply)
 
 		reply->length = cc;
 		retval = 0;
+
+		/* if the caller asked to be informed if it
+		   got a master kdc, tell it */
+		if (master)
+		    *master = ((host >= master_index) &&
+			       (host < (master_index+nmasters)));
+
 		goto out;
 	    } else if (nready == 0) {
 		/* timeout */

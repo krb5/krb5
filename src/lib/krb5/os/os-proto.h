@@ -32,6 +32,8 @@ krb5_error_code krb5_locate_kdc
     PROTOTYPE((krb5_context,
 	       const krb5_data *,
 	       struct sockaddr **,
+	       int *,
+	       int *,
 	       int *));
 #endif
 

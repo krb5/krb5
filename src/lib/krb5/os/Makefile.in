@@ -13,6 +13,7 @@ STLIBOBJS= \
 	def_realm.o	\
 	DNR.o	\
 	ccdefname.o	\
+	changepw.o	\
 	free_krbhs.o	\
 	free_hstrl.o	\
 	full_ipadr.o	\
@@ -36,6 +37,7 @@ STLIBOBJS= \
 	net_write.o	\
 	osconfig.o	\
 	port2ip.o	\
+	prompter.o	\
 	promptusr.o	\
 	read_msg.o	\
 	read_pwd.o	\
@@ -53,6 +55,7 @@ OBJS= \
 	def_realm.$(OBJEXT)	\
 	DNR.$(OBJEXT)	\
 	ccdefname.$(OBJEXT)	\
+	changepw.$(OBJEXT)	\
 	free_krbhs.$(OBJEXT)	\
 	free_hstrl.$(OBJEXT)	\
 	full_ipadr.$(OBJEXT)	\
@@ -76,6 +79,7 @@ OBJS= \
 	net_write.$(OBJEXT)	\
 	osconfig.$(OBJEXT)	\
 	port2ip.$(OBJEXT)	\
+	prompter.$(OBJEXT)	\
 	promptusr.$(OBJEXT)	\
 	read_msg.$(OBJEXT)	\
 	read_pwd.$(OBJEXT)	\
@@ -93,6 +97,7 @@ SRCS= \
 	$(srcdir)/def_realm.c	\
 	$(srcdir)/DNR.c	\
 	$(srcdir)/ccdefname.c	\
+	$(srcdir)/changepw.c	\
 	$(srcdir)/free_krbhs.c	\
 	$(srcdir)/free_hstrl.c	\
 	$(srcdir)/full_ipadr.c	\
@@ -115,6 +120,7 @@ SRCS= \
 	$(srcdir)/net_read.c	\
 	$(srcdir)/net_write.c	\
 	$(srcdir)/osconfig.c	\
+	$(srcdir)/prompter.c	\
 	$(srcdir)/promptusr.c	\
 	$(srcdir)/read_msg.c	\
 	$(srcdir)/read_pwd.c	\

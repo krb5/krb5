@@ -1,3 +1,17 @@
+Sat Dec  6 02:34:50 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add changepw.c, prompter.c.
+
+	* changepw.c: New file; Cygnus password changing protocol.
+
+	* locate_kdc.c: Add parameter to indicate master KDC.
+
+	* os-proto.h: Reflect changes to locate_kdc.
+
+	* prompter.c: New file; Cygnus initial creds.
+
+	* sendto_kdc.c: Add parameter to indicate master KDC.
+
 Mon Oct  6 11:40:11 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* t_std_conf.c (main): Call krb5_free_context when done.

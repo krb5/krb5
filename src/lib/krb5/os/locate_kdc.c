@@ -30,17 +30,21 @@
 
 /*
  * returns count of number of addresses found
+ * if master is non-NULL, it is filled in with the index of
+ * the master kdc
  */
 
 krb5_error_code
-krb5_locate_kdc(context, realm, addr_pp, naddrs)
+krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
     krb5_context context;
     const krb5_data *realm;
     struct sockaddr **addr_pp;
     int *naddrs;
+    int *master_index;
+    int *nmasters;
 {
     const char	*realm_kdc_names[4];
-    char **hostlist, *host, *port, *cp;
+    char **masterlist, **hostlist, *host, *port, *cp;
     krb5_error_code code;
     int i, j, out, count;
     struct sockaddr *addr_p;
@@ -58,7 +62,9 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     strncpy(host, realm->data, realm->length);
     host[realm->length] = '\0';
     hostlist = 0;
-    
+
+    masterlist = NULL;
+
     realm_kdc_names[0] = "realms";
     realm_kdc_names[1] = host;
     realm_kdc_names[2] = "kdc";
@@ -67,12 +73,16 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
     krb5_xfree(host);
 
-    if (code == PROF_NO_SECTION)
-	return KRB5_REALM_UNKNOWN;
-    if (code == PROF_NO_RELATION)
-	return KRB5_CONFIG_BADFORMAT;
-    if (code)
-	return code;
+     if (code == PROF_NO_SECTION) {
+ 	krb5_xfree(host);
+  	return KRB5_REALM_UNKNOWN;
+     } else if (code == PROF_NO_RELATION) {
+ 	krb5_xfree(host);
+  	return KRB5_CONFIG_BADFORMAT;
+     } else if (code) {
+ 	krb5_xfree(host);
+  	return code;
+     }
 
 #ifdef HAVE_NETINET_IN_H
     if ((sp = getservbyname(KDC_PORTNAME, "udp")))
@@ -88,10 +98,52 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	    count++;
     
     if (count == 0) {
+	krb5_xfree(host);
 	*naddrs = 0;
 	return 0;
     }
     
+    if (master_index) {
+	realm_kdc_names[0] = "realms";
+	realm_kdc_names[1] = host;
+	realm_kdc_names[2] = "admin_server";
+	realm_kdc_names[3] = 0;
+
+	code = profile_get_values(context->profile, realm_kdc_names,
+				  &masterlist);
+
+	krb5_xfree(host);
+
+	if (code) {
+	    *master_index = 0;
+	    *nmasters = 0;
+	} else {
+	    for (i=0; masterlist[i]; i++) {
+		host = masterlist[i];
+
+		/*
+		 * Strip off excess whitespace
+		 */
+		cp = strchr(host, ' ');
+		if (cp)
+		    *cp = 0;
+		cp = strchr(host, '\t');
+		if (cp)
+		    *cp = 0;
+		cp = strchr(host, ':');
+		if (cp)
+		    *cp = 0;
+	    }
+	}
+    } else {
+	krb5_xfree(host);
+    }
+
+    /* at this point, is master is non-NULL, then either the master kdc
+       is required, and there is one, or the master kdc is not required,
+       and there may or may not be one. */
+
+
 #ifdef HAVE_NETINET_IN_H
     if (sec_udpport)
 	    count = count * 2;
@@ -115,40 +167,52 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	    *port = 0;
 	    port++;
 	}
-	hp = gethostbyname(hostlist[i]);
-	if (hp != 0) {
-	    switch (hp->h_addrtype) {
-#ifdef HAVE_NETINET_IN_H
-	    case AF_INET:
-		for (j=0; hp->h_addr_list[j]; j++) {
-		    sin_p = (struct sockaddr_in *) &addr_p[out++];
-		    memset ((char *)sin_p, 0, sizeof(struct sockaddr));
-		    sin_p->sin_family = hp->h_addrtype;
-		    sin_p->sin_port = port ? htons(atoi(port)) : udpport;
-		    memcpy((char *)&sin_p->sin_addr,
-			   (char *)hp->h_addr_list[j],
-			   sizeof(struct in_addr));
-		    if (out+1 >= count) {
-			count += 5;
-			addr_p = (struct sockaddr *)
-			    realloc ((char *)addr_p,
-				     sizeof(struct sockaddr) * count);
-		    }
-		    if (sec_udpport && !port) {
-			addr_p[out] = addr_p[out-1];
-			sin_p = (struct sockaddr_in *) &addr_p[out++];
-			sin_p->sin_port = sec_udpport;
-		    }
-		}
-		break;
-#endif
-	    default:
-		break;
-	    }
+
+	if ((hp = gethostbyname(hostlist[i])) == 0) {
+	    free(hostlist[i]);
+	    hostlist[i] = 0;
+	    continue;
 	}
-	free(hostlist[i]);
-	hostlist[i] = 0;
+
+	if (masterlist)
+	    for (j=0; masterlist[j]; j++)
+		if (strcasecmp(hostlist[i], masterlist[j]) == 0)
+		    *master_index = out;
+
+	switch (hp->h_addrtype) {
+
+#ifdef HAVE_NETINET_IN_H
+	case AF_INET:
+	    for (j=0; hp->h_addr_list[j]; j++) {
+		sin_p = (struct sockaddr_in *) &addr_p[out++];
+		memset ((char *)sin_p, 0, sizeof(struct sockaddr));
+		sin_p->sin_family = hp->h_addrtype;
+		sin_p->sin_port = port ? htons(atoi(port)) : udpport;
+		memcpy((char *)&sin_p->sin_addr,
+		       (char *)hp->h_addr_list[j],
+		       sizeof(struct in_addr));
+		if (out+1 >= count) {
+		    count += 5;
+		    addr_p = (struct sockaddr *)
+			realloc ((char *)addr_p,
+				 sizeof(struct sockaddr) * count);
+		}
+		if (sec_udpport && !port) {
+		    addr_p[out] = addr_p[out-1];
+  		    sin_p = (struct sockaddr_in *) &addr_p[out++];
+		    sin_p->sin_port = sec_udpport;
+		}
+	    }
+	    break;
+#endif
+	default:
+	    break;
+	}
+	if (masterlist)
+	    *nmasters = out - *master_index;
     }
+
+
     free ((char *)hostlist);
 
     if (out == 0) {     /* Couldn't resolve any KDC names */
