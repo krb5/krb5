@@ -28,9 +28,15 @@ static char rcsid_sim_client_c[] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
+#include <krb5/sysincl.h>
 #include <com_err.h>
 
 #include "simple.h"
+
+/* for old Unixes and friends ... */
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64
+#endif
 
 #define MSG "hi there!"			/* message text */
 
@@ -47,7 +53,7 @@ char *argv[];
     struct servent *serv;
     struct hostent *host;
     char *cp;
-    char full_hname[256];		/* XXX magic number */
+    char full_hname[MAXHOSTNAMELEN];
     struct sockaddr_in s_sock;		/* server address */
     struct sockaddr_in c_sock;		/* client address */
 
@@ -88,6 +94,7 @@ char *argv[];
 	exit(1);
     }
     strncpy(full_hname, host->h_name, sizeof(full_hname)-1);
+    full_hname[sizeof(full_hname)-1] = '\0';
 
     /* lower-case to get name for "instance" part of service name */
     for (cp = full_hname; *cp; cp++)

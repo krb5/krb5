@@ -29,9 +29,15 @@ static char rcsid_sim_server_c [] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
+#include <krb5/sysincl.h>
 #include <com_err.h>
 
 #include "simple.h"
+
+/* for old Unixes and friends ... */
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64
+#endif
 
 #define PROGNAME argv[0]
 #define SNAME argv[1]
@@ -47,7 +53,7 @@ char *argv[];
     struct hostent *host;
     struct sockaddr_in s_sock;		/* server's address */
     struct sockaddr_in c_sock;		/* client's address */
-    char full_hname[256];		/* XXX magic number; for hostname */
+    char full_hname[MAXHOSTNAMELEN];
     char *cp;
 
     krb5_error_code retval;
