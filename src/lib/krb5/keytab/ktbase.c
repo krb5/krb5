@@ -61,7 +61,7 @@ krb5_kt_ops *ops;
  */
 
 krb5_error_code krb5_kt_resolve (name, ktid)
-    char *name;
+    const char *name;
     krb5_keytab *ktid;
 {
     struct krb5_kt_typelist *tlist;
@@ -72,8 +72,8 @@ krb5_error_code krb5_kt_resolve (name, ktid)
     if (!cp)
 	return KRB5_KT_BADNAME;
 
-    pfxlen = cp - name;
-    resid = name + pfxlen + 1;
+    pfxlen = cp - (char *)name;
+    resid = (char *)name + pfxlen + 1;
 	
     pfx = malloc (pfxlen+1);
     if (!pfx)
