@@ -1,3 +1,11 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * osconf.h: Added DEFAULT_SECURE_PROFILE_PATH so that KfM will only
+    search paths that start with ~/ (homedir-based) when getting an
+    insecure context.  This is the same as DEFAULT_PROFILE_PATH on all
+    other platforms, which allows us to avoid more references to 
+    TARGET_OS_MAC in krb5 sources.
+
 2002-09-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* osconf.h (DEFAULT_KDC_UDP_PORTLIST): Renamed from
