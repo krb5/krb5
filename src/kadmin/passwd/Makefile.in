@@ -14,6 +14,7 @@ $(PROG): $(OBJS) $(CLNTDEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(BINDIR)/$(PROG)
+	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(CLIENT_MANDIR)/$(PROG).1
 
 clean::
 	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)

@@ -251,7 +251,7 @@ kadminv4=kadmin.v4
 krb524=krb524
 fi
 dnl
-CONFIG_DIRS(util include lib $krb524 kdc kadmin slave clients appl tests config-files)
+CONFIG_DIRS(util include lib $krb524 kdc kadmin slave clients appl tests config-files gen-manpages)
 dnl $kadminv4 removed from the above
 DO_SUBDIRS
 dnl AC_OUTPUT(Makefile,[EXTRA_RULES])
