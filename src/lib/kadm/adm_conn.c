@@ -217,9 +217,14 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
     struct sockaddr_in	in_remote;
     int			addr_len;
 
+    const char		*realm_admin_names[4];
+    char		*realm_name;
+    krb5_boolean	found;
+
     /* Initialize */
     hostlist = (char **) NULL;
     *sockp = -1;
+    realm_name = (char *) NULL;
 
     /*
      * XXX - only know ADDRTYPE_INET.
@@ -227,7 +232,10 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 #ifdef	KRB5_USE_INET
     *local = (krb5_address *) malloc(sizeof(krb5_address));
     *remote = (krb5_address *) malloc(sizeof(krb5_address));
-    if ((*local == NULL) || (*remote == NULL)) {
+    realm_name = (char *) malloc((size_t) realmp->length + 1);
+    if ((*local == (krb5_address *) NULL) ||
+	(*remote == (krb5_address *) NULL) ||
+	(realm_name == (char *) NULL)) {
 	kret = ENOMEM;
 	goto cleanup;
     }
@@ -240,64 +248,190 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	goto cleanup;
     }
 
-    if ((service = getservbyname(KRB5_ADM_SERVICE_NAME, "tcp")) == NULL) {
-	kret = ENOENT;
-	goto cleanup;
-    }
-    in_remote.sin_port = service->s_port;
-#endif	/* KRB5_USE_INET */
+    /*
+     * First attempt to find addresses from our config file, if we cannot
+     * find an entry, then try getservbyname().
+     */
+    found = 0;
+#ifndef	OLD_CONFIG_FILES
+    strncpy(realm_name, realmp->data, (size_t) realmp->length);
+    realm_name[realmp->length] = '\0';
+    realm_admin_names[0] = "realms";
+    realm_admin_names[1] = realm_name;
+    realm_admin_names[2] = "admin_server";
+    realm_admin_names[3] = (char *) NULL;
+    if (!(kret = profile_get_values(kcontext->profile,
+				    realm_admin_names,
+				    &hostlist))) {
+	int		hi;
+	char		*cport;
+	char		*cp;
+	krb5_int32	pport;
 
-    if (kret = krb5_get_krbhst(kcontext, realmp, &hostlist))
-	goto cleanup;
+	for (hi = 0; hostlist[hi]; hi++) {
+	    /*
+	     * This knows a little too much about the format of profile
+	     * entries.  Shouldn't it just be some sort of tuple?
+	     *
+	     * The form is assumed to be:
+	     *	admin_server = <hostname>[:<portname>[<whitespace>]]
+	     */
+	    cport = (char *) NULL;
+	    pport = (u_short) KRB5_ADM_DEFAULT_PORT;
+	    cp = strchr(hostlist[hi], ' ');
+	    if (cp)
+		*cp = '\0';
+	    cp = strchr(hostlist[hi], '\t');
+	    if (cp)
+		*cp = '\0';
+	    cport = strchr(hostlist[hi], ':');
+	    if (cport) {
+		*cport = '\0';
+		cport++;
+		if (sscanf(cport, "%d", &pport) != 1) {
+		    kret = KRB5_CONFIG_BADFORMAT;
+		    goto cleanup;
+		}
+	    }
 
-    /* Now count the number of hosts in the realm */
-    count = 0;
-    for (i=0; hostlist[i]; i++)
-      count++;
-    if (count == 0) {
-	kret = ENOENT;	/* something better? */
-	goto cleanup;
-    }
+	    /*
+	     * Now that we have a host name, get the host entry.
+	     */
+	    remote_host = gethostbyname(hostlist[hi]);
+	    if (remote_host == (struct hostent *) NULL) {
+		kret = KRB5_CONFIG_BADFORMAT;
+		goto cleanup;
+	    }
 
-#ifdef	KRB5_USE_INET
-    /* Now find a suitable host */
-    for (i=0; hostlist[i]; i++) {
-	remote_host = gethostbyname(hostlist[i]);
-	if (remote_host != (struct hostent *) NULL) {
+	    /*
+	     * Fill in our address values.
+	     */
 	    in_remote.sin_family = remote_host->h_addrtype;
 	    (void) memcpy((char *) &in_remote.sin_addr,
 			  (char *) remote_host->h_addr,
 			  sizeof(in_remote.sin_addr));
-	    break;
+	    in_remote.sin_port = htons((u_short) pport);
+
+	    /* Open a tcp socket */
+	    *sockp = socket(PF_INET, SOCK_STREAM, 0);
+	    if (*sockp < 0) {
+		kret = errno;
+		goto cleanup;
+	    }
+	    else kret = 0;
+
+	    /* Attempt to connect to the remote address. */
+	    if (connect(*sockp,
+			(struct sockaddr *) &in_remote,
+			sizeof(in_remote)) < 0) {
+		/* Failed, go to next address */
+		close(*sockp);
+		*sockp = -1;
+		continue;
+	    }
+
+	    /* Find out local address */
+	    addr_len = sizeof(in_local);
+	    if (getsockname(*sockp,
+			    (struct sockaddr *) &in_local,
+			    &addr_len) < 0) {
+		/* Couldn't get our local address? */
+		kret = errno;
+		goto cleanup;
+	    }
+	    else {
+		/* Connection established. */
+		memcpy((char *) (*remote)->contents,
+		       (char *) &in_remote.sin_addr,
+		       sizeof(struct in_addr));
+		memcpy((char *) (*local)->contents,
+		       (char *) &in_local.sin_addr,
+		       sizeof(struct in_addr));
+		found = 1;
+		break;
+	    }
+	}
+	if (!found) {
+	    krb5_xfree(hostlist);
+	    hostlist = (char **) NULL;
 	}
     }
+#endif	/* OLD_CONFIG_FILES */
+    if (!found) {
+	/*
+	 * Use the old way of finding our administrative server.
+	 *
+	 * This consists of looking up an entry in /etc/services and if
+	 * we don't find it, then we are just out of luck.  Then, we use
+	 * that port number along with the address of the kdc.
+	 */
+	if ((service = getservbyname(KRB5_ADM_SERVICE_NAME, "tcp")) == NULL) {
+	    kret = ENOENT;
+	    goto cleanup;
+	}
+	in_remote.sin_port = service->s_port;
+	
+	if (kret = krb5_get_krbhst(kcontext, realmp, &hostlist))
+	    goto cleanup;
+	
+	/* Now count the number of hosts in the realm */
+	count = 0;
+	for (i=0; hostlist[i]; i++)
+	    count++;
+	if (count == 0) {
+	    kret = ENOENT;	/* something better? */
+	    goto cleanup;
+	}
+	
+	/* Now find an available host */
+	for (i=0; hostlist[i]; i++) {
+	    remote_host = gethostbyname(hostlist[i]);
+	    if (remote_host != (struct hostent *) NULL) {
+		in_remote.sin_family = remote_host->h_addrtype;
+		(void) memcpy((char *) &in_remote.sin_addr,
+			      (char *) remote_host->h_addr,
+			      sizeof(in_remote.sin_addr));
+	
+		/* Open a tcp socket */
+		*sockp = socket(PF_INET, SOCK_STREAM, 0);
+		if (*sockp < 0) {
+		    kret = errno;
+		    goto cleanup;
+		}
+		else kret = 0;
+	
+		if (connect(*sockp,
+			    (struct sockaddr *) &in_remote,
+			    sizeof(in_remote)) < 0) {
+		    close(*sockp);
+		    *sockp = -1;
+		    continue;
+		}
 
-    /* Open a tcp socket */
-    *sockp = socket(PF_INET, SOCK_STREAM, 0);
-    if (*sockp < 0) {
-	kret = errno;
-	goto cleanup;
+		/* Find out local address */
+		addr_len = sizeof(in_local);
+		if (getsockname(*sockp,
+				(struct sockaddr *) &in_local,
+				&addr_len) < 0) {
+		    kret = errno;
+		    goto cleanup;
+		}
+		else {
+		    memcpy((char *) (*remote)->contents,
+			   (char *) &in_remote.sin_addr,
+			   sizeof(struct in_addr));
+	
+		    memcpy((char *) (*local)->contents,
+			   (char *) &in_local.sin_addr,
+			   sizeof(struct in_addr));
+		    found = 1;
+		    break;
+		}
+	    }
+	}
+	if (!found)
+	    kret = KRB5_SERVICE_UNKNOWN;
     }
-    else kret = 0;
-
-    if (connect(*sockp,
-		(struct sockaddr *) &in_remote,
-		sizeof(in_remote)) < 0) {
-	kret = errno;
-	goto cleanup;
-    }
-    memcpy((char *) (*remote)->contents,
-	   (char *) &in_remote.sin_addr,
-	   sizeof(struct in_addr));
-
-    /* Find out local address */
-    addr_len = sizeof(in_local);
-    if (getsockname(*sockp, (struct sockaddr *) &in_local, &addr_len) < 0)
-	kret = errno;
-    else
-	memcpy((char *) (*local)->contents,
-	       (char *) &in_local.sin_addr,
-	       sizeof(struct in_addr));
 #else	/* KRB5_USE_INET */
     kret = ENOENT;
 #endif	/* KRB5_USE_INET */
@@ -321,9 +455,11 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	    *remote = (krb5_address *) NULL;
 	}
     }
+    if (realm_name)
+	free(realm_name);
     if (hostlist)
 	krb5_xfree(hostlist);
-    return(0);
+    return(kret);
 }
 
 /*
