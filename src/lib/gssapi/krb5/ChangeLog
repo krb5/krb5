@@ -1,3 +1,10 @@
+Fri Jul 24 21:13:53 1998  Tom Yu  <tlyu@mit.edu>
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix to round down
+	by 8 even if the req_output_size-ohlen is a multiple of 8, since
+	the wrap token is always padded regardless of whether it's a
+	mutiple of 8 bytes.
+
 1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* k5unseal.c (kg_unseal):  Clean up lint warnings.
