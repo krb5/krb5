@@ -1,5 +1,11 @@
 Mon May  8 22:19:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* read_pwd.c (krb5_read_password): use volatile on all
+		systems. Let configure define volatile to nothing on
+		systems without. 
+
+	* configure.in: Add HAS_ANSI_VOLATILE
+
 	* mk_faddr.c (krb5_make_fulladdr): Allocate enough memory for
 		raddr contents.
 

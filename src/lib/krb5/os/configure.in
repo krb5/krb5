@@ -8,6 +8,7 @@ dnl and gmt_mktime.c (which only gets them from here...)
 AC_TIME_WITH_SYS_TIME
 AC_HAVE_HEADERS(unistd.h sys/time.h)
 AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
+HAS_ANSI_VOLATILE
 SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE
 V5_AC_OUTPUT_MAKEFILE

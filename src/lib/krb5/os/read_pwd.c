@@ -81,11 +81,8 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     int *size_return;
 {
     /* adapted from Kerberos v4 des/read_password.c */
-#if defined(__STDC__) || defined(mips) || defined(_WINDOWS)
     /* readin_string is used after a longjmp, so must be volatile */
-    volatile
-#endif
-      char *readin_string = 0;
+    volatile char *readin_string = 0;
     register char *ptr;
     int scratchchar;
     krb5_sigtype (*ointrfunc)();
