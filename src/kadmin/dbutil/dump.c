@@ -33,7 +33,7 @@
 #include <kadm5/adb.h>
 #include <com_err.h>
 #include "kdb5_util.h"
-#if	HAVE_REGEX_H
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
 #include <regex.h>
 #endif	/* HAVE_REGEX_H */
 

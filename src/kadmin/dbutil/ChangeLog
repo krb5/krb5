@@ -1,3 +1,8 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* dump.c: Include regex.h if exists and if HAVE_REGCOMP
+	defined. Preior to this, regex.h was never included.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* dumpv4.c: Pass C_Block * to des_read_password() as per prototype.
