@@ -42,17 +42,13 @@ asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
       *tagnum = ASN1_TAGNUM_CEILING;
       return 0;
   }
-  /* Allow for the indefinite encoding */
-  if ((buf->bound - buf->next + 1 >= 2)
-      && !*(buf->next) && !*(buf->next + 1)) {
-    buf->next += 2;
-    *tagnum = ASN1_TAGNUM_CEILING;
-    return 0;
-  }
   retval = asn1_get_id(buf,class,construction,tagnum);
   if(retval) return retval;
   retval = asn1_get_length(buf,retlen,indef);
   if(retval) return retval;
+  if (indef != NULL && *indef &&
+      construction != NULL && *construction != CONSTRUCTED)
+    return ASN1_MISMATCH_INDEF;
   return 0;
 }
 

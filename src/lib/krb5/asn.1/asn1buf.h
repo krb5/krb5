@@ -122,14 +122,17 @@ asn1_error_code asn1buf_imbed
 	      position starts at the beginning of *subbuf. */
 
 asn1_error_code asn1buf_sync
-	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, const asn1_tagnum lasttag,
-		   const unsigned int length));
+	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, const asn1_class class, 
+		   const asn1_tagnum lasttag,
+		   const unsigned int length, const int indef,
+		   const int seqindef));
 /* requires  *subbuf is a sub-buffer of *buf, as created by asn1buf_imbed.
-             lasttag is a pointer to the last tagnumber read.
+             lasttag is the last tagnumber read.
    effects   Synchronizes *buf's current position to match that of *subbuf. */
 
 asn1_error_code asn1buf_skiptail
-	PROTOTYPE((asn1buf *buf));
+	PROTOTYPE((asn1buf *buf, const unsigned int length,
+		   const int indef));
 /* requires  *buf is a subbuffer used in a decoding of a
              constructed indefinite sequence.
    effects   skips trailing fields. */
@@ -222,7 +225,7 @@ asn1_error_code asn12krb5_buf
 
 
 int asn1buf_remains
-	PROTOTYPE((asn1buf *buf));
+	PROTOTYPE((asn1buf *buf, int indef));
 /* requires  *buf is a buffer containing an asn.1 structure or array
    modifies  *buf
    effects   Returns the number of unprocessed octets remaining in *buf. */

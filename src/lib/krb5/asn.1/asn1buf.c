@@ -54,6 +54,9 @@
 #include <stdio.h>
 #include "asn1_get.h"
 
+#define asn1_is_eoc(class, num, indef)	\
+((class) == UNIVERSAL && !(num) && !(indef))
+
 asn1_error_code asn1buf_create(buf)
      asn1buf ** buf;
 {
@@ -91,34 +94,35 @@ asn1_error_code asn1buf_imbed(subbuf, buf, length, indef)
   return 0;
 }
 
-asn1_error_code asn1buf_sync(buf, subbuf, lasttag, length)
+asn1_error_code asn1buf_sync(buf, subbuf, class, lasttag, length, indef, seqindef)
      asn1buf * buf;
      asn1buf * subbuf;
+     const asn1_class class;
      const asn1_tagnum lasttag;
      const unsigned int length;
+     const int indef;
+     const int seqindef;
 {
   asn1_error_code retval;
 
-  if (length) {
+  if (!seqindef) {
+    /* sequence was encoded as definite length */
     buf->next = subbuf->bound + 1;
+  } else if (!asn1_is_eoc(class, lasttag, indef)) {
+      retval = asn1buf_skiptail(subbuf, length, indef);
+      if (retval)
+	  return retval;
   } else {
-    /*
-     * indefinite length:
-     *
-     * Note that asn1_get_tag() returns ASN1_TAGNUM_CEILING
-     * for an EOC encoding.
-     */
-    if (lasttag != ASN1_TAGNUM_CEILING) {
-      retval = asn1buf_skiptail(subbuf);
-      if (retval) return retval;
-    }
+    /* We have just read the EOC octets. */
     buf->next = subbuf->next;
   }
   return 0;
 }
 
-asn1_error_code asn1buf_skiptail(buf)
+asn1_error_code asn1buf_skiptail(buf, length, indef)
      asn1buf *buf;
+     const unsigned int length;
+     const int indef;
 {
   asn1_error_code retval;
   asn1_class class;
@@ -126,16 +130,29 @@ asn1_error_code asn1buf_skiptail(buf)
   asn1_tagnum tagnum;
   unsigned int taglen;
   int nestlevel;
+  int tagindef;
 
-  nestlevel = 1;
+  nestlevel = 1 + indef;
+  if (!indef) {
+    if (length <= buf->bound - buf->next + 1)
+      buf->next += length;
+    else
+      return ASN1_OVERRUN;
+  }
   while (nestlevel > 0) {
-    retval = asn1_get_tag(buf, &class, &construction, &tagnum, &taglen);
+    retval = asn1_get_tag_indef(buf, &class, &construction, &tagnum,
+				&taglen, &tagindef);
     if (retval) return retval;
-    buf->next += taglen;
-    if (construction == CONSTRUCTED && taglen == 0)
+    if (!tagindef) {
+      if (taglen <= buf->bound - buf->next + 1)
+	buf->next += taglen;
+      else
+	return ASN1_OVERRUN;
+    }
+    if (tagindef)
       nestlevel++;
-    if (tagnum == ASN1_TAGNUM_CEILING)
-      nestlevel--;
+    if (asn1_is_eoc(class, tagnum, tagindef))
+      nestlevel--;		/* got an EOC encoding */
   }
   return 0;
 }
@@ -248,8 +265,9 @@ asn1_error_code asn1buf_remove_charstring(buf, len, s)
   return 0;
 }
 
-int asn1buf_remains(buf)
+int asn1buf_remains(buf, indef)
     asn1buf *buf;
+    int indef;
 {
   int remain;
   if(buf == NULL || buf->base == NULL) return 0;
@@ -257,15 +275,9 @@ int asn1buf_remains(buf)
   if (remain <= 0) return remain;
   /*
    * Two 0 octets means the end of an indefinite encoding.
-   * 
-   * XXX  Do we need to test to make sure we'er actually doing an
-   * indefinite encoding here?
    */
-  if ( !*(buf->next) && !*(buf->next + 1)) {
-   /* buf->bound = buf->next + 1;  */
-      buf->next += 2;
+  if (indef && remain >= 2 && !*(buf->next) && !*(buf->next + 1))
       return 0;
-  }
   else return remain;
 }
 
