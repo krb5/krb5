@@ -140,7 +140,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
 	local_kaddr.length =
 	    sizeof(((struct sockaddr_in *) &local_addr)->sin_addr);
 	local_kaddr.contents = 
-	    (char *) &(((struct sockaddr_in *) &local_addr)->sin_addr);
+	    (krb5_octet *) &(((struct sockaddr_in *) &local_addr)->sin_addr);
     } else {
 	krb5_address **addrs;
 
@@ -168,11 +168,11 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
     remote_kaddr.length =
 	sizeof(((struct sockaddr_in *) &remote_addr)->sin_addr);
     remote_kaddr.contents = 
-	(char *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
+	(krb5_octet *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
     
     remote_kaddr.addrtype = ADDRTYPE_INET;
     remote_kaddr.length = sizeof(sin->sin_addr);
-    remote_kaddr.contents = (char *) &sin->sin_addr;
+    remote_kaddr.contents = (krb5_octet *) &sin->sin_addr;
     
     /* mk_priv requires that the local address be set.
        getsockname is used for this.  rd_priv requires that the
