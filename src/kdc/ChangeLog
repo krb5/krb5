@@ -3,6 +3,11 @@
 	* main.c (initialize_realms): Include replay cache name in error
 	if it can't be initialized.
 
+	* kerberos_v4.c (kerb_get_principal): Include kvno when logging
+	failure to find a key.
+	(v4_klog): Include explicit do-nothing default case in switch
+	statement.
+
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* dispatch.c, do_as_req.c, do_tgs_req.c, kdc_preauth.c,

@@ -293,7 +293,9 @@ char * v4_klog( type, format, va_alist)
 	strcpy(log_text, "PROCESS_V4:");
 	vsprintf(log_text+strlen(log_text), format, pvar);
 	krb5_klog_syslog(logpri, "%s", log_text);
-    /* ignore the other types... */
+    default:
+	/* ignore the other types... */
+	;
     }
     va_end(pvar);
     return(log_text);
@@ -486,8 +488,8 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 				  ENCTYPE_DES_CBC_CRC,
 				  -1, kvno, &pkey)) {
 	    lt = klog(L_KRB_PERR,
-		      "KDC V4: failed to find key for %s.%s",
-		      name, inst);
+		      "KDC V4: failed to find key for %s.%s #%d",
+		      name, inst, kvno);
 	    krb5_db_free_principal(kdc_context, &entries, nprinc);
 	    return(0);
 	}
@@ -536,8 +538,6 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
     if (isflagset(entries.attributes,  KRB5_KDB_REQUIRES_PWCHANGE)) {
           principal->attributes |= V4_KDB_REQUIRES_PWCHANGE;
     }
-
-
 
     /* set up v4 format of each date's text: */
     for ( date = &principal->exp_date, text = principal->exp_date_txt;
