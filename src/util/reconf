@@ -1,17 +1,18 @@
 #!/bin/sh
 
-for i in `find . -name configure.in -print` 
+force=
+
+usage="Usage: ./config.status [--recheck] [--version] [--help]"
+for option
 do
-	config=`echo $i | sed -e 's/.in$//'`
-	if test ! -f $config || \
-	   find $i -newer $config -print | grep configure.in  > /dev/null
-	then
-		dir=`dirname $i`
-		topdir=`echo $dir | sed -e 's;/[^/]*;/..;g'`
-		echo "cd $dir; $topdir/util/autoconf/autoconf --topdir=$topdir --macrodir=$topdir/util/autoconf"
-		(  cd $dir; $topdir/util/autoconf/autoconf --topdir=$topdir --macrodir=$topdir/util/autoconf )
-	fi
+  case "$option" in
+  --force | -f)
+    echo "Remaking all configuration files"
+    force=--force ;;
+  -help | --help | --hel | --he | --h)
+    echo "$usage"; exit 0 ;;
+  *) echo "$usage"; exit 1 ;;
+  esac
 done
 
-cd include/krb5
-../../util/autoconf/autoheader --macrodir=../../util/autoconf
+./util/autoreconf.local  -m util/autoconf -l . --verbose $force 
