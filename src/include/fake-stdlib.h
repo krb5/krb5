@@ -514,7 +514,9 @@ int siginterrupt P((int  , int  ));
 unsigned sleep P((unsigned  ));
 int strcmp P((const char * , const char * ));
 char *strcpy P((char * , const char * ));
+#ifndef hpux
 int strlen P((const char * ));
+#endif
 char *strncat P((char * , const char * , int  ));
 int strncmp P((const char * , const char * , int  ));
 char *strncpy P((char * , const char * , int  ));
