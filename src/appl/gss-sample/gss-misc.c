@@ -184,7 +184,11 @@ static void display_status_1(m, code, type)
 {
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;
+#ifdef	GSSAPI_V2
+     OM_uint32 msg_ctx;
+#else	/* GSSAPI_V2 */
      int msg_ctx;
+#endif	/* GSSAPI_V2 */
      
      if (display_file == 0)
 	 display_file = stderr;

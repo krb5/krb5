@@ -50,7 +50,7 @@ FILE *log;
 
 usage()
 {
-     fprintf(stderr, "Usage: gss-server [-port port] [-inetd] [-logfile file] service_name\n");
+     fprintf(stderr, "Usage: gss-server [-port port] [-v2] [-inetd] [-logfile file] service_name\n");
      exit(1);
 }
 
@@ -62,6 +62,7 @@ main(argc, argv)
      u_short port = 4444;
      int s;
      int do_inetd = 0;
+     int dov2 = 0;
 
      log = stdout;
      argc--; argv++;
@@ -72,6 +73,8 @@ main(argc, argv)
 	       port = atoi(*argv);
 	  } else if (strcmp(*argv, "-inetd") == 0) {
 	      do_inetd = 1;
+	  } else if (strcmp(*argv, "-v2") == 0) {
+	      dov2 = 1;
 	  } else if (strcmp(*argv, "-logfile") == 0) {
 	      argc--; argv++;
 	      if (!argc) usage();
@@ -99,7 +102,7 @@ main(argc, argv)
 	 close(2);
      }
 
-     if (sign_server(s, service_name) < 0)
+     if (sign_server(s, service_name, dov2) < 0)
 	  exit(1);
      
      /*NOTREACHED*/
@@ -159,6 +162,8 @@ int create_socket(port)
  * 			inetd and use file descriptor 0.
  * 	service_name	(r) the ASCII name of the GSS-API service to
  * 			establish a context as
+ *	dov2		(r) a boolean indicating whether we should use GSSAPI
+ *			V2 interfaces, if available.
  *
  * Returns: -1 on error
  *
@@ -175,9 +180,10 @@ int create_socket(port)
  *
  * If any error occurs, -1 is returned.
  */
-int sign_server(s, service_name)
+int sign_server(s, service_name, dov2)
      int s;
      char *service_name;
+     int dov2;
 {
      gss_cred_id_t server_creds;     
      gss_buffer_desc client_name, xmit_buf, msg_buf, context_token;
@@ -232,6 +238,12 @@ int sign_server(s, service_name)
 	  if (recv_token(s2, &xmit_buf) < 0)
 	       break;
 
+#ifdef	GSSAPI_V2
+	  if (dov2)
+	      maj_stat = gss_unwrap(&min_stat, context, &xmit_buf, &msg_buf,
+				    (int *) NULL, (gss_qop_t *) NULL);
+	  else
+#endif	/* GSSAPI_V2 */
 	  /* Unseal the message token */
 	  maj_stat = gss_unseal(&min_stat, context, &xmit_buf,
 				&msg_buf, NULL, NULL);
@@ -245,6 +257,12 @@ int sign_server(s, service_name)
 	  fprintf(log, "Received message: \"%s\"\n", msg_buf.value);
 
 	  /* Produce a signature block for the message */
+#ifdef	GSSAPI_V2
+	  if (dov2)
+	      maj_stat = gss_get_mic(&min_stat, context, GSS_C_QOP_DEFAULT,
+				     &msg_buf, &xmit_buf);
+	  else
+#endif	/* GSSAPI_V2 */
 	  maj_stat = gss_sign(&min_stat, context, GSS_C_QOP_DEFAULT,
 			      &msg_buf, &xmit_buf);
 	  if (maj_stat != GSS_S_COMPLETE) {
@@ -312,8 +330,8 @@ int server_acquire_creds(service_name, server_creds)
 
      name_buf.value = service_name;
      name_buf.length = strlen(name_buf.value) + 1;
-     maj_stat = gss_import_name(&min_stat, &name_buf, gss_nt_service_name,
-				&server_name);
+     maj_stat = gss_import_name(&min_stat, &name_buf, 
+				(gss_OID) gss_nt_service_name, &server_name);
      if (maj_stat != GSS_S_COMPLETE) {
 	  display_status("importing name", maj_stat, min_stat);
 	  return -1;
@@ -365,7 +383,7 @@ int server_establish_context(s, server_creds, context, client_name)
      gss_name_t client;
      gss_OID doid;
      OM_uint32 maj_stat, min_stat;
-     int ret_flags;
+     OM_uint32 ret_flags;
 
      *context = GSS_C_NO_CONTEXT;
      

@@ -1,4 +1,13 @@
 
+Thu Aug 31 11:35:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add -DUSE_AUTOCONF_H and -DGSSAPI_V2 to enable usage
+		of autoconf.h in gssapi.h and to enable V2 features in local
+		modules.
+	* gss-client.c, gss-server.c - Add -v2 switch to use V2 features.
+		Clean up V2 argument changes.
+	* gss-misc.c - Clean up V2 argument change.
+
+
 Tue Aug 29 13:24:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gss-{client,server}.c - Test gss_{ex,im}port_sec_context().
 

@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_AUTOCONF_H -DGSSAPI_V2
 
 SRCS= gss-client.c gss-misc.c gss-server.c
 

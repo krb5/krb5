@@ -45,7 +45,7 @@ void display_status();
 
 usage()
 {
-     fprintf(stderr, "Usage: gss-client [-port port] host service msg\n");
+     fprintf(stderr, "Usage: gss-client [-port port] [-v2] host service msg\n");
      exit(1);
 }
 
@@ -55,6 +55,7 @@ main(argc, argv)
 {
      char *service_name, *server_host, *msg;
      u_short port = 4444;
+     int v2 = 0;
      
      /* Parse arguments. */
      argc--; argv++;
@@ -63,6 +64,8 @@ main(argc, argv)
 	       argc--; argv++;
 	       if (!argc) usage();
 	       port = atoi(*argv);
+	  } else if (strcmp(*argv, "-v2") == 0) {
+	       v2 = 1;
 	  } else 
 	       break;
 	  argc--; argv++;
@@ -74,7 +77,7 @@ main(argc, argv)
      service_name = *argv++;
      msg = *argv++;
 
-     if (call_server(server_host, port, service_name, msg) < 0)
+     if (call_server(server_host, port, v2, service_name, msg) < 0)
 	  exit(1);
 
      return 0;
@@ -103,9 +106,10 @@ main(argc, argv)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.
  */
-int call_server(host, port, service_name, msg)
+int call_server(host, port, dov2, service_name, msg)
      char *host;
      u_short port;
+     int dov2;
      char *service_name;
      char *msg;
 {
@@ -113,6 +117,21 @@ int call_server(host, port, service_name, msg)
      gss_buffer_desc in_buf, out_buf, context_token;
      int s, state;
      OM_uint32 maj_stat, min_stat;
+     gss_name_t		src_name, targ_name;
+     gss_buffer_desc	sname, tname;
+     OM_uint32		lifetime;
+     gss_OID		mechanism;
+     int		is_local;
+#ifdef	GSSAPI_V2
+     OM_uint32		context_flags;
+     int		is_open;
+     gss_qop_t		qop_state;
+     gss_OID_set	mech_names;
+     gss_buffer_desc	oid_name;
+#else	/* GSSAPI_V2 */
+     int		context_flags;
+#endif	/* GSSAPI_V2 */
+     
 
      /* Open connection */
      if ((s = connect_to_server(host, port)) < 0)
@@ -122,28 +141,142 @@ int call_server(host, port, service_name, msg)
      if (client_establish_context(s, service_name, &context) < 0)
 	  return -1;
 
-     /*
-      * Attempt to save and then restore the context.
-      */
-     maj_stat = gss_export_sec_context(&min_stat,
-				       &context,
-				       &context_token);
+#ifdef	GSSAPI_V2
+     if (dov2) {
+	 /*
+	  * Attempt to save and then restore the context.
+	  */
+	 maj_stat = gss_export_sec_context(&min_stat,
+					   &context,
+					   &context_token);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("exporting context", maj_stat, min_stat);
+	     return -1;
+	 }
+	 maj_stat = gss_import_sec_context(&min_stat,
+					   &context_token,
+					   &context);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("importing context", maj_stat, min_stat);
+	     return -1;
+	 }
+	 (void) gss_release_buffer(&min_stat, &context_token);
+     }
+#endif	/* GSSAPI_V2 */
+
+     /* Get context information */
+     maj_stat = gss_inquire_context(&min_stat, context,
+				    &src_name, &targ_name, &lifetime,
+				    &mechanism, &context_flags,
+				    &is_local
+#ifdef	GSSAPI_V2
+				    , &is_open
+#endif	/* GSSAPI_V2 */
+				    );
      if (maj_stat != GSS_S_COMPLETE) {
-	 display_status("exporting context", maj_stat, min_stat);
+	 display_status("inquiring context", maj_stat, min_stat);
 	 return -1;
      }
-     maj_stat = gss_import_sec_context(&min_stat,
-				       &context_token,
-				       &context);
+
+     maj_stat = gss_display_name(&min_stat, src_name, &sname,
+				 (gss_OID *) NULL);
      if (maj_stat != GSS_S_COMPLETE) {
-	 display_status("importing context", maj_stat, min_stat);
+	 display_status("displaying context", maj_stat, min_stat);
 	 return -1;
      }
-     (void) gss_release_buffer(&min_stat, &context_token);
+     maj_stat = gss_display_name(&min_stat, targ_name, &tname,
+				 (gss_OID *) NULL);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("displaying context", maj_stat, min_stat);
+	 return -1;
+     }
+     fprintf(stderr, "\"%s\" to \"%s\", lifetime %d, flags %x, %s",
+	     sname.value, tname.value, lifetime, context_flags,
+	     (is_local) ? "locally initiated" : "remotely initiated");
+#ifdef	GSSAPI_V2
+     fprintf(stderr, " %s", (is_open) ? "open" : "closed");
+#endif	/* GSSAPI_V2 */
+     fprintf(stderr, "\n");
+
+     (void) gss_release_name(&min_stat, &src_name);
+     (void) gss_release_name(&min_stat, &targ_name);
+     (void) gss_release_buffer(&min_stat, &sname);
+     (void) gss_release_buffer(&min_stat, &tname);
+
+#ifdef	GSSAPI_V2
+     if (dov2) {
+	 size_t	i;
+
+	 /* Now get the names supported by the mechanism */
+	 maj_stat = gss_inquire_names_for_mech(&min_stat,
+					       mechanism,
+					       &mech_names);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("inquiring mech names", maj_stat, min_stat);
+	     return -1;
+	 }
+
+	 maj_stat = gss_oid_to_str(&min_stat,
+				   mechanism,
+				   &oid_name);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("converting oid->string", maj_stat, min_stat);
+	     return -1;
+	 }
+	 fprintf(stderr, "Mechanism %s supports %d names\n",
+		 oid_name.value, mech_names->count);
+	 (void) gss_release_buffer(&min_stat, &oid_name);
+	 for (i=0; i<mech_names->count; i++) {
+	     gss_OID	tmpoid;
+	     int	is_present;
+
+	     maj_stat = gss_oid_to_str(&min_stat,
+				       &mech_names->elements[i],
+				       &oid_name);
+	     if (maj_stat != GSS_S_COMPLETE) {
+		 display_status("converting oid->string", maj_stat, min_stat);
+		 return -1;
+	     }
+	     fprintf(stderr, "%d: %s\n", i, oid_name.value);
+
+	     maj_stat = gss_str_to_oid(&min_stat,
+				       &oid_name,
+				       &tmpoid);
+	     if (maj_stat != GSS_S_COMPLETE) {
+		 display_status("converting string->oid", maj_stat, min_stat);
+		 return -1;
+	     }
+
+	     maj_stat = gss_test_oid_set_member(&min_stat,
+						tmpoid,
+						mech_names,
+						&is_present);
+	     if (maj_stat != GSS_S_COMPLETE) {
+		 display_status("testing oid presence", maj_stat, min_stat);
+		 return -1;
+	     }
+	     if (!is_present) {
+		 fprintf(stderr, "%s is not present in list?\n",
+			 oid_name.value);
+	     }
+	     (void) gss_release_oid(&min_stat, &tmpoid);
+	     (void) gss_release_buffer(&min_stat, &oid_name);
+	 }
+
+	 (void) gss_release_oid_set(&min_stat, &mech_names);
+	 (void) gss_release_oid(&min_stat, &mechanism);
+     }
+#endif	/* GSSAPI_V2 */
 
      /* Seal the message */
      in_buf.value = msg;
      in_buf.length = strlen(msg) + 1;
+#ifdef	GSSAPI_V2
+     if (dov2)
+	 maj_stat = gss_wrap(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
+			     &in_buf, &state, &out_buf);
+     else
+#endif	/* GSSAPI_V2 */
      maj_stat = gss_seal(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
 			 &in_buf, &state, &out_buf);
      if (maj_stat != GSS_S_COMPLETE) {
@@ -163,6 +296,12 @@ int call_server(host, port, service_name, msg)
 	  return -1;
 
      /* Verify signature block */
+#ifdef	GSSAPI_V2
+     if (dov2)
+	 maj_stat = gss_verify_mic(&min_stat, context, &in_buf,
+				   &out_buf, &qop_state);
+     else
+#endif	/* GSSAPI_V2 */
      maj_stat = gss_verify(&min_stat, context, &in_buf, &out_buf, &state);
      if (maj_stat != GSS_S_COMPLETE) {
 	  display_status("verifying signature", maj_stat, min_stat);
@@ -271,7 +410,7 @@ int client_establish_context(s, service_name, gss_context)
      send_tok.value = service_name;
      send_tok.length = strlen(service_name) + 1;
      maj_stat = gss_import_name(&min_stat, &send_tok,
-				gss_nt_service_name, &target_name);
+				(gss_OID) gss_nt_service_name, &target_name);
      if (maj_stat != GSS_S_COMPLETE) {
 	  display_status("parsing name", maj_stat, min_stat);
 	  return -1;
