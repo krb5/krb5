@@ -252,27 +252,6 @@ dnl
 define(CHECK_DIRENT,[
 AC_HEADER_CHECK(dirent.h,AC_DEFINE(USE_DIRENT_H))])dnl
 dnl
-dnl check if sys/fcntl.h is needed for O_* -- CHECK_FCNTL
-dnl
-define(CHECK_FCNTL,[
-AC_MSG_CHECKING([if O_RDONLY is needed from sys/fcntl.h])
-AC_CACHE_VAL(krb5_cv_decl_fcntl_ordonly,
-[AC_TRY_LINK(
-[#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/file.h>],
-[1+O_RDONLY;], krb5_cv_decl_fcntl_ordonly=no,
-AC_TRY_LINK([#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/file.h>
-#include <sys/fcntl.h>],
-[1+O_RDONLY;],krb5_cv_decl_fcntl_ordonly=yes,krb5_cv_decl_fcntl_ordonly=no))])
-AC_MSG_RESULT($krb5_cv_decl_fcntl_ordonly)
-if test $krb5_cv_decl_fcntl_ordonly = yes; then
-  AC_DEFINE(NEED_SYS_FCNTL_H)
-fi
-])dnl
-dnl
 dnl check if union wait is defined, or if WAIT_USES_INT -- CHECK_WAIT_TYPE
 dnl
 define(CHECK_WAIT_TYPE,[
