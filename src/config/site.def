@@ -259,6 +259,6 @@
 #define DbmLib -ldbm
 #endif
 
-#define IsodeLib /mit/isode/@sys/lib/libisode.a
+#define IsodeLib /mit/isode/isode-6.0/@sys/lib/libisode.a
 
 /* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc */
