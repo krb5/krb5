@@ -37,7 +37,10 @@
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define DesDefines -DBIG -DLSBFIRST
 #undef HasGcc
+#ifdef notdef  /* Added by TYT, for use in doing VAX9000 cross compiles */
 #define HasGcc YES
+#define UltrixCrossCompile
+#endif /* notdef -- TYT */
 #endif
 
 #undef HasNdbm
@@ -47,9 +50,21 @@
 #define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
 #define MakeDependFlags -D__STDC__ -I/mit/gnu/vaxlib/gcc-include
 #ifndef CcCmd
-#define CcCmd gcc -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall -Dunix -Dvax
-#define STDCTopIncludes -I$(TOP)/include/stdc-incl
+#ifdef UltrixCrossCompile
+#define CcCmd gcc -b vax-bsd -pedantic -fpcc-struct-return -Wall -Dunix -Dvax
+#else
+#define CcCmd gcc2 -pedantic -fpcc-struct-return -Wall -Dunix -Dvax
 #endif
+#define	OptimizedCDebugFlags -O3 
+#define DefaultCDebugFlags OptimizedCDebugFlags -g
+#endif
+#else
+/*
+ * I want to see what's going on!
+ */
+#define DefaultCDebugFlags -g
 #endif
 
+#ifndef DefaultCDebugFlags
 #define DefaultCDebugFlags OptimizedCDebugFlags
+#endif
