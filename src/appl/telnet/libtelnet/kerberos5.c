@@ -112,7 +112,7 @@ static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 #define KRB_FORWARD_REJECT     	6       /* Forwarded credentials rejected */
 #endif	/* FORWARD */
 
-krb5_auth_context auth_context;
+krb5_auth_context auth_context = 0;
 
 static	krb5_data auth;
 	/* telnetd gets session key from here */
@@ -364,9 +364,10 @@ kerberos5_is(ap, data, cnt)
 	unsigned char *data;
 	int cnt;
 {
-	int r;
+	int r = 0;
 	krb5_principal server;
 	krb5_keyblock *newkey = NULL;
+	krb5_keytab keytabid = 0;
 	krb5_data outbuf;
 #ifdef ENCRYPTION
 	Session_Key skey;
@@ -384,30 +385,34 @@ kerberos5_is(ap, data, cnt)
 		auth.data = (char *)data;
 		auth.length = cnt;
 
-		r = krb5_sname_to_principal(telnet_context, 0,  "host",
-					    KRB5_NT_SRV_HST,
-					    &server);
-		
+		if (!r && !auth_context)
+		    r = krb5_auth_con_init(telnet_context, &auth_context);
 		if (!r) {
 		    krb5_rcache rcache;
-		    krb5_keytab keytabid = NULL;
-
-		    r = krb5_get_server_rcache(telnet_context,
+		    
+		    r = krb5_auth_con_getrcache(telnet_context, auth_context,
+						&rcache);
+		    if (!r && !rcache) {
+			r = krb5_sname_to_principal(telnet_context, 0, "host",
+						    KRB5_NT_SRV_HST, &server);
+			if (!r) {
+			    r = krb5_get_server_rcache(telnet_context,
 					krb5_princ_component(telnet_context,
 							     server, 0),
-					       &rcache);
-       
+						       &rcache);
+			    krb5_free_principal(telnet_context, server);
+			}
+		    }
 		    if (!r)
-		      if (telnet_srvtab)
-			r = krb5_kt_resolve(telnet_context, 
-					    telnet_srvtab, &keytabid);
-		    if (!r)
-		      r = krb5_rd_req(telnet_context, &auth_context, &auth,
-				      server, keytabid, NULL, &ticket);
-		    if (rcache)
-		        krb5_rc_close(telnet_context, rcache);
-		    krb5_free_principal(telnet_context, server);
+			r = krb5_auth_con_setrcache(telnet_context,
+						    auth_context, rcache);
 		}
+		if (!r && telnet_srvtab)
+		    r = krb5_kt_resolve(telnet_context, 
+					telnet_srvtab, &keytabid);
+		if (!r)
+		    r = krb5_rd_req(telnet_context, &auth_context, &auth,
+				    NULL, keytabid, NULL, &ticket);
 		if (r) {
 			(void) strcpy(errbuf, "krb5_rd_req failed: ");
 			(void) strcat(errbuf, error_message(r));
@@ -762,7 +767,6 @@ kerberos5_forward(ap)
 		   error_message(r));
 	goto cleanup;
     }
-    
 
     if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context, net,
 			    KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR))) {

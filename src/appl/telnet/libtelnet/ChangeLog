@@ -1,3 +1,8 @@
+Sat Apr 27 16:09:54 1996  Richard Basch  <basch@lehman.com>
+
+	* kerberos5.c: a host may have multiple names and multiple keys,
+	so do not try to resolve the "server" principal before the rd_req
+
 Fri Apr 12 23:36:01 1996  Richard Basch  <basch@lehman.com>
 
 	* forward.c (rd_and_store_for_creds): Consistency with the
