@@ -144,6 +144,8 @@ const krb5_data FAR * salt;
 
     /* fix key parity */
     mit_des_fixup_key_parity(key);
+    if (mit_des_is_weak_key(key))
+	((krb5_octet *)key)[7] ^= 0xf0;
 
     /* Now one-way encrypt it with the folded key */
     (void) mit_des_key_sched(key, key_sked);
@@ -157,6 +159,8 @@ const krb5_data FAR * salt;
 
     /* now fix up key parity again */
     mit_des_fixup_key_parity(key);
+    if (mit_des_is_weak_key(key))
+	((krb5_octet *)key)[7] ^= 0xf0;
 
 #if 0
     if (mit_des_debug)
