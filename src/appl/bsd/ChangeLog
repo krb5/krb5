@@ -1,5 +1,9 @@
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* configure.in: Add a check for the header file krb4-proto.h.
+		Replace file existence tests for /etc/environment and
+		/etc/TIMEZONE with K5_AC_CHECK_FILES.
+
 	* login.c (main): 
 	* krshd.c (main): 
 	* krlogind.c (main): POSIX states that getopt returns -1 when it
