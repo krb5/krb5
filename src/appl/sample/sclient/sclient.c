@@ -87,11 +87,11 @@ char *argv[];
 	sin.sin_port = htons(atoi(argv[2]));
     } else {
 	/* find the port number for knetd */
-	sp = getservbyname(SAMPLE_SERVICE, "tcp");
+	sp = getservbyname(SAMPLE_PORT, "tcp");
 	if (!sp) {
 	    fprintf(stderr,
 		    "unknown service %s/tcp; check /etc/services\n",
-		    SAMPLE_SERVICE);
+		    SAMPLE_PORT);
 	    exit(1);
 	}
 	/* copy the port number */

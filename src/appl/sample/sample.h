@@ -31,6 +31,7 @@
 #define KRB5_SAMPLE__
 
 #define SAMPLE_SERVICE "sample"
+#define SAMPLE_PORT "sample"
 #define SAMPLE_VERSION "KRB5_sample_protocol_v1.0"
 
 #endif /* KRB5_SAMPLE__ */
