@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS)
+CFLAGS = $(CCOPTS) $(DEFS) -I../des
 LDFLAGS = -g
 
 all:: $(OBJS) t_mddriver

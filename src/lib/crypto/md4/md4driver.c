@@ -25,12 +25,8 @@
  **********************************************************************
  */
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <time.h>
-#include <string.h>
-#include <krb5/krb5.h>
-#include <krb5/rsa-md4.h>
+#include "k5-int.h"
+#include "rsa-md4.h"
 
 /* Prints message digest buffer in mdContext as 32 hexadecimal digits.
    Order is from low-order byte to high-order byte of digest.

@@ -1,3 +1,11 @@
+Wed Jan 25 20:08:47 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (CFLAGS):  Add -I../des to pull in DES header file.
+	* rsa-md4.h:  New include file, moved from include/krb5, since
+	it's only used locally.
+	* md4.c, md4crypto.c, md4driver.c, md4glue.c:  Replace <.../...>
+	includes with "..."s.
+
 Thu Oct 13 17:48:21 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Add support for the MDx test driver t_mddriver.

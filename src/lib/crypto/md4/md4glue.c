@@ -20,14 +20,11 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- *
  * Kerberos glue for MD4 sample implementation.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/rsa-md4.h>
+#include "k5-int.h"
+#include "rsa-md4.h"
 
 static krb5_error_code
 md4_sum_func(in, in_length, seed, seed_length, outcksum)
