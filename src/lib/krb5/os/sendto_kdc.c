@@ -45,6 +45,11 @@ static char rcsid_sendto_kdc_c[] =
 #include <sys/select.h>
 #endif
 
+#ifndef AF_MAX
+/* good enough -- only missing on old linux so far anyhow. */
+#define AF_MAX 10
+#endif
+
 /*
  * send the formatted request 'message' to a KDC for realm 'realm' and
  * return the response (if any) in 'reply'.
