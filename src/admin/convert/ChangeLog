@@ -1,4 +1,3 @@
-
 Mon Aug 21 16:44:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_convert.c - Interpret -k and -e arguments as strings instead of
 		string representations of integers (e.g. -e des-cbc-md5).
