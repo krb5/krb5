@@ -101,17 +101,17 @@ cleanup:
 }
 
     
-krb5_error_code krb5_obtain_padata(context, preauth_to_use, etype_info,
-				   key_proc, key_seed, creds, request)
+krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
+				   key_seed, creds, request)
     krb5_context		context;
     krb5_pa_data **		preauth_to_use;
-    krb5_etype_info	    	etype_info;
     git_key_proc 		key_proc;
     krb5_const_pointer		key_seed;
     krb5_creds *		creds;
     krb5_kdc_req *		request;
 {
     krb5_error_code		retval;
+    krb5_etype_info	    	etype_info = 0;
     krb5_pa_data **		pa;
     krb5_pa_data **		send_pa_list;
     krb5_pa_data **		send_pa;
@@ -119,13 +119,22 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, etype_info,
     krb5_keyblock *		def_enc_key = 0;
     krb5_enctype 		enctype;
     krb5_data 			salt;
+    krb5_data			scratch;
     int				size;
     int				f_salt = 0;
 
     if (preauth_to_use == NULL)
 	return 0;
 
-    for (pa = preauth_to_use, size=0; *pa; pa++, size++);
+    for (pa = preauth_to_use, size=0; *pa; pa++, size++) {
+	if ((*pa)->pa_type == KRB5_PADATA_ETYPE_INFO) {
+	    scratch.length = (*pa)->length;
+	    scratch.data = (*pa)->contents;
+	    retval = decode_krb5_etype_info(&scratch, &etype_info);
+	    if (retval)
+		return retval;
+	}
+    }
 
     if ((send_pa_list = malloc((size+1) * sizeof(krb5_pa_data *))) == NULL)
 	return ENOMEM;
@@ -133,12 +142,15 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, etype_info,
     send_pa = send_pa_list;
     *send_pa = 0;
 
+    enctype = request->ktype[0];
+    salt.data = 0;
+    salt.length = -1;
     if (etype_info) {
 	enctype = etype_info[0]->etype;
 	salt.data = etype_info[0]->salt;
 	salt.length = etype_info[0]->length;
-    } else {
-	enctype = request->ktype[0];
+    }
+    if (salt.length == -1) {
 	if ((retval = krb5_principal2salt(context, request->client, &salt)))
 	    return(retval);
 	f_salt = 1;

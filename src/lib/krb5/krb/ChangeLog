@@ -1,3 +1,13 @@
+Thu Nov  9 00:02:43 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* get_in_tkt.c (krb5_get_in_tkt): Remove the etype_info argument
+		from the call to krb5_obtain_padata.
+
+	* preauth.c (krb5_obtain_padata): Use the PADATA_ETYPE_INFO
+		preauth, if it exists, to determine which salt type to use
+		when encrypting the preauthentication data.  Remove the
+		etype_info argument.
+
 Wed Nov  8 02:50:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krbconfig.c: Removed the krb5_clockskew variable.

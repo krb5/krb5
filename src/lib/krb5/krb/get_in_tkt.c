@@ -451,7 +451,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	    goto cleanup;
 	}
 
-	if ((retval = krb5_obtain_padata(context, preauth_to_use, 0, key_proc,
+	if ((retval = krb5_obtain_padata(context, preauth_to_use, key_proc,
 					 keyseed, creds, &request)) != 0)
 	    goto cleanup;
 	if (preauth_to_use)
