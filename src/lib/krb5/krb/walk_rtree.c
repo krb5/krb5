@@ -138,6 +138,7 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 		cap_nodes[links] = cap_server; /* put server on end of list */
 						/* this simplifies the code later and make */
 						/* cleanup eaiser as well */
+		links++;		/* count the null entry at end */
 	} else {			/* no path use hierarchical method */
 	krb5_xfree(cap_names[2]); /* failed, don't need server string */
 #endif
@@ -227,6 +228,7 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	return retval;
     }
 #ifdef CONFIGURABLE_AUTHENTICATION_PATH
+	links--;				/* dont count the null entry on end */
 	if (cap_code == 0) {    /* found a path above */
 		tmpcrealm.data = client->data;
 		tmpcrealm.length = client->length;

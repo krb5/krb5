@@ -1,3 +1,10 @@
+Wed Jan 10 21:01:36 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* walk_rtree.c (krb5_walk_realm_tree): Applied patch submitted by
+		Doug Engbert, so that the configurable authentication
+		patch takes into account the null entry at the end of the
+		list.
+
 Tue Jan  9 22:04:09 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): New function which handles all
