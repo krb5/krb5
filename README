@@ -77,12 +77,32 @@ Notes, Major Changes, and Known Bugs for 1.3
   installed com_err library with their own error tables.
 
 * The header files we install now assume ANSI/ISO C ('89, not '99).
-  If you're using a pre-ANSI system, like SunOS 4, try using gcc.  In
-  fact, SunOS 4 with gcc is what we use at MIT as the oldest pre-POSIX
-  system we test against, and even that testing is fairly minimal.
+  We have stopped testing on SunOS 4, even with gcc.  Some of our code
+  now has C89-based assumptions, like free(NULL) being well defined,
+  that will probably frustrate any attempts to run this code under SunOS
+  4 or other pre-C89 systems.
 
 * Some new code, bug fixes, and cleanup for IPv6 support.  [[TODO:
   Insert list of (non-)supporting programs and libraries here.]]
+
+* We have upgraded to autoconf 2.52 (or later), and the syntax for
+  specifying certain configuration options have changed.  For example,
+  autoconf 2.52 configure scripts let you specify command-line options
+  like "configure CC=/some/path/foo-cc", so we have removed some of
+  our old options like --with-cc in favor of this approach.
+
+* The client libraries can now use TCP to connect to the KDC.  This
+  may be necessary when talking to Microsoft KDCs (domain controllers),
+  if they issue you tickets with lots of PAC data.
+
+* If you have versions of the com_err or ss packages installed
+  locally, you can use the --with-system-et and --with-system-ss
+  configure options to use them rather than using the versions
+  supplied here.  Note that the interfaces are assumed to be similar
+  to those we supply; in particular, some older, divergent versions of
+  the com_err library may not work with the krb5 sources.  The
+  CPPFLAGS, LDFLAGS, and SS_LIB variables can be used to help the
+  compiler and linker find the installed packages.
 
 Notes, Major Changes, and Known Bugs for 1.2, delete before shipping 1.3
 ------------------------------------
