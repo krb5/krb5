@@ -15,14 +15,14 @@ LIBOBJS=@LIBOBJS@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 FTPD_LIBS=@FTPD_LIBS@
 
-SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/logwtmp.c $(srcdir)/popen.c \
+SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/popen.c \
 	  $(srcdir)/vers.c \
 	  $(srcdir)/../ftp/glob.c \
 	  $(srcdir)/../ftp/radix.c \
 	  $(srcdir)/../ftp/secure.c \
 	  $(srcdir)/../../bsd/getdtablesize.c $(SETENVSRC)
 
-OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
+OBJS	= ftpd.o ftpcmd.o glob.o popen.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
 LOCALINCLUDE = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
@@ -30,8 +30,8 @@ DEFINES = -DGSSAPI -DNOCONFIDENTIAL
 
 all::	ftpd
 
-ftpd:	$(OBJS) $(GSS_DEPLIBS) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(GSS_LIBS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(GSS_LIBS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) ftpd ftpcmd.c
@@ -72,7 +72,6 @@ secure.o: $(srcdir)/secure.h
 ftpd.o: $(srcdir)/ftpd.c
 ftpcmd.o: ftpcmd.c
 popen.o: $(srcdir)/popen.c
-logwtmp.o: $(srcdir)/logwtmp.c
 vers.o: $(srcdir)/vers.c
 
 # NOPOSTFIX

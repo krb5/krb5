@@ -100,6 +100,7 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include <stdarg.h>
 #endif
 #include "pathnames.h"
+#include <libpty.h>
 
 #ifndef L_SET
 #define L_SET 0
@@ -206,6 +207,8 @@ char	tmpline[FTP_BUFSIZ];
 char    pathbuf[MAXPATHLEN + 1];
 char	hostname[MAXHOSTNAMELEN];
 char	remotehost[MAXHOSTNAMELEN];
+char	rhost_addra[16];
+char	*rhost_sane;
 
 /* Defines for authlevel */
 #define AUTHLEVEL_NONE		0
@@ -254,6 +257,10 @@ int initgroups(char* name, gid_t basegid) {
   return setgroups(ngrps+1, others);
 }
 #endif
+
+int stripdomain = 1;
+int maxhostlen = 0;
+int always_ip = 0;
 
 main(argc, argv, envp)
 	int argc;
@@ -376,6 +383,43 @@ main(argc, argv, envp)
 			goto nextopt;
 		    }
 
+		case 'w':
+		{
+			char *optarg;
+			if (*++cp != '\0')
+				optarg = cp;
+			else if (argc > 1) {
+				argc--;
+				argv++;
+				optarg = *argv;
+			} else {
+				fprintf(stderr, "ftpd: -w expects arg\n");
+				exit(1);
+			}
+
+			if (!strcmp(optarg, "ip"))
+				always_ip = 1;
+			else {
+				char *cp;
+				cp = strchr(optarg, ',');
+				if (cp == NULL)
+					maxhostlen = atoi(optarg);
+				else if (*(++cp)) {
+					if (!strcmp(cp, "striplocal"))
+						stripdomain = 1;
+					else if (!strcmp(cp, "nostriplocal"))
+						stripdomain = 0;
+					else {
+						fprintf(stderr,
+							"ftpd: bad arg to -w\n");
+						exit(1);
+					}
+					*(--cp) = '\0';
+					maxhostlen = atoi(optarg);
+				}
+			}
+			goto nextopt;
+		}
 		default:
 			fprintf(stderr, "ftpd: Unknown flag -%c ignored.\n",
 			     *cp);
@@ -697,8 +741,8 @@ user(name)
 			reply(530, "User %s access denied.", name);
 			if (logging)
 				syslog(LOG_NOTICE,
-				    "FTP LOGIN REFUSED FROM %s, %s",
-				    remotehost, name);
+				    "FTP LOGIN REFUSED FROM %s, %s (%s)",
+				    rhost_addra, remotehost, name);
 			pw = (struct passwd *) NULL;
 			return;
 		}
@@ -823,7 +867,7 @@ end_login()
 
 	(void) krb5_seteuid((uid_t)0);
 	if (logged_in)
-		ftp_logwtmp(ttyline, "", "");
+		pty_logwtmp(ttyline, "", "");
 	if (have_creds) {
 #ifdef GSSAPI
 		krb5_cc_destroy(kcontext, ccache);
@@ -1002,8 +1046,8 @@ pass(passwd)
 				reply(421,
 				      "Login incorrect, closing connection.");
 				syslog(LOG_NOTICE,
-				    "repeated login failures from %s",
-				    remotehost);
+				       "repeated login failures from %s (%s)",
+				       rhost_addra, remotehost);
 				dologout(0);
 			}
 			reply(530, "Login incorrect.");
@@ -1034,7 +1078,7 @@ login(passwd)
 
 	/* open wtmp before chroot */
 	(void) sprintf(ttyline, "ftp%d", getpid());
-	ftp_logwtmp(ttyline, pw->pw_name, remotehost);
+	pty_logwtmp(ttyline, pw->pw_name, rhost_sane);
 	logged_in = 1;
 
 	if (guest || restricted) {
@@ -1081,26 +1125,27 @@ login(passwd)
 	if (guest) {
 		reply(230, "Guest login ok, access restrictions apply.");
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: anonymous/%.*s", remotehost,
-		    sizeof(proctitle) - sizeof(remotehost) -
+		sprintf(proctitle, "%s: anonymous/%.*s", rhost_sane,
+		    sizeof(proctitle) - strlen(rhost_sane) -
 		    sizeof(": anonymous/"), passwd);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
-			syslog(LOG_INFO, "ANONYMOUS FTP LOGIN FROM %s, %s",
-			    remotehost, passwd);
+			syslog(LOG_INFO,
+			       "ANONYMOUS FTP LOGIN FROM %s, %s (%s)",
+			       rhost_addra, remotehost, passwd);
 	} else {
 		if (askpasswd) {
 			askpasswd = 0;
 			reply(230, "User %s logged in.", pw->pw_name);
 		}
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: %s", remotehost, pw->pw_name);
+		sprintf(proctitle, "%s: %s", rhost_sane, pw->pw_name);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
-			syslog(LOG_INFO, "FTP LOGIN FROM %s, %s",
-			    remotehost, pw->pw_name);
+			syslog(LOG_INFO, "FTP LOGIN FROM %s, %s (%s)",
+			    rhost_addra, remotehost, pw->pw_name);
 	}
 	home = pw->pw_dir;		/* home dir for globbing */
 	(void) umask(defumask);
@@ -1603,9 +1648,8 @@ statcmd()
 
 	lreply(211, "%s FTP server status:", hostname, version);
 	reply(0, "     %s", version);
-	sprintf(str, "     Connected to %s", remotehost);
-	if (!isdigit(remotehost[0]))
-		sprintf(&str[strlen(str)], " (%s)", inet_ntoa(his_addr.sin_addr));
+	sprintf(str, "     Connected to %s", remotehost[0] ? remotehost : "");
+	sprintf(&str[strlen(str)], " (%s)", rhost_addra);
 	reply(0, "%s", str);
 	if (auth_type) reply(0, "     Authentication type: %s", auth_type);
 	if (logged_in) {
@@ -1918,21 +1962,31 @@ dolog(sin)
 		sizeof (struct in_addr), AF_INET);
 	time_t t, time();
 	extern char *ctime();
+	krb5_error_code retval;
 
-	if (hp)
+	if (hp != NULL) {
 		(void) strncpy(remotehost, hp->h_name, sizeof (remotehost));
-	else
-		(void) strncpy(remotehost, inet_ntoa(sin->sin_addr),
-		    sizeof (remotehost));
+		remotehost[sizeof (remotehost) - 1] = '\0';
+	} else
+		remotehost[0] = '\0';
+	strncpy(rhost_addra, inet_ntoa(sin->sin_addr), sizeof (rhost_addra));
+	rhost_addra[sizeof (rhost_addra) - 1] = '\0';
+	retval = pty_make_sane_hostname(sin, maxhostlen,
+					stripdomain, always_ip, &rhost_sane);
+	if (retval) {
+		fprintf(stderr, "make_sane_hostname: %s\n",
+			error_message(retval));
+		exit(1);
+	}
 #ifdef SETPROCTITLE
-	sprintf(proctitle, "%s: connected", remotehost);
+	sprintf(proctitle, "%s: connected", rhost_sane);
 	setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 
 	if (logging) {
 		t = time((time_t *) 0);
-		syslog(LOG_INFO, "connection from %s at %s",
-		    remotehost, ctime(&t));
+		syslog(LOG_INFO, "connection from %s (%s) at %s",
+		    rhost_addra, remotehost, ctime(&t));
 	}
 }
 
@@ -1945,7 +1999,7 @@ dologout(status)
 {
 	if (logged_in) {
 		(void) krb5_seteuid((uid_t)0);
-		ftp_logwtmp(ttyline, "", "");
+		pty_logwtmp(ttyline, "", "");
 	}
 	if (have_creds) {
 #ifdef GSSAPI
