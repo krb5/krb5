@@ -440,7 +440,7 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	       using gcc 2.95; we get back "0.0.0.0".  Since this in a
 	       configuration still important at Athena, here's the
 	       workaround....  */
-	    unsigned char *uc = (unsigned char *) &sinp->sin_addr;
+	    const unsigned char *uc = (const unsigned char *) &sinp->sin_addr;
 	    char tmpbuf[20];
 	numeric_host:
 	    sprintf(tmpbuf, "%d.%d.%d.%d", uc[0], uc[1], uc[2], uc[3]);
@@ -490,6 +490,8 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 
     return 0;
 }
+
+#include <errno.h>
 
 static inline
 char *gai_strerror (int code)
