@@ -15,18 +15,19 @@
 
 #ifndef __KRB5_RCACHE__
 #define __KRB5_RCACHE__
+
 typedef struct krb5_rc_st {
 	struct krb5_rc_ops *ops;
 	void *data;
 } *krb5_rcache;
 
-struct krb5_rc_ops {
+typedef struct _krb5_rc_ops {
 	char *prefix;
 	int (*resolve) PROTOTYPE((krb5_rcache *id, char *residual));
-	int (*new) PROTOTYPE((krb5_rcache *id, krb5_rc_ops *));
+	int (*new) PROTOTYPE((krb5_rcache *id, struct _krb5_rc_ops *));
 	char *(*get_name) PROTOTYPE((krb5_rcache));
 	int (*init) PROTOTYPE((krb5_rcache, krb5_timestamp));
-	int (*recover) (krb5_rcache));
+	int (*recover) PROTOTYPE((krb5_rcache));
 	int (*destroy) PROTOTYPE((krb5_rcache));
 	int (*close) PROTOTYPE((krb5_rcache));
 	int (*store) PROTOTYPE((krb5_rcache, krb5_tkt_authent *,
@@ -35,7 +36,7 @@ struct krb5_rc_ops {
 	int (*get_span) PROTOTYPE((krb5_rcache));
 	int (*remove_cred) PROTOTYPE((krb5_rcache, krb5_tkt_authent *));
 	int (*expunge) PROTOTYPE((krb_acache));
-};
+} krb5_rc_ops;
 
 
 #endif /* __KRB5_RCACHE__ */
