@@ -23,13 +23,13 @@
  * des_pcbc_encrypt - {en,de}crypt a stream in PCBC mode
  */
 KRB5_DLLIMP int KRB5_CALLCONV
-des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
+des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 	des_cblock *in;
 	des_cblock *out;
 	long length;
 	const des_key_schedule schedule;
 	des_cblock *ivec;
-	int encrypt;
+	int enc;
 {
 	register unsigned DES_INT32 left, right;
 	register unsigned DES_INT32 temp;
@@ -45,7 +45,7 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	/*
 	 * Deal with encryption and decryption separately.
 	 */
-	if (encrypt) {
+	if (enc) {
 		/* Initialization isn't really needed here, but gcc
 		   complains because it doesn't understand that the
 		   only case where these can be used uninitialized is

@@ -31,16 +31,16 @@
 #include "des.h"
 
 int
-des_cbc_encrypt(in,out,length,key,iv,encrypt)
+des_cbc_encrypt(in,out,length,key,iv,enc)
     krb5_octet   *in;	/* >= length bytes of input text */
     krb5_octet  *out;		/* >= length bytes of output text */
     register unsigned long length;	/* in bytes */
     const mit_des_key_schedule key;		/* precomputed key schedule */
     const krb5_octet *iv;		/* 8 bytes of ivec */
-    int encrypt;		/* 0 ==> decrypt, else encrypt */
+    int enc;		/* 0 ==> decrypt, else encrypt */
 {
 	return (mit_des_cbc_encrypt((const des_cblock *) in,
                                 (des_cblock *) out,
-                                length, key, iv, encrypt));
+                                length, key, iv, enc));
 }
 
