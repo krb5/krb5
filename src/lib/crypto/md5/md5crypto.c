@@ -2,6 +2,16 @@
 #include "rsa-md5.h"
 #include "des_int.h"	/* we cheat a bit and call it directly... */
 
+/* Windows needs to these prototypes for the assignment below */
+
+krb5_error_code
+md5_crypto_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
+	krb5_pointer seed, size_t seed_length, krb5_checksum FAR *outcksum));
+
+krb5_error_code
+md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
+	size_t in_length, krb5_pointer seed, size_t seed_length));
+
 /*
  * In Kerberos V5 Beta 5 and previous releases the RSA-MD5-DES implementation
  * did not follow RFC1510.  The folowing definitions control the compatibility
@@ -95,7 +105,7 @@ krb5_checksum FAR *outcksum;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
-    int i;
+    size_t i;
 
     MD5_CTX working;
 
@@ -158,14 +168,12 @@ size_t seed_length;
 {
     krb5_octet outtmp[RSA_MD5_DES_CKSUM_LENGTH+
 		      RSA_MD5_DES_CONFOUND_LENGTH];
-    krb5_octet outtmp1[RSA_MD5_DES_CKSUM_LENGTH+
-		      RSA_MD5_DES_CONFOUND_LENGTH];
     mit_des_cblock	tmpkey;
     krb5_octet *input = (krb5_octet *)in;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
-    int i;
+    size_t i;
 
     MD5_CTX working;
 
