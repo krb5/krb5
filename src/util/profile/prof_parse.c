@@ -24,7 +24,7 @@ struct parse_state {
 static char *skip_over_blanks(cp)
 	char	*cp;
 {
-	while (*cp && isspace(*cp))
+	while (*cp && isspace((int) (*cp)))
 		cp++;
 	return cp;
 }
@@ -177,7 +177,7 @@ static errcode_t parse_std_line(line, state)
 		do_subsection++;
 	else {
 		cp = value + strlen(value) - 1;
-		while ((cp > value) && isspace(*cp))
+		while ((cp > value) && isspace((int) (*cp)))
 			*cp-- = 0;
 	}
 	if (do_subsection) {
@@ -265,7 +265,7 @@ static int need_double_quotes(str)
 {
 	if (!str || !*str)
 		return 0;
-	if (isspace(*str) ||isspace(*(str + strlen(str) - 1)))
+	if (isspace((int) (*str)) ||isspace((int) (*(str + strlen(str) - 1))))
 		return 1;
 	if (strchr(str, '\n') || strchr(str, '\t') || strchr(str, '\b'))
 		return 1;

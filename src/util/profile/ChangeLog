@@ -1,5 +1,11 @@
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
+	* argv_parse.c (argv_parse): Cast argument to isspace() as int.
+	* prof_parse.c (skip_over_blanks, parse_std_line, need_double_quotes): 
+	Likewise
+
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
 	* Makefile.in (MLIBS): Do not link against libgen.a for test
 	programs. (only needed for krb5 an_to_ln code).
 
