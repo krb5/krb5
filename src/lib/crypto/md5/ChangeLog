@@ -1,3 +1,7 @@
+Sat Jan 27 00:56:38 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* t_cksum.c (main): use proper old-style definition.
+
 Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
 
         * t_cksum.c : Remove krb5_enctype from krb5_string_to_key() args.

@@ -87,7 +87,9 @@ print_checksum(text, number, message, checksum)
  * checksums.
  */
 int
-main(int argc, char *argv[])
+main(argc, argv)
+     int argc;
+     char **argv;
 {
   krb5_octet 		confound[CONFOUNDER_LENGTH];
   int 			msgindex;
