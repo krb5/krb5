@@ -42,7 +42,7 @@
 
 #include "k5-int.h"
 
-static krb5_error_code INTERFACE
+static krb5_error_code
 krb5_get_credentials_core(context, options, ccache, in_creds, out_creds,
 			  mcreds, fields)
     krb5_context context;

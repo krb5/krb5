@@ -1,3 +1,8 @@
+Thu Jun  6 00:06:18 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* get_creds.c (krb5_get_credentials_core): A static function must
+		not use the INTERFACE keyword.
+
 Tue May 14 18:39:22 1996  Richard Basch  <basch@lehman.com>
 
 	* mk_req_ext.c mk_safe.c send_tgs.c:
