@@ -30,6 +30,9 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
+#define FAI_PREFIX krb5int
+#include "fake-addrinfo.h"
+
 krb5_error_code
 krb5_os_hostaddr(context, name, ret_addrs)
     krb5_context context;
@@ -37,47 +40,102 @@ krb5_os_hostaddr(context, name, ret_addrs)
     krb5_address ***ret_addrs;
 {
     krb5_error_code 	retval;
-    struct hostent 	*hp;
     krb5_address 	**addrs;
-    int			i;
+    int			i, j, r;
+    struct addrinfo hints, *ai, *aip;
 
-    if (!name || !(hp = gethostbyname(name)))
-      return KRB5_ERR_BAD_HOSTNAME;
+    if (!name)
+	return KRB5_ERR_BAD_HOSTNAME;
 
-    /* Count elements */
-    for(i=0; hp->h_addr_list[i]; i++);
+    memset (&hints, 0, sizeof (hints));
+    hints.ai_flags = AI_DEFAULT | AI_NUMERICHOST;
+    /* We don't care what kind at this point, really, but without
+       this, we can get back multiple sockaddrs per address, for
+       SOCK_DGRAM, SOCK_STREAM, and SOCK_RAW.  I haven't checked if
+       that's what the spec indicates.  */
+    hints.ai_socktype = SOCK_DGRAM;
 
-    addrs = (krb5_address **) malloc ((i+1)*sizeof(*addrs));
+    r = getaddrinfo (name, 0, &hints, &ai);
+    if (r) {
+	hints.ai_flags &= ~AI_NUMERICHOST;
+	r = getaddrinfo (name, 0, &hints, &ai);
+    }
+    if (r)
+	return KRB5_ERR_BAD_HOSTNAME;
+
+    for (i = 0, aip = ai; aip; aip = aip->ai_next) {
+	switch (aip->ai_addr->sa_family) {
+	case AF_INET:
+#ifdef KRB5_USE_INET6
+	case AF_INET6:
+#endif
+	    i++;
+	default:
+	    /* Ignore addresses of unknown families.  */
+	    ;
+	}
+    }
+
+    addrs = malloc ((i+1) * sizeof(*addrs));
     if (!addrs)
-	return ENOMEM;
+	return errno;
 
-    memset(addrs, 0, (i+1)*sizeof(*addrs));
-    
-    for(i=0; hp->h_addr_list[i]; i++) {
+    for (j = 0; j < i + 1; j++)
+	addrs[j] = 0;
+
+    for (i = 0, aip = ai; aip; aip = aip->ai_next) {
+	void *ptr;
+	size_t addrlen;
+	int atype;
+
+	switch (aip->ai_addr->sa_family) {
+	case AF_INET:
+	    addrlen = sizeof (struct in_addr);
+	    ptr = &((struct sockaddr_in *)aip->ai_addr)->sin_addr;
+	    atype = ADDRTYPE_INET;
+	    break;
+#ifdef KRB5_USE_INET6
+	case AF_INET6:
+	    addrlen = sizeof (struct in6_addr);
+	    ptr = &((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr;
+	    atype = ADDRTYPE_INET6;
+	    break;
+#endif
+	default:
+	    continue;
+	}
 	addrs[i] = (krb5_address *) malloc(sizeof(krb5_address));
 	if (!addrs[i]) {
 	    retval = ENOMEM;
 	    goto errout;
 	}
 	addrs[i]->magic = KV5M_ADDRESS;
-	addrs[i]->addrtype = hp->h_addrtype;
-	addrs[i]->length   = hp->h_length;
-	addrs[i]->contents = (unsigned char *)malloc(addrs[i]->length);
+	addrs[i]->addrtype = atype;
+	addrs[i]->length = addrlen;
+	addrs[i]->contents = malloc(addrs[i]->length);
 	if (!addrs[i]->contents) {
 	    retval = ENOMEM;
 	    goto errout;
 	}
-	memcpy ((char *)addrs[i]->contents, hp->h_addr_list[i],
-		addrs[i]->length);
+	memcpy (addrs[i]->contents, ptr, addrs[i]->length);
+	i++;
     }
-    addrs[i] = 0;
 
     *ret_addrs = addrs;
+    if (ai)
+	freeaddrinfo(ai);
     return 0;
 
 errout:
-    if (addrs)
+    if (addrs) {
+	for (i = 0; addrs[i]; i++) {
+	    free (addrs[i]->contents);
+	    free (addrs[i]);
+	}
 	krb5_free_addresses(context, addrs);
+    }
+    if (ai)
+	freeaddrinfo(ai);
     return retval;
 	
 }

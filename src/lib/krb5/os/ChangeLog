@@ -1,5 +1,10 @@
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* hostaddr.c: Include fake-addrinfo.h.
+	(FAI_PREFIX): Define macro.
+	(krb5_os_hostaddr): Use getaddrinfo, to get ipv6 support and
+	thread safety.  Support numeric addresses as well.
+
 	* t_locate_kdc.c: New file.
 	* Makefile.in (t_locate_kdc.o, t_locate_kdc): New targets.
 
