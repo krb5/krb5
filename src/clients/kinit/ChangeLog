@@ -1,4 +1,11 @@
 
+Mon Aug 21 16:49:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kinit.c - Use string_to_deltat to parse lifetime arguments so that
+		we use common code.  Remove convtime().  Fix gcc -Wall.
+	* configure.in - Add -lkadm.
+	* kinit.M - Remove restriction on lifetimes.
+
+
 Fri Jul 7 15:53:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit library handling.
 	* configure.in - Add KRB5_LIBRARIES.

@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "adm_proto.h"
 
 #include <stdio.h>
 #ifdef HAVE_PWD_H
@@ -38,17 +39,6 @@
 extern int optind;
 extern char *optarg;
 
-static time_t convtime();
-
-krb5_error_code
-krb5_parse_lifetime (time, len)
-    char *time;
-    long *len;
-{
-    *len = convtime(time);
-    return 0;
-}
-    
 krb5_data tgtname = {
     0,
     KRB5_TGS_NAME_SIZE,
@@ -70,8 +60,8 @@ main(argc, argv)
     krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
     char *keytab_name = NULL;		/* -t option */
-    long lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
-    long rlife = 0;
+    krb5_deltat lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
+    krb5_deltat rlife = 0;
     int options = KRB5_DEFAULT_OPTIONS;
     int option;
     int errflg = 0;
@@ -96,9 +86,9 @@ main(argc, argv)
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
-	    code = krb5_parse_lifetime(optarg, &rlife);
+	    code = krb5_string_to_deltat(optarg, &rlife);
 	    if (code != 0 || rlife == 0) {
-		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
+		fprintf(stderr, "Bad lifetime value %s\n", optarg);
 		errflg++;
 	    }
 	    break;
@@ -129,9 +119,9 @@ main(argc, argv)
 	    break;
 #endif
        case 'l':
-	    code = krb5_parse_lifetime(optarg, &lifetime);
+	    code = krb5_string_to_deltat(optarg, &lifetime);
 	    if (code != 0 || lifetime == 0) {
-		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
+		fprintf(stderr, "Bad lifetime value %s\n", optarg);
 		errflg++;
 	    }
 	    break;
@@ -169,7 +159,7 @@ main(argc, argv)
     }
 
     if (ccache == NULL) {
-	 if (code = krb5_cc_default(kcontext, &ccache)) {
+	 if ((code = krb5_cc_default(kcontext, &ccache))) {
 	      com_err(argv[0], code, "while getting default ccache");
 	      exit(1);
 	 }
@@ -196,7 +186,8 @@ main(argc, argv)
 		   /* Else search passwd file for client */
 		   pw = getpwuid((int) getuid());
 		   if (pw) {
-			if (code = krb5_parse_name(kcontext,pw->pw_name,&me)) {
+			if ((code = krb5_parse_name(kcontext,pw->pw_name,
+						    &me))) {
 			     com_err (argv[0], code, "when parsing name %s",
 				      pw->pw_name);
 			     exit(1);
@@ -213,12 +204,12 @@ main(argc, argv)
 	      }
 	 }
     } /* Use specified name */	 
-    else if (code = krb5_parse_name (kcontext, argv[optind], &me)) {
+    else if ((code = krb5_parse_name (kcontext, argv[optind], &me))) {
 	 com_err (argv[0], code, "when parsing name %s",argv[optind]);
 	 exit(1);
     }
     
-    if (code = krb5_unparse_name(kcontext, me, &client_name)) {
+    if ((code = krb5_unparse_name(kcontext, me, &client_name))) {
 	com_err (argv[0], code, "when unparsing name");
 	exit(1);
     }
@@ -234,20 +225,20 @@ main(argc, argv)
     
     my_creds.client = me;
 
-    if (code = krb5_build_principal_ext(kcontext, &server,
+    if((code = krb5_build_principal_ext(kcontext, &server,
 					krb5_princ_realm(kcontext, me)->length,
 					krb5_princ_realm(kcontext, me)->data,
 					tgtname.length, tgtname.data,
 					krb5_princ_realm(kcontext, me)->length,
 					krb5_princ_realm(kcontext, me)->data,
-					0)) {
+					0))) {
 	com_err(argv[0], code, "while building server name");
 	exit(1);
     }
 
     my_creds.server = server;
 
-    if (code = krb5_timeofday(kcontext, &now)) {
+    if ((code = krb5_timeofday(kcontext, &now))) {
 	com_err(argv[0], code, "while getting time of day");
 	exit(1);
     }
@@ -298,67 +289,3 @@ main(argc, argv)
     }
     exit(0);
 }
-
-/*
- * this next function was lifted from the source to sendmail, which is:
- * 
- * Copyright (c) 1983 Eric P. Allman
- * Copyright (c) 1988 Regents of the University of California.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms are permitted provided
- * that: (1) source distributions retain this entire copyright notice and
- * comment, and (2) distributions including binaries display the following
- * acknowledgement:  ``This product includes software developed by the
- * University of California, Berkeley and its contributors'' in the
- * documentation or other materials provided with the distribution and in
- * all advertising materials mentioning features or use of this software.
- * Neither the name of the University nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- */
-
-#include <ctype.h>			/* for isdigit */
-
-static time_t
-convtime(p)
-        char *p;
-{
-        register time_t t, r;
-        register char c;
-
-        r = 0;
-        while (*p != '\0')
-        {
-                t = 0;
-                while (isdigit(c = *p++))
-                        t = t * 10 + (c - '0');
-                if (c == '\0')
-                        p--;
-                switch (c)
-                {
-                  case 'w':             /* weeks */
-                        t *= 7;
-
-                  case 'd':             /* days */
-                        t *= 24;
-
-                  case 'h':             /* hours */
-                  default:
-                        t *= 60;
-
-                  case 'm':             /* minutes */
-                        t *= 60;
-
-                  case 's':             /* seconds */
-                        break;
-                }
-                r += t;
-        }
-
-        return (r);
-}
-

@@ -47,7 +47,7 @@ obtains and caches an initial ticket-granting ticket for
 .IR principal .
 The
 .B \-l
-option specifies the lifetime (in hours) to be requested for the ticket;
+option specifies the lifetime to be requested for the ticket;
 if this option is not specified, the default ticket lifetime (configured
 by each site) is used instead.
 .PP
@@ -65,7 +65,7 @@ The
 .B \-r
 .I rlife
 option specifies that the RENEWABLE option should be requested for the
-ticket, and specifies (in hours) the desired total lifetime of the ticket.
+ticket, and specifies the desired total lifetime of the ticket.
 .PP
 The
 .B \-c
