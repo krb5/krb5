@@ -80,4 +80,12 @@ krb5_error_code krb5_gen_portaddr
 	       krb5_const_pointer,
 	       krb5_address **));
 
+#include <krb5/widen.h>
+krb5_error_code krb5_sname_to_principal
+    PROTOTYPE((const char *,
+	       const char *,
+	       krb5_boolean,
+	       krb5_principal *));
+#include <krb5/narrow.h>
+
 #endif /* KRB5_LIBOS_PROTO__ */
