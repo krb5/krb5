@@ -1,3 +1,9 @@
+Wed Oct 26 14:41:31 1994    (tytso@rsx-11)
+
+	* ktf_get_en.c (krb5_ktfile_get_entry): If the requested kvno is
+		IGNORE_KVNO, fix the error return so that 0 (no error) is
+		returned instead of KTF_NOT_FOUND.
+
 Thu Oct 13 17:26:12 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* configure.in: Add ISODE_DEFS

@@ -74,9 +74,9 @@ OLDDECLARG(krb5_keytab_entry *, entry)
 		krb5_kt_free_entry(&new_entry);
 	}
     }
+    if (kerror == KRB5_KT_END)
+	    kerror = cur_entry.principal ? 0 : KRB5_KT_NOTFOUND;
     if (kerror) {
-	if (kerror == KRB5_KT_END)
-	    kerror = KRB5_KT_NOTFOUND;
 	(void) krb5_ktfileint_close(id);
 	krb5_kt_free_entry(&cur_entry);
 	return kerror;
