@@ -1,3 +1,9 @@
+Fri Apr 28 13:28:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Also compile the kadmin.old directory, at least
+		for now.  (At some point this should be controlled by
+		--enable-old-kadmin).
+
 Fri Apr 28 09:33:52 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Also remove util/profile/prof_err.[ch] after

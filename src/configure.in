@@ -12,7 +12,7 @@ kadminv4=""
 else
 kadminv4=kadmin.v4
 fi
-CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 slave clients appl tests)
+CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 kadmin.old slave clients appl tests)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
