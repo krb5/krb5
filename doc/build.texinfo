@@ -1,78 +1,20 @@
-\input texinfo @c -*-texinfo-*-
-@c
-@c NOTE: add /bin/login and xdm to client machine section
-@c
-@c Note: the above texinfo file must include the "doubleleftarrow"
-@c definitions added by jcb.
-@c %**start of header
-@c guide
-@setfilename Kerberos-Build.info
-@settitle Guide to Building Kerberos
-@c @setchapternewpage odd                  @c chapter begins on next odd page
-@setchapternewpage on                   @c chapter begins on next page
-@smallbook                              @c Format for 7" X 9.25" paper
-@c %**end of header
-
-@paragraphindent 0
-@iftex
-@parskip 6pt plus 6pt
-@end iftex
-
-@include definitions.texinfo
-@set EDITION 0.1 alpha
-
-@c @finalout                               @c don't print black warning boxes
-
-@titlepage
-@title Guide to Building @value{PRODUCT}
-@subtitle Release:  @value{RELEASE}
-@subtitle Document Edition:  @value{EDITION}
-@subtitle Last updated:  @value{UPDATED}
-@author @value{COMPANY}
-
-@page
-@vskip 0pt plus 1filll
-
-@include copyright.texinfo
-@end titlepage
-
-@node Top, Top, (dir), (dir)
-@comment  node-name,  next,  previous,  up
-
-@ifinfo
-This file describes how to build @value{PRODUCT}, and how to build
-software using the @value{PRODUCT} libraries.
-
-@include copyright.texinfo
-@end ifinfo
-
-@menu
-* Compiling @value{PRODUCT}::   
-@end menu
-
-@node Top, Compiling @value{PRODUCT}, (dir), (dir)
-@top Guide to Building @value{PRODUCT}
-
-@menu
-* Compiling @value{PRODUCT}::              
-@end menu
-@end ifinfo
-            
-@node Compiling @value{PRODUCT},  , Top, Top
+@node Compiling @value{PRODUCT}
 @chapter Compiling @value{PRODUCT}
 
 @value{PRODUCT} is supplied in source form for a number of reasons:
 @itemize @bullet
-@item You can examine the source yourself, and verify the behavior of
-the system to your satisfaction. This is especially important with
-security software.
-@item You can make your own changes (of course, we recommend having us
-make the changes, so that we can support them in the future.)
+@item
+You can examine the source yourself, and verify the behavior of the
+system to your satisfaction.  This is especially important with security
+software.
+@item
+You can make your own changes (of course, we recommend having us make
+the changes, so that we can support them in the future.)
 @end itemize
 
-@value{PRODUCT} is a large package. In order to efficiently manage sources across a
-large number of platforms, we've used certain tools that you may be
-unfamilar with, and we explain them here.
+@value{PRODUCT} is a large package.  In order to efficiently manage
+sources across a large number of platforms, we've used certain tools
+that you may be unfamilar with, and we explain them here.
 
 @menu
 * Requirements::                Requirements
@@ -85,26 +27,25 @@ unfamilar with, and we explain them here.
 @section Requirements
 
 At the very minimum, you need a Unix-like operating system with a C
-compiler. (The MacOS and Windows ports are not discussed here.) While an
-ANSI C compiler is preferred, mostly because it is likely to be a more
-recent compiler, the build process checks for particular features and
-works around them in most cases. We of course recommend gcc, but we test
-the compilation with both gcc and the "native" or OS-vendor supplied
-compiler whenever possible.
+compiler.  (The MacOS and Windows ports are not discussed here.)  While
+an ANSI C compiler is preferred, mostly because it is likely to be a
+more recent compiler, the build process checks for particular features
+and works around them in most cases.  We of course recommend gcc, but we
+test the compilation with both gcc and the "native" or OS-vendor
+supplied compiler whenever possible.
 
-You also need a version of @code{make}. We recommend GNU make, but
-again, we test with the vendor-supplied one as well. Most native
-implementations of make are sufficient to build @value{PRODUCT} directly in the
-source tree. Having a seperate build tree is far more convenient, and is
-what we recommend; this usually needs GNU make because of the variation
-in support of @samp{VPATH}. 
+You also need a version of @code{make}.  We recommend GNU make, but
+again, we test with the vendor-supplied one as well.  Most native
+implementations of make are sufficient to build @value{PRODUCT} directly
+in the source tree.  Having a seperate build tree is far more
+convenient, and is what we recommend; this usually needs GNU make
+because of the variation in support of @samp{VPATH}.
 
 If you're only going to compile the unchanged source, or are only going
-to change C files, you should be set. If you're going to change some
-part of the build process (any of the @file{Makefile}s -- more specifically,
-any of the @file{configure.in} or @file{Makefile.in} files that generate
-them) you're 
-going to need a recent version of GNU m4.
+to change C files, you should be set.  If you're going to change some
+part of the build process (any of the @file{Makefile}s---more
+specifically, any of the @file{configure.in} or @file{Makefile.in} files
+that generate them) you're going to need a recent version of GNU m4.
 
 @node Setup, Testing, Requirements, Compiling @value{PRODUCT}
 @section Setup
@@ -116,7 +57,7 @@ is the source tree itself.
 @item src
 is a symlink farm pointing into the source tree.
 @item @var{platform}
-is a directory for a particular build platform. It may be more
+is a directory for a particular build platform.  It may be more
 convenient for you to name these by hostname, but if you're keeping the
 trees around for any length of time it is better to label them by vendor
 and version.
@@ -124,8 +65,7 @@ and version.
 
 Given the above structure, unpack the tar file of sources.
 
-If you don't have GNU m4, or are not planning to change anything,
-simply 
+If you don't have GNU m4, or are not planning to change anything, simply
 @example
         mv krb5 src
 @end example
@@ -147,14 +87,13 @@ procedure
         % util/reconf
         % cd ..
 @end example
-The reconf step will take a while, as it regenerates the build
-scripts. If you change @file{aclocal.m4}, @file{Makefile.in}, or
-@file{configure.in}, you can 
-rerun @file{util/reconf} (causing it to rebuild only those things that
-need to.) If you're just making changes to a @file{Makefile.in} or
-@file{configure.in} 
-in one directory, the make rules will take care of rerunning @file{autoconf} to
-rebuild them directly.
+The reconf step will take a while, as it regenerates the build scripts.
+If you change @file{aclocal.m4}, @file{Makefile.in}, or
+@file{configure.in}, you can rerun @file{util/reconf} (causing it to
+rebuild only those things that need to.) If you're just making changes
+to a @file{Makefile.in} or @file{configure.in} in one directory, the
+make rules will take care of rerunning @file{autoconf} to rebuild them
+directly.
 
 In order to build a particular platform, simply
 @example
@@ -166,8 +105,8 @@ In order to build a particular platform, simply
         % make install
 @end example
 
-If @samp{cc} isn't a working compiler (stock Solaris, for example) you should
-also do a 
+If @samp{cc} isn't a working compiler (stock Solaris, for example) you
+should also do a
 @example
         setenv CC gcc
 @end example
@@ -188,103 +127,100 @@ before running configure.
 @end itemize
 which get automatically propagated to all subdirectories.
 
-
 @node Configure Options,  , Make Options, Setup
 @subsection Configure Options
 
 @var{configure options} include
 @table @code
 @item --with-dbm
- Use native @code{dbm} for the key database.
+Use native @code{dbm} for the key database.
 @item --without-dbm
- Use included version of Berkeley @code{db}. This is the default, but
-not yet recommended. In a future release, after @code{db} is more
+Use included version of Berkeley @code{db}.  This is the default, but
+not yet recommended.  In a future release, after @code{db} is more
 thoroughly tested, a conversion tool will be supplied.
 @item --with-dbm-lname
- Use native @code{dbm} for @code{aname} to @code{lname} conversion
-database. This optional database is most useful when users have
+Use native @code{dbm} for @code{aname} to @code{lname} conversion
+database.  This optional database is most useful when users have
 principals in multiple realms that have common access.
 @item --without-dbm-lname
- Use included version of Berkeley @code{db}. This is the default, but
-not yet recommended. In a future release, after @code{db} is more
+Use included version of Berkeley @code{db}.  This is the default, but
+not yet recommended.  In a future release, after @code{db} is more
 thoroughly tested, a conversion tool will be supplied.
 @item --enable-athena
- If V4 compatibility is also enabled (the default), construct
+If V4 compatibility is also enabled (the default), construct
 @code{kadmin.v4}, the @value{PRODUCT} V4 compatible Kerberos
 Administration Server, and @code{krb524}, the conversion tools to allow
-users to generate V4 tickets from V5 tickets. For further details, see
-the @ref{@value{PRODUCT} V4 Compatibility,,@value{PRODUCT} V4 Backward
-Compatibility Support,@value{PRODUCT}-inst-man,Cygnus Network Security
--- Version 5}.
+users to generate V4 tickets from V5 tickets.
 
-It also causes @code{KRB5_ATHENA_COMPAT} to be defined, which may have affects
-in future releases, but is currently unused.
+It also causes @code{KRB5_ATHENA_COMPAT} to be defined, which may have
+affects in future releases, but is currently unused.
 
 @item --prefix @var{pathname}
- Specify that the installed tree be rooted at @var{pathname}. The MIT
-default is to use @file{/krb5} but 
+Specify that the installed tree be rooted at @var{pathname}.  The MIT
+default is to use @file{/krb5} but
 @item --without-krb4
- Don't include any Kerberos V4 backwards compatibility support in
+Don't include any Kerberos V4 backwards compatibility support in
 applications, and don't build the V4 libraries either.
 @item --with-krb4
- @value{PRODUCT} V4 libraries (enhanced for compatibility use) are included as part of
-the @value{PRODUCT} V5 source tree. By default, or with this option, these are built
-and installed in @file{libkrb4.a} and are used in various utilities.
+@value{PRODUCT} V4 libraries (enhanced for compatibility use) are
+included as part of the @value{PRODUCT} V5 source tree.  By default, or
+with this option, these are built and installed in @file{libkrb4.a} and
+are used in various utilities.
 @item  --with-krb4=@var{KRB4DIR}
- Enable V4 backwards compatibility support, but use existing Kerberos
-libraries as preinstalled in @var{KRB4DIR}. Generally not used now that
+Enable V4 backwards compatibility support, but use existing Kerberos
+libraries as preinstalled in @var{KRB4DIR}.  Generally not used now that
 the V4 libraries are included.
 @item  --with-cc=@var{COMPILER}
- Select compiler to use, and write it into the constructed
+Select compiler to use, and write it into the constructed
 @code{Makefile}s as the default value of @code{CC}.
 @item  --with-linker=@var{LINKER}
- Select linker to use, and write it into the constructed
-@code{Makefile}s as the default value of @code{LD}. Useful for building
-with Purify.
+Select linker to use, and write it into the constructed @code{Makefile}s
+as the default value of @code{LD}.  Useful for building with Purify.
 @item --with-ccopts=@var{CCOPTS}
- Select compiler command line options, and write it into the constructed
-@code{Makefile}s as the default value of @code{CCOPTS}. Useful for
+Select compiler command line options, and write it into the constructed
+@code{Makefile}s as the default value of @code{CCOPTS}.  Useful for
 building with debugging or optimization.
 @item --with-cppopts=@var{CPPOPTS}
-  Select compiler preprocessor command line options, and write it into
-the constructed @code{Makefile}s as the default value of
-@code{CPPOPTS}. Useful for setting flags.
+Select compiler preprocessor command line options, and write it into the
+constructed @code{Makefile}s as the default value of @code{CPPOPTS}.
+Useful for setting flags.
 @item  --with-netlib=@var{libs}
-  Use user defined resolve library. Normally the resolver is part of the
+Use user defined resolve library.  Normally the resolver is part of the
 C library, but on SunOS systems using NIS, you may need to specify
 @code{-lresolv} in order to get a proper domain name resolver.
 @item --enable-shared
- Construct @value{PRODUCT} V5 shared libraries. Not supported on all systems.
+Construct @value{PRODUCT} V5 shared libraries.  Not supported on all
+systems.
 @item --with-shared
- Use constructed shared (default) libraries.
+Use constructed shared (default) libraries.
 @item --without-shared
- Don't use any shared libraries when building @value{PRODUCT}.
+Don't use any shared libraries when building @value{PRODUCT}.
 @item  --without-afs
- The default, indicating that you don't have afs libraries to build
-with and therefore can't to build @code{asetkey}, @code{aklog}, and
+The default, indicating that you don't have afs libraries to build with
+and therefore can't to build @code{asetkey}, @code{aklog}, and
 @code{kascvt}.
 @item --with-afs=@var{AFSDIR}
- Use preinstalled AFS library tree located under @var{AFSDIR} to build
-the TransArc AFS support and conversion tools. These require V4
+Use preinstalled AFS library tree located under @var{AFSDIR} to build
+the TransArc AFS support and conversion tools.  These require V4
 compatibility to operate, and work in conjunction with @code{krb524d}.
 @item  --enable-telnet-encryption
- Use non-standard encryption in telnet. The telnet implementation
+Use non-standard encryption in telnet.  The telnet implementation
 provides for the use of DES in a stream mode to encrypt the connection,
-but there are some user interface issues that may make it less
-safe. Always verify using @kbd{^[ enc status RET} that it was
-successful, rather than trusting the message which may have been
-inserted by an attacker. For this and other reasons, the encryption mode
-is not an Internet Standard as of October 1995, but work is expected in
-the coming year to change that.
+but there are some user interface issues that may make it less safe.
+Always verify using @kbd{^[ enc status RET} that it was successful,
+rather than trusting the message which may have been inserted by an
+attacker.  For this and other reasons, the encryption mode is not an
+Internet Standard as of October 1995, but work is expected in the coming
+year to change that.
 @item  --disable-telnet-encryption
- Don't enable the non-standard telnet encryption mode described above.
+Don't enable the non-standard telnet encryption mode described above.
 @end table
 
 @node Testing, Constructing an Install Kit, Setup, Compiling @value{PRODUCT}
 @section Testing
 
 After running @code{make all} successfully, you should run the
-collection of built in test cases. Running @code{make check} will run a
+collection of built in test cases.  Running @code{make check} will run a
 number of built in tests of
 @itemize @bullet
 @item
@@ -299,12 +235,12 @@ If you have @code{runtest} from the DejaGnu package
 @footnote{@code{prep.ai.mit.edu:/pub/gnu/dejagnu-1.2.tar.gz} as of this
 writing} installed, this will also run a set of live application tests,
 creating a test realm, starting a Kerberos server, @code{kadmind}, and
-clients, and testing their features the way a human would use them. The
+clients, and testing their features the way a human would use them.  The
 end summary should list no unexpected failures.
 
 If you do find problems, you can get more specific detail by changing to
 the @file{tests/dejagnu} directory and running @code{runtest} with the
-@samp{-d} option, and examining the @file{dbg.log} file produced. (This
+@samp{-d} option, and examining the @file{dbg.log} file produced.  (This
 will not be necessary with any platform supported by @value{COMPANY}.)
 
 @node Constructing an Install Kit,  , Testing, Compiling @value{PRODUCT}
@@ -312,7 +248,7 @@ will not be necessary with any platform supported by @value{COMPANY}.)
 
 Currently install kits are constructed by creating an install directory
 and running @code{make install DESTDIR=@var{install directory}}, then
-using @samp{tar cf} to produce a tar file. In the future, there will be
+using @samp{tar cf} to produce a tar file.  In the future, there will be
 direct make targets to support construction of @code{tar} files and
 @sc{svr4} packages.
 
