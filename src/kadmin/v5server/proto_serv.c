@@ -211,6 +211,11 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 
     DPRINT(DEBUG_PROTO, proto_debug_level,
 	   ("= %d:parse message(%d bytes)\n", my_id, in_data.length));
+    /*
+     * If we don't have a keytab, use our squirreled key.
+     */
+    if (!key_keytab_id())
+	krb5_auth_con_setuseruserkey(kcontext, auth_context, key_admin_key());
     /* Parse the AP_REQ message */
     if (kret = krb5_rd_req(kcontext,
 			   &auth_context,

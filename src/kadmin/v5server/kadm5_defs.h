@@ -136,6 +136,7 @@ krb5_boolean key_pwd_is_weak
 krb5_db_entry *key_master_entry();
 char *key_master_realm();
 krb5_keytab key_keytab_id();
+krb5_keyblock *key_admin_key();
 
 /* srv_acl.c */
 krb5_error_code acl_init
