@@ -10,10 +10,10 @@
  * libos: krb5_timeofday function for BSD 4.3 
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char rcsid_timeofday_c[] =
 "$Id$";
-#endif	/* lint */
+#endif	/* lint || saber */
 
 #include <krb5/copyright.h>
 
