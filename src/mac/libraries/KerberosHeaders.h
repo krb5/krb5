@@ -23,8 +23,6 @@
 #include <unix.h>
 #include <ctype.h>
 
-#endif
-
 #define PROVIDE_RSA_MD4
 #define PROVIDE_RSA_MD5
 #define PROVIDE_CRC32
