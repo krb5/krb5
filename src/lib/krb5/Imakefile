@@ -1,6 +1,20 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
-
+NormalLibraryObjectRule()
         SUBDIRS = ccache crc-32 des kdb keytab krb os-4.3 rcache free
+OBJS =	\
+	cryptoconf.o \
+	perror.o \
+	syslog.o \
+	vfprintf.o \
+	vsprintf.o
+SRCS =	\
+	cryptoconf.c \
+	perror.c \
+	syslog.c \
+	vfprintf.c \
+	vsprintf.c
 
 MakeSubdirs($(SUBDIRS))
+
+AdditiveLibraryTarget(krb5,$(OBJS))
