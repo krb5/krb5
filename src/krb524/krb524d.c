@@ -268,8 +268,9 @@ krb5_error_code do_connection(s, context)
      saddrlen = sizeof(struct sockaddr);
      ret = recvfrom(s, msgdata.data, msgdata.length, 0, &saddr, &saddrlen);
      if (ret < 0) {
-	  ret = errno;
-	  goto error;
+       /* if recvfrom fails, we probably don't have a valid saddr to 
+	  use for the reply, so don't even try to respond. */
+       return errno;
      }
      if (debug)
 	  printf("message received\n");
