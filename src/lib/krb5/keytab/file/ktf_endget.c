@@ -24,8 +24,8 @@ static char rcsid_ktf_endget_c[] =
 krb5_error_code
 krb5_ktfile_end_get(id, cursor)
 krb5_keytab id;
-krb5_kt_cursor cursor;
+krb5_kt_cursor *cursor;
 {
-    xfree(cursor);
+    xfree(*cursor);
     return krb5_ktfileint_close(id);
 }
