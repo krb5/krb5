@@ -2,12 +2,16 @@
  * Implements Kerberos 4 authentication
  */
 
-#include <time.h>
-#include <string.h>
 #ifdef KRB4
+	#include <windows.h>
+	#include <time.h>
+	#include <string.h>
+	#include "winsock.h"
     #include "kerberos.h"
 #endif
 #ifdef KRB5
+	#include <time.h>
+	#include <string.h>
     #include "krb5.h"
     #include "des_int.h"
     #include "com_err.h"
@@ -64,7 +68,9 @@
     	#define KRB_SERVICE_NAME    "rcmd"
         #define KERBEROS_VERSION    KERBEROS_V4
 
-        static int k4_auth_send  (void);
+    	static int auth_how;
+        static int k4_auth_send  (kstream ks);
+        static int k4_auth_reply (kstream ks, unsigned char *data, int cnt);
     #endif
     #ifdef KRB5
         static krb5_data auth;
@@ -119,7 +125,7 @@ auth_abort(
 		if (r != KSUCCESS) {
 			strcat(strTmp, "\n");
             #ifdef KRB4
-                lstrcat(strTmp, krb_get_err_text(r));
+                lstrcat(strTmp, krb_get_err_text((int) r));
             #endif
             #ifdef KRB5
                 lstrcat (strTmp, error_message(r));
@@ -202,7 +208,7 @@ auth_send(
 	}
 
     #ifdef KRB4
-        r = k4_auth_send ();
+        r = k4_auth_send (ks);
     #endif /* KRB4 */
     
     #ifdef KRB5
@@ -392,10 +398,13 @@ auth_decrypt(
 ** Returns: 0 on failure, 1 on success
 */
 static int
-k4_auth_send () {
+k4_auth_send (
+	kstream ks)
+{
     int r;                                      // Return value
     char instance[INST_SZ];
     char *realm;
+    char buf[256];
 
     memset(instance, 0, sizeof(instance));
 
@@ -432,8 +441,10 @@ k4_auth_send () {
         return r;
     }
 
-    if (szUserName[0])                          // Copy if not there
+    if (!szUserName[0])					// Copy if not there
         strcpy (szUserName, cred.pname);
+
+	return(1);
 }
 
 /*+

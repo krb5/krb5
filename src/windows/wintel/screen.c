@@ -193,6 +193,7 @@ SCREEN *InitNewScreen(
 	scr->Oldy = 0;
 	scr->attrib = 0;
 	scr->DECAWM = 1;
+	scr->bWrapPending = FALSE;
 	scr->top = 0;
 	scr->bottom = scr->height-1;
 	scr->parmptr = 0;
@@ -1061,13 +1062,7 @@ void ScreenBackspace(SCREEN *pScr)
 {
 	RECT rc;
 	
-	#if 0
-		hDC = GetDC(fpScr->hWnd);
-		assert(hDC != NULL);
-		SelectObject(hDC, fpScr->ghSelectedFont);
-		TextOut(hDC, pScr->x * pScr->cxChar, pScr->y * pScr->cyChar, " ", 1);
-		ReleaseDC(pScr->hWnd, hDC);
-	#endif
+	pScr->bWrapPending = FALSE;
 	rc.left = pScr->x * pScr->cxChar;
 	rc.right = (pScr->x + 1) * pScr->cxChar;
 	rc.top = pScr->cyChar * pScr->y;
@@ -1091,15 +1086,12 @@ void ScreenTab(
 	HDC hDC;
 
 	num_spaces = TAB_SPACES - (pScr->x % TAB_SPACES);
-	if (pScr->x + num_spaces >= pScr->width) {
-	   ScreenScroll(pScr);
-	   num_spaces -= pScr->width - pScr->x;
-	   pScr->x = 0;
-	}
+	if (pScr->x + num_spaces >= pScr->width)
+	   num_spaces = pScr->width - pScr->x;
 	pScrLine = GetScreenLineFromY(pScr, pScr->y);
 	if (pScrLine == NULL)
 		return;
-	for (idx = 0; idx<num_spaces; idx++, pScr->x++) {
+	for (idx = 0; idx < num_spaces; idx++, pScr->x++) {
 		if (!pScrLine->text[pScr->x])
 			iTest=1;
 		if (iTest)
@@ -1110,7 +1102,10 @@ void ScreenTab(
 	SelectObject(hDC, pScr->hSelectedFont);
 	TextOut(hDC, (pScr->x - num_spaces) * pScr->cxChar, pScr->y * pScr->cyChar,
 		pScrLine->text + pScr->x - num_spaces, num_spaces);
-	ReleaseDC(pScr->hWnd, hDC);                
+	ReleaseDC(pScr->hWnd, hDC);
+	if (pScr->x >= pScr->width)
+		pScr->x = pScr->width - 1;
+	pScr->bWrapPending = FALSE;
 
 } /* ScreenTab */
 
@@ -1118,6 +1113,7 @@ void ScreenTab(
 void ScreenCarriageFeed(
 	SCREEN *pScr)
 {
+	pScr->bWrapPending = FALSE;
 	pScr->x = 0;
 
 } /* ScreenCarriageFeed */

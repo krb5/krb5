@@ -163,6 +163,7 @@ void ScreenReset(
 	pScr->parmptr = 0;
 	pScr->escflg = 0;
 	pScr->DECAWM = 1;
+	pScr->bWrapPending = FALSE;
 	pScr->DECCKM = 0;
 	pScr->DECPAM = 0;
 /*  pScr->DECORG = 0;     */
@@ -217,6 +218,8 @@ void ScreenDelLines(
 	RECT rc;
 	HDC hDC;
 	
+	pScr->bWrapPending = FALSE;
+
 	if (s < 0) 
 		s = pScr->y;
 
@@ -305,8 +308,7 @@ void ScreenInsLines(
 	RECT rc;
 	HDC hDC;
  
-//    wsprintf(strTmp, "ScreenInsLine (n=%d s=%d)", n, s);
-//    OutputDebugString(strTmp);
+	pScr->bWrapPending = FALSE;
 
 	if (s < 0)
 		s = pScr->y;
@@ -386,7 +388,9 @@ void ScreenIndex(
 	if (pScr->y >= pScr->bottom)
 		ScreenScroll(pScr);
 	else
-		pScr->y++;    
+		pScr->y++;
+
+	pScr->bWrapPending = FALSE;
 
 } /* ScreenIndex */
 
@@ -396,10 +400,12 @@ void ScreenWrapNow(
 	int *xp,
 	int *yp)
 {
-	if (pScr->x > pScr->width) {
+	if (pScr->bWrapPending && pScr->x >= pScr->width - 1) {
 		pScr->x = 0;
 		ScreenIndex(pScr);
 	}
+
+	pScr->bWrapPending = FALSE;
 
 	*xp = pScr->x;
 	*yp = pScr->y;
@@ -446,6 +452,8 @@ void ScreenDelChars(
 	SCREENLINE *pScrLine;
 	RECT rc;
 	
+	pScr->bWrapPending = FALSE;
+
 	pScrLine = GetScreenLineFromY(pScr, y);
 
 	width = pScr->width - x - n;
@@ -476,6 +484,7 @@ void ScreenRevIndex(
 	SCREENLINE *pScrLine;
 	SCREENLINE *pTopLine;
 	
+	pScr->bWrapPending = FALSE;
 	pScrLine = GetScreenLineFromY(pScr, pScr->y);
 	pTopLine = GetScreenLineFromY(pScr, pScr->top);
 
@@ -565,16 +574,11 @@ void ScreenEraseToEndOfScreen(
 void ScreenRange(
 	SCREEN *pScr)
 {
-	int wrap = 0;
-
-	if (pScr->DECAWM)
-		wrap = 1;
-
 	if (pScr->x < 0)
 		pScr->x = 0;
 
-	if (pScr->x > pScr->width + wrap)
-		pScr->x = pScr->width + wrap;
+	if (pScr->x >= pScr->width)
+		pScr->x = pScr->width - 1;
 
 	if (pScr->y < 0)
 		pScr->y = 0;
@@ -707,9 +711,6 @@ int ScreenInsChar(
 	SCREENLINE *pScrLine;
 	RECT rc;
 		
-//    ScreenWrapNow(&i,&j);  /* JEM- Why is this here? comment out for now */
-
-//    OutputDebugString("OOPS-InsChar!");
 	pScrLine = GetScreenLineFromY(pScr, pScr->y);
 	if (pScrLine == NULL)
 		return(-1);
@@ -721,50 +722,14 @@ int ScreenInsChar(
 
 	memset(&pScrLine->attrib[pScr->x], ScreenClearAttrib, x);
 	memset(&pScrLine->text[pScr->x], ' ', x);
-
-	for(i = pScr->x; i < pScr->x + x; i++) {
-		pScrLine->text[i] = ' ';
-		pScrLine->attrib[i] = ScreenClearAttrib;
-	}
 	rc.left = pScr->cxChar * x;
-	rc.right = (pScr->cxChar * x) + (pScr->cxChar * (x + pScr->x));
+	rc.right = pScr->cxChar * (x + pScr->x);
 	rc.top = pScr->cyChar * (pScr->y - 1);
 	rc.bottom = pScr->cyChar * pScr->y;
 	InvalidateRect(pScr->hWnd, &rc, TRUE);
 	SendMessage(pScr->hWnd, WM_PAINT, NULL, NULL);
 
 } /* ScreenInsChar */
-
-
-void ScreenInsString(
-	SCREEN *pScr,
-	int len,
-	char *start)
-{
-	SCREENLINE *pScrLine;
-	int idx;
-	RECT rc;
-	
-	if (pScr->VSIDC)
-		return;
-	
-	pScrLine = GetScreenLineFromY(pScr, pScr->y);
-	if (pScrLine == NULL)
-		return;
-
-	for(idx = pScr->x; idx < pScr->x + len; idx++) {
-		pScrLine->text[idx] = start[idx];
-		pScrLine->attrib[idx] = pScr->attrib;
-	}
-	rc.left = pScr->cxChar * pScr->x;
-	rc.right = pScr->cxChar * pScr->x + pScr->cxChar * (pScr->x + len);
-	rc.top = pScr->cyChar * pScr->y;
-	rc.bottom = pScr->cyChar * (pScr->y + 1);
-
-	InvalidateRect(pScr->hWnd, &rc, TRUE);
-	SendMessage(pScr->hWnd, WM_PAINT, NULL, NULL);
-
-} /* ScreenInsString */
 
 
 void ScreenSaveCursor(

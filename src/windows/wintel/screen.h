@@ -76,6 +76,7 @@ typedef struct SCREEN {
 	int Pattrib;
 	int VSIDC;          // Insert/Delete character mode 0=draw line
 	int DECAWM;         // AutoWrap mode 0=off
+	BOOL bWrapPending;	// AutoWrap mode is on - wrap on next character
 	int DECCKM;         // Cursor key mode
 	int DECPAM;         // keyPad Application mode
 	int IRM;            // Insert/Replace mode
@@ -236,11 +237,6 @@ intern.c
 	int ScreenInsChar(
 		SCREEN *pScr,
 		int x);
-
-	void ScreenInsString(
-		SCREEN *pScr,
-		int len,
-		char *start);
 
 	void ScreenSaveCursor(
 		SCREEN *pScr);

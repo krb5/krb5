@@ -35,7 +35,7 @@ static char hostdata[MAXGETHOSTSTRUCT];
 static SCREEN *pScr;
 static int debug = 1;
 
-char __near strTmp[1024];				// Scratch buffer
+char strTmp[1024];						// Scratch buffer
 BOOL bAutoConnection = FALSE; 
 int port_no = 23;
 char szUserName[64];					// Used in auth.c

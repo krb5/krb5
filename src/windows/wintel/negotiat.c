@@ -201,10 +201,10 @@ start_negotiation(kstream ks)
     if(tw->mapoutput) { 
         netprintf(tw->pnum,"%c%c%c",IAC,DOTEL,BINARY);
     /* set the flag indicating we wanted server to start transmitting binary */
-        tw->uwantbinary=1;  
+        tw->uwantbinary=1;
         netprintf(tw->pnum,"%c%c%c",IAC,WILLTEL,BINARY);
     /* set the flag indicating we want to start transmitting binary */
-        tw->iwantbinary=1;  
+        tw->iwantbinary=1;
       } /* end if */
 #endif
 
@@ -746,7 +746,9 @@ parse_subnegotiat(kstream ks,int end_sub) {
         default:
             break;
       } /* end switch */
-}   /* end parse_subnegotiat() */
+}   /* parse_subnegotiat */
+
+
 /*+********************************************************************
 *  Function :   send_naws
 *  Purpose  :   Send a window size sub-negotiation.
@@ -755,8 +757,9 @@ parse_subnegotiat(kstream ks,int end_sub) {
 *  Returns  :   none
 **********************************************************************/
 void
-send_naws(CONNECTION *con) {
-    unsigned char buf[13];
+send_naws(CONNECTION *con)
+{
+    unsigned char buf[40];
 	int len;
 
 	wsprintf(buf, "%c%c%c", IAC, SB, NAWS);
@@ -779,10 +782,11 @@ send_naws(CONNECTION *con) {
 
 	TelnetSend(con->ks, buf, len, 0);
 
-#ifdef NEGOTIATEDEBUG
-///	wsprintf(buf, "SEND: SB NAWS %d %d %d %d IAC SE\r\n",
-///		HIBYTE(con->width), LOBYTE(con->width),
-///     HIBYTE(con->height), LOBYTE(con->height));
-///	OutputDebugString(buf);
-#endif
+	#ifdef NEGOTIATEDEBUG
+		wsprintf(buf, "SEND: SB NAWS %d %d %d %d IAC SE\r\n",
+		HIBYTE(con->width), LOBYTE(con->width),
+		HIBYTE(con->height), LOBYTE(con->height));
+		OutputDebugString(buf);
+	#endif
+
 } /* send_naws */

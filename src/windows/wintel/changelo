@@ -1,3 +1,11 @@
+Thu May 25 11:26:14 1995 John Rivlin  <jrvlin@fusion.com>
+
+	* emul.c - make the eol wrapping to work properly. This fixed 
+	   numerous seemingly unrelated scrolling bugs.
+	* auth.c, intern.c, negotiat.c, screen.c, screen.h, telnet.c
+	   telnet.h: removed level of indirection by using pointers rather
+ 	   than handles; also cleaned up the formatting.
+
 Thu Apr 27 12:00:00 1995  John Rivlin  <jrvlin@fusion.com>
 
 	* edit.c, emul.c, font.c, intern.c, screen.c, telnet.c, screen.h

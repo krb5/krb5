@@ -33,7 +33,7 @@ extern void parse(
 extern void send_naws(
 	CONNECTION *con);
 
-extern char __near strTmp[];
+extern char strTmp[1024];
 
 #define DEF_WIDTH 80
 #define DEF_HEIGHT 24
