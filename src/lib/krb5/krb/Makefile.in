@@ -74,7 +74,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_srch.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
-	$(srcdir/chk_trans.c	\
+	$(srcdir)/chk_trans.c	\
 	$(srcdir)/compat_recv.c	\
 	$(srcdir)/conv_princ.c	\
 	$(srcdir)/copy_addrs.c	\
