@@ -167,7 +167,7 @@ setpeer(argc, argv)
 		mode = MODE_S;
 		stru = STRU_F;
 		(void) strcpy(bytename, "8"), bytesize = 8;
-		if (autologin) {
+		if (autoauth) {
 			if (do_auth() && autoencrypt) {
 				setpbsz(1<<20);
 				if (command("PROT P") == COMPLETE)
@@ -175,7 +175,9 @@ setpeer(argc, argv)
 				else
 					fprintf(stderr, "ftp: couldn't enable encryption\n");
 			}
-			(void) login(argv[1]);
+
+			if(autologin)
+			  (void) login(argv[1]);
 		}
 
 #ifndef unix

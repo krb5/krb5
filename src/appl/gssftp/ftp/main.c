@@ -100,6 +100,7 @@ main(argc, argv)
 #endif /* KRB5_KRB4_COMPAT */
 	doglob = 1;
 	interactive = 1;
+	autoauth = 1;
 	autologin = 1;
 	forward = 0;
 	autoencrypt = 0;
@@ -146,6 +147,11 @@ main(argc, argv)
 				doglob = 0;
 				break;
 
+
+			case 'u':
+			  autoauth = 0;
+			  break;
+
 			case 'f':
 				forward = 1;
 				break;
@@ -153,6 +159,7 @@ main(argc, argv)
 			case 'x':
 				autoencrypt = 1;
 				break;
+
 
 			default:
 				fprintf(stdout,

@@ -54,6 +54,7 @@ extern int	interactive;	/* interactively prompt on m* cmds */
 extern int	debug;		/* debugging level */
 extern int	bell;		/* ring bell on cmd completion */
 extern int	doglob;		/* glob local file names */
+extern int autoauth;		/* Do authentication on connect */
 extern int	autologin;	/* establish user account on connection */
 extern int	autoencrypt;	/* negotiate encryption on connection */
 extern int	forward;	/* forward credentials */

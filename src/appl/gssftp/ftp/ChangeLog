@@ -1,3 +1,7 @@
+Sat Apr 25 01:53:04 1998  Sam Hartman  <hartmans@luminous.mit.edu>
+
+	* cmds.c (setpeer): Fix so that autologin is respected again
+
 1998-04-21  Ken Raeburn  <raeburn@cygnus.com>
 
 	* glob.c (ftpglob): Always allocate new storage, even if no magic
@@ -39,12 +43,23 @@ Thu Jan 29 19:39:27 1998  Dan Winship  <danw@mit.edu>
 
 	* cmds.c (setpeer): implement -x
 
+
 Thu Dec 11 23:26:58 1997  Tom Yu  <tlyu@mit.edu>
 
 	* ftp.c:
 	* main.c: Don't include netdb.h or sys/socket.h if krb.h is
 	included; this works around an Ultrix bug where those headers
 	aren't protected against multiple inclusion.
+
+Sat Dec  6 18:17:10 1997  Sam Hartman  <hartmans@luminous.mesas.com>
+
+	* main.c (main): Add -u for unauthenticated
+
+	* ftp_var.h: Add autoauth
+
+	* cmds.c (setpeer): Automatic authentication should not be
+ 	dependent on autologin; use -u instead.
+
 
 Thu Oct 16 01:20:30 1997  Tom Yu  <tlyu@mit.edu>
 
