@@ -1,3 +1,9 @@
+2003-11-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * win-pre.in (KFWFLAGS): conditionally define USE_LEASH=1
+      to enable access to Leash apis for kinit dialogs within 
+      gssapi32.dll
+
 2003-09-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (*-*-linux*): Use $(CC) for linking shared libraries,

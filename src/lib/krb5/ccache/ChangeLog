@@ -1,3 +1,8 @@
+2003-11-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * cc_default.c: Add support for Leash Kinit Dialog on Windows to
+            krb5int_c_default()
+
 2003-07-22  Sam Hartman  <hartmans@mit.edu>
 
 	* ccbase.c: Always register the file credentials cache type.  If
