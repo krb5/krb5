@@ -258,6 +258,9 @@ Thanks to Kevin Coffman and the CITI group at the University of
 Michigan for providing patches for implementing RPCSEC_GSS
 authentication in the RPC library.
 
+Thanks to Quanah Gibson-Mount of Stanford University for helping
+exercise the thread support code.
+
 [...]
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
