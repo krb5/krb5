@@ -1,3 +1,20 @@
+Mon Nov 13 12:57:12 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* preauth.c (krb5_process_padata): Added generalized processing
+		for preauth information which is returned by the KDC.
+		This should be general enough to support the AFS3_SALT
+		preauth type, the SNK4 preauth type, and the public-key
+		mods to Kerberos.
+	(process_pw_salt): New function for processing the KRB5_PW_SALT
+		preauthentication type.
+
+	* get_in_tkt.c (decrypt_as_reply): Removed temporary kludge for
+		processing the PW_SALT preauth type; that's now done in
+		preauth.c
+	(krb5_get_in_tkt): Call krb5_process_padata with new arguments so
+		that the preauth code can set the decryption_key if
+		necessary. 
+		
 Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
 
         * in_tkt_pwd.c : Remove krb5_enctype from krb5_string_to_key() args.

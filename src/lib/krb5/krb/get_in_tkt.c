@@ -173,57 +173,42 @@ cleanup:
 }
 
 static krb5_error_code
-decrypt_as_reply(context, request, as_reply, key_proc, keyseed,
+decrypt_as_reply(context, request, as_reply, key_proc, keyseed, key,
 		 decrypt_proc, decryptarg)
     krb5_context 		context;
     krb5_kdc_req		*request;
     krb5_kdc_rep		*as_reply;
     git_key_proc 		key_proc;
     krb5_const_pointer 		keyseed;
+    krb5_keyblock *		key;	
     git_decrypt_proc 		decrypt_proc;
     krb5_const_pointer 		decryptarg;
 {
     krb5_error_code		retval;
     krb5_keyblock *		decrypt_key = 0;
     krb5_data 			salt;
-    int				use_salt = 0;
-    int				f_salt = 0;
     
     if (as_reply->enc_part2)
 	return 0;
-    
-    /* Temp kludge to get salt */
-    if (as_reply->padata) {
-	krb5_pa_data **ptr;
 
-        for (ptr = as_reply->padata; *ptr; ptr++) {
-            if ((*ptr)->pa_type == KRB5_PADATA_PW_SALT) {
-                /* use KDC-supplied salt, instead of default */
-                salt.data = (char *)(*ptr)->contents;
-                salt.length = (*ptr)->length;
-                use_salt = 1;
-                break;
-            }
-        }
-    }
-    
-    if (!use_salt) {
+    if (key)
+	    decrypt_key = key;
+    else {
 	if ((retval = krb5_principal2salt(context, request->client, &salt)))
 	    return(retval);
-	f_salt = 1;
-    }
     
-    if ((retval = (*key_proc)(context, as_reply->ticket->enc_part.enctype,
-			      &salt, keyseed, &decrypt_key)))
-	goto cleanup;
+	retval = (*key_proc)(context, as_reply->ticket->enc_part.enctype,
+			     &salt, keyseed, &decrypt_key);
+	krb5_xfree(salt.data);
+	if (retval)
+	    goto cleanup;
+    }
     
     if ((retval = (*decrypt_proc)(context, decrypt_key, decryptarg, as_reply)))
 	goto cleanup;
 
 cleanup:
-    if (f_salt)
-	krb5_xfree(salt.data);
-    if (decrypt_key)
+    if (!key && decrypt_key)
 	krb5_free_keyblock(context, decrypt_key);
     return (retval);
 }
@@ -391,6 +376,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 {
     krb5_error_code	retval;
     krb5_timestamp	time_now;
+    krb5_keyblock *	decrypt_key = 0;
     krb5_kdc_req	request;
     krb5_pa_data	**padata = 0;
     krb5_error *	err_reply;
@@ -483,7 +469,8 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	    goto cleanup;
 	}
 	if ((retval = krb5_process_padata(context, &request, as_reply,
-					  key_proc, keyseed, creds,
+					  key_proc, keyseed, decrypt_proc, 
+					  &decrypt_key, creds,
 					  &do_more)) != 0)
 	    goto cleanup;
 
@@ -492,7 +479,8 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     }
     
     if ((retval = decrypt_as_reply(context, &request, as_reply, key_proc,
-				   keyseed, decrypt_proc, decryptarg)))
+				   keyseed, decrypt_key, decrypt_proc,
+				   decryptarg)))
 	goto cleanup;
 
     if ((retval = verify_as_reply(context, time_now, &request, as_reply)))
@@ -513,6 +501,8 @@ cleanup:
 	krb5_free_pa_data(context, padata);
     if (preauth_to_use)
 	krb5_free_pa_data(context, preauth_to_use);
+    if (decrypt_key)
+	krb5_free_keyblock(context, decrypt_key);
     if (as_reply) {
 	if (ret_as_reply)
 	    *ret_as_reply = as_reply;

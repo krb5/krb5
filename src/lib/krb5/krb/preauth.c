@@ -1,6 +1,6 @@
 /*
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1995 by the Massachusetts Institute of Technology.  All
+ * Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -37,6 +37,7 @@
 #endif
 
 static krb5_preauth_obtain_proc obtain_enc_ts_padata;
+static krb5_preauth_process_proc process_pw_salt;
 
 static krb5_preauth_ops preauth_systems[] = {
     {
@@ -46,7 +47,14 @@ static krb5_preauth_ops preauth_systems[] = {
         obtain_enc_ts_padata,
         0,
     },
-    { -1,}
+    {
+	KV5M_PREAUTH_OPS,
+	KRB5_PADATA_PW_SALT,
+        0,
+        0,
+        process_pw_salt,
+    },
+    { KV5M_PREAUTH_OPS, -1 }
 };
 
 static krb5_error_code find_pa_system
@@ -60,47 +68,11 @@ typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
 						   krb5_const_pointer,
 						   krb5_keyblock **));
 
-krb5_error_code
-krb5_encrypt_data(context, key, ivec, data, enc_data)
-    krb5_context	context;
-    krb5_keyblock *	key;
-    krb5_pointer	ivec;
-    krb5_data *		data;
-    krb5_enc_data *	enc_data;
-{
-    krb5_error_code	retval;
-    krb5_encrypt_block	eblock;
+typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
+						       const krb5_keyblock *,
+						       krb5_const_pointer,
+						       krb5_kdc_rep * ));
 
-    krb5_use_enctype(context, &eblock, key->enctype);
-
-    enc_data->magic = KV5M_ENC_DATA;
-    enc_data->kvno = 0;
-    enc_data->enctype = key->enctype;
-    enc_data->ciphertext.length = krb5_encrypt_size(data->length,
-						    eblock.crypto_entry);
-    enc_data->ciphertext.data = malloc(enc_data->ciphertext.length);
-    if (enc_data->ciphertext.data == 0)
-	return ENOMEM;
-
-    if ((retval = krb5_process_key(context, &eblock, key)) != 0)
-	goto cleanup;
-
-    if ((retval = krb5_encrypt(context, (krb5_pointer) data->data,
-			       (krb5_pointer) enc_data->ciphertext.data,
-			       data->length, &eblock, ivec))) {
-    	krb5_finish_key(context, &eblock);
-        goto cleanup;
-    }
-    (void) krb5_finish_key(context, &eblock);
-
-    return 0;
-
-cleanup:
-    free(enc_data->ciphertext.data);
-    return retval;
-}
-
-    
 krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
 				   key_seed, creds, request)
     krb5_context		context;
@@ -199,19 +171,51 @@ cleanup:
 
 krb5_error_code
 krb5_process_padata(context, request, as_reply, key_proc, keyseed,
-		    creds, do_more)
+		    decrypt_proc, decrypt_key, creds, do_more)
     krb5_context	context;
     krb5_kdc_req *	request;
     krb5_kdc_rep *	as_reply;
     git_key_proc	key_proc;
     krb5_const_pointer	keyseed;
+    git_decrypt_proc	decrypt_proc;
+    krb5_keyblock **	decrypt_key;
     krb5_creds *	creds;
     krb5_int32 *	do_more;
 {
-    *do_more = 0;
-    return 0;
+    krb5_error_code		retval = 0;
+    krb5_preauth_ops * 		ops;
+    krb5_pa_data **		pa;
+    krb5_int32			done = 0;
+    
+    *do_more = 0;		/* By default, we don't need to repeat... */
+    if (as_reply->padata == 0)
+	return 0;
+
+    for (pa = as_reply->padata; *pa; pa++) {
+	if (find_pa_system((*pa)->pa_type, &ops))
+	    continue;
+
+	if (ops->process == 0)
+	    continue;
+	
+	retval = ((ops)->process)(context, *pa, request, as_reply,
+				  key_proc, keyseed, decrypt_proc,
+				  decrypt_key, creds, do_more, &done);
+	if (retval)
+	    goto cleanup;
+	if (done)
+	    break;
+    }
+
+cleanup:
+    return retval;
 }
 
+/*
+ * This routine is the "obtain" function for the ENC_TIMESTAMP
+ * preauthentication type.  It take the current time and encrypts it
+ * in the user's key.
+ */
 static krb5_error_code
 obtain_enc_ts_padata(context, in_padata, etype_info, def_enc_key,
 		     key_proc, key_seed, creds, request, out_padata)
@@ -276,6 +280,40 @@ cleanup:
     return retval;
 }
 
+static krb5_error_code
+process_pw_salt(context, padata, request, as_reply,
+		key_proc, keyseed, decrypt_proc, decrypt_key, 
+		creds, do_more, done)
+    krb5_context		context;
+    krb5_pa_data *		padata;
+    krb5_kdc_req *		request;
+    krb5_kdc_rep *		as_reply;
+    git_key_proc		key_proc;
+    krb5_const_pointer		keyseed;
+    git_decrypt_proc		decrypt_proc;
+    krb5_keyblock **		decrypt_key;
+    krb5_creds *		creds;
+    krb5_int32 *		do_more;
+    krb5_int32 *		done;
+{
+    krb5_error_code	retval;
+    krb5_data		salt;
+    
+    if (*decrypt_key != 0)
+	return 0;
+
+    salt.data = (char *) padata->contents;
+    salt.length = padata->length;
+    
+    if ((retval = (*key_proc)(context, as_reply->ticket->enc_part.enctype,
+			      &salt, keyseed, decrypt_key))) {
+	*decrypt_key = 0;
+	return retval;
+    }
+
+    return 0;
+}
+    
 static krb5_error_code
 find_pa_system(type, preauth)
     int			type;
