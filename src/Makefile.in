@@ -312,7 +312,7 @@ mac-bin-dirs:
 	sh mac/mkbindirs.sh bin/CFM-68K $(MAC_SUBDIRS)
 	sh mac/mkbindirs.sh bin/PPC $(MAC_SUBDIRS)
 
-kerbsrc.mac.tar: awk-windows-mac macfile.list Macfile
+kerbsrc.mac.tar: awk-windows-mac macfile.list mac-bin-dirs Macfile
 	cp mac/libraries/autoconf.h include/autoconf.h
 	mv Macfile Makefile
 	tar cvf kerbsrc.mac.tar Makefile include/autoconf.h bin \

@@ -1,3 +1,9 @@
+Tue Dec 17 13:54:48 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (kerbsrc.mac.tar): Automatically make the
+ 		mac-bin-dirs target so that the binary directories are
+ 		correctly created.
+	
 Mon Nov 25 19:42:53 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Comment out distclean and realclean so no one will
