@@ -26,6 +26,7 @@ static char rcsid_network_c[] =
 #include <krb5/kdb.h>
 #include "kdc_util.h"
 #include "extern.h"
+#include "kdc5_err.h"
 
 #ifdef KRB5_USE_INET
 #include <sys/types.h>
@@ -39,33 +40,38 @@ extern int errno;
 
 static int udp_port_fd = -1;
 
-void
-setup_network()
+krb5_error_code
+setup_network(prog)
+const char *prog;
 {
     struct servent *sp;
     struct sockaddr_in sin;
+    krb5_error_code retval;
 
     sp = getservbyname(krb5_kdc_udp_portname, "udp");
     if (!sp) {
-	fprintf(stderr, "XXX: %s/udp service unknown\n",
+	com_err(prog, 0, "%s/udp service unknown\n",
 		krb5_kdc_udp_portname);
-	return;
+	return KDC5_NOPORT;
     }
     if ((udp_port_fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
-	com_err("XXX", errno, "when creating server socket");
-	return;
+	retval = errno;
+	com_err(prog, 0, "Cannot create server socket");
+	return retval;
     }
     bzero((char *)&sin, sizeof(sin));
     sin.sin_port = sp->s_port;
     if (bind(udp_port_fd, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
-	com_err("XXX", errno, "when binding server socket");
-	return;
+	retval = errno;
+	com_err(prog, 0, "Cannot bind server socket");
+	return retval;
     }
-    return;
+    return 0;
 }
 
-void
-listen_and_process()
+krb5_error_code
+listen_and_process(prog)
+const char *prog;
 {
     int cc, saddr_len;
     krb5_error_code retval;
@@ -76,10 +82,8 @@ listen_and_process()
     krb5_data *response;
     char pktbuf[MAX_DGRAM_SIZE];
 
-    if (udp_port_fd == -1) {
-	fprintf(stderr, "Network not setup\n");
-	return;
-    }
+    if (udp_port_fd == -1)
+	return KDC5_NONET;
     
     while (!signal_requests_exit) {
 	saddr_len = sizeof(saddr);
@@ -95,18 +99,18 @@ listen_and_process()
 	    addr.length = 4;
 	    addr.contents = (krb5_octet *) &saddr.sin_addr; /* XXX net order or host order? */
 	    if (retval = dispatch(&request, &faddr, &response)) {
-		com_err("XXX", retval, "while dispatching");
+		com_err(prog, retval, "while dispatching");
 		continue;
 	    }
 	    if ((cc = sendto(udp_port_fd, response->data, response->length, 0,
 			     (struct sockaddr *)&saddr, saddr_len)) != response->length) {
 		switch (cc) {
 		case -1:
-		    com_err("XXX", errno, "while sending reply to %s/%d",
+		    com_err(prog, errno, "while sending reply to %s/%d",
 			    inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
 		    break;
 		default:
-		    fprintf(stderr, "short reply write %d vs %d\n",
+		    com_err(prog, 0, "short reply write %d vs %d\n",
 			    response->length, cc);
 		    break;
 		}
@@ -117,25 +121,25 @@ listen_and_process()
 	    case EINTR:
 		continue;
 	    default:
-		com_err("XXX", errno, "while receiving from network");
+		com_err(prog, errno, "while receiving from network");
 		break;
 	    }
 	}
 	
     }
-    
+    return 0;
 }
 
-void
-closedown_network()
+krb5_error_code
+closedown_network(prog)
+const char *prog;
 {
-    if (udp_port_fd == -1) {
-	fprintf(stderr, "Network not setup\n");
-	return;
-    }
+    if (udp_port_fd == -1)
+	return KDC5_NONET;
+
     (void) close(udp_port_fd);
     udp_port_fd = -1;
-    return;
+    return 0;
 }
 
 #endif /* INET */
