@@ -1,10 +1,13 @@
 CFLAGS = $(CCOPTS)
 
 editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
+HOST_TYPE=@HOST_TYPE@
+HAVE_GCC=@HAVE_GCC@
+SLIBSH=sed -e 's,@''CC''@,$(CC),g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@''HAVE_GCC''@,$(HAVE_GCC),g'
 
 all:: all-$(WHAT)
 
-all-unix:: libupdate
+all-unix:: libupdate makeshlib
 all-mac::
 all-windows: libupdate
 
@@ -14,6 +17,12 @@ libupdate: $(srcdir)/libupdate.sh
 	$(RM) $@ $@.tmp
 	$(editsh) $(srcdir)/libupdate.sh > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
 
+makeshlib: $(srcdir)/makeshlib.sh Makefile
+	 $(RM) $@ $@.tmp
+	 $(SLIBSH) $(srcdir)/makeshlib.sh >$@.tmp&&chmod a+x $@.tmp&&mv $@.tmp $@
+
+aix.bincmds: Makefile
+	 echo libpath $(KRB5_SHLIBDIR):`pwd`/$(TOPLIBD):/usr/lib:/lib >aix.bincmds
 clean::
 	$(RM) libupdate
 

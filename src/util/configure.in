@@ -2,6 +2,24 @@ AC_INIT(configure.in)
 CONFIG_RULES
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
+AC_MSG_CHECKING(whether running Gcc)
+AC_EGREP_CPP(yes,[#ifdef __GNUC__
+yes;
+#endif],HAVE_GCC=yes,HAVE_GCC=)
+if test -n "$HAVE_GCC" ; then
+        AC_MSG_RESULT(yes)
+        else AC_MSG_RESULT(no)
+        fi
+AC_SUBST(HAVE_GCC)
+HOST_TYPE=$krb5_cv_host
+AC_SUBST(HOST_TYPE)
+case $HOST_TYPE in
+*-*-aix*)
+       AppendRule(all::aix.bincmds)
+        ;;
+esac
+SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
+AC_SUBST(SHLIB_TAIL_COMP)
 CONFIG_DIRS(et ss profile berk_db)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

@@ -1,3 +1,21 @@
+Fri Jun 23 19:11:20 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* configure.in: Add aix.bincmds as target on AIX.
+	(SHLIB_TAIL_COMP): set and substitute so SHLIBDIR works
+
+	* Makefile.in (makeshlib): Create aix.bincmds with the binder
+        script exerpt to get the libpath right.
+
+	* configure.in: Modified to test and see if we're using Gcc
+
+	* Makefile.in (makeshlib): Make makeshlib from makeshlib.sh
+
+
+	* makeshlib.sh (LIBPATH): Modified to allow for substitution of CC
+        and HAVE_GCC from Makefile.  Modified to imbed the proper search
+        path into the shared libraries for AIX.
+
+
 Thu Jun 22 21:02:13 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* makeshlib: Added AIX support.

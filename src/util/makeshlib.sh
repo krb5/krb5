@@ -2,12 +2,14 @@
 #
 # makeshlib: Make a shared library.....
 #
-# Usage: makeshlib <host> <CC> <library> <libdirfl> <liblist> <flags>	\
+# Usage: makeshlib  <library> <libdirfl> <liblist> <flags>	\
 #	<directories>
 #
 
-host=$1 ; shift
-CC=$1 ; shift
+host=@HOST_TYPE@
+CC="@CC@"
+HAVE_GCC=@HAVE_GCC@
+
 library=$1 ; shift
 libdirfl=$1; shift
 liblist=$1; shift
@@ -29,7 +31,8 @@ case $host in
 	do
 		sed -e "s;^;$i/;" -e "s; ; $i/;g" $i/DONE
 	done`
-	
+echo rm $library 
+rm -f $library 2>/dev/null
 ar cq $library $FILES || exit $?
 	dump -g $library | sed -e 's/^[ 	]*[0-9][0-9]*[ 	]*\([^ 	.][^ 	]*\)$/\1/p;d' | sort | uniq > ${library}.syms
 	stat=$?
