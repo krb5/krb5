@@ -1,3 +1,10 @@
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Update the text to include the details of the new 
+      Windows registry keys necessary to access the TGT session key.
+      Also, provide details on the incompatibility of the gss.exe
+      sample client and the versions distributed by Microsoft.
+
 2003-12-22  Jeffrey Altman <jaltman@mit.edu>
 
     * README: Update to more clearly specify the build environment 

@@ -222,9 +222,42 @@ The result of a real KSETUP configuration looks like this:
    Mapping jaltman@ATHENA.MIT.EDU to jaltman.
    Mapping all users (*) to a local account by the same name (*).
 
+The MSLSA: credential cache relies on the ability to extract the entire
+Kerberos ticket including the session key from the Kerberos LSA.  In an
+attempt to increase security Microsoft has begun to implement a feature
+by which they no longer export the session keys for Ticket Getting Tickets.
+This has the side effect of making them useless to the MIT krb5 library
+when attempting to request additional service tickets.
 
-Other Issues:
-------------
+This new feature has been seen in Windows 2003 Server, Windows 2000 Server SP4,
+and Windows XP SP2 Beta.  We assume that it will be implemented in all future
+Microsoft operating systems supporting the Kerberos SSPI.  Microsoft does work
+closely with MIT and has provided a registry key to disable this new feature.
+
+  HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters
+    AllowTGTSessionKey = 0x01 (DWORD)
+
+On Windows XP SP2 Beta 1 the key was specified as 
+
+  HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos
+    AllowTGTSessionKey = 0x01 (DWORD)
+
+However, we anticipate that this will be changed to match the Server platforms 
+in time for SP2 RC1.
+
+
+GSSAPI Sample Client:
+---------------------
+
+The GSS API Sample Client provided in this distribution is compatible with the
+gss-server application built on Unix/Linux systems.  This client is not compatible
+with the Platform SDK/Samples/Security/SSPI/GSS/ samples which Microsoft has been
+shipping as of January 2004.  Revised versions of these samples are available upon 
+request to krbdev@mit.edu.  Microsoft is committed to distribute revised samples
+which are compatible with the MIT distributed tools in a future SDK and via MSDN.
+
+Kerberos 4 Library Support:
+---------------------------
 
 The krb4_32.dll that is built (but not installed) is not supported.
 If you need Kerberos 4, you can use the krbv4w32.dll that MIT
