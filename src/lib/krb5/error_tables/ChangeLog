@@ -1,3 +1,9 @@
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_err.et: Add KRB5_KDB_NO_PERMITTED_KEY,
+	KRB5_KDB_NO_MATCHING_KEY for libkdb so we can return something
+	other than ENOENT (which was Just Wrong).
+
 2001-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (includes): New target.  Copy headers into proper
