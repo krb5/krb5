@@ -114,13 +114,147 @@ static krb5_error_code add_port(port)
 #define ifreq_size(i) sizeof(struct ifreq)
 #endif /* HAVE_SA_LEN*/
 
-static int
-foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
-    void *data;
-    int (*pass1fn) (void *, struct sockaddr *);
-    int (*betweenfn) (void *);
-    int (*pass2fn) (void *, struct sockaddr *);
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+
+#ifdef DEBUG
+#include <netinet/in.h>
+#include <net/if.h>
+
+void printaddr (struct sockaddr *sa)
 {
+    char buf[50];
+    printf ("%p ", sa);
+    switch (sa->sa_family) {
+    case AF_INET:
+	inet_ntop (AF_INET, &((struct sockaddr_in *)sa)->sin_addr,
+		   buf, sizeof (buf));
+	printf ("inet %s", buf);
+	break;
+    case AF_INET6:
+	inet_ntop (AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr,
+		   buf, sizeof (buf));
+	printf ("inet6 %s", buf);
+	break;
+    default:
+	printf ("family=%d", sa->sa_family);
+	break;
+    }
+}
+
+void printifaddr (struct ifaddrs *ifp)
+{
+    printf ("%p={\n", ifp);
+/*  printf ("\tnext=%p\n", ifp->ifa_next); */
+    printf ("\tname=%s\n", ifp->ifa_name);
+    printf ("\tflags=");
+    {
+	int ch, flags = ifp->ifa_flags;
+	printf ("%x", flags);
+	ch = '<';
+#define X(F) if (flags & IFF_##F) { printf ("%c%s", ch, #F); flags &= ~IFF_##F; ch = ','; }
+	X (UP); X (BROADCAST); X (DEBUG); X (LOOPBACK); X (POINTOPOINT);
+	X (NOTRAILERS); X (RUNNING); X (NOARP); X (PROMISC); X (ALLMULTI);
+	X (OACTIVE); X (SIMPLEX); X (MULTICAST);
+	printf (">");
+#undef X
+    }
+    if (ifp->ifa_addr)
+	printf ("\n\taddr="), printaddr (ifp->ifa_addr);
+    if (ifp->ifa_netmask)
+	printf ("\n\tnetmask="), printaddr (ifp->ifa_netmask);
+    if (ifp->ifa_broadaddr)
+	printf ("\n\tbroadaddr="), printaddr (ifp->ifa_broadaddr);
+    if (ifp->ifa_dstaddr)
+	printf ("\n\tdstaddr="), printaddr (ifp->ifa_dstaddr);
+    if (ifp->ifa_data)
+	printf ("\n\tdata=%p", ifp->ifa_data);
+    printf ("\n}\n");
+}
+#endif /* DEBUG */
+
+static int
+addr_eq (const struct sockaddr *s1, const struct sockaddr *s2)
+{
+    if (s1->sa_family != s2->sa_family)
+	return 0;
+#ifdef HAVE_SA_LEN
+    if (s1->sa_len != s2->sa_len)
+	return 0;
+    return !memcmp (s1, s2, s1->sa_len);
+#else
+#define CMPTYPE(T,F) (!memcmp(&((T*)s1)->F,&((T*)s2)->F,sizeof(((T*)s1)->F)))
+    switch (s1->sa_family) {
+    case AF_INET:
+	return CMPTYPE (struct sockaddr_in, sin_addr);
+    case AF_INET6:
+	return CMPTYPE (struct sockaddr_in6, sin6_addr);
+    default:
+	/* Err on side of duplicate listings.  */
+	return 0;
+    }
+#endif
+}
+#endif
+
+static int
+foreach_localaddr (void *data,
+		   int (*pass1fn) (void *, struct sockaddr *),
+		   int (*betweenfn) (void *),
+		   int (*pass2fn) (void *, struct sockaddr *))
+{
+#ifdef HAVE_IFADDRS_H
+    struct ifaddrs *ifp_head, *ifp, *ifp2;
+    int match, fail = 0;
+
+    if (getifaddrs (&ifp_head) < 0)
+	return errno;
+    for (ifp = ifp_head; ifp; ifp = ifp->ifa_next) {
+#ifdef DEBUG
+	printifaddr (ifp);
+#endif
+	if ((ifp->ifa_flags & IFF_UP) == 0)
+	    continue;
+	if (ifp->ifa_flags & IFF_LOOPBACK) {
+	    ifp->ifa_flags &= ~IFF_UP;
+	    continue;
+	}
+	/* If this address is a duplicate, punt.  */
+	match = 0;
+	for (ifp2 = ifp_head; ifp2 && ifp2 != ifp; ifp2 = ifp2->ifa_next) {
+	    if ((ifp2->ifa_flags & IFF_UP) == 0)
+		continue;
+	    if (ifp2->ifa_flags & IFF_LOOPBACK)
+		continue;
+	    if (addr_eq (ifp->ifa_addr, ifp2->ifa_addr)) {
+		match = 1;
+		ifp->ifa_flags &= ~IFF_UP;
+		break;
+	    }
+	}
+	if (match)
+	    continue;
+	if ((*pass1fn) (data, ifp->ifa_addr)) {
+	    fail = 1;
+	    goto punt;
+	}
+    }
+    if (betweenfn && (*betweenfn)(data)) {
+	fail = 1;
+	goto punt;
+    }
+    if (pass2fn)
+	for (ifp = ifp_head; ifp; ifp = ifp->ifa_next) {
+	    if (ifp->ifa_flags & IFF_UP)
+		if ((*pass2fn) (data, ifp->ifa_addr)) {
+		    fail = 1;
+		    goto punt;
+		}
+	}
+ punt:
+    freeifaddrs (ifp_head);
+    return fail;
+#else
     struct ifreq *ifr, ifreq, *ifr2;
     struct ifconf ifc;
     int s, code, n, i, j;
@@ -128,6 +262,9 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     char *buf = 0;
     size_t current_buf_size = 0;
     int fail = 0;
+#ifdef SIOCGSIZIFCONF
+    int ifconfsize = -1;
+#endif
 
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
@@ -137,7 +274,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
        isn't big enough for an IPv6 or ethernet address.  So add a
        little more space.  */
     est_ifreq_size = sizeof (struct ifreq) + 8;
-    current_buf_size = est_ifreq_size * est_if_count;
+#ifdef SIOCGSIZIFCONF
+    code = ioctl (s, SIOCGSIZIFCONF, &ifconfsize);
+    if (!code) {
+	current_buf_size = ifconfsize;
+	est_if_count = ifconfsize / est_ifreq_size;
+    }
+#endif
+    if (current_buf_size == 0)
+	current_buf_size = est_ifreq_size * est_if_count;
     buf = malloc (current_buf_size);
 
  ask_again:
@@ -156,7 +301,11 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
        the only indication we get, complicated by the fact that the
        associated address may make the required storage a little
        bigger than the size of an ifreq.  */
-    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40) {
+    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40
+#ifdef SIOCGSIZIFCONF
+	&& ifconfsize <= 0
+#endif
+	) {
 	int new_size;
 	char *newbuf;
 
@@ -179,22 +328,32 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
 
 	strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
+#ifdef TEST
+	printf ("interface %s\n", ifreq.ifr_name);
+#endif
 	if (ioctl (s, SIOCGIFFLAGS, (char *)&ifreq) < 0) {
 	skip:
 	    /* mark for next pass */
 	    ifr->ifr_name[0] = 0;
-
 	    continue;
 	}
 
 #ifdef IFF_LOOPBACK
 	    /* None of the current callers want loopback addresses.  */
-	if (ifreq.ifr_flags & IFF_LOOPBACK)
+	if (ifreq.ifr_flags & IFF_LOOPBACK) {
+#ifdef TEST
+	    printf ("loopback\n");
+#endif
 	    goto skip;
+	}
 #endif
 	/* Ignore interfaces that are down.  */
-	if (!(ifreq.ifr_flags & IFF_UP))
+	if (!(ifreq.ifr_flags & IFF_UP)) {
+#ifdef TEST
+	    printf ("down\n");
+#endif
 	    goto skip;
+	}
 
 	/* Make sure we didn't process this address already.  */
 	for (j = 0; j < i; j += ifreq_size(*ifr2)) {
@@ -209,8 +368,12 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 		   to do it on a per address family basis.  */
 		&& !memcmp (&ifr2->ifr_addr.sa_data, &ifr->ifr_addr.sa_data,
 			    (ifreq_size (*ifr)
-			     - offsetof (struct ifreq, ifr_addr.sa_data))))
+			     - offsetof (struct ifreq, ifr_addr.sa_data)))) {
+#ifdef TEST
+		printf ("duplicate addr\n");
+#endif
 		goto skip;
+	    }
 	}
 
 	if ((*pass1fn) (data, &ifr->ifr_addr)) {
@@ -242,6 +405,7 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     free (buf);
 
     return fail;
+#endif /* not HAVE_IFADDRS_H */
 }
 
 struct socksetup {
