@@ -1,5 +1,8 @@
 Wed Feb  5 20:27:50 1997  Richard Basch  <basch@lehman.com>
 
+	* util_crypt.c: Include k5-int.h as we need to dereference
+		the _cryptosystem_entry element of the krb5_encrypt_block.
+
 	* acquire_cred.c (acquire_accept_cred): Removed unused local variable
 
 Tue Feb  4 15:56:01 1997  Richard Basch  <basch@lehman.com>

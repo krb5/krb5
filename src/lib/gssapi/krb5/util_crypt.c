@@ -20,6 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
@@ -33,7 +34,7 @@ int
 kg_confounder_size(ed)
      krb5_gss_enc_desc *ed;
 {
-   /* XXX Is this an abstraction violation? */
+   /* XXX Abstraction violation!!! */
 
    return(ed->eblock.crypto_entry->block_length);
 }
@@ -43,6 +44,8 @@ kg_make_confounder(ed, buf)
      krb5_gss_enc_desc *ed;
      unsigned char *buf;
 {
+   /* XXX Abstraction violation!!! */
+
    return(krb5_random_confounder(ed->eblock.crypto_entry->block_length, buf));
 }
 
