@@ -677,6 +677,7 @@ extern void *memcpy P((void *, const void *, unsigned int));
 #ifndef memset
 extern void *memset P((void *, int, unsigned int));
 #endif
+extern int bcmp P((void *, void *, unsigned int));
 extern void *calloc P((unsigned int, unsigned int));
 extern void *malloc P((unsigned int));
 extern void *realloc P((void *, unsigned int));
@@ -689,6 +690,18 @@ extern char *getenv P((const char *));
 extern double atof P((const char *));
 extern int    atoi P((const char *));
 
+#ifndef abs
+extern int abs(int);
+#ifdef __HIGHC__
+#define	abs(x)	_abs(x)
+#endif
+#endif
+
 #endif /* ibm032 */
+
+/* Declarations valid for all machines. */
+#if !defined(abs) && defined(__GNUC__)
+#define	abs(x)	__builtin_abs(x)
+#endif
 
 #undef P
