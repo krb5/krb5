@@ -105,7 +105,8 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\crypto\md4\makefile.in lib\crypto\md5\makefile.in \
 		lib\crypto\os\makefile.in lib\des425\makefile.in \
 		lib\gssapi\makefile.in lib\gssapi\generic\makefile.in \
-		lib\gssapi\krb5\makefile.in lib\krb5\makefile.in \
+		lib\gssapi\krb5\makefile.in lib\gssapi\mechglue\makefile.in \
+		lib\krb5\makefile.in \
 		lib\krb5\asn.1\makefile.in lib\krb5\ccache\makefile.in \
 		lib\krb5\ccache\file\makefile.in \
 		lib\krb5\ccache\stdio\makefile.in \
@@ -128,6 +129,7 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\des425\makefile.in >lib\des425\makefile
 	.\wconfig config <lib\gssapi\makefile.in >lib\gssapi\makefile
 	.\wconfig config <lib\gssapi\generic\makefile.in >lib\gssapi\generic\makefile
+	.\wconfig config <lib\gssapi\mechglue\makefile.in >lib\gssapi\mechglue\makefile
 	.\wconfig config <lib\gssapi\krb5\makefile.in >lib\gssapi\krb5\makefile
 	.\wconfig config <lib\kadm\makefile.in >lib\kadm\makefile
 	.\wconfig config <lib\krb5\makefile.in >lib\krb5\makefile
@@ -187,7 +189,8 @@ FILES= ./* \
 	include/krb5/stock/* include/sys/* lib/* lib/crypto/* \
 	lib/crypto/crc32/* lib/crypto/des/* lib/crypto/md4/* \
 	lib/crypto/md5/* lib/crypto/os/* lib/des425/* lib/gssapi/* \
-	lib/gssapi/generic/* lib/gssapi/krb5/* lib/kadm/* lib/krb425/* \
+	lib/gssapi/generic/* lib/gssapi/krb5/* lib/gssapi/mechglue/* \
+	lib/kadm/* lib/krb425/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
@@ -223,7 +226,7 @@ winfile.list:
 
 MAC_SUBDIRS = lib util
 macfile.list:
-	mac/macfiles.sh $(MAC_SUBDIRS) > macfile.list
+	/bin/sh mac/macfiles.sh $(MAC_SUBDIRS) > macfile.list
 	find $(MACFILES) -prune -type f -print | \
 		sed -f config/winexclude.sed >> macfile.list
 
