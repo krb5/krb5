@@ -1,3 +1,11 @@
+Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* brand.c: New file, which allows a release engineer to "brand"
+ 		the krb5 library or a binary application program
+ 		statically linked against the krb5 library.  This file is
+		statically included by init_ctx.c, to force it be in a
+		binary library or application program.
+
 Tue Mar 25 00:32:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* preauth.c (obtain_sam_padata): Fix handling of the sam-timestamp
