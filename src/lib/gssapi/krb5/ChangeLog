@@ -1,3 +1,17 @@
+Mon Dec 21 19:50:04 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Eliminate
+ 		double free of ap_req.data, and initialize ctypes to be
+ 		NULL to avoid freeing a pointer to stack garbage when
+ 		doing a V1 mechanism accept_sec_contxt.
+
+	* init_sec_context.c: Re-arrange program logic to simplify and
+		factor out code; fix gss_init_sec_context() so that if the
+		default OID is passed to the init_sec_context, it will use
+		the V1 mechanism if a single DES enctype is used.   Error
+		handling was revamped to make it simpler and cleaner, and
+		to assure that we don't have memory leaks on error returns.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

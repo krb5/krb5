@@ -223,7 +223,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    int token_length;
    int gsskrb5_vers;
    int nctypes;
-   krb5_cksumtype *ctypes;
+   krb5_cksumtype *ctypes = 0;
    struct kg2_option fwcred;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
@@ -880,7 +880,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 			       &ptr, KG_TOK_CTX_AP_REP);
 
 	   TWRITE_STR(ptr, ap_rep.data, ap_rep.length);
-	   xfree(ap_rep.data);
 
 	   ctx->established = 1;
 
