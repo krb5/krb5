@@ -134,8 +134,7 @@ misc_free.so misc_free.po $(OUTPRE)misc_free.$(OBJEXT): misc_free.c $(BUILDTOP)/
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  server_internal.h admin_internal.h adb.h $(BUILDTOP)/include/db.h \
-  $(BUILDTOP)/include/db-config.h
+  server_internal.h admin_internal.h adb.h $(DB_DEPS)
 kadm_rpc_xdr.so kadm_rpc_xdr.po $(OUTPRE)kadm_rpc_xdr.$(OBJEXT): kadm_rpc_xdr.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
