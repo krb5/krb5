@@ -100,12 +100,12 @@ _krb5_use_dns_realm(krb5_context context)
 
 #endif /* KRB5_DNS_LOOKUP */
 
-static int get_port (const char *service, int stream, int defalt)
-{
 #if 0 /* Only used for "kerberos" and "kerberos-sec", and we want the
 	 right port numbers even on the OSes that botch the entries in
 	 /etc/services.  So don't bother with the lookup, except maybe
 	 to produce a warning.  */
+static int get_port (const char *service, int stream, int defalt)
+{
     struct addrinfo hints = { 0 };
     struct addrinfo *ai;
     int err;
@@ -121,10 +121,12 @@ static int get_port (const char *service, int stream, int defalt)
 	}
 	freeaddrinfo (ai);
     }
-#endif
     /* Any error - don't complain, just use default.  */
     return htons (defalt);
 }
+#else
+#define get_port(SERVICE, STREAM, DFL) htons(DFL)
+#endif
 
 int
 krb5int_grow_addrlist (struct addrlist *lp, int nmore)
