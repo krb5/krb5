@@ -27,6 +27,8 @@ reldir=$2
 relmajor=0
 relminor=0
 relpatch=0
+relhead=
+reltail=
 reldate=`date +%Y%m%d`
 
 case "$reldir" in
@@ -37,6 +39,14 @@ case "$reldir" in
 *" "*|*"	"*)
 	echo "release-dir may  not contain whitespace."
 	exit 1
+	;;
+krb5-*.*.*-*)
+	release=`echo $reldir|sed -e 's/krb5-//'`
+	relhead=`echo $release|sed -e 's/-.*//'`
+	reltail=`echo $release|sed -e 's/.*-//'`
+	relmajor=`echo $relhead|awk -F. '{print $1}'`
+	relminor=`echo $relhead|awk -F. '{print $2}'`
+	relpatch=`echo $relhead|awk -F. '{print $3}'`
 	;;
 krb5-*.*.*)
 	release=`echo $reldir|sed -e 's/krb5-//'`

@@ -1,3 +1,8 @@
+Thu Sep 24 20:05:33 1998  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Add fixes to deal with "tails" on release directories,
+	e.g. for beta releases.
+
 Wed Feb 18 16:31:21 1998  Tom Yu  <tlyu@mit.edu>
 
 	* send-pr/Makefile.in: Remove trialing slash from thisconfigdir.
