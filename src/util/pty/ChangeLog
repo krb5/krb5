@@ -1,8 +1,13 @@
 2000-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname, do_ntoa): Pass address
-	as sockaddr pointer.
+	as const sockaddr pointer.
 	* libpty.h (pty_make_sane_hostname): Update prototype.
+
+	* sane_hostname.c (sockaddrlen, downcase): New function.
+	(do_ntoa, pty_make_sane_hostname): Reimplement using getnameinfo
+	and getaddrinfo if available.
+	* configure.in: Check for IPv6 support.
 
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 

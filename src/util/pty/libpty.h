@@ -46,10 +46,10 @@ long pty_logwtmp (char *tty, char * user, char *host);
 long pty_cleanup(char *slave, int pid, int update_utmp);
 
 #ifndef SOCK_DGRAM
-struct sockaddr_in;
+struct sockaddr;
 #endif
 
-long pty_make_sane_hostname(struct sockaddr *, int, int, int, char **);
+long pty_make_sane_hostname(const struct sockaddr *, int, int, int, char **);
 #else /*__STDC__*/
 long pty_init();
 long pty_getpty();
