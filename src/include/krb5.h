@@ -1821,6 +1821,11 @@ krb5_error_code krb5_auth_con_setuseruserkey
 		   krb5_auth_context *,
 		   krb5_keyblock *));
 
+krb5_error_code krb5_auth_con_getkey
+	PROTOTYPE((krb5_context,
+		   krb5_auth_context *,
+		   krb5_keyblock **));
+
 krb5_error_code krb5_auth_con_getlocalsubkey
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context *,
