@@ -1,3 +1,9 @@
+Wed Jul 10 20:22:41 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_ctx.c (krb5_init_context): Add a call to krb5_win_do_init()
+		on Win16 and Win32 machines.  This is where we do timebomb
+		and version server checking.
+
 Sun Jul  7 15:14:43 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* get_creds.c: (krb5_get_credentials_val_renew_core) Combine

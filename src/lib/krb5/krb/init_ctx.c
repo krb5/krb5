@@ -26,6 +26,10 @@
 #include "k5-int.h"
 #include <ctype.h>
 
+#if (defined(_MSDOS) || defined(_WIN32))
+extern void krb5_win_do_init();
+#endif
+
 krb5_error_code INTERFACE
 krb5_init_context(context)
 	krb5_context *context;
@@ -33,6 +37,14 @@ krb5_init_context(context)
 	krb5_context ctx;
 	krb5_error_code retval;
 	int tmp;
+
+#if (defined(_MSDOS) || defined(_WIN32))
+	/*
+	 * krb5_win_do_init() is defined in win_glue.c, and this is
+	 * where we handle the timebomb and version server checks.
+	 */
+	krb5_win_do_init();
+#endif
 
 	*context = 0;
 
