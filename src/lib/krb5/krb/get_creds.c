@@ -74,14 +74,14 @@ krb5_creds *creds;
 	   session key */
 	fields |= KRB5_TC_MATCH_2ND_TKT|KRB5_TC_MATCH_IS_SKEY;
 	mcreds.is_skey = TRUE;
+	mcreds.second_ticket = creds->second_ticket;
+	if (!creds->second_ticket.length)
+	    return KRB5_NO_2ND_TKT;
     }
 
     retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, creds);
     if (retval != KRB5_CC_NOTFOUND || options & KRB5_GC_CACHED)
 	return retval;
-
-    if (options & KRB5_GC_USER_USER && !creds->second_ticket.length)
-	return KRB5_NO_2ND_TKT;
 
     retval = krb5_get_cred_from_kdc(ccache, creds, &tgts);
     if (tgts) {
