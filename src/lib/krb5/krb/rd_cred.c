@@ -241,23 +241,32 @@ krb5_rd_cred(context, auth_context, pcreddata, pppcreds, outdata)
     CLEANUP_INIT(2);
 
     if (auth_context->local_addr) {
-        if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
-                                 auth_context->local_port, &local_fulladdr))){
-            CLEANUP_PUSH(&local_fulladdr.contents, free);
-	    plocal_fulladdr = &local_fulladdr;
-        } else {
-	    return retval;
+    	if (auth_context->local_addr) {
+            if (!(retval = krb5_make_fulladdr(context,auth_context->local_addr,
+                                 	      auth_context->local_port, 
+					      &local_fulladdr))){
+                CLEANUP_PUSH(&local_fulladdr.contents, free);
+	        plocal_fulladdr = &local_fulladdr;
+            } else {
+	        return retval;
+            }
+	} else {
+            plocal_fulladdr = auth_context->local_addr;
         }
     }
 
     if (auth_context->remote_addr) {
-        if (!(retval = krb5_make_fulladdr(context, auth_context->remote_addr,
-                                 auth_context->remote_port, &remote_fulladdr))){
-            CLEANUP_PUSH(&remote_fulladdr.contents, free);
-	    premote_fulladdr = &remote_fulladdr;
-        } else {
-            CLEANUP_DONE();
-	    return retval;
+    	if (auth_context->remote_addr) {
+            if (!(retval = krb5_make_fulladdr(context,auth_context->remote_addr,
+                                 	      auth_context->remote_port, 
+					      &remote_fulladdr))){
+                CLEANUP_PUSH(&remote_fulladdr.contents, free);
+	        premote_fulladdr = &remote_fulladdr;
+            } else {
+	        return retval;
+            }
+	} else {
+            premote_fulladdr = auth_context->remote_addr;
         }
     }
 

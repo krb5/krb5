@@ -8,6 +8,11 @@
  *
  * MODIFIED
  * $Log$
+ * Revision 5.11  1995/05/02 23:31:39  proven
+ *         * mk_cred.c (mk_cred()), mk_priv.c (mk_priv()), mk_safe.c (mk_safe()),
+ * 	* rd_cred.c (rd_cred()), rd_priv.c (rd_priv()), rd_safe.c (rd_safe()):
+ * 		Don't call krb5_make_fulladdrs() if a port isn't specified.
+ *
  * Revision 5.10  1995/05/01 20:49:45  proven
  *         * auth_con.c (krb5_auth_con_free()) :
  * 		Free all the data associated with the auth_context.
@@ -309,23 +314,33 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     CLEANUP_INIT(2);
 
     if (auth_context->local_addr) {
-        if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
-                                 auth_context->local_port, &local_fulladdr))) {
-            CLEANUP_PUSH(&local_fulladdr.contents, free);
-	    plocal_fulladdr = &local_fulladdr;
-        } else {
-            goto error;
+    	if (auth_context->local_port) {
+            if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
+                                 	      auth_context->local_port, 
+					      &local_fulladdr))) {
+            	CLEANUP_PUSH(&local_fulladdr.contents, free);
+	    	plocal_fulladdr = &local_fulladdr;
+            } else {
+                goto error;
+            }
+	} else {
+            plocal_fulladdr = auth_context->local_addr;
         }
     }
 
     if (auth_context->remote_addr) {
-        if (!(retval = krb5_make_fulladdr(context, auth_context->remote_addr,
-                                 auth_context->remote_port, &remote_fulladdr))){
-            CLEANUP_PUSH(&remote_fulladdr.contents, free);
-	    premote_fulladdr = &remote_fulladdr;
-        } else {
-            CLEANUP_DONE();
-            goto error;
+    	if (auth_context->remote_port) {
+            if (!(retval = krb5_make_fulladdr(context,auth_context->remote_addr,
+                                 	      auth_context->remote_port, 
+					      &remote_fulladdr))){
+                CLEANUP_PUSH(&remote_fulladdr.contents, free);
+	        premote_fulladdr = &remote_fulladdr;
+            } else {
+                CLEANUP_DONE();
+                goto error;
+            }
+	} else {
+            premote_fulladdr = auth_context->remote_addr;
         }
     }
 
