@@ -175,8 +175,9 @@ Major changes listed by ticket ID
 * [1415] Subsession key negotiation has been fixed to allow for
   server-selected subsession keys in the future.
 
-* [1418, 1429, 1446, 1484, 1486, 1487, 1535] The AES cryptosystem has
-  been implemented.  It is not usable for GSSAPI, though.
+* [1418, 1429, 1446, 1484, 1486, 1487, 1535, 1621] The AES
+  cryptosystem has been implemented.  It is not usable for GSSAPI,
+  though.
 
 * [1491] The client-side functionality of the krb524 library has been
   moved into the krb5 library.
@@ -267,6 +268,8 @@ Minor changes listed by ticket ID
 * [971] option parsing bugs rendered irrelevant by removal of unused
   gss mechanism.
 
+* [976] make install mentioned in build documentation.
+
 * [986] Related to [677], problems with the ordering of LDFLAGS
   initialization rendered irrelevant by use of native autoconf
   idioms.
@@ -294,6 +297,9 @@ Minor changes listed by ticket ID
   password expiration.
 
 * [1066] printf() argument mismatches in rpc unit tests fixed.
+
+* [1085] The krb5.conf manpage has been re-synchronized with other
+  documentation.
 
 * [1102] gssapi_generic.h should now work with C++.
 
@@ -419,6 +425,8 @@ Minor changes listed by ticket ID
 
 * [1357] krb__get_srvtab_name() no longer leaks memory.
 
+* [1370] GSS_C_NO_CREDENTIAL now accepts any principal in the keytab.
+
 * [1373] Handling of SAM preauth no longer attempts to stuff a size_t
   into an unsigned int.
 
@@ -537,7 +545,15 @@ Minor changes listed by ticket ID
   uninitialized memory reference in kg_unseal_v1().  Thanks to Kent
   Wu.
 
+* [1607] kerberos-iv SRV records are now documented.
+
 * [1610] Fixed AES credential delegation under GSSAPI.
+
+* [1618] ms2mit no longer inserts local addresses into tickets
+  converted from the MS ccache if they began as addressless tickets.
+
+* [1619] etype_info parser (once again) accepts extra field emitted by
+  Heimdal.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
