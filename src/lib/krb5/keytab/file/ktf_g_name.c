@@ -43,7 +43,7 @@ krb5_ktfile_get_name(context, id, name, len)
     memset(name, 0, len);
 
     if (len < strlen(id->ops->prefix)+2)
-	return(ENAMETOOLONG);
+	return(KRB5_KT_NAME_TOOLONG);
     strcpy(name, id->ops->prefix);
     name += strlen(id->ops->prefix);
     name[0] = ':';
@@ -51,7 +51,7 @@ krb5_ktfile_get_name(context, id, name, len)
     len -= strlen(id->ops->prefix)+1;
 
     if (len < strlen(KTFILENAME(id)+1))
-	return(ENAMETOOLONG);
+	return(KRB5_KT_NAME_TOOLONG);
     strcpy(name, KTFILENAME(id));
     /* strcpy will NUL-terminate the destination */
 

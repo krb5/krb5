@@ -1,3 +1,9 @@
+Wed Jul 24 17:10:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ktf_g_name.c (krb5_ktfile_get_name): Use the error code
+ 		KRB5_KT_NAME_TOOLONG instead of ENAMETOOLONG, which isn't
+ 		portable.
+
 Fri Jul 12 21:16:50 1996  Marc Horowitz  <marc@mit.edu>
 
 	* ktf_g_name.c (krb5_ktfile_get_name): include the prefix in the
