@@ -1,3 +1,8 @@
+2000-05-23  Tom Yu  <tlyu@mit.edu>
+
+	* schpw.c (process_chpw_request): Add new argument to call to
+	chpass_principal_util()
+
 2000-03-16  Ken Raeburn  <raeburn@mit.edu>
 	    Matt Crawford  <crawdad@fnal.gov>
 

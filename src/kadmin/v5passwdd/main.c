@@ -230,7 +230,7 @@ krb5_error_code key_close_db(krb5_context context)
 
 krb5_int32
 pwd_change(kcontext, debug_level, auth_context, ticket,
-	      olddata, newdata, err_str)
+	      olddata, newdata, err_str, err_str_len)
     krb5_context	kcontext;
     int			debug_level;
     krb5_auth_context	auth_context;
@@ -238,6 +238,7 @@ pwd_change(kcontext, debug_level, auth_context, ticket,
     krb5_data		*olddata;
     krb5_data		*newdata;
     char		err_str[];
+    int			err_str_len;
 {
      kadm5_ret_t ret;
      krb5_int32			now;
@@ -301,7 +302,7 @@ pwd_change(kcontext, debug_level, auth_context, ticket,
 					  principal,
 					  newdata->data,
 					  NULL,
-					  err_str))
+					  err_str, err_str_len))
 	 return(KRB5_ADM_PW_UNACCEPT);
 
     return(KRB5_ADM_SUCCESS);

@@ -259,7 +259,8 @@ krb5_int32 pwd_change
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_data *,
-		   char []));
+		   char [],
+		   int));
 
 #if 0
 

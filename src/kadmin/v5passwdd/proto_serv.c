@@ -412,7 +412,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 					       ticket,
 					       &arglist[1],
 					       &arglist[2],
-					       &err_str);
+					       err_str,
+					       sizeof(err_str));
 		    }
 		    else {
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,

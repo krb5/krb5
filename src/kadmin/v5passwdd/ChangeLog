@@ -1,3 +1,11 @@
+2000-05-23  Tom Yu  <tlyu@mit.edu>
+
+	* kadm5_defs.h: Add argument for length of error string.
+
+	* main.c (pwd_change): Add argument for length of error string.
+
+	* proto_serv.c (proto_serv): Fix up call to pwd_change().
+
 2000-02-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* proto_serv.c (proto_serv): For error return,strdup the returned
