@@ -1,3 +1,9 @@
+Fri May  5 13:10:38 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* install.texi: Minor fixups for beta 5 release.  Mainly points
+		that the krb.conf and krb.realms section need to be
+		updated and should be ignored in favor of the krb5.conf
+		manual page.
 
 Fri Apr 28 16:59:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Add new kadmin.protocol.

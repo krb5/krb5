@@ -6,9 +6,9 @@
 @setchapternewpage odd
 @c %**end of header
 
-@set EDITION pre-BETA 5
-@set VERSION pre-BETA 5
-@set UPDATED March 8, 1995
+@set EDITION BETA 5
+@set VERSION BETA 5
+@set UPDATED May 5, 1995
 
 @ignore
 @iftex
@@ -236,7 +236,10 @@ context diffs or unified diffs (using @samp{diff -c} or @samp{diff
 Please note that there are still a number of aspects of Kerberos V5
 which will likely change before the 1.0 release.  In particular, the
 syntax and the names of the configuration files, @file{krb.conf} and
-@file{krb.realms}, are very likely to change in the near future.  In
+@file{krb.realms}, are very likely to change in the near future.
+(@strong{Actually}, they've changed already; this documentation hasn't
+been updated yet to reflect this yet, though.  See the @file{krb5.conf}
+man page for a description of the new configuration file format.)  In
 addition the location of the executable programs may also change as
 well.
 
@@ -945,8 +948,13 @@ your Kerberos realm should be @code{CYGNUS.COM}.
 @comment  node-name,  next,  previous,  up@section 
 @subsection Configuration files
 
-@strong{WARNING:} The name and syntax of the @file{krb.conf} and
-@file{krb.realms} file will be changing before the 1.0 release!
+@strong{WARNING:} The @file{krb.conf} and @file{krb.realms} files are no
+longer used by this release; this documentation hasn't been updated yet
+to describe the new @file{krb5.conf} file, so please disregard the next
+two subsections.  Information about the contents of the @file{krb5.conf} file
+can be found in @file{krb5.conf} manual page, which is located in the
+source tree in the @file{src/config-files} subdirectory.
+
 
 @menu
 * krb.conf::                    
