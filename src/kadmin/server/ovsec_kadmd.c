@@ -60,6 +60,10 @@ void	request_pure_report(int);
 void	request_pure_clear(int);
 #endif /* PURIFY */
 
+#if defined(NEED_DAEMON_PROTO)
+extern int daemon(int, int);
+#endif
+
 volatile int	signal_request_exit = 0;
 volatile int	signal_request_hup = 0;
 void    setup_signal_handlers(void);

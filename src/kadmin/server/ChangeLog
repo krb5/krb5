@@ -1,3 +1,7 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* ovsec_kadmd.c: Add prototype for daemon if needed.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* ovsec_kadmd.c (main): Make format string to sprintf specify that
