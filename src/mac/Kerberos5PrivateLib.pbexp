@@ -32,3 +32,4 @@
 	_krb5_c_checksum_length
 	_krb5_c_encrypt_length
 	_krb5int_cc_default
+    _krb5_set_default_tgs_enctypes
