@@ -1,3 +1,7 @@
+Tue Apr 25 17:28:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_CONST for platforms that do not support const.
+
 Mon Apr 24 17:05:27 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (all): Use ARADD to facilitate incremental
