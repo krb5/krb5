@@ -3,7 +3,7 @@
  * $Author$
  * $Id$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/mit-copyright.h>.
@@ -15,12 +15,6 @@
 
 #ifndef __KRB5_ENCRYPTION__
 #define __KRB5_ENCRYPTION__
-
-#ifndef __STDC__
-#define PROTOTYPE(x) ()
-#else
-#define PROTOTYPE(x) x
-#endif
 
 typedef struct _krb5_keyblock {
     krb5_keytype keytype;
@@ -39,23 +33,25 @@ typedef struct _krb5_checksum {
 typedef struct _krb5_encrypt_block {
     struct _krb5_cryptosystem_entry *crypto_entry;
     krb5_keyblock *key;
-    void *priv;				/* for private use, e.g. DES
+    krb5_pointer priv;			/* for private use, e.g. DES
 					   key schedules */
 } krb5_encrypt_block;
 
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
-    int (*encrypt_func) PROTOTYPE((void *in, void *out, size_t length,
-				    krb5_encrypt_block *block));
-    int (*decrypt_func) PROTOTYPE((void *in, void *out, size_t length,
-			   krb5_encrypt_block *block));
+    int (*encrypt_func) PROTOTYPE((krb5_pointer in, krb5_pointer out,
+				   size_t length,
+				   krb5_encrypt_block *block));
+    int (*decrypt_func) PROTOTYPE((krb5_pointer in, krb5_pointer out,
+				   size_t length,
+				   krb5_encrypt_block *block));
     int (*process_key) PROTOTYPE((krb5_encrypt_block *block,
 				  krb5_keyblock *key));
     int (*finish_key) PROTOTYPE((krb5_encrypt_block *block));
     int (*string_to_key) PROTOTYPE((krb5_keytype keytype, krb5_keyblock *key,
 				    char *string, krb5_principal *client));
-    int (*random_key) PROTOTYPE((void *sequence));
-    void * (*init_random_key) PROTOTYPE((krb5_keyblock *key));
+    int (*random_key) PROTOTYPE((krb5_pointer sequence));
+    krb5_pointer  (*init_random_key) PROTOTYPE((krb5_keyblock *key));
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
@@ -65,8 +61,10 @@ typedef struct _krb5_cryptosystem_entry {
 
 /* could be used in a table to find a sumtype */
 typedef struct _krb5_checksum_entry {
-    void * (*sum_func) PROTOTYPE ((void *in, void *out, void *seed,
-				   size_t in_length, size_t seed_length));
+    krb5_pointer  (*sum_func) PROTOTYPE ((krb5_pointer in, krb5_pointer out,
+					  krb5_pointer seed,
+					  size_t in_length,
+					  size_t seed_length));
     int checksum_length;		/* length of stuff returned by
 					   sum_func */
 } krb5_checksum_entry;
@@ -90,7 +88,5 @@ typedef struct _krb5_checksum_entry {
 #define KEYTYPE_IS_LOCAL(keytype) (keytype & 0x8000)
 #define ETYPE_IS_LOCAL(etype) (etype & 0x8000)
 #define CKSUMTYPE_IS_LOCAL(cksumtype) (cksumtype & 0x8000)
-
-#undef PROTOTYPE
 
 #endif /* __KRB5_ENCRYPTION__ */
