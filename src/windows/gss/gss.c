@@ -20,10 +20,9 @@
 #define INI_HOST	"Host"						// INI file line label
 
 #define MAX_HOSTS 9
-char hosts[MAX_HOSTS][128];
-
-char szHost[128];								// GSSAPI Host to connect to
-char szServiceName[128];						// Service to do
+char hosts[MAX_HOSTS][256];
+char szHost[256];								// GSSAPI Host to connect to
+char szServiceName[256];						// Service to do
 int port = 0;									// Which port to use
 
 static void do_gssapi_test (char *name);
@@ -97,8 +96,7 @@ OpenGssapiDlg(
 	HDC hDC;									// For getting graphic info
 	DWORD Ext;									// Size of dialog
 	int xExt, yExt;								// Size broken apart
-	char hostname[128];							// What the user typed
-
+	char hostname[256];							// What the user typed
 	switch (message) {
 	case WM_INITDIALOG:
 		/*
@@ -128,7 +126,7 @@ OpenGssapiDlg(
 			break;
 
 		case GSS_OK:
-			GetDlgItemText(hDlg, GSS_CONNECT_NAME, hostname, 128);
+			GetDlgItemText(hDlg, GSS_CONNECT_NAME, hostname, 256);
 			SendDlgItemMessage(hDlg, GSS_CONNECT_NAME, CB_SHOWDROPDOWN,
 				FALSE, NULL);
 
@@ -161,14 +159,31 @@ OpenGssapiDlg(
 static void
 parse_name (char *name) {
 	char *ptr;
-
-	strcpy (szHost, name);
-	ptr = strchr (szHost, ' ');					// Is there a port???
-	if (ptr) {									// Yep, start parsing it
-		port = atoi (ptr+1);
-		*ptr = '\0';
+	char seps[] = " ,\t";
+	char tempname[256];
+	
+	memset( &tempname[0], '\0', 256 );
+	strcpy( tempname, name);
+	ptr = strtok( tempname, seps);
+	if (ptr != NULL ){
+	    strcpy( szHost, ptr );
+	} else {
+	    wsprintf( szHost, "k5test" );
 	}
-	wsprintf (szServiceName, "host@%s", szHost); // Make the service name
+	if(ptr){
+	    ptr = strtok( NULL, seps);
+	}
+	if( ptr ){
+		port = atoi (ptr);
+	}
+	if( ptr ){
+	    ptr = strtok( NULL, seps);
+	}
+	if( ptr ){
+	    strcpy( szServiceName, ptr );
+	}else{
+	    wsprintf (szServiceName, "sample@%s", szHost); // Make the service name
+	}
 }
 /*+*************************************************************************
 **
@@ -179,13 +194,13 @@ parse_name (char *name) {
 ***************************************************************************/
 static int
 read_hosts (void) {
-	int i;										// Index
+	int i;					/* Index */
 	char buff[10];
-
-	for (i = 0; MAX_HOSTS; ++i) {				// Read this many entries
+	
+	for (i = 0; MAX_HOSTS; ++i) {		/* Read this many entries */
 		wsprintf (buff, INI_HOST "%d", i);
-		GetPrivateProfileString(INI_HOSTS, buff, "", hosts[i], 128, GSSAPI_INI);
-		if (*hosts[i] == '\0')					// No more entries???
+		GetPrivateProfileString(INI_HOSTS, buff, "", hosts[i], 256, GSSAPI_INI);
+		if (*hosts[i] == '\0')		/* No more entries??? */
 			break;
 	}
 
