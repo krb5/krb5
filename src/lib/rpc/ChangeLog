@@ -1,3 +1,13 @@
+Wed Jul 31 16:54:29 1996  Tom Yu  <tlyu@mit.edu>
+
+	* types.hin: Remove #include <netdb.h> because it appears the only
+		reason for doing so was to get struct rpcent, and we're
+		getting that via <rpc/netdb.h>.
+
+	* clnt_generic.c, clnt_simple.c, clnt_tcp.c, clnt_udp.c,
+ 		getrpcent.c, getrpcport.c, pmap_getmaps.c, svc_simple.c:
+		Revert prior change due to netdb.h shuffling.
+
 Tue Jul 30 18:59:17 1996  Tom Yu  <tlyu@mit.edu>
 
 	* rpc.h: Don't include netdb.h (rpc/types.h already includes it)

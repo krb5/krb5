@@ -36,6 +36,7 @@ static char sccsid[] = "@(#)clnt_generic.c 1.4 87/08/11 (C) 1987 SMI";
 #include <rpc/rpc.h>
 #include <sys/socket.h>
 #include <sys/errno.h>
+#include <netdb.h>
 
 /*
  * Generic client creation: takes (hostname, program-number, protocol) and

@@ -41,6 +41,7 @@ static char sccsid[] = "@(#)svc_simple.c 1.18 87/08/11 Copyr 1984 Sun Micro";
 #include <stdio.h>
 #include <rpc/rpc.h>
 #include <sys/socket.h>
+#include <netdb.h>
 
 static struct proglst {
 	char *(*p_progname)();
