@@ -33,9 +33,6 @@ static errcode_t rw_setup(profile_t profile)
 
 	file = profile->first_file;
 
-	if (!(file->data->flags & PROFILE_FILE_RW))
-	    return PROF_READ_ONLY;
-
 	retval = profile_lock_global();
 	if (retval)
 	    return retval;

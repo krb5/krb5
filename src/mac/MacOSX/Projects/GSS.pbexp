@@ -94,3 +94,17 @@ _gss_nt_exported_name
 #
 	
 _GSS_KRB5_NT_PRINCIPAL_NAME
+
+#
+# GSS-API krb5 symbols from gssapi_krb5.h 
+#
+
+_gss_mech_krb5
+_gss_mech_krb5_old
+_gss_mech_set_krb5
+_gss_mech_set_krb5_both
+_gss_mech_set_krb5_old
+
+_gss_nt_krb5_name
+_gss_nt_krb5_principal
+_krb5_gss_oid_array

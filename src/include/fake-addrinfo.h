@@ -105,6 +105,7 @@
 #include "k5-thread.h"
 
 #include <stdio.h>		/* for sprintf */
+#include <errno.h>
 
 #ifdef S_SPLINT_S
 /*@-incondefs@*/
@@ -967,7 +968,6 @@ fake_getaddrinfo (const char *name, const char *serv,
 }
 
 #ifdef NEED_FAKE_GETNAMEINFO
-#include <errno.h>
 static inline int
 fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 		  char *host, socklen_t hostlen,
@@ -1058,7 +1058,6 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 }
 #endif
 
-#include <errno.h>
 #if defined(HAVE_FAKE_GETADDRINFO) || defined(NEED_FAKE_GETNAMEINFO)
 
 static inline

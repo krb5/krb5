@@ -36,8 +36,8 @@
 ftpd \- DARPA Internet File Transfer Protocol server
 .SH SYNOPSIS
 .B ftpd
-[\fB\-A \fP|\fB -a\fP] [\fB\-C\fP] [\fB\-c\fP] [\fB\-d\fP] [\fB\-l\fP]
-[\fB\-v\fP] [\fB\-T\fP \fImaxtimeout\fP] [\fB\-t\fP \fItimeout\fP]
+[\fB\-A \fP|\fB -a\fP] [\fB\-C\fP] [\fB\-c\fP] [\fB\-d\fP] [\fB-E\fP]
+[\fB\-l\fP] [\fB\-v\fP] [\fB\-T\fP \fImaxtimeout\fP] [\fB\-t\fP \fItimeout\fP]
 [\fB\-p\fP \fIport\fP] [\fB\-U\fP \fIftpusers-file\fP] [\fB\-u\fP \fIumask\fP]
 [\fB\-r\fP \fIrealm-file\fP] [\fB\-s\fP \fIsrvtab\fP]
 [\fB\-w\fP{\fBip\fP|\fImaxhostlen\fP[\fB,\fP{\fBstriplocal\fP|\fBnostriplocal\fP}]}]
@@ -76,6 +76,9 @@ less secure connections, and should probably only be used when debugging.
 .TP
 .B \-d
 Debugging information is written to the syslog.  (Identical to -v)
+.TP
+.B \-E
+Don't allow passwords to be typed across unencrypted connections.
 .TP
 .B \-l
 Each
