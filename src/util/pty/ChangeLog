@@ -1,3 +1,18 @@
+2001-05-10  Tom Yu  <tlyu@mit.edu>
+
+	* pty_paranoia.c: New file; do many paranoid checks about ctty
+	handling by the pty drivers.
+
+	* Makefile.in: Add rules for pty_paranoia and check-paranoia,
+	which runs pty_paranoia.
+
+	* configure.in: Define REVOKE_NEEDS_OPEN for Tru64.  Add support
+	for program building and run flags for the sake of pty_paranoia.
+
+	* open_slave.c: Fix somewhat; AIX doesn't like opening the ctty
+	twice, so only do initial open if we special-case it in
+	configure.in, e.g. for Tru64.
+
 2001-05-08  Tom Yu  <tlyu@mit.edu>
 
 	* logwtmp.c: Delete code under "#if 0".  Fix reversed test for

@@ -39,8 +39,8 @@ pty_open_slave(const char *slave, int *fd)
     ptyint_void_association();
 
     /*
-     * Make a first attempt at acquiring the ctty.  This is necessary
-     * for several reasons:
+     * Make a first attempt at acquiring the ctty under certain
+     * condisions.  This is necessary for several reasons:
      *
      * Under Irix, if you open a pty slave and then close it, a
      * subsequent open of the slave will cause the master to read EOF.
@@ -52,11 +52,13 @@ pty_open_slave(const char *slave, int *fd)
      *
      * Anyway, sshd seems to make a practice of doing this.
      */
+#if defined(VHANG_FIRST) || defined(REVOKE_NEEDS_OPEN)
     retval = pty_open_ctty(slave, fd);
     if (retval)
 	return retval;
     if (*fd < 0)
 	return PTY_OPEN_SLAVE_OPENFAIL;
+#endif
 
     /* chmod and chown the slave. */
     if (chmod(slave, 0))
@@ -76,7 +78,9 @@ pty_open_slave(const char *slave, int *fd)
 
     /* Open the pty for real. */
     retval = pty_open_ctty(slave, &tmpfd);
+#if defined(VHANG_FIRST) || defined(REVOKE_NEEDS_OPEN)
     close(*fd);
+#endif
     if (retval) {
 	*fd = -1;
 	return PTY_OPEN_SLAVE_OPENFAIL;
