@@ -40,7 +40,7 @@ long
 pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
 		       int strip_ldomain, int always_ipaddr, char **out)
 {
-    struct addrinfo *ai;
+    struct addrinfo *ai = 0;
     char addrbuf[NI_MAXHOST];
 #ifdef HAVE_STRUCT_UTMP_UT_HOST
     struct utmp ut;

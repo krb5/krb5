@@ -1,3 +1,8 @@
+2002-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* sane_hostname.c (pty_make_sane_hostname): Always initialize
+	"ai".
+
 2002-03-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* sane_hostname.c: Include fake-addrinfo.h, not fake-addrinfo.c.
