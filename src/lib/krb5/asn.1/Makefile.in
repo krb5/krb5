@@ -1,0 +1,12 @@
+ISODEMAKEFILE = @ISODEMAKEFILE@
+
+all::
+	echo making all in $(CURRENT_DIR)
+	$(MAKE) $(MFLAGS) -f $(ISODEMAKEFILE) CCOPTS="$(CCOPTS)" CC="$(CC)" \
+		CURRENT_DIR=$(CURRENT_DIR) all
+
+clean::
+	echo making clean in $(CURRENT_DIR)
+	$(MAKE) $(MFLAGS) -f $(ISODEMAKEFILE) CCOPTS="$(CCOPTS)" CC="$(CC)" \
+		CURRENT_DIR=$(CURRENT_DIR) clean
+
