@@ -5,8 +5,7 @@
 
 	* network.c: Include <sys/ioctl.h>, <syslog.h>, <net/if.h>.
 	(foreach_localaddr): New function, copied from
-	lib/krb5/os/localaddr.c.  Tweaked to not exclude loopback
-	interface.
+	lib/krb5/os/localaddr.c.
 	(NEED_SOCKETS): Define before including k5-int.h.
 	(n_sockets): New variable.
 	(setup_port): New function; creates listening udp ports given an
