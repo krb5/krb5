@@ -100,6 +100,7 @@ errcode_t profile_open_file(filespec, ret_prof)
 	prf->magic = PROF_MAGIC_FILE;
 #else
 	prf->filespec = filespec;
+	prf->magic = PROF_MAGIC_FILE;
 #endif
 
 	retval = profile_update_file(prf);
