@@ -1,3 +1,9 @@
+Tue Aug  5 18:45:35 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in, gss.rc: Use the version resource from
+		windows/version.rc, which affects the version resources
+		for the entire krb5 distribution.
+
 Mon Jul 28 23:30:03 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Take out the /nod option, and remove libc.lib from

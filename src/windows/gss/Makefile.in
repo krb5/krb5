@@ -36,15 +36,15 @@ LIBS 	 = $(GLIB) $(CLIB) $(WLIB)
 
 all:: makefile gss.exe
 
-gss.exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+gss.exe: $*.def $(OBJS) $(XOBJS) $(LIBS)
 ##WIN16##	$(LINK) $(LFLAGS) $(OBJS), $@, $*.map, \
 ##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
-##WIN16##	$(RC) $(RFLAGS) /k $*.res $@
+##WIN16##	$(RC) $(RFLAGS) /k -DGSS_APP $*.rc $@
 ##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
 ##WIN32##	  $(LIBS) $(SYSLIBS)
 
 ##WIN32##gss.res: gss.rc
-##WIN32##	$(RC) $(RFLAGS) /r $*.rc
+##WIN32##	$(RC) $(RFLAGS) -D_WIN32 -DGSS_APP /r $*.rc
 
 ##WIN32##resource.obj: gss.res
 ##WIN32##	$(CVTRES) /nologo /out:$@ gss.res
