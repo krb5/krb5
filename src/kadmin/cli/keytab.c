@@ -23,7 +23,6 @@ static int remove_principal(char *keytab_str, krb5_keytab keytab, char
 			    *princ_str, char *kvno_str);
 static char *etype_string(krb5_enctype enctype);
 
-extern char *krb5_defkeyname;	 
 extern char *whoami;
 extern krb5_context context;
 extern void *handle;
@@ -45,8 +44,15 @@ int process_keytab(krb5_context context, char **keytab_str,
      int code;
      
      if (*keytab_str == NULL) {
-	  if (! (*keytab_str = strdup(krb5_defkeyname))) {
-	       com_err(whoami, ENOMEM, "while creating keytab name");
+	  char *keytab_str = malloc(BUFSIZ);
+
+	  if (keytab_str == NULL) {
+	       com_err(whoami, ENOMEM, "while creating default keytab name");
+	       return 1;
+	  }
+	  if ((code = krb5_kt_default_name(context, keytab_str, BUFSIZ))) {
+	       com_err(whoami, code, "while copying default keytab name");
+	       free(*keytab_str);
 	       return 1;
 	  }
 	  code = krb5_kt_default(context, keytab);

@@ -421,9 +421,24 @@ char *kadmin_startup(argc, argv)
 	 exit(1);
     }
     {
-#define DEFAULT_KEYTAB "WRFILE:/etc/v5srvtab"
-	 extern char *krb5_defkeyname;
-	 krb5_defkeyname = DEFAULT_KEYTAB;
+	/* hack up the default keytab name to begin with "WRFILE:" */
+	char *cp, ktdef[BUFSIZ];
+	if ((retval = krb5_kt_default_name(context, ktdef, BUFSIZ))) {
+	    com_err(whoami, retval, "while looking up default keytab name");
+	    exit(1);
+	}
+	if ((cp = malloc(strlen(ktdef) + 1 + 2)) == NULL) {
+	    com_err(whoami, ENOMEM, "while editting default keytab name");
+	    exit(1);
+	}
+	strcpy(cp, "WR");
+	strcat(cp, ktdef);
+	if ((retval = krb5_kt_set_default_name(context, cp))) {
+	    com_err(whoami, retval,
+		    "while changing default keytab name");
+	    exit(1);
+	}
+	free(cp);
     }
     
     return query;
