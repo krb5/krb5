@@ -891,7 +891,7 @@ control(pty, cp, n)
 protocol(f, p)
      int f, p;
 {
-    char pibuf[1024], fibuf[1024], *pbp, *fbp;
+    unsigned char pibuf[1024], fibuf[1024], *pbp, *fbp;
     register pcc = 0, fcc = 0;
     int cc;
     char cntl;

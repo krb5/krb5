@@ -1,3 +1,8 @@
+Wed Oct 19 12:36:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krlogind.c (protocol): Make protocol buffers be unsigned, since
+		we're comparing against unsigned data.
+
 Tue Oct 18 15:48:37 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in (HAVE_STREAMS): test for streams interface headers
