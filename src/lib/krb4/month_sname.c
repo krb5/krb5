@@ -8,9 +8,6 @@
  * <mit-copyright.h>.
  */
 
-#include "mit-copyright.h"
-#include "conf.h"
-
 /*
  * Given an integer 1-12, month_sname() returns a string
  * containing the first three letters of the corresponding

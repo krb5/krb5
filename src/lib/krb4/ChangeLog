@@ -1,3 +1,7 @@
+Fri Apr 28 13:03:23 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* month_sname.c, one.c: Remove unnecessary include of conf.h
+
 Fri Apr 28 01:55:18 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* kuserok.c: HAS_UNISTD_H instead of USE_.
