@@ -1,5 +1,6 @@
 thisconfigdir=./
 BUILDTOP=$(U)$(U)
+LOCAL_SUBDIRS=des crc32 md4 md5 sha os
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$(srcdir)/md5 -I$(srcdir)/sha
 
 ##DOSBUILDTOP = ..\..

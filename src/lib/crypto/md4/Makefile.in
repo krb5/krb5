@@ -1,4 +1,4 @@
-thisconfigdir=./
+thisconfigdir=./../
 BUILDTOP=$(U)$(U)$(U)
 # -I$(srcdir) is needed to pull in $(srcdir)/rsa-md4.h for ./t_mddriver.c.
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
