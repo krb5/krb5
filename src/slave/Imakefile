@@ -1,0 +1,31 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990 by the Massachusetts Institute of Technology.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+
+CLIENTSRCS= sendauth.c kprop.c 
+CLIENTOBJS= sendauth.o kprop.o 
+
+SERVERSRCS= sendauth.c kpropd.c 
+SERVEROBJS= sendauth.o kpropd.o 
+
+all::	kprop kpropd
+
+NormalProgramTarget(kprop,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(kpropd,$(SERVEROBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+SaberProgramTarget(kprop, $(CLIENTSRCS), $(CLIENTOBJS), 
+	$(DEPLIBS) $(LOCAL_LIBRARIES),)
+SaberProgramTarget(kpropd, $(SERVERSRCS), $(SERVEROBJS), 
+	$(DEPLIBS) $(LOCAL_LIBRARIES),)
+
+saber-setup:
+	#setopt load_flags $(CFLAGS)
+	#load $(LOCAL_LIBRARIES)
