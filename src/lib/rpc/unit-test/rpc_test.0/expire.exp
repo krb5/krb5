@@ -38,6 +38,8 @@ proc overlap {} {
     eof_client expire 1 $client1_id 0
     eof_client expire 2 $client2_id 0
     eof_client expire 3 $client3_id 0
+
+    flush_server
 }
 overlap
 

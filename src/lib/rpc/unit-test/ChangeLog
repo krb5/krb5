@@ -1,3 +1,11 @@
+2002-11-07  Tom Yu  <tlyu@mit.edu>
+
+	* rpc_test.0/expire.exp (overlap): Add another call to
+	flush_server to make a race condition a little less likely.  There
+	really should be better synchronization, as this test suite is
+	just full of race conditions waiting to happen.
+	[pullup from trunk]
+
 2000-06-21  Tom Yu  <tlyu@mit.edu>
 
 	* server.c: Include gssrpc/pmap_clnt.h in order to get renaming of
