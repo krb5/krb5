@@ -2313,23 +2313,23 @@ telnet(user)
 	while (1) {
 	    if (my_want_state_is_wont(TELOPT_AUTHENTICATION)) {
 		printf("\nServer refused to negotiate authentication, which is required\n");
-		printf("for encryption.  Good bye.\n\r");
+		printf("for encryption.  Good-bye.\n\r");
 		Exit(1);
 	    }
 	    if (auth_has_failed) {
-		printf("\nAuthentication negotation has failed, which is required for\n");
-		printf("encryption.  Good bye.\n\r");
+		printf("\nNegotiation of authentication, which is required for encryption,\n");
+		printf("has failed.  Good-bye.\n\r");
 		Exit(1);
 	    }
 	    if (my_want_state_is_dont(TELOPT_ENCRYPT) ||
 		my_want_state_is_wont(TELOPT_ENCRYPT)) {
-		printf("\nServer refused to negotiate encryption.  Good bye.\n\r");
+		printf("\nServer refused to negotiate encryption.  Good-bye.\n\r");
 		Exit(1);
 	    }
 	    if (encrypt_is_encrypting())
 		break;
 	    if (time(0) > timeout) {
-		printf("\nEncryption could not be enabled.  Goodbye.\n\r");
+		printf("\nEncryption could not be enabled.  Good-bye.\n\r");
 		Exit(1);
 	    }
 	    if (printed_encrypt == 0) {
@@ -2343,7 +2343,7 @@ telnet(user)
 		    intr_waiting = 1;
 	    }
 	    if (intr_happened) {
-		    printf("\nUser requested an interrupt.  Goodbye.\n\r");
+		    printf("\nUser requested an interrupt.  Good-bye.\n\r");
 		    Exit(1);
 	    }
 	    telnet_spin();

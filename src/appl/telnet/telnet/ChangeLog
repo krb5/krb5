@@ -1,3 +1,8 @@
+2001-05-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnet.c (telnet): Fix grammar in some error messages.  Based on
+	a patch from Garry Zacheiss.
+
 2000-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* commands.c (tn): Local var "user" should be volatile.
