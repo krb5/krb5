@@ -22,12 +22,12 @@
 	setkey_principal3_1, and chrand_principal3_1 to do the obvious
 	things.
 
-1999-10-26  Tom Yu  <tlyu@mit.edu>
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
-	Makefile cleanup. [from wsanchez@apple.com]
+	Makefile cleanup.
 
 Tue May 11 23:59:55 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 

@@ -6,12 +6,12 @@
 	* des3.c (mit_des_zeroblock, krb5_enc_des3): Similar.
 	* enc_provider.h (krb5_enc_des, krb5_enc_des3): Update decls.
 
-1999-10-26  Tom Yu  <tlyu@mit.edu>
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
-	Makefile cleanup. [from wsanchez@apple.com]
+	Makefile cleanup.
 
 Mon May 10 15:16:54 1999  Danilo Almeida  <dalmeida@mit.edu>
 

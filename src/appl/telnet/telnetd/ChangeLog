@@ -15,12 +15,12 @@
 	* telnetd.c (doit): Provide a more useful error message than
 	"authentication failed" if no authentication was even attempted.
 
-1999-10-26  Tom Yu  <tlyu@mit.edu>
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
-	Makefile cleanup. [from wsanchez@apple.com]
+	Makefile cleanup.
 
 Thu Apr 15 17:02:49 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 

@@ -45,12 +45,12 @@
 	* alt_prof.c (kadm5_get_config_params): Fix bug in direction of
 	test while walking through whitespace.  Thanks to Matt Crawford.
 
-1999-10-26  Tom Yu  <tlyu@mit.edu>
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
-	Makefile cleanup. [from wsanchez@apple.com]
+	Makefile cleanup.
 
 1999-09-28  Ken Raeburn  <raeburn@mit.edu>
 
