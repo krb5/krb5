@@ -28,7 +28,7 @@
 
 #include "fcc.h"
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_skip_principal(context, id)
    krb5_context context;
    krb5_ccache id;

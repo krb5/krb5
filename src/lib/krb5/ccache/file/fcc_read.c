@@ -40,7 +40,7 @@
  * KRB5_CC_END - there were not len bytes available
  * system errors (read)
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
@@ -75,7 +75,7 @@ krb5_fcc_read(context, id, buf, len)
  * KRB5_CC_NOMEM
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -84,7 +84,7 @@ krb5_fcc_read_principal(context, id, princ)
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code kret;
     register krb5_principal tmpprinc;
-    krb5_int32 length, type;
+    krb5_int32 length, type, msize;
     int i;
 
     if (data->version == KRB5_FCC_FVNO_1) {
@@ -112,8 +112,11 @@ krb5_fcc_read_principal(context, id, princ)
     if (tmpprinc == NULL)
 	return KRB5_CC_NOMEM;
     if (length) {
-	    tmpprinc->data = (krb5_data *) malloc(length * sizeof(krb5_data));
-	    if (tmpprinc->data == 0) {
+            tmpprinc->data = 0;
+            msize = length * sizeof(krb5_data);
+            if ((msize & VALID_UINT_BITS) == msize)  /* Not overflow size_t */
+        	    tmpprinc->data = (krb5_data *) malloc((size_t) msize);
+	    if (tmpprinc->data == (krb5_data *) 0) {
 		    free((char *)tmpprinc);
 		    return KRB5_CC_NOMEM;
 	    }
@@ -143,14 +146,14 @@ krb5_fcc_read_principal(context, id, princ)
     return kret;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_addrs(context, id, addrs)
    krb5_context context;
    krb5_ccache id;
    krb5_address ***addrs;
 {
      krb5_error_code kret;
-     krb5_int32 length;
+     krb5_int32 length, msize;
      int i;
 
      *addrs = 0;
@@ -162,7 +165,10 @@ krb5_fcc_read_addrs(context, id, addrs)
      /* Make *addrs able to hold length pointers to krb5_address structs
       * Add one extra for a null-terminated list
       */
-     *addrs = (krb5_address **) calloc(length+1, sizeof(krb5_address *));
+     msize = length+1;
+     if ((msize & VALID_UINT_BITS) != msize)    /* Overflow size_t??? */
+	  return KRB5_CC_NOMEM;
+     *addrs = (krb5_address **) calloc((size_t) msize, sizeof(krb5_address *));
      if (*addrs == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -183,7 +189,7 @@ krb5_fcc_read_addrs(context, id, addrs)
      return kret;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_keyblock(context, id, keyblock)
    krb5_context context;
    krb5_ccache id;
@@ -211,7 +217,9 @@ krb5_fcc_read_keyblock(context, id, keyblock)
 
      kret = krb5_fcc_read_int32(context, id, &int32);
      CHECK(kret);
-     keyblock->length = int32;
+     if ((int32 & VALID_INT_BITS) != int32)     /* Overflow size_t??? */
+	  return KRB5_CC_NOMEM;
+     keyblock->length = (int) int32;
      if ( keyblock->length == 0 )
 	     return KRB5_OK;
      keyblock->contents = (unsigned char *) malloc(keyblock->length*
@@ -230,19 +238,23 @@ krb5_fcc_read_keyblock(context, id, keyblock)
      return kret;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_data(context, id, data)
    krb5_context context;
    krb5_ccache id;
    krb5_data *data;
 {
      krb5_error_code kret;
+     krb5_int32 len;
 
      data->magic = KV5M_DATA;
      data->data = 0;
 
-     kret = krb5_fcc_read_int32(context, id, &data->length);
+     kret = krb5_fcc_read_int32(context, id, &len);
      CHECK(kret);
+     if ((len & VALID_INT_BITS) != len)
+        return KRB5_CC_NOMEM;
+     data->length = (int) len;
 
      if (data->length == 0) {
 	data->data = 0;
@@ -264,7 +276,7 @@ krb5_fcc_read_data(context, id, data)
      return kret;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_addr(context, id, addr)
    krb5_context context;
    krb5_ccache id;
@@ -283,7 +295,9 @@ krb5_fcc_read_addr(context, id, addr)
      
      kret = krb5_fcc_read_int32(context, id, &int32);
      CHECK(kret);
-     addr->length = int32;
+     if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
+	  return KRB5_CC_NOMEM;
+     addr->length = (int) int32;
 
      if (addr->length == 0)
 	     return KRB5_OK;
@@ -302,7 +316,7 @@ krb5_fcc_read_addr(context, id, addr)
      return kret;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_int32(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -324,7 +338,7 @@ krb5_fcc_read_int32(context, id, i)
     }
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_ui_2(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -346,7 +360,7 @@ krb5_fcc_read_ui_2(context, id, i)
     }
 }    
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_octet(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -356,7 +370,7 @@ krb5_fcc_read_octet(context, id, i)
 }    
 
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_times(context, id, t)
    krb5_context context;
    krb5_ccache id;
@@ -391,14 +405,14 @@ errout:
     return retval;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_authdata(context, id, a)
    krb5_context context;
     krb5_ccache id;
     krb5_authdata ***a;
 {
      krb5_error_code kret;
-     krb5_int32 length;
+     krb5_int32 length, msize;
      int i;
 
      *a = 0;
@@ -413,7 +427,10 @@ krb5_fcc_read_authdata(context, id, a)
      /* Make *a able to hold length pointers to krb5_authdata structs
       * Add one extra for a null-terminated list
       */
-     *a = (krb5_authdata **) calloc(length+1, sizeof(krb5_authdata *));
+     msize = length+1;
+     if ((msize & VALID_UINT_BITS) != msize)    /* Overflow size_t??? */
+	  return KRB5_CC_NOMEM;
+     *a = (krb5_authdata **) calloc((size_t) msize, sizeof(krb5_authdata *));
      if (*a == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -434,7 +451,7 @@ krb5_fcc_read_authdata(context, id, a)
      return kret;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_read_authdatum(context, id, a)
    krb5_context context;
     krb5_ccache id;
@@ -443,7 +460,6 @@ krb5_fcc_read_authdatum(context, id, a)
     krb5_error_code kret;
     krb5_int32 int32;
     krb5_ui_2 ui2;
-    int ret;
     
     a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
@@ -453,7 +469,9 @@ krb5_fcc_read_authdatum(context, id, a)
     a->ad_type = (krb5_authdatatype)ui2;
     kret = krb5_fcc_read_int32(context, id, &int32);
     CHECK(kret);
-    a->length = int32;
+    if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
+          return KRB5_CC_NOMEM;
+    a->length = (int) int32;
     
     if (a->length == 0 )
 	    return KRB5_OK;

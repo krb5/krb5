@@ -1,3 +1,11 @@
+Tue Mar 7 15:58:15 1995 Keith Vetter (keithv@fusion.com)
+
+	* fcc.h: alwas pull in low-level i/o stuff for the PC.
+        * *.c, fcc-proto.h: added windows INTERFACE keyword.
+        * fcc_dest.c, fcc_init.c, fcc_maybe.c, fcc_nseq.c, fcc_read.c, 
+           fcc_sseq.c, fcc_write.c: fixed up some int/long and 
+           signed/unsigned problems.
+
 Tue Feb 28 00:35:55 1995  John Gilmore  (gnu at toad.com)
 
 	* fcc.h, fcc_gennew.c, fcc_maybe.c:  Avoid <krb5/...> includes.

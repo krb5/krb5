@@ -27,7 +27,7 @@
 
 
 #include "fcc.h"
-
+#include <malloc.h>
 /*
  * Modifies:
  * id
@@ -36,7 +36,7 @@
  * Closes the file cache, invalidates the id, and frees any resources
  * associated with the cache.
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_close(context, id)
    krb5_context context;
    krb5_ccache id;

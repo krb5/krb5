@@ -28,6 +28,7 @@
 #ifndef __KRB5_FILE_CCACHE__
 #define __KRB5_FILE_CCACHE__
 
+#define NEED_LOWLEVEL_IO
 #include "k5-int.h"
 #include "fcc-proto.h"
 #include <stdio.h>

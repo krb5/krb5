@@ -1,3 +1,8 @@
+Tue Mar 7 15:55:12 1995 Keith Vetter (keithv@fusion.com)
+
+	* ccbase.c, ccdefault.c: added window INTERFACE keyword.
+        * Makefile.in: made to work on the PC.
+
 Tue Feb 28 00:35:33 1995  John Gilmore  (gnu at toad.com)
 
 	* ccbase.c, ccdefault.c:  Avoid <krb5/...> includes.

@@ -40,30 +40,31 @@
  * system errors
  * permission errors
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_initialize(context, id, princ)
    krb5_context context;
    krb5_ccache id;
    krb5_principal princ;
 {
-     int ret = KRB5_OK;
+     krb5_error_code kret;
+     int reti;
 
      MAYBE_OPEN(context, id, FCC_OPEN_AND_ERASE);
 
 #ifdef NOFCHMOD
-     ret = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
+     reti = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
 #else
-     ret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
+     reti = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
 #endif
-     if (ret == -1) {
-	 ret = krb5_fcc_interpret(context, errno);
-	 MAYBE_CLOSE(context, id, ret);
-	 return ret;
+     if (reti == -1) {
+	 kret = krb5_fcc_interpret(context, errno);
+	 MAYBE_CLOSE(context, id, kret);
+	 return kret;
      }
      krb5_fcc_store_principal(context, id, princ);
 
-     MAYBE_CLOSE(context, id, ret);
-     return ret;
+     MAYBE_CLOSE(context, id, kret);
+     return kret;
 }
 
 

@@ -24,6 +24,7 @@
  * This file contains the source code for conditional open/close calls.
  */
 
+#define NEED_SOCKETS    /* Only for ntohs, etc. */
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -35,7 +36,9 @@
 int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 
 #ifdef KRB5_USE_INET
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 #else
  #error find some way to use net-byte-order file version numbers.
 #endif
@@ -156,7 +159,7 @@ int lockunlock;
 #undef EXCLUSIVE_LOCK
 #undef UNLOCK_LOCK
 
-#endif HAVE_FLOCK
+#endif /* HAVE_FLOCK */
 
 static krb5_error_code fcc_lock_file PROTOTYPE((krb5_fcc_data *, int, int));
 static krb5_error_code
@@ -180,7 +183,7 @@ int lockunlock;
 #endif
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_close_file (context, id)
    krb5_context context;
     krb5_ccache id;
@@ -201,14 +204,14 @@ krb5_fcc_close_file (context, id)
      return (ret == -1) ? krb5_fcc_interpret (context, errno) : 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_open_file (context, id, mode)
    krb5_context context;
     krb5_ccache id;
     int mode;
 {
      krb5_fcc_data *data = (krb5_fcc_data *)id->data;
-     krb5_int16 fcc_fvno;
+     krb5_ui_2 fcc_fvno;
      int fd;
      int open_flag;
      krb5_error_code retval;

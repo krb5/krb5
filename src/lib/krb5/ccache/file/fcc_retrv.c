@@ -84,7 +84,7 @@ register const krb5_data *data1, *data2;
  * permission errors
  * KRB5_CC_NOMEM
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
    krb5_context context;
    krb5_ccache id;

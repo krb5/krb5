@@ -1,12 +1,35 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\krb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
-OBJS=	ccbase.o \
-	ccdefault.o \
-	ccdefops.o
+OBJS=	ccbase.$(OBJEXT) \
+	ccdefault.$(OBJEXT) \
+	ccdefops.$(OBJEXT)
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c
+
+all:: $(OBJS) all-$(WHAT)
+
+all-unix::
+
+all-windows::
+	cd FILE
+	@echo Making in CCACHE\FILE
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+
+clean-windows::
+	cd FILE
+	@echo Making clean in CCACHE\FILE
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+        

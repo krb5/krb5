@@ -24,13 +24,15 @@
  * This file contains the source code for krb5_fcc_generate_new.
  */
 
-
+#define NEED_SOCKETS
 #include <errno.h>
-#include "k5-int.h"
 #include "fcc.h"
+#include "k5-int.h"
 
 #ifdef KRB5_USE_INET
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 #else
  #error find some way to use net-byte-order file version numbers.
 #endif
@@ -51,7 +53,7 @@ extern krb5_cc_ops krb5_fcc_ops;
  * 		krb5_ccache.  id is undefined.
  * system errors (from open)
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_generate_new (context, id)
    krb5_context context;
    krb5_ccache *id;

@@ -28,12 +28,12 @@
 
 #include "fcc.h"
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_interpret(context, errnum)
    krb5_context context;
 int errnum;
 {
-    register int retval;
+    register krb5_error_code retval;
     switch (errnum) {
     case ENOENT:
 	retval = KRB5_FCC_NOFILE;

@@ -40,23 +40,23 @@
  * KRB5_CC_NOMEM
  * system errors
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_start_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
      krb5_fcc_cursor *fcursor;
-     int ret = KRB5_OK;
+     krb5_error_code kret = KRB5_OK;
      
      fcursor = (krb5_fcc_cursor *) malloc(sizeof(krb5_fcc_cursor));
      if (fcursor == NULL)
 	  return KRB5_CC_NOMEM;
      if (OPENCLOSE(id)) {
-	  ret = krb5_fcc_open_file(context, id, FCC_OPEN_RDONLY);
-	  if (ret) {
+	  kret = krb5_fcc_open_file(context, id, FCC_OPEN_RDONLY);
+	  if (kret) {
 	      krb5_xfree(fcursor);
-	      return ret;
+	      return kret;
 	  }
      }
      else
@@ -69,6 +69,6 @@ krb5_fcc_start_seq_get(context, id, cursor)
      fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
 
-     MAYBE_CLOSE(context, id, ret);
-     return ret;
+     MAYBE_CLOSE(context, id, kret);
+     return kret;
 }

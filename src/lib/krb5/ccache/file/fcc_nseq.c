@@ -48,7 +48,7 @@
  * Errors:
  * system errors
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_fcc_next_cred(context, id, cursor, creds)
    krb5_context context;
    krb5_ccache id;
@@ -56,7 +56,6 @@ krb5_fcc_next_cred(context, id, cursor, creds)
    krb5_creds *creds;
 {
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
-     int ret;
      krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
      krb5_int32 int32;
@@ -68,11 +67,11 @@ krb5_fcc_next_cred(context, id, cursor, creds)
 
      fcursor = (krb5_fcc_cursor *) *cursor;
 
-     ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, SEEK_SET);
-     if (ret < 0) {
-	 ret = krb5_fcc_interpret(context, errno);
-	 MAYBE_CLOSE(context, id, ret);
-	 return ret;
+     kret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, SEEK_SET);
+     if (kret < 0) {
+	 kret = krb5_fcc_interpret(context, errno);
+	 MAYBE_CLOSE(context, id, kret);
+	 return kret;
      }
 
      kret = krb5_fcc_read_principal(context, id, &creds->client);
