@@ -144,7 +144,8 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
       user interrupt, fail */
 
    if ((ret == KRB5_KDC_UNREACH) ||
-       (ret == KRB5_LIBOS_PWDINTR))
+       (ret == KRB5_LIBOS_PWDINTR) ||
+	   (ret == KRB5_REALM_CANT_RESOLVE))
       goto cleanup;
 
    /* if the reply did not come from the master kdc, try again with
@@ -166,7 +167,8 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
       /* if the master is unreachable, return the error from the
 	 slave we were able to contact */
 
-      if (ret2 == KRB5_KDC_UNREACH)
+      if ((ret2 == KRB5_KDC_UNREACH) ||
+		  (ret2 == KRB5_REALM_CANT_RESOLVE))
 	 goto cleanup;
 
       ret = ret2;

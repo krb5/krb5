@@ -1,3 +1,11 @@
+2000-04-07  Jeffrey Altman  <jaltman@columbia.edu>
+
+        * gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c (krb5_get_init_creds_password)
+        when determining whether or not to retry with a "master kdc" do not retry if
+        the return value from the first attempt was KRB5_REALM_CANT_RESOLV.  Also, do 
+        not overwrite the return code if the return value from the access to the "master
+        kdc" was KRB5_REALM_CANT_RESOLV.
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* init_ctx.c (init_common), gic_pwd.c (krb5_get_as_key_password,

@@ -87,7 +87,7 @@ krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
 
    /* If all the kdc's are unavailable fail */
 
-   if (ret == KRB5_KDC_UNREACH)
+   if ((ret == KRB5_KDC_UNREACH) || (ret == KRB5_REALM_CANT_RESOLVE))
       goto cleanup;
 
    /* if the reply did not come from the master kdc, try again with
@@ -109,7 +109,7 @@ krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
       /* if the master is unreachable, return the error from the
 	 slave we were able to contact */
 
-      if (ret2 == KRB5_KDC_UNREACH)
+      if ((ret2 == KRB5_KDC_UNREACH) || (ret == KRB5_REALM_CANT_RESOLVE))
 	 goto cleanup;
 
       ret = ret2;
