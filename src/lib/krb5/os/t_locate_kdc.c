@@ -123,5 +123,8 @@ int main (int argc, char *argv[])
     }
     if (err) kfatal (err);
     print_addrs ();
+
+    krb5int_free_addrlist (&al);
+    krb5_free_context (ctx);
     return 0;
 }
