@@ -1,3 +1,8 @@
+Wed Sep 28 14:36:29 1994  Mark Eichin  (eichin@rtl.cygnus.com)
+
+	* Makefile.in: always put $(K4LIB) before $(KLIB) so that
+	references to libcrypto.a get resolved.
+
 Thu Aug 18 18:57:44 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* Makefile.in:
