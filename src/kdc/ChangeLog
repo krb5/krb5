@@ -1,3 +1,17 @@
+Sat Apr 29 00:13:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_util.c (kdc_process_tgs_req): Make sure apreq->ticket gets
+		freed, since it isn't being passed back to the caller 
+		(anymore).
+
+Fri Apr 28 21:28:45 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): Free header_ticket when we're
+		done with it.  (Prevents massive memory leak).
+
+	* Makefile.in (depend): Use $(LD) instead of $(CC) so that we can
+		do purify checking.
+
 Fri Apr 28 18:05:52 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.

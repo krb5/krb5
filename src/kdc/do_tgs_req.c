@@ -632,6 +632,8 @@ cleanup:
 				   fromstring, response);
     }
     
+    if (header_ticket)
+	krb5_free_ticket(kdc_context, header_ticket);
     if (request)
 	krb5_free_kdc_req(kdc_context, request);
     if (cname)

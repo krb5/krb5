@@ -292,7 +292,6 @@ cleanup_auth_context:
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:
-    apreq->ticket = 0;		/* Caller will free the ticket */
     krb5_free_ap_req(kdc_context, apreq);
     return retval;
 }
