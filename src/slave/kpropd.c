@@ -109,7 +109,8 @@ void	recv_error();
 static void usage()
 {
 	fprintf(stderr,
-		"\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n");
+		"\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n",
+		progname);
 	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_edit_pathname]\n\n",
 		progname);
 	exit(1);
@@ -150,7 +151,7 @@ void do_standalone()
 	sin.sin_port = sp->s_port;
 	if (bind(finet, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
 		perror("bind");
-		com_err(progname, errno, "while binding listener socker");
+		com_err(progname, errno, "while binding listener socket");
 		exit(1);
 	}
 	if (!debug)
@@ -512,7 +513,19 @@ kerberos_authenticate(fd, clientp, sin)
 	receiver_addr.contents = (krb5_octet *) malloc(sizeof(r_sin.sin_addr));
 	memcpy((char *) receiver_addr.contents, (char *) &r_sin.sin_addr,
 	       sizeof(r_sin.sin_addr));
-	
+
+	if (debug) {
+		char *name;
+		if (retval = krb5_unparse_name(server, &name)) {
+			com_err(progname, retval,
+				"While unparsing client name");
+			exit(1);
+		}
+		printf("krb5_recvauth(&%d, %s, %s, ...)\n", fd,
+		       kprop_version, name);
+		free(name);
+	}
+
 	if (retval = krb5_recvauth((void *) &fd, kprop_version, server,
 				   &sender_addr, kerb_keytab, NULL, NULL,
 				   "dfl", &my_seq_num, clientp, &ticket,
