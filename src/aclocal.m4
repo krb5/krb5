@@ -541,6 +541,14 @@ if test $ac_cv_c_compiler_gnu = yes ; then
      else HAVE_GCC=
 fi
 AC_SUBST(HAVE_GCC)
+AC_CACHE_CHECK([for GNU linker], krb5_cv_prog_gnu_ld,
+[krb5_cv_prog_gnu_ld=no
+if test "$GCC" = yes; then
+  if AC_TRY_COMMAND([$CC -Wl,-v 2>&1 dnl
+			| grep "GNU ld" > /dev/null]); then
+    krb5_cv_prog_gnu_ld=yes
+  fi
+fi])
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-comment used to be used for SunOS system header <sys/stream.h>
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.

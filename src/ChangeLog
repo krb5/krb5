@@ -1,3 +1,7 @@
+2004-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (WITH_CC): Check for GNU linker.
+
 2004-09-21  Tom Yu  <tlyu@mit.edu>
 
 	* alcocal.m4 (AC_LIBRARY_NET): Additionally, check ns_initparse,
