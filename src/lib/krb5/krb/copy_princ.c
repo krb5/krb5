@@ -50,6 +50,8 @@ krb5_principal *outprinc;
     if (tempprinc == 0)
 	return ENOMEM;
 
+    *tempprinc = *inprinc;	/* Copy all of the non-allocated pieces */
+
     nelems = krb5_princ_size(inprinc);
     tempprinc->data = malloc(nelems * sizeof(krb5_data));
 
@@ -68,7 +70,21 @@ krb5_principal *outprinc;
 	    free (tempprinc);
 	    return ENOMEM;
 	}
+	memcpy(krb5_princ_component(tempprinc, i)->data,
+	       krb5_princ_component(inprinc, i)->data, len);
     }
+
+    tempprinc->realm.data =
+	    malloc(tempprinc->realm.length = inprinc->realm.length);
+    if (!tempprinc->realm.data) {
+	    for (i = 0; i < nelems; i++)
+		    free(krb5_princ_component(tempprinc, i)->data);
+	    free(tempprinc->data);
+	    free(tempprinc);
+	    return ENOMEM;
+    }
+    memcpy(tempprinc->realm.data, inprinc->realm.data, inprinc->realm.length);
+    
     *outprinc = tempprinc;
     return 0;
 }
