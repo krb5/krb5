@@ -70,7 +70,7 @@ typedef DB DBM;
 #define dbm_nextkey	kdb2_dbm_nextkey
 #define dbm_open	kdb2_dbm_open
 #define dbm_store	kdb2_dbm_store
-#define dbm_dirinfo	kdb2_dbm_dirinfo
+#define dbm_dirfno	kdb2_dbm_dirfno
 #define dbm_error	kdb2_dbm_error
 #define dbm_clearerr	kdb2_dbm_clearerr
 
