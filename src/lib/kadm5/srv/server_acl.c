@@ -71,7 +71,7 @@ static int acl_debug_level = 0;
  * the case where the ACL file is not present, this entry controls what can
  * be done.
  */
-static const char *acl_catchall_entry = NULL;
+static const char *acl_catchall_entry = "";
 
 static const char *acl_line2long_msg = "%s: line %d too long, truncated\n";
 static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s\n";
