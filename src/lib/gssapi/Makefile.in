@@ -42,7 +42,7 @@ install:: libgssapi_krb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
 
 clean-unix::
-	$(RM) libgssapi_krb5.a
+	$(RM) libgssapi_krb5.a libgssapi_krb5.stamp
 
 clean-mac::
 	$(RM) libgssapi_krb5.a

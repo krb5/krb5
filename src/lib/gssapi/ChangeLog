@@ -1,3 +1,7 @@
+Mon May  6 21:33:25 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove libgssapi_krb5.stamp.
+
 Tue Feb 27 22:10:48 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (all-windows, clean-windows): Add mechglue to the
