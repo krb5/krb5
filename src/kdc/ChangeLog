@@ -1,3 +1,16 @@
+Tue Mar 14 15:25:38 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in, Makefile.in: Use the libdes425 library so that the
+		DES code doesn't get dragged in twice.
+
+	* kdc_util.c (validate_as_request): Allow a client to obtain a
+		password changing ticket, even if the client's key is
+		expired.
+
+	* main.c (usage, process_args, main): The KDC will disassociate
+		itself from the terminal by default, unless the -n option
+		is given.
+
 Thu Mar  2 12:16:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

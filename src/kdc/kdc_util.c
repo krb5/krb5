@@ -717,8 +717,10 @@ char	**status;
 	return KDC_ERR_BADOPTION;
     }
 
-    /* The client's password must not be expired */
-    if (client.pw_expiration && client.pw_expiration < kdc_time) {
+    /* The client's password must not be expired, unless the server is
+      a KRB5_KDC_PWCHANGE_SERVICE. */
+    if (client.pw_expiration && client.pw_expiration < kdc_time &&
+	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE)) {
 	*status = "CLIENT KEY EXPIRED";
 #ifdef KRBCONF_VAGUE_ERRORS
 	return(KRB_ERR_GENERIC);

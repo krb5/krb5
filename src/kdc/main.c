@@ -39,6 +39,8 @@
 #include "extern.h"
 #include "kdc5_err.h"
 
+static int nofork = 0;
+
 static void
 kdc_com_err_proc(whoami, code, format, pvar)
 	const char *whoami;
@@ -121,7 +123,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterkeytype] [-M masterkeyname] [-p port]\n", name);
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterkeytype] [-M masterkeyname] [-p port] [-n]\n", name);
     return;
 }
 
@@ -144,7 +146,7 @@ char **argv;
 
     extern char *optarg;
 
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:n")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    db_realm = optarg;
@@ -157,6 +159,9 @@ char **argv;
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
+	    break;
+	case 'n':
+	    nofork++;			/* don't detach from terminal */
 	    break;
 	case 'k':			/* keytype for master key */
 	    master_keyblock.keytype = atoi(optarg);
@@ -449,6 +454,11 @@ char *argv[];
     }
     if (retval = setup_network(argv[0])) {
 	com_err(argv[0], retval, "while initializing network");
+	finish_args(argv[0]);
+	return 1;
+    }
+    if (!nofork && daemon(0, 0)) {
+	com_err(argv[0], errno, "while detaching from tty");
 	finish_args(argv[0]);
 	return 1;
     }
