@@ -1,3 +1,9 @@
+2001-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* commands.c (tn): Don't crash printing null hostname in case
+	where supplied destination is a numeric address that doesn't map
+	to a hostname.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use $(srcdir).

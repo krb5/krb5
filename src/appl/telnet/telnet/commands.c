@@ -2529,8 +2529,9 @@ tn(argc, argv)
 	error = getaddrinfo (hostp, portp, &hints, &addrs);
 	if (error == 0) {
 	    if (getnameinfo (addrs->ai_addr, addrs->ai_addrlen,
-			     _hostname, sizeof(_hostname), 0, 0, NI_NAMEREQD) == 0)
-		hostname = _hostname;
+			     _hostname, sizeof(_hostname), 0, 0, NI_NAMEREQD) != 0)
+		strncpy(_hostname, hostp, sizeof (_hostname));
+	    hostname = _hostname;
 	} else {
 	not_numeric:
 	    hints.ai_flags = AI_CANONNAME;
