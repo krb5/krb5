@@ -44,6 +44,9 @@ extern char *malloc(), *index(), *calloc();
 #define	COMPONENT_SEP	'/'
 #define	MAXRLMSZ	256		/* XXX! */
 
+
+#define xfree(val) free((char *)val)
+
 static char *
 strsave(string)
 char *string;
@@ -76,7 +79,7 @@ krb5_principal *principal;
 	if (!realmname)
 	    return(ENOMEM);
 	if (retval = krb5_get_default_realm(MAXRLMSZ, realmname)) {
-	    free(realmname);
+	    xfree(realmname);
 	    return(retval);
 	}
     }
@@ -89,16 +92,16 @@ krb5_principal *principal;
     /* +1 for realm, +1 for null pointer at end */
     retprinc = (krb5_data **) calloc(ncomponents+2, sizeof(krb5_data *));
     if (!retprinc) {
-	free(realmname);
+	xfree(realmname);
 	return(ENOMEM);
     }
     retprinc[ncomponents+1] = 0;
     for (i = 0; i <= ncomponents; i++) {
 	if (!(retprinc[i] = (krb5_data *) malloc(sizeof(krb5_data)))) {
 	    for (i--; i >= 0; i--)
-		free(retprinc[i]);
-	    free(retprinc);
-	    free(realmname);
+		xfree(retprinc[i]);
+	    xfree(retprinc);
+	    xfree(realmname);
 	    return(ENOMEM);
 	}
     }
@@ -127,12 +130,12 @@ krb5_principal *principal;
 	if (!(retprinc[ncomponents]->data =
 	    malloc(retprinc[ncomponents]->length+1))) {
 	    /* ut oh...clean up */
-	    free(retprinc[ncomponents]);
+	    xfree(retprinc[ncomponents]);
 	    for (ncomponents--; ncomponents >= 0; ncomponents--) {
-		free(retprinc[ncomponents]->data);
-		free(retprinc[ncomponents]);
+		xfree(retprinc[ncomponents]->data);
+		xfree(retprinc[ncomponents]);
 	    }
-	    free(retprinc);
+	    xfree(retprinc);
 	    return(ENOMEM);
 	}
 	strncpy(retprinc[ncomponents]->data, cp2,
