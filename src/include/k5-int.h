@@ -519,11 +519,6 @@ krb5_error_code krb5_get_krbhst
 krb5_error_code krb5_free_krbhst
 	KRB5_PROTOTYPE((krb5_context,
 		char * const * ));
-krb5_error_code krb5_gen_replay_name
-	KRB5_PROTOTYPE((krb5_context,
-		const krb5_address *,
-		const char *,
-		char **));
 krb5_error_code krb5_create_secure_file
 	KRB5_PROTOTYPE((krb5_context,
 		   const char * pathname));

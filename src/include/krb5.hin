@@ -2186,6 +2186,11 @@ krb5_error_code krb5_gen_portaddr
 		const krb5_address *,
 		krb5_const_pointer,
 		krb5_address **));
+krb5_error_code krb5_gen_replay_name
+	KRB5_PROTOTYPE((krb5_context,
+		const krb5_address *,
+		const char *,
+		char **));
 krb5_error_code krb5_make_fulladdr
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_address *,
