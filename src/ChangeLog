@@ -1,6 +1,12 @@
+2002-10-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Comment out code looking for the
+	in-tree version of autoconf that we deleted.
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
-	* Makefile.in (install-headers-prerecurse): Create directories in which we install headers
+	* Makefile.in (install-headers-prerecurse): Create directories in
+	which we install headers
 
 2002-09-24  Ezra Peisach  <epeisach@bu.edu>
 

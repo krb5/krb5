@@ -73,17 +73,17 @@ dnl it's relative to the directory of the configure script.  Since the
 dnl automatic makefile rules to rerun autoconf cd into that directory, the
 dnl right thing happens.
 dnl
-if test -f $srcdir/$ac_reltopdir/util/autoconf/autoconf ; then
-	AUTOCONF=$ac_reltopdir/util/autoconf/autoconf
-	AUTOCONFFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
-	AUTOHEADER=$ac_reltopdir/util/autoconf/autoheader
-	AUTOHEADERFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
-else
+dnl if test -f $srcdir/$ac_reltopdir/util/autoconf/autoconf ; then
+dnl	AUTOCONF=$ac_reltopdir/util/autoconf/autoconf
+dnl	AUTOCONFFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
+dnl	AUTOHEADER=$ac_reltopdir/util/autoconf/autoheader
+dnl	AUTOHEADERFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
+dnl else
 	AUTOCONF=autoconf
 	AUTOCONFFLAGS=
 	AUTOHEADER=autoheader
 	AUTOHEADERFLAGS=
-fi
+dnl fi
 AC_SUBST(AUTOCONF)
 AC_SUBST(AUTOCONFFLAGS)
 AC_SUBST(AUTOHEADER)
