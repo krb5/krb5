@@ -19,6 +19,8 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest);
 void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu);
 int stdccCredsMatch(krb5_context context, krb5_creds *base, krb5_creds *match, int whichfields);
 int bitTst(int var, int mask);
+cc_int32 krb5_free_cc_cred_union (cred_union** creds);
+
 #define kAddressArray 4 
 #define kAuthDataArray 5
 

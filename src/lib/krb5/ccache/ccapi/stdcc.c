@@ -365,8 +365,9 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_store
 	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
 		
-	/* free the cred union */
-	err = cc_free_creds(gCntrlBlock, &cu);
+	/* free the cred union using our local version of cc_free_creds()
+	   since we allocated it locally */
+	err = krb5_free_cc_cred_union(&cu);
 		 
 	cache_changed();
 	return err;
@@ -441,7 +442,8 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
 	/* copy data	(with translation) */
 	dupCCtoK5(context, credU->cred.pV5Cred, creds);
 	
-	/* free our version of the cred */
+	/* free our version of the cred - okay to use cc_free_creds() here
+	   because we got it from the CCache library */
 	cc_free_creds(gCntrlBlock, &credU);
 	
 	return 0;
@@ -534,6 +536,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 		if (err)
 			break;
 		
+		/* okay to call cc_free_creds() here because we got credU from CCache lib */
 		cc_free_creds(gCntrlBlock, &credU);
 	}
 #endif
@@ -688,8 +691,9 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
     	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
     	
-    	/* free the temp cred union */
-    	err = cc_free_creds(gCntrlBlock, &cu);
+    	/* free the cred union using our local version of cc_free_creds()
+	       since we allocated it locally */
+    	err = krb5_free_cc_cred_union(&cu);
 	cache_changed();
     	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
