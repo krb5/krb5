@@ -1,3 +1,9 @@
+Mon Mar 30 13:57:07 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* t_inetd.c: Include stdlib.h (if present) for atoi() prototype, 
+	Include unistd.h (if present) for dup() prototype.
+
+
 Wed Feb 18 16:28:37 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

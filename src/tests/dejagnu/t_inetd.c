@@ -32,6 +32,10 @@
 
 
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -41,6 +45,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "com_err.h"
 
@@ -54,6 +62,7 @@ static void usage()
 	exit(1);
 }
 
+int
 main(argc, argv)
     int argc;
     char **argv;
