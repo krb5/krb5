@@ -18,7 +18,7 @@
 #ifndef KRB5_RC_DFL_H
 #define KRB5_RC_DFL_H
 
-krb5_rc_ops krb5_rc_dfl_ops; /* initialized to the following */
+extern krb5_rc_ops krb5_rc_dfl_ops; /* initialized to the following */
 
 krb5_error_code krb5_rc_dfl_init PROTOTYPE((krb5_rcache,krb5_deltat));
 krb5_error_code krb5_rc_dfl_recover PROTOTYPE((krb5_rcache)); 
