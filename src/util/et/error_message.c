@@ -51,18 +51,21 @@ long code;
     offset = (int) l_offset;
     table_num = code - l_offset;
     if (!table_num) {
-#ifdef HAS_SYSERRLIST
 #ifdef HAS_STRERROR
-	return strerror (offset);
+	cp = strerror(offset);
+	if (cp)
+	    return cp;
+	goto oops;
 #else
+#ifdef HAS_SYSERRLIST
         if (offset < sys_nerr)
 	    return(sys_errlist[offset]);
 	else
 	    goto oops;
-#endif
 #else
 		goto oops;
-#endif
+#endif /* HAS_SYSERRLIST */
+#endif /* HAS_STRERROR */
     }
     for (et = _et_list; et; et = et->next) {
 	if (et->table->base == table_num) {
