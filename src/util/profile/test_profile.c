@@ -150,6 +150,7 @@ int main(argc, argv)
     }
     if (retval) {
 	    com_err(argv[0], retval, "while getting values");
+	    profile_release(profile);
 	    exit(1);
     }
     if (print_value) {
