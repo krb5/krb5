@@ -86,6 +86,7 @@ krb5_data **response;			/* filled in with a response packet */
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
     encrypting_key.contents = 0;
+    reply.padata = 0;
     session_key.contents = 0;
 
     ktypes2str(ktypestr, sizeof(ktypestr),
@@ -365,7 +366,6 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
-    reply.padata = 0;
     reply.client = request->client;
     reply.ticket = &ticket_reply;
     reply_encpart.session = &session_key;

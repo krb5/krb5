@@ -1,3 +1,10 @@
+2002-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Fix previous patch; it caused an
+	uninitialized pointer to be dereferenced under certain error
+	conditions.
+	[pullup from trunk]
+
 2002-10-30  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_util.c (add_to_transited): Don't include trailing null in
