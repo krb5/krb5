@@ -299,8 +299,8 @@ krb5_rcache id;
  for (;;)
   {
 #define FREE1 FREE(rep);
-#define FREE2 FREE(rep->client); FREE(rep);
-#define FREE3 FREE(rep->server); FREE(rep->client); FREE(rep);
+#define FREE2 {FREE(rep->client); FREE(rep);}
+#define FREE3 {FREE(rep->server); FREE(rep->client); FREE(rep);}
 #define CLOSE krb5_rc_io_close(&t->d);
 
    if (krb5_rc_io_mark(&t->d)) {
