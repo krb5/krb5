@@ -1,3 +1,13 @@
+Wed Jul 24 14:18:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (all): Use $(LD) instead of $(CC) for link stage.
+
+	* dump.c (dump_db): Zero out kadm5_principal_ent_rec structure
+		before passing to rpc code. 
+
+	* kadmin.c (kadmin_addprinc, kadmin_getprinc, kadmin_modprinc):
+		   Zero out structures before passing to rpc code.
+
 Tue Jul 23 17:02:04 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in: add dependency for kadmin_ct.o

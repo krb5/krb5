@@ -6,10 +6,10 @@ OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o keytab.o
 all:: $(PROG).local $(PROG)
 
 $(PROG).local: $(OBJS) $(SRVDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG).local $(OBJS) $(SRVLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG).local $(OBJS) $(SRVLIBS)
 
 $(PROG): $(OBJS) $(CLNTDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
 
 kadmin_ct.o: kadmin_ct.c
 

@@ -453,6 +453,8 @@ void dump_db(argc, argv)
     dump_name = k5beta6_fmt_name;
     arglist.verbose = 0;
 
+    memset(&princ_ent, 0, sizeof(princ));
+
     /*
      * Parse the qualifiers.
      */

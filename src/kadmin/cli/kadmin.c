@@ -806,6 +806,9 @@ void kadmin_addprinc(argc, argv)
     static char newpw[1024];
     static char prompt1[1024], prompt2[1024];
     
+    /* Zero all fields in request structure */
+    memset(&princ, 0, sizeof(princ));
+
     princ.attributes = 0;
     if (kadmin_parse_princ_args(argc, argv,
 				&princ, &mask, &pass, &randkey,
@@ -894,6 +897,9 @@ void kadmin_modprinc(argc, argv)
 	 return;
     }
 
+    memset(&oldprinc, 0, sizeof(oldprinc));
+    memset(&princ, 0, sizeof(princ));
+
     retval = kadmin_parse_name(argv[argc - 1], &kprinc);
     if (retval) {
 	com_err("modify_principal", retval, "while parsing principal");
@@ -959,6 +965,11 @@ void kadmin_getprinc(argc, argv)
 	fprintf(stderr, "usage: get_principal [-terse] principal\n");
 	return;
     }
+
+
+    memset(&dprinc, 0, sizeof(dprinc));
+    memset(&princ, 0, sizeof(princ));
+
     retval = kadmin_parse_name(argv[argc - 1], &princ);
     if (retval) {
 	com_err("get_principal", retval, "while parsing principal");
