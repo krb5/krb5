@@ -90,7 +90,7 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "r:fpl:s:c:kt:")) != EOF) {
+    while ((option = getopt(argc, argv, "r:fpl:s:c:kt:v")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
@@ -99,6 +99,10 @@ main(argc, argv)
 		fprintf(stderr, "Bad lifetime value %s\n", optarg);
 		errflg++;
 	    }
+	    break;
+	case 'v':
+	    /* validate the ticket */
+	    options |= KDC_OPT_VALIDATE;
 	    break;
 	case 'p':
 	    options |= KDC_OPT_PROXIABLE;
@@ -268,6 +272,18 @@ main(argc, argv)
     } else
 	my_creds.times.renew_till = 0;
 
+    if (options & KDC_OPT_VALIDATE) {
+        /* don't use get_in_tkt, just use mk_req... */
+        krb5_data outbuf;
+
+        code = krb5_validate_tgt(kcontext, ccache, server, &outbuf);
+	if (code) {
+	  com_err (argv[0], code, "validating tgt");
+	  exit(1);
+	}
+	/* should be done... */
+	exit(0);
+    }
 #ifndef NO_KEYTAB
     if (!use_keytab)
 #endif
@@ -323,4 +339,40 @@ main(argc, argv)
     krb5_free_context(kcontext);
     
     exit(0);
+}
+
+/* stripped down version of krb5_mk_req */
+krb5_error_code krb5_validate_tgt(context, ccache, server, outbuf)
+     krb5_context context;
+     krb5_ccache ccache;
+     krb5_principal	  server; /* tgtname */
+     krb5_data *outbuf;
+{
+    krb5_auth_context   * auth_context = 0;
+    const krb5_flags      ap_req_options;
+    krb5_data           * in_data;
+
+    krb5_error_code 	  retval;
+    krb5_creds 		* credsp;
+    krb5_creds 		  creds;
+
+    /* obtain ticket & session key */
+    memset((char *)&creds, 0, sizeof(creds));
+    if ((retval = krb5_copy_principal(context, server, &creds.server)))
+	goto cleanup;
+
+    if ((retval = krb5_cc_get_principal(context, ccache, &creds.client)))
+	goto cleanup_creds;
+
+    if ((retval = krb5_get_credentials_validate(context, 0,
+						ccache, &creds, &credsp)))
+	goto cleanup_creds;
+
+    /* we don't actually need to do the mk_req, just get the creds. */
+cleanup_creds:
+    krb5_free_cred_contents(context, &creds);
+
+cleanup:
+
+    return retval;
 }

@@ -1,3 +1,14 @@
+Fri May  3 00:28:10 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kinit.c (krb5_validate_tgt): new function, takes a credential
+	cache with an tgt with the "invalid flag" set, and asks the kdc to
+	validate it. Wipes cache and stores only the newly validated
+	credential. (After all, there won't be any others, because the
+	invalid krbtgt couldn't have gotten them.) Most of the code is
+	taken from krb5_mk_req, since it did the right thing.
+	(main): add -v option, validates the ticket already in the
+	selected cache.
+
 Wed May  1 02:37:17 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kinit.c (main): add -s starttime option. Have it accept a delta
