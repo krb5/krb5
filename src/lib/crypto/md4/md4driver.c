@@ -6,7 +6,7 @@
 
 #ifndef lint
 static char rcsid_md4driver_c[] = "$Id$";
-#endif lint
+#endif /* lint */
 
 /*
  **********************************************************************
