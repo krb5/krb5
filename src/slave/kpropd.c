@@ -279,7 +279,7 @@ void doit(fd)
 		exit(1);
 	}
 	omask = umask(077);
-	lock_fd = fopen(temp_file_name, O_RDONLY);
+	lock_fd = open(temp_file_name, O_RDONLY, 0600);
 	(void) umask(omask);
 	retval = krb5_lock_file(kpropd_context, lock_fd, 
 				KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
