@@ -1,3 +1,7 @@
+Mon Aug 12 11:47:31 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin_ct.ct: fix typo in add_principal
+
 Sun Aug 11 16:29:27 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* keytab.c: reset static global "quiet" each time; don't print

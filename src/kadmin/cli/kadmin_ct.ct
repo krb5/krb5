@@ -24,7 +24,7 @@
 command_table kadmin_cmds;
 
 request kadmin_addprinc, "Add principal",
-	add_prinicpal, addprinc, ank;
+	add_principal, addprinc, ank;
 
 request kadmin_delprinc, "Delete principal",
 	delete_principal, delprinc;
