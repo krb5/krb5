@@ -47,7 +47,11 @@
 #ifndef _GSSAPIP_KRB5_H_
 #define _GSSAPIP_KRB5_H_
 
+#if TARGET_OS_MAC
+#include <Kerberos/krb5.h>
+#else
 #include <krb5.h>
+#endif
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
@@ -60,11 +64,7 @@
 #undef minor
 #endif
 
-#ifndef macintosh
-#include "../generic/gssapiP_generic.h"
-#else
 #include "gssapiP_generic.h"
-#endif
 
 /* The include of gssapi_krb5.h will dtrt with the above #defines in
  * effect.

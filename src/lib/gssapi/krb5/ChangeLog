@@ -1,3 +1,24 @@
+2002-07-14  Alexandra Ellwood <lxs@mit.edu>
+
+	* gssapi_krb5.h: Added #include of gssapi.h and gssapi_generic.h
+	for the Mac because we can't assume people will include them and
+	get the OID macro and the old names on the Mac.
+
+	* disp_status.c: Updated Mac OS X header paths.
+
+	* gssapiP_krb5.h: Updated Mac OS X header paths and added
+	prototype on Mac.
+
+	* gssapi_krb5.h: Updated Mac OS X headers to new framework layout
+
+	[pullups from 1-2-2-branch]
+
+2002-07-14  Miro Jurisic  <meeroh@mit.edu>
+
+	* gssapi_krb5.h, gssapi_krb5.c: Added oids from rfc 1964 using the
+	suggested names.
+	[pullup from 1-2-2-branch]
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* accept_sec_context.c (rd_and_store_for_creds): Remove
