@@ -257,3 +257,6 @@
     _krb5_verify_init_creds
 	_krb5_verify_init_creds_opt_init
 	_krb5_verify_init_creds_opt_set_ap_req_nofail
+	_krb5_address_compare
+	_krb5_address_order
+	_krb5_address_search
