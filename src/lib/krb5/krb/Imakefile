@@ -65,6 +65,7 @@ OBJS=	addr_comp.o	\
 	mk_safe.o	\
 	parse.o		\
 	pr_to_salt.o	\
+	preauth.o	\
 	princ_comp.o	\
 	rd_error.o	\
 	rd_priv.o	\
@@ -122,6 +123,7 @@ SRCS=	$(SRCDIR)addr_comp.c	\
 	$(SRCDIR)mk_safe.c	\
 	$(SRCDIR)parse.c	\
 	$(SRCDIR)pr_to_salt.c	\
+	$(SRCDIR)preauth.c	\
 	$(SRCDIR)princ_comp.c	\
 	$(SRCDIR)rd_error.c	\
 	$(SRCDIR)rd_priv.c	\
