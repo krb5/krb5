@@ -28,6 +28,7 @@
 #define	DEFAULT_CONFIG_FILENAME	"/etc/krb.conf"
 #define	DEFAULT_TRANS_FILENAME	"/etc/krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"/etc/aname"
+#define	DEFAULT_KEYTAB_NAME	"FILE:/etc/v5srvtab"
 
 #define KDC_PORTNAME	"kerberos5"	/* for /etc/services or equiv. */
 
