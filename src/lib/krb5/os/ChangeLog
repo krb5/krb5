@@ -1,3 +1,19 @@
+1999-03-12  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* init_os_ctx.c (krb5_os_init_context, krb5_os_free_context):
+		Sample the ccdefault name at the time when we create the
+		context.  Free the ccdefault name when we free the os
+		context.
+
+	* ccdefname.c (krb5_cc_default_name, krb5_cc_set_default_name):
+		Check to make sure the context is valid and return an
+		error if it isn't.
+
+1999-03-11  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* ccdefname.c (get_from_os): Add missing call to get_from_registry
+		under windows.
+
 Fri Feb 19 20:49:18 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ccdefname.c (get_from_os): Add missing close-paren; also replace

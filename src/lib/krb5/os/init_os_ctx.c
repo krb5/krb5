@@ -184,6 +184,9 @@ krb5_os_init_context(ctx)
 	os_ctx->time_offset = 0;
 	os_ctx->usec_offset = 0;
 	os_ctx->os_flags = 0;
+	os_ctx->default_ccname = 0;
+
+	krb5_cc_set_default_name(ctx, NULL);
 
 	retval = os_init_paths(ctx, FALSE);
 
@@ -240,6 +243,9 @@ krb5_os_free_context(ctx)
 	
 	if (!os_ctx)
 		return;
+
+	if (os_ctx->default_ccname)
+		free(os_ctx->default_ccname);
 
 	os_ctx->magic = 0;
 	free(os_ctx);
