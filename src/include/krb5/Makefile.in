@@ -30,7 +30,7 @@ KRB5_INCDIR = $(KRB5ROOT)/include
 
 install:: $(KRB5_HEADERS) config.h osconf.h autoconf.h
 	@set -x; for f in $(KRB5_HEADERS) config.h osconf.h ; \
-	do cp $$f $(KRB5_INCDIR)/krb5/$$f ; \
+	do cp $(srcdir)/$$f $(KRB5_INCDIR)/krb5/$$f ; \
 	done
 
 PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
