@@ -1,7 +1,7 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
-	* Makefile.in (MAYBE_ET-k5, MAYBE_ET-sys, MAYBE_SS-k5,
-	MAYBE_SS-sys): New variables.
+	* Makefile.in (MAYBE_ET_k5, MAYBE_ET_sys, MAYBE_SS_k5,
+	MAYBE_SS_sys): New variables.
 	(MY_SUBDIRS): Refer to them, choosing via new configure
 	substitutions.
 

@@ -1,14 +1,14 @@
 thisconfigdir=./..
 myfulldir=util
 mydir=util
-MY_SUBDIRS=$(MAYBE_ET-@COM_ERR_VERSION@) $(MAYBE_SS-@SS_VERSION@) \
+MY_SUBDIRS=$(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
 	profile pty db2 send-pr
 BUILDTOP=$(REL)..
 
-MAYBE_ET-k5 = et
-MAYBE_SS-k5 = ss
-MAYBE_ET-sys =
-MAYBE_SS-sys =
+MAYBE_ET_k5 = et
+MAYBE_SS_k5 = ss
+MAYBE_ET_sys =
+MAYBE_SS_sys =
 
 MAC_SUBDIRS = profile et
 
