@@ -97,12 +97,20 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     reply->length = krb5_max_dgram_size;
 
+#if 0
+    /*
+     * Not needed for Windows, since it's done by the DLL
+     * initialization. XXX What about for the Macintosh?
+     *
+     * See below for commented out SOCKET_CLEANUP()
+     */
     if (SOCKET_INITIALIZE()) {  /* PC needs this for some tcp/ip stacks */
 	krb5_xfree(addr);
 	krb5_xfree(socklist);
 	free(reply->data);
         return SOCKET_ERRNO;
     }
+#endif
 
     /*
      * do exponential backoff.
@@ -203,10 +211,12 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     retval = KRB5_KDC_UNREACH;
  out:
-    SOCKET_CLEANUP();                           /* Done with sockets for now */
     for (i = 0; i < naddr; i++)
 	if (socklist[i] != INVALID_SOCKET)
 	    (void) closesocket (socklist[i]);
+#if 0
+    SOCKET_CLEANUP();                           /* Done with sockets for now */
+#endif
     krb5_xfree(addr);
     krb5_xfree(socklist);
     if (retval) {
