@@ -37,6 +37,15 @@ awk-windows:
 	if exist krb5_err.h copy krb5_err.h $(EHDRDIR)
 	if exist adm_err.h copy adm_err.h $(EHDRDIR)
 	if exist kv5m_err.h copy kv5m_err.h $(EHDRDIR)
+
+install:: $(HDRS)
+	@set -x; for f in $(HDRS) ; \
+	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
+	then true; else \
+		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
+		cp $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
+	fi; done
+
 #
 # dependencies for traditional makes
 #

@@ -1,3 +1,8 @@
+Fri Mar 24 14:25:15 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in (install): Add install rule for the error table
+		headers. 
+
 Tue Mar 21 21:06:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (all-unix): The "includes" target is *not* obsolete;
