@@ -131,7 +131,8 @@ char *argv[];
 	    mkey_password = optarg;
 	    break;
 	case 'p':                       /* prefix name to check */
-	    strcpy(principal_string, optarg);
+	    strncpy(principal_string, optarg, sizeof(principal_string) - 1);
+	    principal_string[sizeof(principal_string) - 1] = '\0';
 	    suffix = principal_string + strlen(principal_string);
 	    break;
        case 'n':                        /* how many to check */
@@ -199,9 +200,9 @@ char *argv[];
       if (check_princ(context, str_princ)) errors++;
 
       for (i = 2; i <= depth; i++) {
-	tmp2[0] = '\0';
 	(void) sprintf(tmp2, "/%s-DEPTH-%d", principal_string, i);
-	strcat(tmp, tmp2);
+	tmp2[sizeof(tmp2) - 1] = '\0';
+	strncat(tmp, tmp2, sizeof(tmp) - 1 - strlen(tmp));
 	str_princ = tmp;
 	if (check_princ(context, str_princ)) errors++;
       }

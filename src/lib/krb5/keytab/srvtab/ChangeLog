@@ -1,9 +1,14 @@
+2002-02-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kts_g_ent.c (krb5_ktsrvtab_get_entry): If a specific DES enctype
+	was requested, set the key's enctype to it, instead of always
+	returning des-cbc-crc.
+
 Fri Jan 28 19:53:44 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* kts_g_ent.c, ktsrvtab.h (krb5_ktsrvtab_get_entry): Change the
  	third argument to krb5_const_principal (from krb5_principal) to
  	agree with krb5_kts_ops entries.
-	
 
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 

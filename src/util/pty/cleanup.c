@@ -32,10 +32,12 @@ long pty_cleanup (slave, pid, update_utmp)
     int pid; /* May be zero for unknown.*/
     int update_utmp;
 {
+#ifdef VHANG_LAST
     int retval, fd;
+#endif
     
     if (update_utmp)
-	pty_update_utmp(PTY_DEAD_PROCESS,0,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
+	pty_update_utmp(PTY_DEAD_PROCESS, pid,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
     
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);
@@ -79,7 +81,7 @@ long pty_cleanup (slave, pid, update_utmp)
 	return errno;
       case 0:
 	ptyint_void_association();
-	if ( retval = ( pty_open_ctty( slave, &fd ))) 
+	if ((retval = pty_open_ctty(slave, &fd)))
 	  exit(retval);
 	ptyint_vhangup();
 	exit(0);

@@ -1,7 +1,7 @@
 #include "krb5.h"
 	
-#if defined(macintosh)
-#include "CCache2.h"
+#if TARGET_OS_MAC
+#include <CredentialsCache/CredentialsCache2.h>
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)

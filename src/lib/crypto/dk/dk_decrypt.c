@@ -41,7 +41,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 {
     krb5_error_code ret;
     size_t hashsize, blocksize, keybytes, keylength, enclen, plainlen;
-    unsigned char *plaindata, *kedata, *kidata, *cksum;
+    unsigned char *plaindata, *kedata, *kidata, *cksum, *cn;
     krb5_keyblock ke, ki;
     krb5_data d1, d2;
     unsigned char constantdata[K5CLENGTH];
@@ -108,6 +108,11 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
 
+    if (ivec != NULL && ivec->length == blocksize)
+	cn = d1.data + d1.length - blocksize;
+    else
+	cn = NULL;
+
     /* verify the hash */
 
     d1.length = hashsize;
@@ -133,6 +138,9 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     output->length = plainlen;
 
     memcpy(output->data, d2.data+blocksize, output->length);
+
+    if (cn != NULL)
+	memcpy(ivec->data, cn, blocksize);
 
     ret = 0;
 
@@ -163,7 +171,7 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 {
     krb5_error_code ret;
     size_t hashsize, blocksize, keybytes, keylength, enclen, plainlen;
-    unsigned char *plaindata, *kedata, *kidata, *cksum;
+    unsigned char *plaindata, *kedata, *kidata, *cksum, *cn;
     krb5_keyblock ke, ki;
     krb5_data d1, d2;
     unsigned char constantdata[K5CLENGTH];
@@ -229,6 +237,11 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 
     if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
+
+    if (ivec != NULL && ivec->length == blocksize)
+	cn = d1.data + d1.length - blocksize;
+    else
+	cn = NULL;
 
     /* verify the hash */
 
@@ -263,6 +276,9 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     output->length = plainlen;
 
     memcpy(output->data, d2.data+4+blocksize, output->length);
+
+    if (cn != NULL)
+	memcpy(ivec->data, cn, blocksize);
 
     ret = 0;
 

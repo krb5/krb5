@@ -1,7 +1,7 @@
 /*
  * kdc/network.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -35,6 +35,7 @@
 #include <sys/ioctl.h>
 #include <syslog.h>
 
+#include <stddef.h>
 #include <ctype.h>
 #ifdef HAVE_NETINET_IN_H
 #include <sys/types.h>
@@ -50,7 +51,9 @@
 #endif
 #include <arpa/inet.h>
 
+#ifndef ARPHRD_ETHER		/* protect on OpenBSD */
 #include <net/if.h>
+#endif
 
 extern int errno;
 
@@ -120,13 +123,17 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     int (*betweenfn) (void *);
     int (*pass2fn) (void *, struct sockaddr *);
 {
-    struct ifreq *ifr, ifreq;
+    struct ifreq *ifr, ifreq, *ifr2;
     struct ifconf ifc;
-    int s, code, n, i;
+    int s, code, n, i, j;
     int est_if_count = 8, est_ifreq_size;
     char *buf = 0;
     size_t current_buf_size = 0;
-    
+    int fail = 0;
+#ifdef SIOCGSIZIFCONF
+    int ifconfsize = -1;
+#endif
+
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
 	return SOCKET_ERRNO;
@@ -134,8 +141,17 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     /* At least on NetBSD, an ifreq can hold an IPv4 address, but
        isn't big enough for an IPv6 or ethernet address.  So add a
        little more space.  */
-    est_ifreq_size = sizeof (struct ifreq) + 8;
-    current_buf_size = est_ifreq_size * est_if_count;
+    est_ifreq_size = sizeof (struct ifreq) + 16;
+#ifdef SIOCGSIZIFCONF
+    code = ioctl (s, SIOCGSIZIFCONF, &ifconfsize);
+    if (!code) {
+	current_buf_size = ifconfsize;
+	est_if_count = ifconfsize / est_ifreq_size;
+    }
+#endif
+    if (current_buf_size == 0) {
+	current_buf_size = est_ifreq_size * est_if_count;
+    }
     buf = malloc (current_buf_size);
 
  ask_again:
@@ -149,12 +165,35 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	closesocket (s);
 	return retval;
     }
-    /* Test that the buffer was big enough that another ifreq could've
+    /* BSD 4.4 and similar systems truncate the address list if the
+       supplied buffer isn't big enough.
+
+       Test that the buffer was big enough that another ifreq could've
        fit easily, if the OS wanted to provide one.  That seems to be
        the only indication we get, complicated by the fact that the
        associated address may make the required storage a little
        bigger than the size of an ifreq.  */
-    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40) {
+#define SLOP (sizeof (struct ifreq) + 128)
+    if ((current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + SLOP
+	/* On AIX 4.3.3, ifc.ifc_len may be set to a larger size than
+	   provided under some circumstances.  On my test system, a
+	   supplied value of 32..112 gets me 112, but with no data
+	   filled in even at 112.  But larger input ifc_len values get
+	   me larger output values, so it's not necessarily the full
+	   desired output buffer size.  And as near as I can tell, the
+	   ifc_len output has little to do with the offset of the last
+	   byte in the buffer actually modified, except that both
+	   input and output ifc_len values are higher (i.e., no buffer
+	   overrun takes place in my testing).  */
+	 || current_buf_size < ifc.ifc_len)
+	/* But let's let SIOCGSIZIFCONF dominate, unless we discover
+	   it's broken somewhere.  */
+#ifdef SIOCGSIZIFCONF
+	&& ifconfsize <= 0
+#endif
+	/* And we need *some* sort of bounds.  */
+	&& current_buf_size <= 100000
+	) {
 	int new_size;
 	char *newbuf;
 
@@ -172,7 +211,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     }
 
     n = ifc.ifc_len;
+    if (n > current_buf_size)
+	n = current_buf_size;
 
+    /* Note: Apparently some systems put the size (used or wanted?)
+       into the start of the buffer, just none that I'm actually
+       using.  Fix this when there's such a test system available.
+       The Samba mailing list archives mention that NTP looks for the
+       size on these systems: *-fujitsu-uxp* *-ncr-sysv4*
+       *-univel-sysv*.  [raeburn:20010201T2226-05]  */
     for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
 
@@ -184,6 +231,7 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 
 	    continue;
 	}
+
 #ifdef IFF_LOOPBACK
 	    /* None of the current callers want loopback addresses.  */
 	if (ifreq.ifr_flags & IFF_LOOPBACK)
@@ -193,13 +241,32 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	if (!(ifreq.ifr_flags & IFF_UP))
 	    goto skip;
 
+	/* Make sure we didn't process this address already.  */
+	for (j = 0; j < i; j += ifreq_size(*ifr2)) {
+	    ifr2 = (struct ifreq *)((caddr_t) ifc.ifc_buf+j);
+	    if (ifr2->ifr_name[0] == 0)
+		continue;
+	    if (ifr2->ifr_addr.sa_family == ifr->ifr_addr.sa_family
+		&& ifreq_size (*ifr) == ifreq_size (*ifr2)
+		/* Compare address info.  If this isn't good enough --
+		   i.e., if random padding bytes turn out to differ
+		   when the addresses are the same -- then we'll have
+		   to do it on a per address family basis.  */
+		&& !memcmp (&ifr2->ifr_addr.sa_data, &ifr->ifr_addr.sa_data,
+			    (ifreq_size (*ifr)
+			     - offsetof (struct ifreq, ifr_addr.sa_data))))
+		goto skip;
+	}
+
 	if ((*pass1fn) (data, &ifr->ifr_addr)) {
-	    abort ();
+	    fail = 1;
+	    goto punt;
 	}
     }
 
     if (betweenfn && (*betweenfn)(data)) {
-	abort ();
+	fail = 1;
+	goto punt;
     }
 
     if (pass2fn)
@@ -211,13 +278,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 		continue;
 
 	    if ((*pass2fn) (data, &ifr->ifr_addr)) {
-		abort ();
+		fail = 1;
+		goto punt;
 	    }
 	}
+ punt:
     closesocket(s);
     free (buf);
 
-    return 0;
+    return fail;
 }
 
 struct socksetup {

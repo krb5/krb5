@@ -54,4 +54,5 @@ ec KADM_INSECURE_PW,	"Insecure password rejected"
 ec KADM_PW_MISMATCH,	"Cleartext password and DES key did not match"
 
 ec KADM_NOT_SERV_PRINC,	"Invalid principal for change srvtab request"
+ec KADM_REALM_TOO_LONG, "Realm name too long"
 end

@@ -1,3 +1,70 @@
+2002-01-18  Tom Yu  <tlyu@mit.edu>
+
+	* ext.h: Make stdarg prototypes unconditional, to avoid annoying
+	mostly-ANSI compilers that don't define __STDC__.
+
+2001-10-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.c (valid_opts): Note that 'w' takes a parameter.
+
+2001-08-02  Tom Yu  <tlyu@mit.edu>
+
+	* authenc.c (net_write): Rewrite in terms of netwrite().
+
+	* configure.in: Check for vsnprintf().
+
+	* ext.h: New prototypes for netprintf, netprintf_urg,
+	netprintf_noflush, netwrite, netputs.
+
+	* slc.c: Fix to use new NETOBUF-handling functions.
+
+	* state.c: Fix to use new NETOBUF-handling functions.
+
+	* telnetd.c: Fix to use new NETOBUF-handling functions.
+
+	* termstat.c: Fix to use new NETOBUF-handling functions.
+
+	* utility.c: General rework to be more paranoid about
+	bounds-checking of NETOBUF and NFRONTP.  Abstract away
+	interactions with NETOBUF to eliminate explicit references to
+	NFRONTP in many places.
+	(netwrite): New function; copies a buffer to the
+	NETOBUF "ring buffer", checking bounds and calling netflush() if
+	needed.
+	(netputs): New function; calls netwrite() with a nul-terminated
+	string.
+	(netprintf, netprintf_ext): New function; wrap sprintf() with
+	bounds checking for use with NETOBUF.
+	(netprintf_urg): New function; like netprintf() except sets neturg
+	to point at last char written.
+	(netprintf_noflush): New function; like netprintf() except
+	silently fails if NETOBUF is full.
+	(ttloop, printoption, printsub, printdata): Fix to use new
+	NETOBUF-handling functions.
+
+2001-01-25  Tom Yu  <tlyu@mit.edu>
+
+	* state.c (envvarok): Disallow LC_* and NLSPATH.
+
+2000-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.c (doit): Change test for "no authentication" as per
+	Jeffrey Altman's patch.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* sys_term.c (start_login, Solaris): forcefully terminate "termbuf"
+	in case the "TERM" environment variable isn't.
+	* telnet-ktd.c (getterminaltype): Don't overflow buffers "first" and
+	"netobuf".
+	(recv_ayt): Forcibly terminate buffer "netobuf".
+
+2000-03-20  Ken Raeburn  <raeburn@mit.edu>
+	    Jeffrey Altman  <jaltman@watsun.cc.columbia.edu>
+
+	* state.c (telrcv): Fix off-by-one error dealing with full
+	buffer.
+
 2000-02-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Remove dependency on libdes425 when krb4 support

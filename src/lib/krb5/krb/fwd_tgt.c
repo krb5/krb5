@@ -53,6 +53,8 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
     krb5_flags kdcoptions;
     int close_cc = 0;
     int free_rhost = 0;
+    krb5_enctype enctype = 0;
+    krb5_keyblock *session_key;
 
     memset((char *)&creds, 0, sizeof(creds));
     memset((char *)&tgt, 0, sizeof(creds));
@@ -71,7 +73,36 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 	memcpy(rhost, server->data[1].data, server->data[1].length);
 	rhost[server->data[1].length] = '\0';
     }
+    retval = krb5_auth_con_getkey (context, auth_context, &session_key);
+    if (retval)
+      goto errout;
+    if (session_key) {
+	enctype = session_key->enctype;
+	krb5_free_keyblock (context, session_key);
+	session_key = NULL;
+    } else if (server) { /* must server be non-NULL when rhost is given? */
+	/* Try getting credentials to see what the remote side supports.
+	   Not bulletproof, just a heuristic.  */
+	krb5_creds in, *out = 0;
+	memset (&in, 0, sizeof(in));
 
+	retval = krb5_copy_principal (context, server, &in.server);
+	if (retval)
+	    goto punt;
+	retval = krb5_copy_principal (context, client, &in.client);
+	if (retval)
+	    goto punt;
+	retval = krb5_get_credentials (context, 0, cc, &in, &out);
+	if (retval)
+	    goto punt;
+	/* Got the credentials.  Okay, now record the enctype and
+	   throw them away.  */
+	enctype = out->keyblock.enctype;
+	krb5_free_creds (context, out);
+    punt:
+	krb5_free_cred_contents (context, &in);
+    }
+    
     retval = krb5_os_hostaddr(context, rhost, &addrs);
     if (retval)
 	goto errout;
@@ -90,7 +121,7 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 	goto errout;
 	
     if (cc == 0) {
-	if ((retval = krb5_cc_default(context, &cc)))
+	if ((retval = krb5int_cc_default(context, &cc)))
 	    goto errout;
 	close_cc = 1;
     }
@@ -111,7 +142,8 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 	retval = KRB5_NO_TKT_SUPPLIED;
 	goto errout;
     }
-
+    
+    creds.keyblock.enctype = enctype;
     creds.times = tgt.times;
     creds.times.starttime = 0;
     kdcoptions = flags2options(tgt.ticket_flags)|KDC_OPT_FORWARDED;

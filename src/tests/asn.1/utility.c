@@ -22,11 +22,11 @@ asn1_error_code asn1_krb5_data_unparse(code, s)
   }else{
     int i;
 
-    *s = (char*)calloc(3*(code->length), sizeof(char));
+    *s = (char*)calloc((size_t) 3*(code->length), sizeof(char));
     if(*s == NULL) return ENOMEM;
     for(i = 0; i < code->length; i++){
-      (*s)[3*i] = hexchar(((code->data)[i]&0xF0)>>4);
-      (*s)[3*i+1] = hexchar((code->data)[i]&0x0F);
+      (*s)[3*i] = hexchar((unsigned char) (((code->data)[i]&0xF0)>>4));
+      (*s)[3*i+1] = hexchar((unsigned char) ((code->data)[i]&0x0F));
       (*s)[3*i+2] = ' ';
     }
     (*s)[3*(code->length)-1] = '\0';
