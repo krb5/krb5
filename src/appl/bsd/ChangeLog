@@ -1,3 +1,7 @@
+2001-01-13  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Force SunOS to not use termios.
+
 2001-01-12  Sam Hartman  <hartmans@mit.edu>
 
 	* krlogin.c: Previously, we only used TIOCGLTC  on systems with
