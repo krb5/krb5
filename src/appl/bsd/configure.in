@@ -93,4 +93,5 @@ AC_COMPILE_CHECK([number of arguments to setpgrp],
 AC_DEFINE(SETPGRP_TWOARG))
 dnl
 ADD_DEF(-DKERBEROS)
+AC_HAVE_FUNCS(srand48 srand srandom)
 V5_AC_OUTPUT_MAKEFILE

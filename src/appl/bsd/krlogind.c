@@ -1595,6 +1595,29 @@ recvauth()
 
 #ifdef KRB5_KRB4_COMPAT
 
+/* Random number support only needed for v4_des_write */
+#ifdef HAVE_SRAND48
+#define SRAND	srand48
+#define RAND	lrand48
+#define RAND_TYPE	long
+#endif
+
+#if !defined(RAND_TYPE) && defined(HAVE_SRAND)
+#define SRAND	srand
+#define RAND	rand
+#define RAND_TYPE	int
+#endif
+
+#if !defined(RAND_TYPE) && defined(HAVE_SRANDOM)	
+#define SRAND	srandom
+#define RAND	random
+#define RAND_TYPE	long
+#endif
+
+#if !defined(RAND_TYPE)
+You need a random number generator!
+#endif
+
 int
 v4_des_read(fd, buf, len)
 int fd;
@@ -1702,10 +1725,11 @@ int len;
 
 	if (len < 8) {
 		if (!seeded) {
+			RAND_TYPE rval = time((long *) 0);
 			seeded = 1;
-			srandom((int) time((long *)0));
+			SRAND(rval);
 		}
-		garbage = random();
+		garbage = RAND();
 		/* insert random garbage */
 		(void) memcpy(garbage_buf, &garbage, min(sizeof(long),8));
 

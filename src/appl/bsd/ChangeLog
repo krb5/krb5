@@ -1,3 +1,10 @@
+Thu Oct 27 14:31:17 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: check for srand48, srand, and srandom.
+	* krlogind.c (v4_des_write): use the best available of the three
+	random number systems for padding (based on code from
+	lib/crypto/os/rnd_confoun.c.)
+
 Wed Oct 26 00:04:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krsh.c (main):
