@@ -5,7 +5,6 @@
 
 #undef ANSI_STDIO
 #undef HAS_SETVBUF
-#undef BITS32
 #undef HAS_ANSI_CONST
 #undef HAS_ANSI_VOLATILE
 #undef HAS_STDLIB_H

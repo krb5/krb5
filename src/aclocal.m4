@@ -534,10 +534,7 @@ dnl
 dnl
 dnl allow for compilation with isode (yuck!)
 dnl
-define(ISODE_DEFS,
-[AC_ARG_ENABLE([isode],
-[  --enable-isode          build and use ISODE to generate ASN.1 stubs],
-[ADD_DEF(-DKRB5_USE_ISODE)],)])dnl
+define(ISODE_DEFS,)dnl
 dnl
 dnl make this one deeper...
 dnl

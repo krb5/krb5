@@ -1,3 +1,10 @@
+Fri Feb  3 06:47:24 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* acconfig.h: Remove BITS* definitions altogether.
+
+	* aclocal.m4:
+	* configure.in: Remove ISODE defines
+
 Fri Dec 30 17:05:12 1994  Richard Basch  (probe@tardis)
 
 	* aclocal.m4
