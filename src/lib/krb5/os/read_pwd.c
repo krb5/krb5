@@ -92,9 +92,11 @@ int *size_return;
 
     if (fgets(return_pwd, *size_return, stdin) == NULL) {
 	/* error */
+	(void) putchar('\n');
 	(void) bzero(return_pwd, *size_return);
 	cleanup(KRB5_LIBOS_CANTREADPWD);
     }
+    (void) putchar('\n');
     /* fgets always null-terminates the returned string */
 
     /* replace newline with null */
@@ -107,7 +109,6 @@ int *size_return;
 
     if (prompt2) {
 	/* put out the prompt */
-	(void) putchar('\n');
 	(void) fputs(prompt2,stdout);
 	(void) fflush(stdout);
 	readin_string = malloc(*size_return);
@@ -118,11 +119,14 @@ int *size_return;
 	(void) bzero(readin_string, *size_return);
 	if (fgets(readin_string, *size_return, stdin) == NULL) {
 	    /* error */
+	    (void) putchar('\n');
 	    (void) bzero(readin_string, *size_return);
 	    (void) bzero(return_pwd, *size_return);
 	    free(readin_string);
 	    cleanup(KRB5_LIBOS_CANTREADPWD);
 	}
+	(void) putchar('\n');
+
 	if (ptr = index(readin_string, '\n'))
 	    *ptr = '\0';
         else /* need to flush */
