@@ -1,3 +1,8 @@
+2002-10-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Use 'eval' when setting
+	TCL_LIBS to force variable substitutions to take place.
+
 2002-10-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL): If --with-tcl is given, failure to

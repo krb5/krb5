@@ -822,7 +822,9 @@ if test -n "$tcl_ok_conf" ; then
       break
     fi
   done
-  TCL_LIBS="$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS"
+  # Need eval because the first-level expansion could reference
+  # variables like ${TCL_DBGX}.
+  eval TCL_LIBS='"'$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS'"'
   TCL_LIBPATH="-L$TCL_EXEC_PREFIX/lib"
   TCL_RPATH=":$TCL_EXEC_PREFIX/lib"
   CPPFLAGS="$old_CPPFLAGS $TCL_INCLUDES"
