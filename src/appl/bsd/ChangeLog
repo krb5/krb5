@@ -1,3 +1,7 @@
+1999-08-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (kshd): Remove $(LOGINLIBS) from kshd dependencies.
+
 1999-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (main): Error out if -D isn't followed by another
