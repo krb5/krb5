@@ -1,3 +1,7 @@
+2003-05-13  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi_krb5.h: Remove check for GSS_RFC_COMPLIANT_OIDS.
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Rename
