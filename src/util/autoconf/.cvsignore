@@ -1,0 +1,10 @@
+config.log
+Makefile
+autoconf
+autoheader
+config.status
+autoreconf
+autoupdate
+autoscan
+ifnames
+config.cache
