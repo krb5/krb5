@@ -60,5 +60,6 @@ error_code KV5M_CRED,		"Bad magic number for krb5_cred structure"
 error_code KV5M_CRED_INFO,	"Bad magic number for krb5_cred_info structure"
 error_code KV5M_CRED_ENC_PART,	"Bad magic number for krb5_cred_enc_part structure"
 error_code KV5M_PWD_DATA,	"Bad magic number for krb5_pwd_data structure"
-error_code  KV5M_ADDRESS,	"Bad magic number for krb5_address structure"
+error_code KV5M_ADDRESS,	"Bad magic number for krb5_address structure"
+error_code KV5M_KEYTAB_ENTRY,	"Bad magic number for krb5_keytab_entry structure"
 end
