@@ -452,6 +452,7 @@ typedef struct _kadm5_config_params {
         char *admin_keytab;
 
         /* server library (database) fields */
+        int mkey_from_kbd;
         char *stash_file;
         char *mkey_name;
         krb5_enctype enctype;
@@ -523,6 +524,11 @@ admin server's dictionary file of passwords to disallow.  No default.
 The keytab file containing the kadmin/admin and kadmin/changepw
 entries for the server to use.  The default is the value of the
 KRB5_KTNAME environment variable, if defined.
+
+\item[mkey_from_keyboard] No variable. MKEY_FROM_KEYBOARD.  Server.
+If non-zero, prompt for the master password via the tty instead of
+using the stash file.  If this mask bit is not set, or is set and the
+value is zero, the stash file is used.
 
 \item[stash_file] Variable: key_stash_file.  STASH_FILE. Server.  The
 file name containing the master key stash file.  No default; libkdb
@@ -659,11 +665,11 @@ AUX_ATTRIBUTES          & 0x000400 & aux_attributes & F & F \\
 POLICY                  & 0x000800 & policy & O, none & O \\
 POLICY_CLR              & 0x001000 & policy & F & O \\
 MAX_RLIFE               & 0x002000 & max_renewable_life & O, K/M value & O \\
-LAST_SUCCESS            & 0x004000 & last_success & F & O \\
-LAST_FAILED             & 0x008000 & last_failed & F & O \\
+LAST_SUCCESS            & 0x004000 & last_success & F & F \\
+LAST_FAILED             & 0x008000 & last_failed & F & F \\
 FAIL_AUTH_COUNT         & 0x010000 & fail_auth_count & F & O \\
 KEY_DATA                & 0x020000 & n_key_data, key_data & F & F \\
-TL_DATA                 & 0x040000 & n_tl_data, tl_data & F & F
+TL_DATA                 & 0x040000 & n_tl_data, tl_data & O, 0, NULL & O
 \end{tabular}
 \caption{Mask bits for creating, retrieving, and modifying principals.}
 \label{tab:princ-bits}
@@ -1073,10 +1079,14 @@ to the realm.  In KADM5_API_VERSION_2, the values in params_in are
 merged with the default values.  If an illegal mask value is
 specified, KADM5_BAD_SERVER_PARAMS is returned.
 
-\item Initializes direct access to the KDC database.  If pass (or
-keytab) is NULL or an empty string, reads the master password from
-/.k5.REALM-NAME (created by kstash).  Otherwise, the non-NULL password
-is ignored and the user is prompted for it via the tty.
+\item Initializes direct access to the KDC database.  In
+KADM5_API_VERISON_1, if pass (or keytab) is NULL or an empty string,
+reads the master password from the stash file; otherwise, the non-NULL
+password is ignored and the user is prompted for it via the tty.  In
+KADM5_API_VERSION_2, if the MKEY_FROM_KEYBOARD parameter mask is set
+and the value is non-zero, reads the master keyboard from the user via
+the tty; otherwise, the master key is read from the stash file.  It is
+illegal to call kadm5_init_with_skey with this parameter mask set.
 
 \item Initializes the dictionary (if present) for dictionary checks.
 
