@@ -1,3 +1,10 @@
+Thu Nov  3 18:29:10 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* pcbc_encrypt.c: moved from f_pcbc.c in lib/crypto/des, and
+	inlined proper des.h to avoid confusion in names.
+	* Makefile.in: add -I to CFLAGS to get f_tables.h from
+	lib/crypto/des as well.
+
 Wed Oct 26 14:23:36 1994    (tytso@rsx-11)
 
 	* Makefile.in (check): 
