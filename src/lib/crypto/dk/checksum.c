@@ -17,7 +17,7 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
     size_t blocksize, keybytes, keylength;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
-    krb5_data datain[2];
+    krb5_data datain;
     unsigned char *kcdata;
     krb5_keyblock kc;
 
@@ -47,30 +47,24 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
 
     /* derive the key */
  
-    datain[0].data = constantdata;
-    datain[0].length = K5CLENGTH;
+    datain.data = constantdata;
+    datain.length = K5CLENGTH;
 
-    datain[0].data[0] = (usage>>24)&0xff;
-    datain[0].data[1] = (usage>>16)&0xff;
-    datain[0].data[2] = (usage>>8)&0xff;
-    datain[0].data[3] = usage&0xff;
+    datain.data[0] = (usage>>24)&0xff;
+    datain.data[1] = (usage>>16)&0xff;
+    datain.data[2] = (usage>>8)&0xff;
+    datain.data[3] = usage&0xff;
 
-    datain[0].data[4] = 0x99;
+    datain.data[4] = 0x99;
 
-    if (ret = krb5_derive_key(enc, key, &kc, &datain[0]))
+    if (ret = krb5_derive_key(enc, key, &kc, &datain))
 	goto cleanup;
 
     /* hash the data */
 
-    datain[0].length = 4;
-    datain[0].data[0] = (input->length>>24)&0xff;
-    datain[0].data[1] = (input->length>>16)&0xff;
-    datain[0].data[2] = (input->length>>8)&0xff;
-    datain[0].data[3] = input->length&0xff;
+    datain = *input;
 
-    datain[1] = *input;
-
-    if (ret = krb5_hmac(hash, &kc, 2, datain, output))
+    if (ret = krb5_hmac(hash, &kc, 1, &datain, output))
 	memset(output->data, 0, output->length);
 
     /* ret is set correctly by the prior call */

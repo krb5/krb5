@@ -3,11 +3,12 @@
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
-/* the spec says that the confounder size is specific to the
-   encryption algorithm.  This code (dk_encrypt_length and dk_encrypt)
-   assumes the confounder is always the blocksize.  If this assumption
-   ever fails, the keytype table should be extended to include this
-   bit of info. */
+/* the spec says that the confounder size and padding are specific to
+   the encryption algorithm.  This code (dk_encrypt_length and
+   dk_encrypt) assume the confounder is always the blocksize, and the
+   padding is always zero bytes up to the blocksize.  If these
+   assumptions ever fails, the keytype table should be extended to
+   include these bits of info. */
 
 void
 krb5_dk_encrypt_length(enc, hash, inputlen, length)
@@ -21,7 +22,7 @@ krb5_dk_encrypt_length(enc, hash, inputlen, length)
     (*(enc->block_size))(&blocksize);
     (*(hash->hash_size))(&hashsize);
 
-    *length = krb5_roundup(blocksize+4+inputlen, blocksize) + hashsize;
+    *length = krb5_roundup(blocksize+inputlen, blocksize) + hashsize;
 }
 
 krb5_error_code
@@ -45,7 +46,7 @@ krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 
     (*(enc->block_size))(&blocksize);
     (*(enc->keysize))(&keybytes, &keylength);
-    plainlen = krb5_roundup(blocksize+4+input->length, blocksize);
+    plainlen = krb5_roundup(blocksize+input->length, blocksize);
 
     krb5_dk_encrypt_length(enc, hash, input->length, &enclen);
 
@@ -99,15 +100,10 @@ krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     if (ret = krb5_c_random_make_octets(/* XXX */ 0, &d1))
 	goto cleanup;
 
-    (plaintext+blocksize)[0] = (input->length>>24)&0xff;
-    (plaintext+blocksize)[1] = (input->length>>16)&0xff;
-    (plaintext+blocksize)[2] = (input->length>>8)&0xff;
-    (plaintext+blocksize)[3] = input->length&0xff;
+    memcpy(plaintext+blocksize, input->data, input->length);
 
-    memcpy(plaintext+blocksize+4, input->data, input->length);
-
-    memset(plaintext+blocksize+4+input->length, 0,
-	   plainlen - (blocksize+4+input->length));
+    memset(plaintext+blocksize+input->length, 0,
+	   plainlen - (blocksize+input->length));
 
     /* encrypt the plaintext */
 

@@ -95,22 +95,18 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 	goto cleanup;
     }
 
-    /* get the real plaintext length and copy the data into the output */
+    /* because this encoding isn't self-describing wrt length, the
+       best we can do here is to compute the length minus the
+       confounder. */
 
-    plainlen = ((((plaindata+blocksize)[0])<<24) |
-		(((plaindata+blocksize)[1])<<16) |
-		(((plaindata+blocksize)[2])<<8) |
-		((plaindata+blocksize)[3]));
-
-    if (plainlen > (enclen - blocksize - 4))
-	return(KRB5_BAD_MSIZE);
+    plainlen = enclen - blocksize;
 
     if (output->length < plainlen)
 	return(KRB5_BAD_MSIZE);
 
     output->length = plainlen;
 
-    memcpy(output->data, d2.data+blocksize+4, output->length);
+    memcpy(output->data, d2.data+blocksize, output->length);
 
     ret = 0;
 
