@@ -76,3 +76,28 @@ SRCS= \
 
 all:: $(OBJS)
 
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+
+TEST_PROGS= t_std_conf
+
+T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
+		hst_realm.o init_os_ctx.o locate_kdc.o $(COMERRLIB) \
+		$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a
+
+t_std_conf: $(T_STD_CONF_OBJS)
+	$(CC) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
+
+check:: check-$(WHAT)
+
+check-unix:: $(TEST_PROGS)
+	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
+	./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
+		-k IGGY.ORG -k DEFAULT_REALM.TST \
+		-D DEFAULT_REALM.TST -r bad.idea -r itar.bad.idea \
+		-r really.BAD.IDEA. -r clipper.bad.idea -r KeYEsCrOW.BaD.IDea \
+		-r pgp.good.idea > test.out
+	cmp test.out $(srcdir)/ref_std_conf.out
+	$(RM) test.out
+
+clean::
+	$(RM) $(TEST_PROGS) test.out

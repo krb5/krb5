@@ -2,6 +2,7 @@ AC_INIT(configure.in)
 WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
+WITH_NETLIB
 dnl time checks are for timeofday.c (which gets them from osconf.h)
 dnl and gmt_mktime.c (which only gets them from here...)
 AC_TIME_WITH_SYS_TIME

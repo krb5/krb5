@@ -39,15 +39,6 @@ int krb5_max_skdc_timeout = MAX_SKDC_TIMEOUT;
 int krb5_skdc_timeout_shift = SKDC_TIMEOUT_SHIFT;
 int krb5_skdc_timeout_1 = SKDC_TIMEOUT_1;
 
-#ifdef KRB5_USE_INET
-char *krb5_kdc_udp_portname = KDC_PORTNAME;
-#ifdef KDC_SECONDARY_PORTNAME
-char *krb5_kdc_sec_udp_portname = KDC_SECONDARY_PORTNAME;
-#else
-char *krb5_kdc_sec_udp_portname = 0;
-#endif	
-#endif
-
 char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;
 char *krb5_default_pwd_prompt2 = DEFAULT_PWD_STRING2;
 

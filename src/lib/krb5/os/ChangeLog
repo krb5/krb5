@@ -1,13 +1,28 @@
+Sat Apr 22 00:11:12 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in, configure.in, t_std_conf.c: Add test program to
+		test the standard configuration krb5 routines.
+
+	* osconfig.c: Don't define krb5_kdc_udp_portname and
+		krb5_kdc_sec_portname any more.	 There's no real point...
+
+	* hst_realm.c (krb5_get_krbhst): Strip off the trailing dot from
+		the hostname if present.
+
+	* locate_kdc.c (krb5_locate_kdc): Use the profile code to get the
+		list of Kerberos servers (plus port numbers) for a
+		particular realm from [realms]/<realm>/kdc
+
 Fri Apr 21 11:38:45 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* def_realm.c (krb5_get_default_realm): Use the profile code to
 		get the default realm from [libdefaults]/default_realm.
 
 	* get_krbhst.c (krb5_get_krbhst): Use the profile code to get the
-		list of Kerberos servers for a particualar realm from 
+		list of Kerberos servers for a particular realm from 
 		[realms]/<realm>/kdc
 
-	* realm_dom.c (krb5_get_realm_domain):  Use the profile code to
+	* realm_dom.c (krb5_get_realm_domain):	Use the profile code to
 		get the default domain postfix for a realm (used only to
 		convert V4 -> V5 principals) from 
 		[realms]/<realm>/default_domain
@@ -17,10 +32,10 @@ Fri Apr 21 11:38:45 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 		[domain_realm]/<host|domain>
 
 	* init_os_ctx.c (krb5_os_init_context): When the OS context is
-		initialized, also initialize the profile file.  This loads
+		initialized, also initialize the profile file.	This loads
 		in the /etc/krb5.conf file.
 
-Wed Apr 19 13:50:19 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+Wed Apr 19 13:50:19 1995  Ezra Peisach	(epeisach@kangaroo.mit.edu)
 
 	* def_realm.c: (krb5_get_default_realm) - remove global default realm.
 		Moved into the context. (krb5_set_default_realm) added.
@@ -28,7 +43,7 @@ Wed Apr 19 13:50:19 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 Fri Apr 14 22:15:00 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* an_to_ln.c (dbm_an_to_ln): Don't compile dbm_an_to_ln() if
-	        USE_DBM_LNAME isn't defined.
+		USE_DBM_LNAME isn't defined.
 
 Fri Apr 14 15:15:48 1995    <tytso@rsx-11.mit.edu>
 
@@ -41,24 +56,24 @@ Fri Apr 14 15:15:48 1995    <tytso@rsx-11.mit.edu>
 Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.[ch]: removed unneeded INTERFACE from non-api functions.
-        * read_pwd.c: __STDC__ conditional also checks the _WINDOWS define.
+	* read_pwd.c: __STDC__ conditional also checks the _WINDOWS define.
 
 Fri Apr 7 15:32:04 1995 Keith Vetter (keithv@fusion.com)
 
 	* ccdefname.c: 
-           changed windows stored filename syntax--dropped the 'FILE:' part.
-           changed buffer from malloc to static since we don't want it 
-            ever to fail, and nobody checks it for errors.
+	   changed windows stored filename syntax--dropped the 'FILE:' part.
+	   changed buffer from malloc to static since we don't want it 
+	    ever to fail, and nobody checks it for errors.
 
 Wed Apr 5 16:32:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* get_krbh.c: better error handling--old return values were 
-           being overwritten.
-        * locate_kdc.c: added new error code KRB5_REALM_CANT_RESOLVE for
-           when we have realm names but can't find their addresses.
-           Also, fixed up indenting of an if clause.
-        * sendto_kdc.c: added winsock init/destroy calls because some
-            PC tcp/ip stacks seem to need it.
+	   being overwritten.
+	* locate_kdc.c: added new error code KRB5_REALM_CANT_RESOLVE for
+	   when we have realm names but can't find their addresses.
+	   Also, fixed up indenting of an if clause.
+	* sendto_kdc.c: added winsock init/destroy calls because some
+	    PC tcp/ip stacks seem to need it.
 
 Fri Mar 31 16:30:03 1995  Theodore Y. Ts'o  (tytso@dcl)
 
@@ -69,47 +84,47 @@ Fri Mar 31 16:30:03 1995  Theodore Y. Ts'o  (tytso@dcl)
 Thu Mar 30 15:54:54 1995 Keith Vetter (keithv@fusion.com)
 
 	* localaddr.c: in Windows/Mac code, fixed bug due to wrong level
-           of indirection on memcpy call.
+	   of indirection on memcpy call.
 
 Tue Mar 28 19:22:28 1995 Keith Vetter (keithv@fusion.com)
 
-        For Windows, added calls to get the default config, realms and
-        ccache files out of a windows ini file.
-        * ccdefname.c: does this for the credential cache.
-        * osconfig.c: does this for the config and realms files.
+	For Windows, added calls to get the default config, realms and
+	ccache files out of a windows ini file.
+	* ccdefname.c: does this for the credential cache.
+	* osconfig.c: does this for the config and realms files.
 	* get_krbh.c, realm_do.c, hst_real.c, def_real.c: added calls to
-           set the default values.
+	   set the default values.
 
-Tue Mar 28 18:35:20 1995  John Gilmore  (gnu at toad.com)
+Tue Mar 28 18:35:20 1995  John Gilmore	(gnu at toad.com)
 
 	* DNR.c:  Add Apple MacTCP source file for domain name resolution.
 	* macsock.c:  Add fake socket support routines for MacTCP.
 	* Makefile.in (OBJS, SRCS):  Add DNR and macsock.
-	* ccdefname.c:  On Mac, default cred cache is "STDIO:krb5cc" for now.
+	* ccdefname.c:	On Mac, default cred cache is "STDIO:krb5cc" for now.
 	FIXME, this needs to find the Preferences folder and use that.
 	FIXME, shouldn't be conditioned on HAVE_MACSOCK_H.
-	* gmt_mktime.c:  Use HAVE_SYS_TYPES_H.
-	* krbfileio.c:  Remove <sys/types.h>.
+	* gmt_mktime.c:	 Use HAVE_SYS_TYPES_H.
+	* krbfileio.c:	Remove <sys/types.h>.
 	* localaddr.c, sendto_kdc.c:  Convert to more generic socket
 	support.  Use closesocket instead of close, SOCKET_ERRNO rather
 	than errno, SOCKET rather than int, etc.
-	* localaddr.c:  Use getmyipaddr() from macsock.c, if on Mac.
+	* localaddr.c:	Use getmyipaddr() from macsock.c, if on Mac.
 	Add FIXME for multiple local addresses.
-	* lock_file.c:  Provide a dummy version for MacOS.
+	* lock_file.c:	Provide a dummy version for MacOS.
 	* read_pwd.c (ECHO_PASSWORD):  Add #ifdef's to avoid all the ioctls
-	and other stuff that turn off echoing.  This is useful for debugging
+	and other stuff that turn off echoing.	This is useful for debugging
 	on MacOS.  FIXME:  ECHO_PASSWORD needs to be added to configure.in.
 	* ustime.c:  Bring in Mac-specific time-and-timezone code.  It
 	probably isn't hooked up correctly, yet.
 
-Mon Mar 27 14:16:39 1995  John Gilmore  (gnu at toad.com)
+Mon Mar 27 14:16:39 1995  John Gilmore	(gnu at toad.com)
 
 	* full_ipadr.c, gen_rname.c, port2ip.c, read_msg.c, write_msg.c:
 	Remove explicit includes of socket files.
-	* locate_kdc.c:  Remove <sys/types.h> and "os-proto.h".
+	* locate_kdc.c:	 Remove <sys/types.h> and "os-proto.h".
 
 	* macsock.c (connect, send, recv):  Add for K5 compatability.
-	(getmyipaddr):  Add for use in K5.
+	(getmyipaddr):	Add for use in K5.
 
 	* macsock.c:  Add Mac socket support file, verbatim from K4 release.
 
@@ -127,7 +142,7 @@ Fri Mar 24 17:58:15 1995  Theodore Y. Ts'o  (tytso@rt-11)
 Thu Mar 23 23:11:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* realm_dom.c (krb5_get_realm_domain): Don't indent preprocessor
-	        directives.  (Not portable).
+		directives.  (Not portable).
 
 	* hst_realm.c (krb5_get_host_realm): Don't indent preprocessor
 		directives.  Removed excess close paren introduced by
@@ -135,35 +150,35 @@ Thu Mar 23 23:11:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 Wed Mar 22 18:59:47 1995 Keith Vetter (keithv@fusion.com)
 
-        * hst_realm.c, realm_dom.c: windows DLL can't use fscanf so had
-           to write a couple of routines to read what we need from the file.
+	* hst_realm.c, realm_dom.c: windows DLL can't use fscanf so had
+	   to write a couple of routines to read what we need from the file.
 
 Wed Mar 22 13:30:35 1995 Keith Vetter (keithv@fusion.com)
 
 	* an_to_ln.c, kuserok.c: last two os routines ported to the PC.
 
-Fri Mar 17 19:56:39 1995  John Gilmore  (gnu at toad.com)
+Fri Mar 17 19:56:39 1995  John Gilmore	(gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Eliminate, duplicates config/pre.in.
-	* localaddr.c:  Remove socket include files now handled in k5-int.h.
+	* localaddr.c:	Remove socket include files now handled in k5-int.h.
 
 Wed Mar 15 12:19:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* sendto_kdc.c: made to work on the PC.
 
-Tue Mar  7 22:15:00 1995 Keith Vetter <keithv@fusion.com>
+Tue Mar	 7 22:15:00 1995 Keith Vetter <keithv@fusion.com>
 
 	* sendto_kdc.c: stubbed on the PC for now.
 
-Tue Mar  7 19:54:17 1995  Mark Eichin  <eichin@cygnus.com>
+Tue Mar	 7 19:54:17 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: take out ISODE_DEFS, ISODE_INCLUDE.
 
 Tue Mar 7 13:35:21 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.c: ported all the c files except an_to_ln, kuserok, and
-          sendto_kdc which have windows stubs.
-        * Makefile.in: reflects above changes.
+	  sendto_kdc which have windows stubs.
+	* Makefile.in: reflects above changes.
 
 Wed Mar 1 17:30:00 1995 Keith Vetter (keithv@fusion.com)
 
@@ -174,16 +189,16 @@ Wed Mar 1 17:30:00 1995 Keith Vetter (keithv@fusion.com)
 	code changes. For now it's just added to the end of the file. Later,
 	we have to decide on a solution for all.
 
-Tue Feb 28 01:07:37 1995  John Gilmore  (gnu at toad.com)
+Tue Feb 28 01:07:37 1995  John Gilmore	(gnu at toad.com)
 
-	* *.c:  Avoid <krb5/...> includes.
+	* *.c:	Avoid <krb5/...> includes.
 
-Fri Feb  3 08:24:18 1995  Theodore Y. Ts'o  (tytso@dcl)
+Fri Feb	 3 08:24:18 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* gmt_mktime.c (gmt_mktime): Don't double count the leap day in a
 		leap year.
 
-Sun Jan 22 18:23:37 1995  John Gilmore  (gnu@cygnus.com)
+Sun Jan 22 18:23:37 1995  John Gilmore	(gnu@cygnus.com)
 
 	* get_krbhst.c (krb5_get_krbhst):  Declare realm argument const,
 	to match prototype.
@@ -192,13 +207,13 @@ Wed Jan 18 11:08:59 1995    <tytso@rsx-11.mit.edu>
 
 	* sendto_kdc.c (krb5_sendto_kdc): Fix use of connected sockets;
 		previously krb5_sendto_kdc only used one socket per
-		address family.  This doesn't work; it now uses one
+		address family.	 This doesn't work; it now uses one
 		socket per address. (krb5-bugs #938)
 
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
 	* Actually move the file init_ctx.c to init_os_ctx.c in the CVS
-		repository and also rename the routine  krb5_free_os_context()
+		repository and also rename the routine	krb5_free_os_context()
 		to krb5_os_free_context().
 
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
@@ -210,7 +225,7 @@ Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
 Mon Dec 19 15:20:35 1994  Theodore Y. Ts'o  (tytso@dcl)
 
-	* init_ctx.c: New file.  Initializes and frees the krb5_os_context
+	* init_ctx.c: New file.	 Initializes and frees the krb5_os_context
 	  structure. 
 
 	* realm_dom.c (krb5_get_realm_domain): Fixed minor bug where the
@@ -226,7 +241,7 @@ Thu Oct 13 17:24:31 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* configure.in: Add ISODE_DEFS
 
-Fri Oct  7 13:23:18 1994  Theodore Y. Ts'o  (tytso@dcl)
+Fri Oct	 7 13:23:18 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add test for unistd.h
 
@@ -238,7 +253,7 @@ Thu Sep 22 20:46:08 1994  Theodore Y. Ts'o  (tytso@dcl)
 	* configure.in: Put in correct dependency order of configure.in
 		lines.
 
-Wed Jul  6 13:26:59 1994  Mark Eichin  (eichin@cygnus.com)
+Wed Jul	 6 13:26:59 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* gmt_mktime.c (gmt_mktime): New file, new function. Similar to
 	POSIX mktime, but always works in GMT.

@@ -28,11 +28,6 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#ifdef KRB5_USE_INET
-extern char *krb5_kdc_udp_portname;
-extern char *krb5_kdc_sec_udp_portname;
-#endif
-
 /*
  * returns count of number of addresses found
  */
@@ -44,7 +39,8 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     struct sockaddr **addr_pp;
     int *naddrs;
 {
-    char **hostlist;
+    const char	*realm_kdc_names[4];
+    char **hostlist, *host, *port, *cp;
     krb5_error_code code;
     int i, j, out, count;
     struct sockaddr *addr_p;
@@ -58,22 +54,27 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 
     hostlist = 0;
     
-    if (code = krb5_get_krbhst (context, realm, &hostlist))
-	return(code);
+    realm_kdc_names[0] = "realms";
+    realm_kdc_names[1] = realm->data;
+    realm_kdc_names[2] = "kdc";
+    realm_kdc_names[3] = 0;
+
+    code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
+    if (code == PROF_NO_SECTION)
+	return KRB5_REALM_UNKNOWN;
+    if (code == PROF_NO_RELATION)
+	return KRB5_CONFIG_BADFORMAT;
+    if (code)
+	return code;
 
 #ifdef KRB5_USE_INET
-    if (sp = getservbyname(krb5_kdc_udp_portname, "udp"))
+    if (sp = getservbyname(KDC_PORTNAME, "udp"))
 	udpport = sp->s_port;
-    if (krb5_kdc_sec_udp_portname)
-    	if (sp = getservbyname(krb5_kdc_sec_udp_portname, "udp")) {
-#ifdef KRB5_TRY_SECONDARY_PORT_FIRST
-	    sec_udpport = udpport;
-	    udpport = sp->s_port;
-#else
-	    sec_udpport = sp->s_port;
+    if (sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp"))
+	sec_udpport = sp->s_port;
 #endif
-	}
-#endif
+    if (sec_udpport == udpport)
+	sec_udpport = 0;
 
     count = 0;
     while (hostlist[count])
@@ -92,39 +93,46 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
 
     for (i=0, out=0; hostlist[i]; i++) {
+	host = hostlist[i];
+	/*
+	 * Strip off excess whitespace
+	 */
+	cp = strchr(host, ' ');
+	if (cp)
+	    *cp = 0;
+	cp = strchr(host, '\t');
+	if (cp)
+	    *cp = 0;
+	port = strchr(host, ':');
+	if (port) {
+	    *port = 0;
+	    port++;
+	}
 	hp = gethostbyname(hostlist[i]);
 	if (hp != 0) {
 	    switch (hp->h_addrtype) {
 #ifdef KRB5_USE_INET
 	    case AF_INET:
-		if (udpport) {		/* must have gotten a port # */
-		    for (j=0; hp->h_addr_list[j]; j++) {
-		        sin_p = (struct sockaddr_in *) &addr_p[out++];
-		        memset ((char *)sin_p, 0, sizeof(struct sockaddr));
-		        sin_p->sin_family = hp->h_addrtype;
-		        sin_p->sin_port = udpport;
-		        memcpy((char *)&sin_p->sin_addr,
-			       (char *)hp->h_addr_list[j],
-			       sizeof(struct in_addr));
-		        if (out >= count) {
-			    count *= 2;
-			    addr_p = (struct sockaddr *)
-			        realloc ((char *)addr_p,
-				         sizeof(struct sockaddr) * count);
-		        }
-		        if (sec_udpport) {
-			    addr_p[out] = addr_p[out-1];
-			    sin_p = (struct sockaddr_in *) &addr_p[out++];
-			    sin_p->sin_port = sec_udpport;
-			    if (out >= count) {
-			        count *= 2;
-			        addr_p = (struct sockaddr *)
-				        realloc ((char *)addr_p,
-					         sizeof(struct sockaddr) * count);
-			    }
-		        }
+		for (j=0; hp->h_addr_list[j]; j++) {
+		    sin_p = (struct sockaddr_in *) &addr_p[out++];
+		    memset ((char *)sin_p, 0, sizeof(struct sockaddr));
+		    sin_p->sin_family = hp->h_addrtype;
+		    sin_p->sin_port = port ? htons(atoi(port)) : udpport;
+		    memcpy((char *)&sin_p->sin_addr,
+			   (char *)hp->h_addr_list[j],
+			   sizeof(struct in_addr));
+		    if (out+1 >= count) {
+			count += 5;
+			addr_p = (struct sockaddr *)
+			    realloc ((char *)addr_p,
+				     sizeof(struct sockaddr) * count);
 		    }
-                }
+		    if (sec_udpport && !port) {
+			addr_p[out] = addr_p[out-1];
+			sin_p = (struct sockaddr_in *) &addr_p[out++];
+			sin_p->sin_port = sec_udpport;
+		    }
+		}
 		break;
 #endif
 	    default:

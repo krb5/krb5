@@ -195,7 +195,7 @@ krb5_get_krbhst(context, realm, hostlist)
 	cp = strchr(*cpp, '\t');
 	if (cp)
 	    *cp = 0;
-	cp = strchr(*cpp, ',');
+	cp = strchr(*cpp, ':');
 	if (cp)
 	    *cp = 0;
     }

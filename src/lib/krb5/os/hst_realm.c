@@ -245,6 +245,7 @@ krb5_get_host_realm(context, host, realmsp)
     char **retrealms;
     char *domain, *default_realm, *realm, *cp;
     krb5_error_code retval;
+    int l;
     char local_host[MAXHOSTNAMELEN+1];
 
     if (host)
@@ -258,6 +259,10 @@ krb5_get_host_realm(context, host, realmsp)
 	if (isupper(*cp))
 	    *cp = tolower(*cp);
     }
+    l = strlen(local_host);
+    /* strip off trailing dot */
+    if (l && local_host[l-1] == '.')
+	    local_host[l-1] = 0;
     domain = strchr(local_host, '.');
 
     /* prepare default */
@@ -277,14 +282,14 @@ krb5_get_host_realm(context, host, realmsp)
 	}
     }
 
-    retval = profile_get_string(context->profile, "domain_realm", local_host,
+    retval = profile_get_string(context->profile, "domain_realm", domain,
 				0, default_realm, &realm);
     free(default_realm);
     if (retval)
 	return retval;
     default_realm = realm;
 
-    retval = profile_get_string(context->profile, "domain_realm", domain,
+    retval = profile_get_string(context->profile, "domain_realm", local_host,
 				0, default_realm, &realm);
     free(default_realm);
     if (retval)
