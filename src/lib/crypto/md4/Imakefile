@@ -1,0 +1,18 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990,1991 by the Massachusetts Institute of Technology.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+NormalLibraryObjectRule()
+
+OBJS=	md4.o md4glue.o
+
+SRCS=	md4.c md4glue.c
+
+DEFINES= $(DESDEFINES)
+
+NormalLibraryTarget(md4,$(OBJS))
