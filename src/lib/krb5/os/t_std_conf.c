@@ -197,5 +197,8 @@ main(argc, argv)
 		usage(argv[0]);
 	    }
 	}
+
+
+	krb5_free_context(ctx);
 	exit(0);
 }

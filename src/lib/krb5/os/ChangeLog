@@ -1,3 +1,7 @@
+Mon Oct  6 11:40:11 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* t_std_conf.c (main): Call krb5_free_context when done.
+
 Wed Oct  1 04:58:34 1997  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Punt some things that are otherwise gotten from
