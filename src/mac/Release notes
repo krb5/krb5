@@ -38,3 +38,8 @@ Changes in 1.1a3:
 1.1b8
  68K builds are back
  Updated to ccache 2.0b2
+ 
+1.1b9
+ Updated to ccache 2.0b3
+ Added Krb5GlobalsGetDefaultCacheNameModification to globals library
+ Fix for profiler crashing when krb5.ini is missing
