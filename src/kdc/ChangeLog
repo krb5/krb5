@@ -1,3 +1,11 @@
+2004-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (delete_fd): Free pointed-to data after removing it
+	from the connection set.
+	(kill_tcp_connection): Move delete_fd call to the end.
+	(accept_tcp_connection): Decrement connection counter again if we
+	drop the incoming connection for lack of buffer space.
+
 2004-03-15  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_preauth.c (verify_sam_response): Free unparsed names
