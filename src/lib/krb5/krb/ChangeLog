@@ -1,3 +1,17 @@
+Thu Nov 10 23:56:43 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rd_rep.c (krb5_rd_rep): Set the encryption type in
+		the subkey keyblock to be the encryption type used to
+		encrypt the rd_rep message.
+
+	* decrypt_tk.c (krb5_decrypt_tkt_part): Set the encryption type in
+		the session keyblock to be the encryption type used to
+		encrypt the ticket.
+
+	* rd_req_dec.c (decrypt_authenticator): Set the encryption type in
+		the subkey keyblock to be the encryption type used to
+		encrypt the authenticator. 
+
 Tue Nov  8 17:09:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* in_tkt_pwd.c (pwd_keyproc): Use the documented interface for

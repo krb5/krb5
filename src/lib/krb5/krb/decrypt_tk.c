@@ -91,5 +91,6 @@ free(scratch.data);}
 	ticket->enc_part2 = dec_tkt_part;
     }
     clean_scratch();
+    ticket->enc_part2->session->etype = ticket->enc_part.etype;
     return retval;
 }
