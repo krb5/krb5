@@ -116,7 +116,7 @@ char *argv[];
 	exit(1);
     }
 
-    master_encblock.crypto_entry = krb5_csarray[etype]->system;
+    krb5_use_cstype(&master_encblock, etype);
 
     if (!dbname)
 	dbname = DEFAULT_DBM_FILE;	/* XXX? */
