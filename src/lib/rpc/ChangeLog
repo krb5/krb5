@@ -1,3 +1,8 @@
+Tue Oct 21 14:31:33 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* svc_auth_gssapi.c (destroy_client): Fix to not lose entries in
+        the chain linked list.
+
 Fri Nov 22 15:50:42 1996  unknown  <bjaspan@mit.edu>
 
 	* get_myaddress.c (get_myaddress): use krb5_os_localaddr instead
