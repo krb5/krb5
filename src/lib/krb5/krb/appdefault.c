@@ -23,7 +23,7 @@ static const char *conf_no[] = {
 static int conf_boolean(s)
 	char *s;
 {
-	char **p;
+	const char **p;
 	for(p=conf_yes; *p; p++) {
 		if (!strcasecmp(*p,s))
 			return 1;

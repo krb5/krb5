@@ -1,3 +1,10 @@
+2002-06-26  Ezra Peisach  <epeisach@bu.edu>
+
+	* appdefault.c (conf_boolean): Change variable from char ** to
+	const char ** to prevent warning of const to non-const.
+	
+	* get_in_tkt.c (_krb5_conf_boolean): Same
+
 2002-06-25  Alexandra Ellwood <lxs@mit.edu>
 
 	* appdefault.c, get_in_tkt.c: made conf_yes and conf_no const to 

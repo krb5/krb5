@@ -614,7 +614,7 @@ int
 _krb5_conf_boolean(s)
      const char *s;
 {
-    char **p;
+    const char **p;
 
     for(p=conf_yes; *p; p++) {
 	if (!strcasecmp(*p,s))
