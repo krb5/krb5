@@ -92,11 +92,10 @@ else { len = 0; var = 0; }
 
 #define begin_structure()\
 asn1buf subbuf;\
-retval = asn1_get_tag(buf,&class,&construction,&tagnum,&length);\
+int indef;\
+retval = asn1_get_sequence(buf,&length,&indef);\
 if(retval) return retval;\
-if(class != UNIVERSAL || construction != CONSTRUCTED ||\
-   tagnum != ASN1_SEQUENCE) return ASN1_BAD_ID;\
-retval = asn1buf_imbed(&subbuf,buf,length);\
+retval = asn1buf_imbed(&subbuf,buf,length,indef);\
 if(retval) return retval;\
 next_tag()
 
@@ -108,9 +107,10 @@ if(retval) return retval
 int size=0;\
 asn1buf seqbuf;\
 int length;\
-retval = asn1_get_sequence(buf,&length);\
+int indef;\
+retval = asn1_get_sequence(buf,&length,&indef);\
 if(retval) return retval;\
-retval = asn1buf_imbed(&seqbuf,buf,length);\
+retval = asn1buf_imbed(&seqbuf,buf,length,indef);\
 if(retval) return retval
 
 #define end_sequence_of(buf)\
