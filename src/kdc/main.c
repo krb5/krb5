@@ -337,14 +337,6 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		rdp->realm_mpname = (def_mpname) ? strdup(def_mpname) :
 		    strdup(KRB5_KDB_M_NAME);
 
-	    /* Handle master key type */
-	    if (rparams && rparams->realm_enctype_valid)
-		rdp->realm_mkey.enctype =
-		    (krb5_enctype) rparams->realm_enctype;
-	    else
-		rdp->realm_mkey.enctype = (def_enctype) ? def_enctype :
-		    ENCTYPE_DES_CBC_CRC;
-
 	    /* Handle KDC port */
 	    if (rparams && rparams->realm_kdc_ports)
 		rdp->realm_ports = strdup(rparams->realm_kdc_ports);
@@ -358,6 +350,15 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	    }
 	    else
 		manual = def_manual;
+
+	    /* Handle master key type */
+	    if (rparams && rparams->realm_enctype_valid)
+		rdp->realm_mkey.enctype =
+		    (krb5_enctype) rparams->realm_enctype;
+	    else
+		/* If not manual, we can lookup the enctype */
+		rdp->realm_mkey.enctype = (def_enctype || !manual)
+		    ? def_enctype : ENCTYPE_DES_CBC_CRC;
 
 	    /* Handle ticket maximum life */
 	    rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?
@@ -423,8 +424,9 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	    }
 
 	    /* Select the specified encryption type */
-	    krb5_use_enctype(rdp->realm_context, &rdp->realm_encblock, 
-			     rdp->realm_mkey.enctype);
+	    if (rdp->realm_mkey.enctype)
+		krb5_use_enctype(rdp->realm_context, &rdp->realm_encblock, 
+				 rdp->realm_mkey.enctype);
 
 	    /*
 	     * Get the master key.
