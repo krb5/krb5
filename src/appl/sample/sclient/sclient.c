@@ -51,12 +51,13 @@ char *argv[];
     int sock, namelen;
     krb5_context context;
     krb5_data recv_data;
-    krb5_checksum send_cksum;
+    krb5_data cksum_data;
     krb5_error_code retval;
     krb5_ccache ccdef;
     krb5_principal client, server;
     krb5_error *err_ret;
     krb5_ap_rep_enc_part *rep_ret;
+    krb5_auth_context * auth_context;
     short xmitlen;
 
     if (argc != 2 && argc != 3) {
@@ -135,23 +136,8 @@ char *argv[];
 	exit(1);
     }
 
-    /* compute checksum, using CRC-32 */
-    if (!(send_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
-	com_err(argv[0], ENOMEM, "while allocating checksum");
-	exit(1);
-    }
-    /* choose some random stuff to compute checksum from */
-    if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
-					 argv[1],
-					 strlen(argv[1]),
-					 0,
-					 0, /* if length is 0, crc-32 doesn't
-					       use the seed */
-					 &send_cksum)) {
-	com_err(argv[0], retval, "while computing checksum");
-	exit(1);
-    }
+    cksum_data.data = argv[1];
+    cksum_data.length = strlen(argv[1]);
 
     if (retval = krb5_cc_default(context, &ccdef)) {
 	com_err(argv[0], retval, "while getting default ccache");
@@ -162,16 +148,12 @@ char *argv[];
 	com_err(argv[0], retval, "while getting client principal name");
 	exit(1);
     }
-    retval = krb5_sendauth(context, (krb5_pointer) &sock,
+    retval = krb5_sendauth(context, &auth_context, (krb5_pointer) &sock,
 			   SAMPLE_VERSION, client, server,
 			   AP_OPTS_MUTUAL_REQUIRED,
-			   &send_cksum,
+			   &cksum_data,
 			   0,		/* no creds, use ccache instead */
-			   ccdef,
-			   0,		/* don't need seq # */
-			   0,		/* don't need a subsession key */
-			   &err_ret,
-			   &rep_ret, NULL);
+			   ccdef, &err_ret, &rep_ret, NULL);
 
     krb5_free_principal(context, server);	/* finished using it */
 

@@ -1,3 +1,7 @@
+Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
+
+        * sclient.c Use new calling convention for krb5_sendauth().
+
 Thu Mar  2 12:27:22 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
