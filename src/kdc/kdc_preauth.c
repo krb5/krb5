@@ -87,11 +87,11 @@ const char *missing_required_preauth(client, server, enc_tkt_reply)
     
     if (isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
 	 !isflagset(enc_tkt_reply->flags, TKT_FLG_PRE_AUTH))
-	return "preauth";
+	return "NEEDED_PREAUTH";
     
     if (isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH) &&
 	!isflagset(enc_tkt_reply->flags, TKT_FLG_HW_AUTH))
-	return "HW preauth";
+	return "NEEDED_HW_PREAUTH";
 
     return 0;
 }

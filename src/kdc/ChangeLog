@@ -1,3 +1,12 @@
+Fri Oct  6 00:07:49 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): Use a slightly more compressed
+		logging format.
+
+	* do_as_req.c (process_as_req): Unify the logging and error packet
+		production, to make sure that both logging and an error
+		packet is returned for each error condition.
+
 Thu Oct  5 21:23:12 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* network.c (setup_network):

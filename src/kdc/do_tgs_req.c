@@ -97,7 +97,7 @@ krb5_data **response;			/* filled in with a response packet */
     /*
      * setup_server_realm() sets up the global realm-specific data pointer.
      */
-    if (retval = setup_server_realm(request->server))
+    if ((retval = setup_server_realm(request->server)))
 	return retval;
 
 #ifdef KRB5_USE_INET
@@ -147,11 +147,9 @@ krb5_data **response;			/* filled in with a response packet */
        header? */
 
     nprincs = 1;
-    if ((retval = krb5_db_get_principal(kdc_context, request->server, &server,
+    if ((errcode = krb5_db_get_principal(kdc_context, request->server, &server,
 					&nprincs, &more))) {
-        krb5_klog_syslog(LOG_INFO,
-	       "TGS_REQ: GET_PRINCIPAL: authtime %d, host %s, %s for %s (%s)",
-	       authtime, fromstring, cname, sname, error_message(retval));
+	status = "LOOKING_UP_SERVER";
 	nprincs = 0;
 	goto cleanup;
     }
@@ -522,8 +520,8 @@ got_a_key:;
 						request->second_ticket[st_idx]->enc_part2->client,
 						&tmp)))
 			tmp = 0;
-		krb5_klog_syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_MISMATCH: authtime %d, host %s, %s for %s, 2nd tkt client %s",
-		       authtime, fromstring, cname, sname,
+		krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): 2ND_TKT_MISMATCH: authtime %d, %s for %s, 2nd tkt client %s",
+		       fromstring, portnum, authtime, cname, sname,
 		       tmp ? tmp : "<unknown>");
 		goto cleanup;
 	}
@@ -621,8 +619,8 @@ got_a_key:;
     
 cleanup:
     if (status)
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ %d: %s: authtime %d, host %s, %s for %s%s%s",
-	       portnum, status, authtime, fromstring,
+        krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): %s: authtime %d, %s for %s%s%s",
+	       fromstring, portnum, status, authtime, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
 	       errcode ? ", " : "",
