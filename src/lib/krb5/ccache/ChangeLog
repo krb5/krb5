@@ -1,3 +1,8 @@
+Wed Mar 22 11:47:49 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in (CFLAGS): Make -I options work when the build and
+		source tree are different.
+
 Fri Mar 17 19:19:07 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Remove, duplicates config/pre.in.

@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I$(C)file -I$(C)stdio
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
