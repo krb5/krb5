@@ -1680,7 +1680,7 @@ krb5_error_code KRB5_CALLCONV krb5_free_keytab_entry_contents
 	(krb5_context,
 		krb5_keytab_entry * );
 #if KRB5_PRIVATE
-/* use krb5_kt_free_entry_contents instead */
+/* use krb5_free_keytab_entry_contents instead */
 krb5_error_code KRB5_CALLCONV krb5_kt_free_entry
 	(krb5_context,
 		krb5_keytab_entry * );

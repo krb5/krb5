@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Update comment on krb5_kt_free_entry prototype to
+	point at the correct recommended function.
+
 2002-12-06  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h: Update prototype of krb5int_locate_server() to take
