@@ -252,7 +252,7 @@ dos-zipfiles: Makefile.sav awk-windows-mac winfile.list
 	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
-kerbsrc.mac: macfile.list awk-windows-mac
+kerbsrc.mac: awk-windows-mac macfile.list 
 	cp mac/libraries/autoconf.h include/autoconf.h
 	tar cvf kerbsrc.tar include/autoconf.h `cat macfile.list`
 	rm -f $(CLEANUP)

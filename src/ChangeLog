@@ -1,3 +1,8 @@
+Fri Oct  6 00:57:25 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ekrbsrc.mac): Build the list of files *after*
+		building files using awk-windows-mac.
+
 Sat Sep 30 04:34:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (DO_SUBDIRS): Add make Makefiles for broken versions
