@@ -89,6 +89,9 @@
 #ifndef MAXDNAME
 #define MAXDNAME 256 /*per the rfc*/
 #endif
+#ifndef INADDR_NONE
+#define INADDR_NONE 0xffffffff
+#endif
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
 int tos = -1;
@@ -2443,10 +2446,10 @@ tn(argc, argv)
     } else {
 #endif
 	temp = inet_addr(hostp);
-	if (temp != (unsigned long) -1) {
+	if (temp != INADDR_NONE) {
 	    sin.sin_addr.s_addr = temp;
 	    sin.sin_family = AF_INET;
-	    (void) strcpy(_hostname, hostp);
+	    (void) strcpy(_hostname, hostp);  
 	    hostname = _hostname;
 	} else {
 	    host = gethostbyname(hostp);
