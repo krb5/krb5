@@ -1,3 +1,7 @@
+2002-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* DNR.c: Deleted.
+
 2002-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	Handle IPv6 sockets that are used to communicate over IPv4, and
