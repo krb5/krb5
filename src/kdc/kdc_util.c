@@ -762,9 +762,6 @@ char	**status;
 			     KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_RENEW | \
 			     KDC_OPT_VALIDATE)
 
-#define TGS_SPECIAL_OPTS	(KDC_OPT_FORWARDED | KDC_OPT_PROXY | \
-				 KDC_OPT_RENEW | KDC_OPT_VALIDATE)
-
 int
 validate_tgs_request(request, server, ticket, kdc_time, status)
 register krb5_kdc_req *request;
@@ -795,35 +792,17 @@ char **status;
      * (either the ticket granting service or the service we're
      * looking for)
      */
-
-    if (request->kdc_options & TGS_SPECIAL_OPTS) {
-	/*
-	 * This is one of the KDC options which allow a non-TGT ticket
-	 * for the purposes of renewing, forwarding, proxying, or
-	 * validating it.
-	 *
-	 * We just make sure the service in the ticket matches service
-	 * the user is request.
-	 */
-	if (!krb5_principal_compare(ticket->server,
-				    request->server)) {
-	    *status = "SERVER MISMATCH";
-	    return KRB5KDC_SERVER_NOMATCH;
-	}
-    } else {
-	/*
-	 * This is a normal TGS request; the ticket must belong to the
-	 * TGS server
-	 */
-	if (!krb5_principal_compare(ticket->server, tgs_server)) {
-	    *status = "NOT TGS TICKET";
-	    return KRB5KRB_AP_ERR_NOT_US;
-	}
-	
+    if (krb5_principal_compare(ticket->server, tgs_server)) {
 	/* Server must allow TGS based issuances */
 	if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
 	    *status = "TGT BASED NOT ALLOWED";
 	    return(KDC_ERR_POLICY);
+	}
+    } else {
+	if (!krb5_principal_compare(ticket->server,
+				    request->server)) {
+	    *status = "BAD SERVER IN TKT";
+	    return KRB5KRB_AP_ERR_NOT_US;
 	}
     }
     
