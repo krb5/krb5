@@ -44,6 +44,11 @@ SRCS=	$(srcdir)/invocation.c $(srcdir)/help.c \
 	$(srcdir)/error.c $(srcdir)/prompt.c \
 	$(srcdir)/request_tbl.c $(srcdir)/list_rqs.c $(srcdir)/pager.c \
 	$(srcdir)/requests.c $(srcdir)/data.c
+EXTRADEPSRCS= \
+	$(srcdir)/mk_cmds.c $(srcdir)/utils.c $(srcdir)/options.c \
+	cmd_tbl.lex.c ct.tab.c \
+	ss_err.c \
+	std_rqs.c
 depend-dependencies: ss_err.h includes
 
 std_rqs.o: std_rqs.c ss_err.h

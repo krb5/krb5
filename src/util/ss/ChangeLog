@@ -1,3 +1,7 @@
+2005-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (EXTRADEPSRCS): Define.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-mac): Target deleted.
