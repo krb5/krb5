@@ -71,7 +71,7 @@ krb5_error_code krb5_get_in_tkt
 		   const krb5_keytype,
 		   krb5_error_code (* )(const krb5_keytype,
 					krb5_keyblock **,
-					krb5_pointer ),
+					krb5_const_pointer ),
 		   krb5_const_pointer,
 		   krb5_error_code (* )(const krb5_keyblock *,
 					krb5_const_pointer,
