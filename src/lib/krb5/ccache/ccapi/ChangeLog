@@ -1,3 +1,12 @@
+2000-03-24  Alexandra Ellwood  <lxs@mit.edu>
+
+	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
+		Modified to copy authdata as well... this code may have 
+		bugs since I couldn't get a good case where authdata != NULL
+	
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+		Added code to store times in localtime, not in kdc time.
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* stdcc.c (krb5_stdcc_destroy): Do not mask KRB5_FCC_NOFILE error

@@ -23,57 +23,85 @@
  * - copy and translate the null terminated arrays of data records
  * 	 used in k5 tickets
  */
-int copyCCDataArrayToK5(cc_creds *cc, krb5_creds *kc, char whichArray) {
+int copyCCDataArrayToK5(cc_creds *ccCreds, krb5_creds *v5Creds, char whichArray) {
 
-	cc_data *ccAdr, **cbase;
-	krb5_address *kAdr, **kbase, **constKBase;
-	int numRecords = 0;
-		
-	
 	if (whichArray == kAddressArray) {
-		/* check pointer */
-		if (cc->addresses == NULL) {
-			kc->addresses = NULL;
-			return 0;
-		}
-	} else if (whichArray == kAuthDataArray) {
-		/* check pointer */
-		if (cc->authdata == NULL) {
-			kc->authdata = NULL;
-			return 0;
-		}
-	} else
-		return -1;
-	
+		if (ccCreds->addresses == NULL) {
+			v5Creds->addresses = NULL;
+		} else {
+		
+			krb5_address 	**addrPtr, *addr;
+			cc_data			**dataPtr, *data;
+			UInt32			numRecords = 0;
+			
+			/* Allocate the array of pointers: */
+			for (dataPtr = ccCreds->addresses; *dataPtr != NULL; numRecords++, dataPtr++) {}
 
-	cbase = (whichArray == kAddressArray) ? cc->addresses : cc->authdata;
-	/* calc number of records */
-	while (*cbase++ != NULL) numRecords++;
-	/* allocate new array */
-	constKBase = kbase = (krb5_address **)malloc((numRecords+1)*sizeof(char *));
-	//reset base
-	cbase = (whichArray == kAddressArray) ? cc->addresses : cc->authdata;
-		
-		
-	//copy records
-	while (*cbase != NULL) {
-		*kbase = (krb5_address *)malloc(sizeof(krb5_address));
-		kAdr = *kbase;
-		ccAdr = *cbase;
-		kAdr->magic = (whichArray == kAddressArray) ? KV5M_ADDRESS : KV5M_AUTHDATA;
-		kAdr->addrtype = ccAdr->type;
-		kAdr->length = ccAdr->length;
-		kAdr->contents = (krb5_octet *)malloc(kAdr->length);
-		memcpy(kAdr->contents, ccAdr->data, kAdr->length);
-		//next element please
-		kbase++; cbase++;
+			v5Creds->addresses = (krb5_address **) malloc (sizeof(krb5_address *) * numRecords + 1);
+			if (v5Creds->addresses == NULL)
+				return ENOMEM;
+
+			/* Fill in the array, allocating the address structures: */
+			for (dataPtr = ccCreds->addresses, addrPtr = v5Creds->addresses; *dataPtr != NULL; addrPtr++, dataPtr++) {
+				
+				*addrPtr = (krb5_address *) malloc (sizeof(krb5_address));
+				if (*addrPtr == NULL)
+					return ENOMEM;
+				data = *dataPtr;
+				addr = *addrPtr;
+				
+				addr->addrtype = data->type;
+				addr->magic    = KV5M_ADDRESS;
+				addr->length   = data->length;
+				addr->contents = (krb5_octet *) malloc (sizeof(krb5_octet) * addr->length);
+				if (addr->contents == NULL)
+					return ENOMEM;
+				memmove(addr->contents, data->data, addr->length); /* copy contents */
+			}	
+			
+			/* Write terminator: */
+			*addrPtr = NULL;
+		}
 	}
 	
-	//write terminator
-	*kbase = NULL;
-	if (whichArray == kAddressArray) kc->addresses = constKBase;
-	else kc->authdata = (krb5_authdata **)constKBase;
+	if (whichArray == kAuthDataArray) {
+		if (ccCreds->authdata == NULL) {
+			v5Creds->authdata = NULL;
+		} else {
+			krb5_authdata 	**authPtr, *auth;
+			cc_data			**dataPtr, *data;
+			UInt32			numRecords = 0;
+			
+			/* Allocate the array of pointers: */
+			for (dataPtr = ccCreds->authdata; *dataPtr != NULL; numRecords++, dataPtr++) {}
 
+			v5Creds->authdata = (krb5_authdata **) malloc (sizeof(krb5_authdata *) * numRecords + 1);
+			if (v5Creds->authdata == NULL)
+				return ENOMEM;
+			
+			/* Fill in the array, allocating the address structures: */
+			for (dataPtr = ccCreds->authdata, authPtr = v5Creds->authdata; *dataPtr != NULL; authPtr++, dataPtr++) {
+				
+				*authPtr = (krb5_authdata *) malloc (sizeof(krb5_authdata));
+				if (*authPtr == NULL)
+					return ENOMEM;
+				data = *dataPtr;
+				auth = *authPtr;
+				
+				auth->ad_type  = data->type;
+				auth->magic    = KV5M_AUTHDATA;
+				auth->length   = data->length;
+				auth->contents = (krb5_octet *) malloc (sizeof(krb5_octet) * auth->length);
+				if (auth->contents == NULL)
+					return ENOMEM;
+				memmove(auth->contents, data->data, auth->length); /* copy contents */
+			}
+			
+			/* Write terminator: */
+			*authPtr = NULL;
+		}
+	}	
+	
 	return 0;
 }
 
@@ -81,53 +109,83 @@ int copyCCDataArrayToK5(cc_creds *cc, krb5_creds *kc, char whichArray) {
  * copyK5DataArrayToCC
  * - analagous to above, but in the other direction
  */
-int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray) {
-
-	cc_data *ccAdr, **cbase, **constCBase;
-	krb5_address *kAdr, **kbase;
-	int numRecords = 0;
-		
-	
+int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray) 
+{
 	if (whichArray == kAddressArray) {
-		//check pointer
-		if (kc->addresses == NULL) {
-			cc->addresses = NULL;
-			return 0; }
-	} else if (whichArray == kAuthDataArray) {
-		//check pointer
-		if (kc->authdata == NULL) {
-			cc->authdata = NULL;
-			return 0; }
-	} else return -1;
-	
+		if (v5Creds->addresses == NULL) {
+			ccCreds->addresses = NULL;
+		} else {
+		
+			krb5_address 	**addrPtr, *addr;
+			cc_data			**dataPtr, *data;
+			UInt32			numRecords = 0;
+			
+			/* Allocate the array of pointers: */
+			for (addrPtr = v5Creds->addresses; *addrPtr != NULL; numRecords++, addrPtr++) {}
 
-	kbase = (whichArray == kAddressArray) ? kc->addresses : (krb5_address **)kc->authdata;
-	//calc number of records
-	while (*kbase++ != NULL) numRecords++;
-	//allocate new array
-	constCBase = cbase = (cc_data **)malloc((numRecords+1)*sizeof(char *));
-	//reset base
-	kbase = (whichArray == kAddressArray) ? kc->addresses : (krb5_address **)kc->authdata;
-		
-		
-	//copy records
-	while (*kbase != NULL) {
-		*cbase = (cc_data *)malloc(sizeof(krb5_address));
-		kAdr = *kbase;
-		ccAdr = *cbase;
-		ccAdr->type = kAdr->addrtype;
-		ccAdr->length = kAdr->length;
-		ccAdr->data = (unsigned char *)malloc(ccAdr->length);
-		memcpy(ccAdr->data, kAdr->contents, kAdr->length);
-		//next element please
-		kbase++; cbase++;
+			ccCreds->addresses = (cc_data **) malloc (sizeof(cc_data *) * numRecords + 1);
+			if (ccCreds->addresses == NULL)
+				return ENOMEM;
+
+			/* Fill in the array, allocating the address structures: */
+			for (dataPtr = ccCreds->addresses, addrPtr = v5Creds->addresses; *addrPtr != NULL; addrPtr++, dataPtr++) {
+				
+				*dataPtr = (cc_data *) malloc (sizeof(cc_data));
+				if (*dataPtr == NULL)
+					return ENOMEM;
+				data = *dataPtr;
+				addr = *addrPtr;
+				
+				data->type   = addr->addrtype;
+				data->length = addr->length;
+				data->data   = malloc (sizeof(char) * data->length);
+				if (data->data == NULL)
+					return ENOMEM;
+				memmove(data->data, addr->contents, data->length); /* copy contents */
+			}	
+			
+			/* Write terminator: */
+			*dataPtr = NULL;
+		}
 	}
 	
-	//write terminator
-	*cbase = NULL;
-	if (whichArray == kAddressArray) cc->addresses = (cc_data **)constCBase;
-	else cc->authdata = (cc_data **)constCBase;
+	if (whichArray == kAuthDataArray) {
+		if (v5Creds->authdata == NULL) {
+			ccCreds->authdata = NULL;
+		} else {
+			krb5_authdata 	**authPtr, *auth;
+			cc_data			**dataPtr, *data;
+			UInt32			numRecords = 0;
+			
+			/* Allocate the array of pointers: */
+			for (authPtr = v5Creds->authdata; *authPtr != NULL; numRecords++, authPtr++) {}
 
+			ccCreds->authdata = (cc_data **) malloc (sizeof(cc_data *) * numRecords + 1);
+			if (ccCreds->authdata == NULL)
+				return ENOMEM;
+			
+			/* Fill in the array, allocating the address structures: */
+			for (dataPtr = ccCreds->authdata, authPtr = v5Creds->authdata; *authPtr != NULL; authPtr++, dataPtr++) {
+				
+				*dataPtr = (cc_data *) malloc (sizeof(cc_data));
+				if (*dataPtr == NULL)
+					return ENOMEM;
+				data = *dataPtr;
+				auth = *authPtr;
+				
+				data->type   = auth->ad_type;
+				data->length = auth->length;
+				data->data   = malloc (sizeof(char) * data->length);
+				if (data->data == NULL)
+					return ENOMEM;
+				memmove(data->data, auth->contents, data->length); /* copy contents */
+			}
+			
+			/* Write terminator: */
+			*dataPtr = NULL;
+		}
+	}	
+	
 	return 0;
 }
 
@@ -136,8 +194,9 @@ int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray) {
  * - allocate an empty k5 style ticket and copy info from the cc_creds ticket
  */
 
-void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
-
+void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) 
+{
+	krb5_int32 offset_seconds, offset_microseconds;
 	int err;
 	
 	/*
@@ -155,15 +214,19 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
 	memcpy(dest->keyblock.contents, src->keyblock.data, dest->keyblock.length);
 	
 	/* copy times */
-	dest->times.authtime = src->authtime;
-	dest->times.starttime = src->starttime;
-	dest->times.endtime = src->endtime;
-	dest->times.renew_till = src->renew_till;
-	dest->is_skey = src->is_skey;
-	dest->ticket_flags = src->ticket_flags;
+	err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
+	if (err) return;
+	dest->times.authtime   = src->authtime     + offset_seconds;
+	dest->times.starttime  = src->starttime    + offset_seconds;
+	dest->times.endtime    = src->endtime      + offset_seconds;
+	dest->times.renew_till = src->renew_till   + offset_seconds;
+	dest->is_skey          = src->is_skey      + offset_seconds;
+	dest->ticket_flags     = src->ticket_flags + offset_seconds;
 	
 	/* more branching fields */
-	copyCCDataArrayToK5(src, dest, kAddressArray);
+	err = copyCCDataArrayToK5(src, dest, kAddressArray);
+	if (err) return;
+	
 	dest->ticket.length = src->ticket.length;
 	dest->ticket.data = (char *)malloc(src->ticket.length);
 	memcpy(dest->ticket.data, src->ticket.data, src->ticket.length);
@@ -173,14 +236,11 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
 	
 	/* zero out magic number */
 	dest->magic = 0;
-	/*
-	 * later
-	 * copyCCDataArrayToK5(src, dest, kAuthDataArray);
-	 * krb5 docs say that authdata can be nulled out if we 
-	 * only want default behavior
-	 */
-	dest->authdata = NULL;
-	
+
+	/* authdata */
+	err = copyCCDataArrayToK5(src, dest, kAuthDataArray);
+	if (err) return;
+
 	return;
 }
 
@@ -192,6 +252,7 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 {
 	cc_creds *c;
 	int err;
+	krb5_int32 offset_seconds, offset_microseconds;
 #ifdef macintosh
 	char *tempname = NULL;
 #endif
@@ -245,15 +306,18 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 	} else {
 		c->keyblock.data = NULL;
 	}
-		
-	c->authtime = creds->times.authtime;
-	c->starttime = creds->times.starttime;
-	c->endtime = creds->times.endtime;
-	c->renew_till = creds->times.renew_till;
-	c->is_skey = creds->is_skey;
-	c->ticket_flags = creds->ticket_flags;
 
-	copyK5DataArrayToCC(creds, c, kAddressArray);	
+	err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
+	if (err) return;
+	c->authtime     = creds->times.authtime   - offset_seconds;
+	c->starttime    = creds->times.starttime  - offset_seconds;
+	c->endtime      = creds->times.endtime    - offset_seconds;
+	c->renew_till   = creds->times.renew_till - offset_seconds;
+	c->is_skey      = creds->is_skey          - offset_seconds;
+	c->ticket_flags = creds->ticket_flags     - offset_seconds;
+
+	err = copyK5DataArrayToCC(creds, c, kAddressArray);	
+	if (err) return;
 
 	c->ticket.length = creds->ticket.length;
 	if (creds->ticket.data != NULL) {
@@ -271,7 +335,8 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 		c->second_ticket.data = NULL;
 	}
 		
-	c->authdata = NULL;
+	err = copyK5DataArrayToCC(creds, c, kAuthDataArray);
+	if (err) return;
 	
 	return;
 }
