@@ -29,7 +29,6 @@
 #include "fake-addrinfo.h"
 #include "k5-int.h"
 #include "os-proto.h"
-#include "adm_err.h"
 
 #include <stdio.h>
 #include <errno.h>

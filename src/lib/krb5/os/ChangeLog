@@ -1,3 +1,7 @@
+2002-11-14  Tom Yu  <tlyu@mit.edu>
+
+	* changepw.c: Remove reference to adm_err.h.
+
 2002-11-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (t_locate_kdc): Use normal CC_LINK rule for linking
