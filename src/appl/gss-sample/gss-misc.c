@@ -26,6 +26,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <string.h>
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -209,3 +210,42 @@ static void display_status_1(m, code, type)
 	       break;
      }
 }
+
+void print_token(tok)
+     gss_buffer_t tok;
+{
+    int i;
+    unsigned char *p = tok->value;
+
+    if (!display_file)
+	return;
+    for (i=0; i < tok->length; i++, p++) {
+	fprintf(display_file, "%02x ", *p);
+	if ((i % 16) == 15) {
+	    fprintf(display_file, "\n");
+	}
+    }
+    fprintf(display_file, "\n");
+    fflush(display_file);
+}
+
+void display_buffer(buffer)
+	gss_buffer_desc buffer;
+{
+    char *namebuf;
+    
+    if (!display_file)
+	return;
+    namebuf = malloc(buffer.length+1);    
+    if (!namebuf) {
+	fprintf(stderr, "display_buffer: couldn't allocate buffer!\n");
+	exit(1);
+    }
+    strncpy(namebuf, buffer.value, buffer.length);
+    namebuf[buffer.length] = '\0';
+    fprintf(display_file, "%s", namebuf);
+    free(namebuf);
+}
+
+    
+    

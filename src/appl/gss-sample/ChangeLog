@@ -1,3 +1,18 @@
+Sat Mar  2 03:03:27 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-server.c (sign_server): Do better import/export security
+		checking.  If the received message to be signed is not
+		printable (at least the first two characters are not),
+		display the message in hex.  Print the hex values of the
+		incoming and outcoming packets, for your information.
+
+	* gss-misc.c (print_token, display_buffer): Two new tokens for
+		displaying GSSAPI buffers, either has hex or as a
+		printable string.
+
+	* gss-client.c (call_server): Add option to support reading in the
+		message to be signed from a file.
+
 Wed Feb 28 11:42:26 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gss-client.c (call_server): Get the nametype OID from

@@ -27,6 +27,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdlib.h>
+#include <ctype.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -44,10 +46,17 @@ int create_socket();
 int send_token();
 int recv_token();
 void display_status();
+int test_import_export_context();
+void print_token();
+
+int server_acquire_creds();
+int server_establish_context();
+int sign_server();
 
 extern FILE *display_file;
 FILE *log;
 
+int verbose = 0;
 
 void
 usage()
@@ -79,6 +88,8 @@ main(argc, argv)
 	  } else if (strcmp(*argv, "-inetd") == 0) {
 	      do_inetd = 1;
 	      display_file = 0;
+	  } else if (strcmp(*argv, "-verbose") == 0) {
+	      verbose = 1;
 	  } else if (strcmp(*argv, "-v2") == 0) {
 	      dov2 = 1;
 	  } else if (strcmp(*argv, "-once") == 0) {
@@ -200,11 +211,12 @@ int sign_server(s, service_name, dov2, once)
      int once;
 {
      gss_cred_id_t server_creds;     
-     gss_buffer_desc client_name, xmit_buf, msg_buf, context_token;
+     gss_buffer_desc client_name, xmit_buf, msg_buf;
      gss_ctx_id_t context;
      OM_uint32 maj_stat, min_stat;
-     int s2;
+     int i,s2;
      time_t	now;
+     char	*cp;
      
      if (server_acquire_creds(service_name, &server_creds) < 0)
 	  return -1;
@@ -230,30 +242,21 @@ int sign_server(s, service_name, dov2, once)
 	  (void) gss_release_buffer(&min_stat, &client_name);
 
 	  if (dov2) {
-	      /*
-	       * Attempt to save and then restore the context.
-	       */
-	      maj_stat = gss_export_sec_context(&min_stat,
-						&context,
-						&context_token);
-	      if (maj_stat != GSS_S_COMPLETE) {
-		  display_status("exporting context", maj_stat, min_stat);
-		  break;
-	      }
-	      fprintf(log, "Exported context: %d bytes\n", context_token.length);
-	      maj_stat = gss_import_sec_context(&min_stat,
-						&context_token,
-						&context);
-	      if (maj_stat != GSS_S_COMPLETE) {
-		  display_status("importing context", maj_stat, min_stat);
-		  break;
-	      }
-	      (void) gss_release_buffer(&min_stat, &context_token);
+		  for (i=0; i < 3; i++)
+			  if (test_import_export_context(&context))
+				  break;
+		  if (i < 3)
+			  break;
 	  }
 
 	  /* Receive the sealed message token */
 	  if (recv_token(s2, &xmit_buf) < 0)
 	       break;
+	  
+	  if (verbose && log) {
+	      fprintf(log, "Sealed message token:\n");
+	      print_token(xmit_buf);
+	  }
 
 #ifdef	GSSAPI_V2
 	  if (dov2)
@@ -271,8 +274,15 @@ int sign_server(s, service_name, dov2, once)
 
 	  (void) gss_release_buffer(&min_stat, &xmit_buf);
 
-	  fprintf(log, "Received message: \"%s\"\n", (char *) msg_buf.value);
-
+	  fprintf(log, "Received message: ");
+	  cp = msg_buf.value;
+	  if (isprint(cp[0]) && isprint(cp[1]))
+	      fprintf(log, "\"%s\"\n", cp);
+	  else {
+	      printf("\n");
+	      print_token(msg_buf);
+	  }
+	  
 	  /* Produce a signature block for the message */
 #ifdef	GSSAPI_V2
 	  if (dov2)
@@ -408,6 +418,11 @@ int server_establish_context(s, server_creds, context, client_name)
 	  if (recv_token(s, &recv_tok) < 0)
 	       return -1;
 
+	  if (verbose && log) {
+	      fprintf(log, "Received token: \n");
+	      print_token(&recv_tok);
+	  }
+
 	  maj_stat =
 	       gss_accept_sec_context(&min_stat,
 				      context,
@@ -428,14 +443,26 @@ int server_establish_context(s, server_creds, context, client_name)
 	  }
 	  (void) gss_release_buffer(&min_stat, &recv_tok);
 	  
-
 	  if (send_tok.length != 0) {
+	      if (verbose && log) {
+		  fprintf(log,
+			  "Sending accept_sec_context token (size=%d)...",
+			  send_tok.length);
+		  print_token(&send_tok);
+	      }
 	       if (send_token(s, &send_tok) < 0) {
 		    fprintf(log, "failure sending token\n");
 		    return -1;
 	       }
 
 	       (void) gss_release_buffer(&min_stat, &send_tok);
+	  }
+	  if (maj_stat == GSS_S_CONTINUE_NEEDED)
+	      if (log)
+		  fprintf(log, "continue needed...");
+	  if (log) {
+	      fprintf(log, "\n");
+	      fflush(log);
 	  }
      } while (maj_stat == GSS_S_CONTINUE_NEEDED);
 
@@ -452,5 +479,42 @@ int server_establish_context(s, server_creds, context, client_name)
      return 0;
 }
 
-	  
+static float timeval_subtract(struct timeval *tv1,
+					 struct timeval *tv2)
+{
+	return ((tv1->tv_sec - tv2->tv_sec) +
+		((float) (tv1->tv_usec - tv2->tv_usec)) / 1000000);
+}
 
+int test_import_export_context(context)
+	gss_ctx_id_t *context;
+{
+	OM_uint32	min_stat, maj_stat;
+	gss_buffer_desc context_token;
+	struct timeval tm1, tm2;
+	
+	/*
+	 * Attempt to save and then restore the context.
+	 */
+	gettimeofday(&tm1);
+	maj_stat = gss_export_sec_context(&min_stat, context, &context_token);
+	if (maj_stat != GSS_S_COMPLETE) {
+		display_status("exporting context", maj_stat, min_stat);
+		return 1;
+	}
+	gettimeofday(&tm2);
+	if (verbose && log)
+		fprintf(log, "Exported context: %d bytes, %7.4f seconds\n",
+			context_token.length, timeval_subtract(&tm2, &tm1));
+	maj_stat = gss_import_sec_context(&min_stat, &context_token, context);
+	if (maj_stat != GSS_S_COMPLETE) {
+		display_status("importing context", maj_stat, min_stat);
+		return 1;
+	}
+	gettimeofday(&tm1);
+	if (verbose && log)
+		fprintf(log, "Importing context: %7.4f seconds\n",
+			timeval_subtract(&tm1, &tm2));
+	(void) gss_release_buffer(&min_stat, &context_token);
+	return 0;
+}

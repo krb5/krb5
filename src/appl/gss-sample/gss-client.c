@@ -21,10 +21,15 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -38,29 +43,33 @@
 int establish_context();
 int connect_to_server();
 int call_server();
+int client_establish_context();
 
 int send_token();
 int recv_token();
+void read_file();
 
 int deleg_flag;
 void display_status();
 
 extern FILE *display_file;
 
-usage()
+
+void usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-d] [-v2] host service \
 msg\n");
      exit(1);
 }
 
-main(argc, argv)
+int main(argc, argv)
      int argc;
      char **argv;
 {
      char *service_name, *server_host, *msg;
      u_short port = 4444;
      int v2 = 0;
+     int use_file = 0;
      
      display_file = stdout;
      deleg_flag = 0;
@@ -76,6 +85,8 @@ main(argc, argv)
 	       v2 = 1;
 	  } else if (strcmp(*argv, "-d") == 0) {
 	       deleg_flag = GSS_C_DELEG_FLAG;
+	  } else if (strcmp(*argv, "-f") == 0) {
+	       use_file = 1;
 	  } else 
 	       break;
 	  argc--; argv++;
@@ -87,7 +98,7 @@ main(argc, argv)
      service_name = *argv++;
      msg = *argv++;
 
-     if (call_server(server_host, port, v2, service_name, msg) < 0)
+     if (call_server(server_host, port, v2, service_name, msg, use_file) < 0)
 	  exit(1);
 
      return 0;
@@ -116,12 +127,13 @@ main(argc, argv)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.
  */
-int call_server(host, port, dov2, service_name, msg)
+int call_server(host, port, dov2, service_name, msg, use_file)
      char *host;
      u_short port;
      int dov2;
      char *service_name;
      char *msg;
+     int use_file;
 {
      gss_ctx_id_t context;
      gss_buffer_desc in_buf, out_buf, context_token;
@@ -141,7 +153,6 @@ int call_server(host, port, dov2, service_name, msg)
 #else	/* GSSAPI_V2 */
      int		context_flags;
 #endif	/* GSSAPI_V2 */
-     
 
      /* Open connection */
      if ((s = connect_to_server(host, port)) < 0)
@@ -201,7 +212,8 @@ int call_server(host, port, dov2, service_name, msg)
 	 return -1;
      }
      fprintf(stderr, "\"%s\" to \"%s\", lifetime %d, flags %x, %s",
-	     sname.value, tname.value, lifetime, context_flags,
+	     (char *) sname.value, (char *) tname.value, lifetime,
+	     context_flags,
 	     (is_local) ? "locally initiated" : "remotely initiated");
 #ifdef	GSSAPI_V2
      fprintf(stderr, " %s", (is_open) ? "open" : "closed");
@@ -225,7 +237,7 @@ int call_server(host, port, dov2, service_name, msg)
 	     return -1;
 	 }
 	 fprintf(stderr, "Name type of source name is %s.\n",
-		 oid_name.value);
+		 (char *) oid_name.value);
 	 (void) gss_release_buffer(&min_stat, &oid_name);
 	 (void) gss_release_oid(&min_stat, &name_type);
 
@@ -246,7 +258,7 @@ int call_server(host, port, dov2, service_name, msg)
 	     return -1;
 	 }
 	 fprintf(stderr, "Mechanism %s supports %d names\n",
-		 oid_name.value, mech_names->count);
+		 (char *) oid_name.value, mech_names->count);
 	 (void) gss_release_buffer(&min_stat, &oid_name);
 	 for (i=0; i<mech_names->count; i++) {
 	     gss_OID	tmpoid;
@@ -259,7 +271,7 @@ int call_server(host, port, dov2, service_name, msg)
 		 display_status("converting oid->string", maj_stat, min_stat);
 		 return -1;
 	     }
-	     fprintf(stderr, "%d: %s\n", i, oid_name.value);
+	     fprintf(stderr, "%d: %s\n", i, (char *) oid_name.value);
 
 	     maj_stat = gss_str_to_oid(&min_stat,
 				       &oid_name,
@@ -279,7 +291,7 @@ int call_server(host, port, dov2, service_name, msg)
 	     }
 	     if (!is_present) {
 		 fprintf(stderr, "%s is not present in list?\n",
-			 oid_name.value);
+			 (char *) oid_name.value);
 	     }
 	     (void) gss_release_oid(&min_stat, &tmpoid);
 	     (void) gss_release_buffer(&min_stat, &oid_name);
@@ -290,9 +302,13 @@ int call_server(host, port, dov2, service_name, msg)
      }
 #endif	/* GSSAPI_V2 */
 
-     /* Seal the message */
-     in_buf.value = msg;
-     in_buf.length = strlen(msg) + 1;
+     if (use_file) {
+	 read_file(msg, &in_buf);
+     } else {
+	 /* Seal the message */
+	 in_buf.value = msg;
+	 in_buf.length = strlen(msg) + 1;
+     }
 #ifdef	GSSAPI_V2
      if (dov2)
 	 maj_stat = gss_wrap(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
@@ -307,6 +323,8 @@ int call_server(host, port, dov2, service_name, msg)
      } else if (! state) {
 	  fprintf(stderr, "Warning!  Message not encrypted.\n");
      }
+     if (use_file)
+	 free(in_buf.value);
 
      /* Send to server */
      if (send_token(s, &out_buf) < 0)
@@ -484,6 +502,8 @@ int client_establish_context(s, service_name, gss_context)
 	  }
 
 	  if (send_tok.length != 0) {
+	       printf("Sending init_sec_context token (size=%d)...",
+		     send_tok.length);
 	       if (send_token(s, &send_tok) < 0) {
 		    (void) gss_release_buffer(&min_stat, &send_tok);
 		    (void) gss_release_name(&min_stat, &target_name);
@@ -493,14 +513,56 @@ int client_establish_context(s, service_name, gss_context)
 	  (void) gss_release_buffer(&min_stat, &send_tok);
 	  
 	  if (maj_stat == GSS_S_CONTINUE_NEEDED) {
+	       printf("continue needed...");
 	       if (recv_token(s, &recv_tok) < 0) {
 		    (void) gss_release_name(&min_stat, &target_name);
 		    return -1;
 	       }
 	       token_ptr = &recv_tok;
 	  }
+	  printf("\n");
      } while (maj_stat == GSS_S_CONTINUE_NEEDED);
 
      (void) gss_release_name(&min_stat, &target_name);
      return 0;
 }
+
+
+void read_file(file_name, in_buf)
+    char		*file_name;
+    gss_buffer_t	in_buf;
+{
+    int fd, bytes_in, count;
+    struct stat stat_buf;
+    
+    if ((fd = open(file_name, O_RDONLY, 0)) < 0) {
+	perror("open");
+	fprintf(stderr, "Couldn't open file %s\n", file_name);
+	exit(1);
+    }
+    if (fstat(fd, &stat_buf) < 0) {
+	perror("fstat");
+	exit(1);
+    }
+    in_buf->length = stat_buf.st_size;
+    in_buf->value = malloc(in_buf->length);
+    if (in_buf->value == 0) {
+	fprintf(stderr, "Couldn't allocate %d byte buffer for reading file\n",
+		in_buf->length);
+	exit(1);
+    }
+    memset(in_buf->value, 0, in_buf->length);
+    for (bytes_in = 0; bytes_in < in_buf->length; bytes_in += count) {
+	count = read(fd, in_buf->value, in_buf->length);
+	if (count < 0) {
+	    perror("read");
+	    exit(1);
+	}
+	if (count == 0)
+	    break;
+    }
+    if (bytes_in != count)
+	fprintf(stderr, "Warning, only read in %d bytes, expected %d\n",
+		bytes_in, count);
+}
+
