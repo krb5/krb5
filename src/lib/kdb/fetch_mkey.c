@@ -98,7 +98,11 @@ OLDDECLARG(krb5_keyblock *,key)
 			   realm->length));
 	(void) strcat(defkeyfile, "");
 	
+#if defined(__STDC__)
+	if (!(kf = fopen(defkeyfile, "rb")))
+#else
 	if (!(kf = fopen(defkeyfile, "r")))
+#endif
 	    return KRB5_KDB_CANTREAD_STORED;
 	if (fread((krb5_pointer) &keytype, sizeof(keytype), 1, kf) != 1) {
 	    retval = KRB5_KDB_CANTREAD_STORED;
