@@ -1,3 +1,12 @@
+Wed Apr 21 16:22:32 1999  Tom Yu  <tlyu@mit.edu>
+
+	* svc.c (xprt_unregister): Fix typo.
+
+1999-04-14    <tytso@rsts-11.mit.edu>
+
+	* svc.c (svc_getreq, svc_getreqset): Avoid using internal, private
+		fd_set structure elements (Needed for Linux/glibc 2.1)
+
 Tue Oct 21 14:31:33 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* svc_auth_gssapi.c (destroy_client): Fix to not lose entries in
