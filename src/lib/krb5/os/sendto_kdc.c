@@ -314,7 +314,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     if (socktype2) {
 	struct addrlist addrs2;
 
-	retval = krb5_locate_kdc(context, realm, &addrs2, use_master,
+	retval = krb5_locate_kdc(context, realm, &addrs2, *use_master,
 				 socktype2, 0);
 	if (retval == 0) {
 	    (void) merge_addrlists(&addrs, &addrs2);

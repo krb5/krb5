@@ -1,3 +1,8 @@
+2004-03-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* sendto_kdc.c (krb5_sendto_kdc): Change passing pointer to value of
+	use_master parameter to krb5_locate_kdc.
+
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* lock_file.c (krb5_lock_file): Initialize flock data on entry,
