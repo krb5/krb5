@@ -1,3 +1,9 @@
+Thu Jul 25 12:11:49 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kadmin.c (quit): Return zero so that we return the proper exit
+		status. 
+		(kadmin_getprivs): Declare function as returning void
+
 Wed Jul 24 14:18:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (all): Use $(LD) instead of $(CC) for link stage.

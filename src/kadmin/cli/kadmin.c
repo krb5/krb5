@@ -442,6 +442,7 @@ int quit()
      }
 
      /* insert more random cleanup here */
+     return 0;
 }
 
 void kadmin_delprinc(argc, argv)
@@ -1305,7 +1306,7 @@ void kadmin_getpols(argc, argv)
     kadm5_free_name_list(handle, names, count);
 }
 
-kadmin_getprivs(argc, argv)
+void kadmin_getprivs(argc, argv)
     int argc;
     char *argv[];
 {
