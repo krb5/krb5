@@ -67,6 +67,7 @@ WITH_CPPOPTS dnl
 WITH_KRB4 dnl
 AC_CONST dnl
 WITH_NETLIB dnl
+WITH_HESIOD dnl
 KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
 AC_SUBST(subdirs)
@@ -934,6 +935,28 @@ else
 	AC_MSG_RESULT("Not looking for Tcl library")
 fi
 ])dnl
+
+dnl
+dnl WITH_HESIOD
+dnl
+AC_DEFUN(WITH_HESIOD,
+[AC_ARG_WITH(hesiod, [  --with-hesiod=path      compile with hesiod support],
+	hesiod=$with_hesiod, with_hesiod=no)
+if test "$hesiod" != "no"; then
+	HESIOD_DEFS=-DHESIOD
+	AC_CHECK_LIB(resolv, res_send, res_lib=-lresolv)
+	if test "$hesiod" != "yes"; then
+		HESIOD_LIBS="-L${hesiod}/lib -lhesiod $res_lib"
+	else
+		HESIOD_LIBS="-lhesiod $res_lib"
+	fi
+else
+	HESIOD_DEFS=
+	HESIOD_LIBS=
+fi
+AC_SUBST(HESIOD_DEFS)
+AC_SUBST(HESIOD_LIBS)])
+
 
 dnl
 dnl KRB5_BUILD_LIBRARY

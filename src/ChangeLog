@@ -1,3 +1,9 @@
+Wed Aug  6 20:25:49 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add support for --with-hesiod (and add it to
+	CONFIG_RULES, as it's needed almost everywhere kadm5 gets
+	linked).
+
 Wed Jun 11 16:46:47 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (MACFILES): Added the mac/gss files to the Macintosh
