@@ -1,0 +1,13 @@
+
+Fri May 26 16:07:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Bring in version 1.85 of the Berkeley database code.  We only
+	use the hashed database, so that's all that's here.  There are
+	slight modifications to the code to fix one bug and to tailor
+	it for usage with Kerberos.
+
+
+Fri May 26 16:06:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Bring in version 1.85 of the Berkeley database code.  We only
+	use the hashed database, so that's all that's here.  There are
+	slight modifications which were done to the code.
+

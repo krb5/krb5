@@ -1,0 +1,58 @@
+##DOSBUILDTOP = ..\..
+##DOS!include $(BUILDTOP)\config\windows.in
+
+TST=if test -n "`cat DONE`" ; then
+
+LIB_SUBDIRS= hash
+
+LIBUPDATE= $(BUILDTOP)/util/libupdate
+
+all:: all-$(WHAT)
+
+all-unix::
+
+all-windows::
+
+libdb_ranlib: libdb.a
+	$(RANLIB) libdb.a
+	touch $@
+
+libdb.a: hash/DONE
+	if test -f $@ ; then \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) $@ $$i/DONE $$i ; \
+		done ; \
+	else \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
+		done ; \
+	fi
+	touch libdb.stamp
+
+install:: libdb_ranlib
+	$(INSTALL_DATA) libdb.a $(DESTDIR)$(KRB5_LIBDIR)/libdb.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdb.a
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) libdb.$(LIBEXT) libdb_ranlib libdb.stamp
+
+clean-windows::
+	$(RM) db.lib db.bak
+
+all-windows::
+	cd BERK_DB
+	@echo Making in berk_db
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..
+
+clean-windows::
+	cd BERK_DB
+	@echo Making clean in berk_db
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean locally
+

@@ -1,0 +1,15 @@
+AC_INIT(configure.in)
+AC_SET_BUILDTOP
+WITH_CCOPTS
+WITH_KRB5ROOT
+CONFIG_RULES
+CONFIG_DIRS(hash test)
+AC_PROG_ARCHIVE
+AC_PROG_ARCHIVE_ADD
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("checking",check)
+AppendRule([all:: libdb.a libdb_ranlib])
+V5_AC_OUTPUT_MAKEFILE
