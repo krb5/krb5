@@ -19,15 +19,29 @@
 
 #if defined(vax) || defined(__vax__)
 #define BITS32
+#define BIG
+#define LSBFIRST
 #endif
 
 #if defined(ibm032) || defined(__ibm032__)
 #define BITS32
+#define BIG
+#define MSBFIRST
 #endif
 
 #if defined(mips) || defined(__mips__)
 #define BITS32
-#endif
+#define BIG
+#ifdef MIPSEL
+#define LSBFIRST
+#else
+#ifdef MIPSEB
+#define MSBFIRST
+#else
+ error: you must figure out if your MIPS is big or little endian
+#endif /* MIPSEB */
+#endif /* MIPSEL */
+#endif /* mips */
 
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_CRC32
