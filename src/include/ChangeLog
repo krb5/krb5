@@ -1,3 +1,8 @@
+
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+	* krb5.h: (krb5_recvauth()): No longer needs the rc_type arg.
+
 Mon May  1 17:06:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.h: (krb5_set_config_files): Added const to prototype

@@ -1755,7 +1755,6 @@ krb5_error_code krb5_recvauth PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   char *,
 		   krb5_principal,
-		   char *,
 		   krb5_int32, 
 		   krb5_keytab,
 		   krb5_ticket **));
