@@ -185,7 +185,10 @@ proc v4ftp_test { } {
     expect -re "Using authentication type GSSAPI; ADAT must follow"
     expect "GSSAPI accepted as authentication type"
     expect "GSSAPI error major: Miscellaneous failure"
-    expect "GSSAPI error minor: Unsupported credentials cache format version number"
+    expect {
+	"GSSAPI error minor: Unsupported credentials cache format version number" {}
+	"GSSAPI error minor: No credentials cache file found" {}
+    }
     expect "GSSAPI error: initializing context"
     expect "GSSAPI authentication failed"
     expect -re "Using authentication type KERBEROS_V4; ADAT must follow"
