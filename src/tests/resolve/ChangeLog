@@ -1,3 +1,7 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* resolve.c: Include stdlib.h (if present) for exit() prototype.
+
 2001-06-12  Tom Yu  <tlyu@mit.edu>
 
 	* resolve.c (main): Make error message note that misconfiguration
