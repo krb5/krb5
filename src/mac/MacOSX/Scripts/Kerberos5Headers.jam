@@ -111,17 +111,20 @@ CatHeader           "$(IntermediateGSSIncludes)/gssapi.h"              : "__GSSA
                                                                          "$(IntermediateErrorTables)/gssapi_err_generic.h"
                                                                          "$(IntermediateErrorTables)/gssapi_err_krb5.h" ;
 CopyHeader          "$(IntermediateGSSIncludes)/gssapi_generic.h"      : "$(SRCROOT)/../../Kerberos5/Sources/lib/gssapi/generic/gssapi_generic.h" ;
-CopyHeader          "$(IntermediateGSSIncludes)/gssapi_krb5.h"         : "$(SRCROOT)/../../Kerberos5/Sources/lib/gssapi/krb5/gssapi_krb5.h" ;
+CopyHeader          "$(IntermediateGSSIncludes)/gssapi_krb5.h"         : "$(IntermediateBuild)/lib/gssapi/krb5/gssapi_krb5.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi.h"         : "$(IntermediateGSSIncludes)/gssapi.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi_generic.h" : "$(IntermediateGSSIncludes)/gssapi_generic.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi_krb5.h"    : "$(IntermediateGSSIncludes)/gssapi_krb5.h" ;
 
 
-MakeInclude "$(MakeIncludeStamp)" ;
-DEPENDS "$(IntermediateBuild)/include/krb5/autoconf.h" "$(IntermediateBuild)/include/krb5/osconf.h" : "$(MakeIncludeStamp)" ;
-
 CopyHeader "$(AutoconfH)" : "$(IntermediateBuild)/include/krb5/autoconf.h" ;
 CopyHeader "$(OsconfH)"   : "$(IntermediateBuild)/include/krb5/osconf.h" ;
+
+DEPENDS "$(IntermediateBuild)/include/krb5/autoconf.h" 
+        "$(IntermediateBuild)/include/krb5/osconf.h" 
+        "$(IntermediateBuild)/lib/gssapi/krb5/gssapi_krb5.h" : "$(MakeIncludeStamp)" ;
+
+MakeInclude "$(MakeIncludeStamp)" ;
 
 
 DEPENDS all :	"$(IntermediateIncludes)/com_err.h"
