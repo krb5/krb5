@@ -1,3 +1,7 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Check for regex.h
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Test for existance of arpa/inet.h
