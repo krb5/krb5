@@ -1587,7 +1587,7 @@ recvauth()
 	sprintf(krusername, "%s/%s@%s", v4_kdata->pname,
 		v4_kdata->pinst, v4_kdata->prealm);
 	
-	if (status = krb5_parse_name(krusername, &client))
+	if (status = krb5_parse_name(bsd_context, krusername, &client))
 	  return(status);
 	return 0;
     }
