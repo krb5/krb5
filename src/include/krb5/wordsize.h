@@ -51,6 +51,23 @@ typedef	unsigned short	krb5_ui_2;
 typedef	unsigned int	krb5_ui_4;
 #endif
 
+#ifdef NOT_RIGHT_YET
+/*
+ * Incorporated from the Sandia changes; but this can't be right; if
+ * we're on a 64 bit machine, an int shouldn't be 32 bits!?!
+ * [tytso:19920616.2224EDT]
+ */
+#ifdef BITS64
+#define __OK
+typedef	short	krb5_int16;
+typedef	int	krb5_int32;
+typedef	unsigned char	krb5_octet;
+typedef	unsigned char	krb5_ui_1;
+typedef	unsigned short	krb5_ui_2;
+typedef	unsigned int	krb5_ui_4;
+#endif
+#endif	/* NOT RIGHT YET */
+
 #ifndef __OK
  ?==error:  must define word size!
 #endif /* __OK */
