@@ -134,16 +134,27 @@ krb5_error_code krb5_decode_generic
 		   (translator_func) KRB5_AP__REQ2krb5_ap_req, \
 		   (free_func) free_KRB5_AP__REQ)
 
-#define encode_krb5_ap_rep(req, output) \
-    krb5_encode_generic((krb5_pointer)req, output, \
+#define encode_krb5_ap_rep(reply, output) \
+    krb5_encode_generic((krb5_pointer)reply, output, \
 		   (encoder_func) encode_KRB5_AP__REP, \
 		   (translator_func) krb5_ap_rep2KRB5_AP__REP, \
 		   (free_func) free_KRB5_AP__REP)
-#define decode_krb5_ap_rep(req, output) \
-    krb5_decode_generic(req, (krb5_pointer *) output, \
+#define decode_krb5_ap_rep(reply, output) \
+    krb5_decode_generic(reply, (krb5_pointer *) output, \
 		   (decoder_func) decode_KRB5_AP__REP, \
 		   (translator_func) KRB5_AP__REP2krb5_ap_rep, \
 		   (free_func) free_KRB5_AP__REP)
+
+#define encode_krb5_ap_rep_enc_part(rpart, output) \
+    krb5_encode_generic((krb5_pointer)rpart, output, \
+		   (encoder_func) encode_KRB5_EncAPRepPart, \
+		   (translator_func) krb5_ap_rep_enc_part2KRB5_EncAPRepPart, \
+		   (free_func) free_KRB5_EncAPRepPart)
+#define decode_krb5_ap_rep_enc_part(rpart, output) \
+    krb5_decode_generic(rpart, (krb5_pointer *) output, \
+		    (decoder_func) decode_KRB5_EncAPRepPart, \
+		    (translator_func) KRB5_EncAPRepPart2krb5_ap_rep_enc_part, \
+		    (free_func) free_KRB5_EncAPRepPart)
 
 #define encode_krb5_tgs_req(req, output) \
     krb5_encode_generic((krb5_pointer)req, output, \
