@@ -177,7 +177,7 @@ proc ftp_test { } {
 
     set testname "ftp connection"
     expect "Connected to $hostname"
-    expect -re "$hostname FTP server .Version \[0-9.\]*. ready."
+    expect -re "$localhostname.*FTP server .Version \[0-9.\]*. ready."
     expect -re "Using authentication type GSSAPI; ADAT must follow"
     expect "GSSAPI accepted as authentication type"
     expect "GSSAPI authentication succeeded"

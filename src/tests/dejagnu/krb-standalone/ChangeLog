@@ -1,3 +1,11 @@
+Wed Apr 17 17:53:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssftp.exp: Fix the expect string so that it doesn't assume that
+		the client is using its fully qualified domain name as its
+		local hostname.  We now check to make sure that FTP banner
+		contains $localhostname, plus optional characters (which
+		can be the domainname depending on the system.)
+
 Mon Apr  8 14:13:06 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* rcp.exp: Invoke kshd with -L for every environment variable we
