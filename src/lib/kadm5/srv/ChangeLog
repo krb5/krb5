@@ -1,3 +1,9 @@
+Fri Jul 26 17:48:14 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* svr_principal.c (krb5_copy_key_data_contents): If
+ 	key_data_length[i] == 0, don't complain if malloc(0) returns 0;
+ 	this is allowed by ANSI.
+
 Thu Jul 25 18:42:47 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in (LIBS): Link against -ldb under AIX for shared
