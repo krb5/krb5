@@ -54,6 +54,7 @@ proc expect_kadm_ok {} {
 	-re "^marshall_new_creds: \[^\n\]*\n" { exp_continue }
 	-re "^gssapi_\[^\n\]*\n" { exp_continue }
 	-re "^\r?\n" { exp_continue }
+	eof	{ perror "kadmin tcl subprocess died" }
 	default { perror "didn't get ok back" }
     }
 }

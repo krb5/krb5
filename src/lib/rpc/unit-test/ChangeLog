@@ -1,3 +1,8 @@
+2004-02-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib/helpers.exp (expect_kadm_ok): Check for eof and report a
+	specific error for that case.
+
 2004-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* config/unix.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which
