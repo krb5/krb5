@@ -212,14 +212,18 @@ char *argv[];
 	    verbose = 1;
 	    break;
 	case 'k':
-	    master_keyblock.keytype = atoi(optarg);
-	    keytypedone++;
+	    if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
+		keytypedone++;
+	    else
+		com_err(argv[0], 0, "%s is an invalid keytype", optarg);
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
 	    break;
 	case 'e':
-	    etype = atoi(optarg);
+	    if (krb5_string_to_enctype(optarg, &etype))
+		com_err(argv[0], 0, "%s is an invalid encryption type",
+			optarg);
 	    break;
 	case 'n':
 	    v4manual++;

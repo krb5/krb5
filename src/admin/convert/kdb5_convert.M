@@ -115,8 +115,8 @@ dump file rather than from a principal database.
 The
 .B \-k
 .I keytype
-option specifies the key type (as an ascii representation of a decimal
-number) of the master key in the database; the default is KEYTYPE_DES.
+option specifies the key type of the master key in the database; the default
+is KEYTYPE_DES.
 .PP
 The
 .B \-M
@@ -127,8 +127,7 @@ the default is KRB5_KDB_M_NAME (usually "K/M" in the local realm).
 The
 .B \-e
 .I enctype
-option specifies the encryption type (as an ascii representation of a decimal
-number) to be used when placing entries in
+option specifies the encryption type to be used when placing entries in
 the database; the default is the default encryption type for the master
 keytype.
 .PP
