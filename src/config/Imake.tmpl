@@ -658,7 +658,7 @@ STDC_TOP_INCLUDES = STDCTopIncludes
  * EXTRA_INCLUDES contains project-specific includes set in project incfiles
  * INCLUDES contains client-specific includes set in Imakefile
  */
-      ALLINCLUDES = $(STD_INCLUDES) $(TOP_INCLUDES) $(INCLUDES) $(EXTRA_INCLUDES) 
+      ALLINCLUDES = $(INCLUDES) $(STD_INCLUDES) $(TOP_INCLUDES) $(EXTRA_INCLUDES) 
        ALLDEFINES = $(ALLINCLUDES) $(STD_DEFINES) $(PROTO_DEFINES) $(DEFINES) $(COMPATFLAGS)
            CFLAGS = $(CDEBUGFLAGS) $(CCOPTIONS) $(ALLDEFINES)
         LINTFLAGS = $(LINTOPTS) -DLINT $(ALLDEFINES)
