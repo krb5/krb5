@@ -1,3 +1,8 @@
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Provide Win32 implementation
+	so that kinit and such work under Win32.
+
 1999-08-06  Danilo Almeida  <dalmeida@mit.edu>
 
 	* def_realm.c (krb5_get_default_realm): 
