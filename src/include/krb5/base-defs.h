@@ -49,6 +49,7 @@ typedef krb5_ui_2	krb5_enctype;
 typedef krb5_ui_2	krb5_cksumtype;
 typedef krb5_ui_2	krb5_authdatatype;
 
+typedef krb5_int32	krb5_preauthtype; /* This may change, later on */
 typedef	krb5_int32	krb5_flags;
 typedef krb5_int32	krb5_timestamp;
 typedef	krb5_int32	krb5_error_code;
