@@ -1,3 +1,8 @@
+
+Tue Aug 29 13:29:19 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* process_key.c, finish_key.c - Set and use priv_size in the krb5_
+		encrypt_block.
+
 Thu Aug 24 18:08:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
         * f_cksum.c: Change code to match prototypes. 

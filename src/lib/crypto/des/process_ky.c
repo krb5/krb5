@@ -64,6 +64,7 @@ mit_des_process_key (eblock, keyblock)
     default:
 	eblock->key = (krb5_keyblock *) keyblock;
 	eblock->priv = (krb5_pointer) schedule;
+	eblock->priv_size = (krb5_int32) sizeof(mit_des_key_schedule);
 	return 0;
     }
 }
