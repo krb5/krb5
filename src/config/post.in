@@ -22,7 +22,6 @@ depend:: .depend
 	else :; fi
 
 clean:: clean-$(WHAT)
-	$(RM) config.log pre.out post.out Makefile.out
 
 clean-unix::
 	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
@@ -31,6 +30,14 @@ clean-unix::
 clean-windows::
 	$(RM) *.$(OBJEXT)
 	$(RM) msvc.pdb *.err
+
+distclean:: distclean-$(WHAT)
+
+distclean-prerecurse::
+	$(MAKE) NORECURSE=true clean
+
+distclean-postrecurse::
+	$(RM) config.log config.cache config.status Makefile
 
 Makefiles-prerecurse:: Makefile
 
@@ -46,10 +53,10 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 			--localdir=$(BUILDTOP) \
 			--macrodir=$(BUILDTOP)/util/autoconf
 
-all-recurse clean-recurse install-recurse check-recurse Makefiles-recurse:
+all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefiles-recurse:
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
 		in *[ik]*) e=:;; *) e="exit 1";; esac; \
-	if test -n "$(SUBDIRS)"; then \
+	if test -n "$(SUBDIRS)" && test -z "$(NORECURSE)"; then \
 	for i in . $(SUBDIRS) ; do \
 		if test -d $$i ; then \
 		case $$i in .);; *) \

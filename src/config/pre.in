@@ -26,6 +26,10 @@ clean-unix:: clean-postrecurse
 clean-prerecurse::
 clean-postrecurse::
 
+distclean-unix:: distclean-prerecurse
+distclean-unix:: distclean-recurse
+distclean-unix:: distclean-postrecurse
+
 install-unix:: install-prerecurse
 install-unix:: install-recurse
 install-unix:: install-postrecurse

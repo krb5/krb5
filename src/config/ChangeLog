@@ -1,3 +1,11 @@
+Thu Feb 27 17:40:51 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add recursion hooks for distclean.
+
+	* post.in: Change recursion rules to skip recursion if NORECURSE
+	is non-null; add distclean support; don't remove config.log,
+	etc. if not doing distclean.
+
 Sat Feb 22 18:42:32 1997  Richard Basch  <basch@lehman.com>
 
 	* win-post.in: Move library list file rule from various
