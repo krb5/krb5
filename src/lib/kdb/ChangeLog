@@ -1,3 +1,8 @@
+Tue Oct  4 15:08:03 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb_dbm.c (decode_princ_contents): Add backwards compatibility
+		for version numbers 1.0 and 2.0.  
+
 Mon Oct  3 22:47:49 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb_dbm.c (decode_princ_contents): Force an incompatible version

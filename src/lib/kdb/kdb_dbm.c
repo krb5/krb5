@@ -38,6 +38,12 @@
 #include <fcntl.h>
 #endif
 
+#define OLD_COMPAT_VERSION_1
+
+#ifdef OLD_COMPAT_VERSION_1
+#include "kdb_compat.h"
+#endif
+
 #define KRB5_DBM_MAX_RETRY 5
 
 /* exclusive or shared lock flags */
@@ -599,6 +605,50 @@ krb5_db_entry *entry;
 	minor_version = *nextloc;
 	nextloc++; sizeleft--;
     }
+#ifdef OLD_COMPAT_VERSION_1
+    if (major_version == 0 || major_version == 1) {
+	old_krb5_db_entry old_entry;
+
+	/*
+	 * Copy in structure to old-style structure, and then copy it
+	 * to the new structure.
+	 */
+	sizeleft -= sizeof(old_entry);
+	if (sizeleft < 0) 
+	    return KRB5_KDB_TRUNCATED_RECORD;
+
+	memcpy((char *) &old_entry, nextloc, sizeof(old_entry));
+	nextloc += sizeof(old_entry);	/* Skip past structure */
+	
+	entry->key.keytype = old_entry.key.keytype;
+	entry->key.length = old_entry.key.length;
+
+	entry->kvno = old_entry.kvno;
+	entry->max_life = old_entry.max_life;
+	entry->max_renewable_life = old_entry.max_renewable_life;
+	entry->mkvno = old_entry.mkvno;
+	
+	entry->expiration = old_entry.expiration;
+	entry->pw_expiration = old_entry.pw_expiration;
+	entry->last_pwd_change = old_entry.last_pwd_change;
+	entry->last_success = old_entry.last_success;
+    
+	entry->last_failed = old_entry.last_failed;
+	entry->fail_auth_count = old_entry.fail_auth_count;
+    
+	entry->mod_date = old_entry.mod_date;
+	entry->attributes = old_entry.attributes;
+	entry->salt_type = old_entry.salt_type;
+	entry->salt_length = old_entry.salt_length;
+	
+	entry->alt_key.keytype = old_entry.alt_key.keytype;
+	entry->alt_key.length = old_entry.alt_key.length;
+	entry->alt_salt_type = old_entry.alt_salt_type;
+	entry->alt_salt_length = old_entry.alt_salt_length;
+
+	goto resume_processing;
+    }
+#endif
     if (major_version != 2)
 	return KRB5_KDB_BAD_VERSION;
     
@@ -607,6 +657,12 @@ krb5_db_entry *entry;
 	return KRB5_KDB_TRUNCATED_RECORD;
 
     memcpy((char *) entry, nextloc, sizeof(*entry));
+    nextloc += sizeof(*entry);	/* Skip past structure */
+
+#ifdef OLD_COMPAT_VERSION_1
+resume_processing:
+#endif
+    
     /*
      * These values should be zero if they are not in use, but just in
      * case, we clear them to make sure nothing bad happens if we need
@@ -618,7 +674,6 @@ krb5_db_entry *entry;
     entry->alt_salt = 0;
     entry->key.contents = 0;
     entry->alt_key.contents = 0;
-    nextloc += sizeof(*entry);	/* Skip past structure */
 
     /*
      * Get the principal name for the entry (stored as a string which
