@@ -1,3 +1,8 @@
+2004-06-25  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c (log_badverf): Use rpcproc_t instead of
+	rpc_u_int32 in procnames.
+
 2004-06-15  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_svc.c (check_rpcsec_auth, gss_to_krb5_name): New

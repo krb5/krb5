@@ -130,9 +130,6 @@ typedef uint32_t	rpcproc_t;
 typedef uint32_t	rpcport_t;
 typedef int32_t		rpc_inline_t;
 
-typedef int32_t		rpc_int32;
-typedef uint32_t	rpc_u_int32;
-
 /* This is for rpc/netdb.h */
 @rpcent_define@
 

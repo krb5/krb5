@@ -69,12 +69,12 @@ typedef struct _osa_princ_ent_t {
 typedef struct _osa_policy_ent_t {
     int		version;
     char	*name;
-    rpc_u_int32	pw_min_life;
-    rpc_u_int32	pw_max_life;
-    rpc_u_int32	pw_min_length;
-    rpc_u_int32	pw_min_classes;
-    rpc_u_int32	pw_history_num;
-    rpc_u_int32	policy_refcnt;
+    uint32_t	pw_min_life;
+    uint32_t	pw_max_life;
+    uint32_t	pw_min_length;
+    uint32_t	pw_min_classes;
+    uint32_t	pw_history_num;
+    uint32_t	policy_refcnt;
 } osa_policy_ent_rec, *osa_policy_ent_t;
 
 typedef	void	(*osa_adb_iter_princ_func) (void *, osa_princ_ent_t);

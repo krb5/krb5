@@ -1,3 +1,7 @@
+2004-06-25  Tom Yu  <tlyu@mit.edu>
+
+	* types.hin: Delete rpc_int32, rpc_u_int32 aliases.
+
 2004-06-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Fix typo in setting

@@ -25,7 +25,7 @@ bool_t xdr_ui_4(XDR *xdrs, krb5_ui_4 *objp)
 {
   /* Assumes that krb5_ui_4 and u_int32 are both four bytes long.
      This should not be a harmful assumption. */
-  return xdr_u_int32(xdrs, (rpc_u_int32 *) objp);
+  return xdr_u_int32(xdrs, (uint32_t *) objp);
 }
 
 
@@ -123,7 +123,7 @@ xdr_krb5_timestamp(XDR *xdrs, krb5_timestamp *objp)
   /* This assumes that int32 and krb5_timestamp are the same size.
      This shouldn't be a problem, since we've got a unit test which
      checks for this. */
-	if (!xdr_int32(xdrs, (rpc_int32 *) objp)) {
+	if (!xdr_int32(xdrs, (int32_t *) objp)) {
 		return (FALSE);
 	}
 	return (TRUE);
@@ -154,7 +154,7 @@ xdr_krb5_deltat(XDR *xdrs, krb5_deltat *objp)
   /* This assumes that int32 and krb5_deltat are the same size.
      This shouldn't be a problem, since we've got a unit test which
      checks for this. */
-	if (!xdr_int32(xdrs, (rpc_int32 *) objp)) {
+	if (!xdr_int32(xdrs, (int32_t *) objp)) {
 		return (FALSE);
 	}
 	return (TRUE);
@@ -166,7 +166,7 @@ xdr_krb5_flags(XDR *xdrs, krb5_flags *objp)
   /* This assumes that int32 and krb5_flags are the same size.
      This shouldn't be a problem, since we've got a unit test which
      checks for this. */
-	if (!xdr_int32(xdrs, (rpc_int32 *) objp)) {
+	if (!xdr_int32(xdrs, (int32_t *) objp)) {
 		return (FALSE);
 	}
 	return (TRUE);
@@ -175,7 +175,7 @@ xdr_krb5_flags(XDR *xdrs, krb5_flags *objp)
 bool_t
 xdr_krb5_ui_4(XDR *xdrs, krb5_ui_4 *objp)
 {
-	if (!xdr_u_int32(xdrs, (rpc_u_int32 *) objp)) {
+	if (!xdr_u_int32(xdrs, (uint32_t *) objp)) {
 		return (FALSE);
 	}
 	return (TRUE);
@@ -343,10 +343,10 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 bool_t
 xdr_kadm5_ret_t(XDR *xdrs, kadm5_ret_t *objp)
 {
-	rpc_u_int32 tmp;
+	uint32_t tmp;
 
 	if (xdrs->x_op == XDR_ENCODE)
-		tmp = (rpc_u_int32) *objp;
+		tmp = (uint32_t) *objp;
 
 	if (!xdr_u_int32(xdrs, &tmp))
 		return (FALSE);
@@ -1018,7 +1018,7 @@ xdr_krb5_enctype(XDR *xdrs, krb5_enctype *objp)
 bool_t
 xdr_krb5_salttype(XDR *xdrs, krb5_int32 *objp)
 {
-    if (!xdr_int32(xdrs, (rpc_int32 *) objp))
+    if (!xdr_int32(xdrs, (int32_t *) objp))
 	return FALSE;
     return TRUE;
 }

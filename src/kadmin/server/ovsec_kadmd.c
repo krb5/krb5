@@ -917,7 +917,7 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
 		 *data)
 {
      struct procnames {
-	  rpc_u_int32 proc;
+	  rpcproc_t proc;
 	  const char *proc_name;
      };
      static const struct procnames proc_names[] = {
