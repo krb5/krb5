@@ -289,6 +289,19 @@ void osa_adb_free_T(osa_T_ent_t);
 Frees the memory associated with an osa_T_ent_t allocated by
 osa_adb_get_T.
 
+\begin{verbatim}
+typedef void (*osa_adb_iter_T_func)(void *data,
+				    ovsec_kadm_T_ent_t entry);
+
+void osa_adb_iter_T(osa_adb_T_t db, osa_adb_iter_T_func func, 
+		    void *data);
+\end{verbatim}
+
+Iterates over every entry in the database.  For each entry ent in the
+database db, the function (*func)(data, ent) is called.  The function
+func is permitted to access the database, but the consequences of
+modifying the database during the iteration are undefined.
+
 \subsection{Kerberos Database}
 
 Kerberos uses dbm to store krb5_db_entry records.  It can be accessed
