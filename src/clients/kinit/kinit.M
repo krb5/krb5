@@ -101,36 +101,36 @@ requests a postdated ticket, valid starting at
 Postdated tickets are issued with the
 .I invalid
 flag set, and need to be fed back to the kdc before use.
-(Not applicaple to Kerberos 4.)
+(Not applicable to Kerberos 4.)
 .TP
 \fB\-r\fP \fIrenewable_life\fP
 requests renewable tickets, with a total lifetime of
 .IR renewable_life .
 The duration is in the same format as the
 .B \-l
-option, with the same delimiters.  (Not applicaple to Kerberos 4.)
+option, with the same delimiters.  (Not applicable to Kerberos 4.)
 .TP
 .B \-f
-request forwardable tickets.  (Not applicaple to Kerberos 4.)
+request forwardable tickets.  (Not applicable to Kerberos 4.)
 .TP
 .B \-F
-do not request forwardable tickets.  (Not applicaple to Kerberos 4.)
+do not request forwardable tickets.  (Not applicable to Kerberos 4.)
 .TP
 .B \-p
-request proxiable tickets.  (Not applicaple to Kerberos 4.)
+request proxiable tickets.  (Not applicable to Kerberos 4.)
 .TP
 .B \-P
-do not request proxiable tickets.  (Not applicaple to Kerberos 4.)
+do not request proxiable tickets.  (Not applicable to Kerberos 4.)
 .TP
 .B \-A
-request address-less tickets.  (Not applicaple to Kerberos 4.)
+request address-less tickets.  (Not applicable to Kerberos 4.)
 .TP
 .B \-v
 requests that the ticket granting ticket in the cache (with the 
 .I invalid
 flag set) be passed to the kdc for validation.  If the ticket is within
 its requested time range, the cache is replaced with the validated
-ticket.  (Not applicaple to Kerberos 4.)
+ticket.  (Not applicable to Kerberos 4.)
 .TP
 .B \-R
 requests renewal of the ticket-granting ticket.  Note that an expired
