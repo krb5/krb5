@@ -1,3 +1,8 @@
+Tue Jul 23 23:13:07 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ftpd.c (auth_data): the logic which dealt with multiple acceptor
+ 	names and fallback was just broken.
+
 Wed Jul 10 16:38:01 1996  Marc Horowitz  <marc@mit.edu>
 
 	* ftpd.c (store), ftpcmd.y (STOR, APPE, STOU): rename store() to
