@@ -45,13 +45,12 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_error_code retval;
     register char *cp;
     char localname[MAXHOSTNAMELEN];
-    int  use_local_realm = 0;
+
 
     if ((type == KRB5_NT_UNKNOWN) ||
 	(type == KRB5_NT_SRV_HST)) {
 
 	if (!hostname) {
-	    use_local_realm = 1;
 	    /* convenience hack:  if hostname is NULL, use gethostname() */
 	    if (gethostname(localname, MAXHOSTNAMELEN))
 		return errno;
@@ -92,7 +91,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		    return ENOMEM;
 	    }
 	} else /* type == KRB5_NT_UNKNOWN */ {
-	    remote_host = strdup(hostname);
+	    remote_host = strdup((char *) hostname);
 	}
 	if (!remote_host)
 	    return ENOMEM;
@@ -102,12 +101,6 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		if (isupper(*cp))
 		    *cp = tolower(*cp);
 
-	if (use_local_realm) {
-	    if (retval = krb5_get_default_realm(context, &realm)) {
-		free(remote_host);
-		return retval;
-	    }
-	} else {
 	    if (retval = krb5_get_host_realm(context, remote_host, &hrealms)) {
 		free(remote_host);
 		return retval;
@@ -118,7 +111,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		return KRB5_ERR_HOST_REALM_UNKNOWN;
 	    }
 	    realm = hrealms[0];
-	}
+
 
 	retval = krb5_build_principal(context, ret_princ, strlen(realm),
 				      realm, sname, remote_host,
@@ -127,8 +120,8 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 	krb5_princ_type(context, *ret_princ) = type;
 
 	free(remote_host);
-	if (!use_local_realm)
-	    krb5_free_host_realm(context, hrealms);
+
+	krb5_free_host_realm(context, hrealms);
 	return retval;
     } else {
 	return KRB5_SNAME_UNSUPP_NAMETYPE;

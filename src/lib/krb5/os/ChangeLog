@@ -1,3 +1,8 @@
+Fri Jul 28 23:28:11 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* sn2princ.c (krb5_sname_to_principal): GDon't use default realm
+        just because we are on local machine. Instead, go through normal
+        translations.
 
 Fri Jul 7 16:32:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Find com_err in TOPLIBD.
