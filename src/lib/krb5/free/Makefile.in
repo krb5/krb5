@@ -21,6 +21,7 @@ OBJS=	\
 	f_cred_cnt.$(OBJEXT)	\
 	f_enc_kdc.$(OBJEXT)	\
 	f_enc_tkt.$(OBJEXT)	\
+	f_einfo.$(OBJEXT)	\
 	f_error.$(OBJEXT)	\
 	f_kdc_rp.$(OBJEXT)	\
 	f_kdc_rq.$(OBJEXT)	\
@@ -54,6 +55,7 @@ SRCS=	\
 	$(srcdir)/f_cred_cnt.c	\
 	$(srcdir)/f_enc_kdc.c	\
 	$(srcdir)/f_enc_tkt.c	\
+	$(srcdir)/f_einfo.c	\
 	$(srcdir)/f_error.c	\
 	$(srcdir)/f_kdc_rp.c	\
 	$(srcdir)/f_kdc_rq.c	\
