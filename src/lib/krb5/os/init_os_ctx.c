@@ -349,7 +349,6 @@ krb5_os_init_context(krb5_context ctx)
 	os_ctx->usec_offset = 0;
 	os_ctx->os_flags = 0;
 	os_ctx->default_ccname = 0;
-	os_ctx->default_ccprincipal = 0;
 
 	krb5_cc_set_default_name(ctx, NULL);
 
@@ -458,11 +457,6 @@ krb5_os_free_context(krb5_context ctx)
 		free(os_ctx->default_ccname);
                 os_ctx->default_ccname = 0;
         }
-
-	if (os_ctx->default_ccprincipal) {
-		krb5_free_principal (ctx, os_ctx->default_ccprincipal);
-		os_ctx->default_ccprincipal = 0;
-	}
 
 	os_ctx->magic = 0;
 

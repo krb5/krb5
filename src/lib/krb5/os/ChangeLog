@@ -1,3 +1,9 @@
+2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
+
+	* init_os_ctx.c (krb5_os_init_context, krb5_os_free_context) 
+          ccdefname.c (krb5_cc_set_default_name):
+        Removed default_ccprincipal field from krb5_context
+
 2004-07-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* dnssrv.c (krb5int_make_srv_query_realm) [HAVE_RES_NSEARCH]: Use

@@ -1,3 +1,8 @@
+2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
+
+	* CCache-glue.c (krb_get_cred) 
+        Removed default principal tracking.
+
 2004-07-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* recvauth.c (krb_recvauth): Initialize cp and tmp_buf.  Check
