@@ -1,5 +1,7 @@
 Thu Aug  4 03:37:26 1994  Tom Yu  (tlyu@dragons-lair)
 
+	* configure.in: pick up dbm libs
+
 	* sys_term.h: fix linux lossage, i.e. <linux/tty.h>
 	* configure.in: check for STREAMSPTY (hopefully)
 
