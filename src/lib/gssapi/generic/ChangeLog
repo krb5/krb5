@@ -1,3 +1,8 @@
+Wed Apr  1 16:33:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* disp_major_status.c (g_display_major_status): Fix a typo in
+	previous.
+
 1998-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* disp_major_status.c (display_unknown): Change to not return

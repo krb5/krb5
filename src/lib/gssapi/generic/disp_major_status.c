@@ -263,7 +263,7 @@ OM_uint32 g_display_major_status(minor_status, status_value,
 	 *minor_status = 0;
 	 if (status_value) {
 	    (*message_context)++;
-	    return(GSS_S_COMPETE);
+	    return(GSS_S_COMPLETE);
 	 } else {
 	    *message_context = 0;
 	    return(GSS_S_COMPLETE);
