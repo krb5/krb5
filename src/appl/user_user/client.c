@@ -47,7 +47,6 @@ char *argv[];
   struct servent *serv;
   struct hostent *host;
   struct sockaddr_in serv_net_addr, cli_net_addr;
-  krb5_address serv_addr, cli_addr;
   krb5_ccache cc;
   krb5_creds creds, *new_creds;
   krb5_data reply, msg, princ_data;
@@ -206,16 +205,16 @@ char *argv[];
 	com_err("uu-client", retval, "reading reply from server");
       return 9;
     }
-  serv_addr.addrtype = ADDRTYPE_INET;
-  serv_addr.length = sizeof (serv_net_addr.sin_addr);
-  serv_addr.contents = (krb5_octet *)&serv_net_addr.sin_addr;
-
-  cli_addr.addrtype = ADDRTYPE_INET;
-  cli_addr.length = sizeof(cli_net_addr.sin_addr);
-  cli_addr.contents = (krb5_octet *)&cli_net_addr.sin_addr;
 
     if (retval = krb5_auth_con_init(context, &auth_context)) {
       	com_err("uu-client", retval, "initializing the auth_context");
+      	return 9;
+    }
+
+    if (retval = krb5_auth_con_genaddrs(context, auth_context, s,
+			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR |
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
+      	com_err("uu-client", retval, "generating addrs for auth_context");
       	return 9;
     }
 
@@ -223,12 +222,6 @@ char *argv[];
 					KRB5_AUTH_CONTEXT_DO_SEQUENCE)) {
 	com_err("uu-client", retval, "initializing the auth_context flags");
 	return 9;
-    }
-
-    if (retval = krb5_auth_con_setaddrs(context, auth_context, &cli_addr,
-					&serv_addr)) {
-      	com_err("uu-client", retval, "setting addresses for auth_context");
-      	return 9;
     }
 
     if (retval = krb5_auth_con_setuseruserkey(context, auth_context, 
@@ -246,6 +239,14 @@ char *argv[];
     retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&s, "???",
 			 0, /* server */, NULL, 0, NULL, &ticket);
 #endif
+
+/* XXX This will be removed -- proven */
+    if (retval = krb5_auth_con_genaddrs(context, auth_context, s,
+			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR |
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) {
+      	com_err("uu-client", retval, "generating addrs for auth_context");
+      	return 9;
+    }
 
   if (retval) {
       com_err("uu-client", retval, "reading AP_REQ from server");

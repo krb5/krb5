@@ -1,4 +1,10 @@
-Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+Wed Apr 26 22:12:26 1995  Chris Provenzano (proven@mit.edu)
+
+	* server.c, client.c : Use krb5_auth_con_genaddrs() instead of
+		krb5_auth_con_setaddrs().
+
+Mon Mar 27 07:56:26 11995 Chris Provenzano (proven@mit.edu)
 
         * server.c: Use new calling conventions for krb5_sendauth(),
 		krb5_mk_req_extended(), and krb5_mk_safe().

@@ -47,7 +47,6 @@ char *argv[];
   int l, sock = 0;
   int retval;
   struct sockaddr_in l_inaddr, f_inaddr;	/* local, foreign address */
-  krb5_address laddr, faddr;
   krb5_creds creds, *new_creds;
   krb5_ccache cc;
   krb5_data msgtext, msg;
@@ -147,20 +146,12 @@ char *argv[];
       return 6;
     }
 #endif
-  faddr.addrtype = ADDRTYPE_INET;
-  faddr.length = sizeof (f_inaddr.sin_addr);
-  faddr.contents = (krb5_octet *)&f_inaddr.sin_addr;
-
   l = sizeof(l_inaddr);
   if (getsockname(0, (struct sockaddr *)&l_inaddr, &l) == -1)
     {
       com_err("uu-server", errno, "getting local address");
       return 6;
     }
-
-  laddr.addrtype = ADDRTYPE_INET;
-  laddr.length = sizeof (l_inaddr.sin_addr);
-  laddr.contents = (krb5_octet *)&l_inaddr.sin_addr;
 
   /* send a ticket/authenticator to the other side, so it can get the key
      we're using for the krb_safe below. */
@@ -176,8 +167,10 @@ char *argv[];
 	return 8;
     }
 
-    if (retval = krb5_auth_con_setaddrs(context, auth_context, &laddr, &faddr)){
-        com_err("uu-server", retval, "setting addresses for auth_context");
+    if (retval = krb5_auth_con_genaddrs(context, auth_context, sock,
+				KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR |
+				KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) {
+        com_err("uu-server", retval, "generating addrs for auth_context");
         return 9;
     }
 
