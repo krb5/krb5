@@ -839,10 +839,6 @@ in this realm.
 not allowed as passwords.  The default is
 @code{@value{ROOTDIR}/var/krb5kdc/kadm5.dict}.
 
-@itemx encryption_type
-(Encryption type string.)  Specifies the encryption type used for this
-realm.  Only "des-cbc-crc" is supported at this time.
-
 @itemx kadmind_port
 (Port number.)  Specifies the port that the kadmind daemon is to listen
 for this realm.  The assigned port for kadmind is 749.
