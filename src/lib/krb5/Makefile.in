@@ -20,6 +20,8 @@ STLIBOBJS=krb5_libinit.o
 LIBBASE=krb5
 LIBMAJOR=3
 LIBMINOR=2
+LIBINITFUNC=profile_library_initializer krb5int_lib_init
+LIBFINIFUNC=profile_library_finalizer krb5int_lib_fini
 
 STOBJLISTS= \
 	OBJS.ST \

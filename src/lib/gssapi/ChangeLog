@@ -1,5 +1,7 @@
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): Define.
+
 	* gss_libinit.c (gssint_lib_init, gssint_lib_fini)
 	[SHOW_INITFINI_FUNCS]: Print tracing messages.
 
