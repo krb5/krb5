@@ -233,7 +233,7 @@ void get_tickets(context)
 	(void) mktemp(tkstring);
 	sprintf(buf, "FILE:%s", tkstring);
 	if (retval = krb5_cc_resolve(context, buf, &ccache)) {
-		com_err(progname, retval, "while opening crednetials cache %s",
+		com_err(progname, retval, "while opening credential cache %s",
 			buf);
 		exit(1);
 	}
