@@ -33,11 +33,13 @@
 long
 pty_logwtmp(const char *tty, const char *user, const char *host)
 {
+#ifndef HAVE_LOGWTMP
     PTY_STRUCT_UTMPX utx;
     int loggingin;
     size_t len;
     const char *cp;
     char utmp_id[5];
+#endif
 
 #ifdef HAVE_LOGWTMP
     logwtmp(tty,user,host);

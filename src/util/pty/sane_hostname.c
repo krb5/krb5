@@ -26,6 +26,7 @@
 #include "libpty.h"
 #include <arpa/inet.h>
 
+#ifdef HAVE_GETNAMEINFO
 static size_t
 sockaddrlen (const struct sockaddr *addr)
 {
@@ -42,12 +43,13 @@ sockaddrlen (const struct sockaddr *addr)
     return 0;
 #endif
 }
+#endif
 
 static void
 downcase (char *s)
 {
     for (; *s != '\0'; s++)
-	*s = tolower (*s);
+	*s = tolower ((int) *s);
 }
 
 static long
@@ -106,7 +108,9 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
 	return ENOMEM;
 
     if (always_ipaddr)
+#ifdef HAVE_GETNAMEINFO
     use_ipaddr:
+#endif
 	return do_ntoa(addr, ut_host_len, out);
 
 #ifdef HAVE_GETNAMEINFO

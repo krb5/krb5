@@ -1,3 +1,15 @@
+2001-05-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* cleanup.c (pty_cleanup): Delcare local variable only if
+	VHANG_LAST defined.
+
+	* logwtmp.c (pty_logwtmp): Only declare local variables if
+	logwtmp() not available on system.
+
+	* sane_hostname.c (sockaddrlen): Only define static function if
+	HAVE_GETNAMEINFO defined. (pty_make_sane_hostname) Declare goto
+	target only if code compiled in.
+
 2001-05-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Fix typo (OWRONLY ->

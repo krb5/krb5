@@ -32,7 +32,9 @@ long pty_cleanup (slave, pid, update_utmp)
     int pid; /* May be zero for unknown.*/
     int update_utmp;
 {
+#ifdef VHANG_LAST
     int retval, fd;
+#endif
     
     if (update_utmp)
 	pty_update_utmp(PTY_DEAD_PROCESS,0,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
