@@ -1284,10 +1284,10 @@ clean Ä
 ###			Copying headers around
 ##############################################################################################################
 
-gss-headers-output-folder							= {root-folder}:GSSLib:Headers:
-krb5-headers-output-folder							= {root-folder}:Kerberos5Lib:Headers:
-comerr-headers-output-folder						= {root-folder}:ComErrLib:Headers:
-profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:
+gss-headers-output-folder							= {root-folder}:GSSLib:Headers:GSS:
+krb5-headers-output-folder							= {root-folder}:Kerberos5Lib:Headers:Kerberos5:
+comerr-headers-output-folder						= {root-folder}:ComErrLib:Headers:ComErr:
+profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:Profile:
 
 gss-headers-output = ¶
 	"{gss-headers-output-folder}gssapi.h" ¶
