@@ -1,3 +1,9 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb.h: Add prototypes for tf_init(), tf_get_pname(),
+	tf_get_pinst(), tf_get_cred() and tf_close() which are all used by
+	clients.
+
 2000-07-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb.h: For get_pw_tkt() and unix_time_gmt_unixsec() add required

@@ -640,11 +640,23 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_save_credentials
 /* send_to_kdc.c */
 int send_to_kdc
 	PROTOTYPE((KTEXT pkt, KTEXT rpkt, char *realm));
+
 /* tkt_string.c */
 char * tkt_string
 	PROTOTYPE((void));
 void krb_set_tkt_string
 	PROTOTYPE((char *));
+
+/* tf_util.c */
+KRB5_DLLIMP int KRB5_CALLCONV tf_init PROTOTYPE((char *tf_name, int rw));
+
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_pname PROTOTYPE((char *p));
+
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_pinst PROTOTYPE((char *p));
+
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_cred PROTOTYPE((CREDENTIALS *c));
+
+KRB5_DLLIMP void KRB5_CALLCONV tf_close PROTOTYPE((void));
 
 /* unix_time.c */
 KRB5_DLLIMP unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec 
