@@ -1,3 +1,13 @@
+Tue Apr  2 22:31:48 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.conf.M, krb5.conf: add default_tkt_enctypes.
+
+Wed Mar 27 22:44:36 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.conf, kdc.conf: specify des-cbc-crc as the only valid
+	enctype (but permit normal, v4, norealm, onlyrealm, and afs3
+	salttypes.)
+	
 Tue Oct  3 17:57:32 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5.conf[libdefaults]: add krb4_config, krb4_realms.

@@ -102,6 +102,10 @@ This relation identifies the supported list of session key encryption
 types that should be returned by the KDC. The list may be delimited with
 commas or whitespace.
 
+.IP default_tkt_enctypes
+This relation identifies the supported list of session key encryption
+types that should be requested by the client, in the same format.
+
 .IP clockskew 
 This relation sets the maximum allowable amount of clockskew in
 seconds that the library will tolerate before assuming that a Kerberos
