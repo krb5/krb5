@@ -388,7 +388,7 @@ aname_replacer(string, contextp, result)
 	 */
 	for (cp = *contextp; *cp; ) {
 	    /* Skip leading whitespace */
-	    while (isspace(*cp))
+	    while (isspace((int) (*cp)))
 		cp++;
 
 	    /*
@@ -520,7 +520,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
 				    *cout = '\0';
 				    current++;
 				    /* Point past number */
-				    while (isdigit(*current))
+				    while (isdigit((int) (*current)))
 					current++;
 				}
 				else
@@ -703,7 +703,7 @@ krb5_aname_to_localname(context, aname, lnsize_in, lname)
 		    /* Trim the value. */
 		    cp = &mapping_values[nvalid-1]
 			[strlen(mapping_values[nvalid-1])];
-		    while (isspace(*cp)) cp--;
+		    while (isspace((int) (*cp))) cp--;
 		    cp++;
 		    *cp = '\0';
 

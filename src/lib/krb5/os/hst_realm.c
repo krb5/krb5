@@ -264,7 +264,7 @@ krb5_get_host_realm(context, host, realmsp)
     local_host[sizeof(local_host) - 1] = '\0';
 
     for (cp = local_host; *cp; cp++) {
-	if (isupper(*cp))
+	if (isupper((int) (*cp)))
 	    *cp = tolower(*cp);
     }
     l = strlen(local_host);
@@ -347,7 +347,7 @@ krb5_get_host_realm(context, host, realmsp)
 
             /* Assume the realm name is upper case */
             for (cp = realm; *cp; cp++)
-                if (islower(*cp))
+                if (islower((int) (*cp)))
                     *cp = toupper(*cp);
         } else {    
             /* We are defaulting to the local realm */
