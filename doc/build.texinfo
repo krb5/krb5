@@ -350,7 +350,7 @@ hardware preauthentication systems.
 
 @item --with-system-et
 
-Use installed versions of the error-table support software, the
+Use an installed version of the error-table support software, the
 @samp{compile_et} program, the @file{com_err.h} header file and the
 @file{com_err} library.  If these are not in the default locations,
 you may wish to specify @code{CPPFLAGS=-I/some/dir} and
@@ -363,7 +363,7 @@ Kerberos tree, for Kerberos applications to link against.
 
 @item --with-system-ss
 
-Use installed versions of the subsystem command-line interface
+Use an installed version of the subsystem command-line interface
 software, the @samp{mk_cmds} program, the @file{ss/ss.h} header file
 and the @file{ss} library.  If these are not in the default locations,
 you may wish to specify @code{CPPFLAGS=-I/some/dir} and
@@ -385,6 +385,28 @@ explicitly specified.
 
 This option is ignored if @samp{--with-system-ss} is not specified.
 
+@item --with-system-db
+
+Use an installed version of the Berkeley DB package, which must
+provide an API compatible with version 1.85.
+
+If this option is not given, a version supplied with the Kerberos
+sources will be built and installed.  (We are not updating this
+version at this time because of licensing issues with newer versions
+that we haven't investigated sufficiently yet.)
+
+@item DB_HEADER=headername.h
+
+If @samp{db.h} is not the correct header file to include to compile
+against the Berkeley DB 1.85 API, specify the correct header file name
+with this option.  For example, @samp{DB_HEADER=db3/db_185.h}.
+
+@item DB_LIB=libs...
+
+If @samp{-ldb} is not the correct library specification for the
+Berkeley DB library version to be used, override it with this option.
+For example, @samp{DB_LIB=-ldb-3.3}.
+
 @end table
 
 For example, in order to configure Kerberos on a Solaris machine using
@@ -393,6 +415,19 @@ script with the following options:
 
 @example
 % ./configure CC=suncc CFLAGS=-O
+@end example
+
+For a slightly more complicated example, consider a system where
+several packages to be used by Kerberos are installed in
+@samp{/usr/foobar}, including Berkeley DB 3.3, and an @samp{ss}
+library that needs to link against the @samp{curses} library.  The
+configuration of Kerberos might be done thus:
+
+@example
+% ./configure CPPFLAGS=-I/usr/foobar/include LDFLAGS=-L/usr/foobar/lib \
+              --with-system-et --with-system-ss --with-system-db \
+              SS_LIB='-lss -lcurses' \
+              DB_HEADER=db3/db_185.h DB_LIB=-ldb-3.3
 @end example
 
 In previous releases, @code{--with-} options were used to specify the
