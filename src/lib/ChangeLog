@@ -1,3 +1,7 @@
+Tue May  2 21:39:26 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: nuke spurious whitespace from blank line
+
 
 Fri Apr 28 15:32:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Add kadm to list of directories to be built.
