@@ -120,7 +120,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
    /* build up the token */
 
    /* allocate space for the token */
-   tlen = g_token_size(gss_mech_krb5, ap_req.length);
+   tlen = g_token_size((gss_OID) gss_mech_krb5, ap_req.length);
 
    if ((t = (unsigned char *) xmalloc(tlen)) == NULL) {
       krb5_auth_con_free(context, *auth_context);
@@ -132,7 +132,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 
    ptr = t;
 
-   g_make_token_header(gss_mech_krb5, ap_req.length,
+   g_make_token_header((gss_OID) gss_mech_krb5, ap_req.length,
 		       &ptr, KG_TOK_CTX_AP_REQ);
 
    TWRITE_STR(ptr, (unsigned char *) ap_req.data, ap_req.length);
@@ -158,14 +158,14 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
     gss_cred_id_t claimant_cred_handle;
     gss_ctx_id_t *context_handle;
     gss_name_t target_name;
-    const_gss_OID mech_type;
-    int req_flags;
+    gss_OID mech_type;
+    OM_uint32 req_flags;
     OM_uint32 time_req;
     gss_channel_bindings_t input_chan_bindings;
     gss_buffer_t input_token;
     gss_OID *actual_mech_type;
     gss_buffer_t output_token;
-    int *ret_flags;
+    OM_uint32 *ret_flags;
     OM_uint32 *time_rec;
 {
     krb5_gss_cred_id_t 	  cred;
@@ -402,7 +402,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 
       ptr = (unsigned char *) input_token->value;
 
-      if (! g_verify_token_header(gss_mech_krb5, &(ap_rep.length),
+      if (! g_verify_token_header((gss_OID) gss_mech_krb5, &(ap_rep.length),
 				  &ptr, KG_TOK_CTX_AP_REP,
 				  input_token->length)) {
 	 *minor_status = 0;

@@ -48,12 +48,14 @@ indicate_mechs.c
 init_sec_context.c
 inq_context.c
 inq_cred.c
+inq_names.c
 k5seal.c
 k5unseal.c
 krb5_gss_glue.c
 process_context_token.c
 rel_cred.c
 rel_name.c
+rel_oid.c
 seal.c
 ser_sctx.c
 sign.c

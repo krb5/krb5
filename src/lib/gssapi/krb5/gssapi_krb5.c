@@ -51,9 +51,9 @@ static const gss_OID_desc oids[] = {
    {10, "\052\206\110\206\367\022\001\002\002\002"},
 };
 
-const_gss_OID gss_mech_krb5 = oids+0;
-const_gss_OID gss_nt_krb5_name = oids+1;
-const_gss_OID gss_nt_krb5_principal = oids+2;
+const gss_OID_desc * const gss_mech_krb5 = oids+0;
+const gss_OID_desc * const gss_nt_krb5_name = oids+1;
+const gss_OID_desc * const gss_nt_krb5_principal = oids+2;
 
 static const gss_OID_set_desc oidsets[] = {
    {1, (gss_OID) oids},
@@ -85,7 +85,7 @@ kg_get_defcred(minor_status, cred)
 	      return GSS_S_FAILURE;
 
       if ((major = krb5_gss_acquire_cred(kg_context, minor_status, 
-					 GSS_C_NO_NAME, GSS_C_INDEFINITE, 
+					 (gss_name_t) NULL, GSS_C_INDEFINITE, 
 					 GSS_C_NULL_OID_SET, GSS_C_INITIATE, 
 					 &defcred, NULL, NULL)) &&
 	  GSS_ERROR(major)) {

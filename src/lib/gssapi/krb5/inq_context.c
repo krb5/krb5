@@ -25,7 +25,7 @@
 OM_uint32
 krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name, 
 			 acceptor_name, lifetime_rec, mech_type, ret_flags,
-			 locally_initiated)
+			 locally_initiated, open)
      krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
@@ -33,8 +33,9 @@ krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name,
      gss_name_t *acceptor_name;
      OM_uint32 *lifetime_rec;
      gss_OID *mech_type;
-     int *ret_flags;
+     OM_uint32 *ret_flags;
      int *locally_initiated;
+     int *open;
 {
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx;
@@ -43,9 +44,9 @@ krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name,
    krb5_deltat lifetime;
 
    if (initiator_name)
-      *initiator_name = GSS_C_NO_NAME;
+      *initiator_name = (gss_name_t) NULL;
    if (acceptor_name)
-      *acceptor_name = GSS_C_NO_NAME;
+      *acceptor_name = (gss_name_t) NULL;
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
@@ -121,6 +122,9 @@ krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name,
 
    if (locally_initiated)
       *locally_initiated = ctx->initiate;
+
+   if (open)
+      *open = ctx->established;
 
    *minor_status = 0;
    return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);

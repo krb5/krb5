@@ -37,3 +37,26 @@ krb5_gss_verify(context, minor_status, context_handle,
 		    token_buffer, message_buffer,
 		    NULL, qop_state, KG_TOK_SIGN_MSG));
 }
+
+/* V2 interface */
+OM_uint32
+krb5_gss_verify_mic(context, minor_status, context_handle,
+		    message_buffer, token_buffer,
+		    qop_state)
+    krb5_context	context;
+    OM_uint32		*minor_status;
+    gss_ctx_id_t	context_handle;
+    gss_buffer_t	message_buffer;
+    gss_buffer_t	token_buffer;
+    gss_qop_t		*qop_state;
+{
+    OM_uint32		rstat;
+    int			qstate;
+
+    rstat = kg_unseal(minor_status, context_handle,
+		      token_buffer, message_buffer,
+		      NULL, &qstate, KG_TOK_MIC_MSG);
+    if (!rstat && qop_state)
+	*qop_state = (gss_qop_t) qstate;
+    return(rstat);
+}

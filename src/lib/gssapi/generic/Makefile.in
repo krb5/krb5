@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -DUSE_AUTOCONF_H
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
@@ -29,6 +29,7 @@ CCSRCS = \
 	$(srcdir)/disp_major_status.c \
 	$(srcdir)/disp_com_err_status.c \
 	$(srcdir)/gssapi_generic.c \
+	$(srcdir)/oid_ops.c \
 	$(srcdir)/rel_buffer.c \
 	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
@@ -42,6 +43,7 @@ CCOBJS = \
 	disp_major_status.$(OBJEXT) \
 	disp_com_err_status.$(OBJEXT) \
 	gssapi_generic.$(OBJEXT) \
+	oid_ops.$(OBJEXT) \
 	rel_buffer.$(OBJEXT) \
 	rel_oid_set.$(OBJEXT) \
 	util_buffer.$(OBJEXT) \

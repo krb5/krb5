@@ -30,7 +30,7 @@ krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
      gss_cred_id_t cred_handle;
      gss_name_t *name;
      OM_uint32 *lifetime_ret;
-     int *cred_usage;
+     gss_cred_usage_t *cred_usage;
      gss_OID_set *mechanisms;
 {
    krb5_gss_cred_id_t cred;
@@ -109,3 +109,54 @@ krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
    *minor_status = 0;
    return((lifetime == 0)?GSS_S_CREDENTIALS_EXPIRED:GSS_S_COMPLETE);
 }
+
+/* V2 interface */
+OM_uint32
+krb5_gss_inquire_cred_by_mech(context, minor_status, cred_handle,
+			      mech_type, name, initiator_lifetime,
+			      acceptor_lifetime, cred_usage)
+    krb5_context	context;
+    OM_uint32		*minor_status;
+    gss_cred_id_t	cred_handle;
+    gss_OID		mech_type;
+    gss_name_t		*name;
+    OM_uint32		*initiator_lifetime;
+    OM_uint32		*acceptor_lifetime;
+    gss_cred_usage_t *cred_usage;
+{
+    krb5_gss_cred_id_t	cred;
+    OM_uint32		lifetime;
+    OM_uint32		mstat;
+
+    /*
+     * We only know how to handle our own creds.
+     */
+    if ((mech_type != GSS_C_NULL_OID) &&
+	!g_OID_equal(gss_mech_krb5, mech_type)) {
+	*minor_status = 0;
+	return(GSS_S_NO_CRED);
+    }
+
+    cred = (krb5_gss_cred_id_t) cred_handle;
+    mstat = krb5_gss_inquire_cred(context,
+				  minor_status,
+				  cred_handle,
+				  name,
+				  &lifetime,
+				  cred_usage,
+				  (gss_OID_set *) NULL);
+    if (mstat == GSS_S_COMPLETE) {
+	if (cred &&
+	    ((cred->usage == GSS_C_INITIATE) ||
+	     (cred->usage == GSS_C_BOTH)) &&
+	    initiator_lifetime)
+	    *initiator_lifetime = lifetime;
+	if (cred &&
+	    ((cred->usage == GSS_C_ACCEPT) ||
+	     (cred->usage == GSS_C_BOTH)) &&
+	    acceptor_lifetime)
+	    *acceptor_lifetime = lifetime;
+    }
+    return(mstat);
+}
+

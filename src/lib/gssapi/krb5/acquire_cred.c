@@ -61,7 +61,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
    /* figure out what principal to use.  If the default name is
       requested, use the default sn2princ output */
 
-   if (desired_name == GSS_C_NO_NAME) {
+   if (desired_name == (gss_name_t) NULL) {
       if (code = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
 					 &princ)) {
 	 *minor_status = code;
@@ -160,7 +160,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
       return(GSS_S_FAILURE);
    }
 
-   if (desired_name != GSS_C_NO_NAME) {
+   if (desired_name != (gss_name_t) NULL) {
       if (! krb5_principal_compare(context, princ, (krb5_principal) desired_name)) {
 	 (void)krb5_free_principal(context, princ);
 	 (void)krb5_cc_close(context, ccache);
@@ -246,7 +246,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
      gss_name_t desired_name;
      OM_uint32 time_req;
      gss_OID_set desired_mechs;
-     int cred_usage;
+     gss_cred_usage_t cred_usage;
      gss_cred_id_t *output_cred_handle;
      gss_OID_set *actual_mechs;
      OM_uint32 *time_rec;
@@ -268,7 +268,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
    /* validate the name */
 
    /*SUPPRESS 29*/
-   if ((desired_name != GSS_C_NO_NAME) &&
+   if ((desired_name != (gss_name_t) NULL) &&
        (! kg_validate_name(desired_name))) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
@@ -425,3 +425,32 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
 
    return(GSS_S_COMPLETE);
 }
+
+/* V2 interface */
+OM_uint32
+krb5_gss_add_cred(context, minor_status, input_cred_handle,
+		  desired_name, desired_mech, cred_usage,
+		  initiator_time_req, acceptor_time_req,
+		  output_cred_handle, actual_mechs, 
+		  initiator_time_rec, acceptor_time_rec)
+    krb5_context	context;
+    OM_uint32		*minor_status;
+    gss_cred_id_t	input_cred_handle;
+    gss_name_t		desired_name;
+    gss_OID		desired_mech;
+    gss_cred_usage_t	cred_usage;
+    OM_uint32		initiator_time_req;
+    OM_uint32		acceptor_time_req;
+    gss_cred_id_t	*output_cred_handle;
+    gss_OID_set		*actual_mechs;
+    OM_uint32		*initiator_time_rec;
+    OM_uint32		*acceptor_time_rec;
+{
+    /*
+     * This does not apply to our single-mechanism implementation.  Until we
+     * come up with a better error code, return failure.
+     */
+    *minor_status = 0;
+    return(GSS_S_FAILURE);
+}
+

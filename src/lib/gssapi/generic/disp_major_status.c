@@ -62,7 +62,10 @@ static const char * const routine_error_string[] = {
    "A credential was invalid",
    "The referenced credentials have expired",
    "The context has expired",
-   "Miscellaneous failure",   
+   "Miscellaneous failure",
+   "The quality-of-protection requested could not be provided",
+   "The operation is forbidden by the local security policy",
+   "The operation or option is not available",
 };   
 
 static const char * const routine_error = "routine error";
@@ -206,7 +209,7 @@ OM_uint32 g_display_major_status(minor_status, status_value,
 				 message_context, status_string)
      OM_uint32 *minor_status;
      OM_uint32 status_value;
-     int *message_context;
+     OM_uint32 *message_context;
      gss_buffer_t status_string;
 {
    OM_uint32 ret, tmp;

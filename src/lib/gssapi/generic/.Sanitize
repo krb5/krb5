@@ -36,6 +36,7 @@ gssapiP_generic.h
 gssapi_err_generic.et
 gssapi_generic.c
 gssapi_generic.h
+oid_ops.c
 rel_buffer.c
 rel_oid_set.c
 util_buffer.c

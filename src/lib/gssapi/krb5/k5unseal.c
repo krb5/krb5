@@ -54,7 +54,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
    unsigned char *plain;
    int plainlen;
 
-   if (toktype == KG_TOK_SEAL_MSG) {
+   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG)) {
       message_buffer->length = 0;
       message_buffer->value = NULL;
    }
@@ -78,13 +78,13 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 
    ptr = (unsigned char *) input_token_buffer->value;
 
-   if (! g_verify_token_header(gss_mech_krb5, &bodysize,
+   if (! g_verify_token_header((gss_OID) gss_mech_krb5, &bodysize,
 			       &ptr, toktype, input_token_buffer->length)) {
       *minor_status = 0;
       return(GSS_S_DEFECTIVE_TOKEN);
    }
 
-   if (toktype == KG_TOK_SEAL_MSG)
+   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
       tmsglen = bodysize-22;
 
    /* get the sign and seal algorithms */
@@ -93,8 +93,10 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
    sealalg = ptr[2] + (ptr[3]<<8);
 
    if (((signalg != 0) && (signalg != 1)) ||
-       ((toktype != KG_TOK_SEAL_MSG) && (sealalg != 0xffff)) ||
-       ((toktype == KG_TOK_SEAL_MSG) && 
+       (((toktype != KG_TOK_SEAL_MSG) &&
+	 (toktype != KG_TOK_WRAP_MSG)) && (sealalg != 0xffff)) ||
+       (((toktype == KG_TOK_SEAL_MSG) ||
+	 (toktype == KG_TOK_WRAP_MSG)) && 
 	((sealalg != 0xffff) && (sealalg != 0))) ||
        (ptr[4] != 0xff) ||
        (ptr[5] != 0xff)) {
@@ -106,7 +108,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 
    /* decode the message, if SEAL */
 
-   if (toktype == KG_TOK_SEAL_MSG) {
+   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG)) {
       if (sealalg == 0) {
 	 if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
 	    *minor_status = ENOMEM;
@@ -142,7 +144,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 	 else
 	    memcpy(token.value, plain+8, token.length);
       }
-   } else if (toktype == KG_TOK_SIGN_MSG) {
+   } else if ((toktype == KG_TOK_SIGN_MSG) || (toktype == KG_TOK_MIC_MSG)) {
       token = *message_buffer;
       plain = token.value;
       plainlen = token.length;
@@ -176,7 +178,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 					 16, ctx->seq.key->contents, 
 					 ctx->seq.key->length,
 					 &desmac)) {
-	 if (toktype == KG_TOK_SEAL_MSG)
+	 if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
 	    xfree(token.value);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -188,7 +190,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 	 if (code = kg_make_seed(ctx->subkey, ctx->seed)) {
 	    if (sealalg == 0)
 	       xfree(plain);
-	    if (toktype == KG_TOK_SEAL_MSG)
+	    if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
 	       xfree(token.value);
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
@@ -216,7 +218,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
    if (memcmp(cksum, ptr+14, 8) != 0) {
       if (signalg == 0)
 	 xfree(desmac.contents);
-      if (toktype == KG_TOK_SEAL_MSG)
+      if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
 	 xfree(token.value);
       *minor_status = 0;
       return(GSS_S_BAD_SIG);
@@ -229,7 +231,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
    
    /* it got through unscathed.  Make sure the context is unexpired */
 
-   if (toktype == KG_TOK_SEAL_MSG)
+   if ((toktype == KG_TOK_SEAL_MSG) || (toktype = KG_TOK_WRAP_MSG))
       *message_buffer = token;
 
    if (conf_state)

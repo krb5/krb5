@@ -45,7 +45,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* create the token buffer */
 
-   if (toktype == KG_TOK_SEAL_MSG) {
+   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG)) {
       if (bigend && !encrypt)
 	 tmsglen = text->length;
       else
@@ -54,7 +54,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       tmsglen = 0;
    }
 
-   tlen = g_token_size(gss_mech_krb5, 22+tmsglen);
+   tlen = g_token_size((gss_OID) gss_mech_krb5, 22+tmsglen);
 
    if ((t = (unsigned char *) xmalloc(tlen)) == NULL)
       return(ENOMEM);
@@ -63,7 +63,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    ptr = t;
 
-   g_make_token_header(gss_mech_krb5, 22+tmsglen, &ptr, toktype);
+   g_make_token_header((gss_OID) gss_mech_krb5, 22+tmsglen, &ptr, toktype);
 
    /* for now, only generate DES integrity */
 
@@ -72,7 +72,8 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* SEAL_ALG, or filler */
 
-   if ((toktype == KG_TOK_SEAL_MSG) && encrypt) {
+   if (((toktype == KG_TOK_SEAL_MSG) ||
+	(toktype == KG_TOK_WRAP_MSG)) && encrypt) {
       ptr[2] = 0;
       ptr[3] = 0;
    } else {
@@ -87,7 +88,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* pad the plaintext, encrypt if needed, and stick it in the token */
 
-   if (toktype == KG_TOK_SEAL_MSG) {
+   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG)) {
       unsigned char *plain;
       unsigned char pad;
 
@@ -230,9 +231,55 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_FAILURE);
    }
 
-   if ((toktype == KG_TOK_SEAL_MSG) && conf_state)
+   if (((toktype == KG_TOK_SEAL_MSG) ||
+	(toktype == KG_TOK_WRAP_MSG)) && conf_state) {
       *conf_state = conf_req_flag;
+   }
 
    *minor_status = 0;
    return((ctx->endtime < now)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }
+
+OM_uint32
+kg_seal_size(minor_status, context_handle, conf_req_flag, qop_req, 
+	     output_size, input_size)
+    OM_uint32		*minor_status;
+    gss_ctx_id_t	context_handle;
+    int			conf_req_flag;
+    gss_qop_t		qop_req;
+    OM_uint32		output_size;
+    OM_uint32		*input_size;
+{
+    krb5_gss_ctx_id_rec	*ctx;
+    krb5_error_code	code;
+    OM_uint32		cfsize;
+    OM_uint32		ohlen;
+
+    /* only default qop is allowed */
+    if (qop_req != GSS_C_QOP_DEFAULT) {
+	*minor_status = (OM_uint32) G_UNKNOWN_QOP;
+	return(GSS_S_FAILURE);
+    }
+    
+    /* validate the context handle */
+    if (! kg_validate_ctx_id(context_handle)) {
+	*minor_status = (OM_uint32) G_VALIDATE_FAILED;
+	return(GSS_S_NO_CONTEXT);
+    }
+    
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+    if (! ctx->established) {
+	*minor_status = KG_CTX_INCOMPLETE;
+	return(GSS_S_NO_CONTEXT);
+    }
+
+    /* Calculate the token size and subtract that from the output size */
+    cfsize = (conf_req_flag) ? kg_confounder_size(&ctx->enc) : 0;
+    ohlen = g_token_size((gss_OID) gss_mech_krb5, cfsize + 22);
+
+    /* Cannot have trailer length that will cause us to pad over our length */
+    *input_size = (output_size - ohlen) & (~7);
+    *minor_status = 0;
+    return(GSS_S_COMPLETE);
+}
+

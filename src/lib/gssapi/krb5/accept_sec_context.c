@@ -39,7 +39,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
      gss_name_t *src_name;
      gss_OID *mech_type;
      gss_buffer_t output_token;
-     int *ret_flags;
+     OM_uint32 *ret_flags;
      OM_uint32 *time_rec;
      gss_cred_id_t *delegated_cred_handle;
 {
@@ -65,7 +65,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    /* set up returns to be freeable */
 
    if (src_name)
-      *src_name = GSS_C_NO_NAME;
+      *src_name = (gss_name_t) NULL;
    output_token->length = 0;
    output_token->value = NULL;
    if (mech_type)
@@ -109,7 +109,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 
    ptr = (unsigned char *) input_token->value;
 
-   if (! g_verify_token_header(gss_mech_krb5, &(ap_req.length),
+   if (! g_verify_token_header((gss_OID) gss_mech_krb5, &(ap_req.length),
 			       &ptr, KG_TOK_CTX_AP_REQ, input_token->length)) {
       *minor_status = 0;
       return(GSS_S_DEFECTIVE_TOKEN);
@@ -281,7 +281,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 	 return(GSS_S_FAILURE);
       }
       krb5_auth_con_getlocalseqnumber(context, auth_context, &ctx->seq_send);
-      token.length = g_token_size(gss_mech_krb5, ap_rep.length);
+      token.length = g_token_size((gss_OID) gss_mech_krb5, ap_rep.length);
 
       if ((token.value = (unsigned char *) xmalloc(token.length)) == NULL) {
 	 (void)krb5_gss_delete_sec_context(context, minor_status, 
@@ -290,7 +290,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 	 return(GSS_S_FAILURE);
       }
       ptr = token.value;
-      g_make_token_header(gss_mech_krb5, ap_rep.length,
+      g_make_token_header((gss_OID) gss_mech_krb5, ap_rep.length,
                        &ptr, KG_TOK_CTX_AP_REP);
 
       TWRITE_STR(ptr, ap_rep.data, ap_rep.length);

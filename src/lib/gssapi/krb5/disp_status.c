@@ -38,8 +38,8 @@ krb5_gss_display_status(context, minor_status, status_value, status_type,
      OM_uint32 *minor_status;
      OM_uint32 status_value;
      int status_type;
-     const_gss_OID mech_type;
-     int *message_context;
+     gss_OID mech_type;
+     OM_uint32 *message_context;
      gss_buffer_t status_string;
 {
    status_string->length = 0;

@@ -93,17 +93,17 @@ int g_make_string_buffer PROTOTYPE((const char *str, gss_buffer_t buffer));
 
 int g_copy_OID_set PROTOTYPE((const gss_OID_set_desc * const in, gss_OID_set *out));
 
-int g_token_size PROTOTYPE((const_gss_OID mech, unsigned int body_size));
+int g_token_size PROTOTYPE((gss_OID mech, unsigned int body_size));
 
-void g_make_token_header PROTOTYPE((const_gss_OID mech, int body_size,
+void g_make_token_header PROTOTYPE((gss_OID mech, int body_size,
 			  unsigned char **buf, int tok_type));
 
-int g_verify_token_header PROTOTYPE((const_gss_OID mech, int *body_size,
+int g_verify_token_header PROTOTYPE((gss_OID mech, int *body_size,
 			  unsigned char **buf, int tok_type, int toksize));
 
 OM_uint32 g_display_major_status PROTOTYPE((OM_uint32 *minor_status,
 				 OM_uint32 status_value,
-				 int *message_context,
+				 OM_uint32 *message_context,
 				 gss_buffer_t status_string));
 
 OM_uint32 g_display_com_err_status PROTOTYPE((OM_uint32 *minor_status,
@@ -125,5 +125,40 @@ OM_uint32 generic_gss_release_oid_set
 PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_OID_set*      /* set */
            ));
+
+OM_uint32 generic_gss_release_oid
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID *		/* oid */
+	   ));
+
+OM_uint32 generic_gss_create_empty_oid_set
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID_set *	/* oid_set */
+	   ));
+
+OM_uint32 generic_gss_add_oid_set_member
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* member_oid */
+	    gss_OID_set *	/* oid_set */
+	   ));
+
+OM_uint32 generic_gss_test_oid_set_member
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* member */
+	    gss_OID_set,	/* set */
+	    int *		/* present */
+	   ));
+
+OM_uint32 generic_gss_oid_to_str
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* oid */
+	    gss_buffer_t	/* oid_str */
+	   ));
+
+OM_uint32 generic_gss_str_to_oid
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_buffer_t,	/* oid_str */
+	    gss_OID *		/* oid */
+	   ));
 
 #endif /* _GSSAPIP_GENERIC_H_ */

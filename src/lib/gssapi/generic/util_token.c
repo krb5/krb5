@@ -118,7 +118,7 @@ static int der_read_length(buf, bufsize)
 /* returns the length of a token, given the mech oid and the body size */
 
 int g_token_size(mech, body_size)
-     const_gss_OID mech;
+     gss_OID mech;
      unsigned int body_size;
 {
    /* set body_size to sequence contents size */
@@ -130,7 +130,7 @@ int g_token_size(mech, body_size)
    be the right size.  buf is advanced past the token header */
 
 void g_make_token_header(mech, body_size, buf, tok_type)
-     const_gss_OID mech;
+     gss_OID mech;
      int body_size;
      unsigned char **buf;
      int tok_type;
@@ -149,7 +149,7 @@ void g_make_token_header(mech, body_size, buf, tok_type)
    to the number of remaining bytes */
 
 int g_verify_token_header(mech, body_size, buf, tok_type, toksize)
-     const_gss_OID mech;
+     gss_OID mech;
      int *body_size;
      unsigned char **buf;
      int tok_type;

@@ -1,3 +1,18 @@
+
+Thu Aug 31 11:50:34 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapiP_krb5.h - Add new V2 dispatch prototypes.  Update arguments
+		to be compatible with V2 API.  Add tokens for V2 integrity
+		and confidentiality services.
+	* k5seal.c - Add support for V2 tokens and add kg_seal_size() to
+		support gss_wrap_size_limit().
+	* k5unseal.c - Add support for V2 tokens.
+	* accept_sec_context,disp_status,gssapi_krb5,init_sec_context,
+		inq_context,rel_name.c - Update arguments to V2.
+	* acquire_cred,import_name,inq_cred,krb5_gss_glue,seal,sign,unseal,
+		verify.c - Update arguments to V2 and add new V2 functions.
+	* rel_oid.c, inq_names.c - New V2 modules.
+	* Makefile.in, .Sanitize - Add rel_oid.c and inq_names.c
+
 Tue Aug 29 22:38:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context):  Remove

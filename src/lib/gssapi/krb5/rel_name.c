@@ -37,7 +37,7 @@ krb5_gss_release_name(context, minor_status, input_name)
 
    krb5_free_principal(context, (krb5_principal) *input_name);
 
-   *input_name = GSS_C_NO_NAME;
+   *input_name = (gss_name_t) NULL;
 
    *minor_status = 0;
    return(GSS_S_COMPLETE);

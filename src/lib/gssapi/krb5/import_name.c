@@ -44,7 +44,7 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
      krb5_context context;
      OM_uint32 *minor_status;
      gss_buffer_t input_name_buffer;
-     const_gss_OID input_name_type;
+     gss_OID input_name_type;
      gss_name_t *output_name;
 {
    krb5_principal princ;

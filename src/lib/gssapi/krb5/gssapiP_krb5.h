@@ -48,7 +48,9 @@
 #define KG_TOK_CTX_ERROR	0x0300
 #define KG_TOK_SIGN_MSG		0x0101
 #define KG_TOK_SEAL_MSG		0x0201
-#define KG_TOK_DEL_CTX		0x0102
+#define	KG_TOK_MIC_MSG		0x0102
+#define	KG_TOK_WRAP_MSG		0x0202
+#define KG_TOK_DEL_CTX		0x0103
 
 /** internal types **/
 
@@ -56,7 +58,7 @@ typedef krb5_principal krb5_gss_name_t;
 
 typedef struct _krb5_gss_cred_id_rec {
    /* name/type of credential */
-   int usage;
+   gss_cred_usage_t usage;
    krb5_principal princ;	/* this is not interned as a gss_name_t */
 
    /* keytab (accept) data */
@@ -75,7 +77,7 @@ typedef struct _krb5_gss_enc_desc {
 
 typedef struct _krb5_gss_ctx_id_rec {
    int initiate;	/* nonzero if initiating, zero if accepting */
-   int mutual;
+   OM_uint32 mutual;
    int seed_init;
    unsigned char seed[16];
    krb5_gss_cred_id_t cred;
@@ -173,7 +175,7 @@ PROTOTYPE( (krb5_context,
             gss_name_t,       /* desired_name */
             OM_uint32,        /* time_req */
             gss_OID_set,      /* desired_mechs */
-            int,              /* cred_usage */
+            gss_cred_usage_t, /* cred_usage */
             gss_cred_id_t*,   /* output_cred_handle */
             gss_OID_set*,     /* actual_mechs */
             OM_uint32*        /* time_rec */
@@ -191,15 +193,15 @@ PROTOTYPE( (krb5_context,
             gss_cred_id_t,    /* claimant_cred_handle */
             gss_ctx_id_t*,    /* context_handle */
             gss_name_t,       /* target_name */
-            const_gss_OID,    /* mech_type */
-            int,              /* req_flags */
+            gss_OID,          /* mech_type */
+            OM_uint32,        /* req_flags */
             OM_uint32,        /* time_req */
             gss_channel_bindings_t,
                               /* input_chan_bindings */
             gss_buffer_t,     /* input_token */
             gss_OID*,         /* actual_mech_type */
             gss_buffer_t,     /* output_token */
-            int*,             /* ret_flags */
+            OM_uint32*,       /* ret_flags */
             OM_uint32*        /* time_rec */
            ));
 
@@ -214,7 +216,7 @@ PROTOTYPE( (krb5_context,
             gss_name_t*,      /* src_name */
             gss_OID*,         /* mech_type */
             gss_buffer_t,     /* output_token */
-            int*,             /* ret_flags */
+            OM_uint32*,       /* ret_flags */
             OM_uint32*,       /* time_rec */
             gss_cred_id_t*    /* delegated_cred_handle */
            ));
@@ -284,8 +286,8 @@ PROTOTYPE( (krb5_context,
 	    OM_uint32*,       /* minor_status */
             OM_uint32,        /* status_value */
             int,              /* status_type */
-            const_gss_OID,    /* mech_type */
-            int*,             /* message_context */
+            gss_OID,          /* mech_type */
+            OM_uint32*,       /* message_context */
             gss_buffer_t      /* status_string */
            ));
 
@@ -307,7 +309,7 @@ OM_uint32 krb5_gss_display_name
 PROTOTYPE( (krb5_context,
 	    OM_uint32*,      /* minor_status */
             gss_name_t,      /* input_name */
-            gss_buffer_t,     /* output_name_buffer */
+            gss_buffer_t,    /* output_name_buffer */
             gss_OID*         /* output_name_type */
            ));
 
@@ -315,7 +317,7 @@ OM_uint32 krb5_gss_import_name
 PROTOTYPE( (krb5_context,
 	    OM_uint32*,       /* minor_status */
             gss_buffer_t,     /* input_name_buffer */
-            const_gss_OID,    /* input_name_type */
+            gss_OID,          /* input_name_type */
             gss_name_t*       /* output_name */
            ));
 
@@ -331,7 +333,7 @@ PROTOTYPE( (krb5_context,
             gss_cred_id_t,    /* cred_handle */
             gss_name_t *,     /* name */
             OM_uint32 *,      /* lifetime */
-            int *,            /* cred_usage */
+            gss_cred_usage_t*,/* cred_usage */
             gss_OID_set *     /* mechanisms */
            ));
 
@@ -343,23 +345,127 @@ PROTOTYPE( (krb5_context,
 	    gss_name_t*,      /* acceptor_name */
 	    OM_uint32*,       /* lifetime_rec */
 	    gss_OID*,         /* mech_type */
-	    int*,             /* ret_flags */
-	    int*              /* locally_initiated */
+	    OM_uint32*,       /* ret_flags */
+	    int*,             /* locally_initiated */
+	    int*              /* open */
+	   ));
+
+/* New V2 entry points */
+OM_uint32 krb5_gss_get_mic
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    gss_qop_t,			/* qop_req */
+	    gss_buffer_t,		/* message_buffer */
+	    gss_buffer_t		/* message_token */
+	   ));
+
+OM_uint32 krb5_gss_verify_mic
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    gss_buffer_t,		/* message_buffer */
+	    gss_buffer_t,		/* message_token */
+	    gss_qop_t *			/* qop_state */
+	   ));
+
+OM_uint32 krb5_gss_wrap
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag */
+	    gss_qop_t,			/* qop_req */
+	    gss_buffer_t,		/* input_message_buffer */
+	    int *,			/* conf_state */
+	    gss_buffer_t		/* output_message_buffer */
+	   ));
+
+OM_uint32 krb5_gss_unwrap
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    gss_buffer_t,		/* input_message_buffer */
+	    gss_buffer_t,		/* output_message_buffer */
+	    int *,			/* conf_state */
+	    gss_qop_t *			/* qop_state */
+	   ));
+
+OM_uint32 krb5_gss_wrap_size_limit
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag */
+	    gss_qop_t,			/* qop_req */
+	    OM_uint32,			/* req_output_size */
+	    OM_uint32 *			/* max_input_size */
+	   ));
+
+OM_uint32 krb5_gss_import_name_object
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    void *,			/* input_name */
+	    gss_OID,			/* input_name_type */
+	    gss_name_t *		/* output_name */
+	   ));
+
+OM_uint32 krb5_gss_export_name_object
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_name_t,			/* input_name */
+	    gss_OID,			/* desired_name_type */
+	    void * *			/* output_name */
+	   ));
+
+OM_uint32 krb5_gss_add_cred
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_cred_id_t,		/* input_cred_handle */
+	    gss_name_t,			/* desired_name */
+	    gss_OID,			/* desired_mech */
+	    gss_cred_usage_t,		/* cred_usage */
+	    OM_uint32,			/* initiator_time_req */
+	    OM_uint32,			/* acceptor_time_req */
+	    gss_cred_id_t *,		/* output_cred_handle */
+	    gss_OID_set *,		/* actual_mechs */
+	    OM_uint32 *,		/* initiator_time_rec */
+	    OM_uint32 *			/* acceptor_time_rec */
+	   ));
+
+OM_uint32 krb5_gss_inquire_cred_by_mech
+PROTOTYPE( (krb5_context,
+	    OM_uint32  *,		/* minor_status */
+	    gss_cred_id_t,		/* cred_handle */
+	    gss_OID,			/* mech_type */
+	    gss_name_t *,		/* name */
+	    OM_uint32 *,		/* initiator_lifetime */
+	    OM_uint32 *,		/* acceptor_lifetime */
+	    gss_cred_usage_t * 		/* cred_usage */
 	   ));
 
 OM_uint32 krb5_gss_export_sec_context
 PROTOTYPE( (krb5_context,
-	    OM_uint32 *,	/* minor_status */
-	    gss_ctx_id_t *,	/* context_handle */
-	    gss_buffer_t	/* interprocess_token */
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t *,		/* context_handle */
+	    gss_buffer_t		/* interprocess_token */
 	    ));
 
 OM_uint32 krb5_gss_import_sec_context
 PROTOTYPE( (krb5_context,
-	    OM_uint32 *,	/* minor_status */
-	    gss_buffer_t,	/* interprocess_token */
-	    gss_ctx_id_t *	/* context_handle */
+	    OM_uint32 *,		/* minor_status */
+	    gss_buffer_t,		/* interprocess_token */
+	    gss_ctx_id_t *		/* context_handle */
 	    ));
+
+OM_uint32 krb5_gss_release_oid
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    gss_OID *			/* oid */
+	   ));
+
+OM_uint32 krb5_gss_inquire_names_for_mech
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    gss_OID,			/* mechanism */
+	    gss_OID_set *		/* name_types */
+	   ));
 
 OM_uint32 kg_get_context();
 	

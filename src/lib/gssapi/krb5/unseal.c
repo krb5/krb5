@@ -38,3 +38,27 @@ krb5_gss_unseal(context, minor_status, context_handle,
 		    input_message_buffer, output_message_buffer,
 		    conf_state, qop_state, KG_TOK_SEAL_MSG));
 }
+
+/* V2 interface */
+OM_uint32
+krb5_gss_unwrap(context, minor_status, context_handle,
+		input_message_buffer, output_message_buffer,
+		conf_state, qop_state)
+    krb5_context	context;
+    OM_uint32		*minor_status;
+    gss_ctx_id_t	context_handle;
+    gss_buffer_t	input_message_buffer;
+    gss_buffer_t	output_message_buffer;
+    int			*conf_state;
+    gss_qop_t		*qop_state;
+{
+    OM_uint32		rstat;
+    int			qstate;
+
+    rstat = kg_unseal(minor_status, context_handle,
+		      input_message_buffer, output_message_buffer,
+		      conf_state, &qstate, KG_TOK_WRAP_MSG);
+    if (!rstat && qop_state)
+	*qop_state = (gss_qop_t) qstate;
+    return(rstat);
+}

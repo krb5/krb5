@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic -I$(srcdir)/../../crypto/md5
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic -I$(srcdir)/../../crypto/md5 -DUSE_AUTOCONF_H
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
@@ -34,12 +34,14 @@ CCSRCS = \
 	$(srcdir)/init_sec_context.c \
 	$(srcdir)/inq_context.c \
 	$(srcdir)/inq_cred.c \
+	$(srcdir)/inq_names.c \
 	$(srcdir)/k5seal.c \
 	$(srcdir)/k5unseal.c \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/process_context_token.c \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_name.c \
+	$(srcdir)/rel_oid.c \
 	$(srcdir)/seal.c \
 	$(srcdir)/ser_sctx.c \
 	$(srcdir)/sign.c \
@@ -67,12 +69,14 @@ CCOBJS = \
 	init_sec_context.$(OBJEXT) \
 	inq_context.$(OBJEXT) \
 	inq_cred.$(OBJEXT) \
+	inq_names.$(OBJEXT) \
 	k5seal.$(OBJEXT) \
 	k5unseal.$(OBJEXT) \
 	krb5_gss_glue.$(OBJEXT) \
 	process_context_token.$(OBJEXT) \
 	rel_cred.$(OBJEXT) \
 	rel_name.$(OBJEXT) \
+	rel_oid.$(OBJEXT) \
 	seal.$(OBJEXT) \
 	ser_sctx.$(OBJEXT) \
 	sign.$(OBJEXT) \

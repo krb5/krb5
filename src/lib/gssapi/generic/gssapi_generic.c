@@ -49,7 +49,7 @@ static const gss_OID_desc oids[] = {
    {10, "\052\206\110\206\367\022\001\002\001\004"},
 };
 
-const_gss_OID gss_nt_user_name = oids+0;
-const_gss_OID gss_nt_machine_uid_name = oids+1;
-const_gss_OID gss_nt_string_uid_name = oids+2;
-const_gss_OID gss_nt_service_name = oids+3;
+const gss_OID_desc * const gss_nt_user_name = oids+0;
+const gss_OID_desc * const gss_nt_machine_uid_name = oids+1;
+const gss_OID_desc * const gss_nt_string_uid_name = oids+2;
+const gss_OID_desc * const gss_nt_service_name = oids+3;

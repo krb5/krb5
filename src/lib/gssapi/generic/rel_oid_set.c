@@ -26,11 +26,15 @@ OM_uint32 generic_gss_release_oid_set(minor_status, set)
      OM_uint32 *minor_status;
      gss_OID_set *set;
 {
+   size_t index;
+
    *minor_status = 0;
 
    if (*set == GSS_C_NULL_OID_SET)
       return(GSS_S_COMPLETE);
 
+   for (index=0; index<(*set)->count; index++)
+     xfree((*set)->elements[index].elements);
    xfree((*set)->elements);
    xfree(*set);
 

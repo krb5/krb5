@@ -1,4 +1,18 @@
 
+Thu Aug 31 11:43:59 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapi.h - Update to V2 API.  Also use autoconf.h if USE_AUTOCONF_H
+		is defined, otherwise resort to brute force.  Remove const_
+		gss_OID, as it's not defined in the API.
+	* gssapiP_generic.h - Add new V2 dispatch prototypes.  Update
+		arguments to be compatible with V2 API.
+	* disp_major_status.c - Describe new failure codes.  Update argument.
+	* gssapi_generic.c - Replace const_gss_OID.
+	* rel_oid_set.c - Free individual OID data also.
+	* util_token.c - Replace const_gss_OID.
+	* oid_ops.c - New V2 OID set manipulation routines.
+	* Makefile.in, .Sanitize - Add oid_ops.c.
+
+
 Tue Aug 29 13:30:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gssapi.h - Add prototypes for gss_{im,ex}port_sec_context.
 
