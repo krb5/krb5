@@ -53,6 +53,8 @@
 #define	KRB5_ADM_CHG_ORPW_CMD	"OTHER-RANDOM-CHANGEPW"
 #define	KRB5_ADM_INQ_PRINC_CMD	"INQUIRE-PRINCIPAL"
 #define	KRB5_ADM_EXT_KEY_CMD	"EXTRACT-KEY"
+#define	KRB5_ADM_ADD_KEY_CMD	"ADD-KEY"
+#define	KRB5_ADM_DEL_KEY_CMD	"DELETE-KEY"
 
 /*
  * Reply status values.
@@ -71,6 +73,8 @@
 #define	KRB5_ADM_BAD_OPTION		67
 #define	KRB5_ADM_VALUE_REQUIRED		68
 #define	KRB5_ADM_SYSTEM_ERROR		69
+#define	KRB5_ADM_KEY_ALREADY_EXISTS	70
+#define	KRB5_ADM_KEY_DOES_NOT_EXIST	71
 
 /*
  * Principal flag keywords.
@@ -79,44 +83,39 @@
 #define	KRB5_ADM_KW_PASSWORD		"PASSWORD"
 #define	KRB5_ADM_KW_RANDOMKEY		"RANDOMKEY"
 /* Settable and retrievable */
-#define	KRB5_ADM_KW_KVNO		"KVNO"
 #define	KRB5_ADM_KW_MAXLIFE		"MAXLIFE"
 #define	KRB5_ADM_KW_MAXRENEWLIFE	"MAXRENEWLIFE"
 #define	KRB5_ADM_KW_EXPIRATION		"EXPIRATION"
 #define	KRB5_ADM_KW_PWEXPIRATION	"PWEXPIRATION"
 #define	KRB5_ADM_KW_FLAGS		"FLAGS"
-#define	KRB5_ADM_KW_SALTTYPE		"SALTTYPE"
+#define	KRB5_ADM_KW_AUXDATA		"AUXDATA"
+#define	KRB5_ADM_KW_EXTRADATA		"EXTRADATA"
 /* Retrievable only */
-#define	KRB5_ADM_KW_MKVNO		"MKVNO"
 #define	KRB5_ADM_KW_LASTPWCHANGE	"LASTPWCHANGE"
 #define	KRB5_ADM_KW_LASTSUCCESS		"LASTSUCCESS"
 #define	KRB5_ADM_KW_LASTFAILED		"LASTFAILED"
 #define	KRB5_ADM_KW_FAILCOUNT		"FAILCOUNT"
-#define	KRB5_ADM_KW_MODNAME		"MODNAME"
-#define	KRB5_ADM_KW_MODDATE		"MODDATE"
-
-#define	KRB5_ADM_KW_MAX_SET		9
-#define	KRB5_ADM_KW_MAX_GET		15
+#define	KRB5_ADM_KW_KEYDATA		"KEYDATA"
 
 /* Valid mask */
 #define	KRB5_ADM_M_PASSWORD		0x00000001
-#define	KRB5_ADM_M_KVNO			0x00000002
-#define	KRB5_ADM_M_MAXLIFE		0x00000004
-#define	KRB5_ADM_M_MAXRENEWLIFE		0x00000008
-#define	KRB5_ADM_M_EXPIRATION		0x00000010
-#define	KRB5_ADM_M_PWEXPIRATION		0x00000020
-#define	KRB5_ADM_M_RANDOMKEY		0x00000040
-#define	KRB5_ADM_M_FLAGS		0x00000080
-#define	KRB5_ADM_M_SALTTYPE		0x00000100
-#define	KRB5_ADM_M_MKVNO		0x00000200
-#define	KRB5_ADM_M_LASTPWCHANGE		0x00000400
-#define	KRB5_ADM_M_LASTSUCCESS		0x00000800
-#define	KRB5_ADM_M_LASTFAILED		0x00001000
-#define	KRB5_ADM_M_FAILCOUNT		0x00002000
-#define	KRB5_ADM_M_MODNAME		0x00004000
-#define	KRB5_ADM_M_MODDATE		0x00008000
+#define	KRB5_ADM_M_MAXLIFE		0x00000002
+#define	KRB5_ADM_M_MAXRENEWLIFE		0x00000004
+#define	KRB5_ADM_M_EXPIRATION		0x00000008
+#define	KRB5_ADM_M_PWEXPIRATION		0x00000010
+#define	KRB5_ADM_M_RANDOMKEY		0x00000020
+#define	KRB5_ADM_M_FLAGS		0x00000040
+#define	KRB5_ADM_M_LASTPWCHANGE		0x00000080
+#define	KRB5_ADM_M_LASTSUCCESS		0x00000100
+#define	KRB5_ADM_M_LASTFAILED		0x00000200
+#define	KRB5_ADM_M_FAILCOUNT		0x00000400
+#define	KRB5_ADM_M_AUXDATA		0x00000800
+#define	KRB5_ADM_M_KEYDATA		0x00001000
+#define	KRB5_ADM_M_EXTRADATA		0x00002000
+#define	KRB5_ADM_M_UNUSED_14		0x00004000
+#define	KRB5_ADM_M_UNUSED_15		0x00008000
 #define	KRB5_ADM_M_UNUSED_16		0x00010000
-#define	KRB5_ADM_M_UNUSED_17		0x00020000
+#define KRB5_ADM_M_UNUSED_17		0x00020000
 #define	KRB5_ADM_M_UNUSED_18		0x00040000
 #define	KRB5_ADM_M_UNUSED_19		0x00080000
 #define	KRB5_ADM_M_UNUSED_20		0x00100000
@@ -134,36 +133,27 @@
 
 #define	KRB5_ADM_M_SET_VALID		(KRB5_ADM_M_SET		+ \
 					 KRB5_ADM_M_PASSWORD	+ \
-					 KRB5_ADM_M_KVNO	+ \
 					 KRB5_ADM_M_MAXLIFE	+ \
 					 KRB5_ADM_M_MAXRENEWLIFE+ \
 					 KRB5_ADM_M_EXPIRATION	+ \
 					 KRB5_ADM_M_PWEXPIRATION+ \
 					 KRB5_ADM_M_RANDOMKEY	+ \
 					 KRB5_ADM_M_FLAGS	+ \
-					 KRB5_ADM_M_SALTTYPE)
+					 KRB5_ADM_M_AUXDATA	+ \
+					 KRB5_ADM_M_EXTRADATA)
 #define	KRB5_ADM_M_GET_VALID		(KRB5_ADM_M_GET		+ \
-					 KRB5_ADM_M_KVNO	+ \
 					 KRB5_ADM_M_MAXLIFE	+ \
 					 KRB5_ADM_M_MAXRENEWLIFE+ \
 					 KRB5_ADM_M_EXPIRATION	+ \
 					 KRB5_ADM_M_PWEXPIRATION+ \
 					 KRB5_ADM_M_FLAGS	+ \
-					 KRB5_ADM_M_SALTTYPE	+ \
-					 KRB5_ADM_M_MKVNO	+ \
 					 KRB5_ADM_M_LASTPWCHANGE+ \
 					 KRB5_ADM_M_LASTSUCCESS	+ \
 					 KRB5_ADM_M_LASTFAILED	+ \
 					 KRB5_ADM_M_FAILCOUNT	+ \
-					 KRB5_ADM_M_MODNAME	+ \
-					 KRB5_ADM_M_MODDATE)
-
-/* Values for salttype */
-#define	KRB5_ADM_SALTTYPE_NORMAL	"KRB5"
-#define	KRB5_ADM_SALTTYPE_V4		"KRB4"
-#define	KRB5_ADM_SALTTYPE_NOREALM	"KRB5-NOREALM"
-#define	KRB5_ADM_SALTTYPE_ONLYREALM	"KRB5-ONLYREALM"
-#define	KRB5_ADM_SALTTYPE_SPECIAL	"SPECIAL"
+					 KRB5_ADM_M_AUXDATA	+ \
+					 KRB5_ADM_M_KEYDATA	+ \
+					 KRB5_ADM_M_EXTRADATA)
 
 /*
  * Keytab reply components.
@@ -176,6 +166,11 @@
 #define	KRB5_ADM_KT_KEY_KEY	5
 #define	KRB5_ADM_KT_NCOMPS	6
 
+typedef struct __krb5_key_salt_tuple {
+    krb5_keytype	ks_keytype;
+    krb5_int32		ks_salttype;
+} krb5_key_salt_tuple;
+
 /*
  * Data structure returned by krb5_read_realm_params()
  */
@@ -187,12 +182,13 @@ typedef struct __krb5_realm_params {
     krb5_int32		realm_kdc_pport;
     krb5_int32		realm_kdc_sport;
     krb5_int32		realm_kadmind_port;
-    krb5_int32		realm_keytype;
-    krb5_int32		realm_enctype;
+    krb5_keytype	realm_keytype;
+    krb5_enctype	realm_enctype;
     krb5_deltat		realm_max_life;
     krb5_deltat		realm_max_rlife;
     krb5_timestamp	realm_expiration;
     krb5_flags		realm_flags;
+    krb5_key_salt_tuple	*realm_keysalts;
     unsigned int	realm_kdc_pport_valid:1;
     unsigned int	realm_kdc_sport_valid:1;
     unsigned int	realm_kadmind_port_valid:1;
@@ -203,5 +199,6 @@ typedef struct __krb5_realm_params {
     unsigned int	realm_expiration_valid:1;
     unsigned int	realm_flags_valid:1;
     unsigned int	realm_filler:7;
+    krb5_int32		realm_num_keysalts;
 } krb5_realm_params;
 #endif	/* KRB5_ADM_H__ */

@@ -1,4 +1,12 @@
 
+Mon Jul 31 15:50:25 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm.h - Add new protocol definitions.  Also, add krb5_key_salt_tuple
+		and add it to the krb5_read_realm_params structure so that
+		we have a list of supported key/salt pairs.  Convert keytype
+		and enctype to be the correct datatype.
+	* adm_proto.h - Add string conversion prototypes.
+
+
 Thu Jul 27 15:06:35 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* {asn1,dbm,ext-proto,k5-{config,errors,sockets},libos,los-proto,
 	   mit-des,preauth,rsa-md5,sysincl}.h - Deleted.
