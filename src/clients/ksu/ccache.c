@@ -236,7 +236,7 @@ int chunk_count = 1;
 		if (auth_debug){ 
 			fprintf(stderr,"krb5_ccache_copy: CREDS EXPIRED:\n");  
 			fputs("  Valid starting		Expires		Service principal\n",stdout);
-			show_credential(&creds, cc); 
+			show_credential(context, &creds, cc); 
 			fprintf(stderr,"\n");  
 		}
 	}

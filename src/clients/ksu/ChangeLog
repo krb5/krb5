@@ -1,5 +1,11 @@
 Tue May  9 15:52:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* krb_auth_su.c (krb5_auth_check): Add missing context
+		(wolfgang@wsrcc.com) 
+
+	* ccache.c (krb5_get_nonexp_tkts): Add missing context
+		(wolfgang@wsrcc.com) 
+
 	* heuristic.c (get_best_princ_for_target): Missing context cuased
 		coredump. 
 		(get_best_princ_for_target): Missing contexts in call to

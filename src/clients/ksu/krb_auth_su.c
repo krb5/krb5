@@ -82,7 +82,7 @@ krb5_boolean zero_password;
 	}
 
 	if (auth_debug)
-	{ dump_principal("krb5_auth_check: Client principal name", client); } 	
+	{ dump_principal(context, "krb5_auth_check: Client principal name", client); } 	
 
 	if ( retval = krb5_sname_to_principal(context, hostname, NULL,
 					      KRB5_NT_SRV_HST, &server)){
@@ -93,7 +93,7 @@ krb5_boolean zero_password;
 	}
 
 	if (auth_debug)
-	{ dump_principal("krb5_auth_check: Server principal name", server); } 
+	{ dump_principal(context, "krb5_auth_check: Server principal name", server); } 
 
 
 
@@ -123,7 +123,7 @@ krb5_boolean zero_password;
  		return (FALSE) ; 	
 	}	
 
-	if (auth_debug){ dump_principal("local tgt principal name", tgtq.server ); } 	
+	if (auth_debug){ dump_principal(context, "local tgt principal name", tgtq.server ); } 	
 	retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
 					&tgtq, &tgt); 
 
@@ -181,7 +181,7 @@ krb5_boolean zero_password;
 
 	if (auth_debug){ 
 	 	fprintf(stderr,"krb5_auth_check: got ticket for end server \n"); 
-		dump_principal("out_creds->server", out_creds->server ); 
+		dump_principal(context, "out_creds->server", out_creds->server ); 
 	} 	
 
 
@@ -293,8 +293,8 @@ krb5_keyblock *	tkt_ses_key;
 
 	if (auth_debug){ 
 	    fprintf(stderr,"krb5_verify_tkt_def: verified target server\n");
-	    dump_principal("server", server); 
-	    dump_principal("tkt->server", tkt->server); 
+	    dump_principal(context, "server", server); 
+	    dump_principal(context, "tkt->server", tkt->server); 
 	} 	
 
 	/* get the default keytab */
@@ -340,8 +340,8 @@ krb5_keyblock *	tkt_ses_key;
 	if (auth_debug){ 
 	 	fprintf(stderr,
 		       "krb5_verify_tkt_def: verified client's identity\n");
-	    	dump_principal("client", client);
-	    	dump_principal("tkt->enc_part2->client",tkt->enc_part2->client);
+	    	dump_principal(context, "client", client);
+	    	dump_principal(context, "tkt->enc_part2->client",tkt->enc_part2->client);
 	} 	
 
 	tkt_ses_key = tkt->enc_part2->session;	
