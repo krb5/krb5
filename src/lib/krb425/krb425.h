@@ -3,7 +3,8 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -49,6 +50,7 @@
 extern char 		*_krb425_local_realm;
 extern krb5_ccache 	_krb425_ccache;
 extern int		_krb425_error_init;
+extern krb5_keyblock	_krb425_servkey;
 
 
 extern int	krb425error();
