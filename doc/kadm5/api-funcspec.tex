@@ -1273,8 +1273,12 @@ specified port number is used.
 \item Otherwise, port number 752 is used.
 \end{enumerate}
 
-\subsection{Authorization ACLs}
+\subsection{Key Table, Authorization ACLs}
 \label{sec:acls}
+
+The admin server's keytable is stored in /krb5/ovsec_admin.srvtab.  It
+contains entries for the principals ovsec_kadm/admin and
+ovsec_kadm/changepw.
 
 The admin server will use a simple ACL mechanism to grant privileges
 to principals.  The file {\tt /krb5/ovsec_admin_acl} will contain a
