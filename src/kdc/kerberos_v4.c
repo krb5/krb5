@@ -51,8 +51,10 @@ int     f;
 /* XXX several files in libkdb know about this */
 char *progname;
 
+#ifndef BACKWARD_COMPAT
 static Key_schedule master_key_schedule;
 static C_Block master_key;
+#endif
 
 static struct timeval kerb_time;
 static Principal a_name_data;	/* for requesting user */
@@ -111,6 +113,7 @@ static long pause_int = -1;
 /* static void check_db_age(); */
 static void hang();
 
+#ifndef BACKWARD_COMPAT
 /*
  * Print usage message and exit.
  */
@@ -123,7 +126,6 @@ static void usage()
     exit(1);
 }
 
-#ifndef BACKWARD_COMPAT
 main(argc, argv)
     int     argc;
     char  **argv;
