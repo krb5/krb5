@@ -27,6 +27,8 @@ VSOBJS=syslog.o
 VSSRCS=syslog.c
 #endif
 
+INCLUDES=-I$(TOP)/include/stdc-incl
+
 OBJS =	\
 	cryptoconf.o \
 	perror.o \
