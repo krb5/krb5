@@ -1,3 +1,9 @@
+Fri Feb 27 21:43:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (KRB5_AC_REGEX_FUNCS): Take the regular expression
+		function code from lib/krb5/os/configure.in and turn it
+		into a generalized regular expression function tester.
+
 Wed Feb 18 15:23:08 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (thisconfigdir): Remove trailing slash from
