@@ -73,10 +73,9 @@
 #ifndef PepsyTarget
 #define	PepsyTarget(basename)						@@\
 .SUFFIXES:	.py							@@\
-basename/**/_tables.c: basename-asn.py					@@\
+basename-types.h basename/**/_tables.c: basename-asn.py					@@\
 	@echo '***Ignore the warning message "Warning: Can'\''t find UNIV.ph failed"' @@\
-	$(PEPSY) $(PSYFLAGS) basename-asn.py				@@\
-basename-types.h: basename/**/_tables.c
+	$(PEPSY) $(PSYFLAGS) basename-asn.py
 #endif /* PepsyTarget */
 
 #ifndef ErrorTableObjectRule
