@@ -40,14 +40,14 @@ struct keytab_keyproc_arg {
  * "keyseed" is actually a krb5_keytab, or NULL if we should fetch
  * from system area.
  */
-static krb5_error_code keytab_keyproc
+krb5_error_code keytab_keyproc
     PROTOTYPE((krb5_context,
                const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
                krb5_keyblock **));
 
-static krb5_error_code
+krb5_error_code
 keytab_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
     const krb5_enctype type;

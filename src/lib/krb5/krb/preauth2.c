@@ -375,7 +375,7 @@ krb5_error_code pa_sam(krb5_context context,
     return(0);
 }
 
-static pa_types_t pa_types[] = {
+pa_types_t pa_types[] = {
     {
 	KRB5_PADATA_PW_SALT,
 	pa_salt,
@@ -444,7 +444,7 @@ krb5_do_preauth(krb5_context context,
 		if (etype_info)
 		    continue;
 		scratch.length = in_padata[i]->length;
-		scratch.data = (char *) in_padata[i]->contents;
+		scratch.data = in_padata[i]->contents;
 		ret = decode_krb5_etype_info(&scratch, &etype_info);
 		if (ret) {
 		    if (out_pa_list) {

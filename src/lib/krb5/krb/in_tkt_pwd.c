@@ -34,14 +34,14 @@ extern char *krb5_default_pwd_prompt1;
 /* 
  * key-producing procedure for use by krb5_get_in_tkt_with_password.
  */
-static krb5_error_code pwd_keyproc
+krb5_error_code pwd_keyproc
     PROTOTYPE((krb5_context,
                const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
                krb5_keyblock **));
 
-static krb5_error_code
+krb5_error_code
 pwd_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
     const krb5_enctype type;

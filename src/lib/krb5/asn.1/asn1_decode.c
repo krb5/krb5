@@ -61,7 +61,7 @@ asn1_error_code asn1_decode_integer(buf, val)
 {
   setup();
   asn1_octet o;
-  long n = 0; /* initialize to keep gcc happy */
+  long n;
   int i;
 
   tag(ASN1_INTEGER);

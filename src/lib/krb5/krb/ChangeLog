@@ -6,13 +6,7 @@
 	(krb5_init_context): Call it.
 	(krb5_init_secure_context): New function.
 
-	* in_tkt_ktb.c (keytab_keyproc): Now static.
-	* in_tkt_pwd.c (pwd_keyproc): Now static.
-	* in_tkt_sky.c (skey_keyproc): Now static.
-
 	* preauth2.c (krb5_do_preauth): Fix syntax in switch statement.
-	Cast padata contents pointer to avoid warning.
-	(pa_types): Now static.
 
 	* str_conv.c (krb5_deltat_to_string): Always write to a local
 	temporary buffer that's guaranteed to be large enough, then see if
