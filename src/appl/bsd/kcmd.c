@@ -71,6 +71,9 @@
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#ifdef _AIX
+#include <sys/select.h>
+#endif
 
 #ifndef POSIX_SIGNALS
 #ifndef sigmask
@@ -292,11 +295,19 @@ setup_secondary_channel (int s, int *fd2p, int *lportp, int *addrfamilyp,
     	int len = sizeof (*fromp);
 	size_t slen;
     	int s2 = getport(lportp, addrfamilyp), s3;
+	fd_set rfds, xfds;
+	struct timeval waitlen;
+	int n;
 
 	*fd2p = -1;
 	if (s2 < 0)
 	    return -1;
+	FD_ZERO(&rfds);
+	FD_ZERO(&xfds);
+	FD_SET(s, &rfds);
+	FD_SET(s, &xfds);
 	listen(s2, 1);
+	FD_SET(s2, &rfds);
     	(void) sprintf(num, "%d", *lportp);
 	slen = strlen(num)+1;
     	if (write(s, num, slen) != slen) {
@@ -304,6 +315,25 @@ setup_secondary_channel (int s, int *fd2p, int *lportp, int *addrfamilyp,
 	    (void) close(s2);
 	    return -1;
     	}
+	waitlen.tv_sec = 600;	/* long, but better than infinite */
+	waitlen.tv_usec = 0;
+	n = (s < s2) ? s2 : s;
+	n = select(n+1, &rfds, 0, &xfds, &waitlen);
+	if (n <= 0) {
+	    /* timeout or error */
+	    fprintf(stderr, "timeout in circuit setup\n");
+	    close(s2);
+	    *fd2p = -1;
+	    return -1;
+	} else {
+	    if (FD_ISSET(s, &rfds) || FD_ISSET(s, &xfds)) {
+		fprintf(stderr, "socket: protocol error or closed connection in circuit setup\n");
+		close(s2);
+		*fd2p = -1;
+		return -1;
+	    }
+	    /* ready to accept a connection; yay! */
+	}
     	s3 = accept(s2, (struct sockaddr *)fromp, &len);
     	(void) close(s2);
     	if (s3 < 0) {

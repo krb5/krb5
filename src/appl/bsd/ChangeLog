@@ -1,5 +1,9 @@
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* kcmd.c (setup_secondary_channel): Use select to time out after
+	10 minutes, or notice the primary channel being closed or
+	receiving data while we wait for the secondary one to be set up.
+
 	* compat_recv.c: New file, moved from lib/krb5util.
 	* Makefile.in (SRCS, OBJS): Include it.
 	(rcp, kshd, klogind): Link against it instead of krb5util
