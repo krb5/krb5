@@ -1,3 +1,7 @@
+Wed Jun 12 15:31:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* config.guess: Updated to a more recent version (from autoconf 1.10).
+
 Mon Jun 10 17:18:34 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* windows.in (CCOPTS): Windows-32 CCOPTS
