@@ -52,7 +52,7 @@
 #define	DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/kadm_old.acl"
 
 /* Location of KDC profile */
-#define	DEFAULT_KDC_PROFILE	"@PREFIX/lib/krb5kdc/kdc.prof"
+#define	DEFAULT_KDC_PROFILE	"@PREFIX/lib/krb5kdc/kdc.conf"
 #define	KDC_PROFILE_ENV		"KRB5_KDC_PROFILE"
 
 #define	DEFAULT_KDC_ENCTYPE	ENCTYPE_DES_CBC_CRC
