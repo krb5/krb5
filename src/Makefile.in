@@ -362,8 +362,8 @@ ETOUT =	\
 	$(INC)kdb5_err.h $(ET)kdb5_err.c \
 	$(INC)krb5_err.h $(ET)krb5_err.c \
 	$(INC)kv5m_err.h $(ET)kv5m_err.c \
-	$(INC)adm_err.h $(ET)adm_err.c \
 	$(INC)/kerberosIV/krb_err.h lib/krb4/krb_err.c \
+	$(INC)/kerberosIV/kadm_err.h lib/krb4/kadm_err.c \
 	$(PR)prof_err.h $(PR)prof_err.c \
 	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
 	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c
