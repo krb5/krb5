@@ -51,8 +51,9 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	   Example build times: 30-40 minutes on a G3 machine, 80 minutes
 	   on a PowerMac 9600/233.
 	   
-	   You may receive some compile warnings about an ignored pragma, and some
-	   link warnings.  These are normal and can be ignored.
+	   You may receive some compile warnings about an ignored pragma, warnings
+	   about illegal implicit const pointer conversions, and some link warnings.
+	   These are normal and can be ignored.
 	   
 	   We used to see MPW crash during the link stage of the build. We think this 
 	   has been fixed. If this happens to you, you should restart MPW and start

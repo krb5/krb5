@@ -1,3 +1,7 @@
+Tue Aug 18 14:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* ReadMe: added information about warnings that should be ignored
+
 Fri Aug 14 14:00:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile.tmpl: Change -sym fullpath to -sym on -- now
