@@ -8,6 +8,9 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 ##DOS##OBJFILE=..\md4.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
 RUN_SETUP=@KRB5_RUN_ENV@
 
 STLIBOBJS=md4.o md4glue.o md4crypto.o
@@ -38,8 +41,8 @@ t_cksum.c: $(srcdir)/../md5/t_cksum.c
 t_cksum.o: t_cksum.c
 	$(CC) -DMD=4 $(CFLAGS) -c  t_cksum.c
 
-t_cksum: t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a 
-	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(LIBS)
+t_cksum: t_cksum.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_cksum t_cksum.o $(KRB5_BASE_LIBS)
 
 check-unix:: t_mddriver t_cksum
 	$(RUN_SETUP) $(C)t_mddriver -x
