@@ -41,7 +41,7 @@ static krb5_cryptosystem_entry mit_des3_raw_cryptosystem_entry = {
     mit_des3_string_to_key,
     mit_des_init_random_key,
     mit_des_finish_random_key,
-    mit_des3_random_key,
+    mit_des_random_key,
     sizeof(mit_des_cblock),
     0,
     sizeof(mit_des3_cblock),
