@@ -44,22 +44,24 @@ The versions of this API and a brief description of the changes for
 each are:
 
 \begin{description}
-\item[KADM5_API_VERSION_1] Also called OVSEC_KADM_API_VERSION_1.  The
-initial version of this API, written by OpenVision Technologies and
-donated to MIT for including in the public release.
+\item[KADM5_API_VERSION_1] The initial version of this API, written by
+OpenVision Technologies and donated to MIT for including in the public
+release.  Originally called OVSEC_KADM_API_VERSION_1.  Most everything
+has been renamed in one way or another, including functions, header
+files, and data structures.  Where possible, the old OVSEC_KADM names
+have been left behind for compatibility with version 1, and
+KADM5_API_VERSION_1 is compatible with OVSEC_KADM_API_VERSION_1 at
+compile-, link-, and run-time.
+
+The OVSEC_KADM name compatibility will not be extended to new
+functionality in future versions because no existing OVSEC_KADM
+clients will use that functionality; new clients should be written to
+the KADM5 API.
 
 \item[KADM5_API_VERSION_2] This version contains the initial changes
 necessary to make the OpenVision administration system work with the
 mid-1996 MIT version of Kerberos 5.  Changes include
 \begin{enumerate}
-\item Renaming of the API from OVSEC_KADM to KADM5.  Most everything
-has been renamed in one way or another, including functions, header
-files, and data structures.  Where possible, the old OVSEC_KADM names
-have been left behind for compatibility with version 1.  The
-OVSEC_KADM name compatibility has not been extended to new
-functionality in this version and will not be extended to future
-versions.
-
 \item The kadm5_init functions now take a structure of parameters
 instead of just a realm name, allowing the calling program to specify
 non-default values for various configuration options.  See section
