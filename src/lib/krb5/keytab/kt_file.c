@@ -979,7 +979,7 @@ const krb5_kt_ops krb5_kt_dfl_ops = {
 
 typedef krb5_int16  krb5_kt_vno;
 
-krb5_kt_vno krb5_kt_default_vno = KRB5_KT_DEFAULT_VNO;
+#define krb5_kt_default_vno ((krb5_kt_vno)KRB5_KT_DEFAULT_VNO)
 
 #define xfwrite(a, b, c, d) fwrite((char *)a, b, (unsigned) c, d)
 #define xfread(a, b, c, d) fread((char *)a, b, (unsigned) c, d)
