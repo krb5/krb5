@@ -20,10 +20,8 @@ OBJS=	addr_comp.o	\
 	copy_princ.o	\
 	copy_tick.o	\
 	decode_kdc.o	\
-	decode_tkt.o	\
 	decrypt_tk.o	\
 	encode_kdc.o	\
-	encode_tkt.o	\
 	encrypt_tk.o	\
 	f_tgt_cred.o	\
 	free_rtree.o	\
@@ -67,10 +65,8 @@ SRCS=	addr_comp.c	\
 	copy_princ.c	\
 	copy_tick.c	\
 	decode_kdc.c	\
-	decode_tkt.c	\
 	decrypt_tk.c	\
 	encode_kdc.c	\
-	encode_tkt.c	\
 	encrypt_tk.c	\
 	f_tgt_cred.c	\
 	free_rtree.c	\
