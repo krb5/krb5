@@ -1,3 +1,8 @@
+Fri Feb  3 06:21:02 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* gss-server.c: ret_flags should be an int based on the prototype
+		of gss_accept_sec_context.
+
 Wed Oct 19 12:32:41 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Obey CCOPTS in CFLAGS declaration

@@ -302,7 +302,8 @@ int server_establish_context(s, server_creds, context, client_name)
      gss_buffer_desc send_tok, recv_tok;
      gss_name_t client;
      gss_OID doid;
-     OM_uint32 maj_stat, min_stat, ret_flags;
+     OM_uint32 maj_stat, min_stat;
+     int ret_flags;
 
      *context = GSS_C_NO_CONTEXT;
      
