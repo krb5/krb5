@@ -1,3 +1,8 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * ktest.c, ktest_equal.c, ktest_equal.h : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
         * ktest.c, ktest.h, ktest_equal.c, ktest_equal.h : Remove krb5_enctype 

@@ -71,7 +71,7 @@ int ktest_equal_keyblock(ref, var)
 {
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
-  return(scalar_equal(keytype) && len_equal(length,contents,ktest_equal_array_of_octet));
+  return(scalar_equal(enctype) && len_equal(length,contents,ktest_equal_array_of_octet));
 }
 
 int ktest_equal_data(ref, var)
@@ -103,7 +103,7 @@ int ktest_equal_enc_data(ref, var)
   int p=TRUE;
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
-  p=p&&scalar_equal(keytype);
+  p=p&&scalar_equal(enctype);
   p=p&&scalar_equal(kvno);
   p=p&&struct_equal(ciphertext,ktest_equal_data);
   return p;
@@ -116,7 +116,7 @@ int ktest_equal_encryption_key(ref, var)
   int p=TRUE;
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
-  p = p && scalar_equal(keytype);
+  p = p && scalar_equal(enctype);
   p = p && len_equal(length,contents,ktest_equal_array_of_octet);
   return p;
 }
@@ -363,7 +363,7 @@ int ktest_equal_as_req(ref, var)
   p=p&&scalar_equal(till);
   p=p&&scalar_equal(rtime);
   p=p&&scalar_equal(nonce);
-  p=p&&len_equal(nktypes,ktype,ktest_equal_array_of_keytype);
+  p=p&&len_equal(nktypes,ktype,ktest_equal_array_of_enctype);
   p=p&&ptr_equal(addresses,ktest_equal_addresses);
   p=p&&struct_equal(authorization_data,ktest_equal_enc_data);
 /* This field isn't actually in the ASN.1 encoding. */
@@ -392,7 +392,7 @@ int ktest_equal_kdc_req_body(ref, var)
   p=p&&scalar_equal(till);
   p=p&&scalar_equal(rtime);
   p=p&&scalar_equal(nonce);
-  p=p&&len_equal(nktypes,ktype,ktest_equal_array_of_keytype);
+  p=p&&len_equal(nktypes,ktype,ktest_equal_array_of_enctype);
   p=p&&ptr_equal(addresses,ktest_equal_addresses);
   p=p&&struct_equal(authorization_data,ktest_equal_enc_data);
   /* This isn't part of the ASN.1 encoding. */
@@ -536,10 +536,10 @@ int ktest_equal_array_of_char(length, ref, var)
   return p;
 }
 
-int ktest_equal_array_of_keytype(length, ref, var)
+int ktest_equal_array_of_enctype(length, ref, var)
      const int length;
-     krb5_keytype * ref;
-     krb5_keytype * var;
+     krb5_enctype * ref;
+     krb5_enctype * var;
 {
   int i, p=TRUE;
 
