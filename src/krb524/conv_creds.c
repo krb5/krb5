@@ -151,10 +151,16 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
 
      /* V4 has no concept of authtime or renew_till, so ignore them */
      /* V4 lifetime is 1 byte, in 5 minute increments */
+#if TARGET_OS_MAC
+    /* krb4 long lifetime support --- how should this be done on Unix? */
+    v4creds->lifetime = krb_time_to_life (v5creds->times.starttime, 
+                                          v5creds->times.endtime);
+#else
      lifetime = 
 	  ((v5creds->times.endtime - v5creds->times.starttime) / 300);
      v4creds->lifetime =
 	  ((lifetime > 0xff) ? 0xff : lifetime);
+#endif
      v4creds->issue_date = v5creds->times.starttime;
 
 #if 0

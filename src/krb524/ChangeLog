@@ -1,3 +1,7 @@
+2002-05-16 Alexandra Ellwood <lxs@mit.edu>
+	conv_creds.c: call krb_time_to_life to get v4 lifetime on Mac OS
+	X.  This enables v4 long lifetime support.
+
 2002-05-05 Alexandra Ellwood <lxs@mit.edu>
     * krb524.h: Mac OS X needs krb524.h to include krb5.h because it 
     uses KRB5_PROTOTYPE, krb5_context, etc.  On Mac OS X this is a
