@@ -1,3 +1,8 @@
+2001-10-01  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Handle error
+	returns from krb5_rd_cred more sanely.
+
 2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
 
 	* gssapi_krb5.h: Unmark gss_mech_krb5 variable as an import.
