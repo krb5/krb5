@@ -16,13 +16,15 @@ On the PC side
         - or -
    pkunzip -d kerbsrc.zip
 
-4) nmake -c -f makefile.in             # Configures the makefiles and runs
+4) nmake -c                            # Configures the makefiles and runs
                                        # ...make in all the subdirectories.
-5) <make sure the config and realms files, krb.con and krb.rea, 
-    are in the windows directory.>
+5) <make sure the config and realms files, krb.con and krb.rea, are in 
+    the windows directory.>
 
 The resulting interesting files will be:
 lib/libkrb5.dll                        # The actual DLL
 lib/libkrb5.lib                        # The library for linking in the DLL
+lib/gssapi.dll                         # A 2nd DLL for the gssapi world
+lib/gssapi.lib                         # The library for linking in the DLL
 windows/cns/cns.exe                    # Cygnus Network Security program
 windows/wintel/telnet                  # K5 authenticated telnet program
