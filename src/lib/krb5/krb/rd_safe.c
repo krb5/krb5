@@ -104,8 +104,11 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
     }
 
     /* verify the checksum */
-    /* to do the checksum stuff, we need to re-encode the message with a
-       zero-length zero-type checksum, then checksum the encoding, and verify.
+    /*
+     * In order to recreate what was checksummed, we regenerate the message
+     * without checksum and then have the cryptographic subsystem verify
+     * the checksum for us.  This is because some checksum methods have
+     * a confounder encrypted as part of the checksum.
      */
     his_cksum = message->checksum;
 
@@ -120,28 +123,16 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 
     message->checksum = his_cksum;
 			 
-    if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(context, his_cksum->checksum_type)))) {
-	retval = ENOMEM;
-	goto cleanup;
-    }
-
-    retval = krb5_calculate_checksum(context, his_cksum->checksum_type,
-				     scratch->data, scratch->length,
-				     (krb5_pointer) keyblock->contents,
-				     keyblock->length, &our_cksum);
+    retval = krb5_verify_checksum(context, his_cksum->checksum_type,
+				  his_cksum, scratch->data, scratch->length,
+				  (krb5_pointer) keyblock->contents,
+				  keyblock->length);
     (void) memset((char *)scratch->data, 0, scratch->length);
     krb5_free_data(context, scratch);
     
     if (retval) {
-	goto cleanup_cksum;
-    }
-
-    if (our_cksum.length != his_cksum->length ||
-	memcmp((char *)our_cksum.contents, (char *)his_cksum->contents,
-	       our_cksum.length)) {
 	retval = KRB5KRB_AP_ERR_MODIFIED;
-	goto cleanup_cksum;
+	goto cleanup;
     }
 
     replaydata->timestamp = message->timestamp;
@@ -153,9 +144,6 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 
     krb5_free_checksum(context, his_cksum);
     return 0;
-
-cleanup_cksum:
-    krb5_xfree(our_cksum.contents);
 
 cleanup:
     krb5_free_safe(context, message);
