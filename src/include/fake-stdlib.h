@@ -321,7 +321,7 @@ int puts P((char *));
 
 #endif /* VAX */
 
-#if (defined(mips) && defined(ultrix)) || (defined(__mips__) && defined(__ultrix__))
+#if (defined(mips) && defined(ultrix)) || (defined(__mips__) && defined(__ultrix__)) || defined(__mips__) || defined(mips)
 
 /* massaged from /usr/lib/lint/llib-lc, via watchbin/mkproto */
 /* above functions removed, plus:
@@ -339,6 +339,8 @@ int puts P((char *));
    is*
    hsearch
    ftok
+   getmnt
+   sprintf
  */
 
 /* /usr/lib/lint/llib-lc */
@@ -376,7 +378,6 @@ int setdomainname P((char * , int ));
 int getgid P((void ));
 int getegid P((void ));
 #endif
-int getmnt P((int * , struct fs_data * , int  , int , char * ));
 #ifndef SYSTEM_FIVE
 int getpgrp P((int ));
 #endif
@@ -530,9 +531,6 @@ long fpathconf P((int , int ));
 int pause P((void ));
 void perror P((char * ));
 int printf P((char *, ...));
-#ifndef SYSTEM_FIVE
-char *sprintf P((char * , const char *, ... ));
-#endif
 int puts P((char * ));
 #ifndef SYSTEM_FIVE
 int qsort P((char * , int  , int , int (* )()));
@@ -721,7 +719,6 @@ struct passwd *getpwuid P((int  ));
 struct passwd *getpwnam P((char * ));
 void setpwent P((void ));
 void endpwent P((void ));
-int sprintf P((char * , char *, ... ));
 void qsort P((char * , unsigned  , unsigned  , int (* )()));
 #endif
 
