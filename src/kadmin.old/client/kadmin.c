@@ -39,6 +39,12 @@
 #include "krb5.h"
 #include "adm_defs.h"
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
+
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,
 		   krb5_ccache, 
@@ -588,7 +594,7 @@ adm5_init_link(context, realm_of_server, port, local_socket)
 	return retval;
     }
     /* connect to the server */
-    if (connect(*local_socket, &remote_sin, sizeof(remote_sin)) < 0) {
+    if (connect(*local_socket, (struct sockaddr *) &remote_sin, sizeof(remote_sin)) < 0) {
 	retval = errno;
 	fprintf(stderr, "Cannot Connect to Socket!\n");
 	close(*local_socket);

@@ -38,6 +38,12 @@
 #include <krb5.h>
 #include "adm_defs.h"
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
+
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif

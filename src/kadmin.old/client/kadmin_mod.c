@@ -32,6 +32,12 @@
 #include <krb5.h>
 #include "adm_defs.h"
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
+
 void decode_kadmind_reply();
 int print_status_message();
 
