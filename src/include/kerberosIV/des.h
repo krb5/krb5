@@ -136,7 +136,7 @@ KRB5_DLLIMP int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule);
 KRB5_DLLIMP int KRB5_CALLCONV
 des_pcbc_encrypt (C_Block FAR *in, C_Block FAR *out, long length,
 		  const des_key_schedule schedule, C_Block FAR *ivec,
-		  int encrypt);
+		  int enc);
 
 KRB5_DLLIMP unsigned long KRB5_CALLCONV
 des_quad_cksum (const unsigned char FAR *in, unsigned KRB4_32 FAR *out,
