@@ -1,3 +1,8 @@
+Fri Apr 21 15:24:57 1995  Chris Provenzano (proven@mit.edu)
+
+	* configure.in : Make configure look for pwd.h and define
+		HAVE_PWD_H if found.
+
 Tue Mar 28 17:55:37 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Remove, conflicts with pre.in.
