@@ -93,9 +93,6 @@ tested.
 %ADMIN_SERVICE is abbreviated A_S, and CHANGEPW_SERVICE is abbreviated
 %C_S.
 
-XXX needs to be updated to take into account new server behavior with
-respect to reading master key vs. getting it from stash.
-
 \numtest{1}{
 \Reason{An empty string realm is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, "")}
@@ -103,14 +100,18 @@ respect to reading master key vs. getting it from stash.
 }
 
 \numtest{2}{
-\Reason{A bad realm is rejected.}
+\Reason{A realm containing invalid characters is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, B.R)}
 \Expected{returns XXX}
 }
 
+\numtest{2.5}{
+\Reason{A non-existent realm is rejected.}
+}
+
 \numtest{3}{
 \Reason{A bad service name representing an existing principal
-		is rejected.}
+	(different from the client principal) is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, b, null)}
 \Expected{returns XXX}
 \Conditions{RPC}
@@ -133,7 +134,7 @@ respect to reading master key vs. getting it from stash.
 }
 
 \numtest{6}{
-\Reason{A null password is rejected.}
+\Reason{A null password causes password prompting.}
 \Call{ovsec_kadm_init(a, null, A_S, null)}
 \Expected{returns XXX}
 \Conditions{RPC}
@@ -192,7 +193,7 @@ respect to reading master key vs. getting it from stash.
 
 \numtest{14}{
 \Reason{A client_name referring to a non-existent principal in
-		a bad realm is rejected.}
+	a nonexistent realm is rejected.}
 \Call{ovsec_kadm_init(n@B.R, no-p, A_S, null)}
 \Expected{returns XXX}
 \Conditions{RPC}
@@ -200,7 +201,7 @@ respect to reading master key vs. getting it from stash.
 
 \numtest{15}{
 \Reason{A client_name referring to an existing principal in a
-		bad realm is rejected.}
+	nonexistent realm is rejected.}
 \Call{ovsec_kadm_init(a@B.R, a's-p, A_S, null)}
 \Expected{returns XXX}
 \Conditions{RPC}
@@ -251,7 +252,7 @@ respect to reading master key vs. getting it from stash.
 }
 
 \numtest{22}{
-\Reason{Null password is ignored in local invocation.}
+\Reason{A null password causes master-key prompting.}
 \Call{ovsec_kadm_init(a, null, A_S, null);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
@@ -259,7 +260,7 @@ respect to reading master key vs. getting it from stash.
 }
 
 \numtest{23}{
-\Reason{Non-null password is ignored in local invocation.}
+\Reason{A non-null password causes reading from the kstash.}
 \Call{ovsec_kadm_init(a, no-p, A_S, null);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
@@ -280,6 +281,22 @@ respect to reading master key vs. getting it from stash.
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
 \Conditions{local}
+}
+
+\numtest{26}{
+\Reason{Can't do ``get'' operation before calling init.}
+}
+
+\numtest{27}{
+\Reason{Can't do ``add'' operation before calling init.}
+}
+
+\numtest{28}{
+\Reason{Can't do ``modify'' operation before calling init.}
+}
+
+\numtest{29}{
+\Reason{Can't do ``delete'' operation before calling init.}
 }
 
 \section{ovsec_kadm_destroy}
