@@ -52,15 +52,15 @@
 #ifdef	USE_PTHREADS
 #define	net_slave_type	pthread_t *
 #ifndef	MAX_SLAVES
-#define	MAX_SLAVES	SOMAXCONN
+#define	MAX_SLAVES	2*SOMAXCONN
 #endif	/* MAX_SLAVES */
 #else	/* USE_PTHREADS */
 #define	net_slave_type	pid_t
 #ifndef	MAX_SLAVES
-#define	MAX_SLAVES	SOMAXCONN
+#define	MAX_SLAVES	2*SOMAXCONN
 #endif	/* MAX_SLAVES */
 #endif	/* USE_PTHREADS */
-#define	NET_SLAVE_FULL_SLEEP	15	/* seconds */
+#define	NET_SLAVE_FULL_SLEEP	2	/* seconds */
 
 /*
  * Slave information storage.
@@ -192,7 +192,11 @@ net_shutdown()
 	}
     }
     sleep(5);		/* to allow children to die and be reaped */
+#if	POSIX_SETJMP
+    siglongjmp(shutdown_jmp, 1);
+#else	/* POSIX_SETJMP */
     longjmp(shutdown_jmp, 1);
+#endif	/* POSIX_SETJMP */
     /* NOTREACHED */
 }
 
@@ -295,7 +299,7 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
 	   sizeof(struct sockaddr_in));
 
 #ifdef	DEBUG
-    if (net_debug_level < DEBUG_REQUESTS) {
+    if ((net_debug_level & DEBUG_NOSLAVES) == 0) {
 #endif	/* DEBUG */
 	/* Do a real slave creation */
 #if	USE_PTHREADS
@@ -338,13 +342,32 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
 	    goto done;
 	}
 	else {
+#if	POSIX_SIGNALS
+	    struct sigaction s_action;
+#endif	/* POSIX_SIGNALS */
+
 	    /* child */
+#if	POSIX_SIGNALS
+	    (void) sigemptyset(&s_action.sa_mask);
+	    s_action.sa_flags = 0;
+	    /* Ignore SIGINT, SIGTERM, SIGHUP, SIGQUIT and SIGPIPE */
+	    s_action.sa_handler = SIG_IGN;
+	    (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
+	    (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
+	    (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
+	    (void) sigaction(SIGQUIT, &s_action, (struct sigaction *) NULL);
+	    (void) sigaction(SIGPIPE, &s_action, (struct sigaction *) NULL);
+	    /* Restore to default SIGCHLD */
+	    s_action.sa_handler = SIG_DFL;
+	    (void) sigaction(SIGCHLD, &s_action, (struct sigaction *) NULL);
+#else	/* POSIX_SIGNALS */
 	    signal(SIGINT, SIG_IGN);	/* Ignore SIGINT */
 	    signal(SIGTERM, SIG_IGN);	/* Ignore SIGTERM */
 	    signal(SIGHUP, SIG_IGN);	/* Ignore SIGHUP */
 	    signal(SIGQUIT, SIG_IGN);	/* Ignore SIGQUIT */
 	    signal(SIGPIPE, SIG_IGN);	/* Ignore SIGPIPE */
 	    signal(SIGCHLD, SIG_DFL);	/* restore SIGCHLD handling */
+#endif	/* POSIX_SIGNALS */
 	    close(listen_sock);
 	    slent->sl_id = getpid();
 	    DPRINT(DEBUG_SPROC, net_debug_level,
@@ -363,7 +386,21 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
     }
     else {
 	net_slave_info *sl1;
+#if	POSIX_SIGNALS
+	struct sigaction s_action;
+#endif	/* POSIX_SIGNALS */
+
+	/*
+	 * Ignore SIGPIPE.
+	 */
+#if	POSIX_SIGNALS
+	(void) sigemptyset(&s_action.sa_mask);
+	s_action.sa_flags = 0;
+	s_action.sa_handler = SIG_IGN;
+	(void) sigaction(SIGPIPE, &s_action, (struct sigaction *) NULL);
+#else	/* POSIX_SIGNALS */
 	signal(SIGPIPE, SIG_IGN);	/* Ignore SIGPIPE */
+#endif	/* POSIX_SIGNALS */
 	DPRINT(DEBUG_SPROC, net_debug_level,
 	       ("| (%d) not doing child creation\n", getpid()));
 	slent->sl_id = (net_slave_type) getpid();
@@ -660,6 +697,9 @@ net_dispatch(kcontext)
     krb5_error_code	kret;
     fd_set		mask, readfds;
     int			nready;
+#if	POSIX_SIGNALS
+    struct sigaction	s_action;
+#endif	/* POSIX_SIGNALS */
 
     DPRINT(DEBUG_CALLS, net_debug_level, ("* net_dispatch()\n"));
 
@@ -669,6 +709,15 @@ net_dispatch(kcontext)
     FD_ZERO(&mask);
     FD_SET(net_listen_socket, &mask);
 
+#if	POSIX_SIGNALS
+    (void) sigemptyset(&s_action.sa_mask);
+    s_action.sa_flags = 0;
+    s_action.sa_handler = net_shutdown;
+    (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
+#ifdef	DEBUG
+    (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
+#endif	/* DEBUG */
+#else	/* POSIX_SIGNALS */
     /*
      * SIGTERM (or SIGINT, if debug) shuts us down.
      */
@@ -676,17 +725,29 @@ net_dispatch(kcontext)
 #ifdef	DEBUG
     signal(SIGINT, net_shutdown);
 #endif	/* DEBUG */
+#endif	/* POSIX_SIGNALS */
 
 #if	!USE_PTHREADS
+#if	POSIX_SIGNALS
+    s_action.sa_handler = net_reaper;
+    (void) sigaction(SIGCHLD, &s_action, (struct sigaction *) NULL);
+#else	/* POSIX_SIGNALS */
     /*
      * SIGCHILD indicates end of child process life.
      */
     signal(SIGCHLD, net_reaper);
+#endif	/* POSIX_SIGNALS */
 #endif	/* !USE_PTHREADS */
 
     /* Receive connections on the socket */
     DLOG(DEBUG_OPERATION, net_debug_level, "listening on socket");
-    if (setjmp(shutdown_jmp) == 0) {
+    if (
+#if	POSIX_SETJMP
+	sigsetjmp(shutdown_jmp, 1) == 0
+#else	/* POSIX_SETJMP */
+	setjmp(shutdown_jmp) == 0
+#endif	/* POSIX_SETJMP */
+	) {
 	if (listen(net_listen_socket, SOMAXCONN) < 0)
 	    kret = errno;
     }
@@ -698,7 +759,13 @@ net_dispatch(kcontext)
 	/*
 	 * Prepare to catch signals.
 	 */
-	if (setjmp(shutdown_jmp) == 0) {
+	if (
+#if	POSIX_SETJMP
+	    sigsetjmp(shutdown_jmp, 1) == 0
+#else	/* POSIX_SETJMP */
+	    setjmp(shutdown_jmp) == 0
+#endif	/* POSIX_SETJMP */
+	    ) {
 	    readfds = mask;
 	    DLOG(DEBUG_OPERATION, net_debug_level, "doing select");
 	    if ((nready = select(net_listen_socket+1,
