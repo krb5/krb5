@@ -36,7 +36,7 @@ typedef struct _krb5_address {
 
 /* implementation-specific stuff: */
 typedef struct _krb5_fulladdr {
-    krb5_address address;
+    krb5_address *address;
     unsigned long port;			/* port, for some address types.
 					   large enough for most protos? */
 } krb5_fulladdr;
