@@ -96,7 +96,7 @@ SRC_HDRS = ss.h
 SRC_HDRS_DEP = $(srcdir)/ss.h 
 
 includes:: $(SRC_HDRS_DEP) $(BUILD_HDRS)
-	mkdir -p $(HDRDIR)
+	if [ -d $(HDRDIR) ] ; then :; else mkdir -p $(HDRDIR); fi
 	for i in $(SRC_HDRS) ; do \
 		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
 		else \

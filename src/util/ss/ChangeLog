@@ -1,3 +1,8 @@
+Mon Apr  6 19:45:25 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (includes): Don't mkdir unless the directory doesn't
+ 	exist yet.
+
 Mon Mar 30 11:30:00 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ss_internal.h: Add ss_pager_create prototype.

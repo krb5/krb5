@@ -1,3 +1,8 @@
+Mon Apr  6 19:44:51 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (includes): Don't mkdir unless the directory doesn't
+ 	exist yet.
+
 Wed Feb 18 16:26:19 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
