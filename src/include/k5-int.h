@@ -102,6 +102,7 @@
 #define INI_KRB_CCACHE	"krb5cc"	/* Location of the ccache */
 #define INI_KRB5_CONF	"krb5.ini"	/* Location of krb5.conf file */
 #define HAVE_LABS
+#define ANSI_STDIO
 #endif
 
 
@@ -1473,6 +1474,11 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 		size_t,
 		krb5_octet FAR * FAR *,
 		size_t FAR *));
+
+
+krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
+	KRB5_PROTOTYPE((krb5_context, krb5_ccache, krb5_flags,
+			krb5_creds *, krb5_creds *));
 
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
