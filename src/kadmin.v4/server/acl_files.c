@@ -494,7 +494,7 @@ char *principal;
     /* It isn't there yet, copy the file and put it in */
     for(i = 0; i < acl_cache[idx].acl->size; i++) {
 	if(acl_cache[idx].acl->tbl[i] != NULL) {
-	    if(fputs(acl_cache[idx].acl->tbl[i], new) == NULL
+	    if(fputs(acl_cache[idx].acl->tbl[i], new) == EOF
 	       || putc('\n', new) != '\n') {
 		   acl_abort(acl, new);
 		   return(-1);
