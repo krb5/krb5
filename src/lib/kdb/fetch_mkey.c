@@ -115,7 +115,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 	    retval = KRB5_KDB_CANTREAD_STORED;
 	    goto errout;
 	}
-	if (key->enctype == NULL)
+	if (key->enctype == ENCTYPE_UNKNOWN)
 	    key->enctype = enctype;
 	else if (enctype != key->enctype) {
 	    retval = KRB5_KDB_BADSTORED_MKEY;
