@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * This is the get_entry routine for the file based keytab implementation.
  * It opens the keytab file, and either retrieves the entry or returns

@@ -6,7 +6,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * This header file contains information needed by internal routines
  * of the file-based ticket cache implementation.

@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * This routine is designed to be passed to krb5_rd_req.  
  * It is a convenience function that reads a key out of a keytab.
