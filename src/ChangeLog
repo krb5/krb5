@@ -1,3 +1,7 @@
+2002-11-15  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove some missed references to adm_err.et.
+
 2002-11-13  Ezra Peisach  <epeisach@bu.edu>
 
 	* aclocal.m4 (CONFIG_RULES): Define AUTOCONFINCFLAGS as --include

@@ -469,10 +469,10 @@ $(INC)krb5_err.h: $(AH) $(ET)krb5_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)krb5_err.et
 $(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)kv5m_err.et
-$(INC)adm_err.h: $(AH) $(ET)adm_err.et
-	$(AWK) -f $(AH) outfile=$@ $(ET)adm_err.et
 $(INC)/kerberosIV/krb_err.h: $(AH) lib/krb4/krb_err.et
 	$(AWK) -f $(AH) outfile=$@ lib/krb4/krb_err.et
+$(INC)/kerberosIV/kadm_err.h: $(AH) lib/krb4/kadm_err.et
+	$(AWK) -f $(AH) outfile=$@ lib/krb4/kadm_err.et
 $(PR)prof_err.h: $(AH) $(PR)prof_err.et
 	$(AWK) -f $(AH) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
@@ -488,10 +488,10 @@ $(ET)krb5_err.c: $(AC) $(ET)krb5_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)krb5_err.et
 $(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)kv5m_err.et
-$(ET)adm_err.c: $(AC) $(ET)adm_err.et
-	$(AWK) -f $(AC) outfile=$@ $(ET)adm_err.et
 lib/krb4/krb_err.c: $(AC) lib/krb4/krb_err.et
 	$(AWK) -f $(AC) outfile=$@ lib/krb4/krb_err.et
+lib/krb4/kadm_err.c: $(AC) lib/krb4/kadm_err.et
+	$(AWK) -f $(AC) outfile=$@ lib/krb4/kadm_err.et
 $(PR)prof_err.c: $(AC) $(PR)prof_err.et
 	$(AWK) -f $(AC) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
