@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/locate_kdc.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -50,9 +50,6 @@
 #endif
 
 #define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
-#ifndef KPASSWD_PORTNAME
-#define KPASSWD_PORTNAME "kpasswd"
-#endif
 
 #if KRB5_DNS_LOOKUP_KDC
 #define DEFAULT_LOOKUP_KDC 1
@@ -107,32 +104,286 @@ _krb5_use_dns_realm(context)
 
 #endif /* KRB5_DNS_LOOKUP */
 
+static int get_port (const char *service, int stream, int defalt)
+{
+#ifdef HAVE_GETADDRINFO
+    struct addrinfo hints = { 0 };
+    struct addrinfo *ai;
+    int err;
+
+    hints.ai_family = PF_INET;
+    hints.ai_socktype = stream ? SOCK_STREAM : SOCK_DGRAM;
+    err = getaddrinfo (NULL, service, &hints, &ai);
+    if (err == 0 && ai != 0) {
+	if (ai->ai_addr->sa_family == AF_INET) {
+	    int port = ((struct sockaddr_in *)ai->ai_addr)->sin_port;
+	    freeaddrinfo (ai);
+	    return port;
+	}
+	freeaddrinfo (ai);
+    }
+    /* Any error - don't complain, just use default.  */
+    return htons (defalt);
+#else
+    struct servent *sp;
+    sp = getservbyname (service, stream ? "tcp" : "udp"); /* NOT THREAD SAFE */
+    if (sp)
+	return sp->s_port;
+    return htons (defalt);
+#endif
+}
+
+struct addrlist {
+    struct sockaddr **addrs;
+    int naddrs;
+    int space;
+};
+#define ADDRLIST_INIT { 0, 0, 0 }
+
+static int
+grow_list (struct addrlist *lp, int nmore)
+{
+    int i;
+    int newspace = lp->space + nmore;
+    size_t newsize = newspace * sizeof (struct addrlist);
+    struct sockaddr **newaddrs;
+
+    newaddrs = realloc (lp->addrs, newsize);
+
+    if (newaddrs == NULL)
+	return errno;
+    for (i = lp->space; i < newspace; i++)
+	newaddrs[i] = NULL;
+    lp->addrs = newaddrs;
+    lp->space = newspace;
+    return 0;
+}
+
+static void
+free_list (struct addrlist *lp)
+{
+    int i;
+    for (i = 0; i < lp->naddrs; i++)
+	free (lp->addrs[i]);
+    free (lp->addrs);
+    lp->addrs = NULL;
+    lp->naddrs = lp->space = 0;
+}
+
+static int
+add_sockaddr_to_list (struct addrlist *lp, const struct sockaddr *addr,
+		      size_t len)
+{
+    struct sockaddr *copy;
+
+#ifdef TEST
+    fprintf (stderr, "\tadding sockaddr family %2d", addr->sa_family);
+    if (addr->sa_family == AF_INET)
+	fprintf (stderr, "\t%s",
+		 inet_ntoa (((const struct sockaddr_in *)addr)->sin_addr));
+    fprintf (stderr, "\n");
+#endif
+
+    if (lp->naddrs == lp->space) {
+	int err = grow_list (lp, 1);
+	if (err)
+	    return err;
+    }
+    copy = malloc (len);
+    if (copy == NULL)
+	return errno;
+    memcpy (copy, addr, len);
+    lp->addrs[lp->naddrs++] = copy;
+    return 0;
+}
+
+#ifdef HAVE_GETADDRINFO
+static int translate_ai_error (int err)
+{
+    switch (err) {
+    case 0:
+	return 0;
+    case EAI_ADDRFAMILY:
+    case EAI_BADFLAGS:
+    case EAI_FAMILY:
+    case EAI_SOCKTYPE:
+    case EAI_SERVICE:
+	/* All of these indicate bad inputs to getaddrinfo.  */
+	return EINVAL;
+    case EAI_AGAIN:
+	/* Translate to standard errno code.  */
+	return EAGAIN;
+    case EAI_MEMORY:
+	/* Translate to standard errno code.  */
+	return ENOMEM;
+    case EAI_NODATA:
+    case EAI_NONAME:
+	/* Name not known or no address data, but no error.  Do
+	   nothing more.  */
+	return 0;
+    case EAI_SYSTEM:
+	/* System error, duh.  */
+	return errno;
+    default:
+	/* An error code we haven't handled?  */
+	return EINVAL;
+    }
+}
+
+static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
+{
+    return add_sockaddr_to_list (lp, a->ai_addr, a->ai_addrlen);
+}
+
+static void set_port_num (struct sockaddr *addr, int num)
+{
+    switch (addr->sa_family) {
+    case AF_INET:
+	((struct sockaddr_in *)addr)->sin_port = num;
+	break;
+    case AF_INET6:
+	((struct sockaddr_in6 *)addr)->sin6_port = num;
+	break;
+    }
+}
+#endif
+
+/* There's also gethostbyname_r, which is IPv4-only but thread-safe;
+   it wants the caller to supply scratch space and a hostent
+   structure.  Let's go for IPv6 support before thread safety, though;
+   it's easier to accomplish, and will probably be finished first
+   anyways.  */
+#if !defined (HAVE_GETADDRINFO) && !defined (HAVE_GETIPNODEBYNAME)
+#undef getipnodebyname
+#define freehostent(X) ((void)(X))
+#ifdef HAVE_GETHOSTBYNAME2
+#define getipnodebyname(NAME,AF,FLAGS,ERRP) (gethostbyname2(NAME,AF))
+#else
+#define getipnodebyname(NAME,AF,FLAGS,ERRP) ((AF)==AF_INET?gethostbyname(NAME):(struct hostent *)0)
+#endif
+#endif
+
+static int
+add_host_to_list (struct addrlist *lp, const char *hostname,
+		  int port, int secport)
+{
+#ifdef HAVE_GETADDRINFO
+    int err;
+    struct addrinfo *addrs, *a;
+
+#ifdef TEST
+    fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname,
+	     ntohs (port), ntohs (secport));
+#endif
+
+    err = getaddrinfo (hostname, NULL, NULL, &addrs);
+    if (err)
+	return translate_ai_error (err);
+    for (a = addrs; a; a = a->ai_next) {
+	set_port_num (a->ai_addr, port);
+	err = add_addrinfo_to_list (lp, a);
+	if (err)
+	    break;
+
+	if (secport == 0)
+	    continue;
+
+	set_port_num (a->ai_addr, secport);
+	err = add_addrinfo_to_list (lp, a);
+	if (err)
+	    break;
+    }
+    freeaddrinfo (addrs);
+    return err;
+#else
+    int err;
+    struct hostent *hp;
+    int i;
+
+#ifdef TEST
+    fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname, port, secport);
+#endif
+
+    hp = getipnodebyname (hostname, AF_INET, 0, &err);
+    if (hp != NULL) {
+	for (i = 0; hp->h_addr_list[i] != 0; i++) {
+	    struct sockaddr_in sin4;
+
+	    memset (&sin4, 0, sizeof (sin4));
+	    memcpy (&sin4.sin_addr, hp->h_addr_list[i],
+		    sizeof (sin4.sin_addr));
+	    sin4.sin_family = AF_INET;
+	    sin4.sin_port = port;
+	    err = add_sockaddr_to_list (lp, (struct sockaddr *) &sin4,
+					sizeof (sin4));
+	    if (err)
+		break;
+	    if (secport != 0) {
+		sin4.sin_port = secport;
+		err = add_sockaddr_to_list (lp, (struct sockaddr *) &sin4,
+					    sizeof (sin4));
+	    }
+
+	    if (err)
+		break;
+	}
+	freehostent (hp);
+    }
+#if defined (KRB5_USE_INET6)
+    hp = getipnodebyname (hostname, AF_INET6, 0, &err); /* NOT THREAD SAFE */
+    if (hp != NULL) {
+	for (i = 0; hp->h_addr_list[i] != 0; i++) {
+	    struct sockaddr_in6 sin6;
+
+	    memset (&sin6, 0, sizeof (sin6));
+	    memcpy (&sin6.sin6_addr, hp->h_addr_list[i],
+		    sizeof (sin6.sin6_addr));
+	    sin6.sin6_family = AF_INET6;
+	    sin6.sin6_port = port;
+	    err = add_sockaddr_to_list (lp, (struct sockaddr *) &sin6,
+					sizeof (sin6));
+	    if (err)
+		break;
+	    if (secport != 0) {
+		sin6.sin6_port = secport;
+		err = add_sockaddr_to_list (lp, (struct sockaddr *) &sin6,
+					    sizeof (sin6));
+		if (err)
+		    break;
+	    }
+	}
+	freehostent (hp);
+    }
+#endif
+    return 0;
+#endif
+}
+
 /*
  * returns count of number of addresses found
  * if master is non-NULL, it is filled in with the index of
  * the master kdc
  */
 
-krb5_error_code
-krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
+static krb5_error_code
+krb5_locate_srv_conf_1(context, realm, name, addrlist, get_masters,
+		       udpport, sec_udpport)
     krb5_context context;
     const krb5_data *realm;
     const char * name;
-    struct sockaddr **addr_pp;
-    int *naddrs;
+    struct addrlist *addrlist;
     int get_masters;
+    int udpport, sec_udpport;
 {
     const char	*realm_srv_names[4];
     char **masterlist, **hostlist, *host, *port, *cp;
     krb5_error_code code;
-    int i, j, out, count, ismaster;
-    struct sockaddr *addr_p;
-    struct sockaddr_in *sin_p;
-    struct hostent *hp;
-    struct servent *sp;
-#ifdef HAVE_NETINET_IN_H
-    u_short udpport;
-    u_short sec_udpport;
+    int i, j, count, ismaster;
+
+#ifdef TEST
+    fprintf (stderr,
+	     "looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
+	     realm->data, name, ntohs (udpport), ntohs (sec_udpport));
 #endif
 
     if ((host = malloc(realm->length + 1)) == NULL) 
@@ -158,27 +409,6 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
   	return code;
      }
 
-#ifdef HAVE_NETINET_IN_H
-    if ( !strcmp(name,"kpasswd_server") ) {
-        if ((sp = getservbyname(KPASSWD_PORTNAME, "udp")))
-            udpport = sp->s_port;
-        else
-            udpport = htons(DEFAULT_KPASSWD_PORT);
-        sec_udpport = 0;
-    } else {
-    if ((sp = getservbyname(KDC_PORTNAME, "udp")))
-	udpport = sp->s_port;
-        else 
-            udpport = htons(KRB5_DEFAULT_PORT);
-    if ((sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp")))
-	sec_udpport = sp->s_port;
-        else
-            sec_udpport = htons(KRB5_DEFAULT_SEC_PORT);
-    }
-#endif
-    if (sec_udpport == udpport)
-	sec_udpport = 0;
-
     count = 0;
     while (hostlist && hostlist[count])
 	    count++;
@@ -186,7 +416,7 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
     if (count == 0) {
         profile_free_list(hostlist);
 	krb5_xfree(host);
-	*naddrs = 0;
+	addrlist->naddrs = 0;
 	return 0;
     }
     
@@ -232,16 +462,9 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
 	    count = count * 2;
 #endif
 
-    addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
-    if (addr_p == NULL) {
-        if (hostlist)
-            profile_free_list(hostlist);
-        if (masterlist)
-            profile_free_list(masterlist);
-	return ENOMEM;
-    }
+    for (i=0; hostlist[i]; i++) {
+	int p1, p2;
 
-    for (i=0, out=0; hostlist[i]; i++) {
 	host = hostlist[i];
 	/*
 	 * Strip off excess whitespace
@@ -258,10 +481,6 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
 	    port++;
 	}
 
-	if ((hp = gethostbyname(hostlist[i])) == 0) {
-	    continue;
-	}
-
 	ismaster = 0;
 	if (masterlist) {
 	    for (j=0; masterlist[j]; j++) {
@@ -271,44 +490,37 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
 	    }
 	}
 
-        if ( !get_masters || ismaster ) {
-            switch (hp->h_addrtype) {
+	if (get_masters && !ismaster)
+	    continue;
 
-#ifdef HAVE_NETINET_IN_H
-            case AF_INET:
-                for (j=0; hp->h_addr_list[j]; j++) {
-                    sin_p = (struct sockaddr_in *) &addr_p[out++];
-                    memset ((char *)sin_p, 0, sizeof(struct sockaddr));
-                    sin_p->sin_family = hp->h_addrtype;
-                    sin_p->sin_port = port ? htons(atoi(port)) : udpport;
-                    memcpy((char *)&sin_p->sin_addr,
-                            (char *)hp->h_addr_list[j],
-                            sizeof(struct in_addr));
-                    if (out+1 >= count) {
-                        count += 5;
-                        addr_p = (struct sockaddr *)
-                            realloc ((char *)addr_p,
-                                      sizeof(struct sockaddr) * count);
-                        if (addr_p == NULL) {
-                            if ( hostlist )
-                                profile_free_list(hostlist);
-                            if ( masterlist )
-                                profile_free_list(masterlist);
-                            return ENOMEM;
-                        }
-                    }
-                    if (sec_udpport && !port) {
-                        addr_p[out] = addr_p[out-1];
-                        sin_p = (struct sockaddr_in *) &addr_p[out++];
-                        sin_p->sin_port = sec_udpport;
-                    }
-                }
-                break;
+	if (port) {
+	    unsigned long l;
+#ifdef HAVE_STROUL
+	    char *endptr;
+	    l = strtoul (port, &endptr, 10);
+	    if (endptr == NULL || *endptr != 0)
+		return EINVAL;
+#else
+	    l = atoi (port);
 #endif
-            default:
-                break;
-            }
-        }
+	    /* L is unsigned, don't need to check <0.  */
+	    if (l > 65535)
+		return EINVAL;
+	    p1 = htons (l);
+	    p2 = 0;
+	} else {
+	    p1 = udpport;
+	    p2 = sec_udpport;
+	}
+
+	code = add_host_to_list (addrlist, hostlist[i], p1, p2);
+	if (code) {
+	    if (hostlist)
+		profile_free_list (hostlist);
+	    if (masterlist)
+		profile_free_list (masterlist);
+	    return code;
+	}
     }
 
     if (hostlist)
@@ -316,15 +528,36 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
     if (masterlist)
         profile_free_list(masterlist);
 
-    if (out == 0) {     /* Couldn't resolve any KDC names */
-        free (addr_p);
-        return KRB5_REALM_CANT_RESOLVE;
-    }
-
-    *addr_pp = addr_p;
-    *naddrs = out;
     return 0;
 }
+
+static krb5_error_code
+krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters,
+		     udpport, sec_udpport)
+    krb5_context context;
+    const krb5_data *realm;
+    const char * name;
+    struct sockaddr ***addr_pp;
+    int *naddrs;
+    int get_masters;
+    int udpport, sec_udpport;
+{
+    krb5_error_code ret;
+    struct addrlist al = ADDRLIST_INIT;
+
+    ret = krb5_locate_srv_conf_1 (context, realm, name, &al,
+				  get_masters, udpport, sec_udpport);
+    if (ret) {
+	free_list (&al);
+	return ret;
+    }
+    if (al.naddrs == 0)		/* Couldn't resolve any KDC names */
+	return KRB5_REALM_CANT_RESOLVE;
+    *addr_pp = al.addrs;
+    *naddrs = al.naddrs;
+    return 0;
+}
+
 
 #ifdef KRB5_DNS_LOOKUP
 
@@ -332,24 +565,19 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
  * Lookup a KDC via DNS SRV records
  */
 
-krb5_error_code
-krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
+static krb5_error_code
+krb5_locate_srv_dns_1 (realm, service, protocol, addrlist)
     const krb5_data *realm;
     const char *service;
     const char *protocol;
-    struct sockaddr **addr_pp;
-    int *naddrs;
+    struct addrlist *addrlist;
 {
-    int out, j, count;
     union {
         unsigned char bytes[2048];
         HEADER hdr;
     } answer;
     unsigned char *p=NULL;
     char host[MAX_DNS_NAMELEN], *h;
-    struct sockaddr *addr = NULL;
-    struct sockaddr_in *sin_p = NULL;
-    struct hostent *hp = NULL;
     int type, class;
     int priority, weight, size, len, numanswers, numqueries, rdlen;
     unsigned short port;
@@ -364,13 +592,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
 
     struct srv_dns_entry *head = NULL;
     struct srv_dns_entry *srv = NULL, *entry = NULL;
-
-    out = 0;
-    addr = (struct sockaddr *) malloc(sizeof(struct sockaddr));
-    if (addr == NULL)
-	return ENOMEM;
-
-    count = 1;
+    krb5_error_code code = 0;
 
     /*
      * First off, build a query of the form:
@@ -390,18 +612,21 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
 	    realm->data);
 
     /* Realm names don't (normally) end with ".", but if the query
-    doesn't end with "." and doesn't get an answer as is, the
-    resolv code will try appending the local domain.  Since the
-    realm names are absolutes, let's stop that.  
+       doesn't end with "." and doesn't get an answer as is, the
+       resolv code will try appending the local domain.  Since the
+       realm names are absolutes, let's stop that.  
 
-    But only if a name has been specified.  If we are performing
-    a search on the prefix alone then the intention is to allow
-    the local domain or domain search lists to be expanded.
-    */
+       But only if a name has been specified.  If we are performing
+       a search on the prefix alone then the intention is to allow
+       the local domain or domain search lists to be expanded.  */
 
     h = host + strlen (host);
     if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
         strcpy (h, ".");
+
+#ifdef TEST
+    fprintf (stderr, "sending DNS SRV query for %s\n", host);
+#endif
 
     size = res_search(host, C_IN, T_SRV, answer.bytes, sizeof(answer.bytes));
 
@@ -546,36 +771,20 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     if (head == NULL)
 	goto out;
 
+#ifdef TEST
+    fprintf (stderr, "walking answer list:\n");
+#endif
     for (entry = head; entry != NULL; entry = entry->next) {
-	hp = gethostbyname(entry->host);
-	if (hp != 0) {
-	    switch (hp->h_addrtype) {
-#ifdef HAVE_NETINET_IN_H
-            case AF_INET:
-		for (j=0; hp->h_addr_list[j]; j++) {
-		    sin_p = (struct sockaddr_in *) &addr[out++];
-		    memset ((char *) sin_p, 0, sizeof (struct sockaddr));
-		    sin_p->sin_family = hp->h_addrtype;
-		    sin_p->sin_port = htons(entry->port);
-		    memcpy((char *) &sin_p->sin_addr,
-			   (char *) hp->h_addr_list[j],
-			   sizeof(struct in_addr));
-		    if (out + 1 >= count) {
-			count += 5;
-			addr = (struct sockaddr *)
-				realloc((char *) addr,
-					sizeof(struct sockaddr) * count);
-			if (!addr)
-			    goto out;
-		    }
-		}
-		break;
-#endif /* HAVE_NETINET_IN_H */
-	    default:
-		break;
-	    }
-	}
+#ifdef TEST
+	fprintf (stderr, "\tport=%d host=%s\n", entry->port, entry->host);
+#endif
+	code = add_host_to_list (addrlist, entry->host, htons (entry->port), 0);
+	if (code)
+	    break;
     }
+#ifdef TEST
+    fprintf (stderr, "[end]\n");
+#endif
 
     for (entry = head; entry != NULL; ) {
 	free(entry->host);
@@ -590,15 +799,22 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     if (srv)
         free(srv);
 
-    if (out == 0) {	/* No good servers */
-        if (addr)
-            free(addr);
-	return KRB5_REALM_CANT_RESOLVE;
-    }
+    return code;
+}
 
-    *addr_pp = addr;
-    *naddrs = out;
-    return 0;
+static krb5_error_code
+krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
+    const krb5_data *realm;
+    const char *service;
+    const char *protocol;
+    struct sockaddr ***addr_pp;
+    int *naddrs;
+{
+    struct addrlist al = ADDRLIST_INIT;
+    krb5_error_code code;
+
+    code = krb5_locate_srv_dns_1 (realm, service, protocol, &al);
+    return code;
 }
 #endif /* KRB5_DNS_LOOKUP */
 
@@ -607,56 +823,63 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
  */
 
 krb5_error_code
-krb5_locate_kdc(context, realm, addr_pp, naddrs, get_masters)
-    krb5_context context;
-    const krb5_data *realm;
-    struct sockaddr **addr_pp;
-    int *naddrs;
-    int get_masters;
+krb5int_locate_server (krb5_context context, const krb5_data *realm,
+		       struct sockaddr ***addr_pp, int *naddrs,
+		       int get_masters,
+		       const char *profname, const char *dnsname,
+		       int is_stream,
+		       /* network order port numbers! */
+		       int dflport1, int dflport2)
 {
     krb5_error_code code;
+    struct addrlist al = ADDRLIST_INIT;
 
     /*
      * We always try the local file first
      */
 
-    code = krb5_locate_srv_conf(context, realm, "kdc", addr_pp, naddrs,
-                                 get_masters);
+    code = krb5_locate_srv_conf(context, realm, profname, &al, get_masters);
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-        int use_dns = _krb5_use_dns_kdc(context);
-        if ( use_dns ) {
-            code = krb5_locate_srv_dns(realm, 
-                                        get_masters ? "_kerberos-master" : "_kerberos",
-                                        "_udp", addr_pp, naddrs);
-        }
+	int use_dns = _krb5_use_dns_kdc(context);
+	if (use_dns)
+	    code = krb5_locate_srv_dns(realm, dnsname,
+				       is_stream ? "_tcp" : "_udp", &al);
     }
 #endif /* KRB5_DNS_LOOKUP */
-    return (code);
+    if (al.naddrs == 0) {	/* No good servers */
+	return KRB5_REALM_CANT_RESOLVE;
+    }
+    if (code == 0) {
+	*addr_pp = al.addrs;
+	*naddrs = al.naddrs;
+    }
+    return code;
 }
-
-#if 0 /* Why is this useful?  It's not used now, and it's certainly
-	 not useful if you don't have the DNS code enabled.  -KR  */
-
-/*
- * It turns out that it is really useful to be able to use these functions
- * for other things (like admin servers), so create an abstract function
- * for this
- */
 
 krb5_error_code
-krb5_locate_server(realm, name, proto, addr_pp, naddrs)
+krb5_locate_kdc(context, realm, addr_pp, naddrs, get_masters)
+    krb5_context context;
     const krb5_data *realm;
-    const char *name, *proto;
-    struct sockaddr **addr_pp;
+    struct sockaddr ***addr_pp;
     int *naddrs;
+    int get_masters;
 {
-    krb5_error_code code = KRB5_REALM_UNKNOWN;
-#ifdef KRB5_DNS_LOOKUP
-    code = krb5_locate_srv_dns(realm, name, proto,
-                                (struct sockaddr **) addr_pp, naddrs);
-#endif /* KRB5_DNS_LOOKUP */
-    return (code);
+    int udpport, sec_udpport;
+
+    udpport = get_port (KDC_PORTNAME, 0, KRB5_DEFAULT_PORT);
+    sec_udpport = get_port (KDC_SECONDARY_PORTNAME, 0,
+			    (udpport == htons (KRB5_DEFAULT_PORT)
+			     ? KRB5_DEFAULT_SEC_PORT
+			     : KRB5_DEFAULT_PORT));
+    if (sec_udpport == udpport)
+	sec_udpport = 0;
+
+    return krb5int_locate_server (context, realm, addr_pp, naddrs, get_masters,
+				  "kdc",
+				  (get_masters
+				   ? "_kerberos-master"
+				   : "_kerberos"),
+				  0, udpport, sec_udpport);
 }
-#endif

@@ -300,6 +300,9 @@ foreach_localaddr (/*@null@*/ void *data,
     int ifconfsize = -1;
 #endif
     int retval = 0;
+#ifdef SIOCGIFNUM
+    int numifs = -1;
+#endif
 
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
@@ -315,6 +318,10 @@ foreach_localaddr (/*@null@*/ void *data,
 	current_buf_size = ifconfsize;
 	est_if_count = ifconfsize / est_ifreq_size;
     }
+#elif defined (SIOCGIFNUM)
+    code = ioctl (s, SIOCGIFNUM, &numifs);
+    if (!code && numifs > 0)
+	est_if_count = numifs;
 #endif
     if (current_buf_size == 0)
 	current_buf_size = est_ifreq_size * est_if_count;
@@ -341,6 +348,8 @@ foreach_localaddr (/*@null@*/ void *data,
     if (current_buf_size - size < sizeof (struct ifreq) + 40
 #ifdef SIOCGSIZIFCONF
 	&& ifconfsize <= 0
+#elif defined (SIOCGIFNUM)
+	&& numifs <= 0
 #endif
 	) {
 	size_t new_size;
@@ -468,7 +477,9 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
 	printf ("addr %s\n", hostbuf);
     return 0;
 #else
+#ifdef AF_INET6
     char buf[50];
+#endif
     printf ("family %2d ", sa->sa_family);
     switch (sa->sa_family) {
     case AF_INET:

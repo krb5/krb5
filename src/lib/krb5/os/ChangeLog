@@ -2,6 +2,10 @@
 
 	* localaddr.c (socklen_t, socklen): Deleted; definitions now in
 	k5-int.h instead.
+	(foreach_localaddr): Use SIOCGIFNUM if it's available and
+	SIOCGSIZIFCONF is not (e.g., Solaris 7 and 8).
+	(print_addr) [!HAVE_GETNAMEINFO]: Only declare variable buf if
+	AF_INET6 is defined.
 
 2001-03-31  Ken Raeburn  <raeburn@mit.edu>
 
