@@ -1,3 +1,9 @@
+Fri Sep 29 02:02:35 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h: For MS-DOS, use the brute force method of defining the
+		size of variables; we should really get an autoconf file
+		for MS-DOS.
+
 Mon Sep 28 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 	
 	* gssapi_generic.h: Modified to use build in compiler symbols rather

@@ -26,7 +26,14 @@
 /*
  * Determine platform-dependent configuration.
  */
-#ifdef	USE_AUTOCONF_H
+#ifdef _MSDOS
+/* XXX brute force */
+#define GSS_SIZEOF_INT      2
+#define GSS_SIZEOF_SHORT    2
+#define GSS_SIZEOF_LONG     4
+#else /* _MSDOS_ */
+
+#if defined(USE_AUTOCONF_H)
 /*
  * Use autoconf generated header.
  */
@@ -35,23 +42,18 @@
 #define	GSS_SIZEOF_LONG		SIZEOF_LONG
 #define	GSS_SIZEOF_SHORT	SIZEOF_SHORT
 #else	/* USE_AUTOCONF_H */
+    
 /*
  * Do it brute force.
  */
-#ifdef _MSDOS
-#define GSS_SIZEOF_INT      2
-#define GSS_SIZEOF_SHORT    2
-#define GSS_SIZEOF_LONG     4
-/* #define	HAVE_STDDEF_H	1 */
-/* #define	HAVE_XOM_H	1 */
-#else	/* _MSDOS */
 #define GSS_SIZEOF_INT 4
 #define GSS_SIZEOF_LONG 4
 #define GSS_SIZEOF_SHORT 2
 /* #define	HAVE_STDDEF_H	1 */
 /* #define	HAVE_XOM_H	1 */
-#endif	/* _MSDOS */
+
 #endif	/* USE_AUTOCONF_H */
+#endif /* _MSDOS */
 
 /*
  * Define INTERFACE, INTERFACE_C and FAR.
