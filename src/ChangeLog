@@ -1,3 +1,10 @@
+2004-09-14  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_LIBRARY_NET): Require the BIND_8_COMPAT check
+	prior to looking for prototypes, as BIND 9 (at least on Panther)
+	turns off some prototypes and typedefs if BIND_8_COMPAT is
+	defined.
+
 2004-09-13  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Fix check for resolv.h; some platforms have
