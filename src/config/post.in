@@ -3,6 +3,8 @@
 #
 all::
 
+check::
+
 clean::
 	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
 

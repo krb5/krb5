@@ -1,5 +1,8 @@
 Thu Oct  6 19:41:52 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* post.in: add default "check" rule for Makefiles that don't do
+		anything else.
+
 	* pre.in: add default all:: rule at the end of pre.in
 
 Thu Aug  4 03:52:23 1994  Tom Yu  (tlyu@dragons-lair)
