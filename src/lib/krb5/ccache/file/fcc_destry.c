@@ -84,14 +84,14 @@ krb5_fcc_destroy(context, id)
         size -= i;                              /* We've read this much */
     }
 
+    if (OPENCLOSE(id)) {
+        (void) close(((krb5_fcc_data *)id->data)->fd);
+        ((krb5_fcc_data *) id->data)->fd = -1;
+    }
+
     ret = unlink(((krb5_fcc_data *) id->data)->filename);
     if (ret < 0) {
         kret = krb5_fcc_interpret(context, errno);
-        if (OPENCLOSE(id)) {
-            (void) close(((krb5_fcc_data *)id->data)->fd);
-            ((krb5_fcc_data *) id->data)->fd = -1;
-            kret = ret;
-        }
         goto cleanup;
     }
 

@@ -1,3 +1,9 @@
+Sat Feb 24 19:16:23 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* fcc_destry.c (krb5_fcc_destroy): For MS-DOS filesystems, you
+		must close the file before unlinking it, otherwise the
+		unlink() will fail.
+
 Thu Feb 15 14:55:56 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* fcc_skip.c (krb5_fcc_skip_header): If version is not FVNO_4, do not
