@@ -1,3 +1,12 @@
+2000-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* kfree.c: Remove unneeded "return" statements at the end of many
+	functions.
+	(krb5_free_*_content, krb5_free_*_contents,
+	krb5_free_cred_enc_part, krb5_free_pwd_sequences): Set freed
+	pointer members to null when containing structure isn't being
+	freed.
+
 2000-05-16  Tom Yu  <tlyu@mit.edu>
 
 	* conv_princ.c (krb5_524_conv_principal): Make a copy of the krb5
