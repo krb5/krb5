@@ -444,7 +444,7 @@ dump_k5beta_iterator(ptr, entry)
 		"\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t",
 		(krb5_int32) pkey->key_data_kvno,
 		entry->max_life, entry->max_renewable_life,
-		entry->mkvno, entry->expiration, entry->pw_expiration,
+		1 /* Fake mkvno */, entry->expiration, entry->pw_expiration,
 		last_pwd_change, entry->last_success, entry->last_failed,
 		entry->fail_auth_count, mod_name, mod_date,
 		entry->attributes, pkey->key_data_type[1]);
@@ -533,7 +533,7 @@ dump_standard_iterator(ptr, entry)
 	 * The dump format is as follows:
 	 *	len strlen(name) n_tl_data n_key_data e_length
 	 *	name
-	 *	mkvno attributes max_life max_renewable_life expiration
+	 *	attributes max_life max_renewable_life expiration
 	 *	pw_expiration last_success last_failed fail_auth_count
 	 *	n_tl_data*[type length <contents>]
 	 *	n_key_data*[ver kvno ver*(type length <contents>)]
@@ -558,8 +558,7 @@ dump_standard_iterator(ptr, entry)
 		    (int) entry->n_key_data,
 		    (int) entry->e_length,
 		    name);
-	    fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
-		    entry->mkvno,
+	    fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
 		    entry->attributes,
 		    entry->max_life,
 		    entry->max_renewable_life,
@@ -1017,7 +1016,6 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 		error++;
 	    }
 	    pkey->key_data_kvno = tmpint1;
-	    dbent.mkvno = tmpint2;
 	    dbent.fail_auth_count = tmpint3;
 	    /* Read modifier name */
 	    if (!error && read_string(filep,
@@ -1247,10 +1245,9 @@ process_k5_record(fname, kcontext, filep, verbose, linenop)
 		!(kret = krb5_parse_name(kcontext, name, &dbentry.princ))) {
 
 		/* Get the fixed principal attributes */
-		nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
-			       &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
+		nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
+			       &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
 		if (nread == 9) {
-		    dbentry.mkvno = (krb5_kvno) t1;
 		    dbentry.attributes = (krb5_flags) t2;
 		    dbentry.max_life = (krb5_deltat) t3;
 		    dbentry.max_renewable_life = (krb5_deltat) t4;
@@ -1259,8 +1256,7 @@ process_k5_record(fname, kcontext, filep, verbose, linenop)
 		    dbentry.last_success = (krb5_timestamp) t7;
 		    dbentry.last_failed = (krb5_timestamp) t8;
 		    dbentry.fail_auth_count = (krb5_kvno) t9;
-		}
-		else {
+		} else {
 		    try2read = read_nint_data;
 		    error++;
 		}

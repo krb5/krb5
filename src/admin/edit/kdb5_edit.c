@@ -331,7 +331,6 @@ int create_db_entry(principal, newentry)
     memset(newentry, 0, sizeof(krb5_db_entry));
     
     newentry->len = KRB5_KDB_V1_BASE_LENGTH;
-    newentry->mkvno = mblock.mkvno;
     newentry->attributes = mblock.flags;
     newentry->max_life = mblock.max_life;
     newentry->max_renewable_life = mblock.max_rlife;
@@ -1098,7 +1097,6 @@ void show_principal(argc, argv)
     printf("Name: %s\n", pr_name);
     printf("Maximum life: %s\n", strdur(entry.max_life));
     printf("Maximum renewable life: %s\n", strdur(entry.max_renewable_life));
-    printf("Master key version: %d\n", entry.mkvno);
     (void) krb5_timestamp_to_string(entry.expiration, buffer, sizeof(buffer));
     printf("Expiration: %s\n", buffer);
     (void) krb5_timestamp_to_string(entry.pw_expiration,

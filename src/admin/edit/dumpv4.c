@@ -197,7 +197,7 @@ dump_v4_iterator(ptr, entry)
 found_one:;
     principal->key_version = max_kvno;
     principal->max_life = entry->max_life / (60 * 5);
-    principal->kdc_key_ver = entry->mkvno; /* ??? not preserved incoming */
+    principal->kdc_key_ver = 1; /* ??? not preserved incoming */
     principal->attributes = 0;	/* ??? not preserved either */
 
     fprintf(arg->f, "%s %s %d %d %d %d ",

@@ -530,7 +530,6 @@ Principal *princ;
 
     entry.max_life = princ->max_life * 60 * 5;
     entry.max_renewable_life = rblock.max_rlife;
-    entry.mkvno = 1;
     entry.len = KRB5_KDB_V1_BASE_LENGTH;
     entry.expiration = princ->exp_date;
     entry.attributes = rblock.flags;	/* XXX is there a way to convert
@@ -610,7 +609,6 @@ struct realm_info *pblock;
 	return(retval);
     entry.max_life = pblock->max_life;
     entry.max_renewable_life = pblock->max_rlife;
-    entry.mkvno = 1;
     entry.len = KRB5_KDB_V1_BASE_LENGTH;
     entry.expiration = pblock->expiration;
     if (retval = krb5_copy_principal(context, &db_create_princ,
