@@ -81,7 +81,7 @@
 .SUFFIXES:	.py							@@\
 basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables.c: basename-asn.py					@@\
 	@echo '***Ignore the warning message "Warning: Can'\''t find UNIV.ph failed"' @@\
-	$(PEPSY) $(PSYFLAGS) basename-asn.py
+	$(PEPSY) $(PSYFLAGS) $(SRCDIR)basename-asn.py
 #endif /* PepsyTarget */
 
 #ifndef ErrorTableObjectRule
@@ -90,10 +90,10 @@ basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables
 .SUFFIXES: .et .h .c							@@\
 									@@\
 .et.h: 									@@\
-	$(COMPILE_ET) $*.et						@@\
+	$(COMPILE_ET) $(SRCDIR)$*.et					@@\
 									@@\
 .et.c: 									@@\
-	$(COMPILE_ET) $*.et
+	$(COMPILE_ET) $(SRCDIR)$*.et
 
 #endif
 
@@ -111,12 +111,18 @@ basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables
 #include LibraryRules
 #endif
 
+
+#ifndef SharedLibraryTarget
+#define SharedLibraryTarget(libname,deps)				@@\
+lib/**/libname.a::
+#endif
+
 /*
  * AdditiveLibraryTarget - generate rules to create a library from
  * several directories
  */
 #ifndef AdditiveLibraryTarget
-#define	AdditiveLibraryTarget(libname,objlist)				@@\
+#define	AdditiveLibraryTarget(libname,objlist,deps)			@@\
 AllTarget(lib/**/libname.a)						@@\
 AllTarget(foo/**/libname)						@@\
 DependTarget()								@@\
@@ -131,7 +137,7 @@ clean::									@@\
 #endif /* AdditiveLibraryTarget */
 
 #ifndef RanlibLibraryTarget
-#define	RanlibLibraryTarget(libname)					@@\
+#define	RanlibLibraryTarget(libname,deps)				@@\
 AllTarget(lib/**/libname.a)						@@\
 foo2/**/libname: foo/**/libname						@@\
 	$(TOUCH) $@							@@\
@@ -151,12 +157,8 @@ AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
 AllTarget(foo/**/libname)						@@\
 									@@\
-foo/**/libname: objlist							@@\
+libdir/lib/**/libname.a foo/**/libname:					@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
-	$(TOUCH) libdir/foo/**/libname					@@\
-	$(TOUCH) foo/**/libname						@@\
-libdir/lib/**/libname.a:						@@\
-	$(ARADD) $@ objlist						@@\
 	$(TOUCH) foo/**/libname						@@\
 	$(TOUCH) libdir/foo/**/libname
 /* The $(RANLIB) is done at the end by the directory itself */
@@ -188,7 +190,7 @@ includes:: hfile							@@\
 #define ProcessStockHeader(stockname,newname)				@@\
 newname: stockname Makefile						@@\
 	-$(RM) newname.new						@@\
-	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname.new		@@\
+	-$(UNIFDEF) $(PROCESS_DEFINES) stockname | sed $(PROCESS_REPLACE) >newname.new		@@\
 	if cmp -s newname.new newname ; then true; \			@@\
 	else $(RM) newname ; $(CP) newname.new newname ; fi
 #endif /* ProcessStockHeader */
@@ -245,7 +247,7 @@ install.man:: file.M							@@\
 #ifndef Krb5SimpleProgramTarget
 #define	Krb5SimpleProgramTarget(program,bindir,mandir,mansuffix)	@@\
            OBJS = program.o						@@\
-           SRCS = program.c						@@\
+           SRCS = $(SRCDIR)program.c					@@\
 									@@\
 Krb5ComplexProgramTarget(program,bindir,mandir,mansuffix)
 #endif /* Krb5SimpleProgramTarget */
@@ -342,6 +344,11 @@ P_TYPES=-DHasPosixTypesTrue
 #else
 P_TYPES=-UHasPosixTypesTrue
 #endif
+#if IsPOSIX || SystemV
+P_UNISTD=-DHasUnistdH
+#else
+P_UNISTD=-UHasUnistdH
+#endif
 #if HasVoidSignalReturn
 P_SIGTYPE=-DHasVoidSignalReturnTrue
 #else
@@ -433,6 +440,11 @@ P_VOLATILE=-DUseVolatile
 #else
 P_VOLATILE=-UUseVolatile
 #endif
+#ifdef NoNestedPrototypes
+P_NESTPROTO=-DNoNestedPrototypes
+#else
+P_NESTPROTO=-UNoNestedPrototypes
+#endif
 
 /*
  * Default Definitions.
@@ -460,13 +472,16 @@ P_VOLATILE=-UUseVolatile
 #endif
          KRB5ROOT = Krb5Root
 
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) $(P_UNISTD) $(P_NESTPROTO) -DUnifdefRan
+  PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+"
        DESDEFINES = DesDefines
+#if HasSharedLibraries
+          TOPLIBD = $(TOP)/lib/shared
+#else
           TOPLIBD = $(TOP)/lib
-            OSLIB = os
-         OSDEPLIB = $(TOPLIBD)/libos.a
-           DESLIB = des5
-        DESDEPLIB = $(TOPLIBD)/libdes5.a
+#endif
+           DESLIB = crypto
+        DESDEPLIB = $(TOPLIBD)/libcrypto.a
         RSAMD4LIB = md4
      RSAMD4DEPLIB = $(TOPLIBD)/libmd4.a
           KRB5LIB = krb5
@@ -476,7 +491,7 @@ P_VOLATILE=-UUseVolatile
          ISODELIB = IsodeLib
 
            DBMLIB = DbmLib
-          DEPKLIB = $(KRB5DEPLIB) $(DESDEPLIB) $(OSDEPLIB)
+          DEPKLIB = $(KRB5DEPLIB) $(DESDEPLIB)
           KLIBLOC = -L$(TOPLIBD)
              KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(DESLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
         KDBDEPLIB = $(TOPLIBD)/libkdb5.a
