@@ -1,6 +1,13 @@
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
-	* afsstring2key.c, destest.c: Don't use PROTOTYPE macro.
+	* des_int.h (des_cblock, des_key_schedule): Duplicate definitions
+	here and in kerberosIV/des.h, using macro
+	KRB5INT_DES_TYPES_DEFINED to avoid duplication.
+	(mit_des_cblock, mit_des_key_schedule): Define in terms of the
+	other types for now.
+	(PROTOTYPE): Don't define.
+
+	* afsstring2key.c, des_int.h, destest.c: Don't use PROTOTYPE macro.
 
 2001-01-25  Ken Raeburn  <raeburn@mit.edu>
 
