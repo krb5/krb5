@@ -307,7 +307,7 @@ main(argc, argv)
     while (argc--, *++argv) {
         arg = *argv;
         if (*arg == '-') {
-            if (!strcmp(arg, "-d") && !strcmp(arg, "-debug"))
+	    if (!strcmp(arg, "-d") || !strcmp(arg, "-debug"))
                 mit_des_debug++;
             else {
                 fprintf(stderr, "%s: unknown control argument %s\n",
