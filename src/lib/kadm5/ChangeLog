@@ -1,3 +1,9 @@
+2002-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_krb5_kvno): Return an error if the key
+	version number won't fit in the one-byte encoding we currently
+	use.
+
 2001-10-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* str_conv.c (krb5_string_to_keysalts): When parsing string, allow
