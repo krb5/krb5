@@ -28,8 +28,8 @@ test_parse: test_parse.o $(OBJS) $(LIBS)
 test_profile: test_profile.o $(OBJS) $(LIBS)
 	$(CC) -o test_profile test_profile.o $(OBJS) $(LIBS)
 
-profile.h: prof_err.h profile.h.in
-	cat $(srcdir)/profile.h.in prof_err.h > $@
+profile.h: prof_err.h profile.hin
+	cat $(srcdir)/profile.hin prof_err.h > $@
 
 prof_err.h: $(srcdir)/prof_err.et
 
