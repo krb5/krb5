@@ -25,11 +25,6 @@ static char rcsid_decrypt_tk_c[] =
 
 #include <krb5/ext-proto.h>
 
-
-/* array of pointers into encryption systems */
-extern krb5_cs_table_entry *csarray[];
-extern int max_cryptosystem;
-
 /*
  Takes encrypted dec_ticket->enc_part, encrypts with dec_ticket->etype
  using *srv_key, and places result in dec_ticket->enc_part2.
@@ -54,7 +49,7 @@ register krb5_ticket *ticket;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = csarray[ticket->etype]->system;
+    eblock.crypto_entry = krb5_csarray[ticket->etype]->system;
 
     scratch.length = ticket->enc_part.length;
     if (!(scratch.data = malloc(ticket->enc_part.length)))

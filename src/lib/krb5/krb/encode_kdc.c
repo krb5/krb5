@@ -24,10 +24,6 @@ static char rcsid_encode_kdc_c [] =
 
 #include <krb5/ext-proto.h>
 
-/* array of pointers into encryption systems */
-extern krb5_cs_table_entry *csarray[];
-extern int max_cryptosystem;		/* max entry in array */
-
 /*
  Takes KDC rep parts in *rep and *encpart, and formats it into *enc_rep,
  using message type type and encryption key client_key and encryption type
@@ -71,7 +67,7 @@ krb5_data **enc_rep;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = csarray[dec_rep->etype]->system;
+    eblock.crypto_entry = krb5_csarray[dec_rep->etype]->system;
     dec_rep->enc_part.length = krb5_encrypt_size(scratch->length,
 					      eblock.crypto_entry);
     if (!(dec_rep->enc_part.data = malloc(dec_rep->enc_part.length))) {

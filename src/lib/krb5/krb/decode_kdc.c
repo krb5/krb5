@@ -26,10 +26,6 @@ static char rcsid_decode_kdc_c[] =
 
 #include <krb5/ext-proto.h>
 
-/* array of pointers into encryption systems */
-extern krb5_cs_table_entry *csarray[];
-extern int max_cryptosystem;
-
 /*
  Takes a KDC_REP message and decrypts encrypted part using etype and
  *key, putting result in *rep.
@@ -79,12 +75,12 @@ krb5_kdc_rep **dec_rep;
 	return(ENOMEM);
     }
 
-    if (!valid_etype(local_dec_rep->etype))
+    if (!valid_etype(etype))
 	return KRB5KDC_ERR_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = csarray[local_dec_rep->etype]->system;
+    eblock.crypto_entry = krb5_csarray[etype]->system;
 
     /* do any necessary key pre-processing */
     if (retval = (*eblock.crypto_entry->process_key)(&eblock, key)) {
