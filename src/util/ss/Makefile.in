@@ -136,7 +136,7 @@ libss.o:	$(OBJS)
 #	$(INSTALLPROG) mk_cmds ${DESTDIR}$(PROGDIR)/mk_cmds
 
 mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script 
-	$(srcdir)/config_script $(srcdir)/mk_cmds.sh . $(AWK) $(SED) > mk_cmds
+	$(SHELL) $(srcdir)/config_script $(srcdir)/mk_cmds.sh . $(AWK) $(SED) > mk_cmds
 	chmod 755 mk_cmds	
 
 ct_c.awk: $(srcdir)/ct_c_awk.in

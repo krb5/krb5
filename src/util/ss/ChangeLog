@@ -1,3 +1,8 @@
+Mon Aug  7 19:14:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (mk_cmds): Add $(SHELL) to invocation of
+		config_script, so that the tree can build even after
+		checked into a broken SCCS system.
 
 Fri Jul 7 16:42:42 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add symlink to $(TOPLIBD) for libss.
