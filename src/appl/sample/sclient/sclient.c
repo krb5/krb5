@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
@@ -42,17 +42,15 @@ char *argv[];
     struct servent *sp;
     struct hostent *hp;
     struct sockaddr_in sin, lsin;
-    char *remote_host;
-    register char *cp;
     int sock, namelen;
-    krb5_data send_data;
+    krb5_data recv_data;
     krb5_checksum send_cksum;
     krb5_error_code retval;
     krb5_ccache ccdef;
-    krb5_principal server;
-    char **hrealms;
+    krb5_principal client, server;
+    krb5_error *err_ret;
+    krb5_ap_rep_enc_part *rep_ret;
     short xmitlen;
-    char sbuf[512];
 
     if (argc != 2) {
 	fprintf(stderr, "usage: %s <hostname>\n",argv[0]);
@@ -89,35 +87,12 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_get_host_realm(hp->h_name, &hrealms)) {
-	com_err(argv[0], retval, "while determining realm(s) of %s",
-		hp->h_name);
-	exit(1);
-    }
-    if (strlen(hp->h_name)+strlen(SAMPLE_SERVICE)+strlen(hrealms[0])+3 >
-	sizeof(sbuf)) {
-	fprintf(stderr, "hostname too long!\n");
-	exit(1);
-    }
-
-    /* copy the hostname into non-volatile storage */
-    remote_host = malloc(strlen(hp->h_name) + 1);
-    (void) strcpy(remote_host, hp->h_name);
-
-    /* lower-case to get name for "instance" part of service name */
-    for (cp = remote_host; *cp; cp++)
-	if (isupper(*cp))
-	    *cp = tolower(*cp);
-
-    memset(sbuf, 0, sizeof(sbuf));
-    strcpy(sbuf, SAMPLE_SERVICE);
-    strcat(sbuf, "/");
-    strcat(sbuf, remote_host);
-    strcat(sbuf, "@");
-    strcat(sbuf, hrealms[0]);
-    (void) krb5_free_host_realm(hrealms);
-    if (retval = krb5_parse_name(sbuf, &server)) {
-	com_err(argv[0], retval, "while parsing service name %s", sbuf);
+    if (retval = krb5_sname_to_principal(argv[1], SAMPLE_SERVICE,
+					 TRUE, /* TRUE means canonicalize
+						  hostname */
+					 &server)) {
+	com_err(argv[0], retval, "while creating server name for %s",
+		argv[1]);
 	exit(1);
     }
 
@@ -157,8 +132,8 @@ char *argv[];
     }
     /* choose some random stuff to compute checksum from */
     if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
-					 remote_host,
-					 strlen(remote_host),
+					 argv[1],
+					 strlen(argv[1]),
 					 0,
 					 0, /* if length is 0, crc-32 doesn't
 					       use the seed */
@@ -172,43 +147,59 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_mk_req(server, 0, &send_cksum, ccdef, &send_data)) {
-	com_err(argv[0], retval, "while preparing AP_REQ");
+    if (retval = krb5_cc_get_principal(ccdef, &client)) {
+	com_err(argv[0], retval, "while getting client principal name");
 	exit(1);
     }
-    xmitlen = htons(send_data.length);
+    retval = krb5_sendauth((krb5_pointer) &sock,
+			   SAMPLE_VERSION, client, server,
+			   AP_OPTS_MUTUAL_REQUIRED,
+			   &send_cksum,
+			   0,		/* no creds, use ccache instead */
+			   ccdef,
+			   0,		/* don't need seq # */
+			   0,		/* don't need a subsession key */
+			   &err_ret,
+			   &rep_ret);
 
-    if ((retval = krb5_net_write(sock, (char *)&xmitlen,
-				 sizeof(xmitlen))) < 0) {
-	com_err(argv[0], errno, "while writing len to server");
+    krb5_free_principal(server);	/* finished using it */
+
+    if (retval && retval != KRB5_SENDAUTH_REJECTED) {
+	com_err(argv[0], retval, "while using sendauth");
 	exit(1);
     }
-    if ((retval = krb5_net_write(sock, (char *)send_data.data,
-				 send_data.length)) < 0) {
-	com_err(argv[0], errno, "while writing data to server");
+    if (retval == KRB5_SENDAUTH_REJECTED) {
+	/* got an error */
+	printf("sendauth rejected, error reply is:\n\t\"%*s\"",
+	       err_ret->text.length, err_ret->text.data);
+    } else if (rep_ret) {
+	/* got a reply */
+	printf("sendauth succeeded, reply is:\n");
+	if ((retval = krb5_net_read(sock, (char *)&xmitlen,
+				    sizeof(xmitlen))) <= 0) {
+	    if (retval == 0)
+		errno = ECONNABORTED;
+	    com_err(argv[0], errno, "while reading data from server");
+	    exit(1);
+	}
+	recv_data.length = ntohs(xmitlen);
+	if (!(recv_data.data = (char *)malloc(recv_data.length + 1))) {
+	    com_err(argv[0], ENOMEM,
+		    "while allocating buffer to read from server");
+	    exit(1);
+	}
+	if ((retval = krb5_net_read(sock, (char *)recv_data.data,
+				    recv_data.length)) <= 0) {
+	    if (retval == 0)
+		errno = ECONNABORTED;
+	    com_err(argv[0], errno, "while reading data from server");
+	    exit(1);
+	}
+	printf("reply len %d, contents:\n%*s\n",
+	       recv_data.length,recv_data.length,recv_data.data);
+    } else {
+	com_err(argv[0], 0, "no error or reply from sendauth!");
 	exit(1);
     }
-    xfree(send_data.data);
-    if ((retval = krb5_net_read(sock, (char *)&xmitlen,
-				sizeof(xmitlen))) <= 0) {
-	if (retval == 0)
-	    errno = ECONNRESET;		/* XXX */
-	com_err(argv[0], errno, "while reading data from server");
-	exit(1);
-    }
-    send_data.length = ntohs(xmitlen);
-    if (!(send_data.data = (char *)malloc(send_data.length + 1))) {
-	com_err(argv[0], ENOMEM, "while allocating buffer to read from server");
-	exit(1);
-    }
-    if ((retval = krb5_net_read(sock, (char *)send_data.data,
-				send_data.length)) <= 0) {
-	if (retval == 0)
-	    errno = ECONNRESET;		/* XXX */
-	com_err(argv[0], errno, "while reading data from server");
-	exit(1);
-    }
-    send_data.data[send_data.length] = '\0';
-    printf("reply len %d, contents:\n%s\n",send_data.length,send_data.data);
     exit(0);
 }

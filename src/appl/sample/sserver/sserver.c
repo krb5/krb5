@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
@@ -50,11 +50,11 @@ char *argv[];
     struct sockaddr_in peername;
     krb5_address peeraddr;
     int namelen = sizeof(peername);
+    int sock = 0;			/* incoming connection fd */
     krb5_data recv_data;
     short xmitlen;
     krb5_error_code retval;
-    krb5_tkt_authent *authdat;
-    krb5_principal server;
+    krb5_principal server, client;
     char repbuf[BUFSIZ];
     char *cname;
 
@@ -72,35 +72,36 @@ char *argv[];
 	       error_message(retval));
 	exit(1);
     }
-
+    
 #ifdef DEBUG
-{
-    int sock, acc;
-    struct sockaddr_in sin;
+    {
+	int acc;
+	struct sockaddr_in sin;
 
-    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-	syslog(LOG_ERR, "socket: %m");
-	exit(3);
-    }
+	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+	    syslog(LOG_ERR, "socket: %m");
+	    exit(3);
+	}
 
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = 0;
-    sin.sin_port = htons(5555);
-    if (bind(sock, &sin, sizeof(sin))) {
-	syslog(LOG_ERR, "bind: %m");
-	exit(3);
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = 0;
+	sin.sin_port = htons(5555);
+	if (bind(sock, &sin, sizeof(sin))) {
+	    syslog(LOG_ERR, "bind: %m");
+	    exit(3);
+	}
+	if (listen(sock, 1) == -1) {
+	    syslog(LOG_ERR, "listen: %m");
+	    exit(3);
+	}
+	if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1) {
+	    syslog(LOG_ERR, "accept: %m");
+	    exit(3);
+	}
+	dup2(acc, 0);
+	close(sock);
+	sock = 0;
     }
-    if (listen(sock, 1) == -1) {
-	syslog(LOG_ERR, "listen: %m");
-	exit(3);
-    }
-    if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1) {
-	syslog(LOG_ERR, "accept: %m");
-	exit(3);
-    }
-    dup2(acc, 0);
-    close(sock);
-}
 #else
     /*
      * To verify authenticity, we need to know the address of the
@@ -113,47 +114,29 @@ char *argv[];
 #endif
     peeraddr.addrtype = peername.sin_family;
     peeraddr.length = sizeof(peername.sin_addr);
-    if (!(peeraddr.contents = (krb5_octet *)malloc(peeraddr.length))) {
-	syslog(LOG_ERR, "no memory allocating addr");
-	exit(1);
-    }
-    memcpy((char *)peeraddr.contents, (char *)&peername.sin_addr,
-	  peeraddr.length);
+    peeraddr.contents = (krb5_octet *)&peername.sin_addr;
 
-    if ((retval = krb5_net_read(0, (char *)&xmitlen, sizeof(xmitlen))) <= 0) {
-	if (retval == 0)
-	    errno = ECONNRESET;		/* XXX */
-	syslog(LOG_ERR, "read size: %m");
+    if (retval = krb5_recvauth((krb5_pointer)&sock,
+			       SAMPLE_VERSION, server, &peeraddr,
+			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
+			       0,	/* default rc type */
+			       0,	/* don't need seq number */
+			       &client,
+			       0, 0	/* don't care about ticket or
+					   authenticator */
+			       )) {
+	syslog(LOG_ERR, "recvauth failed--%s", error_message(retval));
 	exit(1);
     }
-    recv_data.length = ntohs(xmitlen);
-    if (!(recv_data.data = (char *) malloc(recv_data.length))) {
-	syslog(LOG_ERR, "no memory allocating packet");
-	exit(1);
-    }
-    if ((retval = krb5_net_read(0, (char *)recv_data.data,
-				recv_data.length)) <= 0) {
-	if (retval == 0)
-	    errno = ECONNRESET;		/* XXX */
-	syslog(LOG_ERR, "read contents: %m");
-	exit(1);
-    }
-    if (retval = krb5_rd_req_simple(&recv_data, server, &peeraddr, &authdat)) {
-	syslog(LOG_ERR, "rd_req failed: %s", error_message(retval));
-	sprintf(repbuf, "RD_REQ failed: %s\n", error_message(retval));
-	goto sendreply;
-    }
-    xfree(recv_data.data);
 
-    if (retval = krb5_unparse_name(authdat->ticket->enc_part2->client, &cname)) {
+    if (retval = krb5_unparse_name(client, &cname)) {
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
 	cname = "<unparse error>";
     }
-    krb5_free_tkt_authent(authdat);
+
     sprintf(repbuf, "You are %s\n", cname);
     if (!retval)
 	free(cname);
- sendreply:
     xmitlen = htons(strlen(repbuf));
     recv_data.length = strlen(repbuf);
     recv_data.data = repbuf;
