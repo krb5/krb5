@@ -1,7 +1,7 @@
 /*
  * wconfig.c
  *
- * Copyright 1995,1996 by the Massachusetts Institute of Technology.
+ * Copyright 1995,1996,1997,1998 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,63 +33,114 @@
  * config\pre.in, then the filtered stdin text, and will end with
  * config\post.in.
  *
- * Syntax: wconfig [config_directory] <input_file >output_file
+ * Syntax: wconfig [options] [config_directory] <input_file >output_file
  *
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 static int copy_file (char *path, char *fname);
 void add_ignore_list(char *str);
 
 int mit_specific = 0;
 
+char *win16_flag = "WIN16##";
+char *win32_flag = "WIN32##";
+
+
 int main(int argc, char *argv[])
 {
 	char *ignore_str = "--ignore=";
 	int ignore_len;
-	
+	char *cp, tmp[80];
+	char *win_flag;
+	char wflags[1024];
+
+#ifdef _MSDOS
+	win_flag = win16_flag;
+#else
+#ifdef _WIN32
+	win_flag = win32_flag;
+#else
+	win_flag = "UNIX##";
+#endif
+#endif
+
+	wflags[0] = 0;
+
 	ignore_len = strlen(ignore_str);
 	argc--; argv++;
-	while ((argc > 1) && *argv[0] == '-') {
+	while (*argv && *argv[0] == '-') {
+		if (wflags[0])
+			strcat(wflags, " ");
+		strcat(wflags, *argv);
+
 		if (!strcmp(*argv, "--mit")) {
 			mit_specific = 1;
 			argc--; argv++;
 			continue;
 		}
-		if (!strcmp(*argv, "--nomit")) {
-			mit_specific = 0;
+		if (!strcmp(*argv, "--win16")) {
+			win_flag = win16_flag;
+			argc--; argv++;
+			continue;
+		}
+		if (!strcmp(*argv, "--win32")) {
+			win_flag = win32_flag;
+			argc--; argv++;
+			continue;
+		}
+		if (!strncmp(*argv, "--enable-", 9)) {
+			sprintf(tmp, "%s##", (*argv)+ignore_len);
+			for (cp = tmp; *cp; cp++) {
+				if (islower(*cp))
+					*cp = toupper(*cp);
+			}
+			cp = malloc(strlen(tmp)+1);
+			if (!cp) {
+				fprintf(stderr,
+					"wconfig: malloc failed!\n");
+				exit(1);
+			}
+			strcpy(cp, tmp);
+			add_ignore_list(cp);
 			argc--; argv++;
 			continue;
 		}
 		if (!strncmp(*argv, ignore_str, ignore_len)) {
 			add_ignore_list((*argv)+ignore_len);
 			argc--; argv++;
+			continue;
 		}
+		fprintf(stderr, "Invalid option: %s\n", *argv);
+		exit(1);
 	}
+
+	if (win_flag)
+		add_ignore_list(win_flag);
 
 	if (mit_specific)
 		add_ignore_list("MIT##");
 		
-	if (argc > 0)                              /* Config directory given */
-		copy_file (*argv, "\\windows.in");        /* Send out prefix */
+	if (wflags[0] && (argc > 0))
+		printf("WCONFIG_FLAGS=%s\n", wflags);
+
+	if (argc > 0)
+		copy_file (*argv, "windows.in");
 
 	copy_file("", "-");
     
-	if (argc > 0)                          /* Config directory given */
-		copy_file (*argv, "\\win-post.in");    /* Send out postfix */
+	if (argc > 0)
+		copy_file (*argv, "win-post.in");
+
 	return 0;
 }
 
-char *ignore_list[32] = {
+char *ignore_list[64] = {
 	"DOS##",
 	"DOS",
-#ifdef _MSDOS
-	"WIN16##",
-#endif
-#ifdef _WIN32
-	"WIN32##",
-#endif
 	};
 
 /*
@@ -123,11 +174,16 @@ copy_file (char *path, char *fname)
     if (strcmp(fname, "-") == 0) {
 	    fin = stdin;
     } else {
-	    strcpy (buf, path);              /* Build up name to open */
-	    strcat (buf, fname);
+#if (defined(_MSDOS) || defined(_WIN32))
+	    sprintf(buf, "%s\\%s", path, fname);
+#else
+	    sprintf(buf, "%s/%s", path, fname);
+#endif
 	    fin = fopen (buf, "r");                     /* File to read */
-	    if (fin == NULL)
+	    if (fin == NULL) {
+		    fprintf(stderr, "wconfig: Can't open file %s\n", buf);
 		    return 1;
+	    }
     }
     
 

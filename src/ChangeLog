@@ -1,3 +1,16 @@
+1999-01-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* wconfig.c: Updated to be more featureful.  It will now save the
+		arguments passed to it and emit it as a makefile variable
+		WCONFIG_FLAGS.  This allows the makefile to be able to
+		preserve wconfig options in the future when updating
+		makefile.  Also added the --win32 and --win16 options to
+		force win16 or win32 makefiles.  An option of the form
+		--enable-foo will cause lines that begin ##FOO## to be
+		uncommented in the Makefile.  The program has also been
+		cleaned up so it can be run (for debugging purposes) under
+		Unix.
+
 Sat Dec  5 01:14:23 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Updated windows configuration rules to work with
