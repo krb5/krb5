@@ -847,7 +847,7 @@ int mode;
 	return KRB5_KDB_BADLOCKMODE;
     }
     if (non_blocking)
-	flock_mode |= KRB5_LOCKMODE_DONTBLOCK;
+	krb5_lock_mode |= KRB5_LOCKMODE_DONTBLOCK;
 
     error = krb5_lock_file(dblfp, dblfname, krb5_lock_mode);
 
