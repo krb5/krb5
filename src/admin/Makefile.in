@@ -1,4 +1,0 @@
-CFLAGS = $(CCOPTS) $(DEFS)
-
-all::
-
