@@ -210,6 +210,7 @@ char *argv[];
     if (errval = krb5_db_set_lockmode(kadm_context, TRUE)) {
 	com_err(argv[0], errval, "while setting db to nonblocking");
 	close_syslog();
+	krb5_db_fini(kadm_context);
 	byebye();
 	exit(1);
     }
