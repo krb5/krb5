@@ -59,15 +59,7 @@ if test "$TCL_LIBS" != "" ;  then
 	DO_ALL=tcl
 fi
 AC_SUBST(DO_ALL)
-dnl See if we should build v4server
-if test -z "$KRB4_LIB"; then
-V4SERVER=""
-else
-V4SERVER=v4server
-fi
-AC_SUBST(V4SERVER)
-dnl
 KRB5_BUILD_PROGRAM
 dnl
 K5_GEN_FILE(testing/scripts/env-setup.sh:testing/scripts/env-setup.shin)
-V5_AC_OUTPUT_MAKEFILE(. cli dbutil passwd passwd/unit-test ktutil server v4server v4server/unit-test v5passwdd testing testing/scripts testing/util)
+V5_AC_OUTPUT_MAKEFILE(. cli dbutil passwd passwd/unit-test ktutil server  testing testing/scripts testing/util)

@@ -1,3 +1,7 @@
+2003-12-11  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in (DO_ALL): Don't build v4server on v5passwdd
+
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
