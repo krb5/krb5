@@ -1,5 +1,8 @@
 2000-05-15  Ken Raeburn  <raeburn@mit.edu>
 
+	* krcp.c (main): Fix some conditionalizations to make proper
+	indentation easier.
+
 	* kcmd.c (encivec_i, encivec_o): New variables replace old single
 	variable encivec.
 	(rcmd_stream_init_krb5): New argument am_client, used to
