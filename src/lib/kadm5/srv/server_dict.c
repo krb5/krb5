@@ -57,7 +57,7 @@ word_compare(const void *s1, const void *s2)
  *
  * Arguments:
  *	    none
- *	    <return value> KADM5_OK on sucsess errno on failure;
+ *	    <return value> KADM5_OK on success errno on failure;
  * 			   (but success on ENOENT)
  *
  * Requires:

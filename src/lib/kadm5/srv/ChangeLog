@@ -1,3 +1,7 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* server_dict.c: Silly typo fixed.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* server_misc.c (passwd_check): cast argument to
