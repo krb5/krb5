@@ -148,23 +148,7 @@
    tell us how to get a shared library finalization function invoked
    automatically.  */
 
-#if !defined(_WIN32xxx)
-# define DELAY_INITIALIZER
-#endif
-
-/* These should be turned into feature tests or otherwise driven from
-   the configure script.  */
-#if defined(__linux__) || defined(__NetBSD__) \
-	|| (defined(__sun__) && defined(__svr4__) && defined(__GNUC__))
-# define CONSTRUCTOR_ATTR_WORKS
-# define DESTRUCTOR_ATTR_WORKS
-#endif
-#if defined(__sgi) && defined(__mips) && defined(_SYSTYPE_SVR4) /* IRIX? */
-# define USE_LINKER_FINI_OPTION
-#endif
-#if !defined(__GNUC__) && defined(__sun) && defined(__SVR4) && defined(__SUNPRO_C) /* Solaris ld -z finiarray */
-# define USE_LINKER_FINI_OPTION
-#endif
+/* Helper macros.  */
 
 # define JOIN4_2(A,B,C,D) A ## B ## C ## D
 # define JOIN4(A,B,C,D) JOIN4_2(A,B,C,D)
@@ -183,8 +167,15 @@
    possible moment.  This means multiple threads may be active.  */
 # include "k5-thread.h"
 typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init_t;
+# ifdef USE_LINKER_INIT_OPTION
+#  define MAYBE_DUMMY_INIT(NAME)		\
+	void JOIN2(NAME, __auxinit) () { }
+# else
+#  define MAYBE_DUMMY_INIT(NAME)
+# endif
 # define MAKE_INIT_FUNCTION(NAME)				\
 	static int NAME(void);					\
+	MAYBE_DUMMY_INIT(NAME)					\
 	/* forward declaration for use in initializer */	\
 	static void JOIN2(NAME, __aux) (void);			\
 	static k5_init_t JOIN2(NAME, __once) =			\
@@ -221,8 +212,17 @@ static inline int k5_call_init_function(k5_init_t *i)
 #elif defined(__GNUC__) && !defined(_WIN32) && defined(CONSTRUCTOR_ATTR_WORKS)
 
 /* Run initializer at load time, via GCC/C++ hook magic.  */
+
+# ifdef USE_LINKER_INIT_OPTION
+#  define MAYBE_DUMMY_INIT(NAME)		\
+	void JOIN2(NAME, __auxinit) () { }
+# else
+#  define MAYBE_DUMMY_INIT(NAME)
+# endif
+
 typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define MAKE_INIT_FUNCTION(NAME)		\
+	MAYBE_DUMMY_INIT(NAME)			\
 	static k5_init_t JOIN2(NAME, __ran)	\
 		= { 0, 2 };			\
 	static void JOIN2(NAME, __aux)(void)	\
@@ -238,9 +238,9 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 	(JOIN2(NAME, __ran).did_run == 3	\
 	 ? JOIN2(NAME, __ran).error		\
 	 : (abort(),0))
-# define INITIALIZER_RAN(NAME)	(JOIN2(NAME, __ran).error == 0)
+# define INITIALIZER_RAN(NAME)	(JOIN2(NAME,__ran).did_run == 3 && JOIN2(NAME, __ran).error == 0)
 
-#elif defined(LINKER_HAS_INIT_OPTION)
+#elif defined(USE_LINKER_INIT_OPTION)
 
 /* Run initializer at load time, via linker magic.  */
 typedef struct { int error; unsigned char did_run; } k5_init_t;
@@ -248,7 +248,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 	static k5_init_t JOIN2(NAME, __ran)	\
 		= { 0, 2 };			\
 	static int NAME(void);			\
-	void JOIN2(NAME, __aux)			\
+	void JOIN2(NAME, __auxinit)		\
 	{					\
 	    JOIN2(NAME, __ran).error = NAME();	\
 	    JOIN2(NAME, __ran).did_run = 3;	\
@@ -290,6 +290,16 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
    XXX How do we know if the C++ support actually works?  */
 # define MAKE_FINI_FUNCTION(NAME)	\
 	static void NAME(void) __attribute__((destructor))
+
+#elif !defined(SHARED)
+
+/* In this case, we just don't care about finalization.
+
+   The code will still define the function, but we won't do anything
+   with it.  Annoying: This may generate unused-function warnings.  */
+
+# define MAKE_FINI_FUNCTION(NAME)	\
+	static void NAME(void)
 
 #else
 

@@ -1,3 +1,16 @@
+2004-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (DELAY_INITIALIZER): Don't define.
+	(CONSTRUCTOR_ATTR_WORKS, DESTRUCTOR_ATTR_WORKS): Don't define.
+	(USE_LINKER_FINI_OPTION): Don't define.
+	(MAYBE_DUMMY_INIT): New macro, to optionally produce a dummy
+	initializer for the linker to reference in the case where other
+	options indicate we don't want to use it.
+	(MAKE_INIT_FUNCTION): Use it in some versions.  Set the exported
+	function name to have a __auxinit suffix.
+	(MAKE_FINI_FUNCTION) [!SHARED]: Declare the function static, and
+	do nothing to try to cause it to get invoked.
+
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (DELAY_INITIALIZER): New macro, defined always.
