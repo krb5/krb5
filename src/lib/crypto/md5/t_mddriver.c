@@ -20,15 +20,13 @@ documentation and/or software.
 #define MD 5
 #endif
 
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
-#include <krb5/krb5.h>
+#include "k5-int.h"
+
 #if MD == 2
 #include "md2.h"
 #endif
 #if MD == 4
-#include <krb5/rsa-md4.h>
+#include "rsa-md4.h"
 #endif
 #if MD == 5
 #include <krb5/rsa-md5.h>

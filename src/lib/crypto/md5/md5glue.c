@@ -1,5 +1,4 @@
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include <krb5/rsa-md5.h>
 
 static krb5_error_code

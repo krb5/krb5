@@ -35,7 +35,7 @@
  ***********************************************************************
  */
 
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include <krb5/rsa-md5.h>
 
 #ifdef __STDC__

@@ -1,8 +1,6 @@
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include <krb5/rsa-md5.h>
-
-#include "../des/des_int.h"	/* we cheat a bit and call it directly... */
+#include "des_int.h"	/* we cheat a bit and call it directly... */
 
 static krb5_error_code
 md5_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
