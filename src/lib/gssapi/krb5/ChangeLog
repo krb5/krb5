@@ -1,3 +1,35 @@
+2000-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Delete field
+	gsskrb5_version.
+	(struct _krb5_gss_cred_id_rec): Delete field rfcv2_mech.
+	* accept_sec_context.c, acquire_cred.c, add_cred.c, inq_cred.c,
+	k5seal.c, k5unseal.c, ser_ctx.c:
+	Delete krb5-mech2 support.
+
+	* init_sec_context.c (get_credentials): Enctype argument is now a
+	pointer to a list of enctypes.  Explicitly try each in order until
+	success or an error other than cryptosystem not being supported.
+	(krb5_gss_init_sec_context): Pass list of cryptosystems, starting
+	with 3DES.
+
+	* gssapiP_krb5.h (enum sgn_alg, enum seal_alg): New types,
+	giving symbolic names for values from RFC 1964, a Microsoft win2k
+	I-D, and our proposed 3des-sha1 values.
+	(KG_USAGE_SEAL, KG_USAGE_SIGN): New macros.
+
+	* accept_sec_context.c (rd_req_keyproc): Already-disabled routine
+	deleted.
+	(krb5_gss_accept_sec_context): Use sgn_alg and seal_alg symbolic
+	names.  Add a case for des3-hmac-sha1.
+	* k5seal.c (make_seal_token_v1): Likewise.  Do key derivation for
+	checksums.
+	* k5unseal.c (kg_unseal_v1): Likewise.
+	* util_crypt.c (kg_encrypt, kg_decrypt): Do key derivation for
+	encryption.
+
+	* util_crypt.c (zeros): Unused variable deleted.
+
 2000-04-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* wrap_size_limit.c: Remove mech2 support.  Add MIT copyright.
