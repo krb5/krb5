@@ -42,18 +42,13 @@
 #define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
 
-static unsigned int dirlen = 0;
-static char *dir;
+#define GETDIR (dir = getdir(), dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1)
 
-/* The do ... while(0) is required to insure that GETDIR looks like a
-   single statement in all situations (just {}'s may cause troubles in
-   certain situations, such as nested if/else clauses. */
-
-#define GETDIR do { if (!dirlen) getdir(); } while(0)
-
-static void
+static char *
 getdir(void)
 {
+    char *dir;
+
     if (!(dir = getenv("KRB5RCACHEDIR"))) {
 #if defined(_WIN32)
 	if (!(dir = getenv("TEMP")))
@@ -69,7 +64,7 @@ getdir(void)
 	}
 #endif
     }
-    dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1;
+    return dir;
 }
 
 krb5_error_code
@@ -79,6 +74,8 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
     krb5_int16 rc_vno = htons(KRB5_RC_VNO);
     krb5_error_code retval = 0;
     int do_not_unlink = 0;
+    char *dir;
+    size_t dirlen;
 
     GETDIR;
     if (fn && *fn)
@@ -182,6 +179,8 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 #ifndef NO_USERID
     struct stat statb;
 #endif
+    char *dir;
+    size_t dirlen;
 
     GETDIR;
     if (full_pathname) {

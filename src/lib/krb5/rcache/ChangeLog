@@ -1,3 +1,13 @@
+2004-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_io.c (dir, dirlen): Top-level variables deleted.
+	(getdir): Now returns the pointer, doesn't set top-level
+	variables.
+	(GETDIR): Set local variables dir and dirlen using the function's
+	return value.
+	(krb5_rc_io_creat, krb5_rc_io_open_internal): Add the new local
+	variables.
+
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc-int.h (struct krb5_rc_st, struct _krb5_rc_ops, krb5_rc_ops):
