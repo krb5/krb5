@@ -1,3 +1,8 @@
+Fri Dec 20 18:20:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_16.def: Change name of library in file to be krb5_16.def
+	 	[PR#302]
+
 Sat Nov 23 00:25:25 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 	
 	* libkrb5.def: Renamed to krb5_16.def [PR#204]
