@@ -1,3 +1,9 @@
+Sat Sep 16 03:45:59 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sim_client.c (main): Fix optional host parsing so that host is
+		recognized as an argument without the -h option.  
+		Free the context and auth_context structures before exiting.
+
 Fri Sep 15 04:59:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sim_client.c (main): Added better options parsing for more

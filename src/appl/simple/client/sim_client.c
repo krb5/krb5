@@ -127,10 +127,10 @@ main(argc, argv)
     }
     argc -= optind;
     argv += optind;
-    if (argc > 1) {
+    if (argc > 0) {
 	if (hostname)
 	    usage();
-	hostname = argv[1];
+	hostname = argv[0];
     }
 
     if (hostname == 0) {
@@ -332,5 +332,9 @@ main(argc, argv)
 	com_err(progname, errno, "while sending PRIV message");
     printf("Sent encrypted message: %d bytes\n", i);
     krb5_xfree(packet.data);
+
+    krb5_auth_con_free(context, auth_context);
+    krb5_free_context(context);
+    
     exit(0);
 }
