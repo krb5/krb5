@@ -1,3 +1,9 @@
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Look for dlfcn.h.  Configure new shlib
+	subdirectory.
+	* Makefile.in (LOCAL_SUBDIRS): Build in shlib subdir.
+
 2004-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Build makefile for new "threads" subdirectory.
