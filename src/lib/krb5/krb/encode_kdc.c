@@ -64,6 +64,7 @@ OLDDECLARG(krb5_data **, enc_rep)
     krb5_data *scratch;
     krb5_encrypt_block eblock;
     krb5_error_code retval;
+    krb5_enc_kdc_rep_part tmp_encpart;
 
     if (!valid_etype(dec_rep->enc_part.etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
@@ -76,10 +77,26 @@ OLDDECLARG(krb5_data **, enc_rep)
 	return KRB5_BADMSGTYPE;
     }
 
-    retval = encode_krb5_enc_kdc_rep_part(encpart, &scratch);
+    /*
+     * We don't want to modify encpart, but we need to be able to pass
+     * in the message type to the encoder, so it can set the ASN.1
+     * type correct.
+     * 
+     * Although note that it may be doing nothing with the message
+     * type, to be compatible with old versions of Kerberos that ways
+     * encode this as a TGS_REP regardly of what it really should be;
+     * also note that the reason why we are passing it in a structure
+     * instead of as an argument to encode_krb5_enc_kdc_rep_part (the
+     * way we should) is for compatibility with the ISODE version of
+     * this fuction.  Ah, compatibility....
+     */
+    tmp_encpart = *encpart;
+    tmp_encpart.msg_type = type;
+    retval = encode_krb5_enc_kdc_rep_part(&tmp_encpart, &scratch);
     if (retval) {
 	return retval;
     }
+    memset(&tmp_encpart, 0, sizeof(tmp_encpart));
 
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
 krb5_free_data(scratch); }

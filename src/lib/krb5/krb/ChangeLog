@@ -1,3 +1,12 @@
+Wed Aug 17 17:58:22 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* encode_kdc.c (krb5_encode_kdc_rep): Pass in to
+	encode_krb5_enc_kdc_rep_part the msg_type which should be used.
+	Old versions of Kerberos always assume TGS_REP; this merely allows
+	the right msg_type to be passed down to the encoding routines.
+	For now, the encoding routines will ignore this value and do
+	things the old way, for compatibility's sake.
+
 Mon Aug  8 22:38:16 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* preauth.c: Renamed preauthentication mechanism names to match
