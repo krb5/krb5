@@ -1,3 +1,10 @@
+2004-07-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* dnssrv.c (krb5int_make_srv_query_realm) [HAVE_RES_NSEARCH]: Use
+	res_nsearch instead of res_search.
+	* hst_realm.c (krb5_try_realm_txt_rr) [HAVE_RES_NSEARCH]:
+	Likewise.
+
 2004-07-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* an_to_ln.c: Include string.h.

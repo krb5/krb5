@@ -128,7 +128,35 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
     fprintf (stderr, "sending DNS SRV query for %s\n", host);
 #endif
 
+#ifdef HAVE_RES_NSEARCH
+    {
+	res_state statp;
+	/* Weird... the man pages I've been looking at (Solaris 9) say
+	   we pass a res_state object (which is a pointer) into
+	   various routines, but they don't say much of anything about
+	   what it should point to initially or how it should be
+	   allocated.
+
+	   They also give no indication what the return value of
+	   res_ninit is.  */
+	typedef union {
+	    struct sockaddr_storage ss;
+	    INT64_TYPE i64;
+	    double d;
+	} aligned_thing;
+	aligned_thing statp_buf[(sizeof(*statp) + sizeof(aligned_thing) - 1) / sizeof(aligned_thing)];
+	int n;
+
+	statp = (res_state) &statp_buf;
+	memset(&statp_buf, 0, sizeof(statp_buf));
+	n = res_ninit(statp);
+	/* ignore n? */
+	size = res_nsearch(statp, host, C_IN, T_SRV,
+			   answer.bytes, sizeof(answer.bytes));
+    }
+#else
     size = res_search(host, C_IN, T_SRV, answer.bytes, sizeof(answer.bytes));
+#endif
 
     if ((size < hdrsize) || (size > sizeof(answer.bytes)))
 	goto out;

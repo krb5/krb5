@@ -143,7 +143,35 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
         if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
             strcpy (h, ".");
     }
+#ifdef HAVE_RES_NSEARCH
+    {
+	res_state statp;
+	/* Weird... the man pages I've been looking at (Solaris 9) say
+	   we pass a res_state object (which is a pointer) into
+	   various routines, but they don't say much of anything about
+	   what it should point to initially or how it should be
+	   allocated.
+
+	   They also give no indication what the return value of
+	   res_ninit is.  */
+	typedef union {
+	    struct sockaddr_storage ss;
+	    INT64_TYPE i64;
+	    double d;
+	} aligned_thing;
+	aligned_thing statp_buf[(sizeof(*statp) + sizeof(aligned_thing) - 1) / sizeof(aligned_thing)];
+	int n;
+
+	statp = (res_state) &statp_buf;
+	memset(&statp_buf, 0, sizeof(statp_buf));
+	n = res_ninit(statp);
+	/* ignore n? */
+	size = res_nsearch(statp, host, C_IN, T_TXT,
+			   answer.bytes, sizeof(answer.bytes));
+    }
+#else
     size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
+#endif
 
     if ((size < sizeof(HEADER)) || (size > sizeof(answer.bytes)))
 	return KRB5_ERR_HOST_REALM_UNKNOWN;
