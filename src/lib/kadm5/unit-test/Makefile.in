@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/kadm5/unit-test
+mydir=unit-test
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS  =	$(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)

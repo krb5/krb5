@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/krb5/posix
+mydir=posix
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 

@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/krb5/keytab
+mydir=keytab
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCAL_SUBDIRS = file
 

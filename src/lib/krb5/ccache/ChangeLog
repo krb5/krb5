@@ -1,3 +1,8 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
 Sat Dec  5 01:20:31 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in, ccdefops.c: Temporarily back out the ccapi ccache

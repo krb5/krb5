@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=krb524
+mydir=.
 BUILDTOP=$(REL)$(U)
 # Copyright 1994 by OpenVision Technologies, Inc.
 # 

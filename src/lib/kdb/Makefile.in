@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=lib/kdb
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 KRB5_RUN_ENV = @KRB5_RUN_ENV@

@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/krb5/rcache
+mydir=rcache
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 

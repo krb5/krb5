@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/kadm5/clnt
+mydir=clnt
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5
 

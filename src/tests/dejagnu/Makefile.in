@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=tests/dejagnu
+mydir=dejagnu
 BUILDTOP=$(REL)$(U)$(S)$(U)
 HAVE_RUNTEST = @RUNTEST@
 RUNTESTFLAGS =

@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=lib/krb5util
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) 
 

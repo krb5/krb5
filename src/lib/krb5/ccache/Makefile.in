@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/krb5/ccache
+mydir=ccache
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCAL_SUBDIRS = stdio file memory
 

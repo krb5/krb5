@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=tests/asn.1
+mydir=asn.1
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
 PROG_LIBPATH=-L$(TOPLIBD)

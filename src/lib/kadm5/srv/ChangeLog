@@ -1,3 +1,8 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
 Fri Dec  4 23:10:32 1998  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (kadm5_create_principal): Modify to call

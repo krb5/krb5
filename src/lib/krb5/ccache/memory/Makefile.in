@@ -1,4 +1,6 @@
 thisconfigdir=./../..
+myfulldir=lib/krb5/ccache/memory
+mydir=ccache/memory
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 

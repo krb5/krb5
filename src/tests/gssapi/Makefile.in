@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=tests/gssapi
+mydir=gssapi
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)

@@ -1,4 +1,6 @@
-thisconfigdir=./
+thisconfigdir=.
+myfulldir=lib/rpc/unit-test
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS	= $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I.
 PROG_LIBPATH=-L$(TOPLIBD)

@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/krb5/error_tables
+mydir=error_tables
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
