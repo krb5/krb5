@@ -1,3 +1,113 @@
+Thanks to everybody who's submitted changes and additions to Autoconf!
+I've incorporated many of them, and am still considering others for
+future releases -- but I didn't want to postpone this release indefinitely.
+
+Caution: don't indiscriminantly rebuild configure scripts with
+Autoconf version 2.  Some configure.in files need minor adjustments to
+work with it; the documentation has a chapter on upgrading.  A few
+configure.in files, including those for GNU Emacs and the GNU C
+Library, need major changes because they relied on undocumented
+internals of version 1.  Future releases of those packages will have
+updated configure.in files.
+
+It's best to use GNU m4 1.3 (or later) with Autoconf version 2.
+Autoconf now makes heavy use of m4 diversions, which were implemented
+inefficiently in GNU m4 releases before 1.3.
+
+Major changes in release 2.0:
+
+** New copyright terms:
+* There are no restrictions on distribution or use of configure scripts.
+
+** Documentation:
+* Autoconf manual is reorganized to make information easier to find
+  and has several new indexes.
+* INSTALL is reorganized and clearer and is now made from Texinfo source.
+
+** New utilities:
+* autoscan to generate a preliminary configure.in for a package by
+  scanning its source code for commonly used nonportable functions,
+  programs, and header files.
+* autoupdate to update a configure.in to use the new macro names.
+* ifnames to list the symbols used in #if and #ifdef directives in a
+  source tree.
+* autoreconf to recursively remake configure and configuration header
+  files in a source tree.
+
+** Changed utilities:
+* autoheader can take pieces of acconfig.h to replace config.h.{top,bot}.
+* autoconf and autoheader can look for package-local definition files
+  in an alternate directory.
+
+** New macros:
+* AC_CACHE_VAL to share results of tests between configure runs.
+* AC_DEFUN to define macros, automatically AC_PROVIDE them, and ensure
+  that macros invoked with AC_REQUIRE don't interrupt other macros.
+* AC_CONFIG_AUX_DIR, AC_CANONICAL_SYSTEM, AC_CANONICAL_HOST, AC_LINK_FILES to
+  support deciding unguessable features based on the host and target types.
+* AC_CONFIG_SUBDIRS to recursively configure a source tree.
+* AC_ARG_PROGRAM to use the options --program-prefix,
+  --program-suffix, and --program-transform-name to change the names
+  of programs being installed.
+* AC_PREFIX_DEFAULT to change the default prefix.
+* AC_TRY_COMPILE to compile a test program without linking it.
+* AC_CHECK_TYPE to check whether sys/types.h defines a given type.
+* AC_CHECK_LIB to check for a particular function in a library.
+* AC_MSG_CHECKING and AC_MSG_RESULT to print test results, on a single line,
+  whether or not the test succeeds.  They obsolete AC_CHECKING and AC_VERBOSE.
+* AC_SUBST_FILE to insert one file into another.
+* AC_FUNC_MEMCMP to check whether memcmp is 8-bit clean.
+* AC_FUNC_STRFTIME to find strftime even if it's in -lintl.
+* AC_FUNC_GETMNTENT to find getmntent even if it's in -lsun or -lseq.
+* AC_HEADER_SYS_WAIT to check whether sys/wait.h is POSIX.1 compatible.
+
+** Changed macros:
+* Many macros renamed systematically, but old names are accepted for
+  backward compatibility.
+* AC_OUTPUT adds the "automatically generated" comment to
+  non-Makefiles where it finds @configure_input@ in an input file, to
+  support files with various comment syntaxes.
+* AC_OUTPUT does not replace "prefix" and "exec_prefix" in generated
+  files when they are not enclosed in @ signs.
+* AC_OUTPUT allows the optional environment variable CONFIG_STATUS to
+  override the file name "config.status".
+* AC_OUTPUT takes an optional argument for passing variables from
+  configure to config.status.
+* AC_OUTPUT and AC_CONFIG_HEADER allow you to override the input-file names.
+* AC_OUTPUT automatically substitutes the values of CFLAGS, CXXFLAGS,
+  CPPFLAGS, and LDFLAGS from the environment.
+* AC_PROG_CC and AC_PROG_CXX now set CFLAGS and CXXFLAGS, respectively.
+* AC_PROG_INSTALL looks for install-sh or install.sh in the directory
+  specified by AC_CONFIG_AUXDIR, or srcdir or srcdir/.. or
+  srcdir/../.. by default.
+* AC_DEFINE, AC_DEFINE_UNQUOTED, and AC_SUBST are more robust and smaller.
+* AC_DEFINE no longer prints anything, because of the new result reporting
+  mechanism (AC_MSG_CHECKING and AC_MSG_RESULT).
+* AC_ARG_ENABLE and AC_ARG_WITH support whitespace in the arguments to
+  --enable- and --with- options.
+* AC_VERBOSE pays attention to --quiet/--silent, not --verbose.
+* AC_CHECK_FUNCS and AC_CHECK_HEADERS take optional shell commands to
+  execute on success or failure.
+* Checking for C functions in C++ works.
+
+** Removed macros:
+* AC_REMOTE_TAPE and AC_RSH removed; too specific to tar and cpio, and
+  better maintained with them.
+* AC_ARG_ARRAY removed because no one was likely using it.
+* AC_HAVE_POUNDBANG replaced with AC_SYS_INTERPRETER, which doesn't
+  take arguments, for consistency with all of the other specific checks.
+
+** New files:
+* Comes with config.sub and config.guess, and uses them optionally.
+* Uses config.cache to cache test results.  An alternate cache file
+  can be selected with the --cache-file=FILE option.
+* Uses optional shell scripts $prefix/share/config.site and
+  $prefix/etc/config.site to perform site or system specific initializations. 
+* configure saves compiler output to ./config.log for debugging.
+* New files autoconf.m4 and autoheader.m4 load the other Autoconf macros.
+* acsite.m4 is the new name for the system-wide aclocal.m4.
+* Has the beginnings of a DejaGnu test suite.
+
 Major changes in release 1.11:
 
 * AC_PROG_INSTALL calls install.sh with the -c option.
@@ -10,8 +120,8 @@ Plus a few other bug fixes.
 Major changes in release 1.10:
 
 * autoheader uses config.h.bot if present, analogous to config.h.top.
-* AC_PROG_INSTALL looks for install.sh in srcdir or srcdir/.. or
-  srcdir/../.. and never uses cp.
+* AC_PROG_INSTALL looks for install.sh in srcdir or srcdir/.. and
+  never uses cp.
 * AC_PROG_CXX looks for cxx as a C++ compiler.
 
 Plus several bugs fixed.

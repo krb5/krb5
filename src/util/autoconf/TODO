@@ -1,0 +1,102 @@
+-*- outline -*-
+
+Things it might be nice to do someday:
+
+------------------------------------------------------------------------------
+
+* Make AC_CHECK_LIB check whether the function is already available
+  before checking for the library.  This might involve adding another
+  kind of cache variable to indicate whether a given function needs a
+  given library.  The current ac_cv_func_ variables are intended to
+  indicate whether the function is in the default libraries, but
+  actually also take into account whatever value LIBS had when they
+  were checked for.
+
+------------------------------------------------------------------------------
+
+* Add AC_PROG_CC_POSIX to replace the current ad-hoc macros for AIX,
+  Minix, ISC, etc.
+
+------------------------------------------------------------------------------
+
+* Use AC_EGREP_CPP instead of AC_TRY_LINK to detect structures and members.
+
+------------------------------------------------------------------------------
+
+* Make AC_CHECK_FUNC[S] automatically use any particular macros for the
+  listed functions.
+
+------------------------------------------------------------------------------
+
+* Support creating both config.h and DEFS in the same configure.
+
+------------------------------------------------------------------------------
+
+* Select the right CONFIG_SHELL automatically (for Ultrix, Lynx especially.)
+
+------------------------------------------------------------------------------
+
+* Doc: Add concept index.
+
+------------------------------------------------------------------------------
+
+* Doc: Centralize information on POSIX, MS-DOS, cross-compiling, and
+  other important topics.
+
+------------------------------------------------------------------------------
+
+* Split up AC_SUBST substitutions using a loop to accomodate shells
+  with severely limited here document sizes, if it turns out to be a problem.
+  I'm not sure whether the limit is on lines or bytes; if bytes, it
+  will be less of a problem than it was with the long lines used for
+  creating a header file.
+  There has also been a report that HPUX and OSF/1 seds only allow 100
+  commands.
+
+------------------------------------------------------------------------------
+
+* Allow [ and ] in egrep patterns and AC_DEFINE args.
+
+------------------------------------------------------------------------------
+
+* Add a Makefile generator that supports the standard GNU targets.
+  (Being worked on.)
+
+------------------------------------------------------------------------------
+
+* Mike Haertel's suggestions:
+
+** Provide files containing decls for alloca, strings, etc.
+
+** Cross compiling:
+
+*** Error messages include instructions for overriding defaults using
+config.site.
+
+*** Distribute a config.site corresponding to a hypothetical bare POSIX system with c89.
+
+*** Cache consistency checking: ignore cache if environment
+(CC or PATH) differs.
+
+** Site defaults:
+
+*** Convention for consistency checking of env vars and options in config.site so config.site can print obnoxious messages if it doesn't like options or env vars that users use.
+
+------------------------------------------------------------------------------
+
+* autoscan: Tell the files that caused inclusion of each macro,
+in a dnl comment.  (Seems to be hard.)
+
+------------------------------------------------------------------------------
+
+* Look at user contributed macros: prototypes, IEEE double precision math, 
+shared libraries, various other things.
+
+------------------------------------------------------------------------------
+
+* Test suite: more things to test:
+** That the shell scripts produce correct output on some simple data.
+** Configuration header files.  That autoheader does the right thing,
+   and so does AC_CONFIG_HEADER when autoconf is run.
+
+------------------------------------------------------------------------------

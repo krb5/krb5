@@ -1,4 +1,4 @@
-Autoconf -- generate automatic software configuration scripts from templates
+Autoconf
 
 Autoconf is an extensible package of m4 macros that produce shell
 scripts to automatically configure software source code packages.
@@ -8,9 +8,17 @@ configuration script for a package from a template file that lists the
 operating system features that the package can use, in the form of m4
 macro calls.
 
-Autoconf requires GNU m4.  The configuration scripts produced by
-Autoconf are independent of Autoconf when they are run, so their users
-do not need to have Autoconf (or GNU m4).
+Producing configuration scripts using Autoconf requires GNU m4.  You
+must install GNU m4 (version 1.1 or later, preferably 1.3 or later
+for better performance) before configuring Autoconf, so that
+Autoconf's configure script can find it.  The configuration scripts
+produced by Autoconf are self-contained, so their users do not need to
+have Autoconf (or GNU m4).
+
+Also, some optional utilities that come with Autoconf use Perl, TCL,
+and the TCL packages Expect and DejaGNU.  However, none of those
+are required in order to use the main Autoconf program.  If they are
+not present, the affected Autoconf utilities will not be installed.
 
 The file INSTALL can be distributed with packages that use
 Autoconf-generated configure scripts and Makefiles that conform to the
@@ -22,7 +30,7 @@ to maintain many similar sets of installation instructions.
 The file `acconfig.h' contains short descriptions of the C preprocessor
 variables that Autoconf can define, suitable for copying into other
 packages' configuration headers or Makefile.in files.  You can use the
-program `autoheader' to automatically creates a configuration header
+program `autoheader' to automatically create a configuration header
 from a `configure.in', based on the information in `acconfig.h'.
 
 Mail suggestions and bug reports for Autoconf to

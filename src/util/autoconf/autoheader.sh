@@ -22,14 +22,16 @@
 # With one arg, create a header file on standard output from
 # the given template file.
 
-usage="Usage: autoheader [-h] [--help] [-m dir] [--macrodir=dir] 
-                  [-v] [--version] [template-file]" 
+usage="\
+Usage: autoheader [-h] [--help] [-m dir] [--macrodir=dir] 
+       [-l dir] [--localdir=dir] [--version] [template-file]" 
 
 # NLS nuisances.
+# Only set `LANG' and `LC_ALL' to "C" if already set.
 # These must not be set unconditionally because not all systems understand
 # e.g. LANG=C (notably SCO).
-if test "${LC_ALL+set}" = 'set' ; then LC_ALL=C; export LC_ALL; fi
-if test "${LANG+set}"   = 'set' ; then LANG=C;   export LANG;   fi
+if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
+if test "${LANG+set}"   = set; then LANG=C;   export LANG;   fi
 
 test -z "${AC_MACRODIR}" && AC_MACRODIR=@datadir@
 test -z "${M4}" && M4=@M4@
@@ -39,81 +41,57 @@ case "${M4}" in
     test -f "${M4}" || M4=m4 ;;
 esac
 
-print_version=""
+localdir=.
+show_version=no
+
 while test $# -gt 0 ; do
-   case "z${1}" in 
-      z-h | z--help | z--h* )
+   case "${1}" in 
+      -h | --help | --h* )
          echo "${usage}"; exit 0 ;;
-      z--macrodir=* | z--m*=* )
+      --localdir=* | --l*=* )
+         localdir="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
+         shift ;;
+      -l | --localdir | --l*)
+         shift
+         test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
+         localdir="${1}"
+         shift ;;
+      --macrodir=* | --m*=* )
          AC_MACRODIR="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
          shift ;;
-      z-m | z--macrodir | z--m* ) 
+      -m | --macrodir | --m* ) 
          shift
          test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
          AC_MACRODIR="${1}"
          shift ;;
-      z-v | z--version | z--v* )
-         print_version="-DAC_PRINT_VERSION"
-         shift ;;
-      z-- )     # Stop option processing
+      --version | --v* )
+         show_version=yes; shift ;;
+      -- )     # Stop option processing
         shift; break ;;
-      z- )	# Use stdin as input.
+      - )	# Use stdin as input.
         break ;;
-      z-* )
+      -* )
         echo "${usage}" 1>&2; exit 1 ;;
       * )
         break ;;
    esac
 done
 
+if test $show_version = yes; then
+  version=`sed -n 's/define.AC_ACVERSION.[ 	]*\([0-9.]*\).*/\1/p' \
+    $AC_MACRODIR/acgeneral.m4`
+  echo "Autoconf version $version"
+  exit 0
+fi
+
 TEMPLATES="${AC_MACRODIR}/acconfig.h"
-test -r acconfig.h && TEMPLATES="${TEMPLATES} acconfig.h"
-MACROFILES="${AC_MACRODIR}/acgeneral.m4 ${AC_MACRODIR}/acspecific.m4"
-test -r ${AC_MACRODIR}/aclocal.m4 \
-   && MACROFILES="${MACROFILES} ${AC_MACRODIR}/aclocal.m4"
-test -r aclocal.m4 && MACROFILES="${MACROFILES} aclocal.m4"
-MACROFILES="${print_version} ${MACROFILES}"
+test -r $localdir/acconfig.h && TEMPLATES="${TEMPLATES} $localdir/acconfig.h"
 
 case $# in
-  0) if test -n "$print_version"
-       then infile=/dev/null
-       else infile=configure.in; fi ;;
+  0) infile=configure.in ;;
   1) infile=$1 ;;
   *) echo "$usage" >&2; exit 1 ;;
 esac
-
-# These are the alternate definitions of the acgeneral.m4 macros we want to
-# redefine.  They produce strings in the output marked with "@@@" so we can
-# easily extract the information we want.  The `#' at the end of the first
-# line of each definition seems to be necessary to prevent m4 from eating
-# the newline, which makes the @@@ not always be at the beginning of a line.
-frob='define([AC_DEFINE],[#
-@@@syms="$syms $1"@@@
-])dnl
-define([AC_SIZEOF_TYPE],[#
-@@@types="$types,$1"@@@
-])dnl
-define([AC_HAVE_FUNCS],[#
-@@@funcs="$funcs $1"@@@
-])dnl
-define([AC_HAVE_HEADERS],[#
-@@@headers="$headers $1"@@@
-])dnl
-define([AC_CONFIG_HEADER],[#
-@@@config_h=$1@@@
-])dnl
-define([AC_HAVE_LIBRARY], [#
-changequote(/,/)dnl
-define(/libname/, dnl
-patsubst(patsubst($1, /lib\([^\.]*\)\.a/, /\1/), /-l/, //))dnl
-changequote([,])dnl
-@@@libs="$libs libname"@@@
-# If it was found, we do:
-$2
-# If it was not found, we do:
-$3
-])dnl
-'
 
 config_h=config.h
 syms=
@@ -122,12 +100,26 @@ funcs=
 headers=
 libs=
 
-# We extract assignments of SYMS, TYPES, FUNCS, HEADERS, and LIBS from the
+if test "$localdir" != .; then
+  use_localdir="-I$localdir -DAC_LOCALDIR=$localdir"
+else
+  use_localdir=
+fi
+
+# Use the frozen version of Autoconf if available.
+r= f=
+# Some non-GNU m4's don't reject the --help option, so give them /dev/null.
+case `$M4 --help < /dev/null 2>&1` in
+*reload-state*) test -r $AC_MACRODIR/autoheader.m4f && { r=--reload f=f; } ;;
+*traditional*) ;;
+*) echo Autoconf requires GNU m4 1.1 or later >&2; exit 1 ;;
+esac
+
+# Extract assignments of SYMS, TYPES, FUNCS, HEADERS, and LIBS from the
 # modified autoconf processing of the input file.  The sed hair is
 # necessary to win for multi-line macro invocations.
-eval "`echo \"$frob\" \
-       | $M4 $MACROFILES - $infile \
-       | sed -n -e '
+eval "`$M4 -I$AC_MACRODIR $use_localdir $r autoheader.m4$f $infile |
+       sed -n -e '
 		: again
 		/^@@@.*@@@$/s/^@@@\(.*\)@@@$/\1/p
 		/^@@@/{
@@ -137,10 +129,11 @@ eval "`echo \"$frob\" \
 			b again
 		}'`"
 
-test -n "$print_version" && exit 0
-
 # Make SYMS newline-separated rather than blank-separated, and remove dups.
-syms="`for sym in $syms; do echo $sym; done | sort | uniq`"
+# Start each symbol with a blank (to match the blank after "#undef")
+# to reduce the possibility of mistakenly matching another symbol that
+# is a substring of it.
+syms="`for sym in $syms; do echo $sym; done | sort | uniq | sed 's@^@ @'`"
 
 if test $# -eq 0; then
   tmpout=autoh$$
@@ -148,13 +141,23 @@ if test $# -eq 0; then
   exec > $tmpout
 fi
 
+# Support "outfile[:infile]", defaulting infile="outfile.in".
+case "$config_h" in
+*:*) config_h_in=`echo "$config_h"|sed 's%.*:%%'`
+     config_h=`echo "$config_h"|sed 's%:.*%%'` ;;
+*) config_h_in="${config_h}.in" ;;
+esac
+
 # Don't write "do not edit" -- it will get copied into the
 # config.h, which it's ok to edit.
-echo "/* ${config_h}.in.  Generated automatically from $infile by autoheader.  */"
+echo "/* ${config_h_in}.  Generated automatically from $infile by autoheader.  */"
 
-test -f ${config_h}.top && cat ${config_h}.top
+test -r ${config_h}.top && cat ${config_h}.top
+test -r $localdir/acconfig.h &&
+  grep @TOP@ $localdir/acconfig.h >/dev/null &&
+  sed '/@TOP@/,$d' $localdir/acconfig.h
 
-# This puts each paragraph on its own line, separated by @s.
+# This puts each template paragraph on its own line, separated by @s.
 if test -n "$syms"; then
    # Make sure the boundary of template files is also the boundary
    # of the paragraph.  Extra newlines don't hurt since they will
@@ -186,46 +189,58 @@ echo "$types" | tr , \\012 | sort | uniq | while read ctype; do
 #undef SIZEOF_${sym}"
 done
 
-for func in `for x in $funcs; do echo $x; done | sort | uniq`; do
-  sym="`echo ${func} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
-  echo "
-/* Define if you have ${func}.  */
+# /bin/sh on the Alpha gives `for' a random value if $funcs is empty.
+if test -n "$funcs"; then
+  for func in `for x in $funcs; do echo $x; done | sort | uniq`; do
+    sym="`echo ${func} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
+    echo "
+/* Define if you have the ${func} function.  */
 #undef HAVE_${sym}"
-done
+  done
+fi
 
-for header in `for x in $headers; do echo $x; done | sort | uniq`; do
-  sym="`echo ${header} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
-  echo "
+if test -n "$headers"; then
+  for header in `for x in $headers; do echo $x; done | sort | uniq`; do
+    sym="`echo ${header} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
+    echo "
 /* Define if you have the <${header}> header file.  */
 #undef HAVE_${sym}"
-done
+  done
+fi
 
-for lib in `for x in $libs; do echo $x; done | sort | uniq`; do
-  sym="`echo ${lib} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
-  echo "
+if test -n "$libs"; then
+  for lib in `for x in $libs; do echo $x; done | sort | uniq`; do
+   sym="`echo ${lib} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
+    echo "
 /* Define if you have the ${lib} library (-l${lib}).  */
 #undef HAVE_LIB${sym}"
-done
+  done
+fi
 
+test -r $localdir/acconfig.h &&
+  grep @BOTTOM@ $localdir/acconfig.h >/dev/null &&
+  sed '1,/@BOTTOM@/d' $localdir/acconfig.h
 test -f ${config_h}.bot && cat ${config_h}.bot
 
 status=0
 
-for sym in $syms; do
-  if fgrep $sym $TEMPLATES >/dev/null; then
-    : # All is well.
-  else
-    echo "$0: Symbol \`${sym}' is not covered by $TEMPLATES" >&2
-    status=1
-  fi
-done
+if test -n "$syms"; then
+  for sym in $syms; do
+    if fgrep $sym $TEMPLATES >/dev/null; then
+      : # All is well.
+    else
+      echo "$0: Symbol \`${sym}' is not covered by $TEMPLATES" >&2
+      status=1
+    fi
+  done
+fi
 
 if test $# -eq 0; then
   if test $status -eq 0; then
-    if cmp -s $tmpout ${config_h}.in; then
+    if cmp -s $tmpout ${config_h_in}; then
       rm -f $tmpout
     else
-      mv -f $tmpout ${config_h}.in
+      mv -f $tmpout ${config_h_in}
     fi
   else
     rm -f $tmpout

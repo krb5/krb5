@@ -47,7 +47,14 @@
 \let\ptexl=\l
 \let\ptexL=\L
 
-\def\tie{\penalty 10000\ }     % Save plain tex definition of ~.
+% Be sure we're in horizontal mode when doing a tie, since we make space
+% equivalent to this in @example-like environments. Otherwise, a space
+% at the beginning of a line will start with \penalty -- and
+% since \penalty is valid in vertical mode, we'd end up putting the
+% penalty on the vertical list instead of in the new paragraph.
+{\catcode`@ = 11
+ \gdef\tie{\leavevmode\penalty\@M\ }
+}
 \let\~ = \tie                  % And make it available as @~.
 
 \message{Basics,}
@@ -352,6 +359,15 @@
 % @. is an end-of-sentence period.
 \def\.{.\spacefactor=3000 }
 
+% @enddots{} is an end-of-sentence ellipsis.
+\gdef\enddots{$\mathinner{\ldotp\ldotp\ldotp\ldotp}$\spacefactor=3000}
+
+% @! is an end-of-sentence bang.
+\gdef\!{!\spacefactor=3000 }
+
+% @? is an end-of-sentence query.
+\gdef\?{?\spacefactor=3000 }
+
 % @w prevents a word break.  Without the \leavevmode, @w at the
 % beginning of a paragraph, when TeX is still in vertical mode, would
 % produce a whole line of output instead of starting the paragraph.
@@ -609,9 +625,11 @@ where each line of input produces a line of output.}
 %
 \def\ignore{\doignore{ignore}}
 
-% Also ignore @ifinfo, @menu, and @direntry text.
+% Also ignore @ifinfo, @ifhtml, @html, @menu, and @direntry text.
 %
 \def\ifinfo{\doignore{ifinfo}}
+\def\ifhtml{\doignore{ifhtml}}
+\def\html{\doignore{html}}
 \def\menu{\doignore{menu}}
 \def\direntry{\doignore{direntry}}
 
@@ -838,15 +856,15 @@ where each line of input produces a line of output.}
 
 \def\donoderef{\ifx\lastnode\relax\else
 \expandafter\expandafter\expandafter\setref{\lastnode}\fi
-\let\lastnode=\relax}
+\global\let\lastnode=\relax}
 
 \def\unnumbnoderef{\ifx\lastnode\relax\else
 \expandafter\expandafter\expandafter\unnumbsetref{\lastnode}\fi
-\let\lastnode=\relax}
+\global\let\lastnode=\relax}
 
 \def\appendixnoderef{\ifx\lastnode\relax\else
 \expandafter\expandafter\expandafter\appendixsetref{\lastnode}\fi
-\let\lastnode=\relax}
+\global\let\lastnode=\relax}
 
 \let\refill=\relax
 
@@ -1656,6 +1674,159 @@ July\or August\or September\or October\or November\or December\fi
 \hbox to 0pt{\hss \itemcontents\hskip \itemmargin}%
 \vadjust{\penalty 1200}}%
 \flushcr}
+
+% @multitable macros
+% Amy Hendrickson, 8/18/94
+%
+% @multitable ... @endmultitable will make as many columns as desired.
+% Contents of each column will wrap at width given in preamble. Width
+% can be specified either with sample text given in a template line,
+% or in percent of \hsize, the current width of text on page.
+
+% Table can continue over pages but will only break between lines.
+
+% To make preamble:
+%
+% Either define widths of columns in terms of percent of \hsize: 
+%   @multitable @percentofhsize .2 .3 .5
+%   @item ...
+%
+%   Numbers following @percentofhsize are the percent of the total
+%   current hsize to be used for each column. You may use as many
+%   columns as desired.
+
+% Or use a template:
+%   @multitable {Column 1 template} {Column 2 template} {Column 3 template}
+%   @item ...
+%   using the widest term desired in each column.
+
+
+% Each new table line starts with @item, each subsequent new column 
+% starts with @tab. Empty columns may be produced by supplying @tab's
+% with nothing between them for as many times as empty columns are needed,
+% ie, @tab@tab@tab will produce two empty columns.
+
+% @item, @tab, @multicolumn or @endmulticolumn do not need to be on their
+% own lines, but it will not hurt if they are.
+
+% Sample multitable:
+
+%   @multitable {Column 1 template} {Column 2 template} {Column 3 template}
+%   @item first col stuff @tab second col stuff @tab third col
+%   @item 
+%   first col stuff 
+%   @tab 
+%   second col stuff 
+%   @tab 
+%   third col 
+%   @item first col stuff @tab second col stuff 
+%   @tab Many paragraphs of text may be used in any column.
+%     
+%         They will wrap at the width determined by the template.
+%   @item@tab@tab This will be in third column.
+%   @endmultitable
+
+% Default dimensions may be reset by user.
+% @intableparskip will set vertical space between paragraphs in table.
+% @intableparindent will set paragraph indent in table.
+% @spacebetweencols will set horizontal space to be left between columns.
+% @spacebetweenlines will set vertical space to be left between lines.
+
+%%%%
+% Dimensions 
+
+\newdimen\intableparskip
+\newdimen\intableparindent
+\newdimen\spacebetweencols
+\newdimen\spacebetweenlines
+\intableparskip=0pt
+\intableparindent=6pt
+\spacebetweencols=12pt
+\spacebetweenlines=12pt
+
+%%%%
+% Macros used to set up halign preamble:
+\let\endsetuptable\relax
+\def\xendsetuptable{\endsetuptable}
+\let\percentofhsize\relax
+\def\xpercentofhsize{\percentofhsize}
+\newif\ifsetpercent
+
+\newcount\colcount
+\def\setuptable#1{\def\firstarg{#1}%
+\ifx\firstarg\xendsetuptable\let\go\relax%
+\else
+  \ifx\firstarg\xpercentofhsize\global\setpercenttrue%
+  \else
+    \ifsetpercent
+       \if#1.\else%
+       \global\advance\colcount by1 %
+       \expandafter\xdef\csname col\the\colcount\endcsname{.#1\hsize}%
+       \fi
+    \else
+       \global\advance\colcount by1
+       \setbox0=\hbox{#1}%
+       \expandafter\xdef\csname col\the\colcount\endcsname{\the\wd0}%
+    \fi%
+  \fi%
+  \let\go\setuptable%
+\fi\go}
+%%%%
+% multitable syntax
+\def\tab{&}
+
+%%%%
+% @multitable ... @endmultitable definitions:
+
+\def\multitable#1\item{\bgroup
+\let\item\cr
+\tolerance=9500
+\hbadness=9500
+\parskip=\intableparskip
+\parindent=\intableparindent
+\overfullrule=0pt
+\global\colcount=0\relax%
+\def\Emultitable{\global\setpercentfalse\global\everycr{}\cr\egroup\egroup}%
+ % To parse everything between @multitable and @item :
+\def\one{#1}\expandafter\setuptable\one\endsetuptable
+ % Need to reset this to 0 after \setuptable.
+\global\colcount=0\relax% 
+ %
+ % This preamble sets up a generic column definition, which will
+ % be used as many times as user calls for columns.
+ % \vtop will set a single line and will also let text wrap and 
+ % continue for many paragraphs if desired.
+\halign\bgroup&\global\advance\colcount by 1\relax%
+\vtop{\hsize=\expandafter\csname col\the\colcount\endcsname
+ % In order to keep entries from bumping into each other
+ % we will add a \leftskip of \spacebetweencols to all columns after
+ % the first one.
+ %  If a template has been used, we will add \spacebetweencols 
+ % to the width of each template entry.
+ %  If user has set preamble in terms of percent of \hsize
+ % we will use that dimension as the width of the column, and
+ % the \leftskip will keep entries from bumping into each other.
+ % Table will start at left margin and final column will justify at
+ % right margin.
+\ifnum\colcount=1
+\else
+  \ifsetpercent
+  \else
+   % If user has <not> set preamble in terms of percent of \hsize
+   % we will advance \hsize by \spacebetweencols 
+  \advance\hsize by \spacebetweencols
+  \fi
+ % In either case we will make \leftskip=\spacebetweencols:
+\leftskip=\spacebetweencols
+\fi
+\noindent##}\cr%
+ % \everycr will reset column counter, \colcount, at the end of
+ % each line. Every column  entry will cause \colcount to advance by one. 
+ % The table preamble
+ % looks at the current \colcount to find the correct column width.
+\global\everycr{\noalign{\nointerlineskip\vskip\spacebetweenlines
+\filbreak%% keeps underfull box messages off when table breaks over pages.
+\global\colcount=0\relax}}}
 
 \message{indexing,}
 % Index generation facilities
@@ -2674,6 +2845,7 @@ July\or August\or September\or October\or November\or December\fi
    \unnumbchapmacro{#1}\def\thischapter{}%
    \begingroup   		% Set up to handle contents files properly.
       \catcode`\\=0  \catcode`\{=1  \catcode`\}=2  \catcode`\@=11
+      \catcode`\^=7 % to see ^^e4 as \"a etc. juha@piuha.ydi.vtt.fi
       \raggedbottom             % Worry more about breakpoints than the bottom.
       \advance\hsize by -\contentsrightmargin % Don't use the full line length.
 }
@@ -3095,23 +3267,26 @@ July\or August\or September\or October\or November\or December\fi
   \advance\leftskip by 0pt plus 1fill
   \gobble}
 
-% @quotation does normal linebreaking and narrows the margins.
+% @quotation does normal linebreaking (hence we can't use \nonfillstart)
+% and narrows the margins.
 %
 \def\quotation{%
-\begingroup\inENV %This group ends at the end of the @quotation body
-{\parskip=0pt  % because we will skip by \parskip too, later
-\aboveenvbreak}%
-\singlespace
-\parindent=0pt
-\let\Equotation = \nonfillfinish
-% @cartouche defines \nonarrowing to inhibit narrowing
-% at next level down.
-\ifx\nonarrowing\relax
-\advance \leftskip by \lispnarrowing
-\advance \rightskip by \lispnarrowing
-\exdentamount=\lispnarrowing
-\let\nonarrowing=\relax
-\fi}
+  \begingroup\inENV %This group ends at the end of the @quotation body
+  {\parskip=0pt \aboveenvbreak}% because \aboveenvbreak inserts \parskip
+  \singlespace
+  \parindent=0pt
+  % We have retained a nonzero parskip for the environment, since we're
+  % doing normal filling. So to avoid extra space below the environment...
+  \def\Equotation{\parskip = 0pt \nonfillfinish}%
+  %
+  % @cartouche defines \nonarrowing to inhibit narrowing at next level down.
+  \ifx\nonarrowing\relax
+    \advance\leftskip by \lispnarrowing
+    \advance\rightskip by \lispnarrowing
+    \exdentamount = \lispnarrowing
+    \let\nonarrowing = \relax
+  \fi
+}
 
 \message{defuns,}
 % Define formatter for defuns
@@ -3388,7 +3563,7 @@ July\or August\or September\or October\or November\or December\fi
 % #1 is the data type, #2 the name, #3 the args.
 \def\deftypefunheaderx #1#2 #3\relax{%
 \doind {fn}{\code{#2}}% Make entry in function index
-\begingroup\defname {\code{#1} #2}{Function}%
+\begingroup\defname {\defheaderxcond#1\relax$$$#2}{Function}%
 \deftypefunargs {#3}\endgroup %
 \catcode 61=\other % Turn off change made in \defparsebody
 }
@@ -3396,6 +3571,10 @@ July\or August\or September\or October\or November\or December\fi
 % @deftypefn {Library Function} int foobar (int @var{foo}, float @var{bar})
 
 \def\deftypefn{\defmethparsebody\Edeftypefn\deftypefnx\deftypefnheader}
+
+% \defheaderxcond#1\relax$$$
+% puts #1 in @code, followed by a space, but does nothing if #1 is null.
+\def\defheaderxcond#1#2$$${\ifx#1\relax\else\code{#1#2} \fi}
 
 % #1 is the classification.  #2 is the data type.  #3 is the name and args.
 \def\deftypefnheader #1#2#3{\deftypefnheaderx{#1}{#2}#3 \relax}
@@ -3405,7 +3584,7 @@ July\or August\or September\or October\or November\or December\fi
 \begingroup
 \normalparens % notably, turn off `&' magic, which prevents
 %               at least some C++ text from working
-\defname {\code{#2} #3}{#1}%
+\defname {\defheaderxcond#2\relax$$$#3}{#1}%
 \deftypefunargs {#4}\endgroup %
 \catcode 61=\other % Turn off change made in \defparsebody
 }
@@ -3533,7 +3712,7 @@ July\or August\or September\or October\or November\or December\fi
 % #1 is the data type.  #2 is the name.
 \def\deftypevarheader #1#2{%
 \doind {vr}{\code{#2}}% Make entry in variables index
-\begingroup\defname {\code{#1} #2}{Variable}%
+\begingroup\defname {\defheaderxcond#1\relax$$$#2}{Variable}%
 \interlinepenalty=10000
 \endgraf\penalty 10000\vskip -\parskip\penalty 10000
 \endgroup}
@@ -3543,7 +3722,7 @@ July\or August\or September\or October\or November\or December\fi
 \def\deftypevr{\defvrparsebody\Edeftypevr\deftypevrx\deftypevrheader}
 
 \def\deftypevrheader #1#2#3{\doind {vr}{\code{#3}}%
-\begingroup\defname {\code{#2} #3}{#1}
+\begingroup\defname {\defheaderxcond#2\relax$$$#3}{#1}
 \interlinepenalty=10000
 \endgraf\penalty 10000\vskip -\parskip\penalty 10000
 \endgroup}
@@ -3607,44 +3786,53 @@ July\or August\or September\or October\or November\or December\fi
 \def\pxref#1{\putwordsee{} \xrefX[#1,,,,,,,]}
 \def\xref#1{\putwordSee{} \xrefX[#1,,,,,,,]}
 \def\ref#1{\xrefX[#1,,,,,,,]}
-\def\xrefX[#1,#2,#3,#4,#5,#6]{\begingroup%
-\def\printedmanual{\ignorespaces #5}%
-\def\printednodename{\ignorespaces #3}%
-\def\correctnodename{{\normalturnoffactive\printednodename}}%
-\setbox1=\hbox{\printedmanual}%
-\setbox0=\hbox{\printednodename}%
-\ifdim \wd0=0pt%
-% No printed node name was explicitly given.
-\ifx SETxref-automatic-section-title %
-% This line should make the actual chapter or section title appear inside
-% the square brackets.  Use the real section title if we have it.
-\ifdim \wd1>0pt%
-% It is in another manual, so we don't have it.
-\def\printednodename{\ignorespaces #1} \else%
-% We know the real title if we have the xref values.
-\ifhavexrefs \def\printednodename{\refx{#1-title}}%
-% Otherwise just copy the Info node name.
-\else \def\printednodename{\ignorespaces #1} \fi%
-\fi\def\printednodename{#1-title}%
-\else% This line just uses the node name.
-\def\printednodename{\ignorespaces #1}%
-\fi% ends \ifx SETxref-automatic-section-title
-\fi% ends \ifdim \wd0
-%
-%
-% If we use \unhbox0 and \unhbox1 to print the node names, TeX does
-% not insert empty discretionaries after hyphens, which means that it
-% will not find a line break at a hyphen in a node names.  Since some
-% manuals are best written with fairly long node names, containing
-% hyphens, this is a loss.  Therefore, we simply give the text of
-% the node name again, so it is as if TeX is seeing it for the first
-% time.
-\ifdim \wd1>0pt
-\putwordsection{} ``\correctnodename'' in \cite{\printedmanual}%
-\else%
-\turnoffactive%
-\refx{#1-snt}{} [\correctnodename], \putwordpage\tie\refx{#1-pg}{}%
-\fi
+\def\xrefX[#1,#2,#3,#4,#5,#6]{\begingroup
+  \def\printedmanual{\ignorespaces #5}%
+  \def\printednodename{\ignorespaces #3}%
+  \setbox1=\hbox{\printedmanual}%
+  \setbox0=\hbox{\printednodename}%
+  \ifdim \wd0 = 0pt
+    % No printed node name was explicitly given.
+    \ifx\SETxref-automatic-section-title\relax %
+      % Use the actual chapter/section title appear inside
+      % the square brackets.  Use the real section title if we have it.
+      \ifdim \wd1>0pt%
+        % It is in another manual, so we don't have it.
+        \def\printednodename{\ignorespaces #1}%
+      \else
+        \ifhavexrefs
+          % We know the real title if we have the xref values.
+          \def\printednodename{\refx{#1-title}}%
+        \else
+          % Otherwise just copy the Info node name.
+          \def\printednodename{\ignorespaces #1}%
+        \fi%
+      \fi
+      \def\printednodename{#1-title}%
+    \else
+      % Use the node name inside the square brackets.
+      \def\printednodename{\ignorespaces #1}%
+    \fi
+  \fi
+  %
+  % If we use \unhbox0 and \unhbox1 to print the node names, TeX does not
+  % insert empty discretionaries after hyphens, which means that it will
+  % not find a line break at a hyphen in a node names.  Since some manuals
+  % are best written with fairly long node names, containing hyphens, this
+  % is a loss.  Therefore, we give the text of the node name again, so it
+  % is as if TeX is seeing it for the first time.
+  \ifdim \wd1 > 0pt
+    \putwordsection{} ``\printednodename'' in \cite{\printedmanual}%
+  \else
+    % _ (for example) has to be the character _ for the purposes of the
+    % control sequence corresponding to the node, but it has to expand
+    % into the usual \leavevmode...\vrule stuff for purposes of
+    % printing. So we \turnoffactive for the \refx-snt, back on for the
+    % printing, back off for the \refx-pg.
+    {\turnoffactive \refx{#1-snt}{}}%
+    \space [\printednodename],\space
+    \turnoffactive \putwordpage\tie\refx{#1-pg}{}%
+  \fi
 \endgroup}
 
 % \dosetq is the interface for calls from other macros
@@ -3772,6 +3960,15 @@ July\or August\or September\or October\or November\or December\fi
 \catcode `\&=\other
 % `\+ does not work, so use 43.
 \catcode 43=\other
+% Make the characters 128-255 be printing characters
+{%
+  \count 1=128
+  \def\loop{%
+    \catcode\count 1=\other
+    \advance\count 1 by 1
+    \ifnum \count 1<256 \loop \fi
+  }%
+}%
 % the aux file uses ' as the escape.
 % Turn off \ as an escape so we do not lose on
 % entries which were dumped with control sequences in their names.
@@ -3997,6 +4194,28 @@ July\or August\or September\or October\or November\or December\fi
 \global\pagewidth=\hsize
 \global\pageheight=\vsize
 }
+
+% Allow control of the text dimensions.  Parameters in order: textheight;
+% textwidth; \voffset; \hoffset (!); binding offset.  All require a dimension;
+% header is additional; added length extends the bottom of the page.
+
+\def\changepagesizes#1#2#3#4#5
+{\global\vsize= #1
+ \advance\vsize by \topskip
+ \global\voffset= #3
+ \global\hsize= #2
+ \global\outerhsize=\hsize
+ \global\advance\outerhsize by 0.5in
+ \global\outervsize=\vsize
+ \global\advance\outervsize by 0.6in
+ \global\pagewidth=\hsize
+ \global\pageheight=\vsize
+ \global\normaloffset= #4
+ \global\bindingoffset= #5}
+
+% This layout is compatible with Latex on A4 paper.
+
+\def\afourlatex{\changepagesizes{22cm}{15cm}{7mm}{4.6mm}{5mm}}
 
 % Define macros to output various characters with catcode for normal text.
 \catcode`\"=\other
