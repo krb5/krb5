@@ -195,7 +195,7 @@ char *argv[];
     csentry = master_encblock.crypto_entry;
 
     if (!dbname)
-	dbname = DEFAULT_DBM_FILE;	/* XXX? */
+	dbname = DEFAULT_KDB_FILE;	/* XXX? */
 
     if (!cur_realm) {
 	if (retval = krb5_get_default_realm(&cur_realm)) {
