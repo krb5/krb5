@@ -1,3 +1,8 @@
+Fri Sep 15 05:05:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (kerbsrc-nt.zip): Update production rule to be like
+		the modified kerbsrc.zip rule.
+
 Tue Sep 12 22:06:24 1995  John Rivlin (jrivlin@fusion.com)
 
 	* Makefile.in: Added telnet to Mac file list
