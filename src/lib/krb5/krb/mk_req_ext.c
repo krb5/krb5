@@ -98,9 +98,9 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
 	return(retval);
     
-    /* verify a valid etype is available */
-    if (!valid_etype(request.ticket->enc_part.etype)) {
-	retval = KRB5_PROG_ETYPE_NOSUPP;
+    /* verify a valid keytype is available */
+    if (!valid_keytype(request.ticket->enc_part.keytype)) {
+	retval = KRB5_PROG_KEYTYPE_NOSUPP;
 	goto cleanup;
     }
 
@@ -185,8 +185,8 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(context, &eblock, request.ticket->enc_part.etype);
-    request.authenticator.etype = request.ticket->enc_part.etype;
+    krb5_use_keytype(context, &eblock, request.ticket->enc_part.keytype);
+    request.authenticator.keytype = request.ticket->enc_part.keytype;
     request.authenticator.kvno = 0;
     request.authenticator.ciphertext.length =
 	krb5_encrypt_size(scratch->length, eblock.crypto_entry);

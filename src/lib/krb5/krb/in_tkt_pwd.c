@@ -96,12 +96,12 @@ pwd_keyproc(context, type, salt, keyseed, key)
  returns system errors, encryption errors
  */
 krb5_error_code INTERFACE
-krb5_get_in_tkt_with_password(context, options, addrs, etypes, pre_auth_types, 
+krb5_get_in_tkt_with_password(context, options, addrs, ktypes, pre_auth_types, 
 			      password, ccache, creds, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_enctype * etypes;
+    krb5_keytype * ktypes;
     krb5_preauthtype * pre_auth_types;
     const char * password;
     krb5_ccache ccache;
@@ -118,7 +118,7 @@ krb5_get_in_tkt_with_password(context, options, addrs, etypes, pre_auth_types,
 	data.length = 0;
     }
 
-    retval = krb5_get_in_tkt(context, options, addrs, etypes, pre_auth_types, 
+    retval = krb5_get_in_tkt(context, options, addrs, ktypes, pre_auth_types, 
 			     pwd_keyproc, (krb5_pointer) &data,
 			     krb5_kdc_rep_decrypt_proc, 0,
 			     creds, ccache, ret_as_reply);

@@ -66,7 +66,6 @@ krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
     (*ppcreds)->second_ticket = *pdata;
     krb5_xfree(pdata);
 
-    (*ppcreds)->keyblock.etype = pkdcrep->ticket->enc_part.etype;
     (*ppcreds)->ticket_flags = pkdcrep->enc_part2->flags;
     (*ppcreds)->times = pkdcrep->enc_part2->times;
     (*ppcreds)->magic = KV5M_CREDS;
@@ -172,8 +171,7 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     }
 
     if ((retval = krb5_decode_kdc_rep(context, &tgsrep.response,
-				      &tkt->keyblock,
-				      tkt->keyblock.etype, &dec_rep)))
+				      &tkt->keyblock, &dec_rep)))
 	goto error_4;
 
     if (dec_rep->msg_type != KRB5_TGS_REP) {

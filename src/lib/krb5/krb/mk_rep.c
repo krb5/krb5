@@ -44,21 +44,15 @@ krb5_mk_rep(context, auth_context, outbuf)
 {
     krb5_error_code 	  retval;
     krb5_keytype 	  keytype;
-    krb5_enctype 	  etype;
     krb5_ap_rep_enc_part  repl;
     krb5_encrypt_block 	  eblock;
     krb5_ap_rep 	  reply;
     krb5_data 		* scratch;
     krb5_data 		* toutbuf;
 
-    /* verify a valid etype is available */
+    /* verify a valid keytype is available */
     if (!valid_keytype(keytype = auth_context->keyblock->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
-
-    etype = krb5_keytype_array[keytype]->system->proto_enctype;
-
-    if (!valid_etype(etype))
-	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* Make the reply */
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
@@ -79,8 +73,8 @@ krb5_mk_rep(context, auth_context, outbuf)
 	return retval;
 
     /* put together an eblock for this encryption */
-    krb5_use_cstype(context, &eblock, etype);
-    reply.enc_part.etype = etype;
+    krb5_use_keytype(context, &eblock, keytype);
+    reply.enc_part.keytype = keytype;
     reply.enc_part.kvno = 0;		/* XXX user set? */
 
     reply.enc_part.ciphertext.length = krb5_encrypt_size(scratch->length,

@@ -74,10 +74,10 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
     krb5_keytab_entry 	  ktent;
 
     /*
-     * OK we know the encryption type req->ticket->enc_part.etype, 
+     * OK we know the encryption type req->ticket->enc_part.keytype, 
      * and now we need to get the keytype
      */
-    keytype = krb5_csarray[req->ticket->enc_part.etype]->system->proto_keytype;
+    keytype = req->ticket->enc_part.keytype;
 
     if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
 				    req->ticket->enc_part.kvno,
@@ -306,10 +306,7 @@ decrypt_authenticator(context, request, authpp)
 
     /* put together an eblock for this encryption */
 
-    if (!valid_etype(request->authenticator.etype))
-	return KRB5_PROG_ETYPE_NOSUPP;
-
-    krb5_use_cstype(context, &eblock, request->authenticator.etype);
+    krb5_use_keytype(context, &eblock, request->authenticator.keytype);
 
     scratch.length = request->authenticator.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length)))
@@ -340,8 +337,6 @@ free(scratch.data);}
     /*  now decode the decrypted stuff */
     if (!(retval = decode_krb5_authenticator(&scratch, &local_auth))) {
 	*authpp = local_auth;
-	if (local_auth->subkey)
-		local_auth->subkey->etype = request->authenticator.etype;
     }
     clean_scratch();
     return retval;

@@ -45,7 +45,7 @@ krb5_kdc_rep_decrypt_proc(context, key, decryptarg, dec_rep)
     krb5_data scratch;
     krb5_enc_kdc_rep_part *local_encpart;
 
-    if (!valid_etype(dec_rep->enc_part.etype))
+    if (!valid_keytype(dec_rep->enc_part.keytype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* set up scratch decrypt/decode area */
@@ -57,7 +57,7 @@ krb5_kdc_rep_decrypt_proc(context, key, decryptarg, dec_rep)
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(context, &eblock, dec_rep->enc_part.etype);
+    krb5_use_keytype(context, &eblock, dec_rep->enc_part.keytype);
 
     /* do any necessary key pre-processing */
     if ((retval = krb5_process_key(context, &eblock, key))) {

@@ -54,7 +54,7 @@ krb5_encode_kdc_rep(context, type, encpart, eblock, client_key, dec_rep, enc_rep
     krb5_error_code retval;
     krb5_enc_kdc_rep_part tmp_encpart;
 
-    if (!valid_etype(dec_rep->enc_part.etype))
+    if (!valid_keytype(dec_rep->enc_part.keytype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     switch (type) {
@@ -127,7 +127,7 @@ dec_rep->enc_part.ciphertext.data = 0;}
 	goto clean_prockey;
     }
 
-    dec_rep->enc_part.etype = krb5_eblock_enctype(context, eblock);
+    dec_rep->enc_part.keytype = krb5_eblock_keytype(context, eblock);
 
     /* do some cleanup */
     cleanup_scratch();

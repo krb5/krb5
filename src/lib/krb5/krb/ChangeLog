@@ -1,3 +1,13 @@
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * decode_kdc.c, decrypt_tk.c, encode_kdc.c, encrypt_tk.c, gc_frm_kdc.c
+	* gc_via_tkt.c, get_in_tkt.c, in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c
+	* init_ctx.c, kdc_rep_dc.c, mk_cred.c, mk_priv.c, mk_rep.c
+	* mk_req_ext.c, rd_cred.c, rd_priv.c, rd_rep.c, rd_req_dec.c,
+	* send_tgs.c, ser_ctx.c, ser_eblk.c, ser_key.c, t_ser.c: 
+		Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
+
 Fri Sep  1 20:03:41 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* get_in_tkt.c (krb5_get_in_tkt): If kdc_settime is enabled, then

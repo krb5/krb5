@@ -42,7 +42,7 @@ krb5_init_context(context)
 	ctx->magic = KV5M_CONTEXT;
 
 	/* Set the default encryption types, possible defined in krb5/conf */
-	if ((retval = krb5_set_default_in_tkt_etypes(ctx, NULL)))
+	if ((retval = krb5_set_default_in_tkt_ktypes(ctx, NULL)))
 		goto cleanup;
 
 	if ((retval = krb5_os_init_context(ctx)))
@@ -74,8 +74,8 @@ krb5_free_context(ctx)
 {
      krb5_os_free_context(ctx);
 
-     if (ctx->etypes)
-          free(ctx->etypes);
+     if (ctx->ktypes)
+          free(ctx->ktypes);
 
      if (ctx->default_realm)
 	  free(ctx->default_realm);
@@ -88,25 +88,25 @@ krb5_free_context(ctx)
 }
 
 /*
- * Set the desired default etypes, making sure they are valid.
+ * Set the desired default ktypes, making sure they are valid.
  */
 krb5_error_code
-krb5_set_default_in_tkt_etypes(context, etypes)
+krb5_set_default_in_tkt_ktypes(context, ktypes)
 	krb5_context context;
-	const krb5_enctype *etypes;
+	const krb5_keytype *ktypes;
 {
-    krb5_enctype * new_etypes;
+    krb5_keytype * new_ktypes;
     int i;
 
-    if (etypes) {
-	for (i = 0; etypes[i]; i++) {
-	    if (!valid_etype(etypes[i])) 
+    if (ktypes) {
+	for (i = 0; ktypes[i]; i++) {
+	    if (!valid_keytype(ktypes[i])) 
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
 
-	/* Now copy the default etypes into the context pointer */
-	if ((new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)))
-	    memcpy(new_etypes, etypes, sizeof(krb5_enctype) * i);
+	/* Now copy the default ktypes into the context pointer */
+	if ((new_ktypes = (krb5_keytype *)malloc(sizeof(krb5_keytype) * i)))
+	    memcpy(new_ktypes, ktypes, sizeof(krb5_keytype) * i);
 	else
 	    return ENOMEM;
 
@@ -114,38 +114,38 @@ krb5_set_default_in_tkt_etypes(context, etypes)
 	i = 2;
 
 	/* Should reset the list to the runtime defaults */
-	if ((new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i))) {
-	    new_etypes[0] = ETYPE_DES_CBC_MD5;
-	    new_etypes[1] = ETYPE_DES_CBC_CRC;
+	if ((new_ktypes = (krb5_keytype *)malloc(sizeof(krb5_keytype) * i))) {
+	    new_ktypes[0] = KEYTYPE_DES_CBC_MD5;
+	    new_ktypes[1] = KEYTYPE_DES_CBC_CRC;
 	} else {
 	    return ENOMEM;
 	}
     }
 
-    if (context->etypes) 
-        free(context->etypes);
-    context->etypes = new_etypes;
-    context->etype_count = i;
+    if (context->ktypes) 
+        free(context->ktypes);
+    context->ktypes = new_ktypes;
+    context->ktype_count = i;
     return 0;
 }
 
 krb5_error_code
-krb5_get_default_in_tkt_etypes(context, etypes)
+krb5_get_default_in_tkt_ktypes(context, ktypes)
     krb5_context context;
-    krb5_enctype **etypes;
+    krb5_keytype **ktypes;
 {
-    krb5_enctype * old_etypes;
+    krb5_keytype * old_ktypes;
 
-    if ((old_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-					     (context->etype_count + 1)))) {
-	memcpy(old_etypes, context->etypes, sizeof(krb5_enctype) * 
-		  		context->etype_count);
-	old_etypes[context->etype_count] = 0;
+    if ((old_ktypes = (krb5_keytype *)malloc(sizeof(krb5_keytype) *
+					     (context->ktype_count + 1)))) {
+	memcpy(old_ktypes, context->ktypes, sizeof(krb5_keytype) * 
+		  		context->ktype_count);
+	old_ktypes[context->ktype_count] = 0;
     } else {
 	return ENOMEM;
     }
 
-    *etypes = old_etypes;
+    *ktypes = old_ktypes;
     return 0;
 	
 }

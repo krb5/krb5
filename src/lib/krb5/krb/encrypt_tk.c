@@ -95,7 +95,7 @@ dec_ticket->enc_part.ciphertext.data = 0;}
 	goto clean_prockey;
     }
 
-    dec_ticket->enc_part.etype = krb5_eblock_enctype(context, eblock);
+    dec_ticket->enc_part.keytype = krb5_eblock_keytype(context, eblock);
 
     /* ticket is now assembled-- do some cleanup */
     cleanup_scratch();

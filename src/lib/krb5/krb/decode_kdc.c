@@ -40,11 +40,10 @@
  */
 
 krb5_error_code
-krb5_decode_kdc_rep(context, enc_rep, key, etype, dec_rep)
+krb5_decode_kdc_rep(context, enc_rep, key, dec_rep)
     krb5_context context;
     krb5_data * enc_rep;
     const krb5_keyblock * key;
-    const krb5_enctype etype;
     krb5_kdc_rep ** dec_rep;
 {
     krb5_error_code retval;
@@ -60,16 +59,10 @@ krb5_decode_kdc_rep(context, enc_rep, key, etype, dec_rep)
     if (retval)
 	return retval;
 
-    if (local_dec_rep->enc_part.etype != etype) {
+    if (retval = krb5_kdc_rep_decrypt_proc(context, key, 0, local_dec_rep)) 
 	krb5_free_kdc_rep(context, local_dec_rep);
-	return KRB5_WRONG_ETYPE;
-    }
-    retval = krb5_kdc_rep_decrypt_proc(context, key, 0, local_dec_rep);
-    if (retval) {
-	krb5_free_kdc_rep(context, local_dec_rep);
-	return(retval);
-    }
-    *dec_rep = local_dec_rep;
-    return 0;
+    else
+    	*dec_rep = local_dec_rep;
+    return(retval);
 }
 

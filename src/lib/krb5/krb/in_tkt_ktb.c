@@ -113,12 +113,12 @@ cleanup:
 
  */
 krb5_error_code
-krb5_get_in_tkt_with_keytab(context, options, addrs, etypes, pre_auth_types, 
+krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes, pre_auth_types, 
 			    keytab, ccache, creds, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_enctype * etypes;
+    krb5_keytype * ktypes;
     krb5_preauthtype * pre_auth_types;
     const krb5_keytab keytab;
     krb5_ccache ccache;
@@ -130,7 +130,7 @@ krb5_get_in_tkt_with_keytab(context, options, addrs, etypes, pre_auth_types,
     arg.keytab = keytab;
     arg.client = creds->client;
 
-    return (krb5_get_in_tkt(context, options, addrs, etypes, pre_auth_types, 
+    return (krb5_get_in_tkt(context, options, addrs, ktypes, pre_auth_types, 
 			    keytab_keyproc, (krb5_pointer)&arg,
 			    krb5_kdc_rep_decrypt_proc, 0, creds,
 			    ccache, ret_as_reply));

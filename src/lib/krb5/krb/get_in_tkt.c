@@ -71,12 +71,12 @@ typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
 krb5_error_code
-krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
+krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_enctype * etypes;
+    krb5_keytype * ktypes;
     krb5_preauthtype * ptypes;
     git_key_proc key_proc;
     krb5_const_pointer keyseed;
@@ -86,8 +86,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     krb5_ccache ccache;
     krb5_kdc_rep ** ret_as_reply;
 {
-    krb5_keytype keytype;
-    krb5_enctype etype;
+    krb5_keytype keytype, ktype;
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply = 0;
     krb5_error *err_reply;
@@ -160,11 +159,17 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
 
-    if (etypes) 
-	request.etype = etypes;
+    if ((retval = krb5_timeofday(context, &time_now)))
+	goto cleanup;
+
+    /* XXX we know they are the same size... */
+    request.nonce = (krb5_int32) time_now;
+
+    if (ktypes) 
+	request.ktype = ktypes;
     else 
-    	krb5_get_default_in_tkt_etypes(context, &request.etype);
-    for (request.netypes = 0;request.etype[request.netypes];request.netypes++);
+    	krb5_get_default_in_tkt_ktypes(context, &request.ktype);
+    for (request.nktypes = 0;request.ktype[request.nktypes];request.nktypes++);
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
     request.unenc_authdata = 0;
@@ -178,8 +183,8 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 
     /* encode & send to KDC */
     retval = encode_krb5_as_req(&request, &packet);
-    if (!etypes)
-      free(request.etype);
+    if (!ktypes)
+      free(request.ktype);
     if (retval)
       goto cleanup;
 
@@ -245,8 +250,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     }
 
     /* Encryption type, keytype, */
-    etype = as_reply->ticket->enc_part.etype;
-    keytype = krb5_csarray[etype]->system->proto_keytype;
+    keytype = as_reply->ticket->enc_part.keytype;
 
     /* and salt */
     if (as_reply->padata) {
@@ -326,7 +330,6 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 					      as_reply->enc_part2->session,
 					      &creds->keyblock)))
 	goto cleanup;
-    creds->keyblock.etype = as_reply->ticket->enc_part.etype;
 
     creds->times = as_reply->enc_part2->times;
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot

@@ -31,7 +31,7 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
     krb5_encrypt_block 	  eblock;
     krb5_data 		* scratch;
 
-    if (!valid_etype(pkeyblock->etype))
+    if (!valid_keytype(pkeyblock->keytype))
     	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* start by encoding to-be-encrypted part of the message */
@@ -41,9 +41,9 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
     /* put together an eblock for this encryption */
 
     pencdata->kvno = 0;
-    pencdata->etype = pkeyblock->etype;
+    pencdata->keytype = pkeyblock->keytype;
 
-    krb5_use_cstype(context, &eblock, pkeyblock->etype);
+    krb5_use_keytype(context, &eblock, pkeyblock->keytype);
     pencdata->ciphertext.length = krb5_encrypt_size(scratch->length, 
 						    eblock.crypto_entry);
 
