@@ -1,3 +1,8 @@
+Fri Jan 23 22:19:39 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Add AC_PROG_INSTALL since it's need by the install
+		rules.
+
 Tue Nov 18 18:57:07 1997  Tom Yu  <tlyu@mit.edu>
 
 	* quad_cksum.c (des_quad_cksum): Reorder parameters to match the
