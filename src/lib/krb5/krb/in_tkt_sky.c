@@ -40,14 +40,14 @@ struct skey_keyproc_arg {
  * "keyseed" is actually a krb5_keyblock *, or NULL if we should fetch
  * from system area.
  */
-krb5_error_code skey_keyproc
+static krb5_error_code skey_keyproc
     PROTOTYPE((krb5_context,
                const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
                krb5_keyblock **));
 
-krb5_error_code
+static krb5_error_code
 skey_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
     const krb5_enctype type;

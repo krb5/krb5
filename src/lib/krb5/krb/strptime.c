@@ -35,24 +35,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
 __RCSID("$NetBSD: strptime.c,v 1.18 1999/04/29 02:58:30 tv Exp $");
 #endif
 
-#include "namespace.h"
-#include <sys/localedef.h>
 #include <ctype.h>
-#include <locale.h>
 #include <string.h>
 #include <time.h>
-#include <tzfile.h>
 
-#ifdef __weak_alias
-__weak_alias(strptime,_strptime);
-#endif
-
-#define	_ctloc(x)		__CONCAT(_CurrentTimeLocale->,x)
+#undef _ctloc
+#define _ctloc(x)		_CurrentTimeLocale->x
 
 /*
  * We do not implement alternate representations. However, we always
@@ -66,7 +58,7 @@ __weak_alias(strptime,_strptime);
 static	int conv_num __P((const char **, int *, int, int));
 
 
-char *
+static char *
 strptime(buf, fmt, tm)
 	const char *buf, *fmt;
 	struct tm *tm;

@@ -33,7 +33,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
 #if 0
 static char *sccsid = "@(#)strftime.c	5.11 (Berkeley) 2/24/91";
@@ -42,11 +41,7 @@ __RCSID("$NetBSD: strftime.c,v 1.8 1999/02/07 17:33:30 augustss Exp $");
 #endif
 #endif /* LIBC_SCCS and not lint */
 
-#include "namespace.h"
-#include <sys/localedef.h>
-#include <locale.h>
 #include <string.h>
-#include <tzfile.h>
 #include <time.h>
 
 static	int _add __P((const char *, char **, const char *));
@@ -55,7 +50,7 @@ static	int _secs __P((const struct tm *, char **, const char *));
 static	size_t _fmt __P((const char *, const struct tm *, char **,
 	    const char *));
 
-size_t
+static size_t
 strftime(s, maxsize, format, t)
 	char *s;
 	size_t maxsize;
