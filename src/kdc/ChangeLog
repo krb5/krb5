@@ -1,3 +1,7 @@
+2001-07-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Include stdlib.h in test for swab declaration.
+
 2001-07-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* rtest.c: Provide a prototype for krb5_klog_syslog() dummy handler.

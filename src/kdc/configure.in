@@ -7,6 +7,8 @@ KRB5_NEED_PROTO([#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+/* Solaris 8 declares swab in stdlib.h.  */
+#include <stdlib.h>
 ],swab,1)
 dnl
 KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
