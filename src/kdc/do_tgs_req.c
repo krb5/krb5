@@ -297,7 +297,7 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* realm compare is like strcmp, but knows how to deal with these args */
     if (!realm_compare(realm_of_tgt(header_ticket),
-		      header_ticket->server)) {
+		       header_ticket->server)) {
 	/* tgt issued by local realm */
 	enc_tkt_reply.transited = header_ticket->enc_part2->transited;
     } else {
