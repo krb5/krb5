@@ -25,13 +25,19 @@ kadm5_create_principal(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
+    memset(&arg, 0, sizeof(arg));
     arg.mask = mask;
     arg.passwd = pw;
     arg.api_version = handle->api_version;
 
     if(princ == NULL)
 	return EINVAL;
-    memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+
+    if (handle->api_version == KADM5_API_VERSION_1) {
+       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec_v1));
+    } else {
+       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+    }
     if (handle->api_version == KADM5_API_VERSION_1) {
 	 /*
 	  * hack hack cough cough.
@@ -94,6 +100,7 @@ kadm5_modify_principal(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
+    memset(&arg, 0, sizeof(arg));
     arg.mask = mask;
     arg.api_version = handle->api_version;
     /*
@@ -102,7 +109,11 @@ kadm5_modify_principal(void *server_handle,
      */
     if(princ == NULL)
 	return EINVAL;
-    memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+    if (handle->api_version == KADM5_API_VERSION_1) {
+        memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec_v1));
+    } else {
+        memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+    }
     if(!(mask & KADM5_POLICY))
 	arg.rec.policy = NULL;
     if (! (mask & KADM5_KEY_DATA)) {
