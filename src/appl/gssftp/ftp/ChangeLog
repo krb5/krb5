@@ -1,3 +1,9 @@
+2001-11-30  Tom Yu  <tlyu@mit.edu>
+
+	* glob.c (execbrc): Fix some fencepost errors.  Don't copy
+	uninitialized memory past the end of the pattern string.  Don't
+	increment pointer beyond string end.
+
 2001-10-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* ftp.c: Conditionalize declarations of some "unused variables" to
