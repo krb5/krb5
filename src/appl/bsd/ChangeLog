@@ -1,3 +1,7 @@
+Fri Feb  3 11:51:55 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krcp.c (tgt_keyproc): Add keytype parameter to field.
+
 Mon Jan 30 07:58:16 1995  Chris Provenzano (proven@mit.edu)
 
 	* Removed all #include <krb5/crc-32.h> 
