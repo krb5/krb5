@@ -260,5 +260,6 @@
 #endif
 
 #define IsodeLib /mit/isode/isode-6.0/@sys/lib/libisode.a
+#define IsodeDir /mit/isode/isode-6.0
 
 /* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc */
