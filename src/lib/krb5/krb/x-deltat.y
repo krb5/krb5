@@ -138,7 +138,7 @@ posnum: NUM | LONGNUM ;
 num: posnum | '-' posnum { $$ = - $2; } ;
 ws: /* nothing */ | tok_WS ;
 wsnum: ws num { $$ = $2; }
-        | ws OVERFLOW { YYERROR };
+        | ws OVERFLOW { YYERROR; };
 deltat:
 	  wsnum 'd' opt_hms		{ DO ($1,  0,  0, $3); }
 	| wsnum 'h' opt_ms		{ DO ( 0, $1,  0, $3); }

@@ -1,5 +1,9 @@
 2005-03-22  Tom Yu  <tlyu@mit.edu>
 
+	* x-deltat.y (wsnum): Add missing semicolon following YYERROR,
+	which was preventing bison-1.75 from producing compilable C
+	output.
+
 	* gic_keytab.c (krb5_get_init_creds_keytab): When calling
 	krb5_get_init_creds() for the second time (with use_master=1),
 	also accept KRB5_REALM_UNKNOWN as a soft error, and use the result
