@@ -545,56 +545,73 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
      * We always try the local file first
      */
 
-    code = krb5_locate_srv_conf(context, realm, "kdc", addr_pp, naddrs, 
+    code = krb5_locate_srv_conf(context, realm, "kdc", addr_pp, naddrs,
                                  master_index, nmasters);
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-	code = krb5_locate_srv_dns(realm, "_kerberos", "_udp",
-				   addr_pp, naddrs);
-        if ( master_index && nmasters ) {
+        int use_dns=0;
+        char * string=NULL;
+        krb5_error_code code2; /* preserve error code from krb5_locate_srv_conf */
 
-            code = krb5_locate_srv_dns(realm, "_kerberos-adm", "_tcp",
-                                        &admin_addr_p, &nadmin_addrs);
-            if ( code ) {
-                free(*addr_pp);
-                *addr_pp = NULL;
+        code2 = profile_get_string(context->profile, "libdefaults",
+                                   "dns_fallback", 0, 
+                                    context->profile_in_memory?"1":"0",
+                                    &string);
+        if ( code2 )
+            return(code2);
+
+        if ( string ) {
+            use_dns = krb5_conf_boolean(string);
+            free(string);
+        }
+        if ( use_dns ) {
+            code = krb5_locate_srv_dns(realm, "_kerberos", "_udp",
+                                        addr_pp, naddrs);
+            if ( master_index && nmasters ) {
+
+                code = krb5_locate_srv_dns(realm, "_kerberos-adm", "_tcp",
+                                            &admin_addr_p, &nadmin_addrs);
+                if ( code ) {
+                    free(*addr_pp);
+                    *addr_pp = NULL;
+                    *naddrs = 0;
+                    return(code);
+                } 
+
+                kdc_addr_p = *addr_pp;
+                nkdc_addrs = *naddrs;
+
                 *naddrs = 0;
-                return(code);
-            } 
+                *addr_pp = (struct sockaddr *) malloc(sizeof(*kdc_addr_p));
+                if ( *addr_pp == NULL ) {
+                    free(kdc_addr_p);
+                    free(admin_addr_p);
+                    return ENOMEM;
+                }
 
-            kdc_addr_p = *addr_pp;
-            nkdc_addrs = *naddrs;
-
-            *naddrs = 0;
-            *addr_pp = (struct sockaddr *) malloc(sizeof(*kdc_addr_p));
-            if ( *addr_pp == NULL ) {
-                free(kdc_addr_p);
-                free(admin_addr_p);
-                return ENOMEM;
-            }
-
-            for ( i=0; i<nkdc_addrs; i++ ) {
-                for ( j=0 ; j<nadmin_addrs; j++) {
-                    if ( !memcmp(&kdc_addr_p[i].sa_data[2],&admin_addr_p[j].sa_data[2],4) ) {
-                        memcpy(&(*addr_pp)[(*naddrs)],&kdc_addr_p[i],
-                                sizeof(struct sockaddr));
-                        (*naddrs)++;
-                        break;
+                for ( i=0; i<nkdc_addrs; i++ ) {
+                    for ( j=0 ; j<nadmin_addrs; j++) {
+                        if ( !memcmp(&kdc_addr_p[i].sa_data[2],&admin_addr_p[j].sa_data[2],4) ) {
+                            memcpy(&(*addr_pp)[(*naddrs)],&kdc_addr_p[i],
+                                    sizeof(struct sockaddr));
+                            (*naddrs)++;
+                            break;
+                        }
                     }
                 }
-            }
- 
-            free(kdc_addr_p);
-            free(admin_addr_p);
 
-            if ( *naddrs == 0 ) {
-                free(*addr_pp);
-                *addr_pp = NULL;
-                return KRB5_REALM_CANT_RESOLVE;
+                free(kdc_addr_p);
+                free(admin_addr_p);
+
+                if ( *naddrs == 0 ) {
+                    free(*addr_pp);
+                    *addr_pp = NULL;
+                    return KRB5_REALM_CANT_RESOLVE;
+                }
+                *master_index = 1;
+                *nmasters = *naddrs;
             }
-            *master_index = 1;
-            *nmasters = *naddrs;
         }
     }
 #endif /* KRB5_DNS_LOOKUP */
