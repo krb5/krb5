@@ -1,3 +1,8 @@
+Thu Jun 22 16:06:26 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* krb4-proto.h, krb.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
+		(-> KRB5_NO_PROTOTYPES)
+
 Fri Jun  9 18:40:51 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

@@ -404,7 +404,7 @@ char *tkt_string();
 #define	TIME_GMT_UNIXSEC_US(us)	unix_time_gmt_unixsec((us))
 #define	CONVERT_TIME_EPOCH	((long)0)	/* Unix epoch is Krb epoch */
 
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
+#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()

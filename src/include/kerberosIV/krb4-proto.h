@@ -28,7 +28,7 @@
 #define _KRB4_PROTO_H__
 
 #ifndef P_TYPE_
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
+#if defined(__STDC__) && !defined(KRB5_NO_PROTOTYPES)
 # define	P_TYPE_(s) s
 #else
 # define P_TYPE_(s) ()
