@@ -98,6 +98,13 @@ ShowWinError(LPSTR szAPI, DWORD dwError)
     // TODO - Write errors to event log so that scripts that don't
     // check for errors will still get something in the event log
 
+    // This code is completely unsafe for use on non-English systems
+    // Any call to this function will result in the FormatMessage
+    // call failing and the program terminating.  This might have
+    // been acceptable when this code was part of ms2mit.exe as
+    // a standalone executable but it is not appropriate for a library
+
+#ifdef COMMENT
     WCHAR szMsgBuf[MAX_MSG_SIZE];
     DWORD dwRes;
 
@@ -117,6 +124,7 @@ ShowWinError(LPSTR szAPI, DWORD dwError)
     }
 
     printf("%S",szMsgBuf);
+#endif /* COMMENT */
 }
 
 static VOID
