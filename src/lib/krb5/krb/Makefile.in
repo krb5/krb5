@@ -324,6 +324,8 @@ check-unix:: $(TEST_PROGS)
 		425_conv_principal rcmd uunet UU.NET \
 		425_conv_principal zephyr zephyr ATHENA.MIT.EDU \
 		425_conv_principal kadmin ATHENA.MIT.EDU ATHENA.MIT.EDU \
+		524_conv_principal host/e40-po.mit.edu@ATHENA.MIT.EDU \
+		524_conv_principal host/foobar.stanford.edu@stanford.edu \
 		set_realm marc@MIT.EDU CYGNUS.COM \
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out

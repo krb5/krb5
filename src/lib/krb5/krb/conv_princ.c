@@ -137,7 +137,8 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 {
      const struct krb_convert *p;
      krb5_data *compo;
-     char *c;
+     char *c,*tmp_realm;
+     int tmp_realm_len,retval; 
 
      *name = *inst = '\0';
      switch (krb5_princ_size(context, princ)) {
@@ -187,11 +188,32 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
      }
 
      compo = krb5_princ_realm(context, princ);
-     if (compo->length > REALM_SZ - 1)
-	  return KRB5_INVALID_PRINCIPAL;
-     strncpy(realm, compo->data, compo->length);
-     realm[compo->length] = '\0';
 
+     /* Ask for v4_realm corresponding to 
+	krb5 principal realm from krb5.conf realms stanza */
+
+     if (context->profile == 0)
+       return KRB5_CONFIG_CANTOPEN;
+     retval = profile_get_string(context->profile, "realms",
+				 compo->data, "v4_realm", 0,
+				 &tmp_realm);
+     if (retval) { 
+	 return retval;
+     } else {
+	 if (tmp_realm == 0) {
+	     if (compo->length > REALM_SZ - 1)
+		 return KRB5_INVALID_PRINCIPAL;
+	     strncpy(realm, compo->data, compo->length);
+	     realm[compo->length] = '\0';
+	 } else {
+	     tmp_realm_len =  strlen(tmp_realm);
+	     if (tmp_realm_len > REALM_SZ - 1)
+		 return KRB5_INVALID_PRINCIPAL;
+	     strncpy(realm, tmp_realm, tmp_realm_len);
+	     realm[tmp_realm_len] = '\0';
+	     profile_release_string(tmp_realm);
+	 }
+     }
      return 0;
 }
 

@@ -1,3 +1,21 @@
+2000-05-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_kerb.c (test_524_conv_principal): New test code, to exercise
+	yesterday's code addition.
+	(main, usage): Updated.
+	* t_krb5.conf: Added stanford.edu->IR.STANFORD.EDU mapping, and a
+	test case for improperly long v4 realm names.
+	* Makefile.in (check-unix): Run 524 conversion test for some test
+	Athena and Stanford names.
+	* t_ref_kerb.out: Updated.
+
+2000-05-11  Ken Raeburn  <raeburn@mit.edu>
+	    Booker C. Bense  <bbense@networking.stanford.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Look up v4_realm in
+	config file, in case site's krb4 realm name isn't the same as the
+	krb5 realm name.
+
 2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* chk_trans.c (krb5_check_transited_list): Don't overflow buffers
@@ -7,8 +25,9 @@
 
 2000-04-28	Alexandra Ellwood	<lxs@mit.edu>
 
-	* gic_pwd.c (krb5_init_creds_password) added code to return to login library if 
-	the password is expired (login library handles this error appropriately).
+	* gic_pwd.c (krb5_init_creds_password) added code to return to
+	login library if the password is expired (login library handles
+	this error appropriately).
 
 2000-04-18  Ken Raeburn  <raeburn@mit.edu>
 
@@ -27,11 +46,12 @@
 
 2000-04-07  Jeffrey Altman  <jaltman@columbia.edu>
 
-        * gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c (krb5_get_init_creds_password)
-        when determining whether or not to retry with a "master kdc" do not retry if
-        the return value from the first attempt was KRB5_REALM_CANT_RESOLV.  Also, do 
-        not overwrite the return code if the return value from the access to the "master
-        kdc" was KRB5_REALM_CANT_RESOLV.
+	* gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c
+	(krb5_get_init_creds_password) when determining whether or not to
+	retry with a "master kdc" do not retry if the return value from
+	the first attempt was KRB5_REALM_CANT_RESOLV.  Also, do not
+	overwrite the return code if the return value from the access to
+	the "master kdc" was KRB5_REALM_CANT_RESOLV.
 
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
