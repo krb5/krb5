@@ -32,6 +32,7 @@ typedef char DBM;
 #define dbm_open(file, flags, mode) ((dbminit(file) == 0)?"":((char *)0))
 #define dbm_fetch(db, key) fetch(key)
 #define dbm_store(db, key, content, flag) store(key, content)
+#define dbm_delete(db, key) delete(key)
 #define dbm_firstkey(db) firstkey()
 #define dbm_next(db,key) nextkey(key)
 #define dbm_close(db) dbmclose()
