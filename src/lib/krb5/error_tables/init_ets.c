@@ -35,6 +35,12 @@ static char rcsid_init_ets_c[] =
 void
 krb5_init_ets PROTOTYPE((void))
 {
+    static int initialized = 0;
+
+    if (initialized)
+	    return;
+    
+    initialized++;
     initialize_krb5_error_table();
     initialize_kdb5_error_table();
     initialize_isod_error_table();
