@@ -41,6 +41,11 @@
 #define INTERFACE   KRB5_DLLIMP KRB5_CALLCONV
 #define INTERFACE_C KRB5_DLLIMP KRB5_CALLCONV_C
 
+#ifndef FAR
+#define FAR
+#define NEAR
+#endif
+
 #endif /* Win16 vs Win32 */
 	
 #define sys_nerr              _sys_nerr
