@@ -1,3 +1,36 @@
+2000-02-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): Renamed from krb5_init_context, now
+	static.  New argument SECURE provides initialization of
+	profile_secure field.
+	(krb5_init_context): Call it.
+	(krb5_init_secure_context): New function.
+
+	* str_conv.c (krb5_deltat_to_string): Always write to a local
+	temporary buffer that's guaranteed to be large enough, then see if
+	the supplied output buffer is big enough.
+	(krb5_string_to_deltat): Deleted.
+	* deltat.c: New file.
+
+	* str_conv.c: Removed most static char arrays, substituting the
+	values in place.
+	(krb5_string_to_timestamp): Move atime_format_table inside here.
+	(krb5_timestamp_to_sfstring): Move sftime_format_table inside
+	here.
+
+	* str_conv.c: If strftime or strptime are not available, include
+	the renamed NetBSD versions, and define the function names as
+	macros to map them to the replacement names.
+	(__P, _CurrentTimeLocale, dummy_locale_info, TM_YEAR_BASE,
+	DAYSPERLYEAR, DAYSPERNYEAR, DAYSPERWEEK, isleap, tzname, tzset):
+	Define some dummies for strftime/strptime to use.
+	(strptime): Deleted old stub version.
+	(krb5_timestamp_to_string, krb5_timestamp_to_sfstring): Always
+	assume strftime is available.
+	(krb5_string_to_timestamp): Assume strptime is always available.
+	* strftime.c, strptime.c: New files, based on NetBSD versions.
+	Modified to rename the functions and not export any symbols.
+
 Mon Mar  8 22:39:01 1999  Tom Yu  <tlyu@mit.edu>
 
 	* sendauth.c (krb5_sendauth): Set credspout to NULL if it's
