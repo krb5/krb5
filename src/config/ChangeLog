@@ -1,15 +1,19 @@
+Fri Feb 14 22:02:33 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Define CLIB as the ComErr library (now separate lib)
+
 Mon Feb 10 08:39:10 1997  Tom Yu  <tlyu@mit.edu>
 
 	* post.in: Fix recursion rules to deal with Ultrix sh lossage.
 
 	* libobj.in: Remove instances of STAMP.*, since they aren't
-	actually necessary.
+		actually necessary.
 
 Sun Feb  9 13:43:42 1997  Tom Yu  <tlyu@mit.edu>
 
 	* libobj.in (OBJS.*): Work around a gmake optimization where the
-	timestamps of OBJS.* would not get checked after STAMP.* get
-	updated, even though OBJS.* get updated as a side effect.
+		timestamps of OBJS.* would not get checked after STAMP.* get
+		updated, even though OBJS.* get updated as a side effect.
 
 Sat Feb  8 12:17:17 1997  Richard Basch  <basch@lehman.com>
 

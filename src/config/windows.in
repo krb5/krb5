@@ -69,6 +69,8 @@ AWK=rem
 RC = rc
 CVTRES = cvtres
 
+##WIN16##CLIB=$(BUILDTOP)\lib\comerr16.lib
+##WIN32##CLIB=$(BUILDTOP)\lib\comerr32.lib
 ##WIN16##KLIB=$(BUILDTOP)\lib\krb5_16.lib
 ##WIN32##KLIB=$(BUILDTOP)\lib\krb5_32.lib
 ##WIN16##GLIB=$(BUILDTOP)\lib\gssapi.lib
