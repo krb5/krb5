@@ -1959,34 +1959,13 @@ gunique(local)
 char realm[REALM_SZ + 1];
 #endif /* KRB5_KRB4_COMPAT */
 
-#ifdef _WIN32
-const gss_OID_desc krb5_gss_oid_array[] = {
-   /* this is the official, rfc-specified OID */
-   {9, "\052\206\110\206\367\022\001\002\002"},
-   /* this is the unofficial, wrong OID */
-   {5, "\053\005\001\005\002"},
-   /* this is the v2 assigned OID */
-   {9, "\052\206\110\206\367\022\001\002\003"},
-   /* these two are name type OID's */
-   {10, "\052\206\110\206\367\022\001\002\002\001"},
-   {10, "\052\206\110\206\367\022\001\002\002\002"},
-   { 0, 0 }
-};
-
-const gss_OID_desc * const gss_mech_krb5 = krb5_gss_oid_array+0;
-const gss_OID_desc * const gss_mech_krb5_old = krb5_gss_oid_array+1;
-const gss_OID_desc * const gss_mech_krb5_v2 = krb5_gss_oid_array+2;
-const gss_OID_desc * const gss_nt_krb5_name = krb5_gss_oid_array+3;
-const gss_OID_desc * const gss_nt_krb5_principal = krb5_gss_oid_array+4;
-#endif
-
 #ifdef GSSAPI
 struct {
-    const gss_OID_desc * const * mech_type;
+    gss_OID *mech_type;
     char *service_name;
 } gss_trials[] = {
-    { &gss_mech_krb5, "ftp" },
-    { &gss_mech_krb5, "host" },
+    { GSS_C_NO_OID, "ftp" },
+    { GSS_C_NO_OID, "host" },
 };
 int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
 #endif /* GSSAPI */
@@ -2058,7 +2037,7 @@ int do_auth()
 				     GSS_C_NO_CREDENTIAL,
 				     &gcontext,
 				     target_name,
-				     (gss_OID_desc *)*gss_trials[trial].mech_type,
+				     (gss_OID_desc *)gss_trials[trial].mech_type,
 				     GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
 				       (forward ? GSS_C_DELEG_FLAG : 
 					(unsigned) 0),
