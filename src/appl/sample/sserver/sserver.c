@@ -63,7 +63,7 @@ usage(name)
 		name);
 }	
 
-void
+int
 main(argc, argv)
     int argc;
     char *argv[];
@@ -71,14 +71,13 @@ main(argc, argv)
     krb5_context context;
     krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket;
-    krb5_address peeraddr;
     struct sockaddr_in peername;
     int namelen = sizeof(peername);
     int sock = -1;			/* incoming connection fd */
     krb5_data recv_data;
     short xmitlen;
     krb5_error_code retval;
-    krb5_principal server, client;
+    krb5_principal server;
     char repbuf[BUFSIZ];
     char *cname;
     char *service = SAMPLE_SERVICE;
@@ -190,10 +189,6 @@ main(argc, argv)
 	}
 	sock = 0;
     }
-
-    peeraddr.addrtype = peername.sin_family;
-    peeraddr.length = sizeof(peername.sin_addr);
-    peeraddr.contents = (krb5_octet *)&peername.sin_addr;
 
     if (retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
 			       SAMPLE_VERSION, server, 

@@ -50,7 +50,7 @@ extern char *malloc();
 
 #include "../sample.h"
 
-void
+int
 main(argc, argv)
 int argc;
 char *argv[];
