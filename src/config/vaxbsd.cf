@@ -7,7 +7,11 @@
 #define OSMinorVersion    3
 
 /* Saber bug doesn't allow deref through const *'s */
+#ifdef VaxArchitecture
+#define SaberDefines -I/mit/gnu/vaxlib/gcc-include -Dconst=
+#else
 #define SaberDefines -Dconst=
+#endif
 
 #ifdef VaxArchitecture
 #define HasGcc YES
