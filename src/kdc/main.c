@@ -44,6 +44,10 @@
 #include <netinet/in.h>
 #endif
 
+#ifdef KRB5_KRB4_COMPAT
+#include <des.h>
+#endif
+
 kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 
 void usage (char *);

@@ -56,6 +56,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include <stdio.h>
+#include "adm_proto.h"
 #include <syslog.h>
 
 typedef krb5_error_code (*verify_proc)

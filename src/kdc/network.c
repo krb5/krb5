@@ -32,6 +32,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"
+#include "adm_proto.h"
 #include <sys/ioctl.h>
 #include <syslog.h>
 
@@ -669,7 +670,7 @@ const char *prog;
     
     while (!signal_requests_exit) {
 	if (signal_requests_hup) {
-	    krb5_klog_reopen();
+	    krb5_klog_reopen(kdc_context);
 	    signal_requests_hup = 0;
 	}
 	readfds = select_fds;

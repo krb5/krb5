@@ -1,3 +1,14 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c: Include adm_proto.h for krb5_klog_syslog()
+	prototype.
+
+	* main.c: Include des.h for des_init_random_number_generator()
+	prototype.
+
+	* network.c: Include adm_proto.h for krb5_klog_syslog()
+	prototype. Pass kdc_context to krb5_klog_reopen().
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos_v4.c: Get rid of file wide static krb5_error_code. Cast
