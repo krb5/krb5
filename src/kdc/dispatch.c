@@ -18,8 +18,6 @@ static char rcsid_dispatch_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
-#include <krb5/krb5_err.h>
-#include <krb5/isode_err.h>
 #include <krb5/kdb.h>
 #include "kdc_util.h"
 

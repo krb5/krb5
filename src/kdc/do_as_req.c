@@ -18,20 +18,17 @@ static char rcsid_do_as_req_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/kdb.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
-#include <errno.h>
 #include <com_err.h>
 
-#include <sys/types.h>
 #include <krb5/ext-proto.h>
 
 #include <syslog.h>
 #ifdef KRB5_USE_INET
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
@@ -233,6 +230,7 @@ krb5_data **response;			/* filled in with a response packet */
 	cleanup();
 	return retval;
     }
+    enc_tkt_reply.confounder = krb5_random_confounder();
     retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
     bzero((char *)encrypting_key.contents, encrypting_key.length);
     free((char *)encrypting_key.contents);

@@ -19,11 +19,9 @@ static char rcsid_network_c[] =
 #include <krb5/osconf.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
-#include <errno.h>
-#include <com_err.h>
 #include <krb5/kdb.h>
+#include <com_err.h>
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"

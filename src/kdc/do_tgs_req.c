@@ -18,20 +18,16 @@ static char rcsid_do_tgs_req_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/kdb.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
-#include <errno.h>
-#include <com_err.h>
-
-#include <sys/types.h>
 #include <krb5/ext-proto.h>
+#include <com_err.h>
 
 #include <syslog.h>
 #ifdef KRB5_USE_INET
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
@@ -373,6 +369,8 @@ krb5_data **response;			/* filled in with a response packet */
 		   if (newtransited) free(enc_tkt_reply.transited.data);}
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
+    enc_tkt_reply.confounder = krb5_random_confounder();
+
     if (isflagset(realreq->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
 	if (!second_ticket) {
 	    if (!realreq->enc_part2) {
