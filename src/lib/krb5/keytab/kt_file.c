@@ -26,7 +26,6 @@
  */
 
 #define NEED_SOCKETS
-#include <netinet/in.h>
 #include "k5-int.h"
 #include <stdio.h>
 
