@@ -42,11 +42,7 @@
 
 #include "simple.h"
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#else
-extern char *malloc();
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -148,11 +144,6 @@ main(argc, argv)
     if (hostname == 0) {
 	fprintf(stderr, "You must specify a hostname to contact.\n\n");
 	usage(progname);
-	exit(1);
-    }
-
-    if (!valid_cksumtype(CKSUMTYPE_CRC32)) {
-	com_err(progname, KRB5_PROG_SUMTYPE_NOSUPP, "while using CRC-32");
 	exit(1);
     }
 
