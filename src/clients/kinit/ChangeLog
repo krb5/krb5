@@ -1,3 +1,7 @@
+Mon Feb 13 23:50:52 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use $(LD) instead of $(CC) when linking.
+
 Thu Feb 02 22:43:38 1995  Chris Provenzano (proven@mit.edu)
 
 	* kinit.c (main()) Removed krb5_keytype, changed krb5_enctype to

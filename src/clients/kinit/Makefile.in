@@ -10,7 +10,7 @@ KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) 
 
 kinit: kinit.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o kinit kinit.o $(KLIB) $(LIBS)
+	$(LD) $(CFLAGS) -o kinit kinit.o $(KLIB) $(LIBS)
 
 kinit.o:	$(srcdir)/kinit.c
 
