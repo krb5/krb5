@@ -1,3 +1,7 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (HAVE_RUNTEST): Include $(DEJAFLAGS).
+
 2000-08-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (KRB4_RUNTESTFLAGS): Set from configure.in and pass
