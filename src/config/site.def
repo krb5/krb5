@@ -97,3 +97,9 @@
 					if needed for some system libraries */
 /* #define StandardIncludes -I/foo/bar -- additional include paths, if
 					needed */
+/* Perl can be used to split up the output from ISODE to put each
+   function in a separate .c file; this means your linked binaries can
+   be smaller.  If you don't have perl, you can turn this off, but you
+   don't get the benefit.
+*/
+#define HavePerl YES
