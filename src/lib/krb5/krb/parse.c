@@ -198,7 +198,7 @@ krb5_parse_name(name, nprincipal)
 		 */
 		for (i=0; i < components; i++)
 			krb5_princ_component(principal, i)->length = fcompsize[i];
-		krb5_princ_realm(principal)->length = size;
+		krb5_princ_realm(principal)->length = realmsize;
 	}
 	/*	
 	 * Now, we need to allocate the space for the strings themselves.....
