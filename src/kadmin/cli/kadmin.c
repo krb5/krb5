@@ -377,27 +377,34 @@ char *kadmin_startup(argc, argv)
      * Initialize the kadm5 connection.  If we were given a ccache,
      * use it.  Otherwise, use/prompt for the password.
      */
-    if (ccache_name)
+    if (ccache_name) {
+	 printf("Authenticating as principal %s with existing credentials.\n",
+		princstr);
 	 retval = kadm5_init_with_creds(princstr, cc,
 					KADM5_ADMIN_SERVICE, 
 					&params,
 					KADM5_STRUCT_VERSION,
 					KADM5_API_VERSION_2,
 					&handle);
-    else if (use_keytab)
+    } else if (use_keytab) {
+	 printf("Authenticating as principal %s with keytab %s.\n",
+		princstr, keytab_name);
 	 retval = kadm5_init_with_skey(princstr, keytab_name,
 				       KADM5_ADMIN_SERVICE, 
 				       &params,
 				       KADM5_STRUCT_VERSION,
 				       KADM5_API_VERSION_2,
 				       &handle);
-    else
+    } else {
+	 printf("Authenticating as principal %s with password.\n",
+		princstr);
 	 retval = kadm5_init_with_password(princstr, password,
 					   KADM5_ADMIN_SERVICE, 
 					   &params,
 					   KADM5_STRUCT_VERSION,
 					   KADM5_API_VERSION_2,
 					   &handle);
+    }
     if (retval) {
 	com_err(whoami, retval, "while initializing %s interface", whoami);
 	if (retval == KADM5_BAD_CLIENT_PARAMS ||
@@ -814,11 +821,18 @@ void kadmin_addprinc(argc, argv)
      * unset, since it is never valid for kadm5_create_principal.
      */
     if ((! (mask & KADM5_POLICY)) &&
-	(! (mask & KADM5_POLICY_CLR)) &&
-	(! (retval = kadm5_get_policy(handle, "default", &defpol)))) {
-	 princ.policy = "default";
-	 mask |= KADM5_POLICY;
-	 (void) kadm5_free_policy_ent(handle, &defpol);
+	(! (mask & KADM5_POLICY_CLR))) {
+	 if (! kadm5_get_policy(handle, "default", &defpol)) {
+	      fprintf(stderr,
+		"NOTICE: no policy specified for %s; assigning \"default\"\n",
+		      canon);
+	      princ.policy = "default";
+	      mask |= KADM5_POLICY;
+	      (void) kadm5_free_policy_ent(handle, &defpol);
+	 } else
+	      fprintf(stderr,
+	     "WARNING: no policy specified for %s; defaulting to no policy\n",
+		      canon);
     }
     mask &= ~KADM5_POLICY_CLR;
     
