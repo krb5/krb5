@@ -80,7 +80,7 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #include <pwd.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #ifdef KRB4
 #include <krb.h>
 #include <netdb.h>
