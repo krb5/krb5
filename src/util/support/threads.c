@@ -190,7 +190,7 @@ int k5_key_delete (k5_key_t keynum)
 
 #else
 
-static void (*destructors[K5_KEY_MAX])(void);
+static void (*destructors[K5_KEY_MAX])(void *);
 static void *tsd_values[K5_KEY_MAX];
 static unsigned char destructors_set[K5_KEY_MAX];
 
@@ -199,12 +199,13 @@ int krb5int_thread_support_init(void)
     return 0;
 }
 
-int k5_key_register (k5_key_t keynum, void (*d)(void))
+int k5_key_register (k5_key_t keynum, void (*d)(void *))
 {
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] == 0);
     destructors[keynum] = d;
     destructors_set[keynum] = 1;
+    return 0;
 }
 
 void *k5_getspecific (k5_key_t keynum)
@@ -214,7 +215,7 @@ void *k5_getspecific (k5_key_t keynum)
     return tsd_values[keynum];
 }
 
-int k5_setspecific (k5_key_t keynum, const void *value)
+int k5_setspecific (k5_key_t keynum, void *value)
 {
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] == 1);

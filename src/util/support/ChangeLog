@@ -7,3 +7,6 @@
 	* foreachaddr.c: New file, based on include/foreachaddr.c.
 	* libkrb5support.exports: New file.
 
+	* threads.c (k5_key_register, destructors, k5_setspecific)
+	[!ENABLE_THREADS]: Update to fit declarations.
+
