@@ -105,6 +105,8 @@ kadm_princ2entry(princ, entry)
 				   server_parm.krbrlm, &entry->princ);
   if (retval)
     return retval;
+
+  entry->len = KRB5_KDB_V1_BASE_LENGTH;
   entry->max_life = princ.max_life * (60 * 5);
   entry->max_renewable_life = server_parm.max_rlife; /* XXX yeah well */
   entry->expiration = princ.exp_date;
