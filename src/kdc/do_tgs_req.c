@@ -44,6 +44,7 @@ static void find_alternate_tgs PROTOTYPE((krb5_kdc_req *,
 static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
 						    krb5_ticket *,
 						    int,
+						    const char *,
 						    krb5_data **));
 /*ARGSUSED*/
 krb5_error_code
@@ -75,15 +76,25 @@ krb5_data **response;			/* filled in with a response packet */
     register int i;
     int firstpass = 1;
 
+#ifdef KRB5_USE_INET
+    if (from->address->addrtype == ADDRTYPE_INET)
+	fromstring = inet_ntoa(*(struct in_addr *)from->address->contents);
+#endif
+    if (!fromstring)
+	fromstring = "<unknown>";
+
     if ((retval = kdc_process_tgs_req(request, from, &header_ticket))) {
-	if (!header_ticket || !header_ticket->enc_part2)
-	    return retval;
+	if (header_ticket && !header_ticket->enc_part2) {
+	    krb5_free_ticket(header_ticket);
+	    header_ticket = 0;
+	}
 	if (retval > ERROR_TABLE_BASE_krb5 &&
 	    retval < ERROR_TABLE_BASE_krb5 + 128) {
 	    /* protocol error */
 	    return(prepare_error_tgs(request,
 				     header_ticket,
 				     retval - ERROR_TABLE_BASE_krb5,
+				     fromstring,
 				     response));
 	} else
 	    return retval;
@@ -103,12 +114,6 @@ krb5_data **response;			/* filled in with a response packet */
 	krb5_free_ticket(header_ticket);
 	return(retval);
     }
-#ifdef KRB5_USE_INET
-    if (from->address->addrtype == ADDRTYPE_INET)
-	fromstring = inet_ntoa(*(struct in_addr *)from->address->contents);
-#endif
-    if (!fromstring)
-	fromstring = "<unknown>";
 
     syslog(LOG_INFO, "TGS_REQ: host %s, %s for %s", fromstring, cname, sname);
     free(cname);
@@ -129,6 +134,7 @@ tgt_again:
 	return(prepare_error_tgs(request,
 				 header_ticket,
 				 KDC_ERR_PRINCIPAL_NOT_UNIQUE,
+				 fromstring,
 				 response));
     } else if (nprincs != 1) {
 	/* might be a request for a TGT for some other realm; we should
@@ -148,6 +154,7 @@ tgt_again:
 	return(prepare_error_tgs(request,
 				 header_ticket,
 				 KDC_ERR_S_PRINCIPAL_UNKNOWN,
+				 fromstring,
 				 response));
     }
 
@@ -169,7 +176,8 @@ tgt_again:
 	cleanup();
 	return(prepare_error_tgs(request,
 				 header_ticket,
-				 KDC_ERR_ETYPE_NOSUPP, response));
+				 KDC_ERR_ETYPE_NOSUPP,
+				 fromstring, response));
     }
     useetype = request->etype[i];
 
@@ -208,7 +216,8 @@ tgt_again:
     if (against_flag_policy_tgs(request, header_ticket)) {
 	cleanup();
 	return(prepare_error_tgs(request, header_ticket,
-				 KDC_ERR_BADOPTION, response));
+				 KDC_ERR_BADOPTION,
+				 fromstring, response));
     }
 
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
@@ -246,7 +255,8 @@ tgt_again:
 	if (against_postdate_policy(request->from)) {
 	    cleanup();
 	    return(prepare_error_tgs(request, header_ticket,
-				     KDC_ERR_BADOPTION, response));
+				     KDC_ERR_BADOPTION,
+				     fromstring, response));
 	}	    
 	enc_tkt_reply.times.starttime = request->from;
     } else
@@ -256,13 +266,15 @@ tgt_again:
 	if (header_ticket->enc_part2->times.starttime > kdc_time) {
 	    cleanup();
 	    return(prepare_error_tgs(request, header_ticket,
-				     KRB_AP_ERR_TKT_NYV, response));
+				     KRB_AP_ERR_TKT_NYV,
+				     fromstring, response));
 	}
 	/* XXX move this check out elsewhere? */
 	if (check_hot_list(header_ticket)) {
 	    cleanup();
 	    return(prepare_error_tgs(request, header_ticket,
-				     KRB_AP_ERR_REPEAT, response));
+				     KRB_AP_ERR_REPEAT,
+				     fromstring, response));
 	}
 	/* BEWARE of allocation hanging off of ticket & enc_part2, it belongs
 	   to the caller */
@@ -289,7 +301,8 @@ tgt_again:
 	if (header_ticket->enc_part2->times.renew_till < kdc_time) {
 	    cleanup();
 	    return(prepare_error_tgs(request, header_ticket,
-				     KRB_AP_ERR_TKT_EXPIRED, response));
+				     KRB_AP_ERR_TKT_EXPIRED,
+				     fromstring, response));
 	}    
 
 	/* BEWARE of allocation hanging off of ticket & enc_part2, it belongs
@@ -350,7 +363,8 @@ tgt_again:
 	if (!valid_etype(request->authorization_data.etype)) {
 	    cleanup();
 	    return prepare_error_tgs(request, header_ticket,
-				     KDC_ERR_ETYPE_NOSUPP, response);
+				     KDC_ERR_ETYPE_NOSUPP,
+				     fromstring, response);
 	}
 	/* put together an eblock for this encryption */
 
@@ -456,6 +470,7 @@ tgt_again:
 		cleanup();
 		return(prepare_error_tgs(request, header_ticket,
 					 KDC_ERR_BADOPTION,
+					 fromstring,
 					 response));
 	    }
 	if (retval = krb5_encrypt_tkt_part(request->second_ticket[st_idx]->enc_part2->session,
@@ -535,10 +550,11 @@ tgt_again:
 }
 
 static krb5_error_code
-prepare_error_tgs (request, ticket, error, response)
+prepare_error_tgs (request, ticket, error, ident, response)
 register krb5_kdc_req *request;
 krb5_ticket *ticket;
 int error;
+const char *ident;
 krb5_data **response;
 {
     krb5_error errpkt;
@@ -546,29 +562,34 @@ krb5_data **response;
     krb5_data *scratch;
 
 
-    syslog(LOG_INFO, "TGS_REQ: %s while processing request",
+    syslog(LOG_INFO, "TGS_REQ: host %s: %s while processing request",
+	   ident,
 	   error_message(error+KRB5KDC_ERR_NONE));
 
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
 
     if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec)) {
-	krb5_free_ticket(ticket);
+	if (ticket)
+	    krb5_free_ticket(ticket);
 	return(retval);
     }
     errpkt.error = error;
     errpkt.server = request->server;
-    errpkt.client = ticket->enc_part2->client;
+    errpkt.client = ticket ? ticket->enc_part2->client : 0; /* may not know
+							       the name */
     errpkt.text.length = strlen(error_message(error+KRB5KDC_ERR_NONE))+1;
     if (!(errpkt.text.data = malloc(errpkt.text.length))) {
-	krb5_free_ticket(ticket);
+	if (ticket)
+	    krb5_free_ticket(ticket);
 	return ENOMEM;
     }
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);
-	krb5_free_ticket(ticket);
+	if (ticket)
+	    krb5_free_ticket(ticket);
 	return ENOMEM;
     }
     errpkt.e_data.length = 0;
@@ -577,7 +598,8 @@ krb5_data **response;
     retval = krb5_mk_error(&errpkt, scratch);
     free(errpkt.text.data);
     *response = scratch;
-    krb5_free_ticket(ticket);
+    if (ticket)
+	krb5_free_ticket(ticket);
     return retval;
 }
 
