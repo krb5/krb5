@@ -8,12 +8,16 @@ PROG_RPATH=$(KRB5_LIBDIR)
 kpasswd: kpasswd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o kpasswd kpasswd.o $(KRB5_BASE_LIBS)
 
-kpasswd.o:	$(srcdir)/kpasswd.c
+ksetpwd: ksetpwd.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o ksetpwd ksetpwd.o $(KRB5_BASE_LIBS)
 
-all-unix:: kpasswd
+kpasswd.o:	$(srcdir)/kpasswd.c
+ksetpwd.o:	$(srcdir)/ksetpwd.c
+
+all-unix:: kpasswd ksetpwd
 
 clean-unix::
-	$(RM) kpasswd.o kpasswd
+	$(RM) kpasswd.o kpasswd ksetpwd.o ksetpwd
 
 install-all install-kdc install-server install-client install-unix::
 	$(INSTALL_PROGRAM) kpasswd $(DESTDIR)$(CLIENT_BINDIR)/`echo kpasswd|sed '$(transform)'`
