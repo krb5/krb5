@@ -662,21 +662,11 @@ void one_addr(a)
 	    af = AF_INET6;
 #endif
 	if (!no_resolve) {
-#ifdef HAVE_GETIPNODEBYADDR
-	    int err;
-	    h = getipnodebyaddr(a->contents, a->length, af, &err);
-	    if (h) {
-		printf("%s", h->h_name);
-		freehostent(h);
-	    }
-#else
 	    h = gethostbyaddr(a->contents, (int) a->length, af);
 	    if (h) {
 		printf("%s", h->h_name);
-	    }
-#endif
-	    if (h)
 		return;
+	    }
 	}
 	if (no_resolve || !h) {
 #ifdef HAVE_INET_NTOP

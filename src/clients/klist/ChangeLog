@@ -1,3 +1,7 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* klist.c (one_addr): Drop getipnodebyaddr support.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* klist.c (one_addr): gethostbyaddr takes an int as second argument.
