@@ -1,3 +1,8 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* sendauth.c (krb_sendauth): Add KRB5_DLLIMP/KRB5_CALLCONV definitions
+	for function with exported prototype in krb.h
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* cr_tkt.c (krb_create_ticket): Get rid of last argument (k5key)
