@@ -49,10 +49,10 @@ krb5_generate_seq_number(context, key, seqno)
     krb5_octet *intmp = 0, *outtmp = 0;
     int esize;
 
-    if (!valid_keytype(key->keytype))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
+    if (!valid_enctype(key->enctype))
+	return KRB5_PROG_ETYPE_NOSUPP;
 
-    krb5_use_keytype(context, &eblock, key->keytype);
+    krb5_use_enctype(context, &eblock, key->enctype);
 
     if ((retval = krb5_init_random_key(context, &eblock, key, &random_state)))
 	return(retval);

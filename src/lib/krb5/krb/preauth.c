@@ -122,7 +122,7 @@ krb5_obtain_padata(context, type, client, src_addr, encrypt_key, ret_data)
 	    retval = KRB5_PREAUTH_NO_KEY;
 	    goto error_out;
 	}
-        krb5_use_keytype(context, &eblock, encrypt_key->keytype);
+        krb5_use_enctype(context, &eblock, encrypt_key->enctype);
 
 	/* do any necessay key pre-processing */
 	retval = krb5_process_key(context, &eblock, encrypt_key);
@@ -214,7 +214,7 @@ krb5_verify_padata(context, data,client,src_addr, decrypt_key, req_id, flags)
 	if (!decrypt_key)
 	    return(EINVAL);
 
-        krb5_use_keytype(context, &eblock, decrypt_key->keytype);
+        krb5_use_enctype(context, &eblock, decrypt_key->enctype);
 
         scratch.length = data->length;
         if (!(scratch.data = (char *)malloc(scratch.length))) {

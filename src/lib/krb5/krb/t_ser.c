@@ -293,8 +293,7 @@ ser_acontext_test(kcontext, verbose)
 			      KV5M_AUTH_CONTEXT))) {
 	    memset(&ukeyblock, 0, sizeof(ukeyblock));
 	    memset(keydata, 0, sizeof(keydata));
-	    ukeyblock.keytype = KEYTYPE_DES;
-	    ukeyblock.etype = ETYPE_DES_CBC_MD5;
+	    ukeyblock.enctype = ENCTYPE_DES_CBC_MD5;
 	    ukeyblock.length = sizeof(keydata);
 	    ukeyblock.contents = keydata;
 	    keydata[0] = 0xde;
@@ -510,7 +509,7 @@ ser_eblock_test(kcontext, verbose)
 
     memset(&eblock, 0, sizeof(krb5_encrypt_block));
     eblock.magic = KV5M_ENCRYPT_BLOCK;
-    krb5_use_cstype(kcontext, &eblock, DEFAULT_KDC_ETYPE);
+    krb5_use_enctype(kcontext, &eblock, DEFAULT_KDC_ENCTYPE);
     if (!(kret = ser_data(verbose, "> NULL eblock",
 			  (krb5_pointer) &eblock, KV5M_ENCRYPT_BLOCK))) {
 	eblock.priv = (krb5_pointer) ser_eblock_test;
@@ -520,8 +519,7 @@ ser_eblock_test(kcontext, verbose)
 			      KV5M_ENCRYPT_BLOCK))) {
 	    memset(&ukeyblock, 0, sizeof(ukeyblock));
 	    memset(keydata, 0, sizeof(keydata));
-	    ukeyblock.keytype = KEYTYPE_DES;
-	    ukeyblock.etype = ETYPE_DES_CBC_MD5;
+	    ukeyblock.enctype = ENCTYPE_DES_CBC_MD5;
 	    ukeyblock.length = sizeof(keydata);
 	    ukeyblock.contents = keydata;
 	    keydata[0] = 0xde;
@@ -591,7 +589,11 @@ ser_cksum_test(kcontext, verbose)
 	checksum.checksum_type = 123;
 	checksum.length = sizeof(ckdata);
 	checksum.contents = ckdata;
-	memcpy(ckdata, (char *) ser_cksum_test, sizeof(ckdata));
+#if 0
+	memcpy(ckdata, (char *) &ser_cksum_test, sizeof(ckdata)); 
+#else
+	memcpy(ckdata, (char *) &ser_princ_test, sizeof(ckdata)); 
+#endif
 	if (!(kret = ser_data(verbose, "> checksum with data",
 			      (krb5_pointer) &checksum, KV5M_CHECKSUM))) {
 	    if (verbose)

@@ -60,8 +60,6 @@ extern krb5_cksumtype krb5_kdc_req_sumtype;
 /* helper macro: convert flags to necessary KDC options */
 
 #define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
-#define TGT_ETYPE \
-      krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
 
 krb5_error_code
 krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
@@ -75,7 +73,6 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
   int             ntgts = 0;
 
   krb5_creds      tgt, tgtq, *tgtr = NULL;
-  krb5_enctype    etype;
   krb5_error_code retval;
   krb5_principal  int_server = NULL;    /* Intermediate server for request */
 
@@ -231,8 +228,8 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	/* didn't find it in the cache so try and get one */
 	/* with current tgt.                              */
     
-	if (!valid_keytype(tgt.keyblock.keytype)) {
-	    retval = KRB5_PROG_KEYTYPE_NOSUPP;
+	if (!valid_enctype(tgt.keyblock.enctype)) {
+	    retval = KRB5_PROG_ETYPE_NOSUPP;
 	    goto cleanup;
 	}
     
@@ -250,7 +247,6 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 	    goto cleanup;
 	tgtq.is_skey      = FALSE;
 	tgtq.ticket_flags = tgt.ticket_flags;
-	etype             = TGT_ETYPE;
 	if ((retval = krb5_get_cred_via_tkt(context, &tgt,
 					    FLAGS2OPTS(tgtq.ticket_flags),
 					    tgt.addresses, &tgtq, &tgtr))) {
@@ -293,8 +289,8 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
   
 	      /* not in the cache so try and get one with our current tgt. */
   
-	      if (!valid_keytype(tgt.keyblock.keytype)) {
-		  retval = KRB5_PROG_KEYTYPE_NOSUPP;
+	      if (!valid_enctype(tgt.keyblock.enctype)) {
+		  retval = KRB5_PROG_ETYPE_NOSUPP;
 		  goto cleanup;
 	      }
             
@@ -309,7 +305,6 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 		  goto cleanup;
 	      tgtq.is_skey      = FALSE;
 	      tgtq.ticket_flags = tgt.ticket_flags;
-	      etype             = TGT_ETYPE;
 	      if ((retval = krb5_get_cred_via_tkt(context, &tgt,
 						  FLAGS2OPTS(tgtq.ticket_flags),
 						  tgt.addresses,
@@ -378,12 +373,11 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
 
   /* got/finally have tgt!  try for the creds */
 
-  if (!valid_keytype(tgt.keyblock.keytype)) {
-    retval = KRB5_PROG_KEYTYPE_NOSUPP;
+  if (!valid_enctype(tgt.keyblock.enctype)) {
+    retval = KRB5_PROG_ETYPE_NOSUPP;
     goto cleanup;
   }
 
-  etype = TGT_ETYPE;
   retval = krb5_get_cred_via_tkt(context, &tgt, FLAGS2OPTS(tgt.ticket_flags) |
   				 	(in_cred->second_ticket.length ? 
 				  	 KDC_OPT_ENC_TKT_IN_SKEY : 0),

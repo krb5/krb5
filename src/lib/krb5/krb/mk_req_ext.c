@@ -98,8 +98,8 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
 	return(retval);
     
-    /* verify a valid etype is available */
-    if (!valid_etype(request.ticket->enc_part.etype)) {
+    /* verify a valid enctype is available */
+    if (!valid_enctype(request.ticket->enc_part.enctype)) {
 	retval = KRB5_PROG_ETYPE_NOSUPP;
 	goto cleanup;
     }
@@ -139,7 +139,6 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	checksum.length = in_data->length;
 	checksum.contents = (krb5_octet *) in_data->data;
       } else  {
-     int T = krb5_checksum_size(context, (*auth_context)->cksumtype);
 	/* Generate checksum, XXX What should the seed be? */
 	if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(context,
 				 (*auth_context)->cksumtype))) == NULL) {
@@ -186,8 +185,8 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(context, &eblock, request.ticket->enc_part.etype);
-    request.authenticator.etype = request.ticket->enc_part.etype;
+    krb5_use_enctype(context, &eblock, request.ticket->enc_part.enctype);
+    request.authenticator.enctype = request.ticket->enc_part.enctype;
     request.authenticator.kvno = 0;
     request.authenticator.ciphertext.length =
 	krb5_encrypt_size(scratch->length, eblock.crypto_entry);

@@ -60,11 +60,11 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 
     /* put together an eblock for this encryption */
 
-    if (!valid_etype(reply->enc_part.etype)) {
+    if (!valid_enctype(reply->enc_part.enctype)) {
 	krb5_free_ap_rep(context, reply);
 	return KRB5_PROG_ETYPE_NOSUPP;
     }
-    krb5_use_cstype(context, &eblock, reply->enc_part.etype);
+    krb5_use_enctype(context, &eblock, reply->enc_part.enctype);
 
     scratch.length = reply->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length))) {
@@ -103,7 +103,6 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 
     /* Set auth subkey */
     if ((*repl)->subkey) {
-	(*repl)->subkey->etype = reply->enc_part.etype;
 	retval = krb5_copy_keyblock(context, (*repl)->subkey,
 				    &auth_context->remote_subkey);
     }

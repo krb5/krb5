@@ -32,7 +32,7 @@
  client identified by in_creds->client, the server identified by
  in_creds->server, with options options, expiration date specified in
  in_creds->times.endtime (0 means as long as possible), session key type
- specified in in_creds->keyblock.keytype (if non-zero)
+ specified in in_creds->keyblock.enctype (if non-zero)
 
  Any returned ticket and intermediate ticket-granting tickets are
  stored in ccache.

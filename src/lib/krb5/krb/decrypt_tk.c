@@ -46,29 +46,27 @@ krb5_decrypt_tkt_part(context, srv_key, ticket)
     krb5_data scratch;
     krb5_error_code retval;
 
-    if (!valid_etype(ticket->enc_part.etype))
+    if (!valid_enctype(ticket->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
-
-    krb5_use_cstype(context, &eblock, ticket->enc_part.etype);
+    krb5_use_enctype(context, &eblock, ticket->enc_part.enctype);
 
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))
 	return(ENOMEM);
 
     /* do any necessary key pre-processing */
-    retval = krb5_process_key(context, &eblock, srv_key);
-    if (retval) {
+    if (retval = krb5_process_key(context, &eblock, srv_key)) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the encryption routine */
-    retval = krb5_decrypt(context, (krb5_pointer) ticket->enc_part.ciphertext.data,
-			  (krb5_pointer) scratch.data,
-			  scratch.length, &eblock, 0);
-    if (retval) {
+    if (retval = krb5_decrypt(context, 
+			      (krb5_pointer) ticket->enc_part.ciphertext.data,
+			      (krb5_pointer) scratch.data, scratch.length, 
+			      &eblock, 0)) {
 	(void) krb5_finish_key(context, &eblock);
 	free(scratch.data);
 	return retval;
@@ -87,6 +85,5 @@ free(scratch.data);}
 	ticket->enc_part2 = dec_tkt_part;
     }
     clean_scratch();
-    ticket->enc_part2->session->etype = ticket->enc_part.etype;
     return retval;
 }

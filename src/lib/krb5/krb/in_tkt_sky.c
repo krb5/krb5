@@ -39,7 +39,7 @@ struct skey_keyproc_arg {
  */
 krb5_error_code skey_keyproc
     PROTOTYPE((krb5_context,
-               const krb5_keytype,
+               const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
                krb5_keyblock **));
@@ -47,7 +47,7 @@ krb5_error_code skey_keyproc
 krb5_error_code
 skey_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
-    const krb5_keytype type;
+    const krb5_enctype type;
     krb5_data * salt;
     krb5_const_pointer keyseed;
     krb5_keyblock ** key;
@@ -58,13 +58,13 @@ skey_keyproc(context, type, salt, keyseed, key)
 
     keyblock = (const krb5_keyblock *)keyseed;
 
-    if (!valid_keytype(type))
+    if (!valid_enctype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     if ((retval = krb5_copy_keyblock(context, keyblock, &realkey)))
 	return retval;
 	
-    if (realkey->keytype != type) {
+    if (realkey->enctype != type) {
 	krb5_free_keyblock(context, realkey);
 	return KRB5_PROG_ETYPE_NOSUPP;
     }	
@@ -95,12 +95,12 @@ skey_keyproc(context, type, salt, keyseed, key)
 
  */
 krb5_error_code
-krb5_get_in_tkt_with_skey(context, options, addrs, etypes, pre_auth_types, 
+krb5_get_in_tkt_with_skey(context, options, addrs, ktypes, pre_auth_types, 
 			  key, ccache, creds, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_enctype * etypes;
+    krb5_enctype * ktypes;
     krb5_preauthtype * pre_auth_types;
     const krb5_keyblock * key;
     krb5_ccache ccache;
@@ -109,12 +109,12 @@ krb5_get_in_tkt_with_skey(context, options, addrs, etypes, pre_auth_types,
 
 {
     if (key) 
-    	return krb5_get_in_tkt(context, options, addrs, etypes, pre_auth_types, 
+    	return krb5_get_in_tkt(context, options, addrs, ktypes, pre_auth_types, 
 			       skey_keyproc, (krb5_pointer)key,
 			       krb5_kdc_rep_decrypt_proc, 0, creds,
 			       ccache, ret_as_reply);
     else 
-	return krb5_get_in_tkt_with_keytab(context, options, addrs, etypes,
+	return krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes,
 					   pre_auth_types, NULL, ccache,
 					   creds, ret_as_reply);
 }

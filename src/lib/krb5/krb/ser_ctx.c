@@ -105,8 +105,8 @@ krb5_context_size(kcontext, arg, sizep)
      *	krb5_int32			for KV5M_CONTEXT
      *	krb5_int32			for sizeof(default_realm)
      *	strlen(default_realm)		for default_realm.
-     *	krb5_int32			for netypes*sizeof(krb5_int32)
-     *	netypes*sizeof(krb5_int32)	for etypes.
+     *	krb5_int32			for nktypes*sizeof(krb5_int32)
+     *	nktypes*sizeof(krb5_int32)	for ktypes.
      *	krb5_int32			for trailer.
      */
     kret = EINVAL;
@@ -116,7 +116,7 @@ krb5_context_size(kcontext, arg, sizep)
 		    sizeof(krb5_int32) +
 		    sizeof(krb5_int32) +
 		    sizeof(krb5_int32) +
-		    (context->etype_count * sizeof(krb5_int32)));
+		    (context->ktype_count * sizeof(krb5_int32)));
 
 	if (context->default_realm)
 	    required += strlen(context->default_realm);
@@ -187,13 +187,13 @@ krb5_context_externalize(kcontext, arg, buffer, lenremain)
 					   strlen(context->default_realm),
 					   &bp, &remain);
 
-	    /* Now number of etypes */
-	    (void) krb5_ser_pack_int32((krb5_int32) context->etype_count,
+	    /* Now number of ktypes */
+	    (void) krb5_ser_pack_int32((krb5_int32) context->ktype_count,
 				       &bp, &remain);
 
-	    /* Now serialize etypes */
-	    for (i=0; i<context->etype_count; i++)
-		(void) krb5_ser_pack_int32((krb5_int32) context->etypes[i],
+	    /* Now serialize ktypes */
+	    for (i=0; i<context->ktype_count; i++)
+		(void) krb5_ser_pack_int32((krb5_int32) context->ktypes[i],
 					   &bp, &remain);
 	    kret = 0;
 
@@ -280,22 +280,22 @@ krb5_context_internalize(kcontext, argp, buffer, lenremain)
 		    context->default_realm[ibuf] = '\0';
 		}
 
-		/* Get the number of etypes */
+		/* Get the number of ktypes */
 		if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
 		    /* Reduce it to a count */
-		    context->etype_count = ibuf;
-		    if ((context->etypes = (krb5_enctype *)
+		    context->ktype_count = ibuf;
+		    if ((context->ktypes = (krb5_enctype *)
 			 malloc(sizeof(krb5_enctype) *
-				(context->etype_count+1)))) {
-			memset(context->etypes,
+				(context->ktype_count+1)))) {
+			memset(context->ktypes,
 			       0,
 			       sizeof(krb5_enctype) *
-			       (context->etype_count + 1));
-			for (i=0; i<context->etype_count; i++) {
+			       (context->ktype_count + 1));
+			for (i=0; i<context->ktype_count; i++) {
 			    if ((kret = krb5_ser_unpack_int32(&ibuf,
 							      &bp, &remain)))
 				break;
-			    context->etypes[i] = (krb5_enctype) ibuf;
+			    context->ktypes[i] = (krb5_enctype) ibuf;
 			}
 		    }
 		}
@@ -448,6 +448,7 @@ krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
 	     malloc(sizeof(struct _krb5_os_context))) &&
 	    (remain >= 4*sizeof(krb5_int32))) {
 	    memset(os_ctx, 0, sizeof(struct _krb5_os_context));
+	    os_ctx->magic = KV5M_OS_CONTEXT;
 
 	    /* Read out our context */
 	    (void) krb5_ser_unpack_int32(&os_ctx->time_offset, &bp, &remain);
@@ -460,8 +461,7 @@ krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
 		kret = 0;
 		*buffer = bp;
 		*lenremain = remain;
-	    }
-	    else
+	    } else
 		kret = EINVAL;
 	}
     }
