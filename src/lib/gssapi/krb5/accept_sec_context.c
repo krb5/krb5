@@ -248,7 +248,14 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_data scratch;
    gss_cred_id_t cred_handle = NULL;
    krb5_gss_cred_id_t deleg_cred = NULL;
+   krb5int_access kaccess;
 
+   code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+    if (code) {
+        *minor_status = code;
+        return(GSS_S_FAILURE);
+    }
+       
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
 
@@ -679,7 +686,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        ctx->signalg = -1;
        ctx->sealalg = -1;
        ctx->proto = 1;
-       code = krb5int_c_mandatory_cksumtype(context, ctx->subkey->enctype,
+       code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, ctx->subkey->enctype,
 					    &ctx->cksumtype);
        if (code)
 	   goto fail;
@@ -762,7 +769,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	       major_status = GSS_S_FAILURE;
 	       goto fail;
 	   }
-	   code = krb5int_c_mandatory_cksumtype(context,
+	   code = (*kaccess.krb5int_c_mandatory_cksumtype)(context,
 						ctx->acceptor_subkey->enctype,
 						&ctx->acceptor_subkey_cksumtype);
 	   if (code) {

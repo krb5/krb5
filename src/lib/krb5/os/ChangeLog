@@ -1,3 +1,7 @@
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * accessor.c: Add new functions for use by gssapi
+
 2003-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* an_to_ln.c (krb5_aname_to_localname): Don't write one byte past
