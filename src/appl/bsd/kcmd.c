@@ -229,6 +229,7 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
     *host_save = malloc(strlen(ap->ai_canonname) + 1);
     if (*host_save == NULL) {
 	fprintf(stderr, "kcmd: no memory\n");
+	freeaddrinfo(ap);
 	return -1;
     }
     strcpy(*host_save, ap->ai_canonname);
@@ -256,6 +257,7 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 		(*lportp)--;
 	}
 
+	oerrno = errno;
 	aierr = getnameinfo(ap->ai_addr, ap->ai_addrlen,
 			    hostbuf, sizeof(hostbuf), 0, 0, NI_NUMERICHOST);
 	if (aierr)
@@ -269,6 +271,7 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	if (ap->ai_next)
 	    fprintf(stderr, "Trying next address...\n");
     }
+    freeaddrinfo(ap2);
     return -1;
 
 connected:
@@ -281,6 +284,7 @@ connected:
 
     *sp = s;
     *sockinp = *(struct sockaddr_in *) ap->ai_addr;
+    freeaddrinfo(ap2);
     return 0;
 }
 
