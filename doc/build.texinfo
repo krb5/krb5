@@ -372,7 +372,7 @@ you usually do not need to do a @code{make install} first.
 
 Some implementations of @samp{make} allow multiple commands to be run in
 parallel, for faster builds.  We test our Makefiles in parallel builds with
-GNU @same{make} only; they may not be compatible with other parallel build
+GNU @samp{make} only; they may not be compatible with other parallel build
 implementations.
 
 @node Testing the Build, Options to Configure, Installing the Binaries, Building Kerberos V5
