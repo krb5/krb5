@@ -14,21 +14,23 @@ LDFLAGS = -g
 RM = rm -f
 CP = cp
 
+AWK = @AWK@
+
 BUILDTOP = ../..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 
-all:: $(OBJS)
+all:: krb_err.h $(OBJS)
 
 OBJS=	425data.o \
 	425error.o \
 	des_sched.o \
-	err_txt.o \
 	get_cred.o \
 	get_krbhst.o \
 	get_lrealm.o \
 	get_phost.o \
 	kn_parse.o \
 	kntoln.o \
+	krb_err.o \
 	kuserok.o \
 	mk_priv.o \
 	mk_req.o \
@@ -46,13 +48,13 @@ OBJS=	425data.o \
 SRCS=	$(srcdir)/425data.c \
 	$(srcdir)/425error.c \
 	$(srcdir)/des_sched.c \
-	$(srcdir)/err_txt.c \
 	$(srcdir)/get_cred.c \
 	$(srcdir)/get_krbhst.c \
 	$(srcdir)/get_lrealm.c \
 	$(srcdir)/get_phost.c \
 	$(srcdir)/kn_parse.c \
 	$(srcdir)/kntoln.c \
+	$(srcdir)/krb_err.c \
 	$(srcdir)/kuserok.c \
 	$(srcdir)/mk_priv.c \
 	$(srcdir)/mk_req.c \
@@ -66,6 +68,8 @@ SRCS=	$(srcdir)/425data.c \
 	$(srcdir)/recvauth.c \
 	$(srcdir)/sendauth.c \
 	$(srcdir)/set_key.c
+
+krb_err.o: krb_err.c
 
 libkrb425.a: ${OBJS}
 	$(RM) $@
