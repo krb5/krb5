@@ -30,5 +30,7 @@
 #endif
 
 #define PROVIDE_DES_CBC_CRC
+#define PROVIDE_CRC32
+#define PROVIDE_DES_CBC_CKSUM
 
 #endif /* KRB5_CONFIG__ */
