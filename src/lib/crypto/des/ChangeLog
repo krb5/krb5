@@ -1,3 +1,8 @@
+Tue Nov 28 11:24:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* f_ecb.c, des_int.h (mit_des_ecb_encrypt): Add const declaration
+		to input cblock.
+
 Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
 
         * string2key.c : Remove krb5_enctype from krb5_string_to_key() args.

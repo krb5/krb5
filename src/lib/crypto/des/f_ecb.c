@@ -19,7 +19,7 @@
  */
 int
 mit_des_ecb_encrypt(in, out, schedule, encrypt)
-	mit_des_cblock *in;
+	const mit_des_cblock *in;
 	mit_des_cblock *out;
 	mit_des_key_schedule schedule;
 	int encrypt;

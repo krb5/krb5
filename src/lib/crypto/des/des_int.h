@@ -107,7 +107,7 @@ extern unsigned long mit_des_cbc_cksum
 
 /* f_ecb.c */
 extern int mit_des_ecb_encrypt
-    PROTOTYPE((mit_des_cblock FAR *, mit_des_cblock FAR *, mit_des_key_schedule , int ));
+    PROTOTYPE((const mit_des_cblock FAR *, mit_des_cblock FAR *, mit_des_key_schedule , int ));
 
 /* f_cbc.c */
 extern int mit_des_cbc_encrypt
