@@ -115,6 +115,8 @@ krb5_sendauth(/* IN */
 	 * credentials cache.
 	 */
 	memset((char *)&creds, 0, sizeof(creds));
+	memset((char *)&authent, 0, sizeof(authent));
+	
 	if (!credsp) {
 		if (!ccache)
 			return(KRB5_NOCREDS_SUPPLIED);
@@ -132,46 +134,38 @@ krb5_sendauth(/* IN */
 		credsp = &creds;
 	}
 	if (!credsp->ticket.length) {
+		if (!ccache)
+			return(KRB5_NOCREDS_SUPPLIED);
 		if (retval = krb5_get_credentials(kdc_options,
 						  ccache,
-						  &creds)) {
-			krb5_free_cred_contents(&creds);
-			return(retval);
-		}
+						  credsp))
+		    goto error_return;
 	}
 
 	/*
 	 * Generate a random sequence number
 	 */
 	if (sequence &&
-	    (retval = krb5_generate_seq_number(&credsp->keyblock, sequence))) {
+	    (retval = krb5_generate_seq_number(&credsp->keyblock, sequence))) 
+	    goto error_return;
 
-	    memset((char *)&authent, 0, sizeof(authent));
-	    krb5_free_cred_contents(&creds);
-	    return(retval);	
-	}
 	/*
 	 * OK, get the authentication header!
 	 */
 	if (retval = krb5_mk_req_extended(ap_req_options, checksump,
 					  kdc_options,
 					  sequence ? *sequence : 0, newkey,
-					  ccache, credsp, &authent, &outbuf)) {
-		memset((char *)&authent, 0, sizeof(authent));
-		krb5_free_cred_contents(&creds);
-		return(retval);	
-	}
+					  ccache, credsp, &authent, &outbuf))
+	    goto error_return;
 
 	/*
 	 * First write the length of the AP_REQ message, then write
 	 * the message itself.
 	 */
-	if (retval = krb5_write_message(fd, &outbuf)) {
-		krb5_free_cred_contents(&creds);
-		memset((char *)&authent, 0, sizeof(authent));
-		return(retval);
-	}
+	retval = krb5_write_message(fd, &outbuf);
 	free(outbuf.data);
+	if (retval)
+	    goto error_return;
 
 	/*
 	 * Now, read back a message.  If it was a null message (the
@@ -179,60 +173,56 @@ krb5_sendauth(/* IN */
 	 * authentication was rejected, and we need to return the
 	 * error structure.
 	 */
-	if (retval = krb5_read_message(fd, &inbuf)) {
-		krb5_free_cred_contents(&creds);
-		memset((char *)&authent, 0, sizeof(authent));
-		return(retval);
-	}
+	if (retval = krb5_read_message(fd, &inbuf))
+	    goto error_return;
+
 	if (inbuf.length) {
 		if (error) {
-			if (retval = krb5_rd_error(&inbuf, error)) {
-				krb5_xfree(inbuf.data);
-				return(retval);
-			}
+		    if (retval = krb5_rd_error(&inbuf, error)) {
+			krb5_xfree(inbuf.data);
+			goto error_return;
+		    }
 		}
 		krb5_xfree(inbuf.data);
-		krb5_free_cred_contents(&creds);
-		memset((char *)&authent, 0, sizeof(authent));
-		return(KRB5_SENDAUTH_REJECTED);
+		retval = KRB5_SENDAUTH_REJECTED;
+		goto error_return;
 	}
+	
 	/*
 	 * If we asked for mutual authentication, we should now get a
 	 * length field, followed by a AP_REP message
 	 */
 	if ((ap_req_options & AP_OPTS_MUTUAL_REQUIRED)) {
-		krb5_ap_rep_enc_part	*repl;
-		krb5_error_code		problem = 0;
+	    krb5_ap_rep_enc_part	*repl = 0;
 		
-		if (retval = krb5_read_message(fd, &inbuf)) {
-			krb5_free_cred_contents(&creds);
-			memset((char *)&authent, 0, sizeof(authent));
-			return(retval);
-		}
-		problem = krb5_rd_rep(&inbuf,
-				      &credsp->keyblock,
-				      &repl);
-		if (problem || ((repl->ctime != authent.ctime) ||
-				(repl->cusec != authent.cusec)))
-			problem = KRB5_SENDAUTH_MUTUAL_FAILED;
-		memset((char *)&authent, 0, sizeof(authent));
-		krb5_free_cred_contents(&creds);
-		krb5_xfree(inbuf.data);
-		if (problem) {
-			krb5_free_ap_rep_enc_part(repl);
-			return(problem);
-		}
-		/*
-		 * If the user wants to look at the AP_REP message,
-		 * copy it for him
-		 */
-		if (rep_result) 
-			*rep_result = repl;
-		else
-			krb5_free_ap_rep_enc_part(repl);
-	} else
-		krb5_free_cred_contents(&creds);
-	return(0);
+	    if (retval = krb5_read_message(fd, &inbuf))
+		goto error_return;
+
+	    retval = krb5_rd_rep(&inbuf, &credsp->keyblock, &repl);
+	    krb5_xfree(inbuf.data);
+	    if (retval || ((repl->ctime != authent.ctime) ||
+			   (repl->cusec != authent.cusec)))
+		retval = KRB5_SENDAUTH_MUTUAL_FAILED;
+	    if (retval) {
+		if (repl)
+		    krb5_free_ap_rep_enc_part(repl);
+		goto error_return;
+	    }
+	    /*
+	     * If the user wants to look at the AP_REP message,
+	     * copy it for him
+	     */
+	    if (rep_result) 
+		*rep_result = repl;
+	    else
+		krb5_free_ap_rep_enc_part(repl);
+	}
+	retval = 0;		/* Normal return */
+error_return:
+	krb5_free_cred_contents(&creds);
+	krb5_free_authenticator_contents(&authent);
+	return(retval);
+	
 }
 
 
