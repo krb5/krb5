@@ -1,3 +1,7 @@
+Thu Oct 31 11:10:56 1996  Ezra Peisach  <epeisach@trane.rose.brandeis.edu>
+
+	* Makefile.in (t_kdb): Link with $(TOPLIBD)/libdb.a
+
 Wed Sep  4 19:29:57 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (t_kdb): Fix up dependencies of t_kdb so it will

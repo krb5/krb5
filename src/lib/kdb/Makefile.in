@@ -68,7 +68,7 @@ clean::
 	$(RM) libkdb5.a DONE
 
 t_kdb:	t_kdb.o $(OBJS) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(TOPLIBD)/libcom_err.a $(TOPLIBD)/libdb.a
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(OBJS) $(LIBS) -ldb
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(OBJS) $(LIBS) $(TOPLIBD)/libdb.a
 
 check::	t_kdb
 	$(KRB5_RUN_ENV) ./t_kdb -tcv
