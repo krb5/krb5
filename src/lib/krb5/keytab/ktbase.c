@@ -7,7 +7,7 @@
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
- * Registration functions for ccache.
+ * Registration functions for keytab.
  */
 
 #if !defined(lint) && !defined(SABER)
@@ -28,8 +28,8 @@ static struct krb5_kt_typelist krb5_kt_typelist_dfl = { &krb5_kt_dfl_ops, 0 };
 static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_dfl;
 
 /*
- * Register a new credentials cache type
- * If override is set, replace any existing ccache with that type tag
+ * Register a new key table type
+ * don't replace if it already exists; return an error instead.
  */
 
 krb5_error_code
