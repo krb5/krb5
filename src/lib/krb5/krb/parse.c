@@ -116,9 +116,10 @@ krb5_parse_name(name, nprincipal)
 			size = 0;
 			i++;
 		} else if (c == REALM_SEP) {
-			if (!*(cp+1)) 
+			if (parsed_realm || !*(cp+1)) 
 				/*
-				 * Null Realm names are not allowed!
+				 * Multiple realm separaters or null
+				 * realm names are not allowed!
 				 */
 				return(KRB5_PARSE_MALFORMED);
 			parsed_realm = cp+1;
