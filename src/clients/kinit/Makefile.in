@@ -16,9 +16,8 @@ kinit: kinit.o $(KRB5_BASE_DEPLIBS)
 ##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
   
 ##WIN32##all-windows:: kinit.exe
-##WIN32##kinit.exe: kinit.obj
-##WIN32##	link /nologo /out:$@ $*.obj \
-##WIN32##	  $(BUILDTOP)\util\windows\getopt.obj $(KLIB) wsock32.lib
+##WIN32##kinit.exe: kinit.obj $(BUILDTOP)\util\windows\getopt.obj $(KLIB) $(CLIB)
+##WIN32##	link /nologo /out:$@ $**
 
 
 clean-unix::

@@ -1,3 +1,8 @@
+Sat Feb 15 12:24:32 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Link in ComErr library $(CLIB)
+	* kinit.c: Winsock initialization/teardown is now done by krb5 lib
+
 Thu Feb 13 14:27:41 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in:

@@ -91,26 +91,6 @@ main(argc, argv)
     int pwsize;
     char password[255], *client_name, prompt[255];
 
-#ifdef _WIN32
-    {
-        WORD            version = 0x0101;
-        WSADATA         wsadata;
-        int             rc;
-
-        rc = WSAStartup(version, &wsadata);
-        if (rc) {
-            fprintf(stderr, "%s: Couldn't initialize Winsock library\n",
-                    argv[0]);
-            exit(1);
-        }
-        if (version != wsadata.wVersion) {
-            fprintf(stderr, "%s: Winsock version 1.1 not available\n",
-                    argv[0]);
-            exit(1);
-        }
-    }
-#endif
-    
     code = krb5_init_context(&kcontext);
     if (code) {
 	    com_err(argv[0], code, "while initializing krb5");
@@ -400,11 +380,7 @@ main(argc, argv)
     krb5_free_principal(kcontext, server);
 
     krb5_free_context(kcontext);
-    
-#ifdef _WIN32
-    WSACleanup();
-#endif
-    
+
     exit(0);
 }
 
