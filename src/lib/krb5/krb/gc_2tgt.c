@@ -139,7 +139,13 @@ krb5_get_cred_via_2tgt (context, tgt, kdcoptions, sumtype, in_cred, out_cred)
 	goto errout;
 
     /* Should verify that the ticket is what we asked for. */
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     (*out_cred)->times = dec_rep->enc_part2->times;
+#else
+    memcpy(&(*out_cred)->times, &dec_rep->enc_part2->times, 
+	   sizeof(krb5_ticket_times));
+#endif
+
     (*out_cred)->ticket_flags = dec_rep->enc_part2->flags;
     (*out_cred)->is_skey = TRUE;
     if (dec_rep->enc_part2->caddrs)

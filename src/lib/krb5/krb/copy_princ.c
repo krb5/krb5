@@ -43,7 +43,11 @@ krb5_copy_principal(context, inprinc, outprinc)
     if (tempprinc == 0)
 	return ENOMEM;
 
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tempprinc = *inprinc;	/* Copy all of the non-allocated pieces */
+#else
+    memcpy(tempprinc, inprinc, sizeof(krb5_principal_data));
+#endif
 
     nelems = (int) krb5_princ_size(context, inprinc);
     tempprinc->data = malloc(nelems * sizeof(krb5_data));

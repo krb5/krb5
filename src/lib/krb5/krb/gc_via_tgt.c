@@ -137,7 +137,12 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, in_cred, out_cred)
     }
 
     (*out_cred)->keyblock.etype = dec_rep->ticket->enc_part.etype;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     (*out_cred)->times = dec_rep->enc_part2->times;
+#else
+    memcpy(&(*out_cred)->times, &dec_rep->enc_part2->times, 
+	   sizeof(krb5_ticket_times));
+#endif
 
 #if 0
     /* XXX probably need access to the request */

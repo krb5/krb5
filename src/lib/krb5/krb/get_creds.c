@@ -61,7 +61,11 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
 
     memset((char *)&mcreds, 0, sizeof(krb5_creds));
     mcreds.times.endtime = in_creds->times.endtime;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     mcreds.keyblock = in_creds->keyblock;
+#else
+    memcpy(&mcreds.keyblock, &in_creds->keyblock, sizeof(krb5_keyblock));
+#endif
     mcreds.authdata = in_creds->authdata;
     mcreds.server = in_creds->server;
     mcreds.client = in_creds->client;

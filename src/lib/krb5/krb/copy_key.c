@@ -39,7 +39,11 @@ krb5_copy_keyblock(context, from, to)
 
 	if (!(new_key = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))))
 		return ENOMEM;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
 	*new_key = *from;
+#else
+	memcpy(new_key, from, sizeof(krb5_keyblock));
+#endif
 	if (!(new_key->contents = (krb5_octet *)malloc(new_key->length))) {
 		krb5_xfree(new_key);
 		return(ENOMEM);

@@ -1,5 +1,13 @@
 Thu Apr 20 16:23:23 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* copy_addrs.c, copy_athctr.c, copy_auth.c, copy_cksum.c,
+	copy_creds.c, copy_key.c, copy_princ.c, copy_tick.c,
+	gc_2tgt.c, gc_frm_kdc.c, gc_via_tgt.c, get_creds.c,
+	mk_req_ext.c: Unless HAVE_C_STRUCTURE_ASSIGNMENT is defined, use
+		memcpy to copy structures around, instead of using
+		structure assignments.  (Which aren't guaranteed to work
+		on some broken compilers.)
+
 	* mk_req.c (krb5_mk_req): Use krb5_sname_to_principal() in order
 		to create the service principal from the service and
 		hostname pair.  This allows for the host cannoncialization

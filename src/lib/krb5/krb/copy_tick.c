@@ -37,7 +37,11 @@ krb5_copy_enc_tkt_part(context, partfrom, partto)
 
     if (!(tempto = (krb5_enc_tkt_part *)malloc(sizeof(*tempto))))
 	return ENOMEM;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tempto = *partfrom;
+#else
+    memcpy(tempto, partfrom, sizeof(krb5_enc_tkt_part));
+#endif
     retval = krb5_copy_keyblock(context, partfrom->session,
 				&tempto->session);
     if (retval) {
@@ -103,7 +107,11 @@ krb5_copy_ticket(context, from, pto)
 
     if (!(tempto = (krb5_ticket *)malloc(sizeof(*tempto))))
 	return ENOMEM;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tempto = *from;
+#else
+    memcpy(tempto, from, sizeof(krb5_ticket));
+#endif
     retval = krb5_copy_principal(context, from->server, &tempto->server);
     if (retval) {
 	krb5_xfree(tempto);

@@ -241,7 +241,12 @@ krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
     
 	krb5_free_cred_contents(context, &tgtq);
 	memset(&tgtq, 0, sizeof(tgtq));
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
 	tgtq.times        = tgt.times;
+#else
+	memcpy(&tgtq.times, &tgt.times, sizeof(krb5_ticket_times));
+#endif
+
 	if (retval = krb5_copy_principal(context, tgt.client, &tgtq.client))
 	    goto cleanup;
 	if(retval = krb5_copy_principal(context, int_server, &tgtq.server))

@@ -37,7 +37,11 @@ krb5_authenticator **authto;
 
     if (!(tempto = (krb5_authenticator *)malloc(sizeof(*tempto))))
 	return ENOMEM;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tempto = *authfrom;
+#else
+    memcpy(tempto, authfrom, sizeof(krb5_authenticator));
+#endif
 
     retval = krb5_copy_principal(context, authfrom->client, &tempto->client);
     if (retval) {
