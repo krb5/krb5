@@ -73,7 +73,7 @@ pwd_keyproc(context, type, salt, keyseed, key)
     if (!(*key = (krb5_keyblock *)malloc(sizeof(**key))))
 	return ENOMEM;
 
-    if ((retval = krb5_string_to_key(context,&eblock,type,*key,password,salt)))
+    if ((retval = krb5_string_to_key(context, &eblock, *key, password, salt)))
 	krb5_xfree(*key);
     return(retval);
 }

@@ -1,3 +1,7 @@
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * in_tkt_pwd.c : Remove krb5_enctype from krb5_string_to_key() args.
+
 Thu Nov  9 00:02:43 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* get_in_tkt.c (krb5_get_in_tkt): Remove the etype_info argument
