@@ -169,7 +169,6 @@ void *k5_getspecific (k5_key_t keynum)
 	t = pthread_getspecific(key);
     else
 	t = GET_NO_PTHREAD_TSD();
-    }
 
 #endif
 
