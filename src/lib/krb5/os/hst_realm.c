@@ -83,7 +83,7 @@ krb5_get_host_realm(context, host, realmsp)
     const char *host;
     char ***realmsp;
 {
-    char **retrealms = NULL;
+    char **retrealms;
     char *domain, *default_realm, *realm, *cp;
     krb5_error_code retval;
     int l;
@@ -104,46 +104,76 @@ krb5_get_host_realm(context, host, realmsp)
     /* strip off trailing dot */
     if (l && local_host[l-1] == '.')
 	    local_host[l-1] = 0;
-    domain = strchr(local_host, '.');
 
-    /* prepare default */
-    if (domain) {
-	if (!(default_realm = malloc(strlen(domain+1)+1)))
+    /*
+       Search for the best match for the host or domain.
+       Example: Given a host a.b.c.d, try to match on:
+         1) A.B.C.D
+	 2) .B.C.D
+	 3) B.C.D
+	 4) .C.D
+	 5) C.D
+	 6) .D
+	 7) D
+     */
+
+    for (cp = local_host; *cp; cp++)
+	if (islower(*cp))
+	    *cp = toupper(*cp);
+    cp = local_host;
+    realm = default_realm = (char *)NULL;
+    while (cp) {
+	retval = profile_get_string(context->profile, "domain_realm", cp,
+				    0, (char *)NULL, &realm);
+	if (retval)
+	    return retval;
+	if (realm != (char *)NULL)
+	    break;	/* Match found */
+
+	/* Setup for another test */
+	if (*cp == '.') {
+	    cp++;
+	    if (default_realm == (char *)NULL) {
+		/* If nothing else works, use the host's domain */
+		default_realm = cp;
+	    }
+	} else {
+	    cp = strchr(cp, '.');
+	}
+    }
+
+    if (realm != (char *)NULL)
+    {
+	/* We found an exact match */
+	if (!(cp = (char *)malloc(strlen(realm)+1)))
 	    return ENOMEM;
-	strcpy(default_realm, domain+1);
-	/* Upper-case realm */
-	for (cp = default_realm; *cp; cp++)
-	    if (islower(*cp))
-		*cp = toupper(*cp);
-    } else {
-	retval = krb5_get_default_realm(context, &default_realm);
+	strcpy(cp, realm);
+	realm = cp;
+    }
+    else if (default_realm != (char *)NULL)
+    {
+	/* We are defaulting to the realm of the host */
+	if (!(cp = (char *)malloc(strlen(default_realm)+1)))
+	    return ENOMEM;
+	strcpy(cp, default_realm);
+	realm = cp;
+    }
+    else
+    {
+	/* We are defaulting to the local realm */
+	retval = krb5_get_default_realm(context, &cp);
 	if (retval) {
 	    krb5_xfree(retrealms);
 	    return retval;
 	}
     }
-
-    if (domain) {
-	retval = profile_get_string(context->profile, "domain_realm",
-				    domain, 0, default_realm, &realm);
-	free(default_realm);
-	if (retval)
-	    return retval;
-	default_realm = realm;
-    }
-
-    retval = profile_get_string(context->profile, "domain_realm", local_host,
-				0, default_realm, &realm);
-    free(default_realm);
-    if (retval)
-	return retval;
-
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
-	free(realm);
+	if (realm != (char *)NULL)
+	    free(realm);
 	return ENOMEM;
     }
 
-    retrealms[0] = realm;
+    retrealms[0] = cp;
     retrealms[1] = 0;
     
     *realmsp = retrealms;
