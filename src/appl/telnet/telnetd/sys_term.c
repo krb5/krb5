@@ -57,9 +57,22 @@ char *login_program = LOGIN_PROGRAM;
 int	utmp_len = MAXHOSTNAMELEN;	/* sizeof(init_request.host) */
 #else	/* NEWINIT*/
 
-char	wtmpf[]	= "/usr/adm/wtmp";
-char	utmpf[] = "/etc/utmp";
+#ifdef HAVE_UTMP_H
+#include <utmp.h>
+#endif
 
+#ifdef _PATH_WTMP
+char	wtmpf[] = _PATH_WTMP;
+#else
+char	wtmpf[]	= "/usr/adm/wtmp";
+#endif
+
+#ifdef _PATH_UTMP
+char 	utmpf[] = _PATH_UTMP;
+#else
+char	utmpf[] = "/etc/utmp";
+#endif
+  
 # ifdef CRAY
 #include <tmpdir.h>
 #include <sys/wait.h>
