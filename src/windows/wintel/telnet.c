@@ -20,7 +20,8 @@
 
 ****************************************************************************/
 
-#include <windows.h>            
+#include <windows.h>
+#include <stdlib.h>
 #include <string.h>
 #include "telnet.h"
 #include "auth.h"
@@ -35,20 +36,21 @@ HGLOBAL ghCon;
 SCREEN *fpScr;
 int debug = 1;
 
-char __near strTmp[1024];
+char __near strTmp[1024];                       // Scratch buffer 
 
 BOOL bAutoConnection = FALSE; 
 char szAutoHostName[64];
+int port_no = 23;
 char szUserName[64];
 char szHostName[64];
 
 #ifdef KRB4
-	#define WINDOW_CLASS   "telnetWClass_4"
+	#define WINDOW_CLASS   "K4_telnetWClass"
 #endif
 
 #ifdef KRB5
 	krb5_context k5_context;
-    #define WINDOW_CLASS   "telnetWClass"
+    #define WINDOW_CLASS   "K5_telnetWClass"
 #endif
 
 /*+**************************************************************************
@@ -88,11 +90,7 @@ int nCmdShow;                    /* show-window type (open/icon) */
 
     /* Perform initializations that apply to a specific instance */
 
-	if (lpCmdLine[0]) {
-		bAutoConnection = TRUE;
-		lstrcpy((char *) szAutoHostName, lpCmdLine);
-	}
-	else bAutoConnection = FALSE;
+    parse_cmdline (lpCmdLine);
 	
     if (!InitInstance(hInstance, nCmdShow))
         return (FALSE);
@@ -369,7 +367,6 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 			ret = WSAGETSELECTERROR(lParam);
 			if (ret) {
 				wsprintf(buf, "Error %d on Connect", ret);
-            OutputDebugString (buf);
 		        MessageBox(NULL, buf, NULL, MB_OK|MB_ICONEXCLAMATION);
 				kstream_destroy(con->ks);
 				GlobalUnlock(ghCon);
@@ -401,12 +398,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 		remote_addr.sin_addr.S_un.S_un_b.s_b2 = remote_host->h_addr[1];
 		remote_addr.sin_addr.S_un.S_un_b.s_b3 = remote_host->h_addr[2];
 		remote_addr.sin_addr.S_un.S_un_b.s_b4 = remote_host->h_addr[3];
-        #ifdef KRB4
-    		remote_addr.sin_port = htons(23);
-        #endif
-        #ifdef KRB5
-    		remote_addr.sin_port = htons(13131);
-        #endif
+        remote_addr.sin_port = htons(port_no);
 		
 		connect(con->socket, (struct sockaddr*) &remote_addr, 
 		    	sizeof(struct sockaddr));    
@@ -733,9 +725,10 @@ OpenTelnetDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam) {
                 else
 					break;
             }
-            SetWindowPos(hDlg, NULL, (GetSystemMetrics(SM_CXSCREEN)/2)-(xExt/2), 
-                (GetSystemMetrics(SM_CYSCREEN)/2)-(yExt/2), 0, 0, 
-                SWP_NOSIZE|SWP_NOZORDER|SWP_SHOWWINDOW);
+            SetWindowPos(hDlg, NULL,
+                (GetSystemMetrics(SM_CXSCREEN)/2)-(xExt/2),
+                (GetSystemMetrics(SM_CYSCREEN)/2)-(yExt/2),
+                0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
             ReleaseDC(hDlg, hDC);      
             SendMessage(hEdit, WM_USER+1, NULL, NULL);
             SendMessage(hDlg, WM_SETFOCUS, NULL, NULL);
@@ -811,4 +804,64 @@ TelnetSend(kstream ks, char *buf, int len, int flags) {
 			buf += writelen;
 		}
 	}
+}
+/*+
+ * Function: Trim leading and trailing white space from a string.
+ *
+ * Parameters:
+ *	s - the string to trim.
+ */
+void
+trim (
+	char *s)
+{
+	int l;
+	int i;
+
+	for (i = 0; s[i]; i++)
+		if (s[i] != ' ' && s[i] != '\t')
+			break;
+
+	l = strlen(&s[i]);
+	memmove(s, &s[i], l + 1);
+
+	for (l--; l >= 0; l--) {
+		if (s[l] != ' ' && s[l] != '\t')
+			break;
+	}
+	s[l + 1] = 0;
+
+} /* trim */
+/*+
+** 
+** Parse_cmdline
+** 
+** Reads hostname and port number off the command line.
+**
+** Formats: telnet
+**          telnet <host>
+**          telnet <host> <port no>
+**          telnet -p <port no>
+**
+*/
+void
+parse_cmdline (char *cmdline) {
+    char *ptr;
+    
+    bAutoConnection = FALSE;                    // Initialize to off
+    if (*cmdline == '\0')                       // Empty command line?
+        return;
+
+    trim (cmdline);                             // Remove excess spaces
+    ptr = strchr (cmdline, ' ');                // Find 2nd token
+
+    if (ptr != NULL) {                          // Port number given
+        *ptr++ = '\0';                          // Separate into 2 words
+        port_no = atoi (ptr);
+    }
+
+    if (*cmdline != '-' && *cmdline != '/') {   // Host name given
+		bAutoConnection = TRUE;
+		lstrcpy (szAutoHostName, cmdline);
+    }
 }

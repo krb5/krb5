@@ -866,7 +866,7 @@ opts_command (
 
 		strcat(defname, "\\");
 		strcat(defname, DEF_KRB_CONF);
-		if (_stricmp(confname, defname) == 0 || !defname[0])
+		if (_stricmp(confname, defname) == 0 || !confname[0])
 			p = NULL;
 		else
 			p = confname;
@@ -881,10 +881,10 @@ opts_command (
 
 		strcat(defname, "\\");
 		strcat(defname, DEF_KRB_REALMS);
-		if (_stricmp(realmsname, defname) == 0 || !defname[0])
+		if (_stricmp(realmsname, defname) == 0 || !realmsname[0])
 			p = NULL;
 		else
-			p = defname;
+			p = realmsname;
 		b = WritePrivateProfileString(INI_FILES, INI_KRB_REALMS, p, KERBEROS_INI);
 		assert(b);
 

@@ -7,9 +7,6 @@
 #ifdef KRB4
     #include "kerberos.h"
 #endif
-#include "telnet.h"
-#include "telopts.h"
-
 #ifdef KRB5
     #include "krb5.h"
     #include "des_int.h"
@@ -17,8 +14,11 @@
     #include "los-proto.h"
 #endif
 
+#include "telnet.h"
+#include "telopts.h"
+
 /*
- * Contants
+ * Constants
  */
 	#define IS						0
 	#define SEND					1
@@ -40,7 +40,7 @@
 
 	#define K5_REJECT				1
 	#define K5_ACCEPT				2
-	#define K5_RESPONSE				3
+	#define K5_RESPONSE				3           // They had to make it different
 
 	#define AUTH_WHO_MASK		    1
 	#define AUTH_CLIENT_TO_SERVER   0
@@ -50,7 +50,7 @@
 	#define AUTH_HOW_ONE_WAY        0
 	#define AUTH_HOW_MUTUAL         2
 
-    #ifndef KSUCCESS
+    #ifndef KSUCCESS                            // Let K5 use K4 constants
         #define KSUCCESS    0
         #define KFAILURE    255
     #endif
@@ -59,14 +59,23 @@
  */
     #ifdef KRB4
     	static CREDENTIALS cred;
+    	static KTEXT_ST auth;
+
     	#define KRB_SERVICE_NAME    "rcmd"
         #define KERBEROS_VERSION    KERBEROS_V4
+
+        static int k4_auth_send  (void);
     #endif
     #ifdef KRB5
         static krb5_data auth;
     	static int auth_how;
+        static krb5_auth_context *auth_context;
+
         #define KRB_SERVICE_NAME    "host"
         #define KERBEROS_VERSION    KERBEROS_V5
+
+        static int k5_auth_send  (int how);
+        static int k5_auth_reply (int how, unsigned char *data, int cnt);
     #endif
 
 	BOOL encrypt_enable;
@@ -77,7 +86,8 @@
  * Parameters:
  *	enable - TRUE to enable, FALSE to disable.
  */
-static void auth_encrypt_enable(
+static void
+auth_encrypt_enable(
 	BOOL enable)
 {
 	encrypt_enable = enable;
@@ -91,14 +101,16 @@ static void auth_encrypt_enable(
  * Parameters:
  *	ks - kstream to send abort message to.
  */
-static void auth_abort(
+static void
+auth_abort(
 	kstream ks,
 	char *errmsg,
 	long r)
 {
     char buf[9];
 
-	wsprintf(buf, "%c%c%c%c%c%c%c%c", IAC, SB, AUTHENTICATION, IS, AUTH_NULL, AUTH_NULL, IAC, SE);
+	wsprintf(buf, "%c%c%c%c%c%c%c%c", IAC, SB, AUTHENTICATION, IS, AUTH_NULL,
+        AUTH_NULL, IAC, SE);
 	TelnetSend(ks, (LPSTR)buf, 8, 0);
 
 	if (errmsg != NULL) {
@@ -114,7 +126,8 @@ static void auth_abort(
             #endif
 		}
 
-		MessageBox(HWND_DESKTOP, strTmp, "Kerberos authentication failed!", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(HWND_DESKTOP, strTmp, "Kerberos authentication failed!",
+            MB_OK | MB_ICONEXCLAMATION);
 	}
 
 } /* auth_abort */
@@ -126,7 +139,8 @@ static void auth_abort(
  * Parameters:
  *	kstream - kstream to send abort message to.
  */
-static int copy_for_net(
+static int
+copy_for_net(
 	unsigned char *to,
 	unsigned char *from,
 	int c)
@@ -147,7 +161,7 @@ static int copy_for_net(
 } /* copy_for_net */
 
 
-/*+
+/*++
  * Function: Parse authentication send command
  *
  * Parameters:
@@ -160,7 +174,8 @@ static int copy_for_net(
  *
  * Returns: Kerberos error code.
  */
-static int auth_send(
+static int
+auth_send(
 	kstream ks,
 	unsigned char *parsedat,
 	int end_sub)
@@ -170,14 +185,6 @@ static int auth_send(
     int plen;
 	int r;
 	int i;
-    #ifdef KRB4
-    	KTEXT_ST auth;
-	    char instance[INST_SZ];
-    	char *realm;
-    #endif /* KRB4 */
-    #ifdef KRB5
-        extern int kerberos5_send (int how);
-    #endif /* KRB5 */
 
 	auth_how = -1;
 
@@ -195,57 +202,18 @@ static int auth_send(
 	}
 
     #ifdef KRB4
-    	memset(instance, 0, sizeof(instance));
-
-    	if (realm = krb_get_phost(szHostName))
-    	  	lstrcpy(instance, realm);
-
-    	realm = krb_realmofhost(szHostName);
-
-    	if (!realm) {
-    		strcpy(buf, "Can't find realm for host \"");
-    		strcat(buf, szHostName);
-    		strcat(buf, "\"");
-    		auth_abort(ks, buf, 0);
-    		return KFAILURE;
-    	}
-
-    	r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0);
-
-    	if (r == 0)
-    		r = krb_get_cred(KRB_SERVICE_NAME, instance, realm, &cred);
-
-    	if (r) {
-    		strcpy(buf, "Can't get \"");
-    		strcat(buf, KRB_SERVICE_NAME);
-    		if (instance[0] != 0) {
-    		  	strcat(buf, ".");
-    			lstrcat(buf, instance);
-    		}
-    		strcat(buf, "@");
-    		lstrcat(buf, realm);
-    		strcat(buf, "\" ticket");
-    		auth_abort(ks, buf, r);
-    		return r;
-    	}
-
-        if (szUserName[0])
-            pname = szUserName;
-        else
-            pname = cred.pname;
-        plen = strlen (szUserName);
-
+        r = k4_auth_send ();
     #endif /* KRB4 */
     
     #ifdef KRB5
-        r = kerberos5_send (auth_how);
-        if (! r)
-            return KFAILURE;
-
-        plen = strlen (szUserName);             /* Set in kerberos_5 if needed */
-        pname = szUserName;
-
+        r = k5_auth_send (auth_how);
     #endif /* KRB5 */
+
+    if (! r)
+        return KFAILURE;
+
+    plen = strlen (szUserName);                 // Set by k#_send if needed
+    pname = szUserName;
 
 	wsprintf(buf, "%c%c%c%c", IAC, SB, AUTHENTICATION, NAME);
 	memcpy (&buf[4], pname, plen);
@@ -283,22 +251,206 @@ static int auth_send(
  *
  * Returns: Kerberos error code.
  */
-#ifdef KRB5
-static int auth_reply(
+static int
+auth_reply(
 	kstream ks,
 	unsigned char *parsedat,
 	int end_sub)
 {
-    extern int kerberos5_reply (int how, unsigned char *data, int cnt);
     int n;
 
-    n = kerberos5_reply (0, parsedat, end_sub);
+    #ifdef KRB4
+        n = k4_auth_reply (ks, parsedat, end_sub);
+    #endif
+
+    #ifdef KRB5
+        n = k5_auth_reply (auth_how, parsedat, end_sub);
+    #endif
 
     return n;
 }
-#endif  /* KRB5 */
+
+/*+
+ * Function: Parse the athorization sub-options and reply.
+ *
+ * Parameters:
+ *	ks - kstream to send abort message to.
+ *
+ *	parsedat - sub-option string to parse.
+ *
+ *	end_sub - last charcter position in parsedat.
+ */
+void
+auth_parse(
+	kstream ks,
+	unsigned char *parsedat,
+	int end_sub)
+{
+	if (parsedat[1] == SEND)
+		auth_send(ks, parsedat, end_sub);
+
+	if (parsedat[1] == REPLY)
+		auth_reply(ks, parsedat, end_sub);
+
+} /* auth_parse */
+
+
+/*+
+ * Function: Initialization routine called kstream encryption system.
+ *
+ * Parameters:
+ *	str - kstream to send abort message to.
+ *
+ *  data - user data.
+ */
+int INTERFACE
+auth_init(
+	kstream str,
+	kstream_ptr data)
+{
+	return 0;
+
+} /* auth_init */
+
+
+/*+
+ * Function: Destroy routine called kstream encryption system.
+ *
+ * Parameters:
+ *	str - kstream to send abort message to.
+ *
+ *  data - user data.
+ */
+void INTERFACE
+auth_destroy(
+	kstream str)
+{
+} /* auth_destroy */
+
+
+/*+
+ * Function: Callback to encrypt a block of characters
+ *
+ * Parameters:
+ *	out - return as pointer to converted buffer.
+ *
+ *  in - the buffer to convert
+ *
+ *  str - the stream being encrypted
+ *
+ * Returns: number of characters converted.
+ */
+int INTERFACE
+auth_encrypt(
+	struct kstream_data_block *out,
+	struct kstream_data_block *in,
+	kstream str)
+{
+	out->ptr = in->ptr;
+
+	out->length = in->length;
+
+	return(out->length);
+
+} /* auth_encrypt */
+
+
+/*+
+ * Function: Callback to decrypt a block of characters
+ *
+ * Parameters:
+ *	out - return as pointer to converted buffer.
+ *
+ *  in - the buffer to convert
+ *
+ *  str - the stream being encrypted
+ *
+ * Returns: number of characters converted.
+ */
+int INTERFACE
+auth_decrypt(
+	struct kstream_data_block *out,
+	struct kstream_data_block *in,
+	kstream str)
+{
+	out->ptr = in->ptr;
+
+	out->length = in->length;
+
+	return(out->length);
+
+} /* auth_decrypt */
+
+/*++*/
 #ifdef KRB4
-static int auth_reply(
+/*
+** 
+** K4_auth_send - gets authentication bits we need to send to KDC.
+** 
+** Result is left in auth
+**
+** Returns: 0 on failure, 1 on success
+*/
+static int
+k4_auth_send () {
+    int r;                                      // Return value
+    char instance[INST_SZ];
+    char *realm;
+
+    memset(instance, 0, sizeof(instance));
+
+    if (realm = krb_get_phost(szHostName))
+        lstrcpy(instance, realm);
+
+    realm = krb_realmofhost(szHostName);
+
+    if (!realm) {
+        strcpy(buf, "Can't find realm for host \"");
+        strcat(buf, szHostName);
+        strcat(buf, "\"");
+        auth_abort(ks, buf, 0);
+        return KFAILURE;
+    }
+
+    r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0);
+
+    if (r == 0)
+        r = krb_get_cred(KRB_SERVICE_NAME, instance, realm, &cred);
+
+    if (r) {
+        strcpy(buf, "Can't get \"");
+        strcat(buf, KRB_SERVICE_NAME);
+        if (instance[0] != 0) {
+            strcat(buf, ".");
+            lstrcat(buf, instance);
+        }
+        strcat(buf, "@");
+        lstrcat(buf, realm);
+        strcat(buf, "\" ticket");
+        auth_abort(ks, buf, r);
+
+        return r;
+    }
+
+    if (szUserName[0])                          // Copy if not there
+        strcpy (szUserName, cred.pname);
+}
+
+/*+
+ * Function: K4 parse authentication reply command
+ *
+ * Parameters:
+ *	ks - kstream to send abort message to.
+ *
+ *  parsedat - the sub-command data.
+ *
+ *	end_sub - index of the character in the 'parsedat' array which
+ *		is the last byte in a sub-negotiation
+ *
+ * Returns: Kerberos error code.
+ */
+static int
+k4_auth_reply(
 	kstream ks,
 	unsigned char *parsedat,
 	int end_sub)
@@ -389,127 +541,23 @@ static int auth_reply(
 } /* auth_reply */
 
 #endif /* KRB4 */
-/*+
- * Function: Parse the athorization sub-options and reply.
- *
- * Parameters:
- *	ks - kstream to send abort message to.
- *
- *	parsedat - sub-option string to parse.
- *
- *	end_sub - last charcter position in parsedat.
- */
-void auth_parse(
-	kstream ks,
-	unsigned char *parsedat,
-	int end_sub)
-{
-	if (parsedat[1] == SEND)
-		auth_send(ks, parsedat, end_sub);
-
-	if (parsedat[1] == REPLY)
-		auth_reply(ks, parsedat, end_sub);
-
-} /* auth_parse */
-
-
-/*+
- * Function: Initialization routine called kstream encryption system.
- *
- * Parameters:
- *	str - kstream to send abort message to.
- *
- *  data - user data.
- */
-int INTERFACE auth_init(
-	kstream str,
-	kstream_ptr data)
-{
-	return 0;
-
-} /* auth_init */
-
-
-/*+
- * Function: Destroy routine called kstream encryption system.
- *
- * Parameters:
- *	str - kstream to send abort message to.
- *
- *  data - user data.
- */
-void INTERFACE auth_destroy(
-	kstream str)
-{
-} /* auth_destroy */
-
-
-/*+
- * Function: Callback to encrypt a block of characters
- *
- * Parameters:
- *	out - return as pointer to converted buffer.
- *
- *  in - the buffer to convert
- *
- *  str - the stream being encrypted
- *
- * Returns: number of characters converted.
- */
-int INTERFACE auth_encrypt(
-	struct kstream_data_block *out,
-	struct kstream_data_block *in,
-	kstream str)
-{
-	out->ptr = in->ptr;
-
-	out->length = in->length;
-
-	return(out->length);
-
-} /* auth_encrypt */
-
-
-/*+
- * Function: Callback to decrypt a block of characters
- *
- * Parameters:
- *	out - return as pointer to converted buffer.
- *
- *  in - the buffer to convert
- *
- *  str - the stream being encrypted
- *
- * Returns: number of characters converted.
- */
-int INTERFACE auth_decrypt(
-	struct kstream_data_block *out,
-	struct kstream_data_block *in,
-	kstream str)
-{
-	out->ptr = in->ptr;
-
-	out->length = in->length;
-
-	return(out->length);
-
-} /* auth_decrypt */
-
-/*+*/
+/*++*/
 #ifdef KRB5
 
 /*
 ** 
+** K5_auth_send - gets authentication bits we need to send to KDC.
+** 
 ** Code lifted from telnet sample code in the appl directory.
+**  
+** Result is left in auth
+**
+** Returns: 0 on failure, 1 on success
 ** 
 */
 
-krb5_auth_context *auth_context;
-krb5_flags krb5_kdc_default_options = KDC_OPT_RENEWABLE_OK;
-
-/* 0 on failure, 1 on success */
-int 
-kerberos5_send (int how)
+static int 
+k5_auth_send (int how)
 {
 	krb5_error_code r;
 	krb5_ccache ccache;
@@ -545,7 +593,7 @@ kerberos5_send (int how)
     }
 
 
-	if (r = krb5_get_credentials(k5_context, krb5_kdc_default_options,
+	if (r = krb5_get_credentials(k5_context, KDC_OPT_RENEWABLE_OK,
 				     ccache, &cred, &new_cred)) {
         com_err (NULL, r, "while authorizing.");
 		krb5_free_cred_contents(k5_context, &cred);
@@ -569,9 +617,16 @@ kerberos5_send (int how)
 
 	return(1);
 }
-/*+*/
-int
-kerberos5_reply (int how, unsigned char *data, int cnt) {
+
+/*+
+** 
+** K5_auth_reply -- checks the reply for mutual authentication.
+**
+** Code lifted from telnet sample code in the appl directory.
+** 
+*/
+static int
+k5_auth_reply (int how, unsigned char *data, int cnt) {
     static int mutual_complete = 0;
 
     data += 4;                                  /* Point to status byte */
@@ -620,7 +675,7 @@ kerberos5_reply (int how, unsigned char *data, int cnt) {
 		return KSUCCESS;
 
 	default:
-		return KSUCCESS;                        // Unknown code
+		return KSUCCESS;                        // Unknown reply type
 	}
 }
 #endif /* KRB5 */

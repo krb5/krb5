@@ -1,3 +1,9 @@
+Fri Mar 31 16:24:52 1995 Keith Vetter (keithv@fusion.com)
+
+	* telnet.c, wt-proto.h: added command line option to set port number
+           so port is no longer wired to 13131.
+        * auth.c: made the k4/k5 separation cleaner
+
 Mon Mar 27 20:18:41 1995 Keith Vetter (keithv@fusion.com)
 
 	* Initial release based upon the K4 version. 

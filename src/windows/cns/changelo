@@ -1,3 +1,7 @@
+Fri Mar 31 16:47:18 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.c: realms file was not getting saved properly.
+
 Thu Mar 30 16:11:27 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.h, cns.c, tktlist.c: improved error handling for a bad cache.

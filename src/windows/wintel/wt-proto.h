@@ -9,6 +9,8 @@ BOOL FAR PASCAL ConfigSessionDlg(HWND, WORD, WORD, LONG);
 
 int OpenTelnetConnection(void);
 int NEAR DoDialog(char *szDialog, FARPROC lpfnDlgProc);
+void parse_cmdline (char *cmdline);
+
 ///HCONNECTION FindConnectionFromPortNum(int ID);
 ///HCONNECTION FindConnectionFromTelstate(int telstate);
 ///HCONNECTION FindConnectionFromScreen(HSCREEN hScreen);
