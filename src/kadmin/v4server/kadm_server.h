@@ -53,6 +53,6 @@ typedef struct {
 #define STAB_SERVICES_FILE	"/v4stab_services"
 #define STAB_HOSTS_FILE		"/v4stab_bad_hosts"
 
-krb5_context kadm_context;
+extern krb5_context kadm_context;
 
 #endif /* KADM_SERVER_DEFS */

@@ -1,3 +1,8 @@
+Thu Oct 23 13:07:01 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_server.h: Declare kadm_context as extern so it will not be
+	 	multiply defined in all source files.
+
 Wed Aug  6 20:27:27 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add support for compiling with Hesiod.
