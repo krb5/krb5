@@ -90,6 +90,9 @@
 #endif /* WSHELPER */
 #endif /* KRB5_DNS_LOOKUP */ 
 
+#define FAI_PREFIX krb5int
+#include "fake-addrinfo.h"
+
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
@@ -231,6 +234,39 @@ krb5_try_realm_txt_rr(prefix, name, realm)
 }
 #endif /* KRB5_DNS_LOOKUP */
 
+krb5_error_code krb5int_translate_gai_error (int);
+
+static krb5_error_code
+krb5int_get_fq_hostname (char *buf, size_t bufsize, const char *name)
+{
+    struct addrinfo *ai, hints;
+    int err;
+
+    memset (&hints, 0, sizeof (hints));
+    hints.ai_flags = AI_CANONNAME;
+    err = getaddrinfo (name, 0, &hints, &ai);
+    if (err)
+	return krb5int_translate_gai_error (err);
+    if (ai->ai_canonname == 0)
+	return KRB5_EAI_FAIL;
+    strncpy (buf, ai->ai_canonname, bufsize);
+    buf[bufsize-1] = 0;
+    freeaddrinfo (ai);
+    return 0;
+}
+
+/* Get the local host name, try to make it fully-qualified.
+   Always return a null-terminated string.
+   Might return an error if gethostname fails.  */
+krb5_error_code
+krb5int_get_fq_local_hostname (char *buf, size_t bufsiz)
+{
+    buf[0] = 0;
+    if (gethostname (buf, bufsiz) == -1)
+	return SOCKET_ERRNO;
+    buf[bufsiz - 1] = 0;
+    return krb5int_get_fq_hostname (buf, bufsiz, buf);
+}
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_host_realm(context, host, realmsp)
@@ -243,25 +279,17 @@ krb5_get_host_realm(context, host, realmsp)
     krb5_error_code retval;
     int l;
     char local_host[MAX_DNS_NAMELEN+1];
-    struct hostent *h;
 
-
-    if (host)
+    if (host) {
+	/* Should probably error out if strlen(host) > MAX_DNS_NAMELEN.  */
 	strncpy(local_host, host, sizeof(local_host));
-    else {
-	if (gethostname(local_host, sizeof(local_host)) == -1)
-	    return SOCKET_ERRNO;
-	/*
-	 * Try to make sure that we have a fully qualified name if
-	 * possible.  We need to handle the case where the host has a
-	 * dot but is not FQDN, so we call gethostbyname.
-	 */
-	h = gethostbyname(local_host);
-	if (h) {
-	    strncpy(local_host, h->h_name, sizeof(local_host));
-	}
+	local_host[sizeof(local_host) - 1] = '\0';
+    } else {
+	retval = krb5int_get_fq_local_hostname (local_host,
+						sizeof (local_host));
+	if (retval)
+	    return retval;
     }
-    local_host[sizeof(local_host) - 1] = '\0';
 
     for (cp = local_host; *cp; cp++) {
 	if (isupper((int) (*cp)))
@@ -368,4 +396,36 @@ krb5_get_host_realm(context, host, realmsp)
     
     *realmsp = retrealms;
     return 0;
+}
+
+
+krb5_error_code
+krb5int_translate_gai_error (int num)
+{
+    switch (num) {
+    case EAI_ADDRFAMILY:
+	return EAFNOSUPPORT;
+    case EAI_AGAIN:
+	return EAGAIN;
+    case EAI_BADFLAGS:
+	return EINVAL;
+    case EAI_FAIL:
+	return KRB5_EAI_FAIL;
+    case EAI_FAMILY:
+	return EAFNOSUPPORT;
+    case EAI_MEMORY:
+	return ENOMEM;
+    case EAI_NODATA:
+	return KRB5_EAI_NODATA;
+    case EAI_NONAME:
+	return KRB5_EAI_NONAME;
+    case EAI_SERVICE:
+	return KRB5_EAI_SERVICE;
+    case EAI_SOCKTYPE:
+	return EINVAL;
+    case EAI_SYSTEM:
+	return errno;
+    }
+    abort ();
+    return -1;
 }

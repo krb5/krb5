@@ -323,4 +323,10 @@ error_code KRB5_NOPERM_ETYPE,	"Encryption type not permitted"
 error_code KRB5_CONFIG_ETYPE_NOSUPP,	"No supported encryption types (config file error?)"
 error_code KRB5_OBSOLETE_FN,	"Program called an obsolete, deleted function"
 
+# translated versions of getaddrinfo errors
+error_code KRB5_EAI_FAIL,	"unknown getaddrinfo failure"
+error_code KRB5_EAI_NODATA,	"no data available for host/domain name"
+error_code KRB5_EAI_NONAME,	"host/domain name not found"
+error_code KRB5_EAI_SERVICE,	"service name unknown"
+
 end

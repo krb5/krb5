@@ -1,3 +1,11 @@
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* hst_realm.c (krb5int_get_fq_hostname): New function.  Use
+	getaddrinfo instead of gethostbyname.
+	(krb5int_get_fq_local_hostname): New function.
+	(krb5_get_host_realm): Call it.
+	* def_realm.c (krb5_get_default_realm): Call it.
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* sendto_kdc.c (krb5_sendto_kdc): Get rid of unecessary casts.
