@@ -58,9 +58,9 @@ intr_routine(signo)
 
 /*** Routines ****************************************************** */
 krb5_error_code
-des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize, prompt, prompt2)
+des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
     char *return_pwd;
-    int bufsize;
+    int bufsize_in;
     char *prompt;
     char *prompt2;
 {
@@ -69,6 +69,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize, prompt, prompt2)
     int scratchchar;
     krb5_sigtype (*volatile ointrfunc)();
     krb5_error_code errcode;
+    size_t bufsize = bufsize_in;
 #ifndef ECHO_PASSWORD
     struct termios echo_control, save_control;
     int fd;
@@ -98,7 +99,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize, prompt, prompt2)
     (void) fflush(stdout);
     (void) memset(return_pwd, 0, bufsize);
 
-    if (fgets(return_pwd, bufsize, stdin) == NULL) {
+    if (fgets(return_pwd, bufsize_in, stdin) == NULL) {
 	(void) putchar('\n');
 	errcode = KRB5_LIBOS_CANTREADPWD;
 	goto cleanup;
@@ -124,7 +125,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize, prompt, prompt2)
 	    goto cleanup;
 	}
 	(void) memset((char *)readin_string, 0, bufsize);
-	if (fgets((char *)readin_string, bufsize, stdin) == NULL) {
+	if (fgets((char *)readin_string, bufsize_in, stdin) == NULL) {
 	    (void) putchar('\n');
 	    errcode = KRB5_LIBOS_CANTREADPWD;
 	    goto cleanup;

@@ -1,3 +1,8 @@
+2001-07-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* read_passwd.c: Create local variable that takes the "int"
+	bufsize and makes it unsigned for use in malloc, strcmp, etc.
+
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.c (des_ecb_encrypt): Put "static" before "const" for local
