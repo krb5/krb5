@@ -182,7 +182,7 @@ int pkt_clen P_TYPE_((KTEXT ));
 int krb_rd_err P_TYPE_((u_char *, u_long , long *, MSG_DAT *));
 
 /* rd_priv.c */
-long krb_rd_priv P_TYPE_((u_char *, u_long , Key_schedule , C_Block , struct sockaddr_in *, struct sockaddr_in *, MSG_DAT *));
+long krb_rd_priv P_TYPE_((u_char *, u_long , Key_schedule , C_Block *, struct sockaddr_in *, struct sockaddr_in *, MSG_DAT *));
 
 /* rd_req.c */
 int krb_set_key P_TYPE_((char *, int ));

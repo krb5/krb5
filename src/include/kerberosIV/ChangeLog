@@ -1,3 +1,10 @@
+Sun May  7 08:26:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kparse.h: Remove ErrorMsg definition. It is declared static in
+		source file.
+
+	* krb4-proto.h: krb_rd_priv prototype did not match source
+
 Fri Apr 28 16:39:47 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* kparse.h (strutol, strsave): are only static in this module.

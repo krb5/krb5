@@ -88,11 +88,4 @@ typedef struct {
 
 extern int LineNbr;		/* current line # in parameter file */
 
-extern char ErrorMsg[];		/*
-				 * meaningful only when KV_SYNTAX,
- 				 * PS_SYNTAX,  or PS_BAD_KEYWORD is
-				 * returned by fGetKeywordValue or
-				 * fGetParameterSet
-				 */
-
 #endif /* KPARSE_DEFS */
