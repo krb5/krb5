@@ -27,11 +27,12 @@ check::
 	$(RM) test.out
 	./krb5_encode_test > test.out
 	cmp test.out $(srcdir)/reference_encode.out
+	$(RM) test.out	
 
 install::
 
 clean::
-	rm -f *~ *.o krb5_encode_test krb5_decode_test
+	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out
 
 
 ################ Dependencies ################
