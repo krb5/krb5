@@ -18,6 +18,10 @@ static char *rcsid = "$Header$";
 #include <kadm5/kadm_rpc.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
+#include <adm_proto.h>
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 /*
  * Function: kadm_1

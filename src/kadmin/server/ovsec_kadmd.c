@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
 			   "while initializing, aborting", whoami,
 			   (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
 	  fprintf(stderr, "%s: Missing required configuration values "
-		  "(%x) while initializing, aborting\n", whoami,
+		  "(%lx) while initializing, aborting\n", whoami,
 		  (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
 	  krb5_klog_close(context);
 	  kadm5_destroy(global_server_handle);

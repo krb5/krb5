@@ -1,3 +1,11 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* ovsec_kadmd.c (main): Make format string to sprintf specify that
+	long arguments are present.
+
+	* kadm_rpc_svc.c: Include arpa/inet.h (if present) for inet_ntoa
+	prototype. Include adm_proto.h for krb5_klog_syslog() prototype.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* misc.c, schpw.c: Cleanup assignments in conditionals.
