@@ -21,6 +21,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include <krb5/rsa-md5.h>
 #include <memory.h>
 
 /*
@@ -124,6 +125,7 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
 {
    unsigned char *ptr, *ptr2;
    long tmp;
+   int bigend;
    krb5_gss_cred_id_t cred;
    krb5_data ap_req;
    int i;
@@ -211,14 +213,12 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
 
    /* get the rcache pointer */
 
-   if (krb5_princ_size(cred->princ) > 1) {
-      if (code = krb5_get_server_rcache(krb5_princ_component(cred->princ, 1),
-					&rcache)) {
-	 *minor_status = code;
-	 return(GSS_S_FAILURE);
-      }
-   } else {
-      rcache = NULL;
+   if (code =
+       krb5_get_server_rcache(krb5_princ_component(cred->princ,
+			              ((krb5_princ_size(cred->princ)>1)?1:0)),
+			      &rcache)) {
+      *minor_status = code;
+      return(GSS_S_FAILURE);
    }
 
    /* decode the message */
@@ -248,26 +248,49 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
    /* verify that the checksum is correct */
 
    /* 24 == checksum length: see token formats document */
+   /* This checks for < 24 instead of != 24 in order that this implementation
+      can interoperate with an implementation whcih supports negotiation */
    if ((authdat->authenticator->checksum->checksum_type != CKSUMTYPE_KG_CB) ||
-       (authdat->authenticator->checksum->length != 24)) {
+       (authdat->authenticator->checksum->length < 24)) {
       krb5_free_tkt_authent(authdat);
       *minor_status = 0;
       return(GSS_S_BAD_BINDINGS);
    }
 
-   ptr = (unsigned char *) authdat->authenticator->checksum->contents;
+   /*
+      "Be liberal in what you accept, and
+       conservative in what you send"
+		-- rfc1123
 
-   if (code = kg_checksum_channel_bindings(input_chan_bindings, &md5)) {
-      krb5_free_tkt_authent(authdat);
-      *minor_status = code;
-      return(GSS_S_FAILURE);
+       This code will let this acceptor interoperate with an initiator
+       using little-endian or big-endian integer encoding.
+   */
+
+   ptr = (unsigned char *) authdat->authenticator->checksum->contents;
+   bigend = 0;
+
+   TREAD_INT(ptr, tmp, bigend);
+
+   if (tmp != RSA_MD5_CKSUM_LENGTH) {
+      ptr = (unsigned char *) authdat->authenticator->checksum->contents;
+      bigend = 1;
+
+      TREAD_INT(ptr, tmp, bigend);
+
+      if (tmp != RSA_MD5_CKSUM_LENGTH) {
+	 xfree(md5.contents);
+	 krb5_free_tkt_authent(authdat);
+	 *minor_status = KG_BAD_LENGTH;
+	 return(GSS_S_FAILURE);
+      }
    }
 
-   TREAD_INT(ptr, tmp);
-   if (tmp != md5.length) {
-      xfree(md5.contents);
+   /* at this point, bigend is set according to the initiator's byte order */
+
+   if (code = kg_checksum_channel_bindings(input_chan_bindings, &md5,
+					   bigend)) {
       krb5_free_tkt_authent(authdat);
-      *minor_status = KG_BAD_LENGTH;
+      *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
@@ -281,7 +304,7 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
 
    xfree(md5.contents);
 
-   TREAD_INT(ptr, gss_flags);
+   TREAD_INT(ptr, gss_flags, bigend);
 
    /* create the ctx struct and start filling it in */
 
@@ -295,6 +318,7 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
    ctx->mutual = gss_flags & GSS_C_MUTUAL_FLAG;
    ctx->seed_init = 0;
    ctx->cred = cred;
+   ctx->big_endian = bigend;
 
    if (code = krb5_copy_principal(cred->princ, &ctx->here)) {
       xfree(ctx);
@@ -397,7 +421,6 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
       *ret_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | ctx->mutual;
 
    ctx->established = 1;
-
 
    /* intern the src_name */
 

@@ -28,7 +28,8 @@
  */
 
 krb5_error_code kg_checksum_channel_bindings(gss_channel_bindings_t cb,
-					     krb5_checksum *cksum)
+					     krb5_checksum *cksum,
+					     int bigend)
 {
    int len;
    char *buf, *ptr;
@@ -71,11 +72,11 @@ krb5_error_code kg_checksum_channel_bindings(gss_channel_bindings_t cb,
 
    ptr = buf;
 
-   TWRITE_INT(ptr, tmp, cb->initiator_addrtype);
-   TWRITE_BUF(ptr, tmp, cb->initiator_address);
-   TWRITE_INT(ptr, tmp, cb->acceptor_addrtype);
-   TWRITE_BUF(ptr, tmp, cb->acceptor_address);
-   TWRITE_BUF(ptr, tmp, cb->application_data);
+   TWRITE_INT(ptr, cb->initiator_addrtype, bigend);
+   TWRITE_BUF(ptr, cb->initiator_address, bigend);
+   TWRITE_INT(ptr, cb->acceptor_addrtype, bigend);
+   TWRITE_BUF(ptr, cb->acceptor_address, bigend);
+   TWRITE_BUF(ptr, cb->application_data, bigend);
 
    /* checksum the data */
 

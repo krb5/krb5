@@ -94,6 +94,7 @@ typedef struct _krb5_gss_ctx_id_rec {
    krb5_int32 seq_send;
    krb5_int32 seq_recv;
    int established;
+   int big_endian;
 } krb5_gss_ctx_id_rec, krb5_gss_ctx_id_t;
 
 extern void *kg_vdb;
@@ -119,7 +120,8 @@ OM_uint32 kg_get_defcred(OM_uint32 *minor_status, gss_cred_id_t *cred);
 OM_uint32 kg_release_defcred(OM_uint32 *minor_status);
 
 krb5_error_code kg_checksum_channel_bindings(gss_channel_bindings_t cb,
-					     krb5_checksum *cksum);
+					     krb5_checksum *cksum,
+					     int bigend);
 
 krb5_error_code kg_make_seq_num(krb5_gss_enc_desc *ed, int direction,
 				int seqnum, unsigned char *cksum,

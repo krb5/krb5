@@ -30,11 +30,29 @@
 
 /* these are bogus, but will compile */
 
+/*
+ * The OID of the krb5 mechanism, assigned by IETF, is:
+ * 	1.3.5.1.5.2
+ * The OID of the krb5_name type is:
+ * 	iso(1) member-body(2) US(840) mit(113554) infosys(2) gssapi(1)
+ * 	krb5(2) krb5_name(1) = 1.2.840.113554.2.1.2.1
+ * The OID of the krb5_principal type is:
+ * 	iso(1) member-body(2) US(840) mit(113554) infosys(2) gssapi(1)
+ * 	krb5(2) krb5_principal(2) = 1.2.840.113554.2.1.2.2
+ */
+
+/*
+ * Encoding rules: The first two values are encoded in one byte as 40
+ * * value1 + value2.  Subsequent values are encoded base 128, most
+ * significant digit first, with the high bit set on all octets except
+ * the last in each value's encoding.
+ */
+
 static const gss_OID_desc oids[] = {
    /* this OID is from Ted.  It's not official yet, but it's close. */
    {5, "\053\005\001\005\002"},
-   {2, "\002\002"},
-   {2, "\002\003"},
+   {10, "\052\206\110\206\367\022\002\001\002\001"},
+   {10, "\052\206\110\206\367\022\002\001\002\002"},
 };
 
 const_gss_OID gss_mech_krb5 = oids+0;

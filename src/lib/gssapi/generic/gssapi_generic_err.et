@@ -35,4 +35,5 @@ error_code G_BAD_MSG_CTX, "Message context invalid"
 error_code G_WRONG_SIZE, "Buffer is the wrong size"
 error_code G_BAD_USAGE, "Credential usage type is unknown"
 error_code G_UNKNOWN_QOP, "Unknown quality of protection specified"
+error_code G_BAD_HOSTNAME, "Hostname in SERVICE-NAME string could not be canonicalized"
 end

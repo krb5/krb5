@@ -31,6 +31,8 @@
 
 #include "gssapi_generic_err.h"
 #include <errno.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 
 /** helper macros **/
 
@@ -38,15 +40,23 @@
    (((o1)->length == (o2)->length) && \
     (memcmp((o1)->elements,(o2)->elements,(o1)->length) == 0))
 
-#define TWRITE_INT(ptr, tmp, num) \
-   (tmp) = htonl(num); \
-   memcpy(ptr, (char *) &(tmp), sizeof(tmp)); \
-   (ptr) += sizeof(tmp);
-	     
-#define TREAD_INT(ptr, num) \
-   memcpy((char *) &(num), (char *) (ptr), sizeof(num)); \
-   (num) = ntohl(num); \
-   (ptr) += sizeof(num);
+/* this code knows that an int on the wire is 32 bits.  The type of
+   num should be at least this big, or the extra shifts may do weird
+   things */
+
+#define TWRITE_INT(ptr, num, bigend) \
+   (ptr)[0] = (bigend)?((num)>>24):((num)&0xff); \
+   (ptr)[1] = (bigend)?(((num)>>16)&0xff):(((num)>>8)&0xff); \
+   (ptr)[2] = (bigend)?(((num)>>8)&0xff):(((num)>>16)&0xff); \
+   (ptr)[3] = (bigend)?((num)&0xff):((num)>>24); \
+   (ptr) += 4;
+
+#define TREAD_INT(ptr, num, bigend) \
+   (num) = (((ptr)[0]<<((bigend)?24: 0)) | \
+            ((ptr)[1]<<((bigend)?16: 8)) | \
+            ((ptr)[2]<<((bigend)? 8:16)) | \
+            ((ptr)[3]<<((bigend)? 0:24))); \
+   (ptr) += 4;
 
 #define TWRITE_STR(ptr, str, len) \
    memcpy((ptr), (char *) (str), (len)); \
@@ -56,8 +66,8 @@
    (str) = (ptr); \
    (ptr) += (len);
 
-#define TWRITE_BUF(ptr, tmp, buf) \
-   TWRITE_INT((ptr), (tmp), (buf).length); \
+#define TWRITE_BUF(ptr, buf, bigend) \
+   TWRITE_INT((ptr), (buf).length, (bigend)); \
    TWRITE_STR((ptr), (buf).value, (buf).length);
 
 /** malloc wrappers; these may actually do something later */

@@ -53,14 +53,14 @@ make_ap_req(krb5_gss_cred_id_t cred,
 
    /* compute the hash of the channel bindings */
 
-   if (code = kg_checksum_channel_bindings(chan_bindings, &md5))
+   if (code = kg_checksum_channel_bindings(chan_bindings, &md5, 0))
       return(code);
 
    ptr = ckbuf;
 
-   TWRITE_INT(ptr, tmp, md5.length);
+   TWRITE_INT(ptr, md5.length, 0);
    TWRITE_STR(ptr, (unsigned char *) md5.contents, md5.length);
-   TWRITE_INT(ptr, tmp, do_mutual?GSS_C_MUTUAL_FLAG:0);
+   TWRITE_INT(ptr, do_mutual?GSS_C_MUTUAL_FLAG:0, 0);
 
    /* done with this, free it */
    xfree(md5.contents);
@@ -72,14 +72,8 @@ make_ap_req(krb5_gss_cred_id_t cred,
    /* fill in the necessary fields in creds */
 
    memset((char *) &creds, 0, sizeof(creds));
-
-   code = krb5_copy_principal(cred->princ, &creds.client);
-   if (code)
-	   return code;
-
-   code = krb5_copy_principal(server, &creds.server);
-   if (code)
-	   return code;
+   creds.client = cred->princ;
+   creds.server = server;
 
    creds.times.endtime = *endtime;
 
@@ -96,6 +90,11 @@ make_ap_req(krb5_gss_cred_id_t cred,
    *seqnum = authent.seq_number;
 
    /* free stuff which was created */
+
+   /* XXXX There's a bug in krb5 here, but I have no clue what it is.
+      This is a workaround. */
+   if (creds.client == cred->princ)
+      creds.client = NULL;
 
    krb5_free_cred_contents(&creds);
 
@@ -226,6 +225,7 @@ krb5_gss_init_sec_context(OM_uint32 *minor_status,
       ctx->mutual = req_flags & GSS_C_MUTUAL_FLAG;
       ctx->seed_init = 0;
       ctx->cred = cred;
+      ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
 
       if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
 	 ctx->endtime = 0;

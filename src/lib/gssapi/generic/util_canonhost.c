@@ -36,10 +36,23 @@
 char *g_canonicalize_host(char *hostname)
 {
    struct hostent *hent;
+   char *haddr;
    char *canon, *str;
 
    if ((hent = gethostbyname(hostname)) == NULL)
       return(NULL);
+
+   if (! (haddr = xmalloc(hent->h_length))) {
+	return(NULL);
+   }
+
+   memcpy(haddr, hent->h_addr_list[0], hent->h_length);
+
+   if (! (hent = gethostbyaddr(haddr, hent->h_length, hent->h_addrtype))) {
+	return(NULL);
+   }
+
+   xfree(haddr);
 
    if ((canon = xmalloc(strlen(hent->h_name)+1)) == NULL)
       return(NULL);

@@ -36,6 +36,13 @@ extern const gss_OID_set_desc * const gss_mech_set_krb5;
 extern const gss_OID_desc * const gss_nt_krb5_name;
 extern const gss_OID_desc * const gss_nt_krb5_principal;
 
+#define gss_krb5_nt_general_name	gss_nt_krb5_name
+#define gss_krb5_nt_principal		gss_nt_krb5_principal
+#define gss_krb5_nt_service_name	gss_nt_service_name
+#define gss_krb5_nt_user_name		gss_nt_user_name
+#define gss_krb5_nt_machine_uid_name	gss_nt_machine_uid_name
+#define gss_krb5_nt_string_uid_name	gss_nt_string_uid_name
+
 OM_uint32 gss_krb5_get_tkt_flags(OM_uint32 *minor_status,
 				 gss_ctx_id_t context_handle,
 				 krb5_flags *ticket_flags);

@@ -54,6 +54,8 @@ kg_unseal(OM_uint32 *minor_status,
    MD5_CTX md5;
    unsigned char *cksum;
    krb5_timestamp now;
+   unsigned char *plain;
+   int plainlen;
 
    if (toktype == KG_TOK_SEAL_MSG) {
       message_buffer->length = 0;
@@ -109,8 +111,6 @@ kg_unseal(OM_uint32 *minor_status,
 
    if (toktype == KG_TOK_SEAL_MSG) {
       if (sealalg == 0) {
-	 unsigned char *plain;
-
 	 if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
 	    *minor_status = ENOMEM;
 	    return(GSS_S_FAILURE);
@@ -121,42 +121,56 @@ kg_unseal(OM_uint32 *minor_status,
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
 	 }
+      } else {
+	 plain = ptr+22;
+      }
 
+      plainlen = tmsglen;
+
+      if (sealalg && ctx->big_endian)
+	 token.length = tmsglen;
+      else
 	 token.length = tmsglen - 8 - plain[tmsglen-1];
 
+      if (token.length) {
 	 if ((token.value = xmalloc(token.length)) == NULL) {
-	    xfree(plain);
+	    if (sealalg == 0)
+	       xfree(plain);
 	    *minor_status = ENOMEM;
 	    return(GSS_S_FAILURE);
 	 }
 
-	 memcpy(token.value, plain+8, token.length);
-
-	 xfree(plain);
-      } else {
-	 token.length = tmsglen;
-
-	 if ((token.value = xmalloc(token.length)) == NULL) {
-	    *minor_status = ENOMEM;
-	    return(GSS_S_FAILURE);
-	 }
-
-	 memcpy(token.value, ptr+22, token.length);
+	 if (sealalg && ctx->big_endian)
+	    memcpy(token.value, plain, token.length);
+	 else
+	    memcpy(token.value, plain+8, token.length);
       }
    } else if (toktype == KG_TOK_SIGN_MSG) {
       token = *message_buffer;
+      plain = token.value;
+      plainlen = token.length;
    } else {
       token.length = 0;
       token.value = NULL;
+      plain = token.value;
+      plainlen = token.length;
    }
 
    /* compute the checksum of the message */
 
    if (signalg == 0) {
+      /* compute the checksum of the message */
+
       MD5Init(&md5);
       MD5Update(&md5, (unsigned char *) ptr-2, 8);
-      MD5Update(&md5, token.value, token.length);
+      if (ctx->big_endian)
+	 MD5Update(&md5, token.value, token.length);
+      else
+	 MD5Update(&md5, plain, plainlen);
       MD5Final(&md5);
+
+      if (sealalg == 0)
+	 xfree(plain);
 
       /* XXX this depends on the key being a single-des key, but that's
 	 all that kerberos supports right now */
@@ -175,6 +189,8 @@ kg_unseal(OM_uint32 *minor_status,
    } else {
       if (! ctx->seed_init) {
 	 if (code = kg_make_seed(ctx->subkey, ctx->seed)) {
+	    if (sealalg == 0)
+	       xfree(plain);
 	    if (toktype == KG_TOK_SEAL_MSG)
 	       xfree(token.value);
 	    *minor_status = code;
@@ -186,8 +202,14 @@ kg_unseal(OM_uint32 *minor_status,
       MD5Init(&md5);
       MD5Update(&md5, ctx->seed, sizeof(ctx->seed));
       MD5Update(&md5, (unsigned char *) ptr-2, 8);
-      MD5Update(&md5, token.value, token.length);
+      if (ctx->big_endian)
+	 MD5Update(&md5, token.value, token.length);
+      else
+	 MD5Update(&md5, plain, plainlen);
       MD5Final(&md5);
+
+      if (sealalg == 0)
+	 xfree(plain);
 
       cksum = md5.digest;
    }

@@ -36,7 +36,8 @@ make_seal_token(krb5_gss_enc_desc *enc_ed,
 		gss_buffer_t text,
 		gss_buffer_t token,
 		int encrypt,
-		int toktype)
+		int toktype,
+		int bigend)
 {
    krb5_error_code code;
    MD5_CTX md5;
@@ -47,10 +48,10 @@ make_seal_token(krb5_gss_enc_desc *enc_ed,
    /* create the token buffer */
 
    if (toktype == KG_TOK_SEAL_MSG) {
-      tmsglen = text->length;
-      if (encrypt)
-	 tmsglen = (kg_confounder_size(enc_ed) +
-		    kg_encrypt_size(enc_ed, tmsglen+1));
+      if (bigend && !encrypt)
+	 tmsglen = text->length;
+      else
+	 tmsglen = (kg_confounder_size(enc_ed)+text->length+8)&(~7);
    } else {
       tmsglen = 0;
    }
@@ -86,12 +87,62 @@ make_seal_token(krb5_gss_enc_desc *enc_ed,
    ptr[4] = 0xff;
    ptr[5] = 0xff;
 
-   /* compute the checksum */
+   /* pad the plaintext, encrypt if needed, and stick it in the token */
 
-   MD5Init(&md5);
-   MD5Update(&md5, (unsigned char *) ptr-2, 8);
-   MD5Update(&md5, text->value, text->length);
-   MD5Final(&md5);
+   if (toktype == KG_TOK_SEAL_MSG) {
+      unsigned char *plain;
+      unsigned char pad;
+
+      if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
+	 xfree(t);
+	 return(ENOMEM);
+      }
+
+      if (code = kg_make_confounder(enc_ed, plain)) {
+	 xfree(plain);
+	 xfree(t);
+	 return(code);
+      }
+
+      memcpy(plain+8, text->value, text->length);
+
+      pad = 8-(text->length%8);
+
+      memset(plain+8+text->length, pad, pad);
+
+      if (encrypt) {
+	 if (code = kg_encrypt(enc_ed, NULL, (krb5_pointer) plain,
+			       (krb5_pointer) (ptr+22), tmsglen)) {
+	    xfree(plain);
+	    xfree(t);
+	    return(code);
+	 }
+      } else {
+	 if (bigend)
+	    memcpy(ptr+22, text->value, text->length);
+	 else
+	    memcpy(ptr+22, plain, tmsglen);
+      }
+
+      /* compute the checksum */
+
+      MD5Init(&md5);
+      MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      if (bigend)
+	 MD5Update(&md5, text->value, text->length);
+      else
+	 MD5Update(&md5, plain, tmsglen);
+      MD5Final(&md5);
+
+      xfree(plain);
+   } else {
+      /* compute the checksum */
+
+      MD5Init(&md5);
+      MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      MD5Update(&md5, text->value, text->length);
+      MD5Final(&md5);
+   }
 
    /* XXX this depends on the key being a single-des key, but that's
       all that kerberos supports right now */
@@ -111,47 +162,10 @@ make_seal_token(krb5_gss_enc_desc *enc_ed,
 
    /* create the seq_num */
 
-   if (code = kg_make_seq_num(seq_ed, direction?0xff:0, *seqnum,
+   if (code = kg_make_seq_num(seq_ed, direction?0:0xff, *seqnum,
 			      ptr+14, ptr+6)) {
       xfree(t);
       return(code);
-   }
-
-   /* include seal token fields */
-
-   if (toktype == KG_TOK_SEAL_MSG) {
-      if (encrypt) {
-	 unsigned char *plain;
-	 unsigned char pad;
-
-	 if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
-	    xfree(t);
-	    return(ENOMEM);
-	 }
-
-	 if (code = kg_make_confounder(enc_ed, plain)) {
-	    xfree(plain);
-	    xfree(t);
-	    return(code);
-	 }
-
-	 memcpy(plain+8, text->value, text->length);
-
-	 pad = 8-(text->length%8);
-
-	 memset(plain+8+text->length, pad, pad);
-
-	 if (code = kg_encrypt(enc_ed, NULL, (krb5_pointer) plain,
-			       (krb5_pointer) (ptr+22), tmsglen)) {
-	    xfree(plain);
-	    xfree(t);
-	    return(code);
-	 }
-
-	 xfree(plain);
-      } else {
-	 memcpy(ptr+22, text->value, text->length);
-      }
    }
 
    /* that's it.  return the token */
@@ -211,7 +225,7 @@ kg_seal(OM_uint32 *minor_status,
    if (code = make_seal_token(&ctx->enc, &ctx->seq, &ctx->seq_send,
 			      ctx->initiate,
 			      input_message_buffer, output_message_buffer,
-			      conf_req_flag, toktype)) {
+			      conf_req_flag, toktype, ctx->big_endian)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
