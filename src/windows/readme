@@ -18,11 +18,16 @@ On the PC side
 
 4) nmake -c -f makefile.in             # Configures the makefiles and runs
                                        # ...make in all the subdirectories.
+5) <make sure the config and realms files, krb.con and krb.rea, 
+    are in the top level directory.>
 
 The resulting interesting files will be:
 lib/libkrb5.dll                        # The actual DLL
 lib/libkrb5.lib                        # The library for linking in the DLL
 windows/cns/cns.exe                    # Cygnus Network Security program
+windows/wintel/telnet                  # K5 authenticated telnet program
 
-The config and realms files, krb.con and krb.rea, currently must reside
-in the top level directory.
+Note on telnet: since the only k5 telnet daemon at this time is 
+tsx-11.mit.edu port 13131, the port the program connects to is
+hardwired for now to 13131.
+

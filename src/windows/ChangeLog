@@ -1,3 +1,8 @@
+Mon Mar 27 20:34:58 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: makes recursively in wintel directory
+        * readme: updated for wintel program.
+
 Thu Mar 23 14:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* readme: updated to reflect name change of zipping target.
