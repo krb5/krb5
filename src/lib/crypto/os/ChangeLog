@@ -1,3 +1,8 @@
+Wed Mar 22 11:44:07 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in: Use $(SRCTOP) instead of $(srcdir), since Mac's
+		don't like dealing with $(U)$(U).
+
 Fri Mar 17 16:21:46 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Fix rules for localdr.c, ustime.c, and memmove.c so
