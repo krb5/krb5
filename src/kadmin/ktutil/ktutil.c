@@ -140,7 +140,7 @@ void ktutil_write_v4(argc, argv)
 	fprintf(stderr, "%s: must specify srvtab to write\n", argv[0]);
 	return;
     }
-    retval = ktutil_write_keytab(kcontext, ktlist, argv[1]);
+    retval = ktutil_write_srvtab(kcontext, ktlist, argv[1]);
     if (retval)
 	com_err(argv[0], retval, "while writing srvtab \"%s\"", argv[1]);
 #else

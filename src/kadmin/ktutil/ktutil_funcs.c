@@ -114,6 +114,7 @@ krb5_error_code ktutil_read_keytab(context, name, list)
 	retval = krb5_kt_next_entry(context, kt, entry, &cursor);
 	if (retval)
 	    break;
+
 	if (!lp) {		/* if list is empty, start one */
 	    lp = (krb5_kt_list)malloc(sizeof (*lp));
 	    if (!lp) {
@@ -331,6 +332,7 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 		    pruned = (krb5_kt_list) malloc(sizeof (*pruned));
 		    if (!pruned)
 			return ENOMEM;
+		    memset((char *) pruned, 0, sizeof(*pruned));
 		    lp1 = pruned;
 		} else {
 		    prev->next
@@ -339,6 +341,7 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 			retval = ENOMEM;
 			goto free_pruned;
 		    }
+		    memset((char *) prev->next, 0, sizeof(*pruned));
 		    lp1 = prev->next;
 		}
 		lp1->entry = lp->entry;

@@ -1,3 +1,10 @@
+Mon Dec 25 10:03:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ktutil.c (ktutil_write_v4): Call ktutil_write_srvtab not
+		ktutil_write_keytab.
+
+	* ktutil_funcs.c (ktutil_write_srvtab): Clear malloced memory.
+
 
 Thu Sep 07 15:06:57 1995  Chris Provenzano (proven@mit.edu)
 
