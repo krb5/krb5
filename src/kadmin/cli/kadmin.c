@@ -132,11 +132,11 @@ static char *strdate(when)
     krb5_timestamp when;
 {
     struct tm *tm;
-    static char out[30];
+    static char out[40];
     
     time_t lcltim = when;
     tm = localtime(&lcltim);
-    strftime(out, 30, "%a %b %d %H:%M:%S %Z %Y", tm);
+    strftime(out, sizeof(out), "%a %b %d %H:%M:%S %Z %Y", tm);
     return out;
 }
 
