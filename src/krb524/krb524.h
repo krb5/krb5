@@ -28,6 +28,7 @@
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 	#include <TargetConditionals.h>
+    #include <Kerberos/krb5.h>
     #ifndef KRB524_PRIVATE /* Allow e.g. build system to override */
 		#define KRB524_PRIVATE 0
 	#endif
