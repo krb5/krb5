@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/sn2princ.c
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 1991,2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -30,6 +30,7 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
+#include "fake-addrinfo.h"
 #include <ctype.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -43,7 +44,6 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_int32 type;
     krb5_principal * ret_princ;
 {
-    struct hostent *hp;
     char **hrealms, *realm, *remote_host;
     krb5_error_code retval;
     register char *cp;
@@ -67,27 +67,54 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 	/* copy the hostname into non-volatile storage */
 
 	if (type == KRB5_NT_SRV_HST) {
-	    char *addr;
-	    
-	    if (!(hp = gethostbyname(hostname)))
+	    struct addrinfo *ai, hints;
+	    int err;
+	    char hnamebuf[NI_MAXHOST];
+
+	    /* Note that the old code would accept numeric addresses,
+	       and if the gethostbyaddr step could convert them to
+	       real hostnames, you could actually get reasonable
+	       results.  If the mapping failed, you'd get dotted
+	       triples as realm names.  *sigh*
+
+	       The latter has been fixed in hst_realm.c, but we should
+	       keep supporting numeric addresses if they do have
+	       hostnames associated.  */
+
+	    memset(&hints, 0, sizeof(hints));
+	    hints.ai_family = AF_INET;
+	try_getaddrinfo_again:
+	    err = getaddrinfo(hostname, 0, &hints, &ai);
+	    if (err) {
+		if (hints.ai_family == AF_INET) {
+		    /* Just in case it's an IPv6-only name.  */
+		    hints.ai_family = 0;
+		    goto try_getaddrinfo_again;
+		}
 		return KRB5_ERR_BAD_HOSTNAME;
-	    remote_host = strdup(hp->h_name);
-	    if (!remote_host)
+	    }
+	    remote_host = strdup(ai->ai_canonname ? ai->ai_canonname : hostname);
+	    if (!remote_host) {
+		freeaddrinfo(ai);
 		return ENOMEM;
+	    }
 	    /*
 	     * Do a reverse resolution to get the full name, just in
 	     * case there's some funny business going on.  If there
 	     * isn't an in-addr record, give up.
 	     */
-	    addr = malloc(hp->h_length);
-	    if (!addr)
-		return ENOMEM;
-	    memcpy(addr, hp->h_addr, hp->h_length);
-	    hp = gethostbyaddr(addr, hp->h_length, hp->h_addrtype);
-	    free(addr);
-	    if (hp) {
+	    /* XXX: This is *so* bogus.  There are several cases where
+	       this won't get us the canonical name of the host, but
+	       this is what we've trained people to expect.  We'll
+	       probably fix it at some point, but let's try to
+	       preserve the current behavior and only shake things up
+	       once when it comes time to fix this lossage.  */
+	    err = getnameinfo(ai->ai_addr, ai->ai_addrlen,
+			      hnamebuf, sizeof(hnamebuf), 0, 0, NI_NAMEREQD);
+	    freeaddrinfo(ai);
+	    if (err == 0) {
 		free(remote_host);
-		remote_host = strdup(hp->h_name);
+		remote_host = strdup(hnamebuf);
 		if (!remote_host)
 		    return ENOMEM;
 	    }

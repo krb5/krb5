@@ -1,5 +1,9 @@
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* sn2princ.c: Include fake-addrinfo.h.
+	(krb5_sname_to_principal): Use getaddrinfo and getnameinfo instead
+	of gethostbyname and gethostbyaddr.
+
 	* hst_realm.c (krb5_get_host_realm): Return KRB5_ERR_NUMERIC_REALM
 	if the hostname is a numeric-address form.
 
