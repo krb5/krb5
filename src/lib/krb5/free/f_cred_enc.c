@@ -37,15 +37,16 @@ void
 krb5_free_cred_enc_part(val)
 register krb5_cred_enc_part *val;
 {
-    register krb5_cred_enc_struct **temp;
+    register krb5_cred_info **temp;
     
-    for (temp = val->creds; *temp; temp++) {
+    if (val->r_address)
+      krb5_free_address(val->r_address);
+    if (val->s_address)
+      krb5_free_address(val->s_address);
+
+    for (temp = val->ticket_info; *temp; temp++) {
 	if ((*temp)->session)
 	  krb5_free_keyblock((*temp)->session);
-	if ((*temp)->r_address)
-	  krb5_free_address((*temp)->r_address);
-	if ((*temp)->s_address)
-	  krb5_free_address((*temp)->s_address);
 	if ((*temp)->client)
 	  krb5_free_principal((*temp)->client);
 	if ((*temp)->server)

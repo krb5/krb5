@@ -47,7 +47,8 @@
 
 /* Time set */
 typedef struct _krb5_ticket_times {
-    krb5_timestamp authtime;
+    krb5_timestamp authtime; /* XXX ? should ktime in KDC_REP == authtime
+				in ticket? otherwise client can't get this */ 
     krb5_timestamp starttime;		/* optional in ticket, if not present,
 					   use authtime */
     krb5_timestamp endtime;
@@ -245,24 +246,24 @@ typedef struct _krb5_cred {
     krb5_enc_data enc_part;		/* encrypted part */
 } krb5_cred;
 
-typedef struct _krb5_cred_enc_struct {
+typedef struct _krb5_cred_info {
     krb5_keyblock* session;             /* session key used to encrypt */
 					/* ticket */
-    krb5_int32 nonce;			/* nonce, optional */
-    krb5_timestamp timestamp;		/* client time */
-    krb5_int32 usec;			/* microsecond portion of time */
-    krb5_address *s_address;		/* sender address, optional */
-    krb5_address *r_address;		/* recipient address, optional */
     krb5_principal client;              /* client name/realm, optional */
     krb5_principal server;              /* server name/realm, optional */
     krb5_flags flags;			/* ticket flags, optional */
     krb5_ticket_times times;		/* auth, start, end, renew_till, */
                                         /* optional */
     krb5_address **caddrs;		/* array of ptrs to addresses */
-} krb5_cred_enc_struct;
+} krb5_cred_info;
 
 typedef struct _krb5_cred_enc_part {
-    krb5_cred_enc_struct **creds;
+    krb5_int32 nonce;                   /* nonce, optional */
+    krb5_timestamp timestamp;           /* client time */
+    krb5_int32 usec;                    /* microsecond portion of time */
+    krb5_address *s_address;            /* sender address, optional */
+    krb5_address *r_address;            /* recipient address, optional */
+    krb5_cred_info **ticket_info;
 } krb5_cred_enc_part;    
 
 /* these need to be here so the typedefs are available for the prototypes */

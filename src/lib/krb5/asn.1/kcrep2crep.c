@@ -46,143 +46,160 @@ krb5_cred_enc_part2KRB5_EncKrbCredPart(val, error)
 const register krb5_cred_enc_part *val;
 register int *error;
 {
-    register struct type_KRB5_EncKrbCredPart *retval = 0, *rv1 = 0, *rv2;
-    register krb5_cred_enc_struct * const *temp;
+    struct type_KRB5_EncKrbCredPart *retval = 0;
+    register struct element_KRB5_13 *rv1 = 0, *rv2;
+    register krb5_cred_info * const *temp;
     register int i;
 
-    for (i = 0, temp = val->creds; *temp; temp++, i++, rv1 = rv2) {
- 	
-	rv2 = (struct type_KRB5_EncKrbCredPart *) xmalloc(sizeof(*rv2));
-	if (!rv2) {
+    retval = (struct type_KRB5_EncKrbCredPart *) xmalloc(sizeof(*retval));
+    if (!retval) {
+	*error = ENOMEM;
+	return(0);
+    }
+    xbzero((char *)retval, sizeof (*retval));
+
+    if (val->nonce) {
+	retval->nonce = val->nonce;
+	retval->optionals |= opt_KRB5_EncKrbCredPart_nonce;
+    }
+    
+    if (val->timestamp) {
+	retval->timestamp = unix2gentime(val->timestamp, error);
+	if (!retval->timestamp) {
+	  errout:
 	    if (retval)
-		free_KRB5_EncKrbCredPart(retval);
+	      free_KRB5_EncKrbCredPart(retval);
 	    *error = ENOMEM;
 	    return(0);
 	}
+    }
+    
+    if (val->usec) {
+	retval->usec = val->usec;
+	retval->optionals |= opt_KRB5_EncKrbCredPart_usec;
+    }
+    
+    if (val->s_address) {
+	retval->s__address =
+	  krb5_addr2KRB5_HostAddress(val->s_address, error); 
+	if (!retval->s__address) {
+	    goto errout;
+	}
+    }
+    
+    if (val->r_address) {
+	retval->r__address =
+	  krb5_addr2KRB5_HostAddress(val->r_address, error); 
+	if (!retval->r__address) {
+	    goto errout;
+	}
+    }
+	
+    for (i = 0, temp = val->ticket_info; *temp; temp++, i++, rv1 = rv2) {
+ 	
+	rv2 = (struct element_KRB5_13 *) xmalloc(sizeof(*rv2));
+	if (!rv2)
+	  goto errout;
+
         xbzero((char *)rv2, sizeof (*rv2));
 
         if (rv1)
             rv1->next = rv2;
 
-        if (!retval)
-            retval = rv2;
+        if (!retval->ticket__info)
+            retval->ticket__info = rv2;
 
-	rv2->element_KRB5_13 = (struct element_KRB5_14 *)
-	    xmalloc(sizeof(*(rv2->element_KRB5_13)));
-	if (!rv2->element_KRB5_13) {
-	  errout:
-	    if (retval)
-		free_KRB5_EncKrbCredPart(retval);
-	    *error = ENOMEM;
-	    return(0);
-	} 
-        xbzero((char *)rv2->element_KRB5_13, sizeof (*rv2->element_KRB5_13));
-	
-	rv2->element_KRB5_13->key =
-	  krb5_keyblock2KRB5_EncryptionKey(val->creds[i]->session, error);
-	if (!rv2->element_KRB5_13->key) {
+	rv2->KRB__CRED__INFO = (struct type_KRB5_KRB__CRED__INFO *)
+            xmalloc(sizeof(*(rv2->KRB__CRED__INFO)));
+        if (!rv2->KRB__CRED__INFO)
+            goto errout;
+        xbzero((char *)rv2->KRB__CRED__INFO, sizeof (*rv2->KRB__CRED__INFO));
+
+	rv2->KRB__CRED__INFO->key =
+	  krb5_keyblock2KRB5_EncryptionKey(val->ticket_info[i]->session, 
+					   error);
+	if (!rv2->KRB__CRED__INFO->key) {
 	    goto errout;
 	}
 	
-	if (val->creds[i]->nonce) {
-	    rv2->element_KRB5_13->nonce = val->creds[i]->nonce;
-	    rv2->element_KRB5_13->optionals |= opt_KRB5_element_KRB5_14_nonce;
-	}
-	
-	rv2->element_KRB5_13->timestamp = unix2gentime(val->creds[i]->timestamp, error);
-	if (!rv2->element_KRB5_13->timestamp) {
-	    goto errout;
-	}
-	
-	rv2->element_KRB5_13->usec = val->creds[i]->usec;
-	
-	if (val->creds[i]->s_address) {
-	    rv2->element_KRB5_13->s__address =
-	      krb5_addr2KRB5_HostAddress(val->creds[i]->s_address, error); 
-	    if (!rv2->element_KRB5_13->s__address) {
+	if (val->ticket_info[i]->client) {
+	    rv2->KRB__CRED__INFO->prealm =
+	      krb5_data2qbuf(krb5_princ_realm(val->ticket_info[i]->client)); 
+	    if (!rv2->KRB__CRED__INFO->prealm) {
 		goto errout;
 	    }
-	}
- 
-	if (val->creds[i]->r_address) {
-	    rv2->element_KRB5_13->r__address =
-	      krb5_addr2KRB5_HostAddress(val->creds[i]->r_address, error); 
-	    if (!rv2->element_KRB5_13->r__address) {
+	    rv2->KRB__CRED__INFO->pname =
+	      krb5_principal2KRB5_PrincipalName(val->ticket_info[i]->client, 
+						error); 
+	    if (!rv2->KRB__CRED__INFO->pname) {
 		goto errout;
 	    }
 	}
 	
-	if (val->creds[i]->client) {
-	    rv2->element_KRB5_13->prealm =
-	      krb5_data2qbuf(krb5_princ_realm(val->creds[i]->client)); 
-	    if (!rv2->element_KRB5_13->prealm) {
-		goto errout;
-	    }
-	    rv2->element_KRB5_13->pname =
-	      krb5_principal2KRB5_PrincipalName(val->creds[i]->client, error); 
-	    if (!rv2->element_KRB5_13->pname) {
+	if (val->ticket_info[i]->flags) {
+	    rv2->KRB__CRED__INFO->flags =
+	      krb5_flags2KRB5_TicketFlags(val->ticket_info[i]->flags, error); 
+	    if (!rv2->KRB__CRED__INFO->flags) {
 		goto errout;
 	    }
 	}
 	
-	if (val->creds[i]->flags) {
-	    rv2->element_KRB5_13->flags =
-	      krb5_flags2KRB5_TicketFlags(val->creds[i]->flags, error); 
-	    if (!rv2->element_KRB5_13->flags) {
+	if (val->ticket_info[i]->times.authtime) {
+	    rv2->KRB__CRED__INFO->authtime =
+	      unix2gentime(val->ticket_info[i]->times.authtime, error); 
+	    if (!rv2->KRB__CRED__INFO->authtime) {
+		goto errout;
+	    }
+	}
+
+	if (val->ticket_info[i]->times.starttime) {
+	    rv2->KRB__CRED__INFO->starttime =
+	      unix2gentime(val->ticket_info[i]->times.starttime, error); 
+	    if (!rv2->KRB__CRED__INFO->starttime) {
+		goto errout;
+	    }
+	}
+
+	if (val->ticket_info[i]->times.endtime) {
+	    rv2->KRB__CRED__INFO->endtime =
+	      unix2gentime(val->ticket_info[i]->times.endtime, error); 
+	    if (!rv2->KRB__CRED__INFO->endtime) {
+		goto errout;
+	    }
+	}
+
+	if (val->ticket_info[i]->flags & TKT_FLG_RENEWABLE) {
+	    rv2->KRB__CRED__INFO->renew__till =
+	      unix2gentime(val->ticket_info[i]->times.renew_till, error); 
+	    if (!rv2->KRB__CRED__INFO->renew__till) {
 		goto errout;
 	    }
 	}
 	
-	rv2->element_KRB5_13->authtime =
-	  unix2gentime(val->creds[i]->times.authtime, error); 
-	if (!rv2->element_KRB5_13->authtime) {
-	    goto errout;
-	}
-	if (val->creds[i]->times.starttime) {
-	    rv2->element_KRB5_13->starttime =
-	      unix2gentime(val->creds[i]->times.starttime, error); 
-	    if (!rv2->element_KRB5_13->starttime) {
-		goto errout;
-	    }
-	}
-	rv2->element_KRB5_13->endtime =
-	  unix2gentime(val->creds[i]->times.endtime, error); 
-	if (!rv2->element_KRB5_13->endtime) {
-	    goto errout;
-	}
-	if (val->creds[i]->flags & TKT_FLG_RENEWABLE) {
-	    rv2->element_KRB5_13->renew__till =
-	      unix2gentime(val->creds[i]->times.renew_till, error); 
-	    if (!rv2->element_KRB5_13->renew__till) {
-		goto errout;
-	    }
-	}
-	
-	if (val->creds[i]->server) {
-	    rv2->element_KRB5_13->srealm =
-	      krb5_data2qbuf(krb5_princ_realm(val->creds[i]->server)); 
-	    if (!rv2->element_KRB5_13->srealm) {
+	if (val->ticket_info[i]->server) {
+	    rv2->KRB__CRED__INFO->srealm =
+	      krb5_data2qbuf(krb5_princ_realm(val->ticket_info[i]->server)); 
+	    if (!rv2->KRB__CRED__INFO->srealm) {
 		*error = ENOMEM;
 		goto errout;
 	    }
-	    rv2->element_KRB5_13->sname =
-	      krb5_principal2KRB5_PrincipalName(val->creds[i]->server, error); 
-	    if (!rv2->element_KRB5_13->sname) {
+	    rv2->KRB__CRED__INFO->sname =
+	      krb5_principal2KRB5_PrincipalName(val->ticket_info[i]->server, 
+						error); 
+	    if (!rv2->KRB__CRED__INFO->sname) {
 		goto errout;
 	    }
 	}
 
-	if (val->creds[i]->caddrs) {
-	    rv2->element_KRB5_13->caddr =
-	      krb5_address2KRB5_HostAddresses(val->creds[i]->caddrs, error); 
-	    if (!rv2->element_KRB5_13->caddr) {
+	if (val->ticket_info[i]->caddrs) {
+	    rv2->KRB__CRED__INFO->caddr =
+	      krb5_address2KRB5_HostAddresses(val->ticket_info[i]->caddrs, 
+					      error); 
+	    if (!rv2->KRB__CRED__INFO->caddr) {
 		goto errout;
 	    }
 	}
     }
-
-    if (retval == 0)
-	*error = ISODE_LOCAL_ERR_MISSING_PART;
 
     return(retval);
 }

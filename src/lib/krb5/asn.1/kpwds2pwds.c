@@ -43,9 +43,9 @@
  *	struct type_KRB5_PasswdData {
  *	   integer     passwd__sequence__count;
  *			/* SEQUENCE OF */
- *	   struct element_KRB5_15 {
+ *	   struct element_KRB5_14 {
  *	       struct type_KRB5_PasswdSequence *PasswdSequence;
- *	       struct element_KRB5_15 *next;
+ *	       struct element_KRB5_14 *next;
  *	   } *passwd__sequence;
  *	};
  *
@@ -76,7 +76,7 @@ register const krb5_pwd_data *val;
 register int *error;
 {
     register struct type_KRB5_PasswdData *retval = 0;
-    register struct element_KRB5_15 *passwdseq = 0, *rv1 = 0, *rv2;
+    register struct element_KRB5_14 *passwdseq = 0, *rv1 = 0, *rv2;
     passwd_phrase_element **temp;
     register int i;
 
@@ -93,7 +93,7 @@ register int *error;
 	for ( i = 0, temp = (passwd_phrase_element **) val->element; 
 		*temp; 
 		temp++, i++, rv1 = rv2){
-	    if ((rv2 = (struct element_KRB5_15 *) xcalloc(1, 
+	    if ((rv2 = (struct element_KRB5_14 *) xcalloc(1, 
 			sizeof(*rv2))) == NULL) {;
 		*error = ENOMEM;
 		errout:

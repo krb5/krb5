@@ -48,8 +48,7 @@ register int *error;
 {
     register krb5_cred_enc_part *retval;
     register int i;
-    register const struct type_KRB5_EncKrbCredPart *rv;
-    register const struct element_KRB5_14 *rv2;
+    register const struct element_KRB5_13 *rv;
 
     retval = (krb5_cred_enc_part *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -58,122 +57,133 @@ register int *error;
     }
     xbzero((char *)retval, sizeof(*retval));
 
-    for (i = 0, rv = val; rv; i++, rv = rv->next);
+    /* Count ticket_info */
+    for (i = 0, rv = val->ticket__info; rv; i++, rv = rv->next);
 
     /* plus one for null terminator */
-    retval->creds = (krb5_cred_enc_struct **) xcalloc(i + 1, sizeof(*retval->creds));
-    if (!retval->creds) {
+    retval->ticket_info = (krb5_cred_info **) 
+      xcalloc(i + 1, sizeof(*retval->ticket_info));
+    if (!retval->ticket_info) {
     nomem:
 	*error = ENOMEM;
 	return(0);
     }
-
-    for (i = 0, rv = val; rv; rv = rv->next, i++) {
-	rv2 = rv->element_KRB5_13;
-	retval->creds[i] = (krb5_cred_enc_struct *) xmalloc(sizeof(*retval->creds[i]));
-	if (!retval->creds[i]) {
+    
+    if (val->optionals & opt_KRB5_EncKrbCredPart_nonce)
+      retval->nonce = val->nonce;
+    else
+      retval->nonce = 0;
+    
+    if (val->timestamp) {
+	retval->timestamp = gentime2unix(val->timestamp, error);
+	if (*error) {
+	  errout:
+	    krb5_free_cred_enc_part(retval);
+	    return(0);
+	}
+    }
+    
+    if (val->optionals & opt_KRB5_EncKrbCredPart_usec)
+      retval->usec = val->usec;
+    else
+      retval->timestamp = 0;
+    
+    if (val->s__address) {
+	retval->s_address = 
+	  KRB5_HostAddress2krb5_addr(val->s__address, 
+				     error);
+	if (!retval->s_address) {
+	    goto errout;
+	}
+    }
+    
+    if (val->r__address) {
+	retval->r_address =
+	  KRB5_HostAddress2krb5_addr(val->r__address, 
+				     error); 
+	if (!retval->r_address) {
+	    goto errout;
+	}
+    }
+    
+    for (i = 0, rv = val->ticket__info; rv; rv = rv->next, i++) {
+	retval->ticket_info[i] = (krb5_cred_info *) 
+	  xmalloc(sizeof(*retval->ticket_info[i]));
+	if (!retval->ticket_info[i]) {
 	    krb5_free_cred_enc_part(retval);
 	    goto nomem;
 	}
-	xbzero((char *)retval->creds[i], sizeof(*retval->creds[i]));
+	xbzero((char *)retval->ticket_info[i], 
+	       sizeof(*retval->ticket_info[i]));
 
-	retval->creds[i]->session = KRB5_EncryptionKey2krb5_keyblock(rv2->key, error);
-	if (!retval->creds[i]->session) {
-	    xfree(retval->creds[i]);
-	    return(0);
+	retval->ticket_info[i]->session = 
+	  KRB5_EncryptionKey2krb5_keyblock(rv->KRB__CRED__INFO->key, error);
+	if (!retval->ticket_info[i]->session)
+	  goto errout;
+	
+	if (rv->KRB__CRED__INFO->pname && rv->KRB__CRED__INFO->prealm) {
+	    retval->ticket_info[i]->client = 
+	      KRB5_PrincipalName2krb5_principal(rv->KRB__CRED__INFO->pname,
+						rv->KRB__CRED__INFO->prealm,
+						error);
+	    if (!retval->ticket_info[i]->client)
+	      goto errout;
 	}
 	
-	if (rv2->optionals & opt_KRB5_element_KRB5_14_nonce)
-	  retval->creds[i]->nonce = rv2->nonce;
-	else
-	  retval->creds[i]->nonce = 0;
-	
-	retval->creds[i]->timestamp = gentime2unix(rv2->timestamp, error);
-	if (*error) {
-	  errout:
-	    krb5_free_cred_enc_part(retval->creds[i]);
-	    return(0);
-	}
-	retval->creds[i]->usec = rv2->usec;
-	
-	if (rv2->s__address) {
-	    retval->creds[i]->s_address = KRB5_HostAddress2krb5_addr(rv2->s__address, 
-								     error);
-	    if (!retval->creds[i]->s_address) {
-		goto errout;
-	    }
+	if (rv->KRB__CRED__INFO->sname && rv->KRB__CRED__INFO->srealm) {
+	    retval->ticket_info[i]->server = 
+	      KRB5_PrincipalName2krb5_principal(rv->KRB__CRED__INFO->sname,
+						rv->KRB__CRED__INFO->srealm,
+						error);
+	    if (!retval->ticket_info[i]->server)
+	      goto errout;
 	}
 	
-	if (rv2->r__address) {
-	    retval->creds[i]->r_address = KRB5_HostAddress2krb5_addr(rv2->r__address, 
-								     error); 
-	    if (!retval->creds[i]->r_address) {
-		goto errout;
-	    }
+	if (rv->KRB__CRED__INFO->flags) {
+	    retval->ticket_info[i]->flags =
+	      KRB5_TicketFlags2krb5_flags(rv->KRB__CRED__INFO->flags, error);
+	    if (*error)
+	      goto errout;
 	}
 	
-	if (rv2->pname && rv2->prealm) {
-	    retval->creds[i]->client = KRB5_PrincipalName2krb5_principal(rv2->pname,
-									 rv2->prealm,
-									 error);
-	    if (!retval->creds[i]->client) {
-		goto errout;
-	    }
+	if (rv->KRB__CRED__INFO->authtime) {
+	    retval->ticket_info[i]->times.authtime =
+	      gentime2unix(rv->KRB__CRED__INFO->authtime, error);
+	    if (*error) 
+	      goto errout;
 	}
 	
-	if (rv2->sname && rv2->srealm) {
-	    retval->creds[i]->server = KRB5_PrincipalName2krb5_principal(rv2->sname,
-									 rv2->srealm,
-									 error);
-	    if (!retval->creds[i]->server) {
-		goto errout;
-	    }
+	if (rv->KRB__CRED__INFO->starttime) {
+	    retval->ticket_info[i]->times.starttime = 
+	      gentime2unix(rv->KRB__CRED__INFO->starttime, error);
+	    if (*error)
+	      goto errout;
 	}
 	
-	if (rv2->flags) {
-	    retval->creds[i]->flags = KRB5_TicketFlags2krb5_flags(rv2->flags, error);
-	    if (*error) {
-		xfree(retval->creds[i]);
-		return(0);
-	    }
+	if (rv->KRB__CRED__INFO->endtime) {
+	    retval->ticket_info[i]->times.endtime = 
+	      gentime2unix(rv->KRB__CRED__INFO->endtime, error);
+	    if (*error)
+	      goto errout;
 	}
 	
-	if (rv2->authtime) {
-	    retval->creds[i]->times.authtime = gentime2unix(rv2->authtime, error);
-	    if (*error) {
-		goto errout;
-	    }	
+	if ((retval->ticket_info[i]->flags & TKT_FLG_RENEWABLE) && 
+	    rv->KRB__CRED__INFO->renew__till) {
+	    retval->ticket_info[i]->times.renew_till = 
+	      gentime2unix(rv->KRB__CRED__INFO->renew__till, error);
+	    if (*error)
+	      goto errout;
 	}
 	
-	if (rv2->starttime) {
-	    retval->creds[i]->times.starttime = gentime2unix(rv2->starttime, error);
-	    if (*error) {
-		goto errout;
-	    }	
-	}
-	
-	if (rv2->endtime) {
-	    retval->creds[i]->times.endtime = gentime2unix(rv2->endtime, error);
-	    if (*error) {
-		goto errout;
-	    }	
-	}
-	
-	if ((retval->creds[i]->flags & TKT_FLG_RENEWABLE) && rv2->renew__till) {
-	    retval->creds[i]->times.renew_till = gentime2unix(rv2->renew__till, error);
-	    if (*error) {
-		goto errout;
-	    }	
-	}
-	
-	if (rv2->caddr) {
-	    retval->creds[i]->caddrs = KRB5_HostAddresses2krb5_address(rv2->caddr, 
-								       error);
-	    if (!retval->creds[i]->caddrs) {
-		goto errout;
-	    }
+	if (rv->KRB__CRED__INFO->caddr) {
+	    retval->ticket_info[i]->caddrs = 
+	      KRB5_HostAddresses2krb5_address(rv->KRB__CRED__INFO->caddr, 
+					      error);
+	    if (!retval->ticket_info[i]->caddrs)
+	      goto errout;
 	}
     }
-    retval->creds[i] = 0;
+
+    retval->ticket_info[i] = 0;
     return(retval);
 }

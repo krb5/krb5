@@ -255,8 +255,7 @@ EncKrbPrivPart ::=	[APPLICATION 28] SEQUENCE {
 	r-address[5]	HostAddress OPTIONAL	-- recip's addr 
 }
 
--- These two definitions are added to allow easy forwarding of 
--- credentials.
+-- The KRB-CRED message allows easy forwarding of credentials.
 
 KRB-CRED ::= [APPLICATION 22] SEQUENCE {
 	pvno[0]		INTEGER,
@@ -265,23 +264,27 @@ KRB-CRED ::= [APPLICATION 22] SEQUENCE {
 	enc-part[3]	EncryptedData -- EncKrbCredPart 
 }
 
-EncKrbCredPart ::= [APPLICATION 29] SEQUENCE OF SEQUENCE {
-	key[0]		EncryptionKey,
+EncKrbCredPart ::= [APPLICATION 29] SEQUENCE {
+	ticket-info[0] 	SEQUENCE OF KRB-CRED-INFO,	
 	nonce[1]	INTEGER OPTIONAL,
-	timestamp[2]	KerberosTime,
-	usec[3]		INTEGER,
+	timestamp[2]	KerberosTime OPTIONAL,
+	usec[3]		INTEGER OPTIONAL,
 	s-address[4]	HostAddress OPTIONAL,
-	r-address[5]	HostAddress OPTIONAL,
-        prealm[6] 	Realm OPTIONAL,
-        pname[7] 	PrincipalName OPTIONAL,
-        flags[8] 	TicketFlags OPTIONAL,
-        authtime[9] 	KerberosTime OPTIONAL,
-        starttime[10] 	KerberosTime OPTIONAL,
-        endtime[11] 	KerberosTime OPTIONAL,
-        renew-till[12] 	KerberosTime OPTIONAL,
-        srealm[13] 	Realm OPTIONAL,
-        sname[14] 	PrincipalName OPTIONAL,
-        caddr[15] 	HostAddresses OPTIONAL 
+	r-address[5]	HostAddress OPTIONAL
+}
+
+KRB-CRED-INFO	::=	SEQUENCE {
+	key[0]		EncryptionKey,
+        prealm[1] 	Realm OPTIONAL,
+        pname[2] 	PrincipalName OPTIONAL,
+        flags[3] 	TicketFlags OPTIONAL,
+        authtime[4] 	KerberosTime OPTIONAL,
+        starttime[5] 	KerberosTime OPTIONAL,
+        endtime[6] 	KerberosTime OPTIONAL,
+        renew-till[7] 	KerberosTime OPTIONAL,
+        srealm[8] 	Realm OPTIONAL,
+        sname[9] 	PrincipalName OPTIONAL,
+        caddr[10] 	HostAddresses OPTIONAL 
 }
 
 KRB-ERROR ::=	[APPLICATION 30] SEQUENCE {

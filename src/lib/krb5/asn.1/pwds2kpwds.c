@@ -46,7 +46,7 @@ register int *error;
 {
     register krb5_pwd_data *retval;
     register passwd_phrase_element **element;
-    register struct element_KRB5_15 *seq_ptr, *rv;
+    register struct element_KRB5_14 *seq_ptr, *rv;
     register int i;
 
 
