@@ -23,7 +23,7 @@ clean::
 	$(RM) ksu
 
 install::
-	for f in ksu; do \
+	-for f in ksu; do \
 	  $(INSTALL_SETUID) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
