@@ -273,7 +273,7 @@ main(argc,argv)
 
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
     in_length =  strlen((char *)input);
-    if (retval = mit_des_cbc_encrypt((mit_des_cblock *) input,
+    if (retval = mit_des_cbc_encrypt((const mit_des_cblock *) input,
 				     (mit_des_cblock *) cipher_text,
 				     (size_t) in_length, 
 				     sched,
@@ -290,7 +290,7 @@ main(argc,argv)
 	}
 	printf("\n");
     }
-    if (retval = mit_des_cbc_encrypt((mit_des_cblock *) cipher_text,
+    if (retval = mit_des_cbc_encrypt((const mit_des_cblock *) cipher_text,
 				     (mit_des_cblock *) clear_text,
 				     (size_t) in_length, 
 				     sched,
@@ -359,7 +359,7 @@ do_encrypt(in,out)
     char *out;
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_cbc_encrypt((mit_des_cblock *)in,
+	mit_des_cbc_encrypt((const mit_des_cblock *)in,
 			    (mit_des_cblock *)out,
 			    8,
 			    sched,
@@ -383,7 +383,7 @@ do_decrypt(in,out)
     /* try to invert it */
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_cbc_encrypt((mit_des_cblock *)out,
+	mit_des_cbc_encrypt((const mit_des_cblock *)out,
 			    (mit_des_cblock *)in,
 			    8,
 			    sched,

@@ -1,3 +1,10 @@
+2000-02-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_verify.c: Add "const" to casts in calls to mit_des_cbc_encrypt().
+
+	* destest.c: Declare zeroblock as krb5_octet * instead of char * as
+	argument to mit_des_cbc_encrypt.
+	
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* f_sched.c (PC2_C, PC2_D): Put braces around sub-arrays.

@@ -63,7 +63,7 @@ void convert PROTOTYPE((char *, unsigned char []));
 
 void des_cblock_print_file PROTOTYPE((mit_des_cblock, FILE *));
 
-char zeroblock[8] = {0,0,0,0,0,0,0,0};
+krb5_octet zeroblock[8] = {0,0,0,0,0,0,0,0};
 
 void
 main(argc, argv)
