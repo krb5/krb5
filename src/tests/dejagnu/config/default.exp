@@ -627,6 +627,10 @@ proc modify_principal { name args } {
     send "quit\r"
     expect eof
     catch expect_after
+    if ![check_exit_status "kadmin.local modprinc"] {
+	perror "kadmin.local modprinc exited abnormally"
+    }
+    return 1
 }
 
 # setup_kerberos_files
