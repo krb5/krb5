@@ -799,8 +799,6 @@ local KADM5 client.
 \section{Authentication and Authorization}
 \label{sec:auth}
 
-XXX Everything about server authorization has changed in version 2!
-
 Two Kerberos principals exist for use in communicating with the Admin
 system: kadmin/admin and kadmin/changepw.  Both principals
 have the KRB5_KDB_DISALLOW_TGT_BASED bit set in their attributes so
@@ -821,17 +819,15 @@ Each Admin API operation authenticated to the kadmin/admin service
 requires a specific authorization to run.  This version uses a simple
 named privilege system with the following names and meanings:
 
-The Authorization checks only happen if you are using the RPC mechanism.
-If you are using the server-side API functions locally on the admin server,
-the only authorization check is if you can access the approporiate local
-files. 
-
 \begin{description}
 \item[Get] Able to examine the attributes (NOT key data) of principals
 and policies. 
 \item[Add] Able to add principals and policies.
-\item[Modify] Able to modify attributes of existing principals and policies.
+\item[Modify] Able to modify attributes of existing principals and
+policies; this does not include changing passwords.
 \item[Delete] Able to remove principals and policies.
+\item[List] Able to retrieve a list of principals and policies.
+\item[Changepw] Able to change the password of principals.
 \end{description}
 
 Privileges are specified via an external configuration file on the
@@ -839,7 +835,11 @@ Kerberos master server.
 
 Table \ref{tab:func-overview} summarizes the authorization
 requirements of each function.  Additionally, each API function
-description identifies the privilege required to perform it.
+description identifies the privilege required to perform it.  The
+Authorization checks only happen if you are using the RPC mechanism.
+If you are using the server-side API functions locally on the admin
+server, the only authorization check is if you can access the
+approporiate local files.
 
 \section{Functions}
 
@@ -893,17 +893,17 @@ modify_principal & modify & Modify the attributes of an existing
         principal (not password). \\
 rename_principal & add and delete & Rename a principal. \\
 get_principal & get\footnotemark & Retrieve a principal. \\
-get_principals & get & Retrieve some or all principal names. \\
-chpass_principal & modify\footnotemark[\thefootnote] &
+get_principals & list & Retrieve some or all principal names. \\
+chpass_principal & changepw\footnotemark[\thefootnote] &
          Change a principal's password. \\
-chpass_principal_util & modify\footnotemark[\thefootnote] & Utility wrapper around chpass_principal. \\
-randkey_principal & modify\footnotemark[\thefootnote] &
+chpass_principal_util & changepw\footnotemark[\thefootnote] & Utility wrapper around chpass_principal. \\
+randkey_principal & changepw\footnotemark[\thefootnote] &
         Randomize a principal's key. \\
 create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
 modify_policy & modify & Modify the attributes of a policy. \\
 get_policy & get & Retrieve a policy. \\
-get_policies & get & Retrieve some or all policy names. \\
+get_policies & list & Retrieve some or all policy names. \\
 free_principal_ent & none & Free the memory associated with an
                 kadm5_principal_ent_t. \\
 free_policy_ent & none & Free the memory associated with an
@@ -1336,9 +1336,9 @@ kadm5_chpass_principal(void *server_handle, krb5_principal princ,
                             char *pw);
 \end{verbatim}
 
-AUTHORIZATION REQUIRED: modify, or the calling principal being the
+AUTHORIZATION REQUIRED: changepw, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-kadmin/changepw service, the modify privilege is disregarded.
+kadmin/changepw service, the changepw privilege is disregarded.
 
 Change a principal's password.   See section \ref{sec:keys} for a
 description of how the keys are determined.
@@ -1398,9 +1398,9 @@ kadm5_chpass_principal_util(void *server_handle, krb5_principal princ,
                                  char *msg_ret);
 \end{verbatim}
 
-AUTHORIZATION REQUIRED: modify, or the calling principal being the
+AUTHORIZATION REQUIRED: changepw, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-kadmin/changepw service, the modify privilege is disregarded.
+kadmin/changepw service, the changepw privilege is disregarded.
 
 This function is a wrapper around kadm5_chpass_principal. It can
 read a new password from a user, change a principal's password, and
@@ -1519,9 +1519,9 @@ kadm5_randkey_principal(void *server_handle, krb5_principal princ,
                         krb5_keyblock **new_keys, int *n_keys)
 \end{verbatim}
 
-AUTHORIZATION REQUIRED: modify, or the calling principal being the
+AUTHORIZATION REQUIRED: changepw, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-kadmin/changepw service, the modify privilege is disregarded.
+kadmin/changepw service, the changepw privilege is disregarded.
 
 Generate and assign a new random key to the named principal, and
 return the generated key in allocated storage.  In
@@ -1642,7 +1642,7 @@ kadm5_get_principals(void *server_handle, char *exp,
 
 Retrieves the list of principal names.  
 
-AUTHORIZATION REQUIRED: get
+AUTHORIZATION REQUIRED: list
 
 If \v{exp} is NULL, all principal names are retrieved; otherwise,
 principal names that match the expression exp are retrieved.
@@ -1768,10 +1768,10 @@ kadm5_get_policy(void *server_handle, char *policy,
 AUTHORIZATION REQUIRED: get, or the calling principal's policy being
 the same as the policy argument.  If the request is authenticated to
 the kadmin/changepw service, the get privilege is disregarded.
-If an error is returned entry is set to NULL.
 
 Return the policy's attributes in allocated memory.  The caller must
-free the returned entry with kadm5_free_policy_ent.
+free the returned entry with kadm5_free_policy_ent.  If an error is
+returned entry is set to NULL.
 
 RETURN CODES: 
 
@@ -1790,7 +1790,7 @@ kadm5_get_policies(void *server_handle, char *exp,
 
 Retrieves the list of principal names.  
 
-AUTHORIZATION REQUIRED: get
+AUTHORIZATION REQUIRED: list
 
 If \v{exp} is NULL, all principal names are retrieved; otherwise,
 principal names that match the expression exp are retrieved.  \v{pols}
@@ -1870,12 +1870,19 @@ The returned value is a bitmask indicating the caller's privileges:
 Get & KADM5_PRIV_GET & 0x01 \\
 Add & KADM5_PRIV_ADD & 0x02 \\
 Modify & KADM5_PRIV_MODIFY & 0x04 \\
-Delete & KADM5_PRIV_DELETE & 0x08
+Delete & KADM5_PRIV_DELETE & 0x08 \\
+List & KADM5_PRIV_LIST & 0x10 \\
+Changepw & KADM5_PRIV_CPW & 0x20
 \end{tabular}
 
 There is no guarantee that a caller will have a privilege indicated by
-this function for any length of time; applications using this function
-must still be prepared to handle all possible KADM5_AUTH_* error
-codes.
+this function for any length of time or for any particular target;
+applications using this function must still be prepared to handle all
+possible KADM5_AUTH_* error codes.
+
+In the initial MIT Kerberos version of the admin server, permissions
+depend both on the caller and the target; this function returns a
+bitmask representing all privileges the caller can possibly have for
+any possible target.
 
 \end{document}
