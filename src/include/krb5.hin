@@ -134,7 +134,6 @@ typedef	unsigned int krb5_kvno;
 
 typedef	unsigned int krb5_addrtype;
 typedef unsigned int krb5_keytype;
-typedef unsigned int krb5_enctype;
 typedef unsigned int krb5_cksumtype;
 typedef unsigned int krb5_authdatatype;
 
@@ -282,7 +281,6 @@ typedef struct _krb5_auth_context FAR * krb5_auth_context;
 typedef struct _krb5_keyblock {
     krb5_magic magic;
     krb5_keytype keytype;
-    krb5_enctype etype;	/* hint of what encryption type to use */
     int length;
     krb5_octet FAR *contents;
 } krb5_keyblock;
@@ -305,7 +303,7 @@ typedef struct _krb5_encrypt_block {
 
 typedef struct _krb5_enc_data {
     krb5_magic magic;
-    krb5_enctype etype;
+    krb5_keytype keytype;
     krb5_kvno kvno;
     krb5_data ciphertext;
 } krb5_enc_data;
@@ -340,9 +338,6 @@ typedef struct _krb5_cryptosystem_entry {
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
-    krb5_enctype proto_enctype;		/* encryption type,
-					   (assigned protocol number AND
-					    table index) */
     krb5_keytype proto_keytype;		/* key type,
 					   (assigned protocol number AND
 					    table index) */
@@ -381,17 +376,11 @@ typedef struct _krb5_checksum_entry {
 
 /* per Kerberos v5 protocol spec */
 #define	KEYTYPE_NULL		0x0000
-#define KEYTYPE_DES		0x0001	/* Data Encryption Standard,
-					   FIPS 46,81 */
+#define	KEYTYPE_DES_CBC_CRC	0x0001	/* DES cbc mode with CRC-32 */
+#define	KEYTYPE_DES_CBC_MD4	0x0002	/* DES cbc mode with RSA-MD4 */
+#define	KEYTYPE_DES_CBC_MD5	0x0003	/* DES cbc mode with RSA-MD5 */
+#define	KEYTYPE_DES_CBC_RAW     0x0004  /* DES cbc mode raw */
 #define KEYTYPE_UNKNOWN		0x01ff
-
-#define	ETYPE_NULL		0x0000
-#define	ETYPE_DES_CBC_CRC	0x0001	/* DES cbc mode with CRC-32 */
-#define	ETYPE_DES_CBC_MD4	0x0002	/* DES cbc mode with RSA-MD4 */
-#define	ETYPE_DES_CBC_MD5	0x0003	/* DES cbc mode with RSA-MD5 */
-#define	ETYPE_RAW_DES_CBC       0x0004  /* Raw DES cbc mode */
-
-#define ETYPE_UNKNOWN		0x1FF 	/* Reserved local value */
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002
@@ -425,8 +414,6 @@ extern int krb5_max_keytype;		/* max entry in array */
 extern krb5_checksum_entry * NEAR krb5_cksumarray[];
 extern int krb5_max_cksum;		/* max entry in array */
 
-#define valid_etype(etype)     ((((int) (etype)) <= krb5_max_cryptosystem) && ((etype) > 0) && krb5_csarray[etype])
-
 #define valid_keytype(ktype)     ((((int) (ktype)) <= krb5_max_keytype) && ((ktype) > 0) && krb5_keytype_array[ktype])
 
 #define valid_cksumtype(cktype)     ((((int) (cktype)) <= krb5_max_cksum) && ((cktype) > 0) && krb5_cksumarray[cktype])
@@ -435,8 +422,6 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define is_keyed_cksum(cktype) (krb5_cksumarray[cktype]->uses_key)
 
 /* set up *eblockp to use etype */
-#define krb5_use_cstype(context, eblockp, etype) (eblockp)->crypto_entry = krb5_csarray[(etype)]->system
-/* ...or keytype */
 #define krb5_use_keytype(context, eblockp, keytype) (eblockp)->crypto_entry = krb5_keytype_array[(keytype)]->system
 
 #define krb5_encrypt(context, inptr, outptr, size, eblock, ivec) (*(eblock)->crypto_entry->encrypt_func)(inptr, outptr, size, eblock, ivec)
@@ -449,7 +434,6 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define krb5_random_key(context, eblock, ptr, keyblock) (*(eblock)->crypto_entry->random_key)(eblock, ptr, keyblock)
 
 #define krb5_eblock_keytype(context, eblockp) ((eblockp)->crypto_entry->proto_keytype)
-#define krb5_eblock_enctype(context, eblockp) ((eblockp)->crypto_entry->proto_enctype)
 
 /*
  * Here's the stuff for the checksum switch:
@@ -798,8 +782,8 @@ typedef struct _krb5_kdc_req {
     krb5_timestamp till;		/* requested endtime */
     krb5_timestamp rtime;		/* (optional) requested renew_till */
     krb5_int32 nonce;			/* nonce to match request/response */
-    int netypes;			/* # of etypes, must be positive */
-    krb5_enctype FAR *etype;		/* requested encryption type(s) */
+    int nktypes;			/* # of ktypes, must be positive */
+    krb5_keytype FAR *ktype;		/* requested keytype(s) */
     krb5_address FAR * FAR *addresses;	/* requested addresses, optional */
     krb5_enc_data authorization_data;	/* encrypted auth data; OPTIONAL */
     krb5_authdata FAR * FAR *unenc_authdata; /* unencrypted auth data,
@@ -1225,12 +1209,12 @@ krb5_error_code INTERFACE krb5_init_context
 void krb5_free_context
 	KRB5_PROTOTYPE((krb5_context));
 
-krb5_error_code krb5_set_default_in_tkt_etypes
+krb5_error_code krb5_set_default_in_tkt_ktypes
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_const krb5_enctype *));
-krb5_error_code krb5_get_default_in_tkt_etypes
+		   krb5_const krb5_keytype *));
+krb5_error_code krb5_get_default_in_tkt_ktypes
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_enctype **));
+		   krb5_keytype **));
 
 /* libkrb.spec */
 krb5_error_code krb5_kdc_rep_decrypt_proc
@@ -1630,7 +1614,7 @@ krb5_error_code krb5_send_tgs
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const krb5_flags,
 		   krb5_const krb5_ticket_times *,
-		   krb5_const krb5_enctype *,
+		   krb5_const krb5_keytype *,
 		   krb5_const_principal,
 		   krb5_address * krb5_const *,
 		   krb5_authdata * krb5_const *,
@@ -1643,7 +1627,7 @@ krb5_error_code krb5_get_in_tkt
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const krb5_flags,
 		   krb5_address * krb5_const *,
-		   krb5_enctype *,
+		   krb5_keytype *,
 		   krb5_preauthtype *,
 		   krb5_error_code ( * )(krb5_context,
 					krb5_const krb5_keytype,
@@ -1664,7 +1648,7 @@ krb5_error_code INTERFACE krb5_get_in_tkt_with_password
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const krb5_flags,
 		   krb5_address FAR * krb5_const FAR *,
-		   krb5_enctype FAR *,
+		   krb5_keytype FAR *,
 		   krb5_preauthtype FAR *,
 		   krb5_const char FAR *,
 		   krb5_ccache,
@@ -1675,7 +1659,7 @@ krb5_error_code krb5_get_in_tkt_with_skey
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const krb5_flags,
 		   krb5_address * krb5_const *,
-		   krb5_enctype *,
+		   krb5_keytype *,
 		   krb5_preauthtype *,
 		   krb5_const krb5_keyblock *,
 		   krb5_ccache,
@@ -1686,7 +1670,7 @@ krb5_error_code krb5_get_in_tkt_with_keytab
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const krb5_flags,
 		   krb5_address * krb5_const *,
-		   krb5_enctype *,
+		   krb5_keytype *,
 		   krb5_preauthtype *,
 		   krb5_const krb5_keytab,
 		   krb5_ccache,
@@ -1698,7 +1682,6 @@ krb5_error_code krb5_decode_kdc_rep
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_data *,
 		   krb5_const krb5_keyblock *,
-		   krb5_const krb5_enctype,
 		   krb5_kdc_rep ** ));
 
 krb5_error_code krb5_rd_req

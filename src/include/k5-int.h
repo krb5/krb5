@@ -403,7 +403,7 @@ int win_socket_initialize();
 #define	KDC_ERR_NEVER_VALID		11 /* Requested starttime > endtime */
 #define	KDC_ERR_POLICY			12 /* KDC policy rejects request */
 #define	KDC_ERR_BADOPTION		13 /* KDC can't do requested opt. */
-#define	KDC_ERR_ETYPE_NOSUPP		14 /* No support for encryption type */
+#define	KDC_ERR_KEYTYPE_NOSUPP		14 /* No support for encryption type */
 #define KDC_ERR_SUMTYPE_NOSUPP		15 /* No support for checksum type */
 #define KDC_ERR_PADATA_TYPE_NOSUPP	16 /* No support for padata type */
 #define KDC_ERR_TRTYPE_NOSUPP		17 /* No support for transited type */
@@ -891,12 +891,12 @@ typedef unsigned long profile_t;
 
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype	FAR *etypes;
-	int		etype_count;
-	void	      	FAR *os_context;
-	char	      	FAR *default_realm;
-	profile_t     	profile;
-	void	      	FAR *db_context;
+	krb5_keytype  FAR *ktypes;
+	int		ktype_count;
+	void	      FAR *os_context;
+	char	      FAR *default_realm;
+	profile_t     profile;
+	void	      FAR *db_context;
 	int		ser_ctx_count;
 	void	      	FAR *ser_ctx;
 	krb5_deltat 	clockskew; /* allowable clock skew */
