@@ -13,16 +13,22 @@
 #define UnifdefCmd unifdef
 #endif
 #ifndef CompileEtCmd
-#define CompileEtCmd $(ETSRC)/compile_et
+#define CompileEtCmd compile_et
 #endif
 #ifndef MkCmdsCmd
-#define MkCmdsCmd $(SSSRC)/mk_cmds
+#define MkCmdsCmd mk_cmds
+#endif
+#ifndef DependCmd
+#define DependCmd makedepend		/* assume BINDIR in path */
+#endif
+#ifndef ImakeCmd
+#define ImakeCmd imake			/* assume BINDIR in path */
 #endif
 #ifndef SSLib
-#define SSLib $(SSSRC)/libss.a
+#define SSLib -lss
 #endif
 #ifndef ComErrLib
-#define ComErrLib $(ETSRC)/libcom_err.a
+#define ComErrLib -lcom_err
 #endif
 #ifndef PosyFlags
 #define PosyFlags -f -h2 -a -s
@@ -45,14 +51,10 @@
 #ifndef Krb4Includes
 #define Krb4Includes -I$(TOP)/include/kerberosIV
 #endif
+#ifndef ExtraIncludes
+#define ExtraIncludes /**/
+#endif
 
-#ifndef SSTopIncludes
-#ifdef UseSSInstalled
-#define SSTopIncludes /**/  
-#else /* not installed SS */
-#define SSTopIncludes -I$(TOP)
-#endif /* UseSSInstalled */
-#endif /* SSTopIncludes */
 #ifndef DesDefines
 #define DesDefines YouMustFigureOutYourDesDefines
 #endif
@@ -249,20 +251,19 @@ P_PROTOS=-UUseNarrowPrototypes
  */
 
             ARADD = ArAddCmd
-     TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES) $(SS_TOP_INCLUDES)
-  SS_TOP_INCLUDES = SSTopIncludes
+     TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
         CONFIGSRC = $(TOP)/config
             ISODE = IsodeDir
-         IMAKESRC = $(CONFIGSRC)
           POFLAGS = PosyFlags
           PYFLAGS = PepyFlags
              PEPY = PepyCmd
              POSY = PosyCmd
             TOUCH = TouchCmd
+            IMAKE = ImakeCmd
+           DEPEND = DependCmd
+          UNIFDEF = UnifdefCmd
   PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) -DUnifdefRan
        DESDEFINES = DesDefines
-            ETSRC = $(TOP)/comerr
-            SSSRC = $(TOP)/ss
           TOPLIBD = $(TOP)/lib
             OSLIB = os
          OSDEPLIB = $(TOPLIBD)/libos.a
@@ -287,28 +288,7 @@ P_PROTOS=-UUseNarrowPrototypes
           KRB4LIB = Krb4LibList
      KRB4INCLUDES = Krb4Includes
 
-#ifdef UseImakeInstalled
-            IMAKE = imake		/* assume BINDIR in path */
-#else
-            IMAKE = $(IMAKESRC)/imake
-#endif
-#ifdef UseMakedependInstalled
-           DEPEND = makedepend		/* assume BINDIR in path */
-#else
-           DEPEND = DependCmd
-#endif
-#ifdef UseSSInstalled
-            SSLIB = -lss
-          MK_CMDS = mk_cmds
-#else
             SSLIB = SSLib
           MK_CMDS = MkCmdsCmd
-#endif
-#ifdef UseComErrInstalled
-        COMERRLIB = -lcom_err
-       COMPILE_ET = compile_et
-#else
         COMERRLIB = ComErrLib
        COMPILE_ET = CompileEtCmd
-#endif
-          UNIFDEF = UnifdefCmd
