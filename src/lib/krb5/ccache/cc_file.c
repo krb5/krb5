@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cc_file.c
  *
- * Copyright 1990,1991,1992,1993,1994,2000 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1992,1993,1994,2000,2004 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Original stdio support copyright 1995 by Cygnus Support.
@@ -30,7 +30,7 @@
  */
 
 /*
-If OPENCLOSE is defined, ecah of the functions opens and closes the
+If OPENCLOSE is defined, each of the functions opens and closes the
 file whenever it needs to access it.  Otherwise, the file is opened
 once in initialize and closed once is close.
 
