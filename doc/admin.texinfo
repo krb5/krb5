@@ -471,14 +471,14 @@ For example:
 @smallexample
 @group
 [appdefaults]
-    kinit = {
+    kinit = @{
         forwardable = true
-    }
-    telnet = {
+    @}
+    telnet = @{
         forward = true
         encrypt = true
         autologin = true
-    }
+    @}
 @end group
 @end smallexample
 
@@ -650,24 +650,24 @@ section for ANL.GOV systems would look like this:
 @smallexample
 @group
 [capaths]
-    ANL.GOV = {
+    ANL.GOV = @{
         TEST.ANL.GOV = .
         PNL.GOV = ES.NET
         NERSC.GOV = ES.NET
         ES.NET = .
-    }
-    TEST.ANL.GOV = {
+    @}
+    TEST.ANL.GOV = @{
         ANL.GOV = .
-    }
-    PNL.GOV = {
+    @}
+    PNL.GOV = @{
         ANL.GOV = ES.NET
-    }
-    NERSC.GOV = {
+    @}
+    NERSC.GOV = @{
         ANL.GOV = ES.NET
-    }
-    ES.NET = {
+    @}
+    ES.NET = @{
         ANL.GOV = .
-    }
+    @}
 @end group
 @end smallexample
 
@@ -677,26 +677,26 @@ would look like this:
 @smallexample
 @group
 [capaths]
-    NERSC.GOV = {
+    NERSC.GOV = @{
         ANL.GOV = ES.NET
         TEST.ANL.GOV = ES.NET
         TEST.ANL.GOV = ANL.GOV
         PNL.GOV = ES.NET
         ES.NET = .
-    }
-    ANL.GOV = {
+    @}
+    ANL.GOV = @{
         NERSC.GOV = ES.NET
-    }
-    PNL.GOV = {
+    @}
+    PNL.GOV = @{
         NERSC.GOV = ES.NET
-    }
-    ES.NET = {
+    @}
+    ES.NET = @{
         NERSC.GOV = .
-    }
-    TEST.ANL.GOV = {
+    @}
+    TEST.ANL.GOV = @{
         NERSC.GOV = ANL.GOV
         NERSC.GOV = ES.NET
-    }
+    @}
 @end group
 @end smallexample
 

@@ -1,3 +1,8 @@
+Thu Nov 28 18:54:02 1996  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo (capaths): Fix unquoted braces.
+	(appdefaults): Fix unquoted braces.
+
 Wed Nov 27 18:27:18 1996  Jeffrey C. G. Bigler  <jcb@viola.cygnus.com>
 
 	* Makefile: Added send-pr.texinfo to ADMIN_INCLUDES and
