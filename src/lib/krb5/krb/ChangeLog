@@ -1,3 +1,7 @@
+2005-01-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* parse.c (krb5_parse_name): Don't cache the default realm name.
+
 2004-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* mk_req_ext.c (krb5_mk_req_extended): Free keyblock before
