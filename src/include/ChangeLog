@@ -1,3 +1,6 @@
+Wed Mar 15 20:27:57 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: added recursion into krb5 for the PC.
 
 Fri Mar 10 10:18:50 1995  Chris Provenzano (proven@mit.edu)
 

@@ -1,1 +1,26 @@
-# nothing needed here
+##DOSBUILDTOP = ..
+##DOS!include $(BUILDTOP)\config\windows.in
+
+all:: all-$(WHAT)
+
+all-unix::
+
+all-windows::
+	copy $(BUILDTOP)\util\et\com_err.h .
+	cd krb5
+	@echo Making in include\krb5
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+
+clean-windows::
+	$(RM) com_err.h
+	cd krb5
+	@echo Making clean in include\krb5
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean locally
+
