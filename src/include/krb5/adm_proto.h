@@ -29,7 +29,7 @@
  */
 
 /* adm_conn.c */
-krb5_error_code krb5_adm_connect
+krb5_error_code INTERFACE krb5_adm_connect
 	PROTOTYPE((krb5_context,
 		   char *,
 		   char *,
@@ -37,7 +37,7 @@ krb5_error_code krb5_adm_connect
 		   int *,
 		   krb5_auth_context **,
 		   krb5_ccache *));
-void krb5_adm_disconnect
+void INTERFACE krb5_adm_disconnect
 	PROTOTYPE((krb5_context,
 		   int *,
 		   krb5_auth_context *,
