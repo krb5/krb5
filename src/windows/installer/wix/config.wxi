@@ -52,6 +52,19 @@
 
     <?include lang\config_$(var.BuildLang).wxi?>
     
+    <!-- Parameters for the features containing debug symbols -->
+    <?ifdef DebugSyms?>
+         <?ifdef Debug?>
+             <?define DebugSymInstallDefault="followParent"?>
+             <?define DebugSymLowLevel="30"?>
+             <?define DebugSymHighLevel="130"?>
+         <?else?>
+             <?define DebugSymInstallDefault="followParent"?>
+             <?define DebugSymLowLevel="130"?>
+             <?define DebugSymHighLevel="130"?>
+         <?endif?>
+    <?endif?>
+    
     <!-- Configuration macros -->
     <?ifndef LeashAfsStatus?>
         <?define LeashAfsStatus="1"?>
