@@ -1,0 +1,53 @@
+/**/# Kerberos version 5 Build Parameters
+/**/# $Id$
+
+#define ProjectKRB		5
+
+#ifndef CompileEtCmd
+#define CompileEtCmd $(ETSRC)/compile_et
+#endif
+
+/*
+ * Default Definitions.
+ */
+
+     TOP_INCLUDES = -I$(TOP)/include
+        CONFIGSRC = $(TOP)/config
+         IMAKESRC = $(CONFIGSRC)
+            ISODE = /mit/isode/isode-5.0
+            ETSRC = $(TOP)/lib/comerr/compile_et
+          DEPKLIB = $(TOP)/lib/krb/libkrb.a \
+                    $(TOP)/lib/des/libdes.a \
+                    $(TOP)/lib/ccache/libcred.a \
+                    $(TOP)/lib/ccache/libcred.a \
+                    $(TOP)/lib/ccache/file/libfcc.a \
+                    $(TOP)/lib/os-4.3/libos.a \
+                    $(TOP)/error_tables/libkrberrs.a \
+                    $(TOP)/asn.1/libasn1.a
+
+             KLIB = $(DEPKLIB) $(ISODE)/libisode.a -ldes -lcom_err
+
+#ifdef UseInstalled
+            IMAKE = imake		/* assume BINDIR in path */
+           DEPEND = makedepend		/* assume BINDIR in path */
+        MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
+       COMPILE_ET = compile_et
+#else
+            IMAKE = $(IMAKESRC)/imake
+           DEPEND = DependCmd
+        MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
+       COMPILE_ET = CompileEtCmd
+#endif
+
+#ifndef ErrorTableObjectRule
+
+#define ErrorTableObjectRule()						@@\
+.SUFFIXES: .et								@@\
+									@@\
+.et.h: 									@@\
+	$(COMPILE_ET) $*.et						@@\
+									@@\
+.et.c: 									@@\
+	$(COMPILE_ET) $*.et
+
+#endif
