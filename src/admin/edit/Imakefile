@@ -10,4 +10,7 @@ CmdTableObjectRule()
 # needed until we run makedepend
 kdb5_ed_ct.o: kdb5_ed_ct.c
 
+clean::
+	$(RM) kdb5_ed_ct.c
+
 NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
