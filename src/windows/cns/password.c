@@ -97,22 +97,17 @@ change_password(HWND hwnd, char *name, char *instance, char *realm,
 #ifdef KRB5
   char *msg;                                  /* Message string */
   krb5_error_code code;                       /* Return value */
-  code = k5_change_password(k5_context, name, realm, oldpw, newpw, &msg);
+  code = k5_change_password(hwnd, k5_context, name, realm, oldpw, newpw, &msg);
 
-  if (msg != NULL) {
-    MessageBox(NULL, msg, NULL, MB_ICONEXCLAMATION);
-  } else if (code) {
-    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+  if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
       MessageBox(NULL, "Password incorrect", NULL, MB_ICONEXCLAMATION);
-    else if (code == ENOENT)
-      MessageBox(NULL, "Cannot connect to admin server", NULL,
+  else if (code == -1)
+	  MessageBox(NULL, (msg ? msg : "Cannot change password"), NULL,
 		 MB_ICONEXCLAMATION);
-    else
-      com_err(NULL, code, "while changing password.");
-  }
-
-  if (code == 0)
-    MessageBox(NULL, "Password changed.", "Kerberos", MB_OK | MB_APPLMODAL);
+  else if (code != 0)
+	  com_err(NULL, code, (msg ? msg : "while changing password."));
+  else
+	  MessageBox(NULL, (msg ? msg : "Password changed"), "Kerberos", MB_OK | MB_APPLMODAL);
 
   return (code == 0);
 

@@ -10,10 +10,6 @@
  * <mit-copyright.h>.
  */
 
-#if !defined(KRB5) && !defined(KRB4)
-#error "Must define either KRB4 or KRB5"
-#endif
-
 #include <windows.h>
 #include <windowsx.h>
 
@@ -27,18 +23,15 @@
 
 #include "cns.h"
 #include "tktlist.h"
+#include "cns_reg.h"
+
+#include "../lib/gic.h"
 
 enum {				       /* Actions after login */
   LOGIN_AND_EXIT,
   LOGIN_AND_MINIMIZE,
   LOGIN_AND_RUN,
 };
-
-#ifndef _WIN32
-typedef MINMAXINFO *LPMINMAXINFO;
-#define GET_WM_COMMAND_MPS(id, hwnd, cmd)    \
-        (WPARAM)MAKELONG(id, cmd), (LONG)(hwnd)
-#endif
 
 /*
  * Globals
@@ -55,7 +48,6 @@ BOOL alert;		       	       /* Actions on ticket expiration */
 BOOL beep;
 static BOOL alerted;		       /* TRUE when user already alerted */
 BOOL isblocking = FALSE;	       /* TRUE when blocked in WinSock */
-static DWORD blocking_timeout;	       /* Blocking timeout */
 static DWORD blocking_end_time;	       /* Ending count for blocking timeout */
 static FARPROC hook_instance;	       /* handle for blocking hook function */
 
@@ -76,21 +68,13 @@ krb5_ccache k5_ccache;
  *
  * Returns: TRUE if we got and dispatched a message, FALSE otherwise.
  */
-BOOL __export CALLBACK
+BOOL CALLBACK
 blocking_hook_proc(void)
 {
   MSG msg;
   BOOL rc;
-  DWORD now;
 
-  /*
-   * The additional timeout logic is required because GetTickCount will
-   * wrap approximately every 49.7 days.
-   */
-  now = GetTickCount();
-  if (now >= blocking_end_time &&
-      (blocking_end_time >= blocking_end_time - blocking_timeout ||
-       now < blocking_end_time - blocking_timeout)) {
+  if (GetTickCount() > blocking_end_time) {
     WSACancelBlockingCall();
     return FALSE;
   }
@@ -127,8 +111,7 @@ start_blocking_hook(int timeout)
     return;
 
   isblocking = TRUE;
-  blocking_timeout = 1000 * timeout;
-  blocking_end_time = GetTickCount() + blocking_timeout;
+  blocking_end_time = GetTickCount() + (1000 * timeout);
 #ifdef _WIN32
   proc = WSASetBlockingHook(blocking_hook_proc);
 #else
@@ -193,10 +176,8 @@ center_dialog(HWND hwnd)
 static void
 position_dialog(HWND hwnd)
 {
-  int n;
   int scrwidth, scrheight;
   HDC hdc;
-  char position[256];
   int x, y, cx, cy;
 
   if (hwnd == NULL)
@@ -206,12 +187,12 @@ position_dialog(HWND hwnd)
   scrwidth = GetDeviceCaps(hdc, HORZRES);
   scrheight = GetDeviceCaps(hdc, VERTRES);
   ReleaseDC(NULL, hdc);
-  GetPrivateProfileString(INI_DEFAULTS, INI_POSITION, "",
-			  position, sizeof(position), KERBEROS_INI);
+  x = cns_res.x;
+  y = cns_res.y;
+  cx = cns_res.cx;
+  cy = cns_res.cy;
 
-  n = sscanf(position, " [%d , %d , %d , %d", &x, &y, &cx, &cy);
-  if (n != 4 ||
-      x > scrwidth ||
+  if (x > scrwidth ||
       y > scrheight ||
       x + cx < 0 ||
       y + cy < 0)
@@ -477,7 +458,6 @@ kwin_init_file_menu(HWND hwnd)
 {
   HMENU hmenu;
   int i;
-  char login[sizeof(INI_LOGIN)+1];
   char menuitem[MAX_K_NAME_SZ + 3];
   int id;
   BOOL rc;
@@ -488,13 +468,10 @@ kwin_init_file_menu(HWND hwnd)
   hmenu = GetSubMenu(hmenu, 0);
   assert(hmenu != NULL);
 
-  strcpy(login, INI_LOGIN);
   id = 0;
   for (i = 0; i < FILE_MENU_MAX_LOGINS; i++) {
-    login[sizeof(INI_LOGIN) - 1] = '1' + i;
-    login[sizeof(INI_LOGIN)] = 0;
-    GetPrivateProfileString(INI_RECENT_LOGINS, login, "",
-			    &menuitem[3], sizeof(menuitem) - 3, KERBEROS_INI);
+    strcpy(menuitem + 3, cns_res.logins[i]);
+
     if (!menuitem[3])
       continue;
 
@@ -527,8 +504,6 @@ kwin_save_file_menu(HWND hwnd)
   int id;
   int ctitems;
   char menuitem[MAX_K_NAME_SZ + 3];
-  char login[sizeof(INI_LOGIN)+1];
-  BOOL rc;
 
   hmenu = GetMenu(hwnd);
   assert(hmenu != NULL);
@@ -536,19 +511,14 @@ kwin_save_file_menu(HWND hwnd)
   hmenu = GetSubMenu(hmenu, 0);
   assert(hmenu != NULL);
 
-  strcpy(login, INI_LOGIN);
   ctitems = GetMenuItemCount(hmenu);
   assert(ctitems >= FILE_MENU_ITEMS);
 
   id = 0;
   for (i = FILE_MENU_ITEMS + 1; i < ctitems; i++) {
     GetMenuString(hmenu, i, menuitem, sizeof(menuitem), MF_BYPOSITION);
-    login[sizeof(INI_LOGIN) - 1] = '1' + id;
-    login[sizeof(INI_LOGIN)] = 0;
 
-    rc = WritePrivateProfileString(INI_RECENT_LOGINS, login,
-				   &menuitem[3], KERBEROS_INI);
-    assert(rc);
+    strcpy(cns_res.logins[id], menuitem + 3);
 
     id++;
   }
@@ -607,18 +577,15 @@ kwin_init_name(HWND hwnd, char *fullname)
   if (fullname == NULL || fullname[0] == 0) {
 #ifdef KRB4
     strcpy(name, krb_get_default_user());
-    GetPrivateProfileString(INI_DEFAULTS, INI_INSTANCE, "",
-			    instance, sizeof(instance), KERBEROS_INI);
+    strcpy(instance, cns_res.instance);
     krc = krb_get_lrealm(realm, 1);
     if (krc != KSUCCESS)
       realm[0] = 0;
-    GetPrivateProfileString(INI_DEFAULTS, INI_REALM, realm,
-			    realm, sizeof(realm), KERBEROS_INI);
+    strcpy(realm, cns_res.realm);
 #endif /* KRB4 */
 
 #ifdef KRB5
-    GetPrivateProfileString(INI_DEFAULTS, INI_USER, "",
-			    name, sizeof(name), KERBEROS_INI);
+    strcpy(name, cns_res.name);
     
     *realm = '\0';
     code = krb5_get_default_realm(k5_context, &ptr);
@@ -626,8 +593,7 @@ kwin_init_name(HWND hwnd, char *fullname)
       strcpy(realm, ptr);
       /*      free(ptr); XXX */
     }
-    GetPrivateProfileString(INI_DEFAULTS, INI_REALM, realm,
-			    realm, sizeof(realm), KERBEROS_INI);
+    strcpy(realm, cns_res.realm);
 #endif /* KRB5 */
 
   } else {
@@ -702,18 +668,17 @@ kwin_save_name(HWND hwnd)
   krb_set_default_user(name);
   GetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance, sizeof(instance));
   trim(instance);
-  WritePrivateProfileString(INI_DEFAULTS, INI_INSTANCE,
-			    instance, KERBEROS_INI);
+  strcpy(cns_res.instance, instance);
 #endif
 
 #ifdef KRB5
-  WritePrivateProfileString(INI_DEFAULTS, INI_USER, name, KERBEROS_INI);
+  strcpy(cns_res.name, name);
   *instance = '\0';
 #endif
 
   GetDlgItemText(hwnd, IDD_LOGIN_REALM, realm, sizeof(realm));
   trim(realm);
-  WritePrivateProfileString(INI_DEFAULTS, INI_REALM, realm, KERBEROS_INI);
+  strcpy(cns_res.realm, realm);
 
   kwin_push_login(hwnd, name, instance, realm);
 }
@@ -790,9 +755,7 @@ kwin_initdialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 static void
 kwin_destroy(HWND hwnd)
 {
-  char position[256];
   RECT r;
-  BOOL b;
 
   ticket_destroy(GetDlgItem(hwnd, IDD_TICKET_LIST));
 
@@ -804,11 +767,10 @@ kwin_destroy(HWND hwnd)
 
   kwin_save_file_menu(hwnd);
   GetWindowRect(hwnd, &r);
-  sprintf(position, "[%d,%d,%d,%d]", r.left, r.top,
-	  r.right - r.left, r.bottom - r.top);
-  b = WritePrivateProfileString(INI_DEFAULTS, INI_POSITION,
-				position, KERBEROS_INI);
-  assert(b);
+  cns_res.x = r.left;
+  cns_res.y = r.top;
+  cns_res.cx = r.right - r.left;
+  cns_res.cy = r.bottom - r.top;
 
   KillTimer(hwnd, kwin_timer_id);
 }
@@ -1120,27 +1082,27 @@ kwin_timer(HWND hwnd, UINT timer_id)
 static void
 kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 {
-  char name[ANAME_SZ];
-  char realm[REALM_SZ];
-  char password[MAX_KPW_LEN];
-  HCURSOR hcursor;
-  BOOL blogin;
-  HMENU hmenu;
-  char menuitem[MAX_K_NAME_SZ + 3];
-  char copyright[128];
-  int id;
+  char                      name[ANAME_SZ];
+  char                      realm[REALM_SZ];
+  char                      password[MAX_KPW_LEN];
+  HCURSOR                   hcursor;
+  BOOL                      blogin;
+  HMENU                     hmenu;
+  char                      menuitem[MAX_K_NAME_SZ + 3];
+  char                      copyright[128];
+  int                       id;
 #ifdef KRB4
-  char instance[INST_SZ];
-  int lifetime;
-  int krc;
+  char                      instance[INST_SZ];
+  int                       lifetime;
+  int                       krc;
 #endif
 #ifdef KRB5
-  long lifetime;
-  krb5_error_code code;
-  krb5_principal principal;
-  krb5_creds creds;
-  krb5_principal server;
-  krb5_int32 sec, usec;
+  long                      lifetime;
+  krb5_error_code           code;
+  krb5_principal            principal;
+  krb5_creds                creds;
+  krb5_get_init_creds_opt   opts;
+  gic_data                  gd;
 #endif
 
 #ifdef KRB4
@@ -1223,15 +1185,16 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     GetDlgItemText(hwnd, IDD_LOGIN_REALM, realm, sizeof(realm));
     trim(realm);
     GetDlgItemText(hwnd, IDD_LOGIN_PASSWORD, password, sizeof(password));
+    SetDlgItemText(hwnd, IDD_LOGIN_PASSWORD, "");  /* nuke the password */
     trim(password);
+
 #ifdef KRB4
     GetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance, sizeof(instance));
     trim(instance);
 #endif
 
     hcursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
-    lifetime = GetPrivateProfileInt(INI_OPTIONS, INI_DURATION,
-				    DEFAULT_TKT_LIFE * 5, KERBEROS_INI);
+    lifetime = cns_res.lifetime;
     start_blocking_hook(BLOCK_MAX_SEC);
 
 #ifdef KRB4
@@ -1241,62 +1204,65 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 #endif
 
 #ifdef KRB5
-    do {
-      principal = server = NULL;
-      memset(&creds, 0, sizeof(creds));
-
-      sprintf(menuitem, "%s@%s", name, realm);
-      code = krb5_parse_name(k5_context, menuitem, &principal);
-      if (code)
-	break;
-
-      code = krb5_cc_initialize(k5_context, k5_ccache, principal);
-      if (code)
-	break;
-
-      code = krb5_build_principal_ext(k5_context, &server,
-				      krb5_princ_realm(k5_context, principal)->length,
-				      krb5_princ_realm(k5_context, principal)->data,
-				      KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-				      krb5_princ_realm(k5_context, principal)->length,
-				      krb5_princ_realm(k5_context, principal)->data, 0);
-      if (code)
-	break;
-
-      creds.client = principal;
-      creds.server = server;
-
-      code = krb5_us_timeofday(k5_context, &sec, &usec);
-      if (code)
-	break;
-      creds.times.starttime = 0;
-      creds.times.endtime = sec + 60L * lifetime;
-      creds.times.renew_till = 0;
-		
-      /*
-       * XXX whether or not the credentials should be
-       * forwardable should be a configurable option in the
-       * UI.
-       */
-      code = krb5_get_in_tkt_with_password(k5_context,
-					   (forwardable ? KDC_OPT_FORWARDABLE : 0),
-					   NULL, NULL,
-					   NULL, password, k5_ccache,
-					   &creds, 0);
-    } while (0);
-
+    principal = NULL;
+    
+    /*
+     * convert the name + realm into a krb5 principal string and parse it into a principal
+     */
+    sprintf(menuitem, "%s@%s", name, realm);
+    code = krb5_parse_name(k5_context, menuitem, &principal);
+    if (code)
+      goto errorpoint;
+    
+    /*
+     * set the various ticket options.  First, initialize the structure, then set the ticket
+     * to be forwardable if desired, and set the lifetime.
+     */
+    krb5_get_init_creds_opt_init(&opts);
+    krb5_get_init_creds_opt_set_forwardable(&opts, forwardable);
+    krb5_get_init_creds_opt_set_tkt_life(&opts, lifetime * 60);
+    
+    /*
+     * get the initial creds using the password and the options we set above
+     */
+    gd.hinstance = hinstance;
+    gd.hwnd = hwnd;
+    gd.id = ID_VARDLG;
+    code = krb5_get_init_creds_password(k5_context, &creds, principal, password, 
+					gic_prompter, &gd, 0, NULL, &opts);
+    if (code)
+      goto errorpoint;
+    
+    /*
+     * initialize the credential cache
+     */
+    code = krb5_cc_initialize(k5_context, k5_ccache, principal);
+    if (code)
+      goto errorpoint;
+    
+    /*
+     * insert the principal into the cache
+     */
+    code = krb5_cc_store_cred(k5_context, k5_ccache, &creds);
+    
+  errorpoint:
+    
     if (principal)
       krb5_free_principal(k5_context, principal);
-
-    if (server)
-      krb5_free_principal(k5_context, server);
-
-#endif  /* KRB5 */
 
     end_blocking_hook();
     SetCursor(hcursor);
     kwin_set_default_focus(hwnd);
-
+    
+    if (code) {
+      if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+	MessageBox(hwnd, "Password incorrect", NULL, 
+		   MB_OK | MB_ICONEXCLAMATION);
+      else 
+	com_err(NULL, code, "while logging in");
+    }
+#endif /* KRB5 */
+    
 #ifdef KRB4
     if (krc != KSUCCESS) {
       MessageBox(hwnd, krb_get_err_text(krc),	"",
@@ -1306,18 +1272,6 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     }
 #endif
 
-#ifdef KRB5
-    if (code) {
-      if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
-	MessageBox(hwnd, "Password incorrect", NULL, 
-		   MB_OK | MB_ICONEXCLAMATION);
-      else 
-	com_err(NULL, code, "while logging in");
-      return; /* TRUE */
-    }
-#endif
-
-    SetDlgItemText(hwnd, IDD_LOGIN_PASSWORD, "");
     kwin_save_name(hwnd);
     alerted = FALSE;
 
@@ -1378,25 +1332,22 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     if (isblocking)
       return; /* TRUE */
 
-#ifdef CYGNUS
-    strcpy(copyright, "        KerbNet for Windows ");
+#ifdef KRB4
+    strcpy(copyright, "        Kerberos 4 for Windows ");
+#endif
+#ifdef KRB5
+    strcpy(copyright, "        Kerberos V5 for Windows ");
+#endif
 #ifdef _WIN32
     strcat(copyright, "32-bit\n");
 #else
     strcat(copyright, "16-bit\n");
 #endif
-    strcat(copyright, "\n                Version 1.11\n\n");
-    strcat(copyright, "          For support, contact:\n");
+    strcat(copyright, "\n                Version 1.12\n\n");
+#ifdef ORGANIZATION
+    strcat(copyright, "          For information, contact:\n");
     strcat(copyright, ORGANIZATION);
-#else /* Cygnus */
-    strcpy(copyright, "    Kerberos V5 for Windows ");
-#ifdef _WIN32
-    strcat(copyright, "32-bit\n");
-#else
-    strcat(copyright, "16-bit\n");
 #endif
-    strcat(copyright, "\n                Version 1.11\n\n");
-#endif /* Cygnus */
     MessageBox(hwnd, copyright, KWIN_DIALOG_NAME, MB_OK);
 
     return; /* TRUE */
@@ -1544,10 +1495,12 @@ kwin_wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
   }
 
   switch (message) {
-
     HANDLE_MSG(hwnd, WM_GETMINMAXINFO, kwin_getminmaxinfo);
+
     HANDLE_MSG(hwnd, WM_DESTROY, kwin_destroy);
+
     HANDLE_MSG(hwnd, WM_MEASUREITEM, ticket_measureitem);
+
     HANDLE_MSG(hwnd, WM_DRAWITEM, ticket_drawitem);
 
   case WM_SETCURSOR:
@@ -1558,8 +1511,11 @@ kwin_wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
 
     HANDLE_MSG(hwnd, WM_SIZE, kwin_size);
+
     HANDLE_MSG(hwnd, WM_SYSCOMMAND, kwin_syscommand);
+
     HANDLE_MSG(hwnd, WM_TIMER, kwin_timer);
+
     HANDLE_MSG(hwnd, WM_PAINT, kwin_paint);
     
   case WM_ERASEBKGND:
@@ -1584,6 +1540,7 @@ kwin_dlg_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   switch (message) {
     HANDLE_MSG(hwnd, WM_INITDIALOG, kwin_initdialog);
+
     HANDLE_MSG(hwnd, WM_COMMAND, kwin_command);
   }
 
@@ -1643,6 +1600,7 @@ init_application(HINSTANCE hinstance)
 #ifdef KRB4
   wm_kerberos_changed = krb_get_notification_message();
 #endif
+
 #ifdef KRB5
   wm_kerberos_changed = krb5_get_notification_message();
 #endif
@@ -1683,11 +1641,10 @@ quit_application(HINSTANCE hinstance)
 static BOOL
 init_instance(HINSTANCE hinstance, int ncmdshow)
 {
-  char buf[20];
-  int i;
-  int rc;
   WORD versionrequested;
   WSADATA wsadata;
+  int rc;
+  int i;
 
   versionrequested = 0x0101;			/* We need version 1.1 */
   rc = WSAStartup(versionrequested, &wsadata);
@@ -1706,22 +1663,37 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
     return FALSE;
   }
 
+#ifdef KRB5
+  {
+    krb5_error_code code;
+
+    code = krb5_init_context(&k5_context);
+    if (!code) {
+#if 0				/* Not needed under windows */
+      krb5_init_ets(k5_context);
+#endif
+      code = k5_init_ccache(&k5_ccache);
+    }
+    if (code) {
+      com_err(NULL, code, "while initializing program");
+      return FALSE;
+    }
+    k5_name_from_ccache(k5_ccache);
+  }
+#endif
+
+  cns_load_registry();
+
   /*
    * Set up expiration action
    */
-  GetPrivateProfileString(INI_EXPIRATION, INI_ALERT, "No",
-			  buf, sizeof(buf), KERBEROS_INI);
-  alert = _stricmp(buf, "Yes") == 0;
-  GetPrivateProfileString(INI_EXPIRATION, INI_BEEP, "No",
-			  buf, sizeof(buf), KERBEROS_INI);
-  beep = _stricmp(buf, "Yes") == 0;
+  alert = cns_res.alert;
+  beep = cns_res.beep;
 
   /*
    * ticket options
    */
-  GetPrivateProfileString(INI_TICKETOPTS, INI_FORWARDABLE, "No",
-			  buf, sizeof(buf), KERBEROS_INI);
-  forwardable = _stricmp(buf, "Yes") == 0;
+  forwardable = cns_res.forwardable;
 
   /*
    * Load clock icons
@@ -1731,22 +1703,6 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
 
 #ifdef KRB4
   krb_start_session(NULL);
-#endif
-
-#ifdef KRB5
-  {
-    krb5_error_code code;
-
-    code = krb5_init_context(&k5_context);
-    if (!code)
-      code = k5_init_ccache(&k5_ccache);
-    if (code) {
-      com_err(NULL, code, "while initializing program");
-      return FALSE;
-    }
-    k5_name_from_ccache(k5_ccache);
-  }
-
 #endif
 
   return TRUE;
@@ -1858,6 +1814,7 @@ WinMain(HINSTANCE hinst, HINSTANCE hprevinstance, LPSTR cmdline, int ncmdshow)
 
   if (hprevinstance == NULL)
 #endif /* _WIN32 */
+
   if (!init_application(hinstance))
       return FALSE;
 
@@ -1896,6 +1853,8 @@ WinMain(HINSTANCE hinst, HINSTANCE hprevinstance, LPSTR cmdline, int ncmdshow)
 #ifndef _WIN32
   FreeProcInstance((FARPROC)dlgproc);
 #endif
+
+  cns_save_registry();
 
   return 0;
 }
@@ -2216,7 +2175,7 @@ k5_name_from_ccache(krb5_ccache k5_ccache)
   krb5_principal princ;
   char name[ANAME_SZ];
   char realm[REALM_SZ];
-  char FAR *defname;
+  char *defname;
 
   if (code = krb5_cc_get_principal(k5_context, k5_ccache, &princ))
     return FALSE;
@@ -2227,8 +2186,8 @@ k5_name_from_ccache(krb5_ccache k5_ccache)
   }
 
   k5_kname_parse(name, realm, defname);       /* Extract the components */
-  WritePrivateProfileString(INI_DEFAULTS, INI_USER, name, KERBEROS_INI);
-  WritePrivateProfileString(INI_DEFAULTS, INI_REALM, realm, KERBEROS_INI);
+  strcpy(cns_res.name, name);
+  strcpy(cns_res.realm, realm);
 
   return TRUE;
 }

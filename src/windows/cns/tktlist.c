@@ -31,15 +31,6 @@
 #include "winsock.h"
 #include "krb5.h"
 #include "com_err.h"
-
-#define DEFAULT_TKT_LIFE 120
-#define 	ANAME_SZ	40
-#define		REALM_SZ	40
-#define		SNAME_SZ	40
-#define		INST_SZ		40
-#define 	MAX_KPW_LEN	128
-/* include space for '.' and '@' */
-#define		MAX_K_NAME_SZ	(ANAME_SZ + INST_SZ + REALM_SZ + 2)
 #endif
 
 #include "cns.h"
