@@ -1,3 +1,9 @@
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): 
+	* auth_con.c (krb5_auth_con_setrcache): Export this function in
+		Windows DLL.
+
 1998-05-12  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* str_conv.c (krb5_timestamp_to_sfstring): Make sure the date
