@@ -4,12 +4,13 @@
 
 [realms]
 	__REALM__ = {
-		kdc = localhost:1750
-		admin_server = localhost:1751
+		kdc = __KDCHOST__:1750
+		admin_server = __KDCHOST__:1751
 	}
 
 [domain_realm]
 	localhost = __REALM__
+	__KDCHOST__ = __REALM__
 
 [logging]
 	admin_server = FILE:__K5ROOT__/syslog
