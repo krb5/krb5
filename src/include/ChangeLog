@@ -1,3 +1,15 @@
+2000-06-23  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
+	be KRB5_CALLCONV.
+
+	* k5-int.h (krb5int_cc_default): Fix linkage to be consistent with
+	code.  (Note: We should dump KRB5_DLLIMP.)
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_recvauth_version, krb5_free_ktypes): Declare.
+
 2000-06-05      Jeffrey Altman          <jaltman@columbia.edu>
 
         * krb5-int.h: Fix the prototype for krb5int_cc_default so that it builds
