@@ -147,6 +147,7 @@ STLIBOBJS = \
 	rel_name.o \
 	seal.o \
 	ser_sctx.o \
+	set_ccache.o \
 	sign.o \
 	unseal.o \
 	util_cksum.o \
