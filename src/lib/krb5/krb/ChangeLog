@@ -1,3 +1,10 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* get_in_tkt.c: Include os-proto.h for _krb5_conf_boolean prototype.
+
+	* Makefile.in (LOCALINCLUDES): Add -I$(srcdir)/../os so os-proto.h
+	can be included.
+
 2001-06-29  Tom Yu  <tlyu@mit.edu>
 
 	* init_ctx.c (get_profile_etype_list): Fix etype-counting loop so

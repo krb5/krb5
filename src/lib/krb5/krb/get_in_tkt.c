@@ -31,6 +31,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "os-proto.h"
 
 /*
  All-purpose initial ticket routine, usually called via
