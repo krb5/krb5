@@ -49,7 +49,8 @@ typedef struct _krb5_cryptosystem_entry {
 					      krb5_keyblock *));
     krb5_error_code (*finish_key) PROTOTYPE((krb5_encrypt_block *));
     krb5_error_code (*string_to_key) PROTOTYPE((krb5_keytype, krb5_keyblock *,
-						char *, krb5_principal *));
+						krb5_data *,
+						krb5_principal));
     krb5_error_code (*random_key) PROTOTYPE((krb5_pointer,
 					     krb5_keyblock **));
     krb5_error_code  (*init_random_key) PROTOTYPE((krb5_keyblock *,
@@ -68,10 +69,12 @@ typedef struct _krb5_cs_table_entry {
 
 /* could be used in a table to find a sumtype */
 typedef struct _krb5_checksum_entry {
-    krb5_pointer  (*sum_func) PROTOTYPE ((krb5_pointer in, krb5_pointer out,
-					  krb5_pointer seed,
-					  size_t in_length,
-					  size_t seed_length));
+    krb5_error_code  (*sum_func) PROTOTYPE ((krb5_pointer /* in */,
+					     krb5_pointer /* out */,
+					     krb5_pointer /* seed */,
+					     size_t /* in_length */,
+					     size_t /* seed_length */,
+					     krb5_checksum * /* out_cksum */));
     int checksum_length;		/* length of stuff returned by
 					   sum_func */
 } krb5_checksum_entry;
@@ -108,7 +111,12 @@ typedef struct _krb5_checksum_entry {
 extern krb5_cs_table_entry *krb5_csarray[];
 extern int krb5_max_cryptosystem;		/* max entry in array */
 
+extern krb5_checksum_entry *krb5_cksumarray[];
+extern int krb5_max_cksum;		/* max entry in array */
+
 #define valid_etype(etype)     ((etype <= krb5_max_cryptosystem) && (etype > 0) && krb5_csarray[etype])
+
+#define valid_cksumtype(cktype)     ((cktype <= krb5_max_cksum) && (cktype > 0) && krb5_cksumarray[cktype])
 
 
 #endif /* __KRB5_ENCRYPTION__ */
