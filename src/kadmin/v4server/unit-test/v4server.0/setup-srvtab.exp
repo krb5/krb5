@@ -9,7 +9,7 @@ exp_prog "setup" $kadmin_local "" 0 {
     "already exists" {}
 } {
     "kadmin.local:" { 
-	send "ktadd -k /krb5/ovsec_adm.srvtab changepw/kerberos\n"
+	send "ktadd -k $env(K5ROOT)/ovsec_adm.srvtab changepw/kerberos\n"
     }
 } {
     -re "Entry for principal changepw/kerberos .* added to keytab" {

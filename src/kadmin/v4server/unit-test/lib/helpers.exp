@@ -56,7 +56,7 @@ proc myfail { msg } {
 }
 
 proc server_start { name cmdline should_listen args } {
-    global spawn_id server_id
+    global spawn_id server_id env
     global VFOURSERVER
     global mytest_status
     global sleep hostname
@@ -71,7 +71,7 @@ proc server_start { name cmdline should_listen args } {
 	    verbose "Couldn't connect to V4 kpasswd server; retrying ($num_tries so far)."
 	}
 
-	spawn $VFOURSERVER $cmdline
+	spawn $VFOURSERVER -k $env(K5ROOT)/ovsec_adm.srvtab $cmdline
 	set server_id $spawn_id
 
 	foreach test $args {

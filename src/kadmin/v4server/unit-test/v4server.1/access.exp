@@ -17,7 +17,7 @@ proc kill_admin_server {} {
 }
 
 proc start_admin_server {} {
-    global ovsec_adm_server sleep
+    global ovsec_adm_server sleep env
 
     set max_tries 60
 
@@ -44,10 +44,12 @@ proc remove_changepw_perms {} {
 }
 
 proc set_changepw_perms { perms } {
+        global env
+
 	remove_changepw_perms
 
 	exec echo "changepw/kerberos@SECURE-TEST.OV.COM	$perms" \
-		>> /krb5/ovsec_adm.acl
+		>> $env(K5ROOT)/ovsec_adm.acl
 }
 
 # start off with a dead admin server
