@@ -1284,7 +1284,8 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
 	rep.server = "SAM/rc";  /* Should not match any principal name. */
 	rep.ctime = psr->stime;
 	rep.cusec = psr->susec;
-	if (retval = krb5_rc_store(kdc_context, kdc_rcache, &rep)) {
+	retval = krb5_rc_store(kdc_context, kdc_rcache, &rep);
+	if (retval) {
 	    com_err("krb5kdc", retval, "SAM psr replay attack!");
 	    goto cleanup;
 	}

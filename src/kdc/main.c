@@ -808,7 +808,8 @@ int main(argc, argv)
 
     setup_signal_handlers();
 
-    if (retval = setup_sam()) {
+    retval = setup_sam();
+    if (retval) {
 	com_err(argv[0], retval, "while initializing SAM");
 	finish_realms(argv[0]);
 	return 1;

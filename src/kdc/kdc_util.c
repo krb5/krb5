@@ -213,8 +213,8 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
     krb5_auth_context 	  auth_context = NULL;
     krb5_authenticator	* authenticator = NULL;
     krb5_checksum 	* his_cksum = NULL;
-    krb5_keyblock 	* key = NULL;
-    krb5_kvno 		  kvno = 0;
+/*    krb5_keyblock 	* key = NULL;*/
+/*    krb5_kvno 		  kvno = 0;*/
 
     if (!request->padata)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -401,7 +401,6 @@ kdc_get_server_key(ticket, key, kvno)
     krb5_boolean 	  more;
     int	nprincs;
     krb5_key_data	* server_key;
-    int			  i;
 
     nprincs = 1;
 
@@ -629,20 +628,21 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 
   /* read field into current */
   for (i = 0; *otrans != '\0';) {
-    if (*otrans == '\\')
-      if (*(++otrans) == '\0')
-	break;
-      else
-	continue;
-    if (*otrans == ',') {
-      otrans++;
-      break;
-    }
-    current[i++] = *otrans++;
-    if (i >= MAX_REALM_LN) {
-      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
-      goto fail;
-    }
+      if (*otrans == '\\') {
+	  if (*(++otrans) == '\0')
+	      break;
+	  else
+	      continue;
+      }
+      if (*otrans == ',') {
+	  otrans++;
+	  break;
+      }
+      current[i++] = *otrans++;
+      if (i >= MAX_REALM_LN) {
+	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	  goto fail;
+      }
   }
   current[i] = '\0';
 
@@ -685,20 +685,21 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 
     /* read field into next */
     for (i = 0; *otrans != '\0';) {
-      if (*otrans == '\\')
-	if (*(++otrans) == '\0')
-	  break;
-	else
-	  continue;
-      if (*otrans == ',') {
-	otrans++;
-	break;
-      }
-      next[i++] = *otrans++;
-      if (i >= MAX_REALM_LN) {
-	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
-	goto fail;
-      }
+	if (*otrans == '\\') {
+	    if (*(++otrans) == '\0')
+		break;
+	    else
+		continue;
+	}
+	if (*otrans == ',') {
+	    otrans++;
+	    break;
+	}
+	next[i++] = *otrans++;
+	if (i >= MAX_REALM_LN) {
+	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	    goto fail;
+	}
     }
     next[i] = '\0';
     nlst = i - 1;
@@ -1450,7 +1451,6 @@ select_session_keytype(context, server, nktypes, ktype)
     krb5_enctype	*ktype;
 {
     int		i;
-    krb5_enctype dfl = 0;
     
     for (i = 0; i < nktypes; i++) {
 	if (!valid_enctype(ktype[i]))
