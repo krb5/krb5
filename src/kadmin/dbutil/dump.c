@@ -168,73 +168,71 @@ extern kadm5_config_params global_params;
 
 /* Strings */
 
-static const char k5beta_dump_header[] = "kdb5_edit load_dump version 2.0\n";
-static const char k5beta6_dump_header[] = "kdb5_edit load_dump version 3.0\n";
-static const char k5beta7_dump_header[] = "kdb5_edit load_dump version 4\n";
+#define k5beta_dump_header	"kdb5_edit load_dump version 2.0\n"
 
 static const char null_mprinc_name[] = "kdb5_dump@MISSING";
 
 /* Message strings */
-static const char regex_err[] = "%s: regular expression error - %s\n";
-static const char regex_merr[] = "%s: regular expression match error - %s\n";
-static const char pname_unp_err[] = "%s: cannot unparse principal name (%s)\n";
-static const char mname_unp_err[] = "%s: cannot unparse modifier name (%s)\n";
-static const char nokeys_err[] = "%s: cannot find any standard key for %s\n";
-static const char sdump_tl_inc_err[] = "%s: tagged data list inconsistency for %s (counted %d, stored %d)\n";
-static const char stand_fmt_name[] = "Kerberos version 5";
-static const char old_fmt_name[] = "Kerberos version 5 old format";
-static const char b6_fmt_name[] = "Kerberos version 5 beta 6 format";
-static const char ofopen_error[] = "%s: cannot open %s for writing (%s)\n";
-static const char oflock_error[] = "%s: cannot lock %s (%s)\n";
-static const char dumprec_err[] = "%s: error performing %s dump (%s)\n";
-static const char dumphdr_err[] = "%s: error dumping %s header (%s)\n";
-static const char trash_end_fmt[] = "%s(%d): ignoring trash at end of line: ";
-static const char read_name_string[] = "name string";
-static const char read_key_type[] = "key type";
-static const char read_key_data[] = "key data";
-static const char read_pr_data1[] = "first set of principal attributes";
-static const char read_mod_name[] = "modifier name";
-static const char read_pr_data2[] = "second set of principal attributes";
-static const char read_salt_data[] = "salt data";
-static const char read_akey_type[] = "alternate key type";
-static const char read_akey_data[] = "alternate key data";
-static const char read_asalt_type[] = "alternate salt type";
-static const char read_asalt_data[] = "alternate salt data";
-static const char read_exp_data[] = "expansion data";
-static const char store_err_fmt[] = "%s(%d): cannot store %s(%s)\n";
-static const char add_princ_fmt[] = "%s\n";
-static const char parse_err_fmt[] = "%s(%d): cannot parse %s (%s)\n";
-static const char read_err_fmt[] = "%s(%d): cannot read %s\n";
-static const char no_mem_fmt[] = "%s(%d): no memory for buffers\n";
-static const char rhead_err_fmt[] = "%s(%d): cannot match size tokens\n";
-static const char err_line_fmt[] = "%s: error processing line %d of %s\n";
-static const char head_bad_fmt[] = "%s: dump header bad in %s\n";
-static const char read_bytecnt[] = "record byte count";
-static const char read_encdata[] = "encoded data";
-static const char n_name_unp_fmt[] = "%s(%s): cannot unparse name\n";
-static const char n_dec_cont_fmt[] = "%s(%s): cannot decode contents\n";
-static const char read_nint_data[] = "principal static attributes";
-static const char read_tcontents[] = "tagged data contents";
-static const char read_ttypelen[] = "tagged data type and length";
-static const char read_kcontents[] = "key data contents";
-static const char read_ktypelen[] = "key data type and length";
-static const char read_econtents[] = "extra data contents";
-static const char k5beta_fmt_name[] = "Kerberos version 5 old format";
-static const char standard_fmt_name[] = "Kerberos version 5 format";
-static const char no_name_mem_fmt[] = "%s: cannot get memory for temporary name\n";
-static const char ctx_err_fmt[] = "%s: cannot initialize Kerberos context\n";
-static const char stdin_name[] = "standard input";
-static const char remaster_err_fmt[] = "while re-encoding keys for principal %s with new master key";
-static const char restfail_fmt[] = "%s: %s restore failed\n";
-static const char close_err_fmt[] = "%s: cannot close database (%s)\n";
-static const char dbinit_err_fmt[] = "%s: cannot initialize database (%s)\n";
-static const char dblock_err_fmt[] = "%s: cannot initialize database lock (%s)\n";
-static const char dbname_err_fmt[] = "%s: cannot set database name to %s (%s)\n";
-static const char dbdelerr_fmt[] = "%s: cannot delete bad database %s (%s)\n";
-static const char dbunlockerr_fmt[] = "%s: cannot unlock database %s (%s)\n";
-static const char dbrenerr_fmt[] = "%s: cannot rename database %s to %s (%s)\n";
-static const char dbcreaterr_fmt[] = "%s: cannot create database %s (%s)\n";
-static const char dfile_err_fmt[] = "%s: cannot open %s (%s)\n";
+#define regex_err		"%s: regular expression error - %s\n"
+#define regex_merr		"%s: regular expression match error - %s\n"
+#define pname_unp_err		"%s: cannot unparse principal name (%s)\n"
+#define mname_unp_err		"%s: cannot unparse modifier name (%s)\n"
+#define nokeys_err		"%s: cannot find any standard key for %s\n"
+#define sdump_tl_inc_err	"%s: tagged data list inconsistency for %s (counted %d, stored %d)\n"
+#define stand_fmt_name		"Kerberos version 5"
+#define old_fmt_name		"Kerberos version 5 old format"
+#define b6_fmt_name		"Kerberos version 5 beta 6 format"
+#define ofopen_error		"%s: cannot open %s for writing (%s)\n"
+#define oflock_error		"%s: cannot lock %s (%s)\n"
+#define dumprec_err		"%s: error performing %s dump (%s)\n"
+#define dumphdr_err		"%s: error dumping %s header (%s)\n"
+#define trash_end_fmt		"%s(%d): ignoring trash at end of line: "
+#define read_name_string	"name string"
+#define read_key_type		"key type"
+#define read_key_data		"key data"
+#define read_pr_data1		"first set of principal attributes"
+#define read_mod_name		"modifier name"
+#define read_pr_data2		"second set of principal attributes"
+#define read_salt_data		"salt data"
+#define read_akey_type		"alternate key type"
+#define read_akey_data		"alternate key data"
+#define read_asalt_type		"alternate salt type"
+#define read_asalt_data		"alternate salt data"
+#define read_exp_data		"expansion data"
+#define store_err_fmt		"%s(%d): cannot store %s(%s)\n"
+#define add_princ_fmt		"%s\n"
+#define parse_err_fmt		"%s(%d): cannot parse %s (%s)\n"
+#define read_err_fmt		"%s(%d): cannot read %s\n"
+#define no_mem_fmt		"%s(%d): no memory for buffers\n"
+#define rhead_err_fmt		"%s(%d): cannot match size tokens\n"
+#define err_line_fmt		"%s: error processing line %d of %s\n"
+#define head_bad_fmt		"%s: dump header bad in %s\n"
+#define read_bytecnt		"record byte count"
+#define read_encdata		"encoded data"
+#define n_name_unp_fmt		"%s(%s): cannot unparse name\n"
+#define n_dec_cont_fmt		"%s(%s): cannot decode contents\n"
+#define read_nint_data		"principal static attributes"
+#define read_tcontents		"tagged data contents"
+#define read_ttypelen		"tagged data type and length"
+#define read_kcontents		"key data contents"
+#define read_ktypelen		"key data type and length"
+#define read_econtents		"extra data contents"
+#define k5beta_fmt_name		"Kerberos version 5 old format"
+#define standard_fmt_name	"Kerberos version 5 format"
+#define no_name_mem_fmt		"%s: cannot get memory for temporary name\n"
+#define ctx_err_fmt		"%s: cannot initialize Kerberos context\n"
+#define stdin_name		"standard input"
+#define remaster_err_fmt	"while re-encoding keys for principal %s with new master key"
+#define restfail_fmt		"%s: %s restore failed\n"
+#define close_err_fmt		"%s: cannot close database (%s)\n"
+#define dbinit_err_fmt		"%s: cannot initialize database (%s)\n"
+#define dblock_err_fmt		"%s: cannot initialize database lock (%s)\n"
+#define dbname_err_fmt		"%s: cannot set database name to %s (%s)\n"
+#define dbdelerr_fmt		"%s: cannot delete bad database %s (%s)\n"
+#define dbunlockerr_fmt		"%s: cannot unlock database %s (%s)\n"
+#define dbrenerr_fmt		"%s: cannot rename database %s to %s (%s)\n"
+#define dbcreaterr_fmt		"%s: cannot create database %s (%s)\n"
+#define dfile_err_fmt		"%s: cannot open %s (%s)\n"
 
 static const char oldoption[] = "-old";
 static const char b6option[] = "-b6";
@@ -967,7 +965,7 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 	fputc('\t', arg->ofile);
     else
 	fprintf(arg->ofile, "%s\t", adb.policy);
-    fprintf(arg->ofile, "%x\t%d\t%d\t%d", adb.aux_attributes,
+    fprintf(arg->ofile, "%lx\t%d\t%d\t%d", adb.aux_attributes,
 	    adb.old_key_len,adb.old_key_next, adb.admin_history_kvno);
 
     for (x = 0; x < adb.old_key_len; x++) {

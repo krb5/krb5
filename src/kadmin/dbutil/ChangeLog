@@ -1,3 +1,10 @@
+2000-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* dump.c: Various message char arrays turned into macros, to
+	permit gcc to verify format strings and arguments match.  
+	(k5beta6_dump_header, k5beta7_dump_header): Deleted.
+	(dump_ov_princ): Use %lx for aux_attributes.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* dump.c: Add a new dump version, r1_3_version, and make it the
