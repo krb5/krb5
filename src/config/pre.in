@@ -89,7 +89,7 @@ SRVTCL		= $(TESTDIR)/util/ovsec_kadm_srv_tcl
 # We have to set the host with --host so that setup_xfail will work.
 # If we don't set it, then the host type used is "native", which
 # doesn't match "*-*-*".
-DEJAFLAGS	:= $(DEJALFLAGS) $(CLFLAGS) --debug --srcdir $(srcdir) --host \
+DEJAFLAGS	= $(DEJALFLAGS) $(CLFLAGS) --debug --srcdir $(srcdir) --host \
 		   unknown-$(shell uname -m)-$(shell uname -s)$(shell uname -r)
 RUNTEST		= runtest $(DEJAFLAGS)
 

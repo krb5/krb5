@@ -1,3 +1,7 @@
+Fri Oct 18 11:03:24 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in (DEJAFLAGS): s/:=/=/ [PR #117]
+
 Tue Oct 15 16:26:19 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* pre.in: add TEST_PATH argument to START_SERVERS and STOP_SERVERS
