@@ -1767,6 +1767,13 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
 					   keyblock, keysalt)))
 	 return ret;
 
+    /*
+     * Coerce the enctype of the output keyblock in case we got an
+     * inexact match on the enctype; this behavior will go away when
+     * the key storage architecture gets redesigned for 1.3.
+     */
+    keyblock->enctype = ktype;
+
     if (kvnop)
 	 *kvnop = key_data->key_data_kvno;
 
