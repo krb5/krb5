@@ -126,12 +126,59 @@ krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes, pre_auth_types,
     krb5_kdc_rep ** ret_as_reply;
 {
     struct keytab_keyproc_arg arg;
+    krb5_enctype * kt_ktypes = (krb5_enctype *) NULL;
+    krb5_keytab kt_id = keytab;
+    krb5_keytab_entry kt_ent;
+    krb5_error_code retval;
+    register int i, j;
 
-    arg.keytab = keytab;
+    if (! ktypes) {
+	/* get the default enctype list */
+	retval = krb5_get_default_in_tkt_ktypes(context, &kt_ktypes);
+	if (retval) return retval;
+    } else {
+	/* copy the desired enctypes into a temporary array */
+	for (i = 0; ktypes[i]; i++) ;
+	kt_ktypes = (krb5_enctype *)malloc((i + 1) * sizeof(krb5_enctype));
+	if (! kt_ktypes) return ENOMEM;
+	for (i = 0; kt_ktypes[i] = ktypes[i]; i++) ;
+    }
+
+    /* only keep the enctypes for which we have keytab entries */
+
+    if (kt_id == NULL) {
+	retval = krb5_kt_default(context, &kt_id);
+	if (retval) goto cleanup;
+    }
+    i = 0;
+    while (kt_ktypes[i]) {
+	retval = krb5_kt_get_entry(context, kt_id, creds->client,
+				   0, /* don't have vno available */
+				   kt_ktypes[i], &kt_ent);
+	if (retval) {
+	    if (retval != KRB5_KT_NOTFOUND)
+		goto cleanup;
+	    /* strip the enctype from the requested enctype list */
+	    for (j = i; kt_ktypes[j] = kt_ktypes[j+1]; j++) ;
+	} else {
+	    /* we have this enctype; proceed to the next one */
+	    (void) krb5_kt_free_entry(context, &kt_ent);
+	    i++;
+	}
+    }
+
+    arg.keytab = kt_id;
     arg.client = creds->client;
 
-    return (krb5_get_in_tkt(context, options, addrs, ktypes, pre_auth_types, 
-			    keytab_keyproc, (krb5_pointer)&arg,
-			    krb5_kdc_rep_decrypt_proc, 0, creds,
-			    ccache, ret_as_reply));
+    retval = krb5_get_in_tkt(context, options, addrs, kt_ktypes,
+			     pre_auth_types,
+			     keytab_keyproc, (krb5_pointer)&arg,
+			     krb5_kdc_rep_decrypt_proc, 0, creds,
+			     ccache, ret_as_reply);
+cleanup:
+    if (kt_ktypes)
+	free(kt_ktypes);
+    if ((keytab == NULL) && (kt_id != NULL))
+	krb5_kt_close(context, kt_id);
+    return retval;
 }

@@ -8,6 +8,11 @@ Wed Mar 20 23:00:59 1996  Theodore Y. Ts'o  <tytso@dcl>
 	* get_in_tkt.c (krb5_get_in_tkt): Fix 16bit vs. 32bit error.
 		(do_more should not have been an int!)
 
+Tue Mar 19 13:03:26 1996  Richard Basch  <basch@lehman.com>
+
+	* in_tkt_ktb.c (krb5_get_in_tkt_with_keytab):
+	Only request keytypes that correspond to those in the keytab.
+
 Mon Mar 18 21:49:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add KRB5_RUN_FLAGS
