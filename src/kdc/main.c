@@ -41,7 +41,7 @@ static char rcsid_main_c[] =
 
 #include <krb5/config.h>
 #ifdef PROVIDE_DES_CBC_CRC
-#include <krb5/des.h>
+#include <krb5/mit-des.h>
 #endif
 
 #include "kdc_util.h"
