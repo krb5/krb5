@@ -437,14 +437,13 @@ krb5_error_code krb5_get_in_tkt
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   krb5_address * const *,
-		   const krb5_preauthtype,
-   		   const krb5_enctype,
-		   const krb5_keytype,
+		   krb5_enctype *,
+		   krb5_preauthtype *,
 		   krb5_error_code (* )(krb5_context,
 					const krb5_keytype,
-                                        krb5_keyblock **,
+                                        krb5_data *,
                                         krb5_const_pointer,
-                                        krb5_pa_data **),
+                                        krb5_keyblock **),
 		   krb5_const_pointer,
 		   krb5_error_code (* )(krb5_context,
 					const krb5_keyblock *,
@@ -459,9 +458,8 @@ krb5_error_code krb5_get_in_tkt_with_password
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   krb5_address * const *,
-		   const krb5_preauthtype pre_auth_type,
-		   const krb5_enctype,
-		   const krb5_keytype,
+		   krb5_enctype *,
+		   krb5_preauthtype *,
 		   const char *,
 		   krb5_ccache,
 		   krb5_creds *,
@@ -471,19 +469,30 @@ krb5_error_code krb5_get_in_tkt_with_skey
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   krb5_address * const *,
-		   const krb5_preauthtype pre_auth_type,
-		   const krb5_enctype,
+		   krb5_enctype *,
+		   krb5_preauthtype *,
 		   const krb5_keyblock *,
 		   krb5_ccache,
 		   krb5_creds *,
 		   krb5_kdc_rep ** ));
+
+krb5_error_code krb5_get_in_tkt_with_keytab
+	PROTOTYPE((krb5_context,
+		   const krb5_flags,
+		   krb5_address * const *,
+		   krb5_enctype *,
+		   krb5_preauthtype *,
+		   const krb5_keytab,
+		   krb5_ccache,
+		   krb5_creds *,
+		   krb5_kdc_rep ** ));
+
 
 krb5_error_code krb5_decode_kdc_rep
 	PROTOTYPE((krb5_context,
 		   krb5_data *,
 		   const krb5_keyblock *,
 		   const krb5_enctype,
-
 		   krb5_kdc_rep ** ));
 
 typedef krb5_error_code (*krb5_rdreq_key_proc) PROTOTYPE((krb5_context,

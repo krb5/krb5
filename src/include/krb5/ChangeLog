@@ -1,3 +1,15 @@
+Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
+
+	* func-proto.h (krb5_get_in_tkt()) Changed key_proc args to be the
+		following (krb5_context, const krb5_keytype, krb5_data *,
+                krb5_const_pointer, krb5_keyblock **)
+
+	* func-proto.h (krb5_get_in_tkt_*()) Removed krb5_keytype, changed
+		krb5_enctype to krb5_enctype *, changed krb5_preauthtype to
+		krb5_preauthtype *.
+
+	* func-proto.h Added new routine krb5_get_in_tkt_with_keytab().
+
 Fri Feb  3 07:57:31 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Use politically correct name of AC_CHECK_SIZEOF
