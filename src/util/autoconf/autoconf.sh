@@ -155,10 +155,10 @@ case $AC_TOPDIR in
 esac
 # echo "topdown=$topdown"
 
-case $macrodir in
+case $AC_MACRODIR in
   "")  macdown= ;;
-  /*)  macdown=--macrodir=$macrodir ;;
-  *)   macdown=--macrodir=../$macrodir ;;
+  /*)  macdown=--macrodir=$AC_MACRODIR ;;
+  *)   macdown=--macrodir=../$AC_MACRODIR ;;
 esac
 # echo "macdown=$macdown"
 

@@ -83,7 +83,17 @@ dnl [#] by AC_USER@AC_HOST on AC_DATE
 dnl
 define(AC_PARSEARGS,
 [# Save the original args to write them into config.status later.
-configure_args="[$]*"
+# Do argument quoting in a sane fashion so things don't break while recursing.
+configure_args=
+for arg do
+  case $arg in
+    *\"*|*\\*|*\[$]*|*\`*)
+      arg=`echo $arg|sed -e 's/\\\\/\\\\\\\\/g;s/"/\\\\"/g;s/\\$/\\\\$/g;s/\`/\\\\\`/g'`
+      ;;
+  esac
+  configure_args="$configure_args \"$arg\""
+done
+# configure_args="[$]*"
 
 # Only options that might do something get documented.
 changequote(,)dnl
@@ -353,7 +363,8 @@ ac_configure_temp="${configure_args-[$]*}"
 # Strip out --no-create and --norecursion so they don't pile up.
 configure_args=
 for ac_arg in $ac_configure_temp; do
-  case "$ac_arg" in
+  eval ac_unquoted="$ac_arg"
+  case "$ac_unquoted" in
   -no-create | --no-create | --no-creat | --no-crea | --no-cre \
   | --no-cr | --no-c) ;;
   -norecursion | --norecursion | --norecursio | --norecursi \
