@@ -1,3 +1,11 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* g_cnffile.c: Use krb5__krb4_context instead of init'ing and
+		free'ing a krb5_context each time we need to read data
+		from the configuration file.  We also define
+		krb5__krb4_context in g_cnnfile.c, since it's a likely
+		that any use of the krb4 library will pull in that file.
+
 Fri Aug  7 11:04:03 1998  Tom Yu  <tlyu@mit.edu>
 
 	* tf_util.c (tf_init): Add call to getuid() to initialize me.
