@@ -17,7 +17,7 @@ proc kill_admin_server {} {
 }
 
 proc start_admin_server {} {
-    global ovsec_adm_server sleep env
+    global ovsec_adm_server_path ovsec_adm_server_name sleep env
 
     set max_tries 60
 
@@ -26,15 +26,15 @@ proc start_admin_server {} {
 	    exec $sleep 5
 	    verbose "$ovsec_adm_server couldn't bind; retrying ($num_tries so far)"
 	}
-	if {[catch "exec $ovsec_adm_server" msg]} {
+	if {[catch "system {cd $ovsec_adm_server_path; exec $ovsec_adm_server_name}" msg]} {
 	    if {[regexp {Address already in use} $msg]} {
 		continue
 	    }
-	    fail "starting $ovsec_adm_server: $msg"
+	    fail "starting $ovsec_adm_server_name: $msg"
 	}
 	return
     }
-    fail "starting $ovsec_adm_server: $msg"
+    fail "starting $ovsec_adm_server_name: $msg"
 }
 	
 proc remove_changepw_perms {} {
