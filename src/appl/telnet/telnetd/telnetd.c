@@ -713,6 +713,9 @@ getterminaltype(name)
 	}
     }
 #endif	/* ENCRYPTION */
+    /* Options like environment require authentication and encryption
+       negotiation to be completed.*/
+    auth_negotiated = 1;
     if (his_state_is_will(TELOPT_TSPEED)) {
 	static unsigned char sb[] =
 			{ IAC, SB, TELOPT_TSPEED, TELQUAL_SEND, IAC, SE };

@@ -81,6 +81,17 @@ unsigned char *subsave;
 #define	TS_DO		7	/* do " */
 #define	TS_DONT		8	/* dont " */
 
+static void sb_auth_complete()
+{
+  if (!auth_negotiated) {
+    static char *error =
+      "An environment option was sent before authentication negotiation completed.\r\nThis may create a security hazard. Connection dropped.\r\n";
+    writenet(error, strlen(error));
+    netflush();
+    exit(1);
+  }
+}
+
 	void
 telrcv()
 {
@@ -1108,6 +1119,8 @@ suboption()
 	if (his_state_is_wont(TELOPT_TSPEED))	/* Ignore if option disabled */
 		break;
 
+	sb_auth_complete();
+	
 	settimer(tspeedsubopt);
 
 	if (SB_EOF() || SB_GET() != TELQUAL_IS)
@@ -1131,6 +1144,7 @@ suboption()
 
 	if (his_state_is_wont(TELOPT_TTYPE))	/* Ignore if option disabled */
 		break;
+sb_auth_complete();
 	settimer(ttypesubopt);
 
 	if (SB_EOF() || SB_GET() != TELQUAL_IS) {
@@ -1250,6 +1264,7 @@ suboption()
     case TELOPT_XDISPLOC: {
 	if (SB_EOF() || SB_GET() != TELQUAL_IS)
 		return;
+sb_auth_complete();
 	settimer(xdisplocsubopt);
 	subpointer[SB_LEN()] = '\0';
 	(void)setenv("DISPLAY", (char *)subpointer, 1);
@@ -1265,6 +1280,7 @@ suboption()
 
 	if (SB_EOF())
 		return;
+sb_auth_complete();
 	c = SB_GET();
 	if (c == TELQUAL_IS) {
 		if (subchar == TELOPT_OLD_ENVIRON)
