@@ -35,7 +35,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_init_context(context)
 	krb5_context *context;
 {
-	krb5_context ctx;
+	krb5_context ctx = 0;
 	krb5_error_code retval;
 	int tmp;
 

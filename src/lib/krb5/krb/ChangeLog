@@ -1,3 +1,8 @@
+Tue Aug 12 09:13:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* init_ctx.c (krb5_init_context): Initialize local variable ctx
+	 	before calling krb5_init_ets.
+
 Fri Aug  8 17:04:54 1997  Tom Yu  <tlyu@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred_basic): Check remote_addr and
