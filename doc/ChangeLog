@@ -8,6 +8,8 @@
 	* implementor.texinfo (Host Address Lookup): Document Mac OS X
 	issues.
 
+	* threads.txt, thread-safety.txt: Updates.
+
 2004-11-19  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo (Solaris 9): Document Solaris patches for pty
