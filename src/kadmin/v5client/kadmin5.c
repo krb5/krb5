@@ -1529,4 +1529,5 @@ kadmin_cleanup()
     if (password_prompt)
 	free(password_prompt);
     net_disconnect(1);
+    return 0; /*No currently defined failure conditions*/
 }

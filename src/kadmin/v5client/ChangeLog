@@ -1,3 +1,9 @@
+Fri Jun 16 20:28:38 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* kadmin5.c (kadmin_cleanup): Return success always; nothing
+        called has a useful return value, and the previous behavior
+        (returning an undefined value) caused periodic failure of the
+        regression tests.
 
 Thu Jun 15 17:54:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
@@ -6,6 +12,7 @@ Thu Jun 15 17:54:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Remove dbm library checks, these are no longer needed
 		with the Berkeley database code.  Also, add shared library
 		usage check.
+
 
 Sat Jun 10 23:03:41 1995  Tom Yu  (tlyu@dragons-lair)
 
