@@ -37,7 +37,7 @@ if [ -z "${norecursion}" ] ; then
 	recurse_args=
 	recur_state=
 	for recur_arg in ${configure_args} ; do
-		if test -n "${recur_state}" ; then
+		if test -z "${recur_state}" ; then
 			case "${recur_arg}" in
 			  -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
 			    recur_state="skip"
@@ -143,11 +143,11 @@ dnl
 define(CONFIG_RULES,[
 divert(9)dnl
 [
-Makefile: Makefile.in config.status
+Makefile: $(srcdir)/Makefile.in config.status
 	$(SHELL) config.status
-config.status: configure
+config.status: $(srcdir)/configure
 	$(SHELL) config.status --recheck
-configure: configure.in
+configure: $(srcdir)/configure.in
 	cd $(srcdir); autoconf
 ]
 divert(0)dnl
