@@ -72,21 +72,6 @@ AC_CONFIG_SUBDIRS(lib/kdb lib/gssapi lib/rpc lib/kadm5)
 if test -n "$KRB4_LIB"; then
   AC_CONFIG_SUBDIRS(krb524)
 fi
-case $krb5_cv_host in
-*-*-solaris2.9*)
-	if test "$krb5_cv_prog_gcc" = yes; then
-		DL_COMPILE='$(CC) -fpic -G -nostdlib'
-		DL_COMPILE_TAIL='-lc -ldl'
-	else
-		DL_COMPILE='$(CC) -Kpic -G'
-		DL_COMPILE_TAIL='-ldl'
-	fi
-	EXITSLEEP_TARG=exitsleep
-	;;
-esac
-AC_SUBST(DL_COMPILE)
-AC_SUBST(DL_COMPILE_TAIL)
-AC_SUBST(EXITSLEEP_TARG)
 
 AC_CONFIG_SUBDIRS(kdc kadmin slave clients appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])

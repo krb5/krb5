@@ -1492,3 +1492,16 @@ AC_MSG_RESULT($krb5_cv_need_bind_8_compat)
 test $krb5_cv_need_bind_8_compat = yes && AC_DEFINE(BIND_8_COMPAT,1,[Define if OS has bind 9])
 ])
 dnl
+dnl KRB5_AC_PRIOCNTL_HACK
+dnl
+dnl
+AC_DEFUN([KRB5_AC_PRIOCNTL_HACK],
+[case $krb5_cv_host in
+*-*-solaris2.9*)
+	PRIOCNTL_HACK=1
+	;;
+*)
+	PRIOCNTL_HACK=0
+	;;
+esac
+AC_SUBST(PRIOCNTL_HACK)])

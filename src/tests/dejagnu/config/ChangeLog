@@ -1,3 +1,8 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl things
+	to work around Solaris 9 pty-close bug.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (passes): Add an AES-only pass.

@@ -28,7 +28,7 @@ SLIBSH=sed -e 's|@''CC''@|$(CC)|g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@
 DL_COMPILE=@DL_COMPILE@
 DL_COMPILE_TAIL=@DL_COMPILE_TAIL@
 
-all-recurse: libupdate makeshlib @EXITSLEEP_TARG@
+all-recurse: libupdate makeshlib
 all-unix:: $(FAKEPREFIX)/lib
 all-mac::
 
@@ -70,9 +70,6 @@ libupdate: $(srcdir)/libupdate.sh
 makeshlib: $(srcdir)/makeshlib.sh Makefile
 	 $(RM) $@ $@.tmp
 	 $(SLIBSH) $(srcdir)/makeshlib.sh >$@.tmp&&chmod a+x $@.tmp&&mv $@.tmp $@
-
-exitsleep: $(srcdir)/exitsleep.c
-	$(DL_COMPILE) -oexitsleep $(srcdir)/exitsleep.c $(DL_COMPILE_TAIL)
 
 clean::
 	$(RM) libupdate makeshlib

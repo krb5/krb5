@@ -1,5 +1,7 @@
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
+	* shlib.conf (*-*-solaris-*): Remove exitsleep.
+
 	* pre.in (FAKEDEST, FAKEPREFIX, FAKELIBDIR): Support variables for
 	the _RLD_ROOT hack.
 

@@ -1,5 +1,7 @@
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (all-recurse): Remove exitsleep.
+	
 	* Makefile.in (all-unix, clean-unix): Add new rule to build fake
 	root directory for _RLD_ROOT hacks.
 

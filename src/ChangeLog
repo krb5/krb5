@@ -1,3 +1,10 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_PRIOCNTL_HACK): Set PRIOCNTL_HACK=1 on
+	Solaris 9.
+
+	* configure.in: Remove exitsleep.
+
 2003-12-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use AC_HELP_STRING for kdc-replay-cache option
