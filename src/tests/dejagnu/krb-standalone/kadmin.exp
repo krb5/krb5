@@ -824,7 +824,7 @@ proc kadmin_test { } {
     if {![kadmin_add testuser longtestpw] \
             || ![kinit testuser longtestpw 0] \
 	    || ![kdestroy] \
-	    || ![kadmin_modify testuser "-maxlife 2500"] \
+	    || ![kadmin_modify testuser "-maxlife \"2500 seconds\""] \
 	    || ![kinit testuser longtestpw 0] \
 	    || ![kdestroy] \
 	    || ![kadmin_delete testuser]} {

@@ -1,3 +1,8 @@
+Tue Aug  6 11:50:14 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* kadmin.exp: Fix to specify "2500 seconds" explictly to avoid
+		getting negative maxlife.
+
 Mon Jul 29 11:30:24 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadmin.exp: Added back in. Rewritten to use new admin system.
