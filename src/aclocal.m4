@@ -15,74 +15,41 @@ define(AC_STUFF_FILE_POST,
 AC_DIVERT_POP()dnl
 ])dnl
 dnl
-dnl look for the top of the tree
+dnl Figure out the top of the source and build trees.  We depend on localdir
+dnl being a relative pathname; we could make it general later, but for now 
+dnl this is good enough.
 dnl
-AC_DEFUN(AC_CONFIG_FRAGMENTS_DEFAULT, [
-AC_CONFIG_FRAGMENTS(. .. ../.. ../../.. ../../../.. ../../../../.. ../../../../../..)])dnl
-dnl
-dnl search them looking for the directory named config.
-dnl Crude, but it works.
-dnl
-AC_DEFUN(AC_CONFIG_FRAGMENTS,
-[ac_config_fragdir=
-for ac_dir in $1; do
-  if test -d $srcdir/$ac_dir/config; then
-    ac_reltopdir=$ac_dir
-    ac_topdir=$srcdir/$ac_reltopdir
-    ac_config_fragdir=$ac_reltopdir/config
-    break
-  fi
-done
-if test -z "$ac_config_fragdir"; then
-  AC_MSG_ERROR([can not find config/ directory in $1])
-else
+AC_DEFUN(V5_SET_TOPDIR,[dnl
+ac_reltopdir=AC_LOCALDIR
+case "$ac_reltopdir" in 
+/*)
+	echo "Configure script built with absolute localdir pathname"
+	exit 1
+	;;
+"")
+	ac_reltopdir=.
+	;;
+esac
+ac_topdir=$srcdir/$ac_reltopdir
+ac_config_fragdir=$ac_reltopdir/config
+ac_prepend=$ac_config_fragdir/pre.in
+ac_postpend=$ac_config_fragdir/post.in
+BUILDTOP=$ac_reltopdir
+SRCTOP=$srcdir/$ac_reltopdir
+if test -d "$srcdir/$ac_config_fragdir"; then
   AC_CONFIG_AUX_DIR($ac_config_fragdir)
+else
+  AC_MSG_ERROR([can not find config/ directory in $ac_reltopdir])
 fi
-  ac_tmpin="$srcdir/${ac_config_fragdir}/pre.in"
-  if test -r $ac_tmpin; then
-     ac_prepend=$ac_config_fragdir/pre.in
-  else
-     ac_prepend=
-  fi
-  ac_tmpin="$srcdir/${ac_config_fragdir}/post.in"
-  if test -r $ac_tmpin; then
-     ac_postpend=$ac_config_fragdir/post.in
-  else
-     ac_postpend=
-  fi
-])dnl
-dnl
-dnl
-dnl set up buildtop stuff
-dnl
-define(AC_BUILDTOP,[.])dnl
-define(AC_SET_BUILDTOP,[dnl
-ifdef([AC_PROVIDE_AC_CONFIG_FRAGMENTS_DEFAULT], ,[AC_CONFIG_FRAGMENTS_DEFAULT()])dnl
 AC_SUBST(BUILDTOP)dnl
-BUILDTOP=[$]ac_reltopdir
-])dnl
-dnl
-dnl
-dnl
-dnl
-dnl How do we find other scripts needed for configuration?
-dnl Scripts like Cygnus configure, config.sub, config.guess are stored
-dnl together in one directory.  For now, have the configure.in file
-dnl specify it explicitly with AC_CONFIG_AUX.  We'll provide a half-way
-dnl acceptable default of ${srcdir}.
-dnl
-define(AC__CONFIG_AUX,[
-  if test "z${config_sub}" = "z" ; then
-    config_sub=${srcdir}/config.sub
-  fi
-  if test "z${config_guess}" = "z" ; then
-    config_guess=${srcdir}/config.guess
-  fi
-AC_PROVIDE([$0])dnl
+AC_SUBST(SRCTOP)dnl
 ])dnl
 dnl
 dnl Does configure need to be run in immediate subdirectories of this
 dnl directory?
+dnl
+dnl XXX we should remove this and replace CONFIG_DIRS with AC_CONFIG_SUBDIRS
+dnl in all of the configure.in files.
 dnl
 define(CONFIG_DIRS,[AC_CONFIG_SUBDIRS($1)])dnl
 dnl
@@ -155,7 +122,7 @@ dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[dnl
-AC_SET_BUILDTOP dnl
+V5_SET_TOPDIR dnl
 WITH_CC dnl
 WITH_CCOPTS dnl
 WITH_LINKER dnl
@@ -604,14 +571,6 @@ then
 fi
 AC_MSG_RESULT(setting LEXLIB to $LEXLIB)
 AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
-dnl
-dnl make this one deeper...
-dnl
-dnl The default is `$srcdir' or `$srcdir/..' or `$srcdir/../..'.
-dnl There's no need to call this macro explicitly; just AC_REQUIRE it.
-undefine([AC_CONFIG_AUX_DIR_DEFAULT])
-AC_DEFUN(AC_CONFIG_AUX_DIR_DEFAULT,
-[AC_CONFIG_AUX_DIRS($srcdir $srcdir/.. $srcdir/../.. $srcdir/../../.. $srcdir/../../../.. $srcdir/../../../../..)])dnl
 dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl

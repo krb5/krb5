@@ -1,3 +1,16 @@
+Wed Jun 21 18:10:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* aclocal.m4 (V5_SET_TOPDIR): Replace AC_CONFIG_FRAGMENTS,
+		AC_CONFIG_FRAGMENTS_DEFUALT, AC_SET_BUILDTOP,
+		AC_CONFIG_AUX_DIR_DEFAULT with V5_SET_TOPDIR.  This sets
+		up the correct variables for the top of the source tree
+		and the top of the build tree.  It currently depends on
+		AC_LOCALDIR being a relative pathname, but that's a safe
+		assumption to make.  (And we could fix it to be more
+		general if we really needed to.)
+
+		Removed AC__CONFIG_AUX since it doesn't seem to be used at all.
+
 Wed Jun 21 18:03:40 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* aclocal.m4: undefine AC_CONFIGF_AUX_DIR_DEFAULT before
