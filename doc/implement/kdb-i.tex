@@ -7,8 +7,8 @@ manipulation tools.
 \funcarg{char *}{name}
 \end{funcdecl}
 
-Set the name of the database to \funcparam{name}.  If it doesn't exist,
-an error code is returned.
+Set the name of the database to \funcparam{name}.  
+%Errors: If it doesn't exist, an error code is returned.
 
 Must be called before \funcname{krb5_db_init} or after
 \funcname{krb5_db_fini}; must not be called while db functions are active.
@@ -40,7 +40,7 @@ Called before using \funcname{krb5_db_get_principal},
 
 Does any required initialization.
 
-Errors: init errors, system errors.
+%Errors: init errors, system errors.
 
 \begin{funcdecl}{krb5_db_fini}{krb5_error_code}{\funcvoid}
 \end{funcdecl}
@@ -48,7 +48,7 @@ Errors: init errors, system errors.
 Called after all database operations are complete, to perform any required
 clean-up.
 
-Errors: sysytem errors.
+%Errors: sysytem errors.
 
 
 \begin{funcdecl}{krb5_db_get_age}{krb5_error_code}{\funcin}
@@ -63,7 +63,7 @@ default database if \funcname{db_name} is NULL).
 \funcparam{*age} is filled in in local system time units, and represents
 the last modification time of the database.
 
-Errors: system errors.
+%Errors: system errors.
 
 
 \begin{funcdecl}{krb5_db_create}{krb5_error_code}{\funcin}
@@ -74,7 +74,7 @@ Creates a new database named \funcname{db_name}.  Will not create a
 database by that name if it already exists.  The database must be
 populated by the caller by using \funcname{krb5_db_put_principal}.
 
-Errors: db exists, system errors.
+%Errors: db exists, system errors.
 
 \begin{funcdecl}{krb5_db_rename}{krb5_error_code}{\funcin}
 \funcarg{char *}{source}
@@ -84,7 +84,7 @@ Renames the database \funcarg{source} to \funcarg{dest}
 
 Any database named \funcarg{dest} is destroyed.
 
-Errors: system errors.
+%Errors: system errors.
 
 \begin{funcdecl}{krb5_db_get_principal}{krb5_error_code}{\funcin}
 \funcarg{krb5_principal}{searchfor}
@@ -135,7 +135,7 @@ Stores the \funcparam{*nentries} principal structures pointed to by
 acutally stored; the first \funcparam{*nentries} records will have been
 stored in the database.
 
-Returns error code if not all entries were stored.
+%Errors: Returns error code if not all entries were stored.
 
 \begin{funcdecl}{krb5_db_iterate}{krb5_error_code}{\funcin}
 \funcfuncarg{krb5_error_code}{(*func)}
@@ -150,7 +150,8 @@ and calling \funcparam{(*func)}(\funcparam{iterate_arg},
 \funcparam{principal}) where \funcparam{principal} points to a record from the
 database.
 
-If \funcparam{(*func)}() ever returns an error code, the iteration is
+If \funcparam{(*func)}() ever returns an error code, the iteration
+should be
 aborted and that error code is returned by this function.
 
 \begin{funcdecl}{krb5_db_store_mkey}{krb5_error_code}{\funcin}

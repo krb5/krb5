@@ -26,7 +26,7 @@ be used to compute this size.
 \funcparam{ivec} points to an initial vector/seed to be used in the encryption.
 If null, the cryptosystem may choose an appropriate initialization vector.
 
-Returns errors.
+%Errors: Returns errors.
 
 \begin{funcdecl}{decrypt_func}{krb5_error_code}{\funcvoid}
 \funcarg{krb5_const_pointer}{in}
@@ -49,7 +49,7 @@ the input size.
 \funcparam{ivec} points to an initial vector/seed to be used in the decryption.
 If null, the cryptosystem may choose an appropriate ivec.
 
-Returns errors.
+%Errors: Returns errors.
 
 \begin{funcdecl}{process_key}{krb5_error_code}{\funcvoid}
 \funcarg{krb5_encrypt_block *}{eblock}
@@ -65,7 +65,7 @@ function if the key is needed in raw form by the encryption routine.]
 The caller may not move or reallocate \funcparam{keyblock} before calling
 \funcname{finish_key} on \funcparam{eblock}.
 
-Returns errors.
+%Errors: Returns errors.
 
 \begin{funcdecl}{finish_key}{krb5_error_code}{\funcvoid}
 \funcarg{krb5_encrypt_block *}{eblock}
@@ -73,7 +73,7 @@ Returns errors.
 Does any necessary clean-up on \funcparam{eblock} (such as releasing
 resources held by \funcparam{eblock{\ptsto}priv}.
 
-Returns errors.
+%Errors: Returns errors.
 
 \begin{funcdecl}{string_to_key}{krb5_error_code}{\funcvoid}
 \funcarg{const krb5_keytype}{keytype}
@@ -93,7 +93,7 @@ algorithm.
 If the particular function called does not know how to make a
 key of type \funcparam{keytype}, an error may be returned.
 
-Returns errors.
+%Errors: Returns errors.
 
 \begin{funcdecl}{init_random_key}{krb5_error_code}{\funcvoid}
 \funcarg{const krb5_keyblock *}{seedblock}
@@ -140,3 +140,25 @@ In addition to the above listed function entry points, each encryption
 system should have an entry in \globalname{krb5_csarray} and a
 \datatype{krb5_cryptosystem_entry} structure describing the entry points
 and key and padding sizes for the encryption system.
+
+\subsection{DES functions}
+The DES functions conform to the encryption interface required by the
+Kerberos version 5 library, and provide an encryption mechanism based on
+the DES Cipher-block chaining mode (CBC), with the addition of a
+cyclical redundancy check (CRC-32) for integrity checking upon
+decryption.
+
+The functions have the same signatures as those described by the main
+library document; the names are:
+{\obeylines
+\funcname{mit_des_encrypt_func}
+\funcname{mit_des_decrypt_func}
+\funcname{mit_des_process_key}
+\funcname{mit_des_finish_key}
+\funcname{mit_des_string_to_key}
+\funcname{mit_des_init_random_key}
+\funcname{mit_des_finish_random_key}
+\funcname{mit_des_random_key}
+}
+The \datatype{krb5_cryptosystem_entry} for this cryptosystem is
+\globalname{mit_des_cryptosystem_entry}.
