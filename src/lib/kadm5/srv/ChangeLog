@@ -1,3 +1,8 @@
+2002-10-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* server_init.c (kadm5_lock, kadm5_unlock): Return KADM5_OK
+	instead of falling off end of function.
+
 2002-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* adb_openclose.c (osa_adb_init_db): Reset opencnt.

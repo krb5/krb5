@@ -318,6 +318,8 @@ kadm5_ret_t kadm5_lock(void *server_handle)
     ret = krb5_db_lock(handle->context, KRB5_LOCKMODE_EXCLUSIVE);
     if (ret)
 	return ret;
+
+    return KADM5_OK;
 }
 
 kadm5_ret_t kadm5_unlock(void *server_handle)
@@ -332,6 +334,8 @@ kadm5_ret_t kadm5_unlock(void *server_handle)
     ret = krb5_db_unlock(handle->context);
     if (ret)
 	return ret;
+
+    return KADM5_OK;
 }
 
 kadm5_ret_t kadm5_flush(void *server_handle)
