@@ -17,16 +17,17 @@
 
 #include <sys/types.h>
 #include <sys/file.h>
-#if defined (CRAY) || defined (sgi)
-#include <sys/fcntl.h>
-#define L_SET 0
-#define L_INCR 1
-#endif
 #include <utmp.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+#ifdef USE_UNISTD_H
+#include <unistd.h>
+#endif
      
 #ifndef UTMP_FILE
 #define	UTMP_FILE	"/etc/utmp"
@@ -46,7 +47,7 @@ void login(ut)
     struct utmp utmp;
     int tty;
     
-#if defined(_AIX)
+#ifdef HAVE_GETUTENT
     if (!ut->ut_pid)
        ut->ut_pid = getppid();
     ut->ut_type = USER_PROCESS;
@@ -63,7 +64,7 @@ void login(ut)
 #else
     tty = ttyslot();
     if (tty > 0 && (fd = open(UTMP_FILE, O_WRONLY, 0)) >= 0) {
-	(void)lseek(fd, (long)(tty * sizeof(struct utmp)), L_SET);
+	(void)lseek(fd, (off_t)(tty * sizeof(struct utmp)), SEEK_SET);
 	(void)write(fd, (char *)ut, sizeof(struct utmp));
 	(void)close(fd);
     }
@@ -93,14 +94,17 @@ logout(line)
 	memset(ut.ut_host,0, sizeof(ut.ut_host));
 #endif
 	(void)time(&ut.ut_time);
-#if defined(_AIX)
+#ifdef HAVE_GETUTENT
 	memset(ut.ut_id, 0, sizeof(ut.ut_id));
-	ut.ut_pid = ut.ut_exit.e_exit = 0;
+	ut.ut_pid = 0;
+#ifndef NO_UT_EXIT
+	ut.ut_exit.e_exit = 0;
+#endif
 	ut.ut_type = EMPTY;
 #endif
-	(void)fseek(fp, (long)-sizeof(struct utmp), L_INCR);
+	(void)fseek(fp, (off_t)-sizeof(struct utmp), SEEK_CUR);
 	(void)fwrite((char *)&ut, sizeof(struct utmp), 1, fp);
-	(void)fseek(fp, (long)0, L_INCR);
+	(void)fseek(fp, (off_t)0, SEEK_CUR);
 	rval = 0;
     }
     (void)fclose(fp);
@@ -140,7 +144,7 @@ logwtmp(line, name, host, keep_open, logingin)
 	ut.ut_pid = getpid();
 #endif
 	(void)time(&ut.ut_time);
-#if defined(_AIX)
+#ifdef HAVE_GETUTENT
 	if (*name) {
 	    if (!ut.ut_pid)
 		ut.ut_pid = getpid();

@@ -49,7 +49,8 @@ static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
-     
+#include <fcntl.h>
+
 #include <netinet/in.h>
      
 #include <stdio.h>

@@ -8,12 +8,25 @@ AC_PROG_INSTALL
 AC_HAVE_LIBRARY(socket)
 AC_HAVE_LIBRARY(nsl)
 AC_FUNC_CHECK(utimes,AC_DEFINE(HAS_UTIMES))
+AC_FUNC_CHECK(getutent,AC_DEFINE(HAVE_GETUTENT))
 AC_HAVE_HEADERS(sys/filio.h)
+CHECK_DIRENT
+CHECK_FCNTL
 AC_COMPILE_CHECK([F_SETOWN],
 [#include <sys/types.h>
 #include <fcntl.h>],
 [1+F_SETOWN;], 
 AC_DEFINE(HAVE_SETOWN))
+AC_COMPILE_CHECK([ut_host in struct utmp],
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_host;],
+,
+AC_DEFINE(NO_UT_HOST))
+AC_COMPILE_CHECK([ut_exit in struct utmp],
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_exit;],
+,
+AC_DEFINE(NO_UT_EXIT))
 KRB_INCLUDE
 WITH_KRB5ROOT
 WITH_KRB4

@@ -1,5 +1,12 @@
 Tue Jul 26 00:25:57 1994  Mark Eichin  (eichin@cygnus.com)
 
+	* krlogin.c: include <fcntl.h>
+
+	* configure.in: Added tests for NO_UT_HOST, NO_UT_EXIT.
+	* logutil.c: use them.
+
+	* configure.in: add CHECK_DIRENT, CHECK_FCNTL.
+
 	* configure.in: Added tests for HAVE_SETOWN, HAVE_SYS_FILIO_H.
 	* krlogin.c, krsh.c, krshd.c, krlogin.c, krlogind.c: use them.
 
