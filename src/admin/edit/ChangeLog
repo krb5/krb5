@@ -1,3 +1,18 @@
+Wed Mar  6 16:17:20 1996  Richard Basch  <basch@lehman.com>
+
+	* dumpv4.c: The V4 master key & schedule was never initialized,
+	so the dump created by dump_v4db was garbage.	Read the V4
+	master key from /.k or prompt for the V4 master key password.
+	  If there is no V4-salt key in the database, but there is a DES
+	key, include it in the V4 dump, in case it is merely a random 
+	service key for which there is no associated password.
+	  Skip over K/M in the V5 database (use the entered V4 master key).
+	  Both krbtgt and afs keys often have domain-qualifed instances.
+
+Tue Mar  5 12:18:22 1996  Richard Basch  <basch@lehman.com>
+
+	* dump.c: POSIX locking requires that the file be opened read-write.
+
 Mon Feb 26 22:42:09 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kdb5_edit.c: new command line option -f stashfile.

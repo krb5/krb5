@@ -61,6 +61,34 @@ void update_ok_file();
 #define ANAME_SZ 40
 #define INST_SZ 40
 
+static char *v4_mkeyfile = "/.k";
+
+static int
+v4init(arg, manual)
+    struct dump_record *arg;
+    int manual;
+{
+    int fd;
+    int ok = 0;
+
+    if (!manual) {
+	fd = open(v4_mkeyfile, O_RDONLY, 0600);
+	if (fd >= 0) {
+	    if (read(fd,arg->v4_master_key,sizeof(C_Block)) == sizeof(C_Block))
+		ok = 1;
+	    close(fd);
+	}
+    }
+    if (!ok) {
+	des_read_password(arg->v4_master_key, "V4 Kerberos master key: ", 1);
+	printf("\n");
+    }
+    arg->master_key_version = 1;
+    key_sched(arg->v4_master_key, arg->v4_master_key_schedule);
+
+    return 0;
+}
+
 v4_print_time(file, timeval)
     FILE   *file;
     unsigned long timeval;
@@ -130,17 +158,28 @@ dump_v4_iterator(ptr, entry)
     if (!principal->name[0]) {
         strcpy(principal->name, "*");
     }
-      
-    if (entry->princ->length > 1) {
+
+    if (entry->princ->length > 2) {
+	free(name);
+	return 0;
+    } else if (entry->princ->length > 1) {
         char *inst;
         strncpy(principal->instance,
 	        krb5_princ_component(edit_context, entry->princ, 1)->data, 
 	        INST_SZ);
-        inst = strchr(principal->instance, '.');
-        if (inst && strcmp(principal->name, "krbtgt")) {
+        if ((inst = strchr(principal->instance, '.')) &&
+	    strcmp(principal->name, "krbtgt") &&
+	    strcmp(principal->name, "afs"))
+	{
 	    /* nuke domain off the end of anything that isn't a tgt */
 	    *inst = '\0';
         }
+	if (!strcmp(principal->name, "K") && !strcmp(principal->instance, "M"))
+	{
+	    /* The V4 master key is handled specially */
+	    free(name);
+	    return 0;
+	}
     } else {
         principal->instance[0] = '*';
         principal->instance[1] = '\0';
@@ -182,6 +221,8 @@ dump_v4_iterator(ptr, entry)
 	     ok_key = i;
 	}
     }
+
+    i = ok_key;
     while (ok_key < entry->n_key_data) {
 	if (max_kvno == entry->key_data[ok_key].key_data_kvno) {
 	    if (entry->key_data[ok_key].key_data_type[1]
@@ -191,13 +232,27 @@ dump_v4_iterator(ptr, entry)
 	}
 	ok_key++;
     }
+
+    /* See if there are any DES keys that may be suitable */
+    ok_key = i;
+    while (ok_key < entry->n_key_data) {
+	if (max_kvno == entry->key_data[ok_key].key_data_kvno) {
+	    krb5_enctype enctype = entry->key_data[ok_key].key_data_type[0];
+	    if ((enctype == ENCTYPE_DES_CBC_CRC) ||
+		(enctype == ENCTYPE_DES_CBC_MD5) ||
+		(enctype == ENCTYPE_DES_CBC_RAW))
+		goto found_one;
+	}
+	ok_key++;
+    }
     /* skip this because it's a new style key and we can't help it */
     return 0;
 
 found_one:;
     principal->key_version = max_kvno;
-    principal->max_life = entry->max_life / (60 * 5);
-    principal->kdc_key_ver = 1; /* ??? not preserved incoming */
+    if ((principal->max_life = entry->max_life / (60 * 5)) > 255)
+	principal->max_life = 255;
+    principal->kdc_key_ver = arg->master_key_version;
     principal->attributes = 0;	/* ??? not preserved either */
 
     fprintf(arg->f, "%s %s %d %d %d %d ",
@@ -261,8 +316,10 @@ void dump_v4db(argc, argv)
 	} else {
 		f = stdout;
 	}
+
 	arg.comerr_name = argv[0];
 	arg.f = f;
+	v4init(&arg, 0);
 	handle_keys(&arg);
 
 	/* special handling for K.M since it isn't preserved */
