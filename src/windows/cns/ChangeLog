@@ -1,3 +1,9 @@
+Tue Jan  5 01:38:18 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* cns.c (position_dialog): If the registry position for the window
+		is all zeros, then default to centering the window in the
+		correct place.
+
 1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Folded in enhancements from Cygnus's Kerbnet-1.2 (plus our

@@ -194,8 +194,8 @@ position_dialog(HWND hwnd)
 
   if (x > scrwidth ||
       y > scrheight ||
-      x + cx < 0 ||
-      y + cy < 0)
+      x + cx <= 0 ||
+      y + cy <= 0)
     center_dialog(hwnd);
   else
     MoveWindow(hwnd, x, y, cx, cy, TRUE);
