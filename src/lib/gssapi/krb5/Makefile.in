@@ -422,7 +422,9 @@ util_seqnum.so util_seqnum.po $(OUTPRE)util_seqnum.$(OBJEXT): util_seqnum.c gssa
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/krb5/kdb.h
 val_cred.so val_cred.po $(OUTPRE)val_cred.$(OBJEXT): val_cred.c gssapiP_krb5.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \

@@ -89,11 +89,11 @@ $(OUTPRE)telnetd.$(OBJEXT): telnetd.c telnetd.h defs.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/syslog.h \
   ext.h pathnames.h $(BUILDTOP)/include/libpty.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
+  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
+  $(srcdir)/../libtelnet/misc-proto.h
 $(OUTPRE)termio-tn.$(OBJEXT): termio-tn.c
 $(OUTPRE)termios-tn.$(OBJEXT): termios-tn.c
 $(OUTPRE)state.$(OBJEXT): state.c telnetd.h defs.h \

@@ -83,9 +83,8 @@ $(OUTPRE)commands.$(OBJEXT): commands.c $(srcdir)/../arpa/telnet.h \
   general.h ring.h externs.h defines.h types.h $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h \
-  $(SRCTOP)/include/fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/krb5/autoconf.h
 $(OUTPRE)main.$(OBJEXT): main.c $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h ring.h externs.h \
