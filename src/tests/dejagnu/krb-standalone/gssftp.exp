@@ -398,7 +398,8 @@ proc ftp_test { } {
 
     set testname "quit"
     send "quit\r"
-    expect "\r"
+    expect_after
+    expect eof
     if [check_exit_status $testname] {
 	pass $testname
     }
@@ -436,7 +437,5 @@ if [info exists home] {
 }
 
 if { $status != 0 } {
-    send_error "ERROR: error in ftp.exp\n"
-    send_error "$msg\n"
-    exit 1
+    perror "error in gssftp.exp: $msg"
 }
