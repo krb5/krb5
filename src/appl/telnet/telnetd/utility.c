@@ -122,6 +122,7 @@ ptyflush()
 	if (n < 0) {
 		if (errno == EWOULDBLOCK || errno == EINTR)
 			return;
+		(void)signal(SIGCHLD, SIG_DFL);
 		cleanup(0);
 	}
 	pbackp += n;
@@ -287,6 +288,7 @@ netflush()
     if (n < 0) {
 	if (errno == EWOULDBLOCK || errno == EINTR)
 		return;
+	(void)signal(SIGCHLD, SIG_DFL);
 	cleanup(0);
     }
     nbackp += n;

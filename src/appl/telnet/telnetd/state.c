@@ -947,6 +947,7 @@ dooption(option)
 			send_will(TELOPT_LOGOUT, 0);
 			set_my_state_will(TELOPT_LOGOUT);
 			(void)netflush();
+			(void)signal(SIGCHLD, SIG_DFL);
 			cleanup(0);
 			/* NOT REACHED */
 			break;

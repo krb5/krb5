@@ -1501,6 +1501,7 @@ telnet(f, p, host)
 		if (FD_ISSET(p, &obits) && (pfrontp - pbackp) > 0)
 			ptyflush();
 	}
+	(void) signal(SIGCHLD, SIG_DFL);
 	cleanup(0);
 }  /* end of telnet */
 	

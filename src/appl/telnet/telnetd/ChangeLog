@@ -1,3 +1,14 @@
+Mon Feb 23 22:58:22 1998  Tom Yu  <tlyu@mit.edu>
+
+	* utility.c (ptyflush, netflush): Explicitly reset SIGCHLD handler
+ 	before calling cleanup(). [telnet/546]
+
+	* telnetd.c (telnet):  Explicitly reset SIGCHLD handler before
+	calling cleanup(). [telnet/546]
+
+	* state.c (dooption): Explicitly reset SIGCHLD handler before
+	calling cleanup(). [telnet/546]
+
 Wed Feb 18 15:38:31 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
