@@ -5,7 +5,6 @@
 #include    <string.h>
 #include    <setjmp.h>
 
-#include <gssapi/gssapi_krb5.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
 #include "kadm5_defs.h"
