@@ -63,6 +63,7 @@ krb5_keytab_entry *entry;
 	    break;
 	}
 	krb5_kt_free_entry(cur_entry);
+	krb5_xfree(cur_entry);
     }
 
     if (kerror && kerror != KRB5_KT_END) {

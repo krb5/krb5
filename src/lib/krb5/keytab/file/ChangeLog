@@ -1,3 +1,8 @@
+Thu Sep 22 21:51:53 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktf_remove.c (krb5_ktfile_remove): Fix memory leak caused by not
+		freeing the top-level structure.
+
 Wed Sep 14 21:56:15 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktf_util.c (krb5_ktfileint_delete_entry):  Fixed bug reported by
