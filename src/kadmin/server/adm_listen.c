@@ -45,6 +45,10 @@ static char rcsid_adm_listen[] =
 #include <arpa/inet.h>
 #endif
 
+#ifdef _AIX
+#include <sys/select.h>
+#endif
+
 #include "adm_extern.h"
 
 int adm_debug_flag = 0;
