@@ -172,15 +172,17 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     if (kerror)
 	goto error;
 
-    kerror = krb5_c_enctype_compare(context, enctype, entry->key.enctype, &similar);
-    if (kerror)
-	goto error;
+    if (enctype > 0) {	
+	kerror = krb5_c_enctype_compare(context, enctype,
+					entry->key.enctype, &similar);
+	if (kerror)
+	    goto error;
 
-    if (!similar) {
-		kerror = KRB5_KDB_NO_PERMITTED_KEY;
-	goto error;
+	if (!similar) {
+	    kerror = KRB5_KDB_NO_PERMITTED_KEY;
+	    goto error;
+	}
     }
-
     /*
      * Coerce the enctype of the output keyblock in case we got an
      * inexact match on the enctype.

@@ -1,3 +1,8 @@
+2003-03-18  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): Do not perform the enctype
+	comparison if the requested enctype is a wildcard.
+
 2003-03-16  Sam Hartman  <hartmans@mit.edu>
 
 	* keytab.c (krb5_ktkdb_get_entry):  Match only against the first
