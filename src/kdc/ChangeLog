@@ -9,8 +9,7 @@
 	out an IPv4 address.  Log if not IPv4, but continue.
 	* network.c (set_sa_port): New function.
 	(setup_port): Use it.  Combine IPv4 and IPv6 paths; IPv6 still
-	disabled for now.  Modify supplied sockaddr instead of making a
-	copy.
+	enabled now.  Modify supplied sockaddr instead of making a copy.
 	(process_packet): SADDR is now sockaddr_storage.  Use socket-utils
 	macros instead of casting.  Enable the IPv6 code.
 	* dispatch.c, do_as_req.c, do_tgs_req.c: Define NEED_SOCKETS

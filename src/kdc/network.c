@@ -161,7 +161,7 @@ setup_port(void *P_data, struct sockaddr *addr)
 	break;
 #ifdef AF_INET6
     case AF_INET6:
-#ifndef KRB5_USE_INET6x
+#ifndef KRB5_USE_INET6
     {
 	static int first = 1;
 	if (first) {
