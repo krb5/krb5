@@ -234,7 +234,7 @@ unsigned int nbyte;
 		if (outbuf?
 		    (outbuf = realloc(outbuf, (unsigned) (nbyte + FUDGE_FACTOR))):
 		    (outbuf = malloc((unsigned) (nbyte + FUDGE_FACTOR)))) {
-		  			bufsize = out_buf.length;
+		  			bufsize =nbyte + FUDGE_FACTOR;
 		} else {
 			bufsize = 0;
 			secure_error("%s (in malloc of PROT buffer)",
