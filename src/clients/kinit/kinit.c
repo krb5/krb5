@@ -45,6 +45,17 @@ krb5_data tgtname = {
     KRB5_TGS_NAME
 };
 
+/* Internal prototypes */
+static krb5_error_code krb5_validate_tgt
+        KRB5_PROTOTYPE((krb5_context, krb5_ccache,
+                        krb5_principal, krb5_data *));
+static krb5_error_code krb5_renew_tgt
+        KRB5_PROTOTYPE((krb5_context, krb5_ccache,
+                        krb5_principal, krb5_data *));
+static krb5_error_code krb5_tgt_gen
+        KRB5_PROTOTYPE((krb5_context, krb5_ccache,
+                        krb5_principal, krb5_data *, int opt));
+
 /*
  * Try no preauthentication first; then try the encrypted timestamp
  */
@@ -80,6 +91,26 @@ main(argc, argv)
     int pwsize;
     char password[255], *client_name, prompt[255];
 
+#ifdef _WIN32
+    {
+        WORD            version = 0x0101;
+        WSADATA         wsadata;
+        int             rc;
+
+        rc = WSAStartup(version, &wsadata);
+        if (rc) {
+            fprintf(stderr, "%s: Couldn't initialize Winsock library\n",
+                    argv[0]);
+            exit(1);
+        }
+        if (version != wsadata.wVersion) {
+            fprintf(stderr, "%s: Winsock version 1.1 not available\n",
+                    argv[0]);
+            exit(1);
+        }
+    }
+#endif
+    
     code = krb5_init_context(&kcontext);
     if (code) {
 	    com_err(argv[0], code, "while initializing krb5");
@@ -370,6 +401,10 @@ main(argc, argv)
 
     krb5_free_context(kcontext);
     
+#ifdef _WIN32
+    WSACleanup();
+#endif
+    
     exit(0);
 }
 
@@ -377,7 +412,7 @@ main(argc, argv)
 #define RENEW 1
 
 /* stripped down version of krb5_mk_req */
-krb5_error_code krb5_validate_tgt(context, ccache, server, outbuf)
+static krb5_error_code krb5_validate_tgt(context, ccache, server, outbuf)
      krb5_context context;
      krb5_ccache ccache;
      krb5_principal	  server; /* tgtname */
@@ -387,7 +422,7 @@ krb5_error_code krb5_validate_tgt(context, ccache, server, outbuf)
 }
 
 /* stripped down version of krb5_mk_req */
-krb5_error_code krb5_renew_tgt(context, ccache, server, outbuf)
+static krb5_error_code krb5_renew_tgt(context, ccache, server, outbuf)
      krb5_context context;
      krb5_ccache ccache;
      krb5_principal	  server; /* tgtname */
@@ -398,17 +433,13 @@ krb5_error_code krb5_renew_tgt(context, ccache, server, outbuf)
 
 
 /* stripped down version of krb5_mk_req */
-krb5_error_code krb5_tgt_gen(context, ccache, server, outbuf, opt)
+static krb5_error_code krb5_tgt_gen(context, ccache, server, outbuf, opt)
      krb5_context context;
      krb5_ccache ccache;
      krb5_principal	  server; /* tgtname */
      krb5_data *outbuf;
      int opt;
 {
-    krb5_auth_context   * auth_context = 0;
-    const krb5_flags      ap_req_options;
-    krb5_data           * in_data;
-
     krb5_error_code 	  retval;
     krb5_creds 		* credsp;
     krb5_creds 		  creds;

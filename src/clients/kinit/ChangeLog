@@ -1,6 +1,11 @@
 Thu Feb 13 14:27:41 1997  Richard Basch  <basch@lehman.com>
 
-	* kinit.c: Added krb5_read_password implementation for win32 console.
+	* Makefile.in:
+		Link wsock32 library (win32)
+
+	* kinit.c:
+		Added krb5_read_password implementation for win32 console.
+		Initialize Winsock library (win32)
 
 Sat Feb  8 15:37:39 1997  Richard Basch  <basch@lehman.com>
 
