@@ -1,3 +1,8 @@
+Thu Aug 18 19:07:38 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* configure.in:
+	* pop_xmit.c: Added #ifdef NEED_SYS_FCNTL_H around <sys/fcntl.h>
+
 Wed Aug 10 12:46:12 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* pop_dropcopy.c (pop_dropcopy): Change L_XTND to SEEK_END.
