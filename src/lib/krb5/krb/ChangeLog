@@ -1,3 +1,9 @@
+2005-01-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Free credentials
+	retrieved from ccache before returning.  Based on patch from
+	fumihiko kakuma <kakuma@valinux.co.jp>.
+
 2005-01-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* parse.c (krb5_parse_name): Don't cache the default realm name.
