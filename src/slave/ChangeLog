@@ -1,5 +1,8 @@
 Thu Dec  5 21:15:27 1996  Tom Yu  <tlyu@mit.edu>
 
+	* kslave_update: Update script for new filename conventions. [PR
+	280]
+
 	* kprop.M: Update outdated references to kdb5_edit and /krb5 [PR
 	279]
 
