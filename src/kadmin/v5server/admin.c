@@ -80,12 +80,12 @@ admin_init_def_dbent(mlife, mrlife, evalid, e, fvalid, f)
 {
     /* Zero it all out, and fill in non-zero defaults */
     memset((char *) &admin_def_dbent, 0, sizeof(admin_def_dbent));
-    admin_def_dbent.kvno = 1;
     admin_def_dbent.max_life = (mlife > 0) ? mlife : KRB5_KDB_MAX_LIFE;
     admin_def_dbent.max_renewable_life = 
 	(mrlife > 0) ? mrlife : KRB5_KDB_MAX_RLIFE;
     admin_def_dbent.expiration = (evalid) ? e : KRB5_KDB_EXPIRATION;
     admin_def_dbent.attributes = (fvalid) ? f : KRB5_KDB_DEF_FLAGS;
+    admin_def_dbent.len = KRB5_KDB_V1_BASE_LENGTH;
 }
 
 /*
@@ -137,6 +137,11 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 {
     krb5_error_code	kret = 0;
     krb5_timestamp	now;
+    krb5_tl_data	*pwchg, *def_pwchg;
+    krb5_tl_data	*new, *def;
+    krb5_tl_mod_princ	modent;
+    krb5_int32		num_keys;
+    krb5_key_data	*key_list;
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_merge_dbentries()\n"));
 
     /*
@@ -145,15 +150,15 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
      * 	and that we don't have a password and the random-password option.
      */
     kret = EINVAL;
-    if (dbentp->principal &&
+    num_keys = 0;
+    key_list = (krb5_key_data *) NULL;
+    if (dbentp->princ &&
 	!(kret = krb5_timeofday(kcontext, &now)) &&
 	(!password || ((valid & KRB5_ADM_M_RANDOMKEY) == 0))) {
 
 	/*
 	 * Now fill in unsupplied values from defaults.
 	 */
-	if ((valid & KRB5_ADM_M_KVNO) == 0)
-	    dbentp->kvno = defaultp->kvno;
 	if ((valid & KRB5_ADM_M_MAXLIFE) == 0)
 	    dbentp->max_life = defaultp->max_life;
 	if ((valid & KRB5_ADM_M_MAXRENEWLIFE) == 0)
@@ -164,123 +169,139 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 	    dbentp->pw_expiration = defaultp->pw_expiration;
 	if ((valid & KRB5_ADM_M_FLAGS) == 0)
 	    dbentp->attributes = defaultp->attributes;
-	if ((valid & KRB5_ADM_M_SALTTYPE) == 0) {
-	    dbentp->salt_type = defaultp->salt_type;
-	    dbentp->alt_salt_type = defaultp->alt_salt_type;
-	}
 
 	/*
 	 * Now fill in un-suppliable values from our data.
 	 */
-	if (password || is_pwchange)
-	    dbentp->last_pwd_change = now;	/* Changing password now */
-	else
-	    dbentp->last_pwd_change = defaultp->last_pwd_change;
 	dbentp->last_success = defaultp->last_success;
 	dbentp->last_failed = defaultp->last_failed;
 	dbentp->fail_auth_count = defaultp->fail_auth_count;
-	dbentp->mod_name = who;			/* Modified by caller */
-	dbentp->mod_date = now;			/* Modified now */
-	dbentp->mkvno = key_master_entry()->kvno;
+	dbentp->len = defaultp->len;
 
-	/* See if this is a random key or not */
-	if (password) {
-	    krb5_data		pwdata;
-	    krb5_keyblock	pkey, akey;
-	    krb5_data		psalt, asalt;
-
-	    DPRINT(DEBUG_OPERATION, debug_level, ("> string-to-key\n"));
-	    /*
-	     * Now handle string-to-key and salt.
-	     */
-	    pwdata.data = password;
-	    pwdata.length = strlen(password);
-	    memset((char *) &pkey, 0, sizeof(pkey));
-	    memset((char *) &akey, 0, sizeof(akey));
-	    memset((char *) &psalt, 0, sizeof(psalt));
-	    memset((char *) &asalt, 0, sizeof(asalt));
-
-	    /* Convert password string to key */
-	    if (!(kret = key_string_to_keys(kcontext,
-					    dbentp->principal,
-					    &pwdata,
-					    dbentp->salt_type,
-					    dbentp->alt_salt_type,
-					    &pkey,
-					    &akey,
-					    &psalt,
-					    &asalt))) {
-		/* Encrypt the keys */
-		DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
-		if (!(kret = key_encrypt_keys(kcontext,
-					      dbentp->principal,
-					      &pkey,
-					      &akey,
-					      &dbentp->key,
-					      &dbentp->alt_key))) {
-		    /* Squirrel away the salt. */
-		    dbentp->salt_length = psalt.length;
-		    dbentp->salt = (krb5_octet *) psalt.data;
-		    dbentp->alt_salt_length = asalt.length;
-		    dbentp->alt_salt = (krb5_octet *) asalt.data;
-		    kret = 0;
-		}
-
-		/* Clean up the cleartext keys */
-		if (pkey.contents) {
-		    memset((char *) pkey.contents, 0, (size_t) pkey.length);
-		    krb5_xfree(pkey.contents);
-		}
-		if (akey.contents) {
-		    memset((char *) akey.contents, 0, (size_t) akey.length);
-		    krb5_xfree(akey.contents);
-		}
-		if (kret) {
-		    /* If failed, cleanup the salt data too. */
-		    if (psalt.data) {
-			memset((char *) psalt.data, 0, (size_t) psalt.length);
-			krb5_xfree(psalt.data);
-		    }
-		    if (asalt.data) {
-			memset((char *) asalt.data, 0, (size_t) asalt.length);
-			krb5_xfree(asalt.data);
-		    }
-		}
+	/*
+	 * Now merge tagged data.  This is a little bit painful, hold on.
+	 * First see if we already have a last change block.  If so, then just
+	 * use the existing storage to hold the appropriate value.
+	 */
+	pwchg = def_pwchg = (krb5_tl_data *) NULL;
+	for (new = dbentp->tl_data; new; new = new->tl_data_next) {
+	    if (new->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
+		pwchg = new;
+		break;
 	    }
 	}
-	else {
-	    krb5_keyblock	rkey, akey;
+	/* Find the entry from the default */
+	for (def = defaultp->tl_data; def; def = def->tl_data_next) {
+	    if (def->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
+		def_pwchg = def;
+		break;
+	    }
+	}
+	/*
+	 * If not already there, then we have to make a new entry and blast
+	 * our scuzz in there.
+	 */
+	if (!pwchg) {
+	    if ((pwchg = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) &&
+		(pwchg->tl_data_contents = (krb5_octet *)
+		 malloc(sizeof(krb5_timestamp)))) {
+		pwchg->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+		pwchg->tl_data_length = sizeof(krb5_timestamp);
+		pwchg->tl_data_next = dbentp->tl_data;
+		dbentp->tl_data = pwchg;
+		dbentp->n_tl_data++;
+	    }
+	    else
+		kret = ENOMEM;
+	}
+	if (!kret) {
+	    /*
+	     * If we're changing the password, the time is now.
+	     */
+	    if (password || is_pwchange || !def_pwchg) {
+		pwchg->tl_data_contents[0] =
+		    (unsigned char) ((now >> 24) & 0xff);
+		pwchg->tl_data_contents[1] =
+		    (unsigned char) ((now >> 16) & 0xff);
+		pwchg->tl_data_contents[2] =
+		    (unsigned char) ((now >> 8) & 0xff);
+		pwchg->tl_data_contents[3] = (unsigned char) (now & 0xff);
+	    }
+	    else {
+		/*
+		 * Otherwise, clone the contents of the old one.
+		 */
+		memcpy(pwchg->tl_data_contents,
+		       def_pwchg->tl_data_contents,
+		       sizeof(krb5_timestamp));
+	    }
 
-	    /* Random key */
-	    DPRINT(DEBUG_OPERATION, debug_level, ("> random key\n"));
-	    memset((char *) &rkey, 0, sizeof(rkey));
-	    memset((char *) &akey, 0, sizeof(akey));
-	    if ((dbentp->salt_type == KRB5_KDB_SALTTYPE_NORMAL) &&
-		(!(kret = key_random_key(kcontext, &rkey)))) {
+	    /*
+	     * Handle the modification date/principal.
+	     */
+	    modent.mod_date = now;
+	    kret = krb5_copy_principal(kcontext, who, &modent.mod_princ);
+	    if (!kret) {
+		kret = krb5_dbe_encode_mod_princ_data(kcontext,
+						      &modent,
+						      dbentp);
+		krb5_free_principal(kcontext, modent.mod_princ);
+	    }
+	}
 
-		/* Encrypt the keys */
-		DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
-		if (!(kret = key_encrypt_keys(kcontext,
-					      dbentp->principal,
-					      &rkey,
-					      &akey,
-					      &dbentp->key,
-					      &dbentp->alt_key))) {
-		    /* Squirrel away the salt. */
-		    dbentp->salt_length = 0;
-		    dbentp->salt = (krb5_octet *) NULL;
-		    dbentp->alt_salt_length = 0;
-		    dbentp->alt_salt = (krb5_octet *) NULL;
-		    kret = 0;
+	if (!kret) {
+	    /* See if this is a random key or not */
+	    if (password) {
+		krb5_data		pwdata;
+
+		DPRINT(DEBUG_OPERATION, debug_level, ("> string-to-key\n"));
+		/*
+		 * Now handle string-to-key and salt.
+		 */
+		pwdata.data = password;
+		pwdata.length = strlen(password);
+
+		/* Convert password string to key */
+		if (!(kret = key_string_to_keys(kcontext,
+						dbentp,
+						&pwdata,
+						&num_keys,
+						&key_list))) {
+		    /* Encrypt the keys */
+		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
+		    kret = key_encrypt_keys(kcontext,
+					    dbentp,
+					    &num_keys,
+					    key_list,
+					    &dbentp->key_data);
+		    if (!kret)
+			dbentp->n_key_data = (krb5_int16) num_keys;
 		}
-		/* Clean up the cleartext key */
-		if (rkey.contents) {
-		    memset((char *) rkey.contents, 0, (size_t) rkey.length);
-		    krb5_xfree(rkey.contents);
+	    }
+	    else {
+		/* Random key */
+		DPRINT(DEBUG_OPERATION, debug_level, ("> random key\n"));
+		if (!(kret = key_random_key(kcontext,
+					    dbentp,
+					    &num_keys,
+					    &key_list))) {
+		    
+		    /* Encrypt the keys */
+		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
+		    kret = key_encrypt_keys(kcontext,
+					    dbentp,
+					    &num_keys,
+					    key_list,
+					    &dbentp->key_data);
+		    if (!kret)
+			dbentp->n_key_data = (krb5_int16) num_keys;
 		}
 	    }
 	}
     }
+
+    if (key_list)
+	key_free_key_data(key_list, num_keys);
     DPRINT(DEBUG_CALLS, debug_level, ("X admin_merge_dbentries()=%d\n", kret));
     return(kret);
 }
@@ -399,7 +420,7 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 		     (!should_exist && !how_many))) {
 
 		    /* We need to have a principal */
-		    new_dbentry.principal = principal;
+		    new_dbentry.princ = principal;
 
 		    /*
 		     * Parse the argument list and make sure that only valid
@@ -441,7 +462,7 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 			     ((!pword_data.data && should_exist)||
 			      passwd_check_npass_ok(kcontext,
 						    debug_level,
-						    new_dbentry.principal,
+						    new_dbentry.princ,
 						    &new_dbentry,
 						    &pword_data,
 						    &temp)))) {
@@ -462,12 +483,14 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 				  )) {
 				int nument = 1;
 
+#ifdef	xxx
 				/*
 				 * Update the key version number if we're
 				 * changing it.
 				 */
 				if (should_exist && pwd_supplied)
 				    new_dbentry.kvno++;
+#endif	/* xxx */
 
 				/* Write the entry. */
 				kret = krb5_db_put_principal(kcontext,
@@ -497,23 +520,6 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 				 * Clean up droppings from
 				 * admin_merge_dbentries
 				 */
-				if (new_dbentry.alt_salt) {
-				    memset((char *) new_dbentry.alt_salt,
-					   0,
-					   (size_t) new_dbentry.alt_salt_length
-					   );
-				    krb5_xfree(new_dbentry.alt_salt);
-				}
-				if (new_dbentry.salt) {
-				    memset((char *) new_dbentry.salt,
-					   0,
-					   (size_t) new_dbentry.salt_length);
-				    krb5_xfree(new_dbentry.salt);
-				}
-				if (new_dbentry.key.contents)
-				    krb5_xfree(new_dbentry.key.contents);
-				if (new_dbentry.alt_key.contents)
-				    krb5_xfree(new_dbentry.alt_key.contents);
 			    }
 			    else {
 				/* Option merge failed */
@@ -542,9 +548,6 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 			/* Clean up droppings from krb5_adm_proto_to_dbent */
 			if (new_password)
 			    krb5_xfree(new_password);
-			if (new_dbentry.mod_name)
-			    krb5_free_principal(kcontext,
-						new_dbentry.mod_name);
 		    }
 		    else {
 			/* Argument list parse failed or bad options */
@@ -635,6 +638,7 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
     krb5_principal	orig_principal;
     krb5_int32		operation;
     const char *	op_msg;
+    krb5_tl_mod_princ	*mprinc;
 
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("* admin_delete_rename(%s,%s)\n",
@@ -704,12 +708,26 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 				&& !n_howmany) {
 				/* Change our name */
 				krb5_free_principal(kcontext,
-						    orig_entry.principal);
-				orig_entry.principal = new_principal;
+						    orig_entry.princ);
+				orig_entry.princ = new_principal;
 
 				/* Update our stats */
-				orig_entry.mod_name = client;
-				orig_entry.mod_date = now;
+				if (!krb5_dbe_decode_mod_princ_data(kcontext,
+								    &orig_entry,
+								    &mprinc)) {
+				    krb5_free_principal(kcontext,
+							mprinc->mod_princ);
+				    krb5_copy_principal(kcontext,
+							client,
+							&mprinc->mod_princ);
+				    mprinc->mod_date = now;
+				    krb5_dbe_encode_mod_princ_data(kcontext,
+								   mprinc,
+								   &orig_entry);
+				    krb5_free_principal(kcontext,
+							mprinc->mod_princ);
+				    krb5_xfree(mprinc);
+				}
 
 				n_howmany = 1;
 				if ((kret = krb5_db_put_principal(kcontext,
@@ -724,7 +742,7 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 					    op_msg, original, new,
 					    client_name);
 				}
-				orig_entry.principal = (krb5_principal) NULL;
+				orig_entry.princ = (krb5_principal) NULL;
 			    }
 			    else {
 				if (kret) {
@@ -852,7 +870,7 @@ admin_inq_iterator(pointer, dbentp)
 	if (!iargp->ic_who ||
 	    krb5_principal_compare(iargp->ic_context,
 				   iargp->ic_who,
-				   dbentp->principal)) {
+				   dbentp->princ)) {
 	    if (iargp->ic_who) {
 		DPRINT(DEBUG_OPERATION, iargp->ic_level,
 		       ("> found entry\n"));
@@ -878,7 +896,7 @@ admin_inq_iterator(pointer, dbentp)
 		*(iargp->ic_clist) = (krb5_data *) NULL;
 		if (!iargp->ic_next) {
 		    kret = krb5_unparse_name(iargp->ic_context,
-					     dbentp->principal,
+					     dbentp->princ,
 					     &iargp->ic_next);
 		    if (kret) {
 			DPRINT(DEBUG_OPERATION, iargp->ic_level,
@@ -895,7 +913,7 @@ admin_inq_iterator(pointer, dbentp)
     else {
 	if (!iargp->ic_next) {
 	    kret = krb5_unparse_name(iargp->ic_context,
-				     dbentp->principal,
+				     dbentp->princ,
 				     &iargp->ic_next);
 	    if (kret) {
 		DPRINT(DEBUG_OPERATION, iargp->ic_level,
@@ -1234,7 +1252,8 @@ admin_extract_key(kcontext, debug_level, ticket,
     int			nentries;
     krb5_boolean	more;
     krb5_keytab_entry	ktabentry;
-    krb5_keyblock	xxxkey;
+    krb5_int32		num_keys;
+    krb5_key_data	*dkey_list;
     
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("* admin_extract_key(%s/%s)\n", name->data, instance->data));
@@ -1274,15 +1293,21 @@ admin_extract_key(kcontext, debug_level, ticket,
 
 			/* Decrypt the key entries. */
 			memset((char *) &ktabentry, 0, sizeof(ktabentry));
-			memset((char *) &xxxkey, 0, sizeof(xxxkey));
+			num_keys = (krb5_int32) dbentry.n_key_data;
 			if (!(kret = key_decrypt_keys(kcontext,
-						      principal,
-						      &dbentry.key,
-						      &dbentry.alt_key,
-						      &ktabentry.key,
-						      &xxxkey))) {
+						      &dbentry,
+						      &num_keys,
+						      dbentry.key_data,
+						      &dkey_list))) {
 			    ktabentry.principal = principal;
-			    ktabentry.vno = dbentry.kvno;
+			    ktabentry.vno = dkey_list[0].key_data_kvno;
+			    ktabentry.key.keytype =
+				dkey_list[0].key_data_type[0];
+			    ktabentry.key.etype = ETYPE_UNKNOWN;
+			    ktabentry.key.length = 
+				dkey_list[0].key_data_length[0];
+			    ktabentry.key.contents =
+				dkey_list[0].key_data_contents[0];
 
 			    /* Pack the response */
 			    if (kret = krb5_adm_ktent_to_proto(kcontext,
@@ -1295,16 +1320,8 @@ admin_extract_key(kcontext, debug_level, ticket,
 			    }
 
 			    /* Cleanup from key_decrypt_keys */
-			    if (xxxkey.contents) {
-				memset((char *) xxxkey.contents, 0,
-				       (size_t) xxxkey.length);
-				krb5_xfree(xxxkey.contents);
-			    }
-			    if (ktabentry.key.contents) {
-				memset((char *) ktabentry.key.contents, 0,
-				       (size_t) ktabentry.key.length);
-				krb5_xfree(ktabentry.key.contents);
-			    }
+			    if (num_keys && dkey_list)
+				key_free_key_data(dkey_list, num_keys);
 			}
 			else {
 			    /* key_decrypt_keys failed */
