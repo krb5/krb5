@@ -234,7 +234,7 @@ char *argv[];
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: add_new_key principal");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
@@ -284,7 +284,7 @@ char *argv[];
     krb5_principal newprinc;
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: add_rnd_key principal");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
@@ -368,7 +368,7 @@ krb5_pointer infop;
 
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: set_dbname dbpathname realmname");
+	com_err(argv[0], 0, "Usage: %s dbpathname realmname", argv[0]);
 	return;
     }
     if (dbactive) {
@@ -502,7 +502,7 @@ char *argv[];
 
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: extract_srvtab instance name [name ...]");
+	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
 	return;
     }
 
@@ -611,4 +611,53 @@ int argc;
 char *argv[];
 {
     (void) krb5_db_iterate(list_iterator, argv[0]);
+}
+
+void
+delete_entry(argc, argv)
+int argc;
+char *argv[];
+{
+    krb5_error_code retval;
+    krb5_keyblock *tempkey;
+    krb5_principal newprinc;
+    char yesno[80];
+    int one = 1;
+
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (!princ_exists(argv[0], newprinc)) {
+	com_err(argv[0], 0, "principal '%s' is not in the database", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    printf("Are you sure you want to delete '%s'?\nType 'yes' to confirm:",
+	   argv[1]);
+    if ((fgets(yesno, sizeof(yesno), stdin) == NULL) ||
+	strcmp(yesno, "yes\n")) {
+	printf("NOT removing '%s'\n", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    printf("OK, deleting '%s'\n", argv[1]);
+    if (retval = krb5_db_delete_principal(newprinc, &one)) {
+	com_err(argv[0], retval, "while deleting '%s'", argv[1]);
+    } else if (one != 1) {
+	com_err(argv[0], 0, "no principal deleted? unknown error");
+    }
+#ifdef __STDC__
+    printf("\a\a\aWARNING:  Be sure to take '%s' off all access control lists\n\tbefore reallocating the name\n", argv[1]);
+#else
+    printf("\007\007\007WARNING:  Be sure to take '%s' off all access control lists\n\tbefore reallocating the name\n", argv[1]);
+#endif
+
+    krb5_free_principal(newprinc);
+    return;
 }
