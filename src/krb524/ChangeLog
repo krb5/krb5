@@ -1,3 +1,9 @@
+Fri Jan 12 04:37:23 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): rather than apply fit
+ 	an extended v5 lifetime into a v4 range, give out a v4 ticket with
+ 	as much of the v5 lifetime is available "now" instead.
+
 Sat Jan 27 01:31:12 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krb524d.c (kdc_get_server_key): If an enctype is given, then use

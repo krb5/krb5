@@ -1,4 +1,3 @@
-
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
  * 
@@ -45,6 +44,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
      char sname[ANAME_SZ], sinst[INST_SZ];
      krb5_enc_tkt_part *v5etkt;
      int ret, lifetime;
+     krb5_timestamp server_time;
 
      v5tkt->enc_part2 = NULL;
      if ((ret = krb5_decrypt_tkt_part(context, v5_skey, v5tkt))) {
@@ -77,8 +77,30 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
      /* V4 lifetime is 1 byte, in 5 minute increments */
      if (v5etkt->times.starttime == 0)
 	  v5etkt->times.starttime = v5etkt->times.authtime;
-     lifetime = 0xff &
-	  ((v5etkt->times.endtime - v5etkt->times.authtime) / 300);
+     /* rather than apply fit an extended v5 lifetime into a v4 range,
+	give out a v4 ticket with as much of the v5 lifetime is available
+	"now" instead. */
+     if ((ret = krb5_timeofday(context, &server_time))) {
+         if (krb524_debug)
+	      fprintf(stderr, "krb5_timeofday failed!\n");
+	 krb5_free_enc_tkt_part(context, v5etkt);
+	 v5tkt->enc_part2 = NULL;
+	 return ret;       
+     }
+     if (   (server_time >= v5etkt->times.starttime)
+	 && (server_time <= v5etkt->times.endtime) ) {
+          lifetime = ((v5etkt->times.endtime - server_time) / 300);
+	  if (lifetime > 255) lifetime = 255;
+     } else {
+          if (krb524_debug)
+	       fprintf(stderr, "v5 ticket time out of bounds\n");
+	  krb5_free_enc_tkt_part(context, v5etkt);
+	  v5tkt->enc_part2 = NULL;
+	  if (server_time < v5etkt->times.starttime)
+	       return KRB5KRB_AP_ERR_TKT_NYV;
+	  else if (server_time > v5etkt->times.endtime)
+	       return KRB5KRB_AP_ERR_TKT_EXPIRED;
+     }
 
      /* XXX perhaps we should use the addr of the client host if */
      /* v5creds contains more than one addr.  Q: Does V4 support */
