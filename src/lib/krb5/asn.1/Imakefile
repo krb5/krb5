@@ -75,6 +75,7 @@ OBJS= \
 	decode.o	\
 	adat2kadat.o	\
 	addr2kaddr.o	\
+	adr2kadr.o	\
 	aprp2kaprp.o	\
 	aprq2kaprq.o	\
 	arep2karep.o	\
@@ -89,6 +90,7 @@ OBJS= \
 	g2unix.o	\
 	kadat2adat.o	\
 	kaddr2addr.o	\
+	kadr2adr.o	\
 	kaprp2aprp.o	\
 	kaprq2aprq.o	\
 	karep2arep.o	\
