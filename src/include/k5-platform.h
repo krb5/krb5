@@ -51,13 +51,13 @@
    etc.)  */
 
 static inline void
-store_16_be (unsigned short val, unsigned char *p)
+store_16_be (unsigned int val, unsigned char *p)
 {
     p[0] = (val >>  8) & 0xff;
     p[1] = (val      ) & 0xff;
 }
 static inline void
-store_16_le (unsigned short val, unsigned char *p)
+store_16_le (unsigned int val, unsigned char *p)
 {
     p[1] = (val >>  8) & 0xff;
     p[0] = (val      ) & 0xff;

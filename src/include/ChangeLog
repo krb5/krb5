@@ -2,6 +2,9 @@
 
 	* k5-int.h (struct krb5_keytypes): Added field required_ctype.
 
+	* k5-platform.h (store_16_be, store_16_le): Use unsigned int arg,
+	not unsigned short.
+
 2003-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h: New header file.  Manages inline-function and
