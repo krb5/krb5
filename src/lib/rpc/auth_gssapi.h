@@ -100,10 +100,10 @@ PROTOTYPE((CLIENT *clnt,
 	   gss_cred_id_t claimant_cred_handle,
 	   gss_name_t target_name,
 	   gss_OID mech_type,
-	   int req_flags,
+	   OM_uint32 req_flags,
 	   OM_uint32 time_req,
 	   gss_OID *actual_mech_type,
-	   int *ret_flags,
+	   OM_uint32 *ret_flags,
 	   OM_uint32 *time_rec));
 
 AUTH *auth_gssapi_create_default

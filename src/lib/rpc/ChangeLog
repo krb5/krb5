@@ -1,3 +1,14 @@
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* auth_gssapi.c (auth_gssapi_create): Change calling convention
+	from passing ints as arguments to OM_uint32 to match spec for
+	gss_init_sec_context.
+
+	* auth_gssapi.h: Update prototype for auth_gssapi_create.
+	
+	* svc.h (struct svc_req): The rq_clntcred and rq_svccred elements
+	are now void *.
+
 2001-07-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* xdr_mem.c: Do not assume that XDR x_private field is char *.

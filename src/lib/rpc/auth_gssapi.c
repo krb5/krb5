@@ -138,10 +138,10 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      gss_cred_id_t claimant_cred_handle;
      gss_name_t target_name;
      gss_OID mech_type;
-     int req_flags;
+     OM_uint32 req_flags;
      OM_uint32 time_req;
      gss_OID *actual_mech_type;
-     int *ret_flags;
+     OM_uint32 *ret_flags;
      OM_uint32 *time_rec;
 {
      AUTH *auth, *save_auth;
@@ -150,7 +150,8 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      struct sockaddr_in laddr, raddr;
      enum clnt_stat callstat;
      struct timeval timeout;
-     int init_func, bindings_failed;
+     int bindings_failed;
+     rpc_u_int32 init_func;
      
      auth_gssapi_init_arg call_arg;
      auth_gssapi_init_res call_res;

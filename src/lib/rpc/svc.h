@@ -160,8 +160,8 @@ struct svc_req {
 	rpc_u_int32		rq_vers;	/* service protocol version */
 	rpc_u_int32		rq_proc;	/* the desired procedure */
 	struct opaque_auth rq_cred;	/* raw creds from the wire */
-	caddr_t		rq_clntcred;	/* read only cooked client cred */
-	caddr_t		rq_svccred;	/* read only cooked svc cred */
+	void *		rq_clntcred;	/* read only cooked client cred */
+	void *		rq_svccred;	/* read only cooked svc cred */
 	SVCXPRT		*rq_xprt;	/* associated transport */
 
 	/* The request's auth flavor *should* be here, but the svc_req 	*/
