@@ -119,11 +119,18 @@ typedef struct _krb5_checksum_entry {
 
 #define	ETYPE_NULL		0x0000
 #define	ETYPE_DES_CBC_CRC	0x0001	/* DES cbc mode with CRC-32 */
+#define	ETYPE_DES_CBC_MD4	0x0002	/* DES cbc mode with RSA-MD4 */
+#define	ETYPE_DES_CBC_MD5	0x0003	/* DES cbc mode with RSA-MD5 */
+
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002
 #define	CKSUMTYPE_RSA_MD4_DES	0x0003
 #define	CKSUMTYPE_DESCBC	0x0004
+/* des-mac */
+/* des-mac-k */
+#define	CKSUMTYPE_RSA_MD5	0x0007
+#define	CKSUMTYPE_RSA_MD5_DES	0x0008
 
 /* macros to determine if a type is a local type */
 #define KEYTYPE_IS_LOCAL(keytype) (keytype & 0x8000)
