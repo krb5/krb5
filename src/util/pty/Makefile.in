@@ -117,30 +117,41 @@ $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 #
 pty_err.so pty_err.po $(OUTPRE)pty_err.$(OBJEXT): pty_err.c $(COM_ERR_DEPS)
 cleanup.so cleanup.po $(OUTPRE)cleanup.$(OBJEXT): cleanup.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 getpty.so getpty.po $(OUTPRE)getpty.$(OBJEXT): getpty.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 init_slave.so init_slave.po $(OUTPRE)init_slave.$(OBJEXT): init_slave.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 open_ctty.so open_ctty.po $(OUTPRE)open_ctty.$(OBJEXT): open_ctty.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 open_slave.so open_slave.po $(OUTPRE)open_slave.$(OBJEXT): open_slave.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 update_utmp.so update_utmp.po $(OUTPRE)update_utmp.$(OBJEXT): update_utmp.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 update_wtmp.so update_wtmp.po $(OUTPRE)update_wtmp.$(OBJEXT): update_wtmp.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 vhangup.so vhangup.po $(OUTPRE)vhangup.$(OBJEXT): vhangup.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 void_assoc.so void_assoc.po $(OUTPRE)void_assoc.$(OBJEXT): void_assoc.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 logwtmp.so logwtmp.po $(OUTPRE)logwtmp.$(OBJEXT): logwtmp.c $(COM_ERR_DEPS) \
-  libpty.h pty-int.h pty_err.h
+  libpty.h pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 init.so init.po $(OUTPRE)init.$(OBJEXT): init.c $(COM_ERR_DEPS) libpty.h \
-  pty-int.h pty_err.h
+  pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 sane_hostname.so sane_hostname.po $(OUTPRE)sane_hostname.$(OBJEXT): sane_hostname.c $(COM_ERR_DEPS) \
-  pty-int.h pty_err.h libpty.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h libpty.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h
 
