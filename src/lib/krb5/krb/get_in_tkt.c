@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/get_in_tkt.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991, 2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -409,6 +409,15 @@ make_preauth_list(krb5_context	context,
 }
 
 #define MAX_IN_TKT_LOOPS 16
+static krb5_enctype get_in_tkt_enctypes[] = {
+    ENCTYPE_DES3_CBC_SHA1,
+    ENCTYPE_ARCFOUR_HMAC,
+    ENCTYPE_DES_CBC_MD5,
+    ENCTYPE_DES_CBC_MD4,
+    ENCTYPE_DES_CBC_CRC,
+    0
+};
+
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt(krb5_context context,
@@ -460,8 +469,13 @@ krb5_get_in_tkt(krb5_context context,
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if ((retval = krb5_get_default_in_tkt_ktypes(context, &request.ktype)))
+
+    request.ktype = malloc (sizeof(get_in_tkt_enctypes));
+    if (request.ktype == NULL) {
+	retval = ENOMEM;
 	goto cleanup;
+    }
+    memcpy(request.ktype, get_in_tkt_enctypes, sizeof(get_in_tkt_enctypes));
     for (request.nktypes = 0;request.ktype[request.nktypes];request.nktypes++);
     if (ktypes) {
 	int i, req, next = 0;
@@ -734,6 +748,7 @@ krb5_get_init_creds(krb5_context context,
     krb5_deltat renew_life;
     int loopcount;
     krb5_data salt;
+    krb5_data s2kparams;
     krb5_keyblock as_key;
     krb5_error *err_reply;
     krb5_kdc_rep *local_as_reply;
@@ -742,6 +757,8 @@ krb5_get_init_creds(krb5_context context,
 
     /* initialize everything which will be freed at cleanup */
 
+    s2kparams.data = NULL;
+    s2kparams.length = 0;
     request.server = NULL;
     request.ktype = NULL;
     request.addresses = NULL;
@@ -761,7 +778,7 @@ krb5_get_init_creds(krb5_context context,
 
     /* request.padata is filled in later */
 
-    request.kdc_options = 0;
+    request.kdc_options = context->kdc_default_options;
 
     /* forwardable */
 
@@ -927,7 +944,7 @@ krb5_get_init_creds(krb5_context context,
 
 	if ((ret = krb5_do_preauth(context, &request,
 				  padata, &request.padata,
-				  &salt, &etype, &as_key, prompter,
+				  &salt, &s2kparams, &etype, &as_key, prompter,
 				   prompter_data, gak_fct, gak_data)))
 	    goto cleanup;
 
@@ -973,7 +990,7 @@ krb5_get_init_creds(krb5_context context,
 
     if ((ret = krb5_do_preauth(context, &request,
 			       local_as_reply->padata, &padata,
-			       &salt, &etype, &as_key, prompter,
+			       &salt, &s2kparams, &etype, &as_key, prompter,
 			       prompter_data, gak_fct, gak_data)))
 	goto cleanup;
 
@@ -1005,7 +1022,7 @@ krb5_get_init_creds(krb5_context context,
 
 	if ((ret = ((*gak_fct)(context, request.client,
 			       local_as_reply->enc_part.enctype,
-			       prompter, prompter_data, &salt,
+			       prompter, prompter_data, &salt, &s2kparams,
 			       &as_key, gak_data))))
 	    goto cleanup;
 
@@ -1050,6 +1067,7 @@ cleanup:
     if (salt.data &&
 	(!(options && (options->flags & KRB5_GET_INIT_CREDS_OPT_SALT))))
 	krb5_xfree(salt.data);
+    krb5_free_data_contents(context, &s2kparams);
     if (as_reply)
 	*as_reply = local_as_reply;
     else if (local_as_reply)

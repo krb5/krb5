@@ -1,3 +1,12 @@
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524_err.et: New file, moved from ../../../krb524.  Add new
+	error code KRB524_KRB4_DISABLED.
+	* Makefile.in (STLIBOBJS, HDRS, OBJS, ETSRCS, SRCS, awk-windows):
+	Add it.
+	($(OUTPRE)krb524_err.$(OBJEXT)): List dependence on .c file.
+	* init_ets.c (krb5_init_ets): Call initialize_k524_error_table.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5_ERR_BAD_S2K_PARAMS): New error code.

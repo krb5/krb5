@@ -1,3 +1,26 @@
+2003-05-13  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi_krb5.h: Remove check for GSS_RFC_COMPLIANT_OIDS.
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Rename
+	remote_subkey -> recv_subkey.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Rename
+	local_subkey -> send_subkey.
+
+2003-03-14  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Set
+	prot_ready here
+
+	* init_sec_context.c (krb5_gss_init_sec_context):  Set prot_ready
+	after context established
+
+	* gssapiP_krb5.h (KG_IMPLFLAGS): Don't claim prot_ready until the
+	context is established  because we don't currently support it.  
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * disp_status.c, gssapi_krb5.h, gssapiP_krb5.h: 

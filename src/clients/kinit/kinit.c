@@ -55,10 +55,6 @@ extern int getopt();
 #endif /* HAVE_UNISTD_H */
 #endif /* GETOPT_LONG */
 
-#ifdef HAVE_KRB524
-#include "krb524.h"
-#endif
-
 #ifndef _WIN32
 #define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/')+1 : (x))
 #else
@@ -993,9 +989,6 @@ static int try_convert524(k5)
       From this point on, we can goto cleanup because increds is
       initialized.
     */
-
-    /* or do this directly with krb524_convert_creds_kdc */
-    krb524_init_ets(k5->ctx);
 
     if ((code = krb5_build_principal(k5->ctx,
 				     &kpcserver, 

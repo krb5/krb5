@@ -1,3 +1,25 @@
+2003-05-15  Sam Hartman  <hartmans@mit.edu>
+
+	* combine_keys.c (enctype_ok): new function to determine if we support combine_keys for a particular enctype
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* etypes.c (krb5_enctypes_list): Add names aes128-cts and
+	aes256-cts as aliases.
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* string_to_key.c: Move krb5_c_string_to_key_with_params to krb5.h
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* pbkdf2.c (krb5int_pbkdf2): Provide a temporary buffer for the
+	output from F, if the remaining space in the output buffer isn't
+	big enough.  Free the temporary buffers before returning.
+
+	* etypes.c (krb5_enctypes_list): Use krb5int_aes_encrypt_length,
+	and krb5int_aes_dk_encrypt, and krb5int_aes_dk_decrypt for AES.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * prng.c: use Unix randomness sources on Mac OS X.

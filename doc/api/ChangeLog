@@ -1,3 +1,7 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.tex: Update subkey-related information to match code.
+
 2002-01-15  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.tex (subsubsection{Principal access functions}): krb5_princ_realm returns a pointer.

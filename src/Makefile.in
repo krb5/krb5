@@ -349,7 +349,7 @@ WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
 # Part of building the PC release has to be done on Unix. This includes
 # anything the requires awk.
 #
-AWK = gawk
+AWK = awk
 AH  = util/et/et_h.awk
 AC  = util/et/et_c.awk
 INC = include/
@@ -359,11 +359,11 @@ GK  = lib/gssapi/krb5/
 PR  = util/profile/
 
 ETOUT =	\
-	krb524\krb524_err.h krb524\krb524_err.c \
 	$(INC)asn1_err.h $(ET)asn1_err.c \
 	$(INC)kdb5_err.h $(ET)kdb5_err.c \
 	$(INC)krb5_err.h $(ET)krb5_err.c \
 	$(INC)kv5m_err.h $(ET)kv5m_err.c \
+	$(INC)krb524_err.h $(ET)krb524_err.c \
 	$(INC)/kerberosIV/kadm_err.h lib/krb4/kadm_err.c \
 	$(INC)/kerberosIV/krb_err.h lib/krb4/krb_err.c \
 	$(PR)prof_err.h $(PR)prof_err.c \
@@ -459,11 +459,6 @@ kerbsrc.mac.tar: awk-windows-mac macfile.list mac-bin-dirs Macfile
 	rm -rf bin
 	rm -f include/autoconf.h Makefile macsrc* macfile.maclist
 
-krb524/krb524_err.h: $(AH) krb524/krb524_err.et
-	$(AWK) -f $(AH) outfile=$@ krb524/krb524_err.et
-krb524/krb524_err.c: $(AC) krb524/krb524_err.et
-	$(AWK) -f $(AC) outfile=$@ krb524/krb524_err.et
-
 $(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)asn1_err.et
 $(INC)kdb5_err.h: $(AH) $(ET)kdb5_err.et
@@ -472,6 +467,8 @@ $(INC)krb5_err.h: $(AH) $(ET)krb5_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)krb5_err.et
 $(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)kv5m_err.et
+$(INC)krb524_err.h: $(AH) $(ET)krb524_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)krb524_err.et
 $(INC)/kerberosIV/kadm_err.h: $(AH) lib/krb4/kadm_err.et
 	$(AWK) -f $(AH) outfile=$@ lib/krb4/kadm_err.et
 $(INC)/kerberosIV/krb_err.h: $(AH) lib/krb4/krb_err.et
@@ -491,6 +488,8 @@ $(ET)krb5_err.c: $(AC) $(ET)krb5_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)krb5_err.et
 $(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)kv5m_err.et
+$(ET)krb524_err.c: $(AC) $(ET)krb524_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)krb524_err.et
 lib/krb4/kadm_err.c: $(AC) lib/krb4/kadm_err.et
 	$(AWK) -f $(AC) outfile=$@ lib/krb4/kadm_err.et
 lib/krb4/krb_err.c: $(AC) lib/krb4/krb_err.et
@@ -507,7 +506,7 @@ lib/krb4/krb_err_txt.c: lib/krb4/krb_err.et
 		lib/krb4/krb_err.et
 
 KRBHDEP = $(INC)krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
-	$(INC)kv5m_err.h $(INC)asn1_err.h
+	$(INC)kv5m_err.h $(INC)krb524_err.h $(INC)asn1_err.h
 
 $(INC)krb5.h: $(KRBHDEP)
 	rm -f $@

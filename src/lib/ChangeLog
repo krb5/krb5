@@ -1,3 +1,21 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_32.def: Add krb5_524_convert_creds.
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_32.def: Add krb5_c_string_to_key_with_params
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_32.def: Add krb5_auth_con_getrecvsubkey,
+	krb5_auth_con_getsendsubkey, krb5_auth_con_setrecvsubkey,
+	krb5_auth_con_setsendsubkey.
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_32.def: Add krb5_set_password and krb5_set_password_using_ccache
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (K4LIBS): Revert previous.

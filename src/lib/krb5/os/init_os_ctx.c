@@ -234,8 +234,14 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
     unsigned int ent_len;
     const char *s, *t;
 
+#ifdef USE_LOGIN_LIBRARY
+    /* If __KLAllowHomeDirectoryAccess() == FALSE, we are probably
+        trying to authenticate to a fileserver for the user's homedir. */
+    if (secure || !__KLAllowHomeDirectoryAccess ()) {
+#else
     if (secure) {
-        filepath = DEFAULT_SECURE_PROFILE_PATH;
+#endif
+            filepath = DEFAULT_SECURE_PROFILE_PATH;
     } else { 
         filepath = getenv("KRB5_CONFIG");
         if (!filepath) filepath = DEFAULT_PROFILE_PATH;
