@@ -1,3 +1,9 @@
+Mon Nov 11 14:25:15 1996  Tom Yu  <tlyu@mit.edu>
+
+	* start_servers, start_servers_local, init_db: Use ${FOO+bar} and
+	${FOO=baz} rather than ${FOO:+bar} and ${FOO:=baz} because of
+	Ultrix /bin/sh lossage.
+
 Thu Nov  7 13:56:25 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* env-setup.shin (foo): Use single quotes around @KRB5_RUN_ENV@ so

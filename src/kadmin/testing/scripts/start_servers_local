@@ -18,9 +18,9 @@ fi
 $STOP_SERVERS_LOCAL -start_servers
 
 # If it's set, set it to true
-VERBOSE=${VERBOSE_TEST:+true}
+VERBOSE=${VERBOSE_TEST+true}
 # Otherwise, set it to false
-DUMMY=${VERBOSE:=false}
+DUMMY=${VERBOSE=false}
 
 if $VERBOSE; then
 	REDIRECT=
