@@ -109,8 +109,9 @@ krb4int_address_less (struct sockaddr_in *sender, struct sockaddr_in *receiver)
 	break;
 #ifdef KRB5_USE_INET6
     case AF_INET6:
+    {
 	struct sockaddr_in6 *s6 = (struct sockaddr_in6 *) sender;
-	if (IN6_IS_ADDR_V4MAPPED (s6)) {
+	if (IN6_IS_ADDR_V4MAPPED (&s6->sin6_addr)) {
 	    struct sockaddr_in sintmp = { 0 };
 	    memcpy (&sintmp.sin_addr.s_addr,
 		    12+(char*)&s6->sin6_addr.s6_addr,
@@ -120,6 +121,7 @@ krb4int_address_less (struct sockaddr_in *sender, struct sockaddr_in *receiver)
 	    return -1;
 	sender_port = s6->sin6_port;
 	break;
+    }
 #endif
     default:
 	return -1;
@@ -131,8 +133,9 @@ krb4int_address_less (struct sockaddr_in *sender, struct sockaddr_in *receiver)
 	break;
 #ifdef KRB5_USE_INET6
     case AF_INET6:
+    {
 	struct sockaddr_in6 *s6 = (struct sockaddr_in6 *) receiver;
-	if (IN6_IS_ADDR_V4MAPPED (s6)) {
+	if (IN6_IS_ADDR_V4MAPPED (&s6->sin6_addr)) {
 	    struct sockaddr_in sintmp = { 0 };
 	    memcpy (&sintmp.sin_addr.s_addr,
 		    12+(char*)&s6->sin6_addr.s6_addr,
@@ -142,6 +145,7 @@ krb4int_address_less (struct sockaddr_in *sender, struct sockaddr_in *receiver)
 	    return -1;
 	receiver_port = s6->sin6_port;
 	break;
+    }
 #endif
     default:
 	return -1;

@@ -1,3 +1,9 @@
+2002-06-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* mk_priv.c (krb4int_address_less): Put braces around v4mapped
+	address processing to permit local variable declaration.  Pass
+	correct value to IN6_IS_ADDR_V4MAPPED.
+
 2002-05-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* DNR.c: Deleted.
