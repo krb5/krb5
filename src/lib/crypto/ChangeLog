@@ -1,3 +1,7 @@
+Mon May 10 15:15:00 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Tue Jan  5 00:06:02 1999  Tom Yu  <tlyu@mit.edu>
 
 	* make_checksum.c (krb5_c_make_checksum): Note the fact that we're

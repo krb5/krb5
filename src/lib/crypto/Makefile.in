@@ -9,10 +9,10 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/enc_provider \
 	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk
 
 ##DOSBUILDTOP = ..\..
-##DOSLIBNAME=crypto.lib
-##DOSOBJFILE=crypto.lst
-##DOSOBJFILELIST=@crypto.lst @des.lst @md4.lst @md5.lst @sha1.lst @crc32.lst @dk.lst @old.lst @raw.lst @enc_prov.lst @hash_pro.lst @kh_pro.lst
-##DOSOBJFILEDEP =crypto.lst des.lst md4.lst md5.lst sha1.lst crc32.lst dk.lst old.lst raw.lst enc_prov.lst hash_pro.lst kh_pro.lst
+##DOSLIBNAME=$(OUTPRE)crypto.lib
+##DOSOBJFILE=$(OUTPRE)crypto.lst
+##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)kh_pro.lst
+##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst
 
 MAC_SUBDIRS = crc32 des dk enc_provider hash_provider keyhash_provider \
 	md4 md5 old raw sha1
@@ -48,31 +48,31 @@ STLIBOBJS=\
 	verify_checksum.o
 
 OBJS=\
-	block_size.$(OBJEXT)		\
-	checksum_length.$(OBJEXT)	\
-	cksumtype_to_string.$(OBJEXT)	\
-	cksumtypes.$(OBJEXT)		\
-	coll_proof_cksum.$(OBJEXT)	\
-	decrypt.$(OBJEXT)		\
-	encrypt.$(OBJEXT)		\
-	encrypt_length.$(OBJEXT)	\
-	enctype_compare.$(OBJEXT)	\
-	enctype_to_string.$(OBJEXT)	\
-	etypes.$(OBJEXT)		\
-	hmac.$(OBJEXT)			\
-	keyed_cksum.$(OBJEXT)		\
-	keyed_checksum_types.$(OBJEXT)	\
-	make_checksum.$(OBJEXT)		\
-	make_random_key.$(OBJEXT)	\
-	nfold.$(OBJEXT)			\
-	old_api_glue.$(OBJEXT)		\
-	prng.$(OBJEXT)			\
-	string_to_cksumtype.$(OBJEXT)	\
-	string_to_enctype.$(OBJEXT)	\
-	string_to_key.$(OBJEXT)		\
-	valid_cksumtype.$(OBJEXT)	\
-	valid_enctype.$(OBJEXT)		\
-	verify_checksum.$(OBJEXT)
+	$(OUTPRE)block_size.$(OBJEXT)		\
+	$(OUTPRE)checksum_length.$(OBJEXT)	\
+	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
+	$(OUTPRE)cksumtypes.$(OBJEXT)		\
+	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
+	$(OUTPRE)decrypt.$(OBJEXT)		\
+	$(OUTPRE)encrypt.$(OBJEXT)		\
+	$(OUTPRE)encrypt_length.$(OBJEXT)	\
+	$(OUTPRE)enctype_compare.$(OBJEXT)	\
+	$(OUTPRE)enctype_to_string.$(OBJEXT)	\
+	$(OUTPRE)etypes.$(OBJEXT)		\
+	$(OUTPRE)hmac.$(OBJEXT)			\
+	$(OUTPRE)keyed_cksum.$(OBJEXT)		\
+	$(OUTPRE)keyed_checksum_types.$(OBJEXT)	\
+	$(OUTPRE)make_checksum.$(OBJEXT)	\
+	$(OUTPRE)make_random_key.$(OBJEXT)	\
+	$(OUTPRE)nfold.$(OBJEXT)		\
+	$(OUTPRE)old_api_glue.$(OBJEXT)		\
+	$(OUTPRE)prng.$(OBJEXT)			\
+	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
+	$(OUTPRE)string_to_enctype.$(OBJEXT)	\
+	$(OUTPRE)string_to_key.$(OBJEXT)	\
+	$(OUTPRE)valid_cksumtype.$(OBJEXT)	\
+	$(OUTPRE)valid_enctype.$(OBJEXT)	\
+	$(OUTPRE)verify_checksum.$(OBJEXT)
 
 SRCS=\
 	$(subdir)/block_size.c		\

@@ -1,3 +1,7 @@
+Mon May 10 15:28:27 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Tue Aug  5 18:45:35 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in, gss.rc: Use the version resource from

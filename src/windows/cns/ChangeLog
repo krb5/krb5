@@ -1,3 +1,7 @@
+Mon May 10 15:27:57 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Tue Jan  5 01:38:18 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* cns.c (position_dialog): If the registry position for the window

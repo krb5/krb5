@@ -5,12 +5,12 @@ CFLAGS 	 = $(COPTS) $(INCLUDES)
 ##WIN16##LFLAGS	 = /nologo /nod /nopackcode
 ##WIN32##LFLAGS	 = /nologo /nod
 
-##WIN32##all-windows:: libecho.exe getopt.obj
+##WIN32##all-windows:: $(OUTPRE)libecho.exe $(OUTPRE)getopt.obj
 
-libecho.exe: libecho.c
+$(OUTPRE)libecho.exe: $(OUTPRE)libecho.obj
+	link -out:$@ $**
 
 install-windows::
 
 clean-windows::
-	$(RM) *.res *.map *.obj *.exe
-
+	$(RM) $(OUTPRE)*.res $(OUTPRE)*.map $(OUTPRE)*.obj $(OUTPRE)*.exe

@@ -7,7 +7,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)/../md4 \
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keyhash_provider
-##DOS##OBJFILE=..\kh_pro.lst
+##DOS##OBJFILE=..\$(OUTPRE)kh_pro.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -17,7 +17,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o
 
-OBJS= descbc.$(OBJEXT) k5_md4des.$(OBJEXT) k5_md5des.$(OBJEXT)
+OBJS= $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT)
 
 SRCS= $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c
 

@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)  -I$(srcdir)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md4
-##DOS##OBJFILE=..\md4.lst
+##DOS##OBJFILE=..\$(OUTPRE)md4.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -16,7 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS= md4.o
 
-OBJS= md4.$(OBJEXT) 
+OBJS= $(OUTPRE)md4.$(OBJEXT) 
 
 SRCS= $(srcdir)/md4.c
 
@@ -37,18 +37,19 @@ t_mddriver.o: t_mddriver.c
 t_mddriver: t_mddriver.o md4.o
 	$(CC) $(CFLAGS) -o t_mddriver t_mddriver.o md4.o
 
-t_mddriver.exe:
-	$(CP) $(srcdir)\..\md5\t_mddriver.c t_mddriver.c
-	$(CC) -DMD=4 $(CFLAGS2) -o t_mddriver t_mddriver.c md4.c
-	$(RM) md4.obj
+$(OUTPRE)t_mddriver.obj: t_mddriver.c
+	$(CC) -DMD=4 $(CFLAGS) -Fo$@ -c $**
+
+$(OUTPRE)t_mddriver.exe: $(OUTPRE)t_mddriver.obj $(OUTPRE)md4.obj
+	link -out:$@ $**
 
 check-unix:: t_mddriver
 	$(RUN_SETUP) $(C)t_mddriver -x
 
-check-windows:: t_mddriver$(EXEEXT)
-	$(C)t_mddriver$(EXEEXT) -x
+check-windows:: $(OUTPRE)t_mddriver.exe
+	$(OUTPRE)$(C)t_mddriver.exe -x
 
 clean:: 
-	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT) t_mddriver.c
+	$(RM) $(OUTPRE)t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) t_mddriver.c
 
 clean-unix:: clean-libobjs

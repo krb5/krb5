@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=crc32
-##DOS##OBJFILE=..\crc32.lst
+##DOS##OBJFILE=..\$(OUTPRE)crc32.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -16,7 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS= crc32.o
 
-OBJS= crc32.$(OBJEXT) 
+OBJS= $(OUTPRE)crc32.$(OBJEXT) 
 
 SRCS= $(srcdir)/crc32.c
 

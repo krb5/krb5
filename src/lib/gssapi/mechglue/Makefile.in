@@ -5,7 +5,7 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\gssapi.$(LIBEXT)
+##DOSLIBNAME=..\$(OUTPRE)gssapi.$(LIBEXT)
 
 ##DOS##DLL_EXP_TYPE=GSS
 
@@ -50,37 +50,37 @@ SRCS	= $(srcdir)/g_acquire_cred.c \
 	  $(srcdir)/oid_ops.c \
 	  $(srcdir)/g_mechname.c 
 
-OBJS	= g_acquire_cred.$(OBJEXT) \
-	  g_rel_cred.$(OBJEXT) \
-	  g_init_sec_context.$(OBJEXT) \
-	  g_accept_sec_context.$(OBJEXT) \
-	  g_process_context.$(OBJEXT) \
-	  g_delete_sec_context.$(OBJEXT) \
-	  g_imp_sec_context.$(OBJEXT) \
-	  g_exp_sec_context.$(OBJEXT) \
-	  g_context_time.$(OBJEXT) \
-	  g_sign.$(OBJEXT) \
-	  g_verify.$(OBJEXT) \
-	  g_seal.$(OBJEXT) \
-	  g_unseal.$(OBJEXT) \
-	  g_dsp_status.$(OBJEXT) \
-	  g_indicate_mechs.$(OBJEXT) \
-	  g_compare_name.$(OBJEXT) \
-	  g_dsp_name.$(OBJEXT) \
-	  g_imp_name.$(OBJEXT) \
-	  g_rel_name.$(OBJEXT) \
-	  g_rel_buffer.$(OBJEXT) \
-	  g_rel_oid_set.$(OBJEXT) \
-	  g_oid_ops.$(OBJEXT) \
-	  g_inq_cred.$(OBJEXT) \
-	  g_inq_context.$(OBJEXT) \
-	  g_inq_names.$(OBJEXT) \
-	  g_initialize.$(OBJEXT) \
-	  g_glue.$(OBJEXT) \
-	  gssd_pname_to_uid.$(OBJEXT) \
-	  gen_oids.$(OBJEXT) \
-	  oid_ops.$(OBJEXT) \
-	  g_mechname.$(OBJEXT)
+OBJS	= $(OUTPRE)g_acquire_cred.$(OBJEXT) \
+	  $(OUTPRE)g_rel_cred.$(OBJEXT) \
+	  $(OUTPRE)g_init_sec_context.$(OBJEXT) \
+	  $(OUTPRE)g_accept_sec_context.$(OBJEXT) \
+	  $(OUTPRE)g_process_context.$(OBJEXT) \
+	  $(OUTPRE)g_delete_sec_context.$(OBJEXT) \
+	  $(OUTPRE)g_imp_sec_context.$(OBJEXT) \
+	  $(OUTPRE)g_exp_sec_context.$(OBJEXT) \
+	  $(OUTPRE)g_context_time.$(OBJEXT) \
+	  $(OUTPRE)g_sign.$(OBJEXT) \
+	  $(OUTPRE)g_verify.$(OBJEXT) \
+	  $(OUTPRE)g_seal.$(OBJEXT) \
+	  $(OUTPRE)g_unseal.$(OBJEXT) \
+	  $(OUTPRE)g_dsp_status.$(OBJEXT) \
+	  $(OUTPRE)g_indicate_mechs.$(OBJEXT) \
+	  $(OUTPRE)g_compare_name.$(OBJEXT) \
+	  $(OUTPRE)g_dsp_name.$(OBJEXT) \
+	  $(OUTPRE)g_imp_name.$(OBJEXT) \
+	  $(OUTPRE)g_rel_name.$(OBJEXT) \
+	  $(OUTPRE)g_rel_buffer.$(OBJEXT) \
+	  $(OUTPRE)g_rel_oid_set.$(OBJEXT) \
+	  $(OUTPRE)g_oid_ops.$(OBJEXT) \
+	  $(OUTPRE)g_inq_cred.$(OBJEXT) \
+	  $(OUTPRE)g_inq_context.$(OBJEXT) \
+	  $(OUTPRE)g_inq_names.$(OBJEXT) \
+	  $(OUTPRE)g_initialize.$(OBJEXT) \
+	  $(OUTPRE)g_glue.$(OBJEXT) \
+	  $(OUTPRE)gssd_pname_to_uid.$(OBJEXT) \
+	  $(OUTPRE)gen_oids.$(OBJEXT) \
+	  $(OUTPRE)oid_ops.$(OBJEXT) \
+	  $(OUTPRE)g_mechname.$(OBJEXT)
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
@@ -118,10 +118,10 @@ clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*
- 
+
 clean-mac::
 	$(RM) shared/*
- 
+
 clean-windows::
 	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)

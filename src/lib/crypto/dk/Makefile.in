@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/..
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=dk
-##DOS##OBJFILE=..\dk.lst
+##DOS##OBJFILE=..\$(OUTPRE)dk.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -22,11 +22,11 @@ STLIBOBJS=\
 	stringtokey.o
 
 OBJS=\
-	checksum.$(OBJEXT)	\
-	dk_decrypt.$(OBJEXT)	\
-	dk_encrypt.$(OBJEXT)	\
-	derive.$(OBJEXT)	\
-	stringtokey.$(OBJEXT)
+	$(OUTPRE)checksum.$(OBJEXT)	\
+	$(OUTPRE)dk_decrypt.$(OBJEXT)	\
+	$(OUTPRE)dk_encrypt.$(OBJEXT)	\
+	$(OUTPRE)derive.$(OBJEXT)	\
+	$(OUTPRE)stringtokey.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/checksum.c	\

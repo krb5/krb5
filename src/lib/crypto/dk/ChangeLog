@@ -1,3 +1,7 @@
+Mon May 10 15:16:34 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Tue Jan  5 00:09:13 1999  Tom Yu  <tlyu@mit.edu>
 
 	* dk.h: Add prototypes for krb5_marc_dk_*.

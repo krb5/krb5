@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=sha1
-##DOS##OBJFILE=..\sha1.lst
+##DOS##OBJFILE=..\$(OUTPRE)sha1.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -16,7 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS= shs.o
 
-OBJS= shs.$(OBJEXT) 
+OBJS= $(OUTPRE)shs.$(OBJEXT) 
 
 SRCS= $(srcdir)/shs.c
 
@@ -31,14 +31,14 @@ depend:: $(SRCS)
 t_shs: t_shs.o shs.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o t_shs t_shs.o shs.o
 
-t_shs.exe:
-	$(CC) $(CFLAGS2) -o t_shs.exe t_shs.c shs.c
+$(OUTPRE)t_shs.exe: $(OUTPRE)t_shs.obj $(OUTPRE)shs.obj
+	link -out:$@ $**
 
 check-unix:: t_shs
 	$(C)t_shs -x
 
-check-windows:: t_shs$(EXEEXT)
-	$(C)t_shs$(EXEEXT) -x
+check-windows:: $(OUTPRE)t_shs.exe
+	$(OUTPRE)$(C)t_shs.exe -x
 
 clean:: 
 	$(RM) t_shs$(EXEEXT) t_shs.$(OBJEXT)

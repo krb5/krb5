@@ -1,3 +1,7 @@
+Mon May 10 15:23:15 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Thu Apr 15 20:18:38 1999  Tom Yu  <tlyu@mit.edu>
 
 	* g_cnffile.c (krb__get_srvtabname): Fix to actually extract

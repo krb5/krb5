@@ -4,9 +4,9 @@ mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 LOCAL_SUBDIRS= generic krb5
 
-##DOSLIBNAME=gssapi.lib
-##DOSOBJFILELIST=@generic.lst @krb5.lst
-##DOSOBJFILEDEP=generic.lst krb5.lst
+##DOSLIBNAME=$(OUTPRE)gssapi.lib
+##DOSOBJFILELIST=@$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst
+##DOSOBJFILEDEP=$(OUTPRE)generic.lst $(OUTPRE)krb5.lst
 
 ##DOS##DLL_EXP_TYPE=GSS
 

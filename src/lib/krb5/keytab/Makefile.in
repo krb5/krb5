@@ -8,7 +8,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keytab
-##DOS##OBJFILE=..\$(PREFIXDIR).lst
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 MAC_SUBDIRS = file
@@ -22,12 +22,12 @@ STLIBOBJS= \
 	read_servi.o
 
 OBJS=	\
-	ktadd.$(OBJEXT)		\
-	ktbase.$(OBJEXT)	\
-	ktdefault.$(OBJEXT)	\
-	ktfr_entry.$(OBJEXT)	\
-	ktremove.$(OBJEXT)	\
-	read_servi.$(OBJEXT)
+	$(OUTPRE)ktadd.$(OBJEXT)		\
+	$(OUTPRE)ktbase.$(OBJEXT)	\
+	$(OUTPRE)ktdefault.$(OBJEXT)	\
+	$(OUTPRE)ktfr_entry.$(OBJEXT)	\
+	$(OUTPRE)ktremove.$(OBJEXT)	\
+	$(OUTPRE)read_servi.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/ktadd.c	\
@@ -39,17 +39,17 @@ SRCS=	\
 
 all-windows:: subdirs $(OBJFILE)
 
-##DOSsubdirs:: file\file.lst
-##DOSfile\file.lst::
+##DOSsubdirs:: file\$(OUTPRE)file.lst
+##DOSfile\$(OUTPRE)file.lst::
 ##DOS	cd file
 ##DOS	@echo Making in krb5\keytab\file
 ##DOS	-$(MAKE) -$(MFLAGS)
 ##DOS	cd ..
 
-##DOS$(OBJFILE): $(OBJS) file\file.lst
+##DOS$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst
 ##DOS	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ *.obj file\*.obj > $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj file\$(OUTPRE)*.obj > $(OBJFILE)
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs

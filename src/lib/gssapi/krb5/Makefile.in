@@ -6,16 +6,16 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb5
-##DOS##OBJFILE = ..\krb5.lst
+##DOS##OBJFILE = ..\$(OUTPRE)krb5.lst
 ##WIN16##LIBNAME=..\gssapi.lib
 
 ##DOS##DLL_EXP_TYPE=GSS
 
 ETSRCS= gssapi_err_krb5.c
-ETOBJS= gssapi_err_krb5.$(OBJEXT)
+ETOBJS= $(OUTPRE)gssapi_err_krb5.$(OBJEXT)
 ETHDRS= gssapi_err_krb5.h
 
-gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c
+$(OUTPRE)gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c
 gssapi_err_krb5.h: gssapi_err_krb5.et
 gssapi_err_krb5.c: gssapi_err_krb5.et
 
@@ -68,49 +68,49 @@ SRCS = \
 #	$(srcdir)/k5mech.c
 
 OBJS = \
-	accept_sec_context.$(OBJEXT) \
-	acquire_cred.$(OBJEXT) \
-	add_cred.$(OBJEXT) \
-	canon_name.$(OBJEXT) \
-	compare_name.$(OBJEXT) \
-	context_time.$(OBJEXT) \
-	copy_ccache.$(OBJEXT) \
-	delete_sec_context.$(OBJEXT) \
-	disp_name.$(OBJEXT) \
-	disp_status.$(OBJEXT) \
-	duplicate_name.$(OBJEXT) \
-	export_name.$(OBJEXT) \
-	export_sec_context.$(OBJEXT) \
-	get_tkt_flags.$(OBJEXT) \
-	gssapi_krb5.$(OBJEXT) \
-	import_name.$(OBJEXT) \
-	import_sec_context.$(OBJEXT) \
-	indicate_mechs.$(OBJEXT) \
-	init_sec_context.$(OBJEXT) \
-	inq_context.$(OBJEXT) \
-	inq_cred.$(OBJEXT) \
-	inq_names.$(OBJEXT) \
-	k5seal.$(OBJEXT) \
-	k5unseal.$(OBJEXT) \
-	krb5_gss_glue.$(OBJEXT) \
-	process_context_token.$(OBJEXT) \
-	rel_cred.$(OBJEXT) \
-	rel_oid.$(OBJEXT) \
-	rel_name.$(OBJEXT) \
-	seal.$(OBJEXT) \
-	ser_sctx.$(OBJEXT) \
-	set_ccache.$(OBJEXT) \
-	sign.$(OBJEXT) \
-	unseal.$(OBJEXT) \
-	util_cksum.$(OBJEXT) \
-	util_crypt.$(OBJEXT) \
-	util_ctxsetup.$(OBJEXT) \
-	util_seed.$(OBJEXT) \
-	util_seqnum.$(OBJEXT) \
-	val_cred.$(OBJEXT) \
-	verify.$(OBJEXT) \
-	wrap_size_limit.$(OBJEXT) \
-	gssapi_err_krb5.$(OBJEXT)
+	$(OUTPRE)accept_sec_context.$(OBJEXT) \
+	$(OUTPRE)acquire_cred.$(OBJEXT) \
+	$(OUTPRE)add_cred.$(OBJEXT) \
+	$(OUTPRE)canon_name.$(OBJEXT) \
+	$(OUTPRE)compare_name.$(OBJEXT) \
+	$(OUTPRE)context_time.$(OBJEXT) \
+	$(OUTPRE)copy_ccache.$(OBJEXT) \
+	$(OUTPRE)delete_sec_context.$(OBJEXT) \
+	$(OUTPRE)disp_name.$(OBJEXT) \
+	$(OUTPRE)disp_status.$(OBJEXT) \
+	$(OUTPRE)duplicate_name.$(OBJEXT) \
+	$(OUTPRE)export_name.$(OBJEXT) \
+	$(OUTPRE)export_sec_context.$(OBJEXT) \
+	$(OUTPRE)get_tkt_flags.$(OBJEXT) \
+	$(OUTPRE)gssapi_krb5.$(OBJEXT) \
+	$(OUTPRE)import_name.$(OBJEXT) \
+	$(OUTPRE)import_sec_context.$(OBJEXT) \
+	$(OUTPRE)indicate_mechs.$(OBJEXT) \
+	$(OUTPRE)init_sec_context.$(OBJEXT) \
+	$(OUTPRE)inq_context.$(OBJEXT) \
+	$(OUTPRE)inq_cred.$(OBJEXT) \
+	$(OUTPRE)inq_names.$(OBJEXT) \
+	$(OUTPRE)k5seal.$(OBJEXT) \
+	$(OUTPRE)k5unseal.$(OBJEXT) \
+	$(OUTPRE)krb5_gss_glue.$(OBJEXT) \
+	$(OUTPRE)process_context_token.$(OBJEXT) \
+	$(OUTPRE)rel_cred.$(OBJEXT) \
+	$(OUTPRE)rel_oid.$(OBJEXT) \
+	$(OUTPRE)rel_name.$(OBJEXT) \
+	$(OUTPRE)seal.$(OBJEXT) \
+	$(OUTPRE)ser_sctx.$(OBJEXT) \
+	$(OUTPRE)set_ccache.$(OBJEXT) \
+	$(OUTPRE)sign.$(OBJEXT) \
+	$(OUTPRE)unseal.$(OBJEXT) \
+	$(OUTPRE)util_cksum.$(OBJEXT) \
+	$(OUTPRE)util_crypt.$(OBJEXT) \
+	$(OUTPRE)util_ctxsetup.$(OBJEXT) \
+	$(OUTPRE)util_seed.$(OBJEXT) \
+	$(OUTPRE)util_seqnum.$(OBJEXT) \
+	$(OUTPRE)val_cred.$(OBJEXT) \
+	$(OUTPRE)verify.$(OBJEXT) \
+	$(OUTPRE)wrap_size_limit.$(OBJEXT) \
+	$(OUTPRE)gssapi_err_krb5.$(OBJEXT)
 
 #	k5mech.$(OBJEXT) \
 #	pname_to_uid.$(OBJEXT)

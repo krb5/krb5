@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=des
-##DOS##OBJFILE=..\des.lst
+##DOS##OBJFILE=..\$(OUTPRE)des.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -27,17 +27,17 @@ STLIBOBJS=\
 	string2key.o	\
 	weak_key.o
 
-OBJS=	afsstring2key.$(OBJEXT)	\
-	d3_cbc.$(OBJEXT)	\
-	d3_kysched.$(OBJEXT)	\
-	f_cbc.$(OBJEXT) 	\
-	f_cksum.$(OBJEXT)	\
-	f_parity.$(OBJEXT) 	\
-	f_sched.$(OBJEXT) 	\
-	f_tables.$(OBJEXT)	\
-	key_sched.$(OBJEXT)	\
-	string2key.$(OBJEXT)	\
-	weak_key.$(OBJEXT)
+OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
+	$(OUTPRE)d3_cbc.$(OBJEXT)	\
+	$(OUTPRE)d3_kysched.$(OBJEXT)	\
+	$(OUTPRE)f_cbc.$(OBJEXT) 	\
+	$(OUTPRE)f_cksum.$(OBJEXT)	\
+	$(OUTPRE)f_parity.$(OBJEXT) 	\
+	$(OUTPRE)f_sched.$(OBJEXT) 	\
+	$(OUTPRE)f_tables.$(OBJEXT)	\
+	$(OUTPRE)key_sched.$(OBJEXT)	\
+	$(OUTPRE)string2key.$(OBJEXT)	\
+	$(OUTPRE)weak_key.$(OBJEXT)
 
 SRCS=	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/d3_cbc.c	\
@@ -59,8 +59,8 @@ includes:: depend
 
 depend:: $(SRCS)
 
-TOBJS = key_sched.$(OBJEXT) f_sched.$(OBJEXT) f_cbc.$(OBJEXT) \
-	f_tables.$(OBJEXT) f_cksum.$(OBJEXT)
+TOBJS = $(OUTPRE)key_sched.$(OBJEXT) $(OUTPRE)f_sched.$(OBJEXT) $(OUTPRE)f_cbc.$(OBJEXT) \
+	$(OUTPRE)f_tables.$(OBJEXT) $(OUTPRE)f_cksum.$(OBJEXT)
 
 verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
 	$(COM_ERR_DEPLIB)

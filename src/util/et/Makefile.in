@@ -7,9 +7,9 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
 
 ##DOS##BUILDTOP = ..\..
-##DOS##LIBNAME=comerr.lib
+##DOS##LIBNAME=$(OUTPRE)comerr.lib
 ##DOS##XTRA=
-##DOS##OBJFILE=comerr.lst
+##DOS##OBJFILE=$(OUTPRE)comerr.lst
 
 STLIBOBJS=error_message.o et_name.o init_et.o com_err.o
 STOBJLISTS=OBJS.ST
@@ -23,10 +23,10 @@ install-unix:: install-libs
 
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
-LIBOBJS=com_err.$(OBJEXT) \
-	error_message.$(OBJEXT) \
-	et_name.$(OBJEXT) \
-	init_et.$(OBJEXT)
+LIBOBJS=$(OUTPRE)com_err.$(OBJEXT) \
+	$(OUTPRE)error_message.$(OBJEXT) \
+	$(OUTPRE)et_name.$(OBJEXT) \
+	$(OUTPRE)init_et.$(OBJEXT)
 # for et_lex.lex.c include in error_table.y
 LOCALINCLUDE=-I. -I$(srcdir)
 
@@ -145,7 +145,7 @@ clean-files::
 		eddep makedep *.ln
 
 clean-windows::
-	$(RM) comerr.lib comerr.bak
+	$(RM) $(OUTPRE)comerr.lib comerr.bak
 
 com_err.ps : com_err.dvi
 com_err.dvi: com_err.texinfo

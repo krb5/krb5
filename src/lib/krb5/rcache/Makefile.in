@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=rcache
-##DOS##OBJFILE=..\$(PREFIXDIR).lst
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS = \
@@ -18,12 +18,12 @@ STLIBOBJS = \
 	ser_rc.o
 
 OBJS=	\
-	rc_base.$(OBJEXT)	\
-	rc_dfl.$(OBJEXT) 	\
-	rc_io.$(OBJEXT)		\
-	rcdef.$(OBJEXT)		\
-	rc_conv.$(OBJEXT)	\
-	ser_rc.$(OBJEXT)
+	$(OUTPRE)rc_base.$(OBJEXT)	\
+	$(OUTPRE)rc_dfl.$(OBJEXT) 	\
+	$(OUTPRE)rc_io.$(OBJEXT)		\
+	$(OUTPRE)rcdef.$(OBJEXT)		\
+	$(OUTPRE)rc_conv.$(OBJEXT)	\
+	$(OUTPRE)ser_rc.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/rc_base.c	\

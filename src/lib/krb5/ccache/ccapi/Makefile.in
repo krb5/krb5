@@ -8,7 +8,7 @@ CFLAGS = $(CCOPTS) $(DEFS) $(WIN_INCLUDES)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = ccache\file
-##DOS##OBJFILE = file.lst
+##DOS##OBJFILE = $(OUTPRE)file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS 	= \
@@ -16,7 +16,7 @@ STLIBOBJS 	= \
 	stdcc_util.o \
 	winccld.o
 
-OBJS 	= stdcc.$(OBJEXT) stdcc_util.$(OBJEXT) winccld.$(OBJEXT)
+OBJS 	= $(OUTPRE)stdcc.$(OBJEXT) $(OUTPRE)stdcc_util.$(OBJEXT) $(OUTPRE)winccld.$(OBJEXT)
 
 SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c $(srcdir)/winccld.c
 

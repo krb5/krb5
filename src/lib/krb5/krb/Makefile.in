@@ -9,7 +9,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb
-##DOS##OBJFILE=..\$(PREFIXDIR).lst
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
@@ -96,88 +96,88 @@ STLIBOBJS= \
 	vic_opt.o	\
 	walk_rtree.o
 
-OBJS=	addr_comp.$(OBJEXT)	\
-	addr_order.$(OBJEXT)	\
-	addr_srch.$(OBJEXT)	\
-	auth_con.$(OBJEXT)	\
-	bld_pr_ext.$(OBJEXT)	\
-	bld_princ.$(OBJEXT)	\
-	chk_trans.$(OBJEXT)	\
-	chpw.$(OBJEXT)		\
-	conv_princ.$(OBJEXT)	\
-	copy_addrs.$(OBJEXT)	\
-	copy_auth.$(OBJEXT)	\
-	copy_athctr.$(OBJEXT)	\
-	copy_cksum.$(OBJEXT)    \
-	copy_creds.$(OBJEXT)	\
-	copy_data.$(OBJEXT)	\
-	copy_key.$(OBJEXT)	\
-	copy_princ.$(OBJEXT)	\
-	copy_tick.$(OBJEXT)	\
-	cp_key_cnt.$(OBJEXT)	\
-	decode_kdc.$(OBJEXT)	\
-	decrypt_tk.$(OBJEXT)	\
-        enc_helper.$(OBJEXT)	\
-	encode_kdc.$(OBJEXT)	\
-	encrypt_tk.$(OBJEXT)	\
-	free_rtree.$(OBJEXT)	\
-	fwd_tgt.$(OBJEXT)	\
-	gc_frm_kdc.$(OBJEXT)	\
-	gc_via_tkt.$(OBJEXT)	\
-	gen_seqnum.$(OBJEXT)	\
-	gen_subkey.$(OBJEXT)	\
-	get_creds.$(OBJEXT)	\
-	get_in_tkt.$(OBJEXT)	\
-	gic_keytab.$(OBJEXT)	\
-	gic_opt.$(OBJEXT)	\
-	gic_pwd.$(OBJEXT)	\
-	in_tkt_ktb.$(OBJEXT)	\
-	in_tkt_pwd.$(OBJEXT)	\
-	in_tkt_sky.$(OBJEXT)	\
-	init_ctx.$(OBJEXT)	\
-	kdc_rep_dc.$(OBJEXT)	\
-	kfree.$(OBJEXT)		\
-	mk_cred.$(OBJEXT)	\
-	mk_error.$(OBJEXT)	\
-	mk_priv.$(OBJEXT)	\
-	mk_rep.$(OBJEXT)	\
-	mk_req.$(OBJEXT)	\
-	mk_req_ext.$(OBJEXT)	\
-	mk_safe.$(OBJEXT)	\
-	parse.$(OBJEXT)		\
-	pr_to_salt.$(OBJEXT)	\
-	preauth.$(OBJEXT)	\
-	preauth2.$(OBJEXT)	\
-	princ_comp.$(OBJEXT)	\
-	rd_cred.$(OBJEXT)	\
-	rd_error.$(OBJEXT)	\
-	rd_priv.$(OBJEXT)	\
-	rd_rep.$(OBJEXT)	\
-	rd_req.$(OBJEXT)	\
-	rd_req_dec.$(OBJEXT)	\
-	rd_safe.$(OBJEXT)	\
-	recvauth.$(OBJEXT)	\
-	sendauth.$(OBJEXT)	\
-	send_tgs.$(OBJEXT)	\
-	ser_actx.$(OBJEXT)	\
-	ser_adata.$(OBJEXT)	\
-	ser_addr.$(OBJEXT)	\
-	ser_auth.$(OBJEXT)	\
-	ser_cksum.$(OBJEXT)	\
-	ser_ctx.$(OBJEXT)	\
-	ser_eblk.$(OBJEXT)	\
-	ser_key.$(OBJEXT)	\
-	ser_princ.$(OBJEXT)	\
-	serialize.$(OBJEXT)	\
-	set_realm.$(OBJEXT)	\
-	srv_rcache.$(OBJEXT)	\
-	str_conv.$(OBJEXT)	\
-	tgtname.$(OBJEXT)	\
-	unparse.$(OBJEXT)	\
-	valid_times.$(OBJEXT)	\
-	vfy_increds.$(OBJEXT)	\
-	vic_opt.$(OBJEXT)	\
-	walk_rtree.$(OBJEXT)
+OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
+	$(OUTPRE)addr_order.$(OBJEXT)	\
+	$(OUTPRE)addr_srch.$(OBJEXT)	\
+	$(OUTPRE)auth_con.$(OBJEXT)	\
+	$(OUTPRE)bld_pr_ext.$(OBJEXT)	\
+	$(OUTPRE)bld_princ.$(OBJEXT)	\
+	$(OUTPRE)chk_trans.$(OBJEXT)	\
+	$(OUTPRE)chpw.$(OBJEXT)		\
+	$(OUTPRE)conv_princ.$(OBJEXT)	\
+	$(OUTPRE)copy_addrs.$(OBJEXT)	\
+	$(OUTPRE)copy_auth.$(OBJEXT)	\
+	$(OUTPRE)copy_athctr.$(OBJEXT)	\
+	$(OUTPRE)copy_cksum.$(OBJEXT)    \
+	$(OUTPRE)copy_creds.$(OBJEXT)	\
+	$(OUTPRE)copy_data.$(OBJEXT)	\
+	$(OUTPRE)copy_key.$(OBJEXT)	\
+	$(OUTPRE)copy_princ.$(OBJEXT)	\
+	$(OUTPRE)copy_tick.$(OBJEXT)	\
+	$(OUTPRE)cp_key_cnt.$(OBJEXT)	\
+	$(OUTPRE)decode_kdc.$(OBJEXT)	\
+	$(OUTPRE)decrypt_tk.$(OBJEXT)	\
+        $(OUTPRE)enc_helper.$(OBJEXT)	\
+	$(OUTPRE)encode_kdc.$(OBJEXT)	\
+	$(OUTPRE)encrypt_tk.$(OBJEXT)	\
+	$(OUTPRE)free_rtree.$(OBJEXT)	\
+	$(OUTPRE)fwd_tgt.$(OBJEXT)	\
+	$(OUTPRE)gc_frm_kdc.$(OBJEXT)	\
+	$(OUTPRE)gc_via_tkt.$(OBJEXT)	\
+	$(OUTPRE)gen_seqnum.$(OBJEXT)	\
+	$(OUTPRE)gen_subkey.$(OBJEXT)	\
+	$(OUTPRE)get_creds.$(OBJEXT)	\
+	$(OUTPRE)get_in_tkt.$(OBJEXT)	\
+	$(OUTPRE)gic_keytab.$(OBJEXT)	\
+	$(OUTPRE)gic_opt.$(OBJEXT)	\
+	$(OUTPRE)gic_pwd.$(OBJEXT)	\
+	$(OUTPRE)in_tkt_ktb.$(OBJEXT)	\
+	$(OUTPRE)in_tkt_pwd.$(OBJEXT)	\
+	$(OUTPRE)in_tkt_sky.$(OBJEXT)	\
+	$(OUTPRE)init_ctx.$(OBJEXT)	\
+	$(OUTPRE)kdc_rep_dc.$(OBJEXT)	\
+	$(OUTPRE)kfree.$(OBJEXT)		\
+	$(OUTPRE)mk_cred.$(OBJEXT)	\
+	$(OUTPRE)mk_error.$(OBJEXT)	\
+	$(OUTPRE)mk_priv.$(OBJEXT)	\
+	$(OUTPRE)mk_rep.$(OBJEXT)	\
+	$(OUTPRE)mk_req.$(OBJEXT)	\
+	$(OUTPRE)mk_req_ext.$(OBJEXT)	\
+	$(OUTPRE)mk_safe.$(OBJEXT)	\
+	$(OUTPRE)parse.$(OBJEXT)		\
+	$(OUTPRE)pr_to_salt.$(OBJEXT)	\
+	$(OUTPRE)preauth.$(OBJEXT)	\
+	$(OUTPRE)preauth2.$(OBJEXT)	\
+	$(OUTPRE)princ_comp.$(OBJEXT)	\
+	$(OUTPRE)rd_cred.$(OBJEXT)	\
+	$(OUTPRE)rd_error.$(OBJEXT)	\
+	$(OUTPRE)rd_priv.$(OBJEXT)	\
+	$(OUTPRE)rd_rep.$(OBJEXT)	\
+	$(OUTPRE)rd_req.$(OBJEXT)	\
+	$(OUTPRE)rd_req_dec.$(OBJEXT)	\
+	$(OUTPRE)rd_safe.$(OBJEXT)	\
+	$(OUTPRE)recvauth.$(OBJEXT)	\
+	$(OUTPRE)sendauth.$(OBJEXT)	\
+	$(OUTPRE)send_tgs.$(OBJEXT)	\
+	$(OUTPRE)ser_actx.$(OBJEXT)	\
+	$(OUTPRE)ser_adata.$(OBJEXT)	\
+	$(OUTPRE)ser_addr.$(OBJEXT)	\
+	$(OUTPRE)ser_auth.$(OBJEXT)	\
+	$(OUTPRE)ser_cksum.$(OBJEXT)	\
+	$(OUTPRE)ser_ctx.$(OBJEXT)	\
+	$(OUTPRE)ser_eblk.$(OBJEXT)	\
+	$(OUTPRE)ser_key.$(OBJEXT)	\
+	$(OUTPRE)ser_princ.$(OBJEXT)	\
+	$(OUTPRE)serialize.$(OBJEXT)	\
+	$(OUTPRE)set_realm.$(OBJEXT)	\
+	$(OUTPRE)srv_rcache.$(OBJEXT)	\
+	$(OUTPRE)str_conv.$(OBJEXT)	\
+	$(OUTPRE)tgtname.$(OBJEXT)	\
+	$(OUTPRE)unparse.$(OBJEXT)	\
+	$(OUTPRE)valid_times.$(OBJEXT)	\
+	$(OUTPRE)vfy_increds.$(OBJEXT)	\
+	$(OUTPRE)vic_opt.$(OBJEXT)	\
+	$(OUTPRE)walk_rtree.$(OBJEXT)
 
 SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_order.c	\
@@ -319,6 +319,6 @@ check-unix:: $(TEST_PROGS)
 		$(RUN_SETUP) ./t_ser
 
 clean::
-	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
-	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
-	$(RM) t_ser$(EXEEXT) t_ser.$(OBJEXT)
+	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT)
+	$(RM) $(OUTPRE)t_kerb$(EXEEXT) $(OUTPRE)t_kerb.$(OBJEXT)
+	$(RM) $(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)

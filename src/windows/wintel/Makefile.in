@@ -1,11 +1,11 @@
 # Makefile for the Kerberos for Windows telnet client
 # Works for both k4 and k5 releases.
 #
-OBJS 	 = telnet.obj negotiat.obj auth.obj edit.obj emul.obj \
-	   font.obj intern.obj screen.obj encrypt.obj genget.obj
+OBJS 	 = $(OUTPRE)telnet.obj $(OUTPRE)negotiat.obj $(OUTPRE)auth.obj $(OUTPRE)edit.obj $(OUTPRE)emul.obj \
+	   $(OUTPRE)font.obj $(OUTPRE)intern.obj $(OUTPRE)screen.obj $(OUTPRE)encrypt.obj $(OUTPRE)genget.obj
 
 ##### Options
-DEBUG 	 = 1
+# Set NODEBUG if building release instead of debug
 !IF ! defined(KVERSION)
 KRBOPT=-DFORWARD -DAUTHENTICATION -DENCRYPTION -DDES_ENCRYPTION
 KVERSION = 5
@@ -16,13 +16,9 @@ BUILDTOP =..\..
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
 	   /I$(BUILDTOP)\lib\crypto\des
 ##WIN16##XOBJS    = k5stream.obj enc_des.obj
-##WIN32##XOBJS    = resource.obj k5stream.obj enc_des.obj
+##WIN32##XOBJS    = $(OUTPRE)resource.obj $(OUTPRE)k5stream.obj $(OUTPRE)enc_des.obj
 
-!if defined(DEBUG)
-CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT) /Zi
-!else
 CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT)
-!endif
 
 ##WIN32##RFLAGS  = $(INCLUDES)
 ##WIN16##RFLAGS  = /nologo $(INCLUDES)
@@ -34,30 +30,29 @@ LIBS 	 = $(KLIB) $(CLIB) $(WLIB)
 ##WIN16##SYSLIBS  = libw llibcew commdlg winsock
 ##WIN32##SYSLIBS  = kernel32.lib wsock32.lib user32.lib gdi32.lib \
 ##WIN32##	  comdlg32.lib
-!if defined(DEBUG)
-##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
-##WIN32##LFLAGS = /nologo /debug
-!else
+!ifdef NODEBUG
 ##WIN16##LFLAGS = /nologo /nod /nopackcode
-##WIN32##LFLAGS	= /nologo
+!else
+##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
 !endif
+##WIN32##LFLAGS	= /nologo $(LOPTS)
 
-all:: makefile telnet.exe
+all:: makefile $(OUTPRE)telnet.exe
 
-telnet.exe: $*.def $(OBJS) $(XOBJS) $(LIBS)
+$(OUTPRE)telnet.exe: telnet.def $(OBJS) $(XOBJS) $(LIBS)
 ##WIN16##	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
-##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
+##WIN16##	  $(LIBS) $(SYSLIBS), telnet.def
 ##WIN16##	$(RC) $(RFLAGS) /k -DTELNET_APP telnet.rc $@
 ##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
 ##WIN32##	  $(LIBS) $(SYSLIBS)
 
-##WIN32##telnet.res: telnet.rc
-##WIN32##	$(RC) $(RFLAGS) -D_WIN32 -DTELNET_APP /r $*.rc
-##WIN32##resource.obj: telnet.res
-##WIN32##	$(CVTRES) /nologo /out:resource.obj telnet.res
+##WIN32##$(OUTPRE)telnet.res: telnet.rc
+##WIN32##	$(RC) $(RFLAGS) -D_WIN32 -DTELNET_APP -fo $@ /r $**
+##WIN32##$(OUTPRE)resource.obj: $(OUTPRE)telnet.res
+##WIN32##	$(CVTRES) /nologo /out:$@ $**
 
 install::
-	copy telnet.exe $(DESTDIR)
+	copy $(OUTPRE)telnet.exe $(DESTDIR)
 
 clean:: 
-	$(RM) *.exe *.res *.map
+	$(RM) $(OUTPRE)*.exe $(OUTPRE)*.res $(OUTPRE)*.map

@@ -1,8 +1,8 @@
 ##DOSBUILDTOP=..\..
 
-OBJS=	ginastub.$(OBJEXT)
+OBJS=	$(OUTPRE)ginastub.$(OBJEXT)
 
-DEBUG=1
+# Set NODEBUG if building release instead of debug
 
 INCLUDES = -I$(BUILDTOP)\include
 
@@ -11,26 +11,26 @@ WINLIBS = advapi32.lib comctl32.lib \
 
 #comctl32.lib msvcrt.lib advapi32.lib gdi32.lib comdlg32.lib winspool.lib
 
-WINDLLFLAGS = /nodefaultlib /incremental:no /pdb:none /release \
-	/nologo /align:0x1000 /base:0x1c000000 /dll /debug
+WINDLLFLAGS = /nodefaultlib /incremental:no /release \
+	/nologo /base:0x1c000000 /dll $(LOPTS)
 
-##WIN32##!if defined(DEBUG)
-##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE -DDBG
-##WIN32##!else
+##WIN32##!ifdef NODEBUG
 ##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE
+##WIN32##!else
+##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE -DDBG
 ##WIN32##!endif
 
 all-windows::
-##WIN32##all-windows:: kgina.dll
+##WIN32##all-windows:: $(OUTPRE)kgina.dll
 
 clean-windows::
-	$(RM) kgina.dll
+	$(RM) $(OUTPRE)kgina.dll
 
-kgina.dll: $(OBJS) $(KLIB) $(CLIB)
+$(OUTPRE)kgina.dll: $(OBJS) $(KLIB) $(CLIB)
 	link $(WINDLLFLAGS) -def:gina.def -out:$*.dll \
 	   $** $(WINLIBS)
 
-ginastub.obj: ginastub.h
+$(OUTPRE)ginastub.obj: ginastub.h
 
-#gina.res: res.rc
+#$(OUTPRE)gina.res: res.rc
 #	$(RC) $(RFLAGS) -r -fo $@ res.rc

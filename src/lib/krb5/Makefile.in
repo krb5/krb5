@@ -6,9 +6,9 @@ LOCAL_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
 	ccache/memory keytab keytab/file krb os rcache posix
 
 ##DOSBUILDTOP = ..\..
-##DOSLIBNAME=krb5.lib
-##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst keytab.lst krb.lst os.lst posix.lst rcache.lst
-##DOSOBJFILELIST=@asn1.lst @ccache.lst @err_tbls.lst @keytab.lst @krb.lst @os.lst @posix.lst @rcache.lst
+##DOSLIBNAME=$(OUTPRE)krb5.lib
+##DOSOBJFILEDEP=$(OUTPRE)asn1.lst $(OUTPRE)ccache.lst $(OUTPRE)err_tbls.lst $(OUTPRE)keytab.lst $(OUTPRE)krb.lst $(OUTPRE)os.lst $(OUTPRE)posix.lst $(OUTPRE)rcache.lst
+##DOSOBJFILELIST=@$(OUTPRE)asn1.lst @$(OUTPRE)ccache.lst @$(OUTPRE)err_tbls.lst @$(OUTPRE)keytab.lst @$(OUTPRE)krb.lst @$(OUTPRE)os.lst @$(OUTPRE)posix.lst @$(OUTPRE)rcache.lst
 
 TST=if test -n "`cat DONE`" ; then
 
@@ -60,7 +60,7 @@ all-windows::
 clean-unix:: clean-liblinks clean-libs
 
 clean-windows::
-	$(RM) krb5.lib krb5.bak
+	$(RM) $(OUTPRE)krb5.lib krb5.bak
 
 all-windows::
 	cd asn.1

@@ -19,8 +19,8 @@ klist: klist.o $(KRB5_BASE_DEPLIBS)
 ##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 ##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
 
-##WIN32##all-windows:: klist.exe
-##WIN32##klist.exe: klist.obj $(KLIB) $(CLIB)
+##WIN32##all-windows:: $(OUTPRE)klist.exe
+##WIN32##$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(KLIB) $(CLIB)
 ##WIN32##	link /nologo /out:$@ $** wsock32.lib
 
 

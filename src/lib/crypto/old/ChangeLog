@@ -1,3 +1,7 @@
+Mon May 10 15:20:32 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Wed Dec 16 16:14:02 1998  Tom Yu  <tlyu@mit.edu>
 
 	* old_decrypt.c (krb5_old_decrypt): Initialize the ivec to the key

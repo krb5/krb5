@@ -1,3 +1,7 @@
+Mon May 10 15:26:53 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Tue Apr  6 16:10:44 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* rc_io.c (krb5_rc_io_move): Workaround the fact that Windows has

@@ -1,3 +1,7 @@
+Mon May 10 15:22:12 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Thu Mar 25 22:41:30 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* disp_major_status.c (display_unknown): Fix the length of the

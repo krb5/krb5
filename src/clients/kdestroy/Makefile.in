@@ -20,8 +20,8 @@ kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
 ##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 ##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
 
-##WIN32##all-windows:: kdestroy.exe
-##WIN32##kdestroy.exe: kdestroy.obj $(BUILDTOP)\util\windows\getopt.obj $(KLIB) $(CLIB)
+##WIN32##all-windows:: $(OUTPRE)kdestroy.exe
+##WIN32##$(OUTPRE)kdestroy.exe: $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
 ##WIN32##	link /nologo /out:$@ $**
 
 

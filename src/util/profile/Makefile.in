@@ -5,8 +5,8 @@ BUILDTOP=$(REL)$(U)$(S)$(U)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 ##DOS##BUILDTOP = ..\..
-##DOS##OBJFILE=profile.lst
-##DOS##LIBNAME=profile.lib
+##DOS##OBJFILE=$(OUTPRE)profile.lst
+##DOS##LIBNAME=$(OUTPRE)profile.lib
 ##DOS##DOSDEFS=-DHAVE_STDLIB_H
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DOSDEFS)
@@ -22,13 +22,13 @@ STLIBOBJS = \
 	prof_err.o \
 	prof_init.o
 
-OBJS = prof_tree.$(OBJEXT) \
-	prof_file.$(OBJEXT) \
-	prof_parse.$(OBJEXT) \
-	prof_get.$(OBJEXT) \
-	prof_set.$(OBJEXT) \
-	prof_err.$(OBJEXT) \
-	prof_init.$(OBJEXT)
+OBJS = $(OUTPRE)prof_tree.$(OBJEXT) \
+	$(OUTPRE)prof_file.$(OBJEXT) \
+	$(OUTPRE)prof_parse.$(OBJEXT) \
+	$(OUTPRE)prof_get.$(OBJEXT) \
+	$(OUTPRE)prof_set.$(OBJEXT) \
+	$(OUTPRE)prof_err.$(OBJEXT) \
+	$(OUTPRE)prof_init.$(OBJEXT)
 
 SRCS = $(srcdir)/prof_tree.c \
 	$(srcdir)/prof_file.c \
@@ -82,11 +82,13 @@ test_profile: test_profile.$(OBJEXT) argv_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
 	$(CC_LINK) -o test_profile test_profile.$(OBJEXT) \
 		argv_parse.$(OBJEXT) $(OBJS) $(MLIBS)
 
-test_parse.exe: 
+# NEED TO FIX!!
+$(OUTPRE)test_parse.exe: 
 	$(CC) $(CFLAGS2) -o test_parse.exe test_parse.c \
 		prof_parse.c prof_tree.c /link /stack:16384
 
-test_profile.exe: 
+# NEED TO FIX!!
+$(OUTPRE)test_profile.exe: 
 	$(CC) $(CFLAGS2) -o test_profile.exe test_profile.c prof_init.c \
 		prof_file.c prof_parse.c prof_tree.c /link /stack:16384
 
@@ -104,11 +106,11 @@ clean-unix:: clean-libs clean-libobjs
 		prof_err.c test_profile profile.h
 
 clean-windows::
-	$(RM) profile.lib profile.bak test_parse.exe test_profile.exe
+	$(RM) $(OUTPRE)profile.lib profile.bak $(OUTPRE)test_parse.exe $(OUTPRE)test_profile.exe
 
-check-windows:: test_profile.exe test_parse.exe
-	$(RM) *.obj
-	test_parse test.ini
+check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
+	$(RM) $(OUTPRE)*.obj
+	$(OUTPRE)test_parse test.ini
 
 # +++ Dependency line eater +++
 # 

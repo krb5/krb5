@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=old
-##DOS##OBJFILE=..\old.lst
+##DOS##OBJFILE=..\$(OUTPRE)old.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -16,7 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS= des_stringtokey.o old_decrypt.o old_encrypt.o
 
-OBJS= des_stringtokey.$(OBJEXT) old_decrypt.$(OBJEXT) old_encrypt.$(OBJEXT)
+OBJS= $(OUTPRE)des_stringtokey.$(OBJEXT) $(OUTPRE)old_decrypt.$(OBJEXT) $(OUTPRE)old_encrypt.$(OBJEXT)
 
 SRCS= $(srcdir)/des_stringtokey.c $(srcdir)/old_decrypt.c \
 	$(srcdir)/old_encrypt.c

@@ -1,0 +1,4 @@
+Mon May 10 15:28:12 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+

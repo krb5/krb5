@@ -1,3 +1,7 @@
+Mon May 10 15:28:51 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Fri Feb  5 01:42:07 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* enc_des.c (fb64_session): Call des_init_random_number_generator

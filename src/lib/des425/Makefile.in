@@ -5,10 +5,10 @@ BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
 
 ##DOS##BUILDTOP = ..\..
-##DOS##LIBNAME=des425.lib
-##DOS##OBJFILE=des425.lst
-##DOS##OBJFILEDEP=des425.lst
-##DOS##OBJFILELIST=@des425.lst
+##DOS##LIBNAME=$(OUTPRE)des425.lib
+##DOS##OBJFILE=$(OUTPRE)des425.lst
+##DOS##OBJFILEDEP=$(OUTPRE)des425.lst
+##DOS##OBJFILELIST=@$(OUTPRE)des425.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -45,21 +45,21 @@ STLIBOBJS=cksum.o	\
 	k4_glue.o
 
 
-OBJS=	cksum.$(OBJEXT)		\
-	des.$(OBJEXT)		\
-	enc_dec.$(OBJEXT)	\
-	key_parity.$(OBJEXT)	\
-	key_sched.$(OBJEXT)	\
-	new_rnd_key.$(OBJEXT)	\
-	pcbc_encrypt.$(OBJEXT)	\
-	quad_cksum.$(OBJEXT)	\
-	random_key.$(OBJEXT)	\
-	read_passwd.$(OBJEXT)	\
-	str_to_key.$(OBJEXT)	\
-	unix_time.$(OBJEXT)     \
-	util.$(OBJEXT)		\
-	weak_key.$(OBJEXT)	\
-	k4_glue.$(OBJEXT)
+OBJS=	$(OUTPRE)cksum.$(OBJEXT)	\
+	$(OUTPRE)des.$(OBJEXT)		\
+	$(OUTPRE)enc_dec.$(OBJEXT)	\
+	$(OUTPRE)key_parity.$(OBJEXT)	\
+	$(OUTPRE)key_sched.$(OBJEXT)	\
+	$(OUTPRE)new_rnd_key.$(OBJEXT)	\
+	$(OUTPRE)pcbc_encrypt.$(OBJEXT)	\
+	$(OUTPRE)quad_cksum.$(OBJEXT)	\
+	$(OUTPRE)random_key.$(OBJEXT)	\
+	$(OUTPRE)read_passwd.$(OBJEXT)	\
+	$(OUTPRE)str_to_key.$(OBJEXT)	\
+	$(OUTPRE)unix_time.$(OBJEXT)	\
+	$(OUTPRE)util.$(OBJEXT)		\
+	$(OUTPRE)weak_key.$(OBJEXT)	\
+	$(OUTPRE)k4_glue.$(OBJEXT)
 
 SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/des.c		\
@@ -96,7 +96,7 @@ check-unix:: verify
 check-windows::
 
 clean:: 
-	$(RM) verify$(EXEEXT) verify.$(OBJEXT)
+	$(RM) $(OUTPRE)verify$(EXEEXT) $(OUTPRE)verify.$(OBJEXT)
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 

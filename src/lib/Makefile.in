@@ -29,16 +29,16 @@ clean-windows::
 
 # Windows stuff to make krb5 and gssapi DLLs.
 
-CLIBS = $(BUILDTOP)\util\et\comerr.lib
-PLIBS = $(BUILDTOP)\util\profile\profile.lib
-KLIBS = krb5\krb5.lib crypto\crypto.lib \
-	$(BUILDTOP)\util\profile\profile.lib des425\des425.lib
-GLIBS = gssapi\gssapi.lib
-K4LIBS = krb4\krb4.lib
+CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
+PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
+KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
+	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
+	des425\$(OUTPRE)des425.lib
+GLIBS = gssapi\$(OUTPRE)gssapi.lib
+K4LIBS = krb4\$(OUTPRE)krb4.lib
 
-##WIN16##VERLIBS=..\mit\windows\lib\vswin.lib c:\msvc\lib\ver.lib
-##WIN32##VERLIBS=..\mit\windows\lib\vsnt.lib \
-##WIN32##	"c:\program files\devstudio\vc\lib\version.lib"
+##WIN16##VERLIBS=..\mit\windows\lib\vswin.lib ver.lib
+##WIN32##VERLIBS=..\mit\windows\lib\vsnt.lib version.lib
 ##MIT##MITLIBS= $(VERLIBS)
 ##MIT##MITFLAGS=-I..\mit\windows\include /DVERSERV=1
 
@@ -49,7 +49,7 @@ K4LIBS = krb4\krb4.lib
 ##WIN16##KDEF = krb5_16.def
 ##WIN32##KDEF = krb5_32.def
 ##WIN16##KRB5RC = krb5.rc
-##WIN32##KRB5RC = krb5.obj
+##WIN32##KRB5RC = $(OUTPRE)krb5.obj
 ##WIN16##GDEF = gssapi16.def
 ##WIN32##GDEF = gssapi32.def
 ##WIN16##K4DEF = krb4_16.def
@@ -60,34 +60,34 @@ K4LIBS = krb4\krb4.lib
 ##WIN16##WINLIBS = $(WLIB) ldllcew libw oldnames
 ##WIN32##WINLIBS = kernel32.lib wsock32.lib \
 ##WIN32##	user32.lib shell32.lib oldnames.lib
-##WIN32##WINDLLFLAGS = /incremental:no /pdb:none /debug \
-##WIN32##		/nologo /align:0x1000 /base:0x1c000000 /dll \
+##WIN32##WINDLLFLAGS = /incremental:no /debug \
+##WIN32##		/nologo /base:0x1c000000 /dll \
 ##WIN32##		/entry:DllMain
 
 
 
-$(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
+##DOS##$(CLIB): $(CLIBS) $(WLIB) $(CDEF) $(OUTPRE)no_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   no_glue, $*.dll, $*.map, $(CLIBS) $(WINLIBS), $(CDEF)
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DCE_LIB -D_MSDOS_ -DRES_ONLY version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
-##WIN32##	rc  $(CPPFLAGS) -DCE_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo version.res $(VERSIONRC)
+##WIN32##	rc  $(CPPFLAGS) -DCE_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(CDEF) /out:$*.dll \
-##WIN32##	   no_glue.obj version.res $(CLIBS) $(WINLIBS)
+##WIN32##	   $(OUTPRE)no_glue.obj $(OUTPRE)version.res $(CLIBS) $(WINLIBS)
 
-$(PLIB): $(PLIBS) $(WLIB) $(CLIB) $(PDEF) no_glue.obj
+##DOS##$(PLIB): $(PLIBS) $(WLIB) $(CLIB) $(PDEF) $(OUTPRE)no_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   no_glue, $*.dll, $*.map, $(PLIBS) $(CLIB) $(WINLIBS), \
 ##WIN16##	   $(PDEF)
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DPROF_LIB -D_MSDOS_ -DRES_ONLY version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
-##WIN32##	rc  $(CPPFLAGS) -DPROF_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo version.res $(VERSIONRC)
+##WIN32##	rc  $(CPPFLAGS) -DPROF_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(PDEF) /out:$*.dll \
-##WIN32##	   no_glue.obj version.res $(PLIBS) $(CLIB) $(WINLIBS)
+##WIN32##	   $(OUTPRE)no_glue.obj $(OUTPRE)version.res $(PLIBS) $(CLIB) $(WINLIBS)
 
-$(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
+##DOS##$(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) $(OUTPRE)k5_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k5_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(PLIB) $(WINLIBS), $(KDEF)
@@ -95,24 +95,24 @@ $(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	rc $(CPPFLAGS) -DKRB5_LIB -D_WIN32 -D_MSDOS -DRES_ONLY \
-##WIN32##	   -fo version.res $(VERSIONRC)
+##WIN32##	   -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
-##WIN32##	   k5_glue.obj version.res $(KRB5RC) $(MITLIBS) $(KLIBS) \
+##WIN32##	   $(OUTPRE)k5_glue.obj $(OUTPRE)version.res $(KRB5RC) $(MITLIBS) $(KLIBS) \
 ##WIN32##          $(CLIB) $(PLIB) \
 ##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
-$(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
+##DOS##$(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) $(OUTPRE)gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   gss_glue, $*.dll, $*.map, \
 ##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k -DGSSAPI_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
-##WIN32##	rc  -D_WIN32 -DGSSAPI_LIB -fo version.res $(VERSIONRC)
+##WIN32##	rc  -D_WIN32 -DGSSAPI_LIB -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
-##WIN32##	   gss_glue.obj version.res $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   $(OUTPRE)gss_glue.obj $(OUTPRE)version.res $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
-$(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(K4DEF) k4_glue.obj
+##DOS##$(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(K4DEF) $(OUTPRE)k4_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k4_glue, $*.dll, $*.map, \
 ##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS) llibcew, \
@@ -120,9 +120,9 @@ $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(K4DEF) k4_glue.obj
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k -DKRB4_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
-##WIN32##	rc   -D_WIN32 -DKRB4_LIB -fo version.res $(VERSIONRC)
+##WIN32##	rc   -D_WIN32 -DKRB4_LIB -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(K4DEF) /out:$*.dll \
-##WIN32##	   k4_glue.obj version.res $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) \
+##WIN32##	   $(OUTPRE)k4_glue.obj $(OUTPRE)version.res $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) \
 ##WIN32##	   $(WINLIBS)
 
 #
@@ -135,14 +135,14 @@ $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(K4DEF) k4_glue.obj
 ##WIN32##SKDEF = krb5_32.def
 ##WIN16##SGLIB = sapgss16.lib
 ##WIN16##SKLIB = sapkrb16.lib
-##WIN32##SGLIB = sapgss32.lib
-##WIN32##SKLIB = sapkrb32.lib
+##WIN32##SGLIB = $(OUTPRE)sapgss32.lib
+##WIN32##SKLIB = $(OUTPRE)sapkrb32.lib
 
-sap_glue.obj: win_glue.c
+$(OUTPRE)sap_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) $(MITFLAGS) /DSAP_VERSERV=1 /DKRB5=1 /c \
 		/Fo$@ win_glue.c
 
-$(SKLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) sap_glue.obj $(KRB5RC)
+##DOS##$(SKLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) $(OUTPRE)sap_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   sap_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(WINLIBS), $(SKDEF)
@@ -150,35 +150,39 @@ $(SKLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) sap_glue.obj $(KRB5RC)
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	rc  $(CPPFLAGS) -DSAPKRB_LIB -D_WIN32 -D_MSDOS -DRES_ONLY \
-##WIN32##	   -fo version.res $(VERSIONRC)
+##WIN32##	   -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(SKDEF) /out:$*.dll \
-##WIN32##	   sap_glue.obj version.res $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
+##WIN32##	   $(OUTPRE)sap_glue.obj $(OUTPRE)version.res $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
 ##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
-$(SGLIB): $(GLIBS) $(SKLIB) $(CLIB) $(GDEF) gss_glue.obj
+##DOS##$(SGLIB): $(GLIBS) $(SKLIB) $(CLIB) $(GDEF) $(OUTPRE)gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   gss_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS), $(SGDEF)
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k -DSAPGSS_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
-##WIN32##	rc  -D_WIN32 -DSAPGSS_LIB -fo version.res $(VERSIONRC)
+##WIN32##	rc  -D_WIN32 -DSAPGSS_LIB -fo $(OUTPRE)version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(SGDEF) /out:$*.dll \
-##WIN32##	   gss_glue.obj version.res $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   $(OUTPRE)gss_glue.obj $(OUTPRE)version.res $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS)
 
 ##MIT##lib-windows:: $(SKLIB) $(SGLIB) 
 
-k5_glue.obj: win_glue.c
+$(OUTPRE)k5_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
-k4_glue.obj: win_glue.c
+$(OUTPRE)k4_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /DKRB4=1 /Fo$@ $**
-gss_glue.obj: win_glue.c
+$(OUTPRE)gss_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
-no_glue.obj: win_glue.c
+$(OUTPRE)no_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /Fo$@ $**
 
 ##WIN32##.rc.obj:
 ##WIN32##	$(RC) $(CPPFLAGS) -DKRB5 /r $**
+##WIN32##	$(CVTRES) /nologo /out:$@ $*.res
+
+##WIN32##{}.rc{$(OUTPRE)}.obj:
+##WIN32##	$(RC) $(CPPFLAGS) -DKRB5 -fo $*.res /r $**
 ##WIN32##	$(CVTRES) /nologo /out:$@ $*.res
 
 ##WIN16##$(WLIB):  winsock.def

@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = ccache\memory
-##DOS##OBJFILE = file.lst
+##DOS##OBJFILE = $(OUTPRE)file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 
@@ -18,12 +18,12 @@ STLIBOBJS = \
 	mcc_store.o mcc_ops.o \
 	mcc_sflags.o
 
-OBJS    = mcc_close.$(OBJEXT) mcc_destry.$(OBJEXT) mcc_eseq.$(OBJEXT) \
-	mcc_gennew.$(OBJEXT) mcc_getnam.$(OBJEXT) mcc_gprin.$(OBJEXT) \
-	mcc_init.$(OBJEXT) mcc_nseq.$(OBJEXT) \
-	mcc_reslv.$(OBJEXT) mcc_retrv.$(OBJEXT) mcc_sseq.$(OBJEXT) \
-	mcc_store.$(OBJEXT) mcc_ops.$(OBJEXT) \
-	mcc_sflags.$(OBJEXT)
+OBJS    = $(OUTPRE)mcc_close.$(OBJEXT) $(OUTPRE)mcc_destry.$(OBJEXT) $(OUTPRE)mcc_eseq.$(OBJEXT) \
+	$(OUTPRE)mcc_gennew.$(OBJEXT) $(OUTPRE)mcc_getnam.$(OBJEXT) $(OUTPRE)mcc_gprin.$(OBJEXT) \
+	$(OUTPRE)mcc_init.$(OBJEXT) $(OUTPRE)mcc_nseq.$(OBJEXT) \
+	$(OUTPRE)mcc_reslv.$(OBJEXT) $(OUTPRE)mcc_retrv.$(OBJEXT) $(OUTPRE)mcc_sseq.$(OBJEXT) \
+	$(OUTPRE)mcc_store.$(OBJEXT) $(OUTPRE)mcc_ops.$(OBJEXT) \
+	$(OUTPRE)mcc_sflags.$(OBJEXT)
 
 SRCS    = $(srcdir)/mcc_close.c $(srcdir)/mcc_destry.c $(srcdir)/mcc_eseq.c \
 	$(srcdir)/mcc_gennew.c $(srcdir)/mcc_getnam.c $(srcdir)/mcc_gprin.c \

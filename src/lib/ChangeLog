@@ -1,3 +1,7 @@
+Mon May 10 15:14:34 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Fri May  7 18:27:08 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* xpprof32.def, krb4_32.def, gssapi32.def, comerr32.del: Remove

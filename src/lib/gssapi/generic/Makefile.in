@@ -6,13 +6,13 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=generic
-##DOS##OBJFILE=..\generic.lst
+##DOS##OBJFILE=..\$(OUTPRE)generic.lst
 ##WIN16##LIBNAME=..\gssapi.lib
 
 ##DOS##DLL_EXP_TYPE=GSS
 
 ETSRCS= gssapi_err_generic.c
-ETOBJS= gssapi_err_generic.$(OBJEXT)
+ETOBJS= $(OUTPRE)gssapi_err_generic.$(OBJEXT)
 ETHDRS= gssapi_err_generic.h
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
@@ -25,7 +25,7 @@ $(EHDRDIR)$(S)gssapi.h: gssapi.h
 $(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h
 	$(CP) $(srcdir)$(S)gssapi_generic.h $@
 
-gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
+$(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
@@ -65,21 +65,21 @@ SRCS = \
 	gssapi_err_generic.c
 
 OBJS = \
-	disp_com_err_status.$(OBJEXT) \
-	disp_major_status.$(OBJEXT) \
-	gssapi_generic.$(OBJEXT) \
-	oid_ops.$(OBJEXT) \
-	rel_buffer.$(OBJEXT) \
-	rel_oid_set.$(OBJEXT) \
-	util_buffer.$(OBJEXT) \
-	util_canonhost.$(OBJEXT) \
-	util_dup.$(OBJEXT) \
-	util_oid.$(OBJEXT) \
-	util_ordering.$(OBJEXT) \
-	util_set.$(OBJEXT) \
-	util_token.$(OBJEXT) \
-	util_validate.$(OBJEXT) \
-	gssapi_err_generic.$(OBJEXT)
+	$(OUTPRE)disp_com_err_status.$(OBJEXT) \
+	$(OUTPRE)disp_major_status.$(OBJEXT) \
+	$(OUTPRE)gssapi_generic.$(OBJEXT) \
+	$(OUTPRE)oid_ops.$(OBJEXT) \
+	$(OUTPRE)rel_buffer.$(OBJEXT) \
+	$(OUTPRE)rel_oid_set.$(OBJEXT) \
+	$(OUTPRE)util_buffer.$(OBJEXT) \
+	$(OUTPRE)util_canonhost.$(OBJEXT) \
+	$(OUTPRE)util_dup.$(OBJEXT) \
+	$(OUTPRE)util_oid.$(OBJEXT) \
+	$(OUTPRE)util_ordering.$(OBJEXT) \
+	$(OUTPRE)util_set.$(OBJEXT) \
+	$(OUTPRE)util_token.$(OBJEXT) \
+	$(OUTPRE)util_validate.$(OBJEXT) \
+	$(OUTPRE)gssapi_err_generic.$(OBJEXT)
 
 STLIBOBJS = \
 	disp_com_err_status.o \

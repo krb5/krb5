@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR=keytab\file
-##DOS##OBJFILE= file.lst
+##DOS##OBJFILE=$(OUTPRE)file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS = \
@@ -44,21 +44,21 @@ SRCS= \
 	$(srcdir)/ser_ktf.c
 
 OBJS = \
-	ktf_add.$(OBJEXT)	\
-	ktf_close.$(OBJEXT)	\
-	ktf_endget.$(OBJEXT)	\
-	ktf_g_ent.$(OBJEXT)	\
-	ktf_g_name.$(OBJEXT)	\
-	ktf_next.$(OBJEXT)	\
-	ktf_resolv.$(OBJEXT)	\
-	ktf_remove.$(OBJEXT)	\
-	ktf_ssget.$(OBJEXT)	\
-	ktf_util.$(OBJEXT)	\
-	ktf_ops.$(OBJEXT)	\
-	ktf_wops.$(OBJEXT)	\
-	ktf_wreslv.$(OBJEXT)	\
-	ktf_defops.$(OBJEXT)	\
-	ser_ktf.$(OBJEXT)
+	$(OUTPRE)ktf_add.$(OBJEXT)	\
+	$(OUTPRE)ktf_close.$(OBJEXT)	\
+	$(OUTPRE)ktf_endget.$(OBJEXT)	\
+	$(OUTPRE)ktf_g_ent.$(OBJEXT)	\
+	$(OUTPRE)ktf_g_name.$(OBJEXT)	\
+	$(OUTPRE)ktf_next.$(OBJEXT)	\
+	$(OUTPRE)ktf_resolv.$(OBJEXT)	\
+	$(OUTPRE)ktf_remove.$(OBJEXT)	\
+	$(OUTPRE)ktf_ssget.$(OBJEXT)	\
+	$(OUTPRE)ktf_util.$(OBJEXT)	\
+	$(OUTPRE)ktf_ops.$(OBJEXT)	\
+	$(OUTPRE)ktf_wops.$(OBJEXT)	\
+	$(OUTPRE)ktf_wreslv.$(OBJEXT)	\
+	$(OUTPRE)ktf_defops.$(OBJEXT)	\
+	$(OUTPRE)ser_ktf.$(OBJEXT)
 
 ##DOS##LIBOBJS = $(OBJS)
 

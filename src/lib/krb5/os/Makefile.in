@@ -9,7 +9,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
-##DOS##OBJFILE=..\$(PREFIXDIR).lst
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
@@ -57,48 +57,48 @@ STLIBOBJS= \
 	write_msg.o
 
 OBJS= \
-	an_to_ln.$(OBJEXT)	\
-	c_ustime.$(OBJEXT)	\
-	def_realm.$(OBJEXT)	\
-	DNR.$(OBJEXT)	\
-	ccdefname.$(OBJEXT)	\
-	changepw.$(OBJEXT)	\
-	free_krbhs.$(OBJEXT)	\
-	free_hstrl.$(OBJEXT)	\
-	full_ipadr.$(OBJEXT)	\
-	get_krbhst.$(OBJEXT)	\
-	gen_port.$(OBJEXT)	\
-	genaddrs.$(OBJEXT)	\
-	gen_rname.$(OBJEXT)	\
-	gmt_mktime.$(OBJEXT)	\
-	hostaddr.$(OBJEXT)	\
-	hst_realm.$(OBJEXT)	\
-	init_os_ctx.$(OBJEXT)	\
-	krbfileio.$(OBJEXT)	\
-	ktdefname.$(OBJEXT)	\
-	kuserok.$(OBJEXT)	\
-	mk_faddr.$(OBJEXT)	\
-	localaddr.$(OBJEXT)	\
-	locate_kdc.$(OBJEXT)	\
-	lock_file.$(OBJEXT)	\
-	macsock.$(OBJEXT)	\
-	net_read.$(OBJEXT)	\
-	net_write.$(OBJEXT)	\
-	osconfig.$(OBJEXT)	\
-	port2ip.$(OBJEXT)	\
-	prompter.$(OBJEXT)	\
-	promptusr.$(OBJEXT)	\
-	read_msg.$(OBJEXT)	\
-	read_pwd.$(OBJEXT)	\
-	realm_dom.$(OBJEXT)	\
-	realm_iter.$(OBJEXT)	\
-	sendto_kdc.$(OBJEXT)	\
-	sn2princ.$(OBJEXT)	\
-	timeofday.$(OBJEXT)	\
-	toffset.$(OBJEXT)	\
-	unlck_file.$(OBJEXT)	\
-	ustime.$(OBJEXT)	\
-	write_msg.$(OBJEXT)
+	$(OUTPRE)an_to_ln.$(OBJEXT)	\
+	$(OUTPRE)c_ustime.$(OBJEXT)	\
+	$(OUTPRE)def_realm.$(OBJEXT)	\
+	$(OUTPRE)DNR.$(OBJEXT)	\
+	$(OUTPRE)ccdefname.$(OBJEXT)	\
+	$(OUTPRE)changepw.$(OBJEXT)	\
+	$(OUTPRE)free_krbhs.$(OBJEXT)	\
+	$(OUTPRE)free_hstrl.$(OBJEXT)	\
+	$(OUTPRE)full_ipadr.$(OBJEXT)	\
+	$(OUTPRE)get_krbhst.$(OBJEXT)	\
+	$(OUTPRE)gen_port.$(OBJEXT)	\
+	$(OUTPRE)genaddrs.$(OBJEXT)	\
+	$(OUTPRE)gen_rname.$(OBJEXT)	\
+	$(OUTPRE)gmt_mktime.$(OBJEXT)	\
+	$(OUTPRE)hostaddr.$(OBJEXT)	\
+	$(OUTPRE)hst_realm.$(OBJEXT)	\
+	$(OUTPRE)init_os_ctx.$(OBJEXT)	\
+	$(OUTPRE)krbfileio.$(OBJEXT)	\
+	$(OUTPRE)ktdefname.$(OBJEXT)	\
+	$(OUTPRE)kuserok.$(OBJEXT)	\
+	$(OUTPRE)mk_faddr.$(OBJEXT)	\
+	$(OUTPRE)localaddr.$(OBJEXT)	\
+	$(OUTPRE)locate_kdc.$(OBJEXT)	\
+	$(OUTPRE)lock_file.$(OBJEXT)	\
+	$(OUTPRE)macsock.$(OBJEXT)	\
+	$(OUTPRE)net_read.$(OBJEXT)	\
+	$(OUTPRE)net_write.$(OBJEXT)	\
+	$(OUTPRE)osconfig.$(OBJEXT)	\
+	$(OUTPRE)port2ip.$(OBJEXT)	\
+	$(OUTPRE)prompter.$(OBJEXT)	\
+	$(OUTPRE)promptusr.$(OBJEXT)	\
+	$(OUTPRE)read_msg.$(OBJEXT)	\
+	$(OUTPRE)read_pwd.$(OBJEXT)	\
+	$(OUTPRE)realm_dom.$(OBJEXT)	\
+	$(OUTPRE)realm_iter.$(OBJEXT)	\
+	$(OUTPRE)sendto_kdc.$(OBJEXT)	\
+	$(OUTPRE)sn2princ.$(OBJEXT)	\
+	$(OUTPRE)timeofday.$(OBJEXT)	\
+	$(OUTPRE)toffset.$(OBJEXT)	\
+	$(OUTPRE)unlck_file.$(OBJEXT)	\
+	$(OUTPRE)ustime.$(OBJEXT)	\
+	$(OUTPRE)write_msg.$(OBJEXT)
 
 SRCS= \
 	$(srcdir)/an_to_ln.c	\

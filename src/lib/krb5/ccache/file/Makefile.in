@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = ccache\file
-##DOS##OBJFILE = file.lst
+##DOS##OBJFILE = $(OUTPRE)file.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS = \
@@ -18,13 +18,13 @@ STLIBOBJS = \
 	fcc_write.o fcc_sflags.o fcc_defops.o \
 	fcc_errs.o fcc_maybe.o
 
-OBJS 	= fcc_close.$(OBJEXT) fcc_destry.$(OBJEXT) fcc_eseq.$(OBJEXT) \
-	fcc_gennew.$(OBJEXT) fcc_getnam.$(OBJEXT) fcc_gprin.$(OBJEXT) \
-	fcc_init.$(OBJEXT) fcc_nseq.$(OBJEXT) fcc_read.$(OBJEXT) \
-	fcc_reslv.$(OBJEXT) fcc_retrv.$(OBJEXT) fcc_sseq.$(OBJEXT) \
-	fcc_store.$(OBJEXT) fcc_skip.$(OBJEXT) fcc_ops.$(OBJEXT) \
-	fcc_write.$(OBJEXT) fcc_sflags.$(OBJEXT) fcc_defops.$(OBJEXT) \
-	fcc_errs.$(OBJEXT) fcc_maybe.$(OBJEXT)
+OBJS 	= $(OUTPRE)fcc_close.$(OBJEXT) $(OUTPRE)fcc_destry.$(OBJEXT) $(OUTPRE)fcc_eseq.$(OBJEXT) \
+	$(OUTPRE)fcc_gennew.$(OBJEXT) $(OUTPRE)fcc_getnam.$(OBJEXT) $(OUTPRE)fcc_gprin.$(OBJEXT) \
+	$(OUTPRE)fcc_init.$(OBJEXT) $(OUTPRE)fcc_nseq.$(OBJEXT) $(OUTPRE)fcc_read.$(OBJEXT) \
+	$(OUTPRE)fcc_reslv.$(OBJEXT) $(OUTPRE)fcc_retrv.$(OBJEXT) $(OUTPRE)fcc_sseq.$(OBJEXT) \
+	$(OUTPRE)fcc_store.$(OBJEXT) $(OUTPRE)fcc_skip.$(OBJEXT) $(OUTPRE)fcc_ops.$(OBJEXT) \
+	$(OUTPRE)fcc_write.$(OBJEXT) $(OUTPRE)fcc_sflags.$(OBJEXT) $(OUTPRE)fcc_defops.$(OBJEXT) \
+	$(OUTPRE)fcc_errs.$(OBJEXT) $(OUTPRE)fcc_maybe.$(OBJEXT)
 
 SRCS 	= $(srcdir)/fcc_close.c $(srcdir)/fcc_destry.c $(srcdir)/fcc_eseq.c \
 	$(srcdir)/fcc_gennew.c $(srcdir)/fcc_getnam.c $(srcdir)/fcc_gprin.c \

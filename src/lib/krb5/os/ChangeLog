@@ -1,3 +1,7 @@
+Mon May 10 15:26:20 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Fri May  7 18:04:48 1999  Danilo D Almeida  <dalmeida@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Fixed typo.

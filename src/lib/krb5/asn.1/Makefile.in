@@ -6,7 +6,7 @@ CFLAGS=$(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=asn.1
-##DOS##OBJFILE=..\asn1.lst
+##DOS##OBJFILE=..\$(OUTPRE)asn1.lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
@@ -36,16 +36,16 @@ SRCS= \
 	$(srcdir)/asn1_misc.c
 
 OBJS= \
-	asn1_decode.$(OBJEXT)\
-	asn1_k_decode.$(OBJEXT)\
-	asn1_encode.$(OBJEXT)\
-	asn1_get.$(OBJEXT)\
-	asn1_make.$(OBJEXT)\
-	asn1buf.$(OBJEXT)\
-	krb5_decode.$(OBJEXT)\
-	krb5_encode.$(OBJEXT)\
-	asn1_k_encode.$(OBJEXT)\
-	asn1_misc.$(OBJEXT)
+	$(OUTPRE)asn1_decode.$(OBJEXT)\
+	$(OUTPRE)asn1_k_decode.$(OBJEXT)\
+	$(OUTPRE)asn1_encode.$(OBJEXT)\
+	$(OUTPRE)asn1_get.$(OBJEXT)\
+	$(OUTPRE)asn1_make.$(OBJEXT)\
+	$(OUTPRE)asn1buf.$(OBJEXT)\
+	$(OUTPRE)krb5_decode.$(OBJEXT)\
+	$(OUTPRE)krb5_encode.$(OBJEXT)\
+	$(OUTPRE)asn1_k_encode.$(OBJEXT)\
+	$(OUTPRE)asn1_misc.$(OBJEXT)
 
 ##DOS##LIBOBJS = $(OBJS)
 

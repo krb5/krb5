@@ -1,3 +1,7 @@
+Mon May 10 15:22:27 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
 Fri Apr 30 12:27:14 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* set_ccache.c (gss_krb5_ccache_name): Add call to free the

@@ -6,7 +6,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=error_tables
-##DOS##OBJFILE=..\err_tbls.lst
+##DOS##OBJFILE=..\$(OUTPRE)err_tbls.lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
@@ -27,8 +27,8 @@ STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
       kv5m_err.o adm_err.o init_ets.o
 
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
-OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
-      kv5m_err.$(OBJEXT) adm_err.$(OBJEXT) init_ets.$(OBJEXT)
+OBJS= $(OUTPRE)asn1_err.$(OBJEXT) $(OUTPRE)kdb5_err.$(OBJEXT) $(OUTPRE)krb5_err.$(OBJEXT) \
+      $(OUTPRE)kv5m_err.$(OBJEXT) $(OUTPRE)adm_err.$(OBJEXT) $(OUTPRE)init_ets.$(OBJEXT)
 ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c \
 	$(srcdir)/init_ets.c
@@ -60,12 +60,12 @@ awk-windows:
 #
 # dependencies for traditional makes
 #
-asn1_err.$(OBJEXT): asn1_err.c
-isode_err.$(OBJEXT): isode_err.c
-kdb5_err.$(OBJEXT): kdb5_err.c
-krb5_err.$(OBJEXT): krb5_err.c
-adm_err.$(OBJEXT): adm_err.c
-kv5m_err.$(OBJEXT): kv5m_err.c
+$(OUTPRE)asn1_err.$(OBJEXT): asn1_err.c
+$(OUTPRE)isode_err.$(OBJEXT): isode_err.c
+$(OUTPRE)kdb5_err.$(OBJEXT): kdb5_err.c
+$(OUTPRE)krb5_err.$(OBJEXT): krb5_err.c
+$(OUTPRE)adm_err.$(OBJEXT): adm_err.c
+$(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c
 
 clean-unix:: clean-libobjs
 	$(RM) $(HDRS) $(ETSRCS)

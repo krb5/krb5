@@ -6,8 +6,8 @@ CFLAGS = $(CCOPTS) $(DEFS) $(DEFINES)
 DEFINES=-I$(srcdir)/../../include/kerberosIV
 
 ##DOS##BUILDTOP = ..\..
-##DOS##LIBNAME=krb4.lib
-##DOS##OBJFILE=krb4.lst
+##DOS##LIBNAME=$(OUTPRE)krb4.lib
+##DOS##OBJFILE=$(OUTPRE)krb4.lst
 
 LIB=krb4
 LIBMAJOR=2
@@ -31,37 +31,37 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 EHDRDIR=$(BUILDTOP)$(S)include
 
 OBJS	= \
-	cr_auth_repl.$(OBJEXT) \
-	cr_ciph.$(OBJEXT) \
-	cr_tkt.$(OBJEXT) \
-	debug.$(OBJEXT) \
-	decomp_tkt.$(OBJEXT) \
-	err_txt.$(OBJEXT) \
-	g_ad_tkt.$(OBJEXT) \
-	g_in_tkt.$(OBJEXT) \
-	g_phost.$(OBJEXT) \
-	g_pw_in_tkt.$(OBJEXT) \
-	g_pw_tkt.$(OBJEXT) \
-	g_tkt_svc.$(OBJEXT) \
-	gethostname.$(OBJEXT) \
-	getst.$(OBJEXT) \
-	kname_parse.$(OBJEXT) \
-	mk_auth.$(OBJEXT) \
-	mk_err.$(OBJEXT) \
-	mk_priv.$(OBJEXT) \
-	mk_req.$(OBJEXT) \
-	mk_safe.$(OBJEXT) \
-	month_sname.$(OBJEXT) \
-	one.$(OBJEXT) \
-	pkt_cipher.$(OBJEXT) \
-	pkt_clen.$(OBJEXT) \
-	rd_err.$(OBJEXT) \
-	rd_priv.$(OBJEXT) \
-	rd_safe.$(OBJEXT) \
-	send_to_kdc.$(OBJEXT) \
-	stime.$(OBJEXT) \
-	rd_preauth.$(OBJEXT) \
-	mk_preauth.$(OBJEXT) \
+	$(OUTPRE)cr_auth_repl.$(OBJEXT) \
+	$(OUTPRE)cr_ciph.$(OBJEXT) \
+	$(OUTPRE)cr_tkt.$(OBJEXT) \
+	$(OUTPRE)debug.$(OBJEXT) \
+	$(OUTPRE)decomp_tkt.$(OBJEXT) \
+	$(OUTPRE)err_txt.$(OBJEXT) \
+	$(OUTPRE)g_ad_tkt.$(OBJEXT) \
+	$(OUTPRE)g_in_tkt.$(OBJEXT) \
+	$(OUTPRE)g_phost.$(OBJEXT) \
+	$(OUTPRE)g_pw_in_tkt.$(OBJEXT) \
+	$(OUTPRE)g_pw_tkt.$(OBJEXT) \
+	$(OUTPRE)g_tkt_svc.$(OBJEXT) \
+	$(OUTPRE)gethostname.$(OBJEXT) \
+	$(OUTPRE)getst.$(OBJEXT) \
+	$(OUTPRE)kname_parse.$(OBJEXT) \
+	$(OUTPRE)mk_auth.$(OBJEXT) \
+	$(OUTPRE)mk_err.$(OBJEXT) \
+	$(OUTPRE)mk_priv.$(OBJEXT) \
+	$(OUTPRE)mk_req.$(OBJEXT) \
+	$(OUTPRE)mk_safe.$(OBJEXT) \
+	$(OUTPRE)month_sname.$(OBJEXT) \
+	$(OUTPRE)one.$(OBJEXT) \
+	$(OUTPRE)pkt_cipher.$(OBJEXT) \
+	$(OUTPRE)pkt_clen.$(OBJEXT) \
+	$(OUTPRE)rd_err.$(OBJEXT) \
+	$(OUTPRE)rd_priv.$(OBJEXT) \
+	$(OUTPRE)rd_safe.$(OBJEXT) \
+	$(OUTPRE)send_to_kdc.$(OBJEXT) \
+	$(OUTPRE)stime.$(OBJEXT) \
+	$(OUTPRE)rd_preauth.$(OBJEXT) \
+	$(OUTPRE)mk_preauth.$(OBJEXT) \
 	$(OSOBJS) $(CACHEOBJS) $(SETENVOBJS) $(STRCASEOBJS) $(SHMOBJS) \
 	$(LIB_KRB_HOSTOBJS) $(SERVER_KRB_OBJS) $(NETIO_OBJS) $(REALMDBOBJS)
 
@@ -107,10 +107,10 @@ STOBJLISTS=OBJS.ST
 #
 # These objects implement the time computation routines.
 #
-OSOBJS = unix_time.$(OBJEXT)
+OSOBJS = $(OUTPRE)unix_time.$(OBJEXT)
 OSSRCS = $(srcdir)/unix_time.c
 
-##DOS##OSOBJS = win_time.obj
+##DOS##OSOBJS = $(OUTPRE)win_time.obj
 
 #
 # These objects implement ticket cacheing for Unix.  They are
@@ -119,11 +119,11 @@ OSSRCS = $(srcdir)/unix_time.c
 CACHESRCS=$(srcdir)/tf_util.c $(srcdir)/dest_tkt.c $(srcdir)/in_tkt.c \
 	$(srcdir)/tkt_string.c $(srcdir)/g_tf_fname.c \
 	$(srcdir)/g_tf_realm.c $(srcdir)/g_cred.c $(srcdir)/save_creds.c
-CACHEOBJS=tf_util.$(OBJEXT) dest_tkt.$(OBJEXT) in_tkt.$(OBJEXT) \
-	tkt_string.$(OBJEXT) g_tf_fname.$(OBJEXT) g_tf_realm.$(OBJEXT) \
-	g_cred.$(OBJEXT) save_creds.$(OBJEXT)
+CACHEOBJS=$(OUTPRE)tf_util.$(OBJEXT) $(OUTPRE)dest_tkt.$(OBJEXT) $(OUTPRE)in_tkt.$(OBJEXT) \
+	$(OUTPRE)tkt_string.$(OBJEXT) $(OUTPRE)g_tf_fname.$(OBJEXT) $(OUTPRE)g_tf_realm.$(OBJEXT) \
+	$(OUTPRE)g_cred.$(OBJEXT) $(OUTPRE)save_creds.$(OBJEXT)
 
-##DOS##CACHEOBJS = memcache.$(OBJEXT)
+##DOS##CACHEOBJS = $(OUTPRE)memcache.$(OBJEXT)
 
 #
 # These objects implement Kerberos realm<->host database lookup.
@@ -136,8 +136,8 @@ CNFFILE = g_cnffile
 
 REALMDBSRCS= $(srcdir)/$(CNFFILE).c $(srcdir)/g_krbhst.c $(srcdir)/g_krbrlm.c \
 	$(srcdir)/g_admhst.c $(srcdir)/realmofhost.c 
-REALMDBOBJS= $(CNFFILE).$(OBJEXT) g_krbhst.$(OBJEXT) g_krbrlm.$(OBJEXT) \
-	g_admhst.$(OBJEXT) realmofhost.$(OBJEXT) 
+REALMDBOBJS= $(OUTPRE)$(CNFFILE).$(OBJEXT) $(OUTPRE)g_krbhst.$(OBJEXT) $(OUTPRE)g_krbrlm.$(OBJEXT) \
+	$(OUTPRE)g_admhst.$(OBJEXT) $(OUTPRE)realmofhost.$(OBJEXT) 
 
 #
 # These objects are only used on server or debug implementations of Kerberos,
@@ -151,18 +151,18 @@ SERVER_KRB_SRCS=$(srcdir)/klog.c $(srcdir)/kuserok.c $(srcdir)/log.c \
 		krb_err.c $(srcdir)/ad_print.c \
 		$(srcdir)/cr_death_pkt.c $(srcdir)/kparse.c \
 		$(srcdir)/put_svc_key.c $(srcdir)/sendauth.c 
-SERVER_KRB_OBJS=klog.$(OBJEXT) kuserok.$(OBJEXT) log.$(OBJEXT) \
-		kntoln.$(OBJEXT) \
-		fgetst.$(OBJEXT) rd_svc_key.$(OBJEXT) cr_err_repl.$(OBJEXT) \
-		rd_req.$(OBJEXT) g_svc_in_tkt.$(OBJEXT) recvauth.$(OBJEXT) \
-		krb_err.$(OBJEXT) ad_print.$(OBJEXT) cr_death_pkt.$(OBJEXT) \
-		kparse.$(OBJEXT) put_svc_key.$(OBJEXT) sendauth.$(OBJEXT)
+SERVER_KRB_OBJS=$(OUTPRE)klog.$(OBJEXT) $(OUTPRE)kuserok.$(OBJEXT) $(OUTPRE)log.$(OBJEXT) \
+		$(OUTPRE)kntoln.$(OBJEXT) \
+		$(OUTPRE)fgetst.$(OBJEXT) $(OUTPRE)rd_svc_key.$(OBJEXT) $(OUTPRE)cr_err_repl.$(OBJEXT) \
+		$(OUTPRE)rd_req.$(OBJEXT) $(OUTPRE)g_svc_in_tkt.$(OBJEXT) $(OUTPRE)recvauth.$(OBJEXT) \
+		$(OUTPRE)krb_err.$(OBJEXT) $(OUTPRE)ad_print.$(OBJEXT) $(OUTPRE)cr_death_pkt.$(OBJEXT) \
+		$(OUTPRE)kparse.$(OBJEXT) $(OUTPRE)put_svc_key.$(OBJEXT) $(OUTPRE)sendauth.$(OBJEXT)
 #
 # These objects are included on Unix and Windows (for kstream and kadm)
 # but not under Mac (there are no file descriptors).
 #
 NETIO_SRCS=$(srcdir)/netread.c $(srcdir)/netwrite.c
-NETIO_OBJS=netread.$(OBJEXT) netwrite.$(OBJEXT)
+NETIO_OBJS=$(OUTPRE)netread.$(OBJEXT) $(OUTPRE)netwrite.$(OBJEXT)
 
 #
 # These objects glue the Kerberos library to the operating system
@@ -170,9 +170,9 @@ NETIO_OBJS=netread.$(OBJEXT) netwrite.$(OBJEXT)
 # by other _glue.* routines.
 #
 LIB_KRB_HOSTSRCS=$(srcdir)/unix_glue.c
-LIB_KRB_HOSTOBJS=unix_glue.$(OBJEXT)
+LIB_KRB_HOSTOBJS=$(OUTPRE)unix_glue.$(OBJEXT)
 
-##DOS##LIB_KRB_HOSTOBJS=win_glue.obj
+##DOS##LIB_KRB_HOSTOBJS=$(OUTPRE)win_glue.obj
 
 ARCHIVEARGS= $@ $(OBJS)
 
