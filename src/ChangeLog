@@ -1,3 +1,8 @@
+Tue Nov  5 17:27:30 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-recurse): Add dependency of install-recurse
+	on install-mkdirs to force directories to be made first.
+
 Fri Nov  1 20:41:07 1996  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL): Check for -ldl when checking for -ltcl
