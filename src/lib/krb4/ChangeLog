@@ -1,3 +1,8 @@
+Sun Apr  5 19:51:21 1998  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Fix up to not free context
+	unless it is valid.
+
 Wed Feb 18 16:17:49 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
