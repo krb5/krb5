@@ -68,16 +68,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "krb5.h"
 #endif
 #endif
-#ifdef USG
+
 #include <fcntl.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #ifndef F_OK
 #define F_OK 0
 #define X_OK 1
 #define W_OK 2
 #define R_OK 4
 #endif
-#endif /* USG */
 
 #ifdef XENIX
 #include <sys/locking.h>
@@ -103,12 +104,6 @@ extern char *getenv();
 #else
 #include <strings.h>
 #endif
-
-/* Cancel substitutions made by config.h for Emacs.  */
-#undef open
-#undef read
-#undef write
-#undef close
 
 char *concat ();
 extern int errno;
@@ -381,15 +376,6 @@ xmalloc (size)
 #ifdef HESIOD
 #include <hesiod.h>
 #endif
-
-#ifdef USG
-#include <fcntl.h>
-/* Cancel substitutions made by config.h for Emacs.  */
-#undef open
-#undef read
-#undef write
-#undef close
-#endif /* USG */
 
 #define NOTOK (-1)
 #define OK 0
