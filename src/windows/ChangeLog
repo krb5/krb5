@@ -1,3 +1,7 @@
+2000-04-25  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Bump version to 1.2 beta.
+
 2000-02-06  Danilo Almeida  <dalmeida@mit.edu>
 
 	* README: Add documentation about debug vs. release builds.

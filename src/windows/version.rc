@@ -5,6 +5,16 @@
  * BEGIN COMMON VERSION INFO for GSS and Kerberos version resources
  */
 
+#define PRE_RELEASE
+
+#ifdef PRE_RELEASE
+#define BETA_STR  " beta"
+#define BETA_FLAG VS_FF_PRERELEASE
+#else
+#define BETA_STR  ""
+#define BETA_FLAG 0
+#endif
+
 #if !defined(_WIN32)
 #define Targ_OS VOS__WINDOWS16
 #else
@@ -13,10 +23,10 @@
 
 /* we're going to stamp all the DLLs with the same version number */
 
-#define K5_PRODUCT_VERSION_STRING "1.1.1\0"
-#define K5_PRODUCT_VERSION        1, 1, 1, 0
+#define K5_PRODUCT_VERSION_STRING "1.2" BETA_STR "\0"
+#define K5_PRODUCT_VERSION        1, 2, 0, 0
 
-#define K5_COPYRIGHT "Copyright (C) 1997-1999 by the Massachusetts Institute of Technology\0"
+#define K5_COPYRIGHT "Copyright (C) 1997-2000 by the Massachusetts Institute of Technology\0"
 #define K5_COMPANY_NAME "Massachusetts Institute of Technology.\0"
 
 /* 
@@ -134,7 +144,7 @@ VS_VERSION_INFO VERSIONINFO
 FILEVERSION	K5_PRODUCT_VERSION
 PRODUCTVERSION	K5_PRODUCT_VERSION
 FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
-FILEFLAGS	(VS_FF_DEBUG | VS_FF_PRIVATEBUILD)
+FILEFLAGS	(VS_FF_DEBUG | VS_FF_PRIVATEBUILD | BETA_FLAG)
 FILEOS		Targ_OS
 FILETYPE        K5_FILETYPE
 BEGIN
