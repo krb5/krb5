@@ -77,6 +77,15 @@ krb5_creds my_creds;
 
 extern char *krb5_default_pwd_prompt1;
 
+/*
+ * Try no preauthentication first; then try the encrypted timestamp
+ */
+int preauth_search_list[] = {
+	0,			
+	KRB5_PADATA_ENC_TIMESTAMP,
+	-1
+	};
+
 main(argc,argv)
   int argc;
   char *argv[];
@@ -503,18 +512,38 @@ main(argc,argv)
         goto finish;
     }
 
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
+    rd_priv_resp.appl_code = msg_data.data[0];
+    rd_priv_resp.oper_code = msg_data.data[1];
+    rd_priv_resp.retn_code = msg_data.data[2];
+    if (msg_data.length > 3 && msg_data.data[3]) {
+	rd_priv_resp.message = malloc(msg_data.length - 2);
+	if (rd_priv_resp.message) {
+	    memcpy(rd_priv_resp.message, msg_data.data + 3,
+		   msg_data.length - 3);
+	    rd_priv_resp.message[msg_data.length - 3] = 0;
+	}
+    } else
+	rd_priv_resp.message = NULL;
+
 
     free(inbuf.data);
     free(msg_data.data);
-    if (!((rd_priv_resp.appl_code == KPASSWD) &&
-		(rd_priv_resp.oper_code == CHGOPER) &&
-		(rd_priv_resp.retn_code == KADMGOOD))) {
-	fprintf(stderr, "Generic Error During kpasswd!\n");
-	retval = 1;
-    }
+    if (rd_priv_resp.appl_code == KPASSWD) {
+	if (rd_priv_resp.retn_code == KPASSGOOD)
+	    printf("\n\nPassword changed.\n\n");
+	else if (rd_priv_resp.retn_code == KPASSBAD) {
+	    if (rd_priv_resp.message)
+		fprintf(stderr, "%s\n", rd_priv_resp.message);
+	    else
+		fprintf(stderr, "Server returned KPASSBAD.\n");
+	} else
+	    fprintf(stderr, "Server returned unknown kerberos code.\n");
+    } else
+	fprintf(stderr, "Server returned bad application code %d\n",
+		rd_priv_resp.appl_code);
+    
+    if (rd_priv_resp.message)
+	free(rd_priv_resp.message);
 
     finish:
 
@@ -525,12 +554,11 @@ main(argc,argv)
 
     if (cksum_alloc) free(send_cksum.contents);
     if (retval) {
-	fprintf(stderr, "\n\nProtocol Failure - %s\n\n", 
-		kadmind_kpasswd_response[1]);
+	fprintf(stderr, "\n\nProtocol Failure - Password NOT changed\n\n");
 	exit(1);
     }
 
-    printf("\n\n%s.\n\n", kadmind_kpasswd_response[0]);
+    printf("\n\nPassword changed.\n\n");
 
     exit(0);
 }
@@ -554,6 +582,7 @@ OLDDECLARG(krb5_principal, client)
     int  pword_length = sizeof(pword);
     char *old_password;
     int  old_pwsize;
+    int	 i;
     
     krb5_address **my_addresses;
 
@@ -608,17 +637,24 @@ OLDDECLARG(krb5_principal, client)
     }
 
 /*	Build Request for Initial Credentials */
-    if ((retval = krb5_get_in_tkt_with_password(
+    for (i=0; preauth_search_list[i] >= 0; i++) {
+	retval = krb5_get_in_tkt_with_password(
 					0,	/* options */
 					my_addresses,
 					/* do random preauth */
-                                        KRB5_PADATA_ENC_TIMESTAMP,
+                                        preauth_search_list[i],
 					ETYPE_DES_CBC_CRC,   /* etype */
 					KEYTYPE_DES,
 					old_password,
 					cache,
 					&my_creds,
-					0  ))) {
+				        0);
+	if (retval != KRB5KDC_PREAUTH_FAILED &&
+	    retval != KRB5KRB_ERR_GENERIC)
+	    break;
+    }
+	
+    if (retval) {
 	fprintf(stderr, "\nUnable to Get Initial Credentials : %s %d\n",
 		error_message(retval),retval);
     }
