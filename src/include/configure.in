@@ -82,6 +82,7 @@ dnl
 HAVE_YYLINENO
 CHECK_DIRENT
 AC_TYPE_UID_T
+AC_TYPE_MODE_T
 dnl
 AC_CHECK_HEADER(termios.h,dnl
 [AC_CHECK_FUNC([tcsetattr],dnl
