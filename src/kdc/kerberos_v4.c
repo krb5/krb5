@@ -16,8 +16,9 @@ static char rcsid_kerberos_v4_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
+#include <krb5/config.h>
 
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -373,11 +374,10 @@ static krb5_error_code retval;
 static krb5_data *response;
 void bzero(), bcopy(), com_err(), sleep();
 void kerberos_v4(), kerb_err_reply();
-char *free(), *malloc(), *strcpy();
-#ifdef __STDC__
-extern size_t strlen(const char *);
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
 #else
-int strlen();
+char *free(), *malloc();
 #endif
 krb5_error_code krb5_timeofday(), krb5_get_default_realm();
  
@@ -448,7 +448,7 @@ int type_2_v5err[] = { 0,	/* 		0  No error		      */
     KRB_AP_ERR_BADVERSION	/* L_KRB_PWARN  16 Protocol warning messages  */
 };
 #define klog v4_klog
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 char * v4_klog( int type, const char *format, ...)
 #else
 char * v4_klog( type, format, va_alist)
@@ -458,7 +458,7 @@ char * v4_klog( type, format, va_alist)
 #endif
 {
     va_list pvar;
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
     va_start(pvar, format);
 #else
     va_start(pvar);
