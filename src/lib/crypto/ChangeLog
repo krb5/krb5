@@ -1,3 +1,8 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_cts.c (test_cts): Process encryption and decryption IVs
+	separately, make sure they match, and display the value.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* etypes.c (krb5_enctypes_list): Fill in required_ctype field.
