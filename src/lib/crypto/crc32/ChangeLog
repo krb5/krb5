@@ -1,3 +1,8 @@
+Mon Sep 25 16:48:23 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Wed Sep 13 10:28:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* crc.c: put function prototype back in.

@@ -12,11 +12,9 @@ OBJS=	crc.$(OBJEXT)
 
 SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
 
-all:: all-$(WHAT) $(OBJS)
-
-all-unix:: shared
-all-mac:: shared
-all-windows::
+all-unix:: shared $(OBJS) 
+all-mac:: shared $(OBJS) 
+all-windows:: $(OBJS)
 
 shared:
 	mkdir shared
@@ -31,7 +29,7 @@ crctest.exe:
 check:: crctest$(EXEEXT)
 	$(C)crctest$(EXEEXT) < $(srcdir)$(S)crc-test
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) crctest$(EXEEXT) crctest.$(OBJEXT)
 
 clean-unix::

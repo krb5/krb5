@@ -45,7 +45,7 @@ SRCS=	$(srcdir)/cs_entry.c	\
 	$(srcdir)/weak_key.c	\
 	$(OTHERSRCS)
 
-all:: all-$(WHAT) $(OBJS)
+all:: $(OBJS)
 
 all-unix:: shared
 all-mac:: shared
@@ -68,8 +68,6 @@ verify$(EXEEXT): verify.$(OBJEXT) $(DEPKLIB)
 destest$(EXEEXT): destest.$(OBJEXT) $(DEPKLIB)
 	$(CC) -o $@ destest.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
-check:: check-$(WHAT)
-
 check-mac: check-unix
 
 check-unix:: destest verify
@@ -80,7 +78,7 @@ check-unix:: destest verify
 
 check-windows::
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) verify.$(OBJEXT)
 
 clean-unix::

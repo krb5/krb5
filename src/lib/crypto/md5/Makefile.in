@@ -12,11 +12,9 @@ OBJS=	md5.$(OBJEXT) md5glue.$(OBJEXT) md5crypto.$(OBJEXT)
 
 SRCS=	$(srcdir)/md5.c $(srcdir)/md5glue.c $(srcdir)/md5crypto.c
 
-all:: all-$(WHAT) $(OBJS) 
-
-all-unix:: shared
-all-mac:: shared
-all-windows::
+all-unix:: shared $(OBJS) 
+all-mac:: shared $(OBJS) 
+all-windows:: $(OBJS)
 
 shared:
 	mkdir shared
@@ -37,9 +35,7 @@ check-unix:: t_mddriver t_cksum
 check-windows:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x
 
-check:: check-$(WHAT)
-
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT)
 	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT)
 

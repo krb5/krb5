@@ -1,3 +1,8 @@
+Mon Sep 25 16:48:36 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Fri Sep 22 23:32:58 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* des_int.h: Define PROTOTYPE if it is not defined elsewhere.

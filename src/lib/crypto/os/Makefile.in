@@ -15,8 +15,6 @@ OBJS= $(COBJS) $(LIBOBJS)
 
 SRCS=	rnd_confoun.c c_localaddr.c c_ustime.c
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 
 all-mac:: $(OBJS)
@@ -34,7 +32,7 @@ memmove.o: memmove.c
 @SHARED_RULE_LOCAL@
 	
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) memmove.c
 
 clean-unix::
