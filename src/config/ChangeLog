@@ -1,3 +1,8 @@
+2001-06-22  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Minimize printing of compiler command line during
+	build of a directory.
+
 2001-06-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in, win-post.in: Improve output directory creation and

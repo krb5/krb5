@@ -1,6 +1,6 @@
 WHAT=windows
 
-all:: outpre-dir
+all:: setup-msg outpre-dir
 
 all:: all-$(WHAT)
 clean:: clean-$(WHAT)
@@ -188,17 +188,31 @@ MAKE=-$(MAKE)
 CFLAGS = $(CCOPTS)
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(CPPFLAGS) $(CFLAGS)
 
+C_RULE_STUFF=$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c
+C_RULE_PRINT=$(C_RULE_STUFF)
+C_RULE=$(C_RULE_STUFF) $<
+
+setup-msg::
+	@set C_RULE_PRINT=	$(C_RULE_PRINT)
+	@set DO_C_RULE_PRINT=1
+
 {}.rc{$(OUTPRE)}.res:
 	$(RC) $(RCFLAGS) -fo $@ -r $<
 
 {}.c{$(OUTPRE)}.obj:
-	$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c $<
+	@if "%DO_C_RULE_PRINT%"=="1" echo %C_RULE_PRINT% ...
+	@set DO_C_RULE_PRINT=
+	@$(C_RULE)
 
 {}.cxx{$(OUTPRE)}.obj:
-	$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c $<
+	@if "%DO_C_RULE_PRINT%"=="1" echo %C_RULE_PRINT% ...
+	@set DO_C_RULE_PRINT=
+	@$(C_RULE)
 
 {}.cpp{$(OUTPRE)}.obj:
-	$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c $<
+	@if "%DO_C_RULE_PRINT%"=="1" echo %C_RULE_PRINT% ...
+	@set DO_C_RULE_PRINT=
+	@$(C_RULE)
 
 #
 # End of Win32 pre-config lines (config/win-pre.in)
