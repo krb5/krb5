@@ -1,3 +1,7 @@
+2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
+
+	* gssapi_krb5.h: Mark gss_mech_krb5 variable as an import.
+
 2001-07-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* import_sec_context.c (krb5_gss_import_sec_context): Get rid of

@@ -30,7 +30,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const gss_OID_desc * const gss_mech_krb5;
+GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5;
 extern const gss_OID_desc * const gss_mech_krb5_old;
 extern const gss_OID_desc * const gss_mech_krb5_v2;
 extern const gss_OID_set_desc * const gss_mech_set_krb5;
