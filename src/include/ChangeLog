@@ -1,3 +1,9 @@
+2001-10-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use of AC_DEFINE modified to include third
+	argument - the comment for the generated header file so that
+	acconfig.h can be cleaned up.
+
 2001-10-23  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.hin: Add rc4-hmac, rc4-hmac-exp enctypes,  hmac-md5-rc4
