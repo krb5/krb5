@@ -63,7 +63,7 @@ OLDDECLARG(const krb5_address *, recv_addr)
 OLDDECLARG(krb5_int32, seq_number)
 OLDDECLARG(krb5_int32, priv_flags)
 OLDDECLARG(krb5_pointer, i_vector)
-OLDDECLARG(krb5_rcache, rcache),
+OLDDECLARG(krb5_rcache, rcache)
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;
