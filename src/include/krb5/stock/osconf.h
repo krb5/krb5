@@ -40,19 +40,19 @@
 #define	DEFAULT_LNAME_FILENAME	"/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:%s\\v5srvtab"
 #else /* !_WINDOWS */
-#define DEFAULT_PROFILE_PATH	"/etc/krb5.conf:@PREFIX/lib/krb5.conf"
+#define DEFAULT_PROFILE_PATH	"/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/v5srvtab"
 #define	DEFAULT_LNAME_FILENAME	"@PREFIX/lib/krb5.aname"
 #endif /* _WINDOWS  */
 
-#define DEFAULT_KDB_FILE        "@PREFIX/lib/krb5kdc/principal"
-#define	DEFAULT_KEYFILE_STUB	"@PREFIX/lib/krb5kdc/.k5."
-#define KRB5_DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/krb5_adm.acl"
+#define DEFAULT_KDB_FILE        "@LOCALSTATEDIR/krb5kdc/principal"
+#define	DEFAULT_KEYFILE_STUB	"@LOCALSTATEDIR/krb5kdc/.k5."
+#define KRB5_DEFAULT_ADMIN_ACL	"@LOCALSTATEDIR/krb5kdc/krb5_adm.acl"
 /* Used by old admin server */
-#define	DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/kadm_old.acl"
+#define	DEFAULT_ADMIN_ACL	"@LOCALSTATEDIR/krb5kdc/kadm_old.acl"
 
 /* Location of KDC profile */
-#define	DEFAULT_KDC_PROFILE	"@PREFIX/lib/krb5kdc/kdc.conf"
+#define	DEFAULT_KDC_PROFILE	"@LOCALSTATEDIR/krb5kdc/kdc.conf"
 #define	KDC_PROFILE_ENV		"KRB5_KDC_PROFILE"
 
 #define	DEFAULT_KDC_ENCTYPE	ENCTYPE_DES_CBC_CRC
@@ -71,8 +71,8 @@
 /*
  * Defaults for the KADM5 admin system.
  */
-#define DEFAULT_KADM5_KEYTAB	"@PREFIX/lib/krb5kdc/kadm5.keytab"
-#define DEFAULT_KADM5_ACL_FILE	"@PREFIX/lib/krb5kdc/kadm5.acl"
+#define DEFAULT_KADM5_KEYTAB	"@LOCALSTATEDIR/krb5kdc/kadm5.keytab"
+#define DEFAULT_KADM5_ACL_FILE	"@LOCALSTATEDIR/krb5kdc/kadm5.acl"
 #define DEFAULT_KADM5_PORT	749 /* assigned by IANA */
 
 #define MAX_DGRAM_SIZE	4096
@@ -93,22 +93,22 @@
  */
 
 /* the default syslog file */
-#define KADM_SYSLOG  "@PREFIX/lib/krb5kdc/admin_server.syslog"
+#define KADM_SYSLOG  "@LOCALSTATEDIR/krb5kdc/admin_server.syslog"
 
 /* where to find the bad password table */
-#define PW_CHECK_FILE "@PREFIX/lib/krb5kdc/bad_passwd"
+#define PW_CHECK_FILE "@LOCALSTATEDIR/krb5kdc/bad_passwd"
 
-#define DEFAULT_ACL_DIR	"@PREFIX/lib/krb5kdc"
+#define DEFAULT_ACL_DIR	"@LOCALSTATEDIR/krb5kdc"
 
 /*
  * krb5 slave support follows
  */
 
-#define KPROP_DEFAULT_FILE "@PREFIX/lib/krb5kdc/slave_datatrans"
-#define KPROPD_DEFAULT_FILE "@PREFIX/lib/krb5kdc/from_master"
+#define KPROP_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/slave_datatrans"
+#define KPROPD_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/from_master"
 #define KPROPD_DEFAULT_KDB5_UTIL "@PREFIX/sbin/kdb5_util"
 #define KPROPD_DEFAULT_KDB5_EDIT "@PREFIX/sbin/kdb5_edit"
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
-#define KPROPD_ACL_FILE "@PREFIX/lib/krb5kdc/kpropd.acl"
+#define KPROPD_ACL_FILE "@LOCALSTATEDIR/krb5kdc/kpropd.acl"
 
 #endif /* KRB5_OSCONF__ */

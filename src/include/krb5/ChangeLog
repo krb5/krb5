@@ -1,3 +1,8 @@
+Wed Oct 30 18:55:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (LOCALSTATEDIR): Add localstatedir a and sysconfidr
+ 	to substitutions [37]
+for osconf.h
 Mon Aug 26 17:01:11 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kdb.h: add KRB5_TL_KADM5_E_DATA

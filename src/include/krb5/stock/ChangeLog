@@ -1,3 +1,7 @@
+Wed Oct 30 19:00:07 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* osconf.h :  Set up to use autoconf-style directories. [37]
+
 Wed Aug 28 16:13:10 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* osconf.h: add KADM5 defaults: KEYTAB, ACL_FILE, PORT
