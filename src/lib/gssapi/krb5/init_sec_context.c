@@ -688,6 +688,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	 g_order_init(&(ctx->seqstate), ctx->seq_recv,
 		      (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0, 
 		      (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
+	 ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
 	 ctx->established = 1;
 	 /* fall through to GSS_S_COMPLETE */
       }
