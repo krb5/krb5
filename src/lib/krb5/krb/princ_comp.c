@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,8 +16,6 @@
 static char rcsid_princ_comp_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
-
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -33,10 +32,11 @@ krb5_const_principal princ2;
     register krb5_data * const *p1, * const *p2;
 
     for (p1 = princ1, p2 = princ2; *p1  && *p2; p1++, p2++)
-	if (strncmp((*p1)->data, (*p2)->data, min((*p1)->length,
-						  (*p2)->length)))
+	if (memcmp((*p1)->data, (*p2)->data, min((*p1)->length,
+						 (*p2)->length)))
 	    return FALSE;
-    if (*p1 || *p2)			/* didn't both run out at once */
+    if (*p1 || *p2)			/* didn't both run out of components
+					   at once */
 	return FALSE;
     return TRUE;
 }
