@@ -26,7 +26,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_edit_c[] =
+static char rcsid_tcl_wrapper_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
