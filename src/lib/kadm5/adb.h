@@ -33,6 +33,13 @@ typedef	long		osa_adb_ret_t;
 #define OSA_ADB_POLICY_VERSION_MASK	0x12345D00
 #define OSA_ADB_POLICY_VERSION_1	0x12345D01
 
+/* This structure is really defined in server_internal.h, but that file
+ * includes this file, and if this file includes that file, though they are
+ * protected against multiple inclusion, the definition of this structure
+ * and the structure in this file that uses it happen in the wrong order.
+ */
+struct _kadm5_server_handle_t;
+
 typedef struct _osa_adb_db_lock_ent_t {
      FILE	*lockfile;
      char	*filename;
@@ -47,6 +54,18 @@ typedef struct _osa_adb_db_ent_t {
      BTREEINFO	btinfo;
      char	*filename;
      osa_adb_lock_t lock;
+     /* XXX Ewww - The handle to the policy db needs a handle to the principal
+      * db because in order to get generation numbers to increase when policies
+      * get added, changed, or deleted, we need to be able to do a kdb_get_entry
+      * on the master principal, and that call takes a handle.  Alternatives
+      * included changing the format of the database (inconvenient to
+      * upgraders), keeping the policy and principal databases in sync
+      * separately (seems wrong since they're dumped together, and really want
+      * to be one database in the future), or reengineering the database
+      * structure right now (seems unreasonable to get done before dinner 8-) ).
+      * --mitchb
+      */
+     struct _kadm5_server_handle_t *kadm5_handle;
 } osa_adb_db_ent, *osa_adb_db_t, *osa_adb_princ_t, *osa_adb_policy_t;
 
 /* an osa_pw_hist_ent stores all the key_datas for a single password */
@@ -105,7 +124,8 @@ osa_adb_ret_t   osa_adb_rename_db(char *filefrom, char *lockfrom,
 osa_adb_ret_t   osa_adb_rename_policy_db(kadm5_config_params *fromparams,
 					 kadm5_config_params *toparams);
 osa_adb_ret_t	osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
-				char *lockfile, int magic);
+				char *lockfile, int magic,
+				struct _kadm5_server_handle_t *kadm5_handle);
 osa_adb_ret_t	osa_adb_fini_db(osa_adb_db_t db, int magic);
 osa_adb_ret_t	osa_adb_get_lock(osa_adb_db_t db, int mode);
 osa_adb_ret_t	osa_adb_release_lock(osa_adb_db_t db);
@@ -116,7 +136,8 @@ osa_adb_ret_t	osa_adb_create_policy_db(kadm5_config_params *params);
 osa_adb_ret_t	osa_adb_destroy_policy_db(kadm5_config_params *params);
 osa_adb_ret_t	osa_adb_open_princ(osa_adb_princ_t *db, char *filename);
 osa_adb_ret_t	osa_adb_open_policy(osa_adb_policy_t *db,
-				    kadm5_config_params *rparams);
+				    kadm5_config_params *rparams,
+				    struct _kadm5_server_handle_t *kadm5_handle);
 osa_adb_ret_t	osa_adb_close_princ(osa_adb_princ_t db);
 osa_adb_ret_t	osa_adb_close_policy(osa_adb_policy_t db);
 osa_adb_ret_t	osa_adb_create_princ(osa_adb_princ_t db,

@@ -234,6 +234,20 @@ struct getprivs_ret {
 typedef struct getprivs_ret getprivs_ret;
 bool_t xdr_getprivs_ret();
 
+struct getgeneration_arg {
+	krb5_ui_4 api_version;
+};
+typedef struct getgeneration_arg getgeneration_arg;
+bool_t xdr_getgeneration_arg();
+
+struct getgeneration_ret {
+	krb5_ui_4 api_version;
+	kadm5_ret_t code;
+	krb5_int32 generation;
+};
+typedef struct getgeneration_ret getgeneration_ret;
+bool_t xdr_getgeneration_ret();
+
 #define KADM ((krb5_ui_4)2112)
 #define KADMVERS ((krb5_ui_4)2)
 #define CREATE_PRINCIPAL ((krb5_ui_4)1)
@@ -331,5 +345,11 @@ extern chrand_ret *chrand_principal3_1(chrand3_arg *argp, CLIENT *clnt);
 extern generic_ret *setkey_principal3_1_svc(setkey3_arg *arg, 
 					    struct svc_req *rqstp);
 extern generic_ret *setkey_principal3_1(setkey3_arg *argp, CLIENT *clnt);
+
+#define GET_GENERATION_NUMBER ((krb5_ui_4) 22)
+extern getgeneration_ret *getgeneration_4_svc(getgeneration_arg *arg,
+					    struct svc_req *rqstp);
+extern getgeneration_ret *getgeneration_4(getgeneration_arg *argp,
+					  CLIENT *clnt);
 
 #endif /* __KADM_RPC_H__ */

@@ -920,6 +920,30 @@ bool_t xdr_getprivs_ret(XDR *xdrs, getprivs_ret *objp)
      return TRUE;
 }
 
+bool_t xdr_getgeneration_arg(XDR *xdrs, getgeneration_arg *objp)
+{
+     if (!xdr_ui_4(xdrs, &objp->api_version)) {
+          return (FALSE);
+     }
+     return (TRUE);
+}
+
+bool_t xdr_getgeneration_ret(XDR *xdrs, getgeneration_ret *objp)
+{
+     if (!xdr_ui_4(xdrs, &objp->api_version)) {
+          return (FALSE);
+     }
+     if (!xdr_kadm5_ret_t(xdrs, &objp->code)) {
+          return (FALSE);
+     }
+     if (objp->code == KADM5_OK) {
+          if (!xdr_int32(xdrs, &objp->generation)) {
+	       return (FALSE);
+          }
+     }
+     return (TRUE);
+}
+
 bool_t
 xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
 {

@@ -447,6 +447,11 @@ kadm5_ret_t    kadm5_free_key_data(void *server_handle,
 kadm5_ret_t    kadm5_free_name_list(void *server_handle, char **names, 
 				    int count);
 
+#if USE_KADM5_API_VERSION > 1
+kadm5_ret_t    kadm5_get_generation_number(void *server_handle,
+					   krb5_int32 *generation);
+#endif
+
 #if USE_KADM5_API_VERSION == 1
 /*
  * OVSEC_KADM_API_VERSION_1 should be, if possible, compile-time

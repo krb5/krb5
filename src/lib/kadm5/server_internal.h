@@ -52,8 +52,13 @@ krb5_error_code     kdb_free_entry(kadm5_server_handle_t handle,
 				   krb5_db_entry *kdb, osa_princ_ent_rec *adb);
 krb5_error_code     kdb_put_entry(kadm5_server_handle_t handle,
 				  krb5_db_entry *kdb, osa_princ_ent_rec *adb);
+krb5_error_code     kdb_put_entry_internal(kadm5_server_handle_t handle,
+					   krb5_db_entry *kdb,
+					   osa_princ_ent_rec *adb, int incgen,
+					   int updatemod);
 krb5_error_code     kdb_delete_entry(kadm5_server_handle_t handle,
 				     krb5_principal name);
+krb5_error_code     kdb_update_generation_number(kadm5_server_handle_t handle);
 
 int		    init_dict(kadm5_config_params *);
 int		    find_word(const char *word);

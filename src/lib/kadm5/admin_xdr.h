@@ -4,7 +4,34 @@
  * $Header$
  * 
  * $Log$
+ * Revision 1.6.2.1  2001/06/20 08:17:06  mitchb
+ * * adb.h: Forward declaration of struct _kadm5_server_handle_t added
+ * (had to be this way because simply having it include server_internal.h
+ * and using the typedef found there causes inclusion in the wrong order).
+ * A pointer to a _kadm5_server_handle_t structure has been added to the
+ * _osa_adb_db_ent_t structure.  This was needed for a frustrating and
+ * non-ideal reason, and it's a bit of a kludge.  Read the lengthy comment
+ * in the file for an explanation of why this was done.  A struct
+ * _kadm5_server_handle_t pointer was added to the prototypes of
+ * osa_adb_init_db and osa_adb_open_policy.
+ *
+ * * admin.h: Prototype added for kadm5_get_generation_number.
+ *
+ * * admin_xdr.h: Prototypes added for xdr_getgeneration_arg and
+ * xdr_getgeneration_ret.
+ *
+ * * kadm_rpc.h: Added struct getgeneration_arg and struct
+ * getgeneration_ret and typedefs for them, defined GET_GENERATION_NUMBER,
+ * added prototypes for getgeneration_4_svc and getgeneration_4.
+ *
+ * * kadm_rpc_xdr.c: Added new functions xdr_getgeneration_arg and
+ * xdr_getgeneration_ret.
+ *
+ * * server_internal.h: Added prototypes for kdb_put_entry_internal and
+ * kdb_update_generation_number.
+ *
  * Revision 1.6  2001/02/18 23:00:08  epeisach
+ *
  * 	* server_internal.h: Add prototype for
  *         krb5_free_key_data_contents() which really should be in libkdb.
  *
@@ -108,6 +135,8 @@ bool_t	    xdr_gpol_ret(XDR *xdrs, gpol_ret *objp);
 bool_t      xdr_gpols_arg(XDR *xdrs, gpols_arg *objp);
 bool_t      xdr_gpols_ret(XDR *xdrs, gpols_ret *objp);
 bool_t      xdr_getprivs_ret(XDR *xdrs, getprivs_ret *objp);
+bool_t      xdr_getgeneration_arg(XDR *xdrs, getgeneration_arg *objp);
+bool_t      xdr_getgeneration_ret(XDR *xdrs, getgeneration_ret *objp);
 bool_t	    xdr_krb5_principal(XDR *xdrs, krb5_principal *objp);
 bool_t	    xdr_krb5_octet(XDR *xdrs, krb5_octet *objp);
 bool_t	    xdr_krb5_int32(XDR *xdrs, krb5_int32 *objp);

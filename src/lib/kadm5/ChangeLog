@@ -1,3 +1,30 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* adb.h: Forward declaration of struct _kadm5_server_handle_t added
+	(had to be this way because simply having it include server_internal.h
+	and using the typedef found there causes inclusion in the wrong order).
+	A pointer to a _kadm5_server_handle_t structure has been added to the
+	_osa_adb_db_ent_t structure.  This was needed for a frustrating and
+	non-ideal reason, and it's a bit of a kludge.  Read the lengthy comment
+	in the file for an explanation of why this was done.  A struct
+	_kadm5_server_handle_t pointer was added to the prototypes of
+	osa_adb_init_db and osa_adb_open_policy.
+
+	* admin.h: Prototype added for kadm5_get_generation_number.
+
+	* admin_xdr.h: Prototypes added for xdr_getgeneration_arg and
+	xdr_getgeneration_ret.
+
+	* kadm_rpc.h: Added struct getgeneration_arg and struct
+	getgeneration_ret and typedefs for them, defined GET_GENERATION_NUMBER,
+	added prototypes for getgeneration_4_svc and getgeneration_4.
+
+	* kadm_rpc_xdr.c: Added new functions xdr_getgeneration_arg and
+	xdr_getgeneration_ret.
+
+	* server_internal.h: Added prototypes for kdb_put_entry_internal and
+	kdb_update_generation_number.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 
