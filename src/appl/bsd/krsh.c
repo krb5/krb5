@@ -31,6 +31,7 @@ char copyright[] =
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/file.h>
+#include <sys/time.h>
 
 #include <netinet/in.h>
 
