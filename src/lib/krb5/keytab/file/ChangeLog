@@ -1,3 +1,9 @@
+Wed Sep 28 21:14:49 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktf_get_en.c (krb5_ktfile_get_entry): Modified to return the
+		most recent key (with the greatest kvno), instead of the
+		first.
+
 Thu Sep 22 21:51:53 1994  Theodore Y. Ts'o  (tytso@dcl)
     
     	* ktf_get_en.c (krb5_ktfile_get_entry):

@@ -42,7 +42,7 @@ OLDDECLARG(krb5_principal, principal)
 OLDDECLARG(krb5_kvno, kvno)
 OLDDECLARG(krb5_keytab_entry *, entry)
 {
-    krb5_keytab_entry cur_entry;
+    krb5_keytab_entry cur_entry, new_entry;
     krb5_error_code kerror = 0;
 
     /* Open the keyfile for reading */
@@ -53,25 +53,37 @@ OLDDECLARG(krb5_keytab_entry *, entry)
      * For efficiency and simplicity, we'll use a while true that 
      * is exited with a break statement.
      */
+    cur_entry.principal = 0;
     while (TRUE) {
-	if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
+	if (kerror = krb5_ktfileint_read_entry(id, &new_entry))
 	    break;
 
-	if (((kvno == IGNORE_VNO) || (kvno == cur_entry.vno)) &&
-	    krb5_principal_compare(principal, cur_entry.principal)) {
-	    /* found a match */
-	    break;
+	if (krb5_principal_compare(principal, cur_entry.principal)) {
+		if (kvno == IGNORE_VNO) {
+			if (cur_entry.vno < new_entry.vno) {
+				krb5_kt_free_entry(&cur_entry);
+				cur_entry = new_entry;
+			}
+		} else {
+			cur_entry = new_entry;
+			break;
+		}
+	} else {
+		krb5_kt_free_entry(&new_entry);
 	}
-	krb5_kt_free_entry(&cur_entry);
     }
     if (kerror) {
 	if (kerror == KRB5_KT_END)
 	    kerror = KRB5_KT_NOTFOUND;
 	(void) krb5_ktfileint_close(id);
+	if (cur_entry.principal)
+		krb5_kt_free_entry(&cur_entry);
 	return kerror;
     }
     if ((kerror = krb5_ktfileint_close(id)) != 0) {
 	krb5_kt_free_entry(&cur_entry);
+	if (cur_entry.principal)
+		krb5_kt_free_entry(&cur_entry);
 	return kerror;
     }
     *entry = cur_entry;
