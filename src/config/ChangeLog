@@ -1,3 +1,8 @@
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (S): Variable restored.
+	(ABS): Variable deleted.
+
 2002-08-26  Ezra Peisach  <epeisach@bu.edu>
 
 	* pre.in: Set host to @krb5_cv_host@ instead of @host@. The way

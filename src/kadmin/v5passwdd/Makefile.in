@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=kadmin/v5passwdd
 mydir=v5passwdd
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -32,13 +32,13 @@ $(CLI): $(CLI_OBJS) $(COMMON_OBJS) $(KRB5_BASE_DEPLIBS)
 install::
 	for f in v5passwd; do \
 	  $(INSTALL_PROGRAM) $$f \
-		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
-	  $(INSTALL_DATA) $(srcdir)/$$f.M \
-		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+		$(DESTDIR)$(CLIENT_BINDIR)$(S)`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)$(S)$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)$(S)`echo $$f|sed '$(transform)'`.1; \
 	done
 	for f in v5passwdd; do \
 	  $(INSTALL_PROGRAM) $$f \
-		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
+		$(DESTDIR)$(SERVER_BINDIR)$(S)`echo $$f|sed '$(transform)'`; \
 	done
 
 clean::

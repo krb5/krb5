@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=util/ss
 mydir=.
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 SED = sed
 
 INSTALLLIB=cp

@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=util/profile
 mydir=.
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 ##DOS##BUILDTOP = ..\..
@@ -50,7 +50,7 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 STOBJLISTS=OBJS.ST
 
-PROFILE_HDR=$(BUILDTOP)/include/profile.h
+PROFILE_HDR=$(BUILDTOP)$(S)include$(S)profile.h
 
 all-unix:: includes test_parse test_profile
 all-unix:: all-libs

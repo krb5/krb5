@@ -2,7 +2,7 @@ thisconfigdir=./../..
 myfulldir=appl/simple/client
 mydir=simple/client
 MY_SUBDIRS=.
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 

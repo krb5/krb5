@@ -1,14 +1,14 @@
 thisconfigdir=./..
 myfulldir=lib/krb5/ccache
 mydir=ccache
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 LOCAL_SUBDIRS =
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-LOCALINCLUDES = -I$(srcdir)/ccapi $(WIN_INCLUDES)
+LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 
 ##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
 

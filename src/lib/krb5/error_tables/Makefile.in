@@ -1,15 +1,15 @@
 thisconfigdir=./..
 myfulldir=lib/krb5/error_tables
 mydir=error_tables
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=error_tables
 ##DOS##OBJFILE=..\$(OUTPRE)err_tbls.lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-THDRDIR=$(BUILDTOP)/include
-EHDRDIR=$(BUILDTOP)/include/krb5
+THDRDIR=$(BUILDTOP)$(S)include
+EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 
 STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
       kv5m_err.o adm_err.o init_ets.o

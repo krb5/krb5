@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib/crypto/old
 mydir=old
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des
 
 ##DOS##BUILDTOP = ..\..\..

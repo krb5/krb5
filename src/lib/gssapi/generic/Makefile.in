@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib/gssapi/generic
 mydir=generic
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir)
 
 ##DOS##BUILDTOP = ..\..\..
@@ -15,15 +15,15 @@ ETSRCS= gssapi_err_generic.c
 ETOBJS= $(OUTPRE)gssapi_err_generic.$(OBJEXT)
 ETHDRS= gssapi_err_generic.h
 
-EHDRDIR= $(BUILDTOP)/include/gssapi
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 
-HDRS=	$(EHDRDIR)/gssapi.h \
-	$(EHDRDIR)/gssapi_generic.h
+HDRS=	$(EHDRDIR)$(S)gssapi.h \
+	$(EHDRDIR)$(S)gssapi_generic.h
 
-$(EHDRDIR)/gssapi.h: gssapi.h
+$(EHDRDIR)$(S)gssapi.h: gssapi.h
 	$(CP) gssapi.h $@
-$(EHDRDIR)/gssapi_generic.h: $(srcdir)/gssapi_generic.h
-	$(CP) $(srcdir)/gssapi_generic.h $@
+$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h
+	$(CP) $(srcdir)$(S)gssapi_generic.h $@
 
 $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et

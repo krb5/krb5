@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib/crypto/arcfour
 mydir=arcfour
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4
 
 ##DOS##BUILDTOP = ..\..\..

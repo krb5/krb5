@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib/crypto/crc32
 mydir=crc32
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=crc32

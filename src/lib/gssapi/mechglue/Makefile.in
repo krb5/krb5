@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=lib/gssapi/mechglue
 mydir=.
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir)
 
 ##DOSBUILDTOP = ..\..\..
@@ -82,7 +82,7 @@ OBJS	= $(OUTPRE)g_acquire_cred.$(OBJEXT) \
 	  $(OUTPRE)oid_ops.$(OBJEXT) \
 	  $(OUTPRE)g_mechname.$(OBJEXT)
 
-EHDRDIR= $(BUILDTOP)/include/gssapi
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
 
 @SHARED_RULE@
@@ -125,8 +125,8 @@ clean-windows::
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
-	do $(INSTALL_DATA) $(srcdir)/$$f     \
-		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
+	do $(INSTALL_DATA) $(srcdir)$(S)$$f     \
+		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
 	done
 
 includes::

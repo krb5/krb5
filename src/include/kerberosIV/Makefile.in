@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=include/kerberosIV
 mydir=kerberosIV
 MY_SUBDIRS=.
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
 all-unix:: krb_err.h
@@ -17,4 +17,4 @@ install::
 	done
 
 install:: krb_err.h
-	$(INSTALL_DATA) krb_err.h $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/krb_err.h
+	$(INSTALL_DATA) krb_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kerberosIV$(S)krb_err.h

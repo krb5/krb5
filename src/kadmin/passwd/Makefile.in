@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=kadmin/passwd
 mydir=passwd
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I.
 DEFINES = -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)

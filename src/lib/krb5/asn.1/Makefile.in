@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib/krb5/asn.1
 mydir=asn.1
-BUILDTOP=$(REL)../../..
+BUILDTOP=$(REL)..$(S)..$(S)..
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=asn.1

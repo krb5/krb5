@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=util/pty
 mydir=.
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/pty
 
 SED = sed

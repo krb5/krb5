@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=lib/kadm5
 mydir=.
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS = clnt srv unit-test
 
 ##DOSBUILDTOP = ..\..

@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=appl/bsd
 mydir=.
-BUILDTOP=$(REL)../..
+BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES=@KRB4_INCLUDES@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
