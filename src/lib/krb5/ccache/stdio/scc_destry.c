@@ -111,9 +111,9 @@ krb5_error_code krb5_scc_destroy(id)
 	 ret = krb5_scc_interpret(errno);
 
   cleanup:
-     xfree(data->filename);
-     xfree(data);
-     xfree(id);
+     krb5_xfree(data->filename);
+     krb5_xfree(data);
+     krb5_xfree(id);
 
      return ret;
 }

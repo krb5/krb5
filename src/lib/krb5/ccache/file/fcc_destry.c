@@ -104,9 +104,9 @@ krb5_error_code krb5_fcc_destroy(id)
 	 ret = krb5_fcc_interpret(errno);
 
   cleanup:
-     xfree(((krb5_fcc_data *) id->data)->filename);
-     xfree(id->data);
-     xfree(id);
+     krb5_xfree(((krb5_fcc_data *) id->data)->filename);
+     krb5_xfree(id->data);
+     krb5_xfree(id);
 
      return ret;
 }
