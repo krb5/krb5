@@ -5,6 +5,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS= \
+	adm_conn.$(OBJEXT)	\
 	an_to_ln.$(OBJEXT)	\
 	def_realm.$(OBJEXT)	\
 	DNR.$(OBJEXT)	\
@@ -42,6 +43,7 @@ OBJS= \
 	write_msg.$(OBJEXT)
 
 SRCS= \
+	$(srcdir)/adm_conn.c	\
 	$(srcdir)/an_to_ln.c	\
 	$(srcdir)/def_realm.c	\
 	$(srcdir)/DNR.c	\
