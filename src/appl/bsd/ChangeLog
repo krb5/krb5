@@ -1,3 +1,8 @@
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* login.c (k_init): Call krb5_init_secure_context instead of
+	krb5_init_context and krb5_secure_config_files.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -505,13 +505,12 @@ void k_init (ttyn)
 #ifdef KRB5_GET_TICKETS
     krb5_error_code retval;
     
-    retval = krb5_init_context(&kcontext);
+    retval = krb5_init_secure_context(&kcontext);
     if (retval) {
 	com_err("login", retval, "while initializing krb5");
 	exit(1);
     }
 
-    krb5_secure_config_files (kcontext);
     login_get_kconf(kcontext);
 
     /* Set up the credential cache environment variable */

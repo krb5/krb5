@@ -22,14 +22,14 @@
 	* krb_auth_su.c (dump_principal, plain_dump_principal): Reformat
 	slightly.
 
-	* ksu.h (get_dir_of_file): Argument now points to const.
-
 	* main.c (cc_source_tag, cc_source_tag_tmp): Now point to const.
 	(main): Unset environment variable KRB5_CONFIG.  Delete -C
 	option.  Force an error if lifetime strings are over 14
 	characters.  Fix error message string if setluid fails.  Cast pid
-	to long for printing.
+	to long for printing.  Call krb5_init_secure_context instead of
+	krb5_init_context and krb5_secure_config_files.
 	(get_dir_of_file): Argument now points to const.
+	* ksu.h (get_dir_of_file): Update declaration.
 
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
