@@ -4,38 +4,27 @@ Copyright 1990, Daniel J. Bernstein. All rights reserved.
 Please address any questions or comments to the author at brnstnd@acf10.nyu.edu.
 */
 
-#include <sys/types.h>
-#include <sys/file.h>
-#ifdef BSD
-#include <limits.h>
-#endif
-#include <string.h>
 #include <stdio.h> /* for P_tmpdir */
-#include <malloc.h>
-#include <errno.h>
-extern int errno; /* this should be in errno.h, but isn't on some systems */
-extern char *getenv(char *); /* ain't there an include file for this? */
-extern int open(char *,int,int);
-extern char *sprintf(char *,char *,...);
-extern int getpid(void);
-extern int rename(char *,char *);
-extern int free(char *);
-#define FREE(x) ((void) free((char *) (x)))
-extern int close(int);
-extern int unlink(char *);
-extern int lseek(int,int,int);
-extern int read(int,char *,int);
-extern int write(int,char *,int);
-extern int fsync(int);
-#include "rc_io.h"
-#include "rc_io_err.h"
 
+#include "rc_base.h"
+#include "rc_dfl.h"
+#include "rc_io.h"
+#include "rc_io.h"
+#include <krb5/sysincl.h>
+
+extern int errno; /* this should be in errno.h, but isn't on some systems */
+
+#define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
 
 int dirlen = 0;
 char *dir;
 
-#define GETDIR do { if (!dirlen) getdir(); } while(0); /* stupid C syntax */
+/* The do ... while(0) is required to insure that GETDIR looks like a
+   single statement in all situations (just {}'s may cause troubles in
+   certain situations, such as nested if/else clauses. */
+
+#define GETDIR do { if (!dirlen) getdir(); } while(0)
 
 static void getdir()
 {
@@ -43,8 +32,8 @@ static void getdir()
   {
    if (!(dir = getenv("KRB5RCACHEDIR")))
      if (!(dir = getenv("TMPDIR")))
-#ifdef P_tmpdir
-       dir = P_tmpdir;
+#ifdef RCTMPDIR
+       dir = RCTMPDIR;
 #else
        dir = "/tmp";
 #endif
@@ -52,7 +41,9 @@ static void getdir()
   }
 }
 
-krb5_error_code krb5_rc_io_creat PROTOTYPE((krb5_rc_iostuff *d,char **fn))
+krb5_error_code krb5_rc_io_creat (d, fn)
+krb5_rc_iostuff *d;
+char **fn;
 {
  char *c;
 
@@ -64,19 +55,21 @@ krb5_error_code krb5_rc_io_creat PROTOTYPE((krb5_rc_iostuff *d,char **fn))
    (void) strcpy(d->fn,dir);
    (void) strcat(d->fn,"/");
    (void) strcat(d->fn,*fn);
-   d->fd = open(d->fn,O_WRONLY | O_CREAT | O_TRUNC,0600);
+   d->fd = open(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL,0600);
   }
  else
   {
+      /* %d is max 11 digits (-, 10 digits of 32-bit number)
+	 11 + /krb5_RC + aaa = 24, +6 for slop */
    if (!(d->fn = malloc(30 + dirlen)))
      return KRB5_RC_IO_MALLOC;
    if (fn)
-     if (!(*fn = malloc(30)))
+     if (!(*fn = malloc(35)))
       { FREE(d->fn); return KRB5_RC_IO_MALLOC; }
    (void) sprintf(d->fn,"%s/krb5_RC%d",dir,UNIQUE);
    c = d->fn + strlen(d->fn);
    (void) strcpy(c,"aaa");
-   while ((d->fd = open(d->fn,O_WRONLY | O_CREAT | O_TRUNC,0600)) == -1)
+   while ((d->fd = open(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL,0600)) == -1)
     {
      if ((c[2]++) == 'z')
       {
@@ -108,7 +101,9 @@ krb5_error_code krb5_rc_io_creat PROTOTYPE((krb5_rc_iostuff *d,char **fn))
  return 0;
 }
 
-krb5_error_code krb5_rc_io_open PROTOTYPE((krb5_rc_iostuff *d,char *fn))
+krb5_error_code krb5_rc_io_open (d, fn)
+krb5_rc_iostuff *d;
+char *fn;
 {
  GETDIR;
  if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
@@ -133,7 +128,9 @@ krb5_error_code krb5_rc_io_open PROTOTYPE((krb5_rc_iostuff *d,char *fn))
  return 0;
 }
 
-krb5_error_code krb5_rc_io_move PROTOTYPE((krb5_rc_iostuff *new,krb5_rc_iostuff *old))
+krb5_error_code krb5_rc_io_move (new, old)
+krb5_rc_iostuff *new;
+krb5_rc_iostuff *old;
 {
  if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
    return KRB5_RC_IO_UNKNOWN;
@@ -143,7 +140,10 @@ krb5_error_code krb5_rc_io_move PROTOTYPE((krb5_rc_iostuff *new,krb5_rc_iostuff 
  return 0;
 }
 
-krb5_error_code krb5_rc_io_write PROTOTYPE((krb5_rc_iostuff *d,krb5_pointer buf,int num))
+krb5_error_code krb5_rc_io_write (d, buf, num)
+krb5_rc_iostuff *d;
+krb5_pointer buf;
+int num;
 {
  if (write(d->fd,(char *) buf,num) == -1)
    switch(errno)
@@ -165,19 +165,26 @@ krb5_error_code krb5_rc_io_write PROTOTYPE((krb5_rc_iostuff *d,krb5_pointer buf,
  return 0;
 }
 
-krb5_error_code krb5_rc_io_read PROTOTYPE((krb5_rc_iostuff *d,krb5_pointer buf,int num))
+krb5_error_code krb5_rc_io_read (d, buf, num)
+krb5_rc_iostuff *d;
+krb5_pointer buf;
+int num;
 {
- if (read(d->fd,(char *) buf,num) == -1)
+ int count;
+ if ((count = read(d->fd,(char *) buf,num)) == -1)
    switch(errno)
     {
      case EBADF: return KRB5_RC_IO_UNKNOWN; break;
      case EIO: return KRB5_RC_IO_IO; break;
      default: return KRB5_RC_IO_UNKNOWN; break;
     }
+ if (count == 0)
+     return KRB5_RC_IO_EOF;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_close PROTOTYPE((krb5_rc_iostuff *d))
+krb5_error_code krb5_rc_io_close (d)
+krb5_rc_iostuff *d;
 {
  FREE(d->fn);
  if (close(d->fd) == -1) /* can't happen */
@@ -185,7 +192,8 @@ krb5_error_code krb5_rc_io_close PROTOTYPE((krb5_rc_iostuff *d))
  return 0;
 }
 
-krb5_error_code krb5_rc_io_destroy PROTOTYPE((krb5_rc_iostuff *d))
+krb5_error_code krb5_rc_io_destroy (d)
+krb5_rc_iostuff *d;
 {
  if (unlink(d->fn) == -1)
    switch(errno)
@@ -200,13 +208,15 @@ krb5_error_code krb5_rc_io_destroy PROTOTYPE((krb5_rc_iostuff *d))
  return 0;
 }
 
-krb5_error_code krb5_rc_io_mark PROTOTYPE((krb5_rc_iostuff *d))
+krb5_error_code krb5_rc_io_mark (d)
+krb5_rc_iostuff *d;
 {
  d->mark = lseek(d->fd,0,L_INCR); /* can't fail */
  return 0;
 }
 
-krb5_error_code krb5_rc_io_unmark PROTOTYPE((krb5_rc_iostuff *d))
+krb5_error_code krb5_rc_io_unmark (d)
+krb5_rc_iostuff *d;
 {
  (void) lseek(d->fd,d->mark,L_SET); /* if it fails, tough luck */
  return 0;
