@@ -1,5 +1,12 @@
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* shlib.conf (*-*-darwin*, *-*-rhapsody*): Don't set PICFLAGS or
+	LDFLAGS.  Force static libraries only always, instead of just as
+	the default.
+	(*-*-aix*): The initfini argument should be "-binitfini".  Use
+	-bernotok, not -berok.  Do use the INIT_FINI_PREP command in
+	constructing MAKE_SHLIB_COMMAND.
+
 	* pre.in (PTHREAD_CFLAGS): New variable.
 	(ALL_CFLAGS): Include it.
 
