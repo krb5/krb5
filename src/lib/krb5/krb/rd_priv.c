@@ -26,7 +26,7 @@ static char rd_priv_c[] =
 #include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
 
-extern krb5_deltat krb5_clockskew = 100;   /* temporary assingment for debugging */
+extern krb5_deltat krb5_clockskew;   
 #define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
 
 krb5_error_code
@@ -57,7 +57,7 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_privmsg() {(void)xfree(privmsg->enc_part.data); (void)xfree(privmsg);}
     if (!valid_etype(privmsg->etype)) {
 	cleanup_privmsg();
-	return KRB5KRB_AP_ERR_MODIFIED; /* XXX */
+	return KRB5_PROG_ETYPE_NOSUPP; /* XXX */
     }
 			   
     /* put together an eblock for this decryption */
