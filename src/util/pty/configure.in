@@ -49,15 +49,10 @@ dnl
 AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY) LIBS="$LIBS -lutil"])
 AC_TYPE_MODE_T
 AC_CHECK_TYPE(time_t, long)
-AC_CHECK_FUNC(strsave,[AC_DEFINE(HAS_STRSAVE)])
 AC_CHECK_FUNCS(setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h libutil.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h sys/wait.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h util.h)
 AC_CHECK_FUNCS(waitpid)
-DECLARE_SYS_ERRLIST
-KRB5_SIGTYPE
 CHECK_SIGNALS
-CHECK_SETJMP
-CHECK_DIRENT
 AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS))])
 
 ######################################################################
@@ -225,31 +220,6 @@ if test $krb5_cv_has_streams = yes; then
 AC_DEFINE(HAVE_STREAMS)
 fi
 dnl
-dnl
-AC_MSG_CHECKING([F_SETOWN])
-AC_CACHE_VAL(krb5_cv_f_setown,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <fcntl.h>], [1+F_SETOWN;],
-krb5_cv_f_setown=yes,krb5_cv_f_setown=no)])
-AC_MSG_RESULT($krb5_cv_f_setown)
-if test $krb5_cv_f_setown = yes; then
-AC_DEFINE(HAVE_SETOWN)
-fi
-dnl
-dnl
-AC_MSG_CHECKING([setenv])
-AC_CACHE_VAL(krb5_cv_setenv,
-[AC_TRY_LINK(
-[],[setenv("PATH","/bin",0);],
-krb5_cv_setenv=yes,krb5_cv_setenv=no)])
-AC_MSG_RESULT($krb5_cv_setenv)
-if test $krb5_cv_setenv = no; then
-SETENVSRC=setenv.c
-SETENVOBJ=setenv.o
-AC_SUBST([SETENVSRC])
-AC_SUBST([SETENVOBJ])
-fi
 dnl
 dnl
 AC_MSG_CHECKING([arguments to getpgrp])
