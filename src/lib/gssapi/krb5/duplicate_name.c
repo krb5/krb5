@@ -35,27 +35,34 @@ OM_uint32 krb5_gss_duplicate_name(OM_uint32  *minor_status,
 	krb5_error_code code;
 	krb5_principal princ, outprinc;
 
-	if (GSS_ERROR(kg_get_context(minor_status, &context)))
-		return(GSS_S_FAILURE);
+	code = krb5_init_context(&context);
+	if (code) {
+	    *minor_status = code;
+	    return GSS_S_FAILURE;
+	}
 
 	if (! kg_validate_name(input_name)) {
 		if (minor_status)
 			*minor_status = (OM_uint32) G_VALIDATE_FAILED;
+		krb5_free_context(context);
 		return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
 	}
 
 	princ = input_name;
 	if ((code = krb5_copy_principal(context, princ, &outprinc))) {
 		*minor_status = code;
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	}
 
 	if (! kg_save_name((gss_name_t) outprinc)) {
 		krb5_free_principal(context, outprinc);
+		krb5_free_context(context);
 		*minor_status = (OM_uint32) G_VALIDATE_FAILED;
 		return(GSS_S_FAILURE);
 	}
 	
+	krb5_free_context(context);
 	*dest_name = (gss_name_t) outprinc;
 	return(GSS_S_COMPLETE);
 	

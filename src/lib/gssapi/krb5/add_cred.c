@@ -138,8 +138,11 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	return(GSS_S_DUPLICATE_ELEMENT);
     }
 
-    if (GSS_ERROR(kg_get_context(minor_status, &context)))
-	return(GSS_S_FAILURE);
+    code = krb5_init_context(&context);
+    if (code) {
+	*minor_status = code;
+	return GSS_S_FAILURE;
+    }
 
     /* verify the desired_name */
 
@@ -147,6 +150,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     if ((desired_name != (gss_name_t) NULL) &&
 	(! kg_validate_name(desired_name))) {
 	*minor_status = (OM_uint32) G_VALIDATE_FAILED;
+	krb5_free_context(context);
 	return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
     }
 
@@ -156,6 +160,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	!krb5_principal_compare(context, (krb5_principal) desired_name,
 				cred->princ)) {
 	*minor_status = 0;
+	krb5_free_context(context);
 	return(GSS_S_BAD_NAME);
     }
 
@@ -172,6 +177,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	     (krb5_gss_cred_id_t) xmalloc(sizeof(krb5_gss_cred_id_rec)))
 	    == NULL) {
 	    *minor_status = ENOMEM;
+	    krb5_free_context(context);
 	    return(GSS_S_FAILURE);
 	}
 	memset(new_cred, 0, sizeof(krb5_gss_cred_id_rec));
@@ -187,6 +193,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    xfree(new_cred);
 
 	    *minor_status = code;
+	    krb5_free_context(context);
 	    return(GSS_S_FAILURE);
 	}
 	    
@@ -198,6 +205,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		xfree(new_cred);
 
 		*minor_status = ENOMEM;
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
 
@@ -214,6 +222,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		xfree(new_cred);
 
 		*minor_status = code;
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
 
@@ -224,6 +233,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		xfree(new_cred);
 
 		*minor_status = code;
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
 	} else {
@@ -241,6 +251,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
+		krb5_free_context(context);
 		*minor_status = code;
 		return(GSS_S_FAILURE);
 	    }
@@ -261,6 +272,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
+		krb5_free_context(context);
 		*minor_status = ENOMEM;
 		return(GSS_S_FAILURE);
 	    }
@@ -279,6 +291,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		if (new_cred->princ)
 		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
+		krb5_free_context(context);
 
 		*minor_status = code;
 		return(GSS_S_FAILURE);
@@ -299,6 +312,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    if (new_cred->princ)
 	    krb5_free_principal(context, new_cred->princ);
 	    xfree(new_cred);
+	    krb5_free_context(context);
 
 	    *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	    return(GSS_S_FAILURE);
@@ -325,6 +339,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	
 	if (output_cred_handle)
 	    (void) krb5_gss_release_cred(&dummy, (gss_cred_id_t *) &cred);
+	krb5_free_context(context);
 
 	return(major_status);
     }
@@ -337,6 +352,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     if (output_cred_handle)
 	*output_cred_handle = cred;
 
+    krb5_free_context(context);
     *minor_status = 0;
     return(GSS_S_COMPLETE);
 }

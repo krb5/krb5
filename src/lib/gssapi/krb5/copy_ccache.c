@@ -24,18 +24,23 @@ gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
        return(GSS_S_FAILURE);
    }
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-       return (GSS_S_FAILURE);
+   code = krb5_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
 
    code = krb5_cc_start_seq_get(context, k5creds->ccache, &cursor);
    if (code) {
        *minor_status = code;
+       krb5_free_context(context);
        return(GSS_S_FAILURE);
    }
    while (!code && !krb5_cc_next_cred(context, k5creds->ccache, &cursor, &creds)) 
        code = krb5_cc_store_cred(context, out_ccache, &creds);
    krb5_cc_end_seq_get(context, k5creds->ccache, &cursor);
 
+   krb5_free_context(context);
    if (code) {
        *minor_status = code;
        return(GSS_S_FAILURE);

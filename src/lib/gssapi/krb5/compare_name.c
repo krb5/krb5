@@ -34,9 +34,7 @@ krb5_gss_compare_name(minor_status, name1, name2, name_equal)
      int *name_equal;
 { 
    krb5_context context;
-
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   krb5_error_code code;
 
    if (! kg_validate_name(name1)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -48,8 +46,15 @@ krb5_gss_compare_name(minor_status, name1, name2, name_equal)
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
+   code = krb5_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
+
    *minor_status = 0;
    *name_equal = krb5_principal_compare(context, (krb5_principal) name1,
 					(krb5_principal) name2);
+   krb5_free_context(context);
    return(GSS_S_COMPLETE);
 }

@@ -1,3 +1,17 @@
+2004-03-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Create and destroy a
+	local krb5 context.
+	* add_cred.c (krb5_gss_add_cred): Likewise.
+	* compare_name.c (krb5_gss_compare_name): Likewise.
+	* copy_ccache.c (gss_krb5_copy_ccache): Likewise.
+	* disp_name.c (krb5_gss_display_name): Likewise.
+	* duplicate_name.c (krb5_gss_duplicate_name): Likewise.
+	* inq_cred.c (krb5_gss_inquire_cred): Likewise.
+
+	* context_time.c (krb5_gss_context_time): Use the krb5 context in
+	the GSS security context.
+
 2004-03-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5seal.c (kg_seal): Extract the krb5 context from the security

@@ -34,31 +34,38 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
    krb5_error_code code;
    char *str;
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   code = krb5_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
 
    output_name_buffer->length = 0;
    output_name_buffer->value = NULL;
 
    if (! kg_validate_name(input_name)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      krb5_free_context(context);
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
    if ((code = krb5_unparse_name(context,
 				 (krb5_principal) input_name, &str))) {
       *minor_status = code;
+      krb5_free_context(context);
       return(GSS_S_FAILURE);
    }
 
    if (! g_make_string_buffer(str, output_name_buffer)) {
       krb5_free_unparsed_name(context, str);
+      krb5_free_context(context);
 
       *minor_status = (OM_uint32) G_BUFFER_ALLOC;
       return(GSS_S_FAILURE);
    }
 
    krb5_free_unparsed_name(context, str);
+   krb5_free_context(context);
 
    *minor_status = 0;
    if (output_name_type)

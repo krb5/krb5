@@ -331,9 +331,6 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    OM_uint32 ret;
    krb5_error_code code;
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
-
    /* make sure all outputs are valid */
 
    *output_cred_handle = NULL;
@@ -402,6 +399,13 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    /* if requested, acquire credentials for accepting */
    /* this will fill in cred->princ if the desired_name is not specified */
 
+   code = krb5_init_context(&context);
+   if (code) {
+       xfree(cred);
+       *minor_status = (OM_uint32) code;
+       return GSS_S_FAILURE;
+   }
+
    if ((cred_usage == GSS_C_ACCEPT) ||
        (cred_usage == GSS_C_BOTH))
       if ((ret = acquire_accept_cred(context, minor_status, desired_name,
@@ -410,6 +414,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
 	 xfree(cred);
+	 krb5_free_context(context);
 	 /* minor_status set by acquire_accept_cred() */
 	 return(ret);
       }
@@ -430,6 +435,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
 	 xfree(cred);
+	 krb5_free_context(context);
 	 /* minor_status set by acquire_init_cred() */
 	 return(ret);
       }
@@ -444,6 +450,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	 if (cred->keytab)
 	    (void)krb5_kt_close(context, cred->keytab);
 	 xfree(cred);
+	 krb5_free_context(context);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -466,6 +473,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
 	 xfree(cred);
+	 krb5_free_context(context);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -494,6 +502,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	   if (cred->princ)
 	       krb5_free_principal(context, cred->princ);
 	   xfree(cred);
+	   krb5_free_context(context);
 	   /* *minor_status set above */
 	   return(ret);
        }
@@ -511,6 +520,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       if (cred->princ)
 	 krb5_free_principal(context, cred->princ);
       xfree(cred);
+      krb5_free_context(context);
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }
@@ -522,5 +532,6 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    if (actual_mechs)
       *actual_mechs = ret_mechs;
 
+   krb5_free_context(context);
    return(GSS_S_COMPLETE);
 }

@@ -32,14 +32,10 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
      gss_ctx_id_t context_handle;
      OM_uint32 *time_rec;
 {
-   krb5_context context;
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx;
    krb5_timestamp now;
    krb5_deltat lifetime;
-
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
@@ -54,7 +50,7 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
       return(GSS_S_NO_CONTEXT);
    }
 
-   if ((code = krb5_timeofday(context, &now))) {
+   if ((code = krb5_timeofday(ctx->k5_context, &now))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
