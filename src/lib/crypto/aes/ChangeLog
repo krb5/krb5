@@ -1,0 +1,5 @@
+2003-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* New directory, with Briad Gladstone's implementation of AES,
+	tweaked for the MIT krb5 build system.
+
