@@ -3,7 +3,7 @@
  * $Author$
  * $Id$
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 1991, 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
