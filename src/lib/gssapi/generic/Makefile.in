@@ -157,9 +157,6 @@ rel_oid_set.so rel_oid_set.po $(OUTPRE)rel_oid_set.$(OBJEXT): rel_oid_set.c gssa
 util_buffer.so util_buffer.po $(OUTPRE)util_buffer.$(OBJEXT): util_buffer.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(COM_ERR_DEPS)
-util_dup.so util_dup.po $(OUTPRE)util_dup.$(OBJEXT): util_dup.c gssapiP_generic.h \
-  gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  gssapi_err_generic.h $(COM_ERR_DEPS)
 util_oid.so util_oid.po $(OUTPRE)util_oid.$(OBJEXT): util_oid.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(COM_ERR_DEPS)
