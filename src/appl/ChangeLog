@@ -1,3 +1,14 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+		Add a MY_SUBDIRS definition to control the directories
+		which are recursively descended by the Makefile.
+
+	* configure.in: Fold the autoconf tests from the sample, simple,
+		gss-sample, and user_user directories into this
+		higher-level configure.in file.
+
 Wed Feb 18 15:24:26 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.

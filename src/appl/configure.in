@@ -1,4 +1,25 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-AC_CONFIG_SUBDIRS(sample simple user_user bsd gss-sample gssftp telnet)
-V5_AC_OUTPUT_MAKEFILE
+AC_PROG_INSTALL
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
+AC_CONST
+dnl
+dnl Kludge for simple server --- FIXME is this the best way to do this?
+dnl
+if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
+	AC_DEFINE(BROKEN_STREAMS_SOCKETS)
+fi
+dnl
+dnl
+KRB5_BUILD_PROGRAM
+AC_CONFIG_SUBDIRS(bsd gssftp telnet)
+K5_GEN_MAKEFILE(.)
+K5_GEN_MAKEFILE(sample)
+K5_GEN_MAKEFILE(sample/sclient)
+K5_GEN_MAKEFILE(sample/sserver)
+K5_GEN_MAKEFILE(simple)
+K5_GEN_MAKEFILE(simple/client)
+K5_GEN_MAKEFILE(simple/server)
+K5_GEN_MAKEFILE(gss-sample)
+K5_GEN_MAKEFILE(user_user)
+K5_AC_OUTPUT
