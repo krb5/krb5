@@ -16,7 +16,7 @@ libdes.dvi: $(DESTEX) $(STYLES)
 library.ps: library.dvi
 
 clean:
-	rm -f *.toc *.log *.idx *.ind *.aux lib1.stamp
+	rm -f *.toc *.log *.idx *.ind *.aux *.ilg lib1.stamp
 
 really-clean: clean
 	rm -f *.dvi *.ps

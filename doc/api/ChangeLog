@@ -1,3 +1,7 @@
+2001-11-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile (clean): Delete *.ilg.
+
 2001-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* ccache.tex (krb5_cc_default): Fix "equivalent to" example code.
