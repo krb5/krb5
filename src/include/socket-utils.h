@@ -94,10 +94,12 @@ static __inline__ struct sockaddr_in *ss2sin (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in *) ss;
 }
+#ifdef KRB5_USE_INET6
 static __inline__ struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in6 *) ss;
 }
+#endif
 #else
 #define sa2sin(S)	((struct sockaddr_in *)(S))
 #define sa2sin6(S)	((struct sockaddr_in6 *)(S))

@@ -1,3 +1,8 @@
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* socket-utils.h (ss2sin6) [__GNUC__]: Define inline function only
+	if IPv6 support is turned on.
+
 2001-12-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5-int.h (krb5int_des_init_state): Change variable name in
