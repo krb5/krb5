@@ -1,6 +1,6 @@
 Intermediates = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates" ;
 IntermediateBuild = "$(Intermediates)/build" ;
-Sources = "$(SRCROOT)/../Sources" ;
+Sources = "$(SRCROOT)/../../Kerberos5/Sources" ;
 
 Reconf = "$(Sources)/util/reconf" ;
 Configure = "$(Sources)/configure" ;
@@ -61,8 +61,93 @@ actions Make
     cd "$(1:D)" && make && touch "$(1)" && echo "### HAPPINESS ###"
 }
 
-Make "$(IntermediateBuild)/make.stamp" : "$(Makefile)" ;
+<<<<<<< Kerberos5ServerBuild.jam
+# InstallProgram <destination executable> : <source executable>
+rule InstallProgram
+{
+    DEPENDS "$(1)" : "$(2)" ;
+    DEPENDS "$(2)" : "$(MakeStamp)" ;
+    Clean.Remove clean "$(1)" ;
+}
+actions InstallProgram
+{
+    mkdir -p "$(1:D)"
+    /usr/bin/install -c -s "$(2)" "$(1)" 
+}
 
+# InstallFile <destination file> : <source file>
+rule InstallFile
+{
+    DEPENDS "$(1)" : "$(2)" ;
+    DEPENDS "$(2)" : "$(MakeStamp)" ;
+    Clean.Remove clean "$(1)" ;
+}
+actions InstallFile
+{
+    mkdir -p "$(1:D)"
+    /usr/bin/install -c -m 644 "$(2)" "$(1)" 
+}
+
+Make "$(MakeStamp)" : "$(Makefile)" ;
+=======
+Make "$(IntermediateBuild)/make.stamp" : "$(Makefile)" ;
+>>>>>>> 1.4
+
+<<<<<<< Kerberos5ServerBuild.jam
+InstallProgram "$(DSTROOT)/usr/sbin/kadmin"          : "$(IntermediateBuild)/kadmin/cli/kadmin" ;
+InstallProgram "$(DSTROOT)/usr/sbin/kadmin.local"    : "$(IntermediateBuild)/kadmin/cli/kadmin.local" ;
+InstallProgram "$(DSTROOT)/usr/sbin/kadmind"         : "$(IntermediateBuild)/kadmin/server/kadmind" ;
+InstallProgram "$(DSTROOT)/usr/sbin/kadmind4"        : "$(IntermediateBuild)/kadmin/v4server/kadmind4" ;
+InstallProgram "$(DSTROOT)/usr/sbin/v5passwdd"       : "$(IntermediateBuild)/kadmin/v5passwdd/v5passwdd" ;
+InstallProgram "$(DSTROOT)/usr/sbin/ktutil"          : "$(IntermediateBuild)/kadmin/ktutil/ktutil" ;
+InstallProgram "$(DSTROOT)/usr/sbin/kdb5_util"       : "$(IntermediateBuild)/kadmin/dbutil/kdb5_util" ;
+InstallProgram "$(DSTROOT)/usr/sbin/kprop"           : "$(IntermediateBuild)/slave/kprop" ;
+InstallProgram "$(DSTROOT)/usr/sbin/kpropd"          : "$(IntermediateBuild)/slave/kpropd" ;
+InstallProgram "$(DSTROOT)/usr/sbin/krb524d"         : "$(IntermediateBuild)/krb524/krb524d" ;
+InstallProgram "$(DSTROOT)/usr/sbin/krb5kdc"         : "$(IntermediateBuild)/kdc/krb5kdc" ;
+                  
+InstallFile "$(DSTROOT)/usr/share/man/man1/kerberos.1"     : "$(SRCROOT)/../../Kerberos5/Sources/gen-manpages/kerberos.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man5/kdc.conf.5"     : "$(SRCROOT)/../../Kerberos5/Sources/config-files/kdc.conf.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man5/krb5.conf.5"    : "$(SRCROOT)/../../Kerberos5/Sources/config-files/krb5.conf.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/kadmin.8"       : "$(SRCROOT)/../../Kerberos5/Sources/kadmin/cli/kadmin.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/kadmin.local.8" : "$(SRCROOT)/../../Kerberos5/Sources/kadmin/cli/kadmin.local.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/kadmind.8"      : "$(SRCROOT)/../../Kerberos5/Sources/kadmin/server/kadmind.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/ktutil.8"       : "$(SRCROOT)/../../Kerberos5/Sources/kadmin/ktutil/ktutil.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/kdb5_util.8"    : "$(SRCROOT)/../../Kerberos5/Sources/kadmin/dbutil/kdb5_util.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/kprop.8"        : "$(SRCROOT)/../../Kerberos5/Sources/slave/kprop.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/kpropd.8"       : "$(SRCROOT)/../../Kerberos5/Sources/slave/kpropd.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/krb5kdc.8"      : "$(SRCROOT)/../../Kerberos5/Sources/kdc/krb5kdc.M" ;
+
+
+DEPENDS all     : "$(MakeStamp)" ;
+
+DEPENDS install : all 
+                  "$(DSTROOT)/usr/sbin/kadmin"
+                  "$(DSTROOT)/usr/sbin/kadmin.local"
+                  "$(DSTROOT)/usr/sbin/kadmind"
+                  "$(DSTROOT)/usr/sbin/kadmind4"
+                  "$(DSTROOT)/usr/sbin/kdb5_util"
+                  "$(DSTROOT)/usr/sbin/kprop"
+                  "$(DSTROOT)/usr/sbin/kpropd"
+                  "$(DSTROOT)/usr/sbin/krb524d"
+                  "$(DSTROOT)/usr/sbin/krb5kdc"
+                  "$(DSTROOT)/usr/sbin/ktutil"
+                  "$(DSTROOT)/usr/sbin/v5passwdd"
+                  
+                  "$(DSTROOT)/usr/share/man/man1/kerberos.1"
+                  "$(DSTROOT)/usr/share/man/man5/kdc.conf.5"
+                  "$(DSTROOT)/usr/share/man/man5/krb5.conf.5"
+                  "$(DSTROOT)/usr/share/man/man8/kadmin.8"
+                  "$(DSTROOT)/usr/share/man/man8/kadmin.local.8"
+                  "$(DSTROOT)/usr/share/man/man8/kadmind.8"
+                  "$(DSTROOT)/usr/share/man/man8/kdb5_util.8"
+                  "$(DSTROOT)/usr/share/man/man8/kprop.8"
+                  "$(DSTROOT)/usr/share/man/man8/kpropd.8"
+                  "$(DSTROOT)/usr/share/man/man8/krb5kdc.8"
+                  "$(DSTROOT)/usr/share/man/man8/ktutil.8" ;
+                  
+=======
 DEPENDS all : "$(IntermediateBuild)/make.stamp" ;
 DEPENDS install : all ;
+>>>>>>> 1.4
 DEPENDS installhdrs : all ;
