@@ -30,7 +30,7 @@
 #include "k5-int.h"
 
 #ifdef USE_LOGIN_LIBRARY
-#include <KerberosLoginPrivate/KerberosLoginPrivate.h>
+#include <Kerberos/KerberosLoginPrivate.h>
 #endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV

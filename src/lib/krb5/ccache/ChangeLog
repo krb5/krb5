@@ -1,3 +1,6 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * ccdefault.c: Updated Mac OS X headers to new framework layout
+
 2002-01-29  Tom Yu  <tlyu@mit.edu>
 
 	* ccdefault.c: Add terminal newline.  Fixes [krb5-build/1041].
