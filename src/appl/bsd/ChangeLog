@@ -1,3 +1,8 @@
+2001-01-23  Tom Yu  <tlyu@mit.edu>
+
+	* forward.c (rd_and_store_for_creds): Overwrite any existing value
+	of the KRB5CCNAME environment variable.
+
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* krcp.c (error): Always declare with ellipsis.
