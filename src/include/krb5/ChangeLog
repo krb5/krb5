@@ -1,6 +1,12 @@
 Tue Oct  4 14:51:32 1994  Theodore Y. Ts'o  (tytso@dcl)
 
-* encryption.h: Add magic number to encryption structures.
+	* encryption.h: Cast various potential shorts to ints.  This is
+		not quite right either, but the whole encryption interface
+		needs to be fixed.
+
+	* keytab.h (krb5_kt_ops.resolv): Resolve's first argument is a const.
+
+	* encryption.h: Add magic number to encryption structures.
 
 Mon Oct  3 18:45:55 1994  Theodore Y. Ts'o  (tytso@dcl)
 

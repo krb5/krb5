@@ -165,11 +165,11 @@ extern int krb5_max_keytype;		/* max entry in array */
 extern krb5_checksum_entry *krb5_cksumarray[];
 extern int krb5_max_cksum;		/* max entry in array */
 
-#define valid_etype(etype)     ((etype <= krb5_max_cryptosystem) && (etype > 0) && krb5_csarray[etype])
+#define valid_etype(etype)     ((((int) etype) <= krb5_max_cryptosystem) && (etype > 0) && krb5_csarray[etype])
 
-#define valid_keytype(ktype)     ((ktype <= krb5_max_keytype) && (ktype > 0) && krb5_keytype_array[ktype])
+#define valid_keytype(ktype)     ((((int) ktype) <= krb5_max_keytype) && (ktype > 0) && krb5_keytype_array[ktype])
 
-#define valid_cksumtype(cktype)     ((cktype <= krb5_max_cksum) && (cktype > 0) && krb5_cksumarray[cktype])
+#define valid_cksumtype(cktype)     ((((int) cktype) <= krb5_max_cksum) && (cktype > 0) && krb5_cksumarray[cktype])
 
 #define is_coll_proof_cksum(cktype) (krb5_cksumarray[cktype]->is_collision_proof)
 #define is_keyed_cksum(cktype) (krb5_cksumarray[cktype]->uses_key)

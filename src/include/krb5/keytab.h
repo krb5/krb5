@@ -57,7 +57,7 @@ typedef struct _krb5_kt_ops {
     krb5_magic magic;
     char *prefix;
     /* routines always present */
-    krb5_error_code (*resolve) NPROTOTYPE((char *,
+    krb5_error_code (*resolve) NPROTOTYPE((const char *,
 					   krb5_keytab *));
     krb5_error_code (*get_name) NPROTOTYPE((krb5_keytab,
 					    char *,
