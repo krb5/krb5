@@ -69,6 +69,7 @@ char *argv[];
 
 #ifdef DEBUG
     {
+	int one = 1;
 	int acc;
 	struct servent *sp;
 	int namelen = sizeof(f_inaddr);
@@ -81,11 +82,12 @@ char *argv[];
 	l_inaddr.sin_family = AF_INET;
 	l_inaddr.sin_addr.s_addr = 0;
 	if (!(sp = getservbyname("uu-sample", "tcp"))) {
-	    com_err("uu-server", 0, "can't find uu-sample/tcp");
+	    com_err("uu-server", 0, "can't find uu-sample/tcp service");
 	    exit(3);
 	}
+	(void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof (one));
 	l_inaddr.sin_port = sp->s_port;
-	if (bind(sock, &l_inaddr, sizeof(l_inaddr))) {
+	if (bind(sock, (struct sockaddr *)&l_inaddr, sizeof(l_inaddr))) {
 	    com_err("uu-server", errno, "binding socket");
 	    exit(3);
 	}
@@ -155,7 +157,7 @@ char *argv[];
   faddr.contents = (krb5_octet *)&f_inaddr.sin_addr;
 
   l = sizeof(l_inaddr);
-  if (getsockname(0, (caddr_t)&l_inaddr, &l) == -1)
+  if (getsockname(0, (struct sockaddr *)&l_inaddr, &l) == -1)
     {
       com_err("uu-server", errno, "getting local address");
       return 6;
