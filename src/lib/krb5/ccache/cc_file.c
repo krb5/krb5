@@ -260,7 +260,14 @@ static krb5_error_code krb5_fcc_open_file
 
 typedef struct _krb5_fcc_data {
     char *filename;
+    /* Lock this one before reading or modifying the data stored here
+       that can be changed.  (Filename is fixed after
+       initialization.)  */
     k5_mutex_t lock;
+    /* Grab this one before trying to get an advisory lock on the disk
+       file, since the facility is per-process, not per-thread.  */
+    k5_mutex_t disk_file_lock;
+    int file_is_locked;
     int file;
     krb5_flags flags;
     int mode;				/* needed for locking code */
@@ -282,9 +289,6 @@ static inline void invalidate_cache(krb5_fcc_data *data)
 
 static off_t fcc_lseek(krb5_fcc_data *data, off_t offset, int whence)
 {
-    off_t ret;
-    int adjustment;
-
     /* If we read some extra data in advance, and then want to know or
        use our "current" position, we need to back up a little.  */
     if (whence == SEEK_CUR && data->valid_bytes) {
@@ -355,12 +359,11 @@ typedef struct _krb5_fcc_cursor {
 static krb5_error_code
 krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned int len)
 {
+#if 0
      int ret;
-     krb5_fcc_data *data = (krb5_fcc_data *) id->data;
 
      k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
 
-#if 0
      ret = read(((krb5_fcc_data *) id->data)->file, (char *) buf, len);
      if (ret == -1)
 	  return krb5_fcc_interpret(context, errno);
@@ -369,8 +372,13 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
      else
 	  return KRB5_OK;
 #else
+     krb5_fcc_data *data = (krb5_fcc_data *) id->data;
+
+     k5_assert_locked(&data->lock);
+
      while (len > 0) {
-	 int nread, ncopied, e;
+	 int nread, e;
+	 size_t ncopied;
 
 	 assert (data->valid_bytes >= 0);
 	 if (data->valid_bytes > 0)
@@ -378,7 +386,6 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
 	 if (data->valid_bytes == 0
 	     || data->cur_offset == data->valid_bytes) {
 	     /* Fill buffer from current file position.  */
-	     off_t current_file_pos = lseek(data->file, 0, SEEK_CUR);
 	     nread = read(data->file, data->buf, sizeof(data->buf));
 	     e = errno;
 	     if (nread < 0)
@@ -391,6 +398,7 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
 	 }
 	 assert(data->cur_offset < data->valid_bytes);
 	 ncopied = len;
+	 assert(ncopied == len);
 	 if (data->valid_bytes - data->cur_offset < ncopied)
 	     ncopied = data->valid_bytes - data->cur_offset;
 	 memcpy(buf, data->buf + data->cur_offset, ncopied);
@@ -399,7 +407,8 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
 	 assert(data->cur_offset <= data->valid_bytes);
 	 len -= ncopied;
 	 assert(len >= 0);
-	 buf += ncopied;
+	 /* Don't do arithmetic on void pointers.  */
+	 buf = (char*)buf + ncopied;
      }
      return 0;
 #endif
@@ -1163,7 +1172,9 @@ krb5_fcc_close_file (krb5_context context, krb5_fcc_data *data)
 	 return KRB5_FCC_INTERNAL;
 
      retval = krb5_unlock_file(context, data->file);
+     k5_mutex_unlock(&data->disk_file_lock);
      ret = close (data->file);
+     data->file_is_locked = 0;
      data->file = NO_FILE;
      if (retval)
 	 return retval;
@@ -1201,7 +1212,11 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 
     if (data->file != NO_FILE) {
 	/* Don't know what state it's in; shut down and start anew.  */
-	(void) krb5_unlock_file(context, data->file);
+	if (data->file_is_locked) {
+	    (void) krb5_unlock_file(context, data->file);
+	    k5_mutex_unlock(&data->disk_file_lock);
+	    data->file_is_locked = 0;
+	}
 	(void) close (data->file);
 	data->file = NO_FILE;
     }
@@ -1230,10 +1245,17 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 	lock_flag = KRB5_LOCKMODE_SHARED;
     else 
 	lock_flag = KRB5_LOCKMODE_EXCLUSIVE;
+    retval = k5_mutex_lock(&data->disk_file_lock);
+    if (retval) {
+	close(f);
+	return retval;
+    }
     if ((retval = krb5_lock_file(context, f, lock_flag))) {
+	k5_mutex_unlock(&data->disk_file_lock);
 	(void) close(f);
 	return retval;
     }
+    data->file_is_locked = 1;
 
     if (mode == FCC_OPEN_AND_ERASE) {
 	 /* write the version number */
@@ -1356,6 +1378,8 @@ done:
      if (retval) {
          data->file = -1;
          (void) krb5_unlock_file(context, f);
+	 (void) k5_mutex_unlock(&data->disk_file_lock);
+	 data->file_is_locked = 0;
          (void) close(f);
      }
      return retval;
@@ -1474,6 +1498,7 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
 	}
 	k5_mutex_assert_unlocked(&data->lock);
 	k5_mutex_destroy(&data->lock);
+	k5_mutex_destroy(&data->disk_file_lock);
 	free(data);
     } else
 	k5_mutex_unlock(&krb5int_cc_file_mutex);
@@ -1705,14 +1730,25 @@ krb5_fcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 	     free(data);
 	     return kret;
 	 }
+	 kret = k5_mutex_init(&data->disk_file_lock);
+	 if (kret) {
+	     k5_mutex_unlock(&krb5int_cc_file_mutex);
+	     k5_mutex_unlock(&data->lock);
+	     k5_mutex_destroy(&data->lock);
+	     free(data->filename);
+	     free(data);
+	     return kret;
+	 }
 	 /* data->version,mode filled in for real later */
 	 data->version = data->mode = 0;
+	 data->file_is_locked = 0;
 	 data->flags = KRB5_TC_OPENCLOSE;
 	 data->file = -1;
 	 data->valid_bytes = 0;
 	 setptr = malloc(sizeof(struct fcc_set));
 	 if (setptr == NULL) {
 	     k5_mutex_unlock(&krb5int_cc_file_mutex);
+	     k5_mutex_destroy(&data->disk_file_lock);
 	     k5_mutex_destroy(&data->lock);
 	     free(data->filename);
 	     free(data);
@@ -1929,6 +1965,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      krb5_error_code    retcode = 0;
      char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
 					    NUL */
+     krb5_fcc_data *data;
      
      /* Allocate memory */
      lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -1968,6 +2005,17 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      ((krb5_fcc_data *) lid->data)->flags = 0;
      ((krb5_fcc_data *) lid->data)->file = -1;
      ((krb5_fcc_data *) lid->data)->valid_bytes = 0;
+     data = (krb5_fcc_data *) lid->data;
+
+     retcode = k5_mutex_init(&data->lock);
+     if (retcode)
+	 goto err_out;
+     retcode = k5_mutex_init(&data->disk_file_lock);
+     if (retcode) {
+	 k5_mutex_destroy(&data->lock);
+	 goto err_out;
+     }
+     data->file_is_locked = 0;
 
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);

@@ -1,5 +1,14 @@
 2004-08-15  Ken Raeburn  <raeburn@mit.edu>
 
+	* cc_file.c (struct _krb5_fcc_data): Add new mutex
+	disk_file_lock and flag file_is_locked.
+	(krb5_fcc_close_file): Unlock the mutex and clear the flag.
+	(krb5_fcc_open_file): Acquire the mutex before locking the file,
+	and set the flag after.
+	(krb5_fcc_resolve): Initialize the new mutex and flag.
+	(krb5_fcc_generate_new): Initialize both mutexes and the flag.
+	(dereference): Destroy the new mutex.
+
 	* cc_file.c: Add buffering on reading.
 	(FCC_BUFSIZ): New macro.
 	(struct _krb5_fcc_data): Add new fields buf, valid_bytes,
@@ -14,8 +23,10 @@
 	krb5_fcc_next_cred, krb5_fcc_store): Use fcc_lseek instead of
 	lseek.
 	(fcc_read): Use and maybe refill the buffer.
-	(dereference): Lock mutex around call to krb5_fcc_close_file.
-	Zap the contents of the buffer before freeing it.
+	(dereference): Zap the contents of the buffer before freeing it.
+
+	* cc_file.c (dereference): Lock mutex around call to
+	krb5_fcc_close_file.
 
 2004-08-12  Ken Raeburn  <raeburn@mit.edu>
 
