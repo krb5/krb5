@@ -39,7 +39,7 @@
 Internet File Transfer Protocol server
 .SH SYNOPSIS
 .B ftpd
-[\fB\-a\fP] [\fB\-c\fP] [\fB\-d\fP] [\fB\-l\fP] 
+[\fB\-a \fP|\fB -A\fP] [\fB\-c\fP] [\fB\-C\fP] [\fB\-d\fP] [\fB\-l\fP]
 [\fB\-t\fP \fItimeout\fP] [\fB\-T\fP \fImaxtimeout\fP]
 [\fB\-p\fP \fIport\fP] [\fB\-u\fP \fIumask\fP]
 [\fB\-r\fP \fIrealm-file\fP] [\fB\-s\fP \fIsrvtab\fP]
@@ -55,8 +55,22 @@ specification; see
 .PP
 Available options:
 .TP
+.B \-A
+Connections are only allowed for users who can authenticate via the
+ftp AUTH mechanism. (Anonymous ftp may also be allowed if it is 
+configured.) Ftpd will ask the user for a password if one is
+required.
+.TP
 .B \-a
-Only permit Kerberos-authenticated or anonymous logins.
+Connections are only allowed for users who can authenticate (via the
+ftp AUTH mechanism) and who are authorized to connect to the named 
+account without a password. (Anonymous ftp may also be allowed if it is 
+configured.)
+.TP
+.B \-C
+Non-anonymous users need local credentials (for example, to authenticate
+to remote fileservers), and so they should be prompted for a password
+unless they forwarded credentials as part of authentication.
 .TP
 .B \-c
 Allow the CCC (Clear Command Channel) command to be used. This allows
@@ -95,14 +109,14 @@ Sets the umask for the ftpd process.  The default value is normally 027.
 \fB\-r\fP \fIrealm-file\fP
 Sets the name of the
 .I krb.conf
-file to use.  The default value is normally
-.IR /usr/kerberos/lib/krb.conf .
+file to use.  The default value is normally set by
+.IR /etc/krb5.conf .
 .TP
 \fB\-s\fP \fIsrvtab\fP
 Sets the name of the
 .I srvtab
-file to use.  The default value is normally
-.IR /etc/krb5.keytab .
+file to use for Kerberos V4 authentication.  The default value is normally
+.IR /etc/srvtab .
 .PP
 The ftp server currently supports the following ftp requests; case is
 not distinguished.

@@ -11,6 +11,7 @@ SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
 LIBOBJS=@LIBOBJS@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+FTPD_LIBS=@FTPD_LIBS@
 
 SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/logwtmp.c $(srcdir)/popen.c \
 	  $(srcdir)/vers.c \
@@ -28,7 +29,7 @@ DEFINES = -DGSSAPI -DNOCONFIDENTIAL
 all::	ftpd
 
 ftpd:	$(OBJS) $(GSS_DEPLIBS) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ $(OBJS) $(GSS_LIBS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(GSS_LIBS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) ftpd ftpcmd.c
