@@ -1,0 +1,47 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * This part of the Kerberos V5 software is derived from public-domain code
+ * contributed by Daniel J. Bernstein, <brnstnd@acf10.nyu.edu>.
+ *
+ * XXX correct notice?
+ * This portion of the software may be freely distributed; this permission
+ * shall not be construed to apply to any other portion of the software.
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char rcsid_rc_conv_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+/*
+ * An implementation for the default replay cache type.
+ */
+
+#define FREE(x) ((void) free((char *) (x)))
+
+#include "rc_base.h"
+
+/*
+Local stuff:
+ krb5_auth_to_replay(krb5_tkt_authent *auth,krb5_donot_replay *rep)
+  given auth, take important information and make rep; return -1 if failed
+*/
+
+krb5_error_code
+krb5_auth_to_rep(auth, rep)
+krb5_tkt_authent *auth;
+krb5_donot_replay *rep;
+{
+ krb5_error_code retval;
+ rep->cusec = auth->authenticator->cusec;
+ rep->ctime = auth->authenticator->ctime;
+ if (retval = krb5_unparse_name(auth->ticket->server,&rep->server))
+   return retval; /* shouldn't happen */
+ if (retval = krb5_unparse_name(auth->authenticator->client,&rep->client)) {
+     FREE(rep->server);
+     return retval; /* shouldn't happen. */
+ }
+ return 0;
+}
