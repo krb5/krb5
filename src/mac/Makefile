@@ -545,7 +545,7 @@ library-linker-ppc						= MWLinkPPC
 ### Construct compiler options.
 
 common-compiler-options = ¶
-		-enum int -opt all -strings pool -mapcr ¶
+		-enum int -opt all -strings pool -mapcr -strings readonly ¶
         -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 ¶
         -align mac68k -opt off -toc_data on -fp_contract on ¶
 		-model farData
