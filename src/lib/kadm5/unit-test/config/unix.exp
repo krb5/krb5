@@ -58,6 +58,14 @@ proc api_start {} {
 	if {! [info exists env(TCLUTIL)]} {
 		error "TCLUTIL environment variable isn't set"
 	}
+	# tcl 8.4 for some reason screws up autodetection of output
+	# EOL translation.  Work around it for now.
+	send "if { \[info commands fconfigure\] ne \"\" } { fconfigure stdout -translation lf }\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF starting API" }
+		timeout { error "Timeout starting API" }
+	}
 	send "source $env(TCLUTIL)\n"
 	expect {
 		-re "$prompt$" {}

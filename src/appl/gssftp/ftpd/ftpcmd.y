@@ -91,11 +91,14 @@ extern MSG_DAT msg_data;
 extern gss_ctx_id_t gcontext;
 #endif
 
-#ifndef unix
+#ifndef unix			/* XXX */
 #ifdef _AIX
 #define unix
 #endif
 #ifdef __hpux
+#define unix
+#endif
+#ifdef BSD
 #define unix
 #endif
 #endif
@@ -172,9 +175,6 @@ struct tab sitetab[];
 %union { int num; char *str; }
 
 %token
-	A	B	C	E	F	I
-	L	N	P	R	S	T
-
 	SP	CRLF	COMMA	STRING	NUMBER
 
 	USER	PASS	ACCT	REIN	QUIT	PORT
@@ -204,7 +204,7 @@ struct tab sitetab[];
 
 cmd_list:	/* empty */
 	|	cmd_list cmd
-		= {
+		{
 			fromname = (char *) 0;
 			restart_point = (off_t) 0;
 		}
@@ -212,17 +212,17 @@ cmd_list:	/* empty */
 	;
 
 cmd:		USER SP username CRLF
-		= {
+		{
 			user((char *) $3);
 			free((char *) $3);
 		}
 	|	PASS SP password CRLF
-		= {
+		{
 			pass((char *) $3);
 			free((char *) $3);
 		}
 	|	PORT SP host_port CRLF
-		= {
+		{
 			/*
 			 * Don't allow a port < 1024 if we're not
 			 * connecting back to the original source address
@@ -241,19 +241,19 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	PASV check_login CRLF
-		= {
+		{
 			if ($2)
 				passive();
 		}
 	|	PROT SP prot_code CRLF
-		= {
+		{
 		    if (maxbuf)
 			setdlevel ($3);
 		    else
 			reply(503, "Must first set PBSZ");
 		}
 	|	CCC CRLF
-		= {
+		{
 			if (!allow_ccc) {
 			    reply(534, "CCC not supported");
 			}
@@ -267,7 +267,7 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	PBSZ SP STRING CRLF
-		= {
+		{
 			/* Others may want to do something more fancy here */
 			if (!auth_type)
 			    reply(503, "Must first perform authentication");
@@ -291,7 +291,7 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	TYPE SP type_code CRLF
-		= {
+		{
 			switch (cmd_type) {
 
 			case TYPE_A:
@@ -326,7 +326,7 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	STRU SP struct_code CRLF
-		= {
+		{
 			switch ($3) {
 
 			case STRU_F:
@@ -338,7 +338,7 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	MODE SP mode_code CRLF
-		= {
+		{
 			switch ($3) {
 
 			case MODE_S:
@@ -350,78 +350,78 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	ALLO SP NUMBER CRLF
-		= {
+		{
 			reply(202, "ALLO command ignored.");
 		}
-	|	ALLO SP NUMBER SP R SP NUMBER CRLF
-		= {
+	|	ALLO SP NUMBER SP 'R' SP NUMBER CRLF
+		{
 			reply(202, "ALLO command ignored.");
 		}
 	|	RETR check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				retrieve((char *) 0, (char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	STOR check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				store_file((char *) $4, "w", 0);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	APPE check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				store_file((char *) $4, "a", 0);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	NLST check_login CRLF
-		= {
+		{
 			if ($2)
 				send_file_list(".");
 		}
 	|	NLST check_login SP STRING CRLF
-		= {
+		{
 			if ($2 && $4 != NULL) 
 				send_file_list((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	LIST check_login CRLF
-		= {
+		{
 			if ($2)
 				retrieve("/bin/ls -lgA", "");
 		}
 	|	LIST check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				retrieve("/bin/ls -lgA %s", (char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	STAT check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				statfilecmd((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	STAT CRLF
-		= {
+		{
 			statcmd();
 		}
 	|	DELE check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				delete_file((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	RNTO SP pathname CRLF
-		= {
+		{
 			if (fromname) {
 				renamecmd(fromname, (char *) $3);
 				free(fromname);
@@ -432,27 +432,27 @@ cmd:		USER SP username CRLF
 			free((char *) $3);
 		}
 	|	ABOR CRLF
-		= {
+		{
 			reply(225, "ABOR command successful.");
 		}
 	|	CWD check_login CRLF
-		= {
+		{
 			if ($2)
 				cwd(pw->pw_dir);
 		}
 	|	CWD check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				cwd((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	HELP CRLF
-		= {
+		{
 			help(cmdtab, (char *) 0);
 		}
 	|	HELP SP STRING CRLF
-		= {
+		{
 			register char *cp = (char *)$3;
 
 			if (strncasecmp(cp, "SITE", 4) == 0) {
@@ -467,43 +467,43 @@ cmd:		USER SP username CRLF
 				help(cmdtab, (char *) $3);
 		}
 	|	NOOP CRLF
-		= {
+		{
 			reply(200, "NOOP command successful.");
 		}
 	|	MKD nonguest SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				makedir((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	RMD nonguest SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				removedir((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	PWD check_login CRLF
-		= {
+		{
 			if ($2)
 				pwd();
 		}
 	|	CDUP check_login CRLF
-		= {
+		{
 			if ($2)
 				cwd("..");
 		}
 	|	SITE SP HELP CRLF
-		= {
+		{
 			help(sitetab, (char *) 0);
 		}
 	|	SITE SP HELP SP STRING CRLF
-		= {
+		{
 			help(sitetab, (char *) $5);
 		}
 	|	SITE SP UMASK check_login CRLF
-		= {
+		{
 			int oldmask;
 
 			if ($4) {
@@ -513,7 +513,7 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	SITE SP UMASK nonguest SP octal_number CRLF
-		= {
+		{
 			int oldmask;
 
 			if ($4) {
@@ -528,7 +528,7 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	SITE SP CHMOD nonguest SP octal_number SP pathname CRLF
-		= {
+		{
 			if ($4 && ($8 != NULL)) {
 				if ($6 > 0777)
 					reply(501,
@@ -542,13 +542,13 @@ cmd:		USER SP username CRLF
 				free((char *) $8);
 		}
 	|	SITE SP IDLE CRLF
-		= {
+		{
 			reply(200,
 			    "Current IDLE time limit is %d seconds; max %d",
 				timeout, maxtimeout);
 		}
 	|	SITE SP IDLE SP NUMBER CRLF
-		= {
+		{
 			if ($5 < 30 || $5 > maxtimeout) {
 				reply(501,
 			"Maximum IDLE time must be between 30 and %d seconds",
@@ -562,14 +562,14 @@ cmd:		USER SP username CRLF
 			}
 		}
 	|	STOU check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				store_file((char *) $4, "w", 1);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	SYST CRLF
-		= {
+		{
 #ifdef unix
 #ifdef __svr4__
 #undef BSD
@@ -593,7 +593,7 @@ cmd:		USER SP username CRLF
 		 * using with RESTART (we just count bytes).
 		 */
 	|	SIZE check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL)
 				sizecmd((char *) $4);
 			if ($4 != NULL)
@@ -610,7 +610,7 @@ cmd:		USER SP username CRLF
 		 * not necessarily 3 digits)
 		 */
 	|	MDTM check_login SP pathname CRLF
-		= {
+		{
 			if ($2 && $4 != NULL) {
 				struct stat stbuf;
 				if (stat((char *) $4, &stbuf) < 0)
@@ -633,26 +633,26 @@ cmd:		USER SP username CRLF
 				free((char *) $4);
 		}
 	|	AUTH SP STRING CRLF
-		= {
+		{
 			auth((char *) $3);
 		}
 	|	ADAT SP STRING CRLF
-		= {
+		{
 			auth_data((char *) $3);
 			free((char *) $3);
 		}
 	|	QUIT CRLF
-		= {
+		{
 			reply(221, "Goodbye.");
 			dologout(0);
 		}
 	|	error CRLF
-		= {
+		{
 			yyerrok;
 		}
 	;
 rcmd:		RNFR check_login SP pathname CRLF
-		= {
+		{
 			char *renamefrom();
 
 			restart_point = (off_t) 0;
@@ -664,7 +664,7 @@ rcmd:		RNFR check_login SP pathname CRLF
 			}
 		}
 	|	REST SP byte_size CRLF
-		= {
+		{
 			fromname = (char *) 0;
 			restart_point = $3;
 			reply(350, "Restarting at %ld. %s", restart_point,
@@ -676,7 +676,7 @@ username:	STRING
 	;
 
 password:	/* empty */
-		= {
+		{
 			*(char **)&($$) = (char *)calloc(1, sizeof(char));
 		}
 	|	STRING
@@ -687,7 +687,7 @@ byte_size:	NUMBER
 
 host_port:	NUMBER COMMA NUMBER COMMA NUMBER COMMA NUMBER COMMA 
 		NUMBER COMMA NUMBER
-		= {
+		{
 			register char *a, *p;
 
 			a = (char *)&host_port.sin_addr;
@@ -698,122 +698,129 @@ host_port:	NUMBER COMMA NUMBER COMMA NUMBER COMMA NUMBER COMMA
 		}
 	;
 
-form_code:	N
-	= {
+form_code:	'N'
+	{
 		$$ = FORM_N;
 	}
-	|	T
-	= {
+	|	'T'
+	{
 		$$ = FORM_T;
 	}
-	|	C
-	= {
+	|	'C'
+	{
 		$$ = FORM_C;
 	}
 	;
 
-prot_code:	C
-	= {
+prot_code:	'C'
+	{
 		$$ = PROT_C;
 	}
-	|	S
-	= {
+	|	'S'
+	{
 		$$ = PROT_S;
 	}
-	|	P
-	= {
+	|	'P'
+	{
 		$$ = PROT_P;
 	}
-	|	E
-	= {
+	|	'E'
+	{
 		$$ = PROT_E;
 	}
 	;
 
-type_code:	A
-	= {
+type_code:	'A'
+	{
 		cmd_type = TYPE_A;
 		cmd_form = FORM_N;
 	}
-	|	A SP form_code
-	= {
+	|	'A' SP form_code
+	{
 		cmd_type = TYPE_A;
 		cmd_form = $3;
 	}
-	|	E
-	= {
+	|	'E'
+	{
 		cmd_type = TYPE_E;
 		cmd_form = FORM_N;
 	}
-	|	E SP form_code
-	= {
+	|	'E' SP form_code
+	{
 		cmd_type = TYPE_E;
 		cmd_form = $3;
 	}
-	|	I
-	= {
+	|	'I'
+	{
 		cmd_type = TYPE_I;
 	}
-	|	L
-	= {
+	|	'L'
+	{
 		cmd_type = TYPE_L;
 		cmd_bytesz = NBBY;
 	}
-	|	L SP byte_size
-	= {
+	|	'L' SP byte_size
+	{
 		cmd_type = TYPE_L;
 		cmd_bytesz = $3;
 	}
 	/* this is for a bug in the BBN ftp */
-	|	L byte_size
-	= {
+	|	'L' byte_size
+	{
 		cmd_type = TYPE_L;
 		cmd_bytesz = $2;
 	}
 	;
 
-struct_code:	F
-	= {
+struct_code:	'F'
+	{
 		$$ = STRU_F;
 	}
-	|	R
-	= {
+	|	'R'
+	{
 		$$ = STRU_R;
 	}
-	|	P
-	= {
+	|	'P'
+	{
 		$$ = STRU_P;
 	}
 	;
 
-mode_code:	S
-	= {
+mode_code:	'S'
+	{
 		$$ = MODE_S;
 	}
-	|	B
-	= {
+	|	'B'
+	{
 		$$ = MODE_B;
 	}
-	|	C
-	= {
+	|	'C'
+	{
 		$$ = MODE_C;
 	}
 	;
 
 pathname:	pathstring
-	= {
+	{
 		/*
 		 * Problem: this production is used for all pathname
 		 * processing, but only gives a 550 error reply.
 		 * This is a valid reply in some cases but not in others.
 		 */
 		if (logged_in && $1 && strncmp((char *) $1, "~", 1) == 0) {
-			*(char **)&($$) = *ftpglob((char *) $1);
-			if (globerr != NULL) {
-				reply(550, globerr);
-				$$ = NULL;
-			}
-			free((char *) $1);
+			char **vv;
+
+			vv = ftpglob((char *) $1);
+			$$ = (vv != NULL) ? *vv : NULL;
+			if ($$ == NULL) {
+				if (globerr == NULL)
+					$$ = $1;
+				else {
+					reply(550, "%s", globerr);
+					free((char *) $1);
+				}
+			} else
+				free((char *) $1);
 		} else
 			$$ = $1;
 	}
@@ -823,7 +830,7 @@ pathstring:	STRING
 	;
 
 octal_number:	NUMBER
-	= {
+	{
 		register int ret, dec, multby, digit;
 
 		/*
@@ -848,7 +855,7 @@ octal_number:	NUMBER
 	;
 
 check_login:	/* empty */
-	= {
+	{
 		if (logged_in)
 			$$ = 1;
 		else {
@@ -859,13 +866,13 @@ check_login:	/* empty */
 	;
 
 nonguest: check_login
-	= {
+	{
 		if (guest) {
 			reply(550, "Operation prohibited for anonymous users.");
 			$$ = 0;
 		}
 		else
-			$$ = 1;
+			$$ = $1;
 	}
 	;
 %%
@@ -1349,51 +1356,51 @@ yylex()
 
 			case 'A':
 			case 'a':
-				return (A);
+				return ('A');
 
 			case 'B':
 			case 'b':
-				return (B);
+				return ('B');
 
 			case 'C':
 			case 'c':
-				return (C);
+				return ('C');
 
 			case 'E':
 			case 'e':
-				return (E);
+				return ('E');
 
 			case 'F':
 			case 'f':
-				return (F);
+				return ('F');
 
 			case 'I':
 			case 'i':
-				return (I);
+				return ('I');
 
 			case 'L':
 			case 'l':
-				return (L);
+				return ('L');
 
 			case 'N':
 			case 'n':
-				return (N);
+				return ('N');
 
 			case 'P':
 			case 'p':
-				return (P);
+				return ('P');
 
 			case 'R':
 			case 'r':
-				return (R);
+				return ('R');
 
 			case 'S':
 			case 's':
-				return (S);
+				return ('S');
 
 			case 'T':
 			case 't':
-				return (T);
+				return ('T');
 
 			}
 			break;

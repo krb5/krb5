@@ -1,3 +1,27 @@
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kt_file.c (krb5_ktfileint_internal_read_entry): Use
+	krb5_princ_size instead of direct field access.
+	(krb5_ktfileint_write_entry, krb5_ktfileint_size_entry):
+	Likewise.
+
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build kt accessor functions on Windows.
+
+	* ktfr_entry.c: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.
+
+2002-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktfr_entry.c (krb5_kt_free_entry_contents): Rename from
+	krb5_kt_free_entry, keep old name as wrapper.
+
+2000-04-01  Miro Jurisic  <meeroh@mit.edu>
+
+	* ktfns.c: Merged from trunk
+
 2000-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktbase.c (krb5_kt_resolve): Change prototype from const to

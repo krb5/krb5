@@ -126,10 +126,24 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	
 
     /* generate subkey if needed */
-    if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->local_subkey))
+    if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->local_subkey)) {
+	/* Provide some more fodder for random number code.
+	   This isn't strong cryptographically; the point here is not
+	   to guarantee randomness, but to make it less likely that multiple
+	   sessions could pick the same subkey.  */
+	struct {
+	    krb5_int32 sec, usec;
+	} rnd_data;
+	krb5_data d;
+	krb5_crypto_us_timeofday (&rnd_data.sec, &rnd_data.usec);
+	d.length = sizeof (rnd_data);
+	d.data = (char *) &rnd_data;
+	(void) krb5_c_random_seed (context, &d);
+
 	if ((retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
 					   &(*auth_context)->local_subkey)))
 	    goto cleanup;
+    }
 
     if (in_data) {
 	if ((*auth_context)->req_cksumtype == 0x8003) {

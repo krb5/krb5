@@ -1,5 +1,5 @@
-This is Info file autoconf.info, produced by Makeinfo version 1.67 from
-the input file /home/bje/autoconf-2.13/autoconf.texi.
+This is Info file autoconf.info, produced by Makeinfo version 1.68 from
+the input file ./autoconf.texi.
 
 START-INFO-DIR-ENTRY
 * Autoconf: (autoconf).         Create source code configuration scripts.
@@ -759,7 +759,7 @@ macro is `AC_INIT' (*note Input::.).
 `make' variable `MAKE'.  Most versions of `make' set `MAKE' to the name
 of the `make' program plus any options it was given.  (But many do not
 include in it the values of any variables set on the command line, so
-those are not passed on automatically.) Some old versions of `make' do
+those are not passed on automatically.)  Some old versions of `make' do
 not set this variable.  The following macro allows you to use it even
 with those versions.
 
@@ -4824,9 +4824,9 @@ Changed Macro Writing
    When defining your own macros, you should now use `AC_DEFUN' instead
 of `define'.  `AC_DEFUN' automatically calls `AC_PROVIDE' and ensures
 that macros called via `AC_REQUIRE' do not interrupt other macros, to
-prevent nested `checking...' messages on the screen.  There's no actual
-harm in continuing to use the older way, but it's less convenient and
-attractive.  *Note Macro Definitions::.
+prevent nested `checking...'  messages on the screen.  There's no
+actual harm in continuing to use the older way, but it's less
+convenient and attractive.  *Note Macro Definitions::.
 
    You probably looked at the macros that came with Autoconf as a guide
 for how to do things.  It would be a good idea to take a look at the new
@@ -5047,7 +5047,7 @@ added some auxiliary utilities that I had developed to help convert
 source code packages to use Autoconf.  With the help of Franc,ois
 Pinard, I made the macros not interrupt each others' messages.  (That
 feature revealed some performance bottlenecks in GNU `m4', which he
-hastily corrected!) I reorganized the documentation around problems
+hastily corrected!)  I reorganized the documentation around problems
 people want to solve.  And I began a testsuite, because experience had
 shown that Autoconf has a pronounced tendency to regress when we change
 it.
@@ -5298,8 +5298,8 @@ how this is done.
 * build_cpu:                             System Type Variables.
 * build_os:                              System Type Variables.
 * build_vendor:                          System Type Variables.
-* CC <1>:                                UNIX Variants.
-* CC:                                    Particular Programs.
+* CC <1>:                                Particular Programs.
+* CC:                                    UNIX Variants.
 * CFLAGS <1>:                            Particular Programs.
 * CFLAGS:                                Preset Output Variables.
 * configure_input:                       Preset Output Variables.
@@ -5307,8 +5307,8 @@ how this is done.
 * CPPFLAGS:                              Preset Output Variables.
 * CXX:                                   Particular Programs.
 * CXXCPP:                                Particular Programs.
-* CXXFLAGS <1>:                          Particular Programs.
-* CXXFLAGS:                              Preset Output Variables.
+* CXXFLAGS <1>:                          Preset Output Variables.
+* CXXFLAGS:                              Particular Programs.
 * datadir:                               Preset Output Variables.
 * DEFS:                                  Preset Output Variables.
 * exec_prefix:                           Preset Output Variables.
@@ -5335,11 +5335,11 @@ how this is done.
 * LEXLIB:                                Particular Programs.
 * libdir:                                Preset Output Variables.
 * libexecdir:                            Preset Output Variables.
-* LIBOBJS <1>:                           Structures.
+* LIBOBJS <1>:                           Particular Functions.
 * LIBOBJS <2>:                           Generic Functions.
-* LIBOBJS:                               Particular Functions.
-* LIBS <1>:                              UNIX Variants.
-* LIBS:                                  Preset Output Variables.
+* LIBOBJS:                               Structures.
+* LIBS <1>:                              Preset Output Variables.
+* LIBS:                                  UNIX Variants.
 * LN_S:                                  Particular Programs.
 * localstatedir:                         Preset Output Variables.
 * mandir:                                Preset Output Variables.
@@ -5636,8 +5636,8 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * ST_BLKSIZE:                            Old Macro Names.
 * ST_BLOCKS:                             Old Macro Names.
 * ST_RDEV:                               Old Macro Names.
-* STAT_MACROS_BROKEN <1>:                Old Macro Names.
-* STAT_MACROS_BROKEN:                    Structures.
+* STAT_MACROS_BROKEN <1>:                Structures.
+* STAT_MACROS_BROKEN:                    Old Macro Names.
 * STDC_HEADERS:                          Old Macro Names.
 * STRCOLL:                               Old Macro Names.
 * STRUCT_ST_BLKSIZE:                     Structures.
@@ -5685,119 +5685,119 @@ list easier to use, the macros are listed without their preceding `AC_'.
 
 
 Tag Table:
-Node: Top1209
-Node: Introduction9711
-Node: Making configure Scripts13551
-Node: Writing configure.in16632
-Node: Invoking autoscan20365
-Node: Invoking ifnames22670
-Node: Invoking autoconf24160
-Node: Invoking autoreconf25998
-Node: Setup28834
-Node: Input29739
-Node: Output31476
-Node: Makefile Substitutions35113
-Node: Preset Output Variables36716
-Node: Build Directories41585
-Node: Automatic Remaking43218
-Node: Configuration Headers45304
-Node: Header Templates47818
-Node: Invoking autoheader49027
-Node: Subdirectories52175
-Node: Default Prefix53570
-Node: Versions54974
-Node: Existing Tests56878
-Node: Alternative Programs58426
-Node: Particular Programs59113
-Node: Generic Programs67165
-Node: Libraries70471
-Node: Library Functions73545
-Node: Particular Functions74103
-Node: Generic Functions81297
-Node: Header Files83401
-Node: Particular Headers83960
-Node: Generic Headers90952
-Node: Structures92254
-Node: Typedefs94491
-Node: Particular Typedefs94997
-Node: Generic Typedefs96214
-Node: C Compiler Characteristics96671
-Node: Fortran 77 Compiler Characteristics99542
-Node: System Services101245
-Node: UNIX Variants104381
-Node: Writing Tests106400
-Node: Examining Declarations108393
-Node: Examining Syntax110885
-Node: Examining Libraries112330
-Node: Run Time116040
-Node: Test Programs117028
-Node: Guidelines119356
-Node: Test Functions120545
-Node: Portable Shell122088
-Node: Testing Values and Files124020
-Node: Multiple Cases125675
-Node: Language Choice126873
-Node: Results128975
-Node: Defining Symbols129737
-Node: Setting Output Variables133033
-Node: Caching Results134879
-Node: Cache Variable Names137625
-Node: Cache Files139109
-Node: Printing Messages141946
-Node: Writing Macros145394
-Node: Macro Definitions146041
-Node: Macro Names147169
-Node: Quoting149620
-Node: Dependencies Between Macros151522
-Node: Prerequisite Macros152169
-Node: Suggested Ordering153660
-Node: Obsolete Macros155190
-Node: Manual Configuration156414
-Node: Specifying Names157313
-Node: Canonicalizing159214
-Node: System Type Variables160726
-Node: Using System Type161473
-Node: Site Configuration162967
-Node: External Software163740
-Node: Package Options166943
-Node: Site Details169690
-Node: Transforming Names170913
-Node: Transformation Options172091
-Node: Transformation Examples172584
-Node: Transformation Rules174152
-Node: Site Defaults175561
-Node: Invoking configure179467
-Node: Basic Installation180416
-Node: Compilers and Options182996
-Node: Multiple Architectures183645
-Node: Installation Names184631
-Node: Optional Features185815
-Node: System Type186585
-Node: Sharing Defaults187607
-Node: Operation Controls188231
-Node: Invoking config.status189217
-Node: Questions192605
-Node: Distributing193137
-Node: Why GNU m4194281
-Node: Bootstrapping195094
-Node: Why Not Imake195710
-Node: Upgrading200119
-Node: Changed File Names201640
-Node: Changed Makefiles202394
-Node: Changed Macros203490
-Node: Invoking autoupdate204737
-Node: Changed Results206328
-Node: Changed Macro Writing208430
-Node: History209693
-Node: Genesis210485
-Node: Exodus211674
-Node: Leviticus214723
-Node: Numbers216246
-Node: Deuteronomy218162
-Node: Old Macro Names220826
-Node: Environment Variable Index223875
-Node: Output Variable Index224889
-Node: Preprocessor Symbol Index230087
-Node: Macro Index235373
+Node: Top1187
+Node: Introduction9689
+Node: Making configure Scripts13529
+Node: Writing configure.in16610
+Node: Invoking autoscan20343
+Node: Invoking ifnames22648
+Node: Invoking autoconf24138
+Node: Invoking autoreconf25976
+Node: Setup28812
+Node: Input29717
+Node: Output31454
+Node: Makefile Substitutions35092
+Node: Preset Output Variables36695
+Node: Build Directories41564
+Node: Automatic Remaking43197
+Node: Configuration Headers45283
+Node: Header Templates47797
+Node: Invoking autoheader49006
+Node: Subdirectories52154
+Node: Default Prefix53549
+Node: Versions54953
+Node: Existing Tests56857
+Node: Alternative Programs58405
+Node: Particular Programs59092
+Node: Generic Programs67144
+Node: Libraries70450
+Node: Library Functions73524
+Node: Particular Functions74082
+Node: Generic Functions81276
+Node: Header Files83380
+Node: Particular Headers83939
+Node: Generic Headers90931
+Node: Structures92233
+Node: Typedefs94470
+Node: Particular Typedefs94976
+Node: Generic Typedefs96193
+Node: C Compiler Characteristics96650
+Node: Fortran 77 Compiler Characteristics99521
+Node: System Services101224
+Node: UNIX Variants104360
+Node: Writing Tests106379
+Node: Examining Declarations108372
+Node: Examining Syntax110864
+Node: Examining Libraries112309
+Node: Run Time116019
+Node: Test Programs117007
+Node: Guidelines119335
+Node: Test Functions120524
+Node: Portable Shell122067
+Node: Testing Values and Files123999
+Node: Multiple Cases125654
+Node: Language Choice126852
+Node: Results128954
+Node: Defining Symbols129716
+Node: Setting Output Variables133012
+Node: Caching Results134858
+Node: Cache Variable Names137604
+Node: Cache Files139088
+Node: Printing Messages141925
+Node: Writing Macros145373
+Node: Macro Definitions146020
+Node: Macro Names147148
+Node: Quoting149599
+Node: Dependencies Between Macros151501
+Node: Prerequisite Macros152148
+Node: Suggested Ordering153639
+Node: Obsolete Macros155169
+Node: Manual Configuration156393
+Node: Specifying Names157292
+Node: Canonicalizing159193
+Node: System Type Variables160705
+Node: Using System Type161452
+Node: Site Configuration162946
+Node: External Software163719
+Node: Package Options166922
+Node: Site Details169669
+Node: Transforming Names170892
+Node: Transformation Options172070
+Node: Transformation Examples172563
+Node: Transformation Rules174131
+Node: Site Defaults175540
+Node: Invoking configure179446
+Node: Basic Installation180395
+Node: Compilers and Options182975
+Node: Multiple Architectures183624
+Node: Installation Names184610
+Node: Optional Features185794
+Node: System Type186564
+Node: Sharing Defaults187586
+Node: Operation Controls188210
+Node: Invoking config.status189196
+Node: Questions192584
+Node: Distributing193116
+Node: Why GNU m4194260
+Node: Bootstrapping195073
+Node: Why Not Imake195689
+Node: Upgrading200098
+Node: Changed File Names201619
+Node: Changed Makefiles202373
+Node: Changed Macros203469
+Node: Invoking autoupdate204716
+Node: Changed Results206307
+Node: Changed Macro Writing208409
+Node: History209673
+Node: Genesis210465
+Node: Exodus211654
+Node: Leviticus214703
+Node: Numbers216226
+Node: Deuteronomy218142
+Node: Old Macro Names220807
+Node: Environment Variable Index223856
+Node: Output Variable Index224870
+Node: Preprocessor Symbol Index230068
+Node: Macro Index235354
 
 End Tag Table

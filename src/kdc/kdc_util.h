@@ -98,6 +98,12 @@ get_salt_from_key PROTOTYPE((krb5_context, krb5_principal,
 
 void limit_string PROTOTYPE((char *name));
 
+void
+ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype);
+
+void
+rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
+
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,
@@ -177,6 +183,7 @@ krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
 				      const krb5_fulladdr *,
 				      int is_secondary,
 				      krb5_data **));
+void enable_v4_crossrealm(char *);
 #else
 #define process_v4(foo,bar,quux,foobar)	KRB5KRB_AP_ERR_BADVERSION
 #endif

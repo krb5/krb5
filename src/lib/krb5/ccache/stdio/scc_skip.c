@@ -37,7 +37,6 @@ krb5_scc_skip_header(context, id)
    krb5_ccache id;
 {
      krb5_error_code kret;
-     krb5_principal princ;
      krb5_scc_data *data = (krb5_scc_data *) id->data;
      krb5_ui_2 scc_flen;
 

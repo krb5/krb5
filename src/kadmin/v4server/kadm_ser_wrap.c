@@ -47,7 +47,7 @@ kadm_ser_init(inter, realm, params)
 kadm_ser_init(inter, realm)
     int inter;			/* interactive or from file */
     char realm[];
-#endif   
+#endif
 {
     struct servent *sep;
     struct hostent *hp;
@@ -64,7 +64,11 @@ kadm_ser_init(inter, realm)
     
     (void) strcpy(server_parm.sname, PWSERV_NAME);
     (void) strcpy(server_parm.sinst, KRB_MASTER);
-    (void) strcpy(server_parm.krbrlm, realm);
+    if (strlen (realm) > REALM_SZ)
+	return KADM_REALM_TOO_LONG;
+    (void) strncpy(server_parm.krbrlm, realm, sizeof(server_parm.krbrlm)-1);
+    server_parm.krbrlm[sizeof(server_parm.krbrlm) - 1] = '\0';
+
     if (krb5_425_conv_principal(kadm_context, server_parm.sname,
 				server_parm.sinst, server_parm.krbrlm,
 				&server_parm.sprinc))
@@ -166,14 +170,21 @@ int *dat_len;
     u_char *retdat, *tmpdat;
     int retval, retlen;
 
-    if (strncmp(KADM_VERSTR, (char *)*dat, KADM_VERSIZE)) {
+    if ((*dat_len < KADM_VERSIZE + sizeof(krb5_ui_4))
+	|| strncmp(KADM_VERSTR, (char *)*dat, KADM_VERSIZE)) {
 	errpkt(dat, dat_len, KADM_BAD_VER);
 	return KADM_BAD_VER;
     }
     in_len = KADM_VERSIZE;
     /* get the length */
-    if ((retc = stv_long(*dat, &r_len, in_len, *dat_len)) < 0)
+    if ((retc = stv_long(*dat, &r_len, in_len, *dat_len)) < 0
+	|| (r_len > *dat_len - KADM_VERSIZE - sizeof(krb5_ui_4))
+	|| (*dat_len - r_len - KADM_VERSIZE -
+	    sizeof(krb5_ui_4) > sizeof(authent.dat))) {
+	errpkt(dat, dat_len, KADM_LENGTH_ERROR);
 	return KADM_LENGTH_ERROR;
+    }
+
     in_len += retc;
     authent.length = *dat_len - r_len - KADM_VERSIZE - sizeof(krb5_ui_4);
     memcpy((char *)authent.dat, (char *)(*dat) + in_len, authent.length);

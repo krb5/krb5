@@ -1,7 +1,7 @@
 /*
  * kdc/main.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2001 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -43,8 +43,6 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-
-kdc_realm_t *find_realm_data PROTOTYPE((char *, krb5_ui_4));
 
 void usage PROTOTYPE((char *));
 
@@ -229,6 +227,12 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	rdp->realm_mkey.enctype = (krb5_enctype) rparams->realm_enctype;
     else
 	rdp->realm_mkey.enctype = manual ? def_enctype : ENCTYPE_UNKNOWN;
+
+    /* Handle reject-bad-transit flag */
+    if (rparams && rparams->realm_reject_bad_transit_valid)
+	rdp->realm_reject_bad_transit = rparams->realm_reject_bad_transit;
+    else
+	rdp->realm_reject_bad_transit = 1;
 
     /* Handle ticket maximum life */
     rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?
@@ -555,7 +559,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-4 v4mode] [-n]\n", name);
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-4 v4mode] [-X] [-n]\n", name);
     return;
 }
 
@@ -607,7 +611,7 @@ initialize_realms(kcontext, argc, argv)
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:3")) != -1) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:X3")) != -1) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
@@ -657,6 +661,11 @@ initialize_realms(kcontext, argc, argv)
 	    v4mode = strdup(optarg);
 #endif
 	    break;
+	case 'X':
+#ifdef KRB5_KRB4_COMPAT
+		enable_v4_crossrealm(argv[0]);
+#endif
+		break;
 	case '3':
 #ifdef ATHENA_DES3_KLUDGE
 	    if (krb5_enctypes_list[krb5_enctypes_length-1].etype

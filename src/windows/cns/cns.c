@@ -41,7 +41,9 @@ HFONT hfontdialog = NULL;	       /* Font in which the dialog is drawn. */
 static HFONT hfonticon = NULL;	       /* Font for icon label */
 HINSTANCE hinstance;
 static int dlgncmdshow;		       /* ncmdshow from WinMain */
+#if 0
 static UINT wm_kerberos_changed;       /* message for cache changing */
+#endif
 static int action;		       /* After login actions */
 static UINT kwin_timer_id;	       /* Timer being used for update */
 BOOL alert;		       	       /* Actions on ticket expiration */
@@ -384,12 +386,13 @@ kwin_push_login(HWND hwnd, char *name, char *instance, char *realm)
   char menuitem[MAX_K_NAME_SZ + 3];
   BOOL rc;
 
-  strcpy(fullname, "&x ");
-  strcat(fullname, name);
-  strcat(fullname, ".");
-  strcat(fullname, instance);
-  strcat(fullname, "@");
-  strcat(fullname, realm);
+  fullname[sizeof(fullname) - 1] = '\0';
+  strncpy(fullname, "&x ", sizeof(fullname) - 1);
+  strncat(fullname, name, sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, ".", sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, instance, sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, "@", sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, realm, sizeof(fullname) - 1 - strlen(fullname));
 
   hmenu = GetMenu(hwnd);
   assert(hmenu != NULL);
@@ -1339,14 +1342,16 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     strcpy(copyright, "        Kerberos V5 for Windows ");
 #endif
 #ifdef _WIN32
-    strcat(copyright, "32-bit\n");
+    strncat(copyright, "32-bit\n", sizeof(copyright) - 1 - strlen(copyright));
 #else
-    strcat(copyright, "16-bit\n");
+    strncat(copyright, "16-bit\n", sizeof(copyright) - 1 - strlen(copyright));
 #endif
-    strcat(copyright, "\n                Version 1.12\n\n");
+    strncat(copyright, "\n                Version 1.12\n\n",
+            sizeof(copyright) - 1 - strlen(copyright));
 #ifdef ORGANIZATION
-    strcat(copyright, "          For information, contact:\n");
-    strcat(copyright, ORGANIZATION);
+    strncat(copyright, "          For information, contact:\n",
+	    sizeof(copyright) - 1 - strlen(copyright));
+    strncat(copyright, ORGANIZATION, sizeof(copyright) - 1 - strlen(copyright));
 #endif
     MessageBox(hwnd, copyright, KWIN_DIALOG_NAME, MB_OK);
 
@@ -1469,8 +1474,9 @@ kwin_paint(HWND hwnd)
       sprintf(buf, "%s - %ld hr", KWIN_DIALOG_NAME, dt);
     }
 
+    buf[sizeof(buf) - 1] = '\0';
     if (dt > 1)
-      strcat(buf, "s");
+      strncat(buf, "s", sizeof(buf) - 1 - strlen(buf));
   }
 
   DrawIcon(hdc, r.left, r.top, hicon);
@@ -1487,12 +1493,14 @@ kwin_wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   int n;
 
+#if 0
   if (message == wm_kerberos_changed) {       /* Message from the ccache */
     n = ticket_init_list(GetDlgItem(hwnd, IDD_TICKET_LIST));
     EnableWindow(GetDlgItem(hwnd, IDD_TICKET_DELETE), n > 0);
 
     return 0;
   }
+#endif
 
   switch (message) {
     HANDLE_MSG(hwnd, WM_GETMINMAXINFO, kwin_getminmaxinfo);
@@ -1597,12 +1605,14 @@ init_application(HINSTANCE hinstance)
 {
   BOOL rc;
 
+#if 0
 #ifdef KRB4
   wm_kerberos_changed = krb_get_notification_message();
 #endif
 
 #ifdef KRB5
   wm_kerberos_changed = krb5_get_notification_message();
+#endif
 #endif
 
   rc = kwin_init(hinstance);

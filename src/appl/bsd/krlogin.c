@@ -138,12 +138,6 @@ char copyright[] =
 #endif
 #endif
 
-/* how do we tell apart irix 5 and irix 4? */
-#if defined(__sgi) && defined(__mips)
-/* IRIX 5: TIOCGLTC doesn't actually work */
-#undef TIOCGLTC
-#endif
-
 #ifndef TIOCPKT_NOSTOP
 /* These values are over-the-wire protocol, *not* local values */
 #define TIOCPKT_NOSTOP          0x10
@@ -177,6 +171,7 @@ int fflag = 0, Fflag = 0;
 krb5_creds *cred;
 struct sockaddr_in local, foreign;
 krb5_context bsd_context;
+krb5_auth_context auth_context;
 
 #ifdef KRB5_KRB4_COMPAT
 Key_schedule v4_schedule;
@@ -377,7 +372,8 @@ main(argc, argv)
 #endif
 #endif
     int port, debug_port = 0;
-   
+    enum kcmd_proto kcmd_proto = KCMD_PROTOCOL_COMPAT_HACK;
+
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1;
@@ -502,6 +498,16 @@ main(argc, argv)
 	argv++, argc--;
 	goto another;
     }
+    if (argc > 0 && !strcmp(*argv, "-PO")) {
+	kcmd_proto = KCMD_OLD_PROTOCOL;
+	argv++, argc--;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-PN")) {
+	kcmd_proto = KCMD_NEW_PROTOCOL;
+	argv++, argc--;
+	goto another;
+    }
 #endif /* KERBEROS */
     if (host == 0)
       goto usage;
@@ -559,7 +565,8 @@ main(argc, argv)
 	if (tcgetattr(0, &ttyb) == 0) {
 		int ospeed = cfgetospeed (&ttyb);
 
-		(void) strcat(term, "/");
+                term[sizeof(term) - 1] = '\0';
+		(void) strncat(term, "/", sizeof(term) - 1 - strlen(term));
 		if (ospeed >= 50)
 			/* On some systems, ospeed is the baud rate itself,
 			   not a table index.  */
@@ -567,15 +574,16 @@ main(argc, argv)
 		else if (ospeed >= sizeof(speeds)/sizeof(char*))
 			/* Past end of table, but not high enough to
 			   look like a real speed.  */
-			(void) strcat (term, speeds[sizeof(speeds)/sizeof(char*) - 1]);
+			(void) strncat (term, speeds[sizeof(speeds)/sizeof(char*) - 1], sizeof(term) - 1 - strlen(term));
 		else {
-			(void) strcat(term, speeds[ospeed]);
+			(void) strncat(term, speeds[ospeed], sizeof(term) - 1 - strlen(term));
 		}
+                term[sizeof (term) - 1] = '\0';
 	}
 #else
     if (ioctl(0, TIOCGETP, &ttyb) == 0) {
-	(void) strcat(term, "/");
-	(void) strcat(term, speeds[ttyb.sg_ospeed]);
+	(void) strncat(term, "/", sizeof(term) - 1 - strlen(term));
+	(void) strncat(term, speeds[ttyb.sg_ospeed], sizeof(term) - 1 - strlen(term));
     }
 #endif
     (void) get_window_size(0, &winsize);
@@ -631,10 +639,14 @@ main(argc, argv)
 		  0,		/* No need for sequence number */
 		  0,		/* No need for server seq # */
 		  &local, &foreign,
-		  authopts,
+		  &auth_context, authopts,
 		  0,		/* Not any port # */
-		  0);
+		  0,
+		  &kcmd_proto);
     if (status) {
+	if (kcmd_proto == KCMD_NEW_PROTOCOL && encrypt_flag)
+	    /* Don't fall back to something less secure.  */
+	    exit (1);
 #ifdef KRB5_KRB4_COMPAT
 	fprintf(stderr, "Trying krb4 rlogin...\n");
 	status = k4cmd(&sock, &host, port,
@@ -650,19 +662,20 @@ main(argc, argv)
 	try_normal(orig_argv);
 #endif
     } else {
-	krb5_boolean similar;
+	krb5_keyblock *key = 0;
 
-	rcmd_stream_init_krb5(&cred->keyblock, encrypt_flag, 1);
-
-	if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
-					    cred->keyblock.enctype, &similar))
-	    try_normal(orig_argv); /* doesn't return */
-
-	if (!similar) {
+	if (kcmd_proto == KCMD_NEW_PROTOCOL) {
 	    do_inband = 1;
-	    if (debug_port)
-		fprintf(stderr, "DEBUG: setting do_inband\n");
+
+	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
+						   &key);
+	    if ((status || !key) && encrypt_flag)
+		try_normal(orig_argv);
 	}
+	if (key == 0)
+	    key = &cred->keyblock;
+
+	rcmd_stream_init_krb5(key, encrypt_flag, 1, 1, kcmd_proto);
     }
 	
     rem = sock;
@@ -755,6 +768,8 @@ struct tchars {
 };
 #endif
 
+
+#ifndef POSIX_TERMIOS
 #ifdef TIOCGLTC
 /*
  * POSIX 1003.1-1988 does not define a 'suspend' character.
@@ -768,14 +783,8 @@ struct tchars {
 struct	ltchars defltc;
 struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
 #endif
-
-#ifndef POSIX_TERMIOS
 struct	tchars deftc;
 struct	tchars notc =	{ -1, -1, -1, -1, -1, -1 };
-#ifndef TIOCGLTC
-struct	ltchars defltc;
-struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
-#endif
 #endif
 
 doit(oldmask)
@@ -792,9 +801,6 @@ doit(oldmask)
 #ifdef VLNEXT
     /* there's a POSIX way of doing this, but do we need it general? */
     deftty.c_cc[VLNEXT] = 0;
-#endif
-#ifdef TIOCGLTC
-    (void) ioctl(0, TIOCGLTC, (char *)&defltc);
 #endif
 #else
 #ifdef USE_TERMIO
@@ -1035,13 +1041,15 @@ int signo;
  */
 writer()
 {
-    unsigned char c;
-    register n;
-    register bol = 1;               /* beginning of line */
-    register local = 0;
-    
+    int n_read;
+    char buf[1024];
+    int got_esc; /* set to true by read_wrapper if an escape char
+		    was encountered */
+    char c;
+
 #ifdef ultrix             
     fd_set waitread;
+    register n;
     
     /* we need to wait until the reader() has set up the terminal, else
        the read() below may block and not unblock when the terminal
@@ -1062,89 +1070,169 @@ writer()
 	  }
     }
 #endif /* ultrix */
-    for (;;) {
-	n = read(0, &c, 1);
-	if (n <= 0) {
-	    if (n < 0 && errno == EINTR)
-	      continue;
-	    break;
-	}
-	/*
-	 * If we're at the beginning of the line
-	 * and recognize a command character, then
-	 * we echo locally.  Otherwise, characters
-	 * are echo'd remotely.  If the command
-	 * character is doubled, this acts as a 
-	 * force and local echo is suppressed.
-	 */
-	if (bol) {
-	    bol = 0;
-	    if (c == cmdchar) {
-		bol = 0;
-		local = 1;
-		continue;
-	    }
-	} else if (local) {
-	    local = 0;
-#ifdef POSIX_TERMIOS
-	    if (c == '.' || c == deftty.c_cc[VEOF]) {
-#else
-	    if (c == '.' || c == deftc.t_eofc) {
-#endif
-		if (confirm_death()) {
-		    echo(c);
-		    break;
-		}
-	    }
-#ifdef TIOCGLTC
-	    if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
-		&& !no_local_escape) {
-		bol = 1;
-		echo(c);
-		stop(c);
-		continue;
-	    }
-#else
-#ifdef POSIX_TERMIOS
-	    if ( (
-		  (c == deftty.c_cc[VSUSP]) 
-#ifdef VDSUSP
-		  || (c == deftty.c_cc[VDSUSP]) 
-#endif
-		  )
-		&& !no_local_escape) {
-	      bol = 1;
-	      echo(c);
-	      stop(c);
-	      continue;
-	    }
-#endif
-#endif
 
-	    if (c != cmdchar)
-	      (void) rcmd_stream_write(rem, &cmdchar, 1);
+    /* This loop works as follows.  Call read_wrapper to get data until
+       we would block or until we read a cmdchar at the beginning of a line.
+       If got_esc is false, we just send everything we got back.  If got_esc 
+       is true, we send everything except the cmdchar at the end and look at 
+       the next char.  If its a "." we break out of the loop and terminate.
+       If its ^Z or ^Y we call stop with the value of the char and continue.
+       If its none of those, we send the cmdchar and then send the char we 
+       just read, unless that char is also the cmdchar (in which case we are
+       only supposed to send one of them).  When this loop ends, so does the
+       program.
+    */
+
+    for (;;) {
+
+      /* read until we would block or we get a cmdchar */
+      n_read = read_wrapper(0,buf,sizeof(buf),&got_esc);
+  
+      /* if read returns an error or 0 bytes, just quit */
+      if (n_read <= 0) {
+	break;
+      }
+      
+      if (!got_esc) {
+	if (rcmd_stream_write(rem, buf, n_read, 0) == 0) {
+	  prf("line gone");
+	  break;
 	}
-	if (rcmd_stream_write(rem, &c, 1) == 0) {
+	continue;
+      }
+      else {
+	/* This next test is necessary to avoid sending 0 bytes of data
+	   in the event that we got just a cmdchar */
+	if (n_read > 1) {
+	  if (rcmd_stream_write(rem, buf, n_read-1, 0) == 0) {
 	    prf("line gone");
 	    break;
+	  }
 	}
+	if (read_wrapper(0,&c,1,&got_esc) <= 0) {
+	  break;
+	}
+
 #ifdef POSIX_TERMIOS
-	bol = (c == deftty.c_cc[VKILL] ||
-	       c == deftty.c_cc[VINTR] ||
-	       c == '\r' || c == '\n');
+	if (c == '.' || c == deftty.c_cc[VEOF]) 
+#else
+	  if (c == '.' || c == deftc.t_eofc) 
+#endif
+	    {
+	      if (confirm_death()) {
+		echo(c);
+		break; 
+	      }
+	    }
+
+#ifdef POSIX_TERMIOS
+	if ( (
+	      (c == deftty.c_cc[VSUSP]) 
+#ifdef VDSUSP
+	      || (c == deftty.c_cc[VDSUSP]) 
+#endif
+	      )
+	     && !no_local_escape) {
+	  echo(c);
+	  stop(c);
+	  continue;
+	}
+#else /*POSIX_TERMIOS*/
 #ifdef TIOCGLTC
-	if (!bol)
-	  bol = (c == defltc.t_suspc);
+	if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
+	    && !no_local_escape) {
+	  echo(c);
+	  stop(c);
+	  continue;
+	}
+#endif /*TIOCGLTC*/
 #endif
-#else /* !POSIX_TERMIOS */
-	bol = c == defkill || c == deftc.t_eofc ||
-	  c == deftc.t_intrc || c == defltc.t_suspc ||
-	    c == '\r' || c == '\n';
-#endif
+
+      
+	if (c != cmdchar) {
+	  rcmd_stream_write(rem, &cmdchar, 1, 0);
+	}
+
+	if (rcmd_stream_write(rem,&c,1,0) == 0) {
+	  prf("line gone");
+	  break;
+	}
+      }
     }
 }
 
+/* This function reads up to size bytes from file desciptor fd into buf.
+   It will copy as much data as it can without blocking, but will never
+   copy more than size bytes.  In addition, if it encounters a cmdchar
+   at the beginning of a line, it will copy everything up to and including
+   the cmdchar, but nothing after that.  In this instance *esc_char is set
+   to true and any remaining data is buffered and copied on a subsequent 
+   call.  Otherwise, *esc_char will be set to false and the minimum of size,
+   1024, and the number of bytes that can be read without blocking will
+   be copied.  In all cases, a non-negative return value indicates the number 
+   of bytes actually copied and a return value of -1 indicates that there
+   was a read error (other than EINTR) and errno is set appropriately. 
+*/
 
+int read_wrapper(fd,buf,size,got_esc) 
+     int fd;
+     char *buf;
+     int size;
+     int *got_esc;
+{
+  static char tbuf[1024];
+  static char *data_start = tbuf;
+  static char *data_end = tbuf;
+  static int bol = 1;
+  int return_length = 0;
+  char c;
+
+  /* if we have no data buffered, get more */
+  if (data_start == data_end) {
+    int n_read;
+    while ((n_read = read(fd, tbuf, sizeof(tbuf))) <= 0) {
+      if (n_read < 0 && errno == EINTR)
+	continue;
+      return n_read;
+    }
+    data_start = tbuf;
+    data_end = tbuf+n_read;
+  }
+
+  *got_esc = 0;
+
+  /* We stop when we've fully checked the buffer or have checked size
+     bytes.  We break out and set *got_esc if we encounter a cmdchar
+     at the beginning of a line.
+  */
+
+  while (data_start+return_length < data_end && return_length < size) {
+    
+    c = *(data_start+return_length);
+    return_length++;
+
+    if (bol == 1 && c == cmdchar) {
+      bol = 0;
+      *got_esc = 1;
+      break;
+    }
+
+#ifdef POSIX_TERMIOS
+    bol = (c == deftty.c_cc[VKILL] ||
+	   c == deftty.c_cc[VINTR] ||
+	   c == '\r' || c == '\n');
+	
+#else /* !POSIX_TERMIOS */
+    bol = c == defkill || c == deftc.t_eofc ||
+      c == deftc.t_intrc || c == defltc.t_suspc ||
+      c == '\r' || c == '\n';
+#endif
+  }
+   
+  memcpy(buf, data_start, return_length);
+  data_start = data_start + return_length;
+  return return_length;
+}
 
 echo(c)
      register char c;
@@ -1187,14 +1275,13 @@ stop(cmdc)
     (void) signal(SIGCHLD, SIG_IGN);
 #endif
     
-#ifdef TIOCGLTC
-    (void) kill(cmdc == defltc.t_suspc ? 0 : getpid(), SIGTSTP);
-#else
 #ifdef POSIX_TERMIOS
     (void) kill(cmdc == deftty.c_cc[VSUSP] ? 0 : getpid(), SIGTSTP);
+#else
+#ifdef TIOCGLTC
+    (void) kill(cmdc == defltc.t_suspc ? 0 : getpid(), SIGTSTP);
 #endif
 #endif
-
 #ifdef POSIX_SIGNALS
     sa.sa_handler = catchild;
     (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
@@ -1239,7 +1326,7 @@ sendwindow()
     wp->ws_col = htons(winsize.ws_col);
     wp->ws_xpixel = htons(winsize.ws_xpixel);
     wp->ws_ypixel = htons(winsize.ws_ypixel);
-    (void) rcmd_stream_write(rem, obuf, sizeof(obuf));
+    (void) rcmd_stream_write(rem, obuf, sizeof(obuf), 0);
 }
 
 
@@ -1458,7 +1545,7 @@ fd_set readset, excset, writeset;
 		bufp += n;
 	    }
 	    if (FD_ISSET(rem, &readset)) {
-	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf));
+	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf), 0);
 		if (rcvcnt == 0)
 		    return (0);
 		if (rcvcnt < 0)
@@ -1514,11 +1601,6 @@ mode(f)
 
     switch(f) {
     case 0:
-#ifdef TIOCGLTC
-#if !defined(sun)
-	(void) ioctl(0, TIOCSLTC, (char *)&defltc);
-#endif
-#endif
 	(void) tcsetattr(0, TCSADRAIN, &deftty);
 	break;
     case 1:
@@ -1555,14 +1637,6 @@ mode(f)
 	newtty.c_cc[VMIN] = 1;
 	newtty.c_cc[VTIME] = 0;
 	(void) tcsetattr(0, TCSADRAIN, &newtty);
-#ifdef TIOCGLTC
-	/* Do this after the tcsetattr() in case this version
-	 * of termio supports the VSUSP or VDSUSP characters */
-#if !defined(sun)
-	/* this forces ICRNL under Solaris... */
-	(void) ioctl(0, TIOCSLTC, (char *)&noltc);
-#endif
-#endif
 	break;
     default:
 	return;

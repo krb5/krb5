@@ -1,3 +1,67 @@
+2003-03-24  Tom Yu  <tlyu@mit.edu>
+
+	* xdr_mem.c (xdrmem_create): Perform some additional size checks.
+	(xdrmem_getlong, xdrmem_putlong, xdrmem_getbytes): Check x_handy
+	prior to decrementing it.
+
+2002-08-12  Tom Yu  <tlyu@mit.edu>
+
+	* xdr.c (xdr_string): Fix off-by-one error; we're not vulnerable,
+	since we don't call it.
+
+	* xdr_array.c (xdr_array): Account for elsize when checking
+	encoded array count.
+
+	[pullups from trunk]
+
+2001-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for strerror.
+	* clnt_perror.c (strerror) [!HAVE_STRERROR]: Define, with
+	out-of-range check using sys_nerr.
+	(sys_nerr) [!HAVE_STRERROR]: Declare at top level instead of in
+	clnt_spcreateerror.
+	(clnt_sperror, clnt_spcreateerror): Use strerror always.  Skip
+	range check.
+
+2000-06-21  Tom Yu  <tlyu@mit.edu>
+
+	* svc_auth_gssapi.c (_svcauth_gssapi): Missed a rename.  From
+	Nathan Neulinger.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* pmap_rmt.c (GIFCONF_BUFSIZE): New macro.
+	(getbroadcastnets): Use it for buffer size.
+	(clnt_broadcast): Make buffer at least that big.
+
+	* get_myaddress.c (get_myaddress): Increase buffer size.
+
+2000-05-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Don't pass a
+	gss_buffer_desc to fprintf.
+
+	* clnt_tcp.c (clnttcp_create): Initialize "ct".
+	* clnt_udp.c (clntudp_bufcreate): Initialize "cu".
+
+	* svc_auth_gssapi.c (_svcauth_gssapi, create_client,
+	destroy_client, dump_db, clean_client): Use %p format for
+	displaying pointers.  Remove unused variables.
+
+2000-05-17  Ken Raeburn  <raeburn@mit.edu>
+            Nalin Dahyabhai  <nalin@redhat.com>
+
+	* clnt_perror.c (clnt_sperror): Don't overflow buffer "str" beyond
+	known allocation size.
+	* clnt_simple.c (gssrpc_callrpc): Don't overfill buffer "crp->oldhost".
+
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* clnt_perror.c (_buf): Use bigger buffer.
+	(clnt_spcreateerror): Don't overflow buffer "buf" beyond known
+	allocation size.
+
 2000-02-22  Donn Cave  <donn@u.washington.edu>
 
 	* Makefile.in (includes): Extract basename of header file to be

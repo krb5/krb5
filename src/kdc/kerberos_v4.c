@@ -149,13 +149,13 @@ static krb5_data *response;
 
 void kerberos_v4 PROTOTYPE((struct sockaddr_in *, KTEXT));
 void kerb_err_reply PROTOTYPE((struct sockaddr_in *, KTEXT, long, char *));
-static int set_tgtkey PROTOTYPE((char *, krb5_kvno));
+static int set_tgtkey PROTOTYPE((char *, krb5_kvno, krb5_boolean));
 
 /* Attributes converted from V5 to V4 - internal representation */
 #define V4_KDB_REQUIRES_PREAUTH  0x1
 #define V4_KDB_DISALLOW_ALL_TIX  0x2
 #define V4_KDB_REQUIRES_PWCHANGE 0x4
-
+#define V4_KDB_DISALLOW_SVR      0x8
 
 /* v4 compatibitly mode switch */
 #define KDC_V4_NONE		0	/* Don't even respond to packets */
@@ -182,6 +182,7 @@ static const struct v4mode_lookup_entry  v4mode_table[] = {
 
 static const int v4mode_table_nents = sizeof(v4mode_table)/
 				      sizeof(v4mode_table[0]);
+static int allow_v4_crossrealm = 0;
 
 void process_v4_mode(progname, string)
     const char          *progname;
@@ -210,6 +211,11 @@ void process_v4_mode(progname, string)
     return;
 }
 
+void enable_v4_crossrealm ( char *programname) {
+    allow_v4_crossrealm = 1;
+    krb5_klog_syslog(LOG_ERR, "Enabling v4 cross-realm compatibility; this is a known security hole");
+}
+
 krb5_error_code
 process_v4( pkt, client_fulladdr, is_secondary, resp)
 const krb5_data *pkt;
@@ -233,11 +239,11 @@ krb5_data **resp;
         return(retval);
 
     if (!*local_realm) {		/* local-realm name already set up */
-	/* XXX assumes realm is null-terminated! */
 	lrealm = master_princ->realm.data;
-	if (strlen(lrealm) < sizeof(local_realm))
-	    strcpy(local_realm, lrealm);
-	else
+	if (master_princ->realm.length < sizeof(local_realm)) {
+	    memcpy(local_realm, lrealm, master_princ->realm.length);
+	    local_realm[master_princ->realm.length] = '\0';
+	} else
 	    retval = KRB5_CONFIG_NOTENUFSPACE;
     }
     /* convert client_fulladdr to client_sockaddr:
@@ -256,6 +262,7 @@ krb5_data **resp;
 	    return KRB5KRB_ERR_FIELD_TOOLONG;
     }
     v4_pkt.length = pkt->length;
+    v4_pkt.mbz = 0;
     memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
     kerberos_v4( &client_sockaddr, &v4_pkt);
@@ -400,6 +407,14 @@ compat_decrypt_key (in5, out4, out5, issrv)
 #define MIN5 300
 #define HR21 255
 
+/*
+ * Previously this code returned either a v4 key or a v5 key  and you
+ * could tell from the enctype of the v5 key whether the v4 key was
+ * useful.  Now we return both keys so the code can try both des3 and
+ * des decryption.  We fail if the ticket doesn't have a v4 key.
+ * Also, note as a side effect, the v5 key is basically useless  in
+ * the client case.  It is still returned so the caller can free it.
+ */
 static int
 kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
     char   *name;               /* could have wild card */
@@ -481,8 +496,28 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
 	    return(0);
 	}
     } else {
-	/* XXX yes I know this is a hardcoded search order */
-	if (krb5_dbe_find_enctype(kdc_context, &entries,
+	if ( krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_DES_CBC_CRC,
+				  KRB5_KDB_SALTTYPE_V4, kvno, &pkey) &&
+	    krb5_dbe_find_enctype(kdc_context, &entries,
+				  ENCTYPE_DES_CBC_CRC,
+				  -1, kvno, &pkey)) {
+	    lt = klog(L_KRB_PERR,
+		      "KDC V4: failed to find key for %s.%s #%d",
+		      name, inst, kvno);
+	    krb5_db_free_principal(kdc_context, &entries, nprinc);
+	    return(0);
+	}
+    }
+
+    if (!compat_decrypt_key(pkey, k, k5key, issrv)) {
+ 	memcpy( &principal->key_low, k, LONGLEN);
+       	memcpy( &principal->key_high, (krb5_ui_4 *) k + 1, LONGLEN);
+    }
+    memset(k, 0, sizeof k);
+    if (issrv) {
+	krb5_free_keyblock_contents (kdc_context, k5key);
+      	if (krb5_dbe_find_enctype(kdc_context, &entries,
 				  ENCTYPE_DES3_CBC_RAW,
 				  -1, kvno, &pkey) &&
 	    krb5_dbe_find_enctype(kdc_context, &entries,
@@ -503,12 +538,10 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
 	    krb5_db_free_principal(kdc_context, &entries, nprinc);
 	    return(0);
 	}
+	compat_decrypt_key(pkey, k, k5key, issrv);
+	memset (k, 0, sizeof k);
     }
 
-    if (!compat_decrypt_key(pkey, k, k5key, issrv)) {
- 	memcpy( &principal->key_low, k, LONGLEN);
-       	memcpy( &principal->key_high, (krb5_ui_4 *) k + 1, LONGLEN);
-    }
     /* convert v5's entries struct to v4's Principal struct:
      * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes.
      */
@@ -538,6 +571,9 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
     }
     if (isflagset(entries.attributes,  KRB5_KDB_DISALLOW_ALL_TIX)) {
           principal->attributes |= V4_KDB_DISALLOW_ALL_TIX;
+    }
+    if (issrv && isflagset(entries.attributes, KRB5_KDB_DISALLOW_SVR)) {
+	principal->attributes |= V4_KDB_DISALLOW_SVR;
     }
     if (isflagset(entries.attributes,  KRB5_KDB_REQUIRES_PWCHANGE)) {
           principal->attributes |= V4_KDB_REQUIRES_PWCHANGE;
@@ -622,6 +658,9 @@ kerberos_v4(client, pkt)
 
     req_act_vno = req_version;
 
+    /* set these to point to something safe */
+    req_name_ptr = req_inst_ptr = req_realm_ptr = "";
+
     /* check if disabled, but we tell client */
     if (kdc_v4 == KDC_V4_DISABLE) {
 	lt = klog(L_KRB_PERR,
@@ -700,7 +739,7 @@ kerberos_v4(client, pkt)
 
 	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
 				 &a_name_data, &k5key, 0))) {
-		kerb_err_reply(client, pkt, i, lt);
+		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_low = a_name_data.key_high = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
@@ -715,7 +754,7 @@ kerberos_v4(client, pkt)
 	    /* this does all the checking */
 	    if ((i = check_princ(service, instance, lifetime,
 				 &s_name_data, &k5key, 1))) {
-		kerb_err_reply(client, pkt, i, lt);
+		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_high = a_name_data.key_low = 0;
 		s_name_data.key_high = s_name_data.key_low = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
@@ -739,21 +778,14 @@ kerberos_v4(client, pkt)
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
 	    /* construct and seal the ticket */
-	    if (K4KDC_ENCTYPE_OK(k5key.enctype)) {
-		krb_create_ticket(tk, k_flags, a_name_data.name,
-				  a_name_data.instance, local_realm,
-				  client_host.s_addr, (char *) session_key,
-				  lifetime, kerb_time.tv_sec,
-				  s_name_data.name, s_name_data.instance,
-				  key);
-	    } else {
-		krb_cr_tkt_krb5(tk, k_flags, a_name_data.name,
-				a_name_data.instance, local_realm,
-				client_host.s_addr, (char *) session_key,
-				lifetime, kerb_time.tv_sec,
-				s_name_data.name, s_name_data.instance,
-				&k5key);
-	    }
+	    /* We always issue des tickets; the 3des tickets are a broken hack*/
+	    krb_create_ticket(tk, k_flags, a_name_data.name,
+			      a_name_data.instance, local_realm,
+			      client_host.s_addr, (char *) session_key,
+			      lifetime, kerb_time.tv_sec,
+			      s_name_data.name, s_name_data.instance,
+			      key);
+
 	    krb5_free_keyblock_contents(kdc_context, &k5key);
 	    memset(key, 0, sizeof(key));
 	    memset(key_s, 0, sizeof(key_s));
@@ -806,23 +838,64 @@ kerberos_v4(client, pkt)
 	    tk->length = 0;
 	    k_flags = 0;	/* various kerberos flags */
 
+	    auth->mbz = 0;	/* pkt->mbz already zeroed */
 	    auth->length = 4 + strlen((char *)pkt->dat + 3);
+	    if (auth->length + 1 > MAX_KTXT_LEN) {
+		lt = klog(L_KRB_PERR,
+			  "APPL request with realm length too long from %s",
+			  inet_ntoa(client_host));
+		kerb_err_reply(client, pkt, RD_AP_INCON,
+			       "realm length too long");
+		return;
+	    }
+
 	    auth->length += (int) *(pkt->dat + auth->length) +
 		(int) *(pkt->dat + auth->length + 1) + 2;
+	    if (auth->length > MAX_KTXT_LEN) {
+		lt = klog(L_KRB_PERR,
+			  "APPL request with funky tkt or req_id length from %s",
+			  inet_ntoa(client_host));
+		kerb_err_reply(client, pkt, RD_AP_INCON,
+			       "funky tkt or req_id length");
+		return;
+	    }
 
 	    memcpy(auth->dat, pkt->dat, auth->length);
 
 	    strncpy(tktrlm, (char *)auth->dat + 3, REALM_SZ);
+	    tktrlm[REALM_SZ-1] = '\0';
 	    kvno = (krb5_kvno)auth->dat[2];
-	    if (set_tgtkey(tktrlm, kvno)) {
-		lt = klog(L_ERR_UNK,
+	    if ((!allow_v4_crossrealm)&&strcmp(tktrlm, local_realm) != 0) {
+	      lt = klog(L_ERR_UNK,
+			"Cross realm ticket from %s denied by policy,", tktrlm);
+	      kerb_err_reply(client, pkt,
+			       KERB_ERR_PRINCIPAL_UNKNOWN, lt);
+		return;
+	    }
+	    if (set_tgtkey(tktrlm, kvno, 0)) {
+	      lt = klog(L_ERR_UNK,
 			  "FAILED set_tgtkey realm %s, kvno %d. Host: %s ",
 			  tktrlm, kvno, inet_ntoa(client_host));
-		kerb_err_reply(client, pkt, kerno, lt);
+		/* no better error code */
+		kerb_err_reply(client, pkt,
+			       KERB_ERR_PRINCIPAL_UNKNOWN, lt);
 		return;
 	    }
 	    kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
 		ad, 0);
+	    if (kerno) {
+		if (set_tgtkey(tktrlm, kvno, 1)) {
+		    lt = klog(L_ERR_UNK,
+			      "FAILED 3des set_tgtkey realm %s, kvno %d. Host: %s ",
+			      tktrlm, kvno, inet_ntoa(client_host));
+		    /* no better error code */
+		    kerb_err_reply(client, pkt,
+				   KERB_ERR_PRINCIPAL_UNKNOWN, lt);
+		    return;
+		}
+		kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
+				   ad, 0);
+	    }
 
 	    if (kerno) {
 		klog(L_ERR_UNK, "FAILED krb_rd_req from %s: %s",
@@ -863,7 +936,7 @@ kerberos_v4(client, pkt)
 	    kerno = check_princ(service, instance, req_life,
 				&s_name_data, &k5key, 1);
 	    if (kerno) {
-		kerb_err_reply(client, pkt, kerno, lt);
+		kerb_err_reply(client, pkt, kerno, "check_princ failed");
 		s_name_data.key_high = s_name_data.key_low = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
@@ -888,21 +961,13 @@ kerberos_v4(client, pkt)
 	    des_new_random_key(session_key);
 #endif
 
-	    if (K4KDC_ENCTYPE_OK(k5key.enctype)) {
-		krb_create_ticket(tk, k_flags, ad->pname, ad->pinst,
-				  ad->prealm, client_host.s_addr,
-				  (char *) session_key, lifetime,
-				  kerb_time.tv_sec,
-				  s_name_data.name, s_name_data.instance,
-				  key);
-	    } else {
-		krb_cr_tkt_krb5(tk, k_flags, ad->pname, ad->pinst,
-				ad->prealm, client_host.s_addr,
-				(char *) session_key, lifetime,
-				kerb_time.tv_sec,
-				s_name_data.name, s_name_data.instance,
-				&k5key);
-	    }
+	    /* ALways issue des tickets*/
+	    krb_create_ticket(tk, k_flags, ad->pname, ad->pinst,
+			      ad->prealm, client_host.s_addr,
+			      (char *) session_key, lifetime,
+			      kerb_time.tv_sec,
+			      s_name_data.name, s_name_data.instance,
+			      key);
 	    krb5_free_keyblock_contents(kdc_context, &k5key);
 	    memset(key, 0, sizeof(key));
 	    memset(key_s, 0, sizeof(key_s));
@@ -968,7 +1033,7 @@ kerb_err_reply(client, pkt, err, string)
     static char e_msg[128];
 
     strcpy(e_msg, "\nKerberos error -- ");
-    strcat(e_msg, string);
+    strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
     krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
@@ -1066,6 +1131,13 @@ check_princ(p_name, instance, lifetime, p, k5key, issrv)
 	return KERB_ERR_NAME_EXP;
     }
 
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_SVR)) {
+	lt = klog(L_ERR_SEXP, "V5 DISALLOW_SVR set: "
+		  "\"%s\" \"%s\"", p_name, instance);
+	/* Not sure of a better error to return */
+	return KERB_ERR_NAME_EXP;
+    }
+
     /*
      * Does the principal require preauthentication?
      */
@@ -1103,20 +1175,22 @@ check_princ(p_name, instance, lifetime, p, k5key, issrv)
 
 /* Set the key for krb_rd_req so we can check tgt */
 static int
-set_tgtkey(r, kvno)
+set_tgtkey(r, kvno, use_3des)
     char   *r;			/* Realm for desired key */
     krb5_kvno kvno;
+    krb5_boolean use_3des;
 {
     int     n;
     static char lastrealm[REALM_SZ] = "";
     static int last_kvno = 0;
+    static krb5_boolean last_use_3des = 0;
     Principal p_st;
     Principal *p = &p_st;
     C_Block key;
     krb5_keyblock k5key;
 
     k5key.contents = NULL;
-    if (!strcmp(lastrealm, r) && last_kvno == kvno)
+    if (!strcmp(lastrealm, r) && last_kvno == kvno && last_use_3des == use_3des)
 	return (KSUCCESS);
 
 /*  log("Getting key for %s", r); */
@@ -1125,10 +1199,25 @@ set_tgtkey(r, kvno)
     if (n == 0)
 	return (KFAILURE);
 
-    if (!K4KDC_ENCTYPE_OK(k5key.enctype)) {
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_ALL_TIX)) {
+	lt = klog(L_ERR_SEXP,
+		  "V5 DISALLOW_ALL_TIX set: \"krbtgt\" \"%s\"", r);
+	krb5_free_keyblock_contents(kdc_context, &k5key);
+	return KFAILURE;
+    }
+
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_SVR)) {
+	lt = klog(L_ERR_SEXP, "V5 DISALLOW_SVR set: \"krbtgt\" \"%s\"", r);
+	krb5_free_keyblock_contents(kdc_context, &k5key);
+	return KFAILURE;
+    }
+
+    if (use_3des&&!K4KDC_ENCTYPE_OK(k5key.enctype)) {
 	krb_set_key_krb5(kdc_context, &k5key);
-	strcpy(lastrealm, r);
+	strncpy(lastrealm, r, sizeof(lastrealm) - 1);
+	lastrealm[sizeof(lastrealm) - 1] = '\0';
 	last_kvno = kvno;
+	last_use_3des = use_3des;
     } else {
 	/* unseal tgt key from master key */
 	memcpy(key,                &p->key_low,  4);
@@ -1136,7 +1225,8 @@ set_tgtkey(r, kvno)
 	kdb_encrypt_key(key, key, master_key,
 			master_key_schedule, DECRYPT);
 	krb_set_key((char *) key, 0);
-	strcpy(lastrealm, r);
+	strncpy(lastrealm, r, sizeof(lastrealm) - 1);
+	lastrealm[sizeof(lastrealm) - 1] = '\0';
 	last_kvno = kvno;
     }
     krb5_free_keyblock_contents(kdc_context, &k5key);

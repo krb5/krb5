@@ -403,7 +403,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case KRB5_CONFIG_BADFORMAT: code_string = "KRB5_CONFIG_BADFORMAT"; break;
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
-     default: fprintf(stderr, "**** CODE %d ***\n", code); code_string = "UNKNOWN"; break;
+     default: fprintf(stderr, "**** CODE %d (%s) ***\n", code, error_message (code)); code_string = "UNKNOWN"; break;
      }
 
      error_string = (char *) error_message(code);
@@ -1965,7 +1965,8 @@ int tcl_kadm5_chpass_principal_util(ClientData clientData,
 					    override_qual,
 #endif					    
 					    pw_ret_var ? &pw_ret : 0,
-					    msg_ret_var ? msg_ret : 0);
+					    msg_ret_var ? msg_ret : 0,
+				            msg_ret_var ? sizeof(msg_ret) : 0);
 
      if (ret == KADM5_OK) {
 	  if (pw_ret_var &&

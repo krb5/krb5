@@ -11,7 +11,7 @@ HDRS =
 
 DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
 
-all-unix::
+all-unix:: krb5-config
 
 all-mac::
 
@@ -161,7 +161,8 @@ WINMAKEFILES=Makefile \
 	util\windows\Makefile \
 	windows\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
-	windows\gss\Makefile windows\wintel\Makefile
+	windows\gss\Makefile windows\ms2mit\Makefile \
+	windows\wintel\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -271,6 +272,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\gss\Makefile: windows\gss\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
@@ -290,7 +293,10 @@ clean-windows:: Makefile-windows
 	@echo Making clean in clients
 	cd ..\clients
 	$(MAKE) -$(MFLAGS) clean
-	cd ..
+	@echo Making in appl\gss-sample
+	cd ..\appl\gss-sample
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\..
 	@echo Making clean in root
 
 #
@@ -324,7 +330,7 @@ FILES= ./* \
 	util/* util/et/* util/profile/*
 
 WINFILES= util/windows/* windows/* windows/lib/* windows/cns/* \
-	windows/wintel/* windows/gss/* windows/gina/*
+	windows/wintel/* windows/gss/* windows/gina/* windows/ms2mit/*
 
 MACFILES= mac/* mac/libraries/* config/* include/* \
 	include/krb5/* include/krb5/stock/* include/sys/* \
@@ -543,3 +549,11 @@ install-windows::
 	$(CP) clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
 	@if exist "$(KRB_INSTALL_DIR)\bin\krb4_32.dll" del "$(KRB_INSTALL_DIR)\bin\krb4_32.dll"
 	@if exist "$(KRB_INSTALL_DIR)\lib\krb4_32.lib" del "$(KRB_INSTALL_DIR)\lib\krb4_32.lib"
+
+install-unix:: 
+	$(INSTALL) krb5-config \
+		$(DESTDIR)$(CLIENT_BINDIR)/krb5-config
+
+krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
+	cd $(thisconfigdir) && $(SHELL) config.status
+

@@ -40,6 +40,7 @@ int main(argc, argv)
     retval = decoder(&code,&var);\
     if(retval){\
       com_err("krb5_decode_test", retval, "while decoding %s", typestring);\
+      error_count++;\
     }\
     assert(comparator(&ref,var),typestring);\
     printf("%s\n",description)
@@ -67,6 +68,49 @@ int main(argc, argv)
   {
     setup(krb5_ticket,"krb5_ticket",ktest_make_sample_ticket);
     decode_run("ticket","","61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_ticket,ktest_equal_ticket);
+    decode_run("ticket","(+ trailing [4] INTEGER","61 61 30 5F A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A4 03 02 01 01",decode_krb5_ticket,ktest_equal_ticket);
+
+/*
+  "61 80 30 80 "
+  "  A0 03 02 01 05 "
+  "  A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 "
+  "  A2 80 30 80 "
+  "    A0 03 02 01 01 "
+  "    A1 80 30 80 "
+  "      1B 06 68 66 74 73 61 69 "
+  "      1B 05 65 78 74 72 61 "
+  "    00 00 00 00 "
+  "  00 00 00 00 "
+  "  A3 80 30 80 "
+  "    A0 03 02 01 00 "
+  "    A1 03 02 01 05 "
+  "    A2 17 04 15 6B 72 62 41 53 4E 2E 31 "
+  "      20 74 65 73 74 20 6D 65 73 73 61 67 65 "
+  "  00 00 00 00"
+  "00 00 00 00"
+*/
+    decode_run("ticket","(indefinite lengths)", "61 80 30 80 A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 80 30 80 A0 03 02 01 01 A1 80 30 80 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 00 00 00 00 00 00 00 00 A3 80 30 80 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 00 00 00 00 00 00 00 00" ,decode_krb5_ticket,ktest_equal_ticket);
+/*
+  "61 80 30 80 "
+  "  A0 03 02 01 05 "
+  "  A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 "
+  "  A2 80 30 80 "
+  "    A0 03 02 01 01 "
+  "    A1 80 30 80 "
+  "      1B 06 68 66 74 73 61 69 "
+  "      1B 05 65 78 74 72 61 "
+  "    00 00 00 00 "
+  "  00 00 00 00 "
+  "  A3 80 30 80 "
+  "    A0 03 02 01 00 "
+  "    A1 03 02 01 05 "
+  "    A2 17 04 15 6B 72 62 41 53 4E 2E 31 "
+  "      20 74 65 73 74 20 6D 65 73 73 61 67 65 "
+  "  00 00 00 00"
+  "  A4 03 02 01 01 "
+  "00 00 00 00"
+*/
+    decode_run("ticket","(indefinite lengths + trailing [4] INTEGER)", "61 80 30 80 A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 80 30 80 A0 03 02 01 01 A1 80 30 80 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 00 00 00 00 00 00 00 00 A3 80 30 80 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 00 00 00 00 A4 03 02 01 01 00 00 00 00",decode_krb5_ticket,ktest_equal_ticket);
   }
 
   /****************************************************************/
@@ -74,21 +118,22 @@ int main(argc, argv)
   {
     setup(krb5_keyblock,"krb5_keyblock",ktest_make_sample_keyblock);
     decode_run("encryption_key","","30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
-    decode_run("encryption_key(+ trailing [2] INTEGER)","","30 16 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01",decode_krb5_encryption_key,ktest_equal_encryption_key);
-    decode_run("encryption_key(+ trailing [2] SEQUENCE {[0] INTEGER})","","30 16 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 07 30 05 A0 03 02 01 01",decode_krb5_encryption_key,ktest_equal_encryption_key);
-    decode_run("encryption_key(indefinite lengths)","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
-    decode_run("encryption_key(indefinite lengths + trailing [2] INTEGER)","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
-    decode_run("encryption_key(indefinite lengths + trailing [2] SEQUENCE {[0] INTEGER})","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 80 30 80 A0 03 02 01 01 00 00 00 00 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(+ trailing [2] INTEGER)","30 16 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(+ trailing [2] SEQUENCE {[0] INTEGER})","30 1A A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 07 30 05 A0 03 02 01 01",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(indefinite lengths)","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(indefinite lengths + trailing [2] INTEGER)","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(indefinite lengths + trailing [2] SEQUENCE {[0] INTEGER})","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 80 30 80 A0 03 02 01 01 00 00 00 00 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(indefinite lengths + trailing SEQUENCE {[0] INTEGER})","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 30 80 A0 03 02 01 01 00 00 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
     ref.enctype = -1;
-    decode_run("encryption_key(enctype = -1)","","30 11 A0 03 02 01 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(enctype = -1)","30 11 A0 03 02 01 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
     ref.enctype = -255;
-    decode_run("encryption_key(enctype = -255)","","30 12 A0 04 02 02 FF 01 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(enctype = -255)","30 12 A0 04 02 02 FF 01 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
     ref.enctype = 255;
-    decode_run("encryption_key(enctype = 255)","","30 12 A0 04 02 02 00 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(enctype = 255)","30 12 A0 04 02 02 00 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
     ref.enctype = -2147483648;
-    decode_run("encryption_key(enctype = -2147483648)","","30 14 A0 06 02 04 80 00 00 00 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(enctype = -2147483648)","30 14 A0 06 02 04 80 00 00 00 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
     ref.enctype = 2147483647;
-    decode_run("encryption_key(enctype = 2147483647)","","30 14 A0 06 02 04 7F FF FF FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key","(enctype = 2147483647)","30 14 A0 06 02 04 7F FF FF FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
   }  
   
   /****************************************************************/
@@ -146,6 +191,57 @@ int main(argc, argv)
     ref.msg_type = KRB5_AS_REP;
 
     decode_run("as_rep","","6B 81 EA 30 81 E7 A0 03 02 01 05 A1 03 02 01 0B A2 26 30 24 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 A3 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A4 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A5 5E 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A6 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_as_rep,ktest_equal_as_rep);
+
+/*
+  6B 80 30 80
+    A0 03 02 01 05
+    A1 03 02 01 0B
+    A2 80 30 80
+      30 80
+	A1 03 02 01 0D
+	A2 09 04 07 70 61 2D 64 61 74 61
+      00 00
+      30 80
+	A1 03 02 01 0D
+	A2 09 04 07 70 61 2D 64 61 74 61
+      00 00
+    00 00 00 00
+    A3 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55
+    A4 80 30 80
+      A0 03 02 01 01
+      A1 80 30 80
+	1B 06 68 66 74 73 61 69
+	1B 05 65 78 74 72 61
+      00 00 00 00
+    00 00 00 00
+    A5 80 61 80 30 80
+      A0 03 02 01 05
+      A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55
+      A2 80 30 80
+	A0 03 02 01 01
+	A1 80 30 80
+	  1B 06 68 66 74 73 61 69
+	  1B 05 65 78 74 72 61
+	00 00 00 00
+      00 00 00 00
+      A3 80 30 80
+	A0 03 02 01 00
+	A1 03 02 01 05
+	A2 17 04 15 6B 72 62 41 53 4E 2E 31
+	  20 74 65 73 74 20 6D 65
+	  73 73 61 67 65
+      00 00 00 00
+    00 00 00 00 00 00
+    A6 80 30 80
+      A0 03 02 01 00
+      A1 03 02 01 05
+      A2 17 04 15 6B 72 62 41 53 4E 2E 31
+	20 74 65 73 74 20 6D 65
+	73 73 61 67 65
+    00 00 00 00
+  00 00 00 00
+*/
+    decode_run("as_rep","(indefinite lengths)","6B 80 30 80 A0 03 02 01 05 A1 03 02 01 0B A2 80 30 80 30 80 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 00 00 30 80 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 00 00 00 00 00 00 A3 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A4 80 30 80 A0 03 02 01 01 A1 80 30 80 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 00 00 00 00 00 00 00 00 A5 80 61 80 30 80 A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 80 30 80 A0 03 02 01 01 A1 80 30 80 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 00 00 00 00 00 00 00 00 A3 80 30 80 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 00 00 00 00 00 00 00 00 00 00 A6 80 30 80 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 00 00 00 00 00 00 00 00",decode_krb5_as_rep,ktest_equal_as_rep);
     ktest_destroy_pa_data_array(&(ref.padata));
     decode_run("as_rep","(optionals NULL)","6B 81 C2 30 81 BF A0 03 02 01 05 A1 03 02 01 0B A3 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A4 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A5 5E 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A6 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_as_rep,ktest_equal_as_rep);
   }  
