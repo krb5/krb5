@@ -1,9 +1,9 @@
 NormalLibraryObjectRule()
 
 OBJS=defname.o getaddr.o lock_file.o mstime.o \
-	read_pwd.o timeofday.o unlock_file.o config_fn.o
+	read_pwd.o timeofday.o unlck_file.o config_fn.o
 
 SRCS=defname.c getaddr.c lock_file.c mstime.c \
-	read_pwd.c timeofday.c unlock_file.c config_fn.c
+	read_pwd.c timeofday.c unlck_file.c config_fn.c
 
 NormalLibraryTarget(os,${OBJS})
