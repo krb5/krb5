@@ -35,8 +35,8 @@ ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
 krb5_pre_in=$ac_config_fragdir/pre.in
 krb5_post_in=$ac_config_fragdir/post.in
-krb5_prepend_frags=$krb5_pre_in
-krb5_append_frags=$krb5_post_in
+define([krb5_append_frags],[$krb5_post_in])
+echo "Looking for $srcdir/$ac_config_fragdir"
 if test -d "$srcdir/$ac_config_fragdir"; then
   AC_CONFIG_AUX_DIR($ac_config_fragdir)
 else
@@ -563,12 +563,13 @@ dnl
 dnl V5_AC_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
-[ifelse($1, , ac_v5_makefile_dirs=., ac_v5_makefile_dirs="$1")
-ifelse($2, , filelist="", filelist="$2")
-for x in $ac_v5_makefile_dirs; do
-  filelist="$filelist $x/Makefile:$krb5_prepend_frags:$x/Makefile.in:$krb5_append_frags"
-done
-AC_OUTPUT($filelist)])dnl
+[ifelse($1, , [_V5_AC_OUTPUT_MAKEFILE(.,$2)],[_V5_AC_OUTPUT_MAKEFILE($1,$2)])])
+dnl
+define(_V5_AC_OUTPUT_MAKEFILE,
+[ifelse($2, , ,AC_CONFIG_FILES($2))
+AC_FOREACH([DIR], [$1],dnl
+ [AC_CONFIG_FILES(DIR[/Makefile:$krb5_pre_in:]DIR[/Makefile.in:]krb5_append_frags)])
+K5_AC_OUTPUT])dnl
 dnl
 dnl
 dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
@@ -968,7 +969,7 @@ AC_REQUIRE([AC_PROG_LN_S])
 AC_REQUIRE([AC_PROG_RANLIB])
 AC_CHECK_PROG(AR, ar, ar, false)
 # add frag for building libraries
-krb5_append_frags=$ac_config_fragdir/lib.in:$krb5_append_frags
+define([krb5_append_frags],[$ac_config_fragdir/lib.in:]krb5_append_frags)
 # null out SHLIB_EXPFLAGS because we lack any dependencies
 SHLIB_EXPFLAGS=
 AC_SUBST(LIBLIST)
@@ -1009,7 +1010,7 @@ AC_REQUIRE([AC_PROG_LN_S])
 AC_REQUIRE([AC_PROG_RANLIB])
 AC_CHECK_PROG(AR, ar, ar, false)
 # add frag for building libraries
-krb5_append_frags=$ac_config_fragdir/lib.in:$krb5_append_frags
+define([krb5_append_frags],[$ac_config_fragdir/lib.in:]krb5_append_frags)
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(LDCOMBINE)
@@ -1031,7 +1032,7 @@ dnl Pull in the necessary stuff to build library objects.
 AC_DEFUN(KRB5_BUILD_LIBOBJS,
 [AC_REQUIRE([KRB5_LIB_AUX])
 # add frag for building library objects
-krb5_append_frags=$ac_config_fragdir/libobj.in:$krb5_append_frags
+define([krb5_append_frags],[$ac_config_fragdir/libobj.in:]krb5_append_frags)
 AC_SUBST(OBJLISTS)
 AC_SUBST(STOBJEXT)
 AC_SUBST(SHOBJEXT)

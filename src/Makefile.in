@@ -560,5 +560,5 @@ install-unix::
 		$(DESTDIR)$(CLIENT_BINDIR)/krb5-config
 
 krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
-	cd $(thisconfigdir) && $(SHELL) config.status
+	cd $(thisconfigdir) && $(SHELL) config.status krb5-config
 

@@ -1,4 +1,5 @@
-AC_INIT(aclocal.m4)
+AC_INIT
+AC_CONFIG_SRCDIR([aclocal.m4])
 dnl
 dnl autoconf 2.49 defaults to a /dev/null cache file, which is what we
 dnl do not want for performance reasons. 
@@ -78,9 +79,7 @@ if test -n "$KRB4_LIB"; then
   AC_CONFIG_SUBDIRS(krb524)
 fi
 AC_CONFIG_SUBDIRS(kdc kadmin slave clients appl tests)
-AC_OUTPUT_COMMANDS([chmod +x krb5-config])
-AC_OUTPUT_COMMANDS([echo timestamp > krb5-stamp-h])
-K5_GEN_FILE(krb5-config)
+AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 K5_GEN_MAKEFILE(.)
 K5_GEN_MAKEFILE(util)
 K5_GEN_MAKEFILE(util/send-pr)

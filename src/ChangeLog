@@ -1,3 +1,15 @@
+2002-09-24  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (krb5-config): Add argument to invocation of
+	config.status to only generate krb5-config and not any other
+	Makefiles.
+
+	* configure.in (krb5-config): Use AC_CONFIG_FILES to better
+	generate and chmod krb5-config file.
+
+	* aclocal.m4 (V5_AC_OUTPUT_MAKEFILE): Rewrite to use AC_CONFIG_FILES. 
+	krb5_append_frags is now a define instead of a shell variable.
+	
 2002-09-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* aclocal.m4 (V5_SET_TOPDIR): When determining the location of the
