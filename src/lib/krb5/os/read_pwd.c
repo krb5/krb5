@@ -23,6 +23,8 @@ static char rcsid_read_pwd_c[] =
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <errno.h>
+#include <signal.h>
+#include <setjmp.h>
 
 #ifdef __STDC__
 #include <stdlib.h>
@@ -30,9 +32,23 @@ static char rcsid_read_pwd_c[] =
 char *malloc(), *index();
 #endif
 
+#ifdef POSIX
+#define sigtype void
+#else
+#define sigtype int
+#endif /* POSIX */
+
 extern int errno;
 
-#define cleanup(errcode) ioctl(0, TIOCSETP, (char *)&tty_savestate); return errcode;
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(0, TIOCSETP, (char *)&tty_savestate); return errcode;
+
+static jmp_buf pwd_jump;
+
+sigtype
+intr_routine()
+{
+    longjmp(pwd_jump, 1);
+}
 
 krb5_error_code
 krb5_read_password(prompt, prompt2, return_pwd, size_return)
@@ -44,9 +60,10 @@ int size_return;
     /* adapted from Kerberos v4 des/read_password.c */
 
     struct sgttyb tty_state, tty_savestate;
-    char *readin_string;
+    char *readin_string = 0;
     register char *ptr;
     int scratchchar;
+    sigtype (*ointrfunc)();
 
     /* save terminal state */
     if (ioctl(0,TIOCGETP,(char *)&tty_savestate) == -1) 
@@ -57,6 +74,18 @@ int size_return;
     tty_state.sg_flags &= ~ECHO;
     if (ioctl(0,TIOCSETP,(char *)&tty_state) == -1)
 	return errno;
+
+    if (setjmp(pwd_jump)) {
+	/* interrupted */
+	if (readin_string) {
+	    (void) bzero(readin_string, size_return);
+	    free(readin_string);
+	}
+	(void) bzero(return_pwd, size_return);
+	cleanup(KRB5_LIBOS_PWDINTR);
+    }
+    /* save intrfunc */
+    ointrfunc = signal(SIGINT, intr_routine);
 
     /* put out the prompt */
     (void) fputs(prompt,stdout);
@@ -113,8 +142,12 @@ int size_return;
 	free(readin_string);
     }
     
+    /* reset intrfunc */
+    (void) signal(SIGINT, ointrfunc);
+
     if (ioctl(0, TIOCSETP, (char *)&tty_savestate) == -1)
 	return errno;
+
 
     return 0;
 }
