@@ -48,9 +48,9 @@
 #else	/* MD4_K5BETA_COMPAT */
 #undef	K5BETA_COMPAT
 #endif	/* MD4_K5BETA_COMPAT */
-#define	CKSUM_FUNCTION		md4_crypto_sum_func
-#define	COMPAT_FUNCTION		md4_crypto_compat_sum_func
-#define	VERIFY_FUNCTION		md4_crypto_verify_func
+#define	CKSUM_FUNCTION		krb5_md4_crypto_sum_func
+#define	COMPAT_FUNCTION		krb5_md4_crypto_compat_sum_func
+#define	VERIFY_FUNCTION		krb5_md4_crypto_verify_func
 #endif	/* MD == 4 */
 
 #if	MD == 5
@@ -62,9 +62,9 @@
 #else	/* MD5_K5BETA_COMPAT */
 #undef	K5BETA_COMPAT
 #endif	/* MD5_K5BETA_COMPAT */
-#define	CKSUM_FUNCTION		md5_crypto_sum_func
-#define	COMPAT_FUNCTION		md5_crypto_compat_sum_func
-#define	VERIFY_FUNCTION		md5_crypto_verify_func
+#define	CKSUM_FUNCTION		krb5_md5_crypto_sum_func
+#define	COMPAT_FUNCTION		krb5_md5_crypto_compat_sum_func
+#define	VERIFY_FUNCTION		krb5_md5_crypto_verify_func
 #endif	/* MD == 5 */
 
 static void

@@ -5,11 +5,11 @@
 /* Windows needs to these prototypes for the assignment below */
 
 krb5_error_code
-md5_crypto_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
+krb5_md5_crypto_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
 	krb5_pointer seed, size_t seed_length, krb5_checksum FAR *outcksum));
 
 krb5_error_code
-md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
+krb5_md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
 	size_t in_length, krb5_pointer seed, size_t seed_length));
 
 /*
@@ -19,7 +19,7 @@ md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
  *
  * If MD5_K5BETA_COMPAT is defined, then compatability mode is enabled.  That
  * means that both checksum functions are compiled and available for use and
- * the additional interface md5_crypto_compat_ctl() is defined.
+ * the additional interface krb5_md5_crypto_compat_ctl() is defined.
  *
  * If MD5_K5BETA_COMPAT_DEF is defined and compatability mode is enabled, then
  * the compatible behaviour becomes the default.
@@ -27,23 +27,23 @@ md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
  */
 
 static void
-md5_calculate_cksum(md5ctx, in, in_length, confound, confound_length)
-    MD5_CTX		*md5ctx;
+krb5_md5_calculate_cksum(md5ctx, in, in_length, confound, confound_length)
+    krb5_MD5_CTX		*md5ctx;
     krb5_pointer	in;
     size_t		in_length;
     krb5_pointer	confound;
     size_t		confound_length;
 {
-    MD5Init(md5ctx);
+    krb5_MD5Init(md5ctx);
     if (confound && confound_length)
-	MD5Update(md5ctx, confound, confound_length);
-    MD5Update(md5ctx, in, in_length);
-    MD5Final(md5ctx);
+	krb5_MD5Update(md5ctx, confound, confound_length);
+    krb5_MD5Update(md5ctx, in, in_length);
+    krb5_MD5Final(md5ctx);
 }
 
 #ifdef	MD5_K5BETA_COMPAT
 krb5_error_code
-md5_crypto_compat_sum_func(in, in_length, seed, seed_length, outcksum)
+krb5_md5_crypto_compat_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
 krb5_pointer seed;
@@ -56,11 +56,11 @@ krb5_checksum FAR *outcksum;
     krb5_keyblock keyblock;
     krb5_error_code retval;
 
-    MD5_CTX working;
+    krb5_MD5_CTX working;
 
-    MD5Init(&working);
-    MD5Update(&working, input, in_length);
-    MD5Final(&working);
+    krb5_MD5Init(&working);
+    krb5_MD5Update(&working, input, in_length);
+    krb5_MD5Final(&working);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD5_DES;
     outcksum->length = RSA_MD5_DES_CKSUM_LENGTH;
@@ -91,7 +91,7 @@ krb5_checksum FAR *outcksum;
 #endif	/* MD5_K5BETA_COMPAT */
 
 krb5_error_code
-md5_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
+krb5_md5_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
 krb5_pointer seed;
@@ -107,7 +107,7 @@ krb5_checksum FAR *outcksum;
     krb5_error_code retval;
     size_t i;
 
-    MD5_CTX working;
+    krb5_MD5_CTX working;
 
     /* Generate the confounder in place */
     if (retval = krb5_random_confounder(RSA_MD5_DES_CONFOUND_LENGTH,
@@ -115,7 +115,7 @@ krb5_checksum FAR *outcksum;
 	return(retval);
 
     /* Calculate the checksum */
-    md5_calculate_cksum(&working,
+    krb5_md5_calculate_cksum(&working,
 			(krb5_pointer) outtmp,
 			(size_t) RSA_MD5_DES_CONFOUND_LENGTH,
 			in,
@@ -159,7 +159,7 @@ krb5_checksum FAR *outcksum;
 }
 
 krb5_error_code
-md5_crypto_verify_func(cksum, in, in_length, seed, seed_length)
+krb5_md5_crypto_verify_func(cksum, in, in_length, seed, seed_length)
 krb5_checksum FAR *cksum;
 krb5_pointer in;
 size_t in_length;
@@ -175,7 +175,7 @@ size_t seed_length;
     krb5_error_code retval;
     size_t i;
 
-    MD5_CTX working;
+    krb5_MD5_CTX working;
 
     retval = 0;
     if (cksum->checksum_type == CKSUMTYPE_RSA_MD5_DES) {
@@ -195,7 +195,7 @@ size_t seed_length;
 	     */
 
 	    /* Recalculate the checksum with no confounder */
-	    md5_calculate_cksum(&working,
+	    krb5_md5_calculate_cksum(&working,
 				(krb5_pointer) NULL,
 				(size_t) 0,
 				in,
@@ -268,7 +268,7 @@ size_t seed_length;
 		return(retval);
 
 	    /* Now that we have the decrypted checksum, try to regenerate it */
-	    md5_calculate_cksum(&working,
+	    krb5_md5_calculate_cksum(&working,
 				(krb5_pointer) outtmp,
 				(size_t) RSA_MD5_DES_CONFOUND_LENGTH,
 				in,
@@ -325,7 +325,7 @@ size_t seed_length;
 		return(retval);
 
 	    /* Now that we have the decrypted checksum, try to regenerate it */
-	    md5_calculate_cksum(&working,
+	    krb5_md5_calculate_cksum(&working,
 				(krb5_pointer) outtmp,
 				(size_t) RSA_MD5_DES_CONFOUND_LENGTH,
 				in,
@@ -352,8 +352,8 @@ krb5_checksum_entry rsa_md5_des_cksumtable_entry =
 #if	defined(MD5_K5BETA_COMPAT) && defined(MD5_K5BETA_COMPAT_DEF)
 {
     0,
-    md5_crypto_compat_sum_func,
-    md5_crypto_verify_func,
+    krb5_md5_crypto_compat_sum_func,
+    krb5_md5_crypto_verify_func,
     RSA_MD5_DES_CKSUM_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
@@ -361,8 +361,8 @@ krb5_checksum_entry rsa_md5_des_cksumtable_entry =
 #else	/* MD5_K5BETA_COMPAT && MD5_K5BETA_COMPAT_DEF */
 {
     0,
-    md5_crypto_sum_func,
-    md5_crypto_verify_func,
+    krb5_md5_crypto_sum_func,
+    krb5_md5_crypto_verify_func,
     RSA_MD5_DES_CKSUM_LENGTH+RSA_MD5_DES_CONFOUND_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
@@ -374,16 +374,16 @@ krb5_checksum_entry rsa_md5_des_cksumtable_entry =
  * Turn on/off compatible checksum generation.
  */
 void
-md5_crypto_compat_ctl(scompat)
+krb5_md5_crypto_compat_ctl(scompat)
     krb5_boolean	scompat;
 {
     if (scompat) {
-	rsa_md5_des_cksumtable_entry.sum_func = md5_crypto_compat_sum_func;
+	rsa_md5_des_cksumtable_entry.sum_func = krb5_md5_crypto_compat_sum_func;
 	rsa_md5_des_cksumtable_entry.checksum_length =
 	    RSA_MD5_DES_CKSUM_LENGTH;
     }
     else {
-	rsa_md5_des_cksumtable_entry.sum_func = md5_crypto_sum_func;
+	rsa_md5_des_cksumtable_entry.sum_func = krb5_md5_crypto_sum_func;
 	rsa_md5_des_cksumtable_entry.checksum_length =
 	    RSA_MD5_DES_CKSUM_LENGTH + RSA_MD5_DES_CONFOUND_LENGTH;
     }

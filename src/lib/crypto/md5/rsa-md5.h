@@ -46,16 +46,16 @@ typedef struct {
   krb5_ui_4 buf[4];			/* scratch buffer */
   unsigned char in[64];			/* input buffer */
   unsigned char digest[16];		/* actual digest after MD5Final call */
-} MD5_CTX;
+} krb5_MD5_CTX;
 
 #if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
-extern void MD5Init(MD5_CTX FAR *);
-extern void MD5Update (MD5_CTX FAR *, unsigned char FAR *, unsigned int);
-extern void MD5Final (MD5_CTX FAR *);
+extern void krb5_MD5Init(krb5_MD5_CTX FAR *);
+extern void krb5_MD5Update(krb5_MD5_CTX FAR *,unsigned char FAR *,unsigned int);
+extern void krb5_MD5Final(krb5_MD5_CTX FAR *);
 #else
-extern void MD5Init();
-extern void MD5Update ();
-extern void MD5Final ();
+extern void krb5_MD5Init();
+extern void krb5_MD5Update();
+extern void krb5_MD5Final();
 #endif
 
 #define	RSA_MD5_CKSUM_LENGTH		16

@@ -48,9 +48,9 @@
  ***********************************************************************
  **  Message-digest routines:                                         **
  **  To form the message digest for a message M                       **
- **    (1) Initialize a context buffer mdContext using MD5Init        **
- **    (2) Call MD5Update on mdContext and M                          **
- **    (3) Call MD5Final on mdContext                                 **
+ **    (1) Initialize a context buffer mdContext using krb5_MD5Init   **
+ **    (2) Call krb5_MD5Update on mdContext and M                     **
+ **    (3) Call krb5_MD5Final on mdContext                            **
  **  The message digest is now in mdContext->digest[0...15]           **
  ***********************************************************************
  */
@@ -101,12 +101,12 @@ static unsigned char PADDING[64] = {
    (a) += (b); \
   }
 
-/* The routine MD5Init initializes the message-digest context
+/* The routine krb5_MD5Init initializes the message-digest context
    mdContext. All fields are set to zero.
  */
 void 
-MD5Init (mdContext)
-MD5_CTX FAR *mdContext;
+krb5_MD5Init (mdContext)
+krb5_MD5_CTX FAR *mdContext;
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -118,13 +118,13 @@ MD5_CTX FAR *mdContext;
   mdContext->buf[3] = UL(0x10325476);
 }
 
-/* The routine MD5Update updates the message-digest context to
+/* The routine krb5_MD5Update updates the message-digest context to
    account for the presence of each of the characters inBuf[0..inLen-1]
    in the message whose digest is being computed.
  */
 void
-MD5Update (mdContext, inBuf, inLen)
-MD5_CTX FAR *mdContext;
+krb5_MD5Update (mdContext, inBuf, inLen)
+krb5_MD5_CTX FAR *mdContext;
 unsigned char FAR *inBuf;
 unsigned int inLen;
 {
@@ -158,12 +158,12 @@ unsigned int inLen;
   }
 }
 
-/* The routine MD5Final terminates the message-digest computation and
+/* The routine krb5_MD5Final terminates the message-digest computation and
    ends with the desired message digest in mdContext->digest[0...15].
  */
 void
-MD5Final (mdContext)
-MD5_CTX FAR *mdContext;
+krb5_MD5Final (mdContext)
+krb5_MD5_CTX FAR *mdContext;
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -179,7 +179,7 @@ MD5_CTX FAR *mdContext;
 
   /* pad out to 56 mod 64 */
   padLen = (mdi < 56) ? (56 - mdi) : (120 - mdi);
-  MD5Update (mdContext, PADDING, padLen);
+  krb5_MD5Update (mdContext, PADDING, padLen);
 
   /* append length in bits and transform */
   for (i = 0, ii = 0; i < 14; i++, ii += 4)

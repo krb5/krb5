@@ -50,17 +50,17 @@ struct md_test_entry {
 };
 
 #if MD == 2
-#define MD_CTX MD2_CTX
-#define MDInit MD2Init
-#define MDUpdate MD2Update
-#define MDFinal MD2Final
+#define MD_CTX krb5_MD2_CTX
+#define MDInit krb5_MD2Init
+#define MDUpdate krb5_MD2Update
+#define MDFinal krb5_MD2Final
 #endif
 
 #if MD == 4
-#define MD_CTX MD4_CTX
-#define MDInit MD4Init
-#define MDUpdate MD4Update
-#define MDFinal MD4Final
+#define MD_CTX krb5_MD4_CTX
+#define MDInit krb5_MD4Init
+#define MDUpdate krb5_MD4Update
+#define MDFinal krb5_MD4Final
 
 #define HAVE_TEST_SUITE
 /* Test suite from RFC 1320 */
@@ -93,10 +93,10 @@ struct md_test_entry md_test_suite[] = {
 #endif
 
 #if MD == 5
-#define MD_CTX MD5_CTX
-#define MDInit MD5Init
-#define MDUpdate MD5Update
-#define MDFinal MD5Final
+#define MD_CTX krb5_MD5_CTX
+#define MDInit krb5_MD5Init
+#define MDUpdate krb5_MD5Update
+#define MDFinal krb5_MD5Final
 
 #define HAVE_TEST_SUITE
 /* Test suite from RFC 1321 */
