@@ -40,6 +40,7 @@ OBJS= \
 	port2ip.o	\
 	read_msg.o	\
 	read_pwd.o	\
+	realm_dom.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
 	timeofday.o	\
@@ -69,6 +70,7 @@ SRCS= \
 	$(srcdir)/osconfig.c	\
 	$(srcdir)/read_msg.c	\
 	$(srcdir)/read_pwd.c	\
+	$(srcdir)/realm_dom.c	\
 	$(srcdir)/port2ip.c	\
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
