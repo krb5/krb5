@@ -25,7 +25,7 @@ static char addr_srch_c[] =
 krb5_boolean
 krb5_address_search(addr, addrlist)
 const krb5_address *addr;
-const krb5_address **addrlist;
+krb5_address * const * addrlist;
 {
     if (!addrlist)
 	return TRUE;
