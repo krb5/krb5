@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm_proto.h : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Thu Aug 31 11:38:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add checks for stddef.h and xom.h for use by GSSAPI-V2
 

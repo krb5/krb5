@@ -162,9 +162,8 @@
 #define	KRB5_ADM_KT_TIMESTAMP	1
 #define	KRB5_ADM_KT_VNO		2
 #define	KRB5_ADM_KT_KEY_KEYTYPE	3
-#define	KRB5_ADM_KT_KEY_ETYPE	4
-#define	KRB5_ADM_KT_KEY_KEY	5
-#define	KRB5_ADM_KT_NCOMPS	6
+#define	KRB5_ADM_KT_KEY_KEY	4
+#define	KRB5_ADM_KT_NCOMPS	5
 
 typedef struct __krb5_key_salt_tuple {
     krb5_keytype	ks_keytype;
@@ -183,7 +182,6 @@ typedef struct __krb5_realm_params {
     krb5_int32		realm_kdc_sport;
     krb5_int32		realm_kadmind_port;
     krb5_keytype	realm_keytype;
-    krb5_enctype	realm_enctype;
     krb5_deltat		realm_max_life;
     krb5_deltat		realm_max_rlife;
     krb5_timestamp	realm_expiration;
@@ -193,7 +191,6 @@ typedef struct __krb5_realm_params {
     unsigned int	realm_kdc_sport_valid:1;
     unsigned int	realm_kadmind_port_valid:1;
     unsigned int	realm_keytype_valid:1;
-    unsigned int	realm_enctype_valid:1;
     unsigned int	realm_max_life_valid:1;
     unsigned int	realm_max_rlife_valid:1;
     unsigned int	realm_expiration_valid:1;
