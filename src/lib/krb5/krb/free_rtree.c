@@ -35,9 +35,9 @@ static char rcsid_free_rtree_c[] =
 
 void
 krb5_free_realm_tree(realms)
-const krb5_principal *realms;
+krb5_principal *realms;
 {
-    register const krb5_principal *nrealms = realms;
+    register krb5_principal *nrealms = realms;
     while (*nrealms) {
 	krb5_free_principal(*nrealms);
 	nrealms++;
