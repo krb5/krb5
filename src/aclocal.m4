@@ -116,12 +116,6 @@ divert(0)dnl
 changequote([,])dnl
 ])dnl
 dnl
-dnl check for yylineno -- HAVE_YYLINENO
-dnl
-define(HAVE_YYLINENO,[
-AC_COMPILE_CHECK([yylineno],
-[extern int yylineno;], [t(&yylineno);], , AC_DEFINE(NO_YYLINENO))])dnl
-dnl
 dnl take saved makefile stuff and put it in the Makeile
 dnl
 define(EXTRA_RULES,[
@@ -342,5 +336,21 @@ dnl ISODE/pepsy includes are used -- ISODE_INCLUDE
 dnl
 define(ISODE_INCLUDE,[
 ADD_DEF([-I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h])dnl
+])dnl
+dnl
+dnl check for yylineno -- HAVE_YYLINENO
+dnl
+define(HAVE_YYLINENO,[dnl
+AC_REQUIRE_CPP()AC_REQUIRE([AC_PROG_LEX])dnl
+AC_CHECKING(for yylineno declaration)
+# some systems have yylineno, others don't...
+  echo '%%
+%%' | ${LEX} -t > conftest.out
+  if egrep yylineno conftest.out >/dev/null 2>&1; then
+	:
+  else
+	AC_DEFINE([NO_YYLINENO])
+  fi
+  rm -f conftest.out
 ])dnl
 dnl
