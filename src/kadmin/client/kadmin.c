@@ -603,7 +603,7 @@ OLDDECLARG(krb5_principal, client)
 					cache,
 					&my_creds,
 				        0);
-	if (retval != KRB5KDC_PREAUTH_FAILED &&
+	if (retval != KRB5KDC_ERR_PREAUTH_FAILED &&
 	    retval != KRB5KRB_ERR_GENERIC)
 	    break;
     }

@@ -1,3 +1,7 @@
+Sat Jul 16 02:47:38 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* kadmin.c (get_first_ticket): change error code to match
+
 Fri Jun 24 22:48:29 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* kadmin_done (kadm_done): fix memory allocation bugs
