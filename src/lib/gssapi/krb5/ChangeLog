@@ -1,3 +1,8 @@
+2004-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (gssapi_krb5.h): Add Windows version of generation
+	rule.
+
 2004-06-09  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install-headers-unix install): install

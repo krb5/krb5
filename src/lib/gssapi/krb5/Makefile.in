@@ -205,6 +205,7 @@ clean-windows::
 	$(RM) $(EHDRDIR)\gssapi_krb5.h
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
+##DOS##!if 0
 gssapi_krb5.h: gssapi_krb5.hin
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
@@ -213,6 +214,11 @@ gssapi_krb5.h: gssapi_krb5.hin
 	echo "/* End of gssapi_krb5.h prologue. */"; \
 	cat $(srcdir)/gssapi_krb5.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e
+##DOS##!endif
+##DOS### No prologue needed for Windows, the support is
+##DOS### in gssapi_krb5.hin already.
+##DOS##gssapi_krb5.h: gssapi_krb5.hin
+##DOS##	$(CP) gssapi_krb5.hin gssapi_krb5.h
 
 install-headers-unix install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
