@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include "misc.h"
+
 krb5_error_code
 process_chpw_request(context, server_handle, realm, s, keytab, sockin, 
 		     req, rep)

@@ -1,3 +1,14 @@
+2001-06-29  Ezra Peisach  <epeisach@mit.edu>
+
+	* misc.c, server_stubs.c: Nuke rcsid.
+
+	* misc.h: Add prototypes for kadm_1 and process_chpw_request.
+
+	* ovsec_kadmd.c: Include misc.h and remove prototype for
+	process_chpw_request and kadm_1. 
+
+	* kadm_rpc_svc.c, schpw.c: Include misc.h for prototypes.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* server_glue_v1.c: Include misc.h for prototypes.

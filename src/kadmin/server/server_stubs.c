@@ -1,12 +1,7 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
- * $Header$
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */

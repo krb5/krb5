@@ -51,6 +51,8 @@
 #include    <krb5/adm_proto.h>
 #include    <string.h>
 
+#include    "misc.h"
+
 #ifdef PURIFY
 #include    "purify.h"
 
@@ -112,10 +114,6 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 	
 int schpw;
 void do_schpw(int s, kadm5_config_params *params);
-krb5_error_code process_chpw_request(krb5_context context, void *server_handle,
-				     char *realm, int s, krb5_keytab keytab,
-				     struct sockaddr_in *sockin,
-				     krb5_data *req, krb5_data *rep);
 
 /*
  * Function: usage
@@ -192,7 +190,6 @@ static krb5_context context;
 
 int main(int argc, char *argv[])
 {
-     void	kadm_1(struct svc_req *, SVCXPRT *);
      register	SVCXPRT *transp;
      extern	char *optarg;
      extern	int optind, opterr;

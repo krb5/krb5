@@ -1,13 +1,7 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Id$
- *
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 #include <stdio.h>
 #include <gssrpc/rpc.h>
@@ -22,6 +16,7 @@ static char *rcsid = "$Header$";
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#include "misc.h"
 
 /*
  * Function: kadm_1
