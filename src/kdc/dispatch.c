@@ -55,7 +55,7 @@ krb5_data **response;
 	}
     }
 #ifdef KRB4
-    else if (pkt->data[0] == 4)		/* XXX old version */
+    else if (pkt->data[0] == 4)		/* old version */
 	retval = process_v4(pkt, from, response);
 #endif
     else
