@@ -2474,7 +2474,7 @@ proc krb_exit { } {
 # helpful sometimes for debugging the test suite
 proc spawn_xterm { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }
