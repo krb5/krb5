@@ -1,3 +1,10 @@
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5.hin -- Added prototypes for new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
 2000-04-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin: Declare krb5_free_ktypes.

@@ -2388,6 +2388,24 @@ krb5_decode_ticket
 KRB5_PROTOTYPE((const krb5_data *code, 
 		krb5_ticket **rep));
 
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_appdefault_string
+KRB5_PROTOTYPE((krb5_context context,
+		const char *appname,  
+	        const krb5_data *realm,
+ 		const char *option,
+		const char *default_value,
+		char ** ret_value));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_appdefault_boolean
+KRB5_PROTOTYPE((krb5_context context,
+		const char *appname,  
+	        const krb5_data *realm,
+ 		const char *option,
+		int default_value,
+		int *ret_value));
+
 /*
  * The realm iterator functions
  */
