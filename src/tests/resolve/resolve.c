@@ -111,7 +111,9 @@ main(argc, argv)
 	sethostent(0);
 
 	if((host = gethostbyname (myname)) == NULL) {
-		fprintf(stderr, "Could not look up hostname - fatal\n");
+		fprintf(stderr,
+			"Could not look up address for hostname '%s' - fatal\n",
+			myname);
 		exit(2);
 	}
 	
