@@ -44,7 +44,7 @@ libkrb5.$(STEXT): $(LIBDONE)
 	$(RANLIB) libkrb5.$(STEXT)
 	touch libkrb5.stamp
 
-install-mac:: 
+install-unix:: 
 	$(INSTALL_DATA) libkrb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 

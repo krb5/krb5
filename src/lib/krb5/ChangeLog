@@ -1,3 +1,8 @@
+Sun Jun 25 08:24:46 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: Typo: install-mac was really supposed to be
+		install-unix
+
 Fri Jun 23 12:15:02 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: Typo: krb5_cv_staticlibs_enabled, not
