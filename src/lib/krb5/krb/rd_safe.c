@@ -56,6 +56,9 @@ krb5_data *outbuf;
     krb5_data *scratch;
     krb5_timestamp currenttime;
 
+    if (!krb5_is_krb_safe(inbuf))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
+
     if (retval = decode_krb5_safe(inbuf, &message))
 	return retval;
 

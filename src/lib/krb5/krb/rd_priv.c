@@ -49,6 +49,8 @@ OLDDECLARG(krb5_data *, outbuf)
     krb5_timestamp currenttime;
     krb5_ui_2 computed_direction;
 
+    if (!krb5_is_krb_priv(inbuf))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
     /* decode private message */
     if (retval = decode_krb5_priv(inbuf, &privmsg))  {
 	return retval;

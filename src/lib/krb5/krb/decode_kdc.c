@@ -54,6 +54,8 @@ OLDDECLARG(krb5_kdc_rep **, dec_rep)
 
 
     /* XXX maybe caller should specify type expected? */
+    if (!krb5_is_kdc_rep(enc_rep))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
     retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
     switch (retval) {
     case ISODE_50_LOCAL_ERR_BADMSGTYPE:

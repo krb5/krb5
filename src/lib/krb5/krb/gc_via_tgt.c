@@ -81,7 +81,11 @@ OLDDECLARG(krb5_creds *, cred)
 	break;
     case KRB5_ERROR:
     default:
-	if (decode_krb5_error(&tgsrep.response, &err_reply)) {
+	if (!krb5_is_krb_error(&tgsrep.response)) {
+	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
+	} else
+	    retval = decode_krb5_error(&tgsrep.response, &err_reply);
+	if (retval) {
 	    cleanup();
 	    return retval;		/* neither proper reply nor error! */
 	}
