@@ -44,7 +44,7 @@ static const struct krb5_enc_provider *const enc = &krb5_enc_des;
 
 static int inited = 0;
 static size_t blocksize, keybytes, keylength;
-static int random_count;
+static unsigned int random_count;
 /* keybytes | state-block | encblock | key | new-keybytes | new-state-block */
 static unsigned char *random_state; 
 #define STATE (random_state)
