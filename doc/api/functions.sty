@@ -40,8 +40,11 @@
 \newenvironment{funcdecl}[3]{\underrealtrue\index{#1}\underrealfalse%
 \medbreak
 \gdef\funcn@me{#1}
-\argc@ount=0\noindent\marginpar[{{\sloppy \fix@parname{\funcn@me}}}]%
-{{\sloppy \hfill\fix@parname{\funcn@me}}}%
+\argc@ount=0\noindent%
+%the \mbox{} is to prevent the line/paragraph breaking from eating the
+%fill space.
+\marginpar[{{\sloppy \hfil\fix@parname{\funcn@me}\hfill\mbox{}}}]%
+{{\sloppy \hfill\fix@parname{\funcn@me}\hfil\mbox{}}}%
 \vbox\bgroup\begin{minipage}[t]{\textwidth}\begin{tabbing}
 #2 \\
 {\bf #1}(\= \+ #3%
