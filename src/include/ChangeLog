@@ -1,3 +1,8 @@
+2001-08-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (AI_NUMERICHOST): Define as zero if not already
+	defined.
+
 2001-07-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_check_transited_list): Pointer args now point to

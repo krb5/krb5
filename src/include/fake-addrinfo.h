@@ -379,3 +379,7 @@ static int translate_h_errno (int h)
 #ifndef AI_DEFAULT
 # define AI_DEFAULT 0 /* (AI_V4MAPPED | AI_ADDRCONFIG) */
 #endif
+/* AIX 4.3.3 is based on RFC 2133; no AI_NUMERICHOST.  */
+#ifndef AI_NUMERICHOST
+# define AI_NUMERICHOST 0
+#endif
