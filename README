@@ -90,9 +90,21 @@ Major Changes:
   them out fast enough.  We may replace the implementation later on
   with a shim on top of some cleaner mechanism.
 
+* For Heimdal (and possibly Microsoft) compatibility, we now accept
+  encrypted delegated credentials in gssapi.  Historically, the MIT
+  implementation has sent delegated gssapi credentials "in the clear",
+  but still encrypted in the AP-REQ.
+
+* IP address checks have been removed from rd_cred; this improves
+  compatibility with Heimdal.
+
 Minor changes:
 
 * A null pointer dereference in the krb5 library has been fixed.
+
+Known bugs:
+
+* Most of the other known bugs from 1.2.3 and 1.2.4 are unchanged.
 
 Notes, Major Changes, and Known Bugs for 1.2.4
 ----------------------------------------------
@@ -260,8 +272,9 @@ Known Bugs:
 
 * The gss-sample test application suite is known to not communicate
   with the gss-sample suite in 1.1.x and earlier releases.  This is
-  the result of changes to increase functionality; fixes to allow for
-  backwards compatibility will occur in a later release.
+  the result of changes to gss-sample to increase its functionality;
+  fixes to allow for backwards compatibility will occur in a later
+  release.
 
 * BSD/OS 4.x may have some problems compiling.  These are being
   investigated.
