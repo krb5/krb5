@@ -18,6 +18,8 @@ CLIENTOBJS= kprop.o
 SERVERSRCS= kpropd.c 
 SERVEROBJS= kpropd.o 
 
+SRCS= $(CLIENTSRCS) $(SERVERSRCS)
+
 all::	kprop kpropd
 
 NormalProgramTarget(kprop,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
@@ -30,3 +32,5 @@ SaberProgramTarget(kpropd, $(SERVERSRCS), $(SERVEROBJS),
 saber-setup:
 	#setopt load_flags $(CFLAGS)
 	#load $(LOCAL_LIBRARIES)
+
+DependTarget()
