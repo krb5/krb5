@@ -310,5 +310,7 @@ void krb5_free_priv_enc_part
 	PROTOTYPE((krb5_priv_enc_part * ));
 void krb5_free_kdc_req
 	PROTOTYPE((krb5_kdc_req * ));
+void krb5_free_keyblock
+	PROTOTYPE((krb5_keyblock *));
 
 #endif /* KRB5_FUNC_PROTO__ */
