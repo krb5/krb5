@@ -1,3 +1,13 @@
+Wed Nov  8 02:53:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.hin: Removed internal functions krb5_encrypt_tkt_part,
+		krb5_verify_padta, and krb5_obtain_padata from the public
+		header file.
+
+	* k5-int.h: Removed old preauthentication declarations and added
+		new ones.  Changed function prototype of
+		krb5_encrypt_tkt_part.
+
 Tue Nov 7 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* k5-int.h: Place stat declation inside #ifndef __MWERKS__ so

@@ -809,14 +809,25 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 #ifndef KRB5_PREAUTH__
 #define KRB5_PREAUTH__
 
-#define MAX_PREAUTH_SIZE 20	/* Maximum size of PreAuthenticator.data */
+typedef struct _krb5_pa_enc_ts {
+    krb5_timestamp	patimestamp;
+    krb5_int32		pausec;
+} krb5_pa_enc_ts;
 
-/*
- * Note: these typedefs are subject to change.... [tytso:19920903.1609EDT]
- */
 typedef krb5_error_code (krb5_preauth_obtain_proc)
-    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
-	       krb5_pa_data *pa_data));
+    KRB5_PROTOTYPE((krb5_context,
+		    krb5_pa_data *,
+		    krb5_etype_info,
+		    krb5_keyblock *, 
+		    krb5_error_code ( * )(krb5_context,
+					  krb5_const krb5_enctype,
+					  krb5_data *,
+					  krb5_const_pointer,
+					  krb5_keyblock **),
+		    krb5_const_pointer,
+		    krb5_creds *,
+		    krb5_kdc_req *,
+		    krb5_pa_data **));
 
 typedef krb5_error_code (krb5_preauth_verify_proc)
     KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
@@ -830,37 +841,43 @@ typedef struct _krb5_preauth_ops {
     krb5_preauth_verify_proc	*verify;
 } krb5_preauth_ops;
 
+krb5_error_code krb5_obtain_padata
+    	KRB5_PROTOTYPE((krb5_context,
+		krb5_pa_data **,
+		krb5_etype_info,
+		krb5_error_code ( * )(krb5_context,
+	   			      krb5_const krb5_enctype,
+                                      krb5_data *,
+                                      krb5_const_pointer,
+                                      krb5_keyblock **),
+		krb5_const_pointer, 
+		krb5_creds *,
+		krb5_kdc_req *));
+
+krb5_error_code krb5_process_padata
+	KRB5_PROTOTYPE((krb5_context,
+		krb5_kdc_req *,
+		krb5_kdc_rep *,
+		krb5_error_code ( * )(krb5_context,
+	   			      krb5_const krb5_enctype,
+                                      krb5_data *,
+                                      krb5_const_pointer,
+                                      krb5_keyblock **),
+		krb5_const_pointer, 
+		krb5_creds *, 
+		krb5_int32 *));		
+
+krb5_error_code krb5_verify_padata
+    	KRB5_PROTOTYPE((krb5_context,
+		   krb5_pa_data * data, krb5_principal client,
+	       krb5_address **src_addr, krb5_keyblock *decrypt_key,
+	       int *req_id, int *flags));
+
 /*
  * Preauthentication property flags
  */
 #define KRB5_PREAUTH_FLAGS_ENCRYPT	0x00000001
 #define KRB5_PREAUTH_FLAGS_HARDWARE	0x00000002
-
-#if 0
-krb5_error_code get_random_padata
-    KRB5_PROTOTYPE((krb5_principal client, krb5_address **src_addr,
-	       krb5_pa_data *data));
-
-krb5_error_code verify_random_padata
-    KRB5_PROTOTYPE((krb5_principal client, krb5_address **src_addr,
-	       krb5_data *data));
-#endif
-
-krb5_error_code get_unixtime_padata
-    KRB5_PROTOTYPE((krb5_context, krb5_principal client, 
-	       krb5_address **src_addr, krb5_pa_data *data));
-
-krb5_error_code verify_unixtime_padata
-    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
-	       krb5_data *data));
-
-krb5_error_code get_securid_padata
-    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
-	       krb5_pa_data *data));
-
-krb5_error_code verify_securid_padata
-    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
-	       krb5_data *data));
 
 #endif /* KRB5_PREAUTH__ */
 /*
@@ -1060,6 +1077,12 @@ krb5_error_code encode_krb5_alt_method
 krb5_error_code encode_krb5_etype_info
 	KRB5_PROTOTYPE((const krb5_etype_info_entry **, krb5_data **code));
 
+krb5_error_code encode_krb5_enc_data
+    	KRB5_PROTOTYPE((const krb5_enc_data *, krb5_data **));
+
+krb5_error_code encode_krb5_pa_enc_ts
+    	KRB5_PROTOTYPE((const krb5_pa_enc_ts *, krb5_data **));
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1155,6 +1178,12 @@ krb5_error_code decode_krb5_alt_method
 krb5_error_code decode_krb5_etype_info
 	KRB5_PROTOTYPE((const krb5_data *output, krb5_etype_info_entry ***rep));
 
+krb5_error_code decode_krb5_enc_data
+	KRB5_PROTOTYPE((const krb5_data *output, krb5_enc_data **rep));
+
+krb5_error_code decode_krb5_pa_enc_ts
+	KRB5_PROTOTYPE((const krb5_data *output, krb5_pa_enc_ts **rep));
+
 /*************************************************************************
  * End of prototypes for krb5_decode.c
  *************************************************************************/
@@ -1163,6 +1192,16 @@ krb5_error_code decode_krb5_etype_info
 /*
  * End "asn1.h"
  */
+
+
+/*
+ * Internal krb5 library routines
+ */
+krb5_error_code krb5_encrypt_tkt_part
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_const krb5_keyblock *,
+		   krb5_ticket * ));
+
 
 /*
  * [De]Serialization Handle and operations.

@@ -432,7 +432,6 @@ extern int krb5_max_cryptosystem;		/* max entry in array */
 
 /* This array is indexed by key type, and has (should have) pointers to
    the same entries as krb5_csarray */
-/* XXX what if a given enctype works for several etypes? */
 extern krb5_cs_table_entry * NEAR krb5_enctype_array[];
 extern krb5_enctype krb5_max_enctype;		/* max entry in array */
 
@@ -1250,11 +1249,6 @@ krb5_error_code krb5_kdc_rep_decrypt_proc
 		   krb5_const krb5_keyblock *,
 		   krb5_const_pointer,
 		   krb5_kdc_rep * ));
-krb5_error_code krb5_encrypt_tkt_part
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_encrypt_block *,
-		   krb5_const krb5_keyblock *,
-		   krb5_ticket * ));
 krb5_error_code krb5_decrypt_tkt_part
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const krb5_keyblock *,
@@ -1433,17 +1427,6 @@ krb5_error_code
 krb5_524_conv_principal
 	KRB5_PROTOTYPE((krb5_context context, krb5_const krb5_principal princ, 
 		   char *name, char *inst, char *realm));
-
-krb5_error_code krb5_obtain_padata
-    	KRB5_PROTOTYPE((krb5_context,
-		   int type, krb5_principal client, krb5_address **src_addr,
-	           krb5_keyblock *encrypt_key, krb5_pa_data **data));
-
-krb5_error_code krb5_verify_padata
-    	KRB5_PROTOTYPE((krb5_context,
-		   krb5_pa_data * data, krb5_principal client,
-	       krb5_address **src_addr, krb5_keyblock *decrypt_key,
-	       int *req_id, int *flags));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
