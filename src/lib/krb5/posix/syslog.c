@@ -47,6 +47,7 @@ static char sccsid[] = "@(#)syslog.c	5.20 (Berkeley) 1/19/89";
 #include <fcntl.h>
 #include <sys/signal.h>
 #include <sys/syslog.h>
+#include <sys/wait.h>
 #include <netdb.h>
 #include <strings.h>
 #include <stdio.h>
@@ -167,7 +168,7 @@ vsyslog(pri, fmt, ap)
 		_exit(0);
 	}
 	if (!(LogStat & LOG_NOWAIT))
-		while ((cnt = wait((int *)0)) > 0 && cnt != pid);
+		while ((cnt = wait((union wait *)0)) > 0 && cnt != pid);
 }
 
 static struct sockaddr SyslogAddr;	/* AF_UNIX address of local logger */
