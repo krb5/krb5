@@ -27,7 +27,7 @@ ETSRCS= gssapi_generic_err.c
 ETOBJS= gssapi_generic_err.o
 ETHDRS= gssapi_generic_err.h
 
-#ifdef HasHashLibrary
+#if HasHashLibrary
 UTIL_VALIDATE_SRC= util_validate.c
 UTIL_VALIDATE_OBJ= util_validate.o
 #else
