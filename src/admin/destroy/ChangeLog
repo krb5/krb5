@@ -1,3 +1,8 @@
+Thu Oct  6 23:43:38 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_destroy.c (main): Add option to force destruction of a
+		  database.
+
 Mon Oct  3 19:10:23 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

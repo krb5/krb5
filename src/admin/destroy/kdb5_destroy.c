@@ -60,16 +60,20 @@ char *argv[];
     char buf[5];
     char dbfilename[MAXPATHLEN];
     krb5_error_code retval;
+    int force = 0;
 
     krb5_init_ets();
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "d:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:f")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
+	    break;
+	case 'f':
+	    force++;
 	    break;
 	case '?':
 	default:
@@ -77,45 +81,47 @@ char *argv[];
 	    /*NOTREACHED*/
 	}
     }
-    printf("Deleting KDC database stored in '%s', are you sure?\n", dbname);
-    printf("(type 'yes' to confirm)? ");
-    if ((fgets(buf, sizeof(buf), stdin) != NULL) && /* typed something */
-	!strcmp(buf,yes)) {		/* it matches yes */
-	printf("OK, deleting database '%s'...\n", dbname);
-	(void) strcpy(dbfilename, dbname);
-	(void) strcat(dbfilename, ".dir");
-	if (unlink(dbfilename) == -1) {
-	    retval = errno;
-	    com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
-	    if (retval == ENOENT)
-		    fprintf(stderr,
-			    "Database appears to not exist--inspect files manually!\n");
-		else
-		    fprintf(stderr,
-			    "Database may be partially deleted--inspect files manually!\n");
-
+    if (!force) {
+	printf("Deleting KDC database stored in '%s', are you sure?\n",
+	       dbname);
+	printf("(type 'yes' to confirm)? ");
+	if (fgets(buf, sizeof(buf), stdin) == NULL)
 	    exit(1);
-	}
-	(void) strcpy(dbfilename, dbname);
-	(void) strcat(dbfilename, ".pag");
-	if (unlink(dbfilename) == -1) {
-	    retval = errno;
-	    com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
+	if (strcmp(buf, yes))
+	    exit(1);
+	printf("OK, deleting database '%s'...\n", dbname);
+    }
+    (void) strcpy(dbfilename, dbname);
+    (void) strcat(dbfilename, ".dir");
+    if (unlink(dbfilename) == -1) {
+	retval = errno;
+	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
+	if (retval == ENOENT)
+	    fprintf(stderr,
+		    "Database appears to not exist--inspect files manually!\n");
+	else
 	    fprintf(stderr,
 		    "Database may be partially deleted--inspect files manually!\n");
-	    exit(1);
-	}
-	(void) strcpy(dbfilename, dbname);
-	(void) strcat(dbfilename, ".ok");
-	if (unlink(dbfilename) == -1) {
-	    retval = errno;
-	    com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
-	    fprintf(stderr,
-		    "Database partially deleted--inspect files manually!\n");
-	    exit(1);
-	}
-	printf("** Database '%s' destroyed.\n", dbname);
-	exit(0);
+	exit(1);
     }
-    exit(1);
+    (void) strcpy(dbfilename, dbname);
+    (void) strcat(dbfilename, ".pag");
+    if (unlink(dbfilename) == -1) {
+	retval = errno;
+	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
+	fprintf(stderr,
+		"Database may be partially deleted--inspect files manually!\n");
+	exit(1);
+    }
+    (void) strcpy(dbfilename, dbname);
+    (void) strcat(dbfilename, ".ok");
+    if (unlink(dbfilename) == -1) {
+	retval = errno;
+	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
+	fprintf(stderr,
+		"Database partially deleted--inspect files manually!\n");
+	exit(1);
+    }
+    printf("** Database '%s' destroyed.\n", dbname);
+    exit(0);
 }
