@@ -1,3 +1,7 @@
+Wed Jan 25 20:24:35 1995  John Gilmore  (gnu at toad.com)
+
+	* rnd_confoun.c: Replace <.../...> includes with "..."s.
+
 Mon Oct 24 14:58:14 1994    (tytso@rsx-11)
 
 	* configure.in:
