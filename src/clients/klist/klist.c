@@ -39,6 +39,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+/* Need definition of INET6 before network headers, for IRIX.  */
+#include "autoconf.h"
 #if defined(HAVE_ARPA_INET_H)
 #include <arpa/inet.h>
 #endif
