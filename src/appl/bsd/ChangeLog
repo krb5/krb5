@@ -1,5 +1,8 @@
 Fri Dec 30 18:35:50 1994  Richard Basch  (probe@tardis)
 
+	* krlogin.c
+	  	Don't need: #ifdef _AIX, #undef _BSD, #endif
+
 	* Makefile.in
 	  	Fixed man page installation when build tree != source tree
 

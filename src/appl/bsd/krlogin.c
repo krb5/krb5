@@ -32,10 +32,6 @@ char copyright[] =
       * rlogin - remote login
       */
      
-#ifdef _AIX
-#undef _BSD
-#endif
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
