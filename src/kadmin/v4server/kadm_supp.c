@@ -16,6 +16,8 @@
 #include <unistd.h>
 #endif
 #include <sys/param.h>
+#include <string.h>
+
 /*
   kadm_supp.c
   this holds the support routines for the kerberos administration server

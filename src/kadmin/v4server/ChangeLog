@@ -1,3 +1,7 @@
+2001-06-11  Ezra Peisach  <epeisach@rna.mit.edu>
+
+	* kadm_supp.c: Include string.h for strncpy() prototype.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm_ser_wrap.c: Argument to quad_cksum is C_Block * - not C_Block.
