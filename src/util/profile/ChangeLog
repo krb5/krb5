@@ -1,7 +1,7 @@
 Thu Apr 27 15:36:27 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* test_parse.c (main): can't make function declarations local to
-	functions under SunOS cc. (dump_profile)
+	functions under SunOS cc. (dump_profile) Also needs to be protected.
 
 Thu Apr 27 10:43:24 1995 Keith Vetter (keithv@fusion.com)
 

@@ -20,7 +20,7 @@ char *error_message (long err) {
 }
 #endif
 
-void dump_profile(struct profile_node *root, int level);
+void dump_profile PROTOTYPE((struct profile_node *root, int level));
 
 int main(argc, argv)
 	int	argc;
