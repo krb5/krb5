@@ -562,7 +562,7 @@ void kadmin_renprinc(argc, argv)
 	return;
     }
     printf("Principal \"%s\" renamed to \"%s\".\nMake sure that you have removed \"%s\" from all ACLs before reusing.\n",
-	   oldcanon, newcanon, newcanon);
+	   oldcanon, newcanon, oldcanon);
     return;
 }
 
