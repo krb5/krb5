@@ -1,3 +1,7 @@
+Sun Dec 10 11:02:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* adm_proto.h: Add prototype for krb5_input_flag_to_string.
+
 Fri Dec  1 17:16:05 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* adm.h: Added temporary definition of KRB5_ADM_M_EXTRADATA so
