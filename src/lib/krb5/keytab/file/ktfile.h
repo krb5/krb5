@@ -61,9 +61,6 @@ typedef struct _krb5_ktfile_data {
 extern struct _krb5_kt_ops krb5_ktf_ops;
 extern struct _krb5_kt_ops krb5_ktf_writable_ops;
 
-/* widen prototypes, if needed */
-#include <krb5/widen.h>
-
 krb5_error_code krb5_ktfile_resolve 
 	PROTOTYPE((krb5_context,
 		   const char *,
@@ -162,7 +159,5 @@ krb5_error_code krb5_ktfileint_find_slot
                    krb5_int32 *,
                    krb5_int32 *));
 
-/* and back to normal... */
-#include <krb5/narrow.h>
 
 #endif /* KRB5_KTFILE__ */

@@ -61,12 +61,13 @@
  * For each component, sizeof(krb5_int16) bytes for the number of bytes
  * in the component, followed by the component.
  * sizeof(krb5_int32) for the principal type (for KEYTAB V2 and higher)
- * sizeof(krb5_timestamp) bytes for the timestamp
- * sizeof(krb5_kvno) bytes for the key version number
- * sizeof(krb5_keytype) bytes for the keytype
+ * sizeof(krb5_int32) bytes for the timestamp
+ * sizeof(krb5_octet) bytes for the key version number
+ * sizeof(krb5_int16) bytes for the keytype
  * sizeof(krb5_int32) bytes for the key length, followed by the key
  *
  */
+
 
 
 #include <krb5/krb5.h>
@@ -254,7 +255,9 @@ krb5_keytab id;
 krb5_keytab_entry *ret_entry;
 krb5_int32 *delete_point;
 {
+    krb5_octet vno;
     krb5_int16 count;
+    krb5_int16 keytype;
     krb5_int16 princ_size;
     register int i;
     krb5_int32 size;
@@ -391,17 +394,19 @@ krb5_int32 *delete_point;
 	ret_entry->timestamp = ntohl(ret_entry->timestamp);
     
     /* read in the version number */
-    if (!xfread(&ret_entry->vno, sizeof(ret_entry->vno), 1, KTFILEP(id))) {
+    if (!xfread(&vno, sizeof(vno), 1, KTFILEP(id))) {
 	error = KRB5_KT_END;
 	goto fail;
     }
+    ret_entry->vno = (krb5_kvno)vno;
     
     /* key type */
-    if (!xfread(&ret_entry->key.keytype, sizeof(ret_entry->key.keytype), 1,
-		KTFILEP(id))) {
+    if (!xfread(&keytype, sizeof(keytype), 1, KTFILEP(id))) {
 	error = KRB5_KT_END;
 	goto fail;
     }
+    ret_entry->key.keytype = (krb5_keytype)keytype;
+
     if (KTVERSION(id) != KRB5_KT_VNO_1)
 	ret_entry->key.keytype = ntohs(ret_entry->key.keytype);
     
@@ -468,6 +473,7 @@ krb5_ktfileint_write_entry(context, id, entry)
 krb5_keytab id;
 krb5_keytab_entry *entry;
 {
+    krb5_octet vno;
     krb5_data *princ;
     krb5_int16 count, size, keytype;
     krb5_error_code retval = 0;
@@ -555,7 +561,8 @@ krb5_keytab_entry *entry;
     }
     
     /* key version number */
-    if (!xfwrite(&entry->vno, sizeof(entry->vno), 1, KTFILEP(id))) {
+    vno = (krb5_octet)entry->vno;
+    if (!xfwrite(&vno, sizeof(vno), 1, KTFILEP(id))) {
 	goto abend;
     }
     /* key type */
@@ -628,8 +635,8 @@ krb5_int32 *size_needed;
 
     total_size += sizeof(entry->principal->type);
     total_size += sizeof(entry->timestamp);
-    total_size += sizeof(entry->vno);
-    total_size += sizeof(entry->key.keytype);
+    total_size += sizeof(krb5_octet);
+    total_size += sizeof(krb5_int16);
     total_size += sizeof(size) + entry->key.length;
 
     *size_needed = total_size;

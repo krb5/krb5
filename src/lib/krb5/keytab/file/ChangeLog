@@ -1,3 +1,9 @@
+Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
+
+        * Removed all narrow types and references to wide.h and narrow.h
+	* ktf_util.c : Use a constant size for file data not subfield
+		size from krb5_keytab_entry
+
 Fri Nov 18 15:34:35 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktf_util.c (krb5_ktfileint_internal_read_entry): Add magic
