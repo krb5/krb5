@@ -97,7 +97,7 @@ hostname=`hostname`
 QUALNAME=`$TOP/testing/scripts/qualname.pl $hostname`; export QUALNAME
 
 eval $SRVTCL <<'EOF' $REDIRECT
-source $env(TOP)/testing/tcl/util.t
+source $env(STOP)/testing/tcl/util.t
 set r $env(REALM)
 set q $env(QUALNAME)
 puts stdout [ovsec_kadm_init $env(SRVTCL) mrroot null $r \
