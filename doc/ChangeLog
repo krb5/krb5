@@ -1,3 +1,10 @@
+Fri Dec 13 15:10:44 1996  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo (The User--Kerberos Interaction): The environment
+ 	variable is KRB5CCNAME, not KRB5_CCNAME.
+	(Getting DNS Information Correct): It's Domain Name System, not
+ 	Distributed Name Service.
+
 Thu Dec 12 18:36:20 1996  Tom Yu  <tlyu@mit.edu>
 
 	* user-guide.texinfo: Bump edition to 1.0.  Nuke gratuitous

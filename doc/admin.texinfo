@@ -284,8 +284,8 @@ ticket-granting ticket and the key which allows you to use it, encrypted
 by your password.  If @samp{kinit} can decrypt the Kerberos reply using
 the password you provide, it stores this ticket in a credentials cache
 on your local machine for later use.  The name of the credentials cache
-can be specified in the @samp{KRB5_CCNAME} environment variable.  If
-this variable is not set, the name of the file will be
+can be specified in the @samp{KRB5CCNAME} environment variable.  If this
+variable is not set, the name of the file will be
 @file{/tmp/krb5cc_<uid>}, where <uid> is your UNIX user-id, represented
 in decimal format.
 @end enumerate
@@ -2083,7 +2083,7 @@ to set up a cron job that adjusts the time on a regular basis.
 Several aspects of Kerberos rely on name service.  In order for Kerberos
 to provide its high level of security, it is less forgiving of name
 service problems than some other parts of your network.  It is important
-that your Distributed Name Service (DNS) entries and your hosts have the
+that your Domain Name System (DNS) entries and your hosts have the
 correct information.
 
 Each host's canonical name must be the fully-qualified host name
