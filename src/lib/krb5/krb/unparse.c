@@ -119,6 +119,8 @@ int	*size;
 		switch (*cp) {
 		case COMPONENT_SEP:
 		case REALM_SEP:
+		case '\t':
+		case '\\':
 			*q++ = '\\';
 			*q++ = *cp;
 			break;
