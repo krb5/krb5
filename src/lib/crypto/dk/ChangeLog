@@ -1,3 +1,11 @@
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* dk_encrypt.c (krb5_dk_encrypt, krb5_marc_dk_encrypt): Chain
+	ivecs.
+	
+	* dk_decrypt.c (krb5_dk_decrypt, krb5_marc_dk_decrypt): Chain
+	ivecs.
+
 2000-04-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* derive.c (krb5_derive_key): If memory allocation fails, release
