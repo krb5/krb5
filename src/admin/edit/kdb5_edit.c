@@ -47,6 +47,9 @@ struct mblock {
     0
 };
 
+char	*Err_no_master_msg = "Master key not entered!\n";
+char	*current_dbname = NULL;
+
 /* krb5_kvno may be narrow */
 #include <krb5/widen.h>
 void add_key PROTOTYPE((char * const *, krb5_const_principal,
@@ -75,6 +78,7 @@ krb5_principal master_princ;
 krb5_db_entry master_entry;
 krb5_encrypt_block master_encblock;
 krb5_pointer master_random;
+int	valid_master_key = 0;
 
 extern ss_request_table kdb5_edit_cmds;
 
@@ -84,13 +88,15 @@ static char *progname;
 static char *cur_realm = 0;
 static char *mkey_name = 0;
 static krb5_boolean manual_mkey = FALSE;
-static krb5_boolean dbactive = FALSE;
+krb5_boolean dbactive = FALSE;
 
 void
 quit()
 {
     krb5_error_code retval = krb5_db_fini();
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    if (valid_master_key)
+	    memset((char *)master_keyblock.contents, 0,
+		   master_keyblock.length);
     if (retval) {
 	com_err(progname, retval, "while closing database");
 	exit(1);
@@ -206,8 +212,10 @@ char *argv[];
 		    ss_perror(sci_idx, code, request);
     } else
 	    ss_listen(sci_idx, &retval);
-    (void) krb5_finish_key(&master_encblock);
-    (void) krb5_finish_random_key(&master_encblock, &master_random);
+    if (valid_master_key) {
+	    (void) krb5_finish_key(&master_encblock);
+	    (void) krb5_finish_random_key(&master_encblock, &master_random);
+    }
     retval = krb5_db_fini();
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
@@ -253,6 +261,10 @@ char *argv[];
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
@@ -280,6 +292,10 @@ char *argv[];
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
@@ -301,10 +317,15 @@ char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
+
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
@@ -334,7 +355,6 @@ OLDDECLARG(krb5_kvno, vno)
     krb5_db_entry newentry;
     int one = 1;
 
-    newentry.key = *key;
     retval = krb5_kdb_encrypt_key(&master_encblock,
 				  key,
 				  &newentry.key);
@@ -388,8 +408,11 @@ krb5_pointer infop;
 	    com_err(argv[0], retval, "while closing previous database");
 	    return;
 	}
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &master_random);
+	if (valid_master_key) {
+		(void) krb5_finish_key(&master_encblock);
+		(void) krb5_finish_random_key(&master_encblock,
+					      &master_random);
+	}
 	krb5_free_principal(master_princ);
 	dbactive = FALSE;
     }
@@ -414,32 +437,28 @@ char *dbname;
     int nentries;
     krb5_boolean more;
 
-    if (retval = krb5_db_set_name(dbname)) {
+    if (current_dbname)
+	    free(current_dbname);
+    if (!(current_dbname = malloc(strlen(dbname)+1))) {
+	    com_err(pname, 0, "Out of memory while trying to store dbname");
+	    exit(1);
+    }
+    strcpy(current_dbname, dbname);
+    if (retval = krb5_db_set_name(current_dbname)) {
 	com_err(pname, retval, "while setting active database to '%s'",
 		dbname);
 	return(1);
-    }
-    /* assemble & parse the master key name */
-
-    if (retval = krb5_db_setup_mkey_name(mkey_name, cur_realm, 0,
-					 &master_princ)) {
-	com_err(pname, retval, "while setting up master key name");
-	return(1);
-    }
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
-				    manual_mkey,
-				    FALSE, &master_keyblock)) {
-	com_err(pname, retval, "while reading master key");
-	return(1);
-    }
+    } 
     if (retval = krb5_db_init()) {
 	com_err(pname, retval, "while initializing database");
 	return(1);
     }
-    if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
-					   &master_encblock)) {
-	com_err(pname, retval, "while verifying master key");
-	(void) krb5_db_fini();
+	    
+   /* assemble & parse the master key name */
+
+    if (retval = krb5_db_setup_mkey_name(mkey_name, cur_realm, 0,
+					 &master_princ)) {
+	com_err(pname, retval, "while setting up master key name");
 	return(1);
     }
     nentries = 1;
@@ -458,7 +477,29 @@ char *dbname;
 	(void) krb5_db_fini();
 	return(1);
     }
+    mblock.max_life = master_entry.max_life;
+    mblock.max_rlife = master_entry.max_renewable_life;
+    mblock.expiration = master_entry.expiration;
+    /* don't set flags, master has some extra restrictions */
+    mblock.mkvno = master_entry.kvno;
 
+    krb5_db_free_principal(&master_entry, nentries);
+    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
+				    manual_mkey,
+				    FALSE, &master_keyblock)) {
+	com_err(pname, retval, "while reading master key");
+	com_err(pname, 0, "Warning: proceeding without master key");
+	valid_master_key = 0;
+	dbactive = TRUE;
+	return(0);
+    } else
+	    valid_master_key = 1;
+    if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
+					   &master_encblock)) {
+	com_err(pname, retval, "while verifying master key");
+	(void) krb5_db_fini();
+	return(1);
+    }
     if (retval = krb5_process_key(&master_encblock,
 				  &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
@@ -473,16 +514,47 @@ char *dbname;
 	(void) krb5_db_fini();
 	return(1);
     }
-    mblock.max_life = master_entry.max_life;
-    mblock.max_rlife = master_entry.max_renewable_life;
-    mblock.expiration = master_entry.expiration;
-    /* don't set flags, master has some extra restrictions */
-    mblock.mkvno = master_entry.kvno;
-
-    krb5_db_free_principal(&master_entry, nentries);
     dbactive = TRUE;
     return 0;
 }
+
+void enter_master_key(argc, argv)
+	int	argc;
+	char	**argv;
+{
+	char	*pname = argv[0];
+	krb5_error_code retval;
+	
+	if (!dbactive) {
+		com_err(pname, 0, "Kerberos database not selected");
+		return;
+	}
+	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
+					TRUE, FALSE, &master_keyblock)) {
+		com_err(pname, retval, "while reading master key");
+		return;
+	}
+	if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
+					       &master_encblock)) {
+		com_err(pname, retval, "while verifying master key");
+		return;
+	}
+	if (retval = krb5_process_key(&master_encblock,
+				      &master_keyblock)) {
+		com_err(pname, retval, "while processing master key");
+		return;
+	}
+	if (retval = krb5_init_random_key(&master_encblock,
+					  &master_keyblock,
+					  &master_random)) {
+		com_err(pname, retval, "while initializing random key generator");
+		(void) krb5_finish_key(&master_encblock);
+		return;
+	}
+	valid_master_key = 1;
+	return;
+}
+
 
 extern krb5_kt_ops krb5_ktf_writable_ops;
 
@@ -514,6 +586,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
 	return;
+    }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
     }
 
     memset(ktname, 0, sizeof(ktname));
@@ -617,6 +693,10 @@ char *argv[];
 	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
 	return;
     }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
 
     memset(ktname, 0, sizeof(ktname));
     if (strlen(argv[1])+sizeof("-new-v4-srvtab") >= sizeof(ktname)) {
@@ -681,8 +761,8 @@ char *argv[];
 		free((char *)key.contents);
 		continue;
 	}
-	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.name */
-	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.instance */
+	fwrite(argv[i], strlen(argv[1]) + 1, 1, fout); /* p.name */
+	fwrite(argv[1], strlen(argv[i]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */
 	fwrite((char *)&dbentry.kvno, sizeof(dbentry.kvno), 1, fout);
 	fwrite((char *)key.contents, 8, 1, fout);
@@ -723,6 +803,10 @@ list_db(argc, argv)
 int argc;
 char *argv[];
 {
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
     (void) krb5_db_iterate(list_iterator, argv[0]);
 }
 
@@ -740,6 +824,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
@@ -787,6 +875,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
@@ -837,6 +929,10 @@ char *argv[];
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
@@ -864,6 +960,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
@@ -894,6 +994,7 @@ OLDDECLARG(krb5_kvno, vno)
     int pwsize = sizeof(password);
     krb5_keyblock tempkey;
     krb5_data pwd;
+    krb5_data salt;
 
     if (retval = krb5_read_password(krb5_default_pwd_prompt1,
 				    krb5_default_pwd_prompt2,
@@ -904,10 +1005,15 @@ OLDDECLARG(krb5_kvno, vno)
     pwd.data = password;
     pwd.length = pwsize;
 
+    if (retval = krb5_principal2salt(string_princ, &salt)) {
+	com_err(argv[0], retval, "while converting principal to salt for '%s'", argv[1]);
+	return;
+    }
     retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
 				&tempkey,
 				&pwd,
-				string_princ);
+				&salt);
+    xfree(salt.data);
     memset(password, 0, sizeof(password)); /* erase it */
     if (retval) {
 	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
