@@ -128,12 +128,7 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
-##WIN16##LIBOBJS = $(OBJS)
-##WIN32##LIBOBJS = $(OBJS) win-pwd.obj
-
-##WIN32##.rc.obj:
-##WIN32##	$(RC) $(CPPFLAGS) /r $**
-##WIN32##	$(CVTRES) /nologo /out:$@ $*.res
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs

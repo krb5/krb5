@@ -159,11 +159,10 @@ cleanup:
 }
 #endif
 
-#ifdef _WIN32    /* defined(_MSDOS) || defined(_WIN32) */
+#if defined(_MSDOS) || defined(_WIN32)
 #define DEFINED_KRB5_READ_PASSWORD
 
 #include <io.h>
-#include "win-pwd.h"
 
 typedef struct {
     char *pwd_prompt;
@@ -282,18 +281,14 @@ cleanup:
 }
 #endif
 
-static char *pwd_prompt;
-static char *pwd_prompt2;
-static char *pwd_return_pwd;
-static int *pwd_size_return;
-
 static int CALLBACK
 read_pwd_proc(HWND hdlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    pwd_params FAR *dp = (pwd_params FAR *) lParam;
+    pwd_params FAR *dp;
     
     switch(msg) {
     case WM_INITDIALOG:
+	dp = (pwd_params FAR *) lParam;
 	SetWindowLong(hdlg, DWL_USER, lParam);
 	SetDlgItemText(hdlg, ID_READ_PWD_PROMPT, dp->pwd_prompt);
 	SetDlgItemText(hdlg, ID_READ_PWD_PROMPT2, dp->pwd_prompt2);
@@ -302,11 +297,12 @@ read_pwd_proc(HWND hdlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	return TRUE;
 
     case WM_COMMAND:
+	dp = (pwd_params FAR *) GetWindowLong(hdlg, DWL_USER);
         switch (wParam) {
 	case IDOK:
 	    *(dp->pwd_size_return) =
 		GetDlgItemText(hdlg, ID_READ_PWD_PWD, 
-			       pwd_return_pwd, *pwd_size_return);
+			       dp->pwd_return_pwd, *(dp->pwd_size_return));
 	    EndDialog(hdlg, TRUE);
 	    break;
 	    
