@@ -1,3 +1,7 @@
+Sat Feb  8 15:01:33 1997  Richard Basch  <basch@lehman.com>
+
+	* krb5.hin: Export krb5_get_credentials_{renew,validate} (win32)
+
 Tue Feb  4 15:57:18 1997  Richard Basch  <basch@lehman.com>
 
 	* k5-int.h: Make sure KRB5_EXPORTVAR is defined
@@ -5,8 +9,7 @@ Tue Feb  4 15:57:18 1997  Richard Basch  <basch@lehman.com>
 
 Sun Feb  2 20:58:40 1997  Richard Basch  <basch@lehman.com>
 
-	* k5-int.h: 
-		All pointers to KRB5_DLLIMP functions must be declared FAR.
+	* k5-int.h: All pointers to KRB5_DLLIMP functions must be declared FAR
 
 Fri Jan 31 23:10:09 1997  Richard Basch  <basch@lehman.com>
 
