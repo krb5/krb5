@@ -24,90 +24,6 @@
 #include <krb5/rsa-md5.h>
 #include <memory.h>
 
-static krb5_error_code 
-rd_req_keyproc(context, keyprocarg, server, kvno, keytype, keyblock)
-     krb5_context context;
-     krb5_pointer keyprocarg;
-     krb5_principal server;
-     krb5_kvno kvno;
-     krb5_keytype keytype;
-     krb5_keyblock **keyblock;
-{
-   krb5_error_code code;
-   krb5_keytab_entry ktentry;
-
-   if (code = krb5_kt_get_entry(context, (krb5_keytab) keyprocarg, server, 
-				kvno, keytype, &ktentry))
-      return(code);
-
-   code = krb5_copy_keyblock(context, &ktentry.key, keyblock);
-
-   (void) krb5_kt_free_entry(context, &ktentry);
-
-   return(code);
-}
-
-static krb5_error_code 
-make_ap_rep(context, authdat, subkey, seq_send, token)
-     krb5_context context;
-     krb5_tkt_authent *authdat;
-     krb5_keyblock *subkey;
-     krb5_int32 *seq_send;
-     gss_buffer_t token;
-{
-   krb5_error_code code;
-   krb5_ap_rep_enc_part ap_rep_data;
-   krb5_data ap_rep;
-   int tlen;
-   unsigned char *t, *ptr;
-
-   /* make the ap_rep */
-
-   ap_rep_data.ctime = authdat->authenticator->ctime;
-   ap_rep_data.cusec = authdat->authenticator->cusec;
-   ap_rep_data.subkey = authdat->authenticator->subkey;
-
-   if (code = krb5_generate_seq_number(context, 
-				       authdat->ticket->enc_part2->session,
-				       &ap_rep_data.seq_number))
-      return(code);
-
-   if (code = krb5_mk_rep(context, &ap_rep_data, subkey, &ap_rep))
-      return(code);
-
-   /* build up the token */
-
-   /* allocate space for the token */
-   tlen = g_token_size(gss_mech_krb5, ap_rep.length);
-
-   if ((t = (unsigned char *) xmalloc(tlen)) == NULL) {
-      xfree(ap_rep.data);
-      return(ENOMEM);
-   }
-
-   /* fill in the buffer */
-
-   ptr = t;
-
-   g_make_token_header(gss_mech_krb5, ap_rep.length,
-		       &ptr, KG_TOK_CTX_AP_REP);
-
-   TWRITE_STR(ptr, ap_rep.data, ap_rep.length);
-
-   /* free the ap_rep */
-
-   xfree(ap_rep.data);
-
-   /* pass everything back */
-
-   *seq_send = ap_rep_data.seq_number;
-
-   token->length = tlen;
-   token->value = (void *) t;
-
-   return(0);
-}
-
 OM_uint32 INTERFACE
 krb5_gss_accept_sec_context(context, minor_status, context_handle, 
 			    verifier_cred_handle, input_token,
@@ -136,14 +52,15 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    int i;
    krb5_error_code code;
    krb5_address addr, *paddr;
-   krb5_tkt_authent *authdat;
+   krb5_authenticator *authdat;
    krb5_checksum md5;
-   krb5_rcache rcache;
    krb5_principal name;
    int gss_flags;
    krb5_gss_ctx_id_rec *ctx;
    krb5_timestamp now;
    gss_buffer_desc token;
+   krb5_auth_context * auth_context = NULL;
+   krb5_ticket * ticket = NULL;
 
    /* set up returns to be freeable */
 
@@ -217,48 +134,24 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 
    /* decode the AP_REQ message */
 
-   /* get the rcache pointer */
-
-   if (code =
-       krb5_get_server_rcache(context, 
-			      krb5_princ_component(context, cred->princ,
-			      ((krb5_princ_size(context, cred->princ)>1)?1:0)),
-			      &rcache)) {
-      *minor_status = code;
-      return(GSS_S_FAILURE);
-   }
-
    /* decode the message */
 
-   if (code = krb5_rd_req(context, &ap_req, cred->princ, paddr, NULL, 
-			  (krb5_rdreq_key_proc) rd_req_keyproc,
-                          (krb5_pointer) cred->keytab, rcache, &authdat)) {
-      (void) krb5_rc_close(context, rcache);
+   if (code = krb5_rd_req(context, &auth_context, &ap_req, cred->princ,
+			  cred->keytab, NULL, &ticket)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   /* close and free the rcache */
-
-   krb5_rc_close(context, rcache);
-
-   /* make sure the necessary parts of the authdat are present */
-
-   if ((authdat->authenticator->subkey == NULL) ||
-       (authdat->ticket->enc_part2 == NULL)) {
-      krb5_free_tkt_authent(context, authdat);
-      *minor_status = KG_NO_SUBKEY;
-      return(GSS_S_FAILURE);
-   }
+   krb5_auth_con_getauthenticator(context, &auth_context, &authdat);
 
    /* verify that the checksum is correct */
 
    /* 24 == checksum length: see token formats document */
    /* This checks for < 24 instead of != 24 in order that this implementation
       can interoperate with an implementation whcih supports negotiation */
-   if ((authdat->authenticator->checksum->checksum_type != CKSUMTYPE_KG_CB) ||
-       (authdat->authenticator->checksum->length < 24)) {
-      krb5_free_tkt_authent(context, authdat);
+   if ((authdat->checksum->checksum_type != CKSUMTYPE_KG_CB) ||
+       (authdat->checksum->length < 24)) {
+      krb5_free_authenticator(context, authdat);
       *minor_status = 0;
       return(GSS_S_BAD_BINDINGS);
    }
@@ -272,20 +165,20 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
        using little-endian or big-endian integer encoding.
    */
 
-   ptr = (unsigned char *) authdat->authenticator->checksum->contents;
+   ptr = (unsigned char *) authdat->checksum->contents;
    bigend = 0;
 
    TREAD_INT(ptr, tmp, bigend);
 
    if (tmp != RSA_MD5_CKSUM_LENGTH) {
-      ptr = (unsigned char *) authdat->authenticator->checksum->contents;
+      ptr = (unsigned char *) authdat->checksum->contents;
       bigend = 1;
 
       TREAD_INT(ptr, tmp, bigend);
 
       if (tmp != RSA_MD5_CKSUM_LENGTH) {
 	 xfree(md5.contents);
-	 krb5_free_tkt_authent(context, authdat);
+	 krb5_free_authenticator(context, authdat);
 	 *minor_status = KG_BAD_LENGTH;
 	 return(GSS_S_FAILURE);
       }
@@ -295,7 +188,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 
    if (code = kg_checksum_channel_bindings(input_chan_bindings, &md5,
 					   bigend)) {
-      krb5_free_tkt_authent(context, authdat);
+      krb5_free_authenticator(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -303,7 +196,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    TREAD_STR(ptr, ptr2, md5.length);
    if (memcmp(ptr2, md5.contents, md5.length) != 0) {
       xfree(md5.contents);
-      krb5_free_tkt_authent(context, authdat);
+      krb5_free_authenticator(context, authdat);
       *minor_status = 0;
       return(GSS_S_BAD_BINDINGS);
    }
@@ -321,6 +214,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    }
 
    ctx->context = context;
+   ctx->auth_context = auth_context;
    ctx->initiate = 0;
    ctx->mutual = gss_flags & GSS_C_MUTUAL_FLAG;
    ctx->seed_init = 0;
@@ -329,26 +223,24 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 
    if (code = krb5_copy_principal(context, cred->princ, &ctx->here)) {
       xfree(ctx);
-      krb5_free_tkt_authent(context, authdat);
+      krb5_free_authenticator(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if (code = krb5_copy_principal(context, authdat->authenticator->client,
-				  &ctx->there)) {
+   if (code = krb5_copy_principal(context, authdat->client, &ctx->there)) {
       krb5_free_principal(context, ctx->here);
       xfree(ctx);
-      krb5_free_tkt_authent(context, authdat);
+      krb5_free_authenticator(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if (code = krb5_copy_keyblock(context, authdat->authenticator->subkey,
-				 &ctx->subkey)) {
+   if (code = krb5_auth_con_getremotesubkey(context,auth_context,&ctx->subkey)){
       krb5_free_principal(context, ctx->there);
       krb5_free_principal(context, ctx->here);
       xfree(ctx);
-      krb5_free_tkt_authent(context, authdat);
+      krb5_free_authenticator(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -367,11 +259,11 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    ctx->seq.processed = 0;
    ctx->seq.key = ctx->subkey;
 
-   ctx->endtime = authdat->ticket->enc_part2->times.endtime;
+   ctx->endtime = ticket->enc_part2->times.endtime;
 
-   ctx->flags = authdat->ticket->enc_part2->flags;
+   ctx->flags = ticket->enc_part2->flags;
 
-   ctx->seq_recv = authdat->authenticator->seq_number;
+   krb5_auth_con_getremoteseqnumber(context, auth_context, &ctx->seq_recv);
 
    /* at this point, the entire context structure is filled in, 
       so it can be released.  */
@@ -379,14 +271,29 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    /* generate an AP_REP if necessary */
 
    if (ctx->mutual) {
-      if (code = make_ap_rep(context, authdat, ctx->subkey, &ctx->seq_send,
-			     &token)) {
+      krb5_data ap_rep;
+      unsigned char * ptr;
+      if (code = krb5_mk_rep(context, auth_context, &ap_rep)) {
 	 (void)krb5_gss_delete_sec_context(context, minor_status, 
 					   (gss_ctx_id_t *) &ctx, NULL);
-	 krb5_free_tkt_authent(context, authdat);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
+      krb5_auth_con_getlocalseqnumber(context, auth_context, &ctx->seq_send);
+      token.length = g_token_size(gss_mech_krb5, ap_rep.length);
+
+      if ((token.value = (unsigned char *) xmalloc(token.length)) == NULL) {
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   (gss_ctx_id_t *) &ctx, NULL);
+	 *minor_status = code;
+	 return(GSS_S_FAILURE);
+      }
+      ptr = token.value;
+      g_make_token_header(gss_mech_krb5, ap_rep.length,
+                       &ptr, KG_TOK_CTX_AP_REP);
+
+      TWRITE_STR(ptr, ap_rep.data, ap_rep.length);
+      xfree(ap_rep.data);
    } else {
       token.length = 0;
       token.value = NULL;
@@ -394,7 +301,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    }
 
    /* done with authdat! */
-   krb5_free_tkt_authent(context, authdat);
+   krb5_free_authenticator(context, authdat);
 
    /* set the return arguments */
 

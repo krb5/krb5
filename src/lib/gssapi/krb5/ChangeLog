@@ -1,3 +1,8 @@
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * accept_sec_context.c: Use new calling convention for krb5_rd_req()
+		and krb5_mk_rep().
+
 Thu Mar 16 19:54:33 1995 Keith Vetter (keithv@fusion.com)
 
 	* init_sec_context.c: fixed signed/unsigned mismatch and
