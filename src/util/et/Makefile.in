@@ -25,8 +25,10 @@ FILES=	Makefile et_name.c error_message.c compile_et.c \
 		test_et.c test1.et test2.et \
 		compiler.h internal.h \
 		com_err.texinfo texinfo.tex
-SRCS=	compile_et.c error_table.c error_message.c et_name.c \
-	init_et.c com_err.c
+#SRCS=	compile_et.c error_table.c error_message.c et_name.c \
+#	init_et.c com_err.c
+SRCS= error_message.c et_name.c init_et.c com_err.c
+
 
 DEPLIBS=
 SHLIB_LIBS=

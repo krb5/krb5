@@ -1,3 +1,8 @@
+Wed Mar 20 00:19:08 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Fix SRCS definition so that it doesn't fool
+		the Macintosh macfiles.sh Makefile generation script.
+
 Tue Mar 12 22:34:10 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Use AC_HEADER_STDARG.
