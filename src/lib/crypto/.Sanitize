@@ -32,7 +32,7 @@ crc32
 cryptoconf.c
 decrypt_data.c
 des
-des3_md5.c
+des3_sha.c
 des_crc.c
 des_md5.c
 encrypt_data.c
