@@ -511,7 +511,7 @@ krb5_error_code krb5_sendto_kdc
 		const krb5_data *,
 		const krb5_data *,
 		krb5_data *,
-		int *));
+		int));
 krb5_error_code krb5_get_krbhst
 	KRB5_PROTOTYPE((krb5_context,
 		const krb5_data *,
@@ -555,9 +555,8 @@ krb5_error_code krb5_locate_srv_conf
 			const krb5_data *,
 			const char *,
 			struct sockaddr **,
-			int *,
-			int *,
-			int *));
+			int,
+                        int));
 
 /* no context? */
 krb5_error_code krb5_locate_srv_dns
@@ -565,7 +564,7 @@ krb5_error_code krb5_locate_srv_dns
 			const char *,
 			const char *,
 			struct sockaddr **,
-			int *));
+			int));
 
 #endif /* KRB5_LIBOS_PROTO__ */
 
@@ -965,7 +964,7 @@ KRB5_PROTOTYPE((krb5_context context,
 		krb5_get_init_creds_opt *options,
 		krb5_gic_get_as_key_fct gak,
 		void *gak_data,
-		int *master,
+		int master,
 		krb5_kdc_rep **as_reply));
 
 
