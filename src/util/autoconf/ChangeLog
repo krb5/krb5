@@ -1,3 +1,10 @@
+Fri Mar 17 20:39:08 1995  John Gilmore  (gnu at toad.com)
+
+	* acgeneral.m4:  Report the update status of the cache better;
+	show diffs if an unwriteable cache gets updated, for manually
+	configuring the Mac config.cache.
+	* configure:  Update with this acgeneral.m4.
+
 Wed Jan 25 19:52:11 1995  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
 	* autoreconf.sh (ls test): use -Llt to sort, in case we're in a
