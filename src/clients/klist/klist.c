@@ -53,7 +53,6 @@
 #include <netdb.h>
 #endif
 
-int use_k4_only = 0, use_k5_only = 0;
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0;
 char *defname;
@@ -76,36 +75,11 @@ void fillit KRB5_PROTOTYPE((FILE *, int, int));
 
 #ifdef KRB5_KRB4_COMPAT
 void do_v4_ccache KRB5_PROTOTYPE((char *));
-#define K54_USAGE_STRING "[-4] [-5] "
-#define K54_USAGE_HELP   "\t-4 Kerberos 4 only, -5 Kerberos 5 only, default is both\n"
-#else /* KRB5_KRB4_COMPAT */
-#define K54_USAGE_STRING ""
-#define K54_USAGE_HELP   ""
 #endif /* KRB5_KRB4_COMPAT */
 
 #define DEFAULT 0
 #define CCACHE 1
 #define KEYTAB 2
-
-void usage()
-{
-     fprintf(stderr, "Usage: %s " K54_USAGE_STRING
-	     "[[-c] [-f] [-e] [-s] [-a] [-n]] [-k [-t] [-K]] [name]\n",
-	     progname); 
-     fprintf(stderr, K54_USAGE_HELP);
-     fprintf(stderr, "\t-c specifies credentials cache, -k specifies keytab");
-     fprintf(stderr, ", -c is default\n");
-     fprintf(stderr, "\toptions for credential caches:\n");
-     fprintf(stderr, "\t\t-f shows credentials flags\n");
-     fprintf(stderr, "\t\t-e shows the encryption type\n");
-     fprintf(stderr, "\t\t-s sets exit status based on valid tgt existence\n");
-     fprintf(stderr, "\t\t-a displays the address list\n");
-     fprintf(stderr, "\t\t\t-n do not reverse-resolve\n");
-     fprintf(stderr, "\toptions for keytabs:\n");
-     fprintf(stderr, "\t\t-t shows keytab entry timestamps\n");
-     fprintf(stderr, "\t\t-K shows keytab entry DES keys\n");
-     exit(1);
-}
 
 /*
  * The reason we start out with got_k4 and got_k5 as zero (false) is
@@ -113,10 +87,43 @@ void usage()
  * whether Kerberos 4 and Keberos 5 libraries are available
  */
 
-#ifdef KRB5_KRB4_COMPAT
-static int got_k4 = 0;
-#endif
 static int got_k5 = 0; 
+static int got_k4 = 0;
+
+static int default_k5 = 1;
+#ifdef KRB5_KRB4_COMPAT
+static int default_k4 = 1;
+#else
+static int default_k4 = 0;
+#endif
+
+void usage()
+{
+#define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
+
+    fprintf(stderr, "Usage: %s [-5] [-4] [-e] [[-c] [-f] [-s] [-a [-n]]] "
+	     "[-k [-t] [-K]] [name]\n", progname); 
+    fprintf(stderr, "\t-5 Kerberos 5 (%s)\n", KRB_AVAIL_STRING(got_k5));
+    fprintf(stderr, "\t-4 Kerberos 4 (%s)\n", KRB_AVAIL_STRING(got_k4));
+    fprintf(stderr, "\t   (Default is %s%s%s%s)\n",
+	    default_k5?"Kerberos 5":"",
+	    (default_k5 && default_k4)?" and ":"",
+	    default_k4?"Kerberos 4":"",
+	    (!default_k5 && !default_k4)?"neither":"");
+    fprintf(stderr, "\t-c specifies credentials cache\n");
+    fprintf(stderr, "\t-k specifies keytab\n");
+    fprintf(stderr, "\t   (Default is credentials cache)\n");
+    fprintf(stderr, "\t-e shows the encryption type\n");
+    fprintf(stderr, "\toptions for credential caches:\n");
+    fprintf(stderr, "\t\t-f shows credentials flags\n");
+    fprintf(stderr, "\t\t-s sets exit status based on valid tgt existence\n");
+    fprintf(stderr, "\t\t-a displays the address list\n");
+    fprintf(stderr, "\t\t\t-n do not reverse-resolve\n");
+    fprintf(stderr, "\toptions for keytabs:\n");
+    fprintf(stderr, "\t\t-t shows keytab entry timestamps\n");
+    fprintf(stderr, "\t\t-K shows keytab entry DES keys\n");
+    exit(1);
+}
 
 int
 main(argc, argv)
@@ -125,6 +132,7 @@ main(argc, argv)
 {
     char *name;
     int mode;
+    int use_k5 = 0, use_k4 = 0;
 
     got_k5 = 1;
 #ifdef KRB5_KRB4_COMPAT
@@ -170,14 +178,26 @@ main(argc, argv)
 	    if (mode != DEFAULT) usage();
 	    mode = KEYTAB;
 	    break;
-#ifdef KRB5_KRB4_COMPAT
 	case '4':
-	    use_k4_only = 1;
+	    if (!got_k4)
+	    {
+#ifdef KRB5_KRB4_COMPAT
+		fprintf(stderr, "Kerberos 4 support could not be loaded\n");
+#else
+		fprintf(stderr, "This was not built with Kerberos 4 support\n");
+#endif
+		exit(3);
+	    }
+	    use_k4 = 1;
 	    break;
 	case '5':
-	    use_k5_only = 1;
+	    if (!got_k5)
+	    {
+		fprintf(stderr, "Kerberos 5 support could not be loaded\n");
+		exit(3);
+	    }
+	    use_k5 = 1;
 	    break;
-#endif /* KRB4_KRB5_COMPAT */
 	default:
 	    usage();
 	    break;
@@ -185,26 +205,28 @@ main(argc, argv)
 	argv++;
     }
 
-    if (mode == DEFAULT || mode == CCACHE) {
-	 if (show_time || show_keys)
-	      usage();
-    } else {
-	 if (show_flags || status_only)
-	      usage();
-    }
-
-    if (use_k4_only && use_k5_only)
-    {
-	fprintf(stderr, "Only one of -4 and -5 allowed\n");
+    if (no_resolve && !show_addresses) {
 	usage();
     }
 
-#ifdef KRB5_KRB4_COMPAT
-    if (use_k4_only)
+    if (mode == DEFAULT || mode == CCACHE) {
+	if (show_time || show_keys)
+	    usage();
+    } else {
+	if (show_flags || status_only || show_addresses)
+	    usage();
+    }
+
+    if (!use_k5 && !use_k4)
+    {
+	use_k5 = default_k5;
+	use_k4 = default_k4;
+    }
+
+    if (!use_k5)
 	got_k5 = 0;
-    if (use_k5_only)
+    if (!use_k4)
 	got_k4 = 0;
-#endif /* KRB4_KRB5_COMPAT */
 
     now = time(0);
     {

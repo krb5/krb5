@@ -25,9 +25,10 @@
 .SH NAME
 klist \- list cached Kerberos tickets
 .SH SYNOPSIS
-\fBklist\fP [\fB\-e\fP] [[\fB\-c\fP] [\fB\-f\fP] [\fB\-s\fP]
-[\fIcache_name\fP]] [\fB\-k\fP [\fB\-t\fP] [\fB\-K\fP]
-[\fIkeytab_name\fP]]
+\fBklist\fP [\fB\-5\fP] [\fB\-4\fP] [\fB\-e\fP] [[\fB\-c\fP] [\fB\-f\fP] 
+[\fB\-s\fP] [\fB\-a\fP  [\fB\-n\fP]]]
+[\fB\-k\fP [\fB\-t\fP] [\fB\-K\fP]]
+[\fIcache_name\fP | \fIkeytab_name\fP]
 .br
 .SH DESCRIPTION
 .I Klist
@@ -35,7 +36,23 @@ lists the Kerberos principal and Kerberos tickets held in a credentials
 cache, or the keys held in a
 .B keytab
 file.
+If klist was built with Kerberos 4 support, the default behavior is to list
+both Kerberos 5 and Kerberos 4 credentials.  Otherwise, klist will default
+to listing only Kerberos 5 credentials.
 .SH OPTIONS
+.TP
+.B \-5
+list Kerberos 5 credentials.  This overrides whatever the default built-in
+behavior may be.  This option may be used with
+.B \-4
+.
+.TP
+.B \-4
+list Kerberos 4 credentials.  This overrides whatever the default built-in
+behavior may be.  This option is only available if kinit was built
+with Kerberos 4 compatibility.  This option may be used with 
+.B \-5
+.
 .TP
 .B \-e
 displays the encryption types of the session key and the ticket for each
@@ -76,6 +93,12 @@ according to whether it finds the credentials cache.  The exit status is
 .B klist
 finds a credentials cache, and `1' if it does not.
 .TP
+.B \-a
+display list of addresses in credentials.
+.TP
+.B \-n
+show numeric addresses instead of reverse-resolving addresses.
+.TP
 \fB\-k\fP
 List keys held in a
 .B keytab
@@ -100,18 +123,25 @@ environment variable is set, its value is used to name the default
 ticket cache.
 .SH ENVIRONMENT
 .B Klist
-uses the following environment variable:
+uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
-Location of the credentials (ticket) cache.
+Location of the Kerberos 5 credentials (ticket) cache.
+.TP "\w'.SM KRBTKFILE\ \ 'u"
+.SM KRBTKFILE
+Filename of the Kerberos 4 credentials (ticket) cache.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
-default location of the credentials cache ([uid] is the decimal UID of
-the user).
+default location of Kerberos 5 credentials cache 
+([uid] is the decimal UID of the user).
+.TP "\w'/tmp/tkt[uid]\ \ 'u"
+/tmp/tkt[uid]
+default location of Kerberos 4 credentials cache 
+([uid] is the decimal UID of the user).
 .TP
 /etc/krb5.keytab
-default location of the
+default location for the local host's
 .B keytab
 file.
 .SH SEE ALSO

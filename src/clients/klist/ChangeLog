@@ -1,3 +1,9 @@
+2000-03-07  Danilo Almeida  <dalmeida@mit.edu>
+
+	* klist.M: Get man page up-to-date.
+
+	* klist.c: Add support for combining -4 and -5.  Tweak usage info.
+
 2000-02-24  Ezra Peisach  <epeisach@engrailed.mit.edu>
 
 	* klist.c: Include <arpa/inet.h> if present for inet_ntop
