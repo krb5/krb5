@@ -255,6 +255,7 @@ void get_tickets(context)
 					 KRB5_NT_SRV_HST, &creds.server);
 	if (retval) {
 	    com_err(progname, errno, "while setting server principal name");
+	    (void) krb5_cc_destroy(context, ccache);
 	    exit(1);
 	}
 	if (realm) {
@@ -268,11 +269,13 @@ void get_tickets(context)
 	 */
 	if (retval = krb5_copy_principal(context, my_principal, &creds.client)) {
 		com_err(progname, retval, "While copying client principal");
+		(void) krb5_cc_destroy(context, ccache);
 		exit(1);
 	}
 	if (srvtab) {
 		if (retval = krb5_kt_resolve(context, srvtab, &keytab)) {
 			com_err(progname, retval, "while resolving keytab");
+			(void) krb5_cc_destroy(context, ccache);
 			exit(1);
 		}
 	}
@@ -281,6 +284,7 @@ void get_tickets(context)
 					     NULL, keytab, ccache, &creds, 0);
 	if (retval) {
 		com_err(progname, retval, "while getting initial ticket\n");
+		(void) krb5_cc_destroy(context, ccache);
 		exit(1);
 	}
 	/*
