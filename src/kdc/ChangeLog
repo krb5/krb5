@@ -1,3 +1,12 @@
+2004-06-07  Ezra Peisach  <epeisach@mit.edu.edu>
+
+	* network.c (paddr): Use unsigned int for length.
+	(kdc_conn_type): Declare CONN_ enumerated types in connection as
+	distinct type.
+	(add_fd): Declare as taking enum type instead of simply
+	integer. Prevents assignment of interger to an enum.
+	(process_tcp_connection): Remove variable assigned to but never used.
+
 2004-05-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c: Include foreachaddr.h, not foreachaddr.c.

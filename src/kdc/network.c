@@ -126,7 +126,7 @@ static const char *paddr (struct sockaddr *sa)
 		    NI_NUMERICHOST|NI_NUMERICSERV))
 	strcpy(buf, "<unprintable>");
     else {
-	int len = sizeof(buf) - strlen(buf);
+	unsigned int len = sizeof(buf) - strlen(buf);
 	char *p = buf + strlen(buf);
 	if (len > 2+strlen(portbuf)) {
 	    *p++ = '.';
@@ -139,10 +139,12 @@ static const char *paddr (struct sockaddr *sa)
 
 /* KDC data.  */
 
+enum kdc_conn_type { CONN_UDP, CONN_TCP_LISTENER, CONN_TCP };
+
 /* Per-connection info.  */
 struct connection {
     int fd;
-    enum { CONN_UDP, CONN_TCP_LISTENER, CONN_TCP } type;
+    enum kdc_conn_type type;
     void (*service)(struct connection *, const char *, int);
     union {
 	/* Type-specific information.  */
@@ -270,7 +272,7 @@ struct socksetup {
 };
 
 static struct connection *
-add_fd (struct socksetup *data, int sock, int conntype,
+add_fd (struct socksetup *data, int sock, enum kdc_conn_type conntype,
 	void (*service)(struct connection *, const char *, int))
 {
     struct connection *newconn;
@@ -895,12 +897,10 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
     if (selflags & SSF_WRITE) {
 	ssize_t nwrote;
 	SOCKET_WRITEV_TEMP tmp;
-	krb5_error_code e;
 
 	nwrote = SOCKET_WRITEV(conn->fd, conn->u.tcp.sgp, conn->u.tcp.sgnum,
 			       tmp);
 	if (nwrote < 0) {
-	    e = SOCKET_ERRNO;
 	    goto kill_tcp_connection;
 	}
 	if (nwrote == 0)
