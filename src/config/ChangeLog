@@ -1,3 +1,7 @@
+Thu May 25 21:36:40 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in(HOST_TYPE, SHEXT): Added variables filled in by configure
+
 Wed May 24 15:42:02 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* config.guess, config.sub: Added for shared library support.

@@ -55,6 +55,9 @@ LEX = @LEX@
 LEXLIB = @LEXLIB@
 YACC = @YACC@
 
+HOST_TYPE = @HOST_TYPE@
+SHEXT = @SHEXT@
+
 SRCTOP = $(srcdir)/$(BUILDTOP)
 SUBDIRS = @subdirs@
 
