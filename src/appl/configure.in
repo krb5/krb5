@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(sample simple user_user bsd gss-sample telnet popper movemail mailquery)
+CONFIG_DIRS(sample simple user_user bsd gss-sample gssftp telnet popper movemail mailquery)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE
