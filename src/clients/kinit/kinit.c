@@ -21,11 +21,10 @@ static char rcsid_kinit_c [] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>			/* for TGTNAME */
 #include <krb5/ext-proto.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
-#include <krb5/krb5_err.h>
-#include <krb5/isode_err.h>
+
 #include <com_err.h>
+#include <stdio.h>
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
@@ -65,12 +64,7 @@ main(argc, argv)
     krb5_data *server[4];
     krb5_creds my_creds;
     
-    /*
-     * XXX init error tables here
-     */
-
-    initialize_krb5_error_table();
-    initialize_isod_error_table();
+    krb5_init_ets();
 
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
