@@ -342,6 +342,8 @@ krb5_gss_init_sec_context(ct, minor_status, claimant_cred_handle,
 	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
 	 *minor_status = code;
+	 if (code == KRB5KRB_AP_ERR_TKT_EXPIRED)
+		 return GSS_S_CREDENTIALS_EXPIRED;
 	 return(GSS_S_FAILURE);
       }
 

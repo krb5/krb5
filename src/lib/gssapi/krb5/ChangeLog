@@ -1,3 +1,9 @@
+Wed Apr  3 16:10:24 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): If make_ap_req()
+		returns KRB5APP_TKT_EXPIRED, then return
+		GSS_S_CREDENTIALS_EXPIRED as the major return code.
+
 Tue Apr  2 15:20:24 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Inlined list of source files for SRCS and
