@@ -45,7 +45,8 @@ SRCS=	$(srcdir)/cs_entry.c	\
 
 includes:: depend
 
-all::
+all:: 
+
 depend:: $(SRCS)
 
 clean::
@@ -53,9 +54,6 @@ clean::
 
 verify: verify.o $(DEPKLIB)
 	$(CC) -o $@ verify.o $(KLIB) $(LIBS) $(LDFLAGS) 
-
-clean::
-	$(RM) verify destest 
 
 destest: destest.o $(DEPKLIB)
 	$(CC) -o $@ destest.o $(KLIB) $(LIBS) $(LDFLAGS) 
@@ -67,4 +65,4 @@ check:: destest verify
 	./destest < $(srcdir)/keytest.data
 
 clean::
-	$(RM) destest
+	$(RM) destest verify destest.o verify.o

@@ -1,5 +1,8 @@
 Thu Oct  6 12:49:29 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: Make sure the "make check" programs get cleaned up
+		on a "make clean".
+
 	* verify.c (main): Take out check that assures that long is 4
 		bytes.  The DES implementation shouldn't be depending on
 		this, and if it is, then that's what the verify program
