@@ -1,0 +1,4 @@
+Fri Oct 14 00:21:05 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Remove symlinked files on make clean.
+

@@ -19,3 +19,6 @@ ustime.c: ../../krb5/os/ustime.c
 
 memmove.c: ../../krb5/posix/memmove.c
 	-$(LN) $(srcdir)/../../krb5/posix/memmove.c $@
+
+clean::
+	$(RM) ustime.c localaddr.c memmove.c
