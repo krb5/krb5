@@ -150,6 +150,8 @@ krb5_error_code key_update_tl_attrs
 			krb5_db_entry *,
 			krb5_principal,
 			krb5_boolean));
+krb5_error_code key_open_db KRB5_PROTOTYPE((krb5_context));
+krb5_error_code key_close_db KRB5_PROTOTYPE((krb5_context));
 
 /* srv_acl.c */
 krb5_error_code acl_init

@@ -67,6 +67,7 @@ static const char *key_vmast_key_fmt = "%s: cannot verify master key (%s).\n";
 static const char *key_key_pp_fmt = "%s: cannot preprocess key (%s).\n";
 static const char *key_rkey_fmt = "%s: cannot initialize random key generator (%s).\n";
 static const char *key_getm_fmt = "%s: cannot get master entry (%s).\n";
+static const char *key_nomem_fmt = "%s: cannot get memory for string %s.\n";
 
 static int		mprinc_init = 0;
 static krb5_principal	master_principal;
@@ -100,6 +101,8 @@ static int		key_ktents_inited = 0;
 static krb5_key_salt_tuple default_ktent = {
     KEYTYPE_DES, KRB5_KDB_SALTTYPE_NORMAL
 };
+
+static char		*key_db_name = (char *) NULL;
 
 static int key_debug_level = 0;
 
@@ -418,10 +421,16 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	   ("- initializing for realm %s\n", master_realm));
 
     /* Set database name if supplied */
-    if (db_file && (kret = krb5_db_set_name(kcontext, db_file))) {
-	fprintf(stderr, key_bad_name_fmt, programname, db_file,
-		error_message(kret));
-	goto leave;
+    if (db_file) {
+	if (!(key_db_name = strdup(db_file))) {
+	    fprintf(stderr, key_nomem_fmt, programname, db_file);
+	    goto leave;
+	}
+	if ((kret = krb5_db_set_name(kcontext, db_file))) {
+	    fprintf(stderr, key_bad_name_fmt, programname, db_file,
+		    error_message(kret));
+	    goto leave;
+	}
     }
 
     /* Initialize database */
@@ -573,8 +582,11 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	    key_free_key_data(madmin_keys, madmin_num_keys);
 	    madmin_key_init = 0;
 	}
+	if (key_db_name)
+	    free(key_db_name);
     }
  leave:
+    krb5_db_fini(kcontext);
     DPRINT(DEBUG_CALLS, key_debug_level, ("X key_init() = %d\n", kret));
     return(kret);
 }
@@ -624,6 +636,8 @@ key_finish(kcontext, debug_level)
 	key_free_key_data(madmin_keys, madmin_num_keys);
 	madmin_key_init = 0;
     }
+    if (key_db_name)
+	free(key_db_name);
     krb5_db_fini(kcontext);
     /* memset((char *) tgs_key.contents, 0, tgs_key.length); */
     DPRINT(DEBUG_CALLS, key_debug_level, ("X key_finish()\n"));
@@ -1332,4 +1346,23 @@ key_update_tl_attrs(kcontext, dbentp, mod_name, is_pwchg)
     }
 
     return(kret);
+}
+
+krb5_error_code
+key_open_db(kcontext)
+    krb5_context	kcontext;
+{
+    krb5_error_code	kret;
+
+    if (!(key_db_name) || !(kret = krb5_db_set_name(kcontext, key_db_name))) {
+	kret = krb5_db_init(kcontext);
+    }
+    return(kret);
+}
+
+krb5_error_code
+key_close_db(kcontext)
+    krb5_context	kcontext;
+{
+    return(krb5_db_fini(kcontext));
 }
