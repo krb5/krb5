@@ -1,3 +1,8 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_C_CONST and AC_CHECK_FUNCS instead of
+	AC_CONST and AC_HAVE_FUNCS.
+
 2000-10-23  Tom Yu  <tlyu@mit.edu>
 
 	* mk_auth.c (krb_check_auth): Modify call to rd_priv() by kludging

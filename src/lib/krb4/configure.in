@@ -4,7 +4,7 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
-AC_CONST
+AC_C_CONST
 AC_CHECK_HEADERS(sys/select.h time.h unistd.h)
 dnl Could check for full stdc environment, but will only test
 dnl for stdlib.h
@@ -40,7 +40,7 @@ fi
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_DEFINE(KRB4_USE_KEYTAB)
-AC_HAVE_FUNCS(strdup seteuid setreuid setresuid)
+AC_CHECK_FUNCS(strdup seteuid setreuid setresuid)
 AC_PROG_AWK
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS
