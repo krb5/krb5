@@ -1,3 +1,7 @@
+Mon Dec 21 22:04:02 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gss-server.c (test_import_export_context): Fix memory leak.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Removed and tests moved up to appl/configure.in

@@ -315,6 +315,7 @@ int test_import_export_context(context)
 		display_status("importing context", maj_stat, min_stat);
 		return 1;
 	}
+	free(copied_token.value);
 	gettimeofday(&tm1, (struct timezone *)0);
 	if (verbose && log)
 		fprintf(log, "Importing context: %7.4f seconds\n",
