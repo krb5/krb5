@@ -36,43 +36,6 @@ static char rcsid_sim_server_c [] =
 #define PROGNAME argv[0]
 #define SNAME argv[1]
 
-/* this should become a library function */
-
-krb5_error_code
-krb5_rc_getrcache(rcptr, server)
-krb5_rcache *rcptr;
-krb5_principal server;
-{
-    krb5_rcache rcache;
-    char *cachename;
-    extern krb5_deltat krb5_clockskew;
-    krb5_error_code retval;
-
-    if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
-	if (!(retval = krb5_rc_resolve_type(&rcache, "dfl"))) {
-
-	    if (cachename = malloc(server[1]->length+1+3)) {
-		strcpy(cachename, "rc_");
-		strncat(cachename, server[1]->data, server[1]->length);
-		cachename[server[1]->length+3] = '\0';
-
-		if (!(retval = krb5_rc_resolve(rcache, cachename))) {
-		    if (!((retval = krb5_rc_recover(rcache)) &&
-			  (retval = krb5_rc_initialize(rcache,
-						       krb5_clockskew)))) {
-			*rcptr = rcache;
-			return 0;
-		    }
-		}
-	    } else
-		retval = ENOMEM;
-	}
-	xfree(rcache);
-    } else
-	retval = ENOMEM;
-    return retval;
-}
-
 void
 main(argc, argv)
 int argc;
@@ -199,7 +162,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_rc_getrcache(&rcache, sprinc)) {
+    if (retval = krb5_get_server_rcache(sprinc[1]->data, &rcache)) {
 	com_err(PROGNAME, retval, "while opening replay cache");
 	exit(1);
     }
@@ -209,6 +172,8 @@ char *argv[];
 			      rcache,
 			      &message)) {
 	com_err(PROGNAME, retval, "while verifying PRIV message");
+	(void) krb5_rc_close(rcache);
+	xfree(rcache);
 	exit(1);
     }
     printf("Safe message is: '%.*s'\n", message.length, message.data);
@@ -224,6 +189,8 @@ char *argv[];
 		 (struct sockaddr *)&c_sock, &i);
     if (i < 0) {
 	perror("receiving datagram");
+	(void) krb5_rc_close(rcache);
+	xfree(rcache);
 	exit(1);
     }
     printf("Received %d bytes\n", i);
@@ -232,6 +199,8 @@ char *argv[];
 				   (krb5_pointer) &c_sock.sin_port,
 				   &portforeign_addr)) {
 	com_err(PROGNAME, retval, "while generating port address");
+	(void) krb5_rc_close(rcache);
+	xfree(rcache);
 	exit(1);
     }
 
@@ -240,9 +209,14 @@ char *argv[];
 			      rcache,
 			      &message)) {
 	com_err(PROGNAME, retval, "while verifying SAFE message");
+	(void) krb5_rc_close(rcache);
+	xfree(rcache);
 	exit(1);
     }
     printf("Decrypted message is: '%.*s'\n", message.length, message.data);
+
+    (void) krb5_rc_close(rcache);
+    xfree(rcache);
 
     exit(0);
 }
