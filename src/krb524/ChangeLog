@@ -1,5 +1,8 @@
 2001-06-05  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for unistd.h.
+	* k524init.c: Only include unistd.h if it's available.
+
 	* krb524d.c: Include stdarg.h.
 	(main): Accept new argument -p to indicate port number to use;
 	fall back to KRB524_SERVICE and then KRB524_PORT.  In error

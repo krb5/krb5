@@ -24,7 +24,9 @@
 #include "com_err.h"
 
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <signal.h>
 #include <sys/types.h>
