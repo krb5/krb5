@@ -75,8 +75,7 @@ krb5_tkt_authent *tktauthent;
     krb5_timestamp currenttime;
 
 
-    if (!krb5_principal_compare(server,
-				(krb5_const_principal) req->ticket->server))
+    if (!krb5_principal_compare(server, req->ticket->server))
 	return KRB5KRB_AP_WRONG_PRINC;
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
@@ -123,8 +122,8 @@ krb5_tkt_authent *tktauthent;
     }
 #define clean_authenticator() {(void) krb5_free_authenticator(tktauthent->authenticator); tktauthent->authenticator = 0;}
 
-    if (!krb5_principal_compare((krb5_const_principal)tktauthent->authenticator->client,
-				(krb5_const_principal)req->ticket->enc_part2->client)) {
+    if (!krb5_principal_compare(tktauthent->authenticator->client,
+				req->ticket->enc_part2->client)) {
 	clean_authenticator();
 	return KRB5KRB_AP_ERR_BADMATCH;
     }
