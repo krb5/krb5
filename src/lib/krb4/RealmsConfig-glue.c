@@ -359,23 +359,6 @@ krb_get_kpasswdhst(
 			    REALMS_V4_PROF_KPASSWD_KDC);
 }
 
-static int
-get_krbhst_default(h, r, n)
-    char *h;
-    char *r;
-    int n;
-{
-    if (n != 1)
-	return KFAILURE;
-    if (strlen(KRB_HOST) + 1 + strlen(r) >= MAXHOSTNAMELEN)
-	return KFAILURE;
-    /* KRB_HOST.REALM (ie. kerberos.CYGNUS.COM) */
-    strcpy(h, KRB_HOST);
-    strcat(h, ".");
-    strcat(h, r);
-    return KSUCCESS;
-}
-
 /*
  * Realm, index -> KDC mapping
  *
@@ -466,8 +449,6 @@ krb_get_krbhst(
 	else
 	    result = KFAILURE;
     } while (0);
-    if (result == KFAILURE)
-	result = get_krbhst_default(host, realm, n);
     return result;
 }
 
