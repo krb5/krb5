@@ -1,3 +1,9 @@
+2000-05-17  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* an_to_ln.c (do_replacement):  Don't overflow buffers "in" or "out".
+	* hst_realm.c (krb5_try_realm_txt_rr):  Don't overfill "host" when
+	malformed DNS responses are received.
+
 2000-05-15  Jeffrey Altman <jaltman@columbia.edu>
 
         * hst_realm.c (krb5_get_host_realm)

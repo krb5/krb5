@@ -298,15 +298,15 @@ do_replacement(regexp, repl, doall, in, out)
 		    strncpy(op, cp, match_match.rm_so);
 		    op += match_match.rm_so;
 		}
-		strcpy(op, repl);
-		op += strlen(repl);
+		strncpy(op, repl, MAX_FORMAT_BUFFER - 1 - (op - out));
+		op += strlen(op);
 		cp += match_match.rm_eo;
 		if (!doall)
-		    strcpy(op, cp);
+		    strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
 		matched = 1;
 	    }
 	    else {
-		strcpy(op, cp);
+		strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
 		matched = 0;
 	    }
 	} while (doall && matched);
@@ -333,20 +333,20 @@ do_replacement(regexp, repl, doall, in, out)
 		strncpy(op, cp, sdispl);
 		op += sdispl;
 	    }
-	    strcpy(op, repl);
+	    strncpy(op, repl, MAX_FORMAT_BUFFER - 1 - (op - out));
 	    op += strlen(repl);
 	    cp += edispl;
 	    if (!doall)
-		strcpy(op, cp);
+		strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
 	    matched = 1;
 	}
 	else {
-	    strcpy(op, cp);
+	    strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
 	    matched = 0;
 	}
     } while (doall && matched);
 #else	/* HAVE_REGEXP_H */
-    strcpy(out, in);
+    memcpy(out, in, MAX_FORMAT_BUFFER);
 #endif	/* HAVE_REGCOMP */
 }
 
@@ -379,7 +379,8 @@ aname_replacer(string, contextp, result)
 	 * Prime the buffers.  Copy input string to "out" to simulate it
 	 * being the result of an initial iteration.
 	 */
-	strcpy(out, string);
+	strncpy(out, string, MAX_FORMAT_BUFFER - 1);
+	out[MAX_FORMAT_BUFFER - 1] = '\0';
 	in[0] = '\0';
 	kret = 0;
 	/*
@@ -421,6 +422,7 @@ aname_replacer(string, contextp, result)
 		    out = ep;
 
 		    /* Do the replacemenbt */
+		    memset(out, '\0', MAX_FORMAT_BUFFER);
 		    do_replacement(rule, repl, doglobal, in, out);
 		    free(rule);
 		    free(repl);

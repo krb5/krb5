@@ -117,6 +117,8 @@ krb5_try_realm_txt_rr(prefix, name, realm)
      */
 
     if (name == NULL || name[0] == '\0') {
+	if (strlen (prefix) >= sizeof(host)-1)
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
         strcpy(host,prefix);
     } else {
         if ( strlen(prefix) + strlen(name) + 3 > MAX_DNS_NAMELEN )
@@ -134,7 +136,7 @@ krb5_try_realm_txt_rr(prefix, name, realm)
         */
 
         h = host + strlen (host);
-        if (h > host && h[-1] != '.')
+        if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
             strcpy (h, ".");
     }
     size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
