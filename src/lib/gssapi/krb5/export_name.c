@@ -36,8 +36,11 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 	size_t length;
 	char *str, *cp;
 
-	if (GSS_ERROR(kg_get_context(minor_status, &context)))
-		return(GSS_S_FAILURE);
+	code = krb5_init_context(&context);
+	if (code) {
+	    *minor_status = code;
+	    return GSS_S_FAILURE;
+	}
 
 	exported_name->length = 0;
 	exported_name->value = NULL;
@@ -45,15 +48,18 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 	if (! kg_validate_name(input_name)) {
 		if (minor_status)
 			*minor_status = (OM_uint32) G_VALIDATE_FAILED;
+		krb5_free_context(context);
 		return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
 	}
 
 	if ((code = krb5_unparse_name(context, (krb5_principal) input_name, 
 				      &str))) {
 		*minor_status = code;
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	}
 
+	krb5_free_context(context);
 	length = strlen(str);
 	exported_name->length = 10 + length + gss_mech_krb5->length;
 	exported_name->value = malloc(exported_name->length);
@@ -82,9 +88,3 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 
 	return(GSS_S_COMPLETE);
 }
-
-
-
-
-
-

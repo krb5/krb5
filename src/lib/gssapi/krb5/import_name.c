@@ -60,8 +60,11 @@ krb5_gss_import_name(minor_status, input_name_buffer,
    struct passwd *pw;
 #endif
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   code = krb5_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
 
    /* set up default returns */
 
@@ -78,6 +81,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
       if ((tmp =
 	   (char *) xmalloc(input_name_buffer->length + 1)) == NULL) {
 	 *minor_status = ENOMEM;
+	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
 
@@ -100,6 +104,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
       if (input_name_buffer->length != sizeof(krb5_principal)) {
 	 *minor_status = (OM_uint32) G_WRONG_SIZE;
+	 krb5_free_context(context);
 	 return(GSS_S_BAD_NAME);
       }
 
@@ -107,6 +112,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
       if ((code = krb5_copy_principal(context, input, &princ))) {
 	 *minor_status = code;
+	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
    } else {
@@ -115,6 +121,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
       if ((tmp =
 	   (char *) xmalloc(input_name_buffer->length + 1)) == NULL) {
 	 *minor_status = ENOMEM;
+	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
       tmp2 = 0;
@@ -165,6 +172,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 if (tmp2 == NULL) {
 		 xfree(tmp);
 		 *minor_status = ENOMEM;
+		 krb5_free_context(context);
 		 return GSS_S_FAILURE;
 	 }
 	 strncpy(tmp2, cp, length);
@@ -172,6 +180,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 
 	 stringrep = tmp2;
      } else {
+	 krb5_free_context(context);
 	 return(GSS_S_BAD_NAMETYPE);
       }
 
@@ -184,6 +193,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 xfree(tmp);
 	 if (tmp2)
 		 xfree(tmp2);
+	 krb5_free_context(context);
 	 return(GSS_S_BAD_NAME);
       }
       
@@ -197,6 +207,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
    if (code) {
       *minor_status = (OM_uint32) code;
+      krb5_free_context(context);
       return(GSS_S_BAD_NAME);
    }
 
@@ -204,9 +215,12 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
    if (! kg_save_name((gss_name_t) princ)) {
       krb5_free_principal(context, princ);
+      krb5_free_context(context);
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }
+
+   krb5_free_context(context);
 
    /* return it */
 
