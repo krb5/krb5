@@ -1,5 +1,10 @@
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (K4LIBS): Revert previous.
+
+	* krb5_32.def: Add afs_string_to_key, which is now needed by the
+	krb4 library.
+
 	* Makefile.in (K4LIBS): Add des425.lib.
 
 2003-01-17  Ken Raeburn  <raeburn@mit.edu>

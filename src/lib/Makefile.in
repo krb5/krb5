@@ -40,7 +40,7 @@ KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
 	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
 	des425\$(OUTPRE)des425.lib
 GLIBS = gssapi\$(OUTPRE)gssapi.lib
-K4LIBS = krb4\$(OUTPRE)krb4.lib des425\$(OUTPRE)des425.lib
+K4LIBS = krb4\$(OUTPRE)krb4.lib
 
 CDEF = comerr32.def
 PDEF = xpprof32.def

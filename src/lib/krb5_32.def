@@ -239,6 +239,7 @@ EXPORTS
 	des_quad_cksum				; PRIVATE KRB4
 	des_string_to_key			; PRIVATE KRB4
 	des_init_random_number_generator	; PRIVATE KRB4
+	afs_string_to_key			; PRIVATE KRB4
 
 ; DO NOT USE -- Currently required to implement gssapi32.dll
 	decode_krb5_ap_req			; PRIVATE GSSAPI k5-int.h KRB5_CALLCONV_WRONG
