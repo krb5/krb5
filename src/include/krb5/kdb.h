@@ -28,6 +28,30 @@
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
 
+/* Salt types */
+#define KRB5_KDB_SALTTYPE_NORMAL	0
+#define KRB5_KDB_SALTTYPE_V4		1
+#define KRB5_KDB_SALTTYPE_NOREALM	2
+#define KRB5_KDB_SALTTYPE_ONLYREALM	3
+#define KRB5_KDB_SALTTYPE_SPECIAL	4
+
+/* Attributes */
+#define	KRB5_KDB_DISALLOW_POSTDATED	0x00000001
+#define	KRB5_KDB_DISALLOW_FORWARDABLE	0x00000002
+#define	KRB5_KDB_DISALLOW_TGT_BASED	0x00000004
+#define	KRB5_KDB_DISALLOW_RENEWABLE	0x00000008
+#define	KRB5_KDB_DISALLOW_PROXIABLE	0x00000010
+#define	KRB5_KDB_DISALLOW_DUP_SKEY	0x00000020
+#define	KRB5_KDB_DISALLOW_ALL_TIX	0x00000040
+#define	KRB5_KDB_REQUIRES_PRE_AUTH	0x00000080
+#define KRB5_KDB_REQUIRES_HW_AUTH	0x00000100
+#define	KRB5_KDB_REQUIRES_PWCHANGE	0x00000200
+#define KRB5_KDB_DISALLOW_SVR		0x00001000
+#define KRB5_KDB_PWCHANGE_SERVICE	0x00002000
+#define KRB5_KDB_SUPPORT_DESMD5         0x00004000
+
+#if !defined(_MACINTOSH) && !defined(_MSDOS)
+
 /*
  * Note --- these structures cannot be modified without changing the
  * database version number in libkdb.a, but should be expandable by
@@ -60,13 +84,6 @@ typedef struct _krb5_keysalt {
     krb5_int16		  type;	
     krb5_data		  data;			/* Length, data */
 } krb5_keysalt;
-
-/* Salt types */
-#define KRB5_KDB_SALTTYPE_NORMAL	0
-#define KRB5_KDB_SALTTYPE_V4		1
-#define KRB5_KDB_SALTTYPE_NOREALM	2
-#define KRB5_KDB_SALTTYPE_ONLYREALM	3
-#define KRB5_KDB_SALTTYPE_SPECIAL	4
 
 typedef struct _krb5_db_entry_new {
     krb5_magic 		  magic;		/* NOT saved */
@@ -106,21 +123,6 @@ typedef struct tl_data_2 {
 
 #define KRB5_TL_MOD_PRINC		0x0002
     
-/* Attributes */
-#define	KRB5_KDB_DISALLOW_POSTDATED	0x00000001
-#define	KRB5_KDB_DISALLOW_FORWARDABLE	0x00000002
-#define	KRB5_KDB_DISALLOW_TGT_BASED	0x00000004
-#define	KRB5_KDB_DISALLOW_RENEWABLE	0x00000008
-#define	KRB5_KDB_DISALLOW_PROXIABLE	0x00000010
-#define	KRB5_KDB_DISALLOW_DUP_SKEY	0x00000020
-#define	KRB5_KDB_DISALLOW_ALL_TIX	0x00000040
-#define	KRB5_KDB_REQUIRES_PRE_AUTH	0x00000080
-#define KRB5_KDB_REQUIRES_HW_AUTH	0x00000100
-#define	KRB5_KDB_REQUIRES_PWCHANGE	0x00000200
-#define KRB5_KDB_DISALLOW_SVR		0x00001000
-#define KRB5_KDB_PWCHANGE_SERVICE	0x00002000
-#define KRB5_KDB_SUPPORT_DESMD5         0x00004000
-
 /*
  * Determines the number of failed KDC requests before DISALLOW_ALL_TIX is set
  * on the principal.
@@ -411,4 +413,5 @@ typedef struct _kdb5_dispatch_table {
 krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
 						  kdb5_dispatch_table *));
 #endif	/* KDB5_DISPATCH */
+#endif /* !defined(_MACINTOSH) && !defined(_MSDOS) */
 #endif /* KRB5_KDB5__ */
