@@ -1338,6 +1338,9 @@ krb5_error_code krb5_encode_kdc_rep
 		   krb5_kdc_rep *,
 		   krb5_data ** ));
 
+krb5_error_code krb5_validate_times
+	KRB5_PROTOTYPE((krb5_context, 
+			krb5_ticket_times *));
 /*
  * [De]Serialization Handle and operations.
  */
