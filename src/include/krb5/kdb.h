@@ -121,9 +121,11 @@ typedef struct tl_data_2 {
 #define KRB5_KDB_PWCHANGE_SERVICE	0x00002000
 #define KRB5_KDB_SUPPORT_DESMD5         0x00004000
 
-#ifdef SANDIA	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
+/*
+ * Determines the number of failed KDC requests before DISALLOW_ALL_TIX is set
+ * on the principal.
+ */
 #define KRB5_MAX_FAIL_COUNT		5
-#endif
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
