@@ -1,3 +1,9 @@
+Wed Mar 27 21:15:00 1995  Keith Vetter (keithv@fusion.com)
+
+	* renamed conv_tkt_skey.c to cnv_tkt_skey.c for DOS 8.3
+	   compatability.
+	* Makefile: reflected the above change
+
 Tue Feb 28 02:31:22 1995  John Gilmore  (gnu at toad.com)
 
 	* README, *.[ch]:  Avoid <...> includes for our include files.

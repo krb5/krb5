@@ -23,9 +23,9 @@
 KRB5TOP = /ua/software/build/sun4/krb5.src.B2/src
 
 # Library sources
-SRCS	= conv_creds.c conv_princ.c conv_tkt.c conv_tkt_skey.c \
+SRCS	= conv_creds.c conv_princ.c conv_tkt.c cnv_tkt_skey.c \
 	encode.c misc.c globals.c sendmsg.c krb524_err.et
-OBJS	= conv_creds.o conv_princ.o conv_tkt.o conv_tkt_skey.o \
+OBJS	= conv_creds.o conv_princ.o conv_tkt.o cnv_tkt_skey.o \
 	encode.o misc.o globals.o sendmsg.o krb524_err.o
 
 GENS	= krb524_err.c krb524_err.h
