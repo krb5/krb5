@@ -279,6 +279,15 @@ in_tkt(pname,pinst)
 	
 }
 
+KRB5_DLLIMP int KRB5_CALLCONV
+krb_in_tkt(pname, pinst, prealm)
+    char *pname;
+    char *pinst;
+    char *prealm;
+{
+    return in_tkt(pname, pinst);
+}
+
 /*
  * dest_tkt() is used to destroy the ticket store upon logout.
  * If the ticket file does not exist, dest_tkt() returns RET_TKFIL.
