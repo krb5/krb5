@@ -346,14 +346,17 @@ etype_string(enctype)
     static char buf[12];
     
     switch (enctype) {
-    case 1:
+    case ENCTYPE_DES_CBC_CRC:
 	return "DES-CBC-CRC";
 	break;
-    case 2:
+    case ENCTYPE_DES_CBC_MD4:
 	return "DES-CBC-MD4";
 	break;
-    case 3:
+    case ENCTYPE_DES_CBC_MD5:
 	return "DES-CBC-MD5";
+	break;
+    case ENCTYPE_DES3_CBC_MD5:
+	return "DES3-CBC-MD5";
 	break;
     default:
 	sprintf(buf, "etype %d", enctype);
