@@ -133,7 +133,7 @@ krb5_utmp_e_termination=`echo $krb5_mem|sed -e 's%_exit$%_termination%'`], )
 fi
 
 if test "$krb5_cv_struct_utmpx_ut_exit" = yes; then
-  AC_MSG_RESULT(checking for working ut_exit.e_exit in struct utmp)
+  AC_MSG_RESULT(checking for working ut_exit.e_exit in struct utmpx)
   for krb5_mem in __e_exit ut_e_exit ut_exit e_exit; do
     K5_CHECK_UT_EXIT_MEMBER(utmpx, $krb5_mem,
 [krb5_utmpx_e_exit=$krb5_mem

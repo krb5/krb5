@@ -1,3 +1,7 @@
+2001-09-11  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Cosmetic fix in utmpx.ut_exit check.
+
 Wed Sep  5 20:08:21 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in ($(BUILDTOP)/include/krb5/autoconf.h): Add rules to
