@@ -312,6 +312,32 @@ get_lifconf (int af, int s, size_t *lenp, /*@out@*/ char *buf)
     return ret;
 }
 #endif
+#if defined(SIOCGLIFCONF) && defined(HAVE_STRUCT_IF_LADDRCONF) && 0
+/* I'm not sure if this is needed or if net/if.h will pull it in.  */
+/* #include <net/if6.h> */
+static int
+get_if_laddrconf (int af, int s, size_t *lenp, /*@out@*/ char *buf)
+    /*@modifies *buf,*lenp@*/
+{
+    int ret;
+    struct if_laddrconf iflc;
+
+    /*@+matchanyintegral@*/
+    iflc.iflc_len = *lenp;
+    /*@=matchanyintegral@*/
+    iflc.iflc_buf = buf;
+    memset(buf, 0, *lenp);
+    /*@-moduncon@*/
+    ret = ioctl (s, SIOCGLIFCONF, (char *)&iflc);
+    if (ret)
+	Tperror ("SIOCGLIFCONF");
+    /*@=moduncon@*/
+    /*@+matchanyintegral@*/
+    *lenp = iflc.iflc_len;
+    /*@=matchanyintegral@*/
+    return ret;
+}
+#endif
 #endif /* ! HAVE_IFADDRS_H */
 
 #ifdef LINUX_IPV6_HACK
@@ -620,6 +646,178 @@ have_working_socket:
 
 		    /*@-moduncon@*/
 		    if ((*pass2fn) (data, ss2sa (&lifr->lifr_addr)))
+			goto punt;
+		    /*@=moduncon@*/
+		}
+	    }
+punt:
+    FOREACH_AF () {
+	/*@-moduncon@*/
+	closesocket(P.sock);
+	/*@=moduncon@*/
+	free (P.buf);
+    }
+
+    return retval;
+}
+
+#elif defined (SIOCGLIFNUM) && defined(HAVE_STRUCT_IF_LADDRCONF) && 0 /* HP-UX 11 support being debugged */
+
+int
+foreach_localaddr (/*@null@*/ void *data,
+		   int (*pass1fn) (/*@null@*/ void *, struct sockaddr *) /*@*/,
+		   /*@null@*/ int (*betweenfn) (/*@null@*/ void *) /*@*/,
+		   /*@null@*/ int (*pass2fn) (/*@null@*/ void *,
+					      struct sockaddr *) /*@*/)
+#if defined(DEBUG) || defined(TEST)
+     /*@modifies fileSystem@*/
+#endif
+{
+    /* Okay, this is kind of odd.  We have to use each of the address
+       families we care about, because with an AF_INET socket, extra
+       interfaces like hme0:1 that have only AF_INET6 addresses will
+       cause errors.  Similarly, if hme0 has more AF_INET addresses
+       than AF_INET6 addresses, we won't be able to retrieve all of
+       the AF_INET addresses if we use an AF_INET6 socket.  Since
+       neither family is guaranteed to have the greater number of
+       addresses, we should use both.
+
+       If it weren't for this little quirk, we could use one socket of
+       any type, and ask for addresses of all types.  At least, it
+       seems to work that way.  */
+
+    static const int afs[] = { AF_INET, AF_NS, AF_INET6 };
+#define N_AFS (sizeof (afs) / sizeof (afs[0]))
+    struct {
+	int af;
+	int sock;
+	void *buf;
+	size_t buf_size;
+	int if_num;
+    } afp[N_AFS];
+    int code, i, j;
+    int retval = 0, afidx;
+    krb5_error_code sock_err = 0;
+    struct if_laddrreq *lifr, lifreq, *lifr2;
+
+#define FOREACH_AF() for (afidx = 0; afidx < N_AFS; afidx++)
+#define P (afp[afidx])
+
+    /* init */
+    FOREACH_AF () {
+	P.af = afs[afidx];
+	P.sock = -1;
+	P.buf = 0;
+    }
+
+    /* first pass: get raw data, discard uninteresting addresses, callback */
+    FOREACH_AF () {
+	Tprintf (("trying af %d...\n", P.af));
+	P.sock = socket (P.af, USE_TYPE, USE_PROTO);
+	if (P.sock < 0) {
+	    sock_err = SOCKET_ERROR;
+	    Tperror ("socket");
+	    continue;
+	}
+
+	code = ioctl (P.sock, SIOCGLIFNUM, &P.if_num);
+	if (code) {
+	    Tperror ("ioctl(SIOCGLIFNUM)");
+	    retval = errno;
+	    goto punt;
+	}
+
+	P.buf_size = P.if_num * sizeof (struct if_laddrreq) * 2;
+	P.buf = malloc (P.buf_size);
+	if (P.buf == NULL) {
+	    retval = errno;
+	    goto punt;
+	}
+
+	code = get_if_laddrconf (P.af, P.sock, &P.buf_size, P.buf);
+	if (code < 0) {
+	    retval = errno;
+	    goto punt;
+	}
+
+	for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+	    lifr = (struct if_laddrreq *)((caddr_t) P.buf+i);
+
+	    strncpy(lifreq.iflr_name, lifr->iflc_name,
+		    sizeof (lifreq.iflr_name));
+	    Tprintf (("interface %s\n", lifreq.iflr_name));
+	    /*@-moduncon@*/ /* ioctl unknown to lclint */
+	    if (ioctl (P.sock, SIOCGLIFFLAGS, (char *)&lifreq) < 0) {
+		Tperror ("ioctl(SIOCGLIFFLAGS)");
+	    skip:
+		/* mark for next pass */
+		lifr->iflr_name[0] = '\0';
+		continue;
+	    }
+	    /*@=moduncon@*/
+
+#ifdef IFF_LOOPBACK
+	    /* None of the current callers want loopback addresses.  */
+	    if (lifreq.iflr_flags & IFF_LOOPBACK) {
+		Tprintf (("  loopback\n"));
+		goto skip;
+	    }
+#endif
+	    /* Ignore interfaces that are down.  */
+	    if ((lifreq.iflr_flags & IFF_UP) == 0) {
+		Tprintf (("  down\n"));
+		goto skip;
+	    }
+
+	    /* Make sure we didn't process this address already.  */
+	    for (j = 0; j < i; j += sizeof (*lifr2)) {
+		lifr2 = (struct if_laddrreq *)((caddr_t) P.buf+j);
+		if (lifr2->iflr_name[0] == '\0')
+		    continue;
+		if (lifr2->iflr_addr.ss_family == lifr->iflr_addr.ss_family
+		    /* Compare address info.  If this isn't good enough --
+		       i.e., if random padding bytes turn out to differ
+		       when the addresses are the same -- then we'll have
+		       to do it on a per address family basis.  */
+		    && !memcmp (&lifr2->iflr_addr, &lifr->iflr_addr,
+				sizeof (*lifr))) {
+		    Tprintf (("  duplicate addr\n"));
+		    goto skip;
+		}
+	    }
+
+	    /*@-moduncon@*/
+	    if ((*pass1fn) (data, ss2sa (&lifr->iflr_addr)))
+		goto punt;
+	    /*@=moduncon@*/
+	}
+    }
+
+    /* Did we actually get any working sockets?  */
+    FOREACH_AF ()
+	if (P.sock != -1)
+	    goto have_working_socket;
+    retval = sock_err;
+    goto punt;
+have_working_socket:
+
+    /*@-moduncon@*/
+    if (betweenfn != NULL && (*betweenfn)(data))
+	goto punt;
+    /*@=moduncon@*/
+
+    if (pass2fn)
+	FOREACH_AF ()
+	    if (P.sock >= 0) {
+		for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+		    lifr = (struct if_laddrreq *)((caddr_t) P.buf+i);
+
+		    if (lifr->iflr_name[0] == '\0')
+			/* Marked in first pass to be ignored.  */
+			continue;
+
+		    /*@-moduncon@*/
+		    if ((*pass2fn) (data, ss2sa (&lifr->iflr_addr)))
 			goto punt;
 		    /*@=moduncon@*/
 		}
