@@ -34,18 +34,20 @@
  * 
  *     1.  Identify a machine-specific cpp symbol.  If your preprocessor 
  *         doesn't have any built in, you'll need to add the symbol to the
- *         cpp_argv table in util/imake/imake.c and rebuild imake with the
+ *         cpp_argv table in config/imake.c and rebuild imake with the
  *         BOOTSTRAPCFLAGS variable set (see the macII for an example).
  *
+ *     [ignore this for now...no makedepend with Kerberos V5 (yet...)]
  *     2.  Add all machine-specific cpp symbols (either defined by you or by
  *         the preprocessor or compiler) to the predefs table in 
- *         util/makedepend/main.c.
+ *         config/makedepend/main.c.
  *
  *     3.  But a new #ifdef block below that defines MacroIncludeFile and
  *         MacroFile for your new platform and then #undefs the machine-
  *         specific preprocessor symbols (to avoid problems with file names).
  *
- *     4.  Create a .cf file with the name given by MacroFile.
+ *     4.  Create a .cf file with the name given by MacroFile.  See
+ *	   existing .cf files for examples of what to put there.
  */
 
 #ifdef ultrix
@@ -560,7 +562,7 @@
 #define FilesToClean *.CKP *.ln *.BAK *.bak *.o core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut 
 #endif
 #ifndef STDCTopIncludes
-#define STDCTopIncludes  
+#define STDCTopIncludes /**/  
 #endif
 
             SHELL = BourneShell
@@ -612,23 +614,6 @@ STDC_TOP_INCLUDES = STDCTopIncludes
 #if !HasVoidSignalReturn
    SIGNAL_DEFINES = -DSIGNALRETURNSINT
 #endif
-/*
- * The following crap is necessary to support forcing of function prototypes
- */
-#if NeedFunctionPrototypes
-#define _funcprotodef -DFUNCPROTO
-#else
-#define _funcprotodef /**/
-#endif
-#if NeedWidePrototypes
-#define _wideprotodef /**/
-#else
-#define _wideprotodef -DNARROWPROTO
-#endif
-    PROTO_DEFINES = _funcprotodef _wideprotodef 
-#undef _funcprotodef
-#undef _wideprotodef
-
 #if StripInstalledPrograms
      INSTPGMFLAGS = InstPgmFlags -s	/* install flags for stripping */
 #else
