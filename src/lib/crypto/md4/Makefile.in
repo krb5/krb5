@@ -48,8 +48,8 @@ t_cksum.c: $(srcdir)/../md5/t_cksum.c
 t_cksum.o: t_cksum.c
 	$(CC) -DMD=4 $(CFLAGS) -c  t_cksum.c
 
-t_cksum: t_cksum.o $(TOPLIBD)/libcrypto.a
-	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libcrypto.a $(LIBS)
+t_cksum: t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a 
+	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(LIBS)
 
 check-unix:: t_mddriver t_cksum
 	$(RUN_SETUP) $(C)t_mddriver -x

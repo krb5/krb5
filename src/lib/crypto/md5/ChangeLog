@@ -1,3 +1,7 @@
+Thu Feb  6 12:48:41 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (t_cksum): Link with libkrb5.a as well.
+
 Thu Jan 30 21:42:50 1997  Richard Basch  <basch@lehman.com>
 
 	* md5crypto.c md5glue.c:

@@ -32,8 +32,8 @@ t_mddriver: t_mddriver.o md5.o
 t_mddriver.exe:
 	$(CC) $(CFLAGS2) -o t_mddriver.exe t_mddriver.c md5.c
 
-t_cksum: t_cksum.o $(TOPLIBD)/libcrypto.a
-	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libcrypto.a $(LIBS)
+t_cksum: t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a
+	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(LIBS)
 
 check-unix:: t_mddriver t_cksum
 	$(RUN_SETUP) $(C)t_mddriver -x
