@@ -112,6 +112,16 @@ krb5_error_code decode_generic
 		   (translator_func) KRB5_KDC__REP2krb5_tgs_rep, \
 		   (free_func) free_KRB5_KDC__REP)
 
+#define encode_krb5_tgs_req_enc_part(req, output) \
+    encode_generic((krb5_pointer)req, output, \
+		   (encoder_func) encode_KRB5_KDC__REP, \
+		   (translator_func) krb5_tgs_req_enc_part2KRB5_EncTgsReqPart, \
+		   (free_func) free_KRB5_EncTgsReqPart)
+#define decode_krb5_tgs_req_enc_part(req, output) \
+    decode_generic((krb5_pointer)req, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_EncTgsReqPart, \
+		   (translator_func) KRB5_EncTgsReqPart2krb5_tgs_req_enc_part, \
+		   (free_func) free_KRB5_EncTgsReqPart)
 
 #define encode_krb5_ap_req(req, output) \
     encode_generic((krb5_pointer)req,  output, \
