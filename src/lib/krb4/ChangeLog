@@ -1,5 +1,7 @@
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* cr_err_repl.c (req_act_vno): Delete commented-out declaration.
+
 	* kparse.c, send_to_kdc.c: Don't use macro PROTOTYPE.
 
 2001-01-29  Tom Yu  <tlyu@mit.edu>

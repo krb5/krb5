@@ -29,15 +29,6 @@
 #include <string.h>
 
 /*
- * This is only needed for backwards compatibility for Kerberos V3 (!)
- * and it causes problems for shared libraries.  So I've yanked it.
- */
-#if 0
-extern int req_act_vno;		/* this is defined in the kerberos
-				 * server code */
-#endif
-
-/*
  * This routine is used by the Kerberos authentication server to
  * create an error reply packet to send back to its client.
  *
