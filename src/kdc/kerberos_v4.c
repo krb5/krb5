@@ -380,7 +380,7 @@ krb5_error_code krb5_timeofday(), krb5_get_default_realm();
 krb5_error_code
 process_v4( pkt, client_fulladdr, resp)
 const krb5_data *pkt;
-krb5_fulladdr *client_fulladdr;
+const krb5_fulladdr *client_fulladdr;
 krb5_data **resp;
 {
     struct sockaddr_in client_sockaddr;
@@ -831,13 +831,13 @@ kerberos_v4(client, pkt)
 	    tk->length = 0;
 	    k_flags = 0;	/* various kerberos flags */
 
-	    auth->length = 4 + strlen(pkt->dat + 3);
+	    auth->length = 4 + strlen((char *)pkt->dat + 3);
 	    auth->length += (int) *(pkt->dat + auth->length) +
 		(int) *(pkt->dat + auth->length + 1) + 2;
 
 	    bcopy(pkt->dat, auth->dat, auth->length);
 
-	    strncpy(tktrlm, auth->dat + 3, REALM_SZ);
+	    strncpy(tktrlm, (char *)auth->dat + 3, REALM_SZ);
 	    if (set_tgtkey(tktrlm)) {
 		lt = klog(L_ERR_UNK,
 		    "FAILED realm %s unknown. Host: %s ",

@@ -74,7 +74,7 @@ void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_data *));
 #define realm_of_tgt(ticket) krb5_princ_realm(ticket->server)
 #ifdef KRB4
 krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
-				      krb5_fulladdr *,
+				      const krb5_fulladdr *,
 				      krb5_data **));
 #else
 #define process_v4(foo,bar,foobar)	KRB5KRB_AP_ERR_BADVERSION
