@@ -32,8 +32,8 @@ krb5_error_code
 encode_generic(input, data_out, encoder, translator, free_translation)
 krb5_pointer input;
 register krb5_data **data_out;
-int (*encoder) PROTOTYPE((PE, int, int, char *, pointer));
-krb5_pointer (*translator) PROTOTYPE((pointer, int * ));
+int (*encoder) PROTOTYPE((PE, int, int, char *, krb5_pointer));
+krb5_pointer (*translator) PROTOTYPE((krb5_pointer, int * ));
 void (*free_translation) PROTOTYPE((krb5_pointer ));
 {
     krb5_pointer isode_out;
