@@ -1,3 +1,9 @@
+2003-07-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (realms (krb5.conf)): Add description of
+	master_kdc tag.
+	(Sample krb5.conf File): Add it to the example.
+
 2003-07-24  Sam Hartman  <hartmans@mit.edu>
 
 	* admin.texinfo (realms (kdc.conf)): Remove references to kdc_supported_enctypes
