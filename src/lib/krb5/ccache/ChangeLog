@@ -2,7 +2,8 @@
 
 	* cc_file.c: All functions except krb5_change_cache and
 	krb5_get_notification_message now static.
-	* cc_stdio.c: All functions now static.
+	* cc_stdio.c: All functions now static.  Rename all krb5_scc_
+	functions and krb5_scc_cursor to use krb5_fcc_ prefix instead.
 
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 

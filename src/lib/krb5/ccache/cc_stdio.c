@@ -82,191 +82,191 @@ end-of-file versus other errors.
  */
 #include "k5-int.h"
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_close
+static krb5_error_code KRB5_CALLCONV krb5_fcc_close
 	(krb5_context, 
 		   krb5_ccache id );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_destroy
+static krb5_error_code KRB5_CALLCONV krb5_fcc_destroy
 	(krb5_context, 
 		   krb5_ccache id );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_end_seq_get
+static krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_generate_new
+static krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new
 	(krb5_context, 
 		   krb5_ccache *id );
 
-static const char * KRB5_CALLCONV krb5_scc_get_name
+static const char * KRB5_CALLCONV krb5_fcc_get_name
 	(krb5_context, 
 		   krb5_ccache id );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_get_principal
+static krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal *princ );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_initialize 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_initialize 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal princ );
 
-static krb5_error_code krb5_scc_close_file 
+static krb5_error_code krb5_fcc_close_file 
 	(krb5_context, 
 		   krb5_ccache);
-static krb5_error_code krb5_scc_open_file 
+static krb5_error_code krb5_fcc_open_file 
 	(krb5_context, 
 		   krb5_ccache,
 		   int);
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_next_cred 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_next_cred 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
 		   krb5_creds *creds );
 
-static krb5_error_code krb5_scc_read
+static krb5_error_code krb5_fcc_read
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_pointer buf,
 		   unsigned int len);
-static krb5_error_code krb5_scc_read_principal 
+static krb5_error_code krb5_fcc_read_principal 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal *princ );
-static krb5_error_code krb5_scc_read_keyblock 
+static krb5_error_code krb5_fcc_read_keyblock 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_keyblock *keyblock );
-static krb5_error_code krb5_scc_read_data 
+static krb5_error_code krb5_fcc_read_data 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_data *data );
-static krb5_error_code krb5_scc_read_int32 
+static krb5_error_code krb5_fcc_read_int32 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_int32 *i );
-static krb5_error_code krb5_scc_read_ui_2 
+static krb5_error_code krb5_fcc_read_ui_2 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_ui_2 *i );
-static krb5_error_code krb5_scc_read_octet 
+static krb5_error_code krb5_fcc_read_octet 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_octet *i );
-static krb5_error_code krb5_scc_read_times 
+static krb5_error_code krb5_fcc_read_times 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_ticket_times *t );
-static krb5_error_code krb5_scc_read_addrs 
+static krb5_error_code krb5_fcc_read_addrs 
 	(krb5_context, 
 		   krb5_ccache, 
 		   krb5_address ***);
-static krb5_error_code krb5_scc_read_addr 
+static krb5_error_code krb5_fcc_read_addr 
 	(krb5_context, 
 		   krb5_ccache, 
 		   krb5_address *);
-static krb5_error_code krb5_scc_read_authdata 
+static krb5_error_code krb5_fcc_read_authdata 
 	(krb5_context, 
 		   krb5_ccache, 
 		   krb5_authdata***);
-static krb5_error_code krb5_scc_read_authdatum 
+static krb5_error_code krb5_fcc_read_authdatum 
 	(krb5_context, 
 		   krb5_ccache, 
 		   krb5_authdata*);
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_resolve 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_resolve 
 	(krb5_context, 
 		   krb5_ccache *id , 
 		   const char *residual );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_retrieve 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags whichfields , 
 		   krb5_creds *mcreds , 
 		   krb5_creds *creds );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_start_seq_get 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_start_seq_get 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_store 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_store 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_creds *creds );
 
-static krb5_error_code krb5_scc_skip_header
+static krb5_error_code krb5_fcc_skip_header
 	(krb5_context, krb5_ccache);
-static krb5_error_code krb5_scc_skip_principal 
+static krb5_error_code krb5_fcc_skip_principal 
 	(krb5_context, 
 		   krb5_ccache id );
 
-static krb5_error_code KRB5_CALLCONV krb5_scc_set_flags 
+static krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags flags );
 
 extern krb5_cc_ops krb5_scc_ops;
 
-static krb5_error_code krb5_scc_write 
+static krb5_error_code krb5_fcc_write 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_pointer buf , 
 		   unsigned int len );
-static krb5_error_code krb5_scc_store_principal 
+static krb5_error_code krb5_fcc_store_principal 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal princ );
-static krb5_error_code krb5_scc_store_keyblock 
+static krb5_error_code krb5_fcc_store_keyblock 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_keyblock *keyblock );
-static krb5_error_code krb5_scc_store_data 
+static krb5_error_code krb5_fcc_store_data 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_data *data );
-static krb5_error_code krb5_scc_store_int32 
+static krb5_error_code krb5_fcc_store_int32 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_int32 i );
-static krb5_error_code krb5_scc_store_ui_4 
+static krb5_error_code krb5_fcc_store_ui_4 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_ui_4 i );
-static krb5_error_code krb5_scc_store_ui_2 
+static krb5_error_code krb5_fcc_store_ui_2 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_int32 i );
-static krb5_error_code krb5_scc_store_octet 
+static krb5_error_code krb5_fcc_store_octet 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_int32 i );
-static krb5_error_code krb5_scc_store_times 
+static krb5_error_code krb5_fcc_store_times 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_ticket_times *t );
-static krb5_error_code krb5_scc_store_addrs 
+static krb5_error_code krb5_fcc_store_addrs 
 	(krb5_context, 
 		   krb5_ccache , 
 		   krb5_address ** );
-static krb5_error_code krb5_scc_store_addr 
+static krb5_error_code krb5_fcc_store_addr 
 	(krb5_context, 
 		   krb5_ccache , 
 		   krb5_address * );
-static krb5_error_code krb5_scc_store_authdata 
+static krb5_error_code krb5_fcc_store_authdata 
 	(krb5_context, 
 		   krb5_ccache, 
 		   krb5_authdata **);
-static krb5_error_code krb5_scc_store_authdatum 
+static krb5_error_code krb5_fcc_store_authdatum 
 	(krb5_context, 
 		   krb5_ccache, 
 		   krb5_authdata *);
 
-static krb5_error_code krb5_scc_interpret 
+static krb5_error_code krb5_fcc_interpret 
 	(krb5_context, 
 		   int );
 
@@ -274,7 +274,7 @@ static krb5_error_code krb5_scc_interpret
 
 #define KRB5_OK 0
 
-#define KRB5_SCC_MAXLEN 100
+#define KRB5_FCC_MAXLEN 100
 
 /*
  * SCC version 2 contains type information for principals.  SCC
@@ -320,20 +320,20 @@ typedef struct _krb5_scc_data {
 } krb5_scc_data;
 
 /* An off_t can be arbitrarily complex */
-typedef struct _krb5_scc_cursor {
+typedef struct _krb5_fcc_cursor {
     long pos;
-} krb5_scc_cursor;
+} krb5_fcc_cursor;
 
-#define MAYBE_OPEN(context, ID, MODE) \
+#define MAYBE_OPEN(CONTEXT, ID, MODE) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_open_ret = krb5_scc_open_file (context, ID,MODE);	\
+	krb5_error_code maybe_open_ret = krb5_fcc_open_file (CONTEXT, ID,MODE);	\
 	if (maybe_open_ret) return maybe_open_ret; } }
 
-#define MAYBE_CLOSE(context, ID, RET) \
+#define MAYBE_CLOSE(CONTEXT, ID, RET) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_close_ret = krb5_scc_close_file (context, ID);	\
+	krb5_error_code maybe_close_ret = krb5_fcc_close_file (CONTEXT, ID);	\
 	if (!(RET)) RET = maybe_close_ret; } }
 
 #define CHECK(ret) if (ret != KRB5_OK) goto errout;
@@ -347,7 +347,7 @@ typedef struct _krb5_scc_cursor {
  * system errors (read)
  */
 static krb5_error_code
-krb5_scc_read(context, id, buf, len)
+krb5_fcc_read(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
    krb5_pointer buf;
@@ -358,7 +358,7 @@ krb5_scc_read(context, id, buf, len)
      errno = 0;
      ret = fread((char *) buf, 1, len, ((krb5_scc_data *) id->data)->file);
      if ((ret == 0) && errno)
-	  return krb5_scc_interpret(context, errno);
+	  return krb5_fcc_interpret(context, errno);
      else if (ret != len)
 	  return KRB5_CC_END;
      else
@@ -383,7 +383,7 @@ krb5_scc_read(context, id, buf, len)
  */
 
 static krb5_error_code
-krb5_scc_read_principal(context, id, princ)
+krb5_fcc_read_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
    krb5_principal *princ;
@@ -398,13 +398,13 @@ krb5_scc_read_principal(context, id, princ)
 	type = KRB5_NT_UNKNOWN;
     } else {
         /* Read principal type */
-        kret = krb5_scc_read_int32(context, id, &type);
+        kret = krb5_fcc_read_int32(context, id, &type);
         if (kret != KRB5_OK)
 	    return kret;
     }
 
     /* Read the number of components */
-    kret = krb5_scc_read_int32(context, id, &length);
+    kret = krb5_fcc_read_int32(context, id, &length);
     if (kret != KRB5_OK)
 	return kret;
 
@@ -430,13 +430,13 @@ krb5_scc_read_principal(context, id, princ)
     tmpprinc->length = length;
     tmpprinc->type = type;
 
-    kret = krb5_scc_read_data(context, id, krb5_princ_realm(context, tmpprinc));
+    kret = krb5_fcc_read_data(context, id, krb5_princ_realm(context, tmpprinc));
 
     i = 0;
     CHECK(kret);
 
     for (i=0; i < length; i++) {
-	kret = krb5_scc_read_data(context, id, krb5_princ_component(context, tmpprinc, i));
+	kret = krb5_fcc_read_data(context, id, krb5_princ_component(context, tmpprinc, i));
 	CHECK(kret);
     }
     *princ = tmpprinc;
@@ -451,7 +451,7 @@ krb5_scc_read_principal(context, id, princ)
 }
 
 static krb5_error_code
-krb5_scc_read_addrs(context, id, addrs)
+krb5_fcc_read_addrs(context, id, addrs)
    krb5_context context;
    krb5_ccache id;
    krb5_address ***addrs;
@@ -463,7 +463,7 @@ krb5_scc_read_addrs(context, id, addrs)
      *addrs = 0;
 
      /* Read the number of components */
-     kret = krb5_scc_read_int32(context, id, &length);
+     kret = krb5_fcc_read_int32(context, id, &length);
      CHECK(kret);
 
      /* Make *addrs able to hold length pointers to krb5_address structs
@@ -480,7 +480,7 @@ krb5_scc_read_addrs(context, id, addrs)
 	      krb5_free_addresses(context, *addrs);
 	      return KRB5_CC_NOMEM;
 	  }	  
-	  kret = krb5_scc_read_addr(context, id, (*addrs)[i]);
+	  kret = krb5_fcc_read_addr(context, id, (*addrs)[i]);
 	  CHECK(kret);
      }
 
@@ -492,7 +492,7 @@ krb5_scc_read_addrs(context, id, addrs)
 }
 
 static krb5_error_code
-krb5_scc_read_keyblock(context, id, keyblock)
+krb5_fcc_read_keyblock(context, id, keyblock)
    krb5_context context;
    krb5_ccache id;
    krb5_keyblock *keyblock;
@@ -505,17 +505,17 @@ krb5_scc_read_keyblock(context, id, keyblock)
      keyblock->magic = KV5M_KEYBLOCK;
      keyblock->contents = 0;
 
-     kret = krb5_scc_read_ui_2(context, id, &ui2);
+     kret = krb5_fcc_read_ui_2(context, id, &ui2);
      keyblock->enctype = ui2;
      CHECK(kret);
      if (data->version == KRB5_SCC_FVNO_3) {
 		/* This works because the old etype is the same as the new enctype. */
-	     kret = krb5_scc_read_ui_2(context, id, &ui2);
+	     kret = krb5_fcc_read_ui_2(context, id, &ui2);
 	     /* keyblock->enctype = ui2; */
 	     CHECK(kret);
      }
 
-     kret = krb5_scc_read_int32(context, id, &int32);
+     kret = krb5_fcc_read_int32(context, id, &int32);
      CHECK(kret);
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow size_t??? */
 	  return KRB5_CC_NOMEM;
@@ -527,7 +527,7 @@ krb5_scc_read_keyblock(context, id, keyblock)
      if (keyblock->contents == NULL)
 	  return KRB5_CC_NOMEM;
      
-     kret = krb5_scc_read(context, id, keyblock->contents, keyblock->length);
+     kret = krb5_fcc_read(context, id, keyblock->contents, keyblock->length);
      if (kret)
 	 goto errout;
 
@@ -539,7 +539,7 @@ krb5_scc_read_keyblock(context, id, keyblock)
 }
 
 static krb5_error_code
-krb5_scc_read_data(context, id, data)
+krb5_fcc_read_data(context, id, data)
    krb5_context context;
    krb5_ccache id;
    krb5_data *data;
@@ -550,7 +550,7 @@ krb5_scc_read_data(context, id, data)
      data->magic = KV5M_DATA;
      data->data = 0;
 
-     kret = krb5_scc_read_int32(context, id, &len);
+     kret = krb5_fcc_read_int32(context, id, &len);
      CHECK(kret);
      if ((len & VALID_INT_BITS) != len)
         return KRB5_CC_NOMEM;
@@ -565,7 +565,7 @@ krb5_scc_read_data(context, id, data)
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
-     kret = krb5_scc_read(context, id, data->data, (unsigned) data->length);
+     kret = krb5_fcc_read(context, id, data->data, (unsigned) data->length);
      CHECK(kret);
      
      data->data[data->length] = 0; /* Null terminate, just in case.... */
@@ -577,7 +577,7 @@ krb5_scc_read_data(context, id, data)
 }
 
 static krb5_error_code
-krb5_scc_read_addr(context, id, addr)
+krb5_fcc_read_addr(context, id, addr)
    krb5_context context;
    krb5_ccache id;
    krb5_address *addr;
@@ -589,11 +589,11 @@ krb5_scc_read_addr(context, id, addr)
      addr->magic = KV5M_ADDRESS;
      addr->contents = 0;
 
-     kret = krb5_scc_read_ui_2(context, id, &ui2);
+     kret = krb5_fcc_read_ui_2(context, id, &ui2);
      CHECK(kret);
      addr->addrtype = ui2;
      
-     kret = krb5_scc_read_int32(context, id, &int32);
+     kret = krb5_fcc_read_int32(context, id, &int32);
      CHECK(kret);
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
 	  return KRB5_CC_NOMEM;
@@ -606,7 +606,7 @@ krb5_scc_read_addr(context, id, addr)
      if (addr->contents == NULL)
 	  return KRB5_CC_NOMEM;
 
-     kret = krb5_scc_read(context, id, addr->contents, addr->length);
+     kret = krb5_fcc_read(context, id, addr->contents, addr->length);
      CHECK(kret);
 
      return KRB5_OK;
@@ -617,7 +617,7 @@ krb5_scc_read_addr(context, id, addr)
 }
 
 static krb5_error_code
-krb5_scc_read_int32(context, id, i)
+krb5_fcc_read_int32(context, id, i)
    krb5_context context;
    krb5_ccache id;
    krb5_int32 *i;
@@ -628,9 +628,9 @@ krb5_scc_read_int32(context, id, i)
 
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2)) 
-	return krb5_scc_read(context, id, (krb5_pointer) i, sizeof(krb5_int32));
+	return krb5_fcc_read(context, id, (krb5_pointer) i, sizeof(krb5_int32));
     else {
-	retval = krb5_scc_read(context, id, buf, 4);
+	retval = krb5_fcc_read(context, id, buf, 4);
 	if (retval)
 	    return retval;
 	*i = (((((buf[0] << 8) + buf[1]) << 8 ) + buf[2]) << 8) + buf[3];
@@ -639,7 +639,7 @@ krb5_scc_read_int32(context, id, i)
 }
 
 static krb5_error_code
-krb5_scc_read_ui_2(context, id, i)
+krb5_fcc_read_ui_2(context, id, i)
    krb5_context context;
    krb5_ccache id;
    krb5_ui_2 *i;
@@ -650,9 +650,9 @@ krb5_scc_read_ui_2(context, id, i)
     
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2))
-	return krb5_scc_read(context, id, (krb5_pointer) i, sizeof(krb5_ui_2));
+	return krb5_fcc_read(context, id, (krb5_pointer) i, sizeof(krb5_ui_2));
     else {
-	retval = krb5_scc_read(context, id, buf, 2);
+	retval = krb5_fcc_read(context, id, buf, 2);
 	if (retval)
 	    return retval;
 	*i = (buf[0] << 8) + buf[1];
@@ -661,17 +661,17 @@ krb5_scc_read_ui_2(context, id, i)
 }    
 
 static krb5_error_code
-krb5_scc_read_octet(context, id, i)
+krb5_fcc_read_octet(context, id, i)
    krb5_context context;
    krb5_ccache id;
    krb5_octet *i;
 {
-    return krb5_scc_read(context, id, (krb5_pointer) i, 1);
+    return krb5_fcc_read(context, id, (krb5_pointer) i, 1);
 }    
 
 
 static krb5_error_code
-krb5_scc_read_times(context, id, t)
+krb5_fcc_read_times(context, id, t)
    krb5_context context;
    krb5_ccache id;
    krb5_ticket_times *t;
@@ -682,21 +682,21 @@ krb5_scc_read_times(context, id, t)
     
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2))
-	return krb5_scc_read(context, id, (krb5_pointer) t, sizeof(krb5_ticket_times));
+	return krb5_fcc_read(context, id, (krb5_pointer) t, sizeof(krb5_ticket_times));
     else {
-	retval = krb5_scc_read_int32(context, id, &i);
+	retval = krb5_fcc_read_int32(context, id, &i);
 	CHECK(retval);
 	t->authtime = i;
 	
-	retval = krb5_scc_read_int32(context, id, &i);
+	retval = krb5_fcc_read_int32(context, id, &i);
 	CHECK(retval);
 	t->starttime = i;
 
-	retval = krb5_scc_read_int32(context, id, &i);
+	retval = krb5_fcc_read_int32(context, id, &i);
 	CHECK(retval);
 	t->endtime = i;
 
-	retval = krb5_scc_read_int32(context, id, &i);
+	retval = krb5_fcc_read_int32(context, id, &i);
 	CHECK(retval);
 	t->renew_till = i;
     }
@@ -706,7 +706,7 @@ errout:
 }
 
 static krb5_error_code
-krb5_scc_read_authdata(context, id, a)
+krb5_fcc_read_authdata(context, id, a)
    krb5_context context;
     krb5_ccache id;
     krb5_authdata ***a;
@@ -718,7 +718,7 @@ krb5_scc_read_authdata(context, id, a)
      *a = 0;
 
      /* Read the number of components */
-     kret = krb5_scc_read_int32(context, id, &length);
+     kret = krb5_fcc_read_int32(context, id, &length);
      CHECK(kret);
 
      if (length == 0)
@@ -738,7 +738,7 @@ krb5_scc_read_authdata(context, id, a)
 	      krb5_free_authdata(context, *a);
 	      return KRB5_CC_NOMEM;
 	  }	  
-	  kret = krb5_scc_read_authdatum(context, id, (*a)[i]);
+	  kret = krb5_fcc_read_authdatum(context, id, (*a)[i]);
 	  CHECK(kret);
      }
 
@@ -750,7 +750,7 @@ krb5_scc_read_authdata(context, id, a)
 }
 
 static krb5_error_code
-krb5_scc_read_authdatum(context, id, a)
+krb5_fcc_read_authdatum(context, id, a)
    krb5_context context;
     krb5_ccache id;
     krb5_authdata *a;
@@ -762,10 +762,10 @@ krb5_scc_read_authdatum(context, id, a)
     a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
 
-    kret = krb5_scc_read_ui_2(context, id, &ui2);
+    kret = krb5_fcc_read_ui_2(context, id, &ui2);
     CHECK(kret);
     a->ad_type = (krb5_authdatatype)ui2;
-    kret = krb5_scc_read_int32(context, id, &int32);
+    kret = krb5_fcc_read_int32(context, id, &int32);
     CHECK(kret);
     if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
           return KRB5_CC_NOMEM;
@@ -778,7 +778,7 @@ krb5_scc_read_authdatum(context, id, a)
     if (a->contents == NULL)
 	return KRB5_CC_NOMEM;
 
-    kret = krb5_scc_read(context, id, a->contents, a->length);
+    kret = krb5_fcc_read(context, id, a->contents, a->length);
     CHECK(kret);
     
      return KRB5_OK;
@@ -804,7 +804,7 @@ krb5_scc_read_authdatum(context, id, a)
  * system errors
  */
 static krb5_error_code
-krb5_scc_write(context, id, buf, len)
+krb5_fcc_write(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
    krb5_pointer buf;
@@ -814,7 +814,7 @@ krb5_scc_write(context, id, buf, len)
      errno = 0;
      ret = fwrite((char *) buf, 1, len, ((krb5_scc_data *)id->data)->file);
      if ((ret == 0) && errno) {
-	  return krb5_scc_interpret (context, errno);
+	  return krb5_fcc_interpret (context, errno);
      } else if (ret != len)
 	 return KRB5_CC_END;
      return KRB5_OK;
@@ -835,7 +835,7 @@ krb5_scc_write(context, id, buf, len)
  */
 
 static krb5_error_code
-krb5_scc_store_principal(context, id, princ)
+krb5_fcc_store_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
    krb5_principal princ;
@@ -855,18 +855,18 @@ krb5_scc_store_principal(context, id, princ)
 	 */
 	tmp++;
     } else {
-	ret = krb5_scc_store_int32(context, id, type);
+	ret = krb5_fcc_store_int32(context, id, type);
 	CHECK(ret);
     }
     
-    ret = krb5_scc_store_int32(context, id, tmp);
+    ret = krb5_fcc_store_int32(context, id, tmp);
     CHECK(ret);
 
-    ret = krb5_scc_store_data(context, id, krb5_princ_realm(context, princ));
+    ret = krb5_fcc_store_data(context, id, krb5_princ_realm(context, princ));
     CHECK(ret);
 
     for (i=0; i < length; i++) {
-	ret = krb5_scc_store_data(context, id, 
+	ret = krb5_fcc_store_data(context, id, 
       krb5_princ_component(context, princ, i));
 	CHECK(ret);
     }
@@ -875,7 +875,7 @@ krb5_scc_store_principal(context, id, princ)
 }
 
 static krb5_error_code
-krb5_scc_store_addrs(context, id, addrs)
+krb5_fcc_store_addrs(context, id, addrs)
    krb5_context context;
    krb5_ccache id;
    krb5_address ** addrs;
@@ -891,10 +891,10 @@ krb5_scc_store_addrs(context, id, addrs)
 	     length += 1;
      }
 
-     ret = krb5_scc_store_int32(context, id, length);
+     ret = krb5_fcc_store_int32(context, id, length);
      CHECK(ret);
      for (i=0; i < length; i++) {
-	  ret = krb5_scc_store_addr(context, id, addrs[i]);
+	  ret = krb5_fcc_store_addr(context, id, addrs[i]);
 	  CHECK(ret);
      }
 
@@ -902,7 +902,7 @@ krb5_scc_store_addrs(context, id, addrs)
 }
 
 static krb5_error_code
-krb5_scc_store_keyblock(context, id, keyblock)
+krb5_fcc_store_keyblock(context, id, keyblock)
    krb5_context context;
    krb5_ccache id;
    krb5_keyblock *keyblock;
@@ -910,48 +910,48 @@ krb5_scc_store_keyblock(context, id, keyblock)
      krb5_scc_data *data = (krb5_scc_data *)id->data;
      krb5_error_code ret;
 
-     ret = krb5_scc_store_ui_2(context, id, keyblock->enctype);
+     ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
      CHECK(ret);
      if (data->version == KRB5_SCC_FVNO_3) {
-	 ret = krb5_scc_store_ui_2(context, id, keyblock->enctype);
+	 ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
 	 CHECK(ret);
      }
-     ret = krb5_scc_store_ui_4(context, id, keyblock->length);
+     ret = krb5_fcc_store_ui_4(context, id, keyblock->length);
      CHECK(ret);
-     return krb5_scc_write(context, id, (char *) keyblock->contents, keyblock->length);
+     return krb5_fcc_write(context, id, (char *) keyblock->contents, keyblock->length);
 }
 
 static krb5_error_code
-krb5_scc_store_addr(context, id, addr)
+krb5_fcc_store_addr(context, id, addr)
    krb5_context context;
    krb5_ccache id;
    krb5_address *addr;
 {
      krb5_error_code ret;
 
-     ret = krb5_scc_store_ui_2(context, id, addr->addrtype);
+     ret = krb5_fcc_store_ui_2(context, id, addr->addrtype);
      CHECK(ret);
-     ret = krb5_scc_store_ui_4(context, id, addr->length);
+     ret = krb5_fcc_store_ui_4(context, id, addr->length);
      CHECK(ret);
-     return krb5_scc_write(context, id, (char *) addr->contents, addr->length);
+     return krb5_fcc_write(context, id, (char *) addr->contents, addr->length);
 }
 
 
 static krb5_error_code
-krb5_scc_store_data(context, id, data)
+krb5_fcc_store_data(context, id, data)
    krb5_context context;
    krb5_ccache id;
    krb5_data *data;
 {
      krb5_error_code ret;
 
-     ret = krb5_scc_store_ui_4(context, id, data->length);
+     ret = krb5_fcc_store_ui_4(context, id, data->length);
      CHECK(ret);
-     return krb5_scc_write(context, id, data->data, data->length);
+     return krb5_fcc_write(context, id, data->data, data->length);
 }
 
 static krb5_error_code
-krb5_scc_store_int32(context, id, i)
+krb5_fcc_store_int32(context, id, i)
    krb5_context context;
    krb5_ccache id;
    krb5_int32 i;
@@ -961,7 +961,7 @@ krb5_scc_store_int32(context, id, i)
 
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2)) 
-	return krb5_scc_write(context, id, (char *) &i, sizeof(krb5_int32));
+	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
 	buf[3] = i & 0xFF;
 	i >>= 8;
@@ -971,12 +971,12 @@ krb5_scc_store_int32(context, id, i)
 	i >>= 8;
 	buf[0] = i & 0xFF;
 	
-	return krb5_scc_write(context, id, buf, 4);
+	return krb5_fcc_write(context, id, buf, 4);
     }
 }
 
 static krb5_error_code
-krb5_scc_store_ui_4(context, id, i)
+krb5_fcc_store_ui_4(context, id, i)
    krb5_context context;
    krb5_ccache id;
    krb5_ui_4 i;
@@ -986,7 +986,7 @@ krb5_scc_store_ui_4(context, id, i)
 
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2)) 
-	return krb5_scc_write(context, id, (char *) &i, sizeof(krb5_int32));
+	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
 	buf[3] = i & 0xFF;
 	i >>= 8;
@@ -996,12 +996,12 @@ krb5_scc_store_ui_4(context, id, i)
 	i >>= 8;
 	buf[0] = i & 0xFF;
 	
-	return krb5_scc_write(context, id, buf, 4);
+	return krb5_fcc_write(context, id, buf, 4);
     }
 }
 
 static krb5_error_code
-krb5_scc_store_ui_2(context, id, i)
+krb5_fcc_store_ui_2(context, id, i)
    krb5_context context;
     krb5_ccache id;
     krb5_int32 i;
@@ -1013,18 +1013,18 @@ krb5_scc_store_ui_2(context, id, i)
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2)) {
 	ibuf = i;
-	return krb5_scc_write(context, id, (char *) &ibuf, sizeof(krb5_ui_2));
+	return krb5_fcc_write(context, id, (char *) &ibuf, sizeof(krb5_ui_2));
     } else {
 	buf[1] = i & 0xFF;
 	i >>= 8;
 	buf[0] = i & 0xFF;
 	
-	return krb5_scc_write(context, id, buf, 2);
+	return krb5_fcc_write(context, id, buf, 2);
     }
 }
    
 static krb5_error_code
-krb5_scc_store_octet(context, id, i)
+krb5_fcc_store_octet(context, id, i)
    krb5_context context;
     krb5_ccache id;
     krb5_int32 i;
@@ -1032,11 +1032,11 @@ krb5_scc_store_octet(context, id, i)
     krb5_octet ibuf;
 
     ibuf = i;
-    return krb5_scc_write(context, id, (char *) &ibuf, 1);
+    return krb5_fcc_write(context, id, (char *) &ibuf, 1);
 }
    
 static krb5_error_code
-krb5_scc_store_times(context, id, t)
+krb5_fcc_store_times(context, id, t)
    krb5_context context;
    krb5_ccache id;
    krb5_ticket_times *t;
@@ -1046,22 +1046,22 @@ krb5_scc_store_times(context, id, t)
 
     if ((data->version == KRB5_SCC_FVNO_1) ||
 	(data->version == KRB5_SCC_FVNO_2))
-	return krb5_scc_write(context, id, (char *) t, sizeof(krb5_ticket_times));
+	return krb5_fcc_write(context, id, (char *) t, sizeof(krb5_ticket_times));
     else {
-	retval = krb5_scc_store_int32(context, id, t->authtime);
+	retval = krb5_fcc_store_int32(context, id, t->authtime);
 	CHECK(retval);
-	retval = krb5_scc_store_int32(context, id, t->starttime);
+	retval = krb5_fcc_store_int32(context, id, t->starttime);
 	CHECK(retval);
-	retval = krb5_scc_store_int32(context, id, t->endtime);
+	retval = krb5_fcc_store_int32(context, id, t->endtime);
 	CHECK(retval);
-	retval = krb5_scc_store_int32(context, id, t->renew_till);
+	retval = krb5_fcc_store_int32(context, id, t->renew_till);
 	CHECK(retval);
 	return 0;
     }
 }
    
 static krb5_error_code
-krb5_scc_store_authdata(context, id, a)
+krb5_fcc_store_authdata(context, id, a)
    krb5_context context;
     krb5_ccache id;
     krb5_authdata **a;
@@ -1075,27 +1075,27 @@ krb5_scc_store_authdata(context, id, a)
 	    length++;
     }
 
-    ret = krb5_scc_store_int32(context, id, length);
+    ret = krb5_fcc_store_int32(context, id, length);
     CHECK(ret);
     for (i=0; i<length; i++) {
-	ret = krb5_scc_store_authdatum (context, id, a[i]);
+	ret = krb5_fcc_store_authdatum (context, id, a[i]);
 	CHECK(ret);
     }
     return KRB5_OK;
 }
 
 static krb5_error_code
-krb5_scc_store_authdatum (context, id, a)
+krb5_fcc_store_authdatum (context, id, a)
    krb5_context context;
     krb5_ccache id;
     krb5_authdata *a;
 {
     krb5_error_code ret;
-    ret = krb5_scc_store_ui_2(context, id, a->ad_type);
+    ret = krb5_fcc_store_ui_2(context, id, a->ad_type);
     CHECK(ret);
-    ret = krb5_scc_store_ui_4(context, id, a->length);
+    ret = krb5_fcc_store_ui_4(context, id, a->length);
     CHECK(ret);
-    return krb5_scc_write(context, id, (krb5_pointer) a->contents, a->length);
+    return krb5_fcc_write(context, id, (krb5_pointer) a->contents, a->length);
 }
 
 #ifdef macintosh
@@ -1137,7 +1137,7 @@ static FILE *my_fopen(char *path, char *mode)
 #endif
 
 static krb5_error_code
-krb5_scc_close_file (context, id)
+krb5_fcc_close_file (context, id)
    krb5_context context;
     krb5_ccache id;
 {
@@ -1170,7 +1170,7 @@ krb5_scc_close_file (context, id)
 	  (void) krb5_unlock_file(context, fileno(data->file));
 	  (void) fclose (data->file);
 	  data->file = 0;
-	  return krb5_scc_interpret (context, errsave);
+	  return krb5_fcc_interpret (context, errsave);
      }
      retval = krb5_unlock_file(context, fileno(data->file));
      ret = fclose (data->file);
@@ -1178,11 +1178,11 @@ krb5_scc_close_file (context, id)
      if (retval)
 	 return retval;
      else
-     return ret ? krb5_scc_interpret (context, errno) : 0;
+     return ret ? krb5_fcc_interpret (context, errno) : 0;
 }
 
 static krb5_error_code
-krb5_scc_open_file (context, id, mode)
+krb5_fcc_open_file (context, id, mode)
     krb5_context context;
     krb5_ccache id;
     int mode;
@@ -1243,7 +1243,7 @@ krb5_scc_open_file (context, id, mode)
     f = fopen (data->filename, open_flag);
 #endif    
     if (!f)
-	return krb5_scc_interpret (context, errno);
+	return krb5_fcc_interpret (context, errno);
     data->mode = mode;
 #ifdef HAVE_SETVBUF
     setvbuf(f, data->stdio_buffer, _IOFBF, sizeof (data->stdio_buffer));
@@ -1271,7 +1271,7 @@ krb5_scc_open_file (context, id, mode)
 
 	data->file = f;
 	data->version = context->scc_default_format;
-	retval = krb5_scc_store_ui_2(context, id, data->version);
+	retval = krb5_fcc_store_ui_2(context, id, data->version);
 	if (retval) goto done;
 
 	if (data->version == KRB5_SCC_FVNO_4) {
@@ -1281,7 +1281,7 @@ krb5_scc_open_file (context, id, mode)
                  scc_hlen += (2*sizeof(krb5_ui_2) + 2*sizeof(krb5_int32));
  
 	    /* Write header length */
-	    retval = krb5_scc_store_ui_2(context, id, (krb5_int32)scc_hlen);
+	    retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)scc_hlen);
 	    if (retval) goto done;
  
 	    if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
@@ -1289,13 +1289,13 @@ krb5_scc_open_file (context, id, mode)
 		scc_tag = SCC_TAG_DELTATIME;
 		scc_taglen = 2*sizeof(krb5_int32);
                  
-		retval = krb5_scc_store_ui_2(context,id,(krb5_int32)scc_tag);
+		retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)scc_tag);
 		if (retval) goto done;
-		retval = krb5_scc_store_ui_2(context,id,(krb5_int32)scc_taglen);
+		retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)scc_taglen);
 		if (retval) goto done;
-		retval = krb5_scc_store_int32(context,id,os_ctx->time_offset);
+		retval = krb5_fcc_store_int32(context,id,os_ctx->time_offset);
 		if (retval) goto done;
-		retval = krb5_scc_store_int32(context,id,os_ctx->usec_offset);
+		retval = krb5_fcc_store_int32(context,id,os_ctx->usec_offset);
 		if (retval) goto done;
 	    }
 	}
@@ -1323,7 +1323,7 @@ krb5_scc_open_file (context, id, mode)
     if (data->version == KRB5_SCC_FVNO_4) {
 	char buf[1024];
 
-	if (krb5_scc_read_ui_2(context, id, &scc_hlen) ||
+	if (krb5_fcc_read_ui_2(context, id, &scc_hlen) ||
 	    (scc_hlen > sizeof(buf)))
 	{
 	    retval = KRB5_CC_FORMAT;
@@ -1332,8 +1332,8 @@ krb5_scc_open_file (context, id, mode)
 	
 	while (scc_hlen) {
 	    if ((scc_hlen < (2*sizeof(krb5_ui_2))) ||
-		krb5_scc_read_ui_2(context, id, &scc_tag) ||
-		krb5_scc_read_ui_2(context, id, &scc_taglen) ||
+		krb5_fcc_read_ui_2(context, id, &scc_tag) ||
+		krb5_fcc_read_ui_2(context, id, &scc_taglen) ||
 		(scc_taglen > (scc_hlen - 2*sizeof(krb5_ui_2))))
 	    {
 		retval = KRB5_CC_FORMAT;
@@ -1349,14 +1349,14 @@ krb5_scc_open_file (context, id, mode)
                  if (!(context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) ||
                      (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID))
                  {
-                     if (krb5_scc_read(context, id, buf, scc_taglen)) {
+                     if (krb5_fcc_read(context, id, buf, scc_taglen)) {
                          retval = KRB5_CC_FORMAT;
                          goto done;
                      }
                      break;
                  }
-                 if (krb5_scc_read_int32(context, id, &os_ctx->time_offset) ||
-                     krb5_scc_read_int32(context, id, &os_ctx->usec_offset))
+                 if (krb5_fcc_read_int32(context, id, &os_ctx->time_offset) ||
+                     krb5_fcc_read_int32(context, id, &os_ctx->usec_offset))
                  {
                      retval = KRB5_CC_FORMAT;
                      goto done;
@@ -1366,7 +1366,7 @@ krb5_scc_open_file (context, id, mode)
                       KRB5_OS_TOFFSET_VALID);
                  break;
 	    default:
-                 if (scc_taglen && krb5_scc_read(context,id,buf,scc_taglen)) {
+                 if (scc_taglen && krb5_fcc_read(context,id,buf,scc_taglen)) {
                      retval = KRB5_CC_FORMAT;
                      goto done;
                  }
@@ -1387,7 +1387,7 @@ done:
 }
 
 static krb5_error_code
-krb5_scc_skip_header(context, id)
+krb5_fcc_skip_header(context, id)
    krb5_context context;
    krb5_ccache id;
 {
@@ -1398,7 +1398,7 @@ krb5_scc_skip_header(context, id)
      if (fseek(data->file, sizeof(krb5_ui_2), SEEK_SET))
 	 return errno;
      if (data->version == KRB5_SCC_FVNO_4) {
-	 kret = krb5_scc_read_ui_2(context, id, &scc_flen);
+	 kret = krb5_fcc_read_ui_2(context, id, &scc_flen);
 	 if (kret) return kret;
 	 if (fseek(data->file, scc_flen, SEEK_CUR))
 	     return errno;
@@ -1407,14 +1407,14 @@ krb5_scc_skip_header(context, id)
 }
 
 static krb5_error_code
-krb5_scc_skip_principal(context, id)
+krb5_fcc_skip_principal(context, id)
    krb5_context context;
    krb5_ccache id;
 {
      krb5_error_code kret;
      krb5_principal princ;
 
-     kret = krb5_scc_read_principal(context, id, &princ);
+     kret = krb5_fcc_read_principal(context, id, &princ);
      if (kret != KRB5_OK)
 	  return kret;
 
@@ -1436,21 +1436,21 @@ krb5_scc_skip_principal(context, id)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_initialize(context, id, princ)
+krb5_fcc_initialize(context, id, princ)
    krb5_context context;
    krb5_ccache id;
    krb5_principal princ;
 {
      krb5_error_code kret;
 
-     kret = krb5_scc_open_file (context, id, SCC_OPEN_AND_ERASE);
+     kret = krb5_fcc_open_file (context, id, SCC_OPEN_AND_ERASE);
      if (kret < 0)
-	  return krb5_scc_interpret(context, errno);
+	  return krb5_fcc_interpret(context, errno);
 
 #if 0
      kret = fchmod(((krb5_scc_data *) id->data)->fd, S_IREAD | S_IWRITE);
      if (kret == -1) {
-	 kret = krb5_scc_interpret(context, errno);
+	 kret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     close(((krb5_scc_data *)id->data)->fd);
 	     ((krb5_scc_data *) id->data)->fd = -1;
@@ -1458,7 +1458,7 @@ krb5_scc_initialize(context, id, princ)
 	 return kret;
      }
 #endif
-     kret = krb5_scc_store_principal(context, id, princ);
+     kret = krb5_fcc_store_principal(context, id, princ);
 
      MAYBE_CLOSE (context, id, kret);
      return kret;
@@ -1475,7 +1475,7 @@ krb5_scc_initialize(context, id, princ)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_close(context, id)
+krb5_fcc_close(context, id)
    krb5_context context;
    krb5_ccache id;
 {
@@ -1486,7 +1486,7 @@ krb5_scc_close(context, id)
 	 closeval = fclose (data->file);
 	 data->file = 0;
 	 if (closeval == -1) {
-	     closeval = krb5_scc_interpret(context, errno);
+	     closeval = krb5_fcc_interpret(context, errno);
 	 } else
 	     closeval = KRB5_OK;
 		 
@@ -1511,7 +1511,7 @@ krb5_scc_close(context, id)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_destroy(context, id)
+krb5_fcc_destroy(context, id)
    krb5_context context;
    krb5_ccache id;
 {
@@ -1529,7 +1529,7 @@ krb5_scc_destroy(context, id)
 
      ret = remove (data->filename);
      if (ret < 0) {
-	 ret = krb5_scc_interpret(context, errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) fclose(data->file);
 	     data->file = 0;
@@ -1545,7 +1545,7 @@ krb5_scc_destroy(context, id)
       */
      ret = fstat(fileno(data->file), &buf);
      if (ret < 0) {
-	 ret = krb5_scc_interpret(context, errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) fclose(data->file);
 	     data->file = 0;
@@ -1559,7 +1559,7 @@ krb5_scc_destroy(context, id)
      memset (zeros, 0, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
 	  if (fwrite(data->file, zeros, BUFSIZ) < 0) {
-	      ret = krb5_scc_interpret(context, errno);
+	      ret = krb5_fcc_interpret(context, errno);
 	      if (OPENCLOSE(id)) {
 		  (void) fclose(data->file);
 		  data->file = 0;
@@ -1568,7 +1568,7 @@ krb5_scc_destroy(context, id)
 	  }
 
      if (fwrite(data->file, zeros, size % BUFSIZ) < 0) {
-	 ret = krb5_scc_interpret(context, errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) fclose(data->file);
 	     data->file = 0;
@@ -1581,7 +1581,7 @@ krb5_scc_destroy(context, id)
 #endif
 
      if (ret)
-	 ret = krb5_scc_interpret(context, errno);
+	 ret = krb5_fcc_interpret(context, errno);
 
   cleanup:
      krb5_xfree(data->filename);
@@ -1612,7 +1612,7 @@ krb5_scc_destroy(context, id)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_resolve (context, id, residual)
+krb5_fcc_resolve (context, id, residual)
    krb5_context context;
    krb5_ccache *id;
    const char *residual;
@@ -1658,11 +1658,11 @@ krb5_scc_resolve (context, id, residual)
 /*
  * Effects:
  * Prepares for a sequential search of the credentials cache.
- * Returns and krb5_cc_cursor to be used with krb5_scc_next_cred and
- * krb5_scc_end_seq_get.
+ * Returns and krb5_cc_cursor to be used with krb5_fcc_next_cred and
+ * krb5_fcc_end_seq_get.
  *
  * If the cache is modified between the time of this call and the time
- * of the final krb5_scc_end_seq_get, the results are undefined.
+ * of the final krb5_fcc_end_seq_get, the results are undefined.
  *
  * Errors:
  * KRB5_CC_NOMEM
@@ -1670,24 +1670,24 @@ krb5_scc_resolve (context, id, residual)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_start_seq_get(context, id, cursor)
+krb5_fcc_start_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
-     krb5_scc_cursor *fcursor;
+     krb5_fcc_cursor *fcursor;
      int ret = 0;
      
-     fcursor = (krb5_scc_cursor *) malloc(sizeof(krb5_scc_cursor));
+     fcursor = (krb5_fcc_cursor *) malloc(sizeof(krb5_fcc_cursor));
      if (fcursor == NULL)
 	  return KRB5_CC_NOMEM;
 
      /* Make sure we start reading right after the primary principal */
      MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
 
-     ret = krb5_scc_skip_header(context, id);
+     ret = krb5_fcc_skip_header(context, id);
      if (ret) goto done;
-     ret = krb5_scc_skip_principal(context, id);
+     ret = krb5_fcc_skip_principal(context, id);
      if (ret) goto done;
      
      fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
@@ -1702,7 +1702,7 @@ done:
 /*
  * Requires:
  * cursor is a krb5_cc_cursor originally obtained from
- * krb5_scc_start_seq_get.
+ * krb5_fcc_start_seq_get.
  *
  * Modifes:
  * cursor, creds
@@ -1714,14 +1714,14 @@ done:
  * credentials structure, so the object returned must be passed to
  * krb5_destroy_credential.
  *
- * The cursor is updated for the next call to krb5_scc_next_cred.
+ * The cursor is updated for the next call to krb5_fcc_next_cred.
  *
  * Errors:
  * system errors
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_next_cred(context, id, cursor, creds)
+krb5_fcc_next_cred(context, id, cursor, creds)
    krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
@@ -1730,7 +1730,7 @@ krb5_scc_next_cred(context, id, cursor, creds)
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
      int ret;
      krb5_error_code kret;
-     krb5_scc_cursor *fcursor;
+     krb5_fcc_cursor *fcursor;
      krb5_int32 int32;
      krb5_octet octet;
 
@@ -1746,35 +1746,35 @@ krb5_scc_next_cred(context, id, cursor, creds)
 
      MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
 
-     fcursor = (krb5_scc_cursor *) *cursor;
+     fcursor = (krb5_fcc_cursor *) *cursor;
      ret = fseek(((krb5_scc_data *) id->data)->file, fcursor->pos, 0);
      if (ret < 0) {
-	 ret = krb5_scc_interpret(context, errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 MAYBE_CLOSE (context, id, ret);
 	 return ret;
      }
 
-     kret = krb5_scc_read_principal(context, id, &creds->client);
+     kret = krb5_fcc_read_principal(context, id, &creds->client);
      TCHECK(kret);
-     kret = krb5_scc_read_principal(context, id, &creds->server);
+     kret = krb5_fcc_read_principal(context, id, &creds->server);
      TCHECK(kret);
-     kret = krb5_scc_read_keyblock(context, id, &creds->keyblock);
+     kret = krb5_fcc_read_keyblock(context, id, &creds->keyblock);
      TCHECK(kret);
-     kret = krb5_scc_read_times(context, id, &creds->times);
+     kret = krb5_fcc_read_times(context, id, &creds->times);
      TCHECK(kret);
-     kret = krb5_scc_read_octet(context, id, &octet);
+     kret = krb5_fcc_read_octet(context, id, &octet);
      TCHECK(kret);
      creds->is_skey = octet;
-     kret = krb5_scc_read_int32(context, id, &int32);
+     kret = krb5_fcc_read_int32(context, id, &int32);
      TCHECK(kret);
      creds->ticket_flags = int32;
-     kret = krb5_scc_read_addrs(context, id, &creds->addresses);
+     kret = krb5_fcc_read_addrs(context, id, &creds->addresses);
      TCHECK(kret);
-     kret = krb5_scc_read_authdata (context, id, &creds->authdata);
+     kret = krb5_fcc_read_authdata (context, id, &creds->authdata);
      TCHECK (kret);
-     kret = krb5_scc_read_data(context, id, &creds->ticket);
+     kret = krb5_fcc_read_data(context, id, &creds->ticket);
      TCHECK(kret);
-     kret = krb5_scc_read_data(context, id, &creds->second_ticket);
+     kret = krb5_fcc_read_data(context, id, &creds->second_ticket);
      TCHECK(kret);
      
      fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
@@ -1791,7 +1791,7 @@ lose:
 /*
  * Requires:
  * cursor is a krb5_cc_cursor originally obtained from
- * krb5_scc_start_seq_get.
+ * krb5_fcc_start_seq_get.
  *
  * Modifies:
  * id, cursor
@@ -1803,7 +1803,7 @@ lose:
 /* ARGSUSED */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_end_seq_get(context, id, cursor)
+krb5_fcc_end_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
@@ -1811,7 +1811,7 @@ krb5_scc_end_seq_get(context, id, cursor)
     int ret = KRB5_OK;
 /*    MAYBE_CLOSE (context, id, ret); */
 
-    krb5_xfree((krb5_scc_cursor *) *cursor);
+    krb5_xfree((krb5_fcc_cursor *) *cursor);
 
     return ret;
 }
@@ -1835,7 +1835,7 @@ extern krb5_cc_ops krb5_scc_ops;
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_generate_new (context, id)
+krb5_fcc_generate_new (context, id)
    krb5_context context;
    krb5_ccache *id;
 {
@@ -1886,7 +1886,7 @@ krb5_scc_generate_new (context, id)
      f = fopen (((krb5_scc_data *) lid->data)->filename, "w+");
 #endif
      if (!f) {
-	     retcode = krb5_scc_interpret (context, errno);
+	     retcode = krb5_fcc_interpret (context, errno);
 	     goto err_out;
      } else {
 	 unsigned char scc_fvno[2];
@@ -1895,7 +1895,7 @@ krb5_scc_generate_new (context, id)
 	 scc_fvno[1] = (unsigned char) (context->scc_default_format & 0xFF);
 
 	 if (!fwrite((char *)scc_fvno, sizeof(scc_fvno), 1, f)) {
-	     retcode = krb5_scc_interpret(context, errno);
+	     retcode = krb5_fcc_interpret(context, errno);
 	     (void) fclose(f);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
 	     goto err_out;
@@ -1906,14 +1906,14 @@ krb5_scc_generate_new (context, id)
 	     scc_flen[0] = 0;
 	     scc_flen[1] = 0;
 	     if (!fwrite((char *)scc_flen, sizeof(scc_flen), 1, f)) {
-	        retcode = krb5_scc_interpret(context, errno);
+	        retcode = krb5_fcc_interpret(context, errno);
 	        (void) fclose(f);
 	        (void) remove(((krb5_scc_data *) lid->data)->filename);
                 goto err_out;
             }
 	 }
 	 if (fclose(f) == EOF) {
-	     retcode = krb5_scc_interpret(context, errno);
+	     retcode = krb5_fcc_interpret(context, errno);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
 	     goto err_out;
 	 }
@@ -1936,7 +1936,7 @@ err_out:
  */
 static const char *
 KRB5_CALLCONV
-krb5_scc_get_name (context, id)
+krb5_fcc_get_name (context, id)
    krb5_context context;
    krb5_ccache id;
 {
@@ -1949,7 +1949,7 @@ krb5_scc_get_name (context, id)
  *
  * Effects:
  * Retrieves the primary principal from id, as set with
- * krb5_scc_initialize.  The principal is returned is allocated
+ * krb5_fcc_initialize.  The principal is returned is allocated
  * storage that must be freed by the caller via krb5_free_principal.
  *
  * Errors:
@@ -1958,7 +1958,7 @@ krb5_scc_get_name (context, id)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_get_principal(context, id, princ)
+krb5_fcc_get_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
    krb5_principal *princ;
@@ -1967,10 +1967,10 @@ krb5_scc_get_principal(context, id, princ)
 
      MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
 
-     kret = krb5_scc_skip_header(context, id);
+     kret = krb5_fcc_skip_header(context, id);
      if (kret) goto done;
 
-     kret = krb5_scc_read_principal(context, id, princ);
+     kret = krb5_fcc_read_principal(context, id, princ);
 
 done:
      MAYBE_CLOSE (context, id, kret);
@@ -1979,7 +1979,7 @@ done:
 
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
+krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
    krb5_context context;
    krb5_ccache id;
    krb5_flags whichfields;
@@ -2003,7 +2003,7 @@ krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_store(context, id, creds)
+krb5_fcc_store(context, id, creds)
    krb5_context context;
    krb5_ccache id;
    krb5_creds *creds;
@@ -2016,27 +2016,27 @@ krb5_scc_store(context, id, creds)
 
      ret = fseek(((krb5_scc_data *) id->data)->file, 0, 2);
      if (ret < 0)
-	  return krb5_scc_interpret(context, errno);
+	  return krb5_fcc_interpret(context, errno);
 
-     ret = krb5_scc_store_principal(context, id, creds->client);
+     ret = krb5_fcc_store_principal(context, id, creds->client);
      TCHECK(ret);
-     ret = krb5_scc_store_principal(context, id, creds->server);
+     ret = krb5_fcc_store_principal(context, id, creds->server);
      TCHECK(ret);
-     ret = krb5_scc_store_keyblock(context, id, &creds->keyblock);
+     ret = krb5_fcc_store_keyblock(context, id, &creds->keyblock);
      TCHECK(ret);
-     ret = krb5_scc_store_times(context, id, &creds->times);
+     ret = krb5_fcc_store_times(context, id, &creds->times);
      TCHECK(ret);
-     ret = krb5_scc_store_octet(context, id, (krb5_int32) creds->is_skey);
+     ret = krb5_fcc_store_octet(context, id, (krb5_int32) creds->is_skey);
      TCHECK(ret);
-     ret = krb5_scc_store_int32(context, id, creds->ticket_flags);
+     ret = krb5_fcc_store_int32(context, id, creds->ticket_flags);
      TCHECK(ret);
-     ret = krb5_scc_store_addrs(context, id, creds->addresses);
+     ret = krb5_fcc_store_addrs(context, id, creds->addresses);
      TCHECK(ret);
-     ret = krb5_scc_store_authdata(context, id, creds->authdata);
+     ret = krb5_fcc_store_authdata(context, id, creds->authdata);
      TCHECK(ret);
-     ret = krb5_scc_store_data(context, id, &creds->ticket);
+     ret = krb5_fcc_store_data(context, id, &creds->ticket);
      TCHECK(ret);
-     ret = krb5_scc_store_data(context, id, &creds->second_ticket);
+     ret = krb5_fcc_store_data(context, id, &creds->second_ticket);
      TCHECK(ret);
 
 lose:
@@ -2048,8 +2048,8 @@ lose:
 
 /*
  * Requires:
- * id is a cred cache returned by krb5_scc_resolve or
- * krb5_scc_generate_new, but has not been opened by krb5_scc_initialize.
+ * id is a cred cache returned by krb5_fcc_resolve or
+ * krb5_fcc_generate_new, but has not been opened by krb5_fcc_initialize.
  *
  * Modifies:
  * id
@@ -2059,7 +2059,7 @@ lose:
  */
 static krb5_error_code
 KRB5_CALLCONV
-krb5_scc_set_flags(context, id, flags)
+krb5_fcc_set_flags(context, id, flags)
    krb5_context context;
    krb5_ccache id;
    krb5_flags flags;
@@ -2070,12 +2070,12 @@ krb5_scc_set_flags(context, id, flags)
     if (flags & KRB5_TC_OPENCLOSE) {
 	/* asking to turn on OPENCLOSE mode */
 	if (!OPENCLOSE(id))
-	    ret = krb5_scc_close_file (context, id);
+	    ret = krb5_fcc_close_file (context, id);
     } else {
 	/* asking to turn off OPENCLOSE mode, meaning it must be
 	   left open.  We open if it's not yet open */
 	if (OPENCLOSE(id)) {
-	    ret = krb5_scc_open_file (context, id, SCC_OPEN_RDWR);
+	    ret = krb5_fcc_open_file (context, id, SCC_OPEN_RDWR);
 	}
     }
 
@@ -2085,7 +2085,7 @@ krb5_scc_set_flags(context, id, flags)
 
 
 static krb5_error_code
-krb5_scc_interpret(context, errnum)
+krb5_fcc_interpret(context, errnum)
     krb5_context context;
     int errnum;
 {
@@ -2139,37 +2139,37 @@ krb5_scc_interpret(context, errnum)
 krb5_cc_ops krb5_scc_ops = {
      0,
      "STDIO",
-     krb5_scc_get_name,
-     krb5_scc_resolve,
-     krb5_scc_generate_new,
-     krb5_scc_initialize,
-     krb5_scc_destroy,
-     krb5_scc_close,
-     krb5_scc_store,
-     krb5_scc_retrieve,
-     krb5_scc_get_principal,
-     krb5_scc_start_seq_get,
-     krb5_scc_next_cred,
-     krb5_scc_end_seq_get,
-     NULL, /* XXX krb5_scc_remove, */
-     krb5_scc_set_flags,
+     krb5_fcc_get_name,
+     krb5_fcc_resolve,
+     krb5_fcc_generate_new,
+     krb5_fcc_initialize,
+     krb5_fcc_destroy,
+     krb5_fcc_close,
+     krb5_fcc_store,
+     krb5_fcc_retrieve,
+     krb5_fcc_get_principal,
+     krb5_fcc_start_seq_get,
+     krb5_fcc_next_cred,
+     krb5_fcc_end_seq_get,
+     NULL, /* XXX krb5_fcc_remove, */
+     krb5_fcc_set_flags,
 };
 
 krb5_cc_ops krb5_cc_stdio_ops = {
      0,
      "STDIO",
-     krb5_scc_get_name,
-     krb5_scc_resolve,
-     krb5_scc_generate_new,
-     krb5_scc_initialize,
-     krb5_scc_destroy,
-     krb5_scc_close,
-     krb5_scc_store,
-     krb5_scc_retrieve,
-     krb5_scc_get_principal,
-     krb5_scc_start_seq_get,
-     krb5_scc_next_cred,
-     krb5_scc_end_seq_get,
-     NULL, /* XXX krb5_scc_remove, */
-     krb5_scc_set_flags,
+     krb5_fcc_get_name,
+     krb5_fcc_resolve,
+     krb5_fcc_generate_new,
+     krb5_fcc_initialize,
+     krb5_fcc_destroy,
+     krb5_fcc_close,
+     krb5_fcc_store,
+     krb5_fcc_retrieve,
+     krb5_fcc_get_principal,
+     krb5_fcc_start_seq_get,
+     krb5_fcc_next_cred,
+     krb5_fcc_end_seq_get,
+     NULL, /* XXX krb5_fcc_remove, */
+     krb5_fcc_set_flags,
 };
