@@ -38,7 +38,9 @@ MakeSubdirs($(SUBDIRS))
 /* This target will make all Makefiles except asn.1/Makefile. */
 #undef MakefileSubdirs
 #define MakefileSubdirs(dirs)						@@\
-MakeMakeSubdirs($(SUBDIRS1) $(SUBDIRS2), Makefiles)
+MakeMakeSubdirs($(SUBDIRS1) $(SUBDIRS2), Makefiles)			@@\
+									@@\
+MakeNsubdirMakefiles()
 
 #ifdef SourceTop
      IMAKEARG = -f/**/SourceTop/CURDIR/asn.1/Imakefile
