@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "ktest_equal.h"
 
 #define FALSE 0

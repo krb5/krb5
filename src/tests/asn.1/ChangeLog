@@ -1,3 +1,7 @@
+Wed Sep 28 16:12:08 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* ktest_equal.c: #include stdio.h to get NULL under sunos.
+
 Tue Sep 20 23:53:13 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Fix typo in utility.c --- we should be freeing the pointer to
