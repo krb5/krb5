@@ -139,3 +139,5 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
 
+clean::
+	$(RM) $(OBJS)
