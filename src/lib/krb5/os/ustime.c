@@ -66,6 +66,7 @@ krb5_us_timeofday(context, seconds, microseconds)
 #include <time.h>
 #include <sys/timeb.h>
 #include <dos.h>
+#include <string.h>
 
 /*
  * Time handling.  Translate Unix time calls into Kerberos internal 
@@ -113,7 +114,6 @@ win_gettime () {
     struct _timeb now;
     time_t time;
     long convert;                               /* MSC 7.00 bug work around */
-    void memset();
 
     _ftime(&now);                               /* Daylight savings time */
 

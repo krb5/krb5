@@ -1,3 +1,8 @@
+Thu Mar 2 18:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* ustime.c: added another include for the pc for prototyping.
+	* localaddr.c: used the NEED_SOCKETS mechanism for getting winsock.h.
+
 Wed Mar 1 17:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work on the PC

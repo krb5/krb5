@@ -27,6 +27,7 @@
  */
 
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 #ifndef _MSDOS
@@ -226,8 +227,6 @@ krb5_os_localaddr(addr)
 /* No ioctls in winsock so we just assume there is only one networking 
  * card per machine, so gethostent is good enough. 
  */
-#include <krb5/winsock.h>
-#include <errno.h>
 
 krb5_error_code INTERFACE
 krb5_os_localaddr (krb5_address ***addr) {
