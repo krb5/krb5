@@ -1,3 +1,9 @@
+Wed Feb 21 23:31:09 1996  Richard Basch  <basch@lehman.com>
+
+	* aclocal.m4:
+		- Do not include build directories in the runtime libpath
+		- Fixed the prefix of some cache variables (krb_ --> krb5_)
+
 Wed Feb  7 00:22:26 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (krbsrc.mac): Folded in danw's changes to allow
