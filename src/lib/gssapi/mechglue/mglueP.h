@@ -110,13 +110,13 @@ typedef struct gss_config {
 		    gss_ctx_id_t*,		/* context_handle */
 		    gss_name_t,			/* target_name */
 		    gss_OID,			/* mech_type */
-		    int,			/* req_flags */
+		    OM_uint32,			/* req_flags */
 		    OM_uint32,			/* time_req */
 		    gss_channel_bindings_t,	/* input_chan_bindings */
 		    gss_buffer_t,		/* input_token */
 		    gss_OID*,			/* actual_mech_type */
 		    gss_buffer_t,		/* output_token */
-		    int*,			/* ret_flags */
+		    OM_uint32*,			/* ret_flags */
 		    OM_uint32*			/* time_rec */
 		    ));
     OM_uint32       (*gss_accept_sec_context)
@@ -130,7 +130,7 @@ typedef struct gss_config {
 		    gss_name_t*,		/* src_name */
 		    gss_OID*,			/* mech_type */
 		    gss_buffer_t,		/* output_token */
-		    int*,			/* ret_flags */
+		    OM_uint32*,			/* ret_flags */
 		    OM_uint32*,			/* time_rec */
 		    gss_cred_id_t*		/* delegated_cred_handle */
 		    ));
@@ -201,7 +201,7 @@ typedef struct gss_config {
 		    OM_uint32,		/* status_value */
 		    int,		/* status_type */
 		    gss_OID,		/* mech_type */
-		    int*,		/* message_context */
+		    OM_uint32*,		/* message_context */
 		    gss_buffer_t	/* status_string */
 		    ));
     OM_uint32       (*gss_indicate_mechs)

@@ -1,3 +1,9 @@
+Sat Feb 24 12:21:03 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* mglueP.h (gss_config): Change int fields to OM_uint32 to match
+		arguments to procedure calls in gss_init_sec_context,
+		gss_accept_sec_context, and gss_display_status.
+
 Sat Feb 24 00:00:27 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* g_imp_name.c (gss_import_name): If the user passes in a
