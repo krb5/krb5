@@ -219,7 +219,7 @@ char    **      argmessage;
                 p->client = p->ipaddr;
             }
         }
-#endif BIND43
+#endif
     }
 
     /*  Create input file stream for TCP/IP communication */
@@ -247,7 +247,7 @@ char    **      argmessage;
                 trace_file_name);
     else if (p->debug)
         pop_log(p,POP_PRIORITY,"Debugging turned on");
-#endif DEBUG
+#endif
 
     return(authenticate(p, &cs));
 }

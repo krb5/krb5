@@ -78,7 +78,7 @@ static char sccsid[] = "@(#)commands.c	8.1 (Berkeley) 6/6/93";
 
 #ifndef       MAXHOSTNAMELEN
 #define       MAXHOSTNAMELEN 64
-#endif        MAXHOSTNAMELEN
+#endif
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
 int tos = -1;

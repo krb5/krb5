@@ -92,7 +92,7 @@ POP     *   p;
                 pop_log(p,POP_DEBUG,
                     "Msg %d at offset %d is %d octets long and has %u lines.",
                         mp->number,mp->offset,mp->length,mp->lines);
-#endif DEBUG
+#endif
             ++mp;
             mp->number = msg_num;
             mp->length = 0;
@@ -103,7 +103,7 @@ POP     *   p;
 #ifdef DEBUG
             if(p->debug)
                 pop_log(p,POP_DEBUG, "Msg %d being added to list", mp->number);
-#endif DEBUG
+#endif
         }
         mp->length += nchar;
         p->drop_size += nchar;
@@ -119,7 +119,7 @@ POP     *   p;
                 "Msg %d at offset %d is %d octets long and has %u lines.",
                     mp->number,mp->offset,mp->length,mp->lines);
     }
-#endif DEBUG
+#endif
 
     return(POP_SUCCESS);
 }

@@ -63,7 +63,7 @@ POP     *   p;
         pop_log(p,POP_DEBUG,"Performing maildrop update...");
         pop_log(p,POP_DEBUG,"Checking to see if all messages were deleted");
     }
-#endif DEBUG
+#endif
 
     if (p->msgs_deleted == p->msg_count) {
         /* Truncate before close, to avoid race condition,  DO NOT UNLINK!
@@ -76,7 +76,7 @@ POP     *   p;
 #ifdef DEBUG
     if (p->debug) 
         pop_log(p,POP_DEBUG,"Opening mail drop \"%s\"",p->drop_name);
-#endif DEBUG
+#endif
 
     /*  Open the user's real maildrop */
     if ((mfd = open(p->drop_name,O_RDWR|O_CREAT,0600)) == -1 ||
@@ -133,7 +133,7 @@ POP     *   p;
     if (p->debug) 
         pop_log(p,POP_DEBUG,"Creating new maildrop \"%s\" from \"%s\"",
                 p->drop_name,p->temp_drop);
-#endif DEBUG
+#endif
 
     for (msg_num = 0; msg_num < p->msg_count; ++msg_num) {
 
@@ -147,7 +147,7 @@ POP     *   p;
             if(p->debug)
                 pop_log(p,POP_DEBUG,
                     "Message %d flagged for deletion.",mp->number);
-#endif DEBUG
+#endif
             continue;
         }
 
@@ -156,7 +156,7 @@ POP     *   p;
 #ifdef DEBUG
         if(p->debug)
             pop_log(p,POP_DEBUG,"Copying message %d.",mp->number);
-#endif DEBUG
+#endif
 	begun = 0;
 
         for(status_written = doing_body = 0 ;

@@ -64,7 +64,7 @@ va_dcl
 #ifdef DEBUG
     if (p->debug && stat == POP_SUCCESS)
         pop_log(p,POP_DEBUG,"%s",message);
-#endif DEBUG
+#endif
 
     /*  Log the message if a failure occurred */
     if (stat != POP_SUCCESS) 

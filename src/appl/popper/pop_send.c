@@ -114,7 +114,7 @@ char        *   buffer;
 
 #ifdef DEBUG
     if(p->debug)pop_log(p,POP_DEBUG,"Sending line \"%s\"",buffer);
-#endif DEBUG
+#endif
 
     /*  Put a <CR><NL> if a newline was removed from the buffer */
     if (bp) (void)fputs ("\r\n",p->output);

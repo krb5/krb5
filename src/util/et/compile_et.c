@@ -303,7 +303,7 @@ int yyerror(s) char *s; {
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)strcasecmp.c	1.3 (Berkeley) 8/3/87";
-#endif LIBC_SCCS and not lint
+#endif
 
 /*
  * This array is designed for mapping upper and lower case letter

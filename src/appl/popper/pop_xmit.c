@@ -7,7 +7,7 @@
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
 static char SccsId[] = "@(#)pop_xmit.c	2.1  3/18/91";
-#endif not lint
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -45,7 +45,7 @@ POP     *   p;
         pop_log(p,POP_DEBUG,
             "Creating temporary file for sending a mail message \"%s\"\n",
                 temp_xmit);
-#endif DEBUG
+#endif
     if ((tmp = fopen(temp_xmit,"w+")) == NULL)
         return (pop_msg(p,POP_FAILURE,
             "Unable to create temporary message file \"%s\", errno = %d",
@@ -57,12 +57,12 @@ POP     *   p;
     /*  Receive the message */
 #ifdef DEBUG
     if(p->debug)pop_log(p,POP_DEBUG,"Receiving mail message");
-#endif DEBUG
+#endif
     while (fgets(buffer,MAXLINELEN,p->input)){
         /*  Look for initial period */
 #ifdef DEBUG
         if(p->debug)pop_log(p,POP_DEBUG,"Receiving: \"%s\"",buffer);
-#endif DEBUG
+#endif
         if (*buffer == '.') {
             /*  Exit on end of message */
             if (strcmp(buffer,".\r\n") == 0) break;
@@ -73,7 +73,7 @@ POP     *   p;
 
 #ifdef DEBUG
     if(p->debug)pop_log(p,POP_DEBUG,"Forking for \"%s\"",_PATH_SENDMAIL);
-#endif DEBUG
+#endif
     /*  Send the message */
     switch (pid = fork()) {
         case 0:
@@ -86,7 +86,7 @@ POP     *   p;
         case -1:
 #ifdef DEBUG
             if (!p->debug) (void)unlink (temp_xmit);
-#endif DEBUG
+#endif
             return (pop_msg(p,POP_FAILURE,
                 "Unable to execute \"%s\"",_PATH_SENDMAIL));
         default:

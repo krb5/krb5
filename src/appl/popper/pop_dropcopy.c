@@ -58,7 +58,7 @@ struct passwd	*	pwp;
     if(p->debug)
         pop_log(p,POP_DEBUG,"Creating temporary maildrop '%s'",
             p->temp_drop);
-#endif DEBUG
+#endif
 
     /* Here we work to make sure the user doesn't cause us to remove or
      * write over existing files by limiting how much work we do while
@@ -99,7 +99,7 @@ struct passwd	*	pwp;
 
 #ifdef DEBUG
     if(p->debug)pop_log(p,POP_DEBUG,"uid = %d, gid = %d",getuid(),getgid());
-#endif DEBUG
+#endif
 
     /* Open for append,  this solves the crash recovery problem */
     if ((dfd = open(p->temp_drop,O_RDWR|O_APPEND|O_CREAT,0600)) == -1){

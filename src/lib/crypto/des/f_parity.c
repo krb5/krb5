@@ -11,7 +11,7 @@
 #ifndef	lint
 static char rcsid_f_parity_c[] =
 "$Header$";
-#endif	lint
+#endif
 
 #include "des.h"
 
