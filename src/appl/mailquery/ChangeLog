@@ -1,3 +1,6 @@
+Tue Jun 20 14:29:23 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* poplib.c: HAS_STDLIB_H -> HAVE_STDLIB_H
 
 Thu Jun 15 17:36:11 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and

@@ -44,7 +44,7 @@ error You cannot define both KRB4 and KRB5
 #endif
 #endif
 
-#ifdef HAS_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
 extern char *malloc();
