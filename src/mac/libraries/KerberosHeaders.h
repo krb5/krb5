@@ -21,7 +21,7 @@
 
 #include <unix.h>
 #include <ctype.h>
-#include <SocketErrors.h>
+#include <KerberosSupport/SocketErrors.h>
 #include <unistd.h>
 
 #define PROVIDE_RSA_MD4

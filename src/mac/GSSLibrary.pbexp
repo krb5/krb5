@@ -64,7 +64,33 @@
 # krb5-specific CCache name	stuff
 #
 	_gss_krb5_ccache_name
+
+#
+# GSS-API object identifiers from rfc 2744
+#
 	
+_GSS_C_NT_USER_NAME
+_GSS_C_NT_MACHINE_UID_NAME
+_GSS_C_NT_STRING_UID_NAME
+_GSS_C_NT_HOSTBASED_SERVICE_X
+_GSS_C_NT_HOSTBASED_SERVICE
+_GSS_C_NT_ANONYMOUS
+_GSS_C_NT_EXPORT_NAME
+  
+#
+# GSS-API compatibility symbols from gssapi_generic.h 
+# (the same as rfc 2744 symbols)
+#
+    
+_gss_nt_user_name
+_gss_nt_machine_uid_name
+_gss_nt_string_uid_name
+_gss_nt_service_name_v2
+_gss_nt_service_name
+_gss_nt_exported_name
+
+#
+# KRB5 Mechanism GSS-API object identifier from rfc 1964
+#
 	
-	
-	
+_GSS_KRB5_NT_PRINCIPAL_NAME

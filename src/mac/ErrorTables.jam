@@ -4,55 +4,64 @@ include "/Developer/Makefiles/pbx_jamfiles/Jambase" ;
 SED = /usr/bin/sed ;
 AWK = /usr/bin/awk ;
 
+GSSKRB5_TEMP_DIR = "$(SYMROOT)/GSSKerberos5.intermediates" ;
+COMPILE_ET_SCRIPT = "$(GSSKRB5_TEMP_DIR)/compile_et" ;
+
 COMERR_DIR = "$(SRCROOT)/../util/et" ;
 COMPILE_ET_SH = "$(COMERR_DIR)/compile_et.sh" ;
-COMPILE_ET_SCRIPT = "$(COMERR_DIR)/compile_et" ;
+CONFIG_SCRIPT = "$(COMERR_DIR)/config_script" ;
+
+COMPILE_ET_SH_EXEC = "$(GSSKRB5_TEMP_DIR)/compile_et.sh" ;
+CONFIG_SCRIPT_EXEC = "$(GSSKRB5_TEMP_DIR)/config_script" ;
 
 PROFILE_DIR = "$(SRCROOT)/../util/profile" ;
 ERROR_TABLES_DIR = "$(SRCROOT)/../lib/krb5/error_tables" ;
 GSS_GENERIC_DIR = "$(SRCROOT)/../lib/gssapi/generic" ;
 GSS_KRB5_DIR = "$(SRCROOT)/../lib/gssapi/krb5" ;
 
-DEPENDS all : 
-    "$(PROFILE_DIR)/prof_err.c"
-    "$(PROFILE_DIR)/prof_err.h"
-    "$(ERROR_TABLES_DIR)/adm_err.c"
-    "$(ERROR_TABLES_DIR)/adm_err.h"
-    "$(ERROR_TABLES_DIR)/asn1_err.c"
-    "$(ERROR_TABLES_DIR)/asn1_err.h"
-    "$(ERROR_TABLES_DIR)/kdb5_err.c"
-    "$(ERROR_TABLES_DIR)/kdb5_err.h"
-    "$(ERROR_TABLES_DIR)/krb5_err.c"
-    "$(ERROR_TABLES_DIR)/krb5_err.h"
-    "$(ERROR_TABLES_DIR)/kv5m_err.c"
-    "$(ERROR_TABLES_DIR)/kv5m_err.h"
-    "$(GSS_GENERIC_DIR)/gssapi_err_generic.c"
-    "$(GSS_GENERIC_DIR)/gssapi_err_generic.h"
-    "$(GSS_KRB5_DIR)/gssapi_err_krb5.c"
-    "$(GSS_KRB5_DIR)/gssapi_err_krb5.h"
-;
+# We need these error tables to install and to build the public headers (ie: krb5.h)
+DEPENDS install :		all ;
+DEPENDS installhdrs : 	all ;
 
-DEPENDS install : all ;
+# The list of error tables we need to generate to build:
+DEPENDS all : 			"$(GSSKRB5_TEMP_DIR)"
+                        "$(GSSKRB5_TEMP_DIR)/prof_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/prof_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/adm_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/adm_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/asn1_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/asn1_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/kdb5_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/kdb5_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/krb5_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/krb5_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/kv5m_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/kv5m_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_generic.c"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_generic.h"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_krb5.c"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_krb5.h" ;
 
-Clean.Remove clean : 
-    "$(PROFILE_DIR)/prof_err.c"
-    "$(PROFILE_DIR)/prof_err.h"
-    "$(ERROR_TABLES_DIR)/adm_err.c"
-    "$(ERROR_TABLES_DIR)/adm_err.h"
-    "$(ERROR_TABLES_DIR)/asn1_err.c"
-    "$(ERROR_TABLES_DIR)/asn1_err.h"
-    "$(ERROR_TABLES_DIR)/kdb5_err.c"
-    "$(ERROR_TABLES_DIR)/kdb5_err.h"
-    "$(ERROR_TABLES_DIR)/krb5_err.c"
-    "$(ERROR_TABLES_DIR)/krb5_err.h"
-    "$(ERROR_TABLES_DIR)/kv5m_err.c"
-    "$(ERROR_TABLES_DIR)/kv5m_err.h"
-    "$(GSS_GENERIC_DIR)/gssapi_err_generic.c"
-    "$(GSS_GENERIC_DIR)/gssapi_err_generic.h"
-    "$(GSS_KRB5_DIR)/gssapi_err_krb5.c"
-    "$(GSS_KRB5_DIR)/gssapi_err_krb5.h"
-    "$(COMPILE_ET_SCRIPT)"
-;
+# The header files and scripts we need to remove
+Clean.Remove clean : 	"$(GSSKRB5_TEMP_DIR)/prof_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/prof_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/adm_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/adm_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/asn1_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/asn1_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/kdb5_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/kdb5_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/krb5_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/krb5_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/kv5m_err.c"
+                        "$(GSSKRB5_TEMP_DIR)/kv5m_err.h"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_generic.c"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_generic.h"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_krb5.c"
+                        "$(GSSKRB5_TEMP_DIR)/gssapi_err_krb5.h"
+                        "$(COMPILE_ET_SCRIPT)" ;
+
+# JAM Rules:
 
 rule CompileEt
 {
@@ -62,30 +71,50 @@ rule CompileEt
 
 actions CompileEt
 {
-    (cd "$(2:D)" && "$(COMPILE_ET_SCRIPT)" "$(2)" ) ;
-    mv "$(2:S=.c)" "$(1[1])" ;
-    mv "$(2:S=.h)" "$(1[2])" ;
+    ( cd "$(1[1]:D)" && "$(COMPILE_ET_SCRIPT)" "$(2)" ) ;
 }
-
-CompileEt "$(PROFILE_DIR)/prof_err.c" "$(PROFILE_DIR)/prof_err.h" : "$(PROFILE_DIR)/prof_err.et" ;
-CompileEt "$(ERROR_TABLES_DIR)/adm_err.c" "$(ERROR_TABLES_DIR)/adm_err.h" : "$(ERROR_TABLES_DIR)/adm_err.et" ;
-CompileEt "$(ERROR_TABLES_DIR)/asn1_err.c" "$(ERROR_TABLES_DIR)/asn1_err.h" : "$(ERROR_TABLES_DIR)/asn1_err.et" ;
-CompileEt "$(ERROR_TABLES_DIR)/kdb5_err.c" "$(ERROR_TABLES_DIR)/kdb5_err.h" : "$(ERROR_TABLES_DIR)/kdb5_err.et" ;
-CompileEt "$(ERROR_TABLES_DIR)/krb5_err.c" "$(ERROR_TABLES_DIR)/krb5_err.h" : "$(ERROR_TABLES_DIR)/krb5_err.et" ;
-CompileEt "$(ERROR_TABLES_DIR)/kv5m_err.c" "$(ERROR_TABLES_DIR)/kv5m_err.h" : "$(ERROR_TABLES_DIR)/kv5m_err.et" ;
-CompileEt "$(GSS_GENERIC_DIR)/gssapi_err_generic.c" "$(GSS_GENERIC_DIR)/gssapi_err_generic.h" : "$(GSS_GENERIC_DIR)/gssapi_err_generic.et" ;
-CompileEt "$(GSS_KRB5_DIR)/gssapi_err_krb5.c" "$(GSS_KRB5_DIR)/gssapi_err_krb5.h" : "$(GSS_KRB5_DIR)/gssapi_err_krb5.et" ;
 
 rule GenerateCompileEt
 {
+    DEPENDS "$(1)" : "$(2[1]:D)/et_c.awk" "$(2[1]:D)/et_h.awk" ;
+    Cp "$(2[1]:D)/et_c.awk" : "$(COMERR_DIR)/et_c.awk" ;
+    Cp "$(2[1]:D)/et_h.awk" : "$(COMERR_DIR)/et_h.awk" ;
     DEPENDS "$(1)" : "$(2)" ;
 }
 
 actions GenerateCompileEt
 {
+    chmod 755 "$(2)" ;
     "$(2)" "$(AWK)" "$(SED)" > "$(1)";
     chmod 755 "$(1)" ;
 }
 
-GenerateCompileEt "$(COMPILE_ET_SCRIPT)" : "$(COMERR_DIR)/config_script" "$(COMPILE_ET_SH)" ;
+# Rule to make the temporary directory
+Mkdir				"$(GSSKRB5_TEMP_DIR)" ;
+
+# Copy the scripts to temp space so we can make them +x
+Cp "$(CONFIG_SCRIPT_EXEC)" : "$(CONFIG_SCRIPT)" ;
+Cp "$(COMPILE_ET_SH_EXEC)" : "$(COMPILE_ET_SH)" ;
+
+# Rule to generate compile_et, which builds the scripts
+GenerateCompileEt "$(COMPILE_ET_SCRIPT)" : "$(CONFIG_SCRIPT_EXEC)" "$(COMPILE_ET_SH_EXEC)" ;
+
+# Rules to generate the error tables
+CompileEt	"$(GSSKRB5_TEMP_DIR)/prof_err.c"
+            "$(GSSKRB5_TEMP_DIR)/prof_err.h" 			: "$(PROFILE_DIR)/prof_err.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/adm_err.c" 
+            "$(GSSKRB5_TEMP_DIR)/adm_err.h" 			: "$(ERROR_TABLES_DIR)/adm_err.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/asn1_err.c" 
+            "$(GSSKRB5_TEMP_DIR)/asn1_err.h" 			: "$(ERROR_TABLES_DIR)/asn1_err.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/kdb5_err.c" 
+            "$(GSSKRB5_TEMP_DIR)/kdb5_err.h" 			: "$(ERROR_TABLES_DIR)/kdb5_err.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/krb5_err.c" 
+            "$(GSSKRB5_TEMP_DIR)/krb5_err.h" 			: "$(ERROR_TABLES_DIR)/krb5_err.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/kv5m_err.c" 
+            "$(GSSKRB5_TEMP_DIR)/kv5m_err.h" 			: "$(ERROR_TABLES_DIR)/kv5m_err.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/gssapi_err_generic.c" 
+            "$(GSSKRB5_TEMP_DIR)/gssapi_err_generic.h" 	: "$(GSS_GENERIC_DIR)/gssapi_err_generic.et" ;
+CompileEt 	"$(GSSKRB5_TEMP_DIR)/gssapi_err_krb5.c" 
+            "$(GSSKRB5_TEMP_DIR)/gssapi_err_krb5.h" 	: "$(GSS_KRB5_DIR)/gssapi_err_krb5.et" ;
+
 

@@ -109,7 +109,7 @@ privatekrb5-library-current-version					= 5
 privatekrb5-library-definition-version				= 5
 privatekrb5-library-implementation-version			= 5
 
-krb5-library-current-version						= 5
+krb5-library-current-version						= 6
 krb5-library-definition-version						= 5
 krb5-library-implementation-version					= 5
 
@@ -493,12 +493,14 @@ standard-libraries-macos9-debug			= ¶
 	"{runtimelib-macos9-debug}" ¶
 	"{runtimelib-static-macos9-debug}" ¶
 	¶"{SharedLibraries}InterfaceLib¶" ¶
+	¶"{SharedLibraries}OpenTptInternetLib¶" ¶
 	¶"{SharedLibraries}MathLib¶"
 standard-libraries-macos9-final			= ¶
 	"{clib-macos9-final}" ¶
 	"{runtimelib-macos9-final}" ¶
 	"{runtimelib-static-macos9-final}" ¶
 	¶"{SharedLibraries}InterfaceLib¶" ¶
+	¶"{SharedLibraries}OpenTptInternetLib¶" ¶
 	¶"{SharedLibraries}MathLib¶"
 standard-libraries-carbon-debug			= ¶
 	"{clib-carbon-debug}" ¶
@@ -744,7 +746,7 @@ library-linker-carbon					= MWLinkPPC
 
 common-compiler-options = ¶
 		-enum int -opt all -strings pool -mapcr -strings readonly ¶
-        -relax_pointers -warnings off -fatext -nosyspath -maxerrors 1000 ¶
+        -relax_pointers -warnings off -fatext -convertpaths -maxerrors 10 ¶
         -align mac68k -opt off -toc_data on -fp_contract on ¶
 		-model farData
 
@@ -755,6 +757,8 @@ debug-compiler-options = -sym on
 final-compiler-options = -sym off
 
 mitsupportlib-include-paths = ¶
+	-i {mitsupportlib-root-folder}MoreFilesLib:Headers: ¶
+	-i {mitsupportlib-root-folder}Common:Headers: ¶
 	-i {mitsupportlib-root-folder}CLib:Headers: ¶
 	-i {mitsupportlib-root-folder}SocketsLib:Headers: ¶
 	-i {mitsupportlib-root-folder}ErrorLib:Headers: ¶
@@ -762,20 +766,24 @@ mitsupportlib-include-paths = ¶
 
 include-paths = -i {root-folder}mac:libraries: ¶
 	`catenate {include-folders-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/-i (Å)¨1/ Print '-i 'prefix¨1"` ¶
+	-I- ¶
 	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
 	-i {mitkerberoslib-root-folder}LoginLib:Headers: ¶
 	-i {mitkerberoslib-root-folder}PreferencesLib:Headers: ¶
-	-i {mitkerberoslib-root-folder}Support:Headers: ¶
+	-i {mitkerberoslib-root-folder}Kerberos5Lib:Headers: ¶
+	-i {mitkerberoslib-root-folder}GSSLib:Headers: ¶
+	-i {mitkerberoslib-root-folder}KerberosProfileLib:Headers: ¶
+	-i {mitkerberoslib-root-folder}ComErrLib:Headers: ¶
 	{mitsupportlib-include-paths}
 		
-compiler-options-macos9-debug = {include-paths} {common-compiler-options} {macos9-compiler-options} ¶
-	{debug-compiler-options} -prefix {precompiled-headers-macos9}
-compiler-options-macos9-final = {include-paths} {common-compiler-options} {macos9-compiler-options} ¶
-	{final-compiler-options} -prefix {precompiled-headers-macos9}
-compiler-options-carbon-debug = {include-paths} {common-compiler-options} {carbon-compiler-options} ¶
-	{debug-compiler-options} -prefix {precompiled-headers-carbon}
-compiler-options-carbon-final = {include-paths} {common-compiler-options} {carbon-compiler-options} ¶
-	{final-compiler-options} -prefix {precompiled-headers-carbon}
+compiler-options-macos9-debug = {common-compiler-options} {include-paths} {macos9-compiler-options} ¶
+	{debug-compiler-options} -i {precompiled-headers-folder} -prefix KerberosHeaders.9
+compiler-options-macos9-final = {common-compiler-options} {include-paths} {macos9-compiler-options} ¶
+	{final-compiler-options} -i {precompiled-headers-folder} -prefix KerberosHeaders.9
+compiler-options-carbon-debug = {common-compiler-options} {include-paths} {carbon-compiler-options} ¶
+	{debug-compiler-options} -i {precompiled-headers-folder} -prefix KerberosHeaders.CB
+compiler-options-carbon-final = {common-compiler-options} {include-paths} {carbon-compiler-options} ¶
+	{final-compiler-options} -i {precompiled-headers-folder} -prefix KerberosHeaders.CB
 
 compiler-macos9							= MWCPPC
 compiler-carbon							= MWCPPC
@@ -791,11 +799,11 @@ precompiled-headers-source-macos9 = {precompiled-headers-folder}KerberosHeaders.
 precompiled-headers-source-carbon = {precompiled-headers-folder}KerberosHeaders.CB.pch
 
 {precompiled-headers-macos9} Ä {precompiled-headers-source-macos9} {precompiled-headers-folder}KerberosHeaders.h
-	{compiler-macos9} -nostdinc -i "{CWANSIIncludes}sys" {precompiled-headers-source-macos9} {common-compiler-options} {macos9-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {include-paths} -I- -i "{mitsupportlib-root-folder}Clib:Headers:" -i "{MWCIncludes}"
+	{compiler-macos9} -convertpaths {precompiled-headers-source-macos9} {common-compiler-options} {macos9-compiler-options} ¶
+		-precompile {Targ} -i {precompiled-headers-folder} {include-paths} -i "{CWANSIIncludes}sys"
 {precompiled-headers-carbon} Ä {precompiled-headers-source-carbon} {precompiled-headers-folder}KerberosHeaders.h
-	{compiler-carbon} -nostdinc -i "{CWANSIIncludes}sys" {precompiled-headers-source-carbon} {common-compiler-options} {carbon-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {include-paths} -I- -i "{mitsupportlib-root-folder}Clib:Headers:" -i "{MWCIncludes}"
+	{compiler-carbon} -convertpaths {precompiled-headers-source-carbon} {common-compiler-options} {carbon-compiler-options} ¶
+		-precompile {Targ} -i {precompiled-headers-folder} {include-paths} -i "{CWANSIIncludes}sys"
 
 make-options-common = ¶
 	-f {makefile-name} ¶
@@ -1088,7 +1096,7 @@ comerr-library-linker-options =
 gss-library-output-files = ¶
 	{gss-library-output-folder}{gss-library-name}{library-platform}{library-kind}
 gss-library-dependencies = ¶
-	{autogenerated-files} {gss-library-export} {gss-library-libraries} {gss-library-objects}
+	headers {autogenerated-files} {gss-library-export} {gss-library-libraries} {gss-library-objects}
 gss-library-build-command = ¶
 	{library-linker} ¶
 	-name "{gss-library-fragment-name}{fragment-kind}" ¶
@@ -1104,7 +1112,7 @@ gss-library-build-command = ¶
 krb5-library-output-files = ¶
 	{krb5-library-output-folder}{krb5-library-name}{library-platform}{library-kind}
 krb5-library-dependencies = ¶
-	{autogenerated-files} {krb5-library-export} {krb5-library-libraries} {krb5-library-objects}
+	headers {autogenerated-files} {krb5-library-export} {krb5-library-libraries} {krb5-library-objects}
 krb5-library-build-command = ¶
 	{library-linker} ¶
 	-name "{krb5-library-fragment-name}{fragment-kind}" ¶
@@ -1120,7 +1128,7 @@ krb5-library-build-command = ¶
 privatekrb5-library-output-files = ¶
 	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform}{library-kind}
 privatekrb5-library-dependencies = ¶
-	{autogenerated-files} {privatekrb5-library-export} {privatekrb5-library-libraries} {privatekrb5-library-objects}
+	headers {autogenerated-files} {privatekrb5-library-export} {privatekrb5-library-libraries} {privatekrb5-library-objects}
 privatekrb5-library-build-command = ¶
 	{library-linker} ¶
 	-name "{privatekrb5-library-fragment-name}{fragment-kind}" ¶
@@ -1137,7 +1145,7 @@ privatekrb5-library-build-command = ¶
 profile-library-output-files = ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform}{library-kind}
 profile-library-dependencies = ¶
-	{autogenerated-files} {profile-library-export} {profile-library-libraries} {profile-library-objects}
+	headers {autogenerated-files} {profile-library-export} {profile-library-libraries} {profile-library-objects}
 profile-library-build-command = ¶
 	{library-linker} ¶
 	-name "{profile-library-fragment-name}{fragment-kind}" ¶
@@ -1153,7 +1161,7 @@ profile-library-build-command = ¶
 comerr-library-output-files = ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-platform}{library-kind}
 comerr-library-dependencies = ¶
-	{autogenerated-files} {comerr-library-export} {comerr-library-libraries} {comerr-library-objects}
+	headers {autogenerated-files} {comerr-library-export} {comerr-library-libraries} {comerr-library-objects}
 comerr-library-build-command = ¶
 	{library-linker} ¶
 	-name "{comerr-library-fragment-name}{fragment-kind}" ¶
@@ -1200,11 +1208,11 @@ comerr-library Ä {comerr-library-output-files}
 
 {object-suffix} Ä .c {autogenerated-files} {makefile-dependency} {precompiled-headers}
 	echo {DepDir}{Default}{object-suffix}
-	{compiler} -i "{CWANSIIncludes}sys" {DepDir}{Default}.c -o {DepDir}{Default}{object-suffix} {compiler-options}
+	{compiler} {DepDir}{Default}.c -o {DepDir}{Default}{object-suffix} {compiler-options} -i "{CWANSIIncludes}sys" 
 
 {object-suffix-data} Ä .c {autogenerated-files} {makefile-dependency} {precompiled-headers}
 	echo {DepDir}{Default}{object-suffix-data}
-	{compiler} -i "{CWANSIIncludes}sys" {DepDir}{Default}.c -o {DepDir}{Default}{object-suffix-data} {compiler-options}
+	{compiler} {DepDir}{Default}.c -o {DepDir}{Default}{object-suffix-data} {compiler-options} -i "{CWANSIIncludes}sys" 
 
 ##############################################################################################################
 ###			Autogenerating classic 68K glue files
@@ -1286,27 +1294,40 @@ clean Ä
 
 gss-headers-output-folder							= {root-folder}:GSSLib:Headers:GSS:
 krb5-headers-output-folder							= {root-folder}:Kerberos5Lib:Headers:Kerberos5:
-comerr-headers-output-folder						= {root-folder}:ComErrLib:Headers:ComErr:
-profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:Profile:
+comerr-headers-output-folder						= {root-folder}:ComErrLib:Headers:KerberosComErr:
+profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:KerberosProfile:
 
 gss-headers-output = ¶
 	"{gss-headers-output-folder}gssapi.h" ¶
+	"{gss-headers-output-folder}GSS.h" ¶
 	"{gss-headers-output-folder}gssapi_krb5.h"
 
 krb5-headers-output = ¶
 	"{krb5-headers-output-folder}krb5.h" ¶
+	"{krb5-headers-output-folder}Kerberos5.h" ¶
 	"{krb5-headers-output-folder}win-mac.h"
 
 comerr-headers-output = ¶
-	"{comerr-headers-output-folder}com_err.h"
+	"{comerr-headers-output-folder}com_err.h" ¶
+	"{comerr-headers-output-folder}KerberosComErr.h"
 	
 profile-headers-output = ¶
-	"{profile-headers-output-folder}profile.h"
+	"{profile-headers-output-folder}profile.h" ¶
+	"{profile-headers-output-folder}KerberosProfile.h"
 	
 headers-output = {gss-headers-output} {krb5-headers-output} ¶
 	{comerr-headers-output} {profile-headers-output} 
 
 headers Ä unset-echo {headers-output}
+
+"{gss-headers-output-folder}GSS.h" Ä {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Echo "#include <GSS/gssapi.h>" > "{Targ}"
+	Echo "#include <GSS/gssapi_krb5.h>" >> "{Targ}"
+	SetFile -a l "{Targ}"
 
 "{gss-headers-output-folder}gssapi.h" Ä "{root-folder}lib:gssapi:generic:gssapi.h" {makefile-dependency}
 	"{create-folder}" "{TargDir}"
@@ -1322,6 +1343,14 @@ headers Ä unset-echo {headers-output}
 		SetFile -a l "{Targ}"
 	End
 	Catenate "{root-folder}lib:gssapi:krb5:gssapi_krb5.h" > "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{krb5-headers-output-folder}Kerberos5.h" Ä "{root-folder}include:krb5.h" {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Echo "#include <Kerberos5/krb5.h>" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{krb5-headers-output-folder}krb5.h" Ä "{root-folder}include:krb5.h" {makefile-dependency}
@@ -1340,12 +1369,28 @@ headers Ä unset-echo {headers-output}
 	Catenate "{root-folder}include:win-mac.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
+"{comerr-headers-output-folder}KerberosComErr.h" Ä "{root-folder}util:et:com_err.h" {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Echo "#include <KerberosComErr/com_err.h>" > "{Targ}"
+	SetFile -a l "{Targ}"
+
 "{comerr-headers-output-folder}com_err.h" Ä "{root-folder}util:et:com_err.h" {makefile-dependency}
 	"{create-folder}" "{TargDir}"
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
 	Catenate "{root-folder}util:et:com_err.h" > "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{profile-headers-output-folder}KerberosProfile.h" Ä "{root-folder}util:profile:profile.h" {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Echo "#include <KerberosProfile/profile.h>" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{profile-headers-output-folder}profile.h" Ä "{root-folder}util:profile:profile.h" {makefile-dependency}
