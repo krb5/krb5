@@ -66,6 +66,22 @@ set passes {
 	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
     }
     {
+	des-v4
+	des3_krbtgt=0
+	{supported_enctypes=des-cbc-crc:v4}
+	{kdc_supported_enctypes=des-cbc-crc:v4}
+	{default_tkt_enctypes(client)=des-cbc-crc}
+	{dummy=[verbose -log "DES TGT, DES-CRC enctype, V4 salt"]}
+    }
+    {
+	des-md5-v4
+	des3_krbtgt=0
+	{supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
+	{kdc_supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
+	{default_tkt_enctypes(client)=des-cbc-md5 des-cbc-crc}
+	{dummy=[verbose -log "DES TGT, DES-MD5 and -CRC enctypes, V4 salt"]}
+    }
+    {
 	all-des-des3-enctypes
 	des3_krbtgt=1
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal \
@@ -288,6 +304,8 @@ foreach i {
     {KADMIN_LOCAL $objdir/../../kadmin/cli/kadmin.local}
     {KINIT $objdir/../../clients/kinit/kinit}
     {KTUTIL $objdir/../../kadmin/ktutil/ktutil}
+    {KLIST $objdir/../../clients/klist/klist}
+    {KDESTROY $objdir/../../clients/kdestroy/kdestroy}
     {RESOLVE $objdir/../resolve/resolve}
     {T_INETD $objdir/t_inetd}
 } {
@@ -582,6 +600,36 @@ proc get_hostname { } {
     set domain [string tolower $domain]
     verbose "hostname: $hostname; localhostname: $localhostname; domain $domain"
 
+    return 1
+}
+
+# modify_principal name options...
+
+proc modify_principal { name args } {
+    global KADMIN_LOCAL
+    global REALMNAME
+
+    spawn $KADMIN_LOCAL -r $REALMNAME
+    expect_after {
+	eof {
+	    fail "modprinc (kadmin.local)"
+	    return 0
+	}
+	timeout {
+	    fail "modprinc (kadmin.local)"
+	    return 0
+	}
+    }
+    expect "kadmin.local: "
+    send "modprinc $args $name\r"
+    expect -re "modprinc \[^\n\r\]* $name"
+    expect -re "Principal .* modified."
+    send "quit\r"
+    expect eof
+    catch expect_after
+    if ![check_exit_status "kadmin.local modprinc"] {
+	perror "kadmin.local modprinc exited abnormally"
+    }
     return 1
 }
 
@@ -1367,8 +1415,11 @@ proc start_kerberos_daemons { standalone } {
     set line [tail1 $kadmind_lfile]
     switch -regexp $line {
 	"Seeding random number" {
-	    # Wait a few seconds and get the new line
-	    sleep 3
+	    # Wait a few seconds and get the new line.
+	    # (Should loop -- we don't want to wait 10 seconds if it takes
+	    # 1, but we don't want to give up at 3 seconds if it takes 14
+	    # either.  Probably should wait up to $timeout seconds.)
+	    sleep 20
   	    set line [tail1 $kadmind_lfile]
 	}
     }
@@ -1397,11 +1448,13 @@ proc start_kerberos_daemons { standalone } {
 	"starting" { }
 	default {
 	    if {$standalone} {
-		verbose -log "kadmind failed to start"
+		verbose -log "kadmind failed to start: $line"
 		fail "kadmind"
 	    } else {
+		verbose -log "kadmind failed to start: $line"
 		perror "kadmind failed to start"
 	    }
+sleep 10
 	    stop_kerberos_daemons
 	    return 0
 	}
@@ -1554,7 +1607,6 @@ proc add_random_key { kkey standalone } {
 	    "Principal or policy already exists while creating*" { }
 	}
 	expect eof
-	catch expect_after
 	if ![check_exit_status kadmin] {
 	    break
 	}
@@ -1720,6 +1772,189 @@ proc kinit { name pass standalone } {
     return 1
 }
 
+proc kinit_kt { name keytab standalone testname } {
+    global REALMNAME
+    global KINIT
+    global spawn_id
+
+    # Use kinit to get a ticket.
+	#
+	# For now always get forwardable tickets. Later when we need to make
+	# tests that distiguish between forwardable tickets and otherwise
+	# we should but another option to this proc. --proven
+	#
+    spawn $KINIT -5 -f -k -t $keytab $name@$REALMNAME
+    expect {
+	timeout {
+	    fail "kinit $testname"
+	    return 0
+	}
+	eof { }
+    }
+    if ![check_exit_status "kinit $testname"] {
+	return 0
+    }
+
+    if {$standalone} {
+	pass "kinit $testname"
+    }
+
+    return 1
+}
+
+# List tickets.  Requires client and server names, and test name.
+# Checks that klist exist status is zero.
+# Records pass or fail, and returns 1 or 0.
+proc do_klist { myname servname testname } {
+    global KLIST
+    global tmppwd
+
+    spawn $KLIST -5 -e
+    expect {
+	-re "Ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*Default principal:\[ 	\]*$myname.*$servname\r\n" {
+	    verbose "klist started"
+	}
+	timeout {
+	    fail $testname
+	    return 0
+	}
+	eof {
+	    fail $testname
+	    return 0
+	}
+    }
+
+    expect {
+        "\r" { }
+	eof { }
+    }
+
+    if ![check_exit_status $testname] {
+	return 0
+    }
+    pass $testname
+    return 1
+}
+
+proc do_klist_kt { keytab testname } {
+    global KLIST
+    global tmppwd
+
+    spawn $KLIST -5 -e -k $keytab
+    expect {
+	-re "Keytab name:\[ 	\]*(.+:)?.*KVNO Principal\r\n---- -*\r\n" {
+	    verbose "klist started"
+	}
+	timeout {
+	    fail $testname
+	    return 0
+	}
+	eof {
+	    fail $testname
+	    return 0
+	}
+    }
+    set more 1
+    while {$more} {
+	expect {
+	    -re { *[0-9][0-9]* *[a-zA-Z/@.-]* \([/a-zA-Z 0-9-]*\) *\r\n} {
+		verbose -log "key: $expect_out(buffer)"
+	    }
+	    eof { set more 0 }
+	}
+    }
+
+    if ![check_exit_status $testname] {
+	return 0
+    }
+    pass $testname
+    return 1
+}
+
+proc do_klist_err { testname } {
+    global KLIST
+    global spawn_id
+
+    spawn $KLIST -5
+    # Might say "credentials cache" or "credentials cache file".
+    expect {
+	-re "klist: No credentials cache.*found.*\r\n" {
+	    verbose "klist started"
+	}
+	timeout {
+	    fail $testname
+	    return 0
+	}
+	eof {
+	    fail $testname
+	    return 0
+	}
+    }
+    # We can't use check_exit_status, because we expect an exit status
+    # of 1.
+    set status_list [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $status_list ($testname)"
+    if { [lindex $status_list 2] != 0 } {
+	fail "$testname (bad exit status) $status_list"
+	return 0
+    } else { if { [lindex $status_list 3] != 1 } {
+	fail "$testname (bad exit status) $status_list"
+	return 0
+    } else {
+	pass $testname
+    } }
+    return 1
+}
+
+proc do_kdestroy { testname } {
+    global KDESTROY
+    spawn $KDESTROY -5
+    if ![check_exit_status $testname] {
+	fail $testname
+	return 0
+    }
+    pass $testname
+    return 1
+}
+
+proc xst { keytab name } {
+    global KADMIN_LOCAL
+    global REALMNAME
+
+    envstack_push
+    setup_kerberos_env kdc
+    spawn $KADMIN_LOCAL -r $REALMNAME
+    envstack_pop
+    catch expect_after
+    expect_after {
+	-re "(.*)\r\nkadmin.local:  " {
+	    fail "kadmin.local xst $keytab (unmatched output: $expect_out(1,string)"
+	    catch "expect_after"
+	    return 0
+	}
+	timeout {
+	    fail "kadmin.local xst $keytab (timeout)"
+	    catch "expect_after"
+	    return 0
+	}
+	eof {
+	    fail "kadmin.local xst $keytab (eof)"
+	    catch "expect_after"
+	    return 0
+	}
+    }
+    expect "kadmin.local:  "
+    send "xst -k $keytab $name\r"
+    expect -re "xst -k \[^\r\n\]*\r\n.*Entry for principal .* added to keytab WRFILE:.*\r\nkadmin.local:  "
+    send "quit\r"
+    expect eof
+    catch expect_after
+    if ![check_exit_status "kadmin.local $keytab"] {
+	perror "kadmin.local xst $keytab exited abnormally"
+	return 0
+    }
+    return 1
+}
 
 # v4_compatible_enctype
 # Returns 1 if v4 testing is enabled this passes encryption types are compatable with kerberos 4 work
@@ -1777,6 +2012,120 @@ proc v4kinit { name pass standalone } {
 	pass "v4kinit"
     }
 
+    return 1
+}
+
+proc v4kinit_kt { name keytab standalone } {
+    global REALMNAME
+    global KINIT
+    global spawn_id
+
+    # Use kinit to get a ticket.
+	#
+	# For now always get forwardable tickets. Later when we need to make
+	# tests that distiguish between forwardable tickets and otherwise
+	# we should but another option to this proc. --proven
+	#
+    spawn $KINIT -4 -k -t $keytab $name@$REALMNAME
+    expect {
+	timeout {
+	    fail "v4kinit"
+	    return 0
+	}
+	eof { }
+    }
+    if ![check_exit_status kinit] {
+	return 0
+    }
+
+    if {$standalone} {
+	pass "v4kinit"
+    }
+
+    return 1
+}
+
+# List v4 tickets.
+# Client and server are regular expressions.
+proc v4klist { client server testname } {
+    global KLIST
+    global tmppwd
+
+    spawn $KLIST -4
+    expect {
+	-re "Kerberos 4 ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*Principal:\[ 	\]*$client.*$server\r\n" {
+	    verbose "klist started"
+	}
+	timeout {
+	    fail $testname
+	    return 0
+	}
+	eof {
+	    fail $testname
+	    return 0
+	}
+    }
+
+    expect {
+        "\r" { }
+	eof { }
+    }
+
+    if ![check_exit_status $testname] {
+	return 0
+    }
+    pass $testname
+    return 1
+}
+
+# Destroy tickets.
+proc v4kdestroy { testname } {
+    global KDESTROY
+    spawn $KDESTROY -4
+    if ![check_exit_status $testname] {
+	return 0
+    }
+    pass $testname
+    return 1
+}
+
+# Try to list the krb4 tickets -- there shouldn't be any ticket file.
+proc v4klist_none { testname } {
+    global KLIST
+    global tmppwd
+
+    # Double check that the ticket was destroyed.
+    spawn $KLIST -4
+    expect {
+	-re "Kerberos 4 ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*klist: You have no tickets cached.*\r\n" {
+	    verbose "v4klist started"
+	    pass "$testname (output)"
+	}
+	timeout {
+	    fail "$testname (output)"
+	    # Skip the 'wait' below, if it's taking too long.
+	    untested "$testname (exit status)"
+	    return 0
+	}
+	eof {
+	    fail "$testname (output)"
+	}
+    }
+    # We can't use check_exit_status, because we expect an exit status
+    # of 1.
+    set status_list [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $status_list (v4klist)"
+    if { [lindex $status_list 2] != 0 } {
+	fail "$testname (exit status)"
+	return 0
+    } else {
+	if { [lindex $status_list 3] != 1 } {
+	    fail "$testname (exit status)"
+	    return 0
+	} else {
+	    pass "$testname (exit status)"
+	}
+    }
     return 1
 }
 
@@ -1899,7 +2248,7 @@ proc setup_root_shell { testname } {
     }
 
     # Set up our krb5.conf
-    send "KRB5_CONFIG=$tmppwd/krb5.conf\r"
+    send "KRB5_CONFIG=$tmppwd/krb5.server.conf\r"
     expect {
 	-re "$ROOT_PROMPT" { }
     }
@@ -1984,7 +2333,7 @@ proc setup_root_shell_noremote { testname } {
     }
 
     # Set up our krb5.conf
-    send "KRB5_CONFIG=$tmppwd/krb5.conf\r"
+    send "KRB5_CONFIG=$tmppwd/krb5.server.conf\r"
     expect {
 	-re "$ROOT_PROMPT" { }
     }
@@ -2097,4 +2446,14 @@ proc setup_wrapper { file command } {
 
 proc krb_exit { } {
     stop_kerberos_daemons
+}
+
+# helpful sometimes for debugging the test suite
+proc spawn_xterm { } {
+    global env
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST} {
+	global $i
+	set env($i) [set $i]
+    }
+    exec "xterm"
 }

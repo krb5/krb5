@@ -1,3 +1,18 @@
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (modify_principal, kinit_kt, v4kinit_kt, do_klist,
+	do_klist_kt, do_klist_err, do_kdestroy, xst, v4klist, v4kdestroy,
+	v4klist_none): New procs.
+	(add_random_key): No need to call expect_after in 'body' since
+	both branches at invocation site will do it.
+	(setup_root_shell, setup_root_shell_remote): Set correct value for
+	KRB5_CONFIG.
+	(passes): Add des-crc and des-md5 krb4 passes.
+	(top level): Set KLIST and KDESTROY.
+	(spawn_xterm): New proc useful for debugging only.
+	(start_kerberos_daemons): Wait longer for "starting"
+	line in log file.
+
 2002-02-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp (start_kerberos_daemons): In starting the kadmin
