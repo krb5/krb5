@@ -1,3 +1,30 @@
+2003-06-27  Jen Selby <jenselby@mit.edu>
+
+	* kdc.conf.M: replaced the @LOCALSTATEDIR typos with
+	/usr/local/var
+
+2003-06-20  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.conf.M: Sync with doc/krb5conf.texinfo.
+
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc.conf: Delete supported and master key type specs.
+
+	* krb5.conf: Delete Athena KDC specifications.  Delete Cygnus
+	realm info.  Replace CLUB.CC.CMU.EDU info with ANDREW.CMU.EDU,
+	which has SRV records and thus doesn't need KDC specs.  Provide a
+	commented-out example of a [logging] spec.  Delete commented-out
+	enctype specs.
+
+	* krb5.conf.M: Remove "kdc =" lines from "realms" section example,
+	and recommend not using it unless DNS info isn't available.
+
+2003-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc.conf.M (FILES): Refer to correct location for kdc.conf in
+	the default installation path.
+
 2002-09-24  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.conf: Update enctypes and add club.cc.cmu.edu

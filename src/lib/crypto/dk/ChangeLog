@@ -1,3 +1,32 @@
+2004-02-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* dk_decrypt.c (krb5_dk_decrypt_maybe_trunc_hmac): New argument
+	IVEC_MODE.  If clear, same old behavior.  If set, copy out next
+	to last block for CTS.
+	(krb5_dk_decrypt, krb5int_aes_dk_decrypt): Pass extra argument.
+	* dk_encrypt.c (krb5int_aes_dk_encrypt): For IV, copy out next to
+	last block for CTS.
+
+2003-04-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* dk_encrypt.c (krb5int_aes_dk_encrypt): Set output length
+	properly.
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* dk_decrypt.c (krb5_dk_decrypt_maybe_trunc_hmac): Renamed from
+	krb5_dk_decrypt, made static, added extra HMACSIZE argument to
+	indicate size of HMAC.  Cast byte values to char to silence
+	compiler warning.
+	(krb5_dk_decrypt): Call it.
+	(krb5int_aes_dk_decrypt): New function.
+	* dk_encrypt.c (krb5_dk_encrypt): Cast byte values to char to
+	silence compiler warning.
+	(krb5int_aes_encrypt_length, trunc_hmac, krb5int_aes_dk_encrypt):
+	New functions.
+	* dk.h (krb5int_aes_encrypt_length, krb5int_aes_dk_encrypt,
+	krb5int_aes_dk_decrypt): Declare.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* stringtokey.c (krb5int_dk_string_to_key): Renamed from

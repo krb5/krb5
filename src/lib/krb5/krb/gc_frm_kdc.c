@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994 by the Massachusetts Institute of Technology.
+ * Copyright (c) 1994,2003 by the Massachusetts Institute of Technology.
  * Copyright (c) 1994 CyberSAFE Corporation
  * Copyright (c) 1993 Open Computing Security Group
  * Copyright (c) 1990,1991 by the Massachusetts Institute of Technology.
@@ -76,6 +76,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache, krb5_creds 
   krb5_principal  *top_server = NULL;
   krb5_principal  *next_server = NULL;
   unsigned int    nservers = 0;
+  krb5_boolean	  old_use_conf_ktypes = context->use_conf_ktypes;
 
   /* in case we never get a TGT, zero the return */
 
@@ -114,6 +115,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache, krb5_creds 
       goto cleanup;
   }
 
+    context->use_conf_ktypes = 1;
   if ((retval = krb5_cc_retrieve_cred(context, ccache,
 				      KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 				      &tgtq, &tgt))) {
@@ -231,21 +233,17 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache, krb5_creds 
     
 	krb5_free_cred_contents(context, &tgtq);
 	memset(&tgtq, 0, sizeof(tgtq));
-#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
 	tgtq.times        = tgt.times;
-#else
-	memcpy(&tgtq.times, &tgt.times, sizeof(krb5_ticket_times));
-#endif
-
 	if ((retval = krb5_copy_principal(context, tgt.client, &tgtq.client)))
 	    goto cleanup;
 	if ((retval = krb5_copy_principal(context, int_server, &tgtq.server)))
 	    goto cleanup;
 	tgtq.is_skey      = FALSE;
 	tgtq.ticket_flags = tgt.ticket_flags;
-	if ((retval = krb5_get_cred_via_tkt(context, &tgt,
-					    FLAGS2OPTS(tgtq.ticket_flags),
-					    tgt.addresses, &tgtq, &tgtr))) {
+	retval = krb5_get_cred_via_tkt(context, &tgt,
+				       FLAGS2OPTS(tgtq.ticket_flags),
+				       tgt.addresses, &tgtq, &tgtr);
+	if (retval) {
 	      
        /*
 	* couldn't get one so now loop backwards through the realms
@@ -301,12 +299,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache, krb5_creds 
 		  goto cleanup;
 	      tgtq.is_skey      = FALSE;
 	      tgtq.ticket_flags = tgt.ticket_flags;
-	      if ((retval = krb5_get_cred_via_tkt(context, &tgt,
-						  FLAGS2OPTS(tgtq.ticket_flags),
-						  tgt.addresses,
-						  &tgtq, &tgtr))) {
+	      retval = krb5_get_cred_via_tkt(context, &tgt,
+					     FLAGS2OPTS(tgtq.ticket_flags),
+					     tgt.addresses,
+					     &tgtq, &tgtr);
+	      if (retval)
 		  continue;
-	      }
 	      
 	      /* save tgt in return array */
 	      if ((retval = krb5_copy_creds(context, tgtr,
@@ -341,7 +339,9 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache, krb5_creds 
 	for (next_server = top_server; *next_server; next_server++) {
             krb5_data *realm_1 = krb5_princ_component(context, next_server[0], 1);
             krb5_data *realm_2 = krb5_princ_component(context, tgtr->server, 1);
-            if (realm_1->length == realm_2->length &&
+	    if (realm_1 != NULL &&
+		realm_2 != NULL &&
+                realm_1->length == realm_2->length &&
                 !memcmp(realm_1->data, realm_2->data, realm_1->length)) {
 		break;
             }
@@ -374,10 +374,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache, krb5_creds 
     goto cleanup;
   }
 
-  retval = krb5_get_cred_via_tkt(context, &tgt, FLAGS2OPTS(tgt.ticket_flags) |
-				 kdcopt | 
-  				 	(in_cred->second_ticket.length ? 
-				  	 KDC_OPT_ENC_TKT_IN_SKEY : 0),
+  context->use_conf_ktypes = old_use_conf_ktypes;
+  retval = krb5_get_cred_via_tkt(context, &tgt,
+				 FLAGS2OPTS(tgt.ticket_flags) |
+				 kdcopt |
+				 (in_cred->second_ticket.length ?
+				  KDC_OPT_ENC_TKT_IN_SKEY : 0),
 				 tgt.addresses, in_cred, out_cred);
 
   /* cleanup and return */
@@ -393,6 +395,7 @@ cleanup:
       if (ret_tgts)  free(ret_tgts);
       krb5_free_cred_contents(context, &tgt);
   }
+  context->use_conf_ktypes = old_use_conf_ktypes;
   return(retval);
 }
 

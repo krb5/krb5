@@ -38,8 +38,14 @@ typedef struct _queue {
    int do_sequence;
    int start;
    int length;
-   unsigned int firstnum;
-   unsigned int elem[QUEUE_LENGTH];
+   gssint_uint64 firstnum;
+   /* Stored as deltas from firstnum.  This way, the high bit won't
+      overflow unless we've actually gone through 2**n messages, or
+      gotten something *way* out of sequence.  */
+   gssint_uint64 elem[QUEUE_LENGTH];
+   /* All ones for 64-bit sequence numbers; 32 ones for 32-bit
+      sequence numbers.  */
+   gssint_uint64 mask;
 } queue;
 
 /* rep invariant:
@@ -51,7 +57,7 @@ typedef struct _queue {
 #define QELEM(q,i) ((q)->elem[(i)%QSIZE(q)])
 
 static void
-queue_insert(queue *q, int after, unsigned int seqnum)
+queue_insert(queue *q, int after, gssint_uint64 seqnum)
 {
    /* insert.  this is not the fastest way, but it's easy, and it's
       optimized for insert at end, which is the common case */
@@ -80,10 +86,10 @@ queue_insert(queue *q, int after, unsigned int seqnum)
       q->length++;
    }
 }
-   
+
 gss_int32
-g_order_init(void **vqueue, OM_uint32 seqnum,
-	     int do_replay, int do_sequence)
+g_order_init(void **vqueue, gssint_uint64 seqnum,
+	     int do_replay, int do_sequence, int wide_nums)
 {
    queue *q;
 
@@ -92,38 +98,49 @@ g_order_init(void **vqueue, OM_uint32 seqnum,
 
    q->do_replay = do_replay;
    q->do_sequence = do_sequence;
+   q->mask = wide_nums ? ~(gssint_uint64)0 : 0xffffffffUL;
 
    q->start = 0;
    q->length = 1;
    q->firstnum = seqnum;
-   q->elem[q->start] = seqnum-1;
+   q->elem[q->start] = ((gssint_uint64)0 - 1) & q->mask;
 
    *vqueue = (void *) q;
    return(0);
 }
 
 gss_int32
-g_order_check(void **vqueue, OM_uint32 seqnum)
+g_order_check(void **vqueue, gssint_uint64 seqnum)
 {
    queue *q;
    int i;
-   
+   gssint_uint64 expected;
+
    q = (queue *) (*vqueue);
 
    if (!q->do_replay && !q->do_sequence)
       return(GSS_S_COMPLETE);
 
+   /* All checks are done relative to the initial sequence number, to
+      avoid (or at least put off) the pain of wrapping.  */
+   seqnum -= q->firstnum;
+   /* If we're only doing 32-bit values, adjust for that again.
+
+      Note that this will probably be the wrong thing to if we get
+      2**32 messages sent with 32-bit sequence numbers.  */
+   seqnum &= q->mask;
+
    /* rule 1: expected sequence number */
 
-   if (seqnum == QELEM(q,q->start+q->length-1)+1) { 
+   expected = (QELEM(q,q->start+q->length-1)+1) & q->mask;
+   if (seqnum == expected) { 
       queue_insert(q, q->start+q->length-1, seqnum);
       return(GSS_S_COMPLETE);
    }
 
    /* rule 2: > expected sequence number */
 
-   if ((seqnum > QELEM(q,q->start+q->length-1)+1) ||
-       (seqnum < q->firstnum)) {
+   if ((seqnum > expected)) {
       queue_insert(q, q->start+q->length-1, seqnum);
       if (q->do_replay && !q->do_sequence)
 	 return(GSS_S_COMPLETE);
@@ -134,7 +151,20 @@ g_order_check(void **vqueue, OM_uint32 seqnum)
    /* rule 3: seqnum < seqnum(first) */
 
    if ((seqnum < QELEM(q,q->start)) &&
-       (seqnum >= q->firstnum)) {
+       /* Is top bit of whatever width we're using set?
+
+	  We used to check for greater than or equal to firstnum, but
+	  (1) we've since switched to compute values relative to
+	  firstnum, so the lowest we can have is 0, and (2) the effect
+	  of the original scheme was highly dependent on whether
+	  firstnum was close to either side of 0.  (Consider
+	  firstnum==0xFFFFFFFE and we miss three packets; the next
+	  packet is *new* but would look old.)
+
+          This check should give us 2**31 or 2**63 messages "new", and
+          just as many "old".  That's not quite right either.  */
+       (seqnum & (1 + (q->mask >> 1)))
+       ) {
       if (q->do_replay && !q->do_sequence)
 	 return(GSS_S_OLD_TOKEN);
       else
@@ -189,6 +219,8 @@ g_queue_size(void *vqueue, size_t *sizep)
 gss_uint32
 g_queue_externalize(void *vqueue, unsigned char **buf, size_t *lenremain)
 {
+    if (*lenremain < sizeof(queue))
+	return ENOMEM;
     memcpy(*buf, vqueue, sizeof(queue));
     *buf += sizeof(queue);
     *lenremain -= sizeof(queue);
@@ -201,6 +233,8 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
 {
     void *q;
 
+    if (*lenremain < sizeof(queue))
+	return EINVAL;
     if ((q = malloc(sizeof(queue))) == 0)
 	return ENOMEM;
     memcpy(q, *buf, sizeof(queue));

@@ -1,3 +1,23 @@
+2003-07-04  Kenneth Raeburn  <raeburn@mit.edu>
+
+	* test_et.c: Conditionalize sys_nerr declaration on
+	NEED_SYS_ERRLIST, not HAVE_SYS_ERRLIST.
+
+2003-06-12  Alexandra Ellwood  <lxs@mit.edu>
+    * error_table.h, et_c.awk, et_c.pl, et_h.awk, et_c.awk: Removed Mac 
+    OS support because it prevents darwin builds from getting com error 
+    strings via the initialize_*_error_table function
+
+2003-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_et.c [HAVE_SYS_ERRLIST]: Do declare sys_nerr.
+
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* compile_et.c: Don't declare malloc or errno.  Include stdlib.h
+	and errno.h.
+	* test_et.c: Don't declare errno or sys_nerr.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     * com_err.c, com_err.h, error_message.c, et_c.awk, et_h.awk: 
       Removed Mac OS 9-specific code.
