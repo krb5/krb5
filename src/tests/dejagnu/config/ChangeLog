@@ -1,3 +1,10 @@
+Tue Mar 26 00:38:14 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp (start_kerberos_daemons): New methodology for
+		starting KDC so that the KDC will not hang on a full
+		output buffer which is being ignored.
+		(setup_kerberos_files): Enable des3 encryption types.
+
 Thu Mar 14 15:20:33 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* default.exp (add_kerberos_key): clarify "lost KDC" text.

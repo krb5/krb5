@@ -261,6 +261,7 @@ proc setup_kerberos_files { } {
     set conffile [open tmpdir/krb5.conf w]
     puts $conffile "\[libdefaults\]"
     puts $conffile "	default_realm = $REALMNAME"
+    puts $conffile "default_tgs_enctypes = des3-cbc-md5 des-cbc-md5 des-cbc-crc"
     puts $conffile ""
     puts $conffile "\[realms\]"
     puts $conffile "	$REALMNAME = \{"
@@ -276,7 +277,6 @@ proc setup_kerberos_files { } {
     puts $conffile "	admin_server = STDERR"
     puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"
     puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
-    puts $conffile "	kdc = STDERR"
     puts $conffile "	default = FILE:$tmppwd/others.log"
     close $conffile
     }
@@ -299,7 +299,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable -forwardable"
-	puts $conffile "		supported_enctypes = des-cbc-crc:normal des:normal des:v4 des:norealm des:onlyrealm"
+	puts $conffile "		supported_enctypes = des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm des3-cbc-md5:normal"
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile
@@ -701,9 +701,41 @@ proc start_kerberos_daemons { standalone } {
     }
 
     # Start up the kerberos daemon
+    # Why are we doing all this with the log file you may ask.
+    #   We need a handle on when the server starts. If we log the output
+    #   of the server to say stderr, then if we stop looking for output,
+    #   buffers will fill and the server will stop working....
+    #   So, we look to see when a line is added to the log file and then
+    #   check it.. 
+    set kdc_lfile $tmppwd/kdc.log
+    set retry 30
+
+    if ![file exists $kdc_lfile] then {
+	catch [exec touch $kdc_lfile]
+	catch "exec sleep 1"
+    }
+
+    set start [file mtime $kdc_lfile]
+
     spawn $KRB5KDC -r $REALMNAME -n
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
+
+    for {set count 0} {$count < $retry} {incr count} {
+	if { [file mtime $kdc_lfile] != $start } then  {
+		send_user win\r
+		break;
+	}	
+	catch "exec sleep 1"
+    }
+
+    if {$count >= $retry} {
+	fail "krb5kdc"
+	stop_kerberos_daemons
+	return 0
+    }
+
+    spawn -open [open "|tail -1 $kdc_lfile"]
 
     expect {
 	"while.*\r" {
@@ -711,7 +743,7 @@ proc start_kerberos_daemons { standalone } {
 	    stop_kerberos_daemons
 	    return 0
 	}
-	"commencing operation\r" { }
+	"commencing operation\n" { }
 	timeout {
 	    fail "krb5kdc"
 	    stop_kerberos_daemons
@@ -723,6 +755,9 @@ proc start_kerberos_daemons { standalone } {
 	    return 0
 	}
     }
+
+    # And cleanup for the tail -1...
+    wait 
 
     if {$standalone} {
 	pass "krb5kdc"
