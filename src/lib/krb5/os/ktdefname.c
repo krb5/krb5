@@ -43,7 +43,6 @@ krb5_kt_default_name(context, name, namesize)
     int namesize;
 {
     char *cp = 0;
-    krb5_error_code code;
     char *retval;
 
     if (krb5_overridekeyname) {
@@ -55,10 +54,10 @@ krb5_kt_default_name(context, name, namesize)
 	if ((size_t) namesize < (strlen(cp)+1))
 	    return KRB5_CONFIG_NOTENUFSPACE;
 	strcpy(name, cp);
-    } else if (((code = profile_get_string(context->profile,
-					   "libdefaults",
-					   "default_keytab_name", NULL, 
-					   NULL, &retval)) == 0) &&
+    } else if ((profile_get_string(context->profile,
+				   "libdefaults",
+				   "default_keytab_name", NULL, 
+				   NULL, &retval) == 0) &&
 	       retval) {
 	if ((size_t) namesize < (strlen(retval)+1))
 	    return KRB5_CONFIG_NOTENUFSPACE;

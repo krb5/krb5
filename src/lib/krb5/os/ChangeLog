@@ -1,3 +1,8 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktdefname.c (krb5_kt_default_name): Get rid of a variable that
+	was set in a conditional but never used.
+
 2001-05-08  Danilo Almeida  <dalmeida@mit.edu>
 
 	* locate_kdc.c (add_host_to_list): Initialize stack variable err
