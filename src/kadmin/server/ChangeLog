@@ -1,3 +1,16 @@
+Tue Jul 21 16:36:51 1998  Geoffrey King  <gjking@mit.edu>
+
+	* ovsec_kadmd.c: Call krb5_klog_reopen in kadm_svc_run
+		upon receiving a SIGHUP.  Use sigaction instead of
+		signal if POSIX_SIGNALS is defined.  All of the calls
+		to signal and sigaction are now in a separate function
+		setup_signal_handlers, as the kdc code does.  Also,
+		since reset_db no longer does anything, change the name
+		of signal_request_reset to the more descriptive
+		signal_request_hup, and request_reset_db to 
+		request_hup (paralleling the nomenclature in the kdc
+		code).
+
 Mon Jul 20 11:28:39 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* schpw.c (process_chpw_request): Cast to krb5_octet * instead of
