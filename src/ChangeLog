@@ -1,3 +1,11 @@
+Fri Jun  7 17:39:45 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (makefile-windows): Use full directory
+		name "error_tables" when building under Windows so that
+		the build will work correctly under VFAT and NTFS
+		filesystems.  Build the "makefile" file so that it
+		includes config/win-post.in.
+		
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command

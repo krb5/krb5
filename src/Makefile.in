@@ -121,13 +121,13 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\krb5\asn.1\makefile.in lib\krb5\ccache\makefile.in \
 		lib\krb5\ccache\file\makefile.in \
 		lib\krb5\ccache\stdio\makefile.in \
-		lib\krb5\error_ta\makefile.in \
+		lib\krb5\error_tables\makefile.in \
 		lib\krb5\free\makefile.in lib\krb5\keytab\makefile.in \
 		lib\krb5\keytab\file\makefile.in lib\krb5\krb\makefile.in \
 		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
 		lib\krb5\rcache\makefile.in \
 		util\et\makefile.in util\profile\makefile.in
-	type makefile.in >makefile
+	.\wconfig config <makefile.in >makefile
 	.\wconfig config <include\makefile.in >include\makefile
 	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
 	.\wconfig config <lib\makefile.in >lib\makefile
@@ -149,7 +149,7 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\krb5\ccache\makefile.in >lib\krb5\ccache\makefile
 	.\wconfig config <lib\krb5\ccache\file\makefile.in >lib\krb5\ccache\file\makefile
 	.\wconfig config <lib\krb5\ccache\stdio\makefile.in >lib\krb5\ccache\stdio\makefile
-	.\wconfig config <lib\krb5\error_ta\makefile.in >lib\krb5\error_ta\makefile
+	.\wconfig config <lib\krb5\error_tales\makefile.in >lib\krb5\error_tables\makefile
 	.\wconfig config <lib\krb5\free\makefile.in >lib\krb5\free\makefile
 	.\wconfig config <lib\krb5\keytab\makefile.in >lib\krb5\keytab\makefile
 	.\wconfig config <lib\krb5\keytab\file\makefile.in >lib\krb5\keytab\file\makefile
@@ -245,7 +245,7 @@ macfile.list:
 Makefile.sav:
 	rm -f Makefile.sav
 	mv Makefile Makefile.sav
-	cat config/windows.in Makefile.in > Makefile
+	cat config/windows.in Makefile.in config/win-post.in > Makefile
 
 kerbsrc.zip: Makefile.sav awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
