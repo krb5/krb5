@@ -265,7 +265,37 @@ typedef struct _krb5_fcc_data {
     krb5_flags flags;
     int mode;				/* needed for locking code */
     int version;	      		/* version number of the file */
+
+    /* Buffer data on reading, for performance.
+       We used to have a stdio option, but we get more precise control
+       by using the POSIX I/O functions.  */
+#define FCC_BUFSIZ 1024
+    int valid_bytes;
+    int cur_offset;
+    char buf[FCC_BUFSIZ];
 } krb5_fcc_data;
+
+static inline void invalidate_cache(krb5_fcc_data *data)
+{
+    data->valid_bytes = 0;
+}
+
+static off_t fcc_lseek(krb5_fcc_data *data, off_t offset, int whence)
+{
+    off_t ret;
+    int adjustment;
+
+    /* If we read some extra data in advance, and then want to know or
+       use our "current" position, we need to back up a little.  */
+    if (whence == SEEK_CUR && data->valid_bytes) {
+	assert(data->valid_bytes > 0);
+	assert(data->cur_offset > 0);
+	assert(data->cur_offset <= data->valid_bytes);
+	offset -= (data->valid_bytes - data->cur_offset);
+    }
+    invalidate_cache(data);
+    return lseek(data->file, offset, whence);
+}
 
 struct fcc_set {
     struct fcc_set *next;
@@ -326,9 +356,11 @@ static krb5_error_code
 krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned int len)
 {
      int ret;
+     krb5_fcc_data *data = (krb5_fcc_data *) id->data;
 
      k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
 
+#if 0
      ret = read(((krb5_fcc_data *) id->data)->file, (char *) buf, len);
      if (ret == -1)
 	  return krb5_fcc_interpret(context, errno);
@@ -336,6 +368,41 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
 	  return KRB5_CC_END;
      else
 	  return KRB5_OK;
+#else
+     while (len > 0) {
+	 int nread, ncopied, e;
+
+	 assert (data->valid_bytes >= 0);
+	 if (data->valid_bytes > 0)
+	     assert(data->cur_offset <= data->valid_bytes);
+	 if (data->valid_bytes == 0
+	     || data->cur_offset == data->valid_bytes) {
+	     /* Fill buffer from current file position.  */
+	     off_t current_file_pos = lseek(data->file, 0, SEEK_CUR);
+	     nread = read(data->file, data->buf, sizeof(data->buf));
+	     e = errno;
+	     if (nread < 0)
+		 return krb5_fcc_interpret(context, e);
+	     if (nread == 0)
+		 /* EOF */
+		 return KRB5_CC_END;
+	     data->valid_bytes = nread;
+	     data->cur_offset = 0;
+	 }
+	 assert(data->cur_offset < data->valid_bytes);
+	 ncopied = len;
+	 if (data->valid_bytes - data->cur_offset < ncopied)
+	     ncopied = data->valid_bytes - data->cur_offset;
+	 memcpy(buf, data->buf + data->cur_offset, ncopied);
+	 data->cur_offset += ncopied;
+	 assert(data->cur_offset > 0);
+	 assert(data->cur_offset <= data->valid_bytes);
+	 len -= ncopied;
+	 assert(len >= 0);
+	 buf += ncopied;
+     }
+     return 0;
+#endif
 }
 
 /*
@@ -808,6 +875,7 @@ krb5_fcc_write(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned 
      int ret;
 
      k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
+     invalidate_cache((krb5_fcc_data *) id->data);
 
      ret = write(((krb5_fcc_data *)id->data)->file, (char *) buf, len);
      if (ret < 0)
@@ -1128,7 +1196,8 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
     int lock_flag;
     krb5_error_code retval = 0;
 
-    k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
+    k5_assert_locked(&data->lock);
+    invalidate_cache(data);
 
     if (data->file != NO_FILE) {
 	/* Don't know what state it's in; shut down and start anew.  */
@@ -1179,7 +1248,7 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
              goto done;
          }
          data->file = f;
-	 
+
 	 if (data->version == KRB5_FCC_FVNO_4) {
              /* V4 of the credentials cache format allows for header tags */
 	     fcc_flen = 0;
@@ -1206,10 +1275,12 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 		 if (retval) goto done;
 	     }
 	 }
+	 invalidate_cache(data);
 	 goto done;
      }
 
      /* verify a valid version number is there */
+    invalidate_cache(data);
      if (read(f, (char *)&fcc_fvno, sizeof(fcc_fvno)) != sizeof(fcc_fvno)) {
 	 retval = KRB5_CC_FORMAT;
 	 goto done;
@@ -1299,12 +1370,12 @@ krb5_fcc_skip_header(krb5_context context, krb5_ccache id)
 
      k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
 
-     lseek(data->file, (off_t) sizeof(krb5_ui_2), SEEK_SET);
+     fcc_lseek(data, (off_t) sizeof(krb5_ui_2), SEEK_SET);
      if (data->version == KRB5_FCC_FVNO_4) {
 	 kret = krb5_fcc_read_ui_2(context, id, &fcc_flen);
 	 if (kret) return kret;
-         if(lseek(data->file, (off_t) fcc_flen, SEEK_CUR) < 0)
-		 return errno;
+         if(fcc_lseek(data, (off_t) fcc_flen, SEEK_CUR) < 0)
+		return errno;
      }
      return KRB5_OK;
 }
@@ -1395,6 +1466,7 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
 	*fccsp = (*fccsp)->next;
 	k5_mutex_unlock(&krb5int_cc_file_mutex);
 	free(data->filename);
+	zap(data->buf, sizeof(data->buf));
 	if (data->file >= 0) {
 	    k5_mutex_lock(&data->lock);
 	    krb5_fcc_close_file(context, data);
@@ -1447,6 +1519,7 @@ krb5_fcc_destroy(krb5_context context, krb5_ccache id)
 	 return kret;
 
      if (OPENCLOSE(id)) {
+	 invalidate_cache(data);
 	  ret = THREEPARAMOPEN(data->filename,
 			       O_RDWR | O_BINARY, 0);
 	  if (ret < 0) {
@@ -1456,7 +1529,7 @@ krb5_fcc_destroy(krb5_context context, krb5_ccache id)
 	  data->file = ret;
      }
      else
-	  lseek(data->file, (off_t) 0, SEEK_SET);
+	  fcc_lseek(data, (off_t) 0, SEEK_SET);
 
 #ifdef MSDOS_FILESYSTEM
 /* "disgusting bit of UNIX trivia" - that's how the writers of NFS describe
@@ -1636,6 +1709,7 @@ krb5_fcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 	 data->version = data->mode = 0;
 	 data->flags = KRB5_TC_OPENCLOSE;
 	 data->file = -1;
+	 data->valid_bytes = 0;
 	 setptr = malloc(sizeof(struct fcc_set));
 	 if (setptr == NULL) {
 	     k5_mutex_unlock(&krb5int_cc_file_mutex);
@@ -1714,7 +1788,7 @@ krb5_fcc_start_seq_get(krb5_context context, krb5_ccache id,
      kret = krb5_fcc_skip_principal(context, id);
      if (kret) goto done;
 
-     fcursor->pos = lseek(data->file, (off_t) 0, SEEK_CUR);
+     fcursor->pos = fcc_lseek(data, (off_t) 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
 
 done:
@@ -1763,7 +1837,7 @@ krb5_fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
      MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
      fcursor = (krb5_fcc_cursor *) *cursor;
 
-     kret = (lseek(d->file, fcursor->pos, SEEK_SET) == (off_t) -1);
+     kret = (fcc_lseek(d, fcursor->pos, SEEK_SET) == (off_t) -1);
      if (kret) {
 	 kret = krb5_fcc_interpret(context, errno);
 	 MAYBE_CLOSE(context, id, kret);
@@ -1794,7 +1868,7 @@ krb5_fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
      kret = krb5_fcc_read_data(context, id, &creds->second_ticket);
      TCHECK(kret);
      
-     fcursor->pos = lseek(d->file, (off_t) 0, SEEK_CUR);
+     fcursor->pos = fcc_lseek(d, (off_t) 0, SEEK_CUR);
      cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
@@ -1893,6 +1967,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
       */
      ((krb5_fcc_data *) lid->data)->flags = 0;
      ((krb5_fcc_data *) lid->data)->file = -1;
+     ((krb5_fcc_data *) lid->data)->valid_bytes = 0;
 
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
@@ -2038,7 +2113,7 @@ krb5_fcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
      MAYBE_OPEN(context, id, FCC_OPEN_RDWR);
 
      /* Make sure we are writing to the end of the file */
-     ret = lseek(((krb5_fcc_data *) id->data)->file, (off_t) 0, SEEK_END);
+     ret = fcc_lseek((krb5_fcc_data *) id->data, (off_t) 0, SEEK_END);
      if (ret < 0) {
           MAYBE_CLOSE_IGNORE(context, id);
 	  k5_mutex_unlock(&((krb5_fcc_data *) id->data)->lock);

@@ -1,7 +1,21 @@
 2004-08-15  Ken Raeburn  <raeburn@mit.edu>
 
-	* cc_file.c (dereference): Lock mutex around call to
-	krb5_fcc_close_file.
+	* cc_file.c: Add buffering on reading.
+	(FCC_BUFSIZ): New macro.
+	(struct _krb5_fcc_data): Add new fields buf, valid_bytes,
+	cur_offset.
+	(krb5_fcc_resolve, krb5_fcc_generate_new): Initialize
+	valid_bytes.
+	(invalidate_cache): New function.
+	(krb5_fcc_write, krb5_fcc_open_file, krb5_fcc_destroy): Call
+	invalidate_cache.
+	(fcc_lseek): New function.
+	(krb5_fcc_skip_header, krb5_fcc_destroy, krb5_fcc_start_seq_get,
+	krb5_fcc_next_cred, krb5_fcc_store): Use fcc_lseek instead of
+	lseek.
+	(fcc_read): Use and maybe refill the buffer.
+	(dereference): Lock mutex around call to krb5_fcc_close_file.
+	Zap the contents of the buffer before freeing it.
 
 2004-08-12  Ken Raeburn  <raeburn@mit.edu>
 
