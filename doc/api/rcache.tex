@@ -52,7 +52,7 @@ Errors: permission errors
 
 \begin{funcdecl}{krb5_rc_store}{krb5_error_code}{\funcin}
 \funcarg{krb5_rcache}{id}
-\funcarg{krb5_dont_replay *}{rep}
+\funcarg{krb5_donot_replay *}{rep}
 \end{funcdecl}
 Stores \funcparam{rep} in the replay cache \funcparam{id}.
 Requires that \funcparam{id} identifies a valid replay cache.
@@ -145,7 +145,11 @@ Returns the type of the default replay cache.
 \begin{funcdecl}{krb5_rc_default}{krb5_error_code}{\funcinout}
 \funcarg{krb5_rcache *}{id}
 \end{funcdecl}
-Equivalent to \funcnamenoparens{krb5_rc_resolve_full}(\funcparam{id},
-\funcnamenoparens{strcat}(\funcnamenoparens{strcat}(\funcname{krb5_rc_default_type},``:''),
-\funcname{krb5_rc_default_name})) (except of course you can't do the
-strcat's with the return values\ldots).
+
+Equivalent to:
+\begin{verbatim}
+krb5_rc_resolve_full(id, 
+                     strcat(strcat(krb5_rc_default_type(),``:''),
+                                   krb5_rc_default_name)) ;
+\end{verbatim}
+Except of course you can't do the strcat's with the return values.
