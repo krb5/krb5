@@ -1,3 +1,8 @@
+Mon Nov 11 14:22:30 1996  Tom Yu  <chaoself@avalanche-breakdown.mit.edu>
+
+	* Makefile.in (client.o, server.o): client.o and server.o, not
+	client.c and server.c, depend on rpc_test.h.
+
 Thu Nov  7 16:16:38 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Remove spurious KRB_INCLUDE and WITH_CCOPTS.
