@@ -708,7 +708,6 @@
 			conditionalBuildSettings = {
 			};
 			dependencies = (
-				00F242B4FFB7612912120156,
 			);
 			isa = PBXLibraryTarget;
 			name = libkrb5;
@@ -881,7 +880,6 @@
 			conditionalBuildSettings = {
 			};
 			dependencies = (
-				00F242B5FFB7612912120156,
 			);
 			isa = PBXLibraryTarget;
 			name = libcom_err;
@@ -959,7 +957,6 @@
 			conditionalBuildSettings = {
 			};
 			dependencies = (
-				00F242B6FFB7612912120156,
 			);
 			isa = PBXLibraryTarget;
 			name = libgssapi_krb5;
