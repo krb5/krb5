@@ -31,8 +31,8 @@ error_code KRB5KDC_ERR_BADOPTION,		"KDC can't fulfill requested option"
 error_code KRB5KDC_ERR_ETYPE_NOSUPP,	"KDC has no support for encryption type"
 error_code KRB5KDC_ERR_SUMTYPE_NOSUPP,	"KDC has no support for checksum type"
 error_code KRB5KDC_ERR_PADATA_TYPE_NOSUPP,	"KDC has no support for padata type"
-# ^^ 16
-error_code KRB5PLACEHOLD_17,		"KRB5 error code 17"
+error_code KRB5KDC_ERR_TRTYPE_NOSUPP,		"KDC has no support for transited type"
+# ^^ 17
 error_code KRB5PLACEHOLD_18,		"KRB5 error code 18"
 error_code KRB5PLACEHOLD_19,		"KRB5 error code 19"
 error_code KRB5PLACEHOLD_20,		"KRB5 error code 20"
@@ -65,9 +65,7 @@ error_code KRB5KRB_AP_ERR_NOKEY,	"Service key not available"
 error_code KRB5KRB_AP_ERR_MUT_FAIL,	"Mutual authentication failed"
 error_code KRB5KRB_AP_ERR_BADDIRECTION,	"Incorrect message direction"
 error_code KRB5KRB_AP_ERR_METHOD,	"Alternative authentication method required"
-#^^ 48
-error_code KRB5PLACEHOLD_49,		"KRB5 error code 49"
-#vv 50
+error_code KRB5KRB_AP_ERR_BADSEQ,	"Incorrect sequence number in message"
 error_code KRB5KRB_ERR_FIELD_TOOLONG,	"Field is too long for impl."
 #^^ 50
 error_code KRB5PLACEHOLD_51,	"KRB5 error code 51"
@@ -236,5 +234,9 @@ error_code KRB5_FCC_PERM,		"Credentials cache file permissions incorrect"
 error_code KRB5_FCC_NOFILE,		"No credentials cache file found"
 error_code KRB5_FCC_INTERNAL,		"Internal file credentials cache error"
 error_code KRB5_CC_NOMEM,		"No more memory to allocate (in credentials cache code)"
+
+# errors for dual tgt library calls
+error_code KRB5_INVALID_FLAGS,		"Invalid KDC option combination (library internal error)"
+error_code KRB5_NO_2ND_TKT,		"Request missing second ticket"
 
 end
