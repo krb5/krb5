@@ -1,3 +1,8 @@
+2001-09-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (TKT_FLG_TRANSIT_POLICY_CHECKED,
+	TKT_FLG_OK_AS_DELEGATE, TKT_FLG_ANONYMOUS): New macros.
+
 2001-09-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include socket-utils.h.
