@@ -42,7 +42,8 @@ all::	krb5kdc
 depend:: kdc5_err.c
 
 logger.c: $(SRCTOP)/lib/kadm5/logger.c
-	$(CP) $(SRCTOP)/lib/kadm5/logger.c logger.c
+	$(RM) $@
+	$(CP) $(SRCTOP)/lib/kadm5/logger.c $@
 
 logger.o: logger.c
 

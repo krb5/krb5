@@ -1,3 +1,9 @@
+Thu Feb  6 00:09:46 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Remove logger.c target before copying over it.
+		This avoids permission problems if the source is read-only
+		and later changes.
+
 Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc_preauth.c (get_sam_edata): Use proper interface to
