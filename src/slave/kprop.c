@@ -80,7 +80,7 @@ void	kerberos_authenticate NPROTOTYPE((int, krb5_principal));
 int	open_database NPROTOTYPE((char *, int *));
 void	close_database NPROTOTYPE((int));
 void	xmit_database NPROTOTYPE((int, int, int));
-void	send_error NPROTOTYPE((int, int, int));
+void	send_error NPROTOTYPE((int, char *, krb5_error_code));
 void	update_last_prop_file NPROTOTYPE((char *, char *));
 
 static void usage()
