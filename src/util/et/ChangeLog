@@ -1,3 +1,11 @@
+2001-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* error_message.c (error_message): Handle some Irix error codes
+	ranging up above sys_nerr, and above 256.
+
+	* test_et.c (main): Test one of the high-numbered Irix system
+	error codes.
+
 2001-03-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* com_err.h: For struct error_table, change the base from an

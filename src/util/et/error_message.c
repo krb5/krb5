@@ -68,6 +68,12 @@ static struct et_list etl[PREALLOCATE_ETL];
 static int etl_used = 0;
 #endif
 
+#ifndef DEBUG_TABLE_LIST
+#define dprintf(X)
+#else
+#define dprintf(X) printf X
+#endif
+
 KRB5_DLLIMP const char FAR * KRB5_CALLCONV
 error_message(long code)
     /*@modifies internalState@*/
@@ -86,14 +92,15 @@ error_message(long code)
 	offset = l_offset;
 	table_num = ((unsigned long)code - l_offset) & ERRCODE_MAX;
 	if (table_num == 0) {
+	system_error_code:
 		if (code == 0)
 			goto oops;
 
 		/* This could trip if int is 16 bits.  */
-		if ((unsigned long)(int)offset != offset)
+		if ((unsigned long)(int)code != code)
 		    abort ();
 #ifdef HAVE_STRERROR
-		cp = strerror((int) offset);
+		cp = strerror((int) code);
 		if (cp)
 			return cp;
 		goto oops;
@@ -108,11 +115,12 @@ error_message(long code)
 #endif /* HAVE_SYS_ERRLIST */
 #endif /* HAVE_STRERROR */
 	}
-
-#ifndef DEBUG_TABLE_LIST
-#define dprintf(X)
-#else
-#define dprintf(X) printf X
+#ifdef __sgi
+	/* Irix 6.5 uses a much bigger table than other UNIX systems
+	   I've looked at, but the table is sparse.  The sparse
+	   entries start around 500, but sys_nerr is only 152.  */
+	if (code > 0 && code <= 1600)
+	    goto system_error_code;
 #endif
 
 	dprintf (("scanning static list for %x\n", table_num));
