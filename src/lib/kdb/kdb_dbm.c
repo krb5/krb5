@@ -8,12 +8,12 @@
  * <krb5/mit-copyright.h>. 
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char rcsid_krb_dbm_c[] =
-"$Header$";
-#endif	lint
+"$Id$";
+#endif	/* lint */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
 #ifndef ODBM
 #include <ndbm.h>
@@ -21,10 +21,22 @@ static char rcsid_krb_dbm_c[] =
 #include <dbm.h>
 #endif /*ODBM*/
 
+#include <stdio.h>
+
+/* XXX these should go into a central system include file */
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/file.h>
+#include <errno.h>
+
 #include <krb5/krb5.h>
 #include <krb5/kdb5.h>
+#include <krb5/kdb5_dbm.h>
+#include <krb5/kdb5_err.h>
 
-#define KRB5_DB_MAX_RETRY 5
+
+#define KRB5_DBM_MAX_RETRY 5
 
 /* exclusive or shared lock flags */
 #define	KRB5_DBM_SHARED		0
@@ -42,21 +54,44 @@ extern char *progname;
 extern char *malloc();
 #endif /* __STDC__ */
 
-static void encode_princ_key PROTOTYPE(());
-static void decode_princ_key PROTOTYPE(());
-static void encode_princ_contents PROTOTYPE(());
-static void decode_princ_contents PROTOTYPE(());
-static void krb5_dbm_dbl_fini PROTOTYPE((void));
-static int krb5_dbm_dbl_lock PROTOTYPE(());
-static void krb5_dbm_dbl_unlock PROTOTYPE(());
-
 extern int errno;
 
-static int init = 0;
-static char default_db_name[] = DBM_FILE;
+static int dblfd = -1;
+static int mylock = 0;
+static int inited = 0;
+
+static char default_db_name[] = DEFAULT_DBM_FILE;
 static char *current_db_name = default_db_name;
 
-static krb5_boolean non_blocking = 0;
+static krb5_boolean non_blocking = FALSE;
+
+static char *gen_dbsuffix PROTOTYPE((char *, char * ));
+static krb5_error_code krb5_dbm_db_start_update PROTOTYPE((char *,
+							   time_t * ));
+static krb5_error_code krb5_dbm_db_end_update PROTOTYPE((char *,
+							 time_t ));
+static krb5_error_code krb5_dbm_db_start_read PROTOTYPE((time_t * ));
+static krb5_error_code krb5_dbm_db_end_read PROTOTYPE((time_t  ));
+static krb5_error_code encode_princ_dbmkey PROTOTYPE((datum *,
+						      krb5_principal ));
+static void free_encode_princ_dbmkey PROTOTYPE((datum * ));
+static krb5_error_code encode_princ_contents
+    PROTOTYPE((datum *,
+	       krb5_kdb_principal * ));
+static void free_encode_princ_contents PROTOTYPE((datum * ));
+static krb5_error_code decode_princ_contents
+    PROTOTYPE((datum *,
+	       krb5_kdb_principal * ));
+static void free_decode_princ_contents PROTOTYPE((krb5_kdb_principal * ));
+static krb5_error_code krb5_dbm_db_lock PROTOTYPE((int ));
+static krb5_error_code krb5_dbm_db_unlock PROTOTYPE((void ));
+
+#if 0
+/* not used */
+static krb5_error_code decode_princ_dbmkey PROTOTYPE((datum *,
+						      krb5_principal * ));
+static void free_decode_princ_dbmkey PROTOTYPE((krb5_principal ));
+#endif
 
 /*
  * This module contains all of the code which directly interfaces to
@@ -92,7 +127,7 @@ static krb5_boolean non_blocking = 0;
  * version number changed, or if the semaphore was nonexistant at
  * either time, the reader sleeps for a second to let things
  * stabilize, and then tries again; if it does not succeed after
- * KRB5_DB_MAX_RETRY attempts, it gives up.
+ * KRB5_DBM_MAX_RETRY attempts, it gives up.
  * 
  * On update, the semaphore file is deleted (if it exists) before any
  * update takes place; at the end of the update, it is replaced, with
@@ -162,20 +197,39 @@ char *sfx;
 krb5_error_code
 krb5_dbm_db_init()
 {
-    init = 1;
+    if (!inited) {
+	char *filename = gen_dbsuffix (current_db_name, ".ok");
+	if (!filename)
+	    return ENOMEM;
+	if ((dblfd = open(filename, 0, 0)) < 0) {
+	    return errno;
+	}
+	free(filename);
+	inited++;
+    }
     return (0);
 }
-
 /*
  * gracefully shut down database--must be called by ANY program that does
  * a krb5_dbm_db_init 
  */
 
+
 krb5_error_code
 krb5_dbm_db_fini()
 {
-    init = 0;
-    return (0);
+    krb5_error_code retval;
+
+    if (!inited)
+	return KRB5_KDB_DBNOTINITED;
+    if (close(dblfd) == -1)
+	retval = errno;
+    else
+	retval = 0;
+    dblfd = -1;
+    inited = 0;
+    mylock = 0;
+    return retval;
 }
 
 /*
@@ -191,13 +245,14 @@ char *name;
 {
     DBM *db;
 
+    if (inited)
+	return KRB5_KDB_DBINITED;
     if (name == NULL)
 	name = default_db_name;
     db = dbm_open(name, 0, 0);
     if (db == NULL)
 	return errno;
     dbm_close(db);
-    krb5_dbm_db_l_fini();
     current_db_name = name;
     return 0;
 }
@@ -209,11 +264,10 @@ char *name;
 krb5_error_code
 krb5_dbm_db_get_age(db_name, age)
 char *db_name;
-krb5_timestamp *age;
+time_t *age;
 {
     struct stat st;
     char *okname;
-    long age;
     
     okname = gen_dbsuffix(db_name ? db_name : current_db_name, ".ok");
 
@@ -243,7 +297,7 @@ krb5_timestamp *age;
 static krb5_error_code
 krb5_dbm_db_start_update(db_name, age)
 char *db_name;
-long *age;
+time_t *age;
 {
     char *okname;
     krb5_error_code retval;
@@ -254,6 +308,7 @@ long *age;
 
     retval = krb5_dbm_db_get_age(db_name, age);
     if (!retval && unlink(okname) < 0) {
+	if (errno != ENOENT)
 	    retval = errno;
     }
     free_dbsuffix (okname);
@@ -263,7 +318,7 @@ long *age;
 static krb5_error_code
 krb5_dbm_db_end_update(db_name, age)
 char *db_name;
-long age;
+time_t age;
 {
     int fd;
     krb5_error_code retval = 0;
@@ -314,115 +369,223 @@ long age;
 /* Database readers call start_read(), do the reading, and then call
    end_read() with the value from start_read().
 
-   If the value of krb5_dbm_db_get_age(NULL) changes while this is going on,
+   If the value of krb5_dbm_db_get_age(NULL, age) changes while this is
+   going on,
    then the reader has encountered a modified database and should retry.
 */
 
 static krb5_error_code
 krb5_dbm_db_start_read(age)
-long *age;
+time_t *age;
 {
     return (krb5_dbm_db_get_age(NULL, age));
 }
 
 static krb5_error_code
 krb5_dbm_db_end_read(age)
-long age;
+time_t age;
 {
-    if ((long) krb5_dbm_db_get_age(NULL) != age || age == -1) {
+    time_t age2;
+    krb5_error_code retval;
+
+    if (retval = krb5_dbm_db_get_age(NULL, &age2))
+	return retval;
+    if (age2 != age || age == -1) {
 	return KRB5_KDB_DB_CHANGED;
     }
     return 0;
 }
 
 
-/* XXX start here */
-static void
-encode_princ_key(key, name, instance)
-    datum  *key;
-    char   *name, *instance;
+static krb5_error_code
+encode_princ_dbmkey(key, principal)
+datum  *key;
+krb5_principal principal;
 {
-    static char keystring[ANAME_SZ + INST_SZ];
+    char *princ_name;
+    krb5_error_code retval;
 
-    bzero(keystring, ANAME_SZ + INST_SZ);
-    strncpy(keystring, name, ANAME_SZ);
-    strncpy(&keystring[ANAME_SZ], instance, INST_SZ);
-    key->dptr = keystring;
-    key->dsize = ANAME_SZ + INST_SZ;
+    if (retval = krb5_unparse_name(principal, &princ_name))
+	return(retval);
+    key->dptr = princ_name;
+    key->dsize = strlen(princ_name)+1;	/* need to store the NULL for
+					   decoding */
+    return 0;
 }
 
 static void
-decode_princ_key(key, name, instance)
-    datum  *key;
-    char   *name, *instance;
+free_encode_princ_dbmkey(key)
+datum  *key;
 {
-    strncpy(name, key->dptr, ANAME_SZ);
-    strncpy(instance, key->dptr + ANAME_SZ, INST_SZ);
-    name[ANAME_SZ - 1] = '\0';
-    instance[INST_SZ - 1] = '\0';
+    (void) free(key->dptr);
+    key->dptr = 0;
+    key->dsize = 0;
+    return;
+}
+
+#if 0
+/* these aren't used, but if they ever should be... */
+static krb5_error_code
+decode_princ_dbmkey(key, principal)
+datum  *key;
+krb5_principal *principal;
+{
+    return(krb5_parse_name(key->dptr, principal));
 }
 
 static void
+free_decode_princ_dbmkey(principal)
+krb5_principal principal;
+{
+    krb5_free_principal(principal);
+    return;
+}
+#endif
+
+static krb5_error_code
 encode_princ_contents(contents, principal)
-    datum  *contents;
-    Principal *principal;
+register datum  *contents;
+krb5_kdb_principal *principal;
 {
-    contents->dsize = sizeof(*principal);
-    contents->dptr = (char *) principal;
-}
+    krb5_kdb_principal copy_princ;
+    char *unparse_princ, *unparse_mod_princ;
+    register char *nextloc;
+    int princ_size, mod_size;
 
-static void
-decode_princ_contents(contents, principal)
-    datum  *contents;
-    Principal *principal;
-{
-    bcopy(contents->dptr, (char *) principal, sizeof(*principal));
-}
+    krb5_error_code retval;
 
+    /* since there is some baggage pointing off of the principal
+       structure, we'll encode it by writing the structure, with nulled
+       pointers, followed by the unparsed principal name, then the key, and
+       then the unparsed mod_princ name.
+       */
+    copy_princ = *principal;
+    copy_princ.principal = 0;
+    copy_princ.key = 0;
+    copy_princ.mod_name = 0;
 
-static int dblfd = -1;
-static int mylock = 0;
-static int inited = 0;
-
-static krb5_dbm_init()
-{
-    if (!inited) {
-	char *filename = gen_dbsuffix (current_db_name, ".ok");
-	if ((dblfd = open(filename, 0)) < 0) {
-	    fprintf(stderr, "krb5_dbm_init: couldn't open %s\n", filename);
-	    fflush(stderr);
-	    perror("open");
-	    exit(1);
-	}
-	free(filename);
-	inited++;
+    if (retval = krb5_unparse_name(principal->principal, &unparse_princ))
+	return(retval);
+    if (retval = krb5_unparse_name(principal->mod_name, &unparse_mod_princ)) {
+	free(unparse_princ);
+	return(retval);
     }
-    return (0);
+    princ_size = strlen(unparse_princ)+1;
+    mod_size = strlen(unparse_mod_princ)+1;
+    contents->dsize = sizeof(copy_princ)+ princ_size + mod_size
+		      + sizeof(*principal->key) + principal->key->length - 1;
+    contents->dptr = malloc(contents->dsize);
+    if (!contents->dptr) {
+	free(unparse_princ);
+	free(unparse_mod_princ);
+	contents->dsize = 0;
+	contents->dptr = 0;
+	return(ENOMEM);
+    }
+    (void) bcopy((char *)&copy_princ, contents->dptr, sizeof(copy_princ));
+    nextloc = contents->dptr + sizeof(copy_princ);
+
+    (void) bcopy(unparse_princ, nextloc, princ_size);
+    nextloc += princ_size;
+    (void) bcopy(unparse_mod_princ, nextloc, mod_size);
+    nextloc += mod_size;
+    (void) bcopy((char *)principal->key, nextloc,
+		 sizeof(*principal->key) + principal->key->length - 1);
+    free(unparse_princ);
+    free(unparse_mod_princ);
+    return 0;
 }
 
 static void
-krb5_dbm_fini()
+free_encode_princ_contents(contents)
+datum *contents;
 {
-    close(dblfd);
-    dblfd = -1;
-    inited = 0;
-    mylock = 0;
+    free(contents->dptr);
+    contents->dsize = 0;
+    contents->dptr = 0;
+    return;
 }
 
-static int
+static krb5_error_code
+decode_princ_contents(contents, principal)
+datum  *contents;
+krb5_kdb_principal *principal;
+{
+    register char *nextloc;
+    krb5_principal princ, mod_princ;
+    krb5_error_code retval;
+    int keysize;
+
+    /* undo the effects of encode_princ_contents.
+     */
+
+    nextloc = contents->dptr + sizeof(*principal);
+    if (nextloc >= contents->dptr + contents->dsize)
+	return KRB5_KDB_TRUNCATED_RECORD;
+
+    bcopy(contents->dptr, (char *) principal, sizeof(*principal));
+
+    if (nextloc + strlen(nextloc)+1 >= contents->dptr + contents->dsize)
+	return KRB5_KDB_TRUNCATED_RECORD;
+
+    if (retval = krb5_parse_name(nextloc, &princ))
+	return(retval);
+    principal->principal = princ;
+
+    nextloc += strlen(nextloc)+1;	/* advance past 1st string */
+    if ((nextloc + strlen(nextloc)+1 >= contents->dptr + contents->dsize)
+	|| (retval = krb5_parse_name(nextloc, &mod_princ))) {
+	krb5_free_principal(princ);
+	(void) bzero((char *) principal, sizeof(*principal));
+	return KRB5_KDB_TRUNCATED_RECORD;
+    }
+    principal->mod_name = mod_princ;
+    nextloc += strlen(nextloc)+1;	/* advance past 2nd string */
+    keysize = contents->dsize - (nextloc - contents->dptr);
+    if (keysize <= 0) {
+	krb5_free_principal(princ);
+	krb5_free_principal(mod_princ);
+	(void) bzero((char *) principal, sizeof(*principal));
+	return KRB5_KDB_TRUNCATED_RECORD;
+    }
+    if (!(principal->key = (krb5_keyblock *)malloc(keysize))) {
+	krb5_free_principal(princ);
+	krb5_free_principal(mod_princ);
+	(void) bzero((char *) principal, sizeof(*principal));
+	return ENOMEM;
+    }
+    (void) bcopy(nextloc, (char *)principal->key, keysize);
+    if (keysize != sizeof(*principal->key) + principal->key->length - 1) {
+	krb5_free_principal(princ);
+	krb5_free_principal(mod_princ);
+	free((char *)principal->key);
+	(void) bzero((char *) principal, sizeof(*principal));
+	return KRB5_KDB_TRUNCATED_RECORD;
+    }	
+    return 0;
+}
+
+static void
+free_decode_princ_contents(principal)
+krb5_kdb_principal *principal;
+{
+    free((char *)principal->key);
+    krb5_free_principal(principal->principal);
+    krb5_free_principal(principal->mod_name);
+    (void) bzero((char *)principal, sizeof(*principal));
+    return;
+}
+
+static krb5_error_code
 krb5_dbm_db_lock(mode)
 int mode;
 {
     int flock_mode;
-    
-    if (!inited)
-	krb5_dbm_init();
-    if (mylock) {		/* Detect lock call when lock already
-				 * locked */
-	fprintf(stderr, "Kerberos locking error (mylock)\n");
-	fflush(stderr);
-	exit(1);
-    }
+
+    if (mylock)				/* Detect lock call when lock already
+					 * locked */
+	return KRB5_KDB_RECURSIVELOCK;
+
     switch (mode) {
     case KRB5_DBM_EXCLUSIVE:
 	flock_mode = LOCK_EX;
@@ -431,8 +594,7 @@ int mode;
 	flock_mode = LOCK_SH;
 	break;
     default:
-	fprintf(stderr, "invalid lock mode %d\n", mode);
-	abort();
+	return KRB5_KDB_BADLOCKMODE;
     }
     if (non_blocking)
 	flock_mode |= LOCK_NB;
@@ -443,21 +605,16 @@ int mode;
     return 0;
 }
 
-static void
+static krb5_error_code
 krb5_dbm_db_unlock()
 {
-    if (!mylock) {		/* lock already unlocked */
-	fprintf(stderr, "Kerberos database lock not locked when unlocking.\n");
-	fflush(stderr);
-	exit(1);
-    }
-    if (flock(dblfd, LOCK_UN) < 0) {
-	fprintf(stderr, "Kerberos database lock error. (unlocking)\n");
-	fflush(stderr);
-	perror("flock");
-	exit(1);
-    }
+    if (!mylock)		/* lock already unlocked */
+	return KRB5_KDB_NOTLOCKED;
+
+    if (flock(dblfd, LOCK_UN) < 0)
+	return errno;
     mylock = 0;
+    return 0;
 }
 
 /*
@@ -471,7 +628,7 @@ char *db_name;
     char *okname;
     int fd;
     register krb5_error_code retval = 0;
-#ifdef NDBM
+#ifndef ODBM
     DBM *db;
 
     db = dbm_open(db_name, O_RDWR|O_CREAT|O_EXCL, 0600);
@@ -479,7 +636,7 @@ char *db_name;
 	retval = errno;
     else
 	dbm_close(db);
-#else
+#else /* OLD DBM */
     char *dirname;
     char *pagname;
 
@@ -507,7 +664,7 @@ char *db_name;
     }
     free_dbsuffix(dirname);
     free_dbsuffix(pagname);
-#endif
+#endif /* ODBM */
     if (retval == 0) {
 	okname = gen_dbsuffix(db_name, ".ok");
 	if (!okname)
@@ -542,9 +699,8 @@ krb5_dbm_db_rename(from, to)
     char *frompag;
     char *topag;
     char *fromok;
-    long trans;
+    time_t trans;
     krb5_error_code retval;
-    int ok;
 
     fromdir = gen_dbsuffix (from, ".dir");
     if (!fromdir)
@@ -554,7 +710,7 @@ krb5_dbm_db_rename(from, to)
 	retval = ENOMEM;
 	goto freefromdir;
     }
-    frompag = gen_dbsuffix (from , ".pag");
+    frompag = gen_dbsuffix (from, ".pag");
     if (!frompag) {
 	retval = ENOMEM;
 	goto freetodir;
@@ -598,173 +754,154 @@ krb5_dbm_db_rename(from, to)
 
 /*
  * look up a principal in the data base returns number of principals
- * found , and whether there were more than requested. 
+ * found, and whether there were more than requested. 
  */
 
-krb5_dbm_db_get_principal(name, inst, principal, max, more)
-    char   *name;		/* could have wild card */
-    char   *inst;		/* could have wild card */
-    Principal *principal;
-    unsigned int max;		/* max number of name structs to return */
-    int    *more;		/* where there more than 'max' tuples? */
-
+krb5_error_code
+krb5_dbm_db_get_principal(searchfor, principal, nprincs, more)
+krb5_principal searchfor;
+krb5_kdb_principal *principal;		/* filled in */
+int *nprincs;				/* how much room/how many found */
+krb5_boolean *more;			/* are there more? */
 {
-    int     found = 0, code;
+    int     found = 0;
     extern int errorproc();
-    int     wildp, wildi;
     datum   key, contents;
-    char    testname[ANAME_SZ], testinst[INST_SZ];
-    u_long trans;
+    time_t	transaction;
     int try;
     DBM    *db;
+    krb5_error_code retval;
 
-    if (!init)
-	krb5_dbm_db_init();		/* initialize database routines */
+    if (!inited)
+	return KRB5_KDB_DBNOTINITED;
 
-    for (try = 0; try < KRB5_DB_MAX_RETRY; try++) {
-	trans = krb5_dbm_db_start_read();
+    for (try = 0; try < KRB5_DBM_MAX_RETRY; try++) {
+	if (retval = krb5_dbm_db_start_read(&transaction))
+	    return(retval);
 
-	if ((code = krb5_dbm_db_lock(KRB5_DBM_SHARED)) != 0)
-	    return -1;
+	if (retval = krb5_dbm_db_lock(KRB5_DBM_SHARED))
+	    return(retval);
 
 	db = dbm_open(current_db_name, O_RDONLY, 0600);
+	if (db == NULL) {
+	    retval = errno;
+	    (void) krb5_dbm_db_unlock();
+	    return retval;
+	}
+	*more = FALSE;
 
-	*more = 0;
+	/* XXX deal with wildcard lookups */
+	if (retval = encode_princ_dbmkey(&key, searchfor))
+	    goto cleanup;
 
-#ifdef DEBUG
-	if (krb5_dbm_db_debug & 2)
-	    fprintf(stderr,
-		    "%s: db_get_principal for %s %s max = %d",
-		    progname, name, inst, max);
-#endif
-
-	wildp = !strcmp(name, "*");
-	wildi = !strcmp(inst, "*");
-
-	if (!wildi && !wildp) {	/* nothing's wild */
-	    encode_princ_key(&key, name, inst);
-	    contents = dbm_fetch(db, key);
-	    if (contents.dptr == NULL) {
-		found = 0;
-		goto done;
-	    }
-	    decode_princ_contents(&contents, principal);
-#ifdef DEBUG
-	    if (krb5_dbm_db_debug & 1) {
-		fprintf(stderr, "\t found %s %s p_n length %d t_n length %d\n",
-			principal->name, principal->instance,
-			strlen(principal->name),
-			strlen(principal->instance));
-	    }
-#endif
+	contents = dbm_fetch(db, key);
+	if (contents.dptr == NULL) {
+	    found = 0;
+	} else {
+	    if (retval = decode_princ_contents(&contents, principal))
+		goto cleanup;
 	    found = 1;
-	    goto done;
 	}
-	/* process wild cards by looping through entire database */
-
-	for (key = dbm_firstkey(db); key.dptr != NULL;
-	     key = dbm_next(db, key)) {
-	    decode_princ_key(&key, testname, testinst);
-	    if ((wildp || !strcmp(testname, name)) &&
-		(wildi || !strcmp(testinst, inst))) { /* have a match */
-		if (found >= max) {
-		    *more = 1;
-		    goto done;
-		} else {
-		    found++;
-		    contents = dbm_fetch(db, key);
-		    decode_princ_contents(&contents, principal);
-#ifdef DEBUG
-		    if (krb5_dbm_db_debug & 1) {
-			fprintf(stderr,
-				"\tfound %s %s p_n length %d t_n length %d\n",
-				principal->name, principal->instance,
-				strlen(principal->name),
-				strlen(principal->instance));
-		    }
-#endif
-		    principal++; /* point to next */
-		}
-	    }
-	}
-
-    done:
-	krb5_dbm_db_unlock();	/* unlock read lock */
-	dbm_close(db);
-	if (krb5_dbm_db_end_read(trans) == 0)
+	free_encode_princ_dbmkey(&key);
+	(void) dbm_close(db);
+	(void) krb5_dbm_db_unlock();	/* unlock read lock */
+	if (krb5_dbm_db_end_read(transaction) == 0)
 	    break;
 	found = -1;
 	if (!non_blocking)
 	    sleep(1);
     }
-    return (found);
+    if (found == -1) {
+	*nprincs = 0;
+	return KRB5_KDB_DB_INUSE;
+    }
+    *nprincs = found;
+    return(0);
+
+ cleanup:
+    (void) dbm_close(db);
+    (void) krb5_dbm_db_unlock();	/* unlock read lock */
+    return retval;
 }
 
 /*
- * Update a name in the data base.  Returns number of names
- * successfully updated.
+  Free stuff returned by krb5_dbm_db_get_principal.
+ */
+void
+krb5_dbm_db_free_principal(principal, nprincs)
+krb5_kdb_principal *principal;
+int nprincs;
+{
+    register int i;
+    for (i = 0; i < nprincs; i++)
+	free_decode_princ_contents(&principal[i]);
+    return;
+}
+
+/*
+  Stores the *"nprincs" principal structures pointed to by "principal" in the
+  database.
+
+  *"nprincs" is updated upon return to reflect the number of records
+  acutally stored; the first *"nstored" records will have been stored in the
+  database (even if an error occurs).
+
  */
 
-krb5_dbm_db_put_principal(principal, max)
-    Principal *principal;
-    unsigned int max;		/* number of principal structs to
-				 * update */
+krb5_error_code
+krb5_dbm_db_put_principal(principal, nprincs)
+krb5_kdb_principal *principal;
+register int *nprincs;			/* number of principal structs to
+					 * update */
 
 {
-    int     found = 0, code;
-    u_long  i;
-    extern int errorproc();
+    register int i;
     datum   key, contents;
     DBM    *db;
+    krb5_error_code retval;
 
-    if (!init)
-	krb5_dbm_db_init();
+#define errout(code) { *nprincs = 0; return code; }
 
-    if ((code = krb5_dbm_db_lock(KRB5_DBM_EXCLUSIVE)) != 0)
-	return -1;
+    if (!inited)
+	errout(KRB5_KDB_DBNOTINITED);
+
+    if (retval = krb5_dbm_db_lock(KRB5_DBM_EXCLUSIVE))
+	errout(retval);
 
     db = dbm_open(current_db_name, O_RDWR, 0600);
 
-#ifdef DEBUG
-    if (krb5_dbm_db_debug & 2)
-	fprintf(stderr, "%s: krb5_dbm_db_put_principal  max = %d",
-	    progname, max);
-#endif
-
-    /* for each one, stuff temps, and do replace/append */
-    for (i = 0; i < max; i++) {
-	encode_princ_contents(&contents, principal);
-	encode_princ_key(&key, principal->name, principal->instance);
-	dbm_store(db, key, contents, DBM_REPLACE);
-#ifdef DEBUG
-	if (krb5_dbm_db_debug & 1) {
-	    fprintf(stderr, "\n put %s %s\n",
-		principal->name, principal->instance);
-	}
-#endif
-	found++;
-	principal++;		/* bump to next struct			   */
+    if (db == NULL) {
+	retval = errno;
+	(void) krb5_dbm_db_unlock();
+	errout(errno);
     }
 
-    dbm_close(db);
-    krb5_dbm_db_unlock();		/* unlock database */
-    return (found);
-}
-/*
- * look up a dba in the data base returns number of dbas found , and
- * whether there were more than requested. 
- */
+#undef errout
 
-krb5_dbm_db_get_dba(dba_name, dba_inst, dba, max, more)
-    char   *dba_name;		/* could have wild card */
-    char   *dba_inst;		/* could have wild card */
-    Dba    *dba;
-    unsigned int max;		/* max number of name structs to return */
-    int    *more;		/* where there more than 'max' tuples? */
+    /* for each one, stuff temps, and do replace/append */
+    for (i = 0; i < *nprincs; i++) {
+	if (retval = encode_princ_contents(&contents, principal))
+	    break;
 
-{
-    *more = 0;
-    return (0);
+	if (retval = encode_princ_dbmkey(&key, principal->principal)) {
+	    free_encode_princ_contents(&contents);
+	    break;
+	}
+	if (dbm_store(db, key, contents, DBM_REPLACE))
+	    retval = errno;
+	else
+	    retval = 0;
+	free_encode_princ_contents(&contents);
+	free_encode_princ_dbmkey(&key);
+	if (retval)
+	    break;
+	principal++;			/* bump to next struct */
+    }
+
+    (void) dbm_close(db);
+    (void) krb5_dbm_db_unlock();		/* unlock database */
+    *nprincs = i;
+    return (retval);
 }
 
 krb5_error_code
@@ -773,28 +910,36 @@ krb5_error_code (*func) PROTOTYPE((krb5_pointer, krb5_kdb_principal *));
 krb5_pointer arg;
 {
     datum key, contents;
-    Principal *principal;
+    krb5_kdb_principal principal;
     krb5_error_code retval;
     DBM *db;
     
-    if (retval = krb5_dbm_db_init())	/* initialize and open the database */
-	return(retval);
+    if (!inited)
+	return KRB5_KDB_DBNOTINITED;
 
-    if ((retval = krb5_dbm_db_lock(KRB5_DBM_SHARED)) != 0)
+    if (retval = krb5_dbm_db_lock(KRB5_DBM_SHARED))
 	return retval;
 
     db = dbm_open(current_db_name, O_RDONLY, 0600);
 
+    if (db == NULL) {
+	retval = errno;
+	(void) krb5_dbm_db_unlock();
+	return retval;
+    }
+
     for (key = dbm_firstkey (db); key.dptr != NULL; key = dbm_next(db, key)) {
 	contents = dbm_fetch (db, key);
-	/* XXX may not be properly aligned */
-	principal = (Principal *) contents.dptr;
-	if ((retval = (*func)(arg, principal)) != 0)
-	    return retval;
+	if (retval = decode_princ_contents(&contents, &principal))
+	    break;
+	retval = (*func)(arg, &principal);
+	free_decode_princ_contents(&principal);
+	if (retval)
+	    break;
     }
-    dbm_close(db);
-    krb5_dbm_db_unlock();
-    return 0;
+    (void) dbm_close(db);
+    (void) krb5_dbm_db_unlock();
+    return retval;
 }
 
 krb5_boolean
