@@ -9,6 +9,7 @@ required in porting Kerberos V5 to a new platform.
                                            build Kerberos.
 * Unpacking the Sources::       Preparing the source tree.
 * Doing the Build::             Compiling Kerberos.
+* Installing the Binaries::     Installing the compiled binaries.
 * Testing the Build::           Making sure Kerberos built correctly.
 * Options to Configure::        Command-line options to Configure
 * osconf.h::                    Header file-specific configurations
@@ -57,15 +58,15 @@ source code for building @value{PRODUCT} on Windows (see windows/README)
 
 @menu
 * The appl Directory::          
-* The clients Directory::
-* The gen-manpages Directory::
-* The include Directory::
+* The clients Directory::       
+* The gen-manpages Directory::  
+* The include Directory::       
 * The kadmin Directory::        
 * The kdc Directory::           
 * The krb524 Directory::        
-* The lib Directory::
-* The prototype Directory::
-* The slave Directory::
+* The lib Directory::           
+* The prototype Directory::     
+* The slave Directory::         
 * The util Directory::          
 @end menu
 
@@ -248,7 +249,7 @@ your current directory is @file{/u1} when you unpack the tarfiles, you
 will get @file{/u1/krb5-@value{RELEASE}/src}, etc.)
 
 
-@node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5
+@node Doing the Build, Installing the Binaries, Unpacking the Sources, Building Kerberos V5
 @section Doing the Build
 
 You have a number of different options in how to build Kerberos.  If you
@@ -335,7 +336,33 @@ makes it fail for relative pathnames. Note that this version differs
 from the latest version as distributed and installed by the XConsortium
 with X11R6. Either version should be acceptable.
 
-@node Testing the Build, Options to Configure, Doing the Build, Building Kerberos V5
+@node Installing the Binaries, Testing the Build, Doing the Build, Building Kerberos V5
+@section Installing the Binaries
+
+Once you have built Kerberos, you should install the binaries.  You
+can do this by running:
+
+@example
+% make install
+@end example
+
+If you want to install the binaries into a destination directory that
+is not their final destination, which may be convenient if you want to
+build a binary distribution to be deployed on multiple hosts, you may
+use:
+
+@example
+% make install DESTDIR=/path/to/destdir
+@end example
+
+This will install the binaries under @code{DESTDIR/PREFIX}, e.g., the
+user programs will install into @code{DESTDIR/PREFIX/bin}, the
+libraries into @code{DESTDIR/PREFIX/lib}, etc.
+
+Note that if you want to test the build (see @ref{Testing the Build}),
+you usually do not need to do a @code{make install} first.
+
+@node Testing the Build, Options to Configure, Installing the Binaries, Building Kerberos V5
 @section Testing the Build
 
 The Kerberos V5 distribution comes with built-in regression tests.  To
