@@ -307,7 +307,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     }
     if ((request.from == 0) &&
 	!in_clock_skew(as_reply->enc_part2->times.starttime)) {
-	retval = KRB5_KDCREP_MODIFIED;
+	retval = KRB5_KDCREP_SKEW;
 	goto cleanup;
     }
     

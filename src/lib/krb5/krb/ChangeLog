@@ -1,3 +1,8 @@
+Fri Mar 31 16:45:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5_get_in_tkt: changed error return value for when clocks
+           are out of skew to be KRB5_KDCREP_SKEW.
+
 Fri Mar 31 00:44:26 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rd_req.c (krb5_rd_req): Fix typo which caused new_keytab to not
