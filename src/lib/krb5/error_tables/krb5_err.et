@@ -63,8 +63,8 @@ error_code KRB5PLACEHOLD_43,		"KRB5 error code 43"
 error_code KRB5KRB_AP_ERR_BADKEYVER,	"Key version is not available"
 error_code KRB5KRB_AP_ERR_NOKEY,	"Service key not available"
 error_code KRB5KRB_AP_ERR_MUT_FAIL,	"Mutual authentication failed"
-#^^ 46
-error_code KRB5PLACEHOLD_47,		"KRB5 error code 47"
+error_code KRB5KRB_AP_ERR_BADDIRECTION,	"Incorrect message direction"
+#^^ 47
 error_code KRB5PLACEHOLD_48,		"KRB5 error code 48"
 error_code KRB5PLACEHOLD_49,		"KRB5 error code 49"
 #vv 50
