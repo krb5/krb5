@@ -124,6 +124,7 @@ MSG_DAT msg_data;
 /* need to include the krb5 file, because we're doing manual fallback
    from the v2 mech to the v2 mech.  Once there's real negotiation,
    we can be generic again. */
+#include <gssapi/gssapi_generic.h>
 #include <gssapi/gssapi_krb5.h>
 gss_ctx_id_t gcontext;
 #endif /* GSSAPI */
