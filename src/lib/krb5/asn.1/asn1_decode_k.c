@@ -203,8 +203,11 @@ asn1_error_code asn1_decode_principal_name(DECLARG(asn1buf *, buf),
     { sequence_of(&subbuf);
       while(asn1buf_remains(&seqbuf)){
 	size++;
-	(*val)->data = (krb5_data*)realloc((*val)->data,
-					   size*sizeof(krb5_data));
+	if ((*val)->data == NULL)
+	  (*val)->data = (krb5_data*)malloc(size*sizeof(krb5_data));
+	else
+	  (*val)->data = (krb5_data*)realloc((*val)->data,
+					     size*sizeof(krb5_data));
 	if((*val)->data == NULL) return ENOMEM;
 	retval = asn1_decode_generalstring(&seqbuf,
 					   &((*val)->data[size-1].length),
@@ -490,8 +493,11 @@ if(retval) return retval
      
 #define array_append(array,size,element,type)\
 size++;\
-*(array) = (type**)realloc(*(array),\
-				  (size+1)*sizeof(type*));\
+if (*(array) == NULL)\
+     *(array) = (type**)malloc((size+1)*sizeof(type*));\
+else\
+  *(array) = (type**)realloc(*(array),\
+			     (size+1)*sizeof(type*));\
 if(*(array) == NULL) return ENOMEM;\
 (*(array))[(size)-1] = elt
      

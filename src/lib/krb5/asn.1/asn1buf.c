@@ -332,11 +332,15 @@ asn1_error_code asn1buf_expand(DECLARG(asn1buf *, buf),
   if(buf->base == NULL) bound_offset = -1;
   else bound_offset = buf->bound - buf->base;
 
-  
-  buf->base = realloc(buf->base,
-		      (asn1buf_size(buf)+(inc>STANDARD_INCREMENT ?
-					  inc : STANDARD_INCREMENT))
-		      * sizeof(asn1_octet));
+  if (buf->base == NULL)
+    buf->base = malloc((asn1buf_size(buf)+(inc>STANDARD_INCREMENT ?
+					   inc : STANDARD_INCREMENT))
+		       * sizeof(asn1_octet));
+  else
+    buf->base = realloc(buf->base,
+			(asn1buf_size(buf)+(inc>STANDARD_INCREMENT ?
+					    inc : STANDARD_INCREMENT))
+			* sizeof(asn1_octet));
   if(buf->base == NULL) return ENOMEM;
   buf->bound = (buf->base) + bound_offset + inc;
   buf->next = (buf->base) + next_offset;

@@ -1,3 +1,10 @@
+Fri Jul  8 17:32:29 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* asn1_decode_k.c: yet another instance of the SunOS realloc bug
+
+	* asn1buf.c: whee SunOS realloc of a NULL pointer returns NULL.
+	sigh.
+
 Wed Jul  6 13:21:35 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* an1buf.c: Harry saves vs. Unix again.  Making sure that anything
