@@ -19,8 +19,7 @@ LIBFINIFUNC=krb5int_thread_support_fini
 
 STLIBOBJS= \
 	threads.o \
-	fake-addrinfo.o \
-	foreachaddr.o
+	fake-addrinfo.o
 
 STOBJLISTS=OBJS.ST
 
@@ -30,8 +29,7 @@ LOCALINCLUDES=-I. -I$(srcdir)
 
 SRCS=\
 	$(srcdir)/threads.c \
-	$(srcdir)/fake-addrinfo.c \
-	$(srcdir)/foreachaddr.c
+	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
 SHLIB_EXPLIBS= $(LIBS)
 SHLIB_DIRS=
