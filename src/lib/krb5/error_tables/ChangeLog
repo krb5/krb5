@@ -1,3 +1,8 @@
+Tue May 23 16:46:30 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Don't install the error table header files; they
+		shouldn't be needed by an end-programmer.
+
 Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
 
         * krb5_err.et: Add new error KRB5_TKT_NOT_FORWARDABLE.
