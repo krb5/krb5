@@ -1,5 +1,8 @@
 Thu Jan  4 21:33:38 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* gssapiP_generic.h (TWRITE_INT16, TREAD_INT16): Added new macros
+		to read and write two byte integers from the wire.
+
 	* gssapiP_generic.h: Don't include <sys/types.h> since it's
 		already included by gssapi.h.
 
