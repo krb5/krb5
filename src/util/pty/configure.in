@@ -187,7 +187,22 @@ fi
 # end of utmp-related hair
 #
 ######################################################################
-
+dnl
+KRB5_NEED_PROTO([#ifdef HAVE_UTMP_H
+#include <utmp.h>
+#endif
+#ifdef HAVE_UTMPX_H
+#include <utmpx.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+],getutmp)
+dnl
+dnl
 AC_MSG_CHECKING([streams interface])
 AC_CACHE_VAL(krb5_cv_has_streams,
 [AC_TRY_COMPILE(

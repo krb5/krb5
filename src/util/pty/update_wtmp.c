@@ -38,6 +38,10 @@
 
 #ifdef HAVE_SETUTXENT
 
+#if defined(HAVE_GETUTMP) && defined(NEED_GETUTMP_PROTO)
+extern void getutmp(const struct utmpx *, struct utmp *);
+#endif
+
 /*
  * Welcome to conditional salad.
  *

@@ -1,3 +1,9 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Check for system provided getutmp() prototype.
+
+	* update_wtmp.c: Provide prototype for getutmp() if needed. 
+
 2001-05-15  Tom Yu  <tlyu@mit.edu>
 
 	* getpty.c: Make pty_getpty() into ptyint_getpty_ext(), which has
