@@ -221,7 +221,8 @@ ser_kcontext_test(kcontext, verbose)
 	    if (!(kret = ser_data(verbose, "> Context with default realm",
 				  (krb5_pointer) kcontext,
 				  KV5M_CONTEXT)) &&
-		!(kret = krb5_db_create(kcontext, dbname)) &&
+		!(kret = krb5_db_create(kcontext, dbname,
+					KRB5_KDB_CREATE_BTREE)) &&
 		!(kret = krb5_db_set_name(kcontext, dbname)) &&
 		!(kret = krb5_db_init(kcontext)) &&
 		!(kret = ser_data(verbose, "> Context with open database",
@@ -231,7 +232,7 @@ ser_kcontext_test(kcontext, verbose)
 		!(kret = ser_data(verbose, "> Context with closed database",
 				  (krb5_pointer) kcontext, 
 				  KV5M_CONTEXT))) {
-		kdb5_db_destroy(kcontext, dbname);
+		krb5_db_destroy(kcontext, dbname);
 		if (verbose)
 		    printf("* krb5_context test succeeded\n");
 	    }

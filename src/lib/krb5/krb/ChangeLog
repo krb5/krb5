@@ -1,3 +1,7 @@
+Fri Jul 25 15:25:32 1997  Tom Yu  <tlyu@mit.edu>
+
+	* t_ser.c: Add support for changed kdb API.
+
 Tue Jul 15 22:15:09 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* serialize.c (krb5_register_serializer): Only copy over the old
