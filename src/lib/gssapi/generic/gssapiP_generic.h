@@ -81,53 +81,53 @@
 
 /** helper functions **/
 
-int g_save_name(void **vdb, gss_name_t *name);
-int g_save_cred_id(void **vdb, gss_cred_id_t *cred);
-int g_save_ctx_id(void **vdb, gss_ctx_id_t *ctx);
+int g_save_name PROTOTYPE((void **vdb, gss_name_t *name));
+int g_save_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
+int g_save_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
 
-int g_validate_name(void **vdb, gss_name_t *name);
-int g_validate_cred_id(void **vdb, gss_cred_id_t *cred);
-int g_validate_ctx_id(void **vdb, gss_ctx_id_t *ctx);
+int g_validate_name PROTOTYPE((void **vdb, gss_name_t *name));
+int g_validate_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
+int g_validate_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
 
-int g_delete_name(void **vdb, gss_name_t *name);
-int g_delete_cred_id(void **vdb, gss_cred_id_t *cred);
-int g_delete_ctx_id(void **vdb, gss_ctx_id_t *ctx);
+int g_delete_name PROTOTYPE((void **vdb, gss_name_t *name));
+int g_delete_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
+int g_delete_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
 
-int g_make_string_buffer(const char *str, gss_buffer_t buffer);
+int g_make_string_buffer PROTOTYPE((const char *str, gss_buffer_t buffer));
 
-int g_copy_OID_set(const gss_OID_set_desc * const in, gss_OID_set *out);
+int g_copy_OID_set PROTOTYPE((const gss_OID_set_desc * const in, gss_OID_set *out));
 
-int g_token_size(const_gss_OID mech, unsigned int body_size);
+int g_token_size PROTOTYPE((const_gss_OID mech, unsigned int body_size));
 
-void g_make_token_header(const_gss_OID mech, int body_size,
-			  unsigned char **buf, int tok_type);
+void g_make_token_header PROTOTYPE((const_gss_OID mech, int body_size,
+			  unsigned char **buf, int tok_type));
 
-int g_verify_token_header(const_gss_OID mech, int *body_size,
-			  unsigned char **buf, int tok_type, int toksize);
+int g_verify_token_header PROTOTYPE((const_gss_OID mech, int *body_size,
+			  unsigned char **buf, int tok_type, int toksize));
 
-OM_uint32 g_display_major_status(OM_uint32 *minor_status,
+OM_uint32 g_display_major_status PROTOTYPE((OM_uint32 *minor_status,
 				 OM_uint32 status_value,
 				 int *message_context,
-				 gss_buffer_t status_string);
+				 gss_buffer_t status_string));
 
-OM_uint32 g_display_com_err_status(OM_uint32 *minor_status,
+OM_uint32 g_display_com_err_status PROTOTYPE((OM_uint32 *minor_status,
 				   OM_uint32 status_value,
-				   gss_buffer_t status_string);
+				   gss_buffer_t status_string));
 
-char *g_canonicalize_host(char *hostname);
+char *g_canonicalize_host PROTOTYPE((char *hostname));
 
-char *g_strdup(char *str);
+char *g_strdup PROTOTYPE((char *str));
 
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 generic_gss_release_buffer
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_buffer_t      /* buffer */
-           );
+           ));
 
 OM_uint32 generic_gss_release_oid_set
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_OID_set*      /* set */
-           );
+           ));
 
 #endif /* _GSSAPIP_GENERIC_H_ */

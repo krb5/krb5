@@ -25,9 +25,9 @@
  */
 
 #include "gssapiP_generic.h"
-#include <string.h>
 
-char *g_strdup(char *str)
+char *g_strdup(str)
+     char *str;
 {
    char *ret;
 

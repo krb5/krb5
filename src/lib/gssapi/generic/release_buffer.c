@@ -26,9 +26,9 @@
 
 #include "gssapiP_generic.h"
 
-OM_uint32
-generic_gss_release_buffer(OM_uint32 *minor_status,
-			   gss_buffer_t buffer)
+OM_uint32 generic_gss_release_buffer(minor_status, buffer)
+     OM_uint32 *minor_status;
+     gss_buffer_t buffer;
 {
    if ((buffer->length) &&
        (buffer->value)) {

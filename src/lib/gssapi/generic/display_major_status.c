@@ -102,8 +102,10 @@ static const char * const unknown_error = "Unknown %s (field = %d)";
 
 /**/
 
-int display_unknown(const char *kind, OM_uint32 value,
-		gss_buffer_t buffer)
+int display_unknown(kind, value, buffer)
+     const char *kind;
+     OM_uint32 value;
+     gss_buffer_t buffer;
 {
    int len;
    char *str;
@@ -122,10 +124,10 @@ int display_unknown(const char *kind, OM_uint32 value,
 
 /* code should be set to the calling error field */
 
-static OM_uint32
-   display_calling(OM_uint32 *minor_status,
-		   OM_uint32 code,
-		   gss_buffer_t status_string)
+static OM_uint32 display_calling(minor_status, code, status_string)
+     OM_uint32 *minor_status;
+     OM_uint32 code;
+     gss_buffer_t status_string;
 {
    const char *str;
 
@@ -147,10 +149,10 @@ static OM_uint32
 
 /* code should be set to the routine error field */
 
-static OM_uint32
-   display_routine(OM_uint32 *minor_status,
-		   OM_uint32 code,
-		   gss_buffer_t status_string)
+static OM_uint32 display_routine(minor_status, code, status_string)
+     OM_uint32 *minor_status;
+     OM_uint32 code;
+     gss_buffer_t status_string;
 {
    const char *str;
 
@@ -172,10 +174,10 @@ static OM_uint32
 
 /* code should be set to the bit offset (log_2) of a supplementary info bit */
 
-static OM_uint32
-   display_bit(OM_uint32 *minor_status,
-	       OM_uint32 code,
-	       gss_buffer_t status_string)
+static OM_uint32 display_bit(minor_status, code, status_string)
+     OM_uint32 *minor_status;
+     OM_uint32 code;
+     gss_buffer_t status_string;
 {
    const char *str;
 
@@ -203,11 +205,12 @@ static OM_uint32
      message_context > 2  : print supplementary info bit (message_context-2)
      */
 
-OM_uint32
-g_display_major_status(OM_uint32 *minor_status,
-		       OM_uint32 status_value,
-		       int *message_context,
-		       gss_buffer_t status_string)
+OM_uint32 g_display_major_status(minor_status, status_value, 
+				 message_context, status_string)
+     OM_uint32 *minor_status;
+     OM_uint32 status_value;
+     int *message_context;
+     gss_buffer_t status_string;
 {
    OM_uint32 ret, tmp;
    int bit;

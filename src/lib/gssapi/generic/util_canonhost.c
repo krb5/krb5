@@ -26,14 +26,14 @@
 
 /* This file could be OS specific */
 
+#include "gssapiP_generic.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <string.h>
 
-#include "gssapiP_generic.h"
-
-char *g_canonicalize_host(char *hostname)
+char *g_canonicalize_host(hostname)
+     char *hostname;
 {
    struct hostent *hent;
    char *haddr;

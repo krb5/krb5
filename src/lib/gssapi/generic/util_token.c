@@ -51,7 +51,8 @@ first two inner bytes, which indicate the token type.  The token
 
 */
 
-static int der_length_size(int length)
+static int der_length_size(length)
+     int length;
 {
    if (length < (1<<7))
       return(1);
@@ -65,7 +66,9 @@ static int der_length_size(int length)
       return(5);
 }
 
-static void der_write_length(unsigned char **buf, int length)
+static void der_write_length(buf, length)
+     unsigned char **buf;
+     int length;
 {
    if (length < (1<<7)) {
       *(*buf)++ = (unsigned char) length;
@@ -84,7 +87,9 @@ static void der_write_length(unsigned char **buf, int length)
 /* returns decoded length, or < 0 on failure.  Advances buf and
    decrements bufsize */
 
-static int der_read_length(unsigned char **buf, int *bufsize)
+static int der_read_length(buf, bufsize)
+     unsigned char **buf;
+     int *bufsize;
 {
    unsigned char sf;
    int ret;
@@ -110,7 +115,9 @@ static int der_read_length(unsigned char **buf, int *bufsize)
 
 /* returns the length of a token, given the mech oid and the body size */
 
-int g_token_size(const_gss_OID mech, unsigned int body_size)
+int g_token_size(mech, body_size)
+     const_gss_OID mech;
+     unsigned int body_size;
 {
    /* set body_size to sequence contents size */
    body_size += 4 + mech->length;
@@ -120,8 +127,11 @@ int g_token_size(const_gss_OID mech, unsigned int body_size)
 /* fills in a buffer with the token header.  The buffer is assumed to
    be the right size.  buf is advanced past the token header */
 
-void g_make_token_header(const_gss_OID mech, int body_size,
-			  unsigned char **buf, int tok_type)
+void g_make_token_header(mech, body_size, buf, tok_type)
+     const_gss_OID mech;
+     int body_size;
+     unsigned char **buf;
+     int tok_type;
 {
    *(*buf)++ = 0x60;
    der_write_length(buf, 4 + mech->length + body_size);
@@ -136,8 +146,12 @@ void g_make_token_header(const_gss_OID mech, int body_size,
    leaving buf advanced past the token header, and setting body_size
    to the number of remaining bytes */
 
-int g_verify_token_header(const_gss_OID mech, int *body_size,
-			  unsigned char **buf, int tok_type, int toksize)
+int g_verify_token_header(mech, body_size, buf, tok_type, toksize)
+     const_gss_OID mech;
+     int *body_size;
+     unsigned char **buf;
+     int tok_type;
+     int toksize;
 {
    int seqsize;
    gss_OID_desc toid;

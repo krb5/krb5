@@ -26,9 +26,9 @@
  * $Id$
  */
 
-OM_uint32
-generic_gss_release_oid_set(OM_uint32 *minor_status,
-			    gss_OID_set *set)
+OM_uint32 generic_gss_release_oid_set(minor_status, set)
+     OM_uint32 *minor_status;
+     gss_OID_set *set;
 {
    *minor_status = 0;
 

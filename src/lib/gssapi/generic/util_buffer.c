@@ -31,7 +31,9 @@
    make sure that buffer is consistent (release'able) when this
    function exits, no matter what the exit value */
 
-int g_make_string_buffer(const char *str, gss_buffer_t buffer)
+int g_make_string_buffer(str, buffer)
+     const char *str;
+     gss_buffer_t buffer;
 {
    buffer->length = strlen(str)+1;
 

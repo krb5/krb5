@@ -27,7 +27,9 @@
  */
 
 int
-g_copy_OID_set(const gss_OID_set_desc * const in, gss_OID_set *out)
+g_copy_OID_set(in, out)
+     const gss_OID_set_desc * const in;
+     gss_OID_set *out;
 {
    gss_OID_set copy;
    int i;

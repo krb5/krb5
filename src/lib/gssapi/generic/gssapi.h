@@ -23,7 +23,13 @@
 #ifndef _GSSAPI_H_
 #define _GSSAPI_H_
 
+/* for general config: */
+#include <krb5/osconf.h>
+/* for prototype-related config: */
+#include <krb5/base-defs.h>
+#ifndef NO_STDLIB_H
 #include <stdlib.h>
+#endif
 #include <stdio.h>
 
 /*
@@ -145,7 +151,7 @@ typedef struct gss_channel_bindings_struct {
  * Expiration time of 2^32-1 seconds means infinite lifetime for a
  * credential or security context
  */
-#define GSS_C_INDEFINITE 0xffffffffu
+#define GSS_C_INDEFINITE 0xffffffff
 
 
 /* Major status codes */
@@ -230,7 +236,7 @@ typedef struct gss_channel_bindings_struct {
  */
 
 OM_uint32 gss_acquire_cred
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_name_t,       /* desired_name */
             OM_uint32,        /* time_req */
             gss_OID_set,      /* desired_mechs */
@@ -238,15 +244,15 @@ OM_uint32 gss_acquire_cred
             gss_cred_id_t*,   /* output_cred_handle */
             gss_OID_set*,     /* actual_mechs */
             OM_uint32*        /* time_rec */
-           );
+           ));
 
 OM_uint32 gss_release_cred
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_cred_id_t*    /* cred_handle */
-           );
+           ));
 
 OM_uint32 gss_init_sec_context
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_cred_id_t,    /* claimant_cred_handle */
             gss_ctx_id_t*,    /* context_handle */
             gss_name_t,       /* target_name */
@@ -260,10 +266,10 @@ OM_uint32 gss_init_sec_context
             gss_buffer_t,     /* output_token */
             int*,             /* ret_flags */
             OM_uint32*        /* time_rec */
-           );
+           ));
 
 OM_uint32 gss_accept_sec_context
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t*,    /* context_handle */
             gss_cred_id_t,    /* verifier_cred_handle */
             gss_buffer_t,     /* input_token_buffer */
@@ -275,122 +281,122 @@ OM_uint32 gss_accept_sec_context
             int*,             /* ret_flags */
             OM_uint32*,       /* time_rec */
             gss_cred_id_t*    /* delegated_cred_handle */
-           );
+           ));
 
 OM_uint32 gss_process_context_token
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
             gss_buffer_t      /* token_buffer */
-           );
+           ));
 
 OM_uint32 gss_delete_sec_context
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t*,    /* context_handle */
             gss_buffer_t      /* output_token */
-           );
+           ));
 
 OM_uint32 gss_context_time
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
             OM_uint32*        /* time_rec */
-           );
+           ));
 
 OM_uint32 gss_sign
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
             int,              /* qop_req */
             gss_buffer_t,     /* message_buffer */
             gss_buffer_t      /* message_token */
-           );
+           ));
 
 OM_uint32 gss_verify
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
             gss_buffer_t,     /* message_buffer */
             gss_buffer_t,     /* token_buffer */
             int*              /* qop_state */
-           );
+           ));
 
 OM_uint32 gss_seal
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
             int,              /* conf_req_flag */
             int,              /* qop_req */
             gss_buffer_t,     /* input_message_buffer */
             int*,             /* conf_state */
             gss_buffer_t      /* output_message_buffer */
-           );
+           ));
 
 OM_uint32 gss_unseal
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
             gss_buffer_t,     /* input_message_buffer */
             gss_buffer_t,     /* output_message_buffer */
             int*,             /* conf_state */
             int*              /* qop_state */
-           );
+           ));
 
 OM_uint32 gss_display_status
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             OM_uint32,        /* status_value */
             int,              /* status_type */
             const_gss_OID,    /* mech_type */
             int*,             /* message_context */
             gss_buffer_t      /* status_string */
-           );
+           ));
 
 OM_uint32 gss_indicate_mechs
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_OID_set*      /* mech_set */
-           );
+           ));
 
 OM_uint32 gss_compare_name
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_name_t,       /* name1 */
             gss_name_t,       /* name2 */
             int*              /* name_equal */
-           );
+           ));
 
 OM_uint32 gss_display_name
-           (OM_uint32*,      /* minor_status */
+PROTOTYPE( (OM_uint32*,      /* minor_status */
             gss_name_t,      /* input_name */
             gss_buffer_t,     /* output_name_buffer */
             gss_OID*         /* output_name_type */
-           );
+           ));
 
 OM_uint32 gss_import_name
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_buffer_t,     /* input_name_buffer */
             const_gss_OID,    /* input_name_type */
             gss_name_t*       /* output_name */
-           );
+           ));
 
 OM_uint32 gss_release_name
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_name_t*       /* input_name */
-           );
+           ));
 
 OM_uint32 gss_release_buffer
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_buffer_t      /* buffer */
-           );
+           ));
 
 OM_uint32 gss_release_oid_set
-           (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_OID_set*      /* set */
-           );
+           ));
 
 OM_uint32 gss_inquire_cred
-           (OM_uint32 *,      /* minor_status */
+PROTOTYPE( (OM_uint32 *,      /* minor_status */
             gss_cred_id_t,    /* cred_handle */
             gss_name_t *,     /* name */
             OM_uint32 *,      /* lifetime */
             int *,            /* cred_usage */
             gss_OID_set *     /* mechanisms */
-           );
+           ));
 
 OM_uint32 gss_inquire_context
-	   (OM_uint32*,       /* minor_status */
+PROTOTYPE( (OM_uint32*,       /* minor_status */
 	    gss_ctx_id_t,     /* context_handle */
 	    gss_name_t*,      /* initiator_name */
 	    gss_name_t*,      /* acceptor_name */
@@ -398,7 +404,7 @@ OM_uint32 gss_inquire_context
 	    gss_OID*,         /* mech_type */
 	    int*,             /* ret_flags */
 	    int*              /* locally_initiated */
-	   );
+	   ));
 
 
 #endif /* _GSSAPI_H_ */
