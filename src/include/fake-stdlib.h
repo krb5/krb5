@@ -260,7 +260,7 @@ int setusershell P((void ));
 int siginterrupt P((int , int ));
 int sleep P((unsigned ));
 int srand P((int ));
-int strlen P((const char *));
+size_t strlen P((const char *));
 char *strncat P((char *, const char *, int ));
 int strncmp P((const char *, const char *, int ));
 char *strncpy P((char *, const char *, int ));
@@ -672,16 +672,18 @@ void qsort P((char * , unsigned  , unsigned  , int (* )()));
 
 #ifdef ibm032
 #ifndef memcpy
-extern char *memcpy P((char *, const char *, int));
+extern void *memcpy P((void *, const void *, unsigned int));
 #endif
 #ifndef memset
-extern char *memset P((char *, int, int));
+extern void *memset P((void *, int, unsigned int));
 #endif
 extern void *calloc P((unsigned int, unsigned int));
 extern void *malloc P((unsigned int));
 extern void *realloc P((void *, unsigned int));
 extern void free P((void *));
+#ifndef abort
 extern void abort P((void));
+#endif
 extern char *getenv P((const char *));
 
 extern double atof P((const char *));
