@@ -1,5 +1,8 @@
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5.hin (krb5_os_hostaddr): Declaration moved...
+	* k5-int.h (krb5_os_hostaddr): ...to here.
+
 	* fake-addrinfo.h: New file.
 
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>

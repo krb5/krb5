@@ -2129,9 +2129,6 @@ krb5_error_code krb5_make_fulladdr
 		krb5_address *,
 		krb5_address *);
 
-krb5_error_code krb5_os_hostaddr
-	(krb5_context, const char *, krb5_address ***);
-
 krb5_error_code krb5_set_real_time
 	(krb5_context, krb5_int32, krb5_int32);
 krb5_error_code krb5_set_debugging_time

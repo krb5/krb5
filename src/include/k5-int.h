@@ -542,6 +542,9 @@ void krb5_os_free_context (krb5_context);
 
 krb5_error_code krb5_find_config_files (void);
 
+krb5_error_code krb5_os_hostaddr
+	(krb5_context, const char *, krb5_address ***);
+
 struct addrlist {
     struct sockaddr **addrs;
     int naddrs;
