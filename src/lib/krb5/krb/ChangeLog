@@ -1,3 +1,8 @@
+Mon Nov 13 14:40:05 1995    <tytso@rsts-11.mit.edu>
+
+	* walk_rtree.c (krb5_walk_realm_tree): Added ANL changes to
+		support configuration authentication paths.
+
 Mon Nov 13 12:57:12 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* preauth.c (krb5_process_padata): Added generalized processing

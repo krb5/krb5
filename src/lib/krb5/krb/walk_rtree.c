@@ -24,6 +24,62 @@
  * krb5_walk_realm_tree()
  */
 
+/* ANL - Modified to allow Configurable Authentication Paths.
+ * This modification removes the restriction on the choice of realm
+ * names, i.e. they nolonger have to be hierarchical. This
+ * is allowed by RFC 1510: "If a hierarchical orginization is not used
+ * it may be necessary to consult some database in order to construct
+ * an authentication path between realms."  The database is contained
+ * in the [capath] section of the krb5.conf file.
+ * Client to server paths are defined. There are n**2 possible
+ * entries, but only those entries which are needed by the client
+ * or server need be present in its krb5.conf file. (n entries or 2*n
+ * entries if the same krb5.conf is used for clients and servers)
+ *
+ * for example: ESnet will be running a KDC which will share
+ * inter-realm keys with its many orginizations which include among
+ * other ANL, NERSC and PNL. Each of these orginizations wants to
+ * use its DNS name in the realm, ANL.GOV. In addition ANL wants
+ * to authenticatite to HAL.COM via a K5.MOON and K5.JUPITER
+ * A [capath] section of the krb5.conf file for the ANL.GOV clients
+ * and servers would look like:
+ *
+ * [capath]
+ * ANL.GOV = {
+ *		NERSC.GOV = ES.NET
+ *		PNL.GOV = ES.NET
+ *		ES.NET = .
+ * 		HAL.COM = K5.MOON
+ * 		HAL.COM = K5.JUPITER
+ * }
+ * NERSC.GOV = {
+ *		ANL.GOV = ES.NET
+ * }
+ * PNL.GOV = {
+ *		ANL.GOV = ES.NET
+ * }
+ * ES.NET = {
+ * 		ANL.GOV = .
+ * }
+ * HAL.COM = {
+ *		ANL.GOV = K5.JUPITER
+ *		ANL.GOV = K5.MOON
+ * }
+ *
+ * In the above a "." is used to mean directly connected since the
+ * the profile routines cannot handle a null entry.
+ *
+ * If no client-to-server path is found, the default hierarchical path
+ * is still generated.
+ *
+ * This version of the Configurable Authentication Path modification
+ * differs from the previous versions prior to K5 beta 5 in that
+ * the profile routines are used, and the explicite path from
+ * client's realm to server's realm must be given. The modifications
+ * will work together.
+ * DEE - 5/23/95
+ */
+#define CONFIGURABLE_AUTHENTICATION_PATH
 #include "k5-int.h"
 #include "int-proto.h"
 
@@ -51,6 +107,40 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
     krb5_data tmpcrealm, tmpsrealm;
     int nocommon = 1;
 
+#ifdef CONFIGURABLE_AUTHENTICATION_PATH
+	const char *cap_names[4];
+	char *cap_client, *cap_server;
+	char **cap_nodes;
+	int cap_code;
+	if ((cap_client = (char *)malloc(client->length + 1)) == NULL)
+		return ENOMEM;
+	strncpy(cap_client, client->data, client->length);
+	cap_client[client->length] = '\0';
+	if ((cap_server = (char *)malloc(server->length + 1)) == NULL) {
+		krb5_xfree(cap_client);
+		return ENOMEM;
+	}
+	strncpy(cap_server, server->data, server->length);
+	cap_server[server->length] = '\0';
+	cap_names[0] = "capaths";
+	cap_names[1] = cap_client;
+	cap_names[2] = cap_server;
+	cap_names[3] = 0;
+	cap_code = profile_get_values(context->profile, cap_names, &cap_nodes);
+	krb5_xfree(cap_names[1]);    /* done with client string */
+	if (cap_code == 0) {     /* found a path, so lets use it */
+		links = 0;
+		if (*cap_nodes[0] != '.') { /* a link of . means direct */
+		 	while(cap_nodes[links]) {
+				links++;
+			}
+		}
+		cap_nodes[links] = cap_server; /* put server on end of list */
+						/* this simplifies the code later and make */
+						/* cleanup eaiser as well */
+	} else {			/* no path use hierarchical method */
+	krb5_xfree(cap_names[2]); /* failed, don't need server string */
+#endif
     clen = client->length;
     slen = server->length;
 
@@ -123,6 +213,9 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	if(com_sdot == server->data + server->length -1)
 	   com_sdot = server->data - 1 ;
     }
+#ifdef CONFIGURABLE_AUTHENTICATION_PATH
+	}		/* end of if use hierarchical method */
+#endif
 
     if (!(rettree = (krb5_principal *)calloc(links+2,
 					     sizeof(krb5_principal)))) {
@@ -133,6 +226,42 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	krb5_xfree(rettree);
 	return retval;
     }
+#ifdef CONFIGURABLE_AUTHENTICATION_PATH
+	if (cap_code == 0) {    /* found a path above */
+		tmpcrealm.data = client->data;
+		tmpcrealm.length = client->length;
+		while( i-1 <= links) {
+			
+			tmpsrealm.data = cap_nodes[i-1];
+			/* don't count trailing whitespace from profile_get */
+			tmpsrealm.length = strcspn(cap_nodes[i-1],"\t ");
+			if ((retval = krb5_tgtname(context,
+						   &tmpsrealm,
+						   &tmpcrealm,
+						   &rettree[i]))) {
+				while (i) {
+					krb5_free_principal(context, rettree[i-1]);
+					i--;
+	    		}
+	    		krb5_xfree(rettree);
+				/* cleanup the cap_nodes from profile_get */
+				for (i = 0; i<=links; i++) {
+					krb5_xfree(cap_nodes[i]);
+				}
+				krb5_xfree((char *)cap_nodes);
+	    		return retval;
+			}
+			tmpcrealm.data = tmpsrealm.data;	
+			tmpcrealm.length = tmpsrealm.length;
+			i++;
+		}
+		/* cleanup the cap_nodes from profile_get last one has server */
+		for (i = 0; i<=links; i++) {
+			krb5_xfree(cap_nodes[i]);
+		}
+		krb5_xfree((char *)cap_nodes);
+	} else {  /* if not cap then use hierarchical method */
+#endif
     for (prevccp = ccp = client->data;
 	 ccp <= com_cdot;
 	 ccp++) {
@@ -219,6 +348,9 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	    return retval;
 	}
     }
+#ifdef CONFIGURABLE_AUTHENTICATION_PATH
+	}
+#endif
     *tree = rettree;
     return 0;
 }
