@@ -1,3 +1,8 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+        * configure.in: Use AC_CHECK_HEADER and AC_CHECK_FUNC instead of
+	AC_HEADER_CHECK and AC_FUNC_CHECK.
+
 2000-06-29  Tom Yu  <tlyu@mit.edu>
 
 	* telnetd.c (doit): Change test for "no authentication" as per
