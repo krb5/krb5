@@ -1,0 +1,10 @@
+Tue Aug 27 16:38:29 1996  Jeff Bigler  <jcb@viola.cygnus.com>
+
+	* Makefile.in (install): Added line to install .k5login man page.
+
+	* k5login.M: new file
+
+Sat Aug  3 15:35:19 1996  Michael Graff  <explorer@lenin.cygnus.com>
+
+	* configure.in:  add CONFIG_RULES and AC_PROG_INSTALL checks
+
