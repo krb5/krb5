@@ -129,6 +129,19 @@ struct authlist
  }
 ;
 
+/* XXX should we use strdup? */
+static char *
+strsave(s)
+register const char *s;
+{
+    register char *ret;
+    
+    if (ret = malloc(strlen(s)+1)) {
+	(void) strcpy(ret, s);
+	return ret;
+    }
+    return 0;
+}
 /* of course, list is backwards from file */
 /* hash could be forwards since we have to search on match, but naaaah */
 
@@ -159,7 +172,16 @@ krb5_donot_replay *rep;
  ta->na = t->a; t->a = ta;
  ta->nh = t->h[rephash]; t->h[rephash] = ta;
  ta->rep = *rep;
- 
+ if (!(ta->rep.client = strsave(rep->client))) {
+     FREE(ta);
+     return CMP_MALLOC;
+ }
+ if (!(ta->rep.server = strsave(rep->server))) {
+     FREE(ta->rep.client);
+     FREE(ta);
+     return CMP_MALLOC;
+ }
+
  return CMP_HOHUM;
 }
 
@@ -333,9 +355,9 @@ krb5_donot_replay *rep;
 
  switch(store(id,rep))
   {
-   case CMP_MALLOC: FREE(rep->client); FREE(rep->server); FREE(rep);
+   case CMP_MALLOC:
        return KRB5_RC_MALLOC; break;
-   case CMP_REPLAY: FREE(rep->client); FREE(rep->server); FREE(rep);
+   case CMP_REPLAY:
        return KRB5KRB_AP_ERR_REPEAT; break;
    case 0: break;
    default: /* wtf? */ ;
