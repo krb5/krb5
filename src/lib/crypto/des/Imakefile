@@ -14,6 +14,7 @@ OBJS=	cksum.o		\
 	cbc_cksum.o	\
 	cs_entry.o	\
 	enc_dec.o	\
+	krb_glue.o	\
 	finish_key.o	\
 	fin_rndkey.o	\
 	init_rkey.o	\
@@ -23,13 +24,16 @@ OBJS=	cksum.o		\
 	key_parity.o	\
 	key_sched.o	\
 	new_rn_key.o	\
-	weak_key.o
+	weak_key.o	\
+	read_password.o	\
+	quad_cksum.o
 
 SRCS=	cksum.c		\
 	des.c		\
 	cs_entry.c	\
 	cbc_cksum.c	\
 	enc_dec.c	\
+	krb_glue.c	\
 	finish_key.c	\
 	fin_rndkey.c	\
 	init_rkey.c	\
@@ -39,7 +43,9 @@ SRCS=	cksum.c		\
 	key_parity.c	\
 	key_sched.c	\
 	new_rn_key.c	\
-	weak_key.c
+	weak_key.c	\
+	read_password.c	\
+	quad_cksum.c
 
 DEFINES = $(DESDEFINES)
 
