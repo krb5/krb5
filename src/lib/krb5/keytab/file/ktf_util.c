@@ -154,7 +154,7 @@ int mode;
 	    (kt_vno != KRB5_KT_VNO_1)) {
 	    (void) krb5_unlock_file(context, KTFILEP(id), KTFILENAME(id));
 	    (void) fclose(KTFILEP(id));
-	    return -1 /* KRB5_KEYTAB_BADVNO */;
+	    return KRB5_KEYTAB_BADVNO;
 	}
     }
     return 0;
