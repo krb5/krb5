@@ -82,7 +82,7 @@ krb5_error_code krb5_dbm_db_rename
 		   char * ));
 krb5_error_code krb5_dbm_db_get_principal 
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
+		   krb5_const_principal,
 		   krb5_db_entry *,
 		   int *,
 		   krb5_boolean * ));
@@ -90,6 +90,10 @@ void krb5_dbm_db_free_principal
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_db_entry *,
 		   int ));
+krb5_error_code krb5_dbm_db_delete_principal 
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_const_principal,
+		   int * ));
 krb5_error_code krb5_dbm_db_put_principal 
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_db_entry *,

@@ -1,3 +1,12 @@
+Mon Sep 15 15:01:49 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb_dbm.h: Add const to argument of krb5_dbm_db_get_principal.
+	    Add prototype for krb5_dbm_db_delete_principal.
+
+	* kdb.h: Prototypes for krb5_db_get_principal,
+            krb5_db_delete_principal, krb5_dbe_update_mod_princ_data,
+            krb5_encode_princ_dbkey modified to use const krb5_principals.
+
 Fri Jul 25 15:18:25 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_kt.h: Move support for "kdb" keytab here.

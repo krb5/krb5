@@ -184,7 +184,7 @@ krb5_error_code krb5_db_rename
 		   char * ));
 krb5_error_code krb5_db_get_principal
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal ,
+		   krb5_const_principal ,
 		   krb5_db_entry *,
 		   int *,
 		   krb5_boolean * ));
@@ -198,7 +198,7 @@ krb5_error_code krb5_db_put_principal
 		   int * ));
 krb5_error_code krb5_db_delete_principal
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
+		   krb5_const_principal,
 		   int * ));
 krb5_error_code krb5_db_iterate
 	KRB5_PROTOTYPE((krb5_context,
@@ -294,7 +294,7 @@ krb5_error_code krb5_dbe_update_mod_princ_data
 	KRB5_PROTOTYPE((krb5_context,
 			krb5_db_entry *,
 			krb5_timestamp,
-			krb5_principal));
+			krb5_const_principal));
 krb5_error_code krb5_dbe_lookup_mod_princ_data
 	KRB5_PROTOTYPE((krb5_context,
 			krb5_db_entry *,
@@ -303,7 +303,7 @@ krb5_error_code krb5_dbe_lookup_mod_princ_data
 int krb5_encode_princ_dbkey
 	KRB5_PROTOTYPE((krb5_context,
     		   krb5_data  *,
-    		   krb5_principal));
+    		   krb5_const_principal));
 void krb5_free_princ_dbkey
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_data *));
