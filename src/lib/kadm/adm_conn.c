@@ -127,7 +127,7 @@ kadm_get_ccache(kcontext, user, ccname, ccache, client)
 	goto cleanup;
 
     if (!ccname) {
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
 	strcpy (new_cache, "FILE:");
 	GetTempFileName (0, "tkt", 0, new_cache+5);
 #else
@@ -136,7 +136,7 @@ kadm_get_ccache(kcontext, user, ccname, ccache, client)
 #else
 	(void) sprintf(new_cache, kadm_cache_name_fmt, getpid());
 #endif /* _MACINTOSH */
-#endif /* _WINDOWS */
+#endif /* _MSDOS || _WIN32 */
     }
     else
 	sprintf(new_cache, "FILE:%s", ccname);

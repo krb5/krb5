@@ -161,7 +161,7 @@ format_kw_tagged(datap, kwordp, ntags, taglist, vallen, val)
     return(retval);
 }
 
-#if ! defined(_WINDOWS) && ! defined(_MACINTOSH)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH)
 /*
  * krb5_adm_dbent_to_proto()	- Convert database a database entry into
  *				  an external attribute list.
