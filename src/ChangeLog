@@ -1,3 +1,8 @@
+Mon Nov  7 21:27:45 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* aclocal.m4 (CHECK_SETJMP, CHECK_SIGNALS): Added checks for POSIX
+		setjmp handling and POSIX signal handling.
+
 Wed Nov  2 20:39:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: We're probably not going to be building in the

@@ -250,6 +250,24 @@ define(CHECK_WAIT_TYPE,[
 AC_COMPILE_CHECK([union wait],
 [#include <sys/wait.h>], [union wait i;], , AC_DEFINE(WAIT_USES_INT))])dnl
 dnl
+dnl check for POSIX signal handling -- CHECK_SIGNALS
+dnl
+define(CHECK_SIGNALS,[
+AC_FUNC_CHECK(sigprocmask,
+AC_COMPILE_CHECK([sigset_t],
+[#include <signal.h>],
+[sigset_t x],
+AC_DEFINE(POSIX_SIGNALS)))])dnl
+dnl
+dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
+dnl
+define(CHECK_SETJMP,[
+AC_FUNC_CHECK(sigsetjmp,
+AC_COMPILE_CHECK([sigjmp_buf],
+[#include <setjmp.h>],
+[sigjmp_buf x],
+AC_DEFINE(POSIX_SETJMP)))])dnl
+dnl
 dnl set $(KRB5ROOT) from --with-krb5-root=value -- WITH_KRB5ROOT
 dnl
 define(WITH_KRB5ROOT,[
