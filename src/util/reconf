@@ -21,15 +21,16 @@ do
   esac
 done
 
-
+# Currently (2000-10-03) we need 2.12 or later, and 2.13 is current.
+pat="version 2.1[23456789]"
 if test ! -f $autoreconfprog ; then
-	if autoreconf --version | grep -q "version 2.[123456789]" && \
-	   autoconf --version  | grep -q "version 2.[123456789]" && \
-	   autoheader --version | grep -q "version 2.[123456789]" ; then
+	if autoreconf --version | grep "$pat" >/dev/null && \
+	   autoconf --version  | grep "$pat" >/dev/null && \
+	   autoheader --version | grep "$pat" >/dev/null; then
 		autoreconf=autoreconf
 		echo "Using" `autoconf --version` "found in your path..."
 	else
-		echo "Couldn't find autoconf 2.1 or higher in your path."
+		echo "Couldn't find autoconf 2.12 or higher in your path."
 		echo " "
 		echo "Please cd to util/autoconf, and type the commands"
 		echo "'configure' and then 'make'; then cd back to the top"
