@@ -67,7 +67,7 @@ actions CopyHeader
 }
 
 
-Intermediates = "$(SYMROOT)/Kerberos5.intermediates" ;
+Intermediates = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates" ;
 IntermediateErrorTables = "$(Intermediates)/ErrorTables" ;
 IntermediateHeaders = "$(Intermediates)/Kerberos" ;
 IntermediatePrivateHeaders = "$(Intermediates)/PrivateHeaders" ;

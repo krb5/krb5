@@ -1,6 +1,6 @@
 include "$(SRCROOT)/../../KerberosErrors/Scripts/compile_et.jam" ;
 
-IntermediateErrorTables = "$(SYMROOT)/Kerberos5.intermediates/ErrorTables" ;
+IntermediateErrorTables = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/ErrorTables" ;
 
 compile_et 	"$(IntermediateErrorTables)/prof_err.h"
             "$(IntermediateErrorTables)/prof_err.c"
