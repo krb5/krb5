@@ -3,7 +3,7 @@
 
 all:: all-$(WHAT)
 
-all-unix::
+all-unix:: krb5.h
 all-mac::
 
 all-windows::
@@ -16,6 +16,29 @@ all-windows::
 	@echo Making in include\krb5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
+
+krb5.h: $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h asn1_err.h
+	cat $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
+		asn1_err.h > krb5.h
+
+#
+# Build the error table include files:
+# adm_err.h asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h
+
+adm_err.h: $(SRCTOP)/lib/krb5/error_tables/adm_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
+
+asn1_err.h: $(SRCTOP)/lib/krb5/error_tables/asn1_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
+
+kdb5_err.h: $(SRCTOP)/lib/krb5/error_tables/kdb5_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
+
+krb5_err.h: $(SRCTOP)/lib/krb5/error_tables/krb5_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
+
+kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
 
 clean:: clean-$(WHAT)
 

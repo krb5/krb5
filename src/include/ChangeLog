@@ -1,4 +1,18 @@
+Tue May 23 15:08:54 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in, configure.in, krb5.hin: Move krb5.h to krb5.hin,
+		and build krb5.h from krb5.hin and the error table
+		include files, which are now built in this directory.
+		This way, krb5.h is the only include file that we need to
+		install.
+
+	* k5-int.h: Move the sockets specific setup out of k5-config.h to
+		  k5-sockets.h, and modify k5-int to include k5-sockets.h
+		  (if it is requested by NEED_SOCKETS) after including
+		  krb5.h.  This keeps the gdb type numbers the same across
+		  .o files, so that recent binuntils can compress the
+		  debugging information in executables linked with a
+		  debugging library.
 Mon May 22 10:24:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- (install) Always perform install actions using
 			  $(INSTALL_DATA).

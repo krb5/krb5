@@ -14,6 +14,10 @@
 
 #include "krb5.h"
 
+#ifdef NEED_SOCKETS
+#include "k5-sockets.h"
+#endif
+
 /* krb5/krb5.h includes many other .h files in the krb5 subdirectory.
    The ones that it doesn't include, we include below.  */
 

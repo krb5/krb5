@@ -3,6 +3,7 @@ AC_SET_BUILDTOP
 WITH_CCOPTS
 WITH_KRB5ROOT
 CONFIG_DIRS(krb5 kerberosIV)
+AC_PROG_AWK
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
