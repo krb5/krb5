@@ -1,3 +1,14 @@
+2003-05-27  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (HPUX): Make HPUX compiler flags simpler.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo (HPUX, Solaris 2.X, Ultrix 4.2/3 [notdef]):
+	Replace descriptions of old --with- options with VAR=.
+	(Solaris 2.X): Suggest that defining _XOPEN_SOURCE and
+	__EXTENSIONS__ might help for 64-bit mode.
+
 2003-05-23  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo (appdefaults): Clarify afs_krb5 slightly.
