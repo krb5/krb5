@@ -22,7 +22,7 @@ static char rcsid_rc_base_c[] =
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 /*
 If NOIOSTUFF is defined at compile time, dfl rcaches will be per-process.
@@ -203,7 +203,6 @@ krb5_rcache id;
 krb5_deltat lifespan;
 {
  struct dfl_data *t = (struct dfl_data *)id->data;
- int i;
 
  t->lifespan = lifespan;
 #ifndef NOIOSTUFF
@@ -212,13 +211,6 @@ krb5_deltat lifespan;
  if (krb5_rc_io_write(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan)))
    return KRB5_RC_IO;
 #endif
- t->numhits = t->nummisses = 0;
- t->hsize = HASHSIZE; /* could be variable, but naaaah */
- if (!(t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *))))
-   return KRB5_RC_MALLOC;
- for (i = 0;i < t->hsize;i++)
-   t->h[i] = (struct authlist *) 0;
- t->a = (struct authlist *) 0;
  return 0;
 }
 
@@ -237,7 +229,8 @@ krb5_rcache id;
    FREE(q);
   }
 #ifndef NOIOSTUFF
- (void) krb5_rc_io_close(&t->d);
+ if (t->d.fd >= 0)
+    (void) krb5_rc_io_close(&t->d);
 #endif
  FREE(t);
  return 0;
@@ -258,12 +251,23 @@ krb5_rcache id;
 char *name;
 {
  struct dfl_data *t;
+ int	i;
 
  /* allocate id? no */
  if (!(t = (struct dfl_data *) malloc(sizeof(struct dfl_data))))
    return KRB5_RC_MALLOC;
  id->data = (krb5_pointer) t;
  t->name = name; /* gee, difficult... */
+ t->numhits = t->nummisses = 0;
+ t->hsize = HASHSIZE; /* no need to store---it's memory-only */
+ if (!(t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *))))
+     return KRB5_RC_MALLOC;
+ for (i = 0;i < t->hsize;i++)
+   t->h[i] = (struct authlist *) 0;
+ t->a = (struct authlist *) 0;
+#ifndef NOIOSTUFF
+ t->d.fd = -1;
+#endif
  return 0;
 }
 
@@ -285,15 +289,6 @@ krb5_rcache id;
      krb5_rc_io_close(&t->d);
      return KRB5_RC_IO;
  }
- t->numhits = t->nummisses = 0;
- t->hsize = HASHSIZE; /* no need to store---it's memory-only */
- if (!(t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *)))) {
-     krb5_rc_io_close(&t->d);
-     return KRB5_RC_MALLOC;
- }
- for (i = 0;i < t->hsize;i++)
-   t->h[i] = (struct authlist *) 0;
- t->a = (struct authlist *) 0;
 
  /* now read in each auth_replay and insert into table */
  for (;;)
