@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1993 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -50,7 +50,7 @@ static char rcsid_kuserok_c [] =
 /*
  * Given a Kerberos principal "principal", and a local username "luser",
  * determine whether user is authorized to login according to the
- * authorization file ("~luser/.klogin" by default).  Returns TRUE
+ * authorization file ("~luser/.k5login" by default).  Returns TRUE
  * if authorized, FALSE if not authorized.
  *
  * If there is no account for "luser" on the local machine, returns
@@ -91,7 +91,7 @@ const char *luser;
 
     if (access(pbuf, F_OK)) {	 /* not accessible */
 	/*
-	 * if he's trying to log in as himself, and there is no .klogin file,
+	 * if he's trying to log in as himself, and there is no .k5login file,
 	 * let him.  To find out, call
 	 * krb5_aname_to_localname to convert the principal to a name
 	 * which we can string compare. 
@@ -105,21 +105,21 @@ const char *luser;
     if (krb5_unparse_name(principal, &princname))
 	return(FALSE);			/* no hope of matching */
 
-    /* open ~/.klogin */
+    /* open ~/.k5login */
     if ((fp = fopen(pbuf, "r")) == NULL) {
 	free(princname);
 	return(FALSE);
     }
     /*
-     * security:  if the user does not own his own .klogin file,
-     * do not grant access
+     * For security reasons, the .k5login file must be owned either by
+     * the user himself, or by root.  Otherwise, don't grant access.
      */
     if (fstat(fileno(fp), &sbuf)) {
 	fclose(fp);
 	free(princname);
 	return(FALSE);
     }
-    if (sbuf.st_uid != pwd->pw_uid) {
+    if ((sbuf.st_uid != pwd->pw_uid) && sbuf.st_uid) {
 	fclose(fp);
 	free(princname);
 	return(FALSE);
