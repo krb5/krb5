@@ -359,6 +359,12 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    OM_uint32 ret;
    krb5_error_code code;
 
+   code = gssint_initialize_library();
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
+
    code = krb5_init_context(&context);
    if (code) {
        *minor_status = code;
@@ -427,7 +433,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    code = k5_mutex_init(&cred->lock);
    if (code) {
-       *minor_status = ret;
+       *minor_status = code;
        krb5_free_context(context);
        return GSS_S_FAILURE;
    }

@@ -1,3 +1,9 @@
+2004-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Call
+	gssint_initialize_library.  Return correct error code on mutex
+	initialization failure.
+
 2004-07-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi_krb5.c (kg_ccache_name): Variable deleted.
