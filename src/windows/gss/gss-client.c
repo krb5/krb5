@@ -220,7 +220,7 @@ client_establish_context (int s, char *sname, char *oid_name,
     send_tok.value = sname;
     send_tok.length = strlen(sname) + 1;
     maj_stat = gss_import_name(&min_stat, &send_tok,
-        (gss_OID) service_name, &target_name);
+        (gss_OID) nt_service_name, &target_name);
     if (maj_stat != GSS_S_COMPLETE) {
         display_status("parsing name", maj_stat, min_stat);
         return -1;
