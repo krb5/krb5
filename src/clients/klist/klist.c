@@ -40,7 +40,7 @@
 #ifndef _WIN32
 #define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/')+1 : (x))
 #else
-#define GET_PROGNAME(x) (max(strrchr((x), '/'), strrchr((x), '\\')) + 1, (x))
+#define GET_PROGNAME(x) max(max(strrchr((x), '/'), strrchr((x), '\\')) + 1,(x))
 #endif
 
 #if (defined(_MSDOS) || defined(_WIN32))
@@ -87,7 +87,7 @@ void do_v4_ccache KRB5_PROTOTYPE((char *));
 void usage()
 {
      fprintf(stderr, "Usage: %s " K54_USAGE_STRING
-             "[[-c] [-f] [-e] [-s] [-a] [-n]] [-k [-t] [-K]] [name]\n",
+	     "[[-c] [-f] [-e] [-s] [-a] [-n]] [-k [-t] [-K]] [name]\n",
 	     progname); 
      fprintf(stderr, K54_USAGE_HELP);
      fprintf(stderr, "\t-c specifies credentials cache, -k specifies keytab");
@@ -166,12 +166,12 @@ main(argc, argv)
 	    mode = KEYTAB;
 	    break;
 #ifdef KRB5_KRB4_COMPAT
-        case '4':
-            use_k4_only = 1;
-            break;
-        case '5':
-            use_k5_only = 1;
-            break;
+	case '4':
+	    use_k4_only = 1;
+	    break;
+	case '5':
+	    use_k5_only = 1;
+	    break;
 #endif /* KRB4_KRB5_COMPAT */
 	default:
 	    usage();
@@ -190,15 +190,15 @@ main(argc, argv)
 
     if (use_k4_only && use_k5_only)
     {
-        fprintf(stderr, "Only one of -4 and -5 allowed\n");
-        usage();
+	fprintf(stderr, "Only one of -4 and -5 allowed\n");
+	usage();
     }
 
 #ifdef KRB5_KRB4_COMPAT
     if (use_k4_only)
-        got_k5 = 0;
+	got_k5 = 0;
     if (use_k5_only)
-        got_k4 = 0;
+	got_k4 = 0;
 #endif /* KRB4_KRB5_COMPAT */
 
     now = time(0);
@@ -280,7 +280,7 @@ void do_keytab(name)
 
      if (show_time) {
 	  printf("KVNO Timestamp");
-          fillit(stdout, timestamp_width - sizeof("Timestamp") + 2, (int) ' ');
+	  fillit(stdout, timestamp_width - sizeof("Timestamp") + 2, (int) ' ');
 	  printf("Principal\n");
 	  printf("---- ");
 	  fillit(stdout, timestamp_width, (int) '-');
@@ -315,7 +315,7 @@ void do_keytab(name)
 	       printf(")");
 	  }
 	  printf("\n");
-          krb5_free_unparsed_name(kcontext, pname);
+	  krb5_free_unparsed_name(kcontext, pname);
      }
      if (code && code != KRB5_KT_END) {
 	  com_err(progname, code, "while scanning keytab");
@@ -466,27 +466,27 @@ flags_string(cred)
     int i = 0;
 	
     if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
-        buf[i++] = 'F';
+	buf[i++] = 'F';
     if (cred->ticket_flags & TKT_FLG_FORWARDED)
-        buf[i++] = 'f';
+	buf[i++] = 'f';
     if (cred->ticket_flags & TKT_FLG_PROXIABLE)
-        buf[i++] = 'P';
+	buf[i++] = 'P';
     if (cred->ticket_flags & TKT_FLG_PROXY)
-        buf[i++] = 'p';
+	buf[i++] = 'p';
     if (cred->ticket_flags & TKT_FLG_MAY_POSTDATE)
-        buf[i++] = 'D';
+	buf[i++] = 'D';
     if (cred->ticket_flags & TKT_FLG_POSTDATED)
-        buf[i++] = 'd';
+	buf[i++] = 'd';
     if (cred->ticket_flags & TKT_FLG_INVALID)
-        buf[i++] = 'i';
+	buf[i++] = 'i';
     if (cred->ticket_flags & TKT_FLG_RENEWABLE)
-        buf[i++] = 'R';
+	buf[i++] = 'R';
     if (cred->ticket_flags & TKT_FLG_INITIAL)
-        buf[i++] = 'I';
+	buf[i++] = 'I';
     if (cred->ticket_flags & TKT_FLG_HW_AUTH)
-        buf[i++] = 'H';
+	buf[i++] = 'H';
     if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
-        buf[i++] = 'A';
+	buf[i++] = 'A';
     buf[i] = '\0';
     return(buf);
 }
@@ -526,7 +526,7 @@ show_credential(progname, kcontext, cred)
     retval = krb5_unparse_name(kcontext, cred->server, &sname);
     if (retval) {
 	com_err(progname, retval, "while unparsing server name");
-        krb5_free_unparsed_name(kcontext, name);
+	krb5_free_unparsed_name(kcontext, name);
 	return;
     }
     if (!cred->times.starttime)
@@ -550,7 +550,7 @@ show_credential(progname, kcontext, cred)
 	else
 		fputs(", ",stdout);
 	fputs("renew until ", stdout);
-        printtime(cred->times.renew_till);
+	printtime(cred->times.renew_till);
 	extra_field += 2;
     }
 
@@ -568,7 +568,7 @@ show_credential(progname, kcontext, cred)
 		fputs(", ",stdout);
 	    printf("Flags: %s", flags);
 	    extra_field++;
-        }
+	}
     }
 
     if (extra_field > 2) {
