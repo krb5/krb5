@@ -36,7 +36,11 @@ static char rcsid_unparse_c[] =
  * appear in any the component, they will be representing using
  * backslash encoding.  ("\/", "\@", or '\0', respectively)
  *
- * returns system errors XXX
+ * returns error
+ *	KRB_PARSE_MALFORMED	principal is invalid (does not contain
+ *				at least 2 components)
+ * also returns system errors
+ *	ENOMEM			unable to allocate memory for string
  */
 
 #define REALM_SEP	'@'
