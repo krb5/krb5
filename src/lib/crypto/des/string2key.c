@@ -51,10 +51,10 @@ extern void des_cbc_cksum();
 	returns: errors
  */
 
-krb5_error_code string_to_key (DECLARG(krb5_keytype, keytype),
-				      DECLARG(krb5_keyblock *,keyblock),
-				      DECLARG(krb5_data *,data),
-				      DECLARG(krb5_principal, princ))
+krb5_error_code mit_des_string_to_key (DECLARG(krb5_keytype, keytype),
+				       DECLARG(krb5_keyblock *,keyblock),
+				       DECLARG(krb5_data *,data),
+				       DECLARG(krb5_principal, princ))
 OLDDECLARG(krb5_keytype, keytype)
 OLDDECLARG(krb5_keyblock *,keyblock)
 OLDDECLARG(krb5_data *,data)

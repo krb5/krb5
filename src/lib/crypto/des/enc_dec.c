@@ -56,11 +56,11 @@ extern int des_debug_print();
 	
 	returns: errors
 */
-krb5_error_code encrypt_func(DECLARG(krb5_pointer, in),
-				    DECLARG(krb5_pointer, out),
-				    DECLARG(size_t, size),
-				    DECLARG(krb5_encrypt_block *, key),
-				    DECLARG(krb5_pointer, ivec))
+krb5_error_code mit_des_encrypt_func(DECLARG(krb5_pointer, in),
+				     DECLARG(krb5_pointer, out),
+				     DECLARG(size_t, size),
+				     DECLARG(krb5_encrypt_block *, key),
+				     DECLARG(krb5_pointer, ivec))
 OLDDECLARG(krb5_pointer, in)
 OLDDECLARG(krb5_pointer, out)
 OLDDECLARG(size_t, size)
@@ -97,11 +97,11 @@ OLDDECLARG(krb5_pointer, ivec)
 	returns: errors
 
  */
-krb5_error_code decrypt_func(DECLARG(krb5_pointer, in),
-				    DECLARG(krb5_pointer, out),
-				    DECLARG(size_t, size),
-				    DECLARG(krb5_encrypt_block *, key),
-				    DECLARG(krb5_pointer, ivec))
+krb5_error_code mit_des_decrypt_func(DECLARG(krb5_pointer, in),
+				     DECLARG(krb5_pointer, out),
+				     DECLARG(size_t, size),
+				     DECLARG(krb5_encrypt_block *, key),
+				     DECLARG(krb5_pointer, ivec))
 OLDDECLARG(krb5_pointer, in)
 OLDDECLARG(krb5_pointer, out)
 OLDDECLARG(size_t, size)

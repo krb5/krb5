@@ -33,8 +33,8 @@ extern void des_init_random_number_generator();
         sequence information.
  */
 
-krb5_error_code init_random_key (DECLARG(krb5_keyblock *,seedblock),
-					DECLARG(krb5_pointer *,seed))
+krb5_error_code mit_des_init_random_key (DECLARG(krb5_keyblock *,seedblock),
+					 DECLARG(krb5_pointer *,seed))
 OLDDECLARG(krb5_keyblock *,seedblock)
 OLDDECLARG(krb5_pointer *,seed)
 {

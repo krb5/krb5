@@ -45,11 +45,11 @@ extern int des_key_sched();
 
 	returns: errors
 */
-krb5_error_code des_cbc_checksum(DECLARG(krb5_pointer, in),
-				 DECLARG(size_t, in_length),
-				 DECLARG(krb5_pointer, key),
-				 DECLARG(size_t, key_size),
-				 DECLARG(krb5_checksum *, cksum))
+krb5_error_code mit_des_cbc_checksum(DECLARG(krb5_pointer, in),
+				     DECLARG(size_t, in_length),
+				     DECLARG(krb5_pointer, key),
+				     DECLARG(size_t, key_size),
+				     DECLARG(krb5_checksum *, cksum))
 OLDDECLARG(krb5_pointer, in)
 OLDDECLARG(size_t, in_length)
 OLDDECLARG(krb5_pointer, key)

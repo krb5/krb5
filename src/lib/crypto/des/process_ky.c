@@ -38,8 +38,8 @@ extern int des_key_sched();
         returns: errors
  */
 
-krb5_error_code process_key (DECLARG(krb5_encrypt_block *, eblock),
-				    DECLARG(krb5_keyblock *,keyblock))
+krb5_error_code mit_des_process_key (DECLARG(krb5_encrypt_block *, eblock),
+				     DECLARG(krb5_keyblock *,keyblock))
 OLDDECLARG(krb5_encrypt_block *, eblock)
 OLDDECLARG(krb5_keyblock *,keyblock)
 {

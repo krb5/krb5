@@ -26,7 +26,7 @@ static char des_fnr_key_c[] =
         free any resources held by "seed" and assigned by init_random_key()
  */
 
-krb5_error_code finish_random_key (DECLARG(krb5_pointer *, seed))
+krb5_error_code mit_des_finish_random_key (DECLARG(krb5_pointer *, seed))
 OLDDECLARG(krb5_pointer *, seed)
 {
     bzero( (char *)*seed, sizeof(des_random_key_seed) );

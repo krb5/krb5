@@ -30,7 +30,7 @@ static char des_fin_key_c[] =
 	returns: errors
  */
 
-krb5_error_code finish_key (DECLARG(krb5_encrypt_block *,eblock))
+krb5_error_code mit_des_finish_key (DECLARG(krb5_encrypt_block *,eblock))
 OLDDECLARG(krb5_encrypt_block *,eblock)
 {
     bzero((char *)eblock->priv, sizeof(des_key_schedule));

@@ -29,8 +29,8 @@ extern int des_new_random_key();
         filling in the keyblock address in *keyblock
  */
 
-krb5_error_code random_key (DECLARG(krb5_pointer, seed),
-				   DECLARG(krb5_keyblock **, keyblock))
+krb5_error_code mit_des_random_key (DECLARG(krb5_pointer, seed),
+				    DECLARG(krb5_keyblock **, keyblock))
 OLDDECLARG(krb5_pointer, seed)
 OLDDECLARG(krb5_keyblock **, keyblock)
 {
