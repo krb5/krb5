@@ -1,3 +1,7 @@
+Mon Feb 17 13:58:06 1997  Richard Basch  <basch@lehman.com>
+
+	* cns.h: Don't include krb5ini.h (obsolete file)
+
 Sat Feb 15 12:21:51 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Link in ComErr library $(CLIB)

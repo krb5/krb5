@@ -21,7 +21,6 @@
 #ifdef KRB5
 #include "winsock.h"
 #include "krb5.h"
-#include "krbini.h"
 #include "com_err.h"
 
 #define DEFAULT_TKT_LIFE    120             /* In 5 minute units */
