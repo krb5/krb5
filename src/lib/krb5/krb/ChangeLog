@@ -1,5 +1,21 @@
 Wed Jan 10 21:01:36 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* krbconfig.c, Makefile.in: Removed krbconfig.c; it contained
+		global variables which are no longer used.
+
+	* recvauth.c: Removed the global extern of
+		krb5_kdc_default_options, which wasn't being used anyway.
+
+	* mk_req.c (krb5_mk_req): Replace use of krb5_kdc_default_options
+		with context->kdc_default_options.
+
+	* gc_frm_kdc.c: Remove the global extern of krb5_kdc_req_sumtype,
+		which wasn't being used anymore anyway.
+
+	* send_tgs.c (krb5_send_tgs_basic): Remove use of the global
+		variable krb5_kdc_req_sumtype, and use the kdc_req_sumtype
+		in the context structure instead.
+
 	* walk_rtree.c (krb5_walk_realm_tree): Applied patch submitted by
 		Doug Engbert, so that the configurable authentication
 		patch takes into account the null entry at the end of the

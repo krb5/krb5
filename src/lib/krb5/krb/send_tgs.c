@@ -44,8 +44,6 @@
 
  returns system errors
  */
-extern krb5_cksumtype krb5_kdc_req_sumtype;
-
 static krb5_error_code 
 krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     krb5_context          context;
@@ -63,10 +61,11 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
 
     /* Generate checksum */
     if ((checksum.contents = (krb5_octet *)
-	 malloc(krb5_checksum_size(context, krb5_kdc_req_sumtype))) == NULL) 
+	 malloc(krb5_checksum_size(context,
+				   context->kdc_req_sumtype))) == NULL) 
         return(ENOMEM);
 
-    if ((retval = krb5_calculate_checksum(context, krb5_kdc_req_sumtype,
+    if ((retval = krb5_calculate_checksum(context, context->kdc_req_sumtype,
 					  in_data->data, in_data->length,
 					  (krb5_pointer) in_cred->keyblock.contents,
 					  in_cred->keyblock.length,

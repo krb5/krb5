@@ -42,7 +42,6 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	in_tkt_sky.$(OBJEXT)	\
 	init_ctx.$(OBJEXT)	\
 	kdc_rep_dc.$(OBJEXT)	\
-	krbconfig.$(OBJEXT)	\
 	mk_cred.$(OBJEXT)	\
 	mk_error.$(OBJEXT)	\
 	mk_priv.$(OBJEXT)	\
@@ -115,7 +114,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/in_tkt_sky.c	\
 	$(srcdir)/init_ctx.c	\
 	$(srcdir)/kdc_rep_dc.c	\
-	$(srcdir)/krbconfig.c	\
 	$(srcdir)/mk_cred.c	\
 	$(srcdir)/mk_error.c	\
 	$(srcdir)/mk_priv.c	\

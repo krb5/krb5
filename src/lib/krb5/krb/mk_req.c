@@ -46,8 +46,6 @@
  returns system errors
 */
 
-extern krb5_flags krb5_kdc_default_options;
-
 krb5_error_code
 krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
 	      ccache, outbuf)
@@ -78,7 +76,7 @@ krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
     if ((retval = krb5_cc_get_principal(context, ccache, &creds.client)))
 	goto cleanup_creds;
 
-    if ((retval = krb5_get_credentials(context, krb5_kdc_default_options,
+    if ((retval = krb5_get_credentials(context, context->kdc_default_options,
 				       ccache, &creds, &credsp)))
 	goto cleanup_creds;
 

@@ -55,8 +55,6 @@
  * returns errors, system errors.
  */
 
-extern krb5_cksumtype krb5_kdc_req_sumtype;
-
 /* helper macro: convert flags to necessary KDC options */
 
 #define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)

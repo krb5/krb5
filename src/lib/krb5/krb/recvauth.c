@@ -32,8 +32,6 @@
 #include <stdio.h>
 #include <string.h>
 
-extern krb5_flags	krb5_kdc_default_options;
-
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code

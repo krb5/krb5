@@ -35,8 +35,6 @@
 
 #define WORKING_RCACHE
 
-extern krb5_flags	krb5_kdc_default_options;
-
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code
@@ -62,7 +60,6 @@ krb5_sendauth(context, auth_context,
 	krb5_ap_rep_enc_part   ** rep_result;
 	krb5_creds	       ** out_creds;
 {
-	krb5_flags		kdc_options = krb5_kdc_default_options;
 	krb5_octet		result;
 	krb5_creds 		creds;
 	krb5_creds * 		credsp = NULL;
@@ -143,7 +140,8 @@ krb5_sendauth(context, auth_context,
 		in_creds = &creds;
 	}
 	if (!in_creds->ticket.length) {
-	    if ((retval = krb5_get_credentials(context, kdc_options,
+	    if ((retval = krb5_get_credentials(context,
+					       context->kdc_default_options,
 					       use_ccache, in_creds, &credsp)))
 		    goto error_return;
 	    credspout = credsp;
