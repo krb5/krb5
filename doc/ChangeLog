@@ -1,3 +1,8 @@
+Mon Nov 11 12:45:39 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* install.texinfo (kdc.conf): remove admin_database_name and
+ 	lockfile fields from sample kdc.conf
+
 Sun Nov 10 21:20:05 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* bug-report.texinfo: We have krb5-send-pr now.

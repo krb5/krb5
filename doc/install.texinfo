@@ -1393,8 +1393,6 @@ Here's an example of a generic kdc.conf file:
     @value{PRIMARYREALM} = @{
         profile = /etc/krb5.conf
         database_name = @value{ROOTDIR}/var/krb5kdc/principal
-        admin_database_name = @value{ROOTDIR}/var/krb5kdc/principal.kadm5
-        admin_database_lockfile = @value{ROOTDIR}/var/krb5kdc/principal.kadm5.lock
         admin_keytab = @value{ROOTDIR}/var/krb5kdc/kadm5.keytab
         acl_file = @value{ROOTDIR}/var/krb5kdc/kadm5.acl
         dict_file = @value{ROOTDIR}/var/krb5kdc/kadm5.dict
