@@ -1,3 +1,20 @@
+/*
+ * $Source$
+ * $Author$
+ * $Id$
+ *
+ * Copyright 1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * Kerberos V4 prototypes
+ */
+
+#ifndef _KRB4_PROTO_H__
+#define _KRB4_PROTO_H__
+
 #ifdef __STDC__
 # define	P(s) s
 #else
@@ -205,3 +222,4 @@ int ad_print P((AUTH_DAT *));
 int placebo_cblock_print P((des_cblock ));
 
 #undef P
+#endif /*  _KRB4_PROTO_H__ */
