@@ -24,6 +24,8 @@
  */
 
 /* XXX This API is going to change; what's here isn't general enough! */
+/* XXX Once we finalize the API, it should go into func-proto.h and */
+/* into the API doc. */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -35,7 +37,7 @@ extern krb5_deltat krb5_clockskew;
 
 /* Decode the KRB-CRED message, and return creds */
 krb5_error_code
-rd_cred(inbuf, key, creds, sender_addr, recv_addr)
+krb5_rd_cred(inbuf, key, creds, sender_addr, recv_addr)
 const krb5_data *inbuf;
 const krb5_keyblock *key;
 krb5_creds *creds;                /* Filled in */

@@ -35,6 +35,7 @@ OBJS=	addr_comp.o	\
 	gen_seqnum.o	\
 	gen_subkey.o	\
 	get_creds.o	\
+	get_fcreds.o	\
 	get_in_tkt.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
@@ -97,6 +98,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/gen_seqnum.c	\
 	$(srcdir)/gen_subkey.c	\
 	$(srcdir)/get_creds.c	\
+	$(srcdir)/get_fcreds.c \
 	$(srcdir)/get_in_tkt.c	\
 	$(srcdir)/in_tkt_pwd.c	\
 	$(srcdir)/in_tkt_sky.c	\

@@ -25,6 +25,8 @@
 
 
 /* XXX This API is going to change; what's here isn't general enough! */
+/* XXX Once we finalize the API, it should go into func-proto.h and */
+/* into the API doc. */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -33,7 +35,7 @@
 
 /* Create asn.1 encoded KRB-CRED message from the kdc reply. */
 krb5_error_code
-mk_cred(dec_rep, etype, key, sender_addr, recv_addr, outbuf)
+krb5_mk_cred(dec_rep, etype, key, sender_addr, recv_addr, outbuf)
 krb5_kdc_rep *dec_rep;
 krb5_enctype etype;
 krb5_keyblock *key;
