@@ -57,6 +57,8 @@ static char sccsid[] = "@(#)clnt_tcp.c 1.37 87/10/05 Copyr 1984 Sun Micro";
 #include <netdb.h>
 #include <errno.h>
 #include <gssrpc/pmap_clnt.h>
+/* FD_ZERO may need memset declaration (e.g., Solaris 9) */
+#include <string.h>
 
 #define MCALL_MSG_SIZE 24
 
