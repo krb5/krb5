@@ -1,3 +1,8 @@
+Mon Aug  8 22:38:16 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* preauth.c: Renamed preauthentication mechanism names to match
+	what bcn and I agreed upon.
+
 Tue Jun 28 19:35:07 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* decode_kdc.c: folding in Harry's changes

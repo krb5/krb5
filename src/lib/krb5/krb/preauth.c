@@ -49,22 +49,14 @@
 #include <syslog.h>
 
 static krb5_preauth_ops preauth_systems[] = {
-#if 0
     {
-	KRB5_PADATA_ENC_RANDOM,
-	KRB5_PREAUTH_FLAGS_ENCRYPT,
-	get_random_padata,
-	verify_random_padata,
-    },
-#endif
-    {
-        KRB5_PADATA_ENC_TIMESTAMP,
+        KRB5_PADATA_ENC_UNIX_TIME,
         KRB5_PREAUTH_FLAGS_ENCRYPT,
-        get_timestamp_padata,
-        verify_timestamp_padata,
+        get_unixtime_padata,
+        verify_unixtime_padata,
     },
     {
-	KRB5_PADATA_ENC_SECURID,
+	KRB5_PADATA_ENC_SANDIA_SECURID,
 	KRB5_PREAUTH_FLAGS_ENCRYPT | KRB5_PREAUTH_FLAGS_HARDWARE,
 	get_securid_padata,
 	verify_securid_padata,
@@ -314,7 +306,7 @@ find_preauthenticator(type, preauth)
 int seeded = 0 ; /* Used by srand below */
 
 krb5_error_code
-get_timestamp_padata(client, src_addr, pa_data)
+get_unixtime_padata(client, src_addr, pa_data)
     krb5_principal client;
     krb5_address **src_addr;
     krb5_pa_data *pa_data;
@@ -350,7 +342,7 @@ get_timestamp_padata(client, src_addr, pa_data)
 }
 
 krb5_error_code
-verify_timestamp_padata(client, src_addr, data)
+verify_unixtime_padata(client, src_addr, data)
     krb5_principal client;
     krb5_address **src_addr;
     krb5_data *data;
@@ -378,38 +370,6 @@ verify_timestamp_padata(client, src_addr, data)
 
     return 0;
 }
-
-#if 0
-krb5_error_code
-get_random_padata(client, src_addr, pa_data)
-    krb5_principal client;
-    krb5_address **src_addr;
-    krb5_pa_data *pa_data;
-{
-    char temp[MAX_PREAUTH_SIZE];
-
-    srand(time(0));
-    sprintf(temp, "%1u", rand() & 0x7fffffff);
-    pa_data->length = strlen(temp) + 1;
-    pa_data->contents = (unsigned char *) malloc(pa_data->length);
-    if (!pa_data->contents) 
-	return(ENOMEM);
-    memcpy(pa_data->contents, temp, pa_data->length);
-    return(0);
-}
-
-krb5_error_code
-verify_random_padata(client, src_addr, data)
-    krb5_principal client;
-    krb5_address **src_addr;
-    krb5_data *data;
-{
-    if (atof(data->data) > 2147483637.0)
-	return KRB5_PREAUTH_FAILED;
-    
-    return 0;
-}
-#endif
 
 #ifdef KRBCONF_SECUREID
 #include "sdcli.h"
@@ -477,6 +437,7 @@ verify_securid_padata(client, src_addr, data)
 	free(username);
 	return(KRB5_PREAUTH_FAILED);
 }
+
 #endif
 
 

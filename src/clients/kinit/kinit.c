@@ -65,7 +65,7 @@ krb5_data tgtname = {
  */
 int preauth_search_list[] = {
 	0,			
-	KRB5_PADATA_ENC_TIMESTAMP,
+	KRB5_PADATA_ENC_UNIX_TIME,
 	-1
 	};
 

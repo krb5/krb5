@@ -1,3 +1,8 @@
+Mon Aug  8 22:36:24 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* proto.h: Change preauthentication names to match official names
+	which bcn and I agreed upon.
+
 Tue Aug  2 03:39:14 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* acconfig.h: add HAVE_SETVBUF
