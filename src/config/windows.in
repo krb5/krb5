@@ -65,6 +65,7 @@ CP=copy
 MV=ren
 LN=copy
 LIBCMD=lib
+PAGESIZE=/pagesize:128
 AWK=rem
 
 ARADD=rem

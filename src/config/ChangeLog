@@ -1,3 +1,9 @@
+Wed Jun 12 20:19:49 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in (PAGESIZE): New variable which is used to control the
+		/pagesize parameter for Windows 16.  (Obviously we're
+		suffering from library size bloat if we need to set this.)
+
 Wed Jun 12 15:31:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* config.guess: Updated to a more recent version (from autoconf 1.10).

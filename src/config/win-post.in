@@ -7,7 +7,7 @@ all::
 	$(CC) $(CFLAGS) /c $*.c
 !if defined(LIBNAME)
 !if "$(LIBCMD)"!="rem"
-##WIN16##	$(LIBCMD) /pagesize:128 /nologo $(LIBNAME) -+$@;
+##WIN16##	$(LIBCMD) $(PAGESIZE) /nologo $(LIBNAME) -+$@;
 ##WIN32##	$(LIBCMD) /out:$(LIBNAME) /nologo $@
 !endif
 !endif
