@@ -90,7 +90,7 @@ krb5int_cc_default(context, ccache)
 			err = krb5_unparse_name (context, desiredKrb5Principal, &desiredName);
 			if (!err) {
 				err = KLCreatePrincipalFromString (desiredName, 
-								kerberosPrincipal_V5, &desiredPrincipal);
+								kerberosVersion_V5, &desiredPrincipal);
 				krb5_free_unparsed_name (context, desiredName);
 				if (err != klNoErr)
 					desiredPrincipal = nil;
@@ -99,7 +99,7 @@ krb5int_cc_default(context, ccache)
 		
 		/* Try to make sure a krb5 tgt is in the cache */
 		err = __KLInternalAcquireTicketsForCache (desiredPrincipal, krb5_cc_default_name(context), 
-													kerberosPrincipal_V5, nil, &outCacheName);
+													kerberosVersion_V5, nil, &outCacheName);
 		if (err == klNoErr) {
 			/* This function tries to get tickets and put them in the specified 
 			   cache, however, if the cache does not exist, it may choose to put 

@@ -1,3 +1,8 @@
+2000-5-31	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefault.c: Changed kerberosPrincipal_V5 to kerberosVersion_V5 to reflect 
+	the new constant name.
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* ccdefault.c: Added krb5int_cc_default.  This function 
