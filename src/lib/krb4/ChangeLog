@@ -1,3 +1,7 @@
+2002-12-02  Tom Yu  <tlyu@mit.edu>
+
+	* change_password.c: Remove netdb.h inclusion.
+
 2002-11-27  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (SRCS): Add kadm_err.c.  It was missing.

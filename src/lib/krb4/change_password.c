@@ -26,7 +26,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <netdb.h>
 
 #if TARGET_OS_MAC		/* XXX */
 #include <Kerberos/CredentialsCache.h>
