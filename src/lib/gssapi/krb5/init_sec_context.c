@@ -348,14 +348,14 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
       ctx->seqstate = 0;
 
+      if ((code = krb5_timeofday(context, &now))) {
+	free(ctx);
+	*minor_status = code;
+	return(GSS_S_FAILURE);
+      }
       if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
 	 ctx->endtime = 0;
       } else {
-	 if ((code = krb5_timeofday(context, &now))) {
-	    free(ctx);
-	    *minor_status = code;
-	    return(GSS_S_FAILURE);
-	 }
 	 ctx->endtime = now + time_req;
       }
 

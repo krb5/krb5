@@ -1,3 +1,8 @@
+Fri Jan 30 23:07:40 1998  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Actually
+	initialize now before calling make_ap_req.
+
 Thu Jan 29 20:08:02 1998  Dan Winship  <danw@mit.edu>
 
 	* accept_sec_context.c (rd_and_store_for_creds): Don't mess with
