@@ -27,6 +27,12 @@
 
 #define KRB5_SCC_MAXLEN 100
 
+#define KRB5_SCC_FVNO 0x0501		/* krb v5, scc v1 */
+
+#define	SCC_OPEN_AND_ERASE	1
+#define	SCC_OPEN_RDWR		2
+#define	SCC_OPEN_RDONLY		3
+
 #ifndef TKT_ROOT
 #define TKT_ROOT "/tmp/tkt"
 #endif
