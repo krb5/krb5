@@ -53,7 +53,7 @@ kdb_check: kdc.conf
 	sort $(TEST_DB).odump2 > $(TEST_DB).osort2
 	cmp $(TEST_DB).osort $(TEST_DB).osort2
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
-	$(RM) $(TEST_DB)*
+	$(RM) $(TEST_DB)* stash_file
 
 clean::
 	$(RM) kdc.conf

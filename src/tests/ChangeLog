@@ -1,3 +1,7 @@
+Wed Nov 19 10:54:01 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (kdb_check): Remove temporary file generated during test.
+
 Tue Nov  4 14:36:37 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (kdb_check): Reinstated kdb checks
