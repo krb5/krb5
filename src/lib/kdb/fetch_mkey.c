@@ -73,8 +73,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 
 	if ((retval = krb5_read_password(context, krb5_mkey_pwd_prompt1,
 					 twice ? krb5_mkey_pwd_prompt2 : 0,
-					 password,
-					 &size)))
+					 password, &size)))
 	    return(retval);
 
 	pwd.data = password;
@@ -84,7 +83,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 		if (retval)
 			return retval;
 	}
-	retval = krb5_string_to_key(context, eblock, key->enctype, key, &pwd,
+	retval = krb5_string_to_key(context, eblock, key, &pwd,
 				    salt ? salt : &scratch);
 	if (!salt)
 		krb5_xfree(scratch.data);

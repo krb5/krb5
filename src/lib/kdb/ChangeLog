@@ -1,3 +1,8 @@
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * fetch_mkey.c, kdb_cpw.c, t_kdb.c : 
+		Remove krb5_enctype from krb5_string_to_key() args.
+
 Tue Nov  7 16:35:03 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdb_xdr.c (krb5_dbe_search_enctype): Make a more general version

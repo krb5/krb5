@@ -388,9 +388,8 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 
     	pwd.data = passwd;
     	pwd.length = strlen(passwd);
-	if (retval = krb5_string_to_key(context, &key_eblock, 
-					ks_tuple[i].ks_enctype,
-					&key, &pwd, &key_salt.data))
+	if (retval = krb5_string_to_key(context, &key_eblock, &key, &pwd, 
+					&key_salt.data))
 	    return(retval);
 
 	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, &key,

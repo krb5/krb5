@@ -535,12 +535,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
     passwd.length = strlen(master_passwd);
     passwd.data = master_passwd;
-    if (kret = krb5_string_to_key(kcontext,
-				  &master_encblock,
-				  master_keyblock.enctype,
-				  &master_keyblock,
-				  &passwd,
-				  &salt_data))
+    if (kret = krb5_string_to_key(kcontext, &master_encblock, &master_keyblock,
+				  &passwd, &salt_data))
 	goto goodbye;
     /* Clean up */
     free(salt_data.data);
