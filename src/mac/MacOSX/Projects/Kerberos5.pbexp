@@ -84,6 +84,7 @@
 	_krb5_get_notification_message
 	_krb5_get_time_offsets
 	_krb5_init_context
+    _krb5_init_secure_context
 	_krb5_mk_error
 	_krb5_mk_priv
 	_krb5_mk_rep
