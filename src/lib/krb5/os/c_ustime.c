@@ -51,7 +51,7 @@
 #include <DriverServices.h> /* Nanosecond timing */
 #include <CodeFragments.h>	/* Check for presence of UpTime */
 #include <Math64.h>			/* 64-bit integer math */
-#include <Utilities.h>		/* Mac time -> UNIX time conversion */
+#include <KerberosSupport/Utilities.h>		/* Mac time -> UNIX time conversion */
 #include <Power.h>			/* Sleep queue */
 
 /* Mac Cincludes */
