@@ -83,7 +83,7 @@ kadm_entry2princ(entry, princ)
     strncpy(princ->exp_date_txt,
 	    ctime((const time_t *) &entry->pw_expiration), DATE_SZ);
     princ->attributes = entry->attributes;
-    princ->max_life = entry->max_life / (60 * 5);
+    princ->max_life = krb_time_to_life(0, entry->max_life);
     princ->kdc_key_ver = 1; /* entry->mkvno .... WTF??? --tlyu */
     for (i = 0; i < entry->n_key_data; i++) {
 	/* XXX This assumes knowledge of the internals of krb5_key_data */
@@ -197,7 +197,7 @@ kadm_add_entry (rname, rinstance, rrealm, valsin, valsout)
     }
 
     if (IS_FIELD(KADM_MAXLIFE,valsin->fields)) {
-	newentry.max_life = data_i.max_life * (60 * 5);
+	newentry.max_life = krb_life_to_time(0, data_i.max_life);
 	mask |= KADM5_MAX_LIFE;
     }
 
@@ -466,7 +466,7 @@ kadm_mod_entry (rname, rinstance, rrealm, valsin1, valsin2, valsout)
     }
 
     if (IS_FIELD(KADM_MAXLIFE,valsin2->fields)) {
-	entry.max_life = temp_key.max_life * (60 * 5);
+	entry.max_life = krb_life_to_time(0, temp_key.max_life);
 	mask |= KADM5_MAX_LIFE;
     }
 
