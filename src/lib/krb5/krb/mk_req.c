@@ -77,5 +77,8 @@ krb5_data *outbuf;
 				  &creds,
 				  0, 	/* We don't need the authenticator */
 				  outbuf);
+    creds.server = 0;			/* don't free it, someone else
+					   owns it. */
+    krb5_free_cred_contents(&creds);
     return retval;
 }
