@@ -20,4 +20,4 @@ OBJS= \
 
 all::	krb5kdc
 
-NormalProgramTarget(krb5kdc,$(OBJS),,$(KDBLIB) $(KLIB),)
+NormalProgramTarget(krb5kdc,$(OBJS),$(KDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
