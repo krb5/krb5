@@ -1,3 +1,14 @@
+2001-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* chk_trans.c: Reimplemented from scratch.
+	* transit-tests: New file.
+	* Makefile.in (t_expand, t_expand.o): New targets.  Build test
+	program from chk_trans.c.
+	(T_EXPAND_OBJS): New variable.
+	(TEST_PROGS): Add t_expand.
+	(check-unix): Run transit-tests.
+	* t_krb5.conf: Added capaths section.
+
 2001-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Copy enctype for new creds from

@@ -304,7 +304,13 @@ t_ser: $(T_SER_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 t_deltat : $(T_DELTAT_OBJS)
 	$(CC_LINK) -o t_deltat $(T_DELTAT_OBJS)
 
-TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat
+T_EXPAND_OBJS=t_expand.o
+t_expand.o : chk_trans.c
+	$(CC) $(ALL_CFLAGS) -c -DTEST -o t_expand.o $(srcdir)/chk_trans.c
+t_expand : $(T_EXPAND_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_expand $(T_EXPAND_OBJS) $(KRB5_BASE_LIBS)
+
+TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
@@ -334,6 +340,7 @@ check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 		$(RUN_SETUP) ./t_ser
 	./t_deltat
+	sh $(srcdir)/transit-tests
 
 clean::
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \
