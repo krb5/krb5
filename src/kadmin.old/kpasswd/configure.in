@@ -5,5 +5,19 @@ AC_HAVE_HEADERS(unistd.h string.h stdlib.h)
 CHECK_UTMP
 AC_FUNC_CHECK(getutent,AC_DEFINE(HAVE_GETUTENT))
 ET_RULES
+AC_ARG_WITH([dbm],
+[  --with-dbm		use native dbm for kdc database
+  --without-dbm		use included version of Berkeley db (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using native dbm)
+	AC_CHECK_LIB(ndbm,main)
+	AC_CHECK_LIB(dbm,main)
+else
+	AC_MSG_RESULT(Using Berkeley db)
+fi
+AC_SUBST(DBFLAGS)dnl
+dnl
 V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

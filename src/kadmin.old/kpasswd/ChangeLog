@@ -1,3 +1,8 @@
+
+Fri Jun 30 14:37:02 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm to select between Berkeley and
+		DBM KDC database format.
+
 Wed Jun 21 10:50:33 1995    <tytso@rsx-11.mit.edu>
 
 	* kpasswd.c: Change PROTOTYPE -> KRB5_PROTOTYPE

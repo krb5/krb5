@@ -1,4 +1,9 @@
 
+Fri Jun 30 14:30:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm to select between Berkeley and DBM
+		KDC database format.
+
+
 Thu Jun 15 15:29:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

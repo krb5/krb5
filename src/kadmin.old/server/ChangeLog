@@ -1,4 +1,9 @@
 
+Fri Jun 30 14:37:32 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm to select between Berkeley and DBM
+		KDC database format.
+
+
 Tue Jun 27 16:10:19 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_parse.c - Give compiler something to compile if SANDIA is not
 		defined.  Some compilers choke when nothing to compile.
