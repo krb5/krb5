@@ -56,16 +56,16 @@ krb4prot_encode_naminstrlm(char *name, char *inst, char *realm,
     realmlen = strlen(realm) + 1;
     if (chklen && (namelen > ANAME_SZ || instlen > INST_SZ
 		   || realmlen > REALM_SZ))
-	return -1;
+	return KRB4PROT_ERR_OVERRUN;
     if (*p - pkt->dat < namelen + instlen + realmlen)
-	return -1;
+	return KRB4PROT_ERR_OVERRUN;
     memcpy(*p, name, namelen);
     *p += namelen;
     memcpy(*p, inst, instlen);
     *p += namelen;
     memcpy(*p, realm, realmlen);
     *p += namelen;
-    return 0;
+    return KRB4PROT_OK;
 }
 
 /*
@@ -89,26 +89,32 @@ krb4prot_decode_naminstrlm(KTEXT pkt, /* buffer to decode from */
     int len;
 
 #define PKT_REMAIN (pkt->length - (*p - pkt->dat))
+    if (PKT_REMAIN <= 0)
+	return KRB4PROT_ERR_UNDERRUN;
     len = krb4int_strnlen((char *)*p, PKT_REMAIN) + 1;
-    if (len <= 0 || len > ANAME_SZ)
-	return KFAILURE;
+    if (len == 0 || len > ANAME_SZ)
+	return KRB4PROT_ERR_OVERRUN;
     if (name != NULL)
 	memcpy(name, *p, (size_t)len);
     *p += len;
 
+    if (PKT_REMAIN <= 0)
+	return KRB4PROT_ERR_UNDERRUN;
     len = krb4int_strnlen((char *)*p, PKT_REMAIN) + 1;
     if (len <= 0 || len > INST_SZ)
-	return KFAILURE;
+	return KRB4PROT_ERR_OVERRUN;
     if (name != NULL)
 	memcpy(inst, *p, (size_t)len);
     *p += len;
 
+    if (PKT_REMAIN <= 0)
+	return KRB4PROT_ERR_UNDERRUN;
     len = krb4int_strnlen((char *)*p, PKT_REMAIN) + 1;
     if (len <= 0 || len > REALM_SZ)
-	return KFAILURE;
+	return KRB4PROT_ERR_OVERRUN;
     if (realm != NULL)
 	memcpy(realm, *p, (size_t)len);
     *p += len;
-    return KSUCCESS;
+    return KRB4PROT_OK;
 #undef PKT_REMAIN
 }

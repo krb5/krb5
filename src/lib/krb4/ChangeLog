@@ -1,3 +1,10 @@
+2001-01-24  Tom Yu  <tlyu@mit.edu>
+
+	* prot_common.c: Fix up some error returns.
+
+	* prot_kdc.c: Fix up some error returns.  Add
+	decode_kdc_request().
+
 2001-01-23  Tom Yu  <tlyu@mit.edu>
 
 	* prot_common.c: New file; contains functions to encode/decode

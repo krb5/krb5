@@ -35,11 +35,11 @@
  *
  * Encodes a reply from the KDC to the client.
  *
- * Returns KSUCCESS on success, KFAILURE on failure.
+ * Returns KRB4PROT_OK on success, non-zero on failure.
  *
  * Caller is responsible for cleaning up OUTBUF.
  *
- * This packet layout description was originally in cr_auth_repl.c
+ * This packet layout description was originally in cr_auth_repl.c:
  *
  * 			variable
  * type			or constant	   data
@@ -69,7 +69,7 @@
  * 
  * binary		cipher->dat	   cipher data
  */
-int
+int KRB5_CALLCONV
 krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
 			  long time_ws,
 			  int n, /* Number of tickets; 0 for krb4 (!) */
@@ -81,6 +81,7 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
 			  KTEXT outbuf)
 {
     unsigned char *p;
+    int ret;
 
     p = outbuf->dat;
     /* This is really crusty. */
@@ -91,13 +92,14 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
     /* little-endianness based on input, usually big-endian, though. */
     *p++ = AUTH_MSG_KDC_REPLY | (le ? LSB_FIRST : MSB_FIRST);
 
-    if (krb4prot_encode_naminstrlm(pname, pinst, prealm, chklen,
-				   outbuf, &p))
-	return KFAILURE;
+    ret = krb4prot_encode_naminstrlm(pname, pinst, prealm, chklen,
+				     outbuf, &p);
+    if (ret)
+	return ret;
 
     /* Check lengths */
     if (cipher->length > 65535 || cipher->length < 0)
-	return KFAILURE;
+	return KRB4PROT_ERR_OVERRUN;
     if ((sizeof(outbuf->dat) - (p - outbuf->dat)
 	 < (4			/* timestamp */
 	    + 1			/* num of tickets */
@@ -105,7 +107,7 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
 	    + 1			/* kvno */
 	    + 2			/* cipher->length */
 	    + cipher->length)))	/* cipher->dat */
-        return KFAILURE;
+        return KRB4PROT_ERR_OVERRUN;
 
     /* Workstation timestamp */
     KRB4_PUT32(p, time_ws, le);
@@ -124,7 +126,7 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
 
     /* And return the packet */
     outbuf->length = p - outbuf->dat;
-    return KSUCCESS;
+    return KRB4PROT_OK;
 }
 
 /*
@@ -134,9 +136,9 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
  *
  * Caller is responsible for cleaning up CIPH.
  *
- * Returns KSUCCESS on success, KFAILURE on failure.
+ * Returns KRB4PROT_OK on success, non-zero on failure.
  *
- * Packet format below is originally from cr_ciph.c.
+ * Packet format below is originally from cr_ciph.c:
  *
  * 			variable
  * type			or constant	data
@@ -161,7 +163,7 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
  *
  * <=7 bytes		null		null pad to 8 byte multiple
  */
-int
+int KRB5_CALLCONV
 krb4prot_encode_ciph(C_Block session,
 		     char *name, char *inst, char *realm,
 		     unsigned long life, int kvno,
@@ -172,6 +174,7 @@ krb4prot_encode_ciph(C_Block session,
 		     KTEXT ciph) /* output buffer */
 {
     unsigned char *p;
+    int ret;
 
     p = ciph->dat;
     /*
@@ -181,11 +184,12 @@ krb4prot_encode_ciph(C_Block session,
     memcpy(p, session, 8);
     p += 8;
 
-    if (krb4prot_encode_naminstrlm(name, inst, realm, chklen,
-				   ciph, &p))
-	return KFAILURE;
+    ret = krb4prot_encode_naminstrlm(name, inst, realm, chklen,
+				     ciph, &p);
+    if (ret)
+	return ret;
     if (tkt->length > 255 || tkt->length < 0)
-	return KFAILURE;
+	return KRB4PROT_ERR_OVERRUN;
     if ((sizeof(ciph->dat) - (p - ciph->dat)) / 8
 	< (1			/* life */
 	   + 1			/* kvno */
@@ -193,7 +197,7 @@ krb4prot_encode_ciph(C_Block session,
 	   + tkt->length	/* tkt->dat */
 	   + 4			/* kdc_time */
 	   + 7) / 8)		/* roundoff */
-	return KFAILURE;
+	return KRB4PROT_ERR_OVERRUN;
 
     *p++ = life;
     *p++ = kvno;
@@ -207,7 +211,7 @@ krb4prot_encode_ciph(C_Block session,
     /* Guarantee null pad to multiple of 8 bytes */
     memset(p, 0, 7);
     ciph->length = (((p - ciph->dat) + 7) / 8) * 8;
-    return KSUCCESS;
+    return KRB4PROT_OK;
 }
 
 /*
@@ -220,11 +224,12 @@ krb4prot_encode_ciph(C_Block session,
  * The length of the ticket is a multiple of
  * eight bytes and is in tkt->length.
  *
- * If the ticket is too long, the ticket will contain nulls.
+ * If the ticket is not a multiple of eight bytes long, the ticket
+ * will contain nulls.
  *
- * Returns KSUCCESS on success, KFAILURE on failure.
+ * Returns KRB4PROT_OK on success, non-zero on failure.
  *
- * The following packet layout is from cr_tkt.c
+ * The following packet layout is from cr_tkt.c:
  *
  * 			variable
  * type			or constant	   data
@@ -251,7 +256,7 @@ krb4prot_encode_ciph(C_Block session,
  * 
  * <=7 bytes		null		   null pad to 8 byte multiple
  */
-int
+int KRB5_CALLCONV
 krb4prot_encode_tkt(unsigned int flags,
 		    char *pname, char *pinst, char *prealm,
 		    unsigned long paddress,
@@ -318,14 +323,13 @@ krb4prot_encode_tkt(unsigned int flags,
 }
 
 /*
- * This routine is used by the Kerberos authentication server to
- * create an error reply packet to send back to its client.
+ * encode_err_reply
  *
- * It takes a pointer to the packet to be built, the name, instance,
- * and realm of the principal, the client's timestamp, an error code
- * and an error string as arguments.  Its return value is undefined.
+ * Encode an error reply message from the KDC to the client.
  *
- * The packet is built in the following format:
+ * Returns KRB4PROT_OK on success, non-zero on error.
+ *
+ * The following packet layout description is from cr_err_repl.c:
  * 
  * type			variable	   data
  *			or constant
@@ -349,7 +353,7 @@ krb4prot_encode_tkt(unsigned int flags,
  * 
  * string		e_string	   error text
  */
-int
+int KRB5_CALLCONV
 krb4prot_encode_err_reply(char *pname, char *pinst, char *prealm,
 			  unsigned long time_ws,
 			  unsigned long err, /* error code */
@@ -387,4 +391,70 @@ krb4prot_encode_err_reply(char *pname, char *pinst, char *prealm,
     /* And return */
     pkt->length = p - pkt->dat;
     return KSUCCESS;
+}
+
+/*
+ * decode_kdc_request
+ *
+ * Decode an initial ticket request sent from the client to the KDC.
+ *
+ * Packet format is described in g_in_tkt.c.
+ *
+ * Returns KRB4PROT_OK on success, non-zero on failure.
+ */
+int KRB5_CALLCONV
+krb4prot_decode_kdc_request(KTEXT pkt,
+			    int *le,
+			    char *pname, char *pinst, char *prealm,
+			    long *req_time, int *life,
+			    char *sname, char *sinst)
+{
+    unsigned char *p;
+    int msg_type, ret, len;
+
+    p = pkt->dat;
+
+    /* Get prot vers and msg type */
+    if (pkt->length < 2)
+	return KRB4PROT_ERR_UNDERRUN;
+    if (*p++ != KRB_PROT_VERSION)
+	return KRB4PROT_ERR_PROT_VERS;
+    msg_type = *p++;
+    *le = msg_type & 1;
+    msg_type &= ~1;
+    if (msg_type != AUTH_MSG_KDC_REQUEST)
+	return KRB4PROT_ERR_MSG_TYPE;
+
+    ret = krb4prot_decode_naminstrlm(pkt, &p, pname, pinst, prealm);
+    if (ret)
+	return ret;
+
+#define PKT_REMAIN (pkt->length - (p - pkt->dat))
+
+    if (PKT_REMAIN < (4		/* time */
+		      + 1))	/* life */
+	return KRB4PROT_ERR_UNDERRUN;
+
+    KRB4_GET32(*req_time, p, *le);
+
+    *life = *p++;
+
+    if (PKT_REMAIN <= 0)
+	return KRB4PROT_ERR_UNDERRUN;
+    len = krb4int_strnlen((char *)p, PKT_REMAIN) + 1;
+    if (len <= 0 || len > ANAME_SZ)
+	return KRB4PROT_ERR_OVERRUN;
+    memcpy(sname, p, (size_t)len);
+    p += len;
+
+    if (PKT_REMAIN <= 0)
+	return KRB4PROT_ERR_UNDERRUN;
+    len = krb4int_strnlen((char *)p, PKT_REMAIN) + 1;
+    if (len <= 0 || len > INST_SZ)
+	return KRB4PROT_ERR_OVERRUN;
+    memcpy(sinst, p, (size_t)len);
+    p += len;
+
+    /* XXX krb4 preauth? */
+    return KRB4PROT_OK;
 }
