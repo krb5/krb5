@@ -12,7 +12,7 @@ LIBOBJS = @LIBOBJS@
 
 OBJS=	rnd_confoun.$(OBJEXT) localaddr.$(OBJEXT) ustime.$(OBJEXT) $(LIBOBJS)
 
-SRCS=	rnd_confoun.c
+SRCS=	rnd_confoun.c localaddr.c ustime.c
 
 all:: all-$(WHAT)
 
@@ -25,31 +25,16 @@ all-windows: rnd_confoun.obj
 shared:
 	mkdir shared
 	
-
-localaddr.c: $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)localaddr.c
-	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)localaddr.c $@
-
-ustime.c: $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)ustime.c
-	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)os$(S)ustime.c $@
-
 memmove.c: $(SRCTOP)$(S)lib$(S)krb5$(S)posix$(S)memmove.c
 	-$(LN) $(SRCTOP)$(S)lib$(S)krb5$(S)posix$(S)memmove.c $@
 
-localaddr.o: localaddr.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
-	
-ustime.o: ustime.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
-	
 memmove.o: memmove.c
 	$(CC) $(CFLAGS) -c $*.c
 @SHARED_RULE_LOCAL@
 	
 
 clean:: clean-$(WHAT)
-	$(RM) ustime.c localaddr.c memmove.c
+	$(RM) memmove.c
 
 clean-unix::
 	$(RM) shared/*
