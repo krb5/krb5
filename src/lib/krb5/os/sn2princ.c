@@ -114,7 +114,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 	}
 	
 
-	if (retval = krb5_get_host_realm(context, remote_host, &hrealms)) {
+	if ((retval = krb5_get_host_realm(context, remote_host, &hrealms))) {
 	    free(remote_host);
 	    return retval;
 	}

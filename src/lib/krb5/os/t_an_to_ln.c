@@ -1,5 +1,7 @@
 #include "krb5.h"
 
+#include <stdio.h>
+
 int
 main(argc, argv)
     int		argc;

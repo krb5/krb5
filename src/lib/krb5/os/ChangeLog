@@ -1,3 +1,15 @@
+2000-06-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_an_to_ln.c: Include <stdio.h> for prototypes.
+
+	* locate_kdc.c (krb5_locate_srv_dns): Remove unused variable.
+
+	* changepw.c, sendto_kdc.c, sn2princ.c: Add parentheses around
+	assignment used as truth value.
+
+	* ccdefname.c (get_from_os): Cast return from getuid() to long and
+	indicate use of format in sprintf.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* def_realm.c: Add newline at end of file.

@@ -339,7 +339,6 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     struct sockaddr **addr_pp;
     int *naddrs;
 {
-    krb5_error_code code;
     int out, j, count;
     union {
         unsigned char bytes[2048];

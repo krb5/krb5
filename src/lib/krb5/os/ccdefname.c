@@ -224,7 +224,7 @@ cleanup:
 #if !(defined(_MSDOS) || defined(_WIN32))
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
-	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
+	sprintf(name_buf, "FILE:/tmp/krb5cc_%ld", (long) getuid());
 	return 0;
 }
 #endif

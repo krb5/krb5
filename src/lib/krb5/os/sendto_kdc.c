@@ -81,7 +81,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
      * find KDC location(s) for realm
      */
 
-    if (retval = krb5_locate_kdc(context, realm, &addr, &naddr, use_master))
+    if ((retval = krb5_locate_kdc(context, realm, &addr, &naddr, use_master)))
 	return retval;
     if (naddr == 0)
 	return (use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
@@ -159,11 +159,11 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 	    waitlen.tv_sec = timeout;
 	    FD_ZERO(&readable);
 	    FD_SET(socklist[host], &readable);
-	    if (nready = select(SOCKET_NFDS(socklist[host]),
-				&readable,
-				0,
-				0,
-				&waitlen)) {
+	    if ((nready = select(SOCKET_NFDS(socklist[host]),
+				 &readable,
+				 0,
+				 0,
+				 &waitlen))) {
 		if (nready == SOCKET_ERROR) {
 		    if (SOCKET_ERRNO == SOCKET_EINTR)
 			goto retry;

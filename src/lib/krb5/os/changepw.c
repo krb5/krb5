@@ -141,13 +141,14 @@ krb5_change_password(context, creds, newpw, result_code,
     if ((code = krb5_auth_con_init(context, &auth_context)))
 	  goto cleanup;
     
-    if (code = krb5_mk_req_extended(context, &auth_context, AP_OPTS_USE_SUBKEY,
-				    NULL, creds, &ap_req))
+    if ((code = krb5_mk_req_extended(context, &auth_context, 
+				     AP_OPTS_USE_SUBKEY,
+				     NULL, creds, &ap_req)))
 	  goto cleanup;
 
-    if (code = krb5_locate_kpasswd(context, 
+    if ((code = krb5_locate_kpasswd(context, 
                                     krb5_princ_realm(context, creds->client), 
-                                    &addr_p, &naddr_p))
+                                    &addr_p, &naddr_p)))
         goto cleanup;
 
     /* this is really obscure.  s1 is used for all communications.  it
@@ -255,13 +256,15 @@ krb5_change_password(context, creds, newpw, result_code,
 		  specified.  when rd_priv is called, *only* a remote address
 		  is specified.  Are we having fun yet?  */
 
-		if (code = krb5_auth_con_setaddrs(context, auth_context, &local_kaddr, NULL)) 
+		if ((code = krb5_auth_con_setaddrs(context, auth_context, 
+						   &local_kaddr, NULL)))
 		  {
 		    code = SOCKET_ERRNO;
 			goto cleanup;
 		  }
 
-		if (code = krb5_mk_chpw_req(context, auth_context, &ap_req, newpw, &chpw_req)) 
+		if ((code = krb5_mk_chpw_req(context, auth_context, &ap_req, 
+					     newpw, &chpw_req)))
 		  {
 		    code = SOCKET_ERRNO;
 			goto cleanup;
@@ -321,11 +324,13 @@ krb5_change_password(context, creds, newpw, result_code,
 
 		chpw_rep.length = cc;
 
-		if (code = krb5_auth_con_setaddrs(context, auth_context, NULL, &remote_kaddr)) 
+		if ((code = krb5_auth_con_setaddrs(context, auth_context,
+						   NULL, &remote_kaddr)))
 		  goto cleanup;
 
-		if(code = krb5_rd_chpw_rep(context, auth_context, &chpw_rep,
-					&local_result_code, result_string))
+		if ((code = krb5_rd_chpw_rep(context, auth_context, &chpw_rep,
+					     &local_result_code, 
+					     result_string)))
 		  goto cleanup;
 
 		if (result_code)
@@ -333,8 +338,9 @@ krb5_change_password(context, creds, newpw, result_code,
 
 		if (result_code_string) 
 		  {
-		    if (code = krb5_chpw_result_code_string(context, local_result_code,
-							    &code_string))
+		    if ((code = krb5_chpw_result_code_string(context, 
+							     local_result_code,
+							     &code_string)))
 			  goto cleanup;
 
 		    result_code_string->length = strlen(code_string);
