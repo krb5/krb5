@@ -1,3 +1,10 @@
+Wed Oct 19 17:40:22 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* adm_server.c (main): Select the cryptosystem to be used using
+		krb5_use_cstype() instead of using a implementation
+		specific assignment.  Also, allow the encryption type to
+		be specified using a command line option.
+
 Tue Oct  4 17:08:25 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* adm_process.c (cpw_keyproc): Add widen.h and narrow.h around

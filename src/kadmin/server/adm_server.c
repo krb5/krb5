@@ -126,6 +126,7 @@ char **argv;
     char *mkey_name = 0;
     char *local_realm;
     krb5_enctype etype;
+    krb5_enctype kdc_etype = DEFAULT_KDC_ETYPE;
 
 #ifdef SANDIA
     char input_string[80];
@@ -152,7 +153,7 @@ char **argv;
         fclose(startup_file);
     }
 #endif
-    while ((c = getopt(argc, argv, "hmMa:d:k:r:D")) != EOF) {
+    while ((c = getopt(argc, argv, "hmMa:d:k:r:De:")) != EOF) {
 	switch(c) {
 	    case 'a':			/* new acl directory */
 		acl_file_name = optarg;
@@ -168,6 +169,10 @@ char **argv;
 		}
 		break;
 
+	    case 'e':
+		kdc_etype = atoi(optarg);
+		break;
+		
 	    case 'k':			/* keytype for master key */
 		master_keyblock.keytype = atoi(optarg);
 		keytypedone++;
@@ -224,7 +229,12 @@ char **argv;
 	exit(1);
     }
 
-    master_encblock.crypto_entry = krb5_des_cst_entry.system;
+    if (!valid_etype(kdc_etype)) {
+	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
+		"while setting up etype %d", kdc_etype);
+	exit(1);
+    }
+    krb5_use_cstype(&master_encblock, kdc_etype);
  
     if (retval = krb5_db_fetch_mkey(
 		master_princ, 
