@@ -144,7 +144,8 @@ includes:: hfile							@@\
    indicating some adjustment of the file took place. */
 #ifndef ProcessStockHeader
 #define ProcessStockHeader(stockname,newname)				@@\
-newname: stockname							@@\
+newname: stockname Makefile						@@\
+	-$(RM) newname							@@\
 	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname
 #endif /* ProcessStockHeader */
 
