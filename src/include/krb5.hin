@@ -117,9 +117,11 @@ extern "C" {
 #endif
 
 #if TARGET_OS_MAC
-    #pragma import on
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
     #pragma options align=mac68k
-    #pragma enumsalwaysint on
 #endif
 
 /*
@@ -2528,9 +2530,11 @@ KRB5_DLLIMP krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	KRB5_PROTOTYPE((krb5_context context));
 
 #if TARGET_OS_MAC
-    #pragma enumsalwaysint reset
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
 	#pragma options align=reset
-    #pragma import reset
 #endif
 
 #ifdef __cplusplus
