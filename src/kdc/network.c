@@ -545,7 +545,7 @@ setup_network(prog)
     for (i=0; i<kdc_numrealms; i++) {
 	cp = kdc_realmlist[i]->realm_ports;
 	while (cp && *cp) {
-	    if (*cp == ',' || isspace(*cp)) {
+	    if (*cp == ',' || isspace((int) *cp)) {
 		cp++;
 		continue;
 	    }
