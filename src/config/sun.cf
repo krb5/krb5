@@ -1,0 +1,58 @@
+/**/# $Source$
+/**/# $Author$
+/**/# $Id$
+/**/#
+
+/*
+ * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
+ */
+/*
+ * This file was used for a SPARC running SunOS 4.1.
+ * It has not been tested under any other architecture,
+ * but I would guess it should work for Sun 3's as well.
+ * Older versions of SunOS will probably require some changes.
+ */
+/*
+ * Some random notes for the SUN build:
+ *
+ * 	There are some warnings in the ss and comerr directories.
+ *	They aren't too important, so ignore them for now.
+ *
+ *	The following three files:
+ *		create/kdb5_create.c
+ *		edit/kdb5_edit.c
+ *		stash/kdb5_stash.c
+ *	Each contain a line of code which reads:
+ *		if (etype == -1)
+ *	This will produce a warning about the expression always being false.
+ *	To fix it change the code to:
+ *		if (etype == (krb5_enctype)-1)
+ *	This code is going away in a future release, hence it was not fixed
+ *	in this release.
+ */
+
+#define OSName			SunOS 4.1
+#define OSMajorVersion		4
+#define OSMinorVersion		1
+#define SystemV			NO
+#define HasVoidSignalReturn	YES
+#define	HasPosixTermios		NO
+#define	HasPosixFileLocks	NO
+#define HasPosixTypes		YES
+#define	HasStringH		YES
+#define	HasStdlibH		YES
+#define	HasInet			YES
+#define HasPutenv		YES
+#define HasBsearch		YES
+#define	HasGCC			NO
+#define	UseSysTimeH		YES
+#define IsPOSIX			NO
+#define	Bitsize32		YES
+
+#undef HasNdbm
+#define HasNdbm			YES
+
+#define	ArCmd			ar cru
+#define LintLibFlag		-o
+
+#define DesDefines		-DBIG -DMUSTALIGN -DMSBFIRST
