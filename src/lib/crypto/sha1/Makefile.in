@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=lib/crypto/sha1
 mydir=sha1
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=sha1
@@ -29,7 +28,7 @@ includes:: depend
 depend:: $(SRCS)
 
 t_shs: t_shs.o shs.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o t_shs t_shs.o shs.o
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_shs t_shs.o shs.o
 
 $(OUTPRE)t_shs.exe: $(OUTPRE)t_shs.obj $(OUTPRE)shs.obj
 	link -out:$@ $**

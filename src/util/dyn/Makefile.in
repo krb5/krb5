@@ -4,7 +4,6 @@ mydir=util/dyn
 MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 RELDIR=../util/dyn
-CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libdyn.lib

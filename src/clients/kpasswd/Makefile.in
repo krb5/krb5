@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=clients/kpasswd
 mydir=kpasswd
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -23,7 +22,8 @@ install-all install-kdc install-server install-client install-unix::
 	$(INSTALL_DATA) $(srcdir)/kpasswd.M $(DESTDIR)$(CLIENT_MANDIR)/`echo kpasswd|sed '$(transform)'`.1;
 
 ##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
+##WIN32##CFLAGS = $(CCOPTS2)
+##WIN32##CPPFLAGS = $(INCLUDES)
 
 ##WIN32##all-windows:: $(OUTPRE)kpasswd.exe
 ##WIN32##$(OUTPRE)kpasswd.exe: $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB)

@@ -4,8 +4,6 @@ mydir=keytab
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCAL_SUBDIRS = file srvtab
 
-CFLAGS = $(CCOPTS) $(DEFS)
-
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keytab
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst

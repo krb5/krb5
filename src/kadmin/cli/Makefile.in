@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=kadmin/cli
 mydir=cli
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -32,4 +31,4 @@ clean-unix::
 
 # for testing getdate.y
 datetest: getdate.c
-	$(CC) -o datetest $(CFLAGS) $(LDFLAGS) $(LDARGS) -DTEST getdate.c
+	$(CC) -o datetest $(ALL_CFLAGS) $(LDFLAGS) $(LDARGS) -DTEST getdate.c

@@ -3,7 +3,6 @@ myfulldir=lib
 mydir=lib
 MY_SUBDIRS=crypto krb5 des425 @KRB4@ krb5util kdb gssapi rpc kadm5
 BUILDTOP=$(REL)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..
 ##DOS##VERS_DIR = \vers
@@ -136,15 +135,15 @@ RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 ##MIT##lib-windows:: $(SKLIB) $(SGLIB) 
 
 $(K5_GLUE): win_glue.c
-	$(CC) $(CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
+	$(CC) $(ALL_CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
 $(SAP_GLUE): win_glue.c
-	$(CC) $(CFLAGS) $(MITFLAGS) /DSAP_VERSERV=1 /DKRB5=1 /c /Fo$@ $**
+	$(CC) $(ALL_CFLAGS) $(MITFLAGS) /DSAP_VERSERV=1 /DKRB5=1 /c /Fo$@ $**
 $(K4_GLUE): win_glue.c
-	$(CC) $(CFLAGS) /c /DKRB4=1 /Fo$@ $**
+	$(CC) $(ALL_CFLAGS) /c /DKRB4=1 /Fo$@ $**
 $(GSS_GLUE): win_glue.c
-	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
+	$(CC) $(ALL_CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
 $(NO_GLUE): win_glue.c
-	$(CC) $(CFLAGS) /c /Fo$@ $**
+	$(CC) $(ALL_CFLAGS) /c /Fo$@ $**
 
 # Build Convenience
 comerr.lib: $(CLIB)

@@ -4,7 +4,7 @@ mydir=.
 MY_SUBDIRS=util include lib @krb524@ kdc kadmin slave clients appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
-CFLAGS = $(CCOPTS) $(DEFS)
+LOCALINCLUDES = -I$(srcdir) 
 
 ##DOS##BUILDTOP = .
 
@@ -55,9 +55,6 @@ install-mkdirs:
 
 # install::
 #	$(MAKE) $(MFLAGS) install.man
-
-.c.o:
-	$(CC) -c $(CPPFLAGS) $(DEFS) -I$(srcdir) $(CFLAGS) $<
 
 TAGS: $(SRCS)
 	etags $(SRCS)

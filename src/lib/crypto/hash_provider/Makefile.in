@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/hash_provider
 mydir=hash_provider
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crc32 -I$(srcdir)/../md4 \
+LOCALINCLUDES = -I$(srcdir)/../crc32 -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5 -I$(srcdir)/../sha1
 
 ##DOS##BUILDTOP = ..\..\..
