@@ -13,7 +13,7 @@ LIBMINOR=0
 
 STLIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
 	update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o \
-	logwtmp.o init.o
+	logwtmp.o init.o sane_hostname.o
 
 STOBJLISTS=OBJS.ST
 
@@ -29,7 +29,7 @@ CFILES=$(srcdir)/cleanup.c $(srcdir)/getpty.c $(srcdir)/init_slave.c \
 	$(srcdir)/open_ctty.c $(srcdir)/open_slave.c \
 	$(srcdir)/update_utmp.c $(srcdir)/update_wtmp.c $(srcdir)/vhangup.c \
 	$(srcdir)/void_assoc.c $(srcdir)/logwtmp.c \
-	$(srcdir)/init.c
+	$(srcdir)/init.c $(srcdir)/sane_hostname.c
 
 
 SRCS=pty_err.c $(CFILES)
