@@ -583,7 +583,7 @@ proc setup_kerberos_db { standalone } {
 	return 0
     }
 
-    spawn $KDB5_UTIL -r $REALMNAME -R create
+    spawn $KDB5_UTIL -r $REALMNAME create
 
     expect {
 	"Enter KDC database master key:" {
@@ -638,7 +638,7 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Stash the master key in a file.
-    spawn $KDB5_UTIL  -r $REALMNAME -R stash
+    spawn $KDB5_UTIL  -r $REALMNAME stash
     expect {
 	"Enter KDC database master key:" {
 	    verbose "kdb5_util stash started"

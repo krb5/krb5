@@ -1,3 +1,7 @@
+Mon Aug  5 21:16:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Update to new kdb5_util convention.
+
 Mon Jul 29 11:19:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: (kinit): Wait for eof from kinit before waiting for
