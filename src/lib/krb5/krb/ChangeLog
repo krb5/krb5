@@ -1,3 +1,8 @@
+1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* init_ctx.c (krb5_init_context): Call krb5_win_ccdll_load() to
+		load the krbcc32.dll under windows.
+
 Mon Mar  8 22:39:01 1999  Tom Yu  <tlyu@mit.edu>
 
 	* sendauth.c (krb5_sendauth): Set credspout to NULL if it's
