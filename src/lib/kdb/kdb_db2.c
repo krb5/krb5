@@ -222,7 +222,7 @@ krb5_db2_db_set_hashfirst(context, hashfirst)
 
     if (k5db2_inited(context))
 	return KRB5_KDB_DBNOTINITED;
-    dbc = (krb5_db2_context *) context;
+    dbc = (krb5_db2_context *) context->db_context;
     dbc->hashfirst = hashfirst;
     return 0;
 }

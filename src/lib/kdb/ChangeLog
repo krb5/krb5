@@ -1,3 +1,8 @@
+Tue Jul 29 02:35:09 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_db2.c (krb5_db2_db_set_hashfirst): Don't cast a
+	krb5_context * to a krb5_db2_context *.
+
 Fri Jul 25 15:29:03 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_db2.c: Fix typo; also, tweak page size in attempt to speed
