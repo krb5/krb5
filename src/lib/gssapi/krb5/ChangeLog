@@ -1,3 +1,18 @@
+2004-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi_krb5.c (kg_sync_ccache_name): Add context argument
+	instead of calling kg_get_context.
+	(kg_get_ccache_name): Use a locally created krb5 context instead
+	of calling kg_get_context.
+	(kg_get_context): Deleted.
+	* acquire_cred.c (acquire_init_cred): Pass current context.
+	(krb5_gss_acquire_cred): Use a locally created krb5 context
+	instead of calling kg_get_context.
+	* add_cred.c (krb5_gss_add_cred): Call kg_sync_ccache_name.
+	* init_sec_context.c (krb5_gss_init_sec_context): Likewise.
+	* gssapiP_krb5.h (kg_sync_ccache_name): Update prototype.
+	(kg_get_context): Delete declaration.
+
 2004-07-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* acquire_cred.c: Include gss_libinit.h.

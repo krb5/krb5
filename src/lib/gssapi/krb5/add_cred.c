@@ -143,6 +143,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	*minor_status = code;
 	return GSS_S_FAILURE;
     }
+    if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
+	return GSS_S_FAILURE;
 
     /* verify the desired_name */
 

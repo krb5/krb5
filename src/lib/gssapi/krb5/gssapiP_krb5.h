@@ -303,10 +303,7 @@ krb5_error_code kg_ctx_internalize (krb5_context kcontext,
 					      krb5_octet **buffer,
 					      size_t *lenremain);
 
-OM_uint32 kg_get_context (OM_uint32 *minor_status,
-				    krb5_context *context);
-
-OM_uint32 kg_sync_ccache_name (OM_uint32 *minor_status);
+OM_uint32 kg_sync_ccache_name (krb5_context context, OM_uint32 *minor_status);
 
 OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status, 
                               const char **out_name);

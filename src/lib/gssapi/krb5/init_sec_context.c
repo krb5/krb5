@@ -849,6 +849,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	   *minor_status = kerr;
 	   return GSS_S_FAILURE;
        }
+       if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
+	   return GSS_S_FAILURE;
    } else {
        context = ((krb5_gss_ctx_id_rec *)*context_handle)->k5_context;
    }

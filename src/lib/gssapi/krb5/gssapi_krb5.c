@@ -151,46 +151,17 @@ kg_get_defcred(minor_status, cred)
 }
 
 OM_uint32
-kg_get_context(minor_status, context)
-   OM_uint32 *minor_status;
-   krb5_context *context;
+kg_sync_ccache_name (krb5_context context, OM_uint32 *minor_status)
 {
-   static krb5_context kg_context = NULL;
-   krb5_error_code code;
-
-   if (!kg_context) {
-	   if ((code = krb5_init_context(&kg_context)))
-		   goto fail;
-   }
-   *context = kg_context;
-   *minor_status = 0;
-   return GSS_S_COMPLETE;
-   
-fail:
-   *minor_status = (OM_uint32) code;
-   return GSS_S_FAILURE;
-}
-
-OM_uint32
-kg_sync_ccache_name (OM_uint32 *minor_status)
-{
-    krb5_context context = NULL;
     OM_uint32 err = 0;
-    OM_uint32 minor;
     
     /* 
-     * Sync up the kg_context ccache name with the GSSAPI ccache name.
+     * Sync up the context ccache name with the GSSAPI ccache name.
      * If kg_ccache_name is NULL -- normal unless someone has called 
      * gss_krb5_ccache_name() -- then the system default ccache will 
      * be picked up and used by resetting the context default ccache.
      * This is needed for platforms which support multiple ccaches.
      */
-    
-    if (!err) {
-        if (GSS_ERROR(kg_get_context (&minor, &context))) {
-            err = minor;
-        }
-    }
     
     if (!err) {
         /* kg_ccache_name == NULL resets the context default ccache */
@@ -204,24 +175,24 @@ kg_sync_ccache_name (OM_uint32 *minor_status)
 OM_uint32
 kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 {
-    krb5_context context = NULL;
     const char *name = NULL;
     OM_uint32 err = 0;
-    OM_uint32 minor;
     
-    if (GSS_ERROR(kg_get_context (&minor, &context))) {
-	err = minor;
-    }
-
     if (!err) {
         if (kg_ccache_name != NULL) {
             name = kg_ccache_name;
         } else {
-            /* reset the context default ccache (see text above) */
-            err = krb5_cc_set_default_name (context, NULL);
-            if (!err) {
+	    krb5_context context = NULL;
+
+            /* Reset the context default ccache (see text above), and
+	       then retrieve it.  */
+	    err = krb5_init_context(&context);
+	    if (!err)
+		err = krb5_cc_set_default_name (context, NULL);
+            if (!err)
                 name = krb5_cc_default_name(context);
-            }
+	    if (context)
+		krb5_free_context(context);
         }
     }
 
