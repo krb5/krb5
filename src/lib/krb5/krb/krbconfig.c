@@ -19,5 +19,5 @@ static char rcsid_krbconfig_c [] =
 #include <krb5/krb5.h>
 
 krb5_deltat krb5_clockskew = 5 * 60;	/* five minutes */
-krb5_cksumtype krb5_kdc_req_sumtype = CKSUMTYPE_RSA_MD4_DES;
+krb5_cksumtype krb5_kdc_req_sumtype = CKSUMTYPE_RSA_MD4;
 krb5_flags krb5_kdc_default_options = KDC_OPT_RENEWABLE_OK;
