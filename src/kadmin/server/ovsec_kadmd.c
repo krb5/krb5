@@ -298,8 +298,7 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-#define REQUIRED_PARAMS (KADM5_CONFIG_REALM | KADM5_CONFIG_ACL_FILE | \
-			 KADM5_CONFIG_ADMIN_KEYTAB)
+#define REQUIRED_PARAMS (KADM5_CONFIG_REALM | KADM5_CONFIG_ACL_FILE)
 
      if ((params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_klog_syslog(LOG_ERR, "%s: Missing required configuration values "
@@ -1079,7 +1078,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 	return;
     }
 
-    if ((ret = krb5_kt_resolve(context, params->admin_keytab, &kt))) {
+    if ((ret = krb5_kt_resolve(context, "KDB:", &kt))) {
 	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
 			 error_message(ret));
 	return;

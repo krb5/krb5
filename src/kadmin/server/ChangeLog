@@ -1,3 +1,9 @@
+2003-03-07  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c (REQUIRED_PARAMS): Remove
+	KADM5_CONFIG_ADMIN_KEYTAB.
+	(do_schpw): Use kdb keytab.
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Add gssapi directories in order to
