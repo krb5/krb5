@@ -50,10 +50,10 @@ krb5_timeofday(context, timeret)
     }
 #if TARGET_OS_MAC
 {
-	long usecs;
+	krb5_int32 usecs;
 	krb5_error_code	kret;
 
-	if (kret = krb5_crypto_us_timeofday(&tval, &usecs))
+	if (kret = krb5_crypto_us_timeofday((krb5_int32 *)&tval, &usecs))
 		return kret;
 }
 #else

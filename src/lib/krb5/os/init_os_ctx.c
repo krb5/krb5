@@ -27,11 +27,12 @@
  */
 
 #define NEED_WINDOWS
-#include "k5-int.h"
 
 #ifdef TARGET_OS_MAC
 #include <Kerberos/KerberosPreferences.h>
 #endif /* TARGET_OS_MAC */
+
+#include "k5-int.h"
 
 #if defined(_MSDOS) || defined(_WIN32)
 
@@ -195,7 +196,6 @@ os_get_default_config_files(pfiles, secure)
 	UInt32	numPreferencesFilesToInit;
 	UInt32 i;
 	Boolean foundPreferences = false;
-	Boolean writtenPreferences = false;
 	SInt16 refNum = -1;
 	SInt32 length = 0;
 	
@@ -366,7 +366,7 @@ os_get_default_config_files(pfiles, secure)
     files[i] = 0;
 #endif /* !_MSDOS && !_WIN32 */
 #endif /* !macintosh */
-    *pfiles = files;
+    *pfiles = (profile_filespec_t *)files;
     return 0;
 }
 
@@ -390,7 +390,7 @@ os_init_paths(ctx)
     
     if (!retval) {
 #if TARGET_OS_MAC
-        retval = FSp_profile_init_path(files,
+        retval = FSp_profile_init_path((const FSSpec *)files,
 			      &ctx->profile);
 #else
         retval = profile_init((const_profile_filespec_t *) files,
@@ -474,7 +474,7 @@ krb5_get_profile (ctx, profile)
 
     if (!retval) {
 #if TARGET_OS_MAC
-        retval = FSp_profile_init_path(files,
+        retval = FSp_profile_init_path((const FSSpec *)files,
 			      profile);
 #else
         retval = profile_init((const_profile_filespec_t *) files,

@@ -1,4 +1,11 @@
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * init_os_ctx.c: Add CoreServices.h before k5-int.h so we don't get 
+    multiple definitions for FSSpec.  Also removed an unused variable in
+    Mac OS X code and added casts for Mac OS X code so FSSpecs are cast
+    to profile file types (code deals properly on the other side)
+    * timeofday.c: Added casts to remove warnings
+
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * ccdefname.c, init_os_ctx.c, timeofday.c: Updated Mac OS X headers to new 
     framework layout and updated Mac OS macros
     * changepw.c: removed unused variable
