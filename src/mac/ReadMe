@@ -4,38 +4,34 @@ To Build the Macintosh version of Kerberos 5 and GSS:
 
 	1) Install CodeWarrior Pro 2 with MPW
 
-	2) Copy "MSL C.CFM68K.DLL" from
-	"Metrowerks:Metrowerks CodeWarrior:Metrowerks Standard Library:MSL C:Bin:" to
-	"Metrowerks:CodeWarrior MPW:Interfaces&Libraries:Libraries:MW68KLibraries:"
-
-	3) Copy "MSL C.PPC.DLL" from
-	"Metrowerks:Metrowerks CodeWarrior:Metrowerks Standard Library:MSL C:Bin:" to
-	"Metrowerks:CodeWarrior MPW:Interfaces&Libraries:Libraries:MWPPCLibraries:"
-
-	4) Download MacPerl and MacPerl MPW tool from
+	2) Download MacPerl and MacPerl MPW tool from
 	<ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/>
 
-	5) Install MacPerl and MacPerl MPW tool
+	3) Install MacPerl and MacPerl MPW tool
 
 --- Preparing Kerberos v5 build tree ---
 
-	6) Launch MPW
+	4) Launch MPW
 
-	7) Set directory in MPW to the top level of Kerberos 5 distribution
+	5) Set directory in MPW to the top level of Kerberos 5 distribution ("GSS/krb5 1.0.5 sources")
 
-	8) Execute "perl :mac:macfile_get.pl" in MPW
+	6) Execute "perl :mac:macfile_gen.pl" in MPW
 
-	9) Build target "create-directories" in MPW
+	7) Build target "create-directories" in MPW
 	
+	8) Open projects in ":mac:libraries:Metrowerks:CW Pro 2" in your CW Pro 2 IDE (the projects 
+	will not work correctly with CW Pro 3), and build them. You need to build the Runtime libraries
+	before building the C libraries.
+		
 --- Building libraries ---
 
-	10) Build target "all" in MPW. Wait.
+	9) Build target "all" in MPW. Wait.
 
 --- Building the Cygnus Network Security Application ---
 
-	11) Open the project file :mac:kconfig:kconfig.µ in CodeWarrior Pro 2 IDE
+	10) Open the project file :mac:kconfig:kconfig.µ in CodeWarrior Pro 2 IDE
 	
-	12) Select Make from the Project menu
+	11) Select Make from the Project menu
 
 --- Installation ---
 
