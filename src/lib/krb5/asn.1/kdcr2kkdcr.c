@@ -72,18 +72,21 @@ element_KRB5_112krb5_pa_data(val, error)
 	    *error = ENOMEM;
 	    return(0);
 	}
-	retval[i]->contents = (unsigned char *)xmalloc(rv->PA__DATA->pa__data->qb_forw->qb_len);
-	if (!retval[i]->contents) {
-	    xfree(retval[i]);
-	    retval[i] = 0;
-	    krb5_free_pa_data(retval);
-	    *error = ENOMEM;
-	    return(0);
-	}
 	retval[i]->pa_type = rv->PA__DATA->padata__type;
 	retval[i]->length = rv->PA__DATA->pa__data->qb_forw->qb_len;
-	xbcopy(rv->PA__DATA->pa__data->qb_forw->qb_data,
-	      retval[i]->contents, retval[i]->length);
+	if (retval[i]->length) {
+	    retval[i]->contents = (unsigned char *)xmalloc(rv->PA__DATA->pa__data->qb_forw->qb_len);
+	    if (!retval[i]->contents) {
+		xfree(retval[i]);
+		retval[i] = 0;
+		krb5_free_pa_data(retval);
+		*error = ENOMEM;
+		return(0);
+	    }
+	    xbcopy(rv->PA__DATA->pa__data->qb_forw->qb_data,
+		   retval[i]->contents, retval[i]->length);
+        } else
+	    retval[i]->contents = 0;
     }
     retval[i] = 0;
     return(retval);
