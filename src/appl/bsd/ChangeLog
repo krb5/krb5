@@ -1,3 +1,7 @@
+Wed Apr 26 17:43:08 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* logutil.c (EMPTY): linux has UT_UNKNOWN, not EMPTY.
+
 Wed Apr 26 09:41:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krlogind.c (main): LOG_AUTH in openlog arguments in wrong place.

@@ -42,6 +42,11 @@
 #endif
      
 
+#ifndef EMPTY
+/* linux has UT_UNKNOWN but not EMPTY */
+#define EMPTY UT_UNKNOWN
+#endif
+
 void update_utmp();
 void update_wtmp();
 void logwtmp();
