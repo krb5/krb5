@@ -263,6 +263,7 @@ OLDDECLARG(krb5_kvno,vno)
 OLDDECLARG(krb5_keyblock **,key)
 #include <krb5/narrow.h>
 {
+  krb5_encrypt_block eblock;
   krb5_data pwd, salt;
   char *princ_str, *at;
   krb5_error_code code;
@@ -294,11 +295,9 @@ OLDDECLARG(krb5_keyblock **,key)
     com_err(prog, code, "while allocating key for server %s", princ_str);
     goto errout;
   }    
-  if (code = (*krb5_keytype_array[keytype]->system->
-		string_to_key)(keytype,
-			       *key,
-			       &pwd,
-			       &salt))
+  krb5_use_keytype(&eblock, keytype);
+  code = krb5_string_to_key(&eblock, keytype, *key, &pwd, &salt);
+  if (code)
     goto errout;
 
 out:
