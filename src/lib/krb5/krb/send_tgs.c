@@ -269,7 +269,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     	tgsreq.ktype = (krb5_enctype *)ktypes;
     } else {
         /* Get the default ktypes */
-        krb5_get_default_in_tkt_ktypes(context, &(tgsreq.ktype));
+        krb5_get_tgs_ktypes(context, sname, &(tgsreq.ktype));
 	for(tgsreq.nktypes = 0; tgsreq.ktype[tgsreq.nktypes]; tgsreq.nktypes++);
     }
 
