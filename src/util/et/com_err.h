@@ -14,7 +14,7 @@
 
 #ifndef HAVE_STDARG_H
 /* End-user programs may need this -- oh well */
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_WINDOWS) || defined(_MACINTOSH)
 #define HAVE_STDARG_H 1
 #endif
 #endif

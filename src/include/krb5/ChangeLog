@@ -1,3 +1,6 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* k5-config.h Added _MACINTOSH for macintosh build conditions
+	* macsock.h made definition of PROTOTYPE conditional
 
 Fri Jun 30 16:13:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb.h - Add kdb dispatch table and set routine under KDB5_DISPATCH.

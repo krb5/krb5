@@ -35,7 +35,7 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
-#ifndef _MSDOS
+#if !defined(_MSDOS) && !defined(_MACINTOSH)
 #include <kerberosIV/krb.h>
 #include <kerberosIV/krb4-proto.h>
 #include "com_err.h"

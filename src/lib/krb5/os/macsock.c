@@ -532,6 +532,12 @@ getmyipaddr ()
 }
 
 
+int
+gethostname(char *name, int namelen)
+{
+	return -1;
+}
+
 #if 0
 /* FIXME:  THIS WAS A STAB AT GETHOSTNAME, which I abandoned for lack of need,
    and since the required header files didn't seem to be handy.

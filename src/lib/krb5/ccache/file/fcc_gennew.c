@@ -30,7 +30,7 @@
 #include "k5-int.h"
 
 #ifdef KRB5_USE_INET
-#ifndef _WINSOCKAPI_
+#if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
 #include <netinet/in.h>
 #endif
 #else
@@ -100,7 +100,7 @@ krb5_fcc_generate_new (context, id)
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) lid->data)->filename,
+     ret = THREEPARAMOPEN(((krb5_fcc_data *) lid->data)->filename,
 		O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0);
      if (ret == -1) {
 	  retcode = krb5_fcc_interpret(context, errno);

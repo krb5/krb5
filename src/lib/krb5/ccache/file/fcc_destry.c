@@ -48,7 +48,7 @@ krb5_fcc_destroy(context, id)
       
      
      if (OPENCLOSE(id)) {
-	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR | O_BINARY, 0);
+	  ret = THREEPARAMOPEN(((krb5_fcc_data *) id->data)->filename, O_RDWR | O_BINARY, 0);
 	  if (ret < 0) {
 	      kret = krb5_fcc_interpret(context, errno);
 	      goto cleanup;

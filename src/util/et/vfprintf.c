@@ -18,7 +18,12 @@
 /* based on @(#)vfprintf.c	5.2 (Berkeley) 6/27/88 */
 
 #include <stdio.h>
+#if defined(HAVE_STDARG_H) || defined(_WINDOWS) || defined (_MACINTOSH)
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#define VARARGS
+#endif
 
 int
 vfprintf(iop, fmt, ap)

@@ -718,7 +718,7 @@ void update_last_prop_file(hostname, file_name)
 	strcat(file_last_prop, ".");
 	strcat(file_last_prop, hostname);
 	strcat(file_last_prop, last_prop);
-	if ((fd = open(file_last_prop, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
+	if ((fd = THREEPARAMOPEN(file_last_prop, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
 		com_err(progname, errno,
 			"while creating 'last_prop' file, '%s'",
 			file_last_prop);

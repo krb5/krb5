@@ -159,6 +159,55 @@ typedef unsigned char	u_char;
 
 #else 		/* Rest of include file is for non-Microloss-Windows */
 
+#if defined(_MACINTOSH)
+
+#ifdef NEED_LOWLEVEL_IO
+#include <fcntl.h>
+#endif
+
+/* there is no <stat.h> for mpw */
+typedef unsigned long	mode_t;
+typedef unsigned long	ino_t;
+typedef unsigned long	dev_t;
+typedef short			nlink_t;
+typedef unsigned long	uid_t;
+typedef unsigned long	gid_t;
+typedef long			off_t;
+struct stat
+{
+	mode_t		st_mode;		/* File mode; see #define's below */
+	ino_t		st_ino;			/* File serial number */
+	dev_t		st_dev;			/* ID of device containing this file */
+	nlink_t		st_nlink;		/* Number of links */
+	uid_t		st_uid;			/* User ID of the file's owner */
+	gid_t		st_gid;			/* Group ID of the file's group */
+	dev_t		st_rdev;		/* Device type */
+	off_t		st_size;		/* File size in bytes */
+	unsigned long		st_atime;		/* Time of last access */
+	unsigned long		st_mtime;		/* Time of last data modification */
+	unsigned long		st_ctime;		/* Time of last file status change */
+	long		st_blksize;		/* Optimal blocksize */
+	long		st_blocks;		/* blocks allocated for file */
+};
+
+int stat(const char *path, struct stat *buf);
+int fstat(int fildes, struct stat *buf);
+
+#define EFBIG 1000
+#define OLD_CONFIG_FILES
+#define PROF_NO_SECTION 1
+#define PROF_NO_RELATION 2
+#define KRB5_REALM_CANT_RESOLVE 1
+
+#define NOFCHMOD 1
+#define NOCHMOD 1
+#define _MACSOCKAPI_
+
+#define THREEPARAMOPEN(x,y,z) open(x,y)
+#else /* _MACINTOSH */
+#define THREEPARAMOPEN(x,y,z) open(x,y,z)
+#endif /* _MACINTOSH */
+
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
 #include "autoconf.h"
@@ -239,5 +288,4 @@ typedef unsigned char	u_char;
 #endif
 
 #endif /* _MSDOS */
-
 #endif /* KRB5_CONFIG__ */

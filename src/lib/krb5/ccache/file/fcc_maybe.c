@@ -37,7 +37,7 @@
 int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 
 #ifdef KRB5_USE_INET
-#ifndef _WINSOCKAPI_
+#if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
 #include <netinet/in.h>
 #endif
 #else

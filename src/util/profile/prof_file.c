@@ -2,14 +2,19 @@
  * prof_file.c ---- routines that manipulate an individual profile file.
  */
 
+#include "prof_int.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef NO_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifndef NO_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 #include <errno.h>
 
-#include "prof_int.h"
 
 #ifdef _WINDOWS
 #define stat _stat
@@ -47,13 +52,17 @@ errcode_t profile_update_file(prf)
 	prf_file_t prf;
 {
 	errcode_t retval;
+#ifdef HAS_STAT
 	struct stat st;
+#endif
 	FILE *f;
 
+#ifdef HAS_STAT
 	if (stat(prf->filename, &st))
 		return errno;
 	if (st.st_mtime == prf->timestamp)
 		return 0;
+#endif
 	if (prf->root)
 		profile_free_node(prf->root);
 	f = fopen(prf->filename, "r");
@@ -63,7 +72,9 @@ errcode_t profile_update_file(prf)
 	fclose(f);
 	if (retval)
 		return retval;
+#ifdef HAS_STAT
 	prf->timestamp = st.st_mtime;
+#endif
 	return 0;
 }
 

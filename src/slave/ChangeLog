@@ -1,3 +1,5 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* kprop.c changed open to THREEPARAMOPEN
 
 Fri Jun 30 14:47:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --with-dbm to select between Berkeley and DBM

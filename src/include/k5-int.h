@@ -37,7 +37,11 @@
 #include "preauth.h"
 #include "rsa-md5.h"
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
+#if !defined(_MACINTOSH)
 #include "profile.h"
+#else
+typedef unsigned long profile_t;
+#endif
 
 struct _krb5_context {
 	krb5_magic	magic;

@@ -17,7 +17,6 @@
 
 /* based on @(#)vfprintf.c	5.2 (Berkeley) 6/27/88 */
 
-#include <stdio.h>
 #include <varargs.h>
 
 int

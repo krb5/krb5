@@ -33,7 +33,7 @@
  * Modified to use UNIX domain IPC by Ralph Campbell
  */
 
-#ifndef _WINDOWS
+#if !defined(_WINDOWS) && !defined(_MACINTOSH)
 
 #if defined(__STDC__) || defined(_WINDOWS)
 #include <stdarg.h>

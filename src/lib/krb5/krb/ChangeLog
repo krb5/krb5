@@ -1,3 +1,6 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* added condition for _MACINTOSH
+
 Sun Jul  2 18:59:53 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* recvauth.c (krb5_recvauth): recvauth should send an error reply

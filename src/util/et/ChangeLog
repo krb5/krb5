@@ -1,3 +1,7 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* com_err.[ch] added _MACINTOSH conditional
+	* vsprintf.h added inclusion of stdarg.h for _MACINTSOH
+
 Fri Jun 23 20:08:16 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: fix typo; appended "all" rule needs two colons to

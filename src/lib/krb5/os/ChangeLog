@@ -1,3 +1,12 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* an_to_ln.c added _MACINTOSH conditions
+	* genaddrs.c added HAS_MACSOCK_H conditions
+	* krbfileio.c added THREEPARAMOPEN
+	* kuserok.c added THREEPARAMOPEN
+	* macsock.c added stub for gethostnameA
+	* mk_faddr.c added HAS_MACSOCK_H conditions
+	* read_pwd.c added _MACINTOSH condition
+	* sys_log.c added _MACINTOSH condition
 
 Fri Jun 30 14:44:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* an_to_ln.c - Add profile logic to aname_to_lname.  We can now

@@ -1,3 +1,9 @@
+Wed July 5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* prof_file.c added conditionals for sys/*.h include files
+	* prof_int.h added _MACINTOSH conditional
+	* test_parse.c added _MACINTOSH conditional
+
+=======
 Fri Jun  9 19:00:19 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

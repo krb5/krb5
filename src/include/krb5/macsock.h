@@ -24,9 +24,13 @@
 #define const
 #define volatile
 #define signed
+#ifndef PROTOTYPE
 #define PROTOTYPE(p) ()
+#endif
 #else
+#ifndef PROTOTYPE
 #define PROTOTYPE(p) p
+#endif
 #endif
 
 #define	WORD	short

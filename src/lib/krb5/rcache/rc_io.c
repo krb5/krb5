@@ -27,7 +27,7 @@
 #endif
 
 #ifdef KRB5_USE_INET
-#ifndef _WINSOCKAPI_
+#if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
 #include <netinet/in.h>
 #endif
 #else
@@ -82,7 +82,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    (void) strcpy(d->fn,dir);
    (void) strcat(d->fn,"/");
    (void) strcat(d->fn,*fn);
-   d->fd = open(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_BINARY,0600);
+   d->fd = THREEPARAMOPEN(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_BINARY,0600);
   }
  else
   {
@@ -96,7 +96,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    (void) sprintf(d->fn,"%s/krb5_RC%d",dir,UNIQUE);
    c = d->fn + strlen(d->fn);
    (void) strcpy(c,"aaa");
-   while ((d->fd = open(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL|O_BINARY,0600)) == -1)
+   while ((d->fd = THREEPARAMOPEN(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL|O_BINARY,0600)) == -1)
     {
      if ((c[2]++) == 'z')
       {
@@ -168,7 +168,7 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
  (void) strcat(d->fn,fn);
 
 #ifdef NO_USERID
- d->fd = open(d->fn,O_RDWR | O_BINARY,0600);
+ d->fd = THREEPARAMOPEN(d->fn,O_RDWR | O_BINARY,0600);
 #else
  if ((d->fd = stat(d->fn, &statb)) != -1) {
      uid_t me;
@@ -180,7 +180,7 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
 	 FREE(d->fn);
 	 return KRB5_RC_IO_PERM;
      }
-     d->fd = open(d->fn,O_RDWR | O_BINARY,0600);
+     d->fd = THREEPARAMOPEN(d->fn,O_RDWR | O_BINARY,0600);
  }
 #endif
  if (d->fd == -1) {

@@ -25,7 +25,7 @@
  */
 
 #include "k5-int.h"
-#ifndef _MSDOS    /* Not yet for Windows */
+#if !defined(_MSDOS) && !defined(_MACINTOSH)    /* Not yet for Windows */
 #include <stdio.h>
 #include <pwd.h>
 

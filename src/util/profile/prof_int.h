@@ -11,6 +11,11 @@
 #define PROTOTYPE(x) ()
 #endif
 
+#if defined(_MACINTOSH)
+#define NO_SYS_TYPES_H
+#define NO_SYS_STAT_H
+#endif
+
 typedef long errcode_t;
 
 /*

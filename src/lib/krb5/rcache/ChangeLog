@@ -1,3 +1,6 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* rc_io.c added HAVE_MACSOCK_H, change open to THREEPARAMOPEN
+
 Fri Jun  9 19:34:38 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

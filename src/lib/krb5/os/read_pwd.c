@@ -25,7 +25,7 @@
  */
 
 #include "k5-int.h"
-#ifndef _MSDOS
+#if !defined(_MSDOS) && !defined(_MACINTOSH)
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>

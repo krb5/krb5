@@ -1,3 +1,7 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* k5-int.h disable inclusion of profile.h for macintosh build
+	* krb5.h   enable inclusion of sys/types.h on HAS_SYS_TYPES
+
 Thu Jun 29 22:54:30 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* krb5.hin: special-case ultrix brokenness (again!) for

@@ -1,3 +1,9 @@
+Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* fcc_destroy.c changed open to THREEPARAMOPEN for macintosh
+	opens
+	* fcc_gennew.c conditons for HAS_MACSOCK_H and THREEPARAMOPEN
+	* fcc_maybe.c conditons for HAS_MACSOCK_H
+
 Wed Jun 14 23:54:09 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_errs.c (krb5_fcc_interpret): Add #ifdef around switch

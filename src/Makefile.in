@@ -1,5 +1,15 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
+prefix = /usr/local
+exec_prefix = $(prefix)
+binprefix =
+manprefix =
+
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+mandir = $(prefix)/man/man1
+manext = 1
+
 SRCS =  
 HDRS = 
 
@@ -37,7 +47,7 @@ world::
 	make $(MFLAGS) all
 	date
 
-INSTALLMKDIRS = $(INSTALL_PREFIX) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
+INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
 		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
 		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
@@ -109,9 +119,8 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\makefile.in lib\crypto\makefile.in \
 		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
 		lib\crypto\md4\makefile.in lib\crypto\md5\makefile.in \
-		lib\crypto\os\makefile.in \
+		lib\crypto\os\makefile.in lib\des425\makefile.in \
 		lib\gssapi\makefile.in lib\gssapi\generic\makefile.in \
-		lib\kadm\makefile.in \
 		lib\gssapi\krb5\makefile.in lib\krb5\makefile.in \
 		lib\krb5\asn.1\makefile.in lib\krb5\ccache\makefile.in \
 		lib\krb5\ccache\file\makefile.in \
@@ -132,10 +141,10 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\crypto\md4\makefile.in >lib\crypto\md4\makefile
 	.\wconfig config <lib\crypto\md5\makefile.in >lib\crypto\md5\makefile
 	.\wconfig config <lib\crypto\os\makefile.in >lib\crypto\os\makefile
+	.\wconfig config <lib\des425\makefile.in >lib\des425\makefile
 	.\wconfig config <lib\gssapi\makefile.in >lib\gssapi\makefile
 	.\wconfig config <lib\gssapi\generic\makefile.in >lib\gssapi\generic\makefile
 	.\wconfig config <lib\gssapi\krb5\makefile.in >lib\gssapi\krb5\makefile
-	.\wconfig config <lib\kadm\makefile.in >lib\kadm\makefile
 	.\wconfig config <lib\krb5\makefile.in >lib\krb5\makefile
 	.\wconfig config <lib\krb5\asn.1\makefile.in >lib\krb5\asn.1\makefile
 	.\wconfig config <lib\krb5\ccache\makefile.in >lib\krb5\ccache\makefile
@@ -184,69 +193,66 @@ ren2long:
 	-sh config/ren2long
 
 #
-# Builds the zip file that distributes Kerberos sources for DOS sites
-# from the source tree on Unix.
+# Builds the file that distributes Kerberos sources for DOS and 
+# Macintosh sites from the source tree on Unix.
 #
 ZIP=zip
-ZIPFILES= ./* \
+FILES= ./* \
 	config/* include/* include/krb5/* include/krb5/asn.1/* \
 	include/krb5/stock/* include/sys/* lib/* lib/crypto/* \
 	lib/crypto/crc32/* lib/crypto/des/* lib/crypto/md4/* \
-	lib/crypto/md5/* lib/crypto/os/* lib/gssapi/* \
-	lib/gssapi/generic/* lib/gssapi/krb5/* lib/kadm/* \
+	lib/crypto/md5/* lib/crypto/os/* lib/des425/* lib/gssapi/* \
+	lib/gssapi/generic/* lib/gssapi/krb5/* lib/krb425/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
 	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
-	util/profile/* windows/* windows/cns/* windows/wintel/* \
-	windows/gss/*
+	util/profile/*
 
-ZIPBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
+WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
-ZIPEXCLUDE= LIB/KRB5.SAB \
+MACFILES= mac
+
+WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
+
+WINEXCLUDE= LIB/KRB5.SAB \
 	INCLUDE/KRB5/AUTOCONF.H \
 	LIB/CRYPTO/MD4/T_MDDRIV LIB/CRYPTO/MD5/T_MDDRIV \
 	UTIL/PROFILE/TEST_PAR UTIL/PROFILE/TEST_PRO \
 	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO WINDOWS/GSS/*.ICO \
 	*.O *.A *.ZIP
 
-ZIPLONGEXCLUDE= lib/krb5.sab \
-	include/krb5/autoconf.h \
-	lib/crypto/md4/t_mddriv lib/crypto/md5/t_mddriv \
-	util/profile/test_par util/profile/test_pro \
-	windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico \
-	*.o *.a *.zip
+MACEXCLUDE= windows 
 
-ZIPCLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
+CLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
 	lib/krb5/error_tables/asn1_err.c lib/krb5/error_tables/kdb5_err.c \
 	lib/krb5/error_tables/krb5_err.c lib/krb5/error_tables/kv5m_err.c \
 	lib/krb5/error_tables/adm_err.c \
 	include/krb5/asn1_err.h include/krb5/kdb5_err.h \
 	include/krb5/krb5_err.h include/krb5/kv5m_err.h \
-	include/krb5/adm_err.h include/profile.h include/krb5.h \
+	include/krb5/adm_err.h include/profile.h \
 	lib/gssapi/generic/gssapi_err_generic.[ch] \
 	lib/gssapi/krb5/gssapi_err_krb5.[ch]
 
-kerbsrc.zip: awk-windows
-	rm -f Makefile.bak
-	mv Makefile Makefile.bak
-	cp Makefile.in Makefile
-	rm -f kerbsrc.zip
-	$(ZIP) -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
-	$(ZIP) -Dk kerbsrc.zip $(ZIPBINARYFILES)
-	cp Makefile.bak Makefile
-	rm -f $(ZIPCLEANUP)
+kerbsrc.win: kerbsrc.zip
 
-kerbsrc-nt.zip: awk-windows
+kerbsrc.zip: awk-windows-mac
 	rm -f Makefile.bak
 	mv Makefile Makefile.bak
 	cp Makefile.in Makefile
 	rm -f kerbsrc.zip
-	$(ZIP) -Dl kerbsrc-nt.zip $(ZIPFILES) -x $(ZIPLONGEXCLUDE)
-	$(ZIP) -D kerbsrc-nt.zip $(ZIPBINARYFILES)
+	$(ZIP) -Dlk kerbsrc.zip $(FILES) $(WINFILES) -x $(EXCLUDE) $(WINEXCLUDE)
+	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
 	cp Makefile.bak Makefile
-	rm -f $(ZIPCLEANUP)
+	rm -f $(CLEANUP)
+
+kerbsrc.mac: awk-windows-mac
+	rm -f excludefiles 
+	/bin/ls $(MACEXCLUDE) >excludefiles
+	tar cvfX kerbsrc.tar excludefiles `find $(FILES) $(MACFILES) -prune -type f -print`
+	rm -f excludefiles
+	rm -f $(CLEANUP)
 
 #
 # Part of building the PC release has to be done on Unix. This includes
@@ -255,13 +261,12 @@ kerbsrc-nt.zip: awk-windows
 AH  = util/et/et_h.awk
 AC  = util/et/et_c.awk
 INC = include/krb5/
-IN  = include/
 ET  = lib/krb5/error_tables/
 GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
 PR  = util/profile/
 
-awk-windows:
+awk-windows-mac:
 	gawk -f $(AH) outfile=$(INC)asn1_err.h $(ET)asn1_err.et
 	gawk -f $(AH) outfile=$(INC)kdb5_err.h $(ET)kdb5_err.et
 	gawk -f $(AH) outfile=$(INC)krb5_err.h $(ET)krb5_err.et
@@ -279,5 +284,4 @@ awk-windows:
 	gawk -f $(AH) outfile=$(PR)prof_err.h $(PR)prof_err.et
 	gawk -f $(AC) outfile=$(PR)prof_err.c $(PR)prof_err.et
 	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
-	cat $(IN)/krb5.hin $(INC)/krb5_err.h $(INC)/kdb5_err.h \
-		$(INC)/kv5m_err.h $(INC)/asn1_err.h > $(IN)/krb5.h
+	cp $(PR)profile.h include/profile.h

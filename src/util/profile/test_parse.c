@@ -6,11 +6,10 @@
 
 #include "prof_int.h"
 
-#ifndef _MSDOS
+#if !defined(_MSDOS) && !defined(_MACINTOSH)
 #include "com_err.h"
 #else
 
-#include "prof_int.h"
 #define initialize_prof_error_table()
 char *error_message (long err) {
 	static char buf[50];

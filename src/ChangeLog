@@ -1,3 +1,8 @@
+Wed Jul  5 12:00:00 1995 James Mattly <mattly@fusion.com> 
+
+	* Makefile.in: Added kerbsrc.mac target to facilitate easy 
+	downloading pruned source tree to the Mac.
+
 Tue Jul  4 02:11:14 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* configure.in: Add support for NetBSD shared libraries.

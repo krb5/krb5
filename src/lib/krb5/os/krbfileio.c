@@ -61,7 +61,7 @@ krb5_create_secure_file(context, pathname)
     /*
      * Create the file with access restricted to the owner
      */
-    fd = open(pathname, O_RDWR | O_CREAT | O_EXCL | O_BINARY, 0600);
+    fd = THREEPARAMOPEN(pathname, O_RDWR | O_CREAT | O_EXCL | O_BINARY, 0600);
 
 #ifdef OPEN_MODE_NOT_TRUSTWORTHY
     /*
