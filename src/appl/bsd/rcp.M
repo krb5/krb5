@@ -22,7 +22,7 @@
 rcp \- remote file copy
 .SH SYNOPSIS
 .B rcp
-[\fB\-p\fP] [\fB\-x\fP] [\fB\-k\fP \fIrealm\fP ] [\fB\-D\fP \fIport\fP]
+[\fB\-p\fP] [\fB\-x\fP] [\fB\-k\fP \fIrealm\fP ] [\fB-c\fP \fIccachefile\fP] [\fB-C\fP \fIconfigfile\fP] [\fB\-D\fP \fIport\fP]
 [\fB\-N\fP]
 [\fB\-PN | \-PO\fP]
 .I file1 file2
@@ -94,6 +94,14 @@ obtain tickets for the remote host in
 .I realm
 instead of the remote host's realm as determined by
 .IR krb_realmofhost (3).
+.TP
+\fB\-c\fP \fIccachefile\fP
+change the default credentials cache file to 
+.I ccachefile
+.TP
+\fB\-C\fP \fIconfigfile\fP
+change the default configuation file to
+.I configfile
 .TP
 .B \-r
 if any of the source files are directories, copy each subtree rooted at

@@ -10,10 +10,10 @@ klogind \- remote login server
 .SH SYNOPSIS
 .B klogind
 [
-.B \-kr54cpPe
+.B \-kr54cpPef
 ]
-[
-[ \fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]] ]
+[[ \fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP ]] ]
+[ \fB\-D\fP \fIport\fP ]
 .SH DESCRIPTION
 .I Klogind
 is the server for the 
@@ -149,7 +149,7 @@ is stripped from the remote hostname.  By default, the equivalent of
 
 .PP
 .I Klogind
-supports three options which are used for testing
+supports five options which are used for testing
 purposes:
 
 .IP \fB\-S\ keytab\fP 10
@@ -163,6 +163,17 @@ Set the login program to use.  This option only has an effect if
 DO_NOT_USE_K_LOGIN was not defined when
 .I klogind
 was compiled.
+
+.IP \fB\-D\ port\fP
+Run in standalone mode, listening on \fBport\fP.  The daemon will exit
+after one connection and will not background itself.
+
+.IP \fB\-f\fP
+Allows for standalone daemon operation.  A new child is started for
+each incoming connection and waits for it to finish before accepting
+the next connection.  This automagically figures out which port to bind
+to if no port is specified.
+
 .SH DIAGNOSTICS
 All diagnostic messages are returned on the connection
 associated with the

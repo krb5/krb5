@@ -1,3 +1,9 @@
+2002-06-17 Jen Selby <jenselby@mit.edu>
+
+	* klogind.M: documented the -D and -f options
+	* ksh.M: documented the -D and -L options
+	* rcp.M: documented the -c and -C options
+
 2002-05-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (oob): Loop reading data until we actually reach the
