@@ -65,12 +65,12 @@ krb5_authdata ***outauthdat;
     krb5_authdata ** tempauthdat;
     register int nelems = 0;
 
-    while (inauthdat[nelems]) nelems++;
-
     if (!inauthdat) {
 	    *outauthdat = 0;
 	    return 0;
     }
+
+    while (inauthdat[nelems]) nelems++;
 
     /* one more for a null terminated list */
     if (!(tempauthdat = (krb5_authdata **) calloc(nelems+1,
