@@ -120,10 +120,11 @@ if test $newstyle = t; then
 	if test "$KRB5_RELTAG" != $reltag; then
 		echo "WARNING: patchlevel.h '$KRB5_RELTAG' != $reltag"
 	fi
-	if test "$KRB5_MAJOR_RELEASE" != $relmajor || \
-		test "$KRB5_MINOR_RELEASE" != $relminor || \
-		test "$KRB5_PATCHLEVEL" != $relpatch || \
-		test "$KRB5_RELTAIL" != $reltail; then
+	if test "$KRB5_MAJOR_RELEASE" != "$relmajor" || \
+		test "$KRB5_MINOR_RELEASE" != "$relminor" || \
+		test "$KRB5_PATCHLEVEL" != "$relpatch" || \
+		( test -n "$reltail" && \
+			test "$KRB5_RELTAIL" != "$reltail" ); then
 
 		echo "WARNING: patchlevel.h $KRB5_MAJOR_RELEASE.$KRB5_MINOR_RELEASE.$KRB5_PATCHLEVEL${KRB5_RELTAIL+-$KRB5_RELTAIL} != $relmajor.$relminor.$relpatch${reltail+-$reltail}"
 	fi
