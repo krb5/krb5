@@ -342,7 +342,7 @@ krb5_425_conv_principal(krb5_context context, const char *name, const char *inst
      
 not_service:	
      retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
-				   instance, 0);
+				   instance, NULL);
      if (iterator) profile_iterator_free (&iterator);
      if (full_name) profile_free_list(full_name);
      if (v4realms) profile_free_list(v4realms);

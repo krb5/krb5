@@ -1,3 +1,9 @@
+2004-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (ftpd_gss_convert_creds): Terminate argument list to
+	krb5_build_principal_ext with 0, not NULL.  Patch from Nalin
+	Dahyabhai.
+
 2004-08-27  Sam Hartman  <hartmans@mit.edu>
 
 	* ftpd.c (passwd;): Patch from Garry Zacheiss to use

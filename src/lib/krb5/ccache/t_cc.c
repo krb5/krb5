@@ -84,10 +84,10 @@ static void init_test_cred(krb5_context context)
 {
 #define REALM "REALM"
   krb5_build_principal(context, &test_creds.client, sizeof(REALM), REALM,
-		       "client-comp1", "client-comp2", 0);
+		       "client-comp1", "client-comp2", NULL);
 
   krb5_build_principal(context, &test_creds.server, sizeof(REALM), REALM,
-		       "server-comp1", "server-comp2", 0);
+		       "server-comp1", "server-comp2", NULL);
 }
 
 static void free_test_cred(krb5_context context)

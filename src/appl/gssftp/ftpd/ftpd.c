@@ -2954,7 +2954,7 @@ ftpd_gss_convert_creds(name, creds)
 				     6, "krbtgt",
 				     krb5_princ_realm(kcontext, me)->length,
 				     krb5_princ_realm(kcontext, me)->data,
-				     NULL))
+				     0))
 		goto cleanup;
 
 	memset((char *) &increds, 0, sizeof(increds));

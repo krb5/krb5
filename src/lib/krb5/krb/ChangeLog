@@ -1,3 +1,9 @@
+2004-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Terminate argument list
+	to krb5_build_principal with NULL, not 0.  Patch from Nalin
+	Dahyabhai.
+
 2004-08-12  Alexandra Ellwood  <lxs@mit.edu>
 
         * get_in_tkt.c (get_init_creds):

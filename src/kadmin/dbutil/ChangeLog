@@ -1,3 +1,9 @@
+2004-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* loadv4.c (enter_in_v5_db): Terminate argument list of
+	krb5_build_principal with NULL, not 0.  Patch from Nalin
+	Dahyabhai.
+
 2004-06-15  Tom Yu  <tlyu@mit.edu>
 
 	* kadm5_create.c (add_admin_princs): Create kadmin/fqdn

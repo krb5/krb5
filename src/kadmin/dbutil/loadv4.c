@@ -540,8 +540,8 @@ Principal *princ;
     retval = krb5_build_principal(context, &mod_princ,
 				  strlen(realm), realm, princ->mod_name,
 				  princ->mod_instance[0] ? 
-				    princ->mod_instance : 0,
-				  0);
+				  princ->mod_instance : NULL,
+				  NULL);
     if (retval) {
 	krb5_free_principal(context, entry.princ);
 	return retval;
@@ -607,7 +607,7 @@ Principal *princ;
 	    retval = krb5_build_principal(context, &entry.princ,
 					  strlen(princ->instance),
 					  princ->instance,
-					  "krbtgt", realm, 0);
+					  "krbtgt", realm, NULL);
 	    if (retval)
 		    return retval;
 	    retval = krb5_db_put_principal(context, &entry, &nentries);
