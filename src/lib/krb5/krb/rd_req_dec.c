@@ -203,7 +203,7 @@ krb5_rd_req_decoded(context, req, server, sender_addr, fetchfrom, keyproc,
 
     /* Hierarchical Cross-Realm */
   
-    { int            i;
+    {
       krb5_data      lrealm;
       krb5_data      *realm = krb5_princ_realm(context, req->ticket->enc_part2->client);
       krb5_transited *trans = &(req->ticket->enc_part2->transited);

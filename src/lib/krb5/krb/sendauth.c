@@ -24,14 +24,12 @@
  * convenience sendauth/recvauth functions
  */
 
+#define NEED_WINSOCK_H
 #include "k5-int.h"
 #include "com_err.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef _MSDOS
-#define ECONNABORTED 53
-#endif
 
 #define WORKING_RCACHE
 

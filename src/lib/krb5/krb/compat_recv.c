@@ -33,6 +33,7 @@
  * to a V4 sendauth.
  */
 
+#define NEED_WINSOCK_H
 #include "k5-int.h"
 #ifndef _MSDOS
 #include <kerberosIV/krb.h>
@@ -41,8 +42,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
 #include <sys/socket.h>
+#endif
 
 static int krb_v4_recvauth();
 
@@ -164,7 +167,7 @@ krb5_compat_recvauth(context,
 	 * the version string, and make sure it matches.
 	 */
 	
-	len = ntohl(vers.len);
+	len = (int) ntohl(vers.len);
 
 	if (len < 0 || len > 255)
 		return KRB5_SENDAUTH_BADAUTHVERS;

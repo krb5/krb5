@@ -37,7 +37,7 @@ krb5_principal2salt_internal(context, pr, ret, use_realm)
     int use_realm;
 {
     int size = 0, offset = 0;
-    int nelem;
+    krb5_int32 nelem;
     register int i;
 
     if (pr == 0) {
@@ -51,7 +51,7 @@ krb5_principal2salt_internal(context, pr, ret, use_realm)
     if (use_realm)
 	    size += krb5_princ_realm(context, pr)->length;
 
-    for (i = 0; i < nelem; i++)
+    for (i = 0; i < (int) nelem; i++)
 	size += krb5_princ_component(context, pr, i)->length;
 
     ret->length = size;
@@ -63,7 +63,7 @@ krb5_principal2salt_internal(context, pr, ret, use_realm)
 	    memcpy(ret->data, krb5_princ_realm(context, pr)->data, offset);
     }
 
-    for (i = 0; i < nelem; i++) {
+    for (i = 0; i < (int) nelem; i++) {
 	memcpy(&ret->data[offset], krb5_princ_component(context, pr, i)->data,
 	       krb5_princ_component(context, pr, i)->length);
 	offset += krb5_princ_component(context, pr, i)->length;

@@ -25,14 +25,17 @@
  */
 
 
+#define NEED_WINSOCK_H
 #include "k5-int.h"
-#ifndef _MSDOS
+
 #include "com_err.h"
 #include <errno.h>
 
 #include <stdio.h>
 #include <string.h>
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 
 extern krb5_flags	krb5_kdc_default_options;
 
@@ -317,5 +320,3 @@ krb5_recvauth(context,
 	krb5_xfree(authdat);
 	return 0;
 }
-
-#endif

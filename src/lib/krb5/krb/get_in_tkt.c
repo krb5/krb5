@@ -96,7 +96,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     krb5_data reply;
     krb5_keyblock *decrypt_key = 0;
     krb5_timestamp time_now;
-    krb5_pa_data	*padata;
+/*    krb5_pa_data	*padata; */
     int f_salt = 0, use_salt = 0;
     krb5_data salt;
     char k4_version;		/* same type as *(krb5_data::data) */

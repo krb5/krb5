@@ -41,6 +41,10 @@
 #include <time.h>
 #include "k5-int.h"
 #include <syslog.h>
+#ifdef _MSDOS
+#define getpid _getpid
+#include <process.h>
+#endif
 
 static krb5_preauth_ops preauth_systems[] = {
     {
@@ -324,18 +328,18 @@ get_unixtime_padata(context, client, src_addr, pa_data)
     if (retval)
         return retval;
     if ( !seeded) {
-	seeded = kdc_time + getpid();
+	seeded = (int) kdc_time + getpid();
 	srand(seeded);
     }
 
     for (i=0; i < 8; i++)
         *tmp++ = rand() & 255;
 
-    *tmp++ = 0;
-    *tmp++ = (kdc_time >> 24) & 255;
-    *tmp++ = (kdc_time >> 16) & 255;
-    *tmp++ = (kdc_time >> 8) & 255;
-    *tmp++ = kdc_time & 255;
+    *tmp++ = (unsigned char) 0;
+    *tmp++ = (unsigned char) ((kdc_time >> 24) & 255);
+    *tmp++ = (unsigned char) ((kdc_time >> 16) & 255);
+    *tmp++ = (unsigned char) ((kdc_time >> 8) & 255);
+    *tmp++ = (unsigned char) (kdc_time & 255);
 
     return(0);
 }

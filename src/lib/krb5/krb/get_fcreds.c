@@ -30,12 +30,13 @@
 /* General-purpose forwarding routines. These routines may be put into */
 /* libkrb5.a to allow widespread use */ 
 
+#define NEED_WINSOCK_H
+#include "k5-int.h"
 #include <stdio.h>
-#ifndef _MSDOS
+#ifndef _WINSOCKAPI_
 #include <pwd.h>
 #include <netdb.h>
-
-#include "k5-int.h"
+#endif
 
 #define KRB5_DEFAULT_LIFE 60*60*8   /* 8 hours */
 /* helper function: convert flags to necessary KDC options */
@@ -57,7 +58,6 @@ krb5_get_for_creds(context, sumtype, rhost, client, enc_key,
     krb5_enctype etype;
     krb5_address **addrs;
     krb5_error_code retval;
-    krb5_data *scratch;
     krb5_kdc_rep *dec_rep = 0;
     krb5_error *err_reply;
     krb5_response tgsrep;
@@ -224,4 +224,3 @@ errout:
 	krb5_free_kdc_rep(context, dec_rep); 
     return retval;
 }
-#endif

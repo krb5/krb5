@@ -48,7 +48,6 @@ pwd_keyproc(context, type, salt, keyseed, key)
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
-    const struct pwd_keyproc_arg *arg;
     char pwdbuf[BUFSIZ];
     krb5_data * password;
     int pwsize = sizeof(pwdbuf);

@@ -1,3 +1,11 @@
+Wed Mar 1 20:15:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* compat_r.c, copy_pri.c, get_fcre.c, get_in_t.c, init_ctx.c, in_tkt_p.c
+	   in_tkt_s.c, preauth.c, princ_co.c, pr_to_sa.c, rd_req_d.c, recvauth.c
+	   sendauth.c, send_tgs.c, unparse.c: 16 vs 32 bit casts, removed some
+	   unused local variables, and pulled in winsock.h for network byte
+	   ordering.
+
 Tue Feb 28 01:14:57 1995  John Gilmore  (gnu at toad.com)
 
 	* *.c:  Avoid <krb5/...> includes.

@@ -116,7 +116,6 @@ krb5_get_default_in_tkt_etypes(context, etypes)
     krb5_enctype **etypes;
 {
     krb5_enctype * old_etypes;
-    int i;
 
     if (old_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
 				(context->etype_count + 1))) {

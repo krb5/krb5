@@ -63,7 +63,8 @@ krb5_unparse_name_ext(context, principal, name, size)
 {
 	register char *cp, *q;
 	register int i,j;
-	int	length, nelem;
+	int	length;
+	krb5_int32 nelem;
 	register int totalsize = 0;
 
 	cp = krb5_princ_realm(context, principal)->data;
@@ -77,7 +78,7 @@ krb5_unparse_name_ext(context, principal, name, size)
 	totalsize++;		/* This is for the separator */
 
 	nelem = krb5_princ_size(context, principal);
-	for (i = 0; i < nelem; i++) {
+	for (i = 0; i < (int) nelem; i++) {
 		cp = krb5_princ_component(context, principal, i)->data;
 		length = krb5_princ_component(context, principal, i)->length;
 		totalsize += length;
@@ -112,7 +113,7 @@ krb5_unparse_name_ext(context, principal, name, size)
 
 	q = *name;
 	
-	for (i = 0; i < nelem; i++) {
+	for (i = 0; i < (int) nelem; i++) {
 		cp = krb5_princ_component(context, principal, i)->data;
 		length = krb5_princ_component(context, principal, i)->length;
 		for (j=0; j < length; j++,cp++) {

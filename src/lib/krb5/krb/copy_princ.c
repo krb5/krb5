@@ -45,7 +45,7 @@ krb5_copy_principal(context, inprinc, outprinc)
 
     *tempprinc = *inprinc;	/* Copy all of the non-allocated pieces */
 
-    nelems = krb5_princ_size(context, inprinc);
+    nelems = (int) krb5_princ_size(context, inprinc);
     tempprinc->data = malloc(nelems * sizeof(krb5_data));
 
     if (tempprinc->data == 0) {

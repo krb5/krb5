@@ -55,7 +55,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     const krb5_cksumtype sumtype;
     krb5_const_principal sname;
     krb5_address * const * addrs;
-    const krb5_authdata ** authorization_data;
+    krb5_authdata * const * authorization_data;
     krb5_pa_data * const * padata;
     const krb5_data * second_ticket;
     krb5_creds * in_cred;
@@ -97,7 +97,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	/* need to encrypt it in the request */
 	krb5_encrypt_block eblock;
 
-	if (retval = encode_krb5_authdata(authorization_data, &scratch))
+	if (retval = encode_krb5_authdata((const krb5_authdata**)authorization_data,
+					   &scratch))
 	    return(retval);
 	krb5_use_cstype(context, &eblock, in_cred->keyblock.etype);
 	tgsreq.authorization_data.etype = in_cred->keyblock.etype;

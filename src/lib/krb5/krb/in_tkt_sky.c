@@ -53,10 +53,7 @@ skey_keyproc(context, type, salt, keyseed, key)
     krb5_keyblock ** key;
 {
     krb5_keyblock *realkey;
-    const struct skey_keyproc_arg *arg;
     krb5_error_code retval;
-    krb5_keytab kt_id;
-    krb5_keytab_entry kt_ent;
     const krb5_keyblock * keyblock;
 
     keyblock = (const krb5_keyblock *)keyseed;

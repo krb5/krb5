@@ -49,7 +49,8 @@ krb5_principal_compare(context, princ1, princ2)
     krb5_const_principal princ1;
     krb5_const_principal princ2;
 {
-    register int i, nelem;
+    register int i;
+    krb5_int32 nelem;
 
     nelem = krb5_princ_size(context, princ1);
     if (nelem != krb5_princ_size(context, princ2))
@@ -58,7 +59,7 @@ krb5_principal_compare(context, princ1, princ2)
     if (! krb5_realm_compare(context, princ1, princ2))
 	return FALSE;
 
-    for (i = 0; i < nelem; i++) {
+    for (i = 0; i < (int) nelem; i++) {
 	register const krb5_data *p1 = krb5_princ_component(context, princ1, i);
 	register const krb5_data *p2 = krb5_princ_component(context, princ2, i);
 	if (p1->length != p2->length ||
