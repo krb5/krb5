@@ -1,3 +1,7 @@
+2002-03-03 Alexandra Ellwood <lxs@mit.edu>
+    * ccdefault.c: swapped include of KerberosLoginPrivate with k5-int.h
+    to avoid problems with including CoreServices.h after profile.h and krb.h
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * ccdefault.c: Updated Mac OS X headers to new framework layout
 

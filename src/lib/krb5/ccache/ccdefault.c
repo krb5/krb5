@@ -27,11 +27,11 @@
  * Find default credential cache
  */
 
-#include "k5-int.h"
-
 #ifdef USE_LOGIN_LIBRARY
 #include <Kerberos/KerberosLoginPrivate.h>
 #endif
+
+#include "k5-int.h"
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_cc_default(context, ccache)
