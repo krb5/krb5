@@ -1,3 +1,8 @@
+Mon Mar 30 16:57:43 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c: Add parenthesis about assignements in conditionals.
+
+
 Wed Feb 18 16:28:15 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
