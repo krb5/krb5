@@ -138,7 +138,7 @@ krb5_fcc_read_principal(id, princ)
 	free(krb5_princ_component(tmpprinc, i)->data);
     free((char *)tmpprinc->data);
     free((char *)tmpprinc);
-    return KRB5_CC_NOMEM;
+    return kret;
 }
 
 krb5_error_code

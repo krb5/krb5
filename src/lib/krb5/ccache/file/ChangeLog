@@ -1,3 +1,8 @@
+Fri Nov 18 17:22:51 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* fcc_read.c (krb5_fcc_read_principal): Fix to return correct
+		error code, instead of always returning KRB5_CC_NOMEM.
+
 Wed Nov 16 23:31:49 1994  Theodore Y. Ts'o  (tytso@dcl)
 
         * fcc-proto.h, fcc.h, fcc_maybe.c (krb5_fcc_open_file), fcc_nseq.c
