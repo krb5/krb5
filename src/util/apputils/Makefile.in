@@ -39,9 +39,10 @@ SRCS=	$(srcdir)/daemon.c \
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-error_message.so error_message.po $(OUTPRE)error_message.$(OBJEXT): error_message.c com_err.h \
-  error_table.h
-et_name.so et_name.po $(OUTPRE)et_name.$(OBJEXT): et_name.c com_err.h error_table.h
-init_et.so init_et.po $(OUTPRE)init_et.$(OBJEXT): init_et.c com_err.h error_table.h
-com_err.so com_err.po $(OUTPRE)com_err.$(OBJEXT): com_err.c com_err.h error_table.h
+daemon.so daemon.po $(OUTPRE)daemon.$(OBJEXT): daemon.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+dummy.so dummy.po $(OUTPRE)dummy.$(OBJEXT): dummy.c
 
