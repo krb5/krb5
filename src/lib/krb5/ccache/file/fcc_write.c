@@ -93,7 +93,7 @@ krb5_fcc_store_keyblock(id, keyblock)
      CHECK(ret);
      ret = krb5_fcc_store_int(id, &keyblock->length);
      CHECK(ret);
-     ret = write(((krb5_fcc_data *) id->data)->fd, keyblock->contents,
+     ret = write(((krb5_fcc_data *) id->data)->fd, (char *)keyblock->contents,
 		 (keyblock->length)*sizeof(krb5_octet));
      if (ret < 0)
 	  return errno;
