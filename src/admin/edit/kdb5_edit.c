@@ -603,7 +603,6 @@ char *argv[];
 {
     char ktname[MAXPATHLEN+1];
     FILE	*fout;
-    krb5_keytab ktid;
     krb5_error_code retval;
     krb5_principal princ;
     krb5_db_entry dbentry;
@@ -685,8 +684,8 @@ char *argv[];
 	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.name */
 	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */
-	fwrite(&dbentry.kvno, sizeof(dbentry.kvno), 1, fout);
-	fwrite(key.contents, 8, 1, fout);
+	fwrite((char *)&dbentry.kvno, sizeof(dbentry.kvno), 1, fout);
+	fwrite((char *)key.contents, 8, 1, fout);
 	printf("'%s' added to V4 srvtab '%s'\n", pname, ktname);
 	memset((char *)key.contents, 0, key.length);
 	free((char *)key.contents);
