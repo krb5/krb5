@@ -56,6 +56,7 @@ OBJS=	addr_comp.o	\
 	rd_req_dec.o	\
 	rd_safe.o	\
 	send_tgs.o	\
+	srv_rcache.o	\
 	tgtname.o	\
 	unparse.o	\
 	walk_rtree.o
@@ -106,6 +107,7 @@ SRCS=	addr_comp.c	\
 	rd_req_dec.c	\
 	rd_safe.c	\
 	send_tgs.c	\
+	srv_rcache.c	\
 	tgtname.c	\
 	unparse.c	\
 	walk_rtree.c
