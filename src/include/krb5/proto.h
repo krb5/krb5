@@ -64,6 +64,9 @@
 #define KRB5_PADATA_ENC_TIMESTAMPS	2
 #define	KRB5_PADATA_PW_SALT		3
 
+/* Reserved for SPX pre-authentication. */
+#define KRB5_PADATA_DASS		16
+
 /* Transited encoding types */
 #define	KRB5_DOMAIN_X500_COMPRESS	1
 
