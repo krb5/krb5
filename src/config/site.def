@@ -38,6 +38,96 @@
  *                                                                           *
  *****************************************************************************/
 
+/********************************
+ * Athena configuration changes *
+ ********************************/
+#define ATHENA
+#define SAVESPACE /* No profile libs built */
+
+/* On RT */
+#ifdef RtArchitecture
+#undef HCRevision
+
+#define HCRevision	21019
+#if HCRevision < 21001
+#define BandAidCompiler "rtcchack.bac"
+#undef MacroFile
+#define MacroFile ibm.cf $(IRULESRC)/rtcchack.bac
+#endif
+#undef HasNdbm
+#define HasNdbm		YES
+
+#if 0
+#undef ibmInclude8514
+#undef ibmIncludeAED
+#undef ibmIncludeAPA16
+#undef ibmIncludeAPA8c
+#undef ibmIncludeEGA
+#undef ibmIncludeMPEL
+#undef ibmIncludeVGA
+#undef ibmIncludeGEN
+
+#define ibmInclude8514  NO /* YES */
+#define ibmIncludeAED   YES /* YES */
+#define ibmIncludeAPA16 YES
+#define ibmIncludeAPA8c NO
+#define ibmIncludeEGA   NO /* YES */
+#define ibmIncludeMPEL  YES
+#define ibmIncludeVGA   NO /* YES */
+#define ibmIncludeGEN   NO
+#endif
+#endif RtArchitecture
+
+/* On vax */
+#ifdef VaxArchitecture
+#undef HasNdbm
+#define HasNdbm		YES
+#undef XqdssServer
+#define XqdssServer     Xqdss
+#define ServerDefines StandardDefines ExtensionDefines -DX11R4
+#undef HasGcc
+#define HasGcc	YES
+#define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
+#if HasGcc
+#ifndef CcCmd
+#ifdef UseInstalled		/* if outside the tree */
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
+#else				/* server won't compile with -traditional */
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return 
+#endif
+#endif
+#endif
+
+#endif
+
+/* On Ultrix */
+#ifdef MipsArchitecture
+#define	ArCmd ar cru
+#define LintLibFlag -o
+#endif
+
+/* General */
+#define InstKmemFlag	-g kmem -m 2755
+#define StripInstalledPrograms	YES
+#define InstUidFlags	-o root -m 4755
+
+#ifndef SAVESPACE
+#define	ProfileLibX		YES
+#define ProfileLibXArchive	YES
+#define ProfileLibXaw		YES
+#define ProfileLibXext		YES
+#define ProfileLibXmu		YES
+#define ProfileLibXt		YES
+#define ProfilOldLibX		YES
+#endif
+
+#undef ServerCDebugFlags
+#define ServerCDebugFlags -O -DATHENA
+
+/****************************************
+ * End of Athena specific configuration *
+ ****************************************/
+
 /*
  * SET THESE PARAMETERS FIRST !!!
  */
@@ -144,3 +234,7 @@
 #ifndef SharedLibXext
 #define SharedLibXext NO	/* XXX - haven't made it sharable yet */
 #endif
+
+#define CompileEtCmd compile_et
+
+#define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
