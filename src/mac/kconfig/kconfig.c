@@ -1117,23 +1117,17 @@ void setrcellstring (unsigned char *string, credentialstype *rp)
 #ifdef KRB5
 	unsigned char *cp;
 	
-	cp = string;				/* name */
-	strcpy(cp, rp->name);	
+	cp = string;
+
+	strcpy(cp, rp->pname);		/* name */
 	cp += strlen(cp);
-	if (rp->realm[0]) {			/* realm */
-		*cp++ = '@';
-		strcpy(cp, rp->realm);
-		cp += strlen(cp);
-	}
+
 	strcpy(cp, "\x09" "170;");	/* tab */
 	cp += strlen(cp);
-	strcpy(cp, rp->sname);		/* sname */
+
+	strcpy(cp, rp->cname);		/* credential name */
 	cp += strlen(cp);
-	if (rp->srealm[0]) {		/* srealm */
-		*cp++ = '@';
-		strcpy(cp, rp->srealm);
-		cp += strlen(cp);
-	}
+
 	*cp = '\0';
 #endif
 }
@@ -1972,45 +1966,7 @@ char *ptr;
 	}
     SetItemMark(theMenu, selected, checkMark);
 	fixmenuwidth(theMenu, rect->right - rect->left);
-#if 0
-{
- int count;
-char **realmlist;
-char	host[] = "testing";
-int		code;
-int		i;
-domaintype *dp;
-const char	*realm_kdc_names[4];
 
-    realm_kdc_names[0] = "realms";
-    realm_kdc_names[1] = 0;
-
-    code = profile_get_first_values(kcontext->profile, realm_kdc_names, &realmlist);
-
-    count = 0;
-    while (realmlist && realmlist[count])
-	{
-		strcpy(scratch, realmlist[count]);
-		c2pstr(scratch);
-		AppendMenu(theMenu, scratch);
-	    count++;
-	}
-
-    /* 
-	 * add the items 
-	 */
-	selected = 0;
-	for (i = 1, sp = (servertype *)serverQ; sp; sp = sp->next, i++) {
-		strcpy(scratch, sp->realm);
-		if (strcmp(scratch, localrealm) == 0)
-			selected = i;
-		c2pstr(scratch);
-		AppendMenu(theMenu, scratch);
-	}
-    SetItemMark(theMenu, selected, checkMark);
-	fixmenuwidth(theMenu, rect->right - rect->left);
-}
-#endif
     /* 
 	 *pop it up 
 	 */
@@ -2228,18 +2184,19 @@ void doLogin ()
 		if (s != cKrbUserCancelled)
 			kerror("Error in cKrbCacheInitialTicket", s);
 #endif
+
 #ifdef KRB5
-long lifetime = 8*60;	// 8 hours
-krb5_error_code code;
-krb5_principal principal;
-krb5_creds creds;
-krb5_principal server;
-krb5_int32 sec, usec;
-char usernm[100] = "";
-char passwd[100];
-char credname[100];
-char realm[100];
-char	*ptr;
+    long lifetime = 8*60;	// 8 hours
+    krb5_error_code code;
+    krb5_principal principal;
+    krb5_creds creds;
+    krb5_principal server;
+    krb5_int32 sec, usec;
+    char usernm[100] = "";
+    char passwd[100];
+    char credname[100];
+    char realm[100];
+    char *ptr;
 
 	/* if the gUserName isn't uknown, we'll use that name */
 	if (strcmp(gUserName, kUNKNOWNUSERNAME))
@@ -2556,7 +2513,7 @@ void getCredentialsList ()
 	credentialstype *rp;
 	krb5_cc_cursor cursor;
 	krb5_creds creds;
-	char		*tmpstr;
+	char *tmpstr;
 	
 	killCredentialsList();
 
@@ -2566,8 +2523,7 @@ void getCredentialsList ()
 	cursor = 0;
 	krb5_fcc_start_seq_get(kcontext, k5_ccache, &cursor);
 	while (0 == krb5_fcc_next_cred(kcontext, k5_ccache, &cursor, &creds)) {
-/* Get Cred info here */
-
+		/* Get Cred info here */
 		if (!(rp = (credentialstype *)NewPtrClear(sizeof(credentialstype))))
 			return;
 
@@ -2577,10 +2533,13 @@ void getCredentialsList ()
 		strncpy(rp->sname, (char*) creds.server->data->data, sizeof(Str255));
 		strcpy(rp->sinstance, "sinstance");
 		strncpy(rp->srealm, (char*) creds.server->realm.data, sizeof(Str255));
-
+		krb5_unparse_name(kcontext, creds.client, &tmpstr);
+		strcpy(rp->pname, tmpstr);
+		free(tmpstr);
+		krb5_unparse_name(kcontext, creds.server, &tmpstr);
+		strcpy(rp->cname, tmpstr);
+		free(tmpstr);
 		qlink(&credentialsQ, rp);
-
-//		krb5_free_cred_contents(kcontext, &creds);
 	}
 	krb5_fcc_end_seq_get(kcontext, k5_ccache, &cursor);
 	krb5_cc_default (kcontext, &k5_ccache);
@@ -2969,233 +2928,14 @@ a password, this is the only example I've seen yet
 */
 
 #ifdef KRB5
-krb5_error_code
-k5_change_password (
-    krb5_context k5context,
-	char *user,
-	char *realm,
-	char *opasswd,
-	char *npasswd,
-    char **text);
-
-
-
-#if 0
-static const char *kpwd_old_password_prompt =	"   Enter old password: ";
-#define	KPWD_MAX_TRIES		4
-
-int
-krb5_change_password(krb5_context kcontext, char *name, char *opassword, char *npassword)
-{
-    int			conn_socket = -1;
-	char		*opwd_prompt = NULL;
-	char		opassword[KRB5_ADM_MAX_PASSWORD_LEN];
-    krb5_auth_context	*auth_context;
-	int			npass_tries;
-	
-    /*
-     * Establish the connection.
-     */
-    if (kret = krb5_adm_connect(kcontext,
-				name,
-				(opwd_prompt) ? 
-					opwd_prompt : kpwd_old_password_prompt,
-				opassword,
-				&conn_socket, 
-				&auth_context,
-				&k5_ccache)) {
-	switch (kret) {
-	case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN:
-	    fprintf(stderr, kpwd_bad_client_fmt, argv[0],
-		    (name) ? kpwd_quote : kpwd_null,
-		    (name) ? name : kpwd_you,
-		    (name) ? kpwd_quote : kpwd_null,
-		    (name) ? kpwd_is_third : kpwd_is_second);
-	    break;
-	case KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN:
-	    fprintf(stderr, kpwd_no_server_fmt, argv[0],
-		    (name) ? name : kpwd_this_realm);
-	    break;
-	case KRB5KRB_AP_ERR_BAD_INTEGRITY:
-	    fprintf(stderr, kpwd_incorrect_fmt, argv[0]);
-	    break;
-	default:
-	    fprintf(stderr, kpwd_cant_connect_fmt, argv[0],
-		    error_message(kret));
-	    break;
-	}
-	goto cleanup;
-    }
-
-    send_quit = 1;
-
-    /* Now - Actually change the password. */
-    for (npass_tries = 1; npass_tries <= KPWD_MAX_TRIES; npass_tries++) {
-	int npass_len;
-
-	npass_len = KRB5_ADM_MAX_PASSWORD_LEN;
-	{
-	    krb5_data		check_data[2];
-	    krb5_int32		check_status;
-	    krb5_int32		check_ncomps;
-	    krb5_data		*check_reply;
-	    krb5_data		set_data[3];
-	    krb5_int32		set_status;
-	    krb5_int32		set_ncomps;
-	    krb5_int32		*set_reply;
-
-	    check_data[0].data = KRB5_ADM_CHECKPW_CMD;
-	    check_data[0].length = strlen(check_data[0].data);
-	    check_data[1].data = npassword;
-	    check_data[1].length = npass_len;
-	    if ((kret = krb5_send_adm_cmd(kcontext,
-					  &conn_socket,
-					  auth_context,
-					  2,
-					  check_data)) ||
-		(kret = krb5_read_adm_reply(kcontext,
-					    &conn_socket,
-					    auth_context,
-					    &check_status,
-					    &check_ncomps,
-					    &check_reply))) {
-		fprintf(stderr, kpwd_proto_error_fmt, argv[0], 
-			kpwd_check_pwd_text, error_message(kret));
-		send_quit = 0;
-		error++;
-		break;
-	    }
-	    if ((check_status != KRB5_ADM_SUCCESS) &&
-		(check_status != KRB5_ADM_PW_UNACCEPT)) {
-		error++;
-		fprintf(stderr, kpwd_pwproto_error, argv[0],
-			kpwd_reply_to_string(check_status),
-			kpwd_check_pwd_text);
-		if (check_ncomps > 0)
-		    kpwd_print_sreply(argv[0], check_ncomps, check_reply);
-	    }
-
-	    if (check_status == KRB5_ADM_PW_UNACCEPT) {
-		fprintf(stderr, kpwd_pwd_unacceptable, argv[0],
-			(npass_tries < KPWD_MAX_TRIES) ? 
-			kpwd_try_again_text : kpwd_seeyalater_text);
-		if (check_ncomps > 0)
-		    kpwd_print_sreply(argv[0], check_ncomps, check_reply);
-		if (npass_tries == KPWD_MAX_TRIES)
-		    kret = check_status;
-		continue;
-	    }
-	    krb5_free_adm_data(kcontext, check_ncomps, check_reply);
-	    if (error)
-		break;
-
-	    /* Now actually change the password */
-	    set_data[0].data = KRB5_ADM_CHANGEPW_CMD;
-	    set_data[0].length = strlen(set_data[0].data);
-	    set_data[1].data = opassword;
-	    set_data[1].length = strlen(opassword);
-	    set_data[2].data = npassword;
-	    set_data[2].length = npass_len;
-	    if ((kret = krb5_send_adm_cmd(kcontext,
-					  &conn_socket,
-					  auth_context,
-					  3,
-					  set_data)) ||
-		(kret = krb5_read_adm_reply(kcontext,
-					    &conn_socket,
-					    auth_context,
-					    &set_status,
-					    &set_ncomps,
-					    &set_reply))) {
-		fprintf(stderr, kpwd_proto_error_fmt, argv[0], 
-			kpwd_change_pwd_text, error_message(kret));
-		send_quit = 0;
-		error++;
-		break;
-	    }
-	    if (set_status != KRB5_ADM_SUCCESS) {
-		fprintf(stderr, kpwd_pwproto_error, argv[0],
-			kpwd_reply_to_string(set_status),
-			kpwd_change_pwd_text);
-		if (set_ncomps > 0)
-		    kpwd_print_sreply(argv[0], set_ncomps, set_reply);
-		error++;
-	    }
-	    krb5_free_adm_data(kcontext, set_ncomps, set_reply);
-	    break;
-	}
-    }
-
- cleanup:
-    if (kret)
-	error = kret;
-    if (language)
-	free(language);
-    if (name)
-	free(name);
-
-    /* Clear and free password storage */
-    if (opassword) {
-	memset(opassword, 0, KRB5_ADM_MAX_PASSWORD_LEN);
-	krb5_xfree(opassword);
-    }
-    if (npassword) {
-	memset(npassword, 0, KRB5_ADM_MAX_PASSWORD_LEN);
-	free(npassword);
-    }
-
-    if (send_quit) {
-	/*
-	 * Need to send quit command.
-	 */
-	krb5_data	quit_data;
-	krb5_int32	quit_status;
-	krb5_int32	quit_ncomps;
-	krb5_data	*quit_reply;
-	
-	quit_data.data = KRB5_ADM_QUIT_CMD;
-	quit_data.length = strlen(quit_data.data);
-	if ((kret = krb5_send_adm_cmd(kcontext,
-				      &conn_socket,
-				      auth_context,
-				      1,
-				      &quit_data)) ||
-	    (kret = krb5_read_adm_reply(kcontext,
-					&conn_socket,
-					auth_context,
-					&quit_status,
-					&quit_ncomps,
-					&quit_reply))) {
-	    fprintf(stderr, kpwd_proto_error_fmt, argv[0], kpwd_quit_text,
-		    error_message(kret));
-	    goto done;
-	}
-	switch (quit_status) {
-	case KRB5_ADM_SUCCESS:
-	    break;
-	case KRB5_ADM_CMD_UNKNOWN:
-	    fprintf(stderr, kpwd_pwproto_unsupp_fmt, argv[0], kpwd_quit_text);
-	    if (quit_ncomps > 0)
-		kpwd_print_sreply(argv[0], quit_ncomps, quit_reply);
-	    break;
-	default:
-	    fprintf(stderr, kpwd_pwproto_error, argv[0],
-		    kpwd_reply_to_string(quit_status), kpwd_quit_text);
-	    if (quit_ncomps > 0)
-		kpwd_print_sreply(argv[0], quit_ncomps, quit_reply);
-	}
-	krb5_free_adm_data(kcontext, quit_ncomps, quit_reply);
-    }
-
- done:
-    krb5_adm_disconnect(kcontext, &conn_socket,	auth_context, ccache);
-    krb5_xfree(kcontext);
-    return(error);
-
-
-	return 1;
-}
-#endif
+	krb5_error_code
+	k5_change_password (
+	    krb5_context k5context,
+		char *user,
+		char *realm,
+		char *opasswd,
+		char *npasswd,
+	    char **text);
 #endif
 
 /*
@@ -3329,24 +3069,18 @@ char *ptr;
 #endif
 
 #ifdef KRB5
-#if 1
-{
-char	*text;
-// Change the password from old to new
-		s = k5_change_password(kcontext, username, realm, valcruft.buffer1, valcruft.buffer2, &text);
-		if (s)
 		{
-			SysBeep(10);	// change password failed
-	        com_err (NULL, s, "while logging in.");
+			char *text;
+			// Change the password from old to new
+			s = k5_change_password(kcontext, username, realm, valcruft.buffer1, valcruft.buffer2, &text);
+			if (s)
+			{
+				SysBeep(10);	// change password failed
+		        com_err (NULL, s, "while logging in.");
+			}
 		}
+#endif
 
-// not sure what "text" represents
-}
-#else
-		ParamText("\pChanging passwords does not work presently.", "\p", "\p", "\p");
-		Alert(128, NULL);
-#endif
-#endif
 		if (s) {
 			kerror(reason, s);
 			SelIText(dialog, KPASS_PASS, 0, 32767);		/* hilite password */

@@ -1,3 +1,11 @@
+Tue Nov 7 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
+
+	* kconfig.c, kconfig.h: Cleaned out dead code and improved 
+		credential display to show full Kerberos principal.
+				
+	* getpasswd.c: Improved password dialog to allow CR to
+		act as at TAB when the dialog has not been completed.
+
 Wed Sep 27 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* autoconf.h: Removed this file.  Now taken from libraries

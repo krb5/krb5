@@ -134,6 +134,8 @@ typedef struct credentials_ {
 	Str255 sname;
 	Str255 sinstance;
 	Str255 srealm;
+	Str255 pname;
+	Str255 cname;
 } credentialstype;
 
 
