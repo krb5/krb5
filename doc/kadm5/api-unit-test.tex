@@ -566,20 +566,31 @@ succeedes, and both clients maintain their correct privileges.}
 \Reason{init_with_creds works when given an open ccache with a valid
 credential for ADMIN_SERVICE.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
-\numtest{150}{
+\numtest{151}{
 \Version{KADM5_API_VERSION_2}
 \Reason{init_with_creds works when given an open ccache with a valid
 credential for CHANGEPW_SERVICE.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
-\numtest{150}{
+\numtest{152}{
 \Version{KADM5_API_VERSION_2}
 \Reason{init_with_creds fails with KADM5_GSS_ERROR when given an open
-ccache without a valid credential.}
+ccache with no credentials.}
 \Conditions{RPC}
+\Status{Implemented}
+}
+
+\numtest{153}{
+\Version{KADM5_API_VERSION_2}
+\Reason{init_with_creds fails with KADM5_GSS_ERROR when given an open
+ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \section{ovsec_kadm_destroy}
