@@ -312,6 +312,31 @@ if test $krb5_cv_type_sigset_t = yes; then
 fi
 )])dnl
 dnl
+dnl check for signal type
+dnl
+dnl AC_RETSIGTYPE isn't quite right, but almost.
+define(KRB5_SIGTYPE,
+AC_MSG_CHECKING([POSIX signal handlers])
+AC_CACHE_VAL(krb5_cv_has_posix_signals,
+[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <signal.h>
+#ifdef signal
+#undef signal
+#endif
+extern void (*signal ()) ();], [],
+krb5_cv_has_posix_signals=yes, krb5_cv_has_posix_signals=no)])
+AC_MSG_RESULT($krb5_cv_has_posix_signals)
+if test $krb5_cv_has_posix_signals = yes; then
+   AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)
+else
+  if test $ac_cv_type_signal = void; then
+     AC_DEFINE(krb5_sigtype, void)
+  else
+     AC_DEFINE(krb5_sigtype, int)
+  fi
+fi)dnl
+dnl
 dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
 dnl
 define(CHECK_SETJMP,[
