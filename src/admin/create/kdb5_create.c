@@ -312,6 +312,9 @@ struct realm_info *pblock;
 	break;
     }
     entry.key = ekey;
+    entry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
+    entry.salt_length = 0;
+    entry.salt = 0;
 
     if (retval = krb5_db_put_principal(&entry, &nentries))
 	return retval;
