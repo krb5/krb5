@@ -85,4 +85,12 @@ AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
 AC_FUNC_CHECK([dbm_open], , AC_DEFINE(ODBM))
 
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration],
+AC_DEFINE(KRB5_ATHENA_COMPAT),)
+
+AC_ARG_WITH([krb4],
+[  --with-krb4=KRB4DIR     build with Kerberos V4 backwards compatibility],
+AC_DEFINE(KRB5_KRB4_COMPAT),,)
+
 V5_AC_OUTPUT_MAKEFILE

@@ -39,10 +39,9 @@ install::
 
 PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
 		  -e "s+@KDB5DIR+$(KDB5DIR)+" \
-		  -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+" \
-		  -e "/UnifdefRan/,/SPLIT-HERE/d"
+		  -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+" 
 
-OSCONFSRC = $(srcdir)/stock/osauto.h $(srcdir)/stock/osconf.h
+OSCONFSRC = $(srcdir)/stock/osconf.h
 
 osconf.h: $(OSCONFSRC)
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
@@ -51,7 +50,7 @@ osconf.h: $(OSCONFSRC)
 
 CONF_REPLACE = -e "/UnifdefRan/,/SPLIT-HERE/d"
 
-CONFSRC = $(srcdir)/stock/confauto.h $(srcdir)/stock/config.h
+CONFSRC = $(srcdir)/stock/config.h
 
 config.h: $(CONFSRC)
 	cat $(CONFSRC) | sed $(CONF_REPLACE) > config.new

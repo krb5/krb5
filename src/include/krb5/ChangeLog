@@ -1,3 +1,11 @@
+Wed Nov 30 16:16:54 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add support for --enable-athena and --with-krb4
+		(to set KRB5_KRB4_COMPAT).
+
+	* Makefile.in: Remove remnants of unifdef support for building
+		osconf.h and config.h, left over from the imake build system.
+
 Mon Nov 21 14:43:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* func-proto.h (krb5_encode_kdc_rep, krb5_encrypt_tkt_part):
