@@ -41,6 +41,7 @@ static char sccsid[] = "@(#)bcopy.c	5.11 (Berkeley) 6/21/91";
 #endif /* LIBC_SCCS and not lint */
 
 #include <krb5/osconf.h>
+#include <krb5/config.h>
 #ifdef USE_STRING_H
 #include <string.h>
 #else

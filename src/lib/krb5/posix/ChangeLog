@@ -1,0 +1,4 @@
+Mon Jun 20 19:37:38 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* memmove.c: #include <krb5/config.h> so that build works using imake.
+
