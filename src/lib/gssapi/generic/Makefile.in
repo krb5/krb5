@@ -112,8 +112,6 @@ all-windows:: $(EHDRDIR) $(HDRS)
 ##DOS##$(EHDRDIR):
 ##DOS##	mkdir $(EHDRDIR)
 
-unixmac: $(SRCS) $(ETHDRS)
-
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS)
 

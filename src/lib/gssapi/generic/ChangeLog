@@ -1,3 +1,7 @@
+2001-04-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unixmac): Target deleted.
+
 2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* oid_ops.c: Avoid the use of a variable named index.

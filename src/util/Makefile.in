@@ -39,8 +39,6 @@ clean-windows::
 	$(MAKE) -$(MFLAGS) clean
 	cd ..
 
-unixmac: libupdate
-
 libupdate: $(srcdir)/libupdate.sh
 	$(RM) $@ $@.tmp
 	$(editsh) $(srcdir)/libupdate.sh > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@

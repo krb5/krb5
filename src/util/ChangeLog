@@ -1,3 +1,7 @@
+2001-04-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unixmac): Target deleted.
+
 2001-04-05  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: When generating multiple tarballs, also generate a

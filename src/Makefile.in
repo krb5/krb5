@@ -101,15 +101,6 @@ tgz-bin: pkgdir
 	(cd $(PKGDIR)/install && tar cf - usr/cygnus) | $(GZIPPROG) > cns5-bin.tgz
 	rm -rf $(PKGDIR)/install
 
-# Macintosh build process...
-
-# Build all things for the Mac build, which need to be built on
-# Unix first.
-unixmac:
-	(cd lib/krb5/error_tables; make -f Makefile.in unixmac)
-	(cd lib/gssapi/generic; make -f Makefile.in unixmac)
-
-
 # Microsoft Windows build process...
 #
 

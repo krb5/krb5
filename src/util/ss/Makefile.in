@@ -80,8 +80,6 @@ all-unix:: all-liblinks
 all-mac::
 all-windows::  all-unix
 
-unixmac:: includes
-
 dist:	archives
 
 install::

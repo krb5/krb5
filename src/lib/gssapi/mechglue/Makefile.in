@@ -100,8 +100,6 @@ all-windows:: includes $(OBJS)
 shared:
 	mkdir shared
 
-unixmac: 
-
 libgssapi.$(STEXT): $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
