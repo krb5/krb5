@@ -821,8 +821,8 @@ sdk : all
 	shlb2stub "/Kerberos5Lib.PPC" -o "{sdk-root}Kerberos5Lib/Libraries/Kerberos5Lib.PPC"
 	shlb2stub "/Kerberos5Lib.PPC.debug" -o "{sdk-root}Kerberos5Lib/Libraries/Kerberos5Lib.PPC.debug"
 	NewFolder "{sdk-root}Kerberos5Lib/Classic 68K Glue"
-	Duplicate "/K5.CFMglue.c" "{sdk-root}Kerberos5Lib/Classic 68K glue/Kerberos5Lib.glue.c"
-	Duplicate "/mac/K5.CFMglue.h" "{sdk-root}Kerberos5Lib/Classic 68K glue/Kerberos5Lib.glue.h"
+	Duplicate "/Kerberos5Lib.glue.c" "{sdk-root}Kerberos5Lib/Classic 68K glue/Kerberos5Lib.glue.c"
+	Duplicate "/mac/Kerberos5Lib.glue.h" "{sdk-root}Kerberos5Lib/Classic 68K glue/Kerberos5Lib.glue.h"
 	NewFolder "{sdk-root}Kerberos5Lib/Documentation"
 	Duplicate "///doc/pdf/krb5api.pdf" "{sdk-root}Kerberos5Lib/Documentation/Kerberos v5 API"
 	NewFolder "{sdk-root}Kerberos5GlobalsLib"
@@ -843,8 +843,8 @@ sdk : all
 	shlb2stub "/GSSLib.PPC" -o "{sdk-root}GSSLib/Libraries/GSSLib.PPC"
 	shlb2stub "/GSSLib.PPC.debug" -o "{sdk-root}GSSLib/Libraries/GSSLib.PPC.debug"
 	NewFolder "{sdk-root}GSSLib/Classic 68K Glue"
-	Duplicate "/GSS.CFMglue.c" "{sdk-root}GSSLib/Classic 68K glue/GSSLib.glue.c"
-	Duplicate "/mac/GSS.CFMglue.h" "{sdk-root}GSSLib/Classic 68K glue/GSSLib.glue.h"
+	Duplicate "/GSSLib.glue.c" "{sdk-root}GSSLib/Classic 68K glue/GSSLib.glue.c"
+	Duplicate "/mac/GSSLib.glue.h" "{sdk-root}GSSLib/Classic 68K glue/GSSLib.glue.h"
 	NewFolder "{sdk-root}CCacheLib"
 	NewFolder "{sdk-root}CCacheLib/Headers"
 	Duplicate "/mac/libraries/CCache API/include/CCache.h" "{sdk-root}CCacheLib/Headers/CCache.h"
@@ -865,8 +865,8 @@ sdk : all
 	shlb2stub "/mac/libraries/DES/bin/deslib.68K" -o "{sdk-root}DESLib/Libraries/DESLib.68K"
 	shlb2stub "/mac/libraries/DES/bin/deslib.68K.debug" -o "{sdk-root}DESLib/Libraries/DESLib.68K.debug"
 	NewFolder "{sdk-root}DESLib/Classic 68K Glue"
-	Duplicate "/mac/libraries/DES/include/deslib.CFMglue.c" "{sdk-root}DESLib/Classic 68K glue/DESLib.glue.c"
-	Duplicate "/mac/libraries/DES/include/deslib.CFMglue.h" "{sdk-root}DESLib/Classic 68K glue/DESLib.glue.h"
+	Duplicate "/mac/libraries/DES/include/DESLib.glue.c" "{sdk-root}DESLib/Classic 68K glue/DESLib.glue.c"
+	Duplicate "/mac/libraries/DES/include/DESLib.glue.h" "{sdk-root}DESLib/Classic 68K glue/DESLib.glue.h"
 
 ################################################################################
 ##
