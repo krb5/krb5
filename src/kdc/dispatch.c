@@ -49,7 +49,26 @@ dispatch(pkt, from, portnum, response)
     /* try the replay lookaside buffer */
     if (kdc_check_lookaside(pkt, from, response)) {
 	/* a hit! */
-	krb5_klog_syslog(LOG_INFO, "DISPATCH: repeated (retransmitted?) request, resending response");
+	char *name = 0;
+	char buf[46];
+	krb5_address *a = from->address;
+
+#ifdef HAVE_INET_NTOP
+	name = inet_ntop (from->address->addrtype, from->address->contents,
+			  buf, sizeof (buf));
+#else
+	if (addrtype == ADDRTYPE_INET) {
+	    struct sockaddr_in *sin
+		= (struct sockaddr_in *)from->address->contents;
+	    strcpy (buf, inet_ntoa (sin->sin_addr));
+	    name = buf;
+	}
+#endif
+	if (name == 0)
+	    name = "[unknown address type]";
+	krb5_klog_syslog(LOG_INFO,
+			 "DISPATCH: repeated (retransmitted?) request from %s port %d, resending previous response",
+			 name, portnum);
 	return 0;
     }
 #endif

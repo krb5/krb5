@@ -1,5 +1,8 @@
 2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* dispatch.c (dispatch): Log address and port number of detected
+	retransmits.
+
 	* kdc_util.c (select_session_keytype): Revert 1999-09-01 changes;
 	now always use any requested type indicated as supported by the db
 	entry.
