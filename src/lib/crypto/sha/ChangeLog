@@ -1,0 +1,6 @@
+Fri May 10 01:19:18 1996  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in configure.in t_shs.c sha_glue.c sha_crypto.c shs.c shs.h:
+	Initial check-in of the functions to support the NIST FIPS 180
+	SHA algorithm.  Provide interfaces for cksum-sha, cksum-sha-des3.
+	(enctype-des3-sha is also being defined)

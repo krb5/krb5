@@ -1,0 +1,40 @@
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
+
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\crypto.lib
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
+OBJS=	shs.$(OBJEXT) sha_glue.$(OBJEXT) sha_crypto.$(OBJEXT)
+
+SRCS=	$(srcdir)/shs.c $(srcdir)/sha_glue.c $(srcdir)/sha_crypto.c
+
+all-unix:: shared $(OBJS) 
+all-mac:: shared $(OBJS) 
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
+
+t_shs: t_shs.o shs.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o t_shs t_shs.o shs.o
+
+t_shs.exe:
+	$(CC) $(CFLAGS2) -o t_shs.exe t_shs.c shs.c
+
+check-unix:: t_shs
+	$(C)t_shs -x
+
+check-windows:: t_shs$(EXEEXT)
+	$(C)t_shs$(EXEEXT) -x
+
+clean:: 
+	$(RM) t_shs$(EXEEXT) t_shs.$(OBJEXT)
+
+clean-unix::
+	$(RM) shared/*
+clean-mac::
+	$(RM) shared/*
+clean-windows::
