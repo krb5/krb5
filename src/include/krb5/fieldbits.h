@@ -67,8 +67,14 @@
 #define	KDC_OPT_RENEW			0x00000002
 #define	KDC_OPT_VALIDATE		0x00000001
 
-/* fields common which can be masked and copied */
-#define KDC_TKT_COMMON_MASK		0x7e800000
+/*
+ * Mask of ticket flags in the TGT which should be converted into KDC
+ * options when using the TGT to get derivitive tickets.
+ * 
+ *  New mask = KDC_OPT_FORWARDABLE | KDC_OPT_PROXIABLE |
+ *             KDC_OPT_ALLOW_POSTDATE | KDC_OPT_RENEWABLE
+ */
+#define KDC_TKT_COMMON_MASK		0x54800000
 
 /* definitions for ap_options fields */
 /* ap_options are 32 bits; each host is responsible to put the 4 bytes
