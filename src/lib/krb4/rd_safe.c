@@ -115,7 +115,8 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     /* don't swap, net order always */
     p += sizeof(src_addr);
 
-    if (!krb_ignore_ip_address && src_addr != (u_long) sender->sin_addr.s_addr)
+    if (!krb_ignore_ip_address &&
+	src_addr != (unsigned KRB4_32) sender->sin_addr.s_addr)
         return RD_AP_MODIFIED;
 
     /* safely get time_sec */
@@ -168,8 +169,8 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     memcpy((char *)big_cksum, (char *)p, sizeof(big_cksum));
     if (swap_bytes) {
       /* swap_u_16(big_cksum); */
-      unsigned long tt, *bb;
-      bb = (unsigned long*)big_cksum;
+      unsigned KRB4_32 tt, *bb;
+      bb = (unsigned KRB4_32*)big_cksum;
       tt = bb[0]; swap_u_long(tt); bb[0] = tt;
       tt = bb[1]; swap_u_long(tt); bb[1] = tt;
       tt = bb[2]; swap_u_long(tt); bb[2] = tt;

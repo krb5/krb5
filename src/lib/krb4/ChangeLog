@@ -1,3 +1,7 @@
+Tue Jun 27 23:50:08 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* rd_safe.c (krb_rd_safe): use KRB4_32 for address comparison
+	and checksum swapping.
 
 Tue Jun 27 15:49:35 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kparse.c - Change LineNbr to sLineNbr to avoid conflict with kparse.h
