@@ -25,7 +25,7 @@
 
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
-           SRCS = sclient.o sserver.o
+           SRCS = sclient.c sserver.c
 
 SimpleTestProgramTarget(sclient)
 SimpleTestProgramTarget(sserver)
