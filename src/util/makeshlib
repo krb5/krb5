@@ -26,8 +26,8 @@ alpha-*-osf*)
 
 	done`
 
-	echo 	ld -shared -o $library -all $FILES -none -lc
-	ld -shared -o $library -all $FILES -none -lc
+	echo 	ld -shared -o $library -all $FILES -none -lc -update_registry ../../so_locations
+	ld -shared -o $library -all $FILES -none -lc -update_registry ../../so_locations
 	;;
 
 *)
