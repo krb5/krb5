@@ -1,0 +1,142 @@
+# Makefile for Autoconf.
+# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
+M4 = @M4@
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+
+# Directory in which to install scripts.
+bindir = $(exec_prefix)/bin
+
+# Directory in which to install library files.
+datadir = $(prefix)/lib
+acdatadir = $(datadir)/autoconf
+
+# Directory in which to install documentation info files.
+infodir = $(prefix)/info
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+DISTFILES = README Makefile.in INSTALL NEWS COPYING ChangeLog \
+autoconf.texi acconfig.h autoconf.sh acgeneral.m4 acspecific.m4 \
+configure configure.in autoheader.sh mkinstalldirs install.sh \
+autoconf.info standards.texi make-stds.texi standards.info texinfo.tex
+
+editsh = sed -e 's,@''datadir''@,$(acdatadir),g' -e 's,@''M4''@,$(M4),g'
+
+all: autoconf autoheader
+
+autoconf: autoconf.sh
+	rm -f $@ $@.tmp
+	$(editsh) $(srcdir)/autoconf.sh > $@.tmp && mv $@.tmp $@ && chmod +x $@
+
+autoheader: autoheader.sh
+	rm -f $@ $@.tmp
+	$(editsh) $(srcdir)/autoheader.sh > $@.tmp && mv $@.tmp $@ && chmod +x $@
+
+info: autoconf.info standards.info
+
+autoconf.info: autoconf.texi
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/autoconf.texi --no-split --output=$@
+
+standards.info: standards.texi make-stds.texi
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/standards.texi --no-split --output=$@
+
+dvi: autoconf.dvi standards.dvi
+
+autoconf.dvi: autoconf.texi
+	$(TEXI2DVI) $(srcdir)/autoconf.texi
+
+standards.dvi: standards.texi make-stds.texi
+	$(TEXI2DVI) $(srcdir)/standards.texi
+
+check:
+installcheck:
+
+installdirs:
+	$(SHELL) ${srcdir}/mkinstalldirs $(bindir) $(infodir) $(acdatadir)
+
+# References to install-info have been removed until it's released.
+install: all acgeneral.m4 acspecific.m4 acconfig.h installdirs install-info
+	$(INSTALL_PROGRAM) autoconf $(bindir)/autoconf
+	$(INSTALL_PROGRAM) autoheader $(bindir)/autoheader
+	$(INSTALL_DATA) $(srcdir)/acgeneral.m4 $(acdatadir)/acgeneral.m4
+	$(INSTALL_DATA) $(srcdir)/acspecific.m4 $(acdatadir)/acspecific.m4
+	$(INSTALL_DATA) $(srcdir)/acconfig.h $(acdatadir)/acconfig.h
+
+install-info: info installdirs
+	-if test -f autoconf.info; then d=.; else d=$(srcdir); fi; \
+	$(INSTALL_DATA) $$d/autoconf.info $(infodir)/autoconf.info
+	-if test -f standards.info; then d=.; else d=$(srcdir); fi; \
+	$(INSTALL_DATA) $$d/standards.info $(infodir)/standards.info
+
+uninstall:
+	rm -f $(bindir)/autoconf $(bindir)/autoheader
+	cd $(acdatadir); rm -f acgeneral.m4 acspecific.m4 aclocal.m4 acconfig.h
+	-rmdir $(acdatadir)
+	cd $(infodir); rm -f autoconf.info standards.info
+
+configure: configure.in acgeneral.m4 acspecific.m4
+	cd $(srcdir); \
+	rm -f $@ $@.tmp; \
+	$(M4) acgeneral.m4 acspecific.m4 configure.in > $@.tmp && \
+	mv $@.tmp $@ && \
+	chmod +x $@
+Makefile: Makefile.in config.status
+	./config.status
+config.status: configure
+	./config.status --recheck
+
+clean:
+	rm -f autoconf autoheader *.tmp
+	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.log
+	rm -f *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs *.ma *.mas
+
+mostlyclean: clean
+
+distclean: clean
+	rm -f Makefile config.status
+
+realclean: distclean
+	rm -f TAGS *.info*
+
+TAGS:
+	etags ${srcdir}/*.m4 ${srcdir}/*.sh ${srcdir}/[a-z]*.in ${srcdir}/*.texi
+
+dist: Makefile $(DISTFILES)
+	echo autoconf-`sed -e '/define(AC_ACVERSION,/!d' -e 's/[^0-9.]*\([0-9.]*\).*/\1/' -e q acgeneral.m4` > .fname
+	rm -rf `cat .fname`
+	mkdir `cat .fname`
+	for file in $(DISTFILES); do \
+	  ln $$file `cat .fname` \
+	    || { echo copying $$file instead; cp -p $$file `cat .fname`; }; \
+	done
+	tar --gzip -chf `cat .fname`.tar.gz `cat .fname`
+	rm -rf `cat .fname` .fname
