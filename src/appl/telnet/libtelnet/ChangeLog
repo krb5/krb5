@@ -1,3 +1,7 @@
+2002-03-26  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos.c kerberos5.c (Data): Fix indentation; fix termination condition
+
 2002-03-14  Sam Hartman  <hartmans@mit.edu>
 
 	* kerberos5.c kerberos.c  (Data): Don't overflow

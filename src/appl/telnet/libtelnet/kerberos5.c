@@ -156,15 +156,14 @@ Data(ap, type, d, c)
 	*p++ = type;
 	spaceleft -= 3;
         while (c-- > 0) {
-if ((*p++ = *cd++) == IAC) {
-*p++ = IAC;
-spaceleft--;
-}
-if (--spaceleft <= 4) {
-errno = ENOMEM;
-return -1;
-}
-
+	  if ((*p++ = *cd++) == IAC) {
+	    *p++ = IAC;
+	    spaceleft--;
+	  }
+	  if ((--spaceleft < 4)&&c) {
+	    errno = ENOMEM;
+	    return -1;
+	  }
         }
         *p++ = IAC;
         *p++ = SE;
