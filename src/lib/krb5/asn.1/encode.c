@@ -38,6 +38,8 @@ void (*free_translation) PROTOTYPE((krb5_pointer ));
     PS ps;
     krb5_error_code error;
 
+    ps_len_strategy = PS_LEN_LONG;	/* force use of definite form */
+
     if (!(isode_out = (*translator)(input, &error)))
 	return(error);
     if ((*encoder)(&pe, 0, 0, 0, isode_out)) {
