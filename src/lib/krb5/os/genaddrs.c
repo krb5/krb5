@@ -39,56 +39,65 @@ krb5_auth_con_genaddrs(context, auth_context, fd, flags)
     int			  fd, flags;
 {
     krb5_error_code 	  retval;
-    krb5_address	  * laddr;
-    krb5_address	  * raddr;
+    krb5_address	* laddr;
+    krb5_address	* lport;
+    krb5_address	* raddr;
+    krb5_address	* rport;
 
 #ifdef KRB5_USE_INET
-    struct sockaddr_in saddr;
-    krb5_address lcaddr;
-    krb5_address rcaddr;
+    struct sockaddr_in lsaddr, rsaddr;
+    krb5_address lcaddr, rcaddr;
+    krb5_address lcport, rcport;
     int ssize;
 
     ssize = sizeof(struct sockaddr);
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR)) {
-    	if (retval = getsockname(fd, (struct sockaddr *) &saddr, &ssize)) 
+    	if (retval = getsockname(fd, (struct sockaddr *) &lsaddr, &ssize)) 
 	    return retval;
 
     	if (flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) {
-	    if (retval = krb5_make_fulladdr(context, &saddr, &lcaddr))
-		return retval;
-    	} else {
-    	    lcaddr.contents = (krb5_octet *)&saddr.sin_addr;
-    	    lcaddr.length = sizeof(saddr.sin_addr);
-    	    lcaddr.addrtype = ADDRTYPE_INET;
-	}
+    	    lcport.contents = (krb5_octet *)&lsaddr.sin_port;
+    	    lcport.length = sizeof(lsaddr.sin_port);
+    	    lcport.addrtype = ADDRTYPE_IPPORT;
+	    lport = &lcport;
+	} else {
+	    lport = NULL;
+    	} 
+    	lcaddr.contents = (krb5_octet *)&lsaddr.sin_addr;
+    	lcaddr.length = sizeof(lsaddr.sin_addr);
+    	lcaddr.addrtype = ADDRTYPE_INET;
 	laddr = &lcaddr;
     } else {
 	laddr = NULL;
+	lport = NULL;
     }
 
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
-        if (retval = getpeername(fd, (struct sockaddr *) &saddr, &ssize))
+        if (retval = getpeername(fd, (struct sockaddr *) &rsaddr, &ssize))
 	    return retval;
 
     	if (flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) {
-	    if (retval = krb5_make_fulladdr(context, &saddr, &rcaddr)) {
-		if (flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) 
-		    krb5_xfree(laddr->contents);
-		return retval;
-	    }
-    	} else {
-    	    rcaddr.contents = (krb5_octet *)&saddr.sin_addr;
-    	    rcaddr.length = sizeof(saddr.sin_addr);
-    	    rcaddr.addrtype = ADDRTYPE_INET;
+    	    rcport.contents = (krb5_octet *)&rsaddr.sin_port;
+    	    rcport.length = sizeof(rsaddr.sin_port);
+    	    rcport.addrtype = ADDRTYPE_IPPORT;
+	    rport = &rcport;
+	} else {
+	    rport = NULL;
 	}
+    	rcaddr.contents = (krb5_octet *)&rsaddr.sin_addr;
+    	rcaddr.length = sizeof(rsaddr.sin_addr);
+    	rcaddr.addrtype = ADDRTYPE_INET;
 	raddr = &rcaddr;
     } else {
 	raddr = NULL;
+	rport = NULL;
     }
 
-    return (krb5_auth_con_setaddrs(context, auth_context, laddr, raddr));
+    if (!(retval = krb5_auth_con_setaddrs(context, auth_context, laddr, raddr)))
+    	return (krb5_auth_con_setports(context, auth_context, lport, rport));
+    return retval;
 #else
     return KRB5_PROG_ATYPE_NOSUPP;
 #endif

@@ -1,3 +1,9 @@
+Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
+
+        * genaddrs.c (krb5_auth_con_genaddrs()),
+	* mk_faddr.c (krb5_make_fulladdr()), os-proto.h :
+                Changes to auth_context to better support full addresses.
+
 Sun Apr 30 16:03:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* osconfig.c: Global variables krb5_config_file and

@@ -51,7 +51,8 @@ krb5_error_code krb5_make_full_ipaddr
 
 krb5_error_code krb5_make_fulladdr
     PROTOTYPE((krb5_context,
-	       struct sockaddr_in *,
+	       krb5_address *,
+	       krb5_address *,
 	       krb5_address *));
 
 #endif /* KRB5_USE_INET */
