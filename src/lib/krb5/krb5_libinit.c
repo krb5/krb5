@@ -71,7 +71,9 @@ krb5_error_code krb5int_initialize_library (void)
 void krb5int_lib_fini(void)
 {
     if (!INITIALIZER_RAN(krb5int_lib_init) || PROGRAM_EXITING()) {
+#ifdef SHOW_INITFINI_FUNCS
 	printf("krb5int_lib_fini: skipping\n");
+#endif
 	return;
     }
 

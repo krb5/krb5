@@ -1,3 +1,8 @@
+2005-02-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_libinit.c (krb5int_lib_fini): Only show "skipping" message
+	if SHOW_INITFINI_FUNCS is defined.
+
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_libinit.c (krb5int_lib_init, krb5int_lib_fini): If
