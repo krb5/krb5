@@ -1,4 +1,9 @@
 
+Fri Jun 16 16:57:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* run.test - Remove argument processing loop and only do the first one
+		because Ultrix' /bin/sh5 is lame.
+
+
 Tue Jun 13 16:00:18 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* dbtest.c - Check for HAVE_INDEX.  If we have it, then use it,
 		otherwise use strchr.

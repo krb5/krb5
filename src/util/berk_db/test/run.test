@@ -26,8 +26,9 @@ main()
 			test$t
 		done
 	else
-		while [ $# -gt 0 ]
-			do case "$1" in
+		if [ $# -gt 0 ]
+		then
+			case "$1" in
 			test*)
 				$1;;
 			[0-9]*)
@@ -49,8 +50,7 @@ main()
 				echo "usage: run.test test# | type"
 				exit 1
 			esac
-			shift
-		done
+		fi
 	fi
 	rm -f $TMP1 $TMP2 $TMP3
 	exit 0
@@ -136,10 +136,10 @@ test3()
 {
 	echo "Test 3: hash: small key, big data pairs"
 	rm -f $TMP1
-	(find /bin -type f -print | xargs cat) > $TMP1
+	(find /bin -type f -perm -0444 -print | xargs cat) > $TMP1
 	for type in hash; do
 		rm -f $TMP2 $TMP3
-		for i in `find /bin -type f -print`; do
+		for i in `find /bin -type f -perm -0444 -print`; do
 			echo p
 			echo k$i
 			echo D$i
@@ -702,4 +702,5 @@ bsize=$bsize ffactor=$ffactor nelem=25000 cachesize=65536 failed"
 	done
 }
 
+set +e
 main $*
