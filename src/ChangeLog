@@ -1,3 +1,11 @@
+Fri Jun 23 20:14:45 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* aclocal.m4 (SHARED_RULE_LOCAL): Use makeshlib out of
+        $(BUILDTOP)/util not $(SRCTOP)/util since it moved.
+
+	* configure.in: Include appropriate binder option to set LIBPATH
+        correctly in generated executables.
+
 Thu Jun 22 16:15:10 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* acconfig.h: NO_NESTED_PROTOTYPES -> KRB5_NO_NESTED_PROTOTYPES;

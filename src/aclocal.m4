@@ -756,7 +756,7 @@ clean::
 	$(RM) $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
 
 $1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
-	[$](SRCTOP)/util/makeshlib [$](HOST_TYPE) [$](CC) [$]@	\
+	[$](BUILDTOP)/util/makeshlib [$]@	\
 		"[$](SHLIB_LIBDIRS)" \
 		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" [$](LIB_SUBDIRS)
 
