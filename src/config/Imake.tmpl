@@ -722,6 +722,7 @@ MakefileAdditions()
 #if HasSaberC
 saber:
 	/**/#load $(ALLDEFINES) $(SABER_DEFINES) $(SRCS)
+	/**/#setopt load_flags $(ALLDEFINES) $(SABER_DEFINES)
 
 osaber:
 	/**/#load $(ALLDEFINES) $(OBJS)
