@@ -1,3 +1,8 @@
+Mon Oct 24 15:50:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: If KRB4 is defined, define KRB5_KRB4_COMPAT for
+		compat_recv.c.
+
 Thu Oct 13 17:26:28 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* configure.in: Add ISODE_DEFS
