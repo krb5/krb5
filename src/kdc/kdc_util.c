@@ -291,7 +291,7 @@ krb5_tkt_authent **ret_authdat;
     if (foreign_server) {
 	krb5_data *tkt_realm = krb5_princ_realm(ticket_enc->client);
 	krb5_data *tgs_realm = krb5_princ_realm(tgs_server);
-	if (tkt_realm->length == tgs_realm->length ||
+	if (tkt_realm->length == tgs_realm->length &&
 	    !memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
 	    /* someone in a foreign realm claiming to be local */
 	    syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");

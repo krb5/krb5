@@ -1,3 +1,9 @@
+Mon Nov  7 22:11:01 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_util.c (kdc_process_tgs_req): Fix lineage check so that we
+		don't fail if we're cross-authenticating with a realm with
+		the same length as our own.  ('||' should have been '&&')
+
 Fri Nov  4 17:47:46 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* do_as_req.c (process_as_req): Use published interface to call
