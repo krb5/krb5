@@ -18,16 +18,16 @@
 
 #ifdef BITS16
 #define __OK
-typedef	int	int16;
-typedef	long	int32;
-typedef	unsigned char	octet;
+typedef	int	krb5_int16;
+typedef	long	krb5_int32;
+typedef	unsigned char	krb5_octet;
 #endif
 
 #ifdef BITS32
 #define __OK
-typedef	short	int16;
-typedef	int	int32;
-typedef	unsigned char	octet;
+typedef	short	krb5_int16;
+typedef	int	krb5_int32;
+typedef	unsigned char	krb5_octet;
 #endif
 
 #ifndef __OK
