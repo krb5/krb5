@@ -1919,8 +1919,8 @@ struct authlist {
 };
 
 extern int
-	auth_enable P((int)),
-	auth_disable P((int)),
+	auth_enable P((char *)),
+	auth_disable P((char *)),
 	auth_status P((void));
 static int
 	auth_help P((void));
@@ -1958,6 +1958,12 @@ auth_cmd(argc, argv)
     char *argv[];
 {
     struct authlist *c;
+
+    if (argc < 2) {
+      fprintf(stderr,
+          "Need an argument to 'auth' command.  'auth ?' for help.\n");
+      return 0;
+    }
 
     c = (struct authlist *)
 		genget(argv[1], (char **) AuthList, sizeof(struct authlist));
@@ -2058,6 +2064,12 @@ encrypt_cmd(argc, argv)
     char *argv[];
 {
     struct encryptlist *c;
+
+    if (argc < 2) {
+	fprintf(stderr,
+	    "Need an argument to 'encrypt' command.  'encrypt ?' for help.\n");
+	return 0;
+    }
 
     c = (struct encryptlist *)
 		genget(argv[1], (char **) EncryptList, sizeof(struct encryptlist));
