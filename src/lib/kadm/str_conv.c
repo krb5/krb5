@@ -207,3 +207,15 @@ krb5_flags_to_string(flags, sep, buffer, buflen)
     }
     return(retval);
 }
+
+krb5_error_code
+krb5_input_flag_to_string(flag, buffer, buflen)
+    int		flag;
+    char	* buffer;
+    size_t	buflen;
+{
+    if(flag < 0 || flag >= flags_table_nents) return ENOENT; /* End of list */
+    if(strlen(flags_table[flag].fl_specifier) > buflen) return ENOMEM;
+    strcpy(buffer, flags_table[flag].fl_specifier);
+    return  0;
+}
