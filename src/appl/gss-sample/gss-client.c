@@ -323,8 +323,6 @@ int call_server(host, port, dov2, service_name, msg, use_file)
      } else if (! state) {
 	  fprintf(stderr, "Warning!  Message not encrypted.\n");
      }
-     if (use_file)
-	 free(in_buf.value);
 
      /* Send to server */
      if (send_token(s, &out_buf) < 0)
@@ -348,6 +346,8 @@ int call_server(host, port, dov2, service_name, msg, use_file)
 	  return -1;
      }
      (void) gss_release_buffer(&min_stat, &out_buf);
+     if (use_file)
+	 free(in_buf.value);
 
      printf("Signature verified.\n");
 

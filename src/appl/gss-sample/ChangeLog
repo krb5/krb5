@@ -1,3 +1,9 @@
+Wed Jun  5 00:08:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gss-client.c (call_server): When reading in the test value from
+ 		a file, don't free free inbuf.value until after the last
+ 		place where we use it.
+
 Tue Mar 12 23:46:26 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* gss-server.c (timeval_subtract): Use old-style function
