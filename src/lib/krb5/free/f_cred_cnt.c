@@ -20,7 +20,7 @@ static char rcsid_f_cred_cnt_c [] =
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_creds(val)
+krb5_free_cred_contents(val)
 krb5_creds *val;
 {
     if (val->client)
