@@ -41,6 +41,7 @@ dnl that you link in all other libraries that depend on it.
 dnl
 dnl XXX we need to rethink where things go.
 dnl 
+USE_DYN_LIBRARY
 USE_KADMSRV_LIBRARY
 USE_GSSRPC_LIBRARY
 USE_GSSAPI_LIBRARY

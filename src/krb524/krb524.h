@@ -31,50 +31,50 @@
 extern int krb524_debug;
 
 int krb524_convert_tkt_skey
-	PROTOTYPE((krb5_context context, krb5_ticket *v5tkt, KTEXT_ST *v4tkt, 
+	KRB5_PROTOTYPE((krb5_context context, krb5_ticket *v5tkt, KTEXT_ST *v4tkt, 
 		   krb5_keyblock *v5_skey, krb5_keyblock *v4_skey));
 
 /* conv_princ.c */
 
 int krb524_convert_princs
-	PROTOTYPE((krb5_context context, krb5_principal client, 
+	KRB5_PROTOTYPE((krb5_context context, krb5_principal client, 
 		   krb5_principal server, char *pname, 
 		   char *pinst, char *prealm, char *sname, char *sinst));
 
 /* conv_creds.c */
 
 int krb524_convert_creds_addr
-	PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
+	KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds, struct sockaddr *saddr));
 
 int krb524_convert_creds_kdc
-	PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
+	KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds));
 
 /* conv_tkt.c */
 
 int krb524_convert_tkt
-	PROTOTYPE((krb5_principal server, krb5_data *v5tkt, KTEXT_ST *v4tkt,
+	KRB5_PROTOTYPE((krb5_principal server, krb5_data *v5tkt, KTEXT_ST *v4tkt,
 		   int *kvno, struct sockaddr_in *saddr));
 
 /* encode.c */
 
 int encode_v4tkt
-	PROTOTYPE((KTEXT_ST *v4tkt, char *buf, int *encoded_len));
+	KRB5_PROTOTYPE((KTEXT_ST *v4tkt, char *buf, int *encoded_len));
 
 int decode_v4tkt
-	PROTOTYPE((KTEXT_ST *v4tkt, char *buf, int *encoded_len));
+	KRB5_PROTOTYPE((KTEXT_ST *v4tkt, char *buf, int *encoded_len));
 
 
 /* misc.c */
 
 void krb524_init_ets
-	PROTOTYPE((krb5_context context));
+	KRB5_PROTOTYPE((krb5_context context));
 
 /* sendmsg.c */
 
 int krb524_send_message 
-	PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
+	KRB5_PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
 		   krb5_data * reply));
 
 #endif /* __KRB524_H__ */

@@ -1,3 +1,14 @@
+Wed Jul 24 02:18:02 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* test.c (krb4_print_ticket): s/KRB4_INT4/krb5_ui_4 so we work
+ 	with Athena Kerberos4.
+
+Wed Jul 24 01:14:27 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* encode.c: s/PROTOTYPE/KRB5_PROTOTYPE
+
+	* krb524.h (KRB5_PROTOTYPE): Use KRB5_PROTOTYPE not PROTOTYPE because the include file is installed and PROTOTYPE wasn't defined anyway. 
+
 Wed Jul 31 17:05:25 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb524d.c: Revert prior change due to shuffling of netdb.h

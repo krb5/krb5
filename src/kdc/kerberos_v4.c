@@ -413,7 +413,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
 
     if (! compat_decrypt_key( pkey, k)) {
  	memcpy( &principal->key_low,           k,     LONGLEN);
-       	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
+       	memcpy( &principal->key_high, (krb5_ui_4 *) k + 1, LONGLEN);
     }
     /* convert v5's entries struct to v4's Principal struct:
      * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes.
@@ -579,7 +579,7 @@ kerberos_v4(client, pkt)
 
 	    /* unseal server's key from master key */
 	    memcpy( key,                &s_name_data.key_low,  4);
-	    memcpy( ((KRB4_32 *) key) + 1, &s_name_data.key_high, 4);
+	    memcpy( ((krb5_ui_4 *) key) + 1, &s_name_data.key_high, 4);
 
 	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
@@ -599,7 +599,7 @@ kerberos_v4(client, pkt)
 
 	    /* a_name_data.key_low a_name_data.key_high */
 	    memcpy( key,                &a_name_data.key_low,  4);
-	    memcpy( ((KRB4_32 *) key) + 1, &a_name_data.key_high, 4);
+	    memcpy( ((krb5_ui_4 *) key) + 1, &a_name_data.key_high, 4);
 	    a_name_data.key_low= a_name_data.key_high = 0;
 
 	    /* unseal the a_name key from the master key */
@@ -629,7 +629,7 @@ kerberos_v4(client, pkt)
 	}
     case AUTH_MSG_APPL_REQUEST:
 	{
-	    KRB4_32  time_ws;	/* Workstation time */
+	    krb5_ui_4  time_ws;	/* Workstation time */
 	    u_long req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
@@ -704,7 +704,7 @@ kerberos_v4(client, pkt)
 
 	    /* unseal server's key from master key */
 	    memcpy(key,                &s_name_data.key_low,  4);
-	    memcpy(((KRB4_32 *) key) + 1, &s_name_data.key_high, 4);
+	    memcpy(((krb5_ui_4 *) key) + 1, &s_name_data.key_high, 4);
 	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
@@ -958,7 +958,7 @@ int set_tgtkey(r)
 
     /* unseal tgt key from master key */
     memcpy(key,                &p->key_low,  4);
-    memcpy(((KRB4_32 *) key) + 1, &p->key_high, 4);
+    memcpy(((krb5_ui_4 *) key) + 1, &p->key_high, 4);
     kdb_encrypt_key(key, key, master_key,
 		    master_key_schedule, DECRYPT);
     krb_set_key((char *) key, 0);

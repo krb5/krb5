@@ -3,6 +3,13 @@ Thu Aug  1 11:13:46 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 	* configure.in (withval): Link -ldyn as it is needed by the kadm5
 		shared library.  
 
+Wed Jul 24 02:29:19 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos_v4.c (set_tgtkey): s/KRB4_#@/krb5_ui_4 so we work with
+ 	athena Kerberos.
+
+
+
 Tue Jul 23 22:26:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Build logger.o from the libkadm5 directory.  This
@@ -13,6 +20,7 @@ Tue Jul 23 22:26:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 	* configure.in: Add -lgssapi and -lgssrpc to libraries linked with
  		krb5kdc since they are needed for shared libraries.  This
  		is a horrible hack....
+
 
 Thu Jun 13 22:09:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 

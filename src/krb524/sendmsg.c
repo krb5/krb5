@@ -56,7 +56,7 @@ extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
 int krb524_send_message
-	PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
+	KRB5_PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
 		   krb5_data * reply));
 
 

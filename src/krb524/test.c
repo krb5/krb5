@@ -148,8 +148,8 @@ void krb4_print_ticket(ticket, secret_key)
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
      unsigned char flags;
-     unsigned KRB4_32 addr;
-     unsigned KRB4_32 issue_time;
+     krb5_ui_4 addr;
+     krb5_ui_4 issue_time;
      C_Block session_key;
      int life;
      Key_schedule keysched;

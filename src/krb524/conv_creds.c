@@ -31,7 +31,7 @@
 #include "krb524.h"
 
 int krb524_convert_creds_plain
-	PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
+KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds));
 
 
