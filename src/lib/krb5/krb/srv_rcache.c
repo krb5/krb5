@@ -112,13 +112,11 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
      * First try to recover the replay cache; if that doesn't work,
      * initialize it.
      */
-    if (krb5_rc_recover(context, rcache)) {
-	if ((retval = krb5_rc_initialize(context, rcache,
-					 context->clockskew))) {
-	    krb5_rc_close(context, rcache);
-	    rcache = 0;
-	    goto cleanup;
-	}
+    retval = krb5_rc_recover_or_initialize(context, rcache, context->clockskew);
+    if (retval) {
+	krb5_rc_close(context, rcache);
+	rcache = 0;
+	goto cleanup;
     }
 
     *rcptr = rcache;

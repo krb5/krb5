@@ -1,3 +1,8 @@
+2004-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): Call
+	krb5_rc_recover_or_initialize.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* parse.c (krb5_parse_name): Don't test macintosh.
