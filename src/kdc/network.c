@@ -121,50 +121,7 @@ const char *prog;
     return 0;
 }
 
-krb5_error_code
-listen_and_process(prog)
-const char *prog;
-{
-    static int		errcount = 0;
-    int			nfound;
-    fd_set		readfds;
-    krb5_error_code	retval;
-
-    if (udp_port_fd == -1)
-	return KDC5_NONET;
-    
-    while (!signal_requests_exit) {
-	readfds = select_fds;
-	nfound = select(select_nfsd, &readfds, 0, 0, 0);
-	if (nfound == -1) {
-		if (errno == EINTR)
-			continue;
-		com_err(prog, errno, "while selecting for network input");
-		if (errcount++ > 3)
-			break;
-		continue;
-	}
-	if (FD_ISSET(udp_port_fd, &readfds)) {
-		retval = process_packet(udp_port_fd, prog, 0);
-		if (retval) {
-			if (errcount++ > 3)
-				break;
-		}
-	}
-	if ((sec_udp_port_fd > 0) && FD_ISSET(sec_udp_port_fd, &readfds)) {
-		retval = process_packet(sec_udp_port_fd, prog, 1);
-		if (retval) {
-			if (errcount++ > 3)
-				break;
-		}
-	}
-	errcount = 0;
-    }
-    return 0;
-}
-
-krb5_error_code
-process_packet(port_fd, prog, is_secondary)
+void process_packet(port_fd, prog, is_secondary)
     int	port_fd;
     char	*prog;
     int		is_secondary;
@@ -177,18 +134,20 @@ process_packet(port_fd, prog, is_secondary)
     krb5_data request;
     krb5_data *response;
     char pktbuf[MAX_DGRAM_SIZE];
+
+    if (port_fd < 0)
+	return;
     
     saddr_len = sizeof(saddr);
     cc = recvfrom(port_fd, pktbuf, sizeof(pktbuf), 0,
 		  (struct sockaddr *)&saddr, &saddr_len);
     if (cc == -1) {
-	if (errno == EINTR)
-	    return 0;
-	com_err(prog, errno, "while receiving from network");
-	return errno;
+	if (errno != EINTR)
+	    com_err(prog, errno, "while receiving from network");
+	return;
     }
     if (!cc)
-	return 0;		/* zero-length packet? */
+	return;		/* zero-length packet? */
 
     request.length = cc;
     request.data = pktbuf;
@@ -200,7 +159,7 @@ process_packet(port_fd, prog, is_secondary)
     addr.contents = (krb5_octet *) &saddr.sin_addr;
     if (retval = dispatch(&request, &faddr, is_secondary, &response)) {
 	com_err(prog, retval, "while dispatching");
-	return 0;
+	return;
     }
     cc = sendto(port_fd, response->data, response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
@@ -208,18 +167,45 @@ process_packet(port_fd, prog, is_secondary)
         krb5_free_data(response);
 	com_err(prog, errno, "while sending reply to %s/%d",
 		inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
-	return errno;
+	return;
     }
     if (cc != response->length) {
 	krb5_free_data(response);
 	com_err(prog, 0, "short reply write %d vs %d\n",
 		response->length, cc);
-	return KDC5_IO_RESPONSE;
+	return;
     }
     krb5_free_data(response);
-    return 0;
+    return;
 }
 
+krb5_error_code
+listen_and_process(prog)
+const char *prog;
+{
+    int			nfound;
+    fd_set		readfds;
+
+    if (udp_port_fd == -1)
+	return KDC5_NONET;
+    
+    while (!signal_requests_exit) {
+	readfds = select_fds;
+	nfound = select(select_nfsd, &readfds, 0, 0, 0);
+	if (nfound == -1) {
+	    if (errno == EINTR)
+		continue;
+	    com_err(prog, errno, "while selecting for network input");
+	    continue;
+	}
+	if (FD_ISSET(udp_port_fd, &readfds))
+	    process_packet(udp_port_fd, prog, 0);
+
+	if ((sec_udp_port_fd > 0) && FD_ISSET(sec_udp_port_fd, &readfds))
+	    process_packet(sec_udp_port_fd, prog, 1);
+    }
+    return 0;
+}
 
 krb5_error_code
 closedown_network(prog)
