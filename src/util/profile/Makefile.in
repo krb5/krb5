@@ -2,13 +2,15 @@ thisconfigdir=.
 myfulldir=util/profile
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
+PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
 ##DOS##BUILDTOP = ..\..
 ##DOS##OBJFILE=$(OUTPRE)profile.lst
 ##DOS##LIBNAME=$(OUTPRE)profile.lib
 
-LOCALINCLUDES=-I.
+LOCALINCLUDES=-I. $(TCL_INCLUDES)
+# for tcl.h
+DEFINES=-DHAS_STDARG
 
 STLIBOBJS = \
 	prof_tree.o \
@@ -109,9 +111,18 @@ prof_err.c: $(srcdir)/prof_err.et
 
 prof_err.o: prof_err.c
 
+# not built by default, but may be useful for testing
+profile_tcl.c: profile.swg
+	(cd $(srcdir) && swig -tcl8 -o profile_tcl.c profile.swg)
+profile_tcl.o: $(srcdir)/profile_tcl.c
+profile_tcl: profile_tcl.o libprofile.a
+	$(CC_LINK) -o profile_tcl profile_tcl.o \
+		$(TCL_MAYBE_RPATH) \
+		-L../et -L../.. libprofile.a $(DEPLIBS) $(TCL_LIBS)
+
 clean-unix:: clean-libs clean-libobjs
 	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
-		prof_err.c test_profile profile.h
+		prof_err.c test_profile profile.h profile_tcl
 
 clean-windows::
 	$(RM) $(PROFILE_HDR)

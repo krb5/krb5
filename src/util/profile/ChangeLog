@@ -1,5 +1,13 @@
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* profile.swg: New file.
+	* configure.in: Look for Tcl.
+	* Makefile.in (profile_tcl, profile_tcl.c, profile_tcl.o): New
+	targets, not built by default.
+	(PROG_LIBPATH, PROG_RPATH, LOCALINCLUDES): Add Tcl options.
+	(DEFINES): Define.
+	(clean-unix): Delete profile_tcl.
+
 	* prof_int.h (struct _prf_data_t): Add a mutex.
 	* prof_file.c (profile_open_file): Initialize data mutex.
 	(profile_update_file_data, profile_flush_file_data): Lock it while
