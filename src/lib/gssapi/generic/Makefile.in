@@ -24,9 +24,9 @@ HDRS=	$(EHDRDIR)/gssapi.h \
 	$(EHDRDIR)/gssapi_generic.h
 
 $(EHDRDIR)/gssapi.h: $(EHDRDIR) $(srcdir)/gssapi.h
-	$(CP) $(srcdir)/gssapi.h $@
+	$(CP) $(srcdir)$(S)gssapi.h $@
 $(EHDRDIR)/gssapi_generic.h: $(EHDRDIR) $(srcdir)/gssapi_generic.h
-	$(CP) $(srcdir)/gssapi_generic.h $@
+	$(CP) $(srcdir)$(S)gssapi_generic.h $@
 
 gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 	$(CC) $(CFLAGS) -c $*.c
