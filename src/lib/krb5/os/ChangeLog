@@ -1,3 +1,10 @@
+2002-02-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c: Include foreachaddr.c.
+	(printaddr, printifaddr, addr_eq, grow_or_free, get_ifconf,
+	get_lifconf, get_linux_ipv6_addrs, foreach_localaddr): Deleted.
+	* Makefile.in (localaddr.o): Update dependencies.
+
 2002-02-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (LINUX_IPV6_HACK) [__linux__&& KRB5_USE_INET6]:

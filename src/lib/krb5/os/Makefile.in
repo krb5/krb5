@@ -338,7 +338,8 @@ localaddr.so localaddr.po $(OUTPRE)localaddr.$(OBJEXT): localaddr.c $(SRCTOP)/in
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/foreachaddr.c
 locate_kdc.so locate_kdc.po $(OUTPRE)locate_kdc.$(OBJEXT): locate_kdc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
