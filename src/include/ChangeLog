@@ -1,5 +1,17 @@
 2004-04-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-thread.h (k5_mutex_debug_check_init,
+	k5_mutex_debug_update_loc): New macros.
+	(k5_mutex_debug_lock, k5_mutex_debug_unlock): Use them.
+	(k5_mutex_lock, k5_mutex_unlock) [ENABLE_THREADS &&
+	DEBUG_THREADS]: Use them instead of k5_mutex_debug_lock and
+	k5_mutex_debug_unlock.
+	(enum k5_mutex_debug_states): New enum.
+	(K5_MUTEX_DEBUG_LOCKED, K5_MUTEX_DEBUG_UNLOCKED): Change to
+	enumerator values.
+	(k5_mutex_debug_info): Use the enum type.  Reorder fields.
+	(K5_MUTEX_DEBUG_INITIALIZER): Update for new field order.
+
 	* k5-int.h: Include k5-thread.h.
 	(struct krb5_rc_st): Add a mutex.
 

@@ -138,19 +138,18 @@
 #define DEBUG_THREADS
 
 #include <assert.h>
+enum k5_mutex_debug_states {
+    K5_MUTEX_DEBUG_UNLOCKED = 34,
+    K5_MUTEX_DEBUG_LOCKED = 47
+};
 typedef struct {
-    /* We've got some bits to spare; using more than one bit decreases
-       the likelihood that random storage will contain the right
-       values.  */
-    unsigned int initialized : 3;
-    unsigned int locked : 3;
+    const char *filename;
     /* No source file in this tree gets anywhere near 32K lines.  */
     short lineno;
-    const char *filename;
+    short initialized;
+    enum k5_mutex_debug_states locked;
 } k5_mutex_debug_info;
-#define K5_MUTEX_DEBUG_INITIALIZER	{ 2, K5_MUTEX_DEBUG_UNLOCKED, 0, 0 }
-#define K5_MUTEX_DEBUG_LOCKED		4
-#define K5_MUTEX_DEBUG_UNLOCKED		3
+#define K5_MUTEX_DEBUG_INITIALIZER	{ 0, 0, 2, K5_MUTEX_DEBUG_UNLOCKED }
 #define k5_mutex_debug_finish_init(M)		\
 	(assert((M)->initialized == 2), (M)->initialized = 1, 0)
 #define k5_mutex_debug_init(M)			\
@@ -161,21 +160,18 @@ typedef struct {
 	(assert((M)->initialized == 1				\
 		&& (M)->locked == K5_MUTEX_DEBUG_UNLOCKED),	\
 	 (M)->initialized = 0)
+#define k5_mutex_debug_check_init(M)		\
+	(assert((M)->initialized != 2),		\
+	 assert((M)->initialized != 0),		\
+	 assert((M)->initialized == 1), 0)
+#define k5_mutex_debug_update_loc(M)				\
+	((M)->lineno = __LINE__, (M)->filename = __FILE__)
 #define k5_mutex_debug_lock(M)					\
-	(assert((M)->initialized != 2),				\
-	 assert((M)->initialized != 0),				\
-	 assert((M)->initialized == 1),				\
-	 assert((M)->locked != 0),				\
-	 assert((M)->locked != K5_MUTEX_DEBUG_LOCKED),		\
-	 assert((M)->locked == K5_MUTEX_DEBUG_UNLOCKED),	\
-	 (M)->locked = K5_MUTEX_DEBUG_LOCKED,			\
-	 (M)->lineno = __LINE__, (M)->filename = __FILE__, 0)
+	(k5_mutex_debug_check_init(M),				\
+	 k5_mutex_debug_update_loc(M), 0)
 #define k5_mutex_debug_unlock(M)				\
-	(assert((M)->initialized == 1				\
-		&& (M)->locked == K5_MUTEX_DEBUG_LOCKED),	\
-	 (M)->locked = K5_MUTEX_DEBUG_UNLOCKED,			\
-	 (M)->lineno = __LINE__, (M)->filename = __FILE__, 0)
-
+	(k5_mutex_debug_check_init(M),				\
+	 k5_mutex_debug_update_loc(M), 0)
 
 typedef enum {
     K5_KEY_COM_ERR,
@@ -217,10 +213,18 @@ typedef struct {
 				 0)
 #define k5_mutex_destroy(M)	(k5_mutex_debug_init(&(M)->debug),	      \
 				 assert(0==pthread_mutex_destroy(&(M)->lock)))
-#define k5_mutex_lock(M)	(k5_mutex_debug_lock(&(M)->debug),	    \
+#define k5_mutex_lock(M)	(k5_mutex_debug_check_init(&(M)->debug),    \
 				 assert(0==pthread_mutex_lock(&(M)->lock)), \
+				 assert((M)->debug.locked		    \
+					== K5_MUTEX_DEBUG_UNLOCKED),	    \
+				 k5_mutex_debug_update_loc(&(M)->debug),    \
+				 (M)->debug.locked = K5_MUTEX_DEBUG_LOCKED, \
 				 0)
-#define k5_mutex_unlock(M)	(k5_mutex_debug_unlock(&(M)->debug),	      \
+#define k5_mutex_unlock(M)	(k5_mutex_debug_check_init(&(M)->debug),      \
+				 assert((M)->debug.locked		      \
+					== K5_MUTEX_DEBUG_LOCKED),	      \
+				 k5_mutex_debug_update_loc(&(M)->debug),      \
+				 (M)->debug.locked = K5_MUTEX_DEBUG_UNLOCKED, \
 				 assert(0==pthread_mutex_unlock(&(M)->lock)), \
 				 0)
 
