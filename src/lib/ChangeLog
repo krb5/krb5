@@ -1,3 +1,7 @@
+Fri Sep 30 16:35:16 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Also delete libkdb5.a on make clean.
+
 Thu Aug  4 03:39:23 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: make install fixes

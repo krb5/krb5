@@ -4,4 +4,4 @@ LDFLAGS = -g
 all::
 
 clean::
-	$(RM) libkrb5.a libcrypto.a libgssapi_krb5.a libdes425.a libkrb425.a
+	$(RM) libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a libkrb425.a
