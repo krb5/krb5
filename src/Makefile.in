@@ -24,8 +24,11 @@ update-autoconf-h:
 	(cd include && $(MAKE) krb5/autoconf.h)
 
 all-windows:: maybe-awk Makefile-windows
+	@echo Making autoconf.h in include\krb5
+	cd include\krb5
+	$(MAKE) -$(MFLAGS) autoconf.h
 	@echo Making in util
-	cd util
+	cd ..\..\util
 	$(MAKE) -$(MFLAGS)
 	@echo Making in include
 	cd ..\include
@@ -166,6 +169,7 @@ WINMAKEFILES=Makefile \
 	lib\krb5\rcache\Makefile \
 	util\Makefile \
 	util\et\Makefile util\profile\Makefile \
+	util\support\Makefile \
 	util\windows\Makefile \
 	windows\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
@@ -268,6 +272,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\profile\Makefile: util\profile\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##util\support\Makefile: util\support\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\windows\Makefile: util\windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\Makefile: windows\Makefile.in $(MKFDEP)
@@ -358,6 +364,7 @@ ET  = lib/krb5/error_tables/
 GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
 PR  = util/profile/
+CE  = util/et/
 
 ETOUT =	\
 	$(INC)asn1_err.h $(ET)asn1_err.c \
@@ -435,6 +442,10 @@ $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
 	$(AWK) -f $(AH) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.h: $(AH) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AH) outfile=$@ $(GK)gssapi_err_krb5.et
+$(CE)test1.h: $(AH) $(CE)test1.et
+	$(AWK) -f $(AH) outfile=$@ $(CE)test1.et
+$(CE)test2.h: $(AH) $(CE)test2.et
+	$(AWK) -f $(AH) outfile=$@ $(CE)test2.et
 
 $(ET)asn1_err.c: $(AC) $(ET)asn1_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)asn1_err.et
@@ -456,6 +467,10 @@ $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
 	$(AWK) -f $(AC) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.c: $(AC) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
+$(CE)test1.c: $(AC) $(CE)test1.et
+	$(AWK) -f $(AC) outfile=$@ $(CE)test1.et
+$(CE)test2.c: $(AC) $(CE)test2.et
+	$(AWK) -f $(AC) outfile=$@ $(CE)test2.et
 
 lib/krb4/krb_err_txt.c: lib/krb4/krb_err.et
 	$(AWK) -f lib/krb4/et_errtxt.awk outfile=$@ \

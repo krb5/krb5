@@ -1,3 +1,13 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-windows): Make autoconf.h in include\krb5
+	before building anything else.
+	(WINMAKEFILES): Add util\support\Makefile.
+	(util\support\Makefile) [DOS]: New target.
+	(CE): New variable.
+	($(CE)test1.h, $(CE)test2.h, $(CE)test1.c, $(CE)test2.c): New
+	targets.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MACFILES, MAC_SUBDIRS): Don't set.
