@@ -44,7 +44,8 @@ krb5_get_server_rcache(context, piece, rcptr)
     if (!rcache)
 	return ENOMEM;
     
-    retval = krb5_rc_resolve_type(context, &rcache, "dfl");
+    retval = krb5_rc_resolve_type(context, &rcache, 
+				  krb5_rc_default_type(context));
     if (retval) goto cleanup;
 
     len = piece->length + 3 + 1;
