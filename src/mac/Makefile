@@ -755,6 +755,7 @@ debug-compiler-options = -sym on
 final-compiler-options = -sym off
 
 mitsupportlib-include-paths = ¶
+	-i {mitsupportlib-root-folder}CLib:Headers: ¶
 	-i {mitsupportlib-root-folder}SocketsLib:Headers: ¶
 	-i {mitsupportlib-root-folder}ErrorLib:Headers: ¶
 	-i {mitsupportlib-root-folder}UtilitiesLib:Headers:
@@ -790,11 +791,11 @@ precompiled-headers-source-macos9 = {precompiled-headers-folder}KerberosHeaders.
 precompiled-headers-source-carbon = {precompiled-headers-folder}KerberosHeaders.CB.pch
 
 {precompiled-headers-macos9} Ä {precompiled-headers-source-macos9} {precompiled-headers-folder}KerberosHeaders.h
-	{compiler-macos9} -i "{CWANSIIncludes}sys" {precompiled-headers-source-macos9} {common-compiler-options} {macos9-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {include-paths}
+	{compiler-macos9} -nostdinc -i "{CWANSIIncludes}sys" {precompiled-headers-source-macos9} {common-compiler-options} {macos9-compiler-options} ¶
+		-precompile {Targ} -i {precompiled-headers-folder} {include-paths} -I- -i "{mitsupportlib-root-folder}Clib:Headers:" -i "{MWCIncludes}"
 {precompiled-headers-carbon} Ä {precompiled-headers-source-carbon} {precompiled-headers-folder}KerberosHeaders.h
-	{compiler-carbon} -i "{CWANSIIncludes}sys" {precompiled-headers-source-carbon} {common-compiler-options} {carbon-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {include-paths}
+	{compiler-carbon} -nostdinc -i "{CWANSIIncludes}sys" {precompiled-headers-source-carbon} {common-compiler-options} {carbon-compiler-options} ¶
+		-precompile {Targ} -i {precompiled-headers-folder} {include-paths} -I- -i "{mitsupportlib-root-folder}Clib:Headers:" -i "{MWCIncludes}"
 
 make-options-common = ¶
 	-f {makefile-name} ¶
