@@ -1,3 +1,6 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * profile.pbexp: Restrict Mac OS X export list to public functions
+
 2001-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LIBMINOR): Bump due to error table changes.

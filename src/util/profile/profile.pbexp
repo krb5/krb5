@@ -3,8 +3,6 @@
 #
 # $Header$
 
-___InitializeProfileLib 
-
 _profile_init
 _profile_init_path
 _profile_flush
@@ -24,9 +22,3 @@ _profile_update_relation
 _profile_clear_relation
 _profile_rename_section
 _profile_add_relation
-
-### Temporary -- DO NOT USE
-
-_profile_ser_internalize
-_profile_ser_externalize
-_profile_ser_size
