@@ -477,16 +477,16 @@ get_new_file:
 			return 0;
 		}
 		if ((retval = profile_update_file(iter->file))) {
-            if (retval == ENOENT || retval == EACCES) {
-		/* XXX memory leak? */
-                iter->file = iter->file->next;
-                skip_num = 0;
-                retval = 0;
-                goto get_new_file;
-            } else {
-                profile_node_iterator_free(iter_p);
-                return retval;
-            }
+		    if (retval == ENOENT || retval == EACCES) {
+			/* XXX memory leak? */
+			iter->file = iter->file->next;
+			skip_num = 0;
+			retval = 0;
+			goto get_new_file;
+		    } else {
+			profile_node_iterator_free(iter_p);
+			return retval;
+		    }
 		}
 		iter->file_serial = iter->file->data->upd_serial;
 		/*
