@@ -153,6 +153,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      int i;
 
      char full_service_name[BUFSIZ], host[MAXHOSTNAMELEN], *ccname_orig;
+     const char *c_ccname_orig; 
      char *realm;
      krb5_creds	creds;
      krb5_ccache ccache = NULL;
@@ -439,13 +440,16 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      /* use the kadm5 cache */
      gssstat = gss_krb5_ccache_name(&minor_stat, handle->cache_name,
-				    &ccname_orig);
+				    &c_ccname_orig);
      if (gssstat != GSS_S_COMPLETE) {
 	 code = KADM5_GSS_ERROR;
 	 goto error;
      }
-     if (ccname_orig)
-	  ccname_orig = strdup(ccname_orig);
+     if (c_ccname_orig)
+	  ccname_orig = strdup(c_ccname_orig);
+     else
+       ccname_orig = 0;
+
 
 #ifndef INIT_TEST
      input_name.value = full_service_name;

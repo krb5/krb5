@@ -1,3 +1,8 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_init.c (_kadm5_init_any): gss_krb5_ccache_name returns
+	const char *, but the code was treating it as a char *.
+
 2000-06-23  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* clnt_chpass_util.c (kadm5_chpass_principal_util): Adjust for new
