@@ -139,6 +139,9 @@ profile_abandon(profile)
 {
 	prf_file_t	p, next;
 
+	if (!profile || profile->magic != PROF_MAGIC_PROFILE)
+		return;
+
 	for (p = profile->first_file; p; p = next) {
 		next = p->next;
 		profile_free_file(p);
@@ -152,6 +155,9 @@ profile_release(profile)
 	profile_t	profile;
 {
 	prf_file_t	p, next;
+
+	if (!profile || profile->magic != PROF_MAGIC_PROFILE)
+		return;
 
 	for (p = profile->first_file; p; p = next) {
 		next = p->next;
