@@ -1,12 +1,8 @@
+/* Include prototypes for glue functions */
 #include <krb5.h>
 
+/* Hardcode library fragment name here */
 #define kLibraryName "\pK5Library"
-
-/* This code is directly from Technote 1077 */
-
-/*	changed Library name to be hardcoded at the top of the file
-	instead in the middle of the code */
-
 #include <CodeFragments.h>
 
 // Private function prototypes
@@ -17,6 +13,128 @@ static OSErr Find_Symbol(
 	ProcInfoType pProcInfo);
 
 static pascal OSErr GetSystemArchitecture(OSType *archType);
+
+/* Public functions & globals */
+
+/* We are providing glue for the following functions, for the benefit of the
+	Kerberos v5 telnet plugin:
+		krb5_auth_con_free
+		krb5_auth_con_genaddrs
+		krb5_auth_con_getlocalsubkey
+		krb5_auth_con_init
+
+		krb5_auth_con_setaddrs
+		krb5_auth_con_setports
+		krb5_init_ets
+
+		com_err
+
+		mit_des_ecb_encrypt
+		mit_des_init_random_key
+		mit_des_key_sched
+		mit_des_random_key
+
+		krb5_auth_con_setflags
+
+		krb5_cc_default
+		krb5_copy_keyblock
+		krb5_free_ap_rep_enc_part
+		krb5_free_context
+		krb5_free_cred_contents
+		krb5_free_creds
+		krb5_free_keyblock
+		krb5_free_principal
+		krb5_fwd_tgt_creds
+		krb5_get_credentials
+		krb5_init_context
+
+		krb5_mk_req_extended
+		krb5_rd_rep
+		krb5_sname_to_principal
+*/
+
+/* Glue for every function consists of the ProcInfo enum (built from the prototype)
+	and a glue function */
+
+/* These functions fail silently, anyone have any better ideas? */
+
+
+/* krb5_auth_con_free */
+
+enum {
+	krb5_auth_con_free_ProcInfo = kThinkCStackBased |
+	RESULT_SIZE(SIZE_CODE(sizeof(krb5_error_code))) |
+	STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(krb5_context))) |
+	STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(krb5_auth_context)))
+};
+
+krb5_error_code krb5_auth_con_free (
+		krb5_context			param1,
+		krb5_auth_context		param2))
+{
+	static krb5_auth_con_free_ProcPtr = kUnresolvedSymbolAddress;
+
+	// if this symbol has not been setup yet...
+	if ((Ptr) krb5_auth_con_free_ProcPtr == (Ptr) kUnresolvedSymbolAddress)   
+		Find_Symbol((Ptr*) &krb5_auth_con_free_ProcPtr,"\pkrb5_auth_con_free",krb5_auth_con_free_ProcInfo);
+	if ((Ptr) krb5_auth_con_free_ProcPtr != (Ptr) kUnresolvedSymbolAddress)
+		return krb5_auth_con_free_ProcPtr(param1, param2);
+}
+
+/* krb5_auth_con_genaddrs */
+
+enum {
+	krb5_auth_con_genaddrs_ProcInfo = kThinkCStackBased |
+	RESULT_SIZE(SIZE_CODE(sizeof(krb5_error_code))) |
+	STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(krb5_context))) |
+	STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(krb5_auth_context))) |
+	STACK_ROUTINE_PARAMETER(3, SIZE_CODE(sizeof(int))) |
+	STACK_ROUTINE_PARAMETER(4, SIZE_CODE(sizeof(int)))
+};
+
+krb5_error_code krb5_auth_con_genaddrs (
+		krb5_context			param1,
+		krb5_auth_context		param2,
+		int						param3,
+		int						param4))
+{
+	static krb5_auth_con_genaddrs_ProcPtr = kUnresolvedSymbolAddress;
+
+	// if this symbol has not been setup yet...
+	if ((Ptr) krb5_auth_con_genaddrs_ProcPtr == (Ptr) kUnresolvedSymbolAddress)   
+		Find_Symbol((Ptr*) &krb5_auth_con_genaddrs_ProcPtr,"\pkrb5_auth_con_genaddrs",krb5_auth_con_genaddrs_ProcInfo);
+	if ((Ptr) krb5_auth_con_genaddrs_ProcPtr != (Ptr) kUnresolvedSymbolAddress)
+		return krb5_auth_con_genaddrs_ProcPtr(param1, param2, param3, param4);
+}
+
+/* krb5_auth_con_getlocalsubkey */
+
+enum {
+	krb5_auth_con_getlocalsubkey_ProcInfo = kThinkCStackBased |
+	RESULT_SIZE(SIZE_CODE(sizeof(krb5_error_code))) |
+	STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(krb5_context))) |
+	STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(krb5_auth_context))) |
+	STACK_ROUTINE_PARAMETER(3, SIZE_CODE(sizeof(krb5_keyblock**)))
+};
+
+krb5_error_code krb5_auth_con_getlocalsubkey (
+		krb5_context			param1,	
+		krb5_auth_context		param2,
+		krb5_keyblock**			param3)
+{
+	static krb5_auth_con_getlocalsubkey_ProcPtr = kUnresolvedSymbolAddress;
+
+	// if this symbol has not been setup yet...
+	if ((Ptr) krb5_auth_con_getlocalsubkey_ProcPtr == (Ptr) kUnresolvedSymbolAddress)   
+		Find_Symbol((Ptr*) &krb5_auth_con_getlocalsubkey_ProcPtr,"\pkrb5_auth_con_getlocalsubkey",krb5_auth_con_getlocalsubkey_ProcInfo);
+	if ((Ptr) krb5_auth_con_getlocalsubkey_ProcPtr != (Ptr) kUnresolvedSymbolAddress)
+		return krb5_auth_con_getlocalsubkey_ProcPtr(param1, param2, param3);
+}
+
+/* This code is directly from Technote 1077 */
+
+/*	changed Library name to be hardcoded at the top of the file
+	instead in the middle of the code */
 
 // Private functions
 
@@ -101,80 +219,4 @@ static OSErr Find_Symbol(
 #	endif
 	}
 	return sOSErr;
-}
-
-/* Public functions & globals */
-
-/* These functions fail silently, anyone have any better ideas? */
-
-/* krb5_auth_con_free */
-
-enum {
-	krb5_auth_con_free_ProcInfo = kThinkCStackBased |
-	RESULT_SIZE(SIZE_CODE(sizeof(krb5_error_code))) |
-	STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(krb5_context))) |
-	STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(krb5_auth_context)))
-};
-
-krb5_error_code krb5_auth_con_free (
-		krb5_context			param1,
-		krb5_auth_context		param2))
-{
-	static krb5_auth_con_free_ProcPtr = kUnresolvedSymbolAddress;
-
-	// if this symbol has not been setup yet...
-	if ((Ptr) krb5_auth_con_free_ProcPtr == (Ptr) kUnresolvedSymbolAddress)   
-		Find_Symbol((Ptr*) &krb5_auth_con_free_ProcPtr,"\pkrb5_auth_con_free",krb5_auth_con_free_ProcInfo);
-	if ((Ptr) krb5_auth_con_free_ProcPtr != (Ptr) kUnresolvedSymbolAddress)
-		return krb5_auth_con_free_ProcPtr(param1, param2);
-}
-
-/* krb5_auth_con_genaddrs */
-
-enum {
-	krb5_auth_con_genaddrs_ProcInfo = kThinkCStackBased |
-	RESULT_SIZE(SIZE_CODE(sizeof(krb5_error_code))) |
-	STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(krb5_context))) |
-	STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(krb5_auth_context))) |
-	STACK_ROUTINE_PARAMETER(3, SIZE_CODE(sizeof(int))) |
-	STACK_ROUTINE_PARAMETER(4, SIZE_CODE(sizeof(int)))
-};
-
-krb5_error_code krb5_auth_con_genaddrs (
-		krb5_context			param1,
-		krb5_auth_context		param2,
-		int						param3,
-		int						param4))
-{
-	static krb5_auth_con_genaddrs_ProcPtr = kUnresolvedSymbolAddress;
-
-	// if this symbol has not been setup yet...
-	if ((Ptr) krb5_auth_con_genaddrs_ProcPtr == (Ptr) kUnresolvedSymbolAddress)   
-		Find_Symbol((Ptr*) &krb5_auth_con_genaddrs_ProcPtr,"\pkrb5_auth_con_genaddrs",krb5_auth_con_genaddrs_ProcInfo);
-	if ((Ptr) krb5_auth_con_genaddrs_ProcPtr != (Ptr) kUnresolvedSymbolAddress)
-		return krb5_auth_con_genaddrs_ProcPtr(param1, param2, param3, param4);
-}
-
-/* krb5_auth_con_getlocalsubkey */
-
-enum {
-	krb5_auth_con_getlocalsubkey_ProcInfo = kThinkCStackBased |
-	RESULT_SIZE(SIZE_CODE(sizeof(krb5_error_code))) |
-	STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(krb5_context))) |
-	STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(krb5_auth_context))) |
-	STACK_ROUTINE_PARAMETER(3, SIZE_CODE(sizeof(krb5_keyblock**)))
-};
-
-krb5_error_code krb5_auth_con_getlocalsubkey (
-		krb5_context			param1,	
-		krb5_auth_context		param2,
-		krb5_keyblock**			param3)
-{
-	static krb5_auth_con_getlocalsubkey_ProcPtr = kUnresolvedSymbolAddress;
-
-	// if this symbol has not been setup yet...
-	if ((Ptr) krb5_auth_con_getlocalsubkey_ProcPtr == (Ptr) kUnresolvedSymbolAddress)   
-		Find_Symbol((Ptr*) &krb5_auth_con_getlocalsubkey_ProcPtr,"\pkrb5_auth_con_getlocalsubkey",krb5_auth_con_getlocalsubkey_ProcInfo);
-	if ((Ptr) krb5_auth_con_getlocalsubkey_ProcPtr != (Ptr) kUnresolvedSymbolAddress)
-		return krb5_auth_con_getlocalsubkey_ProcPtr(param1, param2, param3);
 }
