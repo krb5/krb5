@@ -256,9 +256,12 @@ extern int errno;
 #ifdef KRB4_GET_TICKETS
 #define KRB_ENVIRON	"KRBTKFILE"	/* Ticket file environment variable */
 #define KRB_TK_DIR	"/tmp/tkt_"	/* Where to put the ticket */
+#endif /* KRB4_GET_TICKETS */
+
+#if defined(KRB4_GET_TICKETS) || defined(KRB5_GET_TICKETS)
 #define MAXPWSIZE	128		/* Biggest string accepted for KRB4
 					   passsword */
-#endif /* KRB4_GET_TICKETS */
+#endif
 
 #ifdef __SVR4
 #define NO_MOTD
@@ -843,9 +846,8 @@ EGRESS:
  *
  * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
  */
-int verify_krb_v5_tgt (c, realm)
+int verify_krb_v5_tgt (c)
     krb5_context c;
-    char *realm;
 {
     char phost[BUFSIZ];
     krb5_ccache ccdef;
@@ -1437,7 +1439,7 @@ int main(argc, argv)
 		if (lpass_ok)
 			break;
 		if (got_v5_tickets
-		    && verify_krb_v5_tgt(kcontext, realm) != -1)
+		    && verify_krb_v5_tgt(kcontext) != -1)
 			break;	/* we're ok */
 #ifdef KRB4_GET_TICKETS
 		if (login_krb4_get_tickets) {
@@ -1556,8 +1558,14 @@ int main(argc, argv)
 	}
 #endif
 
-#ifdef KRB5_GET_TICKETS
+#if defined(KRB5_GET_TICKETS) || defined(KRB4_GET_TICKETS)
+#if defined(KRB5_GET_TICKETS) && defined(KRB4_GET_TICKETS)
 	if (login_krb4_get_tickets || login_krb5_get_tickets) {
+#elif defined(KRB4_GET_TICKETS)
+	if (login_krb4_get_tickets) {
+#else
+	if (login_krb5_get_tickets) {
+#endif
 	    /* Fork so that we can call kdestroy */
 	    dofork();
 	}
@@ -2223,7 +2231,7 @@ void sleepexit(eval)
 	exit(eval);
 }
 
-#ifdef KRB4_GET_TICKETS
+#if defined(KRB4_GET_TICKETS) || defined(KRB5_GET_TICKETS)
 /* call already conditionalized on login_krb4_get_tickets */
 /*
  * This routine handles cleanup stuff, and the like.
