@@ -45,9 +45,11 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #ifdef KRB5_DNS_LOOKUP
     internals_temp.make_srv_query_realm = krb5int_make_srv_query_realm;
     internals_temp.free_srv_dns_data = krb5int_free_srv_dns_data;
+    internals_temp.use_dns_kdc = _krb5_use_dns_kdc;
 #else
     internals_temp.make_srv_query_realm = 0;
     internals_temp.free_srv_dns_data = 0;
+    internals_temp.use_dns_kdc = 0;
 #endif
 #ifdef KRB5_KRB4_COMPAT
     internals_temp.krb_life_to_time = krb5int_krb_life_to_time;
