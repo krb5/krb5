@@ -1,6 +1,10 @@
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
-    * Added krb5_context to all krb5_routines
+	* read_servi.c (krb5_kt_read_service_key) Add krb5_keytype arg.
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    	* Added krb5_context to all krb5_routines
 
 Fri Oct 14 23:09:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
