@@ -19,7 +19,7 @@
 
 /* libkrb.spec */
 krb5_error_code krb5_encode_kdc_rep
-	PROTOTYPE((krb5_msgtype,
+	PROTOTYPE((int,
 		   krb5_kdc_rep *,
 		   krb5_enc_kdc_rep_part *,
 		   krb5_keyblock *,
