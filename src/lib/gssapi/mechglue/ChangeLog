@@ -1,3 +1,11 @@
+Wed Jun 12 00:50:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Remove include of config/windows.in; that's done
+		automatically by wconfig.
+
+	* g_acquire_cred.c, g_oid_ops.c: Change to use new convention of
+		KRB5_CALLCONV and KRB5_DLLIMP instead of INTERFACE
+
 Wed May 22 07:48:21 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (libgssapi.$(STEXT)): Remove unnecessary install rule for libgssapi.a.
