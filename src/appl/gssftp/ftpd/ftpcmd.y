@@ -1123,6 +1123,11 @@ yylex()
 				dologout(0);
 			}
 			(void) alarm(0);
+
+			/* If getline() finds an error, the string is null */
+			if (*cbuf == '\0')
+				continue;
+
 #ifdef SETPROCTITLE
 			if (strncasecmp(cbuf, "PASS", 4) != NULL)
 				setproctitle("%s: %s", proctitle, cbuf);

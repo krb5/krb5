@@ -598,7 +598,7 @@ user(name)
 			kdata.pinst, kdata.prealm,
 			kerb_ok ? "" : " not",
 			name, kerb_ok ? "" : "; Password required.");
-		reply(kerb_ok ? 232 : 336, "%s", buf);
+		reply(kerb_ok ? 232 : 331, "%s", buf);
 		syslog(kerb_ok ? LOG_INFO : LOG_ERR, "%s", buf);
 	} else
 #endif /* KERBEROS */

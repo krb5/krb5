@@ -1,3 +1,11 @@
+Fri Feb 16 15:51:59 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpcmd.y (yylex): error handling changes from kbalk@hp.com.
+
+Tue Jan 16 18:44:42 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (user): 331 is more appropriate for kuserok failure.
+
 Wed Feb  7 13:33:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Remove ftpd
