@@ -1,3 +1,7 @@
+2004-02-09  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_locate_kpasswd): Run htons on the default port
+
 2003-12-22  Jeffrey Altman <jaltman@mit.edu>
 
     * dnssrv.c:  wrap within #ifdef KRB5_DNS_LOOKUP to prevent references
