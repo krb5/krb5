@@ -203,11 +203,12 @@ krb5_rcache id;
 krb5_deltat lifespan;
 {
  struct dfl_data *t = (struct dfl_data *)id->data;
+ krb5_error_code retval;
 
  t->lifespan = lifespan;
 #ifndef NOIOSTUFF
- if (krb5_rc_io_creat(&t->d,&t->name))
-   return KRB5_RC_IO;
+ if (retval = krb5_rc_io_creat(&t->d,&t->name))
+   return retval;
  if (krb5_rc_io_write(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan)))
    return KRB5_RC_IO;
 #endif
@@ -443,6 +444,7 @@ krb5_rcache id;
   {
    case KRB5_RC_MALLOC: return KRB5_RC_MALLOC;
    case KRB5_RC_IO: return KRB5_RC_IO;
+   case KRB5_RC_IO_PERM: return KRB5_RC_IO_PERM;
    default: ;
   }
  if (retval = krb5_rc_io_creat(&tmp,(char **) 0))
