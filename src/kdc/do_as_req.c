@@ -29,6 +29,9 @@ static char rcsid_do_as_req_c[] =
 #include <sys/types.h>
 #include <krb5/ext-proto.h>
 
+#include "kdc_util.h"
+#include "policy.h"
+
 extern krb5_cs_table_entry *csarray[];
 extern int max_cryptosystem;		/* max entry in array */
 extern krb5_data empty_string;		/* initialized to {0, ""} */
@@ -36,24 +39,15 @@ extern krb5_timestamp infinity;		/* greater than every valid timestamp */
 extern krb5_deltat max_life_for_realm;	/* XXX should be a parameter? */
 extern krb5_deltat max_renewable_life_for_realm; /* XXX should be a parameter? */
 
-static krb5_error_code prepare_error PROTOTYPE((krb5_as_req *,
+static krb5_error_code prepare_error_as PROTOTYPE((krb5_as_req *,
 						int,
 						krb5_data **));
-extern int against_postdate_policy PROTOTYPE((krb5_timestamp));
 
 /*
  * Do all the processing required for a AS_REQ
  */
 
 /* XXX needs lots of cleanup and modularizing */
-
-#define isset(flagfield, flag) (flagfield & flag)
-#define set(flagfield, flag) (flagfield &= flag)
-
-#ifndef	min
-#define	min(a, b)	((a) < (b) ? (a) : (b))
-#define	max(a, b)	((a) > (b) ? (a) : (b))
-#endif
 
 krb5_error_code
 process_as_req(request, response)
@@ -80,10 +74,10 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     if (more) {
 	krb5_db_free_principal(&client, nprincs);
-	return(prepare_error(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
+	return(prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
     } else if (nprincs != 1) {
 	krb5_db_free_principal(&client, nprincs);
-	return(prepare_error(request, KDC_ERR_C_PRINCIPAL_UNKNOWN, response));
+	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN, response));
     }	
 	
     nprincs = 1;
@@ -93,24 +87,26 @@ krb5_data **response;			/* filled in with a response packet */
     if (more) {
 	krb5_db_free_principal(&client, 1);
 	krb5_db_free_principal(&server, nprincs);
-	return(prepare_error(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
+	return(prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
     } else if (nprincs != 1) {
 	krb5_db_free_principal(&client, 1);
 	krb5_db_free_principal(&server, nprincs);
-	return(prepare_error(request, KDC_ERR_S_PRINCIPAL_UNKNOWN, response));
+	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN, response));
     }
-
-    if (retval = krb5_timeofday(&kdc_time))
-	return(retval);
-
-    if (request->etype > max_cryptosystem ||
-	!csarray[request->etype]->system) {
-	/* unsupported etype */
 
 #define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); }
 
+    if (retval = krb5_timeofday(&kdc_time)) {
 	cleanup();
-	return(prepare_error(request, KDC_ERR_ETYPE_NOSUPP, response));
+	return(retval);
+    }
+
+    if (request->etype > max_cryptosystem || request->etype < 0 ||
+	!csarray[request->etype]) {
+	/* unsupported etype */
+
+	cleanup();
+	return(prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response));
     }
 
     if (retval = (*(csarray[request->etype]->system->random_key))(csarray[request->etype]->random_sequence, &session_key)) {
@@ -120,7 +116,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); bzero((char *)session_key, krb5_keyblock_size(session_key)); }
+#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); bzero((char *)session_key->contents, session_key->length); free((char *)session_key->contents); session_key->contents = 0; }
 
 
     ticket_reply.server = request->server;
@@ -133,16 +129,9 @@ krb5_data **response;			/* filled in with a response packet */
         /* processing of any of these flags.  For example, some */
         /* realms may refuse to issue renewable tickets         */
 
-    /* XXX procedurize */
-    if (isset(request->kdc_options, KDC_OPT_FORWARDED) ||
-	isset(request->kdc_options, KDC_OPT_PROXY) ||
-	isset(request->kdc_options, KDC_OPT_RENEW) ||
-	isset(request->kdc_options, KDC_OPT_VALIDATE) ||
-	isset(request->kdc_options, KDC_OPT_REUSE_SKEY) ||
-	isset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
-	/* none of these options is valid for an AS request */
+    if (against_flag_policy_as(request)) {
 	cleanup();
-	return(prepare_error(request, KDC_ERR_BADOPTION, response));
+	return(prepare_error_as(request, KDC_ERR_BADOPTION, response));
     }
 
     if (isset(request->kdc_options, KDC_OPT_FORWARDABLE))
@@ -166,7 +155,7 @@ krb5_data **response;			/* filled in with a response packet */
     if (isset(request->kdc_options, KDC_OPT_POSTDATED)) {
 	if (against_postdate_policy(request->from)) {
 	    cleanup();
-	    return(prepare_error(request, KDC_ERR_POLICY, response));
+	    return(prepare_error_as(request, KDC_ERR_POLICY, response));
 	}
 	set(enc_tkt_reply.flags, TKT_FLG_INVALID);
 	enc_tkt_reply.times.starttime = request->from;
@@ -182,6 +171,7 @@ krb5_data **response;			/* filled in with a response packet */
 		min(enc_tkt_reply.times.starttime + server.max_life,
 		    enc_tkt_reply.times.starttime + max_life_for_realm)));
 
+    /* XXX why && request->till ? */
     if (isset(request->kdc_options, KDC_OPT_RENEWABLE_OK) && 
 	request->till && (enc_tkt_reply.times.endtime < request->till)) {
 
@@ -209,8 +199,8 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
 
-    if (retval = krb5_encrypt_tkt_part(&enc_tkt_reply,
-				       server.key, &ticket_reply)) {
+    ticket_reply.enc_part2 = &enc_tkt_reply;
+    if (retval = krb5_encrypt_tkt_part(&server.key, &ticket_reply)) {
 	cleanup();
 	return retval;
     }
@@ -218,7 +208,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_db_free_principal(&server, 1);
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1);bzero((char *)session_key, krb5_keyblock_size(session_key)); bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
+#define cleanup() {krb5_db_free_principal(&client, 1);bzero((char *)session_key->contents, session_key->length); free((char *)session_key->contents); session_key->contents = 0; bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
 
 
     /* Start assembling the response */
@@ -228,7 +218,11 @@ krb5_data **response;			/* filled in with a response packet */
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
-    reply_encpart.last_req = 0;		/* XXX */
+    if (retval = fetch_last_req_info(&client, &reply_encpart.last_req)) {
+	cleanup();
+	return retval;
+    }
+
     reply_encpart.ctime = request->ctime;
     reply_encpart.key_exp = client.expiration;
     reply_encpart.flags = enc_tkt_reply.flags;
@@ -241,22 +235,16 @@ krb5_data **response;			/* filled in with a response packet */
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
 
-    /* finished with session key */
-    bzero((char *)session_key, krb5_keyblock_size(session_key));
-
-#undef cleanup
-#define cleanup() { krb5_db_free_principal(&client, 1); bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
-
     /* now encode/encrypt the response */
 
     retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply, &reply_encpart,
-				 client.key, response);
+				 &client.key, response);
     cleanup();
     return retval;
 }
 
 static krb5_error_code
-prepare_error (request, error, response)
+prepare_error_as (request, error, response)
 register krb5_as_req *request;
 int error;
 krb5_data **response;
@@ -278,7 +266,7 @@ krb5_data **response;
 	return ENOMEM;
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
-    retval = encode_krb5_error(&errpkt, &response);
+    retval = encode_krb5_error(&errpkt, response);
     free(errpkt.text.data);
     return retval;
 }
