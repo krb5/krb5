@@ -1,3 +1,8 @@
+2001-04-04  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.conf.M: Update description of safe_checksum_type for recent
+	changes. [pullup from krb5-1-2-2-branch]
+	
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.conf.M: Added description of v4_realm from Booker
