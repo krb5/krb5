@@ -1,0 +1,5 @@
+Wed Aug 17 15:47:26 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* gssapi_krb5.c: Fixed OID for the krb5 mechanism.  (Transcription
+	error.) 
+
