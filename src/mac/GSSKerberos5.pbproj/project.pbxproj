@@ -649,8 +649,8 @@
 		0106E999003C5FB27F000001 = {
 			isa = PBXFileReference;
 			name = krb5.hin;
-			path = /Volumes/Almayce/Xellos/Pikachu/Developer/Macdev/MITKerberos/MITKerberosLib/GSSKerberos5Sources_X/include/krb5.hin;
-			refType = 0;
+			path = ../include/krb5.hin;
+			refType = 2;
 		};
 		0106E99A003C767A7F000001 = {
 			isa = PBXFrameworkReference;
