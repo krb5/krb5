@@ -1,3 +1,10 @@
+Fri Nov 22 18:42:02 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
+
+	* configure.in: Do not link against kdb5 because this causes
+ 	NetBSD getpwuid to fail. [228]
+
+	* kpasswd.c (kpasswd): Remove cast from uid_t to int. [228]
+
 Wed Nov 20 16:00:49 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* unit-test/Makefile.in (unit-test-): warn more loudly about unrun
