@@ -219,6 +219,7 @@ void longReverse( LONG *buffer, int byteCount )
 
     switch (init) {
     case 0:
+	init=1;
 	cp = (char *) &init;
 	if (*cp == 1) {
 	    init=2;
