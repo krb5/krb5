@@ -63,7 +63,7 @@ int login_accept_passwd = 0;
  * login -r hostname	(for rlogind)
  * login -h hostname	(for telnetd, etc.)
  * login -f name	(for pre-authenticated login: datakit, xterm, etc.,
- *			 does not allow preauthenticated login as root)
+ *			 does allow preauthenticated login as root)
  * login -F name	(for pre-authenticated login: datakit, xterm, etc.,
  *			 allows preauthenticated login as root)
  * login -e name	(for pre-authenticated encrypted, must do term
@@ -1078,7 +1078,7 @@ afs_cleanup ()
 }
 
 /* Main routines */
-#define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag || fflag || Fflag ) { \
+#define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag || fflag ) { \
 				fprintf(stderr, \
 				    "login: only one of -r, -k, -K, -e, -F, and -f allowed.\n"); \
 				exit(1);\
@@ -1148,7 +1148,7 @@ int main(argc, argv)
 	struct group *gr;
 	int ch;
 	char *p;
-	int fflag, hflag, pflag, rflag, Fflag, cnt;
+	int fflag, hflag, pflag, rflag, cnt;
 	int kflag, Kflag, eflag;
 	int quietlog, passwd_req, ioctlval;
 	sigtype timedout();
@@ -1199,7 +1199,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	(void)gethostname(tbuf, sizeof(tbuf));
 	domain = strchr(tbuf, '.');
 
-	Fflag = fflag = hflag = pflag = rflag = kflag = Kflag = eflag = 0;
+	 fflag = hflag = pflag = rflag = kflag = Kflag = eflag = 0;
 	passwd_req = 1;
 	while ((ch = getopt(argc, argv, "Ffeh:pr:k:K:")) != EOF)
 		switch (ch) {
@@ -1209,7 +1209,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 			break;
 		case 'F':
 			EXCL_AUTH_TEST;
-			Fflag = 1;
+			fflag = 1;
 			break;
 		case 'h':
 			EXCL_HOST_TEST;
@@ -1364,7 +1364,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 #endif /* KRB5_GET_TICKETS */
 
 		if (username == NULL) {
-			fflag = Fflag = 0;
+			fflag = 0;
 			getloginname();
 		}
 
@@ -1374,23 +1374,13 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 		if (pwd == NULL || pwd->pw_uid)
 			checknologin();
 
-		/*
-		 * Disallow automatic login to root.
-		 * If not invoked by root, disallow if the uid's differ.
-		 */
-		if (fflag && pwd) {
-			int uid = (int) getuid();
-
-			passwd_req =
-			    (pwd->pw_uid == 0 || (uid && uid != pwd->pw_uid));
-		}
 
 		/*
 		 * Allows automatic login by root.
 		 * If not invoked by root, disallow if the uid's differ.
 		 */
 
-		if (Fflag && pwd) {
+		if (fflag && pwd) {
 			int uid = (int) getuid();
 			passwd_req = (uid && uid != pwd->pw_uid);
 		}
@@ -1906,7 +1896,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 
 	if (!quietlog) {
 #ifdef KRB4_KLOGIN
-		if (!krbflag && !fflag && !Fflag && !eflag )
+		if (!krbflag && !fflag && !eflag )
 		    printf("\nWarning: No Kerberos tickets obtained.\n\n");
 #endif /* KRB4_KLOGIN */
 		motd ();
@@ -2223,14 +2213,19 @@ void dolastlog(quiet, tty)
 
 char *
 stypeof(ttyid)
-	char *ttyid;
+  char *ttyid;
 {
+char *cp = getenv("term");
+
 #ifndef HAVE_TTYENT_H
-	return(UNKNOWN);
+if (cp)
+  return cp;
+else return(UNKNOWN);
 #else
 	struct ttyent *t;
-
-	return(ttyid && (t = getttynam(ttyid)) ? t->ty_type : UNKNOWN);
+	if (cp)
+	  return cp;
+ else return(ttyid && (t = getttynam(ttyid)) ? t->ty_type : UNKNOWN);
 #endif
 }
 

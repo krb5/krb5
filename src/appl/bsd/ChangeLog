@@ -1,3 +1,14 @@
+Mon Sep 30 17:15:14 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Allow login -f to let you log in as root.
+
+Mon Sep 30 16:22:48 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* login.c (stypeof): If TERM environment variable set, use it.
+
+	* krlogind.c (doit): Do not use login -E; no one supports it
+        besides login.krb5which also supports -f.
+
 Sun Sep 29 20:49:47 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* login.c: Fix so it works with --without-krb4 option

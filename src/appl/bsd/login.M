@@ -39,7 +39,7 @@ pass hostname to rlogind.
 pass hostname to telnetd, etc.
 .TP
 \fB\-f\fP \fIname\fP
-Perform pre-authenticated login, e.g., datakit, xterm, etc.; does not
+Perform pre-authenticated login, e.g., datakit, xterm, etc.; 
 allow preauthenticated login as root.
 .TP
 \fB\-F\fP \fIname\fP

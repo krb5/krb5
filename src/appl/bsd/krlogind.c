@@ -45,7 +45,7 @@ char copyright[] =
  * 3) Prompt for password if any checks fail, or if so configured.
  * Allow login if all goes well either by calling the accompanying 
  * login.krb5 or /bin/login, according to the definition of 
- * DO_NOT_USE_K_LOGIN.
+ * DO_NOT_USE_K_LOGIN.l
  * 
  * The configuration is done either by command-line arguments passed by 
  * inetd, or by the name of the daemon. If command-line arguments are
@@ -94,7 +94,7 @@ char copyright[] =
  */
 #define LOG_REMOTE_REALM
 #define CRYPT
-
+#define USE_LOGIN_F
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -507,8 +507,8 @@ struct winsize win = { 0, 0, 0, 0 };
 int pid; /* child process id */
 
 void doit(f, fromp)
-     int f;
-     struct sockaddr_in *fromp;
+  int f;
+  struct sockaddr_in *fromp;
 {
     int p, t, on = 1;
     register struct hostent *hp;
@@ -622,7 +622,7 @@ int syncpipe[2];
 
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcgetattr(t,&new_termio);
-#if !(defined(DO_NOT_USE_K_LOGIN)&&defined(USE_LOGIN_F))
+#if !defined(USE_LOGIN_F)
 	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
 	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL);
 #else
@@ -714,7 +714,6 @@ int syncpipe[2];
 	}
 #endif
 
-#ifdef DO_NOT_USE_K_LOGIN
 #ifdef USE_LOGIN_F
 /* use the vendors login, which has -p and -f. Tested on 
  * AIX 4.1.4 and HPUX 10 
@@ -735,12 +734,6 @@ int syncpipe[2];
 #else /* USE_LOGIN_F */
 	execl(login_program, "login", "-r", rhost_name, 0);
 #endif /* USE_LOGIN_F */
-#else
-	if (passwd_req)
-	  execl(login_program, "login","-h", rhost_name, lusername, 0);
-	else
-	  execl(login_program, "login", "-h", rhost_name, "-e", lusername, 0);
-#endif
 	
 	fatalperror(2, login_program);
 	/*NOTREACHED*/
@@ -791,12 +784,10 @@ int syncpipe[2];
 #endif
 
     
-#if defined(DO_NOT_USE_K_LOGIN)&&!defined(USE_LOGIN_F)
+#if!defined(USE_LOGIN_F)
     /* Pass down rusername and lusername to login. */
     (void) write(p, rusername, strlen(rusername) +1);
     (void) write(p, lusername, strlen(lusername) +1);
-#endif
-#if !defined(DO_NOT_USE_K_LOGIN) || !defined(USE_LOGIN_F) 
     /* stuff term info down to login */
     if ((write(p, term, strlen(term)+1) != (int) strlen(term)+1)) {
 	/*
@@ -805,7 +796,8 @@ int syncpipe[2];
 	sprintf(buferror,"Cannot write slave pty %s ",line);
 	fatalperror(f,buferror);
     }
-#endif /* DO_NOT_USE_K_LOGIN && USE_LOGIN_F */
+
+#endif
     protocol(f, p);
     signal(SIGCHLD, SIG_IGN);
     cleanup();
