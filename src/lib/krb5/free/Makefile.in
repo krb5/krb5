@@ -14,7 +14,7 @@ OBJS=	\
 	f_authdata.$(OBJEXT)	\
 	f_authent.$(OBJEXT)	\
 	f_auth_cnt.$(OBJEXT)	\
-	f_cksum.$(OBJEXT)	\
+	f_chksum.$(OBJEXT)	\
 	f_creds.$(OBJEXT)	\
 	f_cred_cnt.$(OBJEXT)	\
 	f_enc_kdc.$(OBJEXT)	\
@@ -47,7 +47,7 @@ SRCS=	\
 	$(srcdir)/f_authdata.c	\
 	$(srcdir)/f_authent.c	\
 	$(srcdir)/f_auth_cnt.c	\
-	$(srcdir)/f_cksum.c	\
+	$(srcdir)/f_chksum.c	\
 	$(srcdir)/f_creds.c	\
 	$(srcdir)/f_cred_cnt.c	\
 	$(srcdir)/f_enc_kdc.c	\

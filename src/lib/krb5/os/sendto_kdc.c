@@ -25,12 +25,19 @@
  * as necessary.
  */
 
+#define NEED_SOCKETS
+#define NEED_LOWLEVEL_IO
 #include "k5-int.h"
-#ifndef _MSDOS    /* Not yet for Windows */
 
 #include <sys/types.h>
+#ifndef _WINSOCKAPI_
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#else
+#include <time.h>
+#endif
 #include "os-proto.h"
 
 #ifdef _AIX
@@ -53,7 +60,7 @@ extern int krb5_max_skdc_timeout;
 extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_sendto_kdc (context, message, realm, reply)
     krb5_context context;
     const krb5_data * message;
@@ -206,17 +213,3 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     return retval;
 }
-#else /* MSDOS */
-
-/* Stub for now to satisfy the linker in making the DLL.
-*/
-krb5_error_code INTERFACE
-krb5_sendto_kdc (context, message, realm, reply)
-    krb5_context context;
-    const krb5_data * message;
-    const krb5_data * realm;
-    krb5_data * reply;
-{
-   return 0;
-}
-#endif

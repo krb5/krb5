@@ -214,7 +214,7 @@ krb5_fcc_open_file (context, id, mode)
      krb5_ui_2 fcc_fvno;
      int fd;
      int open_flag;
-     krb5_error_code retval;
+     krb5_error_code retval = 0;
 
      if (data->fd != -1) {
 	  /* Don't know what state it's in; shut down and start anew.  */

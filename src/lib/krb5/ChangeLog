@@ -1,3 +1,7 @@
+Wed Mar 15 12:26:21 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made so it recurses into the subdirs for the PC.
+
 Fri Nov 18 00:17:47 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: move WITH_CCOPTS, WITH_KRB5ROOT.

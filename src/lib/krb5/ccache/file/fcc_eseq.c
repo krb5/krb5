@@ -46,7 +46,7 @@ krb5_fcc_end_seq_get(context, id, cursor)
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
-     int kret = KRB5_OK;
+     krb5_error_code kret = KRB5_OK;
      
      /* don't close; it may be left open by the caller,
 	and if not, fcc_start_seq_get and/or fcc_next_cred will do the

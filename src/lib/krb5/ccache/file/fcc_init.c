@@ -52,7 +52,9 @@ krb5_fcc_initialize(context, id, princ)
      MAYBE_OPEN(context, id, FCC_OPEN_AND_ERASE);
 
 #ifdef NOFCHMOD
+#ifndef NOCHMOD
      reti = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
+#endif
 #else
      reti = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
 #endif

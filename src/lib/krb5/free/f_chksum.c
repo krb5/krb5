@@ -1,5 +1,5 @@
 /*
- * lib/krb5/free/f_cksum.c
+ * lib/krb5/free/f_chksum.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

@@ -17,7 +17,7 @@ all:: all-$(WHAT)
 
 all-unix:: $(HDRS) includes $(OBJS)
 
-all-windows:: awk-windows $(OBJS)
+all-windows:: $(OBJS)
 
 unixmac: $(HDRS)
 

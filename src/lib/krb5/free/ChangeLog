@@ -1,3 +1,9 @@
+Wed Mar 15 12:21:24 1995 Keith Vetter (keithv@fusion.com)
+
+	* f_cksum.c renamed to f_chksum.c because of module name conflicts
+	   with crypto/des/f_cksum.
+	* Makefile.in: reflected above name change.
+
 Tue Mar 7 21:40:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed library name for the PC.

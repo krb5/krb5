@@ -1,3 +1,9 @@
+Wed Mar 15 12:07:28 1995 Keith Vetter (keithv@fusion.com)
+
+	* fcc_eseq.c, fcc_init.c, fcc_maybe.c, fcc_dest.c:
+	   Initialized return code.
+	* fcc_genn.c, fcc_init.c: removed chmod call for the PC
+
 Thu Mar 09 18:43:10 1995  Chris Provenzano (proven@mit.edu)
 
 	* fcc_destry.c (krb5_fcc_destroy())

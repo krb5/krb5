@@ -1,10 +1,17 @@
+##DOSBUILDTOP = ..\..
+##DOS!include $(BUILDTOP)\config\windows.in
+
 TST=if test -n "`cat DONE`" ; then
 
 LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
 	keytab keytab/file krb rcache free os posix
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 
-all:: 
+all:: all-$(WHAT)
+
+all-unix::
+
+all-windows::
 
 libkrb5_ranlib: libkrb5.a
 	$(RANLIB) libkrb5.a
@@ -25,11 +32,77 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		done ; \
 	fi
 	touch libkrb5.stamp
-		
 
 install:: libkrb5_ranlib
 	$(INSTALL_DATA) libkrb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 
-clean::
-	$(RM) libkrb5.a libkrb5_ranlib libkrb5.stamp
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) libkrb5.$(LIBEXT) libkrb5_ranlib libkrb5.stamp
+
+clean-windows::
+	$(RM) krb5.lib krb5.bak
+
+all-windows::
+	cd ASN.1
+	@echo Making in ASN.1
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\CCACHE
+	@echo Making in CCACHE
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\ERROR_TA
+	@echo Making in ERROR_TA
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\FREE
+	@echo Making in FREE
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\KEYTAB
+	@echo Making in KEYTAB
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\KRB
+	@echo Making in KRB
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\OS
+	@echo Making in OS
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\POSIX
+	@echo Making in POSIX
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..\RCACHE
+	@echo Making in RCACHE
+	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	cd ..
+
+clean-windows::
+	cd ASN.1
+	@echo Making clean in ASN.1
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\CCACHE
+	@echo Making clean in CCACHE
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\ERROR_TA
+	@echo Making clean in ERROR_TA
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\FREE
+	@echo Making clean in FREE
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\KEYTAB
+	@echo Making clean in KEYTAB
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\KRB
+	@echo Making clean in KRB
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\OS
+	@echo Making clean in OS
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\POSIX
+	@echo Making clean in POSIX
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\RCACHE
+	@echo Making clean in RCACHE
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean locally
+

@@ -111,7 +111,9 @@ krb5_fcc_generate_new (context, id)
 
 	  /* Ignore user's umask, set mode = 0600 */
 #ifdef NOFCHMOD
+#ifndef NOCHMOD
 	  chmod(((krb5_fcc_data *) lid->data)->filename, S_IRUSR | S_IWUSR);
+#endif
 #else
 	  fchmod(ret, S_IRUSR | S_IWUSR);
 #endif

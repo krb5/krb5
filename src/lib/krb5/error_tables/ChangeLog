@@ -1,3 +1,7 @@
+Wed Mar 15 12:24:25 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: disabled the awk part of the makefile.
+
 Tue Mar 7 21:40:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed library name for the PC.
