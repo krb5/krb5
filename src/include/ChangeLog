@@ -4,6 +4,8 @@
 	defined functions static, and inline if gcc is used.  Drop
 	FAI_PREFIX renaming hacks.  Fix some bugs in the separation of
 	getnameinfo from getaddrinfo/freeaddrinfo for wrapping purposes.
+	(fake_getnameinfo) [__GNUC__ && __mips__]: Don't call inet_ntoa,
+	struct passing doesn't work.  Format the output string locally.
 	* fake-addrinfo.c: Delete.
 
 2002-03-11  Ken Raeburn  <raeburn@mit.edu>

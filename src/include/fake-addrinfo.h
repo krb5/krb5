@@ -435,10 +435,22 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 
     if (host) {
 	if (flags & NI_NUMERICHOST) {
+#if defined(__GNUC__) && defined(__mips__)
+	    /* The inet_ntoa call, passing a struct, fails on Irix 6.5
+	       using gcc 2.95; we get back "0.0.0.0".  Since this in a
+	       configuration still important at Athena, here's the
+	       workaround....  */
+	    unsigned char *uc = (unsigned char *) &sinp->sin_addr;
+	    char tmpbuf[20];
+	numeric_host:
+	    sprintf(tmpbuf, "%d.%d.%d.%d", uc[0], uc[1], uc[2], uc[3]);
+	    strncpy(host, tmpbuf, hostlen);
+#else
 	    char *p;
 	numeric_host:
 	    p = inet_ntoa (sinp->sin_addr);
 	    strncpy (host, p, hostlen);
+#endif
 	} else {
 	    hp = gethostbyaddr ((const char *) &sinp->sin_addr,
 				sizeof (struct in_addr),
