@@ -522,6 +522,9 @@ SONAME=@SONAME@
 PICFLAGS=@PICFLAGS@
 PROFFLAGS=@PROFFLAGS@
 
+# platform-dependent temporary files that should get cleaned up
+EXTRA_FILES=@EXTRA_FILES@
+
 
 
 ##

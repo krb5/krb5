@@ -121,7 +121,7 @@ DEPTARGETS = .depend .d .dtmp .depfix2.sed .depfix2.tmp $(DEP_VERIFY)
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) $(DEPTARGETS)
+	$(RM) $(OBJS) $(DEPTARGETS) $(EXTRA_FILES)
 
 clean-windows::
 	$(RM) *.$(OBJEXT)

@@ -1,5 +1,8 @@
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* pre.in (EXTRA_FILES): New variable.
+	* post.in (clean-unix): Delete extra files.
+
 	* shlib.conf: Initialize use_linker_init_option and
 	use_linker_fini_option to no.
 	(mips-sgi-irix*): Add link-time support for library
