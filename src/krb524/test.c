@@ -43,19 +43,25 @@
 void do_local(krb5_creds *, krb5_keyblock *),
      do_remote(krb5_context, krb5_creds *, char *, krb5_keyblock *);
 
-void print_key(char *msg, char *key)
+void print_key(msg, key)
+     char *msg;
+     char *key;
 {
      printf("%s: ", msg);
      C_Block_print(key);
      printf("\n");
 }
 
-void print_time(char *msg, int t)
+void print_time(msg, t)
+     char *msg;
+     int t;
 {
      printf("%s: %d, %s", msg, t, ctime((time_t *) &t));
 }
 
-void krb5_print_times(char *msg, krb5_ticket_times *t)
+void krb5_print_times(msg, t)
+     char *msg;
+     krb5_ticket_times *t;
 {
      printf("%s: Start: %d, %s", msg, t->starttime, 
 	    ctime((time_t *) &t->starttime));
@@ -67,7 +73,9 @@ void krb5_print_times(char *msg, krb5_ticket_times *t)
 	    ctime((time_t *) &t->renew_till));
 }
 
-void krb5_print_keyblock(char *msg, krb5_keyblock *key)
+void krb5_print_keyblock(msg, key)
+     char *msg;
+     krb5_keyblock *key;
 {
      printf("%s: Keytype: %d\n", msg, key->keytype);
      printf("%s: Length: %d\n", msg, key->length);
@@ -76,8 +84,10 @@ void krb5_print_keyblock(char *msg, krb5_keyblock *key)
      printf("\n");
 }
 
-void krb5_print_ticket(krb5_context context, krb5_data *ticket_data, 
-		       krb5_keyblock *key)
+void krb5_print_ticket(context, ticket_data, key)
+     krb5_context context;
+     krb5_data *ticket_data;
+     krb5_keyblock *key;
 {
      char *p;
      krb5_ticket *tkt;
@@ -110,8 +120,10 @@ void krb5_print_ticket(krb5_context context, krb5_data *ticket_data,
      krb5_free_ticket(context, tkt);
 }
 
-void krb5_print_creds(krb5_context context, krb5_creds *creds, 
-		      krb5_keyblock *secret_key)
+void krb5_print_creds(context, creds, secret_key)
+     krb5_context context;
+     krb5_creds *creds;
+     krb5_keyblock *secret_key;
 {
      char *p;
      
@@ -130,7 +142,9 @@ void krb5_print_creds(krb5_context context, krb5_creds *creds,
      /* krb5_print_ticket(context, &creds->second_ticket, secret_key); */
 }
 
-void krb4_print_ticket(KTEXT ticket, krb5_keyblock *secret_key)
+void krb4_print_ticket(ticket, secret_key)
+     KTEXT ticket;
+     krb5_keyblock *secret_key;
 {
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
@@ -164,7 +178,9 @@ void krb4_print_ticket(KTEXT ticket, krb5_keyblock *secret_key)
 							     &issue_time));
 }
 
-void krb4_print_creds(CREDENTIALS *creds, krb5_keyblock *secret_key)
+void krb4_print_creds(creds, secret_key)
+     CREDENTIALS *creds;
+     krb5_keyblock *secret_key'
 {
      printf("Client: %s.%s@%s\n", creds->pname, creds->pinst,
 	    creds->realm);
@@ -183,7 +199,9 @@ void usage()
      exit(1);
 }
 
-int main(int argc, char **argv)
+int main(argc, argv)
+     int argc;
+     char **argv;
 {
      krb5_principal client, server;
      krb5_ccache cc;
@@ -271,8 +289,11 @@ int main(int argc, char **argv)
      exit(0);
 }
 
-void do_remote(krb5_context context, krb5_creds *v5creds, char *server, 
-	       krb5_keyblock *key)
+void do_remote(context, v5creds, server, key)
+     krb5_context context;
+     krb5_creds *v5creds;
+     char *server;
+     krb5_keyblock *key;
 {
      struct sockaddr_in saddr;
      struct hostent *hp;

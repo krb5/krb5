@@ -24,7 +24,9 @@
 #include "krb5.h"
 #include <krb.h>
 
-main(int argc, char **argv)
+main(argc, argv)
+     int argc;
+     char **argv;
 {
      krb5_principal client, server;
      krb5_ccache cc;

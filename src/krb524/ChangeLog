@@ -1,3 +1,8 @@
+Wed Jun 28 17:32:51 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* test.c, k524init.c, getcred.c: rewrote for old style definitiions.
+	* encode.c: use PROTOTYPE instead of KRB5_PROTOTYPE.
+
 Wed Jun 28 03:04:38 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb524d.c: changed main, krb5_free_keyblock_contents to use old

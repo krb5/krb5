@@ -39,7 +39,9 @@
 extern int optind;
 extern char *optarg;
 
-int main(int argc, char **argv)
+int main(argc, argv)
+     int argc;
+     char **argv;
 {
      krb5_principal client, server;
      krb5_ccache cc;
