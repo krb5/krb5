@@ -21,6 +21,11 @@
 
 	* Makefile.in (SRCS): Delete in_tkt_pwd.c
 
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* chpw.c (krb5int_rd_chpw_rep): Allow new kpasswd error codes up
+	through _INITIAL_FLAG_NEEDED.
+
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Try with no specified enctype if

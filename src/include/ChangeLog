@@ -11,6 +11,12 @@
 
 	* k5-int.h: Prototype krb5int_populate_gic_opt
 
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_KPASSWD_ACCESSDENIED): New macro.
+	(KRB5_KPASSWD_BAD_VERSION, KRB5_KPASSWD_INITIAL_FLAG_NEEDED): New
+	macros.
+
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Add krb5int_copy_data_contents

@@ -174,7 +174,7 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_d
     *result_code = (*result_code<<8) | (*ptr++ & 0xff);
 
     if ((*result_code < KRB5_KPASSWD_SUCCESS) ||
-	(*result_code > KRB5_KPASSWD_SOFTERROR)) {
+	(*result_code > KRB5_KPASSWD_INITIAL_FLAG_NEEDED)) {
 	ret = KRB5KRB_AP_ERR_MODIFIED;
 	goto cleanup;
     }

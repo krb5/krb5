@@ -900,6 +900,11 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_KPASSWD_HARDERROR		2
 #define KRB5_KPASSWD_AUTHERROR		3
 #define KRB5_KPASSWD_SOFTERROR		4
+/* These are Microsoft's extensions in RFC 3244, and it looks like
+   they'll become standardized, possibly with other additions.  */
+#define KRB5_KPASSWD_ACCESSDENIED	5	/* unused */
+#define KRB5_KPASSWD_BAD_VERSION	6
+#define KRB5_KPASSWD_INITIAL_FLAG_NEEDED 7	/* unused */
 
 /*
  * end "proto.h"
