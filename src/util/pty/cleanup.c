@@ -69,5 +69,5 @@ long pty_cleanup (slave, pid, update_utmp)
     ptyint_vhangup();
     return 0;
 #endif
-    #endif
+#endif
 }
