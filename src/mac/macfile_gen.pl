@@ -448,7 +448,7 @@ sub read_file
 {
 	die("Bad call to read_file") unless defined $_[0];
 	local($FN) = (&chew_on_filename($_[0]));
-	local (@LINES, @NLFREE_LINES);
+	local (@LINES, @CRFREE_LINES, @NLFREE_LINES);
 
 	if (!open(FILE, $FN))
 	{
@@ -457,7 +457,8 @@ sub read_file
 	}
 
 	@LINES=<FILE>;
-	@NLFREE_LINES=grep(s/\n$//, @LINES);
+	@CRFREE_LINES=grep(s/\012$//, @LINES);
+	@NLFREE_LINES=grep(s/\n$//, @CRFREELINES);
 	
 	if (!close(FILE))
 	{
