@@ -75,7 +75,7 @@ krb_get_krbhst(h,r,n)
     cnffile = krb__get_cnffile();
     if (!cnffile)
         return get_krbhst_default(h, r, n);
-    if (fscanf(cnffile,"%s",tr) == EOF)
+    if (fscanf(cnffile,"%39s",tr) == EOF) /* XXX assumes REALM_SZ == 40 */
         return get_krbhst_default(h, r, n);
     /* run through the file, looking for the nth server for this realm */
     for (i = 1; i <= n;) {
@@ -83,7 +83,7 @@ krb_get_krbhst(h,r,n)
             (void) fclose(cnffile);
             return get_krbhst_default(h, r, n);
         }
-	if (sscanf(linebuf, "%s %s", tr, h) != 2)
+	if (sscanf(linebuf, "%39s %1023s", tr, h) != 2)	/* REALM_SZ == 40 */
 	    continue;
         if (!strcmp(tr,r))
             i++;
