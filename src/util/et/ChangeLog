@@ -1,3 +1,11 @@
+Mon Oct  3 17:27:28 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in:
+	  configure.in: Don't try to compile compile_et.  Use awk/sed
+	  	  version instead.  It's more apt to be portable, since it
+		  doesn't use awk or sed.  :-(
+	
+
 Fri Sep 30 17:12:15 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* compile_et.c: Add declaration of error_message() manually.

@@ -1,5 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
+SED = /bin/sed
 
 INSTALLFILE = cp
 
@@ -38,14 +39,27 @@ error_table.o: et_lex.lex.c
 
 all:: compile_et includes
 
-compile_et: compile_et.o error_table.o
-	$(CC) $(CFLAGS) -o $@ compile_et.o error_table.o $(LEXLIB) $(BSDLIB)
-	
-install::
-	$(INSTALLPROG) compile_et ${DESTDIR}$(PROGDIR)/compile_et
+# The realm compile_et just isn't portable.  (But then again, anything using 
+# lex and yacc isn't portable by definition.  :-(  )
+#
+#compile_et: compile_et.o error_table.o
+#	$(CC) $(CFLAGS) -o $@ compile_et.o error_table.o $(LEXLIB) $(BSDLIB)
+#
+#install::
+#	$(INSTALLPROG) compile_et ${DESTDIR}$(PROGDIR)/compile_et
 
+compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
+	$(srcdir)/config_script $(srcdir)/compile_et.sh $(AWK) $(SED) > compile_et
+	chmod 755 compile_et	
+
+et_c.awk: $(srcdir)/et_c.awk
+	$(CP) $(srcdir)/et_c.awk et_c.awk
+
+et_h.awk: $(srcdir)/et_h.awk
+	$(CP) $(srcdir)/et_h.awk et_h.awk
+	
 clean::
-	$(RM) compile_et compile_et.o error_table.o
+	$(RM) compile_et compile_et.o error_table.o et_c.awk et_h.awk
 
 depend:: 
 
