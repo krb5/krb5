@@ -1,3 +1,7 @@
+Fri Mar 17 20:27:41 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Eliminate duplicate of config/pre.in.
+
 Tue Mar 7 21:40:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed library name for the PC.
