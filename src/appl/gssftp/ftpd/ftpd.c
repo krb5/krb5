@@ -1938,7 +1938,12 @@ char *data;
 		maj_stat = gss_acquire_cred(&min_stat, server_name, 0,
 					    GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
 					    &server_creds, NULL, NULL);
-		if (maj_stat != GSS_S_COMPLETE) {
+		(void) gss_release_name(&min_stat, &server_name);
+		if (maj_stat != GSS_S_COMPLETE)
+		  continue;
+	}
+		if (maj_stat != GSS_S_COMPLETE)
+		{
 			reply_gss_error(501, maj_stat, min_stat,
 					"acquiring credentials");
 			syslog(LOG_ERR, "gssapi error acquiring credentials");
@@ -1947,9 +1952,7 @@ char *data;
 		if (server_creds == GSS_C_NO_CREDENTIAL) {
 			syslog(LOG_ERR, "acquire return GSS_C_NO_CREDENTIAL");
 		}
-		(void) gss_release_name(&min_stat, &server_name);
-		break;
-	}
+
 
 	gcontext = GSS_C_NO_CONTEXT;
 

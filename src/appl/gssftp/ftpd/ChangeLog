@@ -1,3 +1,7 @@
+Thu Jan 18 14:55:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* ftpd.c : Only return an unable to acquire credentials error if all possible services fail.
+
 Sun Jan 14 02:58:42 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* ftpd.c (auth_data): call gss_release_cred on the server_creds we
