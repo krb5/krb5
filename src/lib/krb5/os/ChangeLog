@@ -1,3 +1,14 @@
+1999-07-26  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_ustime.c (krb5_crypto_us_timeofday): Merged in changes from the
+	Mac_V2_0_derivatives branch -- microseconds support and guaranteed 
+	monotonically increasing microseconds on MacOS
+
+	* init_os_ctx.c (os_get_default_config_files): Merged in changes from the
+	Mac_V2_0_derivatives branch -- NRL config file name
+
+	* init_os_ctx.c (krb5_get_profile): added krb5_get_profile
+
 1999-07-22 Jeffrey Altman <jaltman@columbia.edu>
 
         * init_os_ctx.c (os_init_paths)
