@@ -1222,7 +1222,7 @@ void try_normal(argv)
     register int i;
 #ifndef     KRB5_ATHENA_COMPAT
     if (!encryptflag)
-	#endif
+#endif
 	{
 	fprintf(stderr,"trying normal rcp (%s)\n", UCB_RCP);
 	fflush(stderr);
