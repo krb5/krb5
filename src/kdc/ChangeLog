@@ -1,3 +1,8 @@
+Wed Nov 30 16:37:26 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* confiugre.in: Add appropriate help text for --with-krb4
+		option.
+
 Mon Nov 21 17:23:50 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* do_tgs_req.c (process_tgs_req):
