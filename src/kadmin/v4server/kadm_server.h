@@ -94,18 +94,6 @@ void prin_vals(Kadm_vals *);
 void kadm_prin_to_vals(u_char *, Kadm_vals *, Principal *);
 void kadm_vals_to_prin(u_char *, Principal *, Kadm_vals *);
 
-/* kadm_stream.c */
-int stv_char(u_char *, u_char *, int, int);
-int stv_short(u_char *, u_short *, int, int);
-int stv_long(u_char *, krb5_ui_4 *, int, int);
-int stv_string(u_char *, char *, int, int, int);
-int stream_to_vals(u_char *, Kadm_vals *, int);
-int vals_to_stream(Kadm_vals *, u_char **);
-int vts_string(char *, u_char **, int);
-int vts_short(u_short, u_char **, int);
-int vts_long(krb5_ui_4, u_char **, int);
-int vts_char(u_char, u_char **, int);
-
 /* acl_files.c */
 int acl_add(char *, char *);
 int acl_delete(char *, char *);

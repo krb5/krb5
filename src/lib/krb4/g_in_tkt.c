@@ -44,13 +44,12 @@ typedef int (*decrypt_tkt_type) (char *, char *, char *, char *,
 				     key_proc_type, KTEXT *);
 #endif
 
-static int
-krb_mk_in_tkt_preauth(char *, char *, char *, char *, char *,
-		      int, char *, int, KTEXT, int *);
-
-static int
-krb_parse_in_tkt(char *, char *, char *, char *, char *,
-		 int, KTEXT, int);
+static int decrypt_tkt(char *, char *, char *, char *, key_proc_type, KTEXT *);
+static int krb_mk_in_tkt_preauth(char *, char *, char *, char *, char *,
+				 int, char *, int, KTEXT, int *,
+				 struct sockaddr_in *);
+static int krb_parse_in_tkt_creds(char *, char *, char *, char *, char *,
+				  int, KTEXT, int, CREDENTIALS *);
 
 /*
  * decrypt_tkt(): Given user, instance, realm, passwd, key_proc
@@ -135,7 +134,7 @@ decrypt_tkt(user, instance, realm, arg, key_proc, cipp)
 
 static int
 krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
-		      preauth_p, preauth_len, cip, byteorder)
+		      preauth_p, preauth_len, cip, byteorder, local_addr)
     char *user;
     char *instance;
     char *realm;
@@ -146,6 +145,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     int   preauth_len;
     KTEXT cip;
     int  *byteorder;
+    struct sockaddr_in *local_addr;
 {
     KTEXT_ST pkt_st;
     KTEXT pkt = &pkt_st;	/* Packet to KDC */
@@ -213,7 +213,11 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 
     /* SEND THE REQUEST AND RECEIVE THE RETURN PACKET */
     rpkt->length = 0;
+#if 0 /* XXX */
+    kerror = send_to_kdc_addr(pkt, rpkt, realm, local_addr);
+#else
     kerror = send_to_kdc(pkt, rpkt, realm);
+#endif
     if (kerror)
 	return kerror;
 
@@ -281,8 +285,8 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 }
 
 static int
-krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip,
-		 byteorder)
+krb_parse_in_tkt_creds(user, instance, realm, service, sinstance, life, cip,
+		       byteorder, creds)
     char *user;
     char *instance;
     char *realm;
@@ -291,9 +295,9 @@ krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip,
     int life;
     KTEXT cip;
     int byteorder;
+    CREDENTIALS *creds;
 {
     unsigned char *ptr;
-    C_Block ses;                /* Session key for tkt */
     int len;
     int kvno;			/* Kvno for session key */
     char s_name[SNAME_SZ];
@@ -304,7 +308,6 @@ krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip,
     unsigned long kdc_time;   /* KDC time */
     unsigned KRB4_32 t_local;	/* Must be 4 bytes long for memcpy below! */
     KRB4_32 t_diff;	/* Difference between timestamps */
-    int kerror;
     int lifetime;
 
     ptr = cip->dat;
@@ -368,24 +371,102 @@ krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip,
         return RD_AP_TIME;	/* XXX should probably be better code */
     }
 
-    /* initialize ticket cache */
-    if (in_tkt(user,instance) != KSUCCESS)
-	return INTK_ERR;
     /* stash ticket, session key, etc. for future use */
-    memcpy(ses, cip->dat, 8);
-    kerror = krb_save_credentials(s_name, s_instance, rlm, ses,
-				  lifetime, kvno,
-				  tkt, (KRB4_32)t_local);
-    memset(ses, 0, 8);
-    if (kerror)
-	return kerror;
+    strncpy(creds->service, s_name, sizeof(creds->service));
+    strncpy(creds->instance, s_instance, sizeof(creds->instance));
+    strncpy(creds->realm, rlm, sizeof(creds->realm));
+    memmove(creds->session, cip->dat, sizeof(C_Block));
+    creds->lifetime = lifetime;
+    creds->kvno = kvno;
+    creds->ticket_st.length = tkt->length;
+    memmove(creds->ticket_st.dat, tkt->dat, (size_t)tkt->length);
+    creds->issue_date = t_local;
+    strncpy(creds->pname, user, sizeof(creds->pname));
+    strncpy(creds->pinst, instance, sizeof(creds->pinst));
 
     return INTK_OK;
 }
 
 int
+krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
+			     key_proc, decrypt_proc,
+			     arg, preauth_p, preauth_len, creds)
+    char *user;
+    char *instance;
+    char *realm;
+    char *service;
+    char *sinstance;
+    int life;
+    key_proc_type key_proc;
+    decrypt_tkt_type decrypt_proc;
+    char *arg;
+    char *preauth_p;
+    int   preauth_len;
+    CREDENTIALS *creds;
+{
+    KTEXT_ST cip_st;
+    KTEXT cip = &cip_st;	/* Returned Ciphertext */
+    int kerror;
+    int byteorder;
+#if TARGET_OS_MAC
+    struct sockaddr_in local_addr;
+#endif
+
+#if TARGET_OS_MAC
+    kerror = krb_mk_in_tkt_preauth(user, instance, realm, 
+				   service, sinstance,
+				   life, preauth_p, preauth_len,
+				   cip, &byteorder, &local_addr);
+#else
+    kerror = krb_mk_in_tkt_preauth(user, instance, realm, 
+				   service, sinstance,
+				   life, preauth_p, preauth_len,
+				   cip, &byteorder, NULL);
+#endif
+    if (kerror)
+	return kerror;
+    /* Attempt to decrypt the reply. */
+    if (decrypt_proc == NULL)
+	decrypt_tkt (user, instance, realm, arg, key_proc, &cip);
+    else
+	(*decrypt_proc)(user, instance, realm, arg, key_proc, &cip);
+
+    kerror = krb_parse_in_tkt_creds(user, instance, realm,
+				    service, sinstance,
+				    life, cip, byteorder, creds);
+#if TARGET_OS_MAC
+    /* Do this here to avoid OS dependency in parse_in_tkt prototype. */
+    creds->address = local_addr->sin_addr.s_addr;
+#endif
+    /* stomp stomp stomp */
+    memset(cip->dat, 0, (size_t)cip->length);
+    return kerror;
+}
+
+int
+krb_get_in_tkt_creds(user, instance, realm, service, sinstance, life,
+		     key_proc, decrypt_proc, arg, creds)
+    char *user;
+    char *instance;
+    char *realm;
+    char *service;
+    char *sinstance;
+    int life;
+    key_proc_type key_proc;
+    decrypt_tkt_type decrypt_proc;
+    char *arg;
+    CREDENTIALS *creds;
+{
+    return krb_get_in_tkt_preauth_creds(user, instance, realm,
+					service, sinstance, life,
+					key_proc, decrypt_proc, arg,
+					NULL, 0, creds);
+}
+
+int
 krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
-		       key_proc, decrypt_proc, arg, preauth_p, preauth_len)
+		       key_proc, decrypt_proc,
+		       arg, preauth_p, preauth_len)
     char *user;
     char *instance;
     char *realm;
@@ -398,29 +479,36 @@ krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     char *preauth_p;
     int   preauth_len;
 {
-    KTEXT_ST cip_st;
-    KTEXT cip = &cip_st;	/* Returned Ciphertext */
-    int kerror;
-    int byteorder;
+    int retval;
+    CREDENTIALS creds;
 
-    kerror = krb_mk_in_tkt_preauth(user, instance, realm, 
-				   service, sinstance,
-				   life, preauth_p, preauth_len,
-				   cip, &byteorder);
-    if (kerror)
-	return kerror;
-    /* Attempt to decrypt the reply. */
-    if (decrypt_proc == NULL)
-	decrypt_tkt (user, instance, realm, arg, key_proc, &cip);
-    else
-	(*decrypt_proc)(user, instance, realm, arg, key_proc, &cip);
-
-    kerror = krb_parse_in_tkt(user, instance, realm,
-			      service, sinstance,
-			      life, cip, byteorder);
-    /* stomp stomp stomp */
-    memset(cip->dat, 0, (size_t)cip->length);
-    return kerror;
+    do {
+	retval = krb_get_in_tkt_preauth_creds(user, instance, realm,
+					      service, sinstance, life,
+					      key_proc, decrypt_proc,
+					      arg, preauth_p, preauth_len,
+					      &creds);
+	if (retval != KSUCCESS) break;
+	if (in_tkt(user, instance) != KSUCCESS) {
+	    retval = INTK_ERR;
+	    break;
+	}
+#if TARGET_OS_MAC /* XXX */
+	retval = krb_save_credentials_addr(creds.service, creds.instance,
+					   creds.realm, creds.session,
+					   creds.lifetime, creds.kvno,
+					   &creds.ticket_st, creds.issue_date,
+					   creds.address, creds.stk_type);
+#else
+	retval = krb_save_credentials(creds.service, creds.instance,
+				      creds.realm, creds.session,
+				      creds.lifetime, creds.kvno,
+				      &creds.ticket_st, creds.issue_date);
+#endif
+	if (retval != KSUCCESS) break;
+    } while (0);
+    memset(&creds, 0, sizeof(creds));
+    return retval;
 }
 
 int
@@ -439,5 +527,5 @@ krb_get_in_tkt(user, instance, realm, service, sinstance, life,
     return krb_get_in_tkt_preauth(user, instance, realm,
 				  service, sinstance, life,
 			   	  key_proc, decrypt_proc, arg,
-				  (char *)NULL, 0);
+				  NULL, 0);
 }

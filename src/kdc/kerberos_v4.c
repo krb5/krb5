@@ -79,6 +79,12 @@ char * v4_klog (int, const char *, ...);
 
 /* take this out when we don't need it anymore */
 int krbONE = 1;
+/* XXX inline former contents of krb_conf.h for now */
+/* Byte ordering */
+extern int krbONE;
+#define		HOST_BYTE_ORDER	(* (char *) &krbONE)
+#define		MSB_FIRST		0	/* 68000, IBM RT/PC */
+#define		LSB_FIRST		1	/* Vax, PC8086 */
 
 int     f;
 

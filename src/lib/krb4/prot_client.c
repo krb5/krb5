@@ -64,7 +64,7 @@ krb4prot_encode_kdc_request(char *pname, char *pinst, char *prealm,
     p = pkt->dat;
 
     *p++ = KRB_PROT_VERSION;
-    *p++ = AUTH_MSG_KDC_REQUEST | (le ? LSB_FIRST : MSB_FIRST);
+    *p++ = AUTH_MSG_KDC_REQUEST | !!le;
 
     ret = krb4prot_encode_naminstrlm(pname, pinst, prealm, chklen,
 				     pkt, &p);
@@ -235,7 +235,7 @@ krb4prot_encode_apreq(int kvno, char *realm,
     p = pkt->dat;
     /* Assume >= 3 bytes in a KTEXT. */
     *p++ = KRB_PROT_VERSION;
-    *p++ = AUTH_MSG_APPL_REQUEST | (le ? LSB_FIRST : MSB_FIRST);
+    *p++ = AUTH_MSG_APPL_REQUEST | !!le;
 
     *p++ = kvno;
 

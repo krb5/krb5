@@ -91,7 +91,7 @@ krb4prot_encode_kdc_reply(char *pname, char *pinst, char *prealm,
     else
 	*p++ = KRB_PROT_VERSION;
     /* little-endianness based on input, usually big-endian, though. */
-    *p++ = AUTH_MSG_KDC_REPLY | (le ? LSB_FIRST : MSB_FIRST);
+    *p++ = AUTH_MSG_KDC_REPLY | !!le;
 
     ret = krb4prot_encode_naminstrlm(pname, pinst, prealm, chklen,
 				     outbuf, &p);
@@ -281,7 +281,7 @@ krb4prot_encode_tkt(unsigned int flags,
      * Assume at least one byte in a KTEXT.  If not, we have bigger
      * problems.  Also, bitwise-OR in the little-endian flag.
      */
-    *p++ = flags | (le ? LSB_FIRST : MSB_FIRST);
+    *p++ = flags | !!le;
 
     if (krb4prot_encode_naminstrlm(pname, pinst, prealm, chklen,
 				   tkt, &p))
@@ -369,7 +369,7 @@ krb4prot_encode_err_reply(char *pname, char *pinst, char *prealm,
     p = pkt->dat;
     /* Assume >= 2 bytes in KTEXT. */
     *p++ = KRB_PROT_VERSION;
-    *p++ = AUTH_MSG_ERR_REPLY | (le ? LSB_FIRST : MSB_FIRST);
+    *p++ = AUTH_MSG_ERR_REPLY | !!le;
 
     if (krb4prot_encode_naminstrlm(pname, pinst, prealm, chklen,
 				   pkt, &p))

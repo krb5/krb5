@@ -1,8 +1,8 @@
 /*
  * include/kerberosIV/krb.h
  *
- * Copyright 1987, 1988, 1994, 2001 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright 1987, 1988, 1994, 2001, 2002 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -30,16 +30,50 @@
 #ifndef	KRB_DEFS
 #define KRB_DEFS
 
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#	include <TargetConditionals.h>
+#	if TARGET_RT_MAC_CFM
+#		error "Use KfM 4.0 SDK headers for CFM compilation."
+#	endif
+#endif
+
+/* Define u_char, u_short, u_int, and u_long. */
+/* XXX these typdef names are not standardized! */
+#include <sys/types.h>
+
 /* Need some defs from des.h	 */
 #include <kerberosIV/des.h>
 
-#define KRB4_32		DES_INT32
-#define KRB_INT32	DES_INT32
-#define KRB_UINT32	DES_UINT32
+#include <kerberosIV/krb_err.h>		/* XXX FIXME! */
+
+#include <profile.h>
 
 #ifdef _WINDOWS
 #include <time.h>
 #endif /* _WINDOWS */
+
+#ifdef __cplusplus
+#ifndef KRBINT_BEGIN_DECLS
+#define KRBINT_BEGIN_DECLS	extern "C" {
+#define KRBINT_END_DECLS	}
+#endif
+#else
+#define KRBINT_BEGIN_DECLS
+#define KRBINT_END_DECLS
+#endif
+KRBINT_BEGIN_DECLS
+
+#if TARGET_OS_MAC
+#	if defined(__MWERKS__)
+#		pragma import on
+#		pragma enumsalwaysint on
+#	endif
+#	pragma options align=mac68k
+#endif
+
+#define KRB4_32		DES_INT32
+#define KRB_INT32	DES_INT32
+#define KRB_UINT32	DES_UINT32
 
 /* Text describing error codes */
 #define		MAX_KRB_ERRORS	256
@@ -74,6 +108,9 @@ extern const char *const krb_err_txt[MAX_KRB_ERRORS];
 #define		REALM_SZ	40
 #define		SNAME_SZ	40
 #define		INST_SZ		40
+/*
+ * NB: This overcounts due to NULs.
+ */
 /* include space for '.' and '@' */
 #define		MAX_K_NAME_SZ	(ANAME_SZ + INST_SZ + REALM_SZ + 2)
 #define		KKEY_SZ		100
@@ -117,7 +154,7 @@ typedef struct ktext KTEXT_ST;
 #endif /* PC */
 
 /* Parameters for rd_ap_req */
-/* Maximum alloable clock skew in seconds */
+/* Maximum allowable clock skew in seconds */
 #define 	CLOCK_SKEW	5*60
 /* Filename for readservkey */
 #define		KEYFILE		((char*)krb__get_srvtabname("/etc/srvtab"))
@@ -182,7 +219,10 @@ typedef struct msg_dat MSG_DAT;
 #define TKT_ROOT        "/tmp/tkt"
 #endif /* PC */
 
-#include "kerberosIV/krb_err.h"		/* XXX FIXME! */
+/*
+ * Error codes are now defined as offsets from com_err (krb_err.et)
+ * values.
+ */
 #define KRB_ET(x)	((KRBET_ ## x) - ERROR_TABLE_BASE_krb)
 
 /* Error codes returned from the KDC */
@@ -267,7 +307,7 @@ typedef struct msg_dat MSG_DAT;
 #define	KNAME_FMT	KRB_ET(KNAME_FMT)	/* 81 - Bad krb name fmt */
 
 /* Error code returned by krb_mk_safe */
-#define		SAFE_PRIV_ERROR	-1	/* syscall error */
+#define	SAFE_PRIV_ERROR	(-1)			/* syscall error */
 
 /* Kerberos ticket flag field bit definitions */
 #define K_FLAG_ORDER    0       /* bit 0 --> lsb */
@@ -279,6 +319,7 @@ typedef struct msg_dat MSG_DAT;
 #define K_FLAG_6                /* reserved */
 #define K_FLAG_7                /* reserved, bit 7 --> msb */
 
+/* Are these needed anymore? */
 #ifdef	OLDNAMES
 #define krb_mk_req	mk_ap_req
 #define krb_rd_req	rd_ap_req
@@ -330,9 +371,6 @@ typedef struct msg_dat MSG_DAT;
 #endif /*_WINDOWS*/
 
 
-/* Define u_char, u_short, u_int, and u_long. */
-#include <sys/types.h>
-
 /* ask to disable IP address checking in the library */
 extern int krb_ignore_ip_address;
 
@@ -376,10 +414,6 @@ extern struct _krb5_context * krb5__krb4_context;
 
 struct sockaddr_in;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* dest_tkt.c */
 int KRB5_CALLCONV dest_tkt
 	(void);
@@ -387,7 +421,8 @@ int KRB5_CALLCONV dest_tkt
 const char * KRB5_CALLCONV krb_get_err_text
 	(int errnum);
 /* g_ad_tkt.c */
-int get_ad_tkt
+/* Previously not KRB5_CALLCONV */
+int KRB5_CALLCONV get_ad_tkt
 	(char *service, char *sinst, char *realm, int lifetime);
 /* g_admhst.c */
 int KRB5_CALLCONV krb_get_admhst
@@ -397,15 +432,21 @@ int KRB5_CALLCONV krb_get_cred
 	(char *service, char *instance, char *realm,
 		   CREDENTIALS *c);
 /* g_in_tkt.c */
-int krb_get_in_tkt
+/* Previously not KRB5_CALLCONV */
+int KRB5_CALLCONV krb_get_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
 		   key_proc_type, decrypt_tkt_type, char *arg);
-int krb_get_in_tkt_preauth
+/* Previously not KRB5_CALLCONV */
+int KRB5_CALLCONV krb_get_in_tkt_preauth
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
 		   key_proc_type, decrypt_tkt_type, char *arg,
 		   char *preauth_p, int preauth_len);
+/* From KfM */
+int KRB5_CALLCONV krb_get_in_tkt_creds(char *, char *, char *, char *, char *,
+    int, key_proc_type, decrypt_tkt_type, char *, CREDENTIALS *);
+
 /* g_krbhst.c */
 int KRB5_CALLCONV krb_get_krbhst
 	(char *host, char *realm, int idx);
@@ -427,11 +468,21 @@ int KRB5_CALLCONV krb_get_pw_in_tkt_preauth
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
 		   int life, char *password);
+int KRB5_CALLCONV
+krb_get_pw_in_tkt_creds(char *, char *, char *,
+	char *, char *, int, char *, CREDENTIALS *);
+
 /* g_svc_in_tkt.c */
 int KRB5_CALLCONV krb_get_svc_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
 		   int life, char *srvtab);
+#if TARGET_OS_MAC && defined(__FILES__)
+int KRB5_CALLCONV
+FSp_krb_get_svc_in_tkt(char *, char *, char *, char *, char *,
+    int, const FSSpec *);
+#endif
+
 /* g_tf_fname.c */
 int KRB5_CALLCONV krb_get_tf_fullname
 	(char *ticket_file, char *name, char *inst, char *realm);
@@ -453,6 +504,10 @@ int KRB5_CALLCONV krb_in_tkt
 int KRB5_CALLCONV kname_parse
 	(char *name, char *inst, char *realm,
 		   char *fullname);
+/* From KfM XXX to be merged*/
+int KRB5_CALLCONV kname_unparse
+	(char *, const char *, const char *, const char *);
+
 int KRB5_CALLCONV k_isname
         (char *);
 int KRB5_CALLCONV k_isinst
@@ -503,6 +558,12 @@ int KRB5_CALLCONV krb_mk_req
 	(KTEXT authent,
 		   char *service, char *instance, char *realm,
 		   KRB4_32 checksum);
+/* Merged from KfM */
+int KRB5_CALLCONV krb_mk_req_creds(KTEXT, CREDENTIALS *, KRB_INT32);
+
+/* Added CALLCONV (KfM exports w/o INTERFACE, but KfW doesn't export?) */
+int KRB5_CALLCONV krb_set_lifetime(int newval);
+
 /* mk_safe.c */
 long KRB5_CALLCONV krb_mk_safe
 	(u_char *in, u_char *out, unsigned KRB4_32 length,
@@ -510,12 +571,15 @@ long KRB5_CALLCONV krb_mk_safe
 		   struct sockaddr_in *sender,
 		   struct sockaddr_in *receiver);
 /* netread.c */
+/* XXX private */
 int krb_net_read
 	(int fd, char *buf, int len);
 /* netwrite.c */
+/* XXX private */
 int krb_net_write
 	(int fd, char *buf, int len);
 /* pkt_clen.c */
+/* XXX private */
 int pkt_clen
 	(KTEXT);
 /* put_svc_key.c */
@@ -523,6 +587,11 @@ int KRB5_CALLCONV put_svc_key
 	(char *sfile,
 		   char *name, char *inst, char *realm,
 		   int newvno, char *key);
+#if TARGET_OS_MAC && defined(__FILES__)
+int KRB5_CALLCONV FSp_put_svc_key(const FSSpec *, char *, char *, char *,
+    int, char *);
+#endif
+
 /* rd_err.c */
 int KRB5_CALLCONV krb_rd_err
 	(u_char *in, u_long in_length,
@@ -539,6 +608,10 @@ int KRB5_CALLCONV krb_rd_req
 	(KTEXT, char *service, char *inst,
 		   unsigned KRB4_32 from_addr, AUTH_DAT *,
 		   char *srvtab);
+/* Merged from KfM */
+int KRB5_CALLCONV
+krb_rd_req_int(KTEXT, char *, char *, KRB_UINT32, AUTH_DAT *, C_Block);
+
 /* rd_safe.c */
 long KRB5_CALLCONV krb_rd_safe
 	(u_char *in, unsigned KRB4_32 in_length,
@@ -553,6 +626,11 @@ int KRB5_CALLCONV read_service_key
 int KRB5_CALLCONV get_service_key
 	(char *service, char *instance, char *realm,
 		   int *kvno, char *file, char *key);
+#if TARGET_OS_MAC && defined(__FILES__)
+int KRB5_CALLCONV FSp_read_service_key(char *, char *, char *,
+    int, const FSSpec*, char *);
+#endif
+
 /* realmofhost.c */
 char * KRB5_CALLCONV krb_realmofhost
 	(char *host);
@@ -579,13 +657,15 @@ int KRB5_CALLCONV krb_save_credentials
 		   C_Block session, int lifetime, int kvno,
 		   KTEXT ticket, long issue_date);
 /* send_to_kdc.c */
+/* XXX PRIVATE? KfM doesn't export. */
 int send_to_kdc
 	(KTEXT pkt, KTEXT rpkt, char *realm);
 
 /* tkt_string.c */
-char * tkt_string
+/* Used to return pointer to non-const char */
+const char * KRB5_CALLCONV tkt_string
 	(void);
-void krb_set_tkt_string
+void KRB5_CALLCONV krb_set_tkt_string
 	(char *);
 
 /* tf_util.c */
@@ -608,7 +688,9 @@ unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec
  */
 extern int krb_set_key
 	(char *key, int cvt);
-extern int decomp_ticket
+
+/* This is exported by KfM.  It was previously not KRB5_CALLCONV. */
+extern int KRB5_CALLCONV decomp_ticket
 	(KTEXT tkt, unsigned char *flags, char *pname,
 		   char *pinstance, char *prealm, unsigned KRB4_32 *paddress,
 		   C_Block session, int *life, unsigned KRB4_32 *time_sec,
@@ -646,22 +728,37 @@ extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
 #endif
 
 #if TARGET_OS_MAC
-/* The following functions are not part of the standard Kerberos v4 API. 
- * They were created for Mac implementation, and used by admin tools 
- * such as CNS-Config. */
+/*
+ * KfM krb.hin had the following, probably inherited from CNS:
+ *
+ *   The following functions are not part of the standard Kerberos v4
+ *   API.  They were created for Mac implementation, and used by admin
+ *   tools such as CNS-Config.
+ */
 extern int KRB5_CALLCONV
 krb_get_num_cred(void);
 
-extern int INTERFACE
+extern int KRB5_CALLCONV
 krb_get_nth_cred(char *, char *, char *, int);
 
-extern int INTERFACE
+extern int KRB5_CALLCONV
 krb_delete_cred(char *, char *,char *);
 
-extern int INTERFACE
+extern int KRB5_CALLCONV
 dest_all_tkts(void);
 
 #endif /* TARGET_OS_MAC */
+
+/*
+ * krb_change_password -- merged from KfM
+ */
+/* change_password.c */
+int KRB5_CALLCONV krb_change_password(char *, char *, char *, char *, char *);
+
+/*
+ * RealmConfig-glue.c from KfM XXX to be merged
+ */
+extern int KRB5_CALLCONV krb_get_profile(profile_t *profile);
 
 #ifdef _WINDOWS
 HINSTANCE get_lib_instance(void);
@@ -672,8 +769,14 @@ unsigned KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *);
 long win_time_get_epoch(void);
 #endif
 
-#ifdef __cplusplus
-}
+#if TARGET_OS_MAC
+#	if defined(__MWERKS__)
+#		pragma enumsalwaysint reset
+#		pragma import reset
+#	endif
+#	pragma options align=reset
 #endif
+
+KRBINT_END_DECLS
 
 #endif	/* KRB_DEFS */

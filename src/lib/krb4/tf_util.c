@@ -689,8 +689,6 @@ tf_read(s, n)
     return n;
 }
      
-char   *tkt_string();
-
 /*
  * tf_save_cred() appends an incoming ticket to the end of the ticket
  * file.  You must call tf_init() before calling tf_save_cred().

@@ -1,8 +1,8 @@
 /*
  * lib/krb4/rd_req.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
- * Institute of Technology.  All Rights Reserved.
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001, 2002 by the
+ * Massachusetts Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -32,6 +32,10 @@
 #include <krb54proto.h>
 
 extern int krb_ap_req_debug;
+
+static int
+krb_rd_req_with_key(KTEXT, char *, char *, KRB_UINT32, AUTH_DAT *,
+		    Key_schedule, krb5_keyblock *);
 
 /* declared in krb.h */
 int krb_ignore_ip_address = 0;
@@ -162,14 +166,15 @@ krb_clear_key_krb5(ctx)
  * Mutual authentication is not implemented.
  */
 
-int KRB5_CALLCONV
-krb_rd_req(authent, service, instance, from_addr, ad, fn)
+static int
+krb_rd_req_with_key(authent, service, instance, from_addr, ad, ks, k5key)
     register KTEXT authent;	/* The received message */
     char *service;		/* Service name */
     char *instance;		/* Service instance */
     unsigned KRB4_32 from_addr; /* Net address of originating host */
     AUTH_DAT *ad;		/* Structure to be filled in */
-    char *fn;		/* Filename to get keys from */
+    Key_schedule ks;
+    krb5_keyblock *k5key;
 {
     KTEXT_ST ticket;		/* Temp storage for ticket */
     KTEXT tkt = &ticket;
@@ -178,7 +183,6 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
 
     char realm[REALM_SZ];	/* Realm of issuing kerberos */
     Key_schedule seskey_sched; /* Key sched for session key */
-    unsigned char skey[KKEY_SZ]; /* Session key from ticket */
     char sname[SNAME_SZ];	/* Service name from ticket */
     char iname[INST_SZ];	/* Instance name from ticket */
     char r_aname[ANAME_SZ];	/* Client name from authenticator */
@@ -199,8 +203,6 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
 				   Kerberos used to encrypt ticket */
     int ret;
     int len;
-    krb5_keyblock keyblock;
-    int status;
 
     tkt->mbz = req_id->mbz = 0;
 
@@ -248,49 +250,6 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
     (void)memcpy(realm, ptr, (size_t)len);
     ptr += len;			/* skip the realm "hint" */
 
-    /*
-     * If "fn" is NULL, key info should already be set; don't
-     * bother with ticket file.  Otherwise, check to see if we
-     * already have key info for the given server and key version
-     * (saved in the static st_* variables).  If not, go get it
-     * from the ticket file.  If "fn" is the null string, use the
-     * default ticket file.
-     */
-    if (fn && (strcmp(st_nam,service) || strcmp(st_inst,instance)
-	       || strcmp(st_rlm,realm) || (st_kvno != s_kvno))) {
-        if (*fn == 0)
-	    fn = KEYFILE;
-        st_kvno = s_kvno;
-#ifndef NOENCRYPTION
-        if (read_service_key(service,instance,realm, (int)s_kvno,
-			     fn, (char *)skey) == 0) {
-	    if ((status = krb_set_key((char *)skey,0)))
-		return(status);
-#ifdef KRB4_USE_KEYTAB
-	} else if (krb54_get_service_keyblock(service, instance,
-					      realm, (int)s_kvno,
-					      fn, &keyblock) == 0) {
-	    krb_set_key_krb5(krb5__krb4_context, &keyblock);
-	    krb5_free_keyblock_contents(krb5__krb4_context, &keyblock);
-#endif
-	} else
-	    return RD_AP_UNDEC;
-#endif /* !NOENCRYPTION */
-
-	len = krb4int_strnlen(realm, sizeof(st_rlm)) + 1;
-	if (len <= 0)
-	    return KFAILURE;
-	memcpy(st_rlm, realm, (size_t)len);
-	len = krb4int_strnlen(service, sizeof(st_nam)) + 1;
-	if (len <= 0)
-	    return KFAILURE;
-	memcpy(st_nam, service, (size_t)len);
-	len = krb4int_strnlen(instance, sizeof(st_inst)) + 1;
-	if (len <= 0)
-	    return KFAILURE;
-	memcpy(st_inst, instance, (size_t)len);
-    }
-
     /* Get ticket length */
     tkt->length = *ptr++;
     /* Get authenticator length while we're at it. */
@@ -312,10 +271,10 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
     /* Decrypt and take apart ticket */
 #endif
 
-    if (!krb5_key) {
+    if (k5key == NULL) {
 	if (decomp_ticket(tkt,&ad->k_flags,ad->pname,ad->pinst,ad->prealm,
 			  &(ad->address),ad->session, &(ad->life),
-			  &(ad->time_sec),sname,iname,ky,serv_key)) {
+			  &(ad->time_sec),sname,iname,ky,ks)) {
 #ifdef KRB_CRYPT_DEBUG
 	    log("Can't decode ticket");
 #endif
@@ -325,7 +284,7 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
 	if (decomp_tkt_krb5(tkt, &ad->k_flags, ad->pname, ad->pinst,
 			    ad->prealm, &ad->address, ad->session,
 			    &ad->life, &ad->time_sec, sname, iname,
-			    &srv_k5key)) {
+			    k5key)) {
 	    return RD_AP_UNDEC;
 	}
     }
@@ -470,4 +429,99 @@ cleanup:
     }
 
     return RD_AP_OK;
+}
+
+int KRB5_CALLCONV
+krb_rd_req_int(authent, service, instance, from_addr, ad, key)
+    KTEXT authent;		/* The received message */
+    char *service;		/* Service name */
+    char *instance;		/* Service instance */
+    KRB_UINT32 from_addr;	/* Net address of originating host */
+    AUTH_DAT *ad;		/* Structure to be filled in */
+    C_Block key;		/* Key to decrypt ticket with */
+{
+    Key_schedule ks;
+    int ret;
+
+    do {
+	ret = des_key_sched(key, ks);
+	if (ret) break;
+	ret = krb_rd_req_with_key(authent, service, instance,
+				  from_addr, ad, ks, NULL);
+    } while (0);
+    memset(ks, 0, sizeof(ks));
+    return ret;
+}
+
+int KRB5_CALLCONV
+krb_rd_req(authent, service, instance, from_addr, ad, fn)
+    register KTEXT authent;	/* The received message */
+    char *service;		/* Service name */
+    char *instance;		/* Service instance */
+    unsigned KRB4_32 from_addr; /* Net address of originating host */
+    AUTH_DAT *ad;		/* Structure to be filled in */
+    char *fn;		/* Filename to get keys from */
+{
+    unsigned char *ptr;
+    unsigned char s_kvno;
+    char realm[REALM_SZ];
+    unsigned char skey[KKEY_SZ];
+    krb5_keyblock keyblock;
+    int len;
+    int status;
+
+#define AUTHENT_REMAIN (authent->length - (ptr - authent->dat))
+    if (authent->length < 3)
+	return RD_AP_MODIFIED;
+    ptr = authent->dat + 2;
+    s_kvno = *ptr++;		/* get server key version */
+    len = krb4int_strnlen((char *)ptr, AUTHENT_REMAIN) + 1;
+    if (len <= 0 || len > sizeof(realm))
+	return RD_AP_MODIFIED;
+    (void)memcpy(realm, ptr, (size_t)len);
+#undef AUTHENT_REMAIN
+    /*
+     * If "fn" is NULL, key info should already be set; don't
+     * bother with ticket file.  Otherwise, check to see if we
+     * already have key info for the given server and key version
+     * (saved in the static st_* variables).  If not, go get it
+     * from the ticket file.  If "fn" is the null string, use the
+     * default ticket file.
+     */
+    if (fn && (strcmp(st_nam,service) || strcmp(st_inst,instance)
+	       || strcmp(st_rlm,realm) || (st_kvno != s_kvno))) {
+        if (*fn == 0)
+	    fn = KEYFILE;
+        st_kvno = s_kvno;
+        if (read_service_key(service,instance,realm, (int)s_kvno,
+			     fn, (char *)skey) == 0) {
+	    if ((status = krb_set_key((char *)skey,0)))
+		return(status);
+#ifdef KRB4_USE_KEYTAB
+	} else if (krb54_get_service_keyblock(service, instance,
+					      realm, (int)s_kvno,
+					      fn, &keyblock) == 0) {
+	    krb_set_key_krb5(krb5__krb4_context, &keyblock);
+	    krb5_free_keyblock_contents(krb5__krb4_context, &keyblock);
+#endif
+	} else
+	    return RD_AP_UNDEC;
+
+	len = krb4int_strnlen(realm, sizeof(st_rlm)) + 1;
+	if (len <= 0)
+	    return KFAILURE;
+	memcpy(st_rlm, realm, (size_t)len);
+	len = krb4int_strnlen(service, sizeof(st_nam)) + 1;
+	if (len <= 0)
+	    return KFAILURE;
+	memcpy(st_nam, service, (size_t)len);
+	len = krb4int_strnlen(instance, sizeof(st_inst)) + 1;
+	if (len <= 0)
+	    return KFAILURE;
+	memcpy(st_inst, instance, (size_t)len);
+    }
+    return krb_rd_req_with_key(authent, service, instance,
+			       from_addr, ad,
+			       krb5_key ? NULL : serv_key,
+			       krb5_key ? &srv_k5key : NULL);
 }

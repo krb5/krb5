@@ -1,3 +1,15 @@
+2002-11-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (OBJS): Remove kadm_stream.o and kadm_err.o.  Also,
+	remove references to kadm_err.et.
+
+	* kadm_err.et: Remove.  It lives in lib/krb4 now.
+
+	* kadm_server.h: Remove some prototypes that were moved to
+	kadm.h.
+
+	* kadm_stream.c: Remove.  It lives in lib/krb4 now.
+
 2002-11-01  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_ser_wrap.c (kadm_ser_in): Apply fix for MITKRB5-SA-2002-002

@@ -165,8 +165,8 @@ $(OUTPRE)kerberos_v4.$(OBJEXT): kerberos_v4.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h kdc_util.h $(SRCTOP)/include/krb5/adm_proto.h \
   $(SRCTOP)/include/syslog.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/klog.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/kerberosIV/krb_err.h \
+  $(SRCTOP)/include/kerberosIV/klog.h $(SRCTOP)/include/kerberosIV/prot.h \
   $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/kdc.h \
   extern.h
 

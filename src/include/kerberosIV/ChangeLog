@@ -1,3 +1,31 @@
+2002-11-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (KRB4_HEADERS): Don't install kadm.h anymore.
+
+	* des.h: Put "#" characters in first column.  Do the
+	KRBINT_BEGIN_DECLS hack to make emacs happy.  Shuffle limits.h
+	inclusion to be outside C++ and Mac alignment magic.
+
+	* kadm.h: Remove some spurious prototypes.  Rename a bunch of
+	internal kadm_stream stuff to avoid stomping on namespace.  Add
+	prototypes for some client-side kadm stuff.
+
+	* krb.h: Do Mac CFM magic.  Do C++ mangling protection.  Do Mac
+	alignment magic.  Move inclusions outside of C++ mangling
+	protection and Mac magic.  Add KRB5_CALLCONV to a few functions
+	that KfM's krb.h exports.  Merge the *_in_tkt_*_creds,
+	mk_req_creds, and rd_req_int functions from KfM.  Add prototypes
+	for some KfM-specific things yet to be merged.
+
+	* prot.h: Don't include krb_conf.h anymore.  Twiddle the int
+	encoding/decoding macros a little.
+
+	* des_conf.h:
+	* highc.h:
+	* krb_conf.h:
+	* passwd_server.h:
+	* principal.h: Remove, since they're obsolete.
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in: Support install-headers

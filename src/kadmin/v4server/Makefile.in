@@ -13,13 +13,9 @@ LOCALINCLUDES = $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 PROG = kadmind4
 OBJS = kadm_server.o admin_server.o kadm_ser_wrap.o \
-	kadm_funcs.o kadm_stream.o kadm_supp.o acl_files.o kadm_err.o
+	kadm_funcs.o kadm_supp.o acl_files.o
 
 all:: $(PROG)
-
-kadm_err.c kadm_err.h: kadm_err.et
-
-$(OBJS): kadm_err.h
 
 $(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KDB5_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(KDB5_LIBS) \

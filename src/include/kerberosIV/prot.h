@@ -27,8 +27,6 @@
  * encoding and decoding.
  */
 
-#include <kerberosIV/krb_conf.h>
-
 #ifndef PROT_DEFS
 #define PROT_DEFS
 
@@ -100,20 +98,22 @@
  * that is a moving pointer of type (unsigned char *) into the buffer,
  * and assume that the caller has already bounds-checked.
  */
-#define KRB4_PUT32BE(p, val)				\
-do {							\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 24) & 0xff;	\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 16) & 0xff;	\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
-    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+#define KRB4_PUT32BE(p, val)			\
+do {						\
+    (p)[0] = ((KRB_UINT32)(val) >> 24) & 0xff;	\
+    (p)[1] = ((KRB_UINT32)(val) >> 16) & 0xff;	\
+    (p)[2] = ((KRB_UINT32)(val) >> 8)  & 0xff;	\
+    (p)[3] =  (KRB_UINT32)(val)        & 0xff;	\
+    (p) += 4;					\
 } while (0)
 
-#define KRB4_PUT32LE(p, val)				\
-do {							\
-    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 16) & 0xff;	\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 24) & 0xff;	\
+#define KRB4_PUT32LE(p, val)			\
+do {						\
+    (p)[0] =  (KRB_UINT32)(val)        & 0xff;	\
+    (p)[1] = ((KRB_UINT32)(val) >> 8)  & 0xff;	\
+    (p)[2] = ((KRB_UINT32)(val) >> 16) & 0xff;	\
+    (p)[3] = ((KRB_UINT32)(val) >> 24) & 0xff;	\
+    (p) += 4;					\
 } while (0)
 
 #define KRB4_PUT32(p, val, le)			\
@@ -124,16 +124,18 @@ do {						\
 	KRB4_PUT32BE((p), (val));		\
 } while (0)
 
-#define KRB4_PUT16BE(p, val)				\
-do {							\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
-    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+#define KRB4_PUT16BE(p, val)			\
+do {						\
+    (p)[0] = ((KRB_UINT32)(val) >> 8) & 0xff;	\
+    (p)[1] =  (KRB_UINT32)(val)       & 0xff;	\
+    (p) += 2;					\
 } while (0)
 
-#define KRB4_PUT16LE(p, val)				\
-do {							\
-    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+#define KRB4_PUT16LE(p, val)			\
+do {						\
+    (p)[0] =  (KRB_UINT32)(val)       & 0xff;	\
+    (p)[1] = ((KRB_UINT32)(val) >> 8) & 0xff;	\
+    (p) += 2;					\
 } while (0)
 
 #define KRB4_PUT16(p, val, le)			\
@@ -154,18 +156,20 @@ do {						\
  */
 #define KRB4_GET32BE(val, p)			\
 do {						\
-    (val) = (unsigned KRB4_32)*(p)++ << 24;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
-    (val) |= (unsigned KRB4_32)*(p)++;		\
+    (val)  = (KRB_UINT32)(p)[0] << 24;		\
+    (val) |= (KRB_UINT32)(p)[1] << 16;		\
+    (val) |= (KRB_UINT32)(p)[2] << 8;		\
+    (val) |= (KRB_UINT32)(p)[3];		\
+    (p) += 4;					\
 } while (0)
 
 #define KRB4_GET32LE(val, p)			\
 do {						\
-    (val) = (unsigned KRB4_32)*(p)++;		\
-    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 24;	\
+    (val)  = (KRB_UINT32)(p)[0];		\
+    (val) |= (KRB_UINT32)(p)[1] << 8;		\
+    (val) |= (KRB_UINT32)(p)[2] << 16;		\
+    (val) |= (KRB_UINT32)(p)[3] << 24;		\
+    (p) += 4;					\
 } while(0)
 
 #define KRB4_GET32(val, p, le)			\
@@ -178,14 +182,16 @@ do {						\
 
 #define KRB4_GET16BE(val, p)			\
 do {						\
-    (val) = (unsigned KRB4_32)*(p)++ << 8;	\
-    (val) |= (unsigned KRB4_32)*(p)++;		\
+    (val)  = (KRB_UINT32)(p)[0] << 8;		\
+    (val) |= (KRB_UINT32)(p)[1];		\
+    (p) += 2;					\
 } while (0)
 
 #define KRB4_GET16LE(val, p)			\
 do {						\
-    (val) = (unsigned KRB4_32)*(p)++;		\
-    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+    (val)  = (KRB_UINT32)(p)[0];		\
+    (val) |= (KRB_UINT32)(p)[1] << 8;		\
+    (p) += 2;					\
 } while (0)
 
 #define KRB4_GET16(val, p, le)			\

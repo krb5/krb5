@@ -1,3 +1,8 @@
+2002-11-26  Tom Yu  <tlyu@mit.edu>
+
+	* port-sockets.h: Add SOCKET_CONNECT, SOCKET_GETSOCKNAME, and
+	SOCKET_CLOSE to allow for porting of some KfM things.
+
 2002-11-14  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove references to adm_err.h from here too.

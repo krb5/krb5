@@ -1,3 +1,61 @@
+2002-11-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (OBJS, SRCS): Add change_password.c, kadm_err.c,
+	kadm_net.c, kadm_stream.c.  Remove one.c.
+	Also, add com_err support for kadm_err.et.  Update dependencies.
+
+	* change_password.c: New file.
+
+	* configure.in: Remove checks for BITS16, BITS32, MSBFIRST, and
+	LSBFIRST.
+
+	* g_in_tkt.c (krb_mk_in_tkt_preauth): Update to optionally return
+	local address --  not yet fully implemented.
+	(krb_parse_in_tkt_creds): Renamed from krb_parse_in_tkt().  Now
+	fills in a CREDENTIALS instead of storing into a ticket file.
+	(krb_get_in_tkt_preauth_creds): Renamed from
+	krb_get_in_tkt_preauth().  Now fills in a CREDENTIALS instead of
+	storing into a ticket file.
+	(krb_get_in_tkt_creds): Port from KfM.
+	(krb_get_in_tkt_preauth): Reimplement in terms of
+	krb_get_in_tkt_creds_preauth().
+
+	* g_pw_in_tkt.c (krb_get_pw_in_tkt_creds): Port from KfM.
+
+	* kadm_err.et:
+	* kadm_net.c:
+	* kadm_stream.c: New files to implement password changing, ported
+	from KfM.
+
+	* mk_req.c (krb_mk_req_creds_prealm): New internal function --
+	similar to krb_mk_req_creds() but takes the client's realm, since
+	it's needed for forming a correct request but is not present in a
+	CREDENTIALS.
+	(krb_mk_req): Reimplement in terms of krb_mk_req_creds_prealm().
+	Move the logic for acquiring credentials and determining client's
+	realm here.
+	(krb_mk_req_creds): Port from KfM.
+	(krb_set_lifetime): Make KRB5_CALLCONV now.
+
+	* one.c: Remove.
+
+	* password_to_key.c: New file, ported from KfM.  Will eventually
+	implement some string-to-key stuff.
+
+	* prot_client.c: Eliminate references to {LSB,MSB}_FIRST.
+
+	* prot_kdc.c: Eliminate references to {LSB,MSB}_FIRST.
+
+	* rd_req.c (krb_rd_req_with_key): New internal function -- can
+	take a key schedule or a krb5_keyblock and use one of those to
+	decrypt the ticket.
+	(krb_rd_req_int): Ported from KfM.  Calls into
+	krb_rd_req_with_key().
+	(krb_rd_req): Reimplement in terms of krb_rd_req_with_key().  Copy
+	some of the realm and kvno reading logic here.
+
+	* tkt_string.c: Returns pointer to const now.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

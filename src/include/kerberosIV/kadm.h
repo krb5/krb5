@@ -1,8 +1,8 @@
 /*
  * include/kerberosIV/kadm.h
  *
- * Copyright 1988, 1994 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1988, 1994, 2002 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,7 +23,9 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- * Definitions for Kerberos administration server & client
+ * Definitions for Kerberos administration server & client.  These
+ * should be considered private; among other reasons, it leaks all
+ * over the namespace.
  */
 
 #ifndef KADM_DEFS
@@ -47,18 +49,21 @@
 
 /* The global structures for the client and server */
 typedef struct {
-  struct sockaddr_in admin_addr;
-  struct sockaddr_in my_addr;
-  int my_addr_len;
-  int admin_fd;			/* file descriptor for link to admin server */
-  char sname[ANAME_SZ];		/* the service name */
-  char sinst[INST_SZ];		/* the services instance */
-  char krbrlm[REALM_SZ];
+    struct sockaddr_in admin_addr;
+    struct sockaddr_in my_addr;
+    int my_addr_len;
+    int admin_fd;		/* file descriptor for link to admin server */
+    char sname[ANAME_SZ];	/* the service name */
+    char sinst[INST_SZ];	/* the services instance */
+    char krbrlm[REALM_SZ];
+    /* KfM additions... */
+    int  default_port;
+    CREDENTIALS creds; /* The client's credentials (from krb_get_pw_in_tkt_creds)*/
 } Kadm_Client;
 
 typedef struct {		/* status of the server, i.e the parameters */
-   int inter;			/* Space for command line flags */
-   char *sysfile;		/* filename of server */
+    int inter;			/* Space for command line flags */
+    char *sysfile;		/* filename of server */
 } admin_params;			/* Well... it's the admin's parameters */
 
 /* Largest password length to be supported */
@@ -92,9 +97,9 @@ typedef struct {
     u_char         fields[FLDSZ];     /* The active fields in this struct */
     char           name[ANAME_SZ];
     char           instance[INST_SZ];
-    unsigned long  key_low;
-    unsigned long  key_high;
-    unsigned long  exp_date;
+    KRB_UINT32     key_low;
+    KRB_UINT32     key_high;
+    KRB_UINT32     exp_date;
     unsigned short attributes;
     unsigned char  max_life;
 } Kadm_vals;                    /* The basic values structure in Kadm */
@@ -143,18 +148,47 @@ DELACL
 #define KADM_CYGNUS_EXT_BASE 64
 #define DEL_ENT              (KADM_CYGNUS_EXT_BASE+1)
 
-extern long kdb_get_master_key();	/* XXX should be in krb_db.h */
-extern long kdb_verify_master_key();	/* XXX ditto */
-
-extern long krb_mk_priv(), krb_rd_priv(); /* XXX should be in krb.h */
-extern void krb_set_tkt_string();	/* XXX ditto */
-
-extern unsigned long quad_cksum();	/* XXX should be in des.h */
-
 #ifdef POSIX
 typedef void sigtype;
 #else
 typedef int sigtype;
 #endif
+
+/* Avoid stomping on namespace... */
+
+#define vals_to_stream		kadm_vals_to_stream
+#define build_field_header	kadm_build_field_header
+#define vts_string		kadm_vts_string
+#define vts_short		kadm_vts_short
+#define vts_long		kadm_vts_long
+#define vts_char		kadm_vts_char
+
+#define stream_to_vals		kadm_stream_to_vals
+#define check_field_header	kadm_check_field_header
+#define stv_string		kadm_stv_string
+#define stv_short		kadm_stv_short
+#define stv_long		kadm_stv_long
+#define stv_char		kadm_stv_char
+
+int vals_to_stream(Kadm_vals *, u_char **);
+int build_field_header(u_char *, u_char **);
+int vts_string(char *, u_char **, int);
+int vts_short(KRB_UINT32, u_char **, int);
+int vts_long(KRB_UINT32, u_char **, int);
+int vts_char(KRB_UINT32, u_char **, int);
+
+int stream_to_vals(u_char *, Kadm_vals *, int);
+int check_field_header(u_char *, u_char *, int);
+int stv_string(u_char *, char *, int, int, int);
+int stv_short(u_char *, u_short *, int, int);
+int stv_long(u_char *, KRB_UINT32 *, int, int);
+int stv_char(u_char *, u_char *, int, int);
+
+int kadm_init_link(char *, char *, char *, Kadm_Client *, int);
+int kadm_cli_send(Kadm_Client *, u_char *, size_t, u_char **, size_t *);
+int kadm_cli_conn(Kadm_Client *);
+void kadm_cli_disconn(Kadm_Client *);
+int kadm_cli_out(Kadm_Client *, u_char *, int, u_char **, size_t *);
+int kadm_cli_keyd(Kadm_Client *, des_cblock, des_key_schedule);
 
 #endif /* KADM_DEFS */

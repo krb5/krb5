@@ -27,24 +27,36 @@
  */
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <TargetConditionals.h>
-    #if TARGET_RT_MAC_CFM
-        #error "Use KfM 4.0 SDK headers for CFM compilation."
-    #endif
+#	include <TargetConditionals.h>
+#	if TARGET_RT_MAC_CFM
+#		error "Use KfM 4.0 SDK headers for CFM compilation."
+#	endif
+#endif
+
+#ifdef __cplusplus
+#ifndef KRBINT_BEGIN_DECLS
+#define KRBINT_BEGIN_DECLS	extern "C" {
+#define KRBINT_END_DECLS	}
+#endif
+#else
+#define KRBINT_BEGIN_DECLS
+#define KRBINT_END_DECLS
 #endif
 
 #ifndef KRB5INT_DES_TYPES_DEFINED
 #define KRB5INT_DES_TYPES_DEFINED
 
-#if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma import on
-        #pragma enumsalwaysint on
-    #endif
-    #pragma options align=mac68k
-#endif
-
 #include <limits.h>
+
+KRBINT_BEGIN_DECLS
+
+#if TARGET_OS_MAC
+#	if defined(__MWERKS__)
+#		pragma import on
+#		pragma enumsalwaysint on
+#	endif
+#	pragma options align=mac68k
+#endif
 
 #if UINT_MAX >= 0xFFFFFFFFUL
 #define DES_INT32 int
@@ -60,10 +72,12 @@ typedef unsigned char des_cblock[8];	/* crypto-block size */
  *
  * This used to be
  *
- * typedef struct des_ks_struct { union { DES_INT32 pad; des_cblock _;} __; } des_key_schedule[16];
+ * typedef struct des_ks_struct {
+ *     union { DES_INT32 pad; des_cblock _;} __;
+ * } des_key_schedule[16];
  *
- * but it would cause trouble if DES_INT32 is ever more than 4 bytes.
- * The reason is that all the encryption functions cast it to
+ * but it would cause trouble if DES_INT32 were ever more than 4
+ * bytes.  The reason is that all the encryption functions cast it to
  * (DES_INT32 *), and treat it as if it were DES_INT32[32].  If
  * 2*sizeof(DES_INT32) is ever more than sizeof(des_cblock), the
  * caller-allocated des_key_schedule will be overflowed by the key
@@ -74,12 +88,14 @@ typedef unsigned char des_cblock[8];	/* crypto-block size */
 typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma enumsalwaysint reset
-        #pragma import reset
-    #endif
-	#pragma options align=reset
+#	if defined(__MWERKS__)
+#		pragma enumsalwaysint reset
+#		pragma import reset
+#	endif
+#	pragma options align=reset
 #endif
+
+KRBINT_END_DECLS
 
 #endif /* KRB5INT_DES_TYPES_DEFINED */
 
@@ -94,18 +110,6 @@ typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
 #ifndef KRB5INT_CRYPTO_DES_INT
 #define DES_DEFS
 
-#if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma import on
-        #pragma enumsalwaysint on
-    #endif
-    #pragma options align=mac68k
-#endif
-
-#if defined(_WIN32) && !defined(_WINDOWS)
-#define _WINDOWS
-#endif
-
 #if defined(_WINDOWS)
 #ifndef KRB4
 #define KRB4 1
@@ -113,6 +117,20 @@ typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
 #include <win-mac.h>
 #endif
 #include <stdio.h> /* need FILE for des_cblock_print_file */
+
+KRBINT_BEGIN_DECLS
+
+#if TARGET_OS_MAC
+#	if defined(__MWERKS__)
+#		pragma import on
+#		pragma enumsalwaysint on
+#	endif
+#	pragma options align=mac68k
+#endif
+
+#if defined(_WIN32) && !defined(_WINDOWS)
+#define _WINDOWS
+#endif
 
 /* Windows declarations */
 #ifndef KRB5_CALLCONV
@@ -221,12 +239,14 @@ void des_set_sequence_number(des_cblock);
 #endif /* TARGET_OS_MAC */
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma enumsalwaysint reset
-        #pragma import reset
-    #endif
-	#pragma options align=reset
+#	if defined(__MWERKS__)
+#		pragma enumsalwaysint reset
+#		pragma import reset
+#	endif
+#	pragma options align=reset
 #endif
+
+KRBINT_END_DECLS
 
 #endif /* KRB5INT_CRYPTO_DES_INT */
 #endif	/* DES_DEFS */

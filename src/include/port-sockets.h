@@ -26,6 +26,9 @@ typedef WSABUF sg_buf;
 #define SOCKET_NFDS(f)          (0)     /* select()'s first arg is ignored */
 #define SOCKET_READ(fd, b, l)   (recv(fd, b, l, 0))
 #define SOCKET_WRITE(fd, b, l)  (send(fd, b, l, 0))
+#define SOCKET_CONNECT		connect	/* XXX */
+#define SOCKET_GETSOCKNAME	getsockname /* XXX */
+#define SOCKET_CLOSE		close /* XXX */
 #define SOCKET_EINTR            WSAEINTR
 
 /* Return -1 for error or number of bytes written.
@@ -119,6 +122,9 @@ typedef struct iovec sg_buf;
 #define SOCKET_NFDS(f)		((f)+1)	/* select() arg for a single fd */
 #define SOCKET_READ		read
 #define SOCKET_WRITE		write
+#define SOCKET_CONNECT		connect
+#define SOCKET_GETSOCKNAME	getsockname
+#define SOCKET_CLOSE		close
 #define SOCKET_EINTR		EINTR
 #define SOCKET_WRITEV_TEMP int
 /* Use TMP to avoid compiler warnings and keep things consistent with

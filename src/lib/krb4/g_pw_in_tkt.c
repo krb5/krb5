@@ -115,6 +115,18 @@ krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
 			  (decrypt_tkt_type)NULL, password));
 }
 
+int KRB5_CALLCONV
+krb_get_pw_in_tkt_creds(
+    char *user, char *instance, char *realm, char *service, char *sinstance,
+    int life, char *password, CREDENTIALS *creds)
+{
+    return krb_get_in_tkt_creds(user, instance, realm,
+				service, sinstance, life,
+				(key_proc_type)passwd_to_key,
+				NULL, password, creds);
+}
+
+
 /*
  * krb_get_pw_in_tkt_preauth() gets handed the password or key explicitly,
  * since the whole point of "pre" authentication is to prove that we've

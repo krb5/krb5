@@ -1,3 +1,10 @@
+2002-11-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Update dependencies.
+
+	* kerberos_v4.c: Inline some stuff formerly in krb_conf.h until we
+	get a chance to fix it properly.
+
 2002-11-03  Tom Yu  <tlyu@mit.edu>
 
 	* do_as_req.c (process_as_req): Fix previous patch; it caused an

@@ -1,7 +1,7 @@
 /*
  * lib/krb4/mk_req.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000 by the Massachusetts
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2002 by the Massachusetts
  * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -32,6 +32,8 @@
 
 extern int krb_ap_req_debug;
 static int lifetime = 255;		/* Default based on the TGT */
+
+static int krb_mk_req_creds_prealm(KTEXT, CREDENTIALS *, KRB4_32, char *);
 
 /*
  * krb_mk_req takes a text structure in which an authenticator is to
@@ -83,83 +85,51 @@ static int lifetime = 255;		/* Default based on the TGT */
  *                  all rounded up to multiple of 8.
  */
 
-int KRB5_CALLCONV
-krb_mk_req(authent, service, instance, realm, checksum)
+static int
+krb_mk_req_creds_prealm(authent, creds, checksum, myrealm)
     register	KTEXT authent;	/* Place to build the authenticator */
-    char	*service;	/* Name of the service */
-    char	*instance;	/* Service instance */
-    char	*realm;	/* Authentication domain of service */
+    CREDENTIALS	*creds;
     KRB4_32	checksum;	/* Checksum of data (optional) */
+    char	*myrealm;	/* Client's realm */
 {
     KTEXT_ST req_st; /* Temp storage for req id */
     KTEXT req_id = &req_st;
     unsigned char *p, *q, *reqid_lenp;
     int tl;			/* Tkt len */
     int idl;			/* Reqid len */
-    CREDENTIALS cr;             /* Credentials used by retr */
-    register KTEXT ticket = &(cr.ticket_st); /* Pointer to tkt_st */
-    int retval;                 /* Returned by krb_get_cred */
+    register KTEXT ticket;	/* Pointer to tkt_st */
     Key_schedule  key_s;
-    char krb_realm[REALM_SZ];	/* Our local realm, if not specified */
-    char myrealm[REALM_SZ];	/* Realm of our TGT */
     size_t realmlen, pnamelen, pinstlen, myrealmlen;
     unsigned KRB4_32 time_secs;
     unsigned KRB4_32 time_usecs;
 
-    /* get current realm if not passed in */
-    if (realm == NULL) {
-	retval = krb_get_lrealm(krb_realm, 1);
-	if (retval != KSUCCESS)
-	    return retval;
-	realm = krb_realm;
-    }
-
+    ticket = &creds->ticket_st;
     /* Get the ticket and move it into the authenticator */
     if (krb_ap_req_debug)
-        DEB (("Realm: %s\n",realm));
-    /* 
-     * Determine realm of these tickets.  We will send this to the
-     * KDC from which we are requesting tickets so it knows what to
-     * with our session key.
-     */
-    retval = krb_get_tf_realm(TKT_FILE, myrealm);
-    if (retval != KSUCCESS)
-	return retval;
+        DEB (("Realm: %s\n", creds->realm));
 
-    retval = krb_get_cred(service, instance, realm, &cr);
-    if (retval == RET_NOTKT) {
-	retval = get_ad_tkt(service, instance, realm, lifetime);
-        if (retval)
-            return retval;
-	retval = krb_get_cred(service, instance, realm, &cr);
-        if (retval)
-	    return retval;
-    }
-    if (retval != KSUCCESS)
-	return retval;
-
-    realmlen = strlen(realm) + 1;
+    realmlen = strlen(creds->realm) + 1;
     if (sizeof(authent->dat) < (1 + 1 + 1
 				+ realmlen
 				+ 1 + 1 + ticket->length)
 	|| ticket->length < 0 || ticket->length > 255) {
 	authent->length = 0;
-	memset(cr.session, 0, sizeof(cr.session));
+	memset(creds->session, 0, sizeof(creds->session));
 	return KFAILURE;
     }
 
     if (krb_ap_req_debug)
-        DEB (("%s %s %s %s %s\n", service, instance, realm,
-               cr.pname, cr.pinst));
+        DEB (("%s %s %s %s %s\n", creds->service, creds->instance,
+	      creds->realm, creds->pname, creds->pinst));
 
     p = authent->dat;
 
     /* The fixed parts of the authenticator */
     *p++ = KRB_PROT_VERSION;
     *p++ = AUTH_MSG_APPL_REQUEST;
-    *p++ = cr.kvno;
+    *p++ = creds->kvno;
 
-    memcpy(p, realm, realmlen);
+    memcpy(p, creds->realm, realmlen);
     p += realmlen;
 
     tl = ticket->length;
@@ -173,14 +143,14 @@ krb_mk_req(authent, service, instance, realm, checksum)
     if (krb_ap_req_debug)
         DEB (("Ticket->length = %d\n",ticket->length));
     if (krb_ap_req_debug)
-        DEB (("Issue date: %d\n",cr.issue_date));
+        DEB (("Issue date: %d\n",creds->issue_date));
 
-    pnamelen = strlen(cr.pname) + 1;
-    pinstlen = strlen(cr.pinst) + 1;
+    pnamelen = strlen(creds->pname) + 1;
+    pinstlen = strlen(creds->pinst) + 1;
     myrealmlen = strlen(myrealm) + 1;
     if (sizeof(req_id->dat) / 8 < (pnamelen + pinstlen + myrealmlen
 				   + 4 + 1 + 4 + 7) / 8) {
-	memset(cr.session, 0, sizeof(cr.session));
+	memset(creds->session, 0, sizeof(creds->session));
 	return KFAILURE;
     }
 
@@ -188,10 +158,10 @@ krb_mk_req(authent, service, instance, realm, checksum)
 
     /* Build request id */
     /* Auth name */
-    memcpy(q, cr.pname, pnamelen);
+    memcpy(q, creds->pname, pnamelen);
     q += pnamelen;
     /* Principal's instance */
-    memcpy(q, cr.pinst, pinstlen);
+    memcpy(q, creds->pinst, pinstlen);
     q += pinstlen;    
     /* Authentication domain */
     memcpy(q, myrealm, myrealmlen);
@@ -210,12 +180,12 @@ krb_mk_req(authent, service, instance, realm, checksum)
 
 #ifndef NOENCRYPTION
     /* Encrypt the request ID using the session key */
-    key_sched(cr.session, key_s);
+    key_sched(creds->session, key_s);
     pcbc_encrypt((C_Block *)req_id->dat, (C_Block *)req_id->dat,
-                 (long)req_id->length, key_s, &cr.session, 1);
+                 (long)req_id->length, key_s, &creds->session, 1);
     /* clean up */
     memset(key_s, 0, sizeof(key_s));
-    memset(cr.session, 0, sizeof(cr.session));
+    memset(creds->session, 0, sizeof(creds->session));
 #endif /* NOENCRYPTION */
 
     /* Copy it into the authenticator */
@@ -239,6 +209,61 @@ krb_mk_req(authent, service, instance, realm, checksum)
     return KSUCCESS;
 }
 
+int KRB5_CALLCONV
+krb_mk_req(authent, service, instance, realm, checksum)
+    register	KTEXT authent;	/* Place to build the authenticator */
+    char	*service;	/* Name of the service */
+    char	*instance;	/* Service instance */
+    char	*realm;	/* Authentication domain of service */
+    KRB4_32	checksum;	/* Checksum of data (optional) */
+{
+    char krb_realm[REALM_SZ];	/* Our local realm, if not specified */
+    char myrealm[REALM_SZ];	/* Realm of initial TGT. */
+    int retval;
+    CREDENTIALS creds;
+
+    /* get current realm if not passed in */
+    if (realm == NULL) {
+	retval = krb_get_lrealm(krb_realm, 1);
+	if (retval != KSUCCESS)
+	    return retval;
+	realm = krb_realm;
+    }
+    /*
+     * Determine realm of these tickets.  We will send this to the
+     * KDC from which we are requesting tickets so it knows what to
+     * with our session key.
+     */
+    retval = krb_get_tf_realm(TKT_FILE, myrealm);
+    if (retval != KSUCCESS)
+	retval = krb_get_lrealm(myrealm, 1);
+    if (retval != KSUCCESS)
+	return retval;
+
+    retval = krb_get_cred(service, instance, realm, &creds);
+    if (retval == RET_NOTKT) {
+	retval = get_ad_tkt(service, instance, realm, lifetime);
+        if (retval)
+            return retval;
+	retval = krb_get_cred(service, instance, realm, &creds);
+        if (retval)
+	    return retval;
+    }
+    if (retval != KSUCCESS)
+	return retval;
+
+    return krb_mk_req_creds_prealm(authent, &creds, checksum, myrealm);
+}
+
+int KRB5_CALLCONV
+krb_mk_req_creds(authent, creds, checksum)
+    register	KTEXT authent;	/* Place to build the authenticator */
+    CREDENTIALS	*creds;
+    KRB4_32	checksum;	/* Checksum of data (optional) */
+{
+    return krb_mk_req_creds_prealm(authent, creds, checksum, creds->realm);
+}
+
 /* 
  * krb_set_lifetime sets the default lifetime for additional tickets
  * obtained via krb_mk_req().
@@ -246,7 +271,7 @@ krb_mk_req(authent, service, instance, realm, checksum)
  * It returns the previous value of the default lifetime.
  */
 
-int
+int KRB5_CALLCONV
 krb_set_lifetime(newval)
 int newval;
 {
