@@ -1,3 +1,8 @@
+Wed Dec  7 16:58:59 1994    <tytso@rsx-11.mit.edu>
+
+	* fcc_write.c (krb5_fcc_store_addrs): If a null addresses is
+		passed in, don't core dump.
+
 Fri Nov 18 17:22:51 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_read.c (krb5_fcc_read_principal): Fix to return correct
