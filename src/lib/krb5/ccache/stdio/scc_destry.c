@@ -33,8 +33,10 @@ static char rcsid_scc_destry_c[] =
 krb5_error_code krb5_scc_destroy(id)
    krb5_ccache id;
 {
+#if 0
      unsigned long size;
      char zeros[BUFSIZ];
+#endif
      krb5_scc_data *data = (krb5_scc_data *) id->data;
      register int ret;
      
