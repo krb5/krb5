@@ -9,6 +9,7 @@ gssrpc_auth_gssapi_unwrap_data
 gssrpc_auth_gssapi_wrap_data
 gssrpc_authgss_create
 gssrpc_authgss_create_default
+gssrpc_authgss_get_private_data
 gssrpc_authgss_service
 gssrpc_authnone_create
 gssrpc_authunix_create

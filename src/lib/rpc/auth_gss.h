@@ -70,6 +70,15 @@ struct rpc_gss_sec {
 	gss_OID		mech;		/* mechanism */
 	gss_qop_t	qop;		/* quality of protection */
 	rpc_gss_svc_t	svc;		/* service */
+	gss_cred_id_t   cred;		/* cred handle */
+	uint32_t	req_flags;	/* req flags for init_sec_context */
+};
+
+/* Private data required for kernel implementation */
+struct authgss_private_data {
+	gss_ctx_id_t	pd_ctx;		/* Session context handle */
+	gss_buffer_desc	pd_ctx_hndl;	/* Credentials context handle */
+	uint32_t	pd_seq_win;	/* Sequence window */
 };
 
 /* Krb 5 default mechanism 
@@ -127,7 +136,8 @@ bool_t	xdr_rpc_gss_unwrap_data	(XDR *xdrs, xdrproc_t xdr_func, caddr_t
 
 AUTH   *authgss_create		(CLIENT *, gss_name_t, struct rpc_gss_sec *);
 AUTH   *authgss_create_default	(CLIENT *, char *, struct rpc_gss_sec *);
-bool_t authgss_service(AUTH *auth, int svc);
+bool_t authgss_service		(AUTH *auth, int svc);
+bool_t authgss_get_private_data (AUTH *auth, struct authgss_private_data *);
 
 #ifdef GSSRPC__IMPL
 void	log_debug		(const char *fmt, ...);

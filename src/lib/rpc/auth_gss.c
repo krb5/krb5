@@ -96,65 +96,50 @@ static struct auth_ops authgss_ops = {
 void
 print_rpc_gss_sec(struct rpc_gss_sec *ptr)
 {
-#if HAVE_HEIMDAL
 	int i;
 	char *p;
 
-	log_debug("rpc_gss_sec:\n");
+	log_debug("rpc_gss_sec:");
 	if(ptr->mech == NULL)
-		log_debug("NULL gss_OID mech\n");
+		log_debug("NULL gss_OID mech");
 	else {
-		log_debug("     gss_OID len: %d\n gss_OID elements:",
-			ptr->mech->length);
+		fprintf(stderr, "     mechanism_OID: {");
 		p = (char *)ptr->mech->elements;
-		log_debug("     ");
-		for(i=0;i<ptr->mech->length;i++)
-			log_debug("%u", (u_char)*p++);
-		log_debug("\n");
+		for (i=0; i < ptr->mech->length; i++)
+			/* First byte of OIDs encoded to save a byte */
+			if (i == 0) {
+				int first, second;
+				if (*p < 40) {
+					first = 0;
+					second = *p;
+				}
+				else if (40 <= *p && *p < 80) {
+					first = 1;
+					second = *p - 40;
+				}
+				else if (80 <= *p && *p < 127) {
+					first = 2;
+					second = *p - 80;
+				}
+				else {
+					/* Invalid value! */
+					first = -1;
+					second = -1;
+				}
+				fprintf(stderr, " %u %u", first, second);
+				p++;
+			}
+			else {
+				fprintf(stderr, " %u", (unsigned char)*p++);
+			}
+		fprintf(stderr, " }\n");
 	}
-	log_debug("     qop: %d\n",ptr->qop);
-	log_debug("     service: %d\n",ptr->svc);
-#else
-	OM_uint32 min_stat;
-	gss_buffer_desc msg;
-
-	if (ptr->mech == NULL)
-		log_debug("rpc_gss_sec: mech NULL, qop %d, svc %d",
-			  ptr->qop, ptr->svc);
-	else {
-		gss_oid_to_str(&min_stat, ptr->mech, &msg);
-
-		log_debug("rpc_gss_sec: mech %.*s, qop %d, svc %d",
-			  msg.length, (char *)msg.value,
-			  ptr->qop, ptr->svc);
-
-		gss_release_buffer(&min_stat, &msg);
-	}
-#endif
+	fprintf(stderr, "     qop: %d\n", ptr->qop);
+	fprintf(stderr, "     service: %d\n", ptr->svc);
+	fprintf(stderr, "     cred: %p\n", ptr->cred);
+	fprintf(stderr, "     req_flags: 0x%08x", ptr->req_flags);
 }
 #endif /*DEBUG*/
-
-/* Krb 5 default mechanism oid */
-#define KRB5OID  "1.2.840.113554.1.2.2"
-
-#define g_OID_equal(o1,o2) \
-   (((o1)->length == (o2)->length) && \
-    ((o1)->elements != 0) && ((o2)->elements != 0) && \
-    (memcmp((o1)->elements, (o2)->elements, (o1)->length) == 0))
-
-extern const gss_OID_desc * const gss_mech_krb5;
-#ifdef SPKM
-extern const gss_OID_desc * const gss_mech_spkm3;
-#endif /*SPKM*/
-
-/* from kerberos source, gssapi_krb5.c */
-static gss_OID_desc krb5oid = 
-   {9, "\052\206\110\206\367\022\001\002\002"};
-
-#if SPKM
-static gss_OID_desc spkm3oid = 
-   {7, "\052\006\001\005\005\001\003"};
-#endif /*SPKM*/
 
 struct rpc_gss_data {
 	bool_t			 established;	/* context established */
@@ -178,6 +163,7 @@ authgss_create(CLIENT *clnt, gss_name_t name, struct rpc_gss_sec *sec)
 {
 	AUTH			*auth, *save_auth;
 	struct rpc_gss_data	*gd;
+	OM_uint32		min_stat = 0;
 
 	log_debug("in authgss_create()");
 	
@@ -194,8 +180,19 @@ authgss_create(CLIENT *clnt, gss_name_t name, struct rpc_gss_sec *sec)
 		free(auth);
 		return (NULL);
 	}
+	if (name != GSS_C_NO_NAME) {
+		if (gss_duplicate_name(&min_stat, name, &gd->name)
+						!= GSS_S_COMPLETE) {
+			rpc_createerr.cf_stat = RPC_SYSTEMERROR;
+			rpc_createerr.cf_error.re_errno = ENOMEM;
+			free(auth);
+			return (NULL);
+		}
+	}
+	else
+		gd->name = name;
+
 	gd->clnt = clnt;
-	gd->name = name;
 	gd->ctx = GSS_C_NO_CONTEXT;
 	gd->sec = *sec;
 
@@ -244,11 +241,33 @@ authgss_create_default(CLIENT *clnt, char *service, struct rpc_gss_sec *sec)
 
 	auth = authgss_create(clnt, name, sec);
 	
- 	if(auth)
+ 	if (name != GSS_C_NO_NAME)
  		gss_release_name(&min_stat, &name);
 	
 	log_debug("authgss_create_default returning auth 0x%08x", auth);
 	return (auth);
+}
+
+bool_t
+authgss_get_private_data(AUTH *auth, struct authgss_private_data *pd)
+{
+	struct rpc_gss_data	*gd;
+
+	log_debug("in authgss_get_private_data()");
+
+	if (!auth || !pd)
+		return (FALSE);
+
+	gd = AUTH_PRIVATE(auth);
+
+	if (!gd || !gd->established)
+		return (FALSE);
+
+	pd->pd_ctx = gd->ctx;
+	pd->pd_ctx_hndl = gd->gc.gc_ctx;
+	pd->pd_seq_win = gd->win;
+
+	return (TRUE);
 }
 
 static void
@@ -395,22 +414,14 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 	print_rpc_gss_sec(&gd->sec);
 #endif /*DEBUG*/
 
-	if (g_OID_equal(gd->sec.mech, &krb5oid))
-		req_flags |= GSS_C_MUTUAL_FLAG;
-  
-#ifdef SPKM
-	if (g_OID_equal(gd->sec.mech, gss_mech_spkm3))
-		req_flags |= GSS_C_ANON_FLAG;
-#endif /*SPKM*/
-   
 	for (;;) {
 		gd->inprogress = TRUE;
 		maj_stat = gss_init_sec_context(&min_stat,
-						GSS_C_NO_CREDENTIAL,
+						gd->sec.cred,
 						&gd->ctx,
 						gd->name,
 						gd->sec.mech,
-						req_flags,
+						gd->sec.req_flags,
 						0,		/* time req */
 						NULL,		/* channel */
 						recv_tokenp,
@@ -581,13 +592,7 @@ authgss_destroy(AUTH *auth)
 	
 	if (gd->name != GSS_C_NO_NAME)
 		gss_release_name(&min_stat, &gd->name);
-#if 0
-#ifdef HAVE_HEIMDAL
-		gss_release_name(&min_stat, &gd->name);
-#else
-		gss_release_name(&min_stat, gd->name);
-#endif
-#endif
+
 	free(gd);
 	free(auth);
 }

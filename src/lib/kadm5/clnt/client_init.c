@@ -519,6 +519,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  sec.mech = gss_mech_krb5;
 	  sec.qop = GSS_C_QOP_DEFAULT;
 	  sec.svc = RPCSEC_GSS_SVC_PRIVACY;
+	  sec.cred = gss_client_creds;
+	  sec.req_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
 
 	  handle->clnt->cl_auth = authgss_create(handle->clnt,
 						 gss_target, &sec);

@@ -92,6 +92,7 @@
 
 #define authgss_create		gssrpc_authgss_create
 #define authgss_create_default	gssrpc_authgss_create_default
+#define authgss_get_private_data	gssrpc_authgss_get_private_data
 #define authgss_service		gssrpc_authgss_service
 
 #ifdef GSSRPC__IMPL

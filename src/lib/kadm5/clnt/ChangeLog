@@ -1,3 +1,8 @@
+2004-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Pass req_flags and cred to
+	auth_gss_create().
+
 2004-08-20  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c (_kadm5_init_any): Remove INIT_TEST ifdefs.  Use

@@ -1,3 +1,18 @@
+2004-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gss.c (authgss_get_private_data): New function.
+	(authgss_refresh): Remove explicit OID checks.
+	(authgss_create): Copy initiator name.
+	(authgss_destroy): Release copied initiator name.
+	(print_rpc_gss_sec): Explicitly code OID stringification.
+
+	* auth_gss.h: Add cred and req_flags to struct rpc_gss_sec.  New
+	structure authgss_private_data so kernel implementations can
+	retrieve context state.
+
+	* auth_gss.h, libgssrpc.exports, rename.h: Add
+	authgss_get_private_data.
+
 2004-10-18  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-unix): Install headers.
