@@ -1,5 +1,8 @@
 Mon Oct 24 14:46:07 1994    (tytso@rsx-11)
 
+	* kcmd.c (kcmd): Don't free host_save; it's supposed to be
+		returned by kcmd to the caller!
+
 	* configure.in
 	* krlogin.c (des_write): Don't check for srand48 and then try to
 		define srandom to be srand48.  This breaks on machines

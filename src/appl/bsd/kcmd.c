@@ -189,7 +189,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif
 #endif /* POSIX_SIGNALS */
 	    if (tmpstr) krb5_xfree(tmpstr);
-	    if (host_save) krb5_xfree(host_save);
 	    krb5_free_creds(ret_cred);
 	    return (-1);
     	}
@@ -239,7 +238,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif
 #endif /* POSIX_SIGNALS */
 	if (tmpstr) krb5_xfree(tmpstr);
-	if (host_save) krb5_xfree(host_save);
 	krb5_free_creds(ret_cred);
     	return (-1);
     }
@@ -411,7 +409,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif /* POSIX_SIGNALS */
     *sock = s;
     if (tmpstr) krb5_xfree(tmpstr);
-    if (host_save) krb5_xfree(host_save);
     
     /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(ret_cred,cred);
@@ -433,7 +430,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif
 #endif /* POSIX_SIGNALS */
     if (tmpstr) krb5_xfree(tmpstr);
-    if (host_save) krb5_xfree(host_save);
     if (ret_cred)
       krb5_free_creds(ret_cred);
     return (status);
