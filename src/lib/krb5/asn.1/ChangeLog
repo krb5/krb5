@@ -1,3 +1,14 @@
+Fri Jul  1 13:03:39 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* configure.in: redo "autoconf frobbage" since the old way didn't
+	work with srcdir. Now, AC_OUTPUT generates all three Makefiles,
+	and ISODEMAKEFILE is subst'ed in to be either Makefile.isode or
+	Makefile.sane. EXTRA_RULES_IN is used to append the extra stuff to
+	the end of the "real" one of the two.
+	* configure.in: krb5_encode.h and krb5_encode.h are source, not
+	generated, so use CopySrcHeader instead.
+
+
 Tue Jun 28 19:57:28 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in:
