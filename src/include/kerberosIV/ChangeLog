@@ -1,3 +1,8 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb.h: Do not include winsock.h for Win32, since we already use
+	port-sockets.h.  This avoids winsock.h vs winsock2.h issues.
+
 2002-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* lsb_addr_cmp.h (krb4int_address_less): Declare.

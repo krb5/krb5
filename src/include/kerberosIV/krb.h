@@ -34,7 +34,6 @@
 #include <kerberosIV/des.h>
 
 #ifdef _WINDOWS
-#include <winsock.h>
 #include <time.h>
 #endif /* _WINDOWS */
 
