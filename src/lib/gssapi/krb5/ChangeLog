@@ -1,3 +1,9 @@
+Tue Mar 25 01:00:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): A zero-length
+		token should be treated like a GSS_C_NO_BUFFER during the
+		initial context establishment.  [krb5-libs/352]
+
 Wed Nov 20 19:55:29 1996  Marc Horowitz  <marc@cygnus.com>
 
 	* init_sec_context.c (make_ap_rep, krb5_gss_init_sec_context),

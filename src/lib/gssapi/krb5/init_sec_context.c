@@ -304,9 +304,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	 return(GSS_S_NO_CRED);
       }
 
-      /* complain if the input token is nonnull */
+      /* complain if the input token is non-null */
 
-      if (input_token != GSS_C_NO_BUFFER) {
+      if (input_token != GSS_C_NO_BUFFER && input_token->length != 0) {
 	 *minor_status = 0;
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }
