@@ -4,6 +4,15 @@
 	New macros.
 	(k5_assert_locked, k5_assert_unlocked): New macros, may or may not
 	call the debug macros.
+	(K5_MUTEX_DEBUG_INITIALIZER): Use current file and line.
+	(k5_mutex_debug_finish_init, k5_mutex_debug_init,
+	k5_mutex_debug_destroy): Save current file and line.
+	(k5_mutex_debug_lock): Verify that the lock was unlocked before,
+	and set the state to locked.
+	(k5_mutex_debug_unlock): Verify that the mutex was locked before,
+	and set the state to unlocked.
+	(k5_debug_assert_locked, k5_debug_assert_unlocked): Use
+	k5_mutex_debug_check_init instead of checking initialized==1.
 
 2004-06-25  Ken Raeburn  <raeburn@mit.edu>
 

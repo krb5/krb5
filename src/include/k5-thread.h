@@ -156,16 +156,18 @@ typedef struct {
     short initialized;
     enum k5_mutex_debug_states locked;
 } k5_mutex_debug_info;
-#define K5_MUTEX_DEBUG_INITIALIZER	{ 0, 0, 2, K5_MUTEX_DEBUG_UNLOCKED }
-#define k5_mutex_debug_finish_init(M)		\
-	(assert((M)->initialized == 2), (M)->initialized = 1, 0)
+#define K5_MUTEX_DEBUG_INITIALIZER	{ __FILE__, __LINE__, 2, K5_MUTEX_DEBUG_UNLOCKED }
+#define k5_mutex_debug_finish_init(M)				\
+	(assert((M)->initialized == 2), (M)->initialized = 1,	\
+	 k5_mutex_debug_update_loc(M), 0)
 #define k5_mutex_debug_init(M)			\
 	((M)->initialized = 1,			\
 	 (M)->locked = K5_MUTEX_DEBUG_UNLOCKED,	\
-	 (M)->lineno = 0, (M)->filename = 0, 0)
+	 k5_mutex_debug_update_loc(M), 0)
 #define k5_mutex_debug_destroy(M)				\
 	(assert((M)->initialized == 1				\
 		&& (M)->locked == K5_MUTEX_DEBUG_UNLOCKED),	\
+	 k5_mutex_debug_update_loc(M),				\
 	 (M)->initialized = 0)
 #define k5_mutex_debug_check_init(M)		\
 	(assert((M)->initialized != 2),		\
@@ -174,17 +176,19 @@ typedef struct {
 #define k5_mutex_debug_update_loc(M)				\
 	((M)->lineno = __LINE__, (M)->filename = __FILE__)
 #define k5_mutex_debug_lock(M)					\
-	(k5_mutex_debug_check_init(M),				\
-	 k5_mutex_debug_update_loc(M), 0)
+	(k5_debug_assert_unlocked(M),				\
+	 k5_mutex_debug_update_loc(M),				\
+	 (M)->locked = K5_MUTEX_DEBUG_LOCKED, 0)
 #define k5_mutex_debug_unlock(M)				\
-	(k5_mutex_debug_check_init(M),				\
-	 k5_mutex_debug_update_loc(M), 0)
+	(k5_debug_assert_locked(M),				\
+	 k5_mutex_debug_update_loc(M),				\
+	 (M)->locked = K5_MUTEX_DEBUG_UNLOCKED, 0)
 #define k5_debug_assert_locked(M)				\
-	(assert((M)->initialized == 1),				\
+	(k5_mutex_debug_check_init(M),				\
 	 assert((M)->locked != K5_MUTEX_DEBUG_UNLOCKED),	\
 	 assert((M)->locked == K5_MUTEX_DEBUG_LOCKED), 0)
 #define k5_debug_assert_unlocked(M)				\
-	(assert((M)->initialized == 1),				\
+	(k5_mutex_debug_check_init(M),				\
 	 assert((M)->locked == K5_MUTEX_DEBUG_UNLOCKED), 0)
 
 typedef enum {
