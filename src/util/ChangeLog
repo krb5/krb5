@@ -1,3 +1,8 @@
+Tue Oct 11 19:07:09 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kbuild (MAKETARGETS): default to "all check" for make, but allow
+	override from config fragments.
+
 Mon Oct  3 23:36:12 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Don't build unifdef directory --- we don't need it

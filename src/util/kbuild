@@ -79,6 +79,7 @@ do
 done
 
 CONFIG_OPTS="-v"
+MAKETARGETS="all check"
 # echo ==== THISCONF: =====
 # cat $THISCONF
 # echo --------------------
@@ -153,7 +154,7 @@ echo "configuring with: $SRCDIR/configure $CONFIG_OPTS"
 $SRCDIR/configure $CONFIG_OPTS
 
 echo "Configuration done.  Building using the command:"
-echo "	(setenv PATH $PATH; make)"
+echo "	(setenv PATH $PATH; make $MAKETARGETS)"
 echo " "
 
-make
+make $MAKETARGETS
