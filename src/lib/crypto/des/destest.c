@@ -67,8 +67,8 @@ krb5_octet zeroblock[8] = {0,0,0,0,0,0,0,0};
 
 int
 main(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     char block1[17], block2[17], block3[17];
 
@@ -127,7 +127,7 @@ char *argv[];
     exit( (error > 256 && error % 256) ? 1 : error);
 }
 
-unsigned int value[128] = {
+int value[128] = {
 -1, -1, -1, -1, -1, -1, -1, -1,
 -1, -1, -1, -1, -1, -1, -1, -1,
 -1, -1, -1, -1, -1, -1, -1, -1,
@@ -148,11 +148,13 @@ unsigned int value[128] = {
 
 void
 convert(text, cblock)
-char *text;
-unsigned char cblock[];
+    char *text;
+    unsigned char cblock[];
 {
     register int i;
     for (i = 0; i < 8; i++) {
+	if (text[i*2] < 0 || text[i*2] >= 128)
+	    abort ();
 	if (value[(int) text[i*2]] == -1 || value[(int) text[i*2+1]] == -1) {
 	    printf("Bad value byte %d in %s\n", i, text);
 	    exit(1);

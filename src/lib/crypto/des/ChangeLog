@@ -1,5 +1,10 @@
 2001-06-21  Ken Raeburn  <raeburn@mit.edu>
 
+	* destest.c (value): Now signed int, since some entries are
+	negative.
+	(convert): Do bounds checking on character values used as indices
+	into value array.
+
 	* string2key.c (mit_des_string_to_key_int): Now static.
 
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
