@@ -2,6 +2,10 @@
 # Start of Win32 post-config lines (config/win-post.in)
 #
 
+setup-msg::
+	@set C_RULE_PRINT=	$(C_RULE_PRINT)
+	@set DO_C_RULE_PRINT=1
+
 !if defined(NO_OUTPRE) || defined(NO_OUTDIR)
 outpre-dir::
 !else

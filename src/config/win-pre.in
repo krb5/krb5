@@ -192,10 +192,6 @@ C_RULE_STUFF=$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c
 C_RULE_PRINT=$(C_RULE_STUFF)
 C_RULE=$(C_RULE_STUFF) $<
 
-setup-msg::
-	@set C_RULE_PRINT=	$(C_RULE_PRINT)
-	@set DO_C_RULE_PRINT=1
-
 {}.rc{$(OUTPRE)}.res:
 	$(RC) $(RCFLAGS) -fo $@ -r $<
 
