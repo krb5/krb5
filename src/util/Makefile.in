@@ -7,7 +7,7 @@ HOST_TYPE=@HOST_TYPE@
 HAVE_GCC=@HAVE_GCC@
 SLIBSH=sed -e 's,@''CC''@,$(CC),g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@''HAVE_GCC''@,$(HAVE_GCC),g'
 
-all-unix:: libupdate makeshlib
+all-recurse: libupdate makeshlib
 all-mac::
 all-windows: libupdate
 
