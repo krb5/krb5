@@ -1,6 +1,0 @@
-all::
-
-Krb5InstallManPage(krb.conf,$(FILE_MANDIR),$(FILE_MANSUFFIX))
-Krb5InstallManPage(krb.realms,$(FILE_MANDIR),$(FILE_MANSUFFIX))
-
-depend::
