@@ -1,3 +1,7 @@
+2001-08-31  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix clean-windows target to clean appl/gssftp/ftp.
+
 2001-08-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_CHECK_TYPE_WITH_HEADERS,

@@ -291,7 +291,7 @@ clean-windows:: Makefile-windows
 	$(MAKE) -$(MFLAGS) clean
 	@echo Making in appl\gssftp\ftp
 	cd ..\..\appl\gssftp\ftp
-	$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\..\..
 	@echo Making clean in root
 
