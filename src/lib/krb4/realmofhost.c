@@ -13,8 +13,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <netdb.h>		/* For struct hostent, gethostbyname, etc */
-#include <sys/param.h>		/* For MAXHOSTNAMELEN */
 #ifdef POSIX
 #include <stdlib.h>
 #else

@@ -1,3 +1,8 @@
+Sat Apr 29 00:33:47 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* g_phost.c: removed references to sys/param.h and netdb.h
+	* realmofhost.c: ditto
+
 Fri Apr 28 13:03:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* tf_util.c, configure.in: Added check for POSIX_FILE_LOCK to
