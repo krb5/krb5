@@ -655,8 +655,10 @@ has @i{inquire} privileges.
 @subsection Adding or Modifying Principals
 
 To add a principal to the database, use the kadmin @code{add_principal}
-command, which requires the ``add'' administrative privilege.  The
-syntax is:
+command, which requires the ``add'' administrative privilege.  This
+function creates the new principal and, if neither the -policy nor
+-clearpolicy options are specified and the policy ``default'' exists,
+assigns it that policy.  The syntax is:
 
 @smallexample
 @b{kadmin:} add_principal [@i{options}] @i{principal}
@@ -692,8 +694,9 @@ are:
 @end itemize
 
 @item -clearpolicy
-removes the current policy from a principal (@code{modify_principal}
-only).
+For @code{modify_principal}, removes the current policy from a
+principal.  For @code{add_principal}, suppresses the automatic
+assignment of the policy ``default''.
 
 @item -expire @i{date}
 Sets the expiration date of the principal to @i{date}.
@@ -709,9 +712,12 @@ Explicity sets the key version number to @i{number}.  @value{COMPANY}
 does not recommend doing this unless there is a specific reason.
 
 @item -policy @i{policy}
-Sets the policy used by this principal.  (@xref{Policies}.)  If no
-policy is supplied, the principal will have no policy, and @code{kadmin}
-will print a warning message.
+Sets the policy used by this principal.  (@xref{Policies}.)  With
+@code{modify_principal}, the current policy assigned to the principal is
+set or changed.  With @code{add_principal}, if this option is not
+supplied, the -clearpolicy is not specified, and the policy ``default''
+exists, that policy is assigned.  If a principal is created with no
+policy, @code{kadmin} will print a warning message.
 
 @item @{-|+@}allow_postdated
 The ``-allow_postdated'' option prohibits this principal from obtaining

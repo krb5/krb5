@@ -1,5 +1,8 @@
 Mon Nov  4 16:50:51 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* admin.texinfo (Adding or Modifying Principals): update kadmin
+ 	"default" policy semantics [krb5-doc/84]
+
 	* install.texinfo: various minor comments from jhawk [krb5-doc/55]
 
 Fri Nov  1 19:05:15 1996  Tom Yu  <tlyu@mit.edu>
