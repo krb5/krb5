@@ -121,6 +121,36 @@ profile_init_path(const_profile_filespec_list_t filepath,
 }
 
 errcode_t KRB5_CALLCONV
+profile_is_writable(profile_t profile, int *writable)
+{
+    if (!profile || profile->magic != PROF_MAGIC_PROFILE)
+        return PROF_MAGIC_PROFILE;
+    
+    if (!writable) 
+        return EINVAL;
+    
+    if (profile->first_file)
+        *writable = (profile->first_file->data->flags & PROFILE_FILE_RW);
+    
+    return 0;
+}
+
+errcode_t KRB5_CALLCONV
+profile_is_modified(profile_t profile, int *modified)
+{
+    if (!profile || profile->magic != PROF_MAGIC_PROFILE)
+        return PROF_MAGIC_PROFILE;
+    
+    if (!modified) 
+        return EINVAL;
+    
+    if (profile->first_file)
+        *modified = (profile->first_file->data->flags & PROFILE_FILE_DIRTY);
+    
+    return 0;
+}
+
+errcode_t KRB5_CALLCONV
 profile_flush(profile_t profile)
 {
 	if (!profile || profile->magic != PROF_MAGIC_PROFILE)
