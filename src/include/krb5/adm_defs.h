@@ -33,13 +33,10 @@
 #define ADM5_VERSIZE		strlen(ADM5_VERSTR)
 /* This used to be kerberos_master */
 #define ADM5_PORTNAME		"kerberos_adm"
-#define DEFAULT_ACL_NAME	"/krb5/.admin_acl_file"
+#define DEFAULT_ACL_NAME	"/krb5/admin_acl_file"
 #define ADM5_CPW_VERSION	"V5CPWS01"
 #define ADM5_ADM_VERSION	"V5ADMS01"
 #define CPWNAME			"kadmin"
-/* Instance used to be kerberos
-#define CPWINSTANCE		"kerberos"
-   Now, instance is realm */
 #define ADMINSTANCE		"admin"
 
 #define ADM_CPW_VERSION         "V5CPWS01"
