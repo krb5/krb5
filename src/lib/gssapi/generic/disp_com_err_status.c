@@ -21,7 +21,7 @@
  */
 
 #include "gssapiP_generic.h"
-#include <com_err.h>
+#include "com_err.h"
 
 /* XXXX internationalization!! */
 

@@ -21,7 +21,7 @@
  */
 
 #include "gssapiP_krb5.h"
-#include <com_err.h>
+#include "com_err.h"
 
 /* XXXX internationalization!! */
 

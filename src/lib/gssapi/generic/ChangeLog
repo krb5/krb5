@@ -1,6 +1,7 @@
 Tue Feb 28 00:25:58 1995  John Gilmore  (gnu at toad.com)
 
 	* gssapi.h:  Avoid <krb5/...> includes.
+	* disp_com_err_status.c:  Use "com_err.h" not <com_err.h>.
 
 Mon Feb 20 18:50:33 1995 Keith Vetter (keithv@fusion.com)
 
