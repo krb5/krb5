@@ -126,6 +126,7 @@
 	_krb5_verify_init_creds_opt_set_ap_req_nofail
 #
 	_krb5_set_default_tgs_enctypes
+	_krb5_get_permitted_enctypes
 #
 	_krb5_free_tgt_creds
 #
@@ -238,6 +239,7 @@
 	_krb5_kuserok
 #
 	_krb5_get_time_offsets
+	_krb5_set_real_time
 #
 	_krb5_string_to_cksumtype
 	_krb5_cksumtype_to_string
