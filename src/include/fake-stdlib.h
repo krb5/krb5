@@ -81,7 +81,9 @@ int close P((int ));
 int dup P((int ));
 int dup2 P((int , int ));
 int execve P((char *, char * [], char * []));
+#ifndef __GNUC__
 int _exit P((int ));
+#endif
 int fchmod P((int , int ));
 int fchown P((int , int , int ));
 int fcntl P((int , int , int ));
@@ -138,12 +140,7 @@ long atol P((char *));
 int bcmp P((char *, char *, int ));
 int bcopy P((const char *, char *, int ));
 int bzero P((char *, int ));
-#ifdef __GNUC__
-#include <stddef.h>
-void *calloc P((size_t, size_t));
-#else
-char *calloc P((unsigned , unsigned ));
-#endif
+void *calloc P((unsigned long, unsigned long));
 void closelog P((void ));
 int creat P((char *, int ));
 char *crypt P((char *, char *));
@@ -164,7 +161,9 @@ int execlp P((char *, char *, ...));
 int execv P((char *, char * []));
 int execvp P((char *, char * []));
 int exect P((char *, char * [], char * []));
+#ifndef __GNUC__
 int exit P((int ));
+#endif
 char *fcvt P((double , int , int *, int *));
 int ffs P((int ));
 #ifdef __GNUC__
@@ -209,9 +208,11 @@ char *malloc P((unsigned ));
 #endif
 char *memccpy P((char *, char *, int , int ));
 char *memchr P((char *, int , int ));
+#ifndef __GNUC__
 int memcmp P((char *, char *, int ));
 char *memcpy P((char *, const char *, int ));
 char *memset P((char *, int , int ));
+#endif
 char *mktemp P((char *));
 int mkstemp P((char *));
 double modf P((double , double *));
@@ -260,10 +261,6 @@ int setusershell P((void ));
 int siginterrupt P((int , int ));
 int sleep P((unsigned ));
 int srand P((int ));
-size_t strlen P((const char *));
-char *strncat P((char *, const char *, int ));
-int strncmp P((const char *, const char *, int ));
-char *strncpy P((char *, const char *, int ));
 int swab P((char *, char *, int ));
 void syslog P((int , const char *, ...));
 int system P((char *));
@@ -278,7 +275,9 @@ int usleep P((unsigned ));
 int utime P((char *, time_t *));
 char *valloc P((unsigned ));
 int vlimit P((int , int ));
+#ifndef __GNUC__
 void abort P((void));
+#endif
 
 #endif /* VAX */
 
@@ -692,7 +691,7 @@ extern int    atoi P((const char *));
 
 #ifndef abs
 extern int abs(int);
-#ifdef __HIGHC__
+#if 0 /* used to be __HIGHC__; that interferes with jfc's c89 stdlib.h */
 #define	abs(x)	_abs(x)
 #endif
 #endif
