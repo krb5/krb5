@@ -226,5 +226,5 @@
 #com_err -- we should really have this in a separate lib!
 #	add_error_table
 #	remove_error_table
-#	error_message
+	error_message
 	
