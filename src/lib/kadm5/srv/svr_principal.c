@@ -1138,8 +1138,8 @@ kadm5_launch_task (krb5_context context,
                 if (krb5_net_write (context, data_pipe[1],
                                     data_buffer, strlen (data_buffer)) < 0) {
                     /* kill the child to make sure waitpid() won't hang later */
-                    kill (pid, SIGKILL);
                     ret = errno;
+                    kill (pid, SIGKILL);
                 }
             }
 
