@@ -193,7 +193,7 @@ static void display_status_1(m, code, type)
 /* XXX yuck.  the signal handlers need this */
 static krb5_context context;
 
-static krb5_context gctx, hctx;
+static krb5_context hctx;
 
 int main(int argc, char *argv[])
 {
@@ -500,11 +500,6 @@ int main(int argc, char *argv[])
       * This prevents kadmind from needing to use an actual file-based
       * keytab.
       */
-     ret = kg_get_context(&minor_status, &gctx);
-     if (ret) {
-	  krb5_klog_syslog(LOG_ERR, "Can't get krb5_gss internal context.");
-	  goto kterr;
-     }
      /* XXX extract kadm5's krb5_context */
      hctx = ((kadm5_server_handle_t)global_server_handle)->context;
      /* Set ktkdb's internal krb5_context. */
@@ -519,7 +514,7 @@ int main(int argc, char *argv[])
 	  krb5_klog_syslog(LOG_ERR, "Can't set master key for kdb keytab.");
 	  goto kterr;
      }
-     ret = krb5_kt_register(gctx, &krb5_kt_kdb_ops);
+     ret = krb5_kt_register(context, &krb5_kt_kdb_ops);
      if (ret) {
 	  krb5_klog_syslog(LOG_ERR, "Can't register kdb keytab.");
 	  goto kterr;

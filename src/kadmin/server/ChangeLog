@@ -1,3 +1,10 @@
+2004-03-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* ovsec_kadmd.c (main): Use any handy krb5 context to register
+	the KDB keytab type, we don't need to pluck it out of the GSSAPI
+	krb5 mechanism.
+	(gctx): Variable deleted.
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJS, $(PROG)): Link against apputils lib instead
