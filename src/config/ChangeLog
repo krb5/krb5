@@ -1,5 +1,13 @@
 2004-06-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* pre.in (AUTOCONF, AUTOHEADER): Always set to autoconf and
+	autoheader respectively.
+	(AUTOCONFFLAGS, AUTOHEADERFLAGS): Always set to empty.
+	* post.in (Makefile): Always run autoconf with --include, don't
+	bother with --localdir any more.  Don't delete autom4te.cache
+	here.
+	(clean-unix): Delete autom4te.cache.
+
 	* shlib.conf (*-*-darwin*, *-*-rhapsody*): Add
 	-Wl,-search_paths_first to linker flags.
 
