@@ -37,62 +37,45 @@ static char rcsid_policy_c[] =
 
 #include "kdc_util.h"
 
-/*ARGSUSED*/
-krb5_boolean
-against_postdate_policy(fromtime)
-krb5_timestamp fromtime;
+int
+against_local_policy_as(request, client, server, kdc_time, status)
+register krb5_kdc_req *request;
+krb5_db_entry client;
+krb5_db_entry server;
+krb5_timestamp kdc_time;
+char	**status;
 {
-    return FALSE;
+    return 0;			/* not against policy */
 }
 
-krb5_boolean
-against_flag_policy_as(request)
-const register krb5_kdc_req *request;
+/*
+ * This is where local policy restrictions for the TGS should placed.
+ */
+krb5_error_code
+against_local_policy_tgs(request, server, ticket, status)
+register krb5_kdc_req *request;
+krb5_db_entry server;
+krb5_ticket *ticket;
+char **status;
 {
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
-	isflagset(request->kdc_options, KDC_OPT_PROXY) ||
-	isflagset(request->kdc_options, KDC_OPT_RENEW) ||
-	isflagset(request->kdc_options, KDC_OPT_VALIDATE) ||
-	isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
-	return TRUE;			/* against policy */
-
-    return FALSE;			/* not against policy */
+#ifdef 0
+    /*
+     * For example, if your site wants to disallow ticket forwarding,
+     * you might do something like this:
+     */
+    
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
+	*status = "FORWARD POLICY";
+	return KRB5KDC_ERR_POLICY;
+    }
+#endif
+    
+    return 0;				/* not against policy */
 }
 
-krb5_boolean
-against_flag_policy_tgs(request, ticket)
-const register krb5_kdc_req *request;
-const register krb5_ticket *ticket;
-{
 
-    if (((isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
-	  isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) &&
-	 !isflagset(ticket->enc_part2->flags,
-		TKT_FLG_FORWARDABLE)) || /* TGS must be forwardable to get
-					    forwarded or forwardable ticket */
 
-	((isflagset(request->kdc_options, KDC_OPT_PROXY) ||
-	  isflagset(request->kdc_options, KDC_OPT_PROXIABLE)) &&
-	 !isflagset(ticket->enc_part2->flags,
-		TKT_FLG_PROXIABLE)) ||	/* TGS must be proxiable to get
-					   proxiable ticket */
 
-	((isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) ||
-	  isflagset(request->kdc_options, KDC_OPT_POSTDATED)) &&
-	 !isflagset(ticket->enc_part2->flags,
-		TKT_FLG_MAY_POSTDATE)) || /* TGS must allow postdating to get
-					   postdated ticket */
-	 
-	(isflagset(request->kdc_options, KDC_OPT_VALIDATE) &&
-	 !isflagset(ticket->enc_part2->flags,
-		TKT_FLG_INVALID)) || 	/* can only validate invalid tix */
 
-	((isflagset(request->kdc_options, KDC_OPT_RENEW) ||
-	  isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) &&
-	 !isflagset(ticket->enc_part2->flags,
-		TKT_FLG_RENEWABLE))) 	/* can only renew renewable tix */
 
-	return TRUE;			/* against policy */
 
-    return FALSE;			/* XXX not against policy */
-}

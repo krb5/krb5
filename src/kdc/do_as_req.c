@@ -32,6 +32,7 @@ static char rcsid_do_as_req_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
+#include <krb5/preauth.h>
 #include <krb5/los-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
@@ -43,8 +44,10 @@ static char rcsid_do_as_req_c[] =
 #ifdef KRB5_USE_INET
 #include <sys/types.h>
 #include <netinet/in.h>
+#ifndef hpux
 #include <arpa/inet.h>
-#endif
+#endif	/* hpux */
+#endif /* KRB5_USE_INET */
 
 #include "kdc_util.h"
 #include "policy.h"
@@ -53,12 +56,58 @@ static char rcsid_do_as_req_c[] =
 static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
 						   int,
 						   krb5_data **));
-
 /*
- * Do all the processing required for a AS_REQ
+ * This routine is called to verify the preauthentication information
+ * for a V5 request.  Client contains information about the principal
+ * from the database. Padata contains pre-auth info received from
+ * the network.
+ *
+ * Returns 0 if the pre-authentication is valid, non-zero to indicate
+ * an error code of some sort.
  */
 
-/* XXX needs lots of cleanup and modularizing */
+static krb5_error_code
+check_padata (client, src_addr, padata, pa_id, flags)
+    krb5_db_entry  *client;
+    krb5_address **src_addr;
+    krb5_pa_data **padata;
+    int *pa_id;			/* Unique id which can be used for replay
+				   of padata. */
+    int *flags;
+{
+    krb5_encrypted_keyblock *enckey;
+    krb5_keyblock tmpkey;
+    krb5_error_code retval;
+   
+    enckey = &(client->key);
+    /* 	Extract client key/alt_key from master key */
+   
+    retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey);
+    if (retval) {
+	syslog( LOG_ERR, "AS_REQ: Unable to Extract Client Key/alt_key\n");
+	return(0);
+    }
+    retval =  krb5_verify_padata(*padata,client->principal,src_addr,
+				 &tmpkey, pa_id, flags);
+    memset((char *)tmpkey.contents, 0, tmpkey.length);
+    xfree(tmpkey.contents);
+    if (retval && client->alt_key.length) {
+	/*
+	 * If we failed, try again with the alternative key
+	 */
+	enckey = &(client->alt_key);
+	/* Extract client key/alt_key from master key */
+	if (retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey)){
+	    syslog( LOG_ERR, "AS_REQ: Unable to Extract Client Key/alt_key\n");
+	    return(0);
+	}
+	retval = krb5_verify_padata(*padata,client->principal,src_addr,
+				    &tmpkey, pa_id, flags);
+	memset((char *)tmpkey.contents, 0, tmpkey.length);
+	xfree(tmpkey.contents);
+    }
+    return retval;
+}
 
 /*ARGSUSED*/
 krb5_error_code
@@ -75,13 +124,17 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_ticket ticket_reply;
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_error_code retval;
+    int	errcode;
     int nprincs;
+    char cpw_service[255];
+    int pwreq, pa_id, pa_flags;
     krb5_boolean more;
-    krb5_timestamp kdc_time;
+    krb5_timestamp kdc_time, authtime;
     krb5_keyblock *session_key;
     krb5_keyblock encrypting_key;
     krb5_enctype useetype;
     krb5_pa_data *padat_tmp[2], padat_local;
+    char *status;
 
     register int i;
 
@@ -106,19 +159,24 @@ krb5_data **response;			/* filled in with a response packet */
     }
 #ifdef KRB5_USE_INET
     if (from->address->addrtype == ADDRTYPE_INET)
-	fromstring = inet_ntoa(*(struct in_addr *)from->address->contents);
+	fromstring = (char *) inet_ntoa(*(struct in_addr *)from->address->contents);
 #endif
     if (!fromstring)
 	fromstring = "<unknown>";
 
-    if (is_secondary)
-	syslog(LOG_INFO, "AS_REQ; host %s, %s for %s", fromstring, cname,
-	       sname);
-    else
-	syslog(LOG_INFO, "AS_REQ: host %s, %s for %s", fromstring, cname,
-	       sname);
-    free(cname);
-    free(sname);
+    /*
+     * Special considerations are allowed when changing passwords. Is
+     * this request for changepw?
+     *
+     * XXX This logic should be moved someplace else, perhaps the
+     * site-specific policiy file....
+     */
+    pwreq = 0;
+    sprintf(cpw_service, "%s@%s", "changepw/kerberos", 
+	    krb5_princ_realm(request->server)->data);
+    if (strcmp(sname, cpw_service) == 0) pwreq++;
+
+#define cleanup() { free(cname); free(sname); }
 
     nprincs = 1;
     if (retval = krb5_db_get_principal(request->client, &client, &nprincs,
@@ -126,44 +184,66 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     if (more) {
 	krb5_db_free_principal(&client, nprincs);
+	cleanup();
 	return(prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
     } else if (nprincs != 1) {
 	krb5_db_free_principal(&client, nprincs);
+	cleanup();
+#ifdef KRBCONF_VAGUE_ERRORS
+	return(prepare_error_as(request, KRB_ERR_GENERIC, response));
+#else
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN, response));
-    }	
+#endif
+    }
+    
+#undef cleanup
+#define cleanup() { krb5_db_free_principal(&client, 1); \
+		    free(sname); free(cname);}
 	
     nprincs = 1;
     if (retval = krb5_db_get_principal(request->server, &server, &nprincs,
 				       &more))
 	return(retval);
     if (more) {
-	krb5_db_free_principal(&client, 1);
+	cleanup();
 	krb5_db_free_principal(&server, nprincs);
 	return(prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
     } else if (nprincs != 1) {
-	krb5_db_free_principal(&client, 1);
+	cleanup();
 	krb5_db_free_principal(&server, nprincs);
 	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN, response));
     }
 
-#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); }
+#undef cleanup
+#define cleanup() {krb5_db_free_principal(&client, 1); \
+		   krb5_db_free_principal(&server, 1); \
+		   free(cname); free(sname);  \
+	       }
 
-    if (retval = check_kdb_flags_as(request, client, server)) {
-	cleanup();
-	return(prepare_error_as(request, retval, response));
-    }
-      
     if (retval = krb5_timeofday(&kdc_time)) {
+	syslog(LOG_INFO, "AS_REQ: TIME_OF_DAY: host %s, %s for %s", 
+                  fromstring, cname, sname);
 	cleanup();
 	return(retval);
     }
 
+    status = "UNKNOWN REASON";
+    if (retval = validate_as_request(request, client, server,
+				     kdc_time, &status)) {
+	syslog(LOG_INFO, "AS_REQ: %s: host %s, %s for %s", status,
+                  fromstring, cname, sname);
+	cleanup();
+	return(prepare_error_as(request, retval, response));
+    }
+      
     for (i = 0; i < request->netypes; i++)
 	if (valid_etype(request->etype[i]))
 	    break;
     if (i == request->netypes) {
 	/* unsupported etype */
-
+	    
+	syslog(LOG_INFO, "AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
+                  fromstring, cname, sname);
 	cleanup();
 	return(prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response));
     }
@@ -171,6 +251,8 @@ krb5_data **response;			/* filled in with a response packet */
 
     if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
 	/* random key failed */
+	syslog(LOG_INFO, "AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
+                  fromstring, cname, sname);
 	cleanup();
 	return(retval);
     }
@@ -178,6 +260,7 @@ krb5_data **response;			/* filled in with a response packet */
 #undef cleanup
 #define cleanup() {krb5_db_free_principal(&client, 1); \
 		   krb5_db_free_principal(&server, 1); \
+		   free(cname); free(sname); \
 		   krb5_free_keyblock(session_key); }
 
     ticket_reply.server = request->server;
@@ -187,24 +270,18 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.flags = 0;
     setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
 
-        /* It should be noted that local policy may affect the  */
+    	/* It should be noted that local policy may affect the  */
         /* processing of any of these flags.  For example, some */
         /* realms may refuse to issue renewable tickets         */
-
-    if (against_flag_policy_as(request)) {
-	cleanup();
-	return(prepare_error_as(request, KDC_ERR_BADOPTION, response));
-    }
 
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
 	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 
     if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE))
-	setflag(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
+	    setflag(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
 
     if (isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
-	setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
-
+	    setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
     enc_tkt_reply.session = session_key;
     enc_tkt_reply.client = request->client;
@@ -214,10 +291,6 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.times.authtime = kdc_time;
 
     if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
-	if (against_postdate_policy(request->from)) {
-	    cleanup();
-	    return(prepare_error_as(request, KDC_ERR_POLICY, response));
-	}
 	setflag(enc_tkt_reply.flags, TKT_FLG_INVALID);
 	enc_tkt_reply.times.starttime = request->from;
     } else
@@ -232,9 +305,9 @@ krb5_data **response;			/* filled in with a response packet */
 		min(enc_tkt_reply.times.starttime + server.max_life,
 		    enc_tkt_reply.times.starttime + max_life_for_realm)));
 
-    /* XXX why && request->till ? */
-    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) && 
-	request->till && (enc_tkt_reply.times.endtime < request->till)) {
+    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
+	!isflagset(client.attributes, KRB5_KDB_DISALLOW_RENEWABLE) &&
+	(enc_tkt_reply.times.endtime < request->till)) {
 
 	/* we set the RENEWABLE option for later processing */
 
@@ -243,9 +316,11 @@ krb5_data **response;			/* filled in with a response packet */
     }
     rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 
-    /* should we squelch the output renew_till to be no earlier
-       than the endtime of the ticket? XXX */
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) {
+	/*
+	 * XXX Should we squelch the output renew_till to be no
+	 * earlier than the endtime of the ticket? 
+	 */
 	setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
 	enc_tkt_reply.times.renew_till =
 	    min(rtime, enc_tkt_reply.times.starttime +
@@ -261,9 +336,72 @@ krb5_data **response;			/* filled in with a response packet */
 	enc_tkt_reply.times.starttime = 0;
 
     enc_tkt_reply.caddrs = request->addresses;
-    enc_tkt_reply.authorization_data = 0; /* XXX? */
+    enc_tkt_reply.authorization_data = 0;
 
-    ticket_reply.enc_part2 = &enc_tkt_reply;
+    /* 
+     * Check the preauthentication if it is there.
+     */
+    if (request->padata) {
+	retval = check_padata(&client,request->addresses,
+			      request->padata, &pa_id, &pa_flags);
+	if (retval) {
+#ifdef KRBCONF_KDC_MODIFIES_KDB
+	    /*
+	     * Note: this doesn't work if you're using slave servers!!!
+	     * It also causes the database to be modified (and thus
+	     * need to be locked) frequently.
+	     */
+	    if (client.fail_auth_count < KRB5_MAX_FAIL_COUNT) {
+		client.fail_auth_count = client.fail_auth_count + 1;
+		if (client.fail_auth_count == KRB5_MAX_FAIL_COUNT) { 
+		    client.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
+		}
+	    }
+            krb5_db_put_principal(&client, &one);
+#endif
+            syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
+		   fromstring, cname, sname, error_message(retval));
+            cleanup();
+#ifdef KRBCONF_VAGUE_ERRORS
+            return(prepare_error_as(request, KRB_ERR_GENERIC, response));
+#else
+	    retval -= ERROR_TABLE_BASE_krb5;
+	    if ((retval < 0) || (retval > 127))
+		    retval = KDC_PREAUTH_FAILED;
+            return(prepare_error_as(request, retval, response));
+#endif
+	} 
+
+	setflag(enc_tkt_reply.flags, TKT_FLG_PRE_AUTH);
+	/*
+	 * If pa_type is one in which additional hardware authentication
+	 * was performed set TKT_FLG_HW_AUTH too.
+	 */
+	if (pa_flags & KRB5_PREAUTH_FLAGS_HARDWARE)
+            setflag(enc_tkt_reply.flags, TKT_FLG_HW_AUTH);
+    }
+
+    /*
+     * Final check before handing out ticket: If the client requires
+     * Hardware authentication, verify ticket flag is set
+     */  
+
+    if (isflagset(client.attributes, KRB5_KDB_REQUIRES_HW_AUTH) &&
+	!isflagset(enc_tkt_reply.flags, TKT_FLG_HW_AUTH)) {
+
+	  /* Of course their are always exceptions, in this case if the
+	     service requested is for changing of the key (password), then
+	     if TKT_FLG_PRE_AUTH is set allow it. */
+	
+	  if (!pwreq || !(enc_tkt_reply.flags & TKT_FLG_PRE_AUTH)){
+              syslog(LOG_INFO, "AS_REQ: Needed HW preauth: host %s, %s for %s",
+		     fromstring, cname, sname);
+              cleanup();
+              return(prepare_error_as(request, KRB_ERR_GENERIC, response));
+	  }
+      }
+
+ticket_reply.enc_part2 = &enc_tkt_reply;
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
@@ -286,6 +424,7 @@ krb5_data **response;			/* filled in with a response packet */
 		   krb5_free_keyblock(session_key); \
 		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
 			 ticket_reply.enc_part.ciphertext.length); \
+		   free(cname); free(sname); \
 		   free(ticket_reply.enc_part.ciphertext.data);}
 
     /* Start assembling the response */
@@ -335,7 +474,9 @@ krb5_data **response;			/* filled in with a response packet */
 		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
 			 ticket_reply.enc_part.ciphertext.length); \
 		   free(ticket_reply.enc_part.ciphertext.data); \
-		   if (client.salt_type == KRB5_KDB_SALTTYPE_NOREALM) xfree(padat_tmp[0]->contents);}
+		   free(cname); free(sname); \
+		   if (client.salt_type == KRB5_KDB_SALTTYPE_NOREALM) \
+		       xfree(padat_tmp[0]->contents);}
 
     reply.client = request->client;
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
@@ -357,7 +498,7 @@ krb5_data **response;			/* filled in with a response packet */
     /* copy the time fields EXCEPT for authtime; it's location
        is used for ktime */
     reply_encpart.times = enc_tkt_reply.times;
-    reply_encpart.times.authtime = kdc_time;
+    reply_encpart.times.authtime = authtime = kdc_time;
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
 
@@ -379,6 +520,22 @@ krb5_data **response;			/* filled in with a response packet */
     memset(reply.enc_part.ciphertext.data, 0,
 	   reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
+
+    if (retval) {
+	syslog(LOG_INFO, "AS_REQ; ENCODE_KDC_REP: host %s, %s for %s",
+	       fromstring, cname, sname);
+    } else {
+	if (is_secondary)
+	    syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
+	else
+	    syslog(LOG_INFO, "AS_REQ: ISSUE: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
+    }
+
+    free(cname);
+    free(sname);
+
     return retval;
 }
 

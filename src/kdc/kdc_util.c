@@ -178,13 +178,6 @@ krb5_tkt_authent **ret_authdat;
     authdat->ticket = apreq->ticket;
     *ret_authdat = authdat;
 
-    /* Verify that the server principal in authdat->ticket is
-       the ticket granting service.  */
-    if (! krb5_principal_compare (authdat->ticket->server, tgs_server)) {
-	cleanup_apreq();
-	return KRB5KRB_AP_ERR_NOT_US;
-    }
-
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
         cleanup_apreq();
@@ -611,5 +604,380 @@ krb5_principal server;
 	strcat(trans,realm);
 	new_trans->length = strlen(trans) + 1;
     }
+    return 0;
+}
+
+/*
+ * Routines that validate a AS request; checks a lot of things.  :-)
+ *
+ * Returns a Kerberos protocol error number, which is _not_ the same
+ * as a com_err error number!
+ */
+#define AS_OPTIONS_HANDLED (KDC_OPT_FORWARDABLE | KDC_OPT_PROXIABLE | \
+			     KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED | \
+			     KDC_OPT_RENEWABLE | KDC_OPT_RENEWABLE_OK)
+int
+validate_as_request(request, client, server, kdc_time, status)
+register krb5_kdc_req *request;
+krb5_db_entry client;
+krb5_db_entry server;
+krb5_timestamp kdc_time;
+char	**status;
+{
+    int		errcode;
+    
+    /*
+     * If an illegal option is set, complain.
+     */
+    if (request->kdc_options & ~(AS_OPTIONS_HANDLED)) {
+	*status = "INVALID AS OPTIONS";
+	return KDC_ERR_BADOPTION;
+    }
+
+     /* An AS request must include the addresses field */
+    if (request->addresses == 0) {
+	*status = "NO ADDRESS";
+	return KRB_AP_ERR_BADADDR;
+    }
+    
+    /* The client's password must not be expired */
+    if (client.pw_expiration && client.pw_expiration < kdc_time) {
+	*status = "CLIENT KEY EXPIRED";
+#ifdef KRBCONF_VAGUE_ERRORS
+	return(KRB_ERR_GENERIC);
+#else
+	return(KDC_ERR_KEY_EXP);
+#endif
+    }
+
+    /* The client must not be expired */
+    if (client.expiration && client.expiration < kdc_time) {
+	*status = "CLIENT EXPIRED";
+#ifdef KRBCONF_VAGUE_ERRORS
+	return(KRB_ERR_GENERIC);
+#else
+	return(KDC_ERR_NAME_EXP);
+#endif
+    }
+
+    /* The server must not be expired */
+    if (server.expiration && server.expiration < kdc_time) {
+	*status = "SERVICE EXPIRED";
+	    return(KDC_ERR_SERVICE_EXP);
+    }
+
+    /*
+     * If the client requires password changing, then only allow the 
+     * pwchange service.
+     */
+    if (isflagset(client.attributes, KRB5_KDB_REQUIRES_PWCHANGE) &&
+	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE)) {
+	*status = "REQUIRED PWCHANGE";
+	return(KDC_ERR_KEY_EXP);
+    }
+
+    /* Client and server must allow postdating tickets */
+    if ((isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) ||
+	 isflagset(request->kdc_options, KDC_OPT_POSTDATED)) && 
+	(isflagset(client.attributes, KRB5_KDB_DISALLOW_POSTDATED) ||
+	 isflagset(server.attributes, KRB5_KDB_DISALLOW_POSTDATED))) {
+	*status = "POSTDATE NOT ALLOWED";
+	return(KDC_ERR_CANNOT_POSTDATE);
+    }
+    
+    /* Client and server must allow forwardable tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
+	(isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
+	 isflagset(server.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))) {
+	*status = "FORWARDABLE NOT ALLOWED";
+	return(KDC_ERR_POLICY);
+    }
+    
+    /* Client and server must allow renewable tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
+	(isflagset(client.attributes, KRB5_KDB_DISALLOW_RENEWABLE) ||
+	 isflagset(server.attributes, KRB5_KDB_DISALLOW_RENEWABLE))) {
+	*status = "RENEWABLE NOT ALLOWED";
+	return(KDC_ERR_POLICY);
+    }
+    
+    /* Client and server must allow proxiable tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE) &&
+	(isflagset(client.attributes, KRB5_KDB_DISALLOW_PROXIABLE) ||
+	 isflagset(server.attributes, KRB5_KDB_DISALLOW_PROXIABLE))) {
+	*status = "PROXIABLE NOT ALLOWED";
+	return(KDC_ERR_POLICY);
+    }
+    
+    /* Check to see if client is locked out */
+    if (isflagset(client.attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
+	*status = "CLIENT LOCKED OUT";
+	return(KDC_ERR_C_PRINCIPAL_UNKNOWN);
+    }
+
+    /* Check to see if server is locked out */
+    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
+	*status = "SERVICE LOCKED OUT";
+	return(KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+	
+    /* Check to see if server is allowed to be a service */
+    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_SVR)) {
+	*status = "SERVICE NOT ALLOWED";
+	return(KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+
+    /* Check to see if preauthentication is required */
+    if (isflagset(client.attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
+        !request->padata) {
+	*status = "MISSING PRE_AUTH";
+#ifdef KRBCONF_VAGUE_ERRORS
+	return KRB_ERR_GENERIC;
+#else
+	return KDC_PREAUTH_FAILED;
+#endif
+    }
+
+    /*
+     * Check against local policy
+     */
+    errcode = against_local_policy_as(request, server, client,
+				      kdc_time, status); 
+    if (errcode)
+	return errcode;
+
+    return 0;
+}
+
+/*
+ * Routines that validate a TGS request; checks a lot of things.  :-)
+ *
+ * Returns a Kerberos protocol error number, which is _not_ the same
+ * as a com_err error number!
+ */
+#define TGS_OPTIONS_HANDLED (KDC_OPT_FORWARDABLE | KDC_OPT_FORWARDED | \
+			     KDC_OPT_PROXIABLE | KDC_OPT_PROXY | \
+			     KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED | \
+			     KDC_OPT_RENEWABLE | KDC_OPT_RENEWABLE_OK | \
+			     KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_RENEW | \
+			     KDC_OPT_VALIDATE)
+
+#define TGS_SPECIAL_OPTS	(KDC_OPT_FORWARDED | KDC_OPT_PROXY | \
+				 KDC_OPT_RENEW | KDC_OPT_VALIDATE)
+
+int
+validate_tgs_request(request, server, ticket, kdc_time, status)
+register krb5_kdc_req *request;
+krb5_db_entry server;
+krb5_ticket *ticket;
+krb5_timestamp kdc_time;
+char **status;
+{
+    int		errcode;
+    int		st_idx = 0;
+
+    /*
+     * If an illegal option is set, complain.
+     */
+    if (request->kdc_options & ~(TGS_OPTIONS_HANDLED)) {
+	*status = "INVALID TGS OPTIONS";
+	return KDC_ERR_BADOPTION;
+    }
+    
+    /* Check to see if server has expired */
+    if (server.expiration && server.expiration < kdc_time) {
+	*status = "SERVICE EXPIRED";
+	    return(KDC_ERR_SERVICE_EXP);
+    }
+
+    /*
+     * Verify that the server principal in authdat->ticket is correct
+     * (either the ticket granting service or the service we're
+     * looking for)
+     */
+
+    if (request->kdc_options & TGS_SPECIAL_OPTS) {
+	/*
+	 * This is one of the KDC options which allow a non-TGT ticket
+	 * for the purposes of renewing, forwarding, proxying, or
+	 * validating it.
+	 *
+	 * We just make sure the service in the ticket matches service
+	 * the user is request.
+	 */
+	if (!krb5_principal_compare(ticket->server,
+				    request->server)) {
+	    *status = "SERVER MISMATCH";
+	    return KRB5KDC_SERVER_NOMATCH;
+	}
+    } else {
+	/*
+	 * This is a normal TGS request; the ticket must belong to the
+	 * TGS server
+	 */
+	if (!krb5_principal_compare(ticket->server, tgs_server)) {
+	    *status = "NOT TGS TICKET";
+	    return KRB5KRB_AP_ERR_NOT_US;
+	}
+	
+	/* Server must allow TGS based issuances */
+	if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
+	    *status = "TGT BASED NOT ALLOWED";
+	    return(KDC_ERR_POLICY);
+	}
+    }
+    
+    /* TGS must be forwardable to get forwarded or forwardable ticket */
+    if ((isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
+	 isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) &&
+	!isflagset(ticket->enc_part2->flags, TKT_FLG_FORWARDABLE)) {
+	*status = "TGT NOT FORWARDABLE";
+
+	return KDC_ERR_BADOPTION;
+    }
+
+    /* TGS must be proxiable to get proxiable ticket */    
+    if ((isflagset(request->kdc_options, KDC_OPT_PROXY) ||
+	 isflagset(request->kdc_options, KDC_OPT_PROXIABLE)) &&
+	!isflagset(ticket->enc_part2->flags, TKT_FLG_PROXIABLE)) {
+	*status = "TGT NOT PROXIABLE";
+	return KDC_ERR_BADOPTION;
+    }
+
+    /* TGS must allow postdating to get postdated ticket */
+    if ((isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) ||
+	  isflagset(request->kdc_options, KDC_OPT_POSTDATED)) &&
+	!isflagset(ticket->enc_part2->flags, TKT_FLG_MAY_POSTDATE)) {
+	*status = "TGT NOT POSTDATABLE";
+	return KDC_ERR_BADOPTION;
+    }
+
+    /* can only validate invalid tix */
+    if (isflagset(request->kdc_options, KDC_OPT_VALIDATE) &&
+	!isflagset(ticket->enc_part2->flags, TKT_FLG_INVALID)) {
+	*status = "VALIDATE VALID TICKET";
+	return KDC_ERR_BADOPTION;
+    }
+
+    /* can only renew renewable tix */
+    if ((isflagset(request->kdc_options, KDC_OPT_RENEW) ||
+	  isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) &&
+	!isflagset(ticket->enc_part2->flags, TKT_FLG_RENEWABLE)) {
+	*status = "TICKET NOT RENEWABLE";
+	return KDC_ERR_BADOPTION;
+    }
+
+    /* can not proxy ticket granting tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_PROXY) &&
+	(!request->server->data ||
+	 request->server->data[0].length != 6 ||
+	 memcmp(request->server->data[0].data, "krbtgt", 6))) {
+	*status = "CAN'T PROXY TGT";
+	return KDC_ERR_BADOPTION;
+    }
+    
+    /* Server must allow forwardable tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
+	isflagset(server.attributes, KRB5_KDB_DISALLOW_FORWARDABLE)) {
+	*status = "NON-FORWARDABLE TICKET";
+	return(KDC_ERR_POLICY);
+    }
+    
+    /* Server must allow renewable tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
+	isflagset(server.attributes, KRB5_KDB_DISALLOW_RENEWABLE)) {
+	*status = "NON-RENEWABLE TICKET";
+	return(KDC_ERR_POLICY);
+    }
+    
+    /* Server must allow proxiable tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE) &&
+	isflagset(server.attributes, KRB5_KDB_DISALLOW_PROXIABLE)) {
+	*status = "NON-PROXIABLE TICKET";
+	return(KDC_ERR_POLICY);
+    }
+    
+    /* Server must allow postdated tickets */
+    if (isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) &&
+	isflagset(server.attributes, KRB5_KDB_DISALLOW_POSTDATED)) {
+	*status = "NON-POSTDATABLE TICKET";
+	return(KDC_ERR_CANNOT_POSTDATE);
+    }
+    
+    /* Server must allow DUP SKEY requests */
+    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&
+	isflagset(server.attributes, KRB5_KDB_DISALLOW_DUP_SKEY)) {
+	*status = "DUP_SKEY DISALLOED";
+	return(KDC_ERR_POLICY);
+    }
+
+    /* Server must not be locked out */
+    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
+	*status = "SERVER LOCKED OUT";
+	return(KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+	
+    /* Server must be allowed to be a service */
+    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_SVR)) {
+	*status = "SERVER NOT ALLOWED";
+	return(KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+
+    /* Check the hot list */
+    if (check_hot_list(ticket)) {
+	*status = "HOT_LIST";
+	return(KRB_AP_ERR_REPEAT);
+    }
+    
+    /* Check the start time vs. the KDC time */
+    if (isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
+	if (ticket->enc_part2->times.starttime > kdc_time) {
+	    *status = "NOT_YET_VALID";
+	    return(KRB_AP_ERR_TKT_NYV);
+	}
+    }
+    
+    /*
+     * Check the renew_till time.  The endtime was already
+     * been checked in the initial authentication check.
+     */
+    if (isflagset(request->kdc_options, KDC_OPT_RENEW) &&
+	(ticket->enc_part2->times.renew_till < kdc_time)) {
+	*status = "TKT_EXPIRED";
+	return(KRB_AP_ERR_TKT_EXPIRED);
+    }
+    
+    /* Make sure second ticket was provided for ENC_TKT_IN_SKEY */
+    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
+	if (!request->second_ticket ||
+	    !request->second_ticket[st_idx]) {
+	    *status = "NO_2ND_TKT";
+	    return(KDC_ERR_BADOPTION);
+	}
+	st_idx++;
+    }
+
+    /* Check for hardware preauthentication */
+    if (isflagset(server.attributes, KRB5_KDB_REQUIRES_HW_AUTH) &&
+	!isflagset(ticket->enc_part2->flags,TKT_FLG_HW_AUTH)) {
+	*status = "NO HW PREAUTH";
+	return KRB_ERR_GENERIC;
+    }
+
+    /* Check for any kind of preauthentication */
+    if (isflagset(server.attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
+	!isflagset(ticket->enc_part2->flags, TKT_FLG_PRE_AUTH)) {
+	*status = "NO PREAUTH";
+	return KRB_ERR_GENERIC;
+    }
+    
+    /*
+     * Check local policy
+     */
+    errcode = against_local_policy_tgs(request, server, ticket, status);
+    if (errcode)
+	return errcode;
+    
+    
     return 0;
 }

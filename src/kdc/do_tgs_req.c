@@ -42,7 +42,9 @@ static char rcsid_do_tgs_req_c[] =
 #ifdef KRB5_USE_INET
 #include <sys/types.h>
 #include <netinet/in.h>
+#ifndef hpux
 #include <arpa/inet.h>
+#endif
 #endif
 
 #include "kdc_util.h"
@@ -81,7 +83,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_error_code retval;
     int nprincs;
     krb5_boolean more;
-    krb5_timestamp kdc_time;
+    krb5_timestamp kdc_time, authtime;
     krb5_keyblock *session_key;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
@@ -89,12 +91,15 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_last_req_entry *nolrarray[2], nolrentry;
 /*    krb5_address *noaddrarray[1]; */
     krb5_enctype useetype;
+    int	errcode;
     register int i;
     int firstpass = 1;
+    char	*status;
 
 #ifdef KRB5_USE_INET
     if (from->address->addrtype == ADDRTYPE_INET)
-	fromstring = inet_ntoa(*(struct in_addr *)from->address->contents);
+	fromstring =
+	    (char *) inet_ntoa(*(struct in_addr *)from->address->contents);
 #endif
     if (!fromstring)
 	fromstring = "<unknown>";
@@ -109,16 +114,17 @@ krb5_data **response;			/* filled in with a response packet */
 	    krb5_free_tkt_authent(req_authdat);
 	    header_ticket = 0;
 	}
-	if (retval > ERROR_TABLE_BASE_krb5 &&
-	    retval < ERROR_TABLE_BASE_krb5 + 128) {
-	    /* protocol error */
-	    return(prepare_error_tgs(request,
-				     header_ticket,
-				     retval - ERROR_TABLE_BASE_krb5,
-				     fromstring,
-				     response));
-	} else
+	errcode = retval - ERROR_TABLE_BASE_krb5;
+	if (errcode < 0 || errcode > 128) {
+	    errcode = KRB_ERR_GENERIC;
+	    prepare_error_tgs(request, header_ticket, errcode,
+				     fromstring, response);
 	    return retval;
+	} else {
+	    /* protocol error */
+	    return(prepare_error_tgs(request, header_ticket, errcode,
+				     fromstring, response));
+	}
     }
 	
     /* we've already dealt with the AP_REQ authentication, so
@@ -135,15 +141,7 @@ krb5_data **response;			/* filled in with a response packet */
 	krb5_free_tkt_authent(req_authdat);
 	return(retval);
     }
-
-    if (is_secondary)
-	syslog(LOG_INFO, "TGS_REQ; host %s, %s for %s", fromstring, cname,
-	       sname);
-    else
-	syslog(LOG_INFO, "TGS_REQ: host %s, %s for %s", fromstring, cname,
-	       sname);
-    free(cname);
-    free(sname);
+    authtime = header_ticket->enc_part2->times.authtime;
 
     /* XXX make sure server here has the proper realm...taken from AP_REQ
        header? */
@@ -151,12 +149,22 @@ krb5_data **response;			/* filled in with a response packet */
     nprincs = 1;
     if (retval = krb5_db_get_principal(request->server, &server, &nprincs,
 				       &more)) {
+        syslog(LOG_INFO,
+	       "TGS_REQ: GET_PRINCIPAL: authtime %d, host %s, %s for %s (%s)",
+	       authtime, fromstring, cname, sname, error_message(retval));
+	free(cname);
+	free(sname);
 	krb5_free_tkt_authent(req_authdat);
 	return(retval);
     }
 tgt_again:
     if (more) {
+        syslog(LOG_INFO,
+	       "TGS_REQ: NON_UNIQUE_PRINCIPAL: authtime %d, host %s, %s for %s",
+	       authtime, fromstring, cname, sname);
 	krb5_db_free_principal(&server, nprincs);
+	free(cname);
+	free(sname);
 	return(prepare_error_tgs(request,
 				 header_ticket,
 				 KDC_ERR_PRINCIPAL_NOT_UNIQUE,
@@ -181,6 +189,9 @@ tgt_again:
 	    goto tgt_again;
 	}
 	krb5_db_free_principal(&server, nprincs);
+        syslog(LOG_INFO,
+	       "TGS_REQ: UNKNOWN PRINCIPAL: authtime %d, host %s, %s for %s",
+	       authtime, fromstring, cname, sname);
 	return(prepare_error_tgs(request,
 				 header_ticket,
 				 KDC_ERR_S_PRINCIPAL_UNKNOWN,
@@ -189,9 +200,13 @@ tgt_again:
     }
 
 #define tkt_cleanup() {krb5_free_tkt_authent(req_authdat); }
-#define cleanup() { krb5_db_free_principal(&server, 1);}
+#define cleanup() { krb5_db_free_principal(&server, 1); free(cname); free(sname); }
 
-    if (retval = check_kdb_flags_tgs(request, server)) {
+    status = "UNKNOWN_REASON";
+    if (retval = validate_tgs_request(request, server, header_ticket,
+				      kdc_time, &status)) {
+	syslog(LOG_INFO, "TGS_REQ: %s: authtime %d, host %s, %s for %s",
+	       status, authtime, fromstring, cname, sname);
 	cleanup();
 	return(prepare_error_tgs(request,
 				 header_ticket,
@@ -201,6 +216,8 @@ tgt_again:
     }
 
     if (retval = krb5_timeofday(&kdc_time)) {
+	syslog(LOG_INFO, "TGS_REQ: TIME_OF_DAY: authtime %d, host %s, %s for %s", 
+                  authtime, fromstring, cname, sname);
 	tkt_cleanup();
 	cleanup();
 	return(retval);
@@ -212,6 +229,8 @@ tgt_again:
     if (i == request->netypes) {
 	/* unsupported etype */
 
+	syslog(LOG_INFO, "TGS_REQ: BAD ENCRYPTION TYPE: authtime %d, host %s, %s for %s",
+                  authtime, cname, sname);
 	cleanup();
 	return(prepare_error_tgs(request,
 				 header_ticket,
@@ -222,6 +241,8 @@ tgt_again:
 
     if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
 	/* random key failed */
+	syslog(LOG_INFO, "TGS_REQ: RANDOM KEY FAILED: authtime %d, host %s, %s for %s",
+                  authtime, fromstring, cname, sname);
 	tkt_cleanup();
 	cleanup();
 	return(retval);
@@ -229,8 +250,9 @@ tgt_again:
 
 #undef cleanup
 #define cleanup() { krb5_db_free_principal(&server, 1); \
-		   krb5_free_keyblock(session_key);}
-
+		    krb5_free_keyblock(session_key); \
+		    free(cname); free(sname); }
+    
     ticket_reply.server = request->server; /* XXX careful for realm... */
     ticket_reply.enc_part.etype = useetype;
     ticket_reply.enc_part.kvno = server.kvno;
@@ -238,6 +260,13 @@ tgt_again:
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.starttime = 0;
 
+    /*
+     * Fix header_ticket's starttime; if it's zero, fill in the
+     * authtime's value.
+     */
+    if (!(header_ticket->enc_part2->times.starttime))
+	header_ticket->enc_part2->times.starttime =
+	    header_ticket->enc_part2->times.authtime;
 
     /* don't use new addresses unless forwarded, see below */
 
@@ -245,19 +274,9 @@ tgt_again:
     /* noaddrarray[0] = 0; */
     reply_encpart.caddrs = 0;		/* optional...don't put it in */
 
-        /* It should be noted that local policy may affect the  */
-        /* processing of any of these flags.  For example, some */
-        /* realms may refuse to issue renewable tickets         */
-
-    /* the policy check MUST make sure there are no invalid option/flag
-       combinations */
-
-    if (against_flag_policy_tgs(request, header_ticket)) {
-	cleanup();
-	return(prepare_error_tgs(request, header_ticket,
-				 KDC_ERR_BADOPTION,
-				 fromstring, response));
-    }
+    /* It should be noted that local policy may affect the  */
+    /* processing of any of these flags.  For example, some */
+    /* realms may refuse to issue renewable tickets         */
 
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
 	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
@@ -291,58 +310,20 @@ tgt_again:
     if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
 	setflag(enc_tkt_reply.flags, TKT_FLG_POSTDATED);
 	setflag(enc_tkt_reply.flags, TKT_FLG_INVALID);
-	if (against_postdate_policy(request->from)) {
-	    cleanup();
-	    return(prepare_error_tgs(request, header_ticket,
-				     KDC_ERR_BADOPTION,
-				     fromstring, response));
-	}	    
 	enc_tkt_reply.times.starttime = request->from;
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
 
     if (isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
-	if (header_ticket->enc_part2->times.starttime > kdc_time) {
-	    cleanup();
-	    return(prepare_error_tgs(request, header_ticket,
-				     KRB_AP_ERR_TKT_NYV,
-				     fromstring, response));
-	}
-	/* XXX move this check out elsewhere? */
-	if (check_hot_list(header_ticket)) {
-	    cleanup();
-	    return(prepare_error_tgs(request, header_ticket,
-				     KRB_AP_ERR_REPEAT,
-				     fromstring, response));
-	}
 	/* BEWARE of allocation hanging off of ticket & enc_part2, it belongs
 	   to the caller */
 	ticket_reply = *(header_ticket);
 	enc_tkt_reply = *(header_ticket->enc_part2);
 	clear(enc_tkt_reply.flags, TKT_FLG_INVALID);
     }
-    /* 
-        if (req.kdc_options.(any flag except ENC-TKT-IN-SKEY, RENEW,
-                             and those already processed) then
-                return KRB_ERROR, code KDC_ERR_BADOPTION;
-        endif
-	*/
 
-    enc_tkt_reply.times.authtime = header_ticket->enc_part2->times.authtime;
     if (isflagset(request->kdc_options, KDC_OPT_RENEW)) {
 	krb5_deltat old_life;
-
-          /* Note that if the endtime has already passed, the ticket would  */
-          /* have been rejected in the initial authentication stage, so     */
-          /* there is no need to check again here                           */
-
-	/* has it completely run out? */
-	if (header_ticket->enc_part2->times.renew_till < kdc_time) {
-	    cleanup();
-	    return(prepare_error_tgs(request, header_ticket,
-				     KRB_AP_ERR_TKT_EXPIRED,
-				     fromstring, response));
-	}    
 
 	/* BEWARE of allocation hanging off of ticket & enc_part2, it belongs
 	   to the caller */
@@ -386,9 +367,23 @@ tgt_again:
 		    min(server.max_renewable_life,
 			max_renewable_life_for_realm)));
     } else {
-	enc_tkt_reply.times.renew_till = 0; /* XXX */
+	enc_tkt_reply.times.renew_till = 0;
     }
+    
+    /*
+     * Set authtime to be the same as header_ticket's
+     */
+    enc_tkt_reply.times.authtime = header_ticket->enc_part2->times.authtime;
+    
+    /*
+     * Propagate the preauthentication flags through to the returned ticket.
+     */
+    if (isflagset(header_ticket->enc_part2->flags, TKT_FLG_PRE_AUTH))
+	setflag(enc_tkt_reply.flags, TKT_FLG_PRE_AUTH);
 
+    if (isflagset(header_ticket->enc_part2->flags, TKT_FLG_HW_AUTH))
+	setflag(enc_tkt_reply.flags, TKT_FLG_HW_AUTH);
+    
     /* starttime is optional, and treated as authtime if not present.
        so we can nuke it if it matches */
     if (enc_tkt_reply.times.starttime == enc_tkt_reply.times.authtime)
@@ -401,6 +396,8 @@ tgt_again:
 
 	/* decrypt the authdata in the request */
 	if (!valid_etype(request->authorization_data.etype)) {
+	    syslog(LOG_INFO, "TGS_REQ: BAD_AUTH_ETYPE: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    cleanup();
 	    return prepare_error_tgs(request, header_ticket,
 				     KDC_ERR_ETYPE_NOSUPP,
@@ -413,6 +410,8 @@ tgt_again:
 	scratch.length = request->authorization_data.ciphertext.length;
 	if (!(scratch.data =
 	      malloc(request->authorization_data.ciphertext.length))) {
+	    syslog(LOG_INFO, "TGS_REQ: AUTH_NOMEM: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return(ENOMEM);
@@ -420,6 +419,8 @@ tgt_again:
 	/* do any necessary key pre-processing */
 	if (retval = krb5_process_key(&eblock,
 				      header_ticket->enc_part2->session)) {
+	    syslog(LOG_INFO, "TGS_REQ: AUTH_PROCESS_KEY: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    free(scratch.data);
 	    tkt_cleanup();
 	    cleanup();
@@ -430,6 +431,8 @@ tgt_again:
 	if (retval = krb5_decrypt((krb5_pointer) request->authorization_data.ciphertext.data,
 				  (krb5_pointer) scratch.data,
 				  scratch.length, &eblock, 0)) {
+	    syslog(LOG_INFO, "TGS_REQ: AUTH_ENCRYPT_FAIL: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    (void) krb5_finish_key(&eblock);
 	    free(scratch.data);
 	    tkt_cleanup();
@@ -437,6 +440,8 @@ tgt_again:
 	    return retval;
 	}
 	if (retval = krb5_finish_key(&eblock)) {
+	    syslog(LOG_INFO, "TGS_REQ: FINISH_KEY: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    free(scratch.data);
 	    tkt_cleanup();
 	    cleanup();
@@ -446,6 +451,8 @@ tgt_again:
 	retval = decode_krb5_authdata(&scratch, request->unenc_authdata);
 	free(scratch.data);
 	if (retval) {
+	    syslog(LOG_INFO, "TGS_REQ: DECODE_AUTH: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -455,6 +462,8 @@ tgt_again:
 	    concat_authorization_data(request->unenc_authdata,
 				      header_ticket->enc_part2->authorization_data, 
 				      &enc_tkt_reply.authorization_data)) {
+	    syslog(LOG_INFO, "TGS_REQ: CONCAT_AUTH: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -477,6 +486,8 @@ tgt_again:
 	/* assemble new transited field into allocated storage */
 	if (header_ticket->enc_part2->transited.tr_type !=
 	    KRB5_DOMAIN_X500_COMPRESS) {
+	    syslog(LOG_INFO, "TGS_REQ: BAD_TRTYPE: authtime %d, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return KRB5KDC_ERR_TRTYPE_NOSUPP;
@@ -491,6 +502,8 @@ tgt_again:
 			       header_ticket->server,
 			       enc_tkt_reply.client,
 			       request->server)) {
+	    syslog(LOG_INFO, "TGS_REQ: ADD_TR_FAIL: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -500,7 +513,8 @@ tgt_again:
 #undef cleanup
 #define cleanup() { krb5_db_free_principal(&server, 1); \
 		   krb5_free_keyblock(session_key); \
-		   if (newtransited) free(enc_tkt_reply.transited.tr_contents.data);}
+		   free(cname); free(sname); \
+	   if (newtransited) free(enc_tkt_reply.transited.tr_contents.data); }
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
@@ -508,17 +522,11 @@ tgt_again:
 	krb5_keyblock *st_sealing_key;
 	krb5_kvno st_srv_kvno;
 
-	if (!request->second_ticket ||
-	    !request->second_ticket[st_idx]) {
-		cleanup();
-		return(prepare_error_tgs(request, header_ticket,
-					 KDC_ERR_BADOPTION,
-					 fromstring,
-					 response));
-	    }
 	if (retval = kdc_get_server_key(request->second_ticket[st_idx],
 					&st_sealing_key,
 					&st_srv_kvno)) {
+	    syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_SERVER: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -529,6 +537,8 @@ tgt_again:
 				       request->second_ticket[st_idx]);
 	krb5_free_keyblock(st_sealing_key);
 	if (retval) {
+	    syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_DECRYPT: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -536,6 +546,8 @@ tgt_again:
 					
 	if (retval = krb5_encrypt_tkt_part(request->second_ticket[st_idx]->enc_part2->session,
 					   &ticket_reply)) {
+	    syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_ENCRYPT: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -545,6 +557,8 @@ tgt_again:
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
 	if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
+	    syslog(LOG_INFO, "TGS_REQ: CONV_KEY: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -556,6 +570,8 @@ tgt_again:
 	xfree(encrypting_key.contents);
 
 	if (retval) {
+	    syslog(LOG_INFO, "TGS_REQ: TKT_ENCRYPT: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
 	    tkt_cleanup();
 	    cleanup();
 	    return retval;
@@ -582,8 +598,12 @@ tgt_again:
     /* copy the time fields EXCEPT for authtime; its location
        is used for ktime */
     reply_encpart.times = enc_tkt_reply.times;
-    reply_encpart.times.authtime = kdc_time;
+    reply_encpart.times.authtime = header_ticket->enc_part2->times.authtime;
 
+    /* starttime is optional, and treated as authtime if not present.
+       so we can nuke it if it matches */
+    if (enc_tkt_reply.times.starttime == enc_tkt_reply.times.authtime)
+	enc_tkt_reply.times.starttime = 0;
 
     nolrentry.lr_type = KRB5_LRQ_NONE;
     nolrentry.value = 0;
@@ -593,7 +613,7 @@ tgt_again:
     reply_encpart.key_exp = 0;		/* ditto */
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
-
+    
     /* use the session key in the ticket, unless there's a subsession key
        in the AP_REQ */
 
@@ -602,6 +622,20 @@ tgt_again:
 				 req_authdat->authenticator->subkey :
 				 header_ticket->enc_part2->session,
 				 &reply, response);
+    if (retval) {
+	syslog(LOG_INFO, "TGS_REQ; ENCODE_KDC_REP: authtime %d, host %s, %s for %s",
+	       authtime, fromstring, cname, sname);
+    } else {
+	if (is_secondary)
+	    syslog(LOG_INFO, "TGS_REQ; ISSUE: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
+	else
+	    syslog(LOG_INFO, "TGS_REQ: ISSUE: authtime %d, host %s, %s for %s",
+		   authtime, fromstring, cname, sname);
+    }
+    free(cname);
+    free(sname);
+
     krb5_free_keyblock(session_key);
     tkt_cleanup();
     memset(ticket_reply.enc_part.ciphertext.data, 0,
