@@ -359,9 +359,11 @@ typedef struct _krb5_cryptosystem_entry {
 						krb5_keyblock FAR *,
 						krb5_const krb5_data FAR *,
  	                                        krb5_const krb5_data FAR *));
-    krb5_error_code  (*init_random_key) KRB5_NPROTOTYPE((krb5_const krb5_keyblock FAR *,
-						   krb5_pointer FAR *));
-    krb5_error_code  (*finish_random_key) KRB5_NPROTOTYPE(( krb5_pointer FAR *));
+    krb5_error_code (*init_random_key) KRB5_NPROTOTYPE(( krb5_const krb5_encrypt_block FAR *,
+						krb5_const krb5_keyblock FAR *,
+						krb5_pointer FAR *));
+    krb5_error_code (*finish_random_key) KRB5_NPROTOTYPE(( krb5_const krb5_encrypt_block FAR *,
+						krb5_pointer FAR *));
     krb5_error_code (*random_key) KRB5_NPROTOTYPE(( krb5_const krb5_encrypt_block FAR *,
 					      krb5_pointer,
 					      krb5_keyblock FAR * FAR *));
@@ -468,8 +470,8 @@ extern krb5_cksumtype krb5_max_cksum;		/* max entry in array */
 #define krb5_process_key(context, eblock, key) krb5_x((eblock)->crypto_entry->process_key,(eblock, key))
 #define krb5_finish_key(context, eblock) krb5_x((eblock)->crypto_entry->finish_key,(eblock))
 #define krb5_string_to_key(context, eblock, keyblock, data, princ) krb5_x((eblock)->crypto_entry->string_to_key,(eblock, keyblock, data, princ))
-#define krb5_init_random_key(context, eblock, keyblock, ptr) krb5_x((eblock)->crypto_entry->init_random_key,(keyblock, ptr))
-#define krb5_finish_random_key(context, eblock, ptr) krb5_x((eblock)->crypto_entry->finish_random_key,(ptr))
+#define krb5_init_random_key(context, eblock, keyblock, ptr) krb5_x((eblock)->crypto_entry->init_random_key,(eblock, keyblock, ptr))
+#define krb5_finish_random_key(context, eblock, ptr) krb5_x((eblock)->crypto_entry->finish_random_key,(eblock, ptr))
 #define krb5_random_key(context, eblock, ptr, keyblock) krb5_x((eblock)->crypto_entry->random_key,(eblock, ptr, keyblock))
 
 #define krb5_eblock_enctype(context, eblockp) ((eblockp)->crypto_entry->proto_enctype)

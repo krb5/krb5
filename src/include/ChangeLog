@@ -1,3 +1,8 @@
+Thu May  2 18:41:00 1996  Richard Basch  <basch@lehman.com>
+
+	* krb5.hin: krb5_init_random_key & krb5_finish_random_key now
+		pass the eblock to the underlying crypto routine.
+
 Fri May  3 00:26:47 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5.hin (krb5_get_credentials_validate): declaration for new
