@@ -45,8 +45,6 @@
 
 /* libkdb.spec */
 krb5_error_code krb5_dbm_db_set_name PROTOTYPE((char * ));
-krb5_error_code krb5_dbm_db_set_nonblocking PROTOTYPE((krb5_boolean,
-						       krb5_boolean * ));
 krb5_error_code krb5_dbm_db_init PROTOTYPE((void ));
 krb5_error_code krb5_dbm_db_fini PROTOTYPE((void ));
 krb5_error_code krb5_dbm_db_get_age PROTOTYPE((char *, time_t * ));
@@ -63,4 +61,15 @@ krb5_error_code krb5_dbm_db_iterate
     PROTOTYPE((krb5_error_code (*) PROTOTYPE((krb5_pointer,
 					      krb5_db_entry *)),
 	       krb5_pointer ));
+
+/* need to play games here, since we take a pointer and the real thing,
+   and it might be narrow. */
+#ifdef NARROW_PROTOTYPES
+krb5_error_code krb5_dbm_db_set_nonblocking PROTOTYPE((krb5_boolean,
+						       krb5_boolean * ));
+#else
+krb5_error_code krb5_dbm_db_set_nonblocking PROTOTYPE((int, /* krb5_boolean */
+						       krb5_boolean * ));
+#endif /* NARROW_PROTOTYPES */
+
 #endif /* KRB5_KDB5_DBM__ */

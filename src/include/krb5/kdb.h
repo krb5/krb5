@@ -51,9 +51,6 @@ extern char *krb5_mkey_pwd_prompt2;
 /* libkdb.spec */
 krb5_error_code krb5_db_set_name
 	PROTOTYPE((char * ));
-krb5_error_code krb5_db_set_nonblocking
-	PROTOTYPE((krb5_boolean,
-		   krb5_boolean * ));
 krb5_error_code krb5_db_init
 	PROTOTYPE((void ));
 krb5_error_code krb5_db_fini
@@ -86,9 +83,6 @@ krb5_error_code krb5_db_iterate
 		   krb5_pointer ));
 krb5_error_code krb5_db_verify_master_key
 	PROTOTYPE((krb5_principal, krb5_keyblock *, krb5_encrypt_block *));
-krb5_error_code	krb5_db_fetch_mkey
-	PROTOTYPE((krb5_principal, krb5_encrypt_block *, krb5_boolean,
-		   krb5_boolean, krb5_keyblock * ));
 krb5_error_code krb5_db_store_mkey PROTOTYPE((char *,
 					      krb5_principal,
 					      krb5_keyblock *));
@@ -107,10 +101,28 @@ krb5_error_code krb5_db_lock
 krb5_error_code krb5_db_unlock
 	PROTOTYPE ((void ));
 
-/* XXX I give up.... the following int should be a krb5_boolean, but */
- /* it causes gcc to give up and die. */
+/* need to play games here, since we take a pointer and the real thing,
+   and it might be narrow. */
+#ifdef NARROW_PROTOTYPES
+krb5_error_code krb5_db_set_nonblocking
+	PROTOTYPE((krb5_boolean,
+		   krb5_boolean * ));
+#else
+krb5_error_code krb5_db_set_nonblocking
+	PROTOTYPE((int, /* krb5_boolean */
+		   krb5_boolean * ));
+#endif /* NARROW_PROTOTYPES */
+#include <krb5/widen.h>
+
+/* Only put things which don't have pointers to the narrow types in this
+   section */
+
 krb5_boolean krb5_db_set_lockmode
-	PROTOTYPE((int ));
+	PROTOTYPE((krb5_boolean ));
+krb5_error_code	krb5_db_fetch_mkey
+	PROTOTYPE((krb5_principal, krb5_encrypt_block *, krb5_boolean,
+		   krb5_boolean, krb5_keyblock * ));
+#include <krb5/narrow.h>
 
 
 #define KRB5_KDB_DEF_FLAGS	(KRB5_KDB_DISALLOW_DUP_SKEY)
