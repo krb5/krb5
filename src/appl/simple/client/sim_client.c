@@ -221,7 +221,7 @@ char *argv[];
 	com_err(PROGNAME, errno, "while sending KRB_AP_REQ message");
     printf("Sent authentication data: %d bytes\n", i);
 
-    xfree(packet.data);
+    krb5_xfree(packet.data);
     /* PREPARE KRB_SAFE MESSAGE */
 
     /* Get my address */
@@ -252,12 +252,12 @@ char *argv[];
 	exit(1);
     }
     if (retval = krb5_rc_resolve_type(&rcache, krb5_rc_default_type())) {
-	xfree(rcache);
+	krb5_xfree(rcache);
 	com_err(PROGNAME, retval, "while resolving replay cache type");
 	exit(1);
     }
     if (retval = krb5_rc_resolve(rcache, cp)) {
-	xfree(rcache);
+	krb5_xfree(rcache);
 	com_err(PROGNAME, retval, "while resolving replay cache type");
 	exit(1);
     }
@@ -308,7 +308,7 @@ char *argv[];
 	com_err(PROGNAME, errno, "while sending SAFE message");
     printf("Sent checksummed message: %d bytes\n", i);
 
-    xfree(packet.data);
+    krb5_xfree(packet.data);
     /* PREPARE KRB_PRIV MESSAGE */
 
 

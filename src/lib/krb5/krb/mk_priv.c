@@ -122,7 +122,7 @@ OLDDECLARG(krb5_data *, outbuf)
     if (!(scratch->data = realloc(scratch->data,
 				  privmsg.enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
-	xfree(scratch);
+	krb5_xfree(scratch);
 	return ENOMEM;
     }
     memset(scratch->data + scratch->length, 0,
@@ -193,13 +193,13 @@ OLDDECLARG(krb5_data *, outbuf)
 	if (retval = krb5_rc_store(rcache, &replay)) {
 	    /* should we really error out here? XXX */
 	    cleanup_scratch();
-	    xfree(replay.client);
+	    krb5_xfree(replay.client);
 	    return retval;
 	}
-	xfree(replay.client);
+	krb5_xfree(replay.client);
     }
     *outbuf = *scratch;
-    xfree(scratch);
+    krb5_xfree(scratch);
     return 0;
 
  clean_prockey:

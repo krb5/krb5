@@ -53,7 +53,7 @@ OM_uint32 gss_verify(minor_status, context, message_buffer,
 	if (*minor_status = decode_krb5_safe(&inbuf, &message))
 		return(GSS_S_FAILURE);
 	if (message->user_data.data)
-		xfree(message->user_data.data);
+		krb5_xfree(message->user_data.data);
 	message->user_data.length = message_buffer->length;
 	message->user_data.data = message_buffer->value;
 	if (*minor_status = encode_krb5_safe(&message,  &scratch)) {

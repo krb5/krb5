@@ -116,7 +116,7 @@ char ***realmsp;
 	char *cp;
 
 	if (!(retrealms[0] = malloc(strlen(&domain[1])+1))) {
-	    xfree(retrealms);
+	    krb5_xfree(retrealms);
 	    return ENOMEM;
 	}
 	strcpy(retrealms[0], &domain[1]);
@@ -126,14 +126,14 @@ char ***realmsp;
 		*cp = toupper(*cp);
     } else {
 	if (retval = krb5_get_default_realm(&retrealms[0])) {
-	    xfree(retrealms);
+	    krb5_xfree(retrealms);
 	    return retval;
 	}
     }
 
     if ((trans_file = fopen(krb5_trans_file, "r")) == (FILE *) 0) {
-	xfree(retrealms[0]);
-	xfree(retrealms);
+	krb5_xfree(retrealms[0]);
+	krb5_xfree(retrealms);
 	return KRB5_TRANS_CANTOPEN;
     }
     (void) sprintf(scanstring, "%%%ds %%%ds",
@@ -153,7 +153,7 @@ char ***realmsp;
 	    /* exact match of hostname, so return the realm */
 	    if (!(retrealms[0] = realloc(retrealms[0],
 					 strlen(trans_realm)+1))) {
-		xfree(retrealms);
+		krb5_xfree(retrealms);
 		return ENOMEM;
 	    }
 	    (void) strcpy(retrealms[0], trans_realm);
@@ -166,7 +166,7 @@ char ***realmsp;
 		/* domain match, save for later */
 		if (!(retrealms[0] = realloc(retrealms[0],
 					     strlen(trans_realm)+1))) {
-		    xfree(retrealms);
+		    krb5_xfree(retrealms);
 		    return ENOMEM;
 		}
 		(void) strcpy(retrealms[0], trans_realm);

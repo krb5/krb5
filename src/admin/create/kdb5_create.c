@@ -338,6 +338,6 @@ struct realm_info *pblock;
     if (retval = krb5_db_put_principal(&entry, &nentries))
 	return retval;
 
-    xfree(ekey.contents);
+    krb5_xfree(ekey.contents);
     return 0;
 }

@@ -65,7 +65,7 @@ register int *error;
     }
     retval->data = (char *)xmalloc(val->qb_forw->qb_len);
     if (!retval->data) {
-	xfree(retval);
+	krb5_xfree(retval);
 	goto nomem;
     }
     xbcopy(val->qb_forw->qb_data, retval->data,

@@ -61,14 +61,14 @@ register int *error;
 						       val->realm,
 						       error);
     if (!retval->server) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 
     temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
 	krb5_free_ticket(retval);
 	return(0);

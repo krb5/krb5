@@ -171,7 +171,7 @@ register int *error;
 		    free_KRB5_Ticket(adtk->Ticket[i]);
 		    i--;
 		}
-		xfree(adtk);
+		krb5_xfree(adtk);
 		goto errout;
 	    }
 	}
@@ -202,7 +202,7 @@ register int *error;
 		    if (rv1->Ticket)
 			free_KRB5_Ticket(rv1->Ticket);
 		    rv2 = rv1->next;
-		    xfree(rv1);
+		    krb5_xfree(rv1);
 		}
 		goto errout;
 	    }
@@ -299,7 +299,7 @@ register int *error;
     if (val->padata) {
 	retval->padata = krb5_pa_data2element_KRB5_7(val->padata, error);
 	if (*error) {
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    return 0;
 	}
     }

@@ -44,15 +44,15 @@ krb5_kdc_req *val;
     if (val->server)
 	krb5_free_principal(val->server);
     if (val->etype)
-	xfree(val->etype);
+	krb5_xfree(val->etype);
     if (val->addresses)
 	krb5_free_addresses(val->addresses);
     if (val->authorization_data.ciphertext.data)
-	xfree(val->authorization_data.ciphertext.data);
+	krb5_xfree(val->authorization_data.ciphertext.data);
     if (val->unenc_authdata)
 	krb5_free_authdata(val->unenc_authdata);
     if (val->second_ticket)
 	krb5_free_tickets(val->second_ticket);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

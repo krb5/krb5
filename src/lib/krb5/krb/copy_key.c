@@ -47,7 +47,7 @@ krb5_keyblock **to;
 		return ENOMEM;
 	*new_key = *from;
 	if (!(new_key->contents = (krb5_octet *)malloc(new_key->length))) {
-		xfree(new_key);
+		krb5_xfree(new_key);
 		return(ENOMEM);
 	}
 	memcpy((char *)new_key->contents, (char *)from->contents,

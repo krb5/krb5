@@ -39,7 +39,7 @@ int cvt;
 {
 	if (cvt) {
 		if (_krb425_servkey.contents)
-			xfree(_krb425_servkey.contents);
+			krb5_xfree(_krb425_servkey.contents);
 		mit_des_string_to_key(KEYTYPE_DES, &_krb425_servkey, 0, 0);
 	} else {
 		if (!_krb425_servkey.contents &&

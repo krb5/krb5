@@ -41,5 +41,5 @@ krb5_creds **tgts;
     register krb5_creds **tgtpp;
     for (tgtpp = tgts; *tgtpp; tgtpp++)
 	krb5_free_creds(*tgtpp);
-    xfree(tgts);
+    krb5_xfree(tgts);
 }

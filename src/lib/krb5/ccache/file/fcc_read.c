@@ -208,18 +208,18 @@ krb5_fcc_read_keyblock(id, keyblock)
 		(keyblock->length)*sizeof(krb5_octet));
 
      if (ret < 0) {
-	 xfree(keyblock->contents);
+	 krb5_xfree(keyblock->contents);
 	 return krb5_fcc_interpret(errno);
      }
      if (ret != (keyblock->length)*sizeof(krb5_octet)) {
-	 xfree(keyblock->contents);
+	 krb5_xfree(keyblock->contents);
 	 return KRB5_CC_END;
      }
 
      return KRB5_OK;
  errout:
      if (keyblock->contents)
-	 xfree(keyblock->contents);
+	 krb5_xfree(keyblock->contents);
      return kret;
 }
 
@@ -248,18 +248,18 @@ krb5_fcc_read_data(id, data)
      ret = read(((krb5_fcc_data *) id->data)->fd, (char *)data->data,
 		data->length);
      if (ret == -1) {
-	 xfree(data->data);
+	 krb5_xfree(data->data);
 	 return krb5_fcc_interpret(errno);
      }
      if (ret != data->length) {
-	 xfree(data->data);
+	 krb5_xfree(data->data);
 	 return KRB5_CC_END;
      }
      data->data[data->length] = 0; /* Null terminate, just in case.... */
      return KRB5_OK;
  errout:
      if (data->data)
-	 xfree(data->data);
+	 krb5_xfree(data->data);
      return kret;
 }
 
@@ -289,17 +289,17 @@ krb5_fcc_read_addr(id, addr)
      ret = read(((krb5_fcc_data *) id->data)->fd, (char *)addr->contents,
 		(addr->length)*sizeof(krb5_octet));
      if (ret == -1) {
-	  xfree(addr->contents);
+	  krb5_xfree(addr->contents);
 	  return krb5_fcc_interpret(errno);
      }
      if (ret != (addr->length)*sizeof(krb5_octet)) {
-	  xfree(addr->contents);
+	  krb5_xfree(addr->contents);
 	  return KRB5_CC_END;
      }
      return KRB5_OK;
  errout:
      if (addr->contents)
-	 xfree(addr->contents);
+	 krb5_xfree(addr->contents);
      return kret;
 }
 
@@ -425,17 +425,17 @@ krb5_fcc_read_authdatum(id, a)
     ret = read(((krb5_fcc_data *) id->data)->fd, (char *)a->contents,
 		(a->length)*sizeof(krb5_octet));
      if (ret == -1) {
-	  xfree(a->contents);
+	  krb5_xfree(a->contents);
 	  return krb5_fcc_interpret(errno);
      }
      if (ret != (a->length)*sizeof(krb5_octet)) {
-	  xfree(a->contents);
+	  krb5_xfree(a->contents);
 	  return KRB5_CC_END;
      }
      return KRB5_OK;
  errout:
      if (a->contents)
-	 xfree(a->contents);
+	 krb5_xfree(a->contents);
      return kret;
     
 }

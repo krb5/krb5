@@ -149,7 +149,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		context->my_address.length = channel->initiator_address.length;
 		if (!(context->my_address.contents = (krb5_octet *)
 		      malloc(context->my_address.length))) {
-			xfree(context);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		memcpy((char *) context->my_address.contents,
@@ -159,8 +159,8 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		context->his_address.length = channel->acceptor_address.length;
 		if (!(context->his_address.contents = (krb5_octet *)
 		      malloc(context->my_address.length))) {
-			xfree(context->my_address.contents);
-			xfree(context);
+			krb5_xfree(context->my_address.contents);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		memcpy((char *) context->his_address.contents,
@@ -172,8 +172,8 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		if (*minor_status =
 		    krb5_generate_seq_number(&creds.keyblock,
 					     &context->my_seq_num)) {
-			xfree(context->his_address.contents);
-			xfree(context->my_address.contents);
+			krb5_xfree(context->his_address.contents);
+			krb5_xfree(context->my_address.contents);
 			free((char *)context);
 			return(GSS_S_FAILURE);
 		}
@@ -222,7 +222,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		if (*minor_status =
 		    krb5_copy_keyblock(&creds.keyblock,
 				       &context->session_key)) {
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 			krb5_free_cred_contents(&creds);
 			free((char *)context);
 			return(GSS_S_FAILURE);
@@ -234,7 +234,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 						   outbuf.length,
 						   outbuf.data,
 						   output_token)) {
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 			krb5_free_cred_contents(&creds);
 			free((char *) context);
 			return(GSS_S_FAILURE);
@@ -243,7 +243,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		 * Send over the requested flags information
 		 */
 		((char *) output_token->value)[4] = context->flags;
-		xfree(outbuf.data);
+		krb5_xfree(outbuf.data);
 		*context_handle = context;
  		context->state = GSS_KRB_STATE_DOWN;
 		*ret_flags = context->flags;

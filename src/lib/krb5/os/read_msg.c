@@ -60,7 +60,7 @@ krb5_read_message(fdp, inbuf)
 			return(ENOMEM);
 		}
 		if ((len2 = krb5_net_read(fd, buf, len)) != len) {
-			xfree(buf);
+			krb5_xfree(buf);
 			return((len2 < 0) ? errno : ECONNABORTED);
 		}
 	}

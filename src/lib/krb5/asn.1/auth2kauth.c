@@ -60,7 +60,7 @@ register int *error;
 						       val->crealm,
 						       error);
     if (!retval->client) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     if (val->cksum) {

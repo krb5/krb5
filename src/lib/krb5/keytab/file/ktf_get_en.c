@@ -77,7 +77,7 @@ OLDDECLARG(krb5_keytab_entry *, entry)
     if (!(kerror = krb5_ktfileint_close(id))) {
 	if (cur_entry) {
 	    *entry = *cur_entry;
-	    xfree(cur_entry);
+	    krb5_xfree(cur_entry);
 	} else
 	    kerror = KRB5_KT_NOTFOUND;
     } else

@@ -437,13 +437,13 @@ void load_db(argc, argv)
 		free(name);
 		free(mod_name);
 		if (entry.key.contents)
-		    xfree(entry.key.contents);
+		    krb5_xfree(entry.key.contents);
 		if (entry.alt_key.contents)
-		    xfree(entry.alt_key.contents);
+		    krb5_xfree(entry.alt_key.contents);
 		if (entry.salt)
-		    xfree(entry.salt);
+		    krb5_xfree(entry.salt);
 		if (entry.alt_salt)
-		    xfree(entry.alt_salt);
+		    krb5_xfree(entry.alt_salt);
 	}
 error_out:
 	if (retval = krb5_db_fini()) {

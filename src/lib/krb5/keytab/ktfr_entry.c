@@ -39,6 +39,6 @@ krb5_keytab_entry *entry;
 {
     krb5_free_principal(entry->principal);
     memset((char *)entry->key.contents, 0, entry->key.length);
-    xfree(entry->key.contents);
+    krb5_xfree(entry->key.contents);
     return 0;
 }

@@ -38,7 +38,7 @@ krb5_free_priv(val)
 register krb5_priv *val;
 {
     if (val->enc_part.ciphertext.data)
-	xfree(val->enc_part.ciphertext.data);
-    xfree(val);
+	krb5_xfree(val->enc_part.ciphertext.data);
+    krb5_xfree(val);
     return;
 }

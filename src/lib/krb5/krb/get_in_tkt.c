@@ -208,7 +208,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	if (retval = decode_krb5_error(&reply, &err_reply)) {
 	    if (decrypt_key)
 		krb5_free_keyblock(decrypt_key);
-	    xfree(reply.data);
+	    krb5_xfree(reply.data);
             return retval;              /* some other reply--??? */
 	}
 	/* it was an error */
@@ -225,23 +225,23 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	krb5_free_error(err_reply);
 	if (decrypt_key)
 	    krb5_free_keyblock(decrypt_key);
-	xfree(reply.data);
+	krb5_xfree(reply.data);
 	return retval;
     }
 
     if (!krb5_is_as_rep(&reply)) {
 	if (decrypt_key)
 	    krb5_free_keyblock(decrypt_key);
-	xfree(reply.data);
+	krb5_xfree(reply.data);
 	return KRB5KRB_AP_ERR_MSG_TYPE;
     }
     if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
 	if (decrypt_key)
 	    krb5_free_keyblock(decrypt_key);
-	xfree(reply.data);
+	krb5_xfree(reply.data);
 	return retval;		/* some other reply--??? */
     }
-    xfree(reply.data);
+    krb5_xfree(reply.data);
     if (as_reply->msg_type != KRB5_AS_REP) {
 	if (decrypt_key)
 	    krb5_free_keyblock(decrypt_key);
@@ -309,7 +309,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     }
 #define cleanup_key() {memset((char *)creds->keyblock.contents, 0,\
 			     creds->keyblock.length); \
-		       xfree(creds->keyblock.contents); \
+		       krb5_xfree(creds->keyblock.contents); \
 		       creds->keyblock.contents = 0; \
 		       creds->keyblock.length = 0;}
 
@@ -333,13 +333,13 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	return retval;
     }	
     creds->ticket = *packet;
-    xfree(packet);
+    krb5_xfree(packet);
 
     /* store it in the ccache! */
     if (retval = krb5_cc_store_cred(ccache, creds)) {
 	krb5_free_kdc_rep(as_reply);
 	/* clean up the pieces */
-	xfree(creds->ticket.data);
+	krb5_xfree(creds->ticket.data);
 	krb5_free_addresses(creds->addresses);
 	cleanup_key();
 	return retval;

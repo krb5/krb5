@@ -39,6 +39,6 @@ krb5_ap_rep_enc_part *val;
 {
     if (val->subkey)
 	krb5_free_keyblock(val->subkey);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

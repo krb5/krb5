@@ -162,7 +162,7 @@ OLDDECLARG(const krb5_data *, salt)
 
     /* clean & free the input string */
     memset(copystr, 0, length);
-    xfree(copystr);
+    krb5_xfree(copystr);
 
     /* now fix up key parity again */
     mit_des_fixup_key_parity(key);

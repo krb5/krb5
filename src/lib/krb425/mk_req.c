@@ -81,12 +81,12 @@ u_long checksum;
 			EPRINT "Return to long (%d > %d)\n",
 				outbuf.length, MAX_KTXT_LEN);
 #endif
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 			return(KFAILURE);
 		}
 		authent->length = outbuf.length;
 		memcpy((char *)authent->dat, (char *)outbuf.data, outbuf.length);
-		xfree(outbuf.data);
+		krb5_xfree(outbuf.data);
 	}
 	return(krb425error(r));
 }

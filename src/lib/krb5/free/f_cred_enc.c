@@ -53,8 +53,8 @@ register krb5_cred_enc_part *val;
 	  krb5_free_principal((*temp)->server);
 	if ((*temp)->caddrs)
 	  krb5_free_addresses((*temp)->caddrs);
-	xfree((*temp));
+	krb5_xfree((*temp));
     }
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

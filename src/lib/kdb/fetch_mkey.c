@@ -101,7 +101,7 @@ OLDDECLARG(krb5_keyblock *,key)
 	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd,
 				    salt ? salt : &scratch);
 	if (!salt)
-		xfree(scratch.data);
+		krb5_xfree(scratch.data);
 	memset(password, 0, sizeof(password)); /* erase it */
 	return retval;
 

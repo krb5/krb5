@@ -42,9 +42,9 @@ register krb5_error *val;
     if (val->server)
 	krb5_free_principal(val->server);
     if (val->text.data)
-	xfree(val->text.data);
+	krb5_xfree(val->text.data);
     if (val->e_data.data)
-	xfree(val->e_data.data);
-    xfree(val);
+	krb5_xfree(val->e_data.data);
+    krb5_xfree(val);
     return;
 }

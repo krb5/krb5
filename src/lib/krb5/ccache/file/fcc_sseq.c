@@ -59,7 +59,7 @@ krb5_fcc_start_seq_get(id, cursor)
      if (OPENCLOSE(id)) {
 	  ret = krb5_fcc_open_file(id, FCC_OPEN_RDONLY);
 	  if (ret) {
-	      xfree(fcursor);
+	      krb5_xfree(fcursor);
 	      return ret;
 	  }
      }

@@ -298,7 +298,7 @@ out:
   return(code);
 
   errout:
-  if (*key) xfree(*key);
+  if (*key) krb5_xfree(*key);
   goto out;
 
 }
@@ -355,7 +355,7 @@ int verify_cs_pair(p_client_str, p_client, p_server_str, p_num,
 
     krb5_free_tkt_authent(authdat);
     krb5_free_principal(server);
-    if (request_data.data) xfree(request_data.data);
+    if (request_data.data) krb5_xfree(request_data.data);
 
     return(0);
 }

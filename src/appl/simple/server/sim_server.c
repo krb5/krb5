@@ -204,12 +204,12 @@ char *argv[];
 			      &message)) {
 	com_err(PROGNAME, retval, "while verifying SAFE message");
 	(void) krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
 	exit(1);
     }
     printf("Safe message is: '%.*s'\n", message.length, message.data);
 
-    xfree(message.data);
+    krb5_xfree(message.data);
     krb5_free_address(portforeign_addr);
 
     /* NOW GET ENCRYPTED MESSAGE */
@@ -221,7 +221,7 @@ char *argv[];
     if (i < 0) {
 	perror("receiving datagram");
 	(void) krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
 	exit(1);
     }
     printf("Received %d bytes\n", i);
@@ -231,7 +231,7 @@ char *argv[];
 				   &portforeign_addr)) {
 	com_err(PROGNAME, retval, "while generating port address");
 	(void) krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
 	exit(1);
     }
 
@@ -241,13 +241,13 @@ char *argv[];
 			      &message)) {
 	com_err(PROGNAME, retval, "while verifying PRIV message");
 	(void) krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
 	exit(1);
     }
     printf("Decrypted message is: '%.*s'\n", message.length, message.data);
 
     (void) krb5_rc_close(rcache);
-    xfree(rcache);
+    krb5_xfree(rcache);
 
     exit(0);
 }

@@ -414,7 +414,7 @@ OLDDECLARG(struct saltblock *, salt)
     if (retval = krb5_timeofday(&newentry.mod_date)) {
 	com_err(cmdname, retval, "while fetching date");
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
-	xfree(newentry.key.contents);
+	krb5_xfree(newentry.key.contents);
 	return;
     }
     newentry.attributes = mblock.flags;
@@ -430,7 +430,7 @@ OLDDECLARG(struct saltblock *, salt)
     
     retval = krb5_db_put_principal(&newentry, &one);
     memset((char *)newentry.key.contents, 0, newentry.key.length);
-    xfree(newentry.key.contents);
+    krb5_xfree(newentry.key.contents);
     if (retval) {
 	com_err(cmdname, retval, "while storing entry for '%s'\n", newprinc);
 	return;
@@ -465,7 +465,7 @@ krb5_pointer infop;
 					      &master_random);
 		memset((char *)master_keyblock.contents, 0,
 		       master_keyblock.length);
-		xfree(master_keyblock.contents);
+		krb5_xfree(master_keyblock.contents);
 		master_keyblock.contents = NULL;
 	}
 	krb5_free_principal(master_princ);
@@ -554,7 +554,7 @@ char *dbname;
 					   &master_encblock)) {
 	com_err(pname, retval, "while verifying master key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	xfree(master_keyblock.contents);
+	krb5_xfree(master_keyblock.contents);
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(1);
@@ -563,7 +563,7 @@ char *dbname;
 				  &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	xfree(master_keyblock.contents);
+	krb5_xfree(master_keyblock.contents);
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(1);
@@ -574,7 +574,7 @@ char *dbname;
 	com_err(pname, retval, "while initializing random key generator");
 	(void) krb5_finish_key(&master_encblock);
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	xfree(master_keyblock.contents);
+	krb5_xfree(master_keyblock.contents);
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(1);
@@ -729,7 +729,7 @@ char *argv[];
 	    printf("'%s' added to keytab '%s'\n",
 		   pname, ktname);
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
-	xfree(newentry.key.contents);
+	krb5_xfree(newentry.key.contents);
     cleanall:
 	    krb5_db_free_principal(&dbentry, nentries);
     cleanmost:
@@ -831,7 +831,7 @@ char *argv[];
 	if (key.keytype != 1) {
 		com_err(argv[0], 0, "%s does not have a DES key!", pname);
 		memset((char *)key.contents, 0, key.length);
-		xfree(key.contents);
+		krb5_xfree(key.contents);
 		continue;
 	}
 	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
@@ -841,7 +841,7 @@ char *argv[];
 	fwrite((char *)key.contents, 8, 1, fout);
 	printf("'%s' added to V4 srvtab '%s'\n", pname, ktname);
 	memset((char *)key.contents, 0, key.length);
-	xfree(key.contents);
+	krb5_xfree(key.contents);
     cleanall:
 	    krb5_db_free_principal(&dbentry, nentries);
     cleanmost:
@@ -1207,7 +1207,7 @@ OLDDECLARG(int, salttype)
 	    return;
 	}
 	salt.saltdata = *foo;
-	xfree(foo);
+	krb5_xfree(foo);
 	break;
     }
     default:
@@ -1222,14 +1222,14 @@ OLDDECLARG(int, salttype)
     if (retval) {
 	com_err(cmdname, retval, "while converting password to key for '%s'",
 		newprinc);
-	xfree(salt.saltdata.data);
+	krb5_xfree(salt.saltdata.data);
 	return;
     }
     add_key(cmdname, newprinc, princ, &tempkey, ++vno,
 	    (salttype == KRB5_KDB_SALTTYPE_NORMAL) ? 0 : &salt);
-    xfree(salt.saltdata.data);
+    krb5_xfree(salt.saltdata.data);
     memset((char *)tempkey.contents, 0, tempkey.length);
-    xfree(tempkey.contents);
+    krb5_xfree(tempkey.contents);
     return;
 }
 

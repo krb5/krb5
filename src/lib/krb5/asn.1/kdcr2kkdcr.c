@@ -62,7 +62,7 @@ element_KRB5_112krb5_pa_data(val, error)
     }
     for (i = 0, rv = val; rv; rv = rv->next, i++) {
 	if (qb_pullup(rv->PA__DATA->pa__data) != OK) {
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    *error = ENOMEM;
 	    return(0);
 	}
@@ -77,7 +77,7 @@ element_KRB5_112krb5_pa_data(val, error)
 	if (retval[i]->length) {
 	    retval[i]->contents = (unsigned char *)xmalloc(rv->PA__DATA->pa__data->qb_forw->qb_len);
 	    if (!retval[i]->contents) {
-		xfree(retval[i]);
+		krb5_xfree(retval[i]);
 		retval[i] = 0;
 		krb5_free_pa_data(retval);
 		*error = ENOMEM;
@@ -113,7 +113,7 @@ register int *error;
     if (val->padata) {
 	retval->padata = element_KRB5_112krb5_pa_data(val->padata, error);
 	if (*error) {
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    return 0;
 
 	}
@@ -122,7 +122,7 @@ register int *error;
 						       val->crealm,
 						       error);
     if (!retval->client) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 
@@ -134,7 +134,7 @@ register int *error;
     temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
 	krb5_free_kdc_rep(retval);
 	return(0);

@@ -58,7 +58,7 @@ register int *error;
     retval->etype = val->etype;
     retval->cipher = krb5_data2qbuf(&(val->ciphertext));
     if (!retval->cipher) {
-	xfree(retval);
+	krb5_xfree(retval);
 	*error = ENOMEM;
 	return(0);
     }

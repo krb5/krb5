@@ -40,6 +40,6 @@ krb5_ktfile_end_get(id, cursor)
 krb5_keytab id;
 krb5_kt_cursor *cursor;
 {
-    xfree(*cursor);
+    krb5_xfree(*cursor);
     return krb5_ktfileint_close(id);
 }

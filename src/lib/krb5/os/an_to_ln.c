@@ -102,13 +102,13 @@ char *lname;
 
     db = dbm_open(krb5_lname_file, O_RDONLY, 0600);
     if (!db) {
-	xfree(princ_name);
+	krb5_xfree(princ_name);
 	return KRB5_LNAME_CANTOPEN;
     }
 
     contents = dbm_fetch(db, key);
 
-    xfree(princ_name);
+    krb5_xfree(princ_name);
 
     if (contents.dptr == NULL) {
 	retval = KRB5_LNAME_NOTRANS;

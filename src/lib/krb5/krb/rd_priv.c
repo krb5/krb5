@@ -94,7 +94,7 @@ OLDDECLARG(krb5_data *, outbuf)
 	return retval;
     }
     
-#define cleanup_privmsg() {(void)xfree(privmsg->enc_part.ciphertext.data); (void)xfree(privmsg);}
+#define cleanup_privmsg() {(void)krb5_xfree(privmsg->enc_part.ciphertext.data); (void)krb5_xfree(privmsg);}
     if (!valid_etype(privmsg->enc_part.etype)) {
 	cleanup_privmsg();
 	return KRB5_PROG_ETYPE_NOSUPP;
@@ -110,7 +110,7 @@ OLDDECLARG(krb5_data *, outbuf)
         return ENOMEM;
     }
 
-#define cleanup_scratch() {(void)memset(scratch.data, 0, scratch.length); (void)xfree(scratch.data);}
+#define cleanup_scratch() {(void)memset(scratch.data, 0, scratch.length); (void)krb5_xfree(scratch.data);}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, key)) {
@@ -158,8 +158,8 @@ OLDDECLARG(krb5_data *, outbuf)
     }
     cleanup_scratch();
 
-#define cleanup_data() {(void)memset(privmsg_enc_part->user_data.data,0,privmsg_enc_part->user_data.length); (void)xfree(privmsg_enc_part->user_data.data);}
-#define cleanup_mesg() {(void)xfree(privmsg_enc_part);}
+#define cleanup_data() {(void)memset(privmsg_enc_part->user_data.data,0,privmsg_enc_part->user_data.length); (void)krb5_xfree(privmsg_enc_part->user_data.data);}
+#define cleanup_mesg() {(void)krb5_xfree(privmsg_enc_part);}
 
     if (!(priv_flags & KRB5_PRIV_NOTIME)) {
 	krb5_donot_replay replay;
@@ -201,12 +201,12 @@ OLDDECLARG(krb5_data *, outbuf)
 	replay.cusec = privmsg_enc_part->usec;
 	replay.ctime = privmsg_enc_part->timestamp;
 	if (retval = krb5_rc_store(rcache, &replay)) {
-	    xfree(replay.client);
+	    krb5_xfree(replay.client);
 	    cleanup_data();
 	    cleanup_mesg();  
 	    return retval;
 	}
-	xfree(replay.client);
+	krb5_xfree(replay.client);
     }
 
     if (priv_flags & KRB5_PRIV_DOSEQUENCE)

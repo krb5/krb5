@@ -128,17 +128,17 @@ OLDDECLARG(krb5_data *, outbuf)
 					 scratch->length,
 					 (krb5_pointer) key->contents,
 					 key->length, &safe_checksum)) {
-	xfree(safe_checksum.contents);
+	krb5_xfree(safe_checksum.contents);
 	clean_scratch();
 	return retval;
     }
     safemsg.checksum = &safe_checksum;
     clean_scratch();
     if (retval = encode_krb5_safe(&safemsg, &scratch)) {
-	xfree(safe_checksum.contents);
+	krb5_xfree(safe_checksum.contents);
 	return retval;
     }
-    xfree(safe_checksum.contents);
+    krb5_xfree(safe_checksum.contents);
     if (!(safe_flags & KRB5_SAFE_NOTIME)) {
 	krb5_donot_replay replay;
 
@@ -154,13 +154,13 @@ OLDDECLARG(krb5_data *, outbuf)
 	if (retval = krb5_rc_store(rcache, &replay)) {
 	    /* should we really error out here? XXX */
 	    clean_scratch();
-	    xfree(replay.client);
+	    krb5_xfree(replay.client);
 	    return retval;
 	}
-	xfree(replay.client);
+	krb5_xfree(replay.client);
     }
     *outbuf = *scratch;
-    xfree(scratch);
+    krb5_xfree(scratch);
 
     return 0;
 }

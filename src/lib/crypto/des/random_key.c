@@ -48,7 +48,7 @@ OLDDECLARG(krb5_keyblock **, keyblock)
     if (!(randkey = (krb5_keyblock *)malloc(sizeof(*randkey))))
 	return ENOMEM;
     if (!(randkey->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock)))) {
-	xfree(randkey);
+	krb5_xfree(randkey);
 	return ENOMEM;
     }
     randkey->length = sizeof(mit_des_cblock);

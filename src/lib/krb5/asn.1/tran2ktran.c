@@ -60,9 +60,9 @@ register int *error;
     temp = qbuf2krb5_data(val->contents, error);
     if (temp) {
 	retval->tr_contents = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     return(retval);

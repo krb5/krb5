@@ -59,12 +59,12 @@ register int *error;
     xbzero(retval, sizeof(*retval));
 
     if (qb_pullup(val->address) != OK) {
-	xfree(retval);
+	krb5_xfree(retval);
 	goto nomem;
     }
     retval->contents = (unsigned char *)xmalloc(val->address->qb_forw->qb_len);
     if (!retval->contents) {
-	xfree(retval);
+	krb5_xfree(retval);
 	goto nomem;
     }
     retval->addrtype = val->addr__type;

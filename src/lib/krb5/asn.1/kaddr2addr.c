@@ -85,7 +85,7 @@ register int *error;
 						    (val[i])->length, 1);
 	if (!retval->element_KRB5_0[i]->address) {
 	    /* clean up */
-	    xfree(retval->element_KRB5_0[i]);
+	    krb5_xfree(retval->element_KRB5_0[i]);
 	    goto errout;
 	}
     }
@@ -129,7 +129,7 @@ register int *error;
 					      (val[i])->length, 1);
 	if (!rv2->element_KRB5_0->address) {
 	    /* clean up */
-	    xfree(rv2->element_KRB5_0);
+	    krb5_xfree(rv2->element_KRB5_0);
 	    goto errout;
 	}
     }

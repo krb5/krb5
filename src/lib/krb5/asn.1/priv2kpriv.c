@@ -59,9 +59,9 @@ register int *error;
     temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     return(retval);

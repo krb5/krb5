@@ -616,14 +616,14 @@ recv_database(fd, database_fd)
 				  KRB5_SAFE_DOSEQUENCE|KRB5_SAFE_NOTIME,
 				  0, &outbuf)) {
 		send_error(fd, retval, "while decoding database size");
-		xfree(inbuf.data);
+		krb5_xfree(inbuf.data);
 		com_err(progname, retval,
 			"while decoding database size from client");
 		exit(1);
 	}
 	memcpy((char *) &database_size, outbuf.data, sizeof(database_size));
-	xfree(inbuf.data);
-	xfree(outbuf.data);
+	krb5_xfree(inbuf.data);
+	krb5_xfree(outbuf.data);
 	database_size = ntohl(database_size);
 	/*
 	 * Initialize the initial vector.
@@ -662,12 +662,12 @@ recv_database(fd, database_fd)
 				received_size);
 			com_err(progname, retval, buf);
 			send_error(fd, retval, buf);
-			xfree(inbuf.data);
+			krb5_xfree(inbuf.data);
 			exit(1);
 		}
 		n = write(database_fd, outbuf.data, outbuf.length);
-		xfree(inbuf.data);
-		xfree(outbuf.data);
+		krb5_xfree(inbuf.data);
+		krb5_xfree(outbuf.data);
 		if (n < 0) {
 			sprintf(buf,
 				"while writing database block starting at offset %d",
@@ -712,12 +712,12 @@ recv_database(fd, database_fd)
 		exit(1);
 	}
 	if (retval = krb5_write_message((void *) &fd, &outbuf)) {
-		xfree(outbuf.data);
+		krb5_xfree(outbuf.data);
 		com_err(progname, retval,
 			"while sending # of receeived bytes");
 		exit(1);
 	}
-	xfree(outbuf.data);
+	krb5_xfree(outbuf.data);
 }
 
 
@@ -756,7 +756,7 @@ send_error(fd, err_code, err_text)
 		strcpy(error.text.data, text);
 		if (!krb5_mk_error(&error, &outbuf)) {
 			(void) krb5_write_message((void *) &fd, &outbuf);
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 		}
 		free(error.text.data);
 	}

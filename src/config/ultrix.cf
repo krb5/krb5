@@ -38,7 +38,7 @@
 /* makedepend won't understand -YPOSIX also implies -DPOSIX... */
 /* #define MakeDependFlags -DPOSIX */
 
-/* #define DefaultCDebugFlags OptimizedCDebugFlags */
+#define DefaultCDebugFlags DebuggableCDebugFlags
 
 /* #undef HasNdbm */
 #define HasNdbm YES

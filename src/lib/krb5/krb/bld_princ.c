@@ -82,9 +82,9 @@ va_list ap;
 	    if (!p_tmp) {
 	    free_out:
 		    while (--i >= 0)
-			xfree(data[i].data);
-		    xfree(data);
-		    xfree(tmpdata);
+			krb5_xfree(data[i].data);
+		    krb5_xfree(data);
+		    krb5_xfree(tmpdata);
 		    return (ENOMEM);
 	    }
 	    count *= 2;

@@ -38,8 +38,8 @@ krb5_free_pwd_sequences(val)
 passwd_phrase_element **val;
 {
     if ((*val)->passwd)
-	xfree((*val)->passwd);
+	krb5_xfree((*val)->passwd);
     if ((*val)->phrase)
-	xfree((*val)->phrase);
+	krb5_xfree((*val)->phrase);
     return;
 }

@@ -46,6 +46,6 @@ char * const *hostlist;
 
     for (cp = hostlist; *cp; cp++)
 	free(*cp);
-    xfree(hostlist);
+    krb5_xfree(hostlist);
     return 0;
 }

@@ -54,6 +54,6 @@ krb5_data *enc_err;
     if (retval = encode_krb5_error(dec_err, &new_enc_err))
 	return(retval);
     *enc_err = *new_enc_err;
-    xfree(new_enc_err);
+    krb5_xfree(new_enc_err);
     return 0;
 }

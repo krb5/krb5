@@ -63,7 +63,7 @@ krb5_rcache *rcptr;
 	    } else
 		retval = ENOMEM;
 	}
-	xfree(rcache);
+	krb5_xfree(rcache);
     } else
 	retval = ENOMEM;
     return retval;

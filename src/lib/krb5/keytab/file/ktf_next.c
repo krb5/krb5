@@ -51,6 +51,6 @@ krb5_kt_cursor *cursor;
 	return kerror;
     *fileoff = ftell(KTFILEP(id));
     *entry = *cur_entry;
-    xfree(cur_entry);
+    krb5_xfree(cur_entry);
     return 0;
 }

@@ -94,7 +94,7 @@ OLDDECLARG(krb5_data *, reply)
 	socklist[i] = -1;
 
     if (!(reply->data = malloc(krb5_max_dgram_size))) {
-	xfree(addr);
+	krb5_xfree(addr);
 	return ENOMEM;
     }
     reply->length = krb5_max_dgram_size;
@@ -195,7 +195,7 @@ OLDDECLARG(krb5_data *, reply)
     for (i = 0; i < AF_MAX; i++)
 	if (socklist[i] != -1)
 	    (void) close(socklist[i]);
-    xfree(addr);
+    krb5_xfree(addr);
     if (retval) {
 	free(reply->data);
 	reply->data = 0;

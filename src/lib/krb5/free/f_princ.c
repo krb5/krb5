@@ -42,10 +42,10 @@ krb5_principal val;
     if (val->data) {
 	while(--i >= 0)
 	    free(krb5_princ_component(val, i)->data);
-	xfree(val->data);
+	krb5_xfree(val->data);
     }
     if (val->realm.data)
-	xfree(val->realm.data);
-    xfree(val);
+	krb5_xfree(val->realm.data);
+    krb5_xfree(val);
     return;
 }

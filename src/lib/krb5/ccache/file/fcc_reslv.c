@@ -69,7 +69,7 @@ krb5_fcc_resolve (id, residual)
      
      lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
-	  xfree(lid);
+	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 
@@ -77,8 +77,8 @@ krb5_fcc_resolve (id, residual)
 	  malloc(strlen(residual) + 1);
 
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
-	  xfree(((krb5_fcc_data *) lid->data));
-	  xfree(lid);
+	  krb5_xfree(((krb5_fcc_data *) lid->data));
+	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 

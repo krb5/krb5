@@ -59,9 +59,9 @@ register int *error;
     temp = qbuf2krb5_data(val->cipher, error);
     if (temp) {
 	retval->ciphertext = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     if (val->optionals & opt_KRB5_EncryptedData_kvno)

@@ -39,6 +39,6 @@ krb5_pwd_data *val;
 {
     if (val->element)
 	krb5_free_pwd_sequences(val->element);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

@@ -57,9 +57,9 @@ krb5_scc_close(id)
 	     closeval = KRB5_OK;
 		 
      }
-     xfree (data->filename);
-     xfree (data);
-     xfree (id);
+     krb5_xfree (data->filename);
+     krb5_xfree (data);
+     krb5_xfree (id);
 
      return closeval;
 }

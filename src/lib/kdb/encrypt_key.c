@@ -70,7 +70,7 @@ register krb5_encrypted_keyblock *out;
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
     if (!out->contents) {
-	xfree(tmpin.contents);
+	krb5_xfree(tmpin.contents);
 	out->contents = 0;
 	out->length = 0;
 	return ENOMEM;
@@ -85,9 +85,9 @@ register krb5_encrypted_keyblock *out;
     retval = krb5_encrypt((krb5_pointer) tmpin.contents,
 			  (krb5_pointer) ((char *) out->contents + 4),
 			  tmpin.length, eblock, 0);
-    xfree(tmpin.contents);
+    krb5_xfree(tmpin.contents);
     if (retval) {
-	xfree(out->contents);
+	krb5_xfree(out->contents);
 	out->contents = 0;
 	out->length = 0;
     }

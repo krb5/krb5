@@ -48,24 +48,24 @@ krb5_authenticator **authto;
 
     retval = krb5_copy_principal(authfrom->client, &tempto->client);
     if (retval) {
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return retval;
     }
     
     if (authfrom->checksum &&
 	(retval = krb5_copy_checksum(authfrom->checksum, &tempto->checksum))) {
 	    krb5_free_principal(tempto->client);    
-	    xfree(tempto);
+	    krb5_xfree(tempto);
 	    return retval;
     }
     
     if (authfrom->subkey) {
 	    retval = krb5_copy_keyblock(authfrom->subkey, &tempto->subkey);
 	    if (retval) {
-		    xfree(tempto->subkey);
+		    krb5_xfree(tempto->subkey);
 		    krb5_free_checksum(tempto->checksum);
 		    krb5_free_principal(tempto->client);    
-		    xfree(tempto);
+		    krb5_xfree(tempto);
 		    return retval;
 	    }
     }
@@ -74,11 +74,11 @@ krb5_authenticator **authto;
 		retval = krb5_copy_authdata(authfrom->authorization_data,
 				    &tempto->authorization_data);
 		if (retval) {
-		    xfree(tempto->subkey);
+		    krb5_xfree(tempto->subkey);
 		    krb5_free_checksum(tempto->checksum);
 		    krb5_free_principal(tempto->client);    
 		    krb5_free_authdata(tempto->authorization_data);
-		    xfree(tempto);
+		    krb5_xfree(tempto);
 		    return retval;
 		}
     }

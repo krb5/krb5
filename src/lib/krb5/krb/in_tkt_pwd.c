@@ -93,7 +93,7 @@ OLDDECLARG(krb5_pa_data **,padata)
 	if (retval = krb5_read_password(krb5_default_pwd_prompt1,
 					0,
 					pwdbuf, &pwsize)) {
-	    if (f_salt) xfree(salt.data);
+	    if (f_salt) krb5_xfree(salt.data);
 	    return retval;
 	}
 	arg2 = *arg;
@@ -103,7 +103,7 @@ OLDDECLARG(krb5_pa_data **,padata)
     }
     *key = (krb5_keyblock *)malloc(sizeof(**key));
     if (!*key) {
-	if (f_salt) xfree(salt.data);
+	if (f_salt) krb5_xfree(salt.data);
 	return ENOMEM;
     }    
     if (retval = (*krb5_keytype_array[type]->system->
@@ -111,11 +111,11 @@ OLDDECLARG(krb5_pa_data **,padata)
 				 *key,
 				 &arg->password,
                                  &salt)) {
-	xfree(*key);
-	if (f_salt) xfree(salt.data);
+	krb5_xfree(*key);
+	if (f_salt) krb5_xfree(salt.data);
 	return(retval);
     }
-    if (f_salt) xfree(salt.data);
+    if (f_salt) krb5_xfree(salt.data);
     return 0;
 }
 

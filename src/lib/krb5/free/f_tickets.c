@@ -41,6 +41,6 @@ krb5_ticket **val;
 
     for (temp = val; *temp; temp++)
         krb5_free_ticket(*temp);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

@@ -41,9 +41,9 @@ krb5_authdata **val;
 
     for (temp = val; *temp; temp++) {
 	if ((*temp)->contents)
-	    xfree((*temp)->contents);
-	xfree(*temp);
+	    krb5_xfree((*temp)->contents);
+	krb5_xfree(*temp);
     }
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

@@ -163,8 +163,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifndef sgi
 	    sigsetmask(oldmask);
 #endif
-	    if (tmpstr) xfree(tmpstr);
-	    if (host_save) xfree(host_save);
+	    if (tmpstr) krb5_xfree(tmpstr);
+	    if (host_save) krb5_xfree(host_save);
 	    krb5_free_creds(ret_cred);
 	    return (-1);
     	}
@@ -211,8 +211,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifndef sgi
     	sigsetmask(oldmask);
 #endif
-	if (tmpstr) xfree(tmpstr);
-	if (host_save) xfree(host_save);
+	if (tmpstr) krb5_xfree(tmpstr);
+	if (host_save) krb5_xfree(host_save);
 	krb5_free_creds(ret_cred);
     	return (-1);
     }
@@ -373,8 +373,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     sigsetmask(oldmask);
 #endif
     *sock = s;
-    if (tmpstr) xfree(tmpstr);
-    if (host_save) xfree(host_save);
+    if (tmpstr) krb5_xfree(tmpstr);
+    if (host_save) krb5_xfree(host_save);
     
     /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(ret_cred,cred);
@@ -391,8 +391,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifndef sgi
     sigsetmask(oldmask);
 #endif
-    if (tmpstr) xfree(tmpstr);
-    if (host_save) xfree(host_save);
+    if (tmpstr) krb5_xfree(tmpstr);
+    if (host_save) krb5_xfree(host_save);
     if (ret_cred)
       krb5_free_creds(ret_cred);
     return (status);

@@ -59,9 +59,9 @@ register int *error;
     temp = qbuf2krb5_data(val->user__data, error);
     if (temp) {
 	retval->user_data = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     if (val->timestamp) {

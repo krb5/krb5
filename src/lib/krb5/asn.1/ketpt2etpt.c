@@ -53,7 +53,7 @@ register int *error;
 
     retval->flags = krb5_flags2KRB5_TicketFlags(val->flags, error);
     if (*error) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     retval->key = krb5_keyblock2KRB5_EncryptionKey(val->session, error);

@@ -73,13 +73,13 @@ krb5_keyblock *out;
     if (retval = krb5_decrypt((krb5_pointer) ((char *) in->contents + 4),
 			      (krb5_pointer) out->contents,
 			      in->length-sizeof(in->length), eblock, 0)) {
-	xfree(out->contents);
+	krb5_xfree(out->contents);
 	out->contents = 0;
 	out->length = 0;
 	return retval;
     }
     if (out->length < 0) {
-	xfree(out->contents);
+	krb5_xfree(out->contents);
 	out->contents = 0;
 	out->length = 0;
 	return KRB5_KDB_INVALIDKEYSIZE;

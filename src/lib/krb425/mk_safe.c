@@ -98,7 +98,7 @@ struct sockaddr_in *receiver;
 			 rcache,
 			 &out5);
 	krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
 	krb5_free_address(saddr2);
 
 	if (r) {

@@ -47,9 +47,9 @@ krb5_ktfile_close(id)
    * This routine should undo anything done by krb5_ktfile_resolve().
    */
 {
-    xfree(KTFILENAME(id));
-    xfree(id->data);
+    krb5_xfree(KTFILENAME(id));
+    krb5_xfree(id->data);
     id->ops = 0;
-    xfree(id);
+    krb5_xfree(id);
     return (0);
 }

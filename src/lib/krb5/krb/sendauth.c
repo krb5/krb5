@@ -187,11 +187,11 @@ krb5_sendauth(/* IN */
 	if (inbuf.length) {
 		if (error) {
 			if (retval = krb5_rd_error(&inbuf, error)) {
-				xfree(inbuf.data);
+				krb5_xfree(inbuf.data);
 				return(retval);
 			}
 		}
-		xfree(inbuf.data);
+		krb5_xfree(inbuf.data);
 		krb5_free_cred_contents(&creds);
 		memset((char *)&authent, 0, sizeof(authent));
 		return(KRB5_SENDAUTH_REJECTED);
@@ -217,7 +217,7 @@ krb5_sendauth(/* IN */
 			problem = KRB5_SENDAUTH_MUTUAL_FAILED;
 		memset((char *)&authent, 0, sizeof(authent));
 		krb5_free_cred_contents(&creds);
-		xfree(inbuf.data);
+		krb5_xfree(inbuf.data);
 		if (problem) {
 			krb5_free_ap_rep_enc_part(repl);
 			return(problem);

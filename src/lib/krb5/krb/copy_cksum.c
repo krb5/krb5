@@ -47,7 +47,7 @@ krb5_checksum **ckto;
 
     if (!(tempto->contents =
 	  (krb5_octet *)malloc(tempto->length))) {
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return ENOMEM;
     }
     memcpy((char *) tempto->contents, (char *) ckfrom->contents,

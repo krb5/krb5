@@ -123,7 +123,7 @@ char ***hostlist;
 	    if (!rethlist[hlindex]) {
 		for (--hlindex; hlindex >= 0; hlindex--)
 		    free(rethlist[hlindex]);
-		xfree(rethlist);
+		krb5_xfree(rethlist);
 		rethlist = 0;
 		retval = ENOMEM;
 		break;
@@ -147,7 +147,7 @@ char ***hostlist;
     (void) fclose(config_file);
 
     if (hlindex == 0) {
-	xfree(rethlist);
+	krb5_xfree(rethlist);
 	rethlist = 0;
 	retval = KRB5_REALM_UNKNOWN;
     }

@@ -38,7 +38,7 @@ krb5_free_checksum(val)
 register krb5_checksum *val;
 {
     if (val->contents)
-	xfree(val->contents);
-    xfree(val);
+	krb5_xfree(val->contents);
+    krb5_xfree(val);
     return;
 }

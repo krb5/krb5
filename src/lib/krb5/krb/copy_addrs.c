@@ -45,7 +45,7 @@ krb5_address **outad;
 	return ENOMEM;
     *tmpad = *inad;
     if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
-	xfree(tmpad);
+	krb5_xfree(tmpad);
 	return ENOMEM;
     }
     memcpy((char *)tmpad->contents, (char *)inad->contents, inad->length);

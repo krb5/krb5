@@ -31,8 +31,8 @@
 #define KRB5_FREE__
 
 /* to keep lint happy */
-#define xfree(val) free((char *)(val))
+#define krb5_xfree(val) free((char *)(val))
 
-#define krb5_free_data(val) { xfree((val)->data); xfree(val);}
+#define krb5_free_data(val) { krb5_xfree((val)->data); krb5_xfree(val);}
 
 #endif /* KRB5_FREE__ */

@@ -76,7 +76,7 @@ int request_exit()
 int krb5_free_keyblock_contents(krb5_keyblock *key)
 {
      memset(key->contents, 0, key->length);
-     xfree(key->contents);
+     krb5_xfree(key->contents);
      return 0;
 }
 

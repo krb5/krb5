@@ -38,7 +38,7 @@ krb5_free_address(val)
 krb5_address *val;
 {
     if (val->contents)
-	xfree(val->contents);
-    xfree(val);
+	krb5_xfree(val->contents);
+    krb5_xfree(val);
     return;
 }

@@ -84,7 +84,7 @@ register int *error;
 		krb5_free_pwd_sequences(element[i]);
 		i--;
 	    }
-	    xfree(element);
+	    krb5_xfree(element);
 	    goto errout;
 	}
     }

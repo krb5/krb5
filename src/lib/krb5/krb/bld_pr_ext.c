@@ -78,15 +78,15 @@ va_dcl
 	return ENOMEM;
     princ_ret = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (!princ_ret) {
-	xfree(princ_data);
+	krb5_xfree(princ_data);
 	return ENOMEM;
     }
     princ_ret->data = princ_data;
     princ_ret->length = count;
     tmpdata = malloc(rlen+1);
     if (!tmpdata) {
-	xfree(princ_data);
-	xfree(princ_ret);
+	krb5_xfree(princ_data);
+	krb5_xfree(princ_ret);
 	return ENOMEM;
     }	
     krb5_princ_set_realm_length(princ_ret, rlen);
@@ -117,9 +117,9 @@ va_dcl
 
 free_out:
     while (i-- >= 0)
-	xfree(princ_data[i].data);
-    xfree(princ_data);
-    xfree(princ_ret);
+	krb5_xfree(princ_data[i].data);
+    krb5_xfree(princ_data);
+    krb5_xfree(princ_ret);
     va_end(ap);
     return ENOMEM;
 }

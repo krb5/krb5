@@ -40,7 +40,7 @@ krb5_last_req_entry **val;
     register krb5_last_req_entry **temp;
 
     for (temp = val; *temp; temp++)
-	xfree(*temp);
-    xfree(val);
+	krb5_xfree(*temp);
+    krb5_xfree(val);
     return;
 }

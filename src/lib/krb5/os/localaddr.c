@@ -152,7 +152,7 @@ krb5_error_code krb5_os_localaddr(addr)
 		    address->length = sizeof(struct in_addr);
 		    address->contents = (unsigned char *)malloc(address->length);
 		    if (!address->contents) {
-			xfree(address);
+			krb5_xfree(address);
 			address = 0;
 			mem_err++;
 		    } else {
@@ -179,7 +179,7 @@ krb5_error_code krb5_os_localaddr(addr)
 		    address->length = sizeof(struct ns_addr);
 		    address->contents = (unsigned char *)malloc(address->length);
 		    if (!address->contents) {
-			xfree(address);
+			krb5_xfree(address);
 			address = 0;
 			mem_err++;
 		    } else {
@@ -210,7 +210,7 @@ krb5_error_code krb5_os_localaddr(addr)
     
     if (mem_err) {
 	for (i=0; i<n_found; i++) {
-	    xfree(addr_temp[i]);
+	    krb5_xfree(addr_temp[i]);
 	    addr_temp[i] = 0;
 	}
 	return ENOMEM;

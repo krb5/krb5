@@ -56,7 +56,7 @@ krb5_fcc_end_seq_get(id, cursor)
 	and if not, fcc_start_seq_get and/or fcc_next_cred will do the
 	MAYBE_CLOSE.
      MAYBE_CLOSE(id, kret); */
-     xfree((krb5_fcc_cursor *) *cursor);
+     krb5_xfree((krb5_fcc_cursor *) *cursor);
 
      return kret;
 }

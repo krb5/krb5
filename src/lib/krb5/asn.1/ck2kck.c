@@ -65,7 +65,7 @@ register int *error;
     }
     retval->contents = (unsigned char *)xmalloc(val->checksum->qb_forw->qb_len);
     if (!retval->contents) {
-	xfree(retval);
+	krb5_xfree(retval);
 	goto nomem;
     }
     retval->checksum_type = val->cksumtype;

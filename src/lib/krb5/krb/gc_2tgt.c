@@ -181,7 +181,7 @@ register krb5_creds * cred;
     }
 
     cred->ticket = *scratch;
-    xfree(scratch);
+    krb5_xfree(scratch);
 
     krb5_free_kdc_rep(dec_rep);
     return 0;

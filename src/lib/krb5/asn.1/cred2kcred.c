@@ -65,7 +65,7 @@ register int *error;
     retval->tickets = (krb5_ticket **) xcalloc(i + 1, sizeof(*retval->tickets));
     if (!retval->tickets) {
 	*error = ENOMEM;
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     
@@ -75,7 +75,7 @@ register int *error;
 	if (!retval->tickets[i]) {
 	    krb5_free_tickets(retval->tickets);
 	    *error = ENOMEM;
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    return(0);
 	}
 	xbzero((char *)retval->tickets[i], sizeof(*retval->tickets[i]));
@@ -83,7 +83,7 @@ register int *error;
 	retval->tickets[i] = KRB5_Ticket2krb5_ticket(rv->Ticket, error);
 	if (!retval->tickets[i]) {
 	    krb5_free_tickets(retval->tickets);
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    return(0);
 	}
     }
@@ -93,10 +93,10 @@ register int *error;
     temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
 	krb5_free_tickets(retval->tickets);
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 

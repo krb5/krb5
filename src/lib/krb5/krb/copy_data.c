@@ -54,7 +54,7 @@ krb5_data **outdata;
     tempdata->length = indata->length;
     if (tempdata->length) {
 	if (!(tempdata->data = malloc(tempdata->length))) {
-	    xfree(tempdata);
+	    krb5_xfree(tempdata);
 	    return ENOMEM;
 	}
 	memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);

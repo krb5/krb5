@@ -40,7 +40,7 @@ register krb5_ap_req *val;
     if (val->ticket)
 	krb5_free_ticket(val->ticket);
     if (val->authenticator.ciphertext.data)
-	xfree(val->authenticator.ciphertext.data);
-    xfree(val);
+	krb5_xfree(val->authenticator.ciphertext.data);
+    krb5_xfree(val);
     return;
 }

@@ -149,7 +149,7 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 		context->my_address.length = channel->initiator_address.length;
 		if (!(context->my_address.contents = (krb5_octet *)
 		      malloc(context->my_address.length))) {
-			xfree(context);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		memcpy((char *) context->my_address.contents,
@@ -159,8 +159,8 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 		context->his_address.length = channel->acceptor_address.length;
 		if (!(context->his_address.contents = (krb5_octet *)
 		      malloc(context->my_address.length))) {
-			xfree(context->my_address.contents);
-			xfree(context);
+			krb5_xfree(context->my_address.contents);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		memcpy((char *) context->his_address.contents,
@@ -179,9 +179,9 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 			if (*minor_status =
 			    krb5_generate_seq_number(authdat->ticket->enc_part2->session,
 						     &context->my_seq_num)) {
-				xfree(context->his_address.contents);
-				xfree(context->my_address.contents);
-				xfree(context);
+				krb5_xfree(context->his_address.contents);
+				krb5_xfree(context->my_address.contents);
+				krb5_xfree(context);
 				krb5_free_tkt_authent(authdat);
 				return(GSS_S_FAILURE);
 			}
@@ -195,9 +195,9 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 			    krb5_mk_rep(&repl,
 					authdat->ticket->enc_part2->session,
 					&outbuf)) {
-				xfree(context->his_address.contents);
-				xfree(context->my_address.contents);
-				xfree(context);
+				krb5_xfree(context->his_address.contents);
+				krb5_xfree(context->my_address.contents);
+				krb5_xfree(context);
 				krb5_free_tkt_authent(authdat);
 				return(GSS_S_FAILURE);
 			}
@@ -207,10 +207,10 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 							   outbuf.length,
 							   outbuf.data,
 							   output_token)) {
-				xfree(context->his_address.contents);
-				xfree(context->my_address.contents);
-				xfree(context);
-				xfree(outbuf.data);
+				krb5_xfree(context->his_address.contents);
+				krb5_xfree(context->my_address.contents);
+				krb5_xfree(context);
+				krb5_xfree(outbuf.data);
 				krb5_free_tkt_authent(authdat);
 				return(GSS_S_FAILURE);
 			}
@@ -222,18 +222,18 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 		if (*minor_status =
 		    krb5_copy_principal(verifier_cred_handle.principal,
 					&context->me)) {
-			xfree(context->his_address.contents);
-			xfree(context->my_address.contents);
-			xfree(context);
+			krb5_xfree(context->his_address.contents);
+			krb5_xfree(context->my_address.contents);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		if (*minor_status =
 		    krb5_copy_principal(authdat->authenticator->client,
 					&context->him)) {
 			krb5_free_principal(context->me);
-			xfree(context->his_address.contents);
-			xfree(context->my_address.contents);
-			xfree(context);
+			krb5_xfree(context->his_address.contents);
+			krb5_xfree(context->my_address.contents);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		if (*minor_status =
@@ -241,9 +241,9 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 				       &context->session_key)) {
 			krb5_free_principal(context->me);
 			krb5_free_principal(context->him);
-			xfree(context->his_address.contents);
-			xfree(context->my_address.contents);
-			xfree(context);
+			krb5_xfree(context->his_address.contents);
+			krb5_xfree(context->my_address.contents);
+			krb5_xfree(context);
 			return(GSS_S_FAILURE);
 		}
 		context->his_seq_num = authdat->authenticator->seq_number;
@@ -260,12 +260,12 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 		if (src_name) {
 			if (*minor_status = krb5_copy_principal(context->him,
 								src_name)) {
-				xfree(context->session_key->contents);
+				krb5_xfree(context->session_key->contents);
 				krb5_free_principal(context->me);
 				krb5_free_principal(context->him);
-				xfree(context->his_address.contents);
-				xfree(context->my_address.contents);
-				xfree(context);
+				krb5_xfree(context->his_address.contents);
+				krb5_xfree(context->my_address.contents);
+				krb5_xfree(context);
 				return(GSS_S_FAILURE);
 			}
 		}

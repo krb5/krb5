@@ -57,7 +57,7 @@ register int *error;
 
     retval->user__data = krb5_data2qbuf(&(val->user_data));
     if (!retval->user__data) {
-	xfree(retval);
+	krb5_xfree(retval);
 	*error = ENOMEM;
 	return(0);
     }

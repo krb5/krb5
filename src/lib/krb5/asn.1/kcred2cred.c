@@ -90,20 +90,20 @@ register int *error;
 	
 	rv2->Ticket = krb5_ticket2KRB5_Ticket(val->tickets[i], error);
 	if (!rv2->Ticket) {
-	    xfree(retval->tickets);
+	    krb5_xfree(retval->tickets);
 	    return(0);
 	}
     }
 
     if (!retval->tickets) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 
     retval->enc__part = krb5_enc_data2KRB5_EncryptedData(&(val->enc_part),
 							 error);
     if (!retval->enc__part) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     return(retval);

@@ -92,21 +92,21 @@ krb5_recvauth(/* IN */
 	if (retval = krb5_read_message(fd, &inbuf))
 		return(retval);
 	if (strcmp(inbuf.data, sendauth_version)) {
-		xfree(inbuf.data);
+		krb5_xfree(inbuf.data);
 		problem = KRB5_SENDAUTH_BADAUTHVERS;
 	}
-	xfree(inbuf.data);
+	krb5_xfree(inbuf.data);
 	/*
 	 * Do the same thing for the application version string.
 	 */
 	if (retval = krb5_read_message(fd, &inbuf))
 		return(retval);
 	if (strcmp(inbuf.data, appl_version)) {
-		xfree(inbuf.data);
+		krb5_xfree(inbuf.data);
 		if (!problem)
 			problem = KRB5_SENDAUTH_BADAPPLVERS;
 	}
-	xfree(inbuf.data);
+	krb5_xfree(inbuf.data);
 	/*
 	 * OK, now check the problem variable.  If it's zero, we're
 	 * fine and we can continue.  Otherwise, we have to signal an
@@ -199,7 +199,7 @@ krb5_recvauth(/* IN */
 	if (!problem)
 		problem = krb5_rd_req(&inbuf, server, sender_addr, fetch_from,
 				      keyproc, keyprocarg, rcache, &authdat);
-	xfree(inbuf.data);
+	krb5_xfree(inbuf.data);
 #ifdef WORKING_RCACHE
 	if (rcache)
 	    retval = krb5_rc_close(rcache);
@@ -242,7 +242,7 @@ krb5_recvauth(/* IN */
 	}
 	if (retval = krb5_write_message(fd, &outbuf)) {
 		if (outbuf.data)
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 		if (!problem)
 			krb5_free_tkt_authent(authdat);
 		return(retval);
@@ -287,11 +287,11 @@ krb5_recvauth(/* IN */
 			return(retval);
 		}
 		if (retval = krb5_write_message(fd, &outbuf)) {
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 			krb5_free_tkt_authent(authdat);
 			return(retval);
 		}
-		xfree(outbuf.data);
+		krb5_xfree(outbuf.data);
 	}
 	/*
 	 * At this point, we've won.  We just need to copy whatever
@@ -321,7 +321,7 @@ krb5_recvauth(/* IN */
 		*authent = authdat->authenticator;
 	else
 		krb5_free_authenticator(authdat->authenticator);
-	xfree(authdat);
+	krb5_xfree(authdat);
 	return 0;
 }
 

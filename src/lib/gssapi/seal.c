@@ -78,7 +78,7 @@ OM_uint32 gss_seal(minor_status, context, conf_req_flag, qop_req,
 						   outbuf.length,
 						   outbuf.data,
 						   output_message_buffer)) {
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 			return(GSS_S_FAILURE);
 		}
 		if (conf_state)
@@ -107,7 +107,7 @@ OM_uint32 gss_seal(minor_status, context, conf_req_flag, qop_req,
 						   outbuf.length,
 						   outbuf.data,
 						   output_message_buffer)) {
-			xfree(outbuf.data);
+			krb5_xfree(outbuf.data);
 			return(GSS_S_FAILURE);
 		}
 		if (conf_state)

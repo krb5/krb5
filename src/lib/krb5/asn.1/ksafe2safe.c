@@ -58,7 +58,7 @@ register int *error;
 
     rv2 = (struct type_KRB5_KRB__SAFE__BODY *)xmalloc(sizeof(*rv2));
     if (!rv2) {
-	xfree(retval);
+	krb5_xfree(retval);
 	*error = ENOMEM;
 	return(0);
     }
@@ -70,7 +70,7 @@ register int *error;
 
     rv2->user__data = krb5_data2qbuf(&(val->user_data));
     if (!rv2->user__data) {
-	xfree(retval);
+	krb5_xfree(retval);
 	*error = ENOMEM;
 	return(0);
     }

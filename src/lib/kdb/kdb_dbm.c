@@ -752,17 +752,17 @@ krb5_db_entry *entry;
     /* erase the key */
     if (entry->key.contents) {
 	memset((char *)entry->key.contents, 0, entry->key.length);
-	xfree(entry->key.contents);
+	krb5_xfree(entry->key.contents);
     }
     if (entry->salt)
-	xfree(entry->salt);
+	krb5_xfree(entry->salt);
     
     if (entry->alt_key.contents) {
 	memset((char *)entry->alt_key.contents, 0, entry->alt_key.length);
-	xfree(entry->alt_key.contents);
+	krb5_xfree(entry->alt_key.contents);
     }
     if (entry->alt_salt)
-	xfree(entry->alt_salt);
+	krb5_xfree(entry->alt_salt);
     
     if (entry->principal)
 	krb5_free_principal(entry->principal);

@@ -41,6 +41,6 @@ krb5_tkt_authent *val;
 	    krb5_free_ticket(val->ticket);
     if (val->authenticator)
 	    krb5_free_authenticator(val->authenticator);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

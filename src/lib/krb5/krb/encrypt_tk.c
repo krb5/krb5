@@ -81,7 +81,7 @@ krb5_free_data(scratch); }
     if (!(scratch->data = realloc(scratch->data,
 				  dec_ticket->enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
-	xfree(scratch);
+	krb5_xfree(scratch);
 	return ENOMEM;
     }
     memset(scratch->data + scratch->length, 0,

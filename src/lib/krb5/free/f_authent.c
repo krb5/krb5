@@ -46,6 +46,6 @@ krb5_authenticator *val;
 	krb5_free_keyblock(val->subkey);
     if (val->authorization_data)        
        krb5_free_authdata(val->authorization_data);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

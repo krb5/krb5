@@ -119,11 +119,11 @@ krb5_data *outbuf;
 	replay.cusec = message->usec;
 	replay.ctime = message->timestamp;
 	if (retval = krb5_rc_store(rcache, &replay)) {
-	    xfree(replay.client);
+	    krb5_xfree(replay.client);
 	    cleanup();
 	    return retval;
 	}
-	xfree(replay.client);
+	krb5_xfree(replay.client);
     }
 
     if (safe_flags & KRB5_SAFE_DOSEQUENCE)
@@ -173,7 +173,7 @@ krb5_data *outbuf;
     }
 
 #undef cleanup
-#define cleanup() {krb5_free_safe(message); xfree(our_cksum.contents);}
+#define cleanup() {krb5_free_safe(message); krb5_xfree(our_cksum.contents);}
 
     retval = krb5_calculate_checksum(his_cksum->checksum_type,
 				     scratch->data, scratch->length,
@@ -196,13 +196,13 @@ krb5_data *outbuf;
 
     *outbuf = message->user_data;
 
-    xfree(our_cksum.contents);
+    krb5_xfree(our_cksum.contents);
     if (message->s_address)
 	krb5_free_address(message->s_address);
     if (message->r_address)
 	krb5_free_address(message->r_address);
     krb5_free_checksum(his_cksum);
-    xfree(message);
+    krb5_xfree(message);
 
     return 0;
 }

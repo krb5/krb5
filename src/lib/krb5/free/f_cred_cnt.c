@@ -48,12 +48,12 @@ krb5_creds *val;
 	krb5_free_principal(val->server);
     if (val->keyblock.contents) {
 	memset((char *)val->keyblock.contents, 0, val->keyblock.length);
-	xfree(val->keyblock.contents);
+	krb5_xfree(val->keyblock.contents);
     }
     if (val->ticket.data)
-	xfree(val->ticket.data);
+	krb5_xfree(val->ticket.data);
     if (val->second_ticket.data)
-	xfree(val->second_ticket.data);
+	krb5_xfree(val->second_ticket.data);
     if (val->addresses)
 	krb5_free_addresses(val->addresses);
     if (val->authdata)

@@ -66,7 +66,7 @@ register int *error;
     }
     retval->contents = (unsigned char *) xmalloc(val->keyvalue->qb_forw->qb_len);
     if (!retval->contents) {
-	xfree(retval);
+	krb5_xfree(retval);
 	goto nomem;
     }
     retval->keytype = val->keytype;

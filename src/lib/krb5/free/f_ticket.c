@@ -40,9 +40,9 @@ krb5_ticket *val;
     if (val->server)
 	krb5_free_principal(val->server);
     if (val->enc_part.ciphertext.data)
-	xfree(val->enc_part.ciphertext.data);
+	krb5_xfree(val->enc_part.ciphertext.data);
     if (val->enc_part2)
 	krb5_free_enc_tkt_part(val->enc_part2);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

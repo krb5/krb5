@@ -48,13 +48,13 @@ krb5_enc_tkt_part **partto;
     retval = krb5_copy_keyblock(partfrom->session,
 				&tempto->session);
     if (retval) {
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return retval;
     }
     retval = krb5_copy_principal(partfrom->client, &tempto->client);
     if (retval) {
 	krb5_free_keyblock(tempto->session);
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return retval;
     }
     tempto->transited = partfrom->transited;
@@ -66,7 +66,7 @@ krb5_enc_tkt_part **partto;
 	if (!tempto->transited.tr_contents.data) {
 	    krb5_free_principal(tempto->client);
 	    krb5_free_keyblock(tempto->session);
-	    xfree(tempto);
+	    krb5_xfree(tempto);
 	    return retval;
 	}
 	memcpy((char *)tempto->transited.tr_contents.data,
@@ -76,10 +76,10 @@ krb5_enc_tkt_part **partto;
 
     retval = krb5_copy_addresses(partfrom->caddrs, &tempto->caddrs);
     if (retval) {
-	xfree(tempto->transited.tr_contents.data);
+	krb5_xfree(tempto->transited.tr_contents.data);
 	krb5_free_principal(tempto->client);
 	krb5_free_keyblock(tempto->session);
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return retval;
     }
     if (partfrom->authorization_data) {
@@ -87,10 +87,10 @@ krb5_enc_tkt_part **partto;
 				    &tempto->authorization_data);
 	if (retval) {
 	    krb5_free_addresses(tempto->caddrs);
-	    xfree(tempto->transited.tr_contents.data);
+	    krb5_xfree(tempto->transited.tr_contents.data);
 	    krb5_free_principal(tempto->client);
 	    krb5_free_keyblock(tempto->session);
-	    xfree(tempto);
+	    krb5_xfree(tempto);
 	    return retval;
 	}
     }
@@ -116,16 +116,16 @@ krb5_ticket **pto;
     retval = krb5_copy_data(&from->enc_part.ciphertext, &scratch);
     if (retval) {
 	krb5_free_principal(tempto->server);
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return retval;
     }
     tempto->enc_part.ciphertext = *scratch;
-    xfree(scratch);
+    krb5_xfree(scratch);
     retval = krb5_copy_enc_tkt_part(from->enc_part2, &tempto->enc_part2);
     if (retval) {
-	xfree(tempto->enc_part.ciphertext.data);
+	krb5_xfree(tempto->enc_part.ciphertext.data);
 	krb5_free_principal(tempto->server);
-	xfree(tempto);
+	krb5_xfree(tempto);
 	return retval;
     }	
     *pto = tempto;

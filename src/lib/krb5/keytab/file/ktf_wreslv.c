@@ -48,13 +48,13 @@ krb5_ktfile_wresolve(name, id)
     
     (*id)->ops = &krb5_ktf_writable_ops;
     if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL) {
-	xfree(*id);
+	krb5_xfree(*id);
 	return(ENOMEM);
     }
 
     if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
-	xfree(data);
-	xfree(*id);
+	krb5_xfree(data);
+	krb5_xfree(*id);
 	return(ENOMEM);
     }
 

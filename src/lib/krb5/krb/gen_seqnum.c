@@ -83,7 +83,7 @@ krb5_int32 *seqno;
     }
     outtmp = (krb5_octet *)malloc(esize);
     if (!outtmp) {
-	xfree(intmp);
+	krb5_xfree(intmp);
 	krb5_free_keyblock(subkey);
 	return ENOMEM;
     }
@@ -118,8 +118,8 @@ krb5_int32 *seqno;
     (void) krb5_finish_key(&eblock);
  cleanup:
     krb5_free_keyblock(subkey);
-    xfree(intmp);
-    xfree(outtmp);
+    krb5_xfree(intmp);
+    krb5_xfree(outtmp);
     return retval;
 }
 

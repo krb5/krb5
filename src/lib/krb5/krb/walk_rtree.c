@@ -140,7 +140,7 @@ char realm_branch_char;
     i = 1;
     if (retval = krb5_tgtname(client,
 			      client, &rettree[0])) {
-	xfree(rettree);
+	krb5_xfree(rettree);
 	return retval;
     }
     for (prevccp = ccp = client->data;
@@ -160,7 +160,7 @@ char realm_branch_char;
 		krb5_free_principal(rettree[i-1]);
 		i--;
 	    }
-	    xfree(rettree);
+	    krb5_xfree(rettree);
 	    return retval;
 	}
 	prevccp = ccp;
@@ -178,7 +178,7 @@ char realm_branch_char;
 		krb5_free_principal(rettree[i-1]);
 		i--;
 	    }
-	    xfree(rettree);
+	    krb5_xfree(rettree);
 	    return retval;
 	}
 	i++;
@@ -202,7 +202,7 @@ char realm_branch_char;
 		krb5_free_principal(rettree[i-1]);
 		i--;
 	    }
-	    xfree(rettree);
+	    krb5_xfree(rettree);
 	    return retval;
 	}
 	prevscp = scp + 1;
@@ -222,7 +222,7 @@ char realm_branch_char;
 		krb5_free_principal(rettree[i-1]);
 		i--;
 	    }
-	    xfree(rettree);
+	    krb5_xfree(rettree);
 	    return retval;
 	}
     }

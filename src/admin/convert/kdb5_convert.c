@@ -563,7 +563,7 @@ Principal *princ;
 
     krb5_free_principal(entry.principal);
     krb5_free_principal(entry.mod_name);
-    xfree(ekey.contents);
+    krb5_xfree(ekey.contents);
 
     return retval;
 }
@@ -622,7 +622,7 @@ struct realm_info *pblock;
     if (retval = krb5_db_put_principal(&entry, &nentries))
 	return retval;
 
-    xfree(ekey.contents);
+    krb5_xfree(ekey.contents);
     return 0;
 }
 

@@ -64,7 +64,7 @@ register int *error;
 
     retval->flags = KRB5_TicketFlags2krb5_flags(val->flags, error);
     if (*error) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 
@@ -84,7 +84,7 @@ register int *error;
     temp = KRB5_TransitedEncoding2krb5_transited(val->transited, error);
     if (temp) {
 	retval->transited = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
 	goto errout;
     }

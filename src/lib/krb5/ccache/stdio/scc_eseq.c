@@ -53,7 +53,7 @@ krb5_scc_end_seq_get(id, cursor)
     int ret = KRB5_OK;
 /*    MAYBE_CLOSE (id, ret);*/
 
-    xfree((krb5_scc_cursor *) *cursor);
+    krb5_xfree((krb5_scc_cursor *) *cursor);
 
     return ret;
 }

@@ -91,7 +91,7 @@ krb5_free_data(scratch); }
     if (!(scratch->data = realloc(scratch->data,
 				  reply.enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
-	xfree(scratch);
+	krb5_xfree(scratch);
 	return ENOMEM;
     }
     memset(scratch->data + scratch->length, 0,
@@ -132,7 +132,7 @@ reply.enc_part.ciphertext.length = 0; reply.enc_part.ciphertext.data = 0;}
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {
 	*outbuf = *toutbuf;
-	xfree(toutbuf);
+	krb5_xfree(toutbuf);
     }
     cleanup_encpart();
     return retval;

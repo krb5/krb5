@@ -79,7 +79,7 @@ krb5_fcc_generate_new (id)
 
      lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
-	  xfree(lid);
+	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 
@@ -91,8 +91,8 @@ krb5_fcc_generate_new (id)
      ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(scratch) + 1);
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
-	  xfree(((krb5_fcc_data *) lid->data));
-	  xfree(lid);
+	  krb5_xfree(((krb5_fcc_data *) lid->data));
+	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
 
@@ -137,8 +137,8 @@ krb5_fcc_generate_new (id)
      }
 
 err_out:
-     xfree(((krb5_fcc_data *) lid->data)->filename);
-     xfree(((krb5_fcc_data *) lid->data));
-     xfree(lid);
+     krb5_xfree(((krb5_fcc_data *) lid->data)->filename);
+     krb5_xfree(((krb5_fcc_data *) lid->data));
+     krb5_xfree(lid);
      return retcode;
 }

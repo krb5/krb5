@@ -94,7 +94,7 @@ OLDDECLARG(krb5_principal *,ret_princ)
 	}
 	if (!hrealms[0]) {
 	    free(remote_host);
-	    xfree(hrealms);
+	    krb5_xfree(hrealms);
 	    return KRB5_ERR_HOST_REALM_UNKNOWN;
 	}
 

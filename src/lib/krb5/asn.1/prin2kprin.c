@@ -80,7 +80,7 @@ register int *error;
     retval->length = i;
     retval->data = (krb5_data *)malloc(i * sizeof(krb5_data));
     if (retval->data == 0) {
-	xfree(retval);
+	krb5_xfree(retval);
 	*error = ENOMEM;
 	return 0;
     }
@@ -88,8 +88,8 @@ register int *error;
     retval->type = val->name__type;
 
     if (qbuf_to_data(realm, krb5_princ_realm(retval))) {
-	xfree(retval->data);
-	xfree(retval);
+	krb5_xfree(retval->data);
+	krb5_xfree(retval);
 	*error = ENOMEM;
 	return 0;
     }

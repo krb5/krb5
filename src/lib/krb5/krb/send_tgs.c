@@ -128,7 +128,7 @@ OLDDECLARG(krb5_response *,rep)
 	if (!(scratch->data = realloc(scratch->data,
 				      tgsreq.authorization_data.ciphertext.length))) {
 	    /* may destroy scratch->data */
-	    xfree(scratch);
+	    krb5_xfree(scratch);
 	    return ENOMEM;
 	}
 	memset(scratch->data + scratch->length, 0,
@@ -147,20 +147,20 @@ OLDDECLARG(krb5_response *,rep)
 				  (krb5_pointer) tgsreq.authorization_data.ciphertext.data,
 				  scratch->length, &eblock, 0)) {
 	    (void) krb5_finish_key(&eblock);
-	    xfree(tgsreq.authorization_data.ciphertext.data);
+	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
 	    krb5_free_data(scratch);
 	    return retval;
 	}	    
 	krb5_free_data(scratch);
 	if (retval = krb5_finish_key(&eblock)) {
-	    xfree(tgsreq.authorization_data.ciphertext.data);
+	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
 	    return retval;
 	}
     }
 #define cleanup_authdata() { if (tgsreq.authorization_data.ciphertext.data) {\
 	(void) memset(tgsreq.authorization_data.ciphertext.data, 0,\
              tgsreq.authorization_data.ciphertext.length); \
-	    xfree(tgsreq.authorization_data.ciphertext.data);}}
+	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);}}
 
 
 
@@ -203,7 +203,7 @@ OLDDECLARG(krb5_response *,rep)
 					 &ap_checksum)) {
 	if (sec_ticket)
 	    krb5_free_ticket(sec_ticket);
-	xfree(ap_checksum.contents);
+	krb5_xfree(ap_checksum.contents);
 	krb5_free_data(scratch);
 	cleanup_authdata();
 	return retval;
@@ -211,7 +211,7 @@ OLDDECLARG(krb5_response *,rep)
     /* done with body */
     krb5_free_data(scratch);
 
-#define cleanup() {xfree(ap_checksum.contents);\
+#define cleanup() {krb5_xfree(ap_checksum.contents);\
 		   if (sec_ticket) krb5_free_ticket(sec_ticket);}
     /* attach ap_req to the tgsreq */
 
@@ -245,7 +245,7 @@ OLDDECLARG(krb5_response *,rep)
 	if (!combined_padata) {
 	    cleanup();
 	    cleanup_authdata();
-	    xfree(ap_req_padata.contents);
+	    krb5_xfree(ap_req_padata.contents);
 	    return ENOMEM;
 	}
 	combined_padata[0] = &ap_req_padata;
@@ -257,7 +257,7 @@ OLDDECLARG(krb5_response *,rep)
 	if (!combined_padata) {
 	    cleanup();
 	    cleanup_authdata();
-	    xfree(ap_req_padata.contents);
+	    krb5_xfree(ap_req_padata.contents);
 	    return ENOMEM;
 	}
 	combined_padata[0] = &ap_req_padata;
@@ -269,18 +269,18 @@ OLDDECLARG(krb5_response *,rep)
     if (retval = encode_krb5_tgs_req(&tgsreq, &scratch)) {
 	cleanup();
 	cleanup_authdata();
-	xfree(combined_padata);
-	xfree(ap_req_padata.contents);
+	krb5_xfree(combined_padata);
+	krb5_xfree(ap_req_padata.contents);
 	return(retval);
     }
     if (sec_ticket)
 	krb5_free_ticket(sec_ticket);
     cleanup_authdata();
-    xfree(combined_padata);
-    xfree(ap_req_padata.contents);
+    krb5_xfree(combined_padata);
+    krb5_xfree(ap_req_padata.contents);
 #undef cleanup_authdata
 #undef cleanup
-#define cleanup() {xfree(ap_checksum.contents);}
+#define cleanup() {krb5_xfree(ap_checksum.contents);}
 
     /* now send request & get response from KDC */
     retval = krb5_sendto_kdc(scratch, krb5_princ_realm(sname),

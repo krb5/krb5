@@ -63,7 +63,7 @@ OLDDECLARG(krb5_address **,outaddr)
 	2*sizeof(temptype) + 2*sizeof(templength);
 
     if (!(retaddr->contents = (krb5_octet *)malloc(retaddr->length))) {
-	xfree(retaddr);
+	krb5_xfree(retaddr);
 	return ENOMEM;
     }
     marshal = retaddr->contents;

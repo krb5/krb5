@@ -66,7 +66,7 @@ register int *error;
     temp = KRB5_EncryptedData2krb5_enc_data(val->authenticator, error);
     if (temp) {
 	retval->authenticator = *temp;
-	xfree(temp);
+	krb5_xfree(temp);
     } else {
 	krb5_free_ap_req(retval);
 	return(0);

@@ -205,8 +205,8 @@ krb5_parse_name(name, nprincipal)
 	 */
 	tmpdata = malloc(realmsize+1);
 	if (tmpdata == 0) {
-		xfree(principal->data);
-		xfree(principal);
+		krb5_xfree(principal->data);
+		krb5_xfree(principal);
 		return ENOMEM;
 	}
 	krb5_princ_set_realm_data(principal, tmpdata);
@@ -215,10 +215,10 @@ krb5_parse_name(name, nprincipal)
 		  malloc(krb5_princ_component(principal, i)->length + 1);
 		if (!tmpdata) {
 			for (i--; i >= 0; i--)
-				xfree(krb5_princ_component(principal, i)->data);
-			xfree(krb5_princ_realm(principal)->data);
-			xfree(principal->data);
-			xfree(principal);
+				krb5_xfree(krb5_princ_component(principal, i)->data);
+			krb5_xfree(krb5_princ_realm(principal)->data);
+			krb5_xfree(principal->data);
+			krb5_xfree(principal);
 			return(ENOMEM);
 		}
 		krb5_princ_component(principal, i)->data = tmpdata;

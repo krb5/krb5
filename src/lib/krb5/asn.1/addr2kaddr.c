@@ -64,7 +64,7 @@ register int *error;
     }
     for (i = 0; i < val->nelem; i++) {
 	if (qb_pullup(val->element_KRB5_0[i]->address) != OK) {
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    goto nomem;
 	}
 	retval[i] = (krb5_address *) xmalloc(sizeof(*retval[i]));
@@ -74,7 +74,7 @@ register int *error;
 	}
 	retval[i]->contents = (unsigned char *)xmalloc(val->element_KRB5_0[i]->address->qb_forw->qb_len);
 	if (!retval[i]->contents) {
-	    xfree(retval[i]);
+	    krb5_xfree(retval[i]);
 	    retval[i] = 0;
 	    krb5_free_addresses(retval);
 	    goto nomem;
@@ -104,7 +104,7 @@ register int *error;
     }
     for (i = 0, rv = val; rv; rv = rv->next, i++) {
 	if (qb_pullup(rv->element_KRB5_0->address) != OK) {
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    goto nomem;
 	}
 	retval[i] = (krb5_address *) xmalloc(sizeof(*retval[i]));
@@ -114,7 +114,7 @@ register int *error;
 	}
 	retval[i]->contents = (unsigned char *)xmalloc(rv->element_KRB5_0->address->qb_forw->qb_len);
 	if (!retval[i]->contents) {
-	    xfree(retval[i]);
+	    krb5_xfree(retval[i]);
 	    retval[i] = 0;
 	    krb5_free_addresses(retval);
 	    goto nomem;

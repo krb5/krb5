@@ -182,8 +182,8 @@ krb5_tkt_authent **authdat;
 	if (retval)
 	    goto cleanup;
 	retval = krb5_rc_store(rcache, &rep);
-	xfree(rep.server);
-	xfree(rep.client);
+	krb5_xfree(rep.server);
+	krb5_xfree(rep.client);
 	if (retval)
 	    goto cleanup;
     }

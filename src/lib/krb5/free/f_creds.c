@@ -38,6 +38,6 @@ krb5_free_creds(val)
 krb5_creds *val;
 {
     krb5_free_cred_contents(val);
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

@@ -42,5 +42,5 @@ krb5_principal *realms;
 	krb5_free_principal(*nrealms);
 	nrealms++;
     }
-    xfree(realms);
+    krb5_xfree(realms);
 }

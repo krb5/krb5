@@ -57,7 +57,7 @@ krb5_keyblock **subkey;
 	
     if (retval = krb5_random_key(&eblock, random_state, subkey)) {
 	(void) krb5_finish_random_key(&eblock, &random_state);
-	xfree(*subkey);
+	krb5_xfree(*subkey);
 	return retval;
     }	
     /* ignore the error if any, since we've already gotten the key out */

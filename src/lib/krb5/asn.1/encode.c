@@ -86,7 +86,7 @@ void (*free_translation) PROTOTYPE((krb5_pointer ));
     alldatout:
 	free((*data_out)->data);
     datout:
-	xfree(*data_out);
+	krb5_xfree(*data_out);
 	*data_out = 0;
     peout:
 	pe_free(pe);

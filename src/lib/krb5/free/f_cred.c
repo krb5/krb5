@@ -40,7 +40,7 @@ register krb5_cred *val;
     if (val->tickets)
         krb5_free_tickets(val->tickets);
     if (val->enc_part.ciphertext.data)
-	xfree(val->enc_part.ciphertext.data);
-    xfree(val);
+	krb5_xfree(val->enc_part.ciphertext.data);
+    krb5_xfree(val);
     return;
 }

@@ -63,7 +63,7 @@ OM_uint32 gss_sign(minor_status, context, qop_req,
 	if (*minor_status = decode_krb5_safe(&outbuf, &message))
 		return(GSS_S_FAILURE);
 	message->user_data.length = 1;
-	xfree(outbuf.data);
+	krb5_xfree(outbuf.data);
 	if (*minor_status = encode_krb5_safe(&message, &scratch)) {
 		krb5_free_safe(message);
 		return(GSS_S_FAILURE);

@@ -158,7 +158,7 @@ int *size_return;
 	/* interrupted */
 	if (readin_string) {
 	    (void) memset((char *)readin_string, 0, *size_return);
-	    xfree(readin_string);
+	    krb5_xfree(readin_string);
 	}
 	(void) memset(return_pwd, 0, *size_return);
 	cleanup(KRB5_LIBOS_PWDINTR);
@@ -203,7 +203,7 @@ int *size_return;
 	    (void) putchar('\n');
 	    (void) memset((char *)readin_string, 0, *size_return);
 	    (void) memset(return_pwd, 0, *size_return);
-	    xfree(readin_string);
+	    krb5_xfree(readin_string);
 	    cleanup(KRB5_LIBOS_CANTREADPWD);
 	}
 	(void) putchar('\n');
@@ -219,11 +219,11 @@ int *size_return;
 	if (strncmp(return_pwd, (char *)readin_string, *size_return)) {
 	    (void) memset((char *)readin_string, 0, *size_return);
 	    (void) memset(return_pwd, 0, *size_return);
-	    xfree(readin_string);
+	    krb5_xfree(readin_string);
 	    cleanup(KRB5_LIBOS_BADPWDMATCH);
 	}
 	(void) memset((char *)readin_string, 0, *size_return);
-	xfree(readin_string);
+	krb5_xfree(readin_string);
     }
     
     /* reset intrfunc */

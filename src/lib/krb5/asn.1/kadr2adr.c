@@ -58,7 +58,7 @@ register int *error;
     retval->addr__type = val->addrtype;
     retval->address = str2qb((char *)val->contents, val->length, 1);
     if (!retval->address) {
-	xfree(retval);
+	krb5_xfree(retval);
 	goto nomem;
     }
     return(retval);

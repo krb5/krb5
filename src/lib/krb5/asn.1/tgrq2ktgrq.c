@@ -137,7 +137,7 @@ register int *error;
 						error);
 	if (temp) {
 	    retval->authorization_data = *temp;
-	    xfree(temp);
+	    krb5_xfree(temp);
 	} else
 	    goto errout;
     }
@@ -164,7 +164,7 @@ register int *error;
 		    krb5_free_ticket(aticks[i]);
 		    i--;
 		}
-		xfree(aticks);
+		krb5_xfree(aticks);
 		goto errout;
 	    }
 	}
@@ -192,7 +192,7 @@ register int *error;
 		    krb5_free_ticket(aticks[i]);
 		    i--;
 		}
-		xfree(aticks);
+		krb5_xfree(aticks);
 		goto errout;
 	    }
 	}
@@ -222,7 +222,7 @@ element_KRB5_72krb5_pa_data(val, error)
     }
     for (i = 0, rv = val; rv; rv = rv->next, i++) {
 	if (qb_pullup(rv->PA__DATA->pa__data) != OK) {
-	    xfree(retval);
+	    krb5_xfree(retval);
 	    *error = ENOMEM;
 	    return(0);
 	}
@@ -237,7 +237,7 @@ element_KRB5_72krb5_pa_data(val, error)
 	if (retval[i]->length) {
 	    retval[i]->contents = (unsigned char *)xmalloc(rv->PA__DATA->pa__data->qb_forw->qb_len);
 	    if (!retval[i]->contents) {
-		xfree(retval[i]);
+		krb5_xfree(retval[i]);
 		retval[i] = 0;
 		krb5_free_pa_data(retval);
 		*error = ENOMEM;

@@ -88,7 +88,7 @@ OLDDECLARG(krb5_const_principal, princ)
 	return(ENOMEM);
 
 #define cleanup() {memset(keyblock->contents, 0, sizeof(mit_des_cblock));\
-		       xfree(keyblock->contents);}
+		       krb5_xfree(keyblock->contents);}
 
     keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);

@@ -56,13 +56,13 @@ register int *error;
 
     retval->passwd = qbuf2krb5_data(val->passwd, error);
     if (!retval->passwd) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 
     retval->phrase = qbuf2krb5_data(val->phrase, error);
     if (!retval->phrase) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 

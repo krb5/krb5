@@ -57,7 +57,7 @@ register int *error;
 
     retval->ctime = unix2gentime(val->ctime, error);
     if (!retval->ctime) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 

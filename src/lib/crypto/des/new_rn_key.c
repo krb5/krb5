@@ -111,10 +111,10 @@ void mit_des_init_random_number_generator(key,p_seed)
 	   libraries */
 	register krb5_address **addr2;
 	for (addr2 = addrs; *addr2; addr2++) {
-	    xfree((*addr2)->contents);
-	    xfree(*addr2);
+	    krb5_xfree((*addr2)->contents);
+	    krb5_xfree(*addr2);
 	}
-	xfree(addrs);
+	krb5_xfree(addrs);
     }
     /*
      * Generate a tempory value that depends on the key and host_id

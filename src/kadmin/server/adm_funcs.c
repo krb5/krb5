@@ -214,9 +214,9 @@ OLDDECLARG(krb5_db_entry *, entry)
 	memset((char *) entry->key.contents, 0, entry->key.length);
 	memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
 	if (entry->key.contents)
-	    xfree(entry->key.contents);
+	    krb5_xfree(entry->key.contents);
 	if (entry->alt_key.contents)
-	    xfree(entry->alt_key.contents);
+	    krb5_xfree(entry->alt_key.contents);
 	return(KRB_ERR_GENERIC);
     }
 
@@ -263,9 +263,9 @@ OLDDECLARG(krb5_db_entry *, entry)
 	    memset((char *) entry->key.contents, 0, entry->key.length);
 	    memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
 	    if (entry->key.contents)
-		xfree(entry->key.contents);
+		krb5_xfree(entry->key.contents);
 	    if (entry->alt_key.contents)
-		xfree(entry->alt_key.contents);
+		krb5_xfree(entry->alt_key.contents);
 	    return(5);
 	}
     }
@@ -274,11 +274,11 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     memset((char *) entry->key.contents, 0, entry->key.length);
     if (entry->key.contents)
-	xfree(entry->key.contents);
+	krb5_xfree(entry->key.contents);
 
     memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
     if (entry->alt_key.contents)
-	xfree(entry->alt_key.contents);
+	krb5_xfree(entry->alt_key.contents);
 
     if (retval) {
 	com_err("adm_modify_kdb", retval, 
@@ -370,7 +370,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	}
 
 	salt.saltdata = *foo;
-	xfree(foo);
+	krb5_xfree(foo);
 	altsalt.salttype = KRB5_KDB_SALTTYPE_V4;
 	altsalt.saltdata.data = 0;
 	altsalt.saltdata.length = 0;
@@ -391,7 +391,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	com_err("adm_enter_pwd_key", retval, 
 		"while converting password to alt_key for '%s'", newprinc);
 	memset((char *) new_password, 0, sizeof(new_password)); /* erase it */
-	xfree(salt.saltdata.data);
+	krb5_xfree(salt.saltdata.data);
 	return(retval);
     }
 
@@ -402,7 +402,7 @@ OLDDECLARG(krb5_db_entry *, entry)
                                 &altsalt.saltdata)) {
 	com_err("adm_enter_pwd_key", retval, 
 		"while converting password to alt_key for '%s'", newprinc);
-	xfree(salt.saltdata.data);
+	krb5_xfree(salt.saltdata.data);
 	free(entry->alt_key.contents);
 	memset((char *) new_password, 0, sizeof(new_password)); /* erase it */
 	return(retval);
@@ -546,7 +546,7 @@ OLDDECLARG(krb5_db_entry *, entry)
         com_err("adm_enter_rnd_pwd_key", 0, "Unable to Initialize Random Key");
         (void) krb5_finish_key(&master_encblock);
         memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-        xfree(master_keyblock.contents);
+        krb5_xfree(master_keyblock.contents);
         goto finish;
     }
 

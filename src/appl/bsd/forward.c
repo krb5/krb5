@@ -87,7 +87,7 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     }
     if (!hrealms[0]) {
 	free(remote_host);
-	xfree(hrealms);
+	krb5_xfree(hrealms);
 	return KRB5_ERR_HOST_REALM_UNKNOWN;
     }
 
@@ -313,7 +313,7 @@ krb5_data *outbuf;
     if (!(scratch->data = realloc(scratch->data,
 				  ret_cred.enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
-	xfree(scratch);
+	krb5_xfree(scratch);
 	return ENOMEM;
     }
     memset(scratch->data + scratch->length, 0,
@@ -363,7 +363,7 @@ krb5_data *outbuf;
     cleanup_encpart();
 
     *outbuf = *scratch;
-    xfree(scratch);
+    krb5_xfree(scratch);
     return 0;
 
  clean_prockey:
@@ -455,14 +455,14 @@ const krb5_address *recv_addr;    /* optional */
 	return retval;
     }
     
-#define cleanup_credmsg() {(void)xfree(credmsg->enc_part.ciphertext.data); (void)xfree(credmsg);}
+#define cleanup_credmsg() {(void)krb5_xfree(credmsg->enc_part.ciphertext.data); (void)krb5_xfree(credmsg);}
 
     if (!(scratch = (krb5_data *) malloc(sizeof(*scratch)))) {
 	cleanup_credmsg();
 	return ENOMEM;
     }
 
-#define cleanup_scratch() {(void)memset(scratch->data, 0, scratch->length); (void)xfree(scratch->data);}
+#define cleanup_scratch() {(void)memset(scratch->data, 0, scratch->length); (void)krb5_xfree(scratch->data);}
 
     if (retval = encode_krb5_ticket(credmsg->tickets[0], &scratch)) {
 	cleanup_credmsg();
@@ -472,7 +472,7 @@ const krb5_address *recv_addr;    /* optional */
 
     creds->ticket = *scratch;
     if (!(creds->ticket.data = malloc(scratch->length))) {
-	xfree(creds->ticket.data);
+	krb5_xfree(creds->ticket.data);
 	return ENOMEM;
     }
     memcpy((char *)creds->ticket.data, (char *) scratch->data, scratch->length);
@@ -530,7 +530,7 @@ const krb5_address *recv_addr;    /* optional */
     }
     cleanup_scratch();
 
-#define cleanup_mesg() {(void)xfree(credmsg_enc_part);}
+#define cleanup_mesg() {(void)krb5_xfree(credmsg_enc_part);}
 
     if (retval = krb5_timeofday(&currenttime)) {
 	cleanup_mesg();

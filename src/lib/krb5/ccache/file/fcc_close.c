@@ -50,9 +50,9 @@ krb5_fcc_close(id)
      if (((krb5_fcc_data *) id->data)->fd >= 0)
 	     krb5_fcc_close_file(id);
 
-     xfree(((krb5_fcc_data *) id->data)->filename);
-     xfree(((krb5_fcc_data *) id->data));
-     xfree(id);
+     krb5_xfree(((krb5_fcc_data *) id->data)->filename);
+     krb5_xfree(((krb5_fcc_data *) id->data));
+     krb5_xfree(id);
 
      return closeval;
 }

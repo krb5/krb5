@@ -39,8 +39,8 @@ register krb5_keyblock *val;
 {
     if (val->contents) {
 	memset((char *)val->contents, 0, val->length);
-	xfree(val->contents);
+	krb5_xfree(val->contents);
     }
-    xfree(val);
+    krb5_xfree(val);
     return;
 }

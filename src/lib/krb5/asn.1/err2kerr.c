@@ -96,7 +96,7 @@ register int *error;
 	temp = qbuf2krb5_data(val->e__text, error);
 	if (temp) {
 	    retval->text = *temp;
-	    xfree(temp);
+	    krb5_xfree(temp);
 	} else {
 	    goto errout;
 	}
@@ -105,7 +105,7 @@ register int *error;
 	temp = qbuf2krb5_data(val->e__text, error);
 	if (temp) {
 	    retval->text = *temp;
-	    xfree(temp);
+	    krb5_xfree(temp);
 	} else {
 	    goto errout;
 	}

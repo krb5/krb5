@@ -117,7 +117,7 @@ register int *error;
 			free_KRB5_PasswdSequence(rv1->PasswdSequence);
 
 		    rv2 = rv1->next;
-		    xfree(rv1);
+		    krb5_xfree(rv1);
 		}
 	    goto errout;
 	    }

@@ -80,7 +80,7 @@ krb5_tkt_authent **authdat;
 				     sender_addr, 0,
 				     0, 0, rcache, authdat);
 	krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
     }
     krb5_free_ap_req(request);
 

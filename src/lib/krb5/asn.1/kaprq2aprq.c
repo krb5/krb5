@@ -61,7 +61,7 @@ register int *error;
     retval->ap__options = krb5_apoptions2KRB5_APOptions(val->ap_options,
 							error);
     if (!retval->ap__options) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
     retval->ticket = krb5_ticket2KRB5_Ticket(val->ticket, error);

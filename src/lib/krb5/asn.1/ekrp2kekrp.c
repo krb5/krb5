@@ -57,7 +57,7 @@ register int *error;
 
     retval->session = KRB5_EncryptionKey2krb5_keyblock(val->key, error);
     if (!retval->session) {
-	xfree(retval);
+	krb5_xfree(retval);
 	return(0);
     }
 

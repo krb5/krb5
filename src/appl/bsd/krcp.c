@@ -1157,7 +1157,7 @@ void send_auth()
 		error_message(status));
 	exit(1);
     }
-    xfree(princ);
+    krb5_xfree(princ);
     status = krb5_write_message((krb5_pointer) &rem, &creds.ticket);
     if (status){
 	fprintf(stderr,
@@ -1189,7 +1189,7 @@ void send_auth()
 						  keyproc */
 			 0,               /* no rcache for the moment XXX */
 			 &authdat);
-    xfree(reply.data);
+    krb5_xfree(reply.data);
     if (status) {
 	fprintf(stderr, "rcp: send_auth failed krb5_rd_req: %s\n",
 		error_message(status));
@@ -1248,7 +1248,7 @@ void
 	krb5_cc_close(cc);
 	exit(1);
     }
-    xfree(pname_data.data);
+    krb5_xfree(pname_data.data);
     
     if (status = krb5_get_credentials(KRB5_GC_USER_USER, cc, &creds)){
 	krb5_cc_destroy(cc);
@@ -1272,7 +1272,7 @@ void
     krb5_cc_destroy(cc);
     krb5_cc_close(cc);
     status = krb5_write_message((krb5_pointer) &rem, &msg);
-    xfree(msg.data);
+    krb5_xfree(msg.data);
     if (status){
 	exit(1);
     }

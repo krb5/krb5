@@ -105,7 +105,7 @@ MSG_DAT *msg;
 	r = krb5_rd_safe(&inbuf, &keyb, saddr2, &raddr,
 			 0, 0, rcache, &out);
 	krb5_rc_close(rcache);
-	xfree(rcache);
+	krb5_xfree(rcache);
 
 	krb5_free_address(saddr2);
 
