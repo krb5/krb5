@@ -68,7 +68,7 @@ Major changes in 1.4
   v5passwdd backwards-compatibility password-changing server have been
   removed.
 
-* [1303, 2740, 2755, 2781, 2782, 2812] Thread safety for
+* [1303, 2740, 2755, 2781, 2782, 2812, 2858, 2859] Thread safety for
   krb5 libraries.
 
 * [2410] Yarrow code now uses AES.
@@ -284,6 +284,9 @@ for a complete list.
 
 * [2795] Fixed some addrinfo problems that affected Irix.
 
+* [2796, 2840] Calling conventions for some API functions for Windows
+  have been fixed.
+
 * [2805] Windows NSIS installer script updated.
 
 * [2808] Support library renamed on Windows.
@@ -301,6 +304,15 @@ for a complete list.
   symbols on Windows.
 
 * [2838] Fix termination of incorrect string in telnetd.
+
+* [2854] Fix memory leak in ccache.
+
+* [2857] Fix memory leak in asn1_decode_generaltime().
+
+* [2861] Minor documenation fixes.
+
+* [2865] New API function krb5_is_thread_safe() to test for thread
+  safety.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
@@ -493,7 +505,8 @@ Thanks to Derrick Schommer for reporting multiple memory leaks.
 Thanks to Quanah Gibson-Mount of Stanford University for helping
 exercise the thread support code.
 
-[...]
+Thanks to Michael Tautschnig for reporting the heap buffer overflow in
+the password history mechanism.  [MITKRB5-SA-2004-004]
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jeffrey Altman, Jay Berkenbilt,
