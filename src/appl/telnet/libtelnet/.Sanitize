@@ -48,14 +48,11 @@ herror.c
 kerberos.c
 kerberos5.c
 key-proto.h
-krb4encpwd.c
 mem.c
 misc-proto.h
 misc.c
 misc.h
 parsetos.c
-read_password.c
-rsaencpwd.c
 setenv.c
 setsid.c
 spx.c

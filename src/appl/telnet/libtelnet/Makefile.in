@@ -35,9 +35,6 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/forward.c \
 	$(srcdir)/spx.c \
 	$(srcdir)/enc_des.c \
-	$(srcdir)/rsaencpwd.c \
-	$(srcdir)/krb4encpwd.c \
-	$(srcdir)/read_password.c \
 	$(srcdir)/setenv.c \
 	$(srcdir)/getent.c \
 	$(srcdir)/strdup.c \
@@ -49,7 +46,6 @@ SRCS=   $(srcdir)/auth.c \
 
 OBJS=   auth.o encrypt.o genget.o \
 	misc.o kerberos.o kerberos5.o forward.o spx.o enc_des.o \
-	rsaencpwd.o krb4encpwd.o read_password.o \
 	$(LIBOBJS)
 
 TELNET_H= $(srcdir)/../arpa/telnet.h

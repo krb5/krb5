@@ -76,23 +76,7 @@
 
 #define	typemask(x)		(1<<((x)-1))
 
-#ifdef	KRB4_ENCPWD
-extern krb4encpwd_init();
-extern krb4encpwd_send();
-extern krb4encpwd_is();
-extern krb4encpwd_reply();
-extern krb4encpwd_status();
-extern krb4encpwd_printsub();
-#endif
 
-#ifdef	RSA_ENCPWD
-extern rsaencpwd_init();
-extern rsaencpwd_send();
-extern rsaencpwd_is();
-extern rsaencpwd_reply();
-extern rsaencpwd_status();
-extern rsaencpwd_printsub();
-#endif
 
 int auth_debug_mode = 0;
 int auth_has_failed = 0;
@@ -170,24 +154,6 @@ Authenticator authenticators[] = {
 				kerberos4_reply,
 				kerberos4_status,
 				kerberos4_printsub },
-#endif
-#ifdef	KRB4_ENCPWD
-	{ AUTHTYPE_KRB4_ENCPWD, AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL,
-				krb4encpwd_init,
-				krb4encpwd_send,
-				krb4encpwd_is,
-				krb4encpwd_reply,
-				krb4encpwd_status,
-				krb4encpwd_printsub },
-#endif
-#ifdef	RSA_ENCPWD
-	{ AUTHTYPE_RSA_ENCPWD, AUTH_WHO_CLIENT|AUTH_HOW_ONE_WAY,
-				rsaencpwd_init,
-				rsaencpwd_send,
-				rsaencpwd_is,
-				rsaencpwd_reply,
-				rsaencpwd_status,
-				rsaencpwd_printsub },
 #endif
 	{ 0, },
 };

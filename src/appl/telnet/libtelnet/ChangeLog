@@ -1,3 +1,11 @@
+Mon Oct 14 00:21:08 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (OBJS): Remove rsaencpwd aned krb4encpwd stuff as
+ 	well as associated read_password [50]
+
+	* auth.c krb4encpwd.c Makefile.in: Remove krb4encpwd [50]
+	While we're at it, remove rsaencpwd as well.
+
 Tue Jul  9 14:59:19 1996  Marc Horowitz  <marc@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): use @KRB4_INCLUDES@ instead of an
