@@ -1,3 +1,8 @@
+Fri Apr 23 20:05:38 1999  Tom Yu  <tlyu@mit.edu>
+
+	* svc.c: Fix to reference the correct xprt because we're no longer
+	calling ffs(); also remove some unused variables.
+
 Wed Apr 21 16:22:32 1999  Tom Yu  <tlyu@mit.edu>
 
 	* svc.c (xprt_unregister): Fix typo.

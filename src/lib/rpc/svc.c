@@ -411,9 +411,6 @@ svc_getreqset(readfds)
 	rpc_u_int32 high_vers;
 	struct svc_req r;
 	register SVCXPRT *xprt;
-	rpc_u_int32 mask;
-	int bit;
-	rpc_u_int32 *maskp;
 	register int sock;
         bool_t no_dispatch;
 
@@ -426,7 +423,7 @@ svc_getreqset(readfds)
 	for (sock = 0; sock <= max_xport; sock++) {
 	    if (FD_ISSET(sock, readfds)) {
 		/* sock has input waiting */
-		xprt = xports[sock + bit - 1];
+		xprt = xports[sock];
 #else
 	for (sock = 0; readfds_local != 0; sock++, readfds_local >>= 1) {
 	    if ((readfds_local & 1) != 0) {
