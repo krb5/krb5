@@ -1,3 +1,8 @@
+2000-05-02  Wilfredo Sanchez <tritan@mit.edu>
+
+	* config.guess, config.sub: Clean up Rhapsody and Mac OS X guesses.
+	Use powerpc-apple-darwin1.x on Mac OS X.
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in (clean-windows): Actually clean gss-sample on Windows.
@@ -89,12 +94,12 @@
 	* aclocal.m4 (KRB5_AC_INET6): New macro.
 	* acconfig.h (KRB5_USE_INET6): Undef.
 
-1999-10-26  Tom Yu  <tlyu@mit.edu>
+1999-10-26  Wilfredo Sanchez <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
-	Makefile cleanup. [from wsanchez@apple.com]
+	Makefile cleanup.
 
 1999-09-21  Ken Raeburn  <raeburn@mit.edu>
 
