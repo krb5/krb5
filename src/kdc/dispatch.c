@@ -19,6 +19,7 @@ static char rcsid_dispatch_c[] =
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
 #include <krb5/kdb.h>
+#include <syslog.h>
 #include "kdc_util.h"
 
 krb5_error_code
@@ -33,6 +34,13 @@ krb5_data **response;
     krb5_kdc_req *tgs_req;
 
     /* decode incoming packet, and dispatch */
+
+    /* try the replay lookaside buffer */
+    if (kdc_check_lookaside(pkt, response)) {
+	/* a hit! */
+	syslog(LOG_INFO, "DISPATCH: replay found and re-transmitted");
+	return 0;
+    }
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
@@ -48,9 +56,12 @@ krb5_data **response;
     }
 #ifdef KRB4
     else if (pkt->data[0] == 4)		/* XXX old version */
-	return(process_v4(pkt, from, response));
+	retval = process_v4(pkt, from, response);
 #endif
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
+    /* put the response into the lookaside buffer */
+    kdc_insert_lookaside(pkt, *response);
+
     return retval;
 }
