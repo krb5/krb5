@@ -164,8 +164,7 @@ OM_uint32 *		time_rec;
      */
     
     creds_returned = (struct creds_returned *)
-	malloc(sizeof(struct creds_returned)
-	       * desired_mechs->count);
+	malloc(sizeof(struct creds_returned) * desired_mechs->count);
     
     /*
      * For each requested mechanism in desired_mechs, determine if it
@@ -209,42 +208,54 @@ OM_uint32 *		time_rec;
 					desired_mechs, cred_usage,
 					&creds_returned[j].cred,
 					NULL, &temp_time_rec);
+
+	/* Release the internal name, if allocated above */
+	if (union_name && !union_name->mech_type) {
+	    (void) __gss_release_internal_name(&temp_minor_status,
+					       &mech->mech_type,
+					       &internal_name);
+	}
+
+	if (status != GSS_S_COMPLETE)
+	    continue;
+
 	/* 
 	 * Add this into the creds_returned structure, if we got
 	 * a good credential for this mechanism.
 	 */
-	if (status == GSS_S_COMPLETE) {
-	    if (time_rec) {
-		*time_rec = *time_rec > temp_time_rec ?
-		    temp_time_rec : *time_rec;
-		temp_time_rec = *time_rec;
-	    }
-
-	    creds_returned[j].available = 1;
-	    creds_acquired++;
+	if (time_rec) {
+	    *time_rec = *time_rec > temp_time_rec ? temp_time_rec : *time_rec;
+	    temp_time_rec = *time_rec;
 	}
 
-	if (union_name == 0) {
-	    /*
-	     * If desired_name was NULL, then do an inquire
-	     * credentials from the first mechanism that suceeds and
-	     * use that as the union name.
-	     *
-	     * XXX status returns?
-	     */
-	    status = mech->gss_inquire_cred(mech->context, &temp_minor_status,
-					    creds_returned[j].cred,
-					    &internal_name, 0, 0, 0);
-	    status = __gss_convert_name_to_union_name(&temp_minor_status,
-						      mech, internal_name,
-					     (gss_name_t *) &union_name);
-	} else {
-	    if (!union_name->mech_type) {
-		(void) __gss_release_internal_name(&temp_minor_status,
-						   &mech->mech_type,
-						   &internal_name);
-	    }
+	creds_returned[j].available = 1;
+	creds_acquired++;
+
+	/*
+	 * If union_name is set, then we're done.  Continue, and
+	 * declare success.  Otherwise, if do an inquire credentials
+	 * from the first mechanism that succeeds and use that as the
+	 * union name.
+	 */
+	if (union_name)
+	    continue;
+
+	status = mech->gss_inquire_cred(mech->context, &temp_minor_status,
+					creds_returned[j].cred,
+					&internal_name, 0, 0, 0);
+	if (status) {
+	    /* Should never happen */
+	    creds_returned[j].available = 0;
+	    creds_acquired--;
+	    if (mech->gss_release_cred)
+		mech->gss_release_cred(mech->context, minor_status,
+				       &creds_returned[j].cred);
+	    continue;
 	}
+
+	status = __gss_convert_name_to_union_name(&temp_minor_status, mech,
+						  internal_name,
+						  (gss_name_t *) &union_name);
     }
     
     /*

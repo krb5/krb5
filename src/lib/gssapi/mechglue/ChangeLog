@@ -1,3 +1,8 @@
+Thu Apr 11 20:11:00 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_acquire_cred.c (gss_add_cred): Fixed code to correctly handle
+		errors reported from the mechanism layer.
+
 Wed Mar 27 00:05:37 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* mglueP.h: Don't include <sys/types.h> mechglue.h will take care
