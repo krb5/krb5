@@ -182,23 +182,23 @@ KHPPC = {KH}KerberosHeadersPPC
 ##
 ################################################################################
 
-GSSRTLCFM68K = "MSL C.CFM68K.DLL" \
-	"MSL RuntimeCFM68K.DLL" \
+GSSRTLCFM68K = "/bin/MIT CLib.68K" \
+	"/bin/MIT RuntimeLib.68K" \
 	"{MW68KLibraries}MSL ShLibRuntimeCFM68K.Lib" \
 	"{SharedLibraries}InterfaceLib" \
 	"{MW68KLibraries}MathLibCFM68K (4i_8d).Lib"
-GSSRTLCFMPPC = "MSL C.PPC.DLL" \
-	"MSL RuntimePPC.DLL" \
+GSSRTLCFMPPC = "/bin/MIT CLib.PPC" \
+	"/bin/MIT RuntimeLib.PPC" \
 	"{MWPPCLibraries}MSL ShLibRuntime.Lib" \
 	"{SharedLibraries}InterfaceLib" \
 	"{SharedLibraries}MathLib"
-K5RTLCFM68K = "MSL C.CFM68K.DLL" \
-	"MSL RuntimeCFM68K.DLL" \
+K5RTLCFM68K = "/bin/MIT CLib.68K" \
+	"/bin/MIT RuntimeLib.68K" \
 	"{MW68KLibraries}MSL ShLibRuntimeCFM68K.Lib" \
 	"{SharedLibraries}InterfaceLib" \
 	"{MW68KLibraries}MathLibCFM68K (4i_8d).Lib"
-K5RTLCFMPPC = "MSL C.PPC.DLL" \
-	"MSL RuntimePPC.DLL" \
+K5RTLCFMPPC = "/bin/MIT CLib.PPC" \
+	"/bin/MIT RuntimeLib.PPC" \
 	"{MWPPCLibraries}MSL ShLibRuntime.Lib" \
 	"{SharedLibraries}InterfaceLib" \
 	"{SharedLibraries}MathLib"
@@ -279,30 +279,6 @@ build-testtrack : {TTOBJ68KCFM} {TTOBJPPC}
 
 ################################################################################
 ##
-## Private version of MSL (different fragment name)
-##
-################################################################################
-
-private-msl : "MSL C.PPC.DLL" "MSL C.CFM68K.DLL" "MSL RuntimePPC.DLL" "MSL RuntimeCFM68K.DLL"
-
-"MSL C.PPC.DLL" : "{MWPPCLibraries}MSL C.PPC.DLL"
-	Duplicate "{MWPPCLibraries}MSL C.PPC.DLL" "MSL C.PPC.DLL"
-	MergeFragment -c -n "MIT_*MITCLib" -t 'pwpc' -x "MSL C.PPC.DLL"
-
-"MSL RuntimePPC.DLL" : "{MWPPCLibraries}MSL RuntimePPC.DLL"
-	Duplicate "{MWPPCLibraries}MSL RuntimePPC.DLL" "MSL RuntimePPC.DLL"
-	MergeFragment -c -n "MIT_*MITRuntimeLib" -t 'pwpc' -x "MSL RuntimePPC.DLL"
-
-"MSL C.CFM68K.DLL" : "{MW68KLibraries}MSL C.CFM68K.DLL"
-	Duplicate "{MW68KLibraries}MSL C.CFM68K.DLL" "MSL C.CFM68K.DLL"
-	MergeFragment -c -n "MIT_*MITCLib" -t 'm68k' -x "MSL C.CFM68K.DLL"
-
-"MSL RuntimeCFM68K.DLL" : "{MW68KLibraries}MSL MWRuntimeLibCFM68K"
-	Duplicate "{MW68KLibraries}MSL MWRuntimeLibCFM68K" "MSL RuntimeCFM68K.DLL"
-	MergeFragment -c -n "MIT_*MITRuntimeLib" -t 'm68k' -x "MSL RuntimeCFM68K.DLL"
-
-################################################################################
-##
 ## Linking
 ##
 ################################################################################
@@ -321,7 +297,7 @@ link-68K : libkrb5.68K libgss.68K
 #	static 68K krb5 library
 #
 
-libkrb5.68K libkrb5.68K.MAP :: autogenerate-files {K5OBJS68K}
+libkrb5.68K libkrb5.68K.MAP :: {AUTOGEN_OUTPUT} {K5OBJS68K}
 	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
 libkrb5.68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o libkrb5.68K
@@ -330,7 +306,7 @@ libkrb5.68K :: /mac/version.r
 #	static GSS krb5 library
 #
 
-libgss.68K libgss.68K.MAP :: autogenerate-files {GSSOBJS68K} 
+libgss.68K libgss.68K.MAP :: {AUTOGEN_OUTPUT} {GSSOBJS68K} 
 	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
 libgss.68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o libgss.68K
@@ -347,7 +323,7 @@ link-68KCFM : K5Library68K GSSLibrary68K
 #	shared CFM-68K krb5 library
 #
 	
-K5Library68K K5Library68K.MAP :: autogenerate-files /mac/K5Library.exp {K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
+K5Library68K K5Library68K.MAP :: {AUTOGEN_OUTPUT} /mac/K5Library.exp {K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
 	MWLink68K -xm sharedlibrary -name K5Library -m "" \
 		-model cfmflat -@export "/mac/K5Library.exp" -sym fullpath \
 		-map K5Library68K.MAP -o K5Library68K \
@@ -361,7 +337,7 @@ K5Library68K :: /mac/version.r
 #	shared CFM-68K GSS library
 #
 
-GSSLibrary68K GSSLibrary68K.MAP :: autogenerate-files  K5Library68K /mac/GSSLibrary.exp {GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM}
+GSSLibrary68K GSSLibrary68K.MAP :: {AUTOGEN_OUTPUT}  K5Library68K /mac/GSSLibrary.exp {GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM}
 	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
 		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym fullpath \
 		-map GSSLibrary68K.MAP -o GSSLibrary68K \
@@ -383,7 +359,7 @@ link-PPC : libkrb5.PPC K5LibraryPPC libgss.PPC GSSLibraryPPC
 #		static PPC krb5 library
 #
 
-libkrb5.PPC libkrb5.PPC.MAP :: autogenerate-files {K5OBJSPPC}
+libkrb5.PPC libkrb5.PPC.MAP :: {AUTOGEN_OUTPUT} {K5OBJSPPC}
 	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
 libkrb5.PPC :: /mac/version.r
 	Rez "/mac/version.r" -a -o libkrb5.PPC
@@ -392,7 +368,7 @@ libkrb5.PPC :: /mac/version.r
 #		shared PPC krb5 library
 #
 
-K5LibraryPPC K5LibraryPPC.MAP :: autogenerate-files  /mac/K5Library.exp {K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
+K5LibraryPPC K5LibraryPPC.MAP :: {AUTOGEN_OUTPUT}  /mac/K5Library.exp {K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
 	MWLinkPPC -sharedlibrary -name K5Library -m "" \
 		-@export "/mac/K5Library.exp" -sym fullpath -init "__initializeK5" \
 		-term "__terminateK5" \
@@ -410,7 +386,7 @@ K5LibraryPPC :: /mac/version.r
 #		static PPC GSS library
 #
 
-libgss.PPC libgss.PPC.MAP :: autogenerate-files {GSSOBJSPPC}
+libgss.PPC libgss.PPC.MAP :: {AUTOGEN_OUTPUT} {GSSOBJSPPC}
 	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
 libgss.PPC :: /mac/version.r
 	Rez "/mac/version.r" -a -o libgss.PPC
@@ -418,7 +394,7 @@ libgss.PPC :: /mac/version.r
 #		shared PPC GSS library
 #
 
-GSSLibraryPPC GSSLibraryPPC.MAP :: autogenerate-files K5LibraryPPC /mac/GSSLibrary.exp {GSSRTLCFMPPC} {GSSOBJSPPC} {GSSSHLIBOBJPPC}
+GSSLibraryPPC GSSLibraryPPC.MAP :: {AUTOGEN_OUTPUT} K5LibraryPPC /mac/GSSLibrary.exp {GSSRTLCFMPPC} {GSSOBJSPPC} {GSSSHLIBOBJPPC}
 	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
 		-@export "/mac/GSSLibrary.exp" -sym fullpath -init "__initializeGSS" \
 		-term "__terminateGSS" -map GSSLibraryPPC.MAP -o GSSLibraryPPC \
@@ -440,10 +416,10 @@ GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
 	MergeFragment GSSLibrary68K GSSLib
 	MergeFragment K5LibraryPPC GSSLib
 	MergeFragment K5Library68K GSSLib
-	MergeFragment "MSL C.PPC.DLL" -t 'pwpc' GSSLib
-	MergeFragment "MSL C.CFM68K.DLL" -t 'm68k' GSSLib
-	MergeFragment "MSL RuntimePPC.DLL" -t 'pwpc' GSSLib
-	MergeFragment "MSL RuntimeCFM68K.DLL" -t 'm68k' GSSLib
+	MergeFragment "/bin/MIT CLib.68K" GSSLib
+	MergeFragment "/bin/MIT RuntimeLib.68K" GSSLib
+	MergeFragment "/bin/MIT CLib.PPC" GSSLib
+	MergeFragment "/bin/MIT RuntimeLib.PPC" GSSLib
 	
 ################################################################################
 ##
