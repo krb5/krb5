@@ -30,12 +30,12 @@ KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 		narrow.h proto.h rcache.h rsa-md4.h safepriv.h \
 		sysincl.h widen.h wordsize.h
 
+AllTarget(config.h osconf.h)
+
 includes:: config.h osconf.h
 
-ProcessStockHeader(stock/config.h,config.h)
-ProcessStockHeader(stock/osconf.h,osconf.h)
-
-all::
+ProcessStockHeader($(SRCDIR)stock/config.h,config.h)
+ProcessStockHeader($(SRCDIR)stock/osconf.h,osconf.h)
 
 clean::
 	$(RM) config.h osconf.h
