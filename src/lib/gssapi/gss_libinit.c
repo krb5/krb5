@@ -1,5 +1,10 @@
 #include <assert.h>
 
+#if TARGET_OS_MAC
+/* Mac OS X com_err files do not include com_err for you */
+#include <Kerberos/com_err.h>
+#endif
+
 #include "gssapi_err_generic.h"
 #include "gssapi_err_krb5.h"
 #include "gssapiP_krb5.h"
@@ -16,8 +21,10 @@ OM_uint32 gssint_initialize_library (void)
 {
 	
 	if (!initialized) {
+#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
 	    add_error_table(&et_k5g_error_table);
 	    add_error_table(&et_ggss_error_table);
+#endif
 
 		initialized = 1;
 	}

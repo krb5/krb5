@@ -1,3 +1,13 @@
+2002-07-14  Alexandra Ellwood <lxs@mit.edu>
+
+	* gss_libinit.c: Conditionalized error table loading for Mac OS X.
+	Error tables should always be loaded on other platforms.
+
+	* gss_libinit.c: updated for Mac OS X header paths and added
+	include of gssapiP_krb5.h to get function prototypes.
+
+	[pullups from 1-2-2-branch]
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use $(srcdir) not $(subdir).
