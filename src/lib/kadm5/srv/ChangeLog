@@ -1,5 +1,8 @@
 Tue Oct  8 13:33:48 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* adb_policy.c (osa_adb_rename_policy_db): rename
+ 	osa_adb_rename_policy to *_db
+
 	* adb_openclose.c, adb_policy.c: implement database renaming;
  	also, only create a db lockfile after the database has been
  	successfully created [krb5-admin/62]

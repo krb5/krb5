@@ -42,6 +42,16 @@ osa_adb_ret_t osa_adb_create_policy_db(kadm5_config_params *params)
 			      OSA_ADB_POLICY_DB_MAGIC);
 }
 
+osa_adb_ret_t osa_adb_rename_policy_db(kadm5_config_params *fromparams,
+				       kadm5_config_params *toparams)
+{
+     return osa_adb_rename_db(fromparams->admin_dbname,
+			      fromparams->admin_lockfile,
+			      toparams->admin_dbname,
+			      toparams->admin_lockfile,
+			      OSA_ADB_POLICY_DB_MAGIC);
+}
+
 osa_adb_ret_t osa_adb_destroy_policy_db(kadm5_config_params *params)
 {
      return osa_adb_destroy_db(params->admin_dbname,
@@ -60,16 +70,6 @@ osa_adb_ret_t osa_adb_open_policy(osa_adb_princ_t *dbp,
 osa_adb_ret_t osa_adb_close_policy(osa_adb_princ_t db)
 {
      return osa_adb_fini_db(db, OSA_ADB_POLICY_DB_MAGIC);
-}
-
-osa_adb_ret_t osa_adb_rename_policy(kadm5_config_params *fromparams,
-				    kadm5_config_params *toparams)
-{
-     return osa_adb_rename_db(fromparams->admin_dbname,
-			      fromparams->admin_lockfile,
-			      toparams->admin_dbname,
-			      toparams->admin_lockfile,
-			      OSA_ADB_POLICY_DB_MAGIC);
 }
 
 /*
