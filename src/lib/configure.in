@@ -1,5 +1,6 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
+CONFIG_RULES
 AC_SET_BUILDTOP
 CONFIG_DIRS(krb5 kdb des425 krb425 crypto gssapi)
 AC_PROG_ARCHIVE
@@ -12,6 +13,5 @@ LinkFile(libcrypto.a, crypto/libcrypto.a)
 LinkFile(libgssapi_krb5.a, gssapi/libgssapi_krb5.a)
 AppendRule([all:: libkrb5.a libcrypto.a])
 AppendRule([all:: libgssapi_krb5.a])
-CONFIG_RULES
 WITH_KRB5ROOT
 AC_OUTPUT(Makefile,[EXTRA_RULES])

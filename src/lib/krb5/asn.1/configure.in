@@ -1,8 +1,8 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
+CONFIG_RULES
 AC_SET_BUILDTOP
 UsePepsy
-CONFIG_RULES
 SubdirLibraryRule([${OBJS}])
 CopyHeader(KRB5-types.h,[$(EHDRDIR)])
 CopyHeader(KRB5_defs.h,[$(EHDRDIR)])

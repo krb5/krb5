@@ -1,5 +1,6 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
+CONFIG_RULES
 AC_SET_BUILDTOP
 CONFIG_DIRS(des crc32 md4 md5 os)
 AC_PROG_ARCHIVE
@@ -9,6 +10,5 @@ MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 AppendRule([all:: libcrypto.a])
 KRB_INCLUDE
-CONFIG_RULES
 WITH_KRB5ROOT
 AC_OUTPUT(Makefile,[EXTRA_RULES])

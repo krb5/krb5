@@ -1,9 +1,9 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
+CONFIG_RULES
 AC_SET_BUILDTOP
 ET_RULES
 SS_RULES
-CONFIG_RULES
 KRB_INCLUDE
 SubdirLibraryRule([${OBJS}])
 CopyHeader(isode_err.h,[$(EHDRDIR)])
