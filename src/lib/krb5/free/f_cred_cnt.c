@@ -19,6 +19,11 @@ static char rcsid_f_cred_cnt_c [] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
+/*
+ * krb5_free_cred_contents zeros out the session key, and then frees
+ * the credentials structures 
+ */
+
 void
 krb5_free_cred_contents(val)
 krb5_creds *val;
@@ -27,8 +32,10 @@ krb5_creds *val;
 	krb5_free_principal(val->client);
     if (val->server)
 	krb5_free_principal(val->server);
-    if (val->keyblock.contents)
+    if (val->keyblock.contents) {
+	memset((char *)val->keyblock.contents, 0, val->keyblock.length);
 	xfree(val->keyblock.contents);
+    }
     if (val->ticket.data)
 	xfree(val->ticket.data);
     if (val->second_ticket.data)
