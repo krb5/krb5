@@ -1,3 +1,25 @@
+2002-07-12  Alexandra Ellwood <lxs@mit.edu>
+
+	* gssapi_generic.h: allow inclusion by C++
+
+	* gssapi.hin: Conditionalized pragmas for Metrowerks
+
+	* gssapi.hin: Added check for CFM compiles.  Removed dependency on
+	PRAGMA_* macros.  Moved check struct alignment check before struct
+	declarations.
+
+	* disp_com_err_status.c, gssapi.hin, gssapi_generic.h: 
+	Updated Mac OS X headers to new framework layout
+
+	* gssapi_generic.h: Fixed check for Mac OS X includes.
+
+	[pullups from 1-2-2-branch]
+
+2002-07-12  Miro Jurisic  <meeroh@mit.edu>
+
+	* gssapiP_generic.h: use "" include for krb5.h
+	[pullup from 1-2-2-branch]
+
 2001-10-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_generic.h (g_*): For every g_ function declared here,

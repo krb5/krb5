@@ -27,13 +27,27 @@
  * Determine platform-dependent configuration.
  */
 
-#if defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
-
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#	include <TargetConditionals.h>
+#	if TARGET_RT_MAC_CFM
+#		error "Use KfM 4.0 SDK headers for CFM compilation."
+#	endif
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+#if TARGET_OS_MAC
+#	if defined(__MWERKS__)
+#		pragma import on
+#		pragma enumsalwaysint on
+#	endif
+#	pragma options align=mac68k
+#endif
+
+#if defined(_MSDOS) || defined(_WIN32)
+#include <win-mac.h>
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -317,10 +331,6 @@ typedef	int		gss_cred_usage_t;
 # endif
 #else
 # define GSS_DLLIMP
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 /* Reserved static storage for GSS_oids.  Comments are quotes from RFC 2744.
@@ -771,6 +781,14 @@ OM_uint32 KRB5_CALLCONV gss_canonicalize_name
 		 const gss_OID,		/* mech_type */
 		 gss_name_t *		/* output_name */
 	);
+
+#if TARGET_OS_MAC
+#  if defined(__MWERKS__)
+#    pragma enumsalwaysint reset
+#    pragma import reset
+#  endif
+#  pragma options align=reset
+#endif
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,7 @@
  */
 
 #if (defined(_WIN32) || defined(macintosh))
-#include <k5-int.h>
+#include "k5-int.h"
 #else
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
