@@ -1,4 +1,8 @@
 
+Thu Jul 27 15:01:01 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm and check for already checking for dbm.
+
+
 Thu Jul 27 02:59:05 1995   Chris Provenzano (proven@mit.edu)
 
         * dump.c kdb5_edit.c kdb5_edit.h util.c : Use new kdb format.

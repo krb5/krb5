@@ -1,4 +1,8 @@
 
+Thu Jul 27 14:59:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm and check for already checking for dbm.
+
+
 Mon Jul 17 14:55:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add KADM library.
 	* kdb5_convert.c - Change calling sequence to krb5_db_fetch_mkey(),
