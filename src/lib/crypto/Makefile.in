@@ -9,8 +9,8 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/enc_provider \
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=crypto.lib
 ##DOSOBJFILE=crypto.lst
-##DOSOBJFILELIST=@crypto.lst @des.lst @md4.lst @md5.lst @sha.lst @crc32.lst @os.lst
-##DOSOBJFILEDEP =crypto.lst des.lst md4.lst md5.lst sha.lst crc32.lst os.lst
+##DOSOBJFILELIST=@crypto.lst @des.lst @md4.lst @md5.lst @sha1.lst @crc32.lst @dk.lst @old.lst @raw.lst @enc_prov.lst @hash_pro.lst @kh_pro.lst
+##DOSOBJFILEDEP =crypto.lst des.lst md4.lst md5.lst sha1.lst crc32.lst dk.lst old.lst raw.lst enc_prov.lst hash_pro.lst kh_pro.lst
 
 MAC_SUBDIRS = crc32 des dk enc_provider hash_provider keyhash_provider \
 	md4 md5 old raw sha1
@@ -169,6 +169,7 @@ all-windows::
 	cd ..\sha1
 	@echo Making in crypto\sha1
 	-$(MAKE) -$(MFLAGS)
+	cd ..
 
 clean-windows::
 	cd crc32
@@ -204,6 +205,7 @@ clean-windows::
 	cd ..\sha1
 	@echo Making clean in crypto\sha1
 	-$(MAKE) -$(MFLAGS) clean
+	cd ..
 
 check-windows::
 	cd crc32
@@ -239,4 +241,5 @@ check-windows::
 	cd ..\sha1
 	@echo Making check in crypto\sha1
 	-$(MAKE) -$(MFLAGS) check
+	cd ..
 
