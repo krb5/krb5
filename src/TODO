@@ -1,5 +1,7 @@
 Major projects:
 
+0.  Update the rest of this file.  I think it predates release 1.0!
+
 1.  Run a V5 KDC on the master KDC.
 	* audit code in v4 kadmind server
 DONE	* convert syslog -> log (to real file)
