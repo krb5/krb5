@@ -62,5 +62,5 @@ ec KRB5_KDB_DB_CORRUPT,		"Database format error"
 ec KRB5_KDB_BAD_VERSION,	"Unsupported version in database entry"
 
 ec KRB5_KDB_BAD_SALTTYPE,	"Unsupported salt type"
-ec KRB5_KDB_BAD_ENCTYPE,	"Unsupported encryption type"
+ec KRB5_KDB_BAD_KEYTYPE,	"Unsupported key type"
 end

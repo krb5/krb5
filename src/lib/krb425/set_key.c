@@ -35,14 +35,14 @@ int cvt;
 	if (cvt) {
 		if (_krb425_servkey.contents)
 			krb5_xfree(_krb425_servkey.contents);
-		mit_des_string_to_key(ENCTYPE_DES, &_krb425_servkey, 0, 0);
+		mit_des_string_to_key(KEYTYPE_DES, &_krb425_servkey, 0, 0);
 	} else {
 		if (!_krb425_servkey.contents &&
 		    !(_krb425_servkey.contents = (krb5_octet *)malloc(8))) {
 			return(KFAILURE);
 		}
 		_krb425_servkey.length = 8;
-		_krb425_servkey.enctype = ENCTYPE_DES;
+		_krb425_servkey.keytype = KEYTYPE_DES;
 		memcpy((char *)_krb425_servkey.contents, (char *)key, 8);
 	}
 	return(KSUCCESS);

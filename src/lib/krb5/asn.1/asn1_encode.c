@@ -183,15 +183,24 @@ asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
   return 0;
 }
 
+#ifdef _MACINTOSH
+#define EPOCH ((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + (getTimeZoneOffset() * 60 * 60))
+#else
+#define EPOCH (0)
+#endif
+
 asn1_error_code asn1_encode_generaltime(buf, val, retlen)
      asn1buf * buf;
      const time_t val;
      int * retlen;
 {
   asn1_error_code retval;
-  struct tm *gtime = gmtime(&val);
+  struct tm *gtime;
   char s[16];
   int length, sum=0;
+
+  val += EPOCH;
+  gtime = gmtime(&val);
 
   /* Time encoding: YYYYMMDDhhmmssZ */
   sprintf(s, "%04d%02d%02d%02d%02d%02dZ",

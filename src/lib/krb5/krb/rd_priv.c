@@ -77,13 +77,13 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
     if ((retval = decode_krb5_priv(inbuf, &privmsg)))
 	return retval;
     
-    if (!valid_enctype(privmsg->enc_part.enctype)) {
+    if (!valid_etype(privmsg->enc_part.etype)) {
 	retval = KRB5_PROG_ETYPE_NOSUPP;
 	goto cleanup_privmsg;
     }
 			   
     /* put together an eblock for this decryption */
-    krb5_use_enctype(context, &eblock, privmsg->enc_part.enctype);
+    krb5_use_cstype(context, &eblock, privmsg->enc_part.etype);
     scratch.length = privmsg->enc_part.ciphertext.length;
     
     if (!(scratch.data = malloc(scratch.length))) {

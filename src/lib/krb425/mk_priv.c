@@ -49,7 +49,7 @@ struct sockaddr_in *receiver;
 	char sa[4], ra[4];
 	krb5_rcache rcache;
 
-	keyb.enctype = ENCTYPE_DES;
+	keyb.keytype = KEYTYPE_DES;
 	keyb.length = sizeof(des_cblock);
 	keyb.contents = (krb5_octet *)key;
 
@@ -87,7 +87,7 @@ struct sockaddr_in *receiver;
 	    return(-1);
 	}
 	r = krb5_mk_priv(&inbuf,
-			 ENCTYPE_DES,
+			 KEYTYPE_DES,
 			 &keyb,
 			 saddr2, &raddr,
 			 0,		/* no sequence number */

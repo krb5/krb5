@@ -106,19 +106,40 @@ krb5_adm_ktent_to_proto(kcontext, ktentp, ncompp, complistp)
 	}
 
 	/*
-	 * Fill in key_enctype.
+	 * Fill in key_keytype.
 	 */
-	if (clist[KRB5_ADM_KT_KEY_ENCTYPE].data = 
+	if (clist[KRB5_ADM_KT_KEY_KEYTYPE].data = 
 	    (char *) malloc(sizeof(krb5_ui_4))) {
-	    clist[KRB5_ADM_KT_KEY_ENCTYPE].length = sizeof(krb5_ui_4);
-	    clist[KRB5_ADM_KT_KEY_ENCTYPE].data[0] =
-		(ktentp->key.enctype >> 24) & 0xff;
-	    clist[KRB5_ADM_KT_KEY_ENCTYPE].data[1] =
-		(ktentp->key.enctype >> 16) & 0xff;
-	    clist[KRB5_ADM_KT_KEY_ENCTYPE].data[2] =
-		(ktentp->key.enctype >> 8) & 0xff;
-	    clist[KRB5_ADM_KT_KEY_ENCTYPE].data[3] =
-		ktentp->key.enctype & 0xff;
+	    clist[KRB5_ADM_KT_KEY_KEYTYPE].length = sizeof(krb5_ui_4);
+	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[0] =
+		(ktentp->key.keytype >> 24) & 0xff;
+	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[1] =
+		(ktentp->key.keytype >> 16) & 0xff;
+	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[2] =
+		(ktentp->key.keytype >> 8) & 0xff;
+	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[3] =
+		ktentp->key.keytype & 0xff;
+	    nents++;
+	}
+	else {
+	    kret = ENOMEM;
+	    goto done;
+	}
+
+	/*
+	 * Fill in key_etype.
+	 */
+	if (clist[KRB5_ADM_KT_KEY_ETYPE].data = 
+	    (char *) malloc(sizeof(krb5_ui_4))) {
+	    clist[KRB5_ADM_KT_KEY_ETYPE].length = sizeof(krb5_ui_4);
+	    clist[KRB5_ADM_KT_KEY_ETYPE].data[0] =
+		(ktentp->key.etype >> 24) & 0xff;
+	    clist[KRB5_ADM_KT_KEY_ETYPE].data[1] =
+		(ktentp->key.etype >> 16) & 0xff;
+	    clist[KRB5_ADM_KT_KEY_ETYPE].data[2] =
+		(ktentp->key.etype >> 8) & 0xff;
+	    clist[KRB5_ADM_KT_KEY_ETYPE].data[3] =
+		ktentp->key.etype & 0xff;
 	    nents++;
 	}
 	else {

@@ -30,7 +30,7 @@
  Sends a request to the TGS and waits for a response.
  options is used for the options in the KRB_TGS_REQ.
  timestruct values are used for from, till, rtime " " "
- enctype is used for enctype " " ", and to encrypt the authorization data, 
+ etype is used for etype " " ", and to encrypt the authorization data, 
  sname is used for sname " " "
  addrs, if non-NULL, is used for addresses " " "
  authorization_dat, if non-NULL, is used for authorization_dat " " "
@@ -105,8 +105,8 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
         goto cleanup_data;
 
     /* put together an eblock for this encryption */
-    krb5_use_enctype(context, &eblock, request.ticket->enc_part.enctype);
-    request.authenticator.enctype = request.ticket->enc_part.enctype;
+    krb5_use_cstype(context, &eblock, request.ticket->enc_part.etype);
+    request.authenticator.etype = request.ticket->enc_part.etype;
     request.authenticator.ciphertext.length =
         krb5_encrypt_size(scratch->length, eblock.crypto_entry);
 
@@ -165,12 +165,12 @@ cleanup_scratch:
 }
 
 krb5_error_code
-krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
+krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
 	      authorization_data, padata, second_ticket, in_cred, rep)
     krb5_context context;
     const krb5_flags kdcoptions;
     const krb5_ticket_times * timestruct;
-    const krb5_enctype * ktypes;
+    const krb5_enctype * etypes;
     krb5_const_principal sname;
     krb5_address * const * addrs;
     krb5_authdata * const * authorization_data;
@@ -203,11 +203,17 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     tgsreq.from = timestruct->starttime;
     tgsreq.till = timestruct->endtime;
     tgsreq.rtime = timestruct->renew_till;
+#if 0
     if ((retval = krb5_timeofday(context, &time_now)))
 	return(retval);
+#else
+{long usec;
+	if ((retval = krb5_us_timeofday(context, &time_now, &usec)))
+	return(retval);
+}
+#endif
     /* XXX we know they are the same size... */
-    rep->expected_nonce = tgsreq.nonce = (krb5_int32) time_now;
-    rep->request_time = time_now;
+    tgsreq.nonce = (krb5_int32) time_now;
 
     tgsreq.addresses = (krb5_address **) addrs;
 
@@ -218,8 +224,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
 	if ((retval = encode_krb5_authdata((const krb5_authdata**)authorization_data,
 					   &scratch)))
 	    return(retval);
-	krb5_use_enctype(context, &eblock, in_cred->keyblock.enctype);
-	tgsreq.authorization_data.enctype = in_cred->keyblock.enctype;
+	krb5_use_cstype(context, &eblock, in_cred->keyblock.etype);
+	tgsreq.authorization_data.etype = in_cred->keyblock.etype;
 	tgsreq.authorization_data.kvno = 0; /* ticket session key has */
 					    /* no version */
 	tgsreq.authorization_data.ciphertext.length =
@@ -260,17 +266,17 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     }
 
     /* Get the encryption types list */
-    if (ktypes) {
-	/* Check passed ktypes and make sure they're valid. */
-   	for (tgsreq.nktypes = 0; ktypes[tgsreq.nktypes]; tgsreq.nktypes++) {
-    	    if (!valid_enctype(ktypes[tgsreq.nktypes]))
+    if (etypes) {
+	/* Check passed etypes and make sure they're valid. */
+   	for (tgsreq.netypes = 0; etypes[tgsreq.netypes]; tgsreq.netypes++) {
+    	    if (!valid_etype(etypes[tgsreq.netypes]))
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
-    	tgsreq.ktype = (krb5_enctype *)ktypes;
+    	tgsreq.etype = (krb5_enctype *)etypes;
     } else {
-        /* Get the default ktypes */
-        krb5_get_default_in_tkt_ktypes(context, &(tgsreq.ktype));
-	for(tgsreq.nktypes = 0; tgsreq.ktype[tgsreq.nktypes]; tgsreq.nktypes++);
+        /* Get the default etypes */
+        krb5_get_default_in_tkt_etypes(context, &(tgsreq.etype));
+	for(tgsreq.netypes = 0; tgsreq.etype[tgsreq.netypes]; tgsreq.netypes++);
     }
 
     if (second_ticket) {
@@ -353,8 +359,8 @@ send_tgs_error_2:;
 	krb5_free_ticket(context, sec_ticket);
 
 send_tgs_error_1:;
-    if (ktypes == NULL)
-	krb5_xfree(tgsreq.ktype);
+    if (etypes == NULL)
+	krb5_xfree(tgsreq.etype);
     if (tgsreq.authorization_data.ciphertext.data) {
 	memset(tgsreq.authorization_data.ciphertext.data, 0,
                tgsreq.authorization_data.ciphertext.length); 

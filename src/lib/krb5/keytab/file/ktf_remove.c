@@ -52,7 +52,7 @@ krb5_keytab_entry *entry;
   	    break;
 
 	if ((entry->vno == cur_entry.vno) &&
-            (entry->key.enctype == cur_entry.key.enctype) &&
+            (entry->key.keytype == cur_entry.key.keytype) &&
 	    krb5_principal_compare(context, entry->principal, cur_entry.principal)) {
 	    /* found a match */
             krb5_kt_free_entry(context, &cur_entry);

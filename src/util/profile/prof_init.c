@@ -177,6 +177,60 @@ cleanup:
 
 /*
  * XXX this version only works to get values from the first file.
+ * To do more than that means we have to implement some "interesting"
+ * code to do the section searching.
+ */
+errcode_t profile_get_first_values(profile, names, ret_values)
+    profile_t	profile;
+    const char	**names;
+    char		***ret_values;
+{
+    prf_file_t	file;
+    errcode_t	retval;
+    struct profile_node *section;
+    void		*state;
+    char		*value;
+    struct string_list values;
+    const char		**cpp;
+    char			*dummyvalue;
+    char			*secname;
+    const char			*mynames[3];
+    
+
+    if (profile == 0)
+	return PROF_NO_PROFILE;
+
+    if (names == 0 || names[0] == 0)
+	return PROF_BAD_NAMESET;
+
+    init_list(&values);
+
+    file = profile->first_file;
+    retval = profile_update_file(file);
+    if (retval)
+	goto cleanup;
+    
+    section = file->root;
+
+    state = 0;
+	retval = profile_find_node_subsection(section, *names, &state, &secname, &section);
+
+    do {
+	retval = profile_find_node_name(section, &state, &value);
+	if (retval)
+	    goto cleanup;
+	add_to_list(&values, value);
+    } while (state);
+
+    *ret_values = values.list;
+    return 0;
+cleanup:
+    free_list(&values);
+    return retval;
+}	
+
+/*
+ * XXX this version only works to get values from the first file.
  */
 static errcode_t profile_get_value(profile, names, ret_value)
     profile_t	profile;

@@ -15,6 +15,10 @@
 #define VARARGS
 #endif
 
+#ifdef _MACINTOSH
+#include "icons.h"
+#endif
+
 #include "error_table.h"
 #include "internal.h"
 
@@ -69,11 +73,69 @@ static void
 #ifdef _WINDOWS
     MessageBox (NULL, errbuf, "Kerboros", MB_ICONEXCLAMATION);
 #else
+#ifdef _MACINTOSH
+{
+WindowPtr	errWindow;
+ControlHandle	errOkButton;
+Rect		errOkButtonRect = { 120, 220, 140, 280 };
+Rect		errRect = { 0, 0, 150, 300 };
+GDHandle	mainDevice = GetMainDevice();
+Rect		mainRect = (**mainDevice).gdRect;
+Rect		tmpRect;
+Rect		errTextRect = { 10, 70, 110, 290 };
+Rect		errIconRect = { 10, 10, 10 + 32, 10 + 32 };
+EventRecord	theEvent;
+Point		localPt;
+Boolean		done;
+
+	/* Find Centered rect for window */
+	tmpRect.top	= (mainRect.bottom + mainRect.top)/2 - (errRect.bottom + errRect.top)/2;
+	tmpRect.bottom = tmpRect.top + (errRect.bottom - errRect.top);
+	tmpRect.left = (mainRect.right + mainRect.left)/2 - (errRect.right + errRect.left)/2;
+	tmpRect.right = tmpRect.left + (errRect.right - errRect.left);
+
+	/* Create the error window - as a dialog window */
+	errWindow = NewWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
+
+	SetPort(errWindow);
+	TextFont(systemFont);
+	TextSize(12);
+
+	errOkButton = NewControl(errWindow,&errOkButtonRect,"\pOk",TRUE,0,0,1,pushButProc,0L);
+	DrawControls(errWindow);
+
+	/* Draw the error text */
+	TextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
+
+	/* Draw the Stop icon */
+	PlotIcon(&errIconRect, GetResource('ICON', 0));
+
+	/* mini event loop here */
+	done = FALSE;
+	while(!done)
+	{
+		GetNextEvent(mDownMask | mUpMask, &theEvent);
+		if (theEvent.what == mouseDown)
+		{
+			localPt = theEvent.where;
+			GlobalToLocal(&localPt);
+			if (TestControl(errOkButton, localPt) && TrackControl(errOkButton, localPt, NULL))
+			{
+				done = TRUE;
+			}
+		}
+	}
+
+	/* Dispose of the Window, disposes of controls */
+	DisposeWindow(errWindow);
+}
+#else
     fputs (errbuf, stderr);
     /* should do this only on a tty in raw mode */
     putc('\r', stderr);
     putc('\n', stderr);
     fflush(stderr);
+#endif
 #endif
 }
 

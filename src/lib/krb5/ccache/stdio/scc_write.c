@@ -148,10 +148,11 @@ krb5_scc_store_keyblock(context, id, keyblock)
      krb5_scc_data *data = (krb5_scc_data *)id->data;
      krb5_error_code ret;
 
-     ret = krb5_scc_store_ui_2(context, id, keyblock->enctype);
+     ret = krb5_scc_store_ui_2(context, id, keyblock->keytype);
      CHECK(ret);
-     if (data->version == KRB5_SCC_FVNO_3) {
-	 ret = krb5_scc_store_ui_2(context, id, keyblock->enctype);
+     if ((data->version != KRB5_SCC_FVNO_1) &&
+	 (data->version != KRB5_SCC_FVNO_2)) {
+	 ret = krb5_scc_store_ui_2(context, id, keyblock->etype);
 	 CHECK(ret);
      }
      ret = krb5_scc_store_int32(context, id, keyblock->length);

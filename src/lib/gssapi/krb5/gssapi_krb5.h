@@ -23,7 +23,11 @@
 #ifndef _GSSAPI_KRB5_H_
 #define _GSSAPI_KRB5_H_
 
+#ifndef _MACINTOSH
 #include <gssapi/gssapi_generic.h>
+#else
+#include <gssapi_generic.h>
+#endif
 #include "krb5.h"
 
 extern const gss_OID_desc * const gss_mech_krb5;

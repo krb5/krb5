@@ -56,7 +56,7 @@ CREDENTIALS *c;
 
 	creds.client = client_principal;
 	creds.times.endtime = 0;
-	creds.keyblock.enctype = ENCTYPE_DES;
+	creds.keyblock.keytype = KEYTYPE_DES;
 
 	r = krb5_get_credentials(0, _krb425_ccache, &creds);
 	if (r)

@@ -35,7 +35,11 @@
 #endif
 
 /* this must be after "krb5.h", since krb5 #defines xfree(), too */
+#ifndef _MACINTOSH
 #include "../generic/gssapiP_generic.h"
+#else
+#include "gssapiP_generic.h"
+#endif
 #include "gssapi_krb5.h"
 #include "gssapi_err_krb5.h"
 

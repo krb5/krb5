@@ -204,11 +204,14 @@ krb5_fcc_read_keyblock(context, id, keyblock)
      keyblock->contents = 0;
 
      kret = krb5_fcc_read_ui_2(context, id, &ui2);
-     keyblock->enctype = ui2;
+     keyblock->keytype = ui2;
      CHECK(kret);
-     if (data->version == KRB5_FCC_FVNO_3) {
+     if ((data->version == KRB5_FCC_FVNO_1) ||
+	 (data->version == KRB5_FCC_FVNO_2))
+	     keyblock->etype = ETYPE_UNKNOWN;
+     else {
 	     kret = krb5_fcc_read_ui_2(context, id, &ui2);
-	     keyblock->enctype = ui2;
+	     keyblock->etype = ui2;
 	     CHECK(kret);
      }
 

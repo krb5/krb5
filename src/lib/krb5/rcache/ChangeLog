@@ -1,3 +1,6 @@
+Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
+	* rc_io.c:  turn off a call to fsync which MACINTOSH doesn't support
+
 
 Thu Aug 31 14:13:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* rc_base.c - Set magic number in rcache structure after successfully

@@ -1,3 +1,10 @@
+Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
+	* gssapiP_generic.h:  changed a path bearing include for MACINTOSH
+	* gssapi_generic.h:  changed a path bearing include for MACINTOSH
+	* util_cannonhost.h:  changed a path bearing include for MACINTOSH
+	* utl_nohash_validate.h:  changed a path bearing include for MACINTOSH,
+		also we don't have limits.h
+
 
 Thu Aug 31 11:43:59 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gssapi.h - Update to V2 API.  Also use autoconf.h if USE_AUTOCONF_H

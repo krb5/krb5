@@ -35,7 +35,7 @@ extern int des_debug;
 
 /*
 	converts the string pointed to by "data" into an encryption key
-	of type "enctype".  *keyblock is filled in with the key info;
+	of type "keytype".  *keyblock is filled in with the key info;
 	in particular, keyblock->contents is to be set to allocated storage.
 	It is the responsibility of the caller to release this storage
 	when the generated key no longer needed.
@@ -44,13 +44,13 @@ extern int des_debug;
 	algorithm.
 
 	If the particular function called does not know how to make a
-	key of type "enctype", an error may be returned.
+	key of type "keytype", an error may be returned.
 
 	returns: errors
  */
 
-krb5_error_code mit_des_string_to_key (enctype, keyblock, data, princ)
-    const krb5_enctype enctype;
+krb5_error_code mit_des_string_to_key (keytype, keyblock, data, princ)
+    const krb5_keytype keytype;
     krb5_keyblock * keyblock;
     const krb5_data * data;
     krb5_const_principal princ;
@@ -71,8 +71,8 @@ krb5_error_code mit_des_string_to_key (enctype, keyblock, data, princ)
 
 #define min(A, B) ((A) < (B) ? (A): (B))
 
-    if ( enctype != ENCTYPE_DES )
-	return (KRB5_PROG_ENCTYPE_NOSUPP);
+    if ( keytype != KEYTYPE_DES )
+	return (KRB5_PROG_KEYTYPE_NOSUPP);
 
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
@@ -80,7 +80,7 @@ krb5_error_code mit_des_string_to_key (enctype, keyblock, data, princ)
 #define cleanup() {memset(keyblock->contents, 0, sizeof(mit_des_cblock));\
 		       krb5_xfree(keyblock->contents);}
 
-    keyblock->enctype = ENCTYPE_DES;
+    keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
 

@@ -26,6 +26,10 @@
 
 #include "fcc.h"
 
+#ifdef _MACINTOSH
+#define register
+#endif
+
 #define set(bits) (whichfields & bits)
 #define flags_match(a,b) (a & b == a)
 #define times_match_exact(t1,t2) (memcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
@@ -163,11 +167,15 @@ register const krb5_ticket_times *t2;
 
 static krb5_boolean
 standard_fields_match(context, mcreds, creds)
-   krb5_context context;
-register const krb5_creds *mcreds, *creds;
+krb5_context		context;
+const krb5_creds	*mcreds;
+const krb5_creds	*creds;
 {
-    return (krb5_principal_compare(context, mcreds->client,creds->client) &&
-	    krb5_principal_compare(context, mcreds->server,creds->server));
+krb5_boolean clientcmp;
+krb5_boolean servercmp;
+	clientcmp = krb5_principal_compare(context, mcreds->client,creds->client);
+	servercmp = krb5_principal_compare(context, mcreds->server,creds->server);
+    return (clientcmp && servercmp);
 }
 
 /* only match the server name portion, not the server realm portion */

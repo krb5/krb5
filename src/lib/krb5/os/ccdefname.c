@@ -28,6 +28,61 @@
 #include "k5-int.h"
 #include <stdio.h>
 
+#ifdef _MACINTOSH
+static CInfoPBRec	theCatInfo;
+static	char		*FileBuffer;
+static	int			indexCount;
+static FSSpec		theWorkingFile;
+
+static char*
+GetDirName(short vrefnum, long dirid, char *dststr)
+{
+CInfoPBRec	theCatInfo;
+FSSpec		theParDir;
+char		str[37];
+char		*curstr;
+OSErr		err;
+	// Get info on the directory itself, it's name and it's parent
+	theCatInfo.dirInfo.ioCompletion		= NULL;
+	theCatInfo.dirInfo.ioNamePtr		= (StringPtr) str;
+	theCatInfo.dirInfo.ioVRefNum		= vrefnum;
+	theCatInfo.dirInfo.ioFDirIndex		= -1;
+	theCatInfo.dirInfo.ioDrDirID		= dirid;
+	err = PBGetCatInfo(&theCatInfo, FALSE);
+
+	// If I'm looking at the root directory and I've tried going up once
+	// start returning down the call chain
+	if (err != noErr || (dirid == 2 && theCatInfo.hFileInfo.ioFlParID == 2))
+		return dststr;
+
+	// Construct a file spec for the parent
+	curstr = GetDirName(theCatInfo.dirInfo.ioVRefNum, theCatInfo.hFileInfo.ioFlParID, dststr);
+
+	// Copy the pascal string to the end of a C string
+	BlockMoveData(&str[1], curstr, str[0]);
+	curstr += str[0];
+	*curstr++ = ':';
+	
+	// return a pointer to the end of the string (for someone below to append to)
+	return curstr;
+}
+
+static void
+GetPathname(FSSpec *theFile, char *dststr)
+{
+FSSpec		theParDir;
+char		*curstr;
+OSErr		err;
+
+	// Start crawling up the directory path recursivly
+	curstr = GetDirName(theFile->vRefNum, theFile->parID, dststr);
+	BlockMoveData(&theFile->name[1], curstr, theFile->name[0]);
+	curstr += theFile->name[0];
+	*curstr = 0;
+}
+#endif
+
+
 char *
 krb5_cc_default_name(context)
     krb5_context context;
@@ -38,7 +93,19 @@ krb5_cc_default_name(context)
     if (name == 0) {
 
 #ifdef HAVE_MACSOCK_H
-	strcpy (name_buf, "STDIO:krb5cc");
+{
+short	vRefnum;
+long	parID;
+OSErr	theErr;
+FSSpec	krbccSpec;
+char	pathbuf[255];
+
+	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
+	FSMakeFSSpec(vRefnum, parID, "\pkrb5cc", &krbccSpec);
+	GetPathname(&krbccSpec, &pathbuf);
+	sprintf(name_buf, "STDIO:%s", pathbuf);
+//	strcpy (name_buf, "STDIO:krb5cc");
+}
 #else
 #ifdef _WINDOWS
         {

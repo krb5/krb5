@@ -23,11 +23,11 @@ decrypt_credencdata(context, pcred, pkeyblock, pcredenc)
     krb5_error_code 	  retval;
     krb5_data 		  scratch;
 
-    if (!valid_enctype(pcred->enc_part.enctype))
+    if (!valid_etype(pcred->enc_part.etype))
     	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this decryption */
-    krb5_use_enctype(context, &eblock, pcred->enc_part.enctype);
+    krb5_use_cstype(context, &eblock, pcred->enc_part.etype);
     scratch.length = pcred->enc_part.ciphertext.length;
     
     if (!(scratch.data = (char *)malloc(scratch.length))) 

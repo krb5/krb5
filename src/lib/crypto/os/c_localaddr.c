@@ -1,5 +1,5 @@
 /*
- * lib/crypto/os/c_localaddr.c
+ * lib/crypto/os/localaddr.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

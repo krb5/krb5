@@ -323,6 +323,42 @@ errcode_t profile_delete_node_relation(section, name)
 }
 
 /*
+ * This function deletes a relation from a section.  Subsections are
+ * not deleted; if those need to be deleted, they must be done so manually.
+ * And sections need not have a value to be delete, this is to enable
+ * deleting sections which are valueless headers for subsections.
+ */
+errcode_t profile_delete_interior_node_relation(section, name)
+	struct profile_node *section;
+	const char *name;
+{
+	struct profile_node *p, *next;
+	
+	for (p = section->first_child; p; p = p->next) {
+		if ((strcmp(p->name, name) == 0))
+			break;
+	}
+	if (p == 0)
+		return PROF_NO_RELATION;
+	/*
+	 * Now we start deleting the relations... if we find a
+	 * subsection with the same name, delete it and keep going.
+	 */
+	while (p && (strcmp(p->name, name) == 0)) {
+		if (p->prev)
+			p->prev->next = p->next;
+		else
+			section->first_child = p->next;
+		next = p->next;
+		if (p->next)
+			p->next->prev = p;
+		profile_free_node(p);
+		p = next;
+	}
+	return 0;
+}
+
+/*
  * This function returns the parent of a particular node.
  */
 errcode_t profile_get_node_parent(section, parent)
@@ -333,3 +369,32 @@ errcode_t profile_get_node_parent(section, parent)
 }
 
 
+/*
+ * Taking the state from another find function, give the name of the
+ * section and move to the next section.  In this case, state can't be null
+ */
+errcode_t profile_find_node_name(section, state, ret_name)
+	struct profile_node *section;
+	void **state;
+	char **ret_name;
+{
+	struct profile_node *p;
+
+	CHECK_MAGIC(section);
+	p = *state;
+	if (p) {
+		CHECK_MAGIC(p);
+	} else
+		p = section->first_child;
+	
+	if (p == 0) {
+		*state = 0;
+		return PROF_NO_SECTION;
+	}
+/* give the name back */
+	*ret_name = p->name;
+	p = p->next;
+
+	*state = p;
+	return 0;
+}

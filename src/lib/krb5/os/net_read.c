@@ -46,7 +46,7 @@ krb5_net_read(context, fd, buf, len)
     int cc, len2 = 0;
 
     do {
-	cc = SOCKET_READ(fd, buf, len);
+	cc = SOCKET_READ((SOCKET)fd, buf, len);
 	if (cc < 0) {
 	    if (SOCKET_ERRNO == SOCKET_EINTR)
 		continue;

@@ -1,3 +1,8 @@
+Thu Sept 7 12:00:00 EDT 1995	James Mattly	(mattly@fusion.com)
+
+	* scc_retrv.c: fixed paramter passing in a call to standard_fields_match.
+		prototypes would have caught this.
+
 Thu Sep  7 18:07:56 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* scc_gennew.c (krb5_scc_generate_new): don't use automatic

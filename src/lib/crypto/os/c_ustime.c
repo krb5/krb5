@@ -28,6 +28,7 @@
 #include "k5-int.h"
 
 #ifdef _MACINTOSH
+
 /* We're a Macintosh -- do Mac time things.  */
 
 /*
@@ -50,37 +51,38 @@
 #include <string.h>
 #include <stddef.h>
 
-  /*******************************
-  The Unix epoch is 1/1/70, the Mac epoch is 1/1/04.
+static krb5_int32 last_sec = 0, last_usec = 0;
 
-  70 - 4 = 66 year differential
-
-  Thus the offset is:
-
-  (66 yrs) * (365 days/yr) * (24 hours/day) * (60 mins/hour) * (60 secs/min)
-  plus
-  (17 leap days) * (24 hours/day) * (60 mins/hour) * (60 secs/min)
-
-  Don't forget the offset from GMT.
-  *******************************/
+/*
+ * The Unix epoch is 1/1/70, the Mac epoch is 1/1/04.
+ *
+ * 70 - 4 = 66 year differential
+ *
+ * Thus the offset is:
+ *
+ * (66 yrs) * (365 days/yr) * (24 hours/day) * (60 mins/hour) * (60 secs/min)
+ * plus
+ * (17 leap days) * (24 hours/day) * (60 mins/hour) * (60 secs/min)
+ *
+ * Don't forget the offset from GMT.
+ */
 
 /* returns the offset in hours between the mac local time and the GMT  */
 /* unsigned krb5_int32 */
 krb5_int32
 getTimeZoneOffset()
 {
-	MachineLocation		macLocation;
-	long			gmtDelta;
+    MachineLocation macLocation;
+    long gmtDelta;
 
-	macLocation.u.gmtDelta=0L;
-	ReadLocation(&macLocation); 
-	gmtDelta=macLocation.u.gmtDelta & 0x00FFFFFF;
-	if (BitTst((void *)&gmtDelta,23L))	gmtDelta |= 0xFF000000;
-	gmtDelta /= 3600L;
-	return(gmtDelta);
+    macLocation.u.gmtDelta=0L;
+    ReadLocation(&macLocation); 
+    gmtDelta=macLocation.u.gmtDelta & 0x00FFFFFF;
+    if (BitTst((void *)&gmtDelta,23L))
+	gmtDelta |= 0xFF000000;
+    gmtDelta /= 3600L;
+    return(gmtDelta);
 }
-
-static krb5_int32 last_sec = 0, last_usec = 0;
 
 /* Returns the GMT in seconds (and fake microseconds) using the Unix epoch */
 
@@ -90,16 +92,13 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 {
     krb5_int32 sec, usec;
     time_t the_time;
-	struct tm *gtime, *ltime;
 
-//	GetDateTime (&the_time);
-	time(&the_time);
-//	gtime = gmtime(&the_time);
-//	ltime = localtime(&the_time);
+    GetDateTime (&the_time);
+
     sec = the_time - 
-	    ((66 * 365 * 24 * 60 * 60) + 
-		  (17 *  24 * 60 * 60) +
-       (getTimeZoneOffset() * 60 * 60));
+    	((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + 
+    	(getTimeZoneOffset() * 60 * 60));
+
     usec = 0;	/* Mac is too slow to count faster than once a second */
 
     if ((sec == last_sec) && (usec == last_usec)) {
@@ -109,107 +108,22 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 	    }
 	    sec = last_sec;
 	    usec = last_usec;
-    } else 
+    }
+    else {
 	    last_sec = sec;
 	    last_usec = usec;
-	    
+	}
+
     *seconds = sec;
     *microseconds = usec;
 
     return 0;
 }
 
-#if 0
 
-int	
-gettimeofdaynet (struct timeval *tp, struct timezone *tz)
-{ 
-	tp->tv_sec = gettimeofdaynet_no_offset();
-	return 0;
-}
+#elif defined (_MSDOS)
 
 
-#define TIME_PORT 37
-#define TM_OFFSET 2208988800
-
-/*
- *
- *   get_net_offset () -- Use UDP time protocol to figure out the
- *	offset between what the Mac thinks the time is an what
- *	the network thinks.
- *
- */
-int
-get_net_offset()
-{
-     time_t tv;
-     char buf[512],ts[256];
-     long *nettime;
-     int attempts, cc, time_port;
-     long unixtime;
-	 char	realm[REALM_SZ];
-	 ip_addr	fromaddr;
-	 unsigned short	fromport;
-	 int result;
-	 
-     nettime = (long *)buf;
-	 time_port = TIME_PORT;
-
-	 cc = sizeof(buf);
-	 result = hosts_send_recv(ts, 1, buf, &cc, "", time_port);
-     time (&tv);
-	 
-	 if (result!=KSUCCESS || cc<4) {
-	 	net_offset = 0;
-	 	if (!result) result = 100;
-	 	return result;
-	 }
-						
-     unixtime = (long) ntohl(*nettime) - TM_OFFSET;
-
-     tv  -= 66 * 365 * 24 * 60 * 60
-	  + 17 * 60 * 60 * 24;			/* Convert to unix time w/o offset */
-     net_offset = unixtime - tv;
-     net_got_offset = 1;
-     
-     return 0;
-}
-
-#endif /* 0 */
-
-#else /* HAVE_MACSOCK_H */
-#ifndef _MSDOS
-/* We're a Unix machine -- do Unix time things.  */
-
-extern int errno;
-
-static struct timeval last_tv = {0, 0};
-
-krb5_error_code INTERFACE
-krb5_crypto_us_timeofday(seconds, microseconds)
-    register krb5_int32 *seconds, *microseconds;
-{
-    struct timeval tv;
-
-    if (gettimeofday(&tv, (struct timezone *)0) == -1) {
-	/* failed, return errno */
-	return (krb5_error_code) errno;
-    }
-    if ((tv.tv_sec == last_tv.tv_sec) && (tv.tv_usec == last_tv.tv_usec)) {
-	    if (++last_tv.tv_usec >= 1000000) {
-		    last_tv.tv_usec = 0;
-		    last_tv.tv_sec++;
-	    }
-	    tv = last_tv;
-    } else 
-	    last_tv = tv;
-	    
-    *seconds = tv.tv_sec;
-    *microseconds = tv.tv_usec;
-    return 0;
-}
-
-#else /* DOS version */
 /*
  * Originally written by John Gilmore, Cygnus Support, May '94.
  * Public Domain.
@@ -257,6 +171,8 @@ register krb5_int32 *seconds, *microseconds;
 
     return 0;
 }
+
+
 static time_t
 win_gettime () {
     struct tm tm;
@@ -299,6 +215,8 @@ win_gettime () {
     return time + convert;
 
 }
+
+
 /*
  * This routine figures out the current time epoch and returns the
  * conversion factor.  It exists because 
@@ -323,5 +241,38 @@ win_time_get_epoch()
     return epoch;
 }
 
-#endif /* MSDOS */
-#endif /* HAVE_MACSOCK_H */
+
+#else
+
+
+/* We're a Unix machine -- do Unix time things.  */
+
+extern int errno;
+
+static struct timeval last_tv = {0, 0};
+
+krb5_error_code INTERFACE
+krb5_crypto_us_timeofday(seconds, microseconds)
+    register krb5_int32 *seconds, *microseconds;
+{
+    struct timeval tv;
+
+    if (gettimeofday(&tv, (struct timezone *)0) == -1) {
+	/* failed, return errno */
+	return (krb5_error_code) errno;
+    }
+    if ((tv.tv_sec == last_tv.tv_sec) && (tv.tv_usec == last_tv.tv_usec)) {
+	    if (++last_tv.tv_usec >= 1000000) {
+		    last_tv.tv_usec = 0;
+		    last_tv.tv_sec++;
+	    }
+	    tv = last_tv;
+    } else 
+	    last_tv = tv;
+	    
+    *seconds = tv.tv_sec;
+    *microseconds = tv.tv_usec;
+    return 0;
+}
+
+#endif

@@ -58,9 +58,10 @@ char *argv[];
     /* do some initialisation */
     initialize_krb5_error_table();
 
-    krb5_use_enctype(context, &eblock, ENCTYPE_DES_CBC_CRC);
+    krb5_use_cstype(context, &eblock, ETYPE_DES_CBC_CRC);
     keyblock.magic = KV5M_KEYBLOCK;
-    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
+    keyblock.etype = ETYPE_DES_CBC_CRC;
+    keyblock.keytype = KEYTYPE_DES;
     keyblock.length = sizeof (mit_des_cblock);
     keyblock.contents = (krb5_octet *)key;
 

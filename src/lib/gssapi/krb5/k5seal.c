@@ -21,7 +21,11 @@
  */
 
 #include "gssapiP_krb5.h"
+#ifndef _MACINTOSH
+#include <krb5/rsa-md5.h>
+#else
 #include "rsa-md5.h"
+#endif
 
 static krb5_error_code
 make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,

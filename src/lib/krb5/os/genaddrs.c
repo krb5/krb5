@@ -36,7 +36,8 @@ krb5_error_code INTERFACE
 krb5_auth_con_genaddrs(context, auth_context, fd, flags)
     krb5_context 	  context;
     krb5_auth_context 	  auth_context;
-    int			  fd, flags;
+    SOCKET			  	fd;
+    int					flags;
 {
     krb5_error_code 	  retval;
     krb5_address	* laddr;

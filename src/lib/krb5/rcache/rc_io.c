@@ -240,7 +240,11 @@ krb5_error_code krb5_rc_io_move (context, new, old)
  if (new->fn == 0)
    return ENOMEM;
  strcpy(new->fn, old->fn);
+#ifdef _MACINTOSH
+ new->fd = fcntl(old->fd, F_DUPFD);
+#else
  new->fd = dup(old->fd);
+#endif
  return 0;
 }
 
@@ -269,7 +273,7 @@ krb5_error_code krb5_rc_io_sync (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
-#ifndef MSDOS_FILESYSTEM
+#if !defined(MSDOS_FILESYSTEM) && !defined(_MACINTOSH)
     if (fsync(d->fd) == -1) {
       switch(errno)
       {

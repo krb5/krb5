@@ -184,4 +184,3 @@ krb5_unparse_name(context, principal, name)
 	return(krb5_unparse_name_ext(context, principal, name, NULL));
 }
 
-

@@ -86,6 +86,7 @@ struct sockaddr_in {
 /* The socket data structure itself.   */
 struct socket {
 	short		fMacTCPRef;		/* refnum of MacTCP driver */
+	short		fType;			/* UDP == SOCK_DGRAM or TCP == SOCK_STREAM Socket */
 	unsigned long	fStream;		/* MacTCP socket/stream */
 	struct sockaddr_in connect_addr;	/* Address from connect call */
 #	define		UDPbuflen	4096
@@ -103,7 +104,10 @@ struct    hostent {
     int  h_addrtype;    /* address type */
     int  h_length; /* length of address */
     char **h_addr_list; /* list of addresses from name server */
+#if 0
 #define	h_addr	h_addr_list[0]	/* address, for backward compatiblity */
+#endif
+#define	h_addr	h_addr_list	/* address, for backward compatiblity */
 };
 
 /*
@@ -116,11 +120,13 @@ struct	servent {
 	char	*s_proto;	/* protocol to use */
 };
 
+#ifndef _MWERKS
 /* Timeout values */
 struct timeval {
 	long tv_sec;			/* Seconds */
 	long tv_usec;			/* Microseconds */
 };
+#endif
 
 /* True Kludge version of select argument fd_set's */
 typedef int		fd_set;
@@ -133,7 +139,10 @@ typedef int		fd_set;
 #define	MAXHOSTNAMELEN	512	/* Why be stingy? */
 #define	SOCK_DGRAM	2		/* Datagram socket type */
 #define	AF_INET	2			/* Internet address family */
+#define PF_INET AF_INET
 #define	INADDR_ANY	((unsigned long)0)	/* Internet addr: any host */
+#define SOCK_STREAM 3		/* Stream socket type */
+
 
 /* Start using sockets */
 extern int
@@ -193,6 +202,9 @@ gethostbyaddr PROTOTYPE ((char *addr, int len, int type));
 
 extern struct hostent *
 getmyipaddr PROTOTYPE ((void));
+
+extern int
+getsockname PROTOTYPE((SOCKET, struct sockaddr_in *, int *));
 
 /* Bypass a few other functions we don't really need. */
 

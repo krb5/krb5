@@ -1,13 +1,13 @@
-Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+Sun Sep 10 12:00:00 1995    <mattly@fusion.com>
 
-        * asn1_k_decode.c, asn1_k_decode.h, asn1_k_encode.c, asn1_k_encode.h,
-	* krb5_decode.c, krb5_encode.c: s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+	* asn1_encode.c: Removed use of localtime for encoding of generaltime.
 
-Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+Wed Sept 6 12:00:00 1995    <mattly@fusion.com>
 
-        * asn1_k_decode.c, asn1_k_decode.h, asn1_k_encode.c, asn1_k_encode.h
-	* krb5_decode.c : Remove krb5_enctype references, and replace with
-                krb5_keytype where appropriate
+	* asn1_encode.c: added EPOCH to account for macintosh time keeping
+		differences in asn1_encode_generaltime.
+
+	* asn1buf.c: removed some debugging cruft.
 
 Mon Aug 28 12:54:05 1995    <tytso@rsts-11.mit.edu>
 

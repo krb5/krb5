@@ -108,7 +108,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     const int lnsize;
     char *lname;
 {
-#if	defined(BERK_DB_DBM) || !defined(_WINDOWS)
+#if	defined(BERK_DB_DBM) || (!defined(_WINDOWS) && !defined(_MACINTOSH))
     DBM *db;
     krb5_error_code retval;
     datum key, contents;

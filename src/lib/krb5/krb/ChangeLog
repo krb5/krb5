@@ -1,43 +1,24 @@
-Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+Sun Sep 10 12:00:00 1995	James Mattly	(mattly@fusion.com)
 
-        * auth_con.c, decrypt_tk.c, encode_kdc.c, encrypt_tk.c,
-	* gc_frm_kdc.c, gen_seqnum.c, get_creds.c, get_in_tkt.c,
-	* in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c, init_ctx.c,
-	* kdc_rep_dc.c, mk_cred.c, mk_priv.c, mk_rep.c, mk_req._ext.c,
-	* preauth.c, rd_cred.c, rd_priv.c, rd_rep.c, rd_req_dec.c,
-	* send_tgs.c, sendauth.c, ser_actx.c, ser_ctx.c, ser_eblk.c,
-	* ser_key.c, t_ser.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+	* gen_seqnum.c:  change usage of krb5_crypto_us_timeofday to krb5_timeofday
+	* get_in_tkt.c:  change usage of  krb5_crypto_us_timeofday to krb5_timeofday
+	* mk_priv.c: change usage of krb5_crypto_us_timeofday to krb5_timeofday
+	* mk_req_ext.c: change usage of krb5_crypto_us_timeofday to krb5_timeofday
+	* send_tgs.c: change usage of krb5_timeofday over to krb5_crypto_us_timeofday
 
-Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+Wed Sept 6 12:00:00 EDT 1995	James Mattly	(mattly@fusion.com)
 
-        * decode_kdc.c, decrypt_tk.c, encode_kdc.c, encrypt_tk.c, gc_frm_kdc.c
-	* gc_via_tkt.c, get_in_tkt.c, in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c
-	* init_ctx.c, kdc_rep_dc.c, mk_cred.c, mk_priv.c, mk_rep.c
-	* mk_req_ext.c, rd_cred.c, rd_priv.c, rd_rep.c, rd_req_dec.c,
-	* send_tgs.c, ser_ctx.c, ser_eblk.c, ser_key.c, t_ser.c: 
-		Remove krb5_enctype references, and replace with
-                krb5_keytype where appropriate
+	* get_in_tkt.c:  change usage of krb5_timeofday to krb5_crypto_us_timeofday
+	* mk_req_ext.c: change usage of timeofday
+	* parse.c:  disabled a usage of exit for macintosh
+	* send_tgs.c: change usage of krb5_timeofday over to
+		krb5_crypto_us_timeofday
+	* unparse.c: include <stdio.h>
 
-Fri Sep  1 20:03:41 1995  Theodore Y. Ts'o  <tytso@dcl>
-
-	* get_in_tkt.c (krb5_get_in_tkt): If kdc_settime is enabled, then
-		set the time_offset fields from the returned ticket's
-		authtime value.
-
-	* init_ctx.c (krb5_init_context): Initialize new fields in
-		krb5_context (clockskew, kdc_req_sumtype, and
-		kdc_default_options).
-
-	* gc_via_tkt.c (krb5_get_cred_via_tkt): Perform the necessary
-		sanity checking on the KDC response to make sure we detect
-		tampering.
-
-	* send_tgs.c (krb5_send_tgs): Set the expected nonce in the
-		response structure.
 
 Fri Sep 1 11:16:43 EDT 1995	Paul Park	(pjpark@mit.edu)
-
 	* ser_ctx.c - Add handling of new time offset fields in the os_context.
+
 
 Tue Aug 29 14:14:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_{actx,adata,addr,auth,cksum,ctx,eblk,key,

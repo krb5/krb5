@@ -1,15 +1,9 @@
-Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+Wed Sept 6 12:00:00 EDT 1995	James Mattly	(mattly@fusion.com)
 
-        * file_read.c, file_write.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+	* fcc_retrv.c: for _MACINTOSH, defined register to null for compiler
+	 prototype problems.
 
-Tue Sep 05 22:58:52 1995
-
-	* fcc.h : Add another KRB5_FCC_FVNO but don't up the default.
-	* fcc_gennew.c, fcc_maybe.c : New version saves a length after 
-		version for whatever we want to put into the ccache before 
-		the first credential (like a time skew)
-        * fcc_read.c, fcc_write.c : Remove krb5_enctype references, and 
-		replace with krb5_keytype where appropriate
+	* fcc_maybe.c: included <stdio.h>
 
 Tue Aug 29 13:36:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* fcc_reslv.c - Set magic number in successfully resolved ccache.

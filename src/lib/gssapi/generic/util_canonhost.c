@@ -24,7 +24,9 @@
 #define NEED_SOCKETS
 #include "gssapiP_generic.h"
 
+#ifndef _MACINTOSH
 #include <sys/types.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 

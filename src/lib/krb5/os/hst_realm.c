@@ -83,7 +83,7 @@ krb5_get_host_realm(context, host, realmsp)
     const char *host;
     char ***realmsp;
 {
-    char **retrealms;
+    char **retrealms = NULL;
     char *domain, *default_realm, *realm, *cp;
     krb5_error_code retval;
     int l;

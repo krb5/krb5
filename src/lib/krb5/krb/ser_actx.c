@@ -100,7 +100,7 @@ krb5_auth_context_size(kcontext, arg, sizep)
 	/* Calculate size required by i_vector - ptooey */
 	if (auth_context->i_vector && auth_context->keyblock)
 	    required += (size_t)
-		krb5_enctype_array[auth_context->keyblock->enctype]->
+		krb5_keytype_array[auth_context->keyblock->keytype]->
 		    system->block_length;
 
 	/* Calculate size required by remote_addr, if appropriate */
@@ -225,7 +225,7 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
 
 	    /* Now figure out the number of bytes for i_vector and write it */
 	    obuf = (!auth_context->i_vector) ? 0 : (krb5_int32)
-		krb5_enctype_array[auth_context->keyblock->enctype]->
+		krb5_keytype_array[auth_context->keyblock->keytype]->
 		    system->block_length;
 	    (void) krb5_ser_pack_int32(obuf, &bp, &remain);
 

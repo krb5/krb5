@@ -230,3 +230,58 @@ void dump_profile(root, level)
 	} while (iter != 0);
 }
 #endif /* ! _WINDOWS */
+
+
+void dump_profile_to_file(root, level, dstfile)
+	struct profile_node *root;
+	int level;
+	FILE *dstfile;
+{
+	int i;
+	struct profile_node *p;
+	void *iter;
+	long retval;
+	char *name, *value;
+	
+	iter = 0;
+	do {
+		retval = profile_find_node_relation(root, 0, &iter,
+						    &name, &value);
+		if (retval)
+			break;
+		for (i=0; i < level; i++)
+			fprintf(dstfile, "\t");
+		fprintf(dstfile, "%s = %s\r", name, value);
+	} while (iter != 0);
+
+	iter = 0;
+	do {
+		retval = profile_find_node_subsection(root, 0, &iter,
+						      &name, &p);
+		if (retval)
+			break;
+		if (level == 0)	/* [xxx] */
+		{
+			for (i=0; i < level; i++)
+				fprintf(dstfile, "\t");
+			fprintf(dstfile, "[%s]\r", name);
+			dump_profile_to_file(p, level+1, dstfile);
+			fprintf(dstfile, "\r");
+		}
+		else if (level == 1) /* xxx = { ... } */
+		{
+			for (i=0; i < level; i++)
+				fprintf(dstfile, "\t");
+			fprintf(dstfile, "%s = {\r", name);
+			dump_profile_to_file(p, level+1, dstfile);
+			for (i=0; i < level; i++)
+				fprintf(dstfile, "\t");
+			fprintf(dstfile, "}\r");
+		}
+		else /* +xxx+ */
+		{
+			// don't know what comes next, this should get someones attention
+			fprintf(dstfile, "+%s+");
+		}
+	} while (iter != 0);
+}

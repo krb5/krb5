@@ -45,7 +45,7 @@ krb5_net_write(context, fd, buf, len)
     int cc;
     register int wrlen = len;
     do {
-	cc = SOCKET_WRITE(fd, buf, wrlen);
+	cc = SOCKET_WRITE((SOCKET)fd, buf, wrlen);
 	if (cc < 0) {
 	    if (SOCKET_ERRNO == SOCKET_EINTR)
 		continue;

@@ -1,3 +1,11 @@
+Thu Sep  8 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* k5-config.h:  defined MPW fake stat.h out for metrowerks compiler
+	* macsock.h:  changed SOCKET definition for MACINTOSH to start support for
+		TCP streams
+	* TCPBP.h:  fixed up some prototype problems with out customized tcp sockets
+		for macintosh
+
 Thu Sep  7 15:53:28 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* adm.h (KRB5_ADM_SERVICE_NAME): Use official IANA assigned name

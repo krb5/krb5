@@ -195,7 +195,7 @@ char *fn;
   
 	ad->checksum = *(long *)authdat->authenticator->checksum->contents;
 
-	if (authdat->ticket->enc_part2->session->enctype != ENCTYPE_DES) {
+	if (authdat->ticket->enc_part2->session->keytype != KEYTYPE_DES) {
 		r = KFAILURE;
 		goto out;
 	} else

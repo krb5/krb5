@@ -22,7 +22,11 @@
 
 #include "gssapiP_krb5.h"
 #include <memory.h>
+#ifndef _MACINTOSH
+#include <krb5/rsa-md5.h>
+#else
 #include "rsa-md5.h"
+#endif
 
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
    conf_state is only valid if SEAL.

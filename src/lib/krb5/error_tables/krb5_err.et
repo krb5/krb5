@@ -240,7 +240,7 @@ error_code KRB5_NO_TKT_IN_RLM,		"Cannot find ticket for requested realm"
 error_code KRB5DES_BAD_KEYPAR,		"DES key has bad parity"
 error_code KRB5DES_WEAK_KEY,		"DES key is a weak key"
 
-error_code KRB5_BAD_ENCTYPE,		"Bad encryption type"
+error_code KRB5_BAD_KEYTYPE,		"Keytype is incompatible with encryption type"
 error_code KRB5_BAD_KEYSIZE,		"Key size is incompatible with encryption type"
 error_code KRB5_BAD_MSIZE,		"Message size is incompatible with encryption type"
 

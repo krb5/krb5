@@ -1,8 +1,3 @@
-Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
-
-        * get_cred.c, mk_priv.c, mk_safe.c, rd_priv.c, rd_req.c, rd_safe.c,
-	* set_key.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
-
 Thu Jul 13 19:47:47 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* rd_priv.c rd_safe.c: Include netinet/in.h

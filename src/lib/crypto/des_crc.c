@@ -47,7 +47,8 @@ static krb5_cryptosystem_entry mit_des_crc_cryptosystem_entry = {
     sizeof(mit_des_cblock),
     CRC32_CKSUM_LENGTH+sizeof(mit_des_cblock),
     sizeof(mit_des_cblock),
-    ENCTYPE_DES_CBC_CRC
+    ETYPE_DES_CBC_CRC,
+    KEYTYPE_DES
     };
 
 krb5_cs_table_entry krb5_des_crc_cst_entry = {

@@ -156,8 +156,9 @@ asn1_error_code fname(buf, val)\
 integer_convert(asn1_decode_int,int)
 integer_convert(asn1_decode_int32,krb5_int32)
 integer_convert(asn1_decode_kvno,krb5_kvno)
-integer_convert(asn1_decode_enctype,krb5_enctype)
+integer_convert(asn1_decode_keytype,krb5_keytype)
 integer_convert(asn1_decode_cksumtype,krb5_cksumtype)
+integer_convert(asn1_decode_enctype,krb5_enctype)
 integer_convert(asn1_decode_octet,krb5_octet)
 integer_convert(asn1_decode_addrtype,krb5_addrtype)
 integer_convert(asn1_decode_authdatatype,krb5_authdatatype)
@@ -240,10 +241,11 @@ asn1_error_code asn1_decode_encryption_key(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->enctype,0,asn1_decode_enctype);
+    get_field(val->keytype,0,asn1_decode_keytype);
     get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
     end_structure();
     val->magic = KV5M_KEYBLOCK;
+    val->etype = ETYPE_UNKNOWN;
   }
   cleanup();
 }
@@ -254,7 +256,7 @@ asn1_error_code asn1_decode_encrypted_data(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->enctype,0,asn1_decode_enctype);
+    get_field(val->etype,0,asn1_decode_enctype);
     opt_field(val->kvno,1,asn1_decode_kvno,0);
     get_lenfield(val->ciphertext.length,val->ciphertext.data,2,asn1_decode_charstring);
     end_structure();
@@ -409,13 +411,13 @@ asn1_error_code asn1_decode_kdc_req_body(buf, val)
     get_field(val->till,5,asn1_decode_kerberos_time);
     opt_field(val->rtime,6,asn1_decode_kerberos_time,0);
     get_field(val->nonce,7,asn1_decode_int32);
-    get_lenfield(val->nktypes,val->ktype,8,asn1_decode_sequence_of_enctype);
+    get_lenfield(val->netypes,val->etype,8,asn1_decode_sequence_of_enctype);
     opt_field(val->addresses,9,asn1_decode_host_addresses,0);
     if(tagnum == 10){
       get_field(val->authorization_data,10,asn1_decode_encrypted_data); }
     else{
       val->authorization_data.magic = 0;
-      val->authorization_data.enctype = 0;
+      val->authorization_data.etype = 0;
       val->authorization_data.kvno = 0;
       val->authorization_data.ciphertext.data = NULL;
       val->authorization_data.ciphertext.length = 0;

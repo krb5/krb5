@@ -55,7 +55,6 @@
 #define KRB5_FCC_FVNO_1 0x0501		/* krb5 v5, fcc v1 */
 #define KRB5_FCC_FVNO_2 0x0502		/* krb5 v5, fcc v2 */
 #define KRB5_FCC_FVNO_3 0x0503		/* krb5 v5, fcc v3 */
-#define KRB5_FCC_FVNO_4 0x0504		/* krb5 v5, fcc v4 */
 
 #define KRB5_FCC_DEFAULT_FVNO KRB5_FCC_FVNO_3
 

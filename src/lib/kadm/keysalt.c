@@ -36,13 +36,13 @@ static const char default_ksaltseps[]	= ":.";
  * krb5_keysalt_is_present()	- Determine if a key/salt pair is present
  *				  in a list of key/salt tuples.
  *
- *	Salttype may be negative to indicate a search for only a enctype.
+ *	Salttype may be negative to indicate a search for only a keytype.
  */
 krb5_boolean
-krb5_keysalt_is_present(ksaltlist, nksalts, enctype, salttype)
+krb5_keysalt_is_present(ksaltlist, nksalts, keytype, salttype)
     krb5_key_salt_tuple	*ksaltlist;
     krb5_int32		nksalts;
-    krb5_enctype	enctype;
+    krb5_keytype	keytype;
     krb5_int32		salttype;
 {
     krb5_boolean	foundit;
@@ -51,7 +51,7 @@ krb5_keysalt_is_present(ksaltlist, nksalts, enctype, salttype)
     foundit = 0;
     if (ksaltlist) {
 	for (i=0; i<nksalts; i++) {
-	    if ((ksaltlist[i].ks_enctype == enctype) &&
+	    if ((ksaltlist[i].ks_keytype == keytype) &&
 		((ksaltlist[i].ks_salttype == salttype) ||
 		 (salttype < 0))) {
 		foundit = 1;
@@ -83,11 +83,11 @@ krb5_keysalt_iterate(ksaltlist, nksalt, ignoresalt, iterator, arg)
 
     kret = 0;
     for (i=0; i<nksalt; i++) {
-	scratch.ks_enctype = ksaltlist[i].ks_enctype;
+	scratch.ks_keytype = ksaltlist[i].ks_keytype;
 	scratch.ks_salttype = (ignoresalt) ? -1 : ksaltlist[i].ks_salttype;
 	if (!krb5_keysalt_is_present(ksaltlist,
 				     i,
-				     scratch.ks_enctype,
+				     scratch.ks_keytype,
 				     scratch.ks_salttype)) {
 	    if (kret = (*iterator)(&scratch, arg))
 		break;
@@ -112,7 +112,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
     krb5_error_code	kret;
     char 		*kp, *sp, *ep;
     char		sepchar, trailchar;
-    krb5_enctype	ktype;
+    krb5_keytype	ktype;
     krb5_int32		stype;
     krb5_key_salt_tuple	*savep;
     const char		*tseplist;
@@ -140,9 +140,9 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 	}
 	/*
 	 * kp points to something (hopefully) of the form:
-	 *	<enctype><ksseplist><salttype>
+	 *	<keytype><ksseplist><salttype>
 	 *	or
-	 *	<enctype>
+	 *	<keytype>
 	 */
 	sp = (char *) NULL;
 	/* Attempt to find a separator */
@@ -152,7 +152,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 	     ep = strchr(kp, (int) *septmp));
 
 	if (sp) {
-	    /* Separate enctype from salttype */
+	    /* Separate keytype from salttype */
 	    sepchar = *sp;
 	    *sp = '\0';
 	    sp++;
@@ -161,10 +161,10 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 	    stype = -1;
 
 	/*
-	 * Attempt to parse enctype and salttype.  If we parse well
+	 * Attempt to parse keytype and salttype.  If we parse well
 	 * then make sure that it specifies a unique key/salt combo
 	 */
-	if (!krb5_string_to_enctype(kp, &ktype) &&
+	if (!krb5_string_to_keytype(kp, &ktype) &&
 	    (!sp || !krb5_string_to_salttype(sp, &stype)) &&
 	    (dups ||
 	     !krb5_keysalt_is_present(*ksaltp, *nksaltp, ktype, stype))) {
@@ -184,7 +184,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 		}
 
 		/* Save our values */
-		(*ksaltp)[(*nksaltp)].ks_enctype = ktype;
+		(*ksaltp)[(*nksaltp)].ks_keytype = ktype;
 		(*ksaltp)[(*nksaltp)].ks_salttype = stype;
 		(*nksaltp)++;
 	    }

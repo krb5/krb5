@@ -17,6 +17,8 @@
 #include "mit-sipb-copyright.h"
 #include "internal.h"
 
+#define sys_nerr 100
+
 static const char copyright[] =
     "Copyright 1986, 1987, 1988 by the Student Information Processing Board\nand the department of Information Systems\nof the Massachusetts Institute of Technology";
 
@@ -47,6 +49,7 @@ long code;
     offset = (int) l_offset;
     table_num = code - l_offset;
     if (!table_num) {
+#ifdef HAS_SYSERRLIST
 #ifdef HAS_STRERROR
 	return strerror (offset);
 #else
@@ -54,6 +57,9 @@ long code;
 	    return(sys_errlist[offset]);
 	else
 	    goto oops;
+#endif
+#else
+		goto oops;
 #endif
     }
     for (et = _et_list; et; et = et->next) {

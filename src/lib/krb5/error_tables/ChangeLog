@@ -1,7 +1,3 @@
-Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
-
-        * kdb5_err.et : Change KRB5_KDB_BAD_KEYTYPE to KRB5_KDB_BAD_ENCTYPE
-	* krb5_err.et : Change KRB5_BAD_KEYTYPE to KRB5_BAD_ENCTYPE
 
 Tue Aug 29 13:37:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kv5m_err.et - Add magic numbers for DB_CONTEXT, AUTH_CONTEXT, KEYTAB

@@ -220,7 +220,7 @@ typedef struct TCPStats {
 typedef struct TCPGlobalInfoPB {
 	struct TCPParam *tcpParamPtr;
 	struct TCPStats *tcpStatsPtr;
-	StreamPtr *tcpCDBTable[];
+	StreamPtr *tcpCDBTable;
 	Ptr userDataPtr;
 	unsigned short maxTCPConnections;
 }TCPGlobalInfoPB;

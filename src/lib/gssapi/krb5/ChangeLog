@@ -1,3 +1,13 @@
+Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* gssapi_krb5.h:  changed a path bearing include for MACINTOSH
+
+	* accept_sec_context.c:  changed a path bearing include for MACINTOSH
+
+	* k5seal.c:  changed a path bearing include for MACINTOSH
+
+	* k5unseal.c:  changed a path bearing include for MACINTOSH
+	
 Sat Sep  9 00:16:34 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_gss_glue.c (gss_delete_sec_context): Add extra indirection

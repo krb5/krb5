@@ -175,8 +175,8 @@ krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
 
      while ((kret = krb5_scc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
 	  if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
-		   srvname_match(mcreds, &fetchcreds)) ||
-	       standard_fields_match(mcreds, &fetchcreds))
+		   srvname_match(context, mcreds, &fetchcreds)) ||
+	       standard_fields_match(context, mcreds, &fetchcreds))
 	      &&
 	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
 	       mcreds->is_skey == fetchcreds.is_skey)

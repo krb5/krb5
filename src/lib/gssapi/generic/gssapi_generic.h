@@ -23,7 +23,11 @@
 #ifndef _GSSAPI_GENERIC_H_
 #define _GSSAPI_GENERIC_H_
 
+#ifndef _MACINTOSH
 #include <gssapi/gssapi.h>
+#else
+#include <gssapi.h>
+#endif
 
 extern const gss_OID_desc FAR * const gss_nt_user_name;
 extern const gss_OID_desc FAR * const gss_nt_machine_uid_name;

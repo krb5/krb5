@@ -31,7 +31,7 @@
  *
  * String decoding:
  * ----------------
- * krb5_string_to_enctype()	- Convert string to krb5_enctype.
+ * krb5_string_to_keytype()	- Convert string to krb5_keytype.
  * krb5_string_to_salttype()	- Convert string to salttype (krb5_int32)
  * krb5_string_to_enctype()	- Convert string to krb5_enctype.
  * krb5_string_to_cksumtype()	- Convert string to krb5_cksumtype;
@@ -41,7 +41,7 @@
  *
  * String encoding:
  * ----------------
- * krb5_enctype_to_string()	- Convert krb5_enctype to string.
+ * krb5_keytype_to_string()	- Convert krb5_keytype to string.
  * krb5_salttype_to_string()	- Convert salttype (krb5_int32) to string.
  * krb5_enctype_to_string()	- Convert krb5_enctype to string.
  * krb5_cksumtype_to_string()	- Convert krb5_cksumtype to string.
@@ -58,16 +58,22 @@
 /*
  * Local data structures.
  */
-struct enctype_lookup_entry {
-    krb5_enctype	ktt_enctype;		/* Keytype		*/
+struct keytype_lookup_entry {
+    krb5_keytype	ktt_keytype;		/* Keytype		*/
     const char *	ktt_specifier;		/* How to recognize it	*/
     const char *	ktt_output;		/* How to spit it out	*/
 };
 
 struct salttype_lookup_entry {
-    krb5_int32		stt_enctype;		/* Salt type		*/
+    krb5_int32		stt_keytype;		/* Salt type		*/
     const char *	stt_specifier;		/* How to recognize it	*/
     const char *	stt_output;		/* How to spit it out	*/
+};
+
+struct enctype_lookup_entry {
+    krb5_enctype	ett_enctype;		/* Encryption type	*/
+    const char *	ett_specifier;		/* How to recognize it	*/
+    const char *	ett_output;		/* How to spit it out	*/
 };
 
 struct cksumtype_lookup_entry {
@@ -95,19 +101,11 @@ struct deltat_match_entry {
 /*
  * Local strings
  */
-
 /* Keytype strings */
-static const char enctype_des_in[]		= "des";
-static const char enctype_null_in[]		= "null";
-static const char enctype_descbccrc_in[]	= "des-cbc-crc";
-static const char enctype_descbcmd4_in[]	= "des-cbc-md4";
-static const char enctype_descbcmd5_in[]	= "des-cbc-md5";
-static const char enctype_descbcraw_in[]	= "des-cbc-raw";
-static const char enctype_null_out[]		= "Null";
-static const char enctype_descbccrc_out[]	= "DES cbc mode with CRC-32";
-static const char enctype_descbcmd4_out[]	= "DES cbc mode with RSA-MD4";
-static const char enctype_descbcmd5_out[]	= "DES cbc mode with RSA-MD5";
-static const char enctype_descbcraw_out[]	= "DES cbc mode raw";
+static const char keytype_null_in[]	= "null";
+static const char keytype_des_in[]	= "des";
+static const char keytype_null_out[]	= "Null";
+static const char keytype_des_out[]	= "DES";
 
 /* Salttype strings */
 static const char stype_v5_in[]		= "normal";
@@ -120,6 +118,18 @@ static const char stype_v4_out[]	= "Version 4";
 static const char stype_norealm_out[]	= "Version 5 - No Realm";
 static const char stype_olrealm_out[]	= "Version 5 - Realm Only";
 static const char stype_special_out[]	= "Special";
+
+/* Encryption type strings */
+static const char etype_null_in[]	= "null";
+static const char etype_descbccrc_in[]	= "des-cbc-crc";
+static const char etype_descbcmd4_in[]	= "des-cbc-md4";
+static const char etype_descbcmd5_in[]	= "des-cbc-md5";
+static const char etype_rawdescbc_in[]	= "raw-des-cbc";
+static const char etype_null_out[]	= "Null";
+static const char etype_descbccrc_out[]	= "DES cbc mode with CRC-32";
+static const char etype_descbcmd4_out[]	= "DES cbc mode with RSA-MD4";
+static const char etype_descbcmd5_out[]	= "DES cbc mode with RSA-MD5";
+static const char etype_rawdescbc_out[]	= "DES cbc mode";
 
 /* Checksum type strings */
 static const char cstype_crc32_in[]	= "crc32";
@@ -214,18 +224,14 @@ static const char dt_output_hms[]	= "%d:%02d:%02d";
 /*
  * Lookup tables.
  */
-static const struct enctype_lookup_entry enctype_table[] = {
-/* krb5_enctype		input specifier		output string		*/
-/*-------------		-----------------------	------------------------*/
-{ ENCTYPE_NULL,		enctype_null_in,	enctype_null_out	},
-{ ENCTYPE_DES_CBC_MD5,	enctype_des_in,		enctype_descbcmd5_out	},
-{ ENCTYPE_DES_CBC_CRC,	enctype_descbccrc_in,	enctype_descbccrc_out	},
-{ ENCTYPE_DES_CBC_MD4,	enctype_descbcmd4_in,	enctype_descbcmd4_out	},
-{ ENCTYPE_DES_CBC_MD5,	enctype_descbcmd5_in,	enctype_descbcmd5_out	},
-{ ENCTYPE_DES_CBC_RAW,	enctype_descbcraw_in,	enctype_descbcraw_out	}
+static const struct keytype_lookup_entry keytype_table[] = {
+/* krb5_keytype	input specifier		output string		*/
+/*-------------	-----------------------	------------------------*/
+{ KEYTYPE_NULL,	keytype_null_in,	keytype_null_out	},
+{ KEYTYPE_DES,	keytype_des_in,		keytype_des_out		}
 };
-static const int enctype_table_nents = sizeof(enctype_table)/
-				       sizeof(enctype_table[0]);
+static const int keytype_table_nents = sizeof(keytype_table)/
+				       sizeof(keytype_table[0]);
 
 static const struct salttype_lookup_entry salttype_table[] = {
 /* salt type			input specifier		output string	  */
@@ -238,6 +244,18 @@ static const struct salttype_lookup_entry salttype_table[] = {
 };
 static const int salttype_table_nents = sizeof(salttype_table)/
 					sizeof(salttype_table[0]);
+
+static const struct enctype_lookup_entry enctype_table[] = {
+/* krb5_enctype	     input specifier		output string		*/
+/*------------------ ---------------------	------------------------*/
+{ ETYPE_NULL,	     etype_null_in,		etype_null_out		},
+{ ETYPE_DES_CBC_CRC, etype_descbccrc_in,	etype_descbccrc_out	},
+{ ETYPE_DES_CBC_MD4, etype_descbcmd4_in,	etype_descbcmd4_out	},
+{ ETYPE_DES_CBC_MD5, etype_descbcmd5_in,	etype_descbcmd5_out	},
+{ ETYPE_RAW_DES_CBC, etype_rawdescbc_in,	etype_rawdescbc_out	}
+};
+static const int enctype_table_nents = sizeof(enctype_table)/
+				       sizeof(enctype_table[0]);
 
 static const struct cksumtype_lookup_entry cksumtype_table[] = {
 /* krb5_cksumtype         input specifier	output string		*/
@@ -416,18 +434,18 @@ strptime(buf, format, tm)
  * These routines return 0 for success, EINVAL for invalid entry.
  */
 krb5_error_code
-krb5_string_to_enctype(string, enctypep)
+krb5_string_to_keytype(string, keytypep)
     char		* string;
-    krb5_enctype	* enctypep;
+    krb5_keytype	* keytypep;
 {
     int i;
     int found;
 
     found = 0;
-    for (i=0; i<enctype_table_nents; i++) {
-	if (!strcasecmp(string, enctype_table[i].ktt_specifier)) {
+    for (i=0; i<keytype_table_nents; i++) {
+	if (!strcasecmp(string, keytype_table[i].ktt_specifier)) {
 	    found = 1;
-	    *enctypep = enctype_table[i].ktt_enctype;
+	    *keytypep = keytype_table[i].ktt_keytype;
 	    break;
 	}
     }
@@ -446,7 +464,26 @@ krb5_string_to_salttype(string, salttypep)
     for (i=0; i<salttype_table_nents; i++) {
 	if (!strcasecmp(string, salttype_table[i].stt_specifier)) {
 	    found = 1;
-	    *salttypep = salttype_table[i].stt_enctype;
+	    *salttypep = salttype_table[i].stt_keytype;
+	    break;
+	}
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_enctype(string, enctypep)
+    char		* string;
+    krb5_enctype	* enctypep;
+{
+    int i;
+    int found;
+
+    found = 0;
+    for (i=0; i<enctype_table_nents; i++) {
+	if (!strcasecmp(string, enctype_table[i].ett_specifier)) {
+	    found = 1;
+	    *enctypep = enctype_table[i].ett_enctype;
 	    break;
 	}
     }
@@ -588,8 +625,8 @@ krb5_string_to_deltat(string, deltatp)
  * if the supplied buffer/length will not contain the output.
  */
 krb5_error_code
-krb5_enctype_to_string(enctype, buffer, buflen)
-    krb5_enctype	enctype;
+krb5_keytype_to_string(keytype, buffer, buflen)
+    krb5_keytype	keytype;
     char		* buffer;
     size_t		buflen;
 {
@@ -597,9 +634,9 @@ krb5_enctype_to_string(enctype, buffer, buflen)
     const char *out;
 
     out = (char *) NULL;
-    for (i=0; i<enctype_table_nents; i++) {
-	if (enctype ==  enctype_table[i].ktt_enctype) {
-	    out = enctype_table[i].ktt_output;
+    for (i=0; i<keytype_table_nents; i++) {
+	if (keytype ==  keytype_table[i].ktt_keytype) {
+	    out = keytype_table[i].ktt_output;
 	    break;
 	}
     }
@@ -625,8 +662,35 @@ krb5_salttype_to_string(salttype, buffer, buflen)
 
     out = (char *) NULL;
     for (i=0; i<salttype_table_nents; i++) {
-	if (salttype ==  salttype_table[i].stt_enctype) {
+	if (salttype ==  salttype_table[i].stt_keytype) {
 	    out = salttype_table[i].stt_output;
+	    break;
+	}
+    }
+    if (out) {
+	if (buflen > strlen(out))
+	    strcpy(buffer, out);
+	else
+	    out = (char *) NULL;
+	return((out) ? 0 : ENOMEM);
+    }
+    else
+	return(EINVAL);
+}
+
+krb5_error_code
+krb5_enctype_to_string(enctype, buffer, buflen)
+    krb5_enctype	enctype;
+    char		* buffer;
+    size_t		buflen;
+{
+    int i;
+    const char *out;
+
+    out = (char *) NULL;
+    for (i=0; i<enctype_table_nents; i++) {
+	if (enctype ==  enctype_table[i].ett_enctype) {
+	    out = enctype_table[i].ett_output;
 	    break;
 	}
     }

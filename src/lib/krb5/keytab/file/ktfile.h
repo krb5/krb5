@@ -86,7 +86,7 @@ krb5_error_code krb5_ktfile_get_entry
 		   krb5_keytab,
 		   krb5_principal,
 		   krb5_kvno,
-		   krb5_enctype,
+		   krb5_keytype,
 		   krb5_keytab_entry *));
 
 krb5_error_code krb5_ktfile_start_seq_get 

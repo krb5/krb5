@@ -61,7 +61,7 @@ extern krb5_deltat krb5_clockskew;
 /* some typedef's for the function args to make things look a bit cleaner */
 
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
-						   const krb5_enctype,
+						   const krb5_keytype,
 						   krb5_data *,
 						   krb5_const_pointer,
 						   krb5_keyblock **));
@@ -71,12 +71,12 @@ typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
 krb5_error_code
-krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
+krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    krb5_enctype * ktypes;
+    krb5_enctype * etypes;
     krb5_preauthtype * ptypes;
     git_key_proc key_proc;
     krb5_const_pointer keyseed;
@@ -86,7 +86,8 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_ccache ccache;
     krb5_kdc_rep ** ret_as_reply;
 {
-    krb5_enctype enctype, ktype;
+    krb5_keytype keytype;
+    krb5_enctype etype;
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply = 0;
     krb5_error *err_reply;
@@ -96,7 +97,6 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_keyblock *decrypt_key = 0;
     krb5_timestamp time_now;
 /*    krb5_pa_data	*padata; */
-    krb5_pa_data  **preauth_to_use = 0;
     int f_salt = 0, use_salt = 0;
     krb5_data salt;
     char k4_version;		/* same type as *(krb5_data::data) */
@@ -132,7 +132,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	     * default.  But if we're changing salts, because of a
 	     * realm renaming, or some such, this won't work.
 	     */
-/*    retval = (*key_proc)(context, enctype, &decrypt_key, keyseed, 0); */
+/*    retval = (*key_proc)(context, keytype, &decrypt_key, keyseed, 0); */
 	    if (retval)
 		    return retval;
 	    request.padata = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)
@@ -159,32 +159,34 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
 
+{
+krb5_int32 usec;
+#if 0
     if ((retval = krb5_timeofday(context, &time_now)))
 	goto cleanup;
+#else
+    if ((retval = krb5_us_timeofday(context, &time_now, &usec)))
+	goto cleanup;
+#endif
+}
 
     /* XXX we know they are the same size... */
     request.nonce = (krb5_int32) time_now;
 
-    if (ktypes) 
-	request.ktype = ktypes;
+    if (etypes) 
+	request.etype = etypes;
     else 
-    	krb5_get_default_in_tkt_ktypes(context, &request.ktype);
-    for (request.nktypes = 0;request.ktype[request.nktypes];request.nktypes++);
+    	krb5_get_default_in_tkt_etypes(context, &request.etype);
+    for (request.netypes = 0;request.etype[request.netypes];request.netypes++);
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
     request.unenc_authdata = 0;
     request.second_ticket = 0;
 
-    if ((retval = krb5_timeofday(context, &time_now)))
-	goto cleanup;
-
-    /* XXX we know they are the same size... */
-    request.nonce = (krb5_int32) time_now;
-
     /* encode & send to KDC */
     retval = encode_krb5_as_req(&request, &packet);
-    if (!ktypes)
-      free(request.ktype);
+    if (!etypes)
+      free(request.etype);
     if (retval)
       goto cleanup;
 
@@ -202,15 +204,14 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	    /* some other error code--??? */	    
 	    goto cleanup;
     
-	if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED &&
-	    err_reply->e_data.length > 0) {
-	    retval = decode_krb5_padata_sequence(&err_reply->e_data,
-						 &preauth_to_use);
-    	    /* XXX we need to actually do something with the info */
-	    krb5_free_pa_data(context, preauth_to_use);
-	}
+	/* it was an error */
 
-	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
+	if ((err_reply->ctime != request.nonce) ||
+	    !krb5_principal_compare(context, err_reply->server, request.server) ||
+	    !krb5_principal_compare(context, err_reply->client, request.client))
+	    retval = KRB5_KDCREP_MODIFIED;
+	else
+	    retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	/* XXX somehow make error msg text available to application? */
 
@@ -249,8 +250,9 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	goto cleanup;
     }
 
-    /* Encryption type, enctype, */
-    enctype = as_reply->ticket->enc_part.enctype;
+    /* Encryption type, keytype, */
+    etype = as_reply->ticket->enc_part.etype;
+    keytype = krb5_csarray[etype]->system->proto_keytype;
 
     /* and salt */
     if (as_reply->padata) {
@@ -276,7 +278,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     /* it was a kdc_rep--decrypt & check */
     /* Generate the key, if we haven't done so already. */
     if (!decrypt_key) {
-	    if ((retval = (*key_proc)(context, enctype, & salt, keyseed,
+	    if ((retval = (*key_proc)(context, keytype, & salt, keyseed,
 				      &decrypt_key)))
 		goto cleanup;
     }
@@ -317,11 +319,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	retval = KRB5_KDCREP_SKEW;
 	goto cleanup;
     }
- 
-   if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME)
-       krb5_set_time_offsets(context,
-			     as_reply->enc_part2->times.authtime - time_now,
-			     0);
+    
 
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	
@@ -330,6 +328,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 					      as_reply->enc_part2->session,
 					      &creds->keyblock)))
 	goto cleanup;
+    creds->keyblock.etype = as_reply->ticket->enc_part.etype;
 
     creds->times = as_reply->enc_part2->times;
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot

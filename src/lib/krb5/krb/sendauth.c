@@ -137,8 +137,8 @@ krb5_sendauth(context, auth_context,
 		}
 		/* creds.times.endtime = 0; -- memset 0 takes care of this
 					zero means "as long as possible" */
-		/* creds.keyblock.enctype = 0; -- as well as this.
-					zero means no session enctype
+		/* creds.keyblock.keytype = 0; -- as well as this.
+					zero means no session keytype
 					preference */
 		in_creds = &creds;
 	}

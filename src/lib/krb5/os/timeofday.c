@@ -51,7 +51,17 @@ krb5_timeofday(context, timeret)
 	    *timeret = os_ctx->time_offset;
 	    return 0;
     }
+#ifdef _MACINTOSH
+{
+	long usecs;
+	krb5_error_code	kret;
+
+	if (kret = krb5_crypto_us_timeofday(&tval, &usecs))
+		return kret;
+}
+#else
     tval = time(0);
+#endif
     if (tval == (timetype) -1)
 	return (krb5_error_code) errno;
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)

@@ -64,7 +64,8 @@ krb5_keyblock_size(kcontext, arg, sizep)
     /*
      * krb5_keyblock requires:
      *	krb5_int32			for KV5M_KEYBLOCK
-     *	krb5_int32			for enctype
+     *	krb5_int32			for keytype
+     *	krb5_int32			for etype;
      *	krb5_int32			for length
      *	keyblock->length		for contents
      *	krb5_int32			for KV5M_KEYBLOCK
@@ -109,8 +110,12 @@ krb5_keyblock_externalize(kcontext, arg, buffer, lenremain)
 	    /* Our identifier */
 	    (void) krb5_ser_pack_int32(KV5M_KEYBLOCK, &bp, &remain);
 		
-	    /* Our enctype */
-	    (void) krb5_ser_pack_int32((krb5_int32) keyblock->enctype,
+	    /* Our keytype */
+	    (void) krb5_ser_pack_int32((krb5_int32) keyblock->keytype,
+				       &bp, &remain);
+
+	    /* Our etype */
+	    (void) krb5_ser_pack_int32((krb5_int32) keyblock->etype,
 				       &bp, &remain);
 
 	    /* Our length */
@@ -163,9 +168,13 @@ krb5_keyblock_internalize(kcontext, argp, buffer, lenremain)
 	    (keyblock = (krb5_keyblock *) malloc(sizeof(krb5_keyblock)))) {
 	    memset(keyblock, 0, sizeof(krb5_keyblock));
 
-	    /* Get the enctype */
+	    /* Get the keytype */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    keyblock->enctype = (krb5_enctype) ibuf;
+	    keyblock->keytype = (krb5_keytype) ibuf;
+
+	    /* Get the etype */
+	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+	    keyblock->etype = (krb5_enctype) ibuf;
 
 	    /* Get the length */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);

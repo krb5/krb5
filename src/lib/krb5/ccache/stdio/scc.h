@@ -46,7 +46,7 @@
  * some overriding compatibility reasons not to do so.
  */
 
-#define KRB5_SCC_FVNO_1   0x0501	/* krb v5, scc v1 */
+#define KRB5_SCC_FVNO_1 0x0501		/* krb v5, scc v1 */
 #define KRB5_SCC_FVNO_2   0x0502	/* krb v5, scc v2 */
 #define KRB5_SCC_FVNO_3   0x0503	/* krb v5, scc v3 */
 #define KRB5_SCC_FVNO_4   0x0504	/* krb v5, scc v4 */

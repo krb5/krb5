@@ -44,7 +44,7 @@ typedef struct _krb5_tl_data {
  * If this ever changes up the version number and make the arrays be as
  * big as necessary.
  *
- * Currently the first type is the enctype and the second is the salt type.
+ * Currently the first type is the keytype and the second is the salt type.
  */
 typedef struct _krb5_key_data {
     krb5_int16 		  key_data_ver;		/* Version */
@@ -298,10 +298,10 @@ void krb5_dbe_free_contents
 	KRB5_PROTOTYPE((krb5_context,
     		   krb5_db_entry *));
 
-krb5_error_code krb5_dbe_find_enctype
+krb5_error_code krb5_dbe_find_keytype
 	KRB5_PROTOTYPE((krb5_context,
 			krb5_db_entry *,
-			krb5_enctype,
+			krb5_keytype,
 			krb5_int32,
 			krb5_int32,
 			krb5_key_data **));
@@ -346,7 +346,7 @@ krb5_error_code krb5_ser_db_context_init KRB5_PROTOTYPE((krb5_context));
 
 typedef struct _krb5_encrypted_keyblock {
     krb5_magic magic;
-    short enctype;			/* XXX this is SO ugly --- proven */
+    short keytype;			/* XXX this is SO ugly --- proven */
     int length;
     krb5_octet *contents;
 } krb5_encrypted_keyblock;

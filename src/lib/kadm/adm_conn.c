@@ -131,7 +131,11 @@ kadm_get_ccache(kcontext, user, ccname, ccache, client)
 	strcpy (new_cache, "FILE:");
 	GetTempFileName (0, "tkt", 0, new_cache+5);
 #else
+#ifdef _MACINTOSH
+	(void) sprintf(new_cache, "STDIO:admcc");
+#else
 	(void) sprintf(new_cache, kadm_cache_name_fmt, getpid());
+#endif /* _MACINTOSH */
 #endif /* _WINDOWS */
     }
     else
@@ -235,10 +239,8 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
 					  &old_pwsize))
 		goto cleanup;
 	}
-
 	if (kret = krb5_timeofday(kcontext, &jetzt))
 	    goto cleanup;
-
 	if (tlife > 0)
 	    creds->times.endtime = jetzt + tlife;
 	else
@@ -414,7 +416,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	    in_remote.sin_port = htons((u_short) pport);
 
 	    /* Open a tcp socket */
-	    *sockp = socket(PF_INET, SOCK_STREAM, 0);
+	    *sockp = (int) socket(PF_INET, SOCK_STREAM, 0);
 	    if (*sockp < 0) {
 		kret = SOCKET_ERRNO;
 		goto cleanup;
@@ -434,7 +436,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 
 	    /* Find out local address */
 	    addr_len = sizeof(in_local);
-	    if (getsockname(*sockp,
+	    if (getsockname((SOCKET) *sockp,
 			    (struct sockaddr *) &in_local,
 			    &addr_len) < 0) {
 		/* Couldn't get our local address? */
@@ -495,7 +497,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 			      sizeof(in_remote.sin_addr));
 	
 		/* Open a tcp socket */
-		*sockp = socket(PF_INET, SOCK_STREAM, 0);
+		*sockp = (int) socket(PF_INET, SOCK_STREAM, 0);
 		if (*sockp < 0) {
 		    kret = SOCKET_ERRNO;
 		    goto cleanup;
@@ -513,7 +515,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 
 		/* Find out local address */
 		addr_len = sizeof(in_local);
-		if (getsockname(*sockp,
+		if (getsockname((SOCKET)*sockp,
 				(struct sockaddr *) &in_local,
 				&addr_len) < 0) {
 		    kret = SOCKET_ERRNO;

@@ -232,8 +232,8 @@ krb5_error_code encode_krb5_encryption_key(rep, code)
   /* keyvalue[1]	OCTET STRING */
   krb5_addlenfield(rep->length,rep->contents,1,asn1_encode_octetstring);
 
-  /* enctype[0]		INTEGER */
-  krb5_addfield(rep->enctype,0,asn1_encode_integer);
+  /* keytype[0]		INTEGER */
+  krb5_addfield(rep->keytype,0,asn1_encode_integer);
 
   /* EncryptionKey ::= SEQUENCE */
   krb5_makeseq();

@@ -36,8 +36,14 @@
 /* MacTCP headers from Apple */
 #include "MacTCPCommonTypes.h"
 #include "UDPPB.h"
+#include "TCPPB.h"
 #include "AddressXlation.h"		/* MacTCP Domain name resolver decls */
 #include "GetMyIPAddr.h"		/* Like it sez... */
+
+typedef union {
+	UDPiopb		udppb;
+	TCPiopb		tcppb;
+} sockunion;
 
 /* This WinSock-ism is just too ugly to use everywhere.  */
 #define	SOCKET_SET_ERRNO	WSASetLastError
@@ -53,6 +59,8 @@ Cygnus Support (email info@cygnus.com).",
 	UDPbuflen,	/* iMaxUDPDg, max datagram size */
 	0			/* lpVendorInfo, nonexistent */
 };
+
+#define kMaxIPPOpenTries 3
 	
 /* This variable implements a kludge in which select() always says that
    sockets are ready for I/O, but recvfrom() actually implements the
@@ -94,14 +102,16 @@ socket(af, type, protocol)
 {
 	SOCKET  theUDP;
 	short	refNum;
-	UDPiopb		pb;
+//	UDPiopb		pb;
+	sockunion	pb;
 	OSErr	err;
+	int		tries;
 
 	if (af != AF_INET) {
 		SOCKET_SET_ERRNO (EINVAL);
 		return INVALID_SOCKET;
 	}
-	if (type != SOCK_DGRAM) {
+	if (type != SOCK_DGRAM && type != SOCK_STREAM) {
 		SOCKET_SET_ERRNO (EINVAL);
 		return INVALID_SOCKET;
 	}
@@ -116,34 +126,62 @@ socket(af, type, protocol)
 		return INVALID_SOCKET;
 	}
 
-	err = OpenDriver( "\p.IPP", &refNum );
+	err = -1;
+	for(tries=0;tries<kMaxIPPOpenTries && err != noErr;tries++)
+	{
+		err = OpenDriver( "\p.IPP", &refNum );
+	}
 	if (err) {
 		free (theUDP);
 		SOCKET_SET_ERRNO (EIO);
 		return INVALID_SOCKET;
 	}
 	theUDP->fMacTCPRef = refNum;
+	theUDP->fType = type;
+	switch(theUDP->fType)
+	{
+	case SOCK_DGRAM:
+		/* Set up param blocks and create the socket (called a 
+		   stream by MacTCP).  */
+		pb.udppb.ioCRefNum					= theUDP->fMacTCPRef;
+		pb.udppb.csCode						= UDPCreate;
+		pb.udppb.csParam.create.rcvBuff		= theUDP->fRecvBuf;
+		pb.udppb.csParam.create.rcvBuffLen	= UDPbuflen;
+		pb.udppb.csParam.create.notifyProc	= NULL;
+		pb.udppb.csParam.create.localPort		= 0;
+	
+		err = PBControl( (ParamBlockRec *) &pb.udppb, false );
+		if (err) {
+			free (theUDP);
+			SOCKET_SET_ERRNO (EIO);
+			return INVALID_SOCKET;
+		}
+		theUDP->fStream = (unsigned long)pb.udppb.udpStream;
+	
+		theUDP->connect_addr.sin_family = 0;
+		theUDP->connect_addr.sin_port = 0;
+		theUDP->connect_addr.sin_addr.s_addr = 0;
+		break;
 
-	/* Set up param blocks and create the socket (called a 
-	   stream by MacTCP).  */
-	pb.ioCRefNum					= theUDP->fMacTCPRef;
-	pb.csCode						= UDPCreate;
-	pb.csParam.create.rcvBuff		= theUDP->fRecvBuf;
-	pb.csParam.create.rcvBuffLen	= UDPbuflen;
-	pb.csParam.create.notifyProc	= NULL;
-	pb.csParam.create.localPort		= 0;
-
-	err = PBControl( (ParamBlockRec *) &pb, false );
-	if (err) {
-		free (theUDP);
-		SOCKET_SET_ERRNO (EIO);
-		return INVALID_SOCKET;
+	case SOCK_STREAM:
+		pb.tcppb.ioCRefNum = theUDP->fMacTCPRef;
+		pb.tcppb.csCode = TCPCreate;
+		pb.tcppb.csParam.create.rcvBuff = theUDP->fRecvBuf;
+		pb.tcppb.csParam.create.rcvBuffLen = UDPbuflen;
+		pb.tcppb.csParam.create.notifyProc = NULL;
+		err = PBControl((ParamBlockRec *)&pb,false);
+		if (err) {
+			free(theUDP);
+			SOCKET_SET_ERRNO (EIO);
+			return INVALID_SOCKET;
+		}
+		theUDP->fStream = (unsigned long)pb.tcppb.tcpStream;
+	
+		theUDP->connect_addr.sin_family = 0;
+		theUDP->connect_addr.sin_port = 0;
+		theUDP->connect_addr.sin_addr.s_addr = 0;
+		break;
 	}
-	theUDP->fStream = (unsigned long)pb.udpStream;
-
-	theUDP->connect_addr.sin_family = 0;
-	theUDP->connect_addr.sin_port = 0;
-	theUDP->connect_addr.sin_addr.s_addr = 0;
 	return theUDP;
 }
 
@@ -152,14 +190,29 @@ int
 closesocket (theUDP)
 	SOCKET theUDP;
 {
-	UDPiopb		pb;
+//	UDPiopb		pb;
+	sockunion	pb;
 
-	if (theUDP->fStream) {
-		pb.ioCRefNum	= theUDP->fMacTCPRef;
-		pb.csCode		= UDPRelease;
-		pb.udpStream	= (StreamPtr) theUDP->fStream;
-
-		(void) PBControl( (ParamBlockRec *) &pb, false );
+	switch(theUDP->fType)
+	{
+	case SOCK_DGRAM:
+		if (theUDP->fStream) {
+			pb.udppb.ioCRefNum	= theUDP->fMacTCPRef;
+			pb.udppb.csCode		= UDPRelease;
+			pb.udppb.udpStream	= (StreamPtr) theUDP->fStream;
+	
+			(void) PBControl( (ParamBlockRec *) &pb.udppb, false );
+		}
+		break;
+	case SOCK_STREAM:
+		if (theUDP->fStream) {
+			pb.tcppb.ioCRefNum	= theUDP->fMacTCPRef;
+			pb.tcppb.csCode		= TCPRelease;
+			pb.tcppb.tcpStream	= (StreamPtr) theUDP->fStream;
+	
+			(void) PBControl( (ParamBlockRec *) &pb.tcppb, false );
+		}
+		break;
 	}
 
 	free(theUDP);
@@ -323,22 +376,55 @@ recvfrom (theUDP, buf, len, flags, from_param, fromlen)
    sendto, recvfrom.  We happily fake this too...   */
 
 int
-connect (s, to, tolen)
+connect (s, addr, tolen)
 	SOCKET s;
-	struct sockaddr *to;
+	struct sockaddr *addr;
 	int tolen;
 {
-
+	sockunion pb;
+	OSErr err;
+	
 	if (tolen != sizeof (struct sockaddr_in)) {
 		SOCKET_SET_ERRNO (EINVAL);
 		return SOCKET_ERROR;
 	}
-	if (to->sin_family != AF_INET) {
+	if (addr->sin_family != AF_INET) {
 		SOCKET_SET_ERRNO (EINVAL);
 		return SOCKET_ERROR;
 	}
 
-	s->connect_addr = *to;		/* Save the connect address */
+	s->connect_addr = *addr;		/* Save the connect address */
+	switch(s->fType)
+	{
+	case SOCK_DGRAM:
+		break;
+	case SOCK_STREAM:
+		pb.tcppb.ioCRefNum = s->fMacTCPRef;
+		pb.tcppb.csCode = TCPActiveOpen;
+		pb.tcppb.csParam.open.validityFlags = timeoutValue | timeoutAction;
+		pb.tcppb.csParam.open.ulpTimeoutValue = 60 /* seconds */;
+		pb.tcppb.csParam.open.ulpTimeoutAction = 1 /* 1:abort 0:report */;
+		pb.tcppb.csParam.open.commandTimeoutValue = 0;
+		pb.tcppb.csParam.open.remoteHost = addr->sin_addr.s_addr;
+		pb.tcppb.csParam.open.remotePort = addr->sin_port;
+		pb.tcppb.csParam.open.localHost = 0;
+		pb.tcppb.csParam.open.localPort = 0; /* we'll get the port back later */
+		pb.tcppb.csParam.open.dontFrag = 0;
+		pb.tcppb.csParam.open.timeToLive = 0;
+		pb.tcppb.csParam.open.security = 0;
+		pb.tcppb.csParam.open.optionCnt = 0;
+		pb.tcppb.tcpStream = s->fStream;
+		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
+		if (err) {
+			SOCKET_SET_ERRNO (EINVAL);
+			return SOCKET_ERROR;
+		}
+		
+		s->connect_addr.sin_addr.s_addr = pb.tcppb.csParam.open.localHost;
+		s->connect_addr.sin_port = pb.tcppb.csParam.open.localPort;
+
+		break;
+	}
 	return 0;
 }
 
@@ -350,13 +436,32 @@ recv (theUDP, buf, len, flags)
 	int len; 
 	int flags;
 {
+	sockunion pb;
 	struct sockaddr_in from;
 	int fromlen;
+	OSErr err;
 
-	fromlen = sizeof(from);
-	return recvfrom (theUDP, buf, len, flags, &from, &fromlen);
-	/* We could check if the packet is from the right place, but 
-	   it isn't clear this is required, so punt.  */
+	switch(theUDP->fType)
+	{
+	case SOCK_DGRAM:
+		fromlen = sizeof(from);
+		return recvfrom (theUDP, buf, len, flags, &from, &fromlen);
+		/* We could check if the packet is from the right place, but 
+		   it isn't clear this is required, so punt.  */
+	case SOCK_STREAM:
+		pb.tcppb.ioCRefNum = theUDP->fMacTCPRef;
+		pb.tcppb.csCode = TCPRcv;
+		pb.tcppb.csParam.receive.commandTimeoutValue = 0 /* infinity */;
+		pb.tcppb.csParam.receive.rcvBuff = buf;
+		pb.tcppb.csParam.receive.rcvBuffLen = len;
+		pb.tcppb.tcpStream = theUDP->fStream;
+		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
+		if (err) {
+			SOCKET_SET_ERRNO (EIO);
+			return SOCKET_ERROR;
+		}
+		return pb.tcppb.csParam.receive.rcvBuffLen;
+	}
 }
 
 /* Send a packet to a UDP peer.  */
@@ -367,8 +472,36 @@ send (theUDP, buf, len, flags)
 	const int len; 
 	int flags;
 {
-	return sendto (theUDP, buf, len, flags,
-		       &theUDP->connect_addr, sizeof(theUDP->connect_addr));
+	OSErr		err;
+	sockunion	pb;
+	wdsEntry	wds[2];
+
+	switch(theUDP->fType)
+	{
+	case SOCK_DGRAM:
+		return sendto (theUDP, buf, len, flags,
+			       &theUDP->connect_addr, sizeof(theUDP->connect_addr));
+
+	case SOCK_STREAM:
+		wds[0].length	= len;
+		wds[0].ptr		= (char *) buf;
+		wds[1].length	= 0;
+		pb.tcppb.ioCRefNum = theUDP->fMacTCPRef;
+		pb.tcppb.csCode = TCPSend;
+		pb.tcppb.csParam.send.validityFlags = timeoutValue | timeoutAction;
+		pb.tcppb.csParam.send.ulpTimeoutValue = 60 /* seconds */;
+		pb.tcppb.csParam.send.ulpTimeoutAction = 1 /* 1:abort 0:report */;
+		pb.tcppb.csParam.send.pushFlag = true;
+		pb.tcppb.csParam.send.urgentFlag = false;
+		pb.tcppb.csParam.send.wdsPtr = (Ptr) wds;
+		pb.tcppb.tcpStream = theUDP->fStream;
+		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
+		if (err) {
+			SOCKET_SET_ERRNO (EIO);
+			return SOCKET_ERROR;
+		}
+		return len;
+	}
 }
 
 /*
@@ -427,6 +560,13 @@ gethostbyname (char *hostname)
 	if (err != noErr) {
 		return 0;
 		}
+	/* take off a period from the end of the connonical host name */
+	{
+	int hostnamelen = strlen(host.cname);
+		if (host.cname[hostnamelen-1] == '.')
+			host.cname[hostnamelen-1] = 0;
+	}
+	
 	
 	/* Build result in hostent structure, which we will return to caller.  */
 	
@@ -506,7 +646,7 @@ getmyipaddr ()
 	int err;
 	
 	sock = socket (AF_INET, SOCK_DGRAM, 0);
-	if (!sock)
+	if (sock == INVALID_SOCKET)
 		return 0;
 	pb.ioCRefNum	= sock->fMacTCPRef;
 	pb.csCode		= ipctlGetAddr;
@@ -528,14 +668,48 @@ getmyipaddr ()
 	ipaddr_ptrs[0] = (char*) ourAddr.s_addr;
 	ipaddr_ptrs[1] = 0;
 
+	closesocket (sock);
+
 	return &result;
 }
 
 
+#define MACHOSTNAME "unknownmac"
+
 int
 gethostname(char *name, int namelen)
 {
-	return -1;
+short int					refnum;
+int							err;
+ip_addr						ipaddr;
+struct hostent				*hp;
+struct GetAddrParamBlock	pb;
+
+/* get my ip address from mactcp */
+	err = OpenDriver( "\p.IPP", &refnum );
+	pb.ioCRefNum	= refnum;
+	pb.csCode		= ipctlGetAddr;
+	err = PBControl( (ParamBlockRec *) &pb, false );
+	if (err) {
+		SOCKET_SET_ERRNO (EIO);
+		return 0;
+	}
+/*jfm we never close this driver */
+
+/* from that address find my name by asking the nameserver to resolve
+ * the name from an address
+ */
+	ipaddr = pb.ourAddress;
+	hp = gethostbyaddr((char*) &ipaddr, sizeof(ip_addr), AF_INET);
+	if( hp == NULL)  
+		strcpy( name, MACHOSTNAME);				/* give the default name */
+	else
+	{
+		strncpy( name, hp->h_name, namelen);	/* use the name given */
+		name[namelen-1] = 0;					/* terminate the string just in case */
+	}
+
+	return 0;
 }
 
 #if 0
@@ -560,7 +734,7 @@ gethostname(char *name, int namelen)
 	struct sockaddr_in hostaddr;
 	
 	sock = socket (AF_INET, SOCK_DGRAM, 0);
-	if (!sock)
+	if (sock == INVALID_SOCKET)
 		return -1;
 	pb.ioCRefNum	= sock->fMacTCPRef;
 	pb.csCode		= ipctlGetAddr;
@@ -585,5 +759,24 @@ gethostname(char *name, int namelen)
 }
 
 #endif
+
+int
+getsockname(s, name, namelen)
+	SOCKET s;
+	struct sockaddr_in *name;
+	int *namelen;
+{
+
+	if (s == NULL)
+		return(EINVAL);
+
+	if (*namelen < sizeof(struct sockaddr_in))
+		return(EINVAL);
+
+	*namelen = sizeof(struct sockaddr_in);
+	*name = s->connect_addr;
+
+	return(0);
+}
 
 #endif /* HAVE_MACSOCK_H */

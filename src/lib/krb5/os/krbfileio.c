@@ -96,7 +96,7 @@ krb5_sync_disk_file(context, fp)
     FILE *fp;
 {
     fflush(fp);
-#ifndef MSDOS_FILESYSTEM
+#if !defined(MSDOS_FILESYSTEM) && !defined(_MACINTOSH)
     if (fsync(fileno(fp))) {
         return errno;
     }
