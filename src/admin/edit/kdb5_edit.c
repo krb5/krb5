@@ -43,12 +43,12 @@ static char rcsid_kdb_edit_c[] =
 #include <ss/ss.h>
 #include <stdio.h>
 
-#include "./kdb5_edit.h"
-
 struct saltblock {
     int salttype;
     krb5_data saltdata;
 };
+
+#include "./kdb5_edit.h"
 
 #define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
 
