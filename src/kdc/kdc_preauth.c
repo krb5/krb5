@@ -28,17 +28,17 @@
 #include "extern.h"
 #include <stdio.h>
 
-typedef krb5_error_code (verify_proc)
+typedef krb5_error_code (*verify_proc)
     KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
 		    krb5_kdc_req *request,
 		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
 
-typedef krb5_error_code (edata_proc)
+typedef krb5_error_code (*edata_proc)
     KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
 		    krb5_pa_data *data));
 
-typedef krb5_error_code (return_proc)
+typedef krb5_error_code (*return_proc)
     KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
@@ -49,14 +49,27 @@ typedef krb5_error_code (return_proc)
 typedef struct _krb5_preauth_systems {
     int		type;
     int		flags;
-    edata_proc	*get_edata;
-    verify_proc	*verify_padata;
-    return_proc *return_padata;
+    edata_proc	get_edata;
+    verify_proc	verify_padata;
+    return_proc return_padata;
 } krb5_preauth_systems;
 
-static verify_proc verify_enc_timestamp;
-static edata_proc get_etype_info;
-static return_proc return_pw_salt;
+static krb5_error_code verify_enc_timestamp
+    KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
+		    krb5_kdc_req *request,
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
+
+static krb5_error_code get_etype_info
+    KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    krb5_pa_data *data));
+static krb5_error_code return_pw_salt
+    KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
+		    krb5_db_entry *client,
+		    krb5_kdc_req *request, krb5_kdc_rep *reply,
+		    krb5_key_data *client_key,
+		    krb5_keyblock *encrypting_key,
+		    krb5_pa_data **send_pa));
 
 /*
  * Preauth property flags

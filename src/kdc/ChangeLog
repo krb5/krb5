@@ -1,3 +1,8 @@
+Thu Nov 30 20:57:11 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* kdc_preauth.c: #@&^(!! Ultrix cc sucks.  Typedef to function
+		pointer rather than function prototype to avoid lossage.
+
 Wed Nov 29 13:31:39 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* do_tgs_req.c (process_tgs_req): Removed extra eblock argument
