@@ -1,3 +1,10 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Delete references to
+	k4_glue.c etc.
+	(clean): Remove t_quad and t_pcbc object files and test programs.
+	* k4_glue.c: Deleted.
+
 2001-04-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_pcbc.c: New file.

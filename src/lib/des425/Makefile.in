@@ -41,8 +41,7 @@ STLIBOBJS=cksum.o	\
 	str_to_key.o	\
 	unix_time.o     \
 	util.o		\
-	weak_key.o	\
-	k4_glue.o
+	weak_key.o
 
 
 OBJS=	$(OUTPRE)cksum.$(OBJEXT)	\
@@ -58,8 +57,7 @@ OBJS=	$(OUTPRE)cksum.$(OBJEXT)	\
 	$(OUTPRE)str_to_key.$(OBJEXT)	\
 	$(OUTPRE)unix_time.$(OBJEXT)	\
 	$(OUTPRE)util.$(OBJEXT)		\
-	$(OUTPRE)weak_key.$(OBJEXT)	\
-	$(OUTPRE)k4_glue.$(OBJEXT)
+	$(OUTPRE)weak_key.$(OBJEXT)
 
 SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/des.c		\
@@ -74,8 +72,7 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/str_to_key.c	\
 	$(srcdir)/unix_time.c   \
 	$(srcdir)/util.c	\
-	$(srcdir)/weak_key.c	\
-	$(srcdir)/k4_glue.c
+	$(srcdir)/weak_key.c
 
 all-unix:: all-liblinks
 all-mac:: $(OBJS)
@@ -104,7 +101,9 @@ check-unix:: verify t_quad t_pcbc
 check-windows::
 
 clean:: 
-	$(RM) $(OUTPRE)verify$(EXEEXT) $(OUTPRE)verify.$(OBJEXT)
+	$(RM) $(OUTPRE)verify$(EXEEXT) $(OUTPRE)verify.$(OBJEXT) \
+		$(OUTPRE)t_quad$(EXEEXT) $(OUTPRE)t_quad.$(OBJEXT) \
+		$(OUTPRE)t_pcbc$(EXEEXT) $(OUTPRE)t_pcbc.$(OBJEXT)
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
