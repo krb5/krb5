@@ -39,8 +39,6 @@
 #include "kadm5_defs.h"
 #include "adm.h"
 
-#define	MAX_BIND_TRIES	5
-
 /* linux doesn't have SOMAXCONN */
 #ifndef SOMAXCONN
 #define SOMAXCONN 5
@@ -87,6 +85,7 @@ static const char *net_no_hostname_fmt = "%s: cannot get our host name (%s).\n";
 static const char *net_no_hostent_fmt = "%s: cannot get our host entry (%s).\n";
 static const char *net_no_servent_fmt = "%s: cannot get service entry for %s (%s).\n";
 static const char *net_sockerr_fmt = "%s: cannot open network socket (%s).\n";
+static const char *net_soerr_fmt = "%s: cannot set socket options (%s).\n";
 static const char *net_binderr_fmt = "%s: cannot bind to network address (%s).\n";
 
 static const char *net_select_fmt = "select failed";
@@ -401,8 +400,6 @@ net_init(kcontext, debug_level, port)
     struct hostent	*our_hostent;
     struct servent	*our_servent;
     char		*realm;
-    int			bind_tries;
-    int			bind_sleep;
 
     net_debug_level = debug_level;
     DPRINT(DEBUG_CALLS, net_debug_level, ("* net_init(port=%d)\n", port));
@@ -591,35 +588,35 @@ net_init(kcontext, debug_level, port)
 	goto done;
     }
 
-    /* Bind socket */
-    bind_sleep = 1;
-    bind_tries = 0;
-    do {
-	if (bind(net_listen_socket,
-		 (struct sockaddr *) &net_server_addr,
-		 sizeof(net_server_addr)) < 0) {
+    /* If we have a non-default port number, then allow reuse of address */
+    if (net_server_addr.sin_port != htons(KRB5_ADM_DEFAULT_PORT)) {
+	int	allowed;
+
+	allowed = 1;
+	if (setsockopt(net_listen_socket,
+		       SOL_SOCKET,
+		       SO_REUSEADDR,
+		       (char *) &allowed,
+		       sizeof(allowed)) < 0) {
 	    kret = errno;
-	    if (errno != EADDRINUSE) {
-		fprintf(stderr, net_binderr_fmt, programname,
-			error_message(kret));
-		goto done;
-	    }
-	    else {
-		bind_tries++;
-		DPRINT(DEBUG_HOST, net_debug_level,
-		       ("- bind failed sleeping for %d seconds\n",
-			bind_sleep));
-		sleep(bind_sleep);
-		bind_sleep = bind_sleep << 1;
-	    }
+	    fprintf(stderr, net_soerr_fmt, programname, error_message(kret));
+	    goto done;
 	}
-	else {
-	    DPRINT(DEBUG_HOST, net_debug_level,
-		   ("- bound socket %d on port\n", net_listen_socket));
-	    kret = 0;
-	    break;
-	}
-    } while (bind_tries < MAX_BIND_TRIES);
+    }
+
+    /* Bind socket */
+    if (bind(net_listen_socket,
+	     (struct sockaddr *) &net_server_addr,
+	     sizeof(net_server_addr)) < 0) {
+	kret = errno;
+	fprintf(stderr, net_binderr_fmt, programname, error_message(kret));
+	goto done;
+    }
+    else {
+	DPRINT(DEBUG_HOST, net_debug_level,
+	       ("- bound socket %d on port\n", net_listen_socket));
+	kret = 0;
+    }
 #else	/* KRB5_USE_INET */
     /* Don't know how to do anything else. */
     kret = ENOENT;
