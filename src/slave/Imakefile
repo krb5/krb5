@@ -23,7 +23,11 @@ SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 all::	kprop kpropd
 
 NormalProgramTarget(kprop,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallAdminProgram(kprop)
+
 NormalProgramTarget(kpropd,$(SERVEROBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallAdminProgram(kpropd)
+
 SaberProgramTarget(kprop, $(CLIENTSRCS), $(CLIENTOBJS), 
 	$(DEPLIBS) $(LOCAL_LIBRARIES),)
 SaberProgramTarget(kpropd, $(SERVERSRCS), $(SERVEROBJS), 

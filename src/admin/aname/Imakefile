@@ -11,4 +11,4 @@
 DEPLIBS = $(OSDEPLIB)
 LOCAL_LIBRARIES = $(KLIBLOC) -l$(OSLIB) $(COMERRLIB) $(DBMLIB)
 
-SimpleProgramTarget(kdb5_anadd)
+Krb5AdminProgramTarget(kdb5_anadd)

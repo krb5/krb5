@@ -12,4 +12,4 @@
 LOCAL_LIBRARIES = $(KLIB)
        INCLUDES = -I..
 
-SimpleProgramTarget(sim_server)
+SimpleTestProgramTarget(sim_server)

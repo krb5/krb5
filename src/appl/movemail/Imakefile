@@ -16,4 +16,4 @@ LOCAL_LIBRARIES = $(KLIB) $(HESLIBS)
         DEFINES = -DKERBEROS -DKRB5 -DMAIL_USE_POP $(OSDEFS) $(HESDEFS)
          OSDEFS = -DMAIL_USE_FLOCK -DBSD
 
-SimpleProgramTarget(movemail)
+SimpleTestProgramTarget(movemail)

@@ -11,4 +11,4 @@
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
-SimpleProgramTarget(kdb5_stash)
+Krb5AdminProgramTarget(kdb5_stash)

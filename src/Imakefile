@@ -26,6 +26,9 @@ MakeSubdirs($(SUBDIRS))
 
 depend:: includes
 
+install::
+	$(MAKE) $(MFLAGS) install.man
+
 /**/# rebuild the Makefiles in the master source tree
 mastermakefiles::
 	-$(MV) Makefile Makefile.bak

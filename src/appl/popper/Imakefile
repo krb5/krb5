@@ -69,9 +69,11 @@ SPOP_SRCS	=	pop_enter.c
 all:: popper
 
 NormalProgramTarget(popper,$(OBJS),$(DEP_LIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallServerProgram(popper)
 
 #if 0
 NormalProgramTarget(spop,$(SPOP_OBJS),$(DEP_LIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallServerProgram(spop)
 #endif
 
 DependTarget()

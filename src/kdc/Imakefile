@@ -55,6 +55,7 @@ kdc5_err.c: kdc5_err.et
 
 NormalProgramTarget(krb5kdc,$(OBJS),$(KDBDEPLIB) $(DEPKLIB), \
 	$(KDBLIB) $(KLIB) $(K4LIB),)
+Krb5InstallServerProgram(krb5kdc)
 
 clean::
 	$(RM) kdc5_err.h kdc5_err.c

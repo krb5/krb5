@@ -11,4 +11,4 @@
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
 
-SimpleProgramTarget(kdc5_hammer)
+SimpleTestProgramTarget(kdc5_hammer)

@@ -24,6 +24,7 @@ clean::
 	$(RM) kdb5_ed_ct.c
 
 NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallAdminProgram(kdb5_edit)
 
 SaberProgramTarget(kdb5_edit,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES),)
 

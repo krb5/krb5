@@ -11,4 +11,4 @@
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
-SimpleProgramTarget(kdb5_verify)
+SimpleTestProgramTarget(kdb5_verify)
