@@ -1,7 +1,7 @@
 /*
  * pty_cleanup: Kill processes associated with pty.
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * (C)Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  *
  * 
  * Permission to use, copy, modify, and distribute this software and
@@ -28,7 +28,8 @@ long pty_cleanup (slave, pid, update_utmp)
 {
     int retval, fd;
     
-    pty_update_utmp(PTY_DEAD_PROCESS,0,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
+    if (update_utmp)
+	pty_update_utmp(PTY_DEAD_PROCESS,0,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
     
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);

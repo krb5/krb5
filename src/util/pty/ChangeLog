@@ -1,11 +1,17 @@
+
 Sat Jan 27 01:13:34 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* void_assoc.c (ptyint_void_association): if we don't have
 	TIOCNOTTY (HP/UX 9 for example) don't try to use it.
 
+Fri Jan 26 00:26:37 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* cleanup.c (pty_cleanup): Update utmp only if update_utmp is true.
+
 Tue Jan 16 13:52:22 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* void_assoc.c (ptyint_void_association): Move setsid call from open_ctty to void_association.
+	* void_assoc.c (ptyint_void_association): Move setsid call from
+        open_ctty to void_association.
 
 	* logwtmp.c (pty_logwtmp): Pass user argument to update_wtmp.
 
