@@ -1,3 +1,7 @@
+2002-06-13  Jen Selby <jenselby@mit.edu>
+
+	* klist.M: updated the manpage to show new ticket flags
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* klist.c: Do not pull in winsock.h since we already pull in
