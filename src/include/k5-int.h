@@ -550,13 +550,13 @@ struct krb5_keyhash_provider {
     void (*hash_size) (size_t *output);
 
     krb5_error_code (*hash) (krb5_const krb5_keyblock *key,
-			     krb5_keyusage usage,
+			     krb5_keyusage keyusage,
 			     krb5_const krb5_data *ivec,
 			     krb5_const krb5_data *input,
 			     krb5_data *output);
 
     krb5_error_code (*verify) (krb5_const krb5_keyblock *key,
-			       krb5_keyusage usage,
+			       krb5_keyusage keyusage,
 			       krb5_const krb5_data *ivec,
 			       krb5_const krb5_data *input,
 			       krb5_const krb5_data *hash,

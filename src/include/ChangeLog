@@ -1,3 +1,8 @@
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-int.h: Do not use "usage" in argument names in
+	krb5_keyhash_provider functions.
+
 2001-10-24  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Add  declaration for  arcfour enc_provider and  md5
