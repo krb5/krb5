@@ -1,3 +1,7 @@
+2002-05-24 Alexandra Ellwood <lxs@mit.edu>
+	* init_os_ctx.c: krb4 needs to get the os config files so it can use
+    the profile too.  Define these functions on Mac OS X now.
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
 	* init_os_ctx.c: Removed use of FSSpecs because these cause serious
 	performance problems on Mac OS X.  We now search paths the same way

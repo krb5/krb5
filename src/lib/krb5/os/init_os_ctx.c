@@ -393,7 +393,6 @@ krb5_get_profile (ctx, profile)
     return retval;
 }	
 
-#if !TARGET_OS_MAC
 
 krb5_error_code
 krb5_set_config_files(ctx, filenames)
@@ -430,7 +429,6 @@ krb5_free_config_files(filenames)
     free_filespecs(filenames);
 }
 
-#endif /* macintosh */
 
 krb5_error_code
 krb5_secure_config_files(ctx)
