@@ -1,0 +1,45 @@
+## config/pre.in
+## common prefix for all Makefile.in in the Kerberos V5 tree.
+
+BUILDTOP = @BUILDTOP@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+CC = @CC@
+CCOPTS = @CCOPTS@
+LIBS = @LIBS@
+KRB5ROOT= @KRB5ROOT@
+
+KRB5MANROOT = $(KRB5ROOT)/man
+ADMIN_BINDIR = $(KRB5ROOT)/admin
+SERVER_BINDIR = $(KRB5ROOT)/sbin
+CLIENT_BINDIR = $(KRB5ROOT)/bin
+ADMIN_MANDIR = $(KRB5MANROOT)/man8
+SERVER_MANDIR = $(KRB5MANROOT)/man8
+CLIENT_MANDIR = $(KRB5MANROOT)/man1
+FILE_MANDIR = $(KRB5MANROOT)/man5
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+KRB5_INCDIR = $(KRB5ROOT)/include
+KRB5_INCSUBDIRS = \
+	$(KRB5_INCDIR)/krb5 \
+	$(KRB5_INCDIR)/asn.1 \
+	$(KRB5_INCDIR)/kerberosIV
+
+
+RM = rm -f
+CP  = cp
+MV = mv
+CHMOD=chmod
+RANLIB = @RANLIB@
+ARCHIVE = @ARCHIVE@
+ARADD = @ARADD@
+LN = @LN_S@
+AWK = @AWK@
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+
+SRCTOP = $(srcdir)/$(BUILDTOP)
+SUBDIRS = @SUBDIRS@
+
+TOPLIBD = $(BUILDTOP)/lib

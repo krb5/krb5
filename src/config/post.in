@@ -1,0 +1,8 @@
+# config/post.in
+# put all:: first just in case no other rules occur here
+#
+all::
+
+clean::
+	if test -n "$(OBJS)" ; then $(RM) $(OBJS) fi
+
