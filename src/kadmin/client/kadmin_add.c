@@ -29,22 +29,21 @@
 #include "com_err.h"
 
 #include <sys/param.h>
-#include "k5-int.h"
+
+#include "krb5.h"
 
 void decode_kadmind_reply();
 int print_status_message();
 
 krb5_error_code
-kadm_add_user(context, my_creds, rep_ret, local_addr, foreign_addr, 
-	      local_socket, seqno, oper_type, principal)
-    krb5_context context;
-    krb5_creds *my_creds;
-    krb5_ap_rep_enc_part *rep_ret;
-    krb5_address *local_addr, *foreign_addr;
-    int *local_socket;
-    krb5_int32 *seqno;
-    int oper_type;
-    char *principal;
+kadm_add_user(context, auth_context, my_creds, local_socket, 
+	      oper_type, principal)
+    krb5_context 	  context;
+    krb5_auth_context	* auth_context;
+    krb5_creds 		* my_creds;
+    int 		* local_socket;
+    int 		  oper_type;
+    char 		* principal;
 {
     krb5_data msg_data, inbuf;
     kadmin_requests rd_priv_resp;
@@ -52,6 +51,7 @@ kadm_add_user(context, my_creds, rep_ret, local_addr, foreign_addr,
     char *password;
     int pwsize;
     int count;
+    krb5_replay_data replaydata;
     krb5_error_code retval;     /* return code */
     
     if ((inbuf.data = (char *) calloc(1, 3 + sizeof(username))) == (char *) 0) {
@@ -86,16 +86,8 @@ kadm_add_user(context, my_creds, rep_ret, local_addr, foreign_addr,
     (void) memcpy( inbuf.data + 3, username, strlen(username));
     inbuf.length = strlen(username) + 3;
     
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			       ETYPE_DES_CBC_CRC,
-			       &my_creds->keyblock, 
-			       local_addr, 
-			       foreign_addr,
-			       *seqno,
-			       KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			       0,
-			       0,
-			       &msg_data))) {
+    if ((retval = krb5_mk_priv(context, auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during Second Message Encoding: %s!\n",
 		error_message(retval));
 	free(inbuf.data);
@@ -117,15 +109,8 @@ kadm_add_user(context, my_creds, rep_ret, local_addr, foreign_addr,
         return(1);
     }
     
-    if (retval = krb5_rd_priv(context, &inbuf,
-			       &my_creds->keyblock,
-			       foreign_addr, 
-			       local_addr,
-			       rep_ret->seq_number, 
-			       KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			       0,
-			       0,
-			       &msg_data)) {
+    if (retval = krb5_rd_priv(context, auth_context, &inbuf,
+			      &msg_data, &replaydata)) {
         fprintf(stderr, "Error during Second Read Decoding :%s!\n", 
 		error_message(retval));
 	free(inbuf.data);
@@ -207,16 +192,8 @@ kadm_add_user(context, my_creds, rep_ret, local_addr, foreign_addr,
 
 #endif /* MACH_PASS */
 
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			       ETYPE_DES_CBC_CRC,
-			       &my_creds->keyblock, 
-			       local_addr, 
-			       foreign_addr,
-			       *seqno,
-			       KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			       0,
-			       0,
-			       &msg_data))) {
+    if ((retval = krb5_mk_priv(context, auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during Second Message Encoding: %s!\n",
 		error_message(retval));
 	free(inbuf.data);
@@ -238,15 +215,8 @@ kadm_add_user(context, my_creds, rep_ret, local_addr, foreign_addr,
         retval = 1;
     }
     
-    if ((retval = krb5_rd_priv(context, &inbuf,
-			       &my_creds->keyblock,
-			       foreign_addr,
-			       local_addr,
-			       rep_ret->seq_number,
-			       KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			       0,
-			       0,
-			       &msg_data))) {
+    if ((retval = krb5_rd_priv(context, auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during Final Read Decoding :%s!\n",
 		error_message(retval));
 	free(inbuf.data);

@@ -35,7 +35,7 @@
 #define MAXPATHLEN 1024
 #endif
 
-#include "k5-int.h"
+#include "krb5.h"
 
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,
@@ -83,9 +83,7 @@ main(argc,argv)
     kadmin_requests rd_priv_resp;
 
     krb5_context context;
-    krb5_checksum send_cksum;
     krb5_data msg_data, inbuf;
-    krb5_int32 seqno;
     char buffer[255];
     char command_type[120];
     char princ_name[120];
@@ -93,6 +91,9 @@ main(argc,argv)
     int option;
     int oper_type;
     int nflag = 0;
+
+    krb5_auth_context * new_auth_context;
+    krb5_replay_data replaydata;
 
     krb5_init_context(&context);
     krb5_init_ets(context);
@@ -209,49 +210,34 @@ main(argc,argv)
     foreign_addr.length = SIZEOF_INADDR ;
     foreign_addr.contents = (krb5_octet *) &remote_sin.sin_addr;
 
-		/* compute checksum, using CRC-32 */
-    if (!(send_cksum.contents = (krb5_octet *)
-	malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
-        fprintf(stderr, "Insufficient Memory while Allocating Checksum!\n");
-        (void) krb5_cc_destroy(context, cache);
-        exit(1);
-    }
-
-		/* choose some random stuff to compute checksum from */
-	if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
-					ADM5_ADM_VERSION,
-					strlen(ADM5_ADM_VERSION),
-					0,
-					0, /* if length is 0, crc-32 doesn't
-                                               use the seed */
-					&send_cksum)) {
-        fprintf(stderr, "Error while Computing Checksum: %s!\n",
-		error_message(retval));
-	free(send_cksum.contents);
-        (void) krb5_cc_destroy(context, cache);
-        exit(1);
-    }
+    krb5_auth_con_init(context, &new_auth_context);
+    krb5_auth_con_setflags(context, new_auth_context,
+                           KRB5_AUTH_CONTEXT_RET_SEQUENCE);
+  
+    krb5_auth_con_setaddrs(context, new_auth_context,
+                           &local_addr, &foreign_addr);
 
     /* call Kerberos library routine to obtain an authenticator,
        pass it over the socket to the server, and obtain mutual
        authentication. */
 
-    if ((retval = krb5_sendauth(context, (krb5_pointer) &local_socket,
+    inbuf.data = ADM5_ADM_VERSION;
+    inbuf.length = strlen(ADM5_ADM_VERSION);
+
+    if ((retval = krb5_sendauth(context, &new_auth_context,
+			(krb5_pointer) &local_socket,
 			ADM_CPW_VERSION, 
 			my_creds.client, 
 			my_creds.server,
 			AP_OPTS_MUTUAL_REQUIRED,
-			&send_cksum,
+			&inbuf,
 			&my_creds,           
 			0,
-			&seqno, 
-			0,           /* don't need a subsession key */
 			&err_ret,
 			&rep_ret, 
 			NULL))) {
 	fprintf(stderr, "Error while performing sendauth: %s!\n",
 			error_message(retval));
-	free(send_cksum.contents);
 	exit(1);
     }
 
@@ -259,21 +245,18 @@ main(argc,argv)
     if (retval = krb5_read_message(context, &local_socket, &inbuf)){
 	fprintf(stderr, " Read Message Error: %s!\n",
 			error_message(retval));
-	free(send_cksum.contents);
         exit(1);
     }
 
     if ((inbuf.length != 2) || (inbuf.data[0] != KADMIND) ||
 			(inbuf.data[1] != KADMSAG)){
 	fprintf(stderr, " Invalid ack from admin server.!\n");
-	free(send_cksum.contents);
         exit(1);
     }
     free(inbuf.data);
 
     if ((inbuf.data = (char *) calloc(1, 2)) == (char *) 0) {
 	fprintf(stderr, "No memory for command!\n");
-	free(send_cksum.contents);
         exit(1);
     }
 
@@ -281,20 +264,11 @@ main(argc,argv)
     inbuf.data[1] = 0xff;
     inbuf.length = 2;
 
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			ETYPE_DES_CBC_CRC,
-			&my_creds.keyblock, 
-			&local_addr, 
-			&foreign_addr,
-			seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_mk_priv(context, new_auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
 	fprintf(stderr, "Error during First Message Encoding: %s!\n",
 			error_message(retval));
 	free(inbuf.data);
-	free(send_cksum.contents);
         exit(1);
     }
     free(inbuf.data);
@@ -302,7 +276,6 @@ main(argc,argv)
 		/* write private message to server */
     if (krb5_write_message(context, &local_socket, &msg_data)){
 	fprintf(stderr, "Write Error During First Message Transmission!\n");
-	free(send_cksum.contents);
         exit(1);
     } 
     free(msg_data.data);
@@ -312,22 +285,13 @@ main(argc,argv)
 	if (retval = krb5_read_message(context, &local_socket, &inbuf)){
 	    fprintf(stderr, "Read Error During First Reply: %s!\n",
 			error_message(retval));
-	    free(send_cksum.contents);
             exit(1);
 	}
 
-	if ((retval = krb5_rd_priv(context, &inbuf,
-			&my_creds.keyblock,
-    			&foreign_addr, 
-			&local_addr,
-			rep_ret->seq_number, 
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+	if ((retval = krb5_rd_priv(context, new_auth_context, &inbuf,
+				   &msg_data, &replaydata))) {
 	    fprintf(stderr, "Error during First Read Decoding: %s!\n", 
 			error_message(retval));
-	    free(send_cksum.contents);
             exit(1);
 	}
 	free(inbuf.data);
@@ -346,109 +310,65 @@ repeat:
 	if (!strcmp(command_type, "add")) {
 	    valid++;
 	    oper_type = ADDOPER;
-	    if (retval = kadm_add_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       oper_type,
-				       princ_name)) break;
+	    if (retval = kadm_add_user(context, new_auth_context, &my_creds, 
+				       &local_socket, oper_type, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "cpw")) {
 	    valid++;
 	    oper_type = CHGOPER;
-	    if (retval = kadm_cpw_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       oper_type,
-				       princ_name)) break;
+	    if (retval = kadm_cpw_user(context, new_auth_context, &my_creds, 
+				       &local_socket, oper_type, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "addrnd")) {
 	    valid++;
-	    if (retval = kadm_add_user_rnd(context, &my_creds, 
-					   rep_ret,
-					   &local_addr, 
-					   &foreign_addr, 
-					   &local_socket, 
-					   &seqno,
-					   princ_name)) break;
+	    if (retval = kadm_add_user_rnd(context, new_auth_context, &my_creds,
+					   &local_socket, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "cpwrnd")) {
 	    valid++;
-	    if (retval = kadm_cpw_user_rnd(context, &my_creds, 
-					   rep_ret,
-					   &local_addr, 
-					   &foreign_addr, 
-					   &local_socket, 
-					   &seqno,
-					   princ_name)) break;
+	    if (retval = kadm_cpw_user_rnd(context, new_auth_context, &my_creds, 
+					   &local_socket, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "del")) {
 	    valid++;
-	    if (retval = kadm_del_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       princ_name)) break;
+	    if (retval = kadm_del_user(context, new_auth_context, &my_creds, 
+				       &local_socket, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "inq")) {
 	    valid++;
-	    if (retval = kadm_inq_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       princ_name)) break;
+	    if (retval = kadm_inq_user(context, new_auth_context, &my_creds, 
+				       &local_socket, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "mod")) {
 	    valid++;
-	    if (retval = kadm_mod_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       princ_name)) break;
+	    if (retval = kadm_mod_user(context, new_auth_context, &my_creds, 
+				       &local_socket, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "addv4")) {
 	    valid++;
 	    oper_type = AD4OPER;
-	    if (retval = kadm_add_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       oper_type,
-				       princ_name)) break;
+	    if (retval = kadm_add_user(context, new_auth_context, &my_creds, 
+				       &local_socket, oper_type, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "cpwv4")) {
 	    valid++;
 	    oper_type = CH4OPER;
-	    if (retval = kadm_cpw_user(context, &my_creds, 
-				       rep_ret,
-				       &local_addr, 
-				       &foreign_addr, 
-				       &local_socket, 
-				       &seqno,
-				       oper_type,
-				       princ_name)) break;
+	    if (retval = kadm_cpw_user(context, new_auth_context, &my_creds, 
+				       &local_socket, oper_type, princ_name)) 
+	    break;
 	}
 	if (!strcmp(command_type, "q")) { 
 	    valid++;
-	    retval = kadm_done(context, &my_creds, 
-			       rep_ret,
-			       &local_addr, 
-			       &foreign_addr, 
-			       &local_socket, 
-			       &seqno);
+	    retval = kadm_done(context, new_auth_context, &my_creds, 
+			       &local_socket); 
 	    break;
 	}
 	
@@ -459,7 +379,6 @@ repeat:
     }
 
     if (retval) {
-	free(send_cksum.contents);
         exit(1);
     }
 
@@ -467,22 +386,13 @@ repeat:
     if (retval = krb5_read_message(context, &local_socket, &inbuf)){
 	fprintf(stderr, "Read Error During Final Reply: %s!\n",
                         error_message(retval));
-	free(send_cksum.contents);
         exit(1);
     }
      
-    if ((retval = krb5_rd_priv(context, &inbuf,
-                        &my_creds.keyblock,
-                        &foreign_addr,
-                        &local_addr,
-                        rep_ret->seq_number,
-                        KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-                        0,
-                        0,
-                        &msg_data))) {
+    if ((retval = krb5_rd_priv(context, new_auth_context, &inbuf,
+                               &msg_data, &replaydata))) {
 	fprintf(stderr, "Error during Final Read Decoding :%s!\n",
                         error_message(retval));
-	free(send_cksum.contents);
 	free(inbuf.data);
 	exit(1);
     }
@@ -505,7 +415,6 @@ repeat:
     if (rd_priv_resp.message)
 	free(rd_priv_resp.message);
 
-    free(send_cksum.contents);
     
     exit(retval);
 }

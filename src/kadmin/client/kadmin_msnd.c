@@ -28,29 +28,27 @@
 #include <netdb.h>
 #include <signal.h>
 #include <string.h>
-#include "com_err.h"
+#include <com_err.h>
 
 #include <sys/param.h>
 #include <pwd.h>
 
 #include <sys/stat.h>
 
-#include "k5-int.h"
+#include <krb5.h>
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif
 
 krb5_error_code
-kadm_snd_mod(context, my_creds, rep_ret, local_addr, foreign_addr, 
-	     local_socket, seqno)
+kadm_snd_mod(context, auth_context, my_creds, local_socket)
     krb5_context context;
+    krb5_auth_context *auth_context;
     krb5_creds *my_creds;
-    krb5_ap_rep_enc_part *rep_ret;
-    krb5_address *local_addr, *foreign_addr;
     int *local_socket;
-    krb5_int32 *seqno;
 {
+    krb5_replay_data replaydata;
     krb5_error_code retval;     /* return code */
     krb5_data msg_data, inbuf;
     char mod_type[10];
@@ -210,16 +208,8 @@ repeat3:
 	inbuf.data[1] = MODOPER;
 	inbuf.data[2] = SENDDATA3;
 
-	if ((retval = krb5_mk_priv(context, &inbuf,
-			ETYPE_DES_CBC_CRC,
-			&my_creds->keyblock, 
-			local_addr, 
-			foreign_addr,
-			*seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+	if ((retval = krb5_mk_priv(context, auth_context, &inbuf,
+				   &msg_data, &replaydata))) {
             fprintf(stderr, "Error during Second Message Encoding: %s!\n",
 			error_message(retval));
 	    free(inbuf.data);
@@ -241,15 +231,8 @@ repeat3:
             return(1);
 	}
 
-	if ((retval = krb5_rd_priv(context, &inbuf,
-			&my_creds->keyblock,
-                        foreign_addr,
-                        local_addr,
-                        rep_ret->seq_number,
-                        KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-                        0,
-                        0,
-                        &msg_data))) {
+	if ((retval = krb5_rd_priv(context, auth_context, &inbuf,
+                      		   &msg_data, &replaydata))) {
             fprintf(stderr, "Error during Second Read Decoding :%s!\n",
                         error_message(retval));
             free(inbuf.data);
@@ -269,16 +252,8 @@ alldone:
     inbuf.data[2] = SENDDATA3;
     inbuf.length = 3;
 
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			ETYPE_DES_CBC_CRC,
-			&my_creds->keyblock, 
-			local_addr, 
-			foreign_addr,
-			*seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_mk_priv(context, auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
 	fprintf(stderr, "Error during Second Message Encoding: %s!\n",
 			error_message(retval));
 	free(inbuf.data);

@@ -26,20 +26,18 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
-#include "com_err.h"
+#include <com_err.h>
 
-#include "k5-int.h"
+#include <krb5.h>
 
 krb5_error_code
-kadm_done(context, my_creds, rep_ret, local_addr, foreign_addr, 
-	  local_socket, seqno)
+kadm_done(context, auth_context, my_creds, local_socket, seqno)
     krb5_context context;
-    krb5_creds *my_creds;
-    krb5_ap_rep_enc_part *rep_ret;
-    krb5_address *local_addr, *foreign_addr;
+    krb5_auth_context *auth_context;
     int *local_socket;
     krb5_int32 *seqno;
 {
+    krb5_replay_data replaydata;
     krb5_data msg_data, inbuf;
     krb5_error_code retval;     /* return code */
     char buf[16];
@@ -53,16 +51,8 @@ kadm_done(context, my_creds, rep_ret, local_addr, foreign_addr,
     (void) memset( inbuf.data + 4, 0, 4);
     inbuf.length = 16;
 
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			ETYPE_DES_CBC_CRC,
-			&my_creds->keyblock, 
-			local_addr, 
-			foreign_addr,
-			*seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_mk_priv(context, auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during Second Message Encoding: %s!\n",
 			error_message(retval));
         return(1);

@@ -1,3 +1,11 @@
+
+Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
+
+	* kadmin.c, kadmin_adr.c, kadmin_cpw.c, kadmin_done.c, kadmin_mod.c
+	* kadmin_add.c, kadmin_cpr.c, kadmin_del.c, kadmin_inq.c, kadmin_msnd.c
+		Use new calling convention for krb5_sendauth(), krb5_mk_priv(), 
+		krb5_rd_priv(), krb5_mk_safe(), and krb5_rd_safe().
+
 Thu Mar  2 12:24:25 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
