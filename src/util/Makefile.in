@@ -48,11 +48,9 @@ clean-windows::
 # destination to make a link...
 
 all-unix::
-	$(RM) ../include/db.h ../include/db-config.h ../include/db-ndbm.h \
-		../lib/libdb.a
-	ln -s ../util/db2/obj/db.h ../include
-	ln -s ../util/db2/obj/db-config.h ../include
-	ln -s ../util/db2/obj/libdb.a ../lib
+	$(RM) ../include/db.h ../include/db-config.h ../include/db-ndbm.h
+	ln -s ../util/db2/include/db.h ../include
+	ln -s ../util/db2/include/db-config.h ../include
 	if test '$(srcdir)' = . ; then \
 		ln -s ../util/db2/include/db-ndbm.h ../include; \
 	else \
@@ -60,8 +58,7 @@ all-unix::
 	fi
 
 clean-unix::
-	$(RM) ../include/db.h ../include/db-config.h ../include/db-ndbm.h \
-		../lib/libdb.a
+	$(RM) ../include/db.h ../include/db-config.h ../include/db-ndbm.h
 
 unixmac: libupdate
 

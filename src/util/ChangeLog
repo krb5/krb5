@@ -1,3 +1,9 @@
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-unix, clean_unix): Update for current geography
+	of util/db2; needs to be moved to util/db2/Makefile.in at some
+	point.
+
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
