@@ -46,7 +46,7 @@
 #define MAXHOSTNAME 64
 #endif
 
-#if defined(HAVE_GETUTENT) && !defined(NO_UT_PID)
+#if !defined(HAVE_GETUTENT) && !defined(NO_UT_PID)
 
 static int utfile;
 
