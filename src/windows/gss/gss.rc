@@ -7,6 +7,7 @@
 ***************************************************************************/
 
 #include <windows.h>
+#include <ver.h>
 
 #define GSS_CONNECT_NAME            102
 #define GSS_OK                      100
@@ -27,4 +28,36 @@ BEGIN
 END
 
 
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION	1, 0
+PRODUCTVERSION	1, 0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS	(VS_FF_DEBUG | VS_FF_PRIVATEBUILD)
+FILEOS          VOS_DOS_WINDOWS16
+FILETYPE        VFT_APP
+BEGIN
+    BLOCK "VarFileInfo"
+    BEGIN
+	VALUE "Translation", 0x0409, 1252
+    END
+
+    BLOCK "StringFileInfo"
+    BEGIN
+	BLOCK "040904E4"
+	BEGIN
+	    VALUE "CompanyName",        "Massachusetts Institute of Technology.\0"
+	    VALUE "FileDescription",	"GSS - GSS Sample Application for MIT Kerberos v5 / GSS distribution\0"
+	    VALUE "FileVersion",	"1.0\0"
+	    VALUE "InternalName",	"GSS\0"
+	    VALUE "LegalTrademarks",	"\0"
+	    VALUE "OriginalFilename",	"gss.exe\0"
+	    VALUE "ProductName",	"GSS\0"
+	    VALUE "ProductVersion",	"1.0\0"
+
+	    VALUE "LegalCopyright",	"Copyright (C) 1996, 1997 by the Massachusetts Institute of Technology\0"
+	END
+    END
+END
+
+TestTrackerMOTD TEXT ver_serv.txt
 
