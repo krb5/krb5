@@ -15,12 +15,12 @@ LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
 ENCOBJS = krb5_encode_test.o ktest.o ktest_equal.o utility.o trval.o
 
 krb5_encode_test: $(ENCOBJS) $(DEPKLIB) 
-	$(CC) $(CFLAGS) -o krb5_encode_test $(ENCOBJS) $(LIBS) $(KLIB)
+	$(LD) $(CFLAGS) -o krb5_encode_test $(ENCOBJS) $(LIBS) $(KLIB)
 
 DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
 
 krb5_decode_test: $(DECOBJS) $(DEPKLIB)
-	$(CC) $(CFLAGS) -o krb5_decode_test $(DECOBJS) $(LIBS) $(KLIB)
+	$(LD) $(CFLAGS) -o krb5_decode_test $(DECOBJS) $(LIBS) $(KLIB)
 
 check:: krb5_decode_test krb5_encode_test
 	./krb5_decode_test
