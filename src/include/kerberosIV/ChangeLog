@@ -1,3 +1,8 @@
+Tue Jun  6 21:16:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb4-proto.h: decomp_ticket change the time field to unsigned
+		KRB4_32 to match the Cygnus krb4 library.
+
 Tue Jun  6 12:30:41 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb4-proto.h: Rename save_credentials to krb_save_credentials,
