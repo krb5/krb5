@@ -1,3 +1,8 @@
+Mon Nov  7 22:36:20 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* auth.c (auth_enable, auth_disable): Change the input type to be
+		a char *, which is what auth_onoff wants anyway.
+
 Mon Aug  8 22:16:54 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* kerberos5.c (kerberos5_send): Whoops, mispelled

@@ -260,14 +260,14 @@ getauthmask(type, maskp)
 
 	int
 auth_enable(type)
-	int type;
+	char * type;
 {
 	return(auth_onoff(type, 1));
 }
 
 	int
 auth_disable(type)
-	int type;
+	char * type;
 {
 	return(auth_onoff(type, 0));
 }
