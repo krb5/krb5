@@ -1,3 +1,12 @@
+Wed Dec 16 16:14:02 1998  Tom Yu  <tlyu@mit.edu>
+
+	* old_decrypt.c (krb5_old_decrypt): Initialize the ivec to the key
+ 	if we're using DES_CBC_CRC, for backwards compatibility.  We
+ 	weren't noticing this before because it only trashes the first
+ 	block, which is the confounder, which we weren't actually
+ 	verifying because checksum was unconditionally succeeding prior to
+ 	the other patch.
+
 Thu Dec 10 22:16:14 1998  Tom Yu  <tlyu@mit.edu>
 
 	* old_decrypt.c (krb5_old_decrypt): Actually compare the

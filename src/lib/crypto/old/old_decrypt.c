@@ -40,7 +40,7 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
     krb5_error_code ret;
     size_t blocksize, hashsize, plainsize;
     unsigned char *plaintext, *cksumdata;
-    krb5_data output, cksum;
+    krb5_data output, cksum, crcivec;
     int alloced;
 
     (*(enc->block_size))(&blocksize);
@@ -75,6 +75,13 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
     }
 
     /* decrypt it */
+
+    /* XXX this is gross, but I don't have much choice */
+    if ((key->enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
+	crcivec.length = key->length;
+	crcivec.data = key->contents;
+	ivec = &crcivec;
+    }
 
     if (ret = ((*(enc->decrypt))(key, ivec, input, &output)))
 	goto cleanup;
