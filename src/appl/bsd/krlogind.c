@@ -102,9 +102,12 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
  *       Note:  Root logins are always logged.
  */
 
-/* This is usually done in site.def. If not, then uncomment this. 
-#define KERBEROS
-*/
+/*
+ * This is usually done in the Makefile.  Actually, these sources may
+ * not work without the KERBEROS #defined.
+ *
+ * #define KERBEROS
+ */
 #define LOG_REMOTE_REALM
 #define CRYPT
 #define SERVE_V4
@@ -153,6 +156,7 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <netdb.h>
 #include <syslog.h>
 #include <strings.h>
+#include <ctype.h>
 #include <sys/param.h>
 #include <utmp.h>
      
@@ -244,7 +248,7 @@ krb5_principal  client;
 extern	int errno;
 int	reapchild();
 struct	passwd *getpwnam();
-#ifndef ultrix
+#if (!defined(__STDC__) && !defined(ultrix))
 char	*malloc();
 #endif
 char 	*progname;
@@ -259,7 +263,8 @@ main(argc, argv)
      int argc;
      char **argv;
 {
-    extern int opterr, optind, optarg;
+    extern int opterr, optind;
+    char * optarg;
     int on = 1, fromlen, ch, i;
     struct sockaddr_in from;
     char *options;
@@ -302,7 +307,7 @@ main(argc, argv)
 	  if (!strcmp(progname+i, "logind")) {
 	      char **newargv;
 
-	      newargv = (char **) malloc(sizeof(char *) 3);
+	      newargv = (char **) malloc(sizeof(char *) * 3);
 
 	      strcpy(options, "-");
 	      strncat(options, progname, i);
@@ -748,14 +753,12 @@ void doit(f, fromp)
     cleanup();
 }
 
-
-
-char	magic[2] = { 0377, 0377 };
+unsigned char	magic[2] = { 0377, 0377 };
 #ifdef TIOCSWINSZ
 #ifndef TIOCPKT_WINDOW
 #define TIOCPKT_WINDOW 0x80
 #endif
-char	oobdata[] = {TIOCPKT_WINDOW};
+unsigned char	oobdata[] = {TIOCPKT_WINDOW};
 #else
 char    oobdata[] = {0};
 #endif
@@ -1346,7 +1349,6 @@ recvauth()
 {
     krb5_error_code status;
     struct sockaddr_in peersin;
-    char hostname[100];
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
 
@@ -1477,14 +1479,12 @@ recvauth()
 	peeraddr.length = SIZEOF_INADDR;
 	peeraddr.contents = (krb5_octet *)&peersin.sin_addr;
 	
-	gethostname(hostname, 100);
-	if (status = krb5_sname_to_principal(hostname,"host", KRB5_NT_SRV_HST,
+	if (status = krb5_sname_to_principal(NULL, "host", KRB5_NT_SRV_HST,
 					     &server)) {
 	    syslog(LOG_ERR, "parse server name %s: %s", "host",
 		   error_message(status));
 	    exit(1);
 	}
-	krb5_princ_type(server) = KRB5_NT_SRV_HST;
 
 	if (status = v5_recvauth(&netf, 
 				 "KCMDV0.1",
