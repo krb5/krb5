@@ -130,7 +130,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
 	case EACCES: 
 	case EROFS: 
 	case EEXIST: 
-	    retval = KRB5_RC_IO_PERM; goto fail;
+	    retval = KRB5_RC_IO_PERM; goto no_unlink;
 
 	default: 
 	    retval = KRB5_RC_IO_UNKNOWN; goto fail;
@@ -141,6 +141,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
     {
     fail:
      (void) unlink(d->fn);
+    no_unlink:
      FREE(d->fn);
 	d->fn = NULL;
      (void) close(d->fd);
