@@ -1085,14 +1085,15 @@ AC_DEFUN(AC_CHECK_DBM_PROTO,[
    AC_TRY_LINK(
 [#include <$1.h>
 int $2();],
-[$2();], $4
+[$2();], 
     eval krb5_cv_missing_$2_prototype=yes,
-    $3
     eval krb5_cv_missing_$2_prototype=no)))
  if eval "test \"`echo '$krb5_cv_missing_'$1_prototype`\" = yes"; then
   AC_MSG_RESULT(yes)
+  $3
  else
   AC_MSG_RESULT(no)
+  $4
  fi
 ])dnl
 dnl
