@@ -117,6 +117,7 @@ extern char *sys_errlist[];
 #endif
 
 extern char *mktemp ();
+char *ftpusers;
 
 #include <k5-util.h>
 
@@ -283,6 +284,7 @@ main(argc, argv, envp)
 {
 	int addrlen, on = 1, tos, port = -1;
 	char *cp;
+	ftpusers = _PATH_FTPUSERS_DEFAULT;
 
 #ifdef KRB5_KRB4_COMPAT
 	keyfile = KEYFILE;
@@ -396,6 +398,17 @@ main(argc, argv, envp)
 				defumask = val;
 			goto nextopt;
 		    }
+
+		case 'U':
+		    if (*++cp != '\0')
+			ftpusers = cp;
+		    else if (argc > 1) {
+			argc--, argv++;
+			ftpusers = *argv;
+		    }
+		    else
+			fprintf(stderr, "ftpd: -U expects argument\n");
+		    goto nextopt;
 
 		case 'w':
 		{
@@ -690,11 +703,11 @@ int askpasswd;			/* had user command, ask for passwd */
  * Sets global passwd pointer pw if named account exists and is acceptable;
  * sets askpasswd if a PASS command is expected.  If logged in previously,
  * need to reset state.  If name is "ftp" or "anonymous", the name is not in
- * _PATH_FTPUSERS, and ftp account exists, set guest and pw, then just return.
+ * ftpusers, and ftp account exists, set guest and pw, then just return.
  * If account doesn't exist, ask for passwd anyway.  Otherwise, check user
  * requesting login privileges.  Disallow anyone who does not have a standard
  * shell as returned by getusershell().  Disallow anyone mentioned in the file
- * _PATH_FTPUSERS to allow people such as root and uucp to be avoided, except
+ * ftpusers to allow people such as root and uucp to be avoided, except
  * for users whose names are followed by whitespace and then the keyword
  * "restrict."  Restricted users are allowed to login, but a chroot() is
  * done to their home directory.
@@ -845,7 +858,7 @@ user(name)
 }
 
 /*
- * Check if a user is in the file _PATH_FTPUSERS.
+ * Check if a user is in the file ftpusers.
  * Return 1 if they are (a disallowed user), -1 if their username
  * is followed by "restrict." (a restricted user).  Otherwise return 0.
  */
@@ -857,7 +870,7 @@ checkuser(name)
 	register char *p;
 	char line[FTP_BUFSIZ];
 
-	if ((fd = fopen(_PATH_FTPUSERS, "r")) != NULL) {
+	if ((fd = fopen(ftpusers, "r")) != NULL) {
 	     while (fgets(line, sizeof(line), fd) != NULL) {
 	          if ((p = strchr(line, '\n')) != NULL) {
 			*p = '\0';

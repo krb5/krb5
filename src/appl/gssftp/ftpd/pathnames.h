@@ -33,4 +33,4 @@
  *	@(#)pathnames.h	5.2 (Berkeley) 6/1/90
  */
 
-#define	_PATH_FTPUSERS	"/etc/ftpusers"
+#define	_PATH_FTPUSERS_DEFAULT	"/etc/ftpusers"

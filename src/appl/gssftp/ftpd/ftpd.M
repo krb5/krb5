@@ -42,6 +42,7 @@ Internet File Transfer Protocol server
 [\fB\-a \fP|\fB -A\fP] [\fB\-c\fP] [\fB\-C\fP] [\fB\-d\fP] [\fB\-l\fP]
 [\fB\-t\fP \fItimeout\fP] [\fB\-T\fP \fImaxtimeout\fP]
 [\fB\-p\fP \fIport\fP] [\fB\-u\fP \fIumask\fP]
+[\fB\-U\fP \fIftpusers-file\fP]
 [\fB\-r\fP \fIrealm-file\fP] [\fB\-s\fP \fIsrvtab\fP]
 [\fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]]
 .SH DESCRIPTION
@@ -106,6 +107,12 @@ Normally the ftp server is invoked by
 .TP
 \fB\-u\fP \fIumask\fP
 Sets the umask for the ftpd process.  The default value is normally 027.
+.TP
+\fB\-U\fP \fIftpusers-file\fP
+Sets the full path and name of the
+.I ftpusers
+file to use.  The default value is normally
+.IR /etc/ftpusers .
 .TP
 \fB\-r\fP \fIrealm-file\fP
 Sets the name of the

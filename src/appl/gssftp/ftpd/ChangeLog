@@ -1,3 +1,12 @@
+2001-06-08  Mitchell Berger  <mitchb@mit.edu>
+
+	* pathnames.h: _PATH_FTPUSERS renamed to _PATH_FTPUSERS_DEFAULT.
+
+	* ftpd.c: Added '-U filename' option to allow specification of
+	an ftpusers file other than the default.
+
+	* ftpd.M: Documented the new -U option.
+
 2001-06-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftpcmd.y: Include "ftpd_var.h" and remove prototype for reply()
