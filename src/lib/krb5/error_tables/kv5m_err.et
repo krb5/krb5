@@ -64,4 +64,6 @@ error_code KV5M_ADDRESS,	"Bad magic number for krb5_address structure"
 error_code KV5M_KEYTAB_ENTRY,	"Bad magic number for krb5_keytab_entry structure"
 error_code KV5M_CONTEXT,	"Bad magic number for krb5_context structure"
 error_code KV5M_OS_CONTEXT,	"Bad magic number for krb5_os_context structure"
+error_code KV5M_ALT_METHOD,	"Bad magic number for krb5_alt_method structure"
+error_code KV5M_ETYPE_INFO_ENTRY, "Bad magic number for krb5_etype_info_entry structure"
 end

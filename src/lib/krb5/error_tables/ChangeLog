@@ -1,3 +1,7 @@
+Mon Aug 28 12:53:01 1995    <tytso@rsts-11.mit.edu>
+
+	* kv5m_err.et: Added new error codes KV5M_ALT_METHOD and
+	        KV5M_ETYPE_INFO_ENTRY.
 
 Mon Aug 07 11:29:49 1995   Chris Provenzano  (proven@mit.edu)
 
