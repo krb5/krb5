@@ -1,3 +1,10 @@
+Sat Jan 27 01:05:12 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kuserok.c: use HAVE_SETEUID and HAVE_SETRESUID to figure out how
+	to emulate seteuid instead of assuming hpux.
+	* configure.in: test for seteuid as well; fold some tests into a
+	single AC_HAVE_FUNCS.
+
 Tue Dec  5 20:53:40 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Shared library depends on krb5 library now.

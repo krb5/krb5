@@ -38,9 +38,7 @@ if test $ac_cv_sizeof_int = 2; then
 else
 	AC_DEFINE(BITS32)
 fi
-AC_FUNC_CHECK(strsave,AC_DEFINE(HAVE_STRSAVE))
-AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
-AC_FUNC_CHECK(setresuid,AC_DEFINE(HAVE_SETRESUID))
+AC_HAVE_FUNCS(strsave seteuid setreuid setresuid)
 ET_RULES
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([$(OBJS)])

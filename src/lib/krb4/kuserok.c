@@ -27,9 +27,11 @@
 #include <sys/unistd.h>
 #endif
 
-#ifdef hpux
+#ifndef HAVE_SETEUID
+#ifdef HAVE_SETRESUID
 #define seteuid(e) setresuid(-1,e,-1)
 #define setegid(e) setresgid(-1,e,-1)
+#endif
 #endif
 
 #define OK 0
