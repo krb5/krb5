@@ -26,17 +26,6 @@
 
 #include "des.h"
 
-extern int INTERFACE mit_des_init_random_number_generator();
-extern void INTERFACE mit_des_set_random_generator_seed();
-extern void INTERFACE mit_des_set_sequence_number();
-extern void INTERFACE mit_des_generate_random_block();
-extern int INTERFACE mit_des_new_random_key();
-
-
-void INTERFACE des_set_random_generator_seed();
-void INTERFACE des_set_sequence_number();
-void INTERFACE des_generate_random_block();
-
 /*
  * The secret des key schedule and sequence number for the current
  * stream of random numbers

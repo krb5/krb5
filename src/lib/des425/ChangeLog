@@ -1,8 +1,20 @@
+Wed Mar 15 13:44:23 1995 Keith Vetter (keithv@fusion.com)
+
+	* des.h: now includes des_int.h for proper prototypes.
+	* enc_dec.c: cast the types of the input/output buffers in calling
+           the encrypt routine.
+	* key_sched.c: removed prototype of a non-existent routine.
+	* new_rnd_key.c: removed prototypes in the file and instead include
+           header file with the real prototypes.
+	* random_key.c: code, as it was, could never have worked. Adding 
+           prototypes revealed that it was passing KEY with the wrong level
+           of indirection.
+        
 Tue Mar 7 19:57:28 1995 Keith Vetter (keithv@fusion.com)
 
 	* pcbc_enc.c: added casts on the long->char assignments.
         * str_to_key.c: converted int->long to match types.
-	* read_passwd.c: converted int->long.
+
 
 Wed Mar  8 17:13:44 1995  Theodore Y. Ts'o  <tytso@dcl>
 

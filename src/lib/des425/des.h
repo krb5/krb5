@@ -32,6 +32,7 @@
 #define DES_DEFS
 
 #include "k5-int.h"
+#include "des_int.h"
 
 typedef mit_des_cblock des_cblock;	/* crypto-block size */
 

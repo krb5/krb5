@@ -66,6 +66,8 @@ des_cbc_encrypt(in,out,length,key,iv,encrypt)
     krb5_octet *iv;		/* 8 bytes of ivec */
     int encrypt;		/* 0 ==> decrypt, else encrypt */
 {
-	return(mit_des_cbc_encrypt(in,out,length,key,iv,encrypt));
+	return (mit_des_cbc_encrypt((const des_cblock *) in,
+                                (des_cblock *) out,
+                                length, key, iv, encrypt));
 }
 
