@@ -349,6 +349,11 @@ krb5_rcache id;
      if (store(id,rep) == CMP_MALLOC) {/* can't be a replay */
        CLOSE; 
        return KRB5_RC_MALLOC; 
+     } else {
+	 /* store() copies the server & client fields to make sure they don't get
+	    stomped on by other callers, so we need to free them */
+	 FREE(rep->server);
+	 FREE(rep->client);
      }
   }
  end_loop: krb5_rc_io_unmark(&t->d);
