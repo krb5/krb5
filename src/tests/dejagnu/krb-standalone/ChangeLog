@@ -1,5 +1,11 @@
 2001-11-02  Tom Yu  <tlyu@mit.edu>
 
+	* rsh.exp: Fix date grabbing code so we don't try to parse the
+	timezone-less date out of of a syslog message.  expect eof in
+	places to drain pty buffers and avoid deadlock.
+
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
 	* v4gssftp.exp: Calling send_error from within a dejagnu test is
 	wrong.  So is calling exit.  Fix to not do these things.  Expect
 	eof rather than "\r" so as to drain pty buffers and avoid
