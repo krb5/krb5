@@ -1,3 +1,7 @@
+2003-05-23  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo (appdefaults): Clarify afs_krb5 slightly.
+
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
 	* admin.texinfo (appdefaults): Describe afs_krb5
