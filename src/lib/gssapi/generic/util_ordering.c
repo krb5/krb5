@@ -191,7 +191,7 @@ g_queue_externalize(void *vqueue, unsigned char **buf, size_t *lenremain)
 {
     memcpy(*buf, vqueue, sizeof(queue));
     *buf += sizeof(queue);
-    *lenremain += sizeof(queue);
+    *lenremain -= sizeof(queue);
     
     return 0;
 }
@@ -205,7 +205,7 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
 	return ENOMEM;
     memcpy(q, *buf, sizeof(queue));
     *buf += sizeof(queue);
-    *lenremain += sizeof(queue);
+    *lenremain -= sizeof(queue);
     *vqueue = q;
     return 0;
 }

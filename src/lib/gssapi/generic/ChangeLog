@@ -1,3 +1,9 @@
+Mon Oct 21 16:16:26 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_ordering.c (g_queue_internalize, g_queue_externalize):
+ 		Fixed typo so that the remaining length field is set
+ 		correctly.
+
 Sat Oct 19 00:39:25 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* util_ordering.c (g_queue_externalize, g_queue_internalize,
