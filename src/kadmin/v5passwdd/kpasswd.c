@@ -417,7 +417,7 @@ main(argc, argv)
 
     /* Now - Actually change the password. */
     for (npass_tries = 1; npass_tries <= KPWD_MAX_TRIES; npass_tries++) {
-	int npass_len;
+	unsigned int npass_len;
 
 	npass_len = KRB5_ADM_MAX_PASSWORD_LEN;
 	if (!(kret = krb5_read_password(kcontext,

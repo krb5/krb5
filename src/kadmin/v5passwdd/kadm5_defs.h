@@ -260,7 +260,7 @@ krb5_int32 pwd_change
 		   krb5_data *,
 		   krb5_data *,
 		   char [],
-		   int));
+		   unsigned int));
 
 #if 0
 

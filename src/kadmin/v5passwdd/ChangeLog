@@ -1,3 +1,11 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* adm_conn.c, kpasswd.c: Argument to krb5_read_password
+	takes an unsigned int.
+
+	* kadm5_defs.h, main.c (pwd_change): Argument err_str_len changed
+	to unsigned int. (Argument to kadm5_chpass_principal_util()).
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: v5passwd does not depend on the kadm5

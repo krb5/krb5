@@ -191,7 +191,7 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
     char		*client_name;
     krb5_error_code	kret;
     krb5_address	**my_addresses;
-    int			old_pwsize;
+    unsigned int	old_pwsize;
     krb5_creds		tcreds;
 
     /* Initialize */

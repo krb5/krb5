@@ -238,7 +238,7 @@ pwd_change(kcontext, debug_level, auth_context, ticket,
     krb5_data		*olddata;
     krb5_data		*newdata;
     char		err_str[];
-    int			err_str_len;
+    unsigned int	err_str_len;
 {
      kadm5_ret_t ret;
      krb5_int32			now;
