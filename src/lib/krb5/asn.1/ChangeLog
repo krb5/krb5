@@ -1,3 +1,12 @@
+Wed Sep 21 00:18:12 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5_decode.c (decode_krb5_authdata): Initialize variable where
+		the authdata is returned to NULL first.  (Caller shouldn't
+		have to do this.)
+
+	* asn1_decode.c (asn1_decode_generaltime): Plug memory leak caused
+		by not freeing temporary string.
+
 Wed Aug 17 16:07:06 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* krb5_encode.c (encode_krb5_enc_kdc_rep_part): Older versions of

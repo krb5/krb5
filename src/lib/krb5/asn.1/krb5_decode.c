@@ -592,6 +592,7 @@ krb5_error_code decode_krb5_authdata(DECLARG(const krb5_data *, code),
      OLDDECLARG(krb5_authdata ***, rep)
 {
   setup_buf_only();
+  *rep = 0;
   retval = asn1_decode_authorization_data(&buf,rep);
   if(retval) return (krb5_error_code)retval;
   cleanup();
