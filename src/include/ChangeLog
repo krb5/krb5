@@ -1,3 +1,10 @@
+2002-02-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* foreachaddr.c: New file, contents taken from code shared between
+	kdc/network.c and lib/krb5/os/localaddr.c.  Split out multiple
+	branches within foreach_localaddr into separate functions.  Fixed
+	a couple minor compiler warnings on Linux.
+
 2002-02-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c (_XOPEN_SOURCE_EXTENDED): Define if not defined,
