@@ -4,7 +4,6 @@ LDFLAGS = -g
 
 ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
 
 SRCS = \
 	$(srcdir)/krb_auth_su.c \
@@ -21,9 +20,10 @@ OBJS = \
 
 all:: ksu
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 
-ksu: $(OBJS)
+ksu: $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o ksu $(OBJS) $(KLIB) $(LIBS)
 
 clean::
