@@ -765,7 +765,7 @@ user(name)
 #ifdef KRB5_KRB4_COMPAT
 		if (auth_type && strcmp(auth_type, "KERBEROS_V4") == 0) {
 			authorized = kuserok(&kdata,name) == 0;
-			sprintf(buf, "Kerberos user %s%s%s@%s is%s authorized as %s%s",
+			sprintf(buf, "Kerberos user %s%s%s@%s is%s authorized as %s",
 				kdata.pname, *kdata.pinst ? "." : "",
 				kdata.pinst, kdata.prealm,
 				authorized ? "" : " not", name);

@@ -1,3 +1,8 @@
+Fri Mar 12 07:35:01 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (user): Remove extra "%s" in call to sprintf() to avoid
+	dereferencing stack garbage.
+
 Mon Mar  8 23:47:51 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.M: Resync with reality.
