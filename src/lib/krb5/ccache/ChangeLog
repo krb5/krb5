@@ -1,3 +1,22 @@
+2004-08-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (krb5_fcc_close_file): Change first argument to be an
+	fcc-data pointer, not a krb5_ccache.  All calls changed.
+	(struct fcc_set): Add a refcount member.  (Definition
+	accidentally introduced without comment in an earlier patch.)
+	(krb5int_cc_file_mutex, fccs): New variables, for managing a
+	global list of open credential cache files.
+	(dereference): New function, with most of old close/destroy
+	operations.  Decrements reference count and only frees the object
+	and removes it from the global list if the refcount hits zero.
+	(krb5_fcc_close, krb5_fcc_destroy): Call dereference.
+	(krb5_fcc_resolve): If a file cache is already open with the same
+	file name, increment its reference count and don't create a new
+	one.  When a new one is created, add it to the global list.
+	* cc-int.h (krb5int_cc_file_mutex): Declare.
+	* ccbase.c (krb5int_cc_initialize): Initialize it.
+	(krb5int_cc_finalize): Destroy it, and krb5int_mcc_mutex.
+
 2004-08-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c: Remove USE_STDIO support.

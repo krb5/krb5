@@ -57,10 +57,14 @@ int
 krb5int_cc_initialize(void)
 {
     int err;
+
     err = k5_mutex_finish_init(&krb5int_mcc_mutex);
     if (err)
 	return err;
     err = k5_mutex_finish_init(&cc_typelist_lock);
+    if (err)
+	return err;
+    err = k5_mutex_finish_init(&krb5int_cc_file_mutex);
     if (err)
 	return err;
     return 0;
@@ -71,6 +75,8 @@ krb5int_cc_finalize(void)
 {
     struct krb5_cc_typelist *t, *t_next;
     k5_mutex_destroy(&cc_typelist_lock);
+    k5_mutex_destroy(&krb5int_cc_file_mutex);
+    k5_mutex_destroy(&krb5int_mcc_mutex);
     for (t = cc_typehead; t != &cc_fcc_entry; t = t_next) {
 	t_next = t->next;
 	free(t);
