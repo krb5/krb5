@@ -202,6 +202,10 @@ OLDDECLARG(krb5_creds *, cred)
 	    return retval;
 	}
     }
+    /*
+     * Free cred->server before overwriting it.
+     */
+    krb5_free_principal(cred->server);
     if (retval = krb5_copy_principal(dec_rep->enc_part2->server,
 				     &cred->server)) {
 	cleanup();
