@@ -116,7 +116,7 @@ is_windows_xp (void)
        if (GetVersionEx (&Version))
        {
            if (Version.dwPlatformId == VER_PLATFORM_WIN32_NT &&
-                (Version.dwMajorVersion >= 5 ||
+                (Version.dwMajorVersion > 5 ||
                  Version.dwMajorVersion == 5 && Version.dwMinorVersion >= 1) )
                fIsWinXP = TRUE;
        }
