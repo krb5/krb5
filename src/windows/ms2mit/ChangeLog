@@ -1,3 +1,9 @@
+2004-01-31  Jeffrey Altman <jaltman@mit.edu>
+
+    * ms2mit.c: Do not allow ticket importing of the Initial TGT cannot
+      be obtained.  The MSLSA krb5_ccache will not export the Initial TGT
+      if the session key enctype is NULL.  
+
 2003-12-11  Jeffrey Altman <jaltman@mit.edu>
 
     * ms2mit.c, Makefile.in:
