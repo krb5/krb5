@@ -1,5 +1,7 @@
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-thread.h: Test HAVE_PTHREAD instead of HAVE_PTHREAD_H.
+
 	* win-mac.h (KRB5_USE_INET6, ENABLE_THREADS): Define.
 
 2004-07-07  Ken Raeburn  <raeburn@mit.edu>

@@ -321,7 +321,7 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # define K5_ONCE_INIT			K5_OS_NOTHREAD_ONCE_INIT
 # define k5_once			k5_os_nothread_once
 
-#elif HAVE_PTHREAD_H
+#elif HAVE_PTHREAD
 
 # include <pthread.h>
 
