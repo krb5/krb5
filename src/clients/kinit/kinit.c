@@ -113,7 +113,7 @@ static int default_k4 = 0;
 static int authed_k5 = 0;
 static int authed_k4 = 0;
 
-#define KRB4_BACKUP_DEFAULT_LIFE_SECS 10*60*60 /* 10 hours */
+#define KRB4_BACKUP_DEFAULT_LIFE_SECS 24*60*60 /* 1 day */
 
 typedef enum { INIT_PW, INIT_KT, RENEW, VALIDATE } action_type;
 

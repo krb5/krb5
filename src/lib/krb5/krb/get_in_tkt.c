@@ -872,7 +872,7 @@ krb5_get_init_creds(krb5_context context,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_TKT_LIFE))
 	request.till += options->tkt_life;
     else
-	request.till += 10*60*60; /* this used to be hardcoded in kinit.c */
+	request.till += 24*60*60; /* this used to be hardcoded in kinit.c */
 
     if (renew_life > 0) {
 	request.rtime = request.from;

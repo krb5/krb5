@@ -1,3 +1,7 @@
+2003-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* kinit.c (KRB4_BACKUP_DEFAULT_LIFE_SECS): Update to one day.
+
 2003-05-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (kinit): Don't use krb524 library.

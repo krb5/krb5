@@ -95,7 +95,10 @@ Notes, Major Changes, and Known Bugs for 1.3
   can be used to help the compiler and linker find the installed
   packages; see the build documentation for details.
 
-* The AES cryptosystem has been implemented.
+* The AES cryptosystem has been implemented.  However, support in the
+  Kerberos GSSAPI mechanism has not been written (or even fully
+  specified), so it's not fully enabled.  See the documentation for
+  details.
 
 Major changes listed by ticket ID
 ---------------------------------
@@ -124,6 +127,14 @@ Major changes listed by ticket ID
   library to build this release.
 
 * [1189, 1251] The KfM krb4 library source base has been merged.
+
+* [1190] The default KDC master key type is now triple-DES.  KDCs
+  being updated may need their config files updated if they are not
+  already specifying the master key type.
+
+* [1190] The default ticket lifetime and default maximum renewable
+  ticket lifetime have been extended to one day and one week,
+  respectively.
 
 * [1191] A new script, k5srvutil, may be used to manipulate keytabs in
   ways similar to the krb4 ksrvutil utility.

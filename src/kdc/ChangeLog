@@ -10,6 +10,11 @@
 	looking up the master kvno.  Don't bother caching the TGS key.
 	None of these were being used.
 
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (init_realm): Use KRB5_KDB_MAX_RLIFE, not
+	KRB5_KDB_MAX_LIFE, as default for realm's max renewable lifetime.
+
 2003-05-23  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_preauth.c (_make_etype_info_entry): Add flag to know if we

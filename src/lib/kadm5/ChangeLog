@@ -3,6 +3,11 @@
 	* alt_prof.c (krb5_read_realm_params): Don't bother reading in
 	realm_keysalts or realm_num_keysalts, as they're no longer used.
 
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Change default max_life to
+	one day.
+
 2003-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): Remove aes256 from the

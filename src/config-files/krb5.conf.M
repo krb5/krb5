@@ -233,9 +233,6 @@ subsection define the properties of that particular realm.  For example:
 .in +1i
 [realms]
 	ATHENA.MIT.EDU = {
-		kdc = KERBEROS.MIT.EDU
-		kdc = KERBEROS-1.MIT.EDU:750
-		kdc = KERBEROS-2.MIT.EDU:88
 		admin_server = KERBEROS.MIT.EDU
 		default_domain = MIT.EDU
 		v4_instance_convert = {
@@ -254,7 +251,8 @@ subsection:
 .IP kdc
 The value of this relation is the name of a host running a KDC for that
 realm.  An optional port number (preceded by a colon) may be appended to
-the hostname.
+the hostname.  This tag should generally be used only if the realm
+administrator has not made the information available through DNS.
 
 .IP admin_server
 This relation identifies the host where the administration server is

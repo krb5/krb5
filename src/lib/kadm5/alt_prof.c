@@ -605,7 +605,7 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 params.max_life = dtvalue;
 	 params.mask |= KADM5_CONFIG_MAX_LIFE;
     } else {
-	 params.max_life = 36000; /* 10 hours */
+	 params.max_life = 24 * 60 * 60; /* 1 day */
 	 params.mask |= KADM5_CONFIG_MAX_LIFE;
     }	 
 	    
