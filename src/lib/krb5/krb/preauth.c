@@ -36,8 +36,40 @@
 #include <process.h>
 #endif
 
-static krb5_preauth_obtain_proc obtain_enc_ts_padata;
-static krb5_preauth_process_proc process_pw_salt;
+static krb5_error_code obtain_enc_ts_padata
+KRB5_NPROTOTYPE((krb5_context,
+		 krb5_pa_data *,
+		 krb5_etype_info,
+		 krb5_keyblock *, 
+		 krb5_error_code ( * )(krb5_context,
+				       krb5_const krb5_enctype,
+				       krb5_data *,
+				       krb5_const_pointer,
+				       krb5_keyblock **),
+		 krb5_const_pointer,
+		 krb5_creds *,
+		 krb5_kdc_req *,
+		 krb5_pa_data **));
+
+static krb5_error_code process_pw_salt
+KRB5_NPROTOTYPE((krb5_context,
+		 krb5_pa_data *,
+		 krb5_kdc_req *,
+		 krb5_kdc_rep *,
+		 krb5_error_code ( * )(krb5_context,
+				       krb5_const krb5_enctype,
+				       krb5_data *,
+				       krb5_const_pointer,
+				       krb5_keyblock **),
+		 krb5_const_pointer,
+		 krb5_error_code ( * )(krb5_context,
+				       krb5_const krb5_keyblock *,
+				       krb5_const_pointer,
+				       krb5_kdc_rep * ),
+		 krb5_keyblock **,
+		 krb5_creds *, 
+		 krb5_int32 *,
+		 krb5_int32 *));
 
 static krb5_preauth_ops preauth_systems[] = {
     {

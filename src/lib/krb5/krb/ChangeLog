@@ -1,3 +1,10 @@
+Sun Nov 26 19:31:18 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* preauth.c: Ultrix is broken.  Prototype obtain_enc_ts_padata()
+		and process_pw_salt() explicitly rather than using the
+		typedef in k5-int.h becaus that typedef is to a function
+		pointer now.
+
 Fri Nov 17 22:35:52 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* get_in_tkt.c (decrypt_as_reply): 
