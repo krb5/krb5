@@ -179,6 +179,7 @@ int	maxtimeout = 7200;/* don't allow idle time to be set beyond 2 hours */
 int	logging;
 int	authenticate;
 int	guest;
+int	restricted;
 int	type;
 int	clevel;			/* control protection level */
 int	dlevel;			/* data protection level */
@@ -607,7 +608,10 @@ int askpasswd;			/* had user command, ask for passwd */
  * If account doesn't exist, ask for passwd anyway.  Otherwise, check user
  * requesting login privileges.  Disallow anyone who does not have a standard
  * shell as returned by getusershell().  Disallow anyone mentioned in the file
- * _PATH_FTPUSERS to allow people such as root and uucp to be avoided.
+ * _PATH_FTPUSERS to allow people such as root and uucp to be avoided, except
+ * for users whose names are followed by whitespace and then the keyword
+ * "restrict."  Restricted users are allowed to login, but a chroot() is
+ * done to their home directory.
  */
 user(name)
 	char *name;
@@ -638,7 +642,7 @@ user(name)
 
 	guest = 0;
 	if (strcmp(name, "ftp") == 0 || strcmp(name, "anonymous") == 0) {
-		if (checkuser("ftp") || checkuser("anonymous"))
+		if (disallowed_user("ftp") || disallowed_user("anonymous"))
 			reply(530, "User %s access denied.", name);
 		else if ((pw = sgetpwnam("ftp")) != NULL) {
 			guest = 1;
@@ -660,7 +664,7 @@ user(name)
 #else
 		cp = shell;
 #endif
-		if (cp == NULL || checkuser(name)) {
+		if (cp == NULL || disallowed_user(name)) {
 			reply(530, "User %s access denied.", name);
 			if (logging)
 				syslog(LOG_NOTICE,
@@ -669,6 +673,7 @@ user(name)
 			pw = (struct passwd *) NULL;
 			return;
 		}
+		restricted = restricted_user(name);
 	}
 #ifdef GSSAPI
 	if (auth_type && strcmp(auth_type, "GSSAPI") == 0) {
@@ -736,6 +741,7 @@ user(name)
 		reply(331, "Password required for %s.", name);
 
 	askpasswd = 1;
+
 	/*
 	 * Delay before reading passwd after first failed
 	 * attempt to slow down passwd-guessing programs.
@@ -745,7 +751,9 @@ user(name)
 }
 
 /*
- * Check if a user is in the file _PATH_FTPUSERS
+ * Check if a user is in the file _PATH_FTPUSERS.
+ * Return 1 if they are (a disallowed user), -1 if their username
+ * is followed by "restrict." (a restricted user).  Otherwise return 0.
  */
 checkuser(name)
 	char *name;
@@ -755,17 +763,45 @@ checkuser(name)
 	char line[FTP_BUFSIZ];
 
 	if ((fd = fopen(_PATH_FTPUSERS, "r")) != NULL) {
-		while (fgets(line, sizeof(line), fd) != NULL)
-			if ((p = strchr(line, '\n')) != NULL) {
-				*p = '\0';
-				if (line[0] == '#')
-					continue;
-				if (strcmp(line, name) == 0)
-					return (1);
+	     while (fgets(line, sizeof(line), fd) != NULL) {
+	          if ((p = strchr(line, '\n')) != NULL) {
+			*p = '\0';
+			if (line[0] == '#')
+			     continue;
+			if (strcmp(line, name) == 0)
+			     return (1);
+			if (strncmp(line, name, strlen(name)) == 0) {
+			     int i = strlen(name) + 1;
+			     
+			     /* Make sure foo doesn't match foobar */
+			     if (line[i] == '\0' || !isspace(line[i]))
+			          continue;
+			     /* Ignore whitespace */
+			     while (isspace(line[++i]));
+
+			     if (strcmp(&line[i], "restrict") == 0)
+			          return (-1);
+			     else
+			          return (1);
 			}
-		(void) fclose(fd);
+		  }
+	     }
 	}
+	(void) fclose(fd);
+
 	return (0);
+}
+
+disallowed_user(name)
+        char *name;
+{
+        return(checkuser(name) == 1);
+}
+
+restricted_user(name)
+        char *name;
+{
+        return(checkuser(name) == -1);
 }
 
 /*
@@ -902,9 +938,9 @@ login(passwd)
 	ftp_logwtmp(ttyline, pw->pw_name, remotehost);
 	logged_in = 1;
 
-	if (guest) {
- 	        if (chroot(pw->pw_dir) < 0) {
-		        reply(550, "Can't set guest privileges.");
+	if (guest || restricted) {
+		if (chroot(pw->pw_dir) < 0) {
+			reply(550, "Can't set privileges.");
 			goto bad;
 		}
 	}
@@ -923,7 +959,7 @@ login(passwd)
 			goto bad;
 		}
 	} else {
-	        if (chdir(pw->pw_dir) < 0) {
+	        if (chdir(restricted ? "/" : pw->pw_dir) < 0) {
 		        if (chdir("/") < 0) {
 			        reply(530, "User %s: can't change directory to %s.",
 				      pw->pw_name, pw->pw_dir);

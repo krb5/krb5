@@ -1,3 +1,10 @@
+1998-10-08  Geoffrey King  <gjking@mit.edu>
+
+	* ftpd.c: Add support for restricted users, as requested in
+	[krb5-appl/481].  Users that appear in /etc/ftpusers, followed
+	by the keyword "restrict" will be granted access, but a chroot()
+	will be done to their home directory.
+
 Tue Sep 29 19:25:09 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ftpd.c (auth_data): Don't use h_errno, it's not fully portable,
