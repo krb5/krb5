@@ -27,13 +27,13 @@
 \newcommand{\Number}[1]{\item[Number:] #1}
 \newcommand{\Reason}[1]{\item[Reason:] #1}
 %\newcommand{\Call}[1]{\item[Call:] #1}
-%\newcommand{\Expected}[1]{\item[Expected:] #1}
+\newcommand{\Expected}[1]{\item[Expected:] #1}
 \newcommand{\Conditions}[1]{\item[Conditions:] #1}
 
 %\newcommand{\Number}[1]{}
 %\newcommand{\Reason}[1]{}
 \newcommand{\Call}[1]{}
-\newcommand{\Expected}[1]{}
+%\newcommand{\Expected}[1]{}
 %\newcommand{\Conditions}[1]{}
 
 \title{OpenV*Secure 1.0 Admin API\\
@@ -53,7 +53,7 @@ OpenV*Secure Admin API.  Each API function is listed, followed by the
 tests that shoud be performed on it.
 
 The tests described here are based on the ``OV*Secure Admin Functional
-Specifications'' dated November 9, 1993.
+Specifications'' revision 1.27, dated November 17, 1993.
 
 Since inter-realm functionality is not a requirement for OpenV*Secure
 1.0, it is not tested.
@@ -96,13 +96,11 @@ tested.
 \numtest{1}{
 \Reason{An empty string realm is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, "")}
-\Expected{returns XXX.}
 }
 
 \numtest{2}{
 \Reason{A realm containing invalid characters is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, B.R)}
-\Expected{returns XXX}
 }
 
 \numtest{2.5}{
@@ -113,7 +111,6 @@ tested.
 \Reason{A bad service name representing an existing principal
 	(different from the client principal) is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, b, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -121,7 +118,6 @@ tested.
 \Reason{A bad service name representing a non-existent
 		principal is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, n, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -129,21 +125,18 @@ tested.
 \Reason{A bad service name identical to the (existing) client
 		name is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, a, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
 \numtest{6}{
 \Reason{A null password causes password prompting.}
 \Call{ovsec_kadm_init(a, null, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
 \numtest{7}{
 \Reason{An empty-string password is rejected.}
 \Call{ovsec_kadm_init(a, "", A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -151,7 +144,6 @@ tested.
 \Reason{An incorrect password which is the password of another
 		user is rejected.}
 \Call{ovsec_kadm_init(a, b's-p, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -159,27 +151,24 @@ tested.
 \Reason{An incorrect password which isn't the password of any
 		user is rejected.}
 \Call{ovsec_kadm_init(a, no-p, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
 \numtest{10}{
 \Reason{A null client_name is rejected.}
 \Call{ovsec_kadm_init(null, no-p, A_S, null)}
-\Expected{returns XXX}
 }
 
-\numtest{11}{
-\Reason{An empty-string client_name is rejected.}
-\Call{ovsec_kadm_init("", no-p, A_S, null)}
-\Expected{returns XXX}
-}
+% Empty string client name is legal.
+%\numtest{11}{
+%\Reason{An empty-string client_name is rejected.}
+%\Call{ovsec_kadm_init("", no-p, A_S, null)}
+%}
 
 \numtest{12}{
 \Reason{A client_name referring to a non-existent principal in
 		the default realm is rejected.}
 \Call{ovsec_kadm_init(n, no-p, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -187,7 +176,6 @@ tested.
 \Reason{A client_name referring to a non-existent principal
 		with the local realm specified explicitly is rejected.}
 \Call{ovsec_kadm_init(n@L.R, no-p, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -195,7 +183,6 @@ tested.
 \Reason{A client_name referring to a non-existent principal in
 	a nonexistent realm is rejected.}
 \Call{ovsec_kadm_init(n@B.R, no-p, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -203,7 +190,6 @@ tested.
 \Reason{A client_name referring to an existing principal in a
 	nonexistent realm is rejected.}
 \Call{ovsec_kadm_init(a@B.R, a's-p, A_S, null)}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -211,28 +197,24 @@ tested.
 \Reason{Valid invocation.}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 }
 
 \numtest{17}{
 \Reason{Valid invocation (explicit client realm).}
 \Call{ovsec_kadm_init(a@L.R, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 }
 
 \numtest{18}{
 \Reason{Valid invocation (CHANGEPW_SERVICE).}
 \Call{ovsec_kadm_init(a, a-s'p, C_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 }
 
 \numtest{19}{
 \Reason{Valid invocation (explicit service realm).}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, L.R);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 }
 
 \numtest{20}{
@@ -240,7 +222,6 @@ tested.
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_get_principal(a, buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 }
 
 \numtest{21}{
@@ -248,14 +229,12 @@ tested.
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK the first time, XXX the second time}
 }
 
 \numtest{22}{
 \Reason{A null password causes master-key prompting.}
 \Call{ovsec_kadm_init(a, null, A_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 \Conditions{local}
 }
 
@@ -263,7 +242,6 @@ tested.
 \Reason{A non-null password causes reading from the kstash.}
 \Call{ovsec_kadm_init(a, no-p, A_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 \Conditions{local}
 }
 
@@ -271,7 +249,6 @@ tested.
 \Reason{Null service name is ignored in local invocation.}
 \Call{ovsec_kadm_init(a, null, null, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 \Conditions{local}
 }
 
@@ -279,7 +256,6 @@ tested.
 \Reason{Non-null service name is ignored in local invocation.}
 \Call{ovsec_kadm_init(a, null, n, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 \Conditions{local}
 }
 
@@ -305,7 +281,6 @@ tested.
 \Reason{Valid invocation.}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
-\Expected{returns OK}
 }
 
 \numtest{2}{
@@ -327,7 +302,6 @@ tested.
 \numtest{6}{
 \Reason{Fails if database not initialized.}
 \Call{ovsec_kadm_destroy()}
-\Expected{returns NOT_INIT}
 }
 
 \numtest{7}{
@@ -335,7 +309,6 @@ tested.
 \Call{ovsec_kadm_init(a, a's-p, A_S, null);
 		ovsec_kadm_destroy();
 		ovsec_kadm_destroy()}
-\Expected{returns OK the first time, NOT_INIT the second}
 }
 
 \numtest{8}{
@@ -390,7 +363,6 @@ tested.
 		ovsec_kadm_create_principal(null, PRINCIPAL, "foobar",
 					    true);
 		ovsec_kadm_destroy()}
-\Expected{returns EINVAL}
 }
 
 \numtest{3}{
@@ -399,17 +371,14 @@ tested.
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL, null,
 					    true);
 		ovsec_kadm_destroy()}
-\Expected{returns EINVAL}
 }
 
 \numtest{4}{
-\Reason{Fails on empty-string password argument. XXX Assumes
-		that an empty string is not a legal password.}
+\Reason{Fails on empty-string password argument.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL, "",
 					    true);
 		ovsec_kadm_destroy()}
-\Expected{returns XXX}
 }
 
 \numtest{5}{
@@ -419,7 +388,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{6}{
@@ -430,7 +398,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{7}{
@@ -440,7 +407,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{8}{
@@ -450,7 +416,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{9}{
@@ -460,7 +425,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{10}{
@@ -471,7 +435,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{11}{
@@ -481,7 +444,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns BAD_MASK}
 }
 
 \numtest{12}{
@@ -495,7 +457,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns AUTH_ADD}
 \Conditions{RPC}
 }
 
@@ -506,7 +467,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns AUTH_ADD}
 \Conditions{RPC}
 }
 
@@ -517,7 +477,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns AUTH_ADD}
 \Conditions{RPC}
 }
 
@@ -528,7 +487,6 @@ tested.
 					    "foobar", true);
 		ovsec_kadm_get_principal("newuser", buffer);
 		ovsec_kadm_destroy()}
-\Expected{returns XXX}
 \Conditions{RPC}
 }
 
@@ -553,19 +511,18 @@ tested.
 		restore new_princ's max_life;
 		ovsec_kadm_free_principle_ent(buffer);
 		ovsec_kadm_free_principal_ent(buffer2)}
-\Expected{returns DUP}
 }
 
 \numtest{18}{
-\Reason{Fails when password is too short.}
+\Reason{Fails when password is too short, when override_qual is false.}
 }
 
 \numtest{19}{
-\Reason{Fails when password has too few classes.}
+\Reason{Fails when password has too few classes, when override_qual is false.}
 }
 
 \numtest{20}{
-\Reason{Fails when password is in dictionary.}
+\Reason{Fails when password is in dictionary, when override_qual is false.}
 }
 
 \numtest{21}{
@@ -585,16 +542,16 @@ tested.
 }
 
 \numtest{25}{
-\Reason{Allows too-short password when override_qual is true.}
+\Reason{Fails when password is too short, when override_qual is true.}
 }
 
 \numtest{26}{
-\Reason{Allows password with too few classes when
+\Reason{Fails when password has too few classes, when
 		override_qual is true.}
 }
 
 \numtest{27}{
-\Reason{Allows password in dictionary when override_qual is
+\Reason{Fails when password is in dictionary, when override_qual is
 		true.}
 }
 
@@ -672,9 +629,10 @@ tested.
 \Reason{Fails on null principal.}
 }
 
-\numtest{3}{
-\Reason{Fails on empty-string principal.}
-}
+% Empty string principal is legal.
+%\numtest{3}{
+%\Reason{Fails on empty-string principal.}
+%}
 
 \numtest{4}{
 \Reason{Fails on invalid principal name.}
@@ -706,13 +664,10 @@ tested.
 
 \numtest{11}{
 \Reason{Valid invocation.}
-\Expected{Principal is removed from database.}
 }
 
 \numtest{12}{
 \Reason{Valid invocation (on principal with policy).}
-\Expected{Principal is removed from database.  Reference count
-		of its policy is decremented.}
 }
 
 
@@ -968,11 +923,10 @@ tested.
 This section lists a series of tests which will be run a number of
 times, with various parameter settings (e.g., which access bits user
 has, whether user connected with ADMIN_SERVICE or CHANGEPW_SERVICE,
-whether override_qual is specified, etc.).  These changes should
-either all succeed or all fail, depending on the parameter settings.
-After the list of tests, the various invocations of them, with the
-corresponding parameter settings and whether the changes should
-succeed or fail, will be given.
+whether override_qual is specified, etc.).  The table following the
+list of tests gives the various parameter settings under which the
+tests should be run, as well which should succeed and which should
+fail for each choice of parameter settings.
 
 \subsubsection{List of tests}
 
@@ -1001,7 +955,7 @@ given in the table below.
 
 \numtest{5}{
 \Reason{With a history setting of 3 and 1 password change,
-	change password itself or previous password.}
+	change password to itself or previous password.}
 }
 
 \numtest{6}{
@@ -1029,24 +983,27 @@ given in the table below.
 
 \subsubsection{List of parameter settings}
 
+In the table below, ``7 passes'' means that test 7 above passes and
+the rest of the tests fail.
+
 \begin{tabular}{llllll}
 Base & Modify access? & Own password? & Service & override_qual & Pass/Fail \\ \hline
-0 & no & yes & ADMIN & false & fail \\
-10 & no & yes & ADMIN & true & RPC: fail; local: {\em pass} \\
-20 & no & yes & CHANGEPW & false & fail \\
-30 & no & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-40 & no & no & ADMIN & false & fail \\
-50 & no & no & ADMIN & true & RPC: fail; local: {\em pass} \\
-60 & no & no & CHANGEPW & false & fail \\
-70 & no & no & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-80 & yes & yes & ADMIN & false & fail \\
-90 & yes & yes & ADMIN & true & RPC: fail; local {\em pass} \\
-100 & yes & yes & CHANGEPW & false & fail \\
-110 & yes & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-120 & yes & no & ADMIN & false & fail \\
-130 & yes & no & ADMIN & true & {\em pass} \\
-140 & yes & no & CHANGEPW & false & fail \\
-150 & yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
+0 & no & yes & ADMIN & false & all fail \\
+10 & no & yes & ADMIN & true & all fail \\
+20 & no & yes & CHANGEPW & false & all fail \\
+30 & no & yes & CHANGEPW & true & all fail \\
+40 & no & no & ADMIN & false & all fail \\
+50 & no & no & ADMIN & true & RPC: all fail; local: 7 passes \\
+60 & no & no & CHANGEPW & false & all fail \\
+70 & no & no & CHANGEPW & true & RPC: all fail; local: 7 passes \\
+80 & yes & yes & ADMIN & false & all fail \\
+90 & yes & yes & ADMIN & true & all fail \\
+100 & yes & yes & CHANGEPW & false & all fail \\
+110 & yes & yes & CHANGEPW & true & all fail \\
+120 & yes & no & ADMIN & false & all fail \\
+130 & yes & no & ADMIN & true & 7 passes \\
+140 & yes & no & CHANGEPW & false & all fail \\
+150 & yes & no & CHANGEPW & true & RPC: all fail; local: 7 passes
 \end{tabular}
 
 \subsection{Other quality/history tests}
@@ -1149,17 +1106,39 @@ These tests should be run with override_qual false.
 	other's password.}
 }
 
+\numtest{181}{
+\Reason{Password that would succeed if override_qual were false fails
+	if override_qual is true.}
+\Expected{Returns CANNOT_OVERRIDE.}
+}
 
 
 \section{ovsec_kadm_chpass_principal_util}
-
-XXX Needs to be modified to take into account the new argument.
 
 Rerun all the tests listed for ovsec_kadm_chpass_principal above in
 Section \ref{ovseckadmchpassprincipal}.  Verify that they succeed
 and fail in the same circumstances.  Also verify that in each failure
 case, the error message returned in msg_ret is as specified in the
 functional specification.
+
+Also, run the following additional tests.
+
+\numtest{1}{
+\Reason{Null msg_ret is rejected.}
+}
+
+\numtest{2}{
+\Reason{New password is put into pw_ret, when it's prompted for.}
+}
+
+\numtest{3}{
+Reason{New password is put into pw_ret, when it's supplied by the
+	caller.}
+}
+
+\numtest{4}{
+\Reason{Successful invocation when pw_ret is null.}
+}
 
 
 
@@ -1180,21 +1159,21 @@ run of the test.
 \begin{tabular}{llllll}
 Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hline
 1 & no & yes & ADMIN & false & fail \\
-2 & no & yes & ADMIN & true & RPC: fail; local: {\em pass} \\
+2 & no & yes & ADMIN & true & fail \\
 3 & no & yes & CHANGEPW & false & fail \\
-4 & no & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+4 & no & yes & CHANGEPW & true & fail \\
 5 & no & no & ADMIN & false & fail \\
-6 & no & no & ADMIN & true & RPC: fail; local: {\em pass} \\
+6 & no & no & ADMIN & true & RPC: fail; local: pass \\
 7 & no & no & CHANGEPW & false & fail \\
-8 & no & no & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+8 & no & no & CHANGEPW & true & RPC: fail; local: pass \\
 9 & yes & yes & ADMIN & false & fail \\
-10 & yes & yes & ADMIN & true & RPC: fail; local {\em pass} \\
+10 & yes & yes & ADMIN & true & fail \\
 11 & yes & yes & CHANGEPW & false & fail \\
-12 & yes & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+12 & yes & yes & CHANGEPW & true & fail \\
 13 & yes & no & ADMIN & false & fail \\
-14 & yes & no & ADMIN & true & {\em pass} \\
+14 & yes & no & ADMIN & true & pass \\
 15 & yes & no & CHANGEPW & false & fail \\
-16 & yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
+16 & yes & no & CHANGEPW & true & RPC: fail; local: pass \\
 \end{tabular}
 
 \subsection{Other tests}
@@ -1383,7 +1362,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{13}{
-\Reason{Accepts 0 for pw_min_length.}
+\Reason{Rejects 0 for pw_min_length.}
 }
 
 \numtest{14}{
@@ -1418,6 +1397,10 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \Reason{Accepts 10 for pw_history_num.}
 }
 
+\numtest{21.5}{
+\Reason{Rejects 11 for pw_history_num.}
+}
+
 \numtest{22}{
 \Reason{Fails for user with no access bits.}
 }
@@ -1445,6 +1428,11 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \numtest{28}{
 \Reason{Rejects null policy argument.}
 }
+
+\numtes{29}{
+\Reason{Rejects change pw_min_life greater than pw_max_life.}
+}
+
 
 
 \section{ovsec_kadm_delete_policy}
@@ -1613,6 +1601,10 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \Reason{Rejects null policy argument.}
 }
 
+\numtes{29}{
+\Reason{Rejects change which makes pw_min_life greater than
+	pw_max_life.}
+}
 
 \section{ovsec_kadm_get_policy}
 
@@ -1715,16 +1707,32 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 
 \section{ovsec_kadm_free_principal_ent}
 
-Handled by memory-leak testing handled elsewhere.
+In addition to the tests listed here, a memory-leak detector such as
+TestCenter, Purify or dbmalloc should be used to verify that the
+memory freed by this function is really freed.
 
-XXX This isn't sufficient.
+\numtest{1}{
+\Reason{Null princ succeeds.}
+}
+
+\numtes{2}{
+\Reason{Non-null princ succeeds.}
 
 
 \section{ovsec_kadm_free_policy_ent}
 
-Handled by memory-leak testing handled elsewhere.
+In addition to the tests listed here, a memory-leak detector such as
+TestCenter, Purify or dbmalloc should be used to verify that the
+memory freed by this function is really freed.
 
-XXX This isn't sufficient.
+\numtest{1}{
+\Reason{Null policy succeeds.}
+}
+
+\numtest{2}{
+\reason{Non-null policy succeeds.}
+}
+
 
 
 \section{ovsec_kadm_get_privs}
