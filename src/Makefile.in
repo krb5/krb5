@@ -31,7 +31,10 @@ all-windows:: maybe-awk Makefile-windows
 	@echo Making in clients
 	cd ..\clients
 	$(MAKE) -$(MFLAGS)
-	cd ..
+	@echo Making in appl\gss-sample
+	cd ..\appl\gss-sample
+	$(MAKE) -$(MFLAGS)
+	cd ..\..
 
 world::
 	date
@@ -124,6 +127,7 @@ config-windows:: Makefile-windows
 ##DOS##MKFDEP=$(WCONFIG_EXE) config\win-pre.in config\win-post.in
 
 WINMAKEFILES=Makefile \
+	appl\gss-sample\Makefile \
 	clients\Makefile clients\kdestroy\Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
@@ -162,6 +166,8 @@ WINMAKEFILES=Makefile \
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
 ##DOS##Makefile: Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##appl\gss-sample\Makefile: appl\gss-sample\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\Makefile: clients\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -255,17 +261,17 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\windows\Makefile: util\windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\Makefile:  windows\Makefile.in $(MKFDEP)
+##DOS##windows\Makefile: windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\lib\Makefile:  windows\lib\Makefile.in $(MKFDEP)
+##DOS##windows\lib\Makefile: windows\lib\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\cns\Makefile:  windows\cns\Makefile.in $(MKFDEP)
+##DOS##windows\cns\Makefile: windows\cns\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\gina\Makefile:  windows\gina\Makefile.in $(MKFDEP)
+##DOS##windows\gina\Makefile: windows\gina\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\gss\Makefile:  windows\gss\Makefile.in $(MKFDEP)
+##DOS##windows\gss\Makefile: windows\gss\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\wintel\Makefile:  windows\wintel\Makefile.in $(MKFDEP)
+##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows

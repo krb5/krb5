@@ -1,3 +1,7 @@
+2000-02-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build gss-sample on Windows.
+
 2000-01-26  Ken Raeburn  <raeburn@raeburn.org>
 
 	* aclocal.m4 (KRB5_AC_REGEX_FUNCS): Require AC_PROG_CC instead of
