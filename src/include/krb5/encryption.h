@@ -51,10 +51,11 @@ typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*string_to_key) PROTOTYPE((krb5_keytype, krb5_keyblock *,
 						krb5_data *,
 						krb5_principal));
-    krb5_error_code (*random_key) PROTOTYPE((krb5_pointer,
-					     krb5_keyblock **));
     krb5_error_code  (*init_random_key) PROTOTYPE((krb5_keyblock *,
 						   krb5_pointer *));
+    krb5_error_code  (*finish_random_key) PROTOTYPE((krb5_pointer *));
+    krb5_error_code (*random_key) PROTOTYPE((krb5_pointer,
+					     krb5_keyblock **));
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
