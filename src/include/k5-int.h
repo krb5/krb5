@@ -1516,14 +1516,6 @@ krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 void krb5int_set_prompt_types
 	KRB5_PROTOTYPE((krb5_context, krb5_prompt_type *));
 
-krb5_error_code krb5_libdefault_boolean
-        KRB5_PROTOTYPE((krb5_context, const krb5_data *, const char *,
-			int *));
-
-int _krb5_use_dns_realm KRB5_PROTOTYPE((krb5_context));
-int _krb5_use_dns_kdc KRB5_PROTOTYPE((krb5_context));
-int _krb5_conf_boolean KRB5_PROTOTYPE((const char *));
-
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
 #endif

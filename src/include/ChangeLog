@@ -1,3 +1,10 @@
+2000-07-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-int.h: Move prototypes for krb5 only internal functions
+	krb5_libdefault_boolean, _krb5_use_dns_realm, _krb5_use_dns_kdc,
+	_krb5_conf_boolean to the header files in the lib/krb5/{os,krb}
+	directories.
+
 2000-07-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_cc_*): Replace macro definitions with function
