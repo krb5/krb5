@@ -35,6 +35,7 @@ kdb_compat.h
 kdb_cpw.c
 kdb_dbm.c
 kdb_xdr.c
+keytab.c
 setup_mkey.c
 store_mkey.c
 t_kdb.c
