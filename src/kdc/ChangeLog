@@ -1,5 +1,8 @@
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
+	* network.c (closedown_network): Free each connection data
+	structure while closing file descriptors.
+
 	* kdc_util.h (sockaddr2p): Don't declare.
 
 2004-07-23  Tom Yu  <tlyu@mit.edu>

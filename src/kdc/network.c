@@ -1069,6 +1069,11 @@ closedown_network(const char *prog)
 	if (conn->fd >= 0)
 	    (void) close(conn->fd);
 	DEL (connections, i);
+	/* There may also be per-connection data in the tcp structure
+	   (tcp.buffer, tcp.response) that we're not freeing here.
+	   That should only happen if we quit with a connection in
+	   progress.  */
+	free(conn);
     }
     FREE_SET_DATA(connections);
     FREE_SET_DATA(udp_port_data);
