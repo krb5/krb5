@@ -1,3 +1,8 @@
+1999-11-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Fix bug in direction of
+	test while walking through whitespace.  Thanks to Matt Crawford.
+
 1999-10-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* logger.c (klog_com_err_proc, klog_vsyslog): Use proper format
