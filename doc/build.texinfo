@@ -348,6 +348,43 @@ the previous responses to them.  This protects against certain types of
 attempts to extract information from the KDC through some of the
 hardware preauthentication systems.
 
+@item --with-system-et
+
+Use installed versions of the error-table support software, the
+@samp{compile_et} program, the @file{com_err.h} header file and the
+@file{com_err} library.  If these are not in the default locations,
+you may wish to specify @code{CPPFLAGS=-I/some/dir} and
+@code{LDFLAGS=-L/some/other/dir} options at configuration time as
+well.
+
+If this option is not given, a version supplied with the Kerberos
+sources will be built and installed along with the rest of the
+Kerberos tree, for Kerberos applications to link against.
+
+@item --with-system-ss
+
+Use installed versions of the subsystem command-line interface
+software, the @samp{mk_cmds} program, the @file{ss/ss.h} header file
+and the @file{ss} library.  If these are not in the default locations,
+you may wish to specify @code{CPPFLAGS=-I/some/dir} and
+@code{LDFLAGS=-L/some/other/dir} options at configuration time as
+well.  See also the @samp{SS_LIB} option.
+
+If this option is not given, the @file{ss} library supplied with the
+Kerberos sources will be compiled and linked into those programs that
+need it; it will not be installed separately.
+
+@item SS_LIB=libs...
+
+If @samp{-lss} is not the correct way to link in your installed
+@file{ss} library, for example if additional support libraries are
+needed, specify the correct link options here.  Some variants of this
+library are around which allow for Emacs-like line editing, but
+different versions require different support libraries to be
+explicitly specified.
+
+This option is ignored if @samp{--with-system-ss} is not specified.
+
 @end table
 
 For example, in order to configure Kerberos on a Solaris machine using
