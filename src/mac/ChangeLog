@@ -1,3 +1,7 @@
+Wed Aug 19 18:20:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* version.r: Upped to 1.1a1 library, 1.5a1 package
+
 Tue Aug 18 14:30:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* ReadMe: added information about warnings that should be ignored
