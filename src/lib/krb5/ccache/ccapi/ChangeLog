@@ -1,3 +1,12 @@
+1999-08-05	Alexandra Ellwood <lxs@mit.edu>
+
+	* stdcc_util.c (deep_free_cc_v5_creds):
+		Added free(creds) so that the cc_creds gets freed when a 
+		cred_union gets freed.  Before it was leaking memory.
+
+		I searched the k5 sources for folks calling deep_free_cc_v5_creds 
+		and my change seems to not break anyone else.
+	
 1999-08-03	Alexandra Ellwood <lxs@mit.edu>
 	
 	* stdcc.c (krb5_stdcc_destroy):
