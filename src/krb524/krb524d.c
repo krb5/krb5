@@ -295,9 +295,7 @@ krb5_error_code do_connection(s, context)
 				   &v4_service_key);
      if (ret)
 	  goto error;
-     krb5_free_keyblock_contents(context, &v5_service_key);
-     krb5_free_keyblock_contents(context, &v4_service_key);
-     krb5_free_ticket(context, v5tkt);
+
      if (debug)
 	  printf("credentials converted\n");
 

@@ -1,3 +1,8 @@
+Mon Nov 11 16:23:32 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c (do_connection): only free v4/v5 keyblock contents and
+	v5 ticket *once*, in cleanup branch at the end.
+
 Thu Nov  7 15:45:16 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* test.c (main): 
