@@ -1,3 +1,168 @@
+2001-11-06  Tom Yu  <tlyu@mit.edu>
+
+	* rsh.exp: Fix date-grabbing regexp to deal with older versions of
+	expect/tcl that have limited regexp capabilities.
+
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* rsh.exp: Fix date grabbing code so we don't try to parse the
+	timezone-less date out of of a syslog message.  expect eof in
+	places to drain pty buffers and avoid deadlock.
+
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* gssftp.exp: Remove -U flag from ftpd invocation for now, since
+	1.2.x won't have it.
+
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* v4gssftp.exp: Calling send_error from within a dejagnu test is
+	wrong.  So is calling exit.  Fix to not do these things.  Expect
+	eof rather than "\r" so as to drain pty buffers and avoid
+	deadlock.
+
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* gssftp.exp: Calling send_error from within a dejagnu test is
+	wrong.  So is calling exit.  Fix to not do these things.  Expect
+	eof rather than "\r" so as to drain pty buffers and avoid
+	deadlock.
+
+2001-10-30  Tom Yu  <tlyu@mit.edu>
+
+	* standalone.exp: Change check for missing ccache to look for "No
+	credentials cache found" instead of "No credentials cache file
+	found" due to change in message text.
+
+	* v4gssftp.exp: Remove -U flag frmo ftpd invocation for now, since
+	1.2.x won't have it.  Change check for missing ccache to look for
+	"No credentials cache found" instead of "No credentials cache file
+	found" due to change in message text.
+
+	* v4krb524d.exp: Remove -p flag from krb524d invocation for now,
+	since 1.2.x won't have it.
+
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* rcp.exp, rsh_exp (stop_rsh_daemon): Do not close a process and
+	then look for eof. Some versions of expect go through a full
+	timeout in this scenario and others return immediately. New order:
+	kill process, expect eof, close, and then wait.
+	[pullup from trunk]
+
+2001-10-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* rsh.exp (rsh_test): Add stop_rsh_daemon before invoking
+	start_rsh_daemon again to prevent running out of ptys.
+	[pullup from trunk]
+
+2001-10-24  Mitchell Berger  <mitchb@mit.edu>
+
+	* kadmin.exp: Corrected a couple of unimportant typos.  Added procedures
+	kadmin_addpol, kadmin_delpol, kadmin_listpols, kadmin_modpol, and
+	kadmin_showpol, which provide the tools with which to perform policy
+	tests.  Added some basic policy operations to the tests of basic
+	kadmin functions.  Added a test case to exercise the kadmind crash
+	that used to occur when the history number of a policy was decreased.
+	[pullup from trunk]
+
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* rcp.exp (stop_rsh_daemon): Call "expect eof" to drain pty buffer
+	and avoid deadlock.
+
+	* rsh.exp (stop_rsh_daemon, rsh_test): Call "expect eof" to drain
+	pty buffer and avoid deadlock.
+	[pullups from trunk]
+
+2001-07-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4gssftp.exp, gssftp.exp: Test transfering a file > 1MB to
+ 	exercise PBSZ failure.
+	[pullup from trunk]
+
+2001-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* gssftp.exp: Use $tmppwd rather than hardcoding tmpdir.
+
+	* kadmin.exp: Use $tmppwd rather than hardcoding tmpdir.
+
+	* rcp.exp: Use $tmppwd rather than hardcoding tmpdir.
+
+	* rsh.exp: Rearrange ordering of environment setup slightly.
+
+	* standalone.exp: Use $KLIST -5 -e so as to better debug enctype
+	problems.
+
+	* v4gssftp.exp: Do check_klogin as well as check_k5login.  Use
+	$tmppwd rather than hardcoding tmpdir.
+	[pullups from trunk]
+
+2001-06-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4krb524d.exp: New tests for the krb524d and k524init programs. 
+	[pullup from trunk]
+
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4gssftp.exp: During test, set KRB5CCNAME to a non-existant
+	cache. Restore at end to previous setting. This prevents failures
+	caused when the krb5 cache contains valid information - as in the
+	case of this test being run immediately after the gssftp.exp test.
+	[pullup from trunk]
+
+2001-06-08  Mitchell Berger  <mitchb@mit.edu>
+
+	* gssftp.exp: Invocation of ftpd changed to use -U /dev/null and
+	-a so that the test may successfully be run by root without failing
+	(i.e. root is granted ftp access) and without opening the running
+	ftpd to a password attack (i.e. authorization is required).
+	Check for successful login messages added.
+
+	* v4gssftp.exp: Same changes.
+	[pullups from trunk]
+
+2001-06-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4gssftp.exp: Allow for "decrypt integrity check failed" error
+	minor code from GSSAPI as well.
+	[pullup from trunk]
+
+2001-04-26  Tom Yu  <tlyu@mit.edu>
+
+	* v4gssftp.exp: Allow for "no credentials cache found" error minor
+	code from GSSAPI.
+	[pullup from trunk]
+
+2000-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* v4gssftp.exp: Fix to handle some cases of krb4 failure prior to
+	timing out.
+	[pullup from trunk]
+
+Tue Aug 22 11:43:14 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4gssftp.exp: New tests for the krb4 compatible interface to gssftp. 
+	[pullup from trunk]
+
+2000-08-08  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* v4standalone.exp: New set of tests for basic V4 functionality.
+	[pullup from trunk]
+
+2000-07-04  Tom Yu  <tlyu@mit.edu>
+
+	* rsh.exp: Drain buffers on klist test to avoid wedging rsh on
+	exit under HP/UX.
+	[pullup from trunk]
+
+	* gssapi.exp: Rework significantly to deal with HP/UX lossage that
+	probably resulted from when either the client or the server wound
+	up blocking on tty output.  Abstract things a little more.  Remove
+	dead duplicate code that used to deal with "-v2".  Should figure
+	out why the "-v2" stuff disappeared mysteriously.
+	[pullup from trunk]
+
 2000-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.exp: Use $KDESTROY -5 to deal with changed behavior.

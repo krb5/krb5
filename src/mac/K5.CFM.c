@@ -16,7 +16,7 @@
  * without express or implied warranty.
  */
  
- 
+#if defined(macintosh)
 #include <CodeFragments.h>
 
 #include "krb5_libinit.h"
@@ -31,7 +31,13 @@ OSErr __initializeK5(CFragInitBlockPtr ibp)
 	OSErr	err = noErr;
 	
 	err = __initialize();
-	
+#else
+#define noErr	0
+void __initializeK5 (void);
+void __initializeK5 (void)
+{
+        int err = noErr;
+#endif
 	if (err == noErr) {
 		err = krb5int_initialize_library ();
 	}
@@ -39,10 +45,12 @@ OSErr __initializeK5(CFragInitBlockPtr ibp)
 	if (err == noErr) {
 		err = cryptoint_initialize_library ();
 	}
-	
+#if defined(macintosh)	
 	return err;
+#endif
 }
 
+#if defined(macintosh)
 void __terminateK5(void)
 {
 
@@ -51,3 +59,4 @@ void __terminateK5(void)
 
 	__terminate();
 }
+#endif

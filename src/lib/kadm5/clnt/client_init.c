@@ -134,6 +134,8 @@ static int preauth_search_list[] = {
 };
 
 static krb5_enctype enctypes[] = {
+    ENCTYPE_DES3_CBC_SHA1,
+    ENCTYPE_DES_CBC_MD5,
     ENCTYPE_DES_CBC_CRC,
     0,
 };
@@ -282,9 +284,15 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  goto error;
 
      if (realm) {
+          if(strlen(service_name) + strlen(realm) + 1 >= sizeof(full_service_name)) {
+	      goto error;
+	  }
 	  sprintf(full_service_name, "%s@%s", service_name, realm);
      } else {
 	  /* krb5_princ_realm(creds.client) is not null terminated */
+          if(strlen(service_name) + krb5_princ_realm(handle->context, creds.client)->length + 1 >= sizeof(full_service_name)) {
+	      goto error;
+	  }
 	  strcpy(full_service_name, service_name);
 	  strcat(full_service_name, "@");
 	  strncat(full_service_name, krb5_princ_realm(handle->context,

@@ -102,8 +102,10 @@ ovsec_kadm_ret_t ovsec_kadm_chpass_principal_util(void *server_handle,
 						  char **ret_pw,
 						  char *msg_ret)
 {
-     return kadm5_chpass_principal_util(server_handle, princ, new_pw,
-						  ret_pw, msg_ret);
+    /* Oh crap.  Can't change the API without bumping the API version... */
+    memset(msg_ret, '\0', 1024);
+    return kadm5_chpass_principal_util(server_handle, princ, new_pw,
+				       ret_pw, msg_ret, 1024);
 }
 
 ovsec_kadm_ret_t ovsec_kadm_randkey_principal(void *server_handle,

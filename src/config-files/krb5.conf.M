@@ -136,15 +136,18 @@ earlier.
 This allows you to set the checksum type used in the authenticator of
 KRB_AP_REQ messages.  The default value for this type is
 CKSUMTYPE_RSA_MD5.  For compatibility with applications linked against
-DCE Kerberos libraries, use a value of 2 to use the CKSUMTYPE_RSA_MD4
-instead. This applies to DCE 1.1 and earlier.
+DCE version 1.1 or earlier Kerberos libraries, use a value of 2 to use
+the CKSUMTYPE_RSA_MD4
+instead.
 
 .IP safe_checksum_type 
-This allows you to set the keyed-checksum type used in KRB_SAFE
+This allows you to set the preferred keyed-checksum type for use in KRB_SAFE
 messages.  The default value for this type is CKSUMTYPE_RSA_MD5_DES.
-For compatibility with applications linked against DCE Kerberos
+For compatibility with applications linked against DCE version 1.1 or
+earlier Kerberos
 libraries, use a value of 3 to use the CKSUMTYPE_RSA_MD4_DES
-instead. This applies to DCE 1.1 and earlier.
+instead.  This field is ignored when its value is incompatible with
+the session key type.
 
 .IP ccache_type
 User this parameter on systems which are DCE clients, to specify the
@@ -179,6 +182,7 @@ subsection define the properties of that particular realm.  For example:
 			mit = mit.edu
 			lithium = lithium.lcs.mit.edu
 		}
+		v4_realm = LCS.MIT.EDU
 	}
 .in -1i
 .fi
@@ -207,6 +211,13 @@ This subsection allows the administrator to configure exceptions to the
 default_domain mapping rule.  It contains V4 instances (the tag name)
 which should be translated to some specific hostname (the tag value) as
 the second component in a Kerberos V5 principal name.
+
+.IP v4_realm
+This relation is used by the krb524 library routines when converting 
+a V5 principal name to a V4 principal name. It is used when V4 realm
+name and the V5 realm are not the same, but still share the same 
+principal names and passwords. The tag value is the Kerberos V4 realm 
+name. 
 
 .SH DOMAIN_REALM SECTION
 
@@ -396,8 +407,6 @@ would look like this:
 	TEST.ANL.GOV = {
 		NERSC.GOV = ANL.GOV
 		NERSC.GOV = ES.NET
-	}
-	
 	}
 .in -1i
 .fi

@@ -1,14 +1,29 @@
 /*
- * in_tkt.c
+ * lib/krb4/in_tkt.c
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  */
 
-#include "mit-copyright.h"
 #include <stdio.h>
 #include <string.h>
 #include "krb.h"
@@ -34,7 +49,7 @@ extern int krb_debug;
 #define do_seteuid(e) seteuid((e))
 #else
 #ifdef HAVE_SETRESUID
-#define do_seteuid(e) setresuid(getuid(), (e), geteuid())
+#define do_seteuid(e) setresuid(-1, (e), -1)
 #else
 #ifdef HAVE_SETREUID
 #define do_seteuid(e) setreuid(geteuid(), (e))
@@ -55,7 +70,7 @@ in_tkt(pname,pinst)
 {
     int tktfile;
     uid_t me, metoo, getuid(), geteuid();
-    struct stat buf;
+    struct stat statpre, statpost;
     int count;
     char *file = TKT_FILE;
     int fd;
@@ -72,20 +87,49 @@ in_tkt(pname,pinst)
 
     me = getuid ();
     metoo = geteuid();
-    if (lstat(file,&buf) == 0) {
-	if (buf.st_uid != me || !(buf.st_mode & S_IFREG) ||
-	    buf.st_mode & 077) {
+    if (lstat(file, &statpre) == 0) {
+	if (statpre.st_uid != me || !(statpre.st_mode & S_IFREG)
+	    || statpre.st_nlink != 1 || statpre.st_mode & 077) {
 	    if (krb_debug)
 		fprintf(stderr,"Error initializing %s",file);
 	    return(KFAILURE);
 	}
+	/*
+	 * Yes, we do uid twiddling here.  It's not optimal, but some
+	 * applications may expect that the ruid is what should really
+	 * own the ticket file, e.g. setuid applications.
+	 */
+	if (me != metoo && do_seteuid(me) < 0)
+	    return KFAILURE;
 	/* file already exists, and permissions appear ok, so nuke it */
-	if ((fd = open(file, O_RDWR|O_SYNC, 0)) < 0)
+	fd = open(file, O_RDWR|O_SYNC, 0);
+	(void)unlink(file);
+	if (me != metoo && do_seteuid(metoo) < 0)
+	    return KFAILURE;
+	if (fd < 0) {
 	    goto out; /* can't zero it, but we can still try truncating it */
+	}
+
+	/*
+	 * Do some additional paranoid things.  The worst-case
+	 * situation is that a user may be fooled into opening a
+	 * non-regular file briefly if the file is in a directory with
+	 * improper permissions.
+	 */
+	if (fstat(fd, &statpost) < 0) {
+	    (void)close(fd);
+	    goto out;
+	}
+	if (statpre.st_dev != statpost.st_dev
+	    || statpre.st_ino != statpost.st_ino) {
+	    (void)close(fd);
+	    errno = 0;
+	    goto out;
+	}
 
 	memset(charbuf, 0, sizeof(charbuf));
 
-	for (i = 0; i < buf.st_size; i += sizeof(charbuf))
+	for (i = 0; i < statpost.st_size; i += sizeof(charbuf))
 	    if (write(fd, charbuf, sizeof(charbuf)) != sizeof(charbuf)) {
 #ifndef NO_FSYNC
 		(void) fsync(fd);
@@ -117,12 +161,7 @@ in_tkt(pname,pinst)
     /* Set umask to ensure that we have write access on the created
        ticket file.  */
     mask = umask(077);
-    if ((tktfile = creat(file,0600)) < 0) {
-	umask(mask);
-	if (krb_debug)
-	    fprintf(stderr,"Error initializing %s",TKT_FILE);
-        return(KFAILURE);
-    }
+    tktfile = open(file, O_RDWR|O_SYNC|O_CREAT|O_EXCL, 0600);
     umask(mask);
     if (me != metoo) {
 	if (do_seteuid(metoo) < 0) {
@@ -134,19 +173,11 @@ in_tkt(pname,pinst)
 	    if (krb_debug)
 		printf("swapped UID's %d and %d\n",me,metoo);
     }
-    if (lstat(file,&buf) < 0) {
+    if (tktfile < 0) {
 	if (krb_debug)
 	    fprintf(stderr,"Error initializing %s",TKT_FILE);
         return(KFAILURE);
     }
-
-    if (buf.st_uid != me || !(buf.st_mode & S_IFREG) ||
-        buf.st_mode & 077) {
-	if (krb_debug)
-	    fprintf(stderr,"Error initializing %s",TKT_FILE);
-        return(KFAILURE);
-    }
-
     count = strlen(pname)+1;
     if (write(tktfile,pname,count) != count) {
         (void) close(tktfile);
@@ -159,8 +190,9 @@ in_tkt(pname,pinst)
     }
     (void) close(tktfile);
 #ifdef TKT_SHMEM
-    (void) strcpy(shmidname, file);
-    (void) strcat(shmidname, ".shm");
+    (void) strncpy(shmidname, file, sizeof(shmidname) - 1);
+    shmidname[sizeof(shmidname) - 1] = '\0';
+    (void) strncat(shmidname, ".shm", sizeof(shmidname) - 1 - strlen(shmidname));
     return(krb_shm_create(shmidname));
 #else /* !TKT_SHMEM */
     return(KSUCCESS);
