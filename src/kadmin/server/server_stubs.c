@@ -1403,6 +1403,43 @@ getprivs_ret * get_privs_1_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      return &ret;
 }
 
+getgeneration_ret * getgeneration_4_svc(getgeneration_arg *arg,
+					struct svc_req *rqstp)
+{
+     static getgeneration_ret	ret;
+     gss_buffer_desc		client_name, service_name;
+     OM_uint32			minor_stat;
+     kadm5_server_handle_t	handle;
+
+     xdr_free(xdr_getgeneration_ret, &ret);
+
+     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
+          return &ret;
+
+     if ((ret.code = check_handle((void *)handle))) {
+          free_server_handle(handle);
+	  return &ret;
+     }
+
+     ret.api_version = handle->api_version;
+
+     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
+          ret.code = KADM5_FAILURE;
+	  return &ret;
+     }
+
+     ret.code = kadm5_get_generation_number((void *)handle, &ret.generation);
+     krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_get_generation_number",
+            client_name.value,
+	    ((ret.code == 0) ? "success" : error_message(ret.code)),
+	    client_name.value, service_name.value,
+	    inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+     free_server_handle(handle);
+     gss_release_buffer(&minor_stat, &client_name);
+     gss_release_buffer(&minor_stat, &service_name);
+     return &ret;
+}
+
 generic_ret *init_1_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 {
      static generic_ret		ret;

@@ -1,3 +1,16 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* kadm_rpc_svc.c (kadm_1): getgeneration_arg added to argument union,
+	new case added to the switch for GET_GENERATION_NUMBER.
+
+	* misc.c: No loger includes adb.h directly (server_internal.h already
+	pulls that in).
+
+	* ovsec_kadmd.c (log_badverf): GET_GENERATION_NUMBER added to
+	proc_names array.
+
+	* server_stubs.c: Added new function getgeneration_4_svc.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* ovsec_kadmd.c (main): Make format string to sprintf specify that

@@ -8,7 +8,6 @@
 static char *rcsid = "$Header$";
 #endif
 
-#include    <kadm5/adb.h>
 #include    <kadm5/server_internal.h>
 #include    <krb5/kdb.h>
 #include    "misc.h"

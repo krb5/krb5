@@ -62,6 +62,7 @@ void kadm_1(rqstp, transp)
 	  chpass3_arg chpass_principal3_1_arg;
 	  chrand3_arg chrand_principal3_1_arg;
 	  setkey3_arg setkey_principal3_1_arg;
+	  getgeneration_arg getgeneration_4_arg;
      } argument;
      char *result;
      bool_t (*xdr_argument)(), (*xdr_result)();
@@ -206,6 +207,12 @@ void kadm_1(rqstp, transp)
 	  xdr_argument = xdr_setkey3_arg;
 	  xdr_result = xdr_generic_ret;
 	  local = (char *(*)()) setkey_principal3_1_svc;
+	  break;
+
+     case GET_GENERATION_NUMBER:
+          xdr_argument = xdr_getgeneration_arg;
+	  xdr_result = xdr_getgeneration_ret;
+	  local = (char *(*)()) getgeneration_4_svc;
 	  break;
 
      default:
