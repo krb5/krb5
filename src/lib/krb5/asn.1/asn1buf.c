@@ -255,6 +255,7 @@ asn1_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code)
   (*code)->data = (char*)malloc((((*code)->length)+1)*sizeof(char));
   if ((*code)->data == NULL) {
     free(*code);
+    *code = NULL;
     return ENOMEM;
   }
   for(i=0; i < (*code)->length; i++)
