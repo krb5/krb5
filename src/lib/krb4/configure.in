@@ -12,6 +12,7 @@ dnl Could check for full stdc environment, but will only test
 dnl for stdlib.h
 AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H))
 
+AC_C_CROSS dnl pretty up output, eval this before AC_TRY_RUN
 dnl need MSBFIRST, LSBFIRST, BITS16, BITS32
 AC_MSG_CHECKING([if system is msbfirst])
 AC_CACHE_VAL(krb5_cv_is_msbfirst,
