@@ -1,3 +1,13 @@
+2002-06-14  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-mac.h: Since this file is now only Win32, remove non-Win32
+	stuff to make it easier to read.  Never used __declspec(dllexport)
+	so that we do not accidentally export symbols.
+
+	* win-mac.h: Add KRB5_CALLCONV_WRONG.
+
+	[pullups from 1-2-2-branch]
+
 2002-06-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* bsdlib.h, bstring.h, fake-stdlib.h: Deleted.
