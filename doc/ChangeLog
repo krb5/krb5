@@ -1,3 +1,7 @@
+2001-02-22  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo: Remove references to "rename_princpal".
+
 2001-02-16  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo (Dumping a Kerberos Database to a File): 

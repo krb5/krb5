@@ -1127,7 +1127,6 @@ that principal.
 * Adding or Modifying Principals::  
 * Deleting Principals::         
 * Changing Passwords::          
-* Renaming Principals::         
 @end menu
 
 @node Retrieving Information About a Principal, Privileges, Principals, Principals
@@ -1315,7 +1314,7 @@ administrative privilege.  The syntax is:
 @code{add_principal} has the aliases @code{addprinc} and
 @code{ank}@footnote{@code{ank} was the short form of the equivalent
 command using the deprecated @code{kadmin5} database administrative
-tool.  It has been kept}.  @code{modify_principal} has the alias @code{modprinc}.
+tool.  It has been kept.  @code{modify_principal} has the alias @code{modprinc}.}
 
 The @code{add_principal} and @code{modify_principal} commands take the
 following switches:
@@ -1540,7 +1539,7 @@ kadmin:}
 @end group
 @end smallexample
 
-@node Changing Passwords, Renaming Principals, Deleting Principals, Principals
+@node Changing Passwords,  , Deleting Principals, Principals
 @subsection Changing Passwords
 
 To change a principal's password use the kadmin @code{change_password}
@@ -1594,35 +1593,6 @@ kadmin:}
 
 Note that @code{change_password} will not let you change the password to
 one that is in the principal's password history.
-
-@node Renaming Principals,  , Changing Passwords, Principals
-@subsection Renaming Principals
-
-To rename a principal, use the kadmin @code{rename_principal} command,
-which requires both the ``add'' and ``delete'' administrative
-privileges.  The syntax is:
-
-@smallexample
-@b{rename_principal} [@b{-force}] @i{old_principal} @i{new_principal}
-@end smallexample
-
-@noindent The @code{rename_principal} command has the alias @code{renprinc}.
-
-For example:
-
-@smallexample
-@group
-@b{kadmin:} renprinc test test0
-@b{Are you sure you want to rename the principal
-"test@@@value{PRIMARYREALM}" to
-"test0@@@value{PRIMARYREALM}"? (yes/no):} yes
-@b{Principal "test@@@value{PRIMARYREALM}" renamed to
-"test0@@@value{PRIMARYREALM}".
-Make sure that you have removed "test@@@value{PRIMARYREALM}" from
-all ACLs before reusing.
-kadmin:}
-@end group
-@end smallexample
 
 @node Policies, Dumping a Kerberos Database to a File, Principals, Administrating Kerberos Database Entries
 @section Policies
