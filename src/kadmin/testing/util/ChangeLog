@@ -1,3 +1,10 @@
+Thu Dec  5 22:47:27 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* tcl_ovsec_kadm.c: 
+	* tcl_kadm5.c: Remove #include of <malloc.h>, which is not
+ 		guaranteed to be there.  #include of <stdlib.h> is all you
+ 		need for malloc(), per ANSI.  [PR#281]
+
 Wed Nov 13 09:55:05 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean): Remove built programs.

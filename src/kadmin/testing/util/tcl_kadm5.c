@@ -4,7 +4,6 @@
 #define USE_KADM5_API_VERSION 2
 #include <kadm5/admin.h>
 #include <com_err.h>
-#include <malloc.h>
 #include <k5-int.h>
 #include <errno.h>
 #include <stdlib.h>
