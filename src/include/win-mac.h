@@ -226,7 +226,7 @@ HINSTANCE get_lib_instance(void);
 
 #ifdef macintosh
 
-#include <KerberosConditionalMacros.h>
+#include <KerberosSupport/KerberosConditionalMacros.h>
 
 #define USE_LOGIN_LIBRARY
 
@@ -247,12 +247,7 @@ HINSTANCE get_lib_instance(void);
 #define NO_PASSWORD
 #define HAVE_LABS
 /*#define ENOMEM 12*/
-#include <unix.h>
 #include <ctype.h>
-
-/*#ifdef NEED_LOWLEVEL_IO*/
-#include <fcntl.h>
-/*#endif*/
 
 /*
  * Which encryption routines libcrypto will provide is controlled by

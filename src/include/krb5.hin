@@ -56,15 +56,11 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
-#endif
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#include <KerberosSupport/KerberosConditionalMacros.h>
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_MSDOS) || defined(_WIN32) || TARGET_API_MAC_OS8
 #include <win-mac.h>
 #endif
 
@@ -95,7 +91,12 @@
  * begin "error_def.h"
  */
 
+#if TARGET_OS_MAC
+#include <KerberosProfile/profile.h>
+#else
 #include <profile.h>
+#endif
+
 #include <errno.h>
 
 /*
@@ -104,6 +105,19 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/* Macintoh CFM-68K magic incantation */
+#if PRAGMA_IMPORT
+#pragma import on
+#endif
+
+#if PRAGMA_STRUCT_ALIGN
+	#pragma options align=mac68k
+#elif PRAGMA_STRUCT_PACKPUSH
+	#pragma pack(push, 2)
+#elif PRAGMA_STRUCT_PACK
+	#pragma pack(2)
 #endif
 
 /*
@@ -2446,14 +2460,24 @@ typedef krb5_int32 krb5_prompt_type;
 KRB5_DLLIMP krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	KRB5_PROTOTYPE((krb5_context context));
 
-#ifdef __cplusplus
-}
+/* Macintosh CFM-68K magic incantation */
+#if PRAGMA_STRUCT_ALIGN
+	#pragma options align=reset
+#elif PRAGMA_STRUCT_PACKPUSH
+	#pragma pack(pop)
+#elif PRAGMA_STRUCT_PACK
+	#pragma pack()
 #endif
 
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#ifdef PRAGMA_IMPORT_OFF
+#pragma import off
+#elif PRAGMA_IMPORT
 #pragma import reset
 #endif
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* KRB5_GENERAL__ */
 
