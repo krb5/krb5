@@ -1,3 +1,9 @@
+Tue Dec 22 01:22:24 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* changepw.c: Add a test for _WIN16 as well as _WIN32 for sockets
+ 		workaround (in case we do want to build the 16 bit library
+ 		again someday)
+
 Sat Dec  5 01:12:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* localaddr.c: Added missing KRB5_DLLIMP and KRB5_CALLCONF macros

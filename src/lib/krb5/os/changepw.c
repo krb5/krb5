@@ -30,7 +30,7 @@
 #include <errno.h>
 
 /* Win32 defines. */
-#if defined(_WIN32) && !defined(__CYGWIN32__)
+#if defined(_WIN16) || (defined(_WIN32) && !defined(__CYGWIN32__))
 #ifndef ECONNABORTED
 #define ECONNABORTED WSAECONNABORTED
 #endif
