@@ -1,3 +1,8 @@
+Thu Oct 17 18:24:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* error_message.c (error_message): Work around a compiler bug on
+		the Alpha.
+
 Thu Sep  5 21:31:07 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* et_c.awk: Change continuation processing so that it doesn't

@@ -75,7 +75,9 @@ long code;
 #endif /* HAVE_STRERROR */
     }
     for (et = _et_list; et; et = et->next) {
-	if (et->table->base == table_num) {
+	/* This is to work around a bug in the compiler on the Alpha 
+	   comparing longs */
+	if (((int) (et->table->base - table_num)) == 0) {
 	    /* This is the right table */
 	    if (et->table->n_msgs <= offset)
 		goto oops;
