@@ -78,8 +78,12 @@ asn1_error_code INTERFACE asn1buf_imbed(subbuf, buf, length)
      const int length;
 {
   subbuf->base = subbuf->next = buf->next;
-  subbuf->bound = subbuf->base + length - 1;
-  if(subbuf->bound > buf->bound) return ASN1_OVERRUN;
+  if (length > 0 ) {
+      subbuf->bound = subbuf->base + length - 1;
+      if (subbuf->bound > buf->bound)
+	  return ASN1_OVERRUN;
+  } else /* constructed indefinite */
+      subbuf->bound = buf->bound;
   return 0;
 }
 
@@ -194,12 +198,27 @@ asn1_error_code INTERFACE asn1buf_remove_charstring(buf, len, s)
   return 0;
 }
 
-int INTERFACE asn1buf_remains(buf)
-     const asn1buf * buf;
+int asn1buf_remains(buf)
+    asn1buf *buf;
 {
+  int remain;
   if(buf == NULL || buf->base == NULL) return 0;
-  else return buf->bound - buf->next + 1;
+  remain = buf->bound - buf->next +1;
+  if (remain <= 0) return remain;
+  /*
+   * Two 0 octets means the end of an indefinite encoding.
+   * 
+   * XXX  Do we need to test to make sure we'er actually doing an
+   * indefinite encoding here?
+   */
+  if ( !*(buf->next) && !*(buf->next + 1)) {
+   /* buf->bound = buf->next + 1;  */
+      buf->next += 2;
+      return 0;
+  }
+  else return remain;
 }
+
 
 asn1_error_code INTERFACE asn12krb5_buf(buf, code)
      const asn1buf * buf;

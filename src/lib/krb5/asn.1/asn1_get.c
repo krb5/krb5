@@ -32,9 +32,10 @@ asn1_error_code INTERFACE asn1_get_tag(buf, class, construction, tagnum, retlen)
 {
   asn1_error_code retval;
   
-  if(asn1buf_remains(buf) <= 0){
-    *tagnum = ASN1_TAGNUM_CEILING;
-    return 0;
+  if (buf == NULL || buf->base == NULL ||
+      buf->bound - buf->next + 1 <= 0) {
+      *tagnum = ASN1_TAGNUM_CEILING;
+      return 0;
   }
   retval = asn1_get_id(buf,class,construction,tagnum);
   if(retval) return retval;

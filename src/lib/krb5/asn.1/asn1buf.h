@@ -143,8 +143,10 @@ asn1_error_code INTERFACE asn12krb5_buf
 
 
 int INTERFACE asn1buf_remains
-	PROTOTYPE((const asn1buf *buf));
-/* effects   Returns the number of unprocessed octets remaining in *buf. */
+	PROTOTYPE((asn1buf *buf));
+/* requires  *buf is a buffer containing an asn.1 structure or array
+   modifies  *buf
+   effects   Returns the number of unprocessed octets remaining in *buf. */
 
 /**************** Private Procedures ****************/
 

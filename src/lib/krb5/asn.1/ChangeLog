@@ -1,3 +1,26 @@
+Wed Mar 22 09:39:55 1995    <tytso@rsx-11.mit.edu>
+
+	* asn1_k_decode.c (setup, next_tag, apptag, get_field_body,
+		get_lenfield_body, asn1_decode_ticket): Use the
+		taglength to determine whether or not the indefinite
+		encoding was used, and if so skip over the termination
+		flag bytes in the ASN.1 stream.
+
+	* asn1buf.c (asn1buf_imbed, asn1buf_remains): Make changes to
+		allow for indefinite encodings.  asn1buf_remains() is now
+		only used for decoding structures and arrays (i.e., asn.1
+		constructs which terminate indefinite encodings with two
+		zero octets.
+
+		[ Note these fixes to support indefinite encoding
+		aren't terribly clean; some invalid encodings may
+		be accepted when they should not be.  This should be
+		looked at in more detail later.]
+
+	* asn1_get.c (asn1_get_tag): Inline original asn1buf_remains()
+		code, since asn1_get_tag doesn't use asn1buf_remains in
+		the context of a structure or an array.
+
 Sat Mar 25 14:12:31 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* asn1_decode.c: move declaration of gmt_mktime() outside of

@@ -31,10 +31,10 @@ asn1_error_code retval;\
 asn1_class class;\
 asn1_construction construction;\
 asn1_tagnum tagnum;\
-int length
+int length,taglen,applen
 
 #define next_tag()\
-retval = asn1_get_tag(&subbuf,&class,&construction,&tagnum,NULL);\
+retval = asn1_get_tag(&subbuf,&class,&construction,&tagnum,&taglen);\
 if(retval) return retval;\
 if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
   return ASN1_BAD_ID
@@ -45,7 +45,7 @@ if((var) == NULL) return ENOMEM
 
 
 #define apptag(tagexpect)\
-retval = asn1_get_tag(buf,&class,&construction,&tagnum,NULL);\
+retval = asn1_get_tag(buf,&class,&construction,&tagnum,&applen);\
 if(retval) return retval;\
 if(class != APPLICATION || construction != CONSTRUCTED ||\
    tagnum != (tagexpect)) return ASN1_BAD_ID
@@ -54,6 +54,7 @@ if(class != APPLICATION || construction != CONSTRUCTED ||\
 #define get_field_body(var,decoder)\
 retval = decoder(&subbuf,&(var));\
 if(retval) return retval;\
+if(!taglen) next_tag();\
 next_tag()
 
 #define get_field(var,tagexpect,decoder)\
@@ -70,6 +71,7 @@ else var = optvalue
 #define get_lenfield_body(len,var,decoder)\
 retval = decoder(&subbuf,&(len),&(var));\
 if(retval) return retval;\
+if(!taglen) next_tag();\
 next_tag()
 
 #define get_lenfield(len,var,tagexpect,decoder)\
@@ -360,6 +362,10 @@ asn1_error_code INTERFACE asn1_decode_ticket(buf, val)
     get_field(val->enc_part,3,asn1_decode_encrypted_data);
     end_structure();
     val->magic = KV5M_TICKET;
+  }
+  if(!applen) {
+    retval = asn1_get_tag(buf,&class,&construction,&tagnum,NULL);
+    if (retval) return retval;
   }
   cleanup();
 }
