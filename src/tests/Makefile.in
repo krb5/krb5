@@ -18,6 +18,7 @@ kdb_check:
 	LD_LIBRARY_PATH=$(TOPLIBD) ../tests/create/kdb5_mkdums $(KTEST_OPTS) 
 	LD_LIBRARY_PATH=$(TOPLIBD) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
 	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/edit/kdb5_edit $(KADMIN_OPTS) -R "dump_db $(TEST_DB).dump"
+	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/edit/kdb5_edit $(KADMIN_OPTS) -R "dump_db -old $(TEST_DB).odump"
 	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/destroy/kdb5_destroy -d $(TEST_DB) -f
 	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/edit/kdb5_edit -r $(TEST_REALM) -R "load_db $(TEST_DB).dump $(TEST_DB)"
 	LD_LIBRARY_PATH=$(TOPLIBD) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
@@ -25,6 +26,13 @@ kdb_check:
 	sort $(TEST_DB).dump > $(TEST_DB).sort
 	sort $(TEST_DB).dump2 > $(TEST_DB).sort2
 	cmp $(TEST_DB).sort $(TEST_DB).sort2
+	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/destroy/kdb5_destroy -d $(TEST_DB) -f
+	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/edit/kdb5_edit -r $(TEST_REALM) -R "load_db -old $(TEST_DB).odump $(TEST_DB)"
+	LD_LIBRARY_PATH=$(TOPLIBD) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
+	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/edit/kdb5_edit $(KADMIN_OPTS) -R "dump_db -old $(TEST_DB).odump2"
+	sort $(TEST_DB).odump > $(TEST_DB).osort
+	sort $(TEST_DB).odump2 > $(TEST_DB).osort2
+	cmp $(TEST_DB).osort $(TEST_DB).osort2
 	LD_LIBRARY_PATH=$(TOPLIBD) ../admin/destroy/kdb5_destroy -d $(TEST_DB) -f
 	$(RM) $(TEST_DB)*
 
