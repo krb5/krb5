@@ -1,3 +1,10 @@
+2003-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* README: Revert previous change, as it was in error; socklen_t
+	was introduced in Aug 2001 Platform SDK, and the actual problem
+	reported was very probably a compilation environment
+	misconfiguration.
+
 2003-07-18  Tom Yu  <tlyu@mit.edu>
 
 	* README: Note requirement for Feb 2003 Platform SDK.  Thanks to
