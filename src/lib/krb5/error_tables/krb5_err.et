@@ -2,7 +2,8 @@
 # $Source$
 # $Author$
 #
-# Copyright 1989,1990 by the Massachusetts Institute of Technology.
+# Copyright 1989,1990,1991 by the Massachusetts Institute of Technology.
+# All Rights Reserved.
 #
 # For copying and distribution information, please see the file
 # <krb5/copyright.h>.
@@ -259,5 +260,6 @@ error_code KRB5_KEYTAB_BADVNO,	"Unsupported key table format version number"
 #
 
 error_code KRB5_PROG_ATYPE_NOSUPP,	"Program lacks support for address type"
+error_code KRB5_RC_REQUIRED,	"Message replay detection requires rcache parameter"
 
 end
