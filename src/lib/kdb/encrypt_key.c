@@ -73,7 +73,7 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
 
     memcpy((char *)tmp.contents, (const char *)keyblock->contents, tmp.length);
     key_data->key_data_contents[0] = ptr = (krb5_octet *)malloc(
-					key_data->key_data_length[0] - 2);
+					key_data->key_data_length[0]);
     if (key_data->key_data_contents[0] == NULL) {
 	krb5_xfree(tmp.contents);
 	return ENOMEM;
