@@ -1,3 +1,9 @@
+2001-07-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* rc_dfl.c (krb5_rc_io_fetch): Once length element read from
+	cache, and verified to be positive, put into unsigned int variable
+	for passing to other functions that expect such.
+
 2001-07-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* rc_io.c: Declare krb5_rc_io_open_internal static.

@@ -312,18 +312,21 @@ static krb5_error_code
 krb5_rc_io_fetch(krb5_context context, struct dfl_data *t,
 		 krb5_donot_replay *rep, int maxlen)
 {
-    int len;
+    int len2;
+    unsigned int len;
     krb5_error_code retval;
 
     rep->client = rep->server = 0;
 
-    retval = krb5_rc_io_read(context, &t->d, (krb5_pointer) &len, sizeof(len));
+    retval = krb5_rc_io_read(context, &t->d, (krb5_pointer) &len2,
+			     sizeof(len2));
     if (retval)
 	return retval;
 
-    if ((len <= 0) || (len >= maxlen))
+    if ((len2 <= 0) || (len2 >= maxlen))
 	return KRB5_RC_IO_EOF;
 
+    len = len2;
     rep->client = malloc (len);
     if (!rep->client)
 	return KRB5_RC_MALLOC;
@@ -332,14 +335,16 @@ krb5_rc_io_fetch(krb5_context context, struct dfl_data *t,
     if (retval)
 	goto errout;
 
-    retval = krb5_rc_io_read(context, &t->d, (krb5_pointer) &len, sizeof(len));
+    retval = krb5_rc_io_read(context, &t->d, (krb5_pointer) &len2, 
+			     sizeof(len2));
     if (retval)
 	goto errout;
 
-    if ((len <= 0) || (len >= maxlen)) {
+    if ((len2 <= 0) || (len2 >= maxlen)) {
 	retval = KRB5_RC_IO_EOF;
 	goto errout;
     }
+    len = len2;
 
     rep->server = malloc (len);
     if (!rep->server) {
