@@ -62,7 +62,7 @@ extern char *krb5_config_file;		/* extern so can be set at
 krb5_error_code
 krb5_get_krbhst(context, realm, hostlist)
     krb5_context context;
-    krb5_data *realm;
+    const krb5_data *realm;
     char ***hostlist;
 {
     FILE *config_file;
