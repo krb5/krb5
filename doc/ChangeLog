@@ -1,3 +1,14 @@
+2001-02-16  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo (Dumping a Kerberos Database to a File): 
+	(Restoring a Kerberos Database from a Dump File): Update to
+	reflect new dump file format and new flags to force beta7 dump
+	format.
+
+	* install.texinfo (Switching Master and Slave KDCs):
+	(Upgrading Existing Kerberos V5 Installations): Update to reflect
+	new dump file format that includes principal policy information.
+
 2000-06-22  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo (HPUX): Update note for HPUX compiler flags.

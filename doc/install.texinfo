@@ -1094,11 +1094,11 @@ Disable the cron job that propagates the database.
 @item
 Run your database propagation script manually, to ensure that the slaves
 all have the latest copy of the database.  (@xref{Propagate the Database
-to Each Slave KDC}.)  If there is a need to preserve per-principal
-policy information from the database, you should do a ``kdb5_util dump
--ov'' in order to preserve that information and propogate that dump file
-securely by some means to the slave so that its database has the correct
-state of the per-principal policy information.
+to Each Slave KDC}.)  As of the 1.2.2 release, it is no longer necessary
+to use ``kdb5_util dump -ov'' in order to preserve per-principal policy
+information, as the default dump format now supports it.  Note you
+should update your slaves prior to your master, so that they will
+understand the new dump format.  (This is a good policy anyway.)
 @end enumerate
 
 On the @emph{new} master KDC:
@@ -1512,10 +1512,10 @@ your current database, you must choose the same master password.
 @end enumerate
 
 The ``dump -ov'' and ``load -update'' commands are necessary in order to
-preserve per-principal policy information, since the default dump format
-filters out that information.  If you omit those steps, the loaded
-database database will lose the policy information for each principal
-that has a policy.
+preserve per-principal policy information, since the dump format in
+releases prior to 1.2.2 filters out that information.  If you omit those
+steps, the loaded database database will lose the policy information for
+each principal that has a policy.
 
 To update a Slave KDC, you must stop the old server processes on the
 Slave KDC, install the new server binaries, reload the most recent slave

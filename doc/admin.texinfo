@@ -1788,8 +1788,8 @@ To dump a Kerberos database into a file, use the @code{kdb5_util}
 @code{dump} command on one of the KDCs.  The syntax is:
 
 @smallexample
-@b{kdb5_util dump} [@b{-old}] [@b{-b6}] [@b{-ov}] [@b{-verbose}] [@i{filename}
-[@i{principals...}]]
+@b{kdb5_util dump} [@b{-old}] [@b{-b6}] [@b{-b7}] [@b{-ov}] [@b{-verbose}]
+[@i{filename} [@i{principals...}]]
 @end smallexample
 
 The @code{kdb5_util dump} command takes the following options:
@@ -1801,10 +1801,12 @@ causes the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 @itemx -b6
 causes the dump to be in the Kerberos 5 Beta 6 format (``kdb5_edit
 load_dump version 3.0'').
+@itemx -b7
+causes the dump to be in the Kerberos 5 Beta 7 format (``kdb5_util
+load_dump version 4'').  This was the dump format produced on releases
+prior to 1.2.2.
 @itemx -ov
-causes the dump to be in ovsec_adm_export format.  Currently, the only
-way to preserve per-principal policy information is to use this in
-conjunction with a normal dump.
+causes the dump to be in ovsec_adm_export format.
 @itemx -verbose
 causes the name of each principal and policy to be printed as it is
 dumped.
@@ -1861,12 +1863,6 @@ not be dumped:
 If you do not specify a dump file, @code{kdb5_util} will dump the
 database to the standard output.
 
-There is currently a bug where the default dump format omits the
-per-principal policy information.  In order to dump all the data
-contained in the Kerberos database, you must perform a normal dump (with
-no option flags) and an additional dump using the ``-ov'' flag to a
-different file.
-
 @node Restoring a Kerberos Database from a Dump File, Creating a Stash File, Dumping a Kerberos Database to a File, Administrating Kerberos Database Entries
 @section Restoring a Kerberos Database from a Dump File
 
@@ -1875,8 +1871,8 @@ To restore a Kerberos database dump from a file, use the
 is:
 
 @smallexample
-@b{kdb5_util load} [@b{-old}] [@b{-b6}] [@b{-ov}] [@b{-verbose}] [@b{-update}]
-@i{dumpfilename} @i{dbname} [@i{admin_dbname}]
+@b{kdb5_util load} [@b{-old}] [@b{-b6}] [@b{-b7}] [@b{-ov}] [@b{-verbose}]
+[@b{-update}] @i{dumpfilename} @i{dbname} [@i{admin_dbname}]
 @end smallexample
 
 The @code{kdb5_util load} command takes the following options:
@@ -1888,6 +1884,9 @@ requires the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 @itemx -b6
 requires the dump to be in the Kerberos 5 Beta 6 format (``kdb5_edit
 load_dump version 3.0'').
+@itemx -b7
+requires the dump to be in the Kerberos 5 Beta 7 format (``kdb5_util
+load_dump version 4'').
 @itemx -ov
 requires the dump to be in ovsec_adm_export format.
 @itemx -verbose
@@ -1895,10 +1894,7 @@ causes the name of each principal and policy to be printed as it is
 dumped.
 @itemx -update
 causes records from the dump file to be updated in or added to the
-existing database.  This is useful in conjunction with an
-ovsec_adm_export format dump if you want to preserve per-principal
-policy information, since the current default format does not contain
-this data.
+existing database.
 @end table
 
 For example:
