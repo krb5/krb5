@@ -1,3 +1,27 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* authenc.c (telnet_gets): Cleanup assignment in conditional.
+
+	* commands.c: Include sys/wait.h, libtelent/auth.h,
+	libtelnet/encrypt.h for prototypes. Explicity declare functions as
+	returning int. Assignments in conditionals cleanup.
+
+	* externs.h: Add numerous prototypes.
+
+	* ring.c (ring_init): Explicitly declare as returning int.
+
+	* ring.h: Add prototype for ring_at_mark().
+
+	* telnet.c: Include unistd.h, libtelnet/auth.h,
+	libtelnet/encrypt.h for prototypes. Delcare is_unique()
+	static. Fix up format string for sprintf() to expect
+	longs. Assignments in conditionals cleaned up.
+
+	* main.c, terminal.c: Include libtelnet/encrypt.h for prototype. 
+
+	* utilities.c: Include sys/socket.h, libtelent/auth.h,
+	libtelnet/encrypt.h for prototypes.
+
 2001-05-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnet.c (telnet): Fix grammar in some error messages.  Based on

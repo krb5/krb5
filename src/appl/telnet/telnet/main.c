@@ -41,7 +41,9 @@ char copyright[] =
 
 #include <sys/types.h>
 #include <libtelnet/auth.h>
-
+#ifdef ENCRYPTION
+#include <libtelnet/encrypt.h>
+#endif
 
 # include <netinet/in.h>
 
@@ -110,6 +112,7 @@ usage()
 /* see forward.c -- indicate that we're in telnet, not telnetd. */
 char *line = 0;
 
+int
 main(argc, argv)
 	int argc;
 	char *argv[];
@@ -132,7 +135,7 @@ main(argc, argv)
 
 	TerminalSaveState();
 
-	if (prompt = strrchr(argv[0], '/'))
+	if ((prompt = strrchr(argv[0], '/')))
 		++prompt;
 	else
 		prompt = argv[0];

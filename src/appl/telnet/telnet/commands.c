@@ -50,6 +50,7 @@
 #ifdef	CRAY
 #include <fcntl.h>
 #endif	/* CRAY */
+#include <sys/wait.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -80,6 +81,13 @@
 #include <libtelnet/auth.h>
 #endif
 
+#ifdef	ENCRYPTION
+#include <libtelnet/encrypt.h>
+#endif
+
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION)
+#include <libtelnet/misc-proto.h>
+#endif
 
 #if !defined(CRAY) && !defined(sysV88)
 #include <netinet/in_systm.h>
@@ -115,7 +123,10 @@ extern int isprefix();
 extern char **genget();
 extern int Ambiguous();
 
-static call();
+static int call();
+void cmdrc P((char *, char *));
+static    int
+send_tncmd P((void (*func)(), char *, char *));
 
 typedef struct {
 	char	*name;		/* command name */
@@ -145,7 +156,7 @@ makeargv()
 	margc++;
 	cp++;
     }
-    while (c = *cp) {
+    while ((c = *cp)) {
 	register int inquote = 0;
 	while (isspace(c))
 	    c = *++cp;
@@ -188,7 +199,7 @@ makeargv()
  * Todo:  1.  Could take random integers (12, 0x12, 012, 0b1).
  */
 
-	static
+	static int
 special(s)
 	register char *s;
 {
@@ -426,7 +437,7 @@ send_wontcmd(name)
     return(send_tncmd(send_wont, "wont", name));
 }
 
-    int
+static    int
 send_tncmd(func, cmd, name)
     void	(*func)();
     char	*cmd, *name;
@@ -1319,7 +1330,7 @@ display(argc, argv)
 	    }
 	}
     }
-/*@*/optionstatus();
+    /*@*/optionstatus();
 #ifdef	ENCRYPTION
     EncryptStatus();
 #endif	/* ENCRYPTION */
@@ -1457,8 +1468,8 @@ shell(argc, argv)
 extern int shell();
 #endif	/* !defined(TN3270) */
 
-    /*VARARGS*/
-    static
+/*VARARGS*/
+static int
 bye(argc, argv)
     int  argc;		/* Number of arguments */
     char *argv[];	/* arguments */
@@ -1488,11 +1499,13 @@ bye(argc, argv)
 }
 
 /*VARARGS*/
+int
 quit()
 {
 	(void) call(bye, "bye", "fromquit", 0);
 	Exit(0);
 	/*NOTREACHED*/
+	return 0;
 }
 
 /*VARARGS*/
@@ -1545,7 +1558,7 @@ slc_help()
     }
 }
 
-    static struct slclist *
+static struct slclist *
 getslc(name)
     char *name;
 {
@@ -1553,7 +1566,7 @@ getslc(name)
 		genget(name, (char **) SlcList, sizeof(struct slclist));
 }
 
-    static
+static int
 slccmd(argc, argv)
     int  argc;
     char *argv[];
@@ -1650,6 +1663,7 @@ getenvcmd(name)
 		genget(name, (char **) EnvList, sizeof(struct envlist));
 }
 
+int
 env_cmd(argc, argv)
     int  argc;
     char *argv[];
@@ -1715,7 +1729,7 @@ env_init()
 	register struct env_lst *ep;
 
 	for (epp = environ; *epp; epp++) {
-		if (cp = strchr(*epp, '=')) {
+		if ((cp = strchr(*epp, '='))) {
 			*cp = '\0';
 			ep = env_define((unsigned char *)*epp,
 					(unsigned char *)cp+1);
@@ -1760,7 +1774,7 @@ env_define(var, value)
 {
 	register struct env_lst *ep;
 
-	if (ep = env_find(var)) {
+	if ((ep = env_find(var))) {
 		if (ep->var)
 			free(ep->var);
 		if (ep->value)
@@ -1786,7 +1800,7 @@ env_undefine(var)
 {
 	register struct env_lst *ep;
 
-	if (ep = env_find(var)) {
+	if ((ep = env_find(var))) {
 		ep->prev->next = ep->next;
 		if (ep->next)
 			ep->next->prev = ep->prev;
@@ -1804,7 +1818,7 @@ env_export(var)
 {
 	register struct env_lst *ep;
 
-	if (ep = env_find(var))
+	if ((ep = env_find(var)))
 		ep->export = 1;
 }
 
@@ -1814,7 +1828,7 @@ env_unexport(var)
 {
 	register struct env_lst *ep;
 
-	if (ep = env_find(var))
+	if ((ep = env_find(var)))
 		ep->export = 0;
 }
 
@@ -1867,7 +1881,7 @@ env_default(init, welldefined)
 		return NULL;	/* guessing here too -- eichin -- XXX */
 	}
 	if (nep) {
-		while (nep = nep->next) {
+		while ((nep = nep->next)) {
 			if (nep->export && (nep->welldefined == welldefined))
 				return(nep->var);
 		}
@@ -1881,7 +1895,7 @@ env_getvalue(var)
 {
 	register struct env_lst *ep;
 
-	if (ep = env_find(var))
+	if ((ep = env_find(var)))
 		return(ep->value);
 	return(NULL);
 }
@@ -1982,6 +1996,7 @@ auth_help()
     return 0;
 }
 
+int
 auth_cmd(argc, argv)
     int  argc;
     char *argv[];
@@ -2088,6 +2103,7 @@ EncryptHelp()
     return 0;
 }
 
+int
 encrypt_cmd(argc, argv)
     int  argc;
     char *argv[];
@@ -2191,6 +2207,7 @@ forw_status()
     return(0);
 }
 
+int
 forw_set(f_flags)
      int f_flags;
 {
@@ -2198,7 +2215,7 @@ forw_set(f_flags)
     return(0);
 }
 
-    static int
+static int
 forw_help()
 {
     struct forwlist *c;
@@ -2214,6 +2231,7 @@ forw_help()
     return 0;
 }
 
+int
 forw_cmd(argc, argv)
     int  argc;
     char *argv[];
@@ -2285,7 +2303,7 @@ filestuff(fd)
  * Print status about the connection.
  */
     /*ARGSUSED*/
-    static
+static int
 status(argc, argv)
     int	 argc;
     char *argv[];
@@ -2449,7 +2467,7 @@ tn(argc, argv)
     } else {
 #endif
 	temp = inet_addr(hostp);
-	if (temp & 0xffffffff != INADDR_NONE) {
+	if ((temp & 0xffffffff) != INADDR_NONE) {
 	    sin.sin_addr.s_addr = temp;
 	    sin.sin_family = AF_INET;
 	    (void) strncpy(_hostname, hostp, sizeof(_hostname) - 1);  
@@ -2584,8 +2602,9 @@ tn(argc, argv)
 
 	user = getenv("USER");
 	if (user == NULL ||
-	    (pw = getpwnam(user)) && pw->pw_uid != getuid()) {
-		if (pw = getpwuid(getuid()))
+	    ((pw = getpwnam(user)) && pw->pw_uid != getuid())) {
+	        pw = getpwuid(getuid());
+		if (pw)
 			user = pw->pw_name;
 		else
 			user = NULL;
@@ -2605,6 +2624,7 @@ tn(argc, argv)
     (void) NetClose(net);
     ExitString("Connection closed by foreign host.\r\n",1);
     /*NOTREACHED*/
+    return 0;
 }
 
 #define HELPINDENT (sizeof ("connect"))
@@ -2678,7 +2698,7 @@ static Command cmdtab[] = {
 #endif
 	{ "environ",	envhelp,	env_cmd,	0 },
 	{ "?",		helphelp,	help,		0 },
-	0
+	{  0,           0,              0,              0 }
 };
 
 static char	crmodhelp[] =	"deprecated command -- use 'toggle crmod' instead";
@@ -2688,7 +2708,7 @@ static Command cmdtab2[] = {
 	{ "help",	0,		help,		0 },
 	{ "escape",	escapehelp,	setescape,	0 },
 	{ "crmod",	crmodhelp,	togcrmod,	0 },
-	0
+	{  0,           0,              0,              0 }
 };
 
 
@@ -2697,7 +2717,7 @@ static Command cmdtab2[] = {
  */
 
     /*VARARGS1*/
-    static
+static int
 call(va_alist)
     va_dcl
 {
@@ -2723,7 +2743,7 @@ getcmd(name)
 {
     Command *cm;
 
-    if (cm = (Command *) genget(name, (char **) cmdtab, sizeof(Command)))
+    if ((cm = (Command *) genget(name, (char **) cmdtab, sizeof(Command))))
 	return cm;
     return (Command *) genget(name, (char **) cmdtab2, sizeof(Command));
 }
@@ -2812,7 +2832,7 @@ command(top, tbuf, cnt)
 /*
  * Help command.
  */
-	static
+static int
 help(argc, argv)
 	int argc;
 	char *argv[];
@@ -2845,6 +2865,7 @@ help(argc, argv)
 static char *rcname = 0;
 static char rcbuf[128];
 
+void
 cmdrc(m1, m2)
 	char *m1, *m2;
 {
@@ -3040,7 +3061,7 @@ sourceroute(arg, cpp, lenp)
 	for (c = 0;;) {
 		if (c == ':')
 			cp2 = 0;
-		else for (cp2 = cp; c = *cp2; cp2++) {
+		else for (cp2 = cp; (c = *cp2); cp2++) {
 			if (c == ',') {
 				*cp2++ = '\0';
 				if (*cp2 == '@')
@@ -3058,7 +3079,7 @@ sourceroute(arg, cpp, lenp)
 
 		if ((tmp = inet_addr(cp)) != -1) {
 			sin_addr.s_addr = tmp;
-		} else if (host = gethostbyname(cp)) {
+		} else if ((host = gethostbyname(cp))) {
 #if	defined(h_addr)
 			memcpy((caddr_t)&sin_addr,
 				host->h_addr_list[0], sizeof(sin_addr));

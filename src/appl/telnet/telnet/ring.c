@@ -103,7 +103,8 @@ static u_long ring_clock = 0;
 
 /* Buffer state transition routines */
 
-    ring_init(ring, buffer, count)
+int
+ring_init(ring, buffer, count)
 Ring *ring;
     unsigned char *buffer;
     int count;

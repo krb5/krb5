@@ -105,7 +105,7 @@ telnet_gets(prompt, result, length, echo)
 	if (echo) {
 		printf("%s", prompt);
 		res = fgets(result, length, stdin);
-	} else if (res = getpass(prompt)) {
+	} else if ((res = getpass(prompt))) {
 		strncpy(result, res, length);
 		res = result;
 	}

@@ -258,19 +258,31 @@ extern void
     command P((int, char *, int)),
     Dump P((int, unsigned char *, int)),
     init_3270 P((void)),
+    init_terminal P((void)),
+    init_telnet P((void)),
+    init_network P((void)),
+    init_sys P((void)),
     printoption P((char *, int, int)),
     printsub P((int, unsigned char *, int)),
     sendnaws P((void)),
+    sendabort P((void)),
+    sendeof P((void)),
+    sendayt P((void)),
+    sendsusp P((void)),
     setconnmode P((int)),
     setcommandmode P((void)),
     setneturg P((void)),
+    set_escape_char P((char *)),
     sys_telnet_init P((void)),
     telnet P((char *)),
     tel_enter_binary P((int)),
+    tel_leave_binary P((int)),
+    TerminalDefaultChars P((void)),
     TerminalFlushOutput P((void)),
     TerminalNewMode P((int)),
     TerminalRestoreState P((void)),
     TerminalSaveState P((void)),
+    TerminalSpeeds P((long *, long *)),
     tninit P((void)),
     upcase P((char *)),
     willoption P((int)),
@@ -290,6 +302,10 @@ extern void
     lm_mode P((unsigned char *, int, int));
 
 extern void
+    ExitString P((char *, int)), 
+    Exit P((int)),
+    SetForExit P((void)),
+    EmptyTerminal P((void)),
     slc_init P((void)),
     slcstate P((void)),
     slc_mode_export P((void)),
@@ -301,15 +317,38 @@ extern void
     slc_start_reply P((void)),
     slc_add_reply P((int, int, int)),
     slc_end_reply P((void));
+
 extern int
-    slc_update P((void));
+    quit P((void)), 
+    ttyflush P((int)),
+    rlogin_susp P((void)),
+    tn P((int, char **)),
+    getconnmode P((void)),
+    netflush P((void)),
+    NetClose P((int)),
+    opt_welldefined P((char *)),
+    process_rings P((int, int, int, int, int, int)),
+    slc_update P((void)),
+    Scheduler P((int)),
+    SetSockOpt P((int, int, int, int)),
+    stilloob P((void)), 
+    telrcv P((void)),
+    telnet_spin P((void)),
+    TerminalWrite P((char *, int)),
+    TerminalRead P((char *, int)),
+    TerminalAutoFlush P((void)),
+    TerminalSpecialChars P((int)),
+    TerminalWindowSize P((long *, long *));
+
 
 extern void
+    env_init P((void)),
     env_opt P((unsigned char *, int)),
     env_opt_start P((void)),
     env_opt_start_info P((void)),
     env_opt_add P((unsigned char *)),
-    env_opt_end P((int));
+    env_opt_end P((int)),
+    optionstatus P((void));
 
 extern unsigned char
     *env_default P((int, int)),

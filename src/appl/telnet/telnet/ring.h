@@ -103,3 +103,6 @@ extern void
 extern void
     ring_clear_mark(),
     ring_mark();
+
+extern int
+    ring_at_mark P((Ring *));

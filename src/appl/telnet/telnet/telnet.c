@@ -33,7 +33,12 @@
 
 /* based on @(#)telnet.c	8.1 (Berkeley) 6/6/93 */
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <sys/types.h>
+#include <time.h>
 
 #if	defined(unix)
 #include <signal.h>
@@ -53,6 +58,20 @@
 #include "externs.h"
 #include "types.h"
 #include "general.h"
+
+#ifdef AUTHENTICATION
+#include <libtelnet/auth.h>
+#endif
+
+#ifdef ENCRYPTION
+#include <libtelnet/encrypt.h>
+#endif
+
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION) 
+#include <libtelnet/misc-proto.h>
+#endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION)  */
+
+static int is_unique P((char *, char **, char **));
 
 
 #define	strip(x)	((x)&0x7f)
@@ -728,7 +747,7 @@ mklist(buf, name)
 		return(unknown);
 }
 
-	int
+static int
 is_unique(name, as, ae)
 	register char *name, **as, **ae;
 {
@@ -858,7 +877,7 @@ suboption()
 
 	    TerminalSpeeds(&ispeed, &ospeed);
 
-	    sprintf((char *)temp, "%c%c%c%c%d,%d%c%c", IAC, SB, TELOPT_TSPEED,
+	    sprintf((char *)temp, "%c%c%c%c%ld,%ld%c%c", IAC, SB, TELOPT_TSPEED,
 		    TELQUAL_IS, ospeed, ispeed, IAC, SE);
 	    len = strlen((char *)temp+4) + 4;	/* temp[3] is 0 ... */
 
@@ -1215,7 +1234,7 @@ slc_init()
 
 #define	initfunc(func, flags) { \
 					spcp = &spc_data[func]; \
-					if (spcp->valp = tcval(func)) { \
+					if ((spcp->valp = tcval(func)) != NULL) { \
 					    spcp->val = *spcp->valp; \
 					    spcp->mylevel = SLC_VARIABLE|flags; \
 					} else { \
@@ -1623,12 +1642,12 @@ env_opt_add(ep)
 	if (ep == NULL || *ep == '\0') {
 		/* Send user defined variables first. */
 		env_default(1, 0);
-		while (ep = env_default(0, 0))
+		while ((ep = env_default(0, 0)) != NULL)
 			env_opt_add(ep);
 
 		/* Now add the list of well know variables.  */
 		env_default(1, 1);
-		while (ep = env_default(0, 1))
+		while ((ep = env_default(0, 1)) != NULL)
 			env_opt_add(ep);
 		return;
 	}
@@ -1658,7 +1677,7 @@ env_opt_add(ep)
 	else
 		*opt_replyp++ = ENV_USERVAR;
 	for (;;) {
-		while (c = *ep++) {
+		while ((c = *ep++)) {
 			switch(c&0xff) {
 			case IAC:
 				*opt_replyp++ = IAC;
@@ -1672,7 +1691,7 @@ env_opt_add(ep)
 			}
 			*opt_replyp++ = c;
 		}
-		if (ep = vp) {
+		if ((ep = vp) != NULL) {
 #ifdef	OLD_ENVIRON
 			if (telopt_environ == TELOPT_OLD_ENVIRON)
 				*opt_replyp++ = old_env_value;
