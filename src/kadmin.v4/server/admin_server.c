@@ -489,8 +489,9 @@ do_child(sig)
 	    pidarraysize--;
 #ifdef WAIT_USES_INT
 	    if (WIFEXITED(status) || WIFSIGNALED(status))
-	        syslog(LOG_ERR, "child %d: termsig %d, retcode %d", pid,
-		       WTERMSIG(status), WEXITSTATUS(status));
+		if (WTERMSIG(status) || WEXITSTATUS(status))
+		    syslog(LOG_ERR, "child %d: termsig %d, retcode %d", pid,
+			   WTERMSIG(status), WEXITSTATUS(status));
 
 #else
 	    if (status.w_retcode || status.w_coredump || status.w_termsig)
