@@ -1,5 +1,10 @@
 1999-09-13  Miro Jurisic <meeroh@mit.edu>
 
+    * win-mac.h:  Remove #define HAVE_STRING_H for MacOS builds (it's already
+    in autoconf.h and I am a moron)
+
+1999-09-13  Miro Jurisic <meeroh@mit.edu>
+
     * win0mac.h:  Add #define HAVE_STRING_H for MacOS builds.
 
 1999-08-31  Jeffrey Altman <jaltman@columbia.edu>

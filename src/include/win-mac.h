@@ -237,8 +237,6 @@ HINSTANCE get_lib_instance(void);
 #define NEAR
 #endif
 
-#define HAVE_STRING_H
-
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
