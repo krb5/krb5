@@ -22,7 +22,7 @@ static char rcsid_ktf_wops_c[] =
 
 struct _krb5_kt_ops krb5_ktf_writable_ops = {
     "WRFILE", 	/* Prefix -- this string should not appear anywhere else! */
-    krb5_ktfile_resolve,
+    krb5_ktfile_wresolve,
     krb5_ktfile_get_name, 
     krb5_ktfile_close,
     krb5_ktfile_get_entry,
