@@ -63,18 +63,18 @@ krb5_parse_name(name, principal)
 register char *name;
 krb5_principal *principal;
 {
-    register char *cp1, *cp2, *cp3;
+    register char *realmptr, *cp, *endcomponent;
     register char *realmname;
     krb5_principal retprinc;
     int ncomponents;
     register int i;
     krb5_error_code retval;
 
-    cp1 = index(name, REALM_SEP);
-    if (cp1)
-	realmname = strsave(cp1+1);
+    realmptr = index(name, REALM_SEP);
+    if (realmptr)
+	realmname = strsave(realmptr+1);
     else {
-	cp1 = name + strlen(name);
+	realmptr = name + strlen(name);
 	realmname = malloc(MAXRLMSZ);
 	if (!realmname)
 	    return(ENOMEM);
@@ -85,9 +85,9 @@ krb5_principal *principal;
     }
 
     /* count components, but only up to 1st @ */
-    for (ncomponents = 1, cp2 = name;
-	 cp2 < cp1 && (cp2 = index(cp2, COMPONENT_SEP)) && cp2 < cp1;
-	 ncomponents++, cp2++);
+    for (ncomponents = 1, cp = name;
+	 cp < realmptr && (cp = index(cp, COMPONENT_SEP)) && cp < realmptr;
+	 ncomponents++, cp++);
 
     /* +1 for realm, +1 for null pointer at end */
     retprinc = (krb5_data **) calloc(ncomponents+2, sizeof(krb5_data *));
@@ -108,24 +108,22 @@ krb5_principal *principal;
     retprinc[0]->length = strlen(realmname)+1;
     retprinc[0]->data = realmname;
 
-    /* cp2 points to the beginning of the current component,
-       cp3 points to the end of the current component divider or
+    /* cp points to the beginning of the current component,
+       endcomponent points to the end of the current component divider or
            is beyond the realm divider, or is null (no more component
 	   dividers).
        */
     
     /* XXX this is broken */
-    for (ncomponents = 1, cp2 = name, cp3 = index(name, COMPONENT_SEP);
-	 cp2 && cp2 <= cp1; 
-	 ncomponents++, cp3 = index(cp2, COMPONENT_SEP)) {
+    for (ncomponents = 1, cp = name,
+	 endcomponent = index(name, COMPONENT_SEP);
+	 cp && cp <= realmptr; 
+	 ncomponents++, endcomponent = index(cp, COMPONENT_SEP)) {
 
-	if (cp3 && cp3 < cp1) {
-	    retprinc[ncomponents]->length = cp3 - cp2;
+	if (endcomponent && endcomponent < realmptr) {
+	    retprinc[ncomponents]->length = endcomponent - cp;
 	} else {
-	    if (cp3)
-		retprinc[ncomponents]->length = cp1 - cp2;
-	    else
-		retprinc[ncomponents]->length = strlen(cp2);
+		retprinc[ncomponents]->length = realmptr - cp;
 	}
 	if (!(retprinc[ncomponents]->data =
 	    malloc(retprinc[ncomponents]->length+1))) {
@@ -138,13 +136,13 @@ krb5_principal *principal;
 	    xfree(retprinc);
 	    return(ENOMEM);
 	}
-	strncpy(retprinc[ncomponents]->data, cp2,
+	strncpy(retprinc[ncomponents]->data, cp,
 		retprinc[ncomponents]->length);
 	retprinc[ncomponents]->data[retprinc[ncomponents]->length] = '\0';
-	if (cp3)
-	    cp2 = cp3 + 1;			/* move past divider */
+	if (endcomponent)
+	    cp = endcomponent + 1;	/* move past divider */
 	else
-	    cp2 = 0;
+	    cp = 0;
     }
     *principal = retprinc;
     return 0;
