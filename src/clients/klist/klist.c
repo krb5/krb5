@@ -27,12 +27,21 @@
  * List out the contents of your credential cache or keytab.
  */
 
-#include "k5-int.h"
-#include "com_err.h"
+#include <krb5.h>
+#ifdef KRB5_KRB4_COMPAT
+#include <kerberosIV/krb.h>
+#endif
+#include <com_err.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+
+#ifndef _WIN32
+#define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/')+1 : (x))
+#else
+#define GET_PROGNAME(x) (max(strrchr((x), '/'), strrchr((x), '\\')) + 1, (x))
+#endif
 
 #if (defined(_MSDOS) || defined(_WIN32))
 #include <winsock.h>
@@ -41,8 +50,7 @@
 #include <netdb.h>
 #endif
 
-extern int optind;
-extern char *optarg;
+int use_k4_only = 0, use_k5_only = 0;
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0;
 char *defname;
@@ -62,15 +70,26 @@ void do_keytab KRB5_PROTOTYPE((char *));
 void printtime KRB5_PROTOTYPE((time_t));
 void one_addr KRB5_PROTOTYPE((krb5_address *));
 void fillit KRB5_PROTOTYPE((FILE *, int, int));
-	
+
+#ifdef KRB5_KRB4_COMPAT
+void do_v4_ccache KRB5_PROTOTYPE((char *));
+#define K54_USAGE_STRING "[-4] [-5] "
+#define K54_USAGE_HELP   "\t-4 Kerberos 4 only, -5 Kerberos 5 only, default is both\n"
+#else /* KRB5_KRB4_COMPAT */
+#define K54_USAGE_STRING ""
+#define K54_USAGE_HELP   ""
+#endif /* KRB5_KRB4_COMPAT */
+
 #define DEFAULT 0
 #define CCACHE 1
 #define KEYTAB 2
 
 void usage()
 {
-     fprintf(stderr, "Usage: %s [[-c] [-f] [-e] [-s] [-a] [-n]] [-k [-t] [-K]] [name]\n",
+     fprintf(stderr, "Usage: %s " K54_USAGE_STRING
+             "[[-c] [-f] [-e] [-s] [-a] [-n]] [-k [-t] [-K]] [name]\n",
 	     progname); 
+     fprintf(stderr, K54_USAGE_HELP);
      fprintf(stderr, "\t-c specifies credentials cache, -k specifies keytab");
      fprintf(stderr, ", -c is default\n");
      fprintf(stderr, "\toptions for credential caches:\n");
@@ -84,25 +103,30 @@ void usage()
      fprintf(stderr, "\t\t-K shows keytab entry DES keys\n");
      exit(1);
 }
- 
+
+/*
+ * The reason we start out with got_k4 and got_k5 as zero (false) is
+ * so that we can easily add dynamic loading support for determining
+ * whether Kerberos 4 and Keberos 5 libraries are available
+ */
+
+static int got_k4 = 0;
+static int got_k5 = 0; 
 
 int
 main(argc, argv)
     int argc;
     char **argv;
 {
-    krb5_error_code retval;
-    int code;
     char *name;
     int mode;
 
-    retval = krb5_init_context(&kcontext);
-    if (retval) {
-	    com_err(argv[0], retval, "while initializing krb5");
-	    exit(1);
-    }
+    got_k5 = 1;
+#ifdef KRB5_KRB4_COMPAT
+    got_k4 = 1;
+#endif
 
-    progname = (strrchr(*argv, '/') ? strrchr(*argv, '/')+1 : argv[0]);
+    progname = GET_PROGNAME(argv[0]);
 
     argv++;
     name = NULL;
@@ -141,6 +165,14 @@ main(argc, argv)
 	    if (mode != DEFAULT) usage();
 	    mode = KEYTAB;
 	    break;
+#ifdef KRB5_KRB4_COMPAT
+        case '4':
+            use_k4_only = 1;
+            break;
+        case '5':
+            use_k5_only = 1;
+            break;
+#endif /* KRB4_KRB5_COMPAT */
 	default:
 	    usage();
 	    break;
@@ -156,27 +188,59 @@ main(argc, argv)
 	      usage();
     }
 
-    if ((code = krb5_timeofday(kcontext, &now))) {
-	 if (!status_only)
-	      com_err(progname, code, "while getting time of day.");
-	 exit(1);
+    if (use_k4_only && use_k5_only)
+    {
+        fprintf(stderr, "Only one of -4 and -5 allowed\n");
+        usage();
     }
-    else {
+
+#ifdef KRB5_KRB4_COMPAT
+    if (use_k4_only)
+        got_k5 = 0;
+    if (use_k5_only)
+        got_k4 = 0;
+#endif /* KRB4_KRB5_COMPAT */
+
+    now = time(0);
+    {
 	char tmp[BUFSIZ];
 
 	if (!krb5_timestamp_to_sfstring(now, tmp, 20, (char *) NULL) ||
-	    !krb5_timestamp_to_sfstring(now, tmp, sizeof(tmp), (char *) NULL))
+	    !krb5_timestamp_to_sfstring(now, tmp, sizeof(tmp), 
+					(char *) NULL))
 	    timestamp_width = (int) strlen(tmp);
 	else
 	    timestamp_width = 15;
     }
 
-    if (mode == DEFAULT || mode == CCACHE)
-	 do_ccache(name);
-    else
-	 do_keytab(name);
+    if (got_k5)
+    {
+	krb5_error_code retval;
+	retval = krb5_init_context(&kcontext);
+	if (retval) {
+	    com_err(progname, retval, "while initializing krb5");
+	    exit(1);
+	}
 
-    exit(0);
+	if (mode == DEFAULT || mode == CCACHE)
+	    do_ccache(name);
+	else
+	    do_keytab(name);
+    } else {
+#ifdef KRB5_KRB4_COMPAT
+	if (mode == DEFAULT || mode == CCACHE)
+	    do_v4_ccache(name);
+	else {
+	    /* We may want to add v4 srvtab support */
+	    fprintf(stderr, 
+		    "%s: srvtab option not supported for Kerberos 4\n", 
+		    progname);
+	    exit(1);
+	}
+#endif /* KRB4_KRB5_COMPAT */
+    }
+
+    return 0;
 }    
 
 void do_keytab(name)
@@ -296,13 +360,20 @@ void do_ccache(name)
     flags = 0;				/* turns off OPENCLOSE mode */
     if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
 	if (code == KRB5_FCC_NOFILE) {
-	    if (!status_only)
-		com_err(progname, code, "(ticket cache %s)",
+	    if (!status_only) {
+		com_err(progname, code, "(ticket cache %s:%s)",
+			krb5_cc_get_type(kcontext, cache),
 			krb5_cc_get_name(kcontext, cache));
+#ifdef KRB5_KRB4_COMPAT
+		if (name == NULL)
+		    do_v4_ccache(0);
+#endif
+	    }
 	} else {
 	    if (!status_only)
 		com_err(progname, code,
-			"while setting cache flags (ticket cache %s)",
+			"while setting cache flags (ticket cache %s:%s)",
+			krb5_cc_get_type(kcontext, cache),
 			krb5_cc_get_name(kcontext, cache));
 	}
 	exit(1);
@@ -318,7 +389,8 @@ void do_ccache(name)
 	exit(1);
     }
     if (!status_only) {
-	printf("Ticket cache: %s\nDefault principal: %s\n\n",
+	printf("Ticket cache: %s:%s\nDefault principal: %s\n\n",
+	       krb5_cc_get_type(kcontext, cache),
 	       krb5_cc_get_name(kcontext, cache), defname);
 	fputs("Valid starting", stdout);
 	fillit(stdout, timestamp_width - sizeof("Valid starting") + 3,
@@ -359,6 +431,10 @@ void do_ccache(name)
 		com_err(progname, code, "while closing ccache");
 	    exit(1);
 	}
+#ifdef KRB5_KRB4_COMPAT
+	if (name == NULL && !status_only)
+	    do_v4_ccache(0);
+#endif
 	exit(exit_status);
     } else {
 	if (!status_only)
@@ -501,7 +577,7 @@ show_credential(progname, kcontext, cred)
     }
 
     if (show_etype) {
-	retval = decode_krb5_ticket(&cred->ticket, &tkt);
+	retval = krb5_decode_ticket(&cred->ticket, &tkt);
 	if (!extra_field)
 	    fputs("\t",stdout);
 	else
@@ -574,8 +650,8 @@ void one_addr(a)
 		return;
 	}
 	if (no_resolve || !h) {
-	    char buf[46];
 #ifdef HAVE_INET_NTOP
+	    char buf[46];
 	    char *name = inet_ntop(a->addrtype, a->contents, buf, sizeof(buf));
 	    if (name) {
 		printf ("%s", name);
@@ -605,3 +681,103 @@ fillit(f, num, c)
 	fputc(c, f);
 }
 
+#ifdef KRB5_KRB4_COMPAT
+void
+do_v4_ccache(name)
+    char * name;
+{
+    char    pname[ANAME_SZ];
+    char    pinst[INST_SZ];
+    char    prealm[REALM_SZ];
+    char    *file;
+    int     k_errno;
+    CREDENTIALS c;
+    int     header = 1;
+
+    if (!got_k4)
+	return;
+
+    file = name?name:tkt_string();
+
+    if (status_only) {
+	fprintf(stderr, 
+		"%s: exit status option not supported for Kerberos 4\n",
+		progname);
+	exit(1);
+    }
+
+    if (got_k5)
+	printf("\n\n");
+
+    printf("Kerberos 4 ticket cache: %s\n", file);
+
+    /* 
+     * Since krb_get_tf_realm will return a ticket_file error, 
+     * we will call tf_init and tf_close first to filter out
+     * things like no ticket file.  Otherwise, the error that 
+     * the user would see would be 
+     * klist: can't find realm of ticket file: No ticket file (tf_util)
+     * instead of
+     * klist: No ticket file (tf_util)
+     */
+
+    /* Open ticket file */
+    if (k_errno = tf_init(file, R_TKT_FIL)) {
+	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
+	exit(1);
+    }
+    /* Close ticket file */
+    (void) tf_close();
+
+    /* 
+     * We must find the realm of the ticket file here before calling
+     * tf_init because since the realm of the ticket file is not
+     * really stored in the principal section of the file, the
+     * routine we use must itself call tf_init and tf_close.
+     */
+    if ((k_errno = krb_get_tf_realm(file, prealm)) != KSUCCESS) {
+	fprintf(stderr, "%s: can't find realm of ticket file: %s\n",
+		progname, krb_get_err_text (k_errno));
+	exit(1);
+    }
+
+    /* Open ticket file */
+    if (k_errno = tf_init(file, R_TKT_FIL)) {
+	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
+	exit(1);
+    }
+    /* Get principal name and instance */
+    if ((k_errno = tf_get_pname(pname)) ||
+	(k_errno = tf_get_pinst(pinst))) {
+	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
+	exit(1);
+    }
+
+    /* 
+     * You may think that this is the obvious place to get the
+     * realm of the ticket file, but it can't be done here as the
+     * routine to do this must open the ticket file.  This is why 
+     * it was done before tf_init.
+     */
+       
+    printf("Principal: %s%s%s%s%s\n\n", pname,
+	   (pinst[0] ? "." : ""), pinst,
+	   (prealm[0] ? "@" : ""), prealm);
+    while ((k_errno = tf_get_cred(&c)) == KSUCCESS) {
+	if (header) {
+	    printf("%-18s  %-18s  %s\n",
+		   "  Issued", "  Expires", "  Principal");
+	    header = 0;
+	}
+	printtime(c.issue_date);
+	fputs("  ", stdout);
+	printtime(c.issue_date + ((unsigned char) c.lifetime) * 5 * 60);
+	printf("  %s%s%s%s%s\n",
+	       c.service, (c.instance[0] ? "." : ""), c.instance,
+	       (c.realm[0] ? "@" : ""), c.realm);
+    }
+    if (header && k_errno == EOF) {
+	printf("No tickets in file.\n");
+    }
+}
+#endif /* KRB4_KRB5_COMPAT */
