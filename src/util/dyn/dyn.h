@@ -40,7 +40,7 @@ typedef struct _DynObject {
 #ifdef __STDC__
 #define P(args) args
 #else
-#define P(args)
+#define P(args) ()
 #endif /* __STDC__ */
 
 DynObject DynCreate P((int el_size, int inc)), DynCopy P((DynObject obj));

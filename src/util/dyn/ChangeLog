@@ -1,3 +1,8 @@
+Mon Jul 22 21:37:52 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* dyn.h: If __STDC__ is not defined, generate prototypes implying
+		functions and not variables. 
+
 Mon Jul 22 04:20:48 1996  Marc Horowitz  <marc@mit.edu>
 
 	* dyn_insert.c (DynInsert): what used to be #ifdef POSIX, should
