@@ -20,7 +20,6 @@ static char rcsid_in_tkt_skey_c [] =
 #include <krb5/krb5.h>
 
 #include <krb5/ext-proto.h>
-#include <krb5/asn1.h>			/* XXX for krb5_free_keyblock! */
 
 struct skey_keyproc_arg {
     krb5_keyblock *key;
