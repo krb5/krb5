@@ -26,9 +26,6 @@ static char rcsid_sendto_kdc_c[] =
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#define MAX_DGRAM_SIZE	4096		/* XXX! */
-#define MAX_TIMEOUT 30			/* XXX */
-#define TIMEOUT_SHIFT 2			/* XXX */
 
 #include <stdio.h>
 #include <krb5/libos-proto.h>
@@ -45,6 +42,13 @@ static char rcsid_sendto_kdc_c[] =
  * when finished.
  *
  */
+
+
+extern int krb5_max_dgram_size;
+extern int krb5_max_skdc_timeout;
+extern int krb5_skdc_timeout_shift;
+extern int krb5_skdc_timeout_1;
+
 krb5_error_code
 krb5_sendto_kdc (DECLARG(const krb5_data *, message),
 		 DECLARG(const krb5_data *, realm),
@@ -76,17 +80,18 @@ OLDDECLARG(krb5_data *, reply)
     for (i = 0; i < AF_MAX; i++)
 	socklist[i] = -1;
 
-    if (!(reply->data = malloc(MAX_DGRAM_SIZE))) { /* XXX size? */
+    if (!(reply->data = malloc(krb5_max_dgram_size))) {
 	free((char *)addr);
 	return ENOMEM;
     }
-    reply->length = MAX_DGRAM_SIZE;
+    reply->length = krb5_max_dgram_size;
 
     /*
      * do exponential backoff.
      */
 
-    for (timeout = 1; timeout < MAX_TIMEOUT; timeout <<=TIMEOUT_SHIFT) {
+    for (timeout = krb5_skdc_timeout_1; timeout < krb5_max_skdc_timeout;
+	 timeout <<= krb5_skdc_timeout_shift) {
 	sent = 0;
 	for (host = 0; host < naddr; host++) {
 	    /* send to the host, wait timeout seconds for a response,
@@ -121,8 +126,12 @@ OLDDECLARG(krb5_data *, reply)
 				0,
 				0,
 				&waitlen)) {
-		if (nready == -1)
-		    continue;		/* XXX */
+		if (nready == -1) {
+		    if (errno == EINTR)
+			continue;
+		    retval = errno;
+		    goto out;
+		}
 		if ((cc = recvfrom(socklist[addr[host].sa_family],
 				   reply->data,
 				   reply->length,
