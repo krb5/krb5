@@ -1832,6 +1832,10 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_config_files
 
 #endif
 
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_profile
+	KRB5_PROTOTYPE((krb5_context, profile_t *));
+
 krb5_error_code krb5_secure_config_files
 	KRB5_PROTOTYPE ((krb5_context));
 

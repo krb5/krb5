@@ -1,3 +1,10 @@
+1997-07-26 Miro Jurisic <meeroh@mit.edu>
+
+        * k5-int.h (krb5_get_profile): added krb5_get_profile. It returns
+        a profile handle you can use with the profile layer. It is guaranteed
+        to be initialized with the same config files as the profile of the context
+        passed in. 
+
 1997-07-22 Jeffrey Altman <jaltman@columbia.edu>
 
         * k5-int.h struct _krb5_context
