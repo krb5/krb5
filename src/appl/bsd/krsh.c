@@ -78,7 +78,7 @@ Key_schedule v4_schedule;
 /*
  * rsh - remote shell
  */
-#define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
+#define SECURE_MESSAGE "This rsh session is encrypting input/output data transmissions.\r\n"
 
 int	error();
      
