@@ -1,3 +1,8 @@
+Thu Mar 23 23:28:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdb5_edit.c (show_principal, parse_princ_args): Add
+		"support_desmd5" flag.
+
 Tue Mar 14 16:29:05 1995    <tytso@rsx-11.mit.edu>
 
 	* ss_wrapper.c (main): Set the return code from ss_execute_line(),
