@@ -50,8 +50,8 @@ clean::
 
 install:
 	$(INSTALL_PROGRAM) telnet $(DESTDIR)$(CLIENT_BINDIR)/telnet
-	$(INSTALL_DATA) telnet.1 ${DESTDIR}$(CLIENT_MANDIR)/telnet.1
-	$(INSTALL_DATA) tmac.doc ${DESTDIR}$(CLIENT_MANDIR)/tmac.doc
+	$(INSTALL_DATA) $(srcdir)/telnet.1 ${DESTDIR}$(CLIENT_MANDIR)/telnet.1
+	$(INSTALL_DATA) $(srcdir)/tmac.doc ${DESTDIR}$(CLIENT_MANDIR)/tmac.doc
 
 authenc.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)
 commands.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)

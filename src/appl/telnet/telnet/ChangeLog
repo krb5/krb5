@@ -1,3 +1,9 @@
+Tue Feb 28 13:28:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (install): Add $(srcdir) to install line so that
+		installs work correctly when the build tree != the source
+		tree. 
+
 Wed Jan 25 18:33:41 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* telnet.1: refer to man1/tmac.doc.
