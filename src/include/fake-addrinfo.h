@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2002 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
