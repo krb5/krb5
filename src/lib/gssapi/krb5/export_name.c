@@ -24,9 +24,9 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32 gss_export_name(OM_uint32  *minor_status,
-			  const gss_name_t input_name,
-			  gss_buffer_t exported_name)
+OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
+			       const gss_name_t input_name,
+			       gss_buffer_t exported_name)
 {
 	krb5_context context;
 	krb5_error_code code;

@@ -499,4 +499,23 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID_set *		/* name_types */
 	   ));
 
+OM_uint32 krb5_gss_canonicalize_name
+PROTOTYPE( (OM_uint32  *,		/* minor_status */
+	    const gss_name_t,		/* input_name */
+	    const gss_OID,		/* mech_type */
+	    gss_name_t *		/* output_name */
+	 ));
+	
+OM_uint32 krb5_gss_export_name
+PROTOTYPE( (OM_uint32  *,		/* minor_status */
+	    const gss_name_t,		/* input_name */
+	    gss_buffer_t		/* exported_name */
+	 ));
+
+OM_uint32 krb5_gss_duplicate_name
+PROTOTYPE( (OM_uint32  *,		/* minor_status */
+	    const gss_name_t,		/* input_name */
+	    gss_name_t *		/* dest_name */
+	 ));
+	
 #endif /* _GSSAPIP_KRB5_H_ */

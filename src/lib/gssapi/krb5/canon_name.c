@@ -26,10 +26,10 @@
 
 /* This is trivial since we're a single mechanism implementation */
 
-OM_uint32 gss_canonicalize_name(OM_uint32  *minor_status,
-				const gss_name_t input_name,
-				const gss_OID mech_type,
-				gss_name_t *output_name)
+OM_uint32 krb5_gss_canonicalize_name(OM_uint32  *minor_status,
+				     const gss_name_t input_name,
+				     const gss_OID mech_type,
+				     gss_name_t *output_name)
 {
 	if ((mech_type == GSS_C_NULL_OID) ||
 	    !g_OID_equal(mech_type, gss_mech_krb5)) {
