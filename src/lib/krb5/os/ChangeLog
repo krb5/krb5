@@ -1,3 +1,7 @@
+Thu Jul  6 09:56:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean): Remove t_an_to_ln.o
+
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* an_to_ln.c added _MACINTOSH conditions
 	* genaddrs.c added HAS_MACSOCK_H conditions

@@ -124,7 +124,7 @@ check-unix:: $(TEST_PROGS)
 	$(RM) test.out
 
 clean:: clean-$(WHAT)
-	$(RM) $(TEST_PROGS) test.out t_std_conf.o
+	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
 
 clean-unix::
 	$(RM) shared/*
