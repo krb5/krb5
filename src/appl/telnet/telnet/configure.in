@@ -5,7 +5,9 @@ AC_VFORK
 AC_CHECK_HEADERS(string.h arpa/nameser.h)
 AC_HAVE_HEADERS(unistd.h sys/select.h stdlib.h)
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
-LIBS="$LIBS -ltermcap")
+LIBS="$LIBS -ltermcap",
+  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses")
+)
 AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_HEADER_CHECK(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
@@ -33,6 +35,7 @@ else
 	AC_DEFINE(KRB4)
 fi
 USE_KRB4_LIBRARY
+USE_ANAME
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

@@ -4,7 +4,9 @@ AC_PROG_INSTALL
 AC_CHECK_LIB(util,main)
 USE_ANAME
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
-LIBS="$LIBS -ltermcap")
+LIBS="$LIBS -ltermcap",
+  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses")
+)
 AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_HEADER_CHECK(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
