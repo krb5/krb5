@@ -321,7 +321,7 @@ ETOUT =	$(INC)asn1_err.h $(ET)asn1_err.c \
 
 HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
 
-CLEANUP= $(ETOUT) $(HOUT) \
+CLEANUP= Makefile $(ETOUT) $(HOUT) \
 	include/profile.h include/krb5/osconf.h \
 	winfile.list macfile.list
 
@@ -338,17 +338,14 @@ macfile.list:
 	find $(MACFILES) -prune -type f -print | \
 		sed -f config/winexclude.sed >> macfile.list
 
-Makefile.sav:
-	rm -f Makefile.sav
-	mv Makefile Makefile.sav
+dos-Makefile:
 	cat config/windows.in Makefile.in config/win-post.in | \
 		sed -e 's/^##DOS##//' -e 's/^##DOS//' > Makefile
 
-kerbsrc.zip: Makefile.sav awk-windows-mac winfile.list
+kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
 	$(ZIP) -Dlk kerbsrc.zip `cat winfile.list`
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
-	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
 kerbsrc-nt.zip: Makefile.sav awk-windows-mac winfile.list
@@ -358,17 +355,16 @@ kerbsrc-nt.zip: Makefile.sav awk-windows-mac winfile.list
 	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
-dos-zipfiles: Makefile.sav awk-windows-mac winfile.list
+dos-zipfiles: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
 	$(ZIP) -Dlk kerbsrc.zip `cat winfile.list`
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
 	rm -f kerbsrc-nt.zip
 	$(ZIP) -Dl kerbsrc-nt.zip `cat winfile.list`
 	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
-	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
-Macfile: macfile.list Makefile.sav
+Macfile: macfile.list 
 	rm -f Macfile
 	sed -e 's|/|:|g' -e 's/^/:/' -e '/:.:/d' -e '/:mac:/d' macfile.list > macfile.maclist
 	grep '\.c$$' macfile.maclist > macsrcsgss
@@ -405,8 +401,6 @@ kerbsrc.mac.tar: awk-windows-mac macfile.list mac-bin-dirs Macfile
 	rm -f $(CLEANUP)
 	rm -rf bin
 	rm -f include/autoconf.h Makefile macsrc* macfile.maclist
-	mv Makefile.sav Makefile
-
 
 $(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)asn1_err.et
