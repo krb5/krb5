@@ -147,7 +147,7 @@ krb5_sendauth(/* IN */
 	 * OK, get the authentication header!
 	 */
 	if (retval = krb5_mk_req_extended(ap_req_options, checksump,
-					  &credsp->times, kdc_options,
+					  kdc_options,
 					  sequence ? *sequence : 0, newkey,
 					  ccache, credsp, &authent, &outbuf)) {
 		memset((char *)&authent, 0, sizeof(authent));
