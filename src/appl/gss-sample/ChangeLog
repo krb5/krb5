@@ -1,3 +1,8 @@
+Thu Oct 12 11:15:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gss-misc.c (recv_token): When continuing partial read, decrease
+		number of bytes to read.
+
 Sun Oct  8 14:26:25 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gss-misc.c (recv_token): When looping for partial read from
