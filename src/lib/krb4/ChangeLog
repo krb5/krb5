@@ -1,5 +1,10 @@
 2003-06-03  Sam Hartman  <hartmans@mit.edu>
 
+	* g_pw_in_tkt.c (passwd_to_key): Fix password prompt
+
+	* password_to_key.c (mit_passwd_to_key): Fix password prompt
+	(afs_passwd_to_key): Fix password prompt
+
 	* g_in_tkt.c (krb_get_in_tkt_preauth_creds): Keep copy of
 	ciphertext while trying different keyprocs 
 
