@@ -1,3 +1,8 @@
+2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
+
+	* gssapi32.def: Export gss_mech_krb5 as DATA.  Mark all exported
+	variables as DATA.
+
 2001-01-22  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Add krb5_rc_close() so gssapi builds.
