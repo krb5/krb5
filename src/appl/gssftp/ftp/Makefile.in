@@ -14,13 +14,13 @@ SRCS	= $(srcdir)/cmds.c $(srcdir)/cmdtab.c $(srcdir)/domacro.c \
 OBJS	= cmds.o cmdtab.o domacro.o ftp.o getpass.o glob.o main.o pclose.o \
 	  radix.o ruserpass.o secure.o
 
-LOCALINCLUDE = -I$(srcdir)/..
+LOCALINCLUDE = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
 DEFINES = -DGSSAPI -DNOCONFIDENTIAL
 
 all::	ftp
 
 ftp:	$(OBJS) $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o ftp $(OBJS) $(GSS_LIBS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o ftp $(OBJS) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) ftp

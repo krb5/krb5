@@ -79,14 +79,14 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #define L_INCR 1
 #endif
 
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 #include <krb.h>
 
 KTEXT_ST ticket;
 CREDENTIALS cred;
 Key_schedule schedule;
 MSG_DAT msg_data;
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -348,7 +348,7 @@ secure_command(cmd)
 		 * File protection level also determines whether
 		 * commands are MIC or ENC.  Should be independent ...
 		 */
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0)
 		    if ((length = level == PROT_P ?
 			krb_mk_priv((unsigned char *)cmd, (unsigned char *)out,
@@ -361,7 +361,7 @@ secure_command(cmd)
 					level == PROT_P ? "priv" : "safe");
 			return(0);
 		    }
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 		/* secure_command (based on level) */
 		if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -616,7 +616,7 @@ getreply(expecteof)
 					code, radix_error(kerror), obuf);
 			    n = '5';
 			}
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 			else if (strcmp(auth_type, "KERBEROS_V4") == 0)
 				if ((kerror = safe ?
 				  krb_rd_safe((unsigned char *)ibuf, len,
@@ -1536,10 +1536,10 @@ pswitch(flag)
 		char mo[MAXPATHLEN];
 		char *authtype;
 		int lvl;
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 		C_Block session;
 		Key_schedule schedule;
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 	} proxstruct, tmpstruct;
 	struct comvars *ip, *op;
 
@@ -1608,12 +1608,12 @@ pswitch(flag)
 	level = op->lvl;
 	if (!level)
 		level = 1;
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	memcpy(ip->session, cred.session, sizeof(cred.session));
 	memcpy(cred.session, op->session, sizeof(cred.session));
 	memcpy(ip->schedule, schedule, sizeof(schedule));
 	memcpy(schedule, op->schedule, sizeof(schedule));
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 	(void) signal(SIGINT, oldintr);
 	if (abrtflag) {
 		abrtflag = 0;
@@ -1821,9 +1821,9 @@ gunique(local)
 	return(new);
 }
 
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 char realm[REALM_SZ + 1];
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 
 #ifdef GSSAPI
 /* for testing, we don't have an ftp key yet */
@@ -1834,77 +1834,19 @@ do_auth()
 {
 	extern int setsafe();
 	int oldverbose;
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	char *service, inst[INST_SZ];
 	u_long cksum, checksum = (u_long) getpid();
-#endif /* KERBEROS */
-#if defined(KERBEROS) || defined(GSSAPI)
+#endif /* KRB5_KRB4_COMPAT */
+#if defined(KRB5_KRB4_COMPAT) || defined(GSSAPI)
 	u_char out_buf[FTP_BUFSIZ];
 	int i;
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 
 	if (auth_type) return(1);	/* auth already succeeded */
 
 	/* Other auth types go here ... */
 
-#ifdef KERBEROS
-	if (command("AUTH %s", "KERBEROS_V4") == CONTINUE) {
-	    if (verbose)
-		printf("%s accepted as authentication type\n", "KERBEROS_V4");
-
-	    strcpy(inst, (char *) krb_get_phost(hostname));
-	    if (realm[0] == '\0')
-	    	strcpy(realm, (char *) krb_realmofhost(hostname));
-	    if ((kerror = krb_mk_req(&ticket, service = "ftp",
-					inst, realm, checksum))
-		&& (kerror != KDC_PR_UNKNOWN ||
-	        (kerror = krb_mk_req(&ticket, service = "rcmd",
-					inst, realm, checksum))))
-			fprintf(stderr, "Kerberos V4 krb_mk_req failed: %s\n",
-					krb_get_err_text(kerror));
-	    else if (kerror = krb_get_cred(service, inst, realm, &cred))
-			fprintf(stderr, "Kerberos V4 krb_get_cred failed: %s\n",
-					krb_get_err_text(kerror));
-	    else {
-		key_sched(cred.session, schedule);
-		reply_parse = "ADAT=";
-		oldverbose = verbose;
-		verbose = 0;
-		i = ticket.length;
-		if (kerror = radix_encode(ticket.dat, out_buf, &i, 0))
-			fprintf(stderr, "Base 64 encoding failed: %s\n",
-					radix_error(kerror));
-		else if (command("ADAT %s", out_buf) != COMPLETE)
-			fprintf(stderr, "Kerberos V4 authentication failed\n");
-		else if (!reply_parse)
-			fprintf(stderr,
-			       "No authentication data received from server\n");
-		else if (kerror = radix_encode(reply_parse, out_buf, &i, 1))
-			fprintf(stderr, "Base 64 decoding failed: %s\n",
-					radix_error(kerror));
-		else if (kerror = krb_rd_safe(out_buf, i, &cred.session,
-					    &hisctladdr, &myctladdr, &msg_data))
-			fprintf(stderr, "Kerberos V4 krb_rd_safe failed: %s\n",
-					krb_get_err_text(kerror));
-		else {
-		    /* fetch the (modified) checksum */
-		    (void) memcpy(&cksum, msg_data.app_data, sizeof(cksum));
-		    if (ntohl(cksum) == checksum + 1) {
-			verbose = oldverbose;
-			if (verbose)
-			   printf("Kerberos V4 authentication succeeded\n");
-			reply_parse = NULL;
-			auth_type = "KERBEROS_V4";
-			return(1);
-		    } else fprintf(stderr,
-				"Kerberos V4 mutual authentication failed\n");
-		}
-		verbose = oldverbose;
-		reply_parse = NULL;
-	    }
-	} else	fprintf(stderr, "%s rejected as an authentication type\n",
-				"KERBEROS_V4");
-#endif /* KERBEROS */
 #ifdef GSSAPI
 	if (command("AUTH %s", "GSSAPI") == CONTINUE) {
 	  OM_uint32 maj_stat, min_stat;
@@ -2042,6 +1984,64 @@ do_auth()
 	  }
 	}
 #endif /* GSSAPI */
+#ifdef KRB5_KRB4_COMPAT
+	if (command("AUTH %s", "KERBEROS_V4") == CONTINUE) {
+	    if (verbose)
+		printf("%s accepted as authentication type\n", "KERBEROS_V4");
+
+	    strcpy(inst, (char *) krb_get_phost(hostname));
+	    if (realm[0] == '\0')
+	    	strcpy(realm, (char *) krb_realmofhost(hostname));
+	    if ((kerror = krb_mk_req(&ticket, service = "ftp",
+					inst, realm, checksum))
+		&& (kerror != KDC_PR_UNKNOWN ||
+	        (kerror = krb_mk_req(&ticket, service = "rcmd",
+					inst, realm, checksum))))
+			fprintf(stderr, "Kerberos V4 krb_mk_req failed: %s\n",
+					krb_get_err_text(kerror));
+	    else if (kerror = krb_get_cred(service, inst, realm, &cred))
+			fprintf(stderr, "Kerberos V4 krb_get_cred failed: %s\n",
+					krb_get_err_text(kerror));
+	    else {
+		key_sched(cred.session, schedule);
+		reply_parse = "ADAT=";
+		oldverbose = verbose;
+		verbose = 0;
+		i = ticket.length;
+		if (kerror = radix_encode(ticket.dat, out_buf, &i, 0))
+			fprintf(stderr, "Base 64 encoding failed: %s\n",
+					radix_error(kerror));
+		else if (command("ADAT %s", out_buf) != COMPLETE)
+			fprintf(stderr, "Kerberos V4 authentication failed\n");
+		else if (!reply_parse)
+			fprintf(stderr,
+			       "No authentication data received from server\n");
+		else if (kerror = radix_encode(reply_parse, out_buf, &i, 1))
+			fprintf(stderr, "Base 64 decoding failed: %s\n",
+					radix_error(kerror));
+		else if (kerror = krb_rd_safe(out_buf, i, &cred.session,
+					    &hisctladdr, &myctladdr, &msg_data))
+			fprintf(stderr, "Kerberos V4 krb_rd_safe failed: %s\n",
+					krb_get_err_text(kerror));
+		else {
+		    /* fetch the (modified) checksum */
+		    (void) memcpy(&cksum, msg_data.app_data, sizeof(cksum));
+		    if (ntohl(cksum) == checksum + 1) {
+			verbose = oldverbose;
+			if (verbose)
+			   printf("Kerberos V4 authentication succeeded\n");
+			reply_parse = NULL;
+			auth_type = "KERBEROS_V4";
+			return(1);
+		    } else fprintf(stderr,
+				"Kerberos V4 mutual authentication failed\n");
+		}
+		verbose = oldverbose;
+		reply_parse = NULL;
+	    }
+	} else	fprintf(stderr, "%s rejected as an authentication type\n",
+				"KERBEROS_V4");
+#endif /* KRB5_KRB4_COMPAT */
 
 	/* Other auth types go here ... */
 

@@ -1,3 +1,18 @@
+Thu Oct 16 01:20:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* main.c: Change KERBEROS to KRB5_KRB4_COMPAT where appropriate.
+
+	* secure.c: Use <secure.h> rather than "secure.h" so that the
+	correct secure.h gets included (the one in the $(srcdir) of the
+	directory we're compiling secure.c into).  From danw@mit.edu.
+
+	* ftp.c: Change KERBEROS to KRB5_KRB4_COMPAT where appropriate.
+	Re-order the clauses so that that GSSAPI gets tried before
+	KERBEROS_V4.
+
+	* Makefile.in: Update LOCALINCLUDE and the link line to DTRT with
+	krb4 compatibility.
+
 Sun Aug 17 14:23:39 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (SRCS): Add $(srcdir) where needed.

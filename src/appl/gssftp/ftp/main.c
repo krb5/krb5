@@ -67,11 +67,11 @@ uid_t	getuid();
 sigtype	intr(), lostpeer();
 extern	char *home;
 char	*getlogin();
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 #include <krb.h>
 struct servent staticsp;
 extern char realm[];
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 
 main(argc, argv)
 	char *argv[];
@@ -86,12 +86,12 @@ main(argc, argv)
 		fprintf(stderr, "ftp: ftp/tcp: unknown service\n");
 		exit(1);
 	}
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 /* GDM need to static sp so that the information is not lost
    when kerberos calls getservbyname */
 	memcpy(&staticsp,sp,sizeof(struct servent));
 	sp = &staticsp;
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 	doglob = 1;
 	interactive = 1;
 	autologin = 1;
@@ -105,7 +105,7 @@ main(argc, argv)
 				debug++;
 				break;
 
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 			case 'k':
 				if (*++cp != '\0')
 					strncpy(realm, ++cp, REALM_SZ);
