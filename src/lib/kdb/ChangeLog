@@ -1,4 +1,12 @@
 
+Thu Aug 17 13:46:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_dbm.c - Remove argument from dbm_db_end_update().  It was never
+		used.  Remove gen_dbsuffix() logic from dbm_db_end_update() and
+		dbm_db_get_age().  This logic was incorrect (end_update) or
+		unused (get_age).  Reorg db_init() to reflect change in
+		dbm_db_get_age().
+
+
 Wed Aug 16 03:10:57 1995  Chris Provenzano  <proven@mit.edu>
 
 	* decrypt_key.c, encrypt_key.c

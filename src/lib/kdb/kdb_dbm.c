@@ -73,8 +73,7 @@ static char *gen_dbsuffix
 static krb5_error_code krb5_dbm_db_start_update 
 	PROTOTYPE((krb5_context));
 static krb5_error_code krb5_dbm_db_end_update 
-	PROTOTYPE((krb5_context,
-		   char *));
+	PROTOTYPE((krb5_context));
 
 #ifdef	BERK_DB_DBM
 /*
@@ -376,19 +375,18 @@ krb5_dbm_db_init(context)
 	    goto err_out;
 	}
     }
+    db_ctx->db_lf_name = filename;
+    db_ctx->db_inited++;
 
     if ((retval = krb5_dbm_db_get_age(context, NULL, &db_ctx->db_lf_time))) 
 	goto err_out;
 
-    db_ctx->db_lf_name = filename;
-    db_ctx->db_inited++;
     return 0;
     
 err_out:
     KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
     db_ctx->db_dbm_ctx = (DBM *) NULL;
     k5dbm_clear_context(db_ctx);
-    free (filename);
     return (retval);
 }
 
@@ -495,23 +493,14 @@ krb5_dbm_db_get_age(context, db_name, age)
 {
     db_context_t *db_ctx;
     struct stat st;
-    char *okname;
-    char *ctxname;
     
-    ctxname = default_db_name;
-    if (context && (db_ctx = context->db_context) && db_ctx->db_name) 
-	ctxname = db_ctx->db_name;
-
-    okname = gen_dbsuffix(db_name ? db_name : ctxname, KDBM_LOCK_EXT(db_ctx));
-
-    if (!okname)
-	return ENOMEM;
+    if (!k5dbm_inited(context))
+	return(KRB5_KDB_DBNOTINITED);
+    db_ctx = (db_context_t *) context->db_context;
     if (fstat (db_ctx->db_lf_file, &st) < 0)
 	*age = -1;
     else
 	*age = st.st_mtime;
-
-    free_dbsuffix (okname);
     return 0;
 }
 
@@ -533,25 +522,20 @@ krb5_dbm_db_start_update(context)
 }
 
 static krb5_error_code
-krb5_dbm_db_end_update(context, db_name)
+krb5_dbm_db_end_update(context)
     krb5_context context;
-    char * db_name;
 {
     db_context_t *db_ctx = context->db_context;
-    char * okname;
     struct stat st;
 
-    if ((okname = gen_dbsuffix(db_name ? db_name : default_db_name, 
-			       KDBM_LOCK_EXT(db_ctx))) == NULL)
-	return(ENOMEM);
-
-    if (utime(okname, NULL) == 0) {
+    if (!k5dbm_inited(context))
+	return(KRB5_KDB_DBNOTINITED);
+    if (utime(db_ctx->db_lf_name, NULL) == 0) {
         if (fstat(db_ctx->db_lf_file, &st) == 0) {
 	    db_ctx->db_lf_time = st.st_mtime;
 	    errno = 0;
 	}
     }
-    free_dbsuffix(okname);
     return errno;
 }
 
@@ -917,7 +901,7 @@ errout:
 	free_dbsuffix (fromdir);
 
     if (retval == 0) {
-	retval = krb5_dbm_db_end_update(context, NULL);
+	retval = krb5_dbm_db_end_update(context);
     } else {
         if (tmpcontext) {
 	    k5dbm_clear_context((db_context_t *) context->db_context);
@@ -1055,7 +1039,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	entries++;			/* bump to next struct */
     }
 
-    (void)krb5_dbm_db_end_update(context, NULL);
+    (void)krb5_dbm_db_end_update(context);
     (void)krb5_dbm_db_unlock(context);		/* unlock database */
     *nentries = i;
     return(retval);
@@ -1132,7 +1116,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
     }
 
 cleanup:
-    (void)krb5_dbm_db_end_update(context, NULL);
+    (void)krb5_dbm_db_end_update(context);
     (void) krb5_dbm_db_unlock(context);	/* unlock write lock */
     return retval;
 }
