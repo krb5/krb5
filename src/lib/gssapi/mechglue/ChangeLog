@@ -1,5 +1,8 @@
 Sat Feb 24 16:19:30 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* mglueP.h:
+	* g_seal.c: Add support for new V2 call gss_wrap_size_limit()
+
 	* g_mechname.c (gss_add_mech_name_type): Only mark a name-type as
 		being non-mechanism-specific if the mechanism doesn't
 		match the type currently associated with the name-type.

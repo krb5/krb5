@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_seal (minor_status,
           context_handle,
           conf_req_flag,
@@ -83,7 +83,7 @@ gss_buffer_t		output_message_buffer;
     return(GSS_S_NO_CONTEXT);
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_wrap (minor_status,
           context_handle,
           conf_req_flag,
@@ -104,4 +104,46 @@ gss_buffer_t		output_message_buffer;
 	return gss_seal(minor_status, context_handle, conf_req_flag,
 			(int) qop_req, input_message_buffer, conf_state,
 			output_message_buffer);
+}
+
+/*
+ * New for V2
+ */
+OM_uint32 INTERFACE
+gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
+		    qop_req, req_output_size, max_input_size)
+    OM_uint32		*minor_status;
+    gss_ctx_id_t	context_handle;
+    int			conf_req_flag;
+    gss_qop_t		qop_req;
+    OM_uint32		req_output_size;
+    OM_uint32		*max_input_size;
+{
+    OM_uint32		status;
+    gss_union_ctx_id_t	ctx;
+    gss_mechanism	mech;
+
+    gss_initialize();
+    
+    if (context_handle == GSS_C_NO_CONTEXT)
+	return GSS_S_NO_CONTEXT;
+
+    /*
+     * select the approprate underlying mechanism routine and
+     * call it.
+     */
+    
+    ctx = (gss_union_ctx_id_t) context_handle;
+    mech = __gss_get_mechanism (ctx->mech_type);
+
+    if (!mech)
+	return (GSS_S_NO_CONTEXT);
+
+    if (!mech->gss_wrap_size_limit)
+	return (GSS_S_BAD_BINDINGS);
+    
+    status = mech->gss_wrap_size_limit(mech->context, minor_status,
+				       context_handle, conf_req_flag, qop_req,
+				       req_output_size, max_input_size);
+    return(status);
 }
