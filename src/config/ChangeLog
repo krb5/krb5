@@ -2,6 +2,7 @@
 
 	* post.in (depfix2.sed): New target, generates a sed script
 	that'll do a better job of identifying possible $(SRCTOP) uses.
+	Collapse multiple slashes to one.  Uses new depgen.sed script.
 	(.depend): Use it.
 
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>

@@ -19,11 +19,13 @@ check-windows::
 # directory-specific parameters.  General substitutions independent of local
 # make variables happen in depfix.sed.
 depfix2.sed: Makefile $(SRCTOP)/util/depgen.sed
+	echo '# automatically generated, do not edit'	>  depfix2.tmp
+	echo 's;///*;/;g'				>> depfix2.tmp
 	echo 's; \./; ;g'				>> depfix2.tmp
 	echo 's; $(SRCTOP)/; $$(SRCTOP)/;g'		>> depfix2.tmp
 	echo 's; $(srcdir)/; $$(srcdir)/;g'		>> depfix2.tmp
 	echo 's; $$(srcdir)/\.\./; $(srcdir)/../;g'	>> depfix2.tmp
-	echo '$(SRCTOP)' | sed -f $(SRCTOP)/util/depgen.sed >> depfix2.tmp
+	echo '$(SRCTOP)' '$(myfulldir)' | sed -f $(SRCTOP)/util/depgen.sed >> depfix2.tmp
 	echo 's; $(BUILDTOP)/; $$(BUILDTOP)/;g'		>> depfix2.tmp
 	mv -f depfix2.tmp depfix2.sed
 
