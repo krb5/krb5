@@ -1,3 +1,14 @@
+Sat Dec  6 02:20:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Add constants and prototypes for the Cygnus password
+	changing API.  Add krb5_cc_copy_creds.  Add support for Cygnus
+	initial credentials API.
+
+	* k5-int.h: Add additional preauth types.  Add additional
+	parameter to krb5_sendto_kdc for designating whether to use the
+	master.  Add functions to support Cygnus initial credentials API.
+	Add prototypes for sam functions.
+
 Tue Sep 30 18:56:05 1997  Tom Yu  <tlyu@mit.edu>
 
 	* win-mac.h: Replace HAS_STDLIB_H with something more sane.

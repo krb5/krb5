@@ -298,7 +298,12 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
 #define PA_SAM_TYPE_SKEY_K0    3   /*  S/key where  KDC has key 0 */
 #define PA_SAM_TYPE_SKEY       4   /*  Traditional S/Key */
 #define PA_SAM_TYPE_SECURID    5   /*  Security Dynamics */
-#define PA_SAM_TYPE_GRAIL    128 /* experimental */
+#define PA_SAM_TYPE_ACTIVCARD_DEC  6   /*  ActivCard decimal mode */
+#define PA_SAM_TYPE_ACTIVCARD_HEX  7   /*  ActivCard hex mode */
+#define PA_SAM_TYPE_DIGI_PATH_HEX  8   /*  Digital Pathways hex mode */
+#define PA_SAM_TYPE_EXP_BASE    128 /* experimental */
+#define PA_SAM_TYPE_GRAIL		(PA_SAM_TYPE_EXP_BASE+0) /* testing */
+#define PA_SAM_TYPE_SECURID_PREDICT	(PA_SAM_TYPE_EXP_BASE+1) /* special */
 
 typedef struct _krb5_predicted_sam_response {
 	krb5_magic	magic;
@@ -452,7 +457,8 @@ krb5_error_code krb5_sendto_kdc
 	KRB5_PROTOTYPE((krb5_context,
 		const krb5_data *,
 		const krb5_data *,
-		krb5_data * ));
+		krb5_data *,
+		int *));
 krb5_error_code krb5_get_krbhst
 	KRB5_PROTOTYPE((krb5_context,
 		const krb5_data *,
@@ -761,6 +767,41 @@ void krb5_free_etype_info
  * End "preauth.h"
  */
 
+
+typedef krb5_error_code (*krb5_gic_get_as_key_fct)
+    KRB5_NPROTOTYPE((krb5_context,
+		     krb5_principal,
+		     krb5_enctype,
+		     krb5_prompter_fct,
+		     void *prompter_data,
+		     krb5_data *salt,
+		     krb5_keyblock *as_key,
+		     void *gak_data));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds
+KRB5_PROTOTYPE((krb5_context context,
+		krb5_creds *creds,
+		krb5_principal client,
+		krb5_prompter_fct prompter,
+		void *prompter_data,
+		krb5_deltat start_time,
+		char *in_tkt_service,
+		krb5_get_init_creds_opt *options,
+		krb5_gic_get_as_key_fct gak,
+		void *gak_data,
+		int *master,
+		krb5_kdc_rep **as_reply));
+
+
+krb5_error_code krb5_do_preauth
+KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *,
+		krb5_pa_data **, krb5_pa_data ***,
+		krb5_data *, krb5_keyblock *,
+		krb5_prompter_fct, void *,
+		krb5_gic_get_as_key_fct, void *));
+
+
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "profile.h"
 
@@ -984,14 +1025,48 @@ krb5_error_code encode_krb5_sam_response
 krb5_error_code encode_krb5_predicted_sam_response
 	KRB5_PROTOTYPE((const krb5_predicted_sam_response * , krb5_data **));
 
+krb5_error_code encode_krb5_sam_challenge
+       KRB5_PROTOTYPE((const krb5_sam_challenge * , krb5_data **));
+
+krb5_error_code encode_krb5_sam_key
+       KRB5_PROTOTYPE((const krb5_sam_key * , krb5_data **));
+
+krb5_error_code encode_krb5_enc_sam_response_enc
+       KRB5_PROTOTYPE((const krb5_enc_sam_response_enc * , krb5_data **));
+
+krb5_error_code encode_krb5_sam_response
+       KRB5_PROTOTYPE((const krb5_sam_response * , krb5_data **));
+
+krb5_error_code encode_krb5_predicted_sam_response
+       KRB5_PROTOTYPE((const krb5_predicted_sam_response * , krb5_data **));
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
+
+krb5_error_code decode_krb5_sam_challenge
+       KRB5_PROTOTYPE((const krb5_data *, krb5_sam_challenge **));
+
+krb5_error_code decode_krb5_sam_key
+       KRB5_PROTOTYPE((const krb5_data *, krb5_sam_key **));
+
+krb5_error_code decode_krb5_enc_sam_response_enc
+       KRB5_PROTOTYPE((const krb5_data *, krb5_enc_sam_response_enc **));
+
+krb5_error_code decode_krb5_sam_response
+       KRB5_PROTOTYPE((const krb5_data *, krb5_sam_response **));
+
+krb5_error_code decode_krb5_predicted_sam_response
+       KRB5_PROTOTYPE((const krb5_data *, krb5_predicted_sam_response **));
 
 
 /*************************************************************************
  * Prototypes for krb5_decode.c
  *************************************************************************/
+
+krb5_error_code krb5_validate_times
+       KRB5_PROTOTYPE((krb5_context, 
+		       krb5_ticket_times *));
 
 /*
    krb5_error_code decode_krb5_structure(const krb5_data *code,

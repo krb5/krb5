@@ -663,6 +663,14 @@ krb5_error_code krb5_decrypt_data
 #define	KRB5_AUTHDATA_OSF_DCE	64
 #define KRB5_AUTHDATA_SESAME	65
 
+/* password change constants */
+
+#define KRB5_KPASSWD_SUCCESS		0
+#define KRB5_KPASSWD_MALFORMED		1
+#define KRB5_KPASSWD_HARDERROR		2
+#define KRB5_KPASSWD_AUTHERROR		3
+#define KRB5_KPASSWD_SOFTERROR		4
+
 /*
  * end "proto.h"
  */
@@ -1478,6 +1486,17 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_524_conv_principal
 	KRB5_PROTOTYPE((krb5_context context, krb5_const krb5_principal princ, 
 		char FAR *name, char FAR *inst, char FAR *realm));
 
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_mk_chpw_req
+	KRB5_PROTOTYPE((krb5_context context, krb5_auth_context auth_context,
+ 			krb5_data *ap_req, char *passwd, krb5_data *packet));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_rd_chpw_rep
+	KRB5_PROTOTYPE((krb5_context context, krb5_auth_context auth_context,
+		       krb5_data *packet, int *result_code,
+		       krb5_data *result_data));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_chpw_result_code_string
+	KRB5_PROTOTYPE((krb5_context context, int result_code,
+			char **result_codestr));
+
 /* libkt.spec */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_register
 	KRB5_PROTOTYPE((krb5_context,
@@ -1527,6 +1546,12 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_default
 		krb5_ccache FAR *));
 KRB5_DLLIMP unsigned int KRB5_CALLCONV krb5_get_notification_message
 	KRB5_PROTOTYPE((void));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_copy_creds
+	KRB5_PROTOTYPE((krb5_context context,
+			krb5_ccache incc,
+			krb5_ccache outcc));
+
 
 /* chk_trans.c */
 krb5_error_code krb5_check_transited_list
@@ -1632,6 +1657,11 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_sname_to_principal
 		   krb5_const char FAR *,
 		   krb5_int32,
 		   krb5_principal FAR *));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_change_password
+	KRB5_PROTOTYPE((krb5_context context, krb5_creds *creds, char *newpw,
+			int *result_code, krb5_data *result_code_string,
+			krb5_data *result_string));
 
 krb5_error_code krb5_set_config_files
 	KRB5_PROTOTYPE ((krb5_context, krb5_const char FAR * FAR *));
@@ -2037,5 +2067,160 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_deltat_to_string
 /* flags for recvauth */
 #define KRB5_RECVAUTH_SKIP_VERSION	0x0001
 #define KRB5_RECVAUTH_BADAUTHVERS	0x0002
+/* initial ticket api functions */
+
+typedef struct _krb5_prompt {
+    char *prompt;
+    int hidden;
+    krb5_data *reply;
+} krb5_prompt;
+
+typedef krb5_error_code (KRB5_CALLCONV *krb5_prompter_fct)(krb5_context context,
+					     void *data,
+					     const char *banner,
+					     int num_prompts,
+					     krb5_prompt prompts[]);
+
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_prompter_posix
+KRB5_PROTOTYPE((krb5_context context,
+		void *data,
+		const char *banner,
+		int num_prompts,
+		krb5_prompt prompts[]));
+
+typedef struct _krb5_get_init_creds_opt {
+    krb5_flags flags;
+    krb5_deltat tkt_life;
+    krb5_deltat renew_life;
+    int forwardable;
+    int proxiable;
+    krb5_enctype *etype_list;
+    int etype_list_length;
+    krb5_address **address_list;
+    krb5_preauthtype *preauth_list;
+    int preauth_list_length;
+    krb5_data *salt;
+} krb5_get_init_creds_opt;
+
+#define KRB5_GET_INIT_CREDS_OPT_TKT_LIFE	0x0001
+#define KRB5_GET_INIT_CREDS_OPT_RENEW_LIFE	0x0002
+#define KRB5_GET_INIT_CREDS_OPT_FORWARDABLE	0x0004
+#define KRB5_GET_INIT_CREDS_OPT_PROXIABLE	0x0008
+#define KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST	0x0010
+#define KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST	0x0020
+#define KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST	0x0040
+#define KRB5_GET_INIT_CREDS_OPT_SALT		0x0080
+
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_init
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_tkt_life
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		krb5_deltat tkt_life));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_renew_life
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		krb5_deltat renew_life));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_forwardable
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		int forwardable));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_proxiable
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		int proxiable));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_etype_list
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		krb5_enctype *etype_list,
+		int etype_list_length));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_address_list
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		krb5_address **addresses));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_preauth_list
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		krb5_preauthtype *preauth_list,
+		int preauth_list_length));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_salt
+KRB5_PROTOTYPE((krb5_get_init_creds_opt *opt,
+		krb5_data *salt));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_password
+KRB5_PROTOTYPE((krb5_context context,
+		krb5_creds *creds,
+		krb5_principal client,
+		char *password,
+		krb5_prompter_fct prompter,
+		void *data,
+		krb5_deltat start_time,
+		char *in_tkt_service,
+		krb5_get_init_creds_opt *options));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_keytab
+KRB5_PROTOTYPE((krb5_context context,
+		krb5_creds *creds,
+		krb5_principal client,
+		krb5_keytab arg_keytab,
+		krb5_deltat start_time,
+		char *in_tkt_service,
+		krb5_get_init_creds_opt *options));
+
+typedef struct _krb5_verify_init_creds_opt {
+    krb5_flags flags;
+    int ap_req_nofail;
+} krb5_verify_init_creds_opt;
+
+#define KRB5_VERIFY_INIT_CREDS_OPT_AP_REQ_NOFAIL	0x0001
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_verify_init_creds_opt_init
+KRB5_PROTOTYPE((krb5_verify_init_creds_opt *options));
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_verify_init_creds_opt_set_ap_req_nofail
+KRB5_PROTOTYPE((krb5_verify_init_creds_opt *options,
+		int ap_req_nofail));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_verify_init_creds
+KRB5_PROTOTYPE((krb5_context context,
+		krb5_creds *creds,
+		krb5_principal ap_req_server,
+		krb5_keytab ap_req_keytab,
+		krb5_ccache *ccache,
+		krb5_verify_init_creds_opt *options));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_validated_creds
+KRB5_PROTOTYPE((krb5_context context,
+		krb5_creds *creds,
+		krb5_principal client,
+		krb5_ccache ccache,
+		char *in_tkt_service));
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_get_renewed_creds
+KRB5_PROTOTYPE((krb5_context context,
+		krb5_creds *creds,
+		krb5_principal client,
+		krb5_ccache ccache,
+		char *in_tkt_service));
+
 
 #endif /* KRB5_GENERAL__ */
