@@ -94,6 +94,11 @@
 /* #  define WRAP_GETNAMEINFO */
 #endif
 
+#ifdef _WIN32
+#define HAVE_GETADDRINFO
+#define HAVE_GETNAMEINFO
+#endif
+
 #ifdef WRAP_GETADDRINFO
 static int (*gaiptr) (const char *, const char *, const struct addrinfo *,
 		      struct addrinfo **) = &getaddrinfo;
@@ -222,7 +227,7 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 
 #if !defined (HAVE_GETADDRINFO)
 
-#define HAVE_FAKE_GETADDRINFO
+#define HAVE_FAKE_GETADDRINFO /* was not originally HAVE_GETADDRINFO */
 #define HAVE_GETADDRINFO
 #undef  HAVE_GETNAMEINFO
 #define HAVE_GETNAMEINFO

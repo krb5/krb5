@@ -2,7 +2,8 @@
 #define _PORT_SOCKET_H
 #if defined(_WIN32)
 
-#include <winsock.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 /* Some of our own infrastructure where the WinSock stuff was too hairy
    to dump into a clean Unix program...  */
