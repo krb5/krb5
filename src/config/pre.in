@@ -22,8 +22,6 @@ C=./
 S=/
 U=../
 
-SRCTOP = @SRCTOP@
-BUILDTOP = @BUILDTOP@
 SUBDIRS = @subdirs@
 srcdir = @srcdir@
 VPATH = @srcdir@
