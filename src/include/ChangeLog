@@ -1,3 +1,10 @@
+1999-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for memmove and bcopy.
+
+	* Makefile.in (install): Install profile.h since krb5.h will use
+	it.
+
 1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin (krb5_kuserok): Fix calling convention to make it
