@@ -1,3 +1,10 @@
+Mon May 17 12:26:12 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* windows.in, win-post.in: Remove win16 stuff.  Add
+		Win9x-compatible output directory creation.  Add more
+		thorough cleanup of output files and directories.  Use
+		latest and greatest (MSVC 6.0) debug flag.
+
 Mon May 10 15:03:28 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* windows.in, win-post.in: Build win32 binaries in 
