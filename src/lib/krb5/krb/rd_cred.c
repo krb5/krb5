@@ -37,14 +37,10 @@ decrypt_credencdata(context, pcred, pkeyblock, pcredenc)
 
     /*  now decode the decrypted stuff */
     if ((retval = decode_krb5_enc_cred_part(&scratch, &ppart)))
-    	goto cleanup_encpart;
+    	goto cleanup;
 
     *pcredenc = *ppart;
     retval = 0;
-
-cleanup_encpart:
-    memset(ppart, 0, sizeof(*ppart));
-    krb5_xfree(ppart);
 
 cleanup:
     memset(scratch.data, 0, scratch.length);

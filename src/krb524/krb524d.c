@@ -535,8 +535,10 @@ ret =  KRB5KDC_ERR_POLICY ;
 	  printf("v4 credentials encoded\n");
 
  error:
-     if (v5tkt->enc_part2)
+     if (v5tkt->enc_part2) {
 	 krb5_free_enc_tkt_part(context, v5tkt->enc_part2);
+	 v5tkt->enc_part2 = NULL;
+     }
 
      if(v5_service_key.contents)
        krb5_free_keyblock_contents(context, &v5_service_key);

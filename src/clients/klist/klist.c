@@ -617,6 +617,9 @@ show_credential(progname, kcontext, cred)
 
     if (show_etype) {
 	retval = krb5_decode_ticket(&cred->ticket, &tkt);
+	if (retval)
+	    goto err_tkt;
+
 	if (!extra_field)
 	    fputs("\t",stdout);
 	else
@@ -625,8 +628,11 @@ show_credential(progname, kcontext, cred)
 	       etype_string(cred->keyblock.enctype));
 	printf("%s ",
 	       etype_string(tkt->enc_part.enctype));
-	krb5_free_ticket(kcontext, tkt);
 	extra_field++;
+
+    err_tkt:
+	if (tkt != NULL)
+	    krb5_free_ticket(kcontext, tkt);
     }
 
     /* if any additional info was printed, extra_field is non-zero */

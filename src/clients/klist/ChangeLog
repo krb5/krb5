@@ -1,3 +1,7 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* klist.c: Fix double-free vulnerabilities.
+
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* klist.c (flags_string): Display transit-policy-checked,

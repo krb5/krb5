@@ -1,3 +1,7 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c: Fix double-free vulnerabilities.
+
 2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* krb524d.c (do_connection): Use krb5_princ_size rather than
