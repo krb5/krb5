@@ -404,6 +404,12 @@ krb5_gss_glue.so krb5_gss_glue.po $(OUTPRE)krb5_gss_glue.$(OBJEXT): krb5_gss_glu
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h $(SRCTOP)/include/k5-platform.h \
   gssapi_krb5.h gssapi_err_krb5.h
+lucid_context.so lucid_context.po $(OUTPRE)lucid_context.$(OBJEXT): lucid_context.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h $(SRCTOP)/include/k5-platform.h \
+  gssapi_krb5.h gssapi_err_krb5.h
 process_context_token.so process_context_token.po $(OUTPRE)process_context_token.$(OBJEXT): process_context_token.c \
   gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
   $(srcdir)/../generic/gssapiP_generic.h $(SRCTOP)/include/k5-thread.h \
@@ -434,6 +440,12 @@ seal.so seal.po $(OUTPRE)seal.$(OBJEXT): seal.c gssapiP_krb5.h $(BUILDTOP)/inclu
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h $(SRCTOP)/include/k5-platform.h \
   gssapi_krb5.h gssapi_err_krb5.h
+set_allowable_enctypes.so set_allowable_enctypes.po $(OUTPRE)set_allowable_enctypes.$(OBJEXT): set_allowable_enctypes.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(srcdir)/../generic/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
+  $(SRCTOP)/include/k5-platform.h gssapi_krb5.h gssapi_err_krb5.h
 ser_sctx.so ser_sctx.po $(OUTPRE)ser_sctx.$(OBJEXT): ser_sctx.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

@@ -56,8 +56,4 @@ $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 #
 threads.so threads.po $(OUTPRE)threads.$(OBJEXT): threads.c $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h
-fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h
 
