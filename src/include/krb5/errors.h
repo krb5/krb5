@@ -55,7 +55,7 @@
 #define KDC_ERR_PADATA_TYPE_NOSUPP	16 /* No support for padata type */
 #define KDC_ERR_TRTYPE_NOSUPP		17 /* No support for transited type */
 #define KDC_ERR_CLIENT_REVOKED		18 /* C's creds have been revoked */
-#define KDC_ERR_SERVICE_REVOKED		19 /* S's creds have been revoked"
+#define KDC_ERR_SERVICE_REVOKED		19 /* S's creds have been revoked */
 #define KDC_ERR_TGT_REVOKED		20 /* TGT has been revoked */
 #define KDC_ERR_CLIENT_NOTYET		21 /* C not yet valid */
 #define KDC_ERR_SERVICE_NOTYET		22 /* S not yet valid */
