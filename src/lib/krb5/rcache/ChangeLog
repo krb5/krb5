@@ -1,3 +1,12 @@
+2001-01-23  Tom Yu  <tlyu@mit.edu>
+
+	* rc_io.c (getdir): Subtract one from dirlen, since sizeof
+	includes the terminating NUL character.  Avoid redundant path
+	separators.
+	(krb5_rc_io_move): When renaming OLD to NEW, don't copy the
+	filename.  This was causing temporary files to get leaked.
+	(krb5_rc_io_close): Don't FREE if d->fn is NULL.
+
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* rcfns.c: New file, with function versions of former dispatch
