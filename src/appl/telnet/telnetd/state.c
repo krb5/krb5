@@ -1645,6 +1645,10 @@ static int envvarok(varp)
 	char *varp;
 {
 	if (!strchr(varp, '=') &&
+	    strcmp(varp, "TERMCAP") && /* to prevent a security hole  */
+	    strcmp(varp, "TERMINFO") &&	/* with tgetent */
+	    strcmp(varp, "TERMPATH") &&
+	    strcmp(varp, "HOME") && /* to prevent the tegetent bug  */
 	    strncmp(varp, "LD_", strlen("LD_")) && /* most systems */
 	    strncmp(varp, "_RLD_", strlen("_RLD_")) && /* irix */
 	    strncmp(varp, "KRB5", strlen("KRB5")) && /* v5 */
