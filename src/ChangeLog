@@ -1,3 +1,8 @@
+1999-08-27  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add some missing dirs needed for generating a proper
+	kerbsrc.zip.  Make krbsrc83.zip obsolete.
+
 1999-08-13  Brad Thompson  <yak@mit.edu>
 
 	* aclocal.m4: Added MacOS X shared library support.
