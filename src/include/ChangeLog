@@ -4,7 +4,7 @@
 	if DEBUG_THREADS.
 	(k5_pthread_mutex_lock, k5_pthread_mutex_unlock,
 	k5_pthread_assert_locked): New macros/functions; if DEBUG_THREADS,
-	set or check the owner field.
+	and thread support loaded, set or check the owner field.
 	(K5_OS_MUTEX_PARTIAL_INITIALIZER) [pthread case && DEBUG_THREADS]:
 	Set the owner field.  If PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
 	is defined, use it.

@@ -489,11 +489,13 @@ k5_pthread_mutex_lock(k5_os_mutex *m)
     return 0;
 }
 # endif
-# define k5_pthread_assert_locked(M) \
-	(assert(pthread_equal((M)->owner, pthread_self())))
-# define k5_pthread_mutex_unlock(M) \
-	(assert(pthread_equal((M)->owner, pthread_self())), \
-	 (M)->owner = (pthread_t) 0,			    \
+# define k5_pthread_assert_locked(M)				\
+	(K5_PTHREADS_LOADED					\
+	 ? assert(pthread_equal((M)->owner, pthread_self()))	\
+	 : (void)0)
+# define k5_pthread_mutex_unlock(M)	\
+	(k5_pthread_assert_locked(M),	\
+	 (M)->owner = (pthread_t) 0,	\
 	 pthread_mutex_unlock(&(M)->p))
 #else
 # define k5_pthread_mutex_lock(M) pthread_mutex_lock(&(M)->p)
