@@ -5,9 +5,10 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "mit-sipb-copyright.h"
 
-#ifdef STDARG_PROTOTYPES
+#if defined(__STDC__) || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -51,21 +52,26 @@ static void
     va_list args;
 #endif
 {
+    static char errbuf[1024];                   /* For those w/o stdio */
+
+    *errbuf = '\0';
     if (whoami) {
-	fputs(whoami, stderr);
-	fputs(": ", stderr);
+	strcat (errbuf, whoami);
+	strcat (errbuf, ": ");
     }
     if (code) {
-	fputs(error_message(code), stderr);
-	fputs(" ", stderr);
+	strcat (errbuf, error_message(code));
+	strcat (errbuf, " ");
     }
     if (fmt) {
-        vfprintf (stderr, fmt, args);
+        vsprintf (errbuf + strlen (errbuf), fmt, args);
     }
-    /* should do this only on a tty in raw mode */
-    putc('\r', stderr);
-    putc('\n', stderr);
+#ifdef _WINDOWS
+    MessageBox (NULL, errbuf, "Kerboros", MB_ICONEXCLAMATION);
+#else
+    fputs (errbuf, stderr);
     fflush(stderr);
+#endif    
 }
 
 #ifdef __STDC__
@@ -86,12 +92,12 @@ void com_err_va (whoami, code, fmt, args)
 }
 
 #ifndef VARARGS
-void com_err (const char *whoami,
+void INTERFACE_C com_err (const char *whoami,
 	      long code,
 	      const char *fmt, ...)
 {
 #else
-void com_err (va_alist)
+void INTERFACE_C com_err (va_alist)
     va_dcl
 {
     const char *whoami, *fmt;

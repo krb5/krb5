@@ -25,16 +25,16 @@
 
 #ifdef __STDC__
 /* ANSI C -- use prototypes etc */
-extern void com_err (const char *, long, const char *, ...);
-extern char const *error_message (long);
+extern void INTERFACE_C com_err (const char *, long, const char *, ...);
+extern char const * INTERFACE error_message (long);
 extern void (*com_err_hook) (const char *, long, const char *, va_list);
 extern void (*set_com_err_hook (void (*) (const char *, long, const char *, va_list)))
     (const char *, long, const char *, va_list);
 extern void (*reset_com_err_hook ()) (const char *, long, const char *, va_list);
 #else
 /* no prototypes */
-extern void com_err ();
-extern char *error_message ();
+extern void INTERFACE_C com_err ();
+extern char * INTERFACE error_message ();
 extern void (*com_err_hook) ();
 extern void (*set_com_err_hook ()) ();
 extern void (*reset_com_err_hook ()) ();

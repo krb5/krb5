@@ -8,6 +8,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "error_table.h"
 #include "mit-sipb-copyright.h"
 #include "internal.h"
@@ -19,19 +21,21 @@ static char buffer[25];
 
 struct et_list * _et_list = (struct et_list *) NULL;
 
-const char * error_message (code)
-long	code;
+const char * INTERFACE error_message (code)
+long code;
 {
     int offset;
+    long l_offset;
     struct et_list *et;
-    int table_num;
+    long table_num;
     int started = 0;
     char *cp;
 
-    offset = code & ((1<<ERRCODE_RANGE)-1);
-    table_num = code - offset;
+    l_offset = code & ((1<<ERRCODE_RANGE)-1);
+    offset = (int) l_offset;
+    table_num = code - l_offset;
     if (!table_num) {
-	if (offset < sys_nerr)
+        if (offset < sys_nerr)
 	    return(sys_errlist[offset]);
 	else
 	    goto oops;

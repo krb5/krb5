@@ -2,9 +2,11 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 SED = sed
 
-INSTALLFILE = cp
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=comerr.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
-all::
+INSTALLFILE = cp
 
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
@@ -24,6 +26,10 @@ CFILES=	compile_et.c error_table.c error_message.c et_name.c \
 
 SRCS=$(CFILES)
 
+all:: all-$(WHAT)
+
+all-windows: com_err.obj error_message.obj et_name.obj
+
 #
 # what to build...
 #
@@ -39,7 +45,7 @@ com_err.o: com_err.c
 # real entries...
 #
 
-all:: compile_et includes
+all-unix:: compile_et includes
 
 # The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )
@@ -48,7 +54,7 @@ all:: compile_et includes
 #	$(CC) $(CFLAGS) -o $@ compile_et.o error_table.o $(LEXLIB) $(BSDLIB)
 #
 #install::
-#	$(INSTALLPROG) compile_et ${DESTDIR}$(PROGDIR)/compile_et
+#	$(INSTALLPROG) compile_et $(DESTDIR)$(PROGDIR)/compile_et
 
 compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
 	$(srcdir)/config_script $(srcdir)/compile_et.sh $(AWK) $(SED) > compile_et
@@ -59,8 +65,10 @@ et_c.awk: $(srcdir)/et_c.awk
 
 et_h.awk: $(srcdir)/et_h.awk
 	$(CP) $(srcdir)/et_h.awk et_h.awk
+
+clean:: clean-$(WHAT)
 	
-clean::
+clean-unix::
 	$(RM) compile_et compile_et.o error_table.o 
 
 depend:: 
@@ -72,20 +80,20 @@ install:: mit-sipb-copyright.h
 	$(INSTALLFILE) $(srcdir)/mit-sipb-copyright.h $(DESTDIR)$(INCLDIR)/mit-sipb-copyright.h
 
 install:: com_err.3
-	$(INSTALLFILE) $(srcdir)/com_err.3 ${DESTDIR}${MANDIR}/man3/com_err.3
+	$(INSTALLFILE) $(srcdir)/com_err.3 $(DESTDIR)$(MANDIR)/man3/com_err.3
 
 install:: compile_et.1
-	$(INSTALLFILE) $(srcdir)/compile_et.1 ${DESTDIR}${MANDIR}/man1/compile_et.1
+	$(INSTALLFILE) $(srcdir)/compile_et.1 $(DESTDIR)$(MANDIR)/man1/compile_et.1
 
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
-all:: libcom_err.a
+all-unix:: libcom_err.a
 
 libcom_err.a: $(LIBOBJS)
 	$(ARCHIVE) $@ $(LIBOBJS)
 	$(RANLIB) $@
 
-clean::
+clean-unix::
 	$(RM) libcom_err.a
 	$(RM) $(LIBOBJS)
 
@@ -96,7 +104,7 @@ install::
 	$(CHMOD) 444 $(DESTDIR)$(LIBDIR)/libcom_err.a
 ## 
 
-clean::
+clean-unix::
 	rm -f *~ \#* *.bak \
 		*.otl *.aux *.toc *.PS *.dvi *.x9700 *.ps \
 		*.cp *.fn *.ky *.log *.pg *.tp *.vr \
@@ -107,7 +115,8 @@ clean::
 		test1.h test1.c test2.h test2.c test_et \
 		eddep makedep *.ln
 
-
+clean-windows::
+	$(RM) comerr.lib comerr.bak
 
 com_err.ps : com_err.dvi
 com_err.dvi: com_err.texinfo

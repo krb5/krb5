@@ -1,3 +1,16 @@
+Wed Mar 15 23:02:14 1995 Keith Vetter (keithv@fusion.com)
+
+	* com_err.c: made to work on the PC. Biggest changes was that
+           the error message now gets built in a buffer and either gets
+           printed to stderr or for Windows gets displays in a message box.
+        * err_message.c: fixed up includes and some 32/16 bit ints.
+        * et_name.c: changed two ints into longs.
+        * com_err.h: added windows keyword INTERFACE to prototypes.
+        * error_table.h: Added some windows specific defines since this
+           source doesn't really know about k5-config.h. Also, added 
+           prototype for error_table_name().
+	* Makefile.in: PC rules to make com_err, err_message and et_name.
+
 Tue Feb 28 13:23:58 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* error_table.h: Remove #ifdef STDC check to see if we should use
