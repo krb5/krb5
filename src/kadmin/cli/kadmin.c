@@ -518,7 +518,7 @@ void kadmin_cpw(argc, argv)
     char *canon;
     char *pwarg = NULL;
     int n_ks_tuple = 0, keepold = 0, randkey = 0;
-    krb5_key_salt_tuple *ks_tuple;
+    krb5_key_salt_tuple *ks_tuple = NULL;
     krb5_principal princ;
     
     if (argc < 2) {
