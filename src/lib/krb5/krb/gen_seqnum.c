@@ -20,6 +20,7 @@ static char rcsid_gen_seqnum_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/libos-proto.h>
 
 #ifndef MIN
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -98,7 +99,7 @@ krb5_int32 *seqno;
 					     esize));
 	outseqno += MIN((char *)(seqno+1)-outseqno, esize);
 	/* chain along */
-	memcpy(intmp,outtmp,esize);
+	memcpy((char *)intmp,(char *)outtmp,esize);
     }
     (void) krb5_finish_key(&eblock);
  cleanup:
