@@ -50,7 +50,7 @@ STOBJS=strdup.o
 STSRCS=strdup.c
 #endif
 
-INCLUDES=-I$(TOP)/include/stdc-incl
+INCLUDES=$(STDC_TOP_INCLUDES)
 
 OBJS =	\
 	cryptoconf.o \
