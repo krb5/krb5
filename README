@@ -78,7 +78,7 @@ supporting the OV administration server integration work.
 Thanks to Jeff Bigler, Mark Eichin, Marc Horowitz, Nancy Gilman, Ken
 Raeburn, and all of the folks at Cygnus Support, who provided
 innumerable bug fixes and portability enhancements to the Kerberos V5
-tree.  Thanks especially to4 Jeff Bigler, for the new user and system
+tree.  Thanks especially to Jeff Bigler, for the new user and system
 administrator's documentation.
 
 Thanks to Doug Engert from ANL for providing many bug fixes, as well
