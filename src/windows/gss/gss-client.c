@@ -23,16 +23,10 @@
 #include "gss.h"
 
 static const gss_OID_desc oids[] = {
-   {10, "\052\206\110\206\367\022\001\002\001\001"},
-   {10, "\052\206\110\206\367\022\001\002\001\002"},
-   {10, "\052\206\110\206\367\022\001\002\001\003"},
    {10, "\052\206\110\206\367\022\001\002\001\004"},
 };
 
-const gss_OID_desc * gss_nt_user_name = oids+0;
-const gss_OID_desc * gss_nt_machine_uid_name = oids+1;
-const gss_OID_desc * gss_nt_string_uid_name = oids+2;
-const gss_OID_desc * gss_nt_service_name = oids+3;
+const gss_OID_desc * nt_service_name = oids+0;
 
 int
 gss (char *host, char *name, char *oid, char *msg, int port)
@@ -226,7 +220,7 @@ client_establish_context (int s, char *sname, char *oid_name,
     send_tok.value = sname;
     send_tok.length = strlen(sname) + 1;
     maj_stat = gss_import_name(&min_stat, &send_tok,
-        (gss_OID) gss_nt_service_name, &target_name);
+        (gss_OID) service_name, &target_name);
     if (maj_stat != GSS_S_COMPLETE) {
         display_status("parsing name", maj_stat, min_stat);
         return -1;
