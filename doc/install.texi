@@ -1,0 +1,1009 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@setfilename install.info
+@settitle Kerberos V5
+@c For double-sided printing, uncomment:
+@c @setchapternewpage odd
+@c %**end of header
+
+@set EDITION BETA 5
+@set VERSION BETA 5
+@set UPDATED January 1995
+
+@ignore
+@iftex
+@finalout
+@end iftex
+@end ignore
+
+@ifinfo
+This file documents how to build and install the Kerberos V5
+distribution.
+
+Copyright (C) 1995 Massachusetts Institute of Technology.
+
+All Rights Reserved.
+
+Export of this software from the United States of America may require a
+specific license from the United States Government.  It is the
+responsibility of any person or organization contemplating export to
+obtain any necessary licenses before exporting.
+
+WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+distribute this software and its documentation for any purpose and
+without fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation, and that
+the name of M.I.T. not be used in advertising or publicity pertaining
+to distribution of the software without specific, written prior
+permission.  M.I.T. makes no representations about the suitability of
+this software for any purpose.  It is provided "as is" without express
+or implied warranty.
+
+@end ifinfo
+
+@titlepage
+@title Kerberos V5
+@subtitle Notes on Building and Installing Kerberos
+@subtitle Edition @value{EDITION}, for Kerberos version @value{VERSION}
+@subtitle @value{UPDATED}
+@author by Theodore Ts'o
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1995 Massachusetts Institute of Technology
+
+All Rights Reserved.
+
+Export of this software from the United States of America may require a
+specific license from the United States Government.  It is the
+responsibility of any person or organization contemplating export to
+obtain such a license before exporting.
+
+WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+distribute this software and its documentation for any purpose and
+without fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation, and that
+the name of M.I.T. not be used in advertising or publicity pertaining
+to distribution of the software without specific, written prior
+permission.  M.I.T. makes no representations about the suitability of
+this software for any purpose.  It is provided "as is" without express
+or implied warranty.
+
+@end titlepage
+
+@node Top, Introduction, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+
+@ifinfo
+This file documents how to build and install the Kerberos V5
+distribution.
+
+This is edition @value{EDITION}, for Kerberos V5 version @value{VERSION}.
+
+@end ifinfo
+
+@c The master menu, created with texinfo-master-menu, goes here.
+
+@menu
+* Introduction::                
+* Building Kerberos::           
+* Installation::                
+
+ --- The Detailed Node Listing ---
+
+Building Kerberos
+
+* Build Requirements::          
+* Unpacking the Sources::       
+* Doing the Build::             
+* Testing the Build::           
+* Configure options::           
+* Compile-time configuration files::  
+* Using Autoconf::              
+
+Doing the Build
+
+* Building within a single tree::  
+* Building with separate build directories::  
+
+Compile-time configuration files
+
+* osconf.h::                    
+* config.h::                    
+
+Operating System Incompatibilities
+
+* Ultrix 4.2/3::                
+* Alpha OSF/1 V2.0::            
+* BSDI::                        
+* Solaris versions 2.0 through 2.3:::  
+* Solaris 2.X:::                
+
+Installation
+
+* Background::                  
+* Installation on any Machine::  
+* Installing the KDC::          
+* A Sample Application::        
+
+Installation on any Machine
+
+* Picking a Realm Name::        
+* Configuration files::         
+* Required Programs::           
+
+Configuration files
+
+* krb.conf::                    
+* krb.realms::                  
+* /etc/services::               
+
+Installing the KDC
+
+* Initializing the KDB::        
+* Storing the Master Password::  
+* Adding Users to the Database::  
+* Starting the Kerberos Server::  
+* The Administration Server::   
+* Testing the Kerberos Server::  
+
+A Sample Application
+
+* Installing the Sample Application::  
+* Testing the Sample Server::   
+@end menu
+
+@node Introduction, Building Kerberos, Top, Top
+@chapter Introduction
+
+Kerberos V5 is still very much a work in progress.  Hence while the
+procedures documented in this paper are accurate as of the current
+release of Kerberos V5.  
+
+When these changes are made, we will update the documentation
+appropriately.  
+
+@node Building Kerberos, Installation, Introduction, Top
+@chapter Building Kerberos
+
+Starting with the Beta 4 distribution, we have started using a new
+configuration system, which was built using the Free Software
+Foundation's autoconf program.  This system will hopefully make Kerberos
+V5 much simpler to build for most people, and reduce the amount of
+effort required in porting Kerberos V5 to a new platform.
+
+@menu
+* Build Requirements::          
+* Unpacking the Sources::       
+* Doing the Build::             
+* Testing the Build::           
+* Configure options::           
+* Compile-time configuration files::  
+* Operating System Incompatibilities::  
+* Using Autoconf::              
+@end menu
+
+@node Build Requirements, Unpacking the Sources, Building Kerberos, Building Kerberos
+@section Build Requirements
+
+In order to build Kerberos V5, you will need roughly 60-70
+megabytes.  The exact amount will vary depending on the platform and
+whether the distribution is compiled with debugging symbol tables (using
+the @code{-g} option or not.
+
+If you wish to keep keep a @dfn{build tree}, which contains the compiled
+@file{*.o} file and executables, separate from your source tree, you
+will either need a @samp{make} program which supports @samp{VPATH}, or
+you will need to use a tool such as @samp{lndir} to produce a symbol
+link tree for your build tree.
+
+@node Unpacking the Sources, Doing the Build, Build Requirements, Building Kerberos
+@section Unpacking the Sources
+
+The first step in each of these build procedures is to unpack the source
+distribution.  The Kerberos V5 distribution comes in two compressed tar
+files.  The first file, which is generally named @file{krb5.src.tar.gz},
+contains the sources for all of Kerberos except for the crypto library,
+which is found in the file @file{krb5.crypto.tar.gz}.
+
+Both files should be unpacked in the same directory, such as
+@file{/u1/krb5}.  (In the rest of this document, we will assume that you
+have chosen to unpack the Kerberos V5 source distribution in this
+directory.)
+
+
+@node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos
+@section Doing the Build
+
+You have a number of different options as far as how you build Kerberos.
+If you only need to build Kerberos for one platform, using a single
+directory tree which contains both the source files and the object files
+is the simplest.  
+
+However, if you need to maintain Kerberos for a large number of
+platforms, it is probably desireable to use separate build trees for
+each platform.
+
+@menu
+* Building within a single tree::  
+* Building with separate build directories::  
+@end menu
+
+@node Building within a single tree, Building with separate build directories, Doing the Build, Doing the Build
+@subsection Building within a single tree
+
+If you don't want separate build trees for each architecture, then
+use the following abbreviated procedure.
+
+@enumerate
+@item @samp{cd /u1/krb5/src}
+@item @samp{configure}
+@item @samp{make}
+@end enumerate
+
+That's it!
+
+@node Building with separate build directories,  , Building within a single tree, Doing the Build
+@subsection Building with separate build directories
+
+If you wish to keep separate build directories for each platform, you
+can do so using the following procedure.  (Note, this requires that your
+@samp{make} program support @samp{VPATH}.  GNU's gmake will provide this
+functionality, for example.)
+
+For example, if you wish to create a build directory for pmax binaries
+you might use the following procedure:
+
+@enumerate
+@item @samp{mkdir /u1/krb5/pmax}
+@item @samp{cd /u1/krb5/pmax}
+@item @samp{../src/configure}
+@item @samp{make}
+@end enumerate
+
+@node Testing the Build, Configure options, Doing the Build, Building Kerberos
+@section Testing the Build
+
+The Kerberos V5 distribution comes with built-in regression tests.  To
+run them, simply type
+
+@example
+% @b{make check}
+@end example
+
+while in the top-level build directory.
+
+@node Configure options, Compile-time configuration files, Testing the Build, Building Kerberos
+@section Configure options
+
+There are a number of options to Configure which you can use to control
+how the Kerberos distribution is built.  The following table lists the
+most commonly used options to Kerberos V5's configure program.
+
+@table @code
+
+@item --with-cc=COMPILER
+
+Use @code{COMPILER} as the C compiler.
+
+@item --with-ccopts=FLAGS
+
+Use @code{FLAGS} as the default set of C compiler flags.
+
+Please take note that if you use the native Ultrix compiler on a
+DECstation you are likely to lose if you pass no flags to cc; md4.c
+takes an estimated 33 million years to compile if you provide neither
+the @samp{-g} flag nor the @samp{-O} flag to @samp{cc}.
+
+@item --with-cppopts=CPPOPTS 
+
+Use @code{CPPOPTS} as the default set of C preprocessor flags.  The most
+common use of this option is to select certain @code{#define}'s for use
+with the operating system's system include files.
+
+@item --with-krb5-root=DIR
+
+By default, Kerberos will expect its configuration files to be in
+the directory @file{/krb5}.  This can be changed by using this option.
+
+@item  --with-krb4=KRB4DIR 
+
+This option enables Kerberos V4 backwards compatibility.  The directory
+specified by @code{KRB4DIR} specifies where the V4 include files should
+be found (@file{/KRB4DIR/include}) as well as where the V4 Kerberos
+library should be found (@file{/KRB4DIR/lib}).
+
+@end table
+
+@node Compile-time configuration files, Operating System Incompatibilities, Configure options, Building Kerberos
+@section Compile-time configuration files
+
+There are two configuration files which you may wish to edit to control
+various compile-time parameters in the Kerberos distribution.
+
+@menu
+* osconf.h::                    
+* config.h::                    
+@end menu
+
+@node osconf.h, config.h, Compile-time configuration files, Compile-time configuration files
+@subsection @file{osconf.h}
+
+This file is found in @file{include/krb5/stock/osconf.h}.
+
+@table @code
+
+@item DEFAULT_CONFIG_FILENAME
+
+The pathname to the file which defines the known realms and their KDCs.
+It currently uses the same format as Kerberos V4's krb.conf file.
+
+@item DEFAULT_TRANS_FILENAME
+
+The pathname to the file which assigns hosts to realms.  It currently
+uses the same format as Kerberos V4's krb.realms
+
+@item DEFAULT_LNAME_FILENAME
+
+The pathname to the database mapping authentication names to local
+account names.  See kdb5_anadd(8).
+
+@item DEFAULT_KEYTAB_NAME
+
+The type and pathname to the default server keytab file (the equivalent
+of Kerberos V4's /etc/srvtab).  
+
+@item DEFAULT_KDC_ETYPE
+
+The default encryption type for the KDC.
+
+@item DEFAULT_KDC_KEYTYPE
+
+The default keytype for the KDC.
+
+@item KDCRCACHE
+
+The name of the replay cache used by the KDC.
+
+@item RCTMPDIR
+
+The directory which stores replay caches.
+
+@end table
+
+@node config.h,  , osconf.h, Compile-time configuration files
+@subsection @file{config.h}
+
+This file is located in @file{include/krb5/stock/config.h}.
+
+@table @code
+
+@item KRBCONF_VAGUE_ERRORS
+
+If defined, give vague and unhelpful error messages to the client... er,
+attacker.  (Needed to meet silly government regulations; most other
+sites will want to keep this undefined.)
+
+@item KRBCONF_KDC_MODIFIES_KDB
+
+Define this if you want to allow the KDC to modify the Kerberos
+database; this allows the last request information to be updated, as
+well as the failure count information.
+
+Note that this doesn't work if you're using slave servers!!!  It also
+causes the database to be modified (and thus need to be locked)
+frequently.
+
+@end table
+
+@node Operating System Incompatibilities, Using Autoconf, Compile-time configuration files, Building Kerberos
+@section Operating System Incompatibilities
+
+This section details operating system incompatibilties with Kerberos V5
+which has been reported to MIT.  If you find additional
+incompatibilities, and/or discover workarounds to such problems, please
+send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
+
+@menu
+* Ultrix 4.2/3::                
+* Alpha OSF/1 V2.0::            
+* BSDI::                        
+* Solaris versions 2.0 through 2.3::  
+* Solaris 2.X::                 
+@end menu
+
+@node Ultrix 4.2/3, Alpha OSF/1 V2.0, Operating System Incompatibilities, Operating System Incompatibilities
+@subsection Ultrix 4.2/3
+
+On the MIPS platform, md4.c and md5.c can not be compiled with the
+optimizer set at level 1.  (Either -O or -g will work; leaving ccopts
+null won't.)  The optimizer isn't hung; it just takes an exponentially
+long time.  Calculations estimate around 4 billion years....
+
+@node Alpha OSF/1 V2.0, BSDI, Ultrix 4.2/3, Operating System Incompatibilities
+@subsection Alpha OSF/1 V2.0
+
+md4.c can not be compiled with the optimizer on.  (This could possibly
+be the same sort of bug as found in @ref{Ultrix 4.2/3}, but that seems
+rather remarkable.)
+
+(Reported by Marc Kenig)
+
+@node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0, Operating System Incompatibilities
+@subsection BSDI
+
+BSDI reportedly has a bad sed which causes it to go into an infinite
+loop during the build.  The workaround is to get a sed from somewhere
+else, such as GNU.
+
+@node Solaris versions 2.0 through 2.3, Solaris 2.X, BSDI, Operating System Incompatibilities
+@subsection Solaris versions 2.0 through 2.3
+
+The @code{gethostbyname()} routine is broken; it does not return a fully
+qualified domain name, even if you are using the DNS.  Since Kerberos
+V5 uses the fully qualified domain name as the second component of a
+service principal (i.e, "host/tsx-11.mit.edu@@ATHENA.MIT.EDU"), this
+causes problems for servers who try to figure out their own fully
+qualified domain name.  (It turns out clients win because Kerberos
+calls gethostbyname() and then calls gethostbyaddr() on the address,
+and SunSoft didn't screw up gethostbyaddr() except when it is your own
+local hostname!)
+
+Workarounds:  
+
+@enumerate
+
+@item   Supply your own resolver library.
+
+@item   Upgrade to Solaris 2.4
+
+@item   Make sure your /etc/nsswitch.conf has the line:
+
+@example
+hosts:      files dns
+@end example
+
+and then in /etc/hosts, make sure there is a line with your
+workstation's IP address and hostname, with the fully qualified domain
+name first.  Example:
+
+@example
+18.172.1.4      dcl.mit.edu dcl
+@end example
+
+@end enumerate
+
+@node Solaris 2.X,  , Solaris versions 2.0 through 2.3, Operating System Incompatibilities
+@subsection Solaris 2.X
+
+You *must* compile Kerberos V5 *without* the UCB compatibility libraries.  
+
+This means that @file{/usr/ucblib} must *not* be in the LD_LIBRARY_PATH
+environment variable when you compile it.  
+
+Alternatively you can place the @code{-i} option on the cc line.  So you
+can put @code{--with-ccopts=-i} on the configure line.  (Thanks to Dan
+Nessett for this suggestion.)
+
+@node Using Autoconf,  , Operating System Incompatibilities, Building Kerberos
+@section Using Autoconf
+
+(If you are not a developer, you can skip this section.)
+
+In most of the Kerberos V5 source directories, there is a
+@file{configure} which automatically determines the compilation
+environment and creates the proper Makefiles for a particular platform.
+These @file{configure} files are generated using @samp{autoconf} version
+2.1, which can be found in the @file{src/util/autoconf} directory in the
+distribution.
+
+Normal users will not need to worry about running autoconf; the
+distribution comes with the @file{configure} files already prebuilt.
+Developers who wish to modify the @file{configure.in} files should see
+@ref{Top, , Overview, autoconf, The Autoconf Manual}.  
+
+Note that in order to run @samp{autoconf}, you must have GNU m4 in your
+path.  Before you use the autoconf in the Kerberos V5 source tree, you
+may also need to run @samp{configure}, and then @samp{make} in the
+@file{src/util/autoconf} directory in order to properly setup @samp{autoconf}.
+
+One tool which is provided for the convenience of developers can be
+found in @file{src/util/reconf}.  This program should be run while the
+current directory is the source directory.  It will automatically rebuild any
+@file{configure} files which need rebuilding.  If you know that you have
+made a change that will require that all the @file{configure} files need to
+be rebuilt from scratch, specify the @code{--reconf} option: 
+
+@example
+% cd /u1/krb5/src
+% ./util/reconf --force
+@end example
+
+@node Installation,  , Building Kerberos, Top
+@chapter Installation
+
+When you are installing Kerberos for the first time at a site, you must
+first decide on the Realm name you will use for your site, and select a
+machine to serve as the @dfn{KDC}, or Key Distribution Center.  The KDC
+must be located on a secure machine, since its database contains the
+keys for the entire realm.  It is extremely important that the database
+be kept secure, if the realm's Kerberos service is to remain secure.
+
+Once a KDC is installed and configured, you may then set up one or more
+client machines, and one or more application machines.
+
+@menu
+* Background::                  
+* Installation on any Machine::  
+* Installing the KDC::          
+* A Sample Application::        
+@end menu
+
+@node Background, Installation on any Machine, Installation, Installation
+@section Background Information
+
+Your system's security is only as good as the security of your
+@samp{root} password.  Please take other precautions to protect your
+system security in addition to installing @sc{CNS}.  @sc{CNS} cannot
+protect you from someone who is able to steal @samp{root} privileges.
+@sc{CNS} also does not protect you from break-ins caused by bugs in your
+daemons (e.g., @samp{fingerd} or @samp{sendmail}).  On almost all Unix
+systems, if intruders can break in as an ordinary users, they can become
+root by exploiting bugs or imperfect configuration files.
+
+
+@node Installation on any Machine, Installing the KDC, Background, Installation
+@section Installation on any Machine
+
+The following steps must be performed no matter what type of type of
+machine (KDC, Client, or Application server) you are installing.  All
+machines functioning within the same administrative domain must use the
+same Kerberos realm name; and all machines which are using Kerberos must
+have Kerberos's configuration files properly installed.
+
+If you are installing Kerberos on a machine which will only act as a
+client, this section describes all that you need to do.  If you are
+installing a KDC, or an Kerberos Application server, please see 
+@ref{Installing the KDC}, or @ref{A Sample Application},
+for additional steps.
+
+@menu
+* Picking a Realm Name::        
+* Configuration files::         
+* Required Programs::           
+@end menu
+
+@node Picking a Realm Name, Configuration files, Installation on any Machine, Installation on any Machine
+@subsection Picking a Realm Name
+
+Before you install Kerberos V5 at your site, you have to choose a
+@dfn{realm name}, the name that specifies the system's administrative
+domain.  By convention, we suggest that you use your internet domain
+name, in capital letters.  
+
+@node Configuration files, Required Programs, Picking a Realm Name, Installation on any Machine
+@comment  node-name,  next,  previous,  up@section 
+@subsection Configuration files
+
+@strong{WARNING:} The name and syntax of the @file{krb.conf} and
+@file{krb.realms} file will be changing before the 1.0 release!
+
+@menu
+* krb.conf::                    
+* krb.realms::                  
+* /etc/services::               
+@end menu
+
+@node krb.conf, krb.realms, Configuration files, Configuration files
+@subsubsection The @file{krb.conf} File
+
+Create a @file{[KRB5ROOT]/krb.conf} file using the following format:
+@example
+<realm_name>
+<realm_name>   <master_server_name> admin server
+@end example
+
+where @samp{realm_name} specifies the system's realm name,
+and @samp{master_server_name} specifies the machine name on
+which you will run the master server.  The words 'admin server' must
+appear next to the name of the server on which you intend to run the
+administration server (which must be a machine with access to the database).
+
+For example,
+if your realm name is @samp{tim.edu} and your master server's name is
+@samp{kerberos.tim.edu}, the file should have these contents:
+
+@example
+tim.edu
+tim.edu  kerberos.tim.edu admin server
+@end example
+
+See the @file{[SOURCE_DIR]/config-files/krb.conf} file for an
+example @file{krb.conf} file.  That file has examples of how to
+provide backup servers for a given realm (additional lines with the same
+leading realm name) and how to designate servers for remote realms.
+
+@node krb.realms, /etc/services, krb.conf, Configuration files
+@subsubsection The @file{krb.realms} File
+
+In many situations, the default realm in which a host operates will be
+identical to the domain portion its Internet domain name.
+
+If this is not the case, you will need to establish a translation from
+host name or domain name to realm name.  This is accomplished with the
+@samp{[KRB5ROOT]/krb.realms} file.
+
+Each line of the translation file specifies either a hostname or domain
+name, and its associated realm:
+
+@example
+.domain.name kerberos.realm1
+host.name kerberos.realm2
+@end example
+For example, to map all hosts in the domain LSC.TIM.EDU to KRB.REALM1
+but the host FILMS.LSC.TIM.EDU to KRB.REALM2 your file would read:
+@example
+.LSC.TIM.EDU KRB.REALM1
+FILMS.LSC.TIM.EDU KRB.REALM2
+@end example
+If a particular host matches both a domain and a host entry, the host
+entry takes precedence.
+
+@node     /etc/services,  , krb.realms, Configuration files
+@subsubsection /etc/services
+
+All hosts which will use Kerberos will need to have certain ports
+defined in the system's @file{/etc/services} file.  The file
+@file{[SOURCEDIR]/config-files/services.append} contains the entries
+which should be appened to the /etc/services file.
+
+@node Required Programs,  , Configuration files, Installation on any Machine
+@subsection Required Programs
+
+The following files should be installed on all machines which are
+running Kerberos, either as a client, a KDC, or an application server:
+
+@itemize
+@item @file{/krb5/bin/kinit}
+@item @file{/krb5/bin/kdestroy}
+@item @file{/krb5/bin/klist}
+@end itemize
+
+@node Installing the KDC, A Sample Application, Installation on any Machine, Installation
+@section Installing the KDC
+
+@menu
+* Initializing the KDB::        
+* Storing the Master Password::  
+* Adding Users to the Database::  
+* Starting the Kerberos Server::  
+* The Administration Server::   
+* Testing the Kerberos Server::  
+@end menu
+
+@node Initializing the KDB, Storing the Master Password, Installing the KDC, Installing the KDC
+@subsection Initializing the Kerberos Database
+
+Login to the Kerberos KDC, and use the @samp{su} command to become root.
+If you installed the Kerberos administration tools 
+with the @samp{make install} command and the default pathnames,
+they should be in the @file{/krb5/sbin} directory.
+If you installed the tools in a different directory,
+hopefully you know what it is.
+From now on, we will refer to this directory as [ADMIN_DIR].
+
+The @samp{kdb5_create} command creates and initializes the master database.
+It asks you to the database's master password.
+Do not forget this password.
+If you do, the database becomes useless.
+(Your realm name should be substituted for [REALMNAME] below.)
+
+Use @samp{kdb5_create} as follows:
+
+@example
+# @b{/krb5/sbin/kdb5_create}
+Initializing database '/krb5/principal' for realm 'ATHENA.MIT.EDU',
+master key name 'K/M@@ATHENA.MIT.EDU'
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.
+Enter KDC database master key:              @b{<-- [Enter the master password.]}
+Re-enter KDC database master key to verify: @b{<-- [Re-enter it.]}
+@end example
+
+
+@node Storing the Master Password, Adding Users to the Database, Initializing the KDB, Installing the KDC
+@subsection Storing the Master Password
+
+The @samp{kdb5_stash} command "stashes" the master password in the file
+@file{/.k.[REALM.NAME]} so that the Kerberos server can be started
+automatically during an unattended reboot of the master server.  Other
+administrative programs use this hidden password so that they can access
+the master database without someone having to manually provide the
+master password.  This command is an optional one; if you'd rather enter
+the master password each time you start the Kerberos server, don't use
+@samp{kdb5_stash}.
+
+One the one hand, if you use @samp{kdb5_stash}, a copy of the master key
+will reside on disk which may not be acceptable; on the other hand, if
+you don't use @samp{kdb5_stash}, the server cannot be started unless
+someone is around to type the password in manually.
+
+The command merely prompts for the master password:
+
+@example
+# @b{/krb5/sbin/kdb5_stash}
+Enter KDC database master key:    @b{<-- [Enter the master password.]}
+@end example
+
+A note about the Kerberos database master key:
+if your master key is compromised and the database is obtained,
+the security of your entire authentication system is compromised.
+The master key must be a carefully kept secret.  If you keep backups,
+you must guard all the master keys you use, in case someone has stolen
+an old backup and wants to attack users' whose passwords haven't changed
+since the backup was stolen.
+This is why we provide the option not to store it on disk.
+
+@node Adding Users to the Database, Starting the Kerberos Server, Storing the Master Password, Installing the KDC
+@subsection Adding Users to the Database
+
+The @samp{kdb5_edit} program is used to add new users and services to
+the master database, and to modify existing database information.
+
+Here we will this program to add yourself to the newly created database
+
+@example
+# @b{/krb5/sbin/kdb5_edit}
+kdb5_edit:  @b{ank tytso}
+Enter password:                        @b{<-- [Enter your password.]}
+Re-enter password for verification:    @b{<-- [Re-enter it.]}
+kdb5_edit: @b{quit}
+@end example
+
+The @samp{ank} command is short for "add_new_key"; this command adds a
+new user to the database.  To see what other commands which kdb5_edit
+supports, type @kbd{? @key{RET}} at the @samp{kdb5_edit} prompt.
+
+@node Starting the Kerberos Server, The Administration Server, Adding Users to the Database, Installing the KDC
+@subsection Starting the Kerberos Server
+
+In order to start the Kerberos server, run it as a background process
+
+@example
+# @b{/krb5/sbin/krb5kdc &}
+@end example
+
+If you have used the @samp{kdb5_stash} command to store the master database password,
+the server will start automatically.
+If you did not use @samp{kdb5_stash}, 
+use the following command:
+
+@example
+# @b{/krb5/sbin/krb5kdc -m}
+@end example
+
+The server will prompt you to enter the master password before actually
+starting itself.
+
+@node The Administration Server, Testing the Kerberos Server, Starting the Kerberos Server, Installing the KDC
+@subsection The Administration Server
+
+There is currently an administration server in the Kerberos source tree.
+It is, however, very rough, and it will likely be replaced before the
+1.0 release.
+
+Hence, this manual does not document the current administration server.
+Changes to the database can be made by logging in to the KDC directly,
+and using the @samp{kdb5_edit} program.
+
+@node Testing the Kerberos Server,  , The Administration Server, Installing the KDC
+@subsection Testing the Kerberos Server
+
+Use the @samp{kinit} command obtain Kerberos credentials.  This command
+creates your credentials cache and stores your credentials in it.
+
+If you used the default @samp{make install} command and directories to
+install the Kerberos user utilities, @samp{kinit} will be in the
+@file{/krb5/bin} directory. From now on, we'll refer to the Kerberos user
+commands directory as [K_USER].
+
+Use @samp{kinit} as follows:
+
+@example
+# @b{[K_USER]/kinit tytso}
+Password for tytso.MIT.EDU:              @b{<-- enter tytso's password}
+@end example
+
+
+Use the @samp{klist} program to list the contents of your ticket file.
+
+@example
+# @b{[K_USER]/klist}
+Ticket cache: /tmp/krb5cc_15806
+Default principal: tytso@@ATHENA.MIT.EDU
+
+  Valid starting       Expires          Service principal
+31-Jan-95 21:58:32   1-Feb-95 05:57:39  krbtgt/ATHENA.MIT.EDU@@ATHENA.MIT.EDU
+
+@end example
+
+@ignore
+@c not yet...
+If you have any problems, you can examine the log file
+@file{/krb5/kerberos.log} on the Kerberos server machine to see if
+there was some sort of error.
+@end ignore
+
+
+@node A Sample Application,  , Installing the KDC, Installation
+@section A Sample Application
+
+This release of Kerberos comes with a sample application
+server and a corresponding client program.  
+You will find this software in the @file{src/appl/sample/sserver} and
+@file{src/appl/sample/sclient} directories, which contain the server's
+exectable, and the client program's executable, respectively.
+
+The programs are rudimentary.
+When they have been installed (the installation procedure is described
+in detail later), they work as follows:
+
+@itemize
+
+The user starts @samp{sclient} and provides as arguments
+to the command the name of the server machine and an optional port on
+which to contact the server.
+For instance:
+@example
+% @b{/u1/krb5/build/appl/sample/sclient/sclient tsx-11.mit.edu}
+@end example
+
+@item @samp{sclient} contacts the server machine and
+authenticates the user to @samp{sserver}.
+
+@item @samp{sserver} authenticates itself to @samp{sclient} (thus
+performing mutual authentication), and 
+then returns a message to the client program.
+This message contains the name of the Kerberos principal that was used
+to authenticate to @samp{sserver}.
+
+@item @samp{sclient} displays the server's message on the user's
+terminal screen.
+@end itemize
+
+@menu
+* Installing the Sample Application::  
+* Testing the Sample Server::   
+@end menu
+
+@node Installing the Sample Application, Testing the Sample Server, A Sample Application, A Sample Application
+@subsection Installing the Sample Application
+
+In general,
+you use the following procedure to install a Kerberos-authenticated
+server-client system.
+
+@enumerate
+
+@item Add the appropriate entry to the Kerberos database using @samp{kdb_edit}
+
+@item Create a @file{/etc/v5srvtab} file for the server machine.
+
+@item Install the service program and the @file{/etc/v5srvtab}
+file on the server machine.
+
+@item Install the client program on the client machine.
+
+@item Update the @file{/etc/services} file on the client and server machines.
+@end enumerate
+
+We will use the sample application as an example, although programs
+which do not take requests via the @samp{inetd} program may have
+slightly different installation procedures.  @samp{Inetd} starts
+@samp{sserver} each time a client process contacts the server machine.
+@samp{sserver} processes the request, terminiates, then is restarted
+when @samp{inetd} receives another @samp{sserver} request.  When you
+install the program on the server, you must add a @samp{sample} entry to
+the server machine's @file{/etc/inetd.conf} file.
+
+The following description assumes that you are installing
+@samp{sserver} on the machine @samp{jimi.mit.edu}.
+Here's the process, step by step:
+
+@enumerate
+
+@item Login as or @samp{su} to root on the Kerberos server machine.
+Use the @samp{kdb5_edit} program to create an entry for
+@code{sample} in the Kerberos database:
+
+@example
+# @b{[ADMIN_DIR]/kdb5_edit}
+kdb5_edit: @b{ark sample/jimi.mit.edu}         @b{<-- add_random_key}
+kdb5_edit: @b{quit}
+@end example
+
+@item Use @samp{kdb5_edit} to create a @file{srvtab} file
+for @samp{sserver}'s host machine:
+
+@example
+# @b{[ADMIN_DIR]/kdb5_edit}
+kdb5_edit: @b{xst jimi.mit.edu sample}         @b{<-- add_random_key}
+'sample/jimi.mit.edu@@ATHENA.MIT.EDU' added to keytab 'WRFILE:jimi.mit.edu-new-srvtab'
+kdb5_edit: @b{quit}
+@end example
+
+Transfer the @file{jimi.mit.edu-new-srvtab} file to @samp{jimi.mit.edu}
+and install it as @file{/etc/v5srvtab}.
+Note that this file is equivalent to the service's password and should
+be treated with care.
+For example, it could be transferred by removable media, but should
+not be sent over an open network in the clear.
+Once installed, this file should be readable only by root.
+
+@item Add the following line to the @file{/etc/services} file on
+@samp{jimi.mit.edu}, and on all machines that will run the
+@samp{sample_client} program:
+
+@example
+sample     906/tcp       # Kerberos sample app server
+@end example
+
+@item Add a line similar to the following line to the @file{/etc/inetd.conf}
+file on @samp{sample_server}'s machine:
+
+@example
+sample   stream   tcp   nowait   switched   root
+    [PATH]/sserver sample_server
+@end example
+
+where [PATH] should be substituted with
+the path to the @samp{sserver} program.
+(This @file{inetd.conf} information should be placed on one line.)
+You should examine existing lines in @file{/etc/inetd.conf} and use the
+same format used by other entries (e.g. for telnet).  Most systems do
+not have a column for the `switched' keyword, and some do not have a
+column for the username (usually `root', as above).
+
+@item Restart @samp{inetd} by sending the current @samp{inetd} process
+a hangup signal:
+
+@example
+# @b{kill -HUP} @i{process_id_number}
+@end example
+
+@item The @samp{sserver} is now ready to take @samp{sclient} requests.
+
+@end enumerate
+
+@node Testing the Sample Server,  , Installing the Sample Application, A Sample Application
+@subsection Testing the Sample Server
+
+Assume that you have installed @samp{sserver} on @samp{jimi.mit.edu}.
+
+Login to your workstation and use the @samp{kinit} command to
+obtain a Kerberos ticket-granting ticket:
+
+@example
+% @b{[K_USER]/kinit tytso}
+Password for tytso@@ATHENA.MIT.EDU:            @b{<--- Enter tytso's password}
+@end example
+
+Now use the @samp{sclient} program as follows:
+
+@example
+% @b{[PATH]/sclient jimi}
+@end example
+
+The command should display something like the following:
+
+@example
+sendauth succeeded, reply is:
+reply len 29, contents:
+You are tytso@@ATHENA.MIT.EDU
+@end example
+
+
+@contents
+@bye
