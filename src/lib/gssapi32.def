@@ -72,14 +72,22 @@ EXPORTS
 ;
 ; GSS-API variables
 ;
-	gss_nt_user_name	           DATA
+        gss_nt_krb5_name               DATA
+        gss_nt_krb5_principal          DATA
+	gss_nt_user_name	       DATA
 	gss_nt_machine_uid_name	       DATA
 	gss_nt_string_uid_name	       DATA
-	gss_nt_service_name	           DATA
-    GSS_C_NT_USER_NAME             DATA
-    GSS_C_NT_MACHINE_UID_NAME      DATA
-    GSS_C_NT_STRING_UID_NAME       DATA
-    GSS_C_NT_HOSTBASED_SERVICE     DATA
-    GSS_C_NT_HOSTBASED_SERVICE_X   DATA
-    GSS_C_NT_ANONYMOUS             DATA
-    GSS_C_NT_EXPORT_NAME           DATA
+	gss_nt_service_name	       DATA
+        GSS_C_NT_USER_NAME             DATA
+        GSS_C_NT_MACHINE_UID_NAME      DATA
+        GSS_C_NT_STRING_UID_NAME       DATA
+        GSS_C_NT_HOSTBASED_SERVICE     DATA
+        GSS_C_NT_HOSTBASED_SERVICE_X   DATA
+        GSS_C_NT_ANONYMOUS             DATA
+        GSS_C_NT_EXPORT_NAME           DATA
+        krb5_gss_oid_array             DATA
+        gss_mech_krb5                  DATA
+        gss_mech_krb5_old              DATA
+        gss_mech_set_krb5              DATA
+        gss_mech_set_krb5_old          DATA
+        gss_mech_set_krb5_both         DATA
