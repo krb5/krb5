@@ -1,3 +1,8 @@
+Mon Aug  8 01:15:27 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* utility.c (putf): don't misdeclare index/rindex, strings.h
+	already got included. Don't even use them -- use str*chr instead.
+
 Thu Aug  4 03:37:26 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: pick up dbm libs

@@ -448,11 +448,6 @@ putf(cp, where)
 	char *slash;
 	time_t t;
 	char db[100];
-#ifdef	STREAMSPTY
-	extern char *index();
-#else
-	extern char *rindex();
-#endif
 
 	putlocation = where;
 
@@ -466,9 +461,9 @@ putf(cp, where)
 		case 't':
 #ifdef	STREAMSPTY
 			/* names are like /dev/pts/2 -- we want pts/2 */
-			slash = index(line+1, '/');
+			slash = strchr(line+1, '/');
 #else
-			slash = rindex(line, '/');
+			slash = strrchr(line, '/');
 #endif
 			if (slash == (char *) 0)
 				putstr(line);
