@@ -17,9 +17,6 @@ static char rcsid_init_ets_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <krb5/isode_err.h>
-#include <krb5/kdb5_err.h>
 
 void
 krb5_init_ets PROTOTYPE((void))
