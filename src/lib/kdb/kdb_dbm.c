@@ -141,16 +141,8 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
 #else	/* dbm_clearerr */
     dbm_clearerr,		/* Clear Database Error	*/
 #endif	/* dbm_clearerr */
-#ifdef	dbm_dirfno
     (int (*)()) NULL,		/* Get DB index FD num	*/
-#else	/* dbm_dirfno */
-    dbm_dirfno,			/* Get DB index FD num	*/
-#endif	/* dbm_dirfno */
-#ifdef	dbm_pagfno
     (int (*)()) NULL,		/* Get DB data FD num	*/
-#else	/* dbm_pagfno */
-    dbm_pagfno,			/* Get DB data FD num	*/
-#endif	/* dbm_pagfno */
 };
 #endif	/* BERK_DB_DBM */
 
@@ -189,18 +181,6 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
 					     db_dispatch->kdb5_dbm_clearerr)) \
 					  (db)) :			 \
 					 dbm_clearerr(db))
-#define	KDBM_DIRFNO(dbc, db)		((((krb5_db_context *)dbc)->	 \
-					  db_dispatch->kdb5_dbm_dirfno) ? \
-					 ((*(((krb5_db_context *)dbc)->	 \
-					     db_dispatch->kdb5_dbm_dirfno)) \
-					  (db)) :			 \
-					 dbm_dirfno(db))
-#define	KDBM_PAGFNO(dbc, db)		((((krb5_db_context *)dbc)->	 \
-					  db_dispatch->kdb5_dbm_pagfno) ? \
-					 ((*(((krb5_db_context *)dbc)->	 \
-					     db_dispatch->kdb5_dbm_pagfno)) \
-					  (db)) :			 \
-					 dbm_pagfno(db))
 #define	KDBM_INDEX_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_db_index_ext)
 #define	KDBM_DATA_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
