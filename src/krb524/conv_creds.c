@@ -20,21 +20,30 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "krb5.h"
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "krb5.h"
 #include <krb.h>
 
 #include "krb524.h"
 
-int krb524_convert_creds_addr(krb5_creds *v5creds, CREDENTIALS *v4creds,
-			 struct sockaddr *saddr)
+int krb524_convert_creds_plain
+	PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
+		   CREDENTIALS *v4creds));
+
+
+int krb524_convert_creds_addr(context, v5creds, v4creds, saddr)
+     krb5_context context;
+     krb5_creds *v5creds;
+     CREDENTIALS *v4creds;
+     struct sockaddr *saddr;
 {
      int ret;
 
-     if (ret = krb524_convert_creds_plain(v5creds, v4creds))
+     if ((ret = krb524_convert_creds_plain(context, v5creds, v4creds)))
 	  return ret;
 
      return krb524_convert_tkt(v5creds->server, &v5creds->ticket,
@@ -43,18 +52,22 @@ int krb524_convert_creds_addr(krb5_creds *v5creds, CREDENTIALS *v4creds,
 			       saddr);
 }
 
-int krb524_convert_creds_kdc(krb5_creds *v5creds, CREDENTIALS *v4creds)
+int krb524_convert_creds_kdc(context, v5creds, v4creds)
+     krb5_context context;
+     krb5_creds *v5creds;
+     CREDENTIALS *v4creds;
 {
      struct sockaddr_in *addrs;
      int ret, naddrs;
 
-     if (ret = krb5_locate_kdc(&v5creds->server->realm, &addrs, &naddrs))
+     if ((ret = krb5_locate_kdc(context, &v5creds->server->realm, &addrs,
+			       &naddrs)))
 	  return ret;
      if (naddrs == 0)
 	  ret = KRB5_KDC_UNREACH;
      else {
 	  addrs[0].sin_port = 0; /* use krb524 default port */
-	  ret = krb524_convert_creds_addr(v5creds, v4creds,
+	  ret = krb524_convert_creds_addr(context, v5creds, v4creds,
 					  (struct sockaddr *) &addrs[0]);
      }
      
@@ -62,18 +75,21 @@ int krb524_convert_creds_kdc(krb5_creds *v5creds, CREDENTIALS *v4creds)
      return ret;
 }
 
-int krb524_convert_creds_plain(krb5_creds *v5creds, CREDENTIALS *v4creds)
+int krb524_convert_creds_plain(context, v5creds, v4creds)
+     krb5_context context;
+     krb5_creds *v5creds;
+     CREDENTIALS *v4creds;
 {
      unsigned long addr;
-     krb5_data *comp;
      int ret;
      
      memset((char *) v4creds, 0, sizeof(CREDENTIALS));
 
-     if (ret = krb524_convert_princs(v5creds->client, v5creds->server,
-				     v4creds->pname, v4creds->pinst,
-				     v4creds->realm, v4creds->service,
-				     v4creds->instance))
+     if ((ret = krb524_convert_princs(context, v5creds->client, 
+				      v5creds->server,
+				      v4creds->pname, v4creds->pinst,
+				      v4creds->realm, v4creds->service,
+				      v4creds->instance)))
 	  return ret;
 
      /* Check keytype too */

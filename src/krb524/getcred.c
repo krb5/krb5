@@ -31,8 +31,10 @@ main(int argc, char **argv)
      krb5_creds v5creds;
      CREDENTIALS v4creds;
      int i, ret;
-
-     krb524_init_ets();
+     krb5_context context;
+     
+     krb5_init_context(&context);
+     krb524_init_ets(context);
 
      if (ret = krb5_parse_name(argv[1], &client)) {
 	  com_err("getcred", ret, "parsing client name");
@@ -52,12 +54,12 @@ main(int argc, char **argv)
      v5creds.server = server;
      v5creds.times.endtime = 0;
      v5creds.keyblock.keytype = KEYTYPE_DES;
-     if (ret = krb5_get_credentials(0, cc, &v5creds)) {
+     if (ret = krb5_get_credentials(context, 0, cc, &v5creds)) {
 	  com_err("getcred", ret, "getting V5 credentials");
 	  exit(1);
      }
 
-     if (ret = krb524_convert_creds_kdc(&v5creds, &v4creds)) {
+     if (ret = krb524_convert_creds_kdc(context, &v5creds, &v4creds)) {
 	  com_err("getcred", ret, "converting to V4 credentials");
 	  exit(1);
      }

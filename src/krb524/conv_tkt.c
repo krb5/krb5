@@ -34,10 +34,12 @@
  * krb524_convert_tkt.  Open a network connection to krb524d, send it
  * the V5 ticket, receive the V4 ticket in response.
  */
-int krb524_convert_tkt(krb5_principal server, krb5_data *v5tkt,
-		       KTEXT_ST *v4tkt,
-		       int *kvno,
-		       struct sockaddr_in *saddr)
+int krb524_convert_tkt(server, v5tkt, v4tkt, kvno, saddr)
+     krb5_principal server;
+     krb5_data *v5tkt;
+     KTEXT_ST *v4tkt;
+     int *kvno;
+     struct sockaddr_in *saddr;
 {
      char *p;
      krb5_data reply;
@@ -54,7 +56,7 @@ int krb524_convert_tkt(krb5_principal server, krb5_data *v5tkt,
 	       saddr->sin_port = htons(KRB524_PORT);
      }
 
-     if (ret = krb524_send_message(saddr, v5tkt, &reply))
+     if ((ret = krb524_send_message((struct sockaddr *) saddr, v5tkt, &reply)))
 	  goto fail;
      
      p = reply.data;

@@ -1,3 +1,11 @@
+Mon Jun  5 22:25:33 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, cnv_tkt_skey.c, conv_creds.c, conv_princ.c,
+		conv_tkt.c, encode.c, getcred.c, k524init.c, krb524.h,
+		krb524d.c, misc.c, sendmsg.c, test.c, configure.in:
+		Updated to use autoconf, and to use the new Kerberos
+		library API.  
+		
 Wed Mar 27 21:15:00 1995  Keith Vetter (keithv@fusion.com)
 
 	* renamed conv_tkt_skey.c to cnv_tkt_skey.c for DOS 8.3

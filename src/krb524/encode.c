@@ -20,8 +20,16 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include "krb5.h"
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/signal.h>
+#include <netinet/in.h>
+
 #include <krb.h>
 #include "krb524.h"
 
@@ -52,7 +60,6 @@ int encode_bytes(char **out, int *outlen, char *in, int len)
 
 int encode_int32(char **out, int *outlen, krb5_int32 *v)
 {
-     int ret;
      int nv;
 
      nv = htonl(*v);
@@ -65,11 +72,11 @@ int encode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
 
      buflen = *encoded_len;
 
-     if (ret = encode_int32(&buf, &buflen, &v4tkt->length))
+     if ((ret = encode_int32(&buf, &buflen, &v4tkt->length)))
 	  return ret;
-     if (ret = encode_bytes(&buf, &buflen, v4tkt->dat, MAX_KTXT_LEN))
+     if ((ret = encode_bytes(&buf, &buflen, v4tkt->dat, MAX_KTXT_LEN)))
 	  return ret;
-     if (ret = encode_int32(&buf, &buflen, &v4tkt->mbz))
+     if ((ret = encode_int32(&buf, &buflen, &v4tkt->mbz)))
 	  return ret;
 
      *encoded_len -= buflen;
@@ -93,7 +100,7 @@ int decode_int32(char **out, int *outlen, krb5_int32 *v)
      int ret;
      int nv;
 
-     if (ret = decode_bytes(out, outlen, (char *) &nv, sizeof(nv)))
+     if ((ret = decode_bytes(out, outlen, (char *) &nv, sizeof(nv))))
 	  return ret;
      *v = ntohl(nv);
      return 0;
@@ -104,11 +111,11 @@ int decode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
      int buflen, ret;
 
      buflen = *encoded_len;
-     if (ret = decode_int32(&buf, &buflen, &v4tkt->length))
+     if ((ret = decode_int32(&buf, &buflen, &v4tkt->length)))
 	  return ret;
-     if (ret = decode_bytes(&buf, &buflen, v4tkt->dat, MAX_KTXT_LEN))
+     if ((ret = decode_bytes(&buf, &buflen, v4tkt->dat, MAX_KTXT_LEN)))
 	  return ret;
-     if (ret = decode_int32(&buf, &buflen, &v4tkt->mbz))
+     if ((ret = decode_int32(&buf, &buflen, &v4tkt->mbz)))
 	  return ret;
      *encoded_len -= buflen;
      return 0;

@@ -20,26 +20,41 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include "krb5.h"
+#include "com_err.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/signal.h>
+#include <netinet/in.h>
+
 #include <krb.h>
+#include <krb4-proto.h>
+#include "krb524.h"
 
 extern int optind;
 extern char *optarg;
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
      krb5_principal client, server;
      krb5_ccache cc;
-     krb5_creds v5creds;
+     krb5_creds increds, *v5creds;
      CREDENTIALS v4creds;
      int code;
      int option;
      char *princ = NULL;
      int nodelete = 0;
      int lose = 0;
+     krb5_context context;
 
-     while((option =  getopt(argc, argv, "p:n")) != EOF) {
+     krb5_init_context(&context);
+
+     while(((option =  getopt(argc, argv, "p:n")) != EOF)) {
 	 switch(option) {
 	   case 'p':
 	     princ = optarg;
@@ -58,46 +73,46 @@ main(int argc, char **argv)
 	 exit(1);
      }
 
-     krb524_init_ets();
+     krb524_init_ets(context);
 
-     if (code = krb5_cc_default(&cc)) {
+     if ((code = krb5_cc_default(context, &cc))) {
 	  com_err("k524init", code, "opening default credentials cache");
 	  exit(1);
      }
 
-     if (code = krb5_cc_get_principal(cc, &client)) {
+     if ((code = krb5_cc_get_principal(context, cc, &client))) {
 	 com_err("k524init", code, "while retrieving user principal name");
 	 exit(1);
      }
 
      if (princ) {
-	 if (code = krb5_parse_name(princ, &server)) {
+	 if ((code = krb5_parse_name(context, princ, &server))) {
 	     com_err("k524init", code, "while parsing service principal name");
 	     exit(1);
 	 }
      } else {
-	 if (code = krb5_build_principal(&server, 
-					 krb5_princ_realm(client)->length,
-					 krb5_princ_realm(client)->data,
-					 "krbtgt",
-					 krb5_princ_realm(client)->data,
-					 NULL)) {
+	 if ((code = krb5_build_principal(context, &server, 
+					  krb5_princ_realm(context, client)->length,
+					  krb5_princ_realm(context, client)->data,
+					  "krbtgt",
+					  krb5_princ_realm(context, client)->data,
+					  NULL))) {
 	     com_err("k524init", code, "while creating service principal name");
 	     exit(1);
 	 }
      }
 
-     memset((char *) &v5creds, 0, sizeof(v5creds));
-     v5creds.client = client;
-     v5creds.server = server;
-     v5creds.times.endtime = 0;
-     v5creds.keyblock.keytype = KEYTYPE_DES;
-     if (code = krb5_get_credentials(0, cc, &v5creds)) {
+     memset((char *) &increds, 0, sizeof(increds));
+     increds.client = client;
+     increds.server = server;
+     increds.times.endtime = 0;
+     increds.keyblock.keytype = KEYTYPE_DES;
+     if ((code = krb5_get_credentials(context, 0, cc, &increds, &v5creds))) {
 	  com_err("k524init", code, "getting V5 credentials");
 	  exit(1);
      }
 
-     if (code = krb524_convert_creds_kdc(&v5creds, &v4creds)) {
+     if ((code = krb524_convert_creds_kdc(context, v5creds, &v4creds))) {
 	  com_err("k524init", code, "converting to V4 credentials");
 	  exit(1);
      }
@@ -106,17 +121,18 @@ main(int argc, char **argv)
 
      if (!nodelete) {
 	/* initialize ticket cache */
-	if (code = in_tkt(v4creds.pname,v4creds.pinst) != KSUCCESS) {
+	if ((code = in_tkt(v4creds.pname,v4creds.pinst) != KSUCCESS)) {
 	   com_err("k524init", code, "trying to create the V4 ticket file");
 	   exit(1);
 	}
      }
 
      /* stash ticket, session key, etc. for future use */
-     if (code = save_credentials(v4creds.service, v4creds.instance,
-				 v4creds.realm, v4creds.session,
-				 v4creds.lifetime, v4creds.kvno,
-				 &(v4creds.ticket_st), v4creds.issue_date)) {
+     if ((code = krb_save_credentials(v4creds.service, v4creds.instance,
+				      v4creds.realm, v4creds.session,
+				      v4creds.lifetime, v4creds.kvno,
+				      &(v4creds.ticket_st), 
+				      v4creds.issue_date))) {
 	 com_err("k524init", code, "trying to save the V4 ticket");
 	 exit(1);
      }

@@ -20,35 +20,42 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include "krb5.h"
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <krb.h>
+#include <krb4-proto.h>
 #include "krb524.h"
 
 /*
  * Convert a v5 ticket for server to a v4 ticket, using service key
  * skey for both.
  */
-int krb524_convert_tkt_skey(krb5_ticket *v5tkt, KTEXT_ST *v4tkt,
-			    krb5_keyblock *skey)
+int krb524_convert_tkt_skey(context, v5tkt, v4tkt, skey)
+     krb5_context context;
+     krb5_ticket *v5tkt;
+     KTEXT_ST *v4tkt;
+     krb5_keyblock *skey;
 {
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
      krb5_enc_tkt_part *v5etkt;
-     krb5_data *comp;
      int ret, lifetime;
 
      v5tkt->enc_part2 = NULL;
-     if (ret = krb5_decrypt_tkt_part(skey, v5tkt)) {
-	  krb5_free_ticket(v5tkt);
+     if ((ret = krb5_decrypt_tkt_part(context, skey, v5tkt))) {
+	  krb5_free_ticket(context, v5tkt);
 	  return ret;
      }
      v5etkt = v5tkt->enc_part2;
 
-     if (ret = krb524_convert_princs(v5etkt->client, v5tkt->server,
+     if ((ret = krb524_convert_princs(context, v5etkt->client, v5tkt->server,
 				     pname, pinst, prealm, sname,
-				     sinst)) {
-	  krb5_free_enc_tkt_part(v5etkt);
+				     sinst))) {
+	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
 	  return ret;
      }
@@ -60,7 +67,7 @@ int krb524_convert_tkt_skey(krb5_ticket *v5tkt, KTEXT_ST *v4tkt,
 		       "C_Block size %d\n", v5etkt->session->keytype,
 		       v5etkt->session->length,
 		       sizeof(C_Block));
-	  krb5_free_enc_tkt_part(v5etkt);
+	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
 	  return KRB524_BADKEY;
      }
@@ -79,7 +86,7 @@ int krb524_convert_tkt_skey(krb5_ticket *v5tkt, KTEXT_ST *v4tkt,
 	 v5etkt->caddrs[0]->addrtype != ADDRTYPE_INET) {
 	  if (krb524_debug)
 	       fprintf(stderr, "Invalid v5creds address information.\n");
-	  krb5_free_enc_tkt_part(v5etkt);
+	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
 	  return KRB524_BADADDR;
      }
@@ -105,7 +112,7 @@ int krb524_convert_tkt_skey(krb5_ticket *v5tkt, KTEXT_ST *v4tkt,
 			     sinst,
 			     skey->contents);
 
-     krb5_free_enc_tkt_part(v5etkt);
+     krb5_free_enc_tkt_part(context, v5etkt);
      v5tkt->enc_part2 = NULL;
      if (ret == KSUCCESS)
 	  return 0;

@@ -24,14 +24,19 @@
 
 #include "krb5.h"
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <netinet/in.h>
 
 #ifdef _AIX
 #include <sys/select.h>
 #endif
 
+#include <krb.h>
 #include "krb524.h"
 
 /*
@@ -50,12 +55,15 @@ extern int krb5_max_skdc_timeout;
 extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
-int krb524_send_message (DECLARG(const struct sock addr *, addr),
-			 DECLARG(const krb5_data *, message),
-			 DECLARG(krb5_data *, reply))
-   OLDDECLARG(const struct sockaddr *, addr)
-   OLDDECLARG(const krb5_data *, message)
-   OLDDECLARG(krb5_data *, reply)
+int krb524_send_message
+	PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
+		   krb5_data * reply));
+
+
+int krb524_send_message (addr, message, reply)
+     const struct sockaddr * addr;
+     const krb5_data * message;
+     krb5_data * reply;
 {
     register int timeout;
     int nready, received;

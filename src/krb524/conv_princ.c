@@ -20,21 +20,30 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include "krb5.h"
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/signal.h>
+#include <netinet/in.h>
+
 #include <krb.h>
 
 #include "krb524.h"
 
-int krb524_convert_princs(krb5_principal client, krb5_principal
-			  server, char *pname, char *pinst, char
-			  *prealm, char *sname, char *sinst)
+int krb524_convert_princs(context, client, server, pname, pinst, prealm, 
+			  sname, sinst)
+     krb5_context context;
+     krb5_principal client, server;
+     char *pname, *pinst, *prealm, *sname, *sinst;
 {
      char dummy[REALM_SZ];
      int ret;
      
-     if (ret = krb5_524_conv_principal(client, pname, pinst, prealm))
+     if ((ret = krb5_524_conv_principal(context, client, pname, pinst, 
+					prealm)))
 	  return ret;
      
-     return krb5_524_conv_principal(server, sname, sinst, dummy);
+     return krb5_524_conv_principal(context, server, sname, sinst, dummy);
 }

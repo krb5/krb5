@@ -20,11 +20,20 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <krb5.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/signal.h>
+#include <netinet/in.h>
+
+#include <krb.h>
 #include "krb524.h"
 
-void krb524_init_ets()
+void krb524_init_ets(context)
+     krb5_context context;
 {
-     krb5_init_ets();
+     krb5_init_ets(context);
      initialize_k524_error_table();
 }
