@@ -50,7 +50,7 @@ static krb5_error_code dr
 (const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
 		unsigned char *outdata, const krb5_data *in_constant);
 
-krb5_error_code KRB5_CALLCONV krb5int_c_combine_keys
+krb5_error_code krb5int_c_combine_keys
 (krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2, krb5_keyblock *outkey)
 {
     unsigned char *r1, *r2, *combined, *rnd, *output;
