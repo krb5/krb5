@@ -1,3 +1,8 @@
+1999-07-26  Tom Yu  <tlyu@mit.edu>
+
+	* telnet.c (telnet): Fix typo in error message, via
+	schwim@whatmore.Stanford.EDU
+
 1999-04-13    <tytso@rsts-11.mit.edu>
 
 	* configure.in: Check for setupterm() in libncurses in addition to
