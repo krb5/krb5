@@ -3,6 +3,8 @@
 	* k5-thread.h (k5_os_mutex_init, k5_os_mutex_destroy): If
 	USE_PTHREAD_LOCK_ONLY_IF_LOADED is defined, use pthread_mutex_init
 	and _destroy only if pthread support is loaded.
+	(k5_key_t): Add a couple new values for GSSAPI ccache name
+	manipulation.
 
 2004-07-11  Ken Raeburn  <raeburn@mit.edu>
 
