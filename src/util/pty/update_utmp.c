@@ -25,6 +25,11 @@
 #define UTMP_FILE _PATH_UTMP
 #endif
 
+/* if it is *still* missing, assume SunOS */
+#ifndef UTMP_FILE
+#define	UTMP_FILE	"/etc/utmp"
+#endif
+
 long pty_update_utmp (process_type, pid, username, line, host)
     int process_type;
     int pid;

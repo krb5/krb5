@@ -25,6 +25,11 @@
 #define WTMP_FILE _PATH_WTMP
 #endif
 
+/* if it is *still* missing, assume SunOS */
+#ifndef WTMP_FILE
+#define	WTMP_FILE	"/usr/adm/wtmp"
+#endif
+
 long ptyint_update_wtmp (ent)
     struct utmp *ent;
     {
