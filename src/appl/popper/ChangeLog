@@ -1,3 +1,8 @@
+Tue Feb 28 01:54:56 1995  John Gilmore  (gnu at toad.com)
+
+	* pop_init.c, pop_pass.c, pop_user.c, mh-6.8.patch:  Avoid
+	<krb5/...> includes.
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
     * Added krb5_context to all krb5_routines

@@ -27,10 +27,8 @@ static char copyright[] = "Copyright (c) 1990 Regents of the University of Calif
 extern AUTH_DAT kdata;
 #endif /* KRB4 */
 #ifdef KRB5
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 extern krb5_principal ext_client;
 extern char *client_name;
 #endif /* KRB5 */

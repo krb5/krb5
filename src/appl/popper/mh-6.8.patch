@@ -10,10 +10,10 @@
 + #error "You cannot define both KPOP and K5POP"
 + #endif
 + #ifdef K5POP
-+ #include <krb5/krb5.h>
-+ #include <krb5/ext-proto.h>
-+ #include <krb5/los-proto.h>
-+ #include <com_err.h>
++ #include "krb5.h"
++ /* #include <krb5/ext-proto.h> */
++ /* #include <krb5/los-proto.h> */
++ #include "com_err.h"
 + #include <ctype.h>
 + 
 + static krb5_error_code retval;

@@ -22,9 +22,8 @@
 AUTH_DAT kdata;
 #endif /* KRB4 */
 #ifdef KRB5    
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 #include <ctype.h>
 krb5_principal ext_client;
 krb5_context pop_context;
