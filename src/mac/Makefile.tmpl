@@ -345,6 +345,16 @@ krb5-globals-data-obj-ppc = \
 krb5-globals-data-ppc = \
 	Kerberos5GlobalsDataLib.PPC
 
+krb5-globals-files = \
+	"/mac/libraries/Kerberos v5 Globals/Krb5Globals.c"
+	"/mac/libraries/Kerberos v5 Globals/Krb5Globals.CFM.c"
+	"/mac/libraries/Kerberos v5 Globals/Krb5Globals.CFM.h"
+	"/mac/libraries/Kerberos v5 Globals/Krb5Globals.exp"
+	"/mac/libraries/Kerberos v5 Globals/Krb5Globals.h"
+	"/mac/libraries/Kerberos v5 Globals/Krb5GlobalsData.c"
+	"/mac/libraries/Kerberos v5 Globals/Krb5GlobalsData.exp"
+	"/mac/libraries/Kerberos v5 Globals/Krb5GlobalsData.h"
+
 #
 #	compilation rules
 #
@@ -641,7 +651,12 @@ dist-clean : clean
 mac-files = `perl "/mac/macfile_gen.pl" maclist`
 mac-folders = `perl "/mac/macfile_gen.pl" macdirs`
 
-all-mac-files = {mac-files} {classic-glue-input} {autogeneration-sources} /Makefile.in /patchlevel.h \
+all-mac-files = \
+	{mac-files} \
+	{classic-glue-input} \
+	{autogeneration-sources} \
+	{krb5-globals-files} \
+	/Makefile.in /patchlevel.h \
 	/util/et/et_h.perl /util/et/et_c.perl \
 	/mac/GSS.CFM.c \
 	/mac/GSS.CFMglue.h \
@@ -720,6 +735,7 @@ all-mac-folders = /config/ /include/ /include/krb5/ /include/krb5/stock/ \
 	"/mac/libraries/CCache API/" \
 	"/mac/libraries/CCache API/bin" \
 	"/mac/libraries/CCache API/include" \
+	"/mac/libraries/Kerberos v5 Globals" \
 	/mac/libraries/DES/ \
 	/mac/libraries/DES/bin \
 	/mac/libraries/DES/doc \
