@@ -1,3 +1,10 @@
+Tue Dec 27 06:10:13 1994  Richard Basch  (probe@tardis)
+
+	* aclocal.m4
+	combined KRB5_UTPID, KRB5_UTTYPE, and KRB5_UTHOST
+	into CHECK_UTMP macro (and added additional checks)
+
+
 Wed Nov 30 17:13:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* aclocal.m4, configure.in: Add appropriate help text for the
