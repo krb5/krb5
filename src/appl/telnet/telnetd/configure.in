@@ -29,14 +29,14 @@ dnl Make our operating system-specific security checks and definitions for
 dnl login.
 dnl
 case $krb5_cv_host in
-*-*-hpux-*)
+*-*-hpux*)
      broken_streams=yes
      ;;
 *-*-irix*)
      # Irix doesn't have a working granpt, and more over
      # you can't push anything onto a pty, so telnetd really
      # Really wants to treat it as if it doesn't have streams
-    broken_streams=yes
+     broken_streams=yes
      ;;
 esac
 if test -z "$broken_streams" ; then

@@ -29,6 +29,8 @@ CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 
 SRCS=	$(srcdir)/telnetd.c \
+	$(srcdir)/termio-tn.c \
+	$(srcdir)/termios-tn.c \
 	$(srcdir)/state.c \
 	$(srcdir)/termstat.c \
 	$(srcdir)/slc.c \
@@ -38,6 +40,8 @@ SRCS=	$(srcdir)/telnetd.c \
 	$(srcdir)/authenc.c \
 	$(GETTYSRC)
 OBJS=	telnetd.o \
+	termio-tn.o \
+	termios-tn.o \
 	state.o \
 	termstat.o \
 	slc.o \

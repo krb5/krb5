@@ -482,12 +482,9 @@ getnpty()
  *
  * Returns the file descriptor of the opened pty.
  */
-#ifndef	__GNUC__
-char *line = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-#else
-static char Xline[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+static char Xline[17];
 char *line = Xline;
-#endif
+
 #ifdef	CRAY
 char *myline = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 #endif	/* CRAY */
@@ -1050,7 +1047,6 @@ termbuf.c_cflag |= HUPCL;
 #ifndef	O_NOCTTY
 #define	O_NOCTTY	0
 #endif
-
 #endif	/* !defined(CRAY) || !defined(NEWINIT) */
 
 

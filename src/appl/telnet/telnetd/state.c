@@ -1144,7 +1144,7 @@ suboption()
 
 	if (his_state_is_wont(TELOPT_TTYPE))	/* Ignore if option disabled */
 		break;
-sb_auth_complete();
+	sb_auth_complete();
 	settimer(ttypesubopt);
 
 	if (SB_EOF() || SB_GET() != TELQUAL_IS) {
@@ -1264,7 +1264,7 @@ sb_auth_complete();
     case TELOPT_XDISPLOC: {
 	if (SB_EOF() || SB_GET() != TELQUAL_IS)
 		return;
-sb_auth_complete();
+	sb_auth_complete();
 	settimer(xdisplocsubopt);
 	subpointer[SB_LEN()] = '\0';
 	(void)setenv("DISPLAY", (char *)subpointer, 1);
@@ -1280,7 +1280,7 @@ sb_auth_complete();
 
 	if (SB_EOF())
 		return;
-sb_auth_complete();
+	sb_auth_complete();
 	c = SB_GET();
 	if (c == TELQUAL_IS) {
 		if (subchar == TELOPT_OLD_ENVIRON)
@@ -1435,10 +1435,10 @@ sb_auth_complete();
 		case ENV_USERVAR:
 			*cp = '\0';
 			if (envvarok(varp)) {
-			    if (valp)
-				(void)setenv(varp, valp, 1);
-			    else
-				unsetenv(varp);
+				if (valp)
+					(void)setenv(varp, valp, 1);
+				else
+					unsetenv(varp);
 			}
 			cp = varp = (char *)subpointer;
 			valp = 0;
@@ -1456,10 +1456,10 @@ sb_auth_complete();
 	}
 	*cp = '\0';
 	if (envvarok(varp)) {
-	    if (valp)
-		(void)setenv(varp, valp, 1);
-	    else
-		unsetenv(varp);
+		if (valp)
+			(void)setenv(varp, valp, 1);
+		else
+			unsetenv(varp);
 	}
 	break;
     }  /* end of case TELOPT_NEW_ENVIRON */
@@ -1476,12 +1476,12 @@ sb_auth_complete();
 		 */
 		break;
 	case TELQUAL_IS:
-	  if (!auth_negotiated)
-  auth_is(subpointer, SB_LEN());
+		if (!auth_negotiated)
+			auth_is(subpointer, SB_LEN());
 		break;
 	case TELQUAL_NAME:
-	  if (!auth_negotiated)
-  auth_name(subpointer, SB_LEN());
+		if (!auth_negotiated)
+			auth_name(subpointer, SB_LEN());
 		break;
 	}
 	break;
@@ -1642,16 +1642,28 @@ send_status()
 }
 
 static int envvarok(varp)
-  char *varp;
+	char *varp;
 {
-    if (!strncmp(varp, "LD_", 3) || !strncmp(varp, "_RLD_", 5) ||
-	!strncmp(varp, "ELF_LD_", 7) || !strncmp(varp, "AOUT_LD_", 8) ||
-        !strcmp(varp, "LIBPATH") || !strcmp(varp, "IFS") ||
-!strcmp(varp, "KRB5_KTNAME")|| !strcmp(varp, "KRB5CCNAME")||
-	strchr(varp, '='))
-    {
-	syslog(LOG_INFO, "Rejected the attempt to modify the environment variable \"%s\"", varp);
-	return 0;
-    }
-    return 1;
+	if (!strchr(varp, '=') &&
+	    strncmp(varp, "LD_", strlen("LD_")) && /* most systems */
+	    strncmp(varp, "_RLD_", strlen("_RLD_")) && /* irix */
+	    strncmp(varp, "KRB5", strlen("KRB5")) && /* v5 */
+	    /* The above is a catch-all for now.  Here are some of the
+	       specific ones we must avoid passing, at least until we
+	       can prove it can be done safely.  Keep this list around
+	       in case someone wants to remove the catch-all.  */
+	    strcmp(varp, "KRB5_CONFIG") && /* v5 */
+	    strcmp(varp, "KRB5CCNAME") &&  /* v5 */
+	    strcmp(varp, "KRB5_KTNAME") && /* v5 */
+	    strcmp(varp, "KRBTKFILE") &&   /* v4 */
+	    strcmp(varp, "KRB_CONF") &&	   /* cns v4 */
+	    strcmp(varp, "KRB_REALMS") &&  /* cns v4 */
+	    strcmp(varp, "LIBPATH") &&     /* AIX */
+	    strcmp(varp, "IFS")) {
+		return 1;
+	} else {
+		syslog(LOG_INFO, "Rejected the attempt to modify the environment variable \"%s\"", varp);
+		return 0;
+	}
+
 }

@@ -933,6 +933,15 @@ pty_init();
 #endif
 
 	init_env();
+
+#ifdef	SIGTTOU
+	/*
+	 * Ignoring SIGTTOU keeps the kernel from blocking us.
+	 * we tweak the tty with an ioctl()
+	 * (in ttioct() in /sys/tty.c in a BSD kernel)
+	 */
+	(void) signal(SIGTTOU, SIG_IGN);
+#endif
 	/*
 	 * get terminal type.
 	 */
@@ -1136,13 +1145,6 @@ telnet(f, p, host)
 
 #ifdef	SIGTSTP
 	(void) signal(SIGTSTP, SIG_IGN);
-#endif
-#ifdef	SIGTTOU
-	/*
-	 * Ignoring SIGTTOU keeps the kernel from blocking us
-	 * in ttioct() in /sys/tty.c.
-	 */
-	(void) signal(SIGTTOU, SIG_IGN);
 #endif
 
 	(void) signal(SIGCHLD, cleanup);
@@ -1533,28 +1535,13 @@ int readstream(p, ibuf, bufsize)
 
 	case M_IOCTL:
 		ip = (struct iocblk *) (ibuf+1);
-
-		switch (ip->ioc_cmd) {
-		case TCSETS:
-		case TCSETSW:
-		case TCSETSF:
-			tsp = (struct termios *)
-					(ibuf+1 + sizeof(struct iocblk));
-			vstop = tsp->c_cc[VSTOP];
-			vstart = tsp->c_cc[VSTART];
-			ixon = tsp->c_iflag & IXON;
-			break;
-		case TCSETA:
-		case TCSETAW:
-		case TCSETAF:
-			tp = (struct termio *) (ibuf+1 + sizeof(struct iocblk));
-			vstop = tp->c_cc[VSTOP];
-			vstart = tp->c_cc[VSTART];
-			ixon = tp->c_iflag & IXON;      
-			break;
-		default:
-			errno = EAGAIN;
-			return(-1);
+		if (readstream_termio(ip->ioc_cmd, ibuf, 
+				      &vstop, &vstart, &ixon)) {
+		  if (readstream_termios(ip->ioc_cmd, ibuf, 
+					 &vstop, &vstart, &ixon)) {
+		    errno = EAGAIN;
+		    return(-1);
+		  }
 		}
 
 		newflow =  (ixon && (vstart == 021) && (vstop == 023)) ? 1 : 0;
