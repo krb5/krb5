@@ -85,7 +85,6 @@ krb5_data **response;			/* filled in with a response packet */
 	       error_message(retval));
 	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
 				response));
-	return(retval);
     }
 #ifdef KRB5_USE_INET
     if (from->address->addrtype == ADDRTYPE_INET)
