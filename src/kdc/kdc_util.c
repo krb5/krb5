@@ -121,7 +121,8 @@ const krb5_fulladdr *from;
 	if (retval =
 	    (*eblock.crypto_entry->decrypt_func)((krb5_pointer) tgs_req->tgs_request2->enc_part.data,
 						 (krb5_pointer) scratch.data,
-						 scratch.length, &eblock)) {
+						 scratch.length, &eblock,
+						 0)) {
 	    (void) (*eblock.crypto_entry->finish_key)(&eblock);
 	    free(scratch.data);
 	    return retval;
@@ -260,17 +261,33 @@ const krb5_fulladdr *from;
     }	
     /* check application checksum vs. tgs request */
 #ifdef notdef
+    if (!(our_cksum.contents = (krb5_octet *)
+	  malloc(krb5_cksumarray[our_cksum.checksum_type]->checksum_length))) {
+	krb5_free_authenticator(authdat.authenticator);
+	krb5_free_ticket(authdat.ticket);
+	return ENOMEM; /* XXX cktype nosupp */
+    }
     if (retval = (*krb5_cksumarray[our_cksum.checksum_type]->
 		  sum_func)(in,		/* where to? */
-			    NULL,	/* don't produce output */
-			    authdat.ticket->enc_part2->session->contents, /* seed */
 			    in_length,	/* input length */
+			    authdat.ticket->enc_part2->session->contents, /* seed */
 			    authdat.ticket->enc_part2->session->length,	/* seed length */
 			    &our_cksum)) {
 	krb5_free_authenticator(authdat.authenticator);
 	krb5_free_ticket(authdat.ticket);
+	xfree(our_cksum.contents);
+	return retval;
+    }
+    if (our_cksum.length != authdat.authenticator->checksum->length ||
+	bcmp((char *)our_cksum.contents,
+	     (char *)authdat.authenticator->checksum->contents,
+	     our_cksum.length)) {
+	krb5_free_authenticator(authdat.authenticator);
+	krb5_free_ticket(authdat.ticket);
+	xfree(our_cksum.contents);
 	return KRB5KRB_AP_ERR_BAD_INTEGRITY; /* XXX wrong code? */
     }
+    xfree(our_cksum.contents);
 #endif
     /* don't need authenticator anymore */
     krb5_free_authenticator(authdat.authenticator);
