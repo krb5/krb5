@@ -1,4 +1,12 @@
 
+Mon Aug 21 16:50:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* klist.c - Add logic to figure out width of time string and then use
+		this width to format the timestamp output.  Remove English-
+		specific months and let timestamp_to_sfstring() handle it.
+		Replace etype string array with enctype_to_string().
+	* configure.in - Add -lkadm.
+
+
 Fri Jul 7 15:54:35 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit library handling and LDFLAGS.
 	* configure.in - Add KRB5_LIBRARIES.

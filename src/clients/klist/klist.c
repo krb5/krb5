@@ -38,6 +38,7 @@ int show_etype = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
+int timestamp_width;
 
 krb5_context kcontext;
 
@@ -48,6 +49,7 @@ void show_credential KRB5_PROTOTYPE((char *,
 void do_ccache KRB5_PROTOTYPE((char *));
 void do_keytab KRB5_PROTOTYPE((char *));
 void printtime KRB5_PROTOTYPE((time_t));
+void fillit KRB5_PROTOTYPE((FILE *, int, int));
 	
 #define DEFAULT 0
 #define CCACHE 1
@@ -134,6 +136,15 @@ main(argc, argv)
 	      com_err(progname, code, "while getting time of day.");
 	 exit(1);
     }
+    else {
+	char tmp[BUFSIZ];
+
+	if (!krb5_timestamp_to_sfstring(now, tmp, 20, (char *) NULL) ||
+	    !krb5_timestamp_to_sfstring(now, tmp, sizeof(tmp), (char *) NULL))
+	    timestamp_width = (int) strlen(tmp);
+	else
+	    timestamp_width = 15;
+    }
 
     if (mode == DEFAULT || mode == CCACHE)
 	 do_ccache(name);
@@ -177,8 +188,14 @@ void do_keytab(name)
      }
 
      if (show_time) {
-	  printf("KVNO Timestamp          Principal\n");
-	  printf("---- ------------------ -------------------------------------------------------\n");
+	  printf("KVNO Timestamp");
+          fillit(stdout, timestamp_width - sizeof("Timestamp") + 2, (int) ' ');
+	  printf("Principal\n");
+	  printf("---- ");
+	  fillit(stdout, timestamp_width, (int) '-');
+	  printf(" ");
+	  fillit(stdout, 78 - timestamp_width - sizeof("KVNO"), (int) '-');
+	  printf("\n");
      } else {
 	  printf("KVNO Principal\n");
 	  printf("---- --------------------------------------------------------------------------\n");
@@ -274,8 +291,13 @@ void do_ccache(name)
     if (!status_only) {
 	printf("Ticket cache: %s\nDefault principal: %s\n\n",
 	       krb5_cc_get_name(kcontext, cache), defname);
-	fputs("  Valid starting       Expires          Service principal\n",
-	      stdout);
+	fputs("Valid starting", stdout);
+	fillit(stdout, timestamp_width - sizeof("Valid starting") + 3,
+	       (int) ' ');
+	fputs("Expires", stdout);
+	fillit(stdout, timestamp_width - sizeof("Expires") + 3,
+	       (int) ' ');
+	fputs("Service principal\n", stdout);
     }
     if ((code = krb5_cc_start_seq_get(kcontext, cache, &cur))) {
 	if (!status_only)
@@ -349,34 +371,21 @@ flags_string(cred)
     return(buf);
 }
 
-static  char *Month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-				"Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
 void 
 printtime(tv)
     time_t tv;
 {
-    struct tm *stime;
+    char timestring[BUFSIZ];
+    char fill;
 
-    stime = localtime((time_t *)&tv);
-    printf("%2d-%s-%2d %02d:%02d:%02d",
-           stime->tm_mday,
-           Month_names[stime->tm_mon],
-           stime->tm_year,
-           stime->tm_hour,
-           stime->tm_min,
-           stime->tm_sec);
+    fill = ' ';
+    if (!krb5_timestamp_to_sfstring((krb5_timestamp) tv,
+				    timestring,
+				    timestamp_width+1,
+				    &fill)) {
+	printf(timestring);
+    }
 }
-
-/* Make sure this list matches the ETYPE order in encryption.h */
-#define ETYPE_MAX 6
-char * etype_string[ETYPE_MAX] = {
-    "ETYPE_NULL", 
-    "ETYPE_DES_CBC_CRC", 
-    "ETYPE_DES_CBC_MD4", 
-    "ETYPE_DES_CBC_MD5", 
-    "ETYPE_RAW_DES_CBC", 
-    NULL };
 
 void
 show_credential(progname, kcontext, cred)
@@ -426,14 +435,16 @@ show_credential(progname, kcontext, cred)
 
     if (show_etype) {
 	krb5_enctype etype = cred->keyblock.etype;
+	char etype_string[BUFSIZ];
 
 	if (!first) 
 	    putchar('\n');
 
 	printf("\tEncryption type: ");
 	if (etype != ETYPE_UNKNOWN) {
-	    if ((etype < ETYPE_MAX) && etype_string[etype]) {
-		printf("%s", etype_string[etype]);
+	    if (!krb5_enctype_to_string(etype, etype_string,
+					sizeof(etype_string))) {
+		printf("%s", etype_string);
 	    } else {
 		printf("UNRECOGNIZED");
 	    }
@@ -459,5 +470,17 @@ show_credential(progname, kcontext, cred)
 	putchar('\n');
     free(name);
     free(sname);
+}
+
+void
+fillit(f, num, c)
+    FILE	*f;
+    int		num;
+    int		c;
+{
+    int i;
+
+    for (i=0; i<num; i++)
+	fputc(c, f);
 }
 

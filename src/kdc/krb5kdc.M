@@ -69,8 +69,8 @@ default the database is in DEFAULT_DBM_FILE.
 The
 .B \-k
 .I keytype
-option specifies the key type (as an ascii representation of a decimal
-number) of the master key in the database; the default is KEYTYPE_DES.
+option specifies the key type of the master key in the database; the default
+is KEYTYPE_DES.
 .PP
 The
 .B \-M

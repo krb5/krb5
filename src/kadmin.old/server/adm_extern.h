@@ -177,6 +177,7 @@ krb5_error_code adm_negotiate_key
 		   char const *,
 		   char *));
 
+krb5_error_code closedown_network PROTOTYPE((const char *));
 krb5_error_code setup_network
 	PROTOTYPE((krb5_context,
 		   const char *));

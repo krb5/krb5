@@ -44,6 +44,7 @@
 
 #include "k5-int.h"
 #include "adm_extern.h"
+#include "adm_proto.h"
 
 char prog[32];
 char *progname = prog;
@@ -69,6 +70,7 @@ krb5_db_entry master_entry;
 
 krb5_flags NEW_ATTRIBUTES;
 
+int
 cleanexit(context, val)
     krb5_context context;
     int	val;
@@ -156,7 +158,7 @@ process_args(context, argc, argv)
 	    case 'd':
 		/* put code to deal with alt database place */
 		dbm_db_name = optarg;
-		if (retval = krb5_dbm_db_set_name(context, dbm_db_name)) {
+		if ((retval = krb5_db_set_name(context, dbm_db_name))) {
 			fprintf(stderr, "opening database %s: %s",
 				dbm_db_name, error_message(retval));
 			exit(1);
@@ -164,12 +166,17 @@ process_args(context, argc, argv)
 		break;
 
 	    case 'e':
-		kdc_etype = atoi(optarg);
+		if (krb5_string_to_enctype(optarg, &kdc_etype))
+		    fprintf(stderr, "%s: %s is an invalid encryption type\n",
+			    argv[0], optarg);
 		break;
 		
 	    case 'k':			/* keytype for master key */
-		master_keyblock.keytype = atoi(optarg);
-		keytypedone++;
+		if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
+		    keytypedone++;
+		else
+		    fprintf(stderr, "%s: %s is an invalid key type\n",
+			    argv[0], optarg);
 		break;
 
 	    case 'm':			/* manual type-in of master key */
@@ -202,7 +209,7 @@ process_args(context, argc, argv)
 
     if (!realm) {
 		/* no realm specified, use default realm */
-	if (retval = krb5_get_default_realm(context, &local_realm)) {
+	if ((retval = krb5_get_default_realm(context, &local_realm))) {
 		com_err(argv[0], retval,
 			"while attempting to retrieve default realm");
 		exit(1);
@@ -219,10 +226,10 @@ process_args(context, argc, argv)
     }
  
     /* assemble & parse the master key name */
-    if (retval = krb5_db_setup_mkey_name(context, mkey_name, 
-					realm, 
-					(char **) 0,
-					&master_princ)) {
+    if ((retval = krb5_db_setup_mkey_name(context, mkey_name, 
+					  realm, 
+					  (char **) 0,
+					  &master_princ))) {
 	com_err(argv[0], retval, "while setting up master key name");
 	exit(1);
     }
@@ -234,14 +241,14 @@ process_args(context, argc, argv)
     }
     krb5_use_cstype(context, &master_encblock, kdc_etype);
  
-    if (retval = krb5_db_fetch_mkey(context, 
+    if ((retval = krb5_db_fetch_mkey(context, 
 		master_princ, 
 		&master_encblock, 
 		manual,
 		FALSE,			/* only read it once, if at all */
 		(char *) NULL,		/* No stash file */
 		0,			/* No salt supplied */
-		&master_keyblock)) {
+		&master_keyblock))) {
 	com_err(argv[0], retval, "while fetching master key");
 	exit(1);
     }
@@ -249,9 +256,9 @@ process_args(context, argc, argv)
     /* initialize random key generators */
     for (etype = 0; etype <= krb5_max_cryptosystem; etype++) {
 	if (krb5_csarray[etype]) {
-		if (retval = (*krb5_csarray[etype]->system->
+		if ((retval = (*krb5_csarray[etype]->system->
 				init_random_key)(&master_keyblock,
-				&krb5_csarray[etype]->random_sequence)) {
+				&krb5_csarray[etype]->random_sequence))) {
 			com_err(argv[0], retval, 
 	"while setting up random key generator for etype %d--etype disabled", 
 				etype);
@@ -284,18 +291,18 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
         return(retval);
 
     /* initialize database */
-    if (retval = krb5_db_init(context))
+    if ((retval = krb5_db_init(context)))
         return(retval);
 
-    if (retval = krb5_db_verify_master_key(context, masterkeyname, 
+    if ((retval = krb5_db_verify_master_key(context, masterkeyname, 
 					masterkeyblock,
-                                        &master_encblock)) {
+                                        &master_encblock))) {
         master_encblock.crypto_entry = 0;
         return(retval);
     }
  
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &master_encblock, masterkeyblock)) {
+    if ((retval = krb5_process_key(context, &master_encblock, masterkeyblock))) {
         master_encblock.crypto_entry = 0;
         (void) krb5_db_fini(context);
         return(retval);
@@ -305,8 +312,8 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
  * fetch the master database entry, and hold on to it.
  */
     number_of_entries = 1;
-    if (retval = krb5_db_get_principal(context, masterkeyname, &master_entry, 
-				       &number_of_entries, &more)) {
+    if ((retval = krb5_db_get_principal(context, masterkeyname, &master_entry, 
+					&number_of_entries, &more))) {
 	return(retval);
     }
     if (number_of_entries != 1) {
@@ -333,11 +340,11 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
     tgs_server->type  = KRB5_NT_SRV_INST;
 
     number_of_entries = 1;
-    if (retval = krb5_db_get_principal(context, 
-				tgs_server,
-				&server_entry, 
-				&number_of_entries,
-				&more)) {
+    if ((retval = krb5_db_get_principal(context, 
+					tgs_server,
+					&server_entry, 
+					&number_of_entries,
+					&more))) {
 	return(retval);
     }
 
@@ -359,21 +366,21 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	convert server.key into a real key 
 	(it may be encrypted in the database) 
  */
-    if (retval = krb5_dbe_find_keytype(context,
-				       &server_entry,
-				       KEYTYPE_DES,
-				       -1,
-				       -1,
-				       &kdatap)) {
+    if ((retval = krb5_dbe_find_keytype(context,
+					&server_entry,
+					KEYTYPE_DES,
+					-1,
+					-1,
+					&kdatap))) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	(void) krb5_finish_key(context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
 	(void) krb5_db_fini(context);
 	return(retval);
     }
-    if (retval = krb5_dbekd_decrypt_key_data(context,&master_encblock,
-				      kdatap,&tgs_key,
-				      &salt)) {
+    if ((retval = krb5_dbekd_decrypt_key_data(context,&master_encblock,
+					      kdatap,&tgs_key,
+					      &salt))) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	(void) krb5_finish_key(context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
@@ -470,6 +477,7 @@ setup_com_err(context)
 ** Main does the logical thing, it sets up the database and RPC interface,
 **  as well as handling the creation and maintenance of the syslog file...
 */
+int
 main(argc, argv)		/* adm_server main routine */
 int argc;
 char **argv;
@@ -499,18 +507,19 @@ char **argv;
 
     setup_signal_handlers();
 
-    if (retval = init_db(context, dbm_db_name, master_princ,&master_keyblock)) {
+    if ((retval = init_db(context, dbm_db_name, master_princ,
+			  &master_keyblock))) {
 	com_err(argv[0], retval, "while initializing database");
 	exit(1);
     }
 
-    if (retval = setup_network(context, argv[0])) {
+    if ((retval = setup_network(context, argv[0]))) {
 	exit(1);
     }
 
     syslog(LOG_AUTH | LOG_INFO, "Admin Server Commencing Operation");
 
-    if (retval = adm5_listen_and_process(context, argv[0])){
+    if ((retval = adm5_listen_and_process(context, argv[0]))) {
         krb5_free_principal(context, client_server_info.server);
 	com_err(argv[0], retval, "while processing network requests");
 	errout++;
@@ -519,12 +528,12 @@ char **argv;
     free(client_server_info.name_of_service);
     krb5_free_principal(context, client_server_info.server);
 
-    if (errout = closedown_network(argv[0])) {
+    if ((errout = closedown_network(argv[0]))) {
 	com_err(argv[0], retval, "while shutting down network");
 	retval = retval + errout;
     }
 
-    if (errout = closedown_db(context)) {
+    if ((errout = closedown_db(context))) {
 	com_err(argv[0], retval, "while closing database");
 	retval = retval + errout;
     }

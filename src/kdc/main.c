@@ -805,7 +805,8 @@ initialize_realms(kcontext, argc, argv)
 	    nofork++;			/* don't detach from terminal */
 	    break;
 	case 'k':			/* keytype for master key */
-	    mkeytype = atoi(optarg);
+	    if (krb5_string_to_keytype(optarg, &mkeytype))
+		com_err(argv[0], 0, "invalid keytype %s", optarg);
 	    break;
 	case 'R':
 	    rcname = optarg;
@@ -817,7 +818,8 @@ initialize_realms(kcontext, argc, argv)
 	    sport = atoi(optarg);
 	    break;
 	case 'e':
-	    kdc_etype = atoi(optarg);
+	    if (krb5_string_to_enctype(optarg, &kdc_etype))
+		com_err(argv[0], 0, "invalid encryption type %s", optarg);
 	    break;
 	case '?':
 	default:

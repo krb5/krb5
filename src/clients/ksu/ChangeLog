@@ -1,3 +1,13 @@
+
+Mon Aug 21 16:53:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* ksu.h - Change lifetime types to krb5_deltat.
+	* main.c - Use string_to_deltat() to parse lifetimes.  Fix gcc -Wall.
+	* krb_auth_su.c - Fix gcc -Wall.  Remove krb5_parse_lifetime() and
+		convtime().  No longer needed.
+	* ccache.c - Remove English-specific months and let timestamp_to_
+		sfstring() handle it.  Fix gcc -Wall.
+	* configure.in - Add -lkadm.
+
 Sat Jul 29 04:41:07 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* configure.in: Don't link with -lkadm.

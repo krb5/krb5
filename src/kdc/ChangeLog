@@ -1,4 +1,10 @@
 
+Mon Aug 21 17:03:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Interpret -k and -e arguments as strings instead of string
+		representations of integers (e.g. -e des-cbc-md5).
+	* krb5kdc.M - Remove "ascii representation of a decimal number".
+
+
 Thu Aug 17 13:49:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* do_as_req.c - Close and re-open the database after performing a
 		database update.  This is the cleanest way to flush out the

@@ -71,8 +71,8 @@ extern char * gb_err;
 
 typedef struct opt_info{
 	int opt;
-	long lifetime;
-	long rlife;
+	krb5_deltat lifetime;
+	krb5_deltat rlife;
 	int princ;
 }opt_info;
 

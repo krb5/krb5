@@ -26,6 +26,7 @@
  */
 
 #include "ksu.h"
+#include "adm_proto.h"
 
 /* globals */
 char * prog_name;
@@ -63,6 +64,7 @@ void usage (){
 
 #define DEBUG
 
+int
 main (argc, argv)
 	int argc;
 	char ** argv;
@@ -171,7 +173,7 @@ char * dir_of_cc_source;
 	switch (option) {
 	case 'r':
 	    options.opt |= KDC_OPT_RENEWABLE;
-	    retval = krb5_parse_lifetime(optarg, &options.rlife);
+	    retval = krb5_string_to_deltat(optarg, &options.rlife);
 	    if (retval != 0 || options.rlife == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
 		errflg++;
@@ -183,7 +185,7 @@ char * dir_of_cc_source;
 	    optind --;	
 	    if (auth_debug){printf("Before get_params optind=%d \n", optind);}
 
-            if ( retval = get_params( & optind, pargc, pargv, &params)){
+            if ((retval = get_params( & optind, pargc, pargv, &params))){
                 com_err(prog_name, retval, "when gathering parameters");
                 errflg++;
             }
@@ -203,14 +205,14 @@ char * dir_of_cc_source;
 	    quiet =1;
 	    break;
         case 'l':
-	    retval = krb5_parse_lifetime(optarg, &options.lifetime);
+	    retval = krb5_string_to_deltat(optarg, &options.lifetime);
 	    if (retval != 0 || options.lifetime == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
 		errflg++;
 	    }
 	    break;
 	case 'n': 
-	    if (retval = krb5_parse_name(ksu_context, optarg, &client)){
+	    if ((retval = krb5_parse_name(ksu_context, optarg, &client))){
 		com_err(prog_name, retval, "when parsing name %s", optarg); 
 		errflg++;
 	    }	
@@ -298,7 +300,7 @@ char * dir_of_cc_source;
 	case 'e': 
 	    cmd = strdup(optarg);
             if(auth_debug){printf("Before get_params optind=%d \n", optind);}
-            if ( retval = get_params( & optind, pargc, pargv, &params)){
+            if ((retval = get_params( & optind, pargc, pargv, &params))){
                 com_err(prog_name, retval, "when gathering parameters");
                 errflg++;
             }
@@ -380,7 +382,7 @@ char * dir_of_cc_source;
 	}
 	
 	/* get a handle for the cache */      
-	if ( retval = krb5_cc_resolve(ksu_context, cc_source_tag, &cc_source)){
+	if ((retval = krb5_cc_resolve(ksu_context, cc_source_tag, &cc_source))){
 		com_err(prog_name, retval,"while getting source cache");    
 		exit(1);
 	}
@@ -397,7 +399,7 @@ char * dir_of_cc_source;
 		}
 
 
-		if (retval= krb5_ccache_refresh(ksu_context, cc_source)){
+		if ((retval= krb5_ccache_refresh(ksu_context, cc_source))){
 			   com_err(prog_name, retval, 
 				"while refreshing %s (source cache)", cc_source_tag); 
 			   exit(1);	
@@ -406,9 +408,9 @@ char * dir_of_cc_source;
 	}
 
 
-	if (retval = get_best_princ_for_target(ksu_context, source_uid,
+	if ((retval = get_best_princ_for_target(ksu_context, source_uid,
 			target_uid, source_user, target_user, cc_source, 
-			&options, cmd, localhostname, &client, &hp)){
+			&options, cmd, localhostname, &client, &hp))){
 		com_err(prog_name,retval, "while selecting the best principal"); 
 		exit(1);
 	}
@@ -444,8 +446,8 @@ char * dir_of_cc_source;
 	    			exit(1); 	
 			}
 
-			if (retval = krb5_cc_initialize(ksu_context, cc_source, 
-							client)){  
+			if ((retval = krb5_cc_initialize(ksu_context, cc_source, 
+							 client))){  
 				com_err(prog_name, retval,
 					"while initializing source cache");    
 				exit(1);
@@ -501,8 +503,8 @@ char * dir_of_cc_source;
 
 		if ((source_uid == 0) && (target_uid != 0)) {
 
-			if (retval =krb5_ccache_copy_restricted(ksu_context,  cc_source,
-				cc_target_tag,client,&cc_target, &stored)){
+			if ((retval =krb5_ccache_copy_restricted(ksu_context,  cc_source,
+				cc_target_tag,client,&cc_target, &stored))){
 	    			com_err (prog_name, retval, 
 				     "while copying cache %s to %s",
 				     krb5_cc_get_name(ksu_context, cc_source),cc_target_tag);
@@ -510,8 +512,8 @@ char * dir_of_cc_source;
 			}
 
                 } else{
-			if (retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag,
-					     client,&cc_target, &stored)){
+			if ((retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag,
+					     client,&cc_target, &stored))){
 	    			com_err (prog_name, retval, 
 					"while copying cache %s to %s",
 			     		krb5_cc_get_name(ksu_context, cc_source),
@@ -527,7 +529,7 @@ char * dir_of_cc_source;
 		cc_target_tag = cc_source_tag;
 		cc_target_tag_tmp = cc_source_tag_tmp;
 
-		if(retval=krb5_find_princ_in_cache(ksu_context, cc_target,client, &stored)){
+		if ((retval=krb5_find_princ_in_cache(ksu_context, cc_target,client, &stored))){
 	    			com_err (prog_name, retval, 
 				"while searching for client in source ccache");
 				exit(1);
@@ -537,10 +539,10 @@ char * dir_of_cc_source;
 	if ((source_uid == 0) || (target_uid == source_uid)){
 #ifdef GET_TGT_VIA_PASSWD
 			if ((!all_rest_copy) && options.princ && (stored == FALSE)){
-				if (retval = krb5_tgtname(ksu_context, 
+				if ((retval = krb5_tgtname(ksu_context, 
 					krb5_princ_realm (ksu_context, client),
 				          krb5_princ_realm(ksu_context, client),
-                              			   	  &kdc_server)){
+                              			   	  &kdc_server))){
 		                	com_err(prog_name, retval,
 					      "while creating tgt for local realm");
 					      sweep_up(ksu_context, use_source_cache, cc_target);
@@ -593,8 +595,8 @@ char * dir_of_cc_source;
 		/* cache the tickets if possible in the source cache */ 
 		if (!path_passwd && !use_source_cache){ 	
 
-			if (retval = krb5_ccache_overwrite(ksu_context, cc_target, cc_source,
-				      client)){
+			if ((retval = krb5_ccache_overwrite(ksu_context, cc_target, cc_source,
+				      client))){
 		  		com_err (prog_name, retval,
 					"while copying cache %s to %s",
 				 	krb5_cc_get_name(ksu_context, cc_target),
@@ -610,7 +612,7 @@ char * dir_of_cc_source;
 			}
 		}
 			
-		if (retval = krb5_unparse_name(ksu_context, client, &client_name)) {
+		if ((retval = krb5_unparse_name(ksu_context, client, &client_name))) {
                		 com_err (prog_name, retval, "When unparsing name");
 			 sweep_up(ksu_context, use_source_cache, cc_target);
 			 exit(1);
@@ -621,8 +623,8 @@ char * dir_of_cc_source;
 			prog_name,target_user,client_name,
 			source_user,ontty());
 
-		if(retval = krb5_authorization(ksu_context, client,target_user,
-		 	 local_realm_name, cmd, &authorization_val, &exec_cmd)){
+		if ((retval = krb5_authorization(ksu_context, client,target_user,
+		 	 local_realm_name, cmd, &authorization_val, &exec_cmd))){
                	       com_err(prog_name,retval,"while checking authorization");
 		       sweep_up(ksu_context, use_source_cache, cc_target);
 		       exit(1);
@@ -676,7 +678,7 @@ char * dir_of_cc_source;
 	}
 	
 	if( some_rest_copy){ 
-		if (retval = krb5_ccache_filter(ksu_context, cc_target, client)){ 	
+		if ((retval = krb5_ccache_filter(ksu_context, cc_target, client))){ 	
                	       com_err(prog_name,retval,"while calling cc_filter");
 		       sweep_up(ksu_context, use_source_cache, cc_target);
 		       exit(1);
@@ -684,7 +686,7 @@ char * dir_of_cc_source;
 	}
 
 	if (all_rest_copy){
-			if (retval = krb5_cc_initialize(ksu_context, cc_target, client)){  
+			if ((retval = krb5_cc_initialize(ksu_context, cc_target, client))){  
 				com_err(prog_name, retval,
 					"while erasing target cache");    
 				exit(1);
@@ -819,7 +821,7 @@ char * dir_of_cc_source;
 		 sweep_up(ksu_context, use_source_cache, cc_target);
 		 exit(1);
 	}else{
-		if (child_pid = fork()){	
+		if ((child_pid = fork())){	
 			if (auth_debug){
 			 	printf(" The childs pid is %d \n", child_pid);
         			printf(" The parents pid is %d \n", getpid());
@@ -868,7 +870,7 @@ char *p, *ttyname();
 static char buf[MAXPATHLEN + 4];
 
        buf[0] = 0;
-       if (p = ttyname(STDERR_FILENO))
+       if ((p = ttyname(STDERR_FILENO)))
 	   sprintf(buf, " on %s", p);
        return (buf);
 }
@@ -901,7 +903,7 @@ struct stat  st_temp;
 	if (! use_source_cache){
 		cc_name = krb5_cc_get_name(context, cc);
 		if ( ! stat(cc_name, &st_temp)){
-			if (retval = krb5_cc_destroy(context, cc)){
+			if ((retval = krb5_cc_destroy(context, cc))){
 				com_err(prog_name, retval, 
 					"while destroying cache");   
 			}
@@ -977,7 +979,7 @@ char *get_dir_of_file(path)
 
     temp_path =  strdup(path);
 
-    if (ptr = strrchr( temp_path, '/')) {
+    if ((ptr = strrchr( temp_path, '/'))) {
 	*ptr = '\0';  
     } else {
 	free (temp_path);
