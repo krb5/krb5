@@ -7,7 +7,7 @@ do include fixes, please send them using either context diffs or unified
 diffs (using @samp{diff -c} or @samp{diff -u}, respectively).
 
 The @code{krb5-send-pr} program is installed in the directory
-@code{@value{ROOTDIR}/bin}.
+@code{@value{ROOTDIR}/sbin}.
 
 The @code{krb5-send-pr} program enters the problem report into our
 Problem Report Management System (PRMS), which automatically assigns it

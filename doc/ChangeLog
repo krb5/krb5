@@ -1,5 +1,28 @@
 Fri Nov 29 19:47:38 1996  Tom Yu  <tlyu@mit.edu>
 
+	* install.texinfo (Mapping Hostnames onto Kerberos Realms): Fix
+	spacing error.
+
+	* admin.texinfo: Fix up old references to "/krb5".
+
+	* send-pr.texinfo: krb5-send-pr is in PREFIX/sbin, not PREFIX/bin.
+
+	* admin.texinfo: "/lib/krb5kdc" -> "/var/krb5kdc"
+
+	* krb425.texinfo (Upgrading Application Servers): Change flag
+	"cygnus" to "CYGNUS".
+
+	* install.texinfo (Please Read the Documentation): Change flag
+	"cygnus" to "CYGNUS".
+
+	* admin.texinfo (domain_realm): Change flag "cygnus" to "CYGNUS".
+
+	* definitions.texinfo: Change /usr/@value{LCPRODUCT} to /usr/local
+	to sync with default paths.
+
+	* admin.texinfo (domain_realm): Conditionalize "COM" vs "EDU" in
+	example.
+
 	* install.texinfo (Create Host Keys for the Slave KDCs): Change
 	-randpass to -randkey. [244]
 

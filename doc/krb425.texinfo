@@ -270,7 +270,7 @@ telnet  stream  tcp  nowait  root
 @end group
 @end smallexample
 
-@ifset cygnus
+@ifset CYGNUS
 @strong{N.B.}:  As noted in the @value{PRODUCT} Installation Guide, if
 you have some clients running older versions of Kerberos V5 (beta
 6@footnote{@value{PRODUCT} is based on the MIT beta 7 release.} or
@@ -279,7 +279,7 @@ cause authentication to fail.  To get around this problem, have the
 @code{klogind} and @code{kshd} daemons ignore checksums, by replacing
 each @code{-c} flag above with @code{-i}.
 @end ifset
-@ifclear cygnus
+@ifclear CYGNUS
 @strong{N.B.}: As noted in the @value{PRODUCT} Installation Guide, if
 you have some clients running older versions of Kerberos V5 (beta 6 or
 earlier), checksums were done differently in those versions, which will

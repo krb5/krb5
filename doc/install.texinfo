@@ -123,13 +123,13 @@ installation procedure is somewhat involved, and requires forethought
 and planning.  @value{COMPANY} has attempted to make this
 @value{PRODUCT} Installation Guide as concise as possible, rather than
 making it an exhaustive description of the details of Kerberos.
-@ifset cygnus
+@ifset CYGNUS
 Consequently, everything in this guide appears because @value{COMPANY}
 believes that it is important.  Please read and follow these
 instructions carefully, and if there is anything you do not understand
 or are not sure of, please don't hesitate to call us.
 @end ifset
-@ifclear cygnus
+@ifclear CYGNUS
 Consequently, everything in this guide appears because @value{COMPANY}
 believes that it is important.  Please read and follow these
 instructions carefully.
@@ -245,7 +245,7 @@ you would do this by specifying the mappings for a given domain or
 subdomain and listing the exceptions.
 
 The @value{PRODUCT} System Administrator's Guide contains a thorough
-description of the parts of the @code{krb5.conf}file and what may be
+description of the parts of the @code{krb5.conf} file and what may be
 specified in each.  A sample @code{krb5.conf} file appears in
 @ref{krb5.conf}.  You should be able to use this file, substituting the
 relevant information for your Kerberos instllation for the samples.

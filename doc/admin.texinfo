@@ -539,7 +539,12 @@ default to the @value{PRIMARYREALM} realm, and all hosts in the
 @value{SECONDDOMAIN} domain will map by default into the
 @value{SECONDREALM} realm.  Note the entries for the hosts
 @value{PRIMARYDOMAIN} and @value{SECONDDOMAIN}.  Without these entries,
+@ifset CYGNUS
 these hosts would be mapped into the Kerberos realms @samp{COM} and
+@end ifset
+@ifclear CYGNUS
+these hosts would be mapped into the Kerberos realms @samp{EDU} and
+@end ifclear
 @samp{ORG}, respectively.
 
 @node logging, capaths, domain_realm, krb5.conf
@@ -762,7 +767,7 @@ Here is an example of a generic @code{krb5.conf} file:
 The @code{kdc.conf} file contains KDC configuration information,
 including defaults used when issuing Kerberos tickets.  Normally, you
 should install your @code{kdc.conf} file in the directory
-@code{@value{ROOTDIR}/lib/krb5kdc}.  You can override the default
+@code{@value{ROOTDIR}/var/krb5kdc}.  You can override the default
 location by setting the environment variable @samp{KRB5_KDC_PROFILE}.
 
 The @code{kdc.conf} file is set up in the same format as the
@@ -817,16 +822,16 @@ subsection:
 @itemx acl_file
 (String.)  Location of the access control list (acl) file that kadmin
 uses to determine which principals are allowed which permissions on the
-database.  The default is @code{@value{ROOTDIR}/lib/krb5kdc/kadm5.acl}.
+database.  The default is @code{@value{ROOTDIR}/var/krb5kdc/kadm5.acl}.
 
 @itemx admin_keytab
 (String.)  Location of the keytab file that kadmin uses to authenticate
 to the database.  The default is
-@code{@value{ROOTDIR}/lib/krb5kdc/kadm5.keytab}.
+@code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
 
 @itemx database_name
 (String.)  Location of the Kerberos database for this realm.  The
-default is @code{@value{ROOTDIR}/lib/krb5kdc/principal}.
+default is @code{@value{ROOTDIR}/var/krb5kdc/principal}.
 
 @itemx default_principal_expiration
 (Absolute time string.)  Specifies the default expiration date of
@@ -839,7 +844,7 @@ in this realm.
 @itemx dict_file
 (String.)  Location of the dictionary file containing strings that are
 not allowed as passwords.  The default is
-@code{@value{ROOTDIR}/lib/krb5kdc/kadm5.dict}.
+@code{@value{ROOTDIR}/var/krb5kdc/kadm5.dict}.
 
 @itemx encryption_type
 (Encryption type string.)  Specifies the encryption type used for this
@@ -852,7 +857,7 @@ for this realm.  The assigned port for kadmind is 749.
 @itemx key_stash_file
 (String.)  Specifies the location where the master key has been stored
 (via @code{kdb5_util stash}).  The default is
-@code{@value{ROOTDIR}/lib/krb5kdc/.k5.@i{REALM}}, where @i{REALM} is the
+@code{@value{ROOTDIR}/var/krb5kdc/.k5.@i{REALM}}, where @i{REALM} is the
 Kerberos realm.
 
 @itemx kdc_ports
@@ -906,8 +911,8 @@ Here's an example of a @code{kdc.conf} file:
     @}
 
 [logging]
-    kdc = FILE:@value{ROOTDIR}/lib/krb5kdc/kdc.log
-    admin_server = FILE:@value{ROOTDIR}/lib/krb5kdc/kadmin.log
+    kdc = FILE:@value{ROOTDIR}/var/krb5kdc/kdc.log
+    admin_server = FILE:@value{ROOTDIR}/var/krb5kdc/kadmin.log
 
 @end group
 @end smallexample
@@ -1895,8 +1900,8 @@ example:
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kdb5_util -r @value{PRIMARYREALM} create -s
-@b{kdb5_util: No such file or directory while setting active database to '/krb5/principal'
-Initializing database '@value{ROOTDIR}/lib/krb5kdc/principal' for
+@b{kdb5_util: No such file or directory while setting active database to '@value{ROOTDIR}/var/krb5kdc/principal'
+Initializing database '@value{ROOTDIR}/var/krb5kdc/principal' for
 @result{} realm '@value{PRIMARYREALM}',
 master key name 'K/M@@@value{PRIMARYREALM}'
 You will be prompted for the database Master Password.
@@ -2001,10 +2006,10 @@ kadmin:}
 
 @smallexample
 @group
-@b{kadmin:} ktadd -k /krb5/kadmind.keytab kadmin/admin kadmin/changepw
+@b{kadmin:} ktadd -k @value{ROOTDIR}/var/krb5kdc/kadmind.keytab kadmin/admin kadmin/changepw
 @b{kadmin: Entry for principal kadmin/admin@@@value{PRIMARYREALM} with
      kvno 3, encryption type DES-CBC-CRC added to keytab
-     WRFILE:/krb5/kadmind.keytab.
+     WRFILE:@value{ROOTDIR}/var/krb5kdc/kadmind.keytab.
 kadmin:}
 @end group
 @end smallexample
@@ -2049,9 +2054,9 @@ For example:
 
 @smallexample
 @group
-@b{kadmin:} ktremove -k /krb5/kadmind.keytab kadmin/admin
+@b{kadmin:} ktremove -k @value{ROOTDIR}/var/krb5kdc/kadmind.keytab kadmin/admin
 @b{kadmin: Entry for principal kadmin/admin with kvno 3 removed
-     from keytab WRFILE:/krb5/kadmind.keytab.
+     from keytab WRFILE:@value{ROOTDIR}/var/krb5kdc/kadmind.keytab.
 kadmin:}
 @end group
 @end smallexample
