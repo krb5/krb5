@@ -1,3 +1,8 @@
+Fri Sep  6 01:22:56 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* build.texinfo: Remove --enable options which are no longer
+		valid.  Updated reference to dejagnu.
+
 Thu Apr 18 14:38:42 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* install.texi (Building using lndir): Minor grammer fix.

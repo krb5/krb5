@@ -20,14 +20,18 @@ that you may be unfamilar with, and we explain them here.
 * Constructing an Install Kit::  Constructing a tar file or package
 @end menu
 
-@node Requirements, Setup
+@node Requirements, Setup, Compiling @value{PRODUCT}, Compiling @value{PRODUCT}
 @section Requirements
 
 At the very minimum, you need a Unix-like operating system with a C
 compiler.  (The MacOS and Windows ports are not discussed here.)  While
 an ANSI C compiler is preferred, mostly because it is likely to be a
 more recent compiler, the build process checks for particular features
-and works around them in most cases.  We of course recommend gcc, but we
+and works around them in most cases.  We 
+@ifset CYGNUS
+of course
+@end ifset
+recommend gcc, but we
 test the compilation with both gcc and the "native" or OS-vendor
 supplied compiler whenever possible.
 
@@ -44,7 +48,7 @@ part of the build process (any of the @file{Makefile}s---more
 specifically, any of the @file{configure.in} or @file{Makefile.in} files
 that generate them) you're going to need a recent version of GNU m4.
 
-@node Setup, Testing, Requirements
+@node Setup, Testing, Requirements, Compiling @value{PRODUCT}
 @section Setup
 
 We recommend a directory structure as follows:
@@ -129,29 +133,6 @@ which get automatically propagated to all subdirectories.
 
 @var{configure options} include
 @table @code
-@item --with-dbm
-Use native @code{dbm} for the key database.
-@item --without-dbm
-Use included version of Berkeley @code{db}.  This is the default, but
-not yet recommended.  In a future release, after @code{db} is more
-thoroughly tested, a conversion tool will be supplied.
-@item --with-dbm-lname
-Use native @code{dbm} for @code{aname} to @code{lname} conversion
-database.  This optional database is most useful when users have
-principals in multiple realms that have common access.
-@item --without-dbm-lname
-Use included version of Berkeley @code{db}.  This is the default, but
-not yet recommended.  In a future release, after @code{db} is more
-thoroughly tested, a conversion tool will be supplied.
-@item --enable-athena
-If V4 compatibility is also enabled (the default), construct
-@code{kadmin.v4}, the @value{PRODUCT} V4 compatible Kerberos
-Administration Server, and @code{krb524}, the conversion tools to allow
-users to generate V4 tickets from V5 tickets.
-
-It also causes @code{KRB5_ATHENA_COMPAT} to be defined, which may have
-affects in future releases, but is currently unused.
-
 @item --prefix @var{pathname}
 Specify that the installed tree be rooted at @var{pathname}.  The MIT
 default is to use @file{/krb5} but
@@ -192,9 +173,10 @@ systems.
 Use constructed shared (default) libraries.
 @item --without-shared
 Don't use any shared libraries when building @value{PRODUCT}.
+@ifset CYGNUS
 @item  --without-afs
 The default, indicating that you don't have afs libraries to build with
-and therefore can't to build @code{asetkey}, @code{aklog}, and
+and therefore can't build @code{asetkey}, @code{aklog}, and
 @code{kascvt}.
 @item --with-afs=@var{AFSDIR}
 Use preinstalled AFS library tree located under @var{AFSDIR} to build
@@ -211,9 +193,10 @@ Internet Standard as of October 1995, but work is expected in the coming
 year to change that.
 @item  --disable-telnet-encryption
 Don't enable the non-standard telnet encryption mode described above.
+@end ifset
 @end table
 
-@node Testing, Constructing an Install Kit, Setup
+@node Testing, Constructing an Install Kit, Setup, Compiling @value{PRODUCT}
 @section Testing
 
 After running @code{make all} successfully, you should run the
@@ -229,7 +212,7 @@ various Kerberos V5 interfaces including @code{kdb5}
 @end itemize
 
 If you have @code{runtest} from the DejaGnu package
-@footnote{@code{prep.ai.mit.edu:/pub/gnu/dejagnu-1.2.tar.gz} as of this
+@footnote{@code{prep.ai.mit.edu:/pub/gnu/dejagnu-1.3.tar.gz} as of this
 writing} installed, this will also run a set of live application tests,
 creating a test realm, starting a Kerberos server, @code{kadmind}, and
 clients, and testing their features the way a human would use them.  The
@@ -240,7 +223,7 @@ the @file{tests/dejagnu} directory and running @code{runtest} with the
 @samp{-d} option, and examining the @file{dbg.log} file produced.  (This
 will not be necessary with any platform supported by @value{COMPANY}.)
 
-@node Constructing an Install Kit,  , Testing
+@node Constructing an Install Kit,  , Testing, Compiling @value{PRODUCT}
 @section Constructing an Install Kit
 
 You can construct an install kit by creating an install directory and
