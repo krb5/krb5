@@ -7,6 +7,7 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.$(LIBEXT)
 
 KLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
+RUN_SETUP = @KRB5_RUN_ENV@
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -79,10 +80,12 @@ clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
 verify$(EXEEXT): t_verify.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ t_verify.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
+	$(CC) -o $@ t_verify.$(OBJEXT) process_ky.o  key_sched.o\
+	../cryptoconf.o ../des_crc.o $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
 destest$(EXEEXT): destest.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ destest.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
+	$(CC) -o $@ destest.$(OBJEXT) process_ky.o key_sched.o\
+	../cryptoconf.o ../des_crc.o  $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
 t_random$(EXEEXT): t_random.$(OBJEXT) $(DEPKLIB)
 	$(LD) -o $@ t_random.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
@@ -90,10 +93,10 @@ t_random$(EXEEXT): t_random.$(OBJEXT) $(DEPKLIB)
 check-mac: check-unix
 
 check-unix:: destest verify
-	./verify -z
-	./verify -m
-	./verify
-	./destest < $(srcdir)/keytest.data
+	$(RUN_SETUP) ./verify -z
+	$(RUN_SETUP) ./verify -m
+	$(RUN_SETUP) ./verify
+	$(RUN_SETUP) ./destest < $(srcdir)/keytest.data
 
 check-windows::
 
