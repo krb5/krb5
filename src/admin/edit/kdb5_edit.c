@@ -247,20 +247,27 @@ char *kdb5_edit_Init(argc, argv)
     if (!dbname)
 	dbname = DEFAULT_KDB_FILE;
 
-    if (!enctypedone)
-	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
-
-    if (!valid_enctype(master_keyblock.enctype)) {
-	char tmp[32];
-	if (krb5_enctype_to_string(master_keyblock.enctype, tmp, sizeof(tmp)))
-	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
-		    "while setting up enctype %d", master_keyblock.enctype);
+    if (!enctypedone) {
+	if (manual_mkey)
+	    master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 	else
-	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
-	exit(1);
+	    master_keyblock.enctype = NULL;
     }
 
-    krb5_use_enctype(edit_context, &master_encblock, master_keyblock.enctype);
+    if (master_keyblock.enctype) {
+	if (!valid_enctype(master_keyblock.enctype)) {
+	    char tmp[32];
+	    if (krb5_enctype_to_string(master_keyblock.enctype,
+				       tmp, sizeof(tmp)))
+		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+			"while setting up enctype %d", master_keyblock.enctype);
+	    else
+		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+	    exit(1);
+	}
+	krb5_use_enctype(edit_context, &master_encblock,
+			 master_keyblock.enctype);
+    }
 
     if (cur_realm) {
 	if ((retval = krb5_set_default_realm(edit_context, cur_realm))) {
