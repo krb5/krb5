@@ -314,6 +314,9 @@ extern unsigned char
     *env_getvalue P((unsigned char *));
 
 extern int
+    env_is_exported P((unsigned char *));
+
+extern int
     get_status P((void)),
     dosynch P((void));
 

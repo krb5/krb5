@@ -521,7 +521,8 @@ dooption(option)
 #endif
 
 	    case TELOPT_XDISPLOC:	/* X Display location */
-		if (env_getvalue((unsigned char *)"DISPLAY"))
+		if (env_getvalue((unsigned char *)"DISPLAY") &&
+		    env_is_exported((unsigned char *)"DISPLAY"))
 		    new_state_ok = 1;
 		break;
 
@@ -954,7 +955,8 @@ suboption()
 	    unsigned char temp[50], *dp;
 	    int len;
 
-	    if ((dp = env_getvalue((unsigned char *)"DISPLAY")) == NULL) {
+	    if (((dp = env_getvalue((unsigned char *)"DISPLAY")) == NULL) ||
+		(! env_is_exported((unsigned char *)"DISPLAY"))) {
 		/*
 		 * Something happened, we no longer have a DISPLAY
 		 * variable.  So, turn off the option.
@@ -2286,7 +2288,8 @@ telnet(user)
 	send_will(TELOPT_LINEMODE, 1);
 	send_will(TELOPT_NEW_ENVIRON, 1);
 	send_do(TELOPT_STATUS, 1);
-	if (env_getvalue((unsigned char *)"DISPLAY"))
+	if (env_getvalue((unsigned char *)"DISPLAY") &&
+	    env_is_exported((unsigned char *)"DISPLAY"))
 	    send_will(TELOPT_XDISPLOC, 1);
 	if (eight)
 	    tel_enter_binary(eight);

@@ -47,6 +47,9 @@
 #include <sys/select.h>
 #endif
 #include <signal.h>
+#ifdef POSIX_SIGNALS
+#include <unistd.h>
+#endif /* POSIX_SIGNALS */
 #include <errno.h>
 #include <arpa/telnet.h>
 
@@ -67,6 +70,30 @@
 #ifdef	SIGINFO
 extern SIG_FUNC_RET ayt_status();
 #endif
+
+#ifdef POSIX_SIGNALS
+static struct sigaction new_sa_rec, old_sa_rec;
+
+#ifdef SA_INTERRUPT
+#define SIGACTION_INTERRUPT SA_INTERRUPT
+#else
+#define SIGACTION_INTERRUPT 0
+#endif
+
+#ifdef SA_NOMASK
+#define SIGACTION_NOMASK SA_NOMASK
+#else
+#define SIGACTION_NOMASK 0
+#endif
+
+#define signal(sig, func) ((new_sa_rec.sa_handler = func), \
+			   sigemptyset(&new_sa_rec.sa_mask), \
+			   (new_sa_rec.sa_flags = SIGACTION_INTERRUPT | \
+			    SIGACTION_NOMASK), \
+			   sigaction(sig, &new_sa_rec, &old_sa_rec), \
+			   old_sa_rec.sa_handler)
+
+#endif /* POSIX_SIGNALS */
 
 int
 	tout,			/* Output file descriptor */

@@ -1872,6 +1872,17 @@ env_getvalue(var)
 	return(NULL);
 }
 
+	int
+env_is_exported(var)
+	unsigned char *var;
+{
+	register struct env_lst *ep;
+
+	if ((ep = env_find(var)))
+		return ep->export;
+	return 0;
+}
+	    
 #if defined(OLD_ENVIRON) && defined(ENV_HACK)
 	void
 env_varval(what)
@@ -2436,7 +2447,13 @@ tn(argc, argv)
 	auth_encrypt_connect(connected);
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
     } while (connected == 0);
+    if (user)
+      user = strdup(user);
+    if (hostp)
+      hostp = strdup(hostp);
     cmdrc(hostp, hostname);
+    if (hostp)
+      free(hostp);
     if (autologin && user == NULL) {
 	struct passwd *pw;
 
@@ -2448,6 +2465,8 @@ tn(argc, argv)
 		else
 			user = NULL;
 	}
+	if (user)
+	  user = strdup(user);
     }
     if (user) {
 	env_define((unsigned char *)"USER", (unsigned char *)user);
@@ -2456,6 +2475,8 @@ tn(argc, argv)
     (void) call(status, "status", "notmuch", 0);
     if (setjmp(peerdied) == 0)
 	telnet(user);
+    if (user)
+      free(user);
     (void) NetClose(net);
     ExitString("Connection closed by foreign host.\r\n",1);
     /*NOTREACHED*/

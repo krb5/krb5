@@ -1,3 +1,7 @@
+Sat Sep 21 03:38:31 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* utility.c (ttloop): Continue on eintr.
+
 Tue Sep 10 14:10:41 1996  Tom Yu  <tlyu@mit.edu>
 
 	* telnetd.8: remove ".so man1/header.doc"

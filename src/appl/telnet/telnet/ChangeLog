@@ -1,3 +1,15 @@
+Sat Sep 21 03:47:46 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* telnet.c (telnet): Only support XDISPLOC if DISPLAY is supported, thanks to jik.
+
+	* commands.c (tn): Save away arguments before memory used by other
+ 	functions.  Patch thanks to jik.
+	(env_init): Cannonify DISPLAY; patch thanks to jik.
+
+	* sys_bsd.c: Use POSIX_SIGNALS when available.  This patch is
+ 	contribued by jik.  It could be cleaned up a bit to be more
+ 	consistent with Kerberos style, but is functionally correct.
+
 Tue Sep 10 14:09:49 1996  Tom Yu  <tlyu@mit.edu>
 
 	* telnet.1: remove ".so man1/header.doc"
