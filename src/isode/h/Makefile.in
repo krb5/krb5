@@ -89,6 +89,6 @@ install:	inst-all clean
 
 lint:;
 
-clean:;		rm -f z* _*
+clean::;	rm -f z* _*
 
 grind:;		tgrind -lc $(HEADERS)

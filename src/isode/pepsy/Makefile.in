@@ -354,7 +354,7 @@ manuals:;	@$(UTILDIR)inst-man.sh $(MANOPTS) $(MANUALS)
 # clean
 ################################################################
 
-clean:;		rm -f *.o *.a x* z* _* core pepsydefs.h *yacc.y *yacc.c lex.l \
+clean::;	rm -f *.o *.a x* z* _* core pepsydefs.h *yacc.y *yacc.c lex.l \
 			lex.c *.ph UNIV_* UNIV-* _* core $(HDIR)/UNIV*.h \
 			pp.c pp pep libpepsy.a pepsy-yacc.y T1* T2* T3* t? \
 			peptest pep.results pepsyvrsn.c

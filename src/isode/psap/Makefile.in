@@ -274,7 +274,7 @@ manuals:;	@$(UTILDIR)inst-man.sh $(MANOPTS) $(MANUALS)
 # clean
 ################################################################
 
-clean:;		rm -f *.o *.a z* _* core psaptest dec2pe hex2pe psapvrsn.c
+clean::;	rm -f *.o *.a z* _* core psaptest dec2pe hex2pe psapvrsn.c
 
 grind:;		iprint Makefile
 		tgrind -lc $(CFILES) psapvrsn.c psaptest.c dec2pe.c hex2pe.c \

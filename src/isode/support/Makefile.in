@@ -116,7 +116,7 @@ clean::
 # clean
 ################################################################
 
-clean:;		rm -f *.o *.a *.so.* x* z* _* core isodevrsn.c llib-lisode \
+clean::;	rm -f *.o *.a *.so.* x* z* _* core isodevrsn.c llib-lisode \
 		    libisode-shared
 
 true:;

@@ -216,7 +216,7 @@ manuals:;	@$(UTILDIR)inst-man.sh $(MANOPTS) $(MANUALS)
 # clean
 ################################################################
 
-clean:;		rm -f *.o *.a z* _* core compatvrsn.c 
+clean::;	rm -f *.o *.a z* _* core compatvrsn.c 
 
 grind:;		iprint Makefile
 		tgrind -lc $(CFILES) compatvrsn.c llib-lcompat
