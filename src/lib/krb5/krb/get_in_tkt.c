@@ -131,6 +131,12 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	     * First, we get the user's key.  We assume we will need
 	     * it for the pre-authentication.  Actually, this could
 	     * possibly not be the case, but it's usually true.
+	     *
+	     * XXX Problem here: if we're doing preauthentication,
+	     * we're getting the key before we get the KDC hit as to
+	     * which salting algorithm to use; hence, we're using the
+	     * default.  But if we're changing salts, because of a
+	     * realm renaming, or some such, this won't work.
 	     */
 	    retval = (*key_proc)(keytype, &decrypt_key, keyseed, 0);
 	    if (retval)
@@ -244,11 +250,13 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 
     /* it was a kdc_rep--decrypt & check */
 
-    /* generate the key */
-    if (retval = (*key_proc)(keytype, &decrypt_key, keyseed,
-			     as_reply->padata)) {
-	krb5_free_kdc_rep(as_reply);
-	return retval;
+     /* Generate the key, if we haven't done so already. */
+    if (!decrypt_key) {
+	    if (retval = (*key_proc)(keytype, &decrypt_key, keyseed,
+				     as_reply->padata)) {
+		    krb5_free_kdc_rep(as_reply);
+		    return retval;
+	    }
     }
     
     retval = (*decrypt_proc)(decrypt_key, decryptarg, as_reply);
