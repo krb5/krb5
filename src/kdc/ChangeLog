@@ -1,3 +1,10 @@
+Tue Oct 11 22:11:09 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_as_req.c (process_as_req): Don't assume that the request
+		server's realm name is null terminated.  Compare the
+		request server against changepw/kerberos using
+		krb5_principal_compare.
+
 Tue Oct  4 16:42:16 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdc_util.c (kdc_rdreq_keyproc): Add widen.h and narrow.h around

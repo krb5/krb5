@@ -132,6 +132,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enctype useetype;
     krb5_pa_data *padat_tmp[2], padat_local;
     krb5_data salt_data;
+    static krb5_principal cpw = 0;
     char *status;
 
     register int i;
@@ -173,9 +174,16 @@ krb5_data **response;			/* filled in with a response packet */
      * site-specific policiy file....
      */
     pwreq = 0;
-    sprintf(cpw_service, "%s@%s", "changepw/kerberos", 
-	    krb5_princ_realm(request->server)->data);
-    if (strcmp(sname, cpw_service) == 0) pwreq++;
+    if (!cpw) {
+	    retval = krb5_parse_name("changepw/kerberos", &cpw);
+	    if (retval)
+		    goto errout;
+	    free(krb5_princ_realm(cpw)->data);
+	    krb5_princ_realm(cpw)->data = 0;
+    }
+    krb5_princ_realm(cpw)->data = krb5_princ_realm(request->server)->data;
+    if (krb5_principal_compare(request->server, cpw))
+	    pwreq++;
 
     c_nprincs = 1;
     if (retval = krb5_db_get_principal(request->client, &client, &c_nprincs,
