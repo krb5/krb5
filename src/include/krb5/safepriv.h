@@ -28,10 +28,15 @@
 #ifndef KRB5_SAFE_PRIV__
 #define KRB5_SAFE_PRIV__
 
-#define KRB5_SAFE_NOTIME	0x1
-#define KRB5_SAFE_DOSEQUENCE	0x2
-
-#define KRB5_PRIV_NOTIME	0x1
-#define KRB5_PRIV_DOSEQUENCE	0x2
+#define KRB5_AUTH_CONTEXT_DO_TIME       0x00000001
+#define KRB5_AUTH_CONTEXT_RET_TIME      0x00000002
+#define KRB5_AUTH_CONTEXT_DO_SEQUENCE   0x00000004
+#define KRB5_AUTH_CONTEXT_RET_SEQUENCE  0x00000008
+ 
+typedef struct krb5_replay_data { 
+    krb5_timestamp      timestamp; 
+    krb5_int32          usec;
+    krb5_int32          seq; 
+} krb5_replay_data;
 
 #endif /* KRB5_SAFE_PRIV__ */

@@ -108,7 +108,7 @@
 /* #define	AP_OPTS_RESERVED	0x00000008 */
 /* #define	AP_OPTS_RESERVED	0x00000004 */
 /* #define	AP_OPTS_RESERVED	0x00000002 */
-/* #define	AP_OPTS_RESERVED	0x00000001 */
+#define AP_OPTS_USE_SUBKEY      0x00000001
 
 /* definitions for ad_type fields. */
 #define	AD_TYPE_RESERVED	0x8000

@@ -1,6 +1,24 @@
+Fri Mar 10 10:04:41 1995 Chris Provenzano (proven@mit.edu)
+
+	* func-proto.h (krb5_mk_req(), krb5_mk_req_extended(), krb5_rd_rep(),
+		krb5_sendauth(), krb5_mk_priv(), krb5_rd_priv(), krb5_mk_safe(),
+		and krb5_rd_safe()). Added a krb5_auth_context argument and
+		eliminated many of the other arguments because they are 
+		included in the krb5_auth_context structure.
+
+	* fieldbits.h Added #define AP_OPTS_USE_SUBKEY 0x00000001 for a
+		new option to an ap req message. This is mainly a clean way
+		to inform krb5_mk_req() and krb5_mk_req_extended() to 
+		create the subkey without adding an extra argument.
+
+	* safepriv.h Replace safe/priv flags with flags for krb5_auth_context
+		and add krb5_replay_data structure for when the appilication
+		want to do it's own replay detection for safe and priv calls.
+
+
 Thu Mar  9 18:29:24 1995  Mark Eichin  <eichin@cygnus.com>
 
-	* Makefile.in (all-windows): tabs, not spaces.
+       * Makefile.in (all-windows): tabs, not spaces.
 
 Tue Mar 7 14:54:02 1995 Keith Vetter (keithv@fusion.com)
 
