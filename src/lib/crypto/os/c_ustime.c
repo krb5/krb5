@@ -121,7 +121,7 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 }
 
 
-#elif defined(WIN32) || defined(_WINDOWS)
+#elif defined(_WIN32) || defined(_MSDOS)
 
    /* Microsoft Windows NT and 95   (32bit)  */
    /* This one works for WOW (Windows on Windows, ntvdm on Win-NT) */

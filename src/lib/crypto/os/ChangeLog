@@ -1,3 +1,10 @@
+Wed Jun 12 00:12:52 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* c_ustime.c: Fix WIN32 to be _WIN32
+
+	* c_localaddr.c: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
+	
+
 Sat Feb 24 00:34:15 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* c_ustime.c (krb5_crypto_us_timeofday): Add Windows 95/NT time

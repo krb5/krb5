@@ -30,7 +30,7 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
-#if !defined(HAVE_MACSOCK_H) && !defined(_MSDOS)
+#if !defined(HAVE_MACSOCK_H) && !defined(_MSDOS) && !defined(_WIN32)
 
 /* needed for solaris, harmless elsewhere... */
 #define BSD_COMP
