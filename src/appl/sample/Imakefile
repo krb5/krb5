@@ -7,13 +7,8 @@
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
 # 
-        DEPLIBS = $(DEPKLIB)
-LOCAL_LIBRARIES = $(KLIB)
+#define IHaveSubdirs
+#define PassCDebugFlags
 
-CLIENTOBJS= sclient.o
-SERVEROBJS= sserver.o
-
-all:: sclient sserver
-
-NormalProgramTarget(sclient,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
-NormalProgramTarget(sserver,$(SERVEROBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+SUBDIRS=sclient sserver
+MakeSubdirs($(SUBDIRS))
