@@ -102,6 +102,13 @@ authenticated Sun RPC had been used, but shouldn't if authentication
 wasn't used.  The test should verify that the API function call after
 the init doesn't succeed.
 
+There is also another test to see if all the API functions handle getting an
+invalid server handle correctly. This is not done as part of the tests that
+are run through the TCL program cause the TCL program has no way of
+invalidating a server handle.  So there is a program that calls init and
+changes the handle magic number, and then attempts to call each API function
+with the corrupted server handle.
+
 \section{ovsec_kadm_init}
 
 \numtest{1}{
@@ -288,6 +295,100 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
+\numtest{31}{
+\Priority{High}
+\Reason{Return BAD_STRUCT_VERSION when the mask bits are set to invalid values}
+\Status{Implemented}
+}
+
+\numtest{32}{
+\Priority{High}
+\Reason{Return BAD_STRUCT_VERSION when the mask bits are not set}
+\Status{Implemented}
+}
+
+\numtest{33}{
+\Priority{High}
+\Reason{Return OLD_STRUCT_VERSION when attempting to use an old/unsupported
+	structure version}
+\Status{Implemented}
+}
+
+\numtest{34}{
+\Priority{High}
+\Reason{Return NEW_STRUCT_VERSION when attempting to use a newer version of
+	of the structure then what is supported}
+\Status{Implemented}
+}
+
+\numtest{35}{
+\Priority{High}
+\Reason{Return BAD_API_VERSION when the mask bits are set to invalid values}
+\Status{Implemented}
+}
+
+\numtest{36}{
+\Priority{High}
+\Reason{Return BAD_API_VERSION when the mask bits are not set}
+\Status{Implemented}
+}
+
+\numtest{37}{
+\Priority{High}
+\Reason{Return OLD_LIB_API_VERSION when using an old/unsuppored
+	api version number}
+\Conditions{RPC}	
+\Status{Implemented}
+}
+
+\numtest{38}{
+\Priority{High}
+\Reason{Return OLD_SERVER_API_VERSION attempting to use an
+	old/unsupported api version number}
+\Condtions{local}	
+\Status{Implemented}
+}
+
+\numtest{39}{
+\Priority{High}
+\Reason{Return NEW_LIB_API_VERSION when using a newer api
+	version number then supported}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
+\numtest{40}{
+\Priority{High}
+\Reason{Return NEW_SERVER_API_VERSION when using a newer api version
+	number then supported}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{41}{
+\Priority{High}
+\Reason{Return BAD_XXX_VERSION when the API and the structure
+	version numbers are reversed}
+\Status{Implemented}
+}
+
+\numtest{42}{
+\Priority{High}
+\Reason{Succeeds when using valid api and struct version numbers and masks}
+\Status{Implemented}
+}
+
+\numtest{43}{
+\Priority{Low}
+\Reason{Returns two different server handle when called twice with same info}
+}
+
+\numtest{44}{
+\Priority{Low}
+\Reason{Returns two different server handles when called twice with
+	different  info}
+}
+
 \section{ovsec_kadm_destroy}
 
 \numtest{1}{
@@ -328,6 +429,18 @@ the init doesn't succeed.
 \numtest{8}{
 \Reason{Database can be reinitialized after destroy.}
 \Status{Implemented}
+}
+
+\numtest{9}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{10}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{client}
 }
 
 \section{ovsec_kadm_create_principal}
@@ -590,6 +703,19 @@ the init doesn't succeed.
 \Reason{Doesn't modify or free mod_name on failure.}
 }
 
+\numtest{43}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{44}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
+
+
 \section{ovsec_kadm_delete_principal}
 
 %\numtest{1}{
@@ -665,6 +791,17 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
+\numtest{13}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{14}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
 
 
 \section{ovsec_kadm_modify_principal}
@@ -943,6 +1080,18 @@ the init doesn't succeed.
 \Reason{Doesn't modify or free mod_name on failure.}
 }
 
+\numtest{43}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{44}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
+
 
 \section{ovsec_kadm_rename_principal}
 
@@ -1043,6 +1192,17 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
+\numtest{16}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{17}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
 
 
 \section{ovsec_kadm_chpass_principal}
@@ -1282,6 +1442,17 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 \Status{Implemented}
 }
 
+\numtest{183}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{184}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
 
 
 \section{ovsec_kadm_chpass_principal_util}
@@ -1433,9 +1604,22 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Reason{Succeeds for own key, no other access bits when connecting with ADMIM service}
 \Status{Implemented}
 }
+
 \numtest{32}{
 \Reason{Cannot change ovsec_adm/history key}
 \Status{Implemented}
+}
+
+\numtest{33}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{34}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
 }
 
 
@@ -1534,6 +1718,17 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Status{Implemented}		
 }
 
+\numtest{15}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{16}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
 
 
 \section{ovsec_kadm_create_policy}
@@ -1711,6 +1906,18 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Reason{Rejects pw_min_life greater than pw_max_life.}
 }
 
+\numtest{30}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{31}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
+
 
 \section{ovsec_kadm_delete_policy}
 
@@ -1779,6 +1986,17 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Status{Implemented}
 }
 
+\numtest{13}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{14}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
 
 
 \section{ovsec_kadm_modify_policy}
@@ -1942,6 +2160,18 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 	pw_max_life.}
 }
 
+\numtest{30}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{31}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
+
 \section{ovsec_kadm_get_policy}
 
 \numtest{1}{
@@ -2061,6 +2291,17 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 	other's policy, using CHANGEPW_SERVICE.}
 }
 
+\numtest{21}{
+\Priority{High}
+\Reason{Returns BAD_SERVER_HANDLE when a null server handle is passed in}
+\Status{Implemented}
+}
+
+\numtest{22}{
+\Priority{Low}
+\Reason{Connects to correct server when mutliple handles exist}
+\Conditions{RPC}
+}
 
 
 \section{ovsec_kadm_free_principal_ent}
