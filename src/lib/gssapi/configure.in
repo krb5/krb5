@@ -14,7 +14,6 @@ AC_SUBST(COMERR_SH_VERS)
 KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
 AC_SUBST(KRB5_SH_VERS)
 AppendRule([all:: libgssapi_krb5.a])
-LinkFileDir(../libgssapi_krb5.a, libgssapi_krb5.a, ./gssapi)
 AppendRule([all-unix:: ../libgssapi_krb5.a])
 AppendRule([all::	all-$(WHAT)])
 V5_AC_OUTPUT_MAKEFILE

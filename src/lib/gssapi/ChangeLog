@@ -1,3 +1,8 @@
+Wed Jan 24 21:28:04 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Remove LinkFileDir line for libgssapi as the
+        shared lib stuff does that.
+
 Tue Jan 23 12:12:49 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (SHLIB_LIBS): Add lines for shared library building
