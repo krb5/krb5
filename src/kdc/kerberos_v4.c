@@ -391,9 +391,6 @@ main(argc, argv)
 
 static krb5_error_code retval; 
 static krb5_data *response;
-#ifndef bcopy
-void bcopy();
-#endif
 void com_err(), sleep();
 void kerberos_v4(), kerb_err_reply();
 #ifdef HAS_STDLIB_H
@@ -431,7 +428,7 @@ krb5_data **resp;
      */
     client_sockaddr.sin_family	= AF_INET;
     client_sockaddr.sin_port	= client_fulladdr->port;
-    bcopy( addr->contents, &client_sockaddr.sin_addr, 
+    memcpy( &client_sockaddr.sin_addr, addr->contents, 
 		     sizeof client_sockaddr.sin_addr);
     memset( client_sockaddr.sin_zero, 0, sizeof client_sockaddr.sin_zero);
 
@@ -439,7 +436,7 @@ krb5_data **resp;
      * this copy is gross, but necessary:
      */
     v4_pkt.length = pkt->length;
-    bcopy( pkt->data, v4_pkt.dat, pkt->length);
+    memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
     kerberos_v4( &client_sockaddr, &v4_pkt);
     *resp = response;
@@ -517,7 +514,7 @@ int to_len;
 	return ENOMEM;
     }
     response->length = len;
-    bcopy( msg, response->data, len);
+    memcpy( response->data, msg, len);
     return( 0);
 }
 static void
@@ -565,7 +562,7 @@ compat_decrypt_key (in5, out4)
     }
     else {
 	retval = 0;
-	bcopy(	out5.contents, out4, out5.length);
+	memcpy( out4, out5.contents, out5.length);
     }
     memset(	out5.contents, 0,    out5.length);
     krb5_xfree(	out5.contents);
@@ -607,8 +604,8 @@ kerb_get_principal(name, inst, principal, maxn, more)
     /* begin setting up the principal structure
      * with the first info we have:
      */
-    bcopy( name, principal->name,     1 + strlen( name));
-    bcopy( inst, principal->instance, 1 + strlen( inst));
+    memcpy( principal->name,     name, 1 + strlen( name));
+    memcpy( principal->instance, inst, 1 + strlen( inst));
 
     /* the principal-name format changed between v4 & v5:
      *     v4: name.instance@realm
@@ -645,14 +642,14 @@ kerb_get_principal(name, inst, principal, maxn, more)
  	if (entries.salt_type != KRB5_KDB_SALTTYPE_V4 &&
 	    entries.alt_key.length) {
  	    if (! compat_decrypt_key( &entries.alt_key,k)){
- 		bcopy(              k,      &principal->key_low,  LONGLEN);
-             	bcopy((long *)      k + 1,  &principal->key_high, LONGLEN);
+ 		memcpy( &principal->key_low,           k,     LONGLEN);
+             	memcpy( &principal->key_high, (long *) k + 1, LONGLEN);
 	    }
  	}
  	else {
  	    if (! compat_decrypt_key( &entries.key, k)) {
-             	bcopy(              k,      &principal->key_low,  LONGLEN);
-             	bcopy((long *)      k + 1,  &principal->key_high, LONGLEN);
+             	memcpy( &principal->key_low,           k,     LONGLEN);
+             	memcpy( &principal->key_high, (long *) k + 1, LONGLEN);
 	    }
  	}
     }
@@ -771,7 +768,7 @@ kerberos_v4(client, pkt)
 	    req_name_ptr = (char *) pkt_a_name(pkt);
 	    req_inst_ptr = (char *) pkt_a_inst(pkt);
 	    req_realm_ptr = (char *) pkt_a_realm(pkt);
-	    bcopy(pkt_time_ws(pkt), &req_time_ws, sizeof(req_time_ws));
+	    memcpy(&req_time_ws, pkt_time_ws(pkt), sizeof(req_time_ws));
 	    /* time has to be diddled */
 	    if (swap_bytes) {
 		swap_u_long(req_time_ws);
@@ -818,8 +815,8 @@ kerberos_v4(client, pkt)
 #endif
 
 	    /* unseal server's key from master key */
-	    bcopy(&s_name_data.key_low, key, 4);
-	    bcopy(&s_name_data.key_high, ((long *) key) + 1, 4);
+	    memcpy( key,                &s_name_data.key_low,  4);
+	    memcpy( ((long *) key) + 1, &s_name_data.key_high, 4);
 	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
@@ -837,8 +834,8 @@ kerberos_v4(client, pkt)
 	     */
 
 	    /* a_name_data.key_low a_name_data.key_high */
-	    bcopy(&a_name_data.key_low, key, 4);
-	    bcopy(&a_name_data.key_high, ((long *) key) + 1, 4);
+	    memcpy( key,                &a_name_data.key_low,  4);
+	    memcpy( ((long *) key) + 1, &a_name_data.key_high, 4);
 	    a_name_data.key_low= a_name_data.key_high = 0;
 
 	    /* unseal the a_name key from the master key */
@@ -883,7 +880,7 @@ kerberos_v4(client, pkt)
 	    auth->length += (int) *(pkt->dat + auth->length) +
 		(int) *(pkt->dat + auth->length + 1) + 2;
 
-	    bcopy(pkt->dat, auth->dat, auth->length);
+	    memcpy(auth->dat, pkt->dat, auth->length);
 
 	    strncpy(tktrlm, (char *)auth->dat + 3, REALM_SZ);
 	    if (set_tgtkey(tktrlm)) {
@@ -905,7 +902,7 @@ kerberos_v4(client, pkt)
 	    }
 	    ptr = (char *) pkt->dat + auth->length;
 
-	    bcopy(ptr, &time_ws, 4);
+	    memcpy(&time_ws, ptr, 4);
 	    ptr += 4;
 
 	    req_life = (u_long) (*ptr++);
@@ -942,8 +939,8 @@ kerberos_v4(client, pkt)
 	    lifetime = min(lifetime, ((u_long) s_name_data.max_life));
 
 	    /* unseal server's key from master key */
-	    bcopy(&s_name_data.key_low, key, 4);
-	    bcopy(&s_name_data.key_high, ((long *) key) + 1, 4);
+	    memcpy(key,                &s_name_data.key_low,  4);
+	    memcpy(((long *) key) + 1, &s_name_data.key_high, 4);
 	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
@@ -1180,8 +1177,8 @@ int set_tgtkey(r)
 	return (KFAILURE);
 
     /* unseal tgt key from master key */
-    bcopy(&p->key_low, key, 4);
-    bcopy(&p->key_high, ((long *) key) + 1, 4);
+    memcpy(key,                &p->key_low,  4);
+    memcpy(((long *) key) + 1, &p->key_high, 4);
     kdb_encrypt_key(key, key, master_key,
 		    master_key_schedule, DECRYPT);
     krb_set_key(key, 0);
