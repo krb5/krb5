@@ -1,4 +1,9 @@
 
+Thu May 04 04:24:38 1995  Chris Provenzano (proven@mit.edu)
+
+	* klist.c : Changed progname to argv[0] for consistancy with 
+		kdestroy, and to cleanup the code some.
+
 Wed May 03 20:20:48 1995  Chris Provenzano (proven@mit.edu)
 
 	* klist.c : #include <string.h>, a must for prototypes of various 

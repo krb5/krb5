@@ -34,13 +34,13 @@ extern int optind;
 extern char *optarg;
 int show_etype = 0;
 int show_flags = 0;
-char *progname;
 char *defname;
 time_t now;
 
 void
 show_credential 
-	PROTOTYPE((krb5_context,
+	PROTOTYPE((char *,
+		   krb5_context,
 		   krb5_creds *));
 
 void
@@ -65,9 +65,7 @@ main(argc, argv)
     time(&now);
     
     if (strrchr(argv[0], '/'))
-	progname = strrchr(argv[0], '/')+1;
-    else
-	progname = argv[0];
+	argv[0] = strrchr(argv[0], '/')+1;
 
     while ((c = getopt(argc, argv, "efc:")) != EOF) {
 	switch (c) {
@@ -83,7 +81,7 @@ main(argc, argv)
 		
 		code = krb5_cc_resolve (kcontext, cache_name, &cache);
 		if (code != 0) {
-		    com_err(progname, code, "while resolving %s", cache_name);
+		    com_err(argv[0], code, "while resolving %s", cache_name);
 		    errflg++;
 		}
 	    } else {
@@ -102,12 +100,12 @@ main(argc, argv)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -c cache ]\n", progname);
+	fprintf(stderr, "Usage: %s [ -c cache ]\n", argv[0]);
 	exit(2);
     }
     if (cache == NULL) {
 	if (code = krb5_cc_default(kcontext, &cache)) {
-	    com_err(progname, code, "while getting default ccache");
+	    com_err(argv[0], code, "while getting default ccache");
 	    exit(1);
 	}
     }
@@ -115,47 +113,47 @@ main(argc, argv)
     flags = 0;				/* turns off OPENCLOSE mode */
     if (code = krb5_cc_set_flags(kcontext, cache, flags)) {
 	if (code == ENOENT) {
-	    com_err(progname, code, "(ticket cache %s)",
+	    com_err(argv[0], code, "(ticket cache %s)",
 		    krb5_cc_get_name(kcontext, cache));
 	} else
-	    com_err(progname, code,
+	    com_err(argv[0], code,
 		    "while setting cache flags (ticket cache %s)",
 		    krb5_cc_get_name(kcontext, cache));
 	exit(1);
     }
     if (code = krb5_cc_get_principal(kcontext, cache, &princ)) {
-	com_err(progname, code, "while retrieving principal name");
+	com_err(argv[0], code, "while retrieving principal name");
 	exit(1);
     }
     if (code = krb5_unparse_name(kcontext, princ, &defname)) {
-	com_err(progname, code, "while unparsing principal name");
+	com_err(argv[0], code, "while unparsing principal name");
 	exit(1);
     }
     printf("Ticket cache: %s\nDefault principal: %s\n\n",
            krb5_cc_get_name(kcontext, cache), defname);
     if (code = krb5_cc_start_seq_get(kcontext, cache, &cur)) {
-	com_err(progname, code, "while starting to retrieve tickets");
+	com_err(argv[0], code, "while starting to retrieve tickets");
 	exit(1);
     }
     fputs("  Valid starting       Expires          Service principal\n",
 	  stdout);
     while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
-	show_credential(kcontext, &creds);
+	show_credential(argv[0], kcontext, &creds);
 	krb5_free_cred_contents(kcontext, &creds);
     }
     if (code == KRB5_CC_END) {
 	if (code = krb5_cc_end_seq_get(kcontext, cache, &cur)) {
-	    com_err(progname, code, "while finishing ticket retrieval");
+	    com_err(argv[0], code, "while finishing ticket retrieval");
 	    exit(1);
 	}
 	flags = KRB5_TC_OPENCLOSE;	/* turns on OPENCLOSE mode */
 	if (code = krb5_cc_set_flags(kcontext, cache, flags)) {
-	    com_err(progname, code, "while closing ccache");
+	    com_err(argv[0], code, "while closing ccache");
 	    exit(1);
 	}
 	exit(0);
     } else {
-	com_err(progname, code, "while retrieving a ticket");
+	com_err(argv[0], code, "while retrieving a ticket");
 	exit(1);
     }	
 }
@@ -223,9 +221,10 @@ char * etype_string[ETYPE_MAX] = {
     NULL };
 
 void
-show_credential(kcontext, cred)
-    krb5_context kcontext;
-    register krb5_creds *cred;
+show_credential(progname, kcontext, cred)
+    char 		* progname;
+    krb5_context  	  kcontext;
+    register krb5_creds * cred;
 {
     krb5_error_code retval;
     char *name, *sname, *flags;
