@@ -51,6 +51,10 @@ int main(argc, argv)
 	printf("\n\nDebugging dump.\n");
 	dump_profile(root, 0);
 
+#if 1
 	profile_free_node(root);
+#else
+	dump_profile_to_file(root, 0, stdout);
+#endif
 	return 0;
 }

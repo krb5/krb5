@@ -110,14 +110,18 @@ static errcode_t parse_std_line(line, state)
 	/*
 	 * Parse the relations
 	 */
-	p = strchr(cp, ' ');
-	if (!p)
-		return PROF_RELATION_SYNTAX;
-	*p = '\0';
 	tag = cp;
-	cp = skip_over_blanks(p+1);
-	if (*cp != '=')
+	cp = strchr(cp, '=');
+	if (!cp)
 		return PROF_RELATION_SYNTAX;
+	*cp = '\0';
+	p = strchr(tag, ' ');
+	if (p) {
+		*p = '\0';
+		p = skip_over_blanks(p+1);
+		if (p != cp)
+			return PROF_RELATION_SYNTAX;
+	}
 	cp = skip_over_blanks(cp+1);
 	value = cp;
 	if (value[0] == 0) {
@@ -260,16 +264,13 @@ void dump_profile_to_file(root, level, dstfile)
 						      &name, &p);
 		if (retval)
 			break;
-		if (level == 0)	/* [xxx] */
-		{
+		if (level == 0)	{ /* [xxx] */
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
 			fprintf(dstfile, "[%s]\r", name);
 			dump_profile_to_file(p, level+1, dstfile);
 			fprintf(dstfile, "\r");
-		}
-		else if (level == 1) /* xxx = { ... } */
-		{
+		} else { 	/* xxx = { ... } */
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
 			fprintf(dstfile, "%s = {\r", name);
@@ -277,11 +278,6 @@ void dump_profile_to_file(root, level, dstfile)
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
 			fprintf(dstfile, "}\r");
-		}
-		else /* +xxx+ */
-		{
-			/* don't know what comes next, this should get someones attention */
-			fprintf(dstfile, "+%s+");
 		}
 	} while (iter != 0);
 }
