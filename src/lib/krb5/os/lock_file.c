@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/lock_file.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 1998 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -35,20 +35,23 @@
 #include <unistd.h>
 #endif
 
-#ifdef POSIX_FILE_LOCKS
 #include <errno.h>
+
+#ifdef POSIX_FILE_LOCKS
 #include <fcntl.h>
-#define SHARED_LOCK	F_RDLCK
-#define EXCLUSIVE_LOCK	F_WRLCK
-#define UNLOCK_LOCK	F_UNLCK
-#else
-#include <sys/file.h>
-#define SHARED_LOCK	LOCK_SH
-#define EXCLUSIVE_LOCK	LOCK_EX
-#define UNLOCK_LOCK	LOCK_UN
 #endif
 
-extern int errno;
+#ifdef HAVE_FLOCK
+#ifndef sysvimp
+#include <sys/file.h>
+#endif
+#else
+#ifndef LOCK_SH
+#define LOCK_SH 0
+#define LOCK_EX 0
+#define LOCK_UN 0
+#endif
+#endif
 
 /*ARGSUSED*/
 krb5_error_code
@@ -57,26 +60,34 @@ krb5_lock_file(context, fd, mode)
     int fd;
     int mode;
 {
+    int 		lock_flag = -1;
+    krb5_error_code	retval = 0;
 #ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;
     static struct flock flock_zero;
     struct flock lock_arg;
+
     lock_arg = flock_zero;
-#define lock_flag lock_arg.l_type
-    lock_flag = -1;
-#else
-    int lock_flag = -1;
 #endif
 
     switch (mode & ~KRB5_LOCKMODE_DONTBLOCK) {
     case KRB5_LOCKMODE_SHARED:
-	lock_flag = SHARED_LOCK;
+#ifdef POSIX_FILE_LOCKS
+	lock_arg.l_type = F_RDLCK;
+#endif
+	lock_flag = LOCK_SH;
 	break;
     case KRB5_LOCKMODE_EXCLUSIVE:
-	lock_flag = EXCLUSIVE_LOCK;
+#ifdef POSIX_FILE_LOCKS
+	lock_arg.l_type = F_WRLCK;
+#endif
+	lock_flag = LOCK_EX;
 	break;
     case KRB5_LOCKMODE_UNLOCK:
-	lock_flag = UNLOCK_LOCK;
+#ifdef POSIX_FILE_LOCKS
+	lock_arg.l_type = F_UNLCK;
+#endif
+	lock_flag = LOCK_UN;
 	break;
     }
 
@@ -86,7 +97,8 @@ krb5_lock_file(context, fd, mode)
     if (mode & KRB5_LOCKMODE_DONTBLOCK) {
 #ifdef POSIX_FILE_LOCKS
 	lock_cmd = F_SETLK;
-#else
+#endif
+#ifdef HAVE_FLOCK
 	lock_flag |= LOCK_NB;
 #endif
     }
@@ -99,13 +111,18 @@ krb5_lock_file(context, fd, mode)
 	if (errno == EACCES || errno == EAGAIN)	/* see POSIX/IEEE 1003.1-1988,
 						   6.5.2.4 */
 	    return(EAGAIN);
-	return(errno);
+	if (errno != EINVAL)	/* Fall back to flock if we get EINVAL */
+	    return(errno);
+	retval = errno;
     }
-#else
-    if (flock(fd, lock_flag) == -1)
-	return(errno);
 #endif
-    return 0;
+    
+#ifdef HAVE_FLOCK
+    if (flock(fd, lock_flag) == -1)
+	retval = errno;
+#endif
+    
+    return retval;
 }
 #else   /* MSDOS or Macintosh */
 
