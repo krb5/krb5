@@ -1,21 +1,7 @@
-<<<<<<< ChangeLog
-2001-03-20	Miro Jurisic <meeroh@mit.edu>
-=======
 Mon Feb 26 13:22:43 2001  Ezra Peisach  <epeisach@mit.edu>
->>>>>>> 5.186
 
-<<<<<<< ChangeLog
-	* macsock.h: Updated Utilities.h and sockets includes
-=======
 	* adm_proto.h (krb5_adm_connect): Declare prompt string const char *. 
->>>>>>> 5.186
 
-<<<<<<< ChangeLog
-2000-10-02	Alexandra Ellwood <lxs@mit.edu>
-
-	* kdb.h: added Mac OS X #define (__MACH__) -- we're still a kerberos client
-
-=======
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_proto.h, kdb.h, kdb_dbc.h, kdb_dbm.h, kdb_kt.h: Make all
@@ -26,7 +12,6 @@ Mon Feb 26 13:22:43 2001  Ezra Peisach  <epeisach@mit.edu>
 	* Makefile.in, osconf.h: Use bindir and sbindir from configure
 	rather than building them up from EXEC_PREFIX.
 
->>>>>>> 5.186
 2000-5-18	Alexandra Ellwood <lxs@mit.edu>
 
 	* macsock.h: local_addr_fallback_kludge defined to 0
