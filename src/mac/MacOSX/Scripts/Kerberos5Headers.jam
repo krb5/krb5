@@ -1,3 +1,5 @@
+include "$(SRCROOT)/../Scripts/Kerberos5BuildSystem.jam" ;
+
 ErrorTableRegexp = "/^\\s*#define\\s+\\w+\(\\s+\\(-?\\d+L\\)\)|\(initialize_\\w+_error_table\\(\\)\)\\s*$/" ;
 ExtractErrorCodes = "perl -e 'while (<STDIN>) { if ($(ErrorTableRegexp)) { print; } }'" ;
 
@@ -9,6 +11,8 @@ IntermediateV4Includes = "$(IntermediateIncludes)/kerberosIV" ;
 IntermediateGSSIncludes = "$(IntermediateIncludes)/gssapi" ;
 IntermediateFrameworkHeaders = "$(Intermediates)/Kerberos" ;
 IntermediateBuild = "$(Intermediates)/build" ;
+
+MakeIncludeStamp = "$(IntermediateBuild)/makeInclude.stamp" ;
 
 AutoconfH = "$(IntermediateV5Includes)/autoconf.h" ;
 OsconfH = "$(IntermediateV5Includes)/osconf.h" ;
@@ -59,8 +63,6 @@ actions MakeFrameworkHeader
            -e 's:<kerberosIV/krb_err.h>:<Kerberos/krb_err.h>:' \
            -e 's:<profile.h>:<Kerberos/profile.h>:' \
            -e 's:<krb5.h>:<Kerberos/krb5.h>:' \
-           -e 's:<krb524.h>:<Kerberos/krb524.h>:' \
-           -e 's:<krb524_err.h>:<Kerberos/krb524_err.h>:' \
            -e 's:<gssapi/gssapi.h>:<Kerberos/gssapi.h>:' \
            -e 's:<gssapi/gssapi_krb5.h>:<Kerberos/gssapi_krb5.h>:' \
            -e 's:<gssapi/gssapi_generic.h>:<Kerberos/gssapi_generic.h>:' \
@@ -82,43 +84,45 @@ actions CopyHeader
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/com_err.h" : "$(SRCROOT)/../../KerberosErrors/Headers/Kerberos/com_err.h" ;
 CopyHeader          "$(IntermediateIncludes)/com_err.h"         : "$(SRCROOT)/../../KerberosErrors/Headers/Kerberos/com_err.h" ;
 
-CopyHeader          "$(IntermediateV4Includes)/des.h"       : "$(SRCROOT)/../Sources/include/kerberosIV/des.h" ;
+CopyHeader          "$(IntermediateV4Includes)/des.h"       : "$(SRCROOT)/../../Kerberos5/Sources/include/kerberosIV/des.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/des.h" : "$(IntermediateV4Includes)/des.h" ;
 
-CopyHeader          "$(IntermediateV4Includes)/krb.h"           : "$(SRCROOT)/../Sources/include/kerberosIV/krb.h" ;
+CopyHeader          "$(IntermediateV4Includes)/krb.h"           : "$(SRCROOT)/../../Kerberos5/Sources/include/kerberosIV/krb.h" ;
 CopyHeader          "$(IntermediateV4Includes)/krb_err.h"       : "$(IntermediateErrorTables)/krb_err.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb.h"     : "$(IntermediateV4Includes)/krb.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb_err.h" : "$(IntermediateV4Includes)/krb_err.h" ;
 
 CatHeader           "$(IntermediateIncludes)/profile.h"         : "__KERBEROSPROFILE__"
-                                                                  "$(SRCROOT)/../Sources/util/profile/profile.hin"
+                                                                  "$(SRCROOT)/../../Kerberos5/Sources/util/profile/profile.hin"
                                                                   "$(IntermediateErrorTables)/prof_err.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/profile.h" : "$(IntermediateIncludes)/profile.h" ;
 
 CatHeader           "$(IntermediateIncludes)/krb5.h"               : "__KERBEROS5__"
-                                                                     "$(SRCROOT)/../Sources/include/krb5.hin"
+                                                                     "$(SRCROOT)/../../Kerberos5/Sources/include/krb5.hin"
                                                                      "$(IntermediateErrorTables)/asn1_err.h"
                                                                      "$(IntermediateErrorTables)/kdb5_err.h"
                                                                      "$(IntermediateErrorTables)/krb5_err.h"
+                                                                     "$(IntermediateErrorTables)/krb524_err.h"
                                                                      "$(IntermediateErrorTables)/kv5m_err.h" ;
-CopyHeader          "$(IntermediateIncludes)/krb524.h"             : "$(SRCROOT)/../Sources/krb524/krb524.h" ;
-CopyHeader          "$(IntermediateIncludes)/krb524_err.h"         : "$(IntermediateErrorTables)/krb524_err.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb5.h"       : "$(IntermediateIncludes)/krb5.h" ;
-MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb524.h"     : "$(IntermediateIncludes)/krb524.h" ;
-MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb524_err.h" : "$(IntermediateIncludes)/krb524_err.h" ;
 
 CatHeader           "$(IntermediateGSSIncludes)/gssapi.h"              : "__GSSAPI__"
-                                                                         "$(SRCROOT)/../Sources/lib/gssapi/generic/gssapi.hin"
+                                                                         "$(SRCROOT)/../../Kerberos5/Sources/lib/gssapi/generic/gssapi.hin"
                                                                          "$(IntermediateErrorTables)/gssapi_err_generic.h"
                                                                          "$(IntermediateErrorTables)/gssapi_err_krb5.h" ;
-CopyHeader          "$(IntermediateGSSIncludes)/gssapi_generic.h"      : "$(SRCROOT)/../Sources/lib/gssapi/generic/gssapi_generic.h" ;
-CopyHeader          "$(IntermediateGSSIncludes)/gssapi_krb5.h"         : "$(SRCROOT)/../Sources/lib/gssapi/krb5/gssapi_krb5.h" ;
+CopyHeader          "$(IntermediateGSSIncludes)/gssapi_generic.h"      : "$(SRCROOT)/../../Kerberos5/Sources/lib/gssapi/generic/gssapi_generic.h" ;
+CopyHeader          "$(IntermediateGSSIncludes)/gssapi_krb5.h"         : "$(SRCROOT)/../../Kerberos5/Sources/lib/gssapi/krb5/gssapi_krb5.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi.h"         : "$(IntermediateGSSIncludes)/gssapi.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi_generic.h" : "$(IntermediateGSSIncludes)/gssapi_generic.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi_krb5.h"    : "$(IntermediateGSSIncludes)/gssapi_krb5.h" ;
 
+
+MakeInclude "$(MakeIncludeStamp)" ;
+DEPENDS "$(IntermediateBuild)/include/krb5/autoconf.h" "$(IntermediateBuild)/include/krb5/osconf.h" : "$(MakeIncludeStamp)" ;
+
 CopyHeader "$(AutoconfH)" : "$(IntermediateBuild)/include/krb5/autoconf.h" ;
 CopyHeader "$(OsconfH)"   : "$(IntermediateBuild)/include/krb5/osconf.h" ;
+
 
 DEPENDS all :	"$(IntermediateIncludes)/com_err.h"
                 "$(IntermediateFrameworkHeaders)/com_err.h"
@@ -135,11 +139,7 @@ DEPENDS all :	"$(IntermediateIncludes)/com_err.h"
                 "$(IntermediateFrameworkHeaders)/profile.h"
                 
                 "$(IntermediateIncludes)/krb5.h"
-                "$(IntermediateIncludes)/krb524.h"
-                "$(IntermediateIncludes)/krb524_err.h"
                 "$(IntermediateFrameworkHeaders)/krb5.h"
-                "$(IntermediateFrameworkHeaders)/krb524.h"
-                "$(IntermediateFrameworkHeaders)/krb524_err.h"
                 
                 "$(IntermediateGSSIncludes)/gssapi.h"
                 "$(IntermediateGSSIncludes)/gssapi_generic.h"

@@ -41,6 +41,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <gssrpc/rpc.h>
+#include <errno.h>
 
 /*
  * Bind a socket to a privileged IP port
@@ -53,7 +54,6 @@ gssrpc_bindresvport(sd, sockin)
 	int res;
 	static short port;
 	struct sockaddr_in myaddr;
-	extern int errno;
 	int i;
 
 #define STARTPORT 600

@@ -30,8 +30,13 @@
 #define SIZEOF_LONG     4
 
 #include <windows.h>
+#include <limits.h>
 
 #define HAVE_LABS
+
+#ifndef SIZE_MAX    /* in case Microsoft defines max size of size_t */
+#define SIZE_MAX UINT_MAX
+#endif
 
 #ifndef KRB5_CALLCONV
 #  define KRB5_CALLCONV __stdcall
@@ -145,8 +150,12 @@ typedef unsigned char	u_char;
 /*
  * Functions with slightly different names on the PC
  */
+#ifndef strcasecmp
 #define strcasecmp   stricmp
+#endif
+#ifndef strncasecmp
 #define strncasecmp  strnicmp
+#endif
 
 HINSTANCE get_lib_instance(void);
 

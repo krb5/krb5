@@ -278,6 +278,7 @@ send_again:
 		}
 		krb5_free_error(context, err_reply);
 	    }
+	    rep->message_type = KRB5_ERROR;
 	} else if (krb5_is_tgs_rep(&rep->response))
 	    rep->message_type = KRB5_TGS_REP;
         else /* XXX: assume it's an error */

@@ -58,3 +58,25 @@ krb5_copy_data(krb5_context context, const krb5_data *indata, krb5_data **outdat
     *outdata = tempdata;
     return 0;
 }
+
+krb5_error_code 
+krb5int_copy_data_contents(krb5_context context, const krb5_data *indata, krb5_data *outdata)
+{
+    if (!indata) {
+	return EINVAL;
+    }
+    
+
+    outdata->length = indata->length;
+    if (outdata->length) {
+	if (!(outdata->data = malloc(outdata->length))) {
+	    krb5_xfree(outdata);
+	    return ENOMEM;
+	}
+	memcpy((char *)outdata->data, (char *)indata->data, outdata->length);
+    } else
+	outdata->data = 0;
+    outdata->magic = KV5M_DATA;
+
+    return 0;
+}

@@ -364,7 +364,7 @@ krb5_error_code get_closest_principal(context, plist, client, found)
 		krb5_data *p2 =
 		    krb5_princ_component(context, temp_client, j);
 		
-		if ((p1->length != p2->length) ||
+		if (!p1 || !p2 || (p1->length != p2->length) ||
 		    memcmp(p1->data,p2->data,p1->length)){
 		    got_one = FALSE;
 		    break;

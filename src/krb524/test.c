@@ -32,7 +32,6 @@
 
 #include <des.h>
 #include <krb.h>
-#include "krb524.h"
 #include "com_err.h"
 
 #define KEYSIZE 8
@@ -223,15 +222,15 @@ int main(argc, argv)
      krb5_context context;
      krb5_error_code retval;
 
+#if 0
      krb524_debug = 1;
+#endif
 
      retval = krb5_init_context(&context);
      if (retval) {
 	     com_err(argv[0], retval, "while initializing krb5");
 	     exit(1);
      }
-
-     krb524_init_ets(context);
 
      local = 0;
      remote = NULL;

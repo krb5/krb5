@@ -137,60 +137,78 @@ proc lock_test_continue {test my_spawn_id test_failed fail_output cont cmds} {
     return {}
 }
 
-lock_test 1 [list \
+set lock1 [lock_test_start 1 [list \
 	[list shared	"shared"] \
 	[list release	"released"] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock1
 
-lock_test 2 [list \
+set lock2 [lock_test_start 2 [list \
 	[list exclusive	exclusive] \
 	[list release	released] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock2
 
-lock_test 3 [list \
+set lock3 [lock_test_start 5 [list \
 	[list permanent	permanent] \
 	[list release	released] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock3
 
-lock_test 4 [list \
+set lock4 [lock_test_start 4 [list \
 	[list release	"Database not locked"] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock4
 
 set lock5 [lock_test_start 5 [list \
 	[list shared	shared] \
 	[list wait	""] \
 	[list eof	0]]]
-lock_test 5.1 [list \
+set lock5_1 [lock_test_start 5.1 [list \
 	[list shared	shared] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock5_1
 eval lock_test_continue $lock5
 
 set lock6 [lock_test_start 6 [list \
 	[list exclusive exclusive] \
 	[list wait	""] \
 	[list eof	0]]]
-lock_test 6.1 [list \
+set lock6_1 [lock_test_start 6.1 [list \
 	[list shared	"Cannot lock database"] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock6_1
 eval lock_test_continue $lock6
 
 set lock7 [lock_test_start 7 [list \
 	[list shared	shared] \
 	[list wait	""] \
 	[list eof	0]]]
-lock_test 7.1 [list \
+set lock7_1 [lock_test_start 7.1 [list \
 	[list exclusive	"Cannot lock database"] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock7_1
 eval lock_test_continue $lock7
 
 set lock8 [lock_test_start 8 [list \
 	[list permanent	permanent] \
 	[list wait	""] \
 	[list release	"released" ] \
+	[list wait	""] \
 	[list eof	0]]]
-lock_test 8.1 [list \
+set lock8_1 [lock_test_start 8.1 [list \
 	[list "" "administration database lock file missing while opening database" ] \
-	[list eof	1]]
+	[list wait	""] \
+	[list eof	1]]]
+eval lock_test_continue $lock8_1
+eval set lock8 \[lock_test_continue $lock8\]
 eval lock_test_continue $lock8
 
 set lock9 [lock_test_start 9 [list \
@@ -198,13 +216,17 @@ set lock9 [lock_test_start 9 [list \
 	[list release released] \
 	[list wait	""] \
 	[list exclusive	"database lock file missing while getting exclusive"] \
+	[list wait	""] \
 	[list eof	0]]]
 set lock9_1 [lock_test_start 9.1 [list \
 	[list permanent	permanent] \
 	[list wait	""] \
 	[list release	released] \
+	[list wait	""] \
 	[list eof	0]]]
+eval set lock9 \[lock_test_continue $lock9\]
 eval lock_test_continue $lock9
+eval set lock9_1 \[lock_test_continue $lock9_1\]
 eval lock_test_continue $lock9_1
 
 if {! [file exists $lockfile]} {
@@ -214,10 +236,12 @@ set lock10 [lock_test_start 10 [list \
 	[list permanent	permanent] \
 	[list wait	""] \
 	[list release	released] \
+	[list wait	""] \
 	[list eof	0]]]
 if {[file exists $lockfile]} {
     fail "test 10: lock file exists"
 }
+eval set lock10 \[lock_test_continue $lock10\]
 eval lock_test_continue $lock10
 if {[file exists $lockfile]} {
     pass "test 11: lock file exists"
@@ -229,15 +253,18 @@ set lock12 [lock_test_start 12 [list \
 	[list shared	shared] \
 	[list wait	""] \
 	[list eof	0]]]
-lock_test 12.1 [list \
+set lock12_1 [lock_test_start 12.1 [list \
 	[list "get test-pol"	retrieved] \
-	[list eof	0]]
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock12_1
 eval lock_test_continue $lock12
 
 set lock13 [lock_test_start 13 [list \
 	[list "get lock13"	"Principal or policy does not exist"] \
 	[list wait	""] \
 	[list "get lock13"	retrieved] \
+	[list wait	""] \
 	[list eof	0]]]
 set test13_spawn_id $spawn_id
 # create_policy could call api_exit immediately when it starts up.
@@ -248,6 +275,7 @@ api_start
 create_policy lock13
 set api_spawn_id $spawn_id
 set spawn_id $test13_spawn_id
+eval set lock13 \[lock_test_continue $lock13\]
 eval lock_test_continue $lock13
 set spawn_id $api_spawn_id
 delete_policy lock13
