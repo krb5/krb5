@@ -11,6 +11,10 @@
 #include <errno.h>
 #define	DEFINE_SOCKADDR
 #include "krb.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifndef _WINDOWS
 extern int errno;
 #endif

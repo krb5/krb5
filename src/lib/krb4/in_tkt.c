@@ -61,7 +61,7 @@ in_tkt(pname,pinst)
     int fd;
     register int i;
     char charbuf[BUFSIZ];
-    int mask;
+    uid_t mask;
 #ifdef TKT_SHMEM
     char shmidname[MAXPATHLEN];
 #endif /* TKT_SHMEM */

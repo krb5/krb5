@@ -1,3 +1,13 @@
+2000-10-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* netread.c, netwrite.c: Include unistd.h if present on machine
+	for read/write prototypes.
+
+	* in_tkt.c: Argument to umask should be of type uid_t.
+
+	* configure.in: Test for uid_t (AC_TYPE_UID_T).
+	
+
 2000-08-31  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in(OBJS, SRCS): Add lifetime.{o,c}.
