@@ -174,9 +174,9 @@ kname_parse(np, ip, rp, fullname)
  * Kerberos name; returns 0 if it's not.
  */
 
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 k_isname(s)
-    char *s;
+    char FAR *s;
 {
     register char c;
     int backslash = 0;
@@ -213,9 +213,9 @@ k_isname(s)
  * We now allow periods in instance names -- they are unambiguous.
  */
 
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 k_isinst(s)
-    char *s;
+    char FAR *s;
 {
     register char c;
     int backslash = 0;
@@ -244,9 +244,9 @@ k_isinst(s)
  * Kerberos realm; returns 0 if it's not.
  */
 
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 k_isrealm(s)
-    char *s;
+    char FAR *s;
 {
     register char c;
     int backslash = 0;
