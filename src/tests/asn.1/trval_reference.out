@@ -1912,3 +1912,64 @@ encode_krb5_enc_data:
       20 74 65 73 74 20 6d 65      test me
       73 73 61 67 65              ssage
 
+encode_krb5_sam_challenge:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      2a                          *
+.  [1] [Bit String] <5>
+      00 80 00 00 00              .....
+.  [2] [Octet String] <9>
+      74 79 70 65 20 6e 61 6d     type nam
+      65                          e
+.  [3] [Octet String] <0>
+.  [4] [Octet String] <15>
+      63 68 61 6c 6c 65 6e 67     challeng
+      65 20 6c 61 62 65 6c        e label
+.  [5] [Octet String] <14>
+      63 68 61 6c 6c 65 6e 67     challeng
+      65 20 69 70 73 65           e ipse
+.  [6] [Octet String] <20>
+      72 65 73 70 6f 6e 73 65     response
+      5f 70 72 6f 6d 70 74 20     _prompt 
+      69 70 73 65                 ipse
+.  [7] [Octet String] <0>
+.  [8] [Integer] <3>
+      54 32 10                    T2.
+.  [9] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Octet String] <4>
+         31 32 33 34                 1234
+
+encode_krb5_sam_response:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      2a                          *
+.  [1] [Bit String] <5>
+      00 80 00 00 00              .....
+.  [2] [Octet String] <10>
+      74 72 61 63 6b 20 64 61     track da
+      74 61                       ta
+.  [3] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Integer] <2>
+         07 96                       ..
+.  .  [2] [Octet String] <3>
+         6b 65 79                    key
+.  [4] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Integer] <2>
+         0d 36                       .6
+.  .  [2] [Octet String] <11>
+         6e 6f 6e 63 65 20 6f 72     nonce or
+         20 74 73                     ts
+.  [5] [Integer] <3>
+      54 32 10                    T2.
+.  [6] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+

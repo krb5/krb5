@@ -476,6 +476,20 @@ void main()
     decode_run("enc_data","","30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_enc_data,ktest_equal_enc_data);
   }
   
+  /****************************************************************/
+  /* decode_sam_challenge */
+  {
+    setup(krb5_sam_challenge,"krb5_sam_challenge",ktest_make_sample_sam_challenge);
+    decode_run("sam_challenge","","30 78 A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0B 04 09 74 79 70 65 20 6E 61 6D 65 A3 02 04 00 A4 11 04 0F 63 68 61 6C 6C 65 6E 67 65 20 6C 61 62 65 6C A5 10 04 0E 63 68 61 6C 6C 65 6E 67 65 20 69 70 73 65 A6 16 04 14 72 65 73 70 6F 6E 73 65 5F 70 72 6F 6D 70 74 20 69 70 73 65 A7 02 04 00 A8 05 02 03 54 32 10 A9 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",decode_krb5_sam_challenge,ktest_equal_sam_challenge);
+  }
+  
+  /****************************************************************/
+  /* decode_sam_response */
+  {
+    setup(krb5_sam_response,"krb5_sam_response",ktest_make_sample_sam_response);
+    decode_run("sam_response","","30 6A A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0C 04 0A 74 72 61 63 6B 20 64 61 74 61 A3 14 30 12 A0 03 02 01 01 A1 04 02 02 07 96 A2 05 04 03 6B 65 79 A4 1C 30 1A A0 03 02 01 01 A1 04 02 02 0D 36 A2 0D 04 0B 6E 6F 6E 63 65 20 6F 72 20 74 73 A5 05 02 03 54 32 10 A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_sam_response,ktest_equal_sam_response);
+  }
+  
   exit(error_count);
 }
 

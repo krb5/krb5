@@ -532,6 +532,53 @@ void main(argc, argv)
     setup(enc_data,krb5_enc_data,"enc_data",ktest_make_sample_enc_data);
     encode_run(enc_data,krb5_enc_data,"enc_data","",encode_krb5_enc_data);
   }
+  /****************************************************************/
+  /* encode_krb5_sam_challenge */
+  {
+    krb5_sam_challenge sam_ch;
+    setup(sam_ch,krb5_sam_challenge,"sam_challenge",
+	  ktest_make_sample_sam_challenge);
+    encode_run(sam_ch,krb5_sam_challenge,"sam_challenge","",
+	       encode_krb5_sam_challenge);
+  }
+  /****************************************************************/
+  /* encode_krb5_sam_response */
+  {
+    krb5_sam_response sam_ch;
+    setup(sam_ch,krb5_sam_response,"sam_response",
+	  ktest_make_sample_sam_response);
+    encode_run(sam_ch,krb5_sam_response,"sam_response","",
+	       encode_krb5_sam_response);
+  }
+#if 0
+  /****************************************************************/
+  /* encode_krb5_sam_key */
+  {
+    krb5_sam_key sam_ch;
+    setup(sam_ch,krb5_sam_key,"sam_key",
+	  ktest_make_sample_sam_key);
+    encode_run(sam_ch,krb5_sam_key,"sam_key","",
+	       encode_krb5_sam_key);
+  }
+  /****************************************************************/
+  /* encode_krb5_enc_sam_response_enc */
+  {
+    krb5_enc_sam_response_enc sam_ch;
+    setup(sam_ch,krb5_enc_sam_response_enc,"enc_sam_response_enc",
+	  ktest_make_sample_enc_sam_response_enc);
+    encode_run(sam_ch,krb5_enc_sam_response_enc,"enc_sam_response_enc","",
+	       encode_krb5_enc_sam_response_enc);
+  }
+  /****************************************************************/
+  /* encode_krb5_predicted_sam_response */
+  {
+    krb5_predicted_sam_response sam_ch;
+    setup(sam_ch,krb5_predicted_sam_response,"predicted_sam_response",
+	  ktest_make_sample_predicted_sam_response);
+    encode_run(sam_ch,krb5_predicted_sam_response,"predicted_sam_response","",
+	       encode_krb5_predicted_sam_response);
+  }
+#endif
 
   exit(error_count);
 }

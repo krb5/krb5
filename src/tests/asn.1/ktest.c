@@ -698,6 +698,62 @@ krb5_error_code ktest_make_sample_pa_enc_ts(pa_enc)
   return 0;
 }
 
+krb5_error_code ktest_make_sample_sam_challenge(p)
+     krb5_sam_challenge * p;
+{
+  krb5_error_code retval;
+
+  p->magic = KV5M_SAM_CHALLENGE;
+  p->sam_type = 42; /* information */
+  p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
+  p->sam_type_name.data = "type name";
+  p->sam_type_name.length = strlen(p->sam_type_name.data);
+  p->sam_track_id.data = 0;
+  p->sam_track_id.length = 0;
+  p->sam_challenge_label.data = "challenge label";
+  p->sam_challenge_label.length = strlen(p->sam_challenge_label.data);
+  p->sam_challenge.data = "challenge ipse";
+  p->sam_challenge.length = strlen(p->sam_challenge.data);
+  p->sam_response_prompt.data = "response_prompt ipse";
+  p->sam_response_prompt.length = strlen(p->sam_response_prompt.data);
+  p->sam_pk_for_sad.data = 0;
+  p->sam_pk_for_sad.length = 0;
+  p->sam_nonce = 0x543210;
+  retval = ktest_make_sample_checksum(&p->sam_cksum);
+  if(retval) return retval;
+
+  return 0;
+}
+
+krb5_error_code ktest_make_sample_sam_response(p)
+     krb5_sam_response * p;
+{
+  krb5_error_code retval;
+
+  p->magic = KV5M_SAM_RESPONSE;
+  p->sam_type = 42; /* information */
+  p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
+  p->sam_track_id.data = "track data";
+  p->sam_track_id.length = strlen(p->sam_track_id.data);
+  p->sam_enc_key.ciphertext.data = "key";
+  p->sam_enc_key.ciphertext.length = strlen(p->sam_enc_key.ciphertext.data);
+  p->sam_enc_key.enctype = ENCTYPE_DES_CBC_CRC;
+  p->sam_enc_key.kvno = 1942;
+  p->sam_enc_nonce_or_ts.ciphertext.data = "nonce or ts";
+  p->sam_enc_nonce_or_ts.ciphertext.length = 
+    strlen(p->sam_enc_nonce_or_ts.ciphertext.data);
+  p->sam_enc_nonce_or_ts.enctype = ENCTYPE_DES_CBC_CRC;
+  p->sam_enc_nonce_or_ts.kvno = 3382;
+  p->sam_nonce = 0x543210;
+  p->sam_patimestamp = SAMPLE_TIME;
+
+  return 0;
+}
+
+
+
+
+
 /****************************************************************/
 /* destructors */
 
