@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2004  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -481,10 +481,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
           GSS_C_NO_CHANNEL_BINDINGS then we skip the check.  If
           the server does provide channel bindings then we compute
           a checksum and compare against those provided by the
-          client.  If the check fails we test the clients checksum
-          to see whether the client specified GSS_C_NO_CHANNEL_BINDINGS.
-          If either test succeeds we continue without error.
-       */
+          client.         */
 
        if ((code = kg_checksum_channel_bindings(context, 
 						input_chan_bindings,
@@ -500,17 +497,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
            if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
                xfree(reqcksum.contents);
                reqcksum.contents = 0;
-               if ((code = kg_checksum_channel_bindings(context, 
-                                                  GSS_C_NO_CHANNEL_BINDINGS,
-                                                  &reqcksum, bigend))) {
-                   major_status = GSS_S_BAD_BINDINGS;
+	       code = 0;
+	       major_status = GSS_S_BAD_BINDINGS;
                    goto fail;
-               }
-               if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
-                   code = 0;
-                   major_status = GSS_S_BAD_BINDINGS;
-                   goto fail;
-               }
            }
            
        }

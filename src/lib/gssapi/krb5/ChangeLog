@@ -1,3 +1,10 @@
+2004-06-09  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): If the
+	server provides channel bindings, these channel bindings must be
+	matched.  Thus clients can only provide null channel bindings if
+	the server provides no channel bindings. 
+
 2004-06-08  Sam Hartman  <hartmans@mit.edu>
 
 	* set_allowable_enctypes.c lucid_context.c:  new file
