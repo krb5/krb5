@@ -1,6 +1,13 @@
+2004-08-20  Jeffrey Altman <jaltman@mit.edu>
+ 
+    * ms2mit.c: add -c ccache command line option
+
+    * mit2ms.c: new command.  Copies contents of the mit ccache
+                to the MSLSA: ccache
+
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
-	* Makefile.in (MY_SUBDIRS): Deleted.
+    * Makefile.in (MY_SUBDIRS): Deleted.
 
 2004-01-31  Jeffrey Altman <jaltman@mit.edu>
 

@@ -1,9 +1,9 @@
 /*
- * ms2mit.c
+ * mit2ms.c
  *
  */
 /*
- * Copyright (C) 2003 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2003,2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -74,27 +74,32 @@ main(
             break;
         }
     }
-        
+
     if (code = krb5_init_context(&kcontext)) {
         com_err(argv[0], code, "while initializing kerberos library");
         exit(1);
     }
   
-    if (code = krb5_cc_resolve(kcontext, "MSLSA:", &mslsa_ccache)) {
-        com_err(argv[0], code, "while opening MS LSA ccache");
+    if (ccachestr)
+        code = krb5_cc_resolve(kcontext, ccachestr, &ccache);
+    else
+        code = krb5_cc_default(kcontext, &ccache);
+    if (code) {
+        com_err(argv[0], code, "while getting default ccache");
+        krb5_free_principal(kcontext, princ);
         krb5_free_context(kcontext);
         exit(1);
     }
 
     /* Enumerate tickets from cache looking for an initial ticket */
-    if ((code = krb5_cc_start_seq_get(kcontext, mslsa_ccache, &cursor))) {
+    if ((code = krb5_cc_start_seq_get(kcontext, ccache, &cursor))) {
         com_err(argv[0], code, "while initiating the cred sequence of MS LSA ccache");
-        krb5_cc_close(kcontext, mslsa_ccache);
+        krb5_cc_close(kcontext, ccache);
         krb5_free_context(kcontext);
         exit(1);
     }
 
-    while (!(code = krb5_cc_next_cred(kcontext, mslsa_ccache, &cursor, &creds))) 
+    while (!(code = krb5_cc_next_cred(kcontext, ccache, &cursor, &creds))) 
     {
         if ( creds.ticket_flags & TKT_FLG_INITIAL ) {
             krb5_free_cred_contents(kcontext, &creds);
@@ -103,45 +108,32 @@ main(
         }
         krb5_free_cred_contents(kcontext, &creds);
     }
-    krb5_cc_end_seq_get(kcontext, mslsa_ccache, &cursor);
+    krb5_cc_end_seq_get(kcontext, ccache, &cursor);
 
     if ( !initial_ticket ) {
-        fprintf(stderr, "%s: Initial Ticket Getting Tickets are not available from the MS LSA\n",
+        fprintf(stderr, "%s: Initial Ticket Getting Tickets are not available from the MIT default cache\n",
                 argv[0]);
-        krb5_cc_close(kcontext, mslsa_ccache);
-        krb5_free_context(kcontext);
-        exit(1);
-    }
-
-    if (code = krb5_cc_get_principal(kcontext, mslsa_ccache, &princ)) {
-        com_err(argv[0], code, "while obtaining MS LSA principal");
-        krb5_cc_close(kcontext, mslsa_ccache);
-        krb5_free_context(kcontext);
-        exit(1);
-    }
-
-    if (ccachestr)
-        code = krb5_cc_resolve(kcontext, ccachestr, &ccache);
-    else
-        code = krb5_cc_default(kcontext, &ccache);
-    if (code) {
-        com_err(argv[0], code, "while getting default ccache");
-        krb5_free_principal(kcontext, princ);
-        krb5_cc_close(kcontext, mslsa_ccache);
-        krb5_free_context(kcontext);
-        exit(1);
-    }
-    if (code = krb5_cc_initialize(kcontext, ccache, princ)) {
-        com_err (argv[0], code, "when initializing ccache");
-        krb5_free_principal(kcontext, princ);
-        krb5_cc_close(kcontext, mslsa_ccache);
         krb5_cc_close(kcontext, ccache);
         krb5_free_context(kcontext);
         exit(1);
     }
 
-    if (code = krb5_cc_copy_creds(kcontext, mslsa_ccache, ccache)) {
-        com_err (argv[0], code, "while copying MS LSA ccache to default ccache");
+    if (code = krb5_cc_get_principal(kcontext, ccache, &princ)) {
+        com_err(argv[0], code, "while obtaining default MIT principal");
+        krb5_cc_close(kcontext, ccache);
+        krb5_free_context(kcontext);
+        exit(1);
+    }
+
+    if (code = krb5_cc_resolve(kcontext, "MSLSA:", &mslsa_ccache)) {
+        com_err(argv[0], code, "while opening MS LSA ccache");
+        krb5_cc_close(kcontext, ccache);
+        krb5_free_context(kcontext);
+        exit(1);
+    }
+
+    if (code = krb5_cc_copy_creds(kcontext, ccache, mslsa_ccache)) {
+        com_err (argv[0], code, "while copying default MIT ccache to MSLSA ccache");
         krb5_free_principal(kcontext, princ);
         krb5_cc_close(kcontext, ccache);
         krb5_cc_close(kcontext, mslsa_ccache);
