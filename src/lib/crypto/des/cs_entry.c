@@ -48,7 +48,7 @@ static krb5_cryptosystem_entry mit_raw_des_cryptosystem_entry = {
     sizeof(mit_des_cblock),
     0,
     sizeof(mit_des_cblock),
-    ETYPE_RAW_CBC_CRC,
+    ETYPE_RAW_CBC,
     KEYTYPE_DES
     };
 
