@@ -17,8 +17,6 @@
 #define __KRB5_KDC_EXTERN__
 
 /* various externs for KDC */
-extern krb5_rcache kdc_rcache;		/* KDC's replay cache */
-
 extern krb5_data empty_string;		/* an empty string */
 extern krb5_timestamp infinity;		/* greater than all other timestamps */
 

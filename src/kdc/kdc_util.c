@@ -195,7 +195,7 @@ krb5_ticket **ticket;
 				 0,	/* no fetchfrom */
 				 kdc_rdreq_keyproc,
 				 (krb5_pointer)&who,
-				 kdc_rcache,
+				 0,	/* no replay cache */
 				 &authdat);
     krb5_db_free_principal(&server, nprincs);
     bzero((char *)encrypting_key.contents, encrypting_key.length);
