@@ -403,7 +403,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case KRB5_CONFIG_BADFORMAT: code_string = "KRB5_CONFIG_BADFORMAT"; break;
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
-     default: fprintf(stderr, "**** CODE %d ***\n", code); code_string = "UNKNOWN"; break;
+     default: fprintf(stderr, "**** CODE %d (%s) ***\n", code, error_message (code)); code_string = "UNKNOWN"; break;
      }
 
      error_string = (char *) error_message(code);

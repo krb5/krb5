@@ -1,3 +1,9 @@
+2002-02-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* tcl_kadm5.c (unparse_err): Print error message, not just number,
+	to stderr for unrecognized error code.
+	* tcl_ovsec_kadm.c (unparse_err): Likewise.
+
 2000-05-23  Tom Yu  <tlyu@mit.edu>
 
 	* tcl_kadm5.c (tcl_kadm5_chpass_principal_util): Add new argument
