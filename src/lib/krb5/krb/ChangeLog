@@ -1,5 +1,12 @@
 Mon Nov 21 15:30:07 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* mk_req_ext.c (krb5_mk_req_extended): Sanitize how memory is
+		freed in both error and normal cases, to remove memory
+		leaks. 
+
+        * mk_req_ext.c (krb5_mk_req_extended): Use the encryption type
+		specified by the ticket to generate the authenticator.
+
 	* encode_kdc.c (krb5_encode_kdc_rep): Now requires that the
 		caller pass in the encryption block to be used for
 		encrpyting the ticket.  That way, this routine doesn't
