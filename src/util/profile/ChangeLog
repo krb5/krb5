@@ -3,6 +3,8 @@
 	* libprofile.exports: Don't try to export
 	krb5int_profile_shared_data.
 
+	* Makefile.in (MLIBS): Add $(LIBS).
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h, prof_parse.c, profile.hin: Don't test macintosh or

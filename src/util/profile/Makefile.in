@@ -38,7 +38,7 @@ SRCS = $(srcdir)/prof_tree.c \
 EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c
 
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-MLIBS = -lcom_err $(SUPPORT_LIB)
+MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
 
 LIBBASE=profile
 LIBMAJOR=1
