@@ -10,7 +10,8 @@ OBJS		=	pop_dele.o pop_dropcopy.o pop_dropinfo.o \
 			pop_last.o pop_list.o pop_log.o pop_lower.o \
 			pop_msg.o pop_parse.o pop_pass.o pop_quit.o \
 			pop_rset.o pop_send.o pop_stat.o pop_updt.o \
-			pop_user.o pop_xtnd.o pop_xmit.o popper.o
+			pop_user.o pop_xtnd.o pop_xmit.o popper.o \
+			../../slave/sendauth.o
 
 SP_SRCS		=	pop_enter.c 
 SP_OBJS		=	pop_enter.o 
@@ -42,7 +43,9 @@ MAKEFILE	=	Makefile
 #									(tom)
 #		KERBEROS_PASSWD_HSCK -  Use popper as passwd server
 
-CFLAGS		=	-O -DBIND43 -DKERBEROS -DNOSTATUS
+CFLAGS		=	-g -DBIND43 -DKERBEROS -DKRB5 -DNOSTATUS -DDEBUG $(INCS)
+
+INCS		=	-I../../include   
 
 TARGET		=	popper
 
@@ -56,7 +59,7 @@ CATPAGE		=	popper.0
 
 MANDIR		=	/usr/local/man/cat8
 
-LIBS 		= 	-lkrb -ldes
+LIBS 		= 	-L../.././lib -lkrb5 -lmd4 -ldes5 -los -lcrc32 -L/mit/isode/isode-6.8/@sys/lib -lisode -lcom_err -ldbm
 
 all: ${TARGET} 
 
