@@ -63,8 +63,10 @@ krb5_ktfile_get_entry(context, id, principal, kvno, keytype, entry)
 				cur_entry = new_entry;
 			}
 		} else {
-			cur_entry = new_entry;
-			break;
+			if (new_entry.vno == kvno) {
+				cur_entry = new_entry;
+				break;
+			}
 		}
 	} else {
 		krb5_kt_free_entry(context, &new_entry);
