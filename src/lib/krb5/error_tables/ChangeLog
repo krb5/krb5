@@ -1,3 +1,7 @@
+2000-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_err.et: Add error codes MISMATCH_INDEF and MISSING_EOC.
+
 2000-06-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* init_ets.c: Remove unused variable.
