@@ -50,7 +50,7 @@ MSG_DAT *msg;
 	krb5_rcache rcache;
 	char *cachename;
 
-	keyb.keytype = KEYTYPE_DES;
+	keyb.enctype = ENCTYPE_DES;
 	keyb.length = sizeof(des_cblock);
 	keyb.contents = (krb5_octet *)key;
 
