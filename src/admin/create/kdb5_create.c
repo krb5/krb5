@@ -105,16 +105,19 @@ krb5_data db_creator_entries[] = {
 
 /* XXX knows about contents of krb5_principal, and that tgt names
  are of form TGT/REALM@REALM */
-krb5_data *tgt_princ[] = {
-	&tgt_princ_entries[0],
-	&tgt_princ_entries[1],
-	&tgt_princ_entries[0],
-	0 };
+krb5_principal_data tgt_princ = {
+	{0, 0},					/* krb5_data realm */
+	tgt_princ_entries,			/* krb5_data *data */
+	2,					/* int length */
+	KRB5_NT_SRV_INST			/* int type */
+};
 
-krb5_data *db_create_princ[] = {
-	&tgt_princ_entries[0],
-	&db_creator_entries[0],
-	0 };
+krb5_principal_data db_create_princ = {
+	{0, 0},					/* krb5_data realm */
+	db_creator_entries,			/* krb5_data *data */
+	2,					/* int length */
+	KRB5_NT_SRV_INST			/* int type */
+};
 
 void
 main(argc, argv)
@@ -212,8 +215,10 @@ char *argv[];
 	exit(1);
     }
 
-    tgt_princ[0]->data = realm;
-    tgt_princ[0]->length = strlen(realm);
+    krb5_princ_set_realm_data(&tgt_princ, realm);
+    krb5_princ_set_realm_length(&tgt_princ, strlen(realm));
+    krb5_princ_set_realm_data(&db_create_princ, realm);
+    krb5_princ_set_realm_length(&db_create_princ, strlen(realm));
 
     printf("Initializing database '%s' for realm '%s',\n\
 master key name '%s'\n",
@@ -264,7 +269,7 @@ master key name '%s'\n",
     }
 
     if ((retval = add_principal(master_princ, MASTER_KEY, &rblock)) ||
-	(retval = add_principal(tgt_princ, RANDOM_KEY, &rblock))) {
+	(retval = add_principal(&tgt_princ, RANDOM_KEY, &rblock))) {
 	(void) krb5_db_fini();
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
@@ -298,7 +303,7 @@ struct realm_info *pblock;
     entry.max_renewable_life = pblock->max_rlife;
     entry.mkvno = 0;
     entry.expiration = pblock->expiration;
-    entry.mod_name = db_create_princ;
+    entry.mod_name = &db_create_princ;
 
     if (retval = krb5_timeofday(&entry.mod_date))
 	return retval;
