@@ -55,12 +55,9 @@ krb5_error_code krb5_send_tgs
 		   krb5_data *,
 		   krb5_creds *,
 		   krb5_response * ));
-krb5_error_code krb5_sendto_kdc
-	PROTOTYPE((krb5_data *,
-		   krb5_data *,
-		   krb5_data * ));
 krb5_error_code krb5_get_cred_from_kdc
-	PROTOTYPE((krb5_creds *,
+	PROTOTYPE((krb5_ccache,
+		   krb5_creds *,
 		   krb5_creds *** ));
 krb5_error_code krb5_free_tgt_creds
 	PROTOTYPE((krb5_creds ** ));
@@ -186,11 +183,6 @@ krb5_error_code krb5_aname_to_localname
 	PROTOTYPE((krb5_principal,
 		   int,
 		   char * ));
-krb5_error_code krb5_get_krbhst
-	PROTOTYPE((krb5_data *,
-		   char *** ));
-krb5_error_code krb5_free_krbhst
-	PROTOTYPE((char ** ));
 krb5_boolean krb5_address_search
 	PROTOTYPE((krb5_address *,
 		   krb5_address **));
@@ -205,6 +197,15 @@ int krb5_fulladdr_order
 krb5_error_code krb5_copy_keyblock
     PROTOTYPE((krb5_keyblock *,
 	       krb5_keyblock *));
+krb5_error_code krb5_copy_cred
+    PROTOTYPE((krb5_creds *,
+	       krb5_creds **));
+krb5_error_code krb5_copy_data
+    PROTOTYPE((krb5_data *,
+	       krb5_data **));
+krb5_error_code krb5_copy_principal
+    PROTOTYPE((krb5_principal,
+	       krb5_principal *));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
