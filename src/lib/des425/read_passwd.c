@@ -60,10 +60,10 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize, prompt, prompt2)
     char *prompt;
     char *prompt2;
 {
-    volatile char *readin_string = 0;
+    char *volatile readin_string = 0;
     register char *ptr;
     int scratchchar;
-    krb5_sigtype (*ointrfunc)();
+    krb5_sigtype (*volatile ointrfunc)();
     krb5_error_code errcode;
 #ifndef ECHO_PASSWORD
     struct termios echo_control, save_control;

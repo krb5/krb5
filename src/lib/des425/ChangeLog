@@ -1,3 +1,8 @@
+2000-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* read_passwd.c (des_read_pw_string): Make ointrfunc volatile.
+	Fix volatile decl for readin_string.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
