@@ -1,3 +1,14 @@
+Thu Dec 21 18:20:46 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Check for the stat call, since profile_update_file
+		needs to know whether it exists.  (It doesn't on the Mac.)
+
+	* prof_file.c (profile_update_file): Change use of HAS_STAT to
+		HAVE_STAT, to confirm with autoconf test.  If the stat()
+		call does not exist, assume that our in-core memory image
+		is correct, and never re-read the profile file unless we
+		explicitly close it.
+
 Fri Oct  6 22:07:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

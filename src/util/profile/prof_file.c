@@ -53,19 +53,27 @@ errcode_t profile_update_file(prf)
 	prf_file_t prf;
 {
 	errcode_t retval;
-#ifdef HAS_STAT
+#ifdef HAVE_STAT
 	struct stat st;
 #endif
 	FILE *f;
 
-#ifdef HAS_STAT
+#ifdef HAVE_STAT
 	if (stat(prf->filename, &st))
 		return errno;
 	if (st.st_mtime == prf->timestamp)
 		return 0;
-#endif
 	if (prf->root)
 		profile_free_node(prf->root);
+#else
+	/*
+	 * If we don't have the stat() call, assume that our in-core
+	 * memory image is correct.  That is, we won't reread the
+	 * profile file if it changes.
+	 */
+	if (prf->root)
+		return 0;
+#endif
 	f = fopen(prf->filename, "r");
 	if (f == NULL)
 		return errno;
@@ -73,7 +81,7 @@ errcode_t profile_update_file(prf)
 	fclose(f);
 	if (retval)
 		return retval;
-#ifdef HAS_STAT
+#ifdef HAVE_STAT
 	prf->timestamp = st.st_mtime;
 #endif
 	return 0;
