@@ -42,25 +42,25 @@ static char rcsid_send_tgs_c[] =
  returns system errors
  */
 krb5_error_code
-krb5_send_tgs(DECLARG(krb5_flags, kdcoptions),
-	      DECLARG(krb5_ticket_times *,timestruct),
-	      DECLARG(krb5_enctype, etype),
-	      DECLARG(krb5_cksumtype, sumtype),
-	      DECLARG(krb5_principal, sname),
-	      DECLARG(krb5_address **, addrs),
-	      DECLARG(krb5_authdata **,authorization_data),
-	      DECLARG(krb5_data *,second_ticket),
-	      DECLARG(krb5_creds *,usecred),
+krb5_send_tgs(DECLARG(const krb5_flags, kdcoptions),
+	      DECLARG(const krb5_ticket_times *,timestruct),
+	      DECLARG(const krb5_enctype, etype),
+	      DECLARG(const krb5_cksumtype, sumtype),
+	      DECLARG(const krb5_principal, sname),
+	      DECLARG(const krb5_address **, addrs),
+	      DECLARG(const krb5_authdata **,authorization_data),
+	      DECLARG(const krb5_data *,second_ticket),
+	      DECLARG(const krb5_creds *,usecred),
 	      DECLARG(krb5_response *,rep))
-OLDDECLARG(krb5_flags, kdcoptions)
-OLDDECLARG(krb5_ticket_times *,timestruct)
-OLDDECLARG(krb5_enctype, etype)
-OLDDECLARG(krb5_cksumtype, sumtype)
-OLDDECLARG(krb5_principal, sname)
-OLDDECLARG(krb5_address **, addrs)
-OLDDECLARG(krb5_authdata **,authorization_data)
-OLDDECLARG(krb5_data *,second_ticket)
-OLDDECLARG(krb5_creds *,usecred)
+OLDDECLARG(const krb5_flags, kdcoptions)
+OLDDECLARG(const krb5_ticket_times *,timestruct)
+OLDDECLARG(const krb5_enctype, etype)
+OLDDECLARG(const krb5_cksumtype, sumtype)
+OLDDECLARG(const krb5_principal, sname)
+OLDDECLARG(const krb5_address **, addrs)
+OLDDECLARG(const krb5_authdata **,authorization_data)
+OLDDECLARG(const krb5_data *,second_ticket)
+OLDDECLARG(const krb5_creds *,usecred)
 OLDDECLARG(krb5_response *,rep)
 {
     krb5_error_code retval;

@@ -36,7 +36,7 @@ static char rcsid_decrypt_tk_c[] =
 
 krb5_error_code
 krb5_decrypt_tkt_part(srv_key, ticket)
-krb5_keyblock *srv_key;
+const krb5_keyblock *srv_key;
 register krb5_ticket *ticket;
 {
     krb5_enc_tkt_part *dec_tkt_part;

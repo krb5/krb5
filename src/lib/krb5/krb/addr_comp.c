@@ -24,7 +24,8 @@ static char addr_comp_c[] =
  */
 krb5_boolean
 krb5_address_compare(addr1, addr2)
-krb5_address *addr1, *addr2;
+const krb5_address *addr1;
+const krb5_address *addr2;
 {
     if (addr1->addrtype != addr2->addrtype)
 	return(FALSE);

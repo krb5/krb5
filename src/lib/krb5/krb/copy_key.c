@@ -26,7 +26,7 @@ static char copy_key_c[] =
  */
 krb5_error_code
 krb5_copy_keyblock(from, to)
-krb5_keyblock *from;
+const krb5_keyblock *from;
 krb5_keyblock *to;
 {
     *to = *from;

@@ -44,7 +44,7 @@ extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
 krb5_error_code
 krb5_get_default_realm(lnsize, lrealm)
-int lnsize;
+const int lnsize;
 char *lrealm;
 {
     FILE *config_file;

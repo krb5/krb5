@@ -45,7 +45,7 @@ static char rcsid_unparse_c[] =
 
 krb5_error_code
 krb5_unparse_name(principal, name)
-krb5_principal principal;
+const krb5_principal principal;
 register char **name;
 {
     register char *cp;

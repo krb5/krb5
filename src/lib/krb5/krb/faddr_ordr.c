@@ -29,7 +29,8 @@ static char addr_comp_c[] =
  */
 int
 krb5_fulladdr_order(addr1, addr2)
-krb5_fulladdr *addr1, *addr2;
+const krb5_fulladdr *addr1;
+const krb5_fulladdr *addr2;
 {
     int dir;
     dir = addr1->address->addrtype - addr2->address->addrtype;

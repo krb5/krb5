@@ -37,7 +37,7 @@ static char rcsid_encrypt_tk_c[] =
 
 krb5_error_code
 krb5_encrypt_tkt_part(srv_key, dec_ticket)
-krb5_keyblock *srv_key;
+const krb5_keyblock *srv_key;
 register krb5_ticket *dec_ticket;
 {
     krb5_data *scratch;

@@ -30,7 +30,8 @@ static char rcsid_copy_creds_c [] =
 
 krb5_error_code
 krb5_copy_creds(incred, outcred)
-krb5_creds *incred, **outcred;
+const krb5_creds *incred;
+krb5_creds **outcred;
 {
     krb5_creds *tempcred;
     krb5_error_code retval;

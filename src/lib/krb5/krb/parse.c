@@ -45,7 +45,7 @@ static char rcsid_parse_c [] =
 
 static char *
 strsave(string)
-char *string;
+const char *string;
 {
     register char *cp;
     cp = malloc(strlen(string)+1);
@@ -56,7 +56,7 @@ char *string;
 
 krb5_error_code
 krb5_parse_name(name, principal)
-register char *name;
+const register char *name;
 krb5_principal *principal;
 {
     register char *realmptr, *cp, *endcomponent;

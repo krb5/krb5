@@ -25,7 +25,8 @@ static char rcsid_copy_data_c[] =
  */
 krb5_error_code
 krb5_copy_data(indata, outdata)
-krb5_data *indata, **outdata;
+const krb5_data *indata;
+krb5_data **outdata;
 {
     krb5_data *tempdata;
 
