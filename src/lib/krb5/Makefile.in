@@ -49,31 +49,31 @@ clean-windows::
 all-windows::
 	cd ASN.1
 	@echo Making in lib\asn.1
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\CCACHE
 	@echo Making in lib\ccache
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\ERROR_TA
 	@echo Making in lib\error_ta
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\FREE
 	@echo Making in lib\free
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\KEYTAB
 	@echo Making in lib\keytab
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\KRB
 	@echo Making in lib\krb
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\OS
 	@echo Making in lib\os
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\POSIX
 	@echo Making in lib\posix
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\RCACHE
 	@echo Making in lib\rcache
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::

@@ -73,23 +73,23 @@ check-unix::
 all-windows::
 	cd crc32
 	@echo Making in crypto\crc32
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\des
 	@echo Making in crypto\des
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\md4
 	@echo Making in crypto\md4
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\os
 	@echo Making in crypto\os
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	rem BUG WITH NMAKE
 	cd ..\md5
 	@echo Making in crypto\md5
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\sha
 	@echo Making in crypto\sha
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::

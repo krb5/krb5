@@ -58,16 +58,16 @@ winsock.lib:  winsock.def
 all-windows:: 
 	@echo Making in lib\crypto
 	cd crypto
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	@echo Making in lib\kadm
 	cd ..\kadm
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\krb5
 	cd ..\krb5
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\gssapi
 	cd ..\gssapi
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS) 
 	@echo Making in lib
 	cd ..
 

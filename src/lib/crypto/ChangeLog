@@ -1,3 +1,8 @@
+Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
+		line.  It's set in the windows.in prologue for all Makefiles anyway.
+
 Thu Jun  6 00:03:05 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Include sha in the list of

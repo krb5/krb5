@@ -1,5 +1,8 @@
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
+		line.  It's set in the windows.in prologue for all Makefiles anyway.
+
 	* patchlevel.h (KRB5_MINOR_RELEASE): Update patchlevel for Beta 6 release.
 
 	* Makefile.in (FILES): Include lib/crypto/sha/* in list of files

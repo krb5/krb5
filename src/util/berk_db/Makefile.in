@@ -34,7 +34,7 @@ clean-windows::
 all-windows::
 	cd BERK_DB
 	@echo Making in berk_db
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::

@@ -9,23 +9,22 @@ all-unix::
 
 all-mac::
 
-LIBCMD = lib
 all-windows:: makefile-windows
 	@echo Making in include
 	cd include
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MAKEFLAGS) 
 	@echo Making in util\et
 	cd ..\util\et
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MAKEFLAGS) 
 	@echo Making in util\profile
 	cd ..\profile
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MAKEFLAGS) 
 	@echo Making in lib
 	cd ..\..\lib
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MAKEFLAGS) 
 	@echo Making in windows
 	cd ..\windows
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MAKEFLAGS) 
 	cd ..
 
 world::

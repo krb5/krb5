@@ -47,13 +47,13 @@ clean-windows::
 all-windows::
 	cd generic
 	@echo Making in gssapi\generic
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\krb5
 	@echo Making in gssapi\krb5
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..\mechglue
 	@echo Making in gssapi\mechglue
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::

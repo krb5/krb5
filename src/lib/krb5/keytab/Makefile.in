@@ -33,7 +33,7 @@ all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 	cd file
 	@echo Making in keytab\file
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-unix::

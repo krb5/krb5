@@ -25,7 +25,7 @@ all-mac:: $(OBJS)
 all-windows:: $(OBJS) 
 	cd FILE
 	@echo Making in ccache\file
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 shared: 

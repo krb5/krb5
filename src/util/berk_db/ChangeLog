@@ -1,3 +1,8 @@
+Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
+		line.  It's set in the windows.in prologue for all Makefiles anyway.
+
 Mon May 20 21:08:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Update use of libupdate to use the new command line

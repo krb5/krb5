@@ -1,3 +1,8 @@
+Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
+		line.  It's set in the windows.in prologue for all Makefiles anyway.
+
 Mon May 20 10:56:51 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* Makefile.in (libkrb5.$(STEXT)): fix sense of test; also deal
