@@ -94,7 +94,7 @@
 void initialize_pty_error_table(void);
 long ptyint_void_association(void);
 long ptyint_open_ctty (char *slave, int *fd);
-long ptyint_update_wtmp (struct utmp *ut, char *host);
+long ptyint_update_wtmp (struct utmp *ut, char *host, char *user);
 
 void ptyint_vhangup(void);
 #else /*__STDC__*/

@@ -32,9 +32,10 @@
 #endif
 
 
-long ptyint_update_wtmp (ent , host)
+long ptyint_update_wtmp (ent , host, user)
     struct utmp *ent;
      char *host;
+char *user;
     {
     struct utmp ut;
     struct stat statb;
@@ -45,7 +46,9 @@ long ptyint_update_wtmp (ent , host)
     getutmpx(ent, &utx);
 if (host)
     strncpy(utx.ut_host, host, sizeof(utx.ut_host) );
-    else utx.ut_host[0] = 0;
+else utx.ut_host[0] = 0;
+if (user)
+    strncpy(utx.ut_user, user, sizeof(utx.ut_user));
     updwtmpx(WTMPX_FILE, &utx);
 #endif
 
