@@ -28,6 +28,10 @@
 #include "k5-int.h"
 #include <stdio.h>
 
+#ifdef macintosh
+#include "Krb5Globals.h"
+#endif
+
 #if defined(_WIN32)
 static int get_from_registry(char *name_buf, int name_size)
 {
