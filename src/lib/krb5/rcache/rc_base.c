@@ -12,6 +12,7 @@
  */
 
 #include "rc_base.h"
+#include "k5-thread.h"
 
 #define FREE(x) ((void) free((char *) (x)))
 
@@ -21,21 +22,31 @@ struct krb5_rc_typelist {
 };
 static struct krb5_rc_typelist krb5_rc_typelist_dfl = { &krb5_rc_dfl_ops, 0 };
 static struct krb5_rc_typelist *typehead = &krb5_rc_typelist_dfl;
+static k5_mutex_t rc_typelist_lock = K5_MUTEX_INITIALIZER;
 
 krb5_error_code krb5_rc_register_type(krb5_context context,
 				      const krb5_rc_ops *ops)
 {
     struct krb5_rc_typelist *t;
+    krb5_error_code err;
+    err = k5_mutex_lock(&rc_typelist_lock);
+    if (err)
+	return err;
     for (t = typehead;t && strcmp(t->ops->type,ops->type);t = t->next)
 	;
-    if (t)
+    if (t) {
+	k5_mutex_unlock(&rc_typelist_lock);
 	return KRB5_RC_TYPE_EXISTS;
+    }
     t = (struct krb5_rc_typelist *) malloc(sizeof(struct krb5_rc_typelist));
-    if (t == NULL)
+    if (t == NULL) {
+	k5_mutex_unlock(&rc_typelist_lock);
 	return KRB5_RC_MALLOC;
+    }
     t->next = typehead;
     t->ops = ops;
     typehead = t;
+    k5_mutex_unlock(&rc_typelist_lock);
     return 0;
 }
 
@@ -43,12 +54,19 @@ krb5_error_code krb5_rc_resolve_type(krb5_context context, krb5_rcache *id,
 				     char *type)
 {
     struct krb5_rc_typelist *t;
+    krb5_error_code err;
+    err = k5_mutex_lock(&rc_typelist_lock);
+    if (err)
+	return err;
     for (t = typehead;t && strcmp(t->ops->type,type);t = t->next)
 	;
-    if (!t)
+    if (!t) {
+	k5_mutex_unlock(&rc_typelist_lock);
 	return KRB5_RC_TYPE_NOTFOUND;
+    }
     /* allocate *id? nah */
     (*id)->ops = t->ops;
+    k5_mutex_unlock(&rc_typelist_lock);
     return 0;
 }
 

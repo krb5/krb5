@@ -1,3 +1,10 @@
+2004-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_base.c: Include k5-thread.h.
+	(rc_typelist_lock): New mutex var.
+	(krb5_rc_register_type, krb5_rc_resolve_type): Lock it while
+	working with the type list.
+
 2004-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_base.c: Delete unused and untested semaphore support.

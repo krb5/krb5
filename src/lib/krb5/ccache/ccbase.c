@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/ccbase.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -28,14 +28,14 @@
  */
 
 #include "k5-int.h"
+#include "k5-thread.h"
 
 #include "fcc.h"
 
-struct krb5_cc_typelist
- {
-  krb5_cc_ops *ops;
-  struct krb5_cc_typelist *next;
- };
+struct krb5_cc_typelist {
+    const krb5_cc_ops *ops;
+    struct krb5_cc_typelist *next;
+};
 extern const krb5_cc_ops krb5_mcc_ops;
 
 #ifdef _WIN32
@@ -50,6 +50,7 @@ static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 						&cc_mcc_entry };
 
 static struct krb5_cc_typelist *cc_typehead = &cc_fcc_entry;
+static k5_mutex_t cc_typelist_lock = K5_MUTEX_INITIALIZER;
 
 
 /*
@@ -61,20 +62,31 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_register(krb5_context context, krb5_cc_ops *ops, krb5_boolean override)
 {
     struct krb5_cc_typelist *t;
+    krb5_error_code err;
+
+    err = k5_mutex_lock(&cc_typelist_lock);
+    if (err)
+	return err;
     for (t = cc_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
 	;
     if (t) {
 	if (override) {
 	    t->ops = ops;
+	    k5_mutex_unlock(&cc_typelist_lock);
 	    return 0;
-	} else
+	} else {
+	    k5_mutex_unlock(&cc_typelist_lock);
 	    return KRB5_CC_TYPE_EXISTS;
+	}
     }
-    if (!(t = (struct krb5_cc_typelist *) malloc(sizeof(*t))))
+    if (!(t = (struct krb5_cc_typelist *) malloc(sizeof(*t)))) {
+	k5_mutex_unlock(&cc_typelist_lock);
 	return ENOMEM;
+    }
     t->next = cc_typehead;
     t->ops = ops;
     cc_typehead = t;
+    k5_mutex_unlock(&cc_typelist_lock);
     return 0;
 }
 
@@ -95,6 +107,7 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     char *pfx, *cp;
     const char *resid;
     unsigned int pfxlen;
+    krb5_error_code err;
     
     cp = strchr (name, ':');
     if (!cp) {
@@ -116,12 +129,20 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
 
     *cache = (krb5_ccache) 0;
 
+    err = k5_mutex_lock(&cc_typelist_lock);
+    if (err) {
+	free(pfx);
+	return err;
+    }
     for (tlist = cc_typehead; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
+	    krb5_error_code (*ccresolver)() = tlist->ops->resolve;
+	    k5_mutex_unlock(&cc_typelist_lock);
 	    free(pfx);
-	    return (*tlist->ops->resolve)(context, cache, resid);
+	    return (*ccresolver)(context, cache, resid);
 	}
     }
+    k5_mutex_unlock(&cc_typelist_lock);
     if (krb5_cc_dfl_ops && !strcmp (pfx, krb5_cc_dfl_ops->prefix)) {
 	free (pfx);
 	return (*krb5_cc_dfl_ops->resolve)(context, cache, resid);

@@ -1,6 +1,10 @@
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
-	* ktbase.c (krb5_kt_register): Ops table is now const.
+	* ktbase.c: Include k5-thread.h.
+	(k5_typehead_lock): New mutex variable.
+	(krb5_kt_register, krb5_kt_resolve): Lock it while accessing the
+	type list.
+	(krb5_kt_register): Ops table is now const.
 	(struct krb5_kt_typelist): "next" pointer now points to const.
 	(krb5_kt_typelist_wrfile, krb5_kt_typelist_file,
 	krb5_kt_typelist_srvtab): Now const.
