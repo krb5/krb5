@@ -33,18 +33,41 @@
 
 /* special struct to convert flag names for principals
    to actual krb5_flags for a principal */
-struct princ_flag {
+struct pflag {
     char *flagname;		/* name of flag as typed to CLI */
     int flaglen;		/* length of string (not counting -,+) */
     krb5_flags theflag;		/* actual principal flag to set/clear */
     int set;			/* 0 means clear, 1 means set (on '-') */
 };
 
-static struct princ_flag the_flags = {
-{ "allow_tgs_req", 13, KRB5_KDB_DISALLOW_TGT_BASED, 1 },
-{ "allow_tix", 9, KRB5_KDB_DISALLOW_ALL_TIX, 1 },
-{ "needchange", 10, KRB5_KDB_REQUIRES_PWCHANGE, 0 },
-{ "password_changing_service", 25, KRB5_KDB_PWCHANGE_SERVICE, 0 }
+static struct princ_flag flags = {
+{"allow_postdated",	15,	KRB5_KDB_DISALLOW_POSTDATED,	1},
+{"allow_forwardable",	17,	KRB5_KDB_DISALLOW_FORWARDABLE,	1},
+{"allow_tgs_req",	13,	KRB5_KDB_DISALLOW_TGT_BASED,	1},
+{"allow_renewable",	15,	KRB5_KDB_DISALLOW_RENEWABLE,	1},
+{"allow_proxiable",	15,	KRB5_KDB_DISALLOW_PROXIABLE,	1},
+{"allow_dup_skey",	14,	KRB5_KDB_DISALLOW_DUP_SKEY,	1},
+{"allow_tix",		9,	KRB5_KDB_DISALLOW_ALL_TIX,	1},
+{"requires_preauth",	16,	KRB5_KDB_REQUIRES_PRE_AUTH,	0},
+{"requres_hwauth",	14,	KRB5_KDB_REQUIRES_HW_AUTH,	0},
+{"needchange",		10,	KRB5_KDB_REQUIRES_PWCHANGE,	0},
+{"allow_svr",		9,	KRB5_KDB_DISALLOW_SVR,		1},
+{"password_changing_service",	25,	KRB5_KDB_PWCHANGE_SERVICE,	0 }
+};
+
+static char *prflags[] = {
+    "DISALLOW_POSTDATED",	/* 0x00000001 */
+    "DISALLOW_FORWARDABLE",	/* 0x00000002 */
+    "DISALLOW_TGT_BASED",	/* 0x00000004 */
+    "DISALLOW_RENEWABLE",	/* 0x00000008 */
+    "DISALLOW_PROXIABLE",	/* 0x00000010 */
+    "DISALLOW_DUP_SKEY",	/* 0x00000020 */
+    "DISALLOW_ALL_TIX",		/* 0x00000040 */
+    "REQUIRES_PRE_AUTH",	/* 0x00000080 */
+    "REQUIRES_HW_AUTH",		/* 0x00000100 */
+    "REQUIRES_PWCHANGE",	/* 0x00000200 */
+    "DISALLOW_SVR",		/* 0x00001000 */
+    "PWCHANGE_SERVICE"		/* 0x00002000 */
 };
 
 char *getenv();
@@ -201,7 +224,7 @@ void kadmin_renprinc(argc, argv)
     ovsec_kadm_ret_t retval;
 
     if (argc > 4 || argc < 3) {
-	fprintf(stderr, "rename_principal: too many arguments\n");
+	fprintf(stderr, "rename_principal: wrong number of arguments\n");
 	return;
     }
     if (argc == 3) {
@@ -230,7 +253,7 @@ void kadmin_renprinc(argc, argv)
 	com_err("rename_principal", retval, "while parsing new principal");
 	return;
     }
-    retval = ovsed_kadm_rename_principal(oldprinc, newprinc);
+    retval = ovsec_kadm_rename_principal(oldprinc, newprinc);
     krb5_free_principal(oldprinc);
     krb5_free_principal(newprinc);
     if (retval) {
@@ -322,16 +345,18 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
     char *argv[];
     ovsec_kadm_principal_ent_t *oprinc;
     u_int32 *mask;
-    char *pw;
+    char **pass
 {
     int i;
     struct timeb now;
-
+    
+    *mask = 0;
+    *pass = NULL;
     ftime(&now);
-    for (i = 1; i < argc - 1; i++) {
+    for (i = 1; i < argc - 2; i++) {
 	if (strlen(argv[i]) == 7 &&
 	    !strcmp("-expire", argv[i])) {
-	    if (++i >= argc - 1)
+	    if (++i > argc - 2)
 		return -1;
 	    else {
 		oprinc->princ_expire_time = get_date(argv[i], now);
@@ -341,7 +366,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
 	}
 	if (strlen(argv[i]) == 9 &&
 	    !strcmp("-pwexpire", argv[i])) {
-	    if (++i >= argc - 1)
+	    if (++i > argc - 2)
 		return -1;
 	    else {
 		oprinc->pw_expiration = get_date(argv[i], now);
@@ -349,9 +374,19 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
 		continue;
 	    }
 	}
+	if (strlen(argv[i]) == 8 &&
+	    !strcmp("-maxlife", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		oprinc->max_life = get_date(argv[i], now);
+		*mask |= OVSEC_KADM_MAX_LIFE;
+		continue;
+	    }
+	}
 	if (strlen(argv[i]) == 5 &&
 	    !strcmp("-kvno", argv[i])) {
-	    if (++i >= argc - 1)
+	    if (++i > argc - 2)
 		return -1;
 	    else {
 		oprinc->kvno = atoi(argv[i]);
@@ -361,7 +396,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
 	}
 	if (strlen(argv[i]) == 8 &&
 	    !strcmp("-policy", argv[i])) {
-	    if (++i >= argc - 1)
+	    if (++i > argc - 2)
 		return -1;
 	    else {
 		oprinc->policy = argv[i];
@@ -371,13 +406,41 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
 	}
 	if (strlen(argv[i]) == 12 &&
 	    !strcmp("-clearpolicy", argv[i])) {
-	    if (++i >= argc - 1)
+	    oprinc->policy = NULL;
+	    *mask |= OVSEC_KADM_POLICY_CLR;
+	    continue;
+	}
+	if (strlen(argv[i]) == 3 &&
+	    !strcmp("-pw", argv[i])) {
+	    if (++i > argc - 2)
 		return -1;
 	    else {
-		oprinc->policy = NULL;
-		*mask |= OVSEC_KADM_POLICY_CLR;
+		pass = argv[i];
 		continue;
 	    }
 	}
+	for (j = 0; j < sizeof (flags) / sizeof (struct pflag); j++) {
+	    if (strlen(argv[i]) == flags[j].flaglen + 1 &&
+		!strcmp(flags[j].flagname,
+			&argv[i][1] /* strip off leading + or - */)) {
+		if (flags[j].set && argv[i][0] == '-' ||
+		    !flags[j].set && argv[i][0] == '+') {
+		    oprinc->attributes |= flags[j].theflag;
+		    *mask |= OVSEC_KADM_ATTRIBUTES;
+		    break;
+		} else if (flags[j].set && argv[i][0] == '+' ||
+			   !flags[j].set && argv[i][0] == '-') {
+		    oprinc->attributes &= ~flags[j];
+		    *mask |= OVSEC_KADM_ATTRIBUTES;
+		    break;
+		} else {
+		    return -1;
+		}
+	    }
+	}
+	retval = krb5_parse_name(argv[i], &oprinc->principal);
+	if (retval)
+	    return -1;
+	*mask |= OVSEC_KADM_PRINCIPAL;
     }
 }
