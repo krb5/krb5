@@ -1,3 +1,8 @@
+Sat Sep 16 03:41:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sim_server.c (main): Free the context and auth_context before
+	        exiting.
+
 Fri Sep 15 14:31:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sim_server.c: Improved (and changed) input argument handling, to

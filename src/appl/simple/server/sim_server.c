@@ -264,5 +264,8 @@ char *argv[];
     }
     printf("Decrypted message is: '%.*s'\n", message.length, message.data);
 
+    krb5_auth_con_free(context, auth_context);
+    krb5_free_context(context);
+
     exit(0);
 }
