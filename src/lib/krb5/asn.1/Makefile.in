@@ -20,16 +20,16 @@ STLIBOBJS= \
 	asn1_misc.o
 
 SRCS= \
-	$(srcdir)asn1_decode.c\
-	$(srcdir)asn1_k_decode.c\
-	$(srcdir)asn1_encode.c\
-	$(srcdir)asn1_get.c\
-	$(srcdir)asn1_make.c\
-	$(srcdir)asn1buf.c\
-	$(srcdir)krb5_decode.c\
-	$(srcdir)krb5_encode.c\
-	$(srcdir)asn1_k_encode.c\
-	$(srcdir)asn1_misc.c
+	$(srcdir)/asn1_decode.c\
+	$(srcdir)/asn1_k_decode.c\
+	$(srcdir)/asn1_encode.c\
+	$(srcdir)/asn1_get.c\
+	$(srcdir)/asn1_make.c\
+	$(srcdir)/asn1buf.c\
+	$(srcdir)/krb5_decode.c\
+	$(srcdir)/krb5_encode.c\
+	$(srcdir)/asn1_k_encode.c\
+	$(srcdir)/asn1_misc.c
 
 OBJS= \
 	asn1_decode.$(OBJEXT)\
