@@ -1,3 +1,10 @@
+2004-08-12  Alexandra Ellwood  <lxs@mit.edu>
+
+        * get_in_tkt.c (get_init_creds):
+        Support ticket_lifetime libdefault.
+        Made aware of 32 bit min and max for times.
+        Allow renew_until time < expiration time.
+        
 2004-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* srv_rcache.c (krb5_get_server_rcache): Call
