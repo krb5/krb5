@@ -1,7 +1,7 @@
 Thu Mar 12 18:09:25 1998  Tom Yu  <tlyu@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Fix bogus entry of
-	PTY_LOGIN_PROCESS types on BSD-ish systems.
+	PTY_LOGIN_PROCESS types on BSD-ish systems. [pty/531]
 
 Wed Feb 18 16:33:58 1998  Tom Yu  <tlyu@mit.edu>
 
