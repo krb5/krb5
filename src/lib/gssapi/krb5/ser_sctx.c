@@ -237,7 +237,6 @@ kg_ctx_size(kcontext, arg, sizep)
     if ((ctx = (krb5_gss_ctx_id_rec *) arg)) {
 	required = 16*sizeof(krb5_int32);
 	required += sizeof(ctx->seed);
-	required += ctx->nctypes*sizeof(krb5_int32);
 
 	kret = 0;
 	if (!kret && ctx->here)
@@ -337,15 +336,13 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) ctx->seq_send,
+	    (void) krb5_ser_pack_int64((krb5_int64) ctx->seq_send,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) ctx->seq_recv,
+	    (void) krb5_ser_pack_int64((krb5_int64) ctx->seq_recv,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->established,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->big_endian,
-				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) ctx->nctypes,
 				       &bp, &remain);
 
 	    /* Now dynamic data */
@@ -395,13 +392,6 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 					       (krb5_pointer) ctx->auth_context,
 					       &bp, &remain);
 
-	    for (i=0; i<ctx->nctypes; i++) {
-		if (!kret) {
-		    kret = krb5_ser_pack_int32((krb5_int32) ctx->ctypes[i],
-					       &bp, &remain);
-		}
-	    }
-	    
 	    if (!kret) {
 		(void) krb5_ser_pack_int32(KG_CONTEXT, &bp, &remain);
 		*buffer = bp;
@@ -464,14 +454,12 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	    ctx->endtime = (krb5_timestamp) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->krb_flags = (krb5_flags) ibuf;
-	    (void) krb5_ser_unpack_int32(&ctx->seq_send, &bp, &remain);
-	    (void) krb5_ser_unpack_int32(&ctx->seq_recv, &bp, &remain);
+	    (void) krb5_ser_unpack_int64(&ctx->seq_send, &bp, &remain);
+	    (void) krb5_ser_unpack_int64(&ctx->seq_recv, &bp, &remain);
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->established = (int) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->big_endian = (int) ibuf;
-	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    ctx->nctypes = (int) ibuf;
 
 	    if ((kret = kg_oid_internalize(kcontext, &ctx->mech_used, &bp,
 					   &remain))) {
@@ -531,22 +519,6 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 					       KV5M_AUTH_CONTEXT,
 				       (krb5_pointer *) &ctx->auth_context,
 					       &bp, &remain);
-		
-	    if (!kret) {
-		if (ctx->nctypes) {
-		    if ((ctx->ctypes = (krb5_cksumtype *)
-			 malloc(ctx->nctypes*sizeof(krb5_cksumtype))) == NULL){
-			kret = ENOMEM;
-		    }
-
-		    for (i=0; i<ctx->nctypes; i++) {
-			if (!kret) {
-			    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-			    ctx->ctypes[i] = (krb5_cksumtype) ibuf;
-			}
-		    }
-		}
-	    }
 
 	    /* Get trailer */
 	    if (!kret &&

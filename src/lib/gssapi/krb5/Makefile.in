@@ -42,6 +42,7 @@ SRCS = \
 	$(srcdir)/inq_cred.c \
 	$(srcdir)/inq_names.c \
 	$(srcdir)/k5seal.c \
+	$(srcdir)/k5sealv3.c \
 	$(srcdir)/k5unseal.c \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/process_context_token.c \
@@ -89,6 +90,7 @@ OBJS = \
 	$(OUTPRE)inq_cred.$(OBJEXT) \
 	$(OUTPRE)inq_names.$(OBJEXT) \
 	$(OUTPRE)k5seal.$(OBJEXT) \
+	$(OUTPRE)k5sealv3.$(OBJEXT) \
 	$(OUTPRE)k5unseal.$(OBJEXT) \
 	$(OUTPRE)krb5_gss_glue.$(OBJEXT) \
 	$(OUTPRE)process_context_token.$(OBJEXT) \
@@ -136,6 +138,7 @@ STLIBOBJS = \
 	inq_cred.o \
 	inq_names.o \
 	k5seal.o \
+	k5sealv3.o \
 	k5unseal.o \
 	krb5_gss_glue.o \
 	process_context_token.o \
