@@ -1,3 +1,9 @@
+Tue Mar 19 17:07:44 1996  Richard Basch  <basch@lehman.com>
+
+	* conv_creds.c (krb524_convert_creds_plain):
+	if the v5 lifetime is greater than the max v4 lifetime, use the max
+	v4 lifetime (0xff), rather than masking it with 0xff.
+
 Fri Jan 12 04:37:23 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* cnv_tkt_skey.c (krb524_convert_tkt_skey): rather than apply fit
