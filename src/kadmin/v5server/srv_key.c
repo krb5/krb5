@@ -82,11 +82,80 @@ static int		mkeytab_init = 0;
 static krb5_keytab	key_keytab = (krb5_keytab) NULL;
 
 static int		madmin_key_init = 0;
+static krb5_key_data	*madmin_keys = (krb5_key_data *) NULL;
 static krb5_keyblock	madmin_key;
+static krb5_int32	madmin_num_keys = 0;
+
+static int		key_num_ktents = 0;
+static krb5_key_salt_tuple *key_ktents = (krb5_key_salt_tuple *) NULL;
+static int		key_ktents_inited = 0;
+static krb5_key_salt_tuple default_ktent = {
+    KEYTYPE_DES, KRB5_KDB_SALTTYPE_NORMAL
+};
 
 static int key_debug_level = 0;
 
 extern char *programname;
+
+/*
+ * key_dbent_to_keysalts()	- Generate a list of key/salt pairs.
+ */
+static krb5_error_code
+key_dbent_to_keysalts(dbentp, nentsp, ksentsp)
+    krb5_db_entry	*dbentp;
+    krb5_int32		*nentsp;
+    krb5_key_salt_tuple	**ksentsp;
+{
+    krb5_error_code	kret;
+    int			i, j;
+    krb5_int32		num;
+    krb5_boolean	found;
+    krb5_key_salt_tuple	*ksp;
+
+    kret = 0;
+    if (dbentp->n_key_data) {
+	/* The hard case */
+	if (ksp = (krb5_key_salt_tuple *)
+	    malloc(dbentp->n_key_data * sizeof(krb5_key_salt_tuple))) {
+	    memset(ksp, 0,
+		   dbentp->n_key_data * sizeof(krb5_key_salt_tuple));
+	    num = 0;
+	    for (i=0; i<dbentp->n_key_data; i++) {
+		found = 0;
+		for (j=0; j<num; j++) {
+		    if ((ksp[j].ks_keytype ==
+			 dbentp->key_data[i].key_data_type[0]) &&
+			(ksp[j].ks_salttype ==
+			 dbentp->key_data[i].key_data_type[1])) {
+			found = 1;
+			break;
+		    }
+		}
+		if (found)
+		    continue;
+		ksp[num].ks_keytype = dbentp->key_data[i].key_data_type[0];
+		ksp[num].ks_salttype = dbentp->key_data[i].key_data_type[1];
+		num++;
+	    }
+	    *ksentsp = ksp;
+	    *nentsp = num;
+	}
+	else
+	    kret = ENOMEM;
+    }
+    else {
+	/* The easy case. */
+	if (*ksentsp = (krb5_key_salt_tuple *)
+	    malloc(key_num_ktents * sizeof(krb5_key_salt_tuple))) {
+	    memcpy(*ksentsp, key_ktents,
+		   key_num_ktents * sizeof(krb5_key_salt_tuple));
+	    *nentsp = key_num_ktents;
+	}
+	else
+	    kret = ENOMEM;
+    }
+    return(kret);
+}
 
 /*
  * key_get_admin_entry()	- Find the admin entry or create one.
@@ -102,14 +171,11 @@ key_get_admin_entry(kcontext)
     int			number_of_entries;
     krb5_boolean	more_entries;
     krb5_db_entry	madmin_entry;
-    krb5_keyblock	pkey, akey;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_get_admin_entry()\n"));
     kret = ENOMEM;
     realm_name = key_master_realm();
 
-    memset((char *) &akey, 0, sizeof(akey));
-    memset((char *) &pkey, 0, sizeof(pkey));
     /*
      * The admin principal format is:
      *	<admin-service-name>/<realm>@<realm>
@@ -145,44 +211,15 @@ key_get_admin_entry(kcontext)
 		 * If the entry's present and it's unique, then we can
 		 * just proceed and decrypt the key.
 		 */
+		madmin_num_keys = madmin_entry.n_key_data;
 		if (!(kret = key_decrypt_keys(kcontext,
-					      admin_principal,
-					      &madmin_entry.key,
-					      &madmin_entry.alt_key,
-					      &pkey,
-					      &akey))) {
-		    if (pkey.contents) {
-			DPRINT(DEBUG_REALM, key_debug_level,
-			       ("- using primary key\n"));
-			memcpy((char *) &madmin_key,
-			       (char *) &pkey,
-			       sizeof(pkey));
-			if (akey.contents) {
-				memset((char *) &akey.contents, 0,
-				       (size_t) akey.length);
-				krb5_xfree(akey.contents);
-			}
-			madmin_key_init = 1;
-		    }
-		    else {
-			if (akey.contents) {
-			    DPRINT(DEBUG_REALM, key_debug_level,
-				   ("- using alternate key\n"));
-			    memcpy((char *) &madmin_key,
-				   (char *) &akey,
-				   sizeof(akey));
-			    madmin_key_init = 1;
-			}
-			else {
-			    DPRINT(DEBUG_REALM, key_debug_level,
-				   ("- NO KEY PRESENT\n"));
-			    fprintf(stderr,
-				    key_cpw_ufokey_fmt,
-				    programname,
-				    admin_princ_name);
-			    kret = KRB5KRB_ERR_GENERIC;
-			}
-		    }
+					      &madmin_entry,
+					      &madmin_num_keys,
+					      madmin_entry.key_data,
+					      &madmin_keys))) {
+		    DPRINT(DEBUG_REALM, key_debug_level,
+			   ("- found admin keys\n"));
+		    madmin_key_init = 1;
 		}
 		else
 		    fprintf(stderr,
@@ -199,7 +236,8 @@ key_get_admin_entry(kcontext)
 		 * wasn't present.  If so, then try to create it.
 		 */
 		if (!kret && !number_of_entries) {
-		    krb5_keyblock	rkey, akey;
+		    krb5_tl_mod_princ	mprinc;
+		    krb5_timestamp	now;
 
 		    DPRINT(DEBUG_REALM, key_debug_level,
 			   ("- no database entry for %s\n", admin_princ_name));
@@ -207,30 +245,62 @@ key_get_admin_entry(kcontext)
 		     * Not present - Set up our database entry.
 		     */
 		    memset((char *) &madmin_entry, 0, sizeof(madmin_entry));
-		    madmin_entry.kvno = 1;
 		    madmin_entry.attributes = KRB5_KDB_PWCHANGE_SERVICE;
-		    madmin_entry.principal = admin_principal;
-		    madmin_entry.mod_name = admin_principal;
-		    krb5_timeofday(kcontext, &madmin_entry.mod_date);
-		    madmin_entry.last_pwd_change = madmin_entry.mod_date;
-		    madmin_entry.mkvno = key_master_entry()->kvno;
+		    madmin_entry.princ = admin_principal;
 		    madmin_entry.max_life = KEY_DEF_MAX_LIFE;
 		    madmin_entry.max_renewable_life = KEY_DEF_MAX_RLIFE;
 		    number_of_entries = 1;
 
+		    krb5_timeofday(kcontext, &now);
+		    /*
+		     * Argh - now set up our auxiliary data.
+		     */
+		    if ((madmin_entry.tl_data =
+			 (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) &&
+			(madmin_entry.tl_data->tl_data_contents =
+			 (krb5_octet *) malloc(sizeof(krb5_timestamp)))) {
+			madmin_entry.n_tl_data = 1;
+			madmin_entry.tl_data->tl_data_next =
+			    (krb5_tl_data *) NULL;
+			madmin_entry.tl_data->tl_data_type =
+			    KRB5_TL_LAST_PWD_CHANGE;
+			madmin_entry.tl_data->tl_data_length =
+			    sizeof(krb5_timestamp);
+			madmin_entry.tl_data->tl_data_contents[0] =
+			    (unsigned char) ((now >> 24) & 0xff);
+			madmin_entry.tl_data->tl_data_contents[1] =
+			    (unsigned char) ((now >> 16) & 0xff);
+			madmin_entry.tl_data->tl_data_contents[2] =
+			    (unsigned char) ((now >> 8) & 0xff);
+			madmin_entry.tl_data->tl_data_contents[3] =
+			    (unsigned char) (now & 0xff);
+		    }
+
+		    mprinc.mod_date = now;
+		    if (!krb5_copy_principal(kcontext,
+					     admin_principal,
+					     &mprinc.mod_princ)) {
+			krb5_dbe_encode_mod_princ_data(kcontext,
+						       &mprinc,
+						       &madmin_entry);
+			krb5_free_principal(kcontext, mprinc.mod_princ);
+		    }
+
 		    /*
 		     * Generate a random key.
 		     */
-		    memset((char *) &rkey, 0, sizeof(rkey));
-		    memset((char *) &akey, 0, sizeof(akey));
-		    if (!(kret = key_random_key(kcontext, &rkey))) {
+		    if (!(kret = key_random_key(kcontext,
+						&madmin_entry,
+						&madmin_num_keys,
+						&madmin_keys))) {
 			if (!(kret = key_encrypt_keys(kcontext,
-						      admin_principal,
-						      &rkey,
-						      &akey,
-						      &madmin_entry.key,
-						      &madmin_entry.alt_key))
+						      &madmin_entry,
+						      &madmin_num_keys,
+						      madmin_keys,
+						      &madmin_entry.key_data))
 			    )  {
+			    madmin_entry.n_key_data =
+				(krb5_int16) madmin_num_keys;
 			    if (kret = 
 				krb5_db_put_principal(kcontext,
 						      &madmin_entry,
@@ -251,15 +321,8 @@ key_get_admin_entry(kcontext)
 				    key_cpw_encerr_fmt,
 				    programname,
 				    admin_princ_name);
-			if (kret) {
-			    krb5_free_keyblock(kcontext, &rkey);
-			}
-			else {
-			    memcpy((char *) &madmin_key,
-				   (char *) &rkey,
-				   sizeof(rkey));
+			if (!kret)
 			    madmin_key_init = 1;
-			}
 		    }
 		    else
 			fprintf(stderr,
@@ -287,6 +350,20 @@ key_get_admin_entry(kcontext)
 		    admin_princ_name);
 	free(admin_princ_name);
     }
+
+    if (kret && madmin_num_keys && madmin_keys) {
+	key_free_key_data(madmin_keys, madmin_num_keys);
+	madmin_key_init = 0;
+    }
+
+    if (!kret && madmin_num_keys && madmin_keys) {
+	memset(&madmin_key, 0, sizeof(krb5_keyblock));
+	madmin_key.keytype = KEYTYPE_DES;
+	madmin_key.etype = ETYPE_UNKNOWN;
+	madmin_key.length = madmin_keys[0].key_data_length[0];
+	madmin_key.contents = madmin_keys[0].key_data_contents[0];
+    }
+
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_get_admin_entry() = %d\n", kret));
     return(kret);
@@ -297,7 +374,7 @@ key_get_admin_entry(kcontext)
  */
 krb5_error_code
 key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
-	 db_file, db_realm, kt_name, sf_name)
+	 db_file, db_realm, kt_name, sf_name, nktent, ktents)
     krb5_context	kcontext;
     int			debug_level;
     int			enc_type;
@@ -308,6 +385,8 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     char		*db_realm;
     char		*kt_name;
     char		*sf_name;
+    krb5_int32		nktent;
+    krb5_key_salt_tuple	*ktents;
 {
     krb5_enctype 	kdc_etype;
     char		*mkey_name;
@@ -486,6 +565,16 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
      */
     kret = key_get_admin_entry(kcontext, debug_level);
 
+    if (!kret) {
+	if (key_num_ktents = nktent)
+	    key_ktents = ktents;
+	else {
+	    key_num_ktents = 1;
+	    key_ktents = &default_ktent;
+	}
+	key_ktents_inited = 1;
+    }
+
  cleanup:
     if (kret) {
 	if (mrand_init) {
@@ -517,8 +606,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	    mkeytab_init = 0;
 	}
 	if (madmin_key_init) {
-	    memset((char *)madmin_key.contents, 0, madmin_key.length);
-	    krb5_xfree(madmin_key.contents);
+	    key_free_key_data(madmin_keys, madmin_num_keys);
 	    madmin_key_init = 0;
 	}
     }
@@ -569,8 +657,7 @@ key_finish(kcontext, debug_level)
 	mkeytab_init = 0;
     }
     if (madmin_key_init) {
-	memset((char *)madmin_key.contents, 0, madmin_key.length);
-	krb5_xfree(madmin_key.contents);
+	key_free_key_data(madmin_keys, madmin_num_keys);
 	madmin_key_init = 0;
     }
     krb5_db_fini(kcontext);
@@ -582,105 +669,144 @@ key_finish(kcontext, debug_level)
  * key_string_to_keys() - convert string to keys.
  */
 krb5_error_code
-key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
-		   primary, alternate, psaltdatap, asaltdatap)
+key_string_to_keys(kcontext, dbentp, string, nkeysp, keysp)
     krb5_context	kcontext;
-    krb5_principal	principal;
+    krb5_db_entry	*dbentp;
     krb5_data		*string;
-    krb5_int32		psalttype;
-    krb5_int32		asalttype;
-    krb5_keyblock	*primary;
-    krb5_keyblock	*alternate;
-    krb5_data		*psaltdatap;
-    krb5_data		*asaltdatap;
+    krb5_int32		*nkeysp;
+    krb5_key_data	**keysp;
 {
     krb5_error_code	kret;
+    krb5_key_salt_tuple	*keysalts;
+    krb5_int32		nkeysalts;
+    int			i;
+    krb5_key_data	*kdata;
+    krb5_key_data	*keys;
+    krb5_boolean	salted;
+    krb5_data		salt;
+    krb5_keyblock	key;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_string_to_keys()\n"));
-    kret = KRB_ERR_GENERIC;
-    psaltdatap->length = asaltdatap->length = 0;
-    psaltdatap->data = asaltdatap->data = (char *) NULL;
 
+    keys = (krb5_key_data *) NULL;
+    nkeysalts = 0;
     /*
-     * Determine the primary salt type.
+     * Determine how many and of what kind of keys to generate.
      */
-    switch (psalttype) {
-    case KRB5_KDB_SALTTYPE_NORMAL:
-	/* Normal salt */
-	if (kret = krb5_principal2salt(kcontext, principal, psaltdatap))
-	    goto done;
-	asaltdatap->data = (char *) NULL;
-	asaltdatap->length = 0;
-	break;
-    case KRB5_KDB_SALTTYPE_V4:
-	/* V4 salt */
-	psaltdatap->data = (char *) NULL;
-	psaltdatap->length = 0;
-	if (kret = krb5_principal2salt(kcontext, principal, asaltdatap))
-	    goto done;
-	break;
-    case KRB5_KDB_SALTTYPE_NOREALM:
-	if (kret = krb5_principal2salt_norealm(kcontext,
-					       principal,
-					       psaltdatap))
-	    goto done;
-	asaltdatap->data = (char *) NULL;
-	asaltdatap->length = 0;
-	break;
-    case KRB5_KDB_SALTTYPE_ONLYREALM:
-    {
-	krb5_data	*tmp;
+    if (!(kret = key_dbent_to_keysalts(dbentp, &nkeysalts, &keysalts))) {
+	if (keys = (krb5_key_data *)
+	    malloc((size_t) (nkeysalts * sizeof(krb5_key_data)))) {
+	    memset(keys, 0, nkeysalts * sizeof(krb5_key_data));
+	    for (i=0; i<nkeysalts; i++) {
+		/*
+		 * Determine if this key/salt pair is salted.
+		 */
+		salted = 0;
+		if (!key_name_to_data(dbentp, &keysalts[i], -1, &kdata)) {
+		    if (kdata->key_data_length[1] &&
+			kdata->key_data_contents[1])
+			salted = 1;
+		}
+		else {
+		    /*
+		     * Cannot find a name-to-data matching, so we must have to
+		     * create a new key entry.
+		     */
+		    if (!(kret = krb5_dbe_create_key_data(kcontext, dbentp))) {
+			kdata = &dbentp->key_data[dbentp->n_key_data-1];
+			kdata->key_data_type[0] =
+			    (krb5_int16) keysalts[i].ks_keytype;
+			kdata->key_data_type[1] =
+			    (krb5_int16) keysalts[i].ks_salttype;
+		    }
+		}
+		if (kret)
+		    goto done;
 
-	if (kret = krb5_copy_data(kcontext,
-				  krb5_princ_realm(kcontext, principal),
-				  &tmp))
-	    goto done;
-	*psaltdatap = *tmp;
-	krb5_xfree(tmp);
-	asaltdatap->data = (char *) NULL;
-	asaltdatap->length = 0;
-	break;
+		/*
+		 * We have "kdata" pointing to the key entry we're to futz
+		 * with.
+		 */
+		if (!salted) {
+		    switch (kdata->key_data_type[1]) {
+		        case KRB5_KDB_SALTTYPE_NORMAL:
+		        case KRB5_KDB_SALTTYPE_V4:
+			    /* Normal salt */
+			    if (kret = krb5_principal2salt(kcontext,
+							   dbentp->princ,
+							   &salt))
+				goto done;
+			    break;
+			case KRB5_KDB_SALTTYPE_NOREALM:
+			    if (kret = krb5_principal2salt_norealm(kcontext,
+								   dbentp->
+								   princ,
+								   &salt))
+				goto done;
+			    break;
+			case KRB5_KDB_SALTTYPE_ONLYREALM:
+			    {
+				krb5_data *xsalt;
+				if (kret = krb5_copy_data(kcontext,
+							  krb5_princ_realm(kcontext, dbentp->princ),
+							  &xsalt))
+				    goto done;
+				salt.length = xsalt->length;
+				salt.data = xsalt->data;
+				krb5_xfree(xsalt);
+			    }
+			    break;
+			default:
+			    goto done;
+		    }
+		}
+		else {
+		    if (salt.length = kdata->key_data_length[1]) {
+			if (salt.data = (char *) malloc(salt.length))
+			    memcpy(salt.data,
+				   (char *) kdata->key_data_contents[1],
+				   (size_t) salt.length);
+		    }
+		    else
+			salt.data = (char *) NULL;
+		}
+
+		/*
+		 * salt contains the salt.
+		 */
+		if (kret = krb5_string_to_key(kcontext,
+					      &master_encblock,
+					      kdata->key_data_type[0],
+					      &key,
+					      string,
+					      &salt))
+		    goto done;
+
+		/*
+		 * Now, salt contains the salt and key contains the decrypted
+		 * key.  kdata contains the key/salt data.  Fill in the output.
+		 */
+		keys[i].key_data_ver = KRB5_KDB_V1_KEY_DATA_ARRAY;
+		keys[i].key_data_kvno = kdata->key_data_kvno + 1;
+		keys[i].key_data_type[0] = kdata->key_data_type[0];
+		keys[i].key_data_type[1] = kdata->key_data_type[1];
+		keys[i].key_data_length[0] = (krb5_int16) key.length;
+		keys[i].key_data_length[1] = (krb5_int16) salt.length;
+		keys[i].key_data_contents[0] = (krb5_octet *) key.contents;
+		keys[i].key_data_contents[1] = (krb5_octet *) salt.data;
+	    }
+	}
+	else
+	    kret = ENOMEM;
     }
-    default:
-	goto done;
-    }
-
-    /* Now convert the string to keys */
-    kret = krb5_string_to_key(kcontext,
-			      &master_encblock,
-			      master_keyblock.keytype,
-			      primary,
-			      string,
-			      psaltdatap);
-    if (!kret)
-	kret = krb5_string_to_key(kcontext,
-				  &master_encblock,
-				  master_keyblock.keytype,
-				  alternate,
-				  string,
-				  asaltdatap);
-
  done:
-    if (kret) {
-	if (primary->contents) {
-	    memset((char *) primary->contents, 0, (size_t) primary->length);
-	    krb5_xfree(primary->contents);
-	}
-	if (alternate->contents) {
-	    memset((char *) alternate->contents, 0,
-		   (size_t) alternate->length);
-	    krb5_xfree(alternate->contents);
-	}
-	if (psaltdatap->data) {
-	    memset(psaltdatap->data, 0, (size_t) psaltdatap->length);
-	    krb5_xfree(psaltdatap->data);
-	    psaltdatap->data = (char *) NULL;
-	}
-	if (asaltdatap->data) {
-	    memset(asaltdatap->data, 0, (size_t) asaltdatap->length);
-	    krb5_xfree(asaltdatap->data);
-	    asaltdatap->data = (char *) NULL;
-	}
+    if (!kret) {
+	*nkeysp = nkeysalts;
+	*keysp = keys;
+    }
+    else {
+	if (keys && nkeysalts)
+	    key_free_key_data(keys, nkeysalts);
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_string_to_keys() = %d\n", kret));
@@ -691,19 +817,38 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
  * key_random_key()	- generate a random key.
  */
 krb5_error_code
-key_random_key(kcontext, rkeyp)
+key_random_key(kcontext, dbentp, nkeysp, keysp)
     krb5_context	kcontext;
-    krb5_keyblock	*rkeyp;
+    krb5_db_entry	*dbentp;
+    krb5_int32		*nkeysp;
+    krb5_key_data	**keysp;
 {
     krb5_error_code	kret;
     krb5_keyblock	*tmp;
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_random_key()\n"));
 
     tmp = (krb5_keyblock *) NULL;
-    kret = krb5_random_key(kcontext, &master_encblock, master_random, &tmp);
-    if (tmp) {
-	memcpy(rkeyp, tmp, sizeof(krb5_keyblock));
-	krb5_xfree(tmp);
+    if (*keysp = (krb5_key_data *) malloc(sizeof(krb5_key_data))) {
+	if (!(kret = krb5_random_key(kcontext,
+				     &master_encblock,
+				     master_random,
+				     &tmp))) {
+	    if (dbentp->n_key_data) {
+		memcpy(*keysp, &dbentp->key_data[0], sizeof(krb5_key_data));
+	    }
+	    else {
+		(*keysp)->key_data_ver = KRB5_KDB_V1_KEY_DATA_ARRAY;
+		(*keysp)->key_data_kvno = 1;
+		(*keysp)->key_data_type[0] = KEYTYPE_DES;
+		(*keysp)->key_data_type[1] = 0;
+	    }
+	    (*keysp)->key_data_length[0] = (krb5_int16) tmp->length;
+	    (*keysp)->key_data_contents[0] = tmp->contents;
+	    (*keysp)->key_data_length[1] = 0;
+	    (*keysp)->key_data_contents[1] = (krb5_octet *) NULL;
+	    krb5_xfree(tmp);
+	    *nkeysp = 1;
+	}
     }
     DPRINT(DEBUG_CALLS, key_debug_level, ("X key_random_key()=%d\n", kret));
     return(kret);
@@ -713,38 +858,68 @@ key_random_key(kcontext, rkeyp)
  * key_encrypt_keys() - encrypt keys.
  */
 krb5_error_code
-key_encrypt_keys(kcontext, principal, primary, alternate, eprimary, ealternate)
+key_encrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     krb5_context	kcontext;
-    krb5_principal	principal;
-    krb5_keyblock	*primary;
-    krb5_keyblock	*alternate;
-    krb5_encrypted_keyblock	*eprimary;
-    krb5_encrypted_keyblock	*ealternate;
+    krb5_db_entry	*dbentp;
+    krb5_int32		*nkeysp;
+    krb5_key_data	*inkeys;
+    krb5_key_data	**outkeysp;
 {
     krb5_error_code	kret;
+    krb5_db_entry	loser;
+    krb5_int32		nkeys, ndone;
+    krb5_keyblock	tmpkey;
+    krb5_keysalt	salt;
+    int			i;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_encrypt_keys()\n"));
-
-    kret = krb5_kdb_encrypt_key(kcontext,
-				&master_encblock,
-				primary,
-				eprimary);
-    if (kret)
-	kret = krb5_kdb_encrypt_key(kcontext,
-				    &master_encblock,
-				    alternate,
-				    ealternate);
+    memset(&loser, 0, sizeof(krb5_db_entry));
+    ndone = 0;
+    nkeys = *nkeysp;
+    for (i=0; i<nkeys; i++) {
+	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
+	    tmpkey.keytype = inkeys[i].key_data_type[0];
+	    tmpkey.length = inkeys[i].key_data_length[0];
+	    if (tmpkey.contents = (krb5_octet *) malloc((size_t)tmpkey.length))
+		memcpy(tmpkey.contents,
+		       inkeys[i].key_data_contents[0],
+		       tmpkey.length);
+	    else
+		break;
+	    salt.type = inkeys[i].key_data_type[1];
+	    if (salt.data.length = inkeys[i].key_data_length[1]) {
+		if (salt.data.data = (char *)
+		    malloc((size_t) salt.data.length))
+		    memcpy(salt.data.data,
+			   inkeys[i].key_data_contents[1],
+			   (size_t) salt.data.length);
+		else
+		    break;
+	    }
+	    if (kret = krb5_dbekd_encrypt_key_data(kcontext,
+						   &master_encblock,
+						   &tmpkey,
+						   (salt.data.length) ?
+						   	&salt :
+						   	(krb5_keysalt *) NULL,
+						   (int) inkeys[i].
+						   	key_data_kvno,
+						   &loser.key_data[i]))
+		break;
+	    else
+		ndone++;
+	}
+	else
+	    break;
+    }
  done:
     if (kret) {
-	if (eprimary->contents) {
-	    memset((char *) eprimary->contents, 0, (size_t) eprimary->length);
-	    krb5_xfree(eprimary->contents);
-	}
-	if (ealternate->contents) {
-	    memset((char *) ealternate->contents, 0,
-		   (size_t) ealternate->length);
-	    krb5_xfree(ealternate->contents);
-	}
+	if (loser.key_data && loser.n_key_data)
+	    key_free_key_data(loser.key_data, (krb5_int32) loser.n_key_data);
+    }
+    else {
+	*outkeysp = loser.key_data;
+	*nkeysp = ndone;
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_encrypt_keys() = %d\n", kret));
@@ -755,40 +930,54 @@ key_encrypt_keys(kcontext, principal, primary, alternate, eprimary, ealternate)
  * key_decrypt_keys() - decrypt keys.
  */
 krb5_error_code
-key_decrypt_keys(kcontext, principal, eprimary, ealternate, primary, alternate)
+key_decrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     krb5_context	kcontext;
-    krb5_principal	principal;
-    krb5_encrypted_keyblock	*eprimary;
-    krb5_encrypted_keyblock	*ealternate;
-    krb5_keyblock	*primary;
-    krb5_keyblock	*alternate;
+    krb5_db_entry	*dbentp;
+    krb5_int32		*nkeysp;
+    krb5_key_data	*inkeys;
+    krb5_key_data	**outkeysp;
 {
     krb5_error_code	kret;
+    krb5_db_entry	loser;
+    krb5_int32		nkeys, ndone;
+    krb5_keyblock	tmpkey;
+    krb5_keysalt	salt;
+    int			i;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_decrypt_keys()\n"));
-
-    kret = krb5_kdb_decrypt_key(kcontext,
-				&master_encblock,
-				eprimary,
-				primary);
-    if (kret)
-	kret = krb5_kdb_decrypt_key(kcontext,
-				    &master_encblock,
-				    ealternate,
-				    alternate);
+    memset(&loser, 0, sizeof(krb5_db_entry));
+    ndone = 0;
+    nkeys = *nkeysp;
+    for (i=0; i<nkeys; i++) {
+	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
+	    if (kret = krb5_dbekd_decrypt_key_data(kcontext,
+						   &master_encblock,
+						   &inkeys[i],
+						   &tmpkey,
+						   &salt))
+		break;
+	    loser.key_data[i].key_data_ver = KRB5_KDB_V1_KEY_DATA_ARRAY;
+	    loser.key_data[i].key_data_type[0] = tmpkey.keytype;
+	    loser.key_data[i].key_data_length[0] = (krb5_int16) tmpkey.length;
+	    loser.key_data[i].key_data_contents[0] = tmpkey.contents;
+	    loser.key_data[i].key_data_kvno = inkeys[i].key_data_kvno;
+	    loser.key_data[i].key_data_type[1] = salt.type;
+	    loser.key_data[i].key_data_length[1] = salt.data.length;
+	    loser.key_data[i].key_data_contents[1] =
+		(krb5_octet *) salt.data.data;
+	    ndone++;
+	}
+	else
+	    break;
+    }
  done:
     if (kret) {
-	if (primary->contents) {
-	    memset((char *) primary->contents, 0, (size_t) primary->length);
-	    krb5_xfree(primary->contents);
-	    primary->contents = 0;
-	}
-	if (alternate->contents) {
-	    memset((char *) alternate->contents, 0,
-		   (size_t) alternate->length);
-	    krb5_xfree(alternate->contents);
-	    alternate->contents = 0;
-	}
+	if (loser.key_data && loser.n_key_data)
+	    key_free_key_data(loser.key_data, (krb5_int32) loser.n_key_data);
+    }
+    else {
+	*outkeysp = loser.key_data;
+	*nkeysp = ndone;
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_decrypt_keys() = %d\n", kret));
@@ -799,64 +988,35 @@ key_decrypt_keys(kcontext, principal, eprimary, ealternate, primary, alternate)
  * key_pwd_is_weak()	- Check for weakness of key from password
  */
 krb5_boolean
-key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
+key_pwd_is_weak(kcontext, dbentp, string)
     krb5_context	kcontext;
-    krb5_principal	principal;
+    krb5_db_entry	*dbentp;
     krb5_data		*string;
-    krb5_int32		psalttype;
-    krb5_int32		asalttype;
 {
     krb5_boolean	weakness;
     krb5_error_code	kret;
-    krb5_keyblock	primary;
-    krb5_keyblock	alternate;
-    krb5_data		psalt, asalt;
+    krb5_int32		num_keys;
+    krb5_key_data	*key_list;
+    int			i;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_pwd_is_weak()\n"));
     weakness = 0;
 
-    if (master_encblock.key->etype != ETYPE_NULL) {
-	memset((char *) &primary, 0, sizeof(primary));
-	memset((char *) &alternate, 0, sizeof(alternate));
-	memset((char *) &psalt, 0, sizeof(psalt));
-	memset((char *) &asalt, 0, sizeof(asalt));
-
-	kret = key_string_to_keys(kcontext,
-				  principal,
-				  string,
-				  psalttype,
-				  asalttype,
-				  &primary,
-				  &alternate,
-				  &psalt,
-				  &asalt);
-	if (!kret) {
-	    if (primary.length &&
-		(primary.length == KRB5_MIT_DES_KEYSIZE) &&
-		mit_des_is_weak_key(primary.contents))
+    kret = key_string_to_keys(kcontext,
+			      dbentp,
+			      string,
+			      &num_keys,
+			      &key_list);
+    if (!kret) {
+	for (i=0; i<num_keys; i++) {
+	    if ((key_list[i].key_data_type[0] == KEYTYPE_DES) &&
+		(key_list[i].key_data_length[0] == KRB5_MIT_DES_KEYSIZE) &&
+		mit_des_is_weak_key(key_list[i].key_data_contents[0])) {
 		weakness = 1;
-	    if (alternate.length &&
-		(alternate.length == KRB5_MIT_DES_KEYSIZE) &&
-		mit_des_is_weak_key(alternate.contents))
-		weakness = 1;
-	    if (primary.contents) {
-		memset((char *) primary.contents, 0, (size_t) primary.length);
-		krb5_xfree(primary.contents);
-	    }
-	    if (alternate.contents) {
-		memset((char *) alternate.contents, 0,
-		       (size_t) alternate.length);
-		krb5_xfree(alternate.contents);
-	    }
-	    if (psalt.data) {
-		memset((char *) psalt.data, 0, (size_t) psalt.length);
-		krb5_xfree(psalt.data);
-	    }
-	    if (asalt.data) {
-		memset((char *) asalt.data, 0, (size_t) asalt.length);
-		krb5_xfree(asalt.data);
+		break;
 	    }
 	}
+	key_free_key_data(key_list, num_keys);
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_pwd_is_weak() = %d\n", weakness));
@@ -897,4 +1057,82 @@ krb5_keyblock *
 key_admin_key()
 {
     return((madmin_key_init) ? &madmin_key : (krb5_keyblock *) NULL);
+}
+
+/*
+ * key_free_key_data()		- Free a krb5_key_data array.
+ */
+void
+key_free_key_data(keys, nkeys)
+    krb5_key_data	*keys;
+    krb5_int32		nkeys;
+{
+    /*
+     * XXX - this should probably be a dbe routine.
+     */
+    int i, j;
+
+    if (keys && nkeys) {
+	for (i=0; i<nkeys; i++) {
+	    for (j=0; j<KRB5_KDB_V1_KEY_DATA_ARRAY; j++) {
+		if (keys[i].key_data_length[j] &&
+		    keys[i].key_data_contents[j]) {
+		    memset(keys[i].key_data_contents[j], 0,
+			   keys[i].key_data_length[j]);
+		    free(keys[i].key_data_contents[j]);
+		}
+	    }
+	    memset(&keys[i], 0, sizeof(krb5_key_data));
+	}
+	free(keys);
+    }
+}
+
+/*
+ * key_name_to_data()	- Find the appropriate krb5_key_data entry for a
+ *			  given name.
+ *
+ * Name consists of key/salt tuple and a kvno.  If the kvno is negative, then
+ * this routine returns the key_data entry with the highest kvno.  Otherwise,
+ * it searches for an exact match.
+ */
+krb5_error_code
+key_name_to_data(dbentp, ksent, kvno, kdatap)
+    krb5_db_entry	*dbentp;
+    krb5_key_salt_tuple	*ksent;
+    krb5_int32		kvno;
+    krb5_key_data	**kdatap;
+{
+    /*
+     * XXX - this should probably be a dbe routine.
+     */
+    int			i;
+    int			maxkvno;
+    krb5_key_data	*datap;
+
+    maxkvno = -1;
+    datap = (krb5_key_data *) NULL;
+    for (i=0; i<dbentp->n_key_data; i++) {
+	if ((dbentp->key_data[i].key_data_type[0] == ksent->ks_keytype) &&
+	    (dbentp->key_data[i].key_data_type[1] == ksent->ks_salttype)) {
+	    if (kvno >= 0) {
+		if (kvno == dbentp->key_data[i].key_data_kvno) {
+		    maxkvno == kvno;
+		    datap = &dbentp->key_data[i];
+		    break;
+		}
+	    }
+	    else {
+		if (dbentp->key_data[i].key_data_kvno > maxkvno) {
+		    maxkvno = dbentp->key_data[i].key_data_kvno;
+		    datap = &dbentp->key_data[i];
+		}
+	    }
+	}
+    }
+    if (maxkvno >= 0) {
+	*kdatap = datap;
+	return(0);
+    }
+    return(ENOENT);
 }
