@@ -71,7 +71,7 @@ krb5_error_code krb5_scc_destroy(id)
      /* XXX This may not be legal XXX */
      size = (unsigned long) buf.st_size;
 
-     bzero(zeros, BUFSIZ);
+     memset (zeros, 0, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
 	  if (fwrite(data->file, zeros, BUFSIZ) < 0) {
 	      ret = krb5_scc_interpret(errno);
