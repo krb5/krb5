@@ -331,8 +331,6 @@ cleanup_salt:
     return retval;
 }
 
-extern krb5_flags krb5_kdc_default_options;
-
 int verify_cs_pair(context, p_client_str, p_client, service, hostname, 
 		   p_num, c_depth, s_depth, ccache)
     krb5_context context;
@@ -382,7 +380,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	return retval;
     }
 
-    if (retval = krb5_get_credentials(context, krb5_kdc_default_options,
+    if (retval = krb5_get_credentials(context, 0, 
                                       ccache, &creds, &credsp)) {
 	com_err(prog, retval, "while getting creds for %s", hostname);
     	krb5_free_cred_contents(context, &creds);
