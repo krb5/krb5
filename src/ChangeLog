@@ -1,3 +1,8 @@
+2004-08-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): Check for
+	pthread_rwlock_init, with and without the thread library.
+
 2004-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): On AIX and OSF/1, always
