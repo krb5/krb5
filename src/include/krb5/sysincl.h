@@ -54,6 +54,15 @@
 #define L_XTND          2       /* relative to end of file */
 #endif /* L_SET */
 
+#ifndef FD_SET
+#define FD_SETSIZE          (sizeof (fd_set) * 8)
+
+#define FD_SET(f,s)         ((s)->fds_bits[0] |= (1 << (f)))
+#define FD_CLR(f,s)         ((s)->fds_bits[0] &= ~(1 << (f)))
+#define FD_ISSET(f,s)       ((s)->fds_bits[0] & (1 << (f)))
+#define FD_ZERO(s)          ((s)->fds_bits[0] = 0)
+#endif
+
 #if defined(SYSV) || defined(_AIX)
 #include <fcntl.h>
 #endif
