@@ -1,0 +1,30 @@
+Autoconf -- generate automatic software configuration scripts from templates
+
+Autoconf is an extensible package of m4 macros that produce shell
+scripts to automatically configure software source code packages.
+These scripts can adapt the packages to many kinds of UNIX-like
+systems without manual user intervention.  Autoconf creates a
+configuration script for a package from a template file that lists the
+operating system features that the package can use, in the form of m4
+macro calls.
+
+Autoconf requires GNU m4.  The configuration scripts produced by
+Autoconf are independent of Autoconf when they are run, so their users
+do not need to have Autoconf (or GNU m4).
+
+The file INSTALL can be distributed with packages that use
+Autoconf-generated configure scripts and Makefiles that conform to the
+GNU coding standards.  The package's README can just give an overview
+of the package, where to report bugs, and a pointer to INSTALL for
+instructions on compilation and installation.  This removes the need
+to maintain many similar sets of installation instructions.
+
+The file `acconfig.h' contains short descriptions of the C preprocessor
+variables that Autoconf can define, suitable for copying into other
+packages' configuration headers or Makefile.in files.  You can use the
+program `autoheader' to automatically creates a configuration header
+from a `configure.in', based on the information in `acconfig.h'.
+
+Mail suggestions and bug reports for Autoconf to
+bug-gnu-utils@prep.ai.mit.edu.  Please include the Autoconf version
+number, which you can get by running "autoconf --version".

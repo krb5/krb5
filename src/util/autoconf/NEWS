@@ -1,0 +1,152 @@
+Major changes in release 1.11:
+
+* AC_PROG_INSTALL calls install.sh with the -c option.
+* AC_SET_MAKE cleans up after itself.
+* AC_OUTPUT sets prefix and exec_prefix if they weren't set already.
+* AC_OUTPUT prevents shells from looking in PATH for config.status.
+
+Plus a few other bug fixes.
+
+Major changes in release 1.10:
+
+* autoheader uses config.h.bot if present, analogous to config.h.top.
+* AC_PROG_INSTALL looks for install.sh in srcdir or srcdir/.. or
+  srcdir/../.. and never uses cp.
+* AC_PROG_CXX looks for cxx as a C++ compiler.
+
+Plus several bugs fixed.
+
+Major changes in release 1.9:
+
+* AC_YYTEXT_POINTER replaces AC_DECLARE_YYTEXT.
+* AC_SIZEOF_TYPE generates the cpp symbol name automatically,
+  and autoheader generates entries for those names automatically.
+* AC_FIND_X gets the result from xmkmf correctly.
+* AC_FIND_X assumes no X if --without-x was given.
+* AC_FIND_XTRA adds libraries to the variable X_EXTRA_LIBS.
+* AC_PROG_INSTALL finds OSF/1 installbsd.
+
+Major changes in release 1.8:
+
+** New macros:
+* New macros AC_LANG_C, AC_LANG_CPLUSPLUS, AC_LANG_SAVE, AC_LANG_RESTORE,
+  AC_PROG_CXX, AC_PROG_CXXCPP, AC_REQUIRE_CPP
+  for checking both C++ and C features in one configure script.
+* New macros AC_CHECKING, AC_VERBOSE, AC_WARN, AC_ERROR for printing messages.
+* New macros AC_FIND_XTRA, AC_MMAP, AC_SIZEOF_TYPE, AC_PREREQ,
+  AC_SET_MAKE, AC_ENABLE.
+
+** Changed macros:
+* AC_FIND_X looks for X in more places.
+* AC_PROG_INSTALL defaults to install.sh instead of cp, if it's in srcdir.
+  install.sh is distributed with Autoconf.
+* AC_DECLARE_YYTEXT has been removed because it can't work, pending
+  a rewrite of quoting in AC_DEFINE.
+* AC_OUTPUT adds its comments in C format when substituting in C files.
+* AC_COMPILE_CHECK protects its ECHO-TEXT argument with double quotes.
+
+** New or changed command line options:
+* configure accepts --enable-FEATURE[=ARG] and --disable-FEATURE options.
+* configure accepts --without-PACKAGE, which sets withval=no.
+* configure accepts --x-includes=DIR and --x-libraries=DIR.
+* Giving --with-PACKAGE no argument sets withval=yes instead of withval=1.
+* configure accepts --help, --version, --silent/--quiet, --no-create options.
+* configure accepts and ignores most other Cygnus configure options, and
+  warns about unknown options.
+* config.status accepts --help, --version options.
+
+** Paths and other changes:
+* Relative srcdir values are not made absolute.
+* The values of @prefix@ and @exec_prefix@ and @top_srcdir@ get substituted.
+* Autoconf library files are installed in ${datadir}/autoconf, not ${datadir}.
+* autoheader optionally copies config.h.top to the beginning of config.h.in.
+* The example Makefile dependencies for configure et al. work better.
+* Namespace cleanup: all shell variables used internally by Autoconf
+  have names beginning with `ac_'.
+
+More big improvements are in process for future releases, but have not
+yet been (variously) finished, integrated, tested, or documented enough
+to release yet.
+
+Major changes in release 1.7:
+
+* New macro AC_OBSOLETE.
+* Bugs in Makefile.in fixed.
+* AC_LONG_FILE_NAMES improved.
+
+Major changes in release 1.6:
+
+* New macro AC_LONG_64_BITS.
+* Multiple .h files can be created.
+* AC_FIND_X looks for X files directly if it doesn't find xmkmf.
+* AC_ALLOCA defines C_ALLOCA if using alloca.c.
+* --with-NAME can take a value, e.g., --with-targets=sun4,hp300bsd.
+* Unused --no-create option to configure removed.
+* autoheader doesn't change the timestamp of its output file if
+  the file didn't change.
+* All macros that look for libraries now use AC_HAVE_LIBRARY.
+* config.status checks three optional environment variables to
+  modify its behavior.
+* The usual bug fixes.
+
+Major changes in release 1.5:
+
+* New macros AC_FIND_X, AC_OFF_T, AC_STAT_MACROS_BROKEN, AC_REVISION.
+* autoconf and autoheader scripts have GNU standards conforming
+  --version and --help options (they print their message and exit).
+* Many bug fixes.
+
+Major changes in release 1.4:
+
+* New macros AC_HAVE_POUNDBANG, AC_TIME_WITH_SYS_TIME, AC_LONG_DOUBLE,
+  AC_GETGROUPS_T, AC_DEFINE_UNQUOTED.
+* autoconf and autoheader use the M4 environment variable to determine the
+  path of the m4 program to use.
+* The --macrodir option to autoconf and autoheader specifies the directory
+  in which acspecific.m4, acgeneral.m4, etc. reside if not the default.
+* autoconf and autoheader can take `-' as their file names, which means to
+  read stdin as input.
+* Resulting configure scripts can take a --verbose option which causes them
+  to print the results of their tests.
+* AC_DEFINE quotes its second argument in such a way that spaces, magic
+  shell characters, etc. will be preserved during various stages of
+  expansion done by the shell.  If you don't want this, use
+  AC_DEFINE_UNQUOTED instead.
+* Much textual processing done with external calls to tr and sed have been
+  internalized with builtin m4 `patsubst' and `translit' calls.
+* AC_OUTPUT doesn't hardwire the filenames it outputs.  Instead, you can
+  set the shell variables `gen_files' and `gen_config' to the list of
+  filenames to output.
+* AC_DECLARE_YYTEXT does an AC_SUBST of `LEX_OUTPUT_ROOT', which may be
+  "lex.yy" or "lexyy", depending on the system. 
+* AC_PROGRAMS_CHECK takes an optional third arg.  If given, it is used as
+  the default value. 
+* If AC_ALLOCA chooses alloca.c, it also defines STACK_DIRECTION.
+* AC_CONST works much more reliably on more systems.
+* Many bug fixes.
+
+Major changes in release 1.3:
+
+configure no longer requires awk for packages that use a config.h.
+Support handling --with-PACKAGE options.
+New `autoheader' script to create `config.h.in' from `configure.in'.
+Ignore troublesome -lucb and -lPW when searching for alloca.
+Rename --exec_prefix to --exec-prefix for GNU standards conformance.
+Improve detection of STDC library.
+Add AC_HAVE_LIBRARY to check for non-default libraries.
+Function checking should work with future GNU libc releases.
+
+Major changes in release 1.2:
+
+The --srcdir option is now usually unnecessary.
+Add a file containing sample comments describing CPP macros.
+A comment in config.status tells which host it was configured on.
+Substituted variable values can now contain commas.
+Fix bugs in various feature checks.
+
+Major changes in release 1.1:
+
+Added AC_STRCOLL macro.
+Made AC_GETLOADAVG check for more things.
+AC_OUTPUT argument is now optional.
+Various bug fixes.
