@@ -1,3 +1,8 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (PROGRAM_EXITING) [__GNUC__ && !_WIN32 &&
+	CONSTRUCTOR_ATTR_WORKS]: Define as zero.
+
 2005-02-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Put #ifndef/#define/#endif wrapper into
