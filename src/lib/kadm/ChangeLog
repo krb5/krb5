@@ -1,3 +1,14 @@
+
+Mon Jul 31 15:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_kw_{enc,dec}.c - Add support for new kadmin protocol.
+	* alt_prof.c - Remove string conversion routine, use the ones in str_
+		conv.c.  Convert krb5_read_realm_params() to use these string
+		conversion routines so that the KDC profile is more textual
+		as opposed to being numeric.
+	* str_conv.c - String conversion routines.
+	* Makefile.in, configure.in - Add support for str_conv.c
+	* t_dbentry.c - Test new kadmin protocol.
+
 Mon Jul 17 15:16:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* alt_prof.c - Add krb5_{read,free}_realm_params() to read in per-
 		realm KDC data and to free the allocated structure.
