@@ -27,11 +27,13 @@ static char rcsid_setup_mkey_c[] =
  */
 
 krb5_error_code
-krb5_db_setup_mkey_name(keyname, realm, principal)
+krb5_db_setup_mkey_name(keyname, realm, fullname, principal)
 const char *keyname;
 const char *realm;
+char **fullname;
 krb5_principal *principal;
 {
+    krb5_error_code retval;
     krb5_principal retprinc;
     int keylen = strlen(keyname);
     int rlen = strlen(realm);
@@ -60,6 +62,12 @@ krb5_principal *principal;
     bcopy(keyname, retprinc[1]->data, keylen);
     retprinc[1]->length = keylen;
 
+    if (fullname && (retval = krb5_unparse_name(retprinc, fullname))) {
+	xfree(retprinc[1]);
+	xfree(retprinc[0]);
+	xfree(retprinc);
+	return retval;
+    }
     return 0;
 
  free1:
