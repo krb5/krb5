@@ -127,6 +127,7 @@ int main(int argc, char **argv)
 	}
      }
 
+#ifdef	notdef
      /* stash ticket, session key, etc. for future use */
      if ((code = krb_save_credentials(v4creds.service, v4creds.instance,
 				      v4creds.realm, v4creds.session,
@@ -136,6 +137,23 @@ int main(int argc, char **argv)
 	 com_err("k524init", code, "trying to save the V4 ticket");
 	 exit(1);
      }
+#else	/* notdef */
+     /*
+      * krb_save_credentials() as supplied by CNS doesn't exist in the MIT
+      * Kerberos version 4.  So, we're inlining the logic here.
+      */
+     if (((code = tf_init(TKT_FILE, W_TKT_FIL)) != KSUCCESS) ||
+	 ((code = tf_save_cred(v4creds.service, v4creds.instance,
+			       v4creds.realm, v4creds.session,
+			       v4creds.lifetime, v4creds.kvno,
+			       &(v4creds.ticket_st),
+			       v4creds.issue_date)))) {
+	 com_err("k524init", code, "trying to save the V4 ticket");
+	 exit(1);
+     }
+     else
+	 (void) tf_close();
+#endif	/* notdef */
 
      exit(0);
 }

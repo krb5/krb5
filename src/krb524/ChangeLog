@@ -1,4 +1,9 @@
 
+Fri Jun 16 17:09:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* k524init.c - Inline code from krb_save_credentials, it doesn't
+		exist for some K4 (e.g. /usr/athena).
+
+
 Thu Jun 15 17:56:43 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.
