@@ -20,7 +20,7 @@ static char rcsid_fcc_maybe_c[] =
 #include <krb5/osconf.h>
 
 #ifdef KRB5_USE_INET
-#include <netinet/in.h>			/* XXX ip only? */
+#include <netinet/in.h>
 #else
  #error find some way to use net-byte-order file version numbers.
 #endif
