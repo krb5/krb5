@@ -72,9 +72,6 @@ all-windows::
 	@echo Making in lib\gssapi
 	cd ..\gssapi
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
-	@echo Making in lib\des425
-	cd ..\des425
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in lib
 	cd ..
 
@@ -92,9 +89,6 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\gssapi
 	cd ..\gssapi
-	-$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in lib\des425
-	cd ..\des425
 	-$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib
 	cd ..
