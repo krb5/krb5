@@ -472,6 +472,7 @@ char * v4_klog( type, format, va_alist)
     va_dcl
 #endif
 {
+    int logpri = LOG_INFO;
     va_list pvar;
 #if __STDC__ || defined(STDARG_PROTOTYPES)
     va_start(pvar, format);
@@ -480,17 +481,18 @@ char * v4_klog( type, format, va_alist)
 #endif
 
     switch (type) {
-    case L_INI_REQ:
-    case L_NTGT_INTK:
-    case L_TKT_REQ:
     case L_ERR_SEXP:
     case L_ERR_NKY:
     case L_ERR_NUN:
     case L_ERR_UNK:
+	logpri = LOG_ERR;
+    case L_INI_REQ:
+    case L_NTGT_INTK:
+    case L_TKT_REQ:
     case L_APPL_REQ:
 	strcpy(log_text, "PROCESS_V4:");
 	vsprintf(log_text+strlen(log_text), format, pvar);
-	com_err(0, 0, log_text);
+	syslog(logpri, log_text);
     /* ignore the other types... */
     }
     va_end(pvar);
@@ -615,15 +617,15 @@ kerb_get_principal(name, inst, principal, maxn, more)
     krb5_princ_set_realm_data (&search, local_realm);
     krb5_princ_set_realm_length (&search, strlen(local_realm));
     search.data = search_stg;
-    search.length = 1 + (inst != 0);
     search.type = 0;
     search_stg[0].data = name;
     search_stg[0].length = strlen(name);
-    if (inst)
-      {
+    if (inst && *inst) {
 	search_stg[1].data = inst;
 	search_stg[1].length = strlen(inst);
-      }
+	search.length = 2;
+      } else
+	search.length = 1;
     if (retval = krb5_db_get_principal(&search, &entries, &nprinc, &more5)) {
 	more = 0;
         return( 0);
@@ -776,6 +778,7 @@ kerberos_v4(client, pkt)
 	    if (i = check_princ(req_name_ptr, req_inst_ptr, 0,
 		&a_name_data)) {
 		kerb_err_reply(client, pkt, i, lt);
+		a_name_data.key_low = a_name_data.key_high = 0;
 		return;
 	    }
 	    tk->length = 0;	/* init */
@@ -787,6 +790,8 @@ kerberos_v4(client, pkt)
 	    if (i = check_princ(service, instance, lifetime,
 		&s_name_data)) {
 		kerb_err_reply(client, pkt, i, lt);
+		a_name_data.key_high = a_name_data.key_low = 0;
+		s_name_data.key_high = s_name_data.key_low = 0;
 		return;
 	    }
 	    /* Bound requested lifetime with service and user */
@@ -802,6 +807,7 @@ kerberos_v4(client, pkt)
 	    /* unseal server's key from master key */
 	    bcopy(&s_name_data.key_low, key, 4);
 	    bcopy(&s_name_data.key_high, ((long *) key) + 1, 4);
+	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
 	    /* construct and seal the ticket */
@@ -820,6 +826,7 @@ kerberos_v4(client, pkt)
 	    /* a_name_data.key_low a_name_data.key_high */
 	    bcopy(&a_name_data.key_low, key, 4);
 	    bcopy(&a_name_data.key_high, ((long *) key) + 1, 4);
+	    a_name_data.key_low= a_name_data.key_high = 0;
 
 	    /* unseal the a_name key from the master key */
 	    kdb_encrypt_key(key, key, master_key, 
@@ -924,6 +931,7 @@ kerberos_v4(client, pkt)
 	    /* unseal server's key from master key */
 	    bcopy(&s_name_data.key_low, key, 4);
 	    bcopy(&s_name_data.key_high, ((long *) key) + 1, 4);
+	    s_name_data.key_low = s_name_data.key_high = 0;
 	    kdb_encrypt_key(key, key, master_key,
 			    master_key_schedule, DECRYPT);
 	    /* construct and seal the ticket */
@@ -1090,6 +1098,7 @@ int check_princ(p_name, instance, lifetime, p)
     
     if (n < 0) {
 	lt = klog(L_KRB_PERR, "Database unavailable!");
+	p->key_high = p->key_low = 0;    
 	hang();
     }
     
@@ -1143,7 +1152,7 @@ int set_tgtkey(r)
     char   *r;			/* Realm for desired key */
 {
     int     n;
-    static char lastrealm[REALM_SZ];
+    static char lastrealm[REALM_SZ] = "";
     Principal p_st;
     Principal *p = &p_st;
     C_Block key;
