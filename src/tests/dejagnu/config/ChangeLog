@@ -1,3 +1,9 @@
+2002-10-07  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (stop_kerberos_daemons): Kill, expect eof, wait, in
+	that order.  Avoids delivery of multiple signals (HUP+TERM) to KDC
+	daemons when shutting down.
+
 2002-09-29  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (start_kerberos_daemons): Fix to use "tail -f" to
