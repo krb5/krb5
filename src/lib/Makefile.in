@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..
 ##DOS!include $(BUILDTOP)\config\windows.in
@@ -12,6 +11,7 @@ all-mac::
 
 clean:: clean-$(WHAT)
 
+clean-mac:: clean-unix
 clean-unix::
 	$(RM) libkrb5.a libkdb5.a libcrypto.a 
 	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a

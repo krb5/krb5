@@ -1,3 +1,10 @@
+Tue Mar 28 18:26:01 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (clean-mac):  Add.
+	* configure.in (LinkFile's):  Put `./' on libraries to ease Mac
+	translation.
+	(AppendRule all-unix):  Rename from AppendRule all.
+
 Thu Mar 23 14:26:35 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: also produces a map for the dll.
