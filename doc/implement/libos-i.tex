@@ -101,9 +101,9 @@ epoch.
 [The ASN.1 encoding routines must convert this to the standard ASN.1
 encoding as needed]
 
-\begin{funcdecl}{krb5_ms_timeofday}{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_us_timeofday}{krb5_error_code}{\funcout}
 \funcarg{krb5_int32 *}{seconds}
-\funcarg{krb5_ui_2 *}{milliseconds}
+\funcarg{krb5_int32 *}{microseconds}
 \end{funcdecl}
 
 Retrieves the system time of day, in seconds since the local system's
@@ -112,7 +112,7 @@ epoch.
 encoding as needed]
 
 The seconds portion is returned in \funcparam{*seconds}, the
-milliseconds portion in \funcparam{*milliseconds}.
+microseconds portion in \funcparam{*microseconds}.
 
 \begin{funcdecl}{krb5_net_read}{int}{\funcin}
 \funcarg{int}{fd}
