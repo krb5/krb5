@@ -1,3 +1,7 @@
+2004-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* btree/bt_seq.c: Include string.h.
+
 2003-04-01  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-unix): Delete install-libs.  We don't want

@@ -68,6 +68,7 @@ static char sccsid[] = "@(#)bt_seq.c	8.9 (Berkeley) 6/20/95";
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "db-int.h"
 #include "btree.h"
