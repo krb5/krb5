@@ -235,29 +235,14 @@ asn1_error_code asn1_encode_encrypted_data(buf, val, retlen)
   asn1_cleanup();
 }
 
-/*
- * NOTE!!!! for historical reasons, krb5_flags are bitreversed 
- * around a 32-bit boundary in the MIT implementation.  Hence, bit #0 is 
- * really 0x80000000, so we need to do a 32 bit reverse operation before 
- * encoding the bit string..  There's no good reason for it, but it's too 
- * hard to change things now, since the flags are used in other places.
- * 
- * People should beware of this before using asn1_encode_krb5_flags to encode
- * other ASN.1 bit strings, since behavior is hard-coded into this function.
- */ 
 asn1_error_code asn1_encode_krb5_flags(buf, val, retlen)
      asn1buf * buf;
      const krb5_flags val;
      int * retlen;
 {
   asn1_setup();
-  krb5_flags valcopy;
+  krb5_flags valcopy = val;
   int i;
-
-  valcopy = ((asn1_swbits[(val & 0xff)] << 24) | 
-	     (asn1_swbits[(val >> 8) & 0xff] << 16) |
-	     (asn1_swbits[(val >> 16) & 0xff] << 8) | 
-	     asn1_swbits[(val >> 24) & 0xff]);
 
   for(i=0; i<4; i++){
     retval = asn1buf_insert_octet(buf,(asn1_octet) (valcopy&0xFF));

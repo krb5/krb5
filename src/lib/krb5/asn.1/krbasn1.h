@@ -39,8 +39,6 @@ typedef int asn1_tagnum;
 #define ASN1_TAGNUM_CEILING INT_MAX
 #define ASN1_TAGNUM_MAX (ASN1_TAGNUM_CEILING-1)
 
-extern asn1_octet asn1_swbits[256];
-
 /* This is Kerberos Version 5 */
 #define KVNO 5
 
