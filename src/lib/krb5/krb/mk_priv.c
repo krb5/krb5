@@ -58,19 +58,19 @@ OLDDECLARG(krb5_data *, outbuf)
     krb5_encrypt_block eblock;
     krb5_priv privmsg;
     krb5_priv_enc_part privmsg_enc_part;
-    krb5_address *addrs[2];
     krb5_data *scratch;
 
     if (!valid_etype(etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+	return KRB5_PROG_ETYPE_NOSUPP;
     privmsg.etype = etype; 
 
     privmsg_enc_part.user_data = *userdata;
     privmsg_enc_part.s_address = sender_addr->address;
     privmsg_enc_part.r_address = recv_addr->address;
 
+    /* ms_timeofday returns signed msec, hence the cast */
     if (retval = krb5_ms_timeofday(&privmsg_enc_part.timestamp,
-				   &privmsg_enc_part.msec))
+				   (krb5_int16 *)&privmsg_enc_part.msec))
 	return retval;
 
     if (krb5_fulladdr_order(sender_addr, recv_addr) > 0)
