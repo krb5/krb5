@@ -1,3 +1,7 @@
+2000-09-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* dispatch.c (dispatch): inet_ntop() returns const char *.
+
 2000-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* main.c (initialize_realms): For "cannot initialize realm"

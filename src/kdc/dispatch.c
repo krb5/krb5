@@ -52,18 +52,17 @@ dispatch(pkt, from, portnum, response)
     /* try the replay lookaside buffer */
     if (kdc_check_lookaside(pkt, from, response)) {
 	/* a hit! */
-	char *name = 0;
+	const char *name = 0;
 	char buf[46];
-	krb5_address *a = from->address;
 
 #ifdef HAVE_INET_NTOP
 	name = inet_ntop (from->address->addrtype, from->address->contents,
 			  buf, sizeof (buf));
 #else
 	if (from->address->addrtype == ADDRTYPE_INET) {
-	    struct sockaddr_in *sin
+	    struct sockaddr_in *mysin
 		= (struct sockaddr_in *)from->address->contents;
-	    strcpy (buf, inet_ntoa (sin->sin_addr));
+	    strcpy (buf, inet_ntoa (mysin->sin_addr));
 	    name = buf;
 	}
 #endif
