@@ -31,8 +31,13 @@ case $host in
 		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
 	done`
  
-	echo $CC -G $ldflags -o $library $FILES $libdirfl $liblist
-	$CC -G $ldflags -o $library $FILES $libdirfl $liblist
+	optflags=""
+	if test "$HAVE_GCC"x = "x" ; then
+		optflags="-h $library"
+	fi
+
+	echo $CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist 
+	$CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist
 	stat=$?
 	;;
 *-*-aix*)

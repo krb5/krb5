@@ -1,3 +1,9 @@
+Mon Oct  2 12:12:20 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* makeshlib.sh: For solaris, if you are not using gcc, add the -h
+		argument to specify the name of the shared library to
+		load. (i.e. libfoo.so.0.1).
+
 Mon Sep 25 16:41:11 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
