@@ -57,7 +57,7 @@ kdc_com_err_proc(whoami, code, format, pvar)
 {
     /* XXX need some way to do this better... */
 
-    extern void vfprintf PROTOTYPE((FILE *, const char *, va_list));
+    extern int vfprintf PROTOTYPE((FILE *, const char *, va_list));
 
     if (whoami) {
         fputs(whoami, stderr);
@@ -144,6 +144,7 @@ char **argv;
     char *rcname = 0;
     char lrealm[BUFSIZ];
     krb5_error_code retval;
+    krb5_enctype etype;
 
     extern char *optarg;
     extern krb5_deltat krb5_clockskew;
@@ -204,6 +205,12 @@ char **argv;
 		krb5_rc_get_name(kdc_rcache));
 	exit(1);
     }
+    if ((retval = krb5_rc_expunge(kdc_rcache))) {
+	com_err(argv[0], retval, "while expunging replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
+	exit(1);
+    }
     /* assemble & parse the master key name */
 
     if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, (char **) 0,
@@ -225,6 +232,17 @@ error(You gotta figure out what cryptosystem to use in the KDC);
 	com_err(argv[0], retval, "while fetching master key");
 	(void) krb5_rc_close(kdc_rcache);
 	exit(1);
+    }
+    /* initialize random key generators */
+    for (etype = 0; etype <= krb5_max_cryptosystem; etype++) {
+	if (krb5_csarray[etype]) {
+	    if (retval = (*krb5_csarray[etype]->system->
+			  init_random_key)(&master_keyblock,
+					   &krb5_csarray[etype]->random_sequence)) {
+		com_err(argv[0], retval, "while setting up random key generator for etype %d--etype disabled", etype);
+		krb5_csarray[etype] = 0;
+	    }
+	}
     }
 
     return;
