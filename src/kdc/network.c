@@ -51,7 +51,9 @@
 #endif
 #include <arpa/inet.h>
 
+#ifndef ARPHRD_ETHER /* OpenBSD breaks on multiple inclusions */
 #include <net/if.h>
+#endif
 
 extern int errno;
 

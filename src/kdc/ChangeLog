@@ -1,5 +1,9 @@
 2000-12-12  Ken Raeburn  <raeburn@mit.edu>
 
+	* network.c: Don't include net/if.h if ARPHRD_ETHER is defined.
+	Fix suggested by Kevin Coffman <kwc@citi.umich.edu> for OpenBSD,
+	which breaks on multiple inclusions of net/if.h.
+
 	* configure.in: Look for ifaddrs.h.
 	* network.c (printaddr, printifaddr, addr_eq, foreach_localaddr):
 	Update from lib/krb5/os/localaddr.c, including getifaddrs
