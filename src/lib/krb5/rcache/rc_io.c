@@ -11,7 +11,7 @@
  * I/O functions for the replay cache default implementation.
  */
 
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
 #  define PATH_SEPARATOR "\\"
 #else
 #  define PATH_SEPARATOR "/"
@@ -60,7 +60,7 @@ static void getdir()
  if (!dirlen)
   {
    if (!(dir = getenv("KRB5RCACHEDIR")))
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
      if (!(dir = getenv("TEMP")))
 	 if (!(dir = getenv("TMP")))
 	     dir = "C:\\";

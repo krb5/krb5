@@ -1,3 +1,7 @@
+Mon Jun 10 21:52:38 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* rc_io.c: Change _WINDOWS to _MSDOS, and add check for _WIN32.
+
 Sat Feb 24 18:53:33 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rc_io.c (krb5_rc_io_creat, krb5_rc_io_open): Use Windows path
