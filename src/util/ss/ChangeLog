@@ -1,3 +1,8 @@
+Tue Mar 12 22:32:56 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Use AC_HEADER_STDARG instead of calling
+	AC_CHECK_HEADER on stdarg.h.
+
 Mon Sep 25 16:42:57 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
