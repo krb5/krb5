@@ -1,3 +1,10 @@
+1999-12-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_os_ctx.c (krb5_secure_config_files): Do define; always
+	return an error, but perform old functionality in case the error
+	is ignored.  Delete when we can make a major version number
+	change.
+
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* an_to_ln.c (default_an_to_ln): Avoid stomping byte after
@@ -17,11 +24,6 @@
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
 	Makefile cleanup. [from wsanchez@apple.com]
-
-1999-10-22  Ken Raeburn  <raeburn@mit.edu>
-
-	* changepw.c (krb5_change_password): Wait only two minutes, not
-	indefinitely, for a response from the kpasswd server.
 
 1999-10-22  Ken Raeburn  <raeburn@mit.edu>
 

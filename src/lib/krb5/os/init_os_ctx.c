@@ -464,11 +464,14 @@ krb5_free_config_files(filenames)
 
 #endif /* macintosh */
 
-#if 0
 krb5_error_code
 krb5_secure_config_files(ctx)
 	krb5_context ctx;
 {
+	/* Obsolete interface; always return an error.
+
+	   This function should be removed next time a major version
+	   number change happens.  */
 	krb5_error_code retval;
 	
 	if (ctx->profile) {
@@ -476,11 +479,13 @@ krb5_secure_config_files(ctx)
 		ctx->profile = 0;
 	}
 
+	ctx->profile_secure = TRUE;
 	retval = os_init_paths(ctx);
+	if (retval)
+		return retval;
 
-	return retval;
+	return KRB5_OBSOLETE_FN;
 }
-#endif
 
 void
 krb5_os_free_context(ctx)
