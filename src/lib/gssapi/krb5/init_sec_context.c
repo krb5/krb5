@@ -507,7 +507,10 @@ new_connection(
    krb5_auth_con_setflags(context, ctx->auth_context,
 			  KRB5_AUTH_CONTEXT_DO_SEQUENCE);
    ctx->initiate = 1;
-   ctx->gss_flags = KG_IMPLFLAGS(req_flags);
+   ctx->gss_flags = (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
+                     GSS_C_TRANS_FLAG | 
+                     ((req_flags) & (GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
+                                     GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG)));
    ctx->seed_init = 0;
    ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
    ctx->seqstate = 0;

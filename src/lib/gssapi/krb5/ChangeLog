@@ -1,3 +1,19 @@
+2004-02-05  Jeffrey Altman <jaltman@mit.edu>
+
+    * gssapiP_krb5.h:  remove KG_IMPLFLAGS macro
+
+    * init_sec_context.c (init_sec_context): Expand KG_IMPLFLAGS
+      macro with previous macro definition
+
+    * accept_sec_context.c (accept_sec_context): Replace KG_IMPLFLAGS
+      macro with new definition.  As per 1964 the INTEG and CONF flags
+      are supposed to indicate the availability of the services in 
+      the client.  By applying the previous definition of KG_IMPLFLAGS
+      the INTEG and CONF flags are always on.  This can be a problem
+      because some clients such as Microsoft's Kerberos SSPI allow
+      CONF and INTEG to be used independently.  By forcing the flags
+      on, we would end up with inconsist state with the client.
+
 2004-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_sec_context.c (make_gss_checksum) [CFX_EXERCISE]: Don't
