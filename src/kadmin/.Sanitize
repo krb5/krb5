@@ -29,10 +29,10 @@ client
 configure
 configure.in
 kpasswd
-server
-v4server
+v5server
 
 Things-to-lose:
+v4server
 
 Do-last:
 
