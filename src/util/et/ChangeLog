@@ -7,6 +7,12 @@
 	(check-unix): Set up the environment properly to load shared
 	libraries when running the test programs.
 
+	* configure.in: Enable dependency support for shared lib.
+	* Makefile.in (test_et, t_com_err): Depend on, and link against,
+	the new support library.
+	(SHLIB_EXPDEPS, SHLIB_EXPLIBS, SHLIB_RDIRS, SHLIB_DIRS): New
+	variables.
+
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): New variables.

@@ -62,8 +62,12 @@ WFLAGS=		-ansi -D_POSIX_SOURCE -pedantic \
 
 DEPLIBS=
 SHLIB_LIBS=
+SHLIB_EXPDEPS = $(SUPPORT_DEPLIB)
+SHLIB_EXPLIBS=-l$(SUPPORT_LIBNAME)
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+SHLIB_DIRS=-L$(TOPLIBD)
 
 COM_ERR_HDR=$(BUILDTOP)$(S)include$(S)com_err.h
 
@@ -127,10 +131,10 @@ do-its4: error_table.y et_lex.lex.c
 
 PROG_RPATH=$(KRB5_LIBDIR)
 PROG_LIBPATH=-L$(TOPLIBD)
-test_et: test_et.o test1.o test2.o $(COM_ERR_DEPLIB)
-	$(CC_LINK) -o test_et test_et.o test1.o test2.o -lcom_err
-t_com_err: t_com_err.o et1.o et2.o $(COM_ERR_DEPLIB)
-	$(CC_LINK) -o t_com_err t_com_err.o et1.o et2.o -lcom_err
+test_et: test_et.o test1.o test2.o $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o test_et test_et.o test1.o test2.o -lcom_err $(SUPPORT_LIB)
+t_com_err: t_com_err.o et1.o et2.o $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_com_err t_com_err.o et1.o et2.o -lcom_err $(SUPPORT_LIB)
 
 all-unix:: compile_et includes
 
