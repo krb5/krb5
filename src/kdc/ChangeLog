@@ -1,5 +1,7 @@
 2002-09-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* network.c: Include sys/filio.h if available.
+
 	* extern.h (struct __kdc_realm_data): New field realm_tcp_ports.
 	* main.c (init_realm): Fill it in.  New argument for default tcp
 	ports; rename old def_ports argument to def_udp_ports.

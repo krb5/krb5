@@ -59,6 +59,10 @@
 #include <net/if.h>
 #endif
 
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>		/* FIONBIO */
+#endif
+
 #include "fake-addrinfo.h"
 
 /* Misc utility routines.  */
