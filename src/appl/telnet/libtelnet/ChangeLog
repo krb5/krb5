@@ -1,3 +1,9 @@
+Mon Aug  8 22:16:54 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* kerberos5.c (kerberos5_send): Whoops, mispelled
+	krb5_copy_keyblock_contents().  (It was inside #ifdef
+	ENCRYPTION)
+
 Thu Aug  4 03:36:29 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: add blank target for install

@@ -270,11 +270,11 @@ kerberos5_send(ap)
 	    if (newkey->keytype != KEYTYPE_DES) {
 		if (creds.keyblock.keytype == KEYTYPE_DES)
 		    /* use the session key in credentials instead */
-		    krb5_copy_keyblocks_contents(&creds, &session_key);
+		    krb5_copy_keyblock_contents(&creds, &session_key);
 		else
 		    /* XXX ? */;
 	    } else {
-		krb5_copy_keyblocks_contents(newkey, &session_key);
+		krb5_copy_keyblock_contents(newkey, &session_key);
 	    }
 	    krb5_free_keyblock(newkey);
 	}
