@@ -1,3 +1,18 @@
+1999-07-22 Jeffrey Altman <jaltman@columbia.edu>
+
+        * init_os_ctx.c (os_init_paths)
+          If profile_init() is unable to open a profile and returns ENOENT,
+          remember in the context that the profile_in_memory and then 
+          call profile_init() with a NULL filespec.
+
+        * def_realm.c (krb5_get_default_realm)
+        * hst_realm.c (krb5_get_host_realm)
+        * locate_kdc.c (krb5_locate_kdc)
+          Use the profile entry [libdefaults] dns_fallback to determine
+          if DNS SRV and TXT records should be used to find realms and
+          servers if they are not found in the profile.
+   
+
 1999-07-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_os_ctx.c (os_get_default_config_files): Fix some typos and
