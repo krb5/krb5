@@ -53,3 +53,6 @@ DependTarget()
 
 Krb5InstallHeaders($(ETHDRS), $(KRB5_INCDIR)/krb5)
 
+SpecialObjectRule(isode_err.o,isode_err.c,)
+SpecialObjectRule(krb5_err.o,krb5_err.c,)
+SpecialObjectRule(kdb5_err.o,kdb5_err.c,)

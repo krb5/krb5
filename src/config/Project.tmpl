@@ -107,6 +107,10 @@ basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables
 
 #endif
 
+#ifdef LibraryRules
+#include LibraryRules
+#endif
+
 /*
  * AdditiveLibraryTarget - generate rules to create a library from
  * several directories
@@ -185,7 +189,8 @@ includes:: hfile							@@\
 newname: stockname Makefile						@@\
 	-$(RM) newname.new						@@\
 	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname.new		@@\
-	CopyHeaderNewName(newname.new,.,newname)
+	if cmp -s newname.new newname ; then true; \			@@\
+	else $(RM) newname ; $(CP) newname.new newname ; fi
 #endif /* ProcessStockHeader */
 
 /*
@@ -310,20 +315,13 @@ clean::									@@\
  */
 #ifndef SimpleTestProgramTarget
 #define	SimpleTestProgramTarget(program)				@@\
-           OBJS = program.o						@@\
-           SRCS = program.c						@@\
-        PROGRAM = program						@@\
-									@@\
 AllTarget(program)							@@\
 									@@\
-program: $(OBJS) $(DEPLIBS)						@@\
+program: program.o $(DEPLIBS)						@@\
 	RemoveTargetProgram($@)						@@\
-	$(CC) -o $@ $(OBJS) $(LDOPTIONS) $(LOCAL_LIBRARIES) $(LDLIBS) $(EXTRA_LOAD_FLAGS) @@\
+	$(CC) -o $@ program.o $(LDOPTIONS) $(LOCAL_LIBRARIES) $(LDLIBS) $(EXTRA_LOAD_FLAGS) @@\
 									@@\
-SaberProgramTarget(program,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES), /**/)	@@\
-									@@\
-DependTarget()								@@\
-LintTarget()								@@\
+SaberProgramTarget(program,program.c,program.o,$(LOCAL_LIBRARIES), /**/)@@\
 									@@\
 clean::									@@\
 	$(RM) $(PROGRAM)
@@ -441,7 +439,11 @@ P_VOLATILE=-UUseVolatile
  */
 
             ARADD = ArAddCmd
+#ifdef SourceTop
+     TOP_INCLUDES = -I$(TOP)/include -I/**/SourceTop/include $(STDC_TOP_INCLUDES)
+#else
      TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
+#endif
         CONFIGSRC = $(TOP)/config
             ISODE = IsodeDir
          PSYFLAGS = PepsyFlags

@@ -574,6 +574,12 @@
 #define MakeDependFlags /**/  
 #endif
 
+#ifdef SourceTop
+           SRCDIR = SourceTop/CURDIR/
+            VPATH = SourceTop/CURDIR
+           SRCTOP = SourceTop
+       SRCINCLUDE = -I/**/SourceTop/CURDIR
+#endif
             SHELL = BourneShell
 
               TOP = TOPDIR

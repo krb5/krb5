@@ -32,19 +32,19 @@ K4LIB=
 #endif
 DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
-INCLUDES = $(KRB4INCLUDES)
+INCLUDES = $(KRB4INCLUDES) -I.
 SRCS= \
 	kdc5_err.c \
-	dispatch.c \
-	do_as_req.c \
-	do_tgs_req.c \
-	kdc_util.c \
-	main.c \
-	network.c \
-	policy.c \
-	extern.c \
-	replay.c \
-	kerberos_v4.c
+	$(SRCDIR)dispatch.c \
+	$(SRCDIR)do_as_req.c \
+	$(SRCDIR)do_tgs_req.c \
+	$(SRCDIR)kdc_util.c \
+	$(SRCDIR)main.c \
+	$(SRCDIR)network.c \
+	$(SRCDIR)policy.c \
+	$(SRCDIR)extern.c \
+	$(SRCDIR)replay.c \
+	$(SRCDIR)kerberos_v4.c
 
 OBJS= \
 	kdc5_err.o \

@@ -570,7 +570,7 @@ target:: $(IMAKE) Imakefile
 #ifndef BuildMakefileTarget
 #define	BuildMakefileTarget(imakefile,imakeflags)			@@\
 ImakeDependency(Makefile)						@@\
-	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) imakeflags -s Makefile.new @@\
+	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR)  -f$(SRCDIR)Imakefile imakeflags -s Makefile.new @@\
 	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f Makefile ]; then \					@@\
 		echo "$(RM) Makefile.bak; $(MV) Makefile Makefile.bak"; \ @@\
@@ -601,7 +601,7 @@ BuildMakefileTarget(Imakefile, /**/)
 #define	NormalLibraryObjectRule()					@@\
 .c.o:									@@\
 	$(RM) $@							@@\
-	$(CC) -c $(CFLAGS) $*.c
+	$(CC) -c $(CFLAGS) $(SRCDIR)$*.c
 #endif /* NormalLibraryObjectRule */
 
 #ifndef NormalFortranObjectRule
@@ -623,9 +623,9 @@ all::									@@\
 									@@\
 .c.o:									@@\
 	$(RM) $@ profiled/$@						@@\
-	$(CC) -pg -c $(CFLAGS) $*.c					@@\
+	$(CC) -pg -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 	$(MV) $*.o profiled/$*.o					@@\
-	$(CC) -c $(CFLAGS) $*.c						@@\
+	$(CC) -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 									@@\
 clean::									@@\
 	-@if [ -d profiled ]; then echo "	$(RM) profiled/?*.o"; \	@@\
@@ -645,9 +645,9 @@ all::									@@\
 									@@\
 .c.o:									@@\
 	$(RM) $@ debugger/$@						@@\
-	$(CC) -g -c $(CFLAGS) $*.c					@@\
+	$(CC) -g -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 	$(MV) $*.o debugger/$*.o					@@\
-	$(CC) -c $(CFLAGS) $*.c						@@\
+	$(CC) -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 									@@\
 clean::									@@\
 	-@if [ -d debugger ]; then echo "	$(RM) debugger/?*.o"; \ @@\
@@ -668,11 +668,11 @@ all::									@@\
 									@@\
 .c.o:									@@\
 	$(RM) $@ profiled/$@ debugger/$@				@@\
-	$(CC) -pg -c $(CFLAGS) $*.c					@@\
+	$(CC) -pg -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 	$(MV) $*.o profiled/$*.o					@@\
-	$(CC) -g -c $(CFLAGS) $*.c					@@\
+	$(CC) -g -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 	$(MV) $*.o debugger/$*.o					@@\
-	$(CC) -c $(CFLAGS) $*.c						@@\
+	$(CC) -c $(CFLAGS) $(SRCDIR)$*.c				@@\
 									@@\
 clean::									@@\
 	-@if [ -d profiled ]; then echo "	$(RM) profiled/?*.o"; \ @@\
@@ -694,9 +694,9 @@ all::									@@\
 									@@\
 .c.o:									@@\
 	$(RM) $@ shared/$@						@@\
-	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) $*.c	@@\
+	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) $(SRCDIR)$*.c @@\
 	$(MV) $*.o shared/$*.o						@@\
-	$(CC) -c $(SHLIBDEF) $(CFLAGS) $*.c				@@\
+	$(CC) -c $(SHLIBDEF) $(CFLAGS) $(SRCDIR)$*.c			@@\
 									@@\
 clean::									@@\
 	-@if [ -d shared ]; then echo "	$(RM) shared/?*.o"; \		@@\
@@ -716,11 +716,11 @@ all::									@@\
 									@@\
 .c.o:									@@\
 	$(RM) $@ shared/$@ debugger/$@					@@\
-	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) $*.c	@@\
+	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) $(SRCDIR)$*.c @@\
 	$(MV) $*.o shared/$*.o						@@\
-	$(CC) -g -c $(SHLIBDEF) $(CFLAGS) $*.c				@@\
+	$(CC) -g -c $(SHLIBDEF) $(CFLAGS) $(SRCDIR)$*.c			@@\
 	$(MV) $*.o debugger/$*.o					@@\
-	$(CC) -c $(SHLIBDEF) $(CFLAGS) $*.c				@@\
+	$(CC) -c $(SHLIBDEF) $(CFLAGS) $(SRCDIR)$*.c			@@\
 									@@\
 clean::									@@\
 	-@if [ -d shared ]; then echo "	$(RM) shared/?*.o"; \	@@\
@@ -1195,88 +1195,61 @@ MakeLintSubdirs(dirs,lintlib,lintlib)
 #define MakeMakeSubdirs(dirs,target)					@@\
 target::								@@\
 	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \			@@\
+	case '${MFLAGS}' in *n*) executeit="no";; esac; \		@@\
 	for i in dirs ;\						@@\
 	do \								@@\
-		echo "making Makefiles in $(CURRENT_DIR)/$$i..."; \	@@\
 		case "$$i" in \						@@\
-		./?*/?*/?*/?*) newtop=../../../../ sub=subsubsubsub;; \	@@\
-		./?*/?*/?*) newtop=../../../ sub=subsubsub;; \		@@\
-		./?*/?*)    newtop=../../ sub=subsub;; \		@@\
-		./?*)       newtop=../ sub=sub;; \			@@\
-		*/?*/?*/?*)    newtop=../../../../ sub=subsubsubsub;; \	@@\
-		*/?*/?*)    newtop=../../../ sub=subsubsub;; \		@@\
-		*/?*)       newtop=../../ sub=subsub;; \		@@\
-		*)	    newtop=../ sub=sub;; \			@@\
+		./?*/?*/?*/?*)	newtop=../../../..;; \			@@\
+		./?*/?*/?*)	newtop=../../..;; \			@@\
+		./?*/?*)	newtop=../..;; \			@@\
+		./?*)		newtop=..;; \				@@\
+		*/?*/?*/?*)	newtop=../../../..;; \			@@\
+		*/?*/?*)	newtop=../../..;; \			@@\
+		*/?*)		newtop=../..;; \			@@\
+		*)		newtop=..;; \				@@\
 		esac; \							@@\
 		case "$(TOP)" in \					@@\
-		/?*) newtop=  upprefix=  ;; \				@@\
-		*) upprefix=../ ;; \					@@\
+		/?*) imaketop=$(TOP) ; top=$(TOP) ; curdir=$(CURRENT_DIR)/;; \ @@\
+		.) imaketop=$$newtop/ ; top=$$newtop ; curdir= ;; \	@@\
+		*) imaketop=$$newtop/ ; top=$$newtop/$(TOP) ; curdir=$(CURRENT_DIR)/ ;; \	@@\
 		esac; \							@@\
-		$(MAKE) $${sub}dirMakefiles UPPREFIX=$$upprefix NEWTOP=$$newtop \		@@\
-		MAKEFILE_SUBDIR=$$i NEW_CURRENT_DIR=$(CURRENT_DIR)/$$i;\ @@\
+		echo "making Makefiles in $${curdir}$$i..."; \		@@\
+		cd $$i; \						@@\
+		$(RM) Makefile.bak; \					@@\
+		if [ -f Makefile ]; then \				@@\
+			echo "	$(MV) Makefile Makefile.bak"; \		@@\
+			if [ "$$executeit" != "no" ]; then \		@@\
+				$(MV) Makefile Makefile.bak; \		@@\
+			fi; \						@@\
+		fi; \							@@\
+		if [ "$$executeit" != "no" ]; then \			@@\
+			ImakeSubCmdHelper -DTOPDIR=$$top -DCURDIR=$${curdir}$$i -f$(SRCSUBDIR)Imakefile; \ @@\
+		fi; \							@@\
+		$(MAKE) $(MFLAGS) Makefiles; \				@@\
+		cd $$newtop; \						@@\
 	done
+
+#ifdef SourceTop
+        SRCSUBDIR = SourceTop/$${curdir}$${i}/
+#endif
+
+#ifdef UseImakeInstalled
+#define ImakeSubCmdHelper $(IMAKE) -I$${imaketop}$(NEWTOP)$(IRULESRC) $(IMAKE_DEFINES)
+#else
+#ifdef UseInstalled
+#define ImakeSubCmdHelper $(IMAKE_CMD)
+#else
+#define ImakeSubCmdHelper $${imaketop}$(NEWTOP)$(IMAKE) -I$${imaketop}$(NEWTOP)$(IRULESRC) $(IMAKE_DEFINES)
+#endif
+#endif
+
 #endif /* MakeMakeSubdirs */
-
-
-/*
- * MakeNsubdirMakefiles - generate rules to create sub Makefiles.
- */
-#ifndef MakeNsubdirMakefiles
-#define MakeNsubdirMakefiles()						@@\
-subdirMakefiles:							@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
-	$(MAKE) -f Makefile.new noop					@@\
-	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
-	fi;								@@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
-	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; 		@@\
-									@@\
-subsubdirMakefiles:							@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
-	$(MAKE) -f Makefile.new noop					@@\
-	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
-	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
-	else exit 0; fi							@@\
-									@@\
-subsubsubdirMakefiles:							@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
-	$(MAKE) -f Makefile.new noop					@@\
-	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
-	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
-	else exit 0; fi							@@\
-									@@\
-subsubsubsubdirMakefiles:						@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
-	$(MAKE) -f Makefile.new noop					@@\
-	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
-	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
-	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
-	else exit 0; fi
-#endif /* MakeNsubdirMakefiles */
-
 
 /*
  * MakefileSubdirs - generate rules to create Makefiles.
  */
 #ifndef MakefileSubdirs
-#define MakefileSubdirs(dirs)						@@\
-MakeMakeSubdirs(dirs,Makefiles)						@@\
-									@@\
-MakeNsubdirMakefiles()
+#define MakefileSubdirs(dirs)	MakeMakeSubdirs(dirs,Makefiles)
 #endif /* MakefileSubdirs */
 
 
