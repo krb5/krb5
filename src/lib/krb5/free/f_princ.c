@@ -39,8 +39,13 @@ krb5_principal val;
 {
     register int i = krb5_princ_size(val);
 
-    while(--i >= 0)
-	free(krb5_princ_component(val, i)->data);
+    if (val->data) {
+	while(--i >= 0)
+	    free(krb5_princ_component(val, i)->data);
+	xfree(val->data);
+    }
+    if (val->realm.data)
+	xfree(val->realm.data);
     xfree(val);
     return;
 }
