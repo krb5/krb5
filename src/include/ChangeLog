@@ -1,3 +1,7 @@
+2003-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: krb524_init_ets() takes one argument.
+
 2003-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (struct srv_dns_entry): Declare.

@@ -33,16 +33,15 @@
 #undef krb524_init_ets
 #endif
 
-int KRB5_CALLCONV 
+int KRB5_CALLCONV_WRONG
 krb524_convert_creds_kdc(krb5_context context, krb5_creds *v5creds, struct credentials *v4creds)
 {
 	return(krb5_524_convert_creds(context,v5creds,v4creds));
 }
 
-void KRB5_CALLCONV
-krb524_init_ets(void) 
+void KRB5_CALLCONV_WRONG
+krb524_init_ets(krb5_context context)
 {
 	/* no-op */
 }
 #endif /* _WIN32 */
-

@@ -1667,7 +1667,7 @@ int KRB5_CALLCONV krb5_524_convert_creds
 	 struct credentials *v4creds);
 #if KRB5_DEPRECATED
 #define krb524_convert_creds_kdc krb5_524_convert_creds
-#define krb524_init_ets() (0)
+#define krb524_init_ets(x) (0)
 #endif
 
 /* libkt.spec */
