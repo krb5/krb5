@@ -1,3 +1,9 @@
+2004-12-16  Jeffrey Altman <jaltman@mit.edu>
+        * cc_mslsa.c:
+          Temporarily deactivate support for KerbSubmitTicketMessage   
+          and KerbQueryTicketCacheEx2Message until the new Platform SDK
+          becomes publicly available.
+
 2004-12-15  Jeffrey Altman <jaltman@mit.edu>
 
         * cc_mslsa.c: 
