@@ -1,3 +1,8 @@
+Mon Jun 19 00:58:33 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* getsyms, getsyms.sed: simple scripts to find #ifdef's that
+		aren't declared with configure.in
+
 Fri Jun 16 14:05:03 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* libupdate.sh: oops they were right to begin with; hack

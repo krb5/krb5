@@ -1,0 +1,36 @@
+#!/bin/sh
+# Run this from the TOP of the source tree!
+M4=gm4
+configs=`find $1 -name configure.in -print|sed -e 's@/configure.in@@`
+for dir in $configs; do
+	AC_MACRODIR=./util/autoconf
+	# The following bits shamelessly stolen from autoheader.sh
+	eval "`$M4 -I$AC_MACRODIR autoheader.m4 $dir/configure.in|
+		sed -n -e '
+		: again
+		/^@@@.*@@@$/s/^@@@\(.*\)@@@$/\1/p
+		/^@@@/{
+			s/^@@@//p
+			n
+			s/^/@@@/
+			b again
+		}'`"
+	syms="`for sym in $syms; do echo $sym; done | sort | uniq`"
+	echo $dir/configure.in: $syms
+	files="$dir/*.[ch]"
+	for file in $files; do
+		badsyms=""
+		fsyms=`sed -f ./util/getsyms.sed $file`
+		fsyms="`for sym in $fsyms; do echo $sym; done | sort | uniq`"
+		for sym in $fsyms; do
+			isbad=yes
+			for tsym in $syms; do
+				if [ $tsym = $sym ]; then isbad=no; fi
+			done
+			if [ $isbad = yes ]; then
+				badsyms="$badsyms $sym"
+			fi
+		done
+		echo $file:$badsyms
+	done
+done
