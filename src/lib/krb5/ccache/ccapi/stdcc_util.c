@@ -222,8 +222,8 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest)
     dest->times.starttime  = src->starttime    + offset_seconds;
     dest->times.endtime    = src->endtime      + offset_seconds;
     dest->times.renew_till = src->renew_till   + offset_seconds;
-    dest->is_skey          = src->is_skey      + offset_seconds;
-    dest->ticket_flags     = src->ticket_flags + offset_seconds;
+    dest->is_skey          = src->is_skey;
+    dest->ticket_flags     = src->ticket_flags;
 
     /* more branching fields */
     err = copyCCDataArrayToK5(src, dest, kAddressArray);
@@ -317,8 +317,8 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
     c->starttime    = creds->times.starttime  - offset_seconds;
     c->endtime      = creds->times.endtime    - offset_seconds;
     c->renew_till   = creds->times.renew_till - offset_seconds;
-    c->is_skey      = creds->is_skey          - offset_seconds;
-    c->ticket_flags = creds->ticket_flags     - offset_seconds;
+    c->is_skey      = creds->is_skey;
+    c->ticket_flags = creds->ticket_flags;
 
     err = copyK5DataArrayToCC(creds, c, kAddressArray);
     if (err) return;
