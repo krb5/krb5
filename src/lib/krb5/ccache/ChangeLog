@@ -1,3 +1,7 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build cc accessor functions on Windows.
+
 2002-04-2 Alexandra Ellwood <lxs@mit.edu>
     * ccdefault.c: updated to new KLL function name
 

@@ -39,6 +39,8 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cc_retr.c \
 	$(srcdir)/ser_cc.c
 
+##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
+
 all-unix:: all-libobjs
 
 all-windows:: subdirs $(OBJFILE) 
