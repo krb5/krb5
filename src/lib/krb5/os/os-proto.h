@@ -60,6 +60,9 @@ int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);
 
+#include "k5-thread.h"
+extern k5_mutex_t krb5int_us_time_mutex;
+
 extern unsigned int krb5_max_skdc_timeout;
 extern unsigned int krb5_skdc_timeout_shift;
 extern unsigned int krb5_skdc_timeout_1;

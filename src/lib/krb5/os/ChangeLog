@@ -1,3 +1,17 @@
+2004-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* c_ustime.c: Include k5-thread.h.
+	(get_time_now): New function, holds system-dependent code.
+	(krb5int_us_time_mutex): New mutex.
+	(struct time_now): New type.
+	(last_time): New variable, replaces old last_tv, last_sec,
+	last_usec.
+	(krb5_crypto_us_timeofday): Rewrite.  Do locking around access to
+	previously returned value, and ensure that we don't return
+	duplicate values.
+	* os-proto.h: Include k5-thread.h.
+	(krb5int_us_time_mutex): Declare.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* kuserok.c (krb5_kuserok): Handle draft POSIX versions of

@@ -29,6 +29,11 @@
  
 #define	NEED_SOCKETS
 #include "k5-int.h"
+#include "k5-thread.h"
+
+k5_mutex_t krb5int_us_time_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+
+struct time_now { krb5_int32 sec, usec; };
 
 #if defined(_WIN32)
 
@@ -39,63 +44,75 @@
 #include <sys/timeb.h>
 #include <string.h>
 
-krb5_error_code
-krb5_crypto_us_timeofday(seconds, microseconds)
-register krb5_int32 *seconds, *microseconds;
+static krb5_error_code
+get_time_now(struct time_now *n)
 {
     struct _timeb timeptr;
-    krb5_int32 sec, usec;
-    static krb5_int32 last_sec = 0;
-    static krb5_int32 last_usec = 0;
-
-    _ftime(&timeptr);                           /* Get the current time */
-    sec  = timeptr.time;
-    usec = timeptr.millitm * 1000;
-
-    if ((sec == last_sec) && (usec <= last_usec)) { /* Same as last time??? */
-        usec = ++last_usec;
-        if (usec >= 1000000) {
-            ++sec;
-            usec = 0;
-        }
-    }
-    last_sec = sec;                             /* Remember for next time */
-    last_usec = usec;
-
-    *seconds = sec;                             /* Return the values */
-    *microseconds = usec;
-
+    _ftime(&timeptr);
+    n->sec = timeptr.time;
+    n->usec = timeptr.millitm * 1000;
     return 0;
 }
 
 #else
 
+/* Everybody else is UNIX, right?  POSIX 1996 doesn't give us
+   gettimeofday, but what real OS doesn't?  */
 
-/* We're a Unix machine -- do Unix time things.  */
-
-static struct timeval last_tv = {0, 0};
-
-krb5_error_code
-krb5_crypto_us_timeofday(register krb5_int32 *seconds, register krb5_int32 *microseconds)
+static krb5_error_code
+get_time_now(struct time_now *n)
 {
     struct timeval tv;
 
-    if (gettimeofday(&tv, (struct timezone *)0) == -1) {
-	/* failed, return errno */
-	return (krb5_error_code) errno;
-    }
-    if ((tv.tv_sec == last_tv.tv_sec) && (tv.tv_usec == last_tv.tv_usec)) {
-	    if (++last_tv.tv_usec >= 1000000) {
-		    last_tv.tv_usec = 0;
-		    last_tv.tv_sec++;
-	    }
-	    tv = last_tv;
-    } else 
-	    last_tv = tv;
-	    
-    *seconds = tv.tv_sec;
-    *microseconds = tv.tv_usec;
+    if (gettimeofday(&tv, (struct timezone *)0) == -1)
+	return errno;
+
+    n->sec = tv.tv_sec;
+    n->usec = tv.tv_usec;
     return 0;
 }
 
 #endif
+
+static struct time_now last_time;
+
+krb5_error_code
+krb5_crypto_us_timeofday(krb5_int32 *seconds, krb5_int32 *microseconds)
+{
+    struct time_now now;
+    krb5_error_code err;
+
+    err = get_time_now(&now);
+    if (err)
+	return err;
+
+    err = k5_mutex_lock(&krb5int_us_time_mutex);
+    if (err)
+	return err;
+    /* Just guessing: If the number of seconds hasn't changed, yet the
+       microseconds are moving backwards, we probably just got a third
+       instance of returning the same clock value from the system, so
+       the saved value was artificially incremented.
+
+       On Windows, where we get millisecond accuracy currently, that's
+       quite likely.  On UNIX, it appears that we always get new
+       microsecond values, so this case should never trigger.  */
+    if ((now.sec == last_time.sec) && (now.usec <= last_time.usec)) {
+	/* Same as last time??? */
+	now.usec = ++last_time.usec;
+	if (now.usec >= 1000000) {
+	    ++now.sec;
+	    now.usec = 0;
+	}
+	/* For now, we're not worrying about the case of enough
+	   returns of the same value that we roll over now.sec, and
+	   the next call still gets the previous now.sec value.  */
+    }
+    last_time.sec = now.sec;	/* Remember for next time */
+    last_time.usec = now.usec;
+    k5_mutex_unlock(&krb5int_us_time_mutex);
+
+    *seconds = now.sec;
+    *microseconds = now.usec;
+    return 0;
+}
