@@ -1,3 +1,8 @@
+Sun Jul  3 07:46:25 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* aclocal.m4: fixing things so we don't have to bother ignoring
+	errors.
+
 Fri Jul  1 13:01:19 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* aclocal.m4: added WITH_CC for use when CONFIG_RULES isn't safe.

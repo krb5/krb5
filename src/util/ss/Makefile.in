@@ -101,17 +101,16 @@ clean::
 depend:: ss_err.h
 
 ct.tab.c ct.tab.h: ct.y
-	rm -f ct.tab.* y.*
+	$(RM) ct.tab.* y.*
 	yacc -d $(srcdir)/ct.y
-	mv -f y.tab.c ct.tab.c
-	mv -f y.tab.h ct.tab.h
+	$(MV) y.tab.c ct.tab.c
+	$(MV) y.tab.h ct.tab.h
 
 # install_library_target(ss,$(OBJS),$(SRCS),)
 all:: libss.a
 
 libss.a: $(OBJS)
-	$(RM) $@.bak
-	-$(MV) $@ $@.bak
+	if test -f $@; then $(RM) $@.bak; $(MV) $@ $@.bak; else :; fi
 	$(ARCHIVE) $@ $(OBJS)
 	$(RANLIB) $@
 

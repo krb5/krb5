@@ -66,8 +66,7 @@ install:: compile_et.1
 all:: libcom_err.a
 
 libcom_err.a: $(LIBOBJS)
-	$(RM) $@.bak
-	-mv $@ $@.bak
+	if test -f $@; then $(RM) $@.bak; $(MV) $@ $@.bak; else :; fi;
 	$(ARCHIVE) $@ $(LIBOBJS)
 	$(RANLIB) $@
 

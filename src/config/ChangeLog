@@ -1,6 +1,10 @@
 Sun Jul  3 04:41:54 1994  Tom Yu  (tlyu at dragons-lair)
 
+	* post.in: whoops, now making sure errors don't get returned if
+	something is empty
+
 	* post.in: fixing missing semicolon in make rules
+	* pre.in: MV=mv -f
 
 Sat Jul  2 00:03:24 1994  Tom Yu  (tlyu at dragons-lair)
 

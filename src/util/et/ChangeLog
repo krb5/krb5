@@ -1,3 +1,7 @@
+Sun Jul  3 07:48:04 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: cleaning up to not spew ignored errors
+
 Wed Jun 22 18:47:36 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
 	* com_err.h: Only set STDARG_PROTOTYPES based on STDC if it isn't

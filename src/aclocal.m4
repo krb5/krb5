@@ -357,9 +357,8 @@ define(CopyHeader,[
 divert(9)dnl
 
 includes:: $1
-	-mkdir $2
-	-if cmp $1 $2/$1 >/dev/null 2>&1; then \
-		echo ; \
+	if test -d $2; then :; else mkdir $2; fi
+	if cmp $1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
 		[$](RM) $2/$1 ; \
 		[$](CP) $1 $2/$1; \
@@ -374,9 +373,8 @@ define(CopySrcHeader,[
 divert(9)dnl
 
 includes:: $1
-	-mkdir $2
-	-if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then \
-		echo ; \
+	if test -d $2; then :; else mkdir $2; fi
+	-if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
 		[$](RM) $2/$1 ; \
 		[$](CP) $(srcdir)/$1 $2/$1; \
@@ -457,10 +455,13 @@ dnl
 undefine([AC_PROG_LEX])dnl
 define(AC_PROG_LEX,
 [AC_PROVIDE([$0])dnl
-LEX="lex"
+AC_PROGRAM_CHECK(LEX, flex, flex, lex)dnl
 if test -z "$LEXLIB"
 then
-   AC_HAVE_LIBRARY(l, LEXLIB="-ll")
+   case "$LEX" in
+   flex*) AC_HAVE_LIBRARY(fl, LEXLIB="-lfl") ;;
+   *) AC_HAVE_LIBRARY(l, LEXLIB="-ll") ;;
+   esac
 fi
 AC_VERBOSE(setting LEXLIB to $LEXLIB)
 AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl

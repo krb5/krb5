@@ -4,5 +4,5 @@
 all::
 
 clean::
-	if test -n "$(OBJS)" ; then $(RM) $(OBJS); fi
+	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
 

@@ -30,7 +30,7 @@ KRB5_INCSUBDIRS = \
 
 RM = rm -f
 CP  = cp
-MV = mv
+MV = mv -f
 CHMOD=chmod
 RANLIB = @RANLIB@
 ARCHIVE = @ARCHIVE@
