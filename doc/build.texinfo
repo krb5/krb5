@@ -20,7 +20,7 @@ required in porting Kerberos V5 to a new platform.
 @end menu
 
 @node Organization of the Source Directory, Build Requirements, Building Kerberos V5, Building Kerberos V5
-@section Build Requirements
+@section Organization of the Source Directory
 
 Below is a brief overview of the organization of the complete source
 directory.  More detailed descriptions follow.
@@ -105,7 +105,7 @@ a credentials cache, or the keys held in a keytab file.
 This program changes a user's Kerberos password.
 
 @itemx ksu
-This program is a Kerberized verions of the @code{su} program that is
+This program is a Kerberized version of the @code{su} program that is
 meant to securely change the real and effective user ID to that of the
 target user and to create a new security context.
 
@@ -215,12 +215,17 @@ library and utilities (@i{et}), the Sub-system library and utilities
 (@i{pty}), and bug-reporting program @code{send-pr}.
 
 @node Build Requirements, Unpacking the Sources, Organization of the Source Directory, Building Kerberos V5
-@section Organization of the Source Directory
+@section Build Requirements
 
 In order to build Kerberos V5, you will need approximately 60-70
 megabytes of disk space.  The exact amount will vary depending on the
 platform and whether the distribution is compiled with debugging symbol
 tables or not.
+
+Your C compiler must conform to ANSI C (ISO/IEC 9899:1990, ``c89'').
+Some operating systems do not have an ANSI C compiler, or their
+default compiler requires extra command-line options to enable ANSI C
+conformance.
 
 If you wish to keep a separate @dfn{build tree}, which contains the compiled
 @file{*.o} file and executables, separate from your source tree, you
@@ -389,7 +394,7 @@ client/server activities.
 
 DejaGnu may be found wherever GNU software is archived.  
 
-Most of the tests are setup to run as a non-privledged user.  For some
+Most of the tests are setup to run as a non-privileged user.  For some
 of the krb-root tests to work properly, either (a) the user running the
 tests must not have a .k5login file in the home directory or (b) the
 .k5login file must contain an entry for @code{<username>@@KRBTEST.COM}.
@@ -738,14 +743,15 @@ one in the tree or you will be missing references.
 
 This section details operating system incompatibilities with Kerberos V5
 which have been reported to the developers at MIT.  If you find
-additional incompatibilities, and/or discover work arounds to such
+additional incompatibilities, and/or discover workarounds to such
 problems, please send a report via the @code{krb5-send-pr} program.
 Thanks!
 
 @menu
 * AIX::                         
 * Alpha OSF/1 V1.3::            
-* Alpha OSF/1 (Digital Unix) V2.0++::  
+* Alpha OSF/1 V2.0::            
+* Alpha OSF/1 V4.0::            
 * BSDI::                        
 * HPUX::                        
 * Solaris versions 2.0 through 2.3::  
@@ -762,7 +768,7 @@ The AIX 3.2.5 linker dumps core trying to build a shared
 @samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
 compiler works fine.  This problem is fixed using the AIX 4.1 linker.
 
-@node Alpha OSF/1 V1.3, Alpha OSF/1 (Digital Unix) V2.0++, AIX, OS Incompatibilities
+@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, AIX, OS Incompatibilities
 @subsection Alpha OSF/1 V1.3
 
 Using the native compiler, compiling with the @samp{-O} compiler flag
@@ -771,8 +777,8 @@ causes the @code{asn.1} library to be compiled incorrectly.
 Using GCC version 2.6.3 or later instead of the native compiler will also work
 fine, both with or without optimization.
 
-@node Alpha OSF/1 (Digital Unix) V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
-@subsection Alpha OSF/1 V2.0++
+@node Alpha OSF/1 V2.0, Alpha OSF/1 V4.0, Alpha OSF/1 V1.3, OS Incompatibilities
+@subsection Alpha OSF/1 V2.0
 
 There used to be a bug when using the native compiler in compiling
 @file{md4.c} when compiled without either the @samp{-O} or @samp{-g}
@@ -781,14 +787,24 @@ under V2.1, but we do not have access to V2.0 to test and see if the
 problem would exist there. (We welcome feedback on this issue). There
 was never a problem in using GCC version 2.6.3.
 
-In version 3.2 and beyond of the operating system, we have not seen any
-problems with the native compiler. 
+In version 3.2 and beyond of the operating system, we have not seen
+this sort of problem with the native compiler.
+
+@node Alpha OSF/1 V4.0, BSDI, Alpha OSF/1 V2.0, OS Incompatibilities
+@subsection Alpha OSF/1 (Digital UNIX) V4.0
+
+The C compiler provided with Alpha OSF/1 V4.0 (a.k.a. Digital UNIX)
+defaults to an extended K&R C mode, not ANSI C.  You need to provide
+the @samp{-std} argument to the compiler (i.e., @samp{./configure
+CC='cc -std'}) to enable extended ANSI C mode.  More recent versions
+of the operating system, such as 5.0, seem to have C compilers which
+default to @samp{-std}.
 
 @c @node Alpha Tru64 UNIX 5.0
 @c @subsection Alpha Tru64 UNIX 5.0
 @c ... login.krb5 problems
 
-@node BSDI, HPUX, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
+@node BSDI, HPUX, Alpha OSF/1 V4.0, OS Incompatibilities
 @subsection BSDI
 
 BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
