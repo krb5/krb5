@@ -284,10 +284,8 @@ void get_tickets(context)
 			"when getting my address");
 		exit(1);
 	}
-	retval = krb5_get_in_tkt_with_skey(context, 0, my_addresses,
-					   0,
-					   ETYPE_DES_CBC_CRC,
-					   0, ccache, &my_creds, 0);
+	retval = krb5_get_in_tkt_with_keytab(context, 0, my_addresses, NULL,
+					     NULL, NULL, ccache, &my_creds, 0);
 	if (retval) {
 		com_err(progname, retval, "while getting initial ticket\n");
 		exit(1);
