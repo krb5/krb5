@@ -91,7 +91,7 @@ foreach $function (keys(%FUNCTIONS))
     print("enum {\n");
     print("  $name" . "_ProcInfo = kThinkCStackBased\n");
     if($retType ne "void") {
-	print("  | RESULT_SIZE(SIZECODE(sizeof($retType)))\n");
+	print("  | RESULT_SIZE(SIZE_CODE(sizeof($retType)))\n");
     }
     for($i = 0, $j = 1; $i <= $#args; $i++, $j++)
     {
@@ -100,6 +100,21 @@ foreach $function (keys(%FUNCTIONS))
     }    
     print("};\n\n");
     
+    # Now Generate the ProcPtr Typedef
+    # --------------------------------
+    print("typedef ");
+    print("$retType ");
+    print("(*$name" . "_ProcPtrType)(");
+    
+    for($i = 0; $i<=$#args; $i++) {
+	    $arg = $args[$i];
+	    print("$arg");
+	    if ($i ne $#args) {
+	    	print (", ");
+	    }
+    }
+    print(");\n");
+  
     
     # Now Generate the Static 68K Function Declaration:
     # -------------------------------------------------
@@ -117,7 +132,7 @@ foreach $function (keys(%FUNCTIONS))
 	}
     } 
     print("{\n");
-    print("  static $name" . "_ProcPtr = kUnresolvedCFragSymbolAddress;\n\n");
+    print("  static $name" . "_ProcPtrType $name" . "_ProcPtr = kUnresolvedCFragSymbolAddress;\n\n");
 
     print("  // if this symbol has not been setup yet...\n");
     print("  if((Ptr) $name" . "_ProcPtr == (Ptr) kUnresolvedCFragSymbolAddress)\n");
