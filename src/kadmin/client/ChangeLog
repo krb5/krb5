@@ -1,3 +1,9 @@
+Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
+
+        * kadmin.c Removed krb5_keytype, changed krb5_enctype to
+                krb5_enctype *, changed krb5_preauthtype to krb5_preauthtype *
+                for krb5_get_in_tkt_with_password() rotuine.
+
 Fri Feb  3 03:03:27 1995  John Gilmore  <gnu@cygnus.com>
 
 	* kadmin.c (main):  Real live non-kludged argument parsing.

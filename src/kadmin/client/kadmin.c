@@ -43,15 +43,6 @@
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
-/*
- * Try no preauthentication first; then try the encrypted timestamp
- */
-int preauth_search_list[] = {
-	0,			
-	KRB5_PADATA_ENC_TIMESTAMP,
-	-1
-	};
-
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,
 		   krb5_ccache, 
@@ -589,22 +580,11 @@ get_first_ticket(context, cache, client)
     }
 
 	/*	Build Request for Initial Credentials */
-    for (i=0; preauth_search_list[i] >= 0; i++) {
-	retval = krb5_get_in_tkt_with_password(context, 
-					0,	/* options */
+    retval = krb5_get_in_tkt_with_password(context, 0, /* options */
 					my_addresses,
-					/* do random preauth */
-                                        preauth_search_list[i],
-					ETYPE_DES_CBC_CRC,   /* etype */
-					KEYTYPE_DES,
-					password,
-					cache,
-					&my_creds,
-				        0);
-	if (retval != KRB5KDC_ERR_PREAUTH_FAILED &&
-	    retval != KRB5KRB_ERR_GENERIC)
-	    break;
-    }
+                                        NULL, /* Default encryption list */
+                                        NULL, /* Default preauth list */
+					password, cache, &my_creds, 0);
     
         /* Do NOT Forget to zap password  */
     memset((char *) password, 0, pwsize);
