@@ -1,3 +1,7 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb.h: Add krb_in_tkt() prototype.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb.h: Add prototypes for get_pw_tkt() and unix_time_gmt_unixsec().

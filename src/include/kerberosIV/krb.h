@@ -530,6 +530,8 @@ int getst
 /* in_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV in_tkt
 	PROTOTYPE((char *name, char *inst));
+KRB5_DLLIMP int KRB5_CALLCONV krb_in_tkt
+        PROTOTYPE((char *pname, char *pinst, char *realm));
 /* kname_parse.c */
 KRB5_DLLIMP int KRB5_CALLCONV kname_parse
 	PROTOTYPE((char FAR *name, char FAR *inst, char FAR *realm,
