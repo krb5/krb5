@@ -10,7 +10,7 @@ while test $# -gt 2; do
 		dodoc=nil;;
 	--doconly)
 		dosrc=nil;;
-	--multi-tarbal)
+	--multi*)
 		multitar=t;;
 	--repository)
 		shift; repository=$1;;
@@ -154,10 +154,10 @@ if test $multitar = t; then
 		gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README
 	fi
 	ls -l ${reldir}.*.tar.gz
-else
-	gtar zcf ${reldir}.tar.gz $reldir
-	ls -l ${reldir}.tar.gz
 fi
+
+gtar zcf ${reldir}.tar.gz $reldir
+ls -l ${reldir}.tar.gz
 
 echo "Done."
 
