@@ -23,13 +23,13 @@
 # 
 # 
 SRCS= \
-	encrypt_key.c \
-	decrypt_key.c \
-	kdb_dbm.c \
-	verify_mky.c \
-	fetch_mkey.c \
-	setup_mkey.c \
-	store_mkey.c
+	$(SRCDIR)encrypt_key.c \
+	$(SRCDIR)decrypt_key.c \
+	$(SRCDIR)kdb_dbm.c \
+	$(SRCDIR)verify_mky.c \
+	$(SRCDIR)fetch_mkey.c \
+	$(SRCDIR)setup_mkey.c \
+	$(SRCDIR)store_mkey.c
 
 NormalLibraryObjectRule()
 
