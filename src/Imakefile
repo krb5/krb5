@@ -29,11 +29,14 @@
 all::
 
 world::
-	date
-	make ${MFLAGS} mastermakefiles
-	make ${MFLAGS} depend
-	make ${MFLAGS} all
-	date
+	@date
+	cd $(IMAKESRC); $(MAKE) $(MFLAGS) -f Makefile.ini clean; $(MAKE) $(MFLAGS) -f Makefile.ini BOOSTRAPCFLAGS="$(BOOTSTAPCFLAGS)"
+	-$(RM) Makefile.bak; $(MV) Makefile Makefile.bak
+	$(MAKE) $(MFLAGS) -f Makefile.bak Makefile
+	$(MAKE) ${MFLAGS} mastermakefiles
+	$(MAKE) ${MFLAGS} depend
+	$(MAKE) ${MFLAGS} all
+	@date
 
 SUBDIRS = util include lib kdc admin kadmin slave clients appl tests \
 		config-files

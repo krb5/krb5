@@ -19,10 +19,18 @@
 #define MkCmdsCmd $(TOP)/util/ss/mk_cmds
 #endif
 #ifndef DependCmd
+#ifdef UseMakedependInstalled
 #define DependCmd makedepend		/* assume BINDIR in path */
+#else
+#define DependCmd $(DEPENDSRC)/makedepend
+#endif
 #endif
 #ifndef ImakeCmd
+#ifdef UseImakeInstalled
 #define ImakeCmd imake
+#else
+#define ImakeCmd $(IMAKESRC)/imake
+#endif
 #endif
 #ifndef SSLib
 #define SSLib $(TOPLIBD)/libss.a
@@ -563,6 +571,8 @@ P_KRB4_COMPAT=-UKrb4Compat
      TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
    EXTRA_INCLUDES = ExtraIncludes
         CONFIGSRC = $(TOP)/config
+         IMAKESRC = $(CONFIGSRC)
+        DEPENDSRC = $(TOP)/util/makedepend
          PSYFLAGS = PepsyFlags
             PEPSY = PepsyCmd
             TOUCH = TouchCmd
