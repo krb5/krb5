@@ -19,6 +19,8 @@ all-unix:: $(HDRS) includes $(OBJS)
 
 all-windows:: awk-windows $(OBJS)
 
+unixmac: $(HDRS)
+
 awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kdb5_err.h kdb5_err.et

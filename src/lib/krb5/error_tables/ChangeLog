@@ -1,3 +1,8 @@
+Thu Mar  2 23:33:21 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (unixmac):  New target, runs on Unix to build include
+	files for Mac build.
+
 Tue Feb 28 00:37:58 1995  John Gilmore  (gnu at toad.com)
 
 	* init_ets.c:  Avoid <krb5/...> includes.
