@@ -132,7 +132,6 @@ int main(argc, argv)
 		    (long) retval);
 	    exit(1);
     }
-    krb5_init_ets(util_context);
     initialize_adb_error_table();
 
     progname = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);

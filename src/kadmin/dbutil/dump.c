@@ -1951,7 +1951,6 @@ load_db(argc, argv)
 	exit_status++;
 	return;
     }
-    krb5_init_ets(kcontext);
 
     /*
      * Open the dumpfile

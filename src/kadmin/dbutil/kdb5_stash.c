@@ -60,7 +60,6 @@ char *argv[];
 	argv[0] = strrchr(argv[0], '/')+1;
 
     krb5_init_context(&context);
-    krb5_init_ets(context);
 
     dbname = global_params.dbname;
     realm = global_params.realm;

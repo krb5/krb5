@@ -56,7 +56,6 @@ kdb5_destroy(argc, argv)
     int force = 0;
 
     krb5_init_context(&context);
-    krb5_init_ets(context);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;

@@ -146,9 +146,11 @@ char *argv[];
     extern kadm5_config_params global_params;
     long exp_time = 0;
 
-    krb5_init_context(&context);
-
-    krb5_init_ets(context);
+    retval = krb5_init_context(&context);
+    if (retval) {
+	fprintf(stderr, "%s: Could not initialize krb5 context.\n", PROGNAME);
+	return;
+    }
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -200,12 +202,14 @@ char *argv[];
 
     if (!v4dumpfile) {
 	usage();
+	krb5_free_context(context);
 	return;
     }
 
     if (!valid_enctype(master_keyblock.enctype)) {
 	com_err(PROGNAME, KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up enctype %d", master_keyblock.enctype);
+	krb5_free_context(context);
 	return;
     }
 
@@ -218,6 +222,7 @@ char *argv[];
 	    fprintf(stderr,
 		    "%s: The v5 database appears to already exist.\n",
 		    PROGNAME);
+	    krb5_free_context(context);
 	    return;
 	}
 	tempdbname = dbname;
@@ -226,6 +231,7 @@ char *argv[];
 	tempdbname = malloc(dbnamelen + 2);
 	if (tempdbname == 0) {
 	    com_err(PROGNAME, ENOMEM, "allocating temporary filename");
+	    krb5_free_context(context);
 	    return;
 	}
 	strcpy(tempdbname, dbname);
@@ -238,6 +244,7 @@ char *argv[];
     if (!realm) {
 	if (retval = krb5_get_default_realm(context, &defrealm)) {
 	    com_err(PROGNAME, retval, "while retrieving default realm name");
+	    krb5_free_context(context);
 	    return;
 	}	    
 	realm = defrealm;
@@ -248,6 +255,7 @@ char *argv[];
     if (retval = krb5_db_setup_mkey_name(context, mkey_name, realm,
 					 &mkey_fullname, &master_princ)) {
 	com_err(PROGNAME, retval, "while setting up master key name");
+	krb5_free_context(context);
 	return;
     }
 
@@ -272,10 +280,12 @@ master key name '%s'\n",
 				    read_mkey, read_mkey, stash_file, 0, 
 				    &master_keyblock)) {
 	com_err(PROGNAME, retval, "while reading master key");
+	krb5_free_context(context);
 	return;
     }
     if (retval = krb5_process_key(context, &master_encblock, &master_keyblock)) {
 	com_err(PROGNAME, retval, "while processing master key");
+	krb5_free_context(context);
 	return;
     }
 
@@ -284,6 +294,7 @@ master key name '%s'\n",
 				      &master_keyblock, &rblock.rseed)) {
 	com_err(PROGNAME, retval, "while initializing random key generator");
 	(void) krb5_finish_key(context, &master_encblock);
+	krb5_free_context(context);
 	return;
     }
     if (retval = krb5_db_create(context, tempdbname)) {
@@ -292,6 +303,7 @@ master key name '%s'\n",
 	(void) krb5_dbm_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while creating %sdatabase '%s'",
 		tempdb ? "temporary " : "", tempdbname);
+	krb5_free_context(context);
 	return;
     }
     if (retval = krb5_db_set_name(context, tempdbname)) {
@@ -300,12 +312,14 @@ master key name '%s'\n",
 	(void) krb5_dbm_db_destroy(context, tempdbname);
         com_err(PROGNAME, retval, "while setting active database to '%s'",
                 tempdbname);
+	krb5_free_context(context);
         return;
     }
     if (v4init(PROGNAME, v4manual, v4dumpfile)) {
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_dbm_db_destroy(context, tempdbname);
+	krb5_free_context(context);
 	return;
     }
     if ((retval = krb5_db_init(context)) || 
@@ -315,6 +329,7 @@ master key name '%s'\n",
 	(void) krb5_dbm_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while initializing the database '%s'",
 		tempdbname);
+	krb5_free_context(context);
 	return;
     }
 
@@ -324,6 +339,7 @@ master key name '%s'\n",
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_dbm_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while adding K/M to the database");
+	krb5_free_context(context);
 	return;
     }
 
@@ -334,6 +350,7 @@ master key name '%s'\n",
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_dbm_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while adding TGT service to the database");
+	krb5_free_context(context);
 	return;
     }
 
@@ -377,16 +394,18 @@ master key name '%s'\n",
      * file with policy info.
      */
     if (!tempdb && (retval = osa_adb_create_policy_db(&newparams))) {
-	 com_err(PROGNAME, retval, "while creating policy database");
-	 kadm5_free_config_params(context, &newparams);
-	 return;
+	com_err(PROGNAME, retval, "while creating policy database");
+	kadm5_free_config_params(context, &newparams);
+	krb5_free_context(context);
+	return;
     }
     /*
      * Create the magic principals in the database.
      */
     if (retval = kadm5_create_magic_princs(&newparams, context)) {
-	 com_err(PROGNAME, retval, "while creating KADM5 principals");
-	 return;
+	com_err(PROGNAME, retval, "while creating KADM5 principals");
+	krb5_free_context(context);
+	return;
     }
     
     krb5_free_context(context);
