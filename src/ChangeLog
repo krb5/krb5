@@ -1,3 +1,7 @@
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build kpasswd under windows.
+
 1999-07-22  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-mkdirs): Use mkinstalldirs rather than

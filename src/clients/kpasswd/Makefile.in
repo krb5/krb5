@@ -14,17 +14,17 @@ kpasswd: kpasswd.o $(KRB5_BASE_DEPLIBS)
 kpasswd.o:	$(srcdir)/kpasswd.c
 
 all-unix:: kpasswd
-all-windows:: kpasswd.exe
 
 clean-unix::
 	$(RM) kpasswd.o kpasswd
-
-clean-windows::
-	$(RM) kpasswd.obj kpasswd.exe
 
 install-all install-kdc install-server install-client install-unix::
 	$(INSTALL_PROGRAM) kpasswd $(DESTDIR)$(CLIENT_BINDIR)/`echo kpasswd|sed '$(transform)'`
 	$(INSTALL_DATA) $(srcdir)/kpasswd.M $(DESTDIR)$(CLIENT_MANDIR)/`echo kpasswd|sed '$(transform)'`.1;
 
-kpasswd.exe: kpasswd.obj
-	link /out:kpasswd.exe kpasswd.obj $(BUILDTOP)\lib\libkrb5.lib
+##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
+
+##WIN32##all-windows:: $(OUTPRE)kpasswd.exe
+##WIN32##$(OUTPRE)kpasswd.exe: $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB)
+##WIN32##	link $(LINKOPTS2) -out:$@ $**
