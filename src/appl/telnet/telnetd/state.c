@@ -1078,6 +1078,24 @@ int env_ovalue = -1;
 # define env_ovalue OLD_ENV_VALUE
 #endif	/* ENV_HACK */
 
+/* envvarok(char*) */
+/* check that variable is safe to pass to login or shell */
+static int
+envvarok(varp)
+	char *varp;
+{
+	if (strncmp(varp, "LD_", strlen("LD_")) &&
+	    strncmp(varp, "_RLD_", strlen("_RLD_")) &&
+	    strcmp(varp, "LIBPATH") &&
+	    strcmp(varp, "IFS")) {
+		return 1;
+	} else {
+		/* optionally syslog(LOG_INFO) here */
+		return 0;
+	}
+
+}
+
 /*
  * suboption()
  *
@@ -1416,10 +1434,12 @@ suboption()
 		case NEW_ENV_VAR:
 		case ENV_USERVAR:
 			*cp = '\0';
+			if (envvarok(varp)) {
 			if (valp)
 				(void)setenv(varp, valp, 1);
 			else
 				unsetenv(varp);
+			}
 			cp = varp = (char *)subpointer;
 			valp = 0;
 			break;
@@ -1435,10 +1455,12 @@ suboption()
 		}
 	}
 	*cp = '\0';
+	if (envvarok(varp)) {
 	if (valp)
 		(void)setenv(varp, valp, 1);
 	else
 		unsetenv(varp);
+	}
 	break;
     }  /* end of case TELOPT_NEW_ENVIRON */
 #if	defined(AUTHENTICATION)

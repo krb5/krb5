@@ -1,3 +1,10 @@
+Thu Oct 19 01:28:23 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* state.c (envvarok): New function, checks environment variables
+	for exceptions that should not be passed to login.
+	(suboption): don't do anything to propagated environment variables
+	if they fail the exception test above.
+
 Mon Oct  9 23:01:36 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* telnetd.c (getterminaltype): If ENCRYPTION defined, send do
