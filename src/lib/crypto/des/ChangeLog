@@ -1,3 +1,8 @@
+Wed Apr 10 17:46:40 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS,OBJS): Added afsstring2key.c to the list of
+		files to be compiled.
+
 Sat Mar 30 22:56:48 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Took the list of sources and object files in

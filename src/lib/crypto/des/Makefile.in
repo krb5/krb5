@@ -12,7 +12,8 @@ DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLI
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
-OBJS=	cbc_cksum.$(OBJEXT)	\
+OBJS=	afsstring2key.$(OBJEXT) \
+	cbc_cksum.$(OBJEXT)	\
 	cs_entry.$(OBJEXT)	\
 	finish_key.$(OBJEXT)	\
 	fin_rndkey.$(OBJEXT)	\
@@ -37,7 +38,8 @@ OBJS=	cbc_cksum.$(OBJEXT)	\
 	d3_str2ky.$(OBJEXT) \
 	u_nfold.$(OBJEXT)
 
-SRCS=	$(srcdir)/cs_entry.c	\
+SRCS=	$(srcdir)/afsstring2key.c \
+	$(srcdir)/cs_entry.c	\
 	$(srcdir)/cbc_cksum.c	\
 	$(srcdir)/finish_key.c	\
 	$(srcdir)/fin_rndkey.c	\
