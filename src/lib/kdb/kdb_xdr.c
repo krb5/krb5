@@ -728,6 +728,7 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
     krb5_key_data	*datap;
     krb5_error_code	ret;
 
+    ret = 0;
     if (kvno == -1 && stype == -1 && ktype == -1)
 	kvno = 0;
 
