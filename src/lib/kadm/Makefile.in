@@ -6,10 +6,13 @@ RUN_SETUP=@KRB5_RUN_ENV@
 BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_dec.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
-	adm_rw.$(OBJEXT)	\
-	alt_prof.$(OBJEXT)	\
-	str_conv.$(OBJEXT)	\
-	keysalt.$(OBJEXT)
+	adm_rw.$(OBJEXT)
+
+# Unused for Macintosh and windows....
+#	alt_prof.$(OBJEXT)	\
+#	str_conv.$(OBJEXT)	\
+#	keysalt.$(OBJEXT)
+
 
 UNIX_OBJS = logger.$(OBJEXT)
 
@@ -21,13 +24,16 @@ OBJS=	$(BASE_OBJS) $(DB_OBJS)
 SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kt_dec.c	\
 	$(srcdir)/adm_kt_enc.c	\
-	$(srcdir)/adm_rw.c	\
-	$(srcdir)/adm_kw_dec.c	\
-	$(srcdir)/adm_kw_enc.c	\
-	$(srcdir)/logger.c	\
-	$(srcdir)/alt_prof.c	\
-	$(srcdir)/str_conv.c	\
-	$(srcdir)/keysalt.c
+	$(srcdir)/adm_rw.c
+
+# Unused for Macintosh and windows
+#	$(srcdir)/logger.c	\
+#	$(srcdir)/alt_prof.c	\
+#	$(srcdir)/str_conv.c	\
+#	$(srcdir)/keysalt.c
+#	$(srcdir)/adm_kw_dec.c	\
+#	$(srcdir)/adm_kw_enc.c
+
 
 all:: $(BASE_OBJS) 
 

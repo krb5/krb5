@@ -1,3 +1,9 @@
+Tue Sep 24 13:25:50 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Eliminate extra files not needed for Macintosh and
+ 		Windows.  (This directory is only used for Windows and
+ 		Macintosh at this point.)
+
 Tue Sep 10 14:37:47 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb5strings.M: remove extra args to .TH
