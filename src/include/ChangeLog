@@ -1,3 +1,11 @@
+1997-07-22 Jeffrey Altman <jaltman@columbia.edu>
+
+        * k5-int.h struct _krb5_context
+                Added profile_in_memory boolean to be used to store
+                whether or not krb5 intentionally requested a profile
+                to be allocated by the profile library without a real
+                file (or list of files) behind it.
+
 1999-07-21  Miro Jurisic  <meeroh@.mit.edu>
 
 	* krb5.hin: #ifdefed out krb5_set_config_files, 
