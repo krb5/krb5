@@ -1,3 +1,11 @@
+Tue Sep 23 13:25:35 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c (check_princ): Add checks for V5 kdc flags
+	        including REQUIRES_PWCHANGE, DISALLOW_ALL_TIX,
+	        REQUIRES_PREAUTH. Adds support for parsing the V4 options.
+		[krb5-kdc/464].
+
+	* main.c (main): Add option -4 to specify V4 handling mode.
 
 Mon Aug 18 12:29:08 1997  Ezra Peisach  <epeisach@mit.edu>
 

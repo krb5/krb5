@@ -43,10 +43,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <signal.h>
-#ifndef POSIX_TERMIOS
-#include <sgtty.h>
-#endif
-#include <sys/ioctl.h>
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME
@@ -85,9 +81,6 @@ char * v4_klog KRB5_PROTOTYPE((int, char *, va_dcl));
 /* take this out when we don't need it anymore */
 int krbONE = 1;
 
-#ifdef notdef
-static struct sockaddr_in sin = {AF_INET};
-#endif
 int     f;
 
 /* XXX several files in libkdb know about this */
@@ -154,6 +147,65 @@ void kerberos_v4 PROTOTYPE((struct sockaddr_in *, KTEXT));
 void kerb_err_reply PROTOTYPE((struct sockaddr_in *, KTEXT, long, char *));
 int set_tgtkey PROTOTYPE((char *));
  
+/* Attributes converted from V5 to V4 - internal representation */
+#define V4_KDB_REQUIRES_PREAUTH  0x1
+#define V4_KDB_DISALLOW_ALL_TIX  0x2
+#define V4_KDB_REQUIRES_PWCHANGE 0x4
+
+
+/* v4 compatibitly mode switch */
+#define KDC_V4_NONE		0	/* Don't even respond to packets */
+#define KDC_V4_DISABLE		1	/* V4 requests return an error */
+#define	KDC_V4_FULL		2	/* Preauth required go through */
+#define KDC_V4_NOPREAUTH	3	/* Preauth required disallowed */
+
+#define KDC_V4_DEFAULT_MODE KDC_V4_NOPREAUTH
+/* Flag on how to handle v4 */
+static int		kdc_v4;
+
+struct v4mode_lookup_entry {
+    int                 mode;                   /* Mode setting */
+    const char *	v4_specifier;		/* How to recognize it	*/
+};
+
+static const struct v4mode_lookup_entry  v4mode_table[] = {
+/*  mode                input specifier */
+{ KDC_V4_NONE,          "none"          },
+{ KDC_V4_DISABLE,       "disable"       }, 
+{ KDC_V4_FULL,          "full"          },
+{ KDC_V4_NOPREAUTH,     "nopreauth"     }
+};
+
+static const int v4mode_table_nents = sizeof(v4mode_table)/
+				      sizeof(v4mode_table[0]);
+
+void process_v4_mode(progname, string)
+    const char          *progname;
+    const char          *string;
+{
+    int i, found;
+
+    found = 0;
+    kdc_v4 = KDC_V4_DEFAULT_MODE;
+
+    if(!string) return;  /* Set to default mode */
+    
+    for (i=0; i<v4mode_table_nents; i++) {
+	if (!strcasecmp(string, v4mode_table[i].v4_specifier)) {
+	    found = 1;
+	    kdc_v4 = v4mode_table[i].mode;
+	    break;
+	}
+    }
+
+    if(!found) {
+      /* It is considered fatal if we request a mode that is not found */
+	com_err(progname, 0, "invalid v4_mode %s", string);
+	exit(1);
+    }
+    return;
+}
+
 krb5_error_code
 process_v4( pkt, client_fulladdr, is_secondary, resp)
 const krb5_data *pkt;
@@ -186,37 +238,24 @@ krb5_data **resp;
 		     sizeof client_sockaddr.sin_addr);
     memset( client_sockaddr.sin_zero, 0, sizeof client_sockaddr.sin_zero);
 
-    /* convert v5 packet structure to v5's.
+    /* convert v5 packet structure to v4's.
      * this copy is gross, but necessary:
      */
     v4_pkt.length = pkt->length;
     memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
+    /* Check if disabled completely */
+    if (kdc_v4 == KDC_V4_NONE) {
+	(void) klog(L_KRB_PERR,
+	"Disabled KRB V4 request");
+	return KRB5KDC_ERR_BAD_PVNO;
+    }
+
     kerberos_v4( &client_sockaddr, &v4_pkt);
     *resp = response;
     return(retval);
 }
-#if 0
-/* convert k4's klog() levels into corresponding errors for v5: */
-int type_2_v5err[] = { 0,	/* 		0 No error		     */
-    KDC_ERR_NONE,		/* L_NET_ERR	1 Error in network code      */
-    KDC_ERR_NONE,		/* L_NET_INFO	2 Info on network activity   */
-    KRB_AP_ERR_BADVERSION,	/* L_KRB_PERR	3 Kerberos protocol errors   */
-    KDC_ERR_NONE,		/* L_KRB_PINFO	4 Kerberos protocol info     */
-    KDC_ERR_NONE,		/* L_INI_REQ	5 Request for initial ticket */
-    KRB_AP_ERR_BADVERSION,	/* L_NTGT_INTK	6 Initial request not for TGT*/
-    KDC_ERR_NONE,		/* L_DEATH_REQ	7 Request for server death   */
-    KDC_ERR_NONE,		/* L_TKT_REQ	8 All ticket requests w/ tgt */
-    KDC_ERR_SERVICE_EXP,	/* L_ERR_SEXP	9 Service expired	     */
-    KDC_ERR_C_OLD_MAST_KVNO,	/* L_ERR_MKV	10 Master key version old    */
-    KDC_ERR_NULL_KEY,		/* L_ERR_NKY    11 User's key is null        */
-    KDC_ERR_PRINCIPAL_NOT_UNIQUE, /* L_ERR_NUN	12 Principal not unique      */
-    KDC_ERR_C_PRINCIPAL_UNKNOWN,  /* L_ERR_UNK	13 Principal Unknown         */
-    KDC_ERR_NONE,		/* L_ALL_REQ    14 All requests	     	     */
-    KDC_ERR_NONE,		/* L_APPL_REQ   15 Application requests w/tgt*/
-    KRB_AP_ERR_BADVERSION	/* L_KRB_PWARN  16 Protocol warning messages */
-};
-#endif
+
 #define klog v4_klog
 #ifdef HAVE_STDARG_H
 char * v4_klog( int type, const char *format, ...)
@@ -418,15 +457,36 @@ kerb_get_principal(name, inst, principal, maxn, more)
      */
     v4_time = (entries.max_life + MIN5 - 1) / MIN5;
     principal->max_life = v4_time > HR21 ? HR21 : (unsigned char) v4_time;
-    principal->exp_date = (unsigned long) entries.expiration;
+    /*
+     * This is weird, but the intent is that the expiration is the minimum
+     * of the principal expiration and key expiration
+     */
+    principal->exp_date = (unsigned long) 
+        entries.expiration && entries.pw_expiration ?
+        min(entries.expiration, entries.pw_expiration) :
+        (entries.pw_expiration ? entries.pw_expiration :
+        entries.expiration);
 /*    principal->mod_date = (unsigned long) entries.mod_date; */
 /* Set the master key version to 1. It's not really useful because all keys
  * will be encrypted in the same master key version, and digging out the 
- * actuall key version will be harder than it's worth --proven */
+ * actual key version will be harder than it's worth --proven */
 /*    principal->kdc_key_ver = entries.mkvno; */
     principal->kdc_key_ver = 1;
     principal->key_version = pkey->key_data_kvno;
+    /* We overload the attributes with the relevant v5 ones */
     principal->attributes = 0;
+    if (isflagset(entries.attributes,  KRB5_KDB_REQUIRES_HW_AUTH) ||
+	isflagset(entries.attributes,  KRB5_KDB_REQUIRES_PRE_AUTH)) {
+          principal->attributes |= V4_KDB_REQUIRES_PREAUTH;
+    }
+    if (isflagset(entries.attributes,  KRB5_KDB_DISALLOW_ALL_TIX)) {
+          principal->attributes |= V4_KDB_DISALLOW_ALL_TIX;
+    }
+    if (isflagset(entries.attributes,  KRB5_KDB_REQUIRES_PWCHANGE)) {
+          principal->attributes |= V4_KDB_REQUIRES_PWCHANGE;
+    }
+
+
 
     /* set up v4 format of each date's text: */
     for ( date = &principal->exp_date, text = principal->exp_date_txt;
@@ -485,6 +545,17 @@ kerberos_v4(client, pkt)
     req_msg_type = pkt_msg_type(pkt);	/* 1 byte, Kerberos msg type */
 
     req_act_vno = req_version;
+
+    /* check if disabled, but we tell client */
+    if (kdc_v4 == KDC_V4_DISABLE) {
+	lt = klog(L_KRB_PERR,
+	"KRB will not handle v4 request from %s",
+		  inet_ntoa(client_host));
+	/* send an error reply */
+	req_name_ptr = req_inst_ptr = req_realm_ptr = "";
+	kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
+	return;
+    }
 
     /* check packet version */
     if (req_version != KRB_PROT_VERSION) {
@@ -765,38 +836,6 @@ kerberos_v4(client, pkt)
 }
 
 
-#ifndef BACKWARD_COMPAT
-/*
- * setup_disc 
- *
- * disconnect all descriptors, remove ourself from the process
- * group that spawned us. 
- */
-
-setup_disc()
-{
-
-    int     s;
-
-    for (s = 0; s < 3; s++) {
-	(void) close(s);
-    }
-
-    (void) open("/dev/null", 0);
-    (void) dup2(0, 1);
-    (void) dup2(0, 2);
-
-    s = open("/dev/tty", 2);
-
-    if (s >= 0) {
-	ioctl(s, TIOCNOTTY, (struct sgttyb *) 0);
-	(void) close(s);
-    }
-    (void) chdir("/tmp");
-    return;
-}
-#endif /* BACKWARD_COMPAT */
-
 
 /*
  * kerb_er_reply creates an error reply packet and sends it to the
@@ -823,34 +862,6 @@ kerb_err_reply(client, pkt, err, string)
 	   (struct sockaddr *) client, S_AD_SZ);
 
 }
-
-#ifndef BACKWARD_COMPAT
-/*
- * Make sure that database isn't stale.
- *
- * Exit if it is; we don't want to tell lies.
- */
-
-static void check_db_age()
-{
-    long age;
-    
-    if (max_age != -1) {
-	/* Requires existance of kerb_get_db_age() */
-	gettimeofday(&kerb_time, 0);
-	age = kerb_get_db_age();
-	if (age == 0) {
-	    klog(L_KRB_PERR, "Database currently being updated!");
-	    hang();
-	}
-	if ((age + max_age) < kerb_time.tv_sec) {
-	    klog(L_KRB_PERR, "Database out of date!");
-	    hang();
-	    /* NOTREACHED */
-	}
-    }
-}
-#endif /* BACKWARD_COMPAT */
 
 /*
  * Given a pointer to a long containing the number of seconds
@@ -915,6 +926,42 @@ int check_princ(p_name, instance, lifetime, p)
 		  p_name, instance, 0);
 	return KERB_ERR_PRINCIPAL_NOT_UNIQUE;
     }
+
+    /*
+     * Check our V5 stuff first.
+     */
+
+    /*
+     * Does the principal have REQUIRES_PWCHANGE set?
+     */
+    if (isflagset(p->attributes, V4_KDB_REQUIRES_PWCHANGE)) {
+	lt = klog(L_ERR_SEXP, "V5 REQUIRES_PWCHANGE set "
+		  "\"%s\" \"%s\"", p_name, instance);
+	return KERB_ERR_NAME_EXP;
+    }
+
+    /*
+     * Does the principal have DISALLOW_ALL_TIX set?
+     */
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_ALL_TIX)) {
+	lt = klog(L_ERR_SEXP, "V5 DISALLOW_ALL_TIX set: "
+		  "\"%s\" \"%s\"", p_name, instance);
+	/* Not sure of a better error to return */
+	return KERB_ERR_NAME_EXP;
+    }
+
+    /*
+     * Does the principal require preauthentication?
+     */
+    if ((kdc_v4 == KDC_V4_NOPREAUTH) &&
+	isflagset(p->attributes, V4_KDB_REQUIRES_PREAUTH)) {
+        lt = klog(L_ERR_SEXP, "V5 REQUIRES_PREAUTH set: "
+		  "\"%s\" \"%s\"", p_name, instance);
+	/* Not sure of a better error to return */
+	return KERB_ERR_AUTH_EXP;
+/*	return KERB_ERR_NAME_EXP;*/
+    }
+
     /* If the user's key is null, we want to return an error */
     if ((p->key_low == 0) && (p->key_high == 0)) {
 	/* User has a null key */
@@ -965,24 +1012,6 @@ int set_tgtkey(r)
     return (KSUCCESS);
 }
 
-#ifndef BACKWARD_COMPAT
-static void
-hang()
-{
-    if (pause_int == -1) {
-	klog(L_KRB_PERR, "Kerberos will pause so as not to loop init");
-	for (;;)
-	    pause();
-    } else {
-	char buf[256];
-	sprintf(buf,  "Kerberos will wait %d seconds before dying so as not to loop init", pause_int);
-	klog(L_KRB_PERR, buf);
-	sleep(pause_int);
-	klog(L_KRB_PERR, "Do svedania....\n");
-	exit(1);
-    }
-}
-#endif /* BACKWARD_COMPAT */
 #else	/* KRB5_KRB4_COMPAT */
 #include "k5-int.h"
 #endif /* KRB5_KRB4_COMPAT */

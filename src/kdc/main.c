@@ -577,7 +577,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-n]\n", name);
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-4 v4mode] [-n]\n", name);
     return;
 }
 
@@ -599,6 +599,9 @@ initialize_realms(kcontext, argc, argv)
     char		*default_ports = 0;
     krb5_pointer	aprof;
     const char		*hierarchy[3];
+#ifdef KRB5_KRB4_COMPAT
+    char                *v4mode = 0;
+#endif
     extern char *optarg;
 
     if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
@@ -607,18 +610,22 @@ initialize_realms(kcontext, argc, argv)
 	hierarchy[2] = (char *) NULL;
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_ports))
 	    default_ports = 0;
+#ifdef KRB5_KRB4_COMPAT
+	hierarchy[1] = "v4_mode";
+	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &v4mode))
+	    v4mode = 0;
+#endif
 	/* aprof_init can return 0 with aprof == NULL */
 	if (aprof)
 	     krb5_aprof_finish(aprof);
     }
     if (default_ports == 0)
 	default_ports = strdup(DEFAULT_KDC_PORTLIST);
-    
     /*
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
@@ -661,12 +668,26 @@ initialize_realms(kcontext, argc, argv)
 		free(default_ports);
 	    default_ports = strdup(optarg);
 	    break;
+	case '4':
+#ifdef KRB5_KRB4_COMPAT
+	    if (v4mode)
+		free(v4mode);
+	    v4mode = strdup(optarg);
+#endif
+	    break;
 	case '?':
 	default:
 	    usage(argv[0]);
 	    exit(1);
 	}
     }
+
+#ifdef KRB5_KRB4_COMPAT
+    /*
+     * Setup the v4 mode 
+     */
+    process_v4_mode(argv[0], v4mode);
+#endif
 
     /*
      * Check to see if we processed any realms.
