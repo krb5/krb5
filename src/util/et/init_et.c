@@ -92,15 +92,15 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_add_error_table(ectx, tbl)
 	et_ctx ectx;
 	struct error_table FAR *tbl;
 {
-	struct et_list FAR *link;
+	struct et_list FAR *e;
 
-	link = malloc(sizeof(struct et_list));
-	if (!link)
+	e = malloc(sizeof(struct et_list));
+	if (!e)
 		return ENOMEM;
 	
-	link->table = tbl;
-	link->next = ectx->tables;
-	ectx->tables = link;
+	e->table = tbl;
+	e->next = ectx->tables;
+	ectx->tables = e;
 	
 	return 0;
 }

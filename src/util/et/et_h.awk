@@ -150,7 +150,7 @@ END {
 	print "" > outfile
 	print "#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)" > outfile
 	print "/* for compatibility with older versions... */" > outfile
-	print "extern void initialize_" table_name "_error_table ();" > outfile
+	print "extern void initialize_" table_name "_error_table () /*@modifies internalState@*/;" > outfile
 	print "#define init_" table_name "_err_tbl initialize_" table_name "_error_table" > outfile
 	print "#define " table_name "_err_base ERROR_TABLE_BASE_" table_name > outfile
 	print "#else" > outfile

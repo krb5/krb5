@@ -33,7 +33,7 @@
 static void MacMessageBox(char *errbuf);
 #endif
 
-static et_old_error_hook_func com_err_hook = 0;
+static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
 
 static void default_com_err_proc
 ET_P((const char FAR *whoami, errcode_t code,
@@ -60,7 +60,8 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 		strncat (errbuf, " ", sizeof(errbuf) - 1 - strlen(errbuf));
 	}
 	if (fmt)
-		vsprintf (errbuf + strlen (errbuf), fmt, ap);
+	    /* ITS4: ignore vsprintf */
+	    vsprintf (errbuf + strlen (errbuf), fmt, ap);
 	errbuf[sizeof(errbuf) - 1] = '\0';
 
 #ifdef macintosh
@@ -148,7 +149,7 @@ et_old_error_hook_func reset_com_err_hook ()
 {
 	et_old_error_hook_func x = com_err_hook;
     
-	com_err_hook = 0;
+	com_err_hook = NULL;
 	return x;
 }
 #endif

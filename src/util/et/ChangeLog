@@ -1,3 +1,41 @@
+2000-11-08  Ken Raeburn  <raeburn@mit.edu>
+
+	Test out lclint and its4 on com_err library.  One lclint error
+	left on Solaris, due to deficiencies in lclint.  Its4 chokes in
+	parser.
+	* com_err.h (struct error_table): Annotate MSGS as pointing to
+	'shared' data.
+	(error_message): Returned data is 'observer' and 'dependent';
+	modifies internal state.
+	* com_err.c (default_com_err_proc): Cast various return values to
+	void.
+	(reset_com_err_hook): Use NULL, not 0.
+	(com_err_hook): Annotate as 'null'.
+	* error_table.h (_et_list): Annotate as 'null' and 'dependent'.
+	(struct et_list): Annotate NEXT as 'dependent' and 'null', and
+	TABLE as 'dependent'.
+	(struct dynamic_et_list): Duplicate et_list definition, except
+	NEXT is annotated as 'only' instead of 'dependent'.
+	(error_table_name, error_table_name_r): Annotate for lclint.
+	* et_h.awk: Add lclint annotations for initialize_* functions.
+	* error_message.c (_et_list): Can be 'null'.
+	(error_message): Explicitly compare against zero.  Cast strerror
+	argument to int.
+	(et_list_dynamic): New variable, for dynamically allocated list
+	elements; _et_list is now for statically allocated elements only.
+	(add_error_table, remove_error_table): Check both lists.
+	* et_name.c (error_table_name, error_table_name_r): Annotate for
+	lclint.
+	* init_et.c (et_add_error_table): Change "link" to "e" to avoid
+	confusion with C library function in analysis tools.
+	* et1.et, et2.et, t_com_err.c: New files.  Exercise addition and
+	removal of error tables from list, using both interfaces.
+	* Makefile.in (LCLINT, LCLINTOPTS, ITS4, ITS4OPTS): New
+	variables.
+	(do-lclint, do-its4, et1.o, et2.o, t_com_err.o, t_com_err): New
+	targets.  Not automatically invoked at present.
+	(FILES): Updated.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Change AC_CONST to AC_C_CONST, AC_HEADER_EGREP to

@@ -34,6 +34,7 @@ FILES=	Makefile et_name.c error_message.c compile_et.c \
 		com_err.c com_err.h \
 		error_table.h mit-sipb-copyright.h \
 		test_et.c test1.et test2.et \
+		t_com_err.c et1.et et2.et \
 		compiler.h internal.h \
 		com_err.texinfo texinfo.tex
 #SRCS=	compile_et.c error_table.c error_message.c et_name.c \
@@ -79,9 +80,37 @@ et_lex.lex.o: et_lex.lex.c
 test1.o: test1.c
 test2.o: test2.c
 test_et.o: test1.h test2.h
+et1.o: et1.c
+et2.o: et2.c
+t_com_err.o: et1.h et2.h t_com_err.c
+
+# /u1/kr/lclint-2.5m/bin/lclint -warnposix -D__sparc
+LCLINT=lclint
+# +posixlib	gets more complete errno list than ansilib
+# -usedef	turns off bogus warnings from poor dataflow analysis (should be
+#		redundant with gcc warnings anyways)
+# -warnposix
+# +charintliteral
+# +ignoresigns
+# -predboolint
+# -exportlocal
+# -retvalint	allow ignoring of int return values (e.g., fputs)
+LCLINTOPTS=+posixlib \
+	-usedef -warnposix +charintliteral +ignoresigns -predboolint \
+	-exportlocal -retvalint \
+	+mod-uncon +modinternalstrict +modfilesys \
+	-expect 1
+do-lclint: error_table.y et_lex.lex.c
+	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) $(SRCS)
+ITS4=its4
+ITS4OPTS=
+do-its4: error_table.y et_lex.lex.c
+	$(ITS4) $(ITS4OPTS) $(SRCS)
 
 test_et: test_et.o test1.o test2.o $(LIBOBJS)
 	$(CC) -o test_et test_et.o test1.o test2.o $(LIBOBJS)
+t_com_err: t_com_err.o et1.o et2.o $(LIBOBJS)
+	$(CC) -o t_com_err t_com_err.o et1.o et2.o $(LIBOBJS)
 
 all-unix:: compile_et includes
 

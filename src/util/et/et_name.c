@@ -25,15 +25,16 @@
 static const char char_set[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
-const char * error_table_name_r(num, out)
-	unsigned long num;
-	char FAR *out;
+const char *
+error_table_name_r (unsigned long num,
+		    /*@out@*/ /*@returned@*/ char FAR *outbuf)
+     /*@modifies outbuf@*/
 {
 	long ch;
 	int i;
-	char *p;
+	/*@out@*/ char *p;
 
-	p = out;
+	p = outbuf;
 	num >>= ERRCODE_RANGE;
 
 	for (i = 3; i >= 0; i--) {
@@ -42,11 +43,12 @@ const char * error_table_name_r(num, out)
 			*p++ = char_set[ch-1];
 	}
 	*p = '\0';
-	return(out);
+	return(outbuf);
 }
 
-const char FAR * error_table_name(num)
-	unsigned long num;
+/*@observer@*/
+const char FAR * error_table_name(unsigned long num)
+     /*@modifies internalState@*/
 {
 	static char buf[6];
 

@@ -55,26 +55,45 @@ static struct et_list * _et_list = (struct et_list *) NULL;
 struct et_list * _et_list = (struct et_list *) NULL;
 #endif
 
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
-	long code;
+/*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
+
+#ifdef _MSDOS
+/*
+ * Win16 applications cannot call malloc while the DLL is being
+ * initialized...  To get around this, we pre-allocate an array
+ * sufficient to hold several error tables.
+ */
+#define PREALLOCATE_ETL 32
+static struct et_list etl[PREALLOCATE_ETL];
+static int etl_used = 0;
+#endif
+
+KRB5_DLLIMP const char FAR * KRB5_CALLCONV
+error_message(long code)
+    /*@modifies internalState@*/
 {
 	unsigned long offset;
 	unsigned long l_offset;
 	struct et_list *et;
+	struct dynamic_et_list *det;
 	unsigned long table_num;
 	int started = 0;
 	unsigned int divisor = 100;
 	char *cp;
+	const struct error_table *table;
 
 	l_offset = (unsigned long)code & ((1<<ERRCODE_RANGE)-1);
 	offset = l_offset;
 	table_num = ((unsigned long)code - l_offset) & ERRCODE_MAX;
-	if (!table_num) {
+	if (table_num == 0) {
 		if (code == 0)
 			goto oops;
 
+		/* This could trip if int is 16 bits.  */
+		if ((unsigned long)(int)offset != offset)
+		    abort ();
 #ifdef HAVE_STRERROR
-		cp = strerror(offset);
+		cp = strerror((int) offset);
 		if (cp)
 			return cp;
 		goto oops;
@@ -90,17 +109,46 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 #endif /* HAVE_STRERROR */
 	}
 
-	et = _et_list;
-	while (et) {
-	    if ((et->table->base & ERRCODE_MAX) == table_num) {
-			/* This is the right table */
-			if (et->table->n_msgs <= offset)
-				break;
-			return(et->table->msgs[offset]);
-		}
-		et = et->next;
-	}
+#ifndef DEBUG_TABLE_LIST
+#define dprintf(X)
+#else
+#define dprintf(X) printf X
+#endif
 
+	dprintf (("scanning static list for %x\n", table_num));
+	for (et = _et_list; et != NULL; et = et->next) {
+	    dprintf (("\t%x = %s\n", et->table->base & ERRCODE_MAX,
+		      et->table->msgs[0]));
+	    if ((et->table->base & ERRCODE_MAX) == table_num) {
+		table = et->table;
+		goto found;
+	    }
+	}
+	dprintf (("scanning dynamic list for %x\n", table_num));
+	for (det = et_list_dynamic; det != NULL; det = det->next) {
+	    dprintf (("\t%x = %s\n", det->table->base & ERRCODE_MAX,
+		      det->table->msgs[0]));
+	    if ((det->table->base & ERRCODE_MAX) == table_num) {
+		table = det->table;
+		goto found;
+	    }
+	}
+	goto no_table_found;
+
+ found:
+	dprintf (("found it!\n"));
+	/* This is the right table */
+
+	/* This could trip if int is 16 bits.  */
+	if ((unsigned long)(unsigned int)offset != offset)
+	    goto no_table_found;
+
+	if (table->n_msgs <= (unsigned int) offset)
+	    goto no_table_found;
+
+	return table->msgs[offset];
+
+ no_table_found:
 #if defined(_MSDOS) || defined(_WIN32)
 	/*
 	 * WinSock errors exist in the 10000 and 11000 ranges
@@ -162,14 +210,14 @@ oops:
 	cp = buffer;
 	strcpy(cp, "Unknown code ");
 	cp += sizeof("Unknown code ") - 1;
-	if (table_num) {
-		error_table_name_r(table_num, cp);
-		while (*cp)
+	if (table_num != 0L) {
+		(void) error_table_name_r(table_num, cp);
+		while (*cp != '\0')
 			cp++;
 		*cp++ = ' ';
 	}
 	while (divisor > 1) {
-	    if (started || offset >= divisor) {
+	    if (started != 0 || offset >= divisor) {
 		*cp++ = '0' + offset / divisor;
 		offset %= divisor;
 		started++;
@@ -181,42 +229,40 @@ oops:
 	return(buffer);
 }
 
-
-#ifdef _MSDOS
-/*
- * Win16 applications cannot call malloc while the DLL is being
- * initialized...  To get around this, we pre-allocate an array
- * sufficient to hold several error tables.
- */
-#define PREALLOCATE_ETL 32
-static struct et_list etl[PREALLOCATE_ETL];
-static int etl_used = 0;
-#endif
-
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 add_error_table(et)
-    const struct error_table FAR * et;
+    /*@dependent@*/ const struct error_table FAR * et;
 {
-    struct et_list *el = _et_list;
+    struct et_list *el;
+    struct dynamic_et_list *del;
 
-    while (el) {
+    /* Always check both lists, because the old interface code
+       wouldn't check the dynamically maintained list before adding an
+       entry to the static list.  */
+    for (el = _et_list; el != NULL; el = el->next)
 	if (el->table->base == et->base)
 	    return EEXIST;
-	el = el->next;
-    }
+    for (del = et_list_dynamic; del != NULL; del = del->next)
+	if (del->table->base == et->base)
+	    return EEXIST;
 
 #ifdef _MSDOS
-    if (etl_used < PREALLOCATE_ETL)
+    if (etl_used < PREALLOCATE_ETL) {
 	el = &etl[etl_used++];
-    else
+	el->table = et;
+	el->next = _et_list;
+	et_list = el;
+	return 0;
+    }
 #endif
-	if (!(el = (struct et_list *)malloc(sizeof(struct et_list))))
-	    return ENOMEM;
 
-    el->table = et;
-    el->next = _et_list;
-    _et_list = el;
+    del = (struct dynamic_et_list *)malloc(sizeof(struct dynamic_et_list));
+    if (del == NULL)
+	return errno;
 
+    del->table = et;
+    del->next = et_list_dynamic;
+    et_list_dynamic = del;
     return 0;
 }
 
@@ -224,23 +270,33 @@ KRB5_DLLIMP errcode_t KRB5_CALLCONV
 remove_error_table(et)
     const struct error_table FAR * et;
 {
-    struct et_list *el = _et_list;
-    struct et_list *el2 = 0;
+    struct dynamic_et_list **del;
+    struct et_list **el;
+    errcode_t ret = ENOENT;
 
-    while (el) {
-	if (el->table->base == et->base) {
-	    if (el2)	/* Not the beginning of the list */
-		el2->next = el->next;
-	    else
-		_et_list = el->next;
-#ifdef _MSDOS
-	    if ((el < etl) || (el > &etl[PREALLOCATE_ETL-1]))
-#endif
-		(void) free(el);
-	    return 0;
+    /* Always check both lists, because the old interface code
+       wouldn't check the dynamically maintained list before adding an
+       entry to the static list.  */
+    for (del = &et_list_dynamic; *del; del = &(*del)->next)
+	if ((*del)->table->base == et->base) {
+	    /*@only@*/ struct dynamic_et_list *old = *del;
+	    *del = old->next;
+	    free (old);
+	    ret = 0;
+	    break;
 	}
-	el2 = el;
-	el = el->next;
-    }
-    return ENOENT;
+    for (el = &_et_list; *el; el = &(*el)->next)
+	if ((*el)->table->base == et->base) {
+	    struct et_list *old = *el;
+	    *el = old->next;
+	    old->next = NULL;
+	    old->table = NULL;
+#ifdef _MSDOS
+	    if ((old >= etl) && (old < &etl[PREALLOCATE_ETL-1]))
+		/* do something? */;
+#endif
+	    ret = 0;
+	    break;
+	}
+    return ret;
 }

@@ -59,7 +59,7 @@ typedef void (*et_old_error_hook_func) ET_P((const char FAR *, errcode_t,
 					     const char FAR *, va_list ap));
 	
 struct error_table {
-	char const FAR * const FAR * msgs;
+	/*@shared@*/ char const FAR * const FAR * msgs;
 	unsigned long base;
 	unsigned int n_msgs;
 };
@@ -73,8 +73,9 @@ KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
 KRB5_DLLIMP extern void KRB5_CALLCONV com_err_va
 	ET_P((const char FAR *whoami, errcode_t code, const char FAR *fmt,
 	      va_list ap));
-KRB5_DLLIMP extern const char FAR * KRB5_CALLCONV error_message
-	ET_P((errcode_t));
+KRB5_DLLIMP extern /*@observer@*//*@dependent@*/ const char FAR * KRB5_CALLCONV error_message
+	ET_P((errcode_t))
+       /*@modifies internalState@*/;
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
 	ET_P((const struct error_table FAR *));
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
