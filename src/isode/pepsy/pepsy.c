@@ -36,7 +36,10 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
- * Revision 1.1  1994/06/10 03:31:15  eichin
+ * Revision 1.2  1994/06/11 08:05:55  tlyu
+ * mips yylineno breakage
+ *
+ * Revision 1.1  1994/06/10  03:31:15  eichin
  * autoconfed isode for kerberos work
  *
  * Revision 1.2  1994/06/07 03:45:37  eichin
@@ -68,7 +71,7 @@ static char *rcsid = "$Header$";
 #include "pepsydefs.h"
 #include "pass2.h"
 
-#if defined(USING_BISON) || defined(mips)
+#if defined(USING_BISON)
 int yylineno = 0;		/* Bison doesn't have yylineno, sigh */
 				/* ultrix doesn't either */
 #endif
