@@ -1,3 +1,8 @@
+Mon Apr  6 19:40:05 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (includes): Don't call mkdir unless the directory
+ 	exists.
+
 Fri Feb 27 22:30:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Move tests from all of kadm5's subdirectories into
