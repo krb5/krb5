@@ -1,3 +1,9 @@
+2002-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Look for strdup.
+	* prof_tree.c (profile_create_node): Use strdup.
+	(strdup, MYstrdup): Define it if the OS doesn't provide it.
+
 2002-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_get.c (profile_get_integer): Set errno to 0 before strtol

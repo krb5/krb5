@@ -67,6 +67,19 @@ void profile_free_node(node)
 	free(node);
 }
 
+#ifndef HAVE_STRDUP
+#undef strdup
+#define strdup MYstrdup
+static char *MYstrdup (const char *s)
+{
+    size_t sz = strlen(s) + 1;
+    char *p = malloc(sz);
+    if (p != 0)
+	memcpy(p, s, sz);
+    return p;
+}
+#endif
+
 /*
  * Create a node
  */
@@ -80,19 +93,17 @@ errcode_t profile_create_node(name, value, ret_node)
 	if (!new)
 		return ENOMEM;
 	memset(new, 0, sizeof(struct profile_node));
-	new->name = malloc(strlen(name)+1);
+	new->name = strdup(name);
 	if (new->name == 0) {
-		profile_free_node(new);
-		return ENOMEM;
+	    profile_free_node(new);
+	    return ENOMEM;
 	}
-	strcpy(new->name, name);
 	if (value) {
-		new->value = malloc(strlen(value)+1);
+		new->value = strdup(value);
 		if (new->value == 0) {
-			profile_free_node(new);
-			return ENOMEM;
+		    profile_free_node(new);
+		    return ENOMEM;
 		}
-		strcpy(new->value, value);
 	}
 	new->magic = PROF_MAGIC_NODE;
 
