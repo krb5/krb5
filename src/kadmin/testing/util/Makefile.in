@@ -18,7 +18,7 @@ $(SRVPROG): $(OBJS) $(SRVDEPLIBS)
 	$(CC) $(LDFLAGS) $(LDARGS) -o $(SRVPROG) $(OBJS) $(SRVLIBS) $(TCLLIB)
 
 $(CLNTPROG): $(OBJS) $(CLNTDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(CLNTPROG) $(OBJS) $(CLNTLIBS) (TCLLIB)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(CLNTPROG) $(OBJS) $(CLNTLIBS) $(TCLLIB)
 
 bsddb_dump: bsddb_dump.o
 	$(CC) $(LDFLAGS) $(LDARGS) -o bsddb_dump bsddb_dump.o $(SRVLIBS)
