@@ -32,26 +32,27 @@
  * without modifying the other sources.
  */
 
-#include <stdio.h>
-#include <krb5.h>
-//#include <k5-int.h>
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <krb5.h>
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
 
-void printhex (size_t len, const char *p)
+static void printhex (size_t len, const char *p)
 {
     while (len--)
 	printf ("%02x", 0xff & *p++);
 }
 
-void printstringhex (const char *p) { printhex (strlen (p), p); }
+static void printstringhex (const char *p) { printhex (strlen (p), p); }
 
-void printdata (krb5_data *d) { printhex (d->length, d->data); }
+static void printdata (krb5_data *d) { printhex (d->length, d->data); }
 
-void printkey (krb5_keyblock *k) { printhex (k->length, k->contents); }
+static void printkey (krb5_keyblock *k) { printhex (k->length, k->contents); }
 
-void test_nfold ()
+static void test_nfold ()
 {
     int i;
     struct {
@@ -74,7 +75,7 @@ void test_nfold ()
 	printstringhex (p);
 	printf (") =\n\t");
 	krb5_nfold (8 * strlen (p), p, tests[i].n, outbuf);
-	printhex (tests[i].n / 8, outbuf);
+	printhex (tests[i].n / 8U, outbuf);
 	printf ("\n\n");
     }
 }
@@ -87,7 +88,7 @@ void test_nfold ()
     {0xe0,0xe0,0xe0,0xe0,0xf1,0xf1,0xf1,0xf1},
    so try to generate them. */
 
-void
+static void
 test_mit_des_s2k ()
 {
     struct {
@@ -107,12 +108,17 @@ test_mit_des_s2k ()
     for (i = 0; i < ASIZE (pairs); i++) {
 	const char *p = pairs[i].pass;
 	const char *s = pairs[i].salt;
-	krb5_data pd = { .length = strlen(p), .data = (char*) p };
-	krb5_data sd = { .length = strlen(s), .data = (char*) s };
+	krb5_data pd;
+	krb5_data sd;
 	unsigned char key_contents[60];
 	krb5_keyblock key = { .contents = key_contents };
 	krb5_error_code r;
 	char buf[80];
+
+	pd.length = strlen (p);
+	pd.data = (char *) p;
+	sd.length = strlen (s);
+	sd.data = (char *) s;
 
 	assert (strlen (s) + 4 < sizeof (buf));
 	sprintf (buf, "\"%s\"", s);
@@ -129,7 +135,7 @@ test_mit_des_s2k ()
     }
 }
 
-void
+static void
 test_s2k (krb5_enctype enctype)
 {
     struct {
@@ -146,12 +152,17 @@ test_s2k (krb5_enctype enctype)
     for (i = 0; i < ASIZE (pairs); i++) {
 	const char *p = pairs[i].pass;
 	const char *s = pairs[i].salt;
-	krb5_data pd = { .length = strlen(p), .data = (char*) p };
-	krb5_data sd = { .length = strlen(s), .data = (char*) s };
+	krb5_data pd, sd;
 	unsigned char key_contents[60];
-	krb5_keyblock key = { .contents = key_contents };
+	krb5_keyblock key;
 	krb5_error_code r;
 	char buf[80];
+
+	pd.length = strlen (p);
+	pd.data = (char *) p;
+	sd.length = strlen (s);
+	sd.data = (char *) s;
+	key.contents = key_contents;
 
 	assert (strlen (s) + 4 < sizeof (buf));
 	sprintf (buf, "\"%s\"", s);
@@ -162,15 +173,15 @@ test_s2k (krb5_enctype enctype)
 	printhex (strlen(p), p);
 	printf ("\n");
 	r = krb5_c_string_to_key (0, enctype, &pd, &sd, &key);
-	printf (  "key:\t", "");
+	printf (  "key:\t");
 	printhex (key.length, key.contents);
 	printf ("\n\n");
     }
 }
 
-void test_des3_s2k () { test_s2k (ENCTYPE_DES3_CBC_SHA1); }
+static void test_des3_s2k () { test_s2k (ENCTYPE_DES3_CBC_SHA1); }
 
-static inline void
+static void
 keyToData (krb5_keyblock *k, krb5_data *d)
 {
     d->length = k->length;
@@ -205,17 +216,20 @@ void combine_keys (krb5_keyblock *k1, krb5_keyblock *k2, krb5_keyblock *knew)
 {
 #define KEYBYTES  21
 #define KEYLENGTH 24
-    krb5_data Combine = { .length = 7, .data = "combine" };
+    krb5_data Combine;
     unsigned char keydata_t1[KEYLENGTH], keydata_t2[KEYLENGTH];
-    krb5_keyblock t1 = { .length = KEYLENGTH, .contents = keydata_t1 };
-    krb5_keyblock t2 = { .length = KEYLENGTH, .contents = keydata_t2 };
+    krb5_keyblock t1, t2;
     unsigned char fold_in[2*KEYBYTES], fold_out[KEYBYTES];
 #define R1data (&fold_in[0])
 #define R2data (&fold_in[KEYBYTES])
-    krb5_data r1 = { .length = KEYBYTES, .data = R1data };
-    krb5_data r2 = { .length = KEYBYTES, .data = R2data };
+    krb5_data r1, r2;
     krb5_data tmp;
-    krb5_error_code r;
+
+    Combine.length = 7, Combine.data = "combine";
+    t1.length = KEYLENGTH, t1.contents = keydata_t1;
+    t2.length = KEYLENGTH, t2.contents = keydata_t2;
+    r1.length = KEYBYTES, r1.data = R1data;
+    r2.length = KEYBYTES, r2.data = R2data;
 
     DK (&t1, k1, &Combine);
     printf ("t1:\t "); printkey (&t1); printf ("\n");
@@ -233,6 +247,7 @@ void combine_keys (krb5_keyblock *k1, krb5_keyblock *k2, krb5_keyblock *knew)
     krb5_random2key (ENCTYPE_DES3_CBC_SHA1, &tmp, knew);
 }
 
+static void
 test_des3_combine ()
 {
     struct {
@@ -314,10 +329,12 @@ test_des3_combine ()
     int i;
 
     for (i = 0; i < ASIZE (keypairs); i++) {
-	krb5_keyblock k1 = { .length = KEYLENGTH, .contents = keypairs[i].k1 };
-	krb5_keyblock k2 = { .length = KEYLENGTH, .contents = keypairs[i].k2 };
+	krb5_keyblock k1, k2, kn;
 	unsigned char keycontents[KEYLENGTH] = { 0 };
-	krb5_keyblock kn = { .length = KEYLENGTH, .contents = keycontents };
+
+	k1.length = KEYLENGTH, k1.contents = keypairs[i].k1;
+	k2.length = KEYLENGTH, k2.contents = keypairs[i].k2;
+	kn.length = KEYLENGTH, kn.contents = keycontents;
 
 	printf ("k1:      "); printkey (&k1); printf ("\n");
 	printf ("k2:      "); printkey (&k2); printf ("\n");
@@ -332,8 +349,11 @@ void spew_keys() {
     int i;
     unsigned char randbytes[21];
     unsigned char keybytes[24];
-    krb5_data d = { .length = 21, .data = randbytes };
-    krb5_keyblock k = { .length = 24, .contents = keybytes };
+    krb5_data d;
+    krb5_keyblock k;
+
+    d.length = 21, d.data = randbytes;
+    k.length = 24, k.contents = keybytes;
 
     srandom(getpid());
     for (i = 0; i < 10; i++) {
@@ -437,15 +457,18 @@ void test_dr_dk ()
 
     for (i = 0; i < ASIZE(derive_tests); i++) {
 #define D (derive_tests[i])
-	krb5_keyblock key = { .length = KEYLENGTH, .contents = D.keydata };
-	krb5_data usage = { .length = D.usage_len, .data = D.usage };
+	krb5_keyblock key;
+	krb5_data usage;
 
 	unsigned char drData[KEYBYTES];
-	krb5_data dr = { .length = KEYBYTES, .data = drData };
+	krb5_data dr;
 	unsigned char dkData[KEYLENGTH];
-	krb5_keyblock dk = { .length = KEYLENGTH, .contents = dkData };
+	krb5_keyblock dk;
 
-	krb5_error_code r;
+	key.length = KEYLENGTH, key.contents = D.keydata;
+	usage.length = D.usage_len, usage.data = D.usage;
+	dr.length = KEYBYTES, dr.data = drData;
+	dk.length = KEYLENGTH, dk.contents = dkData;
 
 	printf ("key:\t"); printkey (&key); printf ("\n");
 	printf ("usage:\t"); printdata (&usage); printf ("\n");
@@ -458,10 +481,14 @@ void test_dr_dk ()
 
 int main ()
 {
+#if 0
     test_nfold ();
     test_mit_des_s2k ();
+#endif
     test_des3_s2k ();
+#if 0
     spew_keys ();
+#endif
     test_des3_combine ();
     test_dr_dk ();
     return 0;

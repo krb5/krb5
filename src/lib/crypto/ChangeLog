@@ -1,3 +1,18 @@
+2001-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* vectors.c: Include string.h.
+	(printhex, printstringhex, printdata, printkey, test_nfold,
+	test_mit_des_s2k, test_s2k, test_des3_s2k, test_des3_combine): Now
+	static.
+	(test_nfold): Pass unsigned first arg to printhex.
+	(test_mit_des_s2k, test_s2k, combine_keys, test_des3_combine,
+	spew_keys, test_dr_dk): Change structure field initializations to
+	assignments, to be palatable to more compilers.
+	(test_s2k): Remove superfluous argument to printf.
+	(test_des3_combine): Return type is void.
+	(keyToData): Drop "inline" spec.
+	(main): Only run some of the tests.
+
 2001-06-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* vectors.c: New file.
