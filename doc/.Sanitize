@@ -32,6 +32,7 @@ TREE-GRAPH
 api
 implement
 install.texi
+install.ps
 kadmin
 krb5-protocol
 old-V4-docs
