@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:14:45  eichin
+ * step 2: bcmp->memcmp
+ *
  * Revision 1.1  1994/06/10 03:27:52  eichin
  * autoconfed isode for kerberos work
  *
@@ -103,7 +106,7 @@ struct NSAPaddr *na;
 	for (ts = ts_interim; ts -> ts_name; ts++)
 	    if (len > ts -> ts_length
 		    && (tp == NULL || ts -> ts_length > tp -> ts_length)
-		    && bcmp (p, ts -> ts_prefix, ts -> ts_length) == 0)
+		    && memcmp (p, ts -> ts_prefix, ts -> ts_length) == 0)
 		tp = ts;
 	if (tp) {
 	    int	    i,

@@ -235,17 +235,17 @@ set_termbuf()
 	 * Only make the necessary changes.
 	 */
 #ifndef	USE_TERMIO
-	if (bcmp((char *)&termbuf.sg, (char *)&termbuf2.sg, sizeof(termbuf.sg)))
+	if (memcmp((char *)&termbuf.sg, (char *)&termbuf2.sg, sizeof(termbuf.sg)))
 		(void) ioctl(pty, TIOCSETN, (char *)&termbuf.sg);
-	if (bcmp((char *)&termbuf.tc, (char *)&termbuf2.tc, sizeof(termbuf.tc)))
+	if (memcmp((char *)&termbuf.tc, (char *)&termbuf2.tc, sizeof(termbuf.tc)))
 		(void) ioctl(pty, TIOCSETC, (char *)&termbuf.tc);
-	if (bcmp((char *)&termbuf.ltc, (char *)&termbuf2.ltc,
+	if (memcmp((char *)&termbuf.ltc, (char *)&termbuf2.ltc,
 							sizeof(termbuf.ltc)))
 		(void) ioctl(pty, TIOCSLTC, (char *)&termbuf.ltc);
 	if (termbuf.lflags != termbuf2.lflags)
 		(void) ioctl(pty, TIOCLSET, (char *)&termbuf.lflags);
 #else	/* USE_TERMIO */
-	if (bcmp((char *)&termbuf, (char *)&termbuf2, sizeof(termbuf)))
+	if (memcmp((char *)&termbuf, (char *)&termbuf2, sizeof(termbuf)))
 # ifdef  STREAMSPTY
 		(void) tcsetattr(ttyfd, TCSANOW, &termbuf);
 # else

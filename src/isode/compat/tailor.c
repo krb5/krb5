@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:14:48  eichin
+ * step 2: bcmp->memcmp
+ *
  * Revision 1.1  1994/06/10 03:28:43  eichin
  * autoconfed isode for kerberos work
  *
@@ -643,8 +646,8 @@ char   *myname;
 	    }
 	    for (tp = ts_interim; tp < ts; tp++)
 		if (tp -> ts_length == ts -> ts_length
-		        && bcmp (tp -> ts_prefix, ts -> ts_prefix,
-				 tp -> ts_length) == 0) {
+		        && memcmp (tp -> ts_prefix, ts -> ts_prefix,
+				   tp -> ts_length) == 0) {
 		    (void) fprintf (stderr,
 			     "duplicate prefixes for communities \"%s\" and \"%s\"\n",
 			     tp -> ts_name, cp);

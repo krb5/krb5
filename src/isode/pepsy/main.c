@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:14:59  eichin
+ * step 2: bcmp->memcmp
+ *
  * Revision 1.1  1994/06/10 03:30:46  eichin
  * autoconfed isode for kerberos work
  *
@@ -2601,7 +2604,7 @@ char	*parm1, *parm2;
 		    (void) printf("%s:t_olen string different\n",
 			t_case[tynum].tst_name);
 		    d++;
-	    } else if (bcmp(Xparm1->t_ostring, Xparm2->t_ostring,
+	    } else if (memcmp(Xparm1->t_ostring, Xparm2->t_ostring,
 		Xparm1->t_olen)) {
 		    (void) printf("%s:t_ostring string different\n",
 			t_case[tynum].tst_name);
@@ -2811,7 +2814,7 @@ char	*parm1, *parm2;
 		    (void) printf("%s:t_olen string different\n",
 			t_case[tynum].tst_name);
 		    d++;
-	    } else if (bcmp(Xparm1->t_ostring, Xparm2->t_ostring,
+	    } else if (memcmp(Xparm1->t_ostring, Xparm2->t_ostring,
 		Xparm1->t_olen)) {
 		    (void) printf("%s:t_ostring string different\n",
 			t_case[tynum].tst_name);
@@ -2827,7 +2830,7 @@ char	*parm1, *parm2;
 		    (void) printf("%s:t_olen1 string different\n",
 			t_case[tynum].tst_name);
 		    d++;
-	    } else if (bcmp(Xparm1->t_ostring1, Xparm2->t_ostring1,
+	    } else if (memcmp(Xparm1->t_ostring1, Xparm2->t_ostring1,
 		Xparm1->t_olen1)) {
 		    (void) printf("%s:t_ostring string different\n",
 			t_case[tynum].tst_name);
@@ -3118,7 +3121,7 @@ char	*parm1, *parm2;
 		    (void) printf("%s:t_olen string different\n",
 			t_case[tynum].tst_name);
 		    d++;
-	    } else if (bcmp(Xparm1->t_ostring, Xparm2->t_ostring,
+	    } else if (memcmp(Xparm1->t_ostring, Xparm2->t_ostring,
 		Xparm1->t_olen)) {
 		    (void) printf("%s:t_ostring string different\n",
 			t_case[tynum].tst_name);
@@ -3477,7 +3480,7 @@ struct	qbuf	*qb1, *qb2;
 
     while (qp1 != qb1 && qp2 != qb2) {
 	if (len1 < len2) {
-	    if (bcmp(po1, po2, len1))
+	    if (memcmp(po1, po2, len1))
 		    return (1);
 	    len2 -= len1;
 	    po2 += len1;
@@ -3485,7 +3488,7 @@ struct	qbuf	*qb1, *qb2;
 	    po1 = qp1->qb_data;
 	    len1 = qp1->qb_len;
 	} else {
-	    if (bcmp(po1, po2, len1))
+	    if (memcmp(po1, po2, len1))
 		    return (1);
 	    len1 -= len2;
 	    po1 += len2;
@@ -3531,7 +3534,7 @@ PE	b1, b2;
 	    goto fail;
 	}
 
-	if (len1 != len2 || bcmp(cp1, cp2, len1/8)) {
+	if (len1 != len2 || memcmp(cp1, cp2, len1/8)) {
 	    free(cp1);
 	    free(cp2);
 	    goto fail;
@@ -3569,7 +3572,7 @@ int	len1, len2;
     int i;
     int	mask;
 
-    if (len1 != len2 || bcmp(cp1, cp2, len1/8))
+    if (len1 != len2 || memcmp(cp1, cp2, len1/8))
 	return (1);
     
     if (len1 % 8) {

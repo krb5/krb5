@@ -763,7 +763,7 @@ encrypt_keyid(kp, keyid, len)
 		if (ep->keyid)
 			(void)(*ep->keyid)(dir, kp->keyid, &kp->keylen);
 
-	} else if ((len != kp->keylen) || (bcmp(keyid, kp->keyid, len) != 0)) {
+	} else if ((len != kp->keylen) || (memcmp(keyid, kp->keyid, len) != 0)) {
 		/*
 		 * Length or contents are different
 		 */

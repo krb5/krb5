@@ -219,7 +219,7 @@ char    **      argmessage;
             /*  Look for the client's IP address in the list returned 
                 for its name */
             for (addrp=ch_again->h_addr_list; *addrp; ++addrp)
-                if (bcmp(*addrp,&(cs.sin_addr),sizeof(cs.sin_addr)) == 0) break;
+                if (memcmp(*addrp,&(cs.sin_addr),sizeof(cs.sin_addr)) == 0) break;
 
             if (!*addrp) {
                 pop_log (p,POP_PRIORITY,

@@ -1085,7 +1085,7 @@ process_rings(netin, netout, netex, ttyin, ttyout, poll)
 		    int i;
 		    i = recv(net, netiring.supply + c, canread - c, MSG_OOB);
 		    if (i == c &&
-			  bcmp(netiring.supply, netiring.supply + c, i) == 0) {
+			memcmp(netiring.supply, netiring.supply + c, i) == 0) {
 			bogus_oob = 1;
 			first = 0;
 		    } else if (i < 0) {

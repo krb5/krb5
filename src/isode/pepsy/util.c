@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:15:07  eichin
+ * step 2: bcmp->memcmp
+ *
  * Revision 1.1  1994/06/10 03:31:50  eichin
  * autoconfed isode for kerberos work
  *
@@ -324,7 +327,7 @@ int     len;
     register int i;
     register unsigned int mask;
 
-    if (len >= 8 && bcmp(p1, p2, len / 8))
+    if (len >= 8 && memcmp(p1, p2, len / 8))
 	return (1);
 
     if (len % 8 == 0)
@@ -359,7 +362,7 @@ register struct qbuf *qb;
 		ferrd(1, "ostrcmp:qb_len %d < 0", qp->qb_len);
 	    if (qp->qb_len > len)
 		return (1);
-	    if (bcmp(qp->qb_data, p, qp->qb_len))
+	    if (memcmp(qp->qb_data, p, qp->qb_len))
 		return (1);
 	    if ((len -= qp->qb_len) == 0)
 		return (0);
@@ -542,7 +545,7 @@ o1string:
 	    val = 0;
 	    break;
 	}
-	if (bcmp(PVAL(mod, dflt), p1, len))
+	if (memcmp(PVAL(mod, dflt), p1, len))
 	    val = 0;
 	else
 	    val = 1;

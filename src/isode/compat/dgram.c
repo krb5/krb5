@@ -7,24 +7,6 @@ static char *rcsid = "$Header$";
 /* 
  * $Header$
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:12  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:27:11  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:15:37  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:33:42  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:17:52  isode
- * Release 7.0
- * 
- * 
  */
 
 /*
@@ -600,7 +582,7 @@ int	secs;
 #ifdef	BSD44
 		len != up -> dgram_addrlen ||
 #endif
-		bcmp (data, up -> dgram_peer.sa.sa_data, (int) len)
+		memcmp (data, up -> dgram_peer.sa.sa_data, (int) len)
 			    != 0) {
 		for (wp = (vp = peers) + maxpeers; vp < wp; vp++)
 		    if (vp != up
@@ -608,8 +590,8 @@ int	secs;
 #ifdef	BSD44
 			    && len == vp -> dgram_addrlen
 #endif
-			    && bcmp (data, vp -> dgram_peer.sa.sa_data,
-				     (int) len) == 0)
+			    && memcmp (data, vp -> dgram_peer.sa.sa_data,
+				       (int) len) == 0)
 			break;
 		if (vp >= wp
 			&& (vp = &peers[up -> dgram_parent])

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:14:47  eichin
+ * step 2: bcmp->memcmp
+ *
  * Revision 1.1  1994/06/10 03:28:12  eichin
  * autoconfed isode for kerberos work
  *
@@ -60,7 +63,7 @@ int	selectlen;
     (void) setisoservent (0);
     while (is = getisoservent ())
 	if (selectlen == is -> is_selectlen
-		&& bcmp (selector, is -> is_selector, is -> is_selectlen) == 0
+		&& memcmp (selector, is -> is_selector, is -> is_selectlen) == 0
 		&& strcmp (provider, is -> is_provider) == 0)
 	    break;
     (void) endisoservent ();

@@ -5,6 +5,9 @@
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:14:53  eichin
+ * step 2: bcmp->memcmp
+ *
  * Revision 1.1  1994/06/10 03:29:36  eichin
  * autoconfed isode for kerberos work
  *
@@ -91,7 +94,7 @@ typedef u_char	  byte, *PElementData;
 #define	PEDfree(p)		free ((char *) (p))
 
 #define	PEDcmp(b1, b2, length)	\
-			bcmp ((char *) (b1), (char *) (b2), (int) (length))
+			memcmp ((char *) (b1), (char *) (b2), (int) (length))
 
 #define	PEDcpy(b1, b2, length)	\
 			bcopy ((char *) (b1), (char *) (b2), (int) (length))

@@ -489,8 +489,8 @@ Principal *princ;
 	memcpy(((long *) key_from_db) + 1, (char *)&princ->key_high, 4);
 	kdb_encrypt_key (key_from_db, key_from_db, 
 			 master_key, master_key_schedule, DECRYPT);
-	val = bcmp((char *) master_key, (char *) key_from_db,
-		   sizeof(master_key));
+	val = memcmp((char *) master_key, (char *) key_from_db,
+		     sizeof(master_key));
 	memset((char *)key_from_db, 0, sizeof(key_from_db));
 	if (val) {
 	    return KRB5_KDB_BADMASTERKEY;

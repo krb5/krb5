@@ -6,27 +6,6 @@ static char *rcsid = "$Header$";
 
 /* 
  * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:18  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:27:26  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:15:54  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.2  1994/06/06 19:51:28  eichin
- * NULL is not a char
- *
- * Revision 1.1  1994/05/31 20:33:55  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:17:57  isode
- * Release 7.0
- * 
  * 
  */
 
@@ -1107,15 +1086,15 @@ bad_pa: ;
 		    char buf[BUFSIZ];
 		    char *dsp;
 	
-		    if (a->p_dec0 && bcmp(a->p_dec0, cp, 2) == 0)
+		    if (a->p_dec0 && memcmp(a->p_dec0, cp, 2) == 0)
 			(pad = a->p_dec1 ? '0' : '\0'), dspmark = 'd';
-		    else if (a->p_dec1 && bcmp(a->p_dec1, cp, 2) == 0)
+		    else if (a->p_dec1 && memcmp(a->p_dec1, cp, 2) == 0)
 			pad = '1', dspmark = 'd';
-		    else if (a->p_hex0 && bcmp(a->p_hex0, cp, 2) == 0)
+		    else if (a->p_hex0 && memcmp(a->p_hex0, cp, 2) == 0)
 			(pad = a->p_hex1 ? '0' : '\0'), dspmark = 'x';
-		    else if (a->p_hex1 && bcmp(a->p_hex1, cp, 2) == 0)
+		    else if (a->p_hex1 && memcmp(a->p_hex1, cp, 2) == 0)
 			pad = '1', dspmark = 'x';
-		    else if (a->p_ia5 && bcmp(a->p_ia5, cp, 2) == 0)
+		    else if (a->p_ia5 && memcmp(a->p_ia5, cp, 2) == 0)
 			pad = '\0', dspmark = 'l';
 		    else
 			continue;

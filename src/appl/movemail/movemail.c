@@ -139,7 +139,7 @@ main (argc, argv)
   }
 
 #ifdef MAIL_USE_POP
-  if (!bcmp (inname, "po:", 3))
+  if (!memcmp (inname, "po:", 3))
     {
       int status; char *user;
 
