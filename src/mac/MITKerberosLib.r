@@ -2,8 +2,6 @@
 
 #include "version.r"
 
-#include "MIT Kerberos.r"
-
 resource 'hfdr' (-5696, purgeable) {
 	HelpMgrVersion,
 	hmDefaultOptions,
