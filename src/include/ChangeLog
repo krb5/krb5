@@ -1,3 +1,13 @@
+2004-08-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h [HAVE_PTHREAD]: Include sched.h if
+	DEBUG_THREADS_SLOW is defined.
+	(MAYBE_SCHED_YIELD) [HAVE_PTHREAD]: Define, to call sched_yield or
+	not, depending on DEBUG_THREADS_SLOW.
+	(k5_os_mutex_lock, k5_os_mutex_unlock) [HAVE_PTHREAD]: Use
+	MAYBE_SCHED_YIELD.
+	(DEBUG_THREADS_SLOW): Define.
+
 2004-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Actually check for pthread_mutex_lock.

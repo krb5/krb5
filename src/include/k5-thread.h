@@ -139,6 +139,7 @@
 
 #define DEBUG_THREADS
 #define DEBUG_THREADS_LOC
+#define DEBUG_THREADS_SLOW /* permit debugging stuff that'll slow things down */
 #undef DEBUG_THREADS_STATS
 
 #include <assert.h>
@@ -417,6 +418,13 @@ typedef struct {
 #define k5_pthread_assert_unlocked(M)	(0)
 #define k5_pthread_assert_locked(M)	(0)
 
+#ifdef DEBUG_THREADS_SLOW
+# include <sched.h>
+# define MAYBE_SCHED_YIELD()	((void)sched_yield())
+#else
+# define MAYBE_SCHED_YIELD()	((void)0)
+#endif
+
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
 # define K5_OS_MUTEX_PARTIAL_INITIALIZER \
@@ -435,14 +443,21 @@ typedef struct {
 	  ? pthread_mutex_destroy(&(M)->p)	\
 	  : 0))
 
-# define k5_os_mutex_lock(M)			\
-	(K5_PTHREADS_LOADED			\
-	 ? pthread_mutex_lock(&(M)->p)		\
-	 : k5_os_nothread_mutex_lock(&(M)->n))
-# define k5_os_mutex_unlock(M)			\
-	(K5_PTHREADS_LOADED			\
-	 ? pthread_mutex_unlock(&(M)->p)	\
-	 : k5_os_nothread_mutex_unlock(&(M)->n))
+static inline int k5_os_mutex_lock(k5_os_mutex *m)
+{
+    int r;
+    if (K5_PTHREADS_LOADED)
+	r = pthread_mutex_lock(&m->p);
+    else
+	r = k5_os_nothread_mutex_lock(&m->n);
+    MAYBE_SCHED_YIELD();
+    return r;
+}
+# define k5_os_mutex_unlock(M)				\
+	(MAYBE_SCHED_YIELD(),				\
+	 (K5_PTHREADS_LOADED				\
+	  ? pthread_mutex_unlock(&(M)->p)		\
+	  : k5_os_nothread_mutex_unlock(&(M)->n)))
 
 # define k5_os_mutex_assert_unlocked(M)			\
 	(K5_PTHREADS_LOADED				\
@@ -462,8 +477,13 @@ typedef struct {
 # define k5_os_mutex_init(M)		pthread_mutex_init(&(M)->p, 0)
 # define k5_os_mutex_destroy(M)		pthread_mutex_destroy(&(M)->p)
 
-# define k5_os_mutex_lock(M)		pthread_mutex_lock(&(M)->p)
-# define k5_os_mutex_unlock(M)		pthread_mutex_unlock(&(M)->p)
+static inline int k5_os_mutex_lock(k5_os_mutex *m)
+{
+    int r = pthread_mutex_lock(&m->p);
+    MAYBE_SCHED_YIELD();
+    return r;
+}
+# define k5_os_mutex_unlock(M)		(MAYBE_SCHED_YIELD(),pthread_mutex_unlock(&(M)->p))
 
 # define k5_os_mutex_assert_unlocked(M)	k5_pthread_assert_unlocked(&(M)->p)
 # define k5_os_mutex_assert_locked(M)	k5_pthread_assert_locked(&(M)->p)
