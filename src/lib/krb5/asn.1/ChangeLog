@@ -1,3 +1,11 @@
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_encode.h (asn1_encode_oid):
+	* asn1_encode.c (asn1_encode_oid): New function.
+
+	* asn1_decode.h (asn1_decode_oid):
+	* asn1_decode.c (asn1_decode_oid): New function.
+
 2002-10-30  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
 
 	* KRB5-asn.py: Fix definition for sam-pk-for-sad element.

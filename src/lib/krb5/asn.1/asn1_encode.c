@@ -130,6 +130,23 @@ asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, unsigned long val,
   return 0;
 }
 
+asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
+				const asn1_octet *val,
+				unsigned int *retlen)
+{
+  asn1_error_code retval;
+  unsigned int length;
+
+  retval = asn1buf_insert_octetstring(buf, len, val);
+  if (retval) return retval;
+  retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE, ASN1_OBJECTIDENTIFIER,
+			 len, &length);
+  if (retval) return retval;
+
+  *retlen = len + length;
+  return 0;
+}
+
 asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
 					const asn1_octet *val,
 					unsigned int *retlen)

@@ -104,6 +104,16 @@ asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *va
   cleanup();
 }
 
+asn1_error_code asn1_decode_oid(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
+{
+  setup();
+  tag(ASN1_OBJECTIDENTIFIER);
+  retval = asn1buf_remove_octetstring(buf, length, val);
+  if (retval) return retval;
+  *retlen = length;
+  cleanup();
+}
+
 asn1_error_code asn1_decode_octetstring(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
 {
   setup();

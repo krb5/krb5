@@ -65,6 +65,8 @@ asn1_error_code asn1_decode_unsigned_integer
 asn1_error_code asn1_decode_null
 	(asn1buf *buf);
 
+asn1_error_code asn1_decode_oid
+	(asn1buf *buf, unsigned int *retlen, asn1_octet **val);
 asn1_error_code asn1_decode_octetstring
 	(asn1buf *buf, unsigned int *retlen, asn1_octet **val);
 asn1_error_code asn1_decode_generalstring

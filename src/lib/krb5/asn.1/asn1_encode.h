@@ -82,6 +82,17 @@ asn1_error_code asn1_encode_octetstring
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
+asn1_error_code asn1_encode_oid
+	(asn1buf *buf,
+		   const unsigned int len, const asn1_octet *val,
+		   unsigned int *retlen);
+/* requires  *buf is allocated
+   modifies  *buf, *retlen
+   effects   Inserts the encoding of val into *buf and returns 
+              the length of the encoding in *retlen.
+             Returns ENOMEM to signal an unsuccesful attempt
+              to expand the buffer. */
+
 asn1_error_code asn1_encode_charstring
 	(asn1buf *buf,
 		   const unsigned int len, const char *val,
