@@ -1,3 +1,7 @@
+Wed Jan 10 22:28:23 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* des_int.h: Fix return type for mit_des3_string_to_key().
+
 Tue Nov 28 11:24:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* f_ecb.c, des_int.h (mit_des_ecb_encrypt): Add const declaration

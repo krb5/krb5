@@ -229,7 +229,7 @@ extern int mit_des3_key_sched
 		   mit_des3_key_schedule schedule));
 
 /* d3_str2ky.c */
-extern int mit_des3_string_to_key
+extern krb5_error_code mit_des3_string_to_key
 	PROTOTYPE((const krb5_encrypt_block FAR * eblock,
 		   krb5_keyblock FAR * keyblock,
 		   const krb5_data FAR * data,
