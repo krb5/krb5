@@ -692,7 +692,6 @@ proc setup_kerberos_files { } {
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		admin_database_name = $tmppwd/adb"
 	puts $conffile "		admin_database_lockfile = $tmppwd/adb.lock"
-	puts $conffile "		admin_keytab = $tmppwd/admin-keytab"
 	puts $conffile "		key_stash_file = $tmppwd/stash"
 	puts $conffile "		acl_file = $tmppwd/acl"
 	puts $conffile "		kadmind_port = 3750"
@@ -936,83 +935,6 @@ proc restore_kerberos_env { } {
 	catch "unset env(KERBEROS_SERVER)"
     }
 
-}
-
-# setup_kadmind_srvtab
-# A procedure to build the srvtab for kadmind5 so that kadmin5 and it
-# may successfully communicate.
-# Returns 1 on success, 0 on failure.
-proc setup_kadmind_srvtab {  } {
-    global REALMNAME
-    global KADMIN_LOCAL
-    global KEY
-    global tmppwd
-
-    catch "exec rm -f $tmppwd/admin-keytab"
-    envstack_push
-    setup_kerberos_env kdc
-    spawn $KADMIN_LOCAL -r $REALMNAME
-    envstack_pop
-    catch expect_after
-    expect_after {
-	-re "(.*)\r\nkadmin.local:  " {
-	    fail "kadmin.local admin-keytab (unmatched output: $expect_out(1,string)"
-	    catch "exec rm -f $tmppwd/admin-keytab"
-	    catch "expect_after"
-	    return 0
-	}
-	timeout {
-	    fail "kadmin.local admin-keytab (timeout)"
-	    catch "exec rm -f $tmppwd/admin-keytab"
-	    catch "expect_after"
-	    return 0
-	}
-	eof {
-	    fail "kadmin.local admin-keytab (eof)"
-	    catch "exec rm -f $tmppwd/admin-keytab"
-	    catch "expect_after"
-	    return 0
-	}
-    }
-    expect "kadmin.local:  "
-    send "xst -k admin-new-srvtab kadmin/admin\r"
-    expect "xst -k admin-new-srvtab kadmin/admin\r\n"
-    expect -re ".*Entry for principal kadmin/admin.* added to keytab WRFILE:admin-new-srvtab."
-    expect "kadmin.local:  "
-
-    catch "exec mv -f admin-new-srvtab changepw-new-srvtab" exec_output
-    if ![string match "" $exec_output] {
-	verbose -log "$exec_output"
-	perror "can't mv admin-new-srvtab"
-	catch expect_after
-	return 0
-    }
-
-    send "xst -k changepw-new-srvtab kadmin/changepw\r"
-    expect "xst -k changepw-new-srvtab kadmin/changepw\r\n"
-    expect -re ".*Entry for principal kadmin/changepw.* added to keytab WRFILE:changepw-new-srvtab."
-    expect "kadmin.local:  "
-    send "quit\r"
-    expect eof
-    catch expect_after
-    if ![check_exit_status "kadmin.local admin-keytab"] {
-	catch "exec rm -f $tmppwd/admin-keytab"
-	perror "kadmin.local admin-keytab exited abnormally"
-	return 0
-    }
-
-    catch "exec mv -f changepw-new-srvtab $tmppwd/admin-keytab" exec_output
-    if ![string match "" $exec_output] {
-	verbose -log "$exec_output"
-	perror "can't mv new admin-keytab"
-	return 0
-    }
-
-    # Make the srvtab file globally readable in case we are using a
-    # root shell and the srvtab is NFS mounted.
-    catch "exec chmod a+r $tmppwd/admin-keytab"
-
-    return 1
 }
 
 # setup_kerberos_db
@@ -1270,12 +1192,7 @@ proc setup_kerberos_db { standalone } {
 	    }
 	}
     }
-    # XXX should deal with envstack inside setup_kadmind_srvtab too
-    set ret [setup_kadmind_srvtab]
     envstack_pop
-    if !$ret {
-	return 0
-    }
 
     # create the admin database lock file
     catch "exec touch $tmppwd/adb.lock"
@@ -2029,6 +1946,7 @@ proc v4kinit { name pass standalone } {
     global REALMNAME
     global KINIT
     global spawn_id
+    global des3_krbtgt
 
     # Use kinit to get a ticket.
 	#
@@ -2052,10 +1970,20 @@ proc v4kinit { name pass standalone } {
     }
     send "$pass\r"
     expect eof
-    if ![check_exit_status kinit] {
-	return 0
+    if {$des3_krbtgt == 0} {
+	if ![check_exit_status v4kinit] {
+	    return 0
+	}
+    } else {
+	# Fail if kinit is successful with a des3 TGT.
+	set status_list [wait -i $spawn_id]
+	set testname v4kinit
+	verbose "wait -i $spawn_id returned $status_list ($testname)"
+	if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 1 } {
+	    verbose -log "exit status: $status_list"
+	    fail "$testname (exit status)"
+	}
     }
-
     if {$standalone} {
 	pass "v4kinit"
     }

@@ -26,7 +26,12 @@ if ![setup_kerberos_db 1] {
 
 proc check_and_destroy_v4_tix { client server } {
     global REALMNAME
+    global des3_krbtgt
 
+    # Skip this if we're using a des3 TGT, since that's supposed to fail.
+    if {$des3_krbtgt} {
+	return
+    }
     # Make sure that klist can see the ticket.
     if ![v4klist "$client" "$server" "v4klist"] {
 	return
