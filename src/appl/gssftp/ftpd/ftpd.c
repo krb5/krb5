@@ -618,14 +618,16 @@ user(name)
 	char *getusershell();
 #endif
 
-	/* Some paranoid sites may want the client to authenticate
-	 * before accepting the USER command.  If so, uncomment this:
-
+#ifdef PARANOID
+	/*
+	 * Some paranoid sites may want the client to authenticate
+	 * before accepting the USER command.
+	 */
 	if (!auth_type) {
 		reply(530,
 			"Must perform authentication before identifying USER.");
 		return;
-	 */
+#endif
 	if (logged_in) {
 		if (guest) {
 			reply(530, "Can't change user from guest login.");
@@ -688,6 +690,10 @@ user(name)
 		/* 232 is per draft-8, but why 331 not 53z? */
 		reply(gss_ok ? 232 : 331, "%s", buf);
 		syslog(gss_ok ? LOG_INFO : LOG_ERR, "%s", buf);
+		if (gss_ok) {
+			login((char *) NULL);
+			return;
+		}
 	} else
 #endif /* GSSAPI */
 #ifdef KRB5_KRB4_COMPAT
@@ -710,6 +716,10 @@ user(name)
 			name, kerb_ok ? "" : "; Password required.");
 		reply(kerb_ok ? 232 : 331, "%s", buf);
 		syslog(kerb_ok ? LOG_INFO : LOG_ERR, "%s", buf);
+		if (kerb_ok) {
+			login((char *) NULL);
+			return;
+		}		
 	} else
 #endif /* KRB5_KRB4_COMPAT */
 	/* Other auth types go here ... */
@@ -724,6 +734,7 @@ user(name)
 		return;
 	} else
 		reply(331, "Password required for %s.", name);
+
 	askpasswd = 1;
 	/*
 	 * Delay before reading passwd after first failed
@@ -829,19 +840,18 @@ pass(passwd)
 {
 	char *xpasswd, *salt;
 
-	if (logged_in || askpasswd == 0) {
-		reply(503, "Login with USER first.");
+	if (auth_ok()) {
+		reply(202, "PASS command superfluous.");
 		return;
 	}
-	askpasswd = 0;
-	if (
-#ifdef KRB5_KRB4_COMPAT
-	    !kerb_ok &&
-#endif /* KRB5_KRB4_COMPAT */
-#ifdef GSSAPI
-	    !gss_ok &&
-#endif /* GSSAPI */
-	    !guest) {		/* "ftp" is only account allowed no password */
+
+	if (logged_in || askpasswd == 0) {
+	  	reply(503, "Login with USER first.");
+		return;
+	} 
+
+	if (!auth_ok() && !guest) {
+	    	/* "ftp" is only account allowed no password */
 		if (pw == NULL)
 			salt = "xx";
 		else
@@ -857,12 +867,13 @@ pass(passwd)
 		if (pw == NULL ||
 		    (*pw->pw_passwd && strcmp(xpasswd, pw->pw_passwd) &&
 			!kpass(pw->pw_name, passwd)) ||
-		    (!*pw->pw_passwd && !kpass(pw->pw_name, passwd))) {
+		    (!*pw->pw_passwd && !kpass(pw->pw_name, passwd)))
 #else
 		/* The strcmp does not catch null passwords! */
 		if (pw == NULL || *pw->pw_passwd == '\0' ||
-		    strcmp(xpasswd, pw->pw_passwd)) {
+		    strcmp(xpasswd, pw->pw_passwd))
 #endif /* KRB5_KRB4_COMPAT */
+		                                                      {
 			reply(530, "Login incorrect.");
 			pw = NULL;
 			if (login_attempts++ >= 5) {
@@ -872,20 +883,28 @@ pass(passwd)
 				exit(0);
 			}
 			return;
-		}
+	        }
 	}
 	login_attempts = 0;		/* this time successful */
+
+	login(passwd);
+	return;
+}
+
+login(passwd)
+	char *passwd;
+{
 	(void) krb5_setegid((gid_t)pw->pw_gid);
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 
 	/* open wtmp before chroot */
-	(void)sprintf(ttyline, "ftp%d", getpid());
+	(void) sprintf(ttyline, "ftp%d", getpid());
 	ftp_logwtmp(ttyline, pw->pw_name, remotehost);
 	logged_in = 1;
 
 	if (guest) {
  	        if (chroot(pw->pw_dir) < 0) {
-		        reply(550, "Can't set guest priveleges.");
+		        reply(550, "Can't set guest privileges.");
 			goto bad;
 		}
 	}
@@ -925,7 +944,10 @@ pass(passwd)
 			syslog(LOG_INFO, "ANONYMOUS FTP LOGIN FROM %s, %s",
 			    remotehost, passwd);
 	} else {
-		reply(230, "User %s logged in.", pw->pw_name);
+		if (askpasswd) {
+			askpasswd = 0;
+			reply(230, "User %s logged in.", pw->pw_name);
+		}
 #ifdef SETPROCTITLE
 		sprintf(proctitle, "%s: %s", remotehost, pw->pw_name);
 		setproctitle(proctitle);
@@ -2367,6 +2389,18 @@ data_err:
 	pdata = -1;
 }
 
+int auth_ok(void)
+{
+	return(0
+#ifdef KRB5_KRB4_COMPAT
+	       || kerb_ok
+#endif /* KRB5_KRB4_COMPAT */
+#ifdef GSSAPI
+	       || gss_ok
+#endif /* GSSAPI */
+	       );
+}
+
 #ifdef SETPROCTITLE
 /*
  * clobber argv so ps will show what we're doing.
@@ -2479,3 +2513,4 @@ ftpd_userok(client_name, name)
 	return retval;
 }
 #endif /* GSSAPI */
+
