@@ -1,3 +1,11 @@
+2004-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* error_message.c: Include k5-thread.h.
+	(_et_list): Now always static.
+	(et_list_lock): New mutex.
+	(error_message): Lock it while manipulating the table lists.
+	(add_error_table, remove_error_table): Likewise.
+
 2003-07-04  Kenneth Raeburn  <raeburn@mit.edu>
 
 	* test_et.c: Conditionalize sys_nerr declaration on
