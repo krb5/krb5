@@ -1,3 +1,7 @@
+2004-11-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_cc_get_flags): Declare.
+
 2004-11-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Move most of code content into
