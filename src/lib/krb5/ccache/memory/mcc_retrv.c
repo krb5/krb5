@@ -64,6 +64,30 @@ register const krb5_data *data1, *data2;
 	return memcmp(data1->data, data2->data, data1->length) ? FALSE : TRUE;
 }
 
+static krb5_boolean
+ktype_match(context, creds)
+register krb5_context context;
+register krb5_creds *creds;
+{
+    register int i;
+    krb5_enctype * ktypes = (krb5_enctype *) NULL;
+    krb5_enctype enctype = creds->keyblock.enctype;
+    krb5_principal princ = creds->server;
+
+    if (krb5_get_tgs_ktypes(context, princ, &ktypes))
+	return FALSE;
+
+    for (i=0; ktypes[i]; i++) {
+	if (ktypes[i] == enctype) {
+	    free(ktypes);
+	    return TRUE;
+	}
+    }
+
+    free(ktypes);
+    return FALSE;
+}
+
 /*
  * Effects:
  * Searches the file cred cache for a credential matching mcreds,
@@ -128,6 +152,9 @@ krb5_mcc_retrieve(context, id, whichfields, mcreds, creds)
 	      &&
 	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
 	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
+	      &&
+	      (! set(KRB5_TC_MATCH_KTYPE) ||
+	       ktype_match (context, &fetchcreds))
 	      )
 	  {
 	       krb5_mcc_end_seq_get(context, id, &cursor);
