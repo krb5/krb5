@@ -3,6 +3,9 @@
 	* Makefile.in (SHLIB_EXPDEPS): Use _DEPLIB variables.
 	(SHLIB_EXPLIBS): Add $(SUPPORT_LIB).
 
+	* gss_libinit.c (gssint_lib_init): Initialize new keytab-name
+	mutex, and register two new key values.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJFILELIST, OBJFILEDEP) [DOS]: Depend on locally
