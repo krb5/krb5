@@ -1,3 +1,11 @@
+Fri Aug  7 11:45:17 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftp.c (getreply): Restore proper setting of safe.  This variable
+	was previously being set to the value of code rather than to the
+	boolean expression (code == 631), which it had been previously.
+	The bug resulted in all replies from the server being parsed as
+	krb_safe messages even when they were krb_priv messages.
+
 1998-04-21  Ken Raeburn  <raeburn@cygnus.com>
 
 	* glob.c (ftpglob): Always allocate new storage, even if no magic
