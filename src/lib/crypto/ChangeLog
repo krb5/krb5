@@ -1,3 +1,9 @@
+Wed Sep 13 10:26:37 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: moved shared rule to all-unix:: target.
+	* des_crc.c, des_md5.c, raw_des.c: had a volatile/const mismatch
+	   which needs a cast to resolve.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * cryptoconf.c, des_crc.c, des_md5.c raw_des.c

@@ -31,7 +31,9 @@ SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all:: shared
+all:: all-$(WHAT)
+
+all-unix:: shared
 
 shared: 
 	mkdir shared

@@ -140,7 +140,7 @@ mit_des_md5_decrypt_func(in, out, size, key, ivec)
     if ( size < 2*sizeof(mit_des_cblock) )
 	return KRB5_BAD_MSIZE;
 
-    retval = mit_des_cbc_encrypt(in,
+    retval = mit_des_cbc_encrypt((const mit_des_cblock *) in,
 				 out,
 				 size,
 				 (struct mit_des_ks_struct *) key->priv,
