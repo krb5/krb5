@@ -40,5 +40,7 @@ all:: ${OBJS}
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
+DependTarget()
+
 test: ${OBJS} scc_test.o
 	${CC} -o test ${OBJS} scc_test.o

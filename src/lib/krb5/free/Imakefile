@@ -81,3 +81,5 @@ SRCS=	\
 	f_tkt_auth.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+DependTarget()

@@ -67,4 +67,3 @@ NormalProgramTarget(verify,$(VERIFYOBJ),libdes425.a,$(EXT_LIB),)
 
 NormalLintTarget($(SRCS))
 
-DependTarget()

@@ -168,3 +168,5 @@ CopyHeader(KRB5_pre_defs.h,$(EHDRDIR))
 
 clean::
 	$(RM) KRB5.ph KRB5_defs.h KRB5_pre_defs.h KRB5-types.h KRB5_tables.c
+
+DependTarget()

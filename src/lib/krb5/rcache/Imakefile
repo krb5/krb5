@@ -41,3 +41,5 @@ SRCS=	\
 	rc_conv.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+DependTarget()

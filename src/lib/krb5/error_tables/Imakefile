@@ -49,3 +49,4 @@ CopyHeader(kdb5_err.h,$(EHDRDIR))
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
+DependTarget()

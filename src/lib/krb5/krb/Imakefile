@@ -138,3 +138,4 @@ SRCS=	addr_comp.c	\
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
+DependTarget()

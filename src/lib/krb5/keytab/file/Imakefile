@@ -57,3 +57,5 @@ OBJS = \
 	ktf_defops.o
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+DependTarget()

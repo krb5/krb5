@@ -47,3 +47,5 @@ SRCS=	\
 	read_servi.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+DependTarget()

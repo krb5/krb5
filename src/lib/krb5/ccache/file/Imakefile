@@ -39,3 +39,5 @@ SRCS 	= fcc_close.c fcc_destry.c fcc_eseq.c \
 all:: ${OBJS}
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+DependTarget()
