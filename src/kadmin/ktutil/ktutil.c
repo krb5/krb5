@@ -1,7 +1,7 @@
 /*
  * kadmin/ktutil/ktutil.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -170,7 +170,7 @@ void ktutil_list(argc, argv)
     krb5_error_code retval;
     krb5_kt_list lp;
     struct tm *stime;
-    int show_time = 0, show_keys = 0;
+    int show_time = 0, show_keys = 0, show_enctype = 0;
     int i, j;
     char *pname;
 
@@ -183,6 +183,12 @@ void ktutil_list(argc, argv)
 	    show_keys++;
 	    continue;
 	}
+if ( (strlen(argv[i]) == 2)&&
+     (!strncmp(argv[i],"-e",2))) {
+    show_enctype = 1;
+    continue;
+}
+	
 	fprintf(stderr, "%s: illegal arguments\n", argv[0]);
 	return;
     }
@@ -214,6 +220,16 @@ void ktutil_list(argc, argv)
 		printf(fmtbuf);
 	}
 	printf("%40s", pname);
+	if (show_enctype) {
+	    static char buf[256];
+		if ((retval = krb5_enctype_to_string(
+		    lp->entry->key.enctype, buf, 256))) {
+		    com_err(argv[0], retval, "While converting enctype to string");
+		    return;
+		}
+	    printf(" (%s) ", buf);
+	}
+	
 	if (show_keys) {
 	    printf(" (0x");
 	    for (j = 0; j < lp->entry->key.length; j++)

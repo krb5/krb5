@@ -1,5 +1,7 @@
 Fri Jan 26 00:06:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
+	* ktutil.c (ktutil_list): Implement -e option to show enctypes.
+
 	* ktutil_funcs.c (ktutil_write_srvtab): Write v4 version
         properly. Previous code was endien dependent.
 
