@@ -21,8 +21,8 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- *
- * Build a principal from a V4 specification
+ * Build a principal from a V4 specification, or separate a V5
+ * principal into name, instance, and realm.
  * 
  * NOTE: This is highly site specific, and is only really necessary
  * for sites who need to convert from V4 to V5.  It is used by both
@@ -33,6 +33,13 @@
 
 #include <krb5/krb5.h>
 #include <string.h>
+
+/* The maximum sizes for V4 aname, realm, sname, and instance +1 */
+/* Taken from krb.h */
+#define 	ANAME_SZ	40
+#define		REALM_SZ	40
+#define		SNAME_SZ	40
+#define		INST_SZ		40
 
 struct krb_convert {
 	char	*v4_str;
@@ -65,47 +72,144 @@ static struct krb_convert rconv_list[] = {
 	0,			0
 };
 
-krb5_error_code
-krb5_425_conv_principal(name, instance, realm, princ)
-    const char	*name;
-    const char	*instance;
-    const char	*realm;
-    krb5_principal	*princ;
+/*
+ * char *strnchr(s, c, n)
+ *   char *s;
+ *   char c;
+ *   int n;
+ *
+ * returns a pointer to the first occurrence of character c in the
+ * string s, or a NULL pointer if c does not occur in in the string;
+ * however, at most the first n characters will be considered.
+ *
+ * This falls in the "should have been in the ANSI C library"
+ * category. :-)
+ */
+static char *strnchr(s, c, n)
+   register char *s, c;
+   register int n;
 {
-    struct krb_convert *p;
-    char buf[256];		/* V4 instances are limited to 40 characters */
-		
-    if (instance) {
-	if (instance[0] == '\0') {
-	    instance = 0;
-	    goto not_service;
-	}
-	p = sconv_list;
-	while (1) {
-	    if (!p->v4_str)
-		goto not_service;
-	    if (!strcmp(p->v4_str, name))
-		break;
-	    p++;
-	}
-	name = p->v5_str;
-	if (p->flags & DO_REALM_CONVERSION) {
-	    strcpy(buf, instance);
-	    p = rconv_list;
-	    while (1) {
-		if (!p->v4_str)
-		    break;
-		if (!strcmp(p->v4_str, realm))
-		    break;
-		p++;
-	    }
-	    if (p->v5_str)
-		strcat(buf, p->v5_str);
-	    instance = buf;
-	}
-	}
+     if (n < 1) 
+	  return 0;
+     
+     while (n-- && *s) {
+	  if (*s == c)
+	       return s;
+	  s++;
+     }
+     return 0;
+}
 
-    not_service:	
-	return(krb5_build_principal(princ, strlen(realm), realm, name,
-				    instance, 0));
-    }
+
+/* XXX This calls for a new error code */
+#define KRB5_INVALID_PRINCIPAL KRB5_LNAME_BADFORMAT
+
+krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
+   const krb5_principal princ;
+   char *name;
+   char *inst;
+   char *realm;
+{
+     struct krb_convert *p;
+     krb5_data *comp;
+     char *c;
+
+     *name = *inst = '\0';
+     switch (krb5_princ_size(princ)) {
+     case 2:
+	  /* Check if this principal is listed in the table */
+	  comp = krb5_princ_component(princ, 0);
+	  p = sconv_list;
+	  while (p->v4_str) {
+	       if (strncmp(p->v5_str, comp->data, comp->length) == 0) {
+		    /* It is, so set the new name now, and chop off */
+		    /* instance's domain name if requested */
+		    strcpy(name, p->v4_str);
+		    if (p->flags & DO_REALM_CONVERSION) {
+			 comp = krb5_princ_component(princ, 1);
+			 c = strnchr(comp->data, '.', comp->length);
+			 if (!c || (c - comp->data) > INST_SZ - 1)
+			      return KRB5_INVALID_PRINCIPAL;
+			 strncpy(inst, comp->data, c - comp->data);
+			 inst[c - comp->data] = '\0';
+		    }
+		    break;
+	       }
+	       p++;
+	  }
+	  /* If inst isn't set, the service isn't listed in the table, */
+	  /* so just copy it. */
+	  if (*inst == '\0') {
+	       comp = krb5_princ_component(princ, 1);
+	       if (comp->length >= INST_SZ - 1)
+		    return KRB5_INVALID_PRINCIPAL;
+	       strncpy(inst, comp->data, comp->length);
+	       inst[comp->length] = '\0';
+	  }
+	  /* fall through */
+     case 1:
+	  /* name may have been set above; otherwise, just copy it */
+	  if (*name == '\0') {
+	       comp = krb5_princ_component(princ, 0);
+	       if (comp->length >= ANAME_SZ)
+		    return KRB5_INVALID_PRINCIPAL;
+	       strncpy(name, comp->data, comp->length);
+	       name[comp->length] = '\0';
+	  }
+	  break;
+     default:
+	  return KRB5_INVALID_PRINCIPAL;
+     }
+
+     comp = krb5_princ_realm(princ);
+     if (comp->length > REALM_SZ - 1)
+	  return KRB5_INVALID_PRINCIPAL;
+     strncpy(realm, comp->data, comp->length);
+     realm[comp->length] = '\0';
+
+     return 0;
+}
+
+krb5_error_code krb5_425_conv_principal(name, instance, realm, princ)
+   const char	*name;
+   const char	*instance;
+   const char	*realm;
+   krb5_principal	*princ;
+{
+     struct krb_convert *p;
+     char buf[256];		/* V4 instances are limited to 40 characters */
+     
+     if (instance) {
+	  if (instance[0] == '\0') {
+	       instance = 0;
+	       goto not_service;
+	  }
+	  p = sconv_list;
+	  while (1) {
+	       if (!p->v4_str)
+		    goto not_service;
+	       if (!strcmp(p->v4_str, name))
+		    break;
+	       p++;
+	  }
+	  name = p->v5_str;
+	  if (p->flags & DO_REALM_CONVERSION) {
+	       strcpy(buf, instance);
+	       p = rconv_list;
+	       while (1) {
+		    if (!p->v4_str)
+			 break;
+		    if (!strcmp(p->v4_str, realm))
+			 break;
+		    p++;
+	       }
+	       if (p->v5_str)
+		    strcat(buf, p->v5_str);
+	       instance = buf;
+	  }
+     }
+     
+not_service:	
+     return(krb5_build_principal(princ, strlen(realm), realm, name,
+				 instance, 0));
+}
