@@ -1,3 +1,10 @@
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (checkuser): Only call fclose on file handle if it's not
+	NULL.
+	(send_file_list): Don't declare strpbrk function if it's defined
+	as a macro.
+
 Thu Mar 25 23:13:56 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (login): Check that the luid is not the uid we want to

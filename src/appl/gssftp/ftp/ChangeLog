@@ -1,3 +1,8 @@
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftp.c (getreply): Don't declare strpbrk or strstr functions if
+	they're defined as macros.
+
 1999-08-27  Tom Yu  <tlyu@mit.edu>
 
 	* ftp.c: Diable krb5-mech2 for now.

@@ -541,7 +541,12 @@ getreply(expecteof)
 	sigtype cmdabort();
 	char ibuf[FTP_BUFSIZ], obuf[FTP_BUFSIZ];
 	int safe = 0;
-	extern char *strpbrk(), *strstr();
+#ifndef strpbrk
+	extern char *strpbrk();
+#endif
+#ifndef strstr
+	extern char *strstr();
+#endif
 
 	ibuf[0] = '\0';
 	if (reply_parse) reply_ptr = reply_buf;
