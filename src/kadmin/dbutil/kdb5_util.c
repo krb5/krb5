@@ -70,6 +70,7 @@ extern krb5_encrypt_block master_encblock;
 krb5_db_entry master_entry;
 krb5_pointer master_random;
 int	valid_master_key = 0;
+int     close_policy_db = 0;
 
 char *progname;
 krb5_boolean manual_mkey = FALSE;
@@ -169,7 +170,7 @@ int main(argc, argv)
        } else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
 	    global_params.mkey_name = optarg;
 	    global_params.mask |= KADM5_CONFIG_MKEY_NAME;
-       } else if (strcmp(*argv, "-f") == 0 && ARG_VAL) {
+       } else if (strcmp(*argv, "-sf") == 0 && ARG_VAL) {
 	    global_params.stash_file = optarg;
 	    global_params.mask |= KADM5_CONFIG_STASH_FILE;
        } else if (strcmp(*argv, "-m") == 0) {
@@ -223,6 +224,12 @@ int main(argc, argv)
 	 return exit_status;
 
     (*cmd->func)(cmd_argc, cmd_argv);
+
+    if(close_policy_db) {
+         (void) osa_adb_close_policy(policy_db);
+    }      
+    kadm5_free_config_params(util_context, &global_params);
+    krb5_free_context(util_context);
     return exit_status;
 }
 

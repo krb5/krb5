@@ -53,6 +53,7 @@ int kadm5_create(kadm5_config_params *params)
      krb5_context context;
      FILE *f;
 
+     kadm5_config_params lparams;
 
      if (retval = krb5_init_context(&context))
 	  exit(ERR);
@@ -62,18 +63,19 @@ int kadm5_create(kadm5_config_params *params)
       * params->admin_lockfile may not be set yet...
       */
      if (retval = kadm5_get_config_params(context, NULL, NULL,
-					  params, params)) {
+					  params, &lparams)) {
 	  com_err(progname, retval, str_INITING_KCONTEXT);
 	  return 1;
      }
 
-     if (retval = osa_adb_create_policy_db(params)) {
+     if (retval = osa_adb_create_policy_db(&lparams)) {
 	  com_err(progname, retval, str_CREATING_POLICY_DB);
 	  return 1;
      }
 
-     retval = kadm5_create_magic_princs(params, context);
+     retval = kadm5_create_magic_princs(&lparams, context);
 
+     kadm5_free_config_params(context, &lparams);
      krb5_free_context(context);
 
      return retval;

@@ -1,3 +1,14 @@
+Sun Nov  2 19:09:17 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_util.c: Add flag indicating that policy db is to be closed.
+  		Change '-f" option to "-sf" to indicate stash file on
+ 		command line.
+
+	* kdb5_stash.c (kdb5_stash): Indicate that policy db should be
+	 	closed, free context when done.
+	
+	* kadm5_create.c (kadm5_create): Fix up memory leaks.
+
 Wed Oct 22 15:39:38 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* tcl_wrapper.c: Include either tcl.h or tcl/tcl.h

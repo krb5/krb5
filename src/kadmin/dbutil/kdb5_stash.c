@@ -37,6 +37,7 @@ extern krb5_encrypt_block master_encblock;
 extern kadm5_config_params global_params;
 
 extern int exit_status;
+extern int close_policy_db;
 
 void
 kdb5_stash(argc, argv)
@@ -58,6 +59,9 @@ char *argv[];
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
+
+    /* Tell upwards to close the policy db cause we don't */
+    close_policy_db = 1; 
 
     krb5_init_context(&context);
 
@@ -138,6 +142,7 @@ char *argv[];
 	exit_status++; return; 
     }
 
+    krb5_free_context(context);
     exit_status = 0;
     return; 
 }
