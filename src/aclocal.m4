@@ -101,7 +101,8 @@ $2::<<<
 	for i in $(SUBDIRS) ;\
 	do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
-			$(MAKE) $(MFLAGS) CCOPTS="$(CCOPTS)" CC="$(CC)" \
+			$(MAKE) $(MFLAGS) CC="$(CC)" \
+			CPPOPTS="$(CPPOPTS)" CCOPTS="$(CCOPTS)" \
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$2<<<); \
 	done>>>
 changequote([,])dnl
@@ -139,6 +140,7 @@ dnl drop in standard configure rebuild rules -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
 WITH_CC dnl
+WITH_CPPOPTS dnl
 AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
 SHELL=/bin/sh
@@ -288,6 +290,16 @@ CCOPTS=$withval
 CFLAGS="$CFLAGS $withval",
 CCOPTS=)dnl
 AC_SUBST(CCOPTS)])dnl
+dnl
+dnl set $(CPPOPTS) from --with-cppopts=value
+dnl
+define(WITH_CPPOPTS,[
+AC_ARG_WITH([cppopts],[select compiler preprocessor command line options],
+echo CPPOPTS=$withval
+CPPOPTS=$withval
+CPPFLAGS="$CPPFLAGS $withval",
+echo CPPOPTS defaults to $CPPOPTS)dnl
+AC_SUBST(CPPOPTS)])dnl
 dnl
 dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
 dnl
