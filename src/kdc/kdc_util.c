@@ -21,12 +21,10 @@ static char rcsid_kdc_util_c[] =
 #include <krb5/krb5_err.h>
 
 #include "kdc_util.h"
+#include "extern.h"
 
 #include <errno.h>
 #include <krb5/ext-proto.h>
-
-extern krb5_cs_table_entry *csarray[];
-extern int max_cryptosystem;		/* max entry in array */
 
 /*
  * concatenate first two authdata arrays, returning an allocated replacement.
@@ -83,16 +81,18 @@ krb5_principal princ;
 }
 
 krb5_error_code
-decrypt_tgs_req(tgs_req)
+decrypt_tgs_req(tgs_req, from)
 krb5_tgs_req *tgs_req;
+krb5_fulladdr *from;
 {
     krb5_error_code retval;
     krb5_data scratch;
     krb5_encrypt_block eblock;
     krb5_tgs_req_enc_part *local_encpart;
 
-    /* parse the request using krb5_rd_req, somehow munging the header
-       into its input form. */
+    if (retval = kdc_process_tgs_req(tgs_req, from))
+	return(retval);
+
     if (tgs_req->enc_part.length) {
 	/* decrypt encrypted part, attach to enc_part2 */
 
@@ -105,7 +105,7 @@ krb5_tgs_req *tgs_req;
 	}
 	/* put together an eblock for this encryption */
 
-	eblock.crypto_entry = csarray[tgs_req->etype]->system; /* XXX */
+	eblock.crypto_entry = krb5_csarray[tgs_req->etype]->system; /* XXX */
 	/* do any necessary key pre-processing */
 	if (retval = (*eblock.crypto_entry->process_key)(&eblock,
 							 tgs_req->header->ticket->enc_part2->session)) {
@@ -139,4 +139,120 @@ krb5_tgs_req *tgs_req;
 	tgs_req->enc_part2 = local_encpart;
     }
     return 0;
+}
+
+struct kparg {
+    krb5_db_entry *dbentry;
+    krb5_keyblock *key;
+};
+
+static krb5_error_code
+kdc_rdreq_keyproc(keyprocarg, principal, vno, key)
+krb5_pointer keyprocarg;
+krb5_principal principal;
+krb5_kvno vno;
+krb5_keyblock **key;
+{
+    register struct kparg *whoisit = (struct kparg *)keyprocarg;
+    register krb5_keyblock *newkey;
+
+    if (vno != whoisit->dbentry->kvno)
+	return KRB5KRB_AP_ERR_BADKEYVER;
+    if (!krb5_principal_compare(principal, whoisit->dbentry->principal))
+	return KRB5KRB_AP_ERR_NOKEY;
+    if (!(newkey = (krb5_keyblock *)malloc(sizeof(*newkey))))
+	return ENOMEM;
+    *newkey = *whoisit->key;
+    if (!(newkey->contents = (krb5_octet *)malloc(newkey->length))) {
+	free(newkey);
+	return ENOMEM;
+    }
+    bcopy(whoisit->key, newkey->contents, newkey->length);
+    *key = newkey;
+    return 0;
+}
+
+
+krb5_error_code 
+kdc_process_tgs_req(request, from)
+krb5_tgs_req *request;
+krb5_fulladdr *from;
+{
+    register krb5_ap_req *apreq = request->header;
+    int nprincs;
+    krb5_boolean more;
+    krb5_db_entry server;
+    krb5_keyblock encrypting_key;
+    krb5_tkt_authent authdat;
+    struct kparg who;
+    krb5_error_code retval;
+
+    if (isset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
+	isset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED))
+	return KRB5KDC_ERR_POLICY;
+
+    /* XXX perhaps we should optimize the case of the TGS ? */
+
+    nprincs = 1;
+    if (retval = krb5_db_get_principal(apreq->ticket->server,
+				       &server, &nprincs,
+				       &more))
+	return(retval);
+    if (more) {
+	krb5_db_free_principal(&server, nprincs);
+	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    } else if (nprincs != 1) {
+	krb5_db_free_principal(&server, nprincs);
+	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+    /* convert server.key into a real key (it may be encrypted
+       in the database) */
+    if (retval = kdc_convert_key(&server.key, &encrypting_key,
+				 CONVERT_OUTOF_DB)) {
+	krb5_db_free_principal(&server, nprincs);
+	return retval;
+    }
+    who.dbentry = &server;
+    who.key = &encrypting_key;
+    if (retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
+				     from->address,
+				     0,	/* no fetchfrom */
+				     kdc_rdreq_keyproc,
+				     (krb5_pointer)&who,
+				     kdc_rcache,
+				     &authdat)) {
+	krb5_db_free_principal(&server, nprincs);
+	bzero((char *)encrypting_key.contents, encrypting_key.length);
+	free((char *)encrypting_key.contents);
+
+	return(retval);
+    }
+    krb5_db_free_principal(&server, nprincs);
+    bzero((char *)encrypting_key.contents, encrypting_key.length);
+    free((char *)encrypting_key.contents);
+
+    /* now rearrange output from rd_req_decoded */
+
+    /* don't need authenticator */
+    krb5_free_authenticator(authdat.authenticator);
+
+    /* copy the ptr to enc_part2, then free remaining stuff */
+    apreq->ticket->enc_part2 = authdat.ticket->enc_part2;
+    authdat.ticket->enc_part2 = 0;
+    krb5_free_ticket(authdat.ticket);
+
+    return 0;
+}
+
+krb5_error_code
+kdc_convert_key(in, out, direction)
+krb5_keyblock *in, *out;
+int direction;
+{
+    if (direction == CONVERT_INTO_DB) {
+	return krb5_kdb_encrypt_key(in, out, &master_encblock);
+    } else if (direction == CONVERT_OUTOF_DB) {
+	return krb5_kdb_decrypt_key(in, out, &master_encblock);
+    } else
+	return KRB5_KDB_ILLDIRECTION;
 }
