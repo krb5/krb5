@@ -1,3 +1,8 @@
+2002-08-12  Tom Yu  <tlyu@mit.edu>
+
+	* xdr.c (xdr_string): Fix off-by-one error; we're not vulnerable,
+	since we don't call it.
+
 2002-08-02  Tom Yu  <tlyu@mit.edu>
 
 	* xdr_array.c (xdr_array): Account for elsize when checking
