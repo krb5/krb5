@@ -237,13 +237,13 @@ KRB-SAFE-BODY ::= SEQUENCE {
 	usec[2]				INTEGER OPTIONAL,
 	seq-number[3]			INTEGER OPTIONAL,
 	s-address[4]			HostAddress,	-- sender's addr
-	r-address[5]			HostAddress OPTIONAL -- recip's addr
+	r-address[5]			HostAddress OPTIONAL -- recip's addr 
 }
 
 KRB-PRIV ::=	[APPLICATION 21] SEQUENCE {
 	pvno[0]		INTEGER,
 	msg-type[1]	INTEGER,
-	enc-part[3]	EncryptedData	-- EncKrbPrivPart
+	enc-part[3]	EncryptedData	-- EncKrbPrivPart 
 }
 
 EncKrbPrivPart ::=	[APPLICATION 28] SEQUENCE {
@@ -252,7 +252,36 @@ EncKrbPrivPart ::=	[APPLICATION 28] SEQUENCE {
 	usec[2]		INTEGER OPTIONAL,
 	seq-number[3]	INTEGER OPTIONAL,
 	s-address[4]	HostAddress,	-- sender's addr
-	r-address[5]	HostAddress OPTIONAL	-- recip's addr
+	r-address[5]	HostAddress OPTIONAL	-- recip's addr 
+}
+
+-- These two definitions are added to allow easy forwarding of 
+-- credentials.
+
+KRB-CRED ::= [APPLICATION 22] SEQUENCE {
+	pvno[0]		INTEGER,
+	msg-type[1]	INTEGER, -- KRB_CRED
+	tickets[2]	SEQUENCE OF Ticket,
+	enc-part[3]	EncryptedData -- EncKrbCredPart 
+}
+
+EncKrbCredPart ::= [APPLICATION 29] SEQUENCE OF SEQUENCE {
+	key[0]		EncryptionKey,
+	nonce[1]	INTEGER OPTIONAL,
+	timestamp[2]	KerberosTime,
+	usec[3]		INTEGER,
+	s-address[4]	HostAddress OPTIONAL,
+	r-address[5]	HostAddress OPTIONAL,
+        prealm[6] 	Realm OPTIONAL,
+        pname[7] 	PrincipalName OPTIONAL,
+        flags[8] 	TicketFlags OPTIONAL,
+        authtime[9] 	KerberosTime OPTIONAL,
+        starttime[10] 	KerberosTime OPTIONAL,
+        endtime[11] 	KerberosTime OPTIONAL,
+        renew-till[12] 	KerberosTime OPTIONAL,
+        srealm[13] 	Realm OPTIONAL,
+        sname[14] 	PrincipalName OPTIONAL,
+        caddr[15] 	HostAddresses OPTIONAL 
 }
 
 KRB-ERROR ::=	[APPLICATION 30] SEQUENCE {
