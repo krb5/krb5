@@ -19,7 +19,12 @@ kdestroy
 
 #### no principal specified
 
-set whoami $USER
+if {[info exists env(USER)]} {
+    set whoami $env(USER)
+} else {
+    set whoami [exec whoami]
+}
+
 test_win {} {B.7: default nonexisting ccache(1)} $whoami $whoami newpass
 test_win {} {B.7: default nonexisting ccache(2)} $whoami newpass $whoami
 
