@@ -71,7 +71,10 @@ static krb5_preauth_ops preauth_systems[] = {
     },
     { -1,}
 };
-				
+
+static krb5_error_code find_preauthenticator
+    PROTOTYPE((int type, krb5_preauth_ops **Preauth_proc));
+
 /*
  *   krb5_obtain_padata  is a glue routine which when passed in
  *   a preauthentication type, client principal, and src_addr, returns

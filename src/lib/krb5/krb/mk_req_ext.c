@@ -71,6 +71,11 @@ static char rcsid_mk_req_ext_c[] =
  returns system errors
 */
 
+static krb5_error_code 
+krb5_generate_authenticator PROTOTYPE(( krb5_authenticator *, krb5_principal,
+				       const krb5_checksum *, krb5_keyblock *,
+				       krb5_int32, krb5_authdata ** ));
+
 krb5_error_code
 krb5_mk_req_extended(ap_req_options, checksum, kdc_options,
 		     sequence, newkey, ccache, creds, authentp, outbuf)
