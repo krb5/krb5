@@ -1,0 +1,146 @@
+/**/# site:  $XConsortium: site.def,v 1.21 89/12/06 11:46:50 jim Exp $
+
+/*****************************************************************************
+ *                                                                           *
+ *			   SITE-SPECIFIC DEFINITIONS                         *
+ *                                                                           *
+ * Override any of the defaults in *.tmpl here.  Use ifndef so that servers  *
+ * can override you if necessary:                                            *
+ *                                                                           *
+ *     #ifndef ABuildParameter                                               *
+ *     #define ABuildParameter myvalue                                       *
+ *     #endif                                                                *
+ *                                                                           *
+ * Make sure you check the following parameters:                             *
+ *                                                                           *
+ *     1.  HasLargeTmp                                                       *
+ *     2.  InstallOldHeaderFiles                                             *
+ *     3.  ContribDir                                                        *
+ *     4.  HasXwWidgets                                                      *
+ *     5.  HasXcuWidgets                                                     *
+ *                                                                           *
+ * Note on using DESTDIR:  If you want to install into a scratch directory   *
+ * but will eventually move the tree back to the root, compile with DESTDIR  *
+ * blank and install with "make install DESTDIR=directory".                  *
+ *                                                                           *
+ * We strongly recommend that you don't change the installation directories  *
+ * and just use symbolic links if you want things to be installed on a       *
+ * different partition.  For example,                                        *
+ *                                                                           *
+ *     # cd directory_containing_X_distribution                              *
+ *     # make World                                                          *
+ *     # mkdir /otherdisk/X                                                  *
+ *     # foreach i (bin lib include)                                         *
+ *     >     mkdir /otherdisk/X/$i                                           *
+ *     >     ln -s /otherdisk/X/$i /usr/$i/X11                               *
+ *     > end                                                                 *
+ *     # make install                                                        *
+ *                                                                           *
+ *****************************************************************************/
+
+/*
+ * SET THESE PARAMETERS FIRST !!!
+ */
+
+/*
+ * 1.  HasLargeTmp - if your /tmp space is less than a 1meg, you should 
+ * probably set this to NO
+ */
+#ifndef HasLargeTmp
+#define HasLargeTmp YES
+#endif
+
+
+/*
+ * 2.  InstallOldHeaderFiles - set the following to YES until you have 
+ * converted your Xaw programs to use the new naming scheme.
+ */
+#ifndef InstallOldHeaderFiles
+#define InstallOldHeaderFiles NO	/* set to YES for compat with R3 Xaw */
+#endif
+
+
+/*
+ * 3.  ContribDir - set ContribDir to wherever you've placed your sources; the
+ * R4 tape comes with the core tree in ./mit and the contrib tree in ./contrib,
+ * so to get to contrib, go up from TOP:
+ */
+#ifndef ContribDir
+#define ContribDir $(TOP)/../contrib
+#endif
+
+/*
+ * 4.  HasXwWidgets - if you want to have make variables for the Xw widgets
+ * used in Doug Young's book, set this to YES.
+ */
+#ifndef HasXwWidgets		/* whether or not to include make vars */
+#define HasXwWidgets NO
+#endif
+
+
+/*
+ * 5.  HasXcuWidgets - if you want to have make variables for the Xcu widgets,
+ * set this to YES.
+ */
+#ifndef HasXcuWidgets		/* whether or not to include make vars */
+#define HasXcuWidgets NO
+#endif
+
+
+
+/*****************************************************************************
+ *                                                                           *
+ *			       Build Parameters                              *
+ *                                                                           *
+ *****************************************************************************/
+
+/*
+ * If you want to use GCC, set HasGcc in the appropriate .cf files.  This 
+ * results in substantial improvements for the server.
+ */
+#ifndef HasGcc
+#define HasGcc NO
+#endif
+
+#if HasGcc
+#ifndef CcCmd
+#ifdef UseInstalled		/* if outside the tree */
+#define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
+#else				/* server won't compile with -traditional */
+#define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return 
+#endif
+#endif
+#endif
+
+
+#ifndef ExtensionDefines
+#if SystemV
+#define ExtensionDefines -DSHAPE -DMULTIBUFFER -DMITSHM -DMITMISC
+#else
+#define ExtensionDefines -DSHAPE -DMULTIBUFFER -DMITMISC
+#endif
+#endif
+
+#ifdef ATHENA
+#ifndef DoInstallExtensionsIntoXlib
+#define DoInstallExtensionsIntoXlib YES		/* for Makefile hosers */
+#endif
+#endif
+
+/*
+ * Make sure that the library has compatibility stuff built into it, for wno
+ */
+#ifndef BuildXawBC
+#define BuildXawBC YES			/* headers can be installed later */
+#endif
+#ifndef CompatibilityFlags
+#if InstallOldHeaderFiles
+#define CompatibilityFlags -DXAW_BC
+#else
+#define CompatibilityFlags /**/
+#endif
+#endif
+
+#ifndef SharedLibXext
+#define SharedLibXext NO	/* XXX - haven't made it sharable yet */
+#endif
