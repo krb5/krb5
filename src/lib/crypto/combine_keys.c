@@ -50,6 +50,25 @@ static krb5_error_code dr
 (const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
 		unsigned char *outdata, const krb5_data *in_constant);
 
+/*
+ * We only support this combine_keys algorithm for des and 3des keys.
+ * Everything else should use the PRF defined in the crypto framework.
+ * We don't implement that yet.
+ */
+
+static krb5_boolean  enctype_ok (krb5_enctype e) 
+{
+    switch (e) {
+    case ENCTYPE_DES_CBC_CRC:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES3_CBC_SHA1:
+	return 1;
+    default:
+	return 0;
+    }
+}
+
 krb5_error_code krb5int_c_combine_keys
 (krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2, krb5_keyblock *outkey)
 {
@@ -60,6 +79,9 @@ krb5_error_code krb5int_c_combine_keys
     krb5_keyblock tkey;
     krb5_error_code ret;
     int i, myalloc = 0;
+    if (!(enctype_ok(key1->enctype)&&enctype_ok(key2->enctype)))
+	return (KRB5_CRYPTO_INTERNAL);
+    
 
     if (key1->length != key2->length || key1->enctype != key2->enctype)
 	return (KRB5_CRYPTO_INTERNAL);

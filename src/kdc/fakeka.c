@@ -1361,7 +1361,7 @@ char **argv;
 	    /*
 	     * copy the forwarder header and adjust the bases and lengths.
 	     */
-	    memcpy(reply.data, reply.data, HEADER_LEN);
+	    memcpy(reply.data, req.data, HEADER_LEN);
 	    req.base += HEADER_LEN;
 	    req.len -= HEADER_LEN;
 	    reply.base += HEADER_LEN;
