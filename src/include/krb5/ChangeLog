@@ -1,3 +1,6 @@
+Sun Jul  9 21:47:49 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* los-proto.h: Add krb5_auth_con_genaddrs prototype
 
 Fri Jul 7 15:58:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* rsa-md5.h - Add RSA_MD5_DES_CONFOUND_LENGTH - the length of the

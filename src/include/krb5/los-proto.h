@@ -94,6 +94,10 @@ krb5_error_code krb5_gen_replay_name
 		   const krb5_address *,
 	       const char *,
 	       char **));
+krb5_error_code INTERFACE krb5_auth_con_genaddrs
+    KRB5_PROTOTYPE((krb5_context,
+		   krb5_auth_context,
+	       int, int));
 krb5_error_code krb5_gen_portaddr
     KRB5_PROTOTYPE((krb5_context,
 		   const krb5_address *,
