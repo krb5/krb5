@@ -1,3 +1,8 @@
+Tue Dec 24 16:08:05 1996  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (V5_AC_OUTPUT_MAKEFILE): Fix to deal with the
+	autoconf-2.12 syntax for file concatenation.
+
 Tue Dec 17 13:54:48 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (kerbsrc.mac.tar): Automatically make the

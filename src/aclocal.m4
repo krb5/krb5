@@ -506,7 +506,7 @@ define(V5_AC_OUTPUT_MAKEFILE,
 ifelse($2, , filelist="", filelist="$2")
 dnl OPTIMIZE THIS FOR COMMON CASE!!
 for x in $ac_v5_makefile_dirs; do
-  filelist="$filelist $x/Makefile.tmp:$ac_prepend+$x/Makefile.in+$ac_postpend"
+  filelist="$filelist $x/Makefile.tmp:$ac_prepend:$x/Makefile.in:$ac_postpend"
 done
 AC_OUTPUT($filelist,
 [EOF
