@@ -1130,7 +1130,7 @@ struct buffer *allocbuf(bp, fd, blksize)
 #else
     size = roundup(stb.st_blksize, blksize);
 #endif
-    if (size == 0)
+
       size = blksize;
     if (bp->cnt < size) {
 	if (bp->buf != 0)
@@ -1433,7 +1433,7 @@ int des_write(fd, buf, len)
     if (fd == 0)
 	fd = 1;
     if (!encryptflag)
-      return(write(fd, buf, len));
+      return(krb5_net_write(bsd_context, fd, buf, len));
     
     desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
     if (desoutbuf.length > sizeof(des_outbuf)){

@@ -1134,11 +1134,7 @@ if(port)
 	    (void) close(pw[1]);
 	    (void) close(px[0]);
 	    
-if(port)
-    ioctl(pv[0], FIONBIO, (char *)&one);
-	    ioctl(pw[0], FIONBIO, (char *)&one);
-	    /* should set s nbio! */
-
+	    
 	    
 	    FD_ZERO(&readfrom);
 	    FD_SET(f, &readfrom);
