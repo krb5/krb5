@@ -20,6 +20,30 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
+/*
+ * #defines for MIT-specific time-based timebombs and/or version
+ * server for the Kerberos DLL.
+ */
+#ifdef SAP_TIMEBOMB
+#if 1
+#define TIMEBOMB 852094800	/* 1-Jan-97 */
+#else
+#define TIMEBOMB 820472400	/* 1-Jan-96 */
+#endif
+#define TIMEBOMB_PRODUCT "SAPGUI"
+#define TIMEBOMB_WARN  31
+#endif
+
+#ifdef KRB_TIMEBOMB
+#if 1
+#define TIMEBOMB 852094800	/* 1-Jan-97 */
+#else
+#define TIMEBOMB 820472400	/* 1-Jan-96 */
+#endif
+#define TIMEBOMB_PRODUCT "Kerberos V5"
+#define TIMEBOMB_WARN 31
+#endif
+
 #ifdef SAP_VERSERV
 #define VERSERV
 #define APP_TITLE "KRB5-SAP"
@@ -108,11 +132,29 @@ WORD wDataSeg;
 WORD cbHeap;
 LPSTR CmdLine;
 {
+#ifdef TIMEBOMB
+   char buf[256];
+   long timeleft;
+
+   timeleft = TIMEBOMB - time(0);
+   if (timeleft <= 0) {
+           sprintf(buf, "Your version of %s has expired.\n", TIMEBOMB_PRODUCT);
+           strcat(buf, "Please upgrade it.");
+           MessageBox(NULL, buf, "", MB_OK);
+	   PostQuitMessage(0);
+   }
+   timeleft = timeleft / ((long) 60*60*24);
+   if (timeleft < TIMEBOMB_WARN) {
+        sprintf(buf, "Your version of %s will expire in %ld days.\n",
+                TIMEBOMB_PRODUCT, timeleft);
+        strcat(buf, "Please upgrade it soon.");
+        MessageBox(NULL, buf, "", MB_OK);
+   }
+#endif
 #ifdef SAP_VERSERV
    if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
 	   PostQuitMessage(0);
 #endif
-	
     win_socket_initialize ();
     return 1;
 }
