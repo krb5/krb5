@@ -1,3 +1,8 @@
+2004-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (fai_add_hosts_by_name): Handle case where
+	returned ai_canonname is null.
+
 2004-08-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_os_nothread_mutex_assert_locked,

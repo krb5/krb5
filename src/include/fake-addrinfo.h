@@ -787,7 +787,7 @@ static inline int fai_add_hosts_by_name (const char *name,
 		break;
 	    }
 	}
-	ce->canonname = strdup(ai->ai_canonname);
+	ce->canonname = ai->ai_canonname ? strdup(ai->ai_canonname) : 0;
 	system_freeaddrinfo(ai);
 	plant_face(name, ce);
     }
@@ -810,7 +810,9 @@ static inline int fai_add_hosts_by_name (const char *name,
 	}
     }
     if (*result && (flags & AI_CANONNAME))
-	(*result)->ai_canonname = strdup(ce->canonname);
+	(*result)->ai_canonname = (ce->canonname
+				   ? strdup(ce->canonname)
+				   : NULL);
     krb5int_unlock_fac();
     return 0;
 
