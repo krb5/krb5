@@ -46,7 +46,7 @@ dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 AC_DEFUN(CONFIG_RULES,[dnl
-V5_SET_TOPDIR dnl
+AC_REQUIRE([V5_SET_TOPDIR]) dnl
 WITH_CC dnl
 AC_REQUIRE_CPP
 if test -z "$LD" ; then LD=$CC; fi
@@ -99,6 +99,8 @@ lib_frag=$srcdir/$ac_config_fragdir/lib.in
 AC_SUBST_FILE(lib_frag)
 libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
+dnl
+KRB5_AC_ENABLE_THREADS dnl
 ])dnl
 
 dnl Maintainer mode, akin to what automake provides, 'cept we don't
@@ -121,6 +123,21 @@ MAINT=$MAINTAINER_MODE_TRUE
 AC_SUBST(MAINTAINER_MODE_TRUE)
 AC_SUBST(MAINTAINER_MODE_FALSE)
 AC_SUBST(MAINT)
+])
+
+dnl Hack for now.
+AC_DEFUN([KRB5_AC_ENABLE_THREADS],[
+AC_ARG_ENABLE([thread-support],
+AC_HELP_STRING([--enable-thread-support],use PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support),
+[  if test "$withval" = yes ; then
+    AC_MSG_NOTICE(enabling PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support)
+    AC_DEFINE(ENABLE_THREADS,1,[Define if thread support enabled])
+  fi
+])
+dnl Maybe this should be inside the conditional above?  Doesn't cache....
+ACX_PTHREAD
+dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
+AC_CHECK_HEADERS(pthread.h)
 ])
 
 dnl This is somewhat gross and should go away when the build system
@@ -1507,3 +1524,6 @@ AC_DEFUN([KRB5_AC_PRIOCNTL_HACK],
 	;;
 esac
 AC_SUBST(PRIOCNTL_HACK)])
+dnl
+dnl
+m4_include(config/ac-archive/acx_pthread.m4)
