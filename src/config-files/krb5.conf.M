@@ -103,6 +103,10 @@ example:
 		kdc = KERBEROS-2.MIT.EDU:88
 		admin_server = KERBEROS.MIT.EDU
 		default_domain = MIT.EDU
+		v4_instance_convert = {
+			mit = mit.edu
+			lithium = lithium.lcs.mit.edu
+		}
 	}
 .in -1i
 .fi
@@ -124,6 +128,12 @@ Typically this is the Master Kerberos server.
 This relation identifies the default domain for which hosts in this
 realm are assumed to be in.  This is needed for translating V4 principal names
 (which do not contain a domain name) to V5 principal names (which do).  
+
+.IP v4_instance_convert
+This subsection allows the administrator to configure exceptions to
+the default_domain mapping rule.  It contains V4 instances (the tag
+name) which should be translated to some specific hostname (the tag
+value) as the second component in a Kerberos V5 principal name.
 
 .SH DOMAIN_REALM SECTION
 

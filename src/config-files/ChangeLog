@@ -1,3 +1,11 @@
+Fri May  5 00:58:55 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5.conf: Add example of the new [realms]/<realm>/
+		v4_instance_convert/<instance> form used by
+		krb5_425_convert_principal.
+
+	* krb5.conf.M: Document new v4_instance_convert subsection.
+
 Tue Apr 25 22:04:54 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.conf.M: New file added to document the new krb5.conf
