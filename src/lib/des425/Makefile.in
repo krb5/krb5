@@ -97,16 +97,4 @@ clean::
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-libdes425.$(STEXT): $(OBJS)
-	$(RM) $@
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
-
-install:: libdes425.a
-	$(INSTALL_DATA) libdes425.a $(DESTDIR)$(KRB5_LIBDIR)/libdes425.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdes425.a
-
-clean::
-	$(RM) libdes425.$(LIBEXT) libdes425.bak
-
 install-unix:: install-libs

@@ -1,3 +1,8 @@
+Tue Nov 18 18:57:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Garbage collect some old library build system
+	stuff.
+
 Mon Oct 27 01:14:16 1997  Tom Yu  <tlyu@mit.edu>
 
 	* pcbc_encrypt.c, quad_cksum.c: Punt duplicates of definitions;
