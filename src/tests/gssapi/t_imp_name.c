@@ -33,6 +33,7 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
+#define GSSAPI_V2
 void display_status();
 static void display_status_1();
 static void display_buffer();
