@@ -34,9 +34,13 @@
 
 #ifndef ODBM
 #include <ndbm.h>
-#else /*ODBM*/
+#else /* ODBM */
+#ifdef unicos61
+#include <rpcsvc/dbm.h>
+#else
 #include <dbm.h>
-#endif /*ODBM*/
+#endif
+#endif /*ODBM */
 
 #ifndef ODBM
 #define dbm_next(db,key) dbm_nextkey(db)
