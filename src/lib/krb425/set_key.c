@@ -23,20 +23,18 @@ krb_set_key(key, cvt)
 char *key;
 int cvt;
 {
-	static krb5_keyblock keyblock;
-
 	if (cvt) {
-		if (keyblock.contents)
-			xfree(keyblock.contents);
-		mit_des_string_to_key(KEYTYPE_DES, &keyblock, 0, 0);
+		if (_krb425_servkey.contents)
+			xfree(_krb425_servkey.contents);
+		mit_des_string_to_key(KEYTYPE_DES, &_krb425_servkey, 0, 0);
 	} else {
-		if (!keyblock.contents &&
-		    !(keyblock.contents = (krb5_octet *)malloc(8))) {
+		if (!_krb425_servkey.contents &&
+		    !(_krb425_servkey.contents = (krb5_octet *)malloc(8))) {
 			return(KFAILURE);
 		}
-		keyblock.length = 8;
-		keyblock.keytype = KEYTYPE_DES;
-		memcpy((char *)keyblock.contents, (char *)key, 8);
+		_krb425_servkey.length = 8;
+		_krb425_servkey.keytype = KEYTYPE_DES;
+		memcpy((char *)_krb425_servkey.contents, (char *)key, 8);
 	}
 	return(KSUCCESS);
 }
