@@ -52,7 +52,7 @@ extern int	krbONE;
 
 #else
 
-Sorry, I don't know about your machine.  Describe it here.
+Please put a description of your machine here.
 
 #endif ibm032
 #endif vax
