@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <assert.h>
 
+krb5_context krb5__krb4_context = 0;
 
 char *
 krb__get_srvtabname(default_srvtabname)
