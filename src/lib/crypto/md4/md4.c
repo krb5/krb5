@@ -8,11 +8,15 @@
  * md4.c from RFC1186
  *
  * $Log$
- * Revision 5.1  1990/11/08 11:32:24  jtkohl
+ * Revision 5.2  1991/01/17 11:39:34  jtkohl
+ * fix problem with referencing past end of array on byte-aligned
+ * input
+ *
+ * Revision 5.1  90/11/08  11:32:24  jtkohl
  * change to copy onto stack to avoid modifying input in MDupdate
  * add Kerberos byte-order detection
  * some compilers will require the "L" qualifier on long constants.
- *
+ * 
  * Revision 5.0  90/11/07  14:12:04  jtkohl
  * Initial code from RFC
  * 
@@ -270,7 +274,7 @@ unsigned int count;
   p = MDp->count;
   while (tmp)
     { tmp += *p;
-      *p++ = tmp;
+      *p++ = (unsigned char) tmp;
       tmp = tmp >> 8;
     }
   /* Process data */
@@ -288,7 +292,11 @@ unsigned int count;
       byte = count >> 3;
       bit =  count & 7;
       /* Copy X into XX since we need to modify it */
-      for (i=0;i<=byte;i++)   XX[i] = X[i];
+      for (i=0;i<byte;i++)   XX[i] = X[i];
+      if (bit)
+	  XX[byte] = X[byte];
+      else
+	  XX[byte] = 0;
       for (i=byte+1;i<64;i++) XX[i] = 0;
       /* Add padding '1' bit and low-order zeros in last byte */
       mask = 1 << (7 - bit);
