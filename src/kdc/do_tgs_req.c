@@ -547,7 +547,6 @@ tgt_again:
 	if ((encrypting_key.enctype == ENCTYPE_DES_CBC_CRC) &&
 	    (isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5)))
 	    encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
-	ticket_reply.enc_part.kvno = server_key->key_data_kvno;
 	errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
 					&ticket_reply);
 	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
@@ -555,6 +554,7 @@ tgt_again:
 	    status = "TKT_ENCRYPT";
 	    goto cleanup;
 	}
+	ticket_reply.enc_part.kvno = server_key->key_data_kvno;
     }
 
     /* Start assembling the response */
