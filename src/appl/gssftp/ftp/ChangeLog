@@ -1,3 +1,8 @@
+2001-08-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* glob.c (amatch, case '*'): Treat multiple asterisks the same as
+	one.
+
 2001-07-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftp.c: Declare mech_type in struct gss_trials gss_OID to be

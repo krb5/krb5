@@ -469,6 +469,12 @@ amatch(s, p)
 			continue;
 
 		case '*':
+			/* Multiple stars are equivalent to one.
+			   Don't chew up cpu time with O(n**2)
+			   recursion if a long string of them is
+			   given.  */
+			while (*p == '*')
+				p++;
 			if (!*p)
 				return (1);
 			if (*p == '/') {
