@@ -1,3 +1,8 @@
+Wed Jun 12 01:02:45 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Remove unnecessary include config/windows.in.
+		wconfig takes care of this automatically.
+
 Wed May 22 07:41:15 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install-unix): Don't include an install rule, as it

@@ -3,7 +3,6 @@ DEFINES=-I$(srcdir)/../../include/kerberosIV
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 EHDRDIR=$(BUILDTOP)$(S)include
 
