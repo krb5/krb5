@@ -29,12 +29,13 @@
  */
 
 static krb5_error_code
-make_ap_req(context, auth_context, cred, server, endtime, chan_bindings, 
+make_ap_req(context, auth_context, cred, server, now, endtime, chan_bindings, 
 	    req_flags, krb_flags, mech_type, token)
     krb5_context context;
     krb5_auth_context * auth_context;
     krb5_gss_cred_id_t cred;
     krb5_principal server;
+    krb5_timestamp now;
     krb5_timestamp *endtime;
     gss_channel_bindings_t chan_bindings;
     OM_uint32 *req_flags;
@@ -151,6 +152,16 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     if ((code = krb5_get_credentials(context, 0, cred->ccache, 
 				     &in_creds, &out_creds)))
 	goto cleanup;
+
+    /*
+     * Enforce a stricter limit (without timeskew forgiveness at the
+     * boundaries) because accept_sec_context code is also similarly
+     * non-forgiving.
+     */
+    if (out_creds->times.endtime < now) {
+	code = KRB5KRB_AP_ERR_TKT_EXPIRED;
+	goto cleanup;
+    }
 
     /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
@@ -363,13 +374,18 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       }
 
       if ((code = make_ap_req(context, &(ctx->auth_context), cred, 
-			      ctx->there, &ctx->endtime, input_chan_bindings, 
+			      ctx->there, now, &ctx->endtime,
+			      input_chan_bindings, 
 			      &ctx->gss_flags, &ctx->krb_flags, mech_type,
 			      &token))) {
 	 krb5_free_principal(context, ctx->here);
 	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
 	 *minor_status = code;
+
+	 if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||
+	     (code == KG_EMPTY_CCACHE))
+	     return GSS_S_NO_CRED;
 	 if (code == KRB5KRB_AP_ERR_TKT_EXPIRED)
 		 return GSS_S_CREDENTIALS_EXPIRED;
 	 return(GSS_S_FAILURE);

@@ -1,3 +1,12 @@
+Wed Dec  3 02:16:18 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_sec_context.c (make_ap_req): Enforce a stricter requirement
+		on the ticket expiration time of the credentials, since
+		accept_sec_context doesn't use the timeskew fudge for
+		checking ticket expirations.
+		(krb5_gss_init_sec_context): Return GSS_S_NO_CRED when
+		appropriate. 
+
 Wed Jan 21 19:14:09 1998  Tom Yu  <tlyu@mit.edu>
 
 	* gssapiP_krb5.h: Add rcache member to the creds
