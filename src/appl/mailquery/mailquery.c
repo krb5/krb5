@@ -168,6 +168,8 @@ mailquery(mhost, user)
             exit (1);
     }
 
+    (void) pop_command("QUIT");
+    
     if (verbose)
       printf("%d messages (%d bytes) on host %s\n", nmsgs, nbytes, mhost);
 
