@@ -4,6 +4,7 @@ tickets, creating authenticators, and the like.
 \begin{funcdecl}{krb5_encode_kdc_rep}{krb5_error_code}{\funcin}
 \funcarg{const krb5_msgtype}{type}
 \funcarg{const krb5_enc_kdc_rep_part *}{encpart}
+\funcarg{krb5_encrypt_block *}{eblock}
 \funcarg{const krb5_keyblock *}{client_key}
 \funcinout
 \funcarg{krb5_kdc_rep *}{dec_rep}
@@ -11,10 +12,12 @@ tickets, creating authenticators, and the like.
 \funcarg{krb5_data **}{enc_rep}
 \end{funcdecl}
 
+\internalfunc
+
 Takes KDC rep parts in \funcparam{*rep} and \funcparam{*encpart}, and
-formats it into \funcparam{*enc_rep}, using message type \funcparam{type}
-and encryption key \funcparam{client_key} and encryption type
-\funcparam{dec_rep{\ptsto}etype}.
+formats it into \funcparam{*enc_rep}, using message type
+\funcparam{type} and encryption key \funcparam{client_key} and
+encryption block \funcparam{eblock}.
 
 \funcparam{enc_rep{\ptsto}data} will point to  allocated storage upon
 non-error return; the caller should free it when finished.
@@ -28,6 +31,8 @@ Returns system errors.
 \funcout
 \funcarg{krb5_kdc_rep **}{dec_rep}
 \end{funcdecl}
+
+\internalfunc
 
 Takes a KDC_REP message and decrypts encrypted part using
 \funcparam{etype} and \funcparam{*key}, putting result in \funcparam{*dec_rep}.
@@ -58,15 +63,18 @@ This function is suitable for use as the \funcparam{decrypt_proc}
 argument to \funcname{krb5_get_in_tkt}.
 
 \begin{funcdecl}{krb5_encrypt_tkt_part}{krb5_error_code}{ \funcin}
+\funcarg{const krb5_encrypt_block *}{eblock}
 \funcarg{const krb5_keyblock *}{srv_key}
 \funcinout
 \funcarg{krb5_ticket *}{dec_ticket}
 \end{funcdecl}
 
+\internalfunc
+
 Takes unencrypted \funcparam{dec_ticket} and
 \funcparam{dec_ticket{\ptsto}enc_part2}, encrypts with
-\funcparam{dec_ticket{\ptsto}etype}
-using \funcparam{srv_key}, and places result in
+the encryption system specified by \funcparam{eblock} using
+\funcparam{srv_key}, and places result in 
 \funcparam{dec_ticket{\ptsto}enc_part}.
 The string \funcparam{dec_ticket{\ptsto}enc_part} will be allocated
 before formatting.
@@ -81,6 +89,8 @@ encrypted stuff.
 \funcinout
 \funcarg{krb5_ticket *}{dec_ticket}
 \end{funcdecl}
+
+\internalfunc
 
 Takes encrypted \funcparam{dec_ticket{\ptsto}enc_part}, encrypts with
 \funcparam{dec_ticket{\ptsto}etype}
@@ -105,6 +115,8 @@ Returns errors from encryption routines, system errors
 \funcout
 \funcarg{krb5_response *}{rep}
 \end{funcdecl}
+
+\internalfunc
 
 Sends a request to the TGS and waits for a response.
 \funcparam{options} is used for the options in the KRB_TGS_REQ.

@@ -1,3 +1,16 @@
+Mon Nov 21 14:17:50 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* library.tex (internalfunc): Define \internalfunc, which prints a
+		disclaimer in front of "internal functions".  We should
+		move them somewhere else, but for now, let's start marking
+		those functions which we believe are internal.
+
+	* krb5.tex: Documented changed interfaces to krb5_encode_kdc_rep
+		and krb5_encrypt_tkt_part.  Document krb5_encode_kdc_rep,
+		krb5_decode_kdc_rep, krb5_encrypt_tkt_part,
+		krb5_decrypt_tkt_part, and krb5_send_tgs as all internal
+		functions.  
+
 Thu Oct 13 13:14:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.tex: Fixed typo; extra space in \funcname{ krb5_recvauth}.
