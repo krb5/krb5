@@ -658,13 +658,17 @@ void qsort P((char * , unsigned  , unsigned  , int (* )()));
 #endif /* MIPS/Ultrix */
 
 #ifdef ibm032
-extern char *memcpy(char *, const char *, int);
-extern char *memset(char *, int, int);
-extern char *malloc(unsigned int);
-extern char *realloc(char *, unsigned int);
-extern void free(char *);
-extern void abort(void);
-extern char *getenv(const char *);
+#ifndef memcpy
+extern char *memcpy P((char *, const char *, int));
+#endif
+#ifndef memset
+extern char *memset P((char *, int, int));
+#endif
+extern char *malloc P((unsigned int));
+extern char *realloc P((char *, unsigned int));
+extern void free P((char *));
+extern void abort P((void));
+extern char *getenv P((const char *));
 #endif /* ibm032 */
 
 #undef P
