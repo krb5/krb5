@@ -1,3 +1,11 @@
+2002-06-21  Ezra Peisach  <epeisach@bu.edu>
+
+	* fake-addrinfo.h: If IPv6 support is compiled in, but the OS does
+	not provide in6addr_any in libc, provide a static copy.
+
+	* configure.in: If IPv6 support is compiled in, test for existence
+	of in6addr_any in libc.
+
 2002-06-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* port-sockets.h [!_WIN32 && !HAVE_MACSOCK_H]: Include

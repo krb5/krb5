@@ -893,6 +893,11 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 
 #endif /* WRAP_GETADDRINFO || WRAP_GETNAMEINFO */
 
+#if defined(KRB5_USE_INET6) && defined(NEED_INSIXADDR_ANY) 
+/* If compiling with IPv6 support and C library does not define in6addr_any */
+static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+#endif
+
 #ifdef ADDRINFO_UNDEF_INLINE
 # undef inline
 # undef ADDRINFO_UNDEF_INLINE
