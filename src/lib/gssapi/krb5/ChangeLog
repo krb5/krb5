@@ -1,4 +1,10 @@
 
+Tue Aug 29 17:48:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* {accept,init}_sec_context.c - Zero out the newly allocated context
+		because garbage in the uninitialized context messes up the
+		serializers.
+
+
 Tue Aug 29 13:31:46 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, {im,ex}port_sec_context.c, ser_sctx.c - Add
 		new modules to support {im,ex}port of GSSAPI context.

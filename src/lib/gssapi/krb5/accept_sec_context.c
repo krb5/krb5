@@ -213,6 +213,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
+   memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
    ctx->context = context;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;

@@ -243,7 +243,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
       }
 
       /* fill in the ctx */
-
+      memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
       ctx->context = context;
       ctx->auth_context = NULL;
       ctx->initiate = 1;
