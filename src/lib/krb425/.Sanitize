@@ -28,6 +28,7 @@ Things-to-keep:
 425error.c
 ChangeLog
 Makefile.in
+README
 configure
 configure.in
 des_sched.c

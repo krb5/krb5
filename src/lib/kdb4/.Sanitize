@@ -27,6 +27,7 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 configure.in
+configure
 krb_cache.c
 krb_dbl.c
 krb_dbm.c

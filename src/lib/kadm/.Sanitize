@@ -29,6 +29,7 @@ Makefile.in
 adm_conn.c
 adm_rw.c
 configure.in
+configure
 
 Things-to-lose:
 

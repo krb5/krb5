@@ -30,6 +30,7 @@ Makefile.in
 Password.c
 ad_print.c
 configure.in
+configure
 cr_auth_repl.c
 cr_ciph.c
 cr_death_pkt.c

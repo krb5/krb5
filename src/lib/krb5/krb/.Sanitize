@@ -34,6 +34,7 @@ auth_con.h
 bld_pr_ext.c
 bld_princ.c
 chk_trans.c
+cleanup.h
 compat_recv.c
 configure
 configure.in
@@ -90,6 +91,9 @@ send_tgs.c
 sendauth.c
 srv_rcache.c
 t_walk_rtree.c
+t_kerb.c
+t_krb5.conf
+t_ref_kerb.out
 tgtname.c
 unparse.c
 walk_rtree.c
