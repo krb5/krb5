@@ -94,7 +94,7 @@ proc mytest { name kpargs status args } {
 proc kinit { princ pass } {
 	global env;
         global KINIT
-	spawn -noecho $KINIT $princ;
+	spawn -noecho $KINIT -5 $princ;
 
 	expect {
 		-re {Password for .*: $}
@@ -122,7 +122,7 @@ proc kdestroy {} {
 	if {[info exists errorInfo]} {
 		set saveErrorInfo $errorInfo
 	}
-	catch "system $KDESTROY 2>/dev/null"
+	catch "system $KDESTROY -5 2>/dev/null"
 	if {[info exists saveErrorCode]} {
 		set errorCode $saveErrorCode
 	} elseif {[info exists errorCode]} {
