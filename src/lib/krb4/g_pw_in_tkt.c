@@ -127,8 +127,8 @@ krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
 #endif
 
     return(krb_get_in_tkt(user,instance,realm,service,sinstance,life,
-                          (key_proc_type)passwd_to_key,
-			  (decrypt_tkt_type)NULL, password));
+                          (key_proc_type)NULL, /* krb_get_in_tkt will try them all */
+                          (decrypt_tkt_type)NULL, password));
 }
 
 int KRB5_CALLCONV
@@ -138,7 +138,7 @@ krb_get_pw_in_tkt_creds(
 {
     return krb_get_in_tkt_creds(user, instance, realm,
 				service, sinstance, life,
-				(key_proc_type)passwd_to_key,
+				(key_proc_type)NULL,  /* krb_get_in_tkt_creds will try them all */
 				NULL, password, creds);
 }
 
@@ -166,26 +166,32 @@ krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
     int life;
     char *password;
 {
-   char *preauth_p;
-   int   preauth_len;
-   int   ret_st;
-
-#if defined(_WIN32) || defined(macintosh)
+    char          *preauth_p;
+    int            preauth_len;
+    int            ret_st;
+    key_proc_type *keyprocs = krb_get_keyprocs (NULL);
+    int            i = 0;
+    
+#if defined(_WIN32) || USE_LOGIN_LIBRARY
    /* On non-Unix systems, we can't handle a null password, because
       passwd_to_key can't handle prompting for the password.  */
-   if (password == 0)
-     return INTK_PW_NULL;
+    if (password == 0)
+        return INTK_PW_NULL;
 #endif
 
-   krb_mk_preauth(&preauth_p, &preauth_len, (key_proc_type)passwd_to_key,
-		  user, instance, realm, password, old_key);
-   ret_st = krb_get_in_tkt_preauth(user,instance,realm,service,sinstance,life,
+    /* Loop trying all the key_proc types */
+	do {
+        krb_mk_preauth(&preauth_p, &preauth_len, keyprocs[i],
+                            user, instance, realm, password, old_key);
+        ret_st = krb_get_in_tkt_preauth(user,instance,realm,service,sinstance,life,
 				   (key_proc_type) stub_key,
 				   (decrypt_tkt_type) NULL, password,
 				   preauth_p, preauth_len);
-
-   krb_free_preauth(preauth_p, preauth_len);
-   return ret_st;
+                   
+        krb_free_preauth(preauth_p, preauth_len);
+    } while ((keyprocs[++i] != NULL) && (ret_st == INTK_BADPW));
+    
+      return ret_st;
 }
 
 /* FIXME!  This routine belongs in the krb library and should simply

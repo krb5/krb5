@@ -29,6 +29,7 @@
 #include "krb4int.h"
 #include "prot.h"
 
+#include "port-sockets.h"
 #include <string.h>
 
 /* Define a couple of function types including parameters.  These
@@ -414,6 +415,8 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     KTEXT cip = &cip_st;	/* Returned Ciphertext */
     int kerror;
     int byteorder;
+    key_proc_type *keyprocs = krb_get_keyprocs (key_proc);
+    int i = 0;
 #if TARGET_OS_MAC
     struct sockaddr_in local_addr;
 #endif
@@ -431,15 +434,19 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
 #endif
     if (kerror)
 	return kerror;
-    /* Attempt to decrypt the reply. */
-    if (decrypt_proc == NULL)
-	decrypt_tkt (user, instance, realm, arg, key_proc, &cip);
-    else
-	(*decrypt_proc)(user, instance, realm, arg, key_proc, &cip);
-
-    kerror = krb_parse_in_tkt_creds(user, instance, realm,
-				    service, sinstance,
-				    life, cip, byteorder, creds);
+    
+    /* Attempt to decrypt the reply.  Loop trying password_to_key algorithms 
+       until we succeed or we get an error other than "bad password" */
+    do {
+        if (decrypt_proc == NULL) {
+            decrypt_tkt (user, instance, realm, arg, keyprocs[i], &cip);
+        } else {
+            (*decrypt_proc)(user, instance, realm, arg, keyprocs[i], &cip);
+        }
+        kerror = krb_parse_in_tkt_creds(user, instance, realm,
+                    service, sinstance, life, cip, byteorder, creds);
+    } while ((keyprocs [++i] != NULL) && (kerror == INTK_BADPW))
+    
 #if TARGET_OS_MAC
     /* Do this here to avoid OS dependency in parse_in_tkt prototype. */
     creds->address = local_addr->sin_addr.s_addr;
@@ -504,7 +511,7 @@ krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 					   creds.realm, creds.session,
 					   creds.lifetime, creds.kvno,
 					   &creds.ticket_st, creds.issue_date,
-					   creds.address, creds.stk_type);
+					   creds.address);
 #else
 	retval = krb_save_credentials(creds.service, creds.instance,
 				      creds.realm, creds.session,

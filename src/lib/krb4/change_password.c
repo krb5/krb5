@@ -27,9 +27,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if TARGET_OS_MAC		/* XXX */
-#include <Kerberos/CredentialsCache.h>
-#endif
 #include "krb.h"
 #include "krb4int.h"
 #include "kadm.h"
@@ -69,24 +66,7 @@ krb_change_password(char *principal, char *instance, char *realm,
 
 #if TARGET_OS_MAC
     /* Now create the key to send to the server */
-    switch (client_parm.creds.stk_type) {
-    case cc_v4_stk_des:
-	mit_passwd_to_key(principal, instance, realm, newPassword, key);
-	break;
-    case cc_v4_stk_afs:
-	afs_passwd_to_key(principal, instance, realm, newPassword, key);
-	break;
-    case cc_v4_stk_krb5:
-	krb5_passwd_to_key(principal, instance, realm, newPassword, key);
-	break;
-    default:
-        /*
-	 * Okay, actually afs_string_to_key sites can't use this
-	 * protocol to change passwords
-	 */
-	mit_passwd_to_key(principal, instance, realm, newPassword, key);
-	break;
-    }
+    mit_passwd_to_key(principal, instance, realm, newPassword, key);
 #else
     des_string_to_key(newPassword, key); /* XXX check this! */
 #endif

@@ -1,3 +1,43 @@
+2003-02-10  Alexandra Ellwood <lxs@mit.edu>
+    Note: these checkins are partial progress for Tom Yu.
+    They probably don't build; Tom is expecting that.
+
+    * CCache-glue.c: Removed copying of the string_to_key type in
+    krb_save_credentials.  Saving the string_to_key type is unnecessary
+    and was just for display purposes.  Will be removed for KfM 5.0.
+    Updated to use KRB5_CALLCONV instead of INTERFACE and include the
+    krb5's krb4 headers instead of the KfM ones.
+
+    * change-password.c: Removed include of CredentialsCache.h and
+    code that switches between string to key types.  This doesn't make
+    sense for password changing because the krb4 protocol for password
+    changing implemented here only supports mit's string to key.  Bug 
+    was in KfM and got ported forward.  Should the code call 
+    mit_password_to_key for all platforms?  
+    
+    * FSp-glue.c: Removed dependency on MoreFiles and replaced it with
+    code to use FSRefs now that we are Carbon-only.
+    
+    * g_in_tkt.c: Added loop which calls password to key functions 
+    trying each one.  This technique was imported from KTH-KRB into 
+    KfM.  This code still needs to have the TARGET_OS_MAC code made more
+    Unix friendly for Darwin builds.  The behavior differences (store
+    the address or not) should be deferred until the very last moment to
+    avoid excessive #ifdefs.
+
+    * g_pw_in_tkt.c: Added loop which calls password to key functions 
+    trying each one.  This technique was imported from KTH-KRB into KfM.
+    
+    * krb4int.h: Added password-to-key.c functions so they can be used by
+    g_in_tkt.c and g_pw_in_tkt.c.
+    
+    * password-to-key.c: Removed dependence on the CCAPI so this code can
+    be used on all platforms to implement looping over the password to
+    key functions.
+    
+    * RealmsConfig-glue.c: Changed to use #ifdef USE_CCAPI like is used 
+    elsewhere in the krb5 sources.  This is just for consistency in krb5.
+
 2003-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add rules to generate krb_err_txt.c.

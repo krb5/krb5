@@ -42,8 +42,8 @@
 #include "krb4int.h"
 #include "port-sockets.h"
 
-#if USE_CCAPI
-#include <Kerberos/CredentialsCache.h>
+#ifdef USE_CCAPI
+#include <CredentialsCache.h>
 #endif
 
 #define KRB5_PRIVATE 1
@@ -478,7 +478,7 @@ krb_get_krbhst(
     return result;
 }
 
-#if USE_CCAPI
+#ifdef USE_CCAPI
 /*
  * Realm -> string_to_key mapping
  */

@@ -33,9 +33,10 @@
 
 #if TARGET_OS_MAC && defined(__FILES__)
 
-#include <Kerberos/KerberosFullPath.h>
+#include <CoreServices/CoreServices.h>
 
 static int FSp_srvtab_to_key(char *, char *, char *, char *, C_Block);
+static OSStatus FSSpec2Path (FSSpec *spec, char **path, int pathLen);
 
 int KRB5_CALLCONV
 FSp_read_service_key(
@@ -47,9 +48,9 @@ FSp_read_service_key(
     char *key)                  /* Pointer to key to be filled in */
 {
     int retval = KFAILURE;
-    char *file = NULL;
+    char file [MAXPATHLEN];
     if (filespec != NULL) {
-        if (FSpGetFullPOSIXPath (filespec, &file) != noErr) {
+        if (FSSpec2Path (filespec, &file, sizeof(file)) != noErr) {
             return retval;
         }
     }
@@ -70,9 +71,10 @@ FSp_put_svc_key(
     char *key)
 {
     int retval = KFAILURE;
-    char *sfile = NULL;
+    char sfile[MAXPATHLEN];
+
     if (sfilespec != NULL) {
-        if (FSpGetFullPOSIXPath (sfilespec, &sfile) != noErr) {
+        if (FSSpec2Path (sfilespec, &sfile, sizeof(sfile)) != noErr) {
             return retval;
         }
     }
@@ -102,4 +104,32 @@ static int FSp_srvtab_to_key(char *user, char *instance, char *realm,
     return FSp_read_service_key(user, instance, realm, 0,
 				(FSSpec *)srvtab, (char *)key);
 }
+
+static OSStatus FSSpec2Path (FSSpec *spec, char **path, int pathLen)
+{
+    OSStatus err = noErr;
+    FSRef ref;
+    
+    /* check parameters */
+    if (path == NULL) err = paramErr;
+    
+    /* convert the FSSpec to an FSRef */
+    if (err == noErr) {
+        FSRefParam pb;
+        
+        pb.ioVRefNum = spec->vRefNum;
+        pb.ioDirID = spec->parID;
+        pb.ioNamePtr = (StringPtr) spec->name;
+        pb.newRef = &ref;
+        err = PBMakeFSRefSync(&pb);
+    }
+    
+    /* and then convert the FSRef to a path */
+    if (err == noErr) {
+        err = FSRefMakePath (&ref, path, pathLen);
+    }
+    
+    return err;
+}
+
 #endif

@@ -67,6 +67,15 @@ void krb_set_logfile(char *);
 /* month_sname.c */
 const char * month_sname(int);
 
+/* password_to_key.c */
+key_proc_type *krb_get_keyprocs (key_proc_type keyproc);
+int mit_passwd_to_key(char *user, char *instance, char *realm, 
+                      char *passwd, C_Block key);
+int krb5_passwd_to_key(char *user, char *instance, char *realm,
+                      char *passwd, C_Block key);
+int afs_passwd_to_key(char *user, char *instance, char *realm,
+                      char *passwd, C_Block key);
+
 /* rd_preauth.c */
 #ifdef KRB_DB_DEFS
 int krb_rd_preauth(KTEXT, char *, int, Principal *, des_cblock);

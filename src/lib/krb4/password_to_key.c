@@ -29,8 +29,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if TARGET_OS_MAC
-#include <Kerberos/CredentialsCache.h>
+#ifdef USE_CCAPI
+#include <CredentialsCache.h>
 #endif
 #include "krb.h"
 #include "krb4int.h"
@@ -53,68 +53,47 @@
  * and 0 is returned.
  */
 
-#if TARGET_OS_MAC
-/*ARGSUSED */
-int 
-krb_get_keyprocs(KRB_UINT32 stkType,
-		 key_proc_array kps, key_proc_type_array sts)
+
+key_proc_type *krb_get_keyprocs (key_proc_type keyproc)
 {
-    /* generates the list of key procs */
-    /* always try them all, but try the specified one first */
-    switch (stkType) {
-    case cc_v4_stk_afs:
-	kps[0] = afs_passwd_to_key;
-	sts[0] = cc_v4_stk_afs;
-
-	kps[1] = mit_passwd_to_key;
-	sts[1] = cc_v4_stk_des;
-
-	kps[2] = krb5_passwd_to_key;
-	sts[2] = cc_v4_stk_krb5;
-
-	kps[3] = NULL;
-	break;
-    case cc_v4_stk_des:
-    case cc_v4_stk_unknown:
-    default:
-	kps[0] = mit_passwd_to_key;
-	sts[0] = cc_v4_stk_des;
-
-	kps[1] = afs_passwd_to_key;
-	sts[1] = cc_v4_stk_afs;
-
-	kps[2] = krb5_passwd_to_key;
-	sts[2] = cc_v4_stk_krb5;
-
-	kps[3] = NULL;
-	break;
+    static key_proc_type default_keyprocs[4] = { mit_passwd_to_key, 
+                                                 afs_passwd_to_key, 
+                                                 krb5_passwd_to_key, 
+                                                 NULL };
+                                                  
+    static key_proc_type user_keyprocs[2] = { NULL, NULL };
+    
+    /* generate the list of key procs */
+    if (key_proc == NULL) {
+        return default_keyprocs; /* use the default */
+    } else {
+        user_keyprocs[0] = keyproc;
+        return user_keyprocs;  /* use the caller provided keyprocs */
     }
-    return KSUCCESS;
 }
-#endif
 
-int
-mit_passwd_to_key(char *user, char *instance, char *realm,
-		  char *passwd, C_Block key)
+int mit_passwd_to_key(char *user, char *instance, char *realm,
+                      char *passwd, C_Block key)
 {
 #pragma unused(user)
 #pragma unused(instance)
 #pragma unused(realm)
 
-    if (passwd)
+    if (passwd) {
         mit_string_to_key(passwd, key);
-#if !(defined(_WIN32) || defined(macintosh))
-    else {
-        des_read_password((C_Block *)key, "Password: ", 0);
+    } else {
+#if !(defined(_WIN32) || defined(USE_LOGIN_LIBRARY))
+        des_read_password((des_cblock *)key, "Password: ", 0);
+#else
+        return (-1);
+#endif
     }
-#endif /* unix */
     return (0);
 }
 
 /* So we can use a v4 kinit against a v5 kdc with no krb4 salted key */
-int
-krb5_passwd_to_key(char *user, char *instance, char *realm,
-		   char *passwd, C_Block key)
+int krb5_passwd_to_key(char *user, char *instance, char *realm,
+                      char *passwd, C_Block key)
 {
     if (user && instance && realm && passwd) {
         unsigned int len = MAX_K_NAME_SZ + strlen(passwd) + 1;
@@ -130,19 +109,20 @@ krb5_passwd_to_key(char *user, char *instance, char *realm,
     return -1;
 }
 
-int
-afs_passwd_to_key(char *user, char *instance, char *realm,
-		  char *passwd, C_Block key)
+int afs_passwd_to_key(char *user, char *instance, char *realm,
+                      char *passwd, C_Block key)
 {
 #pragma unused(user)
 #pragma unused(instance)
 
-    if (passwd)
+    if (passwd) {
         afs_string_to_key(passwd, realm, key);
-#if !(defined(_WIN32) || defined(macintosh))
-    else {
-        des_read_password((C_Block *)key, "Password: ", 0);
+    } else {
+#if !(defined(_WIN32) || defined(USE_LOGIN_LIBRARY))
+        des_read_password((des_cblock *)key, "Password: ", 0);
+#else
+        return (-1);
+#endif
     }
-#endif /* unix */
     return (0);
 }

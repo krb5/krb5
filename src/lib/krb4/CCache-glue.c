@@ -9,29 +9,24 @@
 
 
 #include <CoreServices/CoreServices.h>
-#include "kerberos.h"
+#include "krb.h"
+#include "krb4int.h"
+#include "prot.h"
+
+#if !defined (USE_CCAPI) || !USE_CCAPI
+#error "Cannot use CCache glue without the CCAPI!"
+#endif
 
 #ifdef USE_LOGIN_LIBRARY
-#include <Kerberos/KerberosLoginPrivate.h>
+#include <KerberosLoginPrivate.h>
 #endif /* USE_LOGIN_LIBRARY */
-#include <Kerberos/CredentialsCache.h>
+#include <CredentialsCache.h>
 
 #include <string.h>
 #include <stdlib.h>
-
-#include "Kerberos4Private.h"
  
-/*
- * Psycho krb4 sources don't compile with these options on, so I use them just for this file
- */
- 
-#pragma require_prototypes on
-#pragma mpwc_relax off
-
-int INTERFACE
-krb_get_tf_realm (
-	const char*		ticket_file,
-	char*			realm);
+void
+UpdateDefaultCache (void);
 
 /* 
  * The way Kerberos v4 normally works is that at any given point in time there is a
@@ -125,11 +120,8 @@ krb_save_credentials (
 	int				kvno,
 	KTEXT			ticket,
 	long			issue_date,
-	KRB_UINT32		local_address,
-	KRB_UINT32		stk_type)
+	KRB_UINT32		local_address)
 {
-#pragma unused (realm)
-
 	cc_int32				cc_err = ccNoError;
 	int						kerr = KSUCCESS;
 	cc_credentials_v4_t		v4creds;
@@ -163,7 +155,7 @@ krb_save_credentials (
         strncpy (v4creds.realm, realm, REALM_SZ);
         memmove (v4creds.session_key, session, sizeof (C_Block));
         v4creds.kvno = kvno;
-        v4creds.string_to_key_type = stk_type;
+        v4creds.string_to_key_type = cc_v4_stk_unknown;
         v4creds.issue_date = issue_date;
         v4creds.address = local_address;
         v4creds.lifetime = lifetime;
@@ -194,7 +186,7 @@ krb_save_credentials (
  *
  * Determine the realm by opening the named cache and parsing realm from the principal
  */
-int INTERFACE
+int KRB5_CALLCONV
 krb_get_tf_realm (
 	const char*		ticket_file,
 	char*			realm)
@@ -245,7 +237,7 @@ krb_get_tf_realm (
 /*
  * Credentials file -> name, instance, realm mapping
  */
-int INTERFACE
+int KRB5_CALLCONV
 krb_get_tf_fullname (
 	const char*		ticket_file,
 	char*			name,
@@ -292,7 +284,7 @@ krb_get_tf_fullname (
 /*
  * Retrieval from credentials cache
  */
-int INTERFACE
+int KRB5_CALLCONV
 krb_get_cred (
 	char*			service,
 	char*			instance,
@@ -429,7 +421,7 @@ krb_get_cred (
 /*
  * Getting name of default credentials cache
  */
-const char* INTERFACE
+const char* KRB5_CALLCONV
 tkt_string (void)
 {
 	if (gDefaultCacheName == NULL) {
@@ -490,7 +482,7 @@ krb_set_tkt_string (
  *
  * Implementation in dest_tkt.c
  */
-int INTERFACE
+int KRB5_CALLCONV
 dest_tkt (void)
 {
 	cc_int32		cc_err = ccNoError;
@@ -528,7 +520,7 @@ dest_tkt (void)
 /*
  * Number of credentials in credentials cache
  */
-int INTERFACE
+int KRB5_CALLCONV
 krb_get_num_cred (void)
 {
 	cc_credentials_t			theCreds = NULL;
@@ -581,7 +573,7 @@ krb_get_num_cred (void)
  * This function is _not_!! well-defined under CCache API, because
  * there is no guarantee about order of credentials remaining the same.
  */
-int INTERFACE
+int KRB5_CALLCONV
 krb_get_nth_cred (
 	char*			sname,
 	char*			sinstance,
@@ -648,7 +640,7 @@ krb_get_nth_cred (
 /*
  * Deletion from credentials file
  */
-int INTERFACE
+int KRB5_CALLCONV
 krb_delete_cred (
 	char*	sname,
 	char*	sinstance,
@@ -711,7 +703,7 @@ krb_delete_cred (
  *
  * Implementation in memcache.c
  */
-int INTERFACE
+int KRB5_CALLCONV
 dest_all_tkts (void)
 {
 	int						count = 0;
