@@ -46,29 +46,36 @@
 int send_token(int s, gss_buffer_t tok) {
     long len;
     size_t ret;
+    size_t ws_err;
 
     len = htonl(tok->length);
 
     ret = send (s, (char *) &len, 4, 0);        // Send length over the socket
     if (ret < 0) {
-		errno = WSAGetLastError();
+		ws_err = WSAGetLastError();
+		errno = ws_err;
 		my_perror("sending token length");
-        return -1;
+		OkMsgBox ("Winsock error  %d \n", ws_err);
+		return -1;
     } else if (ret != 4) {
-        OkMsgBox ("sending token length: %d of %d bytes written\n",
-            ret, 4);
-        return -1;
+	    ws_err = WSAGetLastError();
+	    OkMsgBox("sending token length: %d of %d bytes written\nWinsock error = %d\n",
+		     ret, 4, ws_err);
+	    return -1;
     }
 
     ret = send (s, tok->value, tok->length, 0); // Send the data
     if (ret < 0) {
-		errno = WSAGetLastError();
-        my_perror("sending token data");
-        return -1;
+	    ws_err = WSAGetLastError();
+	    errno = ws_err;
+	    my_perror("sending token data");
+	    OkMsgBox ("Winsock error  %d \n", ws_err);
+	    return -1;
     } else if (ret != tok->length) {
-        OkMsgBox ("sending token data: %d of %d bytes written\n",
-            ret, tok->length);
-        return -1;
+	    ws_err = WSAGetLastError();
+	    OkMsgBox ("sending token data: %d of %d bytes written\nWinsock error = %d\n",
+		      ret, tok->length, ws_err);
+	    return -1;
     }
 
     return 0;
@@ -99,16 +106,20 @@ int
 recv_token (int s, gss_buffer_t tok) {
     int ret;
     unsigned long len;
+	size_t ws_err;
 
     ret = recv (s, (char *) &len, 4, 0);
     if (ret < 0) {
-		errno = WSAGetLastError();
-        my_perror("reading token length");
+	    ws_err = WSAGetLastError();
+	    errno = ws_err;
+	    my_perror("reading token length");
+	    OkMsgBox ("Winsock error  %d \n", ws_err);
         return -1;
     } else if (ret != 4) {
-        OkMsgBox ("reading token length: %d of %d bytes read\n",
-            ret, 4);
-        return -1;
+	    ws_err = WSAGetLastError();
+	    OkMsgBox ("reading token length: %d of %d bytes written\nWinsock error = %d\n",
+		      ret, 4, ws_err);
+	    return -1;
     }
 	  
     len = ntohl(len);
@@ -121,15 +132,18 @@ recv_token (int s, gss_buffer_t tok) {
 
     ret = recv (s, (char *) tok->value, tok->length, 0);
     if (ret < 0) {
-		errno = WSAGetLastError();
-        my_perror("reading token data");
-        free(tok->value);
-        return -1;
+	    ws_err = WSAGetLastError();
+	    errno = ws_err;
+	    my_perror("reading token data");
+	    OkMsgBox ("Winsock error  %d \n", ws_err);
+	    free(tok->value);
+	    return -1;
     } else if ((size_t) ret != tok->length) {
-        OkMsgBox ("sending token data: %d of %d bytes written\n",
-            ret, tok->length);
-        free(tok->value);
-        return -1;
+	    ws_err = WSAGetLastError();
+	    OkMsgBox ("reading token data: %d of %d bytes written\nWinsock error = %d\n",
+		      ret, tok->length, ws_err);
+	    free(tok->value);
+	    return -1;
     }
 
     return 0;
@@ -211,3 +225,4 @@ my_perror (char *msg) {
     else
         MessageBox (NULL, err, "", MB_OK);
 }
+
