@@ -48,11 +48,14 @@ typedef struct {
 
 extern SVCAUTH svc_auth_any;
 
+#include <gssrpc/svc.h>
+
 /*
  * Server side authenticator
  */
 #define _authenticate	_gssrpc_authenticate
-extern enum auth_stat _authenticate();
+extern enum auth_stat _authenticate(struct svc_req *rqst, struct rpc_msg *msg,
+        bool_t *no_dispatch);
 
 #define SVCAUTH_WRAP(auth, xdrs, xfunc, xwhere) \
      ((*((auth)->svc_ah_ops->svc_ah_wrap))(auth, xdrs, xfunc, xwhere))

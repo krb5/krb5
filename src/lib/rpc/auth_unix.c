@@ -44,6 +44,8 @@ static char sccsid[] = "@(#)auth_unix.c 1.19 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 
 #include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
@@ -82,7 +84,7 @@ struct audata {
 };
 #define	AUTH_PRIVATE(auth)	((struct audata *)auth->ah_private)
 
-static bool_t marshal_new_auth();
+static void marshal_new_auth();
 
 
 /*
@@ -303,7 +305,7 @@ authunix_destroy(auth)
  * Marshals (pre-serializes) an auth struct.
  * sets private data, au_marshed and au_mpos
  */
-static bool_t
+static void
 marshal_new_auth(auth)
 	register AUTH *auth;
 {

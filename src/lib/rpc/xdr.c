@@ -66,7 +66,7 @@ static char xdr_zero[BYTES_PER_XDR_UNIT] = { 0, 0, 0, 0 };
 void
 gssrpc_xdr_free(proc, objp)
 	xdrproc_t proc;
-	char *objp;
+	void *objp;
 {
 	XDR x;
 	
@@ -303,7 +303,7 @@ xdr_char(xdrs, cp)
 bool_t
 xdr_u_char(xdrs, cp)
 	XDR *xdrs;
-	char *cp;
+	unsigned char *cp;
 {
 	unsigned int u;
 

@@ -1,3 +1,21 @@
+Sun Feb 18 17:48:35 2001  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* xdr.h: Flush out prototypes for xdrmem_create(),
+        xdrstdio_create(), xdrrec_create(), xdralloc_create(),
+        xdralloc_release(), xdrrec_endofrecord(), xdrrec_skiprecord(),
+        xdrrec_eof(), xdralloc_getdata(). Add prototype for
+        gssrpc_xdr_fre().
+
+	* xdr.c: Argument to gssrpc_xdr_free(0 changed from char * to void
+        *. xdr_u_char() changed to take unsigned char * instead of char *.
+
+	* auth_unix.c: Include unistd.h and string.h for
+        prototypes. Declare marshal_new_auth() as static void instead of
+        static bool_t based on usage.
+
+	* auth.h, svc_auth.h: Provide full prototypes for a number of
+        functions.
+
 2000-06-21  Tom Yu  <tlyu@mit.edu>
 
 	* svc_auth_gssapi.c (_svcauth_gssapi): Missed a rename.  From

@@ -38,6 +38,9 @@
 #ifndef __XDR_HEADER__
 #define __XDR_HEADER__
 
+/* We need FILE.  */
+#include <stdio.h>
+
 /*
  * Make sure we have a definition for PROTOTYPE.
  */
@@ -285,7 +288,7 @@ PROTOTYPE((XDR *, enum_t *, char *, struct xdr_discrim *, xdrproc_t));
 extern bool_t	xdr_char
 PROTOTYPE((XDR *, char *));
 extern bool_t	xdr_u_char
-PROTOTYPE((XDR *, char *));
+PROTOTYPE((XDR *, unsigned char *));
 extern bool_t	xdr_vector
 PROTOTYPE((XDR *, char *, unsigned int, unsigned int, xdrproc_t));
 extern bool_t	xdr_float
@@ -335,14 +338,38 @@ PROTOTYPE((XDR *, rpc_u_int32 *));
 #define xdrrec_eof		gssrpc_xdrrec_eof
 #define xdralloc_getdata	gssrpc_xdralloc_getdata
 
-extern void   xdrmem_create();		/* XDR using memory buffers */
-extern void   xdrstdio_create();	/* XDR using stdio library */
-extern void   xdrrec_create();		/* XDR pseudo records for tcp */
-extern void   xdralloc_create();	/* XDR allocating memory buffer */
-extern void   xdralloc_release();	/* destroy xdralloc, save buf */
-extern bool_t xdrrec_endofrecord();	/* make end of xdr record */
-extern bool_t xdrrec_skiprecord();	/* move to beginning of next record */
-extern bool_t xdrrec_eof();		/* true if no more input */
-extern caddr_t xdralloc_getdata();	/* get buffer from xdralloc */
+/* XDR allocating memory buffer */
+extern void   xdralloc_create PROTOTYPE((XDR *xdrs, enum xdr_op op));	
 
+/* destroy xdralloc, save buf */
+extern void   xdralloc_release PROTOTYPE((XDR *xdrs));	
+
+/* get buffer from xdralloc */
+extern caddr_t xdralloc_getdata PROTOTYPE((XDR *xdrs));	
+
+/* XDR using memory buffers */
+extern void xdrmem_create PROTOTYPE((XDR *xdrs, caddr_t addr,
+				     unsigned int size, enum xdr_op xop));
+
+/* XDR using stdio library */
+extern void xdrstdio_create PROTOTYPE((XDR *xdrs, FILE *file,
+					enum xdr_op op));
+
+/* XDR pseudo records for tcp */
+extern void xdrrec_create PROTOTYPE((XDR *xdrs, unsigned int sendsize,
+				     unsigned int recvsize, caddr_t tcp_handle,
+				     int (*readit) (caddr_t, caddr_t, int),
+				     int (*writeit) (caddr_t, caddr_t, int)));
+
+/* make end of xdr record */
+extern bool_t xdrrec_endofrecord PROTOTYPE((XDR *xdrs, bool_t sendnow));
+
+/* move to beginning of next record */
+extern bool_t xdrrec_skiprecord PROTOTYPE((XDR *xdrs));
+
+/* true if no more input */
+extern bool_t xdrrec_eof PROTOTYPE((XDR *xdrs));
+
+/* free memory buffers for xdr */
+extern void gssrpc_xdr_free PROTOTYPE((xdrproc_t proc, void *__objp));
 #endif /* !__XDR_HEADER__ */

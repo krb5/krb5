@@ -184,9 +184,10 @@ int authany_wrap(), authany_unwrap();
 #define authnone_create		gssrpc_authnone_create
 #define authdes_create		gssrpc_authdes_create
 
-extern AUTH *authunix_create();
-extern AUTH *authunix_create_default();	/* takes no parameters */
-extern AUTH *authnone_create();		/* takes no parameters */
+extern AUTH *authunix_create(char *machname, int uid, int gid, int len,
+			     int *aup_gids);
+extern AUTH *authunix_create_default(void);	/* takes no parameters */
+extern AUTH *authnone_create(void);		/* takes no parameters */
 extern AUTH *authdes_create();
 
 /*
