@@ -520,7 +520,7 @@ krb5_get_in_tkt(krb5_context context,
 	err_reply = 0;
 	as_reply = 0;
 	if ((retval = send_as_request(context, &request, &time_now, &err_reply,
-				      &as_reply, NULL)))
+				      &as_reply, 0)))
 	    goto cleanup;
 
 	if (err_reply) {
