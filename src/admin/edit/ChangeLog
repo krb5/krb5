@@ -1,3 +1,10 @@
+Mon Dec 19 18:04:11 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in:
+	* Makefile.in:
+	* dumpv4.c (dump_v4db): Do the right thing if we are compiling
+		without V4 support.  (The dump_v4db command is disabled.)
+
 Wed Dec  7 00:07:46 1994    <tytso@rsx-11.mit.edu>
 
 	* dumpv4.c (v4_print_time): gmtime expects a pointer to a time_t,

@@ -9,8 +9,7 @@ DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
-KDB4LIB=$(KRB4)/lib/libkdb.a
-KRB4LIB=$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a
+K4LIB=@K4LIB@
 
 all::
 
@@ -19,7 +18,7 @@ DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DB
 
 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(KDB4LIB) $(KRB4LIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(K4LIB)
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
 OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o dumpv4.o ss_wrapper.o
