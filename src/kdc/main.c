@@ -179,7 +179,6 @@ kdc_initialize_rcache(kcontext, rcache_name)
     char 		*rcache_name;
 {
     krb5_error_code	retval;
-    extern krb5_deltat krb5_clockskew;
     char		*rcname;
     char		*sname;
 
@@ -191,7 +190,7 @@ kdc_initialize_rcache(kcontext, rcache_name)
 	if (!(retval = krb5_rc_recover(kcontext, kdc_rcache)) ||
 	    !(retval = krb5_rc_initialize(kcontext,
 					  kdc_rcache,
-					  krb5_clockskew))
+					  kcontext->clockskew))
 	    ) {
 	    /* Expunge the replay cache */
 	    if (!(retval = krb5_rc_expunge(kcontext, kdc_rcache))) {

@@ -89,6 +89,10 @@ select_session_keytype PROTOTYPE((krb5_context context,
 				  int nktypes,
 				  krb5_enctype *ktypes));
 
+krb5_error_code
+get_salt_from_key PROTOTYPE((krb5_context, krb5_principal,
+			     krb5_key_data *, krb5_data *));
+
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,
@@ -127,9 +131,10 @@ int against_local_policy_tgs PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
 const char * missing_required_preauth
     PROTOTYPE((krb5_db_entry *client, krb5_db_entry *server,
 	       krb5_enc_tkt_part *enc_tkt_reply));
-void get_preauth_hint_list PROTOTYPE((krb5_db_entry *client,
-				     krb5_db_entry *server,
-				     krb5_data *e_data));
+void get_preauth_hint_list PROTOTYPE((krb5_kdc_req * request,
+				      krb5_db_entry *client,
+				      krb5_db_entry *server,
+				      krb5_data *e_data));
     
 /* replay.c */
 krb5_boolean kdc_check_lookaside PROTOTYPE((krb5_data *, krb5_data **));

@@ -293,7 +293,7 @@ krb5_data **response;			/* filled in with a response packet */
     status = missing_required_preauth(&client, &server, &enc_tkt_reply);
     if (status) {
 	errcode = KRB5KDC_ERR_PREAUTH_REQUIRED;
-	get_preauth_hint_list(&client, &server, &e_data);
+	get_preauth_hint_list(request, &client, &server, &e_data);
 	goto errout;
     }
 

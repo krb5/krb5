@@ -34,7 +34,9 @@ typedef krb5_error_code (verify_proc)
 		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
 
 typedef krb5_error_code (edata_proc)
-    KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client, krb5_pa_data *data));
+    KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    krb5_pa_data *data));
 
 typedef struct _krb5_preauth_systems {
     int		type;
@@ -44,6 +46,7 @@ typedef struct _krb5_preauth_systems {
 } krb5_preauth_systems;
 
 static verify_proc verify_enc_timestamp;
+static edata_proc get_etype_info;
 
 /*
  * Preauth property flags
@@ -58,6 +61,12 @@ static krb5_preauth_systems preauth_systems[] = {
         0,
         0,
 	verify_enc_timestamp,
+    },
+    {
+	KRB5_PADATA_ETYPE_INFO,
+	0,
+	get_etype_info,
+	0
     },
     { -1,}
 };
@@ -146,7 +155,8 @@ const char *missing_required_preauth(client, server, enc_tkt_reply)
     return 0;
 }
 
-void get_preauth_hint_list(client, server, e_data)
+void get_preauth_hint_list(request, client, server, e_data)
+    krb5_kdc_req *request;
     krb5_db_entry *client, *server;
     krb5_data *e_data;
 {
@@ -177,7 +187,7 @@ void get_preauth_hint_list(client, server, e_data)
 	(*pa)->magic = KV5M_PA_DATA;
 	(*pa)->pa_type = ap->type;
 	if (ap->get_edata)
-	    (ap->get_edata)(kdc_context, client, *pa);
+	    (ap->get_edata)(kdc_context, request, client, server, *pa);
 	pa++;
     }
     retval = encode_krb5_padata_sequence((const krb5_pa_data **) pa_data,
@@ -229,6 +239,8 @@ check_padata (context, client, request, enc_tkt_reply)
 		break;
 	}
     }
+    if (retval)
+	retval = KRB5KDC_ERR_PREAUTH_FAILED;
     return retval;
 }
 
@@ -305,15 +317,90 @@ cleanup:
     return retval;
 }
 
+/*
+ * This function returns the etype information for a particular
+ * client, to be passed back in the preauth list in the KRB_ERROR
+ * message.
+ */
+static krb5_error_code
+get_etype_info(context, request, client, server, pa_data)
+    krb5_context 	context;
+    krb5_kdc_req *	request;
+    krb5_db_entry *	client;
+    krb5_db_entry *	server;
+    krb5_pa_data *	pa_data;
+{
+    krb5_etype_info_entry **	entry = 0;
+    krb5_key_data		*client_key;
+    krb5_error_code		retval;
+    krb5_data			salt;
+    krb5_data *			scratch;
+    krb5_enctype		db_etype;
+    int 			i = 0;
+    int 			start = 0;
 
-#if 0			
+    salt.data = 0;
 
-	setflag(enc_tkt_reply.flags, TKT_FLG_PRE_AUTH);
-	/*
-	 * If pa_type is one in which additional hardware authentication
-	 * was performed set TKT_FLG_HW_AUTH too.
-	 */
-	if (pa_flags & KRB5_PREAUTH_FLAGS_HARDWARE)
-            setflag(enc_tkt_reply.flags, TKT_FLG_HW_AUTH);
+    entry = malloc((client->n_key_data * 2) * sizeof(krb5_etype_info_entry *));
+    if (entry == NULL)
+	return ENOMEM;
+    entry[0] = NULL;
 
-#endif
+    while (1) {
+	retval = krb5_dbe_search_enctype(context, client, &start, -1,
+					 -1, 0, &client_key);
+	if (retval == ENOENT)
+	    break;
+	if (retval)
+	    goto cleanup;
+	db_etype = client_key->key_data_type[0];
+	if (db_etype == ENCTYPE_DES_CBC_MD4 || db_etype == ENCTYPE_DES_CBC_MD5)
+	    db_etype = ENCTYPE_DES_CBC_CRC;
+	
+	while (1) {
+	    if ((entry[i] = malloc(sizeof(krb5_etype_info_entry))) == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    entry[i+1] = 0;
+	    entry[i]->magic = KV5M_ETYPE_INFO_ENTRY;
+	    entry[i]->etype = db_etype;
+	    entry[i]->length = -1;
+	    entry[i]->salt = 0;
+	    retval = get_salt_from_key(context, request->client,
+				       client_key, &salt);
+	    if (retval)
+		goto cleanup;
+	    if (salt.length >= 0) {
+		entry[i]->length = salt.length;
+		entry[i]->salt = salt.data;
+		salt.data = 0;
+	    }
+	    i++;
+	    /*
+	     * If we have a DES_CRC key, it can also be used as a
+	     * DES_MD5 key.
+	     */
+	    if (db_etype == ENCTYPE_DES_CBC_CRC)
+		db_etype = ENCTYPE_DES_CBC_MD5;
+	    else
+		break;
+	}
+    }
+    retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry,
+				    &scratch);
+    if (retval)
+	goto cleanup;
+    pa_data->contents = scratch->data;
+    pa_data->length = scratch->length;
+
+    retval = 0;
+
+cleanup:
+    if (entry)
+	krb5_free_etype_info(context, entry);
+    if (salt.data)
+	krb5_xfree(salt.data);
+    return retval;
+}
+

@@ -1,3 +1,15 @@
+Thu Nov  9 00:05:55 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_preauth.c (get_etype_info): Added function to return the
+		etype_info preauth hint to the client.
+
+	* kdc_util.c (get_salt_from_key): Added new function which
+		determines the salting information from the krb5_key_data
+		structure.
+
+	* main.c (kdc_initialize_rcache): Replace use of krb5_clockskew
+		with context->clockskew.
+
 Wed Nov  8 02:57:15 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc_util.c (): Added new helper functions
