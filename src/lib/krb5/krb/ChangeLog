@@ -1,3 +1,8 @@
+Fri Dec  1 17:04:43 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* recvauth.c (krb5_recvauth): Initialize rcache to zero, so that
+		on cleanup we don't try to free stack garbage.
+
 Sun Nov 26 19:31:18 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* preauth.c: Ultrix is broken.  Prototype obtain_enc_ts_padata()

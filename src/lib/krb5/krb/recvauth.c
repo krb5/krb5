@@ -56,7 +56,7 @@ krb5_recvauth(context, auth_context,
     krb5_error_code	  retval, problem;
     krb5_data		  inbuf;
     krb5_data		  outbuf;
-    krb5_rcache 	  rcache;
+    krb5_rcache 	  rcache = 0;
     krb5_octet		  response;
     krb5_data		  null_server;
 	
@@ -176,10 +176,6 @@ krb5_recvauth(context, auth_context,
 	memset((char *)&error, 0, sizeof(error));
 	krb5_us_timeofday(context, &error.stime, &error.susec);
 	error.server = server;
-
-
-
-
 
 	error.error = problem - ERROR_TABLE_BASE_krb5;
 	if (error.error > 127)
