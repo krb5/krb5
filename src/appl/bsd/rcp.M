@@ -32,6 +32,10 @@ rcp \- remote file copy
 \fIport\fP] [\fB\-N\fP]
 [\fB\-PN | \-PO\fP]
 .I file ... directory
+.sp
+.B rcp
+[\fB\-f | \-t\fP]
+.I ...
 .SH DESCRIPTION
 .B Rcp
 copies files between machines.  Each
@@ -113,6 +117,13 @@ on the remote machine.
 .B \-N
 use a network connection, even when copying files on the local machine
 (used for testing purposes).
+.TP
+.B \-f \-t
+These options are for internal use only.  They tell the
+remotely-running rcp process (started via the Kerberos remote shell
+daemon) which direction files are being sent.  These options should
+not be used by the user.  In particular, \fB-f\fP does \fBnot\fP mean
+that the user's Kerberos ticket should be forwarded!
 .PP
 .B Rcp
 handles third party copies, where neither source nor target files are on

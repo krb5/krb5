@@ -1,3 +1,7 @@
+2002-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* rcp.M: Document -f and -t options as internal use only.
+
 2002-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* kcmd.c: Revert 2002-02-10 changes except those related to
