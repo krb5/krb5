@@ -469,9 +469,10 @@ if test $ac_cv_c_compiler_gnu = yes ; then
 fi
 AC_SUBST(HAVE_GCC)
 # maybe add -Waggregate-return, or can we assume that actually works by now?
-# -Wno-comment is for SunOS system header <sys/stream.h>
+# -Wno-comment used to be used for SunOS system header <sys/stream.h>
+# -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
- -Wcast-align -Wconversion -Wshadow -Wno-comment"
+ -Wcast-align -Wconversion -Wshadow"
 if test "$GCC" = yes ; then
   if test "x$krb5_ac_cflags_set" = xset ; then
     AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)

@@ -1,3 +1,8 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (WITH_CC): Drop -Wno-comment, since we don't support
+	SunOS 4 any longer.
+
 2003-12-05  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add support for building an LD_PRELOAD object for
