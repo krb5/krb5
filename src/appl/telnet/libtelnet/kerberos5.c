@@ -103,11 +103,12 @@ static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 #define KRB_FORWARD_REJECT     	6       /* Forwarded credentials rejected */
 #endif	/* FORWARD */
 
+krb5_auth_context * auth_context;
+
 static	krb5_data auth;
 	/* telnetd gets session key from here */
 static	krb5_tkt_authent *authdat = NULL;
 /* telnet matches the AP_REQ and AP_REP with this */
-static	krb5_authenticator authenticator;
 
 /* some compilers can't hack void *, so we use the Kerberos krb5_pointer,
    which is either void * or char *, depending on the compiler. */
@@ -229,36 +230,33 @@ kerberos5_send(ap)
 	    ap_opts = AP_OPTS_MUTUAL_REQUIRED;
 	else
 	    ap_opts = 0;
-	    
-	r = krb5_mk_req_extended(telnet_context, ap_opts,
-				 (krb5_checksum *) NULL, 0,
-#ifdef	ENCRYPTION
-				 &newkey,
-#else	/* ENCRYPTION */
-				 0,
+
+#ifdef ENCRYPTION
+	ap_opts |= AP_OPTS_USE_SUBKEY;
 #endif	/* ENCRYPTION */
-				 &creds, &authenticator, &auth);
-	/* don't let the key get freed if we clean up the authenticator */
-	authenticator.subkey = 0;
+	    
+	r = krb5_mk_req_extended(telnet_context, &auth_context, ap_opts,
+				 NULL, new_creds, &auth);
 
 #ifdef	ENCRYPTION
-	if (newkey) {
-	    if (session_key.contents)
-		free(session_key.contents);
-	    /* keep the key in our private storage, but don't use it
-	       yet---see kerberos5_reply() below */
-	    if (newkey->keytype != KEYTYPE_DES) {
-		if (new_creds->keyblock.keytype == KEYTYPE_DES)
-		    /* use the session key in credentials instead */
-		    krb5_copy_keyblock_contents(telnet_context, new_creds,
-						&session_key);
-		else
-		    /* XXX ? */;
-	    } else {
-		krb5_copy_keyblock_contents(telnet_context,newkey,&session_key);
-	    }
-	    krb5_free_keyblock(telnet_context, newkey);
+	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, newkey);
+	if (session_key.contents)
+	    free(session_key.contents);
+	/*
+	 * keep the key in our private storage, but don't use it yet
+	 * ---see kerberos5_reply() below 
+	 * /
+	if (newkey->keytype != KEYTYPE_DES) {
+	    if (new_creds->keyblock.keytype == KEYTYPE_DES)
+		/* use the session key in credentials instead */
+		krb5_copy_keyblock_contents(telnet_context, new_creds, 
+					    &session_key);
+	    else
+	        /* XXX ? */;
+	} else {
+	    krb5_copy_keyblock_contents(telnet_context, newkey, &session_key);
 	}
+	krb5_free_keyblock(telnet_context, newkey);
 #endif	/* ENCRYPTION */
 	krb5_free_cred_contents(telnet_context, &creds);
 	krb5_free_creds(telnet_context, new_creds);
@@ -472,16 +470,10 @@ kerberos5_reply(ap, data, cnt)
 			return;
 		    }
 			
-		    if (r = krb5_rd_rep(telnet_context, &inbuf, &session_key, 
+		    if (r = krb5_rd_rep(telnet_context, auth_context, &inbuf,
 					&reply)) {
 			printf("[ Mutual authentication failed: %s ]\n",
 			       error_message(r));
-			auth_send_retry();
-			return;
-		    }
-		    if (reply->ctime != authenticator.ctime ||
-			reply->cusec != authenticator.cusec) {
-			printf("[ Mutual authentication failed (mismatched KRB_AP_REP) ]\n");
 			auth_send_retry();
 			return;
 		    }
