@@ -5,6 +5,7 @@ AC_CONFIG_FRAGMENTS(.. ../.. ../../.. ../../../.. ../../../../.. ../../../../../
 AC_SUBST(BUILDTOP)
 BUILDTOP=[$]ac_reltopdir
 AC_PROG_INSTALL
+AC_CHECK_PROG(RUNTEST,runtest,runtest)
 WITH_NETLIB
 KRB_INCLUDE
 WITH_KRB5ROOT

@@ -1,5 +1,12 @@
-RUNTEST = runtest
+RUNTEST = @RUNTEST@
 RUNTESTFLAGS =
 
-check::
+all install::
+
+check:: check-$(RUNTEST)
+
+check-::
+	@echo "Dejagnu is not installed on this system. No tests run."
+
+check-runtest::
 	$(RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
