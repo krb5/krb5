@@ -1,3 +1,8 @@
+Fri Jun  9 02:42:54 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* rd_cred.c (krb5_rd_cred_basic): fix typo (extra "context"
+		argument passed to krb5_xfree)
+
 Thu Jun  8 22:48:27 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rd_cred.c (krb5_rd_cred_basic): Fix problem where the ticket
