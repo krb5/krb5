@@ -53,6 +53,7 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "cc-int.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -1146,6 +1147,11 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
         krb5_free_cred_contents(context,&creds);
     } else {
         data->princ = 0;
+        krb5_xfree(data->cc_name);
+        krb5_xfree(lid->data);
+        krb5_xfree(lid);
+        CloseHandle(LogonHandle);
+        return KRB5_FCC_NOFILE;
     }
 
     /*
@@ -1235,14 +1241,14 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     if (!GetMSTGT(data->LogonHandle, data->PackageId, &lcursor->mstgt)) {
         free(lcursor);
         *cursor = 0;
-        KRB5_FCC_INTERNAL;
+        return KRB5_FCC_INTERNAL;
     }
 
     if ( !GetQueryTktCacheResponse(data->LogonHandle, data->PackageId, &lcursor->response) ) {
         LsaFreeReturnBuffer(lcursor->mstgt);
         free(lcursor);
         *cursor = 0;
-        KRB5_FCC_INTERNAL;
+        return KRB5_FCC_INTERNAL;
     }
     lcursor->index = 0;
     *cursor = (krb5_cc_cursor) lcursor;
