@@ -1,3 +1,37 @@
+2002-06-15  Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5.hin: Conditionalize KRB5_CALLCONV_WRONG separately
+	because gssapi.h defines KRB5_CALLCONV but doesn't need
+	KRB5_CALLCONV_WRONG
+	[pullup from 1-2-2-branch]
+
+2002-06-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.  Add KRB5_CALLCONV_WRONG.  Fix up various calling
+	conventions.  For Win32, add KT an CC accessors and default to not
+	PRIVATE.
+
+	* krb5.hin: Make krb5_build_principal_va() KRB5_CALLCONV.
+
+	[pullups from 1-2-2-branch]
+
+2002-06-15  Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5.hin: Conditionalized pragmas for Metrowerks
+
+	* krb5.hin: Updated Mac OS X headers to new framework layout
+
+	[pullups from 1-2-2-branch]
+
+2002-06-15  Miro Jurisic  <meeroh@mit.edu>
+
+	* krb5.hin: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+
+	[pullups from 1-2-2-branch]
+
 2002-06-14  Alexandra Ellwood <lxs@mit.edu>
 
 	* k5-int.h: Added krb5_kt_dfl_ops for KRB5_KEYTAB_ACCESSOR_FUNCTIONS

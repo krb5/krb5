@@ -57,15 +57,32 @@
 #define KRB5_GENERAL__
 
 #ifndef KRB5_DEPRECATED
-#define KRB5_DEPRECATED 1	/* Expose deprecated things for now. */
+#define KRB5_DEPRECATED 1 /* Expose deprecated things for now. */
 #endif
 
-#if defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <TargetConditionals.h>
+    #if TARGET_RT_MAC_CFM
+        #error "Use KfM 4.0 SDK headers for CFM compilation."
+    #endif
+
+	#ifndef KRB5_PRIVATE /* Allow e.g. build system to override */
+		#define KRB5_PRIVATE 0
+	#endif
+#else
+#if defined(_WIN32)
+	#ifndef KRB5_PRIVATE
+		#define KRB5_PRIVATE 0
+	#endif
+#else
+	#ifndef KRB5_PRIVATE
+		#define KRB5_PRIVATE 1
+	#endif
 #endif
+#endif
+
+#if defined(_MSDOS) || defined(_WIN32)
+#include <win-mac.h>
 #endif
 
 #ifndef KRB5_CONFIG__
@@ -75,6 +92,10 @@
 #endif /* !KRB5_CALLCONV */
 #endif /* !KRB5_CONFIG__ */
 
+#ifndef KRB5_CALLCONV_WRONG
+#define KRB5_CALLCONV_WRONG
+#endif
+
 #ifndef THREEPARAMOPEN
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
 #endif
@@ -83,6 +104,12 @@
 
 #include <stdlib.h>
 #include <limits.h>		/* for *_MAX */
+
+#if TARGET_OS_MAC
+    #include <Kerberos/profile.h>
+#else
+    #include <profile.h>
+#endif
 
 #ifndef KRB5INT_BEGIN_DECLS
 #if defined(__cplusplus)
@@ -95,6 +122,14 @@
 #endif
 
 KRB5INT_BEGIN_DECLS
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
+#endif
 
 /* from profile.h */
 struct _profile_t;
@@ -1492,11 +1527,11 @@ krb5_error_code KRB5_CALLCONV krb5_unparse_name_ext
 krb5_error_code KRB5_CALLCONV krb5_set_principal_realm
 	(krb5_context, krb5_principal, const char *);
 
-krb5_boolean krb5_address_search
+krb5_boolean KRB5_CALLCONV_WRONG krb5_address_search
 	(krb5_context,
 		const krb5_address *,
 		krb5_address * const *);
-krb5_boolean krb5_address_compare
+krb5_boolean KRB5_CALLCONV_WRONG krb5_address_compare
 	(krb5_context,
 		const krb5_address *,
 		const krb5_address *);
@@ -1588,7 +1623,7 @@ krb5_error_code KRB5_CALLCONV_C krb5_build_principal
 	(krb5_context, krb5_principal *, unsigned int, const char *, ...);
 #ifdef va_start
 /* XXX depending on varargs include file defining va_start... */
-krb5_error_code krb5_build_principal_va
+krb5_error_code KRB5_CALLCONV krb5_build_principal_va
 	(krb5_context,
 		krb5_principal, unsigned int, const char *, va_list);
 #endif
@@ -2055,7 +2090,7 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_getflags
 		krb5_auth_context,
 		krb5_int32 *);
 
-krb5_error_code krb5_auth_con_setaddrs
+krb5_error_code KRB5_CALLCONV_WRONG krb5_auth_con_setaddrs
 	(krb5_context,
 		krb5_auth_context,
 		krb5_address *,
@@ -2133,7 +2168,7 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_setrcache
 		krb5_auth_context,
 		krb5_rcache);
 
-krb5_error_code krb5_auth_con_getrcache
+krb5_error_code KRB5_CALLCONV_WRONG krb5_auth_con_getrcache
 	(krb5_context,
 		krb5_auth_context,
 		krb5_rcache *);
@@ -2483,12 +2518,15 @@ typedef krb5_int32 krb5_prompt_type;
 krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	(krb5_context context);
 
-KRB5INT_END_DECLS
-
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+	#pragma options align=reset
 #endif
+
+KRB5INT_END_DECLS
 
 /* Don't use this!  We're going to phase it out.  It's just here to keep
    applications from breaking right away.  */
