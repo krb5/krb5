@@ -1,3 +1,11 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* des3.c (validate_and_schedule): Split out from old
+	k5_des3_docrypt.
+	(k5_des3_encrypt, k5_des3_decrypt): Call it, and
+	krb5int_des3_cbc_encrypt or _decrypt, instead of
+	k5_des3_docrypt.  Zap key schedules before returning.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
