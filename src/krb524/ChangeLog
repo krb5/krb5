@@ -1,7 +1,10 @@
 2002-06-04  Ken Raeburn  <raeburn@mit.edu>
 
-	* sendmsg.c: Include fake-addrinfo.h.
-	(krb524_sendto_kdc): Update for addrlist changes.
+	* sendmsg.c: Include fake-addrinfo.h.  Don't include
+	sys/select.h.
+	(krb524_sendto_kdc): Update for addrlist, locate_server,
+	locate_kdc changes.  Rip out network code and call
+	internals.sendto_udp instead.
 
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 

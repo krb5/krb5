@@ -1,5 +1,11 @@
 2002-06-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-int.h (krb5int_sendto_udp): Declare.
+	(krb5_sendto_kdc): Update declaration.
+	(KRB5INT_ACCESS_STRUCT_VERSION): Bump.
+	(struct _krb5int_access): Update locate_kdc interface; add
+	sendto_udp.
+
 	* fake-addrinfo.h [COPY_FIRST_CANONNAME]: Include string.h.
 
 	* k5-int.h (struct addrlist): Field "addrs" now points to

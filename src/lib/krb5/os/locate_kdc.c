@@ -291,7 +291,8 @@ egress:
 static krb5_error_code
 krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 		       const char * name, struct addrlist *addrlist,
-		       int get_masters, int udpport, int sec_udpport)
+		       int get_masters, int socktype,
+		       int udpport, int sec_udpport)
 {
     const char	*realm_srv_names[4];
     char **masterlist, **hostlist, *host, *port, *cp;
@@ -431,7 +432,15 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 	    p2 = sec_udpport;
 	}
 
-	code = add_host_to_list (addrlist, hostlist[i], p1, p2, SOCK_DGRAM);
+	if (socktype != 0)
+	    code = add_host_to_list (addrlist, hostlist[i], p1, p2, socktype);
+	else {
+	    code = add_host_to_list (addrlist, hostlist[i], p1, p2,
+				     SOCK_DGRAM);
+	    if (code == 0)
+		code = add_host_to_list (addrlist, hostlist[i], p1, p2,
+					 SOCK_STREAM);
+	}
 	if (code) {
 #ifdef TEST
 	    fprintf (stderr, "error %d returned from add_host_to_list\n", code);
@@ -466,7 +475,7 @@ krb5_locate_srv_conf(context, realm, name, al, get_masters,
     krb5_error_code ret;
 
     ret = krb5_locate_srv_conf_1 (context, realm, name, al,
-				  get_masters, udpport, sec_udpport);
+				  get_masters, 0, udpport, sec_udpport);
     if (ret)
 	return ret;
     if (al->naddrs == 0)	/* Couldn't resolve any KDC names */
@@ -740,7 +749,7 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 		       struct addrlist *addrlist,
 		       int get_masters,
 		       const char *profname, const char *dnsname,
-		       int is_stream,
+		       int socktype,
 		       /* network order port numbers! */
 		       int dflport1, int dflport2)
 {
@@ -754,33 +763,27 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
      */
 
     code = krb5_locate_srv_conf_1(context, realm, profname, &al, get_masters,
-				  dflport1, dflport2);
+				  socktype, dflport1, dflport2);
 
 #ifdef KRB5_DNS_LOOKUP
     if (code && dnsname != 0) {
 	int use_dns = _krb5_use_dns_kdc(context);
 	if (use_dns) {
-	    /* Values of is_stream:
-	       0: udp only
-	       1: tcp only
-	       2: udp or tcp
-	       No other values currently allowed.  */
 	    code = 0;
-#ifdef TEST
-	    fprintf(stderr, "is_stream = %d\n", is_stream);
-#endif
-	    if (is_stream != 1) {
+	    if (socktype == SOCK_DGRAM || socktype == 0) {
 		code = krb5_locate_srv_dns_1(realm, dnsname, "_udp", &al);
 #ifdef TEST
 		if (code)
-		    fprintf(stderr, "dns lookup returned error %d\n", code);
+		    fprintf(stderr, "dns udp lookup returned error %d\n",
+			    code);
 #endif
 	    }
-	    if (is_stream != 0 && code == 0) {
+	    if ((socktype == SOCK_STREAM || socktype == 0) && code == 0) {
 		code = krb5_locate_srv_dns_1(realm, dnsname, "_tcp", &al);
 #ifdef TEST
 		if (code)
-		    fprintf(stderr, "dns lookup returned error %d\n", code);
+		    fprintf(stderr, "dns tcp lookup returned error %d\n",
+			    code);
 #endif
 	    }
 	}
@@ -811,7 +814,7 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 krb5_error_code
 krb5_locate_kdc(krb5_context context, const krb5_data *realm,
 		struct addrlist *addrlist,
-		int get_masters)
+		int get_masters, int socktype)
 {
     int udpport, sec_udpport;
 
@@ -827,5 +830,5 @@ krb5_locate_kdc(krb5_context context, const krb5_data *realm,
 				  (get_masters
 				   ? "_kerberos-master"
 				   : "_kerberos"),
-				  0, udpport, sec_udpport);
+				  socktype, udpport, sec_udpport);
 }

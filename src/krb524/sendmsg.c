@@ -39,10 +39,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _AIX
-#include <sys/select.h>
-#endif
-
 #include <krb.h>
 #include "krb524.h"
 
@@ -68,15 +64,10 @@ krb524_sendto_kdc (context, message, realm, reply)
     const krb5_data * realm;
     krb5_data * reply;
 {
-    register int timeout, host, i;
+    int i;
     struct addrlist al = ADDRLIST_INIT;
     struct servent *serv;
-    int sent, nready;
     krb5_error_code retval;
-    SOCKET *socklist;
-    fd_set readable;
-    struct timeval waitlen;
-    int cc;
     krb5int_access internals;
     int port;
 
@@ -92,16 +83,17 @@ krb524_sendto_kdc (context, message, realm, reply)
 
     retval = internals.krb5_locate_server(context, realm, &al, 0,
 					  "krb524_server", "_krb524",
-					  0, port, 0);
+					  SOCK_DGRAM, port, 0);
     if (retval == KRB5_REALM_CANT_RESOLVE || retval == KRB5_REALM_UNKNOWN) {
 	/* Fallback heuristic: Assume krb524 port on every KDC might
 	   work.  */
-	retval = internals.krb5_locate_kdc(context, realm, &al, 0);
+	retval = internals.krb5_locate_kdc(context, realm, &al, 0, SOCK_DGRAM);
 	/*
 	 * Bash the ports numbers.
 	 */
 	if (retval == 0)
 	    for (i = 0; i < al.naddrs; i++) {
+		al.addrs[i]->ai_socktype = SOCK_DGRAM;
 		if (al.addrs[i]->ai_family == AF_INET)
 		    sa2sin (al.addrs[i]->ai_addr)->sin_port = port;
 	    }
@@ -111,147 +103,7 @@ krb524_sendto_kdc (context, message, realm, reply)
     if (al.naddrs == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    socklist = (SOCKET *)malloc(al.naddrs * sizeof(SOCKET));
-    if (socklist == NULL) {
-	internals.free_addrlist (&al);
-	return ENOMEM;
-    }
-    for (i = 0; i < al.naddrs; i++)
-	socklist[i] = INVALID_SOCKET;
-
-    if (!(reply->data = malloc(internals.krb5_max_dgram_size))) {
-	internals.free_addrlist (&al);
-	free(socklist);
-	return ENOMEM;
-    }
-    reply->length = internals.krb5_max_dgram_size;
-
-#if 0
-    /*
-     * Not needed for Windows, since it's done by the DLL
-     * initialization. XXX What about for the Macintosh?
-     *
-     * See below for commented out SOCKET_CLEANUP()
-     */
-    if (SOCKET_INITIALIZE()) {  /* PC needs this for some tcp/ip stacks */
-	free(addr);
-	free(socklist);
-	free(reply->data);
-        return SOCKET_ERRNO;
-    }
-#endif
-
-    /*
-     * do exponential backoff.
-     */
-
-    for (timeout = internals.krb5_skdc_timeout_1;
-	 timeout < internals.krb5_max_skdc_timeout;
-	 timeout <<= internals.krb5_skdc_timeout_shift) {
-	sent = 0;
-	for (host = 0; host < al.naddrs; host++) {
-	    /* send to the host, wait timeout seconds for a response,
-	       then move on. */
-	    /* cache some sockets for each host */
-	    if (socklist[host] == INVALID_SOCKET) {
-		/* XXX 4.2/4.3BSD has PF_xxx = AF_xxx, so the socket
-		   creation here will work properly... */
-		/*
-		 * From socket(2):
-		 *
-		 * The protocol specifies a particular protocol to be
-		 * used with the socket.  Normally only a single
-		 * protocol exists to support a particular socket type
-		 * within a given protocol family.
-		 */
-		socklist[host] = socket(al.addrs[host]->ai_family, SOCK_DGRAM,
-					0);
-		if (socklist[host] == INVALID_SOCKET)
-		    continue;		/* try other hosts */
-		/* have a socket to send/recv from */
-		/* On BSD systems, a connected UDP socket will get connection
-		   refused and net unreachable errors while an unconnected
-		   socket will time out, so use connect, send, recv instead of
-		   sendto, recvfrom.  The connect here may return an error if
-		   the destination host is known to be unreachable. */
-		if (connect(socklist[host], al.addrs[host]->ai_addr,
-			    al.addrs[host]->ai_addrlen) == SOCKET_ERROR)
-		  continue;
-	    }
-	    if (send(socklist[host], message->data, (int) message->length, 0)
-		!= message->length)
-	      continue;
-	retry:
-	    waitlen.tv_usec = 0;
-	    waitlen.tv_sec = timeout;
-	    FD_ZERO(&readable);
-	    FD_SET(socklist[host], &readable);
-	    nready = select(SOCKET_NFDS(socklist[host]),
-			    &readable, 0, 0, &waitlen);
-	    if (nready) {
-		if (nready == SOCKET_ERROR) {
-		    if (SOCKET_ERRNO == SOCKET_EINTR)
-			goto retry;
-		    retval = SOCKET_ERRNO;
-		    goto out;
-		}
-		if ((cc = recv(socklist[host],
-			       reply->data, (int) reply->length, 0)) == SOCKET_ERROR)
-		  {
-		    /* man page says error could be:
-		       EBADF: won't happen
-		       ENOTSOCK: it's a socket.
-		       EWOULDBLOCK: not marked non-blocking, and we selected.
-		       EINTR: could happen
-		       EFAULT: we allocated the reply packet.
-
-		       In addition, net related errors like ECONNREFUSED
-		       are possble (but undocumented).  Assume anything
-		       other than EINTR is a permanent error for the
-		       server (i.e. don't set sent = 1).
-		       */
-
-		    if (SOCKET_ERRNO == SOCKET_EINTR)
-		      sent = 1;
-		    continue;
-		  }
-
-		/* We might consider here verifying that the reply
-		   came from one of the KDC's listed for that address type,
-		   but that check can be fouled by some implementations of
-		   some network types which might show a loopback return
-		   address, for example, if the KDC is on the same host
-		   as the client. */
-
-		reply->length = cc;
-		retval = 0;
-		goto out;
-	    } else if (nready == 0) {
-		/* timeout */
-	        sent = 1;
-	    }
-	    /* not ready, go on to next server */
-	}
-	if (!sent) {
-	    /* never were able to send to any servers; give up */
-	    retval = KRB5_KDC_UNREACH;
-	    break;
-	}
-    }
-    retval = KRB5_KDC_UNREACH;
- out:
-    for (i = 0; i < al.naddrs; i++)
-	if (socklist[i] != INVALID_SOCKET)
-	    (void) closesocket (socklist[i]);
-#if 0
-    SOCKET_CLEANUP();                           /* Done with sockets for now */
-#endif
+    retval = internals.sendto_udp (context, message, &al, reply);
     internals.free_addrlist (&al);
-    free(socklist);
-    if (retval) {
-	free(reply->data);
-	reply->data = 0;
-	reply->length = 0;
-    }
     return retval;
 }

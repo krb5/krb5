@@ -464,11 +464,15 @@ extern char *strdup (const char *);
 
 #include <stdio.h>
 
+struct addrlist;
+
 /* libos.spec */
 krb5_error_code krb5_lock_file (krb5_context, int, int);
 krb5_error_code krb5_unlock_file (krb5_context, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
 				 const krb5_data *, krb5_data *, int);
+krb5_error_code krb5int_sendto_udp (krb5_context, const krb5_data *,
+				    const struct addrlist *, krb5_data *);
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst (krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file (krb5_context, const char * pathname);
@@ -1543,11 +1547,11 @@ void krb5int_set_prompt_types
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 4
+#define KRB5INT_ACCESS_STRUCT_VERSION 5
 
 typedef struct _krb5int_access {
     krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
-					struct addrlist *, int);
+					struct addrlist *, int, int);
     krb5_error_code (*krb5_locate_server) (krb5_context, const krb5_data *,
 					   struct addrlist *, int,
 					   const char *, const char *,
@@ -1557,13 +1561,15 @@ typedef struct _krb5int_access {
     unsigned int krb5_skdc_timeout_shift;
     unsigned int krb5_skdc_timeout_1;
     unsigned int krb5_max_dgram_size;
-  const  struct krb5_hash_provider *md5_hash_provider;
-  const struct krb5_enc_provider *arcfour_enc_provider;
-  krb5_error_code (* krb5_hmac)
-  (const struct krb5_hash_provider *hash,
-   const krb5_keyblock *key, unsigned int icount,
-   const krb5_data *input, krb5_data *output);
-  } krb5int_access;
+    const struct krb5_hash_provider *md5_hash_provider;
+    const struct krb5_enc_provider *arcfour_enc_provider;
+    krb5_error_code (* krb5_hmac) (const struct krb5_hash_provider *hash,
+				   const krb5_keyblock *key,
+				   unsigned int icount, const krb5_data *input,
+				   krb5_data *output);
+    krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
+				   const struct addrlist *, krb5_data *reply);
+} krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \
     (((krb5_int32)((sizeof(krb5int_access) & 0xFFFF) | \

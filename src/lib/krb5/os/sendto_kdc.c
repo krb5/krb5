@@ -63,6 +63,26 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
     krb5_data * reply;
     int use_master;
 {
+    krb5_error_code retval;
+    struct addrlist addrs;
+
+    /*
+     * find KDC location(s) for realm
+     */
+
+    if ((retval = krb5_locate_kdc(context, realm, &addrs, use_master, SOCK_DGRAM)))
+	return retval;
+    if (addrs.naddrs == 0)
+	return (use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
+    retval = krb5int_sendto_udp (context, message, &addrs, reply);
+    krb5int_free_addrlist (&addrs);
+    return retval;
+}
+
+krb5_error_code
+krb5int_sendto_udp (krb5_context context, const krb5_data *message,
+		    const struct addrlist *addrs, krb5_data *reply)
+{
     int timeout, host, i;
     int sent, nready;
     krb5_error_code retval;
@@ -70,29 +90,15 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
     fd_set readable;
     struct timeval waitlen;
     int cc;
-    struct addrlist addrs;
 
-    /*
-     * find KDC location(s) for realm
-     */
-
-    if ((retval = krb5_locate_kdc(context, realm, &addrs, use_master)))
-	return retval;
-    if (addrs.naddrs == 0)
-	return (use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
-
-    socklist = (SOCKET *)malloc(addrs.naddrs * sizeof(SOCKET));
+    socklist = (SOCKET *)malloc(addrs->naddrs * sizeof(SOCKET));
     if (socklist == NULL) {
-	krb5int_free_addrlist (&addrs);
 	return ENOMEM;
     }
-    for (i = 0; i < addrs.naddrs; i++)
+    for (i = 0; i < addrs->naddrs; i++)
 	socklist[i] = INVALID_SOCKET;
 
     if (!(reply->data = malloc(krb5_max_dgram_size))) {
-	for (i = 0; i < addrs.naddrs; i++)
-	    krb5_xfree (addrs.addrs[i]);
-	krb5int_free_addrlist (&addrs);
 	krb5_xfree(socklist);
 	return ENOMEM;
     }
@@ -106,7 +112,6 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
      * See below for commented out SOCKET_CLEANUP()
      */
     if (SOCKET_INITIALIZE()) {  /* PC needs this for some tcp/ip stacks */
-	krb5int_free_addrlist (&addrs);
 	krb5_xfree(socklist);
 	free(reply->data);
         return SOCKET_ERRNO;
@@ -120,8 +125,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
     for (timeout = krb5_skdc_timeout_1; timeout < krb5_max_skdc_timeout;
 	 timeout <<= krb5_skdc_timeout_shift) {
 	sent = 0;
-	for (host = 0; host < addrs.naddrs; host++) {
-	    if (addrs.addrs[host]->ai_socktype != SOCK_DGRAM)
+	for (host = 0; host < addrs->naddrs; host++) {
+	    if (addrs->addrs[host]->ai_socktype != SOCK_DGRAM)
 		continue;
 	    /* Send to the host, wait timeout seconds for a response,
 	       then move on. */
@@ -139,22 +144,22 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		 */
 #ifdef DEBUG
 		fprintf (stderr, "getting dgram socket in family %d...",
-			 addrs.addrs[host]->ai_family);
+			 addrs->addrs[host]->ai_family);
 #endif
-		socklist[host] = socket(addrs.addrs[host]->ai_family,
+		socklist[host] = socket(addrs->addrs[host]->ai_family,
 					SOCK_DGRAM, 0);
 		if (socklist[host] == INVALID_SOCKET) {
 #ifdef DEBUG
 		    perror ("socket");
-		    fprintf (stderr, "af was %d\n", addrs.addrs[host]->ai_family);
+		    fprintf (stderr, "af was %d\n", addrs->addrs[host]->ai_family);
 #endif
 		    continue;		/* try other hosts */
 		}
 #ifdef DEBUG
 		{
 		    char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV];
-		    if (0 != getnameinfo (addrs.addrs[host]->ai_addr,
-					  addrs.addrs[host]->ai_addrlen,
+		    if (0 != getnameinfo (addrs->addrs[host]->ai_addr,
+					  addrs->addrs[host]->ai_addrlen,
 					  addrbuf, sizeof (addrbuf),
 					  portbuf, sizeof (portbuf),
 					  NI_NUMERICHOST | NI_NUMERICSERV))
@@ -169,8 +174,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		   socket will time out, so use connect, send, recv instead of
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
-		if (connect(socklist[host], addrs.addrs[host]->ai_addr,
-			    addrs.addrs[host]->ai_addrlen) == SOCKET_ERROR) {
+		if (connect(socklist[host], addrs->addrs[host]->ai_addr,
+			    addrs->addrs[host]->ai_addrlen) == SOCKET_ERROR) {
 #ifdef DEBUG
 		    perror ("connect");
 #endif
@@ -253,13 +258,12 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
     }
     retval = KRB5_KDC_UNREACH;
  out:
-    for (i = 0; i < addrs.naddrs; i++)
+    for (i = 0; i < addrs->naddrs; i++)
 	if (socklist[i] != INVALID_SOCKET)
 	    (void) closesocket (socklist[i]);
 #if 0
     SOCKET_CLEANUP();                           /* Done with sockets for now */
 #endif
-    krb5int_free_addrlist (&addrs);
     krb5_xfree(socklist);
     if (retval) {
 	free(reply->data);

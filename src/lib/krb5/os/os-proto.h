@@ -30,10 +30,9 @@
 #ifndef KRB5_LIBOS_INT_PROTO__
 #define KRB5_LIBOS_INT_PROTO__
 
-#ifdef SOCK_DGRAM			/* XXX hack... */
+struct addrlist;
 krb5_error_code krb5_locate_kdc
-    (krb5_context, const krb5_data *, struct addrlist *, int);
-#endif
+    (krb5_context, const krb5_data *, struct addrlist *, int, int);
 
 #ifdef HAVE_NETINET_IN_H
 krb5_error_code krb5_unpack_full_ipaddr

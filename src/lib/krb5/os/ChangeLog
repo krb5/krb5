@@ -1,5 +1,18 @@
 2002-06-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* locate_kdc.c (krb5_locate_srv_conf_1): New argument socktype
+	indicates what type of addrinfo entries to add.
+	(krb5int_locate_server): Change argument is_stream to socktype.
+	Pass the value to krb5_locate_srv_conf_1.
+	(krb5_locate_kdc): New argument socktype.
+	* sendto_kdc.c (krb5int_sendto_udp): New function, containing most
+	of the network code from krb5_sendto_kdc.
+	(krb5_sendto_kdc): Call it.
+	* accessor.c (krb5int_accessor): Set new sendto_udp field.
+	* os-proto.h (krb5_locate_kdc): Update prototype.  Add forward
+	declaration for struct addrlist.
+	* t_locate_kdc.c (main): Update call to krb5_locate_kdc.
+
 	* locate_kdc.c: Include fake-addrinfo.h before k5-int.h.
 	(grow_list, krb5int_free_addrlist)
 	(add_addrinfo_to_list): Incorporate list-updating code from
