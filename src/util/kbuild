@@ -48,11 +48,15 @@ esac
 conflib=". $pts/kfrags"
 
 THISCONF=./kbuild.temp
+RECONF=./kbuild.reconf
 rm -f $THISCONF
 BUILD_PATH=./build-path
 rm -rf $BUILD_PATH
 
+echo '#' $0 $* > $THISCONF
 
+echo  $0 $* > $RECONF
+chmod +x $RECONF
 
 for arg
 do

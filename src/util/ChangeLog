@@ -1,3 +1,7 @@
+Fri Sep 30 20:22:53 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kbuild: log arguments to THISCONF, RECONF files.
+
 Fri Sep 30 19:28:24 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* kbuild: set SRCDIR by default from program name.
