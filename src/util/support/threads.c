@@ -495,4 +495,21 @@ krb5int_mutex_report_stats(k5_mutex_t *m)
 	    sd_hold);
   }
 }
+#elif defined _WIN32
+/* On Windows, everything defined in the export list must be defined.
+   The UNIX systems where we're using the export list don't seem to
+   care.  */
+void
+krb5int_mutex_lock_update_stats(k5_debug_mutex_stats *m,
+				k5_mutex_stats_tmp startwait)
+{
+}
+void
+krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m)
+{
+}
+void
+krb5int_mutex_report_stats(k5_mutex_t *m)
+{
+}
 #endif

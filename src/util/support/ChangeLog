@@ -1,3 +1,10 @@
+2005-01-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (krb5int_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats)
+	[_WIN32 && !DEBUG_THREADS_STATS]: Define empty versions for
+	Windows.
+
 2004-12-15  Jeffrey Altman <jaltman@mit.edu>
 
         * Makefile.in: rename krb5support_32.dll to k5sprt32.dll
