@@ -46,7 +46,7 @@ OSErr		err;
 	theCatInfo.dirInfo.ioVRefNum		= vrefnum;
 	theCatInfo.dirInfo.ioFDirIndex		= -1;
 	theCatInfo.dirInfo.ioDrDirID		= dirid;
-	err = PBGetCatInfo(&theCatInfo, FALSE);
+	err = PBGetCatInfoSync(&theCatInfo);
 
 	// If I'm looking at the root directory and I've tried going up once
 	// start returning down the call chain
