@@ -55,6 +55,8 @@ OBJS=	addr_comp.o	\
 	rd_req_sim.o	\
 	rd_req_dec.o	\
 	rd_safe.o	\
+	recvauth.o	\
+	sendauth.o	\
 	send_tgs.o	\
 	srv_rcache.o	\
 	tgtname.o	\
@@ -106,6 +108,8 @@ SRCS=	addr_comp.c	\
 	rd_req_sim.c	\
 	rd_req_dec.c	\
 	rd_safe.c	\
+	recvauth.o	\
+	sendauth.o	\
 	send_tgs.c	\
 	srv_rcache.c	\
 	tgtname.c	\
