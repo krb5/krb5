@@ -294,3 +294,7 @@ Fixed gssapi_generic.h Mac OS conditionals and synced with 1.2.3b2
 from tag Mac_GSSKerberos5_3_2b4
 Removed the broken microsecond timing code
 Fixed prebinding on Mac OS X
+
+3.2b5
+from tag Mac_GSSKerberos5_3_2b5
+Removed version strings from the Mac OS X project
