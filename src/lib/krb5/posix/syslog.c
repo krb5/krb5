@@ -73,6 +73,7 @@ syslog(pri, fmt, va_alist)
 #endif
 {
     va_list pvar;
+    void vsyslog();
 #ifdef __STDC__
     va_start(pvar, fmt);
 #else
@@ -94,6 +95,7 @@ vsyslog(pri, fmt, ap)
 	time_t now, time();
 	int pid, saved_errno;
 	char tbuf[2048], fmt_cpy[1024], *ctime();
+	void openlog();
 
 	saved_errno = errno;
 
