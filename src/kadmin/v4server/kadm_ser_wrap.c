@@ -39,11 +39,13 @@ kadm_ser_init
 set up the server_parm structure
 */
 #ifdef KADM5
+int
 kadm_ser_init(inter, realm, params)
     int inter;			/* interactive or from file */
     char realm[];
     kadm5_config_params *params;
 #else
+int
 kadm_ser_init(inter, realm)
     int inter;			/* interactive or from file */
     char realm[];
@@ -198,7 +200,7 @@ int *dat_len;
 #ifdef NOENCRYPTION
     ncksum = 0;
 #else
-    ncksum = quad_cksum(in_st, (krb5_ui_4 *)0, (long) r_len, 0, ad.session);
+    ncksum = quad_cksum(in_st, (krb5_ui_4 *)0, (long) r_len, 0, &ad.session);
 #endif
     if (ncksum!=ad.checksum) {		/* yow, are we correct yet */
 	clr_cli_secrets();

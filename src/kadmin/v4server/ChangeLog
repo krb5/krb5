@@ -1,3 +1,8 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_ser_wrap.c: Argument to quad_cksum is C_Block * - not C_Block.
+	(kadm_ser_init): Declare as returning int.
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* acl_files.c, admin_server.c, kadm_funcs.c, kadm_ser_wrap.c:
