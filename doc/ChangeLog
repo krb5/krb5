@@ -1,3 +1,7 @@
+
+Fri Apr 28 16:59:41 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add new kadmin.protocol.
+
 Wed Feb 22 18:56:06 1995  John Gilmore  (gnu at toad.com)
 
 	* install.texi:  Minor corrections.  Add info about bare source
