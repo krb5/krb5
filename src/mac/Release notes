@@ -281,3 +281,7 @@ updated for Mac OS X 10.1
 3.2b1
 from tag Mac_GSSKerberos5_3_2b1
 synced with 1.2.3
+
+3.2b2
+from tag Mac_GSSKerberos5_3_2b2
+Separated private and public krb5 APIs
