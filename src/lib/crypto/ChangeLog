@@ -1,3 +1,9 @@
+2003-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (OBJFILELIST, OBJFILEDEP) [##DOS]: Add aes.lst.
+	(all-windows, clean-windows, check-windows): Process aes
+	directory.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* etypes.c: Include aes_s2k.h.
