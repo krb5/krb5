@@ -1,3 +1,8 @@
+2004-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use AC_MSG_NOTICE for krb4 messages instead of
+	AC_MSG_RESULT, because there's no corresponding AC_MSG_CHECKING.
+
 2004-09-21  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Remove KRB5_AC_NEED_BIND_8_COMPAT.
