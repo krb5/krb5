@@ -5,6 +5,10 @@ SED = sed
 ##DOSLIBNAME=comerr.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 LIBDONE=DONE
 LIB_SUBDIRS=.
 INSTALLFILE = cp
@@ -53,8 +57,10 @@ com_err.o: com_err.c
 # real entries...
 #
 
-all-unix:: compile_et includes
+all-unix:: compile_et includes shared
 all-mac:: libcom_err.a
+shared:
+	 mkdir shared
 
 # The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )
