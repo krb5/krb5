@@ -1,3 +1,18 @@
+2004-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h: Include k5-thread.h.  Don't include sys/types.h and
+	pthread.h.
+	(SHARE_TREE_DATA): Always define.
+	(USE_PTHREADS): Don't define.
+	(prof_mutex_lock, prof_mutex_unlock): Deleted.
+	(struct global_shared_profile_data): Change mutex to use
+	k5_mutex_t instead of pthread_mutex_t.
+	(g_shared_trees_mutex): Don't conditionalize on USE_PTHREADS.
+	* prof_file.c (krb5int_profile_shared_data): Initialize mutex.
+	(profile_open_file, profile_dereference_data): Use new mutex
+	macros.  Check return status when locking.  Fix a potential memory
+	leak in an error case.
+
 2004-03-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* prof_get.c (profile_parse_boolean): Declare first argument as

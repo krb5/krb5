@@ -29,7 +29,8 @@
 
 #ifdef SHARE_TREE_DATA
 struct global_shared_profile_data krb5int_profile_shared_data = {
-    0
+    0,
+    K5_MUTEX_INITIALIZER
 };
 #endif
 
@@ -128,7 +129,12 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	    memcpy(expanded_filename, filespec, len);
 
 #ifdef SHARE_TREE_DATA
-	(void) prof_mutex_lock(&g_shared_trees_mutex);
+	retval = k5_mutex_lock(&g_shared_trees_mutex);
+	if (retval) {
+	    free(expanded_filename);
+	    free(prf);
+	    return retval;
+	}
 	for (data = g_shared_trees; data; data = data->next) {
 	    if (!strcmp(data->filespec, expanded_filename)
 		/* Check that current uid has read access.  */
@@ -138,16 +144,17 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	if (data) {
 	    retval = profile_update_file_data(data);
 	    data->refcount++;
-	    (void) prof_mutex_unlock(&g_shared_trees_mutex);
+	    (void) k5_mutex_unlock(&g_shared_trees_mutex);
 	    free(expanded_filename);
 	    prf->data = data;
 	    *ret_prof = prf;
 	    return retval;
 	}
-	(void) prof_mutex_unlock(&g_shared_trees_mutex);
+	(void) k5_mutex_unlock(&g_shared_trees_mutex);
 	data = malloc(sizeof(struct _prf_data_t));
 	if (data == NULL) {
 	    free(prf);
+	    free(expanded_filename);
 	    return ENOMEM;
 	}
 	memset(data, 0, sizeof(*data));
@@ -168,11 +175,15 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	}
 
 #ifdef SHARE_TREE_DATA
+	retval = k5_mutex_lock(&g_shared_trees_mutex);
+	if (retval) {
+	    profile_close_file(prf);
+	    return retval;
+	}
 	data->flags |= PROFILE_FILE_SHARED;
-	(void) prof_mutex_lock(&g_shared_trees_mutex);
 	data->next = g_shared_trees;
 	g_shared_trees = data;
-	(void) prof_mutex_unlock(&g_shared_trees_mutex);
+	(void) k5_mutex_unlock(&g_shared_trees_mutex);
 #endif
 
 	*ret_prof = prf;
@@ -330,11 +341,14 @@ errout:
 void profile_dereference_data(prf_data_t data)
 {
 #ifdef SHARE_TREE_DATA
-    (void) prof_mutex_lock(&g_shared_trees_mutex);
+    int err;
+    err = k5_mutex_lock(&g_shared_trees_mutex);
+    if (err)
+	return;
     data->refcount--;
     if (data->refcount == 0)
 	profile_free_file_data(data);
-    (void) prof_mutex_unlock(&g_shared_trees_mutex);
+    (void) k5_mutex_unlock(&g_shared_trees_mutex);
 #else
     profile_free_file_data(data);
 #endif
