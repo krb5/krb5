@@ -19,7 +19,7 @@
 
 /* libkrb.spec */
 krb5_error_code krb5_encode_kdc_rep
-	PROTOTYPE((int,			/* promotion rules require this */
+	PROTOTYPE((krb5_msgtype,
 		   krb5_kdc_rep *,
 		   krb5_enc_kdc_rep_part *,
 		   krb5_keyblock *,
@@ -27,12 +27,12 @@ krb5_error_code krb5_encode_kdc_rep
 krb5_error_code krb5_decode_kdc_rep
 	PROTOTYPE((krb5_data *,
 		   krb5_keyblock *,
-		   int,			/* promotion rules require this */
+		   krb5_enctype,
 		   krb5_kdc_rep ** ));
 krb5_error_code krb5_kdc_rep_decrypt_proc
-	PROTOTYPE((krb5_kdc_rep *,
-		   krb5_keyblock *,
-		   krb5_pointer ));
+	PROTOTYPE((krb5_keyblock *,
+		   krb5_pointer,
+		   krb5_kdc_rep * ));
 krb5_error_code krb5_encode_ticket
 	PROTOTYPE((krb5_ticket *,
 		   krb5_data ** ));
@@ -118,7 +118,7 @@ krb5_error_code krb5_rd_req
 		   krb5_pointer,
 		   krb5_error_code (* )(krb5_pointer,
 					krb5_principal,
-					unsigned, /* promotion of kvno */
+					krb5_kvno,
 					krb5_keyblock ** ),
 		   krb5_pointer,
 		   krb5_rcache,
@@ -130,7 +130,7 @@ krb5_error_code krb5_rd_req_decoded
 		   krb5_pointer,
 		   krb5_error_code (* )(krb5_pointer,
 					krb5_principal,
-					unsigned, /* promotion of kvno */
+					krb5_kvno,
 					krb5_keyblock ** ),
 		   krb5_pointer,
 		   krb5_rcache,
