@@ -89,11 +89,13 @@ static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
 /****** MWE *****/
 
 /****** MWE *****/
+#ifdef __svr4__
 #include <sys/tty.h>
 #include <sys/ttold.h>
 #ifdef HAVE_SYS_PTYVAR_H
 /* solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
+#endif
 #endif
 /****** MWE *****/
 
