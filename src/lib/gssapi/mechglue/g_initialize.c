@@ -7,6 +7,11 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+extern gss_mechanism krb5_gss_initialize();
 
 static int _gss_initialized = 0;
 

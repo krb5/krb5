@@ -7,6 +7,10 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <string.h>
 #include <errno.h>
 
 static struct gss_config null_mech = {

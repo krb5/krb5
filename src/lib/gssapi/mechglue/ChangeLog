@@ -1,5 +1,11 @@
 Tue Jan 23 11:52:24 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* add_mechanism.c, g_inquire_cred.c, g_imp_name.c,
+	  g_dsp_name.c, g_indicate_mechs.c, g_accept_sec_context.c,
+	  g_init_sec_context.c, g_acquire_cred.c: Include stdlib.h, string.h
+
+	* configure.in: Check for stdlib.h
+
 	* Makefile.in (SRCS): Remove extraneous line with only a tab.
 		(SHLIB_LDFLAGS): Declare that krb5_gss_initialize is to be
 		unresolved. 

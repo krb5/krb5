@@ -7,6 +7,10 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <string.h>
 
 extern gss_mechanism *mechs_array;
 
