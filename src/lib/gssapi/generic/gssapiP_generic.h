@@ -35,6 +35,8 @@
 #endif
 #endif
 
+#include "k5-thread.h"
+
 #include "gssapi_generic.h"
 
 #include "gssapi_err_generic.h"
@@ -134,10 +136,10 @@ typedef UINT64_TYPE gssint_uint64;
 
 typedef struct _g_set_elt *g_set_elt;
 typedef struct {
-    /* k5_mutex_t mutex; */
+    k5_mutex_t mutex;
     void *data;
 } g_set;
-#define G_SET_INIT { /* K5_MUTEX_INITIALIZER, */ 0 }
+#define G_SET_INIT { K5_MUTEX_INITIALIZER, 0 }
 
 int g_set_init (g_set_elt *s);
 int g_set_destroy (g_set_elt *s);

@@ -14,6 +14,12 @@
 	g_delete_cred_id, g_delete_ctx_id): Updated first argument type.
 	* gssapiP_generic.h: Declarations updated.
 
+	* gssapiP_generic.h: Include k5-thread.h.
+	(g_set): Add a mutex.
+	(G_SET_INIT): Initialize it.
+	* util_validate.c (g_save, g_validate, g_delete): Lock the mutex
+	while working on the set.  (BDB version untested.)
+
 2004-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* util_ordering.c (g_queue_externalize, g_queue_internalize):

@@ -64,10 +64,17 @@ static int g_save(db, type, ptr)
 #endif
      void *ptr;
 {
+   int ret;
 #ifdef HAVE_BSD_DB
-   DB **vdb = (DB **) &db->data;
+   DB **vdb;
    vkey vk;
    DBT key;
+
+   ret = k5_mutex_lock(&db->mutex);
+   if (ret)
+       return 0;
+
+   vdb = (DB **) &db->data;
 
    if (!*vdb)
       *vdb = dbopen(NULL, O_CREAT|O_RDWR, O_CREAT|O_RDWR, DB_HASH, NULL);
@@ -78,15 +85,27 @@ static int g_save(db, type, ptr)
    key.data = &vk;
    key.size = sizeof(vk);
 
-   return((*((*vdb)->put))(*vdb, &key, &dbtone, 0) == 0);
+   ret = ((*((*vdb)->put))(*vdb, &key, &dbtone, 0) == 0);
+   k5_mutex_unlock(&db->mutex);
+   return ret;
 #else
-   g_set_elt *gs = (g_set_elt *) &db->data;
+   g_set_elt *gs;
+
+   ret = k5_mutex_lock(&db->mutex);
+   if (ret)
+       return 0;
+
+   gs = (g_set_elt *) &db->data;
 
    if (!*gs)
-      if (g_set_init(gs))
+      if (g_set_init(gs)) {
+	 k5_mutex_unlock(&db->mutex);
 	 return(0);
+      }
 
-   return(g_set_entry_add(gs, ptr, type) == 0);
+   ret = (g_set_entry_add(gs, ptr, type) == 0);
+   k5_mutex_unlock(&db->mutex);
+   return ret;
 #endif
 }
 
@@ -99,13 +118,21 @@ static int g_validate(db, type, ptr)
 #endif
      void *ptr;
 {
+   int ret;
 #ifdef HAVE_BSD_DB
-   DB **vdb = (DB **) &db->data;
+   DB **vdb;
    vkey vk;
    DBT key, value;
 
-   if (!*vdb)
+   ret = k5_mutex_lock(&db->mutex);
+   if (ret)
+       return 0;
+
+   vdb = (DB **) &db->data;
+   if (!*vdb) {
+      k5_mutex_unlock(&db->mutex);
       return(0);
+   }
 
    vk.type = type;
    vk.ptr = ptr;
@@ -113,21 +140,33 @@ static int g_validate(db, type, ptr)
    key.data = &vk;
    key.size = sizeof(vk);
 
-   if ((*((*vdb)->get))(*vdb, &key, &value, 0))
+   if ((*((*vdb)->get))(*vdb, &key, &value, 0)) {
+      k5_mutex_unlock(&db->mutex);
       return(0);
+   }
 
+   k5_mutex_unlock(&db->mutex);
    return((value.size == sizeof(one)) &&
 	  (*((int *) value.data) == one));
 #else
-   g_set_elt *gs = (g_set_elt *) &db->data;
+   g_set_elt *gs;
    void *value;
 
-   if (!*gs)
-      return(0);
+   ret = k5_mutex_lock(&db->mutex);
+   if (ret)
+       return 0;
 
-   if (g_set_entry_get(gs, ptr, (void **) &value))
+   gs = (g_set_elt *) &db->data;
+   if (!*gs) {
+      k5_mutex_unlock(&db->mutex);
       return(0);
+   }
 
+   if (g_set_entry_get(gs, ptr, (void **) &value)) {
+      k5_mutex_unlock(&db->mutex);
+      return(0);
+   }
+   k5_mutex_unlock(&db->mutex);
    return(value == type);
 #endif
 }
@@ -141,13 +180,21 @@ static int g_delete(db, type, ptr)
 #endif
      void *ptr;
 {
+   int ret;
 #ifdef HAVE_BSD_DB
-   DB **vdb = (DB **) &db->data;
+   DB **vdb;
    vkey vk;
    DBT key;
 
-   if (!*vdb)
+   ret = k5_mutex_lock(&db->mutex);
+   if (ret)
+       return 0;
+
+   vdb = (DB **) &db->data;
+   if (!*vdb) {
+      k5_mutex_unlock(&db->mutex);
       return(0);
+   }
 
    vk.type = type;
    vk.ptr = ptr;
@@ -155,16 +202,27 @@ static int g_delete(db, type, ptr)
    key.data = &vk;
    key.size = sizeof(vk);
 
-   return((*((*vdb)->del))(*vdb, &key, 0) == 0);
+   ret = ((*((*vdb)->del))(*vdb, &key, 0) == 0);
+   k5_mutex_unlock(&db->mutex);
+   return ret;
 #else
-   g_set_elt *gs = (g_set_elt *) &db->data;
+   g_set_elt *gs;
 
-   if (!*gs)
+   ret = k5_mutex_lock(&db->mutex);
+   if (ret)
+       return 0;
+
+   gs = (g_set_elt *) &db->data;
+   if (!*gs) {
+      k5_mutex_unlock(&db->mutex);
       return(0);
+   }
 
-   if (g_set_entry_delete(gs, ptr))
+   if (g_set_entry_delete(gs, ptr)) {
+      k5_mutex_unlock(&db->mutex);
       return(0);
-
+   }
+   k5_mutex_unlock(&db->mutex);
    return(1);
 #endif
 }
