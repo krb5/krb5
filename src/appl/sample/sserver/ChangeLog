@@ -1,3 +1,7 @@
+Sat Jun  3 17:20:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sserver.c (main): If using inetd, set file descriptor to 0.
+
 Wed May 10 15:18:19 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* sserver.M: Document options.

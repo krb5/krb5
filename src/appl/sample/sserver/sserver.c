@@ -173,6 +173,7 @@ main(argc, argv)
 	    syslog(LOG_ERR, "getpeername: %m");
 	    exit(1);
 	}
+	sock = 0;
     }
 
     peeraddr.addrtype = peername.sin_family;
