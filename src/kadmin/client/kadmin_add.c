@@ -80,14 +80,14 @@ char *principal;
 		fprintf(stderr, "Invalid Principal name!\n");
 	    count++;
 	} while (username[0] == '\n' && count < 3);
-    }
 
-    if (username[0] == '\n') {
-	fprintf(stderr, "Aborting!!\n\n");
-	return(1);
-    }
+	if (username[0] == '\n') {
+	    fprintf(stderr, "Aborting!!\n\n");
+	    return(1);
+	}
 
-    username[strlen(username) -1] = '\0';
+	username[strlen(username) -1] = '\0';
+    }
     
     (void) memcpy( inbuf.data + 3, username, strlen(username));
     inbuf.length = strlen(username) + 3;
