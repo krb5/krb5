@@ -1,3 +1,8 @@
+2003-01-12  Ezra Peisach  <epeisach@bu.edu>
+
+	* kdc5_hammer.c (verify_cs_pair): Use krb5_free_creds() instead of
+	krb5_free_cred_contents() to cleanup memory leak.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

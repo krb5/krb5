@@ -324,7 +324,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 {
     krb5_error_code 	  retval;
     krb5_creds 	 	  creds;
-    krb5_creds 		* credsp;
+    krb5_creds 		* credsp = NULL;
     krb5_ticket 	* ticket = NULL;
     krb5_keyblock 	* keyblock = NULL;
     krb5_auth_context 	  auth_context = NULL;
@@ -440,7 +440,7 @@ cleanup_keyblock:
 
 cleanup_rdata:
     krb5_free_data_contents(context, &request_data);
-    krb5_free_cred_contents(context, credsp);
+    if(credsp ) krb5_free_creds(context, credsp);
 
     return retval;
 }
