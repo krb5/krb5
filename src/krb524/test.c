@@ -40,8 +40,8 @@
 
 #define krb5_print_addrs
 
-void do_local(krb5_creds *, krb5_keyblock *),
-     do_remote(krb5_context, krb5_creds *, char *, krb5_keyblock *);
+void do_local PROTOTYPE((krb5_creds *, krb5_keyblock *)),
+     do_remote PROTOTYPE((krb5_context, krb5_creds *, char *, krb5_keyblock *));
 
 void print_key(msg, key)
      char *msg;

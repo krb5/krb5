@@ -1,3 +1,7 @@
+Wed Jun 28 20:14:35 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* test.c: use PROTOTYPE.
+
 Wed Jun 28 17:32:51 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* test.c, k524init.c, getcred.c: rewrote for old style definitiions.
