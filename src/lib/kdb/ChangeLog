@@ -1,3 +1,10 @@
+2004-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb_db2.c (krb5_db2_db_get_principal): Rename local variable
+	"try" to "trynum" because some systems (*cough*Tru64*cough*) turn
+	on some exception handling support when thread support is
+	enabled.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBBASE): Renamed from LIB.

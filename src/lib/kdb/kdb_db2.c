@@ -894,7 +894,7 @@ krb5_db2_db_get_principal(context, searchfor, entries, nentries, more)
     DB *db;
     DBT key, contents;
     krb5_data keydata, contdata;
-    int try, dbret;
+    int trynum, dbret;
 
     *more = FALSE;
     *nentries = 0;
@@ -903,7 +903,7 @@ krb5_db2_db_get_principal(context, searchfor, entries, nentries, more)
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (krb5_db2_context *) context->db_context;
-    for (try = 0; try < KRB5_DB2_MAX_RETRY; try++) {
+    for (trynum = 0; trynum < KRB5_DB2_MAX_RETRY; trynum++) {
 	if ((retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_SHARED))) {
 	    if (db_ctx->db_nb_locks) 
 	    	return(retval);
@@ -912,7 +912,7 @@ krb5_db2_db_get_principal(context, searchfor, entries, nentries, more)
 	}
 	break;
     }
-    if (try == KRB5_DB2_MAX_RETRY) 
+    if (trynum == KRB5_DB2_MAX_RETRY) 
 	return KRB5_KDB_DB_INUSE;
 
     /* XXX deal with wildcard lookups */
