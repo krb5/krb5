@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb_auth_su.c (krb5_get_tkt_via_passwd): Argument to
+	krb5_read_password now takes an unsigned int.
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* ccache.c, heuristic.c, main.c: Return of krb5_cc_get_name() is

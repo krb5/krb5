@@ -407,7 +407,7 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     krb5_error_code code;
     krb5_creds my_creds;
     krb5_timestamp now;
-    int pwsize;
+    unsigned int pwsize;
     char password[255], *client_name, prompt[255];
 
 
