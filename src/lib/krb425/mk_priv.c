@@ -79,7 +79,9 @@ struct sockaddr_in *receiver;
 	}
 
 
-	if (r = krb5_get_server_rcache(inet_ntoa(sender->sin_addr),
+	out5.data = inet_ntoa(sender->sin_addr);
+	out5.length = strlen(out5.data);
+	if (r = krb5_get_server_rcache(&out5,
 				       &rcache)) {
 	    krb5_free_address(saddr2);
 #ifdef	EBUG

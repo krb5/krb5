@@ -90,7 +90,9 @@ MSG_DAT *msg;
 	    return(krb425error(ENOMEM));
 	}
 	    
-	if (r = krb5_get_server_rcache(cachename,
+	out.data = cachename;
+	out.length = strlen(cachename);
+	if (r = krb5_get_server_rcache(&out,
 				       &rcache)) {
 	    krb5_free_address(saddr2);
 #ifdef	EBUG

@@ -116,7 +116,7 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 		/*
 		 * Setup the replay cache.
 		 */
-		if (*minor_status = krb5_get_server_rcache(server[1]->data,
+		if (*minor_status = krb5_get_server_rcache(server[1],
 							   &rcache))
 			return(GSS_S_FAILURE);
 		/*

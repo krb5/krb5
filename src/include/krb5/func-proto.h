@@ -171,7 +171,7 @@ krb5_error_code krb5_generate_subkey
 krb5_error_code krb5_generate_seq_number
     PROTOTYPE((const krb5_keyblock *, krb5_int32 *));
 krb5_error_code krb5_get_server_rcache
-    PROTOTYPE((const char *, krb5_rcache *));
+    PROTOTYPE((const krb5_data *, krb5_rcache *));
 krb5_error_code krb5_build_principal_ext
     STDARG_P((krb5_principal *, int, const char *, ...));
 krb5_error_code krb5_build_principal
