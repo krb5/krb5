@@ -2,6 +2,8 @@
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
 
+	* pty_err.et: Add final "end" statement.
+
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.

@@ -46,3 +46,5 @@ error_code PTY_OPEN_SLAVE_REVOKEFAIL, "Failed to revoke slave side of pty"
 
 error_code PTY_UPDATE_UTMP_PROCTYPE_INVALID, "bad process type passed to pty_update_utmp"
 error_code PTY_OPEN_SLAVE_TOOSHORT, "Slave pty name is zero-length"
+
+end
