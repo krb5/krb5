@@ -310,7 +310,8 @@ dnl
 define(WITH_CCOPTS,[
 AC_WITH([ccopts],
 echo "CCOPTS is $withval"
-CCOPTS=$withval,
+CCOPTS=$withval
+CFLAGS="$CFLAGS $withval",
 CCOPTS=)dnl
 AC_SUBST(CCOPTS)])dnl
 dnl

@@ -1,3 +1,8 @@
+Tue Oct 11 17:07:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* aclocal.m4: Make sure we do our feature tests using the CC
+		options specified using CC_OPTS.
+
 Fri Oct  7 16:38:11 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* aclocal.m4: If using isode we need to add -DKRB5_USE_ISODE to
