@@ -78,9 +78,9 @@ kadm_entry2princ(entry, princ)
   krb5_xfree(mprinc);
 
   /* Find the V4 key */
-  retval = krb5_dbe_find_keytype(kadm_context,
+  retval = krb5_dbe_find_enctype(kadm_context,
 				 &entry,
-				 KEYTYPE_DES_CBC_MD5,
+				 ENCTYPE_DES_CBC_MD5,
 				 KRB5_KDB_SALTTYPE_V4,
 				 -1,
 				 &pkey);
@@ -127,9 +127,9 @@ kadm_princ2entry(princ, entry)
   if (mprinc.mod_princ)
     krb5_free_principal(kadm_context, mprinc.mod_princ);
 
-  if (retval = krb5_dbe_find_keytype(kadm_context,
+  if (retval = krb5_dbe_find_enctype(kadm_context,
 				     entry,
-				     KEYTYPE_DES_CBC_MD5,
+				     ENCTYPE_DES_CBC_MD5,
 				     KRB5_KDB_SALTTYPE_V4,
 				     -1,
 				     &kdatap)) {
@@ -137,7 +137,7 @@ kadm_princ2entry(princ, entry)
       kdatap = &entry->key_data[entry->n_key_data-1];
   }
   if (kdatap) {
-    kdatap->key_data_type[0] = (krb5_int16) KEYTYPE_DES_CBC_MD5;
+    kdatap->key_data_type[0] = (krb5_int16) ENCTYPE_DES_CBC_MD5;
     kdatap->key_data_type[1] = (krb5_int16) KRB5_KDB_SALTTYPE_V4; 
     kdatap->key_data_kvno = (krb5_int16) princ.key_version;
   }
@@ -242,9 +242,9 @@ Kadm_vals *valsout;
   if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL)
     failadd(KADM_NOMEM);
 
-  if (retval = krb5_dbe_find_keytype(kadm_context,
+  if (retval = krb5_dbe_find_enctype(kadm_context,
 				     &newentry,
-				     KEYTYPE_DES_CBC_MD5,
+				     ENCTYPE_DES_CBC_MD5,
 				     KRB5_KDB_SALTTYPE_V4,
 				     -1,
 				     &pkey)) {
@@ -259,7 +259,7 @@ Kadm_vals *valsout;
   memcpy(newpw.contents, &data_i.key_low, 4);
   memcpy((char *)(((krb5_int32 *) newpw.contents) + 1), &data_i.key_high, 4);
   newpw.length = 8;
-  newpw.keytype = KEYTYPE_DES_CBC_MD5;
+  newpw.enctype = ENCTYPE_DES_CBC_MD5;
   sblock.type = KRB5_KDB_SALTTYPE_V4;
   sblock.data.length = 0;
   sblock.data.data = (char *) NULL;
@@ -545,14 +545,14 @@ Kadm_vals *valsout;		/* the actual record which is returned */
       }
       newpw.magic = KV5M_KEYBLOCK;
       newpw.length = 8;
-      newpw.keytype = KEYTYPE_DES_CBC_MD5;
+      newpw.enctype = ENCTYPE_DES_CBC_MD5;
       temp_key.key_low = ntohl(temp_key.key_low);
       temp_key.key_high = ntohl(temp_key.key_high);
       memcpy(newpw.contents, &temp_key.key_low, 4);
       memcpy(newpw.contents + 4, &temp_key.key_high, 4);
-      if (retval = krb5_dbe_find_keytype(kadm_context,
+      if (retval = krb5_dbe_find_enctype(kadm_context,
 					 &newentry,
-					 KEYTYPE_DES_CBC_MD5,
+					 ENCTYPE_DES_CBC_MD5,
 					 KRB5_KDB_SALTTYPE_V4,
 					 -1,
 					 &pkey)) {
@@ -675,7 +675,7 @@ des_cblock newpw;
     failchange(KADM_NOMEM);
   memcpy(localpw.contents, newpw, 8);
   localpw.magic = KV5M_KEYBLOCK;
-  localpw.keytype = KEYTYPE_DES_CBC_MD5;
+  localpw.enctype = ENCTYPE_DES_CBC_MD5;
   localpw.length = 8;
   numfound = 1;
   retval = krb5_db_get_principal(kadm_context, rprinc, &odata,
@@ -686,9 +686,9 @@ des_cblock newpw;
     free(localpw.contents);
     failchange(retval);
   } else if (numfound == 1) {
-    if (retval = krb5_dbe_find_keytype(kadm_context,
+    if (retval = krb5_dbe_find_enctype(kadm_context,
 				       &odata,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       KRB5_KDB_SALTTYPE_V4,
 				       -1,
 				       &pkey)) {
@@ -968,9 +968,9 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
     krb5_free_principal(kadm_context, inprinc);
     failsrvtab(retval);
   } else if (numfound) {
-    retval = krb5_dbe_find_keytype(kadm_context,
+    retval = krb5_dbe_find_enctype(kadm_context,
 				   &odata,
-				   KEYTYPE_DES_CBC_MD5,
+				   ENCTYPE_DES_CBC_MD5,
 				   KRB5_KDB_SALTTYPE_V4,
 				   -1,
 				   &pkey);
@@ -995,7 +995,7 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
       pkey = &odata.key_data[0];
       memset(pkey, 0, sizeof(*pkey));
       pkey->key_data_ver = 2;
-      pkey->key_data_type[0] = KEYTYPE_DES_CBC_MD5;
+      pkey->key_data_type[0] = ENCTYPE_DES_CBC_MD5;
       pkey->key_data_type[1] = KRB5_KDB_SALTTYPE_V4;
     }
   }
@@ -1015,7 +1015,7 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
     krb5_db_free_principal(kadm_context, &odata, 1);
     failsrvtab(KADM_NOMEM);
   }
-  newpw.keytype = KEYTYPE_DES_CBC_MD5;
+  newpw.enctype = ENCTYPE_DES_CBC_MD5;
   newpw.length = 8;
   memcpy((char *)newpw.contents, new_key, 8);
   memset((char *)new_key, 0, sizeof (new_key));

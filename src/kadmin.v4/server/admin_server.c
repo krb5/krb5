@@ -380,14 +380,14 @@ struct sockaddr_in *who;
 	cleanexit(2);
     }
 
-    status = krb5_dbe_find_keytype(kadm_context,
+    status = krb5_dbe_find_enctype(kadm_context,
 				   &sprinc_entries,
-				   KEYTYPE_DES_CBC_MD5,
+				   ENCTYPE_DES_CBC_MD5,
 				   -1,
 				   -1,
 				   &kdatap);
     if (status) {
-	syslog(LOG_ERR, "find keytype failed: %s", error_message(status));
+	syslog(LOG_ERR, "find enctype failed: %s", error_message(status));
 	cleanexit(1);
     }
 
