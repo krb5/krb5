@@ -633,7 +633,7 @@ krb5_error_code krb5_hmac
  */
 
 krb5_error_code krb5int_des_init_state
-(krb5_const krb5_keyblock *key, krb5_keyusage usage, krb5_data *new_state);
+(krb5_const krb5_keyblock *key, krb5_keyusage keyusage, krb5_data *new_state);
 
 /* 
  * normally to free a cipher_state you can just memset the length to zero and
