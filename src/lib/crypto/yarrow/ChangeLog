@@ -1,4 +1,16 @@
+2001-11-09  Sam Hartman  <hartmans@mit.edu>
+
+	* yhash.h :  Use krb5 shaa1
+
+	* yarrow.c (Yarrow_Reseed):  For all calls to cipher_init, use TRY
+	block and  use function rather than macros 
+	(Yarrow_Reseed):  call encrypt block function not macro
+
+	* ycipher.h: Make the the interface use functions not macros; convert for krb5 ciphers
+
 2001-11-08  Sam Hartman  <hartmans@mit.edu>
+
+	* ylock.h (lock UNLOCK):  Turn into no-ops
 
 	* yarrow.h: Don't use #error
 	(YARROW_DLL): Don't actually ever export or import from win32 dlls as Yarrow is not a public part of krb5 API

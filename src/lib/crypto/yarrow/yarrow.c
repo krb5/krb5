@@ -175,7 +175,7 @@ int Yarrow_Init(Yarrow_CTX* y, const char *filename)
 
     mem_zero(y->K, sizeof(y->K));
 
-    CIPHER_Init(&y->cipher, y->K);
+    TRY (Krb5int_Yarrow_Cipher_Init(&y->cipher, y->K));
     y->out_left = 0;
     y->out_count = 0;
     y->gate_count = 0;
@@ -402,7 +402,7 @@ static int Yarrow_Output_Block( Yarrow_CTX* y, void* out )
 
     /* R <- E_k(C) */
 
-    CIPHER_Encrypt_Block( &y->cipher, y->C, out );
+    TRY ( krb5int_yarrow_cipher_encrypt_block ( &y->cipher, y->C, out ))
 
 #if defined(YARROW_DEBUG)
     printf("===\n");
@@ -526,7 +526,7 @@ int Yarrow_Gate(Yarrow_CTX* y)
 
     /* need to resetup the key schedule as the key has changed */
 
-    CIPHER_Init(&y->cipher, y->K);
+    TRY (Krb5int_Yarrow_Cipher_Init(&y->cipher, y->K));
 
  CATCH:
     TRACE( printf( "]," ); );
@@ -678,7 +678,7 @@ int Yarrow_Reseed(Yarrow_CTX* y, int pool)
 
     /* need to resetup the key schedule as the key has changed */
 
-    CIPHER_Init(&y->cipher, y->K);
+    TRY(Krb5int_Yarrow_Cipher_Init(&y->cipher, y->K));
 
 #if defined(YARROW_DEBUG)
     hex_print(stdout, "new K", y->K, sizeof(y->K));
@@ -689,7 +689,7 @@ int Yarrow_Reseed(Yarrow_CTX* y, int pool)
 #if defined(YARROW_DEBUG)
     hex_print(stdout, "old C", y->C, sizeof(y->C));
 #endif
-    CIPHER_Encrypt_Block(&y->cipher, zero_block, y->C);
+    TRY (krb5int_yarrow_cipher_encrypt_block (&y->cipher, zero_block, y->C))
 #if defined(YARROW_DEBUG)
     hex_print(stdout, "new C", y->C, sizeof(y->C));
 #endif
