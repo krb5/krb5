@@ -1,3 +1,10 @@
+2004-02-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-mac.h (GETSOCKNAME_ARG2_TYPE, GETSOCKNAME_ARG3_TYPE): Set
+	proper values for Windows here.
+	(GETPEERNAME_ARG2_TYPE, GETPEERNAME_ARG3_TYPE): Map to the
+	getsockname versions.
+
 2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* krb5.hin: Remove des3 with 32-bit length

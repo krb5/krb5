@@ -157,6 +157,11 @@ typedef unsigned char	u_char;
 
 HINSTANCE get_lib_instance(void);
 
+#define GETSOCKNAME_ARG2_TYPE	struct sockaddr
+#define GETSOCKNAME_ARG3_TYPE	size_t
+#define GETPEERNAME_ARG2_TYPE	GETSOCKNAME_ARG2_TYPE
+#define GETPEERNAME_ARG3_TYPE	GETSOCKNAME_ARG3_TYPE
+
 #endif /* !RES_ONLY */
 
 #endif /* _WIN32 */
