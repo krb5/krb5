@@ -1395,8 +1395,11 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
 	*fccsp = (*fccsp)->next;
 	k5_mutex_unlock(&krb5int_cc_file_mutex);
 	free(data->filename);
-	if (data->file >= 0)
+	if (data->file >= 0) {
+	    k5_mutex_lock(&data->lock);
 	    krb5_fcc_close_file(context, data);
+	    k5_mutex_unlock(&data->lock);
+	}
 	k5_mutex_assert_unlocked(&data->lock);
 	k5_mutex_destroy(&data->lock);
 	free(data);
