@@ -1,3 +1,8 @@
+Mon Nov  4 14:50:42 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* k5-int.h: Removed unusued prototype for krb5_verify_padata();
+		this is old code that has since been removed. [PR#21]
+
 Thu Aug 15 16:31:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Since we are only supporting the db in the util/db2
