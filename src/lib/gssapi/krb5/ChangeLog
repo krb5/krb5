@@ -1,3 +1,9 @@
+2004-02-26  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Don't clear
+	the DO_TIME flag until after rd_req is called so a replay cache is
+	set up  even in the no_credential case. 
+
 2004-02-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix calculation
