@@ -1,3 +1,11 @@
+Sat Dec  5 01:08:57 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.hin: Add KRB5_DLLIMP and KRB5_CALLCONV to the prototypes of
+		valid_enctype, valid_cksumtype, is_coll_proof_cksum, and
+		is_keyed_cksum, which had previously been #defines, but
+		since they are now functions, they needed to be exported
+		by the DLL interface.
+
 1998-12-05  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5.hin: Move krb4 function prototypes to krb54proto.h

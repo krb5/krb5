@@ -484,13 +484,13 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV		24
 
 
-krb5_boolean KRB5_CALLCONV valid_enctype
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV valid_enctype
 	KRB5_PROTOTYPE((krb5_const krb5_enctype ktype));
-krb5_boolean KRB5_CALLCONV valid_cksumtype
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV valid_cksumtype
 	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
-krb5_boolean KRB5_CALLCONV is_coll_proof_cksum
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV is_coll_proof_cksum
 	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
-krb5_boolean KRB5_CALLCONV is_keyed_cksum
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV is_keyed_cksum
 	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
 
 #ifdef KRB5_OLD_CRYPTO
