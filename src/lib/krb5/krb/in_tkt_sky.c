@@ -113,7 +113,7 @@ krb5_get_in_tkt_with_skey(context, options, addrs, ktypes, pre_auth_types,
 {
     if (key) 
     	return krb5_get_in_tkt(context, options, addrs, ktypes, pre_auth_types, 
-			       skey_keyproc, (krb5_pointer)key,
+			       skey_keyproc, (krb5_const_pointer)key,
 			       krb5_kdc_rep_decrypt_proc, 0, creds,
 			       ccache, ret_as_reply);
     else 

@@ -1,3 +1,15 @@
+2001-07-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* in_tkt_sky.c (krb5_get_in_tkt_with_skey): Change cast from
+ 	krb5_pointer to krb5_const_pointer to ensure const integrity of
+ 	parameter.
+
+	* in_tkt_ktb.c (keytab_keyproc): Add const argument to cast of
+ 	keyseed to struct keytab_keyproc_arg to maintain const status.
+
+	* conv_princ.c (krb5_524_conv_principal): Cast argument to memcpy
+ 	to size_t.
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): Cast argument to tolower

@@ -55,7 +55,8 @@ keytab_keyproc(context, type, salt, keyseed, key)
     krb5_const_pointer keyseed;
     krb5_keyblock ** key;
 {
-    struct keytab_keyproc_arg * arg = (struct keytab_keyproc_arg *)keyseed;
+    const struct keytab_keyproc_arg * arg = 
+	(const struct keytab_keyproc_arg *)keyseed;
     krb5_keyblock *realkey;
     krb5_error_code retval = 0;
     krb5_keytab kt_id;

@@ -161,7 +161,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 		       c = strnchr(compo->data, '.', compo->length);
 		       if (!c || (c - compo->data) >= INST_SZ - 1)
 			   return KRB5_INVALID_PRINCIPAL;
-		       memcpy(inst, compo->data, c - compo->data);
+		       memcpy(inst, compo->data, (size_t) (c - compo->data));
 		       inst[c - compo->data] = '\0';
 		   }
 		   break;
