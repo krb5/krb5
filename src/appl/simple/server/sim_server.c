@@ -181,7 +181,7 @@ char *argv[];
 			      portforeign_addr, 0, 0, 0,
 			      rcache,
 			      &message)) {
-	com_err(PROGNAME, retval, "while verifying PRIV message");
+	com_err(PROGNAME, retval, "while verifying SAFE message");
 	(void) krb5_rc_close(rcache);
 	xfree(rcache);
 	exit(1);
@@ -218,7 +218,7 @@ char *argv[];
 			      portforeign_addr, 0, 0, 0, 0,
 			      rcache,
 			      &message)) {
-	com_err(PROGNAME, retval, "while verifying SAFE message");
+	com_err(PROGNAME, retval, "while verifying PRIV message");
 	(void) krb5_rc_close(rcache);
 	xfree(rcache);
 	exit(1);
