@@ -1,3 +1,9 @@
+2002-07-09  Jen Selby <jenselby@mit.edu>
+
+	* login.M: added information about different command line options;
+	changed defaults given for tags that did not match code
+	* login.c: changed inaccurate comments
+
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogind.c (protocol): Initialize pbp, fbp.  Change left to type

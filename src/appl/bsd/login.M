@@ -5,9 +5,8 @@
 login.krb5 \- kerberos enhanced login program
 .SH SYNOPSIS
 .B login.krb5
-[
-.B \-fF [username]
-]
+[\fB\-p\fP] [\fB\-fFe\fP \fIusername\fP] 
+[\fB\-r | \-k | \-K | \-h \fP\fIhostname\fP]
 .SH DESCRIPTION
 .I login.krb5
 is a modification of the BSD login program which is used for two
@@ -32,18 +31,27 @@ user in. However, if the password matches the entry in
 use of the machine in case of network failure.)
 .SH OPTIONS
 .TP
+\fB\-p\fP
+preserve the current environment
+.TP
 \fB\-r\fP \fIhostname\fP
-pass hostname to rlogind.
+pass hostname to rlogind.  Must be the last argument.
 .TP
 \fB\-h\fP \fIhostname\fP
-pass hostname to telnetd, etc.
+pass hostname to telnetd, etc.  Must be the last argument.
+.TP
+\fB\-k\fP \fIhostname\fP
+Use Kerberos V4 to login.  Must be the last argument.
+.TP
+\fB\-K\fP \fIhostname\fP
+Use Kerberos V4 to login.  Must be the last argument.
 .TP
 \fB\-f\fP \fIname\fP
 Perform pre-authenticated login, e.g., datakit, xterm, etc.; 
-allow preauthenticated login as root.
+allows preauthenticated login as root.
 .TP
 \fB\-F\fP \fIname\fP
-Perform pre-authenticated login, e.g.,for datakit, xterm, etc.; allows
+Perform pre-authenticated login, e.g., datakit, xterm, etc.; allows
 preauthenticated login as root.
 .TP
 \fB\-e\fP \fIname\fP
@@ -59,7 +67,7 @@ provided:
 .IP krb5_get_tickets
 Use password to get V5 tickets. Default value true.
 .IP krb4_get_tickets
-Use password to get V4 tickets. Default value true.
+Use password to get V4 tickets. Default value false.
 .IP krb4_convert
 Use Kerberos conversion daemon to get V4 tickets. Default value
 false. If false, and krb4_get_tickets is true, then login will get
@@ -70,7 +78,7 @@ is true, and the krb524d is not running, login will hang for
 approximately a minute  under Solaris, 
 due to a Solaris socket emulation bug.
 .IP krb_run_aklog
-Attempt to run aklog. Default value true.
+Attempt to run aklog. Default value false.
 .IP aklog_path
 Where to find it [not yet implemented.] Default value 
 .I $(prefix)/bin/aklog.

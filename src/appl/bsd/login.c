@@ -27,19 +27,16 @@ char copyright[] =
 
 /* based on @(#)login.c	5.25 (Berkeley) 1/6/89 */
 
-/* While the code may be compiled with some of these options turned off,
-   the default will be to turn them *all* on if v4 compatibility is
-   available, and allow them to be configured via krb5.conf. */
-/* The configuration is of the form
+/* The configuration, with defaults as listed, is of the form:
    [login]
    # login stanza
    krb5_get_tickets = 1
    # use password to get v5 tickets
-   krb4_get_tickets = 1
+   krb4_get_tickets = 0
    # use password to get v4 tickets
-   krb4_convert = 1
+   krb4_convert = 0
    # use kerberos conversion daemon to get v4 tickets
-   krb_run_aklog = 1
+   krb_run_aklog = 0
    # attempt to run aklog
    aklog_path = $(prefix)/bin/aklog
    # where to find it [not yet implemented]
