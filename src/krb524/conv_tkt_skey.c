@@ -98,7 +98,7 @@ int krb524_convert_tkt_skey(krb5_ticket *v5tkt, KTEXT_ST *v4tkt,
 			     0, /* flags */			     
 			     pname,
 			     pinst,
-			     krb5_princ_realm(v5etkt->client),
+			     prealm,
 			     *((unsigned long *)v5etkt->caddrs[0]->contents),
 			     v5etkt->session->contents,
 			     lifetime,
