@@ -1,3 +1,9 @@
+2004-06-24  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (kadmin_startup): Use host-based service name from
+	kadm5_get_admin_service_name() for SEAM compatibility when old
+	AUTH_GSSAPI not requested.
+
 2004-06-15  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.c (kadmin_startup): Add option to force old AUTH_GSSAPI
