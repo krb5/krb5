@@ -38,5 +38,7 @@ ec KRB5_KDB_ILLDIRECTION,	"Bad direction for converting keys"
 ec KRB5_KDB_NOMASTERKEY,	"Cannot find master key record in database"
 ec KRB5_KDB_BADMASTERKEY,	"Master key does not match database"
 ec KRB5_KDB_INVALIDKEYSIZE,	"Key size in database is invalid"
+ec KRB5_KDB_CANTREAD_STORED,	"Cannot find/read stored master key"
+ec KRB5_KDB_BADSTORED_MKEY,	"Stored master key is corrupted"
 
 end
