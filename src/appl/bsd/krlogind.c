@@ -246,7 +246,7 @@ krb5_ccache ccache = NULL;
 
 krb5_keytab keytab = NULL;
 
-#define ARGSTR	"k54ciepPD:S:M:L:u:Is?"
+#define ARGSTR	"k54ciepPD:S:M:L:w:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rpPD:?"
 #define (*des_read)  read
@@ -430,8 +430,27 @@ int main(argc, argv)
         case 'I':
 	  always_ip = 1;
 	  break;
-        case 's':
-	  stripdomain = 0;
+	case 'w':
+	  if (!strcmp(optarg, "ip"))
+	    always_ip = 1;
+	  else {
+	    char *cp;
+	    cp = strchr(optarg, ',');
+	    if (cp == NULL)
+	      maxhostlen = atoi(optarg);
+	    else if (*(++cp)) {
+	      if (!strcmp(cp, "striplocal"))
+		stripdomain = 1;
+	      else if (!strcmp(cp, "nostriplocal"))
+		stripdomain = 0;
+	      else {
+		usage();
+		exit(1);
+	      }
+	      *(--cp) = '\0';
+	      maxhostlen = atoi(optarg);
+	    }
+	  }
 	  break;
 	case '?':
 	default:
@@ -1359,7 +1378,7 @@ void usage()
 {
 #ifdef KERBEROS
     syslog(LOG_ERR, 
-	   "usage: klogind [-ke45pP] [-D port] or [r/R][k/K][x/e][p/P]logind");
+	   "usage: klogind [-ke45pP] [-D port] [-w[ip|maxhostlen[,[no]striplocal]]] or [r/R][k/K][x/e][p/P]logind");
 #else
     syslog(LOG_ERR, 
 	   "usage: rlogind [-rpP] [-D port] or [r/R][p/P]logind");
