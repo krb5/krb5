@@ -41,12 +41,12 @@
 #endif /* ECHO_PASSWORD */
 
 krb5_error_code
-krb5_read_password(krb5_context context, const char *prompt, const char *prompt2, char *return_pwd, unsigned int *bufsize_in)
+krb5_read_password(krb5_context context, const char *prompt, const char *prompt2, char *return_pwd, unsigned int *size_return)
 {
     krb5_data reply_data;      
     krb5_prompt k5prompt;
     krb5_error_code retval;
-    reply_data.length = *bufsize_in;
+    reply_data.length = *size_return; /* NB: size_return is also an input */
     reply_data.data = return_pwd;
     k5prompt.prompt = (const char *) prompt;
     k5prompt.hidden = 1;
@@ -56,8 +56,8 @@ krb5_read_password(krb5_context context, const char *prompt, const char *prompt2
 
     if ((retval==0) && prompt2) {
 	krb5_data verify_data;
-	verify_data.data = malloc(*bufsize_in);
-	verify_data.length = *bufsize_in;
+	verify_data.data = malloc(*size_return);
+	verify_data.length = *size_return;
 	k5prompt.prompt = (const char *) prompt2;
 	k5prompt.reply = &verify_data;
 	if (!verify_data.data)
@@ -68,12 +68,16 @@ krb5_read_password(krb5_context context, const char *prompt, const char *prompt2
 	    free(verify_data.data);
 	} else {
 	    /* compare */
-	    if (strncmp(return_pwd, (char *)verify_data.data, *bufsize_in)) {
+	    if (strncmp(return_pwd, (char *)verify_data.data, *size_return)) {
 		retval = KRB5_LIBOS_BADPWDMATCH;
 		free(verify_data.data);
 	    }
 	}
     }
+    if (!retval)
+	*size_return = k5prompt.reply->length;
+    else
+	memset(return_pwd, 0, *size_return);
     return retval;
 }
 #endif

@@ -1,3 +1,9 @@
+2002-10-11  Tom Yu  <tlyu@mit.edu>
+
+	* read_pwd.c (krb5_read_password): Restore name of size_return.
+	Set *size_return after successful call to krb5_prompter_posix,
+	since some callers were actually checking, e.g. kadm5.
+
 2002-10-10  Sam Hartman  <hartmans@mit.edu>
 
 	* read_pwd.c (krb5_read_password): Reimplement in terms of krb5_prompter_posix for unix
