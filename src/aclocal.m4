@@ -102,7 +102,7 @@ $2::<<<
 	do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) $(MFLAGS) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<); \
+			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) || exit 1; \
 	done>>>
 changequote([,])dnl
 AC_DIVERT_POP()dnl
