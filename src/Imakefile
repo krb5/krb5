@@ -37,11 +37,21 @@ world::
 
 SUBDIRS = util include lib kdc admin kadmin slave clients appl tests \
 		config-files
-LNINSTALLDIRS = 
+INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
+		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
+		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
+		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
+		$(KRB5_INCSUBDIRS)
+
+install:: install-mkdirs
 
 MakeSubdirs($(SUBDIRS))
 
 depend:: includes
+
+
+install-mkdirs:
+	-mkdir $(INSTALLMKDIRS)
 
 install::
 	$(MAKE) $(MFLAGS) install.man
