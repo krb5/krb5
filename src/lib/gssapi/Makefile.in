@@ -10,9 +10,9 @@ LIBMAJOR=1
 LIBMINOR=0
 STOBJLISTS=generic/OBJS.ST krb5/OBJS.ST
 SHLIB_EXPDEPS=\
-	$(TOPLIBD)/libkrb5.so \
-	$(TOPLIBD)/libcrypto.so \
-	$(TOPLIBD)/libcom_err.so
+	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libcom_err$(SHLIBEXT)
 SHLIB_EXPLIBS=-lkrb5 -lcrypto -lcom_err
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)

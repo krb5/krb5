@@ -1,3 +1,7 @@
+Sat Feb 22 01:34:08 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): s/.so/$(SHLIBEXT)
+
 Wed Jan 15 20:59:11 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

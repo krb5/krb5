@@ -5,13 +5,13 @@ LIBMAJOR=1
 LIBMINOR=0
 STOBJLISTS=../OBJS.ST OBJS.ST
 SHLIB_EXPDEPS=\
-	$(TOPLIBD)/libgssrpc.so \
-	$(TOPLIBD)/libgssapi_krb5.so \
-	$(TOPLIBD)/libkdb5.so \
-	$(TOPLIBD)/libkrb5.so \
-	$(TOPLIBD)/libcrypto.so \
-	$(TOPLIBD)/libcom_err.so \
-	$(TOPLIBD)/libdyn.so
+	$(TOPLIBD)/libgssrpc$(SHLIBEXT) \
+	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
+	$(TOPLIBD)/libkdb5$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libcom_err$(SHLIBEXT) \
+	$(TOPLIBD)/libdyn$(SHLIBEXT)
 SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkdb5 -lkrb5 -lcrypto -lcom_err -ldyn
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)

@@ -1,3 +1,7 @@
+Sat Feb 22 01:15:30 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): depend on -lcrypto
+
 Thu Feb  6 15:33:34 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

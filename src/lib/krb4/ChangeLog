@@ -1,3 +1,11 @@
+Sat Feb 22 01:16:01 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (SHLIB_DIRS): Remove extra shlib_explibs
+
+Sat Feb 22 00:55:42 1997  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Depend on -lcrypto -ldes425
+
 Thu Feb 20 23:27:39 1997  Richard Basch  <basch@lehman.com>
 
 	* memcache.c: Just use malloc/free, since _nmalloc isn't on

@@ -1,3 +1,7 @@
+Sat Feb 22 01:34:19 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): s/.so/$(SHLIBEXT)
+
 Mon Feb 10 11:10:02 1997  Ezra Peisach  <epeisach@quest.rose.brandeis.edu>
 
 	* configure.in: Check for sys/uio.h.
