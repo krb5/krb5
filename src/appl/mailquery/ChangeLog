@@ -1,6 +1,10 @@
+Tue Feb 28 01:52:34 1995  John Gilmore  (gnu at toad.com)
+
+	* poplib.c:  Avoid <krb5/...> includes.
+
 Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
 
-	* poplib.c (pop_init): Call krb5_sendauth() with new calling convention.
+	* poplib.c (pop_init): Call krb5_sendauth() with new calling convention
 
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 

@@ -45,7 +45,7 @@
 #endif
 
 #if	defined(KRB5)
-#include <krb5/osconf.h>
+#include "k5-int.h"
 #endif
 
 #if defined(CRAY) || defined(__hpux)

@@ -65,8 +65,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef KRB5
 /* these need to be here to declare the functions which are used by
    non-kerberos specific code */
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "krb5.h"
 #endif
 #endif
 #ifdef USG
@@ -353,8 +352,8 @@ xmalloc (size)
 #include <des.h>
 #endif /* KRB4 */
 #ifdef KRB5
-#include <krb5/los-proto.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 #include <ctype.h>
 #endif /* KRB5 */
 #endif /* KERBEROS */

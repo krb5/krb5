@@ -1,3 +1,7 @@
+Tue Feb 28 01:50:22 1995  John Gilmore  (gnu at toad.com)
+
+	* sys_term.c:  Avoid <krb5/...> includes.
+
 Wed Jan 11 15:23:07 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in (K4LIB): fix quoting so $(KRB4) actually survives

@@ -37,10 +37,8 @@ error You cannot define both KRB4 and KRB5
 #include <krb.h>
 #endif
 #ifdef KRB5
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 #include <ctype.h>
 #endif
 #endif
