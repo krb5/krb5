@@ -1,3 +1,10 @@
+Fri Mar 28 01:51:09 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi16.def, gssapi32.def: Added the V2 calls
+ 		gss_canonicalize_name(), gss_export_name(),
+ 		gss_duplicate_name() to the list of calls exported by the
+ 		DLL.
+
 Wed Mar 19 14:15:42 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Fix up name of the SAP Kerberos glue library to be

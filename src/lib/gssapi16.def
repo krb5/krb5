@@ -66,8 +66,9 @@ EXPORTS
 ;
 	gss_inquire_names_for_mech
 ;	gss_inquire_mechs_for_name
-;	gss_canonicalize_name
-;	gss_export_name
+	gss_canonicalize_name
+	gss_export_name
+	gss_duplicate_name
 ;
 ; GSS-API variables
 ;
