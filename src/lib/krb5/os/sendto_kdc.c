@@ -82,7 +82,7 @@ static void putstr(const char *str)
     put(str, strlen(str));
 }
 #else
-#define krb5int_sendtokdc_debug_handler ((void (*) (const void *, size_t))0)
+void (*krb5int_sendtokdc_debug_handler) (const void *, size_t) = 0;
 #endif
 
 #define dprint krb5int_debug_fprint
