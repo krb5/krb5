@@ -235,8 +235,11 @@ krb5_error_code INTERFACE krb5_rc_io_move (context, new, old)
  if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
    return KRB5_RC_IO_UNKNOWN;
  (void) krb5_rc_io_close(context, new);
- new->fn = old->fn;
- new->fd = old->fd;
+ new->fn = malloc(strlen(old->fn)+1);
+ if (new->fn == 0)
+   return ENOMEM;
+ strcpy(new->fn, old->fn);
+ new->fd = dup(old->fd);
  return 0;
 }
 

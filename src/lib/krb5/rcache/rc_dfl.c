@@ -590,6 +590,7 @@ krb5_rcache id;
 	return KRB5_RC_IO;
     if (krb5_rc_io_move(context, &t->d, &((struct dfl_data *)tmp->data)->d))
 	return KRB5_RC_IO;
+     (void) krb5_rc_dfl_close(context, tmp);
 #endif
     return 0;
 }
