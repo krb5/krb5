@@ -1,7 +1,7 @@
 2004-06-17  Tom Yu  <tlyu@mit.edu>
 
-	* ser_sctx.c (kg_ctx_size, kg_ctx_externalize): Adjust for new
-	field cred_rcache.
+	* ser_sctx.c (kg_ctx_size, kg_ctx_externalize):
+	(kg_ctx_internalize): Adjust for new field cred_rcache.
 
 2004-06-15  Tom Yu  <tlyu@mit.edu>
 

@@ -519,7 +519,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	kret = ENOMEM;
 
 	/* Get a context */
-	if ((remain >= (16*sizeof(krb5_int32)
+	if ((remain >= (17*sizeof(krb5_int32)
 			+ 2*sizeof(krb5_int64)
 			+ sizeof(ctx->seed))) &&
 	    (ctx = (krb5_gss_ctx_id_rec *)
@@ -640,6 +640,9 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 		if (kret == EINVAL)
 		    kret = 0;
 	    }
+	    if (!kret)
+		kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+	    ctx->cred_rcache = ibuf;
 	    if (!kret)
 		kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->acceptor_subkey_cksumtype = ibuf;
