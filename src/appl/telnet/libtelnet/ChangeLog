@@ -1,5 +1,9 @@
 Wed Mar 29 15:08:43 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kerberos5.c: No need to have the session_key established for
+		mutual authentication to work.  (That's only done if
+		ENCRYPTION is defined.)
+
 	* auth.c (authenticators): Allow mutual authentication even if the
 		ENCRYPTION option is not turned on.
 

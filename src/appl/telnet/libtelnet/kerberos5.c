@@ -455,12 +455,6 @@ kerberos5_reply(ap, data, cnt)
 		    inbuf.length = cnt;
 		    inbuf.data = (char *)data;
 
-		    if (!session_key.contents) {
-			printf("[ Mutual authentication failed: no session key ]\n");
-			auth_send_retry();
-			return;
-		    }
-			
 		    if (r = krb5_rd_rep(telnet_context, auth_context, &inbuf,
 					&reply)) {
 			printf("[ Mutual authentication failed: %s ]\n",
@@ -470,10 +464,12 @@ kerberos5_reply(ap, data, cnt)
 		    }
 		    krb5_free_ap_rep_enc_part(telnet_context, reply);
 #ifdef	ENCRYPTION
+		    if (!session_key.contents) {
 			skey.type = SK_DES;
 			skey.length = 8;
 			skey.data = session_key.contents;
 			encrypt_session_key(&skey, 0);
+		      }
 #endif	/* ENCRYPTION */
 		    mutual_complete = 1;
 		}
