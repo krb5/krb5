@@ -1,5 +1,8 @@
 Thu Dec  3 19:41:06 1998  Tom Yu  <tlyu@mit.edu>
 
+	* asn1_k_decode.c (asn1_decode_krb5_flags): Fix previous to
+	properly left-justify bit strings less than 32 bits.
+
 	* asn1_k_decode.c (asn1_decode_krb5_flags): Modify to deal with
 	BIT STRING values that are not exactly 32 bits.  Throw away bits
 	beyond number 31 in a bit string for now.  Deal with masking out
