@@ -225,7 +225,16 @@ main(argc, argv)
 			dest_realm = dst_realm_buf;
 			(void)strncpy(dest_realm, optarg, dst_realm_sz);
 		    }
-#else
+#endif
+#if defined(AUTHENTICATION) && defined(KRB5)
+		    {
+			extern char *telnet_krb5_realm;
+
+			telnet_krb5_realm = optarg;
+			break;
+		    }
+#endif
+#if !defined(AUTHENTICATION) || (!defined(KRB4) && !defined(KRB5))
 			fprintf(stderr,
 			   "%s: Warning: -k ignored, no Kerberos V4 support.\n",
 								prompt);

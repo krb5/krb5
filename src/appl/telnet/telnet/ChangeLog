@@ -1,3 +1,7 @@
+Fri Apr 21 12:45:40 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* main.c (main): Handle -k if KRB5 is defined. (from ian@cygnus.com)
+
 Wed Mar 29 15:39:02 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Add dependency for libtelnet.a
