@@ -615,7 +615,7 @@ initialize_realms(kcontext, argc, argv)
 		    if ((retval = init_realm(argv[0], rdatap, optarg, db_name,
 					     mkey_name, menctype,
 					     default_ports, manual))) {
-			fprintf(stderr,"%s: cannot initialize realm %s\n",
+			fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 				argv[0], optarg);
 			exit(1);
 		    }
@@ -692,13 +692,15 @@ initialize_realms(kcontext, argc, argv)
 	if ((retval = krb5_get_default_realm(kcontext, &lrealm))) {
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
+	    fprintf (stderr, "%s: %s, attempting to retrieve default realm\n",
+		     argv[0], error_message (retval));
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 	    if ((retval = init_realm(argv[0], rdatap, lrealm, db_name,
 				     mkey_name, menctype, default_ports,
 				     manual))) {
-		fprintf(stderr,"%s: cannot initialize realm %s\n",
+		fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 			argv[0], lrealm);
 		exit(1);
 	    }
@@ -794,6 +796,9 @@ int main(argc, argv)
 	    exit(1);
     }
     krb5_klog_init(kcontext, "kdc", argv[0], 1);
+    /* N.B.: After this point, com_err sends output to the KDC log
+       file, and not to stderr.  */
+
     initialize_kdc5_error_table();
 
     /*

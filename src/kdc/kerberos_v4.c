@@ -689,7 +689,7 @@ kerberos_v4(client, pkt)
 	    }
 	    ptr = (char *) pkt_time_ws(pkt) + 4;
 
-	    req_life = (u_long) (*ptr++);
+	    req_life = (u_long) (*ptr++) & 0xff;
 
 	    service = ptr;
 	    str_length_check(service, SNAME_SZ);
