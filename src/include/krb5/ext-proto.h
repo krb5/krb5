@@ -53,4 +53,8 @@ extern char *getenv();
 
 extern char *strdup PROTOTYPE((const char *));
 
+#ifdef HAS_UNISTD_H
+#include <unistd.h>
+#endif
+
 #endif /* KRB5_EXT_PROTO__ */
