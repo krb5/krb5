@@ -36,6 +36,13 @@ Thu May  2 22:48:56 1996  Mark Eichin  <eichin@cygnus.com>
 	that specifies that the "invalid flag" doesn't get checked. (This
 	version is only called from kdc_util.c:kdc_process_tgs_req.)
 
+Wed May  1 14:30:29 1996  Richard Basch  <basch@lehman.com>
+
+	* srv_rcache.c (krb5_get_server_rcache): include the uid in the
+		default server replay cachename, for systems with geteuid.
+
+	* configure.in: test if the system has geteuid()
+
 Wed May  1 02:26:53 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* str_conv.c (krb5_string_to_timestamp): double check that

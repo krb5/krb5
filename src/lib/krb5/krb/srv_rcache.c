@@ -39,6 +39,11 @@ krb5_get_server_rcache(context, piece, rcptr)
     char tmp[4];
     krb5_error_code retval;
     int len, p, i;
+
+#ifdef HAVE_GETEUID
+    unsigned long tens;
+    unsigned long uid = geteuid();
+#endif
     
     rcache = (krb5_rcache) malloc(sizeof(*rcache));
     if (!rcache)
@@ -55,6 +60,13 @@ krb5_get_server_rcache(context, piece, rcptr)
 	else if (!isgraph(piece->data[i]))
 	    len += 3;
     }
+
+#ifdef HAVE_GETEUID
+    len += 2;	/* _<uid> */
+    for (tens = 1; (uid / tens) > 9 ; tens *= 10)
+	len++;
+#endif
+    
     cachename = malloc(len);
     if (!cachename) {
 	retval = ENOMEM;
@@ -78,6 +90,15 @@ krb5_get_server_rcache(context, piece, rcptr)
 	}
 	cachename[p++] = piece->data[i];
     }
+
+#ifdef HAVE_GETEUID
+    cachename[p++] = '_';
+    while (tens) {
+	cachename[p++] = '0' + ((uid / tens) % 10);
+	tens /= 10;
+    }
+#endif
+
     cachename[p++] = '\0';
 
     if ((retval = krb5_rc_resolve(context, rcache, cachename)))
