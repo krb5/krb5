@@ -15,11 +15,14 @@
  * md4.h from RFC1186
  *
  * $Log$
- * Revision 5.1  1990/11/08 11:30:49  jtkohl
+ * Revision 5.2  1990/11/20 10:23:54  jtkohl
+ * don't need types defined here, see <encryption.h>
+ *
+ * Revision 5.1  90/11/08  11:30:49  jtkohl
  * add STDC function prototypes
  * add declaration of MDreverse
  * add Kerberos V5 additions.
- *
+ * 
  * Revision 5.0  90/11/07  14:12:21  jtkohl
  * Initial code from RFC
  * 
@@ -29,8 +32,6 @@
 
 #ifndef KRB5_RSA_MD4__
 #define KRB5_RSA_MD4__
-
-#define RSA_MD4_CKSUMTYPE	4
 
 #define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32))
 
