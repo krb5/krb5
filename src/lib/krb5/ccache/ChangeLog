@@ -1,3 +1,7 @@
+2004-10-07  Jeffrey Altman <jaltman@mit.edu>
+        * cc_mslsa.c: Fix the forced setting of the Initial Ticket Flag
+                on Win2000 and add it to XP and 2003 SP1
+
 2004-09-17  Jeffrey Altman <jaltman@mit.edu>
         * cc_mslsa.c: Fix the error returned when krb5_lcc_start_seq_get()
           discovers the cache is empty.  Check for the new error in 

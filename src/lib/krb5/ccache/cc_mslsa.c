@@ -1621,7 +1621,7 @@ GetMSCacheTicketFromCacheInfoW2K( HANDLE LogonHandle, ULONG PackageId,
      * to us.
      */
     if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_initial )
-        (*ticket)->TicketFlags &= KERB_TICKET_FLAGS_initial;
+        (*ticket)->TicketFlags |= KERB_TICKET_FLAGS_initial;
     return(TRUE);
 
 }
@@ -1679,6 +1679,14 @@ GetMSCacheTicketFromCacheInfoXP( HANDLE LogonHandle, ULONG PackageId,
     
     /* otherwise return ticket */
     *ticket = &(pTicketResponse->Ticket);
+
+    /* set the initial flag if we were attempting to retrieve one
+     * because Windows won't necessarily return the initial ticket
+     * to us.
+     */
+    if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_initial )
+        (*ticket)->TicketFlags |= KERB_TICKET_FLAGS_initial;
+
     return(TRUE);
 
 }
@@ -1737,6 +1745,14 @@ GetMSCacheTicketFromCacheInfoEX2( HANDLE LogonHandle, ULONG PackageId,
     
     /* otherwise return ticket */
     *ticket = &(pTicketResponse->Ticket);
+    
+    /* set the initial flag if we were attempting to retrieve one
+     * because Windows won't necessarily return the initial ticket
+     * to us.
+     */
+    if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_initial )
+        (*ticket)->TicketFlags |= KERB_TICKET_FLAGS_initial;
+
     return(TRUE);
 }
 #endif /* HAVE_CACHE_INFO_EX2 */
