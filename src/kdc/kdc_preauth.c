@@ -406,7 +406,7 @@ cleanup:
 	krb5_free_data_contents(context, &enc_data->ciphertext);
 	free(enc_data);
     }
-    krb5_free_data_contents(context, &enc_ts_data)
+    krb5_free_data_contents(context, &enc_ts_data);
     if (pa_enc)
 	free(pa_enc);
     return retval;
