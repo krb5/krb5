@@ -1,3 +1,7 @@
+Mon Mar 30 17:08:07 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* klist.c (main): Exit with a 0 exit status if everything okay
+
 Wed Feb 18 15:42:57 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

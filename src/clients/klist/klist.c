@@ -156,6 +156,8 @@ main(argc, argv)
 	 do_ccache(name);
     else
 	 do_keytab(name);
+
+    exit(0);
 }    
 
 void do_keytab(name)
