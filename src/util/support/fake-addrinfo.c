@@ -157,11 +157,6 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 # include <stdlib.h>		/* strtoul */
 #endif
 
-#ifdef _WIN32
-#define HAVE_GETADDRINFO 1
-#define HAVE_GETNAMEINFO 1
-#endif
-
 
 /* Do we actually have *any* systems we care about that don't provide
    either getaddrinfo or one of these two flavors of
@@ -362,6 +357,9 @@ static const char *protoname (int p, char *buf) {
 #ifdef IPPROTO_COMP
     X(COMP);
 #endif
+#ifdef IPPROTO_IGMP
+    X(IGMP);
+#endif
 
     sprintf(buf, " %-2d", p);
     return buf;
@@ -430,14 +428,15 @@ static void debug_dump_error (int err)
 static void debug_dump_addrinfos (const struct addrinfo *ai)
 {
     int count = 0;
+    char buf[10];
     fprintf(stderr, "addrinfos returned:\n");
     while (ai) {
 	fprintf(stderr, "%p...", ai);
-	fprintf(stderr, " socktype=%s", socktypename(ai->ai_socktype));
-	fprintf(stderr, " ai_family=%s", familyname(ai->ai_family));
+	fprintf(stderr, " socktype=%s", socktypename(ai->ai_socktype, buf));
+	fprintf(stderr, " ai_family=%s", familyname(ai->ai_family, buf));
 	if (ai->ai_family != ai->ai_addr->sa_family)
 	    fprintf(stderr, " sa_family=%s",
-		    familyname(ai->ai_addr->sa_family));
+		    familyname(ai->ai_addr->sa_family, buf));
 	fprintf(stderr, "\n");
 	ai = ai->ai_next;
 	count++;

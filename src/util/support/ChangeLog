@@ -1,3 +1,11 @@
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (HAVE_GETADDRINFO, HAVE_GETNAMEINFO)[_WIN32]:
+	Don't define here.
+	(protoname): Handle IPPROTO_IGMP.
+	(debug_dump_addrinfo_args): Update for current interfaces to
+	socktypename and familyname.
+
 2004-11-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* cache-addrinfo.h, init-addrinfo.c: New files, split out from
