@@ -90,7 +90,7 @@ char *argv[];
      * If user specified a port, then listen on that port; otherwise,
      * assume we've been started out of inetd.
      */
-    if (argc > 2) {
+    if (argc > 1) {
 	int acc;
 	struct sockaddr_in sin;
 
