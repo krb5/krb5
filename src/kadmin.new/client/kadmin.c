@@ -52,7 +52,7 @@ static struct pflag flags[] = {
 {"allow_dup_skey",	14,	KRB5_KDB_DISALLOW_DUP_SKEY,	1},
 {"allow_tix",		9,	KRB5_KDB_DISALLOW_ALL_TIX,	1},
 {"requires_preauth",	16,	KRB5_KDB_REQUIRES_PRE_AUTH,	0},
-{"requres_hwauth",	14,	KRB5_KDB_REQUIRES_HW_AUTH,	0},
+{"requires_hwauth",	15,	KRB5_KDB_REQUIRES_HW_AUTH,	0},
 {"needchange",		10,	KRB5_KDB_REQUIRES_PWCHANGE,	0},
 {"allow_svr",		9,	KRB5_KDB_DISALLOW_SVR,		1},
 {"password_changing_service",	25,	KRB5_KDB_PWCHANGE_SERVICE,	0 }
@@ -79,12 +79,44 @@ char *getenv();
 struct passwd *getpwuid();
 int exit_status = 0;
 char *def_realm = NULL;
+time_t get_date();
+
+void *ovsec_hndl = NULL;
 
 void usage()
 {
     fprintf(stderr,
 	    "usage: kadmin [-r realm] [-p principal] [-k keytab] [-q query]\n");
     exit(1);
+}
+
+char *strdur(duration)
+    time_t duration;
+{
+    static char out[50];
+    int days, hours, minutes, seconds;
+    
+    days = duration / (24 * 3600);
+    duration %= 24 * 3600;
+    hours = duration / 3600;
+    duration %= 3600;
+    minutes = duration / 60;
+    duration %= 60;
+    seconds = duration;
+    sprintf(out, "%d %s %02d:%02d:%02d", days, days == 1 ? "day" : "days",
+	    hours, minutes, seconds);
+    return out;
+}
+
+char *strdate(when)
+    time_t when;
+{
+    struct tm *tm;
+    static char out[30];
+    
+    tm = localtime(&when);
+    strftime(out, 30, "%a %b %d %H:%M:%S %Z %Y", tm);
+    return out;
 }
 
 /* this is a wrapper to go around krb5_parse_principal so we can set
@@ -226,8 +258,12 @@ char *kadmin_startup(argc, argv)
 	    exit(1);
 	}
     }
-    retval = ovsec_kadm_init(princstr, NULL, OVSEC_KADM_ADMIN_SERVICE,
-			     def_realm);
+    retval = ovsec_kadm_init_with_password(princstr, NULL,
+					   OVSEC_KADM_ADMIN_SERVICE, 
+					   def_realm,
+					   OVSEC_KADM_STRUCT_VERSION,
+					   OVSEC_KADM_API_VERSION_1,
+					   &ovsec_hndl);
     if (freeprinc)
 	free(princstr);
     if (retval) {		/* assume kadm_init does init_ets() */
@@ -239,7 +275,7 @@ char *kadmin_startup(argc, argv)
 
 int quit()
 {
-    ovsec_kadm_destroy();
+    ovsec_kadm_destroy(ovsec_hndl);
     /* insert more random cleanup here */
 }
 
@@ -283,7 +319,7 @@ void kadmin_delprinc(argc, argv)
 	    return;
 	}
     }
-    retval = ovsec_kadm_delete_principal(princ);
+    retval = ovsec_kadm_delete_principal(ovsec_hndl, princ);
     krb5_free_principal(princ);
     if (retval) {
 	com_err("delete_principal", retval,
@@ -357,7 +393,7 @@ void kadmin_renprinc(argc, argv)
 	    return;
 	}
     }
-    retval = ovsec_kadm_rename_principal(oldprinc, newprinc);
+    retval = ovsec_kadm_rename_principal(ovsec_hndl, oldprinc, newprinc);
     krb5_free_principal(oldprinc);
     krb5_free_principal(newprinc);
     if (retval) {
@@ -399,7 +435,7 @@ void kadmin_cpw(argc, argv)
 	return;
     }
     if ((argc == 4) && (strlen(argv[1]) == 3) && !strcmp("-pw", argv[1])) {
-	retval = ovsec_kadm_chpass_principal(princ, argv[2]);
+	retval = ovsec_kadm_chpass_principal(ovsec_hndl, princ, argv[2]);
 	krb5_free_principal(princ);
 	if (retval) {
 	    com_err("change_password", retval,
@@ -413,7 +449,7 @@ void kadmin_cpw(argc, argv)
     } else if ((argc == 3) && (strlen(argv[1]) == 8) &&
 	       !strcmp("-randkey", argv[1])) {
 	krb5_keyblock *newkey = NULL;
-	retval = ovsec_kadm_randkey_principal(princ, &newkey);
+	retval = ovsec_kadm_randkey_principal(ovsec_hndl, princ, &newkey);
 	krb5_free_principal(princ);
 	if (retval) {
 	    com_err("change_password", retval,
@@ -422,6 +458,7 @@ void kadmin_cpw(argc, argv)
 	    return;
 	}
 	memset(newkey->contents, 0, newkey->length);
+	krb5_free_keyblock(newkey);
 	printf("Key for \"%s\" randomized.\n", canon);
 	free(canon);
 	return;
@@ -442,7 +479,7 @@ void kadmin_cpw(argc, argv)
 	    krb5_free_principal(princ);
 	    return;
 	}
-	retval = ovsec_kadm_chpass_principal(princ, newpw);
+	retval = ovsec_kadm_chpass_principal(ovsec_hndl, princ, newpw);
 	krb5_free_principal(princ);
 	memset(newpw, 0, sizeof (newpw));
 	if (retval) {
@@ -461,27 +498,33 @@ void kadmin_cpw(argc, argv)
     return;
 }
 
-int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, caller)
+int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
     int argc;
     char *argv[];
     ovsec_kadm_principal_ent_t oprinc;
     u_int32 *mask;
-    char **pass, *caller;
+    char **pass;
+    int *randkey;
+    char *caller;
 {
-    int i, j;
+    int i, j, attrib_set;
+    time_t date;
     struct timeb now;
     krb5_error_code retval;
     
     *mask = 0;
     *pass = NULL;
     ftime(&now);
+    *randkey = 0;
     for (i = 1; i < argc - 1; i++) {
+	attrib_set = 0;
 	if (strlen(argv[i]) == 7 &&
 	    !strcmp("-expire", argv[i])) {
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		oprinc->princ_expire_time = get_date(argv[i], now);
+		date = get_date(argv[i], now);
+		oprinc->princ_expire_time = date == (time_t)-1 ? 0 : date;
 		*mask |= OVSEC_KADM_PRINC_EXPIRE_TIME;
 		continue;
 	    }
@@ -491,7 +534,8 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		oprinc->pw_expiration = get_date(argv[i], now);
+		date = get_date(argv[i], now);
+		oprinc->pw_expiration = date == (time_t)-1 ? 0 : date;
 		*mask |= OVSEC_KADM_PW_EXPIRATION;
 		continue;
 	    }
@@ -541,6 +585,11 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, caller)
 		continue;
 	    }
 	}
+	if (strlen(argv[i]) == 8 &&
+	    !strcmp("-randkey", argv[i])) {
+	    ++*randkey;
+	    continue;
+	}
 	for (j = 0; j < sizeof (flags) / sizeof (struct pflag); j++) {
 	    if (strlen(argv[i]) == flags[j].flaglen + 1 &&
 		!strcmp(flags[j].flagname,
@@ -549,18 +598,21 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, caller)
 		    !flags[j].set && argv[i][0] == '+') {
 		    oprinc->attributes |= flags[j].theflag;
 		    *mask |= OVSEC_KADM_ATTRIBUTES;
+		    attrib_set++;
 		    break;
 		} else if (flags[j].set && argv[i][0] == '+' ||
 			   !flags[j].set && argv[i][0] == '-') {
 		    oprinc->attributes &= ~flags[j].theflag;
 		    *mask |= OVSEC_KADM_ATTRIBUTES;
+		    attrib_set++;
 		    break;
 		} else {
 		    return -1;
 		}
 	    }
 	}
-	return -1;
+	if (!attrib_set)
+	    return -1;		/* nothing was parsed */
     }
     if (i != argc - 1) {
 	fprintf(stderr, "%s: parser lost count!\n", caller);
@@ -580,6 +632,7 @@ void kadmin_addprinc(argc, argv)
 {
     ovsec_kadm_principal_ent_rec princ;
     u_int32 mask;
+    int randkey = 0;
     char *pass, *canon;
     krb5_error_code retval;
     static char newpw[1024];
@@ -587,7 +640,8 @@ void kadmin_addprinc(argc, argv)
     
     princ.attributes = 0;
     if (kadmin_parse_princ_args(argc, argv,
-				&princ, &mask, &pass, "add_principal")) {
+				&princ, &mask, &pass, &randkey,
+				"add_principal")) {
 	fprintf(stderr, "add_principal: bad arguments\n");
 	return;
     }
@@ -598,14 +652,18 @@ void kadmin_addprinc(argc, argv)
 	krb5_free_principal(princ.principal);
 	return;
     }
-    if (pass == NULL) {
+    if (randkey) {		/* do special stuff if -randkey specified */
+	princ.attributes |= KRB5_KDB_DISALLOW_ALL_TIX; /* set notix */
+	mask |= OVSEC_KADM_ATTRIBUTES;
+	pass = "dummy";
+    } else if (pass == NULL) {
 	int i = sizeof (newpw) - 1;
 	
 	sprintf(prompt1, "Enter password for principal \"%.900s\": ",
-		argv[1]);
+		canon);
 	sprintf(prompt2,
 		"Re-enter password for principal \"%.900s\": ",
-		argv[1]);
+		canon);
 	retval = krb5_read_password(prompt1, prompt2,
 				    newpw, &i);
 	if (retval) {
@@ -618,14 +676,39 @@ void kadmin_addprinc(argc, argv)
 	pass = newpw;
     }
     mask |= OVSEC_KADM_PRINCIPAL;
-    retval = ovsec_kadm_create_principal(&princ, mask, pass);
-    krb5_free_principal(princ.principal);
+    retval = ovsec_kadm_create_principal(ovsec_hndl, &princ, mask, pass);
     if (retval) {
 	com_err("add_principal", retval, "while creating \"%s\".",
 		canon);
+	krb5_free_principal(princ.principal);
 	free(canon);
 	return;
     }
+    if (randkey) {		/* more special stuff for -randkey */
+    	krb5_keyblock *newkey = NULL;
+	retval = ovsec_kadm_randkey_principal(ovsec_hndl, princ.principal,
+					      &newkey);
+	if (retval) {
+	    com_err("add_principal", retval,
+		    "while randomizing key for \"%s\".", canon);
+	    krb5_free_principal(princ.principal);
+	    free(canon);
+	    return;
+	}
+	memset(newkey->contents, 0, newkey->length);
+	krb5_free_keyblock(newkey);
+	princ.attributes &= ~KRB5_KDB_DISALLOW_ALL_TIX;	/* clear notix */
+	mask = OVSEC_KADM_ATTRIBUTES;
+	retval = ovsec_kadm_modify_principal(ovsec_hndl, &princ, mask);
+	if (retval) {
+	    com_err("add_principal", retval,
+		    "while clearing DISALLOW_ALL_TIX for \"%s\".", canon);
+	    krb5_free_principal(princ.principal);
+	    free(canon);
+	    return;
+	}
+    }
+    krb5_free_principal(princ.principal);
     printf("Principal \"%s\" created.\n", canon);
     free(canon);
 }
@@ -635,29 +718,61 @@ void kadmin_modprinc(argc, argv)
     char *argv[];
 {
     ovsec_kadm_principal_ent_rec princ;
+    ovsec_kadm_principal_ent_t oldprinc;
+    krb5_principal kprinc;
     u_int32 mask;
     krb5_error_code retval;
     char *pass, *canon;
-    
-    princ.attributes = 0;
-    if (kadmin_parse_princ_args(argc, argv,
-				&princ, &mask, &pass, "modify_principal")) {
-	fprintf(stderr, "modify_principal: bad arguments\n");
+    int randkey = 0;
+
+    retval = kadmin_parse_name(argv[argc - 1], &kprinc);
+    if (retval) {
+	com_err("modify_principal", retval, "while parsing principal");
 	return;
     }
-    retval = krb5_unparse_name(princ.principal, &canon);
+    retval = krb5_unparse_name(kprinc, &canon);
     if (retval) {
 	com_err("modify_principal", retval,
 		"while canonicalizing principal");
-	krb5_free_principal(princ.principal);
+	krb5_free_principal(kprinc);
 	return;
     }
-    retval = ovsec_kadm_modify_principal(&princ, mask);
+    retval = ovsec_kadm_get_principal(ovsec_hndl, kprinc, &oldprinc);
+    krb5_free_principal(kprinc);
     if (retval) {
-	com_err("modify_principal", retval, "while modifying \"%s\".",
-		argv[argc - 1]);
+	com_err("modify_principal", retval, "while getting \"%s\".",
+		canon);
+	free(canon);
 	return;
     }
+    princ.attributes = oldprinc->attributes;
+    ovsec_kadm_free_principal_ent(ovsec_hndl, oldprinc);
+    retval = kadmin_parse_princ_args(argc, argv,
+				     &princ, &mask,
+				     &pass, &randkey,
+				     "modify_principal");
+    if (retval) {
+	fprintf(stderr, "modify_principal: bad arguments\n");
+	krb5_free_principal(princ.principal);
+	free(canon);
+	return;
+    }
+    if (randkey) {
+	fprintf(stderr, "modify_principal: -randkey not allowed\n");
+	krb5_free_principal(princ.principal);
+	free(canon);
+	return;
+    }
+    retval = ovsec_kadm_modify_principal(ovsec_hndl, &princ, mask);
+    krb5_free_principal(princ.principal);
+    if (retval) {
+	com_err("modify_principal", retval,
+		"while modifying \"%s\".", canon);
+	free(canon);
+	return;
+    }
+    printf("Principal \"%s\" modified.\n", canon);
+    free(canon);
 }
 
 void kadmin_getprinc(argc, argv)
@@ -690,7 +805,7 @@ void kadmin_getprinc(argc, argv)
 	krb5_free_principal(princ);
 	return;
     }
-    retval = ovsec_kadm_get_principal(princ, &dprinc);
+    retval = ovsec_kadm_get_principal(ovsec_hndl, princ, &dprinc);
     krb5_free_principal(princ);
     if (retval) {
 	com_err("get_principal", retval, "while retrieving \"%s\".", canon);
@@ -700,19 +815,22 @@ void kadmin_getprinc(argc, argv)
     retval = krb5_unparse_name(dprinc->mod_name, &modcanon);
     if (retval) {
 	com_err("get_principal", retval, "while unparsing modname");
-	ovsec_kadm_free_principal_ent(dprinc);
+	ovsec_kadm_free_principal_ent(ovsec_hndl, dprinc);
 	free(canon);
 	return;
     }
     if (argc == 2) {
 	printf("Principal: %s\n", canon);
-	printf("Expiration date: %d\n", dprinc->princ_expire_time);
-	printf("Last password change: %d\n", dprinc->last_pwd_change);
-	printf("Password expiration date: %d\n", dprinc->pw_expiration);
-	printf("Maximum life: %d\n", dprinc->max_life);
-	printf("Last modified: by %s\n\ton %d\n",
-	       modcanon, dprinc->mod_date);
-	printf("Attributes: ");
+	printf("Expiration date: %s\n", strdate(dprinc->princ_expire_time));
+	printf("Last password change: %s\n",
+	       strdate(dprinc->last_pwd_change));
+	printf("Password expiration date: %s\n",
+	       dprinc->pw_expiration ?
+	       strdate(dprinc->pw_expiration) : "[none]");
+	printf("Maximum life: %s\n", strdur(dprinc->max_life));
+	printf("Last modified: by %s\n\ton %s\n",
+	       modcanon, strdate(dprinc->mod_date));
+	printf("Attributes:");
 	for (i = 0; i < sizeof (prflags) / sizeof (char *); i++) {
 	    if (dprinc->attributes & (krb5_flags) 1 << i)
 		printf(" %s", prflags[i]);
@@ -720,7 +838,7 @@ void kadmin_getprinc(argc, argv)
 	printf("\n");
 	printf("Key version: %d\n", dprinc->kvno);
 	printf("Master key version: %d\n", dprinc->mkvno);
-	printf("Policy: %s\n", dprinc->policy);
+	printf("Policy: %s\n", dprinc->policy ? dprinc->policy : "[none]");
     } else {
 	printf("\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\n",
 	       canon, dprinc->princ_expire_time, dprinc->last_pwd_change,
@@ -729,7 +847,7 @@ void kadmin_getprinc(argc, argv)
 	       dprinc->mkvno, dprinc->policy);
     }
     free(modcanon);
-    ovsec_kadm_free_principal_ent(dprinc);
+    ovsec_kadm_free_principal_ent(ovsec_hndl, dprinc);
     free(canon);
 }
 
@@ -742,6 +860,7 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 {
     int i;
     struct timeb now;
+    time_t date;
     krb5_error_code retval;
 
     ftime(&now);
@@ -752,7 +871,9 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 	    if (++i > argc -2)
 		return -1;
 	    else {
-		policy->pw_max_life = get_date(argv[i], now) - now.time;
+		date = get_date(argv[i], now);
+		policy->pw_max_life =
+		    (date == (time_t)-1 ? 0 : date) - now.time;
 		*mask |= OVSEC_KADM_PW_MAX_LIFE;
 		continue;
 	    }
@@ -761,7 +882,9 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		policy->pw_min_life = get_date(argv[i], now) - now.time;
+		date = get_date(argv[i], now);
+		policy->pw_min_life =
+		    (date == (time_t)-1 ? 0 : date) - now.time;
 		*mask |= OVSEC_KADM_PW_MIN_LIFE;
 		continue;
 	    }
@@ -816,7 +939,7 @@ void kadmin_addpol(argc, argv)
     } else {
 	policy.policy = argv[argc - 1];
 	mask |= OVSEC_KADM_POLICY;
-	retval = ovsec_kadm_create_policy(&policy, mask);
+	retval = ovsec_kadm_create_policy(ovsec_hndl, &policy, mask);
 	if (retval) {
 	    com_err("add_policy", retval, "while creating policy \"%s\".",
 		    policy.policy);
@@ -840,7 +963,7 @@ void kadmin_modpol(argc, argv)
 	return;
     } else {
 	policy.policy = argv[argc - 1];
-	retval = ovsec_kadm_modify_policy(&policy, mask);
+	retval = ovsec_kadm_modify_policy(ovsec_hndl, &policy, mask);
 	if (retval) {
 	    com_err("modify_policy", retval, "while modifying policy \"%s\".",
 		    policy.policy);
@@ -874,7 +997,7 @@ void kadmin_delpol(argc, argv)
 	    return;
 	}
     }
-    retval = ovsec_kadm_delete_policy(argv[argc - 1]);
+    retval = ovsec_kadm_delete_policy(ovsec_hndl, argv[argc - 1]);
     if (retval) {
 	com_err("delete_policy:", retval, "while deleting policy \"%s\"",
 		argv[argc - 1]);
@@ -899,7 +1022,7 @@ void kadmin_getpol(argc, argv)
 	fprintf(stderr, "get_policy: bad arguments\n");
 	return;
     }
-    retval = ovsec_kadm_get_policy(argv[argc - 1], &policy);
+    retval = ovsec_kadm_get_policy(ovsec_hndl, argv[argc - 1], &policy);
     if (retval) {
 	com_err("get_policy", retval, "while retrieving policy \"%s\".",
 		argv[argc - 1]);
@@ -920,7 +1043,7 @@ void kadmin_getpol(argc, argv)
 	       policy->pw_min_length, policy->pw_min_classes,
 	       policy->pw_history_num, policy->policy_refcnt);
     }
-    ovsec_kadm_free_policy_ent(policy);
+    ovsec_kadm_free_policy_ent(ovsec_hndl, policy);
     return;
 }
 
@@ -937,7 +1060,7 @@ kadmin_getprivs(argc, argv)
 	fprintf(stderr, "get_privs: bad arguments\n");
 	return;
     }
-    retval = ovsec_kadm_get_privs(&plist);
+    retval = ovsec_kadm_get_privs(ovsec_hndl, &plist);
     if (retval) {
 	com_err("get_privs", retval, "while retrieving privileges");
 	return;

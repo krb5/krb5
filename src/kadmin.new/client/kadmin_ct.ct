@@ -62,3 +62,6 @@ request	ss_list_requests, "List available requests.",
 
 request	ss_quit, "Exit program.",
 	quit, exit, q;
+
+end;
+

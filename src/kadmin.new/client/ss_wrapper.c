@@ -28,6 +28,7 @@
 
 extern ss_request_table kadmin_cmds;
 extern int exit_status;
+extern char *kadmin_startup();
 
 int main(argc, argv)
     int argc;

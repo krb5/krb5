@@ -1,13 +1,13 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(OVSECINC)
-OVSECROOT=/home/tlyu/ovsecure
-OVSECSTAGE=/afs/dev.mit.edu/reference/ovsecure/sunos/stage
+OVSECROOT=/home/tlyu/ovsecure/install
+OVSECSTAGE=/home/tlyu/ovsecure/stage
 OVSECINC=-I$(OVSECROOT)/include -I$(OVSECSTAGE)/include
-OVSECLIB=-L$(OVSECSTAGE)/lib -lclient -lcommon -lrpclib -ldyn
+OVSECLIB=-L$(OVSECSTAGE)/lib -ladmclnt -lrpclib -ldyn
 LDFLAGS = -g
 LIBOBJS=@LIBOBJS@
 ISODELIB=$(OVSECROOT)/lib/libisode.a
 COMERRLIB=$(OVSECROOT)/lib/libcom_err.a
-SSLIB=$(OVSECSTAGE)/lib/libss.a
+SSLIB=$(BUILDTOP)/util/ss/libss.a
 DBMLIB=$(OVSECROOT)/lib/libdb.a
 KDBLIB=$(OVSECROOT)/lib/libkdb5.a 
 
