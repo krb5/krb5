@@ -1,5 +1,8 @@
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
+	* sendto_kdc.c (merge_addrlists): Truncate source address list
+	after copying its data into the destination list.
+
 	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
 
 2002-08-22  Ken Raeburn  <raeburn@mit.edu>

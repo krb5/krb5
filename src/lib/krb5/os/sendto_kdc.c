@@ -205,6 +205,7 @@ merge_addrlists (struct addrlist *dest, struct addrlist *src)
 	src->addrs[i] = 0;
     }
     dest->naddrs += i;
+    src->naddrs = 0;
 
     dprint("\tout:   ");
     for (i = 0; i < dest->naddrs; i++)
