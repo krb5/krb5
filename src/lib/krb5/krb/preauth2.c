@@ -256,6 +256,9 @@ krb5_error_code pa_sam(krb5_context context,
     krb5_data *			scratch;
     krb5_pa_data *		pa;
 
+    if (prompter == NULL)
+	return KRB5_LIBOS_CANTREADPWD;
+
     tmpsam.length = in_padata->length;
     tmpsam.data = (char *) in_padata->contents;
     if (ret = decode_krb5_sam_challenge(&tmpsam, &sam_challenge))
