@@ -1,3 +1,9 @@
+1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* stime.c (krb_stime): 
+	* log.c (krb_new_log, krb_log): 
+	* klog.c (klog): Print the year using 4 digits to avoid Y2K issues.
+
 Sun Apr  5 19:51:21 1998  Tom Yu  <tlyu@mit.edu>
 
 	* g_cnffile.c (krb__get_srvtabname): Fix up to not free context
