@@ -303,6 +303,12 @@ kadm5_ret_t    kadm5_destroy(void *server_handle);
 kadm5_ret_t    kadm5_create_principal(void *server_handle,
 				      kadm5_principal_ent_t ent,
 				      long mask, char *pass);
+kadm5_ret_t    kadm5_create_principal_3(void *server_handle,
+					kadm5_principal_ent_t ent,
+					long mask, krb5_boolean keepold,
+					int n_ks_tuple,
+					krb5_key_salt_tuple *ks_tuple,
+					char *pass);
 kadm5_ret_t    kadm5_delete_principal(void *server_handle,
 				      krb5_principal principal);
 kadm5_ret_t    kadm5_modify_principal(void *server_handle,
@@ -323,6 +329,12 @@ kadm5_ret_t    kadm5_get_principal(void *server_handle,
 kadm5_ret_t    kadm5_chpass_principal(void *server_handle,
 				      krb5_principal principal,
 				      char *pass);
+kadm5_ret_t    kadm5_chpass_principal_3(void *server_handle,
+					krb5_principal principal,
+					krb5_boolean keepold,
+					int n_ks_tuple,
+					krb5_key_salt_tuple *ks_tuple,
+					char *pass);
 #if USE_KADM5_API_VERSION == 1
 kadm5_ret_t    kadm5_randkey_principal(void *server_handle,
 				       krb5_principal principal,
@@ -332,6 +344,13 @@ kadm5_ret_t    kadm5_randkey_principal(void *server_handle,
 				       krb5_principal principal,
 				       krb5_keyblock **keyblocks,
 				       int *n_keys);
+kadm5_ret_t    kadm5_randkey_principal_3(void *server_handle,
+					 krb5_principal principal,
+					 krb5_boolean keepold,
+					 int n_ks_tuple,
+					 krb5_key_salt_tuple *ks_tuple,
+					 krb5_keyblock **keyblocks,
+					 int *n_keys);
 #endif
 kadm5_ret_t    kadm5_setv4key_principal(void *server_handle,
 					krb5_principal principal,
