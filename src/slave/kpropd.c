@@ -82,6 +82,10 @@
 
 #include "kprop.h"
 
+#if defined(NEED_DAEMON_PROTO)
+extern int daemon(int, int);
+#endif
+
 #define SYSLOG_CLASS LOG_DAEMON
 
 static char *kprop_version = KPROP_PROT_VERSION;
