@@ -587,11 +587,16 @@ struct krb5_cksumtypes {
     unsigned int flags;
     char *in_string;
     char *out_string;
+    /* if the hash is keyed, this is the etype it is keyed with.
+       Actually, it can be keyed by any etype which has the same
+       enc_provider as the specified etype.  DERIVE checksums can
+       be keyed with any valid etype. */
+    krb5_enctype keyed_etype;
     /* I can't statically initialize a union, so I'm just going to use
-       two pointers here.  The keyhash is used if non-NULL, otherwise
-       hash is used.  HMAC/hash with derived keys is used if the
-       relevant flag is set.  This is all kind of messy, but so is the
-       krb5 api. */
+       two pointers here.  The keyhash is used if non-NULL.  If NULL,
+       then HMAC/hash with derived keys is used if the relevant flag
+       is set.  Otherwise, a non-keyed hash is computed.  This is all
+       kind of messy, but so is the krb5 api. */
     struct krb5_keyhash_provider *keyhash;
     struct krb5_hash_provider *hash;
 };
