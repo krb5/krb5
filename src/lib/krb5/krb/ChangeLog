@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* appdefault.c (conf_yes, conf_no): Now const.
+
 2003-01-07  Sam Hartman  <hartmans@mit.edu>
 
 	* mk_req_ext.c (krb5_mk_req_extended): Fix logic error in checksum function handling
