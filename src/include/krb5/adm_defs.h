@@ -33,7 +33,6 @@
 #define ADM5_VERSIZE		strlen(ADM5_VERSTR)
 /* This used to be kerberos_master */
 #define ADM5_PORTNAME		"kerberos_adm"
-#define DEFAULT_ACL_NAME	"/krb5/admin_acl_file"
 #define ADM5_CPW_VERSION	"V5CPWS01"
 #define ADM5_ADM_VERSION	"V5ADMS01"
 #define CPWNAME			"kadmin"
