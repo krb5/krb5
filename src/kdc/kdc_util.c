@@ -101,19 +101,12 @@ OLDDECLARG(krb5_kvno, vno)
 OLDDECLARG(krb5_keyblock **, key)
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
-    register krb5_keyblock *newkey;
-    krb5_error_code retval;
 
     if (vno != whoisit->dbentry->kvno)
 	return KRB5KRB_AP_ERR_BADKEYVER;
     if (!krb5_principal_compare(principal, whoisit->dbentry->principal))
 	return KRB5KRB_AP_ERR_NOKEY;
-    if (!(newkey = (krb5_keyblock *)malloc(sizeof(*newkey))))
-	return ENOMEM;
-    if (retval = krb5_copy_keyblock(whoisit->key, newkey))
-	return retval;
-    *key = newkey;
-    return 0;
+    return(krb5_copy_keyblock(whoisit->key, key));
 }
 
 
@@ -128,7 +121,7 @@ krb5_ticket **ticket;
     krb5_boolean more;
     krb5_db_entry server;
     krb5_keyblock encrypting_key;
-    krb5_tkt_authent authdat;
+    krb5_tkt_authent *authdat;
     struct kparg who;
     krb5_error_code retval;
     krb5_checksum our_cksum;
@@ -221,17 +214,15 @@ krb5_ticket **ticket;
 
     /* now rearrange output from rd_req_decoded */
 
-    our_cksum.checksum_type = authdat.authenticator->checksum->checksum_type;
+    our_cksum.checksum_type = authdat->authenticator->checksum->checksum_type;
     if (!valid_cksumtype(our_cksum.checksum_type)) {
-	krb5_free_authenticator(authdat.authenticator);
-	krb5_free_ticket(authdat.ticket);
+	krb5_free_tkt_authent(authdat);
 	cleanup_apreq();
 	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
     }	
     /* must be collision proof */
     if (!is_coll_proof_cksum(our_cksum.checksum_type)) {
-	krb5_free_authenticator(authdat.authenticator);
-	krb5_free_ticket(authdat.ticket);
+	krb5_free_tkt_authent(authdat);
 	cleanup_apreq();
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
     }
@@ -239,16 +230,14 @@ krb5_ticket **ticket;
     /* check application checksum vs. tgs request */
     if (!(our_cksum.contents = (krb5_octet *)
 	  malloc(krb5_cksumarray[our_cksum.checksum_type]->checksum_length))) {
-	krb5_free_authenticator(authdat.authenticator);
-	krb5_free_ticket(authdat.ticket);
+	krb5_free_tkt_authent(authdat);
 	cleanup_apreq();
 	return ENOMEM; /* XXX cktype nosupp */
     }
 
     /* encode the body, verify the checksum */
     if (retval = encode_krb5_kdc_req_body(request, &scratch)) {
-	krb5_free_authenticator(authdat.authenticator);
-	krb5_free_ticket(authdat.ticket);
+	krb5_free_tkt_authent(authdat);
 	cleanup_apreq();
 	return retval; /* XXX should be in kdc range */
     }
@@ -256,22 +245,20 @@ krb5_ticket **ticket;
     if (retval = (*krb5_cksumarray[our_cksum.checksum_type]->
 		  sum_func)(scratch->data,
 			    scratch->length,
-			    authdat.ticket->enc_part2->session->contents, /* seed */
-			    authdat.ticket->enc_part2->session->length,	/* seed length */
+			    authdat->ticket->enc_part2->session->contents, /* seed */
+			    authdat->ticket->enc_part2->session->length,	/* seed length */
 			    &our_cksum)) {
-	krb5_free_authenticator(authdat.authenticator);
-	krb5_free_ticket(authdat.ticket);
+	krb5_free_tkt_authent(authdat);
 	xfree(our_cksum.contents);
 	xfree(scratch->data);
 	cleanup_apreq();
 	return retval;
     }
-    if (our_cksum.length != authdat.authenticator->checksum->length ||
+    if (our_cksum.length != authdat->authenticator->checksum->length ||
 	memcmp((char *)our_cksum.contents,
-	       (char *)authdat.authenticator->checksum->contents,
+	       (char *)authdat->authenticator->checksum->contents,
 	       our_cksum.length)) {
-	krb5_free_authenticator(authdat.authenticator);
-	krb5_free_ticket(authdat.ticket);
+	krb5_free_tkt_authent(authdat);
 	xfree(our_cksum.contents);
 	xfree(scratch->data);
 	cleanup_apreq();
@@ -280,11 +267,7 @@ krb5_ticket **ticket;
     xfree(scratch->data);
     xfree(our_cksum.contents);
 
-    /* don't need authenticator anymore */
-    krb5_free_authenticator(authdat.authenticator);
-
-    /* ticket already filled in by rd_req_dec, so free the ticket */
-    krb5_free_ticket(authdat.ticket);
+    krb5_free_tkt_authent(authdat);
     cleanup_apreq();
     return 0;
 }
