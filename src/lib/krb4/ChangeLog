@@ -1,5 +1,8 @@
 Mon Aug  7 18:40:34 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in (SRCS): Include $(NETIO_SRCS) in the list of source
+		files, instead of $(NETIO_OBJS)
+
 	* tf_util.c (utimes): If __SVR4 is defined, #include <utime.h>,
 		just as we do if __svr4__ is defined.
 
