@@ -28,6 +28,12 @@ SLIBSH=sed -e 's|@''CC''@|$(CC)|g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@
 all-recurse: libupdate makeshlib
 all-mac::
 
+$(FAKEPREFIX)/lib:
+	$(SRCTOP)/config/mkinstalldirs $(FAKEPREFIX) && ln -s `pwd`/../lib $(FAKEPREFIX)
+
+clean-unix::
+	$(RM) -r $(FAKEPREFIX)
+
 NO_OUTDIR=1
 all-windows::
 	@echo Making in util\windows
