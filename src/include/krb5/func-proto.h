@@ -140,6 +140,14 @@ krb5_error_code krb5_rd_req_decoded
 		   const krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
+krb5_error_code krb5_mk_rep
+	PROTOTYPE((const krb5_ap_rep_enc_part *,
+		   const krb5_keyblock *,
+		   krb5_data *));
+krb5_error_code krb5_rd_rep
+	PROTOTYPE((const krb5_data *,
+		   const krb5_keyblock *,
+		   krb5_ap_rep_enc_part *));
 krb5_error_code krb5_mk_error
 	PROTOTYPE((const krb5_error *,
 		   krb5_data * ));
