@@ -26,8 +26,8 @@ LINK 	 = link
 LIBS 	 = $(KLIB) $(CLIB) $(WLIB)
 ##WIN16##SYSLIBS  = libw llibcew
 ##WIN16##LFLAGS  = /nologo /nod /nopackcode
-##WIN32##LFLAGS	 = /nologo /nod
-##WIN32##SYSLIBS = libc.lib kernel32.lib wsock32.lib user32.lib gdi32.lib
+##WIN32##LFLAGS	 = /nologo
+##WIN32##SYSLIBS = kernel32.lib wsock32.lib user32.lib gdi32.lib
 
 all:: makefile $(NAME).exe
 

@@ -1,3 +1,8 @@
+Mon Jul 28 23:35:49 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Take out the /nod option, and remove libc.lib from
+ 		the list of libraries to be linked.
+
 Sat Feb 15 12:22:54 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Link in ComErr library $(CLIB)

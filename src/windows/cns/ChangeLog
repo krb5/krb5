@@ -1,3 +1,8 @@
+Mon Jul 28 23:33:11 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Take out the /nod option, and remove libc.lib from
+ 		the list of libraries to be linked.
+
 Mon Feb 17 13:58:06 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Winsock library is still required for win16

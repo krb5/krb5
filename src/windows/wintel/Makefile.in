@@ -32,14 +32,14 @@ CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT)
 LINK 	 = link
 LIBS 	 = $(KLIB) $(CLIB) $(WLIB)
 ##WIN16##SYSLIBS  = libw llibcew commdlg winsock
-##WIN32##SYSLIBS  = libc.lib kernel32.lib wsock32.lib user32.lib gdi32.lib \
+##WIN32##SYSLIBS  = kernel32.lib wsock32.lib user32.lib gdi32.lib \
 ##WIN32##	  comdlg32.lib
 !if defined(DEBUG)
 ##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
-##WIN32##LFLAGS = /nologo /nod /debug
+##WIN32##LFLAGS = /nologo /debug
 !else
 ##WIN16##LFLAGS = /nologo /nod /nopackcode
-##WIN32##LFLAGS	= /nologo /nod
+##WIN32##LFLAGS	= /nologo
 !endif
 
 all:: makefile telnet.exe

@@ -1,5 +1,8 @@
 Mon Jul 28 23:30:03 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* Makefile.in: Take out the /nod option, and remove libc.lib from
+ 		the list of libraries to be linked.
+
 	* gss-misc.c: Add additional debugging messages so we can see the
 		winsock error numbers.
 
