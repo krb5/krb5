@@ -59,7 +59,7 @@ krb5_error_code krb5_db_fini
 	PROTOTYPE((void ));
 krb5_error_code krb5_db_get_age
 	PROTOTYPE((char *,
-		   krb5_timestamp * ));
+		   time_t * ));
 krb5_error_code krb5_db_create
 	PROTOTYPE((char * ));
 krb5_error_code krb5_db_rename
@@ -89,5 +89,15 @@ krb5_error_code krb5_kdb_encrypt_key
 	PROTOTYPE((krb5_encrypt_block *, krb5_keyblock *, krb5_keyblock *));
 krb5_error_code krb5_kdb_decrypt_key
 	PROTOTYPE((krb5_encrypt_block *, krb5_keyblock *, krb5_keyblock *));
+
+/* XXX these belong in some config file */
+#define	KRB5_KDB_MAX_LIFE	(60*60*24) /* one day */
+#define	KRB5_KDB_MAX_RLIFE	(60*60*24*7) /* one week */
+#define	KRB5_KDB_EXPIRATION	2145830400 /* Thu Jan  1 00:00:00 2038 UTC */
+
+#define KRB5_KDB_DEF_FLAGS	(KRB5_KDB_DISALLOW_DUP_SKEY)
+
+/* XXX THIS REALLY BELONGS ELSEWHERE */
+#define	TGTNAME	"krbtgt"
 
 #endif /* __KRB5_KDB5__ */
