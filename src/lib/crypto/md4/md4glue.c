@@ -54,10 +54,9 @@ krb5_checksum *outcksum;
     return 0;
 }
 
-
-krb5_checksum_entry crc32_cksumtable_entry = {
+krb5_checksum_entry md4_cksumtable_entry = {
     md4_sum_func,
-    RSA_MD4_CKSUM_LENGTH, /* CRC-32 is 4 octets */
+    RSA_MD4_CKSUM_LENGTH,
     1,					/* is collision proof */
     0,					/* doesn't use key */
 };
