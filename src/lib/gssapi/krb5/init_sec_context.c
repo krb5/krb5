@@ -161,6 +161,7 @@ cleanup:
 }
 
 
+#if 0
 static krb5_error_code
 make_ap_req_v2(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     krb5_context context;
@@ -173,7 +174,9 @@ make_ap_req_v2(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 {
     int krb5_mech2_supported = 0;
     assert(krb5_mech2_supported);
+    return 0;
 }
+#endif
 
 static krb5_error_code
 make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
@@ -358,9 +361,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    krb5_gss_ctx_id_rec *ctx, *ctx_free;
    krb5_timestamp now;
    gss_buffer_desc token;
-   int i, j, err;
+   int i, err;
    int default_mech = 0;
-   krb5_ui_4 resp_flags;
    OM_uint32 major_status;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
@@ -628,7 +630,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    } else {
       unsigned char *ptr;
       char *sptr;
-      krb5_data ap_rep, mic;
+      krb5_data ap_rep;
       krb5_ap_rep_enc_part *ap_rep_data;
       krb5_error *krb_error;
 

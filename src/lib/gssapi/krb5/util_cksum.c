@@ -33,14 +33,15 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
      krb5_checksum *cksum;
      int bigend;
 {
-   int len;
+   size_t len;
    char *buf, *ptr;
    size_t sumlen;
    krb5_data plaind;
    krb5_error_code code;
 
    /* initialize the the cksum */
-   if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
+   code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen);
+   if (code)
        return(code);
 
    cksum->checksum_type = CKSUMTYPE_RSA_MD5;
@@ -82,8 +83,9 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
    plaind.length = len;
    plaind.data = buf;
 
-   if (code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
-				   &plaind, cksum)) {
+   code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
+			       &plaind, cksum);
+   if (code) {
       xfree(buf);
       return(code);
    }

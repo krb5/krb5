@@ -60,7 +60,8 @@ kg_confounder_size(context, key)
    krb5_error_code code;
    size_t blocksize;
 
-   if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+   code = krb5_c_block_size(context, key->enctype, &blocksize);
+   if (code)
       return(-1); /* XXX */
 
    return(blocksize);
@@ -76,7 +77,8 @@ kg_make_confounder(context, key, buf)
    size_t blocksize;
    krb5_data lrandom;
 
-   if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+   code = krb5_c_block_size(context, key->enctype, &blocksize);
+   if (code)
        return(code);
 
    lrandom.length = blocksize;
@@ -94,7 +96,8 @@ kg_encrypt_size(context, key, n)
    krb5_error_code code;
    size_t enclen;
 
-   if (code = krb5_c_encrypt_length(context, key->enctype, n, &enclen))
+   code = krb5_c_encrypt_length(context, key->enctype, n, &enclen);
+   if (code)
       return(-1); /* XXX */
 
    return(enclen);
@@ -116,7 +119,8 @@ kg_encrypt(context, key, usage, iv, in, out, length)
    krb5_enc_data outputd;
 
    if (iv) {
-       if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+       code = krb5_c_block_size(context, key->enctype, &blocksize);
+       if (code)
 	   return(code);
 
        ivd.length = blocksize;
@@ -154,12 +158,13 @@ kg_decrypt(context, key, usage, iv, in, out, length)
      int length;
 {
    krb5_error_code code;
-   size_t blocksize, enclen;
+   size_t blocksize;
    krb5_data ivd, *pivd, outputd;
    krb5_enc_data inputd;
 
    if (iv) {
-       if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+       code = krb5_c_block_size(context, key->enctype, &blocksize);
+       if (code)
 	   return(code);
 
        ivd.length = blocksize;

@@ -576,12 +576,10 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t *		/* context_handle */
 	    ));
 
-#if 0
 OM_uint32 krb5_gss_release_oid
 PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */
 	   ));
-#endif
 
 OM_uint32 krb5_gss_internal_release_oid
 PROTOTYPE( (OM_uint32 *,		/* minor_status */

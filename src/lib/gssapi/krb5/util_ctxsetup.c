@@ -103,11 +103,11 @@ kg2_parse_token(minor_status, ptr, token_length, flags, nctypes, ctypes,
 	    goto defective;
 
 	for (i=0; i<noptions; i++) {
-	    if (options[i].option_id = opt_id) {
+	    if (options[i].option_id == opt_id) {
 		options[i].length = field_length;
 		options[i].data = ptr;
+		break;
 	    }
-	    break;
 	}
 	    
 	ptr += field_length;

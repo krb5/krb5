@@ -1,3 +1,26 @@
+2001-05-14  Ezra Peisach  <epeisach@mit.edu>
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Get rid of unused
+	variable.
+
+	* util_ctxsetup.c (kg2_parse_token): Fix erroneous assignment in
+	conditional. (code not used in current tree). 
+
+	* util_seed.c, util_seqnum.c, util_crypt.c, util_cksum.c: Cleanup
+	up assignments in conditionals.
+
+	* ser_sctx.c (kg_queue_internalize): Get rid of unused variable.
+
+	* gssapiP_krb5.h: Renable prototype for krb5_gss_release_oid() as
+	code is back (since 1996).
+
+	* k5unseal.c (kg_unseal_v1): Declare internal function static.
+
+	* init_sec_context.c (make_ap_req_v2): Comment out non-referenced
+	function.
+
+	* gssapi_krb5.c: Include k5-int.h for krb5_ser_* prototypes.
+
 2001-04-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* util_crypt.c (kg_make_confounder): Change variable random to

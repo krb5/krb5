@@ -50,6 +50,9 @@
  * $Id$
  */
 
+
+/* For declaration of krb5_ser_context_init */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
 
 /** exported constants defined in gssapi_krb5{,_nx}.h **/

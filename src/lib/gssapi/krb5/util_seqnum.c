@@ -61,7 +61,8 @@ krb5_error_code kg_get_seq_num(context, key, cksum, buf, direction, seqnum)
    krb5_error_code code;
    unsigned char plain[8];
 
-   if (code = kg_decrypt(context, key, KG_USAGE_SEQ, cksum, buf, plain, 8))
+   code = kg_decrypt(context, key, KG_USAGE_SEQ, cksum, buf, plain, 8);
+   if (code)
       return(code);
 
    if ((plain[4] != plain[5]) ||

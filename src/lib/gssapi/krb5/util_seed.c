@@ -37,7 +37,8 @@ kg_make_seed(context, key, seed)
    krb5_keyblock *tmpkey;
    int i;
 
-   if (code = krb5_copy_keyblock(context, key, &tmpkey))
+   code = krb5_copy_keyblock(context, key, &tmpkey);
+   if (code)
       return(code);
 
    /* reverse the key bytes, as per spec */

@@ -54,7 +54,7 @@
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
    conf_state is only valid if SEAL. */
 
-OM_uint32
+static OM_uint32
 kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	     conf_state, qop_state, toktype)
     krb5_context context;
@@ -217,7 +217,8 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	abort ();
     }
 
-    if (code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen))
+    code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
+    if (code)
 	return(code);
     md5cksum.length = sumlen;
 
