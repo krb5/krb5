@@ -1,3 +1,7 @@
+2002-06-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* syslog.h: Deleted.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* syslog.h (syslog, vsyslog, openlog, closelog, setlogmask):
