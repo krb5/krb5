@@ -1,3 +1,10 @@
+2004-07-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* disp_status.c: Include gss_libinit.h.
+	(init_et): Variable deleted.
+	(krb5_gss_display_status): Don't use init_et; instead, call
+	gssint_initialize_library.
+
 2004-07-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* import_name.c [HAVE_GETPWUID_R]: Include stdio.h.
