@@ -1,4 +1,12 @@
 
+Fri Aug 18 17:27:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_dbm.c - Bump timestamp to the future if we can't discriminate
+		between updates within a second.  Fix database rename.  Reopen
+		database after put or delete.
+	* t_kdb.c - Add test code to fork off a few processes to beat on the
+		database.
+
+
 Thu Aug 17 13:46:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_dbm.c - Remove argument from dbm_db_end_update().  It was never
 		used.  Remove gen_dbsuffix() logic from dbm_db_end_update() and
