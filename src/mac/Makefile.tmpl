@@ -19,10 +19,10 @@ build : {KH68K} {KHPPC}
 .c.PPC.o : .c
 	MWCPPC {DepDir}{Default}.c {OPTIONS} -prefix {KHPPC}
 
-{KH68K} : {KH}KerberosHeaders.pch
+{KH68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWC68K {KH}KerberosHeaders.pch -precompile {KH68K} {OPTIONS} -i {KH}
 
-{KHPPC} : {KH}KerberosHeaders.pch
+{KHPPC} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWCPPC {KH}KerberosHeaders.pch -precompile {KHPPC} {OPTIONS} -i {KH}
 
 link :
