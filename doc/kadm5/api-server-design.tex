@@ -718,11 +718,12 @@ osa_adb_ret_t osa_adb_rename_T_db(kadm5_config_params *fromparams,
 \end{verbatim}
 %
 Rename the database named by fromparams to that named by toparams.
-Both databases and lock files must already exist.  When the function
-returns, the database named by fromparams no longer exists, and
-toparams has been overwritten with fromparams.  This function acquires
-a permanent lock on both databases for the duration of its operation,
-so a failure is likely to leave the databases unusable.
+The fromparams database must already exist; the toparams database may
+exist or not.  When the function returns, the database named by
+fromparams no longer exists, and toparams has been overwritten with
+fromparams.  This function acquires a permanent lock on both databases
+for the duration of its operation, so a failure is likely to leave the
+databases unusable.
 
 \begin{verbatim}
 osa_adb_ret_t osa_adb_destroy_policy_db(kadm5_config_params *params)
