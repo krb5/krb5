@@ -11,6 +11,6 @@
 		dict_file = __K5ROOT__/ovsec_adm.dict
 		kadmind_port = 1751
 		master_key_type = des-cbc-crc
-		supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
+		supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4 des-cbc-md5:normal des-cbc-raw:normal
 	}
 

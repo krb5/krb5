@@ -1,3 +1,8 @@
+Mon Mar 31 17:40:24 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* server_acl.c, server_acl.h, svr_pricipal.c: add support for
+ 	setkey_principal
+
 Sun Mar  9 13:40:33 1997  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (add_to_history): Don't call realloc() on a NULL

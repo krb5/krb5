@@ -106,6 +106,20 @@ chpass_principal_1(argp, clnt)
 	return (&res);
 }
 
+generic_ret *
+setkey_principal_1(argp, clnt)
+	setkey_arg *argp;
+	CLIENT *clnt;
+{
+	static generic_ret res;
+
+	memset((char *)&res, 0, sizeof(res));
+	if (clnt_call(clnt, SETKEY_PRINCIPAL, xdr_setkey_arg, argp, xdr_generic_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+}
+
 chrand_ret *
 chrand_principal_1(argp, clnt)
 	chrand_arg *argp;

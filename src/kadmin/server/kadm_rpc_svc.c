@@ -5,6 +5,9 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.13  1997/04/23 19:53:11  bjaspan
+ * add kadm5_setkey_principal
+ *
  * Revision 1.12  1996/07/22 20:28:53  marc
  * this commit includes all the changes on the OV_9510_INTEGRATION and
  * OV_MERGE branches.  This includes, but is not limited to, the new openvision
@@ -173,6 +176,12 @@ void kadm_1(rqstp, transp)
 	  xdr_result = xdr_generic_ret;
 	  local = (char *(*)()) chpass_principal_1;
 	  break;
+
+     case SETKEY_PRINCIPAL:
+	  xdr_argument = xdr_setkey_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) setkey_principal_1;
+	  break;
 	  
      case CHRAND_PRINCIPAL:
 	  xdr_argument = xdr_chrand_arg;
@@ -223,7 +232,7 @@ void kadm_1(rqstp, transp)
 	  break;
 
      default:
-	  krb5_klog_syslog(LOG_ERR, "Invalid OVSEC_KADM procedure number: %s, %d",
+	  krb5_klog_syslog(LOG_ERR, "Invalid KADM5 procedure number: %s, %d",
 		 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
 		 rqstp->rq_proc);
 	  svcerr_noproc(transp);

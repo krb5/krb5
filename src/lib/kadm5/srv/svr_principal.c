@@ -86,6 +86,21 @@ static krb5_tl_data *dup_tl_data(krb5_tl_data *tl)
      return n;
 }
 
+/* This is in lib/kdb/kdb_cpw.c, but is static */
+static void cleanup_key_data(context, count, data)
+   krb5_context	  context;
+   int			  count;
+   krb5_key_data	* data;
+{
+     int i, j;
+     
+     for (i = 0; i < count; i++)
+	  for (j = 0; j < data[i].key_data_ver; j++)
+	       if (data[i].key_data_length[j])
+		    free(data[i].key_data_contents[j]);
+     free(data);
+}
+
 kadm5_ret_t
 kadm5_create_principal(void *server_handle,
 			    kadm5_principal_ent_t entry, long mask,
@@ -1234,6 +1249,133 @@ kadm5_randkey_principal(void *server_handle,
 	 }
     }	 
     
+    if ((ret = kdb_put_entry(handle, &kdb, &adb)))
+	goto done;
+
+    ret = KADM5_OK;
+done:
+    kdb_free_entry(handle, &kdb, &adb);
+    if (have_pol)
+	 kadm5_free_policy_ent(handle->lhandle, &pol);
+
+    return ret;
+}
+
+kadm5_ret_t
+kadm5_setkey_principal(void *server_handle,
+		       krb5_principal principal,
+		       krb5_keyblock *keyblocks,
+		       int n_keys)
+{
+    krb5_db_entry		kdb;
+    osa_princ_ent_rec		adb;
+    krb5_int32			now;
+    kadm5_policy_ent_rec	pol;
+    krb5_key_data		*key_data;
+    int				i, kvno, ret, last_pwd, have_pol = 0;
+    int				deskeys;
+    kadm5_server_handle_t	handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    if (principal == NULL || keyblocks == NULL)
+	return EINVAL;
+    if (hist_princ && /* this will be NULL when initializing the databse */
+	((krb5_principal_compare(handle->context,
+				 principal, hist_princ)) == TRUE))
+	return KADM5_PROTECT_PRINCIPAL;
+
+    for (i = 0, deskeys = 0; i < n_keys; i++) {
+      if (keyblocks[i].enctype == ENCTYPE_DES_CBC_MD4 ||
+	  keyblocks[i].enctype == ENCTYPE_DES_CBC_MD5 ||
+	  keyblocks[i].enctype == ENCTYPE_DES_CBC_RAW ||
+	  keyblocks[i].enctype == ENCTYPE_DES_CBC_CRC)
+	deskeys++;
+      if (deskeys > 1)
+	return KADM5_SETKEY_DUP_ENCTYPES;
+    }
+
+    if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
+       return(ret);
+    
+    for (kvno = 0, i=0; i<kdb.n_key_data; i++)
+	 if (kdb.key_data[i].key_data_kvno > kvno)
+	      kvno = kdb.key_data[i].key_data_kvno;
+
+    if (kdb.key_data != NULL)
+	 cleanup_key_data(handle->context, kdb.n_key_data, kdb.key_data);
+    
+    kdb.key_data = (krb5_key_data*)malloc(n_keys*sizeof(krb5_key_data));
+    if (kdb.key_data == NULL)
+	 return ENOMEM;
+    memset(kdb.key_data, 0, n_keys*sizeof(krb5_key_data));
+    kdb.n_key_data = n_keys;
+
+    for (i = 0; i < n_keys; i++) {
+	 if (ret = krb5_dbekd_encrypt_key_data(handle->context,
+					       &master_encblock,
+					       &keyblocks[i], NULL,
+					       kvno + 1,
+					       &kdb.key_data[i]))
+	      return ret;
+    }
+
+    kdb.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
+
+    if (ret = krb5_timeofday(handle->context, &now))
+	goto done;
+
+    if ((adb.aux_attributes & KADM5_POLICY)) {
+	if ((ret = kadm5_get_policy(handle->lhandle, adb.policy,
+				    &pol)) != KADM5_OK) 
+	   goto done;
+	have_pol = 1;
+
+#if 0
+	/*
+	  * The spec says this check is overridden if the caller has
+	  * modify privilege.  The admin server therefore makes this
+	  * check itself (in chpass_principal_wrapper, misc.c).  A
+	  * local caller implicitly has all authorization bits.
+	  */
+	if (ret = krb5_dbe_lookup_last_pwd_change(handle->context,
+						  &kdb, &last_pwd))
+	     goto done;
+	if((now - last_pwd) < pol.pw_min_life &&
+	   !(kdb.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
+	     ret = KADM5_PASS_TOOSOON;
+	     goto done;
+	}
+#endif
+#if 0
+	/*
+	 * Should we be checking/updating pw history here?
+	 */
+	if(pol.pw_history_num > 1) {
+	    if(adb.admin_history_kvno != hist_kvno) {
+		ret = KADM5_BAD_HIST_KEY;
+		goto done;
+	    }
+
+	    if (ret = check_pw_reuse(handle->context,
+				     &hist_encblock,
+				     kdb.n_key_data, kdb.key_data,
+				     adb.old_key_len, adb.old_keys))
+		goto done;
+	}
+#endif
+	
+	if (pol.pw_max_life)
+	   kdb.pw_expiration = now + pol.pw_max_life;
+	else
+	   kdb.pw_expiration = 0;
+    } else {
+	kdb.pw_expiration = 0;
+    }
+
+    if (ret = krb5_dbe_update_last_pwd_change(handle->context, &kdb, now))
+	 goto done;
+
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
 

@@ -1,3 +1,7 @@
+Mon Mar 31 17:39:52 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in, setkey-test.c: add support for setkey
+
 Wed Mar 12 15:49:46 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* Makefile.in (unit-test-server-body): depend on test-randkey, not

@@ -1,3 +1,8 @@
+Mon Mar 31 17:40:48 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* client_principal.c, client_rpc.c: add support for
+ 	setkey_principal
+
 Sat Feb 22 01:35:19 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): s/.so/$(SHLIBEXT)

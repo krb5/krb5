@@ -56,6 +56,7 @@
 #define	ACL_INQUIRE		32
 /* #define ACL_EXTRACT		64 */
 #define	ACL_LIST		128
+#define ACL_SETKEY		256
 #define	ACL_RENAME		(ACL_ADD+ACL_DELETE)
 
 #define	ACL_ALL_MASK		(ACL_ADD	| \

@@ -1,3 +1,8 @@
+Mon Mar 31 17:41:11 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_err.et, kadm_rpc.h, kadm_rpc_xdr.c: add support for
+ 	setkey_principal
+
 Thu Jan 16 19:01:00 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-prerecurse): Update to use double-colon rules.

@@ -4,6 +4,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: init-test destroy-test client-handle-test client-iter-test
 all:: randkey-test server-handle-test lock-test server-iter-test 
+all:: server-setkey-test client-setkey-test
 
 #
 # The client-side test programs.
@@ -28,6 +29,10 @@ client-iter-test: iter-test.o $(KADMLCNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o client-iter-test iter-test.o \
 		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
+client-setkey-test: setkey-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o client-setkey-test setkey-test.o \
+		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
+
 #
 # The server-side test programs.
 #
@@ -46,6 +51,13 @@ lock-test: lock-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 server-iter-test: iter-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-iter-test iter-test.o \
+		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+
+setkey-test.o: $(SRCTOP)/lib/kadm5/unit-test/setkey-test.c
+	$(CC) $(CFLAGS) -UUSE_KADM5_API_VERSION -DUSE_KADM5_API_VERSION=2 -c $(SRCTOP)/lib/kadm5/unit-test/setkey-test.c
+
+server-setkey-test: setkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o server-setkey-test setkey-test.o \
 		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
 #

@@ -56,6 +56,7 @@ static const aop_t acl_op_table[] = {
     { 'c',	ACL_CHANGEPW },
     { 'i',	ACL_INQUIRE },
     { 'l',	ACL_LIST },
+    { 's',	ACL_SETKEY },
     { 'x',	ACL_ALL_MASK },
     { '*',	ACL_ALL_MASK },
     { '\0',	0 }

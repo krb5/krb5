@@ -55,7 +55,8 @@ static struct pflag flags[] = {
 {"requires_hwauth",	15,	KRB5_KDB_REQUIRES_HW_AUTH,	0},
 {"needchange",		10,	KRB5_KDB_REQUIRES_PWCHANGE,	0},
 {"allow_svr",		9,	KRB5_KDB_DISALLOW_SVR,		1},
-{"password_changing_service",	25,	KRB5_KDB_PWCHANGE_SERVICE,	0 }
+{"password_changing_service",	25,	KRB5_KDB_PWCHANGE_SERVICE,	0 },
+{"support_desmd5",	14,	KRB5_KDB_SUPPORT_DESMD5,	0 }
 };
 
 static char *prflags[] = {
@@ -72,7 +73,9 @@ static char *prflags[] = {
     "UNKNOWN_0x00000400",	/* 0x00000400 */
     "UNKNOWN_0x00000800",	/* 0x00000800 */
     "DISALLOW_SVR",		/* 0x00001000 */
-    "PWCHANGE_SERVICE"		/* 0x00002000 */
+    "PWCHANGE_SERVICE",		/* 0x00002000 */
+    "SUPPORT_DESMD5",		/* 0x00004000 */
+    "NEW_PRINC",		/* 0x00008000 */
 };
 
 char *getenv();

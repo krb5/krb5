@@ -1,3 +1,7 @@
+Mon Mar 31 17:43:06 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in: be more verbose if Tcl is unavailable
+
 Wed Feb  5 22:57:53 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

@@ -14,7 +14,9 @@ DO_ALL=@DO_ALL@
 all:: all-$(DO_ALL)
 
 all-::
-	@echo "Tcl is not installed on this system. The kadm5 test suite cannot be run."
+	@echo "+++"
+	@echo "+++ WARNING: Tcl not available.  The kadm5 tests will not be run."
+	@echo "+++"
 
 all-tcl:: $(CLNTPROG) $(SRVPROG)
 

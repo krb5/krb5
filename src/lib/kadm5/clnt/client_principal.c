@@ -262,6 +262,31 @@ kadm5_chpass_principal(void *server_handle,
 }
 
 kadm5_ret_t
+kadm5_setkey_principal(void *server_handle,
+		       krb5_principal princ,
+		       krb5_keyblock *keyblocks,
+		       int n_keys)
+{
+    setkey_arg		arg;
+    generic_ret		*r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.princ = princ;
+    arg.keyblocks = keyblocks;
+    arg.n_keys = n_keys;
+    arg.api_version = handle->api_version;
+
+    if(princ == NULL || keyblocks == NULL)
+	return EINVAL;
+    r = setkey_principal_1(&arg, handle->clnt);
+    if(r == NULL)
+	return KADM5_RPC_ERROR;        
+    return r->code;
+}
+
+kadm5_ret_t
 kadm5_randkey_principal(void *server_handle,
 			krb5_principal princ,
 			krb5_keyblock **key, int *n_keys)
