@@ -1,3 +1,15 @@
+Fri Nov 18 01:23:13 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install): install telnetd manpage
+	(from Ted Lemon <mellon@ipd.wellsfargo.com>).
+
+Fri Nov 18 00:44:05 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use WITH_KRB4, cache cc_t in termio check, cache
+	SETPGRP_TWOARG check.
+	* Makefile.in (K4LIB): use @K4LIB@.
+	(telnetd): use $(K4LIB). (from epeisach)
+
 Mon Nov  7 22:16:51 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: 

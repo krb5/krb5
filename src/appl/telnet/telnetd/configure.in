@@ -7,6 +7,11 @@ CONFIG_RULES
 AC_SET_BUILDTOP
 AC_PROG_INSTALL
 KRB_INCLUDE
+WITH_KRB4
+AC_ARG_WITH([krb4],,
+K4LIB="$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a",
+K4LIB=)
+AC_SUBST(K4LIB)
 ISODE_INCLUDE
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(socket,main)
@@ -19,8 +24,14 @@ AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_HEADER_CHECK(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
 if test -z "$ac_sysv_termio"; then
-AC_COMPILE_CHECK([cc_t],[#include <termio.h>],
-[cc_t foo;],,AC_DEFINE(NO_CC_T))
+  AC_MSG_CHECKING([for cc_t in termio.h])
+  AC_CACHE_VAL(krb_cv_type_cc_t,
+  [AC_TRY_LINK([cc_t],[#include <termio.h>],
+  [cc_t foo;],krb_cv_type_cc_t=yes,krb_cv_type_cc_t=no)])
+  AC_MSG_RESULT($krb_cv_type_cc_t)
+  if test $krb_cv_type_cc_t = no; then
+    AC_DEFINE(NO_CC_T)
+  fi
 fi
 fi
 AC_HEADER_TIME
@@ -32,7 +43,14 @@ AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
 AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))
 AC_HEADER_CHECK(utmpx.h,AC_DEFINE(UTMPX))
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
-AC_COMPILE_CHECK([number of arguments to setpgrp],
+AC_MSG_CHECKING([if setpgrp takes two arguments])
+dnl
+AC_CACHE_VAL(krb5_cv_sys_setpgrp_two,
+[AC_TRY_LINK( 
 [#include <unistd.h>],[setpgrp(0,0)],
-AC_DEFINE(SETPGRP_TWOARG))
+krb5_cv_sys_setpgrp_two=yes,krb5_cv_sys_setpgrp_two=no)])
+AC_MSG_RESULT($krb5_cv_sys_setpgrp_two)
+if test $krb5_cv_sys_setpgrp_two = yes; then
+  AC_DEFINE(SETPGRP_TWOARG)
+fi
 V5_AC_OUTPUT_MAKEFILE
