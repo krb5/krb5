@@ -7,9 +7,7 @@
 #include "com_err.h"
 
 int
-main(argc, argv)
-	int	argc;
-	char	**argv;
+main(int argc, char **argv)
 {
 	krb5_data client, server;
 	char	realm_branch_char = '.';

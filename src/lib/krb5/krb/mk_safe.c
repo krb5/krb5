@@ -47,16 +47,10 @@
  returns system errors
 */
 static krb5_error_code
-krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
-		   remote_addr, sumtype, outbuf)
-    krb5_context 	  context;
-    const krb5_data 	* userdata;
-    const krb5_keyblock * keyblock;
-    krb5_replay_data    * replaydata;
-    krb5_address 	* local_addr;
-    krb5_address 	* remote_addr;
-    const krb5_cksumtype  sumtype;
-    krb5_data 		* outbuf;
+krb5_mk_safe_basic(krb5_context context, const krb5_data *userdata,
+		   const krb5_keyblock *keyblock, krb5_replay_data *replaydata,
+		   krb5_address *local_addr, krb5_address *remote_addr,
+		   krb5_cksumtype sumtype, krb5_data *outbuf)
 {
     krb5_error_code retval;
     krb5_safe safemsg;
@@ -116,12 +110,7 @@ cleanup_checksum:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
-    krb5_context 	  context;
-    krb5_auth_context 	  auth_context;
-    const krb5_data   	* userdata;
-    krb5_data         	* outbuf;
-    krb5_replay_data  	* outdata;
+krb5_mk_safe(krb5_context context, krb5_auth_context auth_context, const krb5_data *userdata, krb5_data *outbuf, krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
     krb5_keyblock       * keyblock;

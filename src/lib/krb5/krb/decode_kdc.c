@@ -43,11 +43,7 @@
  */
 
 krb5_error_code
-krb5_decode_kdc_rep(context, enc_rep, key, dec_rep)
-    krb5_context context;
-    krb5_data * enc_rep;
-    const krb5_keyblock * key;
-    krb5_kdc_rep ** dec_rep;
+krb5_decode_kdc_rep(krb5_context context, krb5_data *enc_rep, const krb5_keyblock *key, krb5_kdc_rep **dec_rep)
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;

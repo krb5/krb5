@@ -32,10 +32,7 @@
 #include <stdio.h>
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_server_rcache(context, piece, rcptr)
-    krb5_context context;
-    const krb5_data *piece;
-    krb5_rcache *rcptr;
+krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache *rcptr)
 {
     krb5_rcache rcache = 0;
     char *cachename = 0;

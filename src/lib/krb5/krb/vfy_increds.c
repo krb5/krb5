@@ -2,11 +2,7 @@
 #include "int-proto.h"
 
 static krb5_error_code
-krb5_cc_copy_creds_except(context, incc, outcc, princ)
-     krb5_context context;
-     krb5_ccache incc;
-     krb5_ccache outcc;
-     krb5_principal princ;
+krb5_cc_copy_creds_except(krb5_context context, krb5_ccache incc, krb5_ccache outcc, krb5_principal princ)
 {
    krb5_error_code code;
    krb5_flags flags;

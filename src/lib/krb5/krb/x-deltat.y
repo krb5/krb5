@@ -216,9 +216,7 @@ mylex (krb5_int32 *intp, char **pp)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_string_to_deltat(string, deltatp)
-    char	* string;
-    krb5_deltat	* deltatp;
+krb5_string_to_deltat(char *string, krb5_deltat *deltatp)
 {
     struct param p;
     p.delta = 0;

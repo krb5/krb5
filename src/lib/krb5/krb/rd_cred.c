@@ -12,11 +12,7 @@
  * decrypt the enc_part of a krb5_cred
  */
 static krb5_error_code 
-decrypt_credencdata(context, pcred, pkeyblock, pcredenc)
-    krb5_context	  context;
-    krb5_cred 		* pcred;
-    krb5_keyblock 	* pkeyblock;
-    krb5_cred_enc_part 	* pcredenc;
+decrypt_credencdata(krb5_context context, krb5_cred *pcred, krb5_keyblock *pkeyblock, krb5_cred_enc_part *pcredenc)
 {
     krb5_cred_enc_part  * ppart;
     krb5_error_code 	  retval;
@@ -55,13 +51,7 @@ cleanup:
 /*----------------------- krb5_rd_cred_basic -----------------------*/
 
 static krb5_error_code 
-krb5_rd_cred_basic(context, pcreddata, pkeyblock, 
-		   replaydata, pppcreds)
-    krb5_context          context;
-    krb5_data		* pcreddata;
-    krb5_keyblock 	* pkeyblock;
-    krb5_replay_data    * replaydata;
-    krb5_creds        *** pppcreds;
+krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata, krb5_keyblock *pkeyblock, krb5_replay_data *replaydata, krb5_creds ***pppcreds)
 {
     krb5_error_code       retval;
     krb5_cred 		* pcred;
@@ -172,12 +162,7 @@ cleanup_cred:
  * outputs the nonce and an array of the forwarded credentials.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_rd_cred(context, auth_context, pcreddata, pppcreds, outdata)
-    krb5_context          context;
-    krb5_auth_context     auth_context;
-    krb5_data 		 * pcreddata;       
-    krb5_creds *** pppcreds;
-    krb5_replay_data  	 * outdata;
+krb5_rd_cred(krb5_context context, krb5_auth_context auth_context, krb5_data *pcreddata, krb5_creds ***pppcreds, krb5_replay_data *outdata)
 {
     krb5_error_code       retval;
     krb5_keyblock       * keyblock;

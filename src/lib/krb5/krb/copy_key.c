@@ -33,10 +33,7 @@
  * Copy a keyblock, including alloc'ed storage.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_copy_keyblock(context, from, to)
-    krb5_context context;
-    const krb5_keyblock *from;
-    krb5_keyblock **to;
+krb5_copy_keyblock(krb5_context context, const krb5_keyblock *from, krb5_keyblock **to)
 {
 	krb5_keyblock	*new_key;
 

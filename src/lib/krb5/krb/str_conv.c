@@ -78,9 +78,7 @@ static const int salttype_table_nents = sizeof(salttype_table)/
 					sizeof(salttype_table[0]);
 
 krb5_error_code KRB5_CALLCONV
-krb5_string_to_salttype(string, salttypep)
-    char	* string;
-    krb5_int32	* salttypep;
+krb5_string_to_salttype(char *string, krb5_int32 *salttypep)
 {
     int i;
     int found;
@@ -103,10 +101,7 @@ krb5_string_to_salttype(string, salttypep)
  * if the supplied buffer/length will not contain the output.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_salttype_to_string(salttype, buffer, buflen)
-    krb5_int32	salttype;
-    char	* buffer;
-    size_t	buflen;
+krb5_salttype_to_string(krb5_int32 salttype, char *buffer, size_t buflen)
 {
     int i;
     const char *out;
@@ -140,7 +135,11 @@ static size_t strftime (char *, size_t, const char *, const struct tm *);
 #ifdef HAVE_STRPTIME
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime (const char *, const char *,
-			    struct tm *);
+			    struct tm *)
+#ifdef __cplusplus
+    throw()
+#endif
+    ;
 #endif
 #else /* HAVE_STRPTIME */
 #undef strptime
@@ -149,9 +148,7 @@ static char *strptime (const char *, const char *, struct tm *);
 #endif
 
 krb5_error_code KRB5_CALLCONV
-krb5_string_to_timestamp(string, timestampp)
-    char		* string;
-    krb5_timestamp	* timestampp;
+krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp)
 {
     int i;
     struct tm timebuf;
@@ -202,10 +199,7 @@ krb5_string_to_timestamp(string, timestampp)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_timestamp_to_string(timestamp, buffer, buflen)
-    krb5_timestamp	timestamp;
-    char		* buffer;
-    size_t		buflen;
+krb5_timestamp_to_string(krb5_timestamp timestamp, char *buffer, size_t buflen)
 {
     int ret;
     time_t timestamp2 = timestamp;
@@ -219,11 +213,7 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
-    krb5_timestamp	timestamp;
-    char		* buffer;
-    size_t		buflen;
-    char		* pad;
+krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen, char *pad)
 {
     struct tm	*tmp;
     size_t i;
@@ -267,10 +257,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
 /* string->deltat is in deltat.y */
 
 krb5_error_code KRB5_CALLCONV
-krb5_deltat_to_string(deltat, buffer, buflen)
-    krb5_deltat	deltat;
-    char	* buffer;
-    size_t	buflen;
+krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
 {
     int			days, hours, minutes, seconds;
     krb5_deltat		dt;

@@ -30,10 +30,7 @@
 #include "k5-int.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_copy_authenticator(context, authfrom, authto)
-    krb5_context context;
-    const krb5_authenticator *authfrom;
-    krb5_authenticator **authto;
+krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom, krb5_authenticator **authto)
 {
     krb5_error_code retval;
     krb5_authenticator *tempto;

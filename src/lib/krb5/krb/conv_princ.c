@@ -128,9 +128,7 @@ static const struct krb_convert sconv_list[] = {
  * This falls in the "should have been in the ANSI C library"
  * category. :-)
  */
-static char *strnchr(s, c, n)
-   register char *s, c;
-   register int n;
+static char *strnchr(register char *s, register char c, register int n)
 {
      if (n < 1) 
 	  return 0;
@@ -148,12 +146,8 @@ static char *strnchr(s, c, n)
 #define KRB5_INVALID_PRINCIPAL KRB5_LNAME_BADFORMAT
 
 krb5_error_code KRB5_CALLCONV
-krb5_524_conv_principal(context, princ, name, inst, realm)
-    krb5_context context;
-    const krb5_principal princ;
-    char *name;
-    char *inst;
-    char *realm;
+krb5_524_conv_principal(krb5_context context, const krb5_principal princ,
+			char *name, char *inst, char *realm)
 {
      const struct krb_convert *p;
      krb5_data *compo;
@@ -251,12 +245,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_425_conv_principal(context, name, instance, realm, princ)
-   krb5_context context;
-   const char	 *name;
-   const char	 *instance;
-   const char	 *realm;
-   krb5_principal	 *princ;
+krb5_425_conv_principal(krb5_context context, const char *name, const char *instance, const char *realm, krb5_principal *princ)
 {
      const struct krb_convert *p;
      char buf[256];		/* V4 instances are limited to 40 characters */

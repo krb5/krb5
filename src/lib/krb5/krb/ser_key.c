@@ -57,10 +57,7 @@ static const krb5_ser_entry krb5_keyblock_ser_entry = {
  *				  the krb5_keyblock.
  */
 static krb5_error_code
-krb5_keyblock_size(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_keyblock_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code	kret;
     krb5_keyblock	*keyblock;
@@ -90,11 +87,7 @@ krb5_keyblock_size(kcontext, arg, sizep)
  * krb5_keyblock_externalize()	- Externalize the krb5_keyblock.
  */
 static krb5_error_code
-krb5_keyblock_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_keyblock_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_keyblock	*keyblock;
@@ -141,11 +134,7 @@ krb5_keyblock_externalize(kcontext, arg, buffer, lenremain)
  * krb5_keyblock_internalize()	- Internalize the krb5_keyblock.
  */
 static krb5_error_code
-krb5_keyblock_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_keyblock_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_keyblock	*keyblock;
@@ -205,8 +194,7 @@ krb5_keyblock_internalize(kcontext, argp, buffer, lenremain)
  * Register the keyblock serializer.
  */
 krb5_error_code
-krb5_ser_keyblock_init(kcontext)
-    krb5_context	kcontext;
+krb5_ser_keyblock_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_keyblock_ser_entry));
 }

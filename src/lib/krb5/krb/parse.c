@@ -64,10 +64,7 @@
  * that arbitrarily large multi-component names are a Good Thing.....
  */
 krb5_error_code KRB5_CALLCONV
-krb5_parse_name(context, name, nprincipal)
-    	krb5_context context;
-	const char	*name;
-	krb5_principal	*nprincipal;
+krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincipal)
 {
 	register const char	*cp;
 	register char	*q;

@@ -178,8 +178,7 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
 }
 
 static 
-char *sam_challenge_banner(sam_type)
-     krb5_int32 sam_type;
+char *sam_challenge_banner(krb5_int32 sam_type)
 {
     char *label;
 

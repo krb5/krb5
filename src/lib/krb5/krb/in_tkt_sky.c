@@ -48,12 +48,8 @@ static krb5_error_code skey_keyproc
                krb5_keyblock **);
 
 static krb5_error_code
-skey_keyproc(context, type, salt, keyseed, key)
-    krb5_context context;
-    const krb5_enctype type;
-    krb5_data * salt;
-    krb5_const_pointer keyseed;
-    krb5_keyblock ** key;
+skey_keyproc(krb5_context context, krb5_enctype type, krb5_data *salt,
+	     krb5_const_pointer keyseed, krb5_keyblock **key)
 {
     krb5_keyblock *realkey;
     krb5_error_code retval;
@@ -98,18 +94,11 @@ skey_keyproc(context, type, salt, keyseed, key)
 
  */
 krb5_error_code KRB5_CALLCONV
-krb5_get_in_tkt_with_skey(context, options, addrs, ktypes, pre_auth_types, 
-			  key, ccache, creds, ret_as_reply)
-    krb5_context context;
-    const krb5_flags options;
-    krb5_address * const * addrs;
-    krb5_enctype * ktypes;
-    krb5_preauthtype * pre_auth_types;
-    const krb5_keyblock * key;
-    krb5_ccache ccache;
-    krb5_creds * creds;
-    krb5_kdc_rep ** ret_as_reply;
-
+krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
+			  krb5_address *const *addrs, krb5_enctype *ktypes,
+			  krb5_preauthtype *pre_auth_types,
+			  const krb5_keyblock *key, krb5_ccache ccache,
+			  krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
 {
     if (key) 
     	return krb5_get_in_tkt(context, options, addrs, ktypes, pre_auth_types, 

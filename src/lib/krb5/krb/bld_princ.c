@@ -27,19 +27,12 @@
  * Build a principal from a list of strings
  */
 
-/* Need <krb5/k5-config.h> for HAVE_STDARG_H */
-#include "k5-int.h"
-
 #include <stdarg.h>
+#include "k5-int.h"
 
 krb5_error_code
 KRB5_CALLCONV
-krb5_build_principal_va(context, princ, rlen, realm, ap)
-    krb5_context context;
-    krb5_principal princ;
-    unsigned int rlen;
-    const char *realm;
-    va_list ap;
+krb5_build_principal_va(krb5_context context, krb5_principal princ, unsigned int rlen, const char *realm, va_list ap)
 {
     register int i, count = 0;
     register char *next;

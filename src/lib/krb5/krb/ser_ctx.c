@@ -94,10 +94,7 @@ static const krb5_ser_entry krb5_profile_ser_entry = {
  *			  krb5_context.
  */
 static krb5_error_code
-krb5_context_size(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code	kret;
     size_t		required;
@@ -165,11 +162,7 @@ krb5_context_size(kcontext, arg, sizep)
  * krb5_context_externalize()	- Externalize the krb5_context.
  */
 static krb5_error_code
-krb5_context_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_context	context;
@@ -340,11 +333,7 @@ krb5_context_externalize(kcontext, arg, buffer, lenremain)
  * krb5_context_internalize()	- Internalize the krb5_context.
  */
 static krb5_error_code
-krb5_context_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_context	context;
@@ -520,10 +509,7 @@ cleanup:
  *				  the krb5_os_context.
  */
 static krb5_error_code
-krb5_oscontext_size(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_oscontext_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     /*
      * We need five 32-bit integers:
@@ -538,11 +524,7 @@ krb5_oscontext_size(kcontext, arg, sizep)
  * krb5_oscontext_externalize()	- Externalize the krb5_os_context.
  */
 static krb5_error_code
-krb5_oscontext_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_oscontext_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_os_context	os_ctx;
@@ -579,11 +561,7 @@ krb5_oscontext_externalize(kcontext, arg, buffer, lenremain)
  * krb5_oscontext_internalize()	- Internalize the krb5_os_context.
  */
 static krb5_error_code
-krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_oscontext_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_os_context	os_ctx;
@@ -637,8 +615,7 @@ krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
  * Register the context serializers.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_ser_context_init(kcontext)
-    krb5_context	kcontext;
+krb5_ser_context_init(krb5_context kcontext)
 {
     krb5_error_code	kret;
     kret = krb5_register_serializer(kcontext, &krb5_context_ser_entry);

@@ -85,14 +85,12 @@ static krb5_error_code make_preauth_list (krb5_context,
  * unexpected response, an error is returned.
  */
 static krb5_error_code
-send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
-		use_master)
-    krb5_context 		context;
-    krb5_kdc_req		*request;
-    krb5_timestamp 		*time_now;
-    krb5_error ** 		ret_err_reply;
-    krb5_kdc_rep ** 		ret_as_reply;
-    int 			use_master;
+send_as_request(krb5_context 		context,
+		krb5_kdc_req		*request,
+		krb5_timestamp 		*time_now,
+		krb5_error ** 		ret_err_reply,
+		krb5_kdc_rep ** 	ret_as_reply,
+		int 			use_master)
 {
     krb5_kdc_rep *as_reply = 0;
     krb5_error_code retval;
@@ -198,16 +196,14 @@ cleanup:
 }
 
 static krb5_error_code
-decrypt_as_reply(context, request, as_reply, key_proc, keyseed, key,
-		 decrypt_proc, decryptarg)
-    krb5_context 		context;
-    krb5_kdc_req		*request;
-    krb5_kdc_rep		*as_reply;
-    git_key_proc 		key_proc;
-    krb5_const_pointer 		keyseed;
-    krb5_keyblock *		key;	
-    git_decrypt_proc 		decrypt_proc;
-    krb5_const_pointer 		decryptarg;
+decrypt_as_reply(krb5_context 		context,
+		 krb5_kdc_req		*request,
+		 krb5_kdc_rep		*as_reply,
+		 git_key_proc 		key_proc,
+		 krb5_const_pointer 	keyseed,
+		 krb5_keyblock *	key,
+		 git_decrypt_proc 	decrypt_proc,
+		 krb5_const_pointer 	decryptarg)
 {
     krb5_error_code		retval;
     krb5_keyblock *		decrypt_key = 0;
@@ -239,11 +235,10 @@ cleanup:
 }
 
 static krb5_error_code
-verify_as_reply(context, time_now, request, as_reply)
-    krb5_context 		context;
-    krb5_timestamp 		time_now;
-    krb5_kdc_req		*request;
-    krb5_kdc_rep		*as_reply;
+verify_as_reply(krb5_context 		context,
+		krb5_timestamp 		time_now,
+		krb5_kdc_req		*request,
+		krb5_kdc_rep		*as_reply)
 {
     krb5_error_code		retval;
     
@@ -288,13 +283,12 @@ verify_as_reply(context, time_now, request, as_reply)
 }
 
 static krb5_error_code
-stash_as_reply(context, time_now, request, as_reply, creds, ccache)
-    krb5_context 		context;
-    krb5_timestamp 		time_now;
-    krb5_kdc_req		*request;
-    krb5_kdc_rep		*as_reply;
-    krb5_creds * 		creds;
-    krb5_ccache 		ccache;
+stash_as_reply(krb5_context 		context,
+	       krb5_timestamp 		time_now,
+	       krb5_kdc_req		*request,
+	       krb5_kdc_rep		*as_reply,
+	       krb5_creds * 		creds,
+	       krb5_ccache 		ccache)
 {
     krb5_error_code 		retval;
     krb5_data *			packet;
@@ -372,11 +366,10 @@ cleanup:
 }
 
 static krb5_error_code
-make_preauth_list(context, ptypes, nptypes, ret_list)
-    krb5_context	context;
-    krb5_preauthtype *	ptypes;
-    int			nptypes;
-    krb5_pa_data ***	ret_list;
+make_preauth_list(krb5_context	context,
+		  krb5_preauthtype *	ptypes,
+		  int			nptypes,
+		  krb5_pa_data ***	ret_list)
 {
     krb5_preauthtype *		ptypep;
     krb5_pa_data **		preauthp;
@@ -418,20 +411,18 @@ make_preauth_list(context, ptypes, nptypes, ret_list)
 #define MAX_IN_TKT_LOOPS 16
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
-		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
-    krb5_context context;
-    const krb5_flags options;
-    krb5_address * const * addrs;
-    krb5_enctype * ktypes;
-    krb5_preauthtype * ptypes;
-    git_key_proc key_proc;
-    krb5_const_pointer keyseed;
-    git_decrypt_proc decrypt_proc;
-    krb5_const_pointer decryptarg;
-    krb5_creds * creds;
-    krb5_ccache ccache;
-    krb5_kdc_rep ** ret_as_reply;
+krb5_get_in_tkt(krb5_context context,
+		const krb5_flags options,
+		krb5_address * const * addrs,
+		krb5_enctype * ktypes,
+		krb5_preauthtype * ptypes,
+		git_key_proc key_proc,
+		krb5_const_pointer keyseed,
+		git_decrypt_proc decrypt_proc,
+		krb5_const_pointer decryptarg,
+		krb5_creds * creds,
+		krb5_ccache ccache,
+		krb5_kdc_rep ** ret_as_reply)
 {
     krb5_error_code	retval;
     krb5_timestamp	time_now;
@@ -611,8 +602,7 @@ static const char *conf_no[] = {
 };
 
 int
-_krb5_conf_boolean(s)
-     const char *s;
+_krb5_conf_boolean(const char *s)
 {
     const char **p;
 
@@ -631,11 +621,8 @@ _krb5_conf_boolean(s)
 }
 
 static krb5_error_code
-krb5_libdefault_string(context, realm, option, ret_value)
-     krb5_context context;
-     const krb5_data *realm;
-     const char *option;
-     char **ret_value;
+krb5_libdefault_string(krb5_context context, const krb5_data *realm,
+		       const char *option, char **ret_value)
 {
     profile_t profile;
     const char *names[5];
@@ -708,11 +695,8 @@ goodbye:
 /* as well as the DNS code */
 
 krb5_error_code
-krb5_libdefault_boolean(context, realm, option, ret_value)
-     krb5_context context;
-     const char *option;
-     const krb5_data *realm;
-     int *ret_value;
+krb5_libdefault_boolean(krb5_context context, const krb5_data *realm,
+			const char *option, int *ret_value)
 {
     char *string = NULL;
     krb5_error_code retval;
@@ -729,21 +713,18 @@ krb5_libdefault_boolean(context, realm, option, ret_value)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds(context, creds, client, prompter, prompter_data,
-		    start_time, in_tkt_service, options, gak_fct, gak_data,
-		    use_master, as_reply)
-     krb5_context context;
-     krb5_creds *creds;
-     krb5_principal client;
-     krb5_prompter_fct prompter;
-     void *prompter_data;
-     krb5_deltat start_time;
-     char *in_tkt_service;
-     krb5_get_init_creds_opt *options;
-     krb5_gic_get_as_key_fct gak_fct;
-     void *gak_data;
-     int  use_master;
-     krb5_kdc_rep **as_reply;
+krb5_get_init_creds(krb5_context context,
+		    krb5_creds *creds,
+		    krb5_principal client,
+		    krb5_prompter_fct prompter,
+		    void *prompter_data,
+		    krb5_deltat start_time,
+		    char *in_tkt_service,
+		    krb5_get_init_creds_opt *options,
+		    krb5_gic_get_as_key_fct gak_fct,
+		    void *gak_data,
+		    int  use_master,
+		    krb5_kdc_rep **as_reply)
 {
     krb5_error_code ret;
     krb5_kdc_req request;

@@ -48,11 +48,7 @@
  returns system errors
  */
 static krb5_error_code 
-krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
-    krb5_context          context;
-    krb5_data           * in_data;
-    krb5_creds          * in_cred;
-    krb5_data           * outbuf;
+krb5_send_tgs_basic(krb5_context context, krb5_data *in_data, krb5_creds *in_cred, krb5_data *outbuf)
 {   
     krb5_error_code       retval;
     krb5_checksum         checksum;
@@ -127,19 +123,12 @@ cleanup_data:
 }
 
 krb5_error_code
-krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
-	      authorization_data, padata, second_ticket, in_cred, rep)
-    krb5_context context;
-    const krb5_flags kdcoptions;
-    const krb5_ticket_times * timestruct;
-    const krb5_enctype * ktypes;
-    krb5_const_principal sname;
-    krb5_address * const * addrs;
-    krb5_authdata * const * authorization_data;
-    krb5_pa_data * const * padata;
-    const krb5_data * second_ticket;
-    krb5_creds * in_cred;
-    krb5_response * rep;
+krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
+	      const krb5_ticket_times *timestruct, const krb5_enctype *ktypes,
+	      krb5_const_principal sname, krb5_address *const *addrs,
+	      krb5_authdata *const *authorization_data,
+	      krb5_pa_data *const *padata, const krb5_data *second_ticket,
+	      krb5_creds *in_cred, krb5_response *rep)
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;

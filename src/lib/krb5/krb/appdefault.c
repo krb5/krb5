@@ -20,8 +20,7 @@ static const char *conf_no[] = {
 	0,
 };
 
-static int conf_boolean(s)
-	char *s;
+static int conf_boolean(char *s)
 {
 	const char **p;
 	for(p=conf_yes; *p; p++) {
@@ -36,12 +35,7 @@ static int conf_boolean(s)
 	return 0;
 }
 
-static krb5_error_code appdefault_get(context, appname, realm, option,
-				ret_value)
-        krb5_context context;
-	const char *appname, *option;
-        const krb5_data *realm;
-	char **ret_value;
+static krb5_error_code appdefault_get(krb5_context context, const char *appname, const krb5_data *realm, const char *option, char **ret_value)
 {
         profile_t profile;
         const char *names[5];
@@ -142,13 +136,7 @@ goodbye:
 }
 
 void KRB5_CALLCONV 
-krb5_appdefault_boolean(context, appname, realm, option,
-			default_value, ret_value)
-        krb5_context context;
-	const char *appname,  *option;
-        const krb5_data *realm;
-	int default_value;
-	int *ret_value;
+krb5_appdefault_boolean(krb5_context context, const char *appname, const krb5_data *realm, const char *option, int default_value, int *ret_value)
 {
 	char *string = NULL;
 	krb5_error_code retval;
@@ -163,13 +151,8 @@ krb5_appdefault_boolean(context, appname, realm, option,
 }
 
 void KRB5_CALLCONV 
-krb5_appdefault_string(context, appname, realm, option, default_value,
-		       ret_value)
-     krb5_context context;
-	const char *appname, *option, *default_value;
-	char **ret_value;
-     const krb5_data *realm;
-	{
+krb5_appdefault_string(krb5_context context, const char *appname, const krb5_data *realm, const char *option, const char *default_value, char **ret_value)
+{
 	krb5_error_code retval;
 	char *string;
 

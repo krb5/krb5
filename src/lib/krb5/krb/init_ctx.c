@@ -76,16 +76,14 @@ extern void krb5_win_ccdll_load(krb5_context context);
 static krb5_error_code init_common (krb5_context *, krb5_boolean);
 
 krb5_error_code KRB5_CALLCONV
-krb5_init_context(context)
-	krb5_context *context;
+krb5_init_context(krb5_context *context)
 {
 
 	return init_common (context, FALSE);
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_init_secure_context(context)
-	krb5_context *context;
+krb5_init_secure_context(krb5_context *context)
 {
 
         /* This is to make gcc -Wall happy */
@@ -94,9 +92,7 @@ krb5_init_secure_context(context)
 }
 
 static krb5_error_code
-init_common (context, secure)
-	krb5_context *context;
-	krb5_boolean secure;
+init_common (krb5_context *context, krb5_boolean secure)
 {
 	krb5_context ctx = 0;
 	krb5_error_code retval;
@@ -232,8 +228,7 @@ cleanup:
 }
 
 void KRB5_CALLCONV
-krb5_free_context(ctx)
-	krb5_context	ctx;
+krb5_free_context(krb5_context ctx)
 {
      krb5_free_ets(ctx);
      krb5_os_free_context(ctx);
@@ -266,9 +261,7 @@ krb5_free_context(ctx)
  * Set the desired default ktypes, making sure they are valid.
  */
 krb5_error_code
-krb5_set_default_in_tkt_ktypes(context, ktypes)
-	krb5_context context;
-	const krb5_enctype *ktypes;
+krb5_set_default_in_tkt_ktypes(krb5_context context, const krb5_enctype *ktypes)
 {
     krb5_enctype * new_ktypes;
     int i;
@@ -298,12 +291,7 @@ krb5_set_default_in_tkt_ktypes(context, ktypes)
 }
 
 static krb5_error_code
-get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
-     krb5_context context;
-     krb5_enctype **ktypes;
-     char *profstr;
-     int ctx_count;
-     krb5_enctype *ctx_list;
+get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profstr, int ctx_count, krb5_enctype *ctx_list)
 {
     krb5_enctype *old_ktypes;
 
@@ -383,9 +371,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 }
 
 krb5_error_code
-krb5_get_default_in_tkt_ktypes(context, ktypes)
-    krb5_context context;
-    krb5_enctype **ktypes;
+krb5_get_default_in_tkt_ktypes(krb5_context context, krb5_enctype **ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "default_tkt_enctypes",
 				  context->in_tkt_ktype_count,
@@ -393,9 +379,7 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_set_default_tgs_enctypes (context, ktypes)
-	krb5_context context;
-	const krb5_enctype *ktypes;
+krb5_set_default_tgs_enctypes (krb5_context context, const krb5_enctype *ktypes)
 {
     krb5_enctype * new_ktypes;
     int i;
@@ -433,19 +417,14 @@ krb5_error_code krb5_set_default_tgs_ktypes
 
 void
 KRB5_CALLCONV
-krb5_free_ktypes (context, val)
-     krb5_context context;
-     krb5_enctype *val;
+krb5_free_ktypes (krb5_context context, krb5_enctype *val)
 {
     free (val);
 }
 
 krb5_error_code
 KRB5_CALLCONV
-krb5_get_tgs_ktypes(context, princ, ktypes)
-    krb5_context context;
-    krb5_const_principal princ;
-    krb5_enctype **ktypes;
+krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_enctype **ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
 				  context->tgs_ktype_count,
@@ -453,9 +432,7 @@ krb5_get_tgs_ktypes(context, princ, ktypes)
 }
 
 krb5_error_code
-krb5_get_permitted_enctypes(context, ktypes)
-    krb5_context context;
-    krb5_enctype **ktypes;
+krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "permitted_enctypes",
 				  context->tgs_ktype_count,
@@ -463,9 +440,7 @@ krb5_get_permitted_enctypes(context, ktypes)
 }
 
 krb5_boolean
-krb5_is_permitted_enctype(context, etype)
-     krb5_context context;
-     krb5_enctype etype;
+krb5_is_permitted_enctype(krb5_context context, krb5_enctype etype)
 {
     krb5_enctype *list, *ptr;
     krb5_boolean ret;

@@ -49,15 +49,7 @@ krb5_get_as_key_keytab(
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
-			   start_time, in_tkt_service, options)
-     krb5_context context;
-     krb5_creds *creds;
-     krb5_principal client;
-     krb5_keytab arg_keytab;
-     krb5_deltat start_time;
-     char *in_tkt_service;
-     krb5_get_init_creds_opt *options;
+krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds, krb5_principal client, krb5_keytab arg_keytab, krb5_deltat start_time, char *in_tkt_service, krb5_get_init_creds_opt *options)
 {
    krb5_error_code ret, ret2;
    int use_master;

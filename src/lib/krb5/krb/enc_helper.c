@@ -27,12 +27,7 @@
 #include "k5-int.h"
 
 krb5_error_code
-krb5_encrypt_helper(context, key, usage, plain, cipher)
-     krb5_context context;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *plain;
-     krb5_enc_data *cipher;
+krb5_encrypt_helper(krb5_context context, const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *plain, krb5_enc_data *cipher)
 {
     krb5_error_code ret;
     size_t enclen;

@@ -4,7 +4,7 @@
 
 struct cleanup {
     void 		* arg;
-    void		(*func)();
+    void		(*func)(void *);
 };
 
 #define CLEANUP_INIT(x)							\

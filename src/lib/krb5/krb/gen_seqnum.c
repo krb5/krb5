@@ -36,10 +36,7 @@
 #endif
 
 krb5_error_code
-krb5_generate_seq_number(context, key, seqno)
-    krb5_context context;
-    const krb5_keyblock *key;
-    krb5_int32 *seqno;
+krb5_generate_seq_number(krb5_context context, const krb5_keyblock *key, krb5_int32 *seqno)
 {
     krb5_data seed;
     krb5_error_code retval;

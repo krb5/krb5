@@ -28,7 +28,7 @@
 #include "k5-int.h"
 
 int
-main ()
+main (void)
 {
     struct {
 	char *string;

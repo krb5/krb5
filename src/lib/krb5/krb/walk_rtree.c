@@ -115,11 +115,7 @@
  */
 
 krb5_error_code
-krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
-    krb5_context context;
-    const krb5_data *client, *server;
-    krb5_principal **tree;
-    int realm_branch_char;
+krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_data *server, krb5_principal **tree, int realm_branch_char)
 {
     krb5_error_code retval;
     krb5_principal *rettree;

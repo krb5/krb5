@@ -31,10 +31,7 @@
 #include "k5-int.h"
 
 krb5_boolean KRB5_CALLCONV
-krb5_realm_compare(context, princ1, princ2)
-    krb5_context context;
-    krb5_const_principal princ1;
-    krb5_const_principal princ2;
+krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
 {
     if (krb5_princ_realm(context, princ1)->length != 
 	krb5_princ_realm(context, princ2)->length ||
@@ -47,10 +44,7 @@ krb5_realm_compare(context, princ1, princ2)
 }
 
 krb5_boolean KRB5_CALLCONV
-krb5_principal_compare(context, princ1, princ2)
-    krb5_context context;
-    krb5_const_principal princ1;
-    krb5_const_principal princ2;
+krb5_principal_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
 {
     register int i;
     krb5_int32 nelem;

@@ -48,12 +48,8 @@ static krb5_error_code keytab_keyproc
                krb5_keyblock **);
 
 static krb5_error_code
-keytab_keyproc(context, type, salt, keyseed, key)
-    krb5_context context;
-    const krb5_enctype type;
-    krb5_data * salt;
-    krb5_const_pointer keyseed;
-    krb5_keyblock ** key;
+keytab_keyproc(krb5_context context, krb5_enctype type, krb5_data *salt,
+	       krb5_const_pointer keyseed, krb5_keyblock **key)
 {
     const struct keytab_keyproc_arg * arg = 
 	(const struct keytab_keyproc_arg *)keyseed;
@@ -110,17 +106,11 @@ cleanup:
 
  */
 krb5_error_code KRB5_CALLCONV
-krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes, pre_auth_types, 
-			    keytab, ccache, creds, ret_as_reply)
-    krb5_context context;
-    const krb5_flags options;
-    krb5_address * const * addrs;
-    krb5_enctype * ktypes;
-    krb5_preauthtype * pre_auth_types;
-    const krb5_keytab keytab;
-    krb5_ccache ccache;
-    krb5_creds * creds;
-    krb5_kdc_rep ** ret_as_reply;
+krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
+			    krb5_address *const *addrs, krb5_enctype *ktypes,
+			    krb5_preauthtype *pre_auth_types,
+			    krb5_keytab keytab, krb5_ccache ccache,
+			    krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
 {
     struct keytab_keyproc_arg arg;
 

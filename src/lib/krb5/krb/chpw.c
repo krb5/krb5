@@ -5,12 +5,7 @@
 #include "auth_con.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_mk_chpw_req(context, auth_context, ap_req, passwd, packet)
-     krb5_context context;
-     krb5_auth_context auth_context;
-     krb5_data *ap_req;
-     char *passwd;
-     krb5_data *packet;
+krb5_mk_chpw_req(krb5_context context, krb5_auth_context auth_context, krb5_data *ap_req, char *passwd, krb5_data *packet)
 {
     krb5_error_code ret = 0;
     krb5_data clearpw;
@@ -72,12 +67,7 @@ cleanup:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_rd_chpw_rep(context, auth_context, packet, result_code, result_data)
-     krb5_context context;
-     krb5_auth_context auth_context;
-     krb5_data *packet;
-     int *result_code;
-     krb5_data *result_data;
+krb5_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *packet, int *result_code, krb5_data *result_data)
 {
     char *ptr;
     int plen, vno;
@@ -209,10 +199,7 @@ cleanup:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_chpw_result_code_string(context, result_code, code_string)
-     krb5_context context;
-     int result_code;
-     char **code_string;
+krb5_chpw_result_code_string(krb5_context context, int result_code, char **code_string)
 {
    switch (result_code) {
    case KRB5_KPASSWD_MALFORMED:

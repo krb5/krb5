@@ -27,10 +27,7 @@
 #include "k5-int.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_set_principal_realm(context, principal, realm)
-    	krb5_context context;
-	krb5_principal	principal;
-	const char	*realm;
+krb5_set_principal_realm(krb5_context context, krb5_principal principal, const char *realm)
 {
 	size_t	length;
 	char	*newrealm;

@@ -43,9 +43,7 @@ can't safely dereference.  This test file used to make this mistake, often.";
  * Dump an external representation.
  */
 static void
-print_erep(erep, elen)
-    krb5_octet	*erep;
-    size_t	elen;
+print_erep(krb5_octet *erep, size_t elen)
 {
     int i, j;
 
@@ -77,11 +75,7 @@ print_erep(erep, elen)
  * Do a serialization test.
  */
 static krb5_error_code
-ser_data(verbose, msg, ctx, dtype)
-    int			verbose;
-    char		*msg;
-    krb5_pointer	ctx;
-    krb5_magic		dtype;
+ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 {
     krb5_error_code	kret;
     krb5_context	ser_ctx;
@@ -204,9 +198,7 @@ ser_data(verbose, msg, ctx, dtype)
  * Serialize krb5_context.
  */
 static krb5_error_code
-ser_kcontext_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_kcontext_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     profile_t		sprofile;
@@ -252,9 +244,7 @@ ser_kcontext_test(kcontext, verbose)
  * Serialize krb5_auth_context.
  */
 static krb5_error_code
-ser_acontext_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_acontext_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     krb5_auth_context	actx;
@@ -383,9 +373,7 @@ ser_acontext_test(kcontext, verbose)
  * Serialize krb5_ccache
  */
 static krb5_error_code
-ser_ccache_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_ccache_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     char		ccname[128];
@@ -431,9 +419,7 @@ ser_ccache_test(kcontext, verbose)
  * Serialize krb5_keytab.
  */
 static krb5_error_code
-ser_keytab_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_keytab_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     char		ccname[128];
@@ -472,9 +458,7 @@ ser_keytab_test(kcontext, verbose)
  * Serialize krb5_rcache.
  */
 static krb5_error_code
-ser_rcache_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_rcache_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     char		rcname[128];
@@ -554,9 +538,7 @@ ser_eblock_test(kcontext, verbose)
  * Serialize krb5_principal
  */
 static krb5_error_code
-ser_princ_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_princ_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     krb5_principal	princ;
@@ -580,9 +562,7 @@ ser_princ_test(kcontext, verbose)
  * Serialize krb5_checksum.
  */
 static krb5_error_code
-ser_cksum_test(kcontext, verbose)
-    krb5_context	kcontext;
-    int			verbose;
+ser_cksum_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code	kret;
     krb5_checksum	checksum;
@@ -611,9 +591,7 @@ ser_cksum_test(kcontext, verbose)
  * Main procedure.
  */
 int
-main(argc, argv)
-    int argc;
-    char *argv[];
+main(int argc, char **argv)
 {
     krb5_error_code	kret;
     krb5_context	kcontext;

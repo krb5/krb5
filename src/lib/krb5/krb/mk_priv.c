@@ -32,16 +32,7 @@
 #include "auth_con.h"
 
 static krb5_error_code
-krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr, 
-		   remote_addr, i_vector, outbuf)
-    krb5_context 	  context;
-    const krb5_data   	* userdata;
-    const krb5_keyblock * keyblock;
-    krb5_replay_data  	* replaydata;
-    krb5_address      	* local_addr;
-    krb5_address      	* remote_addr;
-    krb5_pointer	  i_vector;
-    krb5_data         	* outbuf; 
+krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata, const krb5_keyblock *keyblock, krb5_replay_data *replaydata, krb5_address *local_addr, krb5_address *remote_addr, krb5_pointer i_vector, krb5_data *outbuf)
 {
     krb5_error_code 	retval;
     krb5_priv 		privmsg;
@@ -116,12 +107,9 @@ clean_scratch:
 
 
 krb5_error_code KRB5_CALLCONV
-krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
-    krb5_context 	  context;
-    krb5_auth_context 	  auth_context;
-    const krb5_data   	* userdata;
-    krb5_data         	* outbuf;
-    krb5_replay_data  	* outdata;
+krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
+	     const krb5_data *userdata, krb5_data *outbuf,
+	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
     krb5_keyblock       * keyblock;

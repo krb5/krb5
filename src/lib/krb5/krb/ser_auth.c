@@ -57,10 +57,7 @@ static const krb5_ser_entry krb5_authenticator_ser_entry = {
  *				  the krb5_authenticator.
  */
 static krb5_error_code
-krb5_authenticator_size(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_authenticator_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code	kret;
     krb5_authenticator	*authenticator;
@@ -124,11 +121,7 @@ krb5_authenticator_size(kcontext, arg, sizep)
  * krb5_authenticator_externalize()	- Externalize the krb5_authenticator.
  */
 static krb5_error_code
-krb5_authenticator_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_authenticator_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_authenticator	*authenticator;
@@ -230,11 +223,7 @@ krb5_authenticator_externalize(kcontext, arg, buffer, lenremain)
  * krb5_authenticator_internalize()	- Internalize the krb5_authenticator.
  */
 static krb5_error_code
-krb5_authenticator_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_authenticator_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_authenticator	*authenticator;
@@ -355,8 +344,7 @@ krb5_authenticator_internalize(kcontext, argp, buffer, lenremain)
  * Register the authenticator serializer.
  */
 krb5_error_code
-krb5_ser_authenticator_init(kcontext)
-    krb5_context	kcontext;
+krb5_ser_authenticator_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_authenticator_ser_entry));
 }

@@ -57,10 +57,7 @@ static const krb5_ser_entry krb5_checksum_ser_entry = {
  *				  the krb5_checksum.
  */
 static krb5_error_code
-krb5_checksum_esize(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_checksum_esize(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code	kret;
     krb5_checksum	*checksum;
@@ -89,11 +86,7 @@ krb5_checksum_esize(kcontext, arg, sizep)
  * krb5_checksum_externalize()	- Externalize the krb5_checksum.
  */
 static krb5_error_code
-krb5_checksum_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_checksum_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_checksum	*checksum;
@@ -140,11 +133,7 @@ krb5_checksum_externalize(kcontext, arg, buffer, lenremain)
  * krb5_checksum_internalize()	- Internalize the krb5_checksum.
  */
 static krb5_error_code
-krb5_checksum_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_checksum_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_checksum	*checksum;
@@ -207,8 +196,7 @@ krb5_checksum_internalize(kcontext, argp, buffer, lenremain)
  * Register the checksum serializer.
  */
 krb5_error_code
-krb5_ser_checksum_init(kcontext)
-    krb5_context	kcontext;
+krb5_ser_checksum_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_checksum_ser_entry));
 }

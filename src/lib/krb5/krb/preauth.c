@@ -131,14 +131,7 @@ typedef krb5_error_code (*git_decrypt_proc) (krb5_context,
 					     krb5_const_pointer,
 					     krb5_kdc_rep *);
 
-krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
-				   key_seed, creds, request)
-    krb5_context		context;
-    krb5_pa_data **		preauth_to_use;
-    git_key_proc 		key_proc;
-    krb5_const_pointer		key_seed;
-    krb5_creds *		creds;
-    krb5_kdc_req *		request;
+krb5_error_code krb5_obtain_padata(krb5_context context, krb5_pa_data **preauth_to_use, git_key_proc key_proc, krb5_const_pointer key_seed, krb5_creds *creds, krb5_kdc_req *request)
 {
     krb5_error_code		retval;
     krb5_etype_info	    	etype_info = 0;
@@ -244,17 +237,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5_process_padata(context, request, as_reply, key_proc, keyseed,
-		    decrypt_proc, decrypt_key, creds, do_more)
-    krb5_context	context;
-    krb5_kdc_req *	request;
-    krb5_kdc_rep *	as_reply;
-    git_key_proc	key_proc;
-    krb5_const_pointer	keyseed;
-    git_decrypt_proc	decrypt_proc;
-    krb5_keyblock **	decrypt_key;
-    krb5_creds *	creds;
-    krb5_int32 *	do_more;
+krb5_process_padata(krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *as_reply, git_key_proc key_proc, krb5_const_pointer keyseed, git_decrypt_proc decrypt_proc, krb5_keyblock **decrypt_key, krb5_creds *creds, krb5_int32 *do_more)
 {
     krb5_error_code		retval = 0;
     krb5_preauth_ops * 		ops;
@@ -291,17 +274,7 @@ cleanup:
  * in the user's key.
  */
 static krb5_error_code
-obtain_enc_ts_padata(context, in_padata, etype_info, def_enc_key,
-		     key_proc, key_seed, creds, request, out_padata)
-    krb5_context		context;
-    krb5_pa_data *		in_padata;
-    krb5_etype_info		etype_info;
-    krb5_keyblock *		def_enc_key;
-    git_key_proc 		key_proc;
-    krb5_const_pointer		key_seed;
-    krb5_creds *		creds;
-    krb5_kdc_req *		request;
-    krb5_pa_data **		out_padata;
+obtain_enc_ts_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info etype_info, krb5_keyblock *def_enc_key, git_key_proc key_proc, krb5_const_pointer key_seed, krb5_creds *creds, krb5_kdc_req *request, krb5_pa_data **out_padata)
 {
     krb5_pa_enc_ts		pa_enc;
     krb5_error_code		retval;
@@ -355,20 +328,7 @@ cleanup:
 }
 
 static krb5_error_code
-process_pw_salt(context, padata, request, as_reply,
-		key_proc, keyseed, decrypt_proc, decrypt_key, 
-		creds, do_more, done)
-    krb5_context		context;
-    krb5_pa_data *		padata;
-    krb5_kdc_req *		request;
-    krb5_kdc_rep *		as_reply;
-    git_key_proc		key_proc;
-    krb5_const_pointer		keyseed;
-    git_decrypt_proc		decrypt_proc;
-    krb5_keyblock **		decrypt_key;
-    krb5_creds *		creds;
-    krb5_int32 *		do_more;
-    krb5_int32 *		done;
+process_pw_salt(krb5_context context, krb5_pa_data *padata, krb5_kdc_req *request, krb5_kdc_rep *as_reply, git_key_proc key_proc, krb5_const_pointer keyseed, git_decrypt_proc decrypt_proc, krb5_keyblock **decrypt_key, krb5_creds *creds, krb5_int32 *do_more, krb5_int32 *done)
 {
     krb5_error_code	retval;
     krb5_data		salt;
@@ -390,9 +350,7 @@ process_pw_salt(context, padata, request, as_reply,
 }
     
 static krb5_error_code
-find_pa_system(type, preauth)
-    krb5_preauthtype	type;
-    krb5_preauth_ops	**preauth;
+find_pa_system(krb5_preauthtype type, krb5_preauth_ops **preauth)
 {
     krb5_preauth_ops *ap = preauth_systems;
     
@@ -408,15 +366,7 @@ find_pa_system(type, preauth)
 extern const char *krb5_default_pwd_prompt1;
 
 static krb5_error_code
-sam_get_pass_from_user(context, etype_info, key_proc, key_seed, request,
-		       new_enc_key, prompt)
-    krb5_context		context;
-    krb5_etype_info		etype_info;
-    git_key_proc 		key_proc;
-    krb5_const_pointer		key_seed;
-    krb5_kdc_req *		request;
-    krb5_keyblock **		new_enc_key;
-    const char *		prompt;
+sam_get_pass_from_user(krb5_context context, krb5_etype_info etype_info, git_key_proc key_proc, krb5_const_pointer key_seed, krb5_kdc_req *request, krb5_keyblock **new_enc_key, const char *prompt)
 {
     krb5_enctype 		enctype;
     krb5_error_code		retval;
@@ -439,8 +389,7 @@ sam_get_pass_from_user(context, etype_info, key_proc, key_seed, request,
     return retval;
 }
 static 
-char *handle_sam_labels(sc)
-     krb5_sam_challenge *sc;
+char *handle_sam_labels(krb5_sam_challenge *sc)
 {
     char *label = sc->sam_challenge_label.data;
     unsigned int label_len = sc->sam_challenge_label.length;
@@ -510,17 +459,7 @@ char *handle_sam_labels(sc)
  * preauthentication type.  It presents the challenge...
  */
 static krb5_error_code
-obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
-		  key_proc, key_seed, creds, request, out_padata)
-    krb5_context		context;
-    krb5_pa_data *		in_padata;
-    krb5_etype_info		etype_info;
-    krb5_keyblock *		def_enc_key;
-    git_key_proc 		key_proc;
-    krb5_const_pointer		key_seed;
-    krb5_creds *		creds;
-    krb5_kdc_req *		request;
-    krb5_pa_data **		out_padata;
+obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info etype_info, krb5_keyblock *def_enc_key, git_key_proc key_proc, krb5_const_pointer key_seed, krb5_creds *creds, krb5_kdc_req *request, krb5_pa_data **out_padata)
 {
     krb5_error_code		retval;
     krb5_data *			scratch;

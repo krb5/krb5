@@ -58,11 +58,7 @@
 #define	COMPONENT_SEP	'/'
 
 krb5_error_code KRB5_CALLCONV
-krb5_unparse_name_ext(context, principal, name, size)
-    krb5_context context;
-    krb5_const_principal principal;
-    register char **name;
-    unsigned int	 *size;
+krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, register char **name, unsigned int *size)
 {
 	register char *cp, *q;
 	register int i,j;
@@ -192,10 +188,7 @@ krb5_unparse_name_ext(context, principal, name, size)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_unparse_name(context, principal, name)
-    krb5_context context;
-    krb5_const_principal principal;
-    register char **name;
+krb5_unparse_name(krb5_context context, krb5_const_principal principal, register char **name)
 {
 	*name = NULL;
 	return(krb5_unparse_name_ext(context, principal, name, NULL));

@@ -1,3 +1,29 @@
+2002-09-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* addr_comp.c, addr_order.c, addr_srch.c, appdefault.c,
+	auth_con.c, bld_princ.c, chpw.c, cleanup.h, conv_princ.c,
+	copy_addrs.c, copy_athctr.c, copy_auth.c, copy_cksum.c,
+	copy_creds.c, copy_data.c, copy_key.c, copy_princ.c, copy_tick.c,
+	cp_key_cnt.c, decode_kdc.c, decrypt_tk.c, enc_helper.c,
+	encode_kdc.c, encrypt_tk.c, free_rtree.c, fwd_tgt.c, gc_frm_kdc.c,
+	gc_via_tkt.c, gen_seqnum.c, gen_subkey.c, get_creds.c,
+	get_in_tkt.c, gic_keytab.c, gic_opt.c, gic_pwd.c, in_tkt_ktb.c,
+	in_tkt_pwd.c, in_tkt_sky.c, init_ctx.c, kdc_rep_dc.c, kfree.c,
+	mk_cred.c, mk_error.c, mk_priv.c, mk_rep.c, mk_req.c,
+	mk_req_ext.c, mk_safe.c, parse.c, pr_to_salt.c, preauth.c,
+	preauth2.c, princ_comp.c, rd_cred.c, rd_error.c, rd_priv.c,
+	rd_rep.c, rd_req.c, rd_req_dec.c, rd_safe.c, recvauth.c,
+	send_tgs.c, sendauth.c, ser_actx.c, ser_adata.c, ser_addr.c,
+	ser_auth.c, ser_cksum.c, ser_ctx.c, ser_key.c, ser_princ.c,
+	serialize.c, set_realm.c, srv_rcache.c, str_conv.c, t_deltat.c,
+	t_kerb.c, t_ser.c, t_walk_rtree.c, tgtname.c, unparse.c,
+	valid_times.c, vfy_increds.c, vic_opt.c, walk_rtree.c,
+	x-deltat.y: Use prototype style function definitions.
+	* deltat.c: Regenerated.
+	* bld_princ.c: Include stdarg.h before k5-int.h.
+	* cleanup.h (struct cleanup): Include prototype for function
+	pointer field 'func'.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
