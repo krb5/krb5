@@ -1,3 +1,11 @@
+2003-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (WITH_CCOPTS, WITH_CPPOPTS, WITH_LINKER,
+	WITH_LDOPTS, KRB5_INIT_CCOPTS, WITH_CC_DEPRECATED_ARG): Deleted.
+	(CONFIG_RULES): Do the non-useless parts directly here.
+	(V5_SET_TOPDIR): Work quietly.
+	(WITH_KRB4): Use AC_MSG_NOTICE.
+
 2003-07-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (extra_gcc_warn_opts): Don't turn on -pedantic on

@@ -35,7 +35,7 @@ ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
 krb5_pre_in=$ac_config_fragdir/pre.in
 krb5_post_in=$ac_config_fragdir/post.in
-echo "Looking for $srcdir/$ac_config_fragdir"
+# echo "Looking for $srcdir/$ac_config_fragdir"
 if test -d "$srcdir/$ac_config_fragdir"; then
   AC_CONFIG_AUX_DIR($ac_config_fragdir)
 else
@@ -48,10 +48,10 @@ dnl
 AC_DEFUN(CONFIG_RULES,[dnl
 V5_SET_TOPDIR dnl
 WITH_CC dnl
-WITH_CCOPTS dnl
-WITH_CPPOPTS dnl
-WITH_LINKER dnl
-WITH_LDOPTS dnl
+AC_REQUIRE_CPP
+if test -z "$LD" ; then LD=$CC; fi
+AC_ARG_VAR(LD,[linker command [CC]])
+AC_SUBST(LDFLAGS) dnl
 WITH_KRB4 dnl
 KRB5_AC_CHOOSE_ET dnl
 KRB5_AC_CHOOSE_SS dnl
@@ -388,7 +388,7 @@ AC_ARG_WITH([krb4],
 withval=yes
 )dnl
 if test $withval = no; then
-	AC_MSG_RESULT(no krb4 support)
+	AC_MSG_NOTICE(no krb4 support)
 	KRB4_LIB=
 	KRB4_DEPLIB=
 	KRB4_INCLUDES=
@@ -399,7 +399,7 @@ if test $withval = no; then
 else
  AC_DEFINE([KRB5_KRB4_COMPAT], 1, [Define this if building with krb4 compat])
  if test $withval = yes; then
-	AC_MSG_RESULT(built in krb4 support)
+	AC_MSG_NOTICE(enabling built in krb4 support)
 	KRB4_DEPLIB='$(TOPLIBD)/libkrb4$(DEPLIBEXT)'
 	KRB4_LIB=-lkrb4
 	KRB4_INCLUDES='-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV'
@@ -408,7 +408,7 @@ else
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
  else
-	AC_MSG_RESULT(preinstalled krb4 in $withval)
+	AC_MSG_NOTICE(using preinstalled krb4 in $withval)
 	KRB4_LIB="-lkrb"
 dnl	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_INCLUDES="-I$withval/include"
@@ -430,22 +430,14 @@ AC_SUBST(DES425_DEPLIB)
 AC_SUBST(DES425_LIB)
 ])dnl
 dnl
-dnl set $(CC) from --with-cc=value
-dnl
-AC_DEFUN(KRB5_INIT_CCOPTS,[CCOPTS=
-])
 dnl
 AC_DEFUN(KRB5_AC_CHECK_FOR_CFLAGS,[
 AC_BEFORE([$0],[AC_PROG_CC])
 krb5_ac_cflags_set=${CFLAGS+set}
 ])
 dnl
-AC_DEFUN(WITH_CC_DEPRECATED_ARG,[dnl
-AC_ARG_WITH([cc],AC_HELP_STRING(--with-cc=COMPILER,deprecated; use CC=...),
-	    AC_MSG_ERROR(option --with-cc is deprecated; use CC=...))])
 AC_DEFUN(WITH_CC,[dnl
 AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])dnl
-AC_REQUIRE([WITH_CC_DEPRECATED_ARG])dnl
 AC_REQUIRE([AC_PROG_CC])dnl
 krb5_cv_prog_gcc=$ac_cv_c_compiler_gnu
 if test $ac_cv_c_compiler_gnu = yes ; then
@@ -472,39 +464,6 @@ if test "$GCC" = yes ; then
 fi
 ])dnl
 dnl
-dnl set $(LD) from --with-linker=value
-dnl
-AC_DEFUN(WITH_LINKER,[
-AC_ARG_WITH([linker],
-	    AC_HELP_STRING(--with-linker=LINKER,deprecated; use LD=...),
-	    AC_MSG_ERROR(option --with-linker is deprecated; use LD=...))
-if test -z "$LD" ; then LD=$CC; fi
-AC_ARG_VAR(LD,[linker command [CC]])
-])dnl
-dnl
-dnl set $(CCOPTS) from --with-ccopts=value
-dnl
-AC_DEFUN(WITH_CCOPTS,[
-AC_REQUIRE([KRB5_INIT_CCOPTS])dnl
-AC_ARG_WITH([ccopts],
-	    AC_HELP_STRING(--with-ccopts=CCOPTS, deprecated; use CFLAGS=...),
-	    AC_MSG_ERROR(option --with-ccopts is deprecated; use CFLAGS=...))])
-dnl
-dnl set $(LDFLAGS) from --with-ldopts=value
-dnl
-AC_DEFUN(WITH_LDOPTS,[
-AC_ARG_WITH([ldopts],
-	    AC_HELP_STRING(--with-ldopts=LDOPTS,deprecated; use LDFLAGS=...),
-	    AC_MSG_ERROR(option --with-ldopts is deprecated; use LDFLAGS=...))
-AC_SUBST(LDFLAGS)])dnl
-dnl
-dnl set $(CPPOPTS) from --with-cppopts=value
-dnl
-AC_DEFUN(WITH_CPPOPTS,[
-AC_REQUIRE_CPP
-AC_ARG_WITH([cppopts],
-	   AC_HELP_STRING(--with-cppopts=CPPOPTS,deprecated; use CPPFLAGS=...),
-	   AC_MSG_ERROR(option --with-cppopts is deprecated; use CPPFLAGS=...))])
 dnl
 dnl check for yylineno -- HAVE_YYLINENO
 dnl
