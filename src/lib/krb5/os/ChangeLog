@@ -1,3 +1,7 @@
+1999-08-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_os_ctx.c (krb5_get_profile): Fix calling convention.
+
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* t_std_conf.c (test_get_krbhst): Use krb5_free_krbhst to

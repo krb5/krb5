@@ -393,7 +393,7 @@ krb5_os_init_context(ctx)
 	return retval;
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_profile (ctx, profile)
 	krb5_context ctx;
 	profile_t* profile;
