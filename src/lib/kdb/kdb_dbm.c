@@ -330,10 +330,10 @@ krb5_dbm_db_close_database(context)
  * The should really reference the db_context
  */
 krb5_error_code
-krb5_dbm_db_set_mkey(context, db_context, eblock)
+krb5_dbm_db_set_mkey(context, db_context, key)
     krb5_context 	  context;
     krb5_db_context 	* db_context;
-    krb5_encrypt_block  * eblock;
+    krb5_keyblock  * key;
 {
     krb5_db_context *db_ctx;
 
@@ -341,15 +341,15 @@ krb5_dbm_db_set_mkey(context, db_context, eblock)
 	return(KRB5_KDB_DBNOTINITED);
 
     db_ctx = context->db_context;
-    db_ctx->db_master_key = eblock;
+    db_ctx->db_master_key = key;
     return 0;
 }
 
 krb5_error_code
-krb5_dbm_db_get_mkey(context, db_context, eblock)
+krb5_dbm_db_get_mkey(context, db_context, key)
     krb5_context 	  context;
     krb5_db_context 	* db_context;
-    krb5_encrypt_block  **eblock;
+    krb5_keyblock  **key;
 {
     krb5_db_context *db_ctx;
 
@@ -357,7 +357,7 @@ krb5_dbm_db_get_mkey(context, db_context, eblock)
 	return(KRB5_KDB_DBNOTINITED);
 
     db_ctx = context->db_context;
-    *eblock = db_ctx->db_master_key;
+    *key = db_ctx->db_master_key;
     return 0;
 
 }

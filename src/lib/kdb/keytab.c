@@ -89,7 +89,7 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
     krb5_enctype 	  enctype;
     krb5_keytab_entry 	* entry;
 {
-    krb5_encrypt_block  * master_key;
+    krb5_keyblock       * master_key;
     krb5_error_code 	  kerror = 0;
     krb5_key_data 	* key_data;
     krb5_db_entry 	  db_entry;

@@ -43,7 +43,7 @@ typedef struct __krb5_db_context {
     int                 db_locks_held;  /* Number of times locked       */
     int                 db_lock_mode;   /* Last lock mode, e.g. greatest*/
     krb5_boolean        db_nb_locks;    /* [Non]Blocking lock modes     */
-    krb5_encrypt_block *db_master_key;  /* Master key of database       */
+    krb5_keyblock      *db_master_key;  /* Master key of database       */
     kdb5_dispatch_table *db_dispatch;   /* Dispatch table               */
 } krb5_db_context;
 

@@ -52,10 +52,11 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 #endif
 
 krb5_error_code
-krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, key)
+krb5_db_fetch_mkey(context, mname, etype, fromkeyboard, twice, keyfile,
+		   salt, key)
     krb5_context context;
     krb5_principal mname;
-    krb5_encrypt_block * eblock;
+    krb5_enctype etype;
     krb5_boolean fromkeyboard;
     krb5_boolean twice;
     char *keyfile;
@@ -66,7 +67,6 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
     char password[BUFSIZ];
     krb5_data pwd;
     int size = sizeof(password);
-
 
     if (fromkeyboard) {
 	krb5_data scratch;
@@ -83,8 +83,9 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 		if (retval)
 			return retval;
 	}
-	retval = krb5_string_to_key(context, eblock, key, &pwd,
-				    salt ? salt : &scratch);
+	retval = krb5_c_string_to_key(context, etype, &pwd, salt?salt:&scratch,
+				      key);
+
 	if (!salt)
 		krb5_xfree(scratch.data);
 	memset(password, 0, sizeof(password)); /* erase it */
@@ -142,7 +143,8 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 	    key->contents = 0;
 	} else
 	    retval = 0;
-	krb5_use_enctype(context, eblock, key->enctype);
+
+	key->enctype = etype;
 	
     errout:
 	(void) fclose(kf);

@@ -56,7 +56,6 @@ typedef struct __kdc_realm_data {
     /*
      * Other per-realm data.
      */
-    krb5_encrypt_block	realm_encblock;	/* Per-realm master encryption block*/
     char		*realm_ports;	/* Per-realm KDC port */
     /*
      * Per-realm parameters.
@@ -79,7 +78,6 @@ extern kdc_realm_t	*kdc_active_realm;
 #define	kdc_context			kdc_active_realm->realm_context
 #define	max_life_for_realm		kdc_active_realm->realm_maxlife
 #define	max_renewable_life_for_realm	kdc_active_realm->realm_maxrlife
-#define	master_encblock			kdc_active_realm->realm_encblock
 #define	master_keyblock			kdc_active_realm->realm_mkey
 #define	master_princ			kdc_active_realm->realm_mprinc
 #define	tgs_key				kdc_active_realm->realm_tgskey
