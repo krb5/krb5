@@ -461,7 +461,6 @@ add_principal(context, princ, op, pblock)
 
     memset((char *) &entry, 0, sizeof(entry));
 
-    entry.mkvno = 1;
     entry.len = KRB5_KDB_V1_BASE_LENGTH;
     entry.attributes = pblock->flags;
     entry.max_life = pblock->max_life;

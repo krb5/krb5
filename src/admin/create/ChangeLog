@@ -1,3 +1,8 @@
+
+Wed Dec 13 03:44:58 1995  Chris Provenzano (proven@mit.edu)
+
+	* kdb5_create.c : Remove mkvno from krb5_db_entry.
+
 Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
 
 	* kdb5_create.c : Remove krb5_enctype from krb5_string_to_key() args.
