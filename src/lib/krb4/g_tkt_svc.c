@@ -71,17 +71,17 @@ static int
 CredIsExpired( cr )
      CREDENTIALS *cr;
 {
-	KRB4_32 time;
+    KRB4_32 now;
 
-	/* This routine is for use with clients only in order to determine if a credential
-	   is still good
-	   Note: twice CLOCK_SKEW was added to age of ticket so that we could 
-	   be more sure that the ticket was good. 
-	   FIXME:  I think this is a bug -- should use the same algorithm
-	   everywhere to determine ticket expiration.   */
+    /* This routine is for use with clients only in order to determine
+       if a credential is still good.
+       Note: twice CLOCK_SKEW was added to age of ticket so that we could 
+       be more sure that the ticket was good. 
+       FIXME:  I think this is a bug -- should use the same algorithm
+       everywhere to determine ticket expiration.   */
 
-   time = TIME_GMT_UNIXSEC;	
-   return time + 2 * CLOCK_SKEW > krb_life_to_time(cr->issue_date,
+    now = TIME_GMT_UNIXSEC;	
+    return now + 2 * CLOCK_SKEW > krb_life_to_time(cr->issue_date,
 						   cr->lifetime);
 }
 
