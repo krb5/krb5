@@ -65,7 +65,7 @@ char *argv[];
 	convert(block2, input);
 	convert(block3, output);
 
-        if (retval = (*eblock.crypto_entry->process_key)(&eblock,&keyblock)) {
+        if (retval = krb5_process_key(&eblock,&keyblock)) {
             com_err("des test", retval, "can't process key");
             exit(-1);
         }
@@ -81,7 +81,7 @@ char *argv[];
 	    error++;
 	}
 
-        if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+        if (retval = krb5_finish_key(&eblock)) {
             com_err("des verify", retval, "can't finish key");
             exit(-1);
         }

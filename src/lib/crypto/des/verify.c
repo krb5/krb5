@@ -147,7 +147,7 @@ main(argc,argv)
     if (zflag) {
 	input = zero_text;
 	keyblock.contents = (krb5_octet *)zero_key;
-	if (retval = (*eblock.crypto_entry->process_key)(&eblock,&keyblock)) {
+	if (retval = krb5_process_key(&eblock,&keyblock)) {
 	    com_err("des verify", retval, "can't process zero key");
 	    exit(-1);
 	}
@@ -158,7 +158,7 @@ main(argc,argv)
 	    printf("%02x ",cipher_text[j]);
 	printf("\n");
 	do_decrypt(output,cipher_text);
-	if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+	if (retval = krb5_finish_key(&eblock)) {
 	    com_err("des verify", retval, "can't finish zero key");
 	    exit(-1);
 	}
@@ -168,7 +168,7 @@ main(argc,argv)
     if (mflag) {
 	input = msb_text;
 	keyblock.contents = (krb5_octet *)key3;
-	if (retval = (*eblock.crypto_entry->process_key)(&eblock,&keyblock)) {
+	if (retval = krb5_process_key(&eblock,&keyblock)) {
 	    com_err("des verify", retval, "can't process key3");
 	    exit(-1);
 	}
@@ -181,7 +181,7 @@ main(argc,argv)
 	}
 	printf("\n");
 	do_decrypt(output,cipher_text);
-	if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+	if (retval = krb5_finish_key(&eblock)) {
 	    com_err("des verify", retval, "can't finish key3");
 	    exit(-1);
 	}
@@ -192,7 +192,7 @@ main(argc,argv)
     {
 	input = zero_text;
 	keyblock.contents = (krb5_octet *)key2;
-	if (retval = (*eblock.crypto_entry->process_key)(&eblock,&keyblock)) {
+	if (retval = krb5_process_key(&eblock,&keyblock)) {
 	    com_err("des verify", retval, "can't process key2");
 	    exit(-1);
 	}
@@ -211,7 +211,7 @@ main(argc,argv)
 	    printf("%02x ",cipher_text[j]);
 	printf("\n\n");
 	do_decrypt(output,cipher_text);
-	if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+	if (retval = krb5_finish_key(&eblock)) {
 	    com_err("des verify", retval, "can't finish key2");
 	    exit(-1);
 	}
@@ -226,7 +226,7 @@ main(argc,argv)
     /* ECB mode */
     {
 	keyblock.contents = (krb5_octet *)default_key;
-	if (retval = (*eblock.crypto_entry->process_key)(&eblock,&keyblock)) {
+	if (retval = krb5_process_key(&eblock,&keyblock)) {
 	    com_err("des verify", retval, "can't process key2");
 	    exit(-1);
 	}
@@ -305,7 +305,7 @@ main(argc,argv)
     for (j = 0; j<=7; j++)
 	printf("%02x ",cipher_text[j]);
     printf("\n\n");
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
 	com_err("des verify", retval, "can't finish key2");
 	exit(-1);
     }
