@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=slave
+mydir=.
 BUILDTOP=$(REL)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)

@@ -1,3 +1,12 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+	* configure.in, kpropd.c: Removed useless test for KRB5_POSIX, and
+		removed unneeded #include of sgtty.h if POSIX_TERMIOS is
+		not defined.
+	
 1998-10-27  Marc Horowitz  <marc@mit.edu>
 
 	* kpropd.c (authorized_principal): make the acl file contain
