@@ -405,57 +405,124 @@ A policy cannot be deleted unless this number is zero.
 \label{sec:configparams}
 
 The KADM5 API acquires configuration information from the Kerberos
-configuration file (/etc/krb5.conf) and from the KDC configuration
-file (XXX/kdc.conf).  The remote client libraries use the following
-variables: XXX.  The local clients libraries use the following
-variables: XXX.  The administration server and administration
-utilities (kadmin_create, etc.) may use other variables as defined in
-their functional specifications (XXX).
-
-In KADM5_API_VERSION_2, the configuration parameters used by the KADM5
-API can be controlled by the caller by providing a kadm5_config_params
-structure to kadm5_init:
+configuration file (\$KRB5_CONFIG or /etc/krb5.conf) and from the KDC
+configuration file (\$KRB5_KDC_CONFIG or DEFAULT_KDC_PROFILE).  In
+KADM5_API_VERSION_2, some of the configuration parameters used by the
+KADM5 API can be controlled by the caller by providing a
+kadm5_config_params structure to kadm5_init:
 %
 \begin{verbatim}
 typedef struct _kadm5_config_params {
         u_int32 mask;
-        char *realm;
-        char *realm_profile;
-        char *realm_dbname;
-        char *realm_adbname;
-        char *realm_mkey_name;
-        char *realm_stash_file;
-        char *realm_kdc_ports;
-        char *realm_acl_file;
-        char *realm_adb_lockfile;
-        krb5_int32 realm_kadmind_port;
-        krb5_enctype realm_enctype;
-        krb5_deltat realm_max_life;
-        krb5_deltat realm_max_rlife;
-        krb5_timestamp realm_expiration;
-        krb5_flags realm_flags;
-        krb5_key_salt_tuple *realm_keysalts;
-        krb5_int32 realm_num_keysalts;
 
-        /* these are all replaced by the mask */
-        unsigned int realm_kadmind_port_valid:1;
-        unsigned int realm_enctype_valid:1;
-        unsigned int realm_max_life_valid:1;
-        unsigned int realm_max_rlife_valid:1;
-        unsigned int realm_expiration_valid:1;
-        unsigned int realm_flags_valid:1;
-        unsigned int realm_filler:7;
+	/* Client and server fields */
+        char *realm;
+	char *profile;
+	int kadmind_port;
+
+	/* client fields */
+	char *admin_server;
+
+	/* server fields */
+        char *dbname;
+	char *admin_dbname;
+	char *admin_lockfile;
+	char *acl_file;
+	char *dict_file;
+	char *admin_keytab;
+
+	/* server library (database) fields */
+        char *stash_file;
+        char *mkey_name;
+        krb5_enctype enctype;
+        krb5_deltat max_life;
+        krb5_deltat max_rlife;
+        krb5_timestamp expiration;
+        krb5_flags flags;
+        krb5_key_salt_tuple *keysalts;
+        krb5_int32 num_keysalts;
 } kadm5_config_params;
 \end{verbatim}
 %
+The following list describes each of the fields of the structure,
+along with the profile variable name it overrides, its mask value, its
+default value, and whether it is valid on the client, server, or both.
 \begin{description}
-\item[mask] XXX document all the fields! (once I decide which ones
-will actually be used)
+\item[mask] No variable.  No mask value.  A bitfield specifying which
+fields of the structure contain valid information.  A caller sets this
+mask before calling kadm5_init_*, indicating which parameters are
+specified.  The mask values are defined in $<$kadm5/admin.h$>$ and are
+all prefixed with KADM5_CONFIG_; the prefix is not included in the
+descriptions below.
 
-\item[realm] The realm to which these parameters apply, and the realm
-for which additional parameters are to be acquired, if any.  If this
-field is not specified in the mask (XXX awk), the default local ream
-is used.
+\item[realm] No variable.  REALM.  Client and server.  The realm to
+which these parameters apply, and the realm for which additional
+parameters are to be acquired, if any.  If this field is not specified
+in the mask, the default local realm is used.
+
+\item[profile] Variable: profile (server only).  PROFILE.  Client and
+server.  The Kerberos profile to use.  On the client, the default is
+the value of the KRB5_CONFIG environment variable, or /etc/krb5.conf
+if that is not set.  On the server, the value of the ``profile''
+variable of the KDC configuration file will be used as the first
+default if it exists; otherwise, the default is the value of the
+KRB5_KDC_PROFILE environment variable or DEFAULT_KDC_PROFILE.
+
+\item[kadmind_port] Variable: kadmind_port.  KADMIND_PORT.  Client and
+server.  The port number the kadmind server listens on.  The client
+uses this field to determine where to connect, and the server to
+determine where to listen.  The default is 752 (XXX).
+
+\item[admin_server] Variable: admin_server.  ADMIN_SERVER.  Client.
+The host name of the admin server to which to connect.  There is no
+default.  If the value of this field contains a colon (:), the text
+following the colon is treated as an integer and assigned to the
+kadmind_port field, overriding any value of the kadmind_port variable.
+
+\item[dbname] Variable: dbname.  DBNAME.  Server.  The Kerberos
+database name to use; the Kerberos database stores principal
+information.  There is no default.
+
+\item[admin_dbname] Variable: admin_database_name.  ADBNAME.  Server.
+The administration database name to use; the administration database
+stores policy information.  The default is the value of dbname
+followed by ``.kadm5'', if dbname is set.
+
+\item[admin_lockfile] Variable: admin_database_lockfile.
+ADB_LOCKFILE.  Server.  The administration database lock file name,
+used to lock the administration database.  The default is admin_dbname
+followed by ``.lock'', if admin_dbname is set.
+
+\item[acl_file] Variable: acl_file.  ACL_FILE.  Server.  The admin
+server's ACL file.  No default.
+
+\item[dict_file] Variable: admin_dict_file.  DICT_FILE.  Server.  The
+admin server's dictionary file of passwords to disallow.  No default.
+
+\item[admin_keytab] Variable: admin_keytab. ADMIN_KEYTAB.  Server.
+The keytab file containing the kadmin/admin and kadmin/changepw
+entries for the server to use.  The default is the value of the
+KRB5_KTNAME environment variable, if defined.
+
+\item[stash_file] Variable: key_stash_file.  STASH_FILE. Server.  The
+file name containing the master key stash file.  No default; libkdb
+will work with a NULL value.
+
+\item[mkey_name] Variable: master_key_name.  MKEY_NAME.  Server.  The
+name of the master principal for the realm.  No default; lbkdb will
+work with a NULL value.
+
+\item[enctype] Variable: master_key_type.  ENCTYPE.  Server.  The
+encryption type of the master principal.  No default.
+
+\item[max_life, max_rlife, expiration, flags] Variables: max_life,
+max_renewable_life, default_principal_expiration,
+default_principal_flags.  MAX_LIFE, MAX_RLIFE, EXPIRATION, FLAGS.
+Server.  Default values for new principals.  All default to 0.
+
+\item[keysalts, num_keysalts] Variable: supported_enctypes.  ENCTYPES.
+Server.  The list of supported encryption type/salt type tuples; both
+fields must be assigned if ENCTYPES is set.  No default.
 \end{description}
 
 \subsection{Principal keys}
@@ -721,6 +788,12 @@ expired
 application is unknown to server (to fix, obtain and install newest
 Admin Server)
 \item[KADM5_SECURE_PRINC_MISSING] Database error! Required principal missing
+\item[KADM5_NO_RENAME_SALT] The salt type of the specified principal
+does not support renaming
+\item[KADM5_BAD_CLIENT_PARAMS] Illegal configuration parameter for
+remote KADM5 client
+\item[KADM5_BAD_SERVER_PARAMS] Illegal configuration parameter for
+local KADM5 client.
 \end{description}
 
 \section{Authentication and Authorization}
@@ -906,14 +979,23 @@ similar: if a NULL pointer is passed for the realm_params argument,
 the default realm and default parameters for that realm, as specified
 in the krb5 configuration file (e.g. /etc/krb5.conf) are used.  If a
 realm_params structure is provided, the fields that are set override
-the default values.  See section \ref{sec:configparams} for a
-discussion of configuration parameters.
+the default values.  If a parameter is specified to the local or
+remote libraries that does not apply to that side, an error code
+(KADM5_BAD_CLIENT_PARAMS or KADM5_BAD_SERVER_PARAMS) is returned.  See
+section \ref{sec:configparams} for a discussion of configuration
+parameters.
 
 For remote clients, the semantics are:
 
 \begin{enumerate}
 \item Initializes all the com_err error tables used by the Admin
 system.
+
+\item Acquires configuration parameters.  In KADM5_API_VERSION_1, all
+the defaults specified in the configuration file are used, according
+to the realm.  In KADM5_API_VERSION_2, the values in params_in are
+merged with the default values.  If an illegal mask value is
+specified, KADM5_BAD_CLIENT_PARAMS is returned.
 
 \item Acquires a Kerberos ticket for the specified service.
 
@@ -962,6 +1044,12 @@ machine.  If any kadm5_init_* is invoked locally its semantics are:
 \item Initializes all the com_err error tables used by the Admin
 system.
 
+\item Acquires configuration parameters.  In KADM5_API_VERSION_1, all
+the defaults specified in the configuration file are used, according
+to the realm.  In KADM5_API_VERSION_2, the values in params_in are
+merged with the default values.  If an illegal mask value is
+specified, KADM5_BAD_SERVER_PARAMS is returned.
+
 \item Initializes direct access to the KDC database.  If pass (or
 keytab) is NULL or an empty string, reads the master password from
 /.k5.REALM-NAME (created by kstash).  Otherwise, the non-NULL password
@@ -996,6 +1084,13 @@ KADM5_ADMIN_SERVICE or KADM5_CHANGEPW_SERVICE does not
 exist.  This is a special-case replacement return code for ``Server
 not found in database'' for these required principals.
 
+\item[KADM5_BAD_CLIENT_PARAMS] A field in the parameters mask was
+specified to the remote client library that is not legal for remote
+clients.
+
+\item[KADM5_BAD_SERVER_PARAMS] A field in the parameters mask was
+specified to the local client library that is not legal for local
+clients.
 \end{description}
 
 \subsection{kadm5_flush}
