@@ -40,7 +40,7 @@ static char rcsid_getaddr_c[] =
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 /*
  * The SIOCGIF* ioctls require a socket.
