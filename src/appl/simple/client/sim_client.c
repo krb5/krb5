@@ -130,8 +130,8 @@ char *argv[];
     printf("Local Kerberos realm is %s\n", c_realm);
 
     /* Get Kerberos realm of host */
-    if (retval = krb5_get_host_realm(HOST, &s_realms)) {
-	com_err(PROGNAME, retval, "while getting realm for '%s'", HOST);
+    if (retval = krb5_get_host_realm(full_hname, &s_realms)) {
+	com_err(PROGNAME, retval, "while getting realm for '%s'", full_hname);
 	exit(1);
     }
 #ifdef DEBUG
@@ -192,9 +192,15 @@ char *argv[];
     }
     printf("Got credentials for %s.\n", SERVICE);
 
+    /* "connect" the datagram socket; this is necessary to get a local address
+       properly bound for getsockname() below. */
+
+    if (connect(sock, (struct sockaddr *)&s_sock, sizeof(s_sock)) == -1) {
+	com_err(PROGNAME, errno, "while connecting to server");
+	exit(1);
+    }
     /* Send authentication info to server */
-    i = sendto(sock, (char *)packet.data, packet.length, flags,
-	       (struct sockaddr *)&s_sock, sizeof(s_sock));
+    i = send(sock, (char *)packet.data, packet.length, flags);
     if (i < 0)
 	com_err(PROGNAME, errno, "while sending KRB_AP_REQ message");
     printf("Sent authentication data: %d bytes\n", i);
@@ -279,13 +285,10 @@ char *argv[];
     }
 
     /* Send it */
-    i = sendto(sock, (char *)packet.data, packet.length, flags,
-	       (struct sockaddr *)&s_sock, sizeof(s_sock));
+    i = send(sock, (char *)packet.data, packet.length, flags);
     if (i < 0)
 	com_err(PROGNAME, errno, "while sending SAFE message");
     printf("Sent checksummed message: %d bytes\n", i);
-    if (i < 0)
-	perror("sending safe message");
 
     xfree(packet.data);
     /* PREPARE KRB_PRIV MESSAGE */
@@ -306,8 +309,8 @@ char *argv[];
     }
 
     /* Send it */
-    i = sendto(sock, (char *)packet.data, packet.length, flags,
-	       (struct sockaddr *)&s_sock, sizeof(s_sock));
+    i = send(sock, (char *)packet.data, packet.length, flags);
+	    
     if (i < 0)
 	com_err(PROGNAME, errno, "while sending PRIV message");
     printf("Sent encrypted message: %d bytes\n", i);
