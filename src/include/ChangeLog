@@ -1,3 +1,9 @@
+1998-12-04  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5.hin: Add function prototypes for the new realm iterator
+		functions.  Also add some krb4 function prototypes to make
+		catching prototype errors easier.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
