@@ -88,14 +88,8 @@
 #define PosyCmd $(ISODE)/@sys/bin/posy
 
 
-#define UseSSInstalled /* -- turn on if you have the SS library &c installed */
-			
-#define UseComErrInstalled /* -- turn on if you have the com_err library
-   				 &c installed */
 #define UseImakeInstalled /* -- turn on if you have imake installed */
 #define UseMakedependInstalled /* -- turn on if you have makedepend installed */
-#define UseUnifdefInstalled /* -- turn on if you have unifdef installed */
-
 #define Krb4ApplCompat /* turn this on if you want selected applications to
 			  work with both v4 & v5 code */
 #define Krb4KDCCompat /* turn this on if you want the KDC to provide v4
@@ -121,7 +115,9 @@
 /* #define LdLibLocations -L/foo/bar -- alternate library search paths,
 					if needed for some system libraries */
 /* #define StandardIncludes -I/foo/bar -- additional include paths, if
-					needed */
+					needed, such as those needed
+					to get special include files,
+					like <ss/ss.h> or <com_err.h> */
 
 #define	AthenaEnv YES		/* Define this if you are in the
 				   athena environment.
