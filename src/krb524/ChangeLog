@@ -1,3 +1,8 @@
+Fri Jul 17 04:11:47 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb524d.c (main): Accept a -r command line option to specify
+	a realm other than the default one.
+
 Wed Jun 17 16:35:37 1998  Tom Yu  <tlyu@mit.edu>
 
 	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Handle null address
