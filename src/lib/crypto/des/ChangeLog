@@ -1,3 +1,8 @@
+Wed Mar 20 22:33:40 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* u_nfold.c (mit_des_n_fold): 
+	* d3_str2ky.c (mit_des3_string_to_key): Fix Windows lint flames.
+
 Mon Mar 11 11:03:23 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* new_rn_key.c (mit_des_generate_random_block): Add const keywrod

@@ -43,11 +43,11 @@ krb5_keyblock FAR * keyblock;
 const krb5_data FAR * data;
 const krb5_data FAR * salt;
 {
-    register char *str, *copystr;
-    register mit_des_cblock *key;
-    register int j;
+    char *copystr;
+    mit_des_cblock *key;
+    unsigned int j;
 
-    register long length;
+    int length;
     mit_des3_key_schedule ks;
     krb5_enctype enctype = eblock->crypto_entry->proto_enctype;
 

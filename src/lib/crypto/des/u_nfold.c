@@ -66,8 +66,7 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 #endif
 
     do {
-	int j;
-	register unsigned int k;
+	unsigned int j, k;
 
 	/* Rotate input */
 	k = ((bytes/inlen) * ROTATE_VALUE) % (inlen*8);
@@ -84,8 +83,9 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 	}
 	j = bytes % outlen;
 	while (k) {
-	    if (j-- == 0)
-		j += outlen;
+	    if (j == 0)
+		j = outlen;
+	    j--;
 	    k += outbuf[j];
 	    outbuf[j] = k & 0xff;
 	    k >>= 8;
