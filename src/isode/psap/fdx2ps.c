@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:24:31  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:32:35  eichin
  * autoconfed isode for kerberos work
  *
@@ -101,7 +104,7 @@ int	in_line;
     if (cc > n)
 	cc = n;
 
-    bcopy (pi -> pio_ptr, (char *) data, cc);
+    memcpy ((char *) data, pi -> pio_ptr, cc);
     pi -> pio_ptr += cc, pi -> pio_cnt -= cc;
 
     return cc;
@@ -136,7 +139,7 @@ int	in_line;
     if (n > po -> pio_cnt)
 	n = po -> pio_cnt;
 
-    bcopy ((char *) data, po -> pio_ptr, n);
+    memcpy (po -> pio_ptr, (char *) data, n);
     po -> pio_ptr += n, po -> pio_cnt -= n;
 
     if (po -> pio_cnt <= 0 && fdx_flush (ps) == NOTOK)

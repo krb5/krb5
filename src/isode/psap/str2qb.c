@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:24:41  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:35:09  eichin
  * autoconfed isode for kerberos work
  *
@@ -66,7 +69,7 @@ int	len,
 
     pb -> qb_data = pb -> qb_base;
     if ((pb -> qb_len = len) > 0 && s)
-	bcopy (s, pb -> qb_data, len);
+	memcpy (pb -> qb_data, s, len);
 
     return qb;
 }

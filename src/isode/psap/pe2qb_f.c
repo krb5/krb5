@@ -27,7 +27,7 @@
 				Len++; \
 			    }  \
 			    else { \
-				    bcopy((char *)c, Qcp, l); \
+				    memcpy(Qcp, (char *)c, l); \
 				    Qcp += l; \
 				    Len  += l; \
 			    }

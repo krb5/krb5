@@ -7,20 +7,6 @@ static char *rcsid = "$Header$";
 /* 
  * $Header$
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:52  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:32:22  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:36:51  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:39  isode
- * Release 7.0
- * 
  * 
  */
 
@@ -92,7 +78,7 @@ register u_char *dlen;
     if (pe2ssdu (pe, &base, &len) == NOTOK)
 	return NOTOK;
 
-    bcopy (base, dbase, (int) (*dlen = len));
+    memcpy (dbase, base, (int) (*dlen = len));
     free (base);
 
     return OK;

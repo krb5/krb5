@@ -7,23 +7,6 @@ static char *rcsid = "$Header$";
 /* 
  * $Header$
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 21:14:59  eichin
- * step 2: bcmp->memcmp
- *
- * Revision 1.1  1994/06/10 03:30:46  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:19:12  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:39:33  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:42:59  isode
- * Release 7.0
- * 
  * 
  */
 
@@ -882,11 +865,11 @@ int	tynum;
         Xparm->t_string = strdup("hello, world\n");
         Xparm->t_string1 = strdup("hello, world\n");
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_ostring = p;
         Xparm->t_olen = t_test + 4;
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_ostring1 = p;
         Xparm->t_olen1 = t_test + 4;
         Xparm->t_bool = t_test % 2;
@@ -900,7 +883,7 @@ int	tynum;
 	Xparm->t_pe1 = strb2bitstr("\0221\0327\052\211\0237\200", 41, 0, 0);
         Xparm->t_any = mkpe(t_test*8 + 3);
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_bstring = p;
         Xparm->t_blen = t_test*8 + 8;
 	break;
@@ -913,11 +896,11 @@ int	tynum;
         Xparm->t_qbuf = str2qb("Some is out there!", 18, 1);
         Xparm->t_string = strdup("hello, world\n");
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_ostring = p;
         Xparm->t_olen = t_test + 4;
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_bstring = p;
         Xparm->t_blen = t_test*8 + 4;
         Xparm->t_bool = t_test % 2;
@@ -993,11 +976,11 @@ int	tynum;
         Xparm->t_qbuf = str2qb("Some one is out there!", 22, 1);
         Xparm->t_string = strdup("hello there, world\n");
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_ostring = p;
         Xparm->t_olen = t_test + 4;
 	p = malloc(30);
-	bcopy("\0001234567890", p, 30);
+	memcpy(p, "\0001234567890", 30);
         Xparm->t_bstring = p;
         Xparm->t_blen = t_test*8 + 4;
 	Xparm->t_pe = strb2bitstr("\0221\0327\052\211\0237\200", t_test + 33, 0, 0);

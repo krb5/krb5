@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:24:33  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:33:54  eichin
  * autoconfed isode for kerberos work
  *
@@ -63,7 +66,7 @@ register int   *len;
 	case PE_FORM_PRIM: 
 	    if ((dp = malloc ((unsigned) ((i = pe -> pe_len) + 1))) == NULLCP)
 		return pe_seterr (pe, PE_ERR_NMEM, NULLCP);
-	    bcopy ((char *) pe -> pe_prim, dp, i);
+	    memcpy (dp, (char *) pe -> pe_prim, i);
 	    break;
 
 	case PE_FORM_CONS: 
@@ -94,7 +97,7 @@ register int   *len;
 			free (dp);
 			return pe_seterr (pe, PE_ERR_NMEM, NULLCP);
 		    }
-		    bcopy (ep, fp + i, j);
+		    memcpy (fp + i, ep, j);
 		    dp = fp, i = k;
 		}
 		else

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:28:59  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:30:23  eichin
  * autoconfed isode for kerberos work
  *
@@ -2064,7 +2067,7 @@ again:
 	    return pepsylose (mod, typ, NULLPE, "setdval:missing OCTET_LEN");
 	i = IVAL(mod, dflt);
 	p = smalloc((int )i + 1);
-	bcopy(PVAL(mod, dflt), p, (int )i);
+	memcpy(p, PVAL(mod, dflt), (int )i);
 	p[i] = '\0';
 	*(char **) (*parm + typ->pe_ucode) = p;
 	*(int *) (*parm + (typ + 1)->pe_ucode) = i;
@@ -2076,7 +2079,7 @@ again:
 	i = IVAL(mod, dflt);
 	no = (i + 7)/8;	/* round up */
 	p = smalloc(no + 1);
-	bcopy(PVAL(mod, dflt), p, no);
+	memcpy(p, PVAL(mod, dflt), no);
 	p[no] = '\0';
 	*(char **) (*parm + typ->pe_ucode) = p;
 	*(int *) (*parm + (typ + 1)->pe_ucode) = i;

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:24:36  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:34:26  eichin
  * autoconfed isode for kerberos work
  *
@@ -67,7 +70,7 @@ register struct qbuf *qb;
 
 	remque (qp);
 
-	bcopy (qp -> qb_data, d, qp -> qb_len);
+	memcpy (d, qp -> qb_data, qp -> qb_len);
 	d += qp -> qb_len;
 
 	free ((char *) qp);

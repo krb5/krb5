@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:29:09  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:31:22  eichin
  * autoconfed isode for kerberos work
  *
@@ -77,11 +80,11 @@ OID	o1, o2;
     if (noid -> oid_elements == NULL)
 	myyerror ("out of memory (%d needed)", noid->oid_nelem);
 
-    bcopy ((char *)o1->oid_elements, (char *)noid->oid_elements,
-	   o1->oid_nelem * sizeof(unsigned int));
-    bcopy ((char *)o2 -> oid_elements,
-	   (char *) &noid -> oid_elements[o1->oid_nelem],
-	   o2 -> oid_nelem * sizeof(unsigned int));
+    memcpy ((char *)noid->oid_elements, (char *)o1->oid_elements,
+	    o1->oid_nelem * sizeof(unsigned int));
+    memcpy ((char *) &noid -> oid_elements[o1->oid_nelem],
+	    (char *)o2 -> oid_elements,
+	    o2 -> oid_nelem * sizeof(unsigned int));
     return noid;
 }
 
