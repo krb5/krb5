@@ -195,7 +195,7 @@ char *argv[];
     printf("Safe message is: '%.*s'\n", message.length, message.data);
 
     xfree(message.data);
-    krb5_free_addr(portforeign_addr);
+    krb5_free_address(portforeign_addr);
 
     /* NOW GET ENCRYPTED MESSAGE */
 

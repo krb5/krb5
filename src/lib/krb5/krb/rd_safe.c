@@ -121,11 +121,11 @@ krb5_data *outbuf;
 	    return retval;
 	}
 	if (!krb5_address_search(message->r_address, our_addrs)) {
-	    krb5_free_address(our_addrs);
+	    krb5_free_addresses(our_addrs);
 	    cleanup();
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
-	krb5_free_address(our_addrs);
+	krb5_free_addresses(our_addrs);
     }
 
     /* verify the checksum */
@@ -182,9 +182,9 @@ krb5_data *outbuf;
 
     xfree(our_cksum.contents);
     if (message->s_address)
-	krb5_free_addr(message->s_address);
+	krb5_free_address(message->s_address);
     if (message->r_address)
-	krb5_free_addr(message->r_address);
+	krb5_free_address(message->r_address);
     krb5_free_checksum(his_cksum);
     xfree(message);
 

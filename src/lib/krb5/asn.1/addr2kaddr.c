@@ -55,14 +55,14 @@ register int *error;
 	}
 	retval[i] = (krb5_address *) xmalloc(sizeof(*retval[i]));
 	if (!retval[i]) {
-	    krb5_free_address(retval);
+	    krb5_free_addresses(retval);
 	    goto nomem;
 	}
 	retval[i]->contents = (unsigned char *)xmalloc(val->element_KRB5_0[i]->address->qb_forw->qb_len);
 	if (!retval[i]->contents) {
 	    xfree(retval[i]);
 	    retval[i] = 0;
-	    krb5_free_address(retval);
+	    krb5_free_addresses(retval);
 	    goto nomem;
 	}
 	retval[i]->addrtype = val->element_KRB5_0[i]->addr__type;
@@ -95,14 +95,14 @@ register int *error;
 	}
 	retval[i] = (krb5_address *) xmalloc(sizeof(*retval[i]));
 	if (!retval[i]) {
-	    krb5_free_address(retval);
+	    krb5_free_addresses(retval);
 	    goto nomem;
 	}
 	retval[i]->contents = (unsigned char *)xmalloc(rv->element_KRB5_0->address->qb_forw->qb_len);
 	if (!retval[i]->contents) {
 	    xfree(retval[i]);
 	    retval[i] = 0;
-	    krb5_free_address(retval);
+	    krb5_free_addresses(retval);
 	    goto nomem;
 	}
 	retval[i]->addrtype = rv->element_KRB5_0->addr__type;

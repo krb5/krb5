@@ -205,12 +205,12 @@ OLDDECLARG(krb5_data *, outbuf)
 	    return retval;
 	}
 	if (!krb5_address_search(privmsg_enc_part->r_address, our_addrs)) {
-	    krb5_free_address(our_addrs);
+	    krb5_free_addresses(our_addrs);
 	    cleanup_data();
 	    cleanup_mesg();
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
-	krb5_free_address(our_addrs);
+	krb5_free_addresses(our_addrs);
     }
 
     /* everything is ok - return data to the user */

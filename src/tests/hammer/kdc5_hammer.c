@@ -399,7 +399,7 @@ int get_tgt (p_client_str, p_client, ccache)
 					 ccache,
 					 &my_creds);
     my_creds.server = my_creds.client = 0;
-    krb5_free_address(my_addresses);
+    krb5_free_addresses(my_addresses);
     krb5_free_cred_contents(&my_creds);
     if (code != 0) {
 	com_err (prog, code, "while getting initial credentials");

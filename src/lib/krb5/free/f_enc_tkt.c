@@ -30,7 +30,7 @@ krb5_enc_tkt_part *val;
     if (val->transited.tr_contents.data)
 	xfree(val->transited.tr_contents.data);
     if (val->caddrs)
-	krb5_free_address(val->caddrs);
+	krb5_free_addresses(val->caddrs);
     if (val->authorization_data)
 	krb5_free_authdata(val->authorization_data);
     xfree(val);

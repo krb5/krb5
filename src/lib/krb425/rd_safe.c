@@ -77,7 +77,7 @@ MSG_DAT *msg;
 	    
 	if (r = krb5_get_server_rcache(cachename,
 				       &rcache)) {
-	    krb5_free_addr(saddr2);
+	    krb5_free_address(saddr2);
 #ifdef	EBUG
 	    ERROR(r);
 #endif
@@ -89,7 +89,7 @@ MSG_DAT *msg;
 	krb5_rc_close(rcache);
 	xfree(rcache);
 
-	krb5_free_addr(saddr2);
+	krb5_free_address(saddr2);
 
 	if (r) {
 #ifdef	EBUG

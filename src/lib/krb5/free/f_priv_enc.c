@@ -26,9 +26,9 @@ register krb5_priv_enc_part *val;
     if (val->user_data.data)
 	xfree(val->user_data.data);
     if (val->r_address)
-	krb5_free_addr(val->r_address);
+	krb5_free_address(val->r_address);
     if (val->s_address)
-	krb5_free_addr(val->s_address);
+	krb5_free_address(val->s_address);
     xfree(val);
     return;
 }

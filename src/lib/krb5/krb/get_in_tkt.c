@@ -248,7 +248,7 @@ OLDDECLARG(krb5_ccache, ccache)
     retval = encode_krb5_ticket(as_reply->ticket, &packet);
     krb5_free_kdc_rep(as_reply);
     if (retval) {
-	krb5_free_address(creds->addresses);
+	krb5_free_addresses(creds->addresses);
 	cleanup_key();
 	return retval;
     }	
@@ -259,7 +259,7 @@ OLDDECLARG(krb5_ccache, ccache)
     if (retval = krb5_cc_store_cred(ccache, creds)) {
 	/* clean up the pieces */
 	xfree(creds->ticket.data);
-	krb5_free_address(creds->addresses);
+	krb5_free_addresses(creds->addresses);
 	cleanup_key();
 	return retval;
     }

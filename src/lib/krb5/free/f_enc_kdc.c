@@ -30,7 +30,7 @@ register krb5_enc_kdc_rep_part *val;
     if (val->server)
 	krb5_free_principal(val->server);
     if (val->caddrs)
-	krb5_free_address(val->caddrs);
+	krb5_free_addresses(val->caddrs);
     xfree(val);
     return;
 }

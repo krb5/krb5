@@ -64,7 +64,7 @@ krb5_enc_tkt_part **partto;
     if (partfrom->authorization_data) {
 	if (retval = krb5_copy_authdata(partfrom->authorization_data,
 					&tempto->authorization_data)) {
-	    krb5_free_address(tempto->caddrs);
+	    krb5_free_addresses(tempto->caddrs);
 	    xfree(tempto->transited.tr_contents.data);
 	    krb5_free_principal(tempto->client);
 	    krb5_free_keyblock(tempto->session);

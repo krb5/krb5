@@ -41,7 +41,7 @@ krb5_creds *val;
     if (val->second_ticket.data)
 	xfree(val->second_ticket.data);
     if (val->addresses)
-	krb5_free_address(val->addresses);
+	krb5_free_addresses(val->addresses);
     if (val->authdata)
 	krb5_free_authdata(val->authdata);
     return;

@@ -65,7 +65,7 @@ struct sockaddr_in *receiver;
 
 	if (r = krb5_get_server_rcache(inet_ntoa(sender->sin_addr),
 				       &rcache)) {
-	    krb5_free_addr(saddr2);
+	    krb5_free_address(saddr2);
 #ifdef	EBUG
 	    ERROR(r);
 #endif
@@ -81,7 +81,7 @@ struct sockaddr_in *receiver;
 			 &out5);
 	krb5_rc_close(rcache);
 	xfree(rcache);
-	krb5_free_addr(saddr2);
+	krb5_free_address(saddr2);
 
 	if (r) {
 #ifdef	EBUG

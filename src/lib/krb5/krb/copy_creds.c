@@ -63,7 +63,7 @@ krb5_creds **outcred;
  cleanticket:
     free(tempcred->ticket.data);
  cleanaddrs:
-    krb5_free_address(tempcred->addresses);
+    krb5_free_addresses(tempcred->addresses);
  cleanblock:
     xfree(tempcred->keyblock.contents);
  cleanserver:

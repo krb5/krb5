@@ -197,7 +197,7 @@ OLDDECLARG(krb5_creds *, cred)
 
     if (retval = encode_krb5_ticket(dec_rep->ticket, &scratch)) {
 	cleanup();
-	krb5_free_address(cred->addresses);
+	krb5_free_addresses(cred->addresses);
 	return retval;
     }
 

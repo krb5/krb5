@@ -93,7 +93,7 @@ void mit_des_init_random_number_generator(key,p_seed)
 	/* XXX may not do all of the seed. */
     }
     if (addrs) {
-	/* can't use krb5_free_address due to circular dependencies in
+	/* can't use krb5_free_addresses due to circular dependencies in
 	   libraries */
 	register krb5_address **addr2;
 	for (addr2 = addrs; *addr2; addr2++) {

@@ -32,7 +32,7 @@ krb5_kdc_req *val;
     if (val->etype)
 	xfree(val->etype);
     if (val->addresses)
-	krb5_free_address(val->addresses);
+	krb5_free_addresses(val->addresses);
     if (val->authorization_data.ciphertext.data)
 	xfree(val->authorization_data.ciphertext.data);
     if (val->unenc_authdata)

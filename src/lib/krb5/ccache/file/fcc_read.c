@@ -134,7 +134,7 @@ krb5_fcc_read_addrs(id, addrs)
      for (i=0; i < length; i++) {
 	  (*addrs)[i] = (krb5_address *) malloc(sizeof(krb5_address));
 	  if ((*addrs)[i] == NULL) {
-	      krb5_free_address(*addrs);
+	      krb5_free_addresses(*addrs);
 	      return KRB5_CC_NOMEM;
 	  }	  
 	  kret = krb5_fcc_read_addr(id, (*addrs)[i]);
@@ -144,7 +144,7 @@ krb5_fcc_read_addrs(id, addrs)
      return KRB5_OK;
  errout:
      if (*addrs)
-	 krb5_free_address(*addrs);
+	 krb5_free_addresses(*addrs);
      return kret;
 }
 

@@ -7,7 +7,7 @@
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
- * krb5_free_addr()
+ * krb5_free_address()
  */
 
 #if !defined(lint) && !defined(SABER)
@@ -20,7 +20,7 @@ static char rcsid_f_addr_c [] =
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_addr(val)
+krb5_free_address(val)
 krb5_address *val;
 {
     if (val->contents)
