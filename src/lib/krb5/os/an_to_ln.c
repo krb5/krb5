@@ -688,10 +688,7 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 		    /* We found one or more explicit mappings. */
 		    for (nvalid=0; mapping_values[nvalid]; nvalid++);
 
-		    /* Free the other ones, just use the last one */
-		    for (i=0; i<nvalid-1; i++)
-			krb5_xfree(mapping_values[i]);
-
+		    /* Just use the last one. */
 		    /* Trim the value. */
 		    cp = &mapping_values[nvalid-1]
 			[strlen(mapping_values[nvalid-1])];
@@ -706,8 +703,7 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 			kret = KRB5_CONFIG_NOTENUFSPACE;
 
 		    /* Free residue */
-		    krb5_xfree(mapping_values[nvalid-1]);
-		    krb5_xfree(mapping_values);
+		    profile_free_list(mapping_values);
 		}
 		else {
 		    /*
@@ -779,9 +775,7 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 			}
 
 			/* We're done, clean up the droppings. */
-			for (i=0; mapping_values[i]; i++)
-			    krb5_xfree(mapping_values[i]);
-			krb5_xfree(mapping_values);
+			profile_free_list(mapping_values);
 		    }
 		    else {
 			/*

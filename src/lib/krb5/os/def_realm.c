@@ -57,7 +57,7 @@ krb5_get_default_realm(context, lrealm)
     krb5_context context;
     char FAR * FAR *lrealm;
 {
-    char *realm;
+    char *realm = 0;
     char *cp;
     krb5_error_code retval;
 
@@ -74,24 +74,21 @@ krb5_get_default_realm(context, lrealm)
             return KRB5_CONFIG_CANTOPEN;
         retval = profile_get_string(context->profile, "libdefaults",
                                      "default_realm", 0, 0,
-                                     &context->default_realm);
+                                     &realm);
+
+        if (!retval) {
+            context->default_realm = malloc(strlen(realm) + 1);
+            if (!context->default_realm) {
+                profile_release_string(realm);
+                return ENOMEM;
+            }
+            strcpy(context->default_realm, realm);
+            profile_release_string(realm);
+        }
+
 #ifdef KRB5_DNS_LOOKUP
         if (context->default_realm == 0) {
-            int use_dns=0;
-            char * string=NULL;
-            krb5_error_code retval2;
-
-            retval2 = profile_get_string(context->profile, "libdefaults",
-                                          "dns_fallback", 0, 
-                                          context->profile_in_memory?"1":"0",
-                                          &string);
-            if ( retval2 )
-                return(retval2);
-
-            if ( string ) {
-                use_dns = krb5_conf_boolean(string);
-                free(string);
-            }
+            int use_dns =  _krb5_use_dns(context);
             if ( use_dns ) {
 		/*
 		 * Since this didn't appear in our config file, try looking

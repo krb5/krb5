@@ -93,14 +93,13 @@ void test_get_krbhst(ctx, realm)
 	}
 	if (hostlist[0] == 0) {
 		printf(" (none)\n");
-		free(hostlist);
+		krb5_free_krbhst(ctx, hostlist);
 		return;
 	}
 	for (cpp = hostlist; *cpp; cpp++) {
 		printf(" '%s'", *cpp);
-		free(*cpp);
 	}
-	free(hostlist);
+	krb5_free_krbhst(ctx, hostlist);
 	printf("\n");
 }
 

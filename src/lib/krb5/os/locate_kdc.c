@@ -46,6 +46,30 @@
 #endif
 
 #define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
+
+int
+_krb5_use_dns(context)
+    krb5_context context;
+{
+    krb5_error_code code;
+    char * value = NULL;
+    int use_dns = 0;
+
+    code = profile_get_string(context->profile, "libdefaults",
+                              "dns_fallback", 0, 
+                              context->profile_in_memory?"1":"0",
+                              &value);
+    if (code)
+        return(code);
+
+    if (value) {
+        use_dns = _krb5_conf_boolean(value);
+        profile_release_string(value);
+    }
+
+    return use_dns;
+}
+
 #endif /* KRB5_DNS_LOOKUP */
 
 /*
@@ -114,6 +138,7 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 	    count++;
     
     if (count == 0) {
+        profile_free_list(hostlist);
 	krb5_xfree(host);
 	*naddrs = 0;
 	return 0;
@@ -165,8 +190,11 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 #endif
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
-    if (addr_p == NULL)
+    if (addr_p == NULL) {
+        profile_free_list(hostlist);
+        profile_free_list(masterlist);
 	return ENOMEM;
+    }
 
     for (i=0, out=0; hostlist[i]; i++) {
 	host = hostlist[i];
@@ -186,8 +214,6 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 	}
 
 	if ((hp = gethostbyname(hostlist[i])) == 0) {
-	    free(hostlist[i]);
-	    hostlist[i] = 0;
 	    continue;
 	}
 
@@ -218,8 +244,11 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 		    addr_p = (struct sockaddr *)
 			realloc ((char *)addr_p,
 				 sizeof(struct sockaddr) * count);
-		    if (addr_p == NULL)
+		    if (addr_p == NULL) {
+                        profile_free_list(hostlist);
+                        profile_free_list(masterlist);
 			return ENOMEM;
+                    }
 		}
 		if (sec_udpport && !port) {
 		    addr_p[out] = addr_p[out-1];
@@ -234,19 +263,10 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 	}
 	if (ismaster)
 	    *nmasters = out - *master_index;
-
-	/* Free the hostlist entry we are looping over. */
-	free(hostlist[i]);
-	hostlist[i] = 0;
     }
 
-    if (masterlist) {
-       for (i=0; masterlist[i]; i++)
-	  free(masterlist[i]);
-       free(masterlist);
-    }
-
-    free ((char *)hostlist);
+    profile_free_list(hostlist);
+    profile_free_list(masterlist);
 
     if (out == 0) {     /* Couldn't resolve any KDC names */
         free (addr_p);
@@ -550,21 +570,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-        int use_dns=0;
-        char * string=NULL;
-        krb5_error_code code2; /* preserve error code from krb5_locate_srv_conf */
-
-        code2 = profile_get_string(context->profile, "libdefaults",
-                                   "dns_fallback", 0, 
-                                    context->profile_in_memory?"1":"0",
-                                    &string);
-        if ( code2 )
-            return(code2);
-
-        if ( string ) {
-            use_dns = krb5_conf_boolean(string);
-            free(string);
-        }
+        int use_dns = _krb5_use_dns(context);
         if ( use_dns ) {
             code = krb5_locate_srv_dns(realm, "_kerberos", "_udp",
                                         addr_pp, naddrs);

@@ -1,3 +1,43 @@
+1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* t_std_conf.c (test_get_krbhst): Use krb5_free_krbhst to
+	free buffers allocated by krb5_get_krbhst.
+
+	* locate_kdc.c (_krb5_use_dns): Add _krb_use_dns to abstract
+	away looking up of whether we use DNS or not in the profile.
+
+	* ktdefname.c (krb5_kt_default_name): Use profile_release_string
+	instead of free to free string allocated by profile_get_string.
+
+	* get_krbhst.c (krb5_get_krbhst): Copy results from profile_get_values
+	into malloc'ed buffers so we can safely free them later.  Also call
+	profile_free_list on the original values.
+
+	* locate_kdc.c (krb5_locate_kdc): 
+	* hst_realm.c (krb5_get_host_realm): 
+	* def_realm.c (krb5_get_default_realm): Use _krb5_use_dns to figure
+	out whether to use DNS or not instead of directly reading the 
+	profile in this routine.
+
+	* realm_dom.c (krb5_get_realm_domain): 
+	* hst_realm.c (krb5_get_host_realm): 
+	* def_realm.c (krb5_get_default_realm): Copy results of 
+	profile_get_string into malloc'ed buffer so it can safely be free'd
+	later.
+
+	* locate_kdc.c (krb5_locate_srv_conf):
+	* def_realm.c (krb5_get_default_realm): 
+	* changepw.c (krb5_change_password): 
+	* an_to_ln.c (krb5_aname_to_localname): Use profile_free_list
+	to free values allocated by profile_get_values.
+
+1999-08-04  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_os_ctx.c (os_init_paths): Wrap use of ctx->profile_in_memory
+	with KRB5_DNS_LOOKUP.  Use pointer value to determine whether to free 
+	files by checking the files value rather than depending on the 
+	return value.
+
 1999-07-27  Miro Jurisic  <meeroh@mit.edu>
 
 	* init_os_ctx.c (GetMacProfileFileSpec): removed bogus string conversion

@@ -180,9 +180,7 @@ krb5_change_password(context, creds, newpw, result_code,
 	}
     }
 
-    for (i=0; hostlist[i]; i++)
-	free(hostlist[i]);
-    free ((char *)hostlist);
+    profile_free_list(hostlist);
 
     if (out == 0) {     /* Couldn't resolve any KDC names */
         free (addr_p);

@@ -63,6 +63,9 @@ krb5_get_krbhst(context, realm, hostlist)
     char	**values, **cpp, *cp;
     const char	*realm_kdc_names[4];
     krb5_error_code	retval;
+    int	i, count;
+
+    *hostlist = 0;
 
     realm_kdc_names[0] = "realms";
     realm_kdc_names[1] = realm->data;
@@ -95,7 +98,26 @@ krb5_get_krbhst(context, realm, hostlist)
 	if (cp)
 	    *cp = 0;
     }
-
-    *hostlist = values;
-    return 0;
+    count = cpp - values;
+    *hostlist = malloc(sizeof(char *) * (count + 1));
+    if (!*hostlist) {
+        retval = ENOMEM;
+        goto cleanup;
+    }
+    for (i = 0; i < count; i++) {
+        *hostlist[i] = malloc(strlen(values[i]) + 1);
+        if (!*hostlist[i]) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+    }
+    *hostlist[count] = 0;
+ cleanup:
+    if (retval && *hostlist) {
+        for (cpp = *hostlist; *cpp; cpp++)
+            free(*cpp);
+        free(*hostlist);
+    }
+    profile_free_list(values);
+    return retval;
 }

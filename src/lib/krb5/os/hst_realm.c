@@ -230,7 +230,7 @@ krb5_get_host_realm(context, host, realmsp)
     char FAR * FAR * FAR *realmsp;
 {
     char **retrealms;
-    char *default_realm, *realm, *cp;
+    char *default_realm, *realm, *cp, *temp_realm;
     krb5_error_code retval;
     int l;
     char local_host[MAX_DNS_NAMELEN+1];
@@ -265,12 +265,13 @@ krb5_get_host_realm(context, host, realmsp)
 
     cp = local_host;
     realm = default_realm = (char *)NULL;
+    temp_realm = 0;
     while (cp) {
 	retval = profile_get_string(context->profile, "domain_realm", cp,
-				    0, (char *)NULL, &realm);
+				    0, (char *)NULL, &temp_realm);
 	if (retval)
 	    return retval;
-	if (realm != (char *)NULL)
+	if (temp_realm != (char *)NULL)
 	    break;	/* Match found */
 
 	/* Setup for another test */
@@ -284,24 +285,19 @@ krb5_get_host_realm(context, host, realmsp)
 	    cp = strchr(cp, '.');
 	}
     }
+    if (temp_realm) {
+        realm = malloc(strlen(temp_realm) + 1);
+        if (!realm) {
+            profile_release_string(temp_realm);
+            return ENOMEM;
+        }
+        strcpy(realm, temp_realm);
+        profile_release_string(temp_realm);
+    }
 
 #ifdef KRB5_DNS_LOOKUP
     if (realm == (char *)NULL) {
-        int use_dns=0;
-        char * string=NULL;
-        krb5_error_code retval2;
-
-        retval2 = profile_get_string(context->profile, "libdefaults",
-                                      "dns_fallback", 0, 
-                                      context->profile_in_memory?"1":"0",
-                                      &string);
-        if ( retval2 )
-            return(retval2);
-
-        if ( string ) {
-            use_dns = krb5_conf_boolean(string);
-            free(string);
-        }
+        int use_dns = _krb5_use_dns(context);
         if ( use_dns ) {
             /*
              * Since this didn't appear in our config file, try looking

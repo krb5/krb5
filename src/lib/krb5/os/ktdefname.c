@@ -60,7 +60,7 @@ krb5_kt_default_name(context, name, namesize)
 	if ((size_t) namesize < (strlen(retval)+1))
 	    return KRB5_CONFIG_NOTENUFSPACE;
 	strcpy(name, retval);
-	free(retval);
+	profile_release_string(retval);
     } else {
 #if defined (_MSDOS) || defined(_WIN32)
 	{
