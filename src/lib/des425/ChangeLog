@@ -1,3 +1,10 @@
+Fri May 26 21:43:52 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* util.c: Added new function, des_cblock_print_file(), which is
+		referenced by libkrb4.a.  (Even though it's never used,
+		some OS's demand that all of the references in a
+		shared library have to be resolved.)
+
 Mon May  1 11:29:37 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* read_passwd.c: (des_read_pw_string): Call to krb5_read_password

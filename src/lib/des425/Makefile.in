@@ -5,6 +5,10 @@ LDFLAGS = -g
 ##DOSLIBNAME=libdes425.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	cksum.$(OBJEXT)		\
 	des.$(OBJEXT)		\
 	enc_dec.$(OBJEXT)	\
@@ -17,6 +21,7 @@ OBJS=	cksum.$(OBJEXT)		\
 	read_passwd.$(OBJEXT) \
 	str_to_key.$(OBJEXT)	\
 	unix_time.$(OBJEXT)     \
+	util.$(OBJEXT)		\
 	weak_key.$(OBJEXT)	
 
 SRCS=	$(srcdir)/cksum.c	\
@@ -31,13 +36,24 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/read_passwd.c \
 	$(srcdir)/str_to_key.c \
 	$(srcdir)/unix_time.c   \
+	$(srcdir)/util.c	\
 	$(srcdir)/weak_key.c	
+
+LIB_SUBDIRS= .
+LIBDONE= ./DONE
 
 
 EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
 DEPKLIB= $(TOPLIBD)/libcrypto.a
 
-all:: $(OBJS)
+all:: all-$(WHAT)
+
+all-unix:: shared $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
 
 verify: verify.o libdes425.a $(DEPKLIB)
 	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
@@ -51,8 +67,14 @@ check-unix:: verify
 
 check-windows::
 
-clean::
+clean:: clean-$(WHAT)
 	$(RM) verify$(EXEEXT) verify.$(OBJEXT)
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
 
 libdes425.a: $(OBJS)
 	$(RM) $@
