@@ -5,7 +5,7 @@ Fri May  5 00:06:24 1995  Theodore Y. Ts'o  (tytso@dcl)
 		returns the realm *without* the leading dot.
 
 		Also use the profile code to look up individual instance
-		conversions using [realms]/<realm>/v4_instance_covert/<inst>
+		conversions using [realms]/<realm>/v4_instance_convert/<inst>
 		This allows special case handling of mit.edu and
 		lithium.lcs.mit.edu.
 
