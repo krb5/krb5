@@ -43,7 +43,7 @@
 /*
  * Strings
  */
-static char *kadm_cache_name_fmt =	"FILE:/tmp/tkt_kadm_%d";
+#define kadm_cache_name_fmt	"FILE:/tmp/tkt_kadm_%d"
 
 /*
  * Prototypes for local functions

@@ -84,23 +84,23 @@ typedef struct _net_slave_info {
 /*
  * Error messages.
  */
-static const char *net_waiterr_msg = "\004child wait failed - cannot reap children";
+#define net_waiterr_msg		"\004child wait failed - cannot reap children"
 #if 0
-static const char *net_def_realm_fmt = "%s: cannot get default realm (%s).\n";
+#define net_def_realm_fmt	"%s: cannot get default realm (%s).\n"
 #endif
-static const char *net_no_mem_fmt = "%s: cannot get memory.\n";
-static const char *net_parse_srv_fmt = "%s: cannot parse server name %s (%s).\n";
-static const char *net_no_hostname_fmt = "%s: cannot get our host name (%s).\n";
-static const char *net_no_hostent_fmt = "%s: cannot get our host entry (%s).\n";
-static const char *net_no_servent_fmt = "%s: cannot get service entry for %s (%s).\n";
-static const char *net_sockerr_fmt = "%s: cannot open network socket (%s).\n";
-static const char *net_soerr_fmt = "%s: cannot set socket options (%s).\n";
-static const char *net_binderr_fmt = "%s: cannot bind to network address (%s).\n";
+#define net_no_mem_fmt		"%s: cannot get memory.\n"
+#define net_parse_srv_fmt	"%s: cannot parse server name %s (%s).\n"
+#define net_no_hostname_fmt	"%s: cannot get our host name (%s).\n"
+#define net_no_hostent_fmt	"%s: cannot get our host entry (%s).\n"
+#define net_no_servent_fmt	"%s: cannot get service entry for %s (%s).\n"
+#define net_sockerr_fmt		"%s: cannot open network socket (%s).\n"
+#define net_soerr_fmt		"%s: cannot set socket options (%s).\n"
+#define net_binderr_fmt		"%s: cannot bind to network address (%s).\n"
 
-static const char *net_select_fmt = "\004select failed";
-static const char *net_cl_disp_fmt = "\004client dispatch failed";
-static const char *net_not_ready_fmt = "\004select error - no socket to read";
-static const char *net_dispatch_msg = "network dispatch";
+#define net_select_fmt		"\004select failed"
+#define net_cl_disp_fmt		"\004client dispatch failed"
+#define net_not_ready_fmt	"\004select error - no socket to read"
+#define net_dispatch_msg	"network dispatch"
 
 static int net_debug_level = 0;
 
@@ -153,7 +153,7 @@ static net_slave_info *
 net_find_slave(id)
     net_slave_type	id;
 {
-    int i, found;
+    int i, found = 0;
 
     for (i=0; i<net_max_slaves; i++) {
 	if (net_slave_table[i].sl_inuse &&
@@ -707,7 +707,7 @@ net_dispatch(kcontext, detached)
     krb5_context	kcontext;
     int			detached;
 {
-    krb5_error_code	kret;
+    volatile krb5_error_code	kret;
     fd_set		mask, readfds;
     int			nready;
 #if	POSIX_SIGNALS

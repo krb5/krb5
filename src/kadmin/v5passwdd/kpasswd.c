@@ -54,33 +54,33 @@
 /*
  * Local data.
  */
-static const char *kpwd_serror_head =		"server";
-static const char *kpwd_change_prompt_1 = 	"   Enter new password: ";
-static const char *kpwd_change_prompt_2 = 	"Re-enter new password: ";
-static const char *kpwd_old_password_prompt =	"   Enter old password: ";
-static const char *kpwd_old_pwd_name_fmt = 	"Enter old password for %s: ";
+#define kpwd_serror_head		"server"
+#define kpwd_change_prompt_1		"   Enter new password: "
+#define kpwd_change_prompt_2		"Re-enter new password: "
+#define kpwd_old_password_prompt	"   Enter old password: "
+#define kpwd_old_pwd_name_fmt		"Enter old password for %s: "
 
 #ifdef	LANGUAGES_SUPPORTED
-static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user] [-l language]\n";
-static const char *kpwd_getoptstring =		"l:u:";
+#define kpwd_usage_error_fmt		"%s: usage is %s [-u user] [-l language]\n"
+#define kpwd_getoptstring		"l:u:"
 #else	/* LANGUAGES_SUPPORTED */
-static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user]\n";
-static const char *kpwd_getoptstring =		"u:";
+#define kpwd_usage_error_fmt		"%s: usage is %s [-u user]\n"
+#define kpwd_getoptstring		"u:"
 #endif	/* LANGUAGES_SUPPORTED */
-static const char *kpwd_extra_args =		"extra arguments";
+#define kpwd_extra_args			"extra arguments"
 #if 0
-static const char *kpwd_bad_option_fmt = 	"%s: unrecognized option -%c.\n";
+#define kpwd_bad_option_fmt		"%s: unrecognized option -%c.\n"
 #endif
-static const char *kpwd_no_memory_fmt = 	"%s: not enough resources to allocate %d bytes for %s.\n";
-static const char *kpwd_bad_client_fmt =	"%s: %s%s%s %s not recognized by the server.\n";
-static const char *kpwd_no_server_fmt =		"%s: cannot find server for %s.\n";
-static const char *kpwd_incorrect_fmt =		"%s: incorrect password\n";
-static const char *kpwd_cant_connect_fmt = 	"%s: cannot contact server (%s).\n";
-static const char *kpwd_proto_error_fmt = 	"%s: protocol error during %s request (%s).\n";
-static const char *kpwd_pwproto_unsupp_fmt = 	"%s: %s request not supported by server.\n";
-static const char *kpwd_pwproto_error = 	"%s: server error (%s) during %s request.\n";
-static const char *kpwd_pwd_unacceptable = 	"%s: your new password is unacceptable to the server, %s.\n";
-static const char *kpwd_read_pass_error =	"%s: error (%s) reading passwords.\n";
+#define kpwd_no_memory_fmt		"%s: not enough resources to allocate %d bytes for %s.\n"
+#define kpwd_bad_client_fmt		"%s: %s%s%s %s not recognized by the server.\n"
+#define kpwd_no_server_fmt		"%s: cannot find server for %s.\n"
+#define kpwd_incorrect_fmt		"%s: incorrect password\n"
+#define kpwd_cant_connect_fmt		"%s: cannot contact server (%s).\n"
+#define kpwd_proto_error_fmt		"%s: protocol error during %s request (%s).\n"
+#define kpwd_pwproto_unsupp_fmt		"%s: %s request not supported by server.\n"
+#define kpwd_pwproto_error		"%s: server error (%s) during %s request.\n"
+#define kpwd_pwd_unacceptable		"%s: your new password is unacceptable to the server, %s.\n"
+#define kpwd_read_pass_error		"%s: error (%s) reading passwords.\n"
 
 static const char *kpwd_password_text = "passwords";
 #if 0

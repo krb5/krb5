@@ -1,3 +1,20 @@
+2001-06-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_conn.c, kpasswd.c, srv_net.c: Changed various char string
+	variables into macros, for better format/argument checking under
+	gcc.
+
+	* main.c (pwd_change): Use strncpy instead of sprintf to copy
+	error message text into buffer.  Use goto rather than repeated
+	code.
+	(main): Use %lx for params.mask.  Make debug_level volatile.
+	Delete unused variables oldnames, rlen.
+
+	* srv_net.c (net_find_slave): Initialize "found".
+	(net_dispatch): Make "kret" volatile, so longjmp won't clobber
+	it.
+	(net_slaves_active): Variable deleted.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c: Add prototype for daemon if needed.

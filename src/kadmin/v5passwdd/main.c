@@ -50,10 +50,11 @@ static void usage()
 
 int main(int argc, char *argv[])
 {
-     int ret, nofork;
+     int ret;
+     volatile int nofork;
      int timeout = -1;
      krb5_error_code code;
-     int debug_level = 0;
+     volatile int debug_level = 0;
 #if	POSIX_SIGNALS
      struct sigaction s_action;
 #endif	/* POSIX_SIGNALS */
@@ -272,44 +273,43 @@ pwd_change(kcontext, debug_level, auth_context, ticket,
 
      ret = krb5_timeofday(kcontext, &now);
      if (ret) {
-	 sprintf(err_str, error_message(ret));
+	     /* XXX - The only caller is known to use a 1K buffer.  */
+     system_error:
+	     strncpy(err_str, error_message(ret), 1024);
 	 return(KRB5_ADM_SYSTEM_ERROR);
      }
 
      if((ret = kadm5_get_principal(global_server_handle, principal,
-				   &princ,
-				   KADM5_PRINCIPAL_NORMAL_MASK)) !=
-	KADM5_OK) {
-	 sprintf(err_str, error_message(ret));
-	 return(KRB5_ADM_SYSTEM_ERROR);
+				  &princ,
+				  KADM5_PRINCIPAL_NORMAL_MASK)) !=
+       KADM5_OK) {
+	 goto system_error;
     }
     if(princ.aux_attributes & KADM5_POLICY) {
 	if((ret=kadm5_get_policy(global_server_handle,
 				 princ.policy, &pol)) != KADM5_OK) {
 	    (void) kadm5_free_principal_ent(global_server_handle, &princ);
-	    sprintf(err_str, error_message(ret));
-	    return(KRB5_ADM_SYSTEM_ERROR);
+	    goto system_error;
 	}
 	if((now - princ.last_pwd_change) < pol.pw_min_life &&
 	   !(princ.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
 	    (void) kadm5_free_policy_ent(global_server_handle, &pol);
 	    (void) kadm5_free_principal_ent(global_server_handle, &princ);
-	    sprintf(err_str, error_message(ret));
+	    /* XXX - The only caller is known to use a 1K buffer.  */
+	    strncpy(err_str, error_message(ret), 1024);
 	    return(KRB5_ADM_PW_UNACCEPT);
 	}
 
 	ret = kadm5_free_policy_ent(global_server_handle, &pol);
 	if (ret) {
 	    (void) kadm5_free_principal_ent(global_server_handle, &princ);
-	    sprintf(err_str, error_message(ret));
-	    return(KRB5_ADM_SYSTEM_ERROR);
+	    goto system_error;
         }
     }
 
     ret = kadm5_free_principal_ent(global_server_handle, &princ);
     if (ret) {
-	sprintf(err_str, error_message(ret));
-	return(KRB5_ADM_SYSTEM_ERROR);
+	 goto system_error;
     }
 
     /* ok, it's not too early to change the password. change it. */
