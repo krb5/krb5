@@ -33,11 +33,8 @@ OM_uint32 gssint_initialize_library (void)
 
 void gssint_cleanup_library (void)
 {
-	OM_uint32 min_stat;
 
 	assert (initialized);
-	
-	(void) kg_release_defcred (&min_stat);
 	
 #if !USE_BUNDLE_ERROR_STRINGS
 	remove_error_table(&et_k5g_error_table);

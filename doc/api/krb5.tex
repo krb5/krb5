@@ -183,28 +183,45 @@ Retrieves the keyblock stored in \funcparam{auth_context}. The memory
 allocated in this function should be freed with a call to
 \funcname{krb5_free_keyblock}. 
 
-\begin{funcdecl}{krb5_auth_con_getlocalsubkey}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_getrecvsubkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_keyblock **}{keyblock}
 \end{funcdecl}
 
-Retrieves the local_subkey keyblock stored in
+Retrieves the recv\_subkey keyblock stored in
 \funcparam{auth_context}. The memory allocated in this function should
 be freed with a call to \funcname{krb5_free_keyblock}.
 
-\begin{funcdecl}{krb5_auth_con_getremotesubkey}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_getsendsubkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_keyblock **}{keyblock}
 \end{funcdecl}
 
-Retrieves the remote_subkey keyblock stored in
+Retrieves the send\_subkey keyblock stored in
 \funcparam{auth_context}. The memory allocated in this function should
 be freed with a call to \funcname{krb5_free_keyblock}.
 
+\begin{funcdecl}{krb5_auth_con_setrecvsubkey}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context}{auth_context}
+\funcout
+\funcarg{krb5_keyblock *}{keyblock}
+\end{funcdecl}
+
+Sets the recv\_subkey keyblock stored in \funcparam{auth_context}.
+
+\begin{funcdecl}{krb5_auth_con_setsendsubkey}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context}{auth_context}
+\funcout
+\funcarg{krb5_keyblock *}{keyblock}
+\end{funcdecl}
+
+Sets the send\_subkey keyblock stored in \funcparam{auth_context}.
 
 \begin{funcdecl}{krb5_auth_setcksumtype}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
@@ -1508,9 +1525,9 @@ Parses a KRB_SAFE message from \funcparam{inbuf}, placing the
 data in \funcparam{*outbuf} after verifying its integrity.
 
 The keyblock used for verifying the integrity of the message is taken
-from the \funcparam{auth_context} local_subkey, remote_subkey, or
-keyblock. The keyblock is chosen in the above order by the first one
-which is not NULL.
+from the \funcparam{auth_context} recv\_subkey or keyblock. The
+keyblock is chosen in the above order by the first one which is not
+NULL.
  
 The remote_addr and localaddr portions of the \funcparam{*auth_context}
 specify the full addresses (host and port) of the sender and receiver,

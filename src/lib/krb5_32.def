@@ -36,8 +36,10 @@ EXPORTS
 	krb5_auth_con_getlocalseqnumber
 	krb5_auth_con_getlocalsubkey
 	krb5_auth_con_getrcache			; KRB5_CALLCONV_WRONG
+	krb5_auth_con_getrecvsubkey
 	krb5_auth_con_getremoteseqnumber
 	krb5_auth_con_getremotesubkey
+	krb5_auth_con_getsendsubkey
 	krb5_auth_con_init
 	krb5_auth_con_initivector		; DEPRECATED
 	krb5_auth_con_setaddrs			; KRB5_CALLCONV_WRONG
@@ -45,6 +47,8 @@ EXPORTS
 	krb5_auth_con_setflags
 	krb5_auth_con_setports
 	krb5_auth_con_setrcache
+	krb5_auth_con_setrecvsubkey
+	krb5_auth_con_setsendsubkey
 	krb5_auth_con_setuseruserkey
 	krb5_build_principal
 	krb5_build_principal_ext
@@ -63,6 +67,7 @@ EXPORTS
 	krb5_c_random_make_octets
 	krb5_c_random_seed
 	krb5_c_string_to_key
+krb5_c_string_to_key_with_params
 	krb5_c_valid_cksumtype
 	krb5_c_valid_enctype
 	krb5_c_verify_checksum
@@ -153,6 +158,7 @@ EXPORTS
 	krb5_get_init_creds_opt_set_salt
 	krb5_get_init_creds_opt_set_tkt_life
 	krb5_get_init_creds_password
+	krb5_get_permitted_enctypes
 	krb5_get_prompt_types
 	krb5_get_renewed_creds
 	krb5_get_server_rcache
@@ -187,6 +193,7 @@ EXPORTS
 	krb5_os_localaddr
 	krb5_parse_name
 	krb5_principal_compare
+	krb5_principal2salt
 	krb5_process_key
 	krb5_prompter_posix
 	krb5_random_key
@@ -204,7 +211,10 @@ EXPORTS
 	krb5_sendauth
 	krb5_set_default_realm
 	krb5_set_default_tgs_enctypes
+krb5_set_password
+krb5_set_password_using_ccache
 	krb5_set_principal_realm
+	krb5_set_real_time
 	krb5_sname_to_principal
 	krb5_string_to_cksumtype
 	krb5_string_to_deltat
@@ -223,6 +233,10 @@ EXPORTS
 	krb5_verify_init_creds
 	krb5_verify_init_creds_opt_init
 	krb5_verify_init_creds_opt_set_ap_req_nofail
+
+	krb5_524_convert_creds
+; Don't add krb524_convert_creds_kdc or krb524_init_ets here;
+; they've never been exported by this library, and are deprecated. -KR
 
 	krb5int_accessor	; INTERNAL (to end all internals)
 
@@ -265,3 +279,4 @@ EXPORTS
 	krb5_rc_close				; PRIVATE GSSAPI krb5.hin
 	krb5_free_enc_tkt_part			; PRIVATE GSSAPI krb5.hin
 	krb5_decrypt_tkt_part			; PRIVATE GSSAPI krb5.hin
+    

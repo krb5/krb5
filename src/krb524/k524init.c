@@ -37,7 +37,6 @@
 #endif
 
 #include <krb.h>
-#include "krb524.h"
 
 extern int optind;
 extern char *optarg;
@@ -91,8 +90,6 @@ int main(argc, argv)
 	 fprintf(stderr, "Usage: %s [-p principal] [-n]\n", prog);
 	 exit(1);
      }
-
-     krb524_init_ets(context);
 
      if ((code = krb5_cc_default(context, &cc))) {
 	  com_err(prog, code, "opening default credentials cache");
@@ -152,7 +149,7 @@ int main(argc, argv)
 	  exit(1);
      }
 
-     if ((code = krb524_convert_creds_kdc(context, v5creds, &v4creds))) {
+     if ((code = krb5_524_convert_creds(context, v5creds, &v4creds))) {
 	  com_err(prog, code, "converting to V4 credentials");
 	  exit(1);
      }

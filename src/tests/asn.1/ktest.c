@@ -71,6 +71,7 @@ krb5_error_code ktest_make_sample_ticket(tkt)
   if(retval) return retval;
   retval = ktest_make_sample_enc_data(&(tkt->enc_part));
   if(retval) return retval;
+  tkt->enc_part2 = NULL;
 
   return 0;
 }
@@ -228,8 +229,6 @@ krb5_error_code ktest_make_sample_last_req(lr)
   *lr = (krb5_last_req_entry**)calloc(3,sizeof(krb5_last_req_entry*));
   if(*lr == NULL) return ENOMEM;
   for(i=0; i<=1; i++){
-    (*lr)[i] = (krb5_last_req_entry*)calloc(1,sizeof(krb5_last_req_entry));
-    if((*lr)[i] == NULL) return ENOMEM;
     retval = ktest_make_sample_last_req_entry(&((*lr)[i]));
     if(retval) return retval;
   }
@@ -628,7 +627,8 @@ krb5_error_code ktest_make_sample_alt_method(p)
      krb5_alt_method * p;
 {
     p->method = 42;
-    p->data = (krb5_octet *) "secret";
+    p->data = (krb5_octet *) strdup("secret");
+    if(p->data == NULL) return ENOMEM;
     p->length = strlen((char *) p->data);
     return 0;
 }
@@ -656,6 +656,8 @@ krb5_error_code ktest_make_sample_etype_info(p)
 	if (info[i]->salt == 0)
 	    goto memfail;
 	strcpy((char *) info[i]->salt, buf);
+	info[i]->s2kparams.data = NULL;
+	info[i]->s2kparams.length = 0;
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
     }
     free(info[1]->salt);
@@ -667,6 +669,49 @@ memfail:
     ktest_destroy_etype_info(info);
     return ENOMEM;
 }
+
+
+krb5_error_code ktest_make_sample_etype_info2(p)
+     krb5_etype_info_entry *** p;
+{
+    krb5_etype_info_entry **info;
+    int	i;
+    char buf[80];
+
+    info = malloc(sizeof(krb5_etype_info_entry *) * 4);
+    if (!info)
+	return ENOMEM;
+    memset(info, 0, sizeof(krb5_etype_info_entry *) * 4);
+
+    for (i=0; i < 3; i++) {
+	info[i] = malloc(sizeof(krb5_etype_info_entry));
+	if (info[i] == 0)
+	    goto memfail;
+	info[i]->etype = i;
+	sprintf(buf, "Morton's #%d", i);
+	info[i]->length = strlen(buf);
+	info[i]->salt = malloc((size_t) (info[i]->length+1));
+	if (info[i]->salt == 0)
+	    goto memfail;
+	strcpy((char *) info[i]->salt, buf);
+	sprintf(buf, "s2k: %d", i);
+	info[i]->s2kparams.data = malloc(strlen(buf)+1);
+	if (info[i]->s2kparams.data == NULL)
+	    goto memfail;
+	strcpy( info[i]->s2kparams.data, buf);
+	info[i]->s2kparams.length = strlen(buf);
+	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
+    }
+    free(info[1]->salt);
+    info[1]->length = KRB5_ETYPE_NO_SALT;
+    info[1]->salt = 0;
+    *p = info;
+    return 0;
+memfail:
+    ktest_destroy_etype_info(info);
+    return ENOMEM;
+}
+
 
 krb5_error_code ktest_make_sample_pa_enc_ts(pa_enc)
      krb5_pa_enc_ts * pa_enc;
@@ -685,15 +730,19 @@ krb5_error_code ktest_make_sample_sam_challenge(p)
   p->magic = KV5M_SAM_CHALLENGE;
   p->sam_type = 42; /* information */
   p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
-  p->sam_type_name.data = "type name";
+  p->sam_type_name.data = strdup("type name");
+  if (p->sam_type_name.data == NULL) return ENOMEM;
   p->sam_type_name.length = strlen(p->sam_type_name.data);
   p->sam_track_id.data = 0;
   p->sam_track_id.length = 0;
-  p->sam_challenge_label.data = "challenge label";
+  p->sam_challenge_label.data = strdup("challenge label");
+  if (p->sam_challenge_label.data == NULL) return ENOMEM;
   p->sam_challenge_label.length = strlen(p->sam_challenge_label.data);
-  p->sam_challenge.data = "challenge ipse";
+  p->sam_challenge.data = strdup("challenge ipse");
+  if (p->sam_challenge.data == NULL) return ENOMEM;
   p->sam_challenge.length = strlen(p->sam_challenge.data);
-  p->sam_response_prompt.data = "response_prompt ipse";
+  p->sam_response_prompt.data = strdup("response_prompt ipse");
+  if (p->sam_response_prompt.data == NULL) return ENOMEM;
   p->sam_response_prompt.length = strlen(p->sam_response_prompt.data);
   p->sam_pk_for_sad.data = 0;
   p->sam_pk_for_sad.length = 0;
@@ -710,13 +759,16 @@ krb5_error_code ktest_make_sample_sam_response(p)
   p->magic = KV5M_SAM_RESPONSE;
   p->sam_type = 42; /* information */
   p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
-  p->sam_track_id.data = "track data";
+  p->sam_track_id.data = strdup("track data");
+  if (p->sam_track_id.data == NULL) return ENOMEM;
   p->sam_track_id.length = strlen(p->sam_track_id.data);
-  p->sam_enc_key.ciphertext.data = "key";
+  p->sam_enc_key.ciphertext.data = strdup("key");
+  if (p->sam_enc_key.ciphertext.data == NULL) return ENOMEM;
   p->sam_enc_key.ciphertext.length = strlen(p->sam_enc_key.ciphertext.data);
   p->sam_enc_key.enctype = ENCTYPE_DES_CBC_CRC;
   p->sam_enc_key.kvno = 1942;
-  p->sam_enc_nonce_or_ts.ciphertext.data = "nonce or ts";
+  p->sam_enc_nonce_or_ts.ciphertext.data = strdup("nonce or ts");
+  if (p->sam_enc_nonce_or_ts.ciphertext.data == NULL) return ENOMEM;
   p->sam_enc_nonce_or_ts.ciphertext.length = 
     strlen(p->sam_enc_nonce_or_ts.ciphertext.data);
   p->sam_enc_nonce_or_ts.enctype = ENCTYPE_DES_CBC_CRC;
@@ -764,6 +816,17 @@ void ktest_destroy_checksum(cs)
   }
 }
 
+void ktest_empty_keyblock(kb)
+     krb5_keyblock * kb;
+{
+  if (kb != NULL) {
+    if (kb->contents) {
+      free (kb->contents);
+      kb->contents = NULL;
+    }
+  }
+}
+
 void ktest_destroy_keyblock(kb)
      krb5_keyblock ** kb;
 {
@@ -779,8 +842,10 @@ void ktest_empty_authorization_data(ad)
 {
   int i;
 
-  for(i=0; ad[i] != NULL; i++)
-    ktest_destroy_authdata(&(ad[i]));
+  if(*ad != NULL) {
+    for(i=0; ad[i] != NULL; i++)
+      ktest_destroy_authdata(&(ad[i]));
+  }
 }
 
 void ktest_destroy_authorization_data(ad)
@@ -863,6 +928,8 @@ void ktest_destroy_principal(p)
 
   for(i=0; i<(*p)->length; i++)
     ktest_empty_data(&(((*p)->data)[i]));
+  ktest_empty_data(&((*p)->realm));
+  free((*p)->data);
   free(*p);
   *p = NULL;
 }
@@ -899,8 +966,20 @@ void ktest_destroy_ticket(tkt)
 {
   ktest_destroy_principal(&((*tkt)->server));
   ktest_destroy_enc_data(&((*tkt)->enc_part));
+  /*  ktest_empty_enc_tkt_part(((*tkt)->enc_part2));*/
   free(*tkt);
   *tkt = NULL;
+}  
+
+void ktest_empty_ticket(tkt)
+     krb5_ticket * tkt;
+{
+  if(tkt->server)
+    ktest_destroy_principal(&((tkt)->server));
+  ktest_destroy_enc_data(&((tkt)->enc_part));
+  if (tkt->enc_part2) {
+    ktest_destroy_enc_tkt_part(&(tkt->enc_part2));
+  }
 }  
 
 void ktest_destroy_enc_data(ed)
@@ -915,6 +994,7 @@ void ktest_destroy_etype_info_entry(i)
 {
     if (i->salt)
 	free(i->salt);
+    ktest_empty_data(&(i->s2kparams));
     free(i);
 }
 
@@ -929,3 +1009,283 @@ void ktest_destroy_etype_info(info)
 }
     
 
+void ktest_empty_kdc_req(kr)
+     krb5_kdc_req *kr;
+{
+  if (kr->padata)
+      ktest_destroy_pa_data_array(&(kr->padata));
+
+  if (kr->client)
+      ktest_destroy_principal(&(kr->client));
+
+  if (kr->server)
+      ktest_destroy_principal(&(kr->server));
+  if (kr->ktype)
+      free(kr->ktype);
+  if (kr->addresses)
+      ktest_destroy_addresses(&(kr->addresses));
+      ktest_destroy_enc_data(&(kr->authorization_data));
+  if (kr->unenc_authdata)
+      ktest_destroy_authorization_data(&(kr->unenc_authdata));
+  if (kr->second_ticket)
+      ktest_destroy_sequence_of_ticket(&(kr->second_ticket));
+
+}
+
+void ktest_empty_kdc_rep(kr)
+     krb5_kdc_rep *kr;
+{
+  if (kr->padata)
+      ktest_destroy_pa_data_array(&(kr->padata));
+
+  if (kr->client)
+      ktest_destroy_principal(&(kr->client));
+
+  if (kr->ticket)
+      ktest_destroy_ticket(&(kr->ticket));
+
+  ktest_destroy_enc_data(&kr->enc_part);
+
+  if (kr->enc_part2) {
+    ktest_empty_enc_kdc_rep_part(kr->enc_part2);
+    free(kr->enc_part2);
+    kr->enc_part2 = NULL;
+  }
+}
+
+
+void ktest_empty_authenticator(a)
+     krb5_authenticator * a;
+{
+
+  if(a->client) 
+    ktest_destroy_principal(&(a->client));
+  if(a->checksum)
+    ktest_destroy_checksum(&(a->checksum));
+  if(a->subkey)
+    ktest_destroy_keyblock(&(a->subkey));
+  if(a->authorization_data)
+    ktest_destroy_authorization_data(&(a->authorization_data));
+}
+
+void ktest_empty_enc_tkt_part(etp)
+     krb5_enc_tkt_part * etp;
+{
+
+  if(etp->session)
+    ktest_destroy_keyblock(&(etp->session));
+  if(etp->client) 
+    ktest_destroy_principal(&(etp->client));
+  if (etp->caddrs)
+      ktest_destroy_addresses(&(etp->caddrs));
+  if(etp->authorization_data)
+    ktest_destroy_authorization_data(&(etp->authorization_data));
+  ktest_destroy_transited(&(etp->transited));
+}
+
+void ktest_destroy_enc_tkt_part(etp)
+     krb5_enc_tkt_part ** etp;
+{
+  if(*etp) {
+    ktest_empty_enc_tkt_part(*etp);
+    free(*etp);
+    *etp = NULL;
+  }
+}
+
+void ktest_empty_enc_kdc_rep_part(ekr)
+     krb5_enc_kdc_rep_part * ekr;
+{
+
+  if(ekr->session)
+    ktest_destroy_keyblock(&(ekr->session));
+
+  if(ekr->server) 
+    ktest_destroy_principal(&(ekr->server));
+
+  if (ekr->caddrs)
+    ktest_destroy_addresses(&(ekr->caddrs));
+  ktest_destroy_last_req(&(ekr->last_req));
+}
+
+
+void ktest_destroy_transited(t)
+     krb5_transited * t;
+{
+  if(t->tr_contents.data)
+    ktest_empty_data(&(t->tr_contents));
+}
+
+
+void ktest_empty_ap_rep(ar)
+     krb5_ap_rep * ar;
+{
+  ktest_destroy_enc_data(&ar->enc_part);
+}
+
+void ktest_empty_ap_req(ar)
+     krb5_ap_req * ar;
+{
+
+  if(ar->ticket)
+      ktest_destroy_ticket(&(ar->ticket));
+  ktest_destroy_enc_data(&(ar->authenticator));
+}
+
+void ktest_empty_cred_enc_part(cep)
+     krb5_cred_enc_part * cep;
+{
+  if (cep->s_address)
+      ktest_destroy_address(&(cep->s_address));
+  if (cep->r_address)
+      ktest_destroy_address(&(cep->r_address));
+  if (cep->ticket_info)
+    ktest_destroy_sequence_of_cred_info(&(cep->ticket_info));
+}
+
+void ktest_destroy_cred_info(ci)
+     krb5_cred_info ** ci;
+{
+  if((*ci)->session)
+    ktest_destroy_keyblock(&((*ci)->session));
+  if((*ci)->client) 
+    ktest_destroy_principal(&((*ci)->client));
+  if((*ci)->server) 
+    ktest_destroy_principal(&((*ci)->server));
+  if ((*ci)->caddrs)
+    ktest_destroy_addresses(&((*ci)->caddrs));
+  free(*ci);
+  *ci = NULL;
+}
+
+void ktest_destroy_sequence_of_cred_info(soci)
+     krb5_cred_info *** soci;
+{
+  int i;
+
+  for(i=0; (*soci)[i] != NULL; i++)
+    ktest_destroy_cred_info(&((*soci)[i]));
+  free(*soci);
+  *soci = NULL;
+}
+
+
+void ktest_empty_safe(s)
+     krb5_safe * s;
+{
+  ktest_empty_data(&(s->user_data));
+  ktest_destroy_address(&(s->s_address));
+  ktest_destroy_address(&(s->r_address));
+  ktest_destroy_checksum(&(s->checksum));
+}
+
+void ktest_empty_priv_enc_part(pep)
+     krb5_priv_enc_part * pep;
+{
+  ktest_empty_data(&(pep->user_data));
+  ktest_destroy_address(&(pep->s_address));
+  ktest_destroy_address(&(pep->r_address));
+}
+
+void ktest_empty_priv(p)
+     krb5_priv * p;
+{
+  ktest_destroy_enc_data(&(p->enc_part));
+}
+
+void ktest_empty_cred(c)
+     krb5_cred * c;
+{
+
+  ktest_destroy_sequence_of_ticket(&(c->tickets));
+  ktest_destroy_enc_data(&(c->enc_part));
+  /* enc_part2 */
+
+}
+
+void ktest_destroy_last_req(lr)
+     krb5_last_req_entry *** lr;
+{
+  int i;
+
+  if(*lr) {
+    for(i=0; (*lr)[i] != NULL; i++) {
+      free((*lr)[i]);
+    }
+    free(*lr);
+  }
+}
+
+void ktest_empty_error(kerr)
+     krb5_error * kerr;
+{
+  if(kerr->client)
+    ktest_destroy_principal(&(kerr->client));
+  if(kerr->server)
+    ktest_destroy_principal(&(kerr->server));
+  ktest_empty_data(&(kerr->text));
+  ktest_empty_data(&(kerr->e_data));
+}
+
+void ktest_empty_ap_rep_enc_part(arep)
+     krb5_ap_rep_enc_part * arep;
+{
+  ktest_destroy_keyblock(&((arep)->subkey));
+}
+
+void ktest_empty_passwd_phrase_element(ppe)
+     passwd_phrase_element * ppe;
+{
+  ktest_destroy_data(&(ppe->passwd));
+  ktest_destroy_data(&(ppe->phrase));
+}
+
+void ktest_empty_pwd_data(pd)
+     krb5_pwd_data * pd;
+{
+  int i;
+
+  for(i=0; i <= pd->sequence_count; i++){
+    if(pd->element[i]) {
+      ktest_empty_passwd_phrase_element(pd->element[i]);
+      free(pd->element[i]);
+      pd->element[i] = NULL;
+    }
+  }
+  free(pd->element);
+  
+}
+
+void ktest_empty_alt_method(am)
+     krb5_alt_method *am;
+{
+  if (am->data) {
+    free(am->data);
+    am->data = NULL;
+  }
+}
+
+void ktest_empty_sam_challenge(p)
+     krb5_sam_challenge * p;
+{
+  ktest_empty_data(&(p->sam_type_name));
+  ktest_empty_data(&(p->sam_track_id));
+  ktest_empty_data(&(p->sam_challenge_label));
+  ktest_empty_data(&(p->sam_challenge));
+  ktest_empty_data(&(p->sam_response_prompt));
+  ktest_empty_data(&(p->sam_pk_for_sad));
+
+  if(p->sam_cksum.contents != NULL) {
+    free(p->sam_cksum.contents);
+    p->sam_cksum.contents = NULL;
+  }
+
+}
+
+void ktest_empty_sam_response(p)
+     krb5_sam_response * p;
+{
+  ktest_empty_data(&(p->sam_track_id));
+  ktest_empty_data(&(p->sam_enc_key.ciphertext));
+  ktest_empty_data(&(p->sam_enc_nonce_or_ts.ciphertext));
+}

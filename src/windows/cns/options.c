@@ -74,6 +74,9 @@ opts_initdialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
   forwardable = cns_res.forwardable;
   SendDlgItemMessage(hwnd, IDD_FORWARDABLE, BM_SETCHECK, forwardable, 0);
 
+  noaddresses = cns_res.noaddresses;
+  SendDlgItemMessage(hwnd, IDD_NOADDRESSES, BM_SETCHECK, noaddresses, 0);
+ 
   return TRUE;
 }
 
@@ -160,6 +163,9 @@ opts_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 
     forwardable = SendDlgItemMessage(hwnd, IDD_FORWARDABLE, BM_GETCHECK, 0, 0);
     cns_res.forwardable = forwardable;
+
+    noaddresses = SendDlgItemMessage(hwnd, IDD_NOADDRESSES, BM_GETCHECK, 0, 0);
+    cns_res.noaddresses = noaddresses;
 
     EndDialog(hwnd, IDOK);
 

@@ -1,3 +1,80 @@
+2004-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which is
+	not present in tcl-8.3.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl things
+	to work around Solaris 9 pty-close bug.
+
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): Check for "not authorized".  Map
+	eof to unsupported.
+
+2003-06-04  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (setup_root_shell): Don't try to use the procedure
+	"-" when handling error messages from rlogin.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): Handle error messages indicating
+	"-x" isn't supported.
+	(start_kerberos_daemons): "cannont" => "cannot".
+
+2003-06-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Default RLOGIN_FLAGS to "-x".
+	(start_kerberos_daemons): Watch for "Cannot bind server socket"
+	and log it.  Watch for "no sockets set up" and report an error.
+	(setup_root_shell): Watch for "Cannot assign requested address",
+	log it and give up.
+
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Be slightly more lenient about matching password
+	prompts.
+
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (spawn_xterm): Add KPASSWD and REALMNAME to the list
+	of exported variables.
+
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Add passes for testing AES.
+	(start_kerberos_daemons): Add a small delay between starting the
+	"tail -f" processes and appending the markers to their files.
+	(spawn_xterm): Add RLOGIN, RLOGIND, FTP, and FTPD to the list of
+	variables to export to the environment.  Check that variables are
+	defined before exporting them.
+
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (start_kerberos_daemons): If we get a timeout
+	looking for the mark, log out the last 10 lines of the kdc
+	logfile.
+
+2003-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (v4kinit): Expect failure when kiniting to a des3
+	TGT, due to fix for MITKRB5-SA-2003-004.
+	(setup_kadmind_srvtab): Remove.  It's not needed anymore.
+
+2003-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): If we get connection refused
+	messages, followed by no unrecognized errors and then eof, report
+	it as an unsupported test.
+
+2003-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): If we get connection refused
+	messages, followed by no unrecognized errors and then eof, report
+	it as an unsupported test.
+
 2003-02-04  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (start_kerberos_daemons): Use correct argument to
