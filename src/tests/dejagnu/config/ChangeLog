@@ -1,4 +1,7 @@
 
+Mon Jun 19 13:38:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Fix setup_root_shell() with LD_LIBRARY_PATH.
+
 Thu Jun 15 18:13:55 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Setup and use LD_LIBRARY_PATH, in case we were built
 		with shared libraries.

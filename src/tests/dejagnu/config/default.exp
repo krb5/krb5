@@ -312,7 +312,13 @@ proc setup_kerberos_env { } {
     verbose "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
 
     # Tell the dynamic loader where to get our shared libraries
-    set env(LD_LIBRARY_PATH) "$SHLIBDIR"
+    if [info exists env(LD_LIBRARY_PATH)] {
+	set oldpath $env(LD_LIBRARY_PATH)
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR $env(LD_LIBRARY_PATH)"
+    } else {
+	catch "unset oldpath"
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
+    }
     verbose "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
     return 1
 }
@@ -964,12 +970,23 @@ proc setup_root_shell { testname } {
     global rlogin_pid
     global tmppwd
     global env
+    global SHLIBDIR
 
     # Make sure we are using the original values of the environment
     # variables.  This means that the caller must call
     # setup_kerberos_env after calling this procedure.
 
     restore_kerberos_env
+
+    # Tell the dynamic loader where to get our shared libraries
+    if [info exists env(LD_LIBRARY_PATH)] {
+	set oldpath $env(LD_LIBRARY_PATH)
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR $env(LD_LIBRARY_PATH)"
+    } else {
+	catch "unset oldpath"
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
+    }
+    verbose "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
 
     if ![get_hostname] {
 	return 0
@@ -1077,6 +1094,13 @@ proc setup_root_shell { testname } {
 	}
     }
 
+    # Restore old setting of LD_LIBRARY_PATH
+    if [info exists oldpath] {
+	set env(LD_LIBRARY_PATH) $oldpath
+	catch "unset oldpath"
+    } else {
+	catch "unset env(LD_LIBRARY_PATH)"
+    }
     expect_after
 
     return 1
