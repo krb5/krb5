@@ -30,9 +30,9 @@ static char rcsid_u2gen_c[] =
 "$Id$";
 #endif	/* lint || saber */
 
+#include <isode/psap.h>
 #include <krb5/krb5.h>
 #include <krb5/sysincl.h>		/* includes <time.h> */
-#include <isode/psap.h>
 #include <krb5/asn1.h>
 #include "asn1glue.h"
 
