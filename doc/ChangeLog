@@ -1,3 +1,10 @@
+2000-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo: Enter correct xref info for DNS data
+	descriptions.  Fix up text around some xrefs.
+	* install.texinfo: Describe SRV and TXT DNS records.  Fix up text
+	around some xrefs.
+
 2000-06-09  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo: Add descriptions of the kadmin {ank,cpw,ktadd} -e

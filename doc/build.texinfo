@@ -200,7 +200,7 @@ libraries to be available during compilation and some of the tests also
 require Perl in order to operate.  If all of these resources are not
 available during configuration, the KADM5 tests will not run.  The TCL
 installation directory can be specified with the @code{--with-tcl}
-configure option (see @xref{Options to Configure}).  The runtest and
+configure option.  (See @xref{Options to Configure}.)  The runtest and
 perl programs must be in the current execution path.
 
 If you install DejaGnu, TCL, or Perl after configuring and building
@@ -334,7 +334,10 @@ platforms.
 @itemx --enable-dns-for-realm
 
 Enable the use of DNS to look up a host's Kerberos realm, or a realm's
-KDCs.  See @x @x @xxxxx.
+KDCs, if the information is not provided in krb5.conf.  See
+@xref{Hostnames for the Master and Slave KDCs}, and @xref{Mapping
+Hostnames onto Kerberos Realms}.  By default, DNS lookups are enabled
+for the latter but not for the former.
 
 @item --enable-kdc-replay-cache
 
