@@ -1,3 +1,13 @@
+2002-11-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unit-test-ok): Depend only on unit-test-body.
+	(unit-test-body): Remove krb5cc_rpc_test_* on entry and on
+	successful exit.  On error exit, let the trap handler do all the
+	cleanup.  Incorporate old unit-test-setup commands.
+	(unit-test-setup, unit-test-cleanup): Targets deleted.
+	* lib/helpers.exp (start_client, wait_client): Set KRB5CCNAME to
+	something in the current directory.
+
 2002-11-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (unit-test-body): Set RPC_TEST_SRVTAB based on

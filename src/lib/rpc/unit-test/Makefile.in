@@ -42,27 +42,25 @@ unit-test-:
 	@echo "+++ Either tcl, runtest, or Perl is unavailable."
 	@echo "+++"
 
-unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
+unit-test-ok:: unit-test-body
 
 PASS=@PASS@
 unit-test-body:
+	$(RM) krb5cc_rpc_test_*
+	$(ENV_SETUP) $(START_SERVERS)
 	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab.$$$$ ; export RPC_TEST_SRVTAB ; \
-	trap "rm -f $$RPC_TEST_SRVTAB ; exit 1" 0 1 2 3 14 15 ; \
+	trap "echo Failed, cleaning up... ; rm -f $$RPC_TEST_SRVTAB ; $(ENV_SETUP) $(STOP_SERVERS) ; trap '' 0 ; exit 1" 0 1 2 3 14 15 ; \
 	if $(ENV_SETUP) \
 		$(RUNTEST) SERVER=./server CLIENT=./client \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
 		PASS="$(PASS)" --tool rpc_test $(RUNTESTFLAGS) ; \
-	then rm -f $$RPC_TEST_SRVTAB ; trap 0 ; exit 0 ; \
-	else rm -f $$RPC_TEST_SRVTAB ; exit 1 ; fi
-
-unit-test-setup::
-	$(ENV_SETUP) $(START_SERVERS)
-#	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) $(srcdir)/rpc_test_setup.sh
-
-unit-test-cleanup::
-	$(ENV_SETUP) $(STOP_SERVERS)
-#	-rm -f /tmp/rpc_test_v5srvtab /tmp/krb5cc_rpc_test_fullrun
+	then \
+		echo Cleaning up... ; \
+		rm -f $$RPC_TEST_SRVTAB krb5cc_rpc_test_* ; \
+		$(ENV_SETUP) $(STOP_SERVERS) ; \
+		trap 0 ; exit 0 ; \
+	else exit 1 ; fi
 
 clean::
 	$(RM) server client

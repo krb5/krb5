@@ -171,7 +171,7 @@ proc start_client {testname ccname user password lifetime count
 		set target "server@$hostname"
 	}
 
-	set env(KRB5CCNAME) FILE:/tmp/krb5cc_rpc_test_$ccname
+	set env(KRB5CCNAME) FILE:[pwd]/krb5cc_rpc_test_$ccname
 	kinit $user $password $lifetime
 
 	if {$verbose > 0} {
@@ -219,7 +219,7 @@ proc wait_client {testname ccname id status} {
 		}
 	}
 
-	set env(KRB5CCNAME) FILE:/tmp/krb5cc_rpc_test_$ccname
+	set env(KRB5CCNAME) FILE:[pwd]/krb5cc_rpc_test_$ccname
  	if {[catch "exec $kdestroy -5"] != 0} {
  		perror "$testname: cannot destroy client $ccname ccache"
  	}
