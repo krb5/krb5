@@ -1258,7 +1258,7 @@ subdirMakefiles:							@@\
 	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
 	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
 	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
@@ -1269,7 +1269,7 @@ subsubdirMakefiles:							@@\
 	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
 	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
 	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
@@ -1280,7 +1280,7 @@ subsubsubdirMakefiles:							@@\
 	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
 	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
 	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
@@ -1291,7 +1291,7 @@ subsubsubsubdirMakefiles:						@@\
 	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
 	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
 	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
