@@ -1,3 +1,30 @@
+Tue Mar 12 18:04:32 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* aclocal.m4 (V5_MAKE_SHARED_LIB): If the cache variables for
+	selecting shared v. archive library support haven't been set,
+	complain, instead of generating a broken Makefile.
+	(WITH_CC): Default to value from cache, if available.  If it
+	differs from name supplied on command line, complain.  When not
+	using a value from the cache, verify that it's a working compiler
+	before proceeding.  At end, use AC_PROG_CC to see if it's gcc
+	we're using.
+	(SubdirLibraryRule): Make DONE depend on Makefile.in, so it
+	doesn't keep getting regenerated in the case of no object files.
+	(CHECK_WAIT_TYPE): Make sure that union wait is acceptable to
+	WEXITSTATUS if that macro is defined.
+
+	* aclocal.m4 (V5_SET_TOPDIR): Don't substitute BUILDTOP, SRCTOP.
+	(CONFIG_RULES): In makefile dependencies, use $(thisconfigdir).
+	(V5_AC_OUTPUT_MAKEFILE): If arguments are given, treat as
+	directories and build pre/Makefile/post in each.  Set
+	thisconfigdir, SRCTOP, BUILDTOP separately in each directory.
+	Tweak Makefile dependencies appropriately.
+
+	* aclocal.m4 (AC_HEADER_STDARG): New macro.  Try compiling some
+	sources with variadic functions; set HAVE_STDARG_H or
+	HAVE_VARARGS_H, or bomb.
+	* acconfig.h (HAVE_STDARG_H, HAVE_VARARGS_H): Undef.
+
 Wed Feb 28 00:00:55 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Modify windows build procedure to include the

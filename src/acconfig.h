@@ -27,6 +27,8 @@
 #undef KRB5_USE_INET
 #undef ODBM
 
+#undef HAVE_STDARG_H
+#undef HAVE_VARARGS_H
 
 /* Define if MIT Project Athena default configuration should be used */
 #undef KRB5_ATHENA_COMPAT

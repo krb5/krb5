@@ -41,8 +41,6 @@ if test -d "$srcdir/$ac_config_fragdir"; then
 else
   AC_MSG_ERROR([can not find config/ directory in $ac_reltopdir])
 fi
-AC_SUBST(BUILDTOP)dnl
-AC_SUBST(SRCTOP)dnl
 ])dnl
 dnl
 dnl Does configure need to be run in immediate subdirectories of this
@@ -159,12 +157,17 @@ SHELL=/bin/sh
 
 Makefiles:: Makefile
 
-Makefile: $(srcdir)/Makefile.in config.status $(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
-	$(SHELL) config.status
-config.status: $(srcdir)/configure
-	$(SHELL) config.status --recheck
-$(srcdir)/configure: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
-	cd $(srcdir); $(SHELL) $(SRCTOP)/util/autoconf/autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
+Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
+		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
+	cd $(thisconfigdir) && $(SHELL) config.status
+$(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
+	cd $(thisconfigdir) && $(SHELL) config.status --recheck
+$(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
+		$(SRCTOP)/aclocal.m4
+	cd $(srcdir)/$(thisconfigdir) && \
+		$(SHELL) $(SRCTOP)/util/autoconf/autoconf \
+			--localdir=$(BUILDTOP) \
+			--macrodir=$(BUILDTOP)/util/autoconf
 ]
 AC_POP_MAKEFILE()dnl
 ])dnl
@@ -259,7 +262,11 @@ define(CHECK_WAIT_TYPE,[
 AC_MSG_CHECKING([for union wait])
 AC_CACHE_VAL(krb5_cv_struct_wait,
 [AC_TRY_COMPILE(
-[#include <sys/wait.h>], [union wait i;], 
+[#include <sys/wait.h>], [union wait i;
+#ifdef WEXITSTATUS
+  WEXITSTATUS (i);
+#endif
+], 
 	krb5_cv_struct_wait=yes, krb5_cv_struct_wait=no)])
 AC_MSG_RESULT($krb5_cv_struct_wait)
 if test $krb5_cv_struct_wait = no; then
@@ -382,12 +389,26 @@ dnl set $(CC) from --with-cc=value
 dnl
 define(WITH_CC,[
 AC_ARG_WITH([cc],
-[  --with-cc=COMPILER      select compiler to use],
-AC_MSG_RESULT(CC=$withval)
-CC=$withval,
-if test -z "$CC" ; then CC=cc; fi
-[AC_MSG_RESULT(CC defaults to $CC)])dnl
-AC_SUBST([CC])])dnl
+[  --with-cc=COMPILER      select compiler to use])
+AC_MSG_CHECKING(for C compiler)
+if test "$with_cc" != ""; then
+  if test "$ac_cv_prog_cc" != "" && test "$ac_cv_prog_cc" != "$with_cc"; then
+    AC_MSG_ERROR(Specified compiler doesn't match cached compiler name;
+	remove cache and try again.)
+  else
+    CC="$with_cc"
+  fi
+fi
+AC_CACHE_VAL(ac_cv_prog_cc,[dnl
+  test -z "$CC" && CC=cc
+  AC_TRY_LINK([#include <stdio.h>],[printf("hi\n");], ,
+    AC_MSG_ERROR(Can't find a working compiler.))
+  ac_cv_prog_cc="$CC"
+])
+CC="$ac_cv_prog_cc"
+AC_MSG_RESULT($CC)
+AC_PROG_CC
+])dnl
 dnl
 dnl set $(LD) from --with-linker=value
 dnl
@@ -482,7 +503,7 @@ AC_PUSH_MAKEFILE()dnl
 
 all-unix:: DONE
 
-DONE:: $1
+DONE:: $1 $(srcdir)/Makefile.in
 	@if test x'$1' = x && test -r [$]@; then :;\
 	else \
 		(set -x; echo $1 > [$]@) \
@@ -591,15 +612,30 @@ dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
-[AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,
-[cat pre.out Makefile.out post.out > Makefile
+[ifelse($1, , ac_v5_makefile_dirs=., ac_v5_makefile_dirs="$1")
+dnl OPTIMIZE THIS FOR COMMON CASE!!
+filelist=""
+for x in $ac_v5_makefile_dirs; do
+  filelist="$filelist $x/Makefile.tmp:$x/Makefile.in $x/pre.tmp:$ac_prepend $x/post.tmp:$ac_postpend"
+done
+AC_OUTPUT($filelist,
+[EOF
+ac_reltopdir=`echo $ac_reltopdir | sed   \
+	-e 's,^\(\./\)*,,g'	\
+	-e 's,/\(\./\)*,/,g'	\
+	-e 's,/\.$,,g'		\
+	`
+test "$ac_reltopdir" = "" && ac_reltopdir=.
+cat >> $CONFIG_STATUS <<EOF
+ac_v5_makefile_dirs="$ac_v5_makefile_dirs"
+ac_reltopdir=$ac_reltopdir
 EOF
 dnl This should be fixed so that the here document produced gets broken up
 dnl into chunks that are the "right" size, in case we run across shells that
 dnl are broken WRT large here documents.
 >> append.out
 cat - append.out >> $CONFIG_STATUS <<\EOF
-cat >> Makefile <<\CEOF
+cat >> append.tmp <<\CEOF
 #
 # rules appended by configure
 
@@ -608,8 +644,43 @@ rm append.out
 dnl now back to regular config.status generation
 cat >> $CONFIG_STATUS <<\EOF
 CEOF
+for d in $ac_v5_makefile_dirs; do
+  # If CONFIG_FILES was set from Makefile, skip unprocessed directories.
+  if test -r $d/Makefile.tmp; then
+changequote(,)dnl
+    x=`echo $d/ | sed   \
+	-e 's,//*$,/,'		\
+	-e 's,^\(\./\)*,,g'	\
+	-e 's,/\(\./\)*,/,g'	\
+	-e 's,/\./$,/,g'	\
+	-e 's,^\./$,,'		\
+	-e 's,[^/]*/,../,g'	\
+	`
+changequote([,])dnl
+    test "$x" = "" && x=./
+    case $srcdir in
+    /*)  s=$ac_given_srcdir/$ac_reltopdir ;;
+    *)   s=$x$ac_given_srcdir/$ac_reltopdir ;;
+    esac
+    s=`echo $s | sed   \
+	-e 's,//*$,/,'		\
+	-e 's,^\(\./\)*,,g'	\
+	-e 's,/\(\./\)*,/,g'	\
+	-e 's,^\./$,,'		\
+	-e 's,/\.$,,g'		\
+	`
+    test "$s" = "" && s=.
+    echo creating $d/Makefile
+    cat - $d/pre.tmp $d/Makefile.tmp $d/post.tmp append.tmp > $d/Makefile <<EOX
+thisconfigdir=$x
+SRCTOP=$s
+BUILDTOP=$x$ac_reltopdir
+EOX
+    rm  $d/pre.tmp $d/Makefile.tmp $d/post.tmp
 # sed -f $CONF_FRAGDIR/mac-mf.sed < Makefile > MakeFile
-rm pre.out Makefile.out post.out
+  fi
+done
+rm append.tmp
 ],
 CONF_FRAGDIR=$srcdir/${ac_config_fragdir} )])dnl
 dnl
@@ -872,6 +943,10 @@ fi
 AC_SUBST(SHLIB_LIBDIRS)
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
+if test "$krb5_cv_shlibs_ext" = ""; then
+  AC_MSG_ERROR(Library building info can't be determined by this lame configure
+script; try reconfiguring again from the top of the tree.)
+fi
 SHEXT=$krb5_cv_shlibs_ext
 AC_SUBST(SHEXT)
 STEXT=$krb5_cv_noshlibs_ext
@@ -1123,4 +1198,49 @@ AC_DEFINE(KRB5_PROVIDE_PROTOTYPES)
 fi
 dnl *never* set NARROW_PROTOTYPES
 ])dnl
+dnl
+dnl Check if stdarg or varargs is available *and compiles*; prefer stdarg.
+dnl (This was sent to djm for incorporation into autoconf 3/12/1996.  KR)
+dnl
+AC_DEFUN(AC_HEADER_STDARG, [
+
+AC_MSG_CHECKING([for stdarg.h])
+AC_CACHE_VAL(ac_cv_header_stdarg_h,
+[AC_TRY_COMPILE([#include <stdarg.h>], [
+  } /* ac_try_compile will have started a function body */
+  int aoeu (char *format, ...) {
+    va_list v;
+    int i;
+    va_start (v, format);
+    i = va_arg (v, int);
+    va_end (v);
+],ac_cv_header_stdarg_h=yes,ac_cv_header_stdarg_h=no)])dnl
+AC_MSG_RESULT($ac_cv_header_stdarg_h)
+if test $ac_cv_header_stdarg_h = yes; then
+  AC_DEFINE(HAVE_STDARG_H)
+else
+
+AC_MSG_CHECKING([for varargs.h])
+AC_CACHE_VAL(ac_cv_header_varargs_h,
+[AC_TRY_COMPILE([#include <varargs.h>],[
+  } /* ac_try_compile will have started a function body */
+  int aoeu (va_alist) va_dcl {
+    va_list v;
+    int i;
+    va_start (v);
+    i = va_arg (v, int);
+    va_end (v);
+],ac_cv_header_varargs_h=yes,ac_cv_header_varargs_h=no)])dnl
+AC_MSG_RESULT($ac_cv_header_varargs_h)
+if test $ac_cv_header_varargs_h = yes; then
+  AC_DEFINE(HAVE_VARARGS_H)
+else
+  AC_MSG_ERROR(Neither stdarg nor varargs compile?)
+fi
+
+fi dnl stdarg test failure
+
+])dnl
+dnl
+dnl
 dnl
