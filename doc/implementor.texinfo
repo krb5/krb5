@@ -87,7 +87,7 @@ the internals of the @value{PRODUCT}.
 Different systems have different ways of finding the local network
 addresses.
 
-On Windows, gethostbyname is called on the local host name to get a
+On Windows, @code{gethostbyname} is called on the local host name to get a
 set of addresses.  If that fails, a UDP socket is ``connected'' to a
 particular IPv4 address, and the local socket name is retrieved, its
 address being treated as the one local network address.  Future
@@ -98,17 +98,18 @@ On Mac OS 9 and earlier, a Mac-specific interface is used to look up
 local addresses.  Presumably, on Mac OS X we'll use that or the
 general UNIX code.
 
-On (most?) UNIX systems, there is an ioctl called SIOCGIFCONF which
-gets interface configuration information.  The behavior of this ioctl
-varies across UNIX systems though.  It takes as input a buffer to fill
-with data structures, but if the buffer isn't big enough, the behavior
-isn't well defined.  Sometimes you get an error, sometimes you get
-incomplete data.  Sometimes you get a clear indication that more space
-was needed, sometimes not.  A couple of systems have additional ioctls
-that can be used to determine or at least estimate the correct size
-for the buffer.  Solaris has introduced SIOCGLIFCONF for querying IPv6
-addresses, and restricts SIOCGIFCONF to IPv4 only.  (** We should
-actually check if that's true.)
+On (most?) UNIX systems, there is an @code{ioctl} called
+@code{SIOCGIFCONF} which gets interface configuration information.
+The behavior of this @code{ioctl} varies across UNIX systems though.
+It takes as input a buffer to fill with data structures, but if the
+buffer isn't big enough, the behavior isn't well defined.  Sometimes
+you get an error, sometimes you get incomplete data.  Sometimes you
+get a clear indication that more space was needed, sometimes not.  A
+couple of systems have additional @code{ioctl}s that can be used to
+determine or at least estimate the correct size for the buffer.
+Solaris has introduced @code{SIOCGLIFCONF} for querying IPv6
+addresses, and restricts @code{SIOCGIFCONF} to IPv4 only.  (** We
+should actually check if that's true.)
 
 We (Ken Raeburn in particular) ran some tests on various systems to
 see what would happen with buffers of various sizes from much smaller
@@ -121,57 +122,71 @@ These values may of coures be dependent on the configurations of the
 particular systems we wre testing with.  (See
 @code{lib/krb5/os/t_gifconf.c} for the test program.)
 
-NetBSD 1.5-alpha: The returned ifc_len is the desired amount of space,
-always.  The returned list may be truncated if there isn't enough
-room; no overrun.  Largest gap: 43.  However, NetBSD has getifaddrs,
-which hides all the ugliness within the C library.
+NetBSD 1.5-alpha: The returned @code{ifc_len} is the desired amount of
+space, always.  The returned list may be truncated if there isn't
+enough room; no overrun.  Largest gap: 43.  However, NetBSD has
+@code{getifaddrs}, which hides all the ugliness within the C library.
 
-BSD/OS 4.0.1 (courtesy djm): The returned ifc_len is equal to or
-less than the supplied ifc_len.  Sometimes the entire buffer is
-used; sometimes N-1 bytes; occasionally, the buffer must have quite
-a bit of extra room before the next structure will be added.
-Largest gap: 39.
+BSD/OS 4.0.1 (courtesy djm): The returned @code{ifc_len} is equal to
+or less than the supplied @code{ifc_len}.  Sometimes the entire buffer
+is used; sometimes N-1 bytes; occasionally, the buffer must have quite
+a bit of extra room before the next structure will be added.  Largest
+gap: 39.
 
-Solaris 7,8: Return EINVAL if the buffer space is too small for all
-the data to be returned, including ifc_len==0.  Solaris is the only
-system I've found so far that actually returns an error.  No gap.
-However, SIOCGIFNUM may be used to query the number of interfaces.
+Solaris 7,8: Return @code{EINVAL} if the buffer space is too small for
+all the data to be returned, including when @code{ifc_len} is 0.
+Solaris is the only system I've found so far that actually returns an
+error.  No gap.  However, @code{SIOCGIFNUM} may be used to query the
+number of interfaces.
 
-Linux 2.2.12 (RH 6.1 dist, x86): The buffer is filled in with as
-many entries as will fit, and the size used is returned in ifc_len.
-The list is truncated if needed, with no indication.  Largest gap: 31.
+Linux 2.2.12 (Red Hat 6.1 distribution, x86), 2.4.9 (RH 7.1, x86): The
+buffer is filled in with as many entries as will fit, and the size
+used is returned in @code{ifc_len}.  The list is truncated if needed,
+with no indication.  Largest gap: 31.  @emph{However}, this interface
+does not return any IPv6 addresses.  They must be read from a file
+under @code{/proc}.  (This appears to be what the @samp{ifconfig}
+program does.)
 
-IRIX 6.5: The buffer is filled in with as many entries as will fit
-in N-1 bytes, and the size used is returned in ifc_len.  Providing
-exactly the desired number of bytes is inadequate; the buffer must
-be *bigger* than needed.  (E.g., 32->0, 33->32.)  The returned
-ifc_len is always less than the supplied one.  Largest gap: 32.
+IRIX 6.5: The buffer is filled in with as many entries as will fit in
+N-1 bytes, and the size used is returned in @code{ifc_len}.  Providing
+exactly the desired number of bytes is inadequate; the buffer must be
+@emph{bigger} than needed.  (E.g., 32->0, 33->32.)  The returned
+@code{ifc_len} is always less than the supplied one.  Largest gap: 32.
 
-AIX 4.3.3: Sometimes the returned ifc_len is bigger than the
-supplied one, but it may not be big enough for *all* the
-interfaces.  Sometimes it's smaller than the supplied value, even
-if the returned list is truncated.  The list is filled in with as
-many entries as will fit; no overrun.  Largest gap: 143.
+AIX 4.3.3: Sometimes the returned @code{ifc_len} is bigger than the
+supplied one, but it may not be big enough for @emph{all} the
+interfaces.  Sometimes it's smaller than the supplied value, even if
+the returned list is truncated.  The list is filled in with as many
+entries as will fit; no overrun.  Largest gap: 143.
 
-Older AIX: We're told by W. David Shambroom
-(DShambroom@@gte.com) in PR krb5-kdc/919 that older versions of
-AIX have a bug in the SIOCGIFCONF ioctl which can cause them to
-overrun the supplied buffer.  However, we don't yet have details as to
-which version, whether the overrun amount was bounded (e.g., one
-ifreq's worth) or not, whether it's a real buffer overrun or someone
-assuming it was because ifc_len was increased, etc.  Once we've got
-details, we can try to work around the problem.
+Older AIX: We're told by W. David Shambroom (DShambroom@@gte.com) in
+PR krb5-kdc/919 that older versions of AIX have a bug in the
+@code{SIOCGIFCONF} @code{ioctl} which can cause them to overrun the
+supplied buffer.  However, we don't yet have details as to which
+version, whether the overrun amount was bounded (e.g., one
+@code{ifreq}'s worth) or not, whether it's a real buffer overrun or
+someone assuming it was because @code{ifc_len} was increased, etc.
+Once we've got details, we can try to work around the problem.
 
-Digital UNIX 4.0F: If input ifc_len is zero, return an ifc_len that's
-big enough to include all entries.  (Actually, on our system, it
-appears to be larger than that by 32.)  If input ifc_len is nonzero,
-fill in as many entries as will fit, and set ifc_len accordingly.
-(Tested only with buffer previously filled with zeros.)
+Digital UNIX 4.0F: If input @code{ifc_len} is zero, return an
+@code{ifc_len} that's big enough to include all entries.  (Actually,
+on our system, it appears to be larger than that by 32.)  If input
+@code{ifc_len} is nonzero, fill in as many entries as will fit, and
+set @code{ifc_len} accordingly.  (Tested only with buffer previously
+filled with zeros.)
 
-So... if the returned ifc_len is bigger than the supplied one,
+Tru64 UNIX 5.1A: Like Digital UNIX 4.0F, except the ``extra'' space
+indicated when the input @code{ifc_len} is zero is larger.  (We got
+400 out when 320 appeared to be needed.)
+
+So... if the returned @code{ifc_len} is bigger than the supplied one,
 we'll need at least that much space -- but possibly more -- to hold
-all the results.  If the returned value is smaller or the same, we
-may still need more space.
+all the results.  If the returned value is smaller or the same, we may
+still need more space.
+
+The heuristic we're using on most systems now is to keep growing the
+buffer until the unused space is larger than an @code{ifreq} structure
+by some safe margin.
 
 @node Host Address Lookup, Thread Safety, Local Addresses, Top
 @chapter Host Address Lookup
@@ -194,8 +209,8 @@ addresses are already presented to us.)
 The @code{getaddrinfo} function takes a host name and service name and
 returns a linked list of structures indicating the address family,
 length, and actual data in ``sockaddr'' form.  (That is, it includes a
-pointer to a ``sockaddr_in'' or ``sockaddr_in6'' structure.)
-Depending on options set via the ``hints'' input argument, the results
+pointer to a @code{sockaddr_in} or @code{sockaddr_in6} structure.)
+Depending on options set via the @code{hints} input argument, the results
 can be limited to a single address family (@i{e.g.}, for IPv4
 applications), and the canonical name of the indicated host can be
 returned.  Either the host or service can be a null pointer, in which
@@ -218,6 +233,10 @@ another.
 
 @table @asis
 
+@item AIX
+As of AIX 4.3.3, @code{getaddrinfo} returns sockaddr structures
+without the family and length fields filled in.
+
 @item GNU libc
 The GNU C library, used on GNU/Linux systems, has had a few problems
 in this area.  One version would drop some IPv4 addresses for some
@@ -226,20 +245,25 @@ hosts that had multiple IPv4 and IPv6 addresses.
 In GNU libc 2.2.4, when the DNS is used, the name referred to by PTR
 records for each of the addresses is looked up and stored in the
 @code{ai_canonname} field, or the printed numeric form of the address
-is.  Returning the printable numeric form is completely wrong, and
-it's debatable whether doing the PTR lookup instead of just a CNAME
-lookup is correct.
-
-@item NetBSD
-As of NetBSD 1.5, this function is not thread-safe.
-
-@item AIX
-As of AIX 4.3.3, @code{getaddrinfo} returns sockaddr structures
-without the family and length fields filled in.
+is, both of which are wrong.
 
 @item IRIX
 No known bugs here, but as of IRIX 6.5, the version we're using at
 MIT, these functions had not been implemented.
+
+@item NetBSD
+As of NetBSD 1.5, this function is not thread-safe.
+
+@item Tru64 UNIX
+In Tru64 UNIX 5.0, @code{getaddrinfo} is available, but requires that
+@code{<netdb.h>} be included before its use; that header file defines
+@code{getaddrinfo} as a macro expanding to either @code{ogetaddrinfo}
+or @code{ngetaddrinfo}, and apparently the symbol @code{getaddrinfo}
+is not present in the system library, causing the @code{configure}
+test for it to fail.  Technically speaking, I [Ken] think Compaq has
+it wrong here, I think the symbol is supposed to be available even if
+the application uses @code{#undef}, but I have not confirmed it in the
+spec.
 
 @end table
 
@@ -260,6 +284,15 @@ this has not been a priority for us, since most modern systems have
 these functions anyways.  And if they don't, they probably don't have
 real IPv6 support either.
 
+Including @code{fake-addrinfo.h} will enable the wrapper or
+replacement versions when needed.  Depending on the system
+configuration, this header file may define several static functions
+(and declare them @code{inline} under GNU C), and leave it to the
+compiler to discard any unused code.  This may produce warnings on
+some systems, and if the compiler isn't being too clever, may cause
+several kilobytes of excess storage to be consumed on these backwards
+systems.
+
 @node Thread Safety, Shared Libraries, Host Address Lookup, Top
 @chapter Thread Safety
 
@@ -270,6 +303,17 @@ thread safe because it operates on a @code{krb5_context} and we simply
 assert that a context can be used only in one thread at a time.  But
 there are places where we use unsafe C library functions, and a few
 places where we have modifiable static data in the libraries.
+
+Even if the Kerberos or C library functions aren't using static data
+themselves, there are other instances of per-process data that have to
+be dealt with before our library can become thread-safe.  For example,
+file locking with UNIX @code{flock()} is on a per-process basis;
+for a single thread to be able to lock a file against accesses from
+other threads, we'll have to implement per-thread locks for files on
+top of the operating system per-process locks, and that means a global
+(per-process) table listing all the locks.  So it seems unlikely that
+we will find an approach that eliminates all static modifiable data
+from the library.
 
 A rough proposal for hooks for implementing locking was put forth, and
 an IBM Linux group is experimenting with a trial implementation of it,
