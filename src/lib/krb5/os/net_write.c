@@ -23,6 +23,7 @@
  */
 
 #define NEED_LOWLEVEL_IO
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 /*
@@ -44,9 +45,12 @@ krb5_net_write(context, fd, buf, len)
     int cc;
     register int wrlen = len;
     do {
-	cc = write(fd, buf, wrlen);
-	if (cc < 0)
+	cc = SOCKET_WRITE(fd, buf, wrlen);
+	if (cc < 0) {
+	    if (SOCKET_ERRNO == SOCKET_EINTR)
+		continue;
 	    return(cc);
+	}
 	else {
 	    buf += cc;
 	    wrlen -= cc;

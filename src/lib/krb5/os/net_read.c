@@ -23,6 +23,7 @@
  */
 
 #define NEED_LOWLEVEL_IO
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 /*
@@ -45,9 +46,12 @@ krb5_net_read(context, fd, buf, len)
     int cc, len2 = 0;
 
     do {
-	cc = read(fd, buf, len);
-	if (cc < 0)
+	cc = SOCKET_READ(fd, buf, len);
+	if (cc < 0) {
+	    if (SOCKET_ERRNO == SOCKET_EINTR)
+		continue;
 	    return(cc);		 /* errno is already set */
+	}		
 	else if (cc == 0) {
 	    return(len2);
 	} else {
