@@ -224,7 +224,8 @@ try_new_version:
       * the beta 7 server it will be accepted.  Not ideal, but it
       * works.
       */
-     if (call_arg.version < 4 && mech_type == gss_mech_krb5)
+     if (call_arg.version < 4 && (mech_type == gss_mech_krb5 ||
+				  mech_type == GSS_C_NULL_OID))
 	  mech_type = gss_mech_krb5_old;
 #endif
 

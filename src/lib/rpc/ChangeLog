@@ -1,3 +1,10 @@
+Tue Oct 29 13:03:50 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* auth_gssapi.c (auth_gssapi_create): #ifdef GSSAPI_KRB5, a null
+ 	mech_type implies gss_mech_krb5, so include that in the version 3
+ 	fallback test.  This change, along with the other changes for rpc
+ 	version 4, complete the fix for [krb5-libs/106].
+
 Wed Oct 23 00:08:27 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* pmap_rmt.c:
