@@ -1,3 +1,19 @@
+Sat Aug 15 00:01:15 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krcp.c (error): Don't call rcmd_stream_write if iamremote is not
+ 	set, because it expects a valid file descriptor [krb5-appl/359].
+  	Also, remove mistakenly duplicated comment above the function.
+
+Mon Jul 27 00:06:20 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krlogin.c (main): Apply ghudson's patch so that rlogin -a
+	no longer dumps core. [krb5-appl/612]
+
+Sat May 16 16:07:42 1998  Tom Yu  <tlyu@mit.edu>
+
+	* login.c: Replace strcpy with strncpy in places.  Add nul
+	termination to some existing invocations of strncpy.
+
 Tue Jan 20 21:42:06 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (protocol): Declare pibuf and fibuf as being BUFSIZ
