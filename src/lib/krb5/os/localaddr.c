@@ -837,37 +837,20 @@ punt:
 
 #define SLOP (sizeof (struct ifreq) + 128)
 
-int
-foreach_localaddr (/*@null@*/ void *data,
-		   int (*pass1fn) (/*@null@*/ void *, struct sockaddr *) /*@*/,
-		   /*@null@*/ int (*betweenfn) (/*@null@*/ void *) /*@*/,
-		   /*@null@*/ int (*pass2fn) (/*@null@*/ void *,
-					      struct sockaddr *) /*@*/)
-#if defined(DEBUG) || defined(TEST)
-     /*@modifies fileSystem@*/
-#endif
+static int
+get_ifreq_array(char **bufp, size_t *np, int s)
 {
-    struct ifreq *ifr, ifreq, *ifr2;
-    int s, code;
+    int code;
     int est_if_count = 8;
     size_t est_ifreq_size;
     char *buf = 0;
-    size_t current_buf_size = 0, size, n, i, j;
+    size_t current_buf_size = 0, size, n;
 #ifdef SIOCGSIZIFCONF
     int ifconfsize = -1;
 #endif
-    int retval = 0;
 #ifdef SIOCGIFNUM
     int numifs = -1;
 #endif
-#ifdef LINUX_IPV6_HACK
-    struct linux_ipv6_addr_list *linux_ipv6_addrs = get_linux_ipv6_addrs ();
-    struct linux_ipv6_addr_list *lx_v6;
-#endif
-
-    s = socket (USE_AF, USE_TYPE, USE_PROTO);
-    if (s < 0)
-	return SOCKET_ERRNO;
 
     /* At least on NetBSD, an ifreq can hold an IPv4 address, but
        isn't big enough for an IPv6 or ethernet address.  So add a
@@ -890,16 +873,13 @@ foreach_localaddr (/*@null@*/ void *data,
     if (buf == NULL)
 	return errno;
 
- ask_again:
+ask_again:
     size = current_buf_size;
     code = get_ifconf (s, &size, buf);
     if (code < 0) {
-	retval = errno;
-	/*@-moduncon@*/ /* close() unknown to lclint */
-	closesocket (s);
-	/*@=moduncon@*/
+	code = errno;
 	free (buf);
-	return retval;
+	return code;
     }
     /* Test that the buffer was big enough that another ifreq could've
        fit easily, if the OS wanted to provide one.  That seems to be
@@ -931,6 +911,43 @@ foreach_localaddr (/*@null@*/ void *data,
     n = size;
     if (n > current_buf_size)
 	n = current_buf_size;
+
+    *bufp = buf;
+    *np = n;
+    return errno;
+}
+
+int
+foreach_localaddr (/*@null@*/ void *data,
+		   int (*pass1fn) (/*@null@*/ void *, struct sockaddr *) /*@*/,
+		   /*@null@*/ int (*betweenfn) (/*@null@*/ void *) /*@*/,
+		   /*@null@*/ int (*pass2fn) (/*@null@*/ void *,
+					      struct sockaddr *) /*@*/)
+#if defined(DEBUG) || defined(TEST)
+     /*@modifies fileSystem@*/
+#endif
+{
+    struct ifreq *ifr, ifreq, *ifr2;
+    int s, code;
+    char *buf = 0;
+    size_t size, n, i, j;
+    int retval = 0;
+#ifdef LINUX_IPV6_HACK
+    struct linux_ipv6_addr_list *linux_ipv6_addrs = get_linux_ipv6_addrs ();
+    struct linux_ipv6_addr_list *lx_v6;
+#endif
+
+    s = socket (USE_AF, USE_TYPE, USE_PROTO);
+    if (s < 0)
+	return SOCKET_ERRNO;
+
+    retval = get_ifreq_array(&buf, &n, s);
+    if (retval) {
+	/*@-moduncon@*/ /* close() unknown to lclint */
+	closesocket(s);
+	/*@=moduncon@*/
+	return retval;
+    }
 
     /* Note: Apparently some systems put the size (used or wanted?)
        into the start of the buffer, just none that I'm actually

@@ -1,3 +1,9 @@
+2004-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (get_ifreq_array): Split out from foreach_localaddr
+	general version.
+	(foreach_localaddr): Call it.
+
 2004-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (foreach_localaddr) [HAVE_STRUCT_IF_LADDRCONF && 0]:
