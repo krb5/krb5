@@ -91,6 +91,9 @@ extern gss_ctx_id_t gcontext;
 #ifdef _AIX
 #define unix
 #endif
+#ifdef __hpux
+#define unix
+#endif
 #endif
 
 #ifndef NBBY

@@ -1,3 +1,7 @@
+Thu Mar 28 21:07:20 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* ftpcmd.y: Define unix for HP-UX.
+
 Mon Mar 18 12:12:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add AC_HEADER_STDARG
@@ -14,6 +18,11 @@ Fri Mar 15 14:16:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 Fri Mar 15 01:24:39 1996  Richard Basch  <basch@lehman.com>
 
         * configure.in, ftpd.c: Added shadow password support.
+
+Wed Mar 13 20:05:52 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (auth_data): use gethostbyname to canonicalize local host
+	name, just like krb5_sname_to_principal does.
 
 Fri Feb 16 15:51:59 1996  Mark Eichin  <eichin@cygnus.com>
 
