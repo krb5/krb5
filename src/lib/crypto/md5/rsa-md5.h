@@ -59,7 +59,8 @@ extern void krb5_MD5Final();
 #endif
 
 #define	RSA_MD5_CKSUM_LENGTH		16
-#define	RSA_MD5_DES_CKSUM_LENGTH	16
+#define	OLD_RSA_MD5_DES_CKSUM_LENGTH	16
+#define	NEW_RSA_MD5_DES_CKSUM_LENGTH	24
 #define	RSA_MD5_DES_CONFOUND_LENGTH	8
 
 extern krb5_checksum_entry
