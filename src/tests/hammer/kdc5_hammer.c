@@ -52,15 +52,6 @@ static int brief;
 static char *cur_realm = 0;
 static int do_timer = 0;
 
-krb5_error_code
-krb5_parse_lifetime (time, len)
-    char *time;
-    long *len;
-{
-    *len = atoi (time) * 60 * 60; /* XXX stub version */
-    return 0;
-}
-    
 krb5_data tgtname = {
     0, 
     KRB5_TGS_NAME_SIZE,
@@ -98,7 +89,6 @@ int status;
 
 static krb5_preauthtype * patype = NULL, patypedata[2] = { 0, -1 };
 static krb5_context test_context;
-static krb5_enctype enctype;
 
 struct timeval	tstart_time, tend_time;
 struct timezone	dontcare;
@@ -132,6 +122,7 @@ main(argc, argv)
     char ctmp[4096], ctmp2[BUFSIZ], stmp[4096], stmp2[BUFSIZ];
     krb5_principal client_princ;
     krb5_error_code retval;
+    krb5_enctype enctype;
 
     krb5_init_context(&test_context);
 

@@ -1,3 +1,9 @@
+2000-07-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc5_hammer.c: Move global (to file) enctype into main to prevent
+	being shadowed in other routines. Remove unused krb5_parse_lifetime().
+
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kdc5_hammer.c (main): Make sure buffer 'prefix' is null-terminated.
