@@ -99,7 +99,7 @@ xdr_int(xdrs, ip)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-		if (*ip > 0x7fffffffL)
+		if (*ip > 0x7fffffffL || *ip < -0x7fffffffL - 1L)
 			return (FALSE);
 
 		l = (long) *ip;
@@ -109,7 +109,7 @@ xdr_int(xdrs, ip)
 		if (!XDR_GETLONG(xdrs, &l))
 			return (FALSE);
 
-		if ((u_long)l > UINT_MAX || l < INT_MIN)
+		if (l > INT_MAX || l < INT_MIN)
 			return (FALSE);
 
 		*ip = (int) l;
@@ -168,7 +168,7 @@ xdr_long(xdrs, lp)
 
 	switch (xdrs->x_op) {
 	case XDR_ENCODE:
-		if (*lp > 0x7fffffffL)
+		if (*lp > 0x7fffffffL || *lp < -0x7fffffffL - 1L)
 			return (FALSE);
 
 		return (XDR_PUTLONG(xdrs, lp));
@@ -227,6 +227,9 @@ xdr_short(xdrs, sp)
 		if (!XDR_GETLONG(xdrs, &l)) {
 			return (FALSE);
 		}
+		if (l > SHRT_MAX || l < SHRT_MIN)
+			return (FALSE);
+
 		*sp = (short) l;
 		return (TRUE);
 

@@ -223,25 +223,25 @@ struct xdr_discrim {
  * N.B. and frozen for all time: each data type here uses 4 bytes
  * of external representation.
  */
-#define IXDR_GET_INT32(buf)		((int32_t)ntohl((uint32_t)*(buf)++))
-#define IXDR_PUT_INT32(buf, v)		(*(buf)++ = (int32_t)htonl((uint32_t)(v)))
-#define IXDR_GET_U_INT32(buf)		((uint32_t)IXDR_GET_INT32(buf))
-#define IXDR_PUT_U_INT32(buf, v)	IXDR_PUT_INT32(buf, (int32_t)(v))
+#define IXDR_GET_INT32(buf)		((int32_t)IXDR_GET_U_INT32(buf))
+#define IXDR_PUT_INT32(buf, v)		IXDR_PUT_U_INT32((buf),((uint32_t)(v)))
+#define IXDR_GET_U_INT32(buf)		(ntohl((uint32_t)*(buf)++))
+#define IXDR_PUT_U_INT32(buf, v)	(*(buf)++ = (int32_t)htonl((v)))
 
-#define IXDR_GET_LONG(buf)		((long)ntohl((uint32_t)*(buf)++))
-#define IXDR_PUT_LONG(buf, v)		(*(buf)++ = (int32_t)htonl((uint32_t)(v)))
+#define IXDR_GET_LONG(buf)		((long)IXDR_GET_INT32(buf))
+#define IXDR_PUT_LONG(buf, v)		IXDR_PUT_U_INT32((buf),((uint32_t)(v)))
 
 #define IXDR_GET_BOOL(buf)		((bool_t)IXDR_GET_LONG(buf))
-#define IXDR_GET_ENUM(buf, t)		((t)IXDR_GET_LONG(buf))
-#define IXDR_GET_U_LONG(buf)		((u_long)IXDR_GET_LONG(buf))
-#define IXDR_GET_SHORT(buf)		((short)IXDR_GET_LONG(buf))
-#define IXDR_GET_U_SHORT(buf)		((u_short)IXDR_GET_LONG(buf))
+#define IXDR_GET_ENUM(buf, t)		((t)IXDR_GET_INT32(buf))
+#define IXDR_GET_U_LONG(buf)		((u_long)IXDR_GET_U_INT32(buf))
+#define IXDR_GET_SHORT(buf)		((short)IXDR_GET_INT32(buf))
+#define IXDR_GET_U_SHORT(buf)		((u_short)IXDR_GET_U_INT32(buf))
 
-#define IXDR_PUT_BOOL(buf, v)		IXDR_PUT_LONG((buf), ((long)(v)))
-#define IXDR_PUT_ENUM(buf, v)		IXDR_PUT_LONG((buf), ((long)(v)))
-#define IXDR_PUT_U_LONG(buf, v)		IXDR_PUT_LONG((buf), ((long)(v)))
-#define IXDR_PUT_SHORT(buf, v)		IXDR_PUT_LONG((buf), ((long)(v)))
-#define IXDR_PUT_U_SHORT(buf, v)	IXDR_PUT_LONG((buf), ((long)(v)))
+#define IXDR_PUT_BOOL(buf, v)		IXDR_PUT_INT32((buf),((int32_t)(v)))
+#define IXDR_PUT_ENUM(buf, v)		IXDR_PUT_INT32((buf),((int32_t)(v)))
+#define IXDR_PUT_U_LONG(buf, v)		IXDR_PUT_U_INT32((buf),((uint32_t)(v)))
+#define IXDR_PUT_SHORT(buf, v)		IXDR_PUT_INT32((buf),((int32_t)(v)))
+#define IXDR_PUT_U_SHORT(buf, v)	IXDR_PUT_U_INT32((buf),((uint32_t)(v)))
 
 /*
  * These are the "generic" xdr routines.
@@ -270,6 +270,12 @@ extern bool_t	xdr_double(XDR *, double *);
 extern bool_t	xdr_reference(XDR *, caddr_t *, u_int, xdrproc_t);
 extern bool_t	xdr_pointer(XDR *, char **, u_int, xdrproc_t);
 extern bool_t	xdr_wrapstring(XDR *, char **);
+
+#define xdr_rpcprog	xdr_u_int32
+#define xdr_rpcvers	xdr_u_int32
+#define xdr_rpcprot	xdr_u_int32
+#define xdr_rpcproc	xdr_u_int32
+#define xdr_rpcport	xdr_u_int32
 
 /*
  * Common opaque bytes objects used by many rpc protocols;

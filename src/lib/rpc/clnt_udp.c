@@ -188,10 +188,10 @@ clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 	} else {
 		cu->cu_closeit = FALSE;
 	}
-	if (connect(*sockp, raddr, sizeof(*raddr)) < 0)
+	if (connect(*sockp, (struct sockaddr *)raddr, sizeof(*raddr)) < 0)
 	     goto fooy;
 	     cu->cu_llen = sizeof(cu->cu_laddr);
-	if (getsockname(*sockp, &cu->cu_laddr, &cu->cu_llen) < 0)
+	if (getsockname(*sockp, (struct sockaddr *)&cu->cu_laddr, &cu->cu_llen) < 0)
 	     goto fooy;
 	
 	cu->cu_sock = *sockp;
@@ -272,7 +272,7 @@ call_again:
 	outlen = (int)XDR_GETPOS(xdrs);
 
 send_again:
-	if (send(cu->cu_sock, cu->cu_outbuf, outlen, 0) != outlen) {
+	if (send(cu->cu_sock, cu->cu_outbuf, (u_int)outlen, 0) != outlen) {
 		cu->cu_error.re_errno = errno;
 		return (cu->cu_error.re_status = RPC_CANTSEND);
 	}
@@ -329,7 +329,7 @@ send_again:
 		do {
 			fromlen = sizeof(struct sockaddr);
 			inlen = recvfrom(cu->cu_sock, cu->cu_inbuf, 
-				(int) cu->cu_recvsz, 0,
+				cu->cu_recvsz, 0,
 				(struct sockaddr *)&from, &fromlen);
 		} while (inlen < 0 && errno == EINTR);
 		if (inlen < 0) {

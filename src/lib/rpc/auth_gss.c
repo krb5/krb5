@@ -140,7 +140,7 @@ print_rpc_gss_sec(struct rpc_gss_sec *ptr)
 #define g_OID_equal(o1,o2) \
    (((o1)->length == (o2)->length) && \
     ((o1)->elements != 0) && ((o2)->elements != 0) && \
-    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
+    (memcmp((o1)->elements, (o2)->elements, (o1)->length) == 0))
 
 extern const gss_OID_desc * const gss_mech_krb5;
 #ifdef SPKM
@@ -166,7 +166,7 @@ struct rpc_gss_data {
 	struct rpc_gss_sec	 sec;		/* security tuple */
 	gss_ctx_id_t		 ctx;		/* context id */
 	struct rpc_gss_cred	 gc;		/* client credentials */
-	u_int			 win;		/* sequence window */
+	uint32_t		 win;		/* sequence window */
 };
 
 #define	AUTH_PRIVATE(auth)	((struct rpc_gss_data *)auth->ah_private)
@@ -297,7 +297,7 @@ authgss_marshal(AUTH *auth, XDR *xdrs)
 	/* Checksum serialized RPC header, up to and including credential. */
 	rpcbuf.length = XDR_GETPOS(xdrs);
 	XDR_SETPOS(xdrs, 0);
-	rpcbuf.value = XDR_INLINE(xdrs, rpcbuf.length);
+	rpcbuf.value = XDR_INLINE(xdrs, (int)rpcbuf.length);
 	
 	maj_stat = gss_get_mic(&min_stat, gd->ctx, gd->sec.qop,
 			    &rpcbuf, &checksum);
@@ -324,7 +324,8 @@ static bool_t
 authgss_validate(AUTH *auth, struct opaque_auth *verf)
 {
 	struct rpc_gss_data	*gd;
-	u_int			 num, qop_state;
+	uint32_t		 num;
+	gss_qop_t		 qop_state;
 	gss_buffer_desc		 signbuf, checksum;
 	OM_uint32		 maj_stat, min_stat;
 
@@ -466,7 +467,8 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 		if (maj_stat == GSS_S_COMPLETE) {
 			gss_buffer_desc   bufin;
 			gss_buffer_desc   bufout;
-			u_int seq, qop_state = 0;
+			uint32_t seq;
+			gss_qop_t qop_state = 0;
 
 			seq = htonl(gr.gr_win);
 			bufin.value = (u_char *)&seq;

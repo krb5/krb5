@@ -58,7 +58,7 @@ xdr_rpc_gss_buf(XDR *xdrs, gss_buffer_t buf, u_int maxsize)
 		else
 			tmplen = buf->length;
 	}
-	xdr_stat = xdr_bytes(xdrs, &buf->value, &tmplen, maxsize);
+	xdr_stat = xdr_bytes(xdrs, (char **)&buf->value, &tmplen, maxsize);
 
 	if (xdr_stat && xdrs->x_op == XDR_DECODE)
 		buf->length = tmplen;
@@ -131,23 +131,28 @@ xdr_rpc_gss_wrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 {
 	gss_buffer_desc	databuf, wrapbuf;
 	OM_uint32	maj_stat, min_stat;
-	int		start, end, conf_state;
+	u_int		start, end;
+	int		conf_state;
 	bool_t		xdr_stat;
 	u_int		tmplen;
 
 	/* Skip databody length. */
 	start = XDR_GETPOS(xdrs);
+	if (start > UINT_MAX - 4)
+		return (FALSE);
 	XDR_SETPOS(xdrs, start + 4);
 	
 	/* Marshal rpc_gss_data_t (sequence number + arguments). */
 	if (!xdr_u_int32(xdrs, &seq) || !(*xdr_func)(xdrs, xdr_ptr))
 		return (FALSE);
 	end = XDR_GETPOS(xdrs);
+	if (end < start + 4)
+		return (FALSE);
 
 	/* Set databuf to marshalled rpc_gss_data_t. */
 	databuf.length = end - start - 4;
 	XDR_SETPOS(xdrs, start + 4);
-	databuf.value = XDR_INLINE(xdrs, databuf.length);
+	databuf.value = XDR_INLINE(xdrs, (int)databuf.length);
 
 	xdr_stat = FALSE;
 	
@@ -198,7 +203,9 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 	XDR		tmpxdrs;
 	gss_buffer_desc	databuf, wrapbuf;
 	OM_uint32	maj_stat, min_stat;
-	u_int		seq_num, conf_state, qop_state;
+	uint32_t	seq_num;
+	int		conf_state;
+	gss_qop_t	qop_state;
 	bool_t		xdr_stat;
 
 	if (xdr_func == xdr_void || xdr_ptr == NULL)

@@ -168,6 +168,9 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      auth = NULL;
      pdata = NULL;
      
+     /* don't assume the caller will want to change clnt->cl_auth */
+     save_auth = clnt->cl_auth;
+
      auth = (AUTH *) malloc(sizeof(*auth));
      pdata = (struct auth_gssapi_data *) malloc(sizeof(*pdata));
      if (auth == NULL || pdata == NULL) {
@@ -194,8 +197,6 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      AUTH_PRIVATE(auth)->def_cred = (claimant_cred_handle ==
 				     GSS_C_NO_CREDENTIAL);
      
-     /* don't assume the caller will want to change clnt->cl_auth */
-     save_auth = clnt->cl_auth;
      clnt->cl_auth = auth;
 
      /* start by trying latest version */

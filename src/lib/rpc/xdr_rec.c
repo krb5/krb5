@@ -213,7 +213,7 @@ xdrrec_getlong(xdrs, lp)
 		if (! xdrrec_getbytes(xdrs, (caddr_t)&mylong,
 				      BYTES_PER_XDR_UNIT))
 			return (FALSE);
-		*lp = (long)ntohl(mylong);
+		*lp = (long)(int32_t)ntohl(mylong);
 	}
 	return (TRUE);
 }
@@ -226,18 +226,17 @@ xdrrec_putlong(xdrs, lp)
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	register int32_t *dest_lp = ((int32_t *)(void *)(rstrm->out_finger));
 
-	if ((rstrm->out_finger += BYTES_PER_XDR_UNIT) > rstrm->out_boundry) {
+	if (rstrm->out_boundry - rstrm->out_finger < BYTES_PER_XDR_UNIT) {
 		/*
 		 * this case should almost never happen so the code is
 		 * inefficient
 		 */
-		rstrm->out_finger -= BYTES_PER_XDR_UNIT;
 		rstrm->frag_sent = TRUE;
 		if (! flush_out(rstrm, FALSE))
 			return (FALSE);
 		dest_lp = ((int32_t *)(void *)(rstrm->out_finger));
-		rstrm->out_finger += BYTES_PER_XDR_UNIT;
 	}
+	rstrm->out_finger += BYTES_PER_XDR_UNIT;
 	*dest_lp = (int32_t)htonl((uint32_t)(*lp));
 	return (TRUE);
 }
@@ -369,10 +368,13 @@ xdrrec_inline(xdrs, len)
 	register RECSTREAM *rstrm = (RECSTREAM *)xdrs->x_private;
 	rpc_inline_t * buf = NULL;
 
+	if (len < 0)
+		return (FALSE);
+
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-		if ((rstrm->out_finger + len) <= rstrm->out_boundry) {
+		if (len <= (rstrm->out_boundry - rstrm->out_finger)) {
 			buf = (rpc_inline_t *)(void *) rstrm->out_finger;
 			rstrm->out_finger += len;
 		}
@@ -380,7 +382,7 @@ xdrrec_inline(xdrs, len)
 
 	case XDR_DECODE:
 		if ((len <= rstrm->fbtbc) &&
-			((rstrm->in_finger + len) <= rstrm->in_boundry)) {
+			(len <= (rstrm->in_boundry - rstrm->in_finger))) {
 			buf = (rpc_inline_t *)(void *) rstrm->in_finger;
 			rstrm->fbtbc -= len;
 			rstrm->in_finger += len;
@@ -557,7 +559,7 @@ set_input_fragment(rstrm)
 
 	if (! get_input_bytes(rstrm, (caddr_t)&header, sizeof(header)))
 		return (FALSE);
-	header = (int)ntohl(header);
+	header = ntohl(header);
 	rstrm->last_frag = ((header & LAST_FRAG) == 0) ? FALSE : TRUE;
 	rstrm->fbtbc = header & (~LAST_FRAG);
 	return (TRUE);

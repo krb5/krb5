@@ -104,7 +104,7 @@ xdrmem_getlong(xdrs, lp)
 		return (FALSE);
 	else
 		xdrs->x_handy -= BYTES_PER_XDR_UNIT;
-	*lp = (long)ntohl(*((uint32_t *)(xdrs->x_private)));
+	*lp = (long)(int32_t)ntohl(*((uint32_t *)(xdrs->x_private)));
 	xdrs->x_private = (char *)xdrs->x_private + BYTES_PER_XDR_UNIT;
 	return (TRUE);
 }

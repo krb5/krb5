@@ -1,3 +1,47 @@
+2004-06-28  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gss.c (g_OID_equal): Fix signedness.
+	(rpc_gss_data): Fix width of WIN.
+	(authgss_validate): Fix width of NUM and QOP_STATE.
+	(authgss_refresh): Fix width of SEQ and QOP_STATE.
+
+	* auth_gssapi.c (auth_gssapi_create): Save clnt->cl_auth early
+	enough to avoid unref use.
+
+	* authgss_prot.c (xdr_rpc_gss_buf): Cast (void **) to (char **)
+	in call to xdr_bytes.
+	(xdr_rpc_gss_wrap_data): Fix signedness.
+	(xdr_rpc_gss_unwrap_data): Fix signedness.  Fix width of SEQ_NUM.
+
+	* clnt_udp.c (clntudp_bufcreate, clntudp_call, clntudp_call):
+	Fix up some argument casting for socket calls.
+
+	* pmap_prot.c (xdr_pmap): Use appropriate xdr macros for the
+	typedefs instead of xdr_u_int32.
+
+	* rpc_prot.c (xdr_accepted_reply, xdr_rejected_reply)
+	(xdr_callhdr): Use appropriate xdr macros for the typedefs instead
+	of xdr_u_int32.
+
+	* svc_auth_unix.c (gssrpc__svcauth_unix): Fix signedness on call
+	to XDR_INLINE.
+
+	* xdr.c (xdr_int, xdr_long, xdr_short): Improve value checks.
+
+	* xdr.h: Make the IXDR macros more paranoid about signedness.  Add
+	macros for xdr_rpcprog, xdr_rpcvers, xdr_rpcprot, xdr_rpcproc,
+	xdr_rpcport.
+
+	* xdr_mem.c (xdrmem_getlong): Cast return value of ntohl to
+	int32_t prior to casting it to long.
+
+	* xdr_rec.c (xdrrec_getlong): Cast return value of ntohl to
+	int32_t prior to casting it to long.
+	(xdrrec_putlong): Make arithmetic more paranoid.
+	(xdrrec_inline): Signedness fixes.  Arithmetic paranoia.
+	(set_input_fragment): Don't cast return value of ntohl which is
+	being assigned to uint32_t.
+
 2004-06-25  Tom Yu  <tlyu@mit.edu>
 
 	* types.hin: Delete rpc_int32, rpc_u_int32 aliases.
