@@ -158,10 +158,10 @@ krb5_checksum FAR *outcksum;
     register u_char *data;
     register u_long c = 0;
     register int idx;
-    int i;
+    size_t i;
 
     data = (u_char *)in;
-    for (i=0; i < (int) in_length;i++) {
+    for (i = 0; i < in_length; i++) {
 	idx = (int) (data[i] ^ c);
 	idx &= 0xff;
 	c >>= 8;
@@ -185,15 +185,3 @@ krb5_checksum_entry crc32_cksumtable_entry = {
     0,					/* not collision proof */
     0,					/* doesn't use key */
 };
-
-#if defined(_WINDOWS)
-/*
-** Windows can't pull in data from a DLL library. So we must provide a
-** method to do so. If the crypto library is merged in with the other
-** libraries, and this never gets called by an end-user, then we
-** can get rid of this.
-*/
-krb5_checksum_entry * INTERFACE load_crc32_cksumtable_entry (void) {
-    return &crc32_cksumtable_entry;
-}
-#endif

@@ -79,21 +79,21 @@ mit_des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 				ip += (int) length;
 				switch(length) {
 				case 8:
-					right ^= *(--ip) & 0xff;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff));
 				case 7:
-					right ^= (*(--ip) & 0xff) << 8;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
 				case 6:
-					right ^= (*(--ip) & 0xff) << 16;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
 				case 5:
-					right ^= (*(--ip) & 0xff) << 24;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
 				case 4:
-					left ^= *(--ip) & 0xff;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff));
 				case 3:
-					left ^= (*(--ip) & 0xff) << 8;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
 				case 2:
-					left ^= (*(--ip) & 0xff) << 16;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
 				case 1:
-					left ^= (*(--ip) & 0xff) << 24;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
 					break;
 				}
 				length = 0;
@@ -178,21 +178,21 @@ mit_des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 				op += (int) length;
 				switch(length) {
 				case 8:
-					*(--op) = right & 0xff;
+					*(--op) = (unsigned char) (right & 0xff);
 				case 7:
-					*(--op) = (right >> 8) & 0xff;
+					*(--op) = (unsigned char) ((right >> 8) & 0xff);
 				case 6:
-					*(--op) = (right >> 16) & 0xff;
+					*(--op) = (unsigned char) ((right >> 16) & 0xff);
 				case 5:
-					*(--op) = (right >> 24) & 0xff;
+					*(--op) = (unsigned char) ((right >> 24) & 0xff);
 				case 4:
-					*(--op) = left & 0xff;
+					*(--op) = (unsigned char) (left & 0xff);
 				case 3:
-					*(--op) = (left >> 8) & 0xff;
+					*(--op) = (unsigned char) ((left >> 8) & 0xff);
 				case 2:
-					*(--op) = (left >> 16) & 0xff;
+					*(--op) = (unsigned char) ((left >> 16) & 0xff);
 				case 1:
-					*(--op) = (left >> 24) & 0xff;
+					*(--op) = (unsigned char) ((left >> 24) & 0xff);
 					break;
 				}
 				break;		/* we're done */

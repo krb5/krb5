@@ -1,3 +1,8 @@
+Tue Mar 14 17:24:57 1995 Keith Vetter (keithv@fusion.com)
+
+	* md5crypto.c: removed method for DLL data since everything's
+           going into one DLL.
+
 Fri Mar 3 19:01:59 1995 Keith Vetter (keithv@fusion.com)
 
 	* md5crypto.c: added a method to pull in a data structure 

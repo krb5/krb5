@@ -61,15 +61,3 @@ krb5_checksum_entry rsa_md5_des_cksumtable_entry = {
     1,					/* is collision proof */
     1,					/* uses key */
 };
-
-#if defined(_WINDOWS)
-/*
-** Windows can't pull in data from a DLL library. So we must provide a
-** method to do so. If the crypto library is merged in with the other
-** libraries, and this never gets called by an end-user, then we
-** can get rid of this.
-*/
-krb5_checksum_entry * INTERFACE load_rsa_md5_des_cksumtable_entry (void) {
-    return &rsa_md5_des_cksumtable_entry;
-}
-#endif

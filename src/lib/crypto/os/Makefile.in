@@ -9,13 +9,13 @@ LIBOBJS = @LIBOBJS@
 
 OBJS=	rnd_confoun.$(OBJEXT) localaddr.$(OBJEXT) ustime.$(OBJEXT) $(LIBOBJS)
 
-SRCS=	rnd_confoun.c localaddr.c ustime.c 
+SRCS=	rnd_confoun.c
 
 all:: all-$(WHAT)
 
 all-unix:: $(OBJS)
 
-all-windows: rnd_confoun.obj localaddr.obj ustime.obj
+all-windows: rnd_confoun.obj
 
 localaddr.c: ..$(S)..$(S)krb5$(S)os$(S)localaddr.c
 	-$(LN) $(srcdir)$(S)..$(S)..$(S)krb5$(S)os$(S)localaddr.c $@

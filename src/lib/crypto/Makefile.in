@@ -22,18 +22,7 @@ all:: all-$(WHAT)
 
 all-unix::
 
-all-windows:: $(OBJS) win_glue.obj
-
-win_glue.obj:: win_glue.c
-	$(CC) $(CFLAGS) /c $*.c
-
-libcrypto.lib:: libcrypto.dll
-	implib /nologo $@ $(@R).dll
-	
-libcrypto.dll:: $(LIBNAME) libcrypto.def
-	link /co /noe /nologo win_glue,libcrypto.dll,nul,\
-		crypto.lib winsock ldllcew libw,libcrypto.def
-	rc /p /k $@
+all-windows:: $(OBJS)
 
 libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
 	(cd des; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
@@ -44,14 +33,17 @@ libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
+libcrypto.lib:
+	libdir crypto.lib
+
 install:: libcrypto.a
 	$(INSTALL_DATA) libcrypto.a $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 
 clean:: clean-$(WHAT)
-	$(RM) libcrypto.$(LIBEXT) libcrypto.dll libcrypto.bak 
 
 clean-unix::
+	$(RM) libcrypto.a
 
 clean-windows::
 	$(RM) crypto.lib crypto.bak
@@ -114,6 +106,3 @@ check-windows::
 	@echo Making check in ..\os
 	-$(MAKE) -$(MFLAGS) check
 	cd ..
-
-all-windows:: libcrypto.lib
-

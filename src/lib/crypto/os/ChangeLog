@@ -1,3 +1,8 @@
+Tue Mar 14 17:23:02 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: no longer need to bring in ustime and localaddr for
+	   windows since everything's going into one DLL in the end.
+
 Thu Mar 2 17:56:48 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed LIBNAME for the PC, and  brought in ustime

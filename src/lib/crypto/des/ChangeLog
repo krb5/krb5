@@ -1,3 +1,8 @@
+Tue Mar 14 17:28:35 1995 Keith Vetter (keithv@fusion.com)
+
+	* f_cbc.c, f_cksum.c, f_pcbc.c: added casts so that chars get promoted
+           to longs instead of ints when doing 32 bit bit manipulations.
+
 Thu Mar 2 17:50:39 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed LIBNAME for the PC.

@@ -1,3 +1,8 @@
+Tue Mar 14 17:20:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* crc.c: removed method for pulling in a data structure (windows),
+           and turned an int into a size_t for corrected 'signed'ness.
+
 Fri Mar 3 19:01:59 1995 Keith Vetter (keithv@fusion.com)
 
 	* crc.c: added a method to pull in a data structure 

@@ -80,14 +80,14 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 			 * forward.  Otherwise we have to fart around.
 			 */
 			if (length >= 8) {
-				left ^= ((*ip++) & 0xff) << 24;
-				left ^= ((*ip++) & 0xff) << 16;
-				left ^= ((*ip++) & 0xff) << 8;
-				left ^= (*ip++) & 0xff;
-				right ^= ((*ip++) & 0xff) << 24;
-				right ^= ((*ip++) & 0xff) << 16;
-				right ^= ((*ip++) & 0xff) << 8;
-				right ^= (*ip++) & 0xff;
+				left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 24;
+				left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 16;
+				left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 8;
+				left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff));
+				right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 24;
+				right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 16;
+				right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 8;
+				right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff));
 				length -= 8;
 			} else {
 				/*
@@ -98,19 +98,19 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 				ip += (int) length;
 				switch(length) {
 				case 7:
-					right ^= (*(--ip) & 0xff) << 8;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
 				case 6:
-					right ^= (*(--ip) & 0xff) << 16;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
 				case 5:
-					right ^= (*(--ip) & 0xff) << 24;
+					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
 				case 4:
-					left ^= *(--ip) & 0xff;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff));
 				case 3:
-					left ^= (*(--ip) & 0xff) << 8;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
 				case 2:
-					left ^= (*(--ip) & 0xff) << 16;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
 				case 1:
-					left ^= (*(--ip) & 0xff) << 24;
+					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
 					break;
 				}
 				length = 0;
