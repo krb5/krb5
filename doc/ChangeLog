@@ -1,3 +1,8 @@
+Mon Oct 30 16:58:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* install.texi: Fix all path names, spelling check, convert tabs
+		to spaces. 
+
 Fri Oct 20 14:06:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* install.texi (Shared Library Support): Document shared library
