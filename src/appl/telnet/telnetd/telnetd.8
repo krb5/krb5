@@ -42,7 +42,7 @@ protocol server
 [\fB\-edebug\fP] [\fB\-h\fP] [\fB\-I\fP\fIinitid\fP] [\fB\-l\fP]
 [\fB\-k\fP] [\fB\-n\fP] [\fB\-r\fP\fIlowpty-highpty\fP] [\fB\-s\fP]
 [\fB\-S\fP \fItos\fP] [\fB\-U\fP] [\fB\-X\fP \fIauthtype\fP]
-[\fB\-u\fImaxhostlen\fP] [\fB\-i\fP] [\fB\-N\fP]
+[\fB\-w\fP [\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]]
 [\fB\-debug\fP [\fIport\fP]]
 .SH DESCRIPTION
 The
@@ -197,9 +197,6 @@ to use when init starts login sessions.  The default
 .SM ID
 is fe.
 .TP
-.B \-i
-Cuases the IP address to be unconditionally passed to login(8).
-.TP
 .B \-k
 This option is only useful if
 .B telnetd
@@ -230,9 +227,6 @@ Specifies line mode.  Tries to force clients to use line-at-a-time
 mode.  If the
 .SM LINEMODE
 option is not supported, it will go into kludge linemode.
-.TP
-.B \-N
-Don't strip the local domain name for passing to login(1).
 .TP
 .B \-n
 Disable
@@ -293,9 +287,17 @@ symbolic name via the
 .IR gethostbyaddr (3)
 routine.
 .TP
-.B \-u
-.I maxhostlen
-Sets the maximum hostname length passed to login(1).
+.B \-w \fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]
+Controls the form of the remote hostname passed to login(1).
+Specifying \fBip\fP results in the numeric IP address always being
+passed to login(1).  Specifying a number, \fImaxhostlen\fP, sets the
+maximum length of the hostname passed to login(1) before it will be
+passed as a numeric IP address.  If \fImaxhostlen\fP is 0, then the
+system default, as determined by the utmp or utmpx structures, is
+used.  The \fBnostriplocal\fP and \fBstriplocal\fP options, which must
+be preceded by a comma, control whether or not the local host domain
+is stripped from the remote hostname.  By default, the equivalent of
+\fBstriplocal\fP is in effect.
 .TP
 \fB\-X\fP \fIauthtype\fP
 This option is only valid if
