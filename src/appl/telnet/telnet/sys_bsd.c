@@ -669,7 +669,16 @@ TerminalNewMode(f)
 #endif
 #ifdef	SIGTSTP
 	(void) signal(SIGTSTP, SIG_DFL);
+#ifdef POSIX_SIGNALS
+	{
+	  sigset_t tmask;
+	  sigemptyset(&tmask);
+	  sigaddtoset(&tmask, SIGTSTP);
+	  sigprocmask(SIG_UNBLOCK, &tmask, (sigset_t*)0);
+	}
+#else
 	(void) sigsetmask(sigblock(0) & ~(1<<(SIGTSTP-1)));
+#endif
 #endif	/* SIGTSTP */
 #ifndef USE_TERMIO
 	ltc = oltc;

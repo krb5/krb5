@@ -1,3 +1,9 @@
+Tue Aug  9 04:02:28 1994  Mark Eichin  (eichin@tess-turbo)
+
+	* configure.in: test for -lsocket, -lnsl, POSIX_SIGNALS
+	* sys_bsd.c: use POSIX_SIGNALS.
+	* commands.c: don't use Berzerkely-style string functions.
+
 Sat Aug  6 18:05:42 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* commands.c: in_systm.h is *not* broken on linux with 4.5 libc.

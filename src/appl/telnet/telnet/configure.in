@@ -25,4 +25,11 @@ AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 AC_FUNC_CHECK(setupterm,AC_DEFINE(HAS_SETUPTERM))
 AC_HAVE_LIBRARY(-lndbm)
 AC_HAVE_LIBRARY(-ldbm)
+AC_FUNC_CHECK(sigprocmask,
+AC_COMPILE_CHECK([sigset_t],
+[#include <signal.h>],
+[sigset_t x],
+AC_DEFINE(POSIX_SIGNALS)))
+AC_HAVE_LIBRARY(socket)
+AC_HAVE_LIBRARY(nsl)
 AC_OUTPUT(Makefile,[EXTRA_RULES])
