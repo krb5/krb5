@@ -1003,7 +1003,10 @@ answer_auth()
 	  local.sin_addr.s_addr = inet_addr(envaddr);
 #endif
 	  local.sin_family = AF_INET;
-	  local.sin_port = 0;
+	  if (envaddr = getenv("KRB5LOCALPORT"))
+	    local.sin_port = htons(atoi(envaddr));
+	  else
+	    local.sin_port = 0;
 	} else {
 	  fprintf(stderr, "v4rcp: couldn't get local address (KRB5LOCALADDR)\n");
 	  exit(1);
@@ -1015,7 +1018,10 @@ answer_auth()
 	  foreign.sin_addr.s_addr = inet_addr(envaddr);
 #endif
 	  foreign.sin_family = AF_INET;
-	  foreign.sin_port = 0;
+	  if (envaddr = getenv("KRB5REMOTEPORT"))
+	    foreign.sin_port = htons(atoi(envaddr));
+	  else
+	    foreign.sin_port = 0;
 	} else {
 	  fprintf(stderr, "v4rcp: couldn't get remote address (KRB5REMOTEADDR)\n");
 	  exit(1);
