@@ -418,10 +418,14 @@ typedef struct {
 	k5_os_nothread_mutex_finish_init(&(M)->n)
 # define k5_os_mutex_init(M)			\
 	(k5_os_nothread_mutex_init(&(M)->n),	\
-	 pthread_mutex_init(&(M)->p, 0))
+	 (K5_PTHREADS_LOADED			\
+	  ? pthread_mutex_init(&(M)->p, 0)	\
+	  : 0))
 # define k5_os_mutex_destroy(M)			\
 	(k5_os_nothread_mutex_destroy(&(M)->n),	\
-	 pthread_mutex_destroy(&(M)->p))
+	 (K5_PTHREADS_LOADED			\
+	  ? pthread_mutex_destroy(&(M)->p)	\
+	  : 0))
 
 # define k5_os_mutex_lock(M)			\
 	(K5_PTHREADS_LOADED			\
