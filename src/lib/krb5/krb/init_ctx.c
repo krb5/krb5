@@ -41,10 +41,10 @@ krb5_init_context(context)
 	ctx->magic = KV5M_CONTEXT;
 
 	/* Set the default encryption types, possible defined in krb5/conf */
-	if (krb5_set_default_in_tkt_etypes(ctx, NULL))
+	if (retval = krb5_set_default_in_tkt_etypes(ctx, NULL))
 		goto cleanup;
 
-	if (krb5_os_init_context(ctx))
+	if (retval = krb5_os_init_context(ctx))
 		goto cleanup;
 	
 

@@ -1,3 +1,9 @@
+Mon Apr 24 17:09:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* init_ctx.c (krb5_init_context): If an error is returned from
+		krb5_set_default_in_tkt_etypes or krb5_os_init_context,
+		pass to caller instead of stack garbage.
+
 Sat Apr 22 11:06:45 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* Makefile.in: t_walk_rtree needs libcrypto
