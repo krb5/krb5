@@ -1,3 +1,8 @@
+2002-05-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (oob): Loop reading data until we actually reach the
+	URG marker.
+
 2002-03-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* defines.h (FAI_PREFIX): Don't define.
