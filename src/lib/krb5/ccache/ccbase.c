@@ -118,11 +118,12 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     }
 
     pfxlen = cp - name;
+
     resid = name + pfxlen + 1;
-	
+
     pfx = malloc (pfxlen+1);
     if (!pfx)
-	return ENOMEM;
+        return ENOMEM;
 
     memcpy (pfx, name, pfxlen);
     pfx[pfxlen] = '\0';
@@ -136,7 +137,7 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     }
     for (tlist = cc_typehead; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
-	    krb5_error_code (*ccresolver)() = tlist->ops->resolve;
+	    krb5_error_code (KRB5_CALLCONV *ccresolver)() = tlist->ops->resolve;
 	    k5_mutex_unlock(&cc_typelist_lock);
 	    free(pfx);
 	    return (*ccresolver)(context, cache, resid);

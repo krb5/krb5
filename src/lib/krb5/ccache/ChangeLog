@@ -1,3 +1,10 @@
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ccbase.c:
+      krb5_cc_resolve() defines a function pointer ccresolver
+      which must be of type KRB5_CALLCONV
+
+
 2004-04-06  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c:
