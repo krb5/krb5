@@ -1,4 +1,5 @@
-#ident  "@(#)krb5_pname_to_uid.c 1.2     95/05/11 SMI"
+/* #ident  "@(#)krb5_pname_to_uid.c 1.2     95/05/11 SMI" */
+
 /*
  *  krb5 mechanism specific routine for pname_to_uid 
  *
@@ -24,7 +25,6 @@
  */
 
 #include "gssapiP_krb5.h"
-#include <gssapi/gssapi.h>
 #if !defined(_MSDOS) && !defined(_MACINTOSH)
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

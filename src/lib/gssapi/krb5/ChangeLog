@@ -1,3 +1,10 @@
+Wed Mar 20 20:25:53 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* pname_to_uid.c: Comment out #ident line.  This causes the
+		Macintosh C compiler indigestion.  Remove #include of
+		gssapi/gssapi.h, since that gets included by
+		gssapiP_generic.h.
+
 Fri Mar  8 21:36:29 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* util_cksum.c (kg_checksum_channel_bindings): Change sizeof(long)
