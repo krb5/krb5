@@ -141,6 +141,8 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 	    key->contents = 0;
 	} else
 	    retval = 0;
+	krb5_use_enctype(context, eblock, key->enctype);
+	
     errout:
 	(void) fclose(kf);
 	return retval;
