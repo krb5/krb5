@@ -1,3 +1,11 @@
+2001-05-10  Tom Yu  <tlyu@mit.edu>
+
+	* defines.h: Fix k4cmd prototype to match kcmd.c.
+
+	* kcmd.c (k4cmd): Fix to not use a narrow type.
+
+	* krlogin.c: Fix prototypes so they don't include narrow types.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't use KRB5_CHECK_PROTOS.

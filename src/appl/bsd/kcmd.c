@@ -527,7 +527,7 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
       cred, schedule, msg_data, laddr, faddr, authopts, anyport)
      int *sock;
      char **ahost;
-     u_short rport;
+     unsigned int rport;
      char *locuser, *remuser, *cmd;
      int *fd2p;
      KTEXT ticket;

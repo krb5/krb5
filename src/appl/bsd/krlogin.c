@@ -276,7 +276,7 @@ static void doit(int);
 #endif
 static int control(unsigned char *, int);
 static void sendwindow(void);
-static void stop(char), echo(char);
+static void stop(int), echo(int);
 static void writer(void), done(int);
 static int confirm_death (void);
 
@@ -974,7 +974,8 @@ setsignal(sig, act)
 
 
 
-void done(status)
+static void
+done(status)
      int status;
 {
 #ifdef POSIX_SIGNALS
