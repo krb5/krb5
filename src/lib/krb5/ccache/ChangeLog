@@ -1,3 +1,15 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* cc_file.c: Use _WIN32 instead of _WINSOCKAPI_ because
+	_WINSOCKAPI_ depends on the Winsock header used (i.e., Winsock 2
+	does not define this).  What we are really trying to check for is
+	Win32.  Include port-sockets.h for Win32.  (NOTE: Why is
+	NEED_SOCKETS being defined after the inclusion of k5-int.h?  That
+	is pretty useless...  What we probably should do is more
+	consitently used NEED_SOCKETS instead of manually putting in
+	network code.  However, some people would probably have issues
+	with the build being slower...)
+
 2001-10-10  Ezra Peisach  <epeisach@mit.edu>
 
 	* cc_file.c (krb5_fcc_read): Remove const from fourth argument to

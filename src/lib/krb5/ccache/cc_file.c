@@ -85,8 +85,10 @@ fcc_nseq.c and fcc_read don't check return values a lot.
           
 
 #ifdef HAVE_NETINET_IN_H
-#if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
+#if !defined(_WIN32) && !defined(HAVE_MACSOCK_H)
 #include <netinet/in.h>
+#else
+#include "port-sockets.h"
 #endif
 #else
  #error find some way to use net-byte-order file version numbers.
