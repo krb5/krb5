@@ -193,6 +193,7 @@ off_t	byte_count;
 #endif
 int	defumask = CMASK;		/* default umask value */
 char	tmpline[FTP_BUFSIZ];
+char    pathbuf[MAXPATHLEN + 1];
 char	hostname[MAXHOSTNAMELEN];
 char	remotehost[MAXHOSTNAMELEN];
 
@@ -274,7 +275,7 @@ main(argc, argv, envp)
 			break;
 
 		case 'l':
-			logging = 1;
+			logging ++;
 			break;
 
 		case 'a':
@@ -535,6 +536,32 @@ sgetpwnam(name)
 	save.pw_dir = sgetsave(p->pw_dir);
 	save.pw_shell = sgetsave(p->pw_shell);
 	return (&save);
+}
+
+/*
+ * Expand the given pathname relative to the current working directory.
+ */
+char *
+path_expand(path)
+       char *path;
+{
+	pathbuf[0] = '\x0';
+	if (!path) return pathbuf;
+	/* Don't bother with getcwd() if the path is absolute */
+	if (path[0] != '/') {
+	        if (!getcwd(pathbuf, sizeof pathbuf)) {
+		        pathbuf[0] = '\x0';
+			syslog(LOG_ERR, "getcwd() failed");
+		}
+		else {
+		        int len = strlen(pathbuf);
+			if (pathbuf[len-1] != '/') {
+			        pathbuf[len++] = '/';
+				pathbuf[len] = '\x0';
+			}
+		}
+	}
+	return strcat(pathbuf, path);
 }
 
 setlevel(prot_level)
@@ -911,6 +938,8 @@ retrieve(cmd, name)
 	struct stat st;
 	int (*closefunc)();
 
+	if (logging > 1 && !cmd)
+	        syslog(LOG_NOTICE, "get %s", path_expand(name));
 	if (cmd == 0) {
 		fin = fopen(name, "r"), closefunc = fclose;
 		st.st_size = 0;
@@ -966,6 +995,8 @@ retrieve(cmd, name)
 	pdata = -1;
 done:
 	(*closefunc)(fin);
+	if (logging > 2 && !cmd)
+	        syslog(LOG_NOTICE, "get: %i bytes transferred", byte_count);
 }
 
 store_file(name, mode, unique)
@@ -976,6 +1007,8 @@ store_file(name, mode, unique)
 	struct stat st;
 	int (*closefunc)();
 	char *gunique();
+
+	if (logging > 1) syslog(LOG_NOTICE, "put %s", path_expand(name));
 
 	if (unique && stat(name, &st) == 0 &&
 	    (name = gunique(name)) == NULL)
@@ -1032,6 +1065,8 @@ store_file(name, mode, unique)
 	pdata = -1;
 done:
 	(*closefunc)(fout);
+	if (logging > 2)
+	        syslog(LOG_NOTICE, "put: %i bytes transferred", byte_count);
 }
 
 FILE *
@@ -1605,6 +1640,8 @@ delete_file(name)
 {
 	struct stat st;
 
+	if (logging > 1) syslog(LOG_NOTICE, "del %s", path_expand(name));
+
 	if (stat(name, &st) < 0) {
 		perror_reply(550, name);
 		return;
@@ -1636,6 +1673,8 @@ cwd(path)
 makedir(name)
 	char *name;
 {
+        if (logging > 1) syslog(LOG_NOTICE, "mkdir %s", path_expand(name));
+
 	if (mkdir(name, 0777) < 0)
 		perror_reply(550, name);
 	else
@@ -1645,6 +1684,8 @@ makedir(name)
 removedir(name)
 	char *name;
 {
+        if (logging > 1) syslog(LOG_NOTICE, "rmdir %s", path_expand(name));
+
 	if (rmdir(name) < 0)
 		perror_reply(550, name);
 	else
@@ -1653,16 +1694,14 @@ removedir(name)
 
 pwd()
 {
-	char path[MAXPATHLEN + 1];
-
-	if (getcwd(path, sizeof path) == (char *)NULL)
+	if (getcwd(pathbuf, sizeof pathbuf) == (char *)NULL)
 #ifdef POSIX
-		perror_reply(550, path);
+		perror_reply(550, pathbuf);
 #else
-		reply(550, "%s.", path);
+		reply(550, "%s.", pathbuf);
 #endif
 	else
-		reply(257, "\"%s\" is current directory.", path);
+		reply(257, "\"%s\" is current directory.", pathbuf);
 }
 
 char *
@@ -1682,6 +1721,9 @@ renamefrom(name)
 renamecmd(from, to)
 	char *from, *to;
 {
+        if(logging > 1)
+                syslog(LOG_NOTICE, "rename %s %s", path_expand(from), to);
+
 	if (rename(from, to) < 0)
 		perror_reply(550, "rename");
 	else

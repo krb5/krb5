@@ -1,3 +1,9 @@
+Tue Aug 11 04:30:59 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* ftpd.c: Add support for extended logging as per PR#481. Using 
+	the 'l' command line option twice now logs the major file commands, 
+	and using it thrice logs bytecounts for RETR and STOR as well.
+
 Fri Aug  7 00:56:30 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* ftpcmd.y: Replace old KERBEROS #ifdef's with KRB5_KRB4_COMPAT
