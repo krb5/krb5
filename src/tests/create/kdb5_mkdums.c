@@ -182,7 +182,7 @@ char *argv[];
     }
 
     if (etype == 0xffff)
-	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
+	etype = DEFAULT_KDC_ETYPE;
 
     if (!valid_etype(etype)) {
 	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
@@ -362,7 +362,7 @@ char *dbname;
 	free(scratch.data);
     } else {
 	if (retval = krb5_db_fetch_mkey(test_context, master_princ, &master_encblock,
-					manual_mkey, FALSE, 0,
+					manual_mkey, FALSE, (char *) NULL, 0,
 					&master_keyblock)) {
 	    com_err(pname, retval, "while reading master key");
 	    return(1);

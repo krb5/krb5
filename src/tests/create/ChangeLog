@@ -1,4 +1,10 @@
 
+Mon Jul 17 15:23:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_mkdums.c - Change setting of defaulted keytype to be DEFAULT_
+		KDC_ETYPE instead of using the keytype array to find the
+		etype.
+
+
 Wed Jul 12 12:31:27 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Remove V5_USE_SHARED_LIB.
 
