@@ -3,133 +3,203 @@
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
-#include <setjmp.h>
+#include <limits.h>
+/* Is vxworks broken w.r.t. termios? --tlyu */
 #ifdef __vxworks
 #define ECHO_PASSWORD
 #endif
 
-#ifndef ECHO_PASSWORD
 #include <termios.h>
-#endif /* ECHO_PASSWORD */
 
-static jmp_buf pwd_jump;
+static void	catch_signals(void);
+static void	restore_signals(void);
+static krb5_sigtype	intrfunc(int sig);
 
-static krb5_sigtype
-intr_routine(int signo)
-{
-    longjmp(pwd_jump, 1);
-    /*NOTREACHED*/
-}
+static krb5_error_code	setup_tty(int);
+static krb5_error_code	restore_tty(void);
+
+#ifdef POSIX_SIGNALS
+static struct sigaction osigint;
+#else
+static krb5_sigtype (*osigint)();
+#endif
+
+static volatile int got_int;
 
 krb5_error_code KRB5_CALLCONV
-krb5_prompter_posix(krb5_context context,
-		    void *data,
-		    const char *name,
-		    const char *banner,
-		    int num_prompts,
-		    krb5_prompt prompts[])
+krb5_prompter_posix(
+    krb5_context	context,
+    void		*data,
+    const char		*name,
+    const char		*banner,
+    int			num_prompts,
+    krb5_prompt		prompts[])
 {
-    /* adapted from Kerberos v5 krb5_read_password() */
+    int		fd, i, scratchchar;
+    FILE	*fp;
+    char	*retp;
+    krb5_error_code	errcode;
 
-    register char *ptr;
-    int scratchchar;
-    krb5_sigtype (*volatile ointrfunc)();
-    volatile krb5_error_code errcode;
-    volatile int i = 0;
-#ifndef ECHO_PASSWORD
-    struct termios echo_control, save_control;
-    volatile int fd;
-#endif
+    errcode = KRB5_LIBOS_CANTREADPWD;
 
     if (name) {
 	fputs(name, stdout);
 	fputs("\n", stdout);
     }
-
     if (banner) {
        fputs(banner, stdout);
        fputs("\n", stdout);
     }
 
-    if (setjmp(pwd_jump)) {
-	errcode = KRB5_LIBOS_PWDINTR; 	/* we were interrupted... */
+    /*
+     * Get a non-buffered stream on stdin.
+     */
+    fp = NULL;
+    fd = dup(STDIN_FILENO);
+    if (fd < 0)
+	return KRB5_LIBOS_CANTREADPWD;
+    fp = fdopen(fd, "r");
+    if (fp == NULL)
 	goto cleanup;
-    }
-    /* save intrfunc */
-    ointrfunc = signal(SIGINT, intr_routine);
+    if (setvbuf(fp, NULL, _IONBF, 0))
+	goto cleanup;
 
-    for (i=0; i<num_prompts; i++) {
-#ifndef ECHO_PASSWORD
-	if (prompts[i].hidden) {
-	    /* get the file descriptor associated with stdin */
-	    fd = fileno(stdin);
-
-	    if (isatty(fd) == 1) {
-		if (tcgetattr(fd, &echo_control) == -1)
-		    return errno;
-
-		save_control = echo_control;
-		echo_control.c_lflag &= ~(ECHO|ECHONL);
-
-		if (tcsetattr(fd, TCSANOW, &echo_control) == -1)
-		    return errno;
-	    }
-	}
-#endif /* ECHO_PASSWORD */
-
-	/* put out the prompt */
-	(void) fputs(prompts[i].prompt,stdout);
-	(void) fputs(": ",stdout);
-	(void) fflush(stdout);
-	(void) memset(prompts[i].reply->data, 0, prompts[i].reply->length);
-
-	if (fgets(prompts[i].reply->data, (int) prompts[i].reply->length, stdin)
-	    == NULL) {
-	    if (prompts[i].hidden)
-		(void) putchar('\n');
-	    errcode = KRB5_LIBOS_CANTREADPWD;
+    for (i = 0; i < num_prompts; i++) {
+	errcode = KRB5_LIBOS_CANTREADPWD;
+	/* fgets() takes int, but krb5_data.length is unsigned. */
+	if (prompts[i].reply->length > INT_MAX)
 	    goto cleanup;
+	/* put out the prompt */
+	(void)fputs(prompts[i].prompt, stdout);
+	(void)fputs(": ", stdout);
+	(void)fflush(stdout);
+	(void)memset(prompts[i].reply->data, 0, prompts[i].reply->length);
+
+	errcode = setup_tty(prompts[i].hidden);
+	if (errcode) {
+	    if (prompts[i].hidden)
+		putchar('\n');
+	    break;
 	}
+	got_int = 0;
+	retp = fgets(prompts[i].reply->data, (int)prompts[i].reply->length,
+		     fp);
 	if (prompts[i].hidden)
-	    (void) putchar('\n');
-	/* fgets always null-terminates the returned string */
+	    putchar('\n');
+	if (retp == NULL) {
+	    if (got_int)
+		errcode = KRB5_LIBOS_PWDINTR;
+	    else
+		errcode = KRB5_LIBOS_CANTREADPWD;
+	    restore_tty();
+	    break;
+	}
 
 	/* replace newline with null */
-	if ((ptr = strchr(prompts[i].reply->data, '\n')))
-	    *ptr = '\0';
-	else /* flush rest of input line */
+	retp = strchr(prompts[i].reply->data, '\n');
+	if (retp != NULL)
+	    *retp = '\0';
+	else {
+	    /* flush rest of input line */
 	    do {
-		scratchchar = getchar();
+		scratchchar = getc(fp);
 	    } while (scratchchar != EOF && scratchchar != '\n');
-    
-	prompts[i].reply->length = strlen(prompts[i].reply->data);
-
-#ifndef ECHO_PASSWORD
-	if (prompts[i].hidden && (isatty(fd) == 1))
-	    if ((tcsetattr(fd, TCSANOW, &save_control) == -1) &&
-		(errcode == 0))
-	        return errno;
-#endif
-    }
-
-    errcode = 0;
-
-cleanup:
-    (void) signal(SIGINT, ointrfunc);
-#ifndef ECHO_PASSWORD
-    if (i < num_prompts) {
-	if (prompts[i].hidden) {
-	    (void)putchar('\n');
-	    if (isatty(fd) == 1) {
-		if ((tcsetattr(fd, TCSANOW, &save_control) == -1
-		     && errcode == 0))
-		    return errno;
-	    }
 	}
+
+	errcode = restore_tty();
+	if (errcode)
+	    break;
+	prompts[i].reply->length = strlen(prompts[i].reply->data);
     }
-#endif
-    return(errcode);
+cleanup:
+    if (fp != NULL)
+	fclose(fp);
+    else if (fd >= 0)
+	close(fd);
+
+    return errcode;
 }
+
+static krb5_sigtype intrfunc(int sig)
+{
+    got_int = 1;
+}
+
+static void
+catch_signals(void)
+{
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = intrfunc;
+    sigaction(SIGINT, &sa, &osigint);
+#else
+    osigint = signal(SIGINT, intrfunc);
+#endif
+}
+
+static void
+restore_signals(void)
+{
+#ifdef POSIX_SIGNALS
+    sigaction(SIGINT, &osigint, NULL);
+#else
+    signal(SIGINT, osigint);
+#endif
+}
+
+static struct termios saveparm;
+
+static krb5_error_code
+setup_tty(int hidden)
+{
+    krb5_error_code	ret;
+    struct termios	tparm;
+
+    ret = KRB5_LIBOS_CANTREADPWD;
+    catch_signals();
+    do {
+	if (!isatty(STDIN_FILENO)) {
+	    ret = 0;
+	    break;
+	}
+	if (tcgetattr(STDIN_FILENO, &tparm) < 0)
+	    break;
+	saveparm = tparm;
+#ifndef ECHO_PASSWORD
+	if (hidden)
+	    tparm.c_lflag &= ~(ECHO|ECHONL);
+#endif
+	tparm.c_lflag |= ISIG|ICANON;
+	if (tcsetattr(STDIN_FILENO, TCSANOW, &tparm) < 0)
+	    break;
+	ret = 0;
+    } while (0);
+    /* If we're losing, restore signal handlers. */
+    if (ret)
+	restore_signals();
+    return ret;
+}
+
+static krb5_error_code
+restore_tty(void)
+{
+    int ret;
+
+    ret = 0;
+    if (isatty(STDIN_FILENO)) {
+	ret = tcsetattr(STDIN_FILENO, TCSANOW, &saveparm);
+	if (ret < 0)
+	    ret = KRB5_LIBOS_CANTREADPWD;
+	else
+	    ret = 0;
+    }
+    restore_signals();
+    return ret;
+}
+
 #else /* non-Cygwin Windows, or Mac */
 
 #if defined(_WIN32)

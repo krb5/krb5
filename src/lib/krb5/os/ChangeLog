@@ -1,3 +1,12 @@
+2003-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Rewrite to no longer use
+	longjmp(), as well as to get a non-buffered stdio stream on stdin
+	to avoid passwords staying around in stdio buffers.  This does
+	have the side effect of possibly losing pre-buffered input from an
+	application that reads from stdin using stdio functions prior to
+	calling the prompter, but hopefully those are rare.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

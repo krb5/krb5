@@ -14,6 +14,8 @@ AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon get
 KRB5_AC_REGEX_FUNCS
 KRB5_NEED_PROTO([#include <time.h>],strptime)
 dnl
+KRB5_SIGTYPE
+CHECK_SIGNALS
 KRB5_SOCKADDR_SA_LEN
 KRB5_GETPEERNAME_ARGS
 KRB5_GETSOCKNAME_ARGS
