@@ -1,3 +1,15 @@
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (RESOLVE): New variable.
+	(get_hostname): New proc, taken from tests/dejagnu.
+	(test101): Use get_hostname, set a variable in the target process
+	to hold the result, and use that variable in the other commands
+	passed, instead of "localhost".
+
+	* Makefile.in (unit-test-client-body): Pass $(RUNTESTFLAGS) to
+	runtest, so the user can run subsets of the test suite.
+	(unit-test-server-body): Likewise.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
