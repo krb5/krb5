@@ -90,7 +90,7 @@ dnl AC_PUSH_MAKEFILE():
 dnl allow stuff to get tacked on to the end of the makefile
 dnl
 define(AC_PUSH_MAKEFILE,[dnl
-cat>>append.out<<'PUSHEOF'
+cat>>append.out<<\PUSHEOF
 ])dnl
 define(AC_POP_MAKEFILE,[dnl
 PUSHEOF
@@ -98,7 +98,7 @@ PUSHEOF
 dnl
 dnl append subdir rule -- MAKE_SUBDIRS("making",all)
 dnl
-define(_MAKE_SUBDIRS,[
+define(_MAKE_SUBDIRS,[dnl
 AC_PUSH_MAKEFILE()dnl
 changequote(<<<,>>>)dnl
 
@@ -113,7 +113,7 @@ $2::<<<
 changequote([,])dnl
 AC_POP_MAKEFILE()dnl
 ])dnl
-define(MAKE_SUBDIRS,[
+define(MAKE_SUBDIRS,[dnl
 _MAKE_SUBDIRS($1, $2, $2)])dnl
 dnl
 dnl take saved makefile stuff and put it in the Makefile
@@ -145,7 +145,7 @@ SUBDIREOF
 dnl
 dnl drop in standard subdirectory rules
 dnl
-define(DO_SUBDIRS,[
+define(DO_SUBDIRS,[dnl
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
@@ -154,7 +154,7 @@ MAKE_SUBDIRS("checking",check)
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
-define(CONFIG_RULES,[
+define(CONFIG_RULES,[dnl
 AC_SET_BUILDTOP dnl
 WITH_CC dnl
 WITH_CCOPTS dnl
@@ -235,7 +235,7 @@ AC_POP_MAKEFILE()dnl
 dnl
 dnl drop in rules for building command tables -- SS_RULES
 dnl
-define(SS_RULES,[
+define(SS_RULES,[dnl
 AC_PUSH_MAKEFILE()dnl
 changequote({,})dnl
 {
@@ -591,10 +591,25 @@ dnl V5_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
 [AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,
-cat pre.out Makefile.out post.out > Makefile
-[EXTRA_RULES]
+[cat pre.out Makefile.out post.out > Makefile
+EOF
+dnl This should be fixed so that the here document produced gets broken up
+dnl into chunks that are the "right" size, in case we run across shells that
+dnl are broken WRT large here documents.
+>> append.out
+cat - append.out >> $CONFIG_STATUS <<\EOF
+cat >> Makefile <<\CEOF
+#
+# rules appended by configure
+
+EOF
+rm append.out
+dnl now back to regular config.status generation
+cat >> $CONFIG_STATUS <<\EOF
+CEOF
 # sed -f $CONF_FRAGDIR/mac-mf.sed < Makefile > MakeFile
-rm pre.out Makefile.out post.out append.out,
+rm pre.out Makefile.out post.out
+],
 CONF_FRAGDIR=$srcdir/${ac_config_fragdir} )])dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
