@@ -1,3 +1,10 @@
+2000-04-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Link in getopt library on Windows.
+
+	* klist.c: Use getopt so that we can parse combined options (e.g.,
+	-an or -45).
+
 2000-03-07  Danilo Almeida  <dalmeida@mit.edu>
 
 	* klist.M: Get man page up-to-date.

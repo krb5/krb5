@@ -16,7 +16,7 @@
 
 @include definitions.texinfo
 @set EDITION 1.0
-@set UPDATED November 27, 1996
+@set UPDATED June 16, 2000
 
 @finalout                               @c don't print black warning boxes
 
@@ -429,7 +429,8 @@ your Kerberos realm.
 @itemx default_tgs_enctypes
 Identifies the supported list of session key encryption types that
 should be returned by the KDC.  The list may be delimited with commas or
-whitespace.  Currently, the only supported encryption type is
+whitespace.  Currently, the supported encryption types are
+"des3-hmac-sha1" and
 "des-cbc-crc".  Support for other encryption types is planned in the
 future.
 
@@ -437,7 +438,7 @@ future.
 Identifies the supported list of session key encryption
 types that should be requested by the client.  The format is the same as
 for @emph{default_tkt_enctypes}.  Again, the only supported encryption
-type is "des-cbc-crc".
+types are "des3-hmac-sha1" and "des-cbc-crc".
 
 @itemx clockskew
 Sets the maximum allowable amount of clockskew in seconds that the
@@ -456,6 +457,50 @@ of cache to be created by kinit, or when forwarded tickets are received.
 DCE and Kerberos can share the cache, but some versions of DCE do not
 support the default cache as created by this version of Kerberos.  Use a
 value of 1 on DCE 1.0.3a systems, and a value of 2 on DCE 1.1 systems.
+
+@itemx dns_lookup_kdc
+Indicate whether DNS SRV records should be used to locate the KDCs and
+other servers for a realm, if they are not listed in the information for
+the realm.  (Note that the @samp{admin_server} entry must be in the
+file, because the DNS implementation for it is incomplete.)
+
+Enabling this option does open up a type of denial-of-service attack, if
+someone spoofs the DNS records and redirects you to another server.
+However, it's no worse than a denial of service, because that fake KDC
+will be unable to decode anything you send it (besides the initial
+ticket request, which has no encrypted data), and anything the fake KDC
+sends will not be trusted without verification using some secret that it
+won't know.
+
+If this option is not specified but @samp{dns_fallback} is, that value
+will be used instead.  If neither option is specified, the behavior
+depends on configure-time options; if none were given, the default is to
+enable this option.  If the DNS support is not compiled in, this entry
+has no effect.
+
+@itemx dns_lookup_realm
+Indicate whether DNS TXT records should be used to determine the
+Kerberos realm of a host.
+
+Enabling this option may permit a redirection attack, where spoofed DNS
+replies persuade a client to authenticate to the wrong realm, when
+talking to the wrong host (either by spoofing yet more DNS records or by
+intercepting the net traffic).  Depending on how the client software
+manages hostnames, however, it could already be vulnerable to such
+attacks.  We are looking at possible ways to minimize or eliminate this
+exposure.  For now, we encourage more adventurous sites to try using
+Secure DNS.
+
+If this option is not specified but @samp{dns_fallback} is, that value
+will be used instead.  If neither option is specified, the behavior
+depends on configure-time options; if none were given, the default is to
+disable this option.  If the DNS support is not compiled in, this entry
+has no effect.
+
+@itemx dns_fallback
+General flag controlling the use of DNS for Kerberos information.  If
+both of the preceding options are specified, this option has no effect.
+
 @end table
 
 @node appdefaults, realms (krb5.conf), libdefaults, krb5.conf
@@ -724,8 +769,8 @@ Here is an example of a generic @code{krb5.conf} file:
 [libdefaults]
     ticket_lifetime = 600
     default_realm = @value{PRIMARYREALM}
-    default_tkt_enctypes = des-cbc-crc
-    default_tgs_enctypes = des-cbc-crc
+    default_tkt_enctypes = des3-hmac-sha1 des-cbc-crc
+    default_tgs_enctypes = des3-hmac-sha1 des-cbc-crc
 
 [realms]
     @value{PRIMARYREALM} = @{
@@ -858,8 +903,9 @@ this realm.  By default, the value of kdc_ports as specified in the
 (String.)  Specifies the name of the master key.
 
 @itemx master_key_type
-(Key type string.)  Specifies the master key's key type.  Only
-"des-cbc-crc" is supported at this time.
+(Key type string.)  Specifies the master key's key type.  Either
+"des3-hmac-sha1" or
+"des-cbc-crc" may be used at this time.
 
 @itemx max_life
 (Delta time string.)  Specifes the maximum time period for which a
@@ -872,23 +918,15 @@ valid ticket may be renewed in this realm.
 @itemx supported_enctypes
 List of key:salt strings.  Specifies the default key/salt combinations
 of principals for this realm.  Any principals created through
-@code{kadmin} will have keys of these types.  Since only the encryption
-type "des-cbc-crc" is supported, you should set this tag to
-@samp{des-cbc-crc:normal des-cbc-crc:v4}.
+@code{kadmin} will have keys of these types.  If you do not yet wish to
+enable triple-DES support, you should set this tag to
+@samp{des-cbc-crc:normal des-cbc-crc:v4}; otherwise, put
+@samp{des3-hmac-sha1:normal} at the beginning of the list.
 
 @itemx kdc_supported_enctypes
 List of key:salt strings.  Specifies the permitted key/salt combinations
 of principals for this realm.  You should set this tag to
-@samp{des-cbc-crc:normal des-cbc-crc:v4}.
-
-@b{Note:} You may also use @samp{des3-cbc-sha1:normal} before
-@samp{des-cbc-crc:normal} if you wish to support triple-DES service keys
-in addition to DES service keys.  In order to create such service keys,
-you must use the @code{-e} option to @code{kadmin.local}, running on the
-KDC system itself; the remote @code{kadmin} client does not allow this
-option.  We do not currently support the use of triple-DES keys anywhere
-other than for service keys.
-
+@samp{des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4}.
 
 @end table
 
@@ -907,9 +945,9 @@ Here's an example of a @code{kdc.conf} file:
         kadmind_port = 749
         max_life = 10h 0m 0s
         max_renewable_life = 7d 0h 0m 0s
-        master_key_type = des-cbc-crc
-        supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
-        kdc_supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
+        master_key_type = des3-hmac-sha1
+        supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
+        kdc_supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
     @}
 
 [logging]
@@ -1011,11 +1049,8 @@ scripts that pass specific queries to @code{kadmin}.
 @b{(For @code{kadmin.local} only.)}
 Sets the list of cryptosystem and salt types to be used for any new keys
 created.  Available types include @samp{des3-cbc-sha1:normal},
-@samp{des-cbc-crc:normal}, and @samp{des-cbc-crc:v4}.  In this release,
-the @samp{des3-cbc-sha1:normal} type should only be used when
-registering service principals; for any services that may request
-tickets themselves to initiate some action, it should be combined with
-one or more of the other types.
+@samp{des-cbc-crc:normal}, and @samp{des-cbc-crc:v4}.
+
 @end table
 
 @node Date Format, Principals, Kadmin Options, Administrating Kerberos Database Entries
@@ -1408,16 +1443,18 @@ Removes the policy @i{policyname} from the principal
 
 @item -randkey
 Sets the key for the principal to a random value (@code{add_principal}
-only).  @value{COMPANY} recommends using this option for host keys.  You
-may also wish to use the @b{kadmin.local} command-line options @b{-e
-"des3-cbc-sha1:normal des-cbc-crc:normal"}@xref{Kadmin Options} on the
-KDC machine itself for host keys and other service keys that are
-security-critical.
+only).  @value{COMPANY} recommends using this option for host keys.
 
 @item -pw @i{password}
 Sets the key of the principal to the specified string and does not
 prompt for a password (@code{add_principal} only).  @value{COMPANY} does
 not recommend using this option.
+
+@item -e @i{enc:salt...}
+Uses the specified list of enctype-salttype pairs for setting the key of
+the principal.  The quotes are necessary if there are multiple
+enctype-salttype pairs.  This will not function against kadmin daemons
+earlier than krb5-1.2.
 @end table
 
 If you want to just use the default values, all you need to do is:
@@ -1529,6 +1566,12 @@ Sets the key of the principal to a random value.
 @item @b{-pw} @i{password}
 Sets the password to the string @i{password}.  @value{COMPANY} does not
 recommend using this option.
+
+@item @b{-e} @i{"enc:salt..."}
+Uses the specified list of enctype-salttype pairs for setting the key of
+the principal.  The quotes are necessary if there are multiple
+enctype-salttype pairs.  This will not function against kadmin daemons
+earlier than krb5-1.2.
 @end table
 
 For example:
@@ -1759,7 +1802,9 @@ causes the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 causes the dump to be in the Kerberos 5 Beta 6 format (``kdb5_edit
 load_dump version 3.0'').
 @itemx -ov
-causes the dump to be in ovsec_adm_export format.
+causes the dump to be in ovsec_adm_export format.  Currently, the only
+way to preserve per-principal policy information is to use this in
+conjunction with a normal dump.
 @itemx -verbose
 causes the name of each principal and policy to be printed as it is
 dumped.
@@ -1816,6 +1861,12 @@ not be dumped:
 If you do not specify a dump file, @code{kdb5_util} will dump the
 database to the standard output.
 
+There is currently a bug where the default dump format omits the
+per-principal policy information.  In order to dump all the data
+contained in the Kerberos database, you must perform a normal dump (with
+no option flags) and an additional dump using the ``-ov'' flag to a
+different file.
+
 @node Restoring a Kerberos Database from a Dump File, Creating a Stash File, Dumping a Kerberos Database to a File, Administrating Kerberos Database Entries
 @section Restoring a Kerberos Database from a Dump File
 
@@ -1844,7 +1895,10 @@ causes the name of each principal and policy to be printed as it is
 dumped.
 @itemx -update
 causes records from the dump file to be updated in or added to the
-existing database.
+existing database.  This is useful in conjunction with an
+ovsec_adm_export format dump if you want to preserve per-principal
+policy information, since the current default format does not contain
+this data.
 @end table
 
 For example:
@@ -2001,6 +2055,12 @@ The @code{ktadd} command takes the following switches:
 use @i{keytab} as the keytab file.  Otherwise, @code{ktadd} will use the
 default keytab file (@code{/etc/krb5.keytab}).
 
+@item @b{-e} @i{"enc:salt..."}
+Uses the specified list of enctype-salttype pairs for setting the key of
+the principal.  The quotes are necessary if there are multiple
+enctype-salttype pairs.  This will not function against kadmin daemons
+earlier than krb5-1.2.
+
 @item -q
 run in quiet mode.  This causes @code{ktadd} to display less verbose
 information.
@@ -2012,8 +2072,9 @@ for the kadmin @code{list_principals} (@pxref{Retrieving a List of
 Principals}) command.
 @end table
 
-For example (The line beginning with @result{} is a continuation of the
-previous line.):
+Here is a sample session, using configuration files that enable only
+@samp{des-cbc-crc} encryption. (The line beginning with @result{} is a
+continuation of the previous line.)
 
 @smallexample
 @group
@@ -2551,7 +2612,6 @@ KRB5PLACEHOLD_110:  KRB5 error code 110
 @item
 KRB5PLACEHOLD_111:  KRB5 error code 111
 @item
-+
 KRB5PLACEHOLD_112:  KRB5 error code 112
 @item
 KRB5PLACEHOLD_113:  KRB5 error code 113

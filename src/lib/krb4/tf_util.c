@@ -181,8 +181,9 @@ int tf_init(tf_name, rw)
 	tf_name = tkt_string();
 
 #ifdef TKT_SHMEM
-    (void) strcpy(shmidname, tf_name);
-    (void) strcat(shmidname, ".shm");
+    (void) strncpy(shmidname, tf_name, sizeof(shmidname) - 1);
+    shmidname[sizeof(shmidname) - 1] = '\0';
+    (void) strncat(shmidname, ".shm", sizeof(shmidname) - 1 - strlen(shmidname));
 #endif /* TKT_SHMEM */
 
     /*

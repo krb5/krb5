@@ -160,7 +160,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 	if (get_from_registry_indirect(name_buf, name_size) != 0)
 		return 0;
 
-        strncpy(name_buf, prefix, name_size);       
+        strncpy(name_buf, prefix, name_size - 1);
         name_buf[name_size - 1] = 0;
         size = name_size - strlen(prefix);
         if (size > 0)
@@ -260,6 +260,13 @@ krb5_cc_set_default_name(context, name)
 	if (!new_name)
 		return ENOMEM;
 	strcpy(new_name, name_buf);
+	
+	if (!os_ctx->default_ccname || (strcmp(os_ctx->default_ccname, new_name) != 0)) {
+		/* the ccache changed... forget the old principal */
+		if (os_ctx->default_ccprincipal)
+			krb5_free_principal (context, os_ctx->default_ccprincipal);
+		os_ctx->default_ccprincipal = 0;  /* we don't care until we use it */
+	}
 	
 	if (os_ctx->default_ccname)
 		free(os_ctx->default_ccname);

@@ -90,8 +90,13 @@ extern void krb5_stdcc_shutdown();
  * arbitrary third party applications.  If there is an error, or we
  * decide that we should not version check the calling application
  * then VSflag will be FALSE when the function returns.
+ *
+ * The buffers passed into this function must be at least
+ * APPVERINFO_SIZE bytes long.
  */
-	
+
+#define APPVERINFO_SIZE 256
+
 void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 			  BOOL *VSflag)
 {
@@ -187,11 +192,15 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 	 * We don't have a way to determine that INI file of the
 	 * application at the moment so let's just use krb5.ini
 	 */
-	strcpy( locAppIni, KERBEROS_INI );
+	strncpy( locAppIni, KERBEROS_INI, sizeof(locAppIni) - 1 );
+	locAppIni[ sizeof(locAppIni) - 1 ] = '\0';
 
-	strcpy( AppTitle, locAppTitle);
-	strcpy( AppVer, locAppVer);
-	strcpy( AppIni, locAppIni);
+	strncpy( AppTitle, locAppTitle, APPVERINFO_SIZE);
+	AppTitle[APPVERINFO_SIZE - 1] = '\0';
+	strncpy( AppVer, locAppVer, APPVERINFO_SIZE);
+	AppVer[APPVERINFO_SIZE - 1] = '\0';
+	strncpy( AppIni, locAppIni, APPVERINFO_SIZE);
+	AppIni[APPVERINFO_SIZE - 1] = '\0';
 
 	/*
 	 * We also need to determine if we want to suppress version
@@ -271,9 +280,10 @@ static krb5_error_code do_timebomb()
 		if (first_time) {
 			sprintf(buf, "Your version of %s has expired.\n",
 				TIMEBOMB_PRODUCT);
-			strcat(buf, "Please upgrade it.");
+			buf[sizeof(buf) - 1] = '\0';
+			strncat(buf, "Please upgrade it.", sizeof(buf) - 1 - strlen(buf));
 #ifdef TIMEBOMB_INFO
-			strcat(buf, TIMEBOMB_INFO);
+			strncat(buf, TIMEBOMB_INFO, sizeof(buf) - 1 - strlen(buf));
 #endif
 			MessageBox(NULL, buf, "", MB_OK);
 			first_time = 0;
@@ -285,9 +295,9 @@ static krb5_error_code do_timebomb()
 		if (first_time) {
 			sprintf(buf, "Your version of %s will expire in %ld days.\n",
 				TIMEBOMB_PRODUCT, timeleft);
-			strcat(buf, "Please upgrade it soon.");
+			strncat(buf, "Please upgrade it soon.", sizeof(buf) - 1 - strlen(buf));
 #ifdef TIMEBOMB_INFO
-			strcat(buf, TIMEBOMB_INFO);
+			strncat(buf, TIMEBOMB_INFO, sizeof(buf) - 1 - strlen(buf));
 #endif
 			MessageBox(NULL, buf, "", MB_OK);
 			first_time = 0;
@@ -323,9 +333,9 @@ krb5_error_code krb5_vercheck()
 		if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
 			return VERSERV_ERROR;
 #else
-		char AppTitle[256];
-		char AppVer[256];
-		char AppIni[256];
+		char AppTitle[APPVERINFO_SIZE];
+		char AppVer[APPVERINFO_SIZE];
+		char AppIni[APPVERINFO_SIZE];
 		BOOL VSflag=TRUE;
 
 		GetCallingAppVerInfo( AppTitle, AppVer, AppIni, &VSflag);

@@ -53,6 +53,8 @@
 #include <netdb.h>
 #endif
 
+extern int optind;
+
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0;
 char *defname;
@@ -130,6 +132,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
+    int c;
     char *name;
     int mode;
     int use_k5 = 0, use_k4 = 0;
@@ -141,14 +144,10 @@ main(argc, argv)
 
     progname = GET_PROGNAME(argv[0]);
 
-    argv++;
     name = NULL;
     mode = DEFAULT;
-    while (*argv) {
-	if ((*argv)[0] != '-') {
-	    if (name) usage();
-	    name = *argv;
-	} else switch ((*argv)[1]) {
+    while ((c = getopt(argc, argv, "fetKsnack45")) != -1) {
+	switch (c) {
 	case 'f':
 	    show_flags = 1;
 	    break;
@@ -202,7 +201,6 @@ main(argc, argv)
 	    usage();
 	    break;
 	}
-	argv++;
     }
 
     if (no_resolve && !show_addresses) {
@@ -216,6 +214,14 @@ main(argc, argv)
 	if (show_flags || status_only || show_addresses)
 	    usage();
     }
+
+    if (argc - optind > 1) {
+	fprintf(stderr, "Extra arguments (starting with \"%s\").\n",
+		argv[optind+1]);
+	usage();
+    }
+
+    name = (optind == argc-1) ? argv[optind] : 0;
 
     if (!use_k5 && !use_k4)
     {
