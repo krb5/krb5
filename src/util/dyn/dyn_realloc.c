@@ -22,7 +22,7 @@ int _DynResize(obj, req)
    DynObjectP obj;
    int req;
 {
-     int cnt, size;
+     int size;
      
      if (obj->size > req)
 	  return DYN_OK;
