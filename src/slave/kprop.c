@@ -213,26 +213,20 @@ void get_tickets(context)
 	/*
 	 * Figure out what tickets we'll be using to send stuff
 	 */
-	if (gethostname (my_host_name, sizeof(my_host_name)) != 0) { 
-		com_err(progname, errno, "while getting my hostname");
-		exit(1);
+	retval = krb5_sname_to_principal(context, NULL, NULL,
+					 KRB5_NT_SRV_HST, &my_principal);
+	if (retval) {
+	    com_err(progname, errno, "while setting client principal name");
+	    exit(1);
 	}
-	/* get canonicalized  service instance name */
-	if (!(hp = gethostbyname(my_host_name))) {
-		fprintf(stderr, "Couldn't get my canonicalized host name!\n");
-		exit(1);
+	if (realm) {
+	    (void) krb5_xfree(krb5_princ_realm(context, my_principal)->data);
+	    krb5_princ_set_realm_length(context, my_principal, strlen(realm));
+	    krb5_princ_set_realm_data(context, my_principal, strdup(realm));
 	}
-	for (cp=hp->h_name; *cp; cp++)
-		if (isupper(*cp))
-			*cp = tolower(*cp);
-	if (realm)
-		sprintf(buf, "host/%s@%s", hp->h_name, realm);
-	else
-		sprintf(buf, "host/%s", hp->h_name);
-	if (retval = krb5_parse_name(context, buf, &my_principal)) {
-		com_err (progname, retval, "when parsing name %s",buf);
-		exit(1);
-	}
+#if 0
+	krb5_princ_type(context, my_principal) = KRB5_NT_PRINCIPAL;
+#endif
 
 	/*
 	 * Initialize cache file which we're going to be using
@@ -256,30 +250,19 @@ void get_tickets(context)
 	 * Construct the principal name for the slave host.
 	 */
 	memset((char *)&creds, 0, sizeof(creds));
-	if (!(hp = gethostbyname(slave_host))) {
-		fprintf(stderr,
-			"Couldn't get canonicalized name for slave\n");
-		exit(1);
+	retval = krb5_sname_to_principal(context,
+					 slave_host, KPROP_SERVICE_NAME,
+					 KRB5_NT_SRV_HST, &creds.server);
+	if (retval) {
+	    com_err(progname, errno, "while setting server principal name");
+	    exit(1);
 	}
-	for (cp=hp->h_name; *cp; cp++)
-		if (isupper(*cp))
-			*cp = tolower(*cp);
-	if (!(slave_host = malloc(strlen(hp->h_name) + 1))) {
-		com_err(progname, ENOMEM,
-			"while allocate space for canonicalized slave host");
-		exit(1);
+	if (realm) {
+	    (void) krb5_xfree(krb5_princ_realm(context, creds.server)->data);
+	    krb5_princ_set_realm_length(context, creds.server, strlen(realm));
+	    krb5_princ_set_realm_data(context, creds.server, strdup(realm));
 	}
-	strcpy(slave_host, hp->h_name);
-	if (realm)
-		sprintf(buf, "%s/%s@%s", KPROP_SERVICE_NAME, slave_host,
-			realm);
-	else
-		sprintf(buf, "%s/%s", KPROP_SERVICE_NAME, hp->h_name);
-	if (retval = krb5_parse_name(context, buf, &creds.server)) {
-		com_err(progname, retval,
-			"while parsing slave principal name");
-		exit(1);
-	}
+
 	/*
 	 * Now fill in the client....
 	 */
@@ -508,7 +491,7 @@ close_database(context, fd)
     int fd;
 {
     int err;
-    if (err = krb5_lock_file(context, fd, KRB5_LOCKMODE_UNLOCK));
+    if (err = krb5_lock_file(context, fd, KRB5_LOCKMODE_UNLOCK))
 	com_err(progname, err, "while unlocking database '%s'", dbpathname);
     free(dbpathname);
     (void)close(fd);

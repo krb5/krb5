@@ -279,7 +279,7 @@ void doit(fd)
 		exit(1);
 	}
 	omask = umask(077);
-	lock_fd = open(temp_file_name, O_RDONLY, 0600);
+	lock_fd = open(temp_file_name, O_RDWR|O_CREAT, 0600);
 	(void) umask(omask);
 	retval = krb5_lock_file(kpropd_context, lock_fd, 
 				KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
@@ -305,6 +305,12 @@ void doit(fd)
 		com_err(progname, errno, "While renaming %s to %s",
 			temp_file_name, file);
 		exit(1);
+	}
+	retval = krb5_lock_file(kpropd_context, lock_fd, KRB5_LOCKMODE_SHARED);
+	if (retval) {
+	    com_err(progname, retval, "while downgrading lock on '%s'",
+		    temp_file_name);
+	    exit(1);
 	}
 	load_database(kpropd_context, kdb5_edit, file);
 	retval = krb5_lock_file(kpropd_context, lock_fd, KRB5_LOCKMODE_UNLOCK);
@@ -430,25 +436,12 @@ void PRS(argv)
 	/*
 	 * Get my hostname, so we can construct my service name
 	 */
-	if (gethostname (my_host_name, sizeof(my_host_name)) != 0) { 
-		com_err(progname, errno, "while getting my hostname");
-		exit(1);
-	}
-	if (!(hp = gethostbyname(my_host_name))) {
-		fprintf(stderr, "Couldn't get my cannonicalized host name!\n");
-		exit(1);
-	}
-	for (cp=hp->h_name; *cp; cp++)
-		if (isupper(*cp))
-			*cp = tolower(*cp);
-	if (realm)
-		sprintf(buf, "%s/%s@%s", KPROP_SERVICE_NAME, hp->h_name,
-			realm);
-	else
-		sprintf(buf, "%s/%s", KPROP_SERVICE_NAME, hp->h_name);
-	if (retval = krb5_parse_name(kpropd_context, buf, &server)) {
+	retval = krb5_sname_to_principal(kpropd_context,
+					 NULL, KPROP_SERVICE_NAME,
+					 KRB5_NT_SRV_HST, &server);
+	if (retval) {
 		com_err(progname, retval,
-			"While trying to parse %s for service name");
+			"While trying to construct my service name");
 		exit(1);
 	}
 	/*

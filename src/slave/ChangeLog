@@ -1,3 +1,18 @@
+Tue Mar  5 12:20:00 1996  Richard Basch  <basch@lehman.com>
+
+	* kprop.c: Call krb5_sname_to_principal rather than doing the OS
+	specific calls; this also deals with site-specific hostname
+	munging that might have occurred.
+	  Removed a trailing ; that caused a spurious message to be printed
+	even upon success.
+
+	* kpropd.c: Call krb5_sname_to_principal rather than doing the OS
+	specific calls.
+	  Open the lock file read-write, as required by
+	POSIX.
+	  Downgrade the lock to a shared lock prior to the execution
+	of kdb5_edit (it also tries to place a shared lock on the dump file).
+
 Wed Sep 13 23:53:19 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* kprop.h (KPROP_SRVTAB, KPROP_DEFAULT_FILE, KPROPD_DEFAULT_FILE,
