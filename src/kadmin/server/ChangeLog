@@ -1,3 +1,7 @@
+Tue May 11 23:59:55 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ovsec_kadmd.c (main): Fix how we specify the OID.
+
 Fri May  7 17:15:17 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ovsec_kadmd.c: Remove dependency on gssapi_krb5.h by using

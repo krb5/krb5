@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
      gss_OID nt_krb5_name_oid;
      
      /* This is OID value the Krb5_Name NameType */
-     gssbuf.value = "1.2.840.113554.1.2.2.1";
+     gssbuf.value = "{1 2 840 113554 1 2 2 1}";
      gssbuf.length = strlen(gssbuf.value);
      major_status = gss_str_to_oid(&minor_status, &gssbuf, &nt_krb5_name_oid);
      if (major_status != GSS_S_COMPLETE) {
