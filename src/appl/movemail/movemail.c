@@ -143,7 +143,7 @@ main (argc, argv)
     {
       int status; char *user;
 
-      user = (char *) rindex (inname, ':') + 1;
+      user = (char *) strrchr (inname, ':') + 1;
       status = popmail (user, outname);
       exit (status);
     }
@@ -534,7 +534,6 @@ char *host;
     krb5_ccache ccdef;
     krb5_principal client, server;
     krb5_error *err_ret = NULL;
-    register char *cp;
     char *hostname;
 #endif /* KRB5 */
 #endif /* KERBEROS */
@@ -656,6 +655,7 @@ char *host;
 
 pop_command(fmt, a, b, c, d)
 char *fmt;
+char *a, *b, *c, *d;
 {
     char buf[128];
 
@@ -703,7 +703,9 @@ int *nmsgs, *nbytes;
 }
 
 pop_retr(msgno, action, arg)
+int msgno;
 int (*action)();
+void* arg;			/* may always be FILE* -- eichin -- XXX */
 {
     char buf[1024];
 
