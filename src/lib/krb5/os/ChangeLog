@@ -1,3 +1,13 @@
+2001-08-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* genaddrs.c (struct addrpair): New type.
+	(cvtaddr): New function.  Fills in krb5_address structures
+	referencing port and address parts of a sockaddr.  Converts
+	IPv4-mapped IPv6 addresses to plain IPv4 addresses.
+	(krb5_auth_con_genaddrs): Use sockaddr_storage for addresses.  Use
+	addrpairs to pass to cvtaddr, then set up pointers to the elements
+	as needed.
+
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c: Include fake-addrinfo.c instead of

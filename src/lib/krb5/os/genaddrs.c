@@ -48,6 +48,38 @@
 #define GETSOCKNAME_ARG3_TYPE size_t
 #endif
 
+struct addrpair {
+    krb5_address addr, port;
+};
+
+#define SET(TARG, THING, TYPE) \
+	((TARG).contents = (krb5_octet *) &(THING),	\
+	 (TARG).length = sizeof (THING),		\
+	 (TARG).addrtype = (TYPE))
+
+static void *cvtaddr (struct sockaddr_storage *a, struct addrpair *ap)
+{
+    switch (ss2sa(a)->sa_family) {
+    case AF_INET:
+	SET (ap->port, ss2sin(a)->sin_port, ADDRTYPE_IPPORT);
+	SET (ap->addr, ss2sin(a)->sin_addr, ADDRTYPE_INET);
+	return a;
+#ifdef AF_INET6
+    case AF_INET6:
+	SET (ap->port, ss2sin6(a)->sin6_port, ADDRTYPE_IPPORT);
+	if (IN6_IS_ADDR_V4MAPPED (&ss2sin6(a)->sin6_addr)) {
+	    ap->addr.addrtype = ADDRTYPE_INET;
+	    ap->addr.contents = 12 + (krb5_octet *) &ss2sin6(a)->sin6_addr;
+	    ap->addr.length = 4;
+	} else
+	    SET (ap->addr, ss2sin6(a)->sin6_addr, ADDRTYPE_INET6);
+	return a;
+#endif
+    default:
+	return 0;
+    }
+}
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_auth_con_genaddrs(context, auth_context, infd, flags)
     krb5_context 	context;
@@ -61,55 +93,47 @@ krb5_auth_con_genaddrs(context, auth_context, infd, flags)
     krb5_address	* raddr;
     krb5_address	* rport;
     SOCKET		fd = (SOCKET) infd;
+    struct addrpair laddrs, raddrs;
 
 #ifdef HAVE_NETINET_IN_H
-    struct sockaddr_in lsaddr, rsaddr;
-    krb5_address lcaddr, rcaddr;
-    krb5_address lcport, rcport;
+    struct sockaddr_storage lsaddr, rsaddr;
     GETSOCKNAME_ARG3_TYPE ssize;
 
-    ssize = sizeof(struct sockaddr);
+    ssize = sizeof(struct sockaddr_storage);
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR)) {
     	if ((retval = getsockname(fd, (GETSOCKNAME_ARG2_TYPE *) &lsaddr, 
 				  &ssize)))
 	    return retval;
 
-    	if (flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) {
-    	    lcport.contents = (krb5_octet *)&lsaddr.sin_port;
-    	    lcport.length = sizeof(lsaddr.sin_port);
-    	    lcport.addrtype = ADDRTYPE_IPPORT;
-	    lport = &lcport;
-	} else {
-	    lport = NULL;
-    	} 
-    	lcaddr.contents = (krb5_octet *)&lsaddr.sin_addr;
-    	lcaddr.length = sizeof(lsaddr.sin_addr);
-    	lcaddr.addrtype = ADDRTYPE_INET;
-	laddr = &lcaddr;
+	if (cvtaddr (&lsaddr, &laddrs)) {
+	    laddr = &laddrs.addr;
+	    if (flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR)
+		lport = &laddrs.port;
+	    else
+		lport = 0;
+	} else
+	    return KRB5_PROG_ATYPE_NOSUPP;
     } else {
 	laddr = NULL;
 	lport = NULL;
     }
 
+    ssize = sizeof(struct sockaddr_storage);
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
         if ((retval = getpeername(fd, (GETPEERNAME_ARG2_TYPE *) &rsaddr, 
 				  &ssize)))
 	    return retval;
 
-    	if (flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) {
-    	    rcport.contents = (krb5_octet *)&rsaddr.sin_port;
-    	    rcport.length = sizeof(rsaddr.sin_port);
-    	    rcport.addrtype = ADDRTYPE_IPPORT;
-	    rport = &rcport;
-	} else {
-	    rport = NULL;
-	}
-    	rcaddr.contents = (krb5_octet *)&rsaddr.sin_addr;
-    	rcaddr.length = sizeof(rsaddr.sin_addr);
-    	rcaddr.addrtype = ADDRTYPE_INET;
-	raddr = &rcaddr;
+	if (cvtaddr (&rsaddr, &raddrs)) {
+	    raddr = &raddrs.addr;
+	    if (flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)
+		rport = &raddrs.port;
+	    else
+		rport = 0;
+	} else
+	    return KRB5_PROG_ATYPE_NOSUPP;
     } else {
 	raddr = NULL;
 	rport = NULL;
