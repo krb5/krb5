@@ -132,7 +132,7 @@ int vhangup P((void ));
 int write P((int , const char *, int ));
 int abs P((int ));
 int alarm P((unsigned ));
-double atof P((char *));
+double atof P((const char *));
 int atoi P((char *));
 long atol P((char *));
 int bcmp P((char *, char *, int ));
