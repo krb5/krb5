@@ -1,7 +1,15 @@
 NormalLibraryObjectRule()
 
-OBJS = ktf_close.o	\
+OBJS = \
+	ktf_add.o	\
+	ktf_close.o	\
+	ktf_endget.o	\
+	ktf_get_en.o	\
 	ktf_get_na.o	\
+	ktf_next.o	\
+	ktf_resolv.o	\
+	ktf_remove.o	\
+	ktf_ssget.o	\
 	ktf_util.o	\
 	ktf_ops.o	\
 	ktf_wops.o
