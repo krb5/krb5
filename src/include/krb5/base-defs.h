@@ -23,7 +23,7 @@ typedef int16		krb5_ui_2;
 typedef int32		krb5_ui_4;
 
 typedef int32		krb5_timestamp;
-typedef krb5_ui_2	confounder;
+typedef krb5_ui_2	krb5_confounder;
 typedef	octet		krb5_msgtype;
 typedef	octet		krb5_kvno;
 typedef	int32		krb5_flags;
@@ -32,5 +32,10 @@ typedef	krb5_ui_2	krb5_addr_type;
 typedef krb5_ui_2	krb5_keytype;
 typedef krb5_ui_2	krb5_enctype;
 typedef krb5_ui_2	krb5_cksumtype;
+
+typedef struct _krb5_string {
+    int length;
+    char *string;
+} krb5_string;
 
 #endif /* __KRB5_BASE_DEFS__ */
