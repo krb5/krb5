@@ -1,32 +1,29 @@
-/*************************************************************
+/*
+ * Declarations for Credentials Cache API Library
  *
- *	Header file for Credential Cache API for MacOS
+ * API specification: <http://web.mit.edu/pismere/kerberos/ccache-api-v2-draft.html>
  *
- *	-as defined by the document found at http://www.umich.edu/~sgr/v4Cache/
- *	-definitions borrowed from a windows implementation found at
- *	 /afs/umich.edu/user/s/g/sgr/Public/TsoCacheDll shell/
+ *	Revision 1: Frank Dabek, 6/4/1998
+ *	Revision 2: meeroh, 2/24/1999
  *
- *	Revision 1: Frank Dabek, 6/4/98
- * 				added missing calls from revision four of the API
- *				deleted some WIN specific Information
- *				added some misssing definitions
- *				renamed to CCache.h
- **************************************************************/
-#ifndef _CCache_h_
-#define _CCache_h_
+ * $Header$
+ */
+ 
+#ifndef __CCache_h__
+#define __CCache_h__
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#include <ConditionalMacros.h>
+
+#if PRAGMA_IMPORT
 #	pragma import on
 #endif
 
 /* This stuff is to make sure that we always use the same compiler options for
    this header file. Otherwise we get really exciting failure modes -- meeroh */
-#include <ConditionalMacros.h>
-
 #if PRAGMA_STRUCT_ALIGN
 	#pragma options align=mac68k
 #elif PRAGMA_STRUCT_PACKPUSH
@@ -46,43 +43,76 @@ extern "C" {
 #include <Processes.h>
 
 /*
-** The Official Error Codes
-*/
-#define	CC_NOERROR	0
-#define CC_BADNAME	1
-#define CC_NOTFOUND	2
-#define CC_END		3
-#define CC_IO		4
-#define CC_WRITE	5
-#define CC_NOMEM	6
-#define CC_FORMAT	7
-#define CC_LOCKED	8
-#define CC_BAD_API_VERSION	9
-#define CC_NO_EXIST	10
-#define CC_NOT_SUPP	11
-#define CC_BAD_PARM 12
-#define CC_ERR_CACHE_ATTACH 13
-#define CC_ERR_CACHE_RELEASE 14
-#define CC_ERR_CACHE_FULL  15
-#define CC_ERR_CRED_VERSION  16
-
-#define CRED_TYPE_IN_UNION
-
-typedef		SInt32		cc_int32;
-typedef		UInt32		cc_uint32;
-typedef		cc_int32	cc_time_t;
-typedef		cc_int32	cc_nc_flags;
-//typedef short cc_cred_vers;
-
-/*
- * Enumerations and constants
+ * Constants
  */
-	
+ 
+/* Error codes */
+
+enum {
+	CC_NOERROR				= 0,
+	CC_BADNAME				= 1,
+	CC_NOTFOUND				= 2,
+	CC_END					= 3,
+	CC_IO					= 4,
+	CC_WRITE				= 5,
+	CC_NOMEM				= 6,
+	CC_FORMAT				= 7,
+	CC_LOCKED				= 8,
+	CC_BAD_API_VERSION		= 9,
+	CC_NO_EXIST				= 10,
+	CC_NOT_SUPP				= 11,
+	CC_BAD_PARM				= 12,
+	CC_ERR_CACHE_ATTACH		= 13,
+	CC_ERR_CACHE_RELEASE	= 14,
+	CC_ERR_CACHE_FULL 		= 15,
+	CC_ERR_CRED_VERSION		= 16
+};
+
+/* Kerberos v4 key types */
+
 enum StringToKey_Type {
 	STK_AFS = 0,
 	STK_DES = 1
 };
 
+/* Credential version types */
+
+enum cc_cred_vers {  
+    CC_CRED_VUNKNOWN		= 0,
+    CC_CRED_V4				= 1,
+    CC_CRED_V5				= 2,
+    CC_CRED_VMAX			= 3
+};
+
+/* API versions */
+
+enum {
+	CC_API_VER_1	= 1,
+	CC_API_VER_2	= 2
+};
+
+/*
+ * Types
+ */
+ 
+/* Basic integer types */
+
+typedef		SInt32					cc_int32;
+typedef		UInt32					cc_uint32;
+
+/* Other simple types */
+
+typedef		cc_int32				cc_time_t;
+typedef		cc_int32				cc_nc_flags;
+
+typedef		cc_int32				cc_result;
+typedef		cc_int32				cc_api_version;
+typedef		enum cc_cred_vers		cc_cred_vers;
+typedef		cc_uint32				cc_flags;
+
+/* Credential structures */
+
+/* V4 credentials */
 enum {  
 	MAX_V4_CRED_LEN = 1250, 
 	KRB_PRINCIPAL_SZ = 40, 
@@ -92,43 +122,28 @@ enum {
 	ADDR_SZ = 16 
 };
 
-// version indentfiers
-// extend to authentication schemes beyond Kerberos?
-enum cc_cred_vers {  
-    CC_CRED_VUNKNOWN = 0,       // For validation
-    CC_CRED_V4 = 1,
-    CC_CRED_V5 = 2,
-    CC_CRED_VMAX = 3,            // For validation
-    CC_INVALID_RECORD = 99
-};
-
-/*
- * Credentials structures
- */
-
-// V4 Credentials
 typedef struct _V4credential {
-	unsigned char	kversion;
-    char			principal[KRB_PRINCIPAL_SZ];
-    char			principal_instance[KRB_INSTANCE_SZ];
-    char			service[KRB_SERVICE_SZ];
-    char			service_instance[KRB_INSTANCE_SZ];
-    char			realm[KRB_REALM_SZ];
-    unsigned char	session_key[8];
-    cc_int32		kvno;
-    enum StringToKey_Type	str_to_key;
-    long			issue_date;  
-    cc_int32		lifetime;          
-    char			address[ADDR_SZ];       // IP Address of local host
-    cc_int32		ticket_sz;    
-    unsigned char	ticket[MAX_V4_CRED_LEN];
-    unsigned long	oops;
+	unsigned char	kversion;								/* Always 4 */
+    char			principal[KRB_PRINCIPAL_SZ];			/* Principal name */
+    char			principal_instance[KRB_INSTANCE_SZ];	/* Principal instance */
+    char			service[KRB_SERVICE_SZ];				/* Service name */
+    char			service_instance[KRB_INSTANCE_SZ];		/* Service instance */
+    char			realm[KRB_REALM_SZ];					/* Realm */
+    unsigned char	session_key[8];							/* Session key */
+    cc_int32		kvno;									/* Key version number */
+    cc_int32		str_to_key;								/* Key password hash type */
+    long			issue_date;  							/* Ticket issue date */
+    cc_int32		lifetime;          						/* Ticket lifetime */
+    cc_uint32		address;								/* IP address of local host */
+    cc_int32		ticket_sz;								/* Ticket size */
+    unsigned char	ticket[MAX_V4_CRED_LEN];				/* Ticket date */
+    unsigned long	oops;									/* unused. ignore */
 } V4Cred_type;
 
-// V5 credentials
+/* V5 credentials */
 typedef struct _cc_data {
-	cc_int32		type; // should be one of above // FIXME: wth is this field for??
-	cc_int32		length;
+	cc_uint32		type;
+	cc_uint32		length;
 	unsigned char*	data;
 } cc_data;
 
@@ -140,42 +155,34 @@ typedef struct _cc_creds {
 	cc_time_t	starttime;
 	cc_time_t	endtime;
 	cc_time_t	renew_till;
-	int			is_skey;
-	cc_int32	ticket_flags;
+	cc_uint32	is_skey;
+	cc_uint32	ticket_flags;
 	cc_data     **addresses;
 	cc_data		ticket;
-	cc_data		second_ticket; //????
+	cc_data		second_ticket;
 	cc_data     **authdata;
 } cc_creds;
 
-//union of v4, v5 pointers
+/* union of v4 and v5 pointers */
 typedef union cred_ptr_union_type {
     V4Cred_type* pV4Cred;
     cc_creds*    pV5Cred;
 } cred_ptr_union;
 
-//version 4 and version 5 union data type
+/* common credentials structure */
 typedef struct cred_union_type {
-#ifdef CRED_TYPE_IN_UNION
     enum cc_cred_vers cred_type;
-#endif
     cred_ptr_union cred;
 } cred_union;
 
-/*
- * Cache info structures
- */
-
+/* Cache info structures */
 typedef struct _infoNC  {
 	char*			name;
 	char*			principal;
 	enum	cc_cred_vers	vers;
 } infoNC;
 
-/*
- * Opaque structures
- * (you never need anything but pointers)
- */
+/* Opaque API references */
  
 struct ccache_p;
 typedef struct ccache_p ccache_p;
@@ -187,220 +194,172 @@ struct ccache_cit;
 typedef struct ccache_cit ccache_cit;
 
 /*
-** The official (externally visible) API
-*/
-
-/*
- * Note that some of the types in the API below are typedefs, to match the API spec.
- * This is because I expect at least some of them to change in the future.
+ * Functions
  */
  
-typedef		int						cc_result;
-typedef		int						cc_api_version;
-typedef		enum cc_cred_vers		cc_cred_vers;
-typedef		int						cc_flags;
+/* Initialization / termination */
 
-#define CC_API_VER_1	1
-#define CC_API_VER_2	2
-
-// -- Main cache routines ------
-
-/* Initialize the Credentials Cache, return a control structure in cc_ctx,
-	This should be the entry point of the shared library, or called from
-	the entry point */
 cc_result
 cc_initialize (
-		apiCB**				cc_ctx,			// < SL's primary control structure. 
-											//   returned here, passed everywhere else 
-		cc_api_version		api_version,	// > ver supported by caller (use CC_API_VER_1)
-		cc_api_version*		api_supported,	// < if ~NULL, returned max ver supported by DLL
-		char**				vendor);		// < if ~NULL, returns read only C string, vendor name */
+		apiCB**				cc_ctx,
+		cc_api_version		api_version,
+		cc_api_version*		api_supported,
+		char**				vendor);
 
-/* Termination routine */
 cc_result
 cc_shutdown (
-		apiCB**				cc_ctx);		// <> SL's primary control structure. NULL after call. 
+		apiCB**				cc_ctx);
+		
+/* ccache access */
 
-
-/* Open a name cache within the ccache designated by name and version? 
- 	Returns a control struture pointer to the NC in *handle */
 cc_result
 cc_open (
-		apiCB*				cc_ctx,				// > SL's primary control structure
-		char*				name,				// > name of pre-created cache
-		cc_cred_vers		vers,				// > version of credentials held in this NC 
-		cc_flags			flags,				// > options
-		ccache_p**			handle);			// < named cache control structure 
+		apiCB*				cc_ctx,
+		char*				name,
+		cc_cred_vers		vers,
+		cc_flags			flags,
+		ccache_p**			handle);
 
-/* Close and deallocate memory assoicated with the named cache pointed to by *handle */
 cc_result
 cc_close (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_p**			handle);			// <> named cache control structure. NULL after call. 
+		apiCB*				cc_ctx,
+		ccache_p**			handle);
 
-/* Create a new named cache in the cache cc_ctx.
-Specify the cache by: a name, a principal, a version
-return a pointer to the control structure for the cache via handle */
 cc_result
 cc_create (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		char*				name,				// > name of cache to be [destroyed if exists, then] created
-		char*				principal,			// > name of principal associated with named cache
-		cc_cred_vers		vers,				// > version of credentials to be held in cache
-		cc_flags			flags,				// > options
-		ccache_p**			handle);			// < named cache control structure 
+		apiCB*				cc_ctx,
+		char*				name,
+		char*				principal,
+		cc_cred_vers		vers,
+		cc_flags			flags,
+		ccache_p**			handle);
 
-/* Destroy cache associated with the handle (handle becomes invalid) */
 cc_result
 cc_destroy (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_p**			handle);			// <> named cache control structure. NULL after call.
-
-/* Get the global last changed time variable for the CCache 
-   Replace this with a change counter instead of an actual time?*/
-cc_result
-cc_get_change_time (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		cc_time_t*			time);				// < time of last change to named cache
-
-// -- Named Cache routines ---------
-
-/* store the credentials (tickets) in cred in the named cache pointed 
-to by handle.  Maybe the last argument should be more general? */
-cc_result
-cc_store (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		const ccache_p*		ccache_pointer,		// > named cache control structure
-		cred_union			cred);				// > credentials to store in cache named
-
-/* Remove the credentials pointed to by cred from the Named Cache pointed to
-by handle. */
-cc_result
-cc_remove_cred (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		const ccache_p*		ccache_pointer,		// > named cache control structure
-		cred_union			cred);				// > credentials to remove from named cache
-
-/* set the principal of the NC *ccache_pointer to principal,
-	principal should be a null terminated C string */
+		apiCB*				cc_ctx,
+		ccache_p**			handle);
+		
 cc_result
 cc_set_principal (
-		apiCB*				cc_ctx,				// > cs 
-		const ccache_p*		ccache_pointer,		// > NC
-		cc_cred_vers		vers,				// > version: to check pointer?
-		const char*			principal);			// > new principal name
+		apiCB*				cc_ctx,
+		const ccache_p*		ccache_pointer,
+		cc_cred_vers		vers,
+		const char*			principal);
 
-/* Get the name of the principal associated with the NC handle */
 cc_result
 cc_get_principal (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		const ccache_p*		ccache_pointer,		// > named cache control structure
-		char**				principal);			// < name of principal associated with named cache
-												//   Free via cc_free_principal()
+		apiCB*				cc_ctx,
+		const ccache_p*		ccache_pointer,
+		char**				principal);
 
-/* Get version of credentials stored in the NC pointed to by ccache_pointer */ 
 cc_result
 cc_get_cred_version (
-		apiCB*				cc_ctx,				// > cs
-		const ccache_p*		ccache_pointer,		// > the named cache
-		cc_cred_vers*		vers);				// <> the version of credentials in the NC
+		apiCB*				cc_ctx,
+		const ccache_p*		ccache_pointer,
+		cc_cred_vers*		vers);
 
-/* Return the name of the NC specified by ccache_p */
 cc_result
 cc_get_name (
-		apiCB*				cc_ctx,				// > control struct
-		const ccache_p*		ccache_pointer, 	// > NC
-		char**				name);				// <> name					
+		apiCB*				cc_ctx,
+		const ccache_p*		ccache_pointer,
+		char**				name);
 
+/* credentials access */
 
-//  - Search routines ----
+cc_result
+cc_store (
+		apiCB*				cc_ctx,
+		const ccache_p*		ccache_pointer,
+		cred_union			cred);
 
-/*
-Sequentially open every NC in the CCache. 
-To use (?): initially set handle and itCache to NULL
-after each call set itCache to handle,
-repeated calls will return all currently held NC's
-*/
+cc_result
+cc_remove_cred (
+		apiCB*				cc_ctx,
+		const ccache_p*		ccache_pointer,
+		cred_union			cred);
+
+/* Iterators */
+
 cc_result
 cc_seq_fetch_NCs_begin (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_cit**		itCache);			// <> iterator used by DLL, set to NULL before first call
+		apiCB*				cc_ctx,
+		ccache_cit**		itCache);
 
 cc_result
 cc_seq_fetch_NCs_next (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_p**			ccache_pointer,		// <> named cache control structure (close, then open next)
-		ccache_cit*			itCache);			// <> iterator used by DLL, set to NULL before first call
+		apiCB*				cc_ctx,
+		ccache_p**			ccache_pointer,
+		ccache_cit*			itCache);
 
 cc_result
 cc_seq_fetch_NCs_end (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_cit**		itCache);			// <> iterator used by DLL, set to NULL before first call
+		apiCB*				cc_ctx,
+		ccache_cit**		itCache);
 
-/* Sequentially fetch every set of credentials in the Named Cache handle
-use similiarly to cc_seq_fetch_NCs */
 cc_result
 cc_seq_fetch_creds_begin (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_p*			ccache_pointer,		// > named cache control structure
-		ccache_cit**		itCreds);			// <> iterator used by DLL, set to NULL before first call
+		apiCB*				cc_ctx,
+		ccache_p*			ccache_pointer,
+		ccache_cit**		itCreds);
 
 cc_result
 cc_seq_fetch_creds_next (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		cred_union**		creds,				// < filled in by DLL, free via cc_free_creds()
-		ccache_cit*			itCreds);			// <> iterator used by DLL, set to NULL before first call
+		apiCB*				cc_ctx,
+		cred_union**		creds,
+		ccache_cit*			itCreds);
 
 cc_result
 cc_seq_fetch_creds_end (
-		apiCB*				cc_ctx,				// > DLL's primary control structure
-		ccache_cit**		itCreds);			// <> iterator used by DLL, set to NULL before first call
-
-/* a wrapper for cc_seq_fetch_NCs.
-	Returns: a null terminated list (array) of pointers to infoNC structs
-	if this works, maybe we should hide that seq call...
-	*/
-cc_result
-cc_get_NC_info(apiCB *cc_ctx,		// > control structure
-			 infoNC*** ppNCi);		// <> info about the NC (yes.. three asterisks...)
-
-				
-// -- Memory recovery ---------
+		apiCB*				cc_ctx,
+		ccache_cit**		itCreds);
+		
+/* global ccache info */
 
 cc_result
-cc_free_principal(apiCB* cc_ctx,		// > DLL's primary control structure
-				  char** principal);// <> principal to be freed, returned as NULL
-									//   (from cc_get_principal())
+cc_get_change_time (
+		apiCB*				cc_ctx,
+		cc_time_t*			time);
+
 cc_result
-cc_free_name(apiCB* cc_ctx,			// > DLL's primary control structure
-			 char** name);			// <> name to be freed, returned as NULL
-									//   (from cc_seq_fetch_cache())
+cc_get_NC_info (
+		apiCB*				cc_ctx,
+		infoNC***			ppNCi);
 
-/* free storage associated with cred_union** */
+/* memory recovery */
+
 cc_result
-cc_free_creds(apiCB* cc_ctx,			// > DLL's primary control structure
-			  cred_union** creds);		// <> creds (from cc_seq_fetch_creds()) to be freed
-										//    Returned as NULL.
+cc_free_principal (
+		apiCB*				cc_ctx,
+		char**				principal);
 
-/* Free that nasty array we created above */
 cc_result
-cc_free_NC_info(apiCB *cc_ctx,		// > control structure
-				infoNC*** ppNCi);	// <> pointer to free
-							 
+cc_free_name (
+		apiCB*				cc_ctx,
+		char**				name);
 
-// -- Locking ----------
+cc_result
+cc_free_creds (
+		apiCB*				cc_ctx,
+		cred_union**		creds);
 
-#define CC_LOCK_UNLOCK	 1
-#define CC_LOCK_READER	 2
-#define CC_LOCK_WRITER	 3
-#define CC_LOCK_NOBLOCK	16
+cc_result
+cc_free_NC_info (
+		apiCB*				cc_ctx,
+		infoNC***			ppNCi);
 
-/* Place a lock on the Named Cache handle, lock types are above 
-NB: API indicates that this call is not implemented*/
-int
-cc_lock_request(apiCB* cc_ctx,		// > DLL's primary control structure
-				ccache_p* ccache_pointer,		// > named cache control structure
-				int lock_type);		// > one (or combination) of above defined lock types
+/* Locking -- not implemented */
+enum {
+	CC_LOCK_UNLOCK		= 1,
+	CC_LOCK_READER		= 2,
+	CC_LOCK_WRITER		= 3,
+	CC_LOCK_NOBLOCK		= 16
+};
+
+cc_result
+cc_lock_request (
+		apiCB*				cc_ctx,
+		ccache_p*			ccache_pointer,
+		cc_uint32			lock_type);
 			   
 #if PRAGMA_STRUCT_ALIGN
 	#pragma options align=reset
@@ -418,7 +377,7 @@ cc_lock_request(apiCB* cc_ctx,		// > DLL's primary control structure
 	#pragma fourbyteints reset
 #endif 
 
-#if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if PRAGMA_IMPORT
 #	pragma import reset
 #endif
 
@@ -426,4 +385,4 @@ cc_lock_request(apiCB* cc_ctx,		// > DLL's primary control structure
 }
 #endif /* __cplusplus */
 
-#endif /* Krb_CCacheAPI_h_ */
+#endif /* __CCache_h__ */
