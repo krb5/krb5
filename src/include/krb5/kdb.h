@@ -102,6 +102,16 @@ krb5_error_code krb5_kdb_decrypt_key
 		   krb5_keyblock *));
 krb5_error_code krb5_db_setup_mkey_name
 	PROTOTYPE((const char *, const char *, char **, krb5_principal *));
+krb5_error_code krb5_db_lock
+	PROTOTYPE((int ));
+krb5_error_code krb5_db_unlock
+	PROTOTYPE ((void ));
+
+/* XXX I give up.... the following int should be a krb5_boolean, but */
+ /* it causes gcc to give up and die. */
+krb5_boolean krb5_db_set_lockmode
+	PROTOTYPE((int ));
+
 
 #define KRB5_KDB_DEF_FLAGS	(KRB5_KDB_DISALLOW_DUP_SKEY)
 
@@ -109,3 +119,4 @@ krb5_error_code krb5_db_setup_mkey_name
 #define	TGTNAME	"krbtgt"
 
 #endif /* KRB5_KDB5__ */
+
