@@ -17,6 +17,7 @@ ktutil: ktutil.o $(OBJS) $(DEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) ktutil ${DESTDIR}$(ADMIN_BINDIR)/ktutil
+	$(INSTALL_DATA) $(srcdir)/ktutil.M ${DESTDIR}$(ADMIN_MANDIR)/ktutil.8
 
 # needed until we run makedepend
 ktutil_ct.c: ktutil_ct.ct
