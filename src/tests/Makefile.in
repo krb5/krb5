@@ -14,7 +14,7 @@ TEST_PREFIX = "foo bar"
 KADMIN_OPTS= -d $(TEST_DB) -r $(TEST_REALM) -P $(TEST_MKEY)
 KTEST_OPTS= $(KADMIN_OPTS) -p $(TEST_PREFIX) -n $(TEST_NUM) -D $(TEST_DEPTH)
 
-check-unix:: kdb_check
+old-check-unix:: kdb_check
 
 kdc.conf: Makefile
 	rm -rf kdc.conf
