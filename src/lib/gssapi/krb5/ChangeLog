@@ -1,3 +1,13 @@
+2000-09-19  Miro Jurisic  <meeroh@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context)
+	* acquire_cred.c (krb5_gss_acquire_cred)
+	* import_sec_context.c (krb5_gss_convert_static_mech_oid)
+	* init_sec_context.c (krb5_gss_init_sec_context)
+	* inq_cred.c (krb5_gss_inquire_cred)
+		Cast away constness from gss_OID where necessary to compile
+		with strict compilers
+
 2000-06-27  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c (get_credentials): Add initial iteration of
