@@ -1,3 +1,15 @@
+Fri Mar 24 14:58:07 1995    <tytso@rsx-11.mit.edu>
+
+	* replay.c: The KDC replay cache needs to store the database
+		modification time, so that if the database is modified in
+		between when it receives a request and when it receives a
+		replay of the same request, it knows to throw away the
+		replay cache entry and generate a new response (since the
+		record in the database on which the response is based may
+		have been modified). 
+
+	* main.c (kdc_com_err_proc): Use syslog() instead of vsyslog().
+
 Sat Mar 18 18:59:45 1995  John Gilmore  (gnu at toad.com)
 
 	* kerberos_v4.c:  Replace STDARG_PROTOTYPES with HAVE_STDARG_H.

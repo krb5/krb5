@@ -49,41 +49,37 @@ kdc_com_err_proc(whoami, code, format, pvar)
 	va_list pvar;
 {
     /* XXX need some way to do this better... */
-
 #ifndef __STDC__
     extern int vfprintf();
 #endif
+
+    char syslogbuf[10240], tmpbuf[10240];
+
+    memset(syslogbuf, 0, sizeof(syslogbuf));
+    memset(tmpbuf, 0, sizeof(tmpbuf));
 
     if (whoami) {
         fputs(whoami, stderr);
         fputs(": ", stderr);
     }
+
     if (code) {
-        fputs(error_message(code), stderr);
-        fputs(" ", stderr);
+	sprintf(tmpbuf, error_message(code));
+	strcat(syslogbuf, tmpbuf);
+	strcat(syslogbuf, " ");
     }
+
     if (format) {
-        vfprintf (stderr, format, pvar);
+	vsprintf(tmpbuf, format, pvar);
+	strcat(syslogbuf, tmpbuf);
     }
+
+    fprintf(stderr, syslogbuf);
     putc('\n', stderr);
-    /* should do this only on a tty in raw mode */
-    putc('\r', stderr);
+    putc('\r', stderr); /* should do this only on a tty in raw mode */
     fflush(stderr);
-    if (format) {
-	/* now need to frob the format a bit... */
-	if (code) {
-	    char *nfmt;
-	    nfmt = malloc(strlen(format)+strlen(error_message(code))+2);
-	    strcpy(nfmt, error_message(code));
-	    strcat(nfmt, " ");
-	    strcat(nfmt, format);
-	    vsyslog(LOG_ERR, nfmt, pvar);
-	} else
-	    vsyslog(LOG_ERR, format, pvar);
-    } else {
-	if (code)
-	    syslog(LOG_ERR, "%s", error_message(code));
-    }
+
+    syslog(LOG_ERR, "%s", syslogbuf);
 
     return;
 }

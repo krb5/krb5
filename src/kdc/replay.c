@@ -33,6 +33,7 @@ typedef struct _krb5_kdc_replay_ent {
     struct _krb5_kdc_replay_ent *next;
     int num_hits;
     krb5_int32 timein;
+    time_t db_age;
     krb5_data *req_packet;
     krb5_data *reply_packet;
 } krb5_kdc_replay_ent;
@@ -45,10 +46,12 @@ static int max_hits_per_entry = 0;
 static int num_entries = 0;
 
 #define STALE_TIME	2*60		/* two minutes */
-#define STALE(ptr) (abs((ptr)->timein - timenow) >= STALE_TIME)
+#define STALE(ptr) ((abs((ptr)->timein - timenow) >= STALE_TIME) || \
+		    ((ptr)->db_age != db_age))
 
 #define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) && \
-		    !memcmp((ptr)->req_packet->data, inpkt->data, inpkt->length))
+		    !memcmp((ptr)->req_packet->data, inpkt->data, inpkt->length) && \
+		    ((ptr)->db_age == db_age))
 
 /* XXX
    Todo:  quench the size of the queue...
@@ -64,9 +67,11 @@ register krb5_data **outpkt;
 {
     krb5_int32 timenow;
     register krb5_kdc_replay_ent *eptr, *last, *hold;
+    time_t db_age;
 
-    if (krb5_timeofday(kdc_context, &timenow))
-	return FALSE;
+    if (krb5_timeofday(kdc_context, &timenow) || 
+	krb5_db_get_age(kdc_context, 0, &db_age))
+	    return FALSE;
 
     calls++;
 
@@ -116,15 +121,18 @@ register krb5_data *outpkt;
 {
     register krb5_kdc_replay_ent *eptr;    
     krb5_int32 timenow;
+    time_t db_age;
 
-    if (krb5_timeofday(kdc_context, &timenow))
-	return;
+    if (krb5_timeofday(kdc_context, &timenow) || 
+	krb5_db_get_age(kdc_context, 0, &db_age))
+	    return;
 
     /* this is a new entry */
     eptr = (krb5_kdc_replay_ent *)calloc(1, sizeof(*eptr));
     if (!eptr)
 	return;
     eptr->timein = timenow;
+    eptr->db_age = db_age;
     if (krb5_copy_data(kdc_context, inpkt, &eptr->req_packet)) {
 	krb5_xfree(eptr);
 	return;
