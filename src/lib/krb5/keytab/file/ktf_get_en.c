@@ -19,7 +19,6 @@ static char rcsid_krb5_ktfile_get_entry_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 
 #include "ktfile.h"

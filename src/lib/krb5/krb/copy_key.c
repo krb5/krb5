@@ -19,8 +19,6 @@ static char rcsid_copy_key_c[] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-#include <errno.h>
-
 /*
  * Copy a keyblock, including alloc'ed storage.
  */

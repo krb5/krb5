@@ -18,11 +18,7 @@ static char rcsid_decode_kdc_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <krb5/isode_err.h>
 #include <krb5/asn1.h>
-
-#include <errno.h>
 
 #include <krb5/ext-proto.h>
 

@@ -22,8 +22,6 @@ static char rcsid_krb5_kt_read_service_key_c[] =
 #include <krb5/krb5.h>
 
 #include <krb5/ext-proto.h>
-#include <errno.h>
-#include <stdio.h>
 
 /* XXX  Things that I need and don't know where to get yet */
 #define KSUCCESS 0
@@ -57,7 +55,7 @@ OLDDECLARG(krb5_keyblock **, key)
     /*
      * Get the name of the file that we should use. 
      */
-    if (keyprocarg == NULL) {
+    if (!keyprocarg) {
 	if ((kerror = krb5_kt_default_name((char *)keytabname, 
 					   sizeof(keytabname) - 1))!= KSUCCESS)
 	    return (kerror);
@@ -82,7 +80,7 @@ OLDDECLARG(krb5_keyblock **, key)
      * XXX
      */
 
-    if ((*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock))) == NULL)
+    if (!(*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock))))
 	return (ENOMEM);	/* XXX */
 
     krb5_copy_keyblock(&entry.key, *key);

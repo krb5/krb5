@@ -17,10 +17,7 @@ static char rcsid_in_tkt_pwd_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <errno.h>
 #include <krb5/ext-proto.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 
 struct pwd_keyproc_arg {

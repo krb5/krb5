@@ -32,7 +32,6 @@ static char rcsid_get_creds_c[] =
  */
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 
 krb5_error_code

@@ -17,7 +17,6 @@ static char rcsid_copy_data_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <errno.h>
 #include <krb5/ext-proto.h>
 
 /*

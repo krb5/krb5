@@ -17,15 +17,12 @@ static char rcsid_mk_req_ext_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/asn1.h>
 
 #include <krb5/libos.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 
 #include <krb5/ext-proto.h>
-#include <errno.h>
 
 /*
  Formats a KRB_AP_REQ message into outbuf, with more complete options than

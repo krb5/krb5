@@ -19,7 +19,6 @@ static char rcsid_tgtname_c [] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/kdb.h>
-#include <errno.h>
 
 static krb5_data tgtdata = {sizeof(TGTNAME), TGTNAME};
 

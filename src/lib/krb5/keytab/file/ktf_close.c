@@ -18,9 +18,7 @@ static char rcsid_krb5_ktfile_close_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-
-#include <stdio.h>
-#include <stdlib.h>
+#include <krb5/ext-proto.h>
 
 #include "ktfile.h"
 

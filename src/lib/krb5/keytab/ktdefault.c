@@ -17,7 +17,6 @@ static char rcsid_ktdefault_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <errno.h>
 #include <stdio.h>
 
 krb5_error_code krb5_kt_default(id)

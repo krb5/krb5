@@ -17,7 +17,6 @@ static char rcsid_ktremove_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 
 krb5_error_code
 krb5_kt_remove_entry (id, entry)

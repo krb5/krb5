@@ -18,10 +18,7 @@ static char rcsid_unparse_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
-
-#include <errno.h>
 
 /*
  converts the multi-part

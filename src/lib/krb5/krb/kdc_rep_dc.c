@@ -18,9 +18,7 @@ static char rcsid_kdc_rep_dc_c [] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
-#include <errno.h>
 
 /*
  * Decrypt the encrypted portion of the KDC_REP message, using the key
