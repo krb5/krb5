@@ -149,7 +149,8 @@ int main(argc, argv)
 	  exit(1);
      }
 
-     if ((code = krb524_convert_creds_kdc(context, v5creds, &v4creds))) {
+     if ((code = krb5_524_convert_creds(context, v5creds, &v4creds))) {
+	 fprintf(stderr, "error code => %ld 0x%x <=\n", code, code);
 	  com_err(prog, code, "converting to V4 credentials");
 	  exit(1);
      }

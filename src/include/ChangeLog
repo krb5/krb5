@@ -1,5 +1,12 @@
 2003-05-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-int.h (KRB524_SERVICE, KRB524_PORT): Moved here...
+	* krb5.h: ...from here.
+	(krb5_524_convert_creds): Renamed from krb524_convert_creds_kdc,
+	fixed calling convention spec.
+	(krb524_convert_creds_kdc, krb524_init_ets) [KRB5_DEPRECATED]: New
+	macros.
+
 	* Makefile.in (clean-windows): Remove new "timestamp" file when
 	cleaning up.
 

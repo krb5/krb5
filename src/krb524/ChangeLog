@@ -1,3 +1,10 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (main): Call krb5_524_convert_creds instead of
+	krb524_convert_creds_kdc.
+
+	* Makefile.in ($(OUTPRE)k524init.exe): Don't depend on K524DEP.
+
 2003-05-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_creds.c, encode.c, globals.c, sendmsg.c: Deleted.  Contents

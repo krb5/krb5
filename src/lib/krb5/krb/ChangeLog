@@ -1,3 +1,10 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c: Enable support on Windows always.
+	(krb5_524_convert_creds): Renamed from krb524_convert_creds_kdc.
+	(krb524_convert_creds_kdc, krb524_init_ets) [!_WIN32]: Backwards
+	compatibility functions.
+
 2003-05-27  Sam Hartman  <hartmans@mit.edu>
 
 	* gic_keytab.c (krb5_get_in_tkt_with_keytab): as below

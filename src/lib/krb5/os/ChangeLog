@@ -1,3 +1,8 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* send524.c (krb5int_524_sendto_kdc): Enable support on Windows
+	always.
+
 2003-05-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* send524.c: New file, moved from krb524/sendmsg.c.  Rename

@@ -65,7 +65,7 @@ krb5int_524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     struct sockaddr *addr;
     socklen_t *addrlen;
 {
-#ifdef KRB5_KRB4_COMPAT
+#if defined(KRB5_KRB4_COMPAT) || defined(_WIN32) /* yuck! */
     int i;
     struct addrlist al = ADDRLIST_INIT;
     struct servent *serv;

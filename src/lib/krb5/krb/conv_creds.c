@@ -27,7 +27,7 @@
 #include "port-sockets.h"
 #include "socket-utils.h"
 
-#ifdef KRB5_KRB4_COMPAT
+#if defined(KRB5_KRB4_COMPAT) || defined(_WIN32) /* yuck */
 #include "kerberosIV/krb.h"
 
 #ifdef USE_CCAPI
@@ -44,9 +44,9 @@ static krb5_error_code krb524_convert_creds_plain
 static int decode_v4tkt
 	(struct ktext *v4tkt, char *buf, unsigned int *encoded_len);
 
-krb5_error_code
-krb524_convert_creds_kdc(krb5_context context, krb5_creds *v5creds,
-			 CREDENTIALS *v4creds)
+krb5_error_code KRB5_CALLCONV
+krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
+		       CREDENTIALS *v4creds)
 {
      krb5_error_code ret;
      krb5_data reply;
@@ -250,11 +250,28 @@ static int decode_v4tkt(v4tkt, buf, encoded_len)
 
 #else /* no krb4 compat */
 
-krb5_error_code
-krb524_convert_creds_kdc(krb5_context context, krb5_creds *v5creds,
-			 struct credentials *v4creds)
+krb5_error_code KRB5_CALLCONV
+krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
+		       struct credentials *v4creds)
 {
     return KRB524_KRB4_DISABLED;
 }
 
+#endif
+
+/* These may be needed for object-level backwards compatibility on Mac
+   OS and UNIX, but Windows should be okay.  */
+#ifndef _WIN32
+#undef krb524_convert_creds_kdc
+krb5_error_code KRB5_CALLCONV
+krb524_convert_creds_kdc(krb5_context context, krb5_creds *v5creds,
+			 struct credentials *v4creds)
+{
+    return krb5_524_convert_creds(context, v5creds, v4creds);
+}
+
+#undef krb524_init_ets
+void KRB5_CALLCONV krb524_init_ets ()
+{
+}
 #endif

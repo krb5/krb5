@@ -1683,6 +1683,9 @@ krb5_error_code KRB5_CALLCONV krb5int_accessor
    in fact a krb4 ticket, so we don't want to drag in the krb4 support
    just to enable this.  */
 
+#define KRB524_SERVICE "krb524"
+#define KRB524_PORT 4444
+
 /* v4lifetime.c */
 extern krb5_int32 krb5int_krb_life_to_time(krb5_int32, int);
 extern int krb5int_krb_time_to_life(krb5_int32, krb5_int32);
