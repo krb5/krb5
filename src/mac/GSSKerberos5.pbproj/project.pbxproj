@@ -173,6 +173,16 @@
 				);
 			};
 		};
+		0101EC5DFF8FDD1B7F000001 = {
+			isa = PBXFileReference;
+			path = ErrorTables.jam;
+			refType = 4;
+		};
+		0101EC5EFF8FE67C7F000001 = {
+			isa = PBXFileReference;
+			path = HeaderFiles.jam;
+			refType = 4;
+		};
 		012574A5FF7A9C8212120111 = {
 			isa = PBXFrameworkReference;
 			path = ComErr.framework;
@@ -199,7 +209,7 @@
 			refType = 4;
 		};
 		174475CBFF5EEEE312120111 = {
-			buildArgumentsString = GenerateErrorTables.sh;
+			buildArgumentsString = "-f $(SRCROOT)/ErrorTables.jam $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -213,7 +223,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /bin/sh;
+			buildToolPath = /usr/bin/jam;
 			conditionalBuildSettings = {
 			};
 			dependencies = (
@@ -765,7 +775,7 @@
 			};
 		};
 		174475FDFF5EFB1212120111 = {
-			buildArgumentsString = GenerateHeaderFiles.sh;
+			buildArgumentsString = "-f $(SRCROOT)/HeaderFiles.jam $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -779,7 +789,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /bin/sh;
+			buildToolPath = /usr/bin/jam;
 			conditionalBuildSettings = {
 			};
 			dependencies = (
@@ -7215,6 +7225,8 @@
 				174475E8FF5EF8A512120111,
 				1744760AFF5FF8DB12120111,
 				5C1372E8FF6546C412120111,
+				0101EC5DFF8FDD1B7F000001,
+				0101EC5EFF8FE67C7F000001,
 			);
 			isa = PBXGroup;
 			refType = 4;
