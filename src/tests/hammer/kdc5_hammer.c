@@ -92,6 +92,8 @@ main(argc, argv)
 
     if (strrchr(argv[0], '/'))
 	prog = strrchr(argv[0], '/')+1;
+    else
+	prog = argv[0];
 
     num_to_check = 0;
     depth = 1;
@@ -286,7 +288,7 @@ int verify_cs_pair(p_client_str, p_client, p_server_str, p_num,
     krb5_principal server;
     krb5_data request_data;
     char *returned_client;
-    krb5_tkt_authent authdat;
+    krb5_tkt_authent *authdat;
 
     if (brief)
       fprintf(stderr, "\tprinc (%d) client (%d) for server (%d)\n", 
@@ -312,21 +314,19 @@ int verify_cs_pair(p_client_str, p_client, p_server_str, p_num,
 	return(-1);
     }
 
-    if (!krb5_principal_compare(authdat.authenticator->client, p_client)) {
-      code = krb5_unparse_name(authdat.authenticator->client, &returned_client);
+    if (!krb5_principal_compare(authdat->authenticator->client, p_client)) {
+      code = krb5_unparse_name(authdat->authenticator->client, &returned_client);
       if (code)
 	com_err (prog, code, 
 		 "Client not as expected, but cannot unparse client name");
       else
 	com_err (prog, 0, "Client not as expected (%s).", returned_client);
-      if (authdat.ticket) xfree(authdat.ticket);
-      if (authdat.authenticator) xfree(authdat.authenticator);
+      krb5_free_tkt_authent(authdat);
       free(returned_client);
       return(-1);
     }
 
-    if (authdat.ticket) xfree(authdat.ticket);
-    if (authdat.authenticator) xfree(authdat.authenticator);
+    krb5_free_tkt_authent(authdat);
     krb5_free_principal(server);
     if (request_data.data) xfree(request_data.data);
 
@@ -398,6 +398,8 @@ int get_tgt (p_client_str, p_client, ccache)
 					 p_client_str,
 					 ccache,
 					 &my_creds);
+    my_creds.server = 0;
+    krb5_free_cred_contents(&my_creds);
     if (code != 0) {
 	com_err (prog, code, "while getting initial credentials");
 	return(-1);
