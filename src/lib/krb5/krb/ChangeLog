@@ -1,5 +1,12 @@
 2001-09-07  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_expand.c: New file.
+	* Makefile.in (SRCS): Add test-case source files; rebuilt
+	dependencies.
+	(t_expand.o): Build from t_expand.c now, no special build rule.
+
+2001-09-07  Ken Raeburn  <raeburn@mit.edu>
+
 	* rd_req_dec.c (krb5_rd_req_decoded_opt): Pass server realm to
 	transited-list check, not local realm, in case they're different.
 

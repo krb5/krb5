@@ -268,7 +268,12 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/valid_times.c	\
 	$(srcdir)/vfy_increds.c \
 	$(srcdir)/vic_opt.c	\
-	$(srcdir)/walk_rtree.c
+	$(srcdir)/walk_rtree.c	\
+	$(srcdir)/t_walk_rtree.c \
+	$(srcdir)/t_kerb.c	\
+	$(srcdir)/t_ser.c	\
+	$(srcdir)/t_deltat.c	\
+	$(srcdir)/t_expand.c
 
 # Someday, when we have a "maintainer mode", do this right:
 BISON=bison
@@ -307,8 +312,7 @@ t_deltat : $(T_DELTAT_OBJS)
 	$(CC_LINK) -o t_deltat $(T_DELTAT_OBJS)
 
 T_EXPAND_OBJS=t_expand.o
-t_expand.o : chk_trans.c
-	$(CC) $(ALL_CFLAGS) -c -DTEST -o t_expand.o $(srcdir)/chk_trans.c
+t_expand.o : t_expand.c
 t_expand : $(T_EXPAND_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_expand $(T_EXPAND_OBJS) $(KRB5_BASE_LIBS)
 
@@ -702,4 +706,23 @@ walk_rtree.o: walk_rtree.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   int-proto.h
+t_walk_rtree.o: t_walk_rtree.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+t_kerb.o: t_kerb.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+t_ser.o: t_ser.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h auth_con.h
+t_deltat.o: t_deltat.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h
+t_expand.o: t_expand.c chk_trans.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
 
