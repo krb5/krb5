@@ -1,3 +1,8 @@
+Wed Jul 31 17:53:45 1996  Tom Yu  <tlyu@mit.edu>
+
+	* admin_server.c: Remove #include <sys/socket.h> because k5-int.h
+		already grabs it if NEED_SOCKETS is defined.
+
 Thu Jul 18 19:46:49 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK

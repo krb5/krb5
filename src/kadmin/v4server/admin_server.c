@@ -38,7 +38,6 @@
 #endif /* POSIX_SIGNALS */
 #include <sys/wait.h>
 #include <errno.h>
-#include <sys/socket.h>
 #include <sys/time.h>
 #include <syslog.h>
 
