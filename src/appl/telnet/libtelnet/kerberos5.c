@@ -74,6 +74,7 @@
 #include "misc.h"
 
 extern auth_debug_mode;
+extern int net;
 
 #ifdef	FORWARD
 int forward_flags = 0;  /* Flags get set in telnet/main.c on -f and -F */
@@ -251,9 +252,19 @@ kerberos5_send(ap)
 	ap_opts |= AP_OPTS_USE_SUBKEY;
 #endif	/* ENCRYPTION */
 	    
-	auth_context = 0;
-	r = krb5_mk_req_extended(telnet_context, &auth_context, ap_opts,
-				 NULL, new_creds, &auth);
+    if (r = krb5_auth_con_init(telnet_context, &auth_context)) {
+	if (auth_debug_mode) {
+	    printf("Kerberos V5: failed to init auth_context (%s)\r\n",
+		   error_message(r));
+	}
+	return(0);
+    }
+    
+    krb5_auth_con_setflags(telnet_context, auth_context,
+                           KRB5_AUTH_CONTEXT_RET_TIME);
+
+    r = krb5_mk_req_extended(telnet_context, &auth_context, ap_opts,
+			     NULL, new_creds, &auth);
 
 #ifdef	ENCRYPTION
 	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, &newkey);
@@ -405,10 +416,13 @@ kerberos5_is(ap, data, cnt)
 		break;
 #ifdef	FORWARD
 	case KRB_FORWARD:
-		inbuf.data = (char *)data;
 		inbuf.length = cnt;
-		if (r = rd_and_store_for_creds(telnet_context, &inbuf, ticket, 
-					       UserNameRequested)) {
+		inbuf.data = (char *)data;
+		if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context, 
+			net, KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) || 
+		    (r = rd_and_store_for_creds(telnet_context, auth_context,
+			   &inbuf, ticket, UserNameRequested))) {
+
 		    char errbuf[128];
 		    
 		    (void) strcpy(errbuf, "Read forwarded creds failed: ");
@@ -605,99 +619,54 @@ kerberos5_printsub(data, cnt, buf, buflen)
 }
 
 #ifdef	FORWARD
-        void
+
+void
 kerberos5_forward(ap)
      Authenticator *ap;
 {
-    krb5_creds *local_creds, * new_creds;
     krb5_error_code r;
-    krb5_data forw_creds;
-    extern krb5_cksumtype krb5_kdc_req_sumtype;
     krb5_ccache ccache;
-
-    if (!(local_creds = (krb5_creds *) 
-	  calloc(1, sizeof(*local_creds)))) {
-	if (auth_debug_mode) 
-	  printf("Kerberos V5: could not allocate memory for credentials\r\n");
-	return;
-    }
-
-    if (r = krb5_sname_to_principal(telnet_context, RemoteHostName, "host", 
-				    KRB5_NT_SRV_HST, &local_creds->server)) {
-	if (auth_debug_mode) 
-	  printf("Kerberos V5: could not build server name - %s\r\n",
-		 error_message(r));
-	krb5_free_creds(telnet_context, local_creds);
-	return;
-    }
-
-    if (telnet_krb5_realm != NULL) {
-        krb5_data rdata;
-
-	rdata.length = strlen(telnet_krb5_realm);
-	rdata.data = (char *) malloc(rdata.length + 1);
-	if (rdata.data == NULL) {
-	    fprintf(stderr, "malloc failed\n");
-	    return;
-	}
-	strcpy(rdata.data, telnet_krb5_realm);
-	krb5_princ_set_realm(telnet_context, local_creds->server, &rdata);
-    }
+    krb5_principal client;
+    krb5_data forw_creds;
 
     if (r = krb5_cc_default(telnet_context, &ccache)) {
 	if (auth_debug_mode) 
-	  printf("Kerberos V5: could not get default ccache - %s\r\n",
-		 error_message(r));
-	krb5_free_creds(telnet_context, local_creds);
+	    printf("Kerberos V5: could not get default ccache - %s\r\n",
+		   error_message(r));
 	return;
     }
 
-    if (r = krb5_cc_get_principal(telnet_context,ccache,&local_creds->client)) {
+    if (r = krb5_cc_get_principal(telnet_context, ccache, &client)) {
 	if (auth_debug_mode) 
-	  printf("Kerberos V5: could not get default principal - %s\r\n",
-		 error_message(r));
-	krb5_free_creds(telnet_context, local_creds);
+	    printf("Kerberos V5: could not get default principal - %s\r\n",
+		   error_message(r));
 	return;
     }
 
-    /* Get ticket from credentials cache */
-    if (r = krb5_get_credentials(telnet_context, KRB5_GC_CACHED, 
-			         ccache, local_creds, &new_creds)) {
-	if (auth_debug_mode) 
-	  printf("Kerberos V5: could not obtain credentials - %s\r\n",
-		 error_message(r));
-	krb5_free_creds(telnet_context, local_creds);
-	krb5_free_creds(telnet_context, new_creds);
+    if (r = krb5_auth_con_genaddrs(telnet_context, auth_context, net,
+			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR)) {
+	if (auth_debug_mode)
+	    printf("Kerberos V5: could not gen local full address - %s\r\n",
+		    error_message(r));
 	return;
     }
 
-    if (r = krb5_get_for_creds(telnet_context,
-			       krb5_kdc_req_sumtype,
-			       RemoteHostName,
-			       new_creds->client,
-			       &new_creds->keyblock,
-			       forward_flags & OPTS_FORWARDABLE_CREDS,
-			       &forw_creds)) {
+    if (r = get_for_creds(telnet_context, auth_context, RemoteHostName, client,
+			  forward_flags & OPTS_FORWARDABLE_CREDS, &forw_creds)){
 	if (auth_debug_mode) 
-	  printf("Kerberos V5: error getting forwarded creds - %s\r\n",
-		 error_message(r));
-	krb5_free_creds(telnet_context, local_creds);
-        krb5_free_creds(telnet_context, new_creds);
+	    printf("Kerberos V5: error getting forwarded creds - %s\r\n",
+	  	   error_message(r));
 	return;
     }
     
     /* Send forwarded credentials */
     if (!Data(ap, KRB_FORWARD, forw_creds.data, forw_creds.length)) {
 	if (auth_debug_mode)
-	  printf("Not enough room for authentication data\r\n");
-    }
-    else {
+	    printf("Not enough room for authentication data\r\n");
+    } else {
 	if (auth_debug_mode)
-	  printf("Forwarded local Kerberos V5 credentials to server\r\n");
+	    printf("Forwarded local Kerberos V5 credentials to server\r\n");
     }
-
-    krb5_free_creds(telnet_context, local_creds);
-    krb5_free_creds(telnet_context, new_creds);
 }
 #endif	/* FORWARD */
 
