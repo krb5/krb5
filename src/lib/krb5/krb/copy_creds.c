@@ -76,9 +76,15 @@ krb5_creds **outcred;
     tempcred->second_ticket = *scratch;
     xfree(scratch);
 
+    retval = krb5_copy_authdata(incred->authdata,&tempcred->authdata);
+    if (retval)
+        goto clearticket;
+
     *outcred = tempcred;
     return 0;
 
+ clearticket:    
+    memset(tempcred->ticket.data,0,tempcred->ticket.length);
  cleanticket:
     free(tempcred->ticket.data);
  cleanaddrs:
