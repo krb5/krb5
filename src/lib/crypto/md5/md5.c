@@ -8,6 +8,10 @@
  */
 
 /*
+ * Modified by John Carr, MIT, to use Kerberos 5 typedefs.
+ */
+
+/*
  ***********************************************************************
  ** Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.  **
  **                                                                   **
@@ -31,6 +35,7 @@
  ***********************************************************************
  */
 
+#include <krb5/krb5.h>
 #include <krb5/rsa-md5.h>
 
 /*
@@ -70,22 +75,22 @@ static unsigned char PADDING[64] = {
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4 */
 /* Rotation is separate from addition to prevent recomputation */
 #define FF(a, b, c, d, x, s, ac) \
-  {(a) += F ((b), (c), (d)) + (x) + (UINT4)(ac); \
+  {(a) += F ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
   }
 #define GG(a, b, c, d, x, s, ac) \
-  {(a) += G ((b), (c), (d)) + (x) + (UINT4)(ac); \
+  {(a) += G ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
   }
 #define HH(a, b, c, d, x, s, ac) \
-  {(a) += H ((b), (c), (d)) + (x) + (UINT4)(ac); \
+  {(a) += H ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
   }
 #define II(a, b, c, d, x, s, ac) \
-  {(a) += I ((b), (c), (d)) + (x) + (UINT4)(ac); \
+  {(a) += I ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
   }
@@ -96,14 +101,14 @@ static unsigned char PADDING[64] = {
 void MD5Init (mdContext)
 MD5_CTX *mdContext;
 {
-  mdContext->i[0] = mdContext->i[1] = (UINT4)0;
+  mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
   /* Load magic initialization constants.
    */
-  mdContext->buf[0] = (UINT4)0x67452301;
-  mdContext->buf[1] = (UINT4)0xefcdab89;
-  mdContext->buf[2] = (UINT4)0x98badcfe;
-  mdContext->buf[3] = (UINT4)0x10325476;
+  mdContext->buf[0] = (krb5_ui_4)0x67452301L;
+  mdContext->buf[1] = (krb5_ui_4)0xefcdab89L;
+  mdContext->buf[2] = (krb5_ui_4)0x98badcfeL;
+  mdContext->buf[3] = (krb5_ui_4)0x10325476L;
 }
 
 /* The routine MD5Update updates the message-digest context to
@@ -115,7 +120,7 @@ MD5_CTX *mdContext;
 unsigned char *inBuf;
 unsigned int inLen;
 {
-  UINT4 in[16];
+  krb5_ui_4 in[16];
   int mdi;
   unsigned int i, ii;
 
@@ -123,10 +128,10 @@ unsigned int inLen;
   mdi = (int)((mdContext->i[0] >> 3) & 0x3F);
 
   /* update number of bits */
-  if ((mdContext->i[0] + ((UINT4)inLen << 3)) < mdContext->i[0])
+  if ((mdContext->i[0] + ((krb5_ui_4)inLen << 3)) < mdContext->i[0])
     mdContext->i[1]++;
-  mdContext->i[0] += ((UINT4)inLen << 3);
-  mdContext->i[1] += ((UINT4)inLen >> 29);
+  mdContext->i[0] += ((krb5_ui_4)inLen << 3);
+  mdContext->i[1] += ((krb5_ui_4)inLen >> 29);
 
   while (inLen--) {
     /* add new character to buffer, increment mdi */
@@ -135,10 +140,10 @@ unsigned int inLen;
     /* transform if necessary */
     if (mdi == 0x40) {
       for (i = 0, ii = 0; i < 16; i++, ii += 4)
-        in[i] = (((UINT4)mdContext->in[ii+3]) << 24) |
-                (((UINT4)mdContext->in[ii+2]) << 16) |
-                (((UINT4)mdContext->in[ii+1]) << 8) |
-                ((UINT4)mdContext->in[ii]);
+        in[i] = (((krb5_ui_4)mdContext->in[ii+3]) << 24) |
+                (((krb5_ui_4)mdContext->in[ii+2]) << 16) |
+                (((krb5_ui_4)mdContext->in[ii+1]) << 8) |
+                ((krb5_ui_4)mdContext->in[ii]);
       Transform (mdContext->buf, in);
       mdi = 0;
     }
@@ -151,7 +156,7 @@ unsigned int inLen;
 void MD5Final (mdContext)
 MD5_CTX *mdContext;
 {
-  UINT4 in[16];
+  krb5_ui_4 in[16];
   int mdi;
   unsigned int i, ii;
   unsigned int padLen;
@@ -169,10 +174,10 @@ MD5_CTX *mdContext;
 
   /* append length in bits and transform */
   for (i = 0, ii = 0; i < 14; i++, ii += 4)
-    in[i] = (((UINT4)mdContext->in[ii+3]) << 24) |
-            (((UINT4)mdContext->in[ii+2]) << 16) |
-            (((UINT4)mdContext->in[ii+1]) << 8) |
-            ((UINT4)mdContext->in[ii]);
+    in[i] = (((krb5_ui_4)mdContext->in[ii+3]) << 24) |
+            (((krb5_ui_4)mdContext->in[ii+2]) << 16) |
+            (((krb5_ui_4)mdContext->in[ii+1]) << 8) |
+            ((krb5_ui_4)mdContext->in[ii]);
   Transform (mdContext->buf, in);
 
   /* store buffer in digest */
@@ -190,10 +195,10 @@ MD5_CTX *mdContext;
 /* Basic MD5 step. Transforms buf based on in.
  */
 static void Transform (buf, in)
-UINT4 *buf;
-UINT4 *in;
+krb5_ui_4 *buf;
+krb5_ui_4 *in;
 {
-  UINT4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
+  register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 
   /* Round 1 */
 #define S11 7

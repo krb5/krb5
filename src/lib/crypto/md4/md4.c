@@ -46,7 +46,7 @@ static char rcsid_md4_c[] = "$Id$";
 
 /* forward declaration */
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
-static void Transform (UINT4 *, UINT4 *);
+static void Transform (krb5_ui_4 *, krb5_ui_4 *);
 #else
 static void Transform ();
 #endif
@@ -76,23 +76,23 @@ static unsigned char PADDING[64] = {
   {(a) += F ((b), (c), (d)) + (x); \
    (a) = ROTATE_LEFT ((a), (s));}
 #define GG(a, b, c, d, x, s) \
-  {(a) += G ((b), (c), (d)) + (x) + (UINT4)013240474631; \
+  {(a) += G ((b), (c), (d)) + (x) + (krb5_ui_4)013240474631; \
    (a) = ROTATE_LEFT ((a), (s));}
 #define HH(a, b, c, d, x, s) \
-  {(a) += H ((b), (c), (d)) + (x) + (UINT4)015666365641; \
+  {(a) += H ((b), (c), (d)) + (x) + (krb5_ui_4)015666365641; \
    (a) = ROTATE_LEFT ((a), (s));}
 
 void MD4Init (mdContext)
 MD4_CTX *mdContext;
 {
-  mdContext->i[0] = mdContext->i[1] = (UINT4)0;
+  mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
   /* Load magic initialization constants.
    */
-  mdContext->buf[0] = (UINT4)0x67452301;
-  mdContext->buf[1] = (UINT4)0xefcdab89;
-  mdContext->buf[2] = (UINT4)0x98badcfe;
-  mdContext->buf[3] = (UINT4)0x10325476;
+  mdContext->buf[0] = (krb5_ui_4)0x67452301;
+  mdContext->buf[1] = (krb5_ui_4)0xefcdab89;
+  mdContext->buf[2] = (krb5_ui_4)0x98badcfe;
+  mdContext->buf[3] = (krb5_ui_4)0x10325476;
 }
 
 void MD4Update (mdContext, inBuf, inLen)
@@ -100,7 +100,7 @@ MD4_CTX *mdContext;
 unsigned char *inBuf;
 unsigned int inLen;
 {
-  UINT4 in[16];
+  krb5_ui_4 in[16];
   int mdi;
   unsigned int i, ii;
 
@@ -108,10 +108,10 @@ unsigned int inLen;
   mdi = (int)((mdContext->i[0] >> 3) & 0x3F);
 
   /* update number of bits */
-  if ((mdContext->i[0] + ((UINT4)inLen << 3)) < mdContext->i[0])
+  if ((mdContext->i[0] + ((krb5_ui_4)inLen << 3)) < mdContext->i[0])
     mdContext->i[1]++;
-  mdContext->i[0] += ((UINT4)inLen << 3);
-  mdContext->i[1] += ((UINT4)inLen >> 29);
+  mdContext->i[0] += ((krb5_ui_4)inLen << 3);
+  mdContext->i[1] += ((krb5_ui_4)inLen >> 29);
 
   while (inLen--) {
     /* add new character to buffer, increment mdi */
@@ -120,10 +120,10 @@ unsigned int inLen;
     /* transform if necessary */
     if (mdi == 0x40) {
       for (i = 0, ii = 0; i < 16; i++, ii += 4)
-        in[i] = (((UINT4)mdContext->in[ii+3]) << 24) |
-                (((UINT4)mdContext->in[ii+2]) << 16) |
-                (((UINT4)mdContext->in[ii+1]) << 8) |
-                ((UINT4)mdContext->in[ii]);
+        in[i] = (((krb5_ui_4)mdContext->in[ii+3]) << 24) |
+                (((krb5_ui_4)mdContext->in[ii+2]) << 16) |
+                (((krb5_ui_4)mdContext->in[ii+1]) << 8) |
+                ((krb5_ui_4)mdContext->in[ii]);
       Transform (mdContext->buf, in);
       mdi = 0;
     }
@@ -133,7 +133,7 @@ unsigned int inLen;
 void MD4Final (mdContext)
 MD4_CTX *mdContext;
 {
-  UINT4 in[16];
+  krb5_ui_4 in[16];
   int mdi;
   unsigned int i, ii;
   unsigned int padLen;
@@ -151,10 +151,10 @@ MD4_CTX *mdContext;
 
   /* append length in bits and transform */
   for (i = 0, ii = 0; i < 14; i++, ii += 4)
-    in[i] = (((UINT4)mdContext->in[ii+3]) << 24) |
-            (((UINT4)mdContext->in[ii+2]) << 16) |
-            (((UINT4)mdContext->in[ii+1]) << 8) |
-            ((UINT4)mdContext->in[ii]);
+    in[i] = (((krb5_ui_4)mdContext->in[ii+3]) << 24) |
+            (((krb5_ui_4)mdContext->in[ii+2]) << 16) |
+            (((krb5_ui_4)mdContext->in[ii+1]) << 8) |
+            ((krb5_ui_4)mdContext->in[ii]);
   Transform (mdContext->buf, in);
 
 
@@ -173,10 +173,10 @@ MD4_CTX *mdContext;
 /* Basic MD4 step. Transform buf based on in.
  */
 static void Transform (buf, in)
-UINT4 *buf;
-UINT4 *in;
+krb5_ui_4 *buf;
+krb5_ui_4 *in;
 {
-  UINT4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
+  krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 
   /* Round 1 */
   FF (a, b, c, d, in[ 0],  3);
