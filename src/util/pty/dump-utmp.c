@@ -1,6 +1,29 @@
-#include <stdio.h>
+/*
+ * Copyright 2001 by the Massachusetts Institute of Technology.
+ *
+ * Permission to use, copy, modify, and distribute this software and
+ * its documentation for any purpose and without fee is hereby
+ * granted, provided that the above copyright notice appear in all
+ * copies and that both that copyright notice and this permission
+ * notice appear in supporting documentation, and that the name of
+ * M.I.T. not be used in advertising or publicity pertaining to
+ * distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability
+ * of this software for any purpose.  It is provided "as is" without
+ * express or implied warranty.
+ *
+ * dump-utmp.c: dump utmp and utmpx format files for debugging purposes.
+ */
+
+#include <sys/types.h>
 #include <sys/file.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #ifndef UTMPX
 #ifdef HAVE_UTMPX_H
@@ -8,138 +31,248 @@
 #endif
 #endif
 
+#if defined(HAVE_UTMPNAME) || defined(HAVE_UTMPXNAME)
+#define UTN			/* we can set utmp or utmpx for getut*() */
+#endif
+
 #ifdef UTMPX
 #include <utmpx.h>
+void print_utx(int, const struct utmpx *);
 #endif
 #include <utmp.h>
 
-extern char *ctime ();
+void print_ut(int, const struct utmp *);
+
+void usage(const char *);
 
 #if defined (HAVE_STRUCT_UTMP_UT_TYPE) || defined (UTMPX)
-char *ut_typename (t) {
-  switch (t) {
+char *ut_typename(int);
+
+char *
+ut_typename(int t) {
+    switch (t) {
 #define S(N) case N : return #N
 #define S2(N,N2) case N : return #N2
-  S(EMPTY);
-  S(RUN_LVL);
-  S(BOOT_TIME);
-  S(OLD_TIME);
-  S(NEW_TIME);
-  S2(INIT_PROCESS,INIT);
-  S2(LOGIN_PROCESS,LOGIN);
-  S2(USER_PROCESS,USER);
-  S2(DEAD_PROCESS,DEAD);
-  S(ACCOUNTING);
-  default: return "??";
-  }
+	S(EMPTY);
+	S(RUN_LVL);
+	S(BOOT_TIME);
+	S(OLD_TIME);
+	S(NEW_TIME);
+	S2(INIT_PROCESS,INIT);
+	S2(LOGIN_PROCESS,LOGIN);
+	S2(USER_PROCESS,USER);
+	S2(DEAD_PROCESS,DEAD);
+	S(ACCOUNTING);
+    default: return "??";
+    }
 }
 #endif
 
-int main (argc, argv) int argc; char *argv[]; {
-  int f;
-  char id[5], user[50], host[100];
-  char *file = 0;
-  int all = 0;
-  int is_utmpx = 0;
+#define S2D(x) (sizeof(x) * 2.4 + 1.5)
 
-  while (*++argv)
-    {
-      char *arg = *argv;
-      if (!arg)
-	break;
-      if (!strcmp ("-a", arg))
-	all = 1;
-      else if (!strcmp ("-x", arg))
-	is_utmpx = 1;
-      else if (arg[0] == '-')
-	{
-	  fprintf (stderr, "unknown arg `%s'\n", arg);
-	  return 1;
-	}
-      else if (file)
-	{
-	  fprintf (stderr, "already got a file\n");
-	  return 1;
-	}
-      else
-	file = arg;
-    }
-  f = open (file, O_RDONLY);
-  if (f < 0) {
-    perror (file);
-    exit (1);
-  }
-  id[4] = 0;
-  if (is_utmpx) {
-#ifdef UTMPX
-    struct utmpx u;
-    while (1) {
-      int nread = read (f, &u, sizeof (u));
-      if (nread == 0) {
-	/* eof */
-	return 0;
-      } else if (nread == -1) {
-	/* error */
-	perror ("read");
-	return 1;
-      }
-      if ((u.ut_type == DEAD_PROCESS
-	   || u.ut_type == EMPTY)
-	  && !all)
-	continue;
-      strncpy (id, u.ut_id, 4);
-      printf ("%-8s:%-12s:%-4s", u.ut_user, u.ut_line, id);
-      printf (":%5d", u.ut_pid);
-      printf ("(%5d,%5d)", u.ut_exit.e_termination, u.ut_exit.e_exit);
-      printf (" %-9s %s", ut_typename (u.ut_type), ctime (&u.ut_xtime) + 4);
-      if (u.ut_syslen && u.ut_host[0])
-	printf (" %s\n", u.ut_host);
-    }
-    abort ();
-#else
-    fprintf (stderr, "utmpx support not compiled in\n");
-    return 1;
-#endif
-  }
-  /* else */
-  {
-    struct utmp u;
-    while (read (f, &u, sizeof (u)) == sizeof (u)) {
-#ifdef EMPTY
-      if ((u.ut_type == DEAD_PROCESS
-	   || u.ut_type == EMPTY)
-	  && !all)
-	continue;
+void
+print_ut(int all, const struct utmp *u)
+{
+    int lu, ll;
+#ifdef HAVE_STRUCT_UTMP_UT_ID
+    int lid;
 #endif
 #ifdef HAVE_STRUCT_UTMP_UT_PID
-      strncpy (id, u.ut_id, 4);
-      strncpy (user, u.ut_user, sizeof (u.ut_user));
-      user[sizeof(u.ut_user)] = 0;
-      printf ("%-8s:%-12s:%-4s", user, u.ut_line, id);
-      printf (":%5d", u.ut_pid);
-#else
-      strncpy (user, u.ut_name, sizeof (u.ut_name));
-      user[sizeof(u.ut_name)] = 0;
-      printf ("%-8s:%-12s", user, u.ut_line);
+    int lpid;
 #endif
-#ifdef HAVE_STRUCT_UTMP_UT_HOST
-      {
-	char host[sizeof (u.ut_host) + 1];
-	strncpy (host, u.ut_host, sizeof(u.ut_host));
-	host[sizeof (u.ut_host)] = 0;
-	printf (":%-*s", sizeof (u.ut_host), host);
-      }
+#ifdef PTY_UTMP_E_EXIT
+    int let, lee;
 #endif
-#ifdef HAVE_STRUCT_UTMP_UT_EXIT
-      printf ("(%5d,%5d)", u.ut_exit.e_termination, u.ut_exit.e_exit);
+
+#ifdef HAVE_STRUCT_UTMP_UT_TYPE
+    if (!all && ((u->ut_type == EMPTY) || (u->ut_type == DEAD_PROCESS)))
+	return;
+#endif
+
+    lu = sizeof(u->ut_user);
+    ll = sizeof(u->ut_line);
+    printf("%-*.*s:", lu, lu, u->ut_name);
+    printf("%-*.*s:", ll, ll, u->ut_line);
+#ifdef HAVE_STRUCT_UTMP_UT_ID
+    lid = sizeof(u->ut_id);
+    printf("%-*.*s:", lid, lid, u->ut_id);
+#endif
+#ifdef HAVE_STRUCT_UTMP_UT_PID
+    lpid = S2D(u->ut_pid);
+    printf("%*ld", lpid, (long)u->ut_pid);
+#endif
+#ifdef PTY_UTMP_E_EXIT
+    let = S2D(u->ut_exit.PTY_UTMP_E_TERMINATION);
+    lee = S2D(u->ut_exit.PTY_UTMP_E_EXIT);
+    printf("(%*ld,", let, (long)u->ut_exit.PTY_UTMP_E_TERMINATION);
+    printf("%*ld)", lee, (long)u->ut_exit.PTY_UTMP_E_EXIT);
 #endif
 #ifdef HAVE_STRUCT_UTMP_UT_TYPE
-      printf (" %-9s", ut_typename (u.ut_type));
+    printf(" %-9s", ut_typename(u->ut_type));
 #endif
-      /* this ends with a newline */
-      printf (" %s", ctime (&u.ut_time) + 4);
-    }
-  }
+    printf(" %s", ctime(&u->ut_time) + 4);
+#ifdef HAVE_STRUCT_UTMP_UT_HOST
+    if (u->ut_host[0])
+	printf(" %s\n", u->ut_host);
+#endif
 
-  return 0;
+    return;
+}
+
+#ifdef UTMPX
+void
+print_utx(int all, const struct utmpx *u)
+{
+    int lu, ll, lid, lpid;
+#ifdef PTY_UTMPX_E_EXIT
+    int let, lee;
+#endif
+
+    if (!all && ((u->ut_type == EMPTY) || (u->ut_type == DEAD_PROCESS)))
+	return;
+
+    lu = sizeof(u->ut_user);
+    ll = sizeof(u->ut_line);
+    lid = sizeof(u->ut_id);
+    printf("%-*.*s:", lu, lu, u->ut_user);
+    printf("%-*.*s:", ll, ll, u->ut_line);
+    printf("%-*.*s", lid, lid, u->ut_id);
+    if (lu + ll + lid >= 60)
+	printf("\n");
+    else
+	printf(":");
+    lpid = S2D(u->ut_pid);
+    printf("%*ld", lpid, (long)u->ut_pid);
+#ifdef PTY_UTMPX_E_EXIT
+    let = S2D(u->ut_exit.PTY_UTMPX_E_TERMINATION);
+    lee = S2D(u->ut_exit.PTY_UTMPX_E_EXIT);
+    printf("(%*ld,", let, (long)u->ut_exit.PTY_UTMPX_E_TERMINATION);
+    printf("%*ld)", lee, (long)u->ut_exit.PTY_UTMPX_E_EXIT);
+#endif
+    printf(" %-9s", ut_typename(u->ut_type));
+    printf(" %s", ctime(&u->ut_tv.tv_sec) + 4);
+#ifdef HAVE_STRUCT_UTMPX_UT_HOST
+    if (u->ut_host[0])
+	printf(" %s\n", u->ut_host);
+#endif
+
+    return;
+}
+#endif
+
+#ifdef UTMPX
+#define OPTX "x"
+#else
+#define OPTX
+#endif
+#ifdef UTN
+#define OPTG "g"
+#else
+#define OPTG
+#endif
+#define OPTS "a" OPTX OPTG
+
+void
+usage(const char *prog)
+{
+    fprintf(stderr, "usage: %s [-" OPTS "] file\n", prog);
+    exit(1);
+}
+
+int
+main(int argc, char **argv)
+{
+    int c;
+    int all, is_utmpx, do_getut;
+    int f;
+    char *fn;
+    size_t recsize;
+    size_t nread;
+    union {
+	struct utmp ut;
+#ifdef UTMPX
+	struct utmpx utx;
+#endif
+    } u;
+    struct utmp *utp;
+#ifdef UTMPX
+    struct utmpx *utxp;
+#endif
+
+    all = is_utmpx = do_getut = 0;
+    recsize = sizeof(struct utmp);
+
+    while ((c = getopt(argc, argv, OPTS)) != EOF) {
+	switch (c) {
+	case 'a':
+	    all = 1;
+	    break;
+#ifdef UTMPX
+	case 'x':
+	    is_utmpx = 1;
+	    recsize = sizeof(struct utmpx);
+	    break;
+#endif
+#ifdef UTN
+	case 'g':
+	    do_getut = 1;
+	    break;
+#endif
+	default:
+	    usage(argv[0]);
+	}
+    }
+    if (argc <= optind)
+	usage(argv[0]);
+    fn = argv[optind];
+    if (!do_getut) {
+	f = open(fn, O_RDONLY);
+	if (f == -1) {
+	    perror(fn);
+	    exit(1);
+	}
+	do {
+	    nread = read(f, &u, recsize);
+	    if (nread == -1) {
+		perror("read");
+		exit(1);
+	    }
+	    if (nread && nread < recsize) {
+		fprintf(stderr, "short read");
+		close(f);
+		exit(1);
+	    }
+	    if (is_utmpx) {
+#ifdef UTMPX
+		print_utx(all, &u.utx);
+#else
+		abort();
+#endif
+	    } else {
+		print_ut(all, &u.ut);
+	    }
+	} while (nread);
+	close(f);
+    } else {
+	if (is_utmpx) {
+#if defined(UTMPX) && defined(UTN)
+	    utmpxname(fn);
+	    setutxent();
+	    while ((utxp = getutxent()) != NULL)
+		print_utx(all, utxp);
+#else
+	    abort();
+#endif
+	} else {
+#ifdef HAVE_UTMPNAME
+	    utmpname(fn);
+	    setutxent();
+	    while ((utp = getutent()) != NULL)
+		print_ut(all, utp);
+#else
+	    abort();
+#endif
+	}
+    }
+    exit(0);    
 }

@@ -1,8 +1,7 @@
 /*
- * ptyint_update_utmp: Update or create a utmp entry
+ * ptyint_update_wtmp: Update wtmp.
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
- *
+ * Copyright 1995, 2001 by the Massachusetts Institute of Technology.
  * 
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
@@ -28,7 +27,7 @@
 #define WTMP_FILE _PATH_WTMP
 #endif
 
-#if !defined(WTMPX_FILE) && defined(_PATH_WTMPX) && defined(HAVE_UPDWTMPX)
+#if !defined(WTMPX_FILE) && defined(_PATH_WTMPX)
 #define WTMPX_FILE _PATH_WTMPX
 #endif
 
@@ -37,85 +36,85 @@
 #define	WTMP_FILE	"/usr/adm/wtmp"
 #endif
 
-#if defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1)
-/* This is ugly, but the lack of standardization in the utmp/utmpx
- * space, and what glibc implements and doesn't make available, is
- * even worse.
+#ifdef HAVE_SETUTXENT
+
+/*
+ * Welcome to conditional salad.
+ *
+ * This really wants to take a (const struct utmpx *) but updutmpx()
+ * on Solaris at least doesn't take a const argument.  *sigh*
  */
-#undef HAVE_UPDWTMPX		/* Don't use updwtmpx for glibc 2.1 */
+long
+ptyint_update_wtmpx(struct utmpx *ent)
+{
+#if !(defined(HAVE_UPDWTMPX) && defined(WTMPX_FILE))
+    struct utmp ut;
 #endif
 
-long ptyint_update_wtmp (ent , host, user)
-    struct utmp *ent;
-    char *host;
-    char *user;
+#if defined(HAVE_UPDWTMPX) && defined(WTMPX_FILE)
+    updwtmpx(WTMPX_FILE, ent);
+    return 0;
+#else
+
+#ifdef HAVE_GETUTMP
+    getutmp(ent, &ut);
+#else  /* Emulate getutmp().  Yuck. */
+    memset(&ut, 0, sizeof(ut));
+    strncpy(ut.ut_name, ent->ut_user, sizeof(ut.ut_name));
+    strncpy(ut.ut_line, ent->ut_line, sizeof(ut.ut_line));
+    ut.ut_time = ent->ut_tv.tv_sec;
+#ifdef HAVE_STRUCT_UTMP_UT_HOST
+    strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
+    ut.ut_host[sizeof(ut.ut_host) - 1] = '\0';
+#ifdef HAVE_STRUCT_UTMP_UT_SYSLEN
+    ut.ut_syslen = strlen(ut.ut_host) + 1;
+#endif
+#endif
+#ifdef HAVE_STRUCT_UTMP_UT_ID
+    strncpy(ut.ut_id, ent->ut_id, sizeof(ut.ut_id));
+#endif
+#ifdef HAVE_STRUCT_UTMP_UT_PID
+    ut.ut_pid = ent->ut_pid;
+#endif
+#ifdef HAVE_STRUCT_UTMP_UT_TYPE
+    ut.ut_type = ent->ut_type;
+#endif
+#if defined(PTY_UTMP_E_EXIT) && defined(PTY_UTMPX_E_EXIT)
+    ut.ut_exit.PTY_UTMP_E_EXIT = ent->ut_exit.PTY_UTMPX_E_EXIT;
+    ut.ut_exit.PTY_UTMP_E_TERMINATION =
+	ent->ut_exit.PTY_UTMPX_E_TERMINATION
+#endif
+#endif /* !HAVE_GETUTMP */
+
+    return ptyint_update_wtmp(&ut);
+#endif /* !(defined(WTMPX_FILE) && defined(HAVE_UPDWTMPX)) */
+}
+
+#else  /* !HAVE_SETUTXENT */
+
+long
+ptyint_update_wtmp(struct utmp *ent)
 {
 #ifndef HAVE_UPDWTMP
     int fd;
-    time_t uttime;
-    struct utmp ut;
     struct stat statb;
 #endif
 
-#ifdef HAVE_UPDWTMPX
-    struct utmpx utx;
-
-    getutmpx(ent, &utx);
-    if (host)
-      strncpy(utx.ut_host, host, sizeof(utx.ut_host) );
-    else
-      utx.ut_host[0] = 0;
-    if (user)
-      strncpy(utx.ut_user, user, sizeof(utx.ut_user));
-    updwtmpx(WTMPX_FILE, &utx);
-#endif
-
 #ifdef HAVE_UPDWTMP
-#ifndef HAVE_UPDWTMPX
-/* This is already performed by updwtmpx if present.*/
     updwtmp(WTMP_FILE, ent);
-#endif /* HAVE_UPDWTMPX*/
-#else /* HAVE_UPDWTMP */
-
-    if ((fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) >= 0) {
-	if (!fstat(fd, &statb)) {
-	  (void)memset((char *)&ut, 0, sizeof(ut));
-#ifdef __hpux
-	  strncpy (ut.ut_id, ent->ut_id, sizeof (ut.ut_id));
-#endif
-	  (void)strncpy(ut.ut_line, ent->ut_line, sizeof(ut.ut_line));
-	  (void)strncpy(ut.ut_name, ent->ut_name, sizeof(ut.ut_name));
-#ifndef NO_UT_HOST
-	  (void)strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
-#endif
-	  (void)time(&uttime);
-	  ut.ut_time = uttime;
-#if defined(HAVE_GETUTENT) && defined(USER_PROCESS)
-	  if (ent->ut_name) {
-	    if (!ut.ut_pid)
-	      ut.ut_pid = getpid();
-#ifndef __hpux
-	    ut.ut_type = USER_PROCESS;
 #else
-	    ut.ut_type = ent->ut_type;
-#endif
-	  } else {
-#ifdef EMPTY
-	    ut.ut_type = EMPTY;
-#else
-	    ut.ut_type = DEAD_PROCESS; /* For Linux brokenness*/
-#endif	    
-
-	  }
-#endif
-	    if (write(fd, (char *)&ut, sizeof(struct utmp)) !=
-		sizeof(struct utmp))
-	      (void)ftruncate(fd, statb.st_size);
-	}
+    fd = open(WTMP_FILE, O_WRONLY | O_APPEND, 0);
+    if (fd != -1 && !fstat(fd, &statb)) {
+	if (write(fd, (char *)ent, sizeof(struct utmp))
+	    != sizeof(struct utmp))
+	    (void)ftruncate(fd, statb.st_size);
 	(void)close(fd);
     }
-#endif /* HAVE_UPDWTMP */
-    return 0; /* no current failure cases; file not found is not failure!*/
-    
+#endif
+    /*
+     * no current failure cases; file not found is not failure!
+     */
+    return 0;
 }
 
+#endif

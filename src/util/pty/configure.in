@@ -52,19 +52,135 @@ AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY) LIBS="$LIBS -lutil"])
 AC_TYPE_MODE_T
 AC_CHECK_TYPE(time_t, long)
 AC_CHECK_FUNC(strsave,[AC_DEFINE(HAS_STRSAVE)])
-AC_CHECK_FUNCS(getutent setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty logwtmp getutmpx)
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h pty.h utmpx.h utmp.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
+AC_CHECK_FUNCS(setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_CHECK_HEADERS(sys/wait.h)
-AC_CHECK_FUNCS(waitpid updwtmpx)
+AC_CHECK_FUNCS(waitpid)
 DECLARE_SYS_ERRLIST
 KRB5_SIGTYPE
 CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT
 AC_CHECK_HEADER(termios.h,AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
-CHECK_UTMP
-dnl
-dnl
+
+######################################################################
+#
+# utmp related hair here.  There's lots of it.
+#
+
+AC_CHECK_HEADERS(utmp.h utmpx.h)
+AC_CHECK_FUNCS(setutent setutxent updwtmp updwtmpx logwtmp getutmp getutmpx)
+AC_CHECK_FUNCS(utmpname utmpxname)
+
+AC_DEFUN(K5_CHECK_UT_MEMBER,
+[AC_MSG_CHECKING([for $2 in struct $1])
+AC_CACHE_VAL([krb5_cv_struct_$1_$2],
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <utmp.h>], [struct $1 u; u.$2;],
+eval "krb5_cv_struct_$1_$2=yes", eval "krb5_cv_struct_$1_$2=no")])
+if eval "test \"`echo '$krb5_cv_struct_'$1'_'$2`\" = yes"; then
+  AC_MSG_RESULT(yes)
+  krb5_tr_ut=HAVE_STRUCT_`echo $1'_'$2 | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  AC_DEFINE_UNQUOTED($krb5_tr_ut)
+else
+  AC_MSG_RESULT(no)
+fi])
+
+if test $ac_cv_header_utmp_h = yes; then
+  AC_MSG_RESULT(checking struct utmp members)
+  for krb5_mem in ut_host ut_syslen ut_addr ut_id ut_pid ut_type ut_exit; do
+    K5_CHECK_UT_MEMBER(utmp, $krb5_mem)
+  done
+fi
+
+if test $ac_cv_header_utmpx_h = yes; then
+  AC_MSG_RESULT(checking struct utmpx members)
+  for krb5_mem in ut_host ut_syslen ut_addr ut_id ut_pid ut_type ut_exit; do
+    K5_CHECK_UT_MEMBER(utmpx, $krb5_mem)
+  done
+fi
+
+AC_DEFUN(K5_CHECK_UT_EXIT_MEMBER,
+[AC_MSG_CHECKING([for ut_exit.$2 in struct $1])
+AC_CACHE_VAL([krb5_cv_struct_$1_ut_exit_$2],
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <$1.h>], [struct $1 u; u.ut_exit.$2;],
+eval "krb5_cv_struct_$1_ut_exit_$2=yes",
+eval "krb5_cv_struct_$1_ut_exit_$2=no")])
+if eval "test \"`echo '$krb5_cv_struct_'$1'_ut_exit_'$2`\" = yes"; then
+  AC_MSG_RESULT(yes)
+  ifelse([$3], , :, [$3])
+else
+  AC_MSG_RESULT(no)
+  ifelse([$4], , :, [$4])
+fi])
+
+if test $krb5_cv_struct_utmp_ut_exit = yes; then
+  AC_MSG_RESULT(checking for working ut_exit.e_exit in struct utmp)
+  for krb5_mem in __e_exit ut_e_exit ut_exit e_exit; do
+    K5_CHECK_UT_EXIT_MEMBER(utmp, $krb5_mem,
+[krb5_utmp_e_exit=$krb5_mem
+krb5_utmp_e_termination=`echo $krb5_mem|sed -e 's%_exit$%_termination%'`], )
+  done
+  if test "${krb5_utmp_e_exit+set}" = set; then
+    AC_MSG_RESULT([working ut_exit.e_exit in utmp is $krb5_utmp_e_exit])
+    AC_DEFINE_UNQUOTED(PTY_UTMP_E_EXIT, $krb5_utmp_e_exit)
+    AC_DEFINE_UNQUOTED(PTY_UTMP_E_TERMINATION, $krb5_utmp_e_termination)
+  else
+    AC_MSG_RESULT([cannot find working ut_exit.e_exit in utmp])
+  fi
+fi
+
+if test $krb5_cv_struct_utmpx_ut_exit = yes; then
+  AC_MSG_RESULT(checking for working ut_exit.e_exit in struct utmp)
+  for krb5_mem in __e_exit ut_e_exit ut_exit e_exit; do
+    K5_CHECK_UT_EXIT_MEMBER(utmpx, $krb5_mem,
+[krb5_utmpx_e_exit=$krb5_mem
+krb5_utmpx_e_termination=`echo $krb5_mem|sed -e 's%_exit$%_termination%'`], )
+  done
+  if test "${krb5_utmpx_e_exit+set}" = set; then
+    AC_MSG_RESULT([working ut_exit.e_exit in utmpx is $krb5_utmpx_e_exit])
+    AC_DEFINE_UNQUOTED(PTY_UTMPX_E_EXIT, $krb5_utmpx_e_exit)
+    AC_DEFINE_UNQUOTED(PTY_UTMPX_E_TERMINATION, $krb5_utmpx_e_termination)
+  else
+    AC_MSG_RESULT([cannot find working ut_exit.e_exit in utmpx])
+  fi
+fi
+
+if test $ac_cv_func_setutent = yes; then
+  AC_MSG_CHECKING(consistency of sysV-ish utmp API)
+  if test $krb5_cv_struct_utmp_ut_id = no \
+    || test $krb5_cv_struct_utmp_ut_type = no \
+    || test $krb5_cv_struct_utmp_ut_pid = no; then
+    AC_MSG_RESULT(not ok)
+    AC_MSG_ERROR([have setutent but no ut_id, ut_type, or ut_pid in utmp])
+  else
+    AC_MSG_RESULT(ok)
+  fi
+fi
+
+if test $ac_cv_header_utmpx_h = yes; then
+  AC_MSG_CHECKING(consistency of utmpx API)
+  if test $ac_cv_func_setutxent = no; then
+    AC_MSG_RESULT(not ok)
+    AC_MSG_ERROR([have utmpx.h but no setutxent])
+  else
+    if test $krb5_cv_struct_utmpx_ut_id = no \
+      || test $krb5_cv_struct_utmpx_ut_type = no \
+      || test $krb5_cv_struct_utmpx_ut_pid = no; then
+      AC_MSG_RESULT(not ok)
+      AC_MSG_ERROR([have setutxent but no ut_id, ut_type, or ut_pid in utmpx])
+    else
+      AC_MSG_RESULT(ok)
+    fi
+  fi
+fi
+
+#
+# end of utmp-related hair
+#
+######################################################################
+
 AC_MSG_CHECKING([streams interface])
 AC_CACHE_VAL(krb5_cv_has_streams,
 [AC_TRY_COMPILE(
@@ -130,44 +246,6 @@ AC_MSG_RESULT($krb5_cv_setpgrp_args)
 if test $krb5_cv_setpgrp_args = two; then
 AC_DEFINE(SETPGRP_TWOARG)
 fi
-dnl
-dnl
-if test $ac_cv_header_utmpx_h  = yes -a $ac_cv_func_getutmpx = no; then
-AC_MSG_CHECKING([if utmpx and utmp ut_exit structures differ])
-AC_CACHE_VAL(krb5_cv_utmp_utmpx_diff_exit_struct,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>
-#include <utmpx.h>],[struct utmpx utx; struct utmp ut;
-utx.ut_exit.ut_exit = ut.ut_exit.e_exit],
-krb5_cv_utmp_utmpx_diff_exit_struct=yes, krb5_cv_utmp_utmpx_diff_exit_struct=no)])
-AC_MSG_RESULT($krb5_cv_utmp_utmpx_diff_exit_struct)
-if test $krb5_cv_utmp_utmpx_diff_exit_struct = yes; then
-AC_DEFINE(UT_EXIT_STRUCTURE_DIFFER)
-fi
-fi
-dnl
-dnl Test to see if a certain prototype exists in the system header files
-dnl If we get a conflict - then we back off. Note: If our prototype matches 
-dnl exactly, then we will list it and we both win.
-if test x$ac_cv_func_getutmpx = xyes; then
-AC_CACHE_CHECK([need to provide getutmpx prototype], krb5_cv_decl_getutmpx,
-[AC_TRY_COMPILE(dnl
-[#include <sys/types.h>
-#ifdef HAVE_UTMP_H
-#include <utmp.h>
-#endif
-#ifdef HAVE_UTMPX_H
-#include <utmpx.h>
-#endif
-extern void getutmpx (const struct utmp *, struct utmpx *);
-],
-[], krb5_cv_decl_getutmpx=yes, krb5_cv_decl_getutmpx=no)])
- if test $krb5_cv_decl_getutmpx = yes; then
-	AC_DEFINE(NEED_GETUTMPX_PROTOTYPE)
- fi
-fi
-dnl
 dnl
 ADD_DEF(-DKERBEROS)
 KRB5_AC_INET6

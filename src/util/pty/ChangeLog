@@ -1,3 +1,35 @@
+2001-04-27  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Many changes to support the rewriting of the utmp
+	pieces of libpty.  Do a large amount of checking for consistency
+	of various utmp and utmpx APIs as currently understood.  See rant
+	in update_utmp.c.
+
+	* dump-utmp.c: Rewrite; now has capability to use utmp{,x}name()
+	to extract entries from utmp and utmpx files.  Adjusts field
+	widths when printing as appropriate.
+
+	* libpty.h: Update call signature for update_utmp() and logwtmp();
+	make prototypes unconditional.
+
+	* logwtmp.c: Rewrite.  Use pututline() or pututxline() API
+	whenever possible.
+
+	* pty-int.h: Update call signatures for update_wtmp{,x}(); make
+	prototypes unconditional.
+
+	* sane_hostname.c: Use the autoconf-correct macro names.
+
+	* update_utmp.c: Rewrite.  Basically, use functions from the
+	pututline() or pututxline() API whenever possible, to avoid
+	lossage.  Inserted large rant about the conjectured history of BSD
+	utmp, sysV utmp, and utmpx, as well as documentation about some
+	known quirks.
+
+	* update_wtmp.c: Rewrite.  Add new function ptyint_logwtmpx() that
+	takes a utmpx rather than a utmp, so it can fail to lose data
+	converting to and from utmp.
+
 2001-01-12  Tom Yu  <tlyu@mit.edu>
 
 	* sane_hostname.c: Switch off of KRB5_USE_INET6 instead of

@@ -30,7 +30,6 @@
 /* flags to update_utmp*/
 #define PTY_TTYSLOT_USABLE (0x1)
 #define PTY_UTMP_USERNAME_VALID (0x2)
-#ifdef __STDC__ /* use prototypes */
 
 long pty_init(void);
 long pty_getpty ( int *fd, char *slave, int slavelength);
@@ -39,9 +38,10 @@ long pty_open_slave (const char *slave, int *fd);
 long pty_open_ctty (const char *slave, int *fd);
 
 long pty_initialize_slave ( int fd);
-long pty_update_utmp (int process_type,int pid,  char *user, char *line, char *host, int flags);
+long pty_update_utmp(int process_type, int pid, const char *user,
+		     const char *line, const char *host, int flags);
 
-long pty_logwtmp (char *tty, char * user, char *host);
+long pty_logwtmp(const char *tty, const char *user, const char *host);
 
 long pty_cleanup(char *slave, int pid, int update_utmp);
 
@@ -50,18 +50,5 @@ struct sockaddr;
 #endif
 
 long pty_make_sane_hostname(const struct sockaddr *, int, int, int, char **);
-#else /*__STDC__*/
-long pty_init();
-long pty_getpty();
-
-long pty_open_slave();
-long pty_open_ctty();
-long pty_initialize_slave();
-
-long pty_update_utmp();
-long pty_logwtmp();
-long pty_cleanup();
-long pty_make_sane_hostname();
-#endif /* __STDC__*/
 #define __LIBPTY_H__
 #endif

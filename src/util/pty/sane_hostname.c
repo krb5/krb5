@@ -81,7 +81,7 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
 #else
     struct hostent *hp;
 #endif
-#ifndef NO_UT_HOST
+#ifdef HAVE_STRUCT_UTMP_UT_HOST
     struct utmp ut;
 #else
     struct utmpx utx;
@@ -94,7 +94,7 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
     if (maxlen && maxlen < 16)
 	/* assume they meant 16, otherwise IP addr won't fit */
 	maxlen = 16;
-#ifndef NO_UT_HOST
+#ifdef HAVE_STRUCT_UTMP_UT_HOST
     ut_host_len = sizeof (ut.ut_host);
 #else
     ut_host_len = sizeof (utx.ut_host);
