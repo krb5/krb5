@@ -1,3 +1,13 @@
+Fri Jan 27 00:56:12 1995  Chris Provenzano  (proven@mit.edu)
+
+	* base-defs.h Typedef krb5_boolean, krb5_msgtype, krb5_kvno,
+                krb5_addrtype, krb5_keytyp, krb5_enctype, krb5_cksumtype,
+                and krb5_authdatatype as unsigned int.
+	* kdb_dbm.h krb5_dbm_db_set_lockmode(), krb5_dbm_db_set_nonblocking()
+		Fix prototypes to use krb5_boolean and not int.
+	* kdb.h krb5_db_set_lockmode(), krb5_db_set_nonblocking()
+		Fix prototypes to use krb5_boolean and not int.
+
 Wed Jan 25 19:26:57 1995  John Gilmore  (gnu at toad.com)
 
 	* crc-32.h:  Move to lib/crypto/crc32; only gets local use.
