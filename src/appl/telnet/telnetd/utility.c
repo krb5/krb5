@@ -1212,7 +1212,7 @@ printdata(tag, ptr, cnt)
 		for (i = 0; i < 20 && cnt; i++) {
 			sprintf(nfrontp, "%02x", *ptr);
 			nfrontp += strlen(nfrontp); 
-			if (isprint(*ptr)) {
+			if (isprint((int) *ptr)) {
 				xbuf[i] = *ptr;
 			} else {
 				xbuf[i] = '.';
