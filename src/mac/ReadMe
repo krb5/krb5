@@ -30,7 +30,7 @@ in a later step.
     suntar 2.0.3   available on mac.archive.umich.edu
     untar          available on mac.archive.umich.edu
     tar 4.0        available on mac.archive.umich.edu
-	Stuffit Deluxe (with an additional tar translator)
+    Stuffit Deluxe (with an additional tar translator)
 	
     suntar and stuffit deluxe can perform cr-lf translations
 
@@ -67,6 +67,7 @@ following paths:
 
    :mac:kconfig:kconfig.sit.hqx
    :mac:libraries:libraries.sit.hqx
+   :mac:telnet-k5-auth:telnet-k5-auth.sit.hqx
    :mac:telnet:telnet.sit.hqx
 		
 These binhqx files each contain a Stuffit archive with metrowerks project
@@ -98,10 +99,10 @@ type Cmd-M, or select "Make" from the "Project" menu.  This will produce
 build libkrb5 before libgss.
 
 Building the CFM libraries.  Be sure the use "MW C/C++ CFM68K 1.0d1" when
-building these projects.  Open one of "cfm¥libkrb5.µ" or "cfm¥libgss.µ".
-Type Cmd-M, or select "Make" from the "Project" menu.  This will produce 
-"cfmlibkrb5" or cfmlibgss" depending on the selected project.  You 
-must build the static libraries before these projects.
+building these projects.  Open one of "Kerberos 5 Library.µ" or 
+"GSS Library.µ".  Type Cmd-M, or select "Make" from the "Project" menu.
+This will produce "Kerberos 5 Library" or "GSS Library" depending on the 
+selected project.
 
 
 7) Build the Cygnus Network Security Application
@@ -121,24 +122,17 @@ usage) double clicking on "CNS Config" should bring you to the main CNS
 configuration window where you can login, logout, change passwords and the
 environment.
 
-NOTE: kconfig is presently constructed with the kerberos sources in the 
-project file directly, versus as an included static library.  This is done
-to preserve debugability and other nice properties.  In a later release, 
-this project will be changed to be more in line with how development is 
-intended with the kerberos libraries.
-
-
 8) Build Kerberized Telnet
 
-Building kerberized telnet.  To compile telnet you will need "libkrb5" built.
-Open the project "mw/68k¥--Telnet" in the :mac:telnet folder, and type Cmd-M, 
-or select "Make" from the "Project" menu.  This will build the kerberzied 
-version of telnet.  This is not an official build of telnet, but is based on
-the 2.6.1d8 sources.
-
-NOTE: Telnet is presently built as a monolithic application.  In a later 
-release of kerberos 5 for Macintosh telnet will be removed and in its 
-place a telnet authentication plug in module will be provided.
+The telnet-k5-auth directory contains the project file necessary to
+build a telnet authorization code resource module.  Open the project
+"K5AuthModule" in the :mac:telnet-k5-auth folder and type Cmd-M,
+or select "Make" from the "Project" menu.  This will build the
+telnet authorization module.  The authorization module should be
+placed in the same directory as the NCSA telnet application which uses
+it. Any NCSA telnet version after 2.6.1d8 should work in conjunction
+with the supplied authentication module.  Also included in the
+telnet-k5-auth directory is version 2.7b4 of telnet.
 
 
 Installation
@@ -150,7 +144,7 @@ Warrior static link library for 68k Macs.  Following are the binary
 components provided in this release:
 
    * Code Fragment Manager libraries for 68k Macintosh
-     (:mac:libraries:cfm*gss and :mac:libraries:cfm*krb5)
+     (:mac:libraries:GSSLibrary and :mac:libraries:Kerberos 5 Library)
     
    * Code Warrior static libraries for 68k Macintosh
      (:mac:libraries:libgss and :mac:libraries:libkrb5)
@@ -164,18 +158,14 @@ components provided in this release:
    * An include directory containing the files necessary
      for development (:include)
 
-   * A pre-compiled header file containing flags
-     necessary for development (:mac:libraries:KerberosHeaders.pch)
-
-
    To install the Kerberos system:
 
-   1) Drop the :mac:kconfig:krb5.ini file into the "Preferences"
+   1) Drop the :mac:krb5.ini file into the "Preferences"
    folder contained in the "System Folder".
    
    2) To install the shared libraries (optional), simply copy the 
-   "cfm*gss" and "cfm*krb5" files to the "Extensions" folder in 
-   the "System folder".
+   "GSS Library" and "Kerberos 5 Library" files to the "Extensions" 
+   folder in the "System Folder".
 
 
 Getting Started Programming
@@ -192,8 +182,6 @@ To add Kerberos utility to a Code Warrior based application:
 
    3) Drag the appropriate library into your project
      (One of: :mac:libraries:libgss, mac:libraries:libkrb5,
-     :mac:libraries:cfm*gss or :mac:libraries:cfm*krb5).
+     :mac:libraries:GSS Library or :mac:libraries:Kerberos 5 Library).
 
-   4) Drag the KerberosHeaders.pch file into your project.
-
-   5) Set the project options to 4 byte integers and enums treated as ints.
+   4) Set the project options to 4 byte integers and enums treated as ints.

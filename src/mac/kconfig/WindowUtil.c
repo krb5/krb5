@@ -10,7 +10,7 @@
  * r.watson@utexas.edu
  * 512-471-3241
  */
-#ifndef _MWERKS
+#ifndef __MWERKS__
 #include <Memory.h>
 #include <OSUtils.h>
 #include <QuickDraw.h>

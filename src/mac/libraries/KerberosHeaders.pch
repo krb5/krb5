@@ -9,19 +9,6 @@
 /*
  * Add the compile flag switches for kerberos compile
  */
-#define _MWERKS
-#define _MACINTOSH
-#define SIZEOF_INT 4
-#define SIZEOF_SHORT 2
-#define HAVE_SRAND
-#define NO_PASSWORD
-#define HAS_LABS
-#define ENOMEM -1
-#define ANSI_STDIO
-typedef unsigned int size_t;
-#define _SIZET
-#include <unix.h>
-#include <ctype.h>
 #define KRB5 1
 
 #define PROVIDE_RSA_MD4

@@ -1,13 +1,29 @@
+Wed Wed 27 12:00:00 1995  James Mattly <mattly@fusion.com>
+
+	* autoconf.h: File is now moved to include directory as 
+		Makefile.in is run to create kerbsrc.tar.  Also 
+		the file has been cleaned up as it is not
+		automatically generated.
+
+	* libraries.sit.hqx: Mac project files have been reworked.
+		The CFM projects are now called "Kerberos 5 Library"
+		and "GSS Library".  The GSS library project includes 
+		the Kerberos 5 Library so you must install both
+		libraries in the system folder to use the GSS API
+		interface.
+
 Wed Sep 20 12:00:00 1995  James Mattly <mattly@fusion.com>
 
-	* libraries.sit.hqx:  Updated project files to exclude verification files so
-		users can link without the benefits of a preimplemented main.
-	* KerberosHeaders.pch:  Updated to handle change password.
+	* libraries.sit.hqx: Updated project files to exclude verification 
+		files so users can link without the benefits of a 
+		preimplemented main.
 
+	* KerberosHeaders.pch:  Updated to handle change password.
 
 Sun Sep 10 12:00:00 1995  James Mattly <mattly@fusion.com>
 
 	* ChangeLog created
-	* libraries.sit.hqx: Project files changed to include new files and renamed
-		files.
+
+	* libraries.sit.hqx: Project files changed to include new files 
+		and renamed files.
 

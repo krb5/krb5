@@ -15,7 +15,7 @@
  * Kconfig
  */
 #include <stdio.h>
-#ifndef _MWERKS
+#ifndef __MWERKS__
 #include <Controls.h>
 #include <Desk.h>
 #include <DiskInit.h>
@@ -123,6 +123,9 @@ char *prefsFilename = "\pCNS Config Preferences";
 
 #ifdef KRB5
 char *prefsFilename = "\pCNSk5 Config Preferences";
+#define kUNKNOWNUSERNAME "Unknown"
+char gUserName[255];					/* last user name */
+char gRealmName[255];					/* last realm name */
 #endif
 
 /*+
@@ -186,6 +189,7 @@ int main (void)
 #endif
 #ifdef KRB5
 	k5_init_ccache (&k5_ccache);
+	strcpy(gUserName, kUNKNOWNUSERNAME);
 #endif
 	
 	readprefs();
@@ -828,8 +832,14 @@ char *ptr;
 		strcpy(scratch, "None");
 #endif
 #ifdef KRB5
-	/* FIXME */
-	strcpy(scratch, "unknown");
+	if (strcmp(gUserName, kUNKNOWNUSERNAME))
+	{
+		strcpy(scratch, gUserName);
+		strcat(scratch, "@");
+		strcat(scratch, gRealmName);
+	}
+	else
+		strcpy(scratch, kUNKNOWNUSERNAME);
 #endif
 	if (strcmp(scratch, olduser)) {
 		strcpy(olduser, scratch);
@@ -2231,6 +2241,10 @@ char credname[100];
 char realm[100];
 char	*ptr;
 
+	/* if the gUserName isn't uknown, we'll use that name */
+	if (strcmp(gUserName, kUNKNOWNUSERNAME))
+		strcpy(usernm, gUserName);
+
 	if (GetUserInfo(usernm, passwd) == 2)
 		return;
 
@@ -2279,20 +2293,14 @@ char	*ptr;
 	if (server) 
 		krb5_free_principal(kcontext, server);
 
-//jfm toss in a little error detection	
-	if (code == 0)
+	if (code)
 	{
-		//jfm got the ticket
-		ParamText("\pTicket granted.", "\p", "\p", "\p");
-		Alert(128, NULL);
+		com_err (NULL, code, "while logging in.");
 	}
 	else
 	{
-		//jfm failed to get the ticket
-        com_err (NULL, code, "while logging in.");
-
-//		ParamText("\pTicket refused.", "\p", "\p", "\p");
-//		Alert(128, NULL);
+		strcpy(gUserName, usernm);	/* copy the user name over to the global username */
+		strcpy(gRealmName, realm);	/* copy the realm name over to the global realmname */
 	}
 #endif
 }
@@ -2340,6 +2348,7 @@ void doLogout ()
 #endif
 #ifdef KRB5
 	k5_dest_tkt();
+	strcpy(gUserName, kUNKNOWNUSERNAME);
 #endif
 }
 
@@ -2679,7 +2688,7 @@ void	*state;
 	code = profile_delete_node_relation(node, realm);	/* possible memory leak here */
 	code = profile_add_node(node, realm, 0, &node);		/* Create the realm node */
 	code = profile_add_node(node, "kdc", host, &node2);		/* Create the realm node */
-	/* what about default_domain, and admin_server? */
+	code = profile_add_node(node, "admin_server", host, &node2);		/* Create the realm node */
 #endif
 }
 
