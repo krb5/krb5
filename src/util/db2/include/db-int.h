@@ -40,18 +40,6 @@
 
 /* deal with autoconf-based stuff (db.h includes db-config.h) */
 
-#ifndef HAVE_MEMMOVE
-#define memmove my_memmove
-#endif
-
-#ifndef HAVE_MKSTEMP
-#define mkstemp my_mkstemp
-#endif
-
-#ifndef HAVE_STRERROR
-#define strerror my_strerror
-#endif
-
 #define DB_LITTLE_ENDIAN 1234
 #define DB_BIG_ENDIAN 4321
 
