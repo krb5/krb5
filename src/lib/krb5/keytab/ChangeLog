@@ -1,3 +1,9 @@
+Tue Oct  4 22:06:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktfr_entry.c (krb5_kt_free_entry): Only try to free
+		entry->key.contents if it is non-NULL.  If entry is NULL,
+		return.
+
 Thu Sep 29 23:19:06 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktbase.c (krb5_kt_resolve_name): If the prefix "FILE:" is not

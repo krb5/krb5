@@ -32,8 +32,13 @@ krb5_error_code
 krb5_kt_free_entry (entry)
 krb5_keytab_entry *entry;
 {
+    if (!entry)
+	return 0;
+    
     krb5_free_principal(entry->principal);
-    memset((char *)entry->key.contents, 0, entry->key.length);
-    krb5_xfree(entry->key.contents);
+    if (entry->key.contents) {
+	memset((char *)entry->key.contents, 0, entry->key.length);
+	krb5_xfree(entry->key.contents);
+    }
     return 0;
 }
