@@ -499,7 +499,7 @@ subrealm(r1,r2)
 char	*r1;
 char	*r2;
 {
-    int	l1,l2;
+    size_t l1,l2;
     l1 = strlen(r1);
     l2 = strlen(r2);
     if(l2 <= l1) return(0);
@@ -732,10 +732,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 	}
         strncat(current, ",", sizeof(current) - 1 - strlen(current));
         if (pl > 0) {
-          strncat(current, realm, pl);
+          strncat(current, realm, (unsigned) pl);
         }
         else {
-          strncat(current, realm+strlen(realm)+pl, -pl);
+          strncat(current, realm+strlen(realm)+pl, (unsigned) (-pl));
         }
       }
 
@@ -758,10 +758,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 	    goto fail;
 	  }
           if (pl1 > 0) {
-            strncat(current, realm, pl1);
+            strncat(current, realm, (unsigned) pl1);
           }
           else {
-            strncat(current, realm+strlen(realm)+pl1, -pl1);
+            strncat(current, realm+strlen(realm)+pl1, (unsigned) (-pl1));
           }
         }
         else { /* If not a subrealm */
@@ -787,10 +787,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
         strncat(current,",", sizeof(current) - 1 - strlen(current));
 	current[sizeof(current) - 1] = '\0';
         if (pl > 0) {
-          strncat(current, exp, pl);
+          strncat(current, exp, (unsigned) pl);
         }
         else {
-          strncat(current, exp+strlen(exp)+pl, -pl);
+          strncat(current, exp+strlen(exp)+pl, (unsigned)(-pl));
         }
       }
     }
