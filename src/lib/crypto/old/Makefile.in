@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/crypto/old
+mydir=old
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 

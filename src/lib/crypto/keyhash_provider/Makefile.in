@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/crypto/keyhash_provider
+mydir=keyhash_provider
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5

@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/crypto/md4
+mydir=md4
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)  -I$(srcdir)
 

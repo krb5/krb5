@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/crypto/sha1
+mydir=sha1
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 

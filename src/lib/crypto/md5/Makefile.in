@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/crypto/md5
+mydir=md5
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
