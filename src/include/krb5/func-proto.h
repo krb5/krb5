@@ -165,12 +165,14 @@ krb5_error_code krb5_mk_priv
 		   const krb5_keyblock *,
 		   const krb5_fulladdr *,
 		   const krb5_fulladdr *,
+		   krb5_pointer,
 		   krb5_data * ));
 krb5_error_code krb5_rd_priv
 	PROTOTYPE((const krb5_data *,
 		   const krb5_keyblock *,
 		   const krb5_fulladdr *,
 		   const krb5_fulladdr *,
+		   krb5_pointer,
 		   krb5_data * ));
 krb5_error_code krb5_parse_name
 	PROTOTYPE((const char *,
