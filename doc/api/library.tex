@@ -8,6 +8,9 @@
 \setlength{\textwidth}{6.25in}
 \makeindex
 \pagestyle{headings}
+\newif\ifdraft
+\drafttrue
+\typein{Draft flag? (type /draftfalse<CR> if not draft...)}
 \begin{document}
 \begin{center}
 {\Huge Kerberos V5 application programming library} \\
@@ -17,6 +20,9 @@
 This section describes the functions provided in the \libname{libkrb5.a}
 library.  The library is built from several pieces, mostly for convenience in
 programming, maintenance, and porting.
+
+\ifdraft\sloppy\fi
+
 \subsection{Main functions}
 \input{krb5.tex}
 
