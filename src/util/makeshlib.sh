@@ -21,6 +21,9 @@ case $host in
 	do
 		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" -e "s;^$i/shared/\$;;" $i/DONE
 	done`
+	# Hack to deal with the fact that with cc options are different
+	# from ld...
+	ldflags=`echo $ldflags |sed  -e "s/-Wl,//g"`
 	echo ld -Bshareable $ldflags -o $library $FILES $libdirfl $liblist
 	ld -Bshareable $ldflags -o $library $FILES $libdirfl $liblist
 	stat=$?
