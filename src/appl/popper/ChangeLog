@@ -6,6 +6,15 @@ Fri Jul 7 15:44:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling.
 	* configure.in - add USE_KADM_LIBRARY and KRB5_LIBRARIES.
 
+Wed Nov 15 20:36:33 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* pop_updt.c (pop_updt): initialize lock_arg to a copy of a static
+ 	(thus zero) struct flock, to avoid panic'ing sunos 4.1.4.
+
+Wed Nov 15 20:35:19 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* pop_dropcopy.c (pop_dropcopy): initialize lock_arg to a copy of
+	a static (thus zero) struct flock, to avoid panic'ing sunos 4.1.4.
 
 Thu Jun 15 17:38:06 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and

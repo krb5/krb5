@@ -75,6 +75,9 @@ int lockunlock;
 
     int lock_cmd = F_SETLKW;
     struct flock lock_arg;
+    static struct flock flock_zero;
+
+    lock_arg = flock_zero;
 #define lock_flag lock_arg.l_type
     lock_flag = -1;
 

@@ -46,7 +46,10 @@ struct passwd	*	pwp;
     off_t                   offset;                 /*  Old/New boundary */
     int                     nchar;                  /*  Bytes written/read */
 #ifdef POSIX_FILE_LOCKS
+    static struct flock flock_zero;
     struct flock            lock_arg;
+
+    lock_arg = flock_zero;
 #endif
 
     /*  Create a temporary maildrop into which to copy the updated maildrop */

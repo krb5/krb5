@@ -1,3 +1,8 @@
+Wed Nov 15 20:40:03 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* lock_file.c (krb5_lock_file): initialize lock_arg to a copy of a
+ 	static (thus zero) struct flock, to avoid panic'ing sunos 4.1.4.
+
 Sun Nov 12 05:31:21 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* def_realm.c (krb5_get_default_realm): check for PROF_NO_PROFILE

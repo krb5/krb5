@@ -1,3 +1,8 @@
+Wed Nov 15 20:38:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* tf_util.c (emul_flock): initialize f to a copy of a static
+ 	(thus zero) struct flock, to avoid panic'ing sunos 4.1.4.
+
 Sun Nov 12 05:26:08 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* g_cnffile.c (krb__get_srvtabname): new function, looks up

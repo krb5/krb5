@@ -731,8 +731,11 @@ static int kerb_dbl_lock(mode)
     int     mode;
 {
 #ifdef POSIX_FILE_LOCKS
+    static struct flock flock_zero;
     struct flock f;
     int rv;
+
+    f = flock_zero;
 #else
     int flock_mode;
 #endif
@@ -792,7 +795,10 @@ static int kerb_dbl_lock(mode)
 static void kerb_dbl_unlock()
 {
 #ifdef POSIX_FILE_LOCKS
+    static struct flock flock_zero;
     struct flock f;
+
+    f = flock_zero;
 #endif
     
     if (!mylock) {		/* lock already unlocked */

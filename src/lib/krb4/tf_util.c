@@ -76,7 +76,10 @@ int utimes(path, times)
 int emul_flock(fd, cmd)
     int fd, cmd;
 {
+    static struct flock flock_zero;
     struct flock f;
+
+    f = flock_zero;
 
     memset(&f, 0, sizeof (f));
 

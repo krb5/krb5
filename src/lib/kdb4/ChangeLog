@@ -1,3 +1,8 @@
+Wed Nov 15 20:37:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb_dbm.c (kerb_dbl_lock): initialize f to a copy of a static
+ 	(thus zero) struct flock, to avoid panic'ing sunos 4.1.4.
+	(kerb_dbl_unlocK): ditto.
 
 Thu Jun 15 18:06:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Create symlink for archive when we build it.

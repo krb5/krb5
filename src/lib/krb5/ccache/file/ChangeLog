@@ -52,6 +52,12 @@ Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* fcc_gennew.c conditons for HAS_MACSOCK_H and THREEPARAMOPEN
 	* fcc_maybe.c conditons for HAS_MACSOCK_H
 
+Wed Nov 15 20:39:18 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* fcc_maybe.c (fcc_lock_file_posix): initialize lock_arg to a copy
+ 	of a static (thus zero) struct flock, to avoid panic'ing sunos
+ 	4.1.4.
+
 Wed Jun 14 23:54:09 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_errs.c (krb5_fcc_interpret): Add #ifdef around switch

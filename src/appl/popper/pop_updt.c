@@ -55,7 +55,10 @@ POP     *   p;
 
     int                     begun;                  /*  Sanity check */
 #ifdef POSIX_FILE_LOCKS
+    static struct flock flock_zero;
     struct flock            lock_arg;
+
+    lock_arg = flock_zero;
 #endif
 
 #ifdef DEBUG

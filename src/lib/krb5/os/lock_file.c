@@ -59,7 +59,9 @@ krb5_lock_file(context, fd, mode)
 {
 #ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;
+    static struct flock flock_zero;
     struct flock lock_arg;
+    lock_arg = flock_zero;
 #define lock_flag lock_arg.l_type
     lock_flag = -1;
 #else
