@@ -1,3 +1,11 @@
+2003-03-06  Alexandra Ellwood <lxs@mit.edu>
+
+    * appdefault.c: Fix constness to avoid warning.
+    
+    * init_ctx.c: Do the same stuff on the Mac as on Unix.
+    
+    * preauth2.c: Added cast to fix warning.
+
 2003-03-04  Tom Yu  <tlyu@mit.edu>
 
 	* srv_rcache.c (krb5_get_server_rcache): Fix missed

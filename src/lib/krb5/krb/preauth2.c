@@ -737,7 +737,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    /* enc_sam_response_enc_2 from above */
 
    retval = krb5_c_encrypt_length(context, as_key->enctype, scratch->length,
-		(unsigned int *) &sr2.sam_enc_nonce_or_sad.ciphertext.length);
+		(size_t *) &sr2.sam_enc_nonce_or_sad.ciphertext.length);
    if (retval) {
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
