@@ -49,7 +49,10 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/file.h>
+#ifndef KERBEROS
+/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <sys/socket.h>
+#endif
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
@@ -64,7 +67,10 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <signal.h>
 #include <pwd.h>
 #include <ctype.h>
+#ifndef KERBEROS
+/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <netdb.h>
+#endif
 #include <errno.h>
 #ifdef KERBEROS
 #include <krb.h>

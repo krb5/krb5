@@ -1,3 +1,12 @@
+Thu Dec 11 23:20:20 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c:
+	* krshd.c:
+	* login.c:
+	* v4rcp.c: Don't include netdb.h or sys/socket.h if krb.h is
+	included; this works around an Ultrix bug where those headers
+	aren't protected against multiple inclusion.
+
 Thu Nov 20 16:42:54 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (recvauth): Fix args in call to

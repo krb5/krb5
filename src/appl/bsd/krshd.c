@@ -87,7 +87,10 @@ char copyright[] =
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
+#ifndef KERBEROS
+/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <sys/socket.h>
+#endif
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -115,8 +118,11 @@ char copyright[] =
 #endif
      
 #include <signal.h>
+#ifndef KERBEROS
+/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <netdb.h>
-     
+#endif
+
 #ifdef CRAY
 #ifndef NO_UDB
 #include <udb.h>
@@ -149,6 +155,7 @@ char copyright[] =
 #include "krb5.h"
 #include "com_err.h"
 #include "loginpaths.h"
+#include <kerberosIV/krb.h>
 
 #define ARGSTR	"ek54ciD:S:M:AP:?L:"
 
@@ -492,7 +499,6 @@ char *kremuser;
 krb5_principal client;
 krb5_authenticator *kdata;
 
-#include <kerberosIV/krb.h>
 AUTH_DAT	*v4_kdata;
 KTEXT		v4_ticket;
 

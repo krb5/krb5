@@ -172,7 +172,6 @@ typedef sigtype (*handler)();
 
 #ifdef KRB4
 #include <krb.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #ifdef HAVE_KRB4_PROTO_H
 #include <krb4-proto.h>

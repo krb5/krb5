@@ -105,7 +105,10 @@ char copyright[] =
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef KERBEROS
+/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <sys/socket.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <sys/file.h>
@@ -146,8 +149,11 @@ char copyright[] =
 #else
 #include <sgtty.h>
 #endif
-     
+
+#ifndef KERBEROS
+/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <netdb.h>
+#endif
 #include <syslog.h>
 #include <string.h>
 #include <sys/param.h>
