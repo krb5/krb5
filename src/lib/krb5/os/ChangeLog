@@ -1,5 +1,14 @@
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* prompter.c (catch_signals, restore_signals): Take pointer to old
+	signal handler info as new argument.
+	(osiginfo): New typedef.
+	(setup_tty, restore_tty): Take pointer to old signal handler info
+	and old termios settings as new arguments.
+	(krb5_prompter_posix): Pass the extra arguments, addresses of new
+	automatic variables.
+	(osigint, saveparm): Variables deleted.
+
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Don't build promptusr.c.
 
 	* sendto_kdc.c (default_debug_handler, put, putstr): Define only
