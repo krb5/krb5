@@ -1,3 +1,7 @@
+2001-02-28  Miro Jurisic <meeroh@mit.edu>
+	* gssapi_generic.h: corrected Mac OS include to <GSS/gssapi.h>
+	* gssapiP_generic.h: use "" include for krb5.h
+	
 2001-02-27  Alexandra Ellwood <lxs@mit.edu>
 	* disp_com_err_status.c, gssapi.hin: Updated Mac OS #defines
 	and #includes for new header layout and Mac OS X frameworks

@@ -1,3 +1,7 @@
+2000-02-28  Miro Jurisic  <meeroh@mit.edu>
+
+	* shs.c: use "" include for k5-int.h
+	
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* shs.c (ROTL): Change (a&b|c) construct to make meaning clear,

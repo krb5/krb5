@@ -1,6 +1,11 @@
+2001-02-28  Miro Jurisic <meeroh@mit.edu>
+
+	* k5-int.h: Rearranged the #ifdef macintosh section to
+	work on Mac OS 9 and X
+        
 2001-02-27  Alexandra Ellwood <lxs@mit.edu>
 
-	* win-mac.h, krb5-int.h, krb5.him: Updated Mac OS #defines
+	* win-mac.h, k5-int.h, krb5.hin: Updated Mac OS #defines
 	and #includes for new header layout and Mac OS X frameworks
         
 2000-10-16  Miro Jurisic  <meeroh@mit.edu>

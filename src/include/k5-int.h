@@ -115,6 +115,9 @@
 /* Note, this may shoot us in the foot if we switch to CW compilers for Mach-o builds */
 #if !defined(macintosh) && (defined(__MWERKS__) || defined(applec) || defined(THINK_C))
 #define macintosh
+#endif
+
+#ifdef macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
@@ -122,12 +125,10 @@
 #define HAVE_LABS
 /*#define ENOMEM -1*/
 #define ANSI_STDIO
-#ifndef _SIZET
-typedef unsigned int size_t;
-#define _SIZET
-#endif
+#include <size_t.h>
 #include <unix.h>
 #include <ctype.h>
+#include <fcntl.h>
 #endif
 
 #ifndef KRB5_AUTOCONF__
@@ -999,7 +1000,7 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pa_enc_ts
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #if TARGET_OS_MAC
-#include <KerberosProfile/profile.h>
+#include <KerberosProfile/KerberosProfile.h>
 #else
 #include "profile.h"
 #endif

@@ -32,7 +32,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 #include <time.h>
-#include <syslog.h>
+#include "syslog.h"
 #ifdef _MSDOS
 #define getpid _getpid
 #include <process.h>

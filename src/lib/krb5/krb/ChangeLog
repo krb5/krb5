@@ -1,3 +1,8 @@
+2001-02-28	Miro Jurisic	<meeroh@mit.edu>
+	* rd_safe.c, rd_priv.c, rd_cred.c, preauth.c, mk_safe.c,
+	mk_cred.c, appdefault.c: use "" includes for krb5.h, k5-int.h and
+	syslog.h
+
 2001-02-27	Alexandra Ellwood <lxs@mit.edu>
 
 	* gic_pwd.c, sendauth.c, recvauth.c: com_err.h is already included by 
