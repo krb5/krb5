@@ -1,3 +1,7 @@
+Thu Aug 24 17:55:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* des_crc.c, des_md5.c, raw_des.c: Remove casting in call to
+		mit_des_cbc_encrypt. 
 
 Thu Jul 27 15:15:46 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --enable-{des-cbc-md5,des-cbc-crc,raw-des-cbc,

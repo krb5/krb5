@@ -63,7 +63,7 @@ mit_raw_des_decrypt_func(in, out, size, key, ivec)
     krb5_encrypt_block * key;
     krb5_pointer ivec;
 {
-    return (mit_des_cbc_encrypt ((const mit_des_cblock *) in, 
+    return (mit_des_cbc_encrypt (in, 
 				 out, 
 				 size, 
 				 (struct mit_des_ks_struct *)key->priv, 
