@@ -18,8 +18,8 @@ SRCS= \
 	main.c \
 	network.c \
 	policy.c \
-	extern.c
-#	kerberos_v4.c
+	extern.c \
+	kerberos_v4.c
 
 OBJS= \
 	kdc5_err.o \
@@ -30,8 +30,8 @@ OBJS= \
 	main.o \
 	network.o \
 	policy.o \
-	extern.o
-#	kerberos_v4.o
+	extern.o \
+	kerberos_v4.o
 
 ErrorTableObjectRule()
 
