@@ -207,10 +207,11 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
     if ((retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
 					 from->address)) )
 	goto cleanup_auth_context;
-
+#ifdef USE_RCACHE
     if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
 					  kdc_rcache)))
 	goto cleanup_auth_context;
+#endif
 
 /*
     if ((retval = kdc_get_server_key(apreq->ticket, &key, &kvno)))
@@ -232,6 +233,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 				      apreq->ticket->server, 
 				      kdc_active_realm->realm_keytab,
 				      NULL, ticket))) {
+#ifdef USE_RCACHE
 	/*
 	 * I'm not so sure that this is right, but it's better than nothing
 	 * at all.
@@ -256,6 +258,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	    }
 	} else
 	    goto cleanup_auth_context;
+#endif
     }
 
     /* "invalid flag" tickets can must be used to validate */
@@ -315,7 +318,9 @@ cleanup_authenticator:
 
 cleanup_auth_context:
     /* We do not want the free of the auth_context to close the rcache */
+#ifdef USE_RCACHE
     (void)  krb5_auth_con_setrcache(kdc_context, auth_context, 0);
+#endif
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:

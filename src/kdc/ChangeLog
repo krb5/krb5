@@ -1,3 +1,8 @@
+Wed Jul 30 18:29:19 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c: 
+	* main.c: Don't use an rcache.
+
 Fri Jul 25 15:44:07 1997  Tom Yu  <tlyu@mit.edu>
 
 	* main.c (init_realm): Fix to use new ktkdb.

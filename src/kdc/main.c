@@ -803,6 +803,7 @@ initialize_realms(kcontext, argc, argv)
 	}
     }
 
+#ifdef USE_RCACHE
     /*
      * Now handle the replay cache.
      */
@@ -810,6 +811,7 @@ initialize_realms(kcontext, argc, argv)
 	com_err(argv[0], retval, "while initializing KDC replay cache");
 	exit(1);
     }
+#endif
 
     /* Ensure that this is set for our first request. */
     kdc_active_realm = kdc_realmlist[0];
