@@ -132,7 +132,7 @@ int client_establish_context(s, service_name, deleg_flag, oid,
 {
      gss_buffer_desc send_tok, recv_tok, *token_ptr;
      gss_name_t target_name;
-     OM_uint32 maj_stat, min_stat;
+     OM_uint32 maj_stat, min_stat, init_sec_min_stat;
 
      /*
       * Import the name into target_name.  Use send_tok to save
@@ -168,7 +168,7 @@ int client_establish_context(s, service_name, deleg_flag, oid,
 
      do {
 	  maj_stat =
-	       gss_init_sec_context(&min_stat,
+	       gss_init_sec_context(&init_sec_min_stat,
 				    GSS_C_NO_CREDENTIAL,
 				    gss_context,
 				    target_name,
@@ -186,12 +186,6 @@ int client_establish_context(s, service_name, deleg_flag, oid,
 	  if (token_ptr != GSS_C_NO_BUFFER)
 	       (void) gss_release_buffer(&min_stat, &recv_tok);
 
-	  if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
-	       display_status("initializing context", maj_stat, min_stat);
-	       (void) gss_release_name(&min_stat, &target_name);
-	       return -1;
-	  }
-
 	  if (send_tok.length != 0) {
 	       printf("Sending init_sec_context token (size=%d)...",
 		     send_tok.length);
@@ -202,6 +196,16 @@ int client_establish_context(s, service_name, deleg_flag, oid,
 	       }
 	  }
 	  (void) gss_release_buffer(&min_stat, &send_tok);
+
+	  if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
+	       display_status("initializing context", maj_stat,
+			      init_sec_min_stat);
+	       (void) gss_release_name(&min_stat, &target_name);
+	       if (*gss_context == GSS_C_NO_CONTEXT)
+		       gss_delete_sec_context(&min_stat, gss_context,
+					      GSS_C_NO_BUFFER);
+	       return -1;
+	  }
 	  
 	  if (maj_stat == GSS_S_CONTINUE_NEEDED) {
 	       printf("continue needed...");

@@ -1,3 +1,15 @@
+Fri Jun  6 15:05:57 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gss-server.c (server_establish_context): Rearrange server
+		establish context loop to match with the
+		draft-ietf-gssv2-cbind-04.txt suggestion --- always send
+		the output token even in the case of an error, and call
+		gss_delete_sec_context() if needed.
+
+	* gss-client.c (client_establish_context): Check for error
+		condition after sending the output token, if present.  In
+		case of error, call delete_sec_context if necessary.
+
 Wed Feb  5 20:25:57 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

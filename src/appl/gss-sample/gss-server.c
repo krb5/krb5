@@ -137,7 +137,7 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
      gss_buffer_desc send_tok, recv_tok;
      gss_name_t client;
      gss_OID doid;
-     OM_uint32 maj_stat, min_stat;
+     OM_uint32 maj_stat, min_stat, acc_sec_min_stat;
      gss_buffer_desc	oid_name;
 
      *context = GSS_C_NO_CONTEXT;
@@ -152,7 +152,7 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
 	  }
 
 	  maj_stat =
-	       gss_accept_sec_context(&min_stat,
+	       gss_accept_sec_context(&acc_sec_min_stat,
 				      context,
 				      server_creds,
 				      &recv_tok,
@@ -163,12 +163,6 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
 				      ret_flags,
 				      NULL, 	/* ignore time_rec */
 				      NULL); 	/* ignore del_cred_handle */
-
-	  if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
-	       display_status("accepting context", maj_stat, min_stat);
-	       (void) gss_release_buffer(&min_stat, &recv_tok);
-	       return -1;
-	  }
 
 	  (void) gss_release_buffer(&min_stat, &recv_tok);
 
@@ -186,6 +180,15 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
 
 	       (void) gss_release_buffer(&min_stat, &send_tok);
 	  }
+	  if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
+	       display_status("accepting context", maj_stat,
+			      acc_sec_min_stat);
+	       if (*context == GSS_C_NO_CONTEXT)
+		       gss_delete_sec_context(&min_stat, context,
+					      GSS_C_NO_BUFFER);
+	       return -1;
+	  }
+
 	  if (verbose && log) {
 	      if (maj_stat == GSS_S_CONTINUE_NEEDED)
 		  fprintf(log, "continue needed...\n");
