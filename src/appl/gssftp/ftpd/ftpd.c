@@ -840,8 +840,8 @@ checkuser(name)
 			}
 		  }
 	     }
+	     (void) fclose(fd);
 	}
-	(void) fclose(fd);
 
 	return (0);
 }
@@ -2018,7 +2018,9 @@ void
 myoob()
 {
 	char *cp, *cs;
+#ifndef strpbrk
 	extern char *strpbrk();
+#endif
 
 	/* only process if transfer occurring */
 	if (!transflag)
@@ -2486,7 +2488,9 @@ send_file_list(whichfiles)
 	FILE *dout = NULL;
 	register char **dirlist, *dirname;
 	int simple = 0;
+#ifndef strpbrk
 	char *strpbrk();
+#endif
 	int ret = 0;
 
 	if (strpbrk(whichfiles, "~{[*?") != NULL) {
