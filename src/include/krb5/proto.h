@@ -70,6 +70,7 @@
 #endif
 #define KRB5_PADATA_ENC_TIMESTAMP       5  /* timestamp encrypted in key */
 #define KRB5_PADATA_ENC_SECURID         6  /* SecurId passcode */
+#define KRB5_PADATA_SESAME		7  /* Sesame project */
 
 /* Reserved for SPX pre-authentication. */
 #define KRB5_PADATA_DASS		16
