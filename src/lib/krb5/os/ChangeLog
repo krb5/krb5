@@ -1,3 +1,9 @@
+2003-10-27  Jeffrey Altman <jaltman@mit.edu>
+
+    * sendto_kdc.c: sockets must be closed with closesocket() and 
+      and not close() in order to ensure portability among different
+      operating systems.
+
 2003-08-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* dnssrv.c: New file; split out DNS SRV RR query support...
