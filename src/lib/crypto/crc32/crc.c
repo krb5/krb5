@@ -7,7 +7,7 @@
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
- * CRC-32 routines
+ * CRC-32/AUTODIN-II routines
  */
 
 #if !defined(lint) && !defined(SABER)
@@ -20,71 +20,120 @@ static char rcsid_crc_c[] =
 #include <krb5/crc-32.h>
 #include <krb5/ext-proto.h>
 
+/* This table and block of comments are taken from code labeled: */
+/*
+ * Copyright (C) 1986 Gary S. Brown.  You may use this program, or
+ * code or tables extracted from it, as desired without restriction.
+ */
+
+/* First, the polynomial itself and its table of feedback terms.  The  */
+/* polynomial is                                                       */
+/* X^32+X^26+X^23+X^22+X^16+X^12+X^11+X^10+X^8+X^7+X^5+X^4+X^2+X^1+X^0 */
+/* Note that we take it "backwards" and put the highest-order term in  */
+/* the lowest-order bit.  The X^32 term is "implied"; the LSB is the   */
+/* X^31 term, etc.  The X^0 term (usually shown as "+1") results in    */
+/* the MSB being 1.                                                    */
+
+/* Note that the usual hardware shift register implementation, which   */
+/* is what we're using (we're merely optimizing it by doing eight-bit  */
+/* chunks at a time) shifts bits into the lowest-order term.  In our   */
+/* implementation, that means shifting towards the right.  Why do we   */
+/* do it this way?  Because the calculated CRC must be transmitted in  */
+/* order from highest-order term to lowest-order term.  UARTs transmit */
+/* characters in order from LSB to MSB.  By storing the CRC this way,  */
+/* we hand it to the UART in the order low-byte to high-byte; the UART */
+/* sends each low-bit to hight-bit; and the result is transmission bit */
+/* by bit from highest- to lowest-order term without requiring any bit */
+/* shuffling on our part.  Reception works similarly.                  */
+
+/* The feedback terms table consists of 256, 32-bit entries.  Notes:   */
+/*                                                                     */
+/*  1. The table can be generated at runtime if desired; code to do so */
+/*     is shown later.  It might not be obvious, but the feedback      */
+/*     terms simply represent the results of eight shift/xor opera-    */
+/*     tions for all combinations of data and CRC register values.     */
+/*                                                                     */
+/*  2. The CRC accumulation logic is the same for all CRC polynomials, */
+/*     be they sixteen or thirty-two bits wide.  You simply choose the */
+/*     appropriate table.  Alternatively, because the table can be     */
+/*     generated at runtime, you can start by generating the table for */
+/*     the polynomial in question and use exactly the same "updcrc",   */
+/*     if your application needn't simultaneously handle two CRC       */
+/*     polynomials.  (Note, however, that XMODEM is strange.)          */
+/*                                                                     */
+/*  3. For 16-bit CRCs, the table entries need be only 16 bits wide;   */
+/*     of course, 32-bit entries work OK if the high 16 bits are zero. */
+/*                                                                     */
+/*  4. The values must be right-shifted by eight bits by the "updcrc"  */
+/*     logic; the shift must be unsigned (bring in zeroes).  On some   */
+/*     hardware you could probably optimize the shift in assembler by  */
+/*     using byte-swap instructions.                                   */
+
 static u_long const crc_table[256] = {
-    0x00000000, 0x01080082, 0x02100104, 0x03180186,
-    0x04200208, 0x0528028a, 0x0630030c, 0x0738038e,
-    0x08400410, 0x09480492, 0x0a500514, 0x0b580596,
-    0x0c600618, 0x0d68069a, 0x0e70071c, 0x0f78079e,
-    0x10800820, 0x118808a2, 0x12900924, 0x139809a6,
-    0x14a00a28, 0x15a80aaa, 0x16b00b2c, 0x17b80bae,
-    0x18c00c30, 0x19c80cb2, 0x1ad00d34, 0x1bd80db6,
-    0x1ce00e38, 0x1de80eba, 0x1ef00f3c, 0x1ff80fbe,
-    0x21001040, 0x200810c2, 0x23101144, 0x221811c6,
-    0x25201248, 0x242812ca, 0x2730134c, 0x263813ce,
-    0x29401450, 0x284814d2, 0x2b501554, 0x2a5815d6,
-    0x2d601658, 0x2c6816da, 0x2f70175c, 0x2e7817de,
-    0x31801860, 0x308818e2, 0x33901964, 0x329819e6,
-    0x35a01a68, 0x34a81aea, 0x37b01b6c, 0x36b81bee,
-    0x39c01c70, 0x38c81cf2, 0x3bd01d74, 0x3ad81df6,
-    0x3de01e78, 0x3ce81efa, 0x3ff01f7c, 0x3ef81ffe,
-    0x42002080, 0x43082002, 0x40102184, 0x41182106,
-    0x46202288, 0x4728220a, 0x4430238c, 0x4538230e,
-    0x4a402490, 0x4b482412, 0x48502594, 0x49582516,
-    0x4e602698, 0x4f68261a, 0x4c70279c, 0x4d78271e,
-    0x528028a0, 0x53882822, 0x509029a4, 0x51982926,
-    0x56a02aa8, 0x57a82a2a, 0x54b02bac, 0x55b82b2e,
-    0x5ac02cb0, 0x5bc82c32, 0x58d02db4, 0x59d82d36,
-    0x5ee02eb8, 0x5fe82e3a, 0x5cf02fbc, 0x5df82f3e,
-    0x630030c0, 0x62083042, 0x611031c4, 0x60183146,
-    0x672032c8, 0x6628324a, 0x653033cc, 0x6438334e,
-    0x6b4034d0, 0x6a483452, 0x695035d4, 0x68583556,
-    0x6f6036d8, 0x6e68365a, 0x6d7037dc, 0x6c78375e,
-    0x738038e0, 0x72883862, 0x719039e4, 0x70983966,
-    0x77a03ae8, 0x76a83a6a, 0x75b03bec, 0x74b83b6e,
-    0x7bc03cf0, 0x7ac83c72, 0x79d03df4, 0x78d83d76,
-    0x7fe03ef8, 0x7ee83e7a, 0x7df03ffc, 0x7cf83f7e,
-    0x84004100, 0x85084182, 0x86104004, 0x87184086,
-    0x80204308, 0x8128438a, 0x8230420c, 0x8338428e,
-    0x8c404510, 0x8d484592, 0x8e504414, 0x8f584496,
-    0x88604718, 0x8968479a, 0x8a70461c, 0x8b78469e,
-    0x94804920, 0x958849a2, 0x96904824, 0x979848a6,
-    0x90a04b28, 0x91a84baa, 0x92b04a2c, 0x93b84aae,
-    0x9cc04d30, 0x9dc84db2, 0x9ed04c34, 0x9fd84cb6,
-    0x98e04f38, 0x99e84fba, 0x9af04e3c, 0x9bf84ebe,
-    0xa5005140, 0xa40851c2, 0xa7105044, 0xa61850c6,
-    0xa1205348, 0xa02853ca, 0xa330524c, 0xa23852ce,
-    0xad405550, 0xac4855d2, 0xaf505454, 0xae5854d6,
-    0xa9605758, 0xa86857da, 0xab70565c, 0xaa7856de,
-    0xb5805960, 0xb48859e2, 0xb7905864, 0xb69858e6,
-    0xb1a05b68, 0xb0a85bea, 0xb3b05a6c, 0xb2b85aee,
-    0xbdc05d70, 0xbcc85df2, 0xbfd05c74, 0xbed85cf6,
-    0xb9e05f78, 0xb8e85ffa, 0xbbf05e7c, 0xbaf85efe,
-    0xc6006180, 0xc7086102, 0xc4106084, 0xc5186006,
-    0xc2206388, 0xc328630a, 0xc030628c, 0xc138620e,
-    0xce406590, 0xcf486512, 0xcc506494, 0xcd586416,
-    0xca606798, 0xcb68671a, 0xc870669c, 0xc978661e,
-    0xd68069a0, 0xd7886922, 0xd49068a4, 0xd5986826,
-    0xd2a06ba8, 0xd3a86b2a, 0xd0b06aac, 0xd1b86a2e,
-    0xdec06db0, 0xdfc86d32, 0xdcd06cb4, 0xddd86c36,
-    0xdae06fb8, 0xdbe86f3a, 0xd8f06ebc, 0xd9f86e3e,
-    0xe70071c0, 0xe6087142, 0xe51070c4, 0xe4187046,
-    0xe32073c8, 0xe228734a, 0xe13072cc, 0xe038724e,
-    0xef4075d0, 0xee487552, 0xed5074d4, 0xec587456,
-    0xeb6077d8, 0xea68775a, 0xe97076dc, 0xe878765e,
-    0xf78079e0, 0xf6887962, 0xf59078e4, 0xf4987866,
-    0xf3a07be8, 0xf2a87b6a, 0xf1b07aec, 0xf0b87a6e,
-    0xffc07df0, 0xfec87d72, 0xfdd07cf4, 0xfcd87c76,
-    0xfbe07ff8, 0xfae87f7a, 0xf9f07efc, 0xf8f87e7e
+    0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
+    0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
+    0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
+    0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
+    0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de,
+    0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
+    0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec,
+    0x14015c4f, 0x63066cd9, 0xfa0f3d63, 0x8d080df5,
+    0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172,
+    0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b,
+    0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940,
+    0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
+    0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116,
+    0x21b4f4b5, 0x56b3c423, 0xcfba9599, 0xb8bda50f,
+    0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
+    0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d,
+    0x76dc4190, 0x01db7106, 0x98d220bc, 0xefd5102a,
+    0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433,
+    0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818,
+    0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01,
+    0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e,
+    0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457,
+    0x65b0d9c6, 0x12b7e950, 0x8bbeb8ea, 0xfcb9887c,
+    0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
+    0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2,
+    0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb,
+    0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0,
+    0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9,
+    0x5005713c, 0x270241aa, 0xbe0b1010, 0xc90c2086,
+    0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+    0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4,
+    0x59b33d17, 0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad,
+    0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a,
+    0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683,
+    0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8,
+    0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1,
+    0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe,
+    0xf762575d, 0x806567cb, 0x196c3671, 0x6e6b06e7,
+    0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc,
+    0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5,
+    0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252,
+    0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
+    0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60,
+    0xdf60efc3, 0xa867df55, 0x316e8eef, 0x4669be79,
+    0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
+    0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f,
+    0xc5ba3bbe, 0xb2bd0b28, 0x2bb45a92, 0x5cb36a04,
+    0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
+    0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a,
+    0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713,
+    0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38,
+    0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21,
+    0x86d3d2d4, 0xf1d4e242, 0x68ddb3f8, 0x1fda836e,
+    0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
+    0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c,
+    0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45,
+    0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2,
+    0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db,
+    0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0,
+    0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+    0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6,
+    0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
+    0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
+    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
     };
 
 static krb5_error_code
