@@ -623,7 +623,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	if (exception) {
 #ifdef DEBUG
 	    int sockerr;
-	    size_t sockerrlen = sizeof(sockerr);
+	    socklen_t sockerrlen = sizeof(sockerr);
 #endif
 	handle_exception:
 #ifdef DEBUG
