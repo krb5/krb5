@@ -1,3 +1,9 @@
+2004-05-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: When generating prtest, use AC_CONFIG_FILES
+	instead of K5_GEN_FILE so that a chmod may be added to make the
+	script executable.
+
 2004-05-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEPLIBS, MLIBS, SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add
