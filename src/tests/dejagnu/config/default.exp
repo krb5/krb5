@@ -1301,3 +1301,30 @@ proc touch { file } {
 proc tail1 { file } {
     exec tail -1 $file
 }
+
+# setup_wrapper
+# Sets up a wraper script to set the runtime shared library environment 
+# variables and then executes a specific command. This is used to allow
+# a "rsh klist" or telnetd to execute login.krb5. 
+proc setup_wrapper { file command } {
+    global BINSH
+    global env
+    global krb5_init_vars
+
+    # We will start with a BINSH script
+    catch "exec rm -f $file"
+
+    set f [open $file "w" 0777]
+    puts $f "#!$BINSH"
+    foreach i $krb5_init_vars {
+	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
+	puts $f "$evar=$env($evar)"
+	puts $f "export $evar"
+    }
+    puts $f "exec $command"
+    close $f
+    
+    return 1
+}
+	
+

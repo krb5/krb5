@@ -1,3 +1,8 @@
+Mon May  6 11:54:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Add procedure setup_wrapper to first setup shared
+		library environment variables and the exec program
+
 Sat May  4 11:56:17 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* default.exp: For stty_init set to \^h as on some /bin/sh, ^ is
