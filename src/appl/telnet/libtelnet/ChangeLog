@@ -1,3 +1,8 @@
+Wed Feb  3 22:59:27 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos5.c: Increase size of str_data so that we can accept
+		mongo-gram tickets from Microsoft.  [telnet/686]
+
 Thu Nov 20 17:13:42 1997  Tom Yu  <tlyu@mit.edu>
 
 	* forward.c (rd_and_store_for_creds): Fix up to no longer do the
