@@ -1,3 +1,10 @@
+Sun Oct 23 00:50:42 1994    (tytso@rsx-11)
+
+	* kdb5_verify.c (check_princ): Check principals with the correct
+		realm name.
+
+	* configure.in: Look for ndbm or dbm libraries
+
 Thu Oct  6 12:42:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb5_verify.c (main, set_dbname_help): Allow master key password

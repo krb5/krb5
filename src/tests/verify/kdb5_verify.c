@@ -254,19 +254,22 @@ OLDDECLARG(char *, str_princ)
     krb5_boolean more;
     int nprincs = 1;
     char *str_mod_name;
+    char princ_name[4096];
 
-    fprintf(stderr, "\t%s ...\n", str_princ);
+    sprintf(princ_name, "%s@%s", str_princ, cur_realm);
 
-    if (retval = krb5_parse_name(str_princ, &princ)) {
-      com_err(progname, retval, "while parsing '%s'", str_princ);
+    fprintf(stderr, "\t%s ...\n", princ_name);
+
+    if (retval = krb5_parse_name(princ_name, &princ)) {
+      com_err(progname, retval, "while parsing '%s'", princ_name);
       goto out;
     }
 
-    pwd.data = str_princ;  /* must be able to regenerate */
-    pwd.length = strlen(str_princ);
+    pwd.data = princ_name;  /* must be able to regenerate */
+    pwd.length = strlen(princ_name);
 
     if (retval = krb5_principal2salt(princ, &salt)) {
-	com_err(progname, retval, "while converting principal to salt for '%s'", str_princ);
+	com_err(progname, retval, "while converting principal to salt for '%s'", princ_name);
 	goto out;
     }
 
@@ -275,7 +278,7 @@ OLDDECLARG(char *, str_princ)
 				&pwd,
 				&salt);
     if (retval) {
-	com_err(progname, retval, "while converting password to key for '%s'", str_princ);
+	com_err(progname, retval, "while converting password to key for '%s'", princ_name);
 	goto out;
     }
 
@@ -286,7 +289,7 @@ OLDDECLARG(char *, str_princ)
 
     if (nprincs != 1) {
       com_err(progname, 0, "Found %d entries db entry for %s.\n", nprincs,
-	      str_princ);
+	      princ_name);
       goto errout;
     }
 
@@ -294,7 +297,7 @@ OLDDECLARG(char *, str_princ)
 				  &kdbe.key,
 				  &db_key);
     if (retval) {
-	com_err(progname, retval, "while decrypting key for '%s'", str_princ);
+	com_err(progname, retval, "while decrypting key for '%s'", princ_name);
 	goto errout;
     }
 
@@ -309,7 +312,7 @@ errout:
     else {
       if (memcmp((char *)pwd_key.contents, (char *) db_key.contents, pwd_key.length)) {
 	fprintf(stderr, "\t key did not match stored value for %s\n", 
-		str_princ);
+		princ_name);
 	goto errout;
       }
     }
@@ -318,32 +321,32 @@ errout:
     free((char *)db_key.contents);
 
     if (kdbe.kvno != 1) {
-      fprintf(stderr, "\tkvno did not match stored value for %s.\n", str_princ);
+      fprintf(stderr, "\tkvno did not match stored value for %s.\n", princ_name);
       goto errout;
     }
 
     if (kdbe.max_life != mblock.max_life) {
       fprintf(stderr, "\tmax life did not match stored value for %s.\n", 
-	      str_princ);
+	      princ_name);
       goto errout;
     }
 
     if (kdbe.max_renewable_life != mblock.max_rlife) {
       fprintf(stderr, 
 	      "\tmax renewable life did not match stored value for %s.\n",
-	      str_princ);
+	      princ_name);
       goto errout;
     }
 
     if (kdbe.mkvno != mblock.mkvno) {
       fprintf(stderr, "\tmaster keyvno did not match stored value for %s.\n", 
-	      str_princ);
+	      princ_name);
       goto errout;
     }
 
     if (kdbe.expiration != mblock.expiration) {
       fprintf(stderr, "\texpiration time did not match stored value for %s.\n",
-	      str_princ);
+	      princ_name);
       goto errout;
     }
 
@@ -361,7 +364,7 @@ errout:
 
     if (kdbe.attributes != mblock.flags) {
       fprintf(stderr, "\tAttributes did not match stored value for %s.\n",
-	      str_princ);
+	      princ_name);
       goto errout;
     }
 
