@@ -7,7 +7,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
-OBJS = @LIBOBJS@
+OBJS = setenv.$(OBJEXT)	@LIBOBJS@
 
 all-unix:: shared $(OBJS)
 all-mac: $(OBJS)

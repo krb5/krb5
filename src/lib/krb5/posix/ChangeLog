@@ -1,3 +1,11 @@
+Wed Jan  3 22:25:52 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Check for presense of setenv(), unsetenv(), and
+		getenv() from the C library.
+	
+	* Makefile.in: New file: setenv.c --- provides routines for
+		setting the environment.
+
 Tue Dec 19 17:29:21 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Don't drag in syslog.c if vsyslog() is not
