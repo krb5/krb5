@@ -1,3 +1,10 @@
+Fri Sep 29 13:35:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove krb5-pro.h
+	              (krb5-pro.h): Add HAVE_SYS_TYPES_H file so that
+		      sys/types.h may be included definition of size_t for
+		      krb5.h  
+
 Fri Sep 29 01:35:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: #include "osconf.h" all the time, at the beginning of
