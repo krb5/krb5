@@ -113,8 +113,7 @@ libdir/lib/**/libname.a:						@@\
           DEPKLIB = $(TOP)/lib/libkrb5.a \
                     $(TOP)/lib/os-4.3/libos.a \
                     $(TOP)/lib/des/libdes.a \
-                    $(TOP)/lib/crc-32/libcrc32.a \
-                    $(TOP)/asn.1/libasn1.a
+                    $(TOP)/lib/crc-32/libcrc32.a
 
              KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err
            KDBLIB = $(TOP)/lib/kdb/libkdb.a
