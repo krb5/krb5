@@ -27,8 +27,8 @@ OBJS = \
 
 all:: ksu
 
-ksu: $(OBJS) $(KRB5_BASE_DEPLIBS) $(UTIL_DEPLIB)
-	$(CC_LINK) -o $@ $(OBJS) $(UTIL_LIB) $(KRB5_BASE_LIBS) $(KSU_LIBS)
+ksu: $(OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(KRB5_BASE_LIBS) $(KSU_LIBS)
 
 clean::
 	$(RM) ksu

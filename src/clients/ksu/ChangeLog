@@ -1,3 +1,7 @@
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (ksu): Don't use krb5util library.
+
 2002-06-21  Ezra Peisach  <epeisach@bu.edu>
 
 	* ccache.c (printtime): Do not assume that krb5_timestamp and
