@@ -768,6 +768,40 @@ kadm5_free_config_params(context, params)
     return(0);
 }
 
+krb5_error_code
+kadm5_get_admin_service_name(krb5_context ctx,
+			     char *realm_in,
+			     char *admin_name,
+			     size_t maxlen)
+{
+    krb5_error_code ret;
+    kadm5_config_params params_in, params_out;
+    struct hostent *hp;
+
+    memset(&params_in, 0, sizeof(params_in));
+    memset(&params_out, 0, sizeof(params_out));
+
+    params_in.mask |= KADM5_CONFIG_ADMIN_SERVER;
+    ret = kadm5_get_config_params(ctx, NULL, NULL, &params_in, &params_out);
+    if (ret)
+	return ret;
+
+    hp = gethostbyname(params_out.admin_server);
+    if (hp == NULL) {
+	ret = errno;
+	goto err_params;
+    }
+    if (strlen(hp->h_name) + sizeof("kadmin/") > maxlen) {
+	ret = ENOMEM;
+	goto err_params;
+    }
+    sprintf(admin_name, "kadmin/%s", hp->h_name);
+
+err_params:
+    free(params_out.admin_server);
+    return ret;
+}
+
 /***********************************************************************
  * This is the old krb5_realm_read_params, which I mutated into
  * kadm5_get_config_params but which old code (kdb5_* and krb5kdc)

@@ -121,7 +121,8 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_DICT_FILE		0x020000
 #define KADM5_CONFIG_MKEY_FROM_KBD	0x040000
 #define KADM5_CONFIG_KPASSWD_PORT	0x080000
-    
+#define KADM5_CONFIG_OLD_AUTH_GSSAPI	0x100000
+
 /*
  * permission bits
  */
@@ -287,6 +288,9 @@ krb5_error_code kadm5_free_config_params(krb5_context context,
 
 krb5_error_code kadm5_free_realm_params(krb5_context kcontext,
 					kadm5_config_params *params);
+
+krb5_error_code kadm5_get_admin_service_name(krb5_context, char *,
+					     char *, size_t);
 #endif
 
 kadm5_ret_t    kadm5_init(char *client_name, char *pass,
