@@ -177,7 +177,7 @@ errcode_t profile_add_node(section, name, value, ret_node)
  * Iterate through the section, returning the relations which match
  * the given name.  If name is NULL, then interate through all the
  * relations in the section.  The first time this routine is called,
- * the state pointer must be null.  When this profile_find_node_relatioon()
+ * the state pointer must be null.  When this profile_find_node_relation()
  * returns, if the state pointer is non-NULL, then this routine should
  * be called again.
  *
