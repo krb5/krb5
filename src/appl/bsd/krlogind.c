@@ -141,7 +141,9 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <sys/stropts.h>
 #endif
      
-#ifndef POSIX_TERMIOS
+#ifdef POSIX_TERMIOS
+#include <termios.h>
+#else
 #ifdef SYSV
 #define USE_TERMIO
 #endif
@@ -567,6 +569,10 @@ void doit(f, fromp)
     
     /* Make sure we can open slave pty, then close it for system 5 so that 
        the process group is set correctly..... */
+#ifdef __alpha
+	/* osf/1 method of losing controlling tty...*/
+	setsid();
+#endif
 #ifdef VHANG_FIRST
     vfd = open(line, O_RDWR);
     if (vfd < 0)
@@ -597,6 +603,10 @@ void doit(f, fromp)
 #endif /* VHANG_FIRST */
     if (t < 0)
       fatalperror(f, line);
+#ifdef __alpha
+    if(ioctl(t, TIOCSCTTY, 0) < 0) /* set controlling tty */
+      fatalperror(f, "setting controlling tty");
+#endif
 #ifdef SYSV
     close(t);
 #endif
@@ -608,19 +618,23 @@ void doit(f, fromp)
       fatalperror(f, "", errno);
     if (pid == 0) {
 	{
+#ifdef POSIX_TERMIOS
+	    struct termios new_termio;
+#else
 #ifdef USE_TERMIO
 	    struct termio b;
-#define TIOCGETP TCGETA
-#define TIOCSETP TCSETA
-#ifdef MIN
-#undef MIN
-#endif
-#define        MIN     1
-#define        TIME    0
+# define TIOCGETP TCGETA
+# define TIOCSETP TCSETA
+# ifdef MIN
+#  undef MIN
+# endif
+# define        MIN     1
+# define        TIME    0
 	    
 #else
 	    struct sgttyb b;
-#endif
+#endif /* USE_TERMIO */
+#endif /* POSIX_TERMIOS */
 #ifdef SYSV
 	    (void) setpgrp();
 	    /* SYSV open slave device: We closed it above so pgrp
@@ -666,6 +680,17 @@ void doit(f, fromp)
 	    if (line_push(t) < 0)
 	      fatalperror(f, "IPUSH",errno);
 #endif
+#ifdef POSIX_TERMIOS
+	    tcgetattr(t,&new_termio);
+	    new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
+	    /* so that login can read the authenticator */
+	    new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
+	    /* new_termio.c_iflag = 0; */
+	    /* new_termio.c_oflag = 0; */
+	    new_termio.c_cc[VMIN] = 1;
+	    new_termio.c_cc[VTIME] = 0;
+	    tcsetattr(t,TCSANOW,&new_termio);
+#else
 	    (void)ioctl(t, TIOCGETP, &b);
 #ifdef USE_TERMIO
 	    /* The key here is to just turn off echo */
@@ -678,8 +703,9 @@ void doit(f, fromp)
 	    b.c_cc[VTIME] = TIME;
 #else
 	    b.sg_flags = RAW|ANYP;
-#endif
+#endif /* USE_TERMIO */
 	    (void)ioctl(t, TIOCSETP, &b);
+#endif /* POSIX_TERMIOS */
 	    /*
 	     **      signal the parent that we have turned off echo
 	     **      on the slave side of the pty ... he's waiting
