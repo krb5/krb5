@@ -73,7 +73,7 @@ Checksum ::= SEQUENCE {
 }
 
 -- Unencrypted authenticator
-Authenticator ::= SEQUENCE  {
+Authenticator ::= [APPLICATION 8] SEQUENCE  {
 	authenticator-vno[0]		AuthenticatorVersion,
 	crealm[1]			Realm,
 	cname[2]			PrincipalName,
@@ -85,7 +85,7 @@ Authenticator ::= SEQUENCE  {
 AuthenticatorVersion ::= INTEGER {krb5(5)}
 
 -- Encrypted part of ticket
-EncTicketPart ::= SEQUENCE {
+EncTicketPart ::= [APPLICATION 9] SEQUENCE {
 	confounder[0]			INTEGER, -- krb5_ui_4
 	flags[1]			TicketFlags,
 	key[2]				EncryptionKey,
@@ -144,7 +144,7 @@ KDCOptions ::= BIT STRING {
 	validate(31)
 }
 
-Ticket ::= SEQUENCE {
+Ticket ::= [APPLICATION 10] SEQUENCE {
 	tkt-vno[0]			INTEGER,
 	srealm[1]			Realm,
 	sname[2]			PrincipalName,
@@ -179,7 +179,7 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 	enc-part[7]			EncryptedData	-- EncKDCRepPart
 }
 
-EncKDCRepPart ::= SEQUENCE {
+EncKDCRepPart ::= [APPLICATION 11] SEQUENCE {
 	confounder[0]			INTEGER, -- krb5_ui_4
 	key[1]				EncryptionKey,
 	last-req[2]			LastReq,
@@ -235,7 +235,7 @@ AP-REP ::= [APPLICATION 4] SEQUENCE {
 	enc-part[2]			EncryptedData	-- EncAPRepPart
 }
 
-EncAPRepPart ::= SEQUENCE {
+EncAPRepPart ::= [APPLICATION 12] SEQUENCE {
 	ctime[0]			GeneralizedTime,
 	cmsec[1]			INTEGER
 }
@@ -252,7 +252,7 @@ TGS-REQ ::= [APPLICATION 5] SEQUENCE {
 	tgs-request[1]			OCTET STRING -- encoded RealTGS-REQ
 }
 
-RealTGS-REQ ::= SEQUENCE {
+RealTGS-REQ ::= [APPLICATION 13] SEQUENCE {
 	pvno[1]				INTEGER,
 	msg-type[2]			INTEGER,
 	kdc-options[3]			KDCOptions,
@@ -266,7 +266,7 @@ RealTGS-REQ ::= SEQUENCE {
 	enc-part[11]			EncryptedData OPTIONAL -- EncTgsReqPart
 }
 
-EncTgsReqPart ::= SEQUENCE {
+EncTgsReqPart ::= [APPLICATION 14] SEQUENCE {
 	authorization-data[0]		AuthorizationData OPTIONAL,
 	second-ticket[1]		Ticket OPTIONAL
 }
@@ -288,7 +288,7 @@ KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
 	enc-part[3]			EncryptedData	-- EncKrbPrivPart
 }
 
-EncKrbPrivPart ::= SEQUENCE {
+EncKrbPrivPart ::= [APPLICATION 15] SEQUENCE {
 	user-data[0]			OCTET STRING,
 	timestamp[1]			GeneralizedTime,
 	msec[2]				INTEGER,
