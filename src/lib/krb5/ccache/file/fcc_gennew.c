@@ -113,9 +113,9 @@ krb5_fcc_generate_new (id)
 
 	  /* Ignore user's umask, set mode = 0600 */
 #ifdef NOFCHMOD
-	  chmod(((krb5_fcc_data *) lid->data)->filename, S_IREAD | S_IWRITE);
+	  chmod(((krb5_fcc_data *) lid->data)->filename, S_IRUSR | S_IWUSR);
 #else
-	  fchmod(ret, S_IREAD | S_IWRITE);
+	  fchmod(ret, S_IRUSR | S_IWUSR);
 #endif
 	  if ((cnt = write(ret, (char *)&fcc_fvno, sizeof(fcc_fvno)))
 	      != sizeof(fcc_fvno)) {
