@@ -255,10 +255,9 @@ profile_get_integer(profile, name, subname, subsubname,
 	char            *end_value;
 	long		ret_long;
 
-	if (profile == 0) {
-		*ret_int = def_val;
+	*ret_int = def_val;
+	if (profile == 0)
 		return 0;
-	}
 
 	names[0] = name;
 	names[1] = subname;
@@ -270,13 +269,22 @@ profile_get_integer(profile, name, subname, subsubname,
 		return 0;
 	} else if (retval)
 		return retval;
-		
-	ret_long = strtol (value, &end_value, 10);
-	if ((errno != 0) || (end_value != value + strlen (value)) || 
-	    (end_value == value) || (ret_long > INT_MAX) ||
-	    (ret_long < INT_MIN)) {
+
+	if (value[0] == 0)
+	    /* Empty string is no good.  */
 	    return PROF_BAD_INTEGER;
-	}
+	errno = 0;
+	ret_long = strtol (value, &end_value, 10);
+
+	/* Overflow or underflow.  */
+	if ((ret_long == LONG_MIN || ret_long == LONG_MAX) && errno != 0)
+	    return PROF_BAD_INTEGER;
+	/* Value outside "int" range.  */
+	if ((long) (int) ret_long != ret_long)
+	    return PROF_BAD_INTEGER;
+	/* Garbage in string.  */
+	if (end_value != value + strlen (value))
+	    return PROF_BAD_INTEGER;
 	
    
 	*ret_int = ret_long;
