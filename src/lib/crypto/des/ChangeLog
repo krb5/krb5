@@ -1,3 +1,10 @@
+Thu Dec 25 20:57:53 1997  Tom Yu  <chaoself@mit.edu>
+
+	* init_rkey.c (mit_des_init_random_key): Punt the struct; use
+	explicit variables instead because we're no longer doing a
+	memcpy.  In addition, fill p_state->sequence.data a byte at a
+	time. [krb5-libs/492]
+
 Mon Oct 27 01:06:34 1997  Tom Yu  <tlyu@mit.edu>
 
 	* d3_cbc.c, des.h, des_int.h, f_cbc.c, f_cksum.c, f_ecb.c,

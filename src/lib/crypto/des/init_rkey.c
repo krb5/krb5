@@ -48,10 +48,9 @@ mit_des_init_random_key (eblock, seedblock, state)
     krb5_error_code kret = 0;
     krb5_address **addrs = 0;
     krb5_data seed;
-    struct tval {
-	krb5_int32 seconds;
-	krb5_int32 microseconds;
-    } timenow;
+    krb5_int32 now;
+    krb5_int32 unow;
+    unsigned char *cp;
 
     switch (enctype)
     {
@@ -137,9 +136,16 @@ mit_des_init_random_key (eblock, seedblock, state)
     if (kret) goto cleanup;
 
     /* sequence = time */
-    (void) krb5_crypto_us_timeofday(&timenow.seconds,
-				    &timenow.microseconds);
-    memcpy((char *)p_state->sequence.data, (char *)&timenow, sizeof(timenow));
+    (void) krb5_crypto_us_timeofday(&now, &unow);
+    cp = p_state->sequence.data;
+    *cp++ = (now >> 24) & 0xff;
+    *cp++ = (now >> 16) & 0xff;
+    *cp++ = (now >> 8) & 0xff;
+    *cp++ = now & 0xff;
+    *cp++ = (unow >> 24) & 0xff;
+    *cp++ = (unow >> 16) & 0xff;
+    *cp++ = (unow >> 8) & 0xff;
+    *cp++ = unow &0xff;
 
     /* seed = random(tmp.seed, time) */
     kret = mit_des_random_key(NULL, p_state, &new_key);
