@@ -51,7 +51,7 @@ autoconf.info standards.texi make-stds.texi standards.info texinfo.tex
 
 editsh = sed -e 's,@''datadir''@,$(acdatadir),g' -e 's,@''M4''@,$(M4),g'
 
-all: autoconf autoheader
+all:: autoconf autoheader
 
 autoconf: autoconf.sh
 	rm -f $@ $@.tmp
