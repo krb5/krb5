@@ -204,7 +204,18 @@ int	swaitmax = SWAITMAX;
 int	swaitint = SWAITINT;
 
 void	lostconn(), myoob();
-FILE	*getdatasock(), *dataconn();
+FILE	*getdatasock(); 
+#if defined(__STDC__)
+/* 
+ * The following prototypes must be ANSI for systems for which
+ * sizeof(off_t) > sizeof(int) to prevent stack overflow problems 
+ */
+FILE	*dataconn(char *name, off_t size, char *mode);
+void	send_data(FILE *instr, FILE *outstr, off_t blksize);
+#else
+void	send_data();
+FILE	*dataconn();
+#endif
 
 #ifdef SETPROCTITLE
 char	**Argv = NULL;		/* pointer to argument vector */
@@ -1052,7 +1063,8 @@ dataconn(name, size, mode)
 	file_size = size;
 	byte_count = 0;
 	if (size != (off_t) -1)
-		(void) sprintf (sizebuf, " (%ld bytes)", size);
+		/* cast size to long in case sizeof(off_t) > sizeof(long) */
+		(void) sprintf (sizebuf, " (%ld bytes)", (long)size);
 	else
 		(void) strcpy(sizebuf, "");
 	if (pdata >= 0) {
@@ -1142,7 +1154,7 @@ secure_error(fmt, p1, p2, p3, p4, p5)
  *
  * NB: Form isn't handled.
  */
-send_data(instr, outstr, blksize)
+void send_data(instr, outstr, blksize)
 	FILE *instr, *outstr;
 	off_t blksize;
 {
