@@ -818,8 +818,7 @@ static int verify_krb_v4_tgt (realm)
     memcpy ((char *) &addr, (char *)hp->h_addr, sizeof (addr));
     /* Do we have rcmd.<host> keys? */
 #if 0 /* Be paranoid.  If srvtab exists, assume it must contain the
-	 right key.  The more paranoid mode also helps avoid a
-	 possible DNS spoofing issue.  */
+	 right key.  */
     have_keys = read_service_key (rcmd_str, phost, realm, 0, KEYFILE, key)
 	? 0 : 1;
     memset (key, 0, sizeof (key));
