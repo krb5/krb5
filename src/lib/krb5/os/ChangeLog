@@ -1,3 +1,10 @@
+2001-07-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* genaddrs.c: Use GETPEERNAME_ARG2_TYPE, GETPEERNAME_ARG3_TYPE
+	instead of assuming types. 
+
+	* changepw.c: Use GETSOCKNAME_ARG3_TYPE instead of int in casts.
+
 2001-07-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* gen_port.c (krb5_gen_portaddr): Add const to cast of

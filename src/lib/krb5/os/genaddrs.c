@@ -35,6 +35,19 @@
 #include <netinet/in.h>
 #endif
 
+#ifndef GETPEERNAME_ARG2_TYPE
+#define GETPEERNAME_ARG2_TYPE struct sockaddr
+#endif
+#ifndef GETPEERNAME_ARG3_TYPE
+#define GETPEERNAME_ARG3_TYPE size_t
+#endif
+#ifndef GETSOCKNAME_ARG2_TYPE
+#define GETSOCKNAME_ARG2_TYPE struct sockaddr
+#endif
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE size_t
+#endif
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_auth_con_genaddrs(context, auth_context, infd, flags)
     krb5_context 	context;
@@ -53,12 +66,13 @@ krb5_auth_con_genaddrs(context, auth_context, infd, flags)
     struct sockaddr_in lsaddr, rsaddr;
     krb5_address lcaddr, rcaddr;
     krb5_address lcport, rcport;
-    int ssize;
+    GETSOCKNAME_ARG3_TYPE ssize;
 
     ssize = sizeof(struct sockaddr);
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR)) {
-    	if ((retval = getsockname(fd, (struct sockaddr *) &lsaddr, &ssize)))
+    	if ((retval = getsockname(fd, (GETSOCKNAME_ARG2_TYPE *) &lsaddr, 
+				  &ssize)))
 	    return retval;
 
     	if (flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) {
@@ -80,7 +94,8 @@ krb5_auth_con_genaddrs(context, auth_context, infd, flags)
 
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
-        if ((retval = getpeername(fd, (struct sockaddr *) &rsaddr, &ssize)))
+        if ((retval = getpeername(fd, (GETPEERNAME_ARG2_TYPE *) &rsaddr, 
+				  &ssize)))
 	    return retval;
 
     	if (flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) {

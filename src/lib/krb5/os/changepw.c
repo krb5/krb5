@@ -49,6 +49,10 @@
 #endif
 #endif /* _WIN32 && !__CYGWIN32__ */
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
+
 /*
  * Wrapper function for the two backends
  */
@@ -96,9 +100,12 @@ krb5_change_password(context, creds, newpw, result_code,
     krb5_address local_kaddr, remote_kaddr;
     char *code_string;
     krb5_error_code code = 0;
-    int i, addrlen;
+    int i;
+    GETSOCKNAME_ARG3_TYPE addrlen;
     struct sockaddr_storage local_addr, remote_addr, tmp_addr;
-    int cc, local_result_code, tmp_len;
+    int cc, local_result_code;
+    /* platforms seem to be consistant and use the same types */
+    GETSOCKNAME_ARG3_TYPE tmp_len; 
     SOCKET s1 = INVALID_SOCKET, s2 = INVALID_SOCKET;
     int tried_one = 0;
     struct addrlist al = ADDRLIST_INIT;
@@ -245,7 +252,8 @@ krb5_change_password(context, creds, newpw, result_code,
 	    goto cleanup;
 	}
 
-	if ((cc = sendto(s1, chpw_req.data, (int) chpw_req.length, 0,
+	if ((cc = sendto(s1, chpw_req.data, 
+			 (GETSOCKNAME_ARG3_TYPE) chpw_req.length, 0,
 			 al.addrs[i], socklen(al.addrs[i]))) != chpw_req.length)
 	{
 	    if ((cc < 0) && ((SOCKET_ERRNO == ECONNREFUSED) ||
@@ -285,7 +293,8 @@ krb5_change_password(context, creds, newpw, result_code,
 	   SunOS 4.1.4 or Irix 5.3.  Thus we must actually accept the
 	   value and discard it. */
 	tmp_len = sizeof(tmp_addr);
-	if ((cc = recvfrom(s1, chpw_rep.data, (int) chpw_rep.length,
+	if ((cc = recvfrom(s1, chpw_rep.data, 
+			   (GETSOCKNAME_ARG3_TYPE) chpw_rep.length,
 			   0, ss2sa(&tmp_addr), &tmp_len)) < 0)
 	{
 	    code = SOCKET_ERRNO;
