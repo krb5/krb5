@@ -1333,6 +1333,8 @@ proc setup_wrapper { file command } {
 
     set f [open $file "w" 0777]
     puts $f "#!$BINSH"
+    puts $f "KRB5_CONFIG=$env(KRB5_CONFIG)"
+    puts $f "export KRB5_CONFIG"
     foreach i $krb5_init_vars {
 	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
 	puts $f "$evar=$env($evar)"
