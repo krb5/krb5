@@ -40,10 +40,9 @@ static char rcsid_kdb_edit_c[] =
 #include <krb5/ext-proto.h>
 
 #include <com_err.h>
-#include <ss/ss.h>
 #include <stdio.h>
 
-#include "./kdb5_edit.h"
+#include "kdb5_edit.h"
 
 struct mblock mblock = {				/* XXX */
     KRB5_KDB_MAX_LIFE,
@@ -86,8 +85,6 @@ krb5_encrypt_block master_encblock;
 krb5_pointer master_random;
 int	valid_master_key = 0;
 
-extern ss_request_table kdb5_edit_cmds;
-
 extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 
 char *progname;
@@ -96,25 +93,9 @@ char *mkey_name = 0;
 krb5_boolean manual_mkey = FALSE;
 krb5_boolean dbactive = FALSE;
 
-void
-quit()
-{
-    krb5_error_code retval = krb5_db_fini();
-    if (valid_master_key)
-	    memset((char *)master_keyblock.contents, 0,
-		   master_keyblock.length);
-    if (retval) {
-	com_err(progname, retval, "while closing database");
-	exit(1);
-    }
-    exit(0);
-}
-
-
-void
-main(argc, argv)
-int argc;
-char *argv[];
+char *kdb5_edit_Init(argc, argv)
+    int argc;
+    char *argv[];
 {
     extern char *optarg;	
     int optchar;
@@ -124,7 +105,6 @@ char *argv[];
     char *defrealm;
     int keytypedone = 0;
     krb5_enctype etype = DEFAULT_KDC_ETYPE;
-    int sci_idx, code;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
 
@@ -199,14 +179,6 @@ char *argv[];
 	exit(1);
     }
     krb5_use_cstype(&master_encblock, etype);
-
-    sci_idx = ss_create_invocation("kdb5_edit", "5.0", (char *) NULL,
-				   &kdb5_edit_cmds, &retval);
-    if (retval) {
-	ss_perror(sci_idx, retval, "creating invocation");
-	exit(1);
-    }
-
     if (!cur_realm) {
 	if (retval = krb5_get_default_realm(&defrealm)) {
 	    com_err(progname, retval, "while retrieving default realm name");
@@ -220,24 +192,7 @@ char *argv[];
 	(void) strcpy(cur_realm, defrealm);
     }
     (void) set_dbname_help(progname, dbname);
-
-    if (request) {
-	    (void) ss_execute_line(sci_idx, request, &code);
-	    if (code != 0)
-		    ss_perror(sci_idx, code, request);
-    } else
-	    ss_listen(sci_idx, &retval);
-    if (valid_master_key) {
-	    (void) krb5_finish_key(&master_encblock);
-	    (void) krb5_finish_random_key(&master_encblock, &master_random);
-    }
-    retval = krb5_db_fini();
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-    if (retval && retval != KRB5_KDB_DBNOTINITED) {
-	com_err(progname, retval, "while closing database");
-	exit(1);
-    }
-    exit(0);
+    return request;
 }
 
 #define	NO_PRINC ((krb5_kvno)-1)
@@ -360,11 +315,9 @@ OLDDECLARG(struct saltblock *, salt)
 }
 
 void
-set_dbname(argc, argv, sci_idx, infop)
+set_dbname(argc, argv)
 int argc;
 char *argv[];
-int sci_idx;
-krb5_pointer infop;
 {
     krb5_error_code retval;
 
@@ -395,10 +348,8 @@ krb5_pointer infop;
 	    free(cur_realm);
     cur_realm = malloc(strlen(argv[2])+1);
     if (!cur_realm) {
-	com_err(argv[0], 0, "Insufficient memory to proceed");
-	ss_quit(argc, argv, sci_idx, infop);
-	/*NOTREACHED*/
-	return;
+	(void)quit();
+	exit(1);		/* XXX */
     }
     (void) strcpy(cur_realm, argv[2]);
     (void) set_dbname_help(argv[0], argv[1]);
@@ -504,8 +455,8 @@ char *dbname;
 }
 
 void enter_master_key(argc, argv)
-	int	argc;
-	char	**argv;
+        int argc;
+        char *argv[];
 {
 	char	*pname = argv[0];
 	krb5_error_code retval;
@@ -560,10 +511,9 @@ static krb5_kt_ops *krb5_kt_dir_array[] = {
 
 krb5_kt_ops **krb5_kt_directory = krb5_kt_dir_array;
 
-void
-extract_srvtab(argc, argv)
-int argc;
-char *argv[];
+void extract_srvtab(argc, argv)
+    int argc;
+    char *argv[];
 {
     char ktname[MAXPATHLEN+sizeof("WRFILE:")+1];
     krb5_keytab ktid;
@@ -670,10 +620,9 @@ char *argv[];
     return;
 }
 
-void
-extract_v4_srvtab(argc, argv)
-int argc;
-char *argv[];
+int extract_v4_srvtab(argc, argv)
+    int argc;
+    char *argv[];
 {
     char ktname[MAXPATHLEN+1];
     FILE	*fout;
@@ -840,10 +789,9 @@ krb5_db_entry *entry;
 }
 
 /*ARGSUSED*/
-void
-list_db(argc, argv)
-int argc;
-char *argv[];
+void list_db(argc, argv)
+    int argc;
+    char *argv[];
 {
     struct list_iterator_struct lis;
     char *start;
@@ -893,10 +841,9 @@ char *argv[];
     (void) krb5_db_iterate(list_iterator, argv[0]);
 }
 
-void
-delete_entry(argc, argv)
-int argc;
-char *argv[];
+int delete_entry(argc, argv)
+    int argc;
+    char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
@@ -1057,26 +1004,23 @@ errout:
     return;
 }
 
-void
-add_rnd_key(argc, argv)
-int argc;
-char *argv[];
+void add_rnd_key(argc, argv)
+    int argc;
+    char *argv[];
 {
     enter_rnd_key(argc, argv, 0);
 }
 
-void
-change_rnd_key(argc, argv)
-int argc;
-char *argv[];
+void change_rnd_key(argc, argv)
+    int argc;
+    char *argv[];
 {
     enter_rnd_key(argc, argv, 1);
 }
 
-void
-add_new_key(argc, argv)
-int argc;
-char *argv[];
+void add_new_key(argc, argv)
+    int argc;
+    char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
@@ -1117,10 +1061,9 @@ char *argv[];
     return;
 }
 
-void
-add_v4_key(argc, argv)
-int argc;
-char *argv[];
+void add_v4_key(argc, argv)
+    int argc;
+    char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
@@ -1149,10 +1092,9 @@ char *argv[];
     return;
 }
 
-void
-change_pwd_key(argc, argv)
-int argc;
-char *argv[];
+void change_pwd_key(argc, argv)
+    int argc;
+    char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
@@ -1198,10 +1140,9 @@ char *argv[];
     return;
 }
 
-void
-change_v4_key(argc, argv)
-int argc;
-char *argv[];
+void change_v4_key(argc, argv)
+    int argc;
+    char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
@@ -1327,8 +1268,8 @@ OLDDECLARG(int, salttype)
  * XXX Still under construction....
  */
 void show_principal(argc, argv)
-    int	argc;
-    char **argv;
+    int argc;
+    char *argv[];
 {
     krb5_principal princ;
     int nprincs = 1;
@@ -1420,4 +1361,23 @@ void print_working_dir(argc, argv)
 	puts(buf);
 }
 
+int quit()
+{
+    krb5_error_code retval;
+    static krb5_boolean finished = 0;
 
+    if (finished)
+	return 0;
+    if (valid_master_key) {
+	    (void) krb5_finish_key(&master_encblock);
+	    (void) krb5_finish_random_key(&master_encblock, &master_random);
+    }
+    retval = krb5_db_fini();
+    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    finished = TRUE;
+    if (retval && retval != KRB5_KDB_DBNOTINITED) {
+	com_err(progname, retval, "while closing database");
+	return 1;
+    }
+    return 0;
+}

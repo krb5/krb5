@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1992 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -21,34 +21,41 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
+ *
+ * ss wrapper for kdb5_edit
  */
 
-#define REALM_SEP	'@'
-#define REALM_SEP_STR	"@"
+#if !defined(lint) && !defined(SABER)
+static char rcsid_kdb_edit_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+#include <krb5/krb5.h>
+#include "kdb5_edit.h"
+#include <ss/ss.h>
+#include <stdio.h>
 
-extern char *progname;
-extern char *Err_no_database;
+extern ss_request_table kdb5_edit_cmds;
 
-struct mblock {
-    krb5_deltat max_life;
-    krb5_deltat max_rlife;
-    krb5_timestamp expiration;
-    krb5_flags flags;
-    krb5_kvno mkvno;
-};
+int main(argc, argv)
+    int argc;
+    char *argv[];
+{
+    char *request;
+    krb5_error_code retval;
+    int sci_idx, code;
 
-struct saltblock {
-    int salttype;
-    krb5_data saltdata;
-};
-
-/* krb5_kvno may be narrow */
-#include <krb5/widen.h>
-void add_key PROTOTYPE((char const *, char const *, krb5_const_principal,
-			const krb5_keyblock *, krb5_kvno, struct saltblock *));
-void enter_pwd_key PROTOTYPE((char *, char *, krb5_const_principal,
-			      krb5_const_principal, krb5_kvno, int));
-int set_dbname_help PROTOTYPE((char *, char *));
-
-#include <krb5/narrow.h>
-char *kdb5_edit_Init PROTOTYPE((int, char **));
+    request = kdb5_edit_Init(argc, argv);
+    sci_idx = ss_create_invocation("kdb5_edit", "5.0", (char *) NULL,
+				   &kdb5_edit_cmds, &retval);
+    if (retval) {
+	ss_perror(sci_idx, retval, "creating invocation");
+	exit(1);
+    }
+    if (request) {
+	    (void) ss_execute_line(sci_idx, request, &code);
+	    if (code != 0)
+		    ss_perror(sci_idx, code, request);
+    } else
+	    ss_listen(sci_idx, &retval);
+    return quit();
+}

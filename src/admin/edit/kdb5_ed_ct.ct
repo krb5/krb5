@@ -76,7 +76,7 @@ request change_working_dir, "Change working directory",
 	change_working_directory, cwd, cd;
 
 request print_working_dir, "Print working directory",
-	print_working_direcotry, pwd;
+	print_working_directory, pwd;
 
 # list_requests is generic -- unrelated to Kerberos
 request	ss_list_requests, "List available requests.",

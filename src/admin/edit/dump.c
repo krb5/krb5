@@ -41,10 +41,9 @@ static char rcsid_kdb_edit_c[] =
 #include <krb5/func-proto.h>
 
 #include <com_err.h>
-#include <ss/ss.h>
 #include <stdio.h>
 
-#include "./kdb5_edit.h"
+#include "kdb5_edit.h"
 
 struct dump_record {
 	char	*comerr_name;

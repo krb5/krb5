@@ -23,11 +23,30 @@
 # 
 # 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(SSLIB)
-OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o
-SRCS= kdb5_edit.c kdb5_ed_ct.c util.c dump.c
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
+CTOBJS = kdb5_ed_ct.o
+CTSRCS = kdb5_ed_ct.c
+
+#if HasTcl
+MOSTOBJS = kdb5_edit.o util.o dump.o
+MOSTSRCS = kdb5_edit.c util.c dump.c
+TCLOBJS = tcl_wrapper.o
+TCLSRCS = tcl_wrapper.c
+SSOBJS = ss_wrapper.o $(CTOBJS)
+SSSRCS = ss_wrapper.c $(CTSRCS)
+OBJS = $(MOSTOBJS) $(TCLOBJS) $(SSOBJS)
+SRCS = $(MOSTSRCS) $(TCLSRCS) $(SSSRCS)
+#else
+OBJS = kdb5_edit.o util.o dump.o $(CTOBJS) ss_wrapper.o
+SRCS = kdb5_edit.c util.c dump.c $(CTSRCS) ss_wrapper.c
+#endif
+
+#if HasTcl
+all:: kdb5_edit.ss kdb5_edit.tcl
+#else
 all:: kdb5_edit
+#endif
 
 CmdTableObjectRule()
 
@@ -37,10 +56,22 @@ kdb5_ed_ct.o: kdb5_ed_ct.c
 clean::
 	$(RM) kdb5_ed_ct.c
 
-NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+#if HasTcl
+INCLUDES = $(TCLINCLUDES)
+NormalProgramTarget(kdb5_edit.ss,$(MOSTOBJS) $(SSOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES) $(SSLIB),)
+NormalProgramTarget(kdb5_edit.tcl,$(MOSTOBJS) $(TCLOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES) $(TCLLIBS),)
+#else
+NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES) $(SSLIB),)
+#endif
+
 Krb5InstallAdminProgram(kdb5_edit)
 
+#if HasTcl
+SaberProgramTarget(kdb5_edit.ss,$(MOSTSRCS) $(CTSRCS),$(OBJS),$(LOCAL_LIBRARIES),)
+SaberProgramTarget(kdb5_edit.tcl,$(MOSTSRCS) $(TCLSRCS),$(OBJS),$(LOCAL_LIBRARIES),)
+#else
 SaberProgramTarget(kdb5_edit,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES),)
+#endif
 
 depend:: kdb5_ed_ct.c
 
