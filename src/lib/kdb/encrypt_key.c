@@ -33,14 +33,12 @@ krb5_encrypt_block *eblock;
 krb5_keyblock *in;
 krb5_keyblock *out;
 {
-    /* encrypted rep has a length encrypted along with the key,
-       so that we win if the keysize != blocksize.
-       However, this means an extra block (at least) if
-       keysize == blocksize. */
+    /* encrypted rep has the real (unencrypted) key length stored
+       along with the encrypted key */
 
     krb5_error_code retval;
 
-    *out = *in;
+    out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
@@ -49,7 +47,9 @@ krb5_keyblock *out;
 	out->length = 0;
 	return ENOMEM;
     }
-    bcopy((char *)&out->length, (char *)out->contents, sizeof(out->length));
+    /* copy in real length */
+    bcopy((char *)&in->length, (char *)out->contents, sizeof(out->length));
+    /* and arrange for encrypted key */
     if (retval = (*eblock->crypto_entry->
 		  encrypt_func)((krb5_pointer) in->contents,
 				(krb5_pointer) (((char *) out->contents) +
