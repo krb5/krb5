@@ -1,3 +1,7 @@
+2002-06-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* bsdlib.h, bstring.h, fake-stdlib.h: Deleted.
+
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (KRB_AP_PATH_NOT_ACCEPTED, KRB_ERR_RESPONSE_TOO_BIG):
