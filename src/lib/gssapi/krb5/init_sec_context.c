@@ -72,8 +72,14 @@ make_ap_req(krb5_gss_cred_id_t cred,
    /* fill in the necessary fields in creds */
 
    memset((char *) &creds, 0, sizeof(creds));
-   creds.client = cred->princ;
-   creds.server = server;
+
+   code = krb5_copy_principal(cred->princ, &creds.client);
+   if (code)
+	   return code;
+
+   code = krb5_copy_principal(server, &creds.server);
+   if (code)
+	   return code;
 
    creds.times.endtime = *endtime;
 
@@ -90,11 +96,6 @@ make_ap_req(krb5_gss_cred_id_t cred,
    *seqnum = authent.seq_number;
 
    /* free stuff which was created */
-
-   /* XXXX There's a bug in krb5 here, but I have no clue what it is.
-      This is a workaround. */
-   if (creds.client == cred->princ)
-      creds.client = NULL;
 
    krb5_free_cred_contents(&creds);
 
