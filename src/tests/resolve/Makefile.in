@@ -8,8 +8,8 @@ SRCS=$(srcdir)/resolve.c
 
 all:: resolve
 
-resolve: $(OBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o resolve $(OBJS) $(KRB5_BASE_LIBS)
+resolve: $(OBJS)
+	$(CC_LINK) -o resolve $(OBJS) 
 
 check:: resolve
 	$(RUN_SETUP) ./resolve

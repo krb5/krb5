@@ -124,7 +124,13 @@ main(argc, argv)
 	else
 	    printf("FQDN: %s\n", host->h_name);
 	
-	if(strchr(host->h_name, '.') == NULL) {
+	/*
+	 * The host name must have at least one '.' in the name, and
+	 * if there is only one '.', it must not be at the end of the
+	 * string.  (i.e., "foo." is not a FQDN)
+	 */
+	ptr = strchr(host->h_name, '.');
+	if (ptr == NULL || ptr[1] == '\0') {
 		fprintf(stderr, "\nResolve library did not return a fully qualified domain name\n");
 		fprintf(stderr, "You may have to reconfigure the kerberos distribution to select a\ndifferent set of libraries using --with-netlib[=libs]\n");
 		exit(3);
