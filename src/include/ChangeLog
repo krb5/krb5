@@ -1,10 +1,11 @@
 Tue Feb  4 15:57:18 1997  Richard Basch  <basch@lehman.com>
 
+	* k5-int.h: Make sure KRB5_EXPORTVAR is defined
 	* krb5.hin: Do not bother to define INTERFACE or INTERFACE_C
 
 Sun Feb  2 20:58:40 1997  Richard Basch  <basch@lehman.com>
 
-	* k5-int.h:
+	* k5-int.h: 
 		All pointers to KRB5_DLLIMP functions must be declared FAR.
 
 Fri Jan 31 23:10:09 1997  Richard Basch  <basch@lehman.com>

@@ -137,6 +137,7 @@ typedef unsigned char	u_char;
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
+#define KRB5_EXPORTVAR
 #define FAR
 #define NEAR
 #endif
