@@ -9,7 +9,7 @@
 	}
 
 [domain_realm]
-	localhost = __REALM__
+	__LOCALHOST__ = __REALM__
 	__KDCHOST__ = __REALM__
 
 [logging]
