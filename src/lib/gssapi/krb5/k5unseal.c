@@ -162,7 +162,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 		return(GSS_S_FAILURE);
 	    }
 
-	    if ((code = kg_decrypt(context, ctx->enc, NULL,
+	    if ((code = kg_decrypt(context, ctx->enc, KG_USAGE_SEAL, NULL,
 				   ptr+14+cksum_len, plain, tmsglen))) {
 		xfree(plain);
 		*minor_status = code;
@@ -261,7 +261,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	    return(GSS_S_FAILURE);
 	}
 
-	if ((code = kg_encrypt(context, ctx->seq,
+	if ((code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
 			       (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
 				ctx->seq->contents : NULL),
 			       md5cksum.contents, md5cksum.contents, 16))) {

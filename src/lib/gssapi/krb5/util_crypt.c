@@ -103,9 +103,10 @@ kg_encrypt_size(context, key, n)
 }
 
 krb5_error_code
-kg_encrypt(context, key, iv, in, out, length)
+kg_encrypt(context, key, usage, iv, in, out, length)
      krb5_context context;
      krb5_keyblock *key;
+     int usage;
      krb5_pointer iv;
      krb5_pointer in;
      krb5_pointer out;
@@ -134,15 +135,16 @@ kg_encrypt(context, key, iv, in, out, length)
    outputd.ciphertext.data = out;
 
    return(krb5_c_encrypt(context, key,
-			 KG_USAGE_SEAL, pivd, &inputd, &outputd));
+			 usage, pivd, &inputd, &outputd));
 }
 
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt(context, key, iv, in, out, length)
+kg_decrypt(context, key, usage, iv, in, out, length)
      krb5_context context;
      krb5_keyblock *key;
+     int usage;
      krb5_pointer iv;
      krb5_pointer in;
      krb5_pointer out;
@@ -172,5 +174,5 @@ kg_decrypt(context, key, iv, in, out, length)
    outputd.data = out;
 
    return(krb5_c_decrypt(context, key,
-			 KG_USAGE_SEAL, pivd, &inputd, &outputd));
+			 usage, pivd, &inputd, &outputd));
 }

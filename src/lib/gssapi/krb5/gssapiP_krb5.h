@@ -123,6 +123,18 @@ enum seal_alg {
 
 #define KG_USAGE_SEAL 22
 #define KG_USAGE_SIGN 23
+#define KG_USAGE_SEQ  24
+
+enum qop {
+  GSS_KRB5_INTEG_C_QOP_MD5       = 0x0001, /* *partial* MD5 = "MD2.5" */
+  GSS_KRB5_INTEG_C_QOP_DES_MD5   = 0x0002,
+  GSS_KRB5_INTEG_C_QOP_DES_MAC   = 0x0003,
+  GSS_KRB5_INTEG_C_QOP_HMAC_SHA1 = 0x0004,
+  GSS_KRB5_INTEG_C_QOP_MASK      = 0x00ff,
+  GSS_KRB5_CONF_C_QOP_DES        = 0x0100,
+  GSS_KRB5_CONF_C_QOP_DES3_KD    = 0x0200,
+  GSS_KRB5_CONF_C_QOP_MASK       = 0xff00
+};
 
 /** internal types **/
 
@@ -233,12 +245,18 @@ int kg_encrypt_size PROTOTYPE((krb5_context context,
 			       krb5_keyblock *key, int n));
 
 krb5_error_code kg_encrypt PROTOTYPE((krb5_context context, 
-            krb5_keyblock *key,
-            krb5_pointer iv, krb5_pointer in, krb5_pointer out, int length));
+				      krb5_keyblock *key, int usage,
+				      krb5_pointer iv,
+				      krb5_pointer in,
+				      krb5_pointer out,
+				      int length));
 
 krb5_error_code kg_decrypt PROTOTYPE((krb5_context context,
-                           krb5_keyblock *key, 
-			   krb5_pointer iv, krb5_pointer in, krb5_pointer out, int length));
+				      krb5_keyblock *key,  int usage,
+				      krb5_pointer iv,
+				      krb5_pointer in,
+				      krb5_pointer out,
+				      int length));
 
 OM_uint32 kg_seal PROTOTYPE((krb5_context context,
 		  OM_uint32 *minor_status,

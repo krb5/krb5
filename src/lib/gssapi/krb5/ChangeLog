@@ -1,3 +1,13 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_krb5.h (KG_USAGE_SEQ): New value.
+	(enum qop): New type, derived from spec but currently not used.
+	* util_crypt.c (kg_encrypt, kg_decrypt): Added key derivation
+	usage value as an argument.  Prototypes and callers updated; all
+	callers use KG_USAGE_SEAL, except KG_USAGE_SEQ when encrypting
+	sequence numbers.
+	* 3des.txt: New file.
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* acquire_cred.c: Changed to use krb5int_cc_default.  This function 

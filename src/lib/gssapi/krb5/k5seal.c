@@ -217,7 +217,8 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
 	}
 
 	if (encrypt) {
-	    if ((code = kg_encrypt(context, enc, NULL, (krb5_pointer) plain,
+	    if ((code = kg_encrypt(context, enc, KG_USAGE_SEAL, NULL,
+				   (krb5_pointer) plain,
 				   (krb5_pointer) (ptr+cksum_size+14),
 				   tmsglen))) {
 		if (plain)
@@ -287,7 +288,7 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
     case SGN_ALG_DES_MAC_MD5:
     case 3:
 
-	if ((code = kg_encrypt(context, seq,
+       if ((code = kg_encrypt(context, seq, KG_USAGE_SEAL,
 			       (g_OID_equal(oid, gss_mech_krb5_old) ?
 				seq->contents : NULL),
 			       md5cksum.contents, md5cksum.contents, 16))) {
