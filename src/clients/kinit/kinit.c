@@ -439,3 +439,91 @@ cleanup:
 
     return retval;
 }
+
+#ifdef _WIN32
+krb5_error_code
+krb5_read_password(
+    krb5_context	context,
+    const char		* prompt,
+    const char		* prompt2,
+    char		* password,
+    int			* pwsize)
+{
+    HANDLE		handle;
+    DWORD		old_mode, new_mode;
+    char		*tmpstr = 0;
+    char		*ptr;
+    int			scratchchar;
+    krb5_error_code	errcode = 0;
+
+    handle = GetStdHandle(STD_INPUT_HANDLE);
+    if (handle == INVALID_HANDLE_VALUE)
+	return ENOTTY;
+    if (!GetConsoleMode(handle, &old_mode))
+	return ENOTTY;
+
+    new_mode = old_mode;
+    new_mode |=  ( ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT );
+    new_mode &= ~( ENABLE_ECHO_INPUT );
+
+    if (!SetConsoleMode(handle, new_mode))
+	return ENOTTY;
+
+    (void) fputs(prompt, stdout);
+    (void) fflush(stdout);
+    (void) memset(password, 0, *pwsize);
+
+    if (fgets(password, *pwsize, stdin) == NULL) {
+	(void) putchar('\n');
+	errcode = KRB5_LIBOS_CANTREADPWD;
+	goto cleanup;
+    }
+    (void) putchar('\n');
+
+    if ((ptr = strchr(password, '\n')))
+	*ptr = '\0';
+    else /* need to flush */
+	do {
+	    scratchchar = getchar();
+	} while (scratchchar != EOF && scratchchar != '\n');
+
+    if (prompt2) {
+	if (! (tmpstr = (char *)malloc(*pwsize))) {
+	    errcode = ENOMEM;
+	    goto cleanup;
+	}
+	(void) fputs(prompt2, stdout);
+	(void) fflush(stdout);
+	if (fgets(tmpstr, *pwsize, stdin) == NULL) {
+	    (void) putchar('\n');
+	    errcode = KRB5_LIBOS_CANTREADPWD;
+	    goto cleanup;
+	}
+	(void) putchar('\n');
+
+	if ((ptr = strchr(tmpstr, '\n')))
+	    *ptr = '\0';
+	else /* need to flush */
+	    do {
+		scratchchar = getchar();
+	    } while (scratchchar != EOF && scratchchar != '\n');
+
+	if (strncmp(password, tmpstr, *pwsize)) {
+	    errcode = KRB5_LIBOS_BADPWDMATCH;
+	    goto cleanup;
+	}
+    }
+
+cleanup:
+    (void) SetConsoleMode(handle, old_mode);
+    if (tmpstr) {
+	(void) memset(tmpstr, 0, *pwsize);
+	(void) free(tmpstr);
+    }
+    if (errcode)
+	(void) memset(password, 0, *pwsize);
+    else
+	*pwsize = strlen(password);
+    return errcode;
+}
+#endif

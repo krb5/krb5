@@ -1,3 +1,7 @@
+Thu Feb 13 14:27:41 1997  Richard Basch  <basch@lehman.com>
+
+	* kinit.c: Added krb5_read_password implementation for win32 console.
+
 Sat Feb  8 15:37:39 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in:
