@@ -78,6 +78,9 @@ verify$(EXEEXT): t_verify.$(OBJEXT) $(DEPKLIB)
 destest$(EXEEXT): destest.$(OBJEXT) $(DEPKLIB)
 	$(CC) -o $@ destest.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
+t_random$(EXEEXT): t_random.$(OBJEXT) $(DEPKLIB)
+	$(LD) -o $@ t_random.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
+
 check-mac: check-unix
 
 check-unix:: destest verify
@@ -89,7 +92,8 @@ check-unix:: destest verify
 check-windows::
 
 clean:: 
-	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) t_verify.$(OBJEXT)
+	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) \
+	t_verify.$(OBJEXT) t_random.$(OBJEXT) t_random$(EXEEXT)
 
 clean-unix::
 	$(RM) shared/*

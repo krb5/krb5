@@ -155,6 +155,11 @@ mit_des_init_random_number_generator(key,p_seed)
  *
  * Requires: key is a valid des key.  I.e., has correct parity and is not a
  *           weak des key.
+ * 	[Note: I have changed this so that even if it is not a valid
+ * 	DES key, this function will do something rational --- that is,
+ * 	we fix up the key parity and make it a non-weak key.  This
+ * 	still won't help us if the input value is guessable, but at
+ * 	least we won't get screwed if the key-parity is wrong... --- TYT]
  */
 void
 mit_des_set_random_generator_seed(key, p_seed)
@@ -162,9 +167,17 @@ mit_des_set_random_generator_seed(key, p_seed)
     mit_des_random_key_seed	*p_seed;
 {
     register int i;
+    mit_des_cblock fixed_key;
+
+    memcpy(fixed_key, key, sizeof(mit_des_cblock));
+    mit_des_fixup_key_parity(fixed_key);
+    if (mit_des_is_weak_key(fixed_key)) {
+	    fixed_key[0] ^= 0xF0;
+	    mit_des_fixup_key_parity(fixed_key);
+    }
 
     /* select the new stream: (note errors are not possible here...) */
-    mit_des_key_sched(key, p_seed->random_sequence_key);
+    mit_des_key_sched(fixed_key, p_seed->random_sequence_key);
 
     /* "seek" to the start of the stream: */
     for (i=0; i<8; i++)
