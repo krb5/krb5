@@ -40,7 +40,7 @@ krb5_error_code decode_generic
 		   (encoder_func) encode_KRB5_Authenticator, \
 		   (translator_func) krb5_authenticator2KRB5_Authenticator, \
 		   (free_func) free_KRB5_Authenticator)
-#define decode_KRB5_authenticator(pauth, output) \
+#define decode_krb5_authenticator(pauth, output) \
     decode_generic((krb5_pointer)pauth, (krb5_pointer *) output, \
 		   (decoder_func) decode_KRB5_Authenticator, \
 		   (translator_func) KRB5_Authenticator2krb5_authenticator, \
