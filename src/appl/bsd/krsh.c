@@ -93,7 +93,7 @@ krb5_sigtype  sendsig();
 #define UCB_RSH "/usr/ucb/rsh"
 #endif
 
-#define RSH_BUFSIZ 4096
+
 
 krb5_context bsd_context;
 krb5_creds *cred;
@@ -129,7 +129,7 @@ main(argc, argv0)
      char **argv0;
 {
     int rem, pid;
-    char *host=0, *cp, **ap, buf[RSH_BUFSIZ], *args, **argv = argv0, *user = 0;
+    char *host=0, *cp, **ap, buf[RCMD_BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
     struct passwd *pwd;
     fd_set readfrom, ready;

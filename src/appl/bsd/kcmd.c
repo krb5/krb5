@@ -98,7 +98,7 @@ extern krb5_context bsd_context;
 extern Key_schedule v4_schedule;
 #endif
 
-#define RCMD_BUFSIZ	5120
+
 #define START_PORT      5120     /* arbitrary */
 char *default_service = "host";
 

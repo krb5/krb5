@@ -73,7 +73,9 @@ char copyright[] =
 #define SERVE_NON_KRB     
 #define LOG_REMOTE_REALM
 #define LOG_CMD
-     
+#include "defines.h"
+   
+  
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -163,7 +165,7 @@ Key_schedule v4_schedule;
 #define ARGSTR	"ek54ciD:S:M:AP:?L:"
 
 
-#define RSHD_BUFSIZ 5120
+
 
 #define MAXRETRIES 4
 
@@ -577,7 +579,7 @@ void doit(f, fromp)
     short port;
     int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
-    char buf[RSHD_BUFSIZ], sig;
+    char buf[RCMD_BUFSIZ], sig;
     struct sockaddr_in fromaddr;
     struct sockaddr_in localaddr;
     int non_privileged = 0;
@@ -1457,7 +1459,7 @@ void error(fmt, a1, a2, a3)
      char *fmt;
      char *a1, *a2, *a3;
 {
-    char buf[RSHD_BUFSIZ];
+    char buf[RCMD_BUFSIZ];
     
     buf[0] = 1;
     (void) sprintf(buf+1, "%s: ", progname);

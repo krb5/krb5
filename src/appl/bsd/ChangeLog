@@ -1,3 +1,9 @@
+1998-11-28  Sam Hartman  <hartmans@mesas.com>
+
+	* krshd.c krsh.c:  Use RCMD_BUFSIZ not RSH_BUFSIZE [krb5-appl/678]
+
+	* kcmd.c: Move RCMD_BUFSIZ into defines.h
+
 1998-11-16  Geoffrey King  <gjking@mit.edu>
 
 	* login.c (login_get_kconf): Also test whether *kconf_val is null
@@ -9,6 +15,7 @@
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
 		relative to buildtop and thisconfigdir, respectively.)
+
 
 1998-10-24  Marc Horowitz  <marc@mit.edu>
 
