@@ -101,7 +101,7 @@ main(argc, argv)
     krb5_get_init_creds_opt opts;
     char *service_name = NULL;
     krb5_keytab keytab = NULL;
-    char *cache_name;
+    char *cache_name = NULL;
     krb5_ccache ccache = NULL;
     enum { INIT_PW, INIT_KT, RENEW, VALIDATE} action;
     int errflg = 0, idx, i;
