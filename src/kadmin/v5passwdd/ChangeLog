@@ -1,0 +1,6 @@
+Thu Jul 25 17:01:32 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in, configure.in, adm_rw.c, kadm5_defs.h, main.c,
+ 	proto_serv.c, srv_net.c: combined pieces of the old v5server and
+ 	kadm libraries with calls to the new kadm5srv library to produce a
+ 	daemon which handles the v5b6 "simple" password changing protocol.

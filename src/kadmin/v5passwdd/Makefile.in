@@ -1,0 +1,18 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+
+SRCS = main.c srv_net.c proto_serv.c adm_rw.c
+OBJS = main.o srv_net.o proto_serv.o adm_rw.o
+
+PROG = v5passwdd
+
+all:: $(PROG)
+
+$(PROG): $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+
+install::
+	$(INSTALL_PROGRAM) $(C)$(PROG) ${DESTDIR}$(SERVER_BINDIR)$(S)$(PROG)
+
+clean::
+	$(RM) $(PROG)
+
