@@ -37,6 +37,10 @@ static char rcsid_read_pwd_c[] =
 #include <signal.h>
 #include <setjmp.h>
 
+#ifdef sun
+#include <sgtty.h>
+#endif
+
 #include <krb5/ext-proto.h>
 
 /* POSIX_* are auto-magically defined in <krb5/config.h> at source
@@ -51,9 +55,11 @@ static char rcsid_read_pwd_c[] =
 extern int errno;
 
 #ifdef POSIX_TERMIOS
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(0, TCSANOW, &save_control); return errcode;
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(fd, TCSANOW, &save_control); return errcode;
+#elif defined(sun)
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); stty(fd, (char *)&tty_savestate); return errcode;
 #else
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(0, TIOCSETP, (char *)&tty_savestate); return errcode;
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(fd, TIOCSETP, (char *)&tty_savestate); return errcode;
 #endif
 
 static jmp_buf pwd_jump;
@@ -84,27 +90,65 @@ int *size_return;
     krb5_sigtype (*ointrfunc)();
 #ifdef POSIX_TERMIOS
     struct termios echo_control, save_control;
+    int fd;
 
-    if (tcgetattr(0, &echo_control) == -1)
+    /* get the file descriptor associated with stdin */
+    fd=fileno(stdin);
+
+#ifdef notdef
+    /* don't want to read password from anything but a terminal */
+    if (!isatty(fd)) {
+        fprintf(stderr,"Can only read password from a tty\n"); /* XXX */
+        errno=ENOTTY; /* say innapropriate ioctl for device */
+	return errno;
+    }
+#endif /* sun */
+
+    if (tcgetattr(fd, &echo_control) == -1)
 	return errno;
 
     save_control = echo_control;
     echo_control.c_lflag &= ~(ECHO|ECHONL);
     
-    if (tcsetattr(0, TCSANOW, &echo_control) == -1)
+    if (tcsetattr(fd, TCSANOW, &echo_control) == -1)
 	return errno;
 #else
     /* 4.3BSD style */
     struct sgttyb tty_state, tty_savestate;
+    int fd;
+
+    /* get the file descriptor associated with stdin */
+    fd=fileno(stdin);
+
+#ifdef notdef
+    /* don't want to read password from anything but a terminal */
+    if (!isatty(fd)) {
+        fprintf(stderr,"Can only read password from a tty\n"); /* XXX */
+        errno=ENOTTY; /* say innapropriate ioctl for device */
+	return errno;
+    }
+#endif /* sun */
 
     /* save terminal state */
-    if (ioctl(0,TIOCGETP,(char *)&tty_savestate) == -1) 
+    if (
+#ifdef sun
+	gtty(fd,(char *)&tty_savestate)
+#else
+	ioctl(fd,TIOCGETP,(char *)&tty_savestate)
+#endif
+	== -1) 
 	return errno;
 
     tty_state = tty_savestate;
 
     tty_state.sg_flags &= ~ECHO;
-    if (ioctl(0,TIOCSETP,(char *)&tty_state) == -1)
+    if (
+#ifdef sun
+	stty(fd,(char *)&tty_state)
+#else
+	ioctl(fd,TIOCSETP,(char *)&tty_state)
+#endif
+	== -1)
 	return errno;
 #endif
 
@@ -184,10 +228,16 @@ int *size_return;
     (void) signal(SIGINT, ointrfunc);
 
 #ifdef POSIX_TERMIOS
-    if (tcsetattr(0, TCSANOW, &save_control) == -1)
+    if (tcsetattr(fd, TCSANOW, &save_control) == -1)
 	return errno;
 #else
-    if (ioctl(0, TIOCSETP, (char *)&tty_savestate) == -1)
+    if (
+#ifdef sun
+	stty(fd, (char *)&tty_savestate)
+#else
+	ioctl(fd, TIOCSETP, (char *)&tty_savestate)
+#endif
+	== -1)
 	return errno;
 #endif
     *size_return = strlen(return_pwd);
