@@ -1,3 +1,8 @@
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5.hin: Declare krb5_auth_con_setrcache and
+		krb5_get_server_rcache to be exported by the DLL.
+
 Sun Feb 22 19:20:31 1998  Tom Yu  <tlyu@mit.edu>
 
 	* k5-util.h: New file.  Add krb5_seteuid in order to allow
