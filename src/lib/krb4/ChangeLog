@@ -1,3 +1,8 @@
+Tue May  2 09:30:50 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove krb_err.h from the include
+		directory. 
+
 Sat Apr 29 00:33:47 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* g_phost.c: removed references to sys/param.h and netdb.h
