@@ -442,10 +442,12 @@ char    *getenv();
 #else /* CRAY */
 #ifdef KERBEROS
 char    *envinit[] =
-{homedir, shell, 0, username, term, 0};
+{homedir, shell, 0, username, term, 0, 0};
+#define TZENV 5
 #else /* KERBEROS */
 char	*envinit[] =
-{homedir, shell, 0, username, term, 0};
+{homedir, shell, 0, username, term, 0, 0};
+#define TZENV 5
 #endif /* KERBEROS */
 #endif /* CRAY */
 
@@ -1229,6 +1231,17 @@ doit(f, fromp)
     }
 #endif
     (void) setuid((uid_t)pwd->pw_uid);
+    /* if TZ is set in the parent, drag it in */
+    {
+      char **findtz = environ;
+      while(*findtz) {
+	if(!strncmp(*findtz,"TZ=",3)) {
+	  envinit[TZENV] = *findtz;
+	  break;
+	}
+	findtz++;
+      }
+    }
     environ = envinit;
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);

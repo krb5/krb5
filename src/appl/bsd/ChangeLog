@@ -1,3 +1,9 @@
+Sun Nov 12 04:44:50 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* krshd.c (doit): drag TZ= from parent environment into envinit to
+	pass to child.
+	(envinit, TZENV): add one more slot for optional TZ, and mark it.
+
 Thu Nov  2 16:16:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krlogin.c, krcp.c, krsh.c (main): If invoked with -D port, do
