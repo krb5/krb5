@@ -1,3 +1,7 @@
+Wed Feb  8 13:59:05 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* des.h: Add KRB5_INT32 definitions for non-32 int platforms.
+
 Fri Feb  3 06:33:22 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* des_int.h: Remove unused cruft from the file.
