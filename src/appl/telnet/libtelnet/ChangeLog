@@ -1,5 +1,7 @@
 Tue Jun 20 13:59:43 1995  Tom Yu  (tlyu@dragons-lair)
 
+	* configure.in: fix typo
+
 	* strrchr.c: NO_STRING_H -> HAVE_STRING_H
 
 	* strftime.c: NO_STRING_H -> HAVE_STRING_H
