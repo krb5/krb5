@@ -26,7 +26,7 @@ krb5_error_code krb5_encode_generic
     PROTOTYPE((krb5_const_pointer,
 	       krb5_data **,
 	       int (* )PROTOTYPE ((PE *,int,int,char *,krb5_pointer )),
-	       krb5_pointer (* )PROTOTYPE ((krb5_pointer,int *)),
+	       krb5_pointer (* )PROTOTYPE ((krb5_const_pointer,int *)),
 	       void (* )PROTOTYPE ((krb5_pointer ))));
 krb5_error_code krb5_decode_generic
 	PROTOTYPE((const krb5_data *,

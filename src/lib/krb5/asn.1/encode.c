@@ -31,7 +31,7 @@ krb5_encode_generic(input, data_out, encoder, translator, free_translation)
 krb5_const_pointer input;
 register krb5_data **data_out;
 int (*encoder) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
-krb5_pointer (*translator) PROTOTYPE((krb5_pointer, int * ));
+krb5_pointer (*translator) PROTOTYPE((krb5_const_pointer, int * ));
 void (*free_translation) PROTOTYPE((krb5_pointer ));
 {
     krb5_pointer isode_out;
