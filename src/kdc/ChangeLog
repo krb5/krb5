@@ -1,3 +1,9 @@
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (validate_as_request): Only reject options we
+	understand and believe are inappropriate for AS requests. Per
+	spec, unknown options are ignored.
+
 2003-05-14  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_preauth.c (check_padata): Allow bad_integrity to be returned to a client

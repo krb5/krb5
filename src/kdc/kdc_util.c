@@ -828,9 +828,8 @@ fail:
  * Returns a Kerberos protocol error number, which is _not_ the same
  * as a com_err error number!
  */
-#define AS_OPTIONS_HANDLED (KDC_OPT_FORWARDABLE | KDC_OPT_PROXIABLE | \
-			     KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED | \
-			     KDC_OPT_RENEWABLE | KDC_OPT_RENEWABLE_OK)
+#define AS_INVALID_OPTIONS (KDC_OPT_FORWARDED | KDC_OPT_PROXY |\
+KDC_OPT_VALIDATE | KDC_OPT_RENEW | KDC_OPT_ENC_TKT_IN_SKEY)
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
@@ -839,9 +838,9 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
     int		errcode;
     
     /*
-     * If an illegal option is set, complain.
+     * If an option is set that is only allowed in TGS requests, complain.
      */
-    if (request->kdc_options & ~(AS_OPTIONS_HANDLED)) {
+    if (request->kdc_options & AS_INVALID_OPTIONS) {
 	*status = "INVALID AS OPTIONS";
 	return KDC_ERR_BADOPTION;
     }
