@@ -46,6 +46,7 @@ static int verbose = 1;
 static void usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
+     fprintf(stderr, "       [-seq] [-noreplay] [-nomutual]\n");
      fprintf(stderr, "       [-f] [-q] [-ccount count] [-mcount count]\n");
      fprintf(stderr, "       [-v1] [-na] [-nw] [-nx] [-nm] host service msg\n");
      exit(1);

@@ -84,7 +84,8 @@ is used).  The command-line options have the following meanings:
 The client's command line usage is
 
 	gss-client [-port port] [-mech mechanism] [-d] [-f] [-q]
-		[-ccount count] [-mcount count] [-na] [-nw] [-nx] [-nm]
+        [-seq] [-noreplay] [-nomutual]		
+        [-ccount count] [-mcount count] [-na] [-nw] [-nx] [-nm]
 		host service_name msg
 
 where host is the host running the server, service_name is the service

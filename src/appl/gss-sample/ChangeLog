@@ -1,5 +1,9 @@
 2004-02-06  Jeffrey Altman <jaltman@mit.edu>
 
+    * Update usage() for gss-client
+
+2004-02-06  Jeffrey Altman <jaltman@mit.edu>
+
     * Add new command line switches to the gss-client
       to support the use of GSS_C_SEQUENCE_FLAG or to 
       disable the use of either GSS_C_MUTUAL_FLAG or 
