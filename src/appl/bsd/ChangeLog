@@ -1,3 +1,66 @@
+Mon Nov 11 15:00:25 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in, configure.in, krshd.c, v4rcp.M, v4rcp.c: added
+	kerberos V4 rcp -x support from Cygnus tree.
+	* Makefile.in, configure.in: added support for not building v4rcp
+	if --without-krb4 is used.
+	
+	Sun Aug 11 17:30:39 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* v4rcp.c : #include <fcntl.h> for O_* flags.
+
+	Mon Jul  8 13:44:39 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* v4rcp.c (getdtablesize): eliminate local copy.
+	(kstream_write): eliminate srandom/random in favor of
+	krb5_random_confounder.
+	Add sys/socket.h to includes (v4 had it internal to krb.h.)
+	(utimes): clone utimes-emulation from v5 krcp.c (should perhaps be
+	changed to use AC_REPLACE_FUNC...)
+	Declare getenv.
+
+	Sat Jul  6 16:39:28 1996  Mark W. Eichin  <eichin@kitten.gen.ma.us>
+
+	* v4rcp.c (answer_auth): use inet_aton only if we have it;
+	otherwise fake it with inet_addr.
+	* configure.in: check_func for inet_aton.
+
+	Tue Jul  2 19:37:52 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krshd.c (envinit): clarified initializations, labeled all slot
+	reservations (SAVEENVPAD, KRBPAD, ADDRPAD are lists of zeroes.)
+	Move TZ to always be slot 5, even on the cray. Added space for the
+	local and remote addresses.
+	(doit): add a getsockname to save the correct local address for
+	the child. Set KRB5LOCALADDR and KRB5REMOTEADDR to literal IP
+	addresses since the child is on the wrong side of a pipe and can't
+	recover them directly.
+	* v4rcp.c (kstream): add common "writelen" field for the length of
+	inbuf and outbuf.
+	(kstream_create_rcp_from_fd): initialze new fields.
+	(kstream_write): grab a big enough buffer (since this is called
+	with chunks that may correspond to the *filesystem* blocksize,
+	which is usually larger than BUFSIZ.) Also skip the first four
+	bytes of outbuf so that the encryption is done on an 8 byte
+	boundary (if malloc is correctly aligned, malloc+8 should also
+	be.)
+	(answer_auth): don't try to getpeername or getsockname, since
+	we're run under a pipe; just use KRB5LOCALADDR and KRB5REMOTEADDR
+	which are now provided by kshd (and fail if they are not present.)
+	This is safe because if they're wrong, it just means that the
+	mutual authentication will fail.
+
+	Thu Jun 27 23:32:41 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (all, clean, install, v4rcp): add v4rcp installation
+	and build rules.
+	* krshd.c: if we got a V4 connection and the command is rcp, use
+	the v4rcp backend to handle encryption.
+	* v4rcp.c: based on Cygnus CNS V4 rcp, stripped down to eliminate
+	user commands (and truncated usage message.)  Includes a fake
+	subset of the kstream interface that only handles "rcp -x" mode.
+	* v4rcp.M: new file, documents v4rcp support.
+
 Sat Nov  9 10:49:36 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* login.c: Re-arrange to deal with compiling without krb4 support. [148]

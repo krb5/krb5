@@ -207,6 +207,7 @@ char *progname;
 
 /* Leave room for 4 environment variables to be passed */
 #define MAXENV 4
+#define SAVEENVPAD 0,0,0,0 /* padding for envinit slots */
 char *save_env[MAXENV];
 int num_env = 0;
 
@@ -444,25 +445,29 @@ char	shell[64] = "SHELL=";
 char    term[64] = "TERM=network";
 char	path_rest[] = RPATH;
 
+char	remote_addr[64];	/* = "KRB5REMOTEADDR=" */
+char	local_addr[64];		/* = "KRB5LOCALADDR=" */
+#define ADDRPAD 0,0		/* remoteaddr, localaddr */
+#define KRBPAD 0		/* KRB5CCNAME, optional */
+
 /* The following include extra space for TZ and MAXENV pointers... */
+#define COMMONVARS homedir, shell, 0/*path*/, username, term
 #ifdef CRAY
-char    *envinit[] =
-{homedir, shell, 0, username, "TZ=GMT0", tmpdir, term, 0, 0, 0, 0, 0, 0};
-#define TZENV   4
-#define TMPDIRENV 5
+char    *envinit[] = 
+{COMMONVARS, "TZ=GMT0", tmpdir, SAVEENVPAD, KRBPAD, ADDRPAD, 0};
+#define TMPDIRENV 6
 char    *getenv();
 #else /* CRAY */
 #ifdef KERBEROS
-char    *envinit[] =
-{homedir, shell, 0, username, term, 0, 0, 0, 0, 0, 0, 0};
-#define TZENV 5
+char    *envinit[] = 
+{COMMONVARS, 0/*tz*/, SAVEENVPAD, KRBPAD, ADDRPAD, 0};
 #else /* KERBEROS */
-char	*envinit[] =
-{homedir, shell, 0, username, term, 0, 0, 0, 0, 0, 0};
-#define TZENV 5
+char	*envinit[] = 
+{COMMONVARS, 0/*tz*/, SAVEENVPAD, ADDRPAD, 0};
 #endif /* KERBEROS */
 #endif /* CRAY */
 
+#define TZENV 5
 #define PATHENV 2
 
 extern char	**environ;
@@ -541,6 +546,7 @@ void doit(f, fromp)
     char buf[RSHD_BUFSIZ], sig;
     krb5_sigtype     cleanup();
     struct sockaddr_in fromaddr;
+    struct sockaddr_in localaddr;
     int non_privileged = 0;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -561,6 +567,13 @@ void doit(f, fromp)
 #endif
 #endif /* IP_TOS */
     
+    { 
+      int sin_len = sizeof (struct sockaddr_in);
+      if (getsockname(f, &localaddr, &sin_len) < 0) {
+	perror("getsockname");
+	exit(1);
+      }
+    }
     fromaddr = *fromp;
 
 #ifdef POSIX_SIGNALS
@@ -1279,6 +1292,18 @@ if(port)
 	}
     }
 
+    {
+      int i;
+      /* these two are covered by ADDRPAD */
+      sprintf(local_addr,  "KRB5LOCALADDR=%s", inet_ntoa(localaddr.sin_addr));
+      for (i = 0; envinit[i]; i++);
+      envinit[i] =local_addr;
+
+      sprintf(remote_addr, "KRB5REMOTEADDR=%s", inet_ntoa(fromp->sin_addr));
+      for (; envinit[i]; i++);
+      envinit[i] =remote_addr;
+    }
+
     /* If we do anything else, make sure there is space in the array. */
 
     for(cnt=0; cnt < num_env; cnt++) {
@@ -1324,7 +1349,11 @@ if(port)
         strcpy((char *) cmdbuf + offst, kprogdir);
 	cp = copy + 3 + offst;
 
-	strcat(cmdbuf, "/rcp");
+	if (auth_sys == KRB5_RECVAUTH_V4) {
+	  strcat(cmdbuf, "/v4rcp");
+	} else {
+	  strcat(cmdbuf, "/rcp");
+	}
 	if (stat((char *)cmdbuf + offst, &s) >= 0)
 	  strcat(cmdbuf, cp);
 	else

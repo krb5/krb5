@@ -1,18 +1,19 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DEFINES)
-LOCALINCLUDE=
+LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
 
 LOGINLIBS =@LOGINLIBS@
 LIBOBJS=@LIBOBJS@
+V4RCPO=@V4RCPO@
 
 LOCAL_LIBRARIES=-lpty
 DEPLOCAL_LIBRARIES=$(TOPLIBD)/../util/pty/libpty.a
 
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c  $(SETENVSRC) \
-	login.c krshd.c krlogind.c
+	login.c krshd.c krlogind.c v4rcp.c
 OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o  $(SETENVOBJ) \
-	login.o krshd.o krlogind.o $(LIBOBJS)
+	login.o krshd.o krlogind.o $(V4RCPO) $(LIBOBJS)
 
 UCB_RLOGIN = @UCB_RLOGIN@
 UCB_RSH = @UCB_RSH@
@@ -25,16 +26,19 @@ BSD=	-DUCB_RLOGIN=\"$(UCB_RLOGIN)\" \
 DEFINES= $(RSH) $(BSD) $(RPROGS) \
 	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
-all:: rsh rcp rlogin kshd klogind login.krb5
+all:: rsh rcp rlogin kshd klogind login.krb5 $(V4RCP)
 
 clean:: 
-	$(RM) rsh rcp rlogin kshd klogind login.krb5
+	$(RM) rsh rcp rlogin kshd klogind login.krb5 v4rcp
 
 rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
+
+v4rcp: v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o v4rcp v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
@@ -47,6 +51,12 @@ install::
 		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1 \
 	  ) || exit 1; \
 	done
+	f=$(V4RCP); \
+	if test -n "$$f" ; then	$(INSTALL_SETUID) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	$(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	fi
 
 kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)

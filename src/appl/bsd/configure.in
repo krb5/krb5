@@ -48,19 +48,25 @@ withval=yes
 )dnl
 if test $withval = no; then
 	AC_MSG_RESULT(no krb4 support)
+	V4RCP=
+	V4RCPO=
 else 
 	AC_MSG_RESULT(Adding in krb4 support)
 	LOGINLIBS="../../krb524/libkrb524.a $LOGINLIBS"
+	V4RCP=v4rcp
+	V4RCPO=v4rcp.o
 fi
 dnl
 dnl
 AC_SUBST(LOGINLIBS)
+AC_SUBST(V4RCP)
+AC_SUBST(V4RCP)
 dnl
 AC_VFORK
 AC_TYPE_MODE_T
 AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
 AC_FUNC_CHECK(utimes,AC_DEFINE(HAS_UTIMES))
-AC_CHECK_FUNCS(isatty) 
+AC_CHECK_FUNCS(isatty inet_aton) 
 AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAVE_GETTOSBYNAME))
 AC_FUNC_CHECK(killpg,AC_DEFINE(HAVE_KILLPG))
 AC_FUNC_CHECK(initgroups,AC_DEFINE(HAVE_INITGROUPS))
