@@ -1,5 +1,12 @@
 Tue Oct 15 17:04:09 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* Makefile.in (CFLAGS): compile with -DGSSAPI_KRB5
+
+	* svc_auth_gssapi.c: add #ifdef GSSAPI_KRB5 for krb5 specific code
+
+	* auth_gssapi.c (auth_gssapi_create): add call_arg version 4, make
+ 	version 3 use using gss_mech_krb5_old (under #ifdef GSSAPI_KRB5)
+
 	* configure.in: add DO_SUBDIRS so make will descend into unit-test
 
 Wed Oct  9 14:15:34 1996  Tom Yu  <tlyu@mit.edu>
