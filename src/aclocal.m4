@@ -370,7 +370,7 @@ dnl set $(CC) from --with-cc=value
 dnl
 AC_DEFUN(KRB5_INIT_CCOPTS,[CCOPTS=
 ])
-define(WITH_CC,[
+AC_DEFUN(WITH_CC,[
 AC_REQUIRE([KRB5_INIT_CCOPTS])
 AC_ARG_WITH([cc],
 [  --with-cc=COMPILER      select compiler to use])
@@ -416,7 +416,7 @@ AC_SUBST([LD])])dnl
 dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
-define(WITH_CCOPTS,[
+AC_DEFUN(WITH_CCOPTS,[
 AC_REQUIRE([KRB5_INIT_CCOPTS])
 AC_ARG_WITH([ccopts],
 [  --with-ccopts=CCOPTS    select compiler command line options],

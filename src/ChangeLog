@@ -1,3 +1,9 @@
+2001-05-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (WITH_CC, WITH_CCOPTS): Autoconf 2.50 fix. Change
+	from define to AC_DEFUN. Autoconf warns of use of AC_REQUIRE
+	outside such as environment.
+
 2001-04-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (DECLARE_SYS_ERRLIST): Check for sys_nerr with an
