@@ -3,7 +3,8 @@ VPATH = @srcdir@
  
 DEFS = @DEFS@
 LIBS = @LIBS@
- 
+KRB4 = @KRB4@
+
 CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
@@ -13,9 +14,9 @@ TOPLIBD = $(BUILDTOP)/lib
 ISODELIB=$(TOPLIBD)/libisode.a
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
-KDB4LIB=/usr/kerberos/lib/libkdb.a
-KRB4LIB=/usr/kerberos/lib/libkrb.a /usr/kerberos/lib/libdes.a
+KDBLIB=$(TOPLIBD)/libkdb5.a
+KDB4LIB=$(KRB4)/lib/libkdb.a
+KRB4LIB=$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a
 
 all::
 
