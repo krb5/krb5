@@ -6,7 +6,7 @@ main(int argc, char **argv)
      ovsec_kadm_ret_t ret;
      void *server_handle;
      char **names;
-     int count, princ;
+     int count, princ, i;
 
      if (argc != 3) {
 	  fprintf(stderr, "Usage: %s [-princ|-pol] exp\n", argv[0]);
@@ -35,8 +35,8 @@ main(int argc, char **argv)
 	  exit(1);
      }
 
-     for (ret = 0; ret < count; ret++)
-	  printf("%d: %s\n", ret, names[ret]);
+     for (i = 0; i < count; i++)
+	  printf("%d: %s\n", i, names[i]);
 
      ovsec_kadm_free_name_list(server_handle, names, count);
 

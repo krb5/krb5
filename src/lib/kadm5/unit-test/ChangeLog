@@ -1,3 +1,8 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* iter-test.c (main): Code was using ovsec_kadm_ret_t in place of
+	an int for referencing array.
+
 2000-05-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* api.2/chpass-principal-v2.exp (test200): Expect an additional
