@@ -1,8 +1,9 @@
-thisconfigdir=.
+thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I. -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+LOCAL_SUBDIRS = unit-test
 
 PROG = kpasswd
 OBJS = tty_kpasswd.o kpasswd.o kpasswd_strings.o

@@ -1,9 +1,0 @@
-AC_INIT(getdate.y)
-CONFIG_RULES
-AC_PROG_INSTALL
-AC_PROG_YACC
-AC_HAVE_HEADERS(unistd.h sys/timeb.h alloca.h)
-AC_HAVE_FUNCS(ftime timezone)
-AC_REPLACE_FUNCS([memmove strftime])
-KRB5_BUILD_PROGRAM
-V5_AC_OUTPUT_MAKEFILE

@@ -1,4 +1,4 @@
-thisconfigdir=.
+thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(KRB4_INCLUDES)
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)

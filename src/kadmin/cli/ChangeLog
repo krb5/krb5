@@ -1,3 +1,9 @@
+Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the kadmin
+ 		directory, since we've moved all of the configure.in
+		tests to the toplevel kadmin configure.in
+
 Wed Feb 18 15:54:11 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash.  Fix up BUILDTOP for new

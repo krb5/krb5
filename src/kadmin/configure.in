@@ -1,9 +1,64 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-if test -z "$KRB4_LIB"; then
-v4server=""
-else
-v4server=v4server
+AC_PROG_INSTALL
+AC_PROG_YACC
+AC_PROG_AWK
+AC_CHECK_HEADERS(unistd.h stdlib.h krb_db.h kdc.h alloca.h sys/time.h sys/select.h)
+AC_CHECK_FUNCS(ftime timezone getcwd strstr waitpid vsprintf)
+AC_REPLACE_FUNCS([memmove strftime])
+CHECK_SIGNALS
+CHECK_WAIT_TYPE
+CHECK_SETJMP
+AC_CANONICAL_HOST
+ath_compat=
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration],
+ath_compat=compat,)
+dnl
+dnl The following are tests for the presence of programs required for testing 
+AC_CHECK_PROG(have_RUNTEST,runtest,runtest)
+AC_CHECK_PROG(have_PERL,perl,perl)
+AC_KRB5_TCL	
+if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
+ 	DO_TEST=ok
 fi
-AC_CONFIG_SUBDIRS(cli dbutil passwd ktutil server $v4server v5passwdd testing)
-V5_AC_OUTPUT_MAKEFILE
+AC_SUBST(DO_TEST) 
+dnl The following are substituted into testing/scripts/env-setup.sh
+AC_SUBST(SRCTOP)
+RBUILD=`pwd`/..
+AC_SUBST(RBUILD)
+AC_PATH_PROG(PERL,perl)
+AC_PATH_PROG(EXPECT,expect)
+dnl
+KRB5_RUN_FLAGS
+dnl For testing/util/Makefile.in
+if test "$TCL_LIBS" != "" ;  then
+	DO_ALL=tcl
+fi
+AC_SUBST(DO_ALL)
+dnl See if we should build v4server
+if test -z "$KRB4_LIB"; then
+V4SERVER=""
+else
+V4SERVER=v4server
+fi
+AC_SUBST(V4SERVER)
+dnl
+KRB5_BUILD_PROGRAM
+dnl
+K5_GEN_MAKEFILE(.)
+K5_GEN_MAKEFILE(cli)
+K5_GEN_MAKEFILE(dbutil)
+K5_GEN_MAKEFILE(passwd)
+K5_GEN_MAKEFILE(passwd/unit-test)
+K5_GEN_MAKEFILE(ktutil)
+K5_GEN_MAKEFILE(server)
+K5_GEN_MAKEFILE(v4server)
+K5_GEN_MAKEFILE(v4server/unit-test)
+K5_GEN_MAKEFILE(v5passwdd)
+K5_GEN_MAKEFILE(testing)
+K5_GEN_MAKEFILE(testing/scripts)
+K5_GEN_FILE(testing/scripts/env-setup.sh:testing/scripts/env-setup.shin)
+K5_GEN_MAKEFILE(testing/util)
+K5_AC_OUTPUT
+

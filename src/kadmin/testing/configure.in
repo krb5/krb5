@@ -1,4 +1,0 @@
-AC_INIT(configure.in)
-CONFIG_RULES
-AC_CONFIG_SUBDIRS(scripts util)
-V5_AC_OUTPUT_MAKEFILE

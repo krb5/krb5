@@ -1,6 +1,7 @@
-thisconfigdir=.
+thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS)
+LOCAL_SUBDIRS = scripts util
 
 all::
 
