@@ -249,13 +249,12 @@ krb5int_mk_setpw_req(
     krb5_data	*encoded_setpw;
 
     char *ptr;
-     int count = 2;
 
      cipherpw.data = NULL;
      cipherpw.length = 0;
      
-    if (ret = krb5_auth_con_setflags(context, auth_context,
-				     KRB5_AUTH_CONTEXT_DO_SEQUENCE))
+    if ((ret = krb5_auth_con_setflags(context, auth_context,
+				      KRB5_AUTH_CONTEXT_DO_SEQUENCE)))
 		return(ret);
 
     ret = encode_krb5_setpw_req(targprinc, passwd, &encoded_setpw);
@@ -318,7 +317,6 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
     krb5_error_code ret;
     krb5_data cipherresult;
     krb5_data clearresult;
-    krb5_replay_data replay;
     krb5_keyblock *tmpkey;
 /*
 ** validate the packet length -
@@ -333,10 +331,10 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
 */
     if (krb5_is_krb_error(packet)) {
 	krb5_error *krberror;
-	if (ret = krb5_rd_error(context, packet, &krberror))
+	if ((ret = krb5_rd_error(context, packet, &krberror)))
 	    return(ret);
 	if (krberror->e_data.data  == NULL) {
-	    ret = ERROR_TABLE_BASE_krb5 + krberror->error;
+	    ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code) krberror->error;
 	    krb5_free_error(context, krberror);
 	    return (ret);
 	}

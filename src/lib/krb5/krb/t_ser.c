@@ -439,6 +439,8 @@ ser_keytab_test(krb5_context kcontext, int verbose)
 	    sprintf(ccname, "WRFILE:temp_kt_%d", (int) getpid());
 	    if ((kret = krb5_kt_resolve(kcontext, ccname, &keytab)))
 		kret = krb5_kt_register(kcontext, &krb5_ktf_writable_ops);
+	    else
+		kret = krb5_kt_close(kcontext, keytab);
 	    if (!kret &&
 		!(kret = krb5_kt_resolve(kcontext, ccname, &keytab)) &&
 		!(kret = ser_data(verbose, "> Resolved WRFILE keytab",
