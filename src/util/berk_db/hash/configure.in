@@ -48,6 +48,12 @@ AC_DEFINE_UNQUOTED(SIZEOF_DBT_SIZE, $ac_cv_sizeof_dbt_size)
 
 AC_HAVE_FUNCS(mktemp mkstemp)
 CHECK_SIGNALS
+dnl
+dnl Check for sys/cdefs.h.
+dnl
+CDEFS_INCLUDE=["-I$(srcdir)/../PORT/krb5"]
+AC_HAVE_HEADERS(sys/cdefs.h, CDEFS_INCLUDE=)
+AC_SUBST(CDEFS_INCLUDE)
 SubdirLibraryRule([$(OBJS)])
 KRB_INCLUDE
 V5_AC_OUTPUT_MAKEFILE

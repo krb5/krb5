@@ -1,3 +1,8 @@
+
+Tue May 30 10:42:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in: Check for sys/cdefs.h.
+	* Makefile.in: If sys/cdefs.h present, don't use the one in PORT/krb5.
+
 Tue May 30 06:30:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (CFLAGS): Added $(DEFS) so that configure determined

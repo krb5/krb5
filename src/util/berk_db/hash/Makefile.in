@@ -12,7 +12,9 @@ CFLAGS = $(CCOPTS) $(DEFS) -D__DBINTERFACE_PRIVATE $(LOCALINCLUDE) $(HASH_DEBUGO
 ##DOSLIBNAME=..\db.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-LOCALINCLUDE=-I$(srcdir)/../PORT/krb5		\
+CDEFS_INCLUDE = @CDEFS_INCLUDE@
+
+LOCALINCLUDE=$(CDEFS_INCLUDE)			\
 	-I$(srcdir)/../PORT/krb5/include	\
 	-I$(srcdir)/../PORT/include		\
 	-I$(srcdir)/../include			\
