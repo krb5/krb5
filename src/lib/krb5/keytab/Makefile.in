@@ -83,7 +83,11 @@ ktfns.so ktfns.po $(OUTPRE)ktfns.$(OBJEXT): ktfns.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h
-kt_file.so kt_file.po $(OUTPRE)kt_file.$(OBJEXT): kt_file.c
+kt_file.so kt_file.po $(OUTPRE)kt_file.$(OBJEXT): kt_file.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 kt_srvtab.so kt_srvtab.po $(OUTPRE)kt_srvtab.$(OBJEXT): kt_srvtab.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
