@@ -1,4 +1,9 @@
 
+Tue Aug 15 14:25:42 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_xdr.c - Add krb5_dbe_find_keytype() and clean up gcc -Wall
+		complaints.
+
+
 Wed Aug 9 17:17:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_cpw.c - Add check for uniqueness of key or key/salt combo.  Don't
 		generate a new key_data entry if one already exists.  Also,

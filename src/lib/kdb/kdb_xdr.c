@@ -47,6 +47,7 @@ krb5_dbe_create_key_data(context, entry)
     return 0;
 }
 
+krb5_error_code
 krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
     krb5_context	  context;
     krb5_tl_mod_princ	* mod_princ;
@@ -103,6 +104,7 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
     return ENOMEM;
 }
 
+krb5_error_code
 krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
     krb5_context	  context;
     krb5_db_entry	* entry;
@@ -141,6 +143,7 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
     return retval;
 }
 
+krb5_error_code
 krb5_encode_princ_dbmkey(context, key, principal)
     krb5_context context;
     datum  *key;
@@ -180,8 +183,6 @@ krb5_encode_princ_contents(context, content, entry)
     krb5_tl_data	* tl_data;
     krb5_error_code 	  retval;
     krb5_int16		  psize16;
-
-    krb5_db_entry copy_princ;
 
     /*
      * Generate one lump of data from the krb5_db_entry.
@@ -373,9 +374,7 @@ krb5_decode_princ_contents(context, content, entry)
     krb5_tl_data       ** tl_data;
     krb5_int16		  i16;
 
-    krb5_principal princ;
     krb5_error_code retval;
-    int major_version = 0, minor_version = 0;
 
     /* Zero out entry and NULL pointers */
     memset(entry, 0, sizeof(krb5_db_entry));
@@ -614,5 +613,49 @@ krb5_dbe_free_contents(context, entry)
     }
     memset(entry, 0, sizeof(*entry));
     return;
+}
+
+/*
+ * Given a particular keytype and optional salttype and kvno, find the
+ * most appropriate krb5_key_data entry of the database entry.
+ *
+ * If stype or kvno is negative, it is ignored.
+ */
+krb5_error_code
+krb5_dbe_find_keytype(kcontext, dbentp, ktype, stype, kvno, kdatap)
+    krb5_context	kcontext;
+    krb5_db_entry	*dbentp;
+    krb5_keytype	ktype;
+    krb5_int32		stype;
+    krb5_int32		kvno;
+    krb5_key_data	**kdatap;
+{
+    int			i;
+    int			maxkvno;
+    krb5_key_data	*datap;
+
+    maxkvno = -1;
+    datap = (krb5_key_data *) NULL;
+    for (i=0; i<dbentp->n_key_data; i++) {
+	if ((dbentp->key_data[i].key_data_type[0] == ktype) &&
+	    ((dbentp->key_data[i].key_data_type[1] == stype) ||
+	     (stype < 0))) {
+	    if (kvno >= 0) {
+		if (kvno == dbentp->key_data[i].key_data_kvno) {
+		    maxkvno = kvno;
+		    datap = &dbentp->key_data[i];
+		    break;
+		}
+	    }
+	    else {
+		if (dbentp->key_data[i].key_data_kvno > maxkvno) {
+		    maxkvno = dbentp->key_data[i].key_data_kvno;
+		    datap = &dbentp->key_data[i];
+		}
+	    }
+	}
+    }
+    *kdatap = datap;
+    return((maxkvno >= 0) ? 0 : ENOENT);
 }
 
