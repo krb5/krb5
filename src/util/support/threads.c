@@ -47,6 +47,9 @@ static unsigned char destructors_set[K5_KEY_MAX];
 
 static DWORD tls_idx;
 static CRITICAL_SECTION key_lock;
+struct tsd_block {
+  void *values[K5_KEY_MAX];
+};
 static void (*destructors[K5_KEY_MAX])(void *);
 static unsigned char destructors_set[K5_KEY_MAX];
 
@@ -204,8 +207,8 @@ int k5_setspecific (k5_key_t keynum, void *value)
 	for (i = 0; i < K5_KEY_MAX; i++)
 	    t->values[i] = 0;
 	/* add to global linked list */
-	t->next = 0;
-	err = TlsSetValue(key, t);
+	/*	t->next = 0; */
+	err = TlsSetValue(tls_idx, t);
 	if (err) {
 	    free(t);
 	    return err;

@@ -1,3 +1,9 @@
+2004-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (struct tsd_block) [_WIN32]: Define.
+	(k5_setspecific) [_WIN32]: Don't fill in a 'next' field.  Fix
+	variable reference for TSD key.
+
 2004-06-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c: Reorganize code: One definition of each function,
