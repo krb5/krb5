@@ -207,6 +207,8 @@ krb5_rcache id;
  struct authlist *q;
 
  FREE(t->h);
+ if (t->name)
+     FREE(t->name);
  while (q = t->a)
   {
    t->a = q->na;
@@ -244,25 +246,43 @@ krb5_error_code krb5_rc_dfl_resolve(id, name)
 krb5_rcache id;
 char *name;
 {
- struct dfl_data *t;
- int	i;
+    struct dfl_data *t = 0;
+    krb5_error_code retval;
 
- /* allocate id? no */
- if (!(t = (struct dfl_data *) malloc(sizeof(struct dfl_data))))
-   return KRB5_RC_MALLOC;
- id->data = (krb5_pointer) t;
- t->name = name; /* gee, difficult... */
- t->numhits = t->nummisses = 0;
- t->hsize = HASHSIZE; /* no need to store---it's memory-only */
- if (!(t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *))))
-     return KRB5_RC_MALLOC;
- for (i = 0;i < t->hsize;i++)
-   t->h[i] = (struct authlist *) 0;
- t->a = (struct authlist *) 0;
+    /* allocate id? no */
+    if (!(t = (struct dfl_data *) malloc(sizeof(struct dfl_data))))
+	return KRB5_RC_MALLOC;
+    id->data = (krb5_pointer) t;
+    memset(t, 0, sizeof(struct dfl_data));
+    t->name = malloc(strlen(name)+1);
+    if (!t->name) {
+	retval = KRB5_RC_MALLOC;
+	goto cleanup;
+    }
+    strcpy(t->name, name);
+    t->numhits = t->nummisses = 0;
+    t->hsize = HASHSIZE; /* no need to store---it's memory-only */
+    t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *));
+    if (!t->h) {
+	retval = KRB5_RC_MALLOC;
+	goto cleanup;
+    }
+    memset(t->h, 0, t->hsize*sizeof(struct authlist *));
+    t->a = (struct authlist *) 0;
 #ifndef NOIOSTUFF
- t->d.fd = -1;
+    t->d.fd = -1;
 #endif
- return 0;
+    return 0;
+    
+cleanup:
+    if (t) {
+	if (t->name)
+	    krb5_xfree(t->name);
+	if (t->h)
+	    krb5_xfree(t->h);
+	krb5_xfree(t);
+    }
+    return retval;
 }
 
 void krb5_rc_free_entry (rep)
