@@ -29,9 +29,9 @@ typedef	char		*kadm5_policy_t;
 typedef long		kadm5_ret_t;
 
 #define KADM5_PW_FIRST_PROMPT \
-	((char *) error_message(CHPASS_UTIL_NEW_PASSWORD_PROMPT))
+	(error_message(CHPASS_UTIL_NEW_PASSWORD_PROMPT))
 #define KADM5_PW_SECOND_PROMPT \
-	((char *) error_message(CHPASS_UTIL_NEW_PASSWORD_AGAIN_PROMPT))
+	(error_message(CHPASS_UTIL_NEW_PASSWORD_AGAIN_PROMPT))
 
 /*
  * Succsessfull return code
@@ -412,7 +412,7 @@ kadm5_ret_t    kadm5_chpass_principal_util(void *server_handle,
 					   char *new_pw, 
 					   char **ret_pw,
 					   char *msg_ret,
-					   int msg_len);
+					   unsigned int msg_len);
 
 kadm5_ret_t    kadm5_free_principal_ent(void *server_handle,
 					kadm5_principal_ent_t

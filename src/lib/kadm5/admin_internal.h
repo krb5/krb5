@@ -63,7 +63,7 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
 					 char *new_pw, 
 					 char **ret_pw,
 					 char *msg_ret,
-					 int msg_len);
+					 unsigned int msg_len);
 
 /* this is needed by the alt_prof code I stole.  The functions
    maybe shouldn't be named krb5_*, but they are. */

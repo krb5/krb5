@@ -1,3 +1,15 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* admin.h (KADM5_PW_FIRST_PROMPT): Get rid of casts from
+	error_message to char * - leave them as const char *.
+	(kadm5_chpass_principal_util): Argument msg_len is unsigned int.
+
+	* admin_internal.h (_kadm5_chpass_principal_util): msg_len is
+	unsigned int.
+
+	* chpass_util.c (_kadm5_chpass_principal_util): Change msg_len to
+	unsigned int. Arhument to krb5_read_password is unsigned int. 
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* admin.h: Add kadm5_free_name_list prototype.
