@@ -3,6 +3,7 @@
 #define KRB5_AUTH_CONTEXT
 
 struct _krb5_auth_context {
+    krb5_magic		magic;
     krb5_address      *	remote_addr;
     krb5_address      *	remote_port;
     krb5_address      *	local_addr;
