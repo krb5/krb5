@@ -1,3 +1,10 @@
+Tue Jul  7 17:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Grayed out password changing button and commented out password changing code
+    (it doesn't work anyway)
+    
+	* Updated to CW Pro 2
+
 Mon Mar  3 15:14:34 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kconfig.c (main): Move krb5_init_context earlier in order to
