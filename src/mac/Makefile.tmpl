@@ -385,7 +385,7 @@ Kerberos5GlobalsLib.PPC.debug Krb5GlobalsLib.PPC.debug.MAP :: "/mac/libraries/Ke
 		-init "__initialize_Kerberos5GlobalsLib" \
 		-term "__terminate_Kerberos5GlobalsLib" \
 		-map Krb5GlobalsLib.PPC.debug.MAP -o Kerberos5GlobalsLib.PPC.debug \
-		{krb5-globals-obj-ppc} {standard-libraries-ppc} {ccache-ppc} {krb5-globals-data-ppc}
+		{krb5-globals-obj-ppc} {standard-libraries-ppc-debug} {ccache-ppc-debug} {krb5-globals-data-ppc}
 
 #
 #	shared PPC v5 globals data library
@@ -599,8 +599,8 @@ GSSLib.debug : GSSLib.PPC.debug Kerberos5Lib.PPC.debug {ccache-ppc-debug} # GSSL
 	Delete -i GSSLib.debug
 	Duplicate -y GSSLib.PPC.debug GSSLib.debug
 #	MergeFragment GSSLib.68K.debug GSSLib.debug
-	MergeFragment "/bin/MIT CLib.PPC" GSSLib.debug
-	MergeFragment "/bin/MIT RuntimeLib.PPC" GSSLib.debug
+	MergeFragment "/bin/MIT CLib.PPC.debug" GSSLib.debug
+	MergeFragment "/bin/MIT RuntimeLib.PPC.debug" GSSLib.debug
 	MergeFragment Kerberos5Lib.PPC.debug GSSLib.debug
 #	MergeFragment Kerberos5Lib.68K.debug GSSLib.debug
 #	MergeFragment "/bin/MIT CLib.68K" GSSLib.debug
