@@ -1,3 +1,8 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (MLIBS): Do not link against libgen.a for test
+	programs. (only needed for krb5 an_to_ln code).
+
 2001-02-02  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.conf: Test with trailing whitespace on "default_realm"

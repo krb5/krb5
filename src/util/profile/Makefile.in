@@ -36,7 +36,7 @@ SRCS = $(srcdir)/prof_tree.c \
 	$(srcdir)/prof_init.c
 
 DEPLIBS = $(COM_ERR_DEPLIB)
-MLIBS = -lcom_err $(GEN_LIB)
+MLIBS = -lcom_err
 
 LIB=profile
 LIBMAJOR=1
