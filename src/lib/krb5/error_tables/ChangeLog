@@ -1,4 +1,8 @@
 
+Mon Aug 07 11:29:49 1995   Chris Provenzano  (proven@mit.edu)
+
+	* krb5_err.et: Add new error KRB5_KDB_BAD_KEYTYPE.
+
 Thu Aug 03 12:35:47 1995   Chris Provenzano  (proven@mit.edu)
 
         * krb5_err.et: Add new error KRB5_KDB_BAD_SALTTYPE.
