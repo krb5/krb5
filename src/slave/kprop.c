@@ -56,6 +56,10 @@ static char rcsid_kprop_c[] =
 #include <krb5/los-proto.h>
 #include <com_err.h>
 
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+
 #include "kprop.h"
 
 static char *kprop_version = KPROP_PROT_VERSION;
