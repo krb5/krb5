@@ -11,6 +11,11 @@
  * I/O functions for the replay cache default implementation.
  */
 
+#ifdef _WINDOWS
+#  define PATH_SEPARATOR "\\"
+#else
+#  define PATH_SEPARATOR "/"
+#endif
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
 #define NEED_SOCKETS
@@ -55,11 +60,17 @@ static void getdir()
  if (!dirlen)
   {
    if (!(dir = getenv("KRB5RCACHEDIR")))
+#ifdef _WINDOWS
+     if (!(dir = getenv("TEMP")))
+	 if (!(dir = getenv("TMP")))
+	     dir = "C:\\";
+#else
      if (!(dir = getenv("TMPDIR")))
 #ifdef RCTMPDIR
        dir = RCTMPDIR;
 #else
        dir = "/tmp";
+#endif
 #endif
    dirlen = strlen(dir) + 1;
   }
@@ -80,7 +91,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    if (!(d->fn = malloc(strlen(*fn) + dirlen + 1)))
      return KRB5_RC_IO_MALLOC;
    (void) strcpy(d->fn,dir);
-   (void) strcat(d->fn,"/");
+   (void) strcat(d->fn,PATH_SEPARATOR);
    (void) strcat(d->fn,*fn);
    d->fd = THREEPARAMOPEN(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_BINARY,0600);
   }
@@ -93,7 +104,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    if (fn)
      if (!(*fn = malloc(35)))
       { FREE(d->fn); return KRB5_RC_IO_MALLOC; }
-   (void) sprintf(d->fn,"%s/krb5_RC%d",dir,UNIQUE);
+   (void) sprintf(d->fn,"%s%skrb5_RC%d",dir,PATH_SEPARATOR,UNIQUE);
    c = d->fn + strlen(d->fn);
    (void) strcpy(c,"aaa");
    while ((d->fd = THREEPARAMOPEN(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL|O_BINARY,0600)) == -1)
@@ -165,7 +176,7 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
  if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
    return KRB5_RC_IO_MALLOC;
  (void) strcpy(d->fn,dir);
- (void) strcat(d->fn,"/");
+ (void) strcat(d->fn,PATH_SEPARATOR);
  (void) strcat(d->fn,fn);
 
 #ifdef NO_USERID

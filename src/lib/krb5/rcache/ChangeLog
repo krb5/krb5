@@ -1,3 +1,9 @@
+Sat Feb 24 18:53:33 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rc_io.c (krb5_rc_io_creat, krb5_rc_io_open): Use Windows path
+		separator, if appropriate.  Under Windows also use the
+		environment variables TEMP and TMP for the replay cache.
+
 Fri Dec  1 17:07:24 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rc_io.c (krb5_rc_io_creat): In case of permission problems,
