@@ -1,5 +1,6 @@
 AC_INIT(configure.in)
 AC_SET_BUILDTOP
+WITH_CCOPTS
 CONFIG_DIRS(libtelnet telnet telnetd)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)

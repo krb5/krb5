@@ -1,3 +1,7 @@
+Fri Nov 18 00:14:56 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: add WITH_CCOPTS so that subdirs work.
+
 Sat Jul 23 08:18:18 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in:
