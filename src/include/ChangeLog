@@ -1,3 +1,10 @@
+2004-07-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h [HAVE_PRAGMA_WEAK_REF]: Declare the pthread mutex
+	functions as weak.
+	(USE_PTHREAD_LOCK_ONLY_IF_LOADED): Define if pthread_mutex_lock
+	isn't available by default.
+
 2004-07-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include k5-thread.h.

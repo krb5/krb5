@@ -349,6 +349,10 @@ typedef k5_os_nothread_mutex k5_os_mutex;
    symbol tables of the current process.  */
 #ifdef HAVE_PRAGMA_WEAK_REF
 # pragma weak pthread_once
+# pragma weak pthread_mutex_lock
+# pragma weak pthread_mutex_unlock
+# pragma weak pthread_mutex_destroy
+# pragma weak pthread_mutex_init
 # ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
 #  pragma weak pthread_mutexattr_setrobust_np
 # endif
@@ -380,6 +384,10 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 #   error "Weak reference support is required"
 #  endif
 # endif
+# define USE_PTHREAD_LOCK_ONLY_IF_LOADED
+#endif
+
+#if !defined(HAVE_PTHREAD_MUTEX_LOCK) && !defined(USE_PTHREAD_LOCK_ONLY_IF_LOADED)
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 #endif
 
