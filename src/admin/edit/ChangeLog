@@ -1,4 +1,8 @@
 
+Fri Aug 18 17:06:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* ss_wrapper.c - Change sense of fgets() check so scripts work.
+
+
 Tue Aug 15 14:22:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_edit.c, ss_wrapper.c, cpw.c, kdb5_edit.h - Add support for
 		-s scriptfile and fix up assorted gcc -Wall complaints.

@@ -63,7 +63,7 @@ int main(argc, argv)
 	if ((command = (char *) malloc(BUFSIZ))) {
 	    /* Process commands from the script until end-of-file or error */
 	    while (!feof(scriptfile) &&
-		   !(fgets(command, BUFSIZ, scriptfile))) {
+		   (fgets(command, BUFSIZ, scriptfile))) {
 
 		/* Strip trailing newline */
 		if (command[strlen(command)-1] == '\n')
