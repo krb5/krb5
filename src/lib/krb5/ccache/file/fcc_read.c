@@ -105,7 +105,7 @@ krb5_fcc_read_principal(id, princ)
     tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (tmpprinc == NULL)
 	return KRB5_CC_NOMEM;
-    tmpprinc->data = malloc(length * sizeof(krb5_principal_data));
+    tmpprinc->data = (krb5_data *) malloc(length * sizeof(krb5_data));
     if (tmpprinc->data == 0) {
 	free((char *)tmpprinc);
 	return KRB5_CC_NOMEM;
@@ -244,6 +244,10 @@ krb5_fcc_read_data(id, data)
      }
      data->data[data->length] = 0; /* Null terminate, just in case.... */
      return KRB5_OK;
+ errout:
+     if (data->data)
+	 xfree(data->data);
+     return kret;
 }
 
 krb5_error_code
