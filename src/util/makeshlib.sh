@@ -130,8 +130,8 @@ alpha-*-osf*)
 
 	done`
 
-	echo 	ld -shared -error_unresolved $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
-	ld -shared -error_unresolved $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
+	echo 	ld -shared -expect_unresolved \* $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
+	ld -shared -expect_unresolved \* $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
 	stat=$?
 	;;
 

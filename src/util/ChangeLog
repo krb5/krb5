@@ -1,3 +1,9 @@
+Thu Aug 15 20:48:16 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* makeshlib.sh (alpha-*-osf*): add -expect_unresolved (due to
+		dbm_error and dbm_clearerr not being in libc when making
+		libkdb5)
+
 Thu Aug 15 16:30:00 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in (all unix): "install" the db-ndbm header file with
