@@ -53,3 +53,7 @@ Changes in 1.1a3:
 1.1b12
  CCache 2.0b4 (v5 credentials corruption fix)
  68K builds gone again
+ 
+1.1b13
+ fixed win-mac.h to not conflict with MSL stat.h
+ updated to CCache 2.0b5
