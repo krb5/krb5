@@ -45,7 +45,7 @@ kg_make_seed(key, seed)
    for (i=0; i<ed.key->length; i++)
       ed.key->contents[i] = key->contents[key->length - 1 - i];
 
-   krb5_use_keytype(kg_context, &ed.eblock, KEYTYPE_DES_CBC_RAW);
+   krb5_use_enctype(kg_context, &ed.eblock, ENCTYPE_DES_CBC_RAW);
    ed.processed = 0;
 
    code = kg_encrypt(&ed, NULL, zeros, seed, 16);

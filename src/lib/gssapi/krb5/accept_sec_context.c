@@ -248,7 +248,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 
    /* fill in the encryption descriptors */
 
-   krb5_use_keytype(context, &ctx->enc.eblock, KEYTYPE_DES_CBC_RAW);
+   krb5_use_enctype(context, &ctx->enc.eblock, ENCTYPE_DES_CBC_RAW);
    ctx->enc.processed = 0;
    if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key))
       return(code); 
@@ -256,7 +256,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
       /*SUPPRESS 113*/
       ctx->enc.key->contents[i] ^= 0xf0;
 
-   krb5_use_keytype(context, &ctx->seq.eblock, KEYTYPE_DES_CBC_RAW);
+   krb5_use_enctype(context, &ctx->seq.eblock, ENCTYPE_DES_CBC_RAW);
    ctx->seq.processed = 0;
    ctx->seq.key = ctx->subkey;
 
