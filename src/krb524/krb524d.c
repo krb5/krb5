@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #include <sys/signal.h>
 #include <netinet/in.h>
+#include <netdb.h>
 
 #include <krb.h>
 #include "krb524.h"
