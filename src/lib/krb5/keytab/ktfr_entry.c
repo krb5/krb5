@@ -17,13 +17,14 @@ static char rcsid_ktfr_entry_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 
 krb5_error_code
 krb5_kt_free_entry (entry)
 krb5_keytab_entry *entry;
 {
     krb5_free_principal(entry->principal);
-    krb5_free_keyblock(entry->key);
+    xfree(entry->key.contents);
     xfree(entry);
     return 0;
 }
