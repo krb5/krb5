@@ -607,7 +607,7 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
     DWORD   Error;
 
     KERB_QUERY_TKT_CACHE_REQUEST CacheRequest;
-    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest;
+    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest = NULL;
     PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
     ULONG RequestSize;
     ULONG ResponseSize;
