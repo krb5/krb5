@@ -11,7 +11,7 @@ KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DB
 HESIODLIB = 
 
 movemail: movemail.o
-	$(CC) $(CFLAGS) -o movemail movemail.o $(KLIB) $(HESIODLIB)
+	$(CC) $(CFLAGS) -o movemail movemail.o $(KLIB) $(HESIODLIB) $(LIBS)
 
 all:: movemail
 

@@ -55,6 +55,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <errno.h>
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
 #define NO_SHORTNAMES   /* Tell config not to load remap.h */
 /* #include "../src/config.h" */
 
