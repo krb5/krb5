@@ -1,3 +1,8 @@
+Fri Aug  7 22:39:47 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* ftp.c (do_auth): Make verbosity not disappear if GSSAPI fails.
+	(getreply): Move 'S:' and 'P:' from verbose to debug.
+
 Fri Aug  7 11:45:17 1998  Tom Yu  <tlyu@mit.edu>
 
 	* ftp.c (getreply): Restore proper setting of safe.  This variable
