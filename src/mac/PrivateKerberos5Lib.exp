@@ -30,3 +30,4 @@
 	krb5_c_block_size					# GSSAPI
 	krb5_c_checksum_length				# GSSAPI
 	krb5_c_encrypt_length				# GSSAPI
+	krb5int_cc_default					# GSSAPI
