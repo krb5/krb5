@@ -1,0 +1,10 @@
+AC_INIT(configure.in)
+WITH_CCOPTS
+AC_SET_BUILDTOP
+CONFIG_DIRS(kpasswd v5server)
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("installing",install)
+CONFIG_RULES
+WITH_KRB5ROOT
+V5_AC_OUTPUT_MAKEFILE
