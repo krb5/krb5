@@ -1,3 +1,18 @@
+Fri Aug 25 21:50:37 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_encode_test.c (main): Add tests for
+		encode_krb5_padata_sequence(). 
+
+	* krb5_decode_test.c (main): Add tests for
+		decode_krb5_padata_sequence().
+
+	* ktest.c (ktest_make_sample_empty_pa_data_array): New function
+		which creates an empty pa_data array.
+
+	* trval.c:  Various -Wall cleanups.
+
+	* Makefile.in (trval): Add rule to build the standalone trval
+		program. 
 
 Thu Jul 27 15:29:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5_{en,de}code_test.c - Use k5-int instead of krb5 and asn1.h.

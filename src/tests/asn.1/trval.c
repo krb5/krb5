@@ -32,6 +32,8 @@
  * trval.c.c
  *****************************************************************************/
 
+#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -100,6 +102,8 @@ int print_krb5_types = 0;
 int print_skip_krb5_tagnum = 0;
 #endif
 
+void print_tag_type();
+int trval(), trval2(), decode_len(), do_cons(), do_prim();
 
 /****************************************************************************/
 
@@ -110,7 +114,6 @@ int main(argc, argv)
 	char **argv;
 {
 	int optflg = 1;
-	int options = 0;
 	FILE *fp;
 	int r;
 	
@@ -132,7 +135,7 @@ int main(argc, argv)
 				continue;
 			}
 			r = trval(fp, stdout);
-			close(fp);
+			fclose(fp);
 		}
 	}
 	if (optflg) r = trval(stdin, stdout);
@@ -292,7 +295,7 @@ int do_prim(fp, tag, enc, len, lev)
 	}
     }
     if ((j = (n % WIDTH)) != 0) {
-	fprintf(fp, "    ", j);
+	fprintf(fp, "    ");
 	for (i=0; i<WIDTH-j; i++) fprintf(fp, "   ");
 	for (i=n-j; i<n; i++)
 	    if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
@@ -312,7 +315,6 @@ int *rlen;
     int r;
     int rlen2;
     int rlent;
-    int l;
 
     for (n = 0, rlent = 0; n < len; n+=rlen2, rlent+=rlen2) {
 	r = trval2(fp, enc+n, len-n, lev, &rlen2);
@@ -327,7 +329,7 @@ int *rlen;
     return(r);
 }
 
-print_tag_type(fp, eid, lev)
+void print_tag_type(fp, eid, lev)
 	FILE *fp;
 	int	eid;
 	int	lev;

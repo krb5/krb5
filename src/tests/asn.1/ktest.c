@@ -300,6 +300,17 @@ krb5_error_code ktest_make_sample_pa_data_array(pad)
   return 0;
 }
 
+krb5_error_code ktest_make_sample_empty_pa_data_array(pad)
+     krb5_pa_data *** pad;
+{
+  *pad = (krb5_pa_data**)calloc(1,sizeof(krb5_pa_data*));
+  if(*pad == NULL) return ENOMEM;
+
+  (*pad)[0] = NULL;
+
+  return 0;
+}
+
 krb5_error_code ktest_make_sample_pa_data(pad)
      krb5_pa_data * pad;
 {

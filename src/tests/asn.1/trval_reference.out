@@ -1819,3 +1819,21 @@ encode_krb5_pwd_data:
 .  .  .  [1] [Octet String] <8>
             6b 72 62 35 64 61 74 61     krb5data
 
+encode_krb5_padata_sequence:
+
+[Sequence/Sequence Of] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         0d                          .
+.  .  [2] [Octet String] <7>
+         70 61 2d 64 61 74 61        pa-data
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         0d                          .
+.  .  [2] [Octet String] <7>
+         70 61 2d 64 61 74 61        pa-data
+
+encode_krb5_padata_sequence(empty):
+
+[Sequence/Sequence Of] 
+

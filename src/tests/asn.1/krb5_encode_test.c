@@ -435,5 +435,27 @@ void main(argc, argv)
     encode_run(pd,krb5_pwd_data,"pwd_data","",encode_krb5_pwd_data);
   }
 
+  /****************************************************************/
+  /* encode_padata_sequence */
+  {
+    krb5_pa_data **pa;
+    
+    setup(pa,krb5_pa_data,"PreauthData",ktest_make_sample_pa_data_array);
+    retval = encode_krb5_padata_sequence((const krb5_pa_data**)pa,&(code));
+    if(retval) com_err("encoding padata_sequence",retval,"");
+    encoder_print_results(code, "padata_sequence", "");
+  }
+
+  /****************************************************************/
+  /* encode_padata_sequence (empty) */
+  {
+    krb5_pa_data **pa;
+    
+    setup(pa,krb5_pa_data,"EmptyPreauthData",ktest_make_sample_empty_pa_data_array);
+    retval = encode_krb5_padata_sequence((const krb5_pa_data**)pa,&(code));
+    if(retval) com_err("encoding padata_sequence(empty)",retval,"");
+    encoder_print_results(code, "padata_sequence(empty)", "");
+  }
+
   exit(error_count);
 }

@@ -2,7 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
 
 COMERRLIB=$(TOPLIBD)/libcom_err.a
 
-all:: krb5_encode_test krb5_decode_test
+all:: krb5_encode_test krb5_decode_test trval
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
 
@@ -15,6 +15,9 @@ DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
 
 krb5_decode_test: $(DECOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o krb5_decode_test $(DECOBJS) $(LIBS)
+
+trval: $(srcdir)/trval.c
+	$(CC) -o trval $(CFLAGS) -DSTANDALONE $(srcdir)/trval.c
 
 check:: krb5_decode_test krb5_encode_test
 	LD_LIBRARY_PATH=$(TOPLIBD) ./krb5_decode_test

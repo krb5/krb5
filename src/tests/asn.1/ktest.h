@@ -50,6 +50,8 @@ krb5_error_code ktest_make_sample_kdc_rep
 	KRB5_PROTOTYPE((krb5_kdc_rep *kdcr));
   krb5_error_code ktest_make_sample_pa_data_array
 	KRB5_PROTOTYPE((krb5_pa_data ***pad));
+  krb5_error_code ktest_make_sample_empty_pa_data_array
+	KRB5_PROTOTYPE((krb5_pa_data ***pad));
   krb5_error_code ktest_make_sample_pa_data
 	KRB5_PROTOTYPE((krb5_pa_data *pad));
 krb5_error_code ktest_make_sample_ap_req

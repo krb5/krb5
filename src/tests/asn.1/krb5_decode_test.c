@@ -352,5 +352,43 @@ void main()
     decode_run("PasswdData","","30 3D A0 03 02 01 02 A1 36 30 34 30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61 30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_pwd_data,ktest_equal_krb5_pwd_data);
   }
 
+  /****************************************************************/
+  /* decode_krb5_padata_sequence */
+  {
+    krb5_pa_data **ref, **var;
+    retval = ktest_make_sample_pa_data_array(&ref);
+    if(retval){
+      com_err("making sample pa_data array",retval,"");
+      exit(1);
+    }
+    retval = krb5_data_hex_parse(&code,"30 24 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61");
+    if(retval){
+      com_err("parsing padata_sequence",retval,"");
+      exit(1);
+    }
+    retval = decode_krb5_padata_sequence(&code,&var);
+    if(retval) com_err("decoding padata_sequence",retval,"");
+    assert(ktest_equal_sequence_of_pa_data(ref,var),"pa_data\n")
+  }
+  
+  /****************************************************************/
+  /* decode_krb5_padata_sequence (empty) */
+  {
+    krb5_pa_data **ref, **var;
+    retval = ktest_make_sample_empty_pa_data_array(&ref);
+    if(retval){
+      com_err("making sample empty pa_data array",retval,"");
+      exit(1);
+    }
+    retval = krb5_data_hex_parse(&code,"30 00");
+    if(retval){
+      com_err("parsing padata_sequence (empty)",retval,"");
+      exit(1);
+    }
+    retval = decode_krb5_padata_sequence(&code,&var);
+    if(retval) com_err("decoding padata_sequence (empty)",retval,"");
+    assert(ktest_equal_sequence_of_pa_data(ref,var),"pa_data (empty)\n")
+  }
+  
   exit(error_count);
 }
