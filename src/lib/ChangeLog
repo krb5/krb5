@@ -1,3 +1,8 @@
+Wed Nov 20 18:28:47 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (clean-windows): Change the name of the Windows (16)
+		dll to be krb516.dll, instead of libkrb5.dll
+
 Fri Jul 12 20:32:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* win_glue.c: Added TIMEBOMB_INFO string which tells the user the
