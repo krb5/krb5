@@ -1,3 +1,9 @@
+Thu Oct  5 10:35:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* cpw.c: Declare std_ks_tuple as extern.
+	* kdb5_edit.h: Remove std_ks_tuple declaration as not all sources
+		include adm.h for structures
+
 Tue Oct  3 23:10:57 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* cpw.c (enter_rnd_key, enter_pwd_key):

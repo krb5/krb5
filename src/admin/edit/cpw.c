@@ -36,6 +36,9 @@ extern char	*Err_no_master_msg;
 extern char	*Err_no_database;
 extern char	*current_dbname;
 
+extern krb5_key_salt_tuple *std_ks_tuple;
+extern int std_ks_tuple_count;
+
 /*
  * I can't figure out any way for this not to be global, given how ss
  * works.
