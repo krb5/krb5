@@ -41,7 +41,11 @@ proc start_ftp_daemon { } {
     # don't need to use inetd.  The 3021 is the port to listen at.
     # We rely on KRB5_KTNAME being set to the proper keyfile as there is
     # no way to cleanly set it with the gssapi API.
-    spawn $FTPD -p 3021 -r $tmppwd/krb5.conf
+    # The -U argument tells it to use an alternate ftpusers file (using
+    # /dev/null will allow root to login regardless of /etc/ftpusers).
+    # The -a argument requires authorization, to mitigate any
+    # vulnerability introduced by circumventing ftpusers.
+    spawn $FTPD -p 3021 -a -U /dev/null -r $tmppwd/krb5.conf
     set ftpd_spawn_id $spawn_id
     set ftpd_pid [exp_pid]
 
@@ -123,6 +127,7 @@ proc ftp_restore_env { } {
 proc ftp_test { } {
     global FTP
     global KEY
+    global REALMNAME
     global hostname
     global localhostname
     global env
@@ -185,9 +190,9 @@ proc ftp_test { } {
     }
     expect -nocase "name ($hostname:$env(USER)): "
     send "$env(USER)\r"
-#    expect "User $env(USER) logged in."
-#    expect "Remote system type is UNIX."
-#    expect "Using binary mode to transfer files."
+    expect "GSSAPI user $env(USER)@$REALMNAME is authorized as $env(USER)"
+    expect "Remote system type is UNIX."
+    expect "Using binary mode to transfer files."
     expect "ftp> " {
 	pass $testname
     }

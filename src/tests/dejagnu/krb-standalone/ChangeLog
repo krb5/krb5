@@ -1,3 +1,13 @@
+2001-06-08  Mitchell Berger  <mitchb@mit.edu>
+
+	* gssftp.exp: Invocation of ftpd changed to use -U /dev/null and
+	-a so that the test may successfully be run by root without failing
+	(i.e. root is granted ftp access) and without opening the running
+	ftpd to a password attack (i.e. authorization is required).
+	Check for successful login messages added.
+
+	* v4gssftp.exp: Same changes.
+
 2001-06-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* v4gssftp.exp: Allow for "decrypt integrity check failed" error
