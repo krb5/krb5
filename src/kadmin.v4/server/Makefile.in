@@ -7,7 +7,7 @@ DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+KLIB = $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
@@ -42,7 +42,7 @@ kadm_err.c: kadm_err.et
 kadm_err.h: kadm_err.et
 
 v4kadmind: $(OBJS) $(DEPLIBS)
-	$(CC) $(CFLAGS) -o v4kadmind $(OBJS) $(KDBLIB) $(KRB4_LIB) $(KLIB) $(LIBS)
+	$(CC) $(CFLAGS) -o v4kadmind $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) v4kadmind ${DESTDIR}$(SERVER_BINDIR)/v4kadmind

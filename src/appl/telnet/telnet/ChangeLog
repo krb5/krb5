@@ -1,3 +1,7 @@
+Fri Apr 28 18:07:03 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.
+
 Thu Apr 27 13:56:12 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (telnet): use KRB4_LIB directly.

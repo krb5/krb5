@@ -27,7 +27,7 @@ CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 KRB4_LIB = @KRB4_LIB@
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+KLIB = $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 SRCS=	commands.c main.c network.c ring.c \
@@ -43,7 +43,7 @@ OBJS=	authenc.o commands.o main.o network.o ring.o sys_bsd.o \
 all:: telnet
 
 telnet:	$(OBJS) $(DEPKLIB) ../libtelnet/libtelnet.a
-	$(CC) -o $@ $(CFLAGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(KRB4_LIB) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(LIBS)
 
 clean::
 	$(RM) telnet

@@ -1,3 +1,7 @@
+Fri Apr 28 18:08:05 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.
+
 Thu Apr 27 13:53:41 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (v4kadmind): use KRB4_LIB directly.
