@@ -1,3 +1,15 @@
+Wed Nov 27 18:27:18 1996  Jeffrey C. G. Bigler  <jcb@viola.cygnus.com>
+
+	* admin.texinfo: Added chapter on config files.  Changed bug
+	reporting section to include send-pr file.
+
+	* install.texinfo: Changed bug reporting section to include
+	send-pr file.  Added reference to Sysadmin Guide chapter on config
+	files.
+
+	* send-pr.texinfo: Fixed this up to match our version of
+	krb5-send-pr.
+
 Tue Nov 26 18:34:11 1996  Tom Yu  <tlyu@mit.edu>
 
 	* install.texinfo: Fix a couple of references to "@value{COMPANY}"
