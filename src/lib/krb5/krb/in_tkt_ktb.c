@@ -86,6 +86,8 @@ keytab_keyproc(context, type, salt, keyseed, key)
     }	
 
     (void) krb5_kt_free_entry(context, &kt_ent);
+    if (arg->keytab) 
+	krb5_kt_close(context, kt_id);
     *key = realkey;
     return 0;
 }

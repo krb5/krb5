@@ -1,3 +1,15 @@
+
+Mon Jun 12 16:49:42 1995  Chris Provenzano (proven@mit.edu)
+
+	A couple bug reports/patches from Ed Phillips (flaregun@udel.edu)
+	* in_tkt_ktb.c (keytab_keyproc()): Fix memory leak. 
+	* recvauth.c (krb5_recvauth()): Don't open a new rcache if
+		the auth_context already has one.
+	* auth_con.c (krb5_auth_con_free()): Close rcache is the
+		auth_context has one set.
+	* auth_con.c (krb5_auth_con_getrcache()): Return pointer
+		to the rcache set in the auth_context.
+
 Sun Jun 11 12:31:39 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* auth_con.c (krb5_auth_con_init): Zero newly allocated

@@ -44,6 +44,8 @@ krb5_auth_con_free(context, auth_context)
 	krb5_free_keyblock(context, auth_context->local_subkey);
     if (auth_context->remote_subkey) 
 	krb5_free_keyblock(context, auth_context->remote_subkey);
+    if (auth_context->rcache)
+	krb5_rc_close(context, auth_context->rcache);
     free(auth_context);
     return 0;
 }
@@ -351,3 +353,14 @@ krb5_auth_con_setrcache(context, auth_context, rcache)
     auth_context->rcache = rcache;
     return 0;
 }
+    
+krb5_error_code
+krb5_auth_con_getrcache(context, auth_context, rcache)
+    krb5_context      	  context;
+    krb5_auth_context 	  auth_context;
+    krb5_rcache		* rcache;
+{
+    *rcache = auth_context->rcache;
+    return 0;
+}
+    

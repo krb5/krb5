@@ -130,23 +130,33 @@ krb5_recvauth(context, auth_context,
 		return(problem); /* We'll return the top-level problem */
 	}
 	if (problem)
-		return(problem);
+	    return(problem);
 
-/* Were clear here */
+    /* We are clear of errors here */
+
     /*
-     * Setup the replay cache.
+     * Now, let's read the AP_REQ message and decode it
      */
-    if (server) {
-        problem = krb5_get_server_rcache(context, 
-			krb5_princ_component(context, server, 0), &rcache);
-    } else {
-    	null_server.length = 7;
-    	null_server.data = "default";
-    	problem = krb5_get_server_rcache(context, &null_server, &rcache);
-    }
+    if (retval = krb5_read_message(context, fd, &inbuf))
+        return retval;
 
-    if (!problem) {
-	if (krb5_rc_recover(context, rcache)) {
+    if (*auth_context == NULL) {
+	problem = krb5_auth_con_init(context, &new_auth_context);
+	*auth_context = new_auth_context;
+    }
+    if ((!problem) && ((*auth_context)->rcache == NULL)) {
+        /*
+         * Setup the replay cache.
+         */
+        if (server) {
+            problem = krb5_get_server_rcache(context, 
+			krb5_princ_component(context, server, 0), &rcache);
+        } else {
+    	    null_server.length = 7;
+    	    null_server.data = "default";
+    	    problem = krb5_get_server_rcache(context, &null_server, &rcache);
+        }
+	if ((!problem) && krb5_rc_recover(context, rcache)) {
 	    /*
 	     * If the rc_recover() didn't work, then try
 	     * initializing the replay cache.
@@ -157,29 +167,12 @@ krb5_recvauth(context, auth_context,
 		rcache = NULL;
 	    }
 	}
-    }
-
-    /*
-     * Now, let's read the AP_REQ message and decode it
-     */
-    if ((retval = krb5_read_message(context, fd, &inbuf))) {
-	if (problem) /* Return top level problem */
-	    retval = problem; 
-	goto cleanup;
-    }
-
-    if (!problem) {
-    	if (*auth_context == NULL) {
-	    problem = krb5_auth_con_init(context, &new_auth_context);
-	    *auth_context = new_auth_context;
-	}
-    }
-    if (!problem) {
-	problem = krb5_auth_con_setrcache(context, *auth_context, rcache);
+        if (!problem) 
+	    problem = krb5_auth_con_setrcache(context, *auth_context, rcache);
     }
     if (!problem) {
 	problem = krb5_rd_req(context, auth_context, &inbuf, server,
-				      keytab, &ap_option, ticket);
+			      keytab, &ap_option, ticket);
 	krb5_xfree(inbuf.data);
     }
 	
@@ -240,6 +233,7 @@ cleanup:;
     if (retval) {
 	if (rcache)
 	    krb5_rc_close(context, rcache);
+	krb5_auth_con_free(context, *auth_context);
     }
     return retval;
 }
