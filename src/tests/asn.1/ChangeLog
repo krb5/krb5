@@ -1,3 +1,7 @@
+Thu Mar 20 16:50:10 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Remove AC_PROG_INSTALL.
+
 Sun Feb  9 01:31:00 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
