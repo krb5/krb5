@@ -1,3 +1,9 @@
+Tue Feb 28 00:00:22 1995  John Gilmore  (gnu at toad.com)
+
+	* aclocal.m4 (ADD_DEF):  Add -I...include/krb5 so we won't need
+	pathnames to Kerberos include files in any of the #include lines
+	in the source tree.
+
 Mon Feb 13 23:39:21 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* aclocal.m4 (WITH_LINKER): Add a new configure production which
