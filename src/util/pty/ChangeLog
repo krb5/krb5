@@ -1,3 +1,8 @@
+1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Remove test CHECK_WAIT_TYPE since nothing is using
+		the results of that test (WAIT_USES_INT).
+
 1998-08-16    <hartmans@fundsxpress.com>
 
 	* Makefile.in (SHLIB_EXPDEPS): Depend on lib_comerr
