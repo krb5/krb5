@@ -4,6 +4,12 @@ Fri Nov 22 15:50:42 1996  unknown  <bjaspan@mit.edu>
  	of h_length to determine number of bytes of addr to copy from DNS
  	response [krb5-misc/211]
 
+Fri Nov 22 11:49:43 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* types.hin: Include stdlib.h if found at config time [203]
+
+	* configure.in: Substitute STDLIB_INCLUDE into types.h. [203]
+
 Tue Nov 12 16:27:27 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* auth_gssapi.c (auth_gssapi_create): handle channel bindings
