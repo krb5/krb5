@@ -17,6 +17,9 @@
 #define __KRB5_KEYTAB__
 
 
+/* XXX */
+#define MAX_KEYTAB_NAME_LEN 1100 /* Long enough for MAXPATHLEN + some extra */
+
 typedef krb5_pointer krb5_kt_cursor;	/* XXX */
 
 typedef struct krb5_keytab_entry_st {
@@ -26,7 +29,7 @@ typedef struct krb5_keytab_entry_st {
 } krb5_keytab_entry;
 
 
-typedef struct krb5_kt_st {
+typedef struct _krb5_kt {
 	struct krb5_kt_ops *ops;
 	krb5_pointer data;
 } *krb5_keytab;
@@ -35,27 +38,27 @@ typedef struct krb5_kt_st {
 typedef struct _krb5_kt_ops {
 	char *prefix;
         /* routines always present */
-	int (*resolve) PROTOTYPE((char *,
-				  krb5_keytab));
-	int (*get_name) PROTOTYPE((krb5_ccache,
-				   char *,
-				   int));
-	int (*close) PROTOTYPE((krb5_keytab *));
-	int (*get) PROTOTYPE((krb5_keytab,
-			      krb5_principal,
-			      krb5_kvno,
-			      krb5_keytab_entry *));
-	int (*start_seq_get) PROTOTYPE((krb5_keytab,
-					krb5_kt_cursor *));	
-	int (*get_next) PROTOTYPE((krb5_keytab,
-				   krb5_keytab_entry *,
-				   krb5_kt_cursor));
-	int (*end_get) PROTOTYPE((krb5_keytab,
-				  krb5_kt_cursor));
+	krb5_error_code (*resolve) PROTOTYPE((char *,
+					      krb5_keytab *));
+	krb5_error_code (*get_name) PROTOTYPE((krb5_keytab,
+					       char *,
+					       int));
+	krb5_error_code (*close) PROTOTYPE((krb5_keytab *));
+	krb5_error_code (*get) PROTOTYPE((krb5_keytab,
+					  krb5_principal,
+					  krb5_kvno,
+					  krb5_keytab_entry *));
+	krb5_error_code (*start_seq_get) PROTOTYPE((krb5_keytab,
+						    krb5_kt_cursor *));	
+	krb5_error_code (*get_next) PROTOTYPE((krb5_keytab,
+					       krb5_keytab_entry *,
+					       krb5_kt_cursor));
+	krb5_error_code (*end_get) PROTOTYPE((krb5_keytab,
+					      krb5_kt_cursor));
 	/* routines to be included on extended version (write routines) */
-	int (*add) PROTOTYPE((krb5_keytab,
-			      krb5_keytab_entry *));
-	int (*remove) PROTOTYPE((krb5_keytab,
+	krb5_error_code (*add) PROTOTYPE((krb5_keytab,
+					  krb5_keytab_entry *));
+	krb5_error_code (*remove) PROTOTYPE((krb5_keytab,
 				  krb5_kt_cursor));
 } krb5_kt_ops;
 
