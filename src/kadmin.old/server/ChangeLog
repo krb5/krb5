@@ -1,3 +1,7 @@
+Wed Apr 26 11:29:07 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: need HAS_ANSI_VOLATILE for signal_requests_exit.
+
 Fri Apr 21 13:11:00 1995  Mark Eichin  <eichin@cygnus.com>
 
 	From Ian Taylor <ian@cygnus.com>. Makes kadmind use -r for both

@@ -1,3 +1,7 @@
+Wed Apr 26 11:23:11 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: need HAS_ANSI_VOLATILE for signal_requests_exit.
+
 Sat Apr 22 00:36:37 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* network.c (setup_network): Don't rely on krb5_kdc_portname and
