@@ -1,3 +1,7 @@
+Thu Apr 27 13:50:59 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* pre.in (KRB4): remove, unused.
+
 Wed Apr 26 14:27:03 1995 Keith Vetter (keithv@fusion.com)
 
 	* post.in: added target check-windows.
