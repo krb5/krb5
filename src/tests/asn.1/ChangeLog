@@ -1,3 +1,7 @@
+
+	* trval.c (print_tag_type): Use fputs when there's no formatting
+	to do.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -814,10 +814,10 @@ void print_tag_type(fp, eid, lev)
 	
 	if (print_types && ((eid & ID_CLASS) == CLASS_UNIV)) {
 		if (do_space)
-			fprintf(fp, " ");
+			fputs(" ", fp);
 		str = lookup_typestring(univ_types, eid & ID_TAG, -1);
 		if (str)
-			fprintf(fp, str);
+			fputs(str, fp);
 		else
 			fprintf(fp, "UNIV %d???", eid & ID_TAG);
 	}
