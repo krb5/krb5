@@ -26,11 +26,7 @@
 
 #include "des.h"
 
-/*
- * The secret des key schedule and sequence number for the current
- * stream of random numbers
- */
-static mit_des_random_key_seed random_sequence_state;
+krb5_pointer des425_random_state = 0;
 
 /*
  * des_new_random_key: create a random des key
@@ -46,7 +42,15 @@ int
 des_new_random_key(key)
     mit_des_cblock key;
 {
-    return(mit_des_new_random_key(key, &random_sequence_state));
+    krb5_keyblock * keyblock;
+    krb5_error_code kret;
+
+    kret = mit_des_random_key(NULL, des425_random_state, &keyblock);
+    if (kret) return kret;
+    
+    memcpy(key, keyblock->contents, sizeof(key));
+    krb5_free_keyblock(NULL, keyblock);
+    return 0;
 }
 
 /*
@@ -65,9 +69,20 @@ des_new_random_key(key)
  */
 void
 des_init_random_number_generator(key)
-     mit_des_cblock key;
+    mit_des_cblock key;
 {
-     mit_des_init_random_number_generator(key, &random_sequence_state);
+    krb5_keyblock keyblock;
+    krb5_encrypt_block eblock;
+
+    krb5_use_enctype(NULL, &eblock, ENCTYPE_DES_CBC_CRC);
+
+    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
+    keyblock.length = sizeof(mit_des_cblock);
+    keyblock.contents = (krb5_octet *)key;
+
+    if (des425_random_state)
+	mit_des_finish_random_key(&eblock, &des425_random_state);
+    mit_des_init_random_key(&eblock, &keyblock, &des425_random_state);
 }
 
 /*
@@ -89,9 +104,16 @@ des_init_random_number_generator(key)
  */
 void
 des_set_random_generator_seed(key)
-     mit_des_cblock key;
+    mit_des_cblock key;
 {
-     mit_des_set_random_generator_seed(key, &random_sequence_state);
+    krb5_data seed;
+
+    seed.length = sizeof(mit_des_cblock);
+    seed.data = (krb5_pointer) key;
+
+    if (!des425_random_state)
+	des_init_random_number_generator(key);
+    mit_des_set_random_generator_seed(&seed, des425_random_state);
 }
 
 
@@ -105,23 +127,11 @@ des_set_random_generator_seed(key)
  */
 void
 des_set_sequence_number(new_sequence_number)
-     mit_des_cblock new_sequence_number;
+    mit_des_cblock new_sequence_number;
 {
-     mit_des_set_sequence_number(new_sequence_number, &random_sequence_state);
-}
+    krb5_data sequence;
 
-/*
- * des_generate_random_block: routine to return the next random number
- *                            from the current random number stream.
- *                            The returned number is 64 bits long.
- *
- * Requires: des_set_random_generator_seed must have been called at least once
- *           before this routine is called.
- */
-void
-des_generate_random_block(block)
-     mit_des_cblock block;
-{
-    mit_des_generate_random_block(block, &random_sequence_state);
+    sequence.length = sizeof(new_sequence_number);
+    sequence.data = (krb5_octet *)new_sequence_number;
+    mit_des_set_random_sequence_number(&sequence, des425_random_state);
 }
-

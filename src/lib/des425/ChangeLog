@@ -1,3 +1,8 @@
+Thu May  2 18:44:02 1996  Richard Basch  <basch@lehman.com>
+
+	* random_key.c new_rnd_key.c:
+	Use the rewritten random number routines of libcrypto
+
 Fri Oct  6 22:01:18 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
