@@ -93,6 +93,8 @@ void *handle = NULL;
 krb5_context context;
 char *ccache_name = NULL;
 
+int locked = 0;
+
 static void usage()
 {
     fprintf(stderr,
@@ -465,6 +467,17 @@ char *kadmin_startup(argc, argv)
 
 int quit()
 {
+    kadm5_ret_t retval;
+
+    if (locked) {
+	retval = kadm5_unlock(handle);
+	if (retval) {
+	    com_err("quit", retval, "while unlocking locked database");
+	    return 1;
+	}
+	locked = 0;
+    }
+
      kadm5_destroy(handle);
      if (ccache_name != NULL) {
 	  fprintf(stderr,
@@ -475,6 +488,38 @@ int quit()
      krb5_klog_close(context);
      krb5_free_context(context);
      return 0;
+}
+
+void kadmin_lock(argc, argv)
+    int argc;
+    char *argv[];
+{
+    kadm5_ret_t retval;
+
+    if (locked)
+	return;
+    retval = kadm5_lock(handle);
+    if (retval) {
+	com_err("lock", retval, "");
+	return;
+    }
+    locked = 1;
+}
+
+void kadmin_unlock(argc, argv)
+    int argc;
+    char *argv[];
+{
+    kadm5_ret_t retval;
+
+    if (!locked)
+	return;
+    retval = kadm5_lock(handle);
+    if (retval) {
+	com_err("unlock", retval, "");
+	return;
+    }
+    locked = 0;
 }
 
 void kadmin_delprinc(argc, argv)

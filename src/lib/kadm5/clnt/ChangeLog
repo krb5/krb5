@@ -1,3 +1,10 @@
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump.
+
+	* client_init.c (kadm5_lock, kadm5_unlock): Add stubs that error
+	out, since these are not supported on the client side.
+
 2002-09-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* client_init.c (_kadm5_init_any): If creating a new ccache, put

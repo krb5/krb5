@@ -306,6 +306,34 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
     return KADM5_OK;
 }
 
+kadm5_ret_t kadm5_lock(void *server_handle)
+{
+    kadm5_server_handle_t handle = server_handle;
+    kadm5_ret_t ret;
+
+    CHECK_HANDLE(server_handle);
+    ret = osa_adb_open_and_lock(handle->policy_db, OSA_ADB_EXCLUSIVE);
+    if (ret)
+	return ret;
+    ret = krb5_db_lock(handle->context, KRB5_LOCKMODE_EXCLUSIVE);
+    if (ret)
+	return ret;
+}
+
+kadm5_ret_t kadm5_unlock(void *server_handle)
+{
+    kadm5_server_handle_t handle = server_handle;
+    kadm5_ret_t ret;
+
+    CHECK_HANDLE(server_handle);
+    ret = osa_adb_close_and_unlock(handle->policy_db);
+    if (ret)
+	return ret;
+    ret = krb5_db_unlock(handle->context);
+    if (ret)
+	return ret;
+}
+
 kadm5_ret_t kadm5_flush(void *server_handle)
 {
      kadm5_server_handle_t handle = server_handle;

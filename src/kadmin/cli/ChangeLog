@@ -1,3 +1,13 @@
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (quit): Release exclusive lock, if acquired.
+	(kadmin_lock, kadmin_unlock): New functions to call kadm5_lock and
+	kadm5_unlock.
+
+	* kadmin.h: Add kadmin_lock and kadmin_unlock.
+
+	* kadmin_ct.ct: Add lock and unlock commands.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

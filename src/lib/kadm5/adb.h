@@ -47,6 +47,7 @@ typedef struct _osa_adb_db_ent_t {
      BTREEINFO	btinfo;
      char	*filename;
      osa_adb_lock_t lock;
+     int	opencnt;
 } osa_adb_db_ent, *osa_adb_db_t, *osa_adb_princ_t, *osa_adb_policy_t;
 
 /* an osa_pw_hist_ent stores all the key_datas for a single password */

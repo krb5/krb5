@@ -1,3 +1,14 @@
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* adb_openclose.c (osa_adb_init_db): Reset opencnt.
+	(osa_adb_open_and_lock): Don't open multiple times; merely
+	increment opencnt if already open.
+	(osa_adb_close_and_unlock): Decrement opencnt instead of
+	unconditionaly closing.
+
+	* server_init.c (kadm5_lock, kadm5_unlock): New functions to
+	support persistent exclusive locks across multiple API calls.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

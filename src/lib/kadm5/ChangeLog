@@ -1,3 +1,10 @@
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* adb.h (struct _osa_adb_db_ent_t): Add opencnt, which keeps track
+	of how many times an open was attempted on the adb.
+
+	* admin.h: Add kadm5_lock and kadm5_unlock.
+
 2002-09-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.h (struct __krb5_realm_params): New field

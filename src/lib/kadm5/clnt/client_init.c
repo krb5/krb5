@@ -605,6 +605,17 @@ kadm5_destroy(void *server_handle)
 
      return code;
 }
+/* not supported on client */
+kadm5_ret_t kadm5_lock(void *server_handle)
+{
+    return EINVAL;
+}
+
+/* not supported on client */
+kadm5_ret_t kadm5_unlock(void *server_handle)
+{
+    return EINVAL;
+}
 
 kadm5_ret_t kadm5_flush(void *server_handle)
 {

@@ -214,6 +214,7 @@ osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
      db->lock = &lockp->lockinfo;
      db->lock->refcnt++;
 
+     db->opencnt = 0;
      db->filename = strdup(filename);
      db->magic = magic;
 
@@ -369,10 +370,12 @@ osa_adb_ret_t osa_adb_open_and_lock(osa_adb_princ_t db, int locktype)
      ret = osa_adb_get_lock(db, locktype);
      if (ret != OSA_ADB_OK)
 	  return ret;
-     
+     if (db->opencnt)
+	  goto open_ok;
+
      db->db = dbopen(db->filename, O_RDWR, 0600, DB_BTREE, &db->btinfo);
      if (db->db != NULL)
-	  return OSA_ADB_OK;
+	 goto open_ok;
      switch (errno) {
 #ifdef EFTYPE
      case EFTYPE:
@@ -380,18 +383,23 @@ osa_adb_ret_t osa_adb_open_and_lock(osa_adb_princ_t db, int locktype)
      case EINVAL:
 	  db->db = dbopen(db->filename, O_RDWR, 0600, DB_HASH, &db->info);
 	  if (db->db != NULL)
-	       return OSA_ADB_OK;
+	       goto open_ok;
      default:
 	  (void) osa_adb_release_lock(db);
 	  if (errno == EINVAL)
 	       return OSA_ADB_BAD_DB;
 	  return errno;
      }
+open_ok:
+     db->opencnt++;
+     return OSA_ADB_OK;
 }
 
 osa_adb_ret_t osa_adb_close_and_unlock(osa_adb_princ_t db)
 {
-     if(db->db->close(db->db) == -1) {
+     if (--db->opencnt)
+	  return osa_adb_release_lock(db);
+     if(db->db != NULL && db->db->close(db->db) == -1) {
 	  (void) osa_adb_release_lock(db);
 	  return OSA_ADB_FAILURE;
      }
@@ -400,4 +408,3 @@ osa_adb_ret_t osa_adb_close_and_unlock(osa_adb_princ_t db)
 
      return(osa_adb_release_lock(db));
 }
-

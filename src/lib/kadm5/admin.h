@@ -330,6 +330,8 @@ kadm5_ret_t    kadm5_init_with_creds(char *client_name,
 				     krb5_ui_4 api_version,
 				     void **server_handle);
 #endif
+kadm5_ret_t    kadm5_lock(void *server_handle);
+kadm5_ret_t    kadm5_unlock(void *server_handle);
 kadm5_ret_t    kadm5_flush(void *server_handle);
 kadm5_ret_t    kadm5_destroy(void *server_handle);
 kadm5_ret_t    kadm5_create_principal(void *server_handle,
