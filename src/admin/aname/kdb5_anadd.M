@@ -17,9 +17,9 @@
 .\" permission.  M.I.T. makes no representations about the suitability of
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
-.\" 
-.\"
-.TH KDB5_ANADD 8 "Kerberos Version 5.0" "MIT Project Athena"
+.\" "
+.so man1/header.doc
+.TH KDB5_ANADD 8 \*h
 .SH NAME
 kdb5_anadd \- manipulate aname/lname translation database
 .SH SYNOPSIS
