@@ -134,6 +134,10 @@ adm_print_exp_time(context, ret_data, time_input)
     return(0);
 }
 
+/*
+ * With the new database format, we assume that a database entry always has a
+ * key which is des:normal
+ */
 krb5_error_code
 adm_fmt_prt(context, entry, Principal_name, ret_data)
     krb5_context context;
@@ -143,6 +147,8 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
 {
     struct tm *mod_time;
     krb5_error_code retval;
+    krb5_key_data	*pkey;
+    krb5_tl_mod_princ	*mprinc_data;
 #ifdef SANDIA
     struct tm *exp_time;
     int pwd_expire;
@@ -162,15 +168,30 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
     sprintf(thisline, "Maximum Renewal Lifetime (MRL) = %d (seconds)\n", 
 			entry->max_renewable_life);
     strcat(my_data, thisline);
+    pkey = (krb5_key_data *) NULL;
+    if (retval = adm_find_keytype(entry,
+				  KEYTYPE_DES,
+				  KRB5_KDB_SALTTYPE_NORMAL,
+				  &pkey)) {
+	free(my_data);
+	return retval;
+    }
     sprintf(thisline, "Principal Key Version (PKV) = %d\n",
-	    entry->key_data[0].key_data_kvno);
+	    pkey->key_data_kvno);
     strcat(my_data, thisline);
     if (retval = adm_print_exp_time(context, my_data, &entry->expiration)) {
 	free(my_data);
 	return retval;
     }
-#ifdef	notdef
-    mod_time = localtime((time_t *) &entry->mod_date);
+
+    /*
+     * Find the modification tagged entry.
+     */
+    if (krb5_dbe_decode_mod_princ_data(context, entry, &mprinc_data)) {
+	free(my_data);
+	return retval;
+    }
+    mod_time = localtime((time_t *) &mprinc_data->mod_date);
     sprintf(thisline, 
 	"Last Modification Date (LMD): %02d%02d/%02d/%02d:%02d:%02d:%02d\n",
            (mod_time->tm_year >= 100) ? 20 : 19,
@@ -181,12 +202,13 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
            mod_time->tm_min,
            mod_time->tm_sec);
     strcat(my_data, thisline);
-#endif	/* notdef */
+    krb5_free_principal(context, mprinc_data->mod_princ);
+    krb5_xfree(mprinc_data);
     if (retval = adm_print_attributes(my_data, entry->attributes)) {
 	free(my_data);
 	return retval;
     }
-    switch (entry->key_data[0].key_data_type[1] & 0xff) {
+    switch (pkey->key_data_type[1] & 0xff) {
            case 0 : strcat(my_data,
 			"Principal Salt Type (PST) = Version 5 Normal\n");
 		    break;

@@ -277,6 +277,7 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
     int number_of_entries;
     char tgs_name[255];
     krb5_keysalt	salt;
+    krb5_key_data	*kdatap;
 
     /* set db name if appropriate */
     if (dbname && (retval = krb5_db_set_name(context, dbname)))
@@ -358,8 +359,18 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	convert server.key into a real key 
 	(it may be encrypted in the database) 
  */
+    if (retval = adm_find_keytype(&server_entry,
+				  KEYTYPE_DES,
+				  -1,
+				  &kdatap)) {
+	krb5_db_free_principal(context, &server_entry, number_of_entries);
+	(void) krb5_finish_key(context, &master_encblock);
+	memset((char *)&master_encblock, 0, sizeof(master_encblock));
+	(void) krb5_db_fini(context);
+	return(retval);
+    }
     if (retval = krb5_dbekd_decrypt_key_data(context,&master_encblock,
-				      &server_entry.key_data[0],&tgs_key,
+				      kdatap,&tgs_key,
 				      &salt)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	(void) krb5_finish_key(context, &master_encblock);
@@ -368,7 +379,7 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	return(retval);
     }
 
-    tgs_kvno = server_entry.key_data[0].key_data_kvno;
+    tgs_kvno = kdatap->key_data_kvno;
     krb5_db_free_principal(context, &server_entry, number_of_entries);
     return(0);
 }

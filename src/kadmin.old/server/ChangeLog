@@ -1,4 +1,18 @@
 
+Thu Aug 10 14:38:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_funcs.c - Rework adm_modify_kdb() to use kdb5's change-password
+		interfaces.  Gut callers of adm_modify_kdb() because most of
+		the work is done in kdb_cpw.c.  Add adm_find_keytype and adm_
+		update_tl_attrs.
+	* adm_extern.h - Add prototypes for adm_find_keytype() and adm_update_
+		tl_attrs().
+	* adm_adm_func, adm_fmt_inq.c - Use adm_find_keytype() to locate the
+		key_data entry for a particular key/salt type instead of
+		assuming that it's always in the first slot.  Actually handle
+		mod_name and mod_date now.
+	* adm_process, adm_server.c - Find the latest DES key for use instead
+		of assuming that it's in the first slot.
+
 Thu Aug 3 11:46:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_{adm_func,fmt_inq,funcs,process,server}.c - In order to get
 		things to compile, replace "salt_type" with "key_data[0].

@@ -158,6 +158,18 @@ krb5_error_code adm_enter_rnd_pwd_key
 		   int,
 		   krb5_db_entry *));
 
+krb5_error_code adm_find_keytype
+	PROTOTYPE((krb5_db_entry *,
+		   krb5_keytype,
+		   krb5_int32,
+		   krb5_key_data **));
+
+krb5_error_code adm_update_tl_attrs
+	PROTOTYPE((krb5_context,
+		   krb5_db_entry *,
+		   krb5_principal,
+		   krb5_boolean));
+
 krb5_error_code adm5_kadmin
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context,

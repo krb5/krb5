@@ -49,6 +49,7 @@ cpw_keyproc(context, keyblock)
     krb5_boolean more;
     int nprincs = 1;
     krb5_keysalt salt;
+    krb5_key_data *kdatap;
 
     if (*keyblock == NULL) {
 	if (retval = krb5_parse_name(context, 
@@ -78,10 +79,21 @@ cpw_keyproc(context, keyblock)
 	    return(ENOMEM);
 	}
 
+	/* Find our key */
+	if (retval = adm_find_keytype(&cpw_entry,
+				      KEYTYPE_DES,
+				      -1,
+				      &kdatap)) {
+	    krb5_db_free_principal(context, &cpw_entry, nprincs);
+	    syslog(LOG_ERR, "cpw_keyproc: cannot find server DES key");
+	    close(client_server_info.client_socket);
+	    return(retval);
+	}
+
 	/* Extract the real kadmin/<realm> keyblock */
 	if (retval = krb5_dbekd_decrypt_key_data(context, 
 				&master_encblock,
-				&cpw_entry.key_data[0],
+				kdatap,
 				realkey,
 				&salt)) {
 	    krb5_db_free_principal(context, &cpw_entry, nprincs);
@@ -132,6 +144,7 @@ process_client(context, prog)
     krb5_keysalt salt;
     
     krb5_timestamp adm_time;
+    krb5_key_data *kdatap;
 
     outbuf.data = retbuf;
     if (setsockopt(client_server_info.client_socket, 
@@ -192,10 +205,22 @@ process_client(context, prog)
 	exit(0);
     }
 
+    /* Find our key */
+    if (retval = adm_find_keytype(&server_entry,
+				  KEYTYPE_DES,
+				  -1,
+				  &kdatap)) {
+	krb5_db_free_principal(context, &server_entry, number_of_entries);
+	syslog(LOG_ERR, 
+	       "kadmind error: cannot find server DES key");
+	close(client_server_info.client_socket);
+	exit(0);
+    }
+
     /* Extract the real kadmin/<realm> keyblock */
     if (retval = krb5_dbekd_decrypt_key_data(context, 
 				      &master_encblock,
-				      &server_entry.key_data[0],
+				      kdatap,
 				      cpw_keyblock,
 				      &salt)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);

@@ -56,6 +56,7 @@ adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     krb5_replay_data replaydata;
     krb5_data outbuf;
     int retval;
+    krb5_key_data *key_data;
 #if defined(MACH_PASS) || defined(SANDIA)
     char *tmp_phrase;
     char *tmp_passwd;
@@ -107,7 +108,15 @@ adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     outbuf.length = 3;
     
     if (oper_type == CHGOPER || oper_type == CH4OPER) {
-	outbuf.data[3] = entry.key_data[0].key_data_type[1];
+	key_data = (krb5_key_data *) NULL;
+	if (adm_find_keytype(&entry,
+			     KEYTYPE_DES,
+			     ((oper_type == CHGOPER) ? 
+			      KRB5_KDB_SALTTYPE_NORMAL : KRB5_KDB_SALTTYPE_V4),
+			     &key_data)) {
+	    com_err("adm_build_key", ENOENT, "finding key data");
+	}
+	outbuf.data[3] = key_data->key_data_type[1];
 	outbuf.length = 4;
     }
     
@@ -221,8 +230,6 @@ adm_change_pwd(context, auth_context, prog, customer_name, salttype)
     }
     
     retval = krb5_unparse_name(context, newprinc, &composite_name);
-
-    entry.key_data[0].key_data_type[1] = (krb5_int16) salttype;
 
     if (retval = adm_enter_pwd_key(context, "adm_change_pwd",              
 				   composite_name,
@@ -580,10 +587,36 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 	    entry.fail_auth_count = atoi(tempstr);
 	}
 #endif
+
 	if (msg_data.data[3] == KMODVNO) {
+	    krb5_key_data	*kdata;
+
 	    (void) memcpy(tempstr, (char *) msg_data.data + 4,
 			  msg_data.length - 4);
-	    entry.key_data[0].key_data_kvno = atoi(tempstr);
+	    /*
+	     * We could loop through all the supported key/salt types, but
+	     * we don't have that technology yet.
+	     */
+	    if (!adm_find_keytype(&entry,
+				  KEYTYPE_DES,
+				  KRB5_KDB_SALTTYPE_NORMAL,
+				  &kdata))
+		kdata->key_data_kvno = atoi(tempstr);
+	    if (!adm_find_keytype(&entry,
+				  KEYTYPE_DES,
+				  KRB5_KDB_SALTTYPE_V4,
+				  &kdata))
+		kdata->key_data_kvno = atoi(tempstr);
+	    if (!adm_find_keytype(&entry,
+				  KEYTYPE_DES,
+				  KRB5_KDB_SALTTYPE_NOREALM,
+				  &kdata))
+		kdata->key_data_kvno = atoi(tempstr);
+	    if (!adm_find_keytype(&entry,
+				  KEYTYPE_DES,
+				  KRB5_KDB_SALTTYPE_ONLYREALM,
+				  &kdata))
+		kdata->key_data_kvno = atoi(tempstr);
 	}
 	
 	if (msg_data.data[3] == KMODATTR) {
@@ -636,15 +669,16 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
         }
 	
 	free(msg_data.data);
-#ifdef	notdef
-	entry.mod_name = client_server_info.client;
-	if (retval = krb5_timeofday(context, &entry.mod_date)) {
-	    com_err("adm_mod_old_key", retval, "while fetching date");
+	if (adm_update_tl_attrs(context,
+				&entry,
+				client_server_info.client,
+				0)) {
+	    com_err("adm_mod_old_key", retval,
+		    "while updating modification attributes");
 	    krb5_free_principal(context, newprinc);
 	    krb5_db_free_principal(context, &entry, nprincs);
 	    return(5);		/* Protocol Failure */
 	}
-#endif	/* notdef */
 	
 	retval = krb5_db_put_principal(context, &entry, &one);
 	if (retval) {
