@@ -36,6 +36,7 @@ OBJS=	addr_comp.o	\
 	rd_error.o	\
 	rd_priv.o	\
 	rd_req.o	\
+	rd_req_sim.o	\
 	rd_req_dec.o	\
 	rd_safe.o	\
 	send_tgs.o	\
@@ -79,6 +80,7 @@ SRCS=	addr_comp.c	\
 	rd_error.c	\
 	rd_priv.c	\
 	rd_req.c	\
+	rd_req_sim.c	\
 	rd_req_dec.c	\
 	rd_safe.c	\
 	send_tgs.c	\
