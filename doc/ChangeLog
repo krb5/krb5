@@ -1,3 +1,8 @@
+Fri Oct 20 14:06:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* install.texi (Shared Library Support): Document shared library
+		specifics.
+
 Tue Oct 17 19:23:50 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* .Sanitize (Things-to-keep): Add Makefile
