@@ -1,3 +1,7 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* cc_stdio.c, cc_file.c: Unsigned/signed int cleanup.
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* ser_cc.c (krb5_ccache_externalize): Use krb5_cc_get_name instead

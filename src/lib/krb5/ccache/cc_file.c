@@ -123,7 +123,7 @@ krb5_error_code krb5_fcc_read
         KRB5_PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_pointer buf,
-		   int len));
+		   unsigned int len));
 krb5_error_code krb5_fcc_read_principal 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
 krb5_error_code krb5_fcc_read_keyblock 
@@ -176,7 +176,7 @@ krb5_error_code krb5_change_cache
    KRB5_PROTOTYPE((void));
 
 krb5_error_code krb5_fcc_write 
-        KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_pointer buf , int len ));
+        KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_pointer buf , unsigned int len ));
 krb5_error_code krb5_fcc_store_principal 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal princ ));
 krb5_error_code krb5_fcc_store_keyblock 
@@ -185,6 +185,8 @@ krb5_error_code krb5_fcc_store_data
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_data *data ));
 krb5_error_code krb5_fcc_store_int32 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_int32 i ));
+krb5_error_code krb5_fcc_store_ui_4
+        KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_ui_4 i ));
 krb5_error_code krb5_fcc_store_ui_2 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_int32 i ));
 krb5_error_code krb5_fcc_store_octet 
@@ -303,12 +305,11 @@ krb5_fcc_read(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
    krb5_pointer buf;
-   int len;
+   const unsigned int len;
 {
      int ret;
-     unsigned ulen = len;
 
-     ret = read(((krb5_fcc_data *) id->data)->fd, (char *) buf, ulen);
+     ret = read(((krb5_fcc_data *) id->data)->fd, (char *) buf, len);
      if (ret == -1)
 	  return krb5_fcc_interpret(context, errno);
      else if (ret != len)
@@ -529,7 +530,7 @@ krb5_fcc_read_data(context, id, data)
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
-     kret = krb5_fcc_read(context, id, data->data, data->length);
+     kret = krb5_fcc_read(context, id, data->data, (unsigned) data->length);
      CHECK(kret);
      
      data->data[data->length] = 0; /* Null terminate, just in case.... */
@@ -570,7 +571,7 @@ krb5_fcc_read_addr(context, id, addr)
      if (addr->length == 0)
 	     return KRB5_OK;
 
-     addr->contents = (krb5_octet *) malloc((unsigned) addr->length);
+     addr->contents = (krb5_octet *) malloc(addr->length);
      if (addr->contents == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -753,7 +754,7 @@ krb5_fcc_read_authdatum(context, id, a)
     if (a->length == 0 )
 	    return KRB5_OK;
 
-    a->contents = (krb5_octet *) malloc((unsigned) a->length);
+    a->contents = (krb5_octet *) malloc(a->length);
     if (a->contents == NULL)
 	return KRB5_CC_NOMEM;
 
@@ -787,12 +788,10 @@ krb5_fcc_write(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
    krb5_pointer buf;
-   int len;
+   unsigned int len;
 {
      int ret;
-     unsigned int ulen = len;
-
-     ret = write(((krb5_fcc_data *)id->data)->fd, (char *) buf, ulen);
+     ret = write(((krb5_fcc_data *)id->data)->fd, (char *) buf, len);
      if (ret < 0)
 	  return krb5_fcc_interpret(context, errno);
      if (ret != len)
@@ -895,7 +894,7 @@ krb5_fcc_store_keyblock(context, id, keyblock)
 	 ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
 	 CHECK(ret);
      }
-     ret = krb5_fcc_store_int32(context, id, keyblock->length);
+     ret = krb5_fcc_store_ui_4(context, id, keyblock->length);
      CHECK(ret);
      return krb5_fcc_write(context, id, (char *) keyblock->contents, keyblock->length);
 }
@@ -910,7 +909,7 @@ krb5_fcc_store_addr(context, id, addr)
 
      ret = krb5_fcc_store_ui_2(context, id, addr->addrtype);
      CHECK(ret);
-     ret = krb5_fcc_store_int32(context, id, addr->length);
+     ret = krb5_fcc_store_ui_4(context, id, addr->length);
      CHECK(ret);
      return krb5_fcc_write(context, id, (char *) addr->contents, addr->length);
 }
@@ -924,7 +923,7 @@ krb5_fcc_store_data(context, id, data)
 {
      krb5_error_code ret;
 
-     ret = krb5_fcc_store_int32(context, id, data->length);
+     ret = krb5_fcc_store_ui_4(context, id, data->length);
      CHECK(ret);
      return krb5_fcc_write(context, id, data->data, data->length);
 }
@@ -934,6 +933,31 @@ krb5_fcc_store_int32(context, id, i)
    krb5_context context;
    krb5_ccache id;
    krb5_int32 i;
+{
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
+    unsigned char buf[4];
+
+    if ((data->version == KRB5_FCC_FVNO_1) ||
+	(data->version == KRB5_FCC_FVNO_2)) 
+	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
+    else {
+	buf[3] = (unsigned char) (i & 0xFF);
+	i >>= 8;
+	buf[2] = (unsigned char) (i & 0xFF);
+	i >>= 8;
+	buf[1] = (unsigned char) (i & 0xFF);
+	i >>= 8;
+	buf[0] = (unsigned char) (i & 0xFF);
+	
+	return krb5_fcc_write(context, id, buf, 4);
+    }
+}
+
+krb5_error_code
+krb5_fcc_store_ui_4(context, id, i)
+   krb5_context context;
+   krb5_ccache id;
+   krb5_ui_4 i;
 {
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     unsigned char buf[4];
@@ -1047,7 +1071,7 @@ krb5_fcc_store_authdatum (context, id, a)
     krb5_error_code ret;
     ret = krb5_fcc_store_ui_2(context, id, a->ad_type);
     CHECK(ret);
-    ret = krb5_fcc_store_int32(context, id, a->length);
+    ret = krb5_fcc_store_ui_4(context, id, a->length);
     CHECK(ret);
     return krb5_fcc_write(context, id, (krb5_pointer) a->contents, a->length);
 }
