@@ -1,6 +1,29 @@
-#### insert configury here
-# flags
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+
+ARCHIVE = @ARCHIVE@
+RANLIB = @RANLIB@
+RM = rm -f
+MV = mv
+
+AWK = @AWK@
+INSTALLLIB=cp
+INSTALLFILE=cp
+CHMOD=chmod
+
+all::
+
 BUILDTOP=../..
+TOP=$(BUILDTOP)
 
 # hard coded srcdir/.. is so that ss/ss.h works
 
@@ -54,16 +77,25 @@ FILES=	$(SRCS) $(MKCMDSFILES) $(HFILES) \
 # stuff to build
 #
 
-all::	mk_cmds libss.a # libss_p.a lint
+all::	mk_cmds libss.a includes # libss_p.a lint
 
 dist:	archives
 
-install:: all
+install:: libss.a
 	$(INSTALLLIB) libss.a ${DESTDIR}$(LIBDIR)/libss.a
 	$(RANLIB) ${DESTDIR}$(LIBDIR)/libss.a
 	@rm -rf ${DESTDIR}$(INCLDIR)/ss
 	@mkdir ${DESTDIR}$(INCLDIR)/ss
 
+
+includes:: mk_cmds ss_err.h
+	-$(RM) -rf $(TOP)/include/ss
+	mkdir $(TOP)/include/ss
+	cp $(srcdir)/ss.h $(TOP)/include/ss
+	cp $(srcdir)/mit-sipb-copyright.h $(TOP)/include/ss
+	cp $(srcdir)/copyright.h $(TOP)/include/ss
+	cp $(srcdir)/ss_err.h $(TOP)/include/ss
+	cp $(srcdir)/ss_internal.h $(TOP)/include/ss
 
 
 install:: $(HFILES) copyright.h
@@ -121,6 +153,8 @@ all:: mk_cmds
 
 mk_cmds: $(MKCMDSOBJS)
 	$(CC) $(CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
+
+mk_cmds.o:	ss_err.h
 
 install::
 	$(INSTALLPROG) mk_cmds ${DESTDIR}$(PROGDIR)/mk_cmds

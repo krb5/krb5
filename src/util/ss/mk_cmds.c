@@ -25,7 +25,9 @@ extern char *last_token;
 extern FILE *output_file;
 
 extern FILE *yyin, *yyout;
+#ifndef NO_YYLINENO
 extern int yylineno;
+#endif
 
 int main(argc, argv)
     int argc;
