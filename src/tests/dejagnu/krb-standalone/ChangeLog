@@ -1,0 +1,5 @@
+Fri May 05 09:21:21 1995  Chris Provenzano (proven@mit.edu)
+
+	* rcp.exp (rcp_test()): Pass -c and -C args to encrypted rcp.
+		These are necessary for the test realm because krshd
+		nukes all environement variables before execing rcp.
