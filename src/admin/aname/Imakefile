@@ -7,7 +7,7 @@
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
 # 
-DEPLIBS = $(DEPKLIBS)
-LOCAL_LIBRARIES = $(KLIB) $(COMERRLIB) $(DBMLIB)
+DEPLIBS = $(OSDEPLIB)
+LOCAL_LIBRARIES = $(KLIBLOC) -l$(OSLIB) $(COMERRLIB) $(DBMLIB)
 
 SimpleProgramTarget(kdb5_anadd)
