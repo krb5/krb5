@@ -1,3 +1,8 @@
+Fri Mar 17 19:46:07 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Zap duplicate defn.
+	(all-mac, clean-mac):  Add.
+
 Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: cleaned up for the PC

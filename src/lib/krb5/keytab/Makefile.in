@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -24,7 +23,7 @@ SRCS=	\
 all:: $(OBJS) all-$(WHAT)
 
 all-unix::
-
+all-mac::
 all-windows::
 	cd file
 	@echo Making in keytab\file
@@ -34,7 +33,7 @@ all-windows::
 clean:: clean-$(WHAT)
 
 clean-unix::
-
+clean-mac::
 clean-windows::
 	cd file
 	@echo Making clean in keytab\file
