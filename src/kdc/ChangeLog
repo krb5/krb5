@@ -1,3 +1,7 @@
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* network.c (setup_port): Change sin to sin4 to prevent shadowing.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Test for daemon prototype.

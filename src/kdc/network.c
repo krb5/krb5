@@ -444,30 +444,30 @@ setup_port(void *P_data, struct sockaddr *addr)
     switch (addr->sa_family) {
     case AF_INET:
     {
-	struct sockaddr_in *sin = (struct sockaddr_in *) addr, psin;
+	struct sockaddr_in *sin4 = (struct sockaddr_in *) addr, psin;
 	for (i = 0; i < n_udp_ports; i++) {
 	    sock = socket (PF_INET, SOCK_DGRAM, 0);
 	    if (sock == -1) {
 		data->retval = errno;
 		com_err(data->prog, data->retval,
 			"Cannot create server socket for port %d address %s",
-			udp_port_nums[i], inet_ntoa (sin->sin_addr));
+			udp_port_nums[i], inet_ntoa (sin4->sin_addr));
 		return 1;
 	    }
-	    psin = *sin;
+	    psin = *sin4;
 	    psin.sin_port = htons (udp_port_nums[i]);
 	    if (bind (sock, (struct sockaddr *)&psin, sizeof (psin)) == -1) {
 		data->retval = errno;
 		com_err(data->prog, data->retval,
 			"Cannot bind server socket to port %d address %s",
-			udp_port_nums[i], inet_ntoa (sin->sin_addr));
+			udp_port_nums[i], inet_ntoa (sin4->sin_addr));
 		return 1;
 	    }
 	    FD_SET (sock, &select_fds);
 	    if (sock > select_nfds)
 		select_nfds = sock;
 	    krb5_klog_syslog (LOG_INFO, "listening on fd %d: %s port %d", sock,
-			     inet_ntoa (sin->sin_addr), udp_port_nums[i]);
+			     inet_ntoa (sin4->sin_addr), udp_port_nums[i]);
 	    if (add_fd (data, sock))
 		return 1;
 	}
