@@ -1,3 +1,10 @@
+2000-10-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* post.in (Makefile): When running autoconf, use AUTOCONFFLAGS
+	instead of always specificying the trees macrodir.
+
+	* pre.in (AUTOCONFFLAGS): Add as flags to pass to autoconf.
+
 2000-08-30  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Fix some inconsistent spelling in the previous changes
