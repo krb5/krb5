@@ -141,6 +141,8 @@ extern int krb5_max_cksum;		/* max entry in array */
 
 #define valid_cksumtype(cktype)     ((cktype <= krb5_max_cksum) && (cktype > 0) && krb5_cksumarray[cktype])
 
+/* set up *eblockp to use etype */
+#define krb5_use_cstype(eblockp, etype) (eblockp)->crypto_entry = krb5_csarray[(etype)]->system
 
 #define krb5_encrypt(inptr, outptr, size, eblock, ivec) (*(eblock)->crypto_entry->encrypt_func)(inptr, outptr, size, eblock, ivec)
 #define krb5_decrypt(inptr, outptr, size, eblock, ivec) (*(eblock)->crypto_entry->decrypt_func)(inptr, outptr, size, eblock, ivec)
