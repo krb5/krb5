@@ -47,6 +47,8 @@ static const char *out_adm_not_auth = "Not authorized for this operation.";
 static const char *out_adm_bad_option = "Bad option supplied.";
 static const char *out_adm_value_req = "Value required for option.";
 static const char *out_adm_sys_error = "Unspecified system error.";
+static const char *out_adm_key_exists = "Key type already exists.";
+static const char *out_adm_key_missing = "Key type does not exist.";
 static const char *out_adm_bad_args = "Bad argument list format for %s command.";
 static const char *out_adm_bad_cmd = "Command %s not supported.";
 static const char *out_adm_no_cmd = "No command in message.";
@@ -190,6 +192,12 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
 	break;
     case KRB5_ADM_SYSTEM_ERROR:
 	ermsg = out_adm_sys_error;
+	break;
+    case KRB5_ADM_KEY_ALREADY_EXISTS:
+	ermsg = out_adm_key_exists;
+	break;
+    case KRB5_ADM_KEY_DOES_NOT_EXIST:
+	ermsg = out_adm_key_missing;
 	break;
     default:
 	ermsg = out_adm_no_err; break;
