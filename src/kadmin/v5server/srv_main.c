@@ -204,19 +204,13 @@ main(argc, argv)
 	usage(argv[0]);
 	return(1);
     }
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
-    krb5_klog_init(kcontext, "admin_server", programname, 1);
-	error = key_init(kcontext, debug_level, enc_type, key_type,
-			 master_key_name, manual_entry, db_file, db_realm,
-			 keytab_name);
 
 #ifndef	DEBUG
     /*
      * If we're not debugging and we didn't specify -n, then detach from our
      * controlling terminal and exit.
      */
-    if (!nofork && daemon(0, 0)) {
+    if (!nofork && daemon(0, (manual_entry != 0))) {
 	fprintf(stderr, daemon_err, argv[0]);
 	perror(argv[0]);
 	return(2);
@@ -235,6 +229,9 @@ main(argc, argv)
 #else	/* DEBUG */
     programname = argv[0];
 #endif	/* DEBUG */
+    krb5_init_context(&kcontext);
+    krb5_init_ets(kcontext);
+    krb5_klog_init(kcontext, "admin_server", programname, 1);
 
     if ((signal_number =
 #if	POSIX_SETJMP
@@ -274,6 +271,9 @@ main(argc, argv)
 	/*
 	 * Initialize our modules.
 	 */
+	error = key_init(kcontext, debug_level, enc_type, key_type,
+			 master_key_name, manual_entry, db_file, db_realm,
+			 keytab_name);
 	if (!error) {
 	    error = acl_init(kcontext, debug_level, acl_file);
 	    if (!error) {
