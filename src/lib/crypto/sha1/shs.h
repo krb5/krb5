@@ -31,21 +31,17 @@ typedef struct {
                } SHS_INFO;
 
 /* Message digest functions (shs.c) */
-void shsInit
-	KRB5_PROTOTYPE((SHS_INFO *shsInfo));
-void shsUpdate
-	KRB5_PROTOTYPE((SHS_INFO *shsInfo, BYTE *buffer, int count));
-void shsFinal
-	KRB5_PROTOTYPE((SHS_INFO *shsInfo));
+void shsInit(SHS_INFO *shsInfo);
+void shsUpdate(SHS_INFO *shsInfo, BYTE *buffer, int count);
+void shsFinal(SHS_INFO *shsInfo);
 
 
 /* Keyed Message digest functions (hmac_sha.c) */
-krb5_error_code hmac_sha
-	KRB5_PROTOTYPE((krb5_octet *text,
+krb5_error_code hmac_sha(krb5_octet *text,
 			int text_len,
 			krb5_octet *key,
 			int key_len,
-			krb5_octet *digest));
+			krb5_octet *digest);
 
 
 #define NIST_SHA_CKSUM_LENGTH		SHS_DIGESTSIZE

@@ -1,3 +1,7 @@
+2001-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* shs.h: Stop using KRB5_PROTOTYPE.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* shs.c (ROTL): Change (a&b|c) construct to make meaning clear,
