@@ -443,8 +443,10 @@ char    term[64] = "TERM=network";
 char	path_rest[] = RPATH;
 
 char	remote_addr[64];	/* = "KRB5REMOTEADDR=" */
+char	remote_port[64];	/* = "KRB5REMOTEPORT=" */
 char	local_addr[64];		/* = "KRB5LOCALADDR=" */
-#define ADDRPAD 0,0		/* remoteaddr, localaddr */
+char	local_port[64];		/* = "KRB5LOCALPORT=" */
+#define ADDRPAD 0,0,0,0
 #define KRBPAD 0		/* KRB5CCNAME, optional */
 
 /* The following include extra space for TZ and MAXENV pointers... */
@@ -1361,14 +1363,22 @@ if(port)
 
     {
       int i;
-      /* these two are covered by ADDRPAD */
+      /* these four are covered by ADDRPAD */
       sprintf(local_addr,  "KRB5LOCALADDR=%s", inet_ntoa(localaddr.sin_addr));
       for (i = 0; envinit[i]; i++);
       envinit[i] =local_addr;
 
+      sprintf(local_port,  "KRB5LOCALPORT=%d", ntohs(localaddr.sin_port));
+      for (; envinit[i]; i++);
+      envinit[i] =local_port;
+
       sprintf(remote_addr, "KRB5REMOTEADDR=%s", inet_ntoa(fromp->sin_addr));
       for (; envinit[i]; i++);
       envinit[i] =remote_addr;
+
+      sprintf(remote_port, "KRB5REMOTEPORT=%d", ntohs(fromp->sin_port));
+      for (; envinit[i]; i++);
+      envinit[i] =remote_port;
     }
 
     /* If we do anything else, make sure there is space in the array. */
