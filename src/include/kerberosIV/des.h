@@ -68,8 +68,27 @@
 
 
 typedef unsigned char des_cblock[8];	/* crypto-block size */
+
 /* Key schedule */
-typedef struct des_ks_struct { des_cblock _; } des_key_schedule[16];
+/* Ick.  We need this in here unfortunately... */
+#ifndef KRB_INT32
+#ifdef SIZEOF_INT
+#if SIZEOF_INT >= 4
+#define KRB_INT32 int
+#else
+#define KRB_INT32 long
+#endif
+#else /* !defined(SIZEOF_INT) */
+#include <limits.h>
+#if (UINT_MAX >= 0xffffffff)
+#define KRB_INT32 int
+#else
+#define KRB_INT32 long
+#endif
+#endif /* !defined(SIZEOF_INT) */
+#endif /* !defined(KRB_INT32) */
+
+typedef struct des_ks_struct {  KRB_INT32 _[2]; } des_key_schedule[16];
 
 #define DES_KEY_SZ 	(sizeof(des_cblock))
 #define DES_ENCRYPT	1
