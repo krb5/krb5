@@ -406,3 +406,16 @@ AC_CHECKING(for yylineno declaration)
   rm -f conftest.out
 ])dnl
 dnl
+dnl fix AC_PROG_LEX
+dnl
+undefine([AC_PROG_LEX])dnl
+define(AC_PROG_LEX,
+[AC_PROVIDE([$0])dnl
+LEX="lex"
+if test -z "$LEXLIB"
+then
+   AC_HAVE_LIBRARY(l, LEXLIB="-ll")
+fi
+AC_VERBOSE(setting LEXLIB to $LEXLIB)
+AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
+dnl
