@@ -1,5 +1,8 @@
 Mon Jan 22 07:55:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* aclocal.m4 (KRB5_CHECK_PROTOS): Move prototype checking code
+		from include/krb5. 
+
 	* configure.in: Add in WITH_ANAME_DB and WITH_KDB_DB so that top
 		level configure --help lists options.
 

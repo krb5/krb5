@@ -1071,3 +1071,21 @@ $1
 :
 fi
 ])dnl
+dnl
+dnl Check for prototype support - used by application not including k5-int.h
+dnl
+define(KRB5_CHECK_PROTOS,[
+AC_MSG_CHECKING([prototype support])
+AC_CACHE_VAL(krb5_cv_has_prototypes,
+[AC_TRY_COMPILE(
+[int x(double y, int z);], [],
+krb5_cv_has_prototypes=yes, krb5_cv_has_prototypes=no)])
+AC_MSG_RESULT($krb5_cv_has_prototypes)
+if test $krb5_cv_has_prototypes = no; then
+AC_DEFINE(KRB5_NO_PROTOTYPES)
+else
+AC_DEFINE(KRB5_PROVIDE_PROTOTYPES)
+fi
+dnl *never* set NARROW_PROTOTYPES
+])dnl
+dnl
