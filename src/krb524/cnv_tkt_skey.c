@@ -34,11 +34,11 @@
  * Convert a v5 ticket for server to a v4 ticket, using service key
  * skey for both.
  */
-int krb524_convert_tkt_skey(context, v5tkt, v4tkt, skey)
+int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
      krb5_context context;
      krb5_ticket *v5tkt;
      KTEXT_ST *v4tkt;
-     krb5_keyblock *skey;
+     krb5_keyblock *v5_skey, *v4_skey;
 {
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
@@ -46,7 +46,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, skey)
      int ret, lifetime;
 
      v5tkt->enc_part2 = NULL;
-     if ((ret = krb5_decrypt_tkt_part(context, skey, v5tkt))) {
+     if ((ret = krb5_decrypt_tkt_part(context, v5_skey, v5tkt))) {
 	  krb5_free_ticket(context, v5tkt);
 	  return ret;
      }
@@ -110,7 +110,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, skey)
 			     v5etkt->times.starttime,
 			     sname,
 			     sinst,
-			     skey->contents);
+			     v4_skey->contents);
 
      krb5_free_enc_tkt_part(context, v5etkt);
      v5tkt->enc_part2 = NULL;

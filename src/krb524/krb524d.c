@@ -92,7 +92,8 @@ int main(argc, argv)
      int ret, s;
      fd_set rfds;
      krb5_context context;
-     
+     krb5_realm_params *rparams;
+     char *realm = 0;
      krb5_init_context(&context);
      krb524_init_ets(context);
 
@@ -116,6 +117,11 @@ int main(argc, argv)
      signal(SIGINT, request_exit);
      signal(SIGHUP, request_exit);
      signal(SIGTERM, request_exit);
+     if (!realm&&(ret = krb5_get_default_realm(context, &realm)))
+       {
+com_err(whoami, ret, "Getting default realm");
+exit(1);
+}
 
      if (use_keytab)
 	  init_keytab(context);
@@ -212,57 +218,94 @@ void init_master(context)
      krb5_context context;
 {
      int ret;
-     char *realm;
-     
-     if ((ret = krb5_get_default_realm(context, &realm))) {
-	  com_err(whoami, ret, "getting default realm");
-	  cleanup_and_exit(1, context);
-     }
-     if ((ret = krb5_db_setup_mkey_name(context, NULL, realm, (char **) 0,
-				       &master_princ))) {
-          free(realm);
-	  com_err(whoami, ret, "while setting up master key name");
-	  cleanup_and_exit(1, context);
-     } else {
-          free(realm);
-     }
+krb5_realm_params *rparams;
+     char *realm = 0;
+     char *key_name =0, *dbname = 0;
+     char *stash_file = 0;
 
      /* Use the stashed enctype */
      master_keyblock.enctype = ENCTYPE_UNKNOWN;
 
-     if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
-				  FALSE, /* non-manual type-in */
-				  FALSE, /* irrelevant, given prev. arg */
-				  (char *) NULL,
-				  0, &master_keyblock))) {
-	  com_err(whoami, ret, "while fetching master key");
+     if (!realm&&(ret = krb5_get_default_realm(context, &realm))) {
+	  com_err(whoami, ret, "getting default realm");
 	  cleanup_and_exit(1, context);
      }
+     if ((ret = krb5_read_realm_params(context,
+					realm,
+					(char *) NULL, (char *) NULL,
+					&rparams))) {
+       com_err(whoami, ret, "Reading KDC profile");
+krb5_xfree(realm);
+       cleanup_and_exit(1,context);
+     }
+     
+	/* Get the value for the database */
+	if (rparams->realm_dbname && !dbname)
+	    dbname = strdup(rparams->realm_dbname);
 
-     if ((ret = krb5_db_init(context))) {
-	  com_err(whoami, ret, "while initializing master database");
-	  cleanup_and_exit(1, context);
+	/* Get the value for the master key name */
+	if (rparams->realm_mkey_name && !key_name)
+	  key_name = strdup(rparams->realm_mkey_name);
+
+	/* Get the value for the master key type */
+	if (rparams->realm_enctype_valid  ) 
+	  master_keyblock.enctype = rparams->realm_enctype;
+     
+     /* Get the value for the stashfile */
+     if (rparams->realm_stash_file)
+       stash_file = strdup(rparams->realm_stash_file);
+     
+     if ((ret = krb5_db_set_name(context, dbname))) {
+						      com_err(whoami, ret, "Setting database name");
+						      cleanup_and_exit(1,context);
+						    }
+     
+     if ((ret = krb5_db_setup_mkey_name(context, key_name, realm, (char **) 0,
+					&master_princ))) {
+       free(realm);
+       com_err(whoami, ret, "while setting up master key name");
+       cleanup_and_exit(1, context);
+     } else {
+       free(realm);
      }
+     
+     
+     if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
+				   FALSE, /* non-manual type-in */
+				   FALSE, /* irrelevant, given prev. arg */
+				   stash_file,
+				   0, &master_keyblock))) {
+       com_err(whoami, ret, "while fetching master key");
+       cleanup_and_exit(1, context);
+     }
+     
+     if ((ret = krb5_db_init(context))) {
+					  com_err(whoami, ret, "while initializing master database");
+					  cleanup_and_exit(1, context);
+					}
      if ((ret = krb5_process_key(context, &master_encblock, 
 				 &master_keyblock))) {
-	  krb5_db_fini(context);
-	  com_err(whoami, ret, "while processing master key");
-	  cleanup_and_exit(1, context);
+       krb5_db_fini(context);
+       com_err(whoami, ret, "while processing master key");
+       cleanup_and_exit(1, context);
      }
-}
+   }
 
 krb5_error_code do_connection(s, context)
      int s;
      krb5_context context;
 {
      struct sockaddr saddr;
-     krb5_ticket *v5tkt;
+     krb5_ticket *v5tkt = 0;
      KTEXT_ST v4tkt;
-     krb5_keyblock service_key;
+     krb5_keyblock v5_service_key, v4_service_key;
      krb5_data msgdata, tktdata;
      char msgbuf[MSGSIZE], tktbuf[TKT_BUFSIZ], *p;
      int n, ret, saddrlen;
-     
+
+     /* Clear out keyblock contents so we don't accidentally free the stack.*/
+     v5_service_key.contents = v4_service_key.contents = 0;
+
      msgdata.data = msgbuf;
      msgdata.length = MSGSIZE;
 
@@ -297,18 +340,25 @@ krb5_error_code do_connection(s, context)
      if (debug)
 	  printf("V5 ticket decoded\n");
      
-     /* XXX ENCTYPE_DES_CBC_MD5 shouldn't be hardcoded here.  Should be
-        derived from the ticket. */
-     if ((ret = lookup_service_key(context, v5tkt->server, ENCTYPE_DES_CBC_MD5, 
-				  &service_key)))
+     if ((ret = lookup_service_key(context, v5tkt->server,
+				   v5tkt->enc_part.enctype, 
+				   &v5_service_key)))
 	  goto error;
+
+     if ((ret = lookup_service_key(context, v5tkt->server,
+				   ENCTYPE_DES_CBC_CRC,
+				   &v4_service_key)))
+	  goto error;
+
      if (debug)
 	  printf("service key retrieved\n");
 
-     ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &service_key);
+     ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
+				   &v4_service_key);
      if (ret)
 	  goto error;
-     krb5_free_keyblock_contents(context, &service_key);
+     krb5_free_keyblock_contents(context, &v5_service_key);
+     krb5_free_keyblock_contents(context, &v4_service_key);
      krb5_free_ticket(context, v5tkt);
      if (debug)
 	  printf("credentials converted\n");
@@ -351,6 +401,14 @@ write_msg:
 	       ret = errno;
      if (debug)
 	  printf("reply written\n");
+/* If we have keys to clean up, do so.*/
+     if (v5_service_key.contents)
+       krb5_free_keyblock_contents(context, &v5_service_key);
+     if (v4_service_key.contents)
+       krb5_free_keyblock_contents(context, &v4_service_key);
+     if (v5tkt)
+       krb5_free_ticket(context, v5tkt);
+     
 	       
      return ret;
 }
@@ -372,24 +430,25 @@ krb5_error_code lookup_service_key(context, p, ktype, key)
      } else if (use_master) {
 	  if ((ret = krb5_db_init(context)))
 	       return ret;
-	  return kdc_get_server_key(context, p, key, NULL);
+	  return kdc_get_server_key(context, p, key, NULL, ktype);
      }
      return 0;
 }
 
 /* taken from kdc/kdc_util.c, and modified somewhat */
-krb5_error_code kdc_get_server_key(context, service, key, kvno)
+krb5_error_code kdc_get_server_key(context, service, key, kvno, ktype)
     krb5_context context;
     krb5_principal service;
     krb5_keyblock *key;
     krb5_kvno *kvno;
+krb5_enctype ktype;
 {
     krb5_error_code ret;
     int nprincs;
     krb5_db_entry server;
     krb5_boolean more;
     int i, vno, ok_key;
-
+    krb5_key_data *pkey;
     nprincs = 1;
     if ((ret = krb5_db_get_principal(context, service, &server, 
 				     &nprincs, &more))) 
@@ -402,19 +461,37 @@ krb5_error_code kdc_get_server_key(context, service, key, kvno)
 	krb5_db_free_principal(context, &server, nprincs);
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
-
-    /* convert server key into a real key (it is encrypted in the database) */
-    for (vno = i = 0; i < server.n_key_data; i++) {
-	if (vno < server.key_data[i].key_data_kvno) {
-	    vno = server.key_data[i].key_data_kvno;
-	    ok_key = i;
-	}
-    }
+/* We use krb5_dbe_find_enctype twice because
+   * in the case of a ENCTYPE_DES_CBC_CRC key, we prefer to find a krb4
+   * salt type over a normal key..  Note this may create a problem if the
+   * server key is passworded and has both a normal and v4 salt.  There is
+   * no good solution to this.*/
+    
+    if (krb5_dbe_find_enctype(context,
+			      &server,
+			      ktype,
+			      (ktype == ENCTYPE_DES_CBC_CRC)?
+			      KRB5_KDB_SALTTYPE_V4:-1,
+			      -1,
+			      &pkey) &&
+	krb5_dbe_find_enctype(context,
+			      &server,
+			      -1,
+			      -1,
+			      -1,
+			      &pkey))
+      {
+	krb5_db_free_principal(context, &server, nprincs);
+	return (KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+      }
+if (kvno)
+    *kvno = pkey->key_data_kvno;
     ret = krb5_dbekd_decrypt_key_data(context, &master_encblock, 
-				       &server.key_data[ok_key], key, NULL);
+				      pkey, key, NULL);
     krb5_db_free_principal(context, &server, nprincs);
-    if (kvno)
-	*kvno = vno;
+
+
+
     return ret;
 }
 

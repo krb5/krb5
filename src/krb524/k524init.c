@@ -108,7 +108,7 @@ int main(argc, argv)
      increds.client = client;
      increds.server = server;
      increds.times.endtime = 0;
-     increds.keyblock.enctype = ENCTYPE_DES_CBC_MD5;
+     increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
      if ((code = krb5_get_credentials(context, 0, cc, &increds, &v5creds))) {
 	  com_err("k524init", code, "getting V5 credentials");
 	  exit(1);

@@ -1,3 +1,30 @@
+Thu Jan 25 02:07:46 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Take both a v5 and v4
+ 	service key.  Use the v5 service key to decrypt the v5 ticket, and
+ 	the v4 service key to encrypt the v4 ticket.
+
+	* krb524d.c (do_connection): Use a separate v5 and v4 service key
+ 	so that if the KDC chooses to encrypt the v5 ticket in something
+ 	besides ENCTYPE_DES_CBC_CRC, we don't lose.  Also, make sure we
+ 	free keyblock contents and tickets on error.
+	(lookup_service_key): Pass enctype to kdc_get_server_key
+
+	(kdc_get_server_key):  Only try for v4 salt if the enctype is
+	DES_CRC.  Take enctype as an argument.  This creates a problem
+	if the server key has a normal and v4 salt of ENCTYPE_DES_CBC_CRC
+	but I can't think of a good answer to this.
+
+
+	* k524init.c (main):  Use crc32 not md5.
+
+Wed Jan 24 20:05:47 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb524d.c (kdc_get_server_key): Try to find a v4 salt type key,
+ 	else try any des_crc32 key, else fail.
+	(do_connection): Lookup a crc32 key not an md5 key.
+	(init_master): Handle reading kdc profile.
+
 Sun Nov 12 04:29:08 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* conv_creds.c (krb524_convert_creds_kdc): loop through all of the
