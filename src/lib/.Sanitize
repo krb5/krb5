@@ -39,6 +39,8 @@ glue4.c
 gssapi
 gssapi.def
 kdb
+kdb4
+krb4
 krb425
 krb5
 krb5.saber.source

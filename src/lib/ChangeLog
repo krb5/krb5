@@ -1,3 +1,7 @@
+Thu Apr 27 13:32:35 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: add kdb4 directory.
+
 Thu Apr 27 11:54:19 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: add krb4 directory (still needs to be
