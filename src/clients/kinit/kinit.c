@@ -97,8 +97,15 @@ static char* progname_v5 = 0;
 static char* progname_v4 = 0;
 static char* progname_v524 = 0;
 
-static int got_k4 = 0;
 static int got_k5 = 0;
+static int got_k4 = 0;
+
+static int default_k5 = 1;
+#if defined(KRB5_KRB4_COMPAT) && defined(KINIT_DEFAULT_BOTH)
+static int default_k4 = 1;
+#else
+static int default_k4 = 0;
+#endif
 
 static int authed_k5 = 0;
 static int authed_k4 = 0;
@@ -174,13 +181,8 @@ struct option long_options[] = {
 #endif
 
 void
-usage(have_k4, have_k5)
-    int have_k4;
-int have_k5;
+usage(void)
 {
-    char* k4_default = 0;
-    char* k5_default = 0;
-
 #define USAGE_BREAK "\n\t"
 
 #ifdef GETOPT_LONG
@@ -209,32 +211,11 @@ int have_k5;
 	    "[-k [-t keytab_file]] "
 	    USAGE_BREAK
 	    "[-c cachename] "
-            "[-S service_name] [principal]"
-            "\n\n", 
+	    "[-S service_name] [principal]"
+	    "\n\n", 
 	    progname);
 
-#define DEFAULT_BOTH  "(default is Kerberos 4 & 5)"
-#define DEFAULT       "(default)"
-#define NOT_AVAILABLE "(not available)"
-
-    if (have_k4 && have_k5)
-    {
-	k4_default = k5_default = DEFAULT_BOTH;
-    }
-    else if (have_k5)
-    {
-	k4_default = NOT_AVAILABLE;
-	k5_default = DEFAULT;
-    }
-    else if (have_k4)
-    {
-	k4_default = DEFAULT;
-	k5_default = NOT_AVAILABLE;
-    }
-    else
-    {
-	k4_default = k5_default = NOT_AVAILABLE;
-    }
+#define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
 #define OPTTYPE_KRB5   "5"
 #define OPTTYPE_KRB4   "4"
@@ -255,8 +236,13 @@ int have_k5;
 fprintf(stderr, USAGE_OPT_FMT, indent, col1, col2)
 
     ULINE("    ", "options:", "valid with Kerberos:");
-    fprintf(stderr, "\t-5 Kerberos 5 only %s\n", k5_default);
-    fprintf(stderr, "\t-4 Kerberos 4 only %s\n", k4_default);
+    fprintf(stderr, "\t-5 Kerberos 5 (%s)\n", KRB_AVAIL_STRING(got_k5));
+    fprintf(stderr, "\t-4 Kerberos 4 (%s)\n", KRB_AVAIL_STRING(got_k4));
+    fprintf(stderr, "\t   (Default behavior is to try %s%s%s%s)\n",
+	    default_k5?"Kerberos 5":"",
+            (default_k5 && default_k4)?" and ":"",
+	    default_k4?"Kerberos 4":"",
+            (!default_k5 && !default_k4)?"neither":"");
     ULINE("\t", "-V verbose",                   OPTTYPE_EITHER);
     ULINE("\t", "-l lifetime",                  OPTTYPE_EITHER);
     ULINE("\t", "-s start time",                OPTTYPE_KRB5);
@@ -280,15 +266,15 @@ fprintf(stderr, USAGE_OPT_FMT, indent, col1, col2)
 char *
 parse_options(argc, argv, opts)
     int argc;
-char **argv;
-struct k_opts* opts;
+    char **argv;
+    struct k_opts* opts;
 {
     krb5_error_code code;
     int errflg = 0;
-    int use_k4_only = 0;
-    int use_k5_only = 0;
-    int old_got_k4 = got_k4;
-    int old_got_k5 = got_k5;
+    int use_k4 = 0;
+    int use_k5 = 0;
+    int have_k4 = got_k4;
+    int have_k5 = got_k5;
     int i;
 
     while ((i = GETOPT(argc, argv, "r:fpFP54AVl:s:c:kt:RS:v"))
@@ -397,11 +383,11 @@ struct k_opts* opts;
 #ifdef KRB5_KRB4_COMPAT
 		fprintf(stderr, "Kerberos 4 support could not be loaded\n");
 #else
-		fprintf(stderr, "This kinit was not built with Kerberos 4 support\n");
+		fprintf(stderr, "This was not built with Kerberos 4 support\n");
 #endif
 		exit(3);
 	    }
-	    use_k4_only = 1;
+	    use_k4 = 1;
 	    break;
 	case '5':
 	    if (!got_k5)
@@ -409,7 +395,7 @@ struct k_opts* opts;
 		fprintf(stderr, "Kerberos 5 support could not be loaded\n");
 		exit(3);
 	    }
-	    use_k5_only = 1;
+	    use_k5 = 1;
 	    break;
 	default:
 	    errflg++;
@@ -417,11 +403,6 @@ struct k_opts* opts;
 	}
     }
 
-    if (use_k5_only && use_k4_only)
-    {
-	fprintf(stderr, "Only one of -4 and -5 allowed\n");
-	errflg++;
-    }
     if (opts->forwardable && opts->not_forwardable)
     {
 	fprintf(stderr, "Only one of -f and -F allowed\n");
@@ -446,13 +427,13 @@ struct k_opts* opts;
 
     /* At this point, if errorless, we know we only have one option
        selection */
-    if (use_k4_only)
-	got_k5 = 0;
-    if (use_k5_only)
-	got_k4 = 0;
+    if (!use_k5 && !use_k4) {
+	use_k5 = default_k5;
+	use_k4 = default_k4;
+    }
 
     /* Now, we encode the OPTTYPE stuff here... */
-    if (!got_k5 &&
+    if (!use_k5 &&
 	(opts->starttime || opts->rlife || opts->forwardable || 
 	 opts->proxiable || opts->addresses || opts->not_forwardable || 
 	 opts->not_proxiable || opts->no_addresses || 
@@ -461,7 +442,7 @@ struct k_opts* opts;
 	fprintf(stderr, "Specified option that requires Kerberos 5\n");
 	errflg++;
     }
-    if (!got_k4 &&
+    if (!use_k4 &&
 	opts->k4_cache_name)
     {
 	fprintf(stderr, "Specified option that require Kerberos 4\n");
@@ -469,9 +450,9 @@ struct k_opts* opts;
     }
     if (
 #ifdef HAVE_KRB524
-	!got_k5
+	!use_k5
 #else
-	got_k4
+	use_k4
 #endif
 	&& (opts->service_name || opts->keytab_name || 
 	    (opts->action == INIT_KT) || (opts->action == RENEW))
@@ -482,8 +463,11 @@ struct k_opts* opts;
     }
 
     if (errflg) {
-	usage(old_got_k4, old_got_k5);
+	usage();
     }
+
+    got_k5 = got_k5 && use_k5;
+    got_k4 = got_k4 && use_k4;
 
     opts->principal_name = (optind == argc-1) ? argv[optind] : 0;
     return opts->principal_name;
@@ -605,7 +589,7 @@ k5_end(k5)
 int
 k4_begin(opts, k4)
     struct k_opts* opts;
-struct k4_data* k4;
+    struct k4_data* k4;
 {
     char* progname = progname_v4;
     int k_errno = 0;
@@ -698,8 +682,8 @@ k4_end(k4)
 int
 k5_kinit(opts, k5, password)
     struct k_opts* opts;
-struct k5_data* k5;
-char* password;
+    struct k5_data* k5;
+    char* password;
 {
     char* progname = progname_v5;
     int notix = 1;
@@ -841,8 +825,8 @@ char* password;
 int
 k4_kinit(opts, k4, password)
     struct k_opts* opts;
-struct k4_data* k4;
-char* password;
+    struct k4_data* k4;
+    char* password;
 {
     char* progname = progname_v4;
     int k_errno = 0;
@@ -1005,7 +989,7 @@ int try_convert524(k5)
 int
 main(argc, argv)
     int argc;
-char **argv;
+    char **argv;
 {
     struct k_opts opts;
     struct k5_data k5;

@@ -44,19 +44,27 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 .SH DESCRIPTION
 .I kinit
 obtains and caches an initial ticket-granting ticket for
-.IR principal .  If kinit was build with Kerberos 4 support,
-the default behavior is to acquired both Kerberos 5 and Kerberos 4 tickets.
-Otherwise, the default behavior is to acquire only Kerberos 5 tickets.
+.IR principal .  The typical default behavior is to acquire only
+Kerberos 5 tickets.  However, if kinit was built with both 
+Kerberos 4 support and with the default behavior of acquiring both
+types of tickets, it will try to acquire both Kerberos 5 and Kerberos 4
+by default.
 Any documentation particular to Kerberos 4 does not apply if Kerberos 4
 support was not built into kinit.
 .SH OPTIONS
 .TP
 .B \-5
-get Kerberos 5 tickets only.
+get Kerberos 5 tickets.  This overrides whatever the default built-in
+behavior may be.  This option may be used with
+.B \-4
+.
 .TP
 .B \-4
-get Kerberos 4 tickets only.  This option is only avialbale if kinit was built
-with Kerberos 4 compatibility.
+get Kerberos 4 tickets.  This overrides whatever the default built-in
+behavior may be.  This option is only available if kinit was built
+with Kerberos 4 compatibility.  This option may be used with 
+.B \-5
+.
 .TP
 .B \-V
 display verbose output.
@@ -163,7 +171,7 @@ Kerberos 5 and Kerberos 4 with a kdc that supports Kerberos 5 to Kerberos 4
 ticket conversion.)
 .SH ENVIRONMENT
 .B Kinit
-uses the following environment variable:
+uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
 Location of the Kerberos 5 credentials (ticket) cache.
@@ -173,10 +181,12 @@ Filename of the Kerberos 4 credentials (ticket) cache.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
-default Kerberos 5 credentials cache ([uid] is the decimal UID of the user).
+default location of Kerberos 5 credentials cache 
+([uid] is the decimal UID of the user).
 .TP "\w'/tmp/tkt[uid]\ \ 'u"
 /tmp/tkt[uid]
-default Kerberos 4 credentials cache ([uid] is the decimal UID of the user).
+default location of Kerberos 4 credentials cache 
+([uid] is the decimal UID of the user).
 .TP
 /etc/krb5.keytab
 default location for the local host's

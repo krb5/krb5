@@ -1,3 +1,11 @@
+2000-03-07  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kinit.c: Add support for using both -4 and -5.  Default to krb5
+	only.  Add KINIT_DEFAULT_BOTH support.  Tweak usage info.
+
+	* kinit.M: Fix a couple of typos.  Document new default
+	behavior.   Document that -4 and -5 may be combined.
+
 2000-02-16  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kinit.M: Document that -s is not applicable to Kerberos 4.
