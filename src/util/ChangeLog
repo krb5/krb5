@@ -1,3 +1,8 @@
+2002-11-13  Ezra Peisach  <epeisach@bu.edu>
+
+	* reconf: For pre autoconf 2.54 - invoke autoreconf with -l for
+	localdir. Posr 2.54 use the -I option.
+
 2002-09-27  Tom Yu  <tlyu@mit.edu>
 
 	* depgen.sed: Solaris sed doesn't like '\(^.*$\)'; replace it with

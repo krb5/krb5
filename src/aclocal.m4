@@ -81,9 +81,13 @@ dnl else
 	AUTOCONFFLAGS=
 	AUTOHEADER=autoheader
 	AUTOHEADERFLAGS=
+dnl Autoconf 2.54+ use --include, --localdir is obsolete and removed
+ifdef([AC_MSG_FAILURE],	AUTOCONFINCFLAGS="--include", dnl
+       AUTOCONFINCFLAGS="--localdir")
 dnl fi
 AC_SUBST(AUTOCONF)
 AC_SUBST(AUTOCONFFLAGS)
+AC_SUBST(AUTOCONFINCFLAGS)
 AC_SUBST(AUTOHEADER)
 AC_SUBST(AUTOHEADERFLAGS)
 dnl

@@ -1,3 +1,10 @@
+2002-11-13  Ezra Peisach  <epeisach@bu.edu>
+
+	* pre.in (AUTOCONFINCFLAGS): Define by configure.
+
+	* post.in (Makefile): Invoke autoconf with AUTOCONFINCFLAGS
+	instead of hardcoding --localdir.
+
 2002-11-12  Tom Yu  <tlyu@mit.edu>
 
 	* shlib.conf: Fix AIX to explicitly include system libraries in

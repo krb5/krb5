@@ -5,6 +5,7 @@ autoreconfprog=autoreconf
 localdir=.
 autoreconfoptions=""
 verbose=false
+localdirarg=
 
 autoreconf="/bin/sh $autoreconfprog"
 
@@ -74,6 +75,19 @@ if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/
 	  *)
 	       ;;
 	esac
+
+	# Determine the proper argument to autoreconf 
+	case "$autoconfversion" in
+	  2.1*)
+	       localdirarg="-l"
+	       ;;
+	  2.5[23])
+	       localdirarg="-l"
+	       ;;
+	    *)
+	       localdirarg="-I"
+	       ;;
+	esac
 else
 	echo "Couldn't find autoconf 2.13 or higher in your path."
 	echo " "
@@ -82,9 +96,9 @@ else
 fi
 
 if $verbose ; then 
-	echo $autoreconf $autoreconfoptions -l $localdir --verbose $force 
+	echo $autoreconf $autoreconfoptions $localdirarg $localdir --verbose $force
 fi
-$autoreconf $autoreconfoptions  -l $localdir --verbose $force || exit 1
+$autoreconf $autoreconfoptions  $localdirarg $localdir --verbose $force || exit 1
 if test $? = 0 ; then
     if test ! -d include/krb5/autoconf.stmp ; then
 	cp /dev/null include/krb5/autoconf.stmp
