@@ -1,3 +1,7 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* winccld.c: Include k5-int.h to get hidden ops struct.
+
 2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* stdcc.h: Remove KRB5_DLLIMP, KRB5_CALLCONV from

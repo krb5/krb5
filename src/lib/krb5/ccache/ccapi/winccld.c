@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include "stdcc.h"
+#include "k5-int.h"
 
 /* from fcc-proto.h */
 KRB5_DLLIMP extern krb5_cc_ops krb5_fcc_ops;
