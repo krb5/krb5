@@ -1,3 +1,8 @@
+Wed Jul 27 12:52:04 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* configure.in: test for HAVE_UNISTD_H.
+	* logutil.c: use HAVE_UNISTD_H.
+
 Tue Jul 26 00:25:57 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* krlogin.c: include <fcntl.h>

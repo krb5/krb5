@@ -25,7 +25,7 @@
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
 #endif
-#ifdef USE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
      
