@@ -1,3 +1,8 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* asn1buf.c:
+	* krb5_decode.c: Fix double-free vulnerabilities.
+
 2003-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_k_encode.c (asn1_encode_krb_saved_safe_body): New function;

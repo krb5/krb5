@@ -183,8 +183,10 @@ get_lenfield_body(len,var,decoder)
 #define cleanup(cleanup_routine)\
    return 0; \
 error_out: \
-   if (rep && *rep) \
+   if (rep && *rep) { \
 	cleanup_routine(*rep); \
+	*rep = NULL; \
+   } \
    return retval;
 
 #define cleanup_none()\
@@ -233,6 +235,7 @@ error_out:
       free_field(*rep,checksum);
       free_field(*rep,client);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -254,7 +257,7 @@ krb5_error_code decode_krb5_ticket(const krb5_data *code, krb5_ticket **rep)
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO;
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO);
     }
     alloc_field((*rep)->server,krb5_principal_data);
     get_field((*rep)->server,1,asn1_decode_realm);
@@ -268,6 +271,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,server);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -320,6 +324,7 @@ error_out:
       free_field(*rep,session);
       free_field(*rep,client);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -403,6 +408,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,ticket);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -451,6 +457,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,subkey);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -556,6 +563,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,checksum);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -614,6 +622,7 @@ error_out:
       free_field(*rep,r_address);
       free_field(*rep,s_address);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -668,6 +677,7 @@ error_out:
       free_field(*rep,r_address);
       free_field(*rep,s_address);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -713,6 +723,7 @@ error_out:
       free_field(*rep,server);
       free_field(*rep,client);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
