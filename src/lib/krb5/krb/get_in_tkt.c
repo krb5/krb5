@@ -137,8 +137,10 @@ OLDDECLARG(krb5_ccache, ccache)
     /* now decode the reply...could be error or as_rep */
 
     if (krb5_is_krb_error(&reply)) {
-	if (retval = decode_krb5_error(&reply, &err_reply))
+	if (retval = decode_krb5_error(&reply, &err_reply)) {
+	    xfree(reply.data);
             return retval;              /* some other reply--??? */
+	}
 	/* it was an error */
 
 	if ((err_reply->ctime != request.nonce) ||
@@ -151,16 +153,22 @@ OLDDECLARG(krb5_ccache, ccache)
 	/* XXX somehow make error msg text available to application? */
 
 	krb5_free_error(err_reply);
+	xfree(reply.data);
 	return retval;
     }
 
-    if (!krb5_is_as_rep(&reply))
+    if (!krb5_is_as_rep(&reply)) {
+	xfree(reply.data);
 	return KRB5KRB_AP_ERR_MSG_TYPE;
-    if (retval = decode_krb5_as_rep(&reply, &as_reply))
+    }
+    if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
+	xfree(reply.data);
 	return retval;		/* some other reply--??? */
-
-    if (as_reply->msg_type != KRB5_AS_REP)
+    }
+    xfree(reply.data);
+    if (as_reply->msg_type != KRB5_AS_REP) {
         return KRB5KRB_AP_ERR_MSG_TYPE;
+    }
 
     /* it was a kdc_rep--decrypt & check */
 
