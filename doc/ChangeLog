@@ -1,3 +1,8 @@
+2002-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* implementor.texinfo: Add chapters on local addresses, hostname
+	address lookups, and thread safety.
+
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo (realms (kdc.conf)): Add description of
