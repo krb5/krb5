@@ -1,3 +1,8 @@
+1999-08-18  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Re-align des3-cbc-sha1 and hmac-sha1-des3 to agree
+	with new number assignments; also rename symbols a little bit.
+
 1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-mac.h: Define MAXPATHLEN only if not already defined.  This
