@@ -1,3 +1,12 @@
+2004-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf: Initialize use_linker_init_option and
+	use_linker_fini_option to no.
+	(mips-sgi-irix*): Add link-time support for library
+	initialization and finalization.
+	(*-*-solaris*): Likewise, for native compiler.  Change "pic" mode
+	to "PIC", libkrb5 seems to need it now.
+
 2004-04-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* libobj.in (.c.so): Add -DSHARED to compile options.
