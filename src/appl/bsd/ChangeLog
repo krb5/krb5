@@ -4,6 +4,9 @@ Mon Feb 22 22:26:32 1999  Tom Yu  <tlyu@mit.edu>
 	all the addresses in hp have been iterated through to avoid
 	smashing. [krb5-appl/516]
 
+	* kcmd.c (k4cmd): Move call to krb_realmofhost() to avoid smashing
+	hp.
+
 Wed Feb 17 17:24:11 1999  Tom Yu  <tlyu@mit.edu>
 
 	* klogind.M: Document things a little better, including new

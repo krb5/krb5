@@ -501,11 +501,6 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
     strcpy(host_save, hp->h_name);
     *ahost = host_save;
 
-    /* If realm is null, look up from table */
-    if ((realm == NULL) || (realm[0] == '\0')) {
-	realm = krb_realmofhost(host_save);
-    }
-
 #ifdef POSIX_SIGNALS
     sigemptyset(&urgmask);
     sigaddset(&urgmask, SIGURG);
@@ -559,6 +554,10 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 	sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
 	return (-1);
+    }
+    /* If realm is null, look up from table */
+    if ((realm == NULL) || (realm[0] == '\0')) {
+	realm = krb_realmofhost(host_save);
     }
     lport--;
     if (fd2p == 0) {
