@@ -5,16 +5,13 @@
 #		@AWK@
 #		@SED@
 #
-# Usage: config_script <filename> [<awk>] [<sed>]
+# Usage: config_script <filename> [<dir>] [<awk>] [<sed>]
 #
 
 FILE=$1
-AWK=$2
-SED=$3
-
-# Grr.... not all Unix's have the dirname command
-TMP=`echo  $1 | sed -e 's;[^/]*$;;' -e 's/^$/./'`
-DIR=`cd ${TMP}; pwd`
+DIR=$2
+AWK=$3
+SED=$4
 
 if test "${AWK}x" = "x" ; then
 	AWK=awk

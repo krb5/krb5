@@ -1,3 +1,17 @@
+2001-01-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (test1.c, test2.c, et1.c, et2.c, test1.h, test2.h,
+	et1.h, et2.h): All depend on compile_et and awk scripts.
+	(prefix, bindir, datadir, mydatadir): New variables.
+	(install-unix): Install compile_et and awk scripts, and compile_et
+	man page.
+	(compile_et): Pass awk script install dir as extra argument.
+	(et_c.awk, et_h.awk): Delete targets for putting copies in build
+	tree.
+	* config_script: Take install dir as extra argument.
+	* compile_et.sh: Accept "-d DIR" to override awk script
+	directory.  Set "-ex" shell flags before running awk commands.
+
 2000-12-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* et_c.awk: Don't generate macros we won't use.  Assume ANSI C

@@ -1,3 +1,7 @@
+prefix=@prefix@
+bindir=@bindir@
+datadir=@datadir@
+mydatadir=$(datadir)/et
 thisconfigdir=.
 myfulldir=util/et
 mydir=.
@@ -82,8 +86,8 @@ test2.o: test2.c
 test_et.o: test1.h test2.h
 et1.o: et1.c
 et2.o: et2.c
-test1.c test2.c et1.c et2.c: et_c.awk
-test1.h test2.h et1.h et2.h: et_h.awk
+test1.c test2.c et1.c et2.c test1.h test2.h et1.h et2.h: \
+	compile_et et_c.awk et_h.awk
 t_com_err.o: et1.h et2.h t_com_err.c
 
 # /u1/kr/lclint-2.5q/bin/lclint -warnposix -D__sparc
@@ -147,18 +151,16 @@ check-unix:: t_com_err test_et
 #compile_et: compile_et.o error_table.o
 #	$(CC) $(CFLAGS) -o $@ compile_et.o error_table.o $(LEXLIB) $(BSDLIB)
 #
-#install::
-#	$(INSTALLPROG) compile_et $(DESTDIR)$(PROGDIR)/compile_et
+install-unix:: compile_et
+	$(INSTALL) compile_et $(DESTDIR)$(bindir)/compile_et
+	test -d $(DESTDIR)$(mydatadir) || mkdir $(DESTDIR)$(mydatadir)
+	$(INSTALL_DATA) $(srcdir)/et_c.awk $(DESTDIR)$(mydatadir)
+	$(INSTALL_DATA) $(srcdir)/et_h.awk $(DESTDIR)$(mydatadir)
 
 compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
 	$(SHELL) $(srcdir)/config_script $(srcdir)/compile_et.sh \
-		$(AWK) $(SED) > compile_et
+		$(mydatadir) $(AWK) $(SED) > compile_et
 	chmod 755 compile_et	
-
-et_c.awk: $(srcdir)/et_c.awk
-	$(CP) $(srcdir)/et_c.awk et_c.awk
-et_h.awk: $(srcdir)/et_h.awk
-	$(CP) $(srcdir)/et_h.awk et_h.awk
 
 rebuild: rebuild-c rebuild-h
 rebuild-c:
@@ -179,10 +181,10 @@ install:: com_err.h
 install:: mit-sipb-copyright.h
 	$(INSTALL_DATA) $(srcdir)/mit-sipb-copyright.h $(DESTDIR)$(KRB5_INCDIR)/mit-sipb-copyright.h
 
-#
-#install:: compile_et.1
-#	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/compile_et.1
-#
+
+install-unix:: compile_et.1
+	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/compile_et.1
+
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
 
