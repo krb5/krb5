@@ -41,7 +41,7 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
 		$(KRB5_INCSUBDIRS)
 
-install:: install-mkdirs
+install-unix:: install-mkdirs
 
 install-mkdirs:
 	@for i in $(INSTALLMKDIRS); do \
