@@ -264,23 +264,23 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 		major_status = GSS_S_DEFECTIVE_TOKEN;
 		goto fail;
 	} else {
-#if 0	      /* Always allow use of the pre-RFC mechanism */
+#if 0	     /* Don't restrict mechanisms when accepting contexts */
 	     if (! cred->prerfc_mech) {
 		     code = G_WRONG_MECH;
 		     major_status = GSS_S_DEFECTIVE_TOKEN;
 		     goto fail;
 	     }
 #endif
-
 	     mech_used = gss_mech_krb5_old;
 	}
    } else {
+#if 0	/* Don't restrict mechanisms when accepting contexts */
 	if (! cred->rfc_mech) {
 		code = G_WRONG_MECH;
 		major_status = GSS_S_DEFECTIVE_TOKEN;
 		goto fail;
 	}
-
+#endif
 	mech_used = gss_mech_krb5;
    }
 
