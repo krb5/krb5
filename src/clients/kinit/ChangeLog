@@ -1,0 +1,4 @@
+Sat Jul 16 03:01:49 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* kinit.c: frob error codes
+

@@ -289,7 +289,7 @@ main(argc, argv)
 						      password,
 						      ccache,
 						      &my_creds, 0);
-	     if (code != KRB5KDC_PREAUTH_FAILED &&
+	     if (code != KRB5KDC_ERR_PREAUTH_FAILED &&
 		 code != KRB5KRB_ERR_GENERIC)
 		 break;
 	     }
@@ -319,7 +319,7 @@ main(argc, argv)
 						  ETYPE_DES_CBC_CRC,
 						  keytab ? &kt_ent.key : NULL,
 						  ccache, &my_creds, 0);
-		 if (code != KRB5KDC_PREAUTH_FAILED &&
+		 if (code != KRB5KDC_ERR_PREAUTH_FAILED &&
 		     code != KRB5KRB_ERR_GENERIC)
 		     break;
 	     }
