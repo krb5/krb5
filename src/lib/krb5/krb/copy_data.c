@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_copy_data_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
@@ -34,7 +34,7 @@ krb5_data **outdata;
 
     *tempdata = *indata;
     if (!(tempdata->data = malloc(tempdata->length))) {
-	free((char *)tempdata);
+	xfree(tempdata);
 	return ENOMEM;
     }
     memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);

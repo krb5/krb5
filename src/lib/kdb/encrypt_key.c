@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_encrypt_key_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/kdb.h>
@@ -54,7 +54,7 @@ krb5_encrypted_keyblock *out;
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
     if (!out->contents) {
-	free((char *)tmpin.contents);
+	xfree(tmpin.contents);
 	out->contents = 0;
 	out->length = 0;
 	return ENOMEM;
@@ -67,9 +67,9 @@ krb5_encrypted_keyblock *out;
 			  (krb5_pointer) (((char *) out->contents) +
 					  sizeof(out->length)),
 			  tmpin.length, eblock, 0);
-    free((char *)tmpin.contents);
+    xfree(tmpin.contents);
     if (retval) {
-	free((char *)out->contents);
+	xfree(out->contents);
 	out->contents = 0;
 	out->length = 0;
     }

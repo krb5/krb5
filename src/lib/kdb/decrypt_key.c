@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_decrypt_key_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/kdb.h>
@@ -57,13 +57,13 @@ krb5_keyblock *out;
 					      sizeof(in->length)),
 			      (krb5_pointer) out->contents,
 			      in->length-sizeof(in->length), eblock, 0)) {
-	free((char *)out->contents);
+	xfree(out->contents);
 	out->contents = 0;
 	out->length = 0;
 	return retval;
     }
     if (out->length < 0) {
-	free((char *)out->contents);
+	xfree(out->contents);
 	out->contents = 0;
 	out->length = 0;
 	return KRB5_KDB_INVALIDKEYSIZE;

@@ -2,7 +2,8 @@
  * $Source$
  * $Author$ 
  *
- * Copyright 1988,1989,1990 by the Massachusetts Institute of Technology. 
+ * Copyright 1988,1989,1990,1991 by the Massachusetts Institute of Technology. 
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>. 
@@ -13,7 +14,6 @@ static char rcsid_krb_dbm_c[] =
 "$Id$";
 #endif	/* lint */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/dbm.h>
 #include <krb5/kdb.h>
@@ -522,7 +522,7 @@ krb5_db_entry *entry;
     if (keysize != entry->key.length) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
-	free((char *)entry->key.contents);
+	xfree(entry->key.contents);
 	(void) memset((char *) entry, 0, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
     }
@@ -534,7 +534,7 @@ krb5_db_entry *entry;
 	if (!(entry->salt = (krb5_octet *)malloc(entry->salt_length))) {
 	    krb5_free_principal(princ);
 	    krb5_free_principal(mod_princ);
-	    free((char *)entry->key.contents);
+	    xfree(entry->key.contents);
 	    (void) memset((char *) entry, 0, sizeof(*entry));
 	    return KRB5_KDB_TRUNCATED_RECORD;
 	}
@@ -549,9 +549,9 @@ krb5_db_entry *entry;
 {
     /* erase the key */
     memset((char *)entry->key.contents, 0, entry->key.length);
-    free((char *)entry->key.contents);
+    xfree(entry->key.contents);
     if (entry->salt_length)
-	free((char *)entry->salt);
+	xfree(entry->salt);
 
     krb5_free_principal(entry->principal);
     krb5_free_principal(entry->mod_name);

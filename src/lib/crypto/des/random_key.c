@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -13,8 +14,6 @@
 static char rcsid_random_key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
-
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -35,7 +34,7 @@ OLDDECLARG(krb5_keyblock **, keyblock)
     if (!(randkey = (krb5_keyblock *)malloc(sizeof(*randkey))))
 	return ENOMEM;
     if (!(randkey->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock)))) {
-	free((char *)randkey);
+	xfree(randkey);
 	return ENOMEM;
     }
     randkey->length = sizeof(mit_des_cblock);

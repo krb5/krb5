@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +15,6 @@ static char rcsid_kdb_edit_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
@@ -386,7 +385,7 @@ OLDDECLARG(struct saltblock *, salt)
     if (retval = krb5_timeofday(&newentry.mod_date)) {
 	com_err(argv[0], retval, "while fetching date");
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
-	free((char *)newentry.key.contents);
+	xfree(newentry.key.contents);
 	return;
     }
     newentry.attributes = mblock.flags;
@@ -402,7 +401,7 @@ OLDDECLARG(struct saltblock *, salt)
     
     retval = krb5_db_put_principal(&newentry, &one);
     memset((char *)newentry.key.contents, 0, newentry.key.length);
-    free((char *)newentry.key.contents);
+    xfree(newentry.key.contents);
     if (retval) {
 	com_err(argv[0], retval, "while storing entry for '%s'\n", argv[1]);
 	return;
@@ -437,7 +436,7 @@ krb5_pointer infop;
 					      &master_random);
 		memset((char *)master_keyblock.contents, 0,
 		       master_keyblock.length);
-		free((char *) master_keyblock.contents);
+		xfree(master_keyblock.contents);
 		master_keyblock.contents = NULL;
 	}
 	krb5_free_principal(master_princ);
@@ -525,7 +524,7 @@ char *dbname;
 					   &master_encblock)) {
 	com_err(pname, retval, "while verifying master key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	free((char *)master_keyblock.contents);
+	xfree(master_keyblock.contents);
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(1);
@@ -534,7 +533,7 @@ char *dbname;
 				  &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	free((char *)master_keyblock.contents);
+	xfree(master_keyblock.contents);
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(1);
@@ -545,7 +544,7 @@ char *dbname;
 	com_err(pname, retval, "while initializing random key generator");
 	(void) krb5_finish_key(&master_encblock);
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	free((char *)master_keyblock.contents);
+	xfree(master_keyblock.contents);
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(1);
@@ -700,7 +699,7 @@ char *argv[];
 	    printf("'%s' added to keytab '%s'\n",
 		   pname, ktname);
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
-	free((char *)newentry.key.contents);
+	xfree(newentry.key.contents);
     cleanall:
 	    krb5_db_free_principal(&dbentry, nentries);
     cleanmost:
@@ -802,7 +801,7 @@ char *argv[];
 	if (key.keytype != 1) {
 		com_err(argv[0], 0, "%s does not have a DES key!", pname);
 		memset((char *)key.contents, 0, key.length);
-		free((char *)key.contents);
+		xfree(key.contents);
 		continue;
 	}
 	fwrite(argv[i], strlen(argv[1]) + 1, 1, fout); /* p.name */
@@ -812,7 +811,7 @@ char *argv[];
 	fwrite((char *)key.contents, 8, 1, fout);
 	printf("'%s' added to V4 srvtab '%s'\n", pname, ktname);
 	memset((char *)key.contents, 0, key.length);
-	free((char *)key.contents);
+	xfree(key.contents);
     cleanall:
 	    krb5_db_free_principal(&dbentry, nentries);
     cleanmost:
@@ -1121,7 +1120,7 @@ OLDDECLARG(int, salttype)
     add_key(argv, princ, &tempkey, ++vno, &salt);
     xfree(salt.saltdata.data);
     memset((char *)tempkey.contents, 0, tempkey.length);
-    free((char *)tempkey.contents);
+    xfree(tempkey.contents);
     return;
 }
 

@@ -1,28 +1,28 @@
 /*
- * $source: /afs/athena.mit.edu/astaff/project/krb5/src/admin/edit/rcs/dump.c,v $
- * $author: tytso $
+ * $Source$
+ * $Author$
  *
- * copyright 1990 by the massachusetts institute of technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
- * for copying and distribution information, please see the file
+ * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
- * dump a kdc database
+ * Dump a KDC database
  */
 
-#if !defined(lint) && !defined(saber)
+#if !defined(lint) && !defined(SABER)
 static char rcsid_kdb_edit_c[] =
-"$id: dump.c,v 1.6 91/01/15 18:25:41 tytso exp locker: tytso $";
+"$Id$";
 #endif	/* !lint & !saber */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/config.h>
-#include <krb5/sysincl.h>		/* for maxpathlen */
+#include <krb5/sysincl.h>		/* for MAXPATHLEN */
 #include <krb5/ext-proto.h>
 #include <krb5/func-proto.h>
 
@@ -269,7 +269,7 @@ void load_db(argc, argv)
 	cleanup:
 		free(name);
 		free(mod_name);
-		free((char *)entry.key.contents);
+		xfree(entry.key.contents);
 	}
 	if (retval = krb5_db_fini()) {
 		com_err(argv[0], retval,

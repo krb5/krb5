@@ -16,8 +16,6 @@ static char rcsid_do_tgs_req_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
-
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/libos-proto.h>
@@ -186,7 +184,7 @@ tgt_again:
 #define cleanup() { krb5_db_free_principal(&server, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
-		   free((char *)session_key->contents); \
+		   xfree(session_key->contents); \
 		   session_key->contents = 0; }
 
     ticket_reply.server = request->server; /* XXX careful for realm... */
@@ -452,7 +450,7 @@ tgt_again:
 #define cleanup() { krb5_db_free_principal(&server, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
-		   free((char *)session_key->contents); \
+		   xfree(session_key->contents); \
 		   session_key->contents = 0; \
 		   if (newtransited) free(enc_tkt_reply.transited.tr_contents.data);}
 
@@ -485,7 +483,7 @@ tgt_again:
 	retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
 
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-	free((char *)encrypting_key.contents);
+	xfree(encrypting_key.contents);
 
 	if (retval) {
 	    tkt_cleanup();
@@ -527,7 +525,7 @@ tgt_again:
 				 header_ticket->enc_part2->session,
 				 &reply, response);
     memset((char *)session_key->contents, 0, session_key->length);
-    free((char *)session_key->contents);
+    xfree(session_key->contents);
     tkt_cleanup();
     session_key->contents = 0;
     return retval;

@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,8 +15,6 @@
 static char rcsid_do_as_req_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
-
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
@@ -156,7 +155,7 @@ krb5_data **response;			/* filled in with a response packet */
 		   krb5_db_free_principal(&server, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
-		   free((char *)session_key->contents); \
+		   xfree(session_key->contents); \
 		   session_key->contents = 0; }
 
 
@@ -252,7 +251,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
     retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    free((char *)encrypting_key.contents);
+    xfree(encrypting_key.contents);
     if (retval) {
 	cleanup();
 	return retval;
@@ -264,7 +263,7 @@ krb5_data **response;			/* filled in with a response packet */
 #define cleanup() {krb5_db_free_principal(&client, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
-		   free((char *)session_key->contents); \
+		   xfree(session_key->contents); \
 		   session_key->contents = 0; \
 		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
 			 ticket_reply.enc_part.ciphertext.length); \
@@ -315,7 +314,7 @@ krb5_data **response;			/* filled in with a response packet */
 #define cleanup() {krb5_db_free_principal(&client, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
-		   free((char *)session_key->contents); \
+		   xfree(session_key->contents); \
 		   session_key->contents = 0; \
 		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
 			 ticket_reply.enc_part.ciphertext.length); \
@@ -357,7 +356,7 @@ krb5_data **response;			/* filled in with a response packet */
     retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart,
 				 &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    free((char *)encrypting_key.contents);
+    xfree(encrypting_key.contents);
     cleanup();
     return retval;
 }
