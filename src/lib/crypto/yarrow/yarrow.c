@@ -187,6 +187,8 @@ int krb5int_yarrow_init(Yarrow_CTX* y, const char *filename)
 
     mem_zero(y->K, sizeof(y->K));
 
+    mem_zero(&y->cipher, sizeof(y->cipher));
+
     TRY (krb5int_yarrow_cipher_init(&y->cipher, y->K));
     y->out_left = 0;
     y->out_count = 0;
@@ -757,7 +759,8 @@ int krb5int_yarrow_stretch(const byte* m, size_t size, byte* out, size_t out_siz
     EXCEP_DECL;
     const byte* s_i;
     byte* outp;
-    int left, use;
+    int left;
+    unsigned int use;
     HASH_CTX hash, save;
     byte digest[HASH_DIGEST_SIZE];
   
