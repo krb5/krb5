@@ -64,3 +64,9 @@
 #undef int32_t
 #undef u_int32_t
 
+/* kludgey stuff to deal with function replacements */
+
+#undef MEMMOVE
+#undef memmove
+#undef mkstemp
+#undef strerror
