@@ -1,3 +1,8 @@
+2003-03-31  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Require autoconf-2.53, since 2.52 generates
+	configure scripts that NetBSD /bin/sh doesn't like.
+
 2003-03-18  Alexandra Ellwood  <lxs@mit.edu>
 
     * aclocal.m4: Define KRB5_AC_NEED_BIND_8_COMPAT to check for bind 9
