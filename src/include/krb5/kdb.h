@@ -54,7 +54,23 @@ typedef struct _krb5_db_entry {
     krb5_int32 salt_type:8,
  	       salt_length:24;
     krb5_octet *salt;
+#ifdef ALT_KEY_SALT	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
+    krb5_encrypted_keyblock alt_key;
+    krb5_int32 alt_salt_type:8,
+ 	       alt_salt_length:24;
+    krb5_octet *alt_salt;
+#endif	/* ALT_KEY_SALT */
+
+    /* SANDIA Enhancement (Pre-Auth/Blacklist) */    
+    krb5_timestamp last_pwd_change;	
+    krb5_timestamp last_success;
+    krb5_kvno fail_auth_count;
+    int lastreqid;
 } krb5_db_entry;
+  
+#ifdef SANDIA	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
+#define KRB5_MAX_FAIL_COUNT		5
+#endif
 
 #define KRB5_KDB_SALTTYPE_NORMAL	0
 #define KRB5_KDB_SALTTYPE_V4		1
@@ -69,6 +85,9 @@ typedef struct _krb5_db_entry {
 #define	KRB5_KDB_DISALLOW_PROXIABLE	0x00000010
 #define	KRB5_KDB_DISALLOW_DUP_SKEY	0x00000020
 #define	KRB5_KDB_DISALLOW_ALL_TIX	0x00000040
+#define	KRB5_KDB_REQUIRES_PRE_AUTH	0x00000080
+#define KRB5_KDB_REQUIRES_HW_AUTH	0x00000100
+#define	KRB5_KDB_REQUIRES_PWCHANGE	0x00000200
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
@@ -159,7 +178,7 @@ krb5_boolean krb5_db_set_lockmode
 
 krb5_error_code	krb5_db_fetch_mkey
 	PROTOTYPE((krb5_principal, krb5_encrypt_block *, krb5_boolean,
-		   krb5_boolean, krb5_keyblock * ));
+		   krb5_boolean, krb5_data *, krb5_keyblock * ));
 #include <krb5/narrow.h>
 
 
