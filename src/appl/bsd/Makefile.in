@@ -35,17 +35,17 @@ all:: rsh rcp rlogin kshd klogind login.krb5 $(V4RCP)
 clean:: 
 	$(RM) rsh rcp rlogin kshd klogind login.krb5 v4rcp
 
-rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
 rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_DEPLIB) $(KRB4COMATP_DEPLIBS)
 	$(CC_LINK) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
 
-v4rcp: v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o v4rcp v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+v4rcp: v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o v4rcp v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
-rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
 install::
 	for f in rsh rcp rlogin; do \
@@ -80,8 +80,8 @@ install::
 # No program name transformation is done with login.krb5 since it is directly
 # referenced by klogind.
 #
-login.krb5: login.o  $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o login.krb5 login.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+login.krb5: login.o  $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o login.krb5 login.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5

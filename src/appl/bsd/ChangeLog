@@ -1,3 +1,8 @@
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Remove linking of krb5util library from
+	applications that never use it.
+
 2000-06-29  Ken Raeburn  <raeburn@mit.edu>
 
 	Patch from Donn Cave and Leonard Peirce from 1.1 release cycle:
