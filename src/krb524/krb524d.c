@@ -421,7 +421,18 @@ krb5_error_code lookup_service_key(context, p, ktype, kvno, key, kvnop)
      if (use_keytab) {
 	  if ((ret = krb5_kt_get_entry(context, kt, p, kvno, ktype, &entry)))
 	       return ret;
-	  memcpy(key, (char *) &entry.key, sizeof(krb5_keyblock));
+	  *key = entry.key;
+	  key->contents = malloc(key->length);
+	  if (key->contents)
+	      memcpy(key->contents, entry.key.contents, key->length);
+	  else if (key->length) {
+	      /* out of memory? */
+	      ret = errno;
+	      memset (key, 0, sizeof (*key));
+	      return ret;
+	  }
+
+	  krb5_kt_free_entry(context, &entry);
 	  return 0;
      } else if (use_master) {
 	  return kdc_get_server_key(context, p, key, kvnop, ktype, kvno);

@@ -1,3 +1,8 @@
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c (lookup_service_key): Copy key block and free up
+	keytab entry data.
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb524d.c (cleanup_and_exit): Call krb5_klog_close().
