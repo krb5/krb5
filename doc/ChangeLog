@@ -1,3 +1,10 @@
+2000-07-11  Tom Yu  <tlyu@mit.edu>
+
+	* coding-style: Some minor tweaks.  Require do-while to always be
+	braced.  Note some aspects of function pointer and array pointer
+	usage.  Elaborate on function declaration practices.  Add
+	placeholders for sections on Makefiles and test suites.
+
 2000-07-10  Tom Yu  <tlyu@mit.edu>
 
 	* coding-style: Another pass.  Add secion on namespaces.

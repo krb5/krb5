@@ -22,7 +22,9 @@ the "krb5" style that is included here.
 Labels, including case labels, are outdented by four columns.
 Continuations of statements are indented by an additional four
 columns.  Continuations of argument lists or parenthesized expressions
-should line up with the column after the opening parenthesis.
+should line up with the column after the opening parenthesis.  Note
+that this may create width problems if you call a fuction deep in a
+bunch of nested control flow statements.
 
 The maximum width should be 79 columns.  If you need more than this,
 consider rewriting the code so that it fits in 79 columns, since
@@ -107,19 +109,21 @@ forever loops.
 	if (x) {
 	    p = calloc(1024, sizeof(int));
 	}
-	cp = (elem->fp)(1024);
+	cp = (*elem->fp)(1024);
 	for (i = 0; i < 10; i++);
 	for (;;) {
 	    /* ... */
 	}
 
 Binary operators get spaces, unary ones do not.  Prefix and postfix
-operators also do not get spaces.
+operators also do not get spaces.  The structure member operators "."
+and "->" count as postfix operators syntactically, not as binary
+operators.
 
 	x = --a + b / c - d++;
 	y = p->z.v[x];
 
-In general, do not parenthesize the argument of "return".  
+In general, do not parenthesize the argument of "return".
 
 Coding practices for C
 ----------------------
@@ -132,6 +136,7 @@ Do not use assignments as truth values.  Rather than this:
 
 do this:
 
+	/* better style */
 	retval = krb5_foo();
 	if (retval)
 	    /* ... */;
@@ -148,11 +153,12 @@ code particularly impenetrable.
 
 There are at least three types of "zero" known to C.  These are the
 integer zero (0), the null pointer constant (NULL), and the character
-constant zero ('\0').  Use them in their correct contexts.  (Purists
-will point out that 0 is a valid null pointer constant; still, do not
-use 0 to specify a null pointer constant.  For further unconfusion,
-read the section on null pointer constants in the C FAQ.)  Do not use
-a lone variable as a truth value unless it's of integer type.  Thus:
+constant zero ('\0').  Yes, these are usually all technically the
+integer zero.  Use them in their correct contexts.  (Purists will
+point out that 0 is a valid null pointer constant; still, do not use 0
+to specify a null pointer constant.  For further unconfusion, read the
+section on null pointer constants in the C FAQ.)  Do not use a lone
+variable as a truth value unless it's of integer type.  Thus:
 
 	int i;
 	char *cp;
@@ -177,7 +183,7 @@ Also, don't assume that malloc(0) will return a non-NULL pointer.
 Typically, though, the output of malloc(0) will be safe to pass to
 realloc() and free().
 
-In any case, reading the secion in the C FAQ on null pointers is
+In any case, reading the section in the C FAQ on null pointers is
 highly recommended to remove confusion regarding null pointers in C,
 since this is a subject of much confusion to even experienced
 programmers.  In particular, if you do not understand why using
@@ -239,9 +245,61 @@ and maintain.  Therefore, avoid code like this:
 		g();
 	    }
 
+If you are writing a do-while loop that has only one statement in its
+body, put braces around it anyway, since the while clause may be
+mistaken for a while loop with an empty body.  Don't do this:
+
+	/* bad style */
+	do
+	    foo();
+	while (x);
+
+Instead, write this:
+
+	/* better style */
+	do {
+	    foo();
+	} while (x);
+
+While it is syntactically correct to call through a function pointer
+without applying a dereference operator to it, do not write code that
+does this.  It is easier to see that the function call is actually
+taking place through a function pointer if you write an explicit
+dereference.  However, do not explicitly take the address of a
+function in order to assign it to a function pointer, since a function
+name degrades into a pointer.  Thus:
+
+	int (*fp)(void);
+	int foofunc(void);
+	fp = foofunc;
+	x = (*fp)();
+
+In general, do not take the address of an array.  It does not return a
+pointer to the first element; it returns a pointer to the array
+itself.  These are often identical when cast to an integral type, but
+they are inherently of different types themselves.  Functions that
+take array types or pointers to array types as arguments can be
+particularly trouble-prone.
+
 If a function is declared to return a value, do not call "return"
 without an argument or allow the flow of control to fall off the end
 of the function.
+
+Always declare the return type of a function, even if it returns int.
+Yes, this means declaring main() to return int, since main() is
+required to return int by the standard.  If a function is not supposed
+to return a value, declare it as returning void rather than omitting
+the return type, which will default the return type to int.
+
+When using K&R style function definitions, declare all the argument
+types, even those that are int. [XXX it is debatable whether to
+require K&R style function definitions for all except stdarg
+functions]
+
+For krb5 code, we have been making the assumption that an ANSI
+compiler is required to compile the distribution, but not to link
+against it.  For this, and other reasons, the use of narrow types in
+API functions is highly discouraged.
 
 Do not declare variables in an inner scope, e.g. inside the compound
 substatement of an if statement, unless the complexity of the code
@@ -271,6 +329,9 @@ expression, so usages such as
 	s = sizeof ++foo;
 
 should be avoided for the sake of sanity and readability.
+
+Don't pass around structures except by address.  We may relax this
+restriction for non-API function, though.
 
 Strive to make your code capable of compiling using "gcc -Wall
 -Wmissing-prototypes -Wtraditional -Wcast-qual -Wcast-align
@@ -312,7 +373,16 @@ we should try to fix these.
 
 Header files should also not leak symbols.  Usually using the upcased
 version of the prefix you've picked will suffice, e.g. "KRB5_" as a
-CPP symbol prefix corresponding to "krb5_".
+CPP symbol prefix corresponding to "krb5_".  In general, do not define
+macros that are lowercase, in order to avoid confusion and to prevent
+namespace collisions.
+
+The C standard only guarantees six case-insensitive characters to be
+significant in external identifiers; this is largely regarded as
+obsolescent and we will ignore it.  It does, however, only guarantee
+31 case-sensitive characters to be signficant in internal identifiers,
+so do not use identifiers that differ beyond the 31st character.  This
+is unlikely to be a problem, though.
 
 Emacs cc-mode style
 -------------------
@@ -374,3 +444,13 @@ in the gnu locker does not currently handle -psl correctly though.
 -psl
 -sc
 -sob
+
+MAKEFILES
+=========
+
+[XXX needs to be written]
+
+TEST SUITES
+===========
+
+[XXX needs to be written]
