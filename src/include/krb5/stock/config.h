@@ -76,6 +76,12 @@
  */
 #undef KRBCONF_KDC_MODIFIES_KDB
     
+/* 
+ * Windows requires a different api interface to each function. Here
+ * just define it as NULL.
+ */
+#define API
+#define FAR
 
 #endif /* KRB5_CONFIG__ */
 

@@ -1,3 +1,8 @@
+Mon Feb 6 20:5:58 1995 Keith Vetter (keithv@fusion.com)
+
+	* config.win: new file--windows base template for config.h
+	* config.h: added API definition default of NULL
+
 Thu Jan  5 17:01:03 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Use the service names kerberos and kerberos-sec, instead of
