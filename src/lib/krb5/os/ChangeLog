@@ -33,6 +33,8 @@
 	(service_fd): New function, calls one of the above two.
 	(service_fds): Call it.  Use a flag word instead of separate r/w/x
 	values.
+	* accessor.c (krb5int_accessor): Use krb5int_sendto instead of
+	krb5int_sendto_udp.
 
 2002-08-15  Ken Raeburn  <raeburn@mit.edu>
 
