@@ -82,6 +82,7 @@ krb5_error_code krb5_scc_skip_principal PROTOTYPE((krb5_ccache id ));
 krb5_error_code krb5_scc_set_flags PROTOTYPE((krb5_ccache id , krb5_flags flags ));
 
 /* scc_ops.c */
+extern krb5_cc_ops krb5_scc_ops;
 
 /* scc_write.c */
 krb5_error_code krb5_scc_write PROTOTYPE((krb5_ccache id , krb5_pointer buf , int len ));
