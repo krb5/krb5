@@ -1,3 +1,13 @@
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (gssapi.h): Change SIZEOF symbols to start with GSS_
+	when extracting from autoconf.h.  Don't look for HAVE_ or USE_
+	symbols.  Add ${include_xom} to the prologue.
+	(include_xom): New variable.
+	* gssapi.h: Always include stddef.h unconditionally.
+	(GSS_SIZEOF_INT, GSS_SIZEOF_LONG, GSS_SIZEOF_SHORT): Don't
+	define.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.hin: Don't test macintosh or __MWERKS__.
