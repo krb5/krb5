@@ -249,7 +249,7 @@ static krb5_error_code master_key_convert(context, db_entry)
     krb5_error_code	retval;
     krb5_keyblock 	v5plainkey, *key_ptr;
     krb5_keysalt 	keysalt;
-    int	      i;
+    int	      i, j;
     krb5_key_data	new_key_data, *key_data;
     krb5_boolean	is_mkey;
 
@@ -278,7 +278,11 @@ static krb5_error_code master_key_convert(context, db_entry)
 	if (retval)
 		return retval;
 	krb5_free_keyblock_contents(context, &v5plainkey);
-	free(key_data->key_data_contents);
+	for (j = 0; j < key_data->key_data_ver; j++) {
+	    if (key_data->key_data_length[j]) {
+		free(key_data->key_data_contents[j]);
+	    }
+	}
 	*key_data = new_key_data;
     }
     return 0;

@@ -1,3 +1,9 @@
+2002-07-31  Tom Yu  <tlyu@mit.edu>
+
+	* dump.c (master_key_convert): Iterate over freeing
+	key_data->key_data_contents[j] rather than attempting to free
+	key_data->key_data_contents.
+
 2002-07-29  Jen Selby  <jenselby@mit.edu>
 
 	* kdb5_util.M: added documentation for some options.
