@@ -27,7 +27,7 @@ static char *skip_over_blanks(cp)
 	return cp;
 }
 
-void strip_line(line)
+static void strip_line(line)
 	char	*line;
 {
 	char	*p;
@@ -139,7 +139,7 @@ static errcode_t parse_std_line(line, state)
 	return 0;
 }
 
-errcode_t parse_line(line, state)
+static errcode_t parse_line(line, state)
 	char	*line;
 	struct parse_state *state;
 {

@@ -79,6 +79,9 @@ extern errcode_t profile_create_node
 	PROTOTYPE((const char *name, const char *value,
 		   struct profile_node **ret_node));
 
+extern errcode_t profile_verify_node
+	PROTOTYPE((struct profile_node *node));
+
 extern errcode_t profile_add_node
 	PROTOTYPE ((struct profile_node *section,
 		    const char *name, const char *value,
@@ -119,6 +122,20 @@ errcode_t profile_init
 
 extern void profile_release
 	PROTOTYPE ((profile_t profile));
+
+
+extern errcode_t profile_get_values
+	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
+extern errcode_t profile_get_string
+	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
+			const char *subsubname, const char *def_val,
+			char **ret_string));
+extern errcode_t profile_get_integer
+	PROTOTYPE((profile_t profile, const char *name, const char *subname,
+			const char *subsubname, int def_val,
+			int *ret_default));
+
+
 
 
 

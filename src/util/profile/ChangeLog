@@ -1,3 +1,9 @@
+Tue Aug 15 17:17:40 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_parse.c (strip_line,parse_line): Declare as static.
+
+	* prof_int.h: Add missing prototypes
+
 Thu Jul  6 10:05:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* prof_file.c: prof_int.h must be included after stdio.h
@@ -7,7 +13,6 @@ Wed July 5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* prof_int.h added _MACINTOSH conditional
 	* test_parse.c added _MACINTOSH conditional
 
-=======
 Fri Jun  9 19:00:19 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
