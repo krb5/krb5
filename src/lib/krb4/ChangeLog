@@ -1,4 +1,10 @@
 
+Fri Jun 16 11:15:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change "./DONE" to "DONE" since we know how to make
+		"DONE", hence a clean make won't get confused any more.
+	* configure.in - Add shared library install target.
+
+
 Thu Jun 15 18:07:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add definitions for shared library build rules.
 	* configure.in - Create symlinks for archive and shared library

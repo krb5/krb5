@@ -15,6 +15,9 @@ AC_ARG_ENABLE([shared],
 [  --enable-shared         build shared libraries],[
 LinkFileDir(../libcrypto.[$](SHEXT), libcrypto.[$](SHEXT), ./crypto)
 AppendRule([all-unix:: ../libcrypto.$(SHEXT)])
+AppendRule([install::	libcrypto.[$](SHEXT)
+	[$](INSTALL_DATA) libcrypto.[$](SHEXT)	\
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libcrypto.[$](SHEXT)])
 ])dnl
 AppendRule([all-unix:: libcrypto.a])
 AppendRule([all:: all-$(WHAT)])

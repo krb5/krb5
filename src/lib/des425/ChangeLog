@@ -1,4 +1,8 @@
 
+Fri Jun 16 11:15:11 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add install target for shared library.
+
+
 Thu Jun 15 18:00:45 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change "./DONE" target to "DONE" since we have a rule
 		for how to build it.  Also add definitions for shared library

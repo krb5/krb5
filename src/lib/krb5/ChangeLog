@@ -1,4 +1,8 @@
 
+Fri Jun 16 11:16:44 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add shared library install target.
+
+
 Thu Jun 15 18:08:12 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add definitions for shared library build rules.  Also,
 		remove explicit "all" target at front so we do subdirectories

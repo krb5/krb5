@@ -52,5 +52,8 @@ AC_ARG_ENABLE([shared],
 [  --enable-shared         build shared libraries],[
 LinkFileDir(../libkrb4.[$](SHEXT), libkrb4.[$](SHEXT), ./krb4)
 AppendRule([all-unix:: ../libkrb4.$(SHEXT)])
+AppendRule([install::	libkrb4.[$](SHEXT)
+	[$](INSTALL_DATA) libkrb4.[$](SHEXT)	\
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libkrb4.[$](SHEXT)])
 ])dnl
 V5_AC_OUTPUT_MAKEFILE

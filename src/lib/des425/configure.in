@@ -14,5 +14,8 @@ AC_ARG_ENABLE([shared],
 [  --enable-shared         build shared libraries],[
 LinkFileDir(../libdes425.[$](SHEXT), libdes425.[$](SHEXT), ./des425)
 AppendRule([all-unix:: ../libdes425.$(SHEXT)])
+AppendRule([install::	libdes425.[$](SHEXT)
+	[$](INSTALL_DATA) libdes425.[$](SHEXT)	\
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libdes425.[$](SHEXT)])
 ])dnl
 V5_AC_OUTPUT_MAKEFILE

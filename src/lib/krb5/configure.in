@@ -12,6 +12,9 @@ AC_ARG_ENABLE([shared],
 [  --enable-shared         build shared libraries],[
 LinkFileDir(../libkrb5.[$](SHEXT), libkrb5.[$](SHEXT), ./krb5)
 AppendRule([all-unix:: ../libkrb5.$(SHEXT)])
+AppendRule([install::	libkrb5.[$](SHEXT)
+	[$](INSTALL_DATA) libkrb5.[$](SHEXT)	\
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libkrb5.[$](SHEXT)])
 ])dnl
 LinkFileDir(../libkrb5.a, libkrb5.a, ./krb5)
 AppendRule([all-unix:: ../libkrb5.a])
