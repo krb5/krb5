@@ -29,7 +29,7 @@
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 	#include <TargetConditionals.h>
 #else
-	#include "krb524_err.h"
+    #include "krb524_err.h"
 #endif
 
 extern int krb524_debug;

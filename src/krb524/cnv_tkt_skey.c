@@ -25,8 +25,14 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#if TARGET_OS_MAC
+#include <Kerberos/krb.h>
+#include <Kerberos/krb524.h>
+#include "cr_tkt.h"
+#else
 #include <krb.h>
 #include "krb524.h"
+#endif
 
 /* rather than copying the cmu code, these values are derived from
    a calculation based on the table and comments found there.
@@ -90,7 +96,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	       fprintf(stderr, "v5 session keyblock type %d length %d != C_Block size %d\n",
 		       v5etkt->session->enctype,
 		       v5etkt->session->length,
-		       sizeof(C_Block));
+		       (int) sizeof(C_Block));
 	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
 	  return KRB524_BADKEY;
