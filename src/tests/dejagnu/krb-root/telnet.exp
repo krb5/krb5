@@ -281,74 +281,74 @@ proc telnet_test { } {
     # of checking whether it actually did.  Kill it just in case.
     stop_telnet_daemon
 
-#    # Try an authenticated encrypted connection.
-#    start_telnet_daemon
-#    spawn $TELNET -a -x -k $REALMNAME $hostname -3023
-#
-#    expect_after {
-#	timeout {
-#	    fail $testname
-#	    catch "expect_after"
-#	    return
-#	}
-#	eof {
-#	    fail $testname
-#	    catch "expect_after"
-#	    return
-#	}
-#    }
-#
-#    set testname "encrypted telnet"
-#    expect "Kerberos V5 accepts you"
-#    expect {
-#	-re "$SHELL_PROMPT" {
-#	    pass $testname
-#	}
-#    }
-#
-#    # Make sure the encryption is not destroying the text.
-#    set testname "echo"
-#    send "echo hello\r"
-#    expect "echo hello"
-#    expect "hello"
-#    expect {
-#	-re "$SHELL_PROMPT" {
-#	    pass $testname
-#	}
-#    }
-#
-#    # Move back to telnet command mode and check the encryption status.
-#    set testname "encryption status"
-#    send "\035"
-#    expect "telnet>"
-#    send "status\r"
-#    expect {
-#	-re "Currently encrypting output with DES_CFB64.*Currently decrypting input with DES_CFB64" {
-#	    pass $testname
-#	}
-#    }
+    # Try an authenticated encrypted connection.
+    start_telnet_daemon
+    spawn $TELNET -a -x -k $REALMNAME $hostname -3023
 
-#    set testname "exit status"
-#    send "exit\r"
-#    expect "Connection closed by foreign host.\r"
-#
-#    expect_after
+    expect_after {
+	timeout {
+	    fail $testname
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail $testname
+	    catch "expect_after"
+	    return
+	}
+    }
+
+    set testname "encrypted telnet"
+    expect "Kerberos V5 accepts you"
+    expect {
+	-re "$SHELL_PROMPT" {
+	    pass $testname
+	}
+    }
+
+    # Make sure the encryption is not destroying the text.
+    set testname "echo"
+    send "echo hello\r"
+    expect "echo hello"
+    expect "hello"
+    expect {
+	-re "$SHELL_PROMPT" {
+	    pass $testname
+	}
+    }
+
+    # Move back to telnet command mode and check the encryption status.
+    set testname "encryption status"
+    send "\035"
+    expect "telnet>"
+    send "status\r"
+    expect {
+	-re "Currently encrypting output with DES_CFB64.*Currently decrypting input with DES_CFB64" {
+	    pass $testname
+	}
+    }
+
+    set testname "exit status"
+    send "exit\r"
+    expect "Connection closed by foreign host.\r"
+
+    expect_after
 
     # We can't use check_exit_status, because we expect an exit status
     # of 1.
-#    set status_list [wait -i $spawn_id]
-#    verbose "wait -i $spawn_id returned $status_list (klist)"
-#    if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 1 } {
-#	send_log "exit status: $status_list\n"
-#	verbose "exit status: $status_list"
-#	fail "exit status"
-#    } else {
-#	pass "exit status"
-#    }
+    set status_list [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $status_list (klist)"
+    if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 1 } {
+	send_log "exit status: $status_list\n"
+	verbose "exit status: $status_list"
+	fail "exit status"
+    } else {
+	pass "exit status"
+    }
 
     # The telnet daemon should have stopped, but we have no easy way
     # of checking whether it actually did.  Kill it just in case.
-#    stop_telnet_daemon
+    stop_telnet_daemon
 }
 
 # Run the test.  Logging in sometimes takes a while, so increase the
