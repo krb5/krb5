@@ -1,6 +1,7 @@
 SRCDIR=../src
 DVI=texi2dvi
 DVIPS=dvips -o "$@"
+PSPDF=ps2pdf
 INFO=makeinfo
 HTML=makeinfo --html
 RM=rm -f
@@ -41,6 +42,9 @@ admin-guide.ps: $(ADMIN_DEPS)
 	$(DVI) admin.texinfo
 	$(DVIPS) admin
 
+admin-guide.pdf: admin-guide.ps
+	$(PSPDF) admin-guide.ps admin-guide.pdf
+
 .PHONY: admin-guide-html
 admin-guide-html:: admin.html
 
@@ -62,6 +66,9 @@ install-guide:: install-guide.ps
 install-guide.ps: $(INSTALL_DEPS)
 	$(DVI) install.texinfo
 	$(DVIPS) install
+
+install-guide.pdf: install-guide.ps
+	$(PSPDF) install-guide.ps install-guide.pdf
 
 .PHONY: install-guide-html
 install-guide-html:: install.html
@@ -138,7 +145,7 @@ clean-all:: clean-tex clean-backup clean-final clean-tarfiles
 
 .PHONY: clean-final
 clean-final::
-	$(RM) *.ps *.info *.info-? *.html
+	$(RM) *.ps *.info *.info-? *.html *.pdf
 
 .PHONY: clean-tex
 clean-tex::
