@@ -1,3 +1,9 @@
+Tue Oct 15 06:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Added standard rules for .plin -> .pl 
+
+	* *.plin: Renamed from *.pl.in
+
 Thu Oct 10 17:32:22 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* env-setup.shin (EXPECT): Subsititute path for expect from

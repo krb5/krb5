@@ -1,5 +1,7 @@
 PERL=@PERL@
 
+.SUFFIXES: .plin .pl
+
 GEN_SCRIPTS = compare_dump.pl fixup-conf-files.pl make-host-keytab.pl \
 	simple_dump.pl verify_xrunner_report.pl qualname.pl
 
@@ -17,7 +19,7 @@ restore_files.sh:
 	rm -f restore_files.sh
 	ln -s $(srcdir)/save_files.sh restore_files.sh
 
-%.pl: %.pl.in
+.plin.pl: 
 	-rm -f $@.tmp
 	echo "#!$(PERL)" > $@.tmp
 	sed 1d $< >> $@.tmp
