@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
-#include <kadm5/adb.h>
+#include <kadm5/server_internal.h>
 
 char *whoami;
 
@@ -26,6 +26,7 @@ int main(int argc, char **argv)
      krb5_context context;
      kadm5_config_params params;
      krb5_error_code kret;
+     kadm5_server_handle_rec kadm5_handle;
 
      whoami = argv[0];
 
@@ -52,7 +53,14 @@ int main(int argc, char **argv)
 	  exit(1);
      }
 
-     ret = osa_adb_open_policy(&policy_db, &params);
+     /* XXX Horrible kludge.  To get the generation number to increase for
+      * policy updates, the handle to the policy db needs a handle to the
+      * principal db so it can do a kdb_get_entry on the master principal.
+      * The only things it looks at are the context and params.
+      */
+     kadm5_handle.context = context;
+     kadm5_handle.params = params;
+     ret = osa_adb_open_policy(&policy_db, &params, &kadm5_handle);
      if (ret != OSA_ADB_OK) {
 	  com_err(whoami, ret, "while opening database");
 	  exit(1);

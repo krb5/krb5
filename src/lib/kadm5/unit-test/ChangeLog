@@ -1,5 +1,11 @@
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
+	* lock-test.c: Changed to include server_internal.h instead of adb.h.
+	(main): kadm5_server_handle_rec added for use with the new
+	osa_adb_open_policy calling sequence.
+
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
 	* api.0/init.exp: Silly typo fixed.
 
 	* api.2/init.exp: Same silly typo fixed.
