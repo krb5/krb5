@@ -810,6 +810,19 @@ EOF
     BePC:BeOS:*:*)	# BeOS running on Intel PC compatible.
 	echo i586-pc-beos
 	exit 0 ;;
+# MIT addition
+    Power\ Macintosh:Rhapsody:*:*)
+       echo powerpc-apple-rhapsody${UNAME_RELEASE}
+       exit 0 ;;
+# MIT addition
+    powerpc:Rhapsody:*:*)
+       echo powerpc-unknown-rhapsody${UNAME_RELEASE}
+       exit 0 ;;
+# MIT addition
+    i?86:Rhapsody:*:*)
+       echo i386-unknown-rhapsody${UNAME_RELEASE}
+       exit 0 ;;
+# MIT addition
     Power\ Macintosh:Mac\ OS:*:*)
 	echo powerpc-apple-macos${UNAME_RELEASE}
 	exit 0 ;;

@@ -1,3 +1,8 @@
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* stdcc.c (krb5_stdcc_retrieve): Replace with a version that calls
+	krb5_cc_retrieve_cred_default.
+
 1999-08-05	Alexandra Ellwood <lxs@mit.edu>
 
 	* stdcc_util.c (deep_free_cc_v5_creds):

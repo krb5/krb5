@@ -56,7 +56,7 @@
  *
  */
 
-krb5_boolean
+krb5_boolean KRB5_CALLCONV
 krb5_kuserok(context, principal, luser)
     krb5_context context;
     krb5_principal principal;
@@ -143,7 +143,7 @@ krb5_kuserok(context, principal, luser)
  * If the given Kerberos name "server" translates to the same name as "luser"
  * (using * krb5_aname_to_lname()), returns TRUE.
  */
-krb5_boolean
+krb5_boolean KRB5_CALLCONV
 krb5_kuserok(context, principal, luser)
     krb5_context context;
     krb5_principal principal;
@@ -151,7 +151,7 @@ krb5_kuserok(context, principal, luser)
 {
     char kuser[50];
 
-    if (! krb5_aname_to_localname(context, principal, sizeof(kuser), kuser))
+    if (krb5_aname_to_localname(context, principal, sizeof(kuser), kuser))
         return FALSE;
 
     if (strcmp(kuser, luser) == 0)

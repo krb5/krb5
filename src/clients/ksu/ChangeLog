@@ -1,3 +1,9 @@
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* heuristic.c (find_ticket): Use flag KRB5_TC_SUPPORTED_KTYPES
+	when calling krb5_cc_retrieve_cred.
+	* krb_auth_su.c (krb5_auth_check, krb5_fast_auth): Ditto.
+
 Fri Mar 12 18:52:18 1999  Tom Yu  <tlyu@mit.edu>
 
 	* main.c (main): Fix cleanup code for setluid() failure.

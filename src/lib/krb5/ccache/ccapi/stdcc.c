@@ -478,6 +478,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
  *
  * - try to find a matching credential in the cache
  */
+#if 0
 krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve 
        		(krb5_context context, 
 		   krb5_ccache id, 
@@ -523,6 +524,22 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve
 	
 	return KRB5_CC_NOTFOUND;
 }
+#else
+#include "k5-int.h"
+
+krb5_error_code KRB5_CALLCONV
+krb5_stdcc_retrieve(context, id, whichfields, mcreds, creds)
+   krb5_context context;
+   krb5_ccache id;
+   krb5_flags whichfields;
+   krb5_creds *mcreds;
+   krb5_creds *creds;
+{
+    return krb5_cc_retrieve_cred_default (context, id, whichfields,
+					  mcreds, creds);
+}
+
+#endif
 
 /*
  *  end seq

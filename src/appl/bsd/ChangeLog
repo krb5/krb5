@@ -1,3 +1,24 @@
+1999-08-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (kshd): Remove $(LOGINLIBS) from kshd dependencies.
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (main): Error out if -D isn't followed by another
+	argument.  Based on patch from Brad Thompson.
+
+	* krshd.c (v4_kdata, v4_ticket): Don't define if KRB5_KRB4_COMPAT
+	is not defined.  Patch from Brad Thompson.
+
+	* kcmd.c (kcmd): If krb5_get_credentials returns a nonzero error
+	code, print an error message before returning.
+
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (main): If ospeed is outside of compiled-in table
+	index range but not high enough to be a baud rate, use the highest
+	rate in the table.
+
 1999-08-02  Ken Raeburn  <raeburn@mit.edu>
 	and Brad Thompson  <yak@mit.edu>
 

@@ -93,7 +93,8 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
     }
 
     /* fetch tgt directly from cache */
-    retval = krb5_cc_retrieve_cred (context, cc, 0, &creds, &tgt);
+    retval = krb5_cc_retrieve_cred (context, cc, KRB5_TC_SUPPORTED_KTYPES,
+				    &creds, &tgt);
     if (retval)
 	goto errout;
 

@@ -1,3 +1,17 @@
+1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* klist.c (do_ccache, show_credential): Use krb5_free_unparsed_name
+	instead of free.
+
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* klist.c (show_credential): Index addresses array with i
+	in a loop instead of 1.  (Thanks to jaltman@columbia.edu)
+
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Use standard windows exe link flags.
+
 Mon May 10 15:13:58 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

@@ -339,7 +339,11 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     status = krb5_get_credentials(bsd_context, 0, cc, get_cred, &ret_cred);
     krb5_free_creds(bsd_context, get_cred);
     (void) krb5_cc_close(bsd_context, cc);
-    if (status) goto bad2;
+    if (status) {
+	fprintf (stderr, "error getting credentials: %s\n",
+		 error_message (status));
+	goto bad2;
+    }
 
     /* Reset internal flags; these should not be sent. */
     authopts &= (~OPTS_FORWARD_CREDS);

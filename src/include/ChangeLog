@@ -1,3 +1,42 @@
+1999-08-31  Jeffrey Altman <jaltman@columbia.edu>
+
+    * k5-int.h:  Add #define ANSI_STDIO for Windows builds so that 
+                 stdio opens files in binary mode instead of text
+                 mode.  This is necessary for Ctrl-Z transparency.
+
+1999-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for memmove and bcopy.
+
+	* Makefile.in (install): Install profile.h since krb5.h will use
+	it.
+
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_kuserok): Fix calling convention to make it
+	consistent with rest of krb5 exports before we start exporting 
+	this from the Windows DLL.
+
+1999-08-25  Danilo Almeida  <dalmeida@mit.edu>
+
+	* k5-int.h (krb5_cc_retrieve_cred_default): Fix calling convention
+	to make it consistent with actual calling convention.
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_TC_SUPPORTED_KTYPES): New flag.
+	* k5-int.h (krb5_cc_retrieve_cred_default): Declare.
+
+1999-08-18  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Re-align des3-cbc-sha1 and hmac-sha1-des3 to agree
+	with new number assignments; also rename symbols a little bit.
+
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-mac.h: Define MAXPATHLEN only if not already defined.  This
+	avoids warnings under Windows.
+
 1999-08-04  Danilo Almeida  <dalmeida@mit.edu>
 
 	* k5-int.h: Keep invariant that profile_in_memory member of context

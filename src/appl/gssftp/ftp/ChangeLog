@@ -1,3 +1,7 @@
+1999-08-27  Tom Yu  <tlyu@mit.edu>
+
+	* ftp.c: Diable krb5-mech2 for now.
+
 Tue May 11 11:58:00 1999  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftp.c: Inclusion of gssapi_krb5.h requires gssapi_generic.h.

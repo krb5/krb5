@@ -118,10 +118,10 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
   }
 
   if ((retval = krb5_cc_retrieve_cred(context, ccache,
-				      KRB5_TC_MATCH_SRV_NAMEONLY,
+				      KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 				      &tgtq, &tgt))) {
 
-    if (retval != KRB5_CC_NOTFOUND) {
+    if (retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE) {
 	goto cleanup;
     }
 
@@ -154,7 +154,7 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
 	goto cleanup;
 
     if ((retval = krb5_cc_retrieve_cred(context, ccache,
-					KRB5_TC_MATCH_SRV_NAMEONLY,
+					KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 					&tgtq, &tgt))) {
 	goto cleanup;
     }
@@ -217,10 +217,10 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
 	  goto cleanup;
 
       if ((retval = krb5_cc_retrieve_cred(context, ccache,
-					  KRB5_TC_MATCH_SRV_NAMEONLY,
+					  KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 					  &tgtq, &tgt))) {
     
-	if (retval != KRB5_CC_NOTFOUND) {
+	if (retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE) {
 	    goto cleanup;
 	}
   
@@ -280,7 +280,7 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
 		goto cleanup;
 
 	    if ((retval = krb5_cc_retrieve_cred(context, ccache,
-						KRB5_TC_MATCH_SRV_NAMEONLY,
+						KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 						&tgtq, &tgt))) {
 	      if (retval != KRB5_CC_NOTFOUND) {
 		  goto cleanup;

@@ -139,7 +139,7 @@ Service for Open Network Systems}, a paper presented at Winter USENIX
 * Kerberos Realms::             
 * The Ticket-Granting Ticket::  
 * Network Services and the Master Database::  
-* The User--Kerberos Interaction::  
+* The User/Kerberos Interaction::  
 * Definitions::                 
 @end menu
 
@@ -210,7 +210,7 @@ just a file in @code{/tmp}.  The credentials cache is also called the
 @dfn{ticket file}, especially in Kerberos V4 documentation.  Note,
 however, that a credentials cache does not have to be stored in a file.
 
-@node Network Services and the Master Database, The User--Kerberos Interaction, The Ticket-Granting Ticket, How Kerberos Works
+@node Network Services and the Master Database, The User/Kerberos Interaction, The Ticket-Granting Ticket, How Kerberos Works
 @section Network Services and the Master Database
 
 The master database also contains entries for all network services that
@@ -258,8 +258,8 @@ services that run as root are usually stored in the keytab file
 of the service's password, and must be kept secure.  Data which is meant
 to be read only by the service is encrypted using this key.
 
-@node The User--Kerberos Interaction, Definitions, Network Services and the Master Database, How Kerberos Works
-@section The User--Kerberos Interaction
+@node The User/Kerberos Interaction, Definitions, Network Services and the Master Database, How Kerberos Works
+@section The User/Kerberos Interaction
 
 Suppose that you walk up to a host intending to login to it, and then
 @samp{rlogin} to the machine @samp{laughter}.  Here's what happens:
@@ -324,7 +324,7 @@ login.
 @end enumerate
 @end enumerate
 
-@node Definitions,  , The User--Kerberos Interaction, How Kerberos Works
+@node Definitions,  , The User/Kerberos Interaction, How Kerberos Works
 @section Definitions
 
 Following are definitions of some of the Kerberos terminology.
@@ -839,10 +839,6 @@ in this realm.
 not allowed as passwords.  The default is
 @code{@value{ROOTDIR}/var/krb5kdc/kadm5.dict}.
 
-@itemx encryption_type
-(Encryption type string.)  Specifies the encryption type used for this
-realm.  Only "des-cbc-crc" is supported at this time.
-
 @itemx kadmind_port
 (Port number.)  Specifies the port that the kadmind daemon is to listen
 for this realm.  The assigned port for kadmind is 749.
@@ -875,9 +871,25 @@ valid ticket may be renewed in this realm.
 
 @itemx supported_enctypes
 List of key:salt strings.  Specifies the default key/salt combinations
-of principals for this realm.  Since only the encryption type
-"des-cbc-crc" is supported, you should set this tag to
-@samp{des-cbc-crc:normal}.
+of principals for this realm.  Any principals created through
+@code{kadmin} will have keys of these types.  Since only the encryption
+type "des-cbc-crc" is supported, you should set this tag to
+@samp{des-cbc-crc:normal des-cbc-crc:v4}.
+
+@itemx kdc_supported_enctypes
+List of key:salt strings.  Specifies the permitted key/salt combinations
+of principals for this realm.  You should set this tag to
+@samp{des-cbc-crc:normal des-cbc-crc:v4}.
+
+@b{Note:} You may also use @samp{des3-cbc-sha1:normal} before
+@samp{des-cbc-crc:normal} if you wish to support triple-DES service keys
+in addition to DES service keys.  In order to create such service keys,
+you must use the @code{-e} option to @code{kadmin.local}, running on the
+KDC system itself; the remote @code{kadmin} client does not allow this
+option.  We do not currently support the use of triple-DES keys anywhere
+other than for service keys.
+
+
 @end table
 
 @node Sample kdc.conf File,  , realms (kdc.conf), kdc.conf
@@ -896,7 +908,8 @@ Here's an example of a @code{kdc.conf} file:
         max_life = 10h 0m 0s
         max_renewable_life = 7d 0h 0m 0s
         master_key_type = des-cbc-crc
-        supported_enctypes = des-cbc-crc:normal
+        supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
+        kdc_supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
     @}
 
 [logging]
@@ -993,6 +1006,16 @@ unauthorized users gain read access to the script.
 @item @b{-q} @i{query}
 Pass @i{query} directly to @code{kadmin}.  This is useful for writing
 scripts that pass specific queries to @code{kadmin}.
+
+@item @b{-e} @i{"enctypes ..."}
+@b{(For @code{kadmin.local} only.)}
+Sets the list of cryptosystem and salt types to be used for any new keys
+created.  Available types include @samp{des3-cbc-sha1:normal},
+@samp{des-cbc-crc:normal}, and @samp{des-cbc-crc:v4}.  In this release,
+the @samp{des3-cbc-sha1:normal} type should only be used when
+registering service principals; for any services that may request
+tickets themselves to initiate some action, it should be combined with
+one or more of the other types.
 @end table
 
 @node Date Format, Principals, Kadmin Options, Administrating Kerberos Database Entries
@@ -1016,11 +1039,14 @@ tomorrow
 now
 "second Monday"
 fortnight
-"3/31/92 10:00:07 PST"
-"January 23, 1987 10:05pm"
+"3/31/1992 10:00:07 PST"
+"January 23, 2007 10:05pm"
 "22:00 GMT"
 @end group
 @end smallexample
+
+Two-digit years are allowed in places, but the use of this form is not
+recommended.
 
 Note that if the date specification contains spaces, you must enclose it
 in double quotes.  Note also that you cannot use a number without a

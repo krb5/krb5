@@ -42,6 +42,8 @@ OSErr __initializeK5(CFragInitBlockPtr ibp)
 
 void __terminateK5(void)
 {
+
+	krb5_stdcc_shutdown();
 	
     remove_error_table(&et_krb5_error_table);
     remove_error_table(&et_kv5m_error_table);

@@ -294,12 +294,11 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
     char host[64];                              /* Name of local machine */
     struct hostent *hostrec;
-    int err;
+    int err, count, i;
+    krb5_address ** paddr;
 
-    *addr = calloc (2, sizeof (krb5_address *));
-    if (*addr == NULL)
-        return ENOMEM;
-
+    *addr = 0;
+    paddr = 0;
     err = 0;
     
     if (gethostname (host, sizeof(host))) {
@@ -319,27 +318,55 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
 		    return err;
     }
 
-    (*addr)[0] = calloc (1, sizeof(krb5_address));
-    if ((*addr)[0] == NULL) {
-        free (*addr);
-        return ENOMEM;
-    }
-    (*addr)[0]->magic = KV5M_ADDRESS;
-    (*addr)[0]->addrtype = hostrec->h_addrtype;
-    (*addr)[0]->length = hostrec->h_length;
-    (*addr)[0]->contents = (unsigned char *)malloc((*addr)[0]->length);
-    if (!(*addr)[0]->contents) {
-        free((*addr)[0]);
-        free(*addr);
-        return ENOMEM;
-    } else {
-        memcpy ((*addr)[0]->contents,
-                hostrec->h_addr,
-                (*addr)[0]->length);
-    }
-	/* FIXME, deal with the case where gethostent returns multiple addrs */
+    for (count = 0; hostrec->h_addr_list[count]; count++);
 
-    return(0);
+
+    paddr = (krb5_address **)malloc(sizeof(krb5_address *) * (count+1));
+    if (!paddr) {
+        err = ENOMEM;
+        goto cleanup;
+    }
+
+    memset(paddr, 0, sizeof(krb5_address *) * (count+1));
+
+    for (i = 0; i < count; i++)
+    {
+        paddr[i] = (krb5_address *)malloc(sizeof(krb5_address));
+        if (paddr[i] == NULL) {
+            err = ENOMEM;
+            goto cleanup;
+        }
+
+        paddr[i]->magic = KV5M_ADDRESS;
+        paddr[i]->addrtype = hostrec->h_addrtype;
+        paddr[i]->length = hostrec->h_length;
+        paddr[i]->contents = (unsigned char *)malloc(paddr[i]->length);
+        if (!paddr[i]->contents) {
+            err = ENOMEM;
+            goto cleanup;
+        }
+        memcpy(paddr[i]->contents,
+               hostrec->h_addr_list[i],
+               paddr[i]->length);
+    }
+
+ cleanup:
+    if (err) {
+        if (paddr) {
+            for (i = 0; i < count; i++)
+            {
+                if (paddr[i]) {
+                    if (paddr[i]->contents)
+                        free(paddr[i]->contents);
+                    free(paddr[i]);
+                }
+            }
+            free(paddr);
+        }
+    }
+    else
+        *addr = paddr;
+
+    return(err);
 }
 #endif
-
