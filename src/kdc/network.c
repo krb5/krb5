@@ -45,7 +45,7 @@ static char rcsid_network_c[] =
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#ifdef AIXArchitecture
+#if defined(_AIX) || defined(AIXArchitecture)
 #include <sys/select.h>
 #endif
 #include <arpa/inet.h>
