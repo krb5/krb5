@@ -219,7 +219,7 @@ while (! $d->eof()) {
     }
     s/[ \t]*//g;
     my($xconv);
-    if (/!CALLCONV/) {
+    if (/!CALLCONV/ || /KRB5_CALLCONV_WRONG/) {
 	$xconv = "KRB5_CALLCONV_WRONG";
     } elsif ($vararg{$_}) {
 	$xconv = "KRB5_CALLCONV_C";
