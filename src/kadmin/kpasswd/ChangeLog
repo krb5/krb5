@@ -1,3 +1,7 @@
+Tue Aug  9 21:42:02 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* networked.c: yet another utent fix
+
 Sat Jul 16 02:51:25 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* kpasswd.c (get_first_ticket): fix error codes
