@@ -1,3 +1,10 @@
+Sun Apr  7 23:03:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add KRB5_RUN_FLAGS
+
+	* Makefile.in (site.exp): Create site.exp with runtime environment
+		line from configure.
+
 Mon Feb 26 03:38:24 1996  Mark W. Eichin  <eichin@cygnus.com>
 
 	* *.exp: use $REALMNAME for the testing realm.
