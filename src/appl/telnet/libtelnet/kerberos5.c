@@ -13,8 +13,8 @@ char rcsid_kerberos5_c[] = "$Id$";
 #endif /* lint */
 
 /*-
- * Copyright (c) 1991 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1991, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,7 +46,7 @@ char rcsid_kerberos5_c[] = "$Id$";
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)kerberos5.c	5.3 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)kerberos5.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
 /*
@@ -82,6 +82,7 @@ static char sccsid[] = "@(#)kerberos5.c	5.3 (Berkeley) 12/18/92";
 #include <netdb.h>
 #include <ctype.h>
 
+#define FORWARD	/* Do credentials forwarding.... */
 
 /* kerberos 5 include files (ext-proto.h) will get an appropriate stdlib.h
    and string.h/strings.h */
@@ -91,12 +92,18 @@ static char sccsid[] = "@(#)kerberos5.c	5.3 (Berkeley) 12/18/92";
 #include "misc.h"
 
 extern auth_debug_mode;
+
+#ifdef	FORWARD
 int forward_flags = 0;  /* Flags get set in telnet/main.c on -f and -F */
 
 /* These values need to be the same as those defined in telnet/main.c. */
 /* Either define them in both places, or put in some common header file. */
 #define OPTS_FORWARD_CREDS           0x00000002
 #define OPTS_FORWARDABLE_CREDS       0x00000001
+
+void kerberos5_forward();
+
+#endif	/* FORWARD */
 
 static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V5, };
@@ -107,17 +114,18 @@ static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 #define	KRB_REJECT		1	/* Rejected (reason might follow) */
 #define	KRB_ACCEPT		2	/* Accepted */
 #define	KRB_RESPONSE		3	/* Response for mutual auth. */
+
+#ifdef	FORWARD
 #define KRB_FORWARD     	4       /* Forwarded credentials follow */
 #define KRB_FORWARD_ACCEPT     	5       /* Forwarded credentials accepted */
 #define KRB_FORWARD_REJECT     	6       /* Forwarded credentials rejected */
+#endif	/* FORWARD */
 
 static	krb5_data auth;
 	/* telnetd gets session key from here */
 static	krb5_tkt_authent *authdat = NULL;
 /* telnet matches the AP_REQ and AP_REP with this */
 static	krb5_authenticator authenticator;
-
-void kerberos5_forward();
 
 /* some compilers can't hack void *, so we use the Kerberos krb5_pointer,
    which is either void * or char *, depending on the compiler. */
@@ -190,9 +198,9 @@ kerberos5_send(ap)
 	extern krb5_flags krb5_kdc_default_options;
 	int ap_opts;
 
-#if     defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	krb5_keyblock *newkey = 0;
-#endif
+#endif	/* ENCRYPTION */
 
 	ksum.checksum_type = CKSUMTYPE_CRC32;
 	ksum.contents = sum;
@@ -280,11 +288,11 @@ kerberos5_send(ap)
 	    ap_opts = 0;
 	    
 	r = krb5_mk_req_extended(ap_opts, &ksum, krb5_kdc_default_options, 0,
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 				 &newkey,
-#else
+#else	/* ENCRYPTION */
 				 0,
-#endif
+#endif	/* ENCRYPTION */
 				 ccache, &creds, &authenticator, &auth);
 	/* don't let the key get freed if we clean up the authenticator */
 	authenticator.subkey = 0;
@@ -292,7 +300,7 @@ kerberos5_send(ap)
 	free(name);
 	krb5_free_host_realm(realms);
 	krb5_free_principal(server);
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	if (newkey) {
 	    /* keep the key in our private storage, but don't use it
 	       yet---see kerberos5_reply() below */
@@ -309,7 +317,7 @@ kerberos5_send(ap)
 	    }
 	    krb5_free_keyblock(newkey);
 	}
-#endif
+#endif	/* ENCRYPTION */
 	if (r) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: mk_req failed (%s)\r\n",
@@ -465,6 +473,7 @@ kerberos5_is(ap, data, cnt)
 		encrypt_session_key(&skey, 1);
 #endif
 		break;
+#ifdef	FORWARD
 	case KRB_FORWARD:
 		inbuf.data = (char *)data;
 		inbuf.length = cnt;
@@ -483,6 +492,7 @@ kerberos5_is(ap, data, cnt)
 		  if (auth_debug_mode)
 		    printf("Forwarded credentials obtained\r\n");
 		break;
+#endif	/* FORWARD */
 	default:
 		if (auth_debug_mode)
 			printf("Unknown Kerberos option %d\r\n", data[-1]);
@@ -523,8 +533,10 @@ kerberos5_reply(ap, data, cnt)
 		else
 		    printf("[ Kerberos V5 accepts you ]\n");
 		auth_finished(ap, AUTH_USER);
+#ifdef	FORWARD
 		if (forward_flags & OPTS_FORWARD_CREDS)
 		  kerberos5_forward(ap);
+#endif	/* FORWARD */
 		break;
 	case KRB_RESPONSE:
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
@@ -554,15 +566,16 @@ kerberos5_reply(ap, data, cnt)
 			return;
 		    }
 		    krb5_free_ap_rep_enc_part(reply);
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 			skey.type = SK_DES;
 			skey.length = 8;
 			skey.data = session_key;
 			encrypt_session_key(&skey, 0);
-#endif
+#endif	/* ENCRYPTION */
 		    mutual_complete = 1;
 		}
 		return;
+#ifdef	FORWARD
 	case KRB_FORWARD_ACCEPT:
 		printf("[ Kerberos V5 accepted forwarded credentials ]\n");
 		return;
@@ -570,6 +583,7 @@ kerberos5_reply(ap, data, cnt)
 		printf("[ Kerberos V5 refuses forwarded credentials because %.*s ]\r\n",
 				cnt, data);
 		return;
+#endif	/* FORWARD */
 	default:
 		if (auth_debug_mode)
 			printf("Unknown Kerberos option %d\r\n", data[-1]);
@@ -636,6 +650,7 @@ kerberos5_printsub(data, cnt, buf, buflen)
 		strncpy((char *)buf, " RESPONSE", buflen);
 		goto common2;
 
+#ifdef	FORWARD
 	case KRB_FORWARD:               /* Forwarded credentials follow */
 		strncpy((char *)buf, " FORWARD", buflen);
 		goto common2;
@@ -648,6 +663,7 @@ kerberos5_printsub(data, cnt, buf, buflen)
 					       /* (reason might follow) */
 		strncpy((char *)buf, " FORWARD_REJECT", buflen);
 		goto common2;
+#endif	/* FORWARD */
 
 	default:
 		sprintf(lbuf, " %d (unknown)", data[3]);
@@ -663,6 +679,7 @@ kerberos5_printsub(data, cnt, buf, buflen)
 	}
 }
 
+#ifdef	FORWARD
         void
 kerberos5_forward(ap)
      Authenticator *ap;
@@ -742,5 +759,6 @@ kerberos5_forward(ap)
 
     krb5_free_creds(local_creds);
 }
+#endif	/* FORWARD */
 
 #endif /* KRB5 */
