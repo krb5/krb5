@@ -1,3 +1,8 @@
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_util.c (select_session_keytype): If none of the requested
+	ktypes are NULL or single-DES, force des-cbc-crc.
+
 1999-08-18  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (compat_decrypt_key): Align DES3 enctypes with
