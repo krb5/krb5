@@ -535,6 +535,7 @@ char *host;
     krb5_principal client, server;
     krb5_error *err_ret = NULL;
     register char *cp;
+    char *hostname;
 #endif /* KRB5 */
 #endif /* KERBEROS */
     hp = gethostbyname(host);
@@ -544,6 +545,12 @@ char *host;
     }
 
 #ifdef KERBEROS
+    hostname = malloc(strlen(hp->h_name)+1);
+    if (!hostname) {
+	    sprintf(ErrMsg, "Couldn't allocate space for hostname");
+	    return(NOTOK);
+    }
+    strcpy(hostname, hp->h_name);
     sp = getservbyname(KPOP_SERVICE, "tcp");
 #else
     sp = getservbyname("pop", "tcp");
@@ -580,8 +587,8 @@ char *host;
 #ifdef KERBEROS
 #ifdef KRB4
     ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
-    rem = krb_sendauth(0L, s, ticket, POP_SNAME, hp->h_name,
-		       (char *) krb_realmofhost(hp->h_name),
+    rem = krb_sendauth(0L, s, ticket, POP_SNAME, hostname,
+		       (char *) krb_realmofhost(hostname),
 		       (unsigned long)0, &msg_data, &cred, schedule,
 		       (struct sockaddr_in *)0,
 		       (struct sockaddr_in *)0,
@@ -605,14 +612,7 @@ char *host;
 	goto krb5error;
     }
 
-#if 0
-    /* lower-case to get name for "instance" part of service name */
-    for (cp = hp->h_name; *cp; cp++)
-	if (isupper(*cp))
-	    *cp = tolower(*cp);
-#endif
-
-    if (retval = krb5_sname_to_principal(hp->h_name, POP_SNAME,
+    if (retval = krb5_sname_to_principal(hostname, POP_SNAME,
 					 KRB5_NT_SRV_HST, &server)) {
 	goto krb5error;
     }
@@ -640,6 +640,7 @@ char *host;
 	return(NOTOK);
     }
 #endif /* KRB5 */
+    free(hostname);
 #endif /* KERBEROS */
 		       
     sfi = fdopen(s, "r");
