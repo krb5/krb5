@@ -147,7 +147,7 @@ krb_prof_get_nth(
 	if (strlen(value) >= retlen)
 	    result = KFAILURE;
 	else
-	    strcpy(ret, value, retlen);
+	    strcpy(ret, value);
     }
 cleanup:
     if (name != NULL)
