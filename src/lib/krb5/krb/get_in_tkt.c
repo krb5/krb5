@@ -55,8 +55,6 @@
  */
 
 
-extern krb5_deltat krb5_clockskew;
-
 /* some typedef's for the function args to make things look a bit cleaner */
 
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
@@ -264,7 +262,7 @@ verify_as_reply(context, time_now, request, as_reply)
 
     if ((request->from == 0) &&
 	(labs(as_reply->enc_part2->times.starttime - time_now)
-	 > krb5_clockskew))
+	 > context->clockskew))
 	return (KRB5_KDCREP_SKEW);
 
     return 0;

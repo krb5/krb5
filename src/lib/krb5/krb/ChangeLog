@@ -1,5 +1,16 @@
 Wed Nov  8 02:50:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* krbconfig.c: Removed the krb5_clockskew variable.
+
+	* srv_rcache.c (krb5_get_server_rcache): 
+	* rd_safe.c (krb5_rd_safe): 
+	* rd_req_dec.c (krb5_rd_req_decoded): 
+	* rd_priv.c (krb5_rd_priv): 
+	* rd_cred.c (krb5_rd_cred): 
+	* gc_via_tkt.c (krb5_get_cred_via_tkt): 
+	* get_in_tkt.c (verify_as_reply): Replace use of krb5_clockskew
+		with context->clockskew.
+
 	* encrypt_tk.c (cleanup_scratch): Changed interface to no longer
 		require an eblock; we can use our own and figure out the
 		enctype from the passed-in key.

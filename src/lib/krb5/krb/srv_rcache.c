@@ -37,7 +37,6 @@ krb5_get_server_rcache(context, piece, rcptr)
     krb5_rcache rcache = 0;
     char *cachename = 0;
     char tmp[4];
-    extern krb5_deltat krb5_clockskew;
     krb5_error_code retval;
     int len, p, i;
     
@@ -88,7 +87,8 @@ krb5_get_server_rcache(context, piece, rcptr)
      * initialize it.
      */
     if (krb5_rc_recover(context, rcache)) {
-	if ((retval = krb5_rc_initialize(context, rcache, krb5_clockskew))) {
+	if ((retval = krb5_rc_initialize(context, rcache,
+					 context->clockskew))) {
 	    krb5_rc_close(context, rcache);
 	    rcache = 0;
 	    goto cleanup;

@@ -201,8 +201,7 @@ cleanup_cred:
 
 /*----------------------- krb5_rd_cred -----------------------*/
 
-extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
 
 /*
  * This functions takes as input an KRB_CRED message, validates it, and

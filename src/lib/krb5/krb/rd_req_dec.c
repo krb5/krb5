@@ -59,8 +59,7 @@
 static krb5_error_code decrypt_authenticator
 	PROTOTYPE((krb5_context, const krb5_ap_req *, krb5_authenticator **));
 
-extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
 
 static krb5_error_code
 krb5_rd_req_decrypt_tkt_part(context, req, keytab)
@@ -236,7 +235,7 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
 
     if ((retval = krb5_timeofday(context, &currenttime)))
 	goto cleanup;
-    if (starttime - currenttime > krb5_clockskew) {
+    if (starttime - currenttime > context->clockskew) {
 	retval = KRB5KRB_AP_ERR_TKT_NYV;	/* ticket not yet valid */
 	goto cleanup;
     }	
@@ -244,7 +243,8 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
 	retval = KRB5KRB_AP_ERR_SKEW;
 	goto cleanup;
     }
-    if (currenttime - req->ticket->enc_part2->times.endtime > krb5_clockskew) {
+    if ((currenttime - req->ticket->enc_part2->times.endtime) >
+	context->clockskew) {
 	retval = KRB5KRB_AP_ERR_TKT_EXPIRED;	/* ticket expired */
 	goto cleanup;
     }	

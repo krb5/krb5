@@ -59,7 +59,6 @@ krb5_recvauth(context, auth_context,
     krb5_rcache 	  rcache;
     krb5_octet		  response;
     krb5_data		  null_server;
-    extern krb5_deltat 	  krb5_clockskew;
 	
 	/*
 	 * Zero out problem variable.  If problem is set at the end of
@@ -137,7 +136,7 @@ krb5_recvauth(context, auth_context,
     /*
      * Now, let's read the AP_REQ message and decode it
      */
-    if (retval = krb5_read_message(context, fd, &inbuf))
+    if ((retval = krb5_read_message(context, fd, &inbuf)))
         return retval;
 
     if (*auth_context == NULL) {

@@ -28,8 +28,7 @@
 #include "cleanup.h"
 #include "auth_con.h"
 
-extern krb5_deltat krb5_clockskew;   
-#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
 
 /*
 

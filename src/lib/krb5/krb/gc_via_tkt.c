@@ -28,8 +28,7 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
-extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date, now) (labs((date)-(now)) < krb5_clockskew)
+#define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 
 static krb5_error_code
 krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
