@@ -277,7 +277,10 @@ SRCS=	$(srcdir)/addr_comp.c	\
 # Someday, when we have a "maintainer mode", do this right:
 BISON=bison
 BISONFLAGS=-v # -v -> .output; -d -> .h
-$(srcdir)/deltat.c : @MAINT@ x-deltat.y
+DELTAT_DEP=@MAINT@ x-deltat.y
+##WIN32##DELTAT_DEP=
+
+$(srcdir)/deltat.c : $(DELTAT_DEP)
 	$(BISON) $(BISONFLAGS) -o $(srcdir)/deltat.c $(srcdir)/x-deltat.y
 
 ##DOS##LIBOBJS = $(OBJS)

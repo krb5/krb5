@@ -1,3 +1,8 @@
+2005-03-14  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: fix maintainer mode since it is not supported on 
+          Windows.
+
 2005-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* x-deltat.y (tok_WS): Renamed terminal from "WS", which conflicts
