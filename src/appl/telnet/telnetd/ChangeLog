@@ -1,3 +1,8 @@
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* telnetd.c (main): Change variable sin to sin4.
+	(encrypt_failure): Change to not shadow global error_message.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* telnetd.c: Add prototypes for getent() and tgetent(). 

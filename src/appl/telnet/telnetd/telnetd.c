@@ -488,22 +488,22 @@ main(argc, argv)
 	if (debug) {
 	    int s, ns, foo;
 	    struct servent *sp;
-	    static struct sockaddr_in sin = { AF_INET };
+	    static struct sockaddr_in sin4 = { AF_INET };
 
 	    if (argc > 1) {
 		usage();
 		/* NOT REACHED */
 	    } else if (argc == 1) {
 		    if ((sp = getservbyname(*argv, "tcp"))) {
-			sin.sin_port = sp->s_port;
+			sin4.sin_port = sp->s_port;
 		    } else {
-			sin.sin_port = atoi(*argv);
-			if ((int)sin.sin_port <= 0) {
+			sin4.sin_port = atoi(*argv);
+			if ((int)sin4.sin_port <= 0) {
 			    fprintf(stderr, "telnetd: %s: bad port #\n", *argv);
 			    usage();
 			    /* NOT REACHED */
 			}
-			sin.sin_port = htons((u_short)sin.sin_port);
+			sin4.sin_port = htons((u_short)sin4.sin_port);
 		   }
 	    } else {
 		sp = getservbyname("telnet", "tcp");
@@ -511,7 +511,7 @@ main(argc, argv)
 		    fprintf(stderr, "telnetd: tcp/telnet: unknown service\n");
 		    exit(1);
 		}
-		sin.sin_port = sp->s_port;
+		sin4.sin_port = sp->s_port;
 	    }
 
 	    s = socket(AF_INET, SOCK_STREAM, 0);
@@ -521,7 +521,7 @@ main(argc, argv)
 	    }
 	    (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
 				(char *)&on, sizeof(on));
-	    if (bind(s, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+	    if (bind(s, (struct sockaddr *)&sin4, sizeof(sin4)) < 0) {
 		perror("bind");
 		exit(1);
 	    }
@@ -529,8 +529,8 @@ main(argc, argv)
 		perror("listen");
 		exit(1);
 	    }
-	    foo = sizeof(sin);
-	    ns = accept(s, (struct sockaddr *)&sin, &foo);
+	    foo = sizeof(sin4);
+	    ns = accept(s, (struct sockaddr *)&sin4, &foo);
 	    if (ns < 0) {
 		perror("accept");
 		exit(1);
@@ -689,10 +689,10 @@ usage()
 
 static void encrypt_failure()
 {
-    char *error_message =
+    char *lerror_message =
 	"Encryption was not successfully negotiated.  Goodbye.\r\n\r\n";
 
-    writenet(error_message, strlen(error_message));
+    writenet(lerror_message, strlen(lerror_message));
     netflush();
     exit(1);
 }
