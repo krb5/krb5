@@ -421,10 +421,9 @@ svc_getreqset(readfds)
 	register int sock;
         bool_t no_dispatch;
 
-	char cred_area[2*MAX_AUTH_BYTES + RQCRED_SIZE];
-	msg.rm_call.cb_cred.oa_base = cred_area;
-	msg.rm_call.cb_verf.oa_base = &(cred_area[MAX_AUTH_BYTES]);
-	r.rq_clntcred = &(cred_area[2*MAX_AUTH_BYTES]);
+	msg.rm_call.cb_cred.oa_base = mem_alloc(MAX_AUTH_BYTES);
+	msg.rm_call.cb_verf.oa_base = mem_alloc(MAX_AUTH_BYTES);
+	r.rq_clntcred = mem_alloc(RQCRED_SIZE);
 
 #ifdef FD_SETSIZE
 	for (sock = 0; sock <= max_xport; sock++) {
@@ -498,4 +497,7 @@ svc_getreqset(readfds)
 		} while (stat == XPRT_MOREREQS);
 	    }
 	}
+	mem_free(msg.rm_call.cb_cred.oa_base, MAX_AUTH_BYTES);
+	mem_free(msg.rm_call.cb_verf.oa_base, MAX_AUTH_BYTES);
+	mem_free(r.rq_clntcred, RQCRED_SIZE);
 }

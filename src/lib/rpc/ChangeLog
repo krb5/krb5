@@ -1,3 +1,11 @@
+2004-08-16  Tom Yu  <tlyu@mit.edu>
+
+	* svc_auth_gss.c (gssrpc__svcauth_gss): Add some debug messages.
+
+	* svc.c (svc_getreqset): Don't allocate either raw or cooked
+	credentials on the stack using the cred_area char array; use
+	mem_alloc() instead.  This avoids alignment problems.
+
 2004-06-28  Tom Yu  <tlyu@mit.edu>
 
 	* auth_gss.c (g_OID_equal): Fix signedness.
