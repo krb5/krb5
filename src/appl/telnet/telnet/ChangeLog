@@ -1,3 +1,11 @@
+Thu Nov 14 14:25:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sys_bsd.c(intr): Added checks to intr_waiting and intr_happened
+		to handle ^C while waiting for encryption negotiation.
+
+	* telnet.c (telnet): Allow ^C to work while waiting for encryption
+		negotiation to finish. [telnet/64]
+
 Sun Nov 10 17:34:40 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* commands.c (tn): Reverse resolve address to deal with dialup

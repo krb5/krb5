@@ -2254,6 +2254,8 @@ Scheduler(block)
 telnet(user)
     char *user;
 {
+    int printed_encrypt = 0;
+    
     sys_telnet_init();
 
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION) 
@@ -2310,27 +2312,46 @@ telnet(user)
 	send_will(TELOPT_ENCRYPT, 1);
 	while (1) {
 	    if (my_want_state_is_wont(TELOPT_AUTHENTICATION)) {
-		printf("Server refused to negotiation authentication, which is required\n");
+		printf("\nServer refused to negotiation authentication, which is required\n");
 		printf("for encryption.  Good bye.\n\r");
 		Exit(1);
 	    }
 	    if (auth_has_failed) {
-		printf("Authentication negotation has failed, which is required for\n");
+		printf("\nAuthentication negotation has failed, which is required for\n");
 		printf("encryption.  Good bye.\n\r");
 		Exit(1);
 	    }
 	    if (my_want_state_is_dont(TELOPT_ENCRYPT) ||
 		my_want_state_is_wont(TELOPT_ENCRYPT)) {
-		printf("Server refused to negotiate encryption.  Good bye.\n\r");
+		printf("\nServer refused to negotiate encryption.  Good bye.\n\r");
 		Exit(1);
 	    }
 	    if (encrypt_is_encrypting())
 		break;
 	    if (time(0) > timeout) {
-		printf("Encryption could not be enabled.  Goodbye.\n\r");
+		printf("\nEncryption could not be enabled.  Goodbye.\n\r");
 		Exit(1);
 	    }
+	    if (printed_encrypt == 0) {
+		    printed_encrypt = 1;
+		    printf("Waiting for encryption to be negotiated...");
+		    /*
+		     * Turn on MODE_TRAPSIG and then turn off localchars 
+		     * so that ^C will cause telnet to exit.
+		     */
+		    TerminalNewMode(getconnmode()|MODE_TRAPSIG);
+		    intr_waiting = 1;
+	    }
+	    if (intr_happened) {
+		    printf("\nUser requested an interrupt.  Goodbye.\n\r");
+		    Exit(1);
+	    }
 	    telnet_spin();
+	}
+	if (printed_encrypt) {
+		printf("done.\n");
+		intr_waiting = 0;
+		setconnmode(0);
 	}
     }
 #endif
