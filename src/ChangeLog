@@ -1,3 +1,13 @@
+Sun Mar  1 22:22:50 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4: Remove unused variables BUILDTOP and SRCTOP (now
+ 		defined in the individual Makefile.in file.  Define
+ 		@AUTOCONF@ to have the appropriate pathname (either
+ 		internal to our source tree, or in the user's path).  Set
+ 		@CONFIG_RELTOPDIR@ to contain the relative path to the top
+ 		of the build directory from the directory containing the
+		configure script.
+
 Fri Feb 27 21:43:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4 (KRB5_AC_REGEX_FUNCS): Take the regular expression

@@ -21,8 +21,6 @@ krb5_pre_in=$ac_config_fragdir/pre.in
 krb5_post_in=$ac_config_fragdir/post.in
 krb5_prepend_frags=$krb5_pre_in
 krb5_append_frags=$krb5_post_in
-BUILDTOP=$ac_reltopdir
-SRCTOP=$srcdir/$ac_reltopdir
 if test -d "$srcdir/$ac_config_fragdir"; then
   AC_CONFIG_AUX_DIR($ac_config_fragdir)
 else
@@ -45,6 +43,25 @@ WITH_NETLIB dnl
 WITH_HESIOD dnl
 KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
+dnl
+dnl This selects the correct autoconf file; either the one in our source tree,
+dnl or the one found in the user's path.  $srcdir may be relative, and if so,
+dnl it's relative to the directory of the configure script.  Since the 
+dnl automatic makefile rules to rerun autoconf cd into that directory, the
+dnl right thing happens.
+dnl
+if test -f $srcdir/$ac_reltopdir/util/autoconf/autoconf ; then
+	AUTOCONF=$ac_reltopdir/util/autoconf/autoconf
+else
+	AUTOCONF=autoconf
+fi
+AC_SUBST(AUTOCONF)
+dnl
+dnl This identifies the top of the source tree relative to the directory 
+dnl in which the configure file lives.
+dnl
+CONFIG_RELTOPDIR=$ac_reltopdir
+AC_SUBST(CONFIG_RELTOPDIR)
 AC_SUBST(subdirs)
 ])dnl
 
