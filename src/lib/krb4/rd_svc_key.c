@@ -207,7 +207,7 @@ int get_service_key(service,instance,realm,kvno,file,key)
     int wcard;
     char krb_realm[REALM_SZ];
 
-    int stab, open();
+    int stab;
 
     if (!file)
 	file = KEYFILE;
