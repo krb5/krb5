@@ -1,3 +1,9 @@
+Wed Sep 24 11:56:50 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_util.c (add_to_transited): Fix up memory leaks, clean out
+        new memory allocated, allocate buffers to max size
+        needed. [based on krb5-kdc/461 by Ken Hornstein].
+
 Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc_preauth.c (get_sam_edata): Use proper interface to
