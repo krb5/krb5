@@ -27,7 +27,7 @@ maybe-make-db.h-redirect:
 krb5/autoconf.h: $(srcdir)/krb5/autoconf.h.in
 	(cd krb5; $(MAKE) autoconf.h)
 $(srcdir)/krb5/autoconf.h.in: @MAINT@ $(srcdir)/krb5/autoconf.stmp
-$(srcdir)/krb5/autoconf.stmp: $(srcdir)/configure.in 
+$(srcdir)/krb5/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
 	cd $(srcdir) && ($(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS) || $(AUTOHEADER) --localdir=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS))
 	touch $(srcdir)/krb5/autoconf.stmp
 

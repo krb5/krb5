@@ -1,6 +1,16 @@
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Look for perl.
+	(KRB5_AC_PRAGMA_WEAK_REF): New macro, tests support for weak
+	references using "#pragma weak".
+	(CONFIG_RULES): Invoke it.
+	(KRB5_AC_ENABLE_THREADS): Test enableval, not withval.  If
+	ACX_PTHREAD can't determine thread support options and thread
+	support was requested, report an error.  Display the options
+	selected by ACX_PTHREAD.  Test for pthread_once without pthread
+	options, and pthread_mutexattr_setrobust_np both with and without
+	pthread options.
+	(KRB5_AC_GCC_ATTRS): New macro, dummy for now.
 
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 

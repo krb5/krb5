@@ -1,3 +1,14 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_libinit.c: Include k5-platform.h.
+	(krb5int_lib_init, krb5int_lib_fini): New init/fini functions.
+	Call the corresponding functions for the ccache, keytab, and
+	rcache code.  Incorporate the finalization code from
+	krb5int_cleanup_library.
+	(krb5int_initialize_library): Make sure the init function runs
+	successfully.
+	(krb5int_cleanup_library): Now empty.
+
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkrb5.exports: New file.

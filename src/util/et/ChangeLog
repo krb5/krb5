@@ -1,3 +1,16 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	Delete support for old globally-visible linked list, necessary
+	for thread support.
+	* Makefile.in (STLIBOBJS, LINTFILES, LIBOBJS, SRCS): Drop
+	init_et.c.
+	* error_message.c: Include k5-platform.h.
+	(et_list_lock): Use new partial initializer.
+	(com_err_initialize, com_err_terminate): New init/fini functions.
+	(error_message, add_error_table, remove_error_table): Ensure the
+	initializer ran successfully.
+	* error_table.h (_et_list) [!_WIN32]: Delete declaration.
+
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* libcom_err.exports: New file.

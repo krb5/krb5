@@ -27,12 +27,43 @@
 #define stat _stat
 #endif
 
+#include "k5-platform.h"
+
 #ifdef SHARE_TREE_DATA
-struct global_shared_profile_data krb5int_profile_shared_data = {
+struct global_shared_profile_data {
+	/* This is the head of the global list of shared trees */
+	prf_data_t trees;
+	/* Lock for above list.  */
+	k5_mutex_t mutex;
+};
+#define g_shared_trees		(krb5int_profile_shared_data.trees)
+#define g_shared_trees_mutex	(krb5int_profile_shared_data.mutex)
+
+static struct global_shared_profile_data krb5int_profile_shared_data = {
     0,
-    K5_MUTEX_INITIALIZER
+    K5_MUTEX_PARTIAL_INITIALIZER
 };
 #endif
+
+MAKE_INIT_FUNCTION(profile_library_initializer);
+MAKE_FINI_FUNCTION(profile_library_finalizer);
+
+int profile_library_initializer(void)
+{
+#ifdef SHARE_TREE_DATA
+    return k5_mutex_finish_init(&g_shared_trees_mutex);
+#else
+    return 0;
+#endif
+}
+void profile_library_finalizer(void)
+{
+    if (! INITIALIZER_RAN(profile_library_initializer) || PROGRAM_EXITING())
+	return;
+#ifdef SHARE_TREE_DATA
+    k5_mutex_destroy(&g_shared_trees_mutex);
+#endif
+}
 
 static void profile_free_file_data(prf_data_t);
 
@@ -95,6 +126,10 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	unsigned int	len;
 	prf_data_t	data;
 	char		*expanded_filename;
+
+	retval = CALL_INIT_FUNCTION(profile_library_initializer);
+	if (retval)
+		return retval;
 
 	prf = malloc(sizeof(struct _prf_file_t));
 	if (!prf)

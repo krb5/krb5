@@ -52,7 +52,23 @@ const static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
 };
 static const struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
 /* Lock for protecting the type list.  */
-static k5_mutex_t kt_typehead_lock = K5_MUTEX_INITIALIZER;
+static k5_mutex_t kt_typehead_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+
+int krb5int_kt_initialize(void)
+{
+    return k5_mutex_finish_init(&kt_typehead_lock);
+}
+
+void
+krb5int_kt_finalize(void)
+{
+    struct krb5_kt_typelist *t, *t_next;
+    k5_mutex_destroy(&kt_typehead_lock);
+    for (t = kt_typehead; t != &krb5_kt_typelist_srvtab; t = t_next) {
+	t_next = t->next;
+	free(t);
+    }
+}
 
 
 /*
@@ -97,6 +113,7 @@ krb5_kt_register(krb5_context context, const krb5_kt_ops *ops)
  * particular keytab type.
  */
 
+#include <ctype.h>
 krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 {

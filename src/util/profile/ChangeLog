@@ -1,3 +1,14 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c: Include k5-platform.h.
+	(krb5int_profile_shared_data): Now static.  Use new partial mutex
+	initializer.
+	(struct global_shared_profile_data, g_shared_trees,
+	g_shared_trees_mutex): Moved here from prof_int.h.
+	(profile_library_initializer, profile_library_finalizer): New
+	init/fini functions.  Deal with mutex.
+	(profile_open_file): Verify initializer ran successfully.
+
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* libprofile.exports: New file.

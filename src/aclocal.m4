@@ -100,7 +100,8 @@ AC_SUBST_FILE(lib_frag)
 libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
 dnl
-KRB5_AC_ENABLE_THREADS dnl
+KRB5_AC_PRAGMA_WEAK_REF
+KRB5_AC_ENABLE_THREADS
 ])dnl
 
 dnl Maintainer mode, akin to what automake provides, 'cept we don't
@@ -128,16 +129,38 @@ dnl Hack for now.
 AC_DEFUN([KRB5_AC_ENABLE_THREADS],[
 AC_ARG_ENABLE([thread-support],
 AC_HELP_STRING([--enable-thread-support],use PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support @<:@disabled@:>@),
-[  if test "$withval" = yes ; then
+[  if test "$enableval" = yes ; then
     AC_MSG_NOTICE(enabling PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support)
     AC_DEFINE(ENABLE_THREADS,1,[Define if thread support enabled])
   fi
 ])
 dnl Maybe this should be inside the conditional above?  Doesn't cache....
-ACX_PTHREAD
+if test "$enable_thread_support" = yes; then
+ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support])])
+AC_MSG_NOTICE(PTHREAD_CC = $PTHREAD_CC)
+AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
+AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
 dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
 AC_CHECK_HEADERS(pthread.h)
+fi
+dnl We want to know where these routines live, so on systems with weak
+dnl reference support we can figure out whether or not the pthread library
+dnl has been linked in.
+dnl If we don't add any libraries for thread support, don't bother.
+AC_CHECK_FUNCS(pthread_once pthread_mutexattr_setrobust_np)
+old_CC="$CC"
+test "$PTHREAD_CC" != "" && CC=$PTHREAD_CC
+old_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+old_LIBS="$LIBS"
+LIBS="$PTHREAD_LIBS $LIBS"
+AC_MSG_NOTICE(rechecking with PTHREAD_... options)
+AC_CHECK_LIB(c, pthread_mutexattr_setrobust_np,
+  [AC_DEFINE(HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB,1,[Define if pthread_mutexattr_setrobust_np is provided in the thread library.])])
 ])
+LIBS="$old_LIBS"
+CC="$old_CC"
+fi
 
 dnl This is somewhat gross and should go away when the build system
 dnl is revamped. -- tlyu
@@ -1042,7 +1065,7 @@ AC_REQUIRE([AC_PROG_ARCHIVE])dnl
 AC_REQUIRE([AC_PROG_ARCHIVE_ADD])dnl
 AC_REQUIRE([AC_PROG_INSTALL])dnl
 AC_CHECK_PROG(AR, ar, ar, false)
-AC_CHECK_PROG(PERL, perl, false)
+AC_CHECK_PROG(PERL, perl, perl, false)
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(MAKE_SHLIB_COMMAND)
@@ -1521,6 +1544,24 @@ AC_DEFUN([KRB5_AC_PRIOCNTL_HACK],
 	;;
 esac
 AC_SUBST(PRIOCNTL_HACK)])
+dnl
+dnl
+dnl KRB5_AC_GCC_ATTRS
+AC_DEFUN([KRB5_AC_GCC_ATTRS],
+[
+])
+dnl
+dnl
+dnl KRB5_AC_PRAGMA_WEAK_REF
+AC_DEFUN([KRB5_AC_PRAGMA_WEAK_REF],
+[AC_CACHE_CHECK([whether pragma weak references are supported],
+krb5_cv_pragma_weak_ref,
+[AC_TRY_LINK([#pragma weak flurbl
+extern int flurbl(void);],[if (&flurbl != 0) return 1;],
+krb5_cv_pragma_weak_ref=yes,krb5_cv_pragma_weak_ref=no)])
+if test $krb5_cv_pragma_weak_ref = yes ; then
+  AC_DEFINE(HAVE_PRAGMA_WEAK_REF,1,[Define if #pragma weak references work])
+fi])
 dnl
 dnl
 m4_include(config/ac-archive/acx_pthread.m4)

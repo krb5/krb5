@@ -1,3 +1,11 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_base.c (rc_typelist_lock): Use new partial initializer.
+	(krb5int_rc_finish_init): New function, finish the mutex
+	initialization.
+	(krb5int_rc_terminate): New function, destroy the mutex and free
+	storage associated with registered types.
+
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_base.c: Include k5-thread.h.

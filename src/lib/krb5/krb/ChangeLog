@@ -1,7 +1,12 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): In UNIX case, check the return value
+	from krb5int_initialize_library.
+
 2004-04-16  Sam Hartman  <hartmans@mit.edu>
 
-
-	* gic_pwd.c (krb5int_populate_gic_opt): Take credentials and populate lifetime options based on them.
+	* gic_pwd.c (krb5int_populate_gic_opt): Take credentials and
+	populate lifetime options based on them.
 
 	* gic_keytab.c gic_pwd.c :  update callers
 

@@ -128,7 +128,9 @@ init_common (krb5_context *context, krb5_boolean secure)
 	if (retval)
 		return retval;
 #else /* assume UNIX for now */
-	krb5int_initialize_library ();
+	retval = krb5int_initialize_library ();
+	if (retval)
+	    return retval;
 #endif
 
 	*context = 0;

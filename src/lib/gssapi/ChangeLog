@@ -1,3 +1,11 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss_libinit.c: Include k5-platform.h.
+	(gssint_lib_init, gssint_lib_fini): New init/fini functions.
+	Create and clean up the mutex in kg_vdb.
+	(gssint_initialize_library): Verify the library initializer has
+	run successfully.
+
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* libgssapi_krb5.exports: New file.

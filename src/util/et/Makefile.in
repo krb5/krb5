@@ -14,7 +14,7 @@ SED = sed
 ##DOS##XTRA=
 ##DOS##OBJFILE=$(OUTPRE)comerr.lst
 
-STLIBOBJS=error_message.o et_name.o init_et.o com_err.o
+STLIBOBJS=error_message.o et_name.o com_err.o
 STOBJLISTS=OBJS.ST
 LIB=com_err
 LIBMAJOR=3
@@ -25,11 +25,10 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs clean-lclint
 install-unix:: install-libs
 
 LINTFLAGS=-uhvb 
-LINTFILES= error_message.c et_name.c init_et.c com_err.c
+LINTFILES= error_message.c et_name.c com_err.c
 LIBOBJS=$(OUTPRE)com_err.$(OBJEXT) \
 	$(OUTPRE)error_message.$(OBJEXT) \
-	$(OUTPRE)et_name.$(OBJEXT) \
-	$(OUTPRE)init_et.$(OBJEXT)
+	$(OUTPRE)et_name.$(OBJEXT)
 # for et_lex.lex.c include in error_table.y
 LOCALINCLUDES=-I. -I$(srcdir)
 
@@ -45,7 +44,6 @@ FILES=	Makefile et_name.c error_message.c compile_et.c \
 #	init_et.c com_err.c
 SRCS= $(srcdir)/error_message.c \
 	$(srcdir)/et_name.c \
-	$(srcdir)/init_et.c \
 	$(srcdir)/com_err.c
 
 #

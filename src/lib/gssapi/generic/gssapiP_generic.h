@@ -139,7 +139,7 @@ typedef struct {
     k5_mutex_t mutex;
     void *data;
 } g_set;
-#define G_SET_INIT { K5_MUTEX_INITIALIZER, 0 }
+#define G_SET_INIT { K5_MUTEX_PARTIAL_INITIALIZER, 0 }
 
 int g_set_init (g_set_elt *s);
 int g_set_destroy (g_set_elt *s);

@@ -50,7 +50,24 @@ static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 						&cc_mcc_entry };
 
 static struct krb5_cc_typelist *cc_typehead = &cc_fcc_entry;
-static k5_mutex_t cc_typelist_lock = K5_MUTEX_INITIALIZER;
+static k5_mutex_t cc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+
+int
+krb5int_cc_initialize(void)
+{
+    return k5_mutex_finish_init(&cc_typelist_lock);
+}
+
+void
+krb5int_cc_finalize(void)
+{
+    struct krb5_cc_typelist *t, *t_next;
+    k5_mutex_destroy(&cc_typelist_lock);
+    for (t = cc_typehead; t != &cc_fcc_entry; t = t_next) {
+	t_next = t->next;
+	free(t);
+    }
+}
 
 
 /*
@@ -100,6 +117,7 @@ krb5_cc_register(krb5_context context, krb5_cc_ops *ops, krb5_boolean override)
  * particular cache type.
  */
 
+#include <ctype.h>
 krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
 {

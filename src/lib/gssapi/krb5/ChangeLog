@@ -5,6 +5,9 @@
 	(kg_set_ccache_name): Likewise.  Return after an error rather
 	than continuing.
 
+	* krb5_gss_glue.c (gss_import_name): Call
+	gssint_initialize_library and check the return status.
+
 2004-04-13  Jeffrey Altman <jaltman@mit.edu>
  
     * k5unseal.c: gss_krb5int_unseal_token_v3() takes a pointer to 

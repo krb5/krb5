@@ -27,6 +27,7 @@
 #include "com_err.h"
 #include "error_table.h"
 #include "k5-thread.h"
+#include "k5-platform.h"
 
 #if defined(_WIN32)
 #define HAVE_STRERROR
@@ -41,7 +42,22 @@ static char buffer[ET_EBUFSIZ];
 
 /*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 /*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
-static k5_mutex_t et_list_lock = K5_MUTEX_INITIALIZER;
+static k5_mutex_t et_list_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+
+MAKE_INIT_FUNCTION(com_err_initialize);
+MAKE_FINI_FUNCTION(com_err_terminate);
+
+int com_err_initialize(void)
+{
+    return k5_mutex_finish_init(&et_list_lock);
+}
+
+void com_err_terminate(void)
+{
+    if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING())
+	return;
+    k5_mutex_destroy(&et_list_lock);
+}
 
 #ifndef DEBUG_TABLE_LIST
 #define dprintf(X)
@@ -101,6 +117,8 @@ error_message(long code)
 	    goto system_error_code;
 #endif
 
+	if (CALL_INIT_FUNCTION(com_err_initialize))
+	    return 0;
 	merr = k5_mutex_lock(&et_list_lock);
 	if (merr)
 	    goto oops;
@@ -230,6 +248,9 @@ add_error_table(/*@dependent@*/ const struct error_table * et)
     struct dynamic_et_list *del;
     int merr;
 
+    if (CALL_INIT_FUNCTION(com_err_initialize))
+	return 0;
+
     del = (struct dynamic_et_list *)malloc(sizeof(struct dynamic_et_list));
     if (del == NULL)
 	return errno;
@@ -256,6 +277,8 @@ remove_error_table(const struct error_table * et)
     struct et_list **el;
     int merr;
 
+    if (CALL_INIT_FUNCTION(com_err_initialize))
+	return 0;
     merr = k5_mutex_lock(&et_list_lock);
     if (merr)
 	return merr;

@@ -22,7 +22,21 @@ struct krb5_rc_typelist {
 };
 static struct krb5_rc_typelist krb5_rc_typelist_dfl = { &krb5_rc_dfl_ops, 0 };
 static struct krb5_rc_typelist *typehead = &krb5_rc_typelist_dfl;
-static k5_mutex_t rc_typelist_lock = K5_MUTEX_INITIALIZER;
+static k5_mutex_t rc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+
+int krb5int_rc_finish_init(void)
+{
+    return k5_mutex_finish_init(&rc_typelist_lock);
+}
+void krb5int_rc_terminate(void)
+{
+    struct krb5_rc_typelist *t, *t_next;
+    k5_mutex_destroy(&rc_typelist_lock);
+    for (t = typehead; t != &krb5_rc_typelist_dfl; t = t_next) {
+	t_next = t->next;
+	free(t);
+    }
+}
 
 krb5_error_code krb5_rc_register_type(krb5_context context,
 				      const krb5_rc_ops *ops)

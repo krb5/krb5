@@ -13,6 +13,7 @@
 #endif
 
 #include "krb5_libinit.h"
+#include "k5-platform.h"
 
 static	int		initialized = 0;
 
@@ -20,41 +21,74 @@ static	int		initialized = 0;
  * Initialize the Kerberos v5 library.
  */
 
+MAKE_INIT_FUNCTION(krb5int_lib_init);
+MAKE_FINI_FUNCTION(krb5int_lib_fini);
+
+/* Possibly load-time initialization -- mutexes, etc.  */
+int krb5int_lib_init(void)
+{
+    int err;
+    err = krb5int_rc_finish_init();
+    if (err)
+	return err;
+    err = krb5int_kt_initialize();
+    if (err)
+	return err;
+    err = krb5int_cc_initialize();
+    if (err)
+	return err;
+    return 0;
+}
+
+/* Always-delayed initialization -- error table linkage, etc.  */
 krb5_error_code krb5int_initialize_library (void)
 {
-	
-	if (!initialized) {
-#if !USE_BUNDLE_ERROR_STRINGS
-	    add_error_table(&et_krb5_error_table);
-	    add_error_table(&et_kv5m_error_table);
-	    add_error_table(&et_kdb5_error_table);
-	    add_error_table(&et_asn1_error_table);
-#endif
+    int err;
 
-		initialized = 1;
-	}
-	
-	return 0;
+    if (!initialized) {
+#if !USE_BUNDLE_ERROR_STRINGS
+	add_error_table(&et_krb5_error_table);
+	add_error_table(&et_kv5m_error_table);
+	add_error_table(&et_kdb5_error_table);
+	add_error_table(&et_asn1_error_table);
+#endif
+	initialized = 1;
+    }
+
+    return CALL_INIT_FUNCTION(krb5int_lib_init);
 }
 
 /*
- * Clean up the Kerberos v5 lirbary state
+ * Clean up the Kerberos v5 library state
  */
 
-void krb5int_cleanup_library (void)
+void krb5int_lib_fini(void)
 {
-	assert (initialized);
+    if (!INITIALIZER_RAN(krb5int_lib_init) || PROGRAM_EXITING())
+	return;
+
+    krb5int_rc_terminate();
+    krb5int_kt_finalize();
+    krb5int_cc_finalize();
+
+    if (!initialized)
+	return;
 
 #if defined(_WIN32) || defined(USE_CCAPI)
-	krb5_stdcc_shutdown();
+    krb5_stdcc_shutdown();
 #endif
-	
+
 #if !USE_BUNDLE_ERROR_STRINGS
-	remove_error_table(&et_krb5_error_table);
-	remove_error_table(&et_kv5m_error_table);
-	remove_error_table(&et_kdb5_error_table);
-	remove_error_table(&et_asn1_error_table);
+    remove_error_table(&et_krb5_error_table);
+    remove_error_table(&et_kv5m_error_table);
+    remove_error_table(&et_kdb5_error_table);
+    remove_error_table(&et_asn1_error_table);
 #endif
-	
-	initialized = 0;
+}
+
+/* Still exists because it went into the export list on Windows.  But
+   since the above function should be invoked at unload time, we don't
+   actually want to do anything here.  */
+void krb5int_cleanup_library (void)
+{
 }

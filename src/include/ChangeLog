@@ -1,3 +1,46 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (DELAY_INITIALIZER): New macro, defined always.
+	(CONSTRUCTOR_ATTR_WORKS, DESTRUCTOR_ATTR_WORKS): New macro,
+	defined for Linux and NetBSD, and Solaris with gcc.
+	(USE_LINKER_FINI_OPTION): New macro, defined on IRIX, and on
+	Solaris with native compiler.
+	(JOIN2, JOIN2_2, JOIN3, JOIN3_2, JOIN4, JOIN4_2): New utility
+	macros.
+	(k5_init_t): New typedef, for some platforms.
+	(MAKE_INIT_FUNCTION, MAKE_FINI_FUNCTION, CALL_INIT_FUNCTION,
+	INITIALIZER_RAN, PROGRAM_EXITING): New macros for library
+	initialization and finalization support.
+
+	* k5-thread.h: Use k5_mutex_init instead of K5_MUTEX_INITIALIZER
+	for multiple-inclusion protection.
+	(K5_MUTEX_DEBUG_INITIALIZER): Change initial initialized flag to
+	2.
+	(k5_mutex_debug_finish_init): New macro, verifies value 2 and
+	changes it to 1.
+	(k5_mutex_debug_lock): Test various values of initialized and
+	locked flags separately, so assertion failure message is more
+	immediately informative.
+	(K5_MUTEX_PARTIAL_INITIALIZER): Rename from K5_MUTEX_INITIALIZER.
+	(k5_mutex_finish_init): New macro.
+	(pthread_once, pthread_mutexattr_setrobust_np): Consider
+	declaring weak based on availability.
+	(K5_PTHREADS_LOADED): New macro, tests to see if pthread
+	functions are available, if weak references are supported.
+	(k5_mutex_lock, k5_mutex_unlock): On IRIX, redefine to bypass
+	pthread code if pthread library isn't loaded.
+	(k5_once_t): New typedef.
+	(K5_ONCE_INIT, k5_once): New macros.
+
+	* Makefile.in (autoconf.stmp): Depend on aclocal.m4.
+
+	* k5-platform.h: Include limits.h before testing for SIZE_MAX.
+
+	* k5-thread.h (k5_key_t): New enumerator typedef.
+	(k5_key_register, k5_getspecific, k5_setspecific): New macros.
+	(krb5int_key_register, krb5int_getspecific, krb5int_setspecific,
+	krb5int_key_delete): Declare.
+
 2004-04-16  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: krb5int_populate_gic_opt now takes credentials  so it

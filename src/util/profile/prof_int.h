@@ -54,19 +54,6 @@ struct _prf_file_t {
 
 typedef struct _prf_file_t *prf_file_t;
 
-#ifdef SHARE_TREE_DATA
-struct global_shared_profile_data {
-	/* This is the head of the global list of shared trees */
-	prf_data_t trees;
-	/* Lock for above list.  */
-	k5_mutex_t mutex;
-};
-extern struct global_shared_profile_data krb5int_profile_shared_data;
-#define g_shared_trees		(krb5int_profile_shared_data.trees)
-#define g_shared_trees_mutex	(krb5int_profile_shared_data.mutex)
-
-#endif /* SHARE_TREE_DATA */
-
 /*
  * The profile flags
  */

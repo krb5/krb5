@@ -1,3 +1,12 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktbase.c: Include ctype.h.
+	(k5_typehead_lock): Use new partial initializer.
+	(krb5int_kt_initialize): New function; finish mutex
+	initialization.
+	(krb5int_kt_finalize): New function; destroy the mutex and free
+	storage associated with registered types.
+
 2004-04-13  Jeffrey Altman <jaltman@mit.edu>
 
     * ktbase.c:
