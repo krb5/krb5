@@ -1,5 +1,26 @@
 2004-04-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* crypto_libinit.c (initialized): Variable deleted.
+	(cryptoint_initialize_library, cryptoint_cleanup_library): Use new
+	macros for automatic shared library init/fini functions.
+	(prng_cleanup): Declaration deleted.
+	(krb5int_prng_init, krb5int_prng_cleanup): Declare.
+	(cryptoint_initialize_library): Call krb5int_prng_init.
+	(krb5int_crypto_init): New function, checks that
+	cryptoint_initialize_library was called successfully.
+	(cryptoint_cleanup_library): Call krb5int_prng_cleanup only if the
+	initializer ran.
+	* crypto_libinit.h: Deleted.
+	* prng.c: Include k5-thread.h.
+	(init_once, init_error, yarrow_lock): New variables.
+	(krb5int_prng_init): New function; finish initializing the mutex
+	lock.
+	(do_yarrow_init): New function.
+	(krb5_c_random_add_entropy): Call it once only.  Lock the mutex
+	before processing the input.
+	(krb5_c_random_make_octets): Lock the mutex before extracting
+	random bytes.
+
 	* libk5crypto.exports: Drop the library init/fini functions and
 	the DES tables from the export list.
 

@@ -26,10 +26,13 @@
 #include "k5-int.h"
 #include "enc_provider.h"
 #include <assert.h>
+#include "k5-thread.h"
 
 #include "yarrow.h"
 static Yarrow_CTX y_ctx;
-static int inited=0;
+static k5_once_t init_once = K5_ONCE_INIT;
+static int inited, init_error;
+static k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 /* Helper function to estimate entropy based on sample length
  * and where it comes from.
@@ -54,56 +57,85 @@ entropy_estimate (unsigned int randsource, size_t length)
 return (0);
 }
 
+int krb5int_prng_init(void)
+{
+    return k5_mutex_finish_init(&yarrow_lock);
+}
+
+static void do_yarrow_init(void)
+{
+    unsigned i;
+    int yerr;
+
+    yerr = krb5int_yarrow_init (&y_ctx, NULL);
+    if ((yerr != YARROW_OK) && (yerr != YARROW_NOT_SEEDED)) {
+	init_error = yerr;
+	return;
+    }
+
+    for (i=0; i < KRB5_C_RANDSOURCE_MAX; i++ ) {
+	unsigned source_id;
+	if (krb5int_yarrow_new_source (&y_ctx, &source_id) != YARROW_OK ) {
+	    init_error = 17;
+	    return;
+	}
+	assert (source_id == i);
+    }
+    inited=1;
+    init_error = 0;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_add_entropy (krb5_context context, unsigned int randsource,
 			   const krb5_data *data)
 {
   int yerr;
 
-  if (inited == 0) {
-    unsigned i;
-    yerr = krb5int_yarrow_init (&y_ctx, NULL);
-    if ((yerr != YARROW_OK) && (yerr != YARROW_NOT_SEEDED))
-      return (KRB5_CRYPTO_INTERNAL);
-      
-
-    for (i=0; i < KRB5_C_RANDSOURCE_MAX; i++ ) {
-      unsigned  source_id;
-      if (krb5int_yarrow_new_source (&y_ctx, &source_id) != YARROW_OK )
-	return KRB5_CRYPTO_INTERNAL;
-      assert (source_id == i);
-    }
-    inited=1;
-      
-  }
+  /* Make sure the mutex got initialized.  */
+  yerr = krb5int_crypto_init();
+  if (yerr)
+      return yerr;
+  /* Run the Yarrow init code, if not done already.  */
+  yerr = k5_once(&init_once, do_yarrow_init);
+  if (yerr)
+      return yerr;
+  /* Return an error if the Yarrow initialization failed.  */
+  if (init_error)
+      return KRB5_CRYPTO_INTERNAL;
+  /* Now, finally, feed in the data.  */
+  yerr = k5_mutex_lock(&yarrow_lock);
+  if (yerr)
+      return yerr;
   yerr = krb5int_yarrow_input (&y_ctx, randsource,
 			       data->data, data->length,
 			       entropy_estimate (randsource, data->length));
+  k5_mutex_unlock(&yarrow_lock);
   if (yerr != YARROW_OK)
     return (KRB5_CRYPTO_INTERNAL);
   return (0);
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_seed
-(krb5_context context, krb5_data *data)
+krb5_c_random_seed (krb5_context context, krb5_data *data)
 {
-  return (krb5_c_random_add_entropy (context,  KRB5_C_RANDSOURCE_OLDAPI, data));
+    return krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_OLDAPI, data);
 }
-
-
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
     int yerr;
     assert (inited);
+    yerr = k5_mutex_lock(&yarrow_lock);
+    if (yerr)
+	return yerr;
     yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
     if (yerr == YARROW_NOT_SEEDED) {
       yerr = krb5int_yarrow_reseed (&y_ctx, YARROW_SLOW_POOL);
       if (yerr == YARROW_OK)
 	yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
     }
+    k5_mutex_unlock(&yarrow_lock);
     if ( yerr != YARROW_OK)
       return (KRB5_CRYPTO_INTERNAL);
     return(0);
@@ -111,8 +143,9 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 
 void krb5int_prng_cleanup (void)
 {
-  if (inited) krb5int_yarrow_final (&y_ctx);
-	inited = 0;
+    if (inited)
+	krb5int_yarrow_final (&y_ctx);
+    inited = 0;
 }
 
 
