@@ -288,6 +288,5 @@ awk-windows:
 	gawk -f $(AH) outfile=$(PR)prof_err.h $(PR)prof_err.et
 	gawk -f $(AC) outfile=$(PR)prof_err.c $(PR)prof_err.et
 	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
-	cp $(PR)profile.h include/profile.h
 	cat $(IN)/krb5.hin $(INC)/krb5_err.h $(INC)/kdb5_err.h \
 		$(INC)/kv5m_err.h $(INC)/asn1_err.h > $(IN)/krb5.h
