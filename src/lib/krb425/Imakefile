@@ -21,7 +21,6 @@ OBJS=	425data.o \
 	get_phost.o \
 	kn_parse.o \
 	kntoln.o \
-	kparse.o \
 	kuserok.o \
 	mk_priv.o \
 	mk_req.o \
@@ -46,7 +45,6 @@ SRCS=	425data.c \
 	get_phost.c \
 	kn_parse.c \
 	kntoln.c \
-	kparse.c \
 	kuserok.c \
 	mk_priv.c \
 	mk_req.c \
