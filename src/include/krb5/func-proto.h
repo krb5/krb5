@@ -140,7 +140,7 @@ void krb5_init_ets PROTOTYPE((void));
 krb5_error_code krb5_kt_register
 	PROTOTYPE((krb5_kt_ops * ));
 krb5_error_code krb5_kt_resolve
-	PROTOTYPE((char *,
+	PROTOTYPE((const char *,
 		   krb5_keytab * ));
 krb5_error_code krb5_kt_default_name
 	PROTOTYPE((char *,
