@@ -29,7 +29,7 @@
  */
 
 /* adm_conn.c */
-krb5_error_code INTERFACE krb5_adm_connect
+krb5_error_code krb5_adm_connect
 	PROTOTYPE((krb5_context,
 		   char *,
 		   char *,
@@ -37,38 +37,38 @@ krb5_error_code INTERFACE krb5_adm_connect
 		   int *,
 		   krb5_auth_context **,
 		   krb5_ccache *));
-void INTERFACE krb5_adm_disconnect
+void krb5_adm_disconnect
 	PROTOTYPE((krb5_context,
 		   int *,
 		   krb5_auth_context *,
 		   krb5_ccache));
 
 /* adm_proto.c */
-void INTERFACE krb5_free_adm_data
+void krb5_free_adm_data
 	PROTOTYPE((krb5_context,
 		   krb5_int32,
 		   krb5_data *));
 
-krb5_error_code INTERFACE krb5_send_adm_cmd
+krb5_error_code krb5_send_adm_cmd
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
 		   int,
 		   krb5_data *));
-krb5_error_code INTERFACE krb5_send_adm_reply
+krb5_error_code krb5_send_adm_reply
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
 		   krb5_int32,
 		   int,
 		   krb5_data *));
-krb5_error_code INTERFACE krb5_read_adm_cmd
+krb5_error_code krb5_read_adm_cmd
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
 		   krb5_int32 *,
 		   krb5_data **));
-krb5_error_code INTERFACE krb5_read_adm_reply
+krb5_error_code krb5_read_adm_reply
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,

@@ -1,3 +1,7 @@
+
+Fri Apr 28 15:14:38 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Remove INTERFACE from prototype definitions in adm_proto.h
+
 Fri Apr 28 11:11:54 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: correct use of --with-krb4 to match top level.
