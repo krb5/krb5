@@ -80,6 +80,7 @@ struct realm_info {
     0
 };
 
+static int verbose = 0;
 
 static krb5_error_code add_principal PROTOTYPE((krb5_principal, enum ap_op,
 						struct realm_info *));
@@ -94,7 +95,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-K] [-k keytype]\n\
 \t[-e etype] [-M mkeyname] -f inputfile\n",
 	    who);
     fprintf(stderr, "\t(You must supply a v4 database dump file for this version of %s\n",who);
@@ -106,7 +107,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-K] [-k keytype]\n\
 \t[-e etype] [-M mkeyname] [-D v4dbpathname | -f inputfile]\n",
 	    who);
     exit(status);
@@ -155,6 +156,8 @@ char *argv[];
     char *defrealm;
     int keytypedone = 0;
     int v4manual = 0;
+    int read_mkey = 0;
+
     krb5_enctype etype = 0xffff;
 
     krb5_init_ets();
@@ -162,7 +165,7 @@ char *argv[];
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "d:D:r:k:M:e:nf:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:D:r:Kvk:M:e:nf:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
@@ -178,6 +181,12 @@ char *argv[];
 #endif
 	case 'r':
 	    realm = optarg;
+	    break;
+	case 'K':
+	    read_mkey = 1;
+	    break;
+	case 'v':
+	    verbose = 1;
 	    break;
 	case 'k':
 	    master_keyblock.keytype = atoi(optarg);
@@ -264,13 +273,14 @@ char *argv[];
 master key name '%s'\n",
 	   dbname, realm, mkey_fullname);
 
-    printf("You will be prompted for the database Master Password.\n");
-    printf("It is important that you NOT FORGET this password.\n");
-    fflush(stdout);
+    if (read_mkey) {
+	puts("You will be prompted for the version 5 database Master Password.");
+	puts("It is important that you NOT FORGET this password.");
+	fflush(stdout);
+    }
 
-    /* TRUE here means read the keyboard, and do it twice */
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE, TRUE,
-				    &master_keyblock)) {
+    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, read_mkey,
+				    read_mkey, &master_keyblock)) {
 	com_err(PROGNAME, retval, "while reading master key");
 	exit(1);
     }
@@ -305,7 +315,7 @@ master key name '%s'\n",
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	exit(1);
     }
-    if (retval = krb5_db_init()) {
+    if ((retval = krb5_db_init()) || (retval = krb5_dbm_open_database())) {
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	v4fini();
@@ -364,8 +374,7 @@ char *dumpfile;
 	    return 1;
 	}
     }
-    if (kdb_get_master_key ((manual == 0), 
-			    master_key, master_key_schedule) != 0) {
+    if (kdb_get_master_key (manual, master_key, master_key_schedule) != 0) {
 	com_err(pname, 0, "Couldn't read v4 master key.");
 	return 1;
     }
@@ -398,8 +407,8 @@ Principal *princ;
 
     /* don't convert certain principals... */
     if (!strcmp(princ->name, "krbtgt")) {
-    ignore:
-	printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
+	if (verbose)
+	    printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
 	return 0;
     }
     if (!strcmp(princ->name, KERB_M_NAME) &&
@@ -412,8 +421,8 @@ Principal *princ;
 	 * use the master key to decrypt the key in the db, had better
 	 * be the same! 
 	 */
-	bcopy((char *)&princ->key_low, key_from_db, 4);
-	bcopy((char *)&princ->key_high, ((long *) key_from_db) + 1, 4);
+	memcpy(key_from_db, (char *)&princ->key_low, 4);
+	memcpy(((long *) key_from_db) + 1, (char *)&princ->key_high, 4);
 	kdb_encrypt_key (key_from_db, key_from_db, 
 			 master_key, master_key_schedule, DECRYPT);
 	val = bcmp((char *) master_key, (char *) key_from_db,
@@ -422,7 +431,9 @@ Principal *princ;
 	if (val) {
 	    return KRB5_KDB_BADMASTERKEY;
 	}
-	goto ignore;
+	if (verbose)
+	    printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
+	return 0;
     }
     if (retval = krb5_build_principal(&entry.principal, strlen(realm),
 				      realm, princ->name,
@@ -431,7 +442,8 @@ Principal *princ;
 	return retval;
     if (retval = krb5_unparse_name(entry.principal, &name))
 	name = strdup("<not unparsable name!>");
-    printf("\ntranslating %s...", name);
+    if (verbose)
+	printf("\ntranslating %s...", name);
     free(name);
 
     if (retval = krb5_build_principal(&entry.mod_name, strlen(realm),
@@ -451,8 +463,8 @@ Principal *princ;
     entry.attributes = rblock.flags;	/* XXX is there a way to convert
 					   the old attrs? */
 
-    bcopy((char *)&(princ->key_low), (char *)v4key, 4);
-    bcopy((char *)&(princ->key_high), (char *) (((long *) v4key) + 1), 4);
+    memcpy((char *)v4key, (char *)&(princ->key_low), 4);
+    memcpy((char *) (((long *) v4key) + 1), (char *)&(princ->key_high), 4);
     kdb_encrypt_key (v4key, v4key, master_key, master_key_schedule, DECRYPT);
 
     v4v5key.contents = (krb5_octet *)v4key;
@@ -471,13 +483,13 @@ Principal *princ;
     entry.salt_length = 0;
     entry.salt = 0;
 
-    if (retval = krb5_db_put_principal(&entry, &nentries)) {
-	krb5_free_principal(entry.principal);
-	krb5_free_principal(entry.mod_name);
-	return retval;
-    }
+    retval = krb5_db_put_principal(&entry, &nentries);
+
+    krb5_free_principal(entry.principal);
+    krb5_free_principal(entry.mod_name);
     xfree(ekey.contents);
-    return 0;
+
+    return retval;
 }
 
 static krb5_error_code
@@ -672,22 +684,27 @@ char *realm;
 	return errno;
 
     for (;;) {			/* explicit break on eof from fscanf */
+	int nread;
+
 	bzero((char *)&aprinc, sizeof(aprinc));
-	if (fscanf(input_file,
-		   "%s %s %d %d %d %hd %x %x %s %s %s %s\n",
-		   aprinc.name,
-		   aprinc.instance,
-		   &temp1,
-		   &temp2,
-		   &temp3,
-		   &aprinc.attributes,
-		   &aprinc.key_low,
-		   &aprinc.key_high,
-		   exp_date_str,
-		   mod_date_str,
-		   aprinc.mod_name,
-		   aprinc.mod_instance) == EOF)
+	nread = fscanf(input_file,
+		       "%s %s %d %d %d %hd %x %x %s %s %s %s\n",
+		       aprinc.name,
+		       aprinc.instance,
+		       &temp1,
+		       &temp2,
+		       &temp3,
+		       &aprinc.attributes,
+		       &aprinc.key_low,
+		       &aprinc.key_high,
+		       exp_date_str,
+		       mod_date_str,
+		       aprinc.mod_name,
+		       aprinc.mod_instance);
+	if (nread != 12) {
+	    retval = nread == EOF ? 0 : KRB5_KDB_DB_CORRUPT;
 	    break;
+	}
 	aprinc.key_low = ntohl (aprinc.key_low);
 	aprinc.key_high = ntohl (aprinc.key_high);
 	aprinc.max_life = (unsigned char) temp1;
@@ -701,11 +718,9 @@ char *realm;
 	    aprinc.mod_name[0] = '\0';
 	if (aprinc.mod_instance[0] == '*')
 	    aprinc.mod_instance[0] = '\0';
-	if (retval = enter_in_v5_db(realm, &aprinc)) {
-	    (void) fclose(input_file);
-	    return retval;
-	}	
+	if (retval = enter_in_v5_db(realm, &aprinc))
+	    break;
     }
     (void) fclose(input_file);
-    return 0;
+    return retval;
 }
