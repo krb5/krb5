@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (argc == 2)                              /* Config directory given */
-        copy_file (argv[1], "\\post.in");       /* Send out postfix */
+        copy_file (argv[1], "\\win-post.in");       /* Send out postfix */
 
     return 0;
 }

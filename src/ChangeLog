@@ -1,3 +1,7 @@
+Tue Oct 10 21:43:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* wconfig.c: Use win-post.in instead of post.in.
+
 Mon Oct  9 18:58:34 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: For NetBSD turn back on shlibs_use_dirs
