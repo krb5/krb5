@@ -227,6 +227,12 @@ mpool_get(mp, pgno, flags)
 	++mp->pageread;
 #endif
 	off = mp->pagesize * pgno;
+	if (off / mp->pagesize != pgno) {
+	    /* Run past the end of the file, or at least the part we
+	       can address without large-file support?  */
+	    errno = E2BIG;
+	    return NULL;
+	}
 	if (lseek(mp->fd, off, SEEK_SET) != off)
 		return (NULL);
 
@@ -416,6 +422,12 @@ mpool_write(mp, bp)
 		(mp->pgout)(mp->pgcookie, bp->pgno, bp->page);
 
 	off = mp->pagesize * bp->pgno;
+	if (off / mp->pagesize != bp->pgno) {
+	    /* Run past the end of the file, or at least the part we
+	       can address without large-file support?  */
+	    errno = E2BIG;
+	    return RET_ERROR;
+	}
 	if (lseek(mp->fd, off, SEEK_SET) != off)
 		return (RET_ERROR);
 	if (write(mp->fd, bp->page, mp->pagesize) != mp->pagesize)
