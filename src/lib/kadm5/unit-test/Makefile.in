@@ -1,7 +1,7 @@
 CFLAGS  =	$(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_KADM5_API_VERSION=1
 
 all:: init-test destroy-test client-handle-test client-iter-test
-all:: randkey-test server-handle-test lock-test server-iter-test sizes-test
+all:: randkey-test server-handle-test lock-test server-iter-test 
 
 #
 # The client-side test programs.
@@ -12,7 +12,7 @@ init-test: init-test.o client_init.o $(CLNTDEPLIPS)
 		$(CLNTLIBS)
 
 client_init.o: $(SRCTOP)/lib/kadm5/clnt/client_init.c
-	$(CC) $(CFLAGS) -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I$(SRCTOP)/lib/kadm5 $<
+	$(CC) $(CFLAGS) -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I$(SRCTOP)/lib/kadm5 $(SRCTOP)/lib/kadm5/clnt/client_init.c
 
 destroy-test: destroy-test.o $(CLNTDEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o destroy-test destroy-test.o $(CLNTLIBS)
@@ -42,9 +42,6 @@ lock-test: lock-test.o $(SRVDEPLIBS)
 server-iter-test: iter-test.o $(SRVDEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o server-iter-test iter-test.o $(SRVLIBS)
 
-sizes-test: sizes-test.o $(SRVDEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o sizes-test sizes-test.o $(SRVLIBS)
-
 #
 # The unit-test targets
 #
@@ -72,9 +69,6 @@ test-noauth: init-test
 test-destroy: destroy-test
 	$(ENV_SETUP) ./destroy-test
 
-test-sizes: sizes-test
-	$(ENV_SETUP) ./sizes-test
-
 unit-test-client-setup::
 	$(ENV_SETUP) $(START_SERVERS)
 
@@ -87,7 +81,7 @@ unit-test-server-setup::
 unit-test-server-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS_LOCAL)
 
-unit-test-client-body: capi.0 capi.2 site.exp test-noauth test-destroy test-handle-client test-sizes
+unit-test-client-body: capi.0 capi.2 site.exp test-noauth test-destroy test-handle-client 
 	$(ENV_SETUP) $(RUNTEST) --tool capi API=$(CLNTTCL) KINIT=$(BUILDTOP)/clients/kinit/kinit KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local RPC=1
 
 #
@@ -123,7 +117,7 @@ sapi.2: $(srcdir)/api.2
 	-rm -f $(srcdir)/sapi.2
 	ln -s $(srcdir)/api.2 $(srcdir)/sapi.2
 
-unit-test-server-body: sapi.0 sapi.1 sapi.2 site.exp randkey-test test-handle-server lock-test test-sizes
+unit-test-server-body: sapi.0 sapi.1 sapi.2 site.exp randkey-test test-handle-server lock-test 
 	$(ENV_SETUP) $(RUNTEST) --tool sapi API=$(SRVTCL) LOCKTEST=./lock-test KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local RPC=0
 
 clean::
@@ -135,5 +129,4 @@ clean::
 	$(RM) server-handle-test handle-test.o
 	$(RM) lock-test lock-test.o
 	$(RM) server-iter-test iter-test.o
-	$(RM) sizes-test sizes-test.o
 	$(RM) *.log *.plog *.sum *.psum unit-test-log.*

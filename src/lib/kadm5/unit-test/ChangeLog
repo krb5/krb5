@@ -1,3 +1,9 @@
+Fri Oct  4 08:31:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sizes-test.c: Removed program.
+
+	* Makefile.in: Remove sizes-test.
+
 Tue Oct  1 14:45:37 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* api.2/init-v2.exp: Remove tests 104 & 105 as lockfile and
