@@ -1,3 +1,8 @@
+2003-07-04  Kenneth Raeburn  <raeburn@mit.edu>
+
+	* test_et.c: Conditionalize sys_nerr declaration on
+	NEED_SYS_ERRLIST, not HAVE_SYS_ERRLIST.
+
 2003-06-12  Alexandra Ellwood  <lxs@mit.edu>
     * error_table.h, et_c.awk, et_c.pl, et_h.awk, et_c.awk: Removed Mac 
     OS support because it prevents darwin builds from getting com error 
