@@ -1,3 +1,9 @@
+2000-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* com_err.h (com_err): Undo previous change; com_err accepts a
+	null pointer in place of the format string, but gcc warns about
+	it.
+
 2000-06-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* com_err.h (com_err): Declare with format attribute if using
