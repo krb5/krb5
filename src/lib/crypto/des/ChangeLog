@@ -1,4 +1,13 @@
 
+Thu Jul 27 15:18:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* des_int.h - Inline the old contents of include/krb5/mit-des.h.  This
+		is now the only place that it's needed.  Also update the
+		prototype for mit_des_ecb_encrypt.
+	* destest.c, f_sched.c, fin_rndkey.c, finish_key.c - Include des_int.h
+	* destest.c, new_rn_key.c, verify.c - Cast to the correct type for
+		mit_des_ecb_encrypt.
+
+
 Fri Jul 7 16:12:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* cbc_cksum.c - Add checksum verifier procedure.
 	* cs_entry.c - Add entry for checksum verifier.
