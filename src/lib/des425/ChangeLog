@@ -1,3 +1,8 @@
+Fri Jun 23 12:45:43 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* configure.in: New static library targets.
+
+	* Makefile.in : Add new static library target handling.
 
 Fri Jun 16 17:00:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k4_glue.c - Add this module with the "req_act_vno" symbol definition

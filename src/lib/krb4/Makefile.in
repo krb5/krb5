@@ -94,8 +94,8 @@ LIBDONE= DONE
 KRB4_CRYPTO_LIBS=@KRB4_CRYPTO_LIB@
 DEPKRB4_LIBS=@DEPKRB4_CRYPTO_LIB@
 DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT)
-SHLIB_LIBS=$(KRB4_CRYPTO_LIBS) -lcrypto
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ $(LD_UNRESOLVED_PREFIX)_et_list
+SHLIB_LIBS=$(KRB4_CRYPTO_LIBS) -lcrypto -lcom_err
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ 
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 #
@@ -152,7 +152,7 @@ NETIO_OBJS=netread.$(OBJEXT) netwrite.$(OBJEXT)
 LIB_KRB_HOSTSRCS=$(srcdir)/unix_glue.c
 LIB_KRB_HOSTOBJS=unix_glue.$(OBJEXT)
 
-LIBNAME=libkrb4.$(LIBEXT)
+LIBNAME=libkrb4.$(STEXT)
 
 ARCHIVEARGS= $@ $(OBJS)
 
@@ -173,7 +173,7 @@ install:: install-$(WHAT)
 # We want *library* compiler options...
 DBG=$(DBG_LIB)
 
-all-unix:: shared $(LIBNAME) krb_err.h includes
+all-unix:: shared  krb_err.h includes
 
 shared:
 	mkdir shared

@@ -1,3 +1,10 @@
+Fri Jun 23 12:29:39 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* configure.in: Handle generation of rules to make static libs.
+
+	* Makefile.in (LIBNAME): Changed to support new handling of static
+        libraries
+
 
 Fri Jun 16 11:15:45 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change "./DONE" to "DONE" since we know how to make

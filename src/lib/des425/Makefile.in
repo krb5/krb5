@@ -84,7 +84,7 @@ clean-unix::
 clean-mac::
 clean-windows::
 
-libdes425.a: $(OBJS)
+libdes425.$(STEXT): $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
