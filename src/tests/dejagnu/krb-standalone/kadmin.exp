@@ -128,7 +128,7 @@ proc kadmin_add { pname password } {
 #
 # Adds principal $pname with random key.  Returns 1 on success.
 #--
-proc kadmin_add_rnd { pname } {
+proc kadmin_add_rnd { pname { flags "" } } {
     global REALMNAME
     global KADMIN
     global KADMIN_LOCAL
@@ -137,7 +137,7 @@ proc kadmin_add_rnd { pname } {
     global tmppwd
 
     set good 0
-    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "ank -randkey $pname"
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "ank -randkey $flags $pname"
     expect_after {
 	"Cannot contact any KDC" {
 	    fail "kadmin add rnd $pname lost KDC"
@@ -952,6 +952,7 @@ proc kdestroy { } {
 # we get some sort of error.
 
 proc kadmin_test { } {
+    global hostname
 
     # Start up the kerberos and kadmind daemons
     if {![start_kerberos_daemons 0] } {
@@ -1049,6 +1050,15 @@ proc kadmin_test { } {
     if { ![kadmin_list] } {
 	return
     }
+
+    # test fallback to kadmin/admin
+    if {![kadmin_delete kadmin/$hostname] \
+	    || ![kadmin_list] \
+	    || ![kadmin_add_rnd kadmin/$hostname -allow_tgs_req] \
+	    || ![kadmin_list]} {
+	return
+    }
+
     verbose "kadmin_test succeeded"
 }
 

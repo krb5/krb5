@@ -410,6 +410,9 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN: code_string = "KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN"; break;
      case KRB5_CONFIG_BADFORMAT: code_string = "KRB5_CONFIG_BADFORMAT"; break;
 
+     case KRB5_CC_NOTFOUND: code_string = "KRB5_CC_NOTFOUND"; break;
+     case KRB5_FCC_NOFILE: code_string = "KRB5_FCC_NOFILE"; break;
+
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
 

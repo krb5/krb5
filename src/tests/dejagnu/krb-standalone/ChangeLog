@@ -1,3 +1,10 @@
+2005-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp (kadmin_add_rnd): Add "flags" arg, defaulting to
+	empty string.
+	(kadmin_test): Add test for fallback to kadmin/admin if
+	kadmin/fqdn is missing.
+
 2005-01-14  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.exp (kadmin_list): Check for communication failure.
