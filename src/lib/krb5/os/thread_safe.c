@@ -1,7 +1,7 @@
 /*
- * lib/krb5/krb/cp_key_cnt.c
+ * lib/krb5/os/thread_safec
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,24 +24,17 @@
  * or implied warranty.
  * 
  *
- * krb5_copy_keyblock()
+ * krb5_is_thread_safe() function.
  */
 
 #include "k5-int.h"
 
-/*
- * Copy a keyblock, including alloc'ed storage.
- */
-krb5_error_code KRB5_CALLCONV
-krb5_copy_keyblock_contents(krb5_context context, const krb5_keyblock *from, krb5_keyblock *to)
+krb5_boolean KRB5_CALLCONV
+krb5_is_thread_safe(void)
 {
-    *to = *from;
-    if (to->length) {
-        to->contents = (krb5_octet *)malloc(to->length);
-        if (!to->contents)
-            return ENOMEM;
-        memcpy((char *)to->contents, (char *)from->contents, to->length);
-    } else 
-        to->contents = 0;
+#if defined(ENABLE_THREADS)
+    return 1;
+#else
     return 0;
+#endif
 }

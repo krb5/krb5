@@ -444,6 +444,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    if ((cred_usage != GSS_C_INITIATE) &&
        (cred_usage != GSS_C_ACCEPT) &&
        (cred_usage != GSS_C_BOTH)) {
+      k5_mutex_destroy(&cred->lock);
       xfree(cred);
       *minor_status = (OM_uint32) G_BAD_USAGE;
       krb5_free_context(context);
@@ -460,7 +461,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	  != GSS_S_COMPLETE) {
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
+         k5_mutex_destroy(&cred->lock);
+         xfree(cred);
 	 /* minor_status set by acquire_accept_cred() */
 	 krb5_free_context(context);
 	 return(ret);
@@ -481,7 +483,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	    krb5_kt_close(context, cred->keytab);
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
+         k5_mutex_destroy(&cred->lock);
+         xfree(cred);
 	 /* minor_status set by acquire_init_cred() */
 	 krb5_free_context(context);
 	 return(ret);
@@ -496,7 +499,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	    (void)krb5_cc_close(context, cred->ccache);
 	 if (cred->keytab)
 	    (void)krb5_kt_close(context, cred->keytab);
-	 xfree(cred);
+         k5_mutex_destroy(&cred->lock);
+         xfree(cred);
 	 *minor_status = code;
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
@@ -519,7 +523,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	    (void)krb5_kt_close(context, cred->keytab);
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
+         k5_mutex_destroy(&cred->lock);
+         xfree(cred);
 	 *minor_status = code;
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
@@ -548,6 +553,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	       (void)krb5_kt_close(context, cred->keytab);
 	   if (cred->princ)
 	       krb5_free_principal(context, cred->princ);
+           k5_mutex_destroy(&cred->lock);
 	   xfree(cred);
 	   /* *minor_status set above */
 	   krb5_free_context(context);
@@ -566,6 +572,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	 (void)krb5_kt_close(context, cred->keytab);
       if (cred->princ)
 	 krb5_free_principal(context, cred->princ);
+      k5_mutex_destroy(&cred->lock);
       xfree(cred);
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       krb5_free_context(context);

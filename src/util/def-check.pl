@@ -219,7 +219,9 @@ while (! $d->eof()) {
     }
     s/[ \t]*//g;
     my($xconv);
-    if (/!CALLCONV/ || /KRB5_CALLCONV_WRONG/) {
+    if (/PRIVATE/ || /INTERNAL/) {
+	$xconv = "PRIVATE";
+    } elsif (/!CALLCONV/ || /KRB5_CALLCONV_WRONG/) {
 	$xconv = "KRB5_CALLCONV_WRONG";
     } elsif ($vararg{$_}) {
 	$xconv = "KRB5_CALLCONV_C";
@@ -227,6 +229,11 @@ while (! $d->eof()) {
 	$xconv = "KRB5_CALLCONV";
     }
     s/;.*$//;
+
+    if ($xconv eq "PRIVATE") {
+	print "\t private $_\n";
+	next LINE2;
+    }
     if (!defined($conv{$_})) {
 	print "No calling convention specified for $_!\n";
     } elsif (! ($conv{$_} eq $xconv)) {

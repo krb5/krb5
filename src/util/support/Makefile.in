@@ -5,9 +5,9 @@ BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
 
 ##DOS##BUILDTOP = ..\..
-##DOS##LIBNAME=$(OUTPRE)krb5support_32.lib
+##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib
 ##DOS##XTRA=
-##DOS##OBJFILE=$(OUTPRE)krb5support_32.lst
+##DOS##OBJFILE=$(OUTPRE)k5sprt32.lst
 
 SED = sed
 
