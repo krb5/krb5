@@ -13,12 +13,8 @@
 
 #include "prof_int.h"
 
-#ifndef NO_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifndef NO_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 #include <errno.h>
 
 
@@ -32,14 +28,6 @@
 struct global_shared_profile_data krb5int_profile_shared_data = {
     0
 };
-#endif
-
-#ifndef PROFILE_USES_PATHS
-#include <FSp_fopen.h>
-
-static OSErr GetMacOSTempFilespec (
-	const	FSSpec*	inFilespec,
-			FSSpec*	outFilespec);
 #endif
 
 static void profile_free_file_data(prf_data_t);
@@ -60,11 +48,32 @@ static int rw_access(filespec)
 	 */
 	FILE	*f;
 
-#ifdef PROFILE_USES_PATHS
 	f = fopen(filespec, "r+");
-#else
-	f = FSp_fopen(&filespec, "r+");
+	if (f) {
+		fclose(f);
+		return 1;
+	}
+	return 0;
 #endif
+}
+
+static int r_access(filespec)
+	profile_filespec_t filespec;
+{
+#ifdef HAVE_ACCESS
+	if (access(filespec, R_OK) == 0)
+		return 1;
+	else
+		return 0;
+#else
+	/*
+	 * We're on a substandard OS that doesn't support access.  So
+	 * we kludge a test using stdio routines, and hope fopen
+	 * checks the r/w permissions.
+	 */
+	FILE	*f;
+
+	f = fopen(filespec, "r");
 	if (f) {
 		fclose(f);
 		return 1;
@@ -94,7 +103,7 @@ errcode_t profile_open_file(filespec, ret_prof)
 	for (data = g_shared_trees; data; data = data->next) {
 	    if (!strcmp(data->filespec, filespec)
 		/* Check that current uid has read access.  */
-		&& access(data->filespec, R_OK) == 0)
+		&& r_access(data->filespec) == 0)
 		break;
 	}
 	if (data) {
@@ -187,11 +196,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 		return 0;
 #endif
 	errno = 0;
-#ifdef PROFILE_USES_PATHS
 	f = fopen(data->filespec, "r");
-#else
-	f = FSp_fopen (&data->filespec, "r");
-#endif
 	if (f == NULL) {
 		retval = errno;
 		if (retval == 0)
@@ -212,24 +217,6 @@ errcode_t profile_update_file_data(prf_data_t data)
 	return 0;
 }
 
-#ifndef PROFILE_USES_PATHS
-OSErr GetMacOSTempFilespec (
-	const	FSSpec*	inFileSpec,
-			FSSpec*	outFileSpec)
-{
-	OSErr	err;
-	
-	err = FindFolder (inFileSpec -> vRefNum, kTemporaryFolderType,
-		kCreateFolder, &(outFileSpec -> vRefNum), &(outFileSpec -> parID));
-	if (err != noErr)
-		return err;
-		
-	BlockMoveData (&(inFileSpec -> name), &(outFileSpec -> name), StrLength (inFileSpec -> name) + 1);
-	return noErr;
-}
-#endif
-
-
 errcode_t profile_flush_file_data(data)
 	prf_data_t data;
 {
@@ -246,7 +233,6 @@ errcode_t profile_flush_file_data(data)
 
 	retval = ENOMEM;
 	
-#ifdef PROFILE_USES_PATHS
 	new_file = old_file = 0;
 	new_file = malloc(strlen(data->filespec) + 5);
 	if (!new_file)
@@ -261,13 +247,6 @@ errcode_t profile_flush_file_data(data)
 	errno = 0;
 
 	f = fopen(new_file, "w");
-#else
-	/* On MacOS, we do this by writing to a new file and then atomically
-	swapping the files with a file system call */
-	GetMacOSTempFilespec (&data->filespec, &new_file);
-	f = FSp_fopen (&new_file, "w");
-#endif
-	
 	if (!f) {
 		retval = errno;
 		if (retval == 0)
@@ -281,7 +260,24 @@ errcode_t profile_flush_file_data(data)
 		goto errout;
 	}
 
-#ifdef PROFILE_USES_PATHS
+#ifdef COPY_RESOURCE_FORK
+	{
+		FSSpec from;
+		FSSpec to;
+		OSErr err = FSpLocationFromFullPOSIXPath (data -> filespec, &from);
+		if (err == noErr) {
+			err = FSpLocationFromFullPOSIXPath (new_file, &to);
+		}
+		if (err == noErr) {
+			err = FSpResourceForkCopy (&from, &to);
+		}
+		if (err != noErr) {
+			retval = ENOENT;
+			goto end;
+		}
+	}
+#endif
+
 	unlink(old_file);
 	if (rename(data->filespec, old_file)) {
 		retval = errno;
@@ -292,17 +288,6 @@ errcode_t profile_flush_file_data(data)
 		rename(old_file, data->filespec); /* back out... */
 		goto errout;
 	}
-#else
-	{
-		OSErr err = FSpExchangeFiles (&data->filespec, &new_file);
-		if (err != noErr) {
-			retval = ENFILE;
-			goto errout;
-		}
-		FSpDelete (&new_file);
-	}
-#endif
-
 
 	data->flags = 0;
 	if (rw_access(data->filespec))
@@ -310,12 +295,10 @@ errcode_t profile_flush_file_data(data)
 	retval = 0;
 	
 errout:
-#ifdef PROFILE_USES_PATHS
 	if (new_file)
 		free(new_file);
 	if (old_file)
 		free(old_file);
-#endif
 	return retval;
 }
 
@@ -364,10 +347,8 @@ static void profile_free_file_data(data)
 	}
     }
 #endif
-#ifdef PROFILE_USES_PATHS
 	if (data->filespec)
 		free(data->filespec);
-#endif
 	if (data->root)
 		profile_free_node(data->root);
 	if (data->comment)

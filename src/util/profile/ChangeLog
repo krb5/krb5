@@ -1,3 +1,27 @@
+2002-12-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (r_access): New function.
+	(profile_open_file): Use it.
+
+	* profile.hin: Don't test MACINTOSH any more.  On Mac OS X,
+	include TargetConditionals.h, set some pragmas, define
+	COPY_RESOURCE_FORK, and error out if TARGET_RT_MAC_CFM is
+	defined; don't set the old m68k CFM pragmas.  Always use
+	PROFILE_USES_PATHS code, don't test or define it.
+	(FSp_profile_init, FSp_profile_init_path): Declare, on Mac OS X.
+	* prof_int.h (NO_SYS_TYPES_H, NO_SYS_STAT_H) [macintosh]: Don't
+	define these.
+	* prof_file.c: Always inclued sys/types.h and sys/stat.h.
+	(GetMacOSTempFilespec): Deleted.
+	(profile_flush_file_data) [COPY_RESOURCE_FORK]: Copy Mac resource
+	fork from old file to new before renaming.
+	(rw_access, profile_update_file_data, profile_flush_file_data,
+	profile_free_file_data): Assume PROFILE_USES_PATHS, don't test.
+	* prof_init.c (profile_ser_size, profile_ser_externalize,
+	profile_ser_internalize): Likewise.
+	(FSp_profile_init, FSp_profile_init_path): Define, on MacOS X.
+	* profile.exp: Add FSp_* functions.
+
 2002-12-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* prof_file.c: Cast return from prof_mutex_lock and

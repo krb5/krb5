@@ -5,8 +5,24 @@
 #ifndef _KRB5_PROFILE_H
 #define _KRB5_PROFILE_H
 
-#if defined(_WIN32) || defined(MACINTOSH)
+#if defined(_WIN32)
 #include <win-mac.h>
+#endif
+
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <TargetConditionals.h>
+    #if TARGET_RT_MAC_CFM
+        #error "Use KfM 4.0 SDK headers for CFM compilation."
+    #endif
+#endif
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
+    /* We use file paths as unique file identifiers */
+    #define COPY_RESOURCE_FORK 1
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -23,40 +39,29 @@ typedef struct _profile_t *profile_t;
 #define PROFILE_ITER_SECTIONS_ONLY	0x0002
 #define PROFILE_ITER_RELATIONS_ONLY	0x0004
 
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/* On everything but MacOS, we use file paths as unique file identifiers */
-#ifndef macintosh
-#define PROFILE_USES_PATHS
-#endif
-
-#ifdef PROFILE_USES_PATHS
 typedef char* profile_filespec_t;	/* path as C string */
 typedef char* profile_filespec_list_t;	/* list of : separated paths, C string */
 typedef const char * const_profile_filespec_t;	/* path as C string */
 typedef const char * const_profile_filespec_list_t;	/* list of : separated paths, C string */
-#else
-/* On MacOS, we use native file specifiers as unique file identifiers */
-#include <Files.h>
-typedef FSSpec profile_filespec_t;
-typedef FSSpec* profile_filespec_list_t;
-/* array should be terminated with {0, 0, ""} */
-typedef FSSpec const_profile_filespec_t;
-typedef FSSpec* const_profile_filespec_list_t;	
-#endif
 
 long KRB5_CALLCONV profile_init
 	(const_profile_filespec_t *files, profile_t *ret_profile);
 
 long KRB5_CALLCONV profile_init_path
 	(const_profile_filespec_list_t filelist, profile_t *ret_profile);
+
+/* On Mac Carbon, also provide FSSpec variants */
+#if TARGET_OS_MAC && defined(__FILES__)
+long KRB5_CALLCONV FSp_profile_init
+	(const FSSpec* files, profile_t *ret_profile);
+
+long KRB5_CALLCONV FSp_profile_init_path
+	(const FSSpec* files, profile_t *ret_profile);
+#endif
 
 long KRB5_CALLCONV profile_flush
 	(profile_t profile);
@@ -120,13 +125,16 @@ long KRB5_CALLCONV profile_add_relation
 	(profile_t profile, const char **names, 
 		   const char *new_value);
 
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+    #pragma options align=reset
+#endif
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
-#endif
 
 #endif /* _KRB5_PROFILE_H */

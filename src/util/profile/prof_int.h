@@ -24,11 +24,6 @@
 #define SIZEOF_LONG     4
 #endif
 
-#if defined(macintosh)
-#define NO_SYS_TYPES_H
-#define NO_SYS_STAT_H
-#endif
-
 typedef long prf_magic_t;
 
 #define SHARE_TREE_DATA
@@ -117,11 +112,7 @@ struct _profile_t {
  * Check if a filespec is last in a list (NULL on UNIX, invalid FSSpec on MacOS
  */
 
-#ifdef PROFILE_USES_PATHS
 #define	PROFILE_LAST_FILESPEC(x) (((x) == NULL) || ((x)[0] == '\0'))
-#else
-#define PROFILE_LAST_FILESPEC(x) (((x).vRefNum == 0) && ((x).parID == 0) && ((x).name[0] == '\0'))
-#endif
 
 /* profile_parse.c */
 

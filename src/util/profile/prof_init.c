@@ -10,6 +10,10 @@
 #endif
 #include <errno.h>
 
+#if TARGET_OS_MAC
+#include <Kerberos/FullPOSIXPath.h>
+#endif
+
 #include "prof_int.h"
 
 /* Find a 4-byte integer type */
@@ -125,6 +129,72 @@ profile_init_path(filepath, ret_profile)
 	return retval;
 }
 
+#if TARGET_OS_MAC
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+FSp_profile_init(files, ret_profile)
+	const FSSpec* files;
+	profile_t *ret_profile;
+{
+    UInt32		fileCount = 0;
+    const FSSpec*	nextSpec;
+    char**		pathArray = NULL;
+    UInt32		i;
+    errcode_t		retval = 0;
+
+    for (nextSpec = files; ; nextSpec++) {
+        if ((nextSpec -> vRefNum == 0) &&
+            (nextSpec -> parID == 0) &&
+            (StrLength (nextSpec -> name) == 0))
+            break;
+        fileCount++;
+    }
+    
+    pathArray = malloc ((fileCount + 1) * sizeof (char*));
+    if (pathArray == NULL) {
+        retval = ENOMEM;
+    }
+    
+    if (retval == 0) {
+        for (i = 0; i < fileCount + 1; i++) {
+            pathArray [i] = NULL;
+        }
+        
+        for (i = 0; i < fileCount; i++) {
+            OSErr err = FSpGetFullPOSIXPath (&files [i], &pathArray [i]);
+            if (err == memFullErr) {
+                retval = ENOMEM;
+                break;
+            } else if (err != noErr) {
+                retval = ENOENT;
+                break;
+            }
+        }
+    }
+    
+    if (retval == 0) {
+        retval = profile_init (pathArray, ret_profile);
+    }
+    
+    if (pathArray != NULL) {
+        for (i = 0; i < fileCount; i++) {
+            if (pathArray [i] != 0)
+                free (pathArray [i]);
+        }
+        free (pathArray);
+    }
+    
+    return retval;
+}
+
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+FSp_profile_init_path(files, ret_profile)
+	const FSSpec* files;
+	profile_t *ret_profile;
+{
+    return FSp_profile_init (files, ret_profile);
+}
+#endif /* TARGET_OS_MAC */
+
 errcode_t KRB5_CALLCONV
 profile_flush(profile)
 	profile_t	profile;
@@ -186,12 +256,8 @@ errcode_t profile_ser_size(unused, profile, sizep)
     required = 3*sizeof(prof_int32);
     for (pfp = profile->first_file; pfp; pfp = pfp->next) {
 	required += sizeof(prof_int32);
-#ifdef PROFILE_USES_PATHS
 	if (pfp->data->filespec)
 	    required += strlen(pfp->data->filespec);
-#else
-	required += sizeof (profile_filespec_t);
-#endif
     }
     *sizep += required;
     return 0;
@@ -237,7 +303,6 @@ errcode_t profile_ser_externalize(unused, profile, bufpp, remainp)
 	    pack_int32(PROF_MAGIC_PROFILE, &bp, &remain);
 	    pack_int32(fcount, &bp, &remain);
 	    for (pfp = profile->first_file; pfp; pfp = pfp->next) {
-#ifdef PROFILE_USES_PATHS
 		slen = (pfp->data->filespec) ?
 		    (prof_int32) strlen(pfp->data->filespec) : 0;
 		pack_int32(slen, &bp, &remain);
@@ -246,13 +311,6 @@ errcode_t profile_ser_externalize(unused, profile, bufpp, remainp)
 		    bp += slen;
 		    remain -= (size_t) slen;
 		}
-#else
-		slen = sizeof (FSSpec);
-		pack_int32(slen, &bp, &remain);
-		memcpy (bp, &(pfp->data->filespec), (size_t) slen);
-		bp += slen;
-		remain -= (size_t) slen;
-#endif
 	    }
 	    pack_int32(PROF_MAGIC_PROFILE, &bp, &remain);
 	    retval = 0;
@@ -317,15 +375,11 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
 	memset(flist, 0, sizeof(char *) * (fcount+1));
 	for (i=0; i<fcount; i++) {
 		if (!unpack_int32(&tmp, &bp, &remain)) {
-#ifdef PROFILE_USES_PATHS
 			flist[i] = (char *) malloc((size_t) (tmp+1));
 			if (!flist[i])
 				goto cleanup;
 			memcpy(flist[i], bp, (size_t) tmp);
 			flist[i][tmp] = '\0';
-#else
-			memcpy (&flist[i], bp, (size_t) tmp);
-#endif
 			bp += tmp;
 			remain -= (size_t) tmp;
 		}
@@ -346,12 +400,10 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
     
 cleanup:
 	if (flist) {
-#ifdef PROFILE_USES_PATHS
 		for (i=0; i<fcount; i++) {
 			if (flist[i])
 				free(flist[i]);
 		}
-#endif
 		free(flist);
 	}
 	return(retval);

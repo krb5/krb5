@@ -29,3 +29,7 @@ profile_add_relation
 profile_ser_internalize
 profile_ser_externalize
 profile_ser_size
+
+# Mac only
+FSp_profile_init
+FSp_profile_init_path
