@@ -1564,8 +1564,10 @@ void try_normal(argv)
 {
     register char *host;
     
+#ifndef KRB5_ATHENA_COMPAT
     if (encrypt_flag)
       exit(1);
+#endif
     fprintf(stderr,"trying normal rlogin (%s)\n",
 	    UCB_RLOGIN);
     fflush(stderr);

@@ -1220,8 +1220,10 @@ void try_normal(argv)
      char **argv;
 {
     register int i;
-    
-    if (!encryptflag) {
+#ifndef     KRB5_ATHENA_COMPAT
+    if (!encryptflag)
+	#endif
+	{
 	fprintf(stderr,"trying normal rcp (%s)\n", UCB_RCP);
 	fflush(stderr);
 	/* close all but stdin, stdout, stderr */

@@ -1,3 +1,10 @@
+Sun Feb 25 18:50:45 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krlogind.c (v5_des_read): Fix server side of bug in detecing eof
+        on the network connection.  Same as client change: v5_des_read
+        needs to return 0 if read returns <= 0, notjust a strict
+        inequality.
+
 Mon Feb 12 22:41:06 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kcmd.c (kcmd): Fix lint flame (added missing cast).
@@ -10,6 +17,15 @@ Fri Feb  9 20:18:48 1996  <hartmans@mit.edu>
 
 	* krlogind.c (recvauth): Fix v4 incompatability created by
         checksum code; if using v4, don't try to verify a v5 checksum.
+
+||||||| 5.174.2.1
+Fri Feb  2 16:10:56 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in (save_path): Look for "ucb" varients in /usr/athena/bin if --enable-athena specified.
+
+
+	* krsh.c krlogin.c krcp.c (try_normal): If a--enable-athena, don't quit just because we are encrypted.
+
 
 Thu Feb  1 00:09:13 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 

@@ -1226,7 +1226,7 @@ v5_des_read(fd, buf, len)
 		cc = krb5_net_read(bsd_context, fd, &c, 1);
 		/* we should check for non-blocking here, but we'd have
 		   to make it save partial reads as well. */
-		if (cc < 0) return 0; /* read error */
+		if (cc <= 0) return 0; /* read error */
 		if (cc == 1) {
 		    if (c == 0) gotzero = 1;
 		}

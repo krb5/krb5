@@ -69,7 +69,10 @@ dnl Check for where the BSD rlogin, rcp, and rsh programs live.
 dnl
 save_path=$PATH
 AC_PROG_ECHO_N
-PATH=/bin:/usr/bin:/usr/bsd:/usr/ucb
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration],
+[PATH=/usr/athena/bin:/bin:/usr/bin:/usr/bsd:/usr/ucb],
+[PATH=/bin:/usr/bin:/usr/bsd:/usr/ucb])
 AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
 AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
 AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
