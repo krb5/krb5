@@ -24,10 +24,6 @@
 #define _GSSAPI_H_
 
 /* for general config: */
-#include "k5-config.h"
-#include "osconf.h"
-/* for prototype-related config: */
-#include "base-defs.h"
 #ifndef NO_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -36,10 +32,43 @@
 /*
  * First, define the platform-dependent types.
  */
-typedef krb5_ui_4 OM_uint32;
+
+#ifdef _MSDOS
+#define GSS_SIZEOF_INT      2
+#define GSS_SIZEOF_SHORT    2
+#define GSS_SIZEOF_LONG     4
+#ifndef FAR
+#define FAR     _far
+#define INTERFACE   __far __export __pascal
+#endif /* FAR */
+#else /* _MSDOS */
+/*
+ * XXX we need to fix this to be modified by autoconf...
+ */
+#define GSS_SIZEOF_INT 4
+#define GSS_SIZEOF_LONG 4
+#define GSS_SIZEOF_SHORT 2
+#ifndef FAR
+#define FAR
+#define INTERFACE
+#endif /* FAR */
+#endif
+
+#if (GSS_SIZEOF_INT == 4)
+typedef unsigned int OM_uint32;
+#elif (GSS_SIZEOF_LONG == 4)
+typedef unsigned long OM_uint32;
+#elif (GSS_SIZEOF_SHORT == 4)
+typedef unsigned short OM_uint32;
+#endif
+
 typedef void FAR * gss_name_t;
 typedef void FAR * gss_cred_id_t;
 typedef void FAR * gss_ctx_id_t;
+
+#if defined(__STDC__) || defined(_WINDOWS)
+#define PROTOTYPE(x) x
+#endif
 
 /*
  * Note that a platform supporting the xom.h X/Open header file

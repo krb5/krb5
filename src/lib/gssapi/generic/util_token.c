@@ -23,6 +23,12 @@
 #include "gssapiP_generic.h"
 #include <memory.h>
 
+#if (SIZEOF_INT == 2)
+#define VALID_INT_BITS    0x7fff
+#elif (SIZEOF_INT == 4)
+#define VALID_INT_BITS    0x7fffffff
+#endif	
+
 /* XXXX this code currently makes the assumption that a mech oid will
    never be longer than 127 bytes.  This assumption is not inherent in
    the interfaces, so the code can be fixed if the OSI namespace

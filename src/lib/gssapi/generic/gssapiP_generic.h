@@ -23,6 +23,8 @@
 #ifndef _GSSAPIP_GENERIC_H_
 #define _GSSAPIP_GENERIC_H_
 
+#include "k5-config.h"
+
 #include "gssapi.h"
 
 #include "gssapi_err_generic.h"

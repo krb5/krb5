@@ -1,3 +1,19 @@
+Thu Apr 20 11:41:04 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Add checking for SIZEOF_SHORT, SIZEOF_INT, and
+		SIZEOF_LONG, so we don't need to depend on getting this
+		information from include/krb5/autoconf.h
+
+	* gssapi.h: Removed dependence on krb5 include files.
+
+	* gssapiP_generic.h: We need to include k5-config in order to get
+		Windows specific hackery.  Somewhat of a wart, but this is
+		a gssapi internal header file, so the rest of the world
+		doesn't have to see this.
+
+	* util_token.c: Define VALID_INT, instead of relying on this being
+		defined by krb5.h.
+
 Thu Apr 13 16:27:56 1995 Keith Vetter (keithv@fusion.com)
 
 	* gssapi_e.c: __STDC__ conditional also checks the _WINDOWS define.
