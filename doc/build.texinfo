@@ -225,23 +225,24 @@ program.
 Provides help to configure. This will list the set of commonly used
 options for building Kerberos.
 
-@item --prefix=DIR
+@item --prefix=PREFIX
 
 By default, Kerberos will install the package's files rooted at
 `/usr/local' as in `/usr/local/bin', `/usr/local/sbin', etc. If you
-desire a different location use this option.
+desire a different location, use this option.
 
-@item --exec-prefix=DIR
+@item --exec-prefix=EXECPREFIX
 
 This option allows one to separate the architecture independent programs
 from the configuration files and manual pages. 
 
-@item --localstatedir=DIR
+@item --localstatedir=LOCALSTATEDIR
 
 This option sets the directory for locally modifiable single-machine
 data.  In Kerberos, this mostly is useful for setting a location for the
-KDC data files, as they will be installed in LOCALSTATEDIR/krb5kdc,
-which is by default PREFIX/var/krb5kdc.
+KDC data files, as they will be installed in
+@code{LOCALSTATEDIR/krb5kdc}, which is by default
+@code{PREFIX/var/krb5kdc}.
 
 @item --with-cc=COMPILER
 
@@ -282,8 +283,8 @@ builtin Kerberos V4 library.
 This option enables Kerberos V4 backwards compatibility using a
 pre-existing Kerberos V4 installation.  The directory specified by
 @code{KRB4DIR} specifies where the V4 header files should be found
-(@file{/KRB4DIR/include}) as well as where the V4 Kerberos library
-should be found (@file{/KRB4DIR/lib}).
+(@file{KRB4DIR/include}) as well as where the V4 Kerberos library should
+be found (@file{KRB4DIR/lib}).
 
 @item  --without-krb4
 
@@ -325,8 +326,8 @@ the implementors do not regularly test this feature.
 
 Some of the unit-tests in the build tree rely upon using a program in
 Tcl. The directory specified by @code{TCLPATH} specifies where the Tcl
-header file (@file{/TCLPATH/include/tcl.h} as well as where the Tcl
-library should be found (@file{/TCLPATH/lib}).
+header file (@file{TCLPATH/include/tcl.h} as well as where the Tcl
+library should be found (@file{TCLPATH/lib}).
 
 @end table
 
@@ -416,9 +417,10 @@ one in the tree or you will be missing references.
 @section Operating System Incompatibilities
 
 This section details operating system incompatibilities with Kerberos V5
-which have been reported to the developers at MIT.  If you find additional
-incompatibilities, and/or discover work arounds to such problems, please
-send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
+which have been reported to the developers at MIT.  If you find
+additional incompatibilities, and/or discover work arounds to such
+problems, please send a report via the @code{krb5-send-pr} program.
+Thanks!
 
 @menu
 * AIX::                         

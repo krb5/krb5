@@ -412,7 +412,6 @@ For a KDC, may contain the location of the kdc.conf file.
 * domain_realm::                
 * logging::                     
 * capaths::                     
-* kdc::                         
 * Sample krb5.conf File::       
 @end menu
 
@@ -501,7 +500,7 @@ number (separated from the hostname by a colon) may be included.
 
 @itemx admin_server
 Identifies the host where the administration server is running.
-Typically this is the master Kerberos server.
+Typically, this is the master Kerberos server.
 
 @itemx application defaults
 Application defaults that are specific to a particular realm may be
@@ -526,6 +525,9 @@ following [domain_realm] section:
 @smallexample
 @group
 [domain_realm]
+@ifset MIT
+    .mit.edu = ATHENA.MIT.EDU
+@end ifset
     @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
     crash.@value{PRIMARYDOMAIN} = TEST.@value{PRIMARYREALM}
     @value{SECONDDOMAIN} = @value{SECONDREALM}
@@ -554,9 +556,6 @@ its logging.  The relations in this section assign one or more values to
 the entity name.  Currently, the following entities are used:
 
 @table @b
-@itemx kdc
-These entries specify how the KDC is to perform its logging.
-
 @itemx admin_server
 These entries specify how the administrative server
 is to perform its logging.
@@ -622,7 +621,7 @@ and sent to the device /dev/tty04.
 @end group
 @end smallexample
 
-@node capaths, kdc, logging, krb5.conf
+@node capaths, Sample krb5.conf File, logging, krb5.conf
 @subsection [capaths]
 
 In order to perform direct (non-hierarchical) cross-realm
@@ -715,16 +714,7 @@ can be used with Kerberized clients and servers, but versions prior to
 DCE 1.1 did not fill in the transited field, and should be used with
 caution.
 
-@node kdc, Sample krb5.conf File, capaths, krb5.conf
-@subsection [kdc]
-
-The [kdc] section is used to define configuration information necessary
-for a KDC to find the KDC configuration file (@code{kdc.conf}) if it is
-not in the default location.  The only tag used in this section would be
-@samp{profile}, which would be set to the location of the KDC
-configuration file.
-
-@node Sample krb5.conf File,  , kdc, krb5.conf
+@node Sample krb5.conf File,  , capaths, krb5.conf
 @subsection Sample krb5.conf File
 
 Here is an example of a generic @code{krb5.conf} file:
@@ -752,6 +742,9 @@ Here is an example of a generic @code{krb5.conf} file:
     @}
 
 [domain_realm]
+@ifset MIT
+    .mit.edu = ATHENA.MIT.EDU
+@end ifset
     @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
 
 @end group
@@ -879,10 +872,6 @@ ticket may be valid in this realm.
 @itemx max_renewable_life
 (Delta time string.)  Specifies the maximum time period during which a
 valid ticket may be renewed in this realm.
-
-@itemx profile
-(String.)  Location of the Kerberos V5 configuration file, if different
-from the default (@code{/etc/krb5.conf}).
 
 @itemx supported_enctypes
 List of key:salt strings.  Specifies the default key/salt combinations
@@ -1329,8 +1318,8 @@ principal in the database.
 @item @{-|+@}allow_proxiable
 The ``-allow_proxiable'' option prohibits this principal from obtaining
 proxiable tickets.  ``+allow_proxiable'' clears this flag.  In effect,
-``-allow_proxiable'' sets the @* KRB5_KDB_DISALLOW_PROXIABLE flag. on the
-principal in the database.
+``-allow_proxiable'' sets the @* KRB5_KDB_DISALLOW_PROXIABLE flag. on
+the principal in the database.
 
 @item @{-|+@}allow_dup_skey
 The ``-allow_dup_skey'' option disables user-to-user authentication for
@@ -1355,8 +1344,8 @@ database.
 @item @{-|+@}allow_svr
 The ``-allow_svr'' flag prohibits the issuance of service tickets for
 this principal.  ``+allow_svr'' clears this flag.  In effect,
-``-allow_svr'' sets the @* KRB5_KDB_DISALLOW_SVR flag on the principal in
-the database.
+``-allow_svr'' sets the @* KRB5_KDB_DISALLOW_SVR flag on the principal
+in the database.
 
 @item @{-|+@}allow_tgs_req
 The ``-allow_tgs_req'' option specifies that a Ticket-Granting Service
@@ -1900,7 +1889,8 @@ example:
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kdb5_util -r @value{PRIMARYREALM} create -s
-@b{kdb5_util: No such file or directory while setting active database to '@value{ROOTDIR}/var/krb5kdc/principal'
+@b{kdb5_util: No such file or directory while setting active database to
+@result{} '@value{ROOTDIR}/var/krb5kdc/principal'
 Initializing database '@value{ROOTDIR}/var/krb5kdc/principal' for
 @result{} realm '@value{PRIMARYREALM}',
 master key name 'K/M@@@value{PRIMARYREALM}'
@@ -1992,7 +1982,8 @@ for the kadmin @code{list_principals} (@pxref{Retrieving a List of
 Principals}) command.
 @end table
 
-For example:
+For example (The line beginning with @result{} is a continuation of the
+previous line.):
 
 @smallexample
 @group
@@ -2006,7 +1997,8 @@ kadmin:}
 
 @smallexample
 @group
-@b{kadmin:} ktadd -k @value{ROOTDIR}/var/krb5kdc/kadmind.keytab kadmin/admin kadmin/changepw
+@b{kadmin:} ktadd -k @value{ROOTDIR}/var/krb5kdc/kadmind.keytab
+@result{} kadmin/admin kadmin/changepw
 @b{kadmin: Entry for principal kadmin/admin@@@value{PRIMARYREALM} with
      kvno 3, encryption type DES-CBC-CRC added to keytab
      WRFILE:@value{ROOTDIR}/var/krb5kdc/kadmind.keytab.
@@ -2116,8 +2108,8 @@ Here is a sample @code{/etc/hosts} file:
 @end smallexample
 
 Additionally, on Solaris machines, you need to be sure the ``hosts''
-entry in the file @code{/etc/nsswitch.conf} includes the source ``dns''
-as well as ``file''.
+entry in the file @* @code{/etc/nsswitch.conf} includes the source
+``dns'' as well as ``file''.
 
 Finally, each host's keytab file must include a host/key pair for the
 host's canonical name.  You can list the keys in a keytab file by
@@ -2215,7 +2207,7 @@ suggests that you have rules that specifically name these applications
 and, if possible, list the allowed hosts.
 
 A reasonably good cookbook for configuring firewalls is available by FTP
-from @code{ftp.livingston.com}, in the location:
+from @* @code{ftp.livingston.com}, in the location:
 @code{/pub/firewall/firewall-1.1.ps.Z}.  The book @cite{UNIX System
 Security}, by David Curry, is also a good starting point.
 
@@ -2290,8 +2282,8 @@ Database from a Dump File}.)
 @appendixsubsec Kerberos V5 Library Error Codes
 
 This is the Kerberos v5 library error code table.  Protocol error codes
-are ERROR_TABLE_BASE_krb5 + the protocol error code number; other error
-codes start at ERROR_TABLE_BASE_krb5 + 128.
+are @* ERROR_TABLE_BASE_krb5 + the protocol error code number; other
+error codes start at ERROR_TABLE_BASE_krb5 + 128.
 
 @c error table numbering starts at 0
 @enumerate 0

@@ -16,7 +16,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION b7-1
+@set EDITION 1.0
 
 @finalout                               @c don't print black warning boxes
 
@@ -129,11 +129,11 @@ believes that it is important.  Please read and follow these
 instructions carefully, and if there is anything you do not understand
 or are not sure of, please don't hesitate to call us.
 @end ifset
-@ifclear CYGNUS
+@ifset MIT
 Consequently, everything in this guide appears because @value{COMPANY}
 believes that it is important.  Please read and follow these
 instructions carefully.
-@end ifclear
+@end ifset
 
 @node Overview of This Guide,  , Please Read the Documentation, Introduction
 @section Overview of This Guide
@@ -141,7 +141,7 @@ instructions carefully.
 The next chapter describes the decisions you need to make before
 installing @value{PRODUCT}.
 
-Chapter three describes installation procedures for each class of
+Chapter four describes installation procedures for each class of
 Kerberos machines:
 
 @enumerate
@@ -167,7 +167,10 @@ UNIX application server machines
 Note that a machine can be both a client machine and an application
 server.
 
-Chapter four describes our problem reporting system.
+Chapter five describes procedure for updating previous installations of
+@value{PRODUCT}.
+
+Chapter six describes our problem reporting system.
 
 The appendices give sample configuration files.
 

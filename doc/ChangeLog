@@ -1,3 +1,20 @@
+Thu Dec 12 18:36:20 1996  Tom Yu  <tlyu@mit.edu>
+
+	* user-guide.texinfo: Bump edition to 1.0.  Nuke gratuitous
+	vfills.  Change @value{PRODUCT} to explicit reference, to avoid
+	makeinfo bug that introduces a nul character.
+
+	* krb425.texinfo: Bump edition to 1.0.
+
+	* build.texinfo (OS Incompatibilities): Refer to krb5-send-pr
+	instead of mail to krb5-bugs.
+	(Options to Configure): Change options to indicate meta-names,
+	e.g. "--prefix=PREFIX"; also nuke leading slash on some
+	descriptions of options.
+
+	* admin.texinfo: Add more explicit linebreaks to prevent overruns;
+	also break up a few long lines in example program output.
+
 Fri Dec  6 13:58:19 1996  Tom Yu  <tlyu@mit.edu>
 
 	* .cvsignore: Ignore by suffix rather than by file.

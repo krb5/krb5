@@ -16,7 +16,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION 0.1 alpha
+@set EDITION 1.0
 @set UPDATED October 8, 1996
 
 @finalout                               @c don't print black warning boxes
