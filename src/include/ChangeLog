@@ -1,5 +1,12 @@
 2003-08-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.h (inline): Move definitions further up, before
+	first use.  Do use __inline__ for gcc without c99 support.
+	(GET_SERV_BY_NAME) [!GETSERVBYNAME_R_RETURNS_INT]: Fix invocation
+	for IRIX definition.
+	* socket-utils.h: Include port-sockets.h to get a definition for
+	struct sockaddr_storage.
+
 	First cut at adding local caching to the getaddrinfo support.
 	Still needs work.
 	* fake-addrinfo.h: Delete the unused WRAP_GETNAMEINFO support.

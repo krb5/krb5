@@ -102,6 +102,19 @@
 #include "port-sockets.h"
 #include "socket-utils.h"
 
+#if !defined(inline)
+# if __STDC_VERSION__ >= 199901L
+/* C99 supports inline, don't do anything.  */
+# elif defined(__GNUC__)
+#  define inline __inline__ /* this form silences -pedantic warnings */
+# elif defined(__mips) && defined(__sgi)
+#  define inline __inline /* IRIX used at MIT does inline but not c99 yet */
+# else
+#  define inline /* nothing, just static */
+# endif
+# define ADDRINFO_UNDEF_INLINE
+#endif
+
 #ifdef S_SPLINT_S
 /*@-incondefs@*/
 extern int
@@ -277,11 +290,10 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 #define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
     {									\
 	struct servent my_s_ent;					\
-	int my_s_err;							\
 	char my_s_buf[8192];						\
 	(SP) = getservbyname_r((NAME), (PROTO), &my_s_ent,		\
-			       my_s_buf, sizeof (my_s_buf), &my_s_err);	\
-	(ERR) = my_s_err;						\
+			       my_s_buf, sizeof (my_s_buf));		\
+	(ERR) = (SP) == NULL;						\
     }
 
 #define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
@@ -551,17 +563,6 @@ char *gai_strerror (int code);
 /* AIX 4.3.3 is based on RFC 2133; no AI_NUMERICHOST.  */
 #ifndef AI_NUMERICHOST
 # define AI_NUMERICHOST 0
-#endif
-
-#if !defined(inline)
-# if __STDC_VERSION__ >= 199901L || defined(__GNUC__)
-/* C99 and GCC support inline, don't do anything.  */
-# elif defined(__mips) && defined(__sgi)
-#  define inline __inline /* IRIX used at MIT does inline but not c99 yet */
-# else
-#  define inline /* nothing, just static */
-# endif
-# define ADDRINFO_UNDEF_INLINE
 #endif
 
 #if !defined(_XOPEN_SOURCE_EXTENDED) && !defined(HAVE_MACSOCK_H) && !defined(_WIN32)

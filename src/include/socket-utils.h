@@ -52,6 +52,8 @@
 
 /* for HAVE_SOCKLEN_T, KRB5_USE_INET6, etc */
 #include "krb5/autoconf.h"
+/* for sockaddr_storage */
+#include "port-sockets.h"
 
 #if defined (__GNUC__)
 /*
