@@ -238,6 +238,29 @@ krb5_error_code krb5_decode_generic
 		   (translator_func) KRB5_AuthorizationData2krb5_authdata, \
 		   (free_func) free_KRB5_AuthorizationData)
 
+/* Sandia Additions */
+#define encode_krb5_pwd_sequence(pauth, output) \
+    krb5_encode_generic((krb5_const_pointer)pauth,  output, \
+		   (encoder_func) encode_KRB5_PasswdSequence, \
+		   (translator_func) krb5_pwd_seq2KRB5_PWD__SEQ, \
+		   (free_func) free_KRB5_PasswdSequence)
+#define decode_krb5_pwd_sequence(pauth, output) \
+    krb5_decode_generic(pauth, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_PasswdSequence, \
+		   (translator_func) KRB5_PWD__SEQ2krb5_pwd_seq, \
+		   (free_func) free_KRB5_PasswdSequence)
+
+#define encode_krb5_pwd_data(pwd_data, output) \
+    krb5_encode_generic((krb5_const_pointer)pwd_data, output, \
+		   (encoder_func) encode_KRB5_PasswdData, \
+		   (translator_func) krb5_pwd_data2KRB5_PWD__DATA, \
+		   (free_func) free_KRB5_PasswdData)
+#define decode_krb5_pwd_data(pwd_data, output) \
+    krb5_decode_generic(pwd_data, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_PasswdData, \
+		   (translator_func) KRB5_PWD__DATA2krb5_pwd_data, \
+		   (free_func) free_KRB5_PasswdData)
+
 /* ASN.1 encoding knowledge; KEEP IN SYNC WITH ASN.1 defs! */
 /* here we use some knowledge of ASN.1 encodings */
 /* 

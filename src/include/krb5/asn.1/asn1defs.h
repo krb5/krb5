@@ -112,6 +112,10 @@ struct type_KRB5_AP__REQ *krb5_ap_req2KRB5_AP__REQ
 struct type_KRB5_EncAPRepPart *krb5_ap_rep_enc_part2KRB5_EncAPRepPart
 	PROTOTYPE((const krb5_ap_rep_enc_part *, int *));
 
+/* kasrp2kdcr.c */
+struct type_KRB5_AS__REP *krb5_as_rep2KRB5_KDC__REP
+	PROTOTYPE((const krb5_kdc_rep *, int *));
+
 /* kauth2auth.c */
 struct type_KRB5_Authenticator *krb5_authenticator2KRB5_Authenticator
 	PROTOTYPE((const krb5_authenticator *, int *));
@@ -119,6 +123,10 @@ struct type_KRB5_Authenticator *krb5_authenticator2KRB5_Authenticator
 /* kck2ck.c */
 struct type_KRB5_Checksum *krb5_checksum2KRB5_Checksum
 	PROTOTYPE((const krb5_checksum *, int *));
+
+/* kdcr2kasrp.c */
+krb5_kdc_rep *KRB5_KDC__REP2krb5_as_rep
+	PROTOTYPE((const struct type_KRB5_AS__REP *, int *));
 
 /* kdcr2kkdcr.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_kdc_rep
@@ -164,6 +172,16 @@ struct type_KRB5_PrincipalName *krb5_principal2KRB5_PrincipalName
 struct type_KRB5_KRB__PRIV *krb5_priv2KRB5_KRB__PRIV
 	PROTOTYPE((const krb5_priv *, int *));
 
+/* Sandia Passwd Utilities */
+/* kpwds2pwds.c */
+struct type_KRB5_PasswdData *krb5_pwd_data2KRB5_PWD__DATA
+	PROTOTYPE((krb5_pwd_data const *, int *));
+
+/* kpwd2pwd.c */
+struct type_KRB5_PasswdSequence *krb5_pwd_seq2KRB5_PWD__SEQ
+	PROTOTYPE((const passwd_phrase_element *, int *));
+
+
 /* ksafe2safe.c */
 struct type_KRB5_KRB__SAFE *krb5_safe2KRB5_KRB__SAFE
 	PROTOTYPE((const krb5_safe *, int *));
@@ -198,6 +216,16 @@ krb5_principal KRB5_PrincipalName2krb5_principal
 krb5_priv *KRB5_KRB__PRIV2krb5_priv
 	PROTOTYPE((const struct type_KRB5_KRB__PRIV *, int *));
 
+/* Sandia passwd utilities */
+/* pwds2kpwds.c */
+krb5_pwd_data *KRB5_PWD__DATA2krb5_pwd_data
+	PROTOTYPE((const struct type_KRB5_PasswdData *, int *));
+
+/* pwd2kpwd.c */
+ passwd_phrase_element *KRB5_PWD__SEQ2krb5_pwd_seq
+	PROTOTYPE((const register struct type_KRB5_PasswdSequence *, int *));
+
+
 /* qbuf2data.c */
 krb5_data *qbuf2krb5_data
 	PROTOTYPE((const struct qbuf *, int *));
@@ -227,16 +255,20 @@ krb5_flags KRB5_TicketFlags2krb5_flags
 	PROTOTYPE((const struct type_KRB5_TicketFlags *,int *));
 
 /* kpadt2padt.c */
+/*
 struct type_KRB5_PA__DATA *krb5_pa_data2KRB5_PA__DATA
     PROTOTYPE((krb5_pa_data **, int *));
+*/
 
 /* ktran2tran.c */
 struct type_KRB5_TransitedEncoding *krb5_transited2KRB5_TransitedEncoding
     PROTOTYPE((const krb5_transited *, int *));
 
 /* padt2kpadt.c */
+/*
 krb5_pa_data **KRB5_PA__DATA2krb5_pa_data
     PROTOTYPE((struct type_KRB5_PA__DATA *, int *));
+*/
 
 /* tran2ktran.c */
 krb5_transited *KRB5_TransitedEncoding2krb5_transited
