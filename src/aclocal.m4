@@ -485,6 +485,22 @@ if test "$GCC" = yes ; then
       CFLAGS="$CFLAGS -pedantic"
     fi
   fi
+  if test "`uname -s`" = Darwin ; then
+    # Someday this should be a feature test.
+    # One current (Jaguar = OS 10.2) problem:
+    # Archive library with foo.o undef sym X and bar.o common sym X,
+    # if foo.o is pulled in at link time, bar.o may not be, causing
+    # the linker to complain.
+    # Dynamic library problems too?
+    case "$CC $CFLAGS" in
+    *-fcommon*) ;; # why someone would do this, I don't know
+    *-fno-common*) ;; # okay, they're already doing the right thing
+    *)
+      AC_MSG_NOTICE(disabling the use of common storage on Darwin)
+      CFLAGS="$CFLAGS -fno-common"
+      ;;
+    esac
+  fi
 fi
 ])dnl
 dnl

@@ -5,6 +5,8 @@
 	corresponding getsockname arg types.
 	(KRB5_GETSOCKNAME_ARGS): If nothing matches, assume struct
 	sockaddr and socklen_t.
+	(WITH_CC): Add -fno-common to CFLAGS on Darwin, unless -fcommon or
+	-fno-common is already given.
 
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
