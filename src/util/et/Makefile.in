@@ -5,7 +5,7 @@ SED = sed
 ##DOSLIBNAME=comerr.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-LIBDONE=./done
+LIBDONE=DONE
 LIB_SUBDIRS=.
 INSTALLFILE = cp
 
@@ -103,9 +103,9 @@ libcom_err.$(STEXT): $(LIBOBJS)
 	$(ARCHIVE) $@ $(LIBOBJS)
 	$(RANLIB) $@
 
-done:: $(LIBOBJS)
-	 $(RM) done
-	 echo $(LIBOBJS) >done
+DONE:: $(LIBOBJS)
+	 $(RM) DONE
+	 echo $(LIBOBJS) >DONE
 
 clean-unix::
 	$(RM) $(LIBOBJS)
