@@ -105,6 +105,14 @@ the following meanings:
 	credential cache (you must have acquired your tickets with
 	"kinit -f" for this to work).
 
+-seq Tells the client to enforce ordered message delivery via
+    sequencing.  
+
+-noreplay Tells the client to disable the use of replay
+    detection.
+
+-nomutual Tells the client to disable the use of mutual authentication.
+
 -f	Tells the client that the "msg" argument is actually the name
 	of a file whose contents should be used as the message.
 

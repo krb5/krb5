@@ -1,3 +1,10 @@
+2004-02-06  Jeffrey Altman <jaltman@mit.edu>
+
+    * Add new command line switches to the gss-client
+      to support the use of GSS_C_SEQUENCE_FLAG or to 
+      disable the use of either GSS_C_MUTUAL_FLAG or 
+      GSS_C_REPLAY_FLAG
+
 2004-01-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* gss-misc.c: Include sys/time.h or time.h, to get struct timeval
@@ -13,7 +20,7 @@
 
 	* gss-misc.c (recv_token): Support reading 0 token flags as part of length
 
-	* gss-client.c :  Support a -v1 argument meaning that no token flags are used o,
+	* gss-client.c :  Support a -v1 argument meaning that no token flags are used,
 
 	* gss-misc.c (send_token): If token flags are null, do not send them.
 
