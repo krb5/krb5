@@ -1,3 +1,13 @@
+Thu Oct 16 01:23:41 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Change LOCALINCLUDE and the link line to allow for
+	krb4 compatibility.
+
+	* ftpd.c: Change KERBEROS to KRB5_KRB4_COMPAT where appropriate.
+	(reply): Fix up braces around the check for auth_type ==
+	"KERBEROS_V4" so that the nesting of if statements is correct.
+	Various and sundry fixes from danw@mit.edu to make it work.
+
 Thu Aug 28 23:48:27 1997  Sam Hartman  <hartmans@luminous.mesas.com>
 
 	* ftpd.c (send_file_list): Flush the data before closing it.

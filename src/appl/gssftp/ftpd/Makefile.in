@@ -20,13 +20,13 @@ SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/logwtmp.c $(srcdir)/popen.c \
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
-LOCALINCLUDE = -I$(srcdir)/..
+LOCALINCLUDE = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
 DEFINES = -DGSSAPI -DNOCONFIDENTIAL
 
 all::	ftpd
 
 ftpd:	$(OBJS) $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ $(OBJS) $(GSS_LIBS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) ftpd ftpcmd.c

@@ -113,7 +113,7 @@ extern reply(int, char *, ...);
 extern lreply(int, char *, ...);
 #endif
 
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 #include <krb.h>
 
 AUTH_DAT kdata;
@@ -121,8 +121,8 @@ KTEXT_ST ticket;
 MSG_DAT msg_data;
 Key_schedule schedule;
 int kerb_ok;	/* Kerberos authentication and authorization succeeded */
-char *keyfile = KEYFILE;
-#endif /* KERBEROS */
+char *keyfile;
+#endif /* KRB5_KRB4_COMPAT */
 
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
@@ -226,6 +226,9 @@ main(argc, argv, envp)
 	int addrlen, on = 1, tos, port = -1;
 	char *cp;
 
+#ifdef KRB5_KRB4_COMPAT
+	keyfile = KEYFILE;
+#endif /* KRB5_KRB4_COMPAT */
 	debug = 0;
 #ifdef SETPROCTITLE
 	/*
@@ -279,7 +282,7 @@ main(argc, argv, envp)
 				fprintf(stderr, "ftpd: -r expects argument\n");
 			goto nextopt;
 
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 		case 's':
 			if (*++cp != '\0')
 				keyfile = cp;
@@ -291,7 +294,7 @@ main(argc, argv, envp)
 				fprintf(stderr, "ftpd: -s expects argument\n");
 			goto nextopt;
 
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 		case 't':
 			timeout = atoi(++cp);
 			if (maxtimeout < timeout)
@@ -593,28 +596,6 @@ user(name)
 			return;
 		}
 	}
-#ifdef KERBEROS
-	if (auth_type && strcmp(auth_type, "KERBEROS_V4") == 0) {
-		char buf[FTP_BUFSIZ];
-		kerb_ok = kuserok(&kdata,name) == 0;
-		if (! kerb_ok && authenticate) {
-			reply(530, "User %s access denied.", name);
-			if (logging)
-				syslog(LOG_NOTICE,
-				       "FTP KERBEROS LOGIN REFUSED FROM %s, %s",
-				       remotehost, name);
-			pw = (struct passwd *) NULL;
-			return;
-		}
-		sprintf(buf, "Kerberos user %s%s%s@%s is%s authorized as %s%s",
-			kdata.pname, *kdata.pinst ? "." : "",
-			kdata.pinst, kdata.prealm,
-			kerb_ok ? "" : " not",
-			name, kerb_ok ? "" : "; Password required.");
-		reply(kerb_ok ? 232 : 331, "%s", buf);
-		syslog(kerb_ok ? LOG_INFO : LOG_ERR, "%s", buf);
-	} else
-#endif /* KERBEROS */
 #ifdef GSSAPI
 	if (auth_type && strcmp(auth_type, "GSSAPI") == 0) {
 		char buf[FTP_BUFSIZ];
@@ -637,6 +618,28 @@ user(name)
 		syslog(gss_ok ? LOG_INFO : LOG_ERR, "%s", buf);
 	} else
 #endif /* GSSAPI */
+#ifdef KRB5_KRB4_COMPAT
+	if (auth_type && strcmp(auth_type, "KERBEROS_V4") == 0) {
+		char buf[FTP_BUFSIZ];
+		kerb_ok = kuserok(&kdata,name) == 0;
+		if (! kerb_ok && authenticate) {
+			reply(530, "User %s access denied.", name);
+			if (logging)
+				syslog(LOG_NOTICE,
+				       "FTP KERBEROS LOGIN REFUSED FROM %s, %s",
+				       remotehost, name);
+			pw = (struct passwd *) NULL;
+			return;
+		}
+		sprintf(buf, "Kerberos user %s%s%s@%s is%s authorized as %s%s",
+			kdata.pname, *kdata.pinst ? "." : "",
+			kdata.pinst, kdata.prealm,
+			kerb_ok ? "" : " not",
+			name, kerb_ok ? "" : "; Password required.");
+		reply(kerb_ok ? 232 : 331, "%s", buf);
+		syslog(kerb_ok ? LOG_INFO : LOG_ERR, "%s", buf);
+	} else
+#endif /* KRB5_KRB4_COMPAT */
 	/* Other auth types go here ... */
 	if (authenticate) {
 		reply(530, "User %s access denied: authentication required.",
@@ -697,7 +700,7 @@ end_login()
 	guest = 0;
 }
 
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 static char *services[] = { "ftp", "rcmd", NULL };
 
 kpass(name, passwd)
@@ -747,7 +750,7 @@ char *name, *passwd;
 	dest_tkt();
 	return(1);
 }
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 
 pass(passwd)
 	char *passwd;
@@ -760,9 +763,9 @@ pass(passwd)
 	}
 	askpasswd = 0;
 	if (
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	    !kerb_ok &&
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 	    !gss_ok &&
 #endif /* GSSAPI */
@@ -777,7 +780,7 @@ pass(passwd)
 #else
 		xpasswd = crypt(passwd, salt);
 #endif
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 		/* null pw_passwd ok if Kerberos password ok */
 		if (pw == NULL ||
 		    (*pw->pw_passwd && strcmp(xpasswd, pw->pw_passwd) &&
@@ -787,7 +790,7 @@ pass(passwd)
 		/* The strcmp does not catch null passwords! */
 		if (pw == NULL || *pw->pw_passwd == '\0' ||
 		    strcmp(xpasswd, pw->pw_passwd)) {
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 			reply(530, "Login incorrect.");
 			pw = NULL;
 			if (login_attempts++ >= 5) {
@@ -1439,20 +1442,24 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
 		strcat(in, buf);
-#ifdef KERBEROS
-		if (strcmp(auth_type, "KERBEROS_V4") == 0)
-		  if ((length = level == PROT_P ?
-		    krb_mk_priv((unsigned char *)in, (unsigned char *)out,
-				strlen(in), schedule, &kdata.session,
-				&ctrl_addr, &his_addr)
-		  : krb_mk_safe((unsigned char *)in, (unsigned char *)out,
-				strlen(in), &kdata.session,
-				&ctrl_addr, &his_addr)) == -1) {
-			syslog(LOG_ERR, "krb_mk_%s failed for KERBEROS_V4",
-					level == PROT_P ? "priv" : "safe");
-			fputs(in,stdout);
-		  } else
-#endif /* KERBEROS */
+#ifdef KRB5_KRB4_COMPAT
+		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
+			if ((length = level == PROT_P ?
+			     krb_mk_priv((unsigned char *)in,
+					 (unsigned char *)out,
+					 strlen(in), schedule, &kdata.session,
+					 &ctrl_addr, &his_addr)
+			     : krb_mk_safe((unsigned char *)in,
+					   (unsigned char *)out,
+					   strlen(in), &kdata.session,
+					   &ctrl_addr, &his_addr)) == -1) {
+				syslog(LOG_ERR,
+				       "krb_mk_%s failed for KERBEROS_V4",
+				       level == PROT_P ? "priv" : "safe");
+				fputs(in,stdout);
+			}
+		} else
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 		/* reply (based on level) */
 		if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -1804,18 +1811,18 @@ char *type;
 	if (auth_type)
 		reply(534, "Authentication type already set to %s", auth_type);
 	else
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	if (strcmp(type, "KERBEROS_V4") == 0)
 		reply(334, "Using authentication type %s; ADAT must follow",
 				temp_auth_type = type);
 	else
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 	if (strcmp(type, "GSSAPI") == 0)
 		reply(334, "Using authentication type %s; ADAT must follow",
 				temp_auth_type = type);
 	else
-#endif /* KERBEROS */
+#endif /* GSSAPI */
 	/* Other auth types go here ... */
 		reply(504, "Unknown authentication type: %s", type);
 }
@@ -1824,14 +1831,14 @@ auth_data(data)
 char *data;
 {
 	int kerror, length;
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	int i;
 	static char *service;
 	char instance[INST_SZ];
 	u_long cksum;
 	char buf[FTP_BUFSIZ];
 	u_char out_buf[sizeof(buf)];
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 
 	if (auth_type) {
 		reply(503, "Authentication already established");
@@ -1841,7 +1848,7 @@ char *data;
 		reply(503, "Must identify AUTH type before ADAT");
 		return(0);
 	}
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	if (strcmp(temp_auth_type, "KERBEROS_V4") == 0) {
 		if (kerror = radix_encode(data, out_buf, &length, 1)) {
 			reply(501, "Couldn't decode ADAT (%s)",
@@ -1889,7 +1896,7 @@ char *data;
 		temp_auth_type = NULL;
 		return(1);
 	}
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 	if (strcmp(temp_auth_type, "GSSAPI") == 0) {
 		int replied = 0;
