@@ -1,3 +1,8 @@
+1999-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install): Install port-sockets.h, needed by
+	kerberosIV/krb.h.
+
 1999-08-31  Jeffrey Altman <jaltman@columbia.edu>
 
     * k5-int.h:  Add #define ANSI_STDIO for Windows builds so that 
