@@ -638,6 +638,7 @@
 				F5C2DF700240FAA201650119,
 			);
 			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5C44E930231BD6801120112 = {
 			fileRef = F5CFD38C022D86AC01120112;
@@ -740,6 +741,7 @@
 				F5C2DF450240FA1601650119,
 			);
 			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5C44E9D0231BD6801120112 = {
 			fileRef = F5CFD38B022D86AC01120112;
@@ -1094,12 +1096,14 @@
 			files = (
 			);
 			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5C44EDE0231BD6801120112 = {
 			buildActionMask = 2147483647;
 			files = (
 			);
 			isa = PBXRezBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5C44EDF0231BF0801120112 = {
 			fileRef = F5CFD617022D911001120112;
@@ -4146,6 +4150,7 @@
 				F5C2DF6E0240FA9A01650119,
 			);
 			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD5CF022D86AD01120112 = {
 			buildActionMask = 2147483647;
@@ -4161,18 +4166,21 @@
 				F5C2DF3E0240F9FC01650119,
 			);
 			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD5D0022D86AD01120112 = {
 			buildActionMask = 2147483647;
 			files = (
 			);
 			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD5D1022D86AD01120112 = {
 			buildActionMask = 2147483647;
 			files = (
 			);
 			isa = PBXRezBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD5D2022D87C301120112 = {
 			fileRef = F5CFD5BA022D86AD01120112;
@@ -4243,7 +4251,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = "./../../../Common/Scripts/jam-2.4";
+			buildToolPath = /usr/bin/jam;
 			dependencies = (
 			);
 			isa = PBXLegacyTarget;
@@ -4368,7 +4376,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = "./../../../Common/Scripts/jam-2.4";
+			buildToolPath = /usr/bin/jam;
 			dependencies = (
 				F5CFD62A022D922C01120112,
 			);
@@ -4497,6 +4505,7 @@
 				F58183520253A2F301120112,
 			);
 			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD63B022DD45401120112 = {
 			buildActionMask = 2147483647;
@@ -4816,18 +4825,21 @@
 				F5F49B5F025A5AB901890E3A,
 			);
 			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD63C022DD45401120112 = {
 			buildActionMask = 2147483647;
 			files = (
 			);
 			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD63D022DD45401120112 = {
 			buildActionMask = 2147483647;
 			files = (
 			);
 			isa = PBXRezBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F5CFD647022DD6E701120112 = {
 			fileRef = F5CFD617022D911001120112;
