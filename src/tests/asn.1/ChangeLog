@@ -1,3 +1,7 @@
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * ktest.c, ktest.h, ktest_equal.c, ktest_equal.h : Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate
 
 Tue Aug 29 14:20:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5_decode_test.c - Fix string constant.

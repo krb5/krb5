@@ -65,7 +65,6 @@ krb5_error_code ktest_make_sample_keyblock(kb)
      krb5_keyblock * kb;
 {
   kb->magic = KV5M_KEYBLOCK;
-  kb->etype = ETYPE_UNKNOWN;
   kb->keytype = 1;
   kb->length = 8;
   kb->contents = (krb5_octet*)calloc(8,sizeof(krb5_octet));
@@ -93,8 +92,8 @@ krb5_error_code ktest_make_sample_enc_data(ed)
 {
   krb5_error_code retval;
 
-  ed->etype = 0;
   ed->kvno = 5;
+  ed->keytype = 0;
   retval = krb5_data_parse(&(ed->ciphertext),"krbASN.1 test message");
   if(retval) return retval;
 
@@ -375,10 +374,10 @@ krb5_error_code ktest_make_sample_kdc_req(kr)
   kr->till = SAMPLE_TIME;
   kr->rtime = SAMPLE_TIME;
   kr->nonce = SAMPLE_NONCE;
-  kr->netypes = 2;
-  kr->etype = (krb5_enctype*)calloc(2,sizeof(krb5_enctype));
-  kr->etype[0] = 0;
-  kr->etype[1] = 1;
+  kr->nktypes = 2;
+  kr->ktype = (krb5_keytype*)calloc(2,sizeof(krb5_keytype));
+  kr->ktype[0] = 0;
+  kr->ktype[1] = 1;
   retval = ktest_make_sample_addresses(&(kr->addresses));
   if(retval) return retval;
   retval = ktest_make_sample_enc_data(&(kr->authorization_data));
@@ -404,10 +403,10 @@ krb5_error_code ktest_make_sample_kdc_req_body(krb)
   krb->till = SAMPLE_TIME;
   krb->rtime = SAMPLE_TIME;
   krb->nonce = SAMPLE_NONCE;
-  krb->netypes = 2;
-  krb->etype = (krb5_enctype*)calloc(2,sizeof(krb5_enctype));
-  krb->etype[0] = 0;
-  krb->etype[1] = 1;
+  krb->nktypes = 2;
+  krb->ktype = (krb5_keytype*)calloc(2,sizeof(krb5_keytype));
+  krb->ktype[0] = 0;
+  krb->ktype[1] = 1;
   retval = ktest_make_sample_addresses(&(krb->addresses));
   if(retval) return retval;
   retval = ktest_make_sample_enc_data(&(krb->authorization_data));
@@ -833,8 +832,8 @@ void ktest_destroy_sequence_of_integer(soi)
   *soi = NULL;
 }
 
-void ktest_destroy_sequence_of_enctype(soi)
-     krb5_enctype ** soi;
+void ktest_destroy_sequence_of_keytype(soi)
+     krb5_keytype ** soi;
 {
   free(*soi);
   *soi = NULL;

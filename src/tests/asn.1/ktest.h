@@ -125,8 +125,6 @@ void ktest_destroy_authdata
 	KRB5_PROTOTYPE((krb5_authdata **ad));
 void ktest_destroy_sequence_of_integer
 	KRB5_PROTOTYPE((long **soi));
-void ktest_destroy_sequence_of_enctype
-	KRB5_PROTOTYPE((krb5_enctype **soi));
 void ktest_destroy_sequence_of_ticket
 	KRB5_PROTOTYPE((krb5_ticket ***sot));
   void ktest_destroy_ticket

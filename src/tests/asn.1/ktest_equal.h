@@ -63,7 +63,7 @@ int ktest_equal_sequence_of_pa_data
 int ktest_equal_sequence_of_cred_info
 	KRB5_PROTOTYPE((krb5_cred_info **ref, krb5_cred_info **var));
 
-len_array(ktest_equal_array_of_enctype,krb5_enctype);
+len_array(ktest_equal_array_of_keytype,krb5_keytype);
 len_array(ktest_equal_array_of_data,krb5_data);
 len_array(ktest_equal_array_of_octet,krb5_octet);
 
