@@ -27,6 +27,8 @@
 
 #include "ksu.h" 
 #include "adm_proto.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /******************************************************************
 krb5_cache_copy

@@ -1,3 +1,27 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* setenv.c: Add prototype for _findenv to avoid inconsistancy of
+	static vs. extern.
+
+	* heuristic.c (find_either_ticket): Change krb5_tgtname() to
+	ksu_tgtname().
+
+	* ccache.c: Include <sys/types.h> and <sys/stat.h> for start()
+	prototype.
+
+	* krb_auth_su.c: Reindent for readability. Remove defunct
+	code. Change use of krb5_tgtname to ksu_tgtname().
+
+	* ksu.h: Include k5-util.h for krb5_seteuid() prototype. Add
+	prototype for ksu_tgtname. Add prototype for unsetenv() if not
+	defined.
+
+	* main.c: Include grp.h for initgroups() prototype. Cleanup
+	assignment in conditional warning. Reindent for
+	readability. Arguments to print_status made consistant with regard
+	to long vs. int. Change krb5_tgtname to ksu_tgtname. (do not use
+	an internal krb5 function that is not advertised).
+
 2001-06-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* authorization.c, heuristic.c, krb_auth_su.c, main.c, setenv.c:

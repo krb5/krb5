@@ -26,6 +26,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-util.h"
 #include <stdio.h>
 #include "com_err.h"
 #include <sys/types.h> 
@@ -233,6 +234,10 @@ extern krb5_error_code get_best_princ_for_target
 	PROTOTYPE((krb5_context, int, int, char *, char *, krb5_ccache, 
 		opt_info *, char *, char *, krb5_principal *, int *));
 
+extern krb5_error_code ksu_tgtname PROTOTYPE((krb5_context, const krb5_data *,
+					      const krb5_data *, 
+					      krb5_principal *tgtprinc));
+
 #ifndef min
 #define min(a,b) ((a) > (b) ? (b) : (a))
 #endif /* min */
@@ -243,3 +248,7 @@ extern char *krb5_lname_file;  /* Note: print this out just be sure
 
 extern void *xmalloc (), *xrealloc (), *xcalloc();
 extern char *xstrdup ();
+
+#ifndef HAVE_UNSETENV
+void unsetenv PROTOTYPE((char *));
+#endif

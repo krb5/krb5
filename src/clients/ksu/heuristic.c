@@ -418,7 +418,7 @@ krb5_error_code find_either_ticket (context, cc, client, end_server, found)
 	    return retval;
  	
 	if (temp_found == FALSE){
-	    retval = krb5_tgtname(context,
+	    retval = ksu_tgtname(context,
 				  krb5_princ_realm(context, client),
 				  krb5_princ_realm(context, client),
 				  &kdc_server);
