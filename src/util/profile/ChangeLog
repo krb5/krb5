@@ -1,5 +1,11 @@
 2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
 
+        * prof_file.c (profile_library_initializer, 
+        profile_library_finalizer): Added macros to avoid adding 
+        error tables on platforms that don't use them (ie: OSX).
+
+2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
+
 	* prof_int.h Added prototypes for profile_lock_global()
         and profile_unlock_global().
 

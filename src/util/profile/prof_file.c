@@ -50,7 +50,9 @@ MAKE_FINI_FUNCTION(profile_library_finalizer);
 
 int profile_library_initializer(void)
 {
+#if !USE_BUNDLE_ERROR_STRINGS
     add_error_table(&et_prof_error_table);
+#endif
 #ifdef SHARE_TREE_DATA
     return k5_mutex_finish_init(&g_shared_trees_mutex);
 #else
@@ -64,7 +66,9 @@ void profile_library_finalizer(void)
 #ifdef SHARE_TREE_DATA
     k5_mutex_destroy(&g_shared_trees_mutex);
 #endif
+#if !USE_BUNDLE_ERROR_STRINGS
     remove_error_table(&et_prof_error_table);
+#endif
 }
 
 static void profile_free_file_data(prf_data_t);
