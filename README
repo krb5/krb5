@@ -62,8 +62,9 @@ and logging in as "guest" with password "guest".
 Notes, Major Changes, and Known Bugs for 1.3.2
 ----------------------------------------------
 
-* [2040, 1471, 2067] Support for AES in GSSAPI has been implemented.
-  This corresponds to the in-progress work in the IETF (CFX).
+* [2040, 1471, 2067, 2077, 2079] Support for AES in GSSAPI has been
+  implemented.  This corresponds to the in-progress work in the IETF
+  (CFX).
 
 Minor changes in 1.3.2
 ----------------------
@@ -95,8 +96,6 @@ Minor changes in 1.3.2
 
 * [1712] Applied patch from Cesar Garcia to fix lifetime computation
   in krb524 ticket conversion.
-
-* [1713] Fixed an endianness bug in krb524d, found by Cesar Garcia.
 
 * [1715] kadmind4 and v5passwdd are no longer installed on Mac OS X.
 
@@ -145,10 +144,25 @@ Minor changes in 1.3.2
 
 * [2051] Missing exports have been added to krb4_32.def on Windows.
 
+* [2058] Some problems with krb4 ticket lifetime backdating have
+  fixed.
+
 * [2060] GSSAPI's idea of the default ccache is less sticky now.
 
 * [2068] The profile library includes prof-int.h before conditionals
   that rely on it.
+
+* [2084] The resolver library is no longer referenced by library code
+  if not building with DNS SRV record support.
+
+* [2085] Updated Windows README file to reflect current compliation
+  requirements, etc.
+
+* [2104] On Windows, only define strcasecmp and strncasecmp
+  replacement macros if said functions are missing.
+
+* [2106] Return an error for unimplemented ccache functions, rather
+  than calling through a null pointer.
 
 Notes, Major Changes, and Known Bugs for 1.3.1
 ----------------------------------------------
@@ -801,7 +815,7 @@ Minor changes listed by ticket ID
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-2003 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2004 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
