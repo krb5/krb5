@@ -1,17 +1,4 @@
-#ifdef mw_rez
-#include <SysTypes.r>
-#include <Types.r>
-#else
-#include "SysTypes.r"
 #include "Types.r"
-#endif
-
-resource 'vers' (1) {
-	0x01, 0x00, final, 0x00,
-	verUS,
-	"1.0",
-	"1.0(SAP), Copyright 1996 Massachusetts Institute of Technology"
-};
 
 resource 'DITL' (135, nonpurgeable) {
 	{	/* array DITLarray: 2 elements */
@@ -46,7 +33,7 @@ resource 'DITL' (136, nonpurgeable) {
 		StaticText {
 			disabled,
 			"This version of the SAP client will expi"
-			"re on June 1, 1997. Please consult: "
+			"re on January 15, 1997. Please consult: "
 			"http://web.mit.edu/reeng/www/saphelp/ fo"
 			"r instructions on obtaining a new versio"
 			"n when it is available."

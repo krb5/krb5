@@ -1,3 +1,11 @@
+Fri Dec 20 12:35:32 1996  Marshall Vale  <mjv@mit.edu>
+
+	* GSSforSAP.r: Moved resources for the timebomb out to Rez 
+		format for easier CVSing
+	* macSAPglue.c (__initializeSAPglue): Added new conditions to the
+		timebomb code so that it can identify individual applications
+		and not just fail globally.
+		
 Tue Dec 17 13:53:36 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* GSSforSAP.r: Fix expire time in the text resource to be June 1,
