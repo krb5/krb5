@@ -1,3 +1,7 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc.conf.proto: Use des3 master key.
+
 2000-05-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.conf.proto: Set dns_fallback=no.
