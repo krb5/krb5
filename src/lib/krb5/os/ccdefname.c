@@ -73,18 +73,6 @@ static int get_from_registry(char *name_buf, int name_size)
 }
 #endif
 
-#ifdef macintosh
-static krb5_error_code get_from_os(char *name_buf, int name_size)
-{
-#if defined(_WIN32)
-	if (get_from_registry(name_buf, name_size))
-		return 0;
-#endif
-	strcpy(name_buf, "API:default_cache_name");
-	return 0;
-}
-#endif
-
 #if defined(_MSDOS) || defined(_WIN32)
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
@@ -106,7 +94,18 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 }
 #endif
 
-#if !(defined(_MSDOS) || defined(_WIN32) || defined(macintosh))
+#if defined (macintosh)
+
+static krb5_error_code get_from_os(char *name_buf, int name_size)
+{
+	if (name_size < 4)
+		return ENOMEM;
+	Krb5GlobalsGetDefaultCacheName (name_buf + 4, name_size - 4);
+	memcpy (name_buf, "API:", 4);
+	return 0;
+}
+
+#elif !(defined(_MSDOS) || defined(_WIN32)
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
