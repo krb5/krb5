@@ -208,6 +208,38 @@ int krb4int_getst(int, char *, int);
 /* strnlen.c */
 extern int KRB5_CALLCONV krb4int_strnlen(const char *, int);
 
+/* prot_client.c */
+extern int KRB5_CALLCONV krb4prot_encode_kdc_request(
+    char *, char *, char *,
+    KRB4_32, int,
+    char *, char *,
+    char *, int, int, int,
+    KTEXT);
+extern int KRB5_CALLCONV krb4prot_decode_kdc_reply(
+    KTEXT,
+    int *,
+    char *, char *, char *,
+    long *, int *, unsigned long *, int *, KTEXT);
+extern int KRB5_CALLCONV krb4prot_decode_ciph(
+    KTEXT, int,
+    C_Block,
+    char *, char *, char *,
+    int *, int *, KTEXT, unsigned long *);
+extern int KRB5_CALLCONV krb4prot_encode_apreq(
+    int, char *,
+    KTEXT, KTEXT,
+    int, int, KTEXT);
+extern int KRB5_CALLCONV krb4prot_encode_authent(
+    char *, char *, char *,
+    KRB4_32,
+    int, long,
+    int, int le,
+    KTEXT pkt);
+extern int KRB5_CALLCONV krb4prot_decode_error(
+    KTEXT, int *,
+    char *, char *, char *,
+    unsigned long *, unsigned long *, char *);
+
 /* prot_common.c */
 extern int KRB5_CALLCONV krb4prot_encode_naminstrlm(
     char *, char *, char *,
@@ -215,6 +247,8 @@ extern int KRB5_CALLCONV krb4prot_encode_naminstrlm(
 extern int KRB5_CALLCONV krb4prot_decode_naminstrlm(
     KTEXT, unsigned char **,
     char *, char *, char *);
+extern int KRB5_CALLCONV krb4prot_decode_header(
+    KTEXT, int *, int *, int *);
 
 /* prot_kdc.c */
 extern int KRB5_CALLCONV krb4prot_encode_kdc_reply(

@@ -1,3 +1,8 @@
+2001-01-25  Tom Yu  <tlyu@mit.edu>
+
+	* prot.h: Add new prototypes for prot_client.c stuff.  Also, add
+	new prototype for decode_header().
+
 2001-01-24  Tom Yu  <tlyu@mit.edu>
 
 	* prot.h: Add prototype for decode_kdc_request() and some rough
