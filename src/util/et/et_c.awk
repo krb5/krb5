@@ -113,7 +113,7 @@ c2n["_"]=63
 	print "# include \"win-mac.h\"" > outfile
 	print "#endif" > outfile
 	print "" > outfile
-	print "#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))" > outfile
+	print "#if !defined(_WIN32)" > outfile
 	print "extern void initialize_" table_name "_error_table (void);" > outfile
 	print "#endif" > outfile
 	print "" > outfile
@@ -199,7 +199,7 @@ END {
 		tab_base_low, table_item_count) > outfile
 	}
 	print "" > outfile
-	print "#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))" > outfile
+	print "#if !defined(_WIN32)" > outfile
 	print "void initialize_" table_name "_error_table (void)" > outfile
 	print "    /*@modifies internalState@*/" > outfile
 	print "{" > outfile

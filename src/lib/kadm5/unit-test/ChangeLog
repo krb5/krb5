@@ -1,3 +1,16 @@
+2003-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test117): Update lifetime expected for new
+	defaults.
+
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* api.0/init.exp (test6, test7): Be slightly more lenient about
+	matching password prompt.
+
+	* api.2/init.exp (test6, test7): Be slightly more lenient about
+	matching password prompt.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.ov: Deleted.

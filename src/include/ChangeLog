@@ -1,3 +1,152 @@
+2003-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: krb524_init_ets() takes one argument.
+
+2003-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct srv_dns_entry): Declare.
+	(krb5int_make_srv_query_realm, krb5int_free_srv_dns_data):
+	Declare.
+	(struct _krb5int_access): Add make_srv_query_realm and
+	free_srv_dns_data fields.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5int_access): Add locate_server back in.
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (KRB524_SERVICE, KRB524_PORT): Moved here...
+	* krb5.h: ...from here.
+	(krb5_524_convert_creds): Renamed from krb524_convert_creds_kdc,
+	fixed calling convention spec.
+	(krb524_convert_creds_kdc, krb524_init_ets) [KRB5_DEPRECATED]: New
+	macros.
+
+	* Makefile.in (clean-windows): Remove new "timestamp" file when
+	cleaning up.
+
+2003-05-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin: Sequence number of krb5_replay_data should be unsigned.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5.h): Include krb524_err.h.
+	(krb524_err.h): Depend on rebuild-error-tables like krb5_err.h and
+	friends.  Add a null command to cause make to recheck the
+	timestamp on the files possibly updated.
+	(clean-unix): Get rid of it.
+	* k5-int.h (KRb5INT_ACCESS_STRUCT_VERSION): Update to 7.
+	(struct ktext) [!defined(ANAME_SZ)]: Declare forward.
+	(krb5int_access): Delete krb5_locate_kdc, krb5_locate_server,
+	krb5_max_dgram_size and timeout fields.  Add krb_life_to_time,
+	krb_time_to_life, and krb524_encode_v4tkt function pointer
+	fields.  Reorder fields, and add comments.
+	(krb5int_krb_life_to_time, krb5int_krb_time_to_life,
+	krb5int_encode_v4tkt, krb5int_524_sendto_kdc): Declare.
+	* krb5.hin (KRB524_SERVICE, KRB524_PORT): New macros.
+	(struct credentials): Declare forward.
+	(krb524_convert_creds_kdc): Declare.
+
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Add prototype for krb5int_auth_con_chkseqnum.
+
+	* krb5.hin: Default KRB5_DEPRECATED to 0.  Default KRB5_PRIVATE to
+	0 on all platforms.
+
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: krb5int_populate_gic_opt returns void
+
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Prototype krb5int_populate_gic_opt
+
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Sequence numbers are now unsigned.
+
+	* krb5.hin: Sequence numbers are now unsigned.
+
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_KPASSWD_ACCESSDENIED): New macro.
+	(KRB5_KPASSWD_BAD_VERSION, KRB5_KPASSWD_INITIAL_FLAG_NEEDED): New
+	macros.
+
+2003-05-13  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add krb5int_copy_data_contents
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add prototype for krb5_c_string_to_key_with_params
+
+	* k5-int.h: Add s2kparams to krb5_gic_get_as_key_fct
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add KRB5_PADATA_ETYPE_INFO2
+
+2003-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5_context): New fields conf_tgs_ktypes,
+	conf_tgs_ktypes_count, use_conf_ktypes.
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Add krb5_auth_con_getsendsubkey,
+	krb5_auth_con_getrecvsubkey, krb5_auth_con_setsendsubkey,
+	krb5_auth_con_setrecvsubkey.  Mark krb5_auth_con_getlocalsubkey
+	and krb5_auth_con_getremotesubkey as deprecated.
+
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add s2kparams to 
+	krb5_etype_info_entry
+	Add encode_etype_info2 and decode_etype_info2
+
+2003-05-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h (inet_ntop) [!_WIN32 && !HAVE_MACSOCK_H]: Define
+	as a macro if not provided by the OS.
+
+2003-04-17  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add encode_krb5_setpw_req
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add krb5_set_password
+	Move krb5*_chpw internals to k5int.h
+
+	* k5-int.h: Add prototypes for set-password helper functions
+
+2003-04-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (getaddrinfo) [NUMERIC_SERVICE_BROKEN]:
+	Overwrite the port number only if a numeric service port was
+	supplied.
+
+2003-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (COPY_FIRST_CANONNAME) [_AIX]: Define.
+	(GET_HOST_BY_NAME) [_AIX]: New version for AIX version of
+	gethostbyname_r.
+	(getaddrinfo) [NUMERIC_SERVICE_BROKEN]: Use "discard" as a dummy
+	service name instead of none at all.  Don't check for unsigned
+	value less than zero.
+	(getaddrinfo) [COPY_FIRST_CANONNAME]: Set any ai_canonname fields
+	other than the first one to null.
+
+2003-03-18  Alexandra Ellwood  <lxs@mit.edu>
+
+    * configure.in: Use KRB5_AC_NEED_BIND_8_COMPAT to check for bind 9
+    and higher.  When bind 9 is present, BIND_8_COMPAT needs to be 
+    defined to get bind 8 types.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     
     * krb5.h: Removed enumsalwaysint because there are no typed

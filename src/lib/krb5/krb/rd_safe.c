@@ -161,9 +161,8 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context, const krb5_da
 	return KRB5_RC_REQUIRED;
 
     /* Get keyblock */
-    if ((keyblock = auth_context->remote_subkey) == NULL)
-	if ((keyblock = auth_context->local_subkey) == NULL)
-            keyblock = auth_context->keyblock;
+    if ((keyblock = auth_context->recv_subkey) == NULL)
+	keyblock = auth_context->keyblock;
 
 {
     krb5_address * premote_fulladdr = NULL;
@@ -240,7 +239,8 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context, const krb5_da
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {
-	if (auth_context->remote_seq_number != replaydata.seq) {
+	if (!krb5int_auth_con_chkseqnum(context, auth_context,
+					replaydata.seq)) {
 	    retval =  KRB5KRB_AP_ERR_BADORDER;
 	    goto error;
 	}

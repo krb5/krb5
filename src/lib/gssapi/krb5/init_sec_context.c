@@ -316,6 +316,8 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
    code = 0;
     
  cleanup:
+   if (checksum_data && checksum_data->data)
+       krb5_free_data_contents(context, checksum_data);
    if (ap_req.data)
        krb5_free_data_contents(context, &ap_req);
 
@@ -537,6 +539,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  if (!is_duplicate_enctype)
 	      requested_enctypes[i++] = e;
       }
+      krb5_free_ktypes(context, default_enctypes);
       requested_enctypes[i++] = 0;
 
       if ((code = get_credentials(context, cred, ctx->there, now,
@@ -572,8 +575,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
 	  krb5_auth_con_getlocalseqnumber(context, ctx->auth_context,
 					  &ctx->seq_send);
-	  krb5_auth_con_getlocalsubkey(context, ctx->auth_context,
-				       &ctx->subkey);
+	  krb5_auth_con_getsendsubkey(context, ctx->auth_context,
+				      &ctx->subkey);
 
 	  /* fill in the encryption descriptors */
 
@@ -688,6 +691,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	 g_order_init(&(ctx->seqstate), ctx->seq_recv,
 		      (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0, 
 		      (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
+	 ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
 	 ctx->established = 1;
 	 /* fall through to GSS_S_COMPLETE */
       }

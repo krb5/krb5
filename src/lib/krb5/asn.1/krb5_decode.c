@@ -219,7 +219,7 @@ krb5_error_code decode_krb5_authenticator(const krb5_data *code, krb5_authentica
     get_field((*rep)->ctime,5,asn1_decode_kerberos_time);
     if(tagnum == 6){ alloc_field((*rep)->subkey,krb5_keyblock); }
     opt_field(*((*rep)->subkey),6,asn1_decode_encryption_key);
-    opt_field((*rep)->seq_number,7,asn1_decode_int32);
+    opt_field((*rep)->seq_number,7,asn1_decode_seqnum);
     opt_field((*rep)->authorization_data,8,asn1_decode_authorization_data);
     (*rep)->magic = KV5M_AUTHENTICATOR;
     end_structure();
@@ -440,7 +440,7 @@ krb5_error_code decode_krb5_ap_rep_enc_part(const krb5_data *code, krb5_ap_rep_e
     get_field((*rep)->cusec,1,asn1_decode_int32);
     if(tagnum == 2){ alloc_field((*rep)->subkey,krb5_keyblock); }
     opt_field(*((*rep)->subkey),2,asn1_decode_encryption_key);
-    opt_field((*rep)->seq_number,3,asn1_decode_int32);
+    opt_field((*rep)->seq_number,3,asn1_decode_seqnum);
     end_structure();
     (*rep)->magic = KV5M_AP_REP_ENC_PART;
   }
@@ -561,7 +561,7 @@ krb5_error_code decode_krb5_enc_priv_part(const krb5_data *code, krb5_priv_enc_p
     get_lenfield((*rep)->user_data.length,(*rep)->user_data.data,0,asn1_decode_charstring);
     opt_field((*rep)->timestamp,1,asn1_decode_kerberos_time);
     opt_field((*rep)->usec,2,asn1_decode_int32);
-    opt_field((*rep)->seq_number,3,asn1_decode_int32);
+    opt_field((*rep)->seq_number,3,asn1_decode_seqnum);
     alloc_field((*rep)->s_address,krb5_address);
     get_field(*((*rep)->s_address),4,asn1_decode_host_address);
     if(tagnum == 5){ alloc_field((*rep)->r_address,krb5_address); }
@@ -743,6 +743,16 @@ krb5_error_code decode_krb5_etype_info(const krb5_data *code, krb5_etype_info_en
   if(retval) clean_return(retval);
   cleanup_none();		/* we're not allocating anything here */
 }
+
+krb5_error_code decode_krb5_etype_info2(const krb5_data *code, krb5_etype_info_entry ***rep)
+{
+  setup_buf_only();
+  *rep = 0;
+  retval = asn1_decode_etype_info(&buf,rep);
+  if(retval) clean_return(retval);
+  cleanup_none();		/* we're not allocating anything here */
+}
+
 
 krb5_error_code decode_krb5_enc_data(const krb5_data *code, krb5_enc_data **rep)
 {

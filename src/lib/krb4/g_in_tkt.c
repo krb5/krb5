@@ -424,6 +424,9 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     /* Attempt to decrypt the reply.  Loop trying password_to_key algorithms 
        until we succeed or we get an error other than "bad password" */
     do {
+	KTEXT_ST cip_copy_st;
+	memcpy(&cip_copy_st, &cip_st, sizeof(cip_st));
+	cip = &cip_copy_st;
         if (decrypt_proc == NULL) {
             decrypt_tkt (user, instance, realm, arg, keyprocs[i], &cip);
         } else {
@@ -432,6 +435,7 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
         kerror = krb_parse_in_tkt_creds(user, instance, realm,
                     service, sinstance, life, cip, byteorder, creds);
     } while ((keyprocs [++i] != NULL) && (kerror == INTK_BADPW));
+    cip = &cip_st;
 
     /* Fill in the local address if the caller wants it */
     if (laddrp != NULL) {

@@ -769,11 +769,12 @@ NetBSD and FreeBSD.)
 @node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
 @subsection HPUX
 
-The native (bundled) compiler for HPUX currently will not work, because
-it is not a full ANSI C compiler.  The optional compiler (c89) should
-work as long as you give it the @samp{-D_HPUX_SOURCE} flag
-(i.e. @samp{./configure --with-cc='c89 -D_HPUX_SOURCE'}).  This has only
-been tested recently for HPUX 10.20.
+The native (bundled) compiler for HPUX currently will not work,
+because it is not a full ANSI C compiler.  The optional ANSI C
+compiler should work as long as you give it the @samp{-Ae} flag
+(i.e. @samp{./configure CC='cc -Ae}).  This is equivalent to
+@samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
+recommendation.  This has only been tested recently for HPUX 10.20.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
@@ -823,7 +824,12 @@ You @b{must} compile Kerberos V5 without the UCB compatibility
 libraries.  This means that @file{/usr/ucblib} must not be in the
 LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
 you can use the @code{-i} option to @samp{cc}, by using the specifying
-@code{--with-ccopts=-i} option to @samp{configure}.
+@code{CFLAGS=-i} option to @samp{configure}.
+
+If you are compiling for a 64-bit execution environment, you may need
+to configure with the option @code{CFLAGS="-D_XOPEN_SOURCE=500
+-D__EXTENSIONS__"}.  This is not well tested; at MIT we work primarily
+with the 32-bit execution environment.
 
 @node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
 @subsection SGI Irix 5.X
@@ -852,8 +858,8 @@ GCC instead.
 
 On the DEC MIPS platform, using the native compiler, @file{md4.c} and
 @file{md5.c} can not be compiled with the optimizer set at level 1.
-That is, you must specify either @samp{--with-ccopts=-O} and
-@samp{--with-ccopts=-g} to configure.  If you don't specify either, the
+That is, you must specify either @samp{CFLAGS=-O} and
+@samp{CFLAGS=-g} to configure.  If you don't specify either, the
 compile will never complete.
 
 The optimizer isn't hung; it just takes an exponentially long time.
