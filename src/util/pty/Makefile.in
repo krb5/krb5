@@ -50,10 +50,6 @@ libpty.a: DONE
 	$(RANLIB) $@
 	touch libpty.stamp
 
-DONE:: $(LIBOBJS)
-	 $(RM) DONE
-	 echo $(LIBOBJS) >DONE
-
 clean-unix::
 	$(RM) $(LIBOBJS) libpty.stamp
 

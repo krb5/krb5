@@ -1,3 +1,9 @@
+Fri Sep 29 14:18:03 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in:
+	* Makefile.in: Use the SubdirLibraryRule defined in aclocal.m4 to
+		create the DONE file (and to properly clean it up).
+
 Mon Sep 25 16:42:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
