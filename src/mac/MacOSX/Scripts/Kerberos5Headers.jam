@@ -6,64 +6,64 @@ ExtractErrorCodes = "perl -e 'while (<STDIN>) { if ($(ErrorTableRegexp)) { print
 rule CatHeader
 {
     NOTFILE "$(>[1])" ;
-    DEPENDS "$(<)" : "$(>[2-])" ;
-    Clean clean "$(<)" ;
+    DEPENDS "$(1)" : "$(>[2-])" ;
+    Clean clean "$(1)" ;
 }
 actions CatHeader
 {
     mkdir -p "$(<:D)"
-    echo "/*"                                   > "$(<)"
-    echo " * This file is auto generated."     >> "$(<)"
-    echo " * Please do not edit it."           >> "$(<)"
-    echo " */"                                 >> "$(<)"
-    echo ""                                    >> "$(<)"
-    echo "#ifndef $(>[1])"                     >> "$(<)"
-    echo ""                                    >> "$(<)"
-    echo "/* Environment dependent macros */"  >> "$(<)"
-    grep SIZEOF           "$(Kerberos5Prefix)" >> "$(<)"
-    grep HAVE_STDARG_H    "$(Kerberos5Prefix)" >> "$(<)"
-    grep HAVE_SYS_TYPES_H "$(Kerberos5Prefix)" >> "$(<)"
-    echo ""                                    >> "$(<)"
+    echo "/*"                                   > "$(1)"
+    echo " * This file is auto generated."     >> "$(1)"
+    echo " * Please do not edit it."           >> "$(1)"
+    echo " */"                                 >> "$(1)"
+    echo ""                                    >> "$(1)"
+    echo "#ifndef $(>[1])"                     >> "$(1)"
+    echo ""                                    >> "$(1)"
+    echo "/* Environment dependent macros */"  >> "$(1)"
+    grep SIZEOF           "$(Kerberos5Prefix)" >> "$(1)"
+    grep HAVE_STDARG_H    "$(Kerberos5Prefix)" >> "$(1)"
+    grep HAVE_SYS_TYPES_H "$(Kerberos5Prefix)" >> "$(1)"
+    echo ""                                    >> "$(1)"
     for header in "$(>[3-])" ; do
         base=`basename "${header}"`
-        echo ""                                >> "$(<)"
-        echo "/* Error tables from ${base} */" >> "$(<)"
-        cat "${header}" | $(ExtractErrorCodes) >> "$(<)"
+        echo ""                                >> "$(1)"
+        echo "/* Error tables from ${base} */" >> "$(1)"
+        cat "${header}" | $(ExtractErrorCodes) >> "$(1)"
     done
-    cat "$(>[2])"                              >> "$(<)"
-    echo "#endif /* $(>[1]) */"                >> "$(<)"
+    cat "$(>[2])"                              >> "$(1)"
+    echo "#endif /* $(>[1]) */"                >> "$(1)"
 }
 
 rule OSConf
 {
-    DEPENDS "$(<)" : "$(>)" ;
-    Clean clean "$(<)" ;
+    DEPENDS "$(1)" : "$(2)" ;
+    Clean clean "$(1)" ;
 }
 actions OSConf
 {
     mkdir -p "$(<:D)"
-    echo "/*"                                   > "$(<)"
-    echo " * This file is auto generated."     >> "$(<)"
-    echo " * Please do not edit it."           >> "$(<)"
-    echo " */"                                 >> "$(<)"
-    echo ""                                    >> "$(<)"
-    cat "$(>)" | $(SED)	               \
+    echo "/*"                                   > "$(1)"
+    echo " * This file is auto generated."     >> "$(1)"
+    echo " * Please do not edit it."           >> "$(1)"
+    echo " */"                                 >> "$(1)"
+    echo ""                                    >> "$(1)"
+    cat "$(2)" | $(SED)	               \
         -e 's+@KRB5RCTMPDIR+/var/tmp+' \
         -e 's+@PREFIX+/usr+'           \
         -e 's+@EXEC_PREFIX+/usr+'      \
         -e 's+@LOCALSTATEDIR+/var+'    \
-        -e 's+@SYSCONFDIR+/usr/etc+'           >> "$(<)"
+        -e 's+@SYSCONFDIR+/usr/etc+'           >> "$(1)"
 }
 rule CopyHeader
 {
-    DEPENDS "$(<)" : "$(>)" ;
-    Clean clean "$(<)" ;
+    DEPENDS "$(1)" : "$(2)" ;
+    Clean clean "$(1)" ;
 
 }
 actions CopyHeader
 {
     mkdir -p "$(<:D)"
-    cp -fRP "$(>)" "$(<)"
+    cp -fRP "$(2)" "$(1)"
 }
 
 
