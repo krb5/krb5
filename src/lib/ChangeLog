@@ -1,3 +1,8 @@
+2000-02-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Replace decode_krb5_ticket with krb5_decode_ticket.
+	Add documentation about adding things to DEF file.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Use DLL_LINKOPTS to link DLL.  Remove dependence of

@@ -2,6 +2,17 @@
 ;   KRB5.DEF - KRB5.DLL module definition file
 ;----------------------------------------------------
 
+; ****************************************************************************
+; Do not add any function to this file until you make sure the calling
+; convention for the exported function is KRB5_CALLCONV
+; ****************************************************************************
+
+; Key:
+;
+; gssapi    - used by GSS API (not part of krb5 API)
+; !CALLCONV - entrypoint that should have used KRB5_CALLCONV, but did not due
+;             developer error
+
 ;LIBRARY		KRB5
 DESCRIPTION	'DLL for Kerberos 5'
 HEAPSIZE	8192
@@ -164,7 +175,7 @@ EXPORTS
 	krb5_auth_con_getlocalsubkey
 	krb5_auth_con_getremotesubkey
 	krb5_auth_con_init
-	krb5_auth_con_setaddrs
+	krb5_auth_con_setaddrs		; !CALLCONV
 	krb5_auth_con_setflags
 	krb5_auth_con_getlocalseqnumber
 	krb5_auth_con_getremoteseqnumber
@@ -204,8 +215,18 @@ EXPORTS
         krb5_decrypt
         krb5_encrypt_size
 ;
-;Temporary exports (DO NOT USE)
-	decode_krb5_ticket
+; Added for Kermit 95
+        krb5_address_search	; !CALLCONV
+        krb5_auth_con_getrcache	; !CALLCONV
+        krb5_c_enctype_compare
+;
+	krb5_kuserok
+;
+; Added for 1.2:
+	krb5_decode_ticket
+;
+; Temporary exports (DO NOT USE)
+;	decode_krb5_ticket	-- no longer in library
 	des_ecb_encrypt
 	des_new_random_key
 	des_key_sched
@@ -227,12 +248,5 @@ EXPORTS
 	krb5_ser_ccache_init
 	krb5_ser_keytab_init
 	krb5_ser_rcache_init
-	decode_krb5_ap_req
+	decode_krb5_ap_req	; gssapi
 	krb5_mcc_ops
-;
-;Added for Kermit 95
-        krb5_address_search
-        krb5_auth_con_getrcache
-        krb5_c_enctype_compare
-
-	krb5_kuserok
