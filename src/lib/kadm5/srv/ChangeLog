@@ -1,3 +1,8 @@
+Mon Oct 21 16:28:52 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_principal.c (kadm5_modify_principal): fix modify_principal's
+ 	handling of KADM5_TL_DATA [krb5-admin/20]
+
 Fri Oct 18 14:24:12 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* svr_misc_free.c, server_dict.c, adb_policy.c, adb_free.c:

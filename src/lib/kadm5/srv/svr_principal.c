@@ -497,24 +497,26 @@ kadm5_modify_principal(void *server_handle,
     }
 
     if (mask & KADM5_TL_DATA) {
-	 /* splice entry->tl_data onto the front of kdb.tl_data */
-	 tl_data_orig = kdb.tl_data;
-	 for (tl_data_tail = entry->tl_data; tl_data_tail->tl_data_next;
-	      tl_data_tail = tl_data_tail->tl_data_next)
-	      ;
-	 tl_data_tail->tl_data_next = kdb.tl_data;
+	 krb5_tl_data *tl;
+	 /*
+	  * Replace kdb.tl_data with what was passed in.  The
+	  * KRB5_TL_KADM_DATA will be re-added (based on adb) by
+	  * kdb_put_entry, below.
+	  */
+	 while (kdb.tl_data) {
+	      tl = kdb.tl_data->tl_data_next;
+	      free(kdb.tl_data->tl_data_contents);
+	      free(kdb.tl_data);
+	      kdb.tl_data = tl;
+	 }
+	 
 	 kdb.tl_data = entry->tl_data;
+	 kdb.n_tl_data = entry->n_tl_data;
     }
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
 
-    if (mask & KADM5_TL_DATA) {
-	 /* remove entry->tl_data from the front of kdb.tl_data */
-	 tl_data_tail->tl_data_next = NULL;
-	 kdb.tl_data = tl_data_orig;
-    }
-    
     ret = KADM5_OK;
 done:
     if (have_opol) {
