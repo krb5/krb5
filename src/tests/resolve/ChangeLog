@@ -1,3 +1,8 @@
+Wed Feb 26 23:12:24 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add $(LIBS) so that compile doesn't blow out under
+	Solaris due to lack of -lnsl -lsocket.
+
 Sat Feb 22 20:28:32 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* resolve.c (main): Make the test for a FQDN be a bit more
