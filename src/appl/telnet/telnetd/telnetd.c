@@ -779,12 +779,14 @@ getterminaltype(name)
 	 * we have to just go with what we (might) have already gotten.
 	 */
 	if (his_state_is_will(TELOPT_TTYPE) && !terminaltypeok(terminaltype)) {
-	    (void) strncpy(first, terminaltype, sizeof(first));
+	    (void) strncpy(first, terminaltype, sizeof(first) - 1);
+	    first[sizeof(first) - 1] = '\0';
 	    for(;;) {
 		/*
 		 * Save the unknown name, and request the next name.
 		 */
-		(void) strncpy(last, terminaltype, sizeof(last));
+		(void) strncpy(last, terminaltype, sizeof(last) - 1);
+		last[sizeof(last) - 1] = '\0';
 		_gettermname();
 		if (terminaltypeok(terminaltype))
 		    break;
@@ -801,9 +803,12 @@ getterminaltype(name)
 		     * RFC1091 compliant telnets will cycle back to
 		     * the start of the list.
 		     */
-		     _gettermname();
-		    if (strncmp(first, terminaltype, sizeof(first)) != 0)
-			(void) strncpy(terminaltype, first, sizeof(first));
+		    _gettermname();
+		    if (strncmp(first, terminaltype, sizeof(first)) != 0) {
+			(void) strncpy(terminaltype, first,
+				       sizeof(terminaltype) - 1);
+			terminaltype[sizeof(terminaltype) - 1] = '\0';
+		    }
 		    break;
 		}
 	    }
@@ -835,7 +840,7 @@ terminaltypeok(s)
 {
     char buf[1024];
 
-    if (terminaltype == NULL)
+    if (!*s)
 	return(1);
 
     /*
@@ -885,11 +890,9 @@ long retval;
 pty_init();
 	
 
-	if ((retval = pty_getpty(&pty, line, 20)) != 0 )
-	    {
+	if ((retval = pty_getpty(&pty, line, 17)) != 0) {
 		fatal(net, error_message(retval));
-	    }
-	
+	}
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
@@ -949,7 +952,7 @@ pty_init();
 	 */
 	*user_name = 0;
 	level = getterminaltype(user_name);
-	setenv("TERM", terminaltype ? terminaltype : "network", 1);
+	setenv("TERM", *terminaltype ? terminaltype : "network", 1);
 
 	/*
 	 * Start up the login process on the slave side of the terminal

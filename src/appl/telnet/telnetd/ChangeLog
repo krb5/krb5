@@ -1,3 +1,32 @@
+Wed Jan 28 17:21:08 1998  Dan Winship  <danw@mit.edu>
+
+	* telnetd.c (doit): additional fix for previous terminaltype change
+
+Tue Jan 27 18:27:16 1998  Dan Winship  <danw@mit.edu>
+
+	* telnetd.c (getterminaltype): Null-terminate strings and avoid a
+	buffer overrun.
+
+	* ext.h: make terminaltype a char[] instead of a char * for
+	telnetd.c change
+
+	* state.c (suboption): redo handling of terminaltype
+
+Thu Dec  4 21:32:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.c (doit): Fix up slave buffer length.
+
+Thu Oct 23 13:59:32 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* state.c (envvarok): Prohibit the passing of TERMCAP, TERMPATH,
+		TERMINFO, and HOME, since they can be used to exploit a
+		security in tgetent.
+
+Wed Apr  9 23:46:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* sys_term.c (start_login): Bounds check the constructed "speed"
+	passed in to login.
+
 Thu Nov  7 15:32:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* telnetd.c (main): Check the error return from

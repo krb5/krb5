@@ -1023,7 +1023,8 @@ static sigtype sigsys ()
     siglongjmp(setpag_buf, 1);
 }
 
-static int try_afscall ()
+static int try_afscall (scall)
+	int (*scall)();
 {
     handler sa, osa;
     volatile int retval = 0;
@@ -1032,7 +1033,7 @@ static int try_afscall ()
     handler_init (sa, sigsys);
     handler_swap (SIGSYS, sa, osa);
     if (sigsetjmp(setpag_buf, 1) == 0) {
-	setpag ();
+	(*scall)();
 	retval = 1;
     }
     handler_set (SIGSYS, osa);
@@ -1326,6 +1327,12 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	 */
 	if (eflag)
 	    	lgetstr(term, sizeof(term), "Terminal type");
+	else if (!(kflag || Kflag ))  /*Preserve terminal if not read over net */
+	  {
+	    if (getenv("TERM"))
+	      strncpy(term, getenv("TERM"), sizeof(term));
+	  }
+	
 	term_init (rflag || kflag || Kflag || eflag);
 
 	for (cnt = getdtablesize(); cnt > 2; cnt--)
@@ -1828,16 +1835,16 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	read_env_vars_from_file ("/etc/TIMEZONE");
 #else
 	if (tz)
-	    setenv ("TZ", tz, 0);
+	    setenv ("TZ", tz, 1);
 #endif
 
 	if (ccname)
-		setenv("KRB5CCNAME", ccname, 0);
+		setenv("KRB5CCNAME", ccname, 1);
 
-	setenv("HOME", pwd->pw_dir, 0);
-	setenv("PATH", LPATH, 0);
-	setenv("USER", pwd->pw_name, 0);
-	setenv("SHELL", pwd->pw_shell, 0);
+	setenv("HOME", pwd->pw_dir, 1);
+	setenv("PATH", LPATH, 1);
+	setenv("USER", pwd->pw_name, 1);
+	setenv("SHELL", pwd->pw_shell, 1);
 
 	if (term[0] == '\0')
 		(void) strncpy(term, stypeof(tty), sizeof(term));

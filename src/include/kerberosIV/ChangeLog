@@ -1,3 +1,7 @@
+Fri Nov 22 11:34:46 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in:  Install krb_err.h [218]
+
 Thu Oct 31 17:27:08 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install): Start installing headers again [36]

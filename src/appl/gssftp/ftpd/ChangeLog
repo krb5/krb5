@@ -1,3 +1,17 @@
+Fri Feb  6 13:25:28 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* popen.c (ftpd_popen): Make sure you can't overrun the argv[] and
+		gargv[] arrays.  (Patch submitted by dima@best.net).
+
+Sun Dec 21 18:17:53 1997  Tom Yu  <tlyu@mit.edu>
+
+	* logwtmp.c (ftp_logwtmp): Rename logwtmp to ftp_logwtmp to avoid
+	collision with native logwtmp.  Also, return void rather than
+	int.
+
+	* ftpd.c: Rename logwtmp to ftp_logwtmp to avoid collision with
+	native logwtmp.
+
 Tue Nov 12 00:04:00 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (ftpd_userok): Don't undconditionally return -1.

@@ -68,8 +68,14 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     ohlen = g_token_size((gss_OID) ctx->mech_used,
 			 (unsigned int) cfsize + ctx->cksum_size + 14);
 
-    /* Cannot have trailer length that will cause us to pad over our length */
-    *max_input_size = (req_output_size - ohlen) & (~7);
+    if (ohlen < req_output_size)
+	    /*
+	     * Cannot have trailer length that will cause us to pad over
+	     * our length
+	     */
+	    *max_input_size = (req_output_size - ohlen) & (~7);
+    else
+	    *max_input_size = 0;
     *minor_status = 0;
     return(GSS_S_COMPLETE);
 }

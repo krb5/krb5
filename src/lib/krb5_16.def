@@ -1,8 +1,8 @@
 ;----------------------------------------------------
-;   LIBKRB5.DEF - LIBKRB5.DLL module definition file
+;   KRB5_16.DEF - KRB5_16.DLL module definition file
 ;----------------------------------------------------
 
-LIBRARY   	LIBKRB5
+LIBRARY   	KRB5_16
 DESCRIPTION 	'DLL for Kerberos 5'
 EXETYPE   	WINDOWS
 CODE      	PRELOAD MOVEABLE DISCARDABLE

@@ -1,3 +1,9 @@
+Fri Nov 22 15:49:27 1996  unknown  <bjaspan@mit.edu>
+
+	* kadm_ser_wrap.c (endif ): use sizeof instead of h_length to
+ 	determine number of bytes of addr to copy from DNS response
+ 	[krb5-misc/211]
+
 Wed Nov 13 19:24:00 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (clean): Remove kadm_err.h and kadm_err.c.

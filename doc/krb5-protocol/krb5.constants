@@ -13,6 +13,8 @@ des-cbc-md4         2            8              0              8
 des-cbc-md5         3            8              0              8
 <reserved>          4
 des3-cbc-md5        5            8              0              8     
+<reserved>	    6
+des3-cbc-sha1	    7            8              0              8
 <reserved>          0x8003
 
 -------------------------------+-------------------+-------------
@@ -26,7 +28,10 @@ des-mac-k                       5                   8
 rsa-md4-des-k                   6                   16
 rsa-md5                         7                   16
 rsa-md5-des                     8                   24
-rsa-md5-des3                    9                   24
+<reserved>                      9
+<reserved>		       10
+nist-sha1		       11		    20
+hmac-sha1-des3                 12		    20
 
 -------------------------------+-----------------
 padata type                    |padata-type value
@@ -42,6 +47,8 @@ PA-OSF-DCE                      8
 PA-CYBERSAFE-SECUREID           9
 PA-AFS3-SALT			10
 PA-ETYPE-INFO                   11
+PAM-SAM-CHALLENGE		12
+PAM-SAM-RESPONSE		13
 
 -------------------------------+-------------
 authorization data type        |ad-type value
@@ -120,6 +127,7 @@ KDC_ERR_KEY_EXPIRED           23   Password has expired - change to reset
 KDC_ERR_PREAUTH_FAILED        24   Pre-authentication information was invalid
 KDC_ERR_PREAUTH_REQUIRED      25   Additional pre-authentication required*
 KDC_ERR_SERVER_NOMATCH        26   Requested server and ticket don't match
+KDC_ERR_MUST_USE_USER2USER    27   Server principal valid for user2user only
 KRB_AP_ERR_BAD_INTEGRITY      31   Integrity check on decrypted field failed
 KRB_AP_ERR_TKT_EXPIRED        32   Ticket expired
 KRB_AP_ERR_TKT_NYV            33   Ticket not yet valid
