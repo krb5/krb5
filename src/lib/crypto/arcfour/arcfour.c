@@ -8,7 +8,7 @@ of RSA Data Security)
 */
 #include "k5-int.h"
 #include "arcfour-int.h"
-const  char *l40 = "fortybits";
+static const  char *l40 = "fortybits";
 
 void
 krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
