@@ -194,7 +194,6 @@ tkt_test_1()
 
 main()
 {
-    initialize_isod_error_table();
-    initialize_krb5_error_table();
+    krb5_init_ets();
     tkt_test_1();
 }

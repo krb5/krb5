@@ -419,9 +419,7 @@ kdc_com_err_proc(whoami, code, format, pvar)
 void
 setup_com_err()
 {
-    initialize_krb5_error_table();
-    initialize_kdb5_error_table();
-    initialize_isod_error_table();
+    krb5_init_ets();
 
     (void) set_com_err_hook(kdc_com_err_proc);
     return;

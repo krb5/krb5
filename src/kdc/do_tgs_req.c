@@ -400,7 +400,11 @@ tgt_again:
 	    goto cleanup;
 	}
 	/* scratch now has the authorization data, so we decode it */
+#ifdef KRB5_USE_ISODE
 	retval = decode_krb5_authdata(&scratch, request->unenc_authdata);
+#else
+	retval = decode_krb5_authdata(&scratch, &(request->unenc_authdata));
+#endif
 	free(scratch.data);
 	if (retval) {
 	    status = "AUTH_DECODE";

@@ -1,5 +1,5 @@
-Fri Jun 17 18:22:32 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+Tue Jun 28 19:57:28 1994  Tom Yu  (tlyu at dragons-lair)
 
-	* Fixed bug in crep2kcrep.c which caused ticket forwarding to
-	break.  The wrong ISODE optional field flag was being tested.
+	* configure.in:
+	* Makefile.in: autoconf frobbage
 

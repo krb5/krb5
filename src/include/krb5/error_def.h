@@ -32,7 +32,11 @@
 
 #include <krb5/krb5_err.h>
 #include <krb5/kdb5_err.h>
+#ifndef KRB5_USE_ISODE
+#include <krb5/asn1_err.h>
+#else
 #include <krb5/isode_err.h>
+#endif
 #include <errno.h>
 
 #endif /* KRB5_ERROR_DEF__ */

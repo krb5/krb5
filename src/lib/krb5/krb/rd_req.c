@@ -87,7 +87,11 @@ krb5_tkt_authent **authdat;
 	return KRB5KRB_AP_ERR_MSG_TYPE;
     if (retval = decode_krb5_ap_req(inbuf, &request)) {
     	switch (retval) {
+#ifdef KRB5_USE_ISDOE
 	case ISODE_50_LOCAL_ERR_BADMSGTYPE:
+#else
+	case KRB5_BADMSGTYPE:
+#endif
 	    return KRB5KRB_AP_ERR_BADVERSION; 
 	default:
 	    return(retval);

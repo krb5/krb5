@@ -80,9 +80,7 @@ char *argv[];
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    initialize_krb5_error_table();
-    initialize_kdb5_error_table();
-    initialize_isod_error_table();
+    krb5_init_ets();
 
     while ((optchar = getopt(argc, argv, "d:r:k:M:e:f:")) != EOF) {
 	switch(optchar) {

@@ -44,7 +44,7 @@ static char rcsid_decode_kdc_c[] =
  when finished with the response.
 
  If the response isn't a KDC_REP (tgs or as), it returns an error from
- the decoding routines (usually ISODE_50_LOCAL_ERR_BADDECODE).
+ the decoding routines.
 
  returns errors from encryption routines, system errors
  */

@@ -30,6 +30,7 @@
 #ifndef KRB5_ENCODE_DEFS__
 #define KRB5_ENCODE_DEFS__
 
+#ifdef KRB5_USE_ISODE
 typedef	int (*encoder_func) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
 typedef void (*free_func) PROTOTYPE((krb5_pointer ));
 typedef krb5_pointer (*translator_func) PROTOTYPE((krb5_const_pointer, int * ));
@@ -370,4 +371,9 @@ krb5_error_code krb5_decode_generic
 				    (dat)->data[0] == 0x5e))
 
 
+#else /* KRB5_USE_ISODE */
+#include <krb5/asn.1/krb5_encode.h>
+#include <krb5/asn.1/krb5_decode.h>
+#include <krb5/asn.1/krb5_is.h>
+#endif /* KRB5_USE_ISODE */
 #endif /* KRB5_ENCODE_DEFS__ */

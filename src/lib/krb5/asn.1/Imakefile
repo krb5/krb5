@@ -1,0 +1,80 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990,1991 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
+# 
+# Export of this software from the United States of America may
+#   require a specific license from the United States Government.
+#   It is the responsibility of any person or organization contemplating
+#   export to obtain such a license before exporting.
+# 
+# WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+# distribute this software and its documentation for any purpose and
+# without fee is hereby granted, provided that the above copyright
+# notice appear in all copies and that both that copyright notice and
+# this permission notice appear in supporting documentation, and that
+# the name of M.I.T. not be used in advertising or publicity pertaining
+# to distribution of the software without specific, written prior
+# permission.  M.I.T. makes no representations about the suitability of
+# this software for any purpose.  It is provided "as is" without express
+# or implied warranty.
+# 
+# 
+NormalLibraryObjectRule()
+
+EHDRDIR=$(TOP)/include/krb5/asn.1
+
+SRCS= \
+	$(SRCDIR)asn1_decode.c\
+	$(SRCDIR)asn1_decode_k.c\
+	$(SRCDIR)asn1_encode.c\
+	$(SRCDIR)asn1_get.c\
+	$(SRCDIR)asn1_make.c\
+	$(SRCDIR)asn1buf.c\
+	$(SRCDIR)krb5_decode.c\
+	$(SRCDIR)krb5_encode.c\
+	$(SRCDIR)asn1_encode_k.c\
+	$(SRCDIR)asn1_misc.c
+
+OBJS= \
+	asn1_decode.o\
+	asn1_decode_k.o\
+	asn1_encode.o\
+	asn1_get.o\
+	asn1_make.o\
+	asn1buf.o\
+	krb5_decode.o\
+	krb5_encode.o\
+	asn1_encode_k.o\
+	asn1_misc.o
+
+all:: depend includes
+
+SubdirLibraryRule($(OBJS))
+
+CopyHeader(krb5_encode.h,$(EHDRDIR))
+CopyHeader(krb5_decode.h,$(EHDRDIR))
+
+Krb5InstallHeaders(krb5_encode.h krb5_decode.h, $(KRB5_INCDIR)/krb5/asn.1)
+
+DependTarget()
+
+#ifdef UseSedHack
+
+#define IHaveSpecialMakefileTarget
+
+Makefile:: $(SRCDIR)Imakefile
+	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) $(SRCSUBDIR)Imakefile -s Makefile.new
+	$(MAKE) -f Makefile.new noop
+	-@if [ -f Makefile ]; then \
+		echo "$(RM) Makefile.bak; $(MV) Makefile Makefile.bak";\
+		$(RM) Makefile.bak; $(MV) Makefile Makefile.bak;\
+	fi
+	sed 's/^@/	@/' Makefile.new > Makefile || $(MV) Makefile.new Makefile
+	-$(RM) Makefile.new
+
+#endif
+
+noop::

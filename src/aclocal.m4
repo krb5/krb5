@@ -391,7 +391,7 @@ dnl
 define(PepsyTarget,[
 divert(9)
 .SUFFIXES:	.py
-$1_defs.h $1_pre_defs.h $1-types.h $1_tables.c: $1-asn.py
+$1_defs.h $1_pre_defs.h $1-types.h $1_tables.c:: $1-asn.py
 	@echo '***Ignore the warning message "Warning: Can'"'"'t find UNIV.ph failed"'
 	[$](PEPSY) [$](PSYFLAGS) [$](srcdir)/$1-asn.py
 
@@ -421,7 +421,10 @@ dnl
 dnl ISODE/pepsy includes are used -- ISODE_INCLUDE
 dnl
 define(ISODE_INCLUDE,[
-ADD_DEF([-I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h])dnl
+AC_ENABLE([isode],
+ISODELIB='[$(TOPLIBD)/libisode.a]'
+ADD_DEF([-I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h]),ISODELIB=)dnl
+AC_SUBST([ISODELIB])dnl
 ])dnl
 dnl
 dnl check for yylineno -- HAVE_YYLINENO
@@ -453,3 +456,8 @@ fi
 AC_VERBOSE(setting LEXLIB to $LEXLIB)
 AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
 dnl
+dnl
+dnl allow for compilation with isode (yuck!)
+dnl
+define(ISODE_DEFS,
+[AC_ENABLE([isode],[ADD_DEF(KRB5_USE_ISODE)],)])dnl

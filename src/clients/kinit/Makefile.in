@@ -28,7 +28,7 @@ KRB5_INCSUBDIRS = \
 
 SRCTOP = $(srcdir)/$(BUILDTOP)
 TOPLIBD = $(BUILDTOP)/lib
-ISODELIB=$(TOPLIBD)/libisode.a
+ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 

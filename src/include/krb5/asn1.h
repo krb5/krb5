@@ -30,9 +30,11 @@
 #ifndef KRB5_ASN1__
 #define KRB5_ASN1__
 
+#ifdef KRB5_USE_ISODE
 #include <krb5/asn.1/KRB5-types.h>
 #include <krb5/asn.1/asn1defs.h>
 #include <krb5/asn.1/KRB5-types-aux.h>
+#endif
 #include <krb5/asn.1/encode.h>
 
 #endif /* KRB5_ASN1__ */

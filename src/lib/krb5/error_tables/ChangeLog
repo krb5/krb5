@@ -1,0 +1,7 @@
+Tue Jun 28 19:11:43 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: doing the right thing with new error tables
+
+	* configure.in: adding ISODE_DEFS
+	* init_ets.c: folding in Harry's changes
+

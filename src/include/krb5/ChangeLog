@@ -1,3 +1,9 @@
+Tue Jun 28 19:09:21 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* error_def.h: folding in Harry's changes
+	* asn1.h: ditto
+	* configure.in: adding ISODE_DEFS, fixing ISODE_INCLUDE to dtrt
+
 Tue Jun 21 23:54:40 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* pulling SEEK_SET, etc. out to avoid redef'ing in unistd.h

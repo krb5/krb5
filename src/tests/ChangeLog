@@ -1,0 +1,4 @@
+Wed Jun 29 00:26:31 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* test1.c: added call to krb5_init_ets
+
