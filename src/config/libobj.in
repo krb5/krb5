@@ -52,6 +52,7 @@ clean-libobjs:
 	$(RM) OBJS.ST OBJS.SH OBJS.PF $(STLIBOBJS) $(SHLIBOBJS) $(PFLIBOBJS)
 
 Makefile: $(SRCTOP)/config/libobj.in
+config.status: $(SRCTOP)/config/shlib.conf
 
 # clean-unix:: clean-libobjs
 # all-unix:: all-libobjs
