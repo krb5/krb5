@@ -61,7 +61,6 @@ kadm5_delete_policy(void *server_handle, char *name)
 kadm5_ret_t
 kadm5_modify_policy(void *server_handle,
 			 kadm5_policy_ent_t policy, long mask)
-
 {
     mpol_arg		arg;
     generic_ret		*r;
@@ -84,7 +83,6 @@ kadm5_modify_policy(void *server_handle,
 
 kadm5_ret_t
 kadm5_get_policy(void *server_handle, char *name, kadm5_policy_ent_t ent)
-
 {
     gpol_arg	    arg;
     gpol_ret	    *r;
