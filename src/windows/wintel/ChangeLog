@@ -1,3 +1,8 @@
+Wed Feb  3 23:00:05 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* auth.c (auth_send): Increase size of buf so we can handle
+		mongo-gram sized tickets from Microsoft.  [telnet/686]
+
 Tue Apr  8 11:22:23 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* screen.c (ScreenWndProc): Remove Cygnus/KerbNet from the help
