@@ -1,3 +1,8 @@
+2004-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (main): Don't overwrite "PATH" environment variable if
+	it's already set.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* compat_recv.c: Only include sys/select.h if it's available.
