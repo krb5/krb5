@@ -93,7 +93,7 @@ kname_parse(np, ip, rp, fullname)
         return KNAME_FMT;
     (void) strcpy(buf, fullname);
 
-    while (c = *rnext++) {
+    while ((c = *rnext++)) {
         if (backslash) {
             *wnext++ = c;
             backslash = 0;
@@ -174,6 +174,7 @@ kname_parse(np, ip, rp, fullname)
  * Kerberos name; returns 0 if it's not.
  */
 
+int
 k_isname(s)
     char *s;
 {
@@ -184,7 +185,7 @@ k_isname(s)
         return 0;
     if (strlen(s) > ANAME_SZ - 1)
         return 0;
-    while(c = *s++) {
+    while((c = *s++)) {
         if (backslash) {
             backslash = 0;
             continue;
@@ -212,6 +213,7 @@ k_isname(s)
  * We now allow periods in instance names -- they are unambiguous.
  */
 
+int
 k_isinst(s)
     char *s;
 {
@@ -220,7 +222,7 @@ k_isinst(s)
 
     if (strlen(s) > INST_SZ - 1)
         return 0;
-    while(c = *s++) {
+    while((c = *s++)) {
         if (backslash) {
             backslash = 0;
             continue;
@@ -242,6 +244,7 @@ k_isinst(s)
  * Kerberos realm; returns 0 if it's not.
  */
 
+int
 k_isrealm(s)
     char *s;
 {
@@ -252,7 +255,7 @@ k_isrealm(s)
         return 0;
     if (strlen(s) > REALM_SZ - 1)
         return 0;
-    while(c = *s++) {
+    while((c = *s++)) {
         if (backslash) {
             backslash = 0;
             continue;

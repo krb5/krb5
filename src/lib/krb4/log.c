@@ -28,7 +28,9 @@
 #include <klog.h>
 
 static char *log_name = KRBLOG;
+#if 0
 static is_open;
+#endif
 
 /*
  * This file contains three logging routines: set_logfile()
@@ -84,11 +86,14 @@ void krb_log(format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0)
  * the logfile defaults to KRBLOG, defined in "krb.h".
  */
 
+void
 krb_set_logfile(filename)
     char *filename;
 {
     log_name = filename;
+#if 0
     is_open = 0;
+#endif
 }
 
 #if 0

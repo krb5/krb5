@@ -1,3 +1,40 @@
+2001-06-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* g_krbrlm.c: Remove unused static variable krb_conf. 
+
+	* g_svc_in_tkt.c (krb_svc_init, krb_svc_init_preauth): Declare as
+	returning int.
+
+	* gethostname.c: Include unistd.h for gethostname() prototype.
+
+	* getst.c: Include unistd.h for read() prototype.
+
+	* in_tkt.c (in_tkt): Cast arguments to debugging printf to int
+	from uid_t to match format statement. 
+
+	* kname_parse.c: Declare k_isname() and k_isinst() as returning
+	int. Cleanup assigments in conditionals.
+
+	* kuserok.c (kuserok): Cleanup assignment in conditional.
+
+	* log.c (krb_set_logfile): Declare function as void. 
+	* klog.c (kset_logfile): Likewise.
+
+	* pkt_clen.c (pkt_clen): Declare as returning int.
+	* kntoln.c (krb_kntoln): Likewise.
+	* fgetst.c (fgetst): Likewise.
+
+	* rd_req.c: Declare local variable only if KRB_CRYPT_DEBUG defined. 
+
+	* recvauth.c: Include stdlib.h and unistd.h for read() and atoi()
+	prototypes.
+
+	* send_to_kdc.c: Include unistd.h for close() prototype.
+
+	* sendauth.c (krb_sendauth): Clean up assignment in conditional.
+
+	* tkt_string.c (tkt_string): Likewise
+
 2001-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (EHDRDIR): Install into kerberosIV subdirectory.

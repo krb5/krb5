@@ -233,7 +233,8 @@ krb_sendauth(options, fd, ticket, service, inst, realm, checksum,
     if (options & KOPT_DO_MUTUAL) {
 	/* get credentials so we have service session
 	   key for decryption below */
-	if (cc = krb_get_cred(service, srv_inst, realm, cred))
+	cc = krb_get_cred(service, srv_inst, realm, cred);
+	if (cc)
 	    return(cc);
 
 	/* Get the reply out of the socket.  */

@@ -191,7 +191,9 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
     register unsigned char *ptr; /* For stepping through */
     unsigned KRB4_32 t_local;	/* Local time on our side of the protocol */
     KRB4_32 delta_t;      	/* Time in authenticator minus local time */
+#ifdef KRB_CRYPT_DEBUG
     KRB4_32 tkt_age;		/* Age of ticket */
+#endif
     int le;			/* is little endian? */
     int mutual;			/* Mutual authentication requested? */
     int t;			/* msg type */
@@ -432,8 +434,8 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
     /* Now check for expiration of ticket */
 
     ret = RD_AP_NYV;
-    tkt_age = t_local - ad->time_sec;
 #ifdef KRB_CRYPT_DEBUG
+    tkt_age = t_local - ad->time_sec;
     if (krb_ap_req_debug)
         log("Time: %d Issue Date: %d Diff: %d Life %x",
             time_secs, ad->time_sec, tkt_age, ad->life);

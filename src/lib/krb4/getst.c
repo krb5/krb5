@@ -9,6 +9,9 @@
 
 #include "mit-copyright.h"
 #include "krb.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 /*
  * getst() takes a file descriptor, a string and a count.  It reads
@@ -20,6 +23,7 @@
  * the null terminator.
  */
 
+int
 getst(fd, s, n)
     int fd;
     register char *s;

@@ -18,6 +18,9 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #define S_AD_SZ sizeof(struct sockaddr_in)
 
@@ -67,6 +70,7 @@ static char *prog = "send_to_kdc";
  *		  after several retries
  */
 
+int
 send_to_kdc(pkt,rpkt,realm)
     KTEXT pkt;
     KTEXT rpkt;
@@ -87,7 +91,6 @@ send_to_kdc(pkt,rpkt,realm)
     char *scol;
     int krb_udp_port = 0;
     int krbsec_udp_port = 0;
-    int default_port;
 
     /*
      * If "realm" is non-null, use that, otherwise get the
@@ -112,7 +115,8 @@ send_to_kdc(pkt,rpkt,realm)
     /* The first time, decide what port to use for the KDC.  */
     if (cached_krb_udp_port == 0) {
         register struct servent FAR *sp;
-        if (sp = getservbyname("kerberos","udp"))
+	sp = getservbyname("kerberos","udp");
+        if (sp)
 	    cached_krb_udp_port = sp->s_port;
 	else
 	    cached_krb_udp_port = htons(KERBEROS_PORT); /* kerberos/udp */
@@ -123,7 +127,8 @@ send_to_kdc(pkt,rpkt,realm)
     if (cached_krbsec_udp_port == 0 && 
 	cached_krb_udp_port != htons(KERBEROS_PORT)) {
         register struct servent FAR *sp;
-        if (sp = getservbyname("kerberos-sec","udp"))
+	sp = getservbyname("kerberos-sec","udp");
+        if (sp)
 	    cached_krbsec_udp_port = sp->s_port;
 	else
 	    cached_krbsec_udp_port = htons(KERBEROS_PORT); /* kerberos/udp */
@@ -166,7 +171,6 @@ send_to_kdc(pkt,rpkt,realm)
 /* End of kludge (FIXME) for FTP Software WinSock stack.  */
 
     no_host = 1;
-    default_port = 0;
     /* get an initial allocation */
     n_hosts = 0;
     for (i = 1; krb_get_krbhst(krbhst, lrealm, i) == KSUCCESS; ++i) {
@@ -192,7 +196,6 @@ send_to_kdc(pkt,rpkt,realm)
 	} else {
 	    krb_udp_port = cached_krb_udp_port;
 	    krbsec_udp_port = cached_krbsec_udp_port;
-	    default_port = 1;
 	}
         farkedhost = gethostbyname(krbhst);
 #ifdef DEBUG

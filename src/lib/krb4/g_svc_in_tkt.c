@@ -83,6 +83,7 @@ static int stub_key(user,instance,realm,passwd,key)
    return 0;
 }
 
+int
 krb_get_svc_in_tkt_preauth(user, instance, realm, service, sinstance, life, srvtab)
     char *user, *instance, *realm, *service, *sinstance;
     int life;
@@ -105,6 +106,7 @@ krb_get_svc_in_tkt_preauth(user, instance, realm, service, sinstance, life, srvt
 
 /* DEC's dss-kerberos adds krb_svc_init; simple enough */
 
+int
 krb_svc_init(user,instance,realm,lifetime,srvtab_file,tkt_file)
     char *user;
     char *instance;
@@ -121,6 +123,7 @@ krb_svc_init(user,instance,realm,lifetime,srvtab_file,tkt_file)
 }
 
 
+int
 krb_svc_init_preauth(user,instance,realm,lifetime,srvtab_file,tkt_file)
     char *user;
     char *instance;

@@ -27,7 +27,7 @@ ParseFullName(name, instance, realm, fname)
 	if (err) return err;
 	if (!*name) return KNAME_FMT;					/* null names are not OK */
 	if (!*realm) { 
-		if (err = krb_get_lrealm (realm, 1))
+		if ((err = krb_get_lrealm (realm, 1)))
 			return err;
 		if (!*realm) return KNAME_FMT;		/* FIXME -- should give better error */
 	}

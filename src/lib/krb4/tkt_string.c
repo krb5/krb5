@@ -48,14 +48,15 @@ char *tkt_string()
     uid_t getuid();
 
     if (!*krb_ticket_string) {
-        if (env = getenv("KRBTKFILE")) {
+	env = getenv("KRBTKFILE");
+        if (env) {
 	    (void) strncpy(krb_ticket_string, env,
 			   sizeof(krb_ticket_string)-1);
 	    krb_ticket_string[sizeof(krb_ticket_string)-1] = '\0';
 	} else {
 	    /* 32 bits of signed integer will always fit in 11 characters
 	     (including the sign), so no need to worry about overflow */
-	    (void) sprintf(krb_ticket_string, "%s%d",TKT_ROOT,getuid());
+	    (void) sprintf(krb_ticket_string, "%s%d",TKT_ROOT,(int) getuid());
         }
     }
     return krb_ticket_string;

@@ -156,7 +156,7 @@ in_tkt(pname,pinst)
 	    return(KFAILURE);
 	} else
 	    if (krb_debug)
-		printf("swapped UID's %d and %d\n",metoo,me);
+		printf("swapped UID's %d and %d\n",(int) metoo, (int) me);
     }
     /* Set umask to ensure that we have write access on the created
        ticket file.  */
@@ -171,7 +171,7 @@ in_tkt(pname,pinst)
 	    return(KFAILURE);
 	} else
 	    if (krb_debug)
-		printf("swapped UID's %d and %d\n",me,metoo);
+		printf("swapped UID's %d and %d\n", (int) me, (int) metoo);
     }
     if (tktfile < 0) {
 	if (krb_debug)

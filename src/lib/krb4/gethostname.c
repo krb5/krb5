@@ -10,6 +10,9 @@
 #include "mit-copyright.h"
 #define	DEFINE_SOCKADDR
 #include "krb.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef	GETHOSTNAME
 #define	GETHOSTNAME	gethostname	/* A rather simple default */
@@ -22,6 +25,7 @@
  * interface is identical to BSD gethostname(2).)
  */
 
+int
 k_gethostname(name, namelen)
     char *name;
     int namelen;

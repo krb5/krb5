@@ -24,6 +24,7 @@ int swap_bytes=0;
  * ciphertext length out of the packet.
  */
 
+int
 pkt_clen(pkt)
     KTEXT pkt;
 {

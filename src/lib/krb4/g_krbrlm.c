@@ -28,9 +28,6 @@
  * krb_get_krbhst().  This will also look in KRB_FB_CONF is
  * ATHENA_CONF_FALLBACK is defined.
  */
-static char *krb_conf = KRB_CONF;
-
-
 KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_lrealm(r,n)
     char *r;

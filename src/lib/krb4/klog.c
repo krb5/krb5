@@ -22,7 +22,6 @@
 #include <klog.h>
 
 static char *log_name = KRBLOG;
-static int is_open;
 static char logtxt[1000];
 
 /*
@@ -102,9 +101,9 @@ char * klog(type,format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0)
  * the logfile defaults to KRBLOG, defined in "krb.h".
  */
 
+void
 kset_logfile(filename)
     char *filename;
 {
     log_name = filename;
-    is_open = 0;
 }

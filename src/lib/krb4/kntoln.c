@@ -42,6 +42,7 @@
  * things will happen. */
 #define MAX_USERNAME 10
 
+int
 krb_kntoln(ad,lname)
     AUTH_DAT *ad;
     char *lname;
