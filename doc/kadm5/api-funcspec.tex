@@ -9,7 +9,7 @@
 \def\v#1{\verb+#1+}
 
 \title{OV*Secure Admin \\ Functional Specifications}
-\author{}
+\author{Barry Jaspan}
 \date{DRAFT --- \today}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,7 +44,7 @@ ispunct(), and other.
 \item Passwords can be required to be different from
 previous passwords; a password that generates the same encryption key
 as any of the principal's specified previous number of passwords will
-not be accepted.  This comparision is performed on the encryption keys
+not be accepted.  This comparison is performed on the encryption keys
 generated from the passwords, not on the passwords themselves.
 
 \item A single ``forbidden password'' dictionary can be specified for all
@@ -350,7 +350,7 @@ REF_COUNT               & 0x080000 & pw_refcnt & O, 0 & O
 
 Several values are fixed and known through \#define's in include files.  
 
-These are defined in <ovsec_admin/admin.h>:
+These are defined in $<$ovsec_admin/admin.h$>$:
 
 \begin{description}
 \item[admin service principal] ADM_PRINCIPAL (``ovsec_kadm/admin'')
@@ -360,7 +360,7 @@ These are defined in <ovsec_admin/admin.h>:
 \end{description}
 
 The location of the admin policy and principal databases are defined
-in <ovsec_admin/adb.h>:
+in $<$ovsec_admin/adb.h$>$:
 
 \begin{description}
 \item[admin policy database] POLICY_DB (``/krb5/policy.db'')
@@ -492,6 +492,7 @@ policy, so the policy check is not performed.
 \caption{Summary of functions and required authorization.}
 \label{tab:func-overview}
 \begin{tabular}{@{}llp{3.24in}}
+\\
 {\bf Function Name} & {\bf Authorization} & {\bf Operation} \\
 
 create_principal & add & Create a new principal. \\
@@ -502,6 +503,7 @@ rename_principal & add and delete & Rename a principal. \\
 get_principal & get\footnotemark & Retrieve a principal. \\
 chpass_principal & modify\footnotemark[\thefootnote] &
          Change a principal's password. \\
+chpass_principal_util & modify\footnotemark[\thefootnote] & Utility wrapper around chpass_principal. \\
 randkey_principal & modify\footnotemark[\thefootnote] &
         Randomize a principal's key. \\
 create_policy & add & Create a new policy. \\
@@ -510,7 +512,7 @@ modify_policy & modify & Modify the attributes of a policy. \\
 get_policy & get & Retrieve a policy. \\
 free_principal_ent & none & Free the memory associated with an
                 ovsec_kadm_principal_ent_t. \\
-free_policy_ent & none & Free the memory assocated with an
+free_policy_ent & none & Free the memory associated with an
                 ovsec_kadm_policy_ent_t. \\
 get_privs & none & Return the caller's admin server privileges.
 \end{tabular}
@@ -530,7 +532,7 @@ ovsec_kadm_create_principal(ovsec_kadm_principal_ent_t princ, u_int32 mask,
 AUTHORIZATION REQUIRED: add
 
 \begin{enumerate}
-\item Determine whether password quality checks should be overriden.
+\item Determine whether password quality checks should be overridden.
 \begin{enumerate}
 \item If the POLICY bit is not set in aux_attributes, set
 override_qual to true.
@@ -702,7 +704,7 @@ ovsec_kadm_chpass_principal(krb5_principal princ, char *pw,
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-ovsec_kadm/changepw service, the modify priviledge is disregarded.
+ovsec_kadm/changepw service, the modify privilege is disregarded.
 
 Change a principal's password.  
 
@@ -721,7 +723,7 @@ set in the principal's aux_attributes field.
 \begin{enumerate}
 \item If the POLICY bit is not set in aux_attributes, set
 override_qual to true.
-\item Otherwise, if the caller does not have the modify priviledge,
+\item Otherwise, if the caller does not have the modify privilege,
 set override_qual to false.
 \item Otherwise, if the caller has the modify privilege, but princ is the
 same as the caller, set override_qual to false.
@@ -758,6 +760,109 @@ password history.
 life. 
 \end{description}
 
+
+\subsection{ovsec_kadm_chpass_principal_util}
+
+\begin{verbatim}
+ovsec_kadm_ret_t
+ovsec_kadm_chpass_principal_util(krb5_principal princ, char *new_pw, 
+                int override_qual, char *msg_ret);
+\end{verbatim}
+
+AUTHORIZATION REQUIRED: modify, or the calling principal being the
+same as the princ argument.  If the request is authenticated to the
+ovsec_kadm/changepw service, the modify privilege is disregarded.
+
+This function is a wrapper around ovsec_kadm_chpass_principal. It can
+read a new password from a user, change a principal's password, and
+return detailed error messages.  msg_ret should point to a char buffer
+in the caller's space of sufficient length for the error messages
+described below. 1024 bytes is recommended.
+
+\begin{enumerate}
+\item If new_pw is NULL, this routine will prompt the user for
+``New Password:'' and ``New Password (again):'' and read (without
+echoing) the password input. This will use krb5_read_password and only
+terminal-based applications will make use of this. If the passwords
+don't match the string ``New passwords do not match - password not
+changed.'' will be copied into msg_ret, and the error code
+KRB5_LIBOS_BADPWDMATCH will be returned.  For while reading the new
+password, copy the string ``<com_err message$>$ occurred while trying to
+change password.''  following by a blank line and ``Password not
+changed.'' into msg_ret and return the error code returned by
+krb5_read_password.
+
+\item Call ovsec_kadm_chpass_principal with princ, new_pw, and override_qual.
+
+\item If successful copy ``Password Changed.'' into msg_ret and return zero.
+
+\item For a policy related failure copy the appropriate message (from below) 
+followed by a newline and ``Password not changed.'' into msg_ret
+filling in the parameters from the principal's policy information. If
+the policy information cannot be obtained copy the generic message if
+one is specified below. Return the error code from
+ovsec_kadm_chpass_principal.
+
+Detailed messages:
+\begin{description}
+
+\item[PASS_Q_TOO_SHORT]
+New password is too short. Please choose a
+password which is more than $<$pw-min-len$>$ characters.
+
+\item[PASS_Q_TOO_SHORT - generic]
+New password is too short. Please choose a longer password.
+
+\item[PASS_REUSE]
+New password was used previously. Please choose a
+different password.
+
+\item[PASS_Q_CLASS]
+New password does not have enough character classes. Classes include
+lower class letters, upper case letters, digits, punctuation and all
+other characters.  Please choose a password with at least
+$<$min-classes$>$ character classes.
+
+\item[PASS_Q_CLASS - generic]
+New password does not have enough character classes. Classes include
+lower class letters, upper case letters, digits, punctuation and all
+other characters. 
+
+\item[PASS_Q_DICT] 
+New password was found in a dictionary of possible passwords and
+therefore may be easily guessed.  Please choose another password. See
+the kpasswd man page for help in choosing a good password.
+
+\item[PASS_TOOSOON]
+Password cannot be changed because it was changed too recently. Please
+wait until $<$last-pw-change+pw-min-life$>$ before you change it. If you
+need to change your password before then, contact your system
+security administrator.
+
+\item[PASS_TOOSOON - generic]
+Password cannot be changed because it was changed too recently. If you
+need to change your now please contact your system security
+administrator.
+\end{description}
+
+\item For other errors copy the string ``$<$com_err message$>$ occurred while trying to change password.'' following by a blank line and ``Password not changed.'' into msg_ret. Return the error code returned by ovsec_kadm_chpass_principal.
+\end{enumerate}
+
+
+RETURN CODES:
+
+\begin{description}
+\item[KRB5_LIBOS_BADPWDMATCH] Typed new passwords did not match.
+\item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
+\item[OVSEC_KADM_PASS_Q_*] Requested password does not meet quality
+standards. 
+\item[OVSEC_KADM_PASS_REUSE] Requested password is in user's
+password history. 
+\item[OVSEC_KADM_PASS_TOOSOON] Current password has not reached minimum
+life. 
+\end{description}
+
+
 \subsection{ovsec_kadm_randkey_principal}
 
 \begin{verbatim}
@@ -772,7 +877,7 @@ the returned krb5_keyblock * with krb5_free_keyblock.
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-ovsec_kadm/changepw service, the modify priviledge is disregarded.
+ovsec_kadm/changepw service, the modify privilege is disregarded.
 
 In the description below, all the checks that can result in
 key-related errors do not apply to callers that have the modify
@@ -785,11 +890,11 @@ Note that the policy checks are only be performed if the POLICY bit is
 set in the principal's aux_attributes field.
 
 \begin{enumerate}
-\item Determine whether policy checks should be overriden.
+\item Determine whether policy checks should be overridden.
 \begin{enumerate}
 \item If the POLICY bit is not set in aux_attributes, set
 override_qual to true.
-\item Otherwise, if the caller does not have the modify priviledge,
+\item Otherwise, if the caller does not have the modify privilege,
 set override_qual to false.
 \item Otherwise, if the caller has the modify privilege, but princ is the
 same as the caller, set override_qual to false.
@@ -849,7 +954,7 @@ must free the returned entry with ovsec_kadm_free_principal_ent.
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
 as the princ argument.  If the request is authenticated to the
-ovsec_kadm/changepw service, the get priviledge is disregarded.
+ovsec_kadm/changepw service, the get privilege is disregarded.
 
 
 RETURN CODES:
@@ -964,7 +1069,7 @@ ovsec_kadm_get_policy(char *policy, ovsec_kadm_policy_ent_t *ent);
 
 AUTHORIZATION REQUIRED: get, or the calling principal's policy being
 the same as the policy argument.  If the request is authenticated to
-the ovsec_kadm/changepw service, the get priviledge is disregarded.
+the ovsec_kadm/changepw service, the get privilege is disregarded.
 
 Return the policy's attributes in allocated memory.  The caller must
 free the returned entry with ovsec_kadm_free_policy_ent.
@@ -1105,7 +1210,7 @@ values of all fields.} and status refers to the com_err string
 corresponding to the error code generated.
 
 \begin{itemize}
-\item Unsuccessfull authentication attempts (e.g.: failures during
+\item Unsuccessful authentication attempts (e.g.: failures during
 GSS-API context establishment).  This error occurs inside the RPC; the
 admin server is notified via a callback.
 
@@ -1124,7 +1229,7 @@ principal in request
 \item Authentication failure.  This error can occur both within the
 RPC, while parsing the RPC call header, and while arguments are
 decoded by the admin server.  It can be the result of a a garbled
-{\it or retransmitted} packet, a replay attack, a packet-modificaton
+{\it or retransmitted} packet, a replay attack, a packet-modification
 attack, or a header/argument splicing attack.
 
 \begin{verbatim}
@@ -1219,7 +1324,7 @@ admin policy database, and an admin principal database with an empty
 entry for every exist principal.
 \item[ovsec_adm_db_export/import] dump or load the admin policy and
 principal databases
-\item[ovsec_adm_check] check the kdc and admin databases for
+\item[ovsec_adm_check] check the KDC and admin databases for
 inconsistencies and repair them.
 \end{description}
 
