@@ -1,3 +1,8 @@
+2001-07-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* setenv.c: Include stdlib.h, provide prototypes for setenv and
+	unsetenv before declaration.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* authorization.c (find_first_cmd_that_exists): Change xmalloc()

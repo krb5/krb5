@@ -19,8 +19,16 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-static char *_findenv();
+static char *_findenv(char *, int *);
+
+#ifndef HAVE_SETENV
+extern int setenv(char *, char *, int);
+#endif
+#ifndef HAVE_UNSETENV
+extern void unsetenv(char *);
+#endif
 
 /*
  * setenv --
@@ -37,7 +45,6 @@ setenv(name, value, rewrite)
 	static int alloced;			/* if allocated space before */
 	register char *C;
 	int l_value, offset;
-	char *malloc(), *realloc();
 
 	if (*value == '=')			/* no `=' in value */
 		++value;
