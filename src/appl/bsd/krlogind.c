@@ -649,17 +649,31 @@ void doit(f, fromp)
 	    if (t < 0)
 	      fatalperror(f, line);
 #endif
-#if defined(HAVE_STREAMS) && (defined(HAVE_LINE_PUSH) || defined(sun))
+
+#ifdef HAVE_STREAMS
+#ifdef HAVE_LINE_PUSH
 	    while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
-#endif
+	    if (line_push(t) < 0)
+		fatalperror(f, "IPUSH",errno);
+#else
+#ifdef sun
+	    while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
+	    if (ioctl(t, I_PUSH, "ptem") < 0)
+		fatalperror(f, "IPUSH-ptem",errno);
+	    if (ioctl(t, I_PUSH, "ldterm") < 0)
+		fatalperror(f, "IPUSH-ldterm",errno);
+	    if (ioctl(t, I_PUSH, "ttcompat") < 0)
+		fatalperror(f, "IPUSH-ttcompat",errno);
+#endif /* sun */
+#endif /* HAVE_LINE_PUSH */
+#endif /* HAVE_STREAMS */
+
 	    /* Under Ultrix 3.0, the pgrp of the slave pty terminal
 	       needs to be set explicitly.  Why rlogind works at all
 	       without this on 4.3BSD is a mystery.
 	       It seems to work fine on 4.3BSD with this code enabled.
 	       IMP's need both ioctl and setpgrp..
 	       */
-#if !defined(SYSV) || defined(sysvimp)
-	    /* SYSV set process group prior to opening pty */
 #ifdef sysvimp
 	    pid = 0;
 #else
@@ -671,29 +685,15 @@ void doit(f, fromp)
 #endif /* sysvimp */
 	    
 #ifdef POSIX_TERMIOS
-	    /* we've already done setsid above. Just do tcsetpgrp here. */
 	    tcsetpgrp(0, pid);
-#else
+#else /* POSIX_TERMIOS */
+#ifdef TIOCSPGRP
 	    ioctl(0, TIOCSPGRP, &pid);
-#endif /* posix */
+#endif /* TIOCSPGRP */
+#endif /* POSIX_TERMIOS */
+
 	    pid = 0;			/*reset pid incase exec fails*/
-#endif /* !sysv || sysvimp */
 	    
-#ifdef HAVE_STREAMS
-#ifdef HAVE_LINE_PUSH
-	    if (line_push(t) < 0)
-		fatalperror(f, "IPUSH",errno);
-#else
-#ifdef sun
-	    if (ioctl(t, I_PUSH, "ptem") < 0)
-		fatalperror(f, "IPUSH-ptem",errno);
-	    if (ioctl(t, I_PUSH, "ldterm") < 0)
-		fatalperror(f, "IPUSH-ldterm",errno);
-	    if (ioctl(t, I_PUSH, "ttcompat") < 0)
-		fatalperror(f, "IPUSH-ttcompat",errno);
-#endif /* sun */
-#endif /* HAVE_LINE_PUSH */
-#endif /* HAVE_STREAMS */
 #ifdef POSIX_TERMIOS
 	    tcgetattr(t,&new_termio);
 	    new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
@@ -1045,7 +1045,6 @@ protocol(f, p)
 
 krb5_sigtype cleanup()
 {
-    char *p;
     struct utmp ut;
     
 #ifndef NO_UT_PID
@@ -1059,7 +1058,7 @@ krb5_sigtype cleanup()
     (void)chmod(line, 0666);
     (void)chown(line, 0, 0);
 #ifndef HAVE_STREAMS
-    *p = 'p';
+    line[strlen("/dev/")] = 'p';
     (void)chmod(line, 0666);
     (void)chown(line, 0, 0);
 #endif
@@ -1376,29 +1375,50 @@ getpty(fd,slave)
      char *slave;
 {
     char c;
+    char *p;
     int i,ptynum;
     struct stat stb;
+
 #ifdef HAVE_STREAMS
-#ifdef sysvimp
-    *fd = open("/dev/pty", O_RDWR|O_NDELAY);
-#else
-    *fd = open("/dev/ptc", O_RDWR|O_NDELAY);
+
+#ifdef sun
+#define PTY_MASTER "/dev/ptmx"
 #endif
-    if (*fd >= 0) {
-	if (fstat(*fd, &stb) < 0) {
-	    close(*fd);
-	    return 1;
-	}
-	ptynum = (int)(stb.st_rdev&0xFF);
 #ifdef sysvimp
-	sprintf(slave, "/dev/ttyp%x", ptynum);
-#else
-	sprintf(slave, "/dev/ttyq%x", ptynum);
+#define PTY_MASTER "/dev/pty"
 #endif
+#ifndef PTY_MASTER
+#define PTY_MASTER "/dev/ptc"
+#endif
+
+    *fd = open(PTY_MASTER, O_RDWR|O_NDELAY);
+    if (*fd < 0) return 1;
+
+#ifdef sun
+    grantpt(*fd);
+    unlockpt(*fd);
+#endif
+    
+#ifdef HAVE_PTSNAME
+    p = ptsname(*fd);
+#else
+    p = ttyname(*fd);
+#endif
+    if (p) {
+	strcpy(slave, p);
+	return 0;
     }
-    return (0);
+
+    if (fstat(*fd, &stb) < 0) {
+	close(*fd);
+	return 1;
+    }
+    ptynum = (int)(stb.st_rdev&0xFF);
+    sprintf(slave, "/dev/ttyp%x", ptynum);
+    return 0;
     
 #else /* NOT STREAMS */
+
     for (c = 'p'; c <= 's'; c++) {
 	sprintf(slave,"/dev/ptyXX");
 	slave[strlen("/dev/pty")] = c;
@@ -1412,10 +1432,10 @@ getpty(fd,slave)
 	      goto gotpty;
 	}
     }
-    return(1);
+    return 1;
   gotpty:
     slave[strlen("/dev/")] = 't';
-    return(0);
+    return 0;
 #endif /* STREAMS */
 }
 
