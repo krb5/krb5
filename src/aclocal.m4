@@ -546,7 +546,7 @@ dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
-[AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,[EXTRA_RULES], cat pre.out Makefile.out post.out > Makefile)])dnl
+[AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,[EXTRA_RULES], cat pre.out Makefile.out post.out > Makefile; rm pre.out Makefile.out post.out)])dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
 dnl
