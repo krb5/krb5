@@ -1,5 +1,10 @@
 Tue Feb 27 18:44:51 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* g_initialize.c (gss_initialize): Don't fprintf to stderr on
+		Macintoshes and Windows.
+
+	* g_inq_context.c: Add INTERFACE keyword for Windows.
+
 	* oid_ops.c: Protect include of unistd.h with HAVE_UNISTD_H
 
 Sun Feb 25 15:39:08 1996  Mark W. Eichin  <eichin@cygnus.com>

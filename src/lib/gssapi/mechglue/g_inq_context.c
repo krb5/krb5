@@ -33,7 +33,8 @@
 #endif
 
 /* Last argument new for V2 */
-OM_uint32 gss_inquire_context(
+OM_uint32 INTERFACE
+gss_inquire_context(
 	    minor_status,
 	    context_handle,
 	    src_name,

@@ -154,10 +154,17 @@ void gss_initialize (void)
 
 #endif /* USE_SOLARIS_SHARED_LIBRARIES */
 
+#if !defined(_MSDOS) && !defined(_MACINTOSH)
     if (__gss_mechs_array == NULL) { /* this is very bad! */
       fprintf(stderr,"gss_initialize fatal error: no mechanisms loaded!\n");
       exit(-1);
     }
+#else
+    /*
+     * Nothing for now, since this should never happen using static
+     * mechanism loading.
+     */
+#endif
 
     return;
 }
