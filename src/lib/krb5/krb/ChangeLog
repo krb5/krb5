@@ -1,3 +1,7 @@
+Fri Feb 10 15:45:59 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_req.c (krb5_rd_req): Remove ISODE cruft.
+
 Thu Feb  9 17:43:04 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gc_via_tgt.c (krb5_get_cred_via_tgt): Set up the keyblock's
