@@ -31,6 +31,8 @@ krb5_mk_chpw_req(context, auth_context, ap_req, passwd, packet)
 
     packet->length = 6 + ap_req->length + cipherpw.length;
     packet->data = (char *) malloc(packet->length);
+    if (packet->data == NULL)
+	return ENOMEM;
     ptr = packet->data;
 
     /* length */
@@ -176,6 +178,10 @@ krb5_rd_chpw_rep(context, auth_context, packet, result_code, result_data)
 
     if (result_data->length) {
 	result_data->data = (char *) malloc(result_data->length);
+	if (result_data->data == NULL) {
+	    ret = ENOMEM;
+	    goto cleanup;
+	}
 	memcpy(result_data->data, ptr, result_data->length);
     } else {
 	result_data->data = NULL;

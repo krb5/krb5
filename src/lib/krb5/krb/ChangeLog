@@ -1,3 +1,11 @@
+Fri Jan  2 21:21:29 1998  Tom Yu  <tlyu@mit.edu>
+
+	* preauth.c (handle_sam_labels):
+	(obtain_sam_padata): Check return of malloc. [krb5-libs/518]
+
+	* chpw.c (krb5_mk_chpw_req): Check return of malloc.
+	(krb5_rd_chpw_rep): Check return of malloc. [krb5-libs/518]
+
 Tue Dec 16 00:08:33 1997  Tom Yu  <tlyu@mit.edu>
 
 	* mk_req_ext.c (krb5_mk_req_extended): Check enctype of session
