@@ -1,3 +1,9 @@
+2000-09-26  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_get.c (asn1_get_tag_indef): Fix to not deref random garbage
+	while checking for EOC encoding.  At least the indefinite decoding
+	breaks consistently now.
+
 2000-08-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* asn1_k_decode.c (asn1_decode_last_req_entry): Decode the lr_type

@@ -43,7 +43,8 @@ asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
       return 0;
   }
   /* Allow for the indefinite encoding */
-  if ( !*(buf->next) && !*(buf->next + 1)) {
+  if ((buf->bound - buf->next + 1 >= 2)
+      && !*(buf->next) && !*(buf->next + 1)) {
     buf->next += 2;
     *tagnum = ASN1_TAGNUM_CEILING;
     return 0;
