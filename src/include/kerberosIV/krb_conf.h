@@ -2,7 +2,7 @@
  *	$Source$
  *	$Header$
  *
- *	This file contains configuration information for the DES 
+ *	This file contains configuration information for the Kerberos
  *	library which is machine specific; currently, this file contains
  *	configuration information for the vax, the "ibm032" (RT),
  *      and the "PC8086" (IBM PC).
@@ -12,6 +12,15 @@
  *      be defined when running the native compiler on the programs that
  *      construct cross-compiled sources.
  */
+
+#ifndef KRB_CONF_DEFS
+#define KRB_CONF_DEFS
+
+/* Byte ordering */
+extern int	krbONE;
+#define		HOST_BYTE_ORDER	(* (char *) &krbONE)
+#define		MSB_FIRST		0	/*  68000, IBM RT/PC */
+#define		LSB_FIRST		1	/*  Vax, PC8086 */
 
 #ifdef PC8086
 #define IBMPC
@@ -43,11 +52,10 @@
 
 #else
 
-Sorry, you lose.  Figure out what the machine looks like and fix this file to 
-include it.
+Sorry, I don't know about your machine.  Describe it here.
 
 #endif ibm032
 #endif vax
 #endif pc8086
 
-
+#endif KRB_CONF_DEFS
