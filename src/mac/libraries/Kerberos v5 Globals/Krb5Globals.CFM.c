@@ -87,8 +87,10 @@ __initialize_Kerberos5GlobalsLib (
 	if (ccErr != CC_NOERROR)
 		return memFullErr;
 		
-	gKerberos5GlobalsRefCount++;		
-	err = Krb5GlobalsSetUniqueDefaultCacheName ();
+	gKerberos5GlobalsRefCount++;
+	if (gKerberos5SystemDefaultCacheName == nil)
+		err = Krb5GlobalsSetUniqueDefaultCacheName ();
+
 	return err;
 }
 

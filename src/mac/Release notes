@@ -47,3 +47,5 @@ Changes in 1.1a3:
 1.1b10
  Exported krb5 and gss interfaces to set cache name
  
+1.1b11
+ Fixed krb5 globals lib to use existing default cache instead of creating a new one
