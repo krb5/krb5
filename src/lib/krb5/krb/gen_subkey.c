@@ -32,7 +32,7 @@
 krb5_error_code
 krb5_generate_subkey(context, key, subkey)
     krb5_context context;
-    const krb5_keyblock *key;
+    krb5_const krb5_keyblock *key;
     krb5_keyblock **subkey;
 {
     krb5_error_code retval;

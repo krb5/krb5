@@ -36,8 +36,8 @@
 krb5_boolean
 krb5_address_search(context, addr, addrlist)
     krb5_context context;
-    const krb5_address *addr;
-    krb5_address * const * addrlist;
+    krb5_const krb5_address *addr;
+    krb5_address * krb5_const * addrlist;
 {
     if (!addrlist)
 	return TRUE;

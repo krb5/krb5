@@ -44,7 +44,7 @@
 krb5_error_code
 krb5_encrypt_tkt_part(context, srv_key, dec_ticket)
     krb5_context context;
-    const krb5_keyblock *srv_key;
+    krb5_const krb5_keyblock *srv_key;
     register krb5_ticket *dec_ticket;
 {
     krb5_data *scratch;

@@ -1,3 +1,8 @@
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktbase.c (krb5_kt_resolve): Change prototype from const to
+	krb5_const to match krb5.hin
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

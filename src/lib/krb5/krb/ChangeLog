@@ -1,3 +1,10 @@
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* addr_comp.c, addr_order.c, addr_srch.c, bld_pr_ext.c,
+	bld_princ.c, encrypt_tk.c, gen_seqnum.c, gen_subkey.c: Change
+	prototypes to use krb5_const instead of const to match the entries
+	in krb5.hin
+
 2000-03-10  Miro Jurisic  <meeroh@mit.edu>
 
 	* get_in_tkt.c (krb5_get_init_creds): Always initialize local_as_reply

@@ -40,8 +40,8 @@
 int
 krb5_address_order(context, addr1, addr2)
     krb5_context context;
-    register const krb5_address *addr1;
-    register const krb5_address *addr2;
+    register krb5_const krb5_address *addr1;
+    register krb5_const krb5_address *addr2;
 {
     int dir;
     register int i;

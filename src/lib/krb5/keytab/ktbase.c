@@ -84,7 +84,7 @@ krb5_kt_register(context, ops)
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (context, name, ktid)
     krb5_context context;
-    const char FAR *name;
+    krb5_const char FAR *name;
     krb5_keytab FAR *ktid;
 {
     struct krb5_kt_typelist *tlist;
