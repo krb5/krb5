@@ -1,3 +1,9 @@
+Wed Oct  9 14:12:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-unix): Fix up various rules that have
+	"includes" as dependencies in order to allow for makes that don't
+	do left-to-right ordering of dependencies.
+
 Wed Aug 28 17:44:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* utl_nohash_validate.c: 

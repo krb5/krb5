@@ -7,10 +7,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -DUSE_AUTOCONF_H
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
-all-unix:: shared $(OBJS)
-
-all-mac:: shared $(OBJS)
-
 all-windows:: $(OBJS)
 
 shared:
@@ -77,11 +73,16 @@ EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
 HDRS= $(ETHDRS)
 
-all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
+$(OBJS): $(WHAT)-includes
+unix-includes: includes
+windows-inclues: win-include
+mac-includes: includes
 
-all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
+all-unix:: shared $(SRCS) $(HDRS) $(OBJS)
 
-all-windows:: win-include $(SRCS) $(HDRS) $(OBJS)
+all-mac:: $(SRCS) $(HDRS) $(OBJS)
+
+all-windows:: $(SRCS) $(HDRS) $(OBJS)
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
