@@ -16,12 +16,11 @@
  * without express or implied warranty.
  */
  
- 
-#include <CodeFragments.h>
- 
 #include "gss_libinit.h"
 
-#ifdef macintosh
+#if TARGET_API_MAC_OS8
+#include <CodeFragments.h>
+
 OSErr __initializeGSS(CFragInitBlockPtr ibp);
 void __terminateGSS(void);
 
@@ -44,12 +43,12 @@ void __initializeGSS(void)
 		err = gssint_initialize_library ();
 	}
 
-#ifdef macintosh	
+#if TARGET_API_MAC_OS8
 	return err;
 #endif
 }
 
-#ifdef macintosh
+#if TARGET_API_MAC_OS8
 void __terminateGSS(void)
 {
 	gssint_cleanup_library ();

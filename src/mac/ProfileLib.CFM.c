@@ -18,7 +18,7 @@
  
 #include "profile.h"
 
-#if defined(macintosh)
+#if TARGET_API_MAC_OS8
 #include <CodeFragments.h>
 
 OSErr InitializeProfileLib (
@@ -45,12 +45,12 @@ void __InitializeProfileLib (void)
 	    add_error_table(&et_prof_error_table);
 	}
 	
-#if defined(macintosh)
+#if TARGET_API_MAC_OS8
 	return err;
 #endif
 }
 
-#if defined(macintosh)
+#if TARGET_API_MAC_OS8
 void TerminateProfileLib(void)
 {
     remove_error_table(&et_prof_error_table);

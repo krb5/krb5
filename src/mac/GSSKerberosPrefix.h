@@ -1,4 +1,4 @@
-#include <ConditionalMacros.h>
+#include <KerberosSupport/KerberosConditionalMacros.h>
 
 #define SIZEOF_LONG		4
 #define SIZEOF_INT		4
@@ -14,6 +14,10 @@
 
 #define USE_CCAPI
 #define USE_LOGIN_LIBRARY
+#define NO_PASSWORD
+
+#define HAVE_SRAND		1
+#define HAVE_LABS		1
 
 #define HAVE_NETINET_IN_H	1
 #define HAVE_SYS_STAT_H		1

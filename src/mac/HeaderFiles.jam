@@ -1,35 +1,62 @@
 include "/Developer/Makefiles/pbx_jamfiles/Jambase" ;
 
+COM_ERR_DIR = "$(SRCROOT)/../util/et" ;
 PROFILE_DIR = "$(SRCROOT)/../util/profile" ;
 GSS_DIR = "$(SRCROOT)/../lib/gssapi" ;
 INCLUDE_DIR = "$(SRCROOT)/../include" ;
 ERROR_TABLES_DIR = "$(SRCROOT)/../lib/krb5/error_tables" ;
 
 DEPENDS all : 
+    "$(COM_ERR_DIR)/KerberosComErr.h"
     "$(PROFILE_DIR)/profile.h"
+    "$(PROFILE_DIR)/KerberosProfile.h"
     "$(INCLUDE_DIR)/adm_err.h"
     "$(INCLUDE_DIR)/asn1_err.h"
     "$(INCLUDE_DIR)/kdb5_err.h"
     "$(INCLUDE_DIR)/krb5_err.h"
     "$(INCLUDE_DIR)/kv5m_err.h"
     "$(INCLUDE_DIR)/krb5.h"
+    "$(INCLUDE_DIR)/Kerberos5.h"
     "$(GSS_DIR)/gssapi.h"
+    "$(GSS_DIR)/GSS.h"
     "$(INCLUDE_DIR)/autoconf.h"
 ;
 
 DEPENDS install : all ;
 
 Clean.Remove clean : 
+    "$(COM_ERR_DIR)/KerberosComErr.h"
     "$(PROFILE_DIR)/profile.h"
+    "$(PROFILE_DIR)/KerberosProfile.h"
     "$(INCLUDE_DIR)/adm_err.h"
     "$(INCLUDE_DIR)/asn1_err.h"
     "$(INCLUDE_DIR)/kdb5_err.h"
     "$(INCLUDE_DIR)/krb5_err.h"
     "$(INCLUDE_DIR)/kv5m_err.h"
     "$(INCLUDE_DIR)/krb5.h"
+    "$(INCLUDE_DIR)/Kerberos5.h"
     "$(GSS_DIR)/gssapi.h"
+    "$(GSS_DIR)/GSS.h"
     "$(INCLUDE_DIR)/autoconf.h"
 ;
+
+rule KerberosComErr.h
+{
+    DEPENDS "$(1)" : "$(2)" ;
+}
+
+actions KerberosComErr.h
+{
+    echo "#ifndef __KERBEROSCOMERR__"				> "$(1)" ;
+    echo "#define __KERBEROSCOMERR__"				>> "$(1)" ;
+    echo ""											>> "$(1)" ;
+    echo "#include <KerberosComErr/com_err.h>"		>> "$(1)" ;
+    echo ""											>> "$(1)" ;
+    echo "#endif /* __KERBEROSCOMERR__ */"			>> "$(1)" ;
+}
+
+KerberosComErr.h "$(COM_ERR_DIR)/KerberosComErr.h" : "$(COM_ERR_DIR)/com_err.h" ;
+
 
 rule profile.h
 {
@@ -41,7 +68,26 @@ actions profile.h
     cat "$(2)" > "$(1)" ;
 }
 
+
+
 profile.h "$(PROFILE_DIR)/profile.h" : "$(PROFILE_DIR)/profile.hin" "$(PROFILE_DIR)/prof_err.h" ;
+
+rule KerberosProfile.h
+{
+    DEPENDS "$(1)" : "$(2)" ;
+}
+
+actions KerberosProfile.h
+{
+    echo "#ifndef __KERBEROSPROFILE__"				> "$(1)" ;
+    echo "#define __KERBEROSPROFILE__"				>> "$(1)" ;
+    echo ""											>> "$(1)" ;
+    echo "#include <KerberosProfile/profile.h>"		>> "$(1)" ;
+    echo ""											>> "$(1)" ;
+    echo "#endif /* __KERBEROSPROFILE__ */"			>> "$(1)" ;
+}
+
+KerberosProfile.h "$(PROFILE_DIR)/KerberosProfile.h" : "$(PROFILE_DIR)/profile.h" ;
 
 rule krb5.h
 {
@@ -67,6 +113,23 @@ krb5.h "$(INCLUDE_DIR)/krb5.h" :
     "$(INCLUDE_DIR)/asn1_err.h"
 ;
 
+rule Kerberos5.h
+{
+    DEPENDS "$(1)" : "$(2)" ;
+}
+
+actions Kerberos5.h
+{
+    echo "#ifndef __KERBEROS5__"				> "$(1)" ;
+    echo "#define __KERBEROS5__"				>> "$(1)" ;
+    echo ""										>> "$(1)" ;
+    echo "#include <Kerberos5/krb5.h>"			>> "$(1)" ;
+    echo ""										>> "$(1)" ;
+    echo "#endif /* __KERBEROS5__ */"			>> "$(1)" ;
+}
+
+Kerberos5.h "$(INCLUDE_DIR)/Kerberos5.h" : "$(INCLUDE_DIR)/krb5.h" ;
+
 rule gssapi.h
 {
     DEPENDS "$(1)" : "$(2)" ;
@@ -87,6 +150,25 @@ actions gssapi.h
 gssapi.h "$(GSS_DIR)/gssapi.h" :
     "$(GSS_DIR)/generic/gssapi.hin"
 ;
+
+rule GSS.h
+{
+    DEPENDS "$(1)" : "$(2)" ;
+}
+
+actions GSS.h
+{
+    echo "#ifndef __GSS__"					> "$(1)" ;
+    echo "#define __GSS__"					>> "$(1)" ;
+    echo ""									>> "$(1)" ;
+    echo "#include <GSS/gssapi.h>"			>> "$(1)" ;
+    echo "#include <GSS/gssapi_krb5.h>"		>> "$(1)" ;
+    echo ""									>> "$(1)" ;
+    echo "#endif /* __GSS__ */"				>> "$(1)" ;
+}
+
+GSS.h "$(GSS_DIR)/GSS.h" : "$(GSS_DIR)/gssapi.h" ;
+
 
 Cp "$(INCLUDE_DIR)/adm_err.h" : "$(ERROR_TABLES_DIR)/adm_err.h" ;
 Cp "$(INCLUDE_DIR)/asn1_err.h" : "$(ERROR_TABLES_DIR)/asn1_err.h" ;
