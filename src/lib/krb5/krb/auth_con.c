@@ -2,6 +2,30 @@
 #include "k5-int.h"
 #include "auth_con.h"
 
+static krb5_error_code
+actx_copy_addr(context, inad, outad)
+    krb5_context	context;
+    const krb5_address	*inad;
+    krb5_address	**outad;
+{
+    krb5_address *tmpad;
+
+    if (!(tmpad = (krb5_address *)malloc(sizeof(*tmpad))))
+	return ENOMEM;
+#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
+    *tmpad = *inad;
+#else
+    memcpy(tmpad, inad, sizeof(krb5_address));
+#endif
+    if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
+	krb5_xfree(tmpad);
+	return ENOMEM;
+    }
+    memcpy((char *)tmpad->contents, (char *)inad->contents, inad->length);
+    *outad = tmpad;
+    return 0;
+}
+
 krb5_error_code
 krb5_auth_con_init(context, auth_context)
     krb5_context      	  context;
@@ -20,6 +44,7 @@ krb5_auth_con_init(context, auth_context)
 
     (*auth_context)->cksumtype = CKSUMTYPE_RSA_MD4_DES;
     /* (*auth_context)->cksumtype = CKSUMTYPE_CRC32; */
+    (*auth_context)->magic = KV5M_AUTH_CONTEXT;
     return 0;
 }
 
@@ -29,13 +54,13 @@ krb5_auth_con_free(context, auth_context)
     krb5_auth_context     auth_context;
 {
     if (auth_context->local_addr) 
-	free(auth_context->local_addr);
+	krb5_free_address(context, auth_context->local_addr);
     if (auth_context->remote_addr) 
-	free(auth_context->remote_addr);
+	krb5_free_address(context, auth_context->remote_addr);
     if (auth_context->local_port) 
-	free(auth_context->local_port);
+	krb5_free_address(context, auth_context->local_port);
     if (auth_context->remote_port) 
-	free(auth_context->remote_port);
+	krb5_free_address(context, auth_context->remote_port);
     if (auth_context->authentp) 
 	krb5_free_authenticator(context, auth_context->authentp);
     if (auth_context->keyblock) 
@@ -57,44 +82,30 @@ krb5_auth_con_setaddrs(context, auth_context, local_addr, remote_addr)
     krb5_address      	* local_addr;
     krb5_address      	* remote_addr;
 {
+    krb5_error_code	retval;
+
     /* Free old addresses */
-    if (auth_context->local_addr) 
-	free(auth_context->local_addr);
-    if (auth_context->remote_addr) 
-	free(auth_context->remote_addr);
+    if (auth_context->local_addr)
+	(void) krb5_free_address(context, auth_context->local_addr);
+    if (auth_context->remote_addr)
+	(void) krb5_free_address(context, auth_context->remote_addr);
 
-    if (local_addr) {
-	if ((auth_context->local_addr = (krb5_address *)
-		malloc(sizeof(krb5_address) + local_addr->length)) == NULL) {
-	    return ENOMEM;
-	}
-	auth_context->local_addr->addrtype = local_addr->addrtype;
-	auth_context->local_addr->length = local_addr->length;
-	auth_context->local_addr->contents = (krb5_octet *)
-	  auth_context->local_addr + sizeof(krb5_address);
-	memcpy(auth_context->local_addr->contents,
-	       local_addr->contents, local_addr->length);
-    } else {
+    retval = 0;
+    if (local_addr)
+	retval = actx_copy_addr(context,
+				local_addr,
+				&auth_context->local_addr);
+    else
 	auth_context->local_addr = NULL;
-    }
 
-    if (remote_addr) {
-	if ((auth_context->remote_addr = (krb5_address *)
-		malloc(sizeof(krb5_address) + remote_addr->length)) == NULL) {
-	    if (auth_context->local_addr)
-		free(auth_context->local_addr);
-	    return ENOMEM;
-	}
-	auth_context->remote_addr->addrtype = remote_addr->addrtype;
-	auth_context->remote_addr->length = remote_addr->length;
-	auth_context->remote_addr->contents = (krb5_octet *)
-	  auth_context->remote_addr + sizeof(krb5_address);
-	memcpy(auth_context->remote_addr->contents,
-	       remote_addr->contents, remote_addr->length);
-    } else {
+    if (!retval && remote_addr)
+	retval = actx_copy_addr(context,
+				remote_addr,
+				&auth_context->remote_addr);
+    else
 	auth_context->remote_addr = NULL;
-    }
-    return 0;
+
+    return retval;
 }
 
 krb5_error_code
@@ -104,44 +115,20 @@ krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
     krb5_address       ** local_addr;
     krb5_address       ** remote_addr;
 {
-    krb5_address	* tmp_addr;
+    krb5_error_code	retval;
 
+    retval = 0;
     if (local_addr && auth_context->local_addr) {
-	if (!(tmp_addr = (krb5_address *)malloc(sizeof(krb5_address))))
-	    return ENOMEM;
-	if ((tmp_addr->contents = malloc(auth_context->local_addr->length))) {
-	    memcpy(tmp_addr->contents, auth_context->local_addr->contents,
-		   auth_context->local_addr->length);
-	    tmp_addr->addrtype = auth_context->local_addr->addrtype;
-	    tmp_addr->length = auth_context->local_addr->length;
-	    *local_addr = tmp_addr;
-	} else {
-	    free(tmp_addr);
-	    return ENOMEM;
-	}
+	retval = actx_copy_addr(context,
+				auth_context->local_addr,
+				local_addr);
     }
-    if ((remote_addr) && auth_context->remote_addr) {
-	if ((tmp_addr = (krb5_address *)malloc(sizeof(krb5_address))) == NULL) {
-	    if (local_addr && auth_context->local_addr) {
-		krb5_free_address(context, *local_addr);
-	    }
-	    return ENOMEM;
-	}
-	if ((tmp_addr->contents = malloc(auth_context->remote_addr->length))) {
-	    memcpy(tmp_addr->contents, auth_context->remote_addr->contents,
-		   auth_context->remote_addr->length);
-	    tmp_addr->addrtype = auth_context->remote_addr->addrtype;
-	    tmp_addr->length = auth_context->remote_addr->length;
-	    *remote_addr = tmp_addr;
-	} else {
-	    if (local_addr && auth_context->local_addr) {
-		krb5_free_address(context, *local_addr);
-	    }
-	    free(tmp_addr);
-	    return ENOMEM;
-	}
+    if (!retval && (remote_addr) && auth_context->remote_addr) {
+	retval = actx_copy_addr(context,
+				auth_context->remote_addr,
+				remote_addr);
     }
-    return 0 ;
+    return retval;
 }
 
 krb5_error_code
@@ -151,44 +138,30 @@ krb5_auth_con_setports(context, auth_context, local_port, remote_port)
     krb5_address      	* local_port;
     krb5_address      	* remote_port;
 {
+    krb5_error_code	retval;
+
     /* Free old addresses */
-    if (auth_context->local_port) 
-	free(auth_context->local_port);
-    if (auth_context->remote_port) 
-	free(auth_context->remote_port);
+    if (auth_context->local_port)
+	(void) krb5_free_address(context, auth_context->local_port);
+    if (auth_context->remote_port)
+	(void) krb5_free_address(context, auth_context->remote_port);
 
-    if (local_port) {
-	if (((auth_context->local_port = (krb5_address *)
-		malloc(sizeof(krb5_address) + local_port->length)) == NULL)) {
-	    return ENOMEM;
-	}
-	auth_context->local_port->addrtype = local_port->addrtype;
-	auth_context->local_port->length = local_port->length;
-	auth_context->local_port->contents = (krb5_octet *)
-	  auth_context->local_port + sizeof(krb5_address);
-	memcpy(auth_context->local_port->contents,
-	       local_port->contents, local_port->length);
-    } else {
+    retval = 0;
+    if (local_port)
+	retval = actx_copy_addr(context,
+				local_port,
+				&auth_context->local_port);
+    else
 	auth_context->local_port = NULL;
-    }
 
-    if (remote_port) {
-	if ((auth_context->remote_port = (krb5_address *)
-		malloc(sizeof(krb5_address) + remote_port->length)) == NULL) {
-	    if (auth_context->local_port)
-		free(auth_context->local_port);
-	    return ENOMEM;
-	}
-	auth_context->remote_port->addrtype = remote_port->addrtype;
-	auth_context->remote_port->length = remote_port->length;
-	auth_context->remote_port->contents = (krb5_octet *)
-	  auth_context->remote_port + sizeof(krb5_address);
-	memcpy(auth_context->remote_port->contents,
-	       remote_port->contents, remote_port->length);
-    } else {
+    if (!retval && remote_port)
+	retval = actx_copy_addr(context,
+				remote_port,
+				&auth_context->remote_port);
+    else
 	auth_context->remote_port = NULL;
-    }
-    return 0;
+
+    return retval;
 }
 
 
