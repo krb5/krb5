@@ -1,3 +1,8 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Include des3 in supported
+	enctypes by default.
+
 2000-05-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Use 1024 for
