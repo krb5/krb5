@@ -572,7 +572,12 @@ policy, so the policy check is not performed.
 \\
 {\bf Function Name} & {\bf Authorization} & {\bf Operation} \\
 
-init & none & Open a connection with the ovsec_kadm library. \\
+init & none & Open a connection with the ovsec_kadm library.  OBSOLETE
+but still provided---use init_with_password instead. \\
+init_with_password & none & Open a connection with the ovsec_kadm
+library using a password to obtain initial credentials. \\
+init_with_skey & none & Open a connection with the ovsec_kadm library
+using the keytab entry to obtain initial credentials. \\
 destroy & none & Close the connection with the ovsec_kadm library. \\
 create_principal & add & Create a new principal. \\
 delete_principal & delete & Delete a principal. \\
@@ -600,9 +605,21 @@ get_privs & none & Return the caller's admin server privileges.
 perform the operation on itself; see the function's semantics for
 details.}
 
-\subsection{ovsec_kadm_init}
+\subsection{ovsec_kadm_init_*}
 
 \begin{verbatim}
+ovsec_kadm_ret_t ovsec_kadm_init_with_password(char *client_name, char *pass,
+                                 char *service_name, char *realm,
+                                 unsigned long struct_version,
+                                 unsigned long api_version,
+                                 void **server_handle)
+
+ovsec_kadm_ret_t ovsec_kadm_init_with_skey(char *client_name, char *keytab,
+                                 char *service_name, char *realm,
+                                 unsigned long struct_version,
+                                 unsigned long api_version,
+                                 void **server_handle)
+
 ovsec_kadm_ret_t ovsec_kadm_init(char *client_name, char *pass,
                                  char *service_name, char *realm,
                                  unsigned long struct_version,
@@ -612,9 +629,12 @@ ovsec_kadm_ret_t ovsec_kadm_init(char *client_name, char *pass,
 
 AUTHORIZATION REQUIRED: none
 
-Open a connection to the ovsec_kadm library and initialize any
-neccessary state information.  This function behaves differently when
-called from local and remote clients.
+NOTE: ovsec_kadm_init is an obsolete provided for backwards
+compatibility.  It is identical to ovsec_kadm_init_with_password.
+
+These three functions open a connection to the ovsec_kadm library and
+initialize any neccessary state information.  They behave differently
+when called from local and remote clients.  
 
 For remote clients, the semantics are:
 
@@ -632,9 +652,14 @@ default realm of the local host is used
 be one of the constants OVSEC_KADM_ADMIN_SERVICE or
 OVSEC_KADM_CHANGEPW_SERVICE.
 \item If realm is NULL, client_name's realm is used.
-\item The ticket is decoded with the password pass, which must be
-client_name's password.  If pass is NULL or an empty string,
-the user is prompted (via the tty) for a password.
+
+\item For init_with_password, the ticket is decoded with the password
+pass, which must be client_name's password.  If pass is NULL or an
+empty string, the user is prompted (via the tty) for a password.
+
+\item For init_with_skey, the ticket is decoded with client_name's key
+obtained from the keytab keytab.  If keytab is NULL or an empty string
+the default keytab is used.
 \end{enumerate}
 
 \item Creates a GSS-API authenticated connection to the Admin server,
@@ -658,16 +683,16 @@ the server handle will be stored.
 Local clients, running on the KDC, may be useful. For now this is will
 most likely be used for testing, but could in the future be the basis
 for a command-line system that works both remotely and on the KDC
-machine.  If ovsec_kadm_init is invoked locally its semantics are:
+machine.  If any ovsec_kadm_init_* is invoked locally its semantics are:
 
 \begin{enumerate}
 \item Initializes all the com_err error tables used by the Admin
 system.
 
-\item Initializes direct access to the KDC database.  If pass is NULL or an
-empty string, reads the master password from /.k5.REALM-NAME (created by
-kstash).  Otherwise, the non-NULL password is ignored and the user is
-prompted for it via the tty.
+\item Initializes direct access to the KDC database.  If pass (or
+keytab) is NULL or an empty string, reads the master password from
+/.k5.REALM-NAME (created by kstash).  Otherwise, the non-NULL password
+is ignored and the user is prompted for it via the tty.
 
 \item Initializes the dictionary (if present) for dictionary checks.
 
