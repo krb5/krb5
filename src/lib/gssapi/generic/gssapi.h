@@ -95,7 +95,9 @@
 /*
  * POSIX says that sys/types.h is where size_t is defined.
  */
+#ifndef _MACINTOSH
 #include <sys/types.h>
+#endif
 
 /*
  * If the platform supports the xom.h header file, it should be included here.

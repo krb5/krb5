@@ -28,9 +28,6 @@
 
 #include "gssapi_err_generic.h"
 #include <errno.h>
-#ifndef _MACINTOSH
-#include <sys/types.h>
-#endif
 
 /** helper macros **/
 

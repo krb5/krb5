@@ -1,3 +1,10 @@
+Thu Jan  4 21:33:38 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_generic.h: Don't include <sys/types.h> since it's
+		already included by gssapi.h.
+
+	* gssapi.h: Add a #ifndef _MACINTOSH around include of <sys/types.h>
+
 Fri Nov 17 22:21:58 1995    <tytso@rsts-11.mit.edu>
 
 	* Makefile.in, ChangeLog: Add support to compile shared libraries.
