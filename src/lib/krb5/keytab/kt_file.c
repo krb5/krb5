@@ -793,6 +793,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
 {
     krb5_ktfile_data *data;
+    krb5_error_code err;
 
     if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
 	return(ENOMEM);
@@ -803,7 +804,14 @@ krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
 	return(ENOMEM);
     }
 
+    err = k5_mutex_init(&data->lock);
+    if (err) {
+	krb5_xfree(*id);
+	return err;
+    }
+
     if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
+	k5_mutex_destroy(&data->lock);
 	krb5_xfree(data);
 	krb5_xfree(*id);
 	return(ENOMEM);
