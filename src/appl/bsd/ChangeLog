@@ -1,3 +1,8 @@
+2002-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* kcmd.c (kcmd_connect): Don't call fixup_addrinfo, it's been
+	deleted.
+
 2002-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* kcmd.c: Include fake-addrinfo.c once again.

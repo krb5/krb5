@@ -225,7 +225,6 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	fprintf(stderr, "%s: no addresses?\n", hname);
 	return -1;
     }
-    fixup_addrinfo(ap);		/* XXX */
 
     *host_save = malloc(strlen(ap->ai_canonname) + 1);
     if (*host_save == NULL) {
