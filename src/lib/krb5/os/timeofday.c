@@ -21,7 +21,7 @@ static char rcsid_timeofday_c[] =
 #include <stdio.h>			/* needed for libos-proto.h */
 
 #include <krb5/config.h>
-#include <krb5/base-defs.h>
+#include <krb5/krb5.h>
 #include <krb5/libos-proto.h>
 
 extern int errno;
