@@ -49,24 +49,15 @@ static char rcsid_main_c[] =
 #include "kdc5_err.h"
 
 static void
-#ifdef __STDC__
-kdc_com_err_proc(const char *whoami, long code, const char * format, ...)
-#else
-kdc_com_err_proc(whoami, code, format, va_alist)
+kdc_com_err_proc(whoami, code, format, pvar)
 	const char *whoami;
 	long code;
 	const char *format;
-	va_dcl
-#endif
+	va_list pvar;
 {
     /* XXX need some way to do this better... */
-    va_list pvar;
+
     extern void vfprintf PROTOTYPE((FILE *, const char *, va_list));
-#ifdef __STDC__
-    va_start(pvar, format);
-#else
-    va_start(pvar);
-#endif
 
     if (whoami) {
         fputs(whoami, stderr);
@@ -99,7 +90,6 @@ kdc_com_err_proc(whoami, code, format, va_alist)
 	    syslog(LOG_ERR, "%s", error_message(code));
     }
 
-    va_end(pvar);
     return;
 }
 
