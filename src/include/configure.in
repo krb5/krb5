@@ -5,7 +5,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_CONST
-AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo inet_ntoa inet_aton)
+AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntoa inet_aton)
 HAVE_YYLINENO
 CHECK_DIRENT
 AC_TYPE_UID_T
@@ -13,6 +13,7 @@ AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
 KRB5_SIGTYPE
 AC_CHECK_HEADERS(stdlib.h string.h stddef.h unistd.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h macsock.h xom.h)
 AC_HEADER_STDARG
+KRB5_AC_INET6
 dnl
 dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
 dnl requires a run check...

@@ -1,3 +1,9 @@
+1999-11-02  Ken Raeburn  <raeburn@raeburn.org>
+
+	* configure.in: Invoke KRB5_AC_INET6.  Delete most of the 10-17
+	changes except for inet_ntoa/aton, since they're in KRB5_AC_INET6
+	now.
+
 1999-10-17  Ken Raeburn  <raeburn@raeburn.org>
 
 	* configure.in: Check for inet_{ntop,pton,ntoa,aton},
