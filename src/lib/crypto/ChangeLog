@@ -1,3 +1,8 @@
+Sat Nov 23 00:22:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* cryptoconf.c: Also zero out the entries in cryptoconf, to make
+		sure no one tries to use triple DES and SHA.
+
 Fri Nov 22 20:49:13 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in (enableval): Disable triple DES and SHA, since
