@@ -1,6 +1,12 @@
+
+Mon Mar 27 09:25:21 1995  Chris Provenzano (proven@mit.edu)
+
+	* sim_client.c: Don't set cksumtype because CKSUMTYPE_RSA_MD4_DES
+		is now the default type.
+
 Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
 
-        * sim_client.c Use new calling convention for krb5_mk_req(),
+        * sim_client.c: Use new calling convention for krb5_mk_req(),
 		krb5_mk_priv(), and krb5_mk_safe().
 
 Thu Mar  2 12:26:47 1995  Theodore Y. Ts'o  <tytso@dcl>

@@ -218,9 +218,6 @@ main(argc, argv)
     /* set auth_context rcache */
     krb5_auth_con_setrcache(context, auth_context, rcache);
 
-    /* set auth_context checksum type */
-     krb5_auth_con_setcksumtype(context, auth_context, CKSUMTYPE_RSA_MD4_DES);
-
     /* Make the safe message */
     inbuf.data = argc == 3 ? argv[2] : MSG;
     inbuf.length = strlen (inbuf.data);
