@@ -1,3 +1,10 @@
+1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* post.in (Makefile): Don't try to run autoconf with $(SHELL),
+		since this doesn't work if $(AUTOCONF) isn't a path to the
+		built-in autoconf, but just an unqualified pathname to the
+		system autoconf.  [krb5-build/707]
+
 1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* windows.in (DLL_FILE_DEF): Add makefile controls to set either

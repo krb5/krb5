@@ -49,7 +49,7 @@ $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 		$(SRCTOP)/aclocal.m4
 	cd $(srcdir)/$(thisconfigdir) && \
-		$(SHELL) $(AUTOCONF) --localdir=$(CONFIG_RELTOPDIR) \
+		$(AUTOCONF) --localdir=$(CONFIG_RELTOPDIR) \
 			--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf
 
 all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefiles-recurse:
