@@ -1,3 +1,8 @@
+Fri Apr 25 19:14:48 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: Check for openpty() in -lutil.  It's there on
+		FreeBSD and BSDI systems.
+
 Fri Feb 21 18:25:47 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* pty-int.h: No longer prototype error table init function.
