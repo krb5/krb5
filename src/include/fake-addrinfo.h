@@ -101,21 +101,7 @@
 #define FAI_DEFINED
 #include "port-sockets.h"
 #include "socket-utils.h"
-
-#if !defined(inline)
-# if __STDC_VERSION__ >= 199901L
-/* C99 supports inline, don't do anything.  */
-# elif defined(__GNUC__)
-#  define inline __inline__ /* this form silences -pedantic warnings */
-# elif defined(__mips) && defined(__sgi)
-#  define inline __inline /* IRIX used at MIT does inline but not c99 yet */
-# elif defined(__sun) && __SUNPRO_C >= 0x540
-/* The Forte Developer 7 C compiler supports "inline".  */
-# else
-#  define inline /* nothing, just static */
-# endif
-# define ADDRINFO_UNDEF_INLINE
-#endif
+#include "k5-platform.h"
 
 #ifdef S_SPLINT_S
 /*@-incondefs@*/

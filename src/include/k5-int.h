@@ -136,6 +136,13 @@ typedef unsigned char	u_char;
 #endif /* HAVE_SYS_TYPES_H */
 #endif /* KRB5_SYSTYPES__ */
 
+
+#include "k5-platform.h"
+/* not used in krb5.h (yet) */
+typedef UINT64_TYPE krb5_ui_8;
+typedef INT64_TYPE krb5_int64;
+
+
 #define DEFAULT_PWD_STRING1 "Enter password"
 #define DEFAULT_PWD_STRING2 "Re-enter password for verification"
 
@@ -1579,6 +1586,11 @@ krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int32
 	(krb5_int32 *,
 		krb5_octet **,
 		size_t *);
+/* [De]serialize 8-byte integer */
+krb5_error_code KRB5_CALLCONV krb5_ser_pack_int64
+	(krb5_int64, krb5_octet **, size_t *);
+krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int64
+	(krb5_int64 *, krb5_octet **, size_t *);
 /* [De]serialize byte string */
 krb5_error_code KRB5_CALLCONV krb5_ser_pack_bytes
 	(krb5_octet *,

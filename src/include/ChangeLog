@@ -1,3 +1,13 @@
+2003-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h: New header file.  Manages inline-function and
+	64-bit support, in platform-specific ways.
+	* fake-addrinfo.h: Include k5-platform.h.
+	(inline): Don't define here.
+	* k5-int.h: Include k5-platform.h.
+	(krb5_ui_8, krb5_int64): New typedefs.
+	(krb5_ser_pack_int64, krb5_ser_unpack_int64): New function decls.
+
 2003-09-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for setsid() and <paths.h>.
