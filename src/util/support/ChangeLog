@@ -5,4 +5,5 @@
 	* threads.c: New file.  Thread-specific data support.
 	* fake-addrinfo.c: New file.  Placeholder.
 	* foreachaddr.c: New file, based on include/foreachaddr.c.
+	* libkrb5support.exports: New file.
 
