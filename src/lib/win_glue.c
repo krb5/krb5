@@ -304,6 +304,9 @@ static krb5_error_code do_timebomb()
  */
 krb5_error_code krb5_vercheck()
 {
+	static int verchecked = 0;
+	if (verchecked)
+		return 0;
 #ifdef TIMEBOMB
 	krb5_error_code retval = do_timebomb();
 	if (retval)
@@ -335,6 +338,7 @@ krb5_error_code krb5_vercheck()
 		
 	}
 #endif
+        verchecked = 1;
 	return 0;
 }
 

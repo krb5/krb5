@@ -1,3 +1,8 @@
+1999-06-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win_glue.c (krb5_vercheck): Only do version checking once per
+		use of the DLL.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.
