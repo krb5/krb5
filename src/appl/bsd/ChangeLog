@@ -1,3 +1,8 @@
+Sat Jun 15 04:03:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Cleanup of tests whose results are not longer used
+		with the pty library in place.
+
 Mon Jun  3 21:26:34 1996  Tom Yu  <tlyu@mit.edu>
 
 	* login.c: Ezra's patches to trim unsed arg from
