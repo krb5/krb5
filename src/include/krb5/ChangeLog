@@ -1,3 +1,9 @@
+
+Thu Jun 8 14:41:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_proto.h - Add prototypes for logging routines.  Also, if
+		kdb.h has not been included, add null structure for entry
+		data structure so that we don't strictly require kdb.h.
+
 Wed Jun  7 16:23:51 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Process osconf.h using PREFIX and EXEC_PREFIX

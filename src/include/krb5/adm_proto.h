@@ -25,6 +25,14 @@
 #define	KRB5_ADM_PROTO_H__
 
 /*
+ * This is ugly, but avoids having to include k5-int or kdb.h for this.
+ */
+#ifndef	KRB5_KDB5__
+struct _krb5_db_entry;
+typedef struct _krb5_db_entry krb5_db_entry;
+#endif	/* KRB5_KDB5__ */
+
+/*
  * Function prototypes.
  */
 
@@ -111,4 +119,13 @@ krb5_error_code INTERFACE krb5_read_adm_reply
 		   krb5_int32 *,
 		   krb5_int32 *,
 		   krb5_data **));
+
+/* logger.c */
+krb5_error_code krb5_klog_init
+	PROTOTYPE((krb5_context,
+		   char *,
+		   char *,
+		   krb5_boolean));
+void krb5_klog_close PROTOTYPE((krb5_context));
+int krb5_klog_syslog PROTOTYPE((int, const char *, ...));
 #endif	/* KRB5_ADM_PROTO_H__ */
