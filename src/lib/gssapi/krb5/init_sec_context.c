@@ -410,7 +410,6 @@ fail:
  *
  * Do the grunt work of setting up a new context.
  */
-#include <stdio.h>
 static OM_uint32
 new_connection(
    OM_uint32 *minor_status,
