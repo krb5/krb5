@@ -1,3 +1,14 @@
+Thu May 25 17:49:06 1995 Keith Vetter (keithv@fusion.com)
+
+	First pass to make the code compile cleanly on the PC.
+	* Makefile.in: made to work on the PC.
+	* adm_conn.c: used atoi instead of sscanf since it can't be
+	   used in a windows DLL. Why not? Ask Microsoft.
+	* adm_kt_e.c, adm_kw_e.c, adm_rw.c: made the explicit the
+	   cast to a char when pulling out bytes from an int.
+	* adm_kw_d.c: size_t != off_t on the PC. Fixed the equation.
+	* adm_rw.c: two parameters were declared as int but prototyped
+	   as krb5_int32.
 
 Tue May 16 13:58:30 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in	- Check for srand48, srand and srandom along with

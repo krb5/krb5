@@ -72,13 +72,13 @@ krb5_adm_ktent_to_proto(kcontext, ktentp, ncompp, complistp)
 	    (char *) malloc(sizeof(krb5_ui_4))) {
 	    clist[KRB5_ADM_KT_TIMESTAMP].length = sizeof(krb5_ui_4);
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[0] =
-		(ktentp->timestamp >> 24) & 0xff;
+		(char) ((ktentp->timestamp >> 24) & 0xff);
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[1] =
-		(ktentp->timestamp >> 16) & 0xff;
+		(char) ((ktentp->timestamp >> 16) & 0xff);
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[2] =
-		(ktentp->timestamp >> 8) & 0xff;
+		(char) ((ktentp->timestamp >> 8) & 0xff);
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[3] =
-		ktentp->timestamp & 0xff;
+		(char) (ktentp->timestamp & 0xff);
 	    nents++;
 	}
 	else {

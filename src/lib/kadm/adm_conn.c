@@ -288,7 +288,9 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	    if (cport) {
 		*cport = '\0';
 		cport++;
-		if (sscanf(cport, "%d", &pport) != 1) {
+
+		pport = atoi (cport);
+		if (pport == 0) {
 		    kret = KRB5_CONFIG_BADFORMAT;
 		    goto cleanup;
 		}

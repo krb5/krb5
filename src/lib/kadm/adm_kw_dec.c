@@ -106,7 +106,7 @@ decode_kw_string(dataentp, keyword, stringp)
     kret = ENOENT;
     if ((valueoff = keyword_value(dataentp, keyword, 1)) >= 0) {
 	kret = ENOMEM;
-	len2copy = dataentp->length - valueoff;
+	len2copy = (size_t) ((off_t) dataentp->length - valueoff);
 	*stringp = (char *) malloc(len2copy+1);
 	if (*stringp) {
 	    strncpy(*stringp, &dataentp->data[valueoff], len2copy);
@@ -134,7 +134,7 @@ decode_kw_integer(dataentp, keyword, uintp)
     kret = ENOENT;
     if ((voff = keyword_value(dataentp, keyword, 1)) >= 0) {
 	kret = EINVAL;
-	len2copy = dataentp->length - voff;
+	len2copy = (size_t) ((off_t) dataentp->length - voff);
 	if (len2copy == sizeof(krb5_ui_4)) {
 	    *uintp = (((krb5_int32) ((unsigned char) dataentp->data[voff])
 		       << 24) +

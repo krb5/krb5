@@ -99,10 +99,10 @@ format_kw_integer(datap, kwordp, val)
     if (datap->data) {
 	datap->length = strlen(fbuffer);
 	strcpy(datap->data, fbuffer);
-	datap->data[datap->length] = (val >> 24) & 0xff;
-	datap->data[datap->length+1] = (val >> 16) & 0xff;
-	datap->data[datap->length+2] = (val >> 8) & 0xff;
-	datap->data[datap->length+3] = val & 0xff;
+	datap->data[datap->length]   = (char) ((val >> 24) & 0xff);
+	datap->data[datap->length+1] = (char) ((val >> 16) & 0xff);
+	datap->data[datap->length+2] = (char) ((val >> 8) & 0xff);
+	datap->data[datap->length+3] = (char) (val & 0xff);
 	datap->length += sizeof(krb5_ui_4);
 	retval = 0;
     }

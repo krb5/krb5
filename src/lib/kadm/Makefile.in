@@ -1,14 +1,16 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=kadm.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
-OBJS=	adm_conn.o	\
-	adm_kw_dec.o	\
-	adm_kw_enc.o	\
-	adm_kt_dec.o	\
-	adm_kt_enc.o	\
-	adm_rw.o
+OBJS=	adm_conn.$(OBJEXT)	\
+	adm_kw_dec.$(OBJEXT)	\
+	adm_kw_enc.$(OBJEXT)	\
+	adm_kt_dec.$(OBJEXT)	\
+	adm_kt_enc.$(OBJEXT)	\
+	adm_rw.$(OBJEXT)
 
 SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kw_dec.c	\
@@ -17,7 +19,9 @@ SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kt_enc.c	\
 	$(srcdir)/adm_rw.c
 
-libkadm.a: ${OBJS}
+all:: $(OBJS)
+
+libkadm.a: $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
@@ -30,7 +34,7 @@ install:: libkadm.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
 
 clean::
-	$(RM) libkadm.a
+	$(RM) libkadm.$(LIBEXT)
 
 #
 # t_dbentry

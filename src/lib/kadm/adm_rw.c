@@ -53,10 +53,10 @@ kadm_copyout_int32(outint, cp)
     krb5_int32	outint;
     char	*cp;
 {
-    cp[0] = (outint >> 24) & 0xff;
-    cp[1] = (outint >> 16) & 0xff;
-    cp[2] = (outint >> 8) & 0xff;
-    cp[3] = outint & 0xff;
+    cp[0] = (char) ((outint >> 24) & 0xff);
+    cp[1] = (char) ((outint >> 16) & 0xff);
+    cp[2] = (char) ((outint >> 8) & 0xff);
+    cp[3] = (char) (outint & 0xff);
 }
 
 /*
@@ -95,7 +95,7 @@ krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to write to	(In ) */
     krb5_auth_context	*ctx;		/* Auth context		(In ) */
-    int			nargs;		/* Number of arguments	(In ) */
+    krb5_int32			nargs;		/* Number of arguments	(In ) */
     krb5_data		*arglist;	/* Components to write	(In ) */
 {
     int	writebufsize;
@@ -189,7 +189,7 @@ krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_pointer	sock;		/* Socket to write to	(In ) */
     krb5_auth_context	*ctx;		/* Auth context		(In ) */
     krb5_int32		cmd_stat;	/* Command status	(In ) */
-    int			ncomps;		/* Number of arguments	(In ) */
+    krb5_int32			ncomps;		/* Number of arguments	(In ) */
     krb5_data		*complist;	/* Components to write	(In ) */
 {
     int	writebufsize;
