@@ -15,18 +15,21 @@ STLIBOBJS = \
 	prof_tree.o \
 	prof_file.o \
 	prof_parse.o \
+	prof_get.o \
 	prof_err.o \
 	prof_init.o
 
 OBJS = prof_tree.$(OBJEXT) \
 	prof_file.$(OBJEXT) \
 	prof_parse.$(OBJEXT) \
+	prof_get.$(OBJEXT) \
 	prof_err.$(OBJEXT) \
 	prof_init.$(OBJEXT)
 
 SRCS = $(srcdir)/prof_tree.c \
 	$(srcdir)/prof_file.c \
 	$(srcdir)/prof_parse.c \
+	$(srcdir)/prof_get.c \
 	prof_err.c \
 	$(srcdir)/prof_init.c
 

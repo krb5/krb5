@@ -267,7 +267,7 @@ static void output_quoted_string(str, f)
 		fputc('"', f);
 		return;
 	}
-	while (ch = *str++) {
+	while ((ch = *str++)) {
 		switch (ch) {
 		case '\\':
 			fputs("\\\\", f);

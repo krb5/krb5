@@ -20,36 +20,45 @@ void com_err (char *fmt, long err, char *msg) {
 }
 #endif
 
+const char *program_name = "test_profile";
+
 int main(argc, argv)
     int		argc;
     char	**argv;
 {
     profile_t	profile;
     long	retval;
-    const char	*filenames[2];
     char	**values, **cpp;
     const char	**names;
+    char	*cmd;
     
-    filenames[0] = argv[1];
-    filenames[1] = 0;
-
-    if (argc < 2) {
-	    fprintf(stderr, "Usage: %s filename argset\n", argv[0]);
+    if (argc < 3) {
+	    fprintf(stderr, "Usage: %s filename cmd argset\n", program_name);
 	    exit(1);
     }
 
     initialize_prof_error_table();
     
-    retval = profile_init(filenames, &profile);
+    retval = profile_init_path(argv[1], &profile);
     if (retval) {
-	com_err(argv[0], retval, "while initializing profile");
+	com_err(program_name, retval, "while initializing profile");
 	exit(1);
     }
-    names = (const char **) argv+2;
-    retval = profile_get_values(profile, names, &values);
+    cmd = *(argv+2);
+    names = (const char **) argv+3;
+    if (!strcmp(cmd, "query")) {
+	    retval = profile_get_values(profile, names, &values);
+    } else if (!strcmp(cmd, "list_sections")) {
+	    retval = profile_get_subsection_names(profile, names, &values);
+    } else if (!strcmp(cmd, "list_relations")) {
+	    retval = profile_get_relation_names(profile, names, &values);
+    } else {
+	    fprintf(stderr, "Invalid command.\n");
+	    exit(1);
+    }
     if (retval) {
-	com_err(argv[0], retval, "while getting values");
-	exit(1);
+	    com_err(argv[0], retval, "while getting values");
+	    exit(1);
     }
     for (cpp = values; *cpp; cpp++) {
 	printf("%s\n", *cpp);
@@ -58,8 +67,7 @@ int main(argc, argv)
     free(values);
     profile_release(profile);
 
-	return 0;
-
+    return 0;
 }
     
     

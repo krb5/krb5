@@ -60,27 +60,7 @@ struct _profile_t {
 
 typedef struct _profile_t *profile_t;
 
-/*
- * This structure defines the profile_section_t object, which is
- * returned to the user when a section is searched.
- */
-struct _profile_section_t {
-	prf_magic_t	magic;
-	int		top_lvl:1, top_lvl_search:1;
-	char		*name;
-	void		*state;
-	struct profile_node	*parent, *sect;
-	profile_t	profile;
-	prf_file_t	file_ptr;
-};
-
-typedef struct _profile_section_t *profile_section_t;
-
-errcode_t profile_get
-	PROTOTYPE((const char *filename, prf_file_t *ret_prof));
-
-errcode_t profile_update
-	PROTOTYPE((prf_file_t profile));
+/* profile_parse.c */
 
 errcode_t profile_parse_file
 	PROTOTYPE((FILE *f, struct profile_node **root));
@@ -145,9 +125,15 @@ errcode_t profile_init_path
 void profile_release
 	PROTOTYPE ((profile_t profile));
 
+/* prof_get.c */
+
+KRB5_DLLIMP void KRB5_CALLCONV profile_free_list
+	PROTOTYPE ((char **list));
 
 KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_values
-	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
+	PROTOTYPE ((profile_t profile, const char **names,
+		    char ***ret_values));
+
 errcode_t profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
@@ -156,3 +142,10 @@ errcode_t profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));
+
+errcode_t profile_get_relation_names
+	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
+
+errcode_t profile_get_subsection_names
+	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
+

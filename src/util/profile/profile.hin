@@ -40,6 +40,10 @@ void profile_release
 
 KRB5_DLLIMP long KRB5_CALLCONV profile_get_values
 	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
+
+KRB5_DLLIMP void KRB5_CALLCONV profile_free_list
+	PROTOTYPE ((char **list));
+
 long profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
@@ -48,5 +52,11 @@ long profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));
+
+long profile_get_relation_names
+	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
+
+long profile_get_subsection_names
+	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 
 #endif /* _KRB5_PROFILE_H */

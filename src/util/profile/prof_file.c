@@ -40,6 +40,7 @@ errcode_t profile_open_file(filename, ret_prof)
 		return ENOMEM;
 	}
 	strcpy(prf->filename, filename);
+	prf->magic = PROF_MAGIC_FILE;
 
 	retval = profile_update_file(prf);
 	if (retval) {
@@ -65,8 +66,14 @@ errcode_t profile_update_file(prf)
 		return errno;
 	if (st.st_mtime == prf->timestamp)
 		return 0;
-	if (prf->root)
+	if (prf->root) {
 		profile_free_node(prf->root);
+		prf->root = 0;
+	}
+	if (prf->comment) {
+		free(prf->comment);
+		prf->comment = 0;
+	}
 #else
 	/*
 	 * If we don't have the stat() call, assume that our in-core
@@ -96,6 +103,9 @@ errcode_t profile_close_file(prf)
 		free(prf->filename);
 	if (prf->root)
 		profile_free_node(prf->root);
+	if (prf->comment)
+		free(prf->comment);
+	prf->magic = 0;
 	free(prf);
 
 	return 0;

@@ -1,3 +1,52 @@
+1998-11-03  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Added prof_get.c to the list of files to be compiled.
+	
+	* profile.hin: Added declarations for profile_free_list(),
+		profile_get_relation_names(), and
+		profile_get_subsection_names().  (These are new public
+		interfaces to the profile library.)
+
+	* prof_int.h: Removed the profile_section_t structure, which was
+		used only by the now-defunct prof_section.c file.  Added
+		the internal interfaces for the new public interfaces.
+		Removed unused declarations which were never
+		implemented(profile_get, profile_update).
+
+	* prof_init.c: Moved all of the profile querying functions
+		(profile_get_values(), profile_get_value(), etc.) to
+		prof_get.c.  In the process, removed the really
+		bletcherous (and badly implemented)
+		profile_get_first_values(), which did nothing like what
+		the named implied.  Also added to prof_get.c new functions
+		profile_get_subsection_names() and
+		profile_get_relation_names(). 
+	  	(profile_ser_internalize): Rewrote error handling to be
+		clearer, and removed a bug where memory was not freed
+		correctly in an error case.  
+		(profile_init): If a list of pathnames is passed in,
+		profile_init will now try to open all of them, now that
+		we've defined query fallback semantics in prof_get.c
+
+	* prof_parse.c: Fix lint warning.
+
+	* prof_tree.c (profile_find_node_relation,
+		profile_find_node_subsection): Allow the returned value or
+		subsection field to be NULL (in case the caller isn't
+		interested in getting the returned value or subsection,
+		and only cares about getting the name).
+		(profile_delete_node_relation,
+		profile_delete_interior_node_relation): Removed these
+		functions and replaced it with profile_remove_node(),
+		which takes a boolean argument section_flag. 
+		(profile_find_node_name): Removed this function.  (This
+		was a Cygnus/Fusion special used by the now removed
+		profile_find_first_values() function.)
+
+	* test_profile.c: Added commands to test the new
+		profile_get_subsection_names() and
+		profile_get_relation_names() interfaces.
+
 1998-08-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* prof_tree.c (profile_delete_node_relation): Fix bug where
