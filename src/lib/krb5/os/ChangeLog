@@ -10,6 +10,14 @@ Wed Jul  1 17:54:56 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 	* t_std_conf.c (main): POSIX states that getopt returns -1
 		when it is done parsing options, not EOF.
 
+Wed Sep 24 12:10:29 1997 Marshall Vale <mjv@mit.edu> (Checked in 1/13/98)
+
+	* init_os_ctx.c: Changed all PBGetCatInfo to PBGetCatInfoSync for new
+		Universal Headers.
+		
+	* ccdefname.c: Changed all PBGetCatInfo to PBGetCatInfoSync for new
+		Universal Headers.
+
 Fri Feb 27 18:03:33 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Changed thisconfigdir to point at the lib/krb5
