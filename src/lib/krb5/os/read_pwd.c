@@ -53,7 +53,7 @@ krb5_read_password(prompt, prompt2, return_pwd, size_return)
 char *prompt;
 char *prompt2;
 char *return_pwd;
-int size_return;
+int *size_return;
 {
     /* adapted from Kerberos v4 des/read_password.c */
 
@@ -76,10 +76,10 @@ int size_return;
     if (setjmp(pwd_jump)) {
 	/* interrupted */
 	if (readin_string) {
-	    (void) bzero(readin_string, size_return);
+	    (void) bzero(readin_string, *size_return);
 	    free(readin_string);
 	}
-	(void) bzero(return_pwd, size_return);
+	(void) bzero(return_pwd, *size_return);
 	cleanup(KRB5_LIBOS_PWDINTR);
     }
     /* save intrfunc */
@@ -88,11 +88,11 @@ int size_return;
     /* put out the prompt */
     (void) fputs(prompt,stdout);
     (void) fflush(stdout);
-    (void) bzero(return_pwd, size_return);
+    (void) bzero(return_pwd, *size_return);
 
-    if (fgets(return_pwd, size_return, stdin) == NULL) {
+    if (fgets(return_pwd, *size_return, stdin) == NULL) {
 	/* error */
-	(void) bzero(return_pwd, size_return);
+	(void) bzero(return_pwd, *size_return);
 	cleanup(KRB5_LIBOS_CANTREADPWD);
     }
     /* fgets always null-terminates the returned string */
@@ -110,33 +110,34 @@ int size_return;
 	(void) putchar('\n');
 	(void) fputs(prompt2,stdout);
 	(void) fflush(stdout);
-	readin_string = malloc(size_return);
+	readin_string = malloc(*size_return);
 	if (!readin_string) {
-	    (void) bzero(return_pwd, size_return);
+	    (void) bzero(return_pwd, *size_return);
 	    cleanup(ENOMEM);
 	}
-	(void) bzero(readin_string, size_return);
-	if (fgets(readin_string, size_return, stdin) == NULL) {
+	(void) bzero(readin_string, *size_return);
+	if (fgets(readin_string, *size_return, stdin) == NULL) {
 	    /* error */
-	    (void) bzero(readin_string, size_return);
-	    (void) bzero(return_pwd, size_return);
+	    (void) bzero(readin_string, *size_return);
+	    (void) bzero(return_pwd, *size_return);
 	    free(readin_string);
 	    cleanup(KRB5_LIBOS_CANTREADPWD);
 	}
 	if (ptr = index(readin_string, '\n'))
 	    *ptr = '\0';
-	else /* need to flush */
+        else /* need to flush */
 	    do {
 		scratchchar = getchar();
 	    } while (scratchchar != EOF && scratchchar != '\n');
+	    
 	/* compare */
-	if (strncmp(return_pwd, readin_string, size_return)) {
-	    (void) bzero(readin_string, size_return);
-	    (void) bzero(return_pwd, size_return);
+	if (strncmp(return_pwd, readin_string, *size_return)) {
+	    (void) bzero(readin_string, *size_return);
+	    (void) bzero(return_pwd, *size_return);
 	    free(readin_string);
 	    cleanup(KRB5_LIBOS_BADPWDMATCH);
 	}
-	(void) bzero(readin_string, size_return);
+	(void) bzero(readin_string, *size_return);
 	free(readin_string);
     }
     
@@ -146,6 +147,7 @@ int size_return;
     if (ioctl(0, TIOCSETP, (char *)&tty_savestate) == -1)
 	return errno;
 
+    *size_return = strlen(return_pwd);
 
     return 0;
 }
