@@ -15,6 +15,8 @@
  * Make sure you check the following parameters:                             *
  *                                                                           *
  *     1.  HasLargeTmp                                                       *
+ *     2.  All the manpage locations & suffixes                              *
+ *     3.  All the binary install locations                                  *
  *                                                                           *
  * Note on using DESTDIR:  If you want to install into a scratch directory   *
  * but will eventually move the tree back to the root, compile with DESTDIR  *
@@ -40,6 +42,53 @@
 #define HasLargeTmp YES
 #endif
 
+/*
+ * 2. Man page locations & suffixes.
+ */
+/* AdminManSuffix: man page suffix for administrative programs */
+#ifndef AdminManSuffix
+#define AdminManSuffix 8
+#endif
+/* AdminMandir: manual page directory for administrative man pages */
+#ifndef AdminMandir
+#define AdminMandir /krb5/man/man8
+#endif
+
+/* ServerManSuffix: man page suffix for server programs */
+#ifndef ServerManSuffix
+#define ServerManSuffix 8
+#endif
+/* ServerMandir: manual page directory for server man pages */
+#ifndef ServerMandir
+#define ServerMandir /krb5/man/man8
+#endif
+
+/* ClientManSuffix: man page suffix for client programs */
+#ifndef ClientManSuffix
+#define ClientManSuffix 1
+#endif
+/* ClientMandir: manual page directory for client man pages */
+#ifndef ClientMandir
+#define ClientMandir /krb5/man/man1
+#endif
+
+/*
+ * 3. Binary program install areas.
+ */
+/* AdminBindir: binary install directory for administrative programs */
+#ifndef AdminBindir
+#define AdminBindir /krb5/admin
+#endif
+
+/* ServerBindir: binary install directory for server programs */
+#ifndef ServerBindir
+#define ServerBindir /krb5/sbin
+#endif
+
+/* ClientBindir: binary install directory for client programs */
+#ifndef ClientBindir
+#define ClientBindir /krb5/bin
+#endif
 
 /*****************************************************************************
  *                                                                           *

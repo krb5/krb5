@@ -420,7 +420,7 @@ install:: program							@@\
  */
 #ifndef InstallProgram
 #define	InstallProgram(program,dest)					@@\
-InstallProgramWithFlags(program,dest, /**/)
+InstallProgramWithFlags(program,dest/program, /**/)
 #endif /* InstallProgram */
 
 

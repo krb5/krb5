@@ -190,6 +190,116 @@ lib/**/libname.a: objlist						@@\
 	$(LN) ../$(CURRENT_DIR)/lib/**/libname.a $(TOP)/lib/lib/**/libname.a
 #endif /* Krb5LibraryTarget */
 
+
+/*
+ * Krb5InstallManPage - generate rules to install the indicated manual page,
+ * giving it an alternate suffix.
+ */
+#ifndef Krb5InstallManPage
+#define	Krb5InstallManPage(file,destdir,suffix)				@@\
+install.man:: file.M							@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.M destdir/file.suffix
+#endif /* Krb5InstallManPage */
+
+/*
+ * Krb5SimpleProgramTarget - generate rules for compiling and linking programs
+ * that only have one C source file.  It should only be used in Imakefiles 
+ * that describe a single program.
+ * takes extra arguments beyond SimpleProgramTarget which specify where
+ * to put manpages & binaries
+ */
+#ifndef Krb5SimpleProgramTarget
+#define	Krb5SimpleProgramTarget(program,bindir,mandir,mansuffix)	@@\
+           OBJS = program.o						@@\
+           SRCS = program.c						@@\
+									@@\
+Krb5ComplexProgramTarget(program,bindir,mandir,mansuffix)
+#endif /* Krb5SimpleProgramTarget */
+
+#ifndef Krb5AdminProgramTarget
+#define Krb5AdminProgramTarget(program)					@@\
+Krb5SimpleProgramTarget(program,$(ADMIN_BINDIR),$(ADMIN_MANDIR),$(ADMIN_MANSUFFIX))
+#endif /* Krb5AdminProgramTarget */
+
+#ifndef Krb5ClientProgramTarget
+#define Krb5ClientProgramTarget(program)				@@\
+Krb5SimpleProgramTarget(program,$(CLIENT_BINDIR),$(CLIENT_MANDIR),$(CLIENT_MANSUFFIX))
+#endif /* Krb5ClientProgramTarget */
+
+#ifndef Krb5InstallAdminProgram
+#define Krb5InstallAdminProgram(program)				@@\
+InstallProgram(program,$(ADMIN_BINDIR))					@@\
+Krb5InstallManPage(program,$(ADMIN_MANDIR),$(ADMIN_MANSUFFIX))
+#endif /* Krb5InstallAdminProgram */
+
+#ifndef Krb5InstallServerProgram
+#define Krb5InstallServerProgram(program)				@@\
+InstallProgram(program,$(SERVER_BINDIR))				@@\
+Krb5InstallManPage(program,$(SERVER_MANDIR),$(SERVER_MANSUFFIX))
+#endif /* Krb5InstallAdminProgram */
+
+#ifndef Krb5InstallClientProgram
+#define Krb5InstallClientProgram(program)				@@\
+InstallProgram(program,$(CLIENT_BINDIR))				@@\
+Krb5InstallManPage(program,$(CLIENT_MANDIR),$(CLIENT_MANSUFFIX))
+#endif /* Krb5InstallAdminProgram */
+
+/*
+ * Krb5ComplexProgramTarget - generate rules for compiling and linking the 
+ * program specified by $(OBJS) and $(SRCS), installing the program and its
+ * man page, and generating dependencies.  It should only be used in 
+ * Imakefiles that describe a single program.
+ * Provides extra arguments to set manpage & binary locations
+ */
+
+#ifndef Krb5ComplexProgramTarget
+#define	Krb5ComplexProgramTarget(program,bindir,mandir,mansuffix)	@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(program)							@@\
+									@@\
+program: $(OBJS) $(DEPLIBS)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(OBJS) $(LDOPTIONS) $(LOCAL_LIBRARIES) $(LDLIBS) $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+SaberProgramTarget(program,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES), /**/)	@@\
+									@@\
+InstallProgram(program,bindir)						@@\
+Krb5InstallManPage(program,mandir,mansuffix)				@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAM)
+#endif /* Krb5ComplexProgramTarget */
+
+
+/*
+ * SimpleTestProgramTarget - generate rules for compiling and linking 
+ * a test program, but don't include any install rules.
+ * cf. SimpleProgramTarget, ComplexProgramTarget
+ */
+#ifndef SimpleTestProgramTarget
+#define	SimpleTestProgramTarget(program)				@@\
+           OBJS = program.o						@@\
+           SRCS = program.c						@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(program)							@@\
+									@@\
+program: $(OBJS) $(DEPLIBS)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(OBJS) $(LDOPTIONS) $(LOCAL_LIBRARIES) $(LDLIBS) $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+SaberProgramTarget(program,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES), /**/)	@@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAM)
+#endif /* ComplexProgramTarget */
+
 #if HasPosixTermios
 P_TERMIOS=-DHasPosixTermiosTrue
 #else
@@ -321,3 +431,13 @@ P_NPROTO=-UUseNarrowPrototypes
           MK_CMDS = MkCmdsCmd
         COMERRLIB = ComErrLib
        COMPILE_ET = CompileEtCmd
+
+     ADMIN_BINDIR = AdminBindir
+  ADMIN_MANSUFFIX = AdminManSuffix
+     ADMIN_MANDIR = AdminMandir
+    SERVER_BINDIR = ServerBindir
+ SERVER_MANSUFFIX = ServerManSuffix
+    SERVER_MANDIR = ServerMandir
+    CLIENT_BINDIR = ClientBindir
+ CLIENT_MANSUFFIX = ClientManSuffix
+    CLIENT_MANDIR = ClientMandir
