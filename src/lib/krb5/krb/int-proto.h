@@ -16,8 +16,8 @@
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__
 krb5_error_code krb5_tgtname
-    PROTOTYPE((krb5_principal,
-	       krb5_principal,
+    PROTOTYPE((const krb5_data *,
+	       const krb5_data *,
 	       krb5_principal *));
 krb5_error_code krb5_get_cred_via_tgt
     PROTOTYPE((krb5_creds *,
@@ -27,11 +27,11 @@ krb5_error_code krb5_get_cred_via_tgt
 	       krb5_address * const *,
 	       krb5_creds * ));
 krb5_error_code krb5_walk_realm_tree
-    PROTOTYPE((krb5_principal,
-	       krb5_principal,
+    PROTOTYPE((const krb5_principal,
+	       const krb5_principal,
 	       krb5_principal **));
-krb5_error_code krb5_free_realm_tree
-    PROTOTYPE((krb5_principal *));
+void krb5_free_realm_tree
+    PROTOTYPE((const krb5_principal *));
 
 #endif /* KRB5_INT_FUNC_PROTO__ */
 
