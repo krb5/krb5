@@ -1,7 +1,7 @@
 /*
  * src/lib/krb5/asn.1/asn1_decode.c
  * 
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -101,6 +101,50 @@ asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *va
 	return ASN1_OVERFLOW;
     }
     n = (n << 8) | o;
+  }
+  *val = n;
+  cleanup();
+}
+
+/*
+ * asn1_decode_maybe_unsigned
+ *
+ * This is needed because older releases of MIT krb5 have signed
+ * sequence numbers.  We want to accept both signed and unsigned
+ * sequence numbers, in the range -2^31..2^32-1, mapping negative
+ * numbers into their positive equivalents in the same way that C's
+ * normal integer conversions do, i.e., would preserve bits on a
+ * two's-complement architecture.
+ */
+asn1_error_code asn1_decode_maybe_unsigned(asn1buf *buf, unsigned long *val)
+{
+  setup();
+  asn1_octet o;
+  unsigned long n, bitsremain;
+  unsigned int i;
+
+  tag(ASN1_INTEGER);
+  o = 0;
+  n = 0;
+  bitsremain = ~0UL;
+  for (i = 0; i < length; i++) {
+    /* Accounts for u_long width not being a multiple of 8. */
+    if (bitsremain < 0xff) return ASN1_OVERFLOW;
+    retval = asn1buf_remove_octet(buf, &o);
+    if (retval) return retval;
+    if (bitsremain == ~0UL) {
+      if (i == 0)
+	n = (o & 0x80) ? ~0UL : 0UL; /* grab sign bit */
+      /*
+       * Skip leading zero or 0xFF octets to humor non-compliant encoders.
+       */
+      if (n == 0 && o == 0)
+	continue;
+      if (n == ~0UL && o == 0xff)
+	continue;
+    }
+    n = (n << 8) | o;
+    bitsremain >>= 8;
   }
   *val = n;
   cleanup();

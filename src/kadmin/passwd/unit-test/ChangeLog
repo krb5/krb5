@@ -1,3 +1,9 @@
+2004-02-16  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (unit-test-body): Add PRIOCNTL_HACK.
+
+	* config/unix.exp: Add PRIOCNTL_HACK.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.ov: Deleted.

@@ -1,3 +1,8 @@
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* ktutil.c (main): Don't register writable keytab ops as they are
+	registered by the library now  
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* ktutil_funcs.c (ktutil_add): Remove trailing colon, as new

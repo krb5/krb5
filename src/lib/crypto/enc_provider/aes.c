@@ -52,23 +52,8 @@ static void printd (const char *descr, krb5_data *d) {
     }
     printf("\n");
 }
-static void enc(char *out, const char *in, aes_ctx *ctx)
-{
-    if (aes_enc_blk(in, out, ctx) != aes_good)
-	abort();
-#if 0
-    {
-	krb5_data e_in, e_out;
-	e_in.data = in;
-	e_out.data = out;
-	e_in.length = e_out.length = BLOCK_SIZE;
-	printf("encrypting [[\n");
-	printd("input block", &e_in);
-	printd("output block", &e_out);
-	printf("]]\n");
-    }
-#endif
-}
+#define enc(OUT, IN, CTX) (aes_enc_blk((IN),(OUT),(CTX)) == aes_good ? (void) 0 : abort())
+#define dec(OUT, IN, CTX) (aes_dec_blk((IN),(OUT),(CTX)) == aes_good ? (void) 0 : abort())
 
 static void xorblock(char *out, const char *in)
 {
@@ -83,7 +68,6 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 {
     aes_ctx ctx;
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
-    int offset;
     int nblocks = 0, blockno;
 
 /*    CHECK_SIZES; */
@@ -100,8 +84,7 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
     if (nblocks == 1) {
 	/* XXX Used for DK function.  */
-	if (aes_enc_blk(input->data, output->data, &ctx) != aes_good)
-	    abort();
+	enc(output->data, input->data, &ctx);
     } else {
 	int nleft;
 
@@ -112,7 +95,6 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
 	    /* Set up for next block.  */
 	    memcpy(tmp, tmp2, BLOCK_SIZE);
-	    offset += BLOCK_SIZE;
 	}
 	/* Do final CTS step for last two blocks (the second of which
 	   may or may not be incomplete).  */
@@ -127,23 +109,70 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	xorblock(tmp, tmp3);
 	enc(tmp2, tmp, &ctx);
 	memcpy(output->data + (nblocks - 2) * BLOCK_SIZE, tmp2, BLOCK_SIZE);
+	if (ivec)
+	    memcpy(ivec->data, tmp2, BLOCK_SIZE);
     }
 
     return 0;
 }
 
-static krb5_error_code
-k5_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
-	       const krb5_data *input, krb5_data *output)
+krb5_error_code
+krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+		    const krb5_data *input, krb5_data *output)
 {
     aes_ctx ctx;
+    unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
+    int nblocks = 0, blockno;
 
     CHECK_SIZES;
 
     if (aes_dec_key(key->contents, key->length, &ctx) != aes_good)
 	abort();
 
-    abort();
+    if (ivec)
+	memcpy(tmp, ivec->data, BLOCK_SIZE);
+    else
+	memset(tmp, 0, BLOCK_SIZE);
+
+    nblocks = (input->length + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    if (nblocks == 1) {
+	if (input->length < BLOCK_SIZE)
+	    abort();
+	dec(output->data, input->data, &ctx);
+    } else {
+	int nleft;
+
+	for (blockno = 0; blockno < nblocks - 2; blockno++) {
+	    dec(tmp2, input->data + blockno * BLOCK_SIZE, &ctx);
+	    xorblock(tmp2, tmp);
+	    memcpy(output->data + blockno * BLOCK_SIZE, tmp2, BLOCK_SIZE);
+	    memcpy(tmp, input->data + blockno * BLOCK_SIZE, BLOCK_SIZE);
+	}
+	/* Do last two blocks, the second of which (next-to-last block
+	   of plaintext) may be incomplete.  */
+	dec(tmp2, input->data + (nblocks - 2) * BLOCK_SIZE, &ctx);
+	/* Set tmp3 to last ciphertext block, padded.  */
+	memset(tmp3, 0, sizeof(tmp3));
+	memcpy(tmp3, input->data + (nblocks - 1) * BLOCK_SIZE,
+	       input->length - (nblocks - 1) * BLOCK_SIZE);
+	/* Set tmp2 to last (possibly partial) plaintext block, and
+	   save it.  */
+	xorblock(tmp2, tmp3);
+	memcpy(output->data + (nblocks - 1) * BLOCK_SIZE, tmp2,
+	       input->length - (nblocks - 1) * BLOCK_SIZE);
+	/* Maybe keep the trailing part, and copy in the last
+	   ciphertext block.  */
+	memcpy(tmp2, tmp3, input->length - (nblocks - 1) * BLOCK_SIZE);
+	/* Decrypt, to get next to last plaintext block xor previous
+	   ciphertext.  */
+	dec(tmp3, tmp2, &ctx);
+	xorblock(tmp3, tmp);
+	memcpy(output->data + (nblocks - 2) * BLOCK_SIZE, tmp3, BLOCK_SIZE);
+	if (ivec)
+	    memcpy(ivec->data, input->data + (nblocks - 2) * BLOCK_SIZE,
+		   BLOCK_SIZE);
+    }
 
     return 0;
 }
@@ -178,7 +207,7 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     aes_block_size,
     aes128_keysize,
     krb5int_aes_encrypt,
-    k5_aes_decrypt,
+    krb5int_aes_decrypt,
     k5_aes_make_key,
     krb5int_aes_init_state,
     krb5int_default_free_state
@@ -188,7 +217,7 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     aes_block_size,
     aes256_keysize,
     krb5int_aes_encrypt,
-    k5_aes_decrypt,
+    krb5int_aes_decrypt,
     k5_aes_make_key,
     krb5int_aes_init_state,
     krb5int_default_free_state

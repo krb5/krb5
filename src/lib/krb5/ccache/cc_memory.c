@@ -519,6 +519,20 @@ krb5_mcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
      return ret;
 }
 
+/* 
+ * Non-functional stub implementation for krb5_mcc_remove
+ * 
+ * Errors:
+ *    KRB5_CC_NOSUPP - not implemented
+ */
+static krb5_error_code KRB5_CALLCONV
+krb5_mcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
+                     krb5_creds *creds)
+{
+    return KRB5_CC_NOSUPP;
+}
+
+
 /*
  * Requires:
  * id is a cred cache returned by krb5_mcc_resolve or
@@ -553,6 +567,6 @@ const krb5_cc_ops krb5_mcc_ops = {
      krb5_mcc_start_seq_get,
      krb5_mcc_next_cred,
      krb5_mcc_end_seq_get,
-     NULL, /* XXX krb5_mcc_remove, */
+     krb5_mcc_remove_cred,
      krb5_mcc_set_flags,
 };

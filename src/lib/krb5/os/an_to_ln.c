@@ -643,7 +643,7 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, const 
     const char		*hierarchy[5];
     char		**mapping_values;
     int			i, nvalid;
-    char		*cp;
+    char		*cp, *s;
     char		*typep, *argp;
     unsigned int        lnsize;
 
@@ -677,11 +677,14 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, const 
 
 		    /* Just use the last one. */
 		    /* Trim the value. */
-		    cp = &mapping_values[nvalid-1]
-			[strlen(mapping_values[nvalid-1])];
-		    while (isspace((int) (*cp))) cp--;
-		    cp++;
-		    *cp = '\0';
+		    s = mapping_values[nvalid-1];
+		    cp = s + strlen(s);
+		    while (cp > s) {
+			cp--;
+			if (!isspace((int)(*cp)))
+			    break;
+			*cp = '\0';
+		    }
 
 		    /* Copy out the value if there's enough room */
 		    if (strlen(mapping_values[nvalid-1])+1 <= (size_t) lnsize)
