@@ -1,3 +1,8 @@
+Wed Mar 10 19:41:31 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_LIBS): Remove -ldb to avoid HP/UX build
+	problems.
+
 Sun Mar  9 13:40:33 1997  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (add_to_history): Don't call realloc() on a NULL
