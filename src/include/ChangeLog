@@ -1,3 +1,41 @@
+2003-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	First cut at adding local caching to the getaddrinfo support.
+	Still needs work.
+	* fake-addrinfo.h: Delete the unused WRAP_GETNAMEINFO support.
+	(HAVE_GETADDRINFO) [__APPLE__ && __MACH__]: Don't undefine.
+	(FAI_CACHE) [__APPLE__ && __MACH__]: Define.
+	(system_getaddrinfo, system_freeaddrinfo, system_getnameinfo):
+	New functions.
+	(gaiptr, faiptr, gniptr): Variables deleted.  Change references
+	to use the system_* functions above.
+	(getaddrinfo, freeaddrinfo) [FAI_CACHE]: Define as macros to the
+	my_fake_* versions.
+	(protoname, socktypename, familyname): Use caller-supplied
+	buffers instead of local static buffers.
+	(debug_dump_getaddrinfo_args): Provide a buffer.
+	(NEED_FAKE_GETNAMEINFO): Define if HAVE_GETADDRINFO is not
+	defined.
+	(inline): Rework macros to test for C99 and IRIX.
+	(NEED_FAKE_GETADDRINFO): Define if FAI_CACHE is defined.
+	(fai_add_entry) [KRB5_USE_INET6]: Support IPv6.
+	(CACHE_ENTRY_LIFETIME): New macro.
+	(struct face, struct fac): New types.
+	(fac): New static variable.
+	(plant_face, find_face): New functions.
+	(fai_add_hosts_by_name) [FAI_CACHE]: Check the cache before
+	looking up the hostname.  Add the looked-up host info to the
+	cache.
+	(fake_getaddrinfo): Call GET_SERV_BY_NAME instead of
+	conditionally calling getservbyname or getservbyname_r.  Don't
+	pass AF_INET to fai_add_hosts_by_name.
+	(fake_getnameinfo): Define only if NEED_FAKE_GETNAMEINFO is
+	defined.
+	(gai_strerror): Define if either HAVE_FAKE_GETADDRINFO or
+	NEED_FAKE_GETNAMEINFO is defined.
+	(getaddrinfo): Do define function if FAI_CACHE is defined.
+	(getnameinfo): Define only if NEED_FAKE_GETNAMEINFO is defined.
+
 2003-08-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for mode_t.

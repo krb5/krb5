@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001,2002 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2002,2003 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -41,13 +41,22 @@
 
 /* Approach overview:
 
-   If a system version is available but buggy, save pointers to it,
-   redefine the names to refer to static functions defined here, and
-   in those functions, call the system versions and fix up the
-   returned data.  Use the native data structures and flag values.
+   If a system version is available but buggy, save handles to it (via
+   inline functions), redefine the names to refer to static functions
+   defined here, and in those functions, call the system versions and
+   fix up the returned data.  Use the native data structures and flag
+   values.
 
    If no system version exists, use gethostby* and fake it.  Define
    the data structures and flag values locally.
+
+
+   On Mac OS X, getaddrinfo results aren't cached (though
+   gethostbyname results are), so we need to build a cache here.  Now
+   things are getting really messy.  Because the cache is in use, we
+   use getservbyname, and throw away thread safety.  (Not that the
+   cache is thread safe, but when we get locking support, that'll be
+   dealt with.)  This code needs tearing down and rebuilding, soon.
 
 
    Note that recent Windows developers' code has an interesting hack:
@@ -82,6 +91,9 @@
 
    + inet_ntop, inet_pton
 
+   + Conditionally export/import the function definitions, so a
+     library can have a single copy instead of multiple.
+
    + Upgrade host requirements to include working implementations of
      these functions, and throw all this away.  Pleeease?  :-)  */
 
@@ -115,13 +127,12 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 
 
 #if defined (__APPLE__) && defined (__MACH__)
-#undef HAVE_GETADDRINFO
+#define FAI_CACHE
 #endif
 
 #if defined (__linux__) || defined (_AIX)
 /* See comments below.  */
 #  define WRAP_GETADDRINFO
-/* #  define WRAP_GETNAMEINFO */
 #endif
 
 #ifdef __linux__
@@ -286,30 +297,36 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 #endif
 #endif
 
-#ifdef WRAP_GETADDRINFO
-static int (*const gaiptr) (const char *, const char *,
-			    const struct addrinfo *,
-			    struct addrinfo **) = &getaddrinfo;
-static void (*const faiptr) (struct addrinfo *) = &freeaddrinfo;
+#if defined(WRAP_GETADDRINFO) || defined(FAI_CACHE)
+static inline int
+system_getaddrinfo (const char *name, const char *serv,
+		    const struct addrinfo *hint,
+		    struct addrinfo **res)
+{
+    return getaddrinfo(name, serv, hint, res);
+}
+
+static inline void
+system_freeaddrinfo (struct addrinfo *ai)
+{
+    freeaddrinfo(ai);
+}
+
+static inline int
+system_getnameinfo (const struct sockaddr *sa, socklen_t salen,
+		    char *host, size_t hostlen, char *serv, size_t servlen,
+		    int flags)
+{
+    return getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+}
 #endif
 
-#ifdef WRAP_GETNAMEINFO
-static int (*const gniptr) (const struct sockaddr *, socklen_t,
-			    char *, socklen_t, char *, socklen_t,
-			    int) = &getnameinfo;
-#endif
-
-#if !defined (HAVE_GETADDRINFO) || defined(WRAP_GETADDRINFO)
+#if !defined (HAVE_GETADDRINFO) || defined(WRAP_GETADDRINFO) || defined(FAI_CACHE)
 
 #undef  getaddrinfo
 #define getaddrinfo	my_fake_getaddrinfo
 #undef  freeaddrinfo
 #define freeaddrinfo	my_fake_freeaddrinfo
-
-#endif
-
-#if !defined (HAVE_GETADDRINFO) || defined(WRAP_GETNAMEINFO)
-
 #undef  getnameinfo
 #define getnameinfo	my_fake_getnameinfo
 
@@ -398,9 +415,7 @@ struct addrinfo {
 #if (!defined (HAVE_GETADDRINFO) || defined (WRAP_GETADDRINFO)) && defined(DEBUG_ADDRINFO)
 /* Some debug routines.  */
 
-static const char *protoname (int p) {
-    static char buf[30];
-
+static const char *protoname (int p, char *buf) {
 #define X(N) if (p == IPPROTO_ ## N) return #N
 
     X(TCP);
@@ -420,8 +435,7 @@ static const char *protoname (int p) {
     return buf;
 }	
 
-static const char *socktypename (int t) {
-    static char buf[30];
+static const char *socktypename (int t, char *buf) {
     switch (t) {
     case SOCK_DGRAM: return "DGRAM";
     case SOCK_STREAM: return "STREAM";
@@ -433,8 +447,7 @@ static const char *socktypename (int t) {
     return buf;
 }
 
-static const char *familyname (int f) {
-    static char buf[30];
+static const char *familyname (int f, char *buf) {
     switch (f) {
     default:
 	sprintf(buf, "AF %d", f);
@@ -456,6 +469,7 @@ static void debug_dump_getaddrinfo_args (const char *name, const char *serv,
 	    "            hints { ",
 	    name ? name : "(null)", serv ? serv : "(null)");
     if (hint) {
+	char buf[30];
 	sep = "";
 #define Z(FLAG) if (hint->ai_flags & AI_##FLAG) fprintf(stderr, "%s%s", sep, #FLAG), sep = "|"
 	Z(CANONNAME);
@@ -466,11 +480,11 @@ static void debug_dump_getaddrinfo_args (const char *name, const char *serv,
 	if (sep[0] == 0)
 	    fprintf(stderr, "no-flags");
 	if (hint->ai_family)
-	    fprintf(stderr, " %s", familyname(hint->ai_family));
+	    fprintf(stderr, " %s", familyname(hint->ai_family, buf));
 	if (hint->ai_socktype)
-	    fprintf(stderr, " SOCK_%s", socktypename(hint->ai_socktype));
+	    fprintf(stderr, " SOCK_%s", socktypename(hint->ai_socktype, buf));
 	if (hint->ai_protocol)
-	    fprintf(stderr, " IPPROTO_%s", protoname(hint->ai_protocol));
+	    fprintf(stderr, " IPPROTO_%s", protoname(hint->ai_protocol, buf));
     } else
 	fprintf(stderr, "(null)");
     fprintf(stderr, " }):\n");
@@ -512,7 +526,7 @@ void freeaddrinfo (struct addrinfo *ai);
 
 #endif
 
-#if !defined (HAVE_GETADDRINFO) || defined (WRAP_GETNAMEINFO)
+#if !defined (HAVE_GETADDRINFO)
 static
 int getnameinfo (const struct sockaddr *addr, socklen_t len,
 		 char *host, socklen_t hostlen,
@@ -524,6 +538,7 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 
 #define HAVE_FAKE_GETADDRINFO /* was not originally HAVE_GETADDRINFO */
 #define HAVE_GETADDRINFO
+#define NEED_FAKE_GETNAMEINFO
 #undef  HAVE_GETNAMEINFO
 #define HAVE_GETNAMEINFO 1
 
@@ -539,10 +554,12 @@ char *gai_strerror (int code);
 #endif
 
 #if !defined(inline)
-# if !defined(__GNUC__)
-#  define inline /* nothing, just static */
+# if __STDC_VERSION__ >= 199901L || defined(__GNUC__)
+/* C99 and GCC support inline, don't do anything.  */
+# elif defined(__mips) && defined(__sgi)
+#  define inline __inline /* IRIX used at MIT does inline but not c99 yet */
 # else
-#  define inline __inline__
+#  define inline /* nothing, just static */
 # endif
 # define ADDRINFO_UNDEF_INLINE
 #endif
@@ -554,7 +571,7 @@ char *gai_strerror (int code);
 # undef _XOPEN_SOURCE_EXTENDED
 #endif
 
-#ifdef HAVE_FAKE_GETADDRINFO
+#if defined(HAVE_FAKE_GETADDRINFO) || defined(FAI_CACHE)
 #define NEED_FAKE_GETADDRINFO
 #endif
 
@@ -571,39 +588,228 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
 				 int port, const struct addrinfo *template)
 {
     struct addrinfo *n = malloc (sizeof (struct addrinfo));
-    struct sockaddr_in *sin4;
     if (n == 0)
 	return EAI_MEMORY;
-    if (template->ai_family != AF_INET)
+    if (template->ai_family != AF_INET
+#ifdef KRB5_USE_INET6
+	&& template->ai_family != AF_INET6
+#endif
+	)
 	return EAI_FAMILY;
     *n = *template;
-    sin4 = malloc (sizeof (struct sockaddr_in));
-    if (sin4 == 0)
-	return EAI_MEMORY;
-    n->ai_addr = (struct sockaddr *) sin4;
-    sin4->sin_family = AF_INET;
-    sin4->sin_addr = *(struct in_addr *)addr;
-    sin4->sin_port = port;
+    if (template->ai_family == AF_INET) {
+	struct sockaddr_in *sin4;
+	sin4 = malloc (sizeof (struct sockaddr_in));
+	if (sin4 == 0)
+	    return EAI_MEMORY;
+	n->ai_addr = (struct sockaddr *) sin4;
+	sin4->sin_family = AF_INET;
+	sin4->sin_addr = *(struct in_addr *)addr;
+	sin4->sin_port = port;
 #ifdef HAVE_SA_LEN
-    sin4->sin_len = sizeof (struct sockaddr_in);
+	sin4->sin_len = sizeof (struct sockaddr_in);
+#endif
+    }
+#ifdef KRB5_USE_INET6
+    if (template->ai_family == AF_INET6) {
+	struct sockaddr_in6 *sin6;
+	sin6 = malloc (sizeof (struct sockaddr_in6));
+	if (sin6 == 0)
+	    return EAI_MEMORY;
+	n->ai_addr = (struct sockaddr *) sin6;
+	sin6->sin6_family = AF_INET6;
+	sin6->sin6_addr = *(struct in6_addr *)addr;
+	sin6->sin6_port = port;
+#ifdef HAVE_SA_LEN
+	sin6->sin6_len = sizeof (struct sockaddr_in6);
+#endif
+    }
 #endif
     n->ai_next = *result;
     *result = n;
     return 0;
 }
 
-static inline int fai_add_hosts_by_name (const char *name, int af,
+#ifdef FAI_CACHE
+/* fake addrinfo cache entries */
+#define CACHE_ENTRY_LIFETIME	15 /* seconds */
+
+struct face {
+    struct in_addr *addrs4;
+    struct in6_addr *addrs6;
+    unsigned int naddrs4, naddrs6;
+    time_t expiration;
+    char *canonname, *name;
+    struct face *next;
+};
+
+/* fake addrinfo cache */
+struct fac {
+    struct face *data;
+};
+static struct fac fac;
+
+static void plant_face (const char *name, struct face *entry)
+{
+    entry->name = strdup(name);
+    if (entry->name == NULL)
+	/* @@ Wastes memory.  */
+	return;
+    entry->next = fac.data;
+    entry->expiration = time(0) + CACHE_ENTRY_LIFETIME;
+    fac.data = entry;
+#ifdef DEBUG_ADDRINFO
+    printf("added cache entry '%s' at %p: %d ipv4, %d ipv6; expire %d\n",
+	   name, entry, entry->naddrs4, entry->naddrs6, entry->expiration);
+#endif
+}
+
+static int find_face (const char *name, struct face **entry)
+{
+    struct face *fp, **fpp;
+    time_t now = time(0);
+
+    /* First, scan for expired entries and free them.
+       (Future improvement: Integrate these two loops.)  */
+#ifdef DEBUG_ADDRINFO
+    printf("scanning cache at %d for '%s'...\n", now, name);
+#endif
+    for (fpp = &fac.data; *fpp; ) {
+	fp = *fpp;
+#ifdef DEBUG_ADDRINFO
+	printf("  checking expiration time of @%p: %d\n",
+	       fp, fp->expiration);
+#endif
+	if (fp->expiration < now) {
+#ifdef DEBUG_ADDRINFO
+	    printf("\texpiring cache entry\n");
+#endif
+	    free(fp->name);
+	    free(fp->canonname);
+	    free(fp->addrs4);
+	    free(fp->addrs6);
+	    *fpp = fp->next;
+	    free(fp);
+	    /* Stay at this point in the list, and check again.  */
+	} else
+	    /* Move forward.  */
+	    fpp = &(*fpp)->next;
+    }
+
+    for (fp = fac.data; fp; fp = fp->next) {
+#ifdef DEBUG_ADDRINFO
+	printf("  comparing entry @%p\n", fp);
+#endif
+	if (!strcasecmp(fp->name, name)) {
+#ifdef DEBUG_ADDRINFO
+	    printf("\tMATCH!\n");
+#endif
+	    *entry = fp;
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+#endif
+
+static inline int fai_add_hosts_by_name (const char *name,
 					 struct addrinfo *template,
 					 int portnum, int flags,
 					 struct addrinfo **result)
 {
+#ifdef FAI_CACHE
+
+    struct face *ce;
+    int i, r;
+
+    if (!find_face(name, &ce)) {
+	struct addrinfo myhints = { 0 }, *ai, *ai2;
+	int i4, i6, aierr;
+
+#ifdef DEBUG_ADDRINFO
+	printf("looking up new data for '%s'...\n", name);
+#endif
+	myhints.ai_socktype = SOCK_STREAM;
+	myhints.ai_flags = AI_CANONNAME;
+	/* Don't set ai_family -- we want to cache all address types,
+	   because the next lookup may not use the same constraints as
+	   the current one.  We *could* cache them separately, so that
+	   we never have to look up an IPv6 address if we are always
+	   asked for IPv4 only, but let's deal with that later, if we
+	   have to.  */
+	aierr = system_getaddrinfo(name, "telnet", &myhints, &ai);
+	if (aierr)
+	    return aierr;
+	ce = malloc(sizeof(struct face));
+	memset(ce, 0, sizeof(*ce));
+	ce->expiration = time(0) + 30;
+	for (ai2 = ai; ai2; ai2 = ai2->ai_next) {
+#ifdef DEBUG_ADDRINFO
+	    printf("  found an address in family %d...\n", ai2->ai_family);
+#endif
+	    switch (ai2->ai_family) {
+	    case AF_INET:
+		ce->naddrs4++;
+		break;
+	    case AF_INET6:
+		ce->naddrs6++;
+		break;
+	    default:
+		break;
+	    }
+	}
+	ce->addrs4 = calloc(ce->naddrs4, sizeof(*ce->addrs4));
+	if (ce->addrs4 == NULL && ce->naddrs4 != 0) {
+	    system_freeaddrinfo(ai);
+	    return EAI_MEMORY;
+	}
+	ce->addrs6 = calloc(ce->naddrs6, sizeof(*ce->addrs6));
+	if (ce->addrs6 == NULL && ce->naddrs6 != 0) {
+	    free(ce->addrs4);
+	    system_freeaddrinfo(ai);
+	    return EAI_MEMORY;
+	}
+	for (ai2 = ai, i4 = i6 = 0; ai2; ai2 = ai2->ai_next) {
+	    switch (ai2->ai_family) {
+	    case AF_INET:
+		ce->addrs4[i4++] = ((struct sockaddr_in *)ai2->ai_addr)->sin_addr;
+		break;
+	    case AF_INET6:
+		ce->addrs6[i6++] = ((struct sockaddr_in6 *)ai2->ai_addr)->sin6_addr;
+		break;
+	    default:
+		break;
+	    }
+	}
+	ce->canonname = strdup(ai->ai_canonname);
+	system_freeaddrinfo(ai);
+	plant_face(name, ce);
+    }
+    template->ai_family = AF_INET6;
+    template->ai_addrlen = sizeof(struct sockaddr_in6);
+    for (i = 0; i < ce->naddrs6; i++) {
+	r = fai_add_entry (result, &ce->addrs6[i], portnum, template);
+	if (r)
+	    return r;
+    }
+    template->ai_family = AF_INET;
+    template->ai_addrlen = sizeof(struct sockaddr_in);
+    for (i = 0; i < ce->naddrs4; i++) {
+	r = fai_add_entry (result, &ce->addrs4[i], portnum, template);
+	if (r)
+	    return r;
+    }
+    if (*result && (flags & AI_CANONNAME))
+	(*result)->ai_canonname = strdup(ce->canonname);
+    return 0;
+
+#else
+
     struct hostent *hp;
     int i, r;
     int herr;
 
-    if (af != AF_INET)
-	/* For now, real ipv6 support needs real getaddrinfo.  */
-	return EAI_FAMILY;
     GET_HOST_BY_NAME (name, hp, herr);
     if (hp == 0)
 	return translate_h_errno (herr);
@@ -615,6 +821,8 @@ static inline int fai_add_hosts_by_name (const char *name, int af,
     if (*result && (flags & AI_CANONNAME))
 	(*result)->ai_canonname = strdup (hp->h_name);
     return 0;
+
+#endif
 }
 
 static inline void
@@ -666,23 +874,15 @@ fake_getaddrinfo (const char *name, const char *serv,
 	    port = htons (p);
 	} else {
 	    struct servent *sp;
-	    int try_dgram_too = 0;
+	    int try_dgram_too = 0, s_err;
+
 	    if (socktype == 0) {
 		try_dgram_too = 1;
 		socktype = SOCK_STREAM;
 	    }
 	try_service_lookup:
-#ifdef HAVE_GETSERVBYNAME_R
-	    {
-		char my_s_buf[1024];
-		struct servent my_s_ent;
-		sp = getservbyname_r(serv,
-				     socktype == SOCK_STREAM ? "tcp" : "udp",
-				     &my_s_ent, my_s_buf, sizeof(my_s_buf));
-	    }
-#else
-	    sp = getservbyname (serv, socktype == SOCK_STREAM ? "tcp" : "udp");
-#endif
+	    GET_SERV_BY_NAME(serv, socktype == SOCK_STREAM ? "tcp" : "udp",
+			     sp, s_err);
 	    if (sp == 0) {
 		if (try_dgram_too) {
 		    socktype = SOCK_DGRAM;
@@ -724,7 +924,7 @@ fake_getaddrinfo (const char *name, const char *serv,
 #endif
 	ret = fai_add_entry (&res, &addr4, port, &template);
     } else {
-	ret = fai_add_hosts_by_name (name, AF_INET, &template, port, flags,
+	ret = fai_add_hosts_by_name (name, &template, port, flags,
 				     &res);
     }
 
@@ -738,6 +938,7 @@ fake_getaddrinfo (const char *name, const char *serv,
     return 0;
 }
 
+#ifdef NEED_FAKE_GETNAMEINFO
 #include <errno.h>
 static inline int
 fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
@@ -827,7 +1028,9 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 
     return 0;
 }
+#endif
 
+#if defined(HAVE_FAKE_GETADDRINFO) || defined(NEED_FAKE_GETNAMEINFO)
 #include <errno.h>
 
 static inline
@@ -848,6 +1051,7 @@ char *gai_strerror (int code)
     default:		return "bogus getaddrinfo error?";
     }
 }
+#endif
 
 static inline int translate_h_errno (int h)
 {
@@ -876,7 +1080,7 @@ static inline int translate_h_errno (int h)
     }
 }
 
-#ifdef HAVE_FAKE_GETADDRINFO
+#if defined(HAVE_FAKE_GETADDRINFO) || defined(FAI_CACHE)
 static inline
 int getaddrinfo (const char *name, const char *serv,
 		 const struct addrinfo *hint, struct addrinfo **result)
@@ -890,6 +1094,7 @@ void freeaddrinfo (struct addrinfo *ai)
     fake_freeaddrinfo(ai);
 }
 
+#ifdef NEED_FAKE_GETNAMEINFO
 static inline
 int getnameinfo (const struct sockaddr *sa, socklen_t len,
 		 char *host, socklen_t hostlen,
@@ -899,6 +1104,7 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
     return fake_getnameinfo(sa, len, host, hostlen, service, servicelen,
 			    flags);
 }
+#endif /* NEED_FAKE_GETNAMEINFO */
 #endif /* HAVE_FAKE_GETADDRINFO */
 #endif /* NEED_FAKE_GETADDRINFO */
 
@@ -947,7 +1153,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
     }
 #endif
 
-    aierr = (*gaiptr) (name, serv, hint, result);
+    aierr = system_getaddrinfo (name, serv, hint, result);
     if (aierr || *result == 0) {
 #ifdef DEBUG_ADDRINFO
 	debug_dump_error(aierr);
@@ -1043,7 +1249,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 
 	ai->ai_canonname = strdup(name2);
 	if (name2 != 0 && ai->ai_canonname == 0) {
-	    (*faiptr)(ai);
+	    system_freeaddrinfo(ai);
 	    *result = 0;
 #ifdef DEBUG_ADDRINFO
 	    debug_dump_error(EAI_MEMORY);
@@ -1110,24 +1316,13 @@ void freeaddrinfo (struct addrinfo *ai)
     if (ai) {
       free(ai->ai_canonname);
 	ai->ai_canonname = 0;
-	(*faiptr)(ai);
+	system_freeaddrinfo(ai);
     }
 #else
-    (*faiptr)(ai);
+    system_freeaddrinfo(ai);
 #endif
 }
 #endif /* WRAP_GETADDRINFO */
-
-#ifdef WRAP_GETNAMEINFO
-static inline
-int getnameinfo (const struct sockaddr *sa, socklen_t len,
-		 char *host, socklen_t hostlen,
-		 char *service, socklen_t servicelen,
-		 int flags)
-{
-    return (*gniptr)(sa, len, host, hostlen, service, servicelen, flags);
-}
-#endif /* WRAP_GETNAMEINFO */
 
 #if defined(KRB5_USE_INET6) && defined(NEED_INSIXADDR_ANY) 
 /* If compiling with IPv6 support and C library does not define in6addr_any */
