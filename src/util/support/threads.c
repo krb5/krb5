@@ -312,8 +312,8 @@ int k5_key_delete (k5_key_t keynum)
 
 #else /* POSIX */
 
-    /* Not written yet.  */
-    abort();
+    /* Not written yet -- resource leak!  */
+    /* abort(); */
 
 #endif
 
