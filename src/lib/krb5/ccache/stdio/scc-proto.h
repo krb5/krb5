@@ -40,6 +40,10 @@ krb5_error_code krb5_scc_get_principal PROTOTYPE((krb5_ccache id , krb5_principa
 /* scc_init.c */
 krb5_error_code krb5_scc_initialize PROTOTYPE((krb5_ccache id , krb5_principal princ ));
 
+/* scc_maybe.c */
+krb5_error_code krb5_scc_close_file PROTOTYPE((krb5_ccache));
+krb5_error_code krb5_scc_open_file PROTOTYPE((krb5_ccache,const char*));
+
 /* scc_nseq.c */
 krb5_error_code krb5_scc_next_cred PROTOTYPE((krb5_ccache id , krb5_cc_cursor *cursor , krb5_creds *creds ));
 
