@@ -4,8 +4,11 @@
 # Makefile that recurses into cns subdirectory.
 #
 all-windows::
+	@echo Making in windows\lib
+	cd lib
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\cns
-	cd cns
+	cd ..\cns
 	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\wintel
 	cd ..\wintel
@@ -19,8 +22,11 @@ all-windows::
 	cd ..
 
 clean-windows::
+	@echo Making clean in windows\lib
+	cd lib
+	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in windows\cns
-	cd cns
+	cd ..\cns
 	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in windows\wintel
 	cd ..\wintel
