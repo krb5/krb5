@@ -300,6 +300,8 @@ for a complete list.
 * [2833, 2834, 2835] Add support for generating/installing debugging
   symbols on Windows.
 
+* [2838] Fix termination of incorrect string in telnetd.
+
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
