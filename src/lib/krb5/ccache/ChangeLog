@@ -1,3 +1,27 @@
+2004-09-01  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: 
+        - Fix MITPrincToMSPrinc to prevent writing to the output
+          buffer if the input won't fit.
+        - Add internal UnicodeStringToMITPrinc function
+        - Rename internal MSPrincToMITPrinc to ExternalNameToMITPrinc
+        - Rename internal PurgeMSTGT to PurgeAllTickets
+        - Add internal PurgeTicket2000 
+        - Add internal PurgeTicketXP
+        - Since tickets can only be requested via KDC Opt Flags it is
+          not possible to specifically request the Initial ticket.  If
+          more than one ticket exists which matching service names,
+          enctypes, and ticket flags the initial ticket flag may not be
+          set.  If the caller requested the initial ticket, set the flag
+          manually.
+        - Add preliminary support for krb5_lcc_set_flags
+        - Modify krb5_lcc_initialize to return success
+        - Modify krb5_lcc_get_principal to support an LSA cache
+          which does not contain a TGT when krb5_lcc_resolve is 
+          called.
+        - Implement krb5_lcc_remove_cred
+            
+
 2004-07-25  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c:  is_windows_xp() should test for major version 
