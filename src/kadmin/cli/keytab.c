@@ -42,32 +42,30 @@ static char *rcsid = "$Header$";
 #include <krb5.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
+#include <krb5/adm_proto.h>
+#include "kadmin.h"
 
-static int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
-			 int keepold,
+static int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
+			 krb5_boolean keepold,
 			 int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
 			 char *princ_str);
 static int remove_principal(char *keytab_str, krb5_keytab keytab, char
 			    *princ_str, char *kvno_str);
 static char *etype_string(krb5_enctype enctype);
 
-extern char *krb5_defkeyname;	 
-extern char *whoami;
-extern krb5_context context;
-extern void *handle;
 static int quiet;
 
-void add_usage()
+static void add_usage()
 {
      fprintf(stderr, "Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [principal | -glob princ-exp] [...]\n");
 }
      
-void rem_usage()
+static void rem_usage()
 {
      fprintf(stderr, "Usage: ktremove [-k[eytab] keytab] [-q] principal [kvno|\"all\"|\"old\"]\n");
 }
 
-int process_keytab(krb5_context context, char **keytab_str,
+static int process_keytab(krb5_context my_context, char **keytab_str,
 		   krb5_keytab *keytab) 
 {
      int code;
@@ -79,7 +77,7 @@ int process_keytab(krb5_context context, char **keytab_str,
 	       com_err(whoami, ENOMEM, "while creating keytab name");
 	       return 1;
 	  }
-	  code = krb5_kt_default(context, keytab);
+	  code = krb5_kt_default(my_context, keytab);
 	  if (code != 0) {
 	       com_err(whoami, code, "while opening default keytab");
 	       free(*keytab_str);
@@ -104,7 +102,7 @@ int process_keytab(krb5_context context, char **keytab_str,
 	       sprintf(*keytab_str, "WRFILE:%s", tmp);
 	  }
 	  
-	  code = krb5_kt_resolve(context, *keytab_str, keytab);
+	  code = krb5_kt_resolve(my_context, *keytab_str, keytab);
 	  if (code != 0) {
 	       com_err(whoami, code, "while resolving keytab %s", *keytab_str);
 	       free(keytab_str);
@@ -119,10 +117,11 @@ int process_keytab(krb5_context context, char **keytab_str,
 void kadmin_keytab_add(int argc, char **argv)
 {
      krb5_keytab keytab = 0;
-     char *princ_str, *keytab_str = NULL, **princs;
+     char *keytab_str = NULL, **princs;
      int code, num, i;
      krb5_error_code retval;
-     int keepold = 0, n_ks_tuple = 0;
+     int n_ks_tuple = 0;
+     krb5_boolean keepold = FALSE;
      krb5_key_salt_tuple *ks_tuple = NULL;
 
      argc--; argv++;
@@ -171,7 +170,8 @@ void kadmin_keytab_add(int argc, char **argv)
 		    break;
 	       }
 	       
-	       if (code = kadm5_get_principals(handle, *argv, &princs, &num)) {
+	       code = kadm5_get_principals(handle, *argv, &princs, &num);
+	       if (code) {
 		    com_err(whoami, code, "while expanding expression \"%s\".",
 			    *argv);
 		    argv++;
@@ -200,7 +200,7 @@ void kadmin_keytab_add(int argc, char **argv)
 void kadmin_keytab_remove(int argc, char **argv)
 {
      krb5_keytab keytab = 0;
-     char *princ_str, *keytab_str = NULL;
+     char *keytab_str = NULL;
      int code;
 
      argc--; argv++;
@@ -236,8 +236,9 @@ void kadmin_keytab_remove(int argc, char **argv)
      free(keytab_str);
 }
 
-int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
-		  int keepold, int n_ks_tuple,
+static 
+int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
+		  krb5_boolean keepold, int n_ks_tuple,
 		  krb5_key_salt_tuple *ks_tuple,
 		  char *princ_str) 
 {
@@ -245,7 +246,7 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
      krb5_principal princ;
      krb5_keytab_entry new_entry;
      krb5_keyblock *keys;
-     int code, code2, mask, nkeys, i;
+     int code, nkeys, i;
 
      (void) memset((char *)&princ_rec, 0, sizeof(princ_rec));
 
@@ -261,11 +262,11 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
      }
 
      if (keepold || ks_tuple != NULL) {
-	 code = kadm5_randkey_principal_3(handle, princ,
+	 code = kadm5_randkey_principal_3(lhandle, princ,
 					  keepold, n_ks_tuple, ks_tuple,
 					  &keys, &nkeys);
      } else {
-	 code = kadm5_randkey_principal(handle, princ, &keys, &nkeys);
+	 code = kadm5_randkey_principal(lhandle, princ, &keys, &nkeys);
      }
      if (code != 0) {
 	  if (code == KADM5_UNK_PRINC) {
@@ -277,7 +278,7 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
 	  goto cleanup;
      }
 
-     code = kadm5_get_principal(handle, princ, &princ_rec,
+     code = kadm5_get_principal(lhandle, princ, &princ_rec,
 				KADM5_PRINCIPAL_NORMAL_MASK);
      if (code != 0) {
 	  com_err(whoami, code, "while retrieving principal");
@@ -293,7 +294,7 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
 	  code = krb5_kt_add_entry(context, keytab, &new_entry);
 	  if (code != 0) {
 	       com_err(whoami, code, "while adding key to keytab");
-	       (void) kadm5_free_principal_ent(handle, &princ_rec);
+	       (void) kadm5_free_principal_ent(lhandle, &princ_rec);
 	       goto cleanup;
 	  }
 
@@ -304,7 +305,7 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
 		      etype_string(keys[i].enctype), keytab_str);
      }
 
-     code = kadm5_free_principal_ent(handle, &princ_rec);
+     code = kadm5_free_principal_ent(lhandle, &princ_rec);
      if (code != 0) {
 	  com_err(whoami, code, "while freeing principal entry");
 	  goto cleanup;
@@ -329,7 +330,8 @@ int remove_principal(char *keytab_str, krb5_keytab keytab, char
      krb5_keytab_entry entry;
      krb5_kt_cursor cursor;
      enum { UNDEF, SPEC, HIGH, ALL, OLD } mode;
-     int code, kvno, did_something;
+     int code, did_something;
+     krb5_kvno kvno;
 
      code = krb5_parse_name(context, princ_str, &princ);
      if (code != 0) {
@@ -428,7 +430,7 @@ int remove_principal(char *keytab_str, krb5_keytab keytab, char
 	  com_err(whoami, code, "while scanning keytab");
 	  return code;
      }
-     if (code = krb5_kt_end_seq_get(context, keytab, &cursor)) {
+     if ((code = krb5_kt_end_seq_get(context, keytab, &cursor))) {
 	  com_err(whoami, code, "while ending keytab scan");
 	  return code;
      }
@@ -458,7 +460,7 @@ static char *etype_string(enctype)
     static char buf[100];
     krb5_error_code ret;
 
-    if (ret = krb5_enctype_to_string(enctype, buf, sizeof(buf)))
+    if ((ret = krb5_enctype_to_string(enctype, buf, sizeof(buf))))
 	sprintf(buf, "etype %d", enctype);
 
     return buf;

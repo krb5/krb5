@@ -1,3 +1,18 @@
+Mon Feb 26 13:25:50 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* ss_wrapper.c: Include kadmin.h.
+
+	* kadmin.c, keytab.c: Warning cleanup of shadowing variables,
+ 	missing prototypes, assignments within conditionals. variables
+ 	type mismatches.
+
+	* getdate.y: Prototypes in file are for getdate_yylex() and
+ 	getdaye_yyerror() and not yylex()/yyerror().
+
+	* kadmin.h: New header file with ss callback prototypes and global
+ 	variables.
+
+	
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadmin.c (kadmin_cpw): Argument to krb5_read_password changed to

@@ -119,8 +119,8 @@ extern struct tm	*localtime();
 #define yylex getdate_yylex
 #define yyerror getdate_yyerror
 
-static int yylex ();
-static int yyerror ();
+static int getdate_yylex ();
+static int getdate_yyerror ();
 
 #if	!defined(lint) && !defined(SABER) && !defined(_LINT)
 static char RCS[] =
