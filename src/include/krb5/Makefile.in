@@ -34,7 +34,7 @@ KRB5_INCDIR = $(KRB5ROOT)/include
 
 install::
 	@set -x; for f in $(KRB5_HEADERS); \
- 	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
+	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
 	done; \
 	@set -x; for f in $(BUILT_HEADERS) $(ET_HEADERS); \
 	do $(INSTALL_DATA) $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
