@@ -41,7 +41,10 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
 
 	alloced = 1;
     } else {
-	output = *arg_output;
+	output.length = input->length;
+
+	output.data = arg_output->data;
+
 	alloced = 0;
     }
 
