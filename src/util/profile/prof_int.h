@@ -9,14 +9,12 @@
 #include <Kerberos/FullPOSIXPath.h>
 #include <CoreServices/CoreServices.h>
 #define USE_PTHREADS
+#define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #else
 #include "com_err.h"
 #endif
 
 #include "profile.h"
-#ifndef ERROR_TABLE_BASE_prof
-#include "prof_err.h"
-#endif
 
 #if defined(_WIN32)
 #define SIZEOF_INT      4

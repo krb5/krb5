@@ -1,3 +1,12 @@
+2003-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_parse.c (profile_parse_file)
+	[PROFILE_SUPPORTS_FOREIGN_NEWLINES]: Look for \r and treat it as a
+	line break.
+	* prof_int.h: Don't include prof_err.h.
+	(PROFILE_SUPPORTS_FOREIGN_NEWLINES) [macintosh]: Define new
+	macro.
+
 2002-12-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (r_access): New function.
