@@ -775,11 +775,16 @@ void kadmin_addprinc(argc, argv)
     kadm5_principal_ent_rec princ;
     kadm5_policy_ent_rec defpol;
     long mask;
-    int randkey = 0;
+    int randkey = 0, i;
     char *pass, *canon;
     krb5_error_code retval;
-    static char newpw[1024];
+    static char newpw[1024], dummybuf[256];
     static char prompt1[1024], prompt2[1024];
+
+    if (dummybuf[0] == 0) {
+	 for (i = 0; i < 256; i++)
+	      dummybuf[i] = (i+1) % 256;
+    }
     
     /* Zero all fields in request structure */
     memset(&princ, 0, sizeof(princ));
@@ -818,7 +823,7 @@ void kadmin_addprinc(argc, argv)
     if (randkey) {		/* do special stuff if -randkey specified */
 	princ.attributes |= KRB5_KDB_DISALLOW_ALL_TIX; /* set notix */
 	mask |= KADM5_ATTRIBUTES;
-	pass = "dummy";
+	pass = dummybuf;
     } else if (pass == NULL) {
 	int i = sizeof (newpw) - 1;
 	

@@ -1,5 +1,10 @@
 Fri Oct 18 13:47:01 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* kadmin.c (kadmin_addprinc): use a studly temporary password when
+ 	creating a principal with a random key (no, the security of this
+ 	operation does not depend on the secrecy of the password)
+ 	[krb5-admin/115]
+ 
 	* getdate.y: remove military timezones and plain integeres as part
  	of date specifications, to reduce confusion by redundancy
  	[krb5-admin/15]
