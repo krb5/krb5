@@ -43,7 +43,7 @@ krb5_kt_ops *ops;
 	return KRB5_KT_TYPE_EXISTS;
     }
     if (!(t = (struct krb5_kt_typelist *) malloc(sizeof(*t))))
-	return ENOMEM;			/* XXX */
+	return ENOMEM;
     t->next = kt_typehead;
     t->ops = ops;
     kt_typehead = t;
