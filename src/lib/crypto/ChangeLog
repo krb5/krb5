@@ -1,3 +1,9 @@
+Fri Feb 21 18:40:13 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (OBJS): Move in crypto_glue.c as krb5_glue.c; avoid
+        libcrypto depending on libkrb5
+     
+
 Sat Feb 22 01:37:23 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
 	* Makefile.in (LIBMINOR): Bump minor version

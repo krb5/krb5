@@ -10,6 +10,7 @@ MAC_SUBDIRS = des sha md4 md5 crc32 os
 
 OBJS=	cryptoconf.$(OBJEXT) \
 	encrypt_data.$(OBJEXT) \
+	krb5_glue.$(OBJEXT) \
 	decrypt_data.$(OBJEXT) \
 	des_crc.$(OBJEXT) \
 	des_md5.$(OBJEXT) \
@@ -19,6 +20,7 @@ OBJS=	cryptoconf.$(OBJEXT) \
 
 SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/encrypt_data.c \
+	$(srcdir)/krb5_glue.c \
 	$(srcdir)/decrypt_data.c \
 	$(srcdir)/des_crc.c \
 	$(srcdir)/des_md5.c \
@@ -31,7 +33,7 @@ LIBMAJOR=1
 LIBMINOR=1
 RELDIR=crypto
 STLIBOBJS=cryptoconf.o encrypt_data.o decrypt_data.o \
-	des_crc.o des_md5.o des3_sha.o des3_raw.o raw_des.o
+	des_crc.o des_md5.o des3_sha.o des3_raw.o raw_des.o krb5_glue.o
 
 STOBJLISTS=des/OBJS.ST md4/OBJS.ST md5/OBJS.ST sha/OBJS.ST crc32/OBJS.ST \
 	os/OBJS.ST OBJS.ST
@@ -126,4 +128,5 @@ check-windows::
 	@echo Making check in crypto\os
 	-$(MAKE) -$(MFLAGS) check
 	cd ..
+
 
