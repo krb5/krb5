@@ -80,7 +80,6 @@ static int g_save(db, type, ptr)
    return((*((*vdb)->put))(*vdb, &key, &dbtone, 0) == 0);
 #else
    g_set *gs = (g_set *) db;
-   void *a = (void *) type;
 
    if (!*gs)
       if (g_set_init(gs))
