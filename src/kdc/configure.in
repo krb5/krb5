@@ -1,7 +1,7 @@
 AC_INIT(main.c)
 CONFIG_RULES
 AC_PROG_INSTALL
-AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h unistd.h)
+AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h ifaddrs.h unistd.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
 KRB5_NEED_PROTO([#include <string.h>
 #ifdef HAVE_UNISTD_H

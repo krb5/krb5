@@ -1,3 +1,7 @@
+2001-06-29  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add check for ifaddrs.h, which missing.
+
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* network.c (setup_port): Change sin to sin4 to prevent shadowing.
