@@ -168,7 +168,7 @@ krb5_fcc_data *data;
 int fd;
 int lockunlock;
 {
-  krb5_error_code st;
+  krb5_error_code st = 0;
 #ifdef POSIX_FILE_LOCKS
   st = fcc_lock_file_posix(data, fd, lockunlock);
   if (st != EINVAL) {

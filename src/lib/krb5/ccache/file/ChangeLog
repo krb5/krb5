@@ -1,3 +1,11 @@
+Thu Mar 09 18:43:10 1995  Chris Provenzano (proven@mit.edu)
+
+	* fcc_destry.c (krb5_fcc_destroy())
+	* fcc_init.c   (krb5_fcc_initialize())
+		Initialize kret before returning it.
+
+	* fcc_maybe.c (fcc_lock_file()) Initialize st before returning it.
+
 Tue Mar  7 19:54:48 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: take out ISODE_DEFS.

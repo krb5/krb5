@@ -44,7 +44,7 @@ krb5_fcc_destroy(context, id)
      unsigned int wlen;
      char zeros[BUFSIZ];
      register int ret;
-     krb5_error_code kret;
+     krb5_error_code kret = 0;
       
      
      if (OPENCLOSE(id)) {
