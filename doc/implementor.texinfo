@@ -87,6 +87,9 @@ the internals of the @value{PRODUCT}.
 Someone should describe the API subset we're allowed to use with
 sockets, how and when to use @code{SOCKET_ERRNO}, @i{etc}.
 
+Note that all new code doing hostname and address translation should
+use @code{getaddrinfo} and friends.  (@xref{Host Address Lookup}.)
+
 @node IPv6 Support, Local Addresses, Socket API, Top
 @chapter IPv6 Support
 
@@ -352,7 +355,13 @@ No known bugs here, but as of IRIX 6.5.7, the version we're using at
 MIT, these functions had not been implemented.
 
 @item NetBSD
-As of NetBSD 1.5, this function is not thread-safe.
+As of NetBSD 1.5, this function is not thread-safe.  In 1.5X
+(intermediate code snapshot between 1.5 and 1.6 releases), the
+@code{ai_canonname} field can be empty, even if the
+@code{AI_CANONNAME} flag was passed.  In particular, this can happen
+if a numeric host address string is provided.  Also, numeric service
+names appear not to work unless the stream type is given; specifying
+the TCP protocol is not enough.
 
 @item Tru64 UNIX
 In Tru64 UNIX 5.0, @code{getaddrinfo} is available, but requires that
@@ -365,11 +374,15 @@ it wrong here, I think the symbol is supposed to be available even if
 the application uses @code{#undef}, but I have not confirmed it in the
 spec.
 
+@item Windows
+According to Windows documentation, the returned @code{ai_canonname}
+field can be null even if the @code{AI_CANONNAME} flag is given.
+
 @end table
 
-For systems where @code{getaddrinfo} returns incorrect data, we've
-provided wrapper versions that call the system version and then try to
-fix up the returned data.
+For most systems where @code{getaddrinfo} returns incorrect data,
+we've provided wrapper versions that call the system version and then
+try to fix up the returned data.
 
 For systems that don't provide these functions at all, we've provided
 replacement versions that neither are thread-safe nor support IPv6,
@@ -392,6 +405,10 @@ compiler to discard any unused code.  This may produce warnings on
 some systems, and if the compiler isn't being too clever, may cause
 several kilobytes of excess storage to be consumed on these backwards
 systems.
+
+Do not assume that @code{ai_canonname} will be set when the
+@code{AI_CANONNAME} flag is set.  Check for a null pointer before
+using it.
 
 @node Thread Safety, Shared Libraries, Host Address Lookup, Top
 @chapter Thread Safety
