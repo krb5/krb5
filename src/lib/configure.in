@@ -8,6 +8,7 @@ AC_PROG_RANLIB
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
+MAKE_SUBDIRS("checking",check)
 LinkFile(libkrb5.a, krb5/libkrb5.a)
 LinkFile(libcrypto.a, crypto/libcrypto.a)
 LinkFile(libgssapi_krb5.a, gssapi/libgssapi_krb5.a)
