@@ -1,3 +1,8 @@
+2003-06-04  Tom Yu  <tlyu@mit.edu>
+
+	* password_to_key.c (mit_passwd_to_key, afs_passwd_to_key): Delete
+	spurious space from prompt.
+
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* RealmsConfig-glue.c (get_krbhst_default): Deleted.
