@@ -133,7 +133,7 @@ foo/**/libname: objlist							@@\
 lib/**/libname.a: foo/**/libname					@@\
 	$(RANLIB) $@							@@\
 clean::									@@\
-	$(RM_CMD) foo/**/libname lib/**/libname.a
+	$(RM) foo/**/libname lib/**/libname.a
 #endif /* AdditiveLibraryTarget */
 
 #ifndef RanlibLibraryTarget
@@ -144,7 +144,7 @@ foo2/**/libname: foo/**/libname						@@\
 lib/**/libname.a: foo2/**/libname					@@\
 	$(RANLIB) $@							@@\
 clean::									@@\
-	$(RM_CMD) foo/**/libname foo2/**/libname lib/**/libname.a
+	$(RM) foo/**/libname foo2/**/libname lib/**/libname.a
 #endif
 
 /*
@@ -157,11 +157,14 @@ AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
 AllTarget(foo/**/libname)						@@\
 									@@\
-libdir/lib/**/libname.a foo/**/libname:					@@\
+libdir/lib/**/libname.a foo/**/libname:	objlist				@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
 	$(TOUCH) foo/**/libname						@@\
-	$(TOUCH) libdir/foo/**/libname
-/* The $(RANLIB) is done at the end by the directory itself */
+	$(TOUCH) libdir/foo/**/libname					@@\
+/* The $(RANLIB) is done at the end by the directory itself */		@@\
+									@@\
+clean::									@@\
+	$(RM) foo/**/libname
 #endif /* OtherdirLibraryTarget */
 
 /*
