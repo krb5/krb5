@@ -266,6 +266,7 @@ char            *krusername = 0;
 char		term[64];
 char            rhost_name[128];
 krb5_principal  client;
+int		do_inband = 0;
 
 int	reapchild();
 char 	*progname;
@@ -837,6 +838,31 @@ unsigned char	oobdata[] = {TIOCPKT_WINDOW};
 char    oobdata[] = {0};
 #endif
 
+int sendoob(fd, byte)
+     int fd;
+     char *byte;
+{
+    char message[5];
+    int cc;
+
+    if (do_inband) {
+	message[0] = '\377';
+	message[1] = '\377';
+	message[2] = 'o';
+	message[3] = 'o';
+	message[4] = *byte;
+
+	cc = rcmd_stream_write(fd, message, sizeof(message));
+	while (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
+	    /* also shouldn't happen */
+	    sleep(5);
+	    cc = rcmd_stream_write(fd, message, sizeof(message));
+	}
+    } else {
+	send(fd, byte, 1, MSG_OOB);
+    }
+}
+
 /*
  * Handle a "control" request (signaled by magic being present)
  * in the data stream.  For now, we are only willing to handle
@@ -880,7 +906,7 @@ int control(pty, cp, n)
 void protocol(f, p)
      int f, p;
 {
-    unsigned char pibuf[BUFSIZ], fibuf[BUFSIZ], *pbp, *fbp;
+    unsigned char pibuf[BUFSIZ], qpibuf[BUFSIZ*2], fibuf[BUFSIZ], *pbp, *fbp;
     register pcc = 0, fcc = 0;
     int cc;
     char cntl;
@@ -915,7 +941,7 @@ void protocol(f, p)
     signal(SIGTTOU, SIG_IGN);
 #endif
 #ifdef TIOCSWINSZ
-    send(f, oobdata, 1, MSG_OOB);	/* indicate new rlogin */
+    sendoob(f, oobdata);
 #endif
     for (;;) {
 	fd_set ibits, obits, ebits;
@@ -933,7 +959,6 @@ void protocol(f, p)
 		FD_SET(f, &obits);
 	    else
 		FD_SET(p, &ibits);
-	FD_SET(p, &ebits);
 	
 	if (select(8*sizeof(ibits), &ibits, &obits, &ebits, 0) < 0) {
 	    if (errno == EINTR)
@@ -941,43 +966,32 @@ void protocol(f, p)
 	    fatalperror(f, "select");
 	}
 #define	pkcontrol(c)	((c)&(TIOCPKT_FLUSHWRITE|TIOCPKT_NOSTOP|TIOCPKT_DOSTOP))
-	if (FD_ISSET(p, &ebits)) {
-	    cc = read(p, &cntl, 1);
-	    if (cc == 1 && pkcontrol(cntl)) {
-		cntl |= oobdata[0];
-		send(f, &cntl, 1, MSG_OOB);
-		if (cntl & TIOCPKT_FLUSHWRITE) {
-		    pcc = 0;
-		    FD_CLR(p, &ibits);
-		}
-	    }
-	}
 	if (FD_ISSET(f, &ibits)) {
 	    fcc = rcmd_stream_read(f, fibuf, sizeof (fibuf));
-	    if (fcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-	      fcc = 0;
-	    else {
+	    if (fcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
+		fcc = 0;
+	    } else {
 		register unsigned char *cp;
 		int left, n;
 		
 		if (fcc <= 0)
-		  break;
+		    break;
 		fbp = fibuf;
 		
-	      top:
-		for (cp = fibuf; cp < fibuf+fcc-1; cp++)
-		  if (cp[0] == magic[0] &&
-		      cp[1] == magic[1]) {
-		      left = fcc - (cp-fibuf);
-		      n = control(p, cp, left);
-		      if (n) {
-			  left -= n;
-			  if (left > 0)
-			    memmove(cp, cp+n, left);
-			  fcc -= n;
-			  goto top; /* n^2 */
-		      }
-		  }
+		for (cp = fibuf; cp < fibuf+fcc-1; cp++) {
+		    if (cp[0] == magic[0] &&
+			cp[1] == magic[1]) {
+			left = (fibuf+fcc) - cp;
+			n = control(p, cp, left);
+			if (n) {
+			    left -= n;
+			    fcc -= n;
+			    if (left > 0)
+				memmove(cp, cp+n, left);
+			    cp--;
+			}
+		    }
+		}
 	    }
 	}
 	
@@ -992,24 +1006,54 @@ void protocol(f, p)
 	if (FD_ISSET(p, &ibits)) {
 	    pcc = read(p, pibuf, sizeof (pibuf));
 	    pbp = pibuf;
-	    if (pcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-	      pcc = 0;
-	    else if (pcc <= 0)
-	      break;
+	    if (pcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
+		pcc = 0;
+	    } else if (pcc <= 0) {
+		break;
+	    }
 #ifdef TIOCPKT
 	    else if (tiocpkt_on) {
-	      if (pibuf[0] == 0)
-	        pbp++, pcc--;
-	      else {
-		  if (pkcontrol(pibuf[0])) {
-		      pibuf[0] |= oobdata[0];
-		      send(f, &pibuf[0], 1, MSG_OOB);
-		  }
-		  pcc = 0;
-	      }
+		if (pibuf[0] == 0) {
+		    pbp++, pcc--;
+		} else {
+		    if (pkcontrol(pibuf[0])) {
+			pibuf[0] |= oobdata[0];
+			sendoob(f, pibuf);
+		    }
+		    pcc = 0;
+		}
 	    }
 #endif
+
+	    /* quote any double-\377's if necessary */
+
+	    if (do_inband) {
+		unsigned char *qpbp;
+		int qpcc, i;
+
+		qpbp = qpibuf;
+		qpcc = 0;
+
+		for (i=0; i<pcc;) {
+		    if (pbp[i] == 0377u && (i+1)<pcc && pbp[i+1] == 0377u) {
+			qpbp[qpcc] = '\377';
+			qpbp[qpcc+1] = '\377';
+			qpbp[qpcc+2] = 'q';
+			qpbp[qpcc+3] = 'q';
+			i += 2;
+			qpcc += 4;
+		    } else {
+			qpbp[qpcc] = pbp[i];
+			i++;
+			qpcc++;
+		    }
+		}
+
+		pbp = qpbp;
+		pcc = qpcc;
+	    }
 	}
+
 	if (FD_ISSET(f, &obits) && pcc > 0) {
 	    cc = rcmd_stream_write(f, pbp, pcc);
 	    if (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {

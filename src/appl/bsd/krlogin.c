@@ -180,6 +180,7 @@ char	*getenv();
 
 char	*name;
 int 	rem = -1;		/* Remote socket fd */
+int	do_inband = 0;
 char	cmdchar = '~';
 int	eight = 1;		/* Default to 8 bit transmission */
 int	no_local_escape = 0;
@@ -224,6 +225,7 @@ char	*host=0;			/* external, so it can be
 					   reached from confirm_death() */
 
 krb5_sigtype	sigwinch KRB5_PROTOTYPE((int));
+int server_message KRB5_PROTOTYPE((int));
 void oob KRB5_PROTOTYPE((void));
 krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
 #if __STDC__
@@ -1190,15 +1192,16 @@ int	rcvcnt;
 int	rcvstate;
 int	ppid;
 
+/* returns 1 if flush, 0 otherwise */
 
-void oob()
+int server_message(mark)
+     int mark;
 {
 #ifndef POSIX_TERMIOS
     int out = FWRITE;
 #endif
-    int atmark, n;
+    int n;
     int rcvd = 0;
-    char waste[RLOGIN_BUFSIZ], mark;
 #ifdef POSIX_TERMIOS
     struct termios tty;
 #else
@@ -1208,10 +1211,6 @@ void oob()
     struct sgttyb sb;
 #endif
 #endif
-    mark = 0;
-    
-    recv(rem, &mark, 1, MSG_OOB);
-
 
     if (mark & TIOCPKT_WINDOW) {
 	/*
@@ -1270,28 +1269,62 @@ void oob()
 	(void) ioctl(1, TCFLSH, 1);
 #endif
 #endif
-	for (;;) {
-	    if (ioctl(rem, SIOCATMARK, &atmark) < 0) {
-		perror("ioctl");
-		break;
-	    }
-	    if (atmark)
-	      break;
-	    n = read(rem, waste, sizeof (waste));
-	    printf("tossed %d bytes\n", n);
-	    if (n <= 0)
-	      break;
-return;
-	}
+	return(1);
     }
-    
-    
+
+    return(0);
 }
 
+void oob()
+{
+    char mark;
+    char waste[RLOGIN_BUFSIZ];
+    int atmark;
 
+    mark = 0;
+    
+    recv(rem, &mark, 1, MSG_OOB);
+
+    if (server_message(mark)) {
+	if (ioctl(rem, SIOCATMARK, &atmark) < 0) {
+	    perror("ioctl");
+	    return;
+	}
+	if (!atmark)
+	    read(rem, waste, sizeof (waste));
+    }
+}
+
+/* two control messages are defined:
+
+   a double flag byte of 'o' indicates a one-byte message which is
+   identical to what was once carried out of band.  
+
+   a double flag byte of 'q' indicates a zero-byte message.  This
+   message is interpreted as two \377 data bytes.  This is just a
+   quote rule so that binary data from the server does not confuse the
+   client.  */
+
+int control(cp, n)
+     unsigned char *cp;
+     int n;
+{
+    if ((n >= 5) && (cp[2] == 'o') && (cp[3] == 'o')) {
+	if (server_message(cp[4]))
+	    return(-5);
+	return(5);
+    } else if ((n >= 4) && (cp[2] == 'q') && (cp[3] == 'q')) {
+	/* this is somewhat of a hack */
+	cp[2] = '\377';
+	cp[3] = '\377';
+	return(2);
+    }
+
+    return(0);
+}
 
 /*
- * reader: read from remote: line -> 1
+ * reader: read from remote: line -> 1 
  */
 reader(oldmask)
 #ifdef POSIX_SIGNALS
@@ -1306,8 +1339,9 @@ reader(oldmask)
     int pid = -getpid();
 #endif
 fd_set readset, excset, writeset;
-    int n, remaining;
+    int n, remaining, left;
     char *bufp = rcvbuf;
+    char *cp;
 
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -1334,24 +1368,23 @@ fd_set readset, excset, writeset;
 #endif /* POSIX_SIGNALS */
 
     for (;;) {
-	if ((remaining = rcvcnt - (bufp - rcvbuf)) > 0)
-	{
+	if ((remaining = rcvcnt - (bufp - rcvbuf)) > 0) {
 	    FD_SET(1,&writeset);
 	    rcvstate = WRITING;
 	    FD_CLR(rem, &readset);
+	} else {
+	    bufp = rcvbuf;
+	    rcvcnt = 0;
+	    rcvstate = READING;
+	    FD_SET(rem,&readset);
+	    FD_CLR(1,&writeset);
 	}
-	else {
-	    
-	bufp = rcvbuf;
-	rcvcnt = 0;
-	rcvstate = READING;
-	FD_SET(rem,&readset);
-	FD_CLR(1,&writeset);
-	}
-	FD_SET(rem,&excset);
+	if (!do_inband)
+	    FD_SET(rem,&excset);
 	if (select(rem+1, &readset, &writeset, &excset, 0) > 0 ) {
-	    if (FD_ISSET(rem, &excset))
-		oob();
+	    if (!do_inband)
+		if (FD_ISSET(rem, &excset))
+		    oob();
 	    if (FD_ISSET(1,&writeset)) {
 		n = write(1, bufp, remaining);
 		if (n < 0) {
@@ -1362,18 +1395,35 @@ fd_set readset, excset, writeset;
 		bufp += n;
 	    }
 	    if (FD_ISSET(rem, &readset)) {
-		{
-		    int x;
-		    
-		    if (!ioctl(rem, FIONREAD, &x));
-
-		}
-
 	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf));
 		if (rcvcnt == 0)
 		    return (0);
 		if (rcvcnt < 0)
 		    goto error;
+
+		if (do_inband) {
+		    for (cp = rcvbuf; cp < rcvbuf+rcvcnt-1; cp++) {
+			if (cp[0] == '\377' &&
+			    cp[1] == '\377') {
+			    left = (rcvbuf+rcvcnt) - cp;
+			    n = control(cp, left);
+			    if (n < 0) {
+				left -= (-n);
+				rcvcnt = 0;
+				/* flush before, and (-n) bytes */
+				if (left > 0)
+				    memmove(rcvbuf, cp+(-n), left);
+				cp = rcvbuf-1;
+			    } else if (n) {
+				left -= n;
+				rcvcnt -= n;
+				if (left > 0)
+				    memmove(cp, cp+n, left);
+				cp--;
+			    }
+			}
+		    }
+		}
 	    }
 	} else
 error:
