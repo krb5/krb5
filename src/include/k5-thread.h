@@ -179,6 +179,13 @@ typedef struct {
 #define k5_mutex_debug_unlock(M)				\
 	(k5_mutex_debug_check_init(M),				\
 	 k5_mutex_debug_update_loc(M), 0)
+#define k5_debug_assert_locked(M)				\
+	(assert((M)->initialized == 1),				\
+	 assert((M)->locked != K5_MUTEX_DEBUG_UNLOCKED),	\
+	 assert((M)->locked == K5_MUTEX_DEBUG_LOCKED), 0)
+#define k5_debug_assert_unlocked(M)				\
+	(assert((M)->initialized == 1),				\
+	 assert((M)->locked == K5_MUTEX_DEBUG_UNLOCKED), 0)
 
 typedef enum {
     K5_KEY_COM_ERR,
@@ -207,6 +214,8 @@ typedef pthread_mutex_t k5_mutex_t;
 #define k5_mutex_destroy(M)	pthread_mutex_destroy(M)
 #define k5_mutex_lock(M)	pthread_mutex_lock(M)
 #define k5_mutex_unlock(M)	pthread_mutex_unlock(M)
+#define k5_assert_locked(M)	(0)
+#define k5_assert_unlocked(M)	(0)
 
 #else /* DEBUG_THREADS */
 
@@ -236,6 +245,8 @@ typedef struct {
 				 (M)->debug.locked = K5_MUTEX_DEBUG_UNLOCKED, \
 				 assert(0==pthread_mutex_unlock(&(M)->lock)), \
 				 0)
+#define k5_assert_locked(M)	(k5_debug_assert_locked(&(M)->debug))
+#define k5_assert_unlocked(M)	(k5_debug_assert_unlocked(&(M)->debug))
 
 #if defined(__mips) && defined(__sgi) && (defined(_SYSTYPE_SVR4) || defined(__SYSTYPE_SVR4__))
 /* IRIX 6.5 stub pthread support in libc is really annoying.
@@ -332,6 +343,8 @@ typedef pthread_once_t k5_once_t;
 #define k5_mutex_destroy	k5_mutex_debug_destroy
 #define k5_mutex_lock		k5_mutex_debug_lock
 #define k5_mutex_unlock		k5_mutex_debug_unlock
+#define k5_assert_locked	k5_debug_assert_locked
+#define k5_assert_unlocked	k5_debug_assert_unlocked
 
 #define k5_once_t	unsigned char
 #define K5_ONCE_INIT	2
@@ -350,6 +363,8 @@ typedef char k5_mutex_t;
 #define k5_mutex_destroy(M)	(0)
 #define k5_mutex_lock(M)	(0)
 #define k5_mutex_unlock(M)	(0)
+#define k5_assert_locked(M)	(0)
+#define k5_assert_unlocked(M)	(0)
 
 #define k5_once_t	unsigned char
 #define K5_ONCE_INIT	2

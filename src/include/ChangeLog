@@ -1,3 +1,10 @@
+2004-06-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_debug_assert_locked, k5_debug_assert_unlocked):
+	New macros.
+	(k5_assert_locked, k5_assert_unlocked): New macros, may or may not
+	call the debug macros.
+
 2004-06-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (JOIN4, JOIN4_2, JOIN3, JOIN3_2): Unused macros
