@@ -895,7 +895,7 @@ krb5_dbm_db_rename(context, from, to)
 	if ((db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name,
 					       KDBM_LOCK_EXT(db_ctx)))) {
 	    if ((db_ctx->db_lf_file = open(db_ctx->db_lf_name,
-					   O_RDWR|O_EXCL, 0600)) >= 0){
+					   O_RDWR|O_EXCL|O_CREAT, 0600)) >= 0){
 		db_ctx->db_inited = 1;
 		if ((retval = krb5_dbm_db_get_age(context,
 						  NULL,
