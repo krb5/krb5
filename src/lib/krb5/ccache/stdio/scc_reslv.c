@@ -53,7 +53,7 @@ krb5_error_code
 krb5_scc_resolve (context, id, residual)
    krb5_context context;
    krb5_ccache *id;
-   char *residual;
+   const char *residual;
 {
      krb5_ccache lid;
      

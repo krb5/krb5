@@ -141,7 +141,7 @@ krb5_error_code krb5_scc_read_authdatum
 krb5_error_code krb5_scc_resolve 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache *id , 
-		   char *residual ));
+		   const char *residual ));
 
 /* scc_retrv.c */
 krb5_error_code krb5_scc_retrieve 
