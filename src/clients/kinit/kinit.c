@@ -158,9 +158,11 @@ main(argc, argv)
     my_creds.client = me;
 
     if (code = krb5_build_principal_ext(&server,
-					me[0]->length, me[0]->data,
+					krb5_princ_realm(me)->length,
+					krb5_princ_realm(me)->data,
 					tgtname.length, tgtname.data,
-					me[0]->length, me[0]->data,
+					krb5_princ_realm(me)->length,
+					krb5_princ_realm(me)->data,
 					0)) {
 	com_err(argv[0], code, "while building server name");
 	exit(1);
