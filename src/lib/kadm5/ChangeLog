@@ -1,5 +1,8 @@
-2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
+	* server_internal.h: Add prototype for kdb_iter_entry().
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* alt_prof.c (krb5_read_realm_params): Cast argument to isspace()
 	to int.
