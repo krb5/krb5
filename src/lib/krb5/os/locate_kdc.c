@@ -148,6 +148,8 @@ grow_list (struct addrlist *lp, int nmore)
     size_t newsize = newspace * sizeof (struct addrlist);
     struct sockaddr **newaddrs;
 
+    /* NULL check a concession to SunOS4 compatibility for now; not
+       required for pure ANSI support.  */
     if (lp->addrs)
 	newaddrs = realloc (lp->addrs, newsize);
     else
