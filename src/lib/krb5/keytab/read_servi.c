@@ -57,11 +57,11 @@ OLDDECLARG(krb5_keyblock **, key)
     /*
      * Get the name of the file that we should use. 
      */
-    if (keyprocarg == NULL)
+    if (keyprocarg == NULL) {
 	if ((kerror = krb5_kt_default_name((char *)keytabname, 
 					   sizeof(keytabname) - 1))!= KSUCCESS)
 	    return (kerror);
-    else {
+    } else {
 	bzero(keytabname, sizeof(keytabname));
 	(void) strncpy(keytabname, (char *)keyprocarg, 
 		       sizeof(keytabname) - 1);
@@ -85,10 +85,9 @@ OLDDECLARG(krb5_keyblock **, key)
     if ((*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock))) == NULL)
 	return (ENOMEM);	/* XXX */
 
-    krb5_copy_keyblock(entry.key, *key);
+    krb5_copy_keyblock(&entry.key, *key);
 
-    /* Zero the memory containing the key */
-    bzero((char *)&entry, sizeof(krb5_keytab_entry));
+    krb5_kt_free_entry(&entry);
 
     return (KSUCCESS);
 }
