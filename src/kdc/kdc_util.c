@@ -20,6 +20,7 @@ static char rcsid_kdc_util_c[] =
 #include <krb5/kdb.h>
 #include <krb5/krb5_err.h>
 #include <krb5/kdb5_err.h>
+#include <krb5/asn1.h>
 
 #include "kdc_util.h"
 #include "extern.h"
@@ -95,29 +96,29 @@ krb5_fulladdr *from;
     if (retval = kdc_process_tgs_req(tgs_req, from))
 	return(retval);
 
-    if (tgs_req->enc_part.length) {
+    if (tgs_req->tgs_request2->enc_part.length) {
 	/* decrypt encrypted part, attach to enc_part2 */
 
-	if (!valid_etype(tgs_req->etype)) /* XXX wrong etype to use? */
+	if (!valid_etype(tgs_req->tgs_request2->etype)) /* XXX wrong etype to use? */
 	    return KRB5KDC_ERR_ETYPE_NOSUPP;
 
-	scratch.length = tgs_req->enc_part.length;
-	if (!(scratch.data = malloc(tgs_req->enc_part.length))) {
+	scratch.length = tgs_req->tgs_request2->enc_part.length;
+	if (!(scratch.data = malloc(tgs_req->tgs_request2->enc_part.length))) {
 	    return(ENOMEM);
 	}
 	/* put together an eblock for this encryption */
 
-	eblock.crypto_entry = krb5_csarray[tgs_req->etype]->system; /* XXX */
+	eblock.crypto_entry = krb5_csarray[tgs_req->tgs_request2->etype]->system; /* XXX */
 	/* do any necessary key pre-processing */
 	if (retval = (*eblock.crypto_entry->process_key)(&eblock,
-							 tgs_req->header->ticket->enc_part2->session)) {
+							 tgs_req->header2->ticket->enc_part2->session)) {
 	    free(scratch.data);
 	    return(retval);
 	}
 
 	/* call the encryption routine */
 	if (retval =
-	    (*eblock.crypto_entry->decrypt_func)((krb5_pointer) tgs_req->enc_part.data,
+	    (*eblock.crypto_entry->decrypt_func)((krb5_pointer) tgs_req->tgs_request2->enc_part.data,
 						 (krb5_pointer) scratch.data,
 						 scratch.length, &eblock)) {
 	    (void) (*eblock.crypto_entry->finish_key)(&eblock);
@@ -138,7 +139,7 @@ krb5_fulladdr *from;
 	clean_scratch();
 #undef clean_scratch
 
-	tgs_req->enc_part2 = local_encpart;
+	tgs_req->tgs_request2->enc_part2 = local_encpart;
     }
     return 0;
 }
@@ -166,10 +167,10 @@ krb5_keyblock **key;
 	return ENOMEM;
     *newkey = *whoisit->key;
     if (!(newkey->contents = (krb5_octet *)malloc(newkey->length))) {
-	free(newkey);
+	free((char *)newkey);
 	return ENOMEM;
     }
-    bcopy(whoisit->key, newkey->contents, newkey->length);
+    bcopy((char *)whoisit->key, (char *)newkey->contents, newkey->length);
     *key = newkey;
     return 0;
 }
@@ -180,7 +181,7 @@ kdc_process_tgs_req(request, from)
 krb5_tgs_req *request;
 krb5_fulladdr *from;
 {
-    register krb5_ap_req *apreq = request->header;
+    register krb5_ap_req *apreq = request->header2;
     int nprincs;
     krb5_boolean more;
     krb5_db_entry server;
@@ -190,8 +191,8 @@ krb5_fulladdr *from;
     krb5_error_code retval;
     krb5_checksum our_cksum;
 
-    if (isset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
-	isset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED))
+    if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
+	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED))
 	return KRB5KDC_ERR_POLICY;
 
     /* XXX perhaps we should optimize the case of the TGS ? */
@@ -281,32 +282,3 @@ int direction;
 	return KRB5_KDB_ILLDIRECTION;
 }
 
-/*
- * get the master key from somewhere, filling it into *key.
- *
- * key->keytype should be set to the desired type.
- *
- */
-
-krb5_error_code
-kdc_input_mkey(mname, key)
-krb5_principal mname;
-krb5_keyblock *key;
-{
-    krb5_error_code retval;
-    char password[BUFSIZ];
-    krb5_data pwd;
-    int size = sizeof(password);
-
-    /* XXX need a way to read from file */
-    if (retval = krb5_read_password(krb5_mkey_pwd_prompt1,
-				    krb5_mkey_pwd_prompt2,
-				    password,
-				    &size))
-	return(retval);
-
-    return (*master_encblock.crypto_entry->string_to_key)(key->keytype,
-							  key,
-							  &pwd,
-							  mname);
-}

@@ -52,8 +52,8 @@ void closedown_network PROTOTYPE((void));
 #define CONVERT_INTO_DB	0
 #define CONVERT_OUTOF_DB 1
 
-#define isset(flagfield, flag) (flagfield & (flag))
-#define set(flagfield, flag) (flagfield |= (flag))
+#define isflagset(flagfield, flag) (flagfield & (flag))
+#define setflag(flagfield, flag) (flagfield |= (flag))
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
 #define realm_of_tgt(ticket) ((ticket)->server[0])
