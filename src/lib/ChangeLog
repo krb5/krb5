@@ -1,4 +1,6 @@
 Sat Nov 23 00:25:25 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+	
+	* libkrb5.def: Renamed to krb5_16.def [PR#204]
 
 	* Makefile.in (all-windows): Change name of dll from krb5_16.dll,
 		which will be the final name of the DLL. [PR#204]
