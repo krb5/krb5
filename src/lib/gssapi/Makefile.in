@@ -12,6 +12,10 @@ LOCAL_SUBDIRS= generic krb5
 
 MAC_SUBDIRS = generic krb5
 
+LOCALINCLUDES = -Igeneric -I$(srcdir)/generic -Ikrb5 -I$(srcdir)/krb5
+STLIBOBJS=\
+	gss_libinit.o
+
 OBJS=\
 	$(OUTPRE)gss_libinit.$(OBJEXT)
 
@@ -21,7 +25,7 @@ SRCS=\
 LIB=gssapi_krb5
 LIBMAJOR=2
 LIBMINOR=1
-STOBJLISTS=generic/OBJS.ST krb5/OBJS.ST
+STOBJLISTS=OBJS.ST generic/OBJS.ST krb5/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \

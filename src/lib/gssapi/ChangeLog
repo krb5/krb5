@@ -1,3 +1,13 @@
+2000-01-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (STLIBOBJS): Properly add gss_libinit.o to permit
+	compiling.
+
+	* configure.in: Add libobj to Makefile frags.
+
+	* gss_libinit.c: Add terminating newline.  Use 0 and 1 instead of
+	false and true.
+
 Fri Jan 21 22:47:00 2000  Miro Jurisic  <meeroh@mit.edu>
 
 	* Makefile.in: added gss_libinit.[co]
