@@ -206,6 +206,7 @@ krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, keepold, db_entry)
     krb5_db_entry	* db_entry;
 {
     int 		  key_data_count;
+    int			  n_new_key_data;
     krb5_key_data 	* key_data;
     krb5_error_code	  retval;
     int			  kvno;
@@ -228,6 +229,7 @@ krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, keepold, db_entry)
 	db_entry->n_key_data = key_data_count;
 	db_entry->key_data = key_data;
     } else if (keepold) {
+	n_new_key_data = db_entry->n_key_data;
 	for (i = 0; i < key_data_count; i++) {
 	    retval = krb5_dbe_create_key_data(context, db_entry);
 	    if (retval) {
@@ -235,6 +237,8 @@ krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, keepold, db_entry)
 				 db_entry->key_data);
 		break;
 	    }
+	    db_entry->key_data[i+n_new_key_data] = key_data[i];
+	    memset(&key_data[i], 0, sizeof(krb5_key_data));
 	}
     } else {
 	cleanup_key_data(context, key_data_count, key_data);
@@ -451,6 +455,7 @@ krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
     krb5_db_entry	* db_entry;
 {
     int 		  key_data_count;
+    int			  n_new_key_data;
     krb5_key_data 	* key_data;
     krb5_error_code	  retval;
     int			  old_kvno;
@@ -476,6 +481,7 @@ krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	db_entry->n_key_data = key_data_count;
 	db_entry->key_data = key_data;
     } else if (keepold) {
+	n_new_key_data = db_entry->n_key_data;
 	for (i = 0; i < key_data_count; i++) {
 	    retval = krb5_dbe_create_key_data(context, db_entry);
 	    if (retval) {
@@ -483,6 +489,8 @@ krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
 				 db_entry->key_data);
 		break;
 	    }
+	    db_entry->key_data[i+n_new_key_data] = key_data[i];
+	    memset(&key_data[i], 0, sizeof(krb5_key_data));
 	}
     } else {
 	cleanup_key_data(context, key_data_count, key_data);

@@ -1,3 +1,8 @@
+2000-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_cpw.c (krb5_dbe_crk): 
+	(krb5_dbe_cpw): Fix to actually save old keys.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
