@@ -97,7 +97,7 @@ static void rfc_tests ()
     }
 }
 
-static void fold_kerberos(int nbytes)
+static void fold_kerberos(unsigned int nbytes)
 {
     unsigned char cipher_text[300];
     int j;
@@ -106,7 +106,7 @@ static void fold_kerberos(int nbytes)
 	abort();
 
     printf("%d-fold(\"kerberos\") =\n\t", nbytes*8);
-    krb5_nfold(64, "kerberos", 8*nbytes, cipher_text);
+    krb5_nfold(64, (unsigned char *) "kerberos", 8*nbytes, cipher_text);
     for (j=0; j<nbytes; j++)
 	printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
     printf("\n");

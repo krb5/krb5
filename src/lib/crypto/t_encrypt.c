@@ -55,7 +55,7 @@ if( retval) { \
   abort(); \
 } else printf ("OK\n");
   
-int compare_results(krb5_data *d1, krb5_data *d2)
+static int compare_results(krb5_data *d1, krb5_data *d2)
 {
     if (d1->length != d2->length) {
 	/* Decryption can leave a little trailing cruft.
@@ -144,7 +144,9 @@ main ()
   }
 
   free(out.data);
+  free(out2.data);
   free(check.data);
+  free(check2.data);
   return 0;
 }
 
