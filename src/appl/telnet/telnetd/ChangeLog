@@ -1,3 +1,7 @@
+Sat Feb 14 10:35:36 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Remove USE_ANAME.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

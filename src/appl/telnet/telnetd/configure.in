@@ -2,7 +2,6 @@ AC_INIT(telnetd.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_CHECK_LIB(util,main)
-USE_ANAME
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
   AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses")
