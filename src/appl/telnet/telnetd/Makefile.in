@@ -59,7 +59,7 @@ clean::
 
 install::
 	$(INSTALL_PROGRAM) telnetd $(DESTDIR)$(SERVER_BINDIR)/telnetd
-	$(INSTALL_DATA) telnetd.8 ${DESTDIR}$(SERVER_MANDIR)/telnetd.8
+	$(INSTALL_DATA) $(srcdir)/telnetd.8 ${DESTDIR}$(SERVER_MANDIR)/telnetd.8
 
 authenc.o: telnetd.h
 global.o: defs.h ext.h $(ARPA_TELNET)
