@@ -27,7 +27,6 @@ Things-to-keep:
 ChangeLog
 DNR.c
 Makefile.in
-adm_conn.c
 an_to_ln.c
 ccdefname.c
 configure

@@ -1,3 +1,7 @@
+Fri Apr 28 09:58:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	Move adm_conn.c from libkrb5 to libkadm.
+
 Thu Apr 27 17:50:14 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_conn.c: added constant to pull in needed PC code, and
