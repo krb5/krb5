@@ -38,7 +38,7 @@
 /* this can be replaced with another encryption provider, since
    everything below uses it abstractly */
 
-struct krb5_enc_provider *enc = &krb5_enc_des;
+static const struct krb5_enc_provider *const enc = &krb5_enc_des;
 
 /* XXX state.  Should it be in krb5_context? */
 
