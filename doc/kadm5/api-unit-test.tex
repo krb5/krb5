@@ -29,12 +29,14 @@
 %\newcommand{\Call}[1]{\item[Call:] #1}
 \newcommand{\Expected}[1]{\item[Expected:] #1}
 \newcommand{\Conditions}[1]{\item[Conditions:] #1}
+\newcommand{\Priority}[1]{\item[Priority:] #1}
 
 %\newcommand{\Number}[1]{}
 %\newcommand{\Reason}[1]{}
 \newcommand{\Call}[1]{}
 %\newcommand{\Expected}[1]{}
 %\newcommand{\Conditions}[1]{}
+%\newcommand{\Priority}[1]{}
 
 \title{OpenV*Secure 1.0 Admin API\\
 Unit Test Description\footnote{\rcsHeader}}
@@ -381,15 +383,15 @@ the init doesn't succeed.
 }
 
 \numtest{18}{
-\Reason{Fails when password is too short, when override_qual is false.}
+\Reason{Fails when password is too short.}
 }
 
 \numtest{19}{
-\Reason{Fails when password has too few classes, when override_qual is false.}
+\Reason{Fails when password has too few classes.}
 }
 
 \numtest{20}{
-\Reason{Fails when password is in dictionary, when override_qual is false.}
+\Reason{Fails when password is in dictionary.}
 }
 
 \numtest{21}{
@@ -408,25 +410,26 @@ the init doesn't succeed.
 \Reason{Succeeds when caller has ``add'' access and another one.}
 }
 
-\numtest{25}{
-\Reason{Fails when password is too short, when override_qual is true.}
-}
+%\numtest{25}{
+%\Reason{Fails when password is too short, when override_qual is true.}
+%}
 
-\numtest{26}{
-\Reason{Fails when password has too few classes, when
-		override_qual is true.}
-}
+%\numtest{26}{
+%\Reason{Fails when password has too few classes, when
+%		override_qual is true.}
+%}
 
-\numtest{27}{
-\Reason{Fails when password is in dictionary, when override_qual is
-		true.}
-}
+%\numtest{27}{
+%\Reason{Fails when password is in dictionary, when override_qual is
+%		true.}
+%}
 
 \numtest{28}{
 \Reason{Succeeds when assigning policy.}
 }
 
 \numtest{29}{
+\Priority{High}
 \Reason{Allows 0 (never) for princ_expire_time.}
 }
 
@@ -466,21 +469,25 @@ the init doesn't succeed.
 }
 
 \numtest{37}{
+\Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if there's no policy and no
 	specified pw_expiration.}
 }
 
 \numtest{38}{
+\Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
 	policy has a 0 (never) pw_max_life.}
 }
 
 \numtest{39}{
+\Priority{High}
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
 	and the policy has a non-zero pw_max_life.}
 }
 
 \numtest{40}{
+\Priority{High}
 \Reason{Allows 0 (forever) for max_life.}
 }
 
@@ -506,34 +513,42 @@ the init doesn't succeed.
 }
 
 \numtest{5}{
+\Priority{High}
 \Reason{Fails on nonexistent principal.}
 }
 
 \numtest{6}{
+\Priority{High}
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
 }
 
 \numtest{7}{
+\Priority{High}
 \Reason{Fails if caller has ``add'' access and not ``delete''.}
 }
 
 \numtest{8}{
+\Priority{High}
 \Reason{Fails if caller has ``modify'' access and not ``delete''.}
 }
 
 \numtest{9}{
+\Priority{High}
 \Reason{Fails if caller has ``get'' access and not ``delete''.}
 }
 
 \numtest{10}{
+\Priority{High}
 \Reason{Fails if caller has no access bits.}
 }
 
 \numtest{11}{
+\Priority{High}
 \Reason{Valid invocation.}
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Valid invocation (on principal with policy).}
 }
 
@@ -546,6 +561,7 @@ the init doesn't succeed.
 }
 
 \numtest{2}{
+\Priority{High}
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
 }
 
@@ -558,6 +574,7 @@ the init doesn't succeed.
 }
 
 \numtest{5}{
+\Priority{High}
 \Reason{Fails on mask with LAST_PWD_CHANGE set.}
 }
 
@@ -574,6 +591,7 @@ the init doesn't succeed.
 }
 
 \numtest{9}{
+\Priority{High}
 \Reason{Fails on mask with AUX_ATTRIBUTES set.}
 }
 
@@ -582,22 +600,27 @@ the init doesn't succeed.
 }
 
 \numtest{11}{
+\Priority{High}
 \Reason{Fails for user with no access bits.}
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Fails for user with ``get'' access.}
 }
 
 \numtest{13}{
+\Priority{High}
 \Reason{Fails for user with ``add'' access.}
 }
 
 \numtest{14}{
+\Priority{High}
 \Reason{Fails for user with ``delete'' access.}
 }
 
 \numtest{15}{
+\Priority{High}
 \Reason{Succeeds for user with ``modify'' access.}
 }
 
@@ -606,10 +629,12 @@ the init doesn't succeed.
 }
 
 \numtest{17}{
+\Priority{High}
 \Reason{Fails when nonexistent policy is specified.}
 }
 
 \numtest{18}{
+\Priority{High}
 \Reason{Succeeds when existent policy is specified.}
 }
 
@@ -661,33 +686,40 @@ the init doesn't succeed.
 }
 
 \numtest{29}{
+\Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if there's no policy and no
 	specified pw_expiration.}
 }
 
 \numtest{30}{
+\Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
 	policy has a 0 (never) pw_max_life.}
 }
 
 \numtest{31}{
+\Priority{High}
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
 	and the policy has a non-zero pw_max_life.}
 }
 
 \numtest{32}{
+\Priority{High}
 \Reason{Accepts princ_expire_time change.}
 }
 
 \numtest{33}{
+\Priority{High}
 \Reason{Accepts attributes change.}
 }
 
 \numtest{34}{
+\Priority{High}
 \Reason{Accepts max_life change.}
 }
 
 \numtest{35}{
+\Priority{High}
 \Reason{Accepts kvno change.}
 }
 
@@ -702,10 +734,12 @@ the init doesn't succeed.
 }
 
 \numtest{38}{
+\Priority{High}
 \Reason{Accepts 0 (never) for princ_expire_time.}
 }
 
 \numtest{39}{
+\Priority{High}
 \Reason{Accepts 0 for max_life.}
 }
 
@@ -721,10 +755,12 @@ the init doesn't succeed.
 }
 
 \numtest{2}{
+\Priority{High}
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
 }
 
 \numtest{3}{
+\Priority{High}
 \Reason{Fails for user with no access bits.}
 }
 
@@ -765,18 +801,22 @@ the init doesn't succeed.
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Fails for user with ``add'' but not ``delete''.}
 }
 
 \numtest{13}{
+\Priority{High}
 \Reason{Fails for user with ``delete'' but not ``add''.}
 }
 
 \numtest{14}{
+\Priority{High}
 \Reason{Succeeds for user with ``add'' and ``delete''.}
 }
 
 \numtest{15}{
+\Priority{High}
 \Reason{Fails if target principal name exists.}
 }
 
@@ -790,7 +830,7 @@ the init doesn't succeed.
 This section lists a series of tests which will be run a number of
 times, with various parameter settings (e.g., which access bits user
 has, whether user connected with ADMIN_SERVICE or CHANGEPW_SERVICE,
-whether override_qual is specified, etc.).  The table following the
+etc.).  The table following the
 list of tests gives the various parameter settings under which the
 tests should be run, as well which should succeed and which should
 fail for each choice of parameter settings.
@@ -801,6 +841,7 @@ The test number of each of these tests is an offset from the base
 given in the table below.
 
 \numtest{1}{
+\Priority{High}
 \Reason{With history setting of 1, change password to itself.}
 }
 
@@ -816,35 +857,42 @@ given in the table below.
 }
 
 \numtest{4}{
+\Priority{High}
 \Reason{With a history setting of 3 and no password changes,
 	change password to itself.}
 }
 
 \numtest{5}{
+\Priority{High}
 \Reason{With a history setting of 3 and 1 password change,
 	change password to itself or previous password.}
 }
 
 \numtest{6}{
+\Priority{High}
 \Reason{With a history setting of 3 and 2 password changes,
 	change password to itself and the two previous passwords.}
 }
 
 \numtest{7}{
+\Priority{High}
 \Reason{Change to previously unused password when now -
 	last_pwd_change $<$ pw_min_life.}
 }
 
 \numtest{8}{
+\Priority{High}
 \Reason{Change to previously unused password that doesn't contain enough
 	character classes.}
 }
 
 \numtest{9}{
+\Priority{High}
 \Reason{Change to previously unused password that's too short.}
 }
 
 \numtest{10}{
+\Priority{High}
 \Reason{Change to previously unused password that's in the dictionary.}
 }
 
@@ -854,30 +902,21 @@ In the table below, ``7 passes'' means that test 7 above passes and
 the rest of the tests fail.
 
 \begin{tabular}{llllll}
-Base & Modify access? & Own password? & Service & override_qual & Pass/Fail \\ \hline
-0 & no & yes & ADMIN & false & all fail \\
-10 & no & yes & ADMIN & true & all fail \\
-20 & no & yes & CHANGEPW & false & all fail \\
-30 & no & yes & CHANGEPW & true & all fail \\
-40 & no & no & ADMIN & false & all fail \\
-50 & no & no & ADMIN & true & RPC: all fail; local: 7 passes \\
-60 & no & no & CHANGEPW & false & all fail \\
-70 & no & no & CHANGEPW & true & RPC: all fail; local: 7 passes \\
-80 & yes & yes & ADMIN & false & all fail \\
-90 & yes & yes & ADMIN & true & all fail \\
-100 & yes & yes & CHANGEPW & false & all fail \\
-110 & yes & yes & CHANGEPW & true & all fail \\
-120 & yes & no & ADMIN & false & all fail \\
-130 & yes & no & ADMIN & true & 7 passes \\
-140 & yes & no & CHANGEPW & false & all fail \\
-150 & yes & no & CHANGEPW & true & RPC: all fail; local: 7 passes
+Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
+0 & No & Yes & ADMIN & all fail \\
+20 & No & Yes & CHANGEPW & all fail \\
+40 & No & No & ADMIN & all fail \\
+60 & No & No & CHANGEPW & all fail \\
+80 & Yes & Yes & ADMIN & all fail \\
+100 & Yes & Yes & CHANGEPW & all fail \\
+120 & Yes & No & ADMIN & all fail \\
+140 & Yes & No & CHANGEPW & all fail \\
 \end{tabular}
 
 \subsection{Other quality/history tests}
 
-These tests should be run with override_qual false.
-
 \numtest{161}{
+\Priority{High}
 \Reason{With history of 1, can change password to anything other than
 	itself that doesn't conflict with other quality
 	rules.}
@@ -889,25 +928,30 @@ These tests should be run with override_qual false.
 }
 
 \numtest{163}{
+\Priority{High}
 \Reason{With history of 3 and 3 password changes, can change password
 	to original password.}
 }
 
 \numtest{164}{
+\Priority{High}
 \Reason{Can change password when now - last_pwd_change $>$ pw_min_life.}
 }
 
 \numtest{165}{
+\Priority{High}
 \Reason{Can change password when it contains exactly the number of
 	classes required by the policy.}
 }
 
 \numtest{166}{
+\Priority{High}
 \Reason{Can change password when it is exactly the length required by
 	the policy.}
 }
 
 \numtest{167}{
+\Priority{High}
 \Reason{Can change password to a word that isn't in the dictionary.}
 }
 
@@ -927,33 +971,40 @@ These tests should be run with override_qual false.
 }
 
 \numtest{171}{
+\Priority{High}
 \Reason{Fails for empty-string password.}
 }
 
 \numtest{172}{
+\Priority{High}
 \Reason{Pw_expiration is set to now + max_pw_life if policy exists and
 	has non-zero max_pw_life.}
 }
 
 \numtest{173}{
+\Priority{High}
 \Reason{Pw_expiration is set to 0 if policy exists and has zero
 	max_pw_life.}
 }
 
 \numtest{174}{
+\Priority{High}
 \Reason{Pw_expiration is set to 0 if no policy.}
 }
 
 \numtest{175}{
+\Priority{High}
 \Reason{KRB5_KDC_REQUIRES_PWCHANGE bit is cleared when password is
 	successfully changed.}
 }
 
 \numtest{176}{
+\Priority{High}
 \Reason{Fails for user with no access bits, on other's password.}
 }
 
 \numtest{177}{
+\Priority{High}
 \Reason{Fails for user with ``get'' but not ``modify'' access, on
 	other's password.}
 }
@@ -973,11 +1024,17 @@ These tests should be run with override_qual false.
 	other's password.}
 }
 
-\numtest{181}{
-\Reason{Password that would succeed if override_qual were false fails
-	if override_qual is true.}
-\Expected{Returns CANNOT_OVERRIDE.}
+\numtest{180.5}{
+\Priority{High}
+\Reason{Succeeds for user with ``modify'' but not ``get'' access, on
+	other's password.}
 }
+
+%\numtest{181}{
+%\Reason{Password that would succeed if override_qual were false fails
+%	if override_qual is true.}
+%\Expected{Returns CANNOT_OVERRIDE.}
+%}
 
 
 \section{ovsec_kadm_chpass_principal_util}
@@ -995,15 +1052,18 @@ Also, run the following additional tests.
 }
 
 \numtest{2}{
+\Priority{High}
 \Reason{New password is put into pw_ret, when it's prompted for.}
 }
 
 \numtest{3}{
+\Priority{High}
 Reason{New password is put into pw_ret, when it's supplied by the
 	caller.}
 }
 
 \numtest{4}{
+\Priority{High}
 \Reason{Successful invocation when pw_ret is null.}
 }
 
@@ -1024,23 +1084,15 @@ run of the test.
 \subsubsection{List of parameter settings}
 
 \begin{tabular}{llllll}
-Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hline
-1 & no & yes & ADMIN & false & fail \\
-2 & no & yes & ADMIN & true & fail \\
-3 & no & yes & CHANGEPW & false & fail \\
-4 & no & yes & CHANGEPW & true & fail \\
-5 & no & no & ADMIN & false & fail \\
-6 & no & no & ADMIN & true & RPC: fail; local: pass \\
-7 & no & no & CHANGEPW & false & fail \\
-8 & no & no & CHANGEPW & true & RPC: fail; local: pass \\
-9 & yes & yes & ADMIN & false & fail \\
-10 & yes & yes & ADMIN & true & fail \\
-11 & yes & yes & CHANGEPW & false & fail \\
-12 & yes & yes & CHANGEPW & true & fail \\
-13 & yes & no & ADMIN & false & fail \\
-14 & yes & no & ADMIN & true & pass \\
-15 & yes & no & CHANGEPW & false & fail \\
-16 & yes & no & CHANGEPW & true & RPC: fail; local: pass \\
+Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
+1 & No & Yes & ADMIN & fail \\
+3 & No & Yes & CHANGEPW & fail \\
+5 & No & No & ADMIN & fail \\
+7 & No & No & CHANGEPW & fail \\
+9 & Yes & Yes & ADMIN & fail \\
+11 & Yes & Yes & CHANGEPW & fail \\
+13 & Yes & No & ADMIN & fail \\
+15 & Yes & No & CHANGEPW & fail \\
 \end{tabular}
 
 \subsection{Other tests}
@@ -1058,29 +1110,35 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{20}{
+\Priority{High}
 \Reason{Pw_expiration is set to now + max_pw_life if policy exists and
 	has non-zero max_pw_life.}
 }
 
 \numtest{21}{
+\Priority{High}
 \Reason{Pw_expiration is set to 0 if policy exists and has zero
 	max_pw_life.}
 }
 
 \numtest{22}{
+\Priority{High}
 \Reason{Pw_expiration is set to 0 if no policy.}
 }
 
 \numtest{23}{
+\Priority{High}
 \Reason{KRB5_KDC_REQUIRES_PWCHANGE bit is cleared when key is
 	successfully changed.}
 }
 
 \numtest{24}{
+\Priority{High}
 \Reason{Fails for user with no access bits, on other's password.}
 }
 
 \numtest{25}{
+\Priority{High}
 \Reason{Fails for user with ``get'' but not ``modify'' access, on
 	other's password.}
 }
@@ -1097,6 +1155,12 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 
 \numtest{28}{
 \Reason{Succeeds for user with ``get'' and ``modify'' access, on
+	other's password.}
+}
+
+\numtest{28.5}{
+\Priority{High}
+\Reason{Succeeds for user with ``modify'' but not ``get'' access, on
 	other's password.}
 }
 
@@ -1118,10 +1182,12 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{3}{
+\Priority{High}
 \Reason{Fails for user with no access bits, retrieving other principal.}
 }
 
 \numtest{4}{
+\Priority{High}
 \Reason{Fails for user with ``add'' but not ``get'', getting principal
 	other than his own, using ADMIN_SERVICE.}
 }
@@ -1142,11 +1208,13 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{8}{
+\Priority{High}
 \Reason{Fails for user with ``get'', getting principal other than his
 	own, using CHANGEPW_SERVICE.}
 }
 
 \numtest{9}{
+\Priority{High}
 \Reason{Succeeds for user without ``get'', retrieving self, using
 	ADMIN_SERVICE.}
 }
@@ -1167,6 +1235,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{13}{
+\Priority{High}
 \Reason{Succeeds for user with ``get'', retrieving other user, using
 	ADMIN_SERVICE.}
 }
@@ -1185,6 +1254,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{2}{
+\Priority{High}
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
 }
 
@@ -1201,6 +1271,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{6}{
+\Priority{High}
 \Reason{Fails for existing policy name.}
 }
 
@@ -1209,58 +1280,72 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{8}{
+\Priority{High}
 \Reason{Fails for empty-string policy name.}
 }
 
 \numtest{9}{
+\Priority{High}
 \Reason{Accepts 0 for pw_min_life.}
 }
 
 \numtest{10}{
+\Priority{High}
 \Reason{Accepts non-zero for pw_min_life.}
 }
 
 \numtest{11}{
+\Priority{High}
 \Reason{Accepts 0 for pw_max_life.}
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Accepts non-zero for pw_max_life.}
 }
 
 \numtest{13}{
+\Priority{High}
 \Reason{Rejects 0 for pw_min_length.}
 }
 
 \numtest{14}{
+\Priority{High}
 \Reason{Accepts non-zero for pw_min_length.}
 }
 
 \numtest{15}{
+\Priority{High}
 \Reason{Rejects 0 for pw_min_classes.}
 }
 
 \numtest{16}{
+\Priority{High}
 \Reason{Accepts 1 for pw_min_classes.}
 }
 
 \numtest{17}{
+\Priority{High}
 \Reason{Accepts 4 for pw_min_classes.}
 }
 
 \numtest{18}{
+\Priority{High}
 \Reason{Rejects 5 for pw_min_classes.}
 }
 
 \numtest{19}{
+\Priority{High}
 \Reason{Rejects 0 for pw_history_num.}
 }
 
 \numtest{20}{
+\Priority{High}
 \Reason{Accepts 1 for pw_history_num.}
 }
 
 \numtest{21}{
+\Priority{High}
 \Reason{Accepts 10 for pw_history_num.}
 }
 
@@ -1269,10 +1354,12 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{22}{
+\Priority{High}
 \Reason{Fails for user with no access bits.}
 }
 
 \numtest{23}{
+\Priority{High}
 \Reason{Fails for user with ``get'' but not ``add''.}
 }
 
@@ -1285,6 +1372,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{26}{
+\Priority{High}
 \Reason{Succeeds for user with ``add.''}
 }
 
@@ -1309,6 +1397,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{2}{
+\Priority{High}
 \Reason{Fails for empty-string policy name.}
 }
 
@@ -1321,14 +1410,17 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{5}{
+\Priority{High}
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
 }
 
 \numtest{6}{
+\Priority{High}
 \Reason{Fails for user with no access bits.}
 }
 
 \numtest{7}{
+\Priority{High}
 \Reason{Fails for user with ``add'' but not ``delete''.}
 }
 
@@ -1341,6 +1433,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{10}{
+\Priority{High}
 \Reason{Succeeds for user with only ``delete''.}
 }
 
@@ -1349,6 +1442,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Fails for policy with non-zero reference count.}
 }
 
@@ -1361,6 +1455,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{2}{
+\Priority{High}
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
 }
 
@@ -1385,66 +1480,82 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{8}{
+\Priority{High}
 \Reason{Fails for empty-string policy name.}
 }
 
 \numtest{9}{
+\Priority{High}
 \Reason{Accepts 0 for pw_min_life.}
 }
 
 \numtest{10}{
+\Priority{High}
 \Reason{Accepts non-zero for pw_min_life.}
 }
 
 \numtest{11}{
+\Priority{High}
 \Reason{Accepts 0 for pw_max_life.}
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Accepts non-zero for pw_max_life.}
 }
 
 \numtest{13}{
+\Priority{High}
 \Reason{Accepts 0 for pw_min_length.}
 }
 
 \numtest{14}{
+\Priority{High}
 \Reason{Accepts non-zero for pw_min_length.}
 }
 
 \numtest{15}{
+\Priority{High}
 \Reason{Rejects 0 for pw_min_classes.}
 }
 
 \numtest{16}{
+\Priority{High}
 \Reason{Accepts 1 for pw_min_classes.}
 }
 
 \numtest{17}{
+\Priority{High}
 \Reason{Accepts 4 for pw_min_classes.}
 }
 
 \numtest{18}{
+\Priority{High}
 \Reason{Rejects 5 for pw_min_classes.}
 }
 
 \numtest{19}{
+\Priority{High}
 \Reason{Rejects 0 for pw_history_num.}
 }
 
 \numtest{20}{
+\Priority{High}
 \Reason{Accepts 1 for pw_history_num.}
 }
 
 \numtest{21}{
+\Priority{High}
 \Reason{Accepts 10 for pw_history_num.}
 }
 
 \numtest{22}{
+\Priority{High}
 \Reason{Fails for user with no access bits.}
 }
 
 \numtest{23}{
+\Priority{High}
 \Reason{Fails for user with ``get'' but not ``modify''.}
 }
 
@@ -1457,6 +1568,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{26}{
+\Priority{High}
 \Reason{Succeeds for user with ``modify.''}
 }
 
@@ -1484,6 +1596,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{3}{
+\Priority{High}
 \Reason{Fails for empty-string policy name.}
 }
 
@@ -1496,11 +1609,13 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{6}{
+\Priority{High}
 \Reason{Fails for user with no access bits trying to get other's
 	policy, using ADMIN_SERVICE.}
 }
 
 \numtest{7}{
+\Priority{High}
 \Reason{Fails for user with ``add'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
 }
@@ -1521,11 +1636,13 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{11}{
+\Priority{High}
 \Reason{Succeeds for user with only ``get'', trying to get own policy,
 	using ADMIN_SERVICE.}
 }
 
 \numtest{12}{
+\Priority{High}
 \Reason{Succeeds for user with only ``get'', trying to get own policy,
 	using CHANGEPW_SERVICE.}
 }
@@ -1546,16 +1663,19 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 }
 
 \numtest{16}{
+\Priority{High}
 \Reason{Succeeds for user without ``get'', trying to get own policy,
 	using CHANGEPW_SERVICE.}
 }
 
 \numtest{17}{
+\Priority{High}
 \Reason{Succeeds for user with ``get'', trying to get other's policy,
 	using ADMIN_SERVICE.}
 }
 
 \numtest{18}{
+\Priority{High}
 \Reason{Fails for user with ``get'', trying to get other's policy,
 	using CHANGEPW_SERVICE.}
 }
@@ -1610,10 +1730,11 @@ memory freed by this function is really freed.
 }
 
 This test should be run with the 16 possible combinations of access
-bits (since there are 4 access bits, there are $2^4 = 16$ popsible
+bits (since there are 4 access bits, there are $2^4 = 16$ possible
 combinations of them):
 
 \numtest{2}{
+\Priority{High}
 \Reason{Returns correct bit mask for access bits of user.}
 \Conditions{RPC}
 }
@@ -1621,6 +1742,7 @@ combinations of them):
 This test should be run locally:
 
 \numtest{3}{
+\Priority{High}
 \Reason{Returns 0x0f.}
 \Conditions{local}
 }
