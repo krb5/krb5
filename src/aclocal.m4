@@ -366,6 +366,9 @@ includes:: $1
 		(set -x; [$](RM) $2/$1;	[$](CP) $1 $2/$1) \
 	fi
 
+clean::
+	$(RM) $2/$1
+
 divert(0)dnl
 ])dnl
 dnl
