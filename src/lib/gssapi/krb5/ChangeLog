@@ -1,3 +1,7 @@
+1999-10-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5seal.c (make_integ_token_v2): Set 'code' when malloc fails.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

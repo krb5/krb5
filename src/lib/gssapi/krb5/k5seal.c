@@ -179,8 +179,10 @@ make_integ_token_v2(context, subkey, ctype, seqnum, direction, text, token,
 
     plain.length = 7+text->length;
 
-    if ((plain.data = (char *) malloc(plain.length)) == NULL)
+    if ((plain.data = (char *) malloc(plain.length)) == NULL) {
+	code = errno;
 	goto cleanup;
+    }
 
     plain.data[0] = (*seqnum >> 24) & 0xff;
     plain.data[1] = (*seqnum >> 16) & 0xff;
