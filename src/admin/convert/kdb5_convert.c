@@ -79,12 +79,16 @@ struct realm_info {
 
 static int verbose = 0;
 
-static krb5_error_code add_principal PROTOTYPE((krb5_principal, enum ap_op,
-						struct realm_info *));
+static krb5_error_code add_principal 
+	PROTOTYPE((krb5_context,
+		   krb5_principal, 
+		   enum ap_op,
+		   struct realm_info *));
+
 void v4fini PROTOTYPE((void));
 int v4init PROTOTYPE((char *, char *, int, char *));
-krb5_error_code enter_in_v5_db PROTOTYPE((char *, Principal *));
-krb5_error_code process_v4_dump PROTOTYPE((char *, char *));
+krb5_error_code enter_in_v5_db PROTOTYPE((krb5_context, char *, Principal *));
+krb5_error_code process_v4_dump PROTOTYPE((krb5_context, char *, char *));
 	
 int create_local_tgt = 0;
 
@@ -167,10 +171,13 @@ char *argv[];
     int read_mkey = 0;
     int tempdb = 0;
     char *tempdbname;
+    krb5_context context;
 
     krb5_enctype etype = 0xffff;
 
-    krb5_init_ets();
+    krb5_init_context(&context);
+
+    krb5_init_ets(context);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -252,11 +259,11 @@ char *argv[];
 		"while setting up etype %d", etype);
 	exit(1);
     }
-    krb5_use_cstype(&master_encblock, etype);
+    krb5_use_cstype(context, &master_encblock, etype);
 
     /* If the user has not requested locking, don't modify an existing database. */
     if (! tempdb) {
-	retval = krb5_db_set_name(dbname);
+	retval = krb5_db_set_name(context, dbname);
 	if (retval != ENOENT) {
 	    fprintf(stderr,
 		    "%s: The v5 database appears to already exist.\n",
@@ -274,12 +281,12 @@ char *argv[];
 	strcpy(tempdbname, dbname);
 	tempdbname[dbnamelen] = '~';
 	tempdbname[dbnamelen+1] = 0;
-	(void) kdb5_db_destroy(tempdbname);
+	(void) kdb5_db_destroy(context, tempdbname);
     }
 	
 
     if (!realm) {
-	if (retval = krb5_get_default_realm(&defrealm)) {
+	if (retval = krb5_get_default_realm(context, &defrealm)) {
 	    com_err(PROGNAME, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
@@ -288,18 +295,18 @@ char *argv[];
 
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(mkey_name, realm, &mkey_fullname,
-				 &master_princ)) {
+    if (retval = krb5_db_setup_mkey_name(context, mkey_name, realm,
+					 &mkey_fullname, &master_princ)) {
 	com_err(PROGNAME, retval, "while setting up master key name");
 	exit(1);
     }
 
-    krb5_princ_set_realm_data(&db_create_princ, realm);
-    krb5_princ_set_realm_length(&db_create_princ, strlen(realm));
-    krb5_princ_set_realm_data(&tgt_princ, realm);
-    krb5_princ_set_realm_length(&tgt_princ, strlen(realm));
-    krb5_princ_component(&tgt_princ,1)->data = realm;
-    krb5_princ_component(&tgt_princ,1)->length = strlen(realm);
+    krb5_princ_set_realm_data(context, &db_create_princ, realm);
+    krb5_princ_set_realm_length(context, &db_create_princ, strlen(realm));
+    krb5_princ_set_realm_data(context, &tgt_princ, realm);
+    krb5_princ_set_realm_length(context, &tgt_princ, strlen(realm));
+    krb5_princ_component(context, &tgt_princ,1)->data = realm;
+    krb5_princ_component(context, &tgt_princ,1)->length = strlen(realm);
 
     printf("Initializing database '%s' for realm '%s',\n\
 master key name '%s'\n",
@@ -311,78 +318,80 @@ master key name '%s'\n",
 	fflush(stdout);
     }
 
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, read_mkey,
-				    read_mkey, 0, &master_keyblock)) {
+    if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
+				    read_mkey, read_mkey, 0, 
+				    &master_keyblock)) {
 	com_err(PROGNAME, retval, "while reading master key");
 	exit(1);
     }
-    if (retval = krb5_process_key(&master_encblock, &master_keyblock)) {
+    if (retval = krb5_process_key(context, &master_encblock, &master_keyblock)) {
 	com_err(PROGNAME, retval, "while processing master key");
 	exit(1);
     }
 
     rblock.eblock = &master_encblock;
-    if (retval = krb5_init_random_key(&master_encblock, &master_keyblock,
-				      &rblock.rseed)) {
+    if (retval = krb5_init_random_key(context, &master_encblock,
+				      &master_keyblock, &rblock.rseed)) {
 	com_err(PROGNAME, retval, "while initializing random key generator");
-	(void) krb5_finish_key(&master_encblock);
+	(void) krb5_finish_key(context, &master_encblock);
 	exit(1);
     }
-    if (retval = krb5_db_create(tempdbname)) {
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(tempdbname);
+    if (retval = krb5_db_create(context, tempdbname)) {
+	(void) krb5_finish_key(context, &master_encblock);
+	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
+	(void) krb5_dbm_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while creating %sdatabase '%s'",
 		tempdb ? "temporary " : "", tempdbname);
 	exit(1);
     }
-    if (retval = krb5_db_set_name(tempdbname)) {
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(tempdbname);
+    if (retval = krb5_db_set_name(context, tempdbname)) {
+	(void) krb5_finish_key(context, &master_encblock);
+	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
+	(void) krb5_dbm_db_destroy(context, tempdbname);
         com_err(PROGNAME, retval, "while setting active database to '%s'",
                 tempdbname);
         exit(1);
     }
     if (v4init(PROGNAME, v4dbname, v4manual, v4dumpfile)) {
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(tempdbname);
+	(void) krb5_finish_key(context, &master_encblock);
+	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
+	(void) krb5_dbm_db_destroy(context, tempdbname);
 	exit(1);
     }
-    if ((retval = krb5_db_init()) || (retval = krb5_dbm_db_open_database())) {
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(tempdbname);
+    if ((retval = krb5_db_init(context)) || 
+	(retval = krb5_dbm_db_open_database(context))) {
+	(void) krb5_finish_key(context, &master_encblock);
+	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
+	(void) krb5_dbm_db_destroy(context, tempdbname);
 	v4fini();
 	com_err(PROGNAME, retval, "while initializing the database '%s'",
 		tempdbname);
 	exit(1);
     }
 
-    if (retval = add_principal(master_princ, MASTER_KEY, &rblock)) {
-	(void) krb5_db_fini();
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(tempdbname);
+    if (retval = add_principal(context, master_princ, MASTER_KEY, &rblock)) {
+	(void) krb5_db_fini(context);
+	(void) krb5_finish_key(context, &master_encblock);
+	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
+	(void) krb5_dbm_db_destroy(context, tempdbname);
 	v4fini();
 	com_err(PROGNAME, retval, "while adding K/M to the database");
 	exit(1);
     }
 
     if (create_local_tgt &&
-	(retval = add_principal(&tgt_princ, RANDOM_KEY, &rblock))) {
-	(void) krb5_db_fini();
-	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(tempdbname);
+	(retval = add_principal(context, &tgt_princ, RANDOM_KEY, &rblock))) {
+	(void) krb5_db_fini(context);
+	(void) krb5_finish_key(context, &master_encblock);
+	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
+	(void) krb5_dbm_db_destroy(context, tempdbname);
 	v4fini();
 	com_err(PROGNAME, retval, "while adding TGT service to the database");
 	exit(1);
     }
 
     if (v4dumpfile)
-	retval = process_v4_dump(v4dumpfile, realm);
+	retval = process_v4_dump(context, v4dumpfile, realm);
     else
 	retval = kerb_db_iterate(enter_in_v5_db, realm);
     putchar('\n');
@@ -391,17 +400,18 @@ master key name '%s'\n",
 
     /* clean up; rename temporary database if there were no errors */
     if (retval == 0) {
-	if (retval = krb5_db_fini ())
+	if (retval = krb5_db_fini (context))
 	    com_err(PROGNAME, retval, "while shutting down database");
-	else if (tempdb && (retval = krb5_dbm_db_rename(tempdbname, dbname)))
+	else if (tempdb && (retval = krb5_dbm_db_rename(context, tempdbname,
+							dbname)))
 	    com_err(PROGNAME, retval, "while renaming temporary database");
     } else {
-	(void) krb5_db_fini ();
+	(void) krb5_db_fini (context);
 	if (tempdb)
-		(void) krb5_dbm_db_destroy (tempdbname);
+		(void) krb5_dbm_db_destroy (context, tempdbname);
     }
-    (void) krb5_finish_key(&master_encblock);
-    (void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
+    (void) krb5_finish_key(context, &master_encblock);
+    (void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     v4fini();
     exit(retval ? 1 : 0);
@@ -451,7 +461,8 @@ char *dumpfile;
 }
 
 krb5_error_code
-enter_in_v5_db(realm, princ)
+enter_in_v5_db(context, realm, princ)
+krb5_context context;
 char *realm;
 Principal *princ;
 {
@@ -496,22 +507,22 @@ Principal *princ;
 	return 0;
     }
     memset((char *) &entry, 0, sizeof(entry));
-    if (retval = krb5_425_conv_principal(princ->name, princ->instance,
+    if (retval = krb5_425_conv_principal(context, princ->name, princ->instance,
 					 realm, &entry.principal))
 	return retval;
     if (verbose) {
-	if (retval = krb5_unparse_name(entry.principal, &name))
+	if (retval = krb5_unparse_name(context, entry.principal, &name))
 	   name = strdup("<not unparsable name!>");
 	if (verbose)
 	    printf("\ntranslating %s...", name);
 	free(name);
     }
 
-    if (retval = krb5_build_principal(&entry.mod_name, strlen(realm),
+    if (retval = krb5_build_principal(context, &entry.mod_name, strlen(realm),
 				      realm, princ->mod_name,
 				      princ->mod_instance[0] ? princ->mod_instance : 0,
 				      0)) {
-	krb5_free_principal(entry.principal);
+	krb5_free_principal(context, entry.principal);
 	return retval;
     }
 
@@ -534,10 +545,10 @@ Principal *princ;
     v4v5key.keytype = KEYTYPE_DES;
     v4v5key.length = sizeof(v4key);
 
-    retval = krb5_kdb_encrypt_key(rblock.eblock, &v4v5key, &ekey);
+    retval = krb5_kdb_encrypt_key(context, rblock.eblock, &v4v5key, &ekey);
     if (retval) {
-	krb5_free_principal(entry.principal);
-	krb5_free_principal(entry.mod_name);
+	krb5_free_principal(context, entry.principal);
+	krb5_free_principal(context, entry.mod_name);
 	return retval;
     }
     memset((char *)v4key, 0, sizeof(v4key));
@@ -546,28 +557,29 @@ Principal *princ;
     entry.salt_length = 0;
     entry.salt = 0;
 
-    retval = krb5_db_put_principal(&entry, &nentries);
+    retval = krb5_db_put_principal(context, &entry, &nentries);
 
     if (!retval && !strcmp(princ->name, "krbtgt") &&
 	strcmp(princ->instance, realm) && princ->instance[0]) {
-	    krb5_free_principal(entry.principal);
-	    if (retval = krb5_build_principal(&entry.principal,
+	    krb5_free_principal(context, entry.principal);
+	    if (retval = krb5_build_principal(context, &entry.principal,
 					      strlen(princ->instance),
 					      princ->instance,
 					      "krbtgt", realm, 0))
 		    return retval;
-	    retval = krb5_db_put_principal(&entry, &nentries);
+	    retval = krb5_db_put_principal(context, &entry, &nentries);
     }
 
-    krb5_free_principal(entry.principal);
-    krb5_free_principal(entry.mod_name);
+    krb5_free_principal(context, entry.principal);
+    krb5_free_principal(context, entry.mod_name);
     krb5_xfree(ekey.contents);
 
     return retval;
 }
 
 static krb5_error_code
-add_principal(princ, op, pblock)
+add_principal(context, princ, op, pblock)
+krb5_context context;
 krb5_principal princ;
 enum ap_op op;
 struct realm_info *pblock;
@@ -587,23 +599,23 @@ struct realm_info *pblock;
     entry.expiration = pblock->expiration;
     entry.mod_name = &db_create_princ;
 
-    if (retval = krb5_timeofday(&entry.mod_date))
+    if (retval = krb5_timeofday(context, &entry.mod_date))
 	return retval;
     entry.attributes = pblock->flags;
 
     switch (op) {
     case MASTER_KEY:
 	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
-	if (retval = krb5_kdb_encrypt_key(pblock->eblock,
+	if (retval = krb5_kdb_encrypt_key(context, pblock->eblock,
 					  &master_keyblock,
 					  &ekey))
 	    return retval;
 	break;
     case RANDOM_KEY:
-	if (retval = krb5_random_key(pblock->eblock, pblock->rseed, &rkey))
+	if (retval = krb5_random_key(context, pblock->eblock, pblock->rseed, &rkey))
 	    return retval;
-	retval = krb5_kdb_encrypt_key(pblock->eblock, rkey, &ekey);
-	krb5_free_keyblock(rkey);
+	retval = krb5_kdb_encrypt_key(context, pblock->eblock, rkey, &ekey);
+	krb5_free_keyblock(context, rkey);
 	if (retval)
 	    return retval;
 	break;
@@ -617,7 +629,7 @@ struct realm_info *pblock;
     entry.salt_length = 0;
     entry.salt = 0;
 
-    if (retval = krb5_db_put_principal(&entry, &nentries))
+    if (retval = krb5_db_put_principal(context, &entry, &nentries))
 	return retval;
 
     krb5_xfree(ekey.contents);
@@ -742,7 +754,8 @@ register char *cp;
 }
 
 krb5_error_code
-process_v4_dump(dumpfile, realm)
+process_v4_dump(context, dumpfile, realm)
+krb5_context context;
 char *dumpfile;
 char *realm;
 {
@@ -793,7 +806,7 @@ char *realm;
 	    aprinc.mod_name[0] = '\0';
 	if (aprinc.mod_instance[0] == '*')
 	    aprinc.mod_instance[0] = '\0';
-	if (retval = enter_in_v5_db(realm, &aprinc))
+	if (retval = enter_in_v5_db(context, realm, &aprinc))
 	    break;
     }
     (void) fclose(input_file);
