@@ -1,3 +1,8 @@
+Wed Jun 28 03:04:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c: changed main, krb5_free_keyblock_contents to use old
+	style definitions.
+
 Tue Jun 27 20:27:06 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* encode.c: make declarations use KRB5_PROTOTYPE, and use old

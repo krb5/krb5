@@ -69,14 +69,18 @@ RETSIGTYPE request_exit(signo)
      signalled = 1;
 }
 
-int krb5_free_keyblock_contents(krb5_context context, krb5_keyblock *key)
+int krb5_free_keyblock_contents(context, key)
+     krb5_context context;
+     krb5_keyblock *key;
 {
      memset(key->contents, 0, key->length);
      krb5_xfree(key->contents);
      return 0;
 }
 
-int main(int argc, char **argv)
+int main(argc, argv)
+     int argc;
+     char **argv;
 {
      struct servent *serv;
      struct sockaddr_in saddr;
