@@ -37,8 +37,10 @@ krb5_error_code
 mit_des_finish_key (eblock)
     krb5_encrypt_block FAR * eblock;
 {
-    memset((char *)eblock->priv, 0, (size_t) eblock->priv_size);
-    free(eblock->priv);
+    if (eblock->priv) {
+	memset((char *)eblock->priv, 0, (size_t) eblock->priv_size);
+	free(eblock->priv);
+    }
     eblock->priv = 0;
     eblock->priv_size = 0;
     /* free/clear other stuff here? */

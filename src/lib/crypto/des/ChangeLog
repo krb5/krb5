@@ -1,3 +1,9 @@
+Tue Oct 31 22:06:52 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* finish_key.c (mit_des_finish_key): Make mit_des_finish_key()
+		safe to call even if there is no key that needs to be
+		freed.
+
 Fri Oct  6 21:59:55 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
