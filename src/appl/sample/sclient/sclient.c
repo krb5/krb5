@@ -66,11 +66,11 @@ char *argv[];
     krb5_ap_rep_enc_part *rep_ret;
     short xmitlen;
 
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s <hostname>\n",argv[0]);
+    if (argc != 2 && argc != 3) {
+	fprintf(stderr, "usage: %s <hostname> [port]\n",argv[0]);
 	exit(1);
     }
-    
+
     krb5_init_ets();
 
     (void) signal(SIGPIPE, SIG_IGN);
@@ -82,17 +82,22 @@ char *argv[];
     /* clear out the structure first */
     (void) memset((char *)&sin, 0, sizeof(sin));
 
-    /* find the port number for knetd */
-    sp = getservbyname(SAMPLE_SERVICE, "tcp");
-    if (!sp) {
-	fprintf(stderr,
-		"unknown service %s/tcp; check /etc/services\n",
-		SAMPLE_SERVICE);
-	exit(1);
+    if (argc == 3) {
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(atoi(argv[2]));
+    } else {
+	/* find the port number for knetd */
+	sp = getservbyname(SAMPLE_SERVICE, "tcp");
+	if (!sp) {
+	    fprintf(stderr,
+		    "unknown service %s/tcp; check /etc/services\n",
+		    SAMPLE_SERVICE);
+	    exit(1);
+	}
+	/* copy the port number */
+	sin.sin_port = sp->s_port;
+	sin.sin_family = AF_INET;
     }
-    /* copy the port number */
-    sin.sin_port = sp->s_port;
-    sin.sin_family = AF_INET;
 
     /* look up the server host */
     hp = gethostbyname(argv[1]);
