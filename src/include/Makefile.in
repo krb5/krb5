@@ -6,7 +6,7 @@ BUILDTOP=$(REL)..
 ##DOSBUILDTOP = ..
 NO_OUTPRE=1
 
-all-unix:: krb5.h kerberosIV/krb_err.h
+all-unix:: krb5.h
 all-mac::
 
 all-windows::
@@ -45,7 +45,6 @@ krb5.h: krb5/autoconf.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
 asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h: rebuild-error-tables
 rebuild-error-tables:
 	(cd ../lib/krb5/error_tables && $(MAKE) includes)
-kerberosIV/krb_err.h: all-recurse
 
 .PHONY: force rebuild-error-tables
 force:
@@ -71,6 +70,6 @@ clean-windows::
 	cd ..
 	@echo Making clean in include
 
-install-headers-unix install:: krb5.h profile.h kerberosIV/krb_err.h
+install-headers-unix install:: krb5.h profile.h
 	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
 	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h
