@@ -73,6 +73,7 @@ There is no random number generator.
 #define	FAILCOUNT_EVENT		RANDOM_EVENT(2,5)
 #define	MODNAME_EVENT		RANDOM_EVENT(2,5)
 #define	MODDATE_EVENT		RANDOM_EVENT(2,5)
+#define	EXTRA_EVENT		RANDOM_EVENT(1,5)
 #define	SET_EVENT		RANDOM_EVENT(1,4)
 
 /*
@@ -88,6 +89,145 @@ time2string(ts)
     /* Remove trailing \n */
     buf[strlen(buf)-1] = '\0';
     return(buf);
+}
+
+static krb5_boolean
+aux_data_inequal(in, out)
+    krb5_db_entry	*in, *out;
+{
+    krb5_tl_data	*intl, *outtl;
+    krb5_boolean	found;
+
+    if (in->n_tl_data != out->n_tl_data)
+	return(1);
+    found = 1;
+    for (intl = in->tl_data; intl; intl = intl->tl_data_next) {
+	found = 0;
+	for (outtl = out->tl_data; outtl; outtl = outtl->tl_data_next) {
+	    if ((intl->tl_data_type == outtl->tl_data_type) &&
+		(intl->tl_data_length == outtl->tl_data_length) &&
+		!memcmp(intl->tl_data_contents,
+			outtl->tl_data_contents,
+			intl->tl_data_length)) {
+		outtl->tl_data_length = -outtl->tl_data_length;
+		found = 1;
+	    }
+	}
+	if (!found)
+	    break;
+    }
+    for (outtl = out->tl_data; outtl; outtl = outtl->tl_data_next) {
+	if (outtl->tl_data_length < 0)
+	    outtl->tl_data_length = -outtl->tl_data_length;
+    }
+    return(!found);
+}
+
+static void
+print_auxdata(entp)
+    krb5_db_entry	*entp;
+{
+    krb5_tl_data	*tl;
+    int			i;
+
+    for (tl = entp->tl_data; tl; tl = tl->tl_data_next) {
+	printf("tl_data(%d)[len=%d] ", tl->tl_data_type, tl->tl_data_length);
+	for (i=0; i<tl->tl_data_length; i++)
+	    printf("%02x ", tl->tl_data_contents[i]);
+	printf("\n");
+    }
+}
+
+static krb5_boolean
+key_data_inequal(in, out)
+    krb5_db_entry	*in, *out;
+{
+    krb5_boolean	found;
+    int 		i, j;
+
+    if (in->n_key_data != out->n_key_data)
+	return(1);
+    found = 1;
+    for (i=0; i<in->n_key_data; i++) {
+	found = 0;
+	for (j=0; j<out->n_key_data; j++) {
+	    if ((in->key_data[i].key_data_kvno ==
+		 out->key_data[j].key_data_kvno) &&
+		(in->key_data[i].key_data_type[0] ==
+		 out->key_data[j].key_data_type[0]) &&
+		(in->key_data[i].key_data_type[1] ==
+		 out->key_data[j].key_data_type[1]) &&
+		(in->key_data[i].key_data_length[0] ==
+		 out->key_data[j].key_data_length[0]) &&
+		(in->key_data[i].key_data_length[1] ==
+		 out->key_data[j].key_data_length[1]) &&
+		!memcmp(in->key_data[i].key_data_contents[0],
+			out->key_data[j].key_data_contents[0],
+			in->key_data[i].key_data_length[0]) &&
+		(!in->key_data[i].key_data_length[1] ||
+		 !memcmp(in->key_data[i].key_data_contents[1],
+			out->key_data[j].key_data_contents[1],
+			in->key_data[i].key_data_length[1]))) {
+		out->key_data[j].key_data_length[0] = 
+		    -out->key_data[j].key_data_length[0];
+		found = 1;
+	    }
+	}
+	if (!found)
+	    break;
+    }
+    for (j=0; j<out->n_key_data; j++) {
+	if (out->key_data[j].key_data_length[0] < 0)
+	    out->key_data[j].key_data_length[0] = 
+		-out->key_data[j].key_data_length[0];
+    }
+    return(!found);
+}
+
+static void
+print_keydata(entp)
+    krb5_db_entry	*entp;
+{
+    int			i, j;
+
+    for (j=0; j<entp->n_key_data; j++) {
+	printf("key(vno=%d):key(type=%d)[contents= ",
+	       entp->key_data[j].key_data_kvno,
+	       entp->key_data[j].key_data_type[0]);
+	for (i=0; i<entp->key_data[j].key_data_length[0]; i++)
+	    printf("%02x ", entp->key_data[j].key_data_contents[0][i]);
+	printf("] salt(type=%d)", entp->key_data[j].key_data_type[1]);
+	if (entp->key_data[j].key_data_length[1]) {
+	    printf("[contents= ");
+	    for (i=0; i<entp->key_data[j].key_data_length[1]; i++)
+		printf("%02x ", entp->key_data[j].key_data_contents[1][i]);
+	    printf("]");
+	}
+	printf("\n");
+    }
+}
+
+static krb5_boolean
+extra_data_inequal(in, out)
+    krb5_db_entry	*in, *out;
+{
+    if (in->e_length != out->e_length)
+	return(1);
+    if (in->e_length && memcmp(in->e_data, out->e_data, (size_t) in->e_length))
+	return(1);
+    return(0);
+}
+
+static void
+print_extradata(entp)
+    krb5_db_entry	*entp;
+{
+    int i;
+
+    printf("extra:");
+    for (i=0; i<entp->e_length; i++)
+	printf("%02x ", entp->e_data[i]);
+    printf("\n");
 }
 
 /*
@@ -132,18 +272,6 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
 	    strcpy(*pwdp, defpass);
 	    *validp |= KRB5_ADM_M_PASSWORD;
 	}
-    }
-
-    /* Do kvno */
-    if (isrand) {
-	if (KVNO_EVENT) {
-	    dbentp->kvno = RAND();
-	    *validp |= KRB5_ADM_M_KVNO;
-	}
-    }
-    else {
-	dbentp->kvno = 1;
-	*validp |= KRB5_ADM_M_KVNO;
     }
 
     /* Do maxlife */
@@ -211,47 +339,6 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
 	*validp |= KRB5_ADM_M_FLAGS;
     }
 
-    /* Do salts */
-    if (isrand) {
-	if (SALT_EVENT) {
-	    dbentp->salt_type = (RAND() % 1);
-	    dbentp->alt_salt_type = (RAND() % 1);
-	    *validp |= KRB5_ADM_M_SALTTYPE;
-	}
-    }
-    else {
-	dbentp->salt_type = dbentp->alt_salt_type = KRB5_KDB_SALTTYPE_NORMAL;
-	*validp |= KRB5_ADM_M_SALTTYPE;
-    }
-
-    /* Do mkvno */
-    if (isrand) {
-	if (MKVNO_EVENT) {
-	    dbentp->mkvno = RAND();
-	    *validp |= KRB5_ADM_M_MKVNO;
-	}
-    }
-    else {
-	if (!is_set) {
-	    dbentp->mkvno = 1;
-	    *validp |= KRB5_ADM_M_MKVNO;
-	}
-    }
-
-    /* Do lastpwchange */
-    if (isrand) {
-	if (LASTPWCHANGE_EVENT) {
-	    dbentp->last_pwd_change = RAND();
-	    *validp |= KRB5_ADM_M_LASTPWCHANGE;
-	}
-    }
-    else {
-	if (!is_set) {
-	    dbentp->last_pwd_change = (krb5_timestamp) now - 3600;
-	    *validp |= KRB5_ADM_M_LASTPWCHANGE;
-	}
-    }
-
     /* Do lastsuccess */
     if (isrand) {
 	if (LASTSUCCESS_EVENT) {
@@ -294,34 +381,137 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
 	}
     }
 
-    /* Do modname */
+    /*
+     * Generate auxiliary data.
+     */
     if (isrand) {
-	if (MODNAME_EVENT) {
-	    if (!krb5_parse_name(kcontext, defprinc, &dbentp->mod_name)) {
-		*validp |= KRB5_ADM_M_MODNAME;
+	krb5_octet *lpw_change;
+	krb5_tl_data *tldata;
+	krb5_timestamp lpw;
+	krb5_tl_mod_princ mprinc;
+	int	didone;
+
+	didone = 0;
+	if (LASTPWCHANGE_EVENT) {
+	    if ((tldata = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) &&
+		(lpw_change = (krb5_octet *) malloc(sizeof(krb5_timestamp)))) {
+		lpw = (krb5_timestamp) RAND();
+		lpw_change[0] = (unsigned char) ((lpw >> 24) & 0xff);
+		lpw_change[1] = (unsigned char) ((lpw >> 16) & 0xff);
+		lpw_change[2] = (unsigned char) ((lpw >> 8) & 0xff);
+		lpw_change[3] = (unsigned char) (lpw & 0xff);
+		tldata->tl_data_next = (krb5_tl_data *) NULL;
+		tldata->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+		tldata->tl_data_length = sizeof(krb5_timestamp);
+		tldata->tl_data_contents = lpw_change;
+		dbentp->n_tl_data = 1;
+		dbentp->tl_data = tldata;
+		didone++;
+	    }
+	}
+	if (MODNAME_EVENT || MODDATE_EVENT) {
+	    mprinc.mod_date = (krb5_timestamp) RAND();
+	    if (!krb5_parse_name(kcontext, defprinc, &mprinc.mod_princ)) {
+		if (!krb5_dbe_encode_mod_princ_data(kcontext, &mprinc, dbentp))
+		    didone++;
+	    }
+	}
+	if (didone)
+	    *validp |= KRB5_ADM_M_AUXDATA;
+    }
+    else {
+	krb5_octet *lpw_change;
+	krb5_tl_data *tldata;
+	krb5_timestamp lpw;
+	krb5_tl_mod_princ mprinc;
+
+	if ((tldata = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) &&
+	    (lpw_change = (krb5_octet *) malloc(sizeof(krb5_timestamp)))) {
+	    lpw = (krb5_timestamp) now - 3600;
+	    lpw_change[0] = (unsigned char) ((lpw >> 24) & 0xff);
+	    lpw_change[1] = (unsigned char) ((lpw >> 16) & 0xff);
+	    lpw_change[2] = (unsigned char) ((lpw >> 8) & 0xff);
+	    lpw_change[3] = (unsigned char) (lpw & 0xff);
+	    tldata->tl_data_next = (krb5_tl_data *) NULL;
+	    tldata->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+	    tldata->tl_data_length = sizeof(krb5_timestamp);
+	    tldata->tl_data_contents = lpw_change;
+	    dbentp->n_tl_data = 1;
+	    dbentp->tl_data = tldata;
+	}
+	mprinc.mod_date = (krb5_timestamp) now;
+	if (!krb5_parse_name(kcontext, defprinc, &mprinc.mod_princ))
+	    krb5_dbe_encode_mod_princ_data(kcontext, &mprinc, dbentp);
+	*validp |= KRB5_ADM_M_AUXDATA;
+    }
+
+    /* Make key data */
+    if (isrand) {
+	int i, j, kl, sl;
+
+	if (!is_set) {
+	    for (i=0; i<(1+(RAND()%8)); i++) {
+		if (!krb5_dbe_create_key_data(kcontext, dbentp)) {
+		    dbentp->key_data[i].key_data_kvno = RAND() % 32768;
+		    dbentp->key_data[i].key_data_type[0] = RAND() % 32768;
+		    dbentp->key_data[i].key_data_type[1] = RAND() % 32768;
+		    kl = dbentp->key_data[i].key_data_length[0] =
+			8 + (RAND() % 128);
+		    sl = dbentp->key_data[i].key_data_length[1] =
+			0 + (RAND() % 128);
+		    if (dbentp->key_data[i].key_data_contents[0] =
+			(krb5_octet *) malloc(kl)) {
+			for (j=0; j<kl; j++) {
+			    dbentp->key_data[i].key_data_contents[0][j] =
+				RAND() % 256;
+			}
+		    }
+		    if (dbentp->key_data[i].key_data_contents[1] =
+			(krb5_octet *) malloc(sl)) {
+			for (j=0; j<sl; j++) {
+			    dbentp->key_data[i].key_data_contents[1][j] =
+				RAND() % 256;
+			}
+		    }
+		    *validp |= KRB5_ADM_M_KEYDATA;
+		}
 	    }
 	}
     }
     else {
 	if (!is_set) {
-	    if (!krb5_parse_name(kcontext, defprinc, &dbentp->mod_name)) {
-		*validp |= KRB5_ADM_M_MODNAME;
+	    if (!krb5_dbe_create_key_data(kcontext, dbentp)) {
+		int i;
+
+		dbentp->key_data[0].key_data_kvno = 1;
+		dbentp->key_data[0].key_data_type[0] = 1;
+		dbentp->key_data[0].key_data_type[1] = 0;
+		dbentp->key_data[0].key_data_length[0] = 24;
+		dbentp->key_data[0].key_data_length[1] = 0;
+		if (dbentp->key_data[0].key_data_contents[0] =
+		    (krb5_octet *) malloc(24)) {
+		    for (i=0; i<24; i++)
+			dbentp->key_data[0].key_data_contents[0][i] = RAND() % 256;
+		}
+		dbentp->key_data[0].key_data_contents[1] = (krb5_octet *) NULL;
+		*validp |= KRB5_ADM_M_KEYDATA;
 	    }
 	}
     }
 
-    /* Do mod_date */
-    if (isrand) {
-	if (MODDATE_EVENT) {
-	    dbentp->mod_date = RAND();
-	    *validp |= KRB5_ADM_M_MODDATE;
+    /* Make extra data */
+    if (isrand && EXTRA_EVENT) {
+	dbentp->e_length = 8 + (RAND() % 504);
+	if (dbentp->e_data = (krb5_octet *)
+	    malloc((size_t) dbentp->e_length)) {
+	    int j;
+	    for (j=0; j<dbentp->e_length; j++) {
+		dbentp->e_data[j] = RAND() % 256;
+	    }
+	    *validp |= KRB5_ADM_M_EXTRADATA;
 	}
-    }
-    else {
-	if (!is_set) {
-	    dbentp->mod_date = (krb5_timestamp) now;
-	    *validp |= KRB5_ADM_M_MODDATE;
-	}
+	else
+	    dbentp->e_length = 0;
     }
 
     if (is_set) {
@@ -362,12 +552,6 @@ compare_entries(kcontext, ivalid, ientp, ipwd, ovalid, oentp, opwd)
 	 strcmp(ipwd, opwd)))
 	    return(0);
 
-    /* Handle/compare kvno */
-    if (((ivalid & KRB5_ADM_M_KVNO) != 0) &&
-	(((ovalid & KRB5_ADM_M_KVNO) == 0) ||
-	 (ientp->kvno != oentp->kvno)))
-	return(0);
-
     /* Handle/compare maxlife */
     if (((ivalid & KRB5_ADM_M_MAXLIFE) != 0) &&
 	(((ovalid & KRB5_ADM_M_MAXLIFE) == 0) ||
@@ -405,25 +589,6 @@ compare_entries(kcontext, ivalid, ientp, ipwd, ovalid, oentp, opwd)
 	 (ientp->attributes != oentp->attributes)))
 	return(0);
 
-    /* Handle/compare salts */
-    if (((ivalid & KRB5_ADM_M_SALTTYPE) != 0) &&
-	(((ovalid & KRB5_ADM_M_SALTTYPE) == 0) ||
-	 (ientp->salt_type != oentp->salt_type) ||
-	 (ientp->alt_salt_type != oentp->alt_salt_type)))
-	return(0);
-
-    /* Handle/compare mkvno */
-    if (((ivalid & KRB5_ADM_M_MKVNO) != 0) &&
-	(((ovalid & KRB5_ADM_M_MKVNO) == 0) ||
-	 (ientp->mkvno != oentp->mkvno)))
-	return(0);
-
-    /* Handle/compare lastpwchange */
-    if (((ivalid & KRB5_ADM_M_LASTPWCHANGE) != 0) &&
-	(((ovalid & KRB5_ADM_M_LASTPWCHANGE) == 0) ||
-	 (ientp->last_pwd_change != oentp->last_pwd_change)))
-	return(0);
-
     /* Handle/compare lastsuccess */
     if (((ivalid & KRB5_ADM_M_LASTSUCCESS) != 0) &&
 	(((ovalid & KRB5_ADM_M_LASTSUCCESS) == 0) ||
@@ -442,17 +607,24 @@ compare_entries(kcontext, ivalid, ientp, ipwd, ovalid, oentp, opwd)
 	 (ientp->fail_auth_count != oentp->fail_auth_count)))
 	return(0);
 
-    /* Handle/compare mod_name */
-    if (((ivalid & KRB5_ADM_M_MODNAME) != 0) &&
-	(((ovalid & KRB5_ADM_M_MODNAME) == 0) ||
-	 !krb5_principal_compare(kcontext, ientp->mod_name, oentp->mod_name)))
+    /* Handle/compare auxiliary data */
+    if (((ivalid & KRB5_ADM_M_AUXDATA) != 0) &&
+	(((ovalid & KRB5_ADM_M_AUXDATA) == 0) ||
+	 aux_data_inequal(ientp, oentp)))
 	return(0);
 
-    /* Handle/compare mod_date */
-    if (((ivalid & KRB5_ADM_M_MODDATE) != 0) &&
-	(((ovalid & KRB5_ADM_M_MODDATE) == 0) ||
-	 (ientp->mod_date != oentp->mod_date)))
+    /* Handle/compare key data */
+    if (((ivalid & KRB5_ADM_M_KEYDATA) != 0) &&
+	(((ovalid & KRB5_ADM_M_KEYDATA) == 0) ||
+	 key_data_inequal(ientp, oentp)))
 	return(0);
+
+    /* Handle/compare extra data */
+    if (((ivalid & KRB5_ADM_M_EXTRADATA) != 0) &&
+	(((ovalid & KRB5_ADM_M_EXTRADATA) == 0) ||
+	 extra_data_inequal(ientp, oentp)))
+	return(0);
+
     return(1);
 }
 
@@ -471,10 +643,6 @@ print_dbent(kcontext, ivalid, ientp, ipwd)
     /* Print password */
     if ((ivalid & KRB5_ADM_M_PASSWORD) != 0)
 	printf("Password:\t%s\n", ipwd);
-
-    /* Print kvno */
-    if ((ivalid & KRB5_ADM_M_KVNO) != 0)
-	printf("kvno:\t\t%8d\t%08x\n", ientp->kvno, ientp->kvno);
 
     /* Print maxlife */
     if ((ivalid & KRB5_ADM_M_MAXLIFE) != 0)
@@ -503,19 +671,6 @@ print_dbent(kcontext, ivalid, ientp, ipwd)
     if ((ivalid & KRB5_ADM_M_FLAGS) != 0)
 	printf("flags:\t\t%8d\t%08x\n", ientp->attributes, ientp->attributes);
 
-    /* Print salts */
-    if ((ivalid & KRB5_ADM_M_SALTTYPE) != 0)
-	printf("salts:\t\t%d, %d\n", ientp->salt_type, ientp->alt_salt_type);
-
-    /* Print mkvno */
-    if ((ivalid & KRB5_ADM_M_MKVNO) != 0)
-	printf("mkvno:\t\t%8d\t%08x\n", ientp->mkvno, ientp->mkvno);
-
-    /* Print lastpwchange */
-    if ((ivalid & KRB5_ADM_M_LASTPWCHANGE) != 0)
-	printf("lastpwchg:\t%8d\t%08x\t%s\n", ientp->last_pwd_change,
-	       ientp->last_pwd_change, time2string(ientp->last_pwd_change));
-
     /* Print lastsuccess */
     if ((ivalid & KRB5_ADM_M_LASTSUCCESS) != 0)
 	printf("lastsucc:\t%8d\t%08x\t%s\n", ientp->last_success,
@@ -531,20 +686,17 @@ print_dbent(kcontext, ivalid, ientp, ipwd)
 	printf("failcount:\t%8d\t%08x\n", ientp->fail_auth_count,
 	       ientp->fail_auth_count);
 
-    /* Print mod_name */
-    if ((ivalid & KRB5_ADM_M_MODNAME) != 0) {
-	char *mprinc;
+    /* Print auxiliary data */
+    if ((ivalid & KRB5_ADM_M_AUXDATA) != 0)
+	print_auxdata(ientp);
 
-	if (!krb5_unparse_name(kcontext, ientp->mod_name, &mprinc)) {
-	    printf("modname:\t%s\n", mprinc);
-	    krb5_xfree(mprinc);
-	}
-    }
+    /* Print key data */
+    if ((ivalid & KRB5_ADM_M_KEYDATA) != 0)
+	print_keydata(ientp);
 
-    /* Print mod_date */
-    if ((ivalid & KRB5_ADM_M_MODDATE) != 0)
-	printf("moddate:\t%8d\t%08x\t%s\n", ientp->mod_date,
-	       ientp->mod_date, time2string(ientp->mod_date));
+    /* Print extra data */
+    if ((ivalid & KRB5_ADM_M_EXTRADATA) != 0)
+	print_extradata(ientp);
 }
 
 /*
@@ -714,11 +866,25 @@ do_test(pname, verbose, isrand, is_a_set, title, passno)
 	/* Cleanup */
 	if (in_password)
 	    free(in_password);
-	if (in_dbent->mod_name)
-	    krb5_free_principal(kcontext, in_dbent->mod_name);
+	if (in_dbent->tl_data) {
+	    krb5_tl_data *xxx, *xxx1;
+
+	    for (xxx=in_dbent->tl_data; xxx; ) {
+		xxx1 = xxx;
+		xxx = xxx->tl_data_next;
+		free(xxx1);
+	    }
+	}
 	free(in_dbent);
-	if (out_dbent->mod_name)
-	    krb5_free_principal(kcontext, out_dbent->mod_name);
+	if (out_dbent->tl_data) {
+	    krb5_tl_data *xxx, *xxx1;
+
+	    for (xxx=out_dbent->tl_data; xxx; ) {
+		xxx1 = xxx;
+		xxx = xxx->tl_data_next;
+		free(xxx1);
+	    }
+	}
 	free(out_dbent);
     }
     else {

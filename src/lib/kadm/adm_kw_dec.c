@@ -32,37 +32,6 @@
 #define	char2int(c)	((c) - '0')
 
 /*
- * string_to_salt_type()	- Convert from salt string to salt type.
- */
-static krb5_int32
-string_to_salt_type(sstring, retp)
-    char		*sstring;
-    krb5_error_code	*retp;
-{
-    krb5_error_code	kret;
-    krb5_int32		stype;
-
-    kret = EINVAL;
-    stype = -1;
-    if (!strcmp(sstring, KRB5_ADM_SALTTYPE_NORMAL))
-	stype = KRB5_KDB_SALTTYPE_NORMAL;
-    else if (!strcmp(sstring, KRB5_ADM_SALTTYPE_V4))
-	stype = KRB5_KDB_SALTTYPE_V4;
-    else if (!strcmp(sstring, KRB5_ADM_SALTTYPE_NOREALM))
-	stype = KRB5_KDB_SALTTYPE_NOREALM;
-    else if (!strcmp(sstring, KRB5_ADM_SALTTYPE_ONLYREALM))
-	stype = KRB5_KDB_SALTTYPE_ONLYREALM;
-    else if (!strcmp(sstring, KRB5_ADM_SALTTYPE_SPECIAL))
-	stype = KRB5_KDB_SALTTYPE_SPECIAL;
-
-    if (stype != -1)
-	kret = 0;
-
-    *retp = kret;
-    return(stype);
-}
-
-/*
  * keyword_value()	- Find index of keyword value if keyword is present.
  *
  * If a value is required, then the index of the keyword value is returned,
@@ -200,31 +169,59 @@ decode_kw_gentime(dataentp, keyword, gtimep)
 }
 
 /*
- * decode_kw_salttype()	- Decode a keyword=<salttype> pair and fill in the
- *			  salt type values if the pair is present.
+ * decode_kw_tagged()	- Decode a keyword=<taglist>...<data> list and return
+ *			  the values of the tags and the data if the list is
+ *			  present.
  */
 static krb5_error_code
-decode_kw_salttype(dataentp, keyword, dbentp)
+decode_kw_tagged(dataentp, keyword, ntags, taglist, lenp, datap)
     krb5_data		*dataentp;
     char		*keyword;
-    krb5_db_entry	*dbentp;
+    krb5_int32		ntags;
+    krb5_int32		*taglist;
+    size_t		*lenp;
+    krb5_octet		**datap;
 {
     krb5_error_code	kret;
-    char		*saltstring;
-    char		*sentp;
+    off_t		valueoff;
+    size_t		len2copy;
+    unsigned char	*cp, *ep;
+    int			i;
 
-    saltstring = (char *) NULL;
-    if (!(kret = decode_kw_string(dataentp, keyword, &saltstring))) {
-	kret = EINVAL;
-	if (sentp = strchr(saltstring, (int) ',')) {
-	    *sentp = '\0';
-	    sentp++;
+    kret = ENOENT;
+    if ((valueoff = keyword_value(dataentp, keyword, 1)) >= 0) {
+	/*
+	 * Blast through the tags.
+	 */
+	kret = 0;
+	cp = (unsigned char *) &dataentp->data[valueoff];
+	ep = (unsigned char *) &dataentp->data[dataentp->length];
+	for (i=0; i<ntags; i++) {
+	    if (&cp[sizeof(krb5_int32)] > ep) {
+		kret = EINVAL;
+		break;
+	    }
+	    taglist[i] = (((krb5_int32) ((unsigned char) cp[0]) << 24) +
+			  ((krb5_int32) ((unsigned char) cp[1]) << 16) +
+			  ((krb5_int32) ((unsigned char) cp[2]) << 8) +
+			  ((krb5_int32) ((unsigned char) cp[3])));
+	    cp += sizeof(krb5_int32);
 	}
-	dbentp->salt_type = string_to_salt_type(saltstring, &kret);
-	if (!kret && sentp) {
-	    dbentp->alt_salt_type = string_to_salt_type(sentp, &kret);
+	if (!kret) {
+	    /*
+	     * If we were successful, copy out the remaining bytes for value.
+	     */
+	    len2copy = (size_t) (ep - cp);
+	    if (len2copy &&
+		(*datap = (krb5_octet *) malloc(len2copy+1))) {
+		memcpy(*datap, cp, len2copy);
+		(*datap)[len2copy] = '\0';
+	    }
+	    if (len2copy && !*datap)
+		kret = ENOMEM;
+	    else
+		*lenp = len2copy;
 	}
-	free(saltstring);
     }
     return(kret);
 }
@@ -255,12 +252,21 @@ krb5_adm_proto_to_dbent(kcontext, nent, data, validp, dbentp, pwordp)
     int			i;
     krb5_error_code	retval;
     krb5_ui_4		parsed_mask;
-    char		*modifier_name;
+    krb5_int32		taglist[4];
+    size_t		data_length;
+    krb5_octet		*tagged_data;
+    struct key_tag_correlator {
+	krb5_int32	key_tag;
+	int		key_data_index;
+    } *correlators, *correlation;
+    int			ncorrelations;
 
     /* Initialize */
     retval = 0;
     parsed_mask = 0;
     *pwordp = (char *) NULL;
+    correlators = (struct key_tag_correlator *) NULL;
+    ncorrelations = 0;
 
     /* Loop through all the specified keyword=value pairs. */
     for (i=0; i<nent; i++) {
@@ -269,18 +275,6 @@ krb5_adm_proto_to_dbent(kcontext, nent, data, validp, dbentp, pwordp)
 					KRB5_ADM_KW_PASSWORD,
 					pwordp))) {
 	    parsed_mask |= KRB5_ADM_M_PASSWORD;
-	    continue;
-	}
-	else {
-	    if (retval != ENOENT)
-		break;
-	}
-
-	/* Check for key version number */
-	if (!(retval = decode_kw_integer(&data[i],
-					 KRB5_ADM_KW_KVNO,
-					 (krb5_ui_4 *) &dbentp->kvno))) {
-	    parsed_mask |= KRB5_ADM_M_KVNO;
 	    continue;
 	}
 	else {
@@ -368,42 +362,6 @@ krb5_adm_proto_to_dbent(kcontext, nent, data, validp, dbentp, pwordp)
 		break;
 	}
 
-	/* Check for salttype */
-	if (!(retval = decode_kw_salttype(&data[i],
-					  KRB5_ADM_KW_SALTTYPE,
-					  dbentp))) {
-	    parsed_mask |= KRB5_ADM_M_SALTTYPE;
-	    continue;
-	}
-	else {
-	    if (retval != ENOENT)
-		break;
-	}
-
-	/* Check for master key version number */
-	if (!(retval = decode_kw_integer(&data[i],
-					 KRB5_ADM_KW_MKVNO,
-					 (krb5_ui_4 *) &dbentp->mkvno))) {
-	    parsed_mask |= KRB5_ADM_M_MKVNO;
-	    continue;
-	}
-	else {
-	    if (retval != ENOENT)
-		break;
-	}
-
-	/* Check for last password change */
-	if (!(retval = decode_kw_gentime(&data[i],
-					 KRB5_ADM_KW_LASTPWCHANGE,
-					 &dbentp->last_pwd_change))) {
-	    parsed_mask |= KRB5_ADM_M_LASTPWCHANGE;
-	    continue;
-	}
-	else {
-	    if (retval != ENOENT)
-		break;
-	}
-
 	/* Check for last successful password entry */
 	if (!(retval = decode_kw_gentime(&data[i],
 					 KRB5_ADM_KW_LASTSUCCESS,
@@ -441,37 +399,158 @@ krb5_adm_proto_to_dbent(kcontext, nent, data, validp, dbentp, pwordp)
 		break;
 	}
 
-	/* Check for modification principal */
-	if (!(retval = decode_kw_string(&data[i],
-					KRB5_ADM_KW_MODNAME,
-					&modifier_name))) {
-	    krb5_principal	modifier;
-	    retval = krb5_parse_name(kcontext, modifier_name, &modifier);
-	    free(modifier_name);
-	    if (!retval) {
-		if (dbentp->mod_name)
-		    krb5_free_principal(kcontext, dbentp->mod_name);
-		dbentp->mod_name = modifier;
-		parsed_mask |= KRB5_ADM_M_MODNAME;
-		continue;
-	    }
-	    else
-		break;
-	}
-	else {
-	    if (retval != ENOENT)
-		break;
-	}
+	/* Check for auxiliary data */
+	if (!(retval = decode_kw_tagged(&data[i],
+					KRB5_ADM_KW_AUXDATA,
+					1,
+					taglist,
+					&data_length,
+					&tagged_data))) {
+	    krb5_tl_data	**fixupp;
+	    krb5_tl_data	*tl_data, *new_tl;
 
-	/* Check for modification time */
-	if (!(retval = decode_kw_gentime(&data[i],
-					 KRB5_ADM_KW_MODDATE,
-					 &dbentp->mod_date))) {
-	    parsed_mask |= KRB5_ADM_M_MODDATE;
+	    /*
+	     * We've got a tagged data value here.  We've got to do a little
+	     * work to put it in the right place.  First, find the right place.
+	     */
+	    fixupp = &dbentp->tl_data;
+	    for (tl_data = dbentp->tl_data;
+		 tl_data; 
+		 tl_data = tl_data->tl_data_next)
+		fixupp = &tl_data->tl_data_next;
+
+	    /* Get memory */
+	    if (new_tl = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) {
+		/* Fill in the supplied values */
+		new_tl->tl_data_type = (krb5_int16) taglist[0];
+		new_tl->tl_data_length = (krb5_int16) data_length;
+		new_tl->tl_data_contents = tagged_data;
+
+		/* Link in the right place */
+		new_tl->tl_data_next= *fixupp;
+		*fixupp = new_tl;
+
+		/* Update counters and flags */
+		dbentp->n_tl_data++;
+		parsed_mask |= KRB5_ADM_M_AUXDATA;
+	    }
+	    else {
+		retval = ENOMEM;
+		break;
+	    }
 	    continue;
 	}
 	else {
-	    if (retval != ENOENT)
+	    if ((retval != ENOENT) && (retval != EINVAL))
+		break;
+	}
+
+	/* Check for key data */
+	if (!(retval = decode_kw_tagged(&data[i],
+					KRB5_ADM_KW_KEYDATA,
+					3,
+					taglist,
+					&data_length,
+					&tagged_data))) {
+	    krb5_boolean	corr_found;
+	    int			cindex, kindex;
+	    krb5_key_data	*kdata;
+
+	    /*
+	     * See if we already have a correlation betwen our key-tag and
+	     * an index into the key table.
+	     */
+	    corr_found = 0;
+	    for (cindex = 0; cindex < ncorrelations; cindex++) {
+		if (correlators[cindex].key_tag == taglist[0]) {
+		    correlation = &correlators[cindex];
+		    corr_found = 1;
+		    break;
+		}
+	    }
+
+	    /* If not, then we had better make one up */
+	    if (!corr_found) {
+		/* Get a new list */
+		if (correlation = (struct key_tag_correlator *)
+		    malloc((ncorrelations+1)*
+			   sizeof(struct key_tag_correlator))) {
+		    /* Save the contents of the old one. */
+		    if (ncorrelations) {
+			memcpy(correlation, correlators,
+			       ncorrelations*
+			       sizeof(struct key_tag_correlator));
+			/* Free the old one */
+			free(correlators);
+		    }
+		    /* Point us at the new relation */
+		    correlators = correlation;
+		    correlation = &correlators[ncorrelations];
+		    ncorrelations++;
+		    correlation->key_tag = taglist[0];
+		    /* Make a new key data entry */
+		    if (kdata = (krb5_key_data *)
+			malloc((dbentp->n_key_data+1)*sizeof(krb5_key_data))) {
+			/* Copy the old list */
+			if (dbentp->n_key_data) {
+			    memcpy(kdata, dbentp->key_data,
+				   dbentp->n_key_data*sizeof(krb5_key_data));
+			    free(dbentp->key_data);
+			}
+			dbentp->key_data = kdata;
+			correlation->key_data_index = dbentp->n_key_data;
+			memset(&kdata[dbentp->n_key_data], 0,
+			       sizeof(krb5_key_data));
+			kdata[dbentp->n_key_data].key_data_ver = 1;
+			dbentp->n_key_data++;
+			corr_found = 1;
+		    }
+		    else
+			retval = ENOMEM;
+		}
+		else
+		    retval = ENOMEM;
+	    }
+
+	    /* Check to see if we either found a correlation or made one */
+	    if (corr_found) {
+		/* Special case for key version number */
+		if (taglist[1] == -1) {
+		    dbentp->key_data[correlation->key_data_index].
+			key_data_kvno = taglist[2];
+		}
+		else {
+		    dbentp->key_data[correlation->key_data_index].
+			key_data_type[taglist[1]] = taglist[2];
+		    dbentp->key_data[correlation->key_data_index].
+			key_data_length[taglist[1]] = (krb5_int16) data_length;
+		    dbentp->key_data[correlation->key_data_index].
+			key_data_contents[taglist[1]] = tagged_data;
+		}
+		parsed_mask |= KRB5_ADM_M_KEYDATA;
+	    }
+	    else
+		break;
+	    continue;
+	}
+	else {
+	    if ((retval != ENOENT) && (retval != EINVAL))
+		break;
+	}
+
+	/* Check for extra data */
+	if (!(retval = decode_kw_tagged(&data[i],
+					KRB5_ADM_KW_EXTRADATA,
+					0,
+					taglist,
+					&data_length,
+					&dbentp->e_data))) {
+	    dbentp->e_length = (krb5_int16) data_length;
+	    parsed_mask |= KRB5_ADM_M_EXTRADATA;
+	    continue;
+	}
+	else {
+	    if ((retval != ENOENT) && (retval != EINVAL))
 		break;
 	}
 
@@ -490,6 +569,8 @@ krb5_adm_proto_to_dbent(kcontext, nent, data, validp, dbentp, pwordp)
 	}
 	parsed_mask = 0;
     }
+    if (correlators)
+	free(correlators);
     *validp |= parsed_mask;
     return(retval);
 }

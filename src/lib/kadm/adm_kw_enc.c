@@ -32,32 +32,6 @@
 
 
 /*
- * salt_type_to_string()	- Return a string for a given salt type.
- *
- * Add support for different salt types here.
- */
-static char *
-salt_type_to_string(stype)
-    krb5_int32	stype;
-{
-    char	*retval = (char *) NULL;
-
-    switch (stype) {
-    case KRB5_KDB_SALTTYPE_NORMAL:
-	retval = KRB5_ADM_SALTTYPE_NORMAL;  break;
-    case KRB5_KDB_SALTTYPE_V4:
-	retval = KRB5_ADM_SALTTYPE_V4;  break;
-    case KRB5_KDB_SALTTYPE_NOREALM:
-	retval = KRB5_ADM_SALTTYPE_NOREALM;  break;
-    case KRB5_KDB_SALTTYPE_ONLYREALM:
-	retval = KRB5_ADM_SALTTYPE_ONLYREALM;  break;
-    case KRB5_KDB_SALTTYPE_SPECIAL:
-	retval = KRB5_ADM_SALTTYPE_SPECIAL;  break;
-    }
-    return(retval);
-}
-
-/*
  * format_kw_string()	- Format a keyword=<string> pair.
  * 
  * Work routine for other string-based formatters also.
@@ -100,10 +74,10 @@ format_kw_integer(datap, kwordp, val)
     if (datap->data) {
 	datap->length = strlen(fbuffer);
 	strcpy(datap->data, fbuffer);
-	datap->data[datap->length]   = (char) ((val >> 24) & 0xff);
-	datap->data[datap->length+1] = (char) ((val >> 16) & 0xff);
-	datap->data[datap->length+2] = (char) ((val >> 8) & 0xff);
-	datap->data[datap->length+3] = (char) (val & 0xff);
+	datap->data[datap->length]   = (unsigned char) ((val >> 24) & 0xff);
+	datap->data[datap->length+1] = (unsigned char) ((val >> 16) & 0xff);
+	datap->data[datap->length+2] = (unsigned char) ((val >> 8) & 0xff);
+	datap->data[datap->length+3] = (unsigned char) (val & 0xff);
 	datap->length += sizeof(krb5_ui_4);
 	retval = 0;
     }
@@ -143,29 +117,46 @@ format_kw_gentime(datap, kwordp, timep)
 }
 
 /*
- * format_kw_salttype()	- Format a keyword=<salttype> pair.
+ * format_kw_tagged()	- Format a <tagged>=<taglist>...<value> list.
  */
 static krb5_error_code
-format_kw_salttype(datap, kwordp, dbentp)
-     krb5_data		*datap;
-     char		*kwordp;
-     krb5_db_entry	*dbentp;
+format_kw_tagged(datap, kwordp, ntags, taglist, vallen, val)
+    krb5_data	*datap;
+    char	*kwordp;
+    const int	ntags;
+    krb5_int32	*taglist;
+    krb5_int32	vallen;
+    krb5_octet	*val;
 {
     krb5_error_code	retval;
-    char		fbuffer[BUFSIZ];
-    char		*sstring;
+    unsigned char	*cp;
+    int			i;
 
-    retval = EINVAL;
-    sstring = salt_type_to_string(dbentp->salt_type);
-    if (sstring) {
-	strcpy(fbuffer, sstring);
-	/* Only add secondary salt type if it's different and valid */
-	if ((dbentp->salt_type != dbentp->alt_salt_type) &&
-	    (sstring = salt_type_to_string(dbentp->alt_salt_type))) {
-	    strcat(fbuffer,",");
-	    strcat(fbuffer,sstring);
+    /* Calculate the size required:
+     *	strlen(kwordp) + 1 for "kword"=
+     *	4 * ntags for tags
+     *	vallen for value;
+     */
+    datap->data = (char *) malloc(strlen(kwordp)+
+				  1+
+				  (ntags*sizeof(krb5_int32))+
+				  vallen+1);
+    if (datap->data) {
+	datap->length = strlen(kwordp)+1+(ntags*sizeof(krb5_int32))+vallen;
+	cp = (unsigned char *) datap->data;
+	cp[datap->length] = '\0';
+	sprintf((char *) cp, "%s=", kwordp);
+	cp += strlen((char *) cp);
+	for (i=0; i<ntags; i++) {
+	    cp[0] = (unsigned char) ((taglist[i] >> 24) & 0xff);
+	    cp[1] = (unsigned char) ((taglist[i] >> 16) & 0xff);
+	    cp[2] = (unsigned char) ((taglist[i] >> 8) & 0xff);
+	    cp[3] = (unsigned char) (taglist[i] & 0xff);
+	    cp += sizeof(krb5_int32);
 	}
-	retval = format_kw_string(datap, kwordp, fbuffer);
+	if (val && vallen)
+	    memcpy(cp, val, vallen);
+	retval = 0;
     }
     return(retval);
 }
@@ -199,6 +190,10 @@ krb5_adm_dbent_to_proto(kcontext, valid, dbentp, password, nentp, datap)
     size_t		n2alloc;
     int			outindex;
     krb5_boolean	is_set;
+    krb5_ui_4		tmp;
+    krb5_int32		taglist[4];
+    krb5_tl_data	*tl_data;
+    int			keyind, attrind;
 
     kret = 0;
     /* First check out whether this is a set or get and the mask */
@@ -208,8 +203,26 @@ krb5_adm_dbent_to_proto(kcontext, valid, dbentp, password, nentp, datap)
 	(!is_set && ((valid & KRB5_ADM_M_GET) == 0)))
 	return(EINVAL);
 
-    /* Allocate a new array of output data */
-    n2alloc = (is_set) ? KRB5_ADM_KW_MAX_SET : KRB5_ADM_KW_MAX_GET;
+    /*
+     * Compute the number of elements to allocate.  First count set bits.
+     */
+    n2alloc = 0;
+    for (tmp = valid & ~(KRB5_ADM_M_SET|KRB5_ADM_M_GET);
+	 tmp;
+	 tmp >>= 1) {
+	if (tmp & 1)
+	    n2alloc++;
+    }
+    if (valid & KRB5_ADM_M_AUXDATA)
+	n2alloc += (dbentp->n_tl_data - 1);
+    /*
+     * NOTE: If the number of per-key attributes increases, you must increase
+     * the 3 below.  The 3 represents 1 for key version, 1 for key type and
+     * one for salt type.
+     */
+    if (valid & KRB5_ADM_M_KEYDATA)
+	n2alloc += ((dbentp->n_key_data*3)-1);
+
     n2alloc *= sizeof(krb5_data);
     outindex = 0;
     outlist = (krb5_data *) malloc(n2alloc);
@@ -224,15 +237,6 @@ krb5_adm_dbent_to_proto(kcontext, valid, dbentp, password, nentp, datap)
 	    if (kret = format_kw_string(&outlist[outindex],
 					KRB5_ADM_KW_PASSWORD,
 					password))
-		goto choke;
-	    else
-		outindex++;
-	}
-	/* Handle key version number */
-	if ((valid & KRB5_ADM_M_KVNO) != 0) {
-	    if (kret = format_kw_integer(&outlist[outindex],
-					 KRB5_ADM_KW_KVNO,
-					 (krb5_ui_4) dbentp->kvno))
 		goto choke;
 	    else
 		outindex++;
@@ -292,35 +296,6 @@ krb5_adm_dbent_to_proto(kcontext, valid, dbentp, password, nentp, datap)
 	    else
 		outindex++;
 	}
-	/* Handle salt types */
-	if ((valid & KRB5_ADM_M_SALTTYPE) != 0) {
-	    if (kret = format_kw_salttype(&outlist[outindex],
-					  KRB5_ADM_KW_SALTTYPE,
-					  dbentp))
-		goto choke;
-	    else
-		outindex++;
-	}
-	/* Handle master key version number */
-	if (!is_set &&
-	    ((valid & KRB5_ADM_M_MKVNO) != 0)) {
-	    if (kret = format_kw_integer(&outlist[outindex],
-					 KRB5_ADM_KW_MKVNO,
-					 (krb5_ui_4) dbentp->mkvno))
-		goto choke;
-	    else
-		outindex++;
-	}
-	/* Handle last successful password change */
-	if (!is_set &&
-	    ((valid & KRB5_ADM_M_LASTPWCHANGE) != 0)) {
-	    if (kret = format_kw_gentime(&outlist[outindex],
-					 KRB5_ADM_KW_LASTPWCHANGE,
-					 &dbentp->last_pwd_change))
-		goto choke;
-	    else
-		outindex++;
-	}
 	/* Handle last successful password entry */
 	if (!is_set &&
 	    ((valid & KRB5_ADM_M_LASTSUCCESS) != 0)) {
@@ -351,39 +326,89 @@ krb5_adm_dbent_to_proto(kcontext, valid, dbentp, password, nentp, datap)
 	    else
 		outindex++;
 	}
-	/* Handle last modification principal name */
-	if (!is_set &&
-	    ((valid & KRB5_ADM_M_MODNAME) != 0)) {
-	    char *modifier_name;
 
-	    /* Flatten the name, format it then free it. */
-	    if (kret = krb5_unparse_name(kcontext,
-					 dbentp->mod_name,
-					 &modifier_name))
-		goto choke;
-
-	    kret = format_kw_string(&outlist[outindex],
-				    KRB5_ADM_KW_MODNAME,
-				    modifier_name);
-	    krb5_xfree(modifier_name);
-	    if (kret)
-		goto choke;
-	    else
-		outindex++;
+	/* Handle the auxiliary data */
+	if ((valid & KRB5_ADM_M_AUXDATA) != 0) {
+	    for (tl_data = dbentp->tl_data; tl_data; tl_data =
+		 tl_data->tl_data_next) {
+		taglist[0] = (krb5_int32) tl_data->tl_data_type;
+		if (kret = format_kw_tagged(&outlist[outindex],
+					    KRB5_ADM_KW_AUXDATA,
+					    1,
+					    taglist,
+					    (krb5_int32) tl_data->
+					        tl_data_length,
+					    tl_data->tl_data_contents))
+		    goto choke;
+		else
+		    outindex++;
+	    }
 	}
-	/* Handle last modification time */
+
+	/* Handle the key data */
 	if (!is_set &&
-	    ((valid & KRB5_ADM_M_MODDATE) != 0)) {
-	    if (kret = format_kw_gentime(&outlist[outindex],
-					 KRB5_ADM_KW_MODDATE,
-					 &dbentp->mod_date))
+	    ((valid  & KRB5_ADM_M_KEYDATA) != 0)) {
+	    for (keyind = 0; keyind < dbentp->n_key_data; keyind++) {
+		/*
+		 * First handle kvno
+		 */
+		taglist[0] = (krb5_int32) keyind;
+		taglist[1] = (krb5_int32) -1;
+		taglist[2] = (krb5_int32) dbentp->key_data[keyind].
+		    key_data_kvno;
+		if (kret = format_kw_tagged(&outlist[outindex],
+					    KRB5_ADM_KW_KEYDATA,
+					    3,
+					    taglist,
+					    0,
+					    (krb5_octet *) NULL))
+		    goto choke;
+		else
+		    outindex++;
+
+		/*
+		 * Then each attribute as supported.
+		 */
+		for (attrind = 0;
+		     attrind < KRB5_KDB_V1_KEY_DATA_ARRAY;
+		     attrind++) {
+		    taglist[1] = (krb5_int32) attrind;
+		    taglist[2] = (krb5_int32) dbentp->key_data[keyind].
+			key_data_type[attrind];
+		    if (kret = format_kw_tagged(&outlist[outindex],
+						KRB5_ADM_KW_KEYDATA,
+						3,
+						taglist,
+						(krb5_int32) dbentp->
+						    key_data[keyind].
+						    key_data_length[attrind],
+						dbentp->key_data[keyind].
+						    key_data_contents[attrind])
+			)
+			goto choke;
+		    else
+			outindex++;
+		}
+	    }
+	}
+
+	/* Finally, handle the extra data */
+	if ((valid & KRB5_ADM_M_EXTRADATA) != 0) {
+	    if (kret = format_kw_tagged(&outlist[outindex],
+					KRB5_ADM_KW_EXTRADATA,
+					0,
+					(krb5_int32 *) NULL,
+					(krb5_int32) dbentp->e_length,
+					dbentp->e_data))
 		goto choke;
 	    else
 		outindex++;
 	}
     }
-    else
-	kret = ENOMEM;
+    else {
+	if (n2alloc)
+	    kret = ENOMEM;
+    }
  choke:
     if (kret) {
 	if (outlist) {
