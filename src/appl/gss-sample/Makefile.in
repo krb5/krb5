@@ -5,6 +5,10 @@ ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 
+SRCS= gss-client.c gss-misc.c gss-server.c
+
+OBJS= gss-client.o gss-misc.o gss-server.o
+
 all:: gss-server gss-client
 
 KLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \

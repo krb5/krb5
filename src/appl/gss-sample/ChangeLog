@@ -1,3 +1,8 @@
+Wed Oct 12 02:29:38 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Add OBJS definition so that object files get
+		cleaned out during a "make clean".
+
 Thu Sep 29 22:50:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executables if libraries change
