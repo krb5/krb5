@@ -1,3 +1,11 @@
+Sun Jul  3 04:43:42 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* asn1_encode_k.h:
+	* asn1buf.c:
+	* krbasn1.h: punt stdlib.h in favor of stdio.h.  It looks like
+	Harry was assuming that NULL gets defined in stdlib instead of
+	stdio
+
 Fri Jul  1 13:03:39 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* asn1_encode_k.c (asn1_encode_msgtype): comment out krb5_msgtype

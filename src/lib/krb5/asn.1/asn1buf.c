@@ -49,7 +49,7 @@
 		     to being crossed by next.)) */
 
 #include "asn1buf.h"
-#include <stdlib.h>
+#include <stdio.h>
 
 asn1_error_code asn1buf_create(DECLARG(asn1buf **, buf))
      OLDDECLARG(asn1buf **, buf)

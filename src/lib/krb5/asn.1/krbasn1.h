@@ -2,7 +2,7 @@
 #define __KRBASN1_H__
 
 #include <krb5/krb5.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 #include <limits.h>
 

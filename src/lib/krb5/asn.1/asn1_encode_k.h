@@ -2,7 +2,7 @@
 #define __ASN1_ENCODE_KRB5_H__
 
 #include <krb5/krb5.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include "asn1buf.h"
 
 /*
