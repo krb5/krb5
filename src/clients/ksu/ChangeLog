@@ -1,3 +1,18 @@
+2000-04-26  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* main.c (DEBUG): Don't define.
+	(usage): Remove -C option from description.
+	(sweep_up): Deleted second argument; all callers changed.
+	(main): Support -D option only if DEBUG is defined.  Initialize
+	ruid on entry.  Set effective uid to ruid before processing
+	argument list.  Removed -C option from -z/-Z conflict messages.
+	Report errors trying to stat source ccache using com_err.  Verify
+	that getpwuid's returned data for source user has correct uid.
+	Eliminate use_source_cache variable.
+
+	* ksu.M: Updates for removal of -C option.
+
 2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* main.c (print_status): Now static.  Add format attribute if
