@@ -41,8 +41,6 @@ static char rcsid_parse_c [] =
 #define	MAXRLMSZ	256		/* XXX! */
 
 
-#define xfree(val) free((char *)val)
-
 static char *
 strsave(string)
 const char *string;
@@ -59,7 +57,7 @@ krb5_parse_name(name, principal)
 const register char *name;
 krb5_principal *principal;
 {
-    register char *realmptr, *cp, *endcomponent;
+    const register char *realmptr, *cp, *endcomponent;
     register char *realmname;
     krb5_principal retprinc;
     int ncomponents;
