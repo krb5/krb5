@@ -1,3 +1,7 @@
+Thu Aug 18 16:15:36 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Added missing $(LIBS) to link line.
+
 Thu Aug 18 13:43:07 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* mailquery.c: Move usage() before main() to solve redeclaration

@@ -8,7 +8,8 @@ KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DB
 HESIODLIB =
 
 mailquery: mailquery.o poplib.o
-	$(CC) $(CFLAGS) -o mailquery mailquery.o poplib.o $(KLIB) $(HESIODLIB)
+	$(CC) $(CFLAGS) -o mailquery mailquery.o poplib.o $(KLIB) \
+		$(HESIODLIB) $(LIBS)
 
 mailquery.o:	$(srcdir)/mailquery.c
 poplib.o:	$(srcdir)/poplib.c
