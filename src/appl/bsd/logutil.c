@@ -86,7 +86,7 @@ void update_utmp(ent, username, line, host)
     
 #ifdef HAVE_SETUTXENT
     getutmpx(ent, &utx);
-    getutxid(&ent);
+    getutxid(&utx);
     setutxent();
     pututxline(&utx);
     endutxent();
@@ -116,7 +116,7 @@ void update_wtmp(ent)
     struct utmpx utx;
 
     getutmpx(ent, &utx);
-    updwtmpx(&utx);
+    updwtmpx(WTMPX_FILE, &utx);
 #endif
 
 #ifdef HAVE_UPDWTMP
