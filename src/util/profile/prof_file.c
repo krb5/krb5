@@ -578,12 +578,13 @@ static void profile_free_file_data(prf_data_t data)
 	    }
 	}
     }
-	if (data->root)
-		profile_free_node(data->root);
-	if (data->comment)
-		free(data->comment);
-	data->magic = 0;
-	free(data);
+    if (data->root)
+	profile_free_node(data->root);
+    if (data->comment)
+	free(data->comment);
+    data->magic = 0;
+    k5_mutex_destroy(&data->lock);
+    free(data);
     scan_shared_trees_locked();
 }
 
