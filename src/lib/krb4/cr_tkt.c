@@ -15,12 +15,6 @@
 #include <string.h>
 #include <krb5.h>
 
-static int krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned char flags, 
-				     char *pname, char *pinstance, 
-				     char *prealm, long paddress,
-				     char *session, short life, long time_sec,
-				     char *sname, char *sinstance, 
-				     C_Block key, krb5_keyblock *k5key));
 /*
  * Create ticket takes as arguments information that should be in a
  * ticket, and the KTEXT object in which the ticket should be
@@ -141,6 +135,23 @@ krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
     register char *data;        /* running index into ticket */
 
     tkt->length = 0;            /* Clear previous data  */
+
+    /* Check length of ticket */
+    if (sizeof(tkt->dat) < (sizeof(flags) +
+                            1 + strlen(pname) +
+                            1 + strlen(pinstance) +
+                            1 + strlen(prealm) +
+                            4 +                         /* address */
+			    8 +                         /* session */
+			    1 +                         /* life */
+			    4 +                         /* issue time */
+                            1 + strlen(sname) +
+                            1 + strlen(sinstance) +
+			    7) / 8) {                   /* roundoff */
+        memset(tkt->dat, 0, sizeof(tkt->dat));
+        return KFAILURE /* XXX */;
+    }
+
     flags |= HOST_BYTE_ORDER;   /* ticket byte order   */
     memcpy((char *) (tkt->dat), (char *) &flags, sizeof(flags));
     data = ((char *)tkt->dat) + sizeof(flags);

@@ -25,10 +25,6 @@
 #include <memory.h>
 #endif
 
-/*
- * $Id$
- */
-
 static unsigned char zeros[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
 krb5_error_code
@@ -49,7 +45,7 @@ kg_make_seed(context, key, seed)
    for (i=0; i<tmpkey->length; i++)
       tmpkey->contents[i] = key->contents[key->length - 1 - i];
 
-   code = kg_encrypt(context, tmpkey, NULL, zeros, seed, 16);
+   code = kg_encrypt(context, tmpkey, KG_USAGE_SEAL, NULL, zeros, seed, 16);
 
    krb5_free_keyblock(context, tmpkey);
 

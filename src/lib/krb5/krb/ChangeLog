@@ -1,3 +1,102 @@
+2000-06-23  Miro Jurisic  <meeroh@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Fixed v4->v5 realm
+	name conversion
+
+	* conv_princ.c (krb5_425_conv_principal): Honor v4/v5 realm name
+	differences when convertion from v4 principals to v5.
+
+2000-06-23  Tom Yu  <tlyu@mit.edu>
+
+	* get_creds.c (krb5_get_credentials): Translate KRB5_CC_NOTFOUND
+	returned from krb5_get_cred_from_kdc() if a prior call to
+	krb5_cc_retrieve_cred() returned KRB5_CC_NOT_KTYPE.
+
+	* rd_priv.c (krb5_rd_priv_basic): Delete code that was incorrectly
+	doing explicit ivec chaining; c_decrypt() does it now.
+
+	* mk_priv.c (krb5_mk_priv_basic): Delete code that was incorrectly
+	doing explicit ivec chaining; c_encrypt() does it now.
+
+	* conv_princ.c (krb5_524_conv_principal): Make a copy of the krb5
+	realm that is nul-terminated to avoid falling off the end of the
+	krb5 realm, which is not necessarily nul-terminated.
+
+2000-06-23  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_ctx.c (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
+	be KRB5_CALLCONV.
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_in_tkt.c (krb5_get_in_tkt): If enctypes are specified, send
+	the server the intersection of that list and the supported types,
+	in the order requested.
+
+	* recvauth.c (krb5_recvauth_version): New routine, takes a
+	krb5_data in which to store the client's application version
+	string.
+	(recvauth_common): Renamed from krb5_recvauth, added above
+	functionality depending on extra argument values.
+	(krb5_recvauth): New stub, calls above routine with extra dummy
+	values.
+
+	* kfree.c: Remove unneeded "return" statements at the end of many
+	functions.
+	(krb5_free_*_content, krb5_free_*_contents,
+	krb5_free_cred_enc_part, krb5_free_pwd_sequences): Set freed
+	pointer members to null when containing structure isn't being
+	freed.
+
+	* t_kerb.c (test_524_conv_principal): New test code, to exercise
+	bbense's code addition.
+	(main, usage): Updated.
+	* t_krb5.conf: Added stanford.edu->IR.STANFORD.EDU mapping, and a
+	test case for improperly long v4 realm names.
+	* Makefile.in (check-unix): Run 524 conversion test for some test
+	Athena and Stanford names.
+	* t_ref_kerb.out: Updated.
+
+	* init_ctx.c (init_common): Feed current-microsecond time and
+	process-id into PRNG, instead of just current-second time.
+	* mk_req_ext.c (krb5_mk_req_extended): Feed current time into
+	PRNG if a subkey will be generated.
+	* sendauth.c (krb5_sendauth): Feed local and remote addresses of
+	socket, if they can be determined, into the PRNG if a subkey will
+	be used.
+
+	* init_ctx.c (krb5_free_ktypes): New routine, to free values
+	returned by krb5_get_tgs_ktypes, krb5_get_permitted_enctypes, and
+	krb5_get_default_in_tkt_ktypes.
+	(krb5_set_default_tgs_ktypes, krb5_is_permitted_enctype): Use it.
+	(get_profile_etype_list): Use passed-in enctype list if the
+	passed-in count is non-zero, instead of checking the
+	in_tkt_ktype_count value in the context.
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+            Nalin Dahyabhai  <nalin@redhat.com>
+
+	* conv_princ.c (krb5_524_conv_principal): Return an error if name
+	is too long.  Use memcpy for character data since we already know
+	the length.
+
+2000-06-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kfree.c (krb5_free_keyblock_contents): Set contents pointer to
+	null after freeing.
+
+	* chk_trans.c (krb5_check_transited_list): Don't overflow buffers
+	"prev" and "next".
+	* conv_princ.c (krb5_425_conv_principal): Don't overflow buffer
+	"buf".
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+	    Booker C. Bense  <bbense@networking.stanford.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Look up v4_realm in
+	config file, in case site's krb4 realm name isn't the same as the
+	krb5 realm name.
+
 2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* fwd_tgt.c: Check for existance of <memory.h>.
@@ -22,8 +121,9 @@
 
 2000-04-28	Alexandra Ellwood	<lxs@mit.edu>
 
-	* gic_pwd.c (krb5_init_creds_password) added code to return to login library if 
-	the password is expired (login library handles this error appropriately).
+	* gic_pwd.c (krb5_init_creds_password) added code to return to
+	login library if the password is expired (login library handles
+	this error appropriately).
 
 2000-04-08  Tom Yu  <tlyu@mit.edu>
 
@@ -32,11 +132,12 @@
 
 2000-04-07  Jeffrey Altman  <jaltman@columbia.edu>
 
-        * gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c (krb5_get_init_creds_password)
-        when determining whether or not to retry with a "master kdc" do not retry if
-        the return value from the first attempt was KRB5_REALM_CANT_RESOLV.  Also, do 
-        not overwrite the return code if the return value from the access to the "master
-        kdc" was KRB5_REALM_CANT_RESOLV.
+	* gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c
+	(krb5_get_init_creds_password) when determining whether or not to
+	retry with a "master kdc" do not retry if the return value from
+	the first attempt was KRB5_REALM_CANT_RESOLV.  Also, do not
+	overwrite the return code if the return value from the access to
+	the "master kdc" was KRB5_REALM_CANT_RESOLV.
 
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 

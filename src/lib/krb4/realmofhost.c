@@ -131,14 +131,18 @@ krb_realmofhost(host)
 		  if (domain && (strlen(trans_host) == strlen(domain))
 		      && !strcasecmp (trans_host, domain)) {
 		    /* got domain match, save for later */
-		    (void) strcpy (ret_realm, trans_realm);
+		    (void) strncpy (ret_realm, trans_realm,
+				    sizeof(ret_realm) - 1);
+		    ret_realm[sizeof(ret_realm) - 1] = '\0';
 		    continue;
 		  }
 		} else {
 		  /* want exact match of hostname */
 		  if ((strlen(lhost) == strlen(trans_host)) &&
 		      !strcasecmp (trans_host, lhost)) {
-		    (void) strcpy (ret_realm, trans_realm);
+		    (void) strncpy (ret_realm, trans_realm,
+				    sizeof(ret_realm) - 1);
+		    ret_realm[sizeof(ret_realm) - 1] = '\0';
 		    break;
 		  }
 		}

@@ -66,10 +66,10 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
      * We always try the local file first
      */
 
-    code = krb5_locate_srv_conf( context, realm, "kpasswd_server", 
+    code = krb5_locate_srv_conf(context, realm, "kpasswd_server",
                                  addr_pp, naddrs, 0);
     if (code) {
-        code = krb5_locate_srv_conf( context, realm, "admin_server", 
+        code = krb5_locate_srv_conf(context, realm, "admin_server", 
                                      addr_pp, naddrs, 0);
         if ( !code ) {
             /* success with admin_server but now we need to change the port */
@@ -83,7 +83,7 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-        int use_dns = _krb5_use_dns(context);
+        int use_dns = _krb5_use_dns_kdc(context);
         if ( use_dns ) {
             code = krb5_locate_srv_dns(realm, "_kpasswd", "_udp",
                                         addr_pp, naddrs);

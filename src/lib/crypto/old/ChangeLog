@@ -1,3 +1,9 @@
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* old_encrypt.c (krb5_old_encrypt): Chain ivecs.
+
+	* old_decrypt.c (krb5_old_decrypt): Chain ivecs.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* des_stringtokey.c (mit_des_string_to_key_int): Declare.

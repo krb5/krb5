@@ -1,3 +1,23 @@
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Include des3 in supported
+	enctypes by default.
+
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Use 1024 for
+	hard-coded length, to match existing callers.
+
+2000-06-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* admin.h: Add a length parameter to kadm5_chpass_principal_util().
+	* admin_internal.h: Add a length parameter to
+	_kadm5_chpass_principal_util().
+	* chpass_util.c (_kadm5_chpass_principal_util): Add a length parameter,
+	and use it to avoid overflowing "msg_ret".
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Adjust for new
+	parameter in kadm5_chpass_principal_util().
+
+	* logger.c (klog_com_err_proc): Don't overflow buffer "outbuf".
+
 2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* configure.in, chpass_util.c, server_internal.h: Check for

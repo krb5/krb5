@@ -457,12 +457,35 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if (ktypes)
-	request.ktype = ktypes;
-    else
-    	if ((retval = krb5_get_default_in_tkt_ktypes(context, &request.ktype)))
-	    goto cleanup;
+    if ((retval = krb5_get_default_in_tkt_ktypes(context, &request.ktype)))
+	goto cleanup;
     for (request.nktypes = 0;request.ktype[request.nktypes];request.nktypes++);
+    if (ktypes) {
+	int i, req, next = 0;
+	for (req = 0; ktypes[req]; req++) {
+	    if (ktypes[req] == request.ktype[next]) {
+		next++;
+		continue;
+	    }
+	    for (i = next + 1; i < request.nktypes; i++)
+		if (ktypes[req] == request.ktype[i]) {
+		    /* Found the enctype we want, but not in the
+		       position we want.  Move it, but keep the old
+		       one from the desired slot around in case it's
+		       later in our requested-ktypes list.  */
+		    krb5_enctype t;
+		    t = request.ktype[next];
+		    request.ktype[next] = request.ktype[i];
+		    request.ktype[i] = t;
+		    next++;
+		    break;
+		}
+	    /* If we didn't find it, don't do anything special, just
+	       drop it.  */
+	}
+	request.ktype[next] = 0;
+	request.nktypes = next;
+    }
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
     request.unenc_authdata = 0;
@@ -538,7 +561,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	goto cleanup;
 
 cleanup:
-    if (!ktypes && request.ktype)
+    if (request.ktype)
 	free(request.ktype);
     if (!addrs && request.addresses)
 	krb5_free_addresses(context, request.addresses);

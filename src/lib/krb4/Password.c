@@ -177,7 +177,8 @@ OSErr GetUserInfo( char *password )
 	// already got a password, just get the initial ticket
 	//////////////////////////////////////////////////////
 	if (*gPassword)	{
-		strcpy (UserName, krb_get_default_user( ));
+		strncpy (UserName, krb_get_default_user( ), sizeof(UserName)-1);
+		UserName[sizeof(UserName) - 1] = '\0';
 		/* FIXME jcm - if we have a password then no dialog 
 		   comes up for setting the uinstance. */
 		rc = kname_parse(uname, uinst, realm, UserName);
@@ -201,7 +202,8 @@ OSErr GetUserInfo( char *password )
 	}
 
 	// Insert user's name in dialog
-	strcpy (UserName, krb_get_default_user( ));
+	strncpy (UserName, krb_get_default_user( ), sizeof(UserName) - 1);
+	UserName[sizeof(UserName) - 1] = '\0';
 	if (*UserName) {
 		tempStr[0] = strlen(UserName);
 		memcpy( &(tempStr[1]), UserName, tempStr[0]);
@@ -417,7 +419,8 @@ CacheInitialTicket( serviceName )
 	if (!serviceName || (serviceName[0] == '\0'))
 		return err;
 	
-	strcpy (UserName, krb_get_default_user());
+	strncpy (UserName, krb_get_default_user(), sizeof(UserName) - 1);
+	UserName[sizeof(UserName) - 1] = '\0';
 			
  	err = kname_parse(uname, uinst, urealm, UserName);
  	if (err) return err;

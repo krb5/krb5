@@ -1,3 +1,50 @@
+2000-06-23  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files): Return ENOENT when
+	file is not found on MacOS (not ENFILE).  Use Kerberos Preferences
+	library to locate the config files on Mac OS.  Eliminated some
+	dead code.
+
+2000-06-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* an_to_ln.c (do_replacement):  Don't overflow buffers "in" or "out".
+	* hst_realm.c (krb5_try_realm_txt_rr):  Don't overfill "host" when
+	malformed DNS responses are received.
+
+	* ccdefname.c (get_from_os): Don't overflow buffer "name_buf".
+	* kuserok.c (krb5_kuserok): Don't overflow buffer "pbuf".
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.  If called functions fail, drop out of loop and
+	return nonzero.  Use SIOCGSIZIFCONF ioctl if available to get the
+	buffer size needed for SIOCGIFCONF, and skip the silly heuristics
+	if it returns a reasonable value.
+	(krb5_os_localaddr): Increment count of addresses to include null
+	pointer terminator.  Delete check for zero count.
+
+	* locate_kdc.c (maybe_use_dns): Renamed from _krb5_use_dns.  Now
+	takes an arg to indicate a key to look up in krb5.conf, falling
+	back to "dns_fallback", and an arg indicating the default value if
+	no config file entries match.
+	(_krb5_use_dns_realm): New routine; use "dns_lookup_realm" and
+	KRB5_DNS_LOOKUP_REALM setting.
+	(_krb5_use_dns_kdc): New routine; use "dns_lookup_kdc" and
+	KRB5_DNS_LOOKUP_KDC.
+	(krb5_locate_kdc): Call _krb5_use_dns_kdc.
+	* changepw.c (krb5_locate_kpasswd): Call _krb5_use_dns_kdc.
+	* def_realm.c (krb5_get_default_realm): Call _krb5_use_dns_realm.
+	* hst_realm.c (krb5_get_host_realm): Call _krb5_use_dns_realm.
+
+2000-06-23	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefname.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+
 2000-05-09	Alexandra Ellwood <lxs@mit.edu>
 
 	*localaddr.c: Fixed the local_addr_fallback_kludge so that it actually does something.

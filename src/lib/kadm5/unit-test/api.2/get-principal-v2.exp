@@ -143,8 +143,8 @@ proc test101_102 {rpc} {
     }
 
     set failed 0
-    if {$num_keys != 2} {
-	fail "$test: num_keys $num_keys should be 2"
+    if {$num_keys != 3} {
+	fail "$test: num_keys $num_keys should be 3"
 	set failed 1
     }
     for {set i 0} {$i < $num_keys} {incr i} {

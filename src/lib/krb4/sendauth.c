@@ -208,7 +208,8 @@ krb_sendauth(options, fd, ticket, service, inst, realm, checksum,
     }
 
     /* copy instance into local storage, so mk_auth can canonicalize */
-    (void) strncpy(srv_inst, inst, INST_SZ);
+    (void) strncpy(srv_inst, inst, INST_SZ-1);
+    srv_inst[INST_SZ-1] = 0;
     rem = krb_mk_auth (options, ticket, service, srv_inst, realm, checksum,
    			   version, packet);
     if (rem != KSUCCESS)

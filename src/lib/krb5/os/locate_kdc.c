@@ -53,27 +53,55 @@
 #define KPASSWD_PORTNAME "kpasswd"
 #endif
 
-int
-_krb5_use_dns(context)
-    krb5_context context;
+#if KRB5_DNS_LOOKUP_KDC
+#define DEFAULT_LOOKUP_KDC 1
+#else
+#define DEFAULT_LOOKUP_KDC 0
+#endif
+#if KRB5_DNS_LOOKUP_REALM
+#define DEFAULT_LOOKUP_REALM 1
+#else
+#define DEFAULT_LOOKUP_REALM 0
+#endif
+
+static int
+maybe_use_dns (context, name, defalt)
+     krb5_context context;
+     const char *name;
+     int defalt;
 {
     krb5_error_code code;
     char * value = NULL;
     int use_dns = 0;
 
     code = profile_get_string(context->profile, "libdefaults",
-                              "dns_fallback", 0, 
-                              context->profile_in_memory?"1":"0",
-                              &value);
+                              name, 0, 0, &value);
+    if (value == 0 && code == 0)
+	code = profile_get_string(context->profile, "libdefaults",
+				  "dns_fallback", 0, 0, &value);
     if (code)
-        return(code);
+        return defalt;
 
-    if (value) {
-        use_dns = _krb5_conf_boolean(value);
-        profile_release_string(value);
-    }
+    if (value == 0)
+	return defalt;
 
+    use_dns = _krb5_conf_boolean(value);
+    profile_release_string(value);
     return use_dns;
+}
+
+int
+_krb5_use_dns_kdc(context)
+    krb5_context context;
+{
+    return maybe_use_dns (context, "dns_lookup_kdc", DEFAULT_LOOKUP_KDC);
+}
+
+int
+_krb5_use_dns_realm(context)
+    krb5_context context;
+{
+    return maybe_use_dns (context, "dns_lookup_realm", DEFAULT_LOOKUP_REALM);
 }
 
 #endif /* KRB5_DNS_LOOKUP */
@@ -205,9 +233,9 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
     if (addr_p == NULL) {
-        if ( hostlist )
+        if (hostlist)
             profile_free_list(hostlist);
-        if ( masterlist )
+        if (masterlist)
             profile_free_list(masterlist);
 	return ENOMEM;
     }
@@ -281,9 +309,9 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
         }
     }
 
-    if ( hostlist )
+    if (hostlist)
         profile_free_list(hostlist);
-    if ( masterlist )
+    if (masterlist)
         profile_free_list(masterlist);
 
     if (out == 0) {     /* Couldn't resolve any KDC names */
@@ -582,11 +610,11 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, get_masters)
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-        int use_dns = _krb5_use_dns(context);
+        int use_dns = _krb5_use_dns_kdc(context);
         if ( use_dns ) {
             code = krb5_locate_srv_dns(realm, 
-                            get_masters ? "_kerberos-master" : "_kerberos", 
-                            "_udp", addr_pp, naddrs);
+                                        get_masters ? "_kerberos-master" : "_kerberos",
+                                        "_udp", addr_pp, naddrs);
         }
     }
 #endif /* KRB5_DNS_LOOKUP */

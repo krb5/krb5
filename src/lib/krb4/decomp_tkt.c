@@ -192,17 +192,17 @@ dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
     if (HOST_BYTE_ORDER != ((*flags >> K_FLAG_ORDER)& 1))
         tkt_swap_bytes++;
 
-    if (strlen(ptr) > ANAME_SZ)
+    if (strlen(ptr) >= ANAME_SZ)
         return(KFAILURE);
     (void) strcpy(pname,ptr);   /* pname */
     ptr += strlen(pname) + 1;
 
-    if (strlen(ptr) > INST_SZ)
+    if (strlen(ptr) >= INST_SZ)
         return(KFAILURE);
     (void) strcpy(pinstance,ptr); /* instance */
     ptr += strlen(pinstance) + 1;
 
-    if (strlen(ptr) > REALM_SZ)
+    if (strlen(ptr) >= REALM_SZ)
         return(KFAILURE);
     (void) strcpy(prealm,ptr);  /* realm */
     ptr += strlen(prealm) + 1;
@@ -229,9 +229,13 @@ dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
     if (tkt_swap_bytes)
         *time_sec = krb4_swab32(*time_sec);
 
+    if (strlen(ptr) >= ANAME_SZ)
+	return KFAILURE;
     (void) strcpy(sname,ptr);   /* service name */
     ptr += 1 + strlen(sname);
 
+    if (strlen (ptr) >= INST_SZ)
+	return KFAILURE;
     (void) strcpy(sinstance,ptr); /* instance */
     ptr += 1 + strlen(sinstance);
 

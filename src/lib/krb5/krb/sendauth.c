@@ -152,9 +152,32 @@ krb5_sendauth(context, auth_context,
 	    credsp = in_creds;
 	}
 
-    if ((retval = krb5_mk_req_extended(context, auth_context, ap_req_options,
-				       in_data, credsp, &outbuf)))
-	goto error_return;
+	if (ap_req_options & AP_OPTS_USE_SUBKEY) {
+	    /* Provide some more fodder for random number code.
+	       This isn't strong cryptographically; the point here is
+	       not to guarantee randomness, but to make it less likely
+	       that multiple sessions could pick the same subkey.  */
+	    char rnd_data[1024];
+	    size_t len;
+	    krb5_data d;
+	    d.length = sizeof (rnd_data);
+	    d.data = rnd_data;
+	    len = sizeof (rnd_data);
+	    if (getpeername (*(int*)fd, (struct sockaddr *) rnd_data, &len) == 0) {
+		d.length = len;
+		(void) krb5_c_random_seed (context, &d);
+	    }
+	    len = sizeof (rnd_data);
+	    if (getsockname (*(int*)fd, (struct sockaddr *) rnd_data, &len) == 0) {
+		d.length = len;
+		(void) krb5_c_random_seed (context, &d);
+	    }
+	}
+
+	if ((retval = krb5_mk_req_extended(context, auth_context,
+					   ap_req_options, in_data, credsp,
+					   &outbuf)))
+	    goto error_return;
 
 	/*
 	 * First write the length of the AP_REQ message, then write
