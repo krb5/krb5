@@ -1,3 +1,7 @@
+2001-10-27  Sam Hartman  <hartmans@mit.edu>
+
+	* k5seal.c (make_seal_token_v1): Use usage 15 only for  mic tokens, not for seal tokens without encryption
+
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5seal.c (make_seal_token_v1): Correct errors in code pertaining

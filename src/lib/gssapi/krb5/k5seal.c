@@ -150,7 +150,7 @@ make_seal_token_v1 (krb5_context context,
       break;
     case SGN_ALG_HMAC_MD5:
       md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-      if (!encrypt)
+      if (toktype != KG_TOK_SEAL_MSG)
 	sign_usage = 15;
       break;
     default:
