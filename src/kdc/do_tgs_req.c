@@ -132,6 +132,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     if (!header_ticket) {
+	errcode = KRB5_NO_TKT_SUPPLIED;	/* XXX? */
 	status="UNEXPECTED NULL in header_ticket";
 	goto cleanup;
     }
@@ -421,6 +422,7 @@ tgt_again:
 	if (!(scratch.data =
 	      malloc(request->authorization_data.ciphertext.length))) {
 	    status = "AUTH_NOMEM";
+	    errcode = ENOMEM;
 	    goto cleanup;
 	}
 	/* do any necessary key pre-processing */
@@ -531,6 +533,7 @@ tgt_again:
 		       cname ? cname : "<unknown client>",
 		       sname ? sname : "<unknown server>",
 		       tmp ? tmp : "<unknown>");
+		errcode = KRB5KDC_ERR_SERVER_NOMATCH;
 		goto cleanup;
 	}
 	    

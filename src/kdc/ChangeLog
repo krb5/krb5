@@ -1,3 +1,9 @@
+Fri Jan 16 03:33:50 1998  Tom Yu  <tlyu@mit.edu>
+
+	* do_tgs_req.c: Add some explicit settings of errcode so that the
+ 	cleanup code doesn't try to construct a bogus error reply, which
+ 	was causing coredumps in the lookaside code.
+
 Thu Dec 11 23:29:41 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c: Don't include sys/socket.h or netdb.h, as krb.h
