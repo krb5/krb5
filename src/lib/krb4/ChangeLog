@@ -1,3 +1,8 @@
+Sat Feb 24 09:27:08 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* g_svc_in_tkt.c, put_svc_key.c, rd_req.c, rd_svc_key.c: Declare
+		krb__get_srvtabname(). 
+
 Sat Jan 27 01:05:12 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kuserok.c: use HAVE_SETEUID and HAVE_SETRESUID to figure out how

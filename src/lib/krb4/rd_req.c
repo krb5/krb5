@@ -16,6 +16,8 @@
 
 extern int krb_ap_req_debug;
 
+extern char *krb__get_srvtabname();
+
 /* declared in krb.h */
 int krb_ignore_ip_address = 0;
 

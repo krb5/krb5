@@ -16,6 +16,8 @@
 #define NULL 0
 #endif
 
+extern char *krb__get_srvtabname();
+
 /*
  * This file contains two routines: srvtab_to_key(), which gets
  * a server's key from a srvtab file, and krb_get_svc_in_tkt() which

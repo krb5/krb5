@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern char *krb__get_srvtabname();
+
 /*
  * The private keys for servers on a given host are stored in a
  * "srvtab" file (typically "/etc/srvtab").  This routine extracts
