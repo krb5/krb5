@@ -25,5 +25,5 @@ library.dvi:  $(LIBTEX) $(STYLES)
 
 
 .dvi.ps:
-	dvi2ps -r $*.dvi >$*.ps
+	dvips $*.dvi -o
 
