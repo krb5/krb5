@@ -64,30 +64,46 @@ krb5_data *outbuf;
     if (!valid_cksumtype(message->checksum->checksum_type))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
 
-    /* length bounds check XXX ?? how */
-    
-    if (sender_addr && !krb5_address_search(sender_addr->address,
-					    message->addresses)) {
-	cleanup();
-	return KRB5KRB_AP_ERR_BADADDR;
-    }
-
     if (retval = krb5_timeofday(&currenttime)) {
 	cleanup();
 	return retval;
     }
+    /* in_clock_skew #defined above */
     if (!in_clock_skew(message->timestamp)) {
 	cleanup();
 	return KRB5KRB_AP_ERR_SKEW;
     }
 
     /* replay detection goes here... XXX */
-    computed_direction = (krb5_fulladdr_order(sender_addr, recv_addr) > 0) ?
-	                 MSEC_DIRBIT : 0; 
-    /* what if sender_addr == 0 ?????*/
-    if (computed_direction != message->msec & MSEC_DIRBIT) {
-	cleanup();
-	return KRB5KRB_AP_ERR_REPEAT;	/* XXX */
+
+    if (sender_addr) {
+	krb5_fulladdr temp_sender;
+	krb5_fulladdr temp_recip;
+	krb5_address **our_addrs;
+	
+	if (retval = krb5_os_localaddr(&our_addrs)) {
+	    cleanup();
+	    return retval;
+	}
+	if (!krb5_address_search(message->r_address, our_addrs)) {
+	    krb5_free_address(our_addrs);
+	    cleanup();
+	    return KRB5KRB_AP_ERR_BADADDR;
+	}
+	krb5_free_address(our_addrs);
+
+	temp_recip = *recv_addr;
+	temp_recip.address = message->r_address;
+
+	temp_sender = *sender_addr;
+	temp_sender.address = message->s_address;
+
+	computed_direction = ((krb5_fulladdr_order(&temp_sender, &temp_recip) >
+			       0) ? MSEC_DIRBIT : 0); 
+	if (computed_direction != (message->msec & MSEC_DIRBIT)) {
+	    cleanup();
+	    return KRB5KRB_AP_ERR_BADDIRECTION;
+	}
     }
 
     /* verify the checksum */
@@ -102,7 +118,7 @@ krb5_data *outbuf;
 
     message->checksum = &our_cksum;
 
-    if (retval = encode_krb5_safe(&message, &scratch)) {
+    if (retval = encode_krb5_safe(message, &scratch)) {
 	message->checksum = his_cksum;
 	cleanup();
 	return retval;
@@ -143,8 +159,10 @@ krb5_data *outbuf;
     *outbuf = message->user_data;
 
     xfree(our_cksum.contents);
-    if (message->addresses)
-	krb5_free_address(message->addresses);
+    if (message->s_address)
+	krb5_free_addr(message->s_address);
+    if (message->r_address)
+	krb5_free_addr(message->r_address);
     krb5_free_checksum(his_cksum);
     xfree(message);
 
