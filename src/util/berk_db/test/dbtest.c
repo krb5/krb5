@@ -535,7 +535,7 @@ u_int
 setflags(s)
 	char *s;
 {
-	char *p, *index();
+	char *p ;
 
 	for (; isspace(*s); ++s);
 	if (*s == '\n' || *s == '\0')
@@ -597,7 +597,7 @@ setinfo(type, s)
 	static BTREEINFO ib;
 	static HASHINFO ih;
 	static RECNOINFO rh;
-	char *eq, *index();
+	char *eq;
 
 	if ((eq = index(s, '=')) == NULL)
 		err("%s: illegal structure set statement", s);
@@ -693,7 +693,7 @@ rfile(name, lenp)
 	struct stat sb;
 	void *p;
 	int fd;
-	char *np, *index();
+	char *np;
 
 	for (; isspace(*name); ++name);
 	if ((np = index(name, '\n')) != NULL)

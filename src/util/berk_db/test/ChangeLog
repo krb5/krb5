@@ -1,3 +1,8 @@
+Thu Oct 12 01:18:07 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* dbtest.c (rfile):  Don't declare index.
+	(setflags setinfo): Same change
+
 
 Fri Sep 1 11:18:25 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove __dbtest after done with make check.
