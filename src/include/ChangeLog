@@ -1,3 +1,10 @@
+
+Fri Mar 10 10:18:50 1995  Chris Provenzano (proven@mit.edu)
+
+	* krb5.h Added empty structure declaration of krb5_auth_context.
+
+	* k5-int.h Moved #include "adm_defs.h" to krb5.h
+
 Thu Mar  2 23:24:00 1995  John Gilmore  (gnu at toad.com)
 
 	Make include files begin to work on the Macintosh.

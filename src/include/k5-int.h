@@ -12,7 +12,6 @@
 /* krb5/krb5.h includes many other krb5/*.h files too.  The ones that it
    doesn't include, we include below.  */
 
-#include "adm_defs.h"
 #include "asn1.h"
 #include "copyright.h"
 #include "dbm.h"

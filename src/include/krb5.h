@@ -52,6 +52,9 @@ typedef struct _krb5_context {
 	void	      * os_context;
 } * krb5_context;
 
+struct _krb5_auth_context;
+typedef struct _krb5_auth_context krb5_auth_context;
+
 #include "encryption.h"
 #include "fieldbits.h"
 #include "errors.h"
@@ -333,5 +336,7 @@ typedef struct _krb5_pwd_data {
 /* flags for recvauth */
 #define KRB5_RECVAUTH_SKIP_VERSION	0x0001
 #define KRB5_RECVAUTH_BADAUTHVERS	0x0002
+
+#include "adm_defs.h"
 
 #endif /* KRB5_GENERAL__ */
