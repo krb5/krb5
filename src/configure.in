@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
-CONFIG_DIRS(util include isode lib kdc admin kadmin slave clients appl tests config-files)
+CONFIG_DIRS(util include isode lib kdc admin kadmin slave clients appl)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 CONFIG_RULES
