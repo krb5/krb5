@@ -11,6 +11,7 @@
  */
 
 #include "fcc.h"
+#include <netinet/in.h>			/* XXX ip only? */
 
 krb5_error_code
 krb5_fcc_close_file (id)

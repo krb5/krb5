@@ -16,6 +16,7 @@ static char rcsid_fcc_resolve_c[] = "$Id$";
 
 #include "fcc.h"
 
+#include <netinet/in.h>			/* XXX ip only? */
 #include <krb5/copyright.h>
 
 extern krb5_cc_ops krb5_fcc_ops;
