@@ -1,3 +1,10 @@
+Mon Oct 31 14:43:07 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Move WITH_CCOPTS and WITH_KRB5ROOT to the
+		beginning of the file.  Otherwise the other tests won't
+		get the CCOPTS flags correct while doing the feature
+		tests. 
+
 Tue Oct 25 23:54:25 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ext-proto.h (strdup): If the header files have strdup, don't try
