@@ -60,6 +60,9 @@ run-aes-test: aes-test
 
 clean-unix:: clean-libobjs
 
+clean::
+	-$(RM) aes-gen aes-gen.o vt.txt vk.txt kresults.out aes-test aes-test.o
+
 # @libobj_frag@
 
 # +++ Dependency line eater +++

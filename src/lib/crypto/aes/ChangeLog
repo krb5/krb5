@@ -1,3 +1,7 @@
+2003-02-28  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (clean): Cleanup testing objects and outputs
+
 2003-02-05  Ezra Peisach  <epeisach@.bu.edu>
 
 	* Makefile.in (run-aes-test): Add $(RUN_SETUP) so that if
