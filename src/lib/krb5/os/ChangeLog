@@ -1,3 +1,9 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* lock_file.c (krb5_lock_file): Fix bug where if the fcntl-style
+		lock succeeded, we should return immediately instead of
+		trying to do flock-style locking.
+
 1998-10-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* lock_file.c (krb5_lock_file): Move the flock() fallback code

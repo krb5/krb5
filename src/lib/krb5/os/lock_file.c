@@ -37,8 +37,12 @@
 
 #include <errno.h>
 
-#ifdef POSIX_FILE_LOCKS
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+
+#if defined(HAVE_FCNTL_H) && defined(F_SETLKW) && defined(F_RDLCK)
+#define POSIX_FILE_LOCKS
 #endif
 
 #ifdef HAVE_FLOCK
@@ -114,7 +118,8 @@ krb5_lock_file(context, fd, mode)
 	if (errno != EINVAL)	/* Fall back to flock if we get EINVAL */
 	    return(errno);
 	retval = errno;
-    }
+    } else
+	    return 0;		/* We succeeded.  Yay. */
 #endif
     
 #ifdef HAVE_FLOCK
