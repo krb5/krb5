@@ -24,6 +24,8 @@
 #define OS_SunOS4		1
 #define OSMajorVersion		4
 #define OSMinorVersion		1
+#define OS_TelnetName           sun4.1 /* see appl/telnet/config.generic
+				          to select the name for this */
 #define SystemV			NO
 #define HasVoidSignalReturn	YES
 #define	HasPosixTermios		NO
