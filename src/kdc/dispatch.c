@@ -39,9 +39,7 @@ krb5_data **response;
 
     if (krb5_is_tgs_req(pkt)) {
 	if (!(retval = decode_krb5_tgs_req(pkt, &tgs_req))) {
-	    /* it's now decoded, but still has an encrypted part to work on */
-	    if (!(retval = decrypt_tgs_req(tgs_req, from)))
-		retval = process_tgs_req(tgs_req, from, response);
+	    retval = process_tgs_req(tgs_req, from, response);
 	    krb5_free_tgs_req(tgs_req);
 	}
     } else if (krb5_is_as_req(pkt)) {
