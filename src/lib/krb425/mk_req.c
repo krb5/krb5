@@ -72,7 +72,7 @@ u_long checksum;
 			return(KFAILURE);
 		}
 		authent->length = outbuf.length;
-		bcopy((char *)outbuf.data, (char *)authent->dat, outbuf.length);
+		memcpy((char *)authent->dat, (char *)outbuf.data, outbuf.length);
 		free((char *)outbuf.data);
 	}
 	return(krb425error(r));

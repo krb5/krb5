@@ -161,7 +161,7 @@ char *version;			 /* version string */
 	    return(cc);
 
     /* zero the buffer */
-    (void) bzero(buf, BUFSIZ);
+    (void) memset(buf, 0, BUFSIZ);
 
     /* insert version strings */
     (void) strncpy(buf, KRB_SENDAUTH_VERS, KRB_SENDAUTH_VLEN);
@@ -172,11 +172,11 @@ char *version;			 /* version string */
 
     /* put ticket length into buffer */
     tkt_len = htonl((unsigned long) ticket->length);
-    (void) bcopy((char *) &tkt_len, buf+i, sizeof(tkt_len));
+    (void) memcpy(buf+i, (char *) &tkt_len, sizeof(tkt_len));
     i += sizeof(tkt_len);
 
     /* put ticket into buffer */
-    (void) bcopy((char *) ticket->dat, buf+i, ticket->length);
+    (void) memcpy(buf+i, (char *) ticket->dat, ticket->length);
     i += ticket->length;
 
     /* write the request to the server */
@@ -214,8 +214,8 @@ char *version;			 /* version string */
 	    return(cc);
 
 	/* fetch the (modified) checksum */
-	(void) bcopy((char *)msg_data->app_data, (char *)&cksum,
-		     sizeof(cksum));
+	(void) memcpy((char *)&cksum, (char *)msg_data->app_data,
+		      sizeof(cksum));
 	cksum = ntohl(cksum);
 
 	/* if it doesn't match, fail */

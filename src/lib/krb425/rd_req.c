@@ -41,7 +41,7 @@ char *fn;
 		peer.addrtype = ADDRTYPE_INET;
 		peer.length = 4;
 		peer.contents = (krb5_octet *)addr;
-		bcopy((char *)&from_addr + (sizeof(from_addr) - 4), addr, 4);
+		memcpy(addr, (char *)&from_addr + (sizeof(from_addr) - 4), 4);
 	}
 
 	if (!_krb425_local_realm[0])
@@ -143,8 +143,9 @@ char *fn;
 		r = KFAILURE;
 		goto out;
 	} else
-		bcopy(authd.ticket->enc_part2->session->contents,
-		      (char*)ad->session, sizeof(C_Block));
+		memcpy((char*)ad->session,
+		       authd.ticket->enc_part2->session->contents,
+		       sizeof(C_Block));
 
 	ad->life = authd.ticket->enc_part2->times.endtime;
 	ad->time_sec = authd.authenticator->ctime;
@@ -154,15 +155,15 @@ char *fn;
 		r = KFAILURE;
 		goto out;
 	} else
-		bcopy(authd.ticket->enc_part2->caddrs[0]->contents, 
-		      (char *)&ad->address + sizeof(ad->address) - 4, 4);
+		memcpy((char *)&ad->address + sizeof(ad->address) - 4,
+		       authd.ticket->enc_part2->caddrs[0]->contents, 4);
 
 	if (authd.ticket->enc_part2->authorization_data &&
 	    authd.ticket->enc_part2->authorization_data[0]) {
 		ad->reply.length = authd.ticket->enc_part2->authorization_data[0]->length;
-		bcopy(authd.ticket->enc_part2->authorization_data[0]->contents,
-		      ad->reply.dat,
-		      min(ad->reply.length, MAX_KTXT_LEN));
+		memcpy(ad->reply.dat,
+		       authd.ticket->enc_part2->authorization_data[0]->contents,
+		       min(ad->reply.length, MAX_KTXT_LEN));
 		ad->reply.mbz = 0;
 	}
 out:

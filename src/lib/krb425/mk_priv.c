@@ -50,8 +50,8 @@ struct sockaddr_in *receiver;
 	raddr.length = 4;
 	raddr.contents = (krb5_octet *)ra;
 
-	bcopy((char *)&sender->sin_addr, sa, 4);
-	bcopy((char *)&receiver->sin_addr, ra, 4);
+	memcpy(sa, (char *)&sender->sin_addr, 4);
+	memcpy(ra, (char *)&receiver->sin_addr, 4);
 
 	sfaddr.address = &saddr;
 	sfaddr.port = sender->sin_port;
@@ -73,7 +73,7 @@ struct sockaddr_in *receiver;
 		return(-1);
 	}
 
-	bcopy(out5.data, out, out5.length);
+	memcpy(out, out5.data, out5.length);
 	free(out5.data);
 	return(out5.length);
 }

@@ -146,7 +146,7 @@ char *version;			 /* version string (filled in) */
 	old_vers = 1;
 
 	/* copy what we have read into tmp_buf */
-	(void) bcopy(krb_vers, (char *) tmp_buf, KRB_SENDAUTH_VLEN);
+	(void) memcpy((char *) tmp_buf, krb_vers, KRB_SENDAUTH_VLEN);
 
 	/* search for space, and make it a null */
 	for (i = 0; i < KRB_SENDAUTH_VLEN; i++)
@@ -191,7 +191,7 @@ char *version;			 /* version string (filled in) */
 	}
 	ticket->length = tkt_len;
 	/* copy the ticket into the struct */
-	(void) bcopy(cp, (char *) ticket->dat, ticket->length);
+	(void) memcpy((char *) ticket->dat, cp, ticket->length);
 
     } else {
 	/* read the application version string */

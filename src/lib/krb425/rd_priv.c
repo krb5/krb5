@@ -50,8 +50,8 @@ MSG_DAT *msg;
 	raddr.length = 4;
 	raddr.contents = (krb5_octet *)ra;
 
-	bcopy((char *)&sender->sin_addr, sa, 4);
-	bcopy((char *)&receiver->sin_addr, ra, 4);
+	memcpy(sa, (char *)&sender->sin_addr, 4);
+	memcpy(ra, (char *)&receiver->sin_addr, 4);
 
 	sfaddr.address = &saddr;
 	sfaddr.port = sender->sin_port;
