@@ -13,7 +13,7 @@ implement.ps: implement.dvi
 # hard to capture two-pass semantics in Makefiles...
 # implement.ind: implement.dvi
 implement.ind: implement.idx
-	index implement.idx
+	makeindex implement.idx
 
 implement.idx: 
 	touch implement.ind
@@ -21,7 +21,7 @@ implement.idx:
 	rm implement.ind
 
 clean:
-	rm -f *.toc *.log *.idx *.ind *.aux
+	rm -f *.toc *.log *.idx *.ind *.aux *.ilg
 
 really-clean: clean
 	rm -f *.dvi *.ps

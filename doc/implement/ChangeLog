@@ -1,3 +1,8 @@
+2001-11-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile (clean): Delete *.ilg.
+	(implement.ind): Use makeindex not index.
+
 2000-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* encrypt-i.tex (subsection{Functional interface}): Comment out
