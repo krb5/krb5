@@ -21,6 +21,8 @@
 typedef octet		krb5_ui_1;
 typedef int16		krb5_ui_2;
 typedef int32		krb5_ui_4;
+typedef octet		krb5_boolean;
+
 
 typedef int32		krb5_timestamp;
 typedef krb5_ui_2	krb5_confounder;
@@ -28,10 +30,11 @@ typedef	octet		krb5_msgtype;
 typedef	octet		krb5_kvno;
 typedef	int32		krb5_flags;
 
-typedef	krb5_ui_2	krb5_addr_type;
+typedef	krb5_ui_2	krb5_addrtype;
 typedef krb5_ui_2	krb5_keytype;
 typedef krb5_ui_2	krb5_enctype;
 typedef krb5_ui_2	krb5_cksumtype;
+typedef krb5_ui_2	krb5_authdatatype;
 
 typedef struct _krb5_string {
     int length;
