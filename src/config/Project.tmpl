@@ -115,13 +115,20 @@ DependTarget()								@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) lib/**/libname.a objlist				@@\
 	$(TOUCH) foo/**/libname						@@\
-	$(RANLIB) lib/**/libname.a					@@\
-lib/**/libname.a: objlist						@@\
-	$(ARADD) $@ objlist						@@\
+lib/**/libname.a: foo/**/libname					@@\
 	$(RANLIB) $@							@@\
 clean::									@@\
-	$(RM_CMD) foo/**/libname
+	$(RM_CMD) foo/**/libname lib/**/libname.a
 #endif /* AdditiveLibraryTarget */
+
+#ifndef RanlibLibraryTarget
+#define	RanlibLibraryTarget(libname)					@@\
+AllTarget(lib/**/libname.a)						@@\
+lib/**/libname.a:: foo/**/libname					@@\
+	$(RANLIB) lib/**/libname.a					@@\
+clean::									@@\
+	$(RM_CMD) foo/**/libname lib/**/libname.a
+#endif
 
 /*
  * OtherdirLibraryTarget - generate rules to create a library in another
@@ -131,15 +138,15 @@ clean::									@@\
 #define	OtherdirLibraryTarget(libdir,libname,objlist)			@@\
 AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
-AllTarget(foo/**/libname)						@@\
+AllTarget(libdir/foo/**/libname)					@@\
 DependTarget()								@@\
 									@@\
-foo/**/libname: objlist							@@\
+libdir/foo/**/libname: objlist						@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
-	$(TOUCH) foo/**/libname						@@\
+	$(TOUCH) libdir/foo/**/libname					@@\
 libdir/lib/**/libname.a:						@@\
 	$(ARADD) $@ objlist						@@\
-	$(TOUCH) foo/**/libname
+	$(TOUCH) libdir/foo/**/libname
 /* The $(RANLIB) is done at the end by the directory itself */
 #endif /* OtherdirLibraryTarget */
 
@@ -344,13 +351,18 @@ P_INET=-DHasInetTrue
 #else
 P_INET=-UHasInetTrue
 #endif
-#if HasStdlibH
-P_STDLIBH=-DHasStdlibHTrue
+/* If HasStdlibH > 1, include <stdlib.h> even if __STDC__ is not defined. */
+#if HasStdlibH > 1
+P_STDLIBH=-DHasStdlibHTrue -DForceStdlibH
 #else
-P_STDLIBH=-UHasStdlibHTrue
+#if HasStdlibH
+P_STDLIBH=-DHasStdlibHTrue -UForceStdlibH
+#else
+P_STDLIBH=-UHasStdlibHTrue -UForceStdlibH
 #endif
-/* Override system defaults for <time.h> vs <sys/time.h> */
+#endif
 #if !defined(UseTimeH) && !defined(UseSysTimeH)
+/* Override system defaults for <time.h> vs <sys/time.h> */
 #ifdef OS_BSD
 #define	UseSysTimeH
 #else
@@ -414,9 +426,9 @@ P_NPROTO=-UUseNarrowPrototypes
          ISODELIB = IsodeLib
 
            DBMLIB = DbmLib
-          DEPKLIB = $(KRB5DEPLIB) $(RSAMD4DEPLIB) $(DESDEPLIB) $(OSDEPLIB) $(CRCDEPLIB)
+          DEPKLIB = $(KRB5DEPLIB) $(DESDEPLIB) $(OSDEPLIB)
           KLIBLOC = -L$(TOPLIBD)
-             KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(RSAMD4LIB) -l$(DESLIB) -l$(OSLIB) -l$(CRCLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+             KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(DESLIB) -l$(OSLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
         KDBDEPLIB = $(TOPLIBD)/libkdb.a
            KDBLIB = $(KLIBLOC) -lkdb
      KRB425DEPLIB = $(TOPLIBD)/libkrb425.a
