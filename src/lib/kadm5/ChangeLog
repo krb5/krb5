@@ -1,3 +1,7 @@
+2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* str_conv.c: Include adm_proto.h for missing prototypes.
+
 Sun Feb 18 16:26:33 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* server_internal.h: Add prototype for

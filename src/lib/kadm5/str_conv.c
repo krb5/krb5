@@ -43,6 +43,7 @@
 
 #include "k5-int.h"
 #include "admin_internal.h"
+#include "adm_proto.h"
 
 /*
  * Local data structures.
