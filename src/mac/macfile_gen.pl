@@ -8,6 +8,7 @@
 #		gss-sources					-- complete list of mac GSS sources, relative to root
 #		krb5-sources				-- complete list of mac Krb5 sources, relative to root
 #		profile-sources				-- complete list of mac profile sources, relative to root
+#		comerr-sources				-- complete list of mac com_err sources, relative to root
 #		gss-objects-ppc-debug		-- complete list of mac GSS PPC debug objects, relative to root
 #		gss-objects-68k-debug		-- complete list of mac GSS 68K debug objects, relative to root
 #		gss-objects-ppc-final		-- complete list of mac GSS PPC final objects, relative to root
@@ -20,6 +21,10 @@
 #		profile-objects-68k-debug	-- complete list of mac profile v5 68K debug objects, relative to root
 #		profile-objects-ppc-final	-- complete list of mac profile v5 PPC final objects, relative to root
 #		profile-objects-68k-final	-- complete list of mac profile v5 68K final objects, relative to root
+#		comerr-objects-ppc-debug	-- complete list of mac com_err PPC debug objects, relative to root
+#		comerr-objects-68k-debug	-- complete list of mac com_err v5 68K debug objects, relative to root
+#		comerr-objects-ppc-final	-- complete list of mac com_err v5 PPC final objects, relative to root
+#		comerr-objects-68k-final	-- complete list of mac com_err v5 68K final objects, relative to root
 #		include-folders				-- complete list of include paths, relative to root
 #
 #	input on stdin
@@ -92,6 +97,12 @@ if ($action eq "all-folders") {
 	@outputList = grep (/:profile:/, @sourceList);
 	print (STDERR "Done. \n");
 	
+} elsif ($action eq "comerr-sources") {
+
+	print (STDERR "# Building profile source list… ");
+	@outputList = grep (/:et:/, @sourceList);
+	print (STDERR "Done. \n");
+	
 } elsif ($action eq "gss-objects-ppc-debug") {
 
 	print (STDERR "# Building GSS PPC debug object list… ");
@@ -152,28 +163,56 @@ if ($action eq "all-folders") {
 
 	print (STDERR "# Building profile PPC debug object list… ");
 	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
-	@outputList = grep (/:profile:|:et:/, @outputList);
+	@outputList = grep (/:profile:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "profile-objects-68k-debug") {
 
 	print (STDERR "# Building profile 68K debug object list… ");
 	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
-	@outputList = grep (/:profile:|:et:/, @outputList);
+	@outputList = grep (/:profile:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "profile-objects-ppc-final") {
 
 	print (STDERR "# Building profile PPC final object list… ");
 	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
-	@outputList = grep (/:profile:|:et:/, @outputList);
+	@outputList = grep (/:profile:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "profile-objects-68k-final") {
 
 	print (STDERR "# Building profile 68K final object list… ");
 	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
-	@outputList = grep (/:profile:|:et:/, @outputList);
+	@outputList = grep (/:profile:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "comerr-objects-ppc-debug") {
+
+	print (STDERR "# Building com_err PPC debug object list… ");
+	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	@outputList = grep (/:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "comerr-objects-68k-debug") {
+
+	print (STDERR "# Building com_err 68K debug object list… ");
+	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	@outputList = grep (/:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "comerr-objects-ppc-final") {
+
+	print (STDERR "# Building com_err PPC final object list… ");
+	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
+	@outputList = grep (/:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "comerr-objects-68k-final") {
+
+	print (STDERR "# Building com_err 68K final object list… ");
+	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
+	@outputList = grep (/:et:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "include-folders") {
