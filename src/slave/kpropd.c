@@ -312,7 +312,7 @@ void PRS(argv)
 	while (word = *argv++) {
 		if (*word == '-') {
 			word++;
-			while (ch = *word++) {
+			while (word && (ch = *word++)) {
 				switch(ch){
 				case 'f':
 					if (*word)
@@ -513,7 +513,7 @@ kerberos_authenticate(fd, clientp, sin)
 		free(name);
 	}
 	his_seq_num = authent->seq_number;
-	krb5_copy_keyblock(ticket->enc_part2->session, session_key);
+	krb5_copy_keyblock(ticket->enc_part2->session, &session_key);
 	krb5_free_ticket(ticket);
 	krb5_free_authenticator(authent);
 }
