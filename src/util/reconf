@@ -2,8 +2,9 @@
 
 force=
 autoreconf=./util/autoconf/autoreconf
+verbose=false
 
-usage="Usage: ./config.status [--recheck] [--version] [--help]"
+usage="Usage: $0 [--recheck] [--version] [--help]"
 for option
 do
   case "$option" in
@@ -12,6 +13,8 @@ do
     force=--force ;;
   -help | --help | --hel | --he | --h)
     echo "$usage"; exit 0 ;;
+  -v | --verbose)
+    verbose=true ;;
   *) echo "$usage"; exit 1 ;;
   esac
 done
@@ -33,4 +36,7 @@ if test ! -f $autoreconf ; then
 	fi
 fi
 
+if $verbose ; then 
+	echo $autoreconf -m util/autoconf -l . --verbose $force 
+fi
 $autoreconf -m util/autoconf -l . --verbose $force 

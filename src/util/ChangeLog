@@ -1,3 +1,8 @@
+Wed Apr 26 11:31:04 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* reconf (usage): fix pathname in message.
+	(verbose): add -v --verbose to echo actual autoreconf line.
+
 Thu Apr 20 21:19:36 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* depfix.sed: Also remove pathnames of the form /mit/cygnus....
