@@ -1,3 +1,6 @@
+Fri Mar 15 21:39:25 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* server.c: Remove declaration of krb5_kdc_default_options.
 
 Fri Jul 7 15:51:45 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit library handling and LDFLAGS.

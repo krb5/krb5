@@ -35,8 +35,6 @@
 #include "krb5.h"
 #include "com_err.h"
 
-extern krb5_flags krb5_kdc_default_options;
-
 /* fd 0 is a tcp socket used to talk to the client */
 
 int main(argc, argv)
