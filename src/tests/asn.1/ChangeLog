@@ -1,3 +1,8 @@
+Sat Jul 10 10:32:31 1999  Tom Yu  <chaoself@mit.edu>
+
+	* krb5_decode_test.c (main): Add additional test cases in
+ 	encryption_key to test negative integer handling.
+
 1999-07-03  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_decode_test.c (main): Add test cases for encryption_key in

@@ -79,6 +79,16 @@ int main(argc, argv)
     decode_run("encryption_key(indefinite lengths)","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
     decode_run("encryption_key(indefinite lengths + trailing [2] INTEGER)","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
     decode_run("encryption_key(indefinite lengths + trailing [2] SEQUENCE {[0] INTEGER})","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 80 30 80 A0 03 02 01 01 00 00 00 00 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    ref.enctype = -1;
+    decode_run("encryption_key(enctype = -1)","","30 11 A0 03 02 01 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    ref.enctype = -255;
+    decode_run("encryption_key(enctype = -255)","","30 12 A0 04 02 02 FF 01 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    ref.enctype = 255;
+    decode_run("encryption_key(enctype = 255)","","30 12 A0 04 02 02 00 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    ref.enctype = -2147483648;
+    decode_run("encryption_key(enctype = -2147483648)","","30 14 A0 06 02 04 80 00 00 00 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    ref.enctype = 2147483647;
+    decode_run("encryption_key(enctype = 2147483647)","","30 14 A0 06 02 04 7F FF FF FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
   }  
   
   /****************************************************************/
