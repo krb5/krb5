@@ -63,8 +63,8 @@ krb5_get_default_realm(context, lrealm)
 	     */
 	    context->default_realm = 0;
 	    retval = profile_get_string(context->profile, "libdefaults",
-			       "default_realm", 0, 0,
-			       &context->default_realm);
+					"default_realm", 0, 0,
+					&context->default_realm);
 	    if (retval == PROF_NO_PROFILE)
 	        return KRB5_CONFIG_CANTOPEN;
 	    if (context->default_realm == 0)
