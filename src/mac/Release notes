@@ -141,3 +141,7 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_2_5fc1
  added documentation and fixed makefile so that documentation,
  headers, and cfrm glue are always built correctly
+
+3.0d1
+ from tag Mac_GSSKerberos5_3_0d1
+ now tracking the trunk again
