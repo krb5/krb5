@@ -37,6 +37,8 @@ ErrorTableObjectRule()
 
 all::	krb5kdc
 
+depend:: kdc5_err.c
+
 kdc5_err.c: kdc5_err.et
 
 NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB), \
