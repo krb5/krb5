@@ -1,0 +1,9 @@
+Tue May 30 09:53:05 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* krb5_ndbm.c: If the size field of datum and DBT do not match,
+		then passing structures subject to stack garbage. Copy
+		instaead. 
+
+	* configure.in: Determine the size of the datum and DBT size
+		fields. 
+
