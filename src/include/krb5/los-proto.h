@@ -55,7 +55,7 @@ int krb5_net_read
 		   int  ));
 int krb5_net_write
 	PROTOTYPE((int ,
-		   char *,
+		   const char *,
 		   int  ));
 		 /* get all the addresses of this host */
 krb5_error_code krb5_os_localaddr
