@@ -442,7 +442,9 @@ main(argc, argv)
 		    if (encryptflag)
 		      send_auth();
 		}
+		(void) setreuid(0, userid);
 		sink(1, argv+argc-1);
+		(void) setreuid(userid, 0);
 #else
 		rem = rcmd(&host, port, pwd->pw_name, suser,
 			   buf, 0);
