@@ -1,3 +1,11 @@
+Sat Jul 11 01:38:05 1998  Geoffrey King  <gjking@mit.edu>
+
+	* main.c: Added a call to signal() in request_hup()
+	        so that the signal handler gets reset after
+	        each SIGHUP, since this does not happen
+	        automatically in System V's signal handling
+	        system.
+
 Wed Jul  8 04:36:28 1998  Geoffrey King  <gjking@mit.edu>
 
 	* extern.h: Added declaration for new variable

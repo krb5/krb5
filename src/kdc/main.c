@@ -575,6 +575,10 @@ request_hup(signo)
     int signo;
 {
     signal_requests_hup = 1;
+#ifndef POSIX_SIGNALS
+    signal(SIGHUP, request_hup);    /* System V's signal() requires
+				       resetting each time */
+#endif
 
 #ifdef POSIX_SIGTYPE
     return;
