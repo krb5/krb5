@@ -18,6 +18,8 @@ static char mk_req_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
+#include <krb5/ext-proto.h>
+
 /*
  Formats a KRB_AP_REQ message into outbuf.
 

@@ -24,6 +24,8 @@ static char mk_req_ext_c[] =
 #include <stdio.h>
 #include <krb5/libos-proto.h>
 
+#include <krb5/ext-proto.h>
+
 /*
  Formats a KRB_AP_REQ message into outbuf, with more complete options than
  krb_mk_req.
