@@ -207,7 +207,7 @@ int init_creds()
 			userlen = strlen( user);
 			if( userlen < 2 )
 				continue;
-			user[userlen-1] = 0;	// get rid of the newline
+			user[userlen-1] = 0;	/* get rid of the newline */
 			break;
 		}
 		{

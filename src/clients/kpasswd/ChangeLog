@@ -1,3 +1,8 @@
+2003-04-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* ksetpwd.c (init_creds): Let's use C comments for C code, shall
+	we?
+
 2003-04-25  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in :   Add rule to build ksetpw, a set/change password
