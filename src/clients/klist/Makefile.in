@@ -6,6 +6,8 @@ BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+SRCS = klist.c
+
 all-unix:: klist
 all-windows:: $(OUTPRE)klist.exe
 
@@ -25,3 +27,15 @@ install-unix::
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
 		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)klist.$(OBJEXT): klist.c $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/fake-addrinfo.h
