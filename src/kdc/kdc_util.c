@@ -69,7 +69,7 @@ krb5_authdata ***output;
 	    *retdata[i] = **ptr;
 	    if (!(retdata[i]->contents =
 		  (krb5_octet *)malloc(retdata[i]->length))) {
-		krb5_xfree(retdata[i]);
+		free((char *)retdata[i]);
 		retdata[i] = 0;
 		krb5_free_authdata(kdc_context, retdata);
 		return ENOMEM;

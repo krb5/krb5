@@ -153,7 +153,7 @@ get_realm_port(ctx, realm, name, defport, service)
 		    }
 		}
 	    }
-	    krb5_xfree(hostlist);
+	    free(hostlist);
 	}
     }
     /*

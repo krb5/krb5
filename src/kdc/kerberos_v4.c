@@ -323,8 +323,7 @@ int compat_decrypt_key (in5, out4)
 	memcpy(out4, out5.contents, out5.length);
 	retval = 0;
     }
-    memset(out5.contents, 0, out5.length);
-    krb5_xfree(out5.contents);
+    krb5_free_keyblock_contents(kdc_context, &out5);
     return(retval);
 }
 

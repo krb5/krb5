@@ -381,9 +381,7 @@ verify_enc_timestamp(context, client, request, enc_tkt_reply, pa)
 	key.enctype = enc_data->enctype;
 
 	retval = krb5_decrypt_data(context, &key, 0, enc_data, &enc_ts_data);
-	memset((char *)key.contents, 0, key.length);
-	krb5_xfree(key.contents);
-
+	krb5_free_keyblock_contents(context, &key);
 	if (retval == 0)
 	    break;
     }
@@ -405,14 +403,12 @@ verify_enc_timestamp(context, client, request, enc_tkt_reply, pa)
     
 cleanup:
     if (enc_data) {
-	if (enc_data->ciphertext.data)
-	    krb5_xfree(enc_data->ciphertext.data);
+	krb5_free_data_contents(context, &enc_data->ciphertext);
 	free(enc_data);
     }
-    if (enc_ts_data.data)
-	krb5_xfree(enc_ts_data.data);
+    krb5_free_data_contents(context, &enc_ts_data)
     if (pa_enc)
-	krb5_xfree(pa_enc);
+	free(pa_enc);
     return retval;
 }
 
@@ -499,7 +495,7 @@ cleanup:
     if (entry)
 	krb5_free_etype_info(context, entry);
     if (salt.data)
-	krb5_xfree(salt.data);
+	free(salt.data);
     return retval;
 }
 
@@ -920,8 +916,7 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
     }
 
 cleanup:
-    memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    krb5_xfree(encrypting_key.contents);
+    krb5_free_keyblock_contents(context, &encrypting_key);
     return retval;
 }
 
@@ -983,9 +978,9 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
     setflag(enc_tkt_reply->flags, TKT_FLG_HW_AUTH);
   cleanup:
     if (retval) com_err("krb5kdc", retval, "sam verify failure");
-    if (sr) krb5_xfree(sr);
-    if (psr) krb5_xfree(psr);
-    if (esre) krb5_xfree(esre);
+    if (sr) free(sr);
+    if (psr) free(psr);
+    if (esre) free(esre);
 
     return retval;
 }

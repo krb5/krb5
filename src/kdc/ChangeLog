@@ -2,6 +2,12 @@ Tue Feb 18 09:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos_v4.c: Remove include of krb4-proto.h
 
+Tue Feb 18 18:51:09 1997  Richard Basch  <basch@lehman.com>
+
+	* do_as_req.c do_tgs_req.c kdc_preauth.c kdc_util.c main.c
+	replay.c kerberos_v4.c:
+		Replace krb5_xfree with appropriate free routine.
+
 Thu Feb  6 00:09:46 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Remove logger.c target before copying over it.

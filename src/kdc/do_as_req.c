@@ -321,8 +321,7 @@ krb5_data **response;			/* filled in with a response packet */
 	encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
 	
     errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key, &ticket_reply);
-    memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    krb5_xfree(encrypting_key.contents);
+    krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     encrypting_key.contents = 0;
     if (errcode) {
 	status = "ENCRYPTING_TICKET";
@@ -397,8 +396,7 @@ krb5_data **response;			/* filled in with a response packet */
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
 				  &encrypting_key,  &reply, response);
-    memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    krb5_xfree(encrypting_key.contents);
+    krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     encrypting_key.contents = 0;
 
     if (errcode) {
@@ -438,10 +436,9 @@ errout:
 	    
 	errcode = prepare_error_as(request, errcode, &e_data, response);
     }
-    if (encrypting_key.contents) {
-	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-	krb5_xfree(encrypting_key.contents);
-    }
+
+    krb5_free_keyblock_contents(kdc_context, &encrypting_key);
+
     if (cname)
 	    free(cname);
     if (sname)

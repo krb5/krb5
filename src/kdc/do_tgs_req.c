@@ -567,8 +567,7 @@ tgt_again:
 	ticket_reply.enc_part.kvno = server_key->key_data_kvno;
 	errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
 					&ticket_reply);
-	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-	krb5_xfree(encrypting_key.contents);
+	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
 	if (errcode) {
 	    status = "TKT_ENCRYPT";
 	    goto cleanup;

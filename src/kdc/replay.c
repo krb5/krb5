@@ -101,7 +101,7 @@ register krb5_data **outpkt;
 		hold = eptr;
 		last->next = eptr->next;
 		eptr = last;
-		krb5_xfree(hold);
+		free(hold);
 	    } else {
 		/* this isn't it, just move along */
 		last = eptr;
@@ -134,12 +134,12 @@ register krb5_data *outpkt;
     eptr->timein = timenow;
     eptr->db_age = db_age;
     if (krb5_copy_data(kdc_context, inpkt, &eptr->req_packet)) {
-	krb5_xfree(eptr);
+	free(eptr);
 	return;
     }
     if (krb5_copy_data(kdc_context, outpkt, &eptr->reply_packet)) {
 	krb5_free_data(kdc_context, eptr->req_packet);
-	krb5_xfree(eptr);
+	free(eptr);
 	return;
     }
     eptr->next = root_ptr.next;
