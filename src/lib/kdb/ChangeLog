@@ -1,3 +1,9 @@
+Wed Sep  4 19:29:57 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (t_kdb): Fix up dependencies of t_kdb so it will
+		build on non-shared architectures; also ensure that libs
+		get linked after the objects.
+
 Fri Aug 23 16:34:45 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in (t_kdb): Fix Makefile so that t_kdb is linked
