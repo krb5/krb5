@@ -125,7 +125,8 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
     krb5_free_creds(context, pcreds);
 
     if (retval) {
-	krb5_free_data(context, scratch);
+	if (scratch)
+	    krb5_free_data(context, scratch);
     } else {
 	*outbuf = *scratch;
 	krb5_xfree(scratch);
