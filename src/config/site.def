@@ -54,15 +54,13 @@
 #define HasGcc NO
 #endif
 
-#ifdef UltrixArchitecture
-#define DefaultCDebugFlags DebuggableCDebugFlags
-#else
+#ifndef UltrixArchitecture
+#define ExtraLoadFlags -Z
+#endif
 #if HasGcc
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
 #else
 #define DefaultCDebugFlags DebuggableCDebugFlags
-#endif
-#define ExtraLoadFlags -Z
 #endif
 
 #if HasNdbm
