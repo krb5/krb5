@@ -16,7 +16,10 @@ main()
 		DICT=/usr/share/dict/words
 	elif [ -f /usr/dict/words ]; then
 		DICT=/usr/dict/words
-	else
+	elif [ -f /usr/share/lib/dict/words ]; then
+		# SGI Irix 5.x
+		DICT=/usr/share/lib/dict/words
+ 	else
 		echo 'run.test: no dictionary'
 		exit 1
 	fi

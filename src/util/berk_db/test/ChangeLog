@@ -1,3 +1,7 @@
+Wed Jun 28 00:04:07 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* run.test: look in /usr/share/lib/dict/words to find the words
+	file under SGI Irix 5.
 
 Fri Jun 16 16:57:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* run.test - Remove argument processing loop and only do the first one
