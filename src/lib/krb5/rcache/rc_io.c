@@ -308,14 +308,14 @@ krb5_rc_iostuff *d;
 krb5_error_code krb5_rc_io_mark (d)
 krb5_rc_iostuff *d;
 {
- d->mark = lseek(d->fd,0,L_INCR); /* can't fail */
+ d->mark = lseek(d->fd,0,SEEK_CUR); /* can't fail */
  return 0;
 }
 
 krb5_error_code krb5_rc_io_unmark (d)
 krb5_rc_iostuff *d;
 {
- (void) lseek(d->fd,d->mark,L_SET); /* if it fails, tough luck */
+ (void) lseek(d->fd,d->mark,SEEK_SET); /* if it fails, tough luck */
  return 0;
 }
 
