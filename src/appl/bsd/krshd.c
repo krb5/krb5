@@ -529,8 +529,10 @@ char *kremuser;
 krb5_principal client;
 krb5_authenticator *kdata;
 
+#ifdef KRB5_KRB4_COMPAT
 AUTH_DAT	*v4_kdata;
 KTEXT		v4_ticket;
+#endif
 
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 
