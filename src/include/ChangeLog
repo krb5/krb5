@@ -1,3 +1,8 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: Updated Mac OS X headers to new framework layout
+    * k5-int.h: Removed conditionals now defined in prefix files
+    and updated header paths
+
 2001-12-19  Miro Jurisic  <meeroh@mit.edu>
 	* win-mac.h: Fixed EFBIG #define
 

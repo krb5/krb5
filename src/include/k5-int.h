@@ -92,14 +92,6 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <KerberosSupport/KerberosConditionalMacros.h>
-	
-	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
-		#include <Kerberos5/win-mac.h>
-	#endif
-#endif
-
 #if defined(_MSDOS) || defined(_WIN32)
 #include "win-mac.h"
 
@@ -1000,7 +992,8 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pa_enc_ts
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #if TARGET_OS_MAC
-#include <KerberosProfile/KerberosProfile.h>
+#include <Kerberos/profile.h>
+#include <Kerberos/com_err.h>  /* Not included by Kerberos/profile.h */
 #else
 #include "profile.h"
 #endif
