@@ -2123,7 +2123,8 @@ gunique(local)
 	}
 	if (cp)
 		*cp = '/';
-	(void) strcpy(new, local);
+	(void) strncpy(new, local, sizeof(new) - 1);
+	new[sizeof(new) - 1] = '\0';
 	cp = new + strlen(new);
 	*cp++ = '.';
 	for (count = 1; count < 100; count++) {
@@ -2287,7 +2288,8 @@ char *data;
 			syslog(LOG_ERR, "Couldn't canonicalize local hostname");
 			return 0;
 		}
-		strcpy(localname, hp->h_name);
+		strncpy(localname, hp->h_name, sizeof(localname) - 1);
+		localname[sizeof(localname) - 1] = '\0';
 
 		for (service = gss_services; *service; service++) {
 			sprintf(service_name, "%s@%s", *service, localname);
