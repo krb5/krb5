@@ -1,3 +1,10 @@
+Thu May 13 17:31:34 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_ctx.c (krb5_init_context): Pass the context to
+		kkrb5_win_ccdll_load so that it can register the FILE
+		ccache type if using ccapi (so that the FILE ccache type
+		will always work).
+
 Mon May 10 15:26:00 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

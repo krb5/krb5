@@ -55,7 +55,7 @@
 
 #if (defined(_MSDOS) || defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
-extern void krb5_win_ccdll_load();
+extern void krb5_win_ccdll_load(krb5_context context);
 #endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
@@ -72,7 +72,7 @@ krb5_init_context(context)
 	krb5_init_ets(ctx);
 
 #if (defined(_MSDOS) || defined(_WIN32))
-	krb5_win_ccdll_load();	/* Load the krbcc32.dll if necessary */
+	krb5_win_ccdll_load(context);	/* Load the krbcc32.dll if necessary */
 	/*
 	 * krb5_vercheck() is defined in win_glue.c, and this is
 	 * where we handle the timebomb and version server checks.
