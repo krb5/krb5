@@ -1,3 +1,8 @@
+2003-04-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5_context): Change os_context to be an
+	array of one _krb5_os_context instead of a void pointer.
+
 2003-04-17  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Add encode_krb5_setpw_req

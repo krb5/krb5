@@ -333,17 +333,8 @@ krb5_os_init_context(krb5_context ctx)
 	krb5_os_context os_ctx;
 	krb5_error_code	retval = 0;
 
-	if (ctx->os_context)
-		return 0;
-
-	os_ctx = malloc(sizeof(struct _krb5_os_context));
-	if (!os_ctx)
-		return ENOMEM;
-	memset(os_ctx, 0, sizeof(struct _krb5_os_context));
+	os_ctx = ctx->os_context;
 	os_ctx->magic = KV5M_OS_CONTEXT;
-
-	ctx->os_context = (void *) os_ctx;
-
 	os_ctx->time_offset = 0;
 	os_ctx->usec_offset = 0;
 	os_ctx->os_flags = 0;
@@ -453,9 +444,6 @@ krb5_os_free_context(krb5_context ctx)
 
 	os_ctx = ctx->os_context;
 	
-	if (!os_ctx)
-		return;
-
 	if (os_ctx->default_ccname) {
 		free(os_ctx->default_ccname);
                 os_ctx->default_ccname = 0;
@@ -467,8 +455,6 @@ krb5_os_free_context(krb5_context ctx)
 	}
 
 	os_ctx->magic = 0;
-	free(os_ctx);
-	ctx->os_context = 0;
 
 	if (ctx->profile) {
 		profile_release(ctx->profile);
