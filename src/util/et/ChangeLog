@@ -1,3 +1,7 @@
+2000-02-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (com_err.o): Depends on com_err.c.
+
 1999-10-28  Alexandra Ellwood  <lxs@mit.edu>
 
 	* error_message.c, error_table.h: Added support to use ErrorLib 

@@ -73,6 +73,8 @@ error_table.c: $(srcdir)/error_table.y
 error_table.o: error_table.c et_lex.lex.c
 	$(CC) $(ALL_CFLAGS) -c error_table.c
 
+com_err.o : com_err.c
+
 et_lex.lex.o: et_lex.lex.c
 test1.o: test1.c
 test2.o: test2.c
