@@ -21,7 +21,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH KADMIND5 1 "Kerberos Version 5.0" "MIT Project Athena"
+.TH KADMIND5 8 "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
 kadmind5 \- network daemon for Kerberos version 5 database information
 .SH SYNOPSIS
@@ -99,7 +99,7 @@ inactive for
 .B timeout
 seconds.
 .PP
-.B Debugging flag
+.B Debugging flags
 .IP \-D
 Enables certain debugging features and messages selected by
 .B debugmask.

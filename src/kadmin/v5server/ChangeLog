@@ -1,4 +1,10 @@
 
+Mon May 22 09:46:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Install kadmind5 in $(SERVER_BINDIR), install
+			  manpage in $(SERVER_MANDIR).
+	* kadmind5.M	- Change section to section 8.
+
+
 Tue May 16 10:31:12 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* proto_serv.c	- Don't destroy the replay cache when done.
 

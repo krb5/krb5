@@ -28,8 +28,8 @@ kadmind5: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o kadmind5 $(OBJS) $(KLIB) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) kadmind5 ${DESTDIR}$(CLIENT_BINDIR)/kadmind5
-	$(INSTALL_DATA) $(srcdir)/kadmind5.M ${DESTDIR}$(CLIENT_MANDIR)/kadmind.8
+	$(INSTALL_PROGRAM) $(C)kadmind5 ${DESTDIR}$(SERVER_BINDIR)$(S)kadmind5
+	$(INSTALL_DATA) $(srcdir)$(S)kadmind5.M ${DESTDIR}$(SERVER_MANDIR)$(S)kadmind5.8
 
 clean::
 	$(RM) kadmind5
