@@ -1,5 +1,20 @@
 Fri Feb 13 14:37:47 1998  Tom Yu  <tlyu@mit.edu>
 
+	* recno/extern.h: Additional renaming.
+
+	* hash/extern.h: Additional renaming.
+
+	* hash/hash_page.c (page_to_oaddr): 
+	(is_bitmap_pgno): Declare static to avoid leaking symbols.
+
+	* hash/search.h: Additional renaming.
+
+	* hash/hash_log2.c (__log2): Rename explicitly.
+
+	* mpool/mpool.h: Additional renaming.
+
+	* btree/extern.h: Additional renaming.
+
 	* hash/hash.c (__kdb2_hash_open): Rename to avoid potential
  	collision with NetBSD libc.
 
