@@ -153,7 +153,11 @@ vsyslog(pri, fmt, ap)
 		return;
 
 	/* output the message to the console */
+#if defined(SYSV) || defined(_AIX)
+	pid = fork();
+#else
 	pid = vfork();
+#endif
 	if (pid == -1)
 		return;
 	if (pid == 0) {
@@ -171,8 +175,14 @@ vsyslog(pri, fmt, ap)
 		(void)close(fd);
 		_exit(0);
 	}
+#if defined(SYSV) || defined(_AIX) || defined(_POSIX_SOURCE)
+#define	cast int *
+#else
+#define cast union wait *
+#endif
 	if (!(LogStat & LOG_NOWAIT))
-		while ((cnt = wait((union wait *)0)) > 0 && cnt != pid);
+		while ((cnt = wait((cast)0)) > 0 && cnt != pid);
+#undef cast
 }
 
 static struct sockaddr SyslogAddr;	/* AF_UNIX address of local logger */
