@@ -1,3 +1,9 @@
+2003-04-10  Tom Yu  <tlyu@mit.edu>
+
+	* reconf: Warn if autoconf-2.52 is used, as it generates buggy
+	configure scripts that don't work with BSD /bin/sh, and don't
+	comply with POSIX.2 (no conditions inside "case" statement).
+
 2003-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Exclude .rconf files.

@@ -51,6 +51,9 @@ if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/
 
 	# Determine if we need to patch autoreconf for 2.53
 	case "$autoconfversion" in
+	  2.52)
+	       echo "WARNING: autoconf 2.52 is known to generate buggy configure scripts!"
+	       ;;
 	  2.53)
 	       echo "Patching autoreconf"
 	       # Walk the path to find autoreconf
