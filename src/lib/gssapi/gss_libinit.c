@@ -38,14 +38,14 @@ OM_uint32 gssint_initialize_library (void)
 
 void gssint_cleanup_library (void)
 {
-	OM_uint32 maj_stat, min_stat;
+	OM_uint32 min_stat;
 
 	assert (initialized);
 	
-	maj_stat = kg_release_defcred (&min_stat);
+	(void) kg_release_defcred (&min_stat);
 	
-    remove_error_table(&et_k5g_error_table);
-    remove_error_table(&et_ggss_error_table);
+	remove_error_table(&et_k5g_error_table);
+	remove_error_table(&et_ggss_error_table);
 	
 	initialized = 0;
 }

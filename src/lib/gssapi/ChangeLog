@@ -1,3 +1,8 @@
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* gss_libinit.c (gssint_cleanup_library): Remove variable set but
+	not used.
+
 2002-07-14  Alexandra Ellwood <lxs@mit.edu>
 
 	* gss_libinit.c: Conditionalized error table loading for Mac OS X.
