@@ -252,7 +252,8 @@ krb5_error_code do_connection(s, context)
      krb5_keyblock v5_service_key, v4_service_key;
      krb5_data msgdata, tktdata;
      char msgbuf[MSGSIZE], tktbuf[TKT_BUFSIZ], *p;
-     int n, ret, saddrlen;
+     int ret, saddrlen;
+     krb5_int32 n; /* Must be 4 bytes */
      krb5_kvno v4kvno;
 
      /* Clear out keyblock contents so we don't accidentally free the stack.*/
@@ -283,7 +284,7 @@ krb5_error_code do_connection(s, context)
 	    break;
 	  default:
 	    /* try and recognize our own error packet */
-	    if (msgdata.length == sizeof(int))
+	    if (msgdata.length == sizeof(krb5_int32))
 	      return KRB5_BADMSGTYPE;
 	    else
 	      goto error;
@@ -342,17 +343,17 @@ error:
      msgdata.length = 0;
      
      n = htonl(ret);
-     memcpy(p, (char *) &n, sizeof(int));
-     p += sizeof(int);
-     msgdata.length += sizeof(int);
+     memcpy(p, (char *) &n, sizeof(krb5_int32));
+     p += sizeof(krb5_int32);
+     msgdata.length += sizeof(krb5_int32);
 
      if (ret)
 	  goto write_msg;
 
      n = htonl(v4kvno);
-     memcpy(p, (char *) &n, sizeof(int));
-     p += sizeof(int);
-     msgdata.length += sizeof(int);
+     memcpy(p, (char *) &n, sizeof(krb5_int32));
+     p += sizeof(krb5_int32);
+     msgdata.length += sizeof(krb5_int32);
 
      memcpy(p, tktdata.data, tktdata.length);
      p += tktdata.length;

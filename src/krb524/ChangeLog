@@ -1,3 +1,21 @@
+2000-10-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c (do_connection): Do not assume that sizeof(int) == 4. 
+
+	* encode.c (encode_int32, decode_int32): Do not assume 
+	sizeof(int) == 4.
+
+	* conv_creds.c (krb524_convert_creds_kdc): Do not assume
+	sizeof(int) == 4 in network packet. 
+
+	* cnv_tkt_skey.c (krb524int_krb_cr_tkt_int): Ensure that OTW flags
+	is one byte long. An error was introduced when prototypes were
+	widened.
+
+	* Makefile.in (includes): When testing to see if krb524_err.h
+	exists in the include directory, compare against the build trees
+	version.
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: Install krb524.h and krb524_err.h header file so

@@ -70,7 +70,7 @@ int encode_int32(out, outlen, v)
      int *outlen;
      krb5_int32 *v;
 {
-     int nv;
+     krb5_int32 nv; /* Must be 4 bytes */
 
      nv = htonl(*v);
      return encode_bytes(out, outlen, (char *) &nv, sizeof(nv));
@@ -118,7 +118,7 @@ int decode_int32(out, outlen, v)
      krb5_int32 *v;
 {
      int ret;
-     int nv;
+     krb5_int32 nv; /* Must be four bytes */
 
      if ((ret = decode_bytes(out, outlen, (char *) &nv, sizeof(nv))))
 	  return ret;

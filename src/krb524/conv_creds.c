@@ -63,14 +63,14 @@ krb524_convert_creds_kdc(context, v5creds, v4creds)
 
      p = reply.data;
      ret = ntohl(*((krb5_error_code *) p));
-     p += sizeof(krb5_error_code);
-     reply.length -= sizeof(krb5_error_code);
+     p += sizeof(krb5_int32);
+     reply.length -= sizeof(krb5_int32);
      if (ret)
 	 goto fail;
 
      v4creds->kvno = ntohl(*((krb5_error_code *) p));
-     p += sizeof(int);
-     reply.length -= sizeof(int);
+     p += sizeof(krb5_int32);
+     reply.length -= sizeof(krb5_int32);
      ret = decode_v4tkt(&v4creds->ticket_st, p, &reply.length);
 
 fail:

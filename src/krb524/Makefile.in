@@ -92,7 +92,7 @@ includes:: krb524.h krb524_err.h
 		 $(CP) $(srcdir)/krb524.h \
 			$(BUILDTOP)/include/krb524.h) ; \
 	fi
-	if cmp $(srcdir)/krb524_err.h \
+	if cmp krb524_err.h \
 	$(BUILDTOP)/include/krb524_err.h  >/dev/null 2>&1; then :; \
 	else \
 		(set -x; $(RM) $(BUILDTOP)/include/krb524_err.h; \
