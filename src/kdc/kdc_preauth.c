@@ -384,6 +384,7 @@ check_padata (krb5_context context, krb5_db_entry *client,
  * to return some preauth system errors back to the client.
  */
         switch(retval) {
+	case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
 	return retval;
     default:
