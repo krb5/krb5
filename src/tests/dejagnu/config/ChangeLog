@@ -1,3 +1,8 @@
+2001-06-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Add an entry for krb524_server for the localhost
+	with a non-standard port number.
+
 2001-04-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp: For Kerberos 4 tests, use a different ticket file

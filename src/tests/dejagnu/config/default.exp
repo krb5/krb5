@@ -390,6 +390,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		admin_server = $hostname:3750"
 	puts $conffile "		kpasswd_server = $hostname:3751"
 	puts $conffile "		default_domain = $domain"
+	puts $conffile "                krb524_server = $hostname:3752"
 	puts $conffile "	\}"
 	puts $conffile ""
 	puts $conffile "\[domain_realm\]"
