@@ -1,3 +1,10 @@
+Wed Jan 25 19:55:59 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (CFLAGS):  Add -I options to pick up include files
+	from the various algorithm subdirs.
+	* cryptoconf.c, des-crc.c, des-md5.c, raw-des.c:  Replace most
+	<.../...> include files with "..." includes.
+
 Tue Oct 18 15:46:01 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* des-crc.c (mit_des_crc_decrypt_func): cast key->key->contents to

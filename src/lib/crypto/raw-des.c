@@ -1,7 +1,7 @@
 /*
- * lib/crypto/des-crc.32
+ * lib/crypto/raw-des.c
  *
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -19,15 +19,10 @@
  * permission.  M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
  */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/crc-32.h>
-
-#include "./des/des_int.h"
+#include "k5-int.h"
+#include "des_int.h"
 
 static krb5_error_code mit_raw_des_encrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
@@ -104,4 +99,3 @@ mit_raw_des_encrypt_func(in, out, size, key, ivec)
 				 ivec ? ivec : (krb5_pointer)key->key->contents,
 				 MIT_DES_ENCRYPT));
 }
-

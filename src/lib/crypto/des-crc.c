@@ -19,15 +19,11 @@
  * permission.  M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
  */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/crc-32.h>
-
-#include "./des/des_int.h"
+#include "k5-int.h"
+#include "crc-32.h"
+#include "des_int.h"
 
 static krb5_error_code mit_des_crc_encrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,

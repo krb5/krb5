@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS)
+CFLAGS = $(CCOPTS) $(DEFS) -Icrc32 -Ides -Imd4 -Imd5
 LDFLAGS = -g
 
 TST=if test -n "`cat DONE`" ; then

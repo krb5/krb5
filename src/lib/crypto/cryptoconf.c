@@ -24,20 +24,17 @@
  * Cryptosystem configurations
  */
 
-
-#include <krb5/config.h>
-#include <krb5/osconf.h>
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 #if defined(PROVIDE_DES_CBC_CRC) || defined(PROVIDE_CRC32)
-#include <krb5/crc-32.h>
+#include "crc-32.h"
 #define CRC32_CKENTRY &crc32_cksumtable_entry
 #else
 #define CRC32_CKENTRY 0
 #endif
 
 #ifdef PROVIDE_RSA_MD4
-#include <krb5/rsa-md4.h>
+#include "rsa-md4.h"
 #define MD4_CKENTRY &rsa_md4_cksumtable_entry
 #define MD4_DES_CKENTRY &rsa_md4_des_cksumtable_entry
 #else
@@ -61,7 +58,7 @@
 #endif
 
 #ifdef PROVIDE_DES_CBC_CKSUM
-#include <krb5/mit-des.h>
+#include "des_int.h"
 #define _DES_DONE__
 #define DES_CBC_CKENTRY &krb5_des_cbc_cksumtable_entry
 #else
@@ -70,7 +67,7 @@
 
 #ifdef PROVIDE_DES_CBC_CRC
 #ifndef _DES_DONE__
-#include <krb5/mit-des.h>
+#include "des_int.h"
 #define _DES_DONE__
 #endif
 #define DES_CBC_CRC_CSENTRY &krb5_des_crc_cst_entry
@@ -80,7 +77,7 @@
 
 #ifdef PROVIDE_DES_CBC_MD5
 #ifndef _DES_DONE__
-#include <krb5/mit-des.h>
+#include "des_int.h"
 #define _DES_DONE__
 #endif
 #define DES_CBC_MD5_CSENTRY &krb5_des_md5_cst_entry
@@ -90,7 +87,7 @@
     
 #ifdef PROVIDE_RAW_DES_CBC
 #ifndef _DES_DONE__
-#include <krb5/mit-des.h>
+#include "des_int.h"
 #define _DES_DONE__
 #endif
 #define RAW_DES_CBC_CSENTRY &krb5_raw_des_cst_entry
