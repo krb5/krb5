@@ -1,3 +1,7 @@
+2001-11-19  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (check-unix): Run t_prng
+
 2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do yarrow subdir on Windows.

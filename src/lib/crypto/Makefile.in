@@ -146,6 +146,8 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 check-unix:: t_nfold t_encrypt t_prng
 	$(RUN_SETUP) ./t_nfold
 	$(RUN_SETUP) ./t_encrypt
+	$(RUN_SETUP) ./t_prng <t_prng.seed >t_prng.output && \
+	diff t_prng.output t_prng.expected
 
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
@@ -159,6 +161,7 @@ t_prng$(EXEEXT): t_prng.$(OBJEXT)
 
 clean::
 	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o
+	-$(RM) t_prng.output
 
 all-windows::
 	cd crc32
