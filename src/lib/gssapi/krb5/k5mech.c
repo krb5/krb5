@@ -105,15 +105,6 @@ void **	context;
 gss_mechanism
 krb5_gss_initialize()
 {
-    OM_uint32	min_stat;
-
-    gss_add_mech_name_type(&min_stat, gss_nt_krb5_name, gss_mech_krb5);
-    gss_add_mech_name_type(&min_stat, gss_nt_krb5_principal, gss_mech_krb5);
-    gss_add_mech_name_type(&min_stat, gss_nt_service_name, gss_mech_krb5);
-    gss_add_mech_name_type(&min_stat, gss_nt_user_name, gss_mech_krb5);
-    gss_add_mech_name_type(&min_stat, gss_nt_machine_uid_name, gss_mech_krb5);
-    gss_add_mech_name_type(&min_stat, gss_nt_string_uid_name, gss_mech_krb5);
-    
     krb5_gss_get_context(&(krb5_mechanism.context));
     return (&krb5_mechanism);
 }
