@@ -1,3 +1,9 @@
+Fri Feb 27 18:41:08 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* export_name.c (krb5_gss_export_name): Fix bug in
+ 	 	gss_export_name.  The 2nd length field in the ASN.1 was 2
+ 	 	bytes bigger than it should have been.
+
 Wed Feb 18 16:12:14 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

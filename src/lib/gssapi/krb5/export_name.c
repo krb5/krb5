@@ -66,7 +66,7 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 	*cp++ = (gss_mech_krb5->length+2) >> 8;
 	*cp++ = (gss_mech_krb5->length+2) & 0xFF;
 	*cp++ = 0x06;
-	*cp++ = (gss_mech_krb5->length+2) & 0xFF;
+	*cp++ = (gss_mech_krb5->length) & 0xFF;
 	memcpy(cp, gss_mech_krb5->elements, gss_mech_krb5->length);
 	cp += gss_mech_krb5->length;
 	*cp++ = length >> 24;
