@@ -110,6 +110,9 @@ KRBINT_END_DECLS
 #ifndef KRB5INT_CRYPTO_DES_INT
 #define DES_DEFS
 
+#if defined(_WIN32) && !defined(_WINDOWS)
+#define _WINDOWS
+#endif
 #if defined(_WINDOWS)
 #ifndef KRB4
 #define KRB4 1
@@ -126,10 +129,6 @@ KRBINT_BEGIN_DECLS
 #		pragma enumsalwaysint on
 #	endif
 #	pragma options align=mac68k
-#endif
-
-#if defined(_WIN32) && !defined(_WINDOWS)
-#define _WINDOWS
 #endif
 
 /* Windows declarations */
