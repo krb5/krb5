@@ -90,6 +90,11 @@ The following relations are defined in the [libdefaults] section:
 This relation identifies the default realm to be used in a client
 host's Kerberos activity.
 
+.IP default_tgs_enctypes
+This relation identifies the supported list of session key encryption
+types that should be returned by the KDC. The list may be delimited with
+commas or whitespace.
+
 .IP clockskew 
 This relation sets the maximum allowable amount of clockskew in
 seconds that the library will tolerate before assuming that a Kerberos
