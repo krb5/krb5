@@ -1,3 +1,8 @@
+2004-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* lock_file.c (krb5_lock_file): Initialize flock data on entry,
+	but don't bother with a static version to copy from.
+
 2004-02-26  Jeffrey Altman <jaltman@mit.edu>
 
     * sendto_kdc.c, send524.c:

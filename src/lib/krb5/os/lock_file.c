@@ -68,10 +68,7 @@ krb5_lock_file(krb5_context context, int fd, int mode)
     krb5_error_code	retval = 0;
 #ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;
-    static const struct flock flock_zero;
-    struct flock lock_arg;
-
-    lock_arg = flock_zero;
+    struct flock lock_arg = { 0 };
 #endif
 
     switch (mode & ~KRB5_LOCKMODE_DONTBLOCK) {
