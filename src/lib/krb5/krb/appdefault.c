@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <k5-int.h>
+#include "k5-int.h"
 
 
 

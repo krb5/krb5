@@ -1,3 +1,11 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* rd_safe.c, rd_priv.c, rd_cred.c, preauth.c, mk_safe.c,
+	mk_cred.c, appdefault.c: use "" includes for krb5.h, k5-int.h and
+	syslog.h
+	* gic_pwd.c, sendauth.c, recvauth.c: com_err.h is already included by 
+	k5-int.h.  Removed #include because it was confusing the Mac OS X builds
+	
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* chk_trans.c: Reimplemented from scratch.

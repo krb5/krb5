@@ -1,5 +1,4 @@
 #include "k5-int.h"
-#include "com_err.h"
 
 static krb5_error_code
 krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
