@@ -1,3 +1,14 @@
+Wed Aug 21 19:39:11 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* mh-6.8.patch: Ken Hornstein <kenh@cmf.nrl.navy.mil> contributed
+ 	replacement patch that uses Beta-6 calling conventions.
+
+Thu Aug 15 22:16:20 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* pop_init.c (authenticate): Patch from Ken Hornstein
+ 	<kenh@cmf.nrl.navy.mil> to make sure we actually look at the
+ 	client name.
+
 Sat Mar 16 07:11:06 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: pop_init.c authenticate() needs USE_ANAME.

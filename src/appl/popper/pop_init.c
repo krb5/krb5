@@ -290,6 +290,7 @@ authenticate(p, addr)
     krb5_auth_context auth_context = NULL;
     krb5_error_code retval;
     krb5_principal server;
+    krb5_ticket *ticket;
     int sock = 0;
 
     krb5_init_context(&pop_context);
@@ -309,7 +310,7 @@ authenticate(p, addr)
 			       "KPOPV1.0", server,
 			       0, 	/* no flags */
 			       NULL,	/* default keytab */
-			       NULL	/* don't care about ticket */
+			       &ticket	/* need ticket for client name */
 			       )) {
 	pop_msg(p, POP_FAILURE, "recvauth failed--%s", error_message(retval));
 	pop_log(p, POP_WARNING, "%s: recvauth failed--%s",
@@ -318,6 +319,15 @@ authenticate(p, addr)
     }
     krb5_free_principal(pop_context, server);
     krb5_auth_con_free(pop_context, auth_context);
+    if (retval = krb5_copy_principal(pop_context, ticket->enc_part2->client,
+				     &ext_client)) {
+	pop_msg(p, POP_FAILURE, "unable to copy principal--%s",
+		error_message(retval));
+	pop_msg(p, POP_FAILURE, "unable to copy principal (%s)",
+		inet_ntoa(addr->sin_addr));
+	exit(-1);
+    }
+    krb5_free_ticket(pop_context, ticket);
     if (retval = krb5_unparse_name(pop_context, ext_client, &client_name)) {
 	pop_msg(p, POP_FAILURE, "name not parsable--%s",
 		error_message(retval));
