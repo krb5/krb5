@@ -96,11 +96,10 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 
     /* Get tgt from database */
     retval = krb5_db_get_principal(context, krbtgt_princ, &krbtgt_entry,
-				   &one, &more)) {
-    krb5_free_principal(krbtgt_princ); /* don't need it anymore */
+				   &one, &more);
+    krb5_free_principal(context, krbtgt_princ); /* don't need it anymore */
     if (retval)
 	return(retval);
-    }
     if ((one > 1) || (more)) {
 	krb5_db_free_principal(context, &krbtgt_entry, one);
 	return KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
