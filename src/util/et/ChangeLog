@@ -1,3 +1,9 @@
+1999-10-28  Alexandra Ellwood  <lxs@mit.edu>
+
+	* error_message.c, error_table.h: Added support to use ErrorLib 
+	to get MIT Support Library and Mac OS Toolbox error codes 
+	(similar to the way windows does it).
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
