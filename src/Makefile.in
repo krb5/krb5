@@ -149,7 +149,7 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\krb5\ccache\makefile.in >lib\krb5\ccache\makefile
 	.\wconfig config <lib\krb5\ccache\file\makefile.in >lib\krb5\ccache\file\makefile
 	.\wconfig config <lib\krb5\ccache\stdio\makefile.in >lib\krb5\ccache\stdio\makefile
-	.\wconfig config <lib\krb5\error_tales\makefile.in >lib\krb5\error_tables\makefile
+	.\wconfig config <lib\krb5\error_tables\makefile.in >lib\krb5\error_tables\makefile
 	.\wconfig config <lib\krb5\free\makefile.in >lib\krb5\free\makefile
 	.\wconfig config <lib\krb5\keytab\makefile.in >lib\krb5\keytab\makefile
 	.\wconfig config <lib\krb5\keytab\file\makefile.in >lib\krb5\keytab\file\makefile
