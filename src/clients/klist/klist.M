@@ -96,7 +96,8 @@ to run silently (produce no output), but to still set the exit status
 according to whether it finds the credentials cache.  The exit status is
 `0' if
 .B klist
-finds a credentials cache, and `1' if it does not.
+finds a credentials cache, and `1' if it does not or if the tickets are
+ expired.
 .TP
 .B \-a
 display list of addresses in credentials.
