@@ -1,3 +1,9 @@
+2001-04-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* client.c (main): Ensure that end of string is NULL terminated
+ 	instead of assuming buffer initialized to 0. Include <string.h>
+ 	for memset prototype.
+
 2000-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (unit-test-body): Combine -tcp and -udp versions,

@@ -5,6 +5,11 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.17  2001/04/24 17:05:34  epeisach
+ * 	* client.c (main): Ensure that end of string is NULL terminated
+ *  	instead of assuming buffer initialized to 0. Include <string.h>
+ *  	for memset prototype.
+ *
  * Revision 1.16  1998/02/14 02:29:42  tlyu
  * 	* client.c: Update header locations.  Rename of xdr_free.
  *
@@ -95,6 +100,7 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
+#include <string.h>
 #include <gssrpc/rpc.h>
 #include <gssapi/gssapi.h>
 #include <gssrpc/rpc.h>
@@ -119,6 +125,13 @@ struct auth_gssapi_data {
 
 extern int auth_debug_gssapi;
 char *whoami;
+
+static void usage()
+{
+     fprintf(stderr, "usage: %s {-t|-u} [-a] [-s num] [-m num] host service [count]\n",
+	     whoami);
+     exit(1);
+}
 
 main(argc, argv)
    int argc;
@@ -177,8 +190,8 @@ main(argc, argv)
      switch (argc) {
      case 3:
 	  count = atoi(argv[2]);
-	  if (count > BIG_BUF) {
-	    fprintf(stderr, "Test count cannot exceed %d.\n", BIG_BUF);
+	  if (count > BIG_BUF-1) {
+	    fprintf(stderr, "Test count cannot exceed %d.\n", BIG_BUF-1);
 	    usage();
 	  }
      case 2:
@@ -312,7 +325,7 @@ main(argc, argv)
       * this last, since it takes a while..
       */
      echo_arg = buf;
-     memset(buf, 0, count);
+     memset(buf, 0, count+1);
      for (i = 0; i < count; i++) {
 	  echo_resp = rpc_test_echo_1(&echo_arg, clnt);
 	  if (echo_resp == NULL) {
@@ -342,9 +355,3 @@ main(argc, argv)
      exit(0);
 }
 
-usage()
-{
-     fprintf(stderr, "usage: %s {-t|-u} [-a] [-s num] [-m num] host service [count]\n",
-	     whoami);
-     exit(1);
-}
