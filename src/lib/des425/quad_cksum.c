@@ -96,20 +96,12 @@ static char rcsid_quad_cksum_c[] =
 #include "des.h"
 /* Definitions for byte swapping */
 
-#ifdef LSBFIRST
-#ifdef MUSTALIGN
-static unsigned long vaxtohl();
-static unsigned short vaxtohs();
-#else /* ! MUSTALIGN */
-#define vaxtohl(x) *((unsigned long *)(x))
-#define vaxtohs(x) *((unsigned short *)(x))
-#endif /* MUSTALIGN */
-#else /* !LSBFIRST */
-static unsigned long four_bytes_vax_to_nets();
-#define vaxtohl(x) four_bytes_vax_to_nets((char *)(x))
-static unsigned short two_bytes_vax_to_nets();
-#define vaxtohs(x) two_bytes_vax_to_nets((char *)(x))
-#endif
+/* vax byte order is LSB first. This is not performance critical, and
+   is far more readable this way. */
+#define four_bytes_vax_to_nets(x) (((x[3]<<8|x[2])<<8|x[1]<<8)|x[0])
+#define vaxtohl(x) four_bytes_vax_to_nets(((char *)(x)))
+#define two_bytes_vax_to_nets(x) ((x[1]<<8)|x[0])
+#define vaxtohs(x) two_bytes_vax_to_nets(((char *)(x)))
 
 /* Externals */
 extern char *errmsg();
@@ -180,53 +172,3 @@ des_quad_cksum(in,out,length,out_count,c_seed)
     /* return final z value as 32 bit version of checksum */
     return z;
 }
-#ifdef MSBFIRST
-
-static unsigned short two_bytes_vax_to_nets(p)
-    char *p;
-{
-    union {
-	char pieces[2];
-	unsigned short result;
-    } short_conv;
-
-    short_conv.pieces[0] = p[1];
-    short_conv.pieces[1] = p[0];
-    return(short_conv.result);
-}
-
-static unsigned long four_bytes_vax_to_nets(p)
-    char *p;
-{
-    static union {
-	char pieces[4];
-	unsigned long result;
-    } long_conv;
-
-    long_conv.pieces[0] = p[3];
-    long_conv.pieces[1] = p[2];
-    long_conv.pieces[2] = p[1];
-    long_conv.pieces[3] = p[0];
-    return(long_conv.result);
-}
-
-#endif
-#ifdef LSBFIRST
-#ifdef MUSTALIGN
-static unsigned long vaxtohl(x)
-char *x;
-{
-    unsigned long val;
-    bcopy(x, (char *)&val, sizeof(val));
-    return(val);
-} 
-
-static unsigned short vaxtohs(x)
-char *x;
-{
-    unsigned short val;
-    bcopy(x, (char *)&val, sizeof(val));
-    return(val);
-} 
-#endif /* MUSTALIGN */
-#endif /* LSBFIRST */
