@@ -46,13 +46,10 @@ krb5_mk_rep(context, auth_context, outbuf)
     krb5_data 		FAR * outbuf;
 {
     krb5_error_code 	  retval;
-    krb5_enctype 	  enctype;
     krb5_ap_rep_enc_part  repl;
     krb5_ap_rep 	  reply;
     krb5_data 		* scratch;
     krb5_data 		* toutbuf;
-
-    enctype = auth_context->keyblock->enctype;
 
     /* Make the reply */
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||

@@ -181,10 +181,8 @@ krb5_get_credentials_val_renew_core(context, options, ccache,
     int which;
 {
     krb5_error_code retval;
-    krb5_creds mcreds;
     krb5_principal tmp;
     krb5_creds **tgts = 0;
-    krb5_flags fields;
 
     switch(which) {
     case INT_GC_VALIDATE:

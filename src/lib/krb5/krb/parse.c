@@ -71,7 +71,7 @@ krb5_parse_name(context, name, nprincipal)
 {
 	register const char	*cp;
 	register char	*q;
-	register i,c,size;
+	register int    i,c,size;
 	int		components = 0;
 	const char	*parsed_realm = NULL;
 	int		fcompsize[FCOMPNUM];

@@ -1,3 +1,8 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* conv_princ.c, get_creds.c, get_in_tkt.c, mk_rep.c, parse.c,
+	send_tgs.c: Remove unused variable.
+
 2000-06-23  Miro Jurisic  <meeroh@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): Fixed v4->v5 realm

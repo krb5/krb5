@@ -240,7 +240,7 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
      char buf[256];		/* V4 instances are limited to 40 characters */
      krb5_error_code retval;
      char *domain, *cp;
-     char **full_name = 0, **cpp;
+     char **full_name = 0;
      const char *names[5];
      void*	iterator = NULL;
      char** v4realms = NULL;
