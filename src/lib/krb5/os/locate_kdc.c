@@ -102,6 +102,10 @@ _krb5_use_dns_realm(krb5_context context)
 
 static int get_port (const char *service, int stream, int defalt)
 {
+#if 0 /* Only used for "kerberos" and "kerberos-sec", and we want the
+	 right port numbers even on the OSes that botch the entries in
+	 /etc/services.  So don't bother with the lookup, except maybe
+	 to produce a warning.  */
     struct addrinfo hints = { 0 };
     struct addrinfo *ai;
     int err;
@@ -117,6 +121,7 @@ static int get_port (const char *service, int stream, int defalt)
 	}
 	freeaddrinfo (ai);
     }
+#endif
     /* Any error - don't complain, just use default.  */
     return htons (defalt);
 }
@@ -265,9 +270,19 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
     }
     if (err || secport == 0)
 	goto egress;
+    if (socktype == 0)
+	socktype = SOCK_DGRAM;
+    else if (socktype != SOCK_DGRAM)
+	goto egress;
+    hint.ai_family = AF_INET;
     err = getaddrinfo (hostname, secportbuf, &hint, &addrs);
-    if (err)
+    if (err) {
+#if 0
 	return translate_ai_error (err);
+#else
+	goto egress;
+#endif
+    }
     for (a = addrs; a != 0 && err == 0; a = anext) {
 	anext = a->ai_next;
 	err = add_addrinfo_to_list (lp, a);
@@ -318,8 +333,12 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     code = profile_get_values(context->profile, realm_srv_names, &hostlist);
 
     if (code) {
+#ifdef TEST
+	fprintf (stderr, "config file lookup failed: %s\n",
+		 error_message(code));
+#endif
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
-            code = KRB5_REALM_UNKNOWN;
+	    code = KRB5_REALM_UNKNOWN;
  	krb5_xfree(host);
   	return code;
      }
@@ -327,6 +346,9 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     count = 0;
     while (hostlist && hostlist[count])
 	    count++;
+#ifdef TEST
+    fprintf (stderr, "found %d entries under 'kdc'\n", count);
+#endif
     
     if (count == 0) {
         profile_free_list(hostlist);
@@ -381,6 +403,9 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 	int p1, p2;
 
 	host = hostlist[i];
+#ifdef TEST
+	fprintf (stderr, "entry %d is '%s'\n", i, host);
+#endif
 	/*
 	 * Strip off excess whitespace
 	 */
@@ -459,7 +484,9 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
 #ifdef TEST
 static krb5_error_code
-krb5_locate_srv_conf(krb5_context context, const krb5_data *realm, const char *name, struct addrlist *al, int get_masters, int udpport, int sec_udpport)
+krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
+		     const char *name, struct addrlist *al, int get_masters,
+		     int udpport, int sec_udpport)
 {
     krb5_error_code ret;
 
@@ -819,9 +846,9 @@ krb5_locate_kdc(krb5_context context, const krb5_data *realm,
 	    sec_udpport = 0;
     }
 
-    return krb5int_locate_server (context, realm, addrlist, get_masters, "kdc",
-				  (get_masters
-				   ? "_kerberos-master"
-				   : "_kerberos"),
-				  socktype, udpport, sec_udpport);
+    return krb5int_locate_server(context, realm, addrlist, get_masters, "kdc",
+				 (get_masters
+				  ? "_kerberos-master"
+				  : "_kerberos"),
+				 socktype, udpport, sec_udpport);
 }
