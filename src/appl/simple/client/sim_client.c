@@ -284,8 +284,6 @@ char *argv[];
 	exit(1);
     }
 
-    krb5_free_principal(server);
-
     /* Make the safe message */
     inbuf.data = argc == 3 ? argv[2] : MSG;
     inbuf.length = strlen (inbuf.data);

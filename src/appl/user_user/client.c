@@ -77,7 +77,6 @@ char *argv[];
   krb5_address serv_addr, cli_addr;
   krb5_ccache cc;
   krb5_creds creds;
-  krb5_principal sprinc;		/* principal of server */
   krb5_data reply, msg, princ_data;
   krb5_tkt_authent *authdat;
   unsigned short port;
@@ -185,7 +184,7 @@ char *argv[];
       return 7;
     }
 
-  if (retval = krb5_build_principal_ext(&sprinc,
+  if (retval = krb5_build_principal_ext(&creds.server,
 					krb5_princ_realm(creds.client)->length,
 					krb5_princ_realm(creds.client)->data,
 					6, "krbtgt",
@@ -197,16 +196,12 @@ char *argv[];
       return 7;
     }
 
-  creds.server = sprinc;
-
   /* Get TGT from credentials cache */
   if (retval = krb5_get_credentials(KRB5_GC_CACHED, cc, &creds))
     {
       com_err("uu-client", retval, "getting TGT");
       return 6;
     }
-  krb5_free_principal(sprinc);		/* creds.server is replaced
-					   upon retrieval */
 
   i = strlen(princ) + 1;
 
