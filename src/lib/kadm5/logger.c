@@ -172,11 +172,7 @@ static struct log_entry	def_log_entry;
  *			  profile.
  */
 static void
-klog_com_err_proc(whoami, code, format, ap)
-    const char	*whoami;
-    long	code;
-    const char	*format;
-    va_list	ap;
+klog_com_err_proc(const char *whoami, long int code, const char *format, va_list ap)
 {
     char	outbuf[KRB5_KLOG_MAX_ERRMSG_SIZE];
     int		lindex;
@@ -348,11 +344,7 @@ klog_com_err_proc(whoami, code, format, ap)
  *			  where/how to send output.
  */
 krb5_error_code
-krb5_klog_init(kcontext, ename, whoami, do_com_err)
-    krb5_context	kcontext;
-    char		*ename;
-    char		*whoami;
-    krb5_boolean	do_com_err;
+krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do_com_err)
 {
     const char	*logging_profent[3];
     const char	*logging_defent[3];
@@ -689,8 +681,7 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
  * krb5_klog_close()	- Close the logging context and free all data.
  */
 void
-krb5_klog_close(kcontext)
-    krb5_context	kcontext;
+krb5_klog_close(krb5_context kcontext)
 {
     int lindex;
     (void) reset_com_err_hook();
@@ -743,8 +734,7 @@ krb5_klog_close(kcontext)
  * severity2string()	- Convert a severity to a string.
  */
 static const char *
-severity2string(severity)
-    int	severity;
+severity2string(int severity)
 {
     int s;
     const char *ss;
@@ -800,10 +790,7 @@ severity2string(severity)
  *			  by krb5_klog_init().
  */
 static int
-klog_vsyslog(priority, format, arglist)
-    int		priority;
-    const char	*format;
-    va_list	arglist;
+klog_vsyslog(int priority, const char *format, va_list arglist)
 {
     char	outbuf[KRB5_KLOG_MAX_ERRMSG_SIZE];
     int		lindex;
@@ -925,25 +912,13 @@ klog_vsyslog(priority, format, arglist)
     return(0);
 }
 
-#ifdef	HAVE_STDARG_H
 int
 krb5_klog_syslog(int priority, const char *format, ...)
-#else	/* HAVE_STDARG_H */
-int
-krb5_klog_syslog(priority, format, va_alist)
-    int		priority;
-    const char	*format;
-    va_dcl
-#endif	/* HAVE_STDARG_H */
 {
     int		retval;
     va_list	pvar;
 
-#ifdef	HAVE_STDARG_H
     va_start(pvar, format);
-#else	/* HAVE_STDARG_H */
-    va_start(pvar);
-#endif	/* HAVE_STDARG_H */
     retval = klog_vsyslog(priority, format, pvar);
     va_end(pvar);
     return(retval);
@@ -957,8 +932,7 @@ krb5_klog_syslog(priority, format, va_alist)
  *                      a new file descriptor for the give filename.
  */
 void
-krb5_klog_reopen(kcontext)
-krb5_context kcontext;
+krb5_klog_reopen(krb5_context kcontext)
 {
     int lindex;
     FILE *f;
