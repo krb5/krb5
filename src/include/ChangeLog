@@ -1,5 +1,9 @@
 Wed Nov  8 02:53:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* krb5.hin: Add preauthentication type KRB5_PADATA_ETYPE_INFO.
+
+	* k5-int.h: Add declaration for krb5_free_etype_info.
+
 	* krb5.hin: Removed internal functions krb5_encrypt_tkt_part,
 		krb5_verify_padta, and krb5_obtain_padata from the public
 		header file.

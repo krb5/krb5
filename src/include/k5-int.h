@@ -873,6 +873,9 @@ krb5_error_code krb5_verify_padata
 	       krb5_address **src_addr, krb5_keyblock *decrypt_key,
 	       int *req_id, int *flags));
 
+void krb5_free_etype_info
+    KRB5_PROTOTYPE((krb5_context, krb5_etype_info));
+
 /*
  * Preauthentication property flags
  */

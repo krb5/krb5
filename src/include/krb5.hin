@@ -669,6 +669,7 @@ extern krb5_cksumtype krb5_max_cksum;		/* max entry in array */
 #define KRB5_PADATA_OSF_DCE		8  /* OSF DCE */
 #define KRB5_CYBERSAFE_SECUREID		9  /* Cybersafe */
 #define	KRB5_PADATA_AFS3_SALT		10 /* Cygnus */
+#define KRB5_PADATA_ETYPE_INFO		11 /* Etype info for preauth */
     
 /* Reserved for SPX pre-authentication. */
 #define KRB5_PADATA_DASS		16
