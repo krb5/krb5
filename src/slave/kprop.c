@@ -119,7 +119,7 @@ void PRS(argv)
 	while (word = *argv++) {
 		if (*word == '-') {
 			word++;
-			while (ch = *word++) {
+			while (word && (ch = *word++)) {
 				switch(ch){
 				case 'r':
 					if (*word)
