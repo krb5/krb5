@@ -213,9 +213,9 @@ void process_v4_mode(program_name, string)
 
 krb5_error_code
 process_v4( pkt, client_fulladdr, resp)
-const krb5_data *pkt;
-const krb5_fulladdr *client_fulladdr;
-krb5_data **resp;
+    const krb5_data *pkt;
+    const krb5_fulladdr *client_fulladdr;
+    krb5_data **resp;
 {
     struct sockaddr_in client_sockaddr;
     krb5_address *addr = client_fulladdr->address;
@@ -244,8 +244,12 @@ krb5_data **resp;
      */
     client_sockaddr.sin_family	= AF_INET;
     client_sockaddr.sin_port	= client_fulladdr->port;
-    memcpy( &client_sockaddr.sin_addr, addr->contents, 
-		     sizeof client_sockaddr.sin_addr);
+    if (client_fulladdr->address->addrtype != ADDRTYPE_INET) {
+	klog(L_KRB_PERR, "got krb4 request from non-ipv4 address");
+	client_sockaddr.sin_addr.s_addr = 0;
+    } else
+	memcpy(&client_sockaddr.sin_addr, addr->contents, 
+	       sizeof client_sockaddr.sin_addr);
     memset( client_sockaddr.sin_zero, 0, sizeof client_sockaddr.sin_zero);
 
     /* convert v5 packet structure to v4's.

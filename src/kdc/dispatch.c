@@ -57,17 +57,8 @@ dispatch(pkt, from, response)
 	const char *name = 0;
 	char buf[46];
 
-#ifdef HAVE_INET_NTOP
-	name = inet_ntop (from->address->addrtype, from->address->contents,
-			  buf, sizeof (buf));
-#else
-	if (from->address->addrtype == ADDRTYPE_INET) {
-	    struct sockaddr_in *mysin
-		= (struct sockaddr_in *)from->address->contents;
-	    strcpy (buf, inet_ntoa (mysin->sin_addr));
-	    name = buf;
-	}
-#endif
+	name = inet_ntop (ADDRTYPE2FAMILY (from->address->addrtype),
+			  from->address->contents, buf, sizeof (buf));
 	if (name == 0)
 	    name = "[unknown address type]";
 	krb5_klog_syslog(LOG_INFO,

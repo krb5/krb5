@@ -1,3 +1,19 @@
+2002-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_util.h (ADDRTYPE2FAMILY): New macro.
+	* do_as_req.c (process_as_req): Use inet_ntop instead of
+	inet_ntoa.
+	* do_tgs_req.c (process_tgs_req): Ditto.
+	* dispatch.c (dispatch): Fix inet_ntop code, and use it always.
+	* kerberos_v4.c (process_v4): Check address family before copying
+	out an IPv4 address.  Log if not IPv4, but continue.
+	* network.c (set_sa_port): New function.
+	(setup_port): Use it.  Combine IPv4 and IPv6 paths; IPv6 still
+	disabled for now.  Modify supplied sockaddr instead of making a
+	copy.
+	(process_packet): SADDR is now sockaddr_storage.  Use socket-utils
+	macros instead of casting.  Enable the IPv6 code.
+
 2002-07-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (process_packet): Now static.  Drop unused "portnum"

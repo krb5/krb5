@@ -184,4 +184,12 @@ void process_v4_mode (const char *, const char *);
 #define	max(a, b)	((a) > (b) ? (a) : (b))
 #endif
 
+#ifdef KRB5_USE_INET6
+#define ADDRTYPE2FAMILY(X) \
+  ((X) == ADDRTYPE_INET6 ? AF_INET6 : (X) == ADDRTYPE_INET ? AF_INET : -1)
+#else
+#define ADDRTYPE2FAMILY(X) \
+  ((X) == ADDRTYPE_INET ? AF_INET : -1)
+#endif
+
 #endif /* __KRB5_KDC_UTIL__ */

@@ -55,7 +55,6 @@ process_as_req(request, from, response)
     const krb5_fulladdr *from;	/* who sent it ? */
     krb5_data **response;	/* filled in with a response packet */
 {
-
     krb5_db_entry client, server;
     krb5_kdc_rep reply;
     krb5_enc_kdc_rep_part reply_encpart;
@@ -76,9 +75,11 @@ process_as_req(request, from, response)
     krb5_data e_data;
     register int i;
     krb5_timestamp until, rtime;
-    char *cname = 0, *sname = 0, *fromstring = 0;
+    char *cname = 0, *sname = 0;
+    const char *fromstring = 0;
     char ktypestr[128];
     char rep_etypestr[128];
+    char fromstringbuf[70];
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
@@ -88,10 +89,9 @@ process_as_req(request, from, response)
     ktypes2str(ktypestr, sizeof(ktypestr),
 	       request->nktypes, request->ktype);
 
-#ifdef HAVE_NETINET_IN_H
-    if (from->address->addrtype == ADDRTYPE_INET)
-	fromstring = (char *) inet_ntoa(*(struct in_addr *)from->address->contents);
-#endif
+    fromstring = inet_ntop(ADDRTYPE2FAMILY (from->address->addrtype),
+			   from->address->contents,
+			   fromstringbuf, sizeof(fromstringbuf));
     if (!fromstring)
 	fromstring = "<unknown>";
 

@@ -76,7 +76,8 @@ process_tgs_req(pkt, from, response)
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     krb5_key_data  *server_key;
-    char *cname = 0, *sname = 0, *tmp = 0, *fromstring = 0;
+    char *cname = 0, *sname = 0, *tmp = 0;
+    const char *fromstring = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
 /*    krb5_address *noaddrarray[1]; */
     krb5_enctype useenctype;
@@ -86,6 +87,7 @@ process_tgs_req(pkt, from, response)
     const char	*status = 0;
     char ktypestr[128];
     char rep_etypestr[128];
+    char fromstringbuf[70];
 
     session_key.contents = 0;
     
@@ -101,11 +103,9 @@ process_tgs_req(pkt, from, response)
     if ((retval = setup_server_realm(request->server)))
 	return retval;
 
-#ifdef HAVE_NETINET_IN_H
-    if (from->address->addrtype == ADDRTYPE_INET)
-	fromstring =
-	    (char *) inet_ntoa(*(struct in_addr *)from->address->contents);
-#endif
+    fromstring = inet_ntop(ADDRTYPE2FAMILY(from->address->addrtype),
+			   from->address->contents,
+			   fromstringbuf, sizeof(fromstringbuf));
     if (!fromstring)
 	fromstring = "<unknown>";
 
