@@ -1,3 +1,8 @@
+2001-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Do fallback if KRB5_REALM_UNKNOWN
+	is returned, as might happen if the DNS support is not enabled.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_creds.c (broken, krb524_convert_creds_plain): Unused code
