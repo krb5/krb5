@@ -31,10 +31,11 @@ static char rcsid_krb_dbm_c[] =
 #include <errno.h>
 
 #include <krb5/krb5.h>
-#include <krb5/kdb5.h>
-#include <krb5/kdb5_dbm.h>
+#include <krb5/kdb.h>
+#include <krb5/kdb_dbm.h>
 #include <krb5/kdb5_err.h>
 
+#include <krb5/ext-proto.h>
 
 #define KRB5_DBM_MAX_RETRY 5
 
@@ -48,11 +49,6 @@ extern long krb5_dbm_db_debug;
 extern char *progname;
 #endif
 
-#ifdef __STDC__
-#include <stdlib.h>
-#else
-extern char *malloc();
-#endif /* __STDC__ */
 
 extern int errno;
 
@@ -569,7 +565,10 @@ static void
 free_decode_princ_contents(entry)
 krb5_db_entry *entry;
 {
+    /* erase the key */
+    bzero((char *)entry->key, sizeof(*entry->key) + entry->key->length - 1);
     free((char *)entry->key);
+
     krb5_free_principal(entry->principal);
     krb5_free_principal(entry->mod_name);
     (void) bzero((char *)entry, sizeof(*entry));
