@@ -63,7 +63,7 @@ kdb5_destroy(argc, argv)
     dbname = global_params.dbname;
 
     optind = 1;
-    while ((optchar = getopt(argc, argv, "f")) != EOF) {
+    while ((optchar = getopt(argc, argv, "f")) != -1) {
 	switch(optchar) {
 	case 'f':
 	    force++;

@@ -1,3 +1,8 @@
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5_encode_test.c (PRS): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
 Mon Mar 30 13:51:58 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ktest_equal.h: Add prototypes for ktest_equal_sam_challenge and 

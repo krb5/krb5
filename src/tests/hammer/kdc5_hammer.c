@@ -145,7 +145,7 @@ main(argc, argv)
     errors = 0;
     enctypedone = 0;
 
-    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:t")) != EOF) {
+    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:t")) != -1) {
 	switch (option) {
 	case 't':
 	    do_timer = 1;

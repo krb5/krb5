@@ -172,7 +172,7 @@ char * dir_of_cc_source;
         }
 
 
-    while(!done && ((option = getopt(pargc, pargv,"n:c:C:r:a:zZDfpkql:e:")) != EOF)){
+    while(!done && ((option = getopt(pargc, pargv,"n:c:C:r:a:zZDfpkql:e:")) != -1)){
 	switch (option) {
 	case 'r':
 	    options.opt |= KDC_OPT_RENEWABLE;

@@ -1015,7 +1015,7 @@ main(argc, argv)
     hash = 0;
 
     /* Parse argument list */
-    while ((option = getopt(argc, argv, "cd:n:prstvDh")) != EOF) {
+    while ((option = getopt(argc, argv, "cd:n:prstvDh")) != -1) {
 	switch (option) {
 	case 'c':
 	    check_cont = 1;

@@ -105,7 +105,7 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "r:Rfpl:s:c:kt:vS:")) != EOF) {
+    while ((option = getopt(argc, argv, "r:Rfpl:s:c:kt:vS:")) != -1) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;

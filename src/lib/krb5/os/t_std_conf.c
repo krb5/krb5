@@ -173,7 +173,7 @@ main(argc, argv)
 		exit(1);
 	}
 
-	while ((c = getopt(argc, argv, "dk:r:D:l:s:")) != EOF) {
+	while ((c = getopt(argc, argv, "dk:r:D:l:s:")) != -1) {
 	    switch (c) {
 	    case 'd': /* Get default realm */
 		test_get_default_realm(ctx);

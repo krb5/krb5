@@ -138,7 +138,7 @@ void kdb5_create(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "s")) != EOF) {
+    while ((optchar = getopt(argc, argv, "s")) != -1) {
 	switch(optchar) {
 	case 's':
 	    do_stash++;

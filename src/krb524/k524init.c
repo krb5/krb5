@@ -59,7 +59,7 @@ int main(argc, argv)
 	     exit(1);
      }
 
-     while(((option =  getopt(argc, argv, "p:n")) != EOF)) {
+     while(((option =  getopt(argc, argv, "p:n")) != -1)) {
 	 switch(option) {
 	   case 'p':
 	     princ = optarg;

@@ -102,7 +102,7 @@ char *argv[];
     memset(krbrlm, 0, sizeof(krbrlm));
 
     fascist_cpw = 1;		/* by default, enable fascist mode */
-    while ((c = getopt(argc, argv, "f:hnd:a:r:FN")) != EOF)
+    while ((c = getopt(argc, argv, "f:hnd:a:r:FN")) != -1)
 	switch(c) {
 	case 'f':			/* Syslog file name change */
 	    prm.sysfile = optarg;

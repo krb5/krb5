@@ -1,4 +1,5 @@
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
-	* getopt.c (getopt): POSIX states that getopt returns -1
+	* getopt.c (main): POSIX states that getopt returns -1
 		when it is done parsing options, not EOF.
+

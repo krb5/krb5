@@ -928,7 +928,7 @@ main(argc, argv)
 
     now = time((time_t *) NULL);
     SRAND((RAND_TYPE) now);
-    while ((option = getopt(argc, argv, "r:v")) != EOF) {
+    while ((option = getopt(argc, argv, "r:v")) != -1) {
 	switch (option) {
 	case 'r':
 	    if (sscanf(optarg, "%d", &randompasses) != 1) {

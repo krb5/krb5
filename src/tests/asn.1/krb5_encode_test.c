@@ -59,7 +59,7 @@ void PRS(argc, argv)
 		print_constructed_length, print_skip_context,
 		print_skip_tagnum, print_context_shortcut;
 
-	while ((optchar = getopt(argc, argv, "tp:")) != EOF) {
+	while ((optchar = getopt(argc, argv, "tp:")) != -1) {
 		switch(optchar) {
 		case 't':
 			do_trval = 1;

@@ -200,7 +200,7 @@ main(argc, argv)
      * Usage is:
      *	kpasswd [-u user] [-l language]
      */
-    while ((option = getopt(argc, argv, kpwd_getoptstring)) != EOF) {
+    while ((option = getopt(argc, argv, kpwd_getoptstring)) != -1) {
 	switch (option) {
 	case 'u':
 	    if ((name = (char *) malloc(strlen(optarg)+1)) == NULL) {

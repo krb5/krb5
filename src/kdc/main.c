@@ -627,7 +627,7 @@ initialize_realms(kcontext, argc, argv)
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:")) != -1) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {

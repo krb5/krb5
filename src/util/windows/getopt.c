@@ -67,12 +67,12 @@ getopt(nargc, nargv, ostr)
 		optreset = 0;
 		if (optind >= nargc || *(place = nargv[optind]) != '-') {
 			place = EMSG;
-			return(EOF);
+			return(-1);
 		}
 		if (place[1] && *++place == '-') {	/* found "--" */
 			++optind;
 			place = EMSG;
-			return(EOF);
+			return(-1);
 		}
 	}					/* option letter okay? */
 	if ((optopt = (int)*place++) == (int)':' ||
@@ -82,7 +82,7 @@ getopt(nargc, nargv, ostr)
 		 * assume it means EOF.
 		 */
 		if (optopt == (int)'-')
-			return(EOF);
+			return(-1);
 		if (!*place)
 			++optind;
 		if (opterr && *ostr != ':') {

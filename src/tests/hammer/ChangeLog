@@ -1,3 +1,8 @@
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdc5_hammer.c (main): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
 Mon Mar 30 16:48:17 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdc5_hammer.c (usage): Change usage to refelect reality

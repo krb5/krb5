@@ -1,3 +1,8 @@
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* main.c (initialize_realms): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
 Fri Mar 20 17:13:46 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_util.c (add_to_transited): Check lengths, fix up comma

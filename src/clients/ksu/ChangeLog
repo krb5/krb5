@@ -1,3 +1,8 @@
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* main.c (main): POSIX states that getopt returns -1 when it
+		is done parsing options, not EOF.
+
 Wed Feb 18 15:44:15 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

@@ -55,7 +55,7 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((c = getopt(argc, argv, "qc:")) != EOF) {
+    while ((c = getopt(argc, argv, "qc:")) != -1) {
 	switch (c) {
 	case 'q':
 	    quiet = 1;

@@ -98,7 +98,7 @@ char *argv[];
      *  
      */
     opterr = 0;
-    while ((ch = getopt(argc, argv, "p:s:S:")) != EOF)
+    while ((ch = getopt(argc, argv, "p:s:S:")) != -1)
     switch (ch) {
     case 'p':
 	port = atoi(optarg);

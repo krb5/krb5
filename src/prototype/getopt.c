@@ -10,7 +10,7 @@ main(argc, argv)
     
     <<<other globals here>>>;
 	
-    while ((c = getopt(argc, argv, "<<<>>>")) != EOF) {
+    while ((c = getopt(argc, argv, "<<<>>>")) != -1) {
 	switch (c) {
 	    <<<add cases for arguments here>>>;
 	case '?':

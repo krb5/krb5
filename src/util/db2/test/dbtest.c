@@ -101,7 +101,7 @@ main(argc, argv)
 	fname = NULL;
 	oflags = O_CREAT | O_RDWR | O_BINARY;
 	sflag = 0;
-	while ((ch = getopt(argc, argv, "f:i:lo:s")) != EOF)
+	while ((ch = getopt(argc, argv, "f:i:lo:s")) != -1)
 		switch (ch) {
 		case 'f':
 			fname = optarg;

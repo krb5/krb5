@@ -71,7 +71,7 @@ char *argv[];
     keyfile = global_params.stash_file;
 
     optind = 1;
-    while ((optchar = getopt(argc, argv, "f:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "f:")) != -1) {
 	switch(optchar) {
 	case 'f':
 	    keyfile = optarg;
