@@ -106,7 +106,7 @@ profile-library-implementation-version				= 0
 list-generation-script-folder = "{root-folder}mac:"
 list-generation-script = "{list-generation-script-folder}macfile_gen.pl"
 list-generation-script-root = ".."
-list-generation-script-prefix = ":"
+list-generation-script-prefix = "{root-folder}"
 
 all-files-list									= {root-folder}"All files.list"
 all-sources-list								= {root-folder}"All sources.list"

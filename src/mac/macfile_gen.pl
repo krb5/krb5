@@ -46,7 +46,10 @@ if ($action ne "all-files") {
 } else {
 
 	@sourceList = &make_macfile_maclist (&make_macfile_list ());
-	@sourceList = map { $prefix . $_;} @sourceList;
+	foreach (@sourcelist) {
+	        $_ =~ s/^:/$prefix/;
+	}
+#	@sourceList = map { $prefix . $_;} @sourceList;
 	
 }
 
