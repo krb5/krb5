@@ -1,0 +1,397 @@
+kadmin [-r _realm_] [[-p _principal_] [-k _keytab_]] [-q _query_]
+
+       	If given the -p option, kadmin will use the specified
+	principal to authenticate.  If the -p option is not given,
+	kadmin will default to $USER/admin (if the environment
+	variable USER is set).  If $USER is not set, then the first
+	component of the principal will be the username as obtained
+	from getuid(). If given -k, kadmin will not prompt for a
+	password, but rather use the specified keytab.  Also, if the
+	-k option is given, the default principal will be the
+	host/hostname.  If -r is present, then kadmin will use the
+	specified realm as the default database realm rather than the
+	default realm for the local machine.
+
+	Upon starting up, kadmin will prompt for a password (unless
+	the -k option has been given).  The program will then obtain
+	tickets for ovsec_admin/admin in the default realm (unless -r
+	has been specified, in which case it will use the specified
+	realm).  The ticket is stored in a separate ccache, unless -c
+	is specified.  The lifetime for these tickets is 5 minutes.
+
+	The -q option allows the passing of a request directly to
+	kadmin, which will then exit.  This can be useful for writing
+	scripts.
+
+DATE FORMAT
+	Various commands in kadmin can take a variety of date formats,
+	specifying durations or absolute times.  Examples of valid
+	formats are:
+
+		1 month ago
+		2 hours ago
+		400000 seconds ago
+		last year
+		last Monday
+		yesterday
+		a fortnight ago
+		3/31/92 10:00:07 PST
+		January 23, 1987 10:05pm
+		22:00 GMT
+
+	Dates which do not have the "ago" specifier default to being
+	absolute dates, unless they appear in a field where a duration
+	is expected.  In that case the time specifier will be
+	interpreted as relative.  Specifying "ago" on a duration may
+	result in unexpected behaviour.
+
+COMMAND DESCRIPTIONS
+
+add_principal [options] _newprinc_
+	creates the principal _newprinc_, prompting twice for a
+	password.  This command requires the "add" privilege.  This
+	command has the aliases "addprinc", "ank".
+
+	OPTIONS
+	-salt _salttype_
+		uses the specified salt instead of the default V5 salt
+		for generating the key.  Valid values for _salttype_
+		are:
+			full_name (aliases "v5_salt", "normal")
+			name_only
+			realm_only
+			no_salt (alias "v4_salt")
+
+	-expire _expdate_
+		expiration date of the principal
+
+	-pwexpire _pwexpdate_
+		password expiration date
+
+	-maxlife _maxlife_
+		maximum ticket life of the principal
+
+	-kvno _kvno_
+		explicity set the key version number.  This is not
+		recommended.
+
+	-policy _policy_
+		policy used by this principal.  If no policy is
+		supplied, the principal will default to having no
+		policy, and a warning message will be printed.
+
+	{-|+}allow_tgs_req
+		"-allow_tgs_req" specifies that a TGS request for a
+		ticket for a service ticket for this principal is not
+		permitted.  This option is useless for most things.
+		"+allow_tgs_req" clears this flag.  The default is
+		"+allow_tgs_req".  In effect, "-allow_tgs_req" sets
+		the KRB5_KDB_DISALLOW_TGT_BASED flag on the principal
+		in the database.
+
+	{-|+}allow_tix
+		"-allow_tix" forbids the issuance of any tickets for
+		this principal.  "+allow_tix" clears this flag.  The
+		default is "+allow_tix".  In effect, "-allow_tix" sets
+		the KRB5_KDB_DISALLOW_ALL_TIX flag on the principal in
+		the database.
+
+	{-|+}needchange
+		"+needchange" sets a flag in attributes field to force
+		a password change; "-needchange" clears it.  The
+		default is "-needchange".  In effect, "+needchange"
+		sets the KRB5_KDB_REQUIRES_PWCHANGE flag on the
+		principal in the database.
+
+	{-|+}password_changing_service
+		"+password_changing_service" sets a flag in the
+		attributes field marking this as a password change
+		service principal (useless for most things).
+		"-password_changing_service" clears the flag.  This
+		flag intentionally has a long name.  The default is
+		"-password_changing_service".  In effect,
+		"+password_changing_service" sets the
+		KRB5_KDB_PWCHANGE_SERVICE flag on the principal in the
+		database.
+
+	-randpass
+		sets the key of the principal to a random value
+
+	-pw _password_
+		sets the key of the principal to the specified string
+		and does not prompt for a password.  This is not
+		recommended.
+
+	EXAMPLE
+	kadmin: addprinc tlyu/deity
+	WARNING: no policy specified for "tlyu/deity@ATHENA.MIT.EDU";
+	defaulting to no policy.
+	Enter password for principal tlyu/deity@ATHENA.MIT.EDU:
+	Re-enter password for principal tlyu/deity@ATHENA.MIT.EDU:
+	Principal "tlyu/deity@ATHENA.MIT.EDU" created.
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_ADD (requires "add" privilege)
+	OVSEC_KADM_BAD_MASK (shouldn't happen)
+	OVSEC_KADM_DUP (principal exists already)
+	OVSEC_KADM_UNK_POLICY (policy does not exist)
+	OVSEC_KADM_PASS_Q_* (password quality violations)
+
+delete_principal [-force] _principal_
+	deletes the specified principal from the database.    This
+	command prompts for deletion, unless the "-force" option is
+	given. This command requires the "delete" privilege.  Aliased
+	to "delprinc".
+
+	EXAMPLE
+	kadmin: delprinc mwm_user
+	Are you sure you want to delete the principal
+	"mwm_user@ATHENA.MIT.EDU"? (yes/no): yes
+	Principal "mwm_user@ATHENA.MIT.EDU" deleted.
+	Make sure that you have removed this principal from
+	all ACLs before reusing.
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_DELETE (reequires "delete" privilege)
+	OVSEC_KADM_UNK_PRINC (principal does not exist)
+
+modify_principal [options] _principal_
+	modifies the specified principal, changing the fields as
+	specified.  The options are as above for "add_principal",
+	except that password changing is forbidden by this command.
+	In addition, the option "-clearpolicy" will remove clear the
+	current	policy of a principal.  This command requires the
+	"modify" privilege.  Aliased to "modprinc".
+
+	ERRORS
+	OVSEC_KADM_AUTH_MODIFY (requires "modify" privilege)
+	OVSEC_KADM_UNK_PRINC (principal does not exist)
+	OVSEC_KADM_UNK_POLICY (policy does not exist)
+	OVSEC_KADM_BAD_MASK (shouldn't happen)
+
+rename_principal [-force] _old_ _new_
+	rename the principal _old_ to _new_.  Prompts for
+	confirmation, unless the "-force" option is given.  Requires
+	both the "add" and "delete" privileges.  Aliased to
+	"renprinc".
+
+	EXAMPLE
+	kadmin: renprinc tlyutest test0
+	Are you sure you want to rename the principal
+	"tlyutest@ATHENA.MIT.EDU" to
+	"test0@ATHENA.MIT.EDU"? (yes/no): yes
+	Principal "tlyutest@ATHENA.MIT.EDU" renamed to
+	"test0@ATHENA.MIT.EDU".
+	Make sure that you have removed "tlyutest@ATHENA.MIT.EDU" from
+	all ACLs before reusing.
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_ADD (requires "add" privilege)
+	OVSEC_KADM_AUTH_DELETE (requires "delete" privilege)
+	OVSEC_KADM_UNK_PRINC (source principal does not exist)
+	OVSEC_KADM_DUP (target principal already exists)
+
+change_password [options] _principal_
+	changes the password of _principal_.  Prompts for a new
+	password if neither -randpass or -pw is specified.  Requires
+	the "modify" privilege, or that the principal that is running
+	the program to be the same as the one changed.  Aliased to
+	"cpw".
+
+	OPTIONS
+	-salt _salttype_
+		uses the specified salt instead of the default V5 salt
+		for generating the key.  Options are the same as for
+		add_principal.
+
+	-randpass
+		sets the key of the principal to a random value
+
+	-pw _password_
+		set the password to the specified string.  Not
+		recommended.
+
+	EXAMPLE
+	kadmin: cpw systest
+	Enter password for principal systest@ATHENA.MIT.EDU:
+	Re-enter password for principal systest@ATHENA.MIT.EDU:
+	Password for systest@ATHENA.MIT.EDU changed.
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_MODIFY (requires the modify privilege)
+	OVSEC_KADM_UNK_PRINC (principal does not exist)
+	OVSEC_KADM_PASS_Q_* (password policy violation errors)
+	OVSEC_KADM_PADD_REUSE (password is in principal's password
+	history)
+	OVSEC_KADM_PASS_TOOSOON (current password minimum life not
+	expired)
+
+get_principal [-terse] _principal_
+	gets the attributes of _principal_.  Requires the "get"
+	privilege, or that the principal that is running the the
+	program to be the same as the one being listed.  With the
+	"-terse" option, outputs fields as a quoted tab-separated
+	strings.  Alias "getprinc".
+
+	EXAMPLES
+	kadmin: getprinc tlyu/deity
+	Principal: tlyu/deity@ATHENA.MIT.EDU
+	Key version: 3
+	Maximum life: 1 day 00:00:00
+	Maximum renewable life: 7 days 00:00:00
+	Master key version: 1
+	Expires: Mon Jan 18 22:14:07 EDT 2038
+	Password expires: Mon Sep 19 14:40:00 EDT 1994
+	Password last changed: Mon Jan 31 02:06:40 EDT 1994
+	Last modified: by tlyu/admin@ATHENA.MIT.EDU
+		on Wed Jul 13 18:27:08 EDT 1994
+	Attributes: DISALLOW_FORWARDABLE, DISALLOW_PROXIABLE,
+		REQUIRES_HW_AUTH
+	Salt type: DEFAULT
+	kadmin: getprinc systest
+	systest@ATHENA.MIT.EDU	3	86400	604800	1
+	785926535	753241234	785900000
+	tlyu/admin@ATHENA.MIT.EDU	786100034	0
+	0
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_GET (requires the get privilege)
+	OVSEC_KADM_UNK_PRINC (principal does not exist)
+
+add_policy [options] _policy_
+	adds the named policy to the policy database.  Requires the
+	"add" privilege.  Aliased to "addpol".
+
+	OPTIONS
+	-maxlife _time_
+		sets the maximum lifetime of a password
+
+	-minlife _time_
+		sets the minimum lifetime of a password
+
+	-minlength _length_
+		sets the minimum length of a password
+
+	-minclasses _number_
+		sets the minimum number of character classes allowed
+		in a password
+
+	-history _number_
+		sets the number of past keys kept for a principal
+
+	ERRORS
+	OVSEC_KADM_AUTH_ADD (requires the add privilege)
+	OVSEC_KADM_DUP (policy already exists)
+
+delete_policy _policy_
+	deletes the named policy.  Prompts for confirmation before
+	deletion.  The command will fail if the policy is in use by
+	any principals.  Requires the "delete" privilege.  Alias
+	"delpol".
+
+	EXAMPLE
+	kadmin: del_policy guests
+	Are you sure you want to delete the policy "guests"?
+	(yes/no): yes
+	Policy "guests" deleted.
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_DELETE (requires the delete privilege)
+	OVSEC_KADM_UNK_POLICY (policy does not exist)
+	OVSEC_KADM_POLICY_REF (reference count on policy is not zero)
+
+modify_policy [options] _policy_
+	modifies the named policy.  Options are as above for
+	"add_policy".  Requires the "modify" privilege".  Alias
+	"modpol".
+
+	ERRORS
+	OVSEC_KADM_AUTH_MODIFY (requires the modify privilege)
+	OVSEC_KADM_UNK_POLICY (policy does not exist)
+
+get_policy [-terse] _policy_
+	displays the values of the named policy.  Requires the "get"
+	privilege.  With the "-terse" flag, outputs the fields as
+	quoted strings separated by tabs.  Alias "getpol".
+
+	EXAMPLES
+	kadmin: get_policy admin
+	Policy: admin
+	Maximum password life: 180 days 00:00:00
+	Minimum password life: 00:00:00
+	Minimum password length: 6
+	Minimum number of password character classes: 2
+	Number of old keys kept: 5
+	Reference count: 17
+	kadmin: get_policy -terse admin
+	admin	15552000	0	6	2	5	17
+	kadmin:
+
+	ERRORS
+	OVSEC_KADM_AUTH_GET (requires the get privilege)
+	OVSEC_KADM_UNK_POLICY (policy does not exist)
+
+get_privs
+	returns the administrative privileges of the current user.
+	Alias "getprivs".
+
+	EXAMPLE
+	kadmin: get_privs
+	Principal tlyu/admin@ATHENA.MIT.EDU
+	has privileges: GET, ADD, MODIFY, DELETE, CHSTAB
+	kadmin:
+
+OPEN POINTS
+	Implementation will most likely be in tcl, which implies that
+	scripts can be written to be run directly by kadmin.  This
+	will require some more spec'ing out.
+
+	get_srvtab is being pulled out into a separate program, to be
+	spec'ed out and documented at a later time.
+----------------------------------------------------------------------------
+get_srvtab [-v4] [-file _name_] {_principal..._}|{-host _host_ _service..._}
+	Creates a srvtab (a krb4 srvtab if -v4 is specified).  If
+	given a list of principals, randomizes the keys for the
+	principals named, creating them if necessary, and stores the
+	keys in the new srvtab.  If -host is given, then the named service
+	principals are randomized/created for the named host and
+	placed in the new srvtab.  The naming convention for the files
+	is hostname-new-srvtab if -host is given, overwriting anything
+	previously in such a file.  If -host is not given, then the
+	filename defaults to the principal-new-srvtab, using only the
+	first component of the principal name.
+
+	If the principals need to be created, the command will prompt
+	for confirmation.  This command requires the "chstab"
+	privilege, and only certain service names can be obtained this
+	way.  (The services are specified in a configuration file on
+	the server.)  In addition, certain hosts may be excluded from
+	this command.  The "modify" privilege is necessary in order to
+	use this command on arbitrary principals.
+
+	This command is aliased to "gst"
+
+	EXAMPLE
+	kadmin: get_srvtab -host dragons-lair host rvdsrv discuss
+	WARNING: hostname canonicalized to "dragons-lair.mit.edu"
+	Principal "host/dragons-lair.mit.edu@ATHENA.MIT.EDU"
+		updated	to kvno 3.
+	WARNING: principal
+	"rvdsrv/dragons-lair.mit.edu@ATHENA.MIT.EDU"
+		does not exist. Create? (y/n): y
+	Created principal
+	"rvdsrv/dragons-lair.mit.edu@ATHENA.MIT.EDU".
+	Principal "discuss/dragons-lair.mit.edu@ATHENA.MIT.EDU"
+		updated to kvno 3.
+	Wrote keytab "WRFILE:dragons-lair-new-srvtab".
+	kadmin:
+
+	ERRORS
+	"Operation requires the chstab privilege"
+	"Operation requires the modify privilege"
