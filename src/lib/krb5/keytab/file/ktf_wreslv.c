@@ -12,7 +12,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char krb5_ktfile_wresolve_c[] =
+static char rcsid_ktfile_wresolve_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
