@@ -505,11 +505,18 @@ kadm5_modify_principal(void *server_handle,
     }
 
     if (mask & KADM5_TL_DATA) {
-	 krb5_tl_data *tl;
+	 krb5_tl_data *tl, *tl2;
 	 /*
 	  * Replace kdb.tl_data with what was passed in.  The
 	  * KRB5_TL_KADM_DATA will be re-added (based on adb) by
 	  * kdb_put_entry, below.
+	  *
+	  * Note that we have to duplicate the passed in tl_data
+	  * before adding it to kdb.  The reason is that kdb_put_entry
+	  * will add its own tl_data entries that we will need to
+	  * free, but we cannot free the caller's tl_data (an
+	  * alternative would be to scan the tl_data after put_entry
+	  * and only free those entries that were not passed in).
 	  */
 	 while (kdb.tl_data) {
 	      tl = kdb.tl_data->tl_data_next;
@@ -517,17 +524,19 @@ kadm5_modify_principal(void *server_handle,
 	      free(kdb.tl_data);
 	      kdb.tl_data = tl;
 	 }
-	 
-	 kdb.tl_data = entry->tl_data;
+
 	 kdb.n_tl_data = entry->n_tl_data;
+	 kdb.tl_data = NULL;
+	 tl2 = entry->tl_data;
+	 while (tl2) {
+	      tl = dup_tl_data(tl2);
+	      tl->tl_data_next = kdb.tl_data;
+	      kdb.tl_data = tl;
+	      tl2 = tl2->tl_data_next;
+	 }
     }
 
     ret = kdb_put_entry(handle, &kdb, &adb);
-    if (mask & KADM5_TL_DATA) {
-	 /* prevent kdb_free_entry from freeing the caller's data */
-	 kdb.tl_data = NULL;
-	 kdb.n_tl_data = 0;
-    }
     if (ret) goto done;
 
     ret = KADM5_OK;

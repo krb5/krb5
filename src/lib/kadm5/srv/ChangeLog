@@ -1,3 +1,8 @@
+Mon Nov 11 17:01:00 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_principal.c (kadm5_modify_principal): fix memory leak
+ 	handling tl_data
+
 Thu Nov  7 16:42:38 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* svr_iters.c (glob_to_regexp): a principal glob with no @
