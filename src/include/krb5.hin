@@ -1926,12 +1926,12 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_getremotesubkey
  * begin stuff from libos.h
  */
 
-krb5_error_code krb5_read_password
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_read_password
 	KRB5_PROTOTYPE((krb5_context,
-		const char *,
-		const char *,
-		char *,
-		int * ));
+		const char FAR *,
+		const char FAR *,
+		char FAR *,
+		int FAR * ));
 krb5_error_code krb5_aname_to_localname
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,

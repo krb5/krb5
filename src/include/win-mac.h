@@ -202,6 +202,8 @@ typedef unsigned char	u_char;
 #define strcasecmp   stricmp
 #define strncasecmp  strnicmp
 
+HINSTANCE get_lib_instance(void);
+
 #endif /* _MSDOS || _WIN32 */
 
 #ifndef KRB5_CALLCONV
