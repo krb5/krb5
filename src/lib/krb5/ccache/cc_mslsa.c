@@ -44,7 +44,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * Implementation of read-only microsoft windows lsa credentials cache
+ * Implementation of microsoft windows lsa read-only credentials cache
  */
 
 #ifdef _WIN32
@@ -65,16 +65,14 @@
 #include <ntsecapi.h>
 #include <ntstatus.h>
 
-#define KERB_SUBMIT_TICKET 1
-#define HAVE_CACHE_INFO_EX2 1
-
 #define MAX_MSG_SIZE 256
 #define MAX_MSPRINC_SIZE 1024
 
 /* THREAD SAFETY 
- * The functions is_windows_2000(), is_windows_xp(), and does_retrieve_ticket_cache_ticket()
- * contain static variables to cache the responses of the tests being performed.  There is
- * no harm in the test being performed more than once since the result will always be the 
+ * The functions is_windows_2000(), is_windows_xp(), and 
+ * does_retrieve_ticket_cache_ticket() contain static variables to cache 
+ * the responses of the tests being performed.  There is no harm in the 
+ * test being performed more than once since the result will always be the 
  * same.
  */
 
@@ -347,6 +345,7 @@ MSTicketToMITTicket(KERB_EXTERNAL_TICKET *msticket, krb5_context context, krb5_d
     // now that this is being done within the library it won't break krb5_free_data()
     krb5_copy_data(context, &tmpdata, &newdata);
     memcpy(ticket, newdata, sizeof(krb5_data));
+    krb5_xfree(newdata);
 }
 
 /*
@@ -512,6 +511,9 @@ does_retrieve_ticket_cache_ticket (void)
 
        if (FAILED(Status) || FAILED(SubStatus)) {
            if ( SubStatus == STATUS_NOT_SUPPORTED )
+               /* The combination of the two CacheOption flags 
+                * is not supported; therefore, the new flag is supported 
+                */
                fCachesTicket = TRUE;
        }
        fChecked = TRUE;
@@ -519,7 +521,6 @@ does_retrieve_ticket_cache_ticket (void)
 
    return fCachesTicket;
 }
-
 
 static DWORD
 ConcatenateUnicodeStrings(UNICODE_STRING *pTarget, UNICODE_STRING Source1, UNICODE_STRING Source2)
@@ -723,7 +724,6 @@ PurgeAllTickets(HANDLE LogonHandle, ULONG  PackageId)
     return TRUE;
 }
 
-
 static BOOL
 PurgeTicket2000( HANDLE LogonHandle, ULONG  PackageId, 
                  krb5_context context, krb5_creds *cred )
@@ -860,7 +860,6 @@ PurgeTicketXP( HANDLE LogonHandle, ULONG  PackageId,
         return FALSE;
     return TRUE;
 }
-
 
 /* 
  * A simple function to determine if there is an exact match between two tickets
@@ -1565,18 +1564,6 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     if (!is_windows_2000())
         return KRB5_FCC_NOFILE;
 
-#ifdef COMMENT
-    /* In at least one case on Win2003 it appears that it is possible 
-     * for the logon session to be authenticated via NTLM and yet for
-     * there to be Kerberos credentials obtained by the LSA on behalf
-     * of the logged in user.  Therefore, we are removing this test
-     * which was meant to avoid the need to perform GetMSTGT() when
-     * there was no possibility of credentials being found.
-     */
-    if (!IsKerberosLogon())
-        return KRB5_FCC_NOFILE;
-#endif
-
     if (!PackageConnectLookup(&LogonHandle, &PackageId))
         return KRB5_FCC_NOFILE;
 
@@ -2057,7 +2044,7 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
          * cache contents until we find the matching service ticket.
          */
         PKERB_QUERY_TKT_CACHE_EX_RESPONSE pResponse = 0;
-        int i;
+        unsigned int i;
 
         if (!GetQueryTktCacheResponseXP( data->LogonHandle, data->PackageId, &pResponse)) {
             kret = KRB5_FCC_INTERNAL;
