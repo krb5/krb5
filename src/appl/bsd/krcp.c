@@ -377,20 +377,22 @@ int main(argc, argv)
 		      suser = pwd->pw_name;
 		    else if (!okname(suser))
 		      continue;
+		    (void) sprintf(buf,
 #if defined(hpux) || defined(__hpux)
-		    (void) sprintf(buf, "remsh %s -l %s -n %s %s '%s%s%s:%s'",
+				   "remsh %s -l %s -n %s %s '%s%s%s:%s'",
 #else
-		    (void) sprintf(buf, "rsh %s -l %s -n %s %s '%s%s%s:%s'",
+				   "rsh %s -l %s -n %s %s '%s%s%s:%s'",
 #endif
 				   host, suser, cmd, src,
 				   tuser ? tuser : "",
 				   tuser ? "@" : "",
 				   thost, targ);
 	       } else
+		   (void) sprintf(buf,
 #if defined(hpux) || defined(__hpux)
-		   (void) sprintf(buf, "remsh %s -n %s %s '%s%s%s:%s'",
+				  "remsh %s -n %s %s '%s%s%s:%s'",
 #else
-		    (void) sprintf(buf, "rsh %s -n %s %s '%s%s%s:%s'",
+				  "rsh %s -n %s %s '%s%s%s:%s'",
 #endif
 				   argv[i], cmd, src,
 				   tuser ? tuser : "",
@@ -398,7 +400,7 @@ int main(argc, argv)
 				   thost, targ);
 		(void) susystem(buf);
 	    } else {		/* local to remote */
-krb5_creds *cred;
+		krb5_creds *cred;
 		if (rem == -1) {
 		    (void) sprintf(buf, "%s -t %s",
 				   cmd, targ);
