@@ -1,3 +1,7 @@
+2002-10-07  Sam Hartman  <hartmans@mit.edu>
+
+	* pre.in post.in (RECURSE_TARGETS): Add install-headers-recurse
+
 2002-09-24  Ezra Peisach  <epeisach@bu.edu>
 
 	* post.in (Makefile): Run config.status to generate only the

@@ -100,7 +100,7 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
-	check-recurse depend-recurse Makefiles-recurse
+	check-recurse depend-recurse Makefiles-recurse install-headers-recurse
 
 $(RECURSE_TARGETS):
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \

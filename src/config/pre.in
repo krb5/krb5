@@ -12,6 +12,8 @@ install:: install-$(WHAT)
 
 check:: check-$(WHAT)
 
+install-headers:: install-headers-$(WHAT)
+
 all-recurse: all-prerecurse
 all-postrecurse:: all-recurse
 all-unix:: all-postrecurse
@@ -36,6 +38,15 @@ install-unix:: install-postrecurse
 
 install-prerecurse::
 install-postrecurse::
+
+install-headers-unix:: install-headers-prerecurse
+install-headers-unix:: install-headers-recurse
+install-headers-unix:: install-headers-postrecurse
+
+install-headers-prerecurse::
+
+install-headers-postrecurse::
+
 
 check-unix:: check-prerecurse
 check-unix:: check-recurse

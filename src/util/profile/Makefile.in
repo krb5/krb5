@@ -56,6 +56,8 @@ all-unix:: includes
 all-unix:: all-libs
 all-windows:: $(PROFILE_HDR)
 
+install-headers-unix:: includes
+
 $(PROFILE_HDR):: profile.h
 	$(CP) profile.h "$@"
 

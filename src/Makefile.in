@@ -62,6 +62,12 @@ install-mkdirs:
 		$(srcdir)/config/mkinstalldirs $(DESTDIR)$$i; \
 	done
 
+install-headers-prerecurse::
+	$(srcdir)/config/mkinstalldirs $(DESTDIR)$(KRB5_INCDIR)
+	$(srcdir)/config/mkinstalldirs $(DESTDIR)$(KRB5_INCDIR)/gssapi
+	$(srcdir)/config/mkinstalldirs $(DESTDIR)$(KRB5_INCDIR)/kerberosIV
+
+
 # install::
 #	$(MAKE) $(MFLAGS) install.man
 

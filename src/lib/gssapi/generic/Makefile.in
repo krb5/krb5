@@ -120,7 +120,7 @@ includes-unix::
 	@if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)) fi
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
-install::
+install-headers-unix install:: gssapi.h
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)/$$f	\
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \

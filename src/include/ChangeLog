@@ -1,3 +1,7 @@
+2002-10-07  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in : Add install-headers support
+
 2002-09-26  Tom Yu  <tlyu@mit.edu>
 
 	* socket-utils.h (sa2sin, sa2sin6): Add redundant cast to (void *)

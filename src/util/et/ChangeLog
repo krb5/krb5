@@ -1,3 +1,7 @@
+2002-10-07  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (install-headers): build compile_et so it can be used later
+
 2002-09-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* com_err.c (default_com_err_proc, com_err_va, set_com_err_hook):

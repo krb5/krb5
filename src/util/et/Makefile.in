@@ -157,6 +157,9 @@ install-unix:: compile_et
 	$(INSTALL_DATA) $(srcdir)/et_c.awk $(DESTDIR)$(mydatadir)
 	$(INSTALL_DATA) $(srcdir)/et_h.awk $(DESTDIR)$(mydatadir)
 
+
+install-headers:: compile_et
+
 compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
 	$(SHELL) $(srcdir)/config_script $(srcdir)/compile_et.sh \
 		"$(mydatadir)" $(AWK) $(SED) > compile_et

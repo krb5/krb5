@@ -72,6 +72,6 @@ clean-windows::
 	cd ..
 	@echo Making clean in include
 
-install:: krb5.h profile.h
+install-headers-unix install:: krb5.h profile.h kerberosIV/krb_err.h
 	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
 	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h
