@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -58,6 +59,9 @@ krb5_checksum *outcksum;
 	for (j = 0; j < 32; j += 8)
 	    *output++ = (working.buffer[i] >> j) & 0xFF;
 
+    for (i = 0; i < 8; i++)
+	*output++ = working.count[i];
+
     keyblock.length = seed_length;
     keyblock.contents = (krb5_octet *)seed;
     keyblock.keytype = KEYTYPE_DES;
@@ -81,7 +85,7 @@ krb5_checksum *outcksum;
 
 krb5_checksum_entry rsa_md4_des_cksumtable_entry = {
     md4_crypto_sum_func,
-    RSA_MD4_CKSUM_LENGTH, /* CRC-32 is 4 octets */
+    RSA_MD4_DES_CKSUM_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
 };

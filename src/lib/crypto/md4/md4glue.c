@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -50,6 +51,9 @@ krb5_checksum *outcksum;
     for (i = 0; i < 4; i++)
 	for (j = 0; j < 32; j += 8)
 	    *output++ = (working.buffer[i] >> j) & 0xFF;
+
+    for (i = 0; i < 8; i++)
+	*output++ = working.count[i];
 
     return 0;
 }
