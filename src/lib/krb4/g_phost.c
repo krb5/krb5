@@ -32,9 +32,9 @@
  * to the original "alias" argument is returned.
  */
 
-char * INTERFACE
+KRB5_DLLIMP char FAR * KRB5_CALLCONV
 krb_get_phost(alias)
-    char *alias;
+    char FAR *alias;
 {
     struct hostent FAR *h;
     char *p;
@@ -59,7 +59,7 @@ krb_get_phost(alias)
 	}
 #endif
 	/* We don't want to return a FAR *, so we copy to a safe location. */
-	_fstrncpy (hostname_mem, h->h_name, sizeof (hostname_mem));
+	strncpy (hostname_mem, h->h_name, sizeof (hostname_mem));
 	hostname_mem[MAXHOSTNAMELEN-1]='\0';
 	p = strchr( hostname_mem, '.' );
         if (p)

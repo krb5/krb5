@@ -25,7 +25,9 @@
  * be sure to support old versions of krb_sendauth!
  */
 
+#ifndef _WINDOWS
 extern int errno;
+#endif
 
 /*
  * krb_recvauth() reads (and optionally responds to) a message sent
@@ -112,20 +114,20 @@ extern int errno;
 #define	max(a,b) (((a) > (b)) ? (a) : (b))
 #endif /* max */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_recvauth(options, fd, ticket, service, instance, faddr, laddr, kdata,
 	     filename, schedule, version)
-long options;			 /* bit-pattern of options */
-int fd;				 /* file descr. to read from */
-KTEXT ticket;			 /* storage for client's ticket */
-char *service;			 /* service expected */
-char *instance;			 /* inst expected (may be filled in) */
-struct sockaddr_in *faddr;	 /* address of foreign host on fd */
-struct sockaddr_in *laddr;	 /* local address */
-AUTH_DAT *kdata;		 /* kerberos data (returned) */
-char *filename;			 /* name of file with service keys */
-Key_schedule schedule;		 /* key schedule (return) */
-char *version;			 /* version string (filled in) */
+    long options;			 /* bit-pattern of options */
+    int fd;				 /* file descr. to read from */
+    KTEXT ticket;			 /* storage for client's ticket */
+    char FAR *service;			 /* service expected */
+    char FAR *instance;			 /* inst expected (may be filled in) */
+    struct sockaddr_in FAR *faddr;	 /* address of foreign host on fd */
+    struct sockaddr_in FAR *laddr;	 /* local address */
+    AUTH_DAT FAR *kdata;		 /* kerberos data (returned) */
+    char FAR *filename;			 /* name of file with service keys */
+    Key_schedule schedule;		 /* key schedule (return) */
+    char FAR *version;			 /* version string (filled in) */
 {
 
     int i, cc, old_vers = 0;

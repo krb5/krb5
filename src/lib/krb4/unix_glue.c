@@ -11,27 +11,27 @@
 #include <sys/time.h>
 
 /* Start and end Kerberos library access.  On Unix, this is a No-op.  */
-int INTERFACE
+int
 krb_start_session (x)
 	char *x;
 {
 	return KSUCCESS;
 }
 
-int INTERFACE
+int
 krb_end_session (x)
 	char *x;
 {
 	return KSUCCESS;
 }
 
-char FAR * INTERFACE
+char FAR *
 krb_get_default_user ()
 {
 	return 0;		/* FIXME */
 }
 
-int INTERFACE
+int
 krb_set_default_user (x)
 	char *x;
 {

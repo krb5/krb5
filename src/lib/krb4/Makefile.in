@@ -1,8 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(DEFINES)
 DEFINES=-I$(srcdir)/../../include/kerberosIV
 
-##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOS##BUILDTOP = ..\..
+##DOS##LIBNAME=krb4.lib
+##DOS##OBJFILE=krb4.lst
 
 LIB=krb4
 LIBMAJOR=1
@@ -50,8 +51,7 @@ OBJS	= \
 	stime.$(OBJEXT) \
 	rd_preauth.$(OBJEXT) \
 	mk_preauth.$(OBJEXT) \
-	unix_time.$(OBJEXT) \
-	$(CACHEOBJS) $(SETENVOBJS) $(STRCASEOBJS) $(SHMOBJS) \
+	$(OSOBJS) $(CACHEOBJS) $(SETENVOBJS) $(STRCASEOBJS) $(SHMOBJS) \
 	$(LIB_KRB_HOSTOBJS) $(SERVER_KRB_OBJS) $(NETIO_OBJS) $(REALMDBOBJS)
 
 SRCS = \
@@ -87,7 +87,7 @@ SRCS = \
 	$(srcdir)/rd_preauth.c \
 	$(srcdir)/mk_preauth.c \
 	$(srcdir)/unix_time.c \
-	$(CACHESRCS) $(SETENVSRCS) $(STRCASESRCS) $(SHMSRCS) \
+	$(OSSRCS) $(CACHESRCS) $(SETENVSRCS) $(STRCASESRCS) $(SHMSRCS) \
 	$(LIB_KRB_HOSTSRCS) $(SERVER_KRB_SRCS) $(NETIO_SRCS) $(REALMDBSRCS)
 
 STLIBOBJS  = $(OBJS)
@@ -107,6 +107,13 @@ SHLIB_EXPLIBS=-lkrb5 $(KRB4_CRYPTO_LIBS) -lcrypto -lcom_err
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
+#
+# These objects implement the time computation routines.
+#
+OSOBJS = unix_time.$(OBJEXT)
+OSSRCS = unix_time.c
+
+##DOS##OSOBJS = win_time.obj
 
 #
 # These objects implement ticket cacheing for Unix.  They are
@@ -119,14 +126,20 @@ CACHEOBJS=tf_util.$(OBJEXT) dest_tkt.$(OBJEXT) in_tkt.$(OBJEXT) \
 	tkt_string.$(OBJEXT) g_tf_fname.$(OBJEXT) g_tf_realm.$(OBJEXT) \
 	g_cred.$(OBJEXT) save_creds.$(OBJEXT)
 
+##DOS##CACHEOBJS = memcache.$(OBJEXT)
+
 #
 # These objects implement Kerberos realm<->host database lookup.
 # They read config files and/or network databases in various ways
 # on various platforms.
 #
-REALMDBSRCS= $(srcdir)/g_cnffile.c $(srcdir)/g_krbhst.c $(srcdir)/g_krbrlm.c \
+
+CNFFILE = g_cnffile
+##DOS##CNFFILE = win_store
+
+REALMDBSRCS= $(srcdir)/$(CNFFILE).c $(srcdir)/g_krbhst.c $(srcdir)/g_krbrlm.c \
 	$(srcdir)/g_admhst.c $(srcdir)/realmofhost.c 
-REALMDBOBJS= g_cnffile.$(OBJEXT) g_krbhst.$(OBJEXT) g_krbrlm.$(OBJEXT) \
+REALMDBOBJS= $(CNFFILE).$(OBJEXT) g_krbhst.$(OBJEXT) g_krbrlm.$(OBJEXT) \
 	g_admhst.$(OBJEXT) realmofhost.$(OBJEXT) 
 
 #
@@ -162,35 +175,30 @@ NETIO_OBJS=netread.$(OBJEXT) netwrite.$(OBJEXT)
 LIB_KRB_HOSTSRCS=$(srcdir)/unix_glue.c
 LIB_KRB_HOSTOBJS=unix_glue.$(OBJEXT)
 
-LIBNAME=libkrb4.$(STEXT)
+##DOS##LIB_KRB_HOSTOBJS=win_glue.obj
 
 ARCHIVEARGS= $@ $(OBJS)
 
 CODE=$(SRCS) Makefile.in krb_err.et
 
-all:: all-really
-
-#### include configury here
-##DOS!include ..\..\config\common
-##DOS!include ..\..\config\mt-win
-
-# We only have a final value of $(WHAT) at this point, and Microsoft
-# NMAKE expands the macros in dependency lines before it finishes reading
-# the whole file (sigh)...
-all-really:: all-$(WHAT)
-
 # We want *library* compiler options...
 DBG=$(DBG_LIB)
 
+
 all-unix:: krb_err.h includes all-liblinks
+all-windows:: $(OBJFILE)
+
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
+
 
 # comp_et_depend(krb_err)
 krb_err.h:: krb_err.et
 krb_err.c: krb_err.et
 
 depend:: krb_err.h
-#
-
 depend:: $(CODE) 
 
 #install-unix::
@@ -199,50 +207,11 @@ depend:: $(CODE)
 
 DEFINES=$(FALLBACK) $(OLD_SRVTAB) $(OLD_KLOGIN) -I$(srcdir)/../../include/kerberosIV
 
-#
-# What we build for `all' and `install' targets on Windows
-#
-all-windows: winsock.lib kerberos.lib kerberos.dll
-
-install-windows:
-	copy winsock.lib  ..\..\floppy
-	copy kerberos.lib ..\..\floppy
-	copy kerberos.dll ..\..\floppy
-
-#
-# The "Import Library" definitions for MS-Windows
-#
-kerberos.lib: kerberos.dll
-	implib /nologo $@ $(@R).dll
-
-winsock.lib:  winsock.def
-	implib /nologo winsock.lib winsock.def
-
-#
-# The Kerberos "Dynamic Link Library" for MS-Windows
-#
-kerberos.dll: kerberos.def winsock.lib \
-	$(DES_LIB_FOR_DLL) $(KADM_LIB_FOR_DLL) $(KSTREAM_LIB_FOR_DLL) \
-	$(LIBNAME)
-	$(RM) $@
-# this a.def and a.dll stuff is for line-too-long crap
-	copy kerberos.def a.def
-	copy $(DES_LIB_FOR_DLL)     a.lib
-	copy $(KADM_LIB_FOR_DLL)    b.lib
-	copy $(KSTREAM_LIB_FOR_DLL) c.lib
-	link /nologo /noe debug, $@,,\
-		$(LIBNAME) a.lib b.lib c.lib\
-		winsock ldllcew libw, $(@R).def
-	del a.lib
-	del b.lib
-	del c.lib
-	rc /p /k $@
-
 clean:: 
-	-$(RM) $(LIBNAME)
-	-$(RM) *.$(OBJEXT)
+	-$(RM) $(OBJS)
 
 clean-:: clean-unix
+
 clean-unix::
 	-$(RM) krb_err.c
 	-$(RM) krb_err.h
@@ -250,26 +219,10 @@ clean-unix::
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-clean-windows::
-	-$(RM) kerberos.lib
-	-$(RM) kerberos.bak
-	-$(RM) kerberos.dll
-	-$(RM) kerberos.lst
-	-$(RM) kerberos.map
-	-$(RM) libkrb.lst
-	-$(RM) libkrb.bak
-	-$(RM) winsock.lib
-	-$(RM) msvc.pdb
-	-$(RM) proj.err
-	-$(RM) ..\..\floppy\winsock.lib
-	-$(RM) ..\..\floppy\kerberos.lib
-	-$(RM) ..\..\floppy\kerberos.dll
-
-
 
 check-unix:: $(TEST_PROGS)
 check-mac:: $(TEST_PROGS)
-
 check-windows::
+
 
 install-unix:: install-libs

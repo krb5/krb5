@@ -8,6 +8,7 @@
  */
 
 #include "mit-copyright.h"
+#include "krb.h"
 
 /*
  * getst() takes a file descriptor, a string and a count.  It reads

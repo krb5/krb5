@@ -26,7 +26,7 @@
  * krb_get_in_tkt().
  */
 
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_tf_fullname(ticket_file, name, instance, realm)
   char *ticket_file;
   char *name;

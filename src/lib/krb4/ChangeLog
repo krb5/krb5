@@ -1,3 +1,15 @@
+Sun Feb 16 21:11:51 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Win16/Win32 cleanup
+
+	* err_txt.c g_admhst.c g_cred.c g_krbhst.c g_krbrlm.c g_phost.c
+	g_pw_in_tkt.c g_svc_in_tkt.c g_tkt_svc.c kname_parse.c mk_auth.c
+	mk_err.c mk_preauth.c mk_priv.c mk_req.c mk_safe.c rd_err.c
+	rd_priv.c rd_req.c rd_safe.c rd_svc_key.c realmofhost.c
+	recvauth.c save_creds.c unix_glue.c
+		Changed declaration of functions to use
+		KRB5_DLLIMP/KRB5_CALLCONV instead of INTERFACE.
+
 Sat Feb  1 08:44:00 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (STOBJLISTS): Fix up des425 reference.

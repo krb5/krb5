@@ -62,14 +62,14 @@ static int srvtab_to_key(user, instance, realm, srvtab, key)
  * It returns the return value of the krb_get_in_tkt() call.
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_svc_in_tkt(user, instance, realm, service, sinstance, life, srvtab)
-    char *user, *instance, *realm, *service, *sinstance;
+    char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
     int life;
-    char *srvtab;
+    char FAR *srvtab;
 {
-    return(krb_get_in_tkt(user, instance, realm, service, sinstance,
-                          life, srvtab_to_key, NULL, srvtab));
+    return(krb_get_in_tkt(user, instance, realm, service, sinstance, life,
+                          (key_proc_type) srvtab_to_key, NULL, srvtab));
 }
 
 /* and we need a preauth version as well. */
@@ -92,10 +92,11 @@ krb_get_svc_in_tkt_preauth(user, instance, realm, service, sinstance, life, srvt
    int   preauth_len;
    int   ret_st;
  
-   krb_mk_preauth(&preauth_p,&preauth_len,
-                  srvtab_to_key,user,instance,realm,srvtab,old_key);
+   krb_mk_preauth(&preauth_p, &preauth_len,
+                  (key_proc_type) srvtab_to_key, user, instance, realm,
+		  srvtab, old_key);
    ret_st = krb_get_in_tkt_preauth(user,instance,realm,service,sinstance,life,
-				   stub_key, NULL, srvtab,
+				   (key_proc_type) stub_key, NULL, srvtab,
 				   preauth_p, preauth_len);
  
    krb_free_preauth(preauth_p, preauth_len);

@@ -51,9 +51,12 @@
  * of name, instance, and realm.  FIXME-gnu:  Does anyone use it this way?
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 kname_parse(np, ip, rp, fullname)
-    char *np, *ip, *rp, *fullname;
+    char FAR *np;
+    char FAR *ip;
+    char FAR *rp;
+    char FAR *fullname;
 {
     char buf[FULL_SZ];
     char *rnext, *wnext;	/* next char to read, write */

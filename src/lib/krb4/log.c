@@ -15,10 +15,11 @@
 #endif
 
 #include "mit-copyright.h"
+#include "krb.h"
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
-#ifndef VMS
+#if !defined(VMS) && !defined(_WINDOWS)
 #include <sys/time.h>
 #endif
 #include <stdio.h>

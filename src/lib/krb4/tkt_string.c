@@ -9,12 +9,22 @@
  */
 
 #include "mit-copyright.h"
-#include <stdio.h>
 #include "krb.h"
+#include <stdio.h>
 #include <string.h>
-#include <sys/param.h>
+#include <sys/types.h>
 
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#else
 char *getenv();
+#endif
+
+
+#ifdef _WINDOWS
+typedef unsigned long uid_t;
+uid_t getuid(void) { return 0; }
+#endif /* _WINDOWS */
 
 /*
  * This routine is used to generate the name of the file that holds

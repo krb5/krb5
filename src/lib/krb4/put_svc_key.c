@@ -23,8 +23,8 @@
  */
 
 #include "krb.h"
+
 #include <string.h>
-#include <sys/file.h>
 #include <stdio.h>
 #include <fcntl.h>
 #ifdef HAS_UNISTD_H
@@ -39,13 +39,14 @@ extern char *krb__get_srvtabname();
    The key (exact match) must already be in the file;
    version numbers are not checked.
  */
+KRB5_DLLIMP int KRB5_CALLCONV
 put_svc_key(sfile,name,inst,realm,newvno,key)
-	char *sfile;
-	char *name;
-	char *inst;
-	char *realm;
+	char FAR *sfile;
+	char FAR *name;
+	char FAR *inst;
+	char FAR *realm;
 	int newvno;
-	char *key;
+	char FAR *key;
 {
 	int fd;
 	char fname[SNAME_SZ], finst[INST_SZ], frlm[REALM_SZ];

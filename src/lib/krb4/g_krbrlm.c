@@ -31,7 +31,7 @@
 static char *krb_conf = KRB_CONF;
 
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_lrealm(r,n)
     char *r;
     int n;

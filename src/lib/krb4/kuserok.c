@@ -11,8 +11,10 @@
  */
 
 #include "mit-copyright.h"
-
 #include "krb.h"
+
+#if !defined(_WINDOWS)
+
 #include <stdio.h>
 #include <pwd.h>
 #include <sys/param.h>
@@ -93,9 +95,10 @@ parmtable kparm[] = {
 #define KPARMS kparm,PARMCOUNT(kparm)
 #endif
 
+KRB5_DLLIMP int KRB5_CALLCONV
 kuserok(kdata, luser)
-    AUTH_DAT *kdata;
-    char   *luser;
+    AUTH_DAT	FAR *kdata;
+    char	FAR *luser;
 {
     struct stat sbuf;
     struct passwd *pwd;
@@ -231,3 +234,5 @@ kuserok(kdata, luser)
     fclose(fp);
     return(isok);
 }
+
+#endif

@@ -17,6 +17,24 @@
 #include <windows.h>
 #include <dos.h>
 
+#ifdef _WIN32
+
+unsigned KRB4_32
+win_time_gmt_unixsec (usecptr)
+    unsigned KRB4_32	*usecptr;
+{
+    struct _timeb timeptr;
+
+    _ftime(&timeptr);                           /* Get the current time */
+
+    if (usecptr)
+	*usecptr = timeptr.millitm * 1000;
+
+    return timeptr.time + CONVERT_TIME_EPOCH;
+}
+
+#else
+
 /*
  * Time handling.  Translate Unix time calls into Kerberos internal 
  * procedure calls.  See ../../include/c-win.h.
@@ -25,9 +43,9 @@
  * to using the AT hardware clock and converting it to Unix time.
  */
 
-unsigned KRB_INT32
+unsigned KRB4_32
 win_time_gmt_unixsec (usecptr)
-	unsigned KRB_INT32	*usecptr;
+	unsigned KRB4_32	*usecptr;
 {
 	struct tm tm;
 	union _REGS inregs;
@@ -77,6 +95,7 @@ win_time_gmt_unixsec (usecptr)
 	return time + CONVERT_TIME_EPOCH;
 }
 
+#endif
 
 /*
  * This routine figures out the current time epoch and returns the

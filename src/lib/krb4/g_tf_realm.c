@@ -21,6 +21,7 @@
  * 
  */
 
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_tf_realm(ticket_file, realm)
   char *ticket_file;
   char *realm;

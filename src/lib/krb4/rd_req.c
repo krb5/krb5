@@ -121,14 +121,14 @@ krb_set_key(key,cvt)
  * Mutual authentication is not implemented.
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_rd_req(authent,service,instance,from_addr,ad,fn)
     register KTEXT authent;	/* The received message */
-    char *service;		/* Service name */
-    char *instance;		/* Service instance */
+    char FAR *service;		/* Service name */
+    char FAR *instance;		/* Service instance */
     unsigned KRB4_32 from_addr; /* Net address of originating host */
-    AUTH_DAT *ad;		/* Structure to be filled in */
-    char *fn;			/* Filename to get keys from */
+    AUTH_DAT FAR *ad;		/* Structure to be filled in */
+    char FAR *fn;		/* Filename to get keys from */
 {
     KTEXT_ST ticket;		/* Temp storage for ticket */
     KTEXT tkt = &ticket;

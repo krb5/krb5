@@ -28,17 +28,17 @@
  * to avoid namespace pollution.
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_save_credentials(service, instance, realm, session, lifetime, kvno,
                  ticket, issue_date)
-    char *service;              /* Service name */
-    char *instance;             /* Instance */
-    char *realm;                /* Auth domain */
-    C_Block session;            /* Session key */
-    int lifetime;               /* Lifetime */
-    int kvno;                   /* Key version number */
-    KTEXT ticket;               /* The ticket itself */
-    long issue_date;            /* The issue time */
+    char FAR *service;		/* Service name */
+    char FAR *instance;		/* Instance */
+    char FAR *realm;		/* Auth domain */
+    C_Block FAR *session;	/* Session key */
+    int lifetime;		/* Lifetime */
+    int kvno;			/* Key version number */
+    KTEXT ticket;		/* The ticket itself */
+    long issue_date;		/* The issue time */
 {
     int tf_status;   /* return values of the tf_util calls */
 

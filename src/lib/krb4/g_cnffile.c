@@ -16,7 +16,7 @@
    it solves a problem for now. */
 
 #include <stdio.h>
-#include <krb.h>
+#include "krb.h"
 #include "k5-int.h"
 
 static FILE*

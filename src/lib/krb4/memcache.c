@@ -12,9 +12,20 @@
  * in_tkt.c, dest_tkt.c, tf_util.c, and tkt_string.c.
  */
 
+#include "krb.h"
+
 #ifdef _WINDOWS
-#include <windows.h>
-#include <malloc.h>	/* REQUIRED for near/far declarations */
+#include <errno.h>
+
+typedef DWORD OSErr;
+#define noErr 0
+#define cKrbCredsDontExist 12001
+#define cKrbSessDoesntExist 12002
+#define OFFSETOF(x) x
+#define _nmalloc malloc
+#define _nrealloc realloc
+#define _nfree free
+#define memFullErr ENOMEM
 #endif
 
 #ifndef unix
@@ -24,7 +35,6 @@
 #endif
 
 #ifdef unix
-
 /* Unix interface to memory cache Mac functions.  */
 
 #include <stdio.h>
@@ -47,8 +57,8 @@ typedef int OSErr;
 
 #endif /* unix */
 
-#include "krb.h"
 #include "memcache.h"
+
 
 /* Lower level data structures  */
 
@@ -206,7 +216,7 @@ change_cache()
  * message will be broadcast to all top level windows when
  * the credential cache changes.
  */
-unsigned int INTERFACE
+unsigned int
 krb_get_notification_message(void)
 {
 	static UINT message = 0;
@@ -220,8 +230,6 @@ krb_get_notification_message(void)
 
 #endif /* Windows */
 
-
-#include "krb_driver.h"
 
 /* The low level routines in this file are capable of storing
    tickets for multiple "sessions", each led by a different
@@ -264,7 +272,7 @@ static char curr_auth_uinst [INST_SZ];
     via ResEdit.
 
  */
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 in_tkt(pname,pinst)
     char *pname;
     char *pinst;
@@ -291,7 +299,7 @@ in_tkt(pname,pinst)
  * failure.
  *
  */
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 dest_tkt()
 {
  	/* 	
@@ -350,7 +358,7 @@ int	dest_all_tkts()
 
 
 /* krb_get_tf_realm -- return the realm of the current ticket file. */
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_tf_realm (tktfile, lrealm)
 	char *tktfile;
 	char *lrealm;		/* Result stored through here */
@@ -362,7 +370,7 @@ krb_get_tf_realm (tktfile, lrealm)
 
 /* krb_get_tf_fullname -- return name, instance and realm of the
 principal in the current ticket file. */
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_tf_fullname (tktfile, name, instance, realm)
   char *tktfile;
   char *name;
@@ -413,7 +421,7 @@ krb_get_tf_fullname (tktfile, name, instance, realm)
  * information from the file.  If successful, it returns KSUCCESS.
  * On failure it returns a Kerberos error code.
  */
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_cred (service, instance, realm, c)
 	char *service;		/* Service name */
 	char *instance;		/* Instance */
@@ -453,7 +461,7 @@ krb_get_cred (service, instance, realm, c)
  * Returns KSUCCESS if all goes well, otherwise KFAILURE.
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_save_credentials(sname, sinst, srealm, session, 
 			lifetime, kvno, ticket, issue_date)
 
@@ -484,7 +492,7 @@ krb_save_credentials(sname, sinst, srealm, session,
 	return KSUCCESS;
 }
 
-int INTERFACE
+int
 krb_delete_cred (sname, sinstance, srealm)
 	char *sname;
 	char *sinstance;
@@ -504,7 +512,7 @@ krb_delete_cred (sname, sinstance, srealm)
     */
 }	
 
-int INTERFACE
+int
 krb_get_nth_cred (sname, sinstance, srealm, n)
 	char *sname;
 	char *sinstance;
@@ -521,7 +529,7 @@ krb_get_nth_cred (sname, sinstance, srealm, n)
  * Return the number of credentials in the current credential cache (ticket cache).
  * On error, returns -1. 
  */
-int INTERFACE
+int
 krb_get_num_cred ()
 {
   int n;

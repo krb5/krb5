@@ -113,13 +113,14 @@ int vxworks_srvtab_read(fd, s, n)
 }
 #endif
 
-int read_service_key(service,instance,realm,kvno,file,key)
-    char *service;              /* Service Name */
-    char *instance;             /* Instance name or "*" */
-    char *realm;                /* Realm */
-    int kvno;                   /* Key version number */
-    char *file;                 /* Filename */
-    char *key;                  /* Pointer to key to be filled in */
+KRB5_DLLIMP int KRB5_CALLCONV
+read_service_key(service,instance,realm,kvno,file,key)
+    char FAR *service;		/* Service Name */
+    char FAR *instance;		/* Instance name or "*" */
+    char FAR *realm;		/* Realm */
+    int kvno;			/* Key version number */
+    char FAR *file;		/* Filename */
+    char FAR *key;		/* Pointer to key to be filled in */
 {
     int kret;
     
@@ -192,13 +193,14 @@ int read_service_key(service,instance,realm,kvno,file,key)
 /* kvno is passed by reference, so that if it is zero, and we find a match,
    the match gets written back into *kvno so the caller can find it.
  */
-int get_service_key(service,instance,realm,kvno,file,key)
-    char *service;              /* Service Name */
-    char *instance;             /* Instance name or "*" */
-    char *realm;                /* Realm */
-    int  *kvno;                 /* Key version number */
-    char *file;                 /* Filename */
-    char *key;                  /* Pointer to key to be filled in */
+KRB5_DLLIMP int KRB5_CALLCONV
+get_service_key(service,instance,realm,kvno,file,key)
+    char FAR *service;              /* Service Name */
+    char FAR *instance;             /* Instance name or "*" */
+    char FAR *realm;                /* Realm */
+    int  FAR *kvno;                 /* Key version number */
+    char FAR *file;                 /* Filename */
+    char FAR *key;                  /* Pointer to key to be filled in */
 {
     char serv[SNAME_SZ];
     char inst[INST_SZ];

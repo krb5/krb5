@@ -33,6 +33,7 @@
  */
 
 #include "mit-copyright.h"
+#include "krb.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <kparse.h>
@@ -48,11 +49,13 @@
 #define MAXKEY          80
 #define MAXVALUE        80
 
-extern char *malloc();
-
 static char *strutol();
+
 #ifndef HAVE_STRSAVE
 static char *strsave();
+#endif
+#ifndef HAS_STDLIB_H
+extern char *malloc();
 #endif
 
 static int sLineNbr=1;		/* current line nbr in parameter file */

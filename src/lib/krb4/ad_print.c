@@ -15,6 +15,8 @@
 #include "des.h"
 #include <stdio.h>
 
+#ifndef _WINDOWS
+
 /*
  * Print some of the contents of the given authenticator structure
  * (AUTH_DAT defined in "krb.h").  Fields printed are:
@@ -64,3 +66,5 @@ placebo_cblock_print(x)
     printf(" }");
 }
 #endif /* NOENCRYPTION */
+
+#endif

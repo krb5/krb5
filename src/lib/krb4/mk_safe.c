@@ -60,7 +60,7 @@ extern int krb_debug;
  *						above using "key"
  */
 
-long INTERFACE
+KRB5_DLLIMP long KRB5_CALLCONV
 krb_mk_safe(in,out,length,key,sender,receiver)
     u_char *in;			/* application data */
     u_char *out;		/*
@@ -69,7 +69,7 @@ krb_mk_safe(in,out,length,key,sender,receiver)
 				 * overlap
 				 */
     unsigned KRB4_32 length;	/* of in data */
-    C_Block *key;		/* encryption key for seed and ivec */
+    C_Block key;		/* encryption key for seed and ivec */
     struct sockaddr_in *sender;	/* sender address */
     struct sockaddr_in *receiver; /* receiver address */
 {
@@ -142,7 +142,7 @@ krb_mk_safe(in,out,length,key,sender,receiver)
     memset((char*) big_cksum, 0, sizeof(big_cksum));
 #else /* Do encryption */
     /* calculate the checksum of length, timestamps, and input data */
-    cksum = quad_cksum(q,big_cksum,p-q,2,(C_Block*) key);
+    cksum = quad_cksum(q, (u_char *)big_cksum, p-q, 2, key);
 #endif /* NOENCRYPTION */
     DEB (("\ncksum = %u",cksum));
 

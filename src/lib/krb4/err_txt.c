@@ -22,7 +22,7 @@ const
 #ifdef MULTIDIMENSIONAL_ERR_TXT
  char krb_err_txt[256][60] = {  
 #else 
- char *const krb_err_txt [256] = { 
+ char FAR *const krb_err_txt [256] = { 
 #endif
   "OK",							/* 000 */
   "Principal expired (kerberos)",			/* 001 */
@@ -283,12 +283,12 @@ const
 };
 
 
-const char * INTERFACE
-krb_get_err_text (errno)
-	int errno;
+KRB5_DLLIMP const char FAR * KRB5_CALLCONV
+krb_get_err_text (code)
+    int code;
 {
-    if (errno >= 0 && errno < (sizeof (krb_err_txt))/(sizeof *krb_err_txt))
-	return krb_err_txt[errno];
+    if (code >= 0 && code < (sizeof (krb_err_txt))/(sizeof *krb_err_txt))
+	return krb_err_txt[code];
     else
 	return "Invalid Kerberos error code";
 }

@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "krb.h"
-#include <sys/file.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #ifdef TKT_SHMEM
@@ -42,6 +41,7 @@ extern int krb_debug;
 #define O_SYNC 0
 #endif
 
+KRB5_DLLIMP int KRB5_CALLCONV
 in_tkt(pname,pinst)
     char *pname;
     char *pinst;

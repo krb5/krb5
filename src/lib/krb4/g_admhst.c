@@ -34,10 +34,10 @@
  * provided by a nameserver.
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_admhst(h, r, n)
-    char *h;
-    char *r;
+    char FAR *h;
+    char FAR *r;
     int n;
 {
     FILE *cnffile, *krb__get_cnffile();

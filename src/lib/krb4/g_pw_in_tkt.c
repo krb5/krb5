@@ -9,11 +9,16 @@
 
 #include "mit-copyright.h"
 #include "krb.h"
+#include "krb_err.h"
 #include "prot.h"
 #include <string.h>
 
 #ifndef NULL
 #define NULL 0
+#endif
+
+#ifndef INTK_PW_NULL
+#define INTK_PW_NULL KRBET_GT_PW_NULL
 #endif
 
 /*
@@ -87,11 +92,11 @@ passwd_to_key(user,instance,realm,passwd,key)
  * The result of the call to krb_get_in_tkt() is returned.
  */
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
-    char *user, *instance, *realm, *service, *sinstance;
+    char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
     int life;
-    char *password;
+    char FAR *password;
 {
 #if defined(_WINDOWS) || defined(macintosh)
     /* In spite of the comments above, we don't allow that path here,
@@ -105,7 +110,7 @@ krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
 #endif
 
     return(krb_get_in_tkt(user,instance,realm,service,sinstance,life,
-                          passwd_to_key,
+                          (key_proc_type)passwd_to_key,
 			  (decrypt_tkt_type)NULL, password));
 }
 
@@ -126,11 +131,11 @@ static int stub_key(user,instance,realm,passwd,key)
    return 0;
 }
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
-    char *user, *instance, *realm, *service, *sinstance;
+    char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
     int life;
-    char *password;
+    char FAR *password;
 {
    char *preauth_p;
    int   preauth_len;
@@ -143,8 +148,8 @@ krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
      return INTK_PW_NULL;
 #endif
 
-   krb_mk_preauth(&preauth_p,&preauth_len, passwd_to_key,
-		  user,instance,realm,password,old_key);
+   krb_mk_preauth(&preauth_p, &preauth_len, (key_proc_type)passwd_to_key,
+		  user, instance, realm, password, old_key);
    ret_st = krb_get_in_tkt_preauth(user,instance,realm,service,sinstance,life,
 				   (key_proc_type) stub_key,
 				   (decrypt_tkt_type) NULL, password,

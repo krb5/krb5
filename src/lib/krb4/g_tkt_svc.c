@@ -102,16 +102,16 @@ CredIsExpired( cr )
  * to get a new TGT.
  */ 
 
-int INTERFACE
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_get_ticket_for_service (serviceName, buf, buflen, checksum, sessionKey,
 		schedule, version, includeVersion)
-	char *serviceName;
-	char *buf;
-	unsigned KRB4_32 *buflen;
+	char FAR *serviceName;
+	char FAR *buf;
+	unsigned KRB4_32 FAR *buflen;
 	int checksum;
 	des_cblock sessionKey;
 	Key_schedule schedule;
-	char *version;
+	char FAR *version;
 	int includeVersion;
 {
 	char service[SNAME_SZ];

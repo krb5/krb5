@@ -11,13 +11,12 @@
 #include "mit-copyright.h"
 #include "krb.h"
 #include <stdio.h>
-#include <sys/file.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #ifdef TKT_SHMEM
 #include <sys/param.h>
 #endif
 #include <errno.h>
-#include <fcntl.h>
 
 #ifndef O_SYNC
 #define O_SYNC 0
@@ -32,6 +31,7 @@
  * The ticket file (TKT_FILE) is defined in "krb.h".
  */
 
+KRB5_DLLIMP int KRB5_CALLCONV
 dest_tkt()
 {
     char *file = TKT_FILE;

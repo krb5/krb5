@@ -65,12 +65,12 @@ int private_msg_ver = KRB_PROT_VERSION;
  * information, MSG_DAT, is defined in "krb.h".
  */
 
-long INTERFACE
+KRB5_DLLIMP long KRB5_CALLCONV
 krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     u_char *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length; /* length of "in" msg */
     Key_schedule schedule;	/* precomputed key schedule */
-    C_Block *key;		/* encryption key for seed and ivec */
+    C_Block key;		/* encryption key for seed and ivec */
     struct sockaddr_in *sender;
     struct sockaddr_in *receiver;
     MSG_DAT *m_data;		/*various input/output data from msg */
@@ -113,8 +113,8 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
 
 #ifndef NOENCRYPTION
     /* pcbc decrypt, use key as ivec */
-    pcbc_encrypt((C_Block *) q,(C_Block *) q, (long) c_length,
-                 schedule,key,DECRYPT);
+    pcbc_encrypt((C_Block *)q, (C_Block *)q, (long)c_length,
+                 schedule, (C_Block *)key, DECRYPT);
 #endif
 
     /* safely get application data length */
@@ -206,7 +206,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
      * calculate the checksum of the length, sequence,
      * and input data, on the sending byte order!!
      */
-    calc_cksum = quad_cksum(q,NULL,p-q,0,key);
+    calc_cksum = quad_cksum(q, NULL, p-q, 0, key);
 
     DEB (("\ncalc_cksum = %u, received cksum = %u",
 	       calc_cksum, cksum));

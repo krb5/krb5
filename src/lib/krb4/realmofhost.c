@@ -10,6 +10,9 @@
  */
 
 #include "mit-copyright.h"
+#define	DEFINE_SOCKADDR		/* Ask for MAXHOSTNAMELEN */
+#include "krb.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -18,8 +21,6 @@
 #else
 extern char *malloc();
 #endif
-#define	DEFINE_SOCKADDR		/* Ask for MAXHOSTNAMELEN */
-#include "krb.h"
 
 /*
  * krb_realmofhost.
@@ -41,9 +42,9 @@ extern char *malloc();
 
 static char ret_realm[REALM_SZ+1];
 
-char * INTERFACE
+KRB5_DLLIMP char FAR * KRB5_CALLCONV
 krb_realmofhost(host)
-char *host;
+char FAR *host;
 {
 	char *domain;
 	FILE *trans_file;
