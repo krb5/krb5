@@ -24,8 +24,8 @@ all-windows::
 # Should only rebuild autoconf.h here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.
 autoconf.h: autoconf.stamp
-autoconf.stamp: $(srcdir)/autoconf.h.in config.status
-	$(SHELL) config.status
+autoconf.stamp: $(srcdir)/autoconf.h.in $(thisconfigdir)/config.status
+	(cd $(thisconfigdir) && $(SHELL) config.status)
 	touch autoconf.stamp
 
 depend::

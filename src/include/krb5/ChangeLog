@@ -1,3 +1,8 @@
+Tue Nov 17 15:39:32 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (autoconf.stamp): Fix up to deal with config.status
+	not being in the current directory anymore.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
