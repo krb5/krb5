@@ -1,5 +1,7 @@
 Fri May  5 01:50:08 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* patchlevel.h: Update patchlevel for BETA 5 release
+
 	* Makefile.in: Remove all files in ZIPCLEANUP after building
 		kerbsrc.zip.  This keeps the source directory clean after
 		building a Windows source distribution.
