@@ -1,3 +1,8 @@
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpd.c: Include gssapi/gssapi_krb5.h for gss_krb5_copy_ccache
+	prototype. Provide prototype for yyparse.
+
 2001-06-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftpcmd.y: Cleanup potential ambiguity between comparsion and

@@ -118,6 +118,7 @@ extern char *sys_errlist[];
 
 extern char *mktemp ();
 char *ftpusers;
+extern int yyparse(void);
 
 #include <k5-util.h>
 
@@ -137,6 +138,7 @@ static char *krb4_services[] = { "ftp", "rcmd", NULL };
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
+#include <gssapi/gssapi_krb5.h>
 gss_ctx_id_t gcontext;
 gss_buffer_desc client_name;
 static char *gss_services[] = { "ftp", "host", NULL };
