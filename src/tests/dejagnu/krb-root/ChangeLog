@@ -1,0 +1,4 @@
+Fri Nov 10 21:15:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* telnet.exp: Comment out encrypted telnet tests.
+
