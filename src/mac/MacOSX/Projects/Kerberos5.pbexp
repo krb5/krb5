@@ -84,13 +84,13 @@
     _krb5_cc_copy_creds
 #
 # Keytab interface (add macros)
-#    _krb5_kt_get_type
-#    _krb5_kt_get_name
-#    _krb5_kt_close
-#    _krb5_kt_get_entry
-#    _krb5_kt_start_seq_get
-#    _krb5_kt_next_entry
-#    _krb5_kt_end_seq_get
+    _krb5_kt_get_type
+    _krb5_kt_get_name
+    _krb5_kt_close
+    _krb5_kt_get_entry
+    _krb5_kt_start_seq_get
+    _krb5_kt_next_entry
+    _krb5_kt_end_seq_get
 #    
 	_krb5_kt_resolve
     _krb5_kt_default_name
@@ -190,6 +190,7 @@
 	_krb5_free_checksum
     _krb5_free_checksum_contents
 #
+    _krb5_init_keyblock
 	_krb5_copy_keyblock
 	_krb5_copy_keyblock_contents
 	_krb5_free_keyblock
