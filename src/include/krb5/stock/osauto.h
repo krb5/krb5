@@ -35,12 +35,4 @@
 #include "autoconf.h"
 #endif
 
-#ifdef USE_SYS_TIME_H
-#ifdef TIME_WITH_SYS_TIME
-#define USE_TIME_H
-#endif /* TIME_WITH_SYS_TIME */
-#else /* !USE_SYS_TIME_H */
-#define USE_TIME_H
-#endif /* USE_SYS_TIME_H */
-
 /* remainder added on */

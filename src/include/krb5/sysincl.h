@@ -36,11 +36,13 @@
 #endif /* KRB5_SYSTYPES__ */
 
 #include <krb5/osconf.h>		/* USE*TIME_H macros */
-#ifdef USE_TIME_H
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
 #include <time.h>
 #endif
-#ifdef USE_SYS_TIME_H
-#include <sys/time.h>			/* struct timeval, utimes() */
+#else
+#include <time.h>
 #endif
 #include <sys/stat.h>			/* struct stat, stat() */
 #include <sys/param.h>			/* MAXPATHLEN */

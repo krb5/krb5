@@ -27,4 +27,4 @@
 #undef HAS_UNISTD_H
 #undef KRB5_USE_INET
 #undef ODBM
-#undef USE_SYS_TIME_H
+#undef TM_IN_SYS_TIME

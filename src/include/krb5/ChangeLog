@@ -1,3 +1,11 @@
+Tue Aug 16 22:01:56 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: change test for USE_SYS_TIME_H to consistent
+	(autoconf style) check for HAVE_SYS_TIME_H with
+	TIME_WITH_SYS_TIME, and use them everywhere.
+	* stock/osauto.h: get rid of USE_TIME_H.
+	* stock/osconf.h: get rid of USE_TIME_H, rename USE_SYS_TIME_H.
+
 Tue Aug  9 02:17:40 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* preauth.h: fix preauth function names as well (timestamp ->
