@@ -57,15 +57,15 @@ static char rcsid_get_in_tkt_c[] =
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
-typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_keytype,
+typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
 						   krb5_keyblock **,
 						   krb5_pointer ));
-typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_keyblock *,
-						       krb5_pointer,
+typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
+						       const krb5_pointer,
 						       krb5_kdc_rep * ));
 krb5_error_code
 krb5_get_in_tkt(DECLARG(const krb5_flags, options),
-		DECLARG(const krb5_address **, addrs),
+		DECLARG(krb5_address * const *, addrs),
 		DECLARG(const krb5_enctype, etype),
 		DECLARG(const krb5_keytype, keytype),
 		DECLARG(git_key_proc, key_proc),
@@ -75,7 +75,7 @@ krb5_get_in_tkt(DECLARG(const krb5_flags, options),
 		DECLARG(krb5_creds *, creds),
 		DECLARG(krb5_ccache, ccache))
 OLDDECLARG(const krb5_flags, options)
-OLDDECLARG(const krb5_address **, addrs)
+OLDDECLARG(krb5_address * const *, addrs)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(git_key_proc, key_proc)
@@ -101,7 +101,7 @@ OLDDECLARG(krb5_ccache, ccache)
     request.rtime = creds->times.renew_till;
     request.etype = etype;
     request.client = creds->client;
-    request.addresses = addrs;
+    request.addresses = (krb5_address **) addrs;
     request.server = creds->server;
 
     /* encode & send to KDC */
