@@ -1,3 +1,7 @@
+Thu Oct 17 18:28:36 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* qualname.plin: Downcase the FQDN for keytab use. [krb5-libs/116]
+
 Tue Oct 15 18:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* env-setup.shin: Support for build tree shared library

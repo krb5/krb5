@@ -14,5 +14,7 @@ if (! ($qualname = (gethostbyaddr($addr,$type))[0])) {
     print STDERR "No address information for host $hostname\n";
     exit(1);
 }
+
+$qualname =~ tr/A-Z/a-z/;	# lowercase our name for keytab use.
 print "$qualname\n";
 
