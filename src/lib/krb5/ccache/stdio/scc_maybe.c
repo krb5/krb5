@@ -17,7 +17,14 @@ static char rcsid_scc_maybe_c[] =
 #endif	/* !lint & !SABER */
 
 #include "scc.h"
-#include <netinet/in.h>			/* XXX ip only? */
+#include <krb5/osconf.h>
+
+#ifdef KRB5_USE_INET
+#include <netinet/in.h>
+#else
+ #error find some way to use net-byte-order file version numbers.
+#endif
+
 #include <krb5/libos.h>
 #include <krb5/los-proto.h>
 
@@ -30,9 +37,8 @@ krb5_scc_close_file (id)
      krb5_error_code retval;
 
      data = (krb5_scc_data *) id->data;
-     if (data->file == (FILE *) NULL) {
-	 abort ();
-     }
+     if (data->file == (FILE *) NULL)
+	 return KRB5_FCC_INTERNAL;
 #ifdef ultrix
      errno = 0;
 #endif
