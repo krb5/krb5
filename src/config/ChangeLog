@@ -1,6 +1,6 @@
 Wed Sep 27 00:51:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
-	* winexclude.sed: New file, used for generated DOS zip files.
+	* winexclude.sed: New file, used for generating DOS zip files.
 
 Mon Sep 25 13:09:17 1995  Theodore Y. Ts'o  <tytso@dcl>
 
