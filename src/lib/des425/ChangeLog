@@ -1,3 +1,11 @@
+Wed Aug  7 12:50:36 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* new_rnd_key.c (des_set_sequence_number): Change cast to
+		krb5_octet to char *. 
+
+	* des.c (des_ecb_encrypt): Add const keyword in cast to make
+		suncc happy.   
+
 Tue May 21 20:42:16 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (check-unix): Use KRB5_RUN_FLAGS

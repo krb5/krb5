@@ -132,6 +132,6 @@ des_set_sequence_number(new_sequence_number)
     krb5_data sequence;
 
     sequence.length = sizeof(new_sequence_number);
-    sequence.data = (krb5_octet *)new_sequence_number;
+    sequence.data = (char FAR *)new_sequence_number;
     mit_des_set_random_sequence_number(&sequence, des425_random_state);
 }
