@@ -40,6 +40,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
 #include <sys/errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <gssrpc/rpc.h>
 
 /*
  * Bind a socket to a privileged IP port

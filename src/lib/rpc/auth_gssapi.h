@@ -77,9 +77,10 @@ typedef void (*auth_gssapi_log_miscerr_func)
 		char *error,
 		caddr_t data));
 
-bool_t xdr_authgssapi_creds();
-bool_t xdr_authgssapi_init_arg();
-bool_t xdr_authgssapi_init_res();
+bool_t xdr_gss_buf(XDR *, gss_buffer_t);
+bool_t xdr_authgssapi_creds(XDR *, auth_gssapi_creds *);
+bool_t xdr_authgssapi_init_arg(XDR *, auth_gssapi_init_arg *);
+bool_t xdr_authgssapi_init_res(XDR *, auth_gssapi_init_res *);
 
 bool_t auth_gssapi_wrap_data
 PROTOTYPE((OM_uint32 *major, OM_uint32 *minor,

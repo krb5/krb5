@@ -56,11 +56,11 @@ static char sccsid[] = "@(#)auth_unix.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 /*
  * Unix authenticator operations vector
  */
-static void	authunix_nextverf();
-static bool_t	authunix_marshal();
-static bool_t	authunix_validate();
-static bool_t	authunix_refresh();
-static void	authunix_destroy();
+static void	authunix_nextverf(AUTH *);
+static bool_t	authunix_marshal(AUTH *, XDR *);
+static bool_t	authunix_validate(AUTH *, struct opaque_auth *);
+static bool_t	authunix_refresh(AUTH *, struct rpc_msg *);
+static void	authunix_destroy(AUTH *);
 
 static struct auth_ops auth_unix_ops = {
 	authunix_nextverf,
@@ -84,7 +84,7 @@ struct audata {
 };
 #define	AUTH_PRIVATE(auth)	((struct audata *)auth->ah_private)
 
-static void marshal_new_auth();
+static void marshal_new_auth(AUTH *);
 
 
 /*
@@ -212,14 +212,14 @@ authunix_marshal(auth, xdrs)
 static bool_t
 authunix_validate(auth, verf)
 	register AUTH *auth;
-	struct opaque_auth verf;
+	struct opaque_auth *verf;
 {
 	register struct audata *au;
 	XDR xdrs;
 
-	if (verf.oa_flavor == AUTH_SHORT) {
+	if (verf->oa_flavor == AUTH_SHORT) {
 		au = AUTH_PRIVATE(auth);
-		xdrmem_create(&xdrs, verf.oa_base, verf.oa_length, XDR_DECODE);
+		xdrmem_create(&xdrs, verf->oa_base, verf->oa_length, XDR_DECODE);
 
 		if (au->au_shcred.oa_base != NULL) {
 			mem_free(au->au_shcred.oa_base,
@@ -240,8 +240,9 @@ authunix_validate(auth, verf)
 }
 
 static bool_t
-authunix_refresh(auth)
+authunix_refresh(auth, msg)
 	register AUTH *auth;
+	struct rpc_msg *msg;
 {
 	register struct audata *au = AUTH_PRIVATE(auth);
 	struct authunix_parms aup;

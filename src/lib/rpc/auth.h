@@ -90,18 +90,29 @@ struct opaque_auth {
 /*
  * Auth handle, interface to client side authenticators.
  */
-typedef struct {
+struct rpc_msg;
+
+typedef struct __rpc_auth {
 	struct	opaque_auth	ah_cred;
 	struct	opaque_auth	ah_verf;
 	union	des_block	ah_key;
 	struct auth_ops {
-		void	(*ah_nextverf)();
-		int	(*ah_marshal)();	/* nextverf & serialize */
-		int	(*ah_validate)();	/* validate varifier */
-		int	(*ah_refresh)();	/* refresh credentials */
-		void	(*ah_destroy)();	/* destroy this structure */
-		int     (*ah_wrap)();		/* encode data for wire */
-		int	(*ah_unwrap)();		/* decode data from wire */
+		void	(*ah_nextverf)(struct __rpc_auth *);
+	        /* nextverf & serialize */
+		int	(*ah_marshal)(struct __rpc_auth *, XDR *);
+	        /* validate varifier */
+		int	(*ah_validate)(struct __rpc_auth *,
+				       struct opaque_auth *);
+	        /* refresh credentials */
+		int	(*ah_refresh)(struct __rpc_auth *, struct rpc_msg *);
+	        /* destroy this structure */
+		void	(*ah_destroy)(struct __rpc_auth *);
+		/* encode data for wire */
+		int     (*ah_wrap)(struct __rpc_auth *, XDR *, 
+				   xdrproc_t, caddr_t);
+	        /* decode data from wire */
+  	        int	(*ah_unwrap)(struct __rpc_auth *, XDR *, 
+				     xdrproc_t, caddr_t);	
 	} *ah_ops;
 	caddr_t ah_private;
 } AUTH;
@@ -138,13 +149,13 @@ typedef struct {
 #define AUTH_WRAP(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_wrap))(auth, xdrs, \
 					      xfunc, xwhere))
-#define AUTH_WRAP(auth, xdrs, xfunc, xwhere)		\
+#define AUTH_wrap(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_wrap))(auth, xdrs, \
 					      xfunc, xwhere))
 #define AUTH_UNWRAP(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_unwrap))(auth, xdrs, \
 					      xfunc, xwhere))
-#define AUTH_UNWRAP(auth, xdrs, xfunc, xwhere)		\
+#define AUTH_unwrap(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_unwrap))(auth, xdrs, \
 					      xfunc, xwhere))
 
@@ -170,7 +181,7 @@ extern struct opaque_auth _null_auth;
 #define authany_wrap	gssrpc_authany_wrap
 #define authany_unwrap	gssrpc_authany_unwrap
 
-int authany_wrap(), authany_unwrap();
+int authany_wrap(AUTH *, XDR *, xdrproc_t, caddr_t), authany_unwrap();
 	
 /*
  * Unix style authentication

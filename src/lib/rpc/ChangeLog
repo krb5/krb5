@@ -1,3 +1,23 @@
+2001-06-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* bindresvport.c: Include gssrpc/rpc.h for prototype.
+
+	* auth_unix.h: Expand prototype for xdr_authunix_params to include
+	arguments.
+
+	* auth_gssapi.h: Give full prototypes for xdr_gss_buf,
+	xdr_authgssapi_creds, xdr_authgssapi_init_arg and
+	xdr_authgssapi_init_res.
+
+	* auth_gssapi.c, auth_none.c, auth_unix.c: For struct AUTH
+	disptach functions, provide full prototypes and ensure consistant
+	usage in functions
+
+	* auth.h: Provide prototypes dispatch functions in struct
+	AUTH. Give a forward declaration of struct rpc_msg. Change
+	duplicate definitions of AUTH_WRAP and AUTH_UNWRAP into auth_wrap
+	and auth_unwrap. Give full prototype for authany_wrap.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* svc_simple.c (universal): Change transp to s_transp to not

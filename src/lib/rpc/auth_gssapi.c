@@ -32,15 +32,15 @@ int auth_debug_gssapi = DEBUG_GSSAPI;
 #define AUTH_GSSAPI_DISPLAY_STATUS(args)
 #endif
    
-static void 	auth_gssapi_nextverf();
-static bool_t 	auth_gssapi_marshall();
-static bool_t	auth_gssapi_validate();
-static bool_t	auth_gssapi_refresh();
-static bool_t	auth_gssapi_wrap();
-static bool_t	auth_gssapi_unwrap();
-static void	auth_gssapi_destroy();
+static void 	auth_gssapi_nextverf(AUTH *);
+static bool_t 	auth_gssapi_marshall(AUTH *, XDR *);
+static bool_t	auth_gssapi_validate(AUTH *, struct opaque_auth *);
+static bool_t	auth_gssapi_refresh(AUTH *, struct rpc_msg *);
+static bool_t	auth_gssapi_wrap(AUTH *, XDR *, xdrproc_t, caddr_t);
+static bool_t	auth_gssapi_unwrap(AUTH *, XDR *, xdrproc_t, caddr_t);
+static void	auth_gssapi_destroy(AUTH *);
    
-static bool_t	marshall_new_creds();
+static bool_t	marshall_new_creds(AUTH *, bool_t, gss_buffer_t);
 
 static struct auth_ops auth_gssapi_ops = {
      auth_gssapi_nextverf,
@@ -537,8 +537,8 @@ static bool_t marshall_new_creds(auth, auth_msg, client_handle)
  *
  * Effects: None.  Never called.
  */
-static void auth_gssapi_nextverf(/*auth*/)
-   /*AUTH *auth;*/
+static void auth_gssapi_nextverf(auth)
+   AUTH *auth;
 {
 }
 

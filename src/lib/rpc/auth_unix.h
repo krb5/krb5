@@ -61,7 +61,7 @@ struct authunix_parms {
 };
 
 #define xdr_authunix_parms	gssrpc_xdr_authunix_parms
-extern bool_t xdr_authunix_parms();
+extern bool_t xdr_authunix_parms(XDR *, struct authunix_parms *);
 
 /* 
  * If a response verifier has flavor AUTH_SHORT, 
