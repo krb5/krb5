@@ -1,3 +1,14 @@
+2002-04-02  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Allow override of KRB5_PRIVATE and KRB5_DEPRECATED on
+	compiler command line.  Make KRB5INT_BEGIN_DECLS and
+	KRB5INT_END_DECLS macros for C++ to keep indentation happy.  Make
+	krb5_{enc_priv_part,priv,safe} private.  Make most of rcache
+	functions and structs private.  Hide keytab structs if
+	KRB5_KEYTAB_ACCESSOR_FUNCTIONS is true.
+	(krb5_auth_con_getcksumtype): Remove declaration for unimplemented
+	function.
+
 2002-04-02  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.hin: Merge krb5_init_keyblock from mainline
