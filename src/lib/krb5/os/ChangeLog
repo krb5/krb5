@@ -21,6 +21,11 @@
 
     * accessor.c: Add new functions for use by gssapi
 
+2003-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (krb5_aname_to_localname): Don't write one byte past
+	the end of a string.  Found by Christopher Nebergall.
+
 2003-10-27  Jeffrey Altman <jaltman@mit.edu>
 
     * sendto_kdc.c: sockets must be closed with closesocket() and 
