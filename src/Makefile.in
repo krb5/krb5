@@ -9,8 +9,6 @@ all-unix::
 
 all-mac::
 
-all-: all-windows
-
 LIBCMD = lib
 all-windows:: makefile-windows
 	@echo Making in include
@@ -204,20 +202,6 @@ MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 
-WINEXCLUDE= LIB/KRB5.SAB \
-	INCLUDE/KRB5/AUTOCONF.H \
-	LIB/CRYPTO/MD4/T_MDDRIV LIB/CRYPTO/MD5/T_MDDRIV \
-	UTIL/PROFILE/TEST_PAR UTIL/PROFILE/TEST_PRO \
-	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO WINDOWS/GSS/*.ICO \
-	*.O *.A *.ZIP *.TAR
-
-NTEXCLUDE= ./lib/krb5.sab \
-	./include/krb5/autoconf.h \
-	./lib/crypto/md4/t_mddriv ./lib/crypto/md5/t_mddriv \
-	./util/profile/test_par ./util/profile/test_pro \
-	windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico \
-	./*.zip ./*.tar
-
 CLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
 	lib/krb5/error_tables/asn1_err.c lib/krb5/error_tables/kdb5_err.c \
 	lib/krb5/error_tables/krb5_err.c lib/krb5/error_tables/kv5m_err.c \
@@ -225,34 +209,52 @@ CLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
 	include/asn1_err.h include/kdb5_err.h \
 	include/krb5_err.h include/kv5m_err.h \
 	include/adm_err.h include/profile.h include/krb5.h \
+	include/krb5/osconf.h \
 	lib/gssapi/generic/gssapi_err_generic.[ch] \
-	lib/gssapi/krb5/gssapi_err_krb5.[ch]
+	lib/gssapi/krb5/gssapi_err_krb5.[ch] winfile.list macfile.list
 
 kerbsrc.win: kerbsrc.zip
 
-kerbsrc.zip: awk-windows-mac
-	rm -f Makefile.bak
-	mv Makefile Makefile.bak
-	cp Makefile.in Makefile
+winfile.list:
+	echo $(FILES) $(WINFILES) | tr ' ' \\012 | \
+		sed -f config/winexclude.sed > winfile.list
+
+macfile.list:
+	 find $(FILES) $(MACFILES) -prune -type f -print | \
+		sed -f config/winexclude.sed > macfile.list
+
+Makefile.sav:
+	rm -f Makefile.sav
+	mv Makefile Makefile.sav
+	cat config/windows.in Makefile.in > Makefile
+
+kerbsrc.zip: Makefile.sav awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
-	$(ZIP) -Dlk kerbsrc.zip $(FILES) $(WINFILES) -x $(WINEXCLUDE)
+	$(ZIP) -Dlk kerbsrc.zip `cat winfile.list`
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
-	mv Makefile.bak Makefile
+	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
-kerbsrc-nt.zip: awk-windows-mac
-	rm -f Makefile.bak
-	mv Makefile Makefile.bak
-	cp Makefile.in Makefile
+kerbsrc-nt.zip: Makefile.sav awk-windows-mac winfile.list
 	rm -f kerbsrc-nt.zip
-	$(ZIP) -Dl kerbsrc-nt.zip $(FILES) $(WINFILES) -x $(NTEXCLUDE)
+	$(ZIP) -Dl kerbsrc-nt.zip `cat winfile.list`
 	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
-	mv Makefile.bak Makefile
+	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
-kerbsrc.mac: awk-windows-mac
+dos-zipfiles: Makefile.sav awk-windows-mac winfile.list
+	rm -f kerbsrc.zip
+	$(ZIP) -Dlk kerbsrc.zip `cat winfile.list`
+	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
+	rm -f kerbsrc-nt.zip
+	$(ZIP) -Dl kerbsrc-nt.zip `cat winfile.list`
+	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
+	mv Makefile.sav Makefile
+	rm -f $(CLEANUP)
+
+kerbsrc.mac: macfile.list awk-windows-mac
 	cp mac/libraries/autoconf.h include/autoconf.h
-	tar cvf kerbsrc.tar `find $(FILES) $(MACFILES) -prune -type f -print | grep -v kerbsrc`
+	tar cvf kerbsrc.tar include/autoconf.h `cat macfile.list`
 	rm -f $(CLEANUP)
 	rm -f include/autoconf.h
 
@@ -289,3 +291,4 @@ awk-windows-mac:
 	gawk -f $(AC) outfile=$(PR)prof_err.c $(PR)prof_err.et
 	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
 	cp $(PR)profile.h include/profile.h
+	cp $(INC)/krb5/stock/osconf.h $(INC)/krb5
