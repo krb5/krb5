@@ -16,8 +16,14 @@ AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_HEADER_CHECK(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
 if test -z "$ac_sysv_termio"; then
-AC_COMPILE_CHECK([cc_t],[#include <termio.h>],
-[cc_t foo;],,AC_DEFINE(NO_CC_T))
+  AC_MSG_CHECKING([for cc_t in termio.h])
+  AC_CACHE_VAL(krb_cv_type_cc_t,
+  [AC_TRY_LINK([cc_t],[#include <termio.h>],
+  [cc_t foo;],krb_cv_type_cc_t=yes,krb_cv_type_cc_t=no)])
+  AC_MSG_RESULT($krb_cv_type_cc_t)
+  if test $krb_cv_type_cc_t = no; then
+    AC_DEFINE(NO_CC_T)
+  fi
 fi
 fi
 AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAS_GETTOS))
@@ -27,11 +33,13 @@ AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 AC_FUNC_CHECK(setupterm,AC_DEFINE(HAS_SETUPTERM))
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
-AC_FUNC_CHECK(sigprocmask,
-AC_COMPILE_CHECK([sigset_t],
-[#include <signal.h>],
-[sigset_t x],
-AC_DEFINE(POSIX_SIGNALS)))
+CHECK_SIGNALS
+WITH_KRB4
+AC_ARG_WITH([krb4],,dnl
+ADD_DEF(-DKRB4)
+K4LIB="$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a",
+K4LIB=)
+AC_SUBST(K4LIB)
 AC_CHECK_LIB(socket,main)
 AC_CHECK_LIB(nsl,main)
 V5_AC_OUTPUT_MAKEFILE

@@ -1,3 +1,15 @@
+Fri Nov 18 01:21:54 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install): install telnet man page.
+	(from Ted Lemon <mellon@ipd.wellsfargo.com>).
+
+Fri Nov 18 00:38:18 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in (LIBS): use WITH_KRB4, CHECK_SIGNALS, and cache
+	cc_t in termio.h check. (from epeisach)
+	* Makefile.in (K4LIB): set to @K4LIB@ instead of explicit setting.
+	(telnet): link with $(K4LIB). (from epeisach).
+
 Tue Nov  8 01:42:13 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* commands.c (EncryptList): Fix spelling typo.
