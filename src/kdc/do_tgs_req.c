@@ -23,11 +23,18 @@ static char rcsid_do_tgs_req_c[] =
 #include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
+#include <krb5/osconf.h>
 #include <errno.h>
 #include <com_err.h>
 
 #include <sys/types.h>
 #include <krb5/ext-proto.h>
+
+#include <syslog.h>
+#ifdef KRB5_USE_INET
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#endif
 
 #include "kdc_util.h"
 #include "policy.h"
@@ -61,16 +68,50 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     register krb5_real_tgs_req *realreq;
+    char *cname = 0, *sname = 0, *fromstring = 0;
+    krb5_last_req_entry *nolrarray[1];
+    krb5_address *noaddrarray[1];
+
+    if ((retval = decrypt_tgs_req(request, from))) {
+	if (!request->tgs_request2)
+	    return retval;
+	if (retval > ERROR_TABLE_BASE_krb5 &&
+	    retval < ERROR_TABLE_BASE_krb5 + 128) {
+	    /* protocol error */
+	    return(prepare_error_tgs(request->tgs_request2,
+				     retval - ERROR_TABLE_BASE_krb5,
+				     response));
+	} else
+	    return retval;
+    }
 	
     /* get ptr to real stuff */
     realreq = request->tgs_request2;
 
-    /* assume that we've already dealt with the AP_REQ header, so
+    /* we've already dealt with the AP_REQ header, so
        we can use request->header2 freely.
-       Also assume the encrypted part (if any) has been decrypted
-       with the session key.
-       
+       The encrypted part (if any) has been decrypted with the session key.
        */
+
+    /* short-hand name to avoid lots of dereferencing */
+    header_ticket = request->header2->ticket;
+
+    if (retval = krb5_unparse_name(header_ticket->enc_part2->client, &cname))
+	return(retval);
+    if (retval = krb5_unparse_name(realreq->server, &sname)) {
+	free(cname);
+	return(retval);
+    }
+#ifdef KRB5_USE_INET
+    if (from->address->addrtype == ADDRTYPE_INET)
+	fromstring = inet_ntoa(*(struct in_addr *)from->address->contents);
+#endif
+    if (!fromstring)
+	fromstring = "<unknown>";
+
+    syslog(LOG_INFO, "TGS_REQ: host %s, %s for %s", fromstring, cname, sname);
+    free(cname);
+    free(sname);
 
     second_ticket = 0;
 
@@ -107,6 +148,10 @@ krb5_data **response;			/* filled in with a response packet */
 
     if (isflagset(realreq->kdc_options, KDC_OPT_REUSE_SKEY)) {
 	/* decrypt second ticket, and examine */
+	if (!realreq->enc_part2) {
+	    cleanup();
+	    return(prepare_error_tgs(realreq, KDC_ERR_BADOPTION, response));
+	}
 	second_ticket = realreq->enc_part2->second_ticket;
 	if (retval = decrypt_second_ticket(second_ticket)) {
 	    cleanup();
@@ -145,13 +190,11 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.times.starttime = 0;
 
 
-    /* short-hand name to avoid lots of dereferencing */
-    header_ticket = request->header2->ticket;
-
     /* don't use new addresses unless forwarded, see below */
 
     enc_tkt_reply.caddrs = header_ticket->enc_part2->caddrs;
-    reply_encpart.caddrs = 0;
+    noaddrarray[0] = 0;
+    reply_encpart.caddrs = noaddrarray;
 
         /* It should be noted that local policy may affect the  */
         /* processing of any of these flags.  For example, some */
@@ -288,7 +331,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     /* assemble any authorization data */
-    if (realreq->enc_part2->authorization_data) {
+    if (realreq->enc_part2 && realreq->enc_part2->authorization_data) {
 	if (retval =
 	    concat_authorization_data(realreq->enc_part2->authorization_data,
 				      header_ticket->enc_part2->authorization_data, 
@@ -296,13 +339,15 @@ krb5_data **response;			/* filled in with a response packet */
 	    cleanup();
 	    return retval;
 	}
-    }
+    } else
+	enc_tkt_reply.authorization_data =
+	    header_ticket->enc_part2->authorization_data;
     enc_tkt_reply.session = session_key;
     enc_tkt_reply.client = header_ticket->enc_part2->client;
     enc_tkt_reply.transited = empty_string; /* equivalent of "" */
 
     /* realm compare is like strcmp, but knows how to deal with these args */
-    if (!realm_compare(realm_of_tgt(header_ticket),
+    if (realm_compare(realm_of_tgt(header_ticket),
 		       header_ticket->server)) {
 	/* tgt issued by local realm */
 	enc_tkt_reply.transited = header_ticket->enc_part2->transited;
@@ -330,6 +375,11 @@ krb5_data **response;			/* filled in with a response packet */
     ticket_reply.enc_part2 = &enc_tkt_reply;
     if (isflagset(realreq->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
 	if (!second_ticket) {
+	    if (!realreq->enc_part2) {
+		cleanup();
+		return(prepare_error_tgs(realreq, KDC_ERR_BADOPTION,
+					 response));
+	    }
 	    if 	(retval = decrypt_second_ticket(realreq->enc_part2->second_ticket)) {
 		cleanup();
 		return(retval);
@@ -378,7 +428,6 @@ krb5_data **response;			/* filled in with a response packet */
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
-    reply_encpart.last_req = 0;		/* XXX */
     reply_encpart.ctime = realreq->ctime;
 
     /* copy the time fields EXCEPT for authtime; it's location
@@ -386,7 +435,9 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.times = enc_tkt_reply.times;
     reply_encpart.times.authtime = kdc_time;
 
-    reply_encpart.last_req = 0;		/* XXX not available for TGS reqs */
+
+    nolrarray[0] = 0;
+    reply_encpart.last_req = nolrarray;	/* not available for TGS reqs */
     reply_encpart.key_exp = 0;		/* ditto */
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
