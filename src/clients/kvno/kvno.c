@@ -106,6 +106,7 @@ static void do_v4_kvno (int count, char *names[])
 	char name[ANAME_SZ], inst[INST_SZ], realm[REALM_SZ];
 	KTEXT_ST req;
 	CREDENTIALS creds;
+	*name = *inst = *realm = '\0';
 	err = kname_parse (name, inst, realm, names[i]);
 	if (err) {
 	    fprintf(stderr, "%s: error parsing name '%s': %s\n",
