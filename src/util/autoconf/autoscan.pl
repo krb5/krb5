@@ -1,4 +1,4 @@
-#!@PERL@
+#! @PERL@
 # autoscan - Create configure.scan (a preliminary configure.in) for a package.
 # Copyright (C) 1994 Free Software Foundation, Inc.
 

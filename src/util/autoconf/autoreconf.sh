@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # autoreconf - remake all Autoconf configure scripts in a directory tree
 # Copyright (C) 1994 Free Software Foundation, Inc.
 
@@ -111,7 +111,7 @@ while read dir; do
   test ! -f $aclocal && aclocal=
 
   if test $force = no && test -f configure &&
-    ls -Llt configure configure.in $aclocal | sed 1q |
+    ls -lt configure configure.in $aclocal | sed 1q |
       grep 'configure$' > /dev/null
   then
     :

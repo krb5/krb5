@@ -1,9 +1,12 @@
 This is Info file autoconf.info, produced by Makeinfo-1.55 from the
-input file ./autoconf.texi.
+input file autoconf.texi.
 
 START-INFO-DIR-ENTRY
 * Autoconf: (autoconf).         Create source code configuration scripts.
 END-INFO-DIR-ENTRY
+
+   Autoconf: Creating Automatic Configuration Scripts, by David
+MacKenzie.
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
@@ -24,6 +27,55 @@ permission notice identical to this one.
 manual into another language, under the above conditions for modified
 versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
+
+
+File: autoconf.info,  Node: Examining Libraries,  Next: Run Time,  Prev: Examining Syntax,  Up: Writing Tests
+
+Examining Libraries
+===================
+
+   To check for a library, a function, or a global variable, Autoconf
+`configure' scripts try to compile and link a small program that uses
+it.  This is unlike Metaconfig, which by default uses `nm' or `ar' on
+the C library to try to figure out which functions are available.
+Trying to link with the function is usually a more reliable approach
+because it avoids dealing with the variations in the options and output
+formats of `nm' and `ar' and in the location of the standard libraries.
+It also allows configuring for cross-compilation or checking a
+function's runtime behavior if needed.  On the other hand, it can be
+slower than scanning the libraries once.
+
+   A few systems have linkers that do not return a failure exit status
+when there are unresolved functions in the link.  This bug makes the
+configuration scripts produced by Autoconf unusable on those systems.
+However, some of them can be given options that make the exit status
+correct.  This is a problem that Autoconf does not currently handle
+automatically.  If users encounter this problem, they might be able to
+solve it by setting `LDFLAGS' in the environment to pass whatever
+options the linker needs (for example, `-Wl,-dn' on MIPS RISC/OS).
+
+   `AC_TRY_LINK' is used to compile test programs to test for functions
+and global variables.  It is also used (by `AC_CHECK_LIB') to check for
+libraries, by adding the library being checked for to `LIBS'
+temporarily and trying to link a small program.
+
+ - Macro: AC_TRY_LINK (INCLUDES, FUNCTION-BODY, ACTION-IF-FOUND [,
+          ACTION-IF-NOT-FOUND])
+     Create a test C program to see whether a function whose body
+     consists of FUNCTION-BODY can be compiled and linked; INCLUDES is
+     any `#include' statements needed by the code in FUNCTION-BODY.  If
+     the file compiles and links successfully, run shell commands
+     ACTION-IF-FOUND, otherwise run ACTION-IF-NOT-FOUND.  This macro
+     uses `CFLAGS' or `CXXFLAGS', `CPPFLAGS', `LDFLAGS', and `LIBS'
+     when compiling.
+
+ - Macro: AC_COMPILE_CHECK (ECHO-TEXT, INCLUDES, FUNCTION-BODY,
+          ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
+     This is an obsolete version of `AC_TRY_LINK', with the addition
+     that it prints `checking for ECHO-TEXT' to the standard output
+     first, if ECHO-TEXT is non-empty.  Use `AC_MSG_CHECKING' and
+     `AC_MSG_RESULT' instead to print messages (*note Printing
+     Messages::.).
 
 
 File: autoconf.info,  Node: Run Time,  Next: Portable Shell,  Prev: Examining Libraries,  Up: Writing Tests
@@ -184,7 +236,12 @@ advantage of features that were added after UNIX version 7, circa 1977.
 You should not use shell functions, aliases, negated character classes,
 or other features that are not found in all Bourne-compatible shells;
 restrict yourself to the lowest common denominator.  Even `unset' is
-not supported by all shells!
+not supported by all shells!  Also, include a space after the
+exclamation point in interpreter specifications, like this:
+     #! /usr/bin/perl
+   If you omit the space before the path, then 4.2BSD based systems
+(such as Sequent DYNIX) will ignore the line, because they interpret
+`#! /' as a 4-byte magic number.
 
    The set of external programs you should run in a `configure' script
 is fairly small.  *Note Utilities in Makefiles:
@@ -600,13 +657,13 @@ automatically.
  - Macro: AC_MSG_ERROR (ERROR-DESCRIPTION)
      Notify the user of an error that prevents `configure' from
      completing.  This macro prints an error message on the standard
-     error stream and exits `configure' with a nonzero status.
+     error output and exits `configure' with a nonzero status.
      eRROR-DESCRIPTION should be something like `invalid value $HOME
      for \$HOME'.
 
  - Macro: AC_MSG_WARN (PROBLEM-DESCRIPTION)
      Notify the `configure' user of a possible problem.  This macro
-     prints the message on the standard error stream; `configure'
+     prints the message on the standard error output; `configure'
      continues running afterward, so macros that call `AC_MSG_WARN'
      should provide a default (back-up) behavior for the situations
      they warn about.  PROBLEM-DESCRIPTION should be something like `ln
@@ -910,8 +967,8 @@ Manual Configuration
 
    A few kinds of features can't be guessed automatically by running
 test programs.  For example, the details of the object file format, or
-special options that need to be passed to the compiler or linker.  It is
-possible to check for such features using ad-hoc means, such as having
+special options that need to be passed to the compiler or linker.  You
+can check for such features using ad-hoc means, such as having
 `configure' check the output of the `uname' program, or looking for
 libraries that are unique to particular systems.  However, Autoconf
 provides a uniform method for handling unguessable features.
@@ -1053,6 +1110,10 @@ together, like in this fragment:
      `SRCDIR/config/${machine}.h', and `object.h', which is a link to
      `SRCDIR/config/${obj_format}.h'.
 
+   You can also use the host system type to find cross-compilation
+tools.  *Note Generic Programs::, for information about the
+`AC_CHECK_TOOL' macro which does that.
+
 
 File: autoconf.info,  Node: Site Configuration,  Next: Invoking configure,  Prev: Manual Configuration,  Up: Top
 
@@ -1102,16 +1163,19 @@ should call `AC_ARG_WITH' to detect whether the `configure' user asked
 to use it.  Whether each package is used or not by default, and which
 arguments are valid, is up to you.
 
- - Macro: AC_ARG_WITH (PACKAGE, HELP-STRING, ACTION-IF-TRUE [,
-          ACTION-IF-FALSE])
+ - Macro: AC_ARG_WITH (PACKAGE, HELP-STRING [, ACTION-IF-GIVEN [,
+          ACTION-IF-NOT-GIVEN]])
      If the user gave `configure' the option `--with-PACKAGE' or
-     `--without-PACKAGE', run shell commands ACTION-IF-TRUE.  Otherwise
-     run shell commands ACTION-IF-FALSE.  The name PACKAGE indicates
-     another software package that this program should work with.  It
-     should consist only of alphanumeric characters and dashes.
+     `--without-PACKAGE', run shell commands ACTION-IF-GIVEN.  If
+     neither option was given, run shell commands ACTION-IF-NOT-GIVEN.
+     The name PACKAGE indicates another software package that this
+     program should work with.  It should consist only of alphanumeric
+     characters and dashes.
 
      The option's argument is available to the shell commands
-     ACTION-IF-TRUE in the shell variable `withval'.
+     ACTION-IF-GIVEN in the shell variable `withval', which is actually
+     just the value of the shell variable `with_PACKAGE'; you may use
+     that variable instead, if you wish.
 
      The argument HELP-STRING is a description of the option which
      looks like this:
@@ -1122,77 +1186,7 @@ arguments are valid, is up to you.
      Avoid tabs in the help string.  You'll need to enclose it in `['
      and `]' in order to produce the leading spaces.
 
- - Macro: AC_WITH (PACKAGE, ACTION-IF-TRUE [, ACTION-IF-FALSE])
+ - Macro: AC_WITH (PACKAGE, ACTION-IF-GIVEN [, ACTION-IF-NOT-GIVEN])
      This is an obsolete version of `AC_ARG_WITH' that does not support
      providing a help string.
-
-
-File: autoconf.info,  Node: Package Options,  Next: Site Details,  Prev: External Software,  Up: Site Configuration
-
-Choosing Package Options
-========================
-
-   If a software package has optional compile-time features, the user
-can give `configure' command line options to specify whether to compile
-them.  The options have one of these forms:
-
-     --enable-FEATURE[=ARG]
-     --disable-FEATURE
-
-   These options allow users to choose which optional features to build
-and install.  `--enable-FEATURE' options should never make a feature
-behave differently or cause one feature to replace another.  They
-should only cause parts of the program to be built rather than left out.
-
-   The user can give an argument by following the feature name with `='
-and the argument.  Giving an argument of `no' requests that the feature
-*not* be made available.  A feature with an argument looks like
-`--enable-debug=stabs'.  If no argument is given, it defaults to `yes'.
-`--disable-FEATURE' is equivalent to `--enable-FEATURE=no'.
-
-   For each optional feature, `configure.in' should call
-`AC_ARG_ENABLE' to detect whether the `configure' user asked to include
-it.  Whether each feature is included or not by default, and which
-arguments are valid, is up to you.
-
- - Macro: AC_ARG_ENABLE (FEATURE, HELP-STRING, ACTION-IF-TRUE [,
-          ACTION-IF-FALSE])
-     If the user gave `configure' the option `--enable-FEATURE' or
-     `--disable-FEATURE', run shell commands ACTION-IF-TRUE.  Otherwise
-     run shell commands ACTION-IF-FALSE.  The name FEATURE indicates an
-     optional user-level facility.  It should consist only of
-     alphanumeric characters and dashes.
-
-     The option's argument is available to the shell commands
-     ACTION-IF-TRUE in the shell variable `enableval'.  The HELP-STRING
-     argument is like that of `AC_ARG_WITH' (*note External
-     Software::.).
-
- - Macro: AC_ENABLE (FEATURE, ACTION-IF-TRUE [, ACTION-IF-FALSE])
-     This is an obsolete version of `AC_ARG_ENABLE' that does not
-     support providing a help string.
-
-
-File: autoconf.info,  Node: Site Details,  Next: Transforming Names,  Prev: Package Options,  Up: Site Configuration
-
-Configuring Site Details
-========================
-
-   Some software packages require complex site-specific information.
-Some examples are host names to use for certain services, company
-names, and email addresses to contact.  Since some configuration
-scripts generated by Metaconfig ask for such information interactively,
-people sometimes wonder how to get that information in
-Autoconf-generated configuration scripts, which aren't interactive.
-
-   Such site configuration information should be put in a file that is
-edited *only by users*, not by programs.  The location of the file can
-either be based on the `prefix' variable, or be a standard location
-such as the user's home directory.  It could even be specified by an
-environment variable.  The programs should examine that file at run
-time, rather than at compile time.  That approach is more convenient
-for users and makes the configuration process simpler than getting the
-information while configuring.  *Note Variables for Installation
-Directories: (standards)Directory Variables, for more information on
-where to put data files.
 

@@ -1,6 +1,8 @@
 -*- outline -*-
 
-Things it might be nice to do someday:
+Things it might be nice to do someday.  I haven't evaluated all of
+these suggestions... their presence here doesn't imply my endorsement.
+-djm
 
 ------------------------------------------------------------------------------
 
@@ -66,7 +68,7 @@ Things it might be nice to do someday:
 
 * Mike Haertel's suggestions:
 
-** Provide files containing decls for alloca, strings, etc.
+** Provide header files containing decls for alloca, strings, etc.
 
 ** Cross compiling:
 
@@ -89,8 +91,275 @@ in a dnl comment.  (Seems to be hard.)
 
 ------------------------------------------------------------------------------
 
-* Look at user contributed macros: prototypes, IEEE double precision math, 
-shared libraries, various other things.
+* Look at user contributed macros:
+	prototypes
+	IEEE double precision math
+	shared libraries
+
+------------------------------------------------------------------------------
+
+For AC_TYPE_SIGNAL signal handlers, provide a way for code to know
+whether to do "return 0" or "return" (int vs void) to avoid compiler
+warnings.  (Roland McGrath)
+
+------------------------------------------------------------------------------
+
+In config.status comment, put the host/target/build types, if used.
+
+------------------------------------------------------------------------------
+
+Support a way of including makefile fragments that then have @var@
+substitutions done on them.
+
+------------------------------------------------------------------------------
+
+Have AC_CANONICAL_* cache the host/build/target types.
+
+------------------------------------------------------------------------------
+
+Look at contributions:
+	ac_include (Karl Berry)
+	aclocal.h tom@basil.icce.rug.NL (Tom R.Hageman)
+
+------------------------------------------------------------------------------
+
+     The argument HELP-STRING is a description of the option which
+     ...
+     Avoid tabs in the help string.  You'll need to enclose it in `['
+     and `]' in order to produce the leading spaces.
+
+Except that [...] is the convention for telling the user the default,
+So I guess a changequote(`,') or something would be in order in some cases.
+From: "K. Berry" <kb@cs.umb.edu>
+
+------------------------------------------------------------------------------
+
+I would find it a wonderful boon if config.log contained not just the
+output from the compilers, but also the invocation. Almost all
+the errors I've found are due to the wrong options getting passed for
+one reason or another.
+
+Saving the input test file(s) that failed would be useful, too.
+From: "K. Berry" <kb@cs.umb.edu>
+
+------------------------------------------------------------------------------
+
+The default of unlimited permission is fine, but there should be some easy
+way for configure to have copyright terms passed through from configure.in.
+Maybe AC_LICENSE([...]).
+From: roland@gnu.ai.mit.edu (Roland McGrath)
+
+------------------------------------------------------------------------------
+
+autoconf-2.1 AC_EGREP_HEADER does not work if [square brackets] 
+are used in the egrep pattern.  This makes egrep fairly useless to
+find, for example, a space or tab followed by something.
+
+Putting changequotes around the PATTERN parameter makes no difference.
+-Jim Avera (jima@netcom.com)
+
+------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([checking for ANSI #stringize])
+AC_REVISION([ #(@) revision 2.1 ])
+
+causes bogus code to be generated for whatever immediately follows.  The
+problem goes away if the '#' is removed.  Probably the macros are not
+disabling the m4 "comment" feature when processing user-supplied strings.
+-Jim Avera jima@netcom.com
+
+------------------------------------------------------------------------------
+
+on hal.gnu.ai.mit.edu, configure is getting the wrong answer for
+AC_CHECK_FUNCS(select).
+
+The problem here is that there's severe namespace pollution: when
+conftest.c includes <ctype.h> to pick up any __stub macro definitions,
+it's getting a prototype declaration for select(), which collides
+with the dummy declaration in conftest.c.  (The chain of includes
+is conftest.c -> <ctype.h> -> <sys/localedef.h> -> <sys/lc_core.h>
+-> <sys/types.h> -> <sys/select.h>.)
+
+	#define $ac_func __dummy_$ac_func
+	#include <ctype.h>
+	#undef $ac_func
+From: kwzh@gnu.ai.mit.edu (Karl Heuer)
+
+------------------------------------------------------------------------------
+
+put all the config.* stuff somewhere like config/?
+All these extraneous files sure clutter up a toplevel directory.
+From: "Randall S. Winchester" <rsw@eng.umd.edu>
+
+------------------------------------------------------------------------------
+
+It would be nice if I could (in the Makefile.in files) set
+the path to config.h. You have config.h ../config.h ../../config.h's all 
+over the place, in the findutils-4.1 directory.
+From: "Randall S. Winchester" <rsw@eng.umd.edu>
+
+------------------------------------------------------------------------------
+
+In libc and make in aclocal.m4 I have AC_CHECK_SYMBOL, which checks for
+sys_siglist et al.  Using AC_CHECK_FUNC doesn't work on some system that
+winds up caring that you reference it as a function and it is really a
+variable.  My version always declares the symbol as a char *[]; if that
+ends up a bad idea, we can have it take an arg with the C decl, but that is
+a bit verbose to write if it's actually superfluous.
+From Roland McGrath.
+[I'd call it AC_CHECK_VAR, I think. -djm]
+
+------------------------------------------------------------------------------
+
+In a future version (after 2.2), make AC_PROG_{CC,RANLIB,anything else}
+use AC_CHECK_TOOL.
+From Roland McGrath.
+
+------------------------------------------------------------------------------
+
+	ls -lt configure configure.in | sort
+doesn't work right if configure.in is from a symlink farm, where the
+symlink has either a timestamp of it's own, or under BSD 4.4, it has
+the timestamp of the current directory, neither of which
+helps. Changing it to
+	ls -Llt configure configure.in | sort
+works for me, though I don't know how portable that is
+_Mark_ <eichin@cygnus.com>
+
+------------------------------------------------------------------------------
+
+Here is the thing I would like the most;
+AC_PKG_WITH(PACKAGE, HELP_STRING, PACKAGE-ROOT, PACKAGE-LIBS, PACKAGE-DEFS,
+	PACKAGE-CCPFLAGS)
+like
+
+AC_PKG_WITH(kerberos,,/usr/local/athena,-lkrb -ldes,[KERBEROS KRB4 
+CRYPT],include)
+AC_PKG_WITH(hesiod,
+[if hesiod is not in kerberos-root add --with-hesiod-root=somewhere]
+,,-lhesiod,HESIOD,,)
+AC_PKG_WITH(glue,,,-lglue,GLUE,,)
+AC_PKG_WITH(bind,,/usr/local/bind, [lib/resolv.a lib/lib44bsd.a], ,include)
+After the apropriate checks, the existance of the paths, and libs and such
+LIBS=$LIBS $PKG-LIBS
+DEFS=$DEFS $PKG-DEFS
+CPPFLAGS=$PKG-CPPFLAGS $CPPFLAGS
+$PKG-ROOT=$PKG-ROOT
+The cppflags should reverse the order so that you can have;
+-I/usr/local/bind/include -I/usr/local/athena/include
+and
+-L/usr/local/athena/lib -lkrb -ldes /usr/local/bind/lib/libresolv.a
+as order matters.
+
+also an AC_PKG_CHK_HEADER
+and an AC_PKG_CHK_FUNCTION
+so one can give alternate paths to check for stuff ($PKG-ROOT/lib for 
+example)
+From: Randall Winchester
+
+------------------------------------------------------------------------------
+
+AC_C_CROSS assumes that configure was
+called like 'CC=target-gcc; ./configure'. I want to write a package
+that has target dependend libraries and host dependend tools. So I
+dont't like to lose the distinction between CC and [G]CC_FOR_TARGET. 
+AC_C_CROSS should check for equality of target and host.
+
+It would be great if 
+
+GCC_FOR_TARGET
+AR_FOR_TARGET
+RANLIB_FOR_TARGET
+
+would be set automatically if host != target.
+AC_LANG_CROSS_C would be nice too, to check header files
+etc. with GCC_FOR_TARGET instead of CC
+
+Here is one simple test
+
+if test "x$host" != "x$target"; then
+AC_PROGRAMS_CHECK(AR_FOR_TARGET, $target-ar, $target-ar, ar)
+AC_PROGRAMS_CHECK(RANLIB_FOR_TARGET, $target-ranlib, $target-ranlib, ranlib)
+AC_PROGRAMS_CHECK(GCC_FOR_TARGET, $target-gcc, $target-gcc, gcc)
+fi
+
+This could be improved to also look for gcc in PATH, but require the
+prefix to contain the target e.g.:
+
+target=m68k-coff -->GCC_FOR_TARGET = /usr/gnu/m68k-coff/bin/gcc
+
+From: nennker@cs.tu-berlin.DE (Axel Nennker)
+
+------------------------------------------------------------------------------
+
+The problem occurs with the following libc functions in SunOS 5.4:
+
+	fnmatch glob globfree regcomp regexec regerror regfree wordexp wordfree
+
+It also occurs with a bunch more libposix4 functions that most people
+probably aren't worried about yet, e.g. shm_open.
+
+All these functions fail with errno set to ENOSYS (89)
+``Operation not applicable''.
+
+Perhaps autoconf should have a
+specific macro for fnmatch, another for glob+globfree, another for
+regcomp+regexec+regerror+regfree, and another for wordexp+wordfree.
+This wouldn't solve the problem in general, but it should work for
+Solaris 2.4.  Or autoconf could limit itself to fnmatch and regcomp,
+the only two functions that I know have been a problem so far.
+
+From Paul Eggert.
+
+------------------------------------------------------------------------------
+
+Make easy macros for checking for X functions and libraries.
+
+------------------------------------------------------------------------------
+
+We probably shouldn't cache a path for INSTALL within a source
+directory, because that will break other packages using the cache if
+that directory is removed.
+
+------------------------------------------------------------------------------
+
+Document this trick:
+
+>> Half my time these days seems to be spent porting
+>> configure.in files to new OS releases.)  Alas, there doesn't seem to
+>> be any way to turn off caching (with a configure.in directive).
+
+define([AC_CACHE_LOAD], )dnl
+define([AC_CACHE_SAVE], )dnl
+AC_INIT(whatever)
+ ... rest of configure.in ...
+
+------------------------------------------------------------------------------
+
+Testing for ANSI header files (AC_HEADER_STDC) fails under linux when
+using the latest libraries (libc-4.6.30, at least libc-4.6.27 works
+ok) when LC_CTYPE is set to ISO-8859-1. The islower/toupper test
+reports errors.
+Anyway, adding a line like 
+if test "${LC_CTYPE+set}"   = set; then LC_CTYPE=C;   export LC_CTYPE;   fi
+to the configure script can solve the problem.
+From: tom@vlsivie.tuwien.ac.AT (Thomas Winder)
+
+------------------------------------------------------------------------------
+
+A number of people have tried to fix configuration problems by editing
+acconfig.h. (Despite comments at the top of the file.) I think they're
+confused because anything.h looks like a regular source file name.
+Maybe acconfig.h could be called acconfig.extra or something?
+From: kb@cs.umb.edu (K. Berry)
+
+------------------------------------------------------------------------------
+
+Using the macro AC_CHECK_LIB, if the library name contains a dot (which is
+the case of the library complib.sgimath on Irix 5.x) a syntax error occurs
+because the corresponding cache variable name contains a dot.
+Should dots be converted to underlines in variable names by autoconf?
+From: Frederic.DEvernay@sophia.inria.fr (Frederic Devernay)
 
 ------------------------------------------------------------------------------
 

@@ -55,10 +55,13 @@ Type @samp{make install} to install the programs and any data files and
 documentation.
 
 @item
-You can remove the program binaries and object files from the source
+You can remove the program binaries and object files from the source code
 directory by typing @samp{make clean}.  To also remove the files that
 @code{configure} created (so you can compile the package for a different
-kind of computer), type @samp{make distclean}.
+kind of computer), type @samp{make distclean}.  There is also a
+@samp{make maintainer-clean} target, but that is intended mainly for the
+package's developers.  If you use it, you may have to get all sorts of
+other programs in order to regenerate files that came with the distribution.
 @end enumerate
 
 @node Compilers and Options
@@ -79,17 +82,23 @@ Or on systems that have the @code{env} program, you can do it like this:
 env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
 @end example
 
-@node Build Directory
-@section Using a Different Build Directory
+@node Multiple Architectures
+@section Compiling For Multiple Architectures
 
-You can compile the package in a different directory from the one
-containing the source code.  Doing so allows you to compile it on more
-than one kind of computer at the same time.  To do this, you must use a
-version of @code{make} that supports the @code{VPATH} variable, such as
-GNU @code{make}.  @code{cd} to the directory where you want the object
-files and executables to go and run the @code{configure} script.
-@code{configure} automatically checks for the source code in the
-directory that @code{configure} is in and in @file{..}.
+You can compile the package for more than one kind of computer at the
+same time, by placing the object files for each architecture in their
+own directory.  To do this, you must use a version of @code{make} that
+supports the @code{VPATH} variable, such as GNU @code{make}.  @code{cd}
+to the directory where you want the object files and executables to go
+and run the @code{configure} script.  @code{configure} automatically
+checks for the source code in the directory that @code{configure} is in
+and in @file{..}.
+
+If you have to use a @code{make} that does not supports the @code{VPATH}
+variable, you have to compile the package for one architecture at a time
+in the source code directory.  After you have installed the package for
+one architecture, use @samp{make distclean} before reconfiguring for
+another architecture.
 
 @node Installation Names
 @section Installation Names
@@ -168,8 +177,8 @@ operates.
 
 @table @code
 @item --cache-file=@var{file}
-Save the results of the tests in @var{file} instead of
-@file{config.cache}.  Set @var{file} to @file{/dev/null} to disable
+Use and save the results of the tests in @var{file} instead of
+@file{./config.cache}.  Set @var{file} to @file{/dev/null} to disable
 caching, for debugging @code{configure}.
 
 @item --help

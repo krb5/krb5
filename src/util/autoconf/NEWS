@@ -1,3 +1,22 @@
+Major changes in release 2.4:
+
+* Fix a few bugs found by Emacs testers.
+
+Major changes in release 2.3:
+
+* Fix the cleanup trap in several ways.
+* Handle C compilers that are picky about option placement.
+* ifnames gets the version number from the right directory.
+
+Major changes in release 2.2:
+
+* The ifnames utility is much faster but requires a "new awk" interpreter.
+* AC_CHECK_LIB and AC_HAVE_LIBRARY check and add the new
+  library before existing libs, not after, in case it uses them.
+* New macros: AC_FUNC_GETPGRP, AC_CHECK_TOOL.
+* Lots of bug fixes.
+* Many additions to the TODO file :-)
+
 Major changes in release 2.1:
 
 * Fix C++ problems.
@@ -12,7 +31,7 @@ Thanks to everybody who's submitted changes and additions to Autoconf!
 I've incorporated many of them, and am still considering others for
 future releases -- but I didn't want to postpone this release indefinitely.
 
-Caution: don't indiscriminantly rebuild configure scripts with
+Caution: don't indiscriminately rebuild configure scripts with
 Autoconf version 2.  Some configure.in files need minor adjustments to
 work with it; the documentation has a chapter on upgrading.  A few
 configure.in files, including those for GNU Emacs and the GNU C

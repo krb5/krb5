@@ -1,5 +1,5 @@
-This is Info file ../standards.info, produced by Makeinfo-1.55 from the
-input file ../standards.texi.
+This is Info file standards.info, produced by Makeinfo-1.55 from the
+input file standards.texi.
 
 START-INFO-DIR-ENTRY
 * Standards: (standards).        GNU coding standards.
@@ -28,7 +28,7 @@ File: standards.info,  Node: Top,  Next: Preface,  Prev: (dir),  Up: (dir)
 Version
 *******
 
-   Last updated 21 September 1994.
+   Last updated 16 May 1995.
 
 * Menu:
 
@@ -43,7 +43,7 @@ Version
 * Formatting::			Formatting Your Source Code
 * Comments::			Commenting Your Work
 * Syntactic Conventions::	Clean Use of C Constructs
-* Names::			Naming Variables and Functions
+* Names::			Naming Variables, Functions and Files
 * Using Extensions::		Using Non-standard Features
 * System Functions::            Portability and "standard" library functions
 * Semantics::			Program Behavior for All Programs
@@ -74,8 +74,8 @@ suggested new wording for it; our time is limited.  We prefer a context
 diff to the `standards.texi' or `make-stds.texi' files, but if you
 don't have those files, please mail your suggestion anyway.
 
-   This release of the GNU Coding Standards was last updated 21
-September 1994.
+   This release of the GNU Coding Standards was last updated 16 May
+1995.
 
 
 File: standards.info,  Node: Reading Non-Free Code,  Next: Contributions,  Prev: Preface,  Up: Top
@@ -165,11 +165,11 @@ eliminate conceptual inconsistencies between different parts of a
 program; they can give you a history of how the conflicting concepts
 arose.
 
-   Use the Emacs command `M-x add-change' to start a new entry in the
-change log.  An entry should have an asterisk, the name of the changed
-file, and then in parentheses the name of the changed functions,
-variables or whatever, followed by a colon.  Then describe the changes
-you made to that function or variable.
+   Use the Emacs command `M-x add-change-log-entry' to start a new
+entry in the change log.  An entry should have an asterisk, the name of
+the changed file, and then in parentheses the name of the changed
+functions, variables or whatever, followed by a colon.  Then describe
+the changes you made to that function or variable.
 
    Separate unrelated entries with blank lines.  When two entries
 represent parts of the same change, so that they work together, then
@@ -408,6 +408,12 @@ Makefiles:
      there is a simple test to verify that a program is properly
      installed, this target should run that test.
 
+     If possible, write the `install' target rule so that it does not
+     modify anything in the directory where the program was built,
+     provided `make all' has just been done.  This is convenient for
+     building the program under one user name and installing it under
+     another.
+
      The commands should create all the directories in which files are
      to be installed, if they don't already exist.  This includes the
      directories specified as the values of the variables `prefix' and
@@ -446,6 +452,9 @@ Makefiles:
      create (but not the noninstalled files such as `make all' would
      create).
 
+     This rule should not modify the directories where compilation is
+     done, only the directories where files are installed.
+
 `clean'
      Delete all files from the current directory that are normally
      created by building the program.  Don't delete the files that
@@ -468,17 +477,32 @@ Makefiles:
      target for GCC does not delete `libgcc.a', because recompiling it
      is rarely necessary and takes a lot of time.
 
-`realclean'
-     Delete everything from the current directory that can be
+`maintainer-clean'
+     Delete almost everything from the current directory that can be
      reconstructed with this Makefile.  This typically includes
      everything deleted by `distclean', plus more: C source files
      produced by Bison, tags tables, Info files, and so on.
 
-     One exception, however: `make realclean' should not delete
-     `configure' even if `configure' can be remade using a rule in the
-     Makefile.  More generally, `make realclean' should not delete
-     anything that needs to exist in order to run `configure' and then
-     begin to build the program.
+     The reason we say "almost everything" is that `make
+     maintainer-clean' should not delete `configure' even if
+     `configure' can be remade using a rule in the Makefile.  More
+     generally, `make maintainer-clean' should not delete anything that
+     needs to exist in order to run `configure' and then begin to build
+     the program.  This is the only exception; `maintainer-clean' should
+     delete everything else that can be rebuilt.
+
+     The `maintainer-clean' is intended to be used by a maintainer of
+     the package, not by ordinary users.  You may need special tools to
+     reconstruct some of the files that `make maintainer-clean' deletes.
+     Since these files are normally included in the distribution, we
+     don't take care to make them easy to reconstruct.  If you find you
+     need to unpack the full distribution again, don't blame us.
+
+     To help make users aware of this, the commands for
+     `maintainer-clean' should start with these two:
+
+          @echo "This command is intended for maintainers to use;"
+          @echo "it deletes files that may require special tools to rebuild."
 
 `TAGS'
      Update a tags table for this program.
@@ -554,6 +578,9 @@ programs in which they are useful.
                                           $(libdir) $(infodir) \
                                           $(mandir)
 
+     This rule should not modify the directories where compilation is
+     done.  It should do nothing but create installation directories.
+
 
 File: standards.info,  Node: Command Variables,  Next: Directory Variables,  Prev: Standard Targets,  Up: Makefile Conventions
 
@@ -627,7 +654,9 @@ Variables for Installation Directories
 
    Installation directories should always be named by variables, so it
 is easy to install in a nonstandard place.  The standard names for these
-variables are as follows.
+variables are described below.  They are based on a standard filesystem
+layout; variants of it are used in SVR4, 4.4BSD, Linux, Ultrix v4, and
+other modern operating systems.
 
    These two variables set the root for the installation.  All the other
 installation directories should be subdirectories of one of these two,
@@ -636,7 +665,8 @@ and nothing should be directly installed into these two directories.
 `prefix'
      A prefix used in constructing the default values of the variables
      listed below.  The default value of `prefix' should be `/usr/local'
-     (at least for now).
+     When building the complete GNU system, the prefix will be empty and
+     `/usr' will be a symbolic link to `/'.
 
 `exec_prefix'
      A prefix used in constructing the default values of some of the
@@ -901,11 +931,10 @@ like this:
 
    The `configure' script needs to be able to decode all plausible
 alternatives for how to describe a machine.  Thus, `sun3-sunos4.1'
-would be a valid alias.  So would `sun3-bsd4.2', since SunOS is
-basically BSD and no other BSD system is used on a Sun.  For many
-programs, `vax-dec-ultrix' would be an alias for `vax-dec-bsd', simply
-because the differences between Ultrix and BSD are rarely noticeable,
-but a few programs might need to distinguish them.
+would be a valid alias.  For many programs, `vax-dec-ultrix' would be
+an alias for `vax-dec-bsd', simply because the differences between
+Ultrix and BSD are rarely noticeable, but a few programs might need to
+distinguish them.
 
    There is a shell script called `config.sub' that you can use as a
 subroutine to validate system types and canonicalize aliases.
@@ -1118,71 +1147,4 @@ but Emacs would mess it up:
 pages at logical places (but not within a function).  It does not matter
 just how long the pages are, since they do not have to fit on a printed
 page.  The formfeeds should appear alone on lines by themselves.
-
-
-File: standards.info,  Node: Comments,  Next: Syntactic Conventions,  Prev: Formatting,  Up: Top
-
-Commenting Your Work
-********************
-
-   Every program should start with a comment saying briefly what it is
-for.  Example: `fmt - filter for simple filling of text'.
-
-   Please put a comment on each function saying what the function does,
-what sorts of arguments it gets, and what the possible values of
-arguments mean and are used for.  It is not necessary to duplicate in
-words the meaning of the C argument declarations, if a C type is being
-used in its customary fashion.  If there is anything nonstandard about
-its use (such as an argument of type `char *' which is really the
-address of the second character of a string, not the first), or any
-possible values that would not work the way one would expect (such as,
-that strings containing newlines are not guaranteed to work), be sure
-to say so.
-
-   Also explain the significance of the return value, if there is one.
-
-   Please put two spaces after the end of a sentence in your comments,
-so that the Emacs sentence commands will work.  Also, please write
-complete sentences and capitalize the first word.  If a lower-case
-identifer comes at the beginning of a sentence, don't capitalize it!
-Changing the spelling makes it a different identifier.  If you don't
-like starting a sentence with a lower case letter, write the sentence
-differently (e.g., "The identifier lower-case is ...").
-
-   The comment on a function is much clearer if you use the argument
-names to speak about the argument values.  The variable name itself
-should be lower case, but write it in upper case when you are speaking
-about the value rather than the variable itself.  Thus, "the inode
-number NODE_NUM" rather than "an inode".
-
-   There is usually no purpose in restating the name of the function in
-the comment before it, because the reader can see that for himself.
-There might be an exception when the comment is so long that the
-function itself would be off the bottom of the screen.
-
-   There should be a comment on each static variable as well, like this:
-
-     /* Nonzero means truncate lines in the display;
-        zero means continue them.  */
-     int truncate_lines;
-
-   Every `#endif' should have a comment, except in the case of short
-conditionals (just a few lines) that are not nested.  The comment should
-state the condition of the conditional that is ending, *including its
-sense*.  `#else' should have a comment describing the condition *and
-sense* of the code that follows.  For example:
-
-     #ifdef foo
-       ...
-     #else /* not foo */
-       ...
-     #endif /* not foo */
-
-but, by contrast, write the comments this way for a `#ifndef':
-
-     #ifndef foo
-       ...
-     #else /* foo */
-       ...
-     #endif /* foo */
 

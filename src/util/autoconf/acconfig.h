@@ -25,7 +25,9 @@
 #undef C_ALLOCA
 
 /* Define if type char is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
 #undef __CHAR_UNSIGNED__
+#endif
 
 /* Define if the closedir function returns void instead of int.  */
 #undef CLOSEDIR_VOID
@@ -49,6 +51,9 @@
 
 /* Define if the `getloadavg' function needs to be run setuid or setgid.  */
 #undef GETLOADAVG_PRIVILEGED
+
+/* Define if the `getpgrp' function takes no argument.  */
+#undef GETPGRP_VOID
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef gid_t

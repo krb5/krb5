@@ -8,6 +8,7 @@ dnl their path, the installer can configure with a path that has GNU m4
 dnl first and get that path embedded in the installed autoconf and
 dnl autoheader scripts.
 AC_PATH_PROGS(M4, gm4 gnum4 m4, m4)
+AC_PROG_AWK
 
 dnl We use a path for perl so the #! line in autoscan will work.
 AC_PATH_PROG(PERL, perl, no)

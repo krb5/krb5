@@ -89,9 +89,9 @@ proc autoconf_load { args } {
     }
 
     # Capture only stderr in exec_output, not "creating Makefile" etc.
-    catch "exec $args >/dev/null" exec_output
+    catch "exec $args --cache=/dev/null >/dev/null" exec_output
     if $verbose>1 then {
-	send_user "Executed $args\n"
+	send_user "Executed $args --cache=/dev/null\n"
     }
     if ![string match "" $exec_output] then {
 	fail "$args, problem with executing"

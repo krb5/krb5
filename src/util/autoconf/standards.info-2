@@ -1,5 +1,5 @@
-This is Info file ../standards.info, produced by Makeinfo-1.55 from the
-input file ../standards.texi.
+This is Info file standards.info, produced by Makeinfo-1.55 from the
+input file standards.texi.
 
 START-INFO-DIR-ENTRY
 * Standards: (standards).        GNU coding standards.
@@ -21,6 +21,73 @@ permission notice identical to this one.
 manual into another language, under the above conditions for modified
 versions, except that this permission notice may be stated in a
 translation approved by the Free Software Foundation.
+
+
+File: standards.info,  Node: Comments,  Next: Syntactic Conventions,  Prev: Formatting,  Up: Top
+
+Commenting Your Work
+********************
+
+   Every program should start with a comment saying briefly what it is
+for.  Example: `fmt - filter for simple filling of text'.
+
+   Please put a comment on each function saying what the function does,
+what sorts of arguments it gets, and what the possible values of
+arguments mean and are used for.  It is not necessary to duplicate in
+words the meaning of the C argument declarations, if a C type is being
+used in its customary fashion.  If there is anything nonstandard about
+its use (such as an argument of type `char *' which is really the
+address of the second character of a string, not the first), or any
+possible values that would not work the way one would expect (such as,
+that strings containing newlines are not guaranteed to work), be sure
+to say so.
+
+   Also explain the significance of the return value, if there is one.
+
+   Please put two spaces after the end of a sentence in your comments,
+so that the Emacs sentence commands will work.  Also, please write
+complete sentences and capitalize the first word.  If a lower-case
+identifier comes at the beginning of a sentence, don't capitalize it!
+Changing the spelling makes it a different identifier.  If you don't
+like starting a sentence with a lower case letter, write the sentence
+differently (e.g., "The identifier lower-case is ...").
+
+   The comment on a function is much clearer if you use the argument
+names to speak about the argument values.  The variable name itself
+should be lower case, but write it in upper case when you are speaking
+about the value rather than the variable itself.  Thus, "the inode
+number NODE_NUM" rather than "an inode".
+
+   There is usually no purpose in restating the name of the function in
+the comment before it, because the reader can see that for himself.
+There might be an exception when the comment is so long that the
+function itself would be off the bottom of the screen.
+
+   There should be a comment on each static variable as well, like this:
+
+     /* Nonzero means truncate lines in the display;
+        zero means continue them.  */
+     int truncate_lines;
+
+   Every `#endif' should have a comment, except in the case of short
+conditionals (just a few lines) that are not nested.  The comment should
+state the condition of the conditional that is ending, *including its
+sense*.  `#else' should have a comment describing the condition *and
+sense* of the code that follows.  For example:
+
+     #ifdef foo
+       ...
+     #else /* not foo */
+       ...
+     #endif /* not foo */
+
+but, by contrast, write the comments this way for a `#ifndef':
+
+     #ifndef foo
+       ...
+     #else /* foo */
+       ...
+     #endif /* foo */
 
 
 File: standards.info,  Node: Syntactic Conventions,  Next: Names,  Prev: Comments,  Up: Top
@@ -130,8 +197,8 @@ pointer constant.
 
 File: standards.info,  Node: Names,  Next: Using Extensions,  Prev: Syntactic Conventions,  Up: Top
 
-Naming Variables and Functions
-******************************
+Naming Variables, Functions, and Files
+**************************************
 
    Please use underscores to separate words in a name, so that the Emacs
 word commands can be useful within them.  Stick to lower case; reserve
@@ -157,6 +224,14 @@ problems on System V.  You can use the program `doschk' to test for
 this.  `doschk' also tests for potential name conflicts if the files
 were loaded onto an MS-DOS file system--something you may or may not
 care about.
+
+   In general, use `-' to separate words in file names, not `_'.  Make
+all letters in file names be lower case, except when following specific
+conventions that call for upper case in certain kinds of names.
+Conventional occasions for using upper case letters in file names
+include `Makefile', `ChangeLog', `COPYING' and `README'.  It is common
+to name other `README'-like documentation files in all upper case just
+like `README'.
 
 
 File: standards.info,  Node: Using Extensions,  Next: System Functions,  Prev: Names,  Up: Top
@@ -310,9 +385,10 @@ Program Behavior for All Programs
 *********************************
 
    Avoid arbitrary limits on the length or number of *any* data
-structure, including filenames, lines, files, and symbols, by allocating
-all data structures dynamically.  In most Unix utilities, "long lines
-are silently truncated".  This is not acceptable in a GNU utility.
+structure, including file names, lines, files, and symbols, by
+allocating all data structures dynamically.  In most Unix utilities,
+"long lines are silently truncated".  This is not acceptable in a GNU
+utility.
 
    Utilities reading files should not drop NUL characters, or any other
 nonprinting characters *including those with codes above 0177*.  The
@@ -372,6 +448,12 @@ comments in the source.  The relevant data will be in variables, which
 are easy to examine with the debugger, so there is no point moving them
 elsewhere.
 
+   Do not use a count of errors as the exit status for a program.
+*That does not work*, because exit status values are limited to 8 bits
+(0 through 255).  A single run of the program might have 256 errors; if
+you try to return 256 as the exit status, the parent process will see 0
+as the status, and it will appear that the program succeeded.
+
 
 File: standards.info,  Node: Errors,  Next: Libraries,  Prev: Semantics,  Up: Top
 
@@ -401,8 +483,8 @@ input from a source other than a terminal, it is not interactive and
 would do best to print error messages using the noninteractive style.)
 
    The string MESSAGE should not begin with a capital letter when it
-follows a program name and/or filename.  Also, it should not end with a
-period.
+follows a program name and/or file name.  Also, it should not end with
+a period.
 
    Error messages from interactive programs, and other messages such as
 usage messages, should start with a capital letter.  But they should not
@@ -576,12 +658,6 @@ output and exits successfully.  These options should inhibit the normal
 function of the command; they should do nothing except print the
 requested information.
 
-`auto-check'
-     `-a' in `recode'.
-
-`auto-reference'
-     `-A' in `ptx'.
-
 `after-date'
      `-N' in `tar'.
 
@@ -609,14 +685,29 @@ requested information.
 `ascii'
      `-a' in `diff'.
 
+`assign'
+     `-v' in Gawk.
+
 `assume-new'
      `-W' in Make.
 
 `assume-old'
      `-o' in Make.
 
+`auto-check'
+     `-a' in `recode'.
+
+`auto-pager'
+     `-a' in `wdiff'.
+
+`auto-reference'
+     `-A' in `ptx'.
+
+`avoid-wraps'
+     `-n' in `wdiff'.
+
 `backward-search'
-     `-B' in etags.
+     `-B' in `ctags'.
 
 `basename'
      `-f' in `shar'.
@@ -675,6 +766,9 @@ requested information.
 `compare'
      `-d' in `tar'.
 
+`compat'
+     Used in gawk (no corresponding single-letter option).
+
 `compress'
      `-Z' in `tar' and `shar'.
 
@@ -687,8 +781,12 @@ requested information.
 `context'
      Used in `diff'.
 
+`copyleft'
+     Used in gawk (no corresponding single-letter option).
+
 `copyright'
-     `-C' in `ptx' and `recode'.
+     `-C' in `ptx', `recode', and `wdiff'.  Also used in gawk (no
+     corresponding single-letter option).
 
 `core'
      Used in GDB.
@@ -706,7 +804,7 @@ requested information.
      `-c' in `shar'.
 
 `cxref'
-     `-x' in `etags'.
+     `-x' in `ctags'.
 
 `date'
      `-d' in `touch'.
@@ -718,7 +816,7 @@ requested information.
      `-D' in `m4'.
 
 `defines'
-     `-d' in Bison and `etags'.
+     `-d' in Bison and `ctags'.
 
 `delete'
      `-D' in `tar'.
@@ -753,9 +851,6 @@ requested information.
 `discard-locals'
      `-X' in `strip'.
 
-`diversions'
-     `-N' in `m4'.
-
 `dry-run'
      `-n' in Make.
 
@@ -764,6 +859,12 @@ requested information.
 
 `elide-empty-files'
      `-z' in `csplit'.
+
+`end-delete'
+     `-x' in `wdiff'.
+
+`end-insert'
+     `-z' in `wdiff'.
 
 `entire-new-file'
      `-N' in `diff'.
@@ -819,9 +920,12 @@ requested information.
 `fatal-warnings'
      `-E' in `m4'.
 
+`field-separator'
+     p`-F' in Gawk.
+
 `file'
-     `-f' in `info', Make, `mt', and `tar'; `-n' in `sed'; `-r' in
-     `touch'.
+     `-f' in Gawk, `info', Make, `mt', and `tar'; `-n' in `sed'; `-r'
+     in `touch'.
 
 `file-prefix'
      `-b' in Bison.
@@ -856,8 +960,8 @@ requested information.
 `format'
      Used in `ls', `time', and `ptx'.
 
-`forward-search'
-     `-F' in `etags'.
+`freeze-state'
+     `-F' in `m4'.
 
 `fullname'
      Used in GDB.
@@ -917,7 +1021,7 @@ requested information.
      `-B' in `diff'.
 
 `ignore-case'
-     `-f' in `look' and `ptx'; `-i' in `diff'.
+     `-f' in `look' and `ptx'; `-i' in `diff' and `wdiff'.
 
 `ignore-errors'
      `-i' in Make.
@@ -926,7 +1030,7 @@ requested information.
      `-i' in `ptx'.
 
 `ignore-indentation'
-     `-S' in `etags'.
+     `-I' in `etags'.
 
 `ignore-init-file'
      `-f' in Oleo.
@@ -986,6 +1090,12 @@ requested information.
 `kilobytes'
      `-k' in `du' and `ls'.
 
+`language'
+     `-l' in `etags'.
+
+`less-mode'
+     `-l' in `wdiff'.
+
 `level-for-gzip'
      `-g' in `shar'.
 
@@ -997,6 +1107,9 @@ requested information.
 
 `link'
      `-l' in `cpio'.
+
+`lint'
+     Used in gawk (no corresponding single-letter option).
 
 `list'
      `-t' in `cpio'; `-l' in `recode'.
@@ -1089,14 +1202,23 @@ requested information.
 `no-check-existing'
      `-x' in `shar'.
 
+`no-common'
+     `-3' in `wdiff'.
+
 `no-create'
      `-c' in `touch'.
 
 `no-defines'
      `-D' in `etags'.
 
+`no-deleted'
+     `-1' in `wdiff'.
+
 `no-dereference'
      `-d' in `cp'.
+
+`no-inserted'
+     `-2' in `wdiff'.
 
 `no-keep-going'
      `-S' in Make.
@@ -1109,6 +1231,9 @@ requested information.
 
 `no-prof'
      `-e' in `gprof'.
+
+`no-regex'
+     `-R' in `etags'.
 
 `no-sort'
      `-p' in `nm'.
@@ -1127,9 +1252,6 @@ requested information.
 
 `no-validate'
      Used in Makeinfo.
-
-`no-verbose'
-     `-v' in `shar'.
 
 `no-warn'
      Used in various programs to inhibit warnings.
@@ -1218,6 +1340,9 @@ requested information.
 `portability'
      `-c' in `cpio' and `tar'.
 
+`posix'
+     Used in gawk (no corresponding single-letter option).
+
 `prefix-builtins'
      `-P' in `m4'.
 
@@ -1257,6 +1382,12 @@ requested information.
 `print-symdefs'
      `-s' in `nm'.
 
+`printer'
+     `-p' in `wdiff'.
+
+`prompt'
+     `-p' in `ed'.
+
 `query-user'
      `-X' in `shar'.
 
@@ -1266,6 +1397,9 @@ requested information.
 `quiet'
      Used in many programs to inhibit the usual output.  *Note:* every
      program accepting `--quiet' should accept `--silent' as a synonym.
+
+`quiet-unshar'
+     `-Q' in `shar'
 
 `quote-name'
      `-Q' in `ls'.
@@ -1295,10 +1429,13 @@ requested information.
      `-r' in `ptx'.
 
 `regex'
-     `-r' in `tac'.
+     `-r' in `tac' and `etags'.
 
 `release'
      `-r' in `uname'.
+
+`reload-state'
+     `-R' in `m4'.
 
 `relocation'
      `-r' in `objdump'.
@@ -1376,6 +1513,9 @@ requested information.
 `sort'
      Used in `ls'.
 
+`source'
+     Used in gawk (no corresponding single-letter option).
+
 `sparse'
      `-S' in `tar'.
 
@@ -1391,9 +1531,18 @@ requested information.
 `squeeze-blank'
      `-s' in `cat'.
 
+`start-delete'
+     `-w' in `wdiff'.
+
+`start-insert'
+     `-y' in `wdiff'.
+
 `starting-file'
      Used in `tar' and `diff' to specify which file within a directory
      to start processing with.
+
+`statistics'
+     `-s' in `wdiff'.
 
 `stdin-file-list'
      `-S' in `shar'.
@@ -1447,7 +1596,7 @@ requested information.
      `-T' in `ls'.
 
 `terminal'
-     `-T' in `tput' and `ul'.
+     `-T' in `tput' and `ul'.  `-t' in `wdiff'.
 
 `text'
      `-a' in `diff'.
@@ -1471,16 +1620,16 @@ requested information.
      `-t' in `m4'.
 
 `traditional'
-     `-t' in `hello'; `-G' in `m4' and `ptx'.
+     `-t' in `hello'; `-G' in `ed', `m4', and `ptx'.
 
 `tty'
      Used in GDB.
 
 `typedefs'
-     `-t' in `etags'.
+     `-t' in `ctags'.
 
 `typedefs-and-c++'
-     `-T' in `etags'.
+     `-T' in `ctags'.
 
 `typeset-mode'
      `-t' in `ptx'.
@@ -1498,7 +1647,10 @@ requested information.
      `-u' in `nm'.
 
 `update'
-     `-u' in `cp', `etags', `mv', `tar'.
+     `-u' in `cp', `ctags', `mv', `tar'.
+
+`usage'
+     Used in gawk (no corresponding single-letter option).
 
 `uuencode'
      `-B' in `shar'.
@@ -1519,7 +1671,7 @@ requested information.
      `-V' in `cp', `ln', `mv'.
 
 `vgrind'
-     `-v' in `etags'.
+     `-v' in `ctags'.
 
 `volume'
      `-V' in `tar'.
@@ -1548,24 +1700,68 @@ File: standards.info,  Node: Documentation,  Next: Releases,  Prev: User Interfa
 Documenting Programs
 ********************
 
-   Please use Texinfo for documenting GNU programs.  See the Texinfo
-manual, either the hardcopy or the version in the GNU Emacs Info
-subsystem (`C-h i').  See existing GNU Texinfo files (e.g., those under
-the `man/' directory in the GNU Emacs distribution) for examples.
+* Menu:
+
+* GNU Manuals::                 Writing proper manuals.
+* Manual Structure Details::    Specific structure conventions.
+* NEWS File::                   NEWS files supplement manuals.
+* Man Pages::                   Man pages are secondary.
+* Reading other Manuals::       How far you can go in learning
+                                  from other manuals.
+
+
+File: standards.info,  Node: GNU Manuals,  Next: Manual Structure Details,  Up: Documentation
+
+GNU Manuals
+===========
+
+   The preferred way to document part of the GNU system is to write a
+manual in the Texinfo formatting language.  See the Texinfo manual,
+either the hardcopy or the version in the Emacs Info subsystem (`C-h
+i').
+
+   The manual should document all of the program's command-line options
+and all of its commands.  It should give examples of their use.  But
+don't organize the manual as a list of features.  Instead, organize it
+logically, by subtopics.  Address the goals that a user will have in
+mind, and explain how to accomplish them.
+
+   In general, a GNU manual should serve both as tutorial and reference.
+It should be set up for convenient access to each topic through Info,
+and for reading straight through (appendixes aside).  A GNU manual
+should give a good introduction to a beginner reading through from the
+start, and should also provide all the details that hackers want.
+
+   That is not as hard as it sounds at first.  Arrange each chapter as a
+logical breakdown of its topic, but order the sections, and write their
+text, so that reading the chapter straight through makes sense.  Do
+likewise when structuring the book into chapters, and when structuring a
+section into paragraphs.  The watchword is, *at each point, address the
+most fundamental and important issue raised by the preceding text.*
+
+   If necessary, add extra chapters at the beginning of the manual which
+are purely tutorial and cover the basics of the subject.  These provide
+the framework for a beginner to understand the rest of the manual.  The
+Bison manual provides a good example of how to do this.
+
+   Don't use Unix man pages as a model for how to write GNU
+documentation; they are a bad example to follow.
+
+   Please do not use the term "pathname" that is used in Unix
+documentation; use "file name" (two words) instead.  We use the term
+"path" only for search paths, which are lists of file names.
+
+
+File: standards.info,  Node: Manual Structure Details,  Next: NEWS File,  Prev: GNU Manuals,  Up: Documentation
+
+Manual Structure Details
+========================
 
    The title page of the manual should state the version of the program
 which the manual applies to.  The Top node of the manual should also
 contain this information.  If the manual is changing more frequently
 than or independent of the program, also state a version number for the
 manual in both of these places.
-
-   The manual should document all command-line arguments and all
-commands.  It should give examples of their use.  But don't organize
-the manual as a list of features.  Instead, organize it by the concepts
-a user will have before reaching that point in the manual.  Address the
-goals that a user will have in mind, and explain how to accomplish
-them.  Don't use Unix man pages as a model for how to write GNU
-documentation; they are a bad example to follow.
 
    The manual should have a node named `PROGRAM Invocation' or
 `Invoking PROGRAM', where PROGRAM stands for the name of the program
@@ -1586,6 +1782,12 @@ quickly reading just this part of its manual.
    If one manual describes several programs, it should have such a node
 for each program described.
 
+
+File: standards.info,  Node: NEWS File,  Next: Man Pages,  Prev: Manual Structure Details,  Up: Documentation
+
+The NEWS File
+=============
+
    In addition to its manual, the package should have a file named
 `NEWS' which contains a list of user-visible changes worth mentioning.
 In each new release, add items to the front of the file and identify
@@ -1597,9 +1799,11 @@ previous version can see what is new.
 a file named `ONEWS' and put a note at the end referring the user to
 that file.
 
-   Please do not use the term "pathname" that is used in Unix
-documentation; use "file name" (two words) instead.  We use the term
-"path" only for search paths, which are lists of file names.
+
+File: standards.info,  Node: Man Pages,  Next: Reading other Manuals,  Prev: NEWS File,  Up: Documentation
+
+Man Pages
+=========
 
    It is ok to supply a man page for the program as well as a Texinfo
 manual if you wish to.  But keep in mind that supporting a man page
@@ -1622,70 +1826,20 @@ that the Texinfo manual is more authoritative, and describing how to
 access the Texinfo documentation.
 
 
-File: standards.info,  Node: Releases,  Prev: Documentation,  Up: Top
+File: standards.info,  Node: Reading other Manuals,  Prev: Man Pages,  Up: Documentation
 
-Making Releases
-***************
+Reading other Manuals
+=====================
 
-   Package the distribution of Foo version 69.96 in a gzipped tar file
-named `foo-69.96.tar.gz'.  It should unpack into a subdirectory named
-`foo-69.96'.
+   There may be non-free books or documentation files that describe the
+program you are documenting.
 
-   Building and installing the program should never modify any of the
-files contained in the distribution.  This means that all the files
-that form part of the program in any way must be classified into "source
-files" and "non-source files".  Source files are written by humans and
-never changed automatically; non-source files are produced from source
-files by programs under the control of the Makefile.
-
-   Naturally, all the source files must be in the distribution.  It is
-okay to include non-source files in the distribution, provided they are
-up-to-date and machine-independent, so that building the distribution
-normally will never modify them.  We commonly include non-source files
-produced by Bison, Lex, TeX, and Makeinfo; this helps avoid unnecessary
-dependencies between our distributions, so that users can install
-whichever packages they want to install.
-
-   Non-source files that might actually be modified by building and
-installing the program should *never* be included in the distribution.
-So if you do distribute non-source files, always make sure they are up
-to date when you make a new distribution.
-
-   Make sure that the directory into which the distribution unpacks (as
-well as any subdirectories) are all world-writable (octal mode 777).
-This is so that old versions of `tar' which preserve the ownership and
-permissions of the files from the tar archive will be able to extract
-all the files even if the user is unprivileged.
-
-   Make sure that all the files in the distribution are world-readable.
-
-   Make sure that no file name in the distribution is more than 14
-characters long.  Likewise, no file created by building the program
-should have a name longer than 14 characters.  The reason for this is
-that some systems adhere to a foolish interpretation of the POSIX
-standard, and refuse to open a longer name, rather than truncating as
-they did in the past.
-
-   Don't include any symbolic links in the distribution itself.  If the
-tar file contains symbolic links, then people cannot even unpack it on
-systems that don't support symbolic links.  Also, don't use multiple
-names for one file in different directories, because certain file
-systems cannot handle this and that prevents unpacking the distribution.
-
-   Try to make sure that all the file names will be unique on MS-DOG.  A
-name on MS-DOG consists of up to 8 characters, optionally followed by a
-period and up to three characters.  MS-DOG will truncate extra
-characters both before and after the period.  Thus, `foobarhacker.c'
-and `foobarhacker.o' are not ambiguous; they are truncated to
-`foobarha.c' and `foobarha.o', which are distinct.
-
-   Include in your distribution a copy of the `texinfo.tex' you used to
-test print any `*.texinfo' files.
-
-   Likewise, if your program uses small GNU software packages like
-regex, getopt, obstack, or termcap, include them in the distribution
-file.  Leaving them out would make the distribution file a little
-smaller at the expense of possible inconvenience to a user who doesn't
-know what other files to get.
-
+   It is ok to use these documents for reference, just as the author of
+a new algebra textbook can read other books on algebra.  A large portion
+of any non-fiction book consists of facts, in this case facts about how
+a certain program works, and these facts are necessarily the same for
+everyone who writes about the subject.  But be careful not to copy your
+outline structure, wording, tables or examples from preexisting non-free
+documentation.  Copying from free documentation may be ok; please check
+with the FSF about the individual case.
 

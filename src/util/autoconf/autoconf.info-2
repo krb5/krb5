@@ -1,9 +1,12 @@
 This is Info file autoconf.info, produced by Makeinfo-1.55 from the
-input file ./autoconf.texi.
+input file autoconf.texi.
 
 START-INFO-DIR-ENTRY
 * Autoconf: (autoconf).         Create source code configuration scripts.
 END-INFO-DIR-ENTRY
+
+   Autoconf: Creating Automatic Configuration Scripts, by David
+MacKenzie.
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
@@ -61,7 +64,7 @@ Using them is optional.
      It is a good idea to call this macro before `AC_INIT' so that the
      revision number is near the top of both `configure.in' and
      `configure'.  To support doing that, the `AC_REVISION' output
-     begins with `#!/bin/sh', like the normal start of a `configure'
+     begins with `#! /bin/sh', like the normal start of a `configure'
      script does.
 
      For example, this line in `configure.in':
@@ -70,7 +73,7 @@ Using them is optional.
 
      produces this in `configure':
 
-          #!/bin/sh
+          #! /bin/sh
           # From configure.in Revision: 1.30
 
 
@@ -259,7 +262,13 @@ Generic Program Checks
    These macros are used to find programs not covered by the particular
 test macros.  If you need to check the behavior of a program as well as
 find out whether it is present, you have to write your own test for it
-(*note Writing Tests::.).
+(*note Writing Tests::.).  If you need to check for a program that
+might not be in the user's `PATH', you can temporarily add to it:
+
+     ac_save_path="$PATH"
+     PATH=/usr/libexec:/usr/sbin:/usr/etc:/etc
+     AC_PATH_PROG(INETD, inetd, /usr/libexec/inetd)
+     PATH="$ac_save_path"
 
  - Macro: AC_CHECK_PROG (VARIABLE, PROG-TO-CHECK-FOR, VALUE-IF-FOUND [,
           VALUE-IF-NOT-FOUND])
@@ -277,6 +286,18 @@ find out whether it is present, you have to write your own test for it
      found, set VARIABLE to VALUE-IF-NOT-FOUND; if VALUE-IF-NOT-FOUND
      is not specified, the value of VARIABLE is not changed.  Calls
      `AC_SUBST' for VARIABLE.
+
+ - Macro: AC_CHECK_TOOL (VARIABLE, PROG-TO-CHECK-FOR [,
+          VALUE-IF-NOT-FOUND])
+     Like `AC_CHECK_PROG', but first looks for PROG-TO-CHECK-FOR with a
+     prefix of the host type as determined by `AC_CANONICAL_HOST',
+     followed by a dash (*note Canonicalizing::.).  For example, if the
+     user runs `configure --host=i386-gnu', then this call:
+          AC_CHECK_TOOL(RANLIB, ranlib, :)
+
+     sets `RANLIB' to `i386-gnu-ranlib' if that program exists in
+     `PATH', or to `ranlib' if that program exists in `PATH', or to `:'
+     if neither program exists.
 
  - Macro: AC_PATH_PROG (VARIABLE, PROG-TO-CHECK-FOR [,
           VALUE-IF-NOT-FOUND])
@@ -314,7 +335,7 @@ archive files.
      If linking with LIBRARY results in unresolved symbols, which would
      be resolved by linking with additional libraries, give those
      libraries as the OTHER-LIBRARIES argument, separated by spaces:
-     `-lX11 -lXt'.  Otherwise this macro will fail to detect that
+     `-lXt -lX11'.  Otherwise this macro will fail to detect that
      LIBRARY is present, because linking the test program will always
      fail with unresolved symbols.
 
@@ -431,9 +452,16 @@ and in some cases how they respond when given certain arguments.
           the name of the group that should own the installed program.
 
  - Macro: AC_FUNC_GETMNTENT
-     Check for the `getmntent' in the `sun' and `seq' libraries, for
-     Irix 4 and PTX, respectively.  Then, if `getmntent' is available,
-     define `HAVE_GETMNTENT'.
+     Check for `getmntent' in the `sun' and `seq' libraries, for Irix 4
+     and PTX, respectively.  Then, if `getmntent' is available, define
+     `HAVE_GETMNTENT'.
+
+ - Macro: AC_FUNC_GETPGRP
+     If `getpgrp' takes no argument (the POSIX.1 version), define
+     `GETPGRP_VOID'.  Otherwise, it is the BSD version, which takes a
+     process ID as an argument.  This macro does not check whether
+     `getpgrp' exists at all; if you need to work in that situation,
+     first call `AC_CHECK_FUNC' for `getpgrp'.
 
  - Macro: AC_FUNC_MEMCMP
      If the `memcmp' function is not available, or does not work on
@@ -469,7 +497,9 @@ and in some cases how they respond when given certain arguments.
      `vfork' is not found, define `vfork' to be `fork'.  This macro
      checks for several known errors in implementations of `vfork' and
      considers the system to not have a working `vfork' if it detects
-     any of them.
+     any of them.  It is not considered to be an implementation error
+     if a child's invocation of `signal' modifies the parent's signal
+     handler, since child processes rarely change their signal handlers.
 
  - Macro: AC_FUNC_VPRINTF
      If `vprintf' is found, define `HAVE_VPRINTF'.  Otherwise, if
@@ -913,9 +943,9 @@ Time::.)
      as empty.
 
  - Macro: AC_C_INLINE
-     If the C compiler is a version of GCC that supports the keyword
-     `__inline' but not `inline' (such as some NeXT versions), define
-     `inline' to be `__inline'.
+     If the C compiler supports the keyword `inline', do nothing.
+     Otherwise define `inline' to `__inline__' or `__inline' if it
+     accepts one of those, otherwise define `inline' to be empty.
 
  - Macro: AC_C_CHAR_UNSIGNED
      If the C type `char' is unsigned, define `__CHAR_UNSIGNED__',
@@ -958,7 +988,7 @@ capabilities.
 
  - Macro: AC_SYS_INTERPRETER
      Check whether the system supports starting scripts with a line of
-     the form `#!/bin/csh' to select the interpreter to use for the
+     the form `#! /bin/csh' to select the interpreter to use for the
      script.  After running this macro, shell code in `configure.in'
      can check the variable `ac_cv_sys_interpreter'; it will be set to
      `yes' if the system supports `#!', `no' if not.
@@ -980,16 +1010,17 @@ capabilities.
      set it to the empty string.
 
  - Macro: AC_PATH_XTRA
-     An enhanced version of `AC_PATH_X'.  Add the C compiler flags that
-     X needs to output variable `X_CFLAGS', and the X linker flags to
-     `X_LIBS'.  If X is not available, add `-DX_DISPLAY_MISSING' to
+     An enhanced version of `AC_PATH_X'.  It adds the C compiler flags
+     that X needs to output variable `X_CFLAGS', and the X linker flags
+     to `X_LIBS'.  If X is not available, adds `-DX_DISPLAY_MISSING' to
      `X_CFLAGS'.
 
-     Also check for special libraries that some systems need in order to
-     compile X programs.  Add any that the system needs to output
-     variable `X_EXTRA_LIBS'.  And check for special X11R6 libraries
-     that need to be linked with before `-lX11', and add any found to
-     the output variable `X_PRE_LIBS'.
+     This macro also checks for special libraries that some systems
+     need in order to compile X programs.  It adds any that the system
+     needs to output variable `X_EXTRA_LIBS'.  And it checks for
+     special X11R6 libraries that need to be linked with before
+     `-lX11', and adds any found to the output variable `X_PRE_LIBS'.
+
 
  - Macro: AC_SYS_LONG_FILE_NAMES
      If the system supports file names longer than 14 characters, define
@@ -1074,6 +1105,10 @@ are checking for to generate a cache variable name.  They also do not
 print any messages, for the same reason.  The checks for particular
 kinds of C features call these macros and do cache their results and
 print messages about what they're checking for.
+
+   When you write a feature test that could be applicable to more than
+one software package, the best thing to do is encapsulate it in a new
+macro.  *Note Writing Macros::, for how to do that.
 
 * Menu:
 
@@ -1164,51 +1199,4 @@ systems.
      `CXXFLAGS', and `CPPFLAGS', when compiling.  It does not try to
      link; use `AC_TRY_LINK' if you need to do that (*note Examining
      Libraries::.).
-
-
-File: autoconf.info,  Node: Examining Libraries,  Next: Run Time,  Prev: Examining Syntax,  Up: Writing Tests
-
-Examining Libraries
-===================
-
-   To check for a library, a function, or a global variable, Autoconf
-`configure' scripts try to compile and link a small program that uses
-it.  This is unlike Metaconfig, which by default uses `nm' or `ar' on
-the C library to try to figure out which functions are available.
-Trying to link with the function is usually a more reliable approach
-because it avoids dealing with the variations in the options and output
-formats of `nm' and `ar' and in the location of the standard libraries.
-It also allows configuring for cross-compilation or checking a
-function's runtime behavior if needed.  On the other hand, it can be
-slower than scanning the libraries once.
-
-   A few systems have linkers that do not return a failure exit status
-when there are unresolved functions in the link.  This bug makes the
-configuration scripts produced by Autoconf unusable on those systems.
-However, some of them can be given options that make the exit status
-correct.  This is a problem that Autoconf does not currently handle
-automatically.
-
-   `AC_TRY_LINK' is used to compile test programs to test for functions
-and global variables.  It is also used (by `AC_CHECK_LIB') to check for
-libraries, by adding the library being checked for to `LIBS'
-temporarily and trying to link a small program.
-
- - Macro: AC_TRY_LINK (INCLUDES, FUNCTION-BODY, ACTION-IF-FOUND [,
-          ACTION-IF-NOT-FOUND])
-     Create a test C program to see whether a function whose body
-     consists of FUNCTION-BODY can be compiled and linked; INCLUDES is
-     any `#include' statements needed by the code in FUNCTION-BODY.  If
-     the file compiles and links successfully, run shell commands
-     ACTION-IF-FOUND, otherwise run ACTION-IF-NOT-FOUND.  This macro
-     uses `CFLAGS' or `CXXFLAGS', `CPPFLAGS', `LDFLAGS', and `LIBS'
-     when compiling.
-
- - Macro: AC_COMPILE_CHECK (ECHO-TEXT, INCLUDES, FUNCTION-BODY,
-          ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
-     This is an obsolete version of `AC_TRY_LINK', with the addition
-     that it prints `checking for ECHO-TEXT' to the standard output
-     first, if ECHO-TEXT is non-empty.  Use `AC_MSG_CHECKING' and
-     `AC_MSG_RESULT' instead to print messages (*note Printing
-     Messages::.).
 

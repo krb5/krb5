@@ -1,26 +1,262 @@
-Fri Mar 17 20:39:08 1995  John Gilmore  (gnu at toad.com)
+Wed Jun 21 14:48:19 1995    <tytso@rsx-11.mit.edu>
 
-	* acgeneral.m4:  Report the update status of the cache better;
-	show diffs if an unwriteable cache gets updated, for manually
-	configuring the Mac config.cache.
-	* configure:  Update with this acgeneral.m4.
+	* Installed autoconf 2.4 in the Kerberos V5 tree.  This reverted a
+		few Krb5-specific changes: tytso Ultrix /bin/sh
+		workarounds (which are supposedly fixed in another way in
+		autoconf 2.4), eichin's change to autoreconf to allow it to
+		work in symlink farms, jgilmore's change acgeneral.m4 to
+		report the update status of the cache better (???).
 
-Wed Jan 25 19:52:11 1995  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+Wed Jun 14 23:07:20 1995  David J. MacKenzie  <djm@geech.gnu.ai.mit.edu>
 
-	* autoreconf.sh (ls test): use -Llt to sort, in case we're in a
-	symlink farm.
+	* Version 2.4.
 
-Mon Dec 19 19:20:58 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+Sun May  7 08:09:12 1995  David J. MacKenzie  <djm@geech.gnu.ai.mit.edu>
 
-	* acgeneral.m4 (AC_DEFINE_UNQUOTED): Workaround more Ultrix sh
-		brain damage.  
+	* acspecific.m4 (AC_PATH_X_XMKMF): Check for libX11.{so,sl} as
+	well as .a when seeing whether LIBDIR or USRLIBDIR is right.
 
-	* acgeneral.m4 (AC_CACHE_SAVE): Work around yet another really
-		horrible Ultrix sh bug.  The values of variables read in
-		using the ${var='bar'} construction are displayed using
-		the "set" command with the high bit set.  (Someone should
-		just haul off the Ultrix sh and have it shot).  Fixed
-		using tr.
+Sat May  6 17:29:07 1995  David J. MacKenzie  <djm@geech.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_PROG_CPP): If CPP is already set, use that as
+	the value and set the cache variable to it.
+
+Mon Mar 27 10:48:36 1995  David J. MacKenzie  <djm@churchy.gnu.ai.mit.edu>
+
+	* Version 2.3.
+
+	* acgeneral.m4 (AC_OUTPUT): Add quotes around the echo arguments
+	in the trap, so backslashes aren't required for multiline input.
+	From G.Wilford@ee.surrey.ac.uk.
+	Also use the sed trick when not using a config header file.
+
+Thu Mar 23 18:02:25 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_LANG_C, AC_LANG_CPLUSPLUS): Put "-c" right
+	  after compiler name.  Same for "-o conftest".
+
+	* ifnames.sh (AC_MACRODIR): Default to @datadir@, not a hardcoded
+	  path. 
+
+	* Test release 2.2.1.
+
+	* acgeneral.m4 (AC_OUTPUT): Use sed, not tr, so we only remove the
+	  output config header, not the input one too.  From
+	  muessig@ipf.bau-verm.uni-karlsruhe.DE (Peter Muessig).
+	  (AC_LANG_C): Undo Feb 7 change.  According to Roland McGrath,
+	  most compilers require all options but -l... and -o to come first.
+
+	* Makefile.in (uninstall): Don't use $@, since the cd makes it
+	  invalid when srcdir is relative.
+
+Wed Mar  8 17:05:06 1995  David J. MacKenzie  <djm@geech.gnu.ai.mit.edu>
+
+	* Version 2.2.
+
+Wed Mar  8 12:44:34 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* Makefile.in: Follow cd commands with &&, not ;.
+	From Franc,ois Pinard.
+
+Tue Mar  7 11:48:19 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acspecific.m4 (AC_FUNC_ALLOCA): Keep sh variable namespace clean.
+	Put newline after AC_DEFINE_UNQUOTED call to avoid Irix syntax error.
+
+Mon Mar  6 15:07:00 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* Test release 2.1.3.
+
+	* acspecific.m4 (AC_FUNC_ALLOCA): Replace nested AC_FUNC_CHECK
+	  calls with a loop.
+
+	* acspecific.m4 (AC_FUNC_VPRINTF): Don't check for signal munging.
+	  From Paul Eggert.
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Tell the user whether the cache
+	  changed or not.  From gnu@toad.com (John Gilmore).
+
+	* Makefile.in (install-info): Don't cd, to avoid breaking
+	  install-sh references.
+
+Fri Mar  3 11:41:01 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* Makefile.in (autoconf.info, standards.info): Use --no-split to
+	  avoid creating filenames > 14 chars. 
+
+	* acgeneral.m4 (AC_CHECK_FUNC): Use assert.h,
+	  to avoid protype conflicts from ctype.h (!!) on OSF/1 3.0.
+
+Sat Feb 25 01:56:57 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_C_BIGENDIAN): Check for BYTE_ORDER macro from
+ 	sys/param.h before trying the test program which cannot be
+ 	cross-compiled.
+
+Fri Feb 24 20:02:08 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_FUNC): Include errno.h instead of ctype.h
+ 	in test program.
+
+Wed Feb 22 18:01:27 1995  David J. MacKenzie  <djm@geech.gnu.ai.mit.edu>
+
+	* Test release 2.1.2.
+
+Tue Feb 21 13:00:07 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_CACHE_VAL): Add extra quotes to work around AIX
+	  4.1 bug reported by hyc@locus.com (Howard Chu).
+
+	* acspecific.m4 (AC_FUNC_GETLOADAVG): Check for -lelf before -lkvm.
+	Reported by Kaveh R. Ghazi <ghazi@caip.rutgers.edu>.
+	(AC_HEADER_STAT): Check whether S_IFDIR is defined, to work around
+	ISC bug reported by rick@anasazi.com (Rick Coupland).
+
+	* autoheader.sh: Better solution to @BOTTOM@ printing.
+	From Paul Eggert.
+
+Mon Feb 13 18:13:11 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_PROG_CC_C_O): Use sed filter to make sure
+ 	${ac_cc} is always a valid shell variable name.
+	(AC_PROG_MAKE_SET): Remove gratuitous backslashes in checking message.
+
+Sun Feb 12 18:42:35 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_TOOL_PREFIX): Require AC_CANONICAL_BUILD,
+ 	so both $build and $host are definitely set before we compare
+ 	them.
+
+Sat Feb 11 04:37:30 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_TOOL): Rewritten.  Take optional third
+ 	arg VALUE-IF-NOT-FOUND.  Check for
+ 	${ac_tool_prefix}PROG-TO-CHECK-FOR first.  If not found and third
+ 	arg given, and ${ac_tool_prefix} is nonempty, check for unadorned
+ 	PROG-TO-CHECK-FOR as well.  Last choice use VALUE-IF-NOT-FOUND.
+
+Fri Feb 10 17:45:53 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_OUTPUT): Fix sed command to produce $ac_dots
+	for subdir configures.
+
+Thu Feb  9 14:42:20 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* testsuite/config/unix.exp (autoconf_load): Run the script with
+	  /dev/null as the cache.
+
+	* acgeneral.m4 (AC_CHECK_TOOL_PREFIX, AC_CHECK_TOOL): New macros,
+	  from Roland McGrath.
+
+	* acspecific.m4 (AC_DECL_YYTEXT): Cache the output file root.
+	(AC_C_INLINE): If the compiler doesn't recognize it, define it
+	away.  Try __inline__ too.  From Jim Avera.
+	(AC_FUNC_GETPGRP): New macro.  From Arnold Robbins.
+	* acconfig.h: New entry for it.
+
+	* configure.in: Check for new awk.
+	* Makefile.in (editsh): Substitute in AWK.
+
+	* acspecific.m4 (AC_PROG_INSTALL): Allow trailing slashes in PATH
+	  elements. 
+	* acgeneral.m4 (AC_PREFIX_PROGRAM): Ditto.
+
+Tue Feb  7 11:32:09 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_CHECK_LIB, AC_HAVE_LIBRARY): Check and add the new
+	  library before existing libs, not after, in case it uses them.
+	* acspecific.m4 (AC_FUNC_GETLOADAVG, AC_FUNC_GETMNTENT,
+	  AC_FUNC_STRFTIME, AC_DYNIX_SEQ, AC_IRIX_SUN, AC_SCO_INTL): Ditto.
+
+	* autoheader.sh: Allow @BOTTOM@ to be the first line in
+	  acconfig.h.  From iwj10@cus.cam.ac.uk (Ian Jackson).
+
+	* acspecific.m4 (AC_FUNC_GETLOADAVG): Add semicolons before
+	  AC_DEFINE.  Check for -lkvm before -lutil.  Assume it needs setgid
+	  if using -lutil.
+
+	* acgeneral.m4 (ac_compile, ac_link): Put the file name before the
+	  variables, so they can contain -l options.
+
+	* acspecific.m4 (AC_FUNC_WAIT3): Sleep longer for HPUX.
+	(AC_TYPE_SIGNAL): Declare signal as extern "C" for C++.
+
+	* Makefile.in testsuite/Makefile.in (maintainer-clean): Renamed
+	  from realclean.
+
+	* autoconf.sh (TMPDIR): Inherit from environment, or set if not.
+
+	* acgeneral.m4 (AC_PREFIX_PROGRAM): Say we're checking the prefix.
+
+	* acspecific.m4 (AC_ISC_POSIX): Fix typo.
+	(AC_PATH_X): Screen out bogus values from imake.
+	(AC_PROG_LEX): Check for yywrap, not main, in the library.
+
+Thu Feb  2 11:32:07 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acconfig.h (__CHAR_UNSIGNED): Protect with #ifndef.
+	From marcus@ee.pdx.edu (Marcus Daniels).
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Workaround Ultrix and 4.3BSD sh
+	  bug in setting the high bit on variable values.
+	  From Ken Raeburn.
+	  (AC_OUTPUT_FILES, AC_OUTPUT_SUBDIRS): Ignore initial "./" to
+	  avoid messing up the dot-dot counts.
+	  (AC_OUTPUT_SUBDIRS): Pass INSTALL magic to subdirectories.
+	  From Karl Berry.
+
+	* ifnames.sh: Speed up drastically by folding 3N+2 processes into 2.
+	From Paul Eggert.
+
+Wed Feb  1 11:58:27 1995  David J. MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_ARG_ENABLE, AC_ARG_WITH): Add additional
+	  quoting for internal consistency.
+	  From junio@twinsun.COM (Jun Hamano).
+
+	* acspecific.m4 (AC_PATH_XTRA): R6 function name was wrong.
+	From Karl Berry.
+	(AC_C_CROSS): Fix typo in cache var name.
+	From tgl@sss.pgh.pa.us (Tom Lane).
+	(AC_PROG_MAKE_SET): Change / in the make program name into _ so it
+	can be part of a shell variable name.
+	(AC_DECL_YYTEXT): Fix arguments to AC_TRY_LINK.
+	From interran@uluru.stanford.edu (John Interrante).
+
+	* acgeneral.m4 (AC_CHECK_SIZEOF): If test program fails, set the
+	  variable to 0 as the doc sez.
+	  From eisen@cc.gatech.edu (Greg Eisenhauer).
+
+	* acgeneral.m4, acspecific.m4: Remove *.core and core.* as well as
+	  core, for recent BSD's.
+
+	* acspecific.m4 (AC_SYS_INTERPRETER): Use `#! /' instead of `#!/'.
+	* acgeneral.m4 (AC_INIT_BINSH): Likewise.
+	* All scripts: likewise.
+	From woods@kuma.web.net (Greg A. Woods).
+
+	* acgeneral.m4 (AC_INIT_PREPARE): Use fd 6 instead of 4, to
+	  prevent a conflict on the Kubota Titan.  From
+	  muessig@ipf.bau-verm.uni-karlsruhe.DE (Peter Muessig).
+
+	* autoconf.sh: Use a more concise syntax to set variables.
+	From Karl Berry.
+
+	* acspecific.m4 (AC_FUNC_WAIT3): Check page fault measurements to
+	  catch Linux.  From tobias@server.et-inf.fho-emden.de (Peter Tobias).
+
+	* acgeneral.m4 (AC_OUTPUT): If running config.status
+	  fails, exit with a nonzero status.  From Ken Raeburn.
+
+Tue Dec  6 19:07:07 1994  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_FUNC_GETLOADAVG): Use elf_begin in -lelf
+        check, not elf_read.
+
+Mon Nov  7 18:18:11 1994  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_PROG_MAKE_SET): Fix msg; $MAKE is not useful
+        Make syntax.
 
 Fri Nov  4 09:08:33 1994  David J. MacKenzie  <djm@duality.gnu.ai.mit.edu>
 

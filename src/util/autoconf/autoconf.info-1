@@ -1,9 +1,12 @@
 This is Info file autoconf.info, produced by Makeinfo-1.55 from the
-input file ./autoconf.texi.
+input file autoconf.texi.
 
 START-INFO-DIR-ENTRY
 * Autoconf: (autoconf).         Create source code configuration scripts.
 END-INFO-DIR-ENTRY
+
+   Autoconf: Creating Automatic Configuration Scripts, by David
+MacKenzie.
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
@@ -30,7 +33,7 @@ File: autoconf.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
-package.  This is edition 2.1, for Autoconf version 2.1.
+package.  This is edition 2.3, for Autoconf version 2.3.
 
 * Menu:
 
@@ -77,7 +80,7 @@ Initialization and Output Files
 Substitutions in Makefiles
 
 * Preset Output Variables::	Output variables that are always set.
-* Build Directories::		Compiling in a different directory.
+* Build Directories::   	Supporting multiple concurrent compiles.
 * Automatic Remaking::		Makefile rules for configuring.
 
 Configuration Header Files
@@ -176,7 +179,7 @@ Site Configuration
 
 Transforming Program Names When Installing
 
-* Transformation Options::      `configure' options to transforme names.
+* Transformation Options::      `configure' options to transform names.
 * Transformation Examples::     Sample uses of transforming names.
 * Transformation Rules::        `Makefile' uses of transforming names.
 
@@ -184,7 +187,7 @@ Running `configure' Scripts
 
 * Basic Installation::          Instructions for typical cases.
 * Compilers and Options::       Selecting compilers and optimization.
-* Build Directory::             Configuring in a different directory.
+* Multiple Architectures::      Compiling for multiple architectures at once.
 * Installation Names::          Installing in different directories.
 * Optional Features::           Selecting optional features.
 * System Type::                 Specifying the system type.
@@ -663,8 +666,9 @@ else.  The only other required macro is `AC_OUTPUT' (*note Output::.).
      directory.  UNIQUE-FILE-IN-SOURCE-DIR is some file that is in the
      package's source directory; `configure' checks for this file's
      existence to make sure that the directory that it is told contains
-     the source code in fact does (*note Invoking configure::., for
-     more information).
+     the source code in fact does.  Occasionally people accidentally
+     specify the wrong directory with `--srcdir'; this is a safety
+     check.  *Note Invoking configure::, for more information.
 
    Packages that do manual configuration or use the `install' program
 might need to tell `configure' where to find some other shell scripts
@@ -773,7 +777,7 @@ for more information on what to put in `Makefile's.
 * Menu:
 
 * Preset Output Variables::	Output variables that are always set.
-* Build Directories::		Compiling in a different directory.
+* Build Directories::   	Supporting multiple concurrent compiles.
 * Automatic Remaking::		Makefile rules for configuring.
 
 
@@ -796,7 +800,7 @@ contains.
      variable in a comment at the top of each input file.  For example,
      an input shell script should begin like this:
 
-          #!/bin/sh
+          #! /bin/sh
           # @configure_input@
 
      The presence of that line also reminds people editing the file
@@ -859,11 +863,9 @@ File: autoconf.info,  Node: Build Directories,  Next: Automatic Remaking,  Prev:
 Build Directories
 -----------------
 
-   You might want to compile a software package in a different directory
-from the one that contains the source code.  Doing this allows you to
-compile the package for several architectures simultaneously from the
-same copy of the source code and keep multiple sets of object files on
-disk.
+   You can support compiling a software package for several
+architectures simultaneously from the same copy of the source code.
+The object files for each architecture are kept in their own directory.
 
    To support doing this, `make' uses the `VPATH' variable to find the
 files that are in the source directory.  GNU `make' and most other
@@ -882,7 +884,7 @@ look like:
 substitutions on the value of `VPATH'.
 
    `configure' substitutes in the correct value for `srcdir' when it
-produces `Makefile.in'.
+produces `Makefile'.
 
    Do not use the `make' variable `$<', which expands to the pathname
 of the file in the source directory (found with `VPATH'), except in
@@ -918,7 +920,7 @@ not change their contents.  This feature avoids unnecessary
 recompilation.  You should include the file `stamp-h.in' your package's
 distribution, so `make' will consider `config.h.in' up to date.  On
 some old BSD systems, `touch' or any command that results in an empty
-file does not update the timestamps, so use a command like `date' as a
+file does not update the timestamps, so use a command like `echo' as a
 workaround.
 
      ${srcdir}/configure: configure.in aclocal.m4
@@ -929,7 +931,7 @@ workaround.
      ${srcdir}/stamp-h.in: configure.in aclocal.m4 acconfig.h \
          config.h.top config.h.bot
              cd ${srcdir} && autoheader
-             date > ${srcdir}/stamp-h.in
+             echo timestamp > ${srcdir}/stamp-h.in
      
      config.h: stamp-h
      stamp-h: config.h.in config.status
@@ -941,10 +943,10 @@ workaround.
      config.status: configure
              ./config.status --recheck
 
-   In addition, you should pass `date > stamp-h' in the EXTRA-CMDS
-argument to `AC_OUTPUT', so `config.status' will ensure that `config.h'
-is considered up to date.  *Note Output::, for more information about
-`AC_OUTPUT'.
+   In addition, you should pass `echo timestamp > stamp-h' in the
+EXTRA-CMDS argument to `AC_OUTPUT', so `config.status' will ensure that
+`config.h' is considered up to date.  *Note Output::, for more
+information about `AC_OUTPUT'.
 
    *Note Invoking config.status::, for more examples of handling
 configuration-related dependencies.

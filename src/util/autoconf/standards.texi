@@ -3,7 +3,7 @@
 @setfilename standards.info
 @settitle GNU Coding Standards
 @c UPDATE THIS DATE WHENEVER YOU MAKE CHANGES!
-@set lastupdate 21 September 1994
+@set lastupdate 16 May 1995
 @c %**end of header
 
 @ifinfo
@@ -49,7 +49,7 @@ by the Free Software Foundation.
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1992, 1993, 1994 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -85,7 +85,7 @@ Last updated @value{lastupdate}.
 * Formatting::			Formatting Your Source Code
 * Comments::			Commenting Your Work
 * Syntactic Conventions::	Clean Use of C Constructs
-* Names::			Naming Variables and Functions
+* Names::			Naming Variables, Functions and Files
 * Using Extensions::		Using Non-standard Features
 * System Functions::            Portability and ``standard'' library functions
 * Semantics::			Program Behavior for All Programs
@@ -197,7 +197,8 @@ can help eliminate conceptual inconsistencies between different parts
 of a program; they can give you a history of how the conflicting
 concepts arose.
 
-Use the Emacs command @kbd{M-x add-change} to start a new entry in the
+Use the Emacs command @kbd{M-x add-change-log-entry} to start a new
+entry in the
 change log.  An entry should have an asterisk, the name of the changed
 file, and then in parentheses the name of the changed functions,
 variables or whatever, followed by a colon.  Then describe the changes
@@ -369,12 +370,11 @@ For example, a Sun 3 might be @samp{m68k-sun-sunos4.1}.
 
 The @code{configure} script needs to be able to decode all plausible
 alternatives for how to describe a machine.  Thus, @samp{sun3-sunos4.1}
-would be a valid alias.  So would @samp{sun3-bsd4.2}, since SunOS is
-basically @sc{BSD} and no other @sc{BSD} system is used on a Sun.  For many
-programs, @samp{vax-dec-ultrix} would be an alias for
-@samp{vax-dec-bsd}, simply because the differences between Ultrix and
-@sc{BSD} are rarely noticeable, but a few programs might need to distinguish
-them.
+would be a valid alias.  For many programs, @samp{vax-dec-ultrix} would
+be an alias for @samp{vax-dec-bsd}, simply because the differences
+between Ultrix and @sc{BSD} are rarely noticeable, but a few programs
+might need to distinguish them.
+@c Real 4.4BSD now runs on some Suns.
 
 There is a shell script called @file{config.sub} that you can use
 as a subroutine to validate system types and canonicalize aliases.
@@ -462,7 +462,6 @@ cross-operation is not a meaningful thing.
 Some programs have ways of configuring themselves automatically.  If
 your program is set up to do this, your @code{configure} script can simply
 ignore most of its arguments.
-
 
 @node Source Language
 @chapter Using Languages Other Than C
@@ -636,7 +635,7 @@ Also explain the significance of the return value, if there is one.
 Please put two spaces after the end of a sentence in your comments, so
 that the Emacs sentence commands will work.  Also, please write
 complete sentences and capitalize the first word.  If a lower-case
-identifer comes at the beginning of a sentence, don't capitalize it!
+identifier comes at the beginning of a sentence, don't capitalize it!
 Changing the spelling makes it a different identifier.  If you don't
 like starting a sentence with a lower case letter, write the sentence
 differently (e.g., ``The identifier lower-case is @dots{}'').
@@ -812,7 +811,7 @@ casts to @code{void}.  Zero without a cast is perfectly fine as a null
 pointer constant.
 
 @node  Names
-@chapter Naming Variables and Functions
+@chapter Naming Variables, Functions, and Files
 
 Please use underscores to separate words in a name, so that the Emacs
 word commands can be useful within them.  Stick to lower case; reserve
@@ -842,6 +841,13 @@ this.  @code{doschk} also tests for potential name conflicts if the
 files were loaded onto an MS-DOS file system---something you may or may
 not care about.
 
+In general, use @samp{-} to separate words in file names, not @samp{_}.
+Make all letters in file names be lower case, except when following
+specific conventions that call for upper case in certain kinds of names.
+Conventional occasions for using upper case letters in file names
+include @file{Makefile}, @file{ChangeLog}, @file{COPYING} and
+@file{README}.  It is common to name other @file{README}-like
+documentation files in all upper case just like @file{README}.
 
 @node Using Extensions
 @chapter Using Non-standard Features
@@ -998,7 +1004,7 @@ One way to get them properly defined is to use Autoconf.
 @chapter Program Behavior for All Programs
 
 Avoid arbitrary limits on the length or number of @emph{any} data
-structure, including filenames, lines, files, and symbols, by allocating
+structure, including file names, lines, files, and symbols, by allocating
 all data structures dynamically.  In most Unix utilities, ``long lines
 are silently truncated''.  This is not acceptable in a GNU utility.
 
@@ -1060,6 +1066,11 @@ comments in the source.  The relevant data will be in variables, which
 are easy to examine with the debugger, so there is no point moving them
 elsewhere.
 
+Do not use a count of errors as the exit status for a program.
+@emph{That does not work}, because exit status values are limited to 8
+bits (0 through 255).  A single run of the program might have 256
+errors; if you try to return 256 as the exit status, the parent process
+will see 0 as the status, and it will appear that the program succeeded.
 
 @node Errors
 @chapter Formatting Error Messages
@@ -1094,7 +1105,7 @@ input from a source other than a terminal, it is not interactive and
 would do best to print error messages using the noninteractive style.)
 
 The string @var{message} should not begin with a capital letter when
-it follows a program name and/or filename.  Also, it should not end
+it follows a program name and/or file name.  Also, it should not end
 with a period.
 
 Error messages from interactive programs, and other messages such as
@@ -1267,6 +1278,7 @@ standard output and exits successfully.  These options should inhibit
 the normal function of the command; they should do nothing except print
 the requested information.
 
+@c longopts begin here (keyword for isearch)
 @c Please leave newlines between items in this table; it's much easier
 @c to update when it isn't completely squashed together and unreadable.
 @c When there is more than one short option for a long option name, put
@@ -1274,12 +1286,6 @@ the requested information.
 @c period.   --friedman
 
 @table @samp
-
-@item auto-check
-@samp{-a} in @code{recode}.
-
-@item auto-reference
-@samp{-A} in @code{ptx}.
 
 @item after-date
 @samp{-N} in @code{tar}.
@@ -1310,14 +1316,29 @@ and @code{unexpand}.
 @item ascii
 @samp{-a} in @code{diff}.
 
+@item assign
+@samp{-v} in Gawk.
+
 @item assume-new
 @samp{-W} in Make.
 
 @item assume-old
 @samp{-o} in Make.
 
+@item auto-check
+@samp{-a} in @code{recode}.
+
+@item auto-pager
+@samp{-a} in @code{wdiff}.
+
+@item auto-reference
+@samp{-A} in @code{ptx}.
+
+@item avoid-wraps
+@samp{-n} in @code{wdiff}.
+
 @item backward-search
-@samp{-B} in etags.
+@samp{-B} in @code{ctags}.
 
 @item basename
 @samp{-f} in @code{shar}.
@@ -1377,6 +1398,9 @@ Used in various programs to specify the directory to use.
 @item compare
 @samp{-d} in @code{tar}.
 
+@item compat
+Used in gawk (no corresponding single-letter option).
+
 @item compress
 @samp{-Z} in @code{tar} and @code{shar}.
 
@@ -1389,8 +1413,12 @@ Used in various programs to specify the directory to use.
 @item context
 Used in @code{diff}.
 
+@item copyleft
+Used in gawk (no corresponding single-letter option).
+
 @item copyright
-@samp{-C} in @code{ptx} and @code{recode}.
+@samp{-C} in @code{ptx}, @code{recode}, and @code{wdiff}.
+Also used in gawk (no corresponding single-letter option).
 
 @item core
 Used in GDB.
@@ -1408,7 +1436,7 @@ Used in @code{tar} and @code{cpio}.
 @samp{-c} in @code{shar}.
 
 @item cxref
-@samp{-x} in @code{etags}.
+@samp{-x} in @code{ctags}.
 
 @item date
 @samp{-d} in @code{touch}.
@@ -1421,7 +1449,7 @@ Used in @code{tar} and @code{cpio}.
 @samp{-D} in @code{m4}.
 
 @item defines
-@samp{-d} in Bison and @code{etags}.
+@samp{-d} in Bison and @code{ctags}.
 
 @item delete
 @samp{-D} in @code{tar}.
@@ -1457,9 +1485,6 @@ specially.
 @item discard-locals
 @samp{-X} in @code{strip}.
 
-@item diversions
-@samp{-N} in @code{m4}.
-
 @item dry-run
 @samp{-n} in Make.
 
@@ -1468,6 +1493,12 @@ specially.
 
 @item elide-empty-files
 @samp{-z} in @code{csplit}.
+
+@item end-delete
+@samp{-x} in @code{wdiff}.
+
+@item end-insert
+@samp{-z} in @code{wdiff}.
 
 @item entire-new-file
 @samp{-N} in @code{diff}.
@@ -1524,8 +1555,11 @@ Used in GDB.
 @item fatal-warnings
 @samp{-E} in @code{m4}.
 
+@item field-separator
+p@samp{-F} in Gawk.
+
 @item file
-@samp{-f} in @code{info}, Make, @code{mt}, and @code{tar};
+@samp{-f} in Gawk, @code{info}, Make, @code{mt}, and @code{tar};
 @samp{-n} in @code{sed};
 @samp{-r} in @code{touch}.
 
@@ -1562,8 +1596,8 @@ Used in Makeinfo.
 @item format
 Used in @code{ls}, @code{time}, and @code{ptx}.
 
-@item forward-search
-@samp{-F} in @code{etags}.
+@item freeze-state
+@samp{-F} in @code{m4}.
 
 @item fullname
 Used in GDB.
@@ -1625,7 +1659,7 @@ Used to ask for brief usage information.
 
 @item ignore-case
 @samp{-f} in @code{look} and @code{ptx};
-@samp{-i} in @code{diff}.
+@samp{-i} in @code{diff} and @code{wdiff}.
 
 @item ignore-errors
 @samp{-i} in Make.
@@ -1634,7 +1668,7 @@ Used to ask for brief usage information.
 @samp{-i} in @code{ptx}.
 
 @item ignore-indentation
-@samp{-S} in @code{etags}.
+@samp{-I} in @code{etags}.
 
 @item ignore-init-file
 @samp{-f} in Oleo.
@@ -1697,6 +1731,12 @@ Used to ask for brief usage information.
 @item kilobytes
 @samp{-k} in @code{du} and @code{ls}.
 
+@item language
+@samp{-l} in @code{etags}.
+
+@item less-mode
+@samp{-l} in @code{wdiff}.
+
 @item level-for-gzip
 @samp{-g} in @code{shar}.
 
@@ -1708,6 +1748,9 @@ Used in @code{split}, @code{head}, and @code{tail}.
 
 @item link
 @samp{-l} in @code{cpio}.
+
+@item lint
+Used in gawk (no corresponding single-letter option).
 
 @item list
 @samp{-t} in @code{cpio};
@@ -1802,14 +1845,23 @@ Used in GDB.
 @item no-check-existing
 @samp{-x} in @code{shar}.
 
+@item no-common
+@samp{-3} in @code{wdiff}.
+
 @item no-create
 @samp{-c} in @code{touch}.
 
 @item no-defines
 @samp{-D} in @code{etags}.
 
+@item no-deleted
+@samp{-1} in @code{wdiff}.
+
 @item no-dereference
 @samp{-d} in @code{cp}.
+
+@item no-inserted
+@samp{-2} in @code{wdiff}.
 
 @item no-keep-going
 @samp{-S} in Make.
@@ -1822,6 +1874,9 @@ Used in GDB.
 
 @item no-prof
 @samp{-e} in @code{gprof}.
+
+@item no-regex
+@samp{-R} in @code{etags}.
 
 @item no-sort
 @samp{-p} in @code{nm}.
@@ -1840,9 +1895,6 @@ Used in Makeinfo.
 
 @item no-validate
 Used in Makeinfo.
-
-@item no-verbose
-@samp{-v} in @code{shar}.
 
 @item no-warn
 Used in various programs to inhibit warnings.
@@ -1931,6 +1983,9 @@ Used in Makeinfo.
 @item portability
 @samp{-c} in @code{cpio} and @code{tar}.
 
+@item posix
+Used in gawk (no corresponding single-letter option).
+
 @item prefix-builtins
 @samp{-P} in @code{m4}.
 
@@ -1970,6 +2025,12 @@ Used in @code{tar} and @code{cp}.
 @item print-symdefs
 @samp{-s} in @code{nm}.
 
+@item printer
+@samp{-p} in @code{wdiff}.
+
+@item prompt
+@samp{-p} in @code{ed}.
+
 @item query-user
 @samp{-X} in @code{shar}.
 
@@ -1980,6 +2041,9 @@ Used in @code{tar} and @code{cp}.
 Used in many programs to inhibit the usual output.  @strong{Note:} every
 program accepting @samp{--quiet} should accept @samp{--silent} as a
 synonym.
+
+@item quiet-unshar
+@samp{-Q} in @code{shar}
 
 @item quote-name
 @samp{-Q} in @code{ls}.
@@ -2010,10 +2074,13 @@ Used in Makeinfo.
 @samp{-r} in @code{ptx}.
 
 @item regex
-@samp{-r} in @code{tac}.
+@samp{-r} in @code{tac} and @code{etags}.
 
 @item release
 @samp{-r} in @code{uname}.
+
+@item reload-state
+@samp{-R} in @code{m4}.
 
 @item relocation
 @samp{-r} in @code{objdump}.
@@ -2092,6 +2159,9 @@ Used in many programs to inhibit the usual output.
 @item sort
 Used in @code{ls}.
 
+@item source
+Used in gawk (no corresponding single-letter option).
+
 @item sparse
 @samp{-S} in @code{tar}.
 
@@ -2107,9 +2177,18 @@ Used in @code{ls}.
 @item squeeze-blank
 @samp{-s} in @code{cat}.
 
+@item start-delete
+@samp{-w} in @code{wdiff}.
+
+@item start-insert
+@samp{-y} in @code{wdiff}.
+
 @item starting-file
 Used in @code{tar} and @code{diff} to specify which file within
 a directory to start processing with.
+
+@item statistics
+@samp{-s} in @code{wdiff}.
 
 @item stdin-file-list
 @samp{-S} in @code{shar}.
@@ -2164,6 +2243,7 @@ Used in GDB and @code{objdump}.
 
 @item terminal
 @samp{-T} in @code{tput} and @code{ul}.
+@samp{-t} in @code{wdiff}.
 
 @item text
 @samp{-a} in @code{diff}.
@@ -2188,16 +2268,16 @@ Used in @code{ls} and @code{touch}.
 
 @item traditional
 @samp{-t} in @code{hello};
-@samp{-G} in @code{m4} and @code{ptx}.
+@samp{-G} in @code{ed}, @code{m4}, and @code{ptx}.
 
 @item tty
 Used in GDB.
 
 @item typedefs
-@samp{-t} in @code{etags}.
+@samp{-t} in @code{ctags}.
 
 @item typedefs-and-c++
-@samp{-T} in @code{etags}.
+@samp{-T} in @code{ctags}.
 
 @item typeset-mode
 @samp{-t} in @code{ptx}.
@@ -2215,7 +2295,10 @@ Used in GDB.
 @samp{-u} in @code{nm}.
 
 @item update
-@samp{-u} in @code{cp}, @samp{etags}, @samp{mv}, @samp{tar}.
+@samp{-u} in @code{cp}, @code{ctags}, @code{mv}, @code{tar}.
+
+@item usage
+Used in gawk (no corresponding single-letter option).
 
 @item uuencode
 @samp{-B} in @code{shar}.
@@ -2236,7 +2319,7 @@ Print the version number.
 @samp{-V} in @code{cp}, @code{ln}, @code{mv}.
 
 @item vgrind
-@samp{-v} in @code{etags}.
+@samp{-v} in @code{ctags}.
 
 @item volume
 @samp{-V} in @code{tar}.
@@ -2260,29 +2343,67 @@ Print the version number.
 @samp{-z} in @code{gprof}.
 
 @end table
+@c longopts end here (keyword for isearch)
 
 @node Documentation
 @chapter Documenting Programs
 
-Please use Texinfo for documenting GNU programs.  See the Texinfo
-manual, either the hardcopy or the version in the GNU Emacs Info
-subsystem (@kbd{C-h i}).  See existing GNU Texinfo files (e.g., those
-under the @file{man/} directory in the GNU Emacs distribution) for
-examples.
+@menu
+* GNU Manuals::                 Writing proper manuals.
+* Manual Structure Details::    Specific structure conventions.
+* NEWS File::                   NEWS files supplement manuals.
+* Man Pages::                   Man pages are secondary.
+* Reading other Manuals::       How far you can go in learning
+                                  from other manuals.
+@end menu
+
+@node GNU Manuals
+@section GNU Manuals
+
+The preferred way to document part of the GNU system is to write a
+manual in the Texinfo formatting language.  See the Texinfo manual,
+either the hardcopy or the version in the Emacs Info subsystem (@kbd{C-h
+i}).
+
+The manual should document all of the program's command-line options and
+all of its commands.  It should give examples of their use.  But don't
+organize the manual as a list of features.  Instead, organize it
+logically, by subtopics.  Address the goals that a user will have in
+mind, and explain how to accomplish them.
+
+In general, a GNU manual should serve both as tutorial and reference.
+It should be set up for convenient access to each topic through Info,
+and for reading straight through (appendixes aside).  A GNU manual
+should give a good introduction to a beginner reading through from the
+start, and should also provide all the details that hackers want.
+
+That is not as hard as it sounds at first.  Arrange each chapter as a
+logical breakdown of its topic, but order the sections, and write their
+text, so that reading the chapter straight through makes sense.  Do
+likewise when structuring the book into chapters, and when structuring a
+section into paragraphs.  The watchword is, @emph{at each point, address
+the most fundamental and important issue raised by the preceding text.}
+
+If necessary, add extra chapters at the beginning of the manual which
+are purely tutorial and cover the basics of the subject.  These provide
+the framework for a beginner to understand the rest of the manual.  The
+Bison manual provides a good example of how to do this.
+
+Don't use Unix man pages as a model for how to write GNU documentation;
+they are a bad example to follow.
+
+Please do not use the term ``pathname'' that is used in Unix
+documentation; use ``file name'' (two words) instead.  We use the term
+``path'' only for search paths, which are lists of file names.
+
+@node Manual Structure Details
+@section Manual Structure Details
 
 The title page of the manual should state the version of the program
 which the manual applies to.  The Top node of the manual should also
 contain this information.  If the manual is changing more frequently
 than or independent of the program, also state a version number for
 the manual in both of these places.
-
-The manual should document all command-line arguments and all
-commands.  It should give examples of their use.  But don't organize
-the manual as a list of features.  Instead, organize it by the
-concepts a user will have before reaching that point in the manual.
-Address the goals that a user will have in mind, and explain how to
-accomplish them.  Don't use Unix man pages as a model for how to
-write GNU documentation; they are a bad example to follow.
 
 The manual should have a node named @samp{@var{program} Invocation} or
 @samp{Invoking @var{program}}, where @var{program} stands for the name
@@ -2303,6 +2424,9 @@ quickly reading just this part of its manual.
 If one manual describes several programs, it should have such a node for
 each program described.
 
+@node NEWS File
+@section The NEWS File
+
 In addition to its manual, the package should have a file named
 @file{NEWS} which contains a list of user-visible changes worth
 mentioning.  In each new release, add items to the front of the file and
@@ -2314,9 +2438,8 @@ If the @file{NEWS} file gets very long, move some of the older items
 into a file named @file{ONEWS} and put a note at the end referring the
 user to that file.
 
-Please do not use the term ``pathname'' that is used in Unix
-documentation; use ``file name'' (two words) instead.  We use the term
-``path'' only for search paths, which are lists of file names.
+@node Man Pages
+@section Man Pages
 
 It is ok to supply a man page for the program as well as a Texinfo
 manual if you wish to.  But keep in mind that supporting a man page
@@ -2337,6 +2460,21 @@ the man page remains useful, put a prominent note near the beginning of
 the man page explaining that you don't maintain it and that the Texinfo
 manual is more authoritative, and describing how to access the Texinfo
 documentation.
+
+@node Reading other Manuals
+@section Reading other Manuals
+
+There may be non-free books or documentation files that describe the
+program you are documenting.
+
+It is ok to use these documents for reference, just as the author of a
+new algebra textbook can read other books on algebra.  A large portion
+of any non-fiction book consists of facts, in this case facts about how
+a certain program works, and these facts are necessarily the same for
+everyone who writes about the subject.  But be careful not to copy your
+outline structure, wording, tables or examples from preexisting non-free
+documentation.  Copying from free documentation may be ok; please check
+with the FSF about the individual case.
 
 @node Releases
 @chapter Making Releases

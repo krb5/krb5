@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # autoheader -- create `config.h.in' from `configure.in'
 # Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
@@ -217,9 +217,10 @@ if test -n "$libs"; then
   done
 fi
 
+# Handle the case where @BOTTOM@ is the first line of acconfig.h.
 test -r $localdir/acconfig.h &&
   grep @BOTTOM@ $localdir/acconfig.h >/dev/null &&
-  sed '1,/@BOTTOM@/d' $localdir/acconfig.h
+  sed -n '/@BOTTOM@/,${/@BOTTOM@/!p;}' $localdir/acconfig.h
 test -f ${config_h}.bot && cat ${config_h}.bot
 
 status=0

@@ -26,6 +26,7 @@ INSTALL_DATA = @INSTALL_DATA@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 M4 = @M4@
+AWK = @AWK@
 PERL = @PERL@
 
 # Programs that are always installed.
@@ -70,7 +71,8 @@ DISTFILES = COPYING ChangeLog ChangeLog.1 INSTALL \
 	testsuite/lib/*.exp testsuite/autoconf.[gs]/*.exp \
 	standards.texi make-stds.texi standards.info*
 
-editsh = sed -e 's,@''datadir''@,$(acdatadir),g' -e 's,@''M4''@,$(M4),g'
+editsh = sed -e 's,@''datadir''@,$(acdatadir),g' -e \
+	's,@''M4''@,$(M4),g'  -e 's,@''AWK''@,$(AWK),g'
 editpl = sed -e 's,@''datadir''@,$(acdatadir),g' -e 's,@''PERL''@,$(PERL),g'
 
 all: ${SCRIPTS}
@@ -88,15 +90,16 @@ all: ${SCRIPTS}
 
 info: autoconf.info @standards_info@ INSTALL
 
+# Use --no-split to avoid creating filenames > 14 chars.
 autoconf.info: autoconf.texi install.texi
-	$(MAKEINFO) -I$(srcdir) $(srcdir)/autoconf.texi --output=$@
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/autoconf.texi --no-split --output=$@
 
 INSTALL: install.texi
 	$(MAKEINFO) -I$(srcdir) $(srcdir)/install.texi --output=$@ \
 	--no-headers --no-validate
 
 standards.info: standards.texi make-stds.texi
-	$(MAKEINFO) -I$(srcdir) $(srcdir)/standards.texi --output=$@
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/standards.texi --no-split --output=$@
 
 dvi: autoconf.dvi @standards_dvi@
 
@@ -140,52 +143,56 @@ install: all $(M4FILES) acconfig.h installdirs install-info
 	done; \
 	else :; fi
 
+# Don't cd, to avoid breaking install-sh references.
 install-info: info installdirs
-	-test -f autoconf.info || cd $(srcdir); \
-	for i in autoconf.info*; do \
-	$(INSTALL_DATA) $$i $(infodir)/$$i; \
-	done
-	-test -f standards.info || cd $(srcdir); \
-	for i in standards.info*; do \
-	$(INSTALL_DATA) $$i $(infodir)/$$i; \
-	done
+	if test -f autoconf.info; then \
+	  for i in *.info*; do \
+	    $(INSTALL_DATA) $$i $(infodir)/$$i; \
+	  done; \
+	else \
+	  for i in $(srcdir)/*.info*; do \
+	    $(INSTALL_DATA) $$i $(infodir)/`echo $$i | sed 's|^$(srcdir)/||'`; \
+	  done; \
+	fi
 
 uninstall:
 	for p in $(SCRIPTS); do \
 	  rm -f $(bindir)/`echo $$p|sed '$(transform)'`; \
 	done
 	rm -fr $(acdatadir)
-	cd $(infodir); rm -f autoconf.info*
+	cd $(infodir) && rm -f autoconf.info*
 	if test -f standards.info || test -f $(srcdir)/standards.info; \
-	then cd $(infodir); rm -f standards.info*; fi
+	then cd $(infodir) && rm -f standards.info*; fi
 
 ${srcdir}/configure: configure.in $(M4FILES)
-	cd $(srcdir); \
-	rm -f $@ $@.tmp; \
-	$(M4) autoconf.m4 configure.in > $@.tmp && \
-	chmod +x $@.tmp && mv $@.tmp $@
+	cd $(srcdir) && \
+	rm -f configure configure.tmp && \
+	$(M4) autoconf.m4 configure.in > configure.tmp && \
+	chmod +x configure.tmp && mv configure.tmp configure
 Makefile: Makefile.in config.status
 	./config.status
 config.status: configure
 	./config.status --recheck
 
-clean mostlyclean distclean realclean::
+maintainer-clean::
+	@echo "This command is intended for maintainers to use;"
+	@echo "rebuilding the deleted files requires makeinfo."
+	rm -f TAGS *.info* INSTALL
+
+clean mostlyclean distclean maintainer-clean::
 	for dir in $(SUBDIRS); do \
 	  echo making $@ in $$dir ; \
-	  (cd $$dir; $(MAKE) $@) ; \
+	  (cd $$dir && $(MAKE) $@) ; \
 	done
 
-clean mostlyclean distclean realclean::
+clean mostlyclean distclean maintainer-clean::
 	rm -f $(SCRIPTS) *.tmp 
 	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.log
 	rm -f *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs
 	rm -f *.ev *.evs *.ov *.ovs *.cv *.cvs *.ma *.mas
 
-distclean realclean::
+distclean maintainer-clean::
 	rm -f Makefile config.status config.cache config.log
-
-realclean::
-	rm -f TAGS *.info* INSTALL
 
 TAGS:
 	etags ${srcdir}/*.m4 ${srcdir}/*.sh ${srcdir}/[a-z]*.in ${srcdir}/*.texi

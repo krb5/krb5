@@ -1,6 +1,6 @@
 dnl Macros that test for specific features.
 dnl This file is part of Autoconf.
-dnl Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+dnl Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -186,7 +186,10 @@ AC_DEFUN(AC_PROG_CC_C_O,
 else
   AC_MSG_CHECKING(whether cc understands -c and -o together)
 fi
-set dummy $CC; ac_cc=[$]2
+set dummy $CC; ac_cc="`echo [$]2 | 
+changequote(, )dnl
+		       sed -e 's/[^a-zA-Z0-9_]/_/g' -e 's/^[0-9]/_/'`"
+changequote([, ])dnl
 AC_CACHE_VAL(ac_cv_prog_cc_${ac_cc}_c_o,
 [eval ac_cv_prog_cc_${ac_cc}_c_o=no
 echo 'foo(){}' > conftest.c
@@ -220,7 +223,7 @@ fi
 
 dnl Define SET_MAKE to set ${MAKE} if make doesn't.
 AC_DEFUN(AC_PROG_MAKE_SET,
-[AC_MSG_CHECKING(whether ${MAKE-make} sets \$MAKE)
+[AC_MSG_CHECKING(whether ${MAKE-make} sets \${MAKE})
 set dummy ${MAKE-make}; ac_make=[$]2
 AC_CACHE_VAL(ac_cv_prog_make_${ac_make}_set,
 [cat > conftestmake <<\EOF
@@ -250,7 +253,7 @@ AC_SUBST([SET_MAKE])dnl
 AC_DEFUN(AC_PROG_RANLIB,
 [AC_CHECK_PROG(RANLIB, ranlib, ranlib, :)])
 
-dnl Check for mawk first since it's said to be faster.
+dnl Check for mawk first since it's generally faster.
 AC_DEFUN(AC_PROG_AWK,
 [AC_CHECK_PROGS(AWK, mawk gawk nawk awk, )])
 
@@ -278,8 +281,10 @@ Syntax Error], ,
   AC_TRY_CPP([#include <assert.h>
 Syntax Error], , CPP=/lib/cpp))
   ac_cv_prog_CPP="$CPP"])dnl
+  CPP="$ac_cv_prog_CPP"
+else
+  ac_cv_prog_CPP="$CPP"
 fi
-CPP="$ac_cv_prog_CPP"
 AC_MSG_RESULT($CPP)
 AC_SUBST(CPP)dnl
 ])
@@ -313,42 +318,48 @@ then
   flex*) ac_lib=fl ;;
   *) ac_lib=l ;;
   esac
-  AC_CHECK_LIB($ac_lib, main, LEXLIB="-l$ac_lib")
+  AC_CHECK_LIB($ac_lib, yywrap, LEXLIB="-l$ac_lib")
 fi
 AC_SUBST(LEXLIB)])
 
+dnl Check if lex declares yytext as a char * by default, not a char[].
+undefine([AC_DECL_YYTEXT])
 AC_DEFUN(AC_DECL_YYTEXT,
 [AC_REQUIRE_CPP()dnl
 AC_REQUIRE([AC_PROG_LEX])dnl
-AC_MSG_CHECKING(for yytext declaration)
+AC_MSG_CHECKING(lex output file root)
+AC_CACHE_VAL(ac_cv_prog_lex_root,
+[# The minimal lex program is just a single line: %%.  But some broken lexes
+# (Solaris, I think it was) want two %% lines, so accommodate them.
+echo '%%
+%%' | $LEX
+if test -f lex.yy.c; then
+  ac_cv_prog_lex_root=lex.yy
+elif test -f lexyy.c; then
+  ac_cv_prog_lex_root=lexyy
+else
+  AC_MSG_ERROR(cannot find output from $LEX; giving up)
+fi])dnl
+LEX_OUTPUT_ROOT=$ac_cv_prog_lex_root
+AC_MSG_RESULT($ac_cv_prog_lex_root)
+AC_SUBST(LEX_OUTPUT_ROOT)dnl
+
+AC_MSG_CHECKING(whether yytext is a pointer)
 AC_CACHE_VAL(ac_cv_prog_lex_yytext_pointer,
 [# POSIX says lex can declare yytext either as a pointer or an array; the
 # default is implementation-dependent. Figure out which it is, since
 # not all implementations provide the %pointer and %array declarations.
-#
-# The minimal lex program is just a single line: %%.  But some broken lexes
-# (Solaris, I think it was) want two %% lines, so accommodate them.
 ac_cv_prog_lex_yytext_pointer=no
-  echo '%%
-%%' | $LEX
-if test -f lex.yy.c; then
-  LEX_OUTPUT_ROOT=lex.yy
-elif test -f lexyy.c; then
-  LEX_OUTPUT_ROOT=lexyy
-else
-  AC_MSG_ERROR(cannot find output from $LEX, giving up)
-fi
-echo 'extern char *yytext; main () { exit (0); }' >>$LEX_OUTPUT_ROOT.c
+echo 'extern char *yytext;' >>$LEX_OUTPUT_ROOT.c
 ac_save_LIBS="$LIBS"
 LIBS="$LIBS $LEXLIB"
-AC_TRY_LINK(`cat $LEX_OUTPUT_ROOT.c`, ac_cv_prog_lex_yytext_pointer=yes)
+AC_TRY_LINK(`cat $LEX_OUTPUT_ROOT.c`, , ac_cv_prog_lex_yytext_pointer=yes)
 LIBS="$ac_save_LIBS"
 rm -f "${LEX_OUTPUT_ROOT}.c"])dnl
 AC_MSG_RESULT($ac_cv_prog_lex_yytext_pointer)
 if test $ac_cv_prog_lex_yytext_pointer = yes; then
   AC_DEFINE(YYTEXT_POINTER)
 fi
-AC_SUBST(LEX_OUTPUT_ROOT)dnl
 ])
 
 AC_DEFUN(AC_PROG_INSTALL,
@@ -368,8 +379,9 @@ if test -z "$INSTALL"; then
 AC_CACHE_VAL(ac_cv_path_install,
 [  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
   for ac_dir in $PATH; do
-    case "$ac_dir" in
-    ''|.|/etc|/usr/sbin|/usr/etc|/sbin|/usr/afsws/bin|/usr/ucb) ;;
+    # Account for people who put trailing slashes in PATH elements.
+    case "$ac_dir/" in
+    /|./|.//|/etc/*|/usr/sbin/*|/usr/etc/*|/sbin/*|/usr/afsws/bin/*|/usr/ucb/*) ;;
     *)
       # OSF1 and SCO ODT 3.0 have their own names for install.
       for ac_prog in ginstall installbsd scoinst install; do
@@ -390,6 +402,9 @@ AC_CACHE_VAL(ac_cv_path_install,
   done
   IFS="$ac_save_ifs"
   # As a last resort, use the slow shell script.
+dnl FIXME We probably shouldn't cache a path within a source directory,
+dnl because that will break other packages using the cache if
+dnl that directory is removed.
   test -z "$ac_cv_path_install" && ac_cv_path_install="$ac_install_sh"])dnl
   INSTALL="$ac_cv_path_install"
 fi
@@ -586,24 +601,26 @@ AC_DEFUN(AC_HEADER_STAT,
 AC_CACHE_VAL(ac_cv_header_stat_broken,
 [AC_EGREP_CPP([You lose], [#include <sys/types.h>
 #include <sys/stat.h>
-#ifdef S_ISBLK
+
+#if defined(S_ISBLK) && defined(S_IFDIR)
 # if S_ISBLK (S_IFDIR)
 You lose.
 # endif
-# ifdef S_IFCHR
-#  if S_ISBLK (S_IFCHR)
+#endif
+
+#if defined(S_ISBLK) && defined(S_IFCHR)
+# if S_ISBLK (S_IFCHR)
 You lose.
-#  endif
 # endif
 #endif
 
-#ifdef S_ISLNK
+#if defined(S_ISLNK) && defined(S_IFREG)
 # if S_ISLNK (S_IFREG)
 You lose.
 # endif
 #endif
 
-#ifdef S_ISSOCK
+#if defined(S_ISSOCK) && defined(S_IFREG)
 # if S_ISSOCK (S_IFREG)
 You lose.
 # endif
@@ -730,7 +747,10 @@ AC_CACHE_VAL(ac_cv_type_signal,
 #ifdef signal
 #undef signal
 #endif
-extern void (*signal ()) ();],
+#ifdef __cplusplus
+extern "C"
+#endif
+void (*signal ()) ();],
 [int i;], ac_cv_type_signal=void, ac_cv_type_signal=int)])dnl
 AC_MSG_RESULT($ac_cv_type_signal)
 AC_DEFINE_UNQUOTED(RETSIGTYPE, $ac_cv_type_signal)
@@ -835,6 +855,69 @@ if test $ac_cv_func_mmap = yes; then
 fi
 ])
 
+AC_DEFUN(AC_FUNC_GETPGRP,
+[AC_MSG_CHECKING(whether getpgrp takes no argument)
+AC_CACHE_VAL(ac_cv_func_getpgrp_void,
+[AC_TRY_RUN([
+/*
+ * If this system has a BSD-style getpgrp(),
+ * which takes a pid argument, exit unsuccessfully.
+ *
+ * Snarfed from Chet Ramey's bash pgrp.c test program
+ */
+#include <stdio.h>
+#include <sys/types.h>
+
+int     pid;
+int     pg1, pg2, pg3, pg4;
+int     ng, np, s, child;
+
+main()
+{
+        pid = getpid();
+        pg1 = getpgrp(0);
+        pg2 = getpgrp();
+        pg3 = getpgrp(pid);
+        pg4 = getpgrp(1);
+
+        /*
+         * If all of these values are the same, it's pretty sure that
+         * we're on a system that ignores getpgrp's first argument.
+         */
+        if (pg2 == pg4 && pg1 == pg3 && pg2 == pg3)
+                exit(0);
+
+        child = fork();
+        if (child < 0)
+                exit(1);
+        else if (child == 0) {
+                np = getpid();
+                /*
+                 * If this is Sys V, this will not work; pgrp will be
+                 * set to np because setpgrp just changes a pgrp to be
+                 * the same as the pid.
+                 */
+                setpgrp(np, pg1);
+                ng = getpgrp(0);        /* Same result for Sys V and BSD */
+                if (ng == pg1) {
+                        exit(1);
+                } else {
+                        exit(0);
+                }
+        } else {
+                wait(&s);
+                exit(s>>8);
+        }
+}
+], ac_cv_func_getpgrp_void=yes, ac_cv_func_getpgrp_void=no,
+   AC_MSG_ERROR(cannot check getpgrp if cross compiling))
+])
+AC_MSG_RESULT($ac_cv_func_getpgrp_void)
+if test $ac_cv_func_getpgrp_void = yes; then
+  AC_DEFINE(GETPGRP_VOID)
+fi
+])
+
 AC_DEFUN(AC_FUNC_VPRINTF,
 [AC_CHECK_FUNC(vprintf, AC_DEFINE(HAVE_VPRINTF))
 if test "$ac_cv_func_vprintf" != yes; then
@@ -847,19 +930,17 @@ AC_DEFUN(AC_FUNC_VFORK,
 AC_CHECK_HEADER(vfork.h, AC_DEFINE(HAVE_VFORK_H))
 AC_MSG_CHECKING(for working vfork)
 AC_CACHE_VAL(ac_cv_func_vfork,
-[AC_REQUIRE([AC_TYPE_SIGNAL])
-AC_TRY_RUN([/* Thanks to Paul Eggert for this test.  */
+[AC_TRY_RUN([/* Thanks to Paul Eggert for this test.  */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <signal.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif
-/* On sparc systems, changes by the child to local and incoming
+/* On some sparc systems, changes by the child to local and incoming
    argument registers are propagated back to the parent.
    The compiler is told about this with #include <vfork.h>,
    but some compilers (e.g. gcc -O) don't grok <vfork.h>.
@@ -884,15 +965,11 @@ sparc_address_test (arg) int arg;
     }
   }
 }
-static int signalled;
-static RETSIGTYPE catch (s) int s; { signalled = 1; }
 main() {
   pid_t parent = getpid ();
   pid_t child;
 
   sparc_address_test ();
-
-  signal (SIGINT, catch);
 
   child = vfork ();
 
@@ -901,7 +978,7 @@ main() {
        This test uses lots of local variables, at least
        as many local variables as main has allocated so far
        including compiler temporaries.  4 locals are enough for
-       gcc 1.40.3 on a sparc, but we use 8 to be safe.
+       gcc 1.40.3 on a Solaris 4.1.3 sparc, but we use 8 to be safe.
        A buggy compiler should reuse the register of parent
        for one of the local variables, since it will think that
        parent can't possibly be used any more in this routine.
@@ -915,12 +992,6 @@ main() {
     if (p != p1 || p != p2 || p != p3 || p != p4
 	|| p != p5 || p != p6 || p != p7)
       _exit(1);
-
-    /* On some systems (e.g. SunOS 5.2), if the parent is catching
-       a signal, the child ignores the signal before execing,
-       and the parent later receives that signal, the parent dumps core.
-       Test for this by ignoring SIGINT in the child.  */
-    signal (SIGINT, SIG_IGN);
 
     /* On some systems (e.g. IRIX 3.3),
        vfork doesn't separate parent from child file descriptors.
@@ -943,10 +1014,6 @@ main() {
 
 	 /* Did the vfork/compiler bug occur?  */
 	 || parent != getpid()
-
-	 /* Did the signal handling bug occur?  */
-	 || kill(parent, SIGINT) != 0
-	 || signalled != 1
 
 	 /* Did the file descriptor bug occur?  */
 	 || fstat(fileno(stdout), &st) != 0
@@ -973,10 +1040,11 @@ main() {
   /* Use a field that we can force nonzero --
      voluntary context switches.
      For systems like NeXT and OSF/1 that don't set it,
-     also use the system CPU time.  */
+     also use the system CPU time.  And page faults (I/O) for Linux.  */
   r.ru_nvcsw = 0;
   r.ru_stime.tv_sec = 0;
   r.ru_stime.tv_usec = 0;
+  r.ru_majflt = r.ru_minflt = 0;
   switch (fork()) {
   case 0: /* Child.  */
     sleep(1); /* Give up the CPU.  */
@@ -984,8 +1052,8 @@ main() {
   case -1: _exit(0); /* What can we do?  */
   default: /* Parent.  */
     wait3(&i, 0, &r);
-    sleep(1); /* Avoid "text file busy" from rm on fast HP-UX machines.  */
-    exit(r.ru_nvcsw == 0
+    sleep(2); /* Avoid "text file busy" from rm on fast HP-UX machines.  */
+    exit(r.ru_nvcsw == 0 && r.ru_majflt == 0 && r.ru_minflt == 0
 	 && r.ru_stime.tv_sec == 0 && r.ru_stime.tv_usec == 0);
   }
 }], ac_cv_func_wait3=yes, ac_cv_func_wait3=no, ac_cv_func_wait3=no)])dnl
@@ -1052,9 +1120,10 @@ wenotbecray
 ], ac_cv_os_cray=yes, ac_cv_os_cray=no)])dnl
 AC_MSG_RESULT($ac_cv_os_cray)
 if test $ac_cv_os_cray = yes; then
-AC_CHECK_FUNC(_getb67, AC_DEFINE(CRAY_STACKSEG_END, _getb67),
-AC_CHECK_FUNC(GETB67, AC_DEFINE(CRAY_STACKSEG_END, GETB67),
-AC_CHECK_FUNC(getb67, AC_DEFINE(CRAY_STACKSEG_END, getb67))))
+for ac_func in _getb67 GETB67 getb67; do
+  AC_CHECK_FUNC($ac_func, [AC_DEFINE_UNQUOTED(CRAY_STACKSEG_END, $ac_func)
+  break])
+done
 fi
 
 AC_MSG_CHECKING(stack direction for C alloca)
@@ -1083,21 +1152,23 @@ AC_SUBST(ALLOCA)dnl
 ])
 
 AC_DEFUN(AC_FUNC_GETLOADAVG,
-[# Some definitions of getloadavg require that the program be installed setgid.
-NEED_SETGID=false
-AC_SUBST(NEED_SETGID)dnl
-ac_have_func=no
+[ac_have_func=no # yes means we've found a way to get the load average.
 
-# Check for the 4.4BSD definition of getloadavg.
-AC_CHECK_LIB(util, getloadavg, [LIBS="$LIBS -lutil" ac_have_func=yes
 # Some systems with -lutil have (and need) -lkvm as well, some do not.
-AC_CHECK_LIB(kvm, kvm_open,  LIBS="$LIBS -lkvm")])
+# On Solaris, -lkvm requires nlist from -lelf, so check that first
+# to get the right answer into the cache.
+AC_CHECK_LIB(elf, elf_begin, LIBS="-lelf $LIBS")
+AC_CHECK_LIB(kvm, kvm_open, LIBS="-lkvm $LIBS")
+# Check for the 4.4BSD definition of getloadavg.
+AC_CHECK_LIB(util, getloadavg,
+  [LIBS="-lutil $LIBS" ac_have_func=yes ac_cv_func_getloadavg_setgid=yes])
 
 if test $ac_have_func = no; then
-# There is a commonly available library for RS/6000 AIX.
-# Since it is not a standard part of AIX, it might be installed locally.
-ac_save_LIBS="$LIBS" LIBS="-L/usr/local/lib $LIBS"
-AC_CHECK_LIB(getloadavg, getloadavg, LIBS="$LIBS -lgetloadavg", LIBS="$ac_save_LIBS")
+  # There is a commonly available library for RS/6000 AIX.
+  # Since it is not a standard part of AIX, it might be installed locally.
+  ac_save_LIBS="$LIBS" LIBS="-L/usr/local/lib $LIBS"
+  AC_CHECK_LIB(getloadavg, getloadavg,
+    LIBS="-lgetloadavg $LIBS", LIBS="$ac_save_LIBS")
 fi
 
 # Make sure it is really in the library, if we think we found it.
@@ -1105,48 +1176,52 @@ AC_REPLACE_FUNCS(getloadavg)
 
 if test $ac_cv_func_getloadavg = yes; then
   AC_DEFINE(HAVE_GETLOADAVG)
+  ac_have_func=yes
 else
-ac_have_func=no
-AC_CHECK_HEADER(sys/dg_sys_info.h,
-[ac_have_func=yes AC_DEFINE(DGUX)
-AC_CHECK_LIB(dgc, dg_sys_info)])
-if test $ac_have_func = no; then
-# We cannot check for <dwarf.h>, because Solaris 2 does not use dwarf (it
-# uses stabs), but it is still SVR4.  We cannot check for <elf.h> because
-# Irix 4.0.5F has the header but not the library.
-AC_CHECK_LIB(elf, elf_read,
-  [LIBS="$LIBS -lelf" ac_have_func=yes AC_DEFINE(SVR4)
-  AC_CHECK_LIB(kvm, kvm_open, LIBS="$LIBS -lkvm")])
-fi
-if test $ac_have_func = no; then
-AC_CHECK_HEADER(inq_stats/cpustats.h,
-  [ac_have_func=yes AC_DEFINE(UMAX)
-   AC_DEFINE(UMAX4_3)])
-fi
-if test $ac_have_func = no; then
-AC_CHECK_HEADER(sys/cpustats.h,
-  [ac_have_func=yes AC_DEFINE(UMAX)])
-fi
-if test $ac_have_func = no; then
-AC_CHECK_HEADERS(mach/mach.h)
-fi
+  # Figure out what our getloadavg.c needs.
+  ac_have_func=no
+  AC_CHECK_HEADER(sys/dg_sys_info.h,
+  [ac_have_func=yes; AC_DEFINE(DGUX)
+  AC_CHECK_LIB(dgc, dg_sys_info)])
 
-AC_CHECK_HEADER(nlist.h,
-[AC_DEFINE(NLIST_STRUCT)
-AC_MSG_CHECKING([for n_un in struct nlist])
-AC_CACHE_VAL(ac_cv_struct_nlist_n_un,
-[AC_TRY_COMPILE([#include <nlist.h>],
-[struct nlist n; n.n_un.n_name = 0;],
-ac_cv_struct_nlist_n_un=yes, ac_cv_struct_nlist_n_un=no)])dnl
-AC_MSG_RESULT($ac_cv_struct_nlist_n_un)
-if test $ac_cv_struct_nlist_n_un = yes; then
-  AC_DEFINE(NLIST_NAME_UNION)
-fi
-])dnl
+  # We cannot check for <dwarf.h>, because Solaris 2 does not use dwarf (it
+  # uses stabs), but it is still SVR4.  We cannot check for <elf.h> because
+  # Irix 4.0.5F has the header but not the library.
+  if test $ac_have_func = no && test $ac_cv_lib_elf = yes; then
+    ac_have_func=yes; AC_DEFINE(SVR4)
+  fi
 
-dnl FIXME two bugs here:
-dnl Hardwiring the path of getloadavg.c in the top-level directory,
-dnl and not checking whether a getloadavg from a library needs privileges.
+  if test $ac_have_func = no; then
+    AC_CHECK_HEADER(inq_stats/cpustats.h,
+    [ac_have_func=yes; AC_DEFINE(UMAX)
+    AC_DEFINE(UMAX4_3)])
+  fi
+
+  if test $ac_have_func = no; then
+    AC_CHECK_HEADER(sys/cpustats.h,
+    [ac_have_func=yes; AC_DEFINE(UMAX)])
+  fi
+
+  if test $ac_have_func = no; then
+    AC_CHECK_HEADERS(mach/mach.h)
+  fi
+
+  AC_CHECK_HEADER(nlist.h,
+  [AC_DEFINE(NLIST_STRUCT)
+  AC_MSG_CHECKING([for n_un in struct nlist])
+  AC_CACHE_VAL(ac_cv_struct_nlist_n_un,
+  [AC_TRY_COMPILE([#include <nlist.h>],
+  [struct nlist n; n.n_un.n_name = 0;],
+  ac_cv_struct_nlist_n_un=yes, ac_cv_struct_nlist_n_un=no)])dnl
+  AC_MSG_RESULT($ac_cv_struct_nlist_n_un)
+  if test $ac_cv_struct_nlist_n_un = yes; then
+    AC_DEFINE(NLIST_NAME_UNION)
+  fi
+  ])dnl
+fi # Do not have getloadavg in system libraries.
+
+# Some definitions of getloadavg require that the program be installed setgid.
+dnl FIXME Don't hardwire the path of getloadavg.c in the top-level directory.
 AC_MSG_CHECKING(whether getloadavg requires setgid)
 AC_CACHE_VAL(ac_cv_func_getloadavg_setgid,
 [AC_EGREP_CPP([Yowza Am I SETGID yet],
@@ -1157,12 +1232,13 @@ Yowza Am I SETGID yet
   ac_cv_func_getloadavg_setgid=yes, ac_cv_func_getloadavg_setgid=no)])dnl
 AC_MSG_RESULT($ac_cv_func_getloadavg_setgid)
 if test $ac_cv_func_getloadavg_setgid = yes; then
-  NEED_SETGID=true AC_DEFINE(GETLOADAVG_PRIVILEGED)
+  NEED_SETGID=true; AC_DEFINE(GETLOADAVG_PRIVILEGED)
+else
+  NEED_SETGID=false
 fi
+AC_SUBST(NEED_SETGID)dnl
 
-fi # Do not have getloadavg in system libraries.
-
-if test "$NEED_SETGID" = true; then
+if test $ac_cv_func_getloadavg_setgid = yes; then
   AC_MSG_CHECKING(group of /dev/kmem)
 AC_CACHE_VAL(ac_cv_group_kmem,
 [changequote(, )dnl
@@ -1196,7 +1272,7 @@ exit(!(stat ("conftestdata", &s) == 0 && utime("conftestdata", (long *)0) == 0
 && t.st_mtime - s.st_mtime < 120));
 }], ac_cv_func_utime_null=yes, ac_cv_func_utime_null=no,
   ac_cv_func_utime_null=no)
-rm -f core])dnl
+rm -f core core.* *.core])dnl
 AC_MSG_RESULT($ac_cv_func_utime_null)
 if test $ac_cv_func_utime_null = yes; then
   AC_DEFINE(HAVE_UTIME_NULL)
@@ -1233,7 +1309,7 @@ main () {
   putc('\r', stdout);
   exit(0);			/* Non-reversed systems segv here.  */
 }], ac_cv_func_setvbuf_reversed=yes, ac_cv_func_setvbuf_reversed=no)
-rm -f core])dnl
+rm -f core core.* *.core])dnl
 AC_MSG_RESULT($ac_cv_func_setvbuf_reversed)
 if test $ac_cv_func_setvbuf_reversed = yes; then
   AC_DEFINE(SETVBUF_REVERSED)
@@ -1242,13 +1318,13 @@ fi
 
 AC_DEFUN(AC_FUNC_GETMNTENT,
 [# getmntent is in -lsun on Irix 4, -lseq on Dynix/PTX.
-AC_CHECK_LIB(sun, getmntent, LIBS="$LIBS -lsun",
-  [AC_CHECK_LIB(seq, getmntent, LIBS="$LIBS -lseq")])
+AC_CHECK_LIB(sun, getmntent, LIBS="-lsun $LIBS",
+  [AC_CHECK_LIB(seq, getmntent, LIBS="-lseq $LIBS")])
 AC_CHECK_FUNC(getmntent, [AC_DEFINE(HAVE_GETMNTENT)])])
 
 AC_DEFUN(AC_FUNC_STRFTIME,
 [# strftime is in -lintl on SCO UNIX.
-AC_CHECK_LIB(intl, strftime, LIBS="$LIBS -lintl")
+AC_CHECK_LIB(intl, strftime, LIBS="-lintl $LIBS")
 AC_CHECK_FUNC(strftime, [AC_DEFINE(HAVE_STRFTIME)])])
 
 AC_DEFUN(AC_FUNC_MEMCMP,
@@ -1372,7 +1448,7 @@ AC_DEFUN(AC_C_CROSS,
 AC_MSG_CHECKING(whether cross-compiling)
 AC_CACHE_VAL(ac_cv_c_cross,
 [AC_TRY_RUN([main(){return(0);}],
-  ac_cv_c_cross=no, ac_cv_c_cross=yes, ac_cv_cross=yes)])dnl
+  ac_cv_c_cross=no, ac_cv_c_cross=yes, ac_cv_c_cross=yes)])dnl
 cross_compiling=$ac_cv_c_cross
 AC_MSG_RESULT($ac_cv_c_cross)
 ])
@@ -1441,7 +1517,20 @@ AC_TRY_RUN([main() { exit(sizeof(long int) != 8); }],
 AC_DEFUN(AC_C_BIGENDIAN,
 [AC_MSG_CHECKING(whether byte ordering is bigendian)
 AC_CACHE_VAL(ac_cv_c_bigendian,
-[AC_TRY_RUN([main () {
+[ac_cv_c_bigendian=unknown
+# See if sys/param.h defines the BYTE_ORDER macro.
+AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/param.h>], [
+#if !BYTE_ORDER || !BIG_ENDIAN || !LITTLE_ENDIAN
+ bogus endian macros
+#endif], [# It does; now see whether it defined to BIG_ENDIAN or not.
+AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/param.h>], [
+#if BYTE_ORDER != BIG_ENDIAN
+ not big endian
+#endif], ac_cv_c_bigendian=yes, ac_cv_c_bigendian=no)])
+if test $ac_cv_c_bigendian = unknown; then
+AC_TRY_RUN([main () {
   /* Are we little or big endian?  From Harbison&Steele.  */
   union
   {
@@ -1450,25 +1539,31 @@ AC_CACHE_VAL(ac_cv_c_bigendian,
   } u;
   u.l = 1;
   exit (u.c[sizeof (long) - 1] == 1);
-}], ac_cv_c_bigendian=no, ac_cv_c_bigendian=yes)])dnl
+}], ac_cv_c_bigendian=no, ac_cv_c_bigendian=yes)
+fi])dnl
 AC_MSG_RESULT($ac_cv_c_bigendian)
 if test $ac_cv_c_bigendian = yes; then
   AC_DEFINE(WORDS_BIGENDIAN)
 fi
 ])
 
+dnl Do nothing if the compiler accepts the inline keyword.
+dnl Otherwise define inline to __inline__ or __inline if one of those work,
+dnl otherwise define inline to be empty.
 AC_DEFUN(AC_C_INLINE,
 [AC_MSG_CHECKING([for inline])
 AC_CACHE_VAL(ac_cv_c_inline,
-[if test "$GCC" = yes; then
-AC_TRY_COMPILE(, [} inline foo() {], ac_cv_c_inline=yes, ac_cv_c_inline=no)
-else
-  ac_cv_c_inline=no
-fi])dnl
+[ac_cv_c_inline=no
+for ac_kw in inline __inline__ __inline; do
+  AC_TRY_COMPILE(, [} $ac_kw foo() {], [ac_cv_c_inline=$ac_kw; break])
+done
+])dnl
 AC_MSG_RESULT($ac_cv_c_inline)
-if test $ac_cv_c_inline = no; then
-  AC_DEFINE(inline, __inline)
-fi
+case "$ac_cv_c_inline" in
+  inline | yes) ;;
+  no) AC_DEFINE(inline, ) ;;
+  *)  AC_DEFINE_UNQUOTED(inline, $ac_cv_c_inline) ;;
+esac
 ])
 
 AC_DEFUN(AC_C_CONST,
@@ -1542,7 +1637,7 @@ AC_DEFUN(AC_SYS_INTERPRETER,
 ac_msg="whether #! works in shell scripts"
 AC_MSG_CHECKING($ac_msg)
 AC_CACHE_VAL(ac_cv_sys_interpreter,
-[echo '#!/bin/cat
+[echo '#! /bin/cat
 exit 69
 ' > conftest
 chmod u+x conftest
@@ -1673,17 +1768,20 @@ EOF
     # GNU make sometimes prints "make[1]: Entering...", which would confuse us.
     eval `make acfindx 2>/dev/null | grep -v make`
     # Open Windows xmkmf reportedly sets LIBDIR instead of USRLIBDIR.
-    if test ! -f $ac_im_usrlibdir/libX11.a && test -f $ac_im_libdir/libX11.a
-    then
-      ac_im_usrlibdir=$ac_im_libdir
-    fi
+    for ac_extension in a so sl; do
+      if test ! -f $ac_im_usrlibdir/libX11.$ac_extension &&
+        test -f $ac_im_libdir/libX11.$ac_extension; then
+        ac_im_usrlibdir=$ac_im_libdir; break
+      fi
+    done
+    # Screen out bogus values from the imake configuration.
     case "$ac_im_incroot" in
 	/usr/include) ;;
-	*) ac_x_includes="$ac_im_incroot" ;;
+	*) test -f "$ac_im_incroot/X11/Xos.h" && ac_x_includes="$ac_im_incroot" ;;
     esac
     case "$ac_im_usrlibdir" in
 	/usr/lib | /lib) ;;
-	*) ac_x_libraries="$ac_im_usrlibdir" ;;
+	*) test -d "$ac_im_usrlibdir" && ac_x_libraries="$ac_im_usrlibdir" ;;
     esac
   fi
   cd ..
@@ -1746,7 +1844,7 @@ AC_TRY_CPP([#include <$x_direct_test_include>],
 # See if we find them without any special options.
 # Don't add to $LIBS permanently.
 ac_save_LIBS="$LIBS"
-LIBS="$LIBS -l$x_direct_test_library"
+LIBS="-l$x_direct_test_library $LIBS"
 AC_TRY_LINK(, [${x_direct_test_function}()],
 [LIBS="$ac_save_LIBS" no_x= ac_x_libraries=],
 [LIBS="$ac_save_LIBS"
@@ -1829,7 +1927,7 @@ else
   # These have to be linked with before -lX11, unlike the other
   # libraries we check for below, so use a different variable.
   #  --interran@uluru.Stanford.EDU, kb@cs.umb.edu.
-  AC_CHECK_LIB(ICE, IceConnectionNumbers,
+  AC_CHECK_LIB(ICE, IceConnectionNumber,
     [X_PRE_LIBS="$X_PRE_LIBS -lSM -lICE"])
   LDFLAGS="$ac_save_LDFLAGS"
 
@@ -1870,6 +1968,7 @@ AC_SUBST(X_EXTRA_LIBS)dnl
 
 dnl ### Checks for UNIX variants
 dnl These are kludges which should be replaced by a single POSIX check.
+dnl They aren't cached, to discourage their use.
 
 
 AC_DEFUN(AC_AIX,
@@ -1897,7 +1996,7 @@ fi
 ])
 
 AC_DEFUN(AC_ISC_POSIX,
-[AC_BEFORE([$0], [AC_TRY_LINK])dnl
+[AC_BEFORE([$0], [AC_TRY_COMPILE])dnl
 AC_BEFORE([$0], [AC_TRY_LINK])dnl
 AC_BEFORE([$0], [AC_TRY_RUN])dnl
 AC_MSG_CHECKING(for POSIXized ISC)
@@ -1929,22 +2028,22 @@ AC_EGREP_CPP(yes,
 ], [AC_MSG_RESULT(yes); XENIX=yes], [AC_MSG_RESULT(no); XENIX=])
 if test "$XENIX" = yes; then
   # Make sure -ldir precedes -lx.
-  test $ac_header_dirent = dirent.h && LIBS="$LIBS -ldir"
+  test $ac_header_dirent = dirent.h && LIBS="-ldir $LIBS"
   LIBS="$LIBS -lx"
 fi
 ])
 
 AC_DEFUN(AC_DYNIX_SEQ,
 [AC_OBSOLETE([$0], [; instead use AC_FUNC_GETMNTENT])dnl
-AC_CHECK_LIB(seq, getmntent, LIBS="$LIBS -lseq")
+AC_CHECK_LIB(seq, getmntent, LIBS="-lseq $LIBS")
 ])
 
 AC_DEFUN(AC_IRIX_SUN,
 [AC_OBSOLETE([$0], [; instead use AC_FUNC_GETMNTENT or AC_CHECK_LIB(sun, getpwnam)])dnl
-AC_CHECK_LIB(sun, getmntent, LIBS="$LIBS -lsun")
+AC_CHECK_LIB(sun, getmntent, LIBS="-lsun $LIBS")
 ])
 
 AC_DEFUN(AC_SCO_INTL,
 [AC_OBSOLETE([$0], [; instead use AC_FUNC_STRFTIME])dnl
-AC_CHECK_LIB(intl, strftime, LIBS="$LIBS -lintl")
+AC_CHECK_LIB(intl, strftime, LIBS="-lintl $LIBS")
 ])

@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 # autoconf -- create `configure' using m4 macros
 # Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
@@ -31,15 +31,16 @@ Usage: autoconf [-h] [--help] [-m dir] [--macrodir=dir]
 if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
 if test "${LANG+set}"   = set; then LANG=C;   export LANG;   fi
 
-test -z "${AC_MACRODIR}" && AC_MACRODIR=@datadir@
-test -z "${M4}" && M4=@M4@
+: ${AC_MACRODIR=@datadir@}
+: ${M4=@M4@}
 case "${M4}" in
 /*) # Handle the case that m4 has moved since we were configured.
     # It may have been found originally in a build directory.
     test -f "${M4}" || M4=m4 ;;
 esac
 
-tmpout=/tmp/acout.$$
+: ${TMPDIR=/tmp}
+tmpout=${TMPDIR}/acout.$$
 localdir=
 show_version=no
 
@@ -91,7 +92,7 @@ esac
 
 trap 'rm -f $tmpin $tmpout; exit 1' 1 2 15
 
-tmpin=/tmp/acin.$$ # Always set this, to avoid bogus errors from some rm's.
+tmpin=${TMPDIR}/acin.$$ # Always set this, to avoid bogus errors from some rm's.
 if test z$infile = z-; then
   infile=$tmpin
   cat > $infile

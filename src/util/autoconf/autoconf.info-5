@@ -1,9 +1,12 @@
 This is Info file autoconf.info, produced by Makeinfo-1.55 from the
-input file ./autoconf.texi.
+input file autoconf.texi.
 
 START-INFO-DIR-ENTRY
 * Autoconf: (autoconf).         Create source code configuration scripts.
 END-INFO-DIR-ENTRY
+
+   Autoconf: Creating Automatic Configuration Scripts, by David
+MacKenzie.
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
@@ -24,6 +27,93 @@ permission notice identical to this one.
 manual into another language, under the above conditions for modified
 versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
+
+
+File: autoconf.info,  Node: Numbers,  Next: Deuteronomy,  Prev: Leviticus,  Up: History
+
+Numbers
+=======
+
+   In July 1992, after months of alpha testing, I released Autoconf 1.0,
+and converted many GNU packages to use it.  I was surprised by how
+positive the reaction to it was.  More people started using it than I
+could keep track of, including people working on software that wasn't
+part of the GNU Project (such as TCL, FSP, and Kerberos V5).  Autoconf
+continued to improve rapidly, as many people using the `configure'
+scripts reported problems they encountered.
+
+   Autoconf turned out to be a good torture test for `m4'
+implementations.  UNIX `m4' started to dump core because of the length
+of the macros that Autoconf defined, and several bugs showed up in GNU
+`m4' as well.  Eventually, we realized that we needed to use some
+features that only GNU `m4' has.  4.3BSD `m4', in particular, has an
+impoverished set of builtin macros; the System V version is better, but
+still doesn't provide everything we need.
+
+   More development occurred as people put Autoconf under more stresses
+(and to uses I hadn't anticipated).  Karl Berry added checks for X11.
+david zuhn contributed C++ support.  Franc,ois Pinard made it diagnose
+invalid arguments.  Jim Blandy bravely coerced it into configuring GNU
+Emacs, laying the groundwork for several later improvements.  Roland
+McGrath got it to configure the GNU C Library, wrote the `autoheader'
+script to automate the creation of C header file templates, and added a
+`--verbose' option to `configure'.  Noah Friedman added the
+`--macrodir' option and `AC_MACRODIR' environment variable.  (He also
+coined the term "autoconfiscate" to mean "adapt a software package to
+use Autoconf".)  Roland and Noah improved the quoting protection in
+`AC_DEFINE' and fixed many bugs, especially when I got sick of dealing
+with portability problems from February through June, 1993.
+
+
+File: autoconf.info,  Node: Deuteronomy,  Prev: Numbers,  Up: History
+
+Deuteronomy
+===========
+
+   A long wish list for major features had accumulated, and the effect
+of several years of patching by various people had left some residual
+cruft.  In April 1994, while working for Cygnus Support, I began a major
+revision of Autoconf.  I added most of the features of the Cygnus
+`configure' that Autoconf had lacked, largely by adapting the relevant
+parts of Cygnus `configure' with the help of david zuhn and Ken
+Raeburn.  These features include support for using `config.sub',
+`config.guess', `--host', and `--target'; making links to files; and
+running `configure' scripts in subdirectories.  Adding these features
+enabled Ken to convert GNU `as', and Rob Savoye to convert DejaGNU, to
+using Autoconf.
+
+   I added more features in response to other peoples' requests.  Many
+people had asked for `configure' scripts to share the results of the
+checks between runs, because (particularly when configuring a large
+source tree, like Cygnus does) they were frustratingly slow.  Mike
+Haertel suggested adding site-specific initialization scripts.  People
+distributing software that had to unpack on MS-DOS asked for a way to
+override the `.in' extension on the file names, which produced file
+names like `config.h.in' containing two dots.  Jim Avera did an
+extensive examination of the problems with quoting in `AC_DEFINE' and
+`AC_SUBST'; his insights led to significant improvements.  Richard
+Stallman asked that compiler output be sent to `config.log' instead of
+`/dev/null', to help people debug the Emacs `configure' script.
+
+   I made some other changes because of my dissatisfaction with the
+quality of the program.  I made the messages showing results of the
+checks less ambiguous, always printing a result.  I regularized the
+names of the macros and cleaned up coding style inconsistencies.  I
+added some auxiliary utilities that I had developed to help convert
+source code packages to use Autoconf.  With the help of Franc,ois
+Pinard, I made the macros not interrupt each others' messages.  (That
+feature revealed some performance bottlenecks in GNU `m4', which he
+hastily corrected!) I reorganized the documentation around problems
+people want to solve.  And I began a testsuite, because experience had
+shown that Autoconf has a pronounced tendency to regress when we change
+it.
+
+   Again, several alpha testers gave invaluable feedback, especially
+Franc,ois Pinard, Jim Meyering, Karl Berry, Rob Savoye, Ken Raeburn,
+and Mark Eichin.
+
+   Finally, version 2.0 was ready.  And there was much rejoicing.  (And
+I have free time again.  I think.  Yeah, right.)
 
 
 File: autoconf.info,  Node: Old Macro Names,  Next: Environment Variable Index,  Prev: History,  Up: Top
@@ -231,11 +321,11 @@ Autoconf checks.
 * Menu:
 
 * AC_MACRODIR:                          Invoking autoupdate.
-* AC_MACRODIR:                          Invoking autoscan.
-* AC_MACRODIR:                          Invoking autoreconf.
-* AC_MACRODIR:                          Invoking ifnames.
 * AC_MACRODIR:                          Invoking autoheader.
+* AC_MACRODIR:                          Invoking autoreconf.
 * AC_MACRODIR:                          Invoking autoconf.
+* AC_MACRODIR:                          Invoking ifnames.
+* AC_MACRODIR:                          Invoking autoscan.
 * CONFIG_FILES:                         Invoking config.status.
 * CONFIG_HEADERS:                       Invoking config.status.
 * CONFIG_SHELL:                         Invoking config.status.
@@ -263,18 +353,18 @@ how this is done.
 * build_cpu:                            System Type Variables.
 * build_os:                             System Type Variables.
 * build_vendor:                         System Type Variables.
-* CC:                                   Particular Programs.
 * CC:                                   UNIX Variants.
 * CC:                                   Particular Programs.
-* CFLAGS:                               Preset Output Variables.
+* CC:                                   Particular Programs.
 * CFLAGS:                               Particular Programs.
+* CFLAGS:                               Preset Output Variables.
 * configure_input:                      Preset Output Variables.
 * CPP:                                  Particular Programs.
 * CPPFLAGS:                             Preset Output Variables.
 * CXX:                                  Particular Programs.
 * CXXCPP:                               Particular Programs.
-* CXXFLAGS:                             Preset Output Variables.
 * CXXFLAGS:                             Particular Programs.
+* CXXFLAGS:                             Preset Output Variables.
 * DEFS:                                 Preset Output Variables.
 * exec_prefix:                          Preset Output Variables.
 * host:                                 System Type Variables.
@@ -290,10 +380,10 @@ how this is done.
 * LEX:                                  Particular Programs.
 * LEXLIB:                               Particular Programs.
 * LEX_OUTPUT_ROOT:                      Particular Programs.
-* LIBOBJS:                              Particular Functions.
-* LIBOBJS:                              Particular Functions.
-* LIBOBJS:                              Generic Functions.
 * LIBOBJS:                              Structures.
+* LIBOBJS:                              Generic Functions.
+* LIBOBJS:                              Particular Functions.
+* LIBOBJS:                              Particular Functions.
 * LIBS:                                 UNIX Variants.
 * LIBS:                                 UNIX Variants.
 * LIBS:                                 Preset Output Variables.
@@ -336,6 +426,7 @@ use these names in `#if' directives.
 * DIRENT:                               Particular Headers.
 * GETGROUPS_T:                          Particular Typedefs.
 * GETLODAVG_PRIVILEGED:                 Particular Functions.
+* GETPGRP_VOID:                         Particular Functions.
 * gid_t:                                Particular Typedefs.
 * HAVE_FUNCTION:                        Generic Functions.
 * HAVE_HEADER:                          Generic Headers.
@@ -435,6 +526,7 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * CHECK_PROG:                           Generic Programs.
 * CHECK_PROGS:                          Generic Programs.
 * CHECK_SIZEOF:                         Compiler Characteristics.
+* CHECK_TOOL:                           Generic Programs.
 * CHECK_TYPE:                           Generic Typedefs.
 * COMPILE_CHECK:                        Examining Libraries.
 * CONFIG_AUX_DIR:                       Input.
@@ -466,6 +558,7 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * FUNC_CLOSEDIR_VOID:                   Particular Functions.
 * FUNC_GETLOADAVG:                      Particular Functions.
 * FUNC_GETMNTENT:                       Particular Functions.
+* FUNC_GETPGRP:                         Particular Functions.
 * FUNC_MEMCMP:                          Particular Functions.
 * FUNC_MMAP:                            Particular Functions.
 * FUNC_SETVBUF_REVERSED:                Particular Functions.
@@ -557,8 +650,8 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * SET_MAKE:                             Old Macro Names.
 * SIZEOF_TYPE:                          Old Macro Names.
 * SIZE_T:                               Old Macro Names.
-* STAT_MACROS_BROKEN:                   Structures.
 * STAT_MACROS_BROKEN:                   Old Macro Names.
+* STAT_MACROS_BROKEN:                   Structures.
 * STDC_HEADERS:                         Old Macro Names.
 * STRCOLL:                              Old Macro Names.
 * STRUCT_ST_BLKSIZE:                    Structures.

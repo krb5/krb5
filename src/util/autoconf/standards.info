@@ -1,5 +1,5 @@
-This is Info file ../standards.info, produced by Makeinfo-1.55 from the
-input file ../standards.texi.
+This is Info file standards.info, produced by Makeinfo-1.55 from the
+input file standards.texi.
 
 START-INFO-DIR-ENTRY
 * Standards: (standards).        GNU coding standards.
@@ -24,37 +24,43 @@ translation approved by the Free Software Foundation.
 
 
 Indirect:
-standards.info-1: 960
-standards.info-2: 49450
+standards.info-1: 954
+standards.info-2: 48207
+standards.info-3: 95193
 
 Tag Table:
 (Indirect)
-Node: Top960
-Node: Preface2096
-Node: Reading Non-Free Code3138
-Node: Contributions4868
-Node: Change Logs6466
-Node: Compatibility10182
-Node: Makefile Conventions11821
-Node: Makefile Basics12178
-Node: Utilities in Makefiles14522
-Node: Standard Targets16219
-Node: Command Variables23328
-Node: Directory Variables26158
-Node: Configuration35220
-Node: Source Language42244
-Node: Formatting43374
-Node: Comments46664
-Node: Syntactic Conventions49450
-Node: Names52342
-Node: Using Extensions53632
-Node: System Functions55373
-Node: Semantics60176
-Node: Errors63464
-Node: Libraries64667
-Node: Portability65891
-Node: User Interfaces69178
-Node: Documentation85106
-Node: Releases89040
+Node: Top954
+Node: Preface2091
+Node: Reading Non-Free Code3127
+Node: Contributions4857
+Node: Change Logs6455
+Node: Compatibility10181
+Node: Makefile Conventions11820
+Node: Makefile Basics12177
+Node: Utilities in Makefiles14521
+Node: Standard Targets16218
+Node: Command Variables24726
+Node: Directory Variables27556
+Node: Configuration36859
+Node: Source Language43787
+Node: Formatting44917
+Node: Comments48207
+Node: Syntactic Conventions50994
+Node: Names53886
+Node: Using Extensions55623
+Node: System Functions57364
+Node: Semantics62167
+Node: Errors65800
+Node: Libraries67004
+Node: Portability68228
+Node: User Interfaces71515
+Node: Documentation88583
+Node: GNU Manuals89090
+Node: Manual Structure Details91101
+Node: NEWS File92506
+Node: Man Pages93185
+Node: Reading other Manuals94409
+Node: Releases95193
 
 End Tag Table

@@ -163,6 +163,11 @@ the file names where they should reside for actual use.  If there is a
 simple test to verify that a program is properly installed, this target
 should run that test.
 
+If possible, write the @code{install} target rule so that it does not
+modify anything in the directory where the program was built, provided
+@samp{make all} has just been done.  This is convenient for building the
+program under one user name and installing it under another.
+
 The commands should create all the directories in which files are to be
 installed, if they don't already exist.  This includes the directories
 specified as the values of the variables @code{prefix} and
@@ -205,6 +210,9 @@ Delete all the installed files that the @samp{install} target would
 create (but not the noninstalled files such as @samp{make all} would
 create).
 
+This rule should not modify the directories where compilation is done,
+only the directories where files are installed.
+
 @comment The gratuitous blank line here is to make the table look better
 @comment in the printed Make manual.  Please leave it in.
 @item clean
@@ -228,17 +236,34 @@ normally don't want to recompile.  For example, the @samp{mostlyclean}
 target for GCC does not delete @file{libgcc.a}, because recompiling it
 is rarely necessary and takes a lot of time.
 
-@item realclean
-Delete everything from the current directory that can be reconstructed
-with this Makefile.  This typically includes everything deleted by
-@code{distclean}, plus more: C source files produced by Bison, tags tables,
-Info files, and so on.
+@item maintainer-clean
+Delete almost everything from the current directory that can be
+reconstructed with this Makefile.  This typically includes everything
+deleted by @code{distclean}, plus more: C source files produced by
+Bison, tags tables, Info files, and so on.
 
-One exception, however: @samp{make realclean} should not delete
-@file{configure} even if @file{configure} can be remade using a rule in
-the Makefile.  More generally, @samp{make realclean} should not delete
-anything that needs to exist in order to run @file{configure}
-and then begin to build the program.
+The reason we say ``almost everything'' is that @samp{make
+maintainer-clean} should not delete @file{configure} even if
+@file{configure} can be remade using a rule in the Makefile.  More
+generally, @samp{make maintainer-clean} should not delete anything that
+needs to exist in order to run @file{configure} and then begin to build
+the program.  This is the only exception; @code{maintainer-clean} should
+delete everything else that can be rebuilt.
+
+The @samp{maintainer-clean} is intended to be used by a maintainer of
+the package, not by ordinary users.  You may need special tools to
+reconstruct some of the files that @samp{make maintainer-clean} deletes.
+Since these files are normally included in the distribution, we don't
+take care to make them easy to reconstruct.  If you find you need to
+unpack the full distribution again, don't blame us.
+
+To help make users aware of this, the commands for
+@code{maintainer-clean} should start with these two:
+
+@example
+@@echo "This command is intended for maintainers to use;"
+@@echo "it deletes files that may require special tools to rebuild."
+@end example
 
 @item TAGS
 Update a tags table for this program.
@@ -327,6 +352,9 @@ installdirs: mkinstalldirs
                                 $(libdir) $(infodir) \
                                 $(mandir)
 @end smallexample
+
+This rule should not modify the directories where compilation is done.
+It should do nothing but create installation directories.
 @end table
 
 @node Command Variables
@@ -401,7 +429,9 @@ installed.
 
 Installation directories should always be named by variables, so it is
 easy to install in a nonstandard place.  The standard names for these
-variables are as follows.
+variables are described below.  They are based on a standard filesystem
+layout; variants of it are used in SVR4, 4.4BSD, Linux, Ultrix v4, and
+other modern operating systems.
 
 These two variables set the root for the installation.  All the other
 installation directories should be subdirectories of one of these two,
@@ -411,7 +441,8 @@ and nothing should be directly installed into these two directories.
 @item prefix
 A prefix used in constructing the default values of the variables listed
 below.  The default value of @code{prefix} should be @file{/usr/local}
-(at least for now).
+When building the complete GNU system, the prefix will be empty and
+@file{/usr} will be a symbolic link to @file{/}.
 
 @item exec_prefix
 A prefix used in constructing the default values of some of the
