@@ -4,7 +4,8 @@ SRCS= \
 	kdb_dbm.c \
 	verify_mky.c \
 	fetch_mkey.c \
-	setup_mkey.c
+	setup_mkey.c \
+	store_mkey.c
 
 NormalLibraryObjectRule()
 
@@ -14,6 +15,7 @@ OBJS= \
 	kdb_dbm.o \
 	verify_mky.o \
 	fetch_mkey.o \
-	setup_mkey.o
+	setup_mkey.o \
+	store_mkey.o
 
 NormalLibraryTarget(kdb,$(OBJS))
