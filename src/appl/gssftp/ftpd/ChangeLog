@@ -8,6 +8,12 @@ Fri Feb 12 21:16:26 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c: strcat -> strncat
 
+Fri Oct 23 18:18:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpcmd.y (cmd): Don't allow the PORT command to accept a port
+		number lower than 1024; this prevents some nasty ftp
+		"bounce attacks" to SMTP ports, etc.
+
 Fri May  8 18:06:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ftpcmd.y (cmd): Fix Y2K problem in the MDTM command.
