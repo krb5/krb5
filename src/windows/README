@@ -18,6 +18,12 @@ creating a distribution that can be built on Windows.  The second
 method works from the sources that come from the Unix distribution if
 you have certain Unix-type utilities.
 
+IMPORTANT NOTE: By default, the sources are build with debug
+information and linked against the debug version of the Microsoft C
+Runtime library, which is not found on most Win32 systems unless they
+have development tools.  To build a release version, you need to
+define NODEBUG either in the environment or the nmake command-line.
+
 
 Traditional Build Method:
 ------------------------
@@ -35,8 +41,8 @@ On the PC side
 3) unzip kerbsrc.zip
         - or -
    pkunzip -d kerbsrc.zip
-4) nmake -nologo                       # Build the sources
-5) nmake install		       # Copy headers, libs, executables
+4) nmake [NODEBUG=1]                   # Build the sources
+5) nmake install [NODEBUG=1]	       # Copy headers, libs, executables
 
 
 All-Windows Build Method:
@@ -46,8 +52,8 @@ First, make sure you have sed, gawk, cat, and cp.
 
 1) cd xxx/src                          # Go to where the source lives
 2) nmake -f Makefile.in prep-windows   # Create Makefile for Windows
-3) nmake -nologo                       # Build the sources
-4) nmake install		       # Copy headers, libs, executables
+3) nmake [NODEBUG=1]                   # Build the sources
+4) nmake install [NODEBUG=1]	       # Copy headers, libs, executables
 
 
 Notes on the install Target:
@@ -58,7 +64,7 @@ point to the directory where the header, library, and executable files
 will be installed.  You can either define this in the environment or
 at the nmake command-line.  For example:
 
-nmake install KRB_INSTALL_DIR=c:\sdk\krb5
+nmake install [NODEBUG=1] KRB_INSTALL_DIR=c:\sdk\krb5
 
 Make sure you create the directory first.  Otherwise, nmake will
 complain.  The files will get installed into include, lib, and bin
