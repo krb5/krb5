@@ -100,7 +100,7 @@ krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds, krb5_princip
       /* if the master is unreachable, return the error from the
 	 slave we were able to contact */
 
-      if ((ret2 == KRB5_KDC_UNREACH) || (ret == KRB5_REALM_CANT_RESOLVE))
+      if ((ret2 == KRB5_KDC_UNREACH) || (ret2 == KRB5_REALM_CANT_RESOLVE))
 	 goto cleanup;
 
       ret = ret2;

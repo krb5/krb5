@@ -1,3 +1,8 @@
+2002-10-28  Sam Hartman  <hartmans@mit.edu>
+
+	* gic_keytab.c (krb5_get_init_creds_keytab): Don't allow failure
+	to  resolve master KDC to mask error from a slave we did talk to. 
+
 2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
 
 	* gic_pwd.c (krb5_get_init_creds_password): Exit out of the loop
