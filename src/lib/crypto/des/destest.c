@@ -72,7 +72,7 @@ char *argv[];
 	mit_des_ecb_encrypt(input, output2,
 			    (struct mit_des_ks_struct *)eblock.priv,1);
 
-	if (bcmp((char *)output2, (char *)output, 8)) {
+	if (memcmp((char *)output2, (char *)output, 8)) {
 	    fprintf(stderr, 
 		    "DES ERROR, key %s, text %s, real cipher %s, computed %02X%02X%02X%02X%02X%02X%02X%02X\n",
 		    block1, block2, block3,
@@ -134,7 +134,7 @@ char cblock[];
 	    printf("Bad value nybble %d in %s\n", i, text);
 	    exit(1);
 	}
-	bcopy(value2[value[text[i]]], &cblock[i*4], 4);
+	memcpy(&cblock[i*4], value2[value[text[i]]], 4);
     }
     cblock[64] = 0;
     return;
