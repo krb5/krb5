@@ -9,6 +9,7 @@ OBJS=	decode_kdc.o	\
 	encrypt_tk.o	\
 	mk_error.o	\
 	parse.o		\
+	princ_comp.o	\
 	rd_error.o	\
 	unparse.o
 
@@ -21,6 +22,7 @@ SRCS=	decode_kdc.c	\
 	encrypt_tk.c	\
 	mk_error.c	\
 	parse.c		\
+	princ_comp.c	\
 	rd_error.c	\
 	unparse.c
 
