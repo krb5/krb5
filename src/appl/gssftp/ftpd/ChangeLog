@@ -1,3 +1,12 @@
+Sun Dec 21 18:17:53 1997  Tom Yu  <tlyu@mit.edu>
+
+	* logwtmp.c (ftp_logwtmp): Rename logwtmp to ftp_logwtmp to avoid
+	collision with native logwtmp.  Also, return void rather than
+	int.
+
+	* ftpd.c: Rename logwtmp to ftp_logwtmp to avoid collision with
+	native logwtmp.
+
 Thu Dec 11 23:28:07 1997  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c: Don't include netdb.h or sys/socket.h if krb.h is
