@@ -23,6 +23,7 @@
 #include <krb5.h>
 #include <kadm5/admin.h>
 #include <com_err.h>
+#include <stdarg.h>
 
 #include <stdio.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -65,7 +66,7 @@ krb5_error_code  kdc_get_server_key(krb5_context, krb5_principal,
 static void usage(context)
      krb5_context context;
 {
-     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]] [-nofork]\n", whoami);
+     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]] [-nofork] [-p portnum]\n", whoami);
      cleanup_and_exit(1, context);
 }
 
@@ -74,18 +75,6 @@ static RETSIGTYPE request_exit(signo)
 {
      signalled = 1;
 }
-
-#if 0
-/* this is in the kadm5 library */
-int krb5_free_keyblock_contents(context, key)
-     krb5_context context;
-     krb5_keyblock *key;
-{
-     memset(key->contents, 0, key->length);
-     krb5_xfree(key->contents);
-     return 0;
-}
-#endif
 
 int main(argc, argv)
      int argc;
@@ -99,14 +88,15 @@ int main(argc, argv)
      krb5_context context;
      krb5_error_code retval;
      kadm5_config_params config_params;
+     unsigned long port = 0;
+
+     whoami = ((whoami = strrchr(argv[0], '/')) ? whoami + 1 : argv[0]);
 
      retval = krb5_init_context(&context);
      if (retval) {
-	     com_err(argv[0], retval, "while initializing krb5");
+	     com_err(whoami, retval, "while initializing krb5");
 	     exit(1);
      }
-
-     whoami = ((whoami = strrchr(argv[0], '/')) ? whoami + 1 : argv[0]);
 
      argv++; argc--;
      use_master = use_keytab = nofork = 0;
@@ -125,6 +115,24 @@ int main(argc, argv)
 		    usage(context);
 	       config_params.mask |= KADM5_CONFIG_REALM;
 	       config_params.realm = *argv;
+	  }
+	  else if (strcmp(*argv, "-p") == 0) {
+	      char *endptr = 0;
+	      argv++; argc--;
+	      if (argc == 0)
+		  usage (context);
+	      if (port != 0) {
+		  com_err (whoami, 0,
+			   "port number may only be specified once");
+		  exit (1);
+	      }
+	      port = strtoul (*argv, &endptr, 0);
+	      if (*endptr != '\0' || port > 65535 || port == 0) {
+		  com_err (whoami, 0,
+			   "invalid port number %s, must be 1..65535\n",
+			   *argv);
+		  exit (1);
+	      }
 	  }
 	  else
 	       break;
@@ -148,12 +156,16 @@ int main(argc, argv)
      memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
      saddr.sin_family = AF_INET;
      saddr.sin_addr.s_addr = INADDR_ANY;
-     serv = getservbyname(KRB524_SERVICE, "udp");
-     if (serv == NULL) {
-	  com_err(whoami, 0, "service entry not found, using %d", KRB524_PORT);
-	  saddr.sin_port = htons(KRB524_PORT);
+     if (port == 0) {
+	 serv = getservbyname(KRB524_SERVICE, "udp");
+	 if (serv == NULL) {
+	     com_err(whoami, 0, "service entry `%s' not found, using %d",
+		     KRB524_SERVICE, KRB524_PORT);
+	     saddr.sin_port = htons(KRB524_PORT);
+	 } else
+	     saddr.sin_port = serv->s_port;
      } else
-	  saddr.sin_port = serv->s_port;
+	 saddr.sin_port = htons(port);
 	  
      if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	  com_err(whoami, errno, "creating main socket");
@@ -165,10 +177,14 @@ int main(argc, argv)
 	  cleanup_and_exit(1, context);
      }
      if (!nofork && daemon(0, 0)) {
-	  com_err(whoami, errno, "while detaching from tty");
-	  cleanup_and_exit(1, context);
+	 com_err(whoami, errno, "while detaching from tty");
+	 cleanup_and_exit(1, context);
      }
-     
+#if 0
+     if (!nofork)
+	 krb5_klog_init(context, "krb524d", argv[0], !nofork);
+#endif
+
      while (1) {
 	  FD_ZERO(&rfds);
 	  FD_SET(s, &rfds);
