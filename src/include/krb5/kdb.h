@@ -200,5 +200,32 @@ krb5_error_code	krb5_db_fetch_mkey
 
 #define KRB5_KDB_DEF_FLAGS	0
 
+#ifdef	KDB5_DISPATCH
+/*
+ * Database operation dispatch table.  This table determines the procedures
+ * to be used to access the KDC database.  Replacement of this structure is
+ * not supported.
+ */
+typedef struct _kdb5_dispatch_table {
+    char *	kdb5_db_mech_name;
+    char *	kdb5_db_index_ext;
+    char *	kdb5_db_data_ext;
+    char *	kdb5_db_lock_ext;
+    DBM *	(*kdb5_dbm_open) KRB5_NPROTOTYPE((char *, int, int));
+    void	(*kdb5_dbm_close) KRB5_NPROTOTYPE((DBM *));
+    datum	(*kdb5_dbm_fetch) KRB5_NPROTOTYPE((DBM *, datum));
+    datum	(*kdb5_dbm_firstkey) KRB5_NPROTOTYPE((DBM *));
+    datum	(*kdb5_dbm_nextkey) KRB5_NPROTOTYPE((DBM *));
+    int		(*kdb5_dbm_delete) KRB5_NPROTOTYPE((DBM *, datum));
+    int		(*kdb5_dbm_store) KRB5_NPROTOTYPE((DBM *, datum, datum, int));
+    int		(*kdb5_dbm_error) KRB5_NPROTOTYPE((DBM *));
+    int		(*kdb5_dbm_clearerr) KRB5_NPROTOTYPE((DBM *));
+    int		(*kdb5_dbm_dirfno) KRB5_NPROTOTYPE((DBM *));
+    int		(*kdb5_dbm_pagfno) KRB5_NPROTOTYPE((DBM *));
+} kdb5_dispatch_table;
+
+krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
+						  kdb5_dispatch_table *));
+#endif	/* KDB5_DISPATCH */
 #endif /* KRB5_KDB5__ */
 

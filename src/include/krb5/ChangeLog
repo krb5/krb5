@@ -1,4 +1,8 @@
 
+Fri Jun 30 16:13:41 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb.h - Add kdb dispatch table and set routine under KDB5_DISPATCH.
+
+
 Tue Jun 27 16:12:09 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_proto.h - Change second argument of aprof_get... routines to be
 		const char *.
