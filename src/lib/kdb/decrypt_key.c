@@ -47,8 +47,7 @@ krb5_keyblock *out;
 	return ENOMEM;
     }
     /* copy out the real length count */
-    bcopy((char *)in->contents, (char *)&out->length,
-	  sizeof(out->length));
+    memcpy((char *)&out->length, (char *)in->contents, sizeof(out->length));
 
     /* remember the contents of the encrypted version has a sizeof(in->length)
        integer length of the real embedded key, followed by the

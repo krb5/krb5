@@ -440,14 +440,14 @@ krb5_db_entry *entry;
 	contents->dptr = 0;
 	return(ENOMEM);
     }
-    (void) bcopy((char *)&copy_princ, contents->dptr, sizeof(copy_princ));
+    (void) memcpy(contents->dptr, (char *)&copy_princ, sizeof(copy_princ));
     nextloc = contents->dptr + sizeof(copy_princ);
 
-    (void) bcopy(unparse_princ, nextloc, princ_size);
+    (void) memcpy(nextloc, unparse_princ, princ_size);
     nextloc += princ_size;
-    (void) bcopy(unparse_mod_princ, nextloc, mod_size);
+    (void) memcpy(nextloc, unparse_mod_princ, mod_size);
     nextloc += mod_size;
-    (void) bcopy((char *)entry->key.contents, nextloc, entry->key.length);
+    (void) memcpy(nextloc, (char *)entry->key.contents, entry->key.length);
     free(unparse_princ);
     free(unparse_mod_princ);
     return 0;
@@ -480,7 +480,7 @@ krb5_db_entry *entry;
     if (nextloc >= contents->dptr + contents->dsize)
 	return KRB5_KDB_TRUNCATED_RECORD;
 
-    bcopy(contents->dptr, (char *) entry, sizeof(*entry));
+    memcpy((char *) entry, contents->dptr, sizeof(*entry));
 
     if (nextloc + strlen(nextloc)+1 >= contents->dptr + contents->dsize)
 	return KRB5_KDB_TRUNCATED_RECORD;
@@ -511,7 +511,7 @@ krb5_db_entry *entry;
 	(void) bzero((char *) entry, sizeof(*entry));
 	return ENOMEM;
     }
-    (void) bcopy(nextloc, (char *)entry->key.contents, keysize);
+    (void) memcpy((char *)entry->key.contents, nextloc, keysize);
     if (keysize != entry->key.length) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
