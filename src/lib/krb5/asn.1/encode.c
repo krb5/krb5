@@ -10,10 +10,10 @@
  * encoding glue routines.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char rcsid_encode_c[] =
 "$Id$";
-#endif	lint
+#endif	/* lint || saber */
 
 #include <krb5/copyright.h>
 #include <isode/psap.h>
@@ -28,109 +28,102 @@ static char rcsid_encode_c[] =
 
 #include <stdio.h>
 
-#ifdef __STDC__
-typedef void * pointer;
-#else
-typedef char * pointer;
-#endif
-
-static char encode_buf[BUFSIZ];
-
-krb5_data *
-encode_generic(input, error, encoder, translator, free_translation)
-pointer input;
-int *error;
-int (*encoder)(/* PE, int, int, char *, pointer */);
-pointer (*translator)(/* pointer, int * */);
-void (*free_translation)(/* pointer  */);
+krb5_error_code
+encode_generic(input, data_out, encoder, translator, free_translation)
+krb5_pointer input;
+register krb5_data **data_out;
+int (*encoder) PROTOTYPE((PE, int, int, char *, pointer));
+krb5_pointer (*translator) PROTOTYPE((pointer, int * ));
+void (*free_translation) PROTOTYPE((krb5_pointer ));
 {
-    pointer isode_out;
+    krb5_pointer isode_out;
     PE pe;
     PS ps;
-    register krb5_data *retval;
+    char encode_buf[BUFSIZ];
+    krb5_error_code error;
 
-    if (!(isode_out = (*translator)(input, error)))
-	return(0);
+    if (!(isode_out = (*translator)(input, &error)))
+	return(error);
     if (!(ps = ps_alloc(str_open))) {
-	*error = ENOMEM;
 	free_translation(isode_out);
-	return(0);
+	return(ENOMEM);
     }
     if (str_setup(ps, encode_buf, sizeof(encode_buf), 1) != OK) {
-	*error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
+	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
     errout:
 	ps_free(ps);
 	free_translation(isode_out);
-	return(0);
+	return(error);
     }
     if ((*encoder)(&pe, 0, 0, 0, isode_out)) {
-	*error = ENOMEM;
+	error = ENOMEM;
 	goto errout;
     }
-    retval = (krb5_data *)malloc(sizeof(*retval));
-    if (!retval) {
-	*error = ENOMEM;
+    *data_out = (krb5_data *)malloc(sizeof(**data_out));
+    if (!*data_out) {
+	error = ENOMEM;
 	goto errout;
     }    
-    if ((retval->length = ps_get_abs(pe)) > sizeof(encode_buf)) {
+    if (((*data_out)->length = ps_get_abs(pe)) > sizeof(encode_buf)) {
 	abort();			/* xxx */
     }
-    retval->data = malloc(ps_get_abs(pe));
-    if (!retval->data) {
-	*error = ENOMEM;
-	free(retval);
+    (*data_out)->data = malloc(ps_get_abs(pe));
+    if (!(*data_out)->data) {
+	error = ENOMEM;
+	free(*data_out);
+	*data_out = 0;
 	goto errout;
     }
     if (pe2ps(ps, pe) != OK || ps_flush(ps) != OK) {
-	*error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
-	free(retval->data);
-	free(retval);
+	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
+	free((*data_out)->data);
+	free(*data_out);
+	*data_out = 0;
 	goto errout;
     }
-    bcopy(encode_buf, retval->data, retval->length);
+    bcopy(encode_buf, (*data_out)->data, (*data_out)->length);
     ps_free(ps);
     pe_free(pe);
     free_translation(isode_out);
-    return(retval);
+    return(0);
 }
 
-pointer
-decode_generic(input, error, decoder, translator, free_translation)
+krb5_error_code
+decode_generic(input, output, decoder, translator, free_translation)
 krb5_data *input;
-int *error;
-int (*decoder)(/* PE, int, int, char *, pointer */);
-pointer (*translator)(/* pointer, int * */);
-void (*free_translation)(/* pointer  */);
+register krb5_pointer *output;
+int (*decoder) PROTOTYPE((PE, int, int, char *, krb5_pointer));
+krb5_pointer (*translator) PROTOTYPE((krb5_pointer, int * ));
+void (*free_translation) PROTOTYPE((krb5_pointer ));
 {
-    register pointer krb5_out;
-    pointer isode_temp;
+    krb5_pointer isode_temp;
     PE pe;
     PS ps;
+    krb5_error_code error;
 
     if (!(ps = ps_alloc(str_open))) {
-	*error = ENOMEM;
-	return(0);
+	return(ENOMEM);
     }
     if (str_setup(ps, input->data, input->length, 1) != OK) {
-	*error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
+	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
 	ps_free(ps);
-	return(0);
+	return(error);
     }
     if (!(pe = ps2pe(ps))) {
-	*error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
+	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
 	ps_free(ps);
-	return(0);
+	return(error);
     }
     if ((*decoder)(pe, 1, 0, 0, &isode_temp) != OK) {
-	*error = ISODE_50_LOCAL_ERR_BADDECODE;
+	error = ISODE_50_LOCAL_ERR_BADDECODE;
 	pe_free(pe);
 	ps_free(ps);
-	return(0);
+	return(error);
     }
-    krb5_out = (*translator)(isode_temp, error);
+    *output = (*translator)(isode_temp, &error);
     pe_free(pe);
     ps_free(ps);
     free_translation(isode_temp);
-    return(krb5_out);			/* may be error if krb5_out
+    return(error);			/* may be error if output
 					   failed above */
 }
