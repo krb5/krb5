@@ -154,6 +154,8 @@ krb5_free_context(ctx)
      if (ctx->ser_ctx_count && ctx->ser_ctx)
 	 free(ctx->ser_ctx);
 
+     if (ctx->kt_default_name)
+         free(ctx->kt_default_name);
      ctx->magic = 0;
      free(ctx);
 }
