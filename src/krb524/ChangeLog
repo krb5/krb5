@@ -1,4 +1,10 @@
 2002-05-22 Alexandra Ellwood <lxs@mit.edu>
+    * conv_creds.c, sendmsg.c: Added return values to krb524_sendto_kdc 
+    to return an IPv4 address for the KDC we talked to (if such an address
+    exists).  On Mac OS X we store this address in the Credentials Cache
+    so we can inform the user when the tickets become invalid.
+    
+2002-05-22 Alexandra Ellwood <lxs@mit.edu>
     * krb524.h: Added #include of krb.h for Mac OS X so that CREDENTIALS 
     is defined (and krb524.h compiles standalone.
 

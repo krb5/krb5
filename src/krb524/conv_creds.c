@@ -39,7 +39,8 @@ KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds,
 
 krb5_error_code krb524_sendto_kdc
 KRB5_PROTOTYPE((krb5_context context, const krb5_data *message,
-		krb5_data *realm, krb5_data *reply));
+		krb5_data *realm, krb5_data *reply, 
+        struct sockaddr *local_addr, int *addrlen));
 
 krb5_error_code
 krb524_convert_creds_kdc(context, v5creds, v4creds)
@@ -50,16 +51,29 @@ krb524_convert_creds_kdc(context, v5creds, v4creds)
      krb5_error_code ret;
      krb5_data reply;
      char *p;
+     struct sockaddr_in local_addr;  /* Ask for an IPv4 address */
+     int addrlen = sizeof (local_addr);
 
      ret = krb524_convert_creds_plain(context, v5creds, v4creds);
      if (ret)
 	 return ret;
 
      reply.data = NULL;
+
      ret = krb524_sendto_kdc(context, &v5creds->ticket,
-			     &v5creds->server->realm, &reply);
+			     &v5creds->server->realm, &reply,
+                 (struct sockaddr *)&local_addr, &addrlen);
      if (ret)
 	 return ret;
+
+#if TARGET_OS_MAC
+    /* On the Mac, we need our local address used to talk to the KDC
+       because we use this to determine validity of v4 tickets. */
+    if ((addrlen == sizeof (struct sockaddr_in))
+        && (local_addr.sin_family == AF_INET)) {
+        v4creds->address = local_addr.sin_addr.s_addr;
+    }
+#endif
 
      p = reply.data;
      ret = ntohl(*((krb5_error_code *) p));

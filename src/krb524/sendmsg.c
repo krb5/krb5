@@ -71,12 +71,17 @@ extern int krb5_max_skdc_timeout;
 extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
+/* returns the local address of the socket used to connect to the KDC.
+   If you don't need this information, pass NULL for the last two parameters */
+
 krb5_error_code
-krb524_sendto_kdc (context, message, realm, reply)
+krb524_sendto_kdc (context, message, realm, reply, local_addr, addrlen)
     krb5_context context;
     const krb5_data * message;
     const krb5_data * realm;
     krb5_data * reply;
+    struct sockaddr * local_addr;
+    int * addrlen;
 {
     register int timeout, host, i;
     struct sockaddr *addr;
@@ -212,13 +217,22 @@ krb524_sendto_kdc (context, message, realm, reply)
 		      sent = 1;
 		    continue;
 		  }
-
+          
 		/* We might consider here verifying that the reply
 		   came from one of the KDC's listed for that address type,
 		   but that check can be fouled by some implementations of
 		   some network types which might show a loopback return
 		   address, for example, if the KDC is on the same host
 		   as the client. */
+
+		/* If the caller wants the local address of this socket
+		   store it here */
+		if ((local_addr != NULL) && (addrlen != NULL) && (addrlen > 0)) {
+		    if (getsockname (socklist[host], local_addr, addrlen) == SOCKET_ERROR) {
+		        /* no address to get... tell the caller we got nothing */
+		        *addrlen = 0;
+		    }
+		}
 
 		reply->length = cc;
 		retval = 0;
