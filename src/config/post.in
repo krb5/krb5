@@ -37,6 +37,7 @@ clean-windows::
 	$(RM) msvc.pdb *.err
 
 Makefiles:: Makefile
+Makefiles:: $(MAKEFILES_RECURSE)
 
 Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
 		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
@@ -50,16 +51,12 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 			--localdir=$(BUILDTOP) \
 			--macrodir=$(BUILDTOP)/util/autoconf
 
-#These don't work well with some versions of GNU make.
-#all-unix clean-unix install-unix check-unix Makefiles::
-#	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-#		*[ik]*) e=:;; *) e="exit 1";; esac;
-
-@RECURSE_TARGETS@::
-	@e="exit 1"; \
+all-recurse clean-recurse install-recurse check-recurse Makefiles-recurse:
+	@case "`echo '$(MFLAGS)'|sed -e 's/ --.*$$//'`" in \
+		*[ik]*) e=:;; *) e="exit 1";; esac; \
 	for i in $(SUBDIRS) ; do \
 		if test -d $$i ; then \
-			target=`echo $@|sed s/-unix//`; \
+			target=`echo $@|sed s/-recurse//`; \
 			echo "making $$target in $(CURRENT_DIR)$$i..."; \
 			if (cd $$i ; $(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
 			    CURRENT_DIR=$(CURRENT_DIR)$$i/ $$target) then :; \

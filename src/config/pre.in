@@ -12,10 +12,19 @@ install:: install-$(WHAT)
 
 check:: check-$(WHAT)
 
-all-unix::
-clean-unix::
-install-unix::
-check-unix::
+#
+# set up some variables for use in recursion
+#
+ALL_RECURSE=@ALL_RECURSE@
+CLEAN_RECURSE=@CLEAN_RECURSE@
+INSTALL_RECURSE=@INSTALL_RECURSE@
+CHECK_RECURSE=@CHECK_RECURSE@
+MAKEFILES_RECURSE=@MAKEFILES_RECURSE@
+
+all-unix:: $(ALL_RECURSE)
+clean-unix:: $(CLEAN_RECURSE)
+install-unix:: $(INSTALL_RECURSE)
+check-unix:: $(CHECK_RECURSE)
 
 # Directory syntax:
 R=/
@@ -159,3 +168,6 @@ all::
 clean::
 install::
 check::
+
+#
+# end of pre.in
