@@ -73,7 +73,7 @@ krb5_error_code krb5_get_in_tkt
 		   krb5_address **,
 		   krb5_enctype,
 		   krb5_keytype,
-		   krb5_error_code (* )(int, /* promoted krb5_keytype */
+		   krb5_error_code (* )(krb5_keytype,
 					krb5_keyblock **,
 					krb5_pointer ),
 		   krb5_pointer,
@@ -85,8 +85,8 @@ krb5_error_code krb5_get_in_tkt
 krb5_error_code krb5_get_in_tkt_with_password
 	PROTOTYPE((krb5_flags,
 		   krb5_address **,
-		   int,			/* promoted from krb5_enctype */
-		   int,			/* promoted from krb5_keytype */
+		   krb5_enctype,
+		   krb5_keytype,
 		   char *,
 		   krb5_ccache,
 		   krb5_creds * ));
