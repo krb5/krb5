@@ -38,10 +38,6 @@ static int calls = 0;
 static int max_hits_per_entry = 0;
 static int num_entries = 0;
 
-#ifndef max
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
 #define STALE_TIME	2*60		/* two minutes */
 #define STALE(ptr) (abs((ptr)->timein - timenow) >= STALE_TIME)
 
