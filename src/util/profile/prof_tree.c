@@ -574,6 +574,8 @@ get_new_file:
 			skip_num--;
 			continue;
 		}
+		if (p->deleted)
+			continue;
 		break;
 	}
 	iter->num++;
