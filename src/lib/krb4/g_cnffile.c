@@ -56,7 +56,7 @@ krb__get_srvtabname(default_srvtabname)
 	const char* names[3];
 	char **full_name = 0, **cpp;
 	krb5_error_code retval;
-	char *retname;
+	static char *retname;
 
 	if (!krb5__krb4_context)
 		krb5_init_context(&krb5__krb4_context);
@@ -67,6 +67,8 @@ krb__get_srvtabname(default_srvtabname)
 	    retval = profile_get_values(krb5__krb4_context->profile, names, 
 					&full_name);
 	    if (retval == 0 && full_name && full_name[0]) {
+		if (retname != NULL)
+		    free(retname);
 		retname = strdup(full_name[0]);
 		for (cpp = full_name; *cpp; cpp++) 
 		    krb5_xfree(*cpp);
@@ -74,6 +76,8 @@ krb__get_srvtabname(default_srvtabname)
 		return retname;
 	    }
 	}
+	if (retname != NULL)
+	    free(retname);
 	retname = strdup(default_srvtabname);
 	return retname;
 }

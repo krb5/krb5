@@ -1,3 +1,9 @@
+2003-03-03  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Keep strdup()ed string in a
+	static variable and free it called again; this prevents a memory
+	leak.
+
 2003-02-28  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in (clean-unix): Remove krb_err_txt.c on clean. Update
