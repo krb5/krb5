@@ -47,6 +47,7 @@ STLIBOBJS= \
 	read_msg.o	\
 	read_pwd.o	\
 	realm_dom.o	\
+	realm_iter.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
 	timeofday.o	\
@@ -90,6 +91,7 @@ OBJS= \
 	read_msg.$(OBJEXT)	\
 	read_pwd.$(OBJEXT)	\
 	realm_dom.$(OBJEXT)	\
+	realm_iter.$(OBJEXT)	\
 	sendto_kdc.$(OBJEXT)	\
 	sn2princ.$(OBJEXT)	\
 	timeofday.$(OBJEXT)	\
@@ -132,6 +134,7 @@ SRCS= \
 	$(srcdir)/read_msg.c	\
 	$(srcdir)/read_pwd.c	\
 	$(srcdir)/realm_dom.c	\
+	$(srcdir)/realm_iter.c	\
 	$(srcdir)/port2ip.c	\
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
@@ -156,11 +159,16 @@ T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
 
 T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 
+T_REALM_ITER_OBJS = t_realm_iter.o realm_iter.o
+
 t_std_conf: $(T_STD_CONF_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_std_conf $(T_STD_CONF_OBJS) $(KRB5_BASE_LIBS)
 
 t_an_to_ln: $(T_AN_TO_LN_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(KRB5_BASE_LIBS)
+
+t_realm_iter: $(T_REALM_ITER_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_realm_iter $(T_REALM_ITER_OBJS) $(KRB5_BASE_LIBS)
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
