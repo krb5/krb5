@@ -1,3 +1,17 @@
+2004-08-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_os_nothread_mutex_finish_init,
+	k5_os_nothread_mutex_init, k5_os_nothread_mutex_destroy,
+	k5_os_nothread_mutex_lock, k5_os_nothread_mutex_unlock)
+	[!DEBUG_THREADS]: Replace macros with inline functions, to gain
+	type checking and eliminate gratuitous compiler warnings.
+	(k5_pthread_assert_unlocked, k5_pthread_assert_locked): Likewise.
+	(k5_os_mutex_finish_init) [HAVE_PTHREAD &&
+	!USE_PTHREAD_LOCK_ONLY_IF_LOADED]: Likewise.
+	(return_after_yield): New inline function.
+	(k5_os_mutex_lock) [HAVE_PTHREAD]: Change back to a macro,
+	calling return_after_yield.
+
 2004-08-09  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Solaris getpwnam_r returns struct passwd*, not

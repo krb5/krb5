@@ -282,11 +282,24 @@ typedef struct {
 
 typedef char k5_os_nothread_mutex;
 # define K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER	0
-# define k5_os_nothread_mutex_finish_init(M)		(0)
-# define k5_os_nothread_mutex_init(M)			(0)
-# define k5_os_nothread_mutex_destroy(M)		(0)
-# define k5_os_nothread_mutex_lock(M)			(0)
-# define k5_os_nothread_mutex_unlock(M)			(0)
+/* Empty inline functions avoid the "statement with no effect"
+   warnings, and do better type-checking than functions that don't use
+   their arguments.  */
+static inline int k5_os_nothread_mutex_finish_init(k5_os_nothread_mutex *m) {
+    return 0;
+}
+static inline int k5_os_nothread_mutex_init(k5_os_nothread_mutex *m) {
+    return 0;
+}
+static inline int k5_os_nothread_mutex_destroy(k5_os_nothread_mutex *m) {
+    return 0;
+}
+static inline int k5_os_nothread_mutex_lock(k5_os_nothread_mutex *m) {
+    return 0;
+}
+static inline int k5_os_nothread_mutex_unlock(k5_os_nothread_mutex *m) {
+    return 0;
+}
 # define k5_os_nothread_mutex_assert_locked(M)		(0)
 # define k5_os_nothread_mutex_assert_unlocked(M)	(0)
 
@@ -415,8 +428,12 @@ typedef struct {
 #endif
 } k5_os_mutex;
 
-#define k5_pthread_assert_unlocked(M)	(0)
-#define k5_pthread_assert_locked(M)	(0)
+/* Define as functions to:
+   (1) eliminate "statement with no effect" warnings for "0"
+   (2) encourage type-checking in calling code  */
+
+static inline void k5_pthread_assert_unlocked(pthread_mutex_t *m) { }
+static inline void k5_pthread_assert_locked(pthread_mutex_t *m) { }
 
 #if defined(DEBUG_THREADS_SLOW) && HAVE_SCHED_H && (HAVE_SCHED_YIELD || HAVE_PRAGMA_WEAK_REF)
 # include <sched.h>
@@ -429,6 +446,29 @@ typedef struct {
 #else
 # define MAYBE_SCHED_YIELD()	((void)0)
 #endif
+
+/* It may not be obvious why this function is desirable.
+
+   I want to call pthread_mutex_lock, then sched_yield, then look at
+   the return code from pthread_mutex_lock.  That can't be implemented
+   in a macro without a temporary variable, or GNU C extensions.
+
+   There used to be an inline function which did it, with both
+   functions called from the inline function.  But that messes with
+   the debug information on a lot of configurations, and you can't
+   tell where the inline function was called from.  (Typically, gdb
+   gives you the name of the function from which the inline function
+   was called, and a line number within the inline function itself.)
+
+   With this auxiliary function, pthread_mutex_lock can be called at
+   the invoking site via a macro; once it returns, the inline function
+   is called (with messed-up line-number info for gdb hopefully
+   localized to just that call).  */
+static inline int return_after_yield(int r)
+{
+    MAYBE_SCHED_YIELD();
+    return r;
+}
 
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
@@ -448,16 +488,10 @@ typedef struct {
 	  ? pthread_mutex_destroy(&(M)->p)	\
 	  : 0))
 
-static inline int k5_os_mutex_lock(k5_os_mutex *m)
-{
-    int r;
-    if (K5_PTHREADS_LOADED)
-	r = pthread_mutex_lock(&m->p);
-    else
-	r = k5_os_nothread_mutex_lock(&m->n);
-    MAYBE_SCHED_YIELD();
-    return r;
-}
+# define k5_os_mutex_lock(M)						\
+	return_after_yield(K5_PTHREADS_LOADED				\
+			   ? pthread_mutex_lock(&(M)->p)		\
+			   : k5_os_nothread_mutex_lock(&(M)->n))
 # define k5_os_mutex_unlock(M)				\
 	(MAYBE_SCHED_YIELD(),				\
 	 (K5_PTHREADS_LOADED				\
@@ -478,16 +512,10 @@ static inline int k5_os_mutex_lock(k5_os_mutex *m)
 # define K5_OS_MUTEX_PARTIAL_INITIALIZER \
 	{ PTHREAD_MUTEX_INITIALIZER }
 
-# define k5_os_mutex_finish_init(M)	(0)
+static inline int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
 # define k5_os_mutex_init(M)		pthread_mutex_init(&(M)->p, 0)
 # define k5_os_mutex_destroy(M)		pthread_mutex_destroy(&(M)->p)
-
-static inline int k5_os_mutex_lock(k5_os_mutex *m)
-{
-    int r = pthread_mutex_lock(&m->p);
-    MAYBE_SCHED_YIELD();
-    return r;
-}
+# define k5_os_mutex_lock(M)	return_after_yield(pthread_mutex_lock(&(M)->p))
 # define k5_os_mutex_unlock(M)		(MAYBE_SCHED_YIELD(),pthread_mutex_unlock(&(M)->p))
 
 # define k5_os_mutex_assert_unlocked(M)	k5_pthread_assert_unlocked(&(M)->p)
