@@ -5,8 +5,6 @@ BUILDTOP=$(REL)$(U)$(S)$(U)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-##DOSBUILDTOP=..\..
-
 kpasswd: kpasswd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o kpasswd kpasswd.o $(KRB5_BASE_LIBS)
 
@@ -21,10 +19,7 @@ install-all install-kdc install-server install-client install-unix::
 	$(INSTALL_PROGRAM) kpasswd $(DESTDIR)$(CLIENT_BINDIR)/`echo kpasswd|sed '$(transform)'`
 	$(INSTALL_DATA) $(srcdir)/kpasswd.M $(DESTDIR)$(CLIENT_MANDIR)/`echo kpasswd|sed '$(transform)'`.1;
 
-##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-##WIN32##CFLAGS = $(CCOPTS2)
-##WIN32##CPPFLAGS = $(INCLUDES)
+all-windows:: $(OUTPRE)kpasswd.exe
 
-##WIN32##all-windows:: $(OUTPRE)kpasswd.exe
-##WIN32##$(OUTPRE)kpasswd.exe: $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB)
-##WIN32##	link $(LINKOPTS2) -out:$@ $**
+$(OUTPRE)kpasswd.exe: $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) -out:$@ $**

@@ -1,3 +1,7 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Bump version up to 1.1.1.
+
 1999-09-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* README: Add documentation about configuration under windows and

@@ -4,8 +4,6 @@ mydir=lib
 MY_SUBDIRS=crypto krb5 des425 @KRB4@ krb5util kdb gssapi rpc kadm5
 BUILDTOP=$(REL)$(U)
 
-##DOS##BUILDTOP = ..
-
 MAC_SUBDIRS = crypto krb5 gssapi
 
 all-unix::
@@ -55,7 +53,7 @@ VERSIONRC = $(BUILDTOP)\windows\version.rc
 
 WINLIBS = kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib \
 	version.lib advapi32.lib gdi32.lib
-WINDLLFLAGS = $(LINKOPTS) -base:0x1c000000
+WINDLLFLAGS = $(DLL_LINKOPTS) -base:0x1c000000
 
 NO_GLUE=$(OUTPRE)no_glue.obj
 K5_GLUE=$(OUTPRE)k5_glue.obj

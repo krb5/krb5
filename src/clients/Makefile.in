@@ -31,4 +31,7 @@ clean-windows::
 	@echo Making clean in clients\kinit
 	cd ..\kinit
 	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kpasswd
+	cd ..\kpasswd
+	$(MAKE) -$(MFLAGS) clean
 	cd ..

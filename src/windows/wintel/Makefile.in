@@ -15,13 +15,13 @@ KVERSION= 5
 KRB	= KRB$(KVERSION)
 
 BUILDTOP=..\..
-INCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
+LOCALINCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
 	   /I$(BUILDTOP)\lib\crypto\des
 RESFILE	= $(OUTPRE)telnet.res
 XOBJS	= $(RESFILE) $(OUTPRE)k5stream.obj $(OUTPRE)enc_des.obj
 
-CFLAGS	= $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT)
-RFLAGS	= $(INCLUDES)
+DEFINES	= /D$(KRB)=1 $(KRBOPT)
+RFLAGS	= $(LOCALINCLUDES)
 RCFLAGS	= $(RFLAGS) -D_WIN32 -DTELNET_APP
 
 ##### Linker

@@ -43,6 +43,9 @@
 #ifndef EHOSTUNREACH
 #define EHOSTUNREACH WSAEHOSTUNREACH
 #endif
+#ifndef ETIMEDOUT
+#define ETIMEDOUT WSAETIMEDOUT
+#endif
 #endif /* _WIN32 && !__CYGWIN32__ */
 
 #ifdef KRB5_DNS_LOOKUP /* pbh says we can wrap this last-minute

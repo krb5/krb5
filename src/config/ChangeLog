@@ -1,3 +1,10 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Update Windows build to work with 10/26/99 change.
+	The only difference between EXE and DLL builds are the
+	DLL_LINKOPTS and EXE_LINKOPTS linker options.  All C flags are the
+	same.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

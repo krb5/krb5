@@ -1,3 +1,7 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* changepw.c: Define ETIMEDOUT for Windows.
+
 1999-12-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_os_ctx.c (krb5_secure_config_files): Do define; always
