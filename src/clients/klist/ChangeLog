@@ -1,3 +1,14 @@
+Fri Feb 10 18:44:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove ISODE cruft.  Use $(LIBS) so that
+		libsocket can be pulled in if necessary.
+
+	* configure.in: Add check for libsocket and libnsl (sigh).
+		krb5_init_ctx drags in cryptoconf.c, which drags in enough
+		of the crypto library that socket() gets called.  We should
+		to fix this eventually to make klist smaller, but the fix
+		will be subtle.
+
 Thu Feb 09 17:43:47 1995  Chris Provenzano (proven@mit.edu)
 
 	* klist.c Added -e option to print out encryption types.

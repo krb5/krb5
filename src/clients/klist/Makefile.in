@@ -1,7 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
@@ -10,7 +9,7 @@ KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 
 klist: klist.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o klist klist.o $(KLIB)
+	$(CC) $(CFLAGS) -o klist klist.o $(KLIB) $(LIBS)
 
 klist.o:	$(srcdir)/klist.c
 
