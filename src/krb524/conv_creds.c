@@ -92,7 +92,7 @@ int krb524_convert_creds_plain(context, v5creds, v4creds)
 				      v4creds->instance)))
 	  return ret;
 
-     /* Check keytype too */
+     /* Check enctype too */
      if (v5creds->keyblock.length != sizeof(C_Block)) {
 	  if (krb524_debug)
 	       fprintf(stderr, "v5 session keyblock length %d != C_Block size %d\n",

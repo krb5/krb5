@@ -77,7 +77,7 @@ void krb5_print_keyblock(msg, key)
      char *msg;
      krb5_keyblock *key;
 {
-     printf("%s: Keytype: %d\n", msg, key->keytype);
+     printf("%s: Keytype: %d\n", msg, key->enctype);
      printf("%s: Length: %d\n", msg, key->length);
      printf("%s: Key: ", msg);
      C_Block_print(key->contents);
@@ -253,7 +253,7 @@ int main(argc, argv)
      increds.client = client;
      increds.server = server;
      increds.times.endtime = 0;
-     increds.keyblock.keytype = KEYTYPE_DES_CBC_MD5;
+     increds.keyblock.enctype = ENCTYPE_DES_CBC_MD5;
      if ((ret = krb5_get_credentials(context, 0, cc, &increds, &v5creds))) {
 	  com_err("test", ret, "getting V5 credentials");
 	  exit(1);
@@ -280,7 +280,7 @@ int main(argc, argv)
 	  keybuf[i] += c;
      }
      
-     key.keytype = KEYTYPE_DES_CBC_MD5;
+     key.enctype = ENCTYPE_DES_CBC_MD5;
      key.length = KEYSIZE; /* presumably */
      key.contents = (krb5_octet *) keybuf;
 

@@ -60,11 +60,11 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, skey)
 	  return ret;
      }
      
-     if (v5etkt->session->keytype != KEYTYPE_DES_CBC_CRC ||
+     if (v5etkt->session->enctype != ENCTYPE_DES_CBC_CRC ||
 	 v5etkt->session->length != sizeof(C_Block)) {
 	  if (krb524_debug)
 	       fprintf(stderr, "v5 session keyblock type %d length %d != C_Block size %d\n",
-		       v5etkt->session->keytype,
+		       v5etkt->session->enctype,
 		       v5etkt->session->length,
 		       sizeof(C_Block));
 	  krb5_free_enc_tkt_part(context, v5etkt);

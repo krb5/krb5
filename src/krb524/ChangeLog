@@ -1,3 +1,8 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * cnv_tkt_skey.c, conv_creds.c, get_cred.c k524init.c krb524d.c,
+	* test.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Wed Sep  6 00:11:53 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb524d.c (main): set timeout inside while loop to prevent spin.
