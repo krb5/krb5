@@ -48,7 +48,10 @@ struct mblock {
 };
 
 void add_key PROTOTYPE((char * const *, const krb5_principal,
-			const krb5_keyblock *));
+			const krb5_keyblock *, krb5_kvno));
+void enter_rnd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
+void enter_pwd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
+
 int set_dbname_help PROTOTYPE((char *, char *));
 
 static void
@@ -196,7 +199,7 @@ char *argv[];
     exit(0);
 }
 
-krb5_boolean
+krb5_kvno
 princ_exists(pname, principal)
 char *pname;
 krb5_principal principal;
@@ -205,15 +208,18 @@ krb5_principal principal;
     krb5_db_entry entry;
     krb5_boolean more;
     krb5_error_code retval;
+    krb5_kvno vno;
 
     if (retval = krb5_db_get_principal(principal, &entry, &nprincs, &more)) {
 	com_err(pname, retval, "while attempting to verify principal's existence");
-	return TRUE;
+	return 0;
     }
+    vno = entry.kvno;
+    krb5_db_free_principal(&entry, nprincs);
     if (nprincs)
-	return TRUE;
+	return vno;
     else
-	return FALSE;
+	return 0;
 }
 
 void
@@ -222,11 +228,7 @@ int argc;
 char *argv[];
 {
     krb5_error_code retval;
-    krb5_keyblock tempkey;
     krb5_principal newprinc;
-    krb5_data pwd;
-    char password[BUFSIZ];
-    int pwsize = sizeof(password);
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -242,30 +244,7 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    if (retval = krb5_read_password(krb5_default_pwd_prompt1,
-				    krb5_default_pwd_prompt2,
-				    password, &pwsize)) {
-	com_err(argv[0], retval, "while reading password for '%s'", argv[1]);
-	krb5_free_principal(newprinc);
-	return;
-    }
-    pwd.data = password;
-    pwd.length = pwsize;
-
-    retval = (*master_encblock.crypto_entry->
-	      string_to_key)(master_keyblock.keytype,
-			     &tempkey,
-			     &pwd,
-			     newprinc);
-    bzero(password, sizeof(password)); /* erase it */
-    if (retval) {
-	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
-	krb5_free_principal(newprinc);
-	return;
-    }
-    add_key(argv, newprinc, &tempkey);
-    bzero((char *)tempkey.contents, tempkey.length);
-    free((char *)tempkey.contents);
+    enter_pwd_key(argv, newprinc, 0);
     krb5_free_principal(newprinc);
     return;
 }
@@ -276,7 +255,6 @@ int argc;
 char *argv[];
 {
     krb5_error_code retval;
-    krb5_keyblock *tempkey;
     krb5_principal newprinc;
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -292,24 +270,20 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    if (retval = (*master_encblock.crypto_entry->random_key)(master_random,
-							     &tempkey)) {
-	com_err(argv[0], retval, "while generating random key");
-	krb5_free_principal(newprinc);
-	return;
-    }
-    add_key(argv, newprinc, tempkey);
-    bzero((char *)tempkey->contents, tempkey->length);
-    krb5_free_keyblock(tempkey);
+    enter_rnd_key(argv, newprinc, 0);
     krb5_free_principal(newprinc);
     return;
 }
 
 void
-add_key(argv, principal, key)
-char * const *argv;
-const krb5_principal principal;
-const krb5_keyblock *key;
+add_key(DECLARG(char * const *, argv),
+	DECLARG(const krb5_principal, principal),
+	DECLARG(const krb5_keyblock *, key),
+	DECLARG(krb5_kvno, vno))
+OLDDECLARG(char * const *, argv)
+OLDDECLARG(const krb5_principal, principal)
+OLDDECLARG(const krb5_keyblock *, key)
+OLDDECLARG(krb5_kvno, vno)
 {
     krb5_error_code retval;
     krb5_db_entry newentry;
@@ -324,7 +298,7 @@ const krb5_keyblock *key;
 	return;
     }
     newentry.principal = principal;
-    newentry.kvno = 1;
+    newentry.kvno = vno;
     newentry.max_life = mblock.max_life;
     newentry.max_renewable_life = mblock.max_rlife;
     newentry.mkvno = mblock.mkvno;
@@ -656,3 +630,121 @@ char *argv[];
     krb5_free_principal(newprinc);
     return;
 }
+
+void
+change_rnd_key(argc, argv)
+int argc;
+char *argv[];
+{
+    krb5_error_code retval;
+    krb5_principal newprinc;
+    krb5_kvno vno;
+
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (!(vno = princ_exists(argv[0], newprinc))) {
+	com_err(argv[0], 0, "No principal '%s' exists", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    enter_rnd_key(argv, newprinc, vno);
+    krb5_free_principal(newprinc);
+    return;
+}
+
+void
+enter_rnd_key(DECLARG(char **, argv),
+	      DECLARG(krb5_principal, princ),
+	      DECLARG(krb5_kvno, vno))
+OLDDECLARG(char **, argv)
+OLDDECLARG(krb5_principal, princ)
+OLDDECLARG(krb5_kvno, vno)
+{
+    krb5_error_code retval;
+    krb5_keyblock *tempkey;
+
+    if (retval = (*master_encblock.crypto_entry->random_key)(master_random,
+							     &tempkey)) {
+	com_err(argv[0], retval, "while generating random key");
+	return;
+    }
+    add_key(argv, princ, tempkey, ++vno);
+    bzero((char *)tempkey->contents, tempkey->length);
+    krb5_free_keyblock(tempkey);
+    return;
+}
+
+void
+change_pwd_key(argc, argv)
+int argc;
+char *argv[];
+{
+    krb5_error_code retval;
+    krb5_principal newprinc;
+    krb5_kvno vno;
+
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (!(vno = princ_exists(argv[0], newprinc))) {
+	com_err(argv[0], 0, "No principal '%s' exists!", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    enter_pwd_key(argv, newprinc, vno);
+    krb5_free_principal(newprinc);
+    return;
+}
+
+void
+enter_pwd_key(DECLARG(char **, argv),
+	      DECLARG(const krb5_principal, princ),
+	      DECLARG(krb5_kvno, vno))
+OLDDECLARG(char **, argv)
+OLDDECLARG(const krb5_principal, princ)
+OLDDECLARG(krb5_kvno, vno)
+{
+    krb5_error_code retval;
+    char password[BUFSIZ];
+    int pwsize = sizeof(password);
+    krb5_keyblock tempkey;
+    krb5_data pwd;
+
+    if (retval = krb5_read_password(krb5_default_pwd_prompt1,
+				    krb5_default_pwd_prompt2,
+				    password, &pwsize)) {
+	com_err(argv[0], retval, "while reading password for '%s'", argv[1]);
+	return;
+    }
+    pwd.data = password;
+    pwd.length = pwsize;
+
+    retval = (*master_encblock.crypto_entry->
+	      string_to_key)(master_keyblock.keytype,
+			     &tempkey,
+			     &pwd,
+			     princ);
+    bzero(password, sizeof(password)); /* erase it */
+    if (retval) {
+	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
+	return;
+    }
+    add_key(argv, princ, &tempkey, ++vno);
+    bzero((char *)tempkey.contents, tempkey.length);
+    free((char *)tempkey.contents);
+    return;
+}
+
