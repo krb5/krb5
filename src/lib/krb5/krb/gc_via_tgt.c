@@ -65,7 +65,7 @@ OLDDECLARG(krb5_creds *, cred)
     if (retval = krb5_send_tgs(kdcoptions, &cred->times, etype, sumtype,
 			       cred->server,
 			       tgt->addresses,
-			       0,	/* no authorization data */
+			       cred->authdata,
 			       0,		/* no second ticket */
 			       tgt, &tgsrep))
 	return retval;

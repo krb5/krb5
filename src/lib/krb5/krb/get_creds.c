@@ -50,8 +50,10 @@ krb5_creds *creds;
     mcreds.client = creds->client;
     mcreds.times.endtime = creds->times.endtime;
     mcreds.keyblock = creds->keyblock;
-
-    fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */ ;
+    mcreds.authdata = creds->authdata;
+    
+    fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
+	| KRB5_TC_MATCH_AUTHDATA;
 
     switch(retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, creds)) {
     case KRB5_CC_NOTFOUND:
