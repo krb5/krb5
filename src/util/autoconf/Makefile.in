@@ -114,7 +114,7 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
-clean:
+clean::
 	rm -f autoconf autoheader *.tmp
 	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.log
 	rm -f *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs *.ma *.mas
