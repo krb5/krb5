@@ -37,6 +37,7 @@
 
 /* #undef HasNdbm */
 #define HasNdbm YES
+#define DbmLib -ldbm
 
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define HasSaberC NO

@@ -292,7 +292,7 @@ XCOMM platform-specific configuration parameters - edit MacroFile to change
  * Concat - concatenates two strings.
  */
 #ifndef Concat
-#if __STDC__ && !defined(UnixCpp)
+#if __STDC__ && !defined(UnixCpp) && !defined(LinuxArchitecture)
 #define ConcatX(a,b)a##b
 #define Concat(a,b) ConcatX(a,b)
 #else

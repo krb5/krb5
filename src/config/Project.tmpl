@@ -16,13 +16,13 @@
 #define CompileEtCmd $(TOP)/util/et/compile_et
 #endif
 #ifndef MkCmdsCmd
-#define MkCmdsCmd mk_cmds
+#define MkCmdsCmd $(TOP)/util/ss/mk_cmds
 #endif
 #ifndef DependCmd
 #define DependCmd makedepend		/* assume BINDIR in path */
 #endif
 #ifndef ImakeCmd
-#define ImakeCmd imake			/* assume BINDIR in path */
+#define ImakeCmd imake
 #endif
 #ifndef SSLib
 #define SSLib -L$(TOPLIBD) -lss
