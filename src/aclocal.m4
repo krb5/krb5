@@ -1066,6 +1066,9 @@ AC_REQUIRE([AC_PROG_ARCHIVE_ADD])dnl
 AC_REQUIRE([AC_PROG_INSTALL])dnl
 AC_CHECK_PROG(AR, ar, ar, false)
 AC_CHECK_PROG(PERL, perl, perl, false)
+if test "$ac_cv_prog_PERL" = "false"; then
+  AC_MSG_ERROR(Perl is now required for Kerberos builds.)
+fi
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(MAKE_SHLIB_COMMAND)
