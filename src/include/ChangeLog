@@ -1,3 +1,7 @@
+Sun Jun 11 09:20:29 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.hin: Add missing declaration of krb5_auth_con_initivector.
+
 Sat Jun 10 22:10:46 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* krb5.hin: declare krb5_auth_context as

@@ -1838,6 +1838,10 @@ krb5_error_code krb5_auth_con_getremoteseqnumber
 		   krb5_auth_context,
 		   krb5_int32 *));
 
+krb5_error_code krb5_auth_con_initivector
+	PROTOTYPE((krb5_context,
+		   krb5_auth_context));
+
 krb5_error_code krb5_auth_con_setivector
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context,
