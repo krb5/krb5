@@ -83,8 +83,9 @@ typedef unsigned char cc_t;
 
 #ifndef	NO_STRING_H
 #include <string.h>
-#endif
+#else
 #include <strings.h>
+#endif
 
 #ifndef	_POSIX_VDISABLE
 # ifdef sun
