@@ -11,4 +11,6 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 CopySrcHeader(gssapi.h,[$(EHDRDIR)])
 CopySrcHeader(gssapi_generic.h,[$(EHDRDIR)])
+WITH_KRB5ROOT
+AC_PROG_INSTALL
 V5_AC_OUTPUT_MAKEFILE

@@ -86,6 +86,11 @@ clean-windows::
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
+install::
+	@set -x; for f in $(EXPORTED_HEADERS) ; \
+	do $(INSTALL_DATA) $(srcdir)$(S)$$f	\
+		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
+	done
 
 depend:: $(ETSRCS)
 

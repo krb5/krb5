@@ -1,3 +1,9 @@
+
+Mon May 22 10:08:13 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Install EXPORTED_HEADERS in gssapi subdirectory of
+			  KRB5_INCDIR.
+	* configure.in	- Find KRB5ROOT and install program.
+
 Sat Apr 29 15:29:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gssapi.h: Only define PROTOTYPE if it is not deined at all.
