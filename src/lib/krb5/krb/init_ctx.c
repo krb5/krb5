@@ -64,7 +64,7 @@ krb5_free_context(ctx)
 {
      krb5_os_free_context(ctx);
 
-     if (ctx->etypes);
+     if (ctx->etypes)
           free(ctx->etypes);
 
      if (ctx->default_realm)

@@ -1,3 +1,8 @@
+Fri Apr 28 08:36:03 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* init_ctx.c (krb5_free_context): Extra semicolon meant the etypes
+		field in the context was never being freed.
+
 Fri Apr 28 01:44:51 1995  Chris Provenzano  (proven@mit.edu)
 
         * send_tgs.c (krb5_send_tgs()), gc_via_tkt.c (krb5_get_cred_via_tkt()):
