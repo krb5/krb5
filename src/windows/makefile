@@ -8,6 +8,9 @@ all::
 	@echo Making in windows\wintel
 	cd ..\wintel
 	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	@echo Making in windows\gss
+	cd ..\gss
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean::
@@ -16,6 +19,9 @@ clean::
 	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in windows\wintel
 	cd ..\wintel
+	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in windows\gss
+	cd ..\gss
 	-$(MAKE) -$(MAKEFLAGS) clean
 	cd ..
 

@@ -1,3 +1,7 @@
+Fri Apr 28 11:21:01 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: added gss, new subdirectory for gss demo.
+
 Wed Apr 19 18:37:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* readme: updated about how to make it, and about gssapi.

@@ -1,0 +1,15 @@
+;
+; Gss - tests the GSSAPI dll
+;
+
+NAME		GSS
+DESCRIPTION	'Tests the gssapi dll'
+
+EXETYPE		windows
+STUB		'winstub.exe'
+CODE		preload moveable
+DATA		preload moveable multiple
+HEAPSIZE	1024
+STACKSIZE	4096
+
+EXPORTS		OpenGssapiDlg

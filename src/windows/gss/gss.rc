@@ -1,0 +1,27 @@
+/*+*************************************************************************
+**
+**	Gss
+**	
+**	Tests the gssapi dll.
+**
+***************************************************************************/
+
+#include <windows.h>
+
+#define GSS_CONNECT_NAME            102
+#define GSS_OK                      100
+#define GSS_CANCEL                  101
+
+OPENGSSAPIDLG DIALOG 63, 65, 175, 51
+STYLE DS_ABSALIGN | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Open GSSAPI Connection"
+FONT 8, "MS Sans Serif"
+BEGIN
+	CONTROL "To Host:", -1, "STATIC", NOT WS_GROUP, 3, 10, 33, 10
+	CONTROL "", GSS_CONNECT_NAME, "COMBOBOX", CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP, 42, 9, 128, 60
+	CONTROL "OK", GSS_OK, "BUTTON", WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON, 27, 30, 51, 14
+	CONTROL "Cancel", GSS_CANCEL, "BUTTON", WS_TABSTOP, 97, 30, 51, 14
+END
+
+
+
