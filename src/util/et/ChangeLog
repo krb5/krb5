@@ -1,3 +1,7 @@
+Tue Oct 11 12:43:00 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Don't rm the awk and sed scripts during a make clean!
+
 Thu Oct  6 19:39:11 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* compile_et.sh: Replace basename with sed -- more portable.
