@@ -32,6 +32,7 @@ OBJS=	\
 	f_arep_enc.o	\
 	f_authdata.o	\
 	f_authent.o	\
+	f_auth_cnt.o	\
 	f_cksum.o	\
 	f_creds.o	\
 	f_cred_cnt.o	\
@@ -64,6 +65,7 @@ SRCS=	\
 	$(SRCDIR)f_ap_req.c	\
 	$(SRCDIR)f_authdata.c	\
 	$(SRCDIR)f_authent.c	\
+	$(SRCDIR)f_auth_cnt.c	\
 	$(SRCDIR)f_cksum.c	\
 	$(SRCDIR)f_creds.c	\
 	$(SRCDIR)f_cred_cnt.c	\
