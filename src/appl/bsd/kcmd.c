@@ -107,7 +107,17 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_data outbuf;
     krb5_flags options = authopts;
     krb5_auth_context auth_context = NULL;
-
+    char *cksumbuf;
+    krb5_data cksumdat;
+    if ((cksumbuf = malloc(strlen(cmd)+strlen(remuser))) == 0 ) {
+      fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
+      return(-1);
+    }
+    strcpy(cksumbuf, cmd);
+    strcat(cksumbuf, remuser);
+    cksumdat.data = cksumbuf;
+	cksumdat.length = strlen(cksumbuf);
+	
     pid = getpid();
     hp = gethostbyname(*ahost);
     if (hp == 0) {
@@ -305,7 +315,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
        authentication. */
     status = krb5_sendauth(bsd_context, &auth_context, (krb5_pointer) &s,
                            "KCMDV0.1", ret_cred->client, ret_cred->server,
-			   authopts, NULL, ret_cred, 0,	&error, &rep_ret, NULL);
+			   authopts, &cksumdat, ret_cred, 0,	&error, &rep_ret, NULL);
+	krb5_xfree(cksumdat.data);
     if (status) {
 	printf("Couldn't authenticate to server: %s\n", error_message(status));
 	if (error) {

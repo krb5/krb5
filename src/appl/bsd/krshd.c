@@ -1611,6 +1611,7 @@ recvauth(netf, peersin)
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
+krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
 
     len = sizeof(laddr);
@@ -1699,7 +1700,32 @@ recvauth(netf, peersin)
     if (status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
 				     &client))
 	return status;
+    if (status = krb5_auth_con_getauthenticator(bsd_context, auth_context, &authenticator))
+      return status;
+    
+    if (authenticator->checksum) {
+      char * chksumbuf = (char *) malloc(strlen(cmdbuf)+strlen(remuser)+1);
+      if (chksumbuf == 0)
+    goto error_cleanup;
 
+      strcpy(chksumbuf,cmdbuf);
+      strcat(chksumbuf,remuser);
+
+      if ( status = krb5_verify_checksum(bsd_context,
+					 authenticator->checksum->checksum_type,
+					 authenticator->checksum,
+					 chksumbuf, strlen(chksumbuf),
+					 				       ticket->enc_part2->session->contents, 
+				       ticket->enc_part2->session->length))
+	goto error_cleanup;
+
+ error_cleanup:
+krb5_free_authenticator(bsd_context, authenticator);
+krb5_xfree(chksumbuf);
+if (status)
+  return status;
+}
+    
     /* Setup eblock for encrypted sessions. */
     krb5_use_enctype(bsd_context, &eblock, ticket->enc_part2->session->enctype);
     if (status = krb5_process_key(bsd_context, &eblock, ticket->enc_part2->session))

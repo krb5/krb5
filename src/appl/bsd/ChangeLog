@@ -1,5 +1,9 @@
 Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
+	* krshd.c (recvauth): Verify checksum against command line and remote user.
+
+	* kcmd.c: Send authenticator with checksum of command line and remote user.
+
 	* krlogin.c (des_read): Return 0 or -1 on close/error respectively.
 
 Wed Jan 17 15:14:33 1996  Sam Hartman  <hartmans@tertius.mit.edu>
