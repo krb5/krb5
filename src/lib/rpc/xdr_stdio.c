@@ -45,14 +45,14 @@ static char sccsid[] = "@(#)xdr_stdio.c 1.16 87/08/11 Copyr 1984 Sun Micro";
 #include <stdio.h>
 #include <gssrpc/xdr.h>
 
-static bool_t	xdrstdio_getlong();
-static bool_t	xdrstdio_putlong();
-static bool_t	xdrstdio_getbytes();
-static bool_t	xdrstdio_putbytes();
-static unsigned int	xdrstdio_getpos();
-static bool_t	xdrstdio_setpos();
-static rpc_int32 *	xdrstdio_inline();
-static void	xdrstdio_destroy();
+static bool_t	xdrstdio_getlong(XDR *, long *);
+static bool_t	xdrstdio_putlong(XDR *, long *);
+static bool_t	xdrstdio_getbytes(XDR *, caddr_t, unsigned int);
+static bool_t	xdrstdio_putbytes(XDR *, caddr_t, unsigned int);
+static unsigned int	xdrstdio_getpos(XDR *);
+static bool_t	xdrstdio_setpos(XDR *, unsigned int);
+static rpc_int32 *	xdrstdio_inline(XDR *, int);
+static void	xdrstdio_destroy(XDR *);
 
 /*
  * Ops vector for stdio type XDR
@@ -104,7 +104,7 @@ xdrstdio_getlong(xdrs, lp)
 	XDR *xdrs;
 	register long *lp;
 {
-  rpc_int32 tmp;
+        rpc_int32 tmp;
 	if (fread((caddr_t)&tmp,
 		  sizeof(rpc_int32), 1, (FILE *)xdrs->x_private) != 1)
 		return (FALSE);
@@ -171,7 +171,7 @@ xdrstdio_setpos(xdrs, pos)
 static rpc_int32 *
 xdrstdio_inline(xdrs, len)
 	XDR *xdrs;
-	unsigned int len;
+	int len;
 {
 
 	/*

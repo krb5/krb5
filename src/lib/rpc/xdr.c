@@ -78,9 +78,9 @@ gssrpc_xdr_free(proc, objp)
  * XDR nothing
  */
 bool_t
-xdr_void(/* xdrs, addr */)
-	/* XDR *xdrs; */
-	/* caddr_t addr; */
+xdr_void(xdrs, addr )
+	XDR *xdrs;
+	void *addr;
 {
 
 	return (TRUE);

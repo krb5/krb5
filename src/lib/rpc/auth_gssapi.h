@@ -122,7 +122,7 @@ PROTOTYPE((gss_ctx_id_t context, gss_buffer_t in_buf, rpc_u_int32 *seq_num));
 bool_t _svcauth_gssapi_set_names
 PROTOTYPE((auth_gssapi_name *names, int num));
 void _svcauth_gssapi_unset_names
-PROTOTYPE(());
+PROTOTYPE((void));
 
 void _svcauth_gssapi_set_log_badauth_func
 PROTOTYPE((auth_gssapi_log_badauth_func func,

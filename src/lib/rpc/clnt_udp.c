@@ -54,12 +54,13 @@ extern int errno;
 /*
  * UDP bases client side rpc operations
  */
-static enum clnt_stat	clntudp_call();
-static void		clntudp_abort();
-static void		clntudp_geterr();
-static bool_t		clntudp_freeres();
-static bool_t           clntudp_control();
-static void		clntudp_destroy();
+static enum clnt_stat	clntudp_call(CLIENT *, rpc_u_int32, xdrproc_t, void *,
+				     xdrproc_t, void *, struct timeval);
+static void		clntudp_abort(CLIENT *);
+static void		clntudp_geterr(CLIENT *, struct rpc_err *);
+static bool_t		clntudp_freeres(CLIENT *, xdrproc_t, void *);
+static bool_t           clntudp_control(CLIENT *, int, void *);
+static void		clntudp_destroy(CLIENT *);
 
 static struct clnt_ops udp_ops = {
 	clntudp_call,
@@ -221,9 +222,9 @@ clntudp_call(cl, proc, xargs, argsp, xresults, resultsp, utimeout)
 	register CLIENT	*cl;		/* client handle */
 	rpc_u_int32		proc;		/* procedure number */
 	xdrproc_t	xargs;		/* xdr routine for args */
-	caddr_t		argsp;		/* pointer to args */
+	void *		argsp;		/* pointer to args */
 	xdrproc_t	xresults;	/* xdr routine for results */
-	caddr_t		resultsp;	/* pointer to results */
+	void *		resultsp;	/* pointer to results */
 	struct timeval	utimeout;	/* seconds to wait before giving up */
 {
 	register struct cu_data *cu = (struct cu_data *)cl->cl_private;
@@ -390,7 +391,7 @@ send_again:
 		 * specifies a receive buffer size that is too small.)
 		 * This memory must be free()ed to avoid a leak.
 		 */
-		int op = reply_xdrs.x_op;
+		enum xdr_op op = reply_xdrs.x_op;
 		reply_xdrs.x_op = XDR_FREE;
 		xdr_replymsg(&reply_xdrs, &reply_msg);
 		reply_xdrs.x_op = op;
@@ -415,7 +416,7 @@ static bool_t
 clntudp_freeres(cl, xdr_res, res_ptr)
 	CLIENT *cl;
 	xdrproc_t xdr_res;
-	caddr_t res_ptr;
+	void *res_ptr;
 {
 	register struct cu_data *cu = (struct cu_data *)cl->cl_private;
 	register XDR *xdrs = &(cu->cu_outxdrs);
@@ -424,9 +425,11 @@ clntudp_freeres(cl, xdr_res, res_ptr)
 	return ((*xdr_res)(xdrs, res_ptr));
 }
 
+
+/*ARGSUSED*/
 static void 
-clntudp_abort(/*h*/)
-	/*CLIENT *h;*/
+clntudp_abort(h)
+	CLIENT *h;
 {
 }
 
@@ -434,7 +437,7 @@ static bool_t
 clntudp_control(cl, request, info)
 	CLIENT *cl;
 	int request;
-	char *info;
+	void *info;
 {
 	register struct cu_data *cu = (struct cu_data *)cl->cl_private;
 	

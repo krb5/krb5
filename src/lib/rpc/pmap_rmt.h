@@ -42,7 +42,7 @@ struct rmtcallargs {
 };
 
 #define xdr_rmtcall_args	gssrpc_xdr_rmtcall_args
-bool_t xdr_rmtcall_args();
+bool_t xdr_rmtcall_args(XDR *, struct rmtcallargs *);
 
 struct rmtcallres {
 	rpc_u_int32 *port_ptr;
@@ -52,4 +52,4 @@ struct rmtcallres {
 };
 
 #define xdr_rmtcallres		gssrpc_xdr_rmtcallres
-bool_t xdr_rmtcallres();
+bool_t xdr_rmtcallres(XDR *, struct rmtcallres *);

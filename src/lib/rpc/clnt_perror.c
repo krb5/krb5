@@ -53,7 +53,7 @@ extern int sys_nerr;
 #undef strerror
 #define strerror(N) (((N) > 0 && (N) < sys_nerr) ? sys_errlist[N] : (char *)0)
 #endif /* HAVE_STRERROR */
-static char *auth_errmsg();
+static char *auth_errmsg(enum auth_stat);
 
 
 

@@ -161,7 +161,7 @@ struct rpc_msg {
  * 	struct rpc_msg *cmsg;
  */
 #define xdr_callmsg	gssrpc_xdr_callmsg
-extern bool_t	xdr_callmsg();
+extern bool_t	xdr_callmsg(XDR *, struct rpc_msg *);
 
 /*
  * XDR routine to pre-serialize the static part of a rpc message.
@@ -170,7 +170,7 @@ extern bool_t	xdr_callmsg();
  * 	struct rpc_msg *cmsg;
  */
 #define xdr_callhdr	gssrpc_xdr_callhdr
-extern bool_t	xdr_callhdr();
+extern bool_t	xdr_callhdr(XDR *, struct rpc_msg *);
 
 /*
  * XDR routine to handle a rpc reply.
@@ -179,7 +179,7 @@ extern bool_t	xdr_callhdr();
  * 	struct rpc_msg *rmsg;
  */
 #define xdr_replymsg	gssrpc_xdr_replymsg
-extern bool_t	xdr_replymsg();
+extern bool_t	xdr_replymsg(XDR *, struct rpc_msg *);
 
 /*
  * Fills in the error part of a reply message.
@@ -189,4 +189,13 @@ extern bool_t	xdr_replymsg();
  */
 #define _seterr_reply	_gssrpc_seterr_reply
 #define sunrpc_seterr_reply	_seterr_reply
-extern void	_seterr_reply();
+extern void	_seterr_reply(struct rpc_msg *, struct rpc_err *);
+
+/* XDR the MSG_ACCEPTED part of a reply message union */
+#define xdr_accepted_reply gssrpc_xdr_accepted_reply
+extern bool_t	xdr_accepted_reply(XDR *, struct accepted_reply *);
+
+/* XDR the MSG_DENIED part of a reply message union */
+#define xdr_rejected_reply gssrpc_xdr_rejected_reply
+extern bool_t	xdr_rejected_reply(XDR *, struct rejected_reply *);
+

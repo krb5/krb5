@@ -108,6 +108,8 @@ enum xdr_op {
  * to be decoded.  If this pointer is 0, then the type routines should
  * allocate dynamic storage of the appropriate size and return it.
  * bool_t	(*xdrproc_t)(XDR *, caddr_t *);
+ *
+ * XXX can't actually prototype it, because some take three args!!!
  */
 typedef	bool_t (*xdrproc_t)();
 
@@ -117,17 +119,32 @@ typedef	bool_t (*xdrproc_t)();
  * an operations vector for the paticular implementation (e.g. see xdr_mem.c),
  * and two private fields for the use of the particular impelementation.
  */
-typedef struct {
+typedef struct __xdr_s {
 	enum xdr_op	x_op;		/* operation; fast additional param */
 	struct xdr_ops {
-		bool_t	(*x_getlong)();	/* get a long from underlying stream */
-		bool_t	(*x_putlong)();	/* put a long to " */
-		bool_t	(*x_getbytes)();/* get some bytes from " */
-		bool_t	(*x_putbytes)();/* put some bytes to " */
-		unsigned int	(*x_getpostn)();/* returns bytes off from beginning */
-		bool_t  (*x_setpostn)();/* lets you reposition the stream */
-		rpc_int32 *	(*x_inline)();	/* buf quick ptr to buffered data */
-		void	(*x_destroy)();	/* free privates of this xdr_stream */
+	    /* get a long from underlying stream */
+	    bool_t	(*x_getlong)(struct __xdr_s *, long *);
+
+            /* put a long to underlying stream */
+	    bool_t	(*x_putlong)(struct __xdr_s *, long *);	
+
+            /* get some bytes from underlying stream */
+	    bool_t	(*x_getbytes)(struct __xdr_s *, caddr_t, unsigned int);
+
+            /* put some bytes to underlying stream */
+	    bool_t	(*x_putbytes)(struct __xdr_s *, caddr_t, unsigned int);
+
+            /* returns bytes off from beginning */
+	    unsigned int	(*x_getpostn)(struct __xdr_s *);
+
+            /* lets you reposition the stream */
+	    bool_t  (*x_setpostn)(struct __xdr_s *, unsigned int);
+
+	    /* buf quick ptr to buffered data */
+	    rpc_int32 *	(*x_inline)(struct __xdr_s *, int);	
+
+            /* free privates of this xdr_stream */
+	    void	(*x_destroy)(struct __xdr_s *);	
 	} *x_ops;
 	caddr_t 	x_public;	/* users' data */
 	caddr_t		x_private;	/* pointer to private data */
@@ -258,7 +275,7 @@ struct xdr_discrim {
 #define xdr_pointer	gssrpc_xdr_pointer
 #define xdr_wrapstring	gssrpc_xdr_wrapstring
 
-extern bool_t	xdr_void();
+extern bool_t	xdr_void(XDR *, void *);
 extern bool_t	xdr_int
 PROTOTYPE((XDR *, int *));
 extern bool_t	xdr_u_int

@@ -54,12 +54,12 @@ extern errno;
 /*
  * Ops vector for TCP/IP based rpc service handle
  */
-static bool_t		svctcp_recv();
-static enum xprt_stat	svctcp_stat();
-static bool_t		svctcp_getargs();
-static bool_t		svctcp_reply();
-static bool_t		svctcp_freeargs();
-static void		svctcp_destroy();
+static bool_t		svctcp_recv(SVCXPRT *, struct rpc_msg *);
+static enum xprt_stat	svctcp_stat(SVCXPRT *);
+static bool_t		svctcp_getargs(SVCXPRT *, xdrproc_t, void *);
+static bool_t		svctcp_reply(SVCXPRT *, struct rpc_msg *);
+static bool_t		svctcp_freeargs(SVCXPRT *, xdrproc_t, void *);
+static void		svctcp_destroy(SVCXPRT *);
 
 static struct xp_ops svctcp_op = {
 	svctcp_recv,
@@ -73,21 +73,24 @@ static struct xp_ops svctcp_op = {
 /*
  * Ops vector for TCP/IP rendezvous handler
  */
-static bool_t		rendezvous_request();
-static bool_t		abortx();
-static enum xprt_stat	rendezvous_stat();
+static bool_t		rendezvous_request(SVCXPRT *, struct rpc_msg *);
+static bool_t		abortx(void);
+static bool_t		abortx_getargs(SVCXPRT *, xdrproc_t, void *);
+static bool_t		abortx_reply(SVCXPRT *, struct rpc_msg *);
+static bool_t		abortx_freeargs(SVCXPRT *, xdrproc_t, void *);
+static enum xprt_stat	rendezvous_stat(SVCXPRT *);
 
 static struct xp_ops svctcp_rendezvous_op = {
 	rendezvous_request,
 	rendezvous_stat,
-	abortx,
-	abortx,
-	abortx,
+	abortx_getargs,
+	abortx_reply,
+	abortx_freeargs,
 	svctcp_destroy
 };
 
-static int readtcp(), writetcp();
-static SVCXPRT *makefd_xprt();
+static int readtcp(SVCXPRT *, caddr_t, int), writetcp(SVCXPRT *, caddr_t, int);
+static SVCXPRT *makefd_xprt(int, unsigned int, unsigned int);
 
 struct tcp_rendezvous { /* kept in xprt->xp_p1 */
 	unsigned int sendsize;
@@ -233,8 +236,9 @@ makefd_xprt(fd, sendsize, recvsize)
 }
 
 static bool_t
-rendezvous_request(xprt)
+rendezvous_request(xprt, msg)
 	register SVCXPRT *xprt;
+	struct rpc_msg *msg;
 {
 	int sock;
 	struct tcp_rendezvous *r;
@@ -265,7 +269,8 @@ rendezvous_request(xprt)
 }
 
 static enum xprt_stat
-rendezvous_stat()
+rendezvous_stat(xprt)
+	register SVCXPRT *xprt;
 {
 
 	return (XPRT_IDLE);
@@ -398,7 +403,7 @@ static bool_t
 svctcp_getargs(xprt, xdr_args, args_ptr)
 	SVCXPRT *xprt;
 	xdrproc_t xdr_args;
-	caddr_t args_ptr;
+	void *args_ptr;
 {
 	if (! SVCAUTH_UNWRAP(xprt->xp_auth,
 			     &(((struct tcp_conn *)(xprt->xp_p1))->xdrs),
@@ -413,7 +418,7 @@ static bool_t
 svctcp_freeargs(xprt, xdr_args, args_ptr)
 	SVCXPRT *xprt;
 	xdrproc_t xdr_args;
-	caddr_t args_ptr;
+	void * args_ptr;
 {
 	register XDR *xdrs =
 	    &(((struct tcp_conn *)(xprt->xp_p1))->xdrs);
@@ -462,5 +467,29 @@ static bool_t abortx()
 {
   abort();
   return 1;
+}
+
+static bool_t abortx_getargs(xprt, proc, info)
+   SVCXPRT *xprt;
+   xdrproc_t proc;
+   void *info;
+{
+    return abortx();
+}
+
+
+static bool_t abortx_reply(xprt, msg)
+    SVCXPRT *xprt;
+    struct rpc_msg *msg;
+{
+    return abortx();
+}
+
+static bool_t abortx_freeargs(xprt, proc, info)
+   SVCXPRT *xprt;
+   xdrproc_t proc;
+   void * info;
+{
+    return abortx();
 }
 

@@ -110,15 +110,27 @@ struct rpc_err {
  * Created by individual implementations, see e.g. rpc_udp.c.
  * Client is responsible for initializing auth, see e.g. auth_none.c.
  */
-typedef struct {
+typedef struct __rpc_client {
 	AUTH	*cl_auth;			/* authenticator */
 	struct clnt_ops {
-		enum clnt_stat	(*cl_call)();	/* call remote procedure */
-		void		(*cl_abort)();	/* abort a call */
-		void		(*cl_geterr)();	/* get specific error code */
-		bool_t		(*cl_freeres)(); /* frees results */
-		void		(*cl_destroy)();/* destroy this structure */
-		bool_t          (*cl_control)();/* the ioctl() of rpc */
+	        /* call remote procedure */
+	        enum clnt_stat	(*cl_call)(struct __rpc_client *,
+					   rpc_u_int32, xdrproc_t, void *,
+					   xdrproc_t, void *, 
+					   struct timeval);	
+                /* abort a call */
+		void		(*cl_abort)(struct __rpc_client *);	
+                /* get specific error code */
+		void		(*cl_geterr)(struct __rpc_client *, 
+					     struct rpc_err *);	
+                /* frees results */
+		bool_t		(*cl_freeres)(struct __rpc_client *,
+					      xdrproc_t, void *);
+                /* destroy this structure */
+		void		(*cl_destroy)(struct __rpc_client *);
+                /* the ioctl() of rpc */
+		bool_t          (*cl_control)(struct __rpc_client *, int,
+					      void *);
 	} *cl_ops;
 	caddr_t			cl_private;	/* private stuff */
 } CLIENT;
@@ -240,7 +252,7 @@ typedef struct {
  *	rpc_u_int32 vers;
  */
 #define clntraw_create	gssrpc_clntraw_create
-extern CLIENT *clntraw_create();
+extern CLIENT *clntraw_create(rpc_u_int32, rpc_u_int32);
 
 
 /*
@@ -248,13 +260,7 @@ extern CLIENT *clntraw_create();
  */
 #define clnt_create	gssrpc_clnt_create
 extern CLIENT *
-clnt_create(/*host, prog, vers, prot*/); /*
-	char *host; 	-- hostname
-	rpc_u_int32 prog;	-- program number
-	rpc_u_int32 vers;	-- version number
-	char *prot;	-- protocol
-*/
-
+clnt_create(char *, rpc_u_int32, rpc_u_int32, char *);
 
 
 
@@ -270,7 +276,8 @@ clnt_create(/*host, prog, vers, prot*/); /*
  *	unsigned int recvsz;
  */
 #define clnttcp_create	gssrpc_clnttcp_create
-extern CLIENT *clnttcp_create();
+extern CLIENT *clnttcp_create(struct sockaddr_in *, rpc_u_int32, rpc_u_int32,
+			      int *, unsigned int, unsigned int);
 
 /*
  * UDP based rpc.
@@ -295,8 +302,11 @@ extern CLIENT *clnttcp_create();
  */
 #define clntudp_create		gssrpc_clntudp_create
 #define clntudp_bufcreate	gssrpc_clntudp_bufcreate
-extern CLIENT *clntudp_create();
-extern CLIENT *clntudp_bufcreate();
+extern CLIENT *clntudp_create(struct sockaddr_in *, rpc_u_int32, 
+			      rpc_u_int32, struct timeval, int *);
+extern CLIENT *clntudp_bufcreate(struct sockaddr_in *, rpc_u_int32, 
+				 rpc_u_int32, struct timeval, int *,
+				 unsigned int, unsigned int);
 
 #define _rpc_dtablesize _gssrpc_rpc_dtablesize
 extern int _rpc_dtablesize(void);
@@ -305,22 +315,22 @@ extern int _rpc_dtablesize(void);
  */
 #define clnt_pcreateerror	gssrpc_clnt_pcreateerror
 #define clnt_spcreateerror	gssrpc_clnt_spcreateerror
-void clnt_pcreateerror(/* char *msg */);	/* stderr */
-char *clnt_spcreateerror(/* char *msg */);	/* string */
+void clnt_pcreateerror(char *);	/* stderr */
+char *clnt_spcreateerror(char *);	/* string */
 
 /*
  * Like clnt_perror(), but is more verbose in its output
  */ 
 #define clnt_perrno		gssrpc_clnt_perrno
-void clnt_perrno(/* enum clnt_stat num */);	/* stderr */
+void clnt_perrno(enum clnt_stat num);	/* stderr */
 
 /*
  * Print an English error message, given the client error code
  */
 #define clnt_perror		gssrpc_clnt_perror
 #define clnt_sperror		gssrpc_clnt_sperror
-void clnt_perror(/* CLIENT *clnt, char *msg */); 	/* stderr */
-char *clnt_sperror(/* CLIENT *clnt, char *msg */);	/* string */
+void clnt_perror(CLIENT *, char *); 	/* stderr */
+char *clnt_sperror(CLIENT *, char *);	/* string */
 
 /* 
  * If a creation fails, the following allows the user to figure out why.
@@ -339,7 +349,7 @@ extern struct rpc_createerr rpc_createerr;
  * Copy error message to buffer.
  */
 #define clnt_sperrno		gssrpc_clnt_sperrno
-char *clnt_sperrno(/* enum clnt_stat num */);	/* string */
+char *clnt_sperrno(enum clnt_stat num);	/* string */
 
 #define UDPMSGSIZE	8800	/* rpc imposed limit on udp msg size */
 #define RPCSMALLMSGSIZE	400	/* a more reasonable packet size */

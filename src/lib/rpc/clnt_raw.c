@@ -57,12 +57,14 @@ static struct clntraw_private {
 	unsigned int	mcnt;
 } *clntraw_private;
 
-static enum clnt_stat	clntraw_call();
-static void		clntraw_abort();
-static void		clntraw_geterr();
-static bool_t		clntraw_freeres();
-static bool_t		clntraw_control();
-static void		clntraw_destroy();
+static enum clnt_stat	clntraw_call(CLIENT *, rpc_u_int32, xdrproc_t, 
+				     void *, xdrproc_t, void *, 
+				     struct timeval);
+static void		clntraw_abort(CLIENT *);
+static void		clntraw_geterr(CLIENT *, struct rpc_err *);
+static bool_t		clntraw_freeres(CLIENT *, xdrproc_t, void *);
+static bool_t		clntraw_control(CLIENT *, int, void *);
+static void		clntraw_destroy(CLIENT *);
 
 static struct clnt_ops client_ops = {
 	clntraw_call,
@@ -126,9 +128,9 @@ clntraw_call(h, proc, xargs, argsp, xresults, resultsp, timeout)
 	CLIENT *h;
 	rpc_u_int32 proc;
 	xdrproc_t xargs;
-	caddr_t argsp;
+	void * argsp;
 	xdrproc_t xresults;
-	caddr_t resultsp;
+	void * resultsp;
 	struct timeval timeout;
 {
 	register struct clntraw_private *clp = clntraw_private;
@@ -180,7 +182,7 @@ call_again:
 		 * specifies a receive buffer size that is too small.)
 		 * This memory must be free()ed to avoid a leak.
 		 */
-		int op = xdrs->x_op;
+		enum xdr_op op = xdrs->x_op;
 		xdrs->x_op = XDR_FREE;
 		xdr_replymsg(xdrs, &msg);
 		xdrs->x_op = op;
@@ -212,8 +214,11 @@ call_again:
 	return (status);
 }
 
+/*ARGSUSED*/
 static void
-clntraw_geterr()
+clntraw_geterr(cl, err)
+     CLIENT *cl;
+     struct rpc_err *err;
 {
 }
 
@@ -222,7 +227,7 @@ static bool_t
 clntraw_freeres(cl, xdr_res, res_ptr)
 	CLIENT *cl;
 	xdrproc_t xdr_res;
-	caddr_t res_ptr;
+	void *res_ptr;
 {
 	register struct clntraw_private *clp = clntraw_private;
 	register XDR *xdrs = &clp->xdr_stream;
@@ -237,18 +242,26 @@ clntraw_freeres(cl, xdr_res, res_ptr)
 	return ((*xdr_res)(xdrs, res_ptr));
 }
 
+/*ARGSUSED*/
 static void
-clntraw_abort()
+clntraw_abort(cl)
+	CLIENT *cl;
 {
 }
 
+/*ARGSUSED*/
 static bool_t
-clntraw_control()
+clntraw_control(cl, request, info)
+	CLIENT *cl;
+	int request;
+	void *info;
 {
 	return (FALSE);
 }
 
+/*ARGSUSED*/
 static void
-clntraw_destroy()
+clntraw_destroy(cl)
+     CLIENT *cl;
 {
 }

@@ -38,10 +38,13 @@
 /*
  * Interface to server-side authentication flavors.
  */
-typedef struct {
+
+typedef struct __rpc_svc_auth {
      struct svc_auth_ops {
-	  int	(*svc_ah_wrap)();
-	  int	(*svc_ah_unwrap)();
+	  int	(*svc_ah_wrap)(struct __rpc_svc_auth *, XDR *, xdrproc_t, 
+			       caddr_t);
+	  int	(*svc_ah_unwrap)(struct __rpc_svc_auth *, XDR *, xdrproc_t, 
+				 caddr_t);
      } *svc_ah_ops;
      caddr_t svc_ah_private;
 } SVCAUTH;

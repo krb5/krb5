@@ -68,16 +68,25 @@ enum xprt_stat {
 /*
  * Server side transport handle
  */
-typedef struct {
+typedef struct __rpc_svcxprt {
 	int		xp_sock;
 	unsigned short		xp_port;	 /* associated port number */
 	struct xp_ops {
-	    bool_t	(*xp_recv)();	 /* receive incomming requests */
-	    enum xprt_stat (*xp_stat)(); /* get transport status */
-	    bool_t	(*xp_getargs)(); /* get arguments */
-	    bool_t	(*xp_reply)();	 /* send reply */
-	    bool_t	(*xp_freeargs)();/* free mem allocated for args */
-	    void	(*xp_destroy)(); /* destroy this struct */
+	    /* receive incomming requests */
+	    bool_t	(*xp_recv)(struct __rpc_svcxprt *, struct rpc_msg *);
+	    /* get transport status */
+	    enum xprt_stat (*xp_stat)(struct __rpc_svcxprt *); 
+	    /* get arguments */
+	    bool_t	(*xp_getargs)(struct __rpc_svcxprt *, xdrproc_t,
+				      void *);
+	    /* send reply */
+	    bool_t	(*xp_reply)(struct __rpc_svcxprt *,
+				    struct rpc_msg *);	 
+            /* free mem allocated for args */
+	    bool_t	(*xp_freeargs)(struct __rpc_svcxprt *, xdrproc_t,
+				       void *);
+	    /* destroy this struct */
+	    void	(*xp_destroy)(struct __rpc_svcxprt *); 
 	} *xp_ops;
 	int		xp_addrlen;	 /* length of remote address */
 	struct sockaddr_in xp_raddr;	 /* remote address */
@@ -173,9 +182,18 @@ struct svc_req {
  *	rpc_u_int32 vers;
  *	void (*dispatch)();
  *	int protocol;  like TCP or UDP, zero means do not register 
+ *
+ * registerrpc(prog, vers, proc, routine, inproc, outproc)
+ * 	returns 0 upon success, -1 if error.
  */
 #define svc_register		gssrpc_svc_register
-extern bool_t	svc_register();
+extern bool_t	svc_register(SVCXPRT *, rpc_u_int32, rpc_u_int32, 
+			     void (*)(struct svc_req *, SVCXPRT *), int);
+
+#define registerrpc             gssrpc_registerrpc
+extern int registerrpc(rpc_u_int32, rpc_u_int32, rpc_u_int32, 
+		       char *(*)(void *),
+		       xdrproc_t, xdrproc_t);
 
 /*
  * Service un-registration
@@ -185,7 +203,7 @@ extern bool_t	svc_register();
  *	rpc_u_int32 vers;
  */
 #define svc_unregister		gssrpc_svc_unregister
-extern void	svc_unregister();
+extern void	svc_unregister(rpc_u_int32, rpc_u_int32);
 
 /*
  * Transport registration.
@@ -194,7 +212,7 @@ extern void	svc_unregister();
  *	SVCXPRT *xprt;
  */
 #define xprt_register		gssrpc_xprt_register
-extern void	xprt_register();
+extern void	xprt_register(SVCXPRT *);
 
 /*
  * Transport un-register
@@ -203,7 +221,7 @@ extern void	xprt_register();
  *	SVCXPRT *xprt;
  */
 #define xprt_unregister		gssrpc_xprt_unregister
-extern void	xprt_unregister();
+extern void	xprt_unregister(SVCXPRT *);
 
 
 
@@ -244,14 +262,14 @@ extern void	xprt_unregister();
 #define svcerr_noprog		gssrpc_svcerr_noprog
 #define svcerr_systemerr	gssrpc_svcerr_systemerr
 
-extern bool_t	svc_sendreply();
-extern void	svcerr_decode();
-extern void	svcerr_weakauth();
-extern void	svcerr_noproc();
-extern void	svcerr_progvers();
-extern void	svcerr_auth();
-extern void	svcerr_noprog();
-extern void	svcerr_systemerr();
+extern bool_t	svc_sendreply(SVCXPRT *, xdrproc_t, caddr_t);
+extern void	svcerr_decode(SVCXPRT *);
+extern void	svcerr_weakauth(SVCXPRT *);
+extern void	svcerr_noproc(SVCXPRT *);
+extern void	svcerr_progvers(SVCXPRT *, rpc_u_int32, rpc_u_int32);
+extern void	svcerr_auth(SVCXPRT *, enum auth_stat);
+extern void	svcerr_noprog(SVCXPRT *);
+extern void	svcerr_systemerr(SVCXPRT *);
     
 /*
  * Lowest level dispatching -OR- who owns this process anyway.
@@ -288,9 +306,13 @@ extern void rpctest_service();
 #define svc_getreqset	gssrpc_svc_getreqset
 #define svc_run		gssrpc_svc_run
 
-extern void	svc_getreq();
-extern void	svc_getreqset();	/* takes fdset instead of int */
-extern void	svc_run(); 	 /* never returns */
+extern void	svc_getreq(int);
+#ifdef FD_SETSIZE
+extern void	svc_getreqset(fd_set *);/* takes fdset instead of int */
+#else
+extern void	svc_getreqset(int *);
+#endif
+extern void	svc_run(void); 	 /* never returns */
 
 /*
  * Socket to use on svcxxx_create call to get default socket
@@ -305,20 +327,28 @@ extern void	svc_run(); 	 /* never returns */
  * Memory based rpc for testing and timing.
  */
 #define svcraw_create	gssrpc_svcraw_create
-extern SVCXPRT *svcraw_create();
+extern SVCXPRT *svcraw_create(void);
 
 /*
  * Udp based rpc.
  */
 #define svcudp_create		gssrpc_svcudp_create
 #define svcudp_bufcreate	gssrpc_svcudp_bufcreate
-extern SVCXPRT *svcudp_create();
-extern SVCXPRT *svcudp_bufcreate();
+extern SVCXPRT *svcudp_create(int);
+extern SVCXPRT *svcudp_bufcreate(int, unsigned int, unsigned int);
 
 /*
  * Tcp based rpc.
  */
 #define svctcp_create		gssrpc_svctcp_create
-extern SVCXPRT *svctcp_create();
+extern SVCXPRT *svctcp_create(int, unsigned int, unsigned int);
+
+/*
+ * Like svtcp_create(), except the routine takes any *open* UNIX file
+ * descriptor as its first input.
+ */
+#define svcfd_create            gssrpc_svcfd_create
+extern SVCXPRT *svcfd_create(int, u_int, u_int);
 
 #endif /* !__SVC_HEADER__ */
+

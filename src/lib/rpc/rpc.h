@@ -85,9 +85,16 @@
  * name service library functions
  */
 #define get_myaddress	gssrpc_get_myaddress
-extern void get_myaddress (struct sockaddr_in *);
+extern int get_myaddress (struct sockaddr_in *);
 
 #define bindresvport 	gssrpc_bindresvport
 extern int bindresvport(int, struct sockaddr_in *);
+
+#define callrpc         gssrpc_callrpc
+extern int callrpc (char *, int, int, int, xdrproc_t, char *,
+		    xdrproc_t , char *);
+
+#define getrpcport     gssrpc_getrpcport
+extern int getrpcport (char *, int, int, int);
 
 #endif /* ndef __RPC_HEADER__ */

@@ -1,3 +1,62 @@
+2001-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* auth.h: Provide full prototype for xdr_des_block.
+
+	* auth_gssapi.h: Complete prototypes for
+	_svcauth_gssapi_unset_names().
+
+	* clnt.h: Prototype dispatch functions and all functions.
+
+	* clnt_perror.c: Prototype static auth_errmsg().
+
+	* clnt_raw.h clnt_tcp.c, clnt_udp.c: Provide prototypes to static
+	functions and match dispatch table prototypes. control function
+	takes void * instead of caddr_t.
+
+	* pmap_rmt.c: Move prototype for resultproc_t to pmap_clnt.h.
+
+	* rpc.h: get_myaddress returns int. Add prototypes for callrpc and
+	getrpcport.
+
+	* rpc_commondata.c (rpc_createerr): When initializing rpc_creaerr
+	use RPC_SUCCESS instead of 0. 
+
+	* get_myaddress.c, rpc_dtablesize.c: Include gssrpc/rpc.h for
+	prototype.
+
+	* pmap_clnt.h, pmap_prot.h, pmap_rmt.h, rpc_msg.h: Full prototypes
+	for all functions.
+
+	* svc.c: Provide full prototype for static function.
+
+	* svc.h: Prototypes for dispatch functions added. Flushed out
+	prototypes for all functions missing prototypes. Added prototype
+	for svcfd_create.
+
+	* svc_auth.c: Prototypes for all functions referenced.
+
+	* svc_auth.h: Prototype dispatch functions to svc_auth_ops.
+
+	* svc_auth_any.c: Replace use of authany_wrap() with a new local
+	function that matches svc_auth_ops dispatch table.
+
+	* svc_simple.c: Provide prototype for static function
+	universal. Fill in missing types of parameters to
+	gssrpc_registerrpc.
+
+	* svc_raw.c svc_tcp.c, svc_udp.c: Provide prototypes for static
+	functions and match prototypes in dispatch table. Change getargs
+	and freeargs argument to void * from caddr_t.
+
+	* xdr.c (xdr_void): Function to match prototype of arguments given.
+
+	* xdr.h: Provide full prototypes for xdr_ops dispatch table and
+	xdr_void().
+
+	* svc_auth_gssapi.c, xdr_alloc.c, xdr_mem.c, xdr_rec.c,
+	xdr_stdio.c: Provide protypes for static functions and match
+	dispatch tables.
+
 2001-06-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* bindresvport.c: Include gssrpc/rpc.h for prototype.

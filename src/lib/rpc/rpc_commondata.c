@@ -41,4 +41,4 @@ fd_set svc_fdset = {0};
 #else
 int svc_fds = 0;
 #endif /* def FD_SETSIZE */
-struct rpc_createerr rpc_createerr = {0};
+struct rpc_createerr rpc_createerr = {RPC_SUCCESS};

@@ -75,7 +75,7 @@ union des_block {
 };
 typedef union des_block des_block;
 #define xdr_des_block	gssrpc_xdr_des_block
-extern bool_t xdr_des_block();
+extern bool_t xdr_des_block(XDR *, des_block *);
 
 /*
  * Authentication info.  Opaque to client.

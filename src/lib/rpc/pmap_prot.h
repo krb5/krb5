@@ -85,7 +85,7 @@ struct pmap {
 };
 
 #define xdr_pmap	gssrpc_xdr_pmap
-extern bool_t xdr_pmap();
+extern bool_t xdr_pmap(XDR *, struct pmap *);
 
 struct pmaplist {
 	struct pmap	pml_map;
@@ -93,4 +93,4 @@ struct pmaplist {
 };
 
 #define xdr_pmaplist	gssrpc_xdr_pmaplist
-extern bool_t xdr_pmaplist();
+extern bool_t xdr_pmaplist(XDR *, struct pmaplist **);

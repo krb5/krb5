@@ -51,13 +51,14 @@ static struct proglst {
 	xdrproc_t p_inproc, p_outproc;
 	struct proglst *p_nxt;
 } *proglst;
-static void universal();
+static void universal(struct svc_req *, SVCXPRT *);
 static SVCXPRT *transp;
 
 int
 gssrpc_registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
 	char *(*progname)();
 	xdrproc_t inproc, outproc;
+	rpc_u_int32 prognum, versnum, procnum;
 {
         struct proglst *pl;
 	

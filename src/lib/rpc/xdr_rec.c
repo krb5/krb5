@@ -56,20 +56,14 @@ static char sccsid[] = "@(#)xdr_rec.c 1.21 87/08/11 Copyr 1984 Sun Micro";
 #include <unistd.h>
 #include <string.h>
 
-static unsigned int	fix_buf_size();
-static bool_t   flush_out();
-static bool_t   get_input_bytes();
-static bool_t   set_input_fragment();
-static bool_t   skip_input_bytes();
-
-static bool_t	xdrrec_getlong();
-static bool_t	xdrrec_putlong();
-static bool_t	xdrrec_getbytes();
-static bool_t	xdrrec_putbytes();
-static unsigned int	xdrrec_getpos();
-static bool_t	xdrrec_setpos();
-static rpc_int32 *	xdrrec_inline();
-static void	xdrrec_destroy();
+static bool_t	xdrrec_getlong(XDR *, long *);
+static bool_t	xdrrec_putlong(XDR *, long *);
+static bool_t	xdrrec_getbytes(XDR *, caddr_t, unsigned int);
+static bool_t	xdrrec_putbytes(XDR *, caddr_t, unsigned int);
+static unsigned int	xdrrec_getpos(XDR *);
+static bool_t	xdrrec_setpos(XDR *, unsigned int);
+static rpc_int32 *	xdrrec_inline(XDR *, int);
+static void	xdrrec_destroy(XDR *);
 
 static struct  xdr_ops xdrrec_ops = {
 	xdrrec_getlong,
@@ -123,6 +117,11 @@ typedef struct rec_strm {
 	unsigned int recvsize;
 } RECSTREAM;
 
+static unsigned int	fix_buf_size(unsigned int);
+static bool_t   flush_out(RECSTREAM *, bool_t);
+static bool_t   get_input_bytes(RECSTREAM *, caddr_t, int);
+static bool_t   set_input_fragment(RECSTREAM *);
+static bool_t   skip_input_bytes(RECSTREAM *, rpc_int32);
 
 /*
  * Create an xdr handle for xdrrec

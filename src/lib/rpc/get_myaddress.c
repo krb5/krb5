@@ -41,6 +41,7 @@ static char sccsid[] = "@(#)get_myaddress.c 1.4 87/08/11 Copyr 1984 Sun Micro";
 #ifdef GSSAPI_KRB5
 #include <string.h>
 #include <gssrpc/types.h>
+#include <gssrpc/rpc.h>
 #include <gssrpc/pmap_prot.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

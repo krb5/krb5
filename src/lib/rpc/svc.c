@@ -73,7 +73,8 @@ static struct svc_callout {
 	void		    (*sc_dispatch)();
 } *svc_head;
 
-static struct svc_callout *svc_find();
+static struct svc_callout *svc_find(rpc_u_int32, rpc_u_int32, 
+				    struct svc_callout **);
 
 /* ***************  SVCXPRT related stuff **************** */
 
