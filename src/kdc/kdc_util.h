@@ -58,6 +58,11 @@ krb5_error_code listen_and_process PROTOTYPE((const char *));
 krb5_error_code setup_network PROTOTYPE((const char *));
 krb5_error_code closedown_network PROTOTYPE((const char *));
 
+
+/* replay.c */
+krb5_boolean kdc_check_lookaside PROTOTYPE((krb5_data *, krb5_data **));
+void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_data *));
+
 /* which way to convert key? */
 #define CONVERT_INTO_DB	0
 #define CONVERT_OUTOF_DB 1
