@@ -459,7 +459,7 @@ net_init(kcontext, debug_level, port)
 	malloc((size_t) (MAX_SLAVES * sizeof(net_slave_info)));
     /* Make our service name */
     net_service_name = (char *) malloc(strlen(realm) +
-				       strlen(KRB5_ADM_SERVICE_NAME) + 2);
+				       strlen(KRB5_ADM_SERVICE_INSTANCE) + 2);
     if ((net_service_name == (char *) NULL) ||
 	(net_slave_table == (net_slave_info *) NULL)) {
 	kret = ENOMEM;
@@ -467,7 +467,7 @@ net_init(kcontext, debug_level, port)
 	goto done;
     }
     (void) sprintf(net_service_name, "%s%s%s",
-		   KRB5_ADM_SERVICE_NAME, "/", realm);
+		   KRB5_ADM_SERVICE_INSTANCE, "/", realm);
     memset((char *) net_slave_table, 0,
 	   (size_t) (MAX_SLAVES * sizeof(net_slave_info)));
     net_max_slaves = MAX_SLAVES;

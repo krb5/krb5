@@ -249,7 +249,13 @@ main(argc, argv)
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
     krb5_klog_init(kcontext, "admin_server", programname, 1);
-
+    if (db_realm) {
+	if ((error = krb5_set_default_realm(kcontext, db_realm))) {
+	    com_err(programname, error, "while setting default realm name");
+	    return(1);
+        }
+    }
+    
     /*
      * Attempt to read the KDC profile.  If we do, then read appropriate values
      * from it and supercede values supplied on the command line.
