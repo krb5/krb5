@@ -1,3 +1,8 @@
+Tue Mar 25 01:15:39 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* rc_io.c (krb5_rc_io_open): rcache owner should be checked against
+		the effective uid, not the real uid.  [krb5-libs/366]
+
 Sat Feb 22 22:44:15 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in

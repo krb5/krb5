@@ -185,7 +185,7 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
  if ((d->fd = stat(d->fn, &statb)) != -1) {
      uid_t me;
 
-     me = getuid();
+     me = geteuid();
      /* must be owned by this user, to prevent some security problems with
 	 * other users modifying replay cache stufff */
      if ((statb.st_uid != me) || ((statb.st_mode & S_IFMT) != S_IFREG)) {
