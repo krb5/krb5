@@ -549,6 +549,7 @@ krb5_decode_princ_contents(context, content, entry)
 	}
 	memcpy((*tl_data)->tl_data_contents,nextloc,(*tl_data)->tl_data_length);
 	nextloc += (*tl_data)->tl_data_length;
+	tl_data = &((*tl_data)->tl_data_next);
     }
 
     	/* key_data is an array */
@@ -572,7 +573,7 @@ krb5_decode_princ_contents(context, content, entry)
     	*(((krb5_octet *)(&key_data->key_data_kvno)) + 1) = *nextloc++;
 
 	/* key_data_ver determins number of elements and how to unparse them. */
-	if (key_data->key_data_ver < KRB5_KDB_V1_KEY_DATA_ARRAY) {
+	if (key_data->key_data_ver <= KRB5_KDB_V1_KEY_DATA_ARRAY) {
 	    for (j = 0; j < key_data->key_data_ver; j++) {
     	        if ((sizeleft -= 4) < 0) {
 	            retval = KRB5_KDB_TRUNCATED_RECORD;
