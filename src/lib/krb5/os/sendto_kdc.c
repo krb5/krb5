@@ -44,16 +44,18 @@
 #include <sys/select.h>
 #endif
 
+#ifdef _WIN32
+#define ENABLE_TCP 0 /* for now */
+#else
+#define ENABLE_TCP 1
+#endif
+
+#if defined(ENABLE_TCP) && !defined(_WIN32)
 /* For FIONBIO.  */
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
-
-#ifdef _WIN32
-#define ENABLE_TCP 0 /* for now */
-#else
-#define ENABLE_TCP 1
 #endif
 
 /*

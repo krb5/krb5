@@ -1,3 +1,8 @@
+2002-06-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c: Include sys/ioctl.h and sys/filio.h only if
+	ENABLE_TCP is set and _WIN32 is not defined.
+
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c: Include sys/ioctl.h and sys/filio.h if
