@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5
+CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5 @HESIOD_DEFS@
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME = libkadm5srv.lib

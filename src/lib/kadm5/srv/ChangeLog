@@ -1,3 +1,10 @@
+Wed Aug  6 20:22:23 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add flags to conditionally compile with Hesiod.
+
+	* server_misc.c: Add support for checking GECOS field of Hesiod
+	passwd entry.
+
 Fri Jul 25 15:37:08 1997  Tom Yu  <tlyu@mit.edu>
 
 	* server_init.c: Change a few calls to align with the new kdb

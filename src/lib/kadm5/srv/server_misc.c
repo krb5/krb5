@@ -12,6 +12,7 @@ static char *rcsid = "$Header$";
 #include    <krb5/kdb.h>
 #include    <ctype.h>
 #include    "adb.h"
+#include    <pwd.h>
 
 /* for strcasecmp */
 #include    <string.h>
@@ -40,6 +41,76 @@ adb_policy_close(kadm5_server_handle_t handle)
     return KADM5_OK;
 }
 
+/* stolen from v4sever/kadm_funcs.c */
+static char *
+reverse(str)
+	char	*str;
+{
+	static char newstr[80];
+	char	*p, *q;
+	int	i;
+
+	i = strlen(str);
+	if (i >= sizeof(newstr))
+		i = sizeof(newstr)-1;
+	p = str+i-1;
+	q = newstr;
+	q[i]='\0';
+	for(; i > 0; i--) 
+		*q++ = *p--;
+	
+	return(newstr);
+}
+
+static int
+lower(str)
+	char	*str;
+{
+	register char	*cp;
+	int	effect=0;
+
+	for (cp = str; *cp; cp++) {
+		if (isupper(*cp)) {
+			*cp = tolower(*cp);
+			effect++;
+		}
+	}
+	return(effect);
+}
+
+static int
+str_check_gecos(gecos, pwstr)
+	char	*gecos;
+	char	*pwstr;
+{
+	char		*cp, *ncp, *tcp;
+	
+	for (cp = gecos; *cp; ) {
+		/* Skip past punctuation */
+		for (; *cp; cp++)
+			if (isalnum(*cp))
+				break;
+		/* Skip to the end of the word */
+		for (ncp = cp; *ncp; ncp++)
+			if (!isalnum(*ncp) && *ncp != '\'')
+				break;
+		/* Delimit end of word */
+		if (*ncp)
+			*ncp++ = '\0';
+		/* Check word to see if it's the password */
+		if (*cp) {
+			if (!strcasecmp(pwstr, cp))
+				return 1;
+			tcp = reverse(cp);
+			if (!strcasecmp(pwstr, tcp))
+				return 1;
+			cp = ncp;				
+		} else
+			break;
+	}
+	return 0;
+}
+
 /* some of this is stolen from gatekeeper ... */
 kadm5_ret_t
 passwd_check(kadm5_server_handle_t handle,
@@ -51,7 +122,11 @@ passwd_check(kadm5_server_handle_t handle,
 	    ndigit = 0, 
 	    npunct = 0,
 	    nspec = 0;
-    char    c, *s;
+    char    c, *s, *cp;
+#ifdef HESIOD
+    extern  struct passwd *hes_getpwnam();
+    struct  passwd *ent;
+#endif
     
     if(use_policy) {
 	if(strlen(password) < pol->pw_min_length)
@@ -90,6 +165,12 @@ passwd_check(kadm5_server_handle_t handle,
 		cp = krb5_princ_component(handle->context, principal, c)->data;
 		if (strcasecmp(cp, password) == 0)
 		    return KADM5_PASS_Q_DICT;
+#ifdef HESIOD
+		ent = hes_getpwnam(cp);
+		if (ent && ent->pw_gecos)
+		    if (str_check_gecos(ent->pw_gecos, password))
+			return KADM5_PASS_Q_DICT; /* XXX new error code? */
+#endif
 	    }
 	    return KADM5_OK;
 	}
