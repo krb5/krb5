@@ -27,7 +27,6 @@ if ![check_k5login rsh] {
 # Set up the kerberos database.
 if {![get_hostname] \
     || ![setup_kerberos_files] \
-    || ![setup_kerberos_env] \
     || ![setup_kerberos_db 0]} {
     return
 }
@@ -58,8 +57,9 @@ proc stop_rsh_daemon { } {
     global krshd_pid
 
     if [info exists krshd_pid] {
-	catch "close -i $krshd_spawn_id"
 	catch "exec kill $krshd_pid"
+	catch "expect -i $krshd_spawn_id eof"
+	catch "close -i $krshd_spawn_id"
 	catch "wait -i $krshd_spawn_id"
 	unset krshd_pid
     }
@@ -85,6 +85,7 @@ proc rsh_test { } {
         || ![add_kerberos_key host/$hostname 0] \
         || ![setup_srvtab 0] \
 	|| ![add_kerberos_key $env(USER) 0] \
+	|| ![setup_kerberos_env client] \
 	|| ![kinit $env(USER) $env(USER)$KEY 0]} {
 	return
     }
@@ -140,6 +141,7 @@ proc rsh_test { } {
 	}
     }
 
+    catch "expect eof"
     if { $failed == "no" } {
 	if ![check_exit_status $testname] {
 	    return
@@ -218,7 +220,6 @@ proc rsh_test { } {
 
     stop_rsh_daemon
 
-
     # Check stderr
     start_rsh_daemon -k
     set testname "rsh to stderr"
@@ -240,6 +241,8 @@ proc rsh_test { } {
     }
 
     pass $testname
+
+    stop_rsh_daemon
 
     start_rsh_daemon -e
     set testname "encrypted rsh to stderr"

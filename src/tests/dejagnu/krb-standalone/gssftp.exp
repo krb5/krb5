@@ -41,7 +41,11 @@ proc start_ftp_daemon { } {
     # don't need to use inetd.  The 3021 is the port to listen at.
     # We rely on KRB5_KTNAME being set to the proper keyfile as there is
     # no way to cleanly set it with the gssapi API.
-    spawn $FTPD -p 3021 -r $tmppwd/krb5.conf
+    # The -U argument tells it to use an alternate ftpusers file (using
+    # /dev/null will allow root to login regardless of /etc/ftpusers).
+    # The -a argument requires authorization, to mitigate any
+    # vulnerability introduced by circumventing ftpusers.
+    spawn $FTPD -p 3021 -a -U /dev/null -r $tmppwd/krb5.conf
     set ftpd_spawn_id $spawn_id
     set ftpd_pid [exp_pid]
 
@@ -64,12 +68,21 @@ proc stop_ftp_daemon { } {
 }
 
 # Create a file to use for ftp testing.
-set file [open tmpdir/ftp-test w]
+set file [open $tmppwd/ftp-test w]
 puts $file "This file is used for ftp testing."
 close $file
 
+# Create a large file to use for ftp testing. File needs to be 
+# larger that 2^20 or 1MB for PBSZ testing.
+set file [open $tmppwd/bigftp-test w]
+puts $file "This file is used for ftp testing.\n"
+seek $file 1048576 current
+puts $file "This file is used for ftp testing."
+close $file
+
+
 # Test that a file was copied correctly.
-proc check_file { filename } {
+proc check_file { filename {bigfile 0}} {
     if ![file exists $filename] {
 	verbose "$filename does not exist"
 	send_log "$filename does not exist\n"
@@ -89,6 +102,24 @@ proc check_file { filename } {
 	send_log "$filename contains $line\n"
 	close $file
 	return 0
+    }
+
+    if {$bigfile} {
+	# + 1 for the newline
+	seek $file 1048577 current
+	if { [gets $file line] == -1 } {
+	    verbose "$filename is truncated"
+	    send_log "$filename is truncated\n"
+	    close $file
+	    return 0
+	}
+
+	if ![string match "This file is used for ftp testing." $line] {
+	    verbose "$filename contains $line"
+	    send_log "$filename contains $line\n"
+	    close $file
+	    return 0
+	}
     }
 
     if { [gets $file line] != -1} {
@@ -123,6 +154,7 @@ proc ftp_restore_env { } {
 proc ftp_test { } {
     global FTP
     global KEY
+    global REALMNAME
     global hostname
     global localhostname
     global env
@@ -185,9 +217,9 @@ proc ftp_test { } {
     }
     expect -nocase "name ($hostname:$env(USER)): "
     send "$env(USER)\r"
-#    expect "User $env(USER) logged in."
-#    expect "Remote system type is UNIX."
-#    expect "Using binary mode to transfer files."
+    expect "GSSAPI user $env(USER)@$REALMNAME is authorized as $env(USER)"
+    expect "Remote system type is UNIX."
+    expect "Using binary mode to transfer files."
     expect "ftp> " {
 	pass $testname
     }
@@ -236,26 +268,26 @@ proc ftp_test { } {
 
 
     set testname "get"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "get $tmppwd/ftp-test $tmppwd/copy\r"
     expect "Opening BINARY mode data connection for $tmppwd/ftp-test"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname
     }
 
     set testname "put"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "put $tmppwd/ftp-test $tmppwd/copy\r"
     expect "Opening BINARY mode data connection for $tmppwd/copy"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes sent in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname
@@ -269,20 +301,33 @@ proc ftp_test { } {
     }
 
     set testname "lcd"
-    send "lcd tmpdir\r"
+    send "lcd $tmppwd\r"
     expect "Local directory now $tmppwd"
     expect "ftp> " {
 	pass $testname
     }
 
     set testname "local get"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "get ftp-test copy\r"
     expect "Opening BINARY mode data connection for ftp-test"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+
+    set testname "big local get"
+    catch "exec rm -f $tmppwd/copy"
+    send "get bigftp-test copy\r"
+    expect "Opening BINARY mode data connection for bigftp-test"
+    expect "Transfer complete"
+    expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
+    expect "ftp> "
+    if [check_file $tmppwd/copy 1] {
 	pass $testname
     } else {
 	fail $testname
@@ -303,18 +348,38 @@ proc ftp_test { } {
     }
 
     set testname "encrypted get"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "get ftp-test copy\r"
     expect "Opening BINARY mode data connection for ftp-test"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname
     }
 
+    set testname "big encrypted get"
+    catch "exec rm -f $tmppwd/copy"
+    send "get bigftp-test copy\r"
+    expect "Opening BINARY mode data connection for bigftp-test"
+    expect {
+	-timeout 300
+	"Transfer complete" {}
+	-re "Length .* of PROT buffer > PBSZ" {
+	    fail "$testname (PBSZ)"
+	    return 0
+	}
+    }
+    expect -re "\[0-9\]+ bytes received in \[0-9.e+-\]+ seconds"
+    expect "ftp> "
+    if [check_file $tmppwd/copy 1] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+    
     set testname "close"
     send "close\r"
     expect "Goodbye."

@@ -57,7 +57,7 @@ proc doit { } {
     }
 
     # Make sure that klist can see the ticket.
-    spawn $KLIST -5
+    spawn $KLIST -5 -e
     expect {
 	-re "Ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*Default principal:\[ 	\]*krbtest/admin@$REALMNAME.*krbtgt/$REALMNAME@$REALMNAME\r\n" {
 	    verbose "klist started"
