@@ -40,7 +40,8 @@ DynObjectP DynCreate(el_size, inc)
      obj->el_size = el_size;
      obj->num_el = obj->size = 0;
      obj->debug = obj->paranoid = 0;
-     obj->inc = (!! inc) ? inc : default_increment;
+     obj->inc = (inc) ? inc : default_increment;
+     obj->initzero = 0;
 
      return obj;
 }
@@ -61,7 +62,7 @@ DynObjectP DynCopy(obj)
      obj1->debug = obj->debug;
      obj1->paranoid = obj->paranoid;
      obj1->initzero = obj->initzero;
-     obj1->array = (char *) malloc(obj1->el_size * obj1->size);
+     obj1->array = (char *) malloc((size_t) (obj1->el_size * obj1->size));
      if (obj1->array == NULL) {
 	  free(obj1);
 	  return NULL;
@@ -79,7 +80,7 @@ int DynDestroy(obj)
 	  if (obj->debug)
 	       fprintf(stderr, "dyn: destroy: zeroing %d bytes from %p.\n",
 		       obj->el_size * obj->size, obj->array);
-	  memset(obj->array, 0, obj->el_size * obj->size);
+	  memset(obj->array, 0, (size_t) (obj->el_size * obj->size));
      }
      free(obj->array);
      free(obj);

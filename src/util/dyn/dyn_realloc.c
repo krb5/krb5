@@ -67,7 +67,7 @@ int _DynRealloc(obj, num_incs)
 		  new_size_in_bytes - obj->el_size*obj->size,
 		  num_incs);
      
-     temp = (DynPtr) realloc(obj->array, new_size_in_bytes);
+     temp = (DynPtr) realloc(obj->array, (size_t) new_size_in_bytes);
      if (temp == NULL) {
 	  if (obj->debug)
 	       fprintf(stderr, "dyn: alloc: Out of memory.\n");

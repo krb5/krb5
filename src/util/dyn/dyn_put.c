@@ -87,7 +87,7 @@ int DynPut(obj, el_in, idx)
 	  return ret;
 
 #ifdef HAVE_MEMMOVE
-     memmove(obj->array + idx*obj->el_size, el, obj->el_size);
+     memmove(obj->array + idx*obj->el_size, el, (size_t) obj->el_size);
 #else
      bcopy(el, obj->array + idx*obj->el_size, obj->el_size);
 #endif     

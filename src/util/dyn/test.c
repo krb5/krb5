@@ -12,9 +12,13 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #ifdef USE_DBMALLOC
 #include <sys/stdtypes.h>
 #include <malloc.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 
 #include "dyn.h"
@@ -24,6 +28,7 @@ static char insert1[] = "This will be put at the beginning.";
 static char insert2[] = "(parenthetical remark!) ";
 static char insert3[] = "  This follows the random string.";
 
+int
 main(argc, argv)
    int	argc;
    char	**argv;

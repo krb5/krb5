@@ -56,6 +56,7 @@ int DynParanoid P((DynObject obj, int state));
 int DynInitzero P((DynObject obj, int state));
 int DynSize P((DynObject obj));
 int DynCapacity P((DynObject obj));
+int DynAppend P((DynObject obj, DynPtr els, int num));
 
 #undef P
 

@@ -40,7 +40,7 @@ int DynDelete(obj, idx)
 	  if (obj->paranoid) {
 	       if (obj->debug)
 		    fprintf(stderr, "dyn: delete: last element, zeroing.\n");
-	       memset(obj->array + idx*obj->el_size, 0, obj->el_size);
+	       memset(obj->array + idx*obj->el_size, 0, (size_t) obj->el_size);
 	  }
 	  else {
 	       if (obj->debug)
@@ -57,7 +57,7 @@ int DynDelete(obj, idx)
 #ifdef HAVE_MEMMOVE
 	  memmove(obj->array + idx*obj->el_size,
 		  obj->array + (idx+1)*obj->el_size,
-		  obj->el_size*(obj->num_el - idx));
+		  (size_t) obj->el_size*(obj->num_el - idx));
 #else
 	  bcopy(obj->array + (idx+1)*obj->el_size,
 		  obj->array + idx*obj->el_size,
@@ -70,7 +70,7 @@ int DynDelete(obj, idx)
 			    obj->el_size, obj->array,
 			    obj->el_size*(obj->num_el - 1));
 	       memset(obj->array + obj->el_size*(obj->num_el - 1), 0,
-		     obj->el_size);
+		     (size_t) obj->el_size);
 	  }
      }
      

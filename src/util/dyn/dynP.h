@@ -37,8 +37,18 @@
 
 typedef struct _DynObject DynObjectRecP, *DynObjectP;
 
+/* Function declarations */
+#ifdef __STDC__
+#define P(args) args
+#else
+#define P(args) ()
+#endif /* __STDC__ */
+
 /* Internal functions */
-int _DynRealloc(), _DynResize();
+int _DynRealloc P((DynObjectP obj, int req)), 
+  _DynResize P((DynObjectP obj, int req));
+
+#undef P
 
 #endif /* _DynP_h */
 /* DON'T ADD STUFF AFTER THIS #endif */

@@ -47,7 +47,7 @@ int DynInsert(obj, idx, els_in, num)
 #ifdef HAVE_MEMMOVE
      memmove(obj->array + obj->el_size*(idx + num),
 	     obj->array + obj->el_size*idx,
-	     (obj->num_el-idx)*obj->el_size);
+	     (size_t) ((obj->num_el-idx)*obj->el_size));
 #else
      bcopy(obj->array + obj->el_size*idx,
 	   obj->array + obj->el_size*(idx + num), 
@@ -59,7 +59,7 @@ int DynInsert(obj, idx, els_in, num)
 		  obj->el_size*num, els, obj->array, obj->el_size*idx);
 
 #ifdef HAVE_MEMMOVE
-     memmove(obj->array + obj->el_size*idx, els, obj->el_size*num);
+     memmove(obj->array + obj->el_size*idx, els, (size_t) (obj->el_size*num));
 #else
      bcopy(els, obj->array + obj->el_size*idx, obj->el_size*num);
 #endif     

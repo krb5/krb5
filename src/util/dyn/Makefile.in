@@ -55,7 +55,13 @@ includes:: dyn.h
 	fi
 
 clean-unix::
-	$(RM) $(BUILDTOP)/include/dyn.h
+	$(RM) $(BUILDTOP)/include/dyn.h test.o dyntest
+
+check-unix:: dyntest
+	./dyntest
+
+dyntest: test.o $(OBJS)
+	$(CC) -o dyntest test.o $(OBJS)
 
 check-windows::
 clean-mac::
