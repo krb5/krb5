@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * prototype/prototype.c
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,7 +24,3 @@
  * <<< Description >>>
  */
 
-#if !defined(lint) && !defined(SABER)
-static char <<< rcsid_module_c >>>[] =
-"$Id$";
-#endif	/* !lint & !SABER */
