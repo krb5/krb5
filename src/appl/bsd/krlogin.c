@@ -1742,9 +1742,7 @@ int des_write(fd, buf, len)
      int len;
 {
     long net_len;
-    static int seeded = 0;
     static char garbage_buf[8];
-    long garbage;
     
     if (!encrypt_flag)
       return(write(fd, buf, len));
@@ -1752,18 +1750,7 @@ int des_write(fd, buf, len)
 #define min(a,b) ((a < b) ? a : b)
     
     if (len < 8) {
-	if (!seeded) {
-	    seeded = 1;
-	    srandom((int) time((long *)0));
-	}
-#if 0
-	garbage = random();
-	/* insert random garbage */
-	(void) memcpy(garbage_buf, &garbage, min(sizeof(long),8));
-#else
-	krb5_random_confounder(8, &garbage_buf);
-#endif
-	
+	krb5_random_confounder(8 - len, &garbage_buf);
 	/* this "right-justifies" the data in the buffer */
 	(void) memcpy(garbage_buf + 8 - len, buf, len);
     }

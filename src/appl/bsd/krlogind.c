@@ -1595,29 +1595,6 @@ recvauth()
 
 #ifdef KRB5_KRB4_COMPAT
 
-/* Random number support only needed for v4_des_write */
-#ifdef HAVE_SRAND48
-#define SRAND	srand48
-#define RAND	lrand48
-#define RAND_TYPE	long
-#endif
-
-#if !defined(RAND_TYPE) && defined(HAVE_SRAND)
-#define SRAND	srand
-#define RAND	rand
-#define RAND_TYPE	int
-#endif
-
-#if !defined(RAND_TYPE) && defined(HAVE_SRANDOM)	
-#define SRAND	srandom
-#define RAND	random
-#define RAND_TYPE	long
-#endif
-
-#if !defined(RAND_TYPE)
-You need a random number generator!
-#endif
-
 int
 v4_des_read(fd, buf, len)
 int fd;
@@ -1699,9 +1676,7 @@ char *buf;
 int len;
 {
 	long net_len;
-	static int seeded = 0;
 	static char garbage_buf[8];
-	long garbage;
 
 	if (!do_encrypt)
 		return(write(fd, buf, len));
@@ -1724,15 +1699,7 @@ int len;
 #define min(a,b) ((a < b) ? a : b)
 
 	if (len < 8) {
-		if (!seeded) {
-			RAND_TYPE rval = time((long *) 0);
-			seeded = 1;
-			SRAND(rval);
-		}
-		garbage = RAND();
-		/* insert random garbage */
-		(void) memcpy(garbage_buf, &garbage, min(sizeof(long),8));
-
+		krb5_random_confounder(8 - len, &garbage_buf);
 		/* this "right-justifies" the data in the buffer */
 		(void) memcpy(garbage_buf + 8 - len, buf, len);
 	}

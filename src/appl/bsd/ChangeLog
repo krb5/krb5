@@ -1,3 +1,10 @@
+Thu Oct 27 16:12:19 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* krlogin.c (des_write): get rid of srandom, since seeding is done
+	directly in krb5_random_confounder. get rid of unused variables.
+	* krlogind.c (v4_des_write): use krb5_random_confounder
+	directly. get rid of unused variables.
+
 Thu Oct 27 14:50:40 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* login.c (main): if CDISCARD is missing, use CFLUSH instead.
