@@ -103,6 +103,13 @@ krb5_scc_read_principal(id, princ)
     if (kret != KRB5_OK)
 	return kret;
 
+    /*
+     * DCE includes the principal's realm in the count; the new format
+     * does not.
+     */
+    if (data->version == KRB5_SCC_FVNO_1)
+	length--;
+
     tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (tmpprinc == NULL)
 	return KRB5_CC_NOMEM;

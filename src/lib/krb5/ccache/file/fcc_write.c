@@ -80,17 +80,24 @@ krb5_fcc_store_principal(id, princ)
 {
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code ret;
-    krb5_int32 i, length, type;
+    krb5_int32 i, length, tmp, type;
 
     type = krb5_princ_type(princ);
-    length = krb5_princ_size(princ);
+    tmp = length = krb5_princ_size(princ);
 
-    if (data->version != KRB5_FCC_FVNO_1) {
-	    ret = krb5_fcc_store_int32(id, &type);
-	    CHECK(ret);
+    if (data->version == KRB5_FCC_FVNO_1) {
+	/*
+	 * DCE-compatible format means that the length count
+	 * includes the realm.  (It also doesn't include the
+	 * principal type information.)
+	 */
+	tmp++;
+    } else {
+	ret = krb5_fcc_store_int32(id, &type);
+	CHECK(ret);
     }
     
-    ret = krb5_fcc_store_int32(id, &length);
+    ret = krb5_fcc_store_int32(id, &tmp);
     CHECK(ret);
 
     ret = krb5_fcc_store_data(id, krb5_princ_realm(princ));
