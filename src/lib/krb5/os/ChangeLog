@@ -1,3 +1,26 @@
+Wed Jun 12 01:12:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* net_read.c (krb5_net_read):
+	* net_write.c (krb5_net_write): In case of an error, on Windows
+		machines, set errno from SOCKET_ERRNO, since the interface
+		assumes the error is passed back the errno global
+		varaible.  This really needs to be fixed sometime...
+
+	* read_msg.c: If ECONNABORTED is not defined, try using the
+		Winsock version of the error code (WSAECONNABORTED).
+
+Mon Jun 10 21:48:45 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* read_pwd.c:
+	* promptusr.c:
+	* lock_file.c:
+	* kuserok.c:
+	* ktdefname.c (krb5_kt_default_name): 
+	* init_os_ctx.c (os_init_paths): 
+	* ccdefname.c: 
+	* an_to_ln.c (db_an_to_ln): Change _WINDOWS to _MSDOS, and add
+	 	check for _WIN32.
+
 Thu Apr 18 16:24:44 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* macsock.c (getsockname, getpeername): Correctly implement

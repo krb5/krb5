@@ -108,7 +108,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     const int lnsize;
     char *lname;
 {
-#if	defined(BERK_DB_DBM) || (!defined(_WINDOWS) && !defined(_MACINTOSH))
+#if	defined(BERK_DB_DBM) || (!defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH))
     DBM *db;
     krb5_error_code retval;
     datum key, contents;
@@ -144,13 +144,13 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     /* can't close until we copy the contents. */
     (void) KDBM_CLOSE(db);
     return retval;
-#else	/* BERK_DB_DBM && !_WINDOWS */
+#else	/* BERK_DB_DBM && !_MSDOS && !_WIN32 && !MACINTOSH */
     /*
      * If we don't have support for a database mechanism, then we can't
      * translate this now, can we?
      */
     return KRB5_LNAME_NOTRANS;
-#endif	/* BERK_DB_DBM && !_WINDOWS */
+#endif	/* BERK_DB_DBM && !_MSDOS && !_WIN32 && !MACINTOSH */
 }
 
 #ifdef	AN_TO_LN_RULES

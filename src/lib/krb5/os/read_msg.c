@@ -28,6 +28,10 @@
 #include "k5-int.h"
 #include <errno.h>
 
+#ifndef ECONNABORTED
+#define ECONNABORTED WSAECONNABORTED
+#endif
+
 krb5_error_code
 krb5_read_message(context, fdp, inbuf)
     krb5_context context;

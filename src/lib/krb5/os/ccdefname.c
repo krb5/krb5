@@ -107,7 +107,7 @@ char	pathbuf[255];
 //	strcpy (name_buf, "STDIO:krb5cc");
 }
 #else
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
         {
             char defname[160];                  /* Default value */
 

@@ -44,7 +44,7 @@ krb5_kt_default_name(context, name, namesize)
 	if (strlen(cp) >= (size_t) namesize)
 	    return KRB5_CONFIG_NOTENUFSPACE;
     } else {
-#if defined (_WINDOWS) || defined(WIN32)
+#if defined (_MSDOS) || defined(_WIN32)
 	{
 	    char    defname[160];
 	    int     len;
