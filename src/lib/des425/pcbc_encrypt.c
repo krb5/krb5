@@ -18,7 +18,6 @@
 /* 
  * copy of include/des.h to avoid collision with local one
  */
-#include "k5-config.h"
 #include "osconf.h"
 
 #ifndef KRB_INT32

@@ -1,4 +1,11 @@
 
+Thu Jul 27 15:23:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Check for the sizes of short, int and long.
+	* des.c - Cast mit_des_ecb_encrypt arguments correctly.
+	* pcbc_encrypt.c - Remove inclusion of k5-config.h.
+	* verify.c - Fix compiler grumbles.
+
+
 Fri Jul 7 16:22:13 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS, it's set by configure.
 
