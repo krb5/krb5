@@ -26,18 +26,8 @@ in this Software without prior written authorization from the X Consortium.
 
 */
 
-#include <X11/Xosdefs.h>
-#ifdef WIN32
-#include <X11/Xw32defs.h>
-#endif
-#include <X11/Xfuncproto.h>
 #include <stdio.h>
 #include <ctype.h>
-#ifndef X_NOT_POSIX
-#ifndef _POSIX_SOURCE
-#define _POSIX_SOURCE
-#endif
-#endif
 #include <sys/types.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -118,7 +108,7 @@ struct filepointer {
 	long	f_line;
 };
 
-#ifndef X_NOT_STDC_ENV
+#ifndef NO_STDLIB_H		/* X_NOT_STDC_ENV */
 #include <stdlib.h>
 #if defined(macII) && !defined(__STDC__)  /* stdlib.h fails to define these */
 char *malloc(), *realloc();
@@ -138,7 +128,7 @@ struct filepointer	*getfile();
 struct inclist		*newinclude();
 struct inclist		*inc_path();
 
-#if NeedVarargsPrototypes
+#ifdef STDARG_PROTOTYPES	/* NeedVarargsPrototypes */
 extern fatalerr(char *, ...);
 extern warning(char *, ...);
 extern warning1(char *, ...);

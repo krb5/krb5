@@ -31,19 +31,7 @@ in this Software without prior written authorization from the X Consortium.
 #define sigvec sigvector
 #endif /* hpux */
 
-#ifdef X_POSIX_C_SOURCE
-#define _POSIX_C_SOURCE X_POSIX_C_SOURCE
 #include <signal.h>
-#undef _POSIX_C_SOURCE
-#else
-#if defined(X_NOT_POSIX) || defined(_POSIX_SOURCE)
-#include <signal.h>
-#else
-#define _POSIX_SOURCE
-#include <signal.h>
-#undef _POSIX_SOURCE
-#endif
-#endif
 
 #if NeedVarargsPrototypes
 #include <stdarg.h>
