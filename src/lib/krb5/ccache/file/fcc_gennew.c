@@ -32,6 +32,7 @@ extern krb5_cc_ops krb5_fcc_ops;
  * Errors:
  * KRB5_NOMEM - there was insufficient memory to allocate the
  * 		krb5_ccache.  id is undefined.
+ * system errors (from open)
  */
 krb5_error_code
 krb5_fcc_generate_new (id)
@@ -71,10 +72,12 @@ krb5_fcc_generate_new (id)
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT| O_EXCL,0600);
+     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT | O_EXCL, 0);
      if (ret == -1)
-	  return ret;
+	  return errno;
      else {
+	  /* Ignore user's umask, set mode = 0600 */
+	  fchmod(ret, S_IREAD | S_IWRITE);
 	  close(ret);
 	  *id = lid;
 	  return KRB5_OK;
