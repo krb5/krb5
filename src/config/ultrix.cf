@@ -7,36 +7,41 @@
  * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
  */
 
-#define OSName            Ultrix-32 3.1
+#define OSName            Ultrix-32 4.2
 #define OS_Ultrix         1
-#define OS_TelnetName     ultrix3.1 /* see appl/telnet/Makefile.telnet
+#define OS_TelnetName     ultrix4.2 /* see appl/telnet/Makefile.telnet
 				       to select the name for this */
-#define OSMajorVersion    3
-#define OSMinorVersion    1
+#define OSMajorVersion    4
+#define OSMinorVersion    2
 #define SystemV NO
 #define HasVoidSignalReturn YES
 #define HasPosixTermios YES
 #define HasPosixFileLocks YES
 #define HasPosixTypes YES
 #define HasStringH YES
-#define HasStdlibH NO
+#define HasStdlibH 2
 #define HasInet YES
 #define HasPutenv YES
 #define HasBsearch YES
-#define IsPOSIX YES
+#define	HasAnsiStdio	YES
+#define	HasUnistdH	YES
+#define IsPOSIX		YES
+#define	WantPrototypes	YES
 #define Bitsize32
+#define	HasVfprintf	YES
+#define	HasStrerror	YES
 
-#define StandardCppDefines -DPOSIX -D_POSIX_SOURCE
+/* #define StandardCppDefines -DPOSIX -D_POSIX_SOURCE */
 /* Saber bug doesn't allow deref through const *'s */
-#define SaberDefines -DPOSIX -Dconst=
-#define StandardDefines -YPOSIX -D_POSIX_SOURCE
+/* #define SaberDefines -DPOSIX -Dconst= */
+/* #define StandardDefines -YPOSIX -D_POSIX_SOURCE */
 /* makedepend won't understand -YPOSIX also implies -DPOSIX... */
-#define MakeDependFlags -DPOSIX
+/* #define MakeDependFlags -DPOSIX */
 
-#define DefaultCDebugFlags OptimizedCDebugFlags
+/* #define DefaultCDebugFlags OptimizedCDebugFlags */
 
-#undef HasNdbm
-#define HasNdbm NO
+/* #undef HasNdbm */
+#define HasNdbm YES
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
@@ -53,6 +58,8 @@
 
 #define	UseVolatile YES
 #define	UseVoid YES
+#define	NoNestedPrototypes
+#define	UseStdarg YES
 
 #define	ArCmd ar cru
 #define LintLibFlag -o
