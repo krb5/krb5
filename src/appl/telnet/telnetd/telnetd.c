@@ -672,8 +672,8 @@ usage()
 #ifdef	AUTHENTICATION
 	fprintf(stderr, " [-X auth-type]");
 #endif
-	fprintf(stderr, " [-U]\n");
-	fprintf(stderr, " [-w [ip|maxhostlen[,[no]striplocal]]]\n");
+	fprintf(stderr, " [-U]\n\t");
+	fprintf(stderr, " [-w [ip|maxhostlen[,[no]striplocal]]]\n\t");
 	fprintf(stderr, " [port]\n");
 	exit(1);
 }

@@ -4,7 +4,7 @@
 	Reported by Nico Williams, <Nicolas.Williams@ubsw.com>.
 	(main): Delete options 'N', 'u', 'i' that were removed from
 	valid_opts in 1999.
-	(usage): Don't show -u option.
+	(usage): Don't show -u option.  Align output columns better.
 
 2001-01-25  Tom Yu  <tlyu@mit.edu>
 
