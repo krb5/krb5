@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000,2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -138,24 +138,6 @@ cleanup:
 	    krb5_free_principal(context, in_creds.server);
     return code;
 }
-
-
-#if 0
-static krb5_error_code
-make_ap_req_v2(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
-    krb5_context context;
-    krb5_gss_ctx_id_rec *ctx;
-    krb5_creds *k_cred;
-    krb5_gss_cred_id_t cred;
-    gss_channel_bindings_t chan_bindings;
-    gss_OID mech_type;
-    gss_buffer_t token;
-{
-    int krb5_mech2_supported = 0;
-    assert(krb5_mech2_supported);
-    return 0;
-}
-#endif
 
 static krb5_error_code
 make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
