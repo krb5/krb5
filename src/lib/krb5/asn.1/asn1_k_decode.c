@@ -272,7 +272,7 @@ asn1_error_code asn1_decode_krb5_flags(buf, val)
      krb5_flags * val;
 {
   setup();
-  asn1_octet o;
+  asn1_octet unused, o;
   int i;
   krb5_flags f=0;
   unused_var(taglen);
@@ -281,16 +281,24 @@ asn1_error_code asn1_decode_krb5_flags(buf, val)
   if(retval) return retval;
   if(class != UNIVERSAL || construction != PRIMITIVE ||
      tagnum != ASN1_BITSTRING) return ASN1_BAD_ID;
-  if(length != 5) return ASN1_BAD_LENGTH;
 
-  retval = asn1buf_remove_octet(buf,&o); /* # of padding bits */
-  if(retval) return retval;	/*  should be 0 */
-  if(o != 0) return ASN1_BAD_FORMAT;
+  retval = asn1buf_remove_octet(buf,&unused); /* # of padding bits */
+  if(retval) return retval;
 
-  for(i=0; i<4; i++){
+  /* Number of unused bits must be between 0 and 7. */
+  if (unused > 7) return ASN1_BAD_FORMAT;
+  length--;
+
+  for(i = 0; i < length; i++) {
     retval = asn1buf_remove_octet(buf,&o);
     if(retval) return retval;
-    f = (f<<8) | ((krb5_flags)o&0xFF);
+    /* ignore bits past number 31 */
+    if (i < 4)
+      f = (f<<8) | ((krb5_flags)o&0xFF);
+  }
+  if (length <= 4) {
+    /* Mask out unused bits, but only if necessary. */
+    f &= ~0 << unused;
   }
   *val = f;
   return 0;
