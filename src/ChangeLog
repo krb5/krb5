@@ -1,5 +1,8 @@
 Wed Nov  2 20:39:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* aclocal.m4: Don't recursively pass the CPPOPTS makefile variable
+		down to subdirectories.
+
 	* aclocal.m4 (CONFIG_RULES, WITH_CPPOPTS): Add support for a new
 		"--with-cppopts" value where you can put -DXXXXX such that
 		they are found by autoconf tests that use run the

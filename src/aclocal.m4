@@ -101,8 +101,7 @@ $2::<<<
 	for i in $(SUBDIRS) ;\
 	do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
-			$(MAKE) $(MFLAGS) CC="$(CC)" \
-			CPPOPTS="$(CPPOPTS)" CCOPTS="$(CCOPTS)" \
+			$(MAKE) $(MFLAGS) CC="$(CC)" CCOPTS="$(CCOPTS)" \
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$2<<<); \
 	done>>>
 changequote([,])dnl
