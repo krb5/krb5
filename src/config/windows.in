@@ -48,6 +48,7 @@ CFLAGS2 = $(CCOPTS2) $(DEFS)
 # /Os optimize for space.  FIXME:  Do not use /Ox; it miscompiles the DES lib!
 # /G2 generate 286 instructions (it complains if you ask for 386!)
 # /Od disable optimization (for debugging)
+# /MD (Win32) thread safe, ML would be single threaded, don't build with ML
 
 DBG_LIB=/nologo /Zp /ALw /GD /Gs /Os /G2 /Zi /Od
 # /Zi gives debug info in each object file.
