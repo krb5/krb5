@@ -79,11 +79,6 @@ static struct gss_config krb5_mechanism =
 
 #include "k5-int.h"
 
-/* 
- * Do we want to allocate a new kg_context everytime we call this?
- * I don't know -- for now, just allocate one of them.
- */
-static krb5_context kg_context;
 
 OM_uint32
 krb5_gss_get_context(context)
