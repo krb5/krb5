@@ -1,3 +1,10 @@
+2000-02-11  Marshall Vale  <mjv@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files.c): Added new
+	file name "Kerberos Preferences" to the of valid configuration
+	file names on Mac OS. The others will be removed at a later 
+	date.
+
 2000-02-08  Marshall Vale  <mjv@mit.edu>
 
 	* init_os_ctx.c (os_get_default_config_files.c): Added
