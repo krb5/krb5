@@ -96,6 +96,8 @@ char copyright[] =
 #include <krb.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <krb4-proto.h>
+#include <arpa/inet.h>
 #ifdef BIND_HACK
 #include <arpa/nameser.h>
 #include <arpa/resolv.h>
@@ -145,7 +147,10 @@ char copyright[] =
 #define GET_MOTD	"/bin/athena/get_message"
 
 #ifndef NO_UT_HOST
+#ifndef UT_HOSTSIZE
+/* linux defines it directly in <utmp.h> */
 #define	UT_HOSTSIZE	sizeof(((struct utmp *)0)->ut_host)
+#endif /* UT_HOSTSIZE */
 #endif
 #ifndef UT_NAMESIZE
 /* linux defines it directly in <utmp.h> */
@@ -197,6 +202,10 @@ int pagflag = 0;			/* true if setpag() has been called */
 char *getenv();
 void dofork();
 
+int doremotelogin(), do_krb_login(), rootterm();
+void lgetstr(), doremoteterm(), getloginname(), checknologin(), sleepexit();
+void dolastlog(), motd();
+
 #ifndef HAVE_STRSAVE
 char * strsave();
 #endif
@@ -227,7 +236,7 @@ int initgroups(char* name, gid_t basegid) {
 }
 #endif
 
-main(argc, argv)
+int main(argc, argv)
 	int argc;
 	char **argv;
 {
@@ -517,7 +526,7 @@ main(argc, argv)
 			getloginname();
 		}
 
-		if (pwd = getpwnam(username))
+		if ((pwd = getpwnam(username)))
 			salt = pwd->pw_passwd;
 		else
 			salt = "xx";
@@ -983,7 +992,7 @@ bad_login:
 	exit(0);
 }
 
-getloginname()
+void getloginname()
 {
 	register int ch;
 	register char *p;
@@ -1019,7 +1028,7 @@ timedout()
 #ifndef HAVE_TTYENT_H
 int root_tty_security = 1;
 #endif
-rootterm(tty)
+int rootterm(tty)
 	char *tty;
 {
 #ifndef HAVE_TTYENT_H
@@ -1037,7 +1046,7 @@ sigjmp_buf motdinterrupt;
 jmp_buf motdinterrupt;
 #endif
 
-motd()
+void motd()
 {
 	register int fd, nchars;
 	char tbuf[8192];
@@ -1085,7 +1094,7 @@ sigint()
 #endif
 }
 
-checknologin()
+void checknologin()
 {
 	register int fd, nchars;
 	char tbuf[8192];
@@ -1097,7 +1106,7 @@ checknologin()
 	}
 }
 
-dolastlog(quiet, tty)
+void dolastlog(quiet, tty)
 	int quiet;
 	char *tty;
 {
@@ -1149,7 +1158,7 @@ stypeof(ttyid)
 #endif
 }
 
-doremotelogin(host)
+int doremotelogin(host)
 	char *host;
 {
 	static char lusername[UT_NAMESIZE+1];
@@ -1166,7 +1175,7 @@ doremotelogin(host)
 }
 
 #ifdef KRB4
-do_krb_login(host, strict)
+int do_krb_login(host, strict)
 	char *host;
 	int strict;
 {
@@ -1207,10 +1216,10 @@ do_krb_login(host, strict)
 	ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
 
 	(void) strcpy(instance, "*");
-	if (rc=krb_recvauth(authoptions, 0, ticket, "rcmd",
+	if ((rc=krb_recvauth(authoptions, 0, ticket, "rcmd",
 			    instance, &sin,
 			    (struct sockaddr_in *)0,
-			    kdata, "", (bit_64 *) 0, version)) {
+			    kdata, "", (bit_64 *) 0, version))) {
 		printf("Kerberos rlogin failed: %s\r\n",krb_err_txt[rc]);
 		if (strict) {
 paranoid:
@@ -1248,7 +1257,7 @@ paranoid:
 		return(-1);
 	}
 
-	if (rc=kuserok(kdata,lusername)) {
+	if ((rc=kuserok(kdata,lusername))) {
 		printf("login: %s has not given you permission to login without a password.\r\n",lusername);
 		if (strict) {
 		  exit(1);
@@ -1259,7 +1268,7 @@ paranoid:
 }
 #endif /* KRB4 */
 
-lgetstr(buf, cnt, err)
+void lgetstr(buf, cnt, err)
 	char *buf, *err;
 	int cnt;
 {
@@ -1293,7 +1302,7 @@ speed_t b_speeds[] = {
 };
 #endif
 
-doremoteterm(tp)
+void doremoteterm(tp)
 #ifdef POSIX_TERMIOS
 	struct termios *tp;
 #else
@@ -1340,7 +1349,7 @@ doremoteterm(tp)
 #endif
 }
 
-sleepexit(eval)
+void sleepexit(eval)
 	int eval;
 {
 #ifdef KRB4
