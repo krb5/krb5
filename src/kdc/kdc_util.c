@@ -228,7 +228,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	goto cleanup_auth_context;
 */
 
-    if ((retval = krb5_rd_req_decoded(kdc_context, &auth_context, apreq, 
+    if ((retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context, apreq, 
 				      apreq->ticket->server, 
 				      kdc_active_realm->realm_keytab,
 				      NULL, ticket))) {
@@ -247,7 +247,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	    if (!(retval = kdc_initialize_rcache(kdc_context, (char *) NULL))) {
 		if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
 						      kdc_rcache)) ||
-		    (retval = krb5_rd_req_decoded(kdc_context, &auth_context,
+		    (retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context,
 						  apreq, apreq->ticket->server,
 				      		 kdc_active_realm->realm_keytab,
 						  NULL, ticket))
@@ -256,6 +256,13 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	    }
 	} else
 	    goto cleanup_auth_context;
+    }
+
+    /* "invalid flag" tickets can must be used to validate */
+    if (isflagset((*ticket)->enc_part2->flags, TKT_FLG_INVALID)
+	&& !isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
+        retval = KRB5KRB_AP_ERR_TKT_INVALID;
+	goto cleanup_auth_context;
     }
 
     if ((retval = krb5_auth_con_getremotesubkey(kdc_context,

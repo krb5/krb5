@@ -1,3 +1,13 @@
+Tue May  7 18:19:59 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	Thu May  2 22:52:56 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdc_util.c (kdc_process_tgs_req): call
+	krb5_rd_req_decoded_anyflag instead of krb5_rd_req_decoded, so
+	that invalid tickets can be used to validate themselves. Add
+	explicit check that if the ticket is TKT_FLG_INVALID, then
+	KDC_OPT_VALIDATE was requested.
+
 Mon May  6 12:15:36 1996  Richard Basch  <basch@lehman.com>
 
 	* main.c: Fixed various abstraction violations where the code knew
