@@ -1,4 +1,8 @@
 
+Tue May 16 10:31:12 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* proto_serv.c	- Don't destroy the replay cache when done.
+
+
 Fri May 12 16:06:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin.c	- Change for Ultrix: howmany->how_many because howmany
 			  is a macro used to count how many elements in an

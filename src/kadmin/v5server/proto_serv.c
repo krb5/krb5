@@ -749,9 +749,10 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	alarm(0);
     if (ticket)
 	krb5_free_ticket(kcontext, ticket);
-    if (rcache)
-	/* krb5_rc_close(kcontext, rcache); */
-	krb5_rc_destroy(kcontext, rcache);
+    if (rcache) {
+	krb5_rc_close(kcontext, rcache);
+	/* krb5_rc_destroy(kcontext, rcache); */
+    }
     if (auth_context)
 	krb5_xfree(auth_context);
     if (curr_lang)
