@@ -112,7 +112,11 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); bzero((char *)session_key->contents, session_key->length); free((char *)session_key->contents); session_key->contents = 0; }
+#define cleanup() {krb5_db_free_principal(&client, 1); \
+		   krb5_db_free_principal(&server, 1); \
+		   bzero((char *)session_key->contents, session_key->length); \
+		   free((char *)session_key->contents); \
+		   session_key->contents = 0; }
 
 
     ticket_reply.server = request->server;
@@ -215,8 +219,13 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_db_free_principal(&server, 1);
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1);bzero((char *)session_key->contents, session_key->length); free((char *)session_key->contents); session_key->contents = 0; bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
-
+#define cleanup() {krb5_db_free_principal(&client, 1); \
+		   bzero((char *)session_key->contents, session_key->length); \
+		   free((char *)session_key->contents); \
+		   session_key->contents = 0; \
+		   bzero(ticket_reply.enc_part.data, \
+			 ticket_reply.enc_part.length); \
+		   free(ticket_reply.enc_part.data);}
 
     /* Start assembling the response */
     reply.client = request->client;

@@ -129,7 +129,13 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&server, 1); bzero((char *)session_key->contents, session_key->length); free((char *)session_key->contents); session_key->contents = 0; if (second_ticket) {krb5_free_enc_tkt_part(second_ticket->enc_part2); second_ticket->enc_part2 = 0;}}
+#define cleanup() {krb5_db_free_principal(&server, 1); \
+		   bzero((char *)session_key->contents, session_key->length); \
+		   free((char *)session_key->contents); \
+		   session_key->contents = 0; \
+		   if (second_ticket) { \
+		       krb5_free_enc_tkt_part(second_ticket->enc_part2); \
+		       second_ticket->enc_part2 = 0;}}
 
     ticket_reply.server = realreq->server; /* XXX careful for realm... */
     ticket_reply.etype = realreq->etype;
@@ -312,7 +318,14 @@ krb5_data **response;			/* filled in with a response packet */
 	newtransited = 1;
     }
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&server, 1); bzero((char *)session_key->contents, session_key->length);free((char *)session_key->contents); session_key->contents = 0; if (second_ticket) {krb5_free_enc_tkt_part(second_ticket->enc_part2); second_ticket->enc_part2 = 0;} if (newtransited) free(enc_tkt_reply.transited.data);}
+#define cleanup() {krb5_db_free_principal(&server, 1); \
+		   bzero((char *)session_key->contents, session_key->length); \
+		   free((char *)session_key->contents); \
+		   session_key->contents = 0; \
+		   if (second_ticket) { \
+		       krb5_free_enc_tkt_part(second_ticket->enc_part2); \
+		       second_ticket->enc_part2 = 0;} \
+		   if (newtransited) free(enc_tkt_reply.transited.data);}
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
     if (isflagset(realreq->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
