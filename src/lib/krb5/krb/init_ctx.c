@@ -190,7 +190,7 @@ init_common (context, secure)
 	profile_get_integer(ctx->profile, "libdefaults",
 			    "kdc_default_options", 0,
 			    KDC_OPT_RENEWABLE_OK, &tmp);
-	ctx->kdc_default_options = KDC_OPT_RENEWABLE_OK;
+	ctx->kdc_default_options = tmp;
 #ifdef macintosh
 #define DEFAULT_KDC_TIMESYNC 1
 #else

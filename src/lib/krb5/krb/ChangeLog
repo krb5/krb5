@@ -1,5 +1,9 @@
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* init_ctx.c (init_common): After fetching kdc_default_options
+	value from krb5.conf, actually use that value.  Pointed out by
+	Emily Ratliff, <ratliff@austin.ibm.com>.
+
 	* get_in_tkt.c, in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c,
 	int-proto.h, mk_req_ext.c, pr_to_salt.c, rd_req_dec.c, ser_actx.c,
 	ser_adata.c, ser_addr.c, ser_auth.c, ser_cksum.c, ser_ctx.c,
