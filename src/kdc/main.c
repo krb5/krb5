@@ -119,6 +119,8 @@ finish_realm(kdc_realm_t *rdp)
 	free(rdp->realm_stash);
     if (rdp->realm_ports)
 	free(rdp->realm_ports);
+    if (rdp->realm_tcp_ports)
+	free(rdp->realm_tcp_ports);
     if (rdp->realm_kstypes)
 	free(rdp->realm_kstypes);
     if (rdp->realm_keytab)
@@ -140,6 +142,7 @@ finish_realm(kdc_realm_t *rdp)
 	krb5_free_context(rdp->realm_context);
     }
     memset((char *) rdp, 0, sizeof(*rdp));
+    free(rdp);
 }
 
 /*
@@ -737,8 +740,10 @@ finish_realms(char *prog)
 {
     int i;
 
-    for (i = 0; i < kdc_numrealms; i++)
+    for (i = 0; i < kdc_numrealms; i++) {
 	finish_realm(kdc_realmlist[i]);
+	kdc_realmlist[i] = 0;
+    }
 }
 
 /*
@@ -837,6 +842,14 @@ int main(int argc, char **argv)
     krb5_klog_syslog(LOG_INFO, "shutting down");
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
+    if (kdc_realmlist) 
+      free(kdc_realmlist);
+#ifdef USE_RCACHE
+    (void) krb5_rc_close(kdc_context, kdc_rcache);
+#endif
+#ifndef NOCACHE
+    kdc_free_lookaside();
+#endif
     krb5_free_context(kcontext);
     return errout;
 }

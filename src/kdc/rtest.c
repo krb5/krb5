@@ -85,7 +85,10 @@ main(int argc, char **argv)
 	ntrans.data = 0;
 
 	otrans.length = strlen(argv[1]);
-	otrans.data = (char *) malloc(otrans.length);
+	if (otrans.length) 
+	  otrans.data = (char *) malloc(otrans.length);
+	else 
+	  otrans.data = 0;
 	memcpy(otrans.data,argv[1], otrans.length);
 
 	tgs = make_princ(kdc_context, argv[2], argv[0]);
@@ -97,7 +100,8 @@ main(int argc, char **argv)
 	printf("%s\n",ntrans.data);
 
 	/* Free up all memory so we can profile for leaks */
-	free(otrans.data);
+	if (otrans.data)
+	  free(otrans.data);
 	free(ntrans.data);
 
 	krb5_free_principal(kdc_realm.realm_context, tgs);

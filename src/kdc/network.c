@@ -205,7 +205,8 @@ struct connection {
 #define DEL(set, idx) \
   (set.data[idx] = set.data[--set.n], 0)
 
-#define FREE_SET_DATA(set) (free(set.data), set.data = 0, set.max = 0)
+#define FREE_SET_DATA(set) if(set.data) free(set.data);                 \
+   (set.data = 0, set.max = 0)
 
 
 /* Set<struct connection *> connections; */

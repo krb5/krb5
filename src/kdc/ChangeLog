@@ -1,3 +1,16 @@
+2003-01-03  Ezra Peisach  <epeisach@bu.edu>
+
+	* main.c: On exit, free more allocated memory, including:
+	realm_tcp_ports data, kdc_realmlist, close the replay cache, and
+	free the lookaside cache.
+
+	* network.c (FREE_SET_DATA): Do not free a NULL pointer.
+
+	* replay.c, kdc_util.h: Add kdc_free_lookaside() to clear the lookaside
+	cache on shutdown - to search for memory leaks.
+
+	* rtest.c (main): Do not allocate or free a NULL pointer.
+
 2002-12-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* kerberos_v4.c (process_v4): Use a temporary variable for the

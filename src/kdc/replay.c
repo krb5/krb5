@@ -168,4 +168,23 @@ kdc_insert_lookaside(krb5_data *inpkt, const krb5_fulladdr *from,
     return;
 }
 
+/* frees memory associated with the lookaside queue for memory profiling */
+void
+kdc_free_lookaside()
+{
+    register krb5_kdc_replay_ent *eptr, *last, *hold;
+    if (root_ptr.next) {
+        for (last = &root_ptr, eptr = root_ptr.next;
+	     eptr; eptr = eptr->next) {
+		krb5_free_data(kdc_context, eptr->req_packet);
+		krb5_free_data(kdc_context, eptr->reply_packet);
+		krb5_free_address(kdc_context, eptr->addr);
+		hold = eptr;
+		last->next = eptr->next;
+		eptr = last;
+		free(hold);
+	}
+    }
+}
+
 #endif /* NOCACHE */
