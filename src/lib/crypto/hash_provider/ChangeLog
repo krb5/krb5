@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* hash_sha1.c (k5_sha1_hash): Cast length field in shsUpdate call
+	to int.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* hash_crc32.c (krb5_hash_crc32): Now const.
