@@ -31,18 +31,13 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	5) Set directory in MPW to the top level of Kerberos 5 distribution
 	   (e.g. "GSS-Kerberos5-1.0.5").
 
-	6) Execute "perl :mac:macfile_gen.pl" in MPW.
-
-	7) Build target "create-directories" in MPW.
-	
-	8) Open the project "[krb5 src]:mac:libraries:BeforeBuild.prj"
-	   in your CW Pro 2 IDE and build it.
-	
-	   You will see some link warnings.  These are normal and can be ignored.
+	6) Build target "all" in MPW.
+		This will create a new Makefile, and launch your CodeWarrior IDE 2.1 to build
+		some CodeWarrior projects. You may be asked to locate CodeWarrior IDE 2.1.
 	    
 --- Building libraries ---
 
-	9) Build target "all" in MPW. Wait.
+	7) Build target "all" in MPW. Wait.
 	
 	   Example build times: 30-40 minutes on a G3 machine, 80 minutes
 	   on a PowerMac 9600/233.

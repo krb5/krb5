@@ -1,0 +1,40 @@
+all Ä build-makefile create-directories build-cw-projects
+	echo # Open {TargDir}:mac:libraries:BeforeBuild.prj in CodeWarrior IDE 2.1 and build it
+
+################################################################################
+##
+## Creating makefile
+##
+################################################################################
+
+build-makefile Ä
+	perl :mac:macfile_gen.pl
+
+################################################################################
+##
+## Creating build directories
+##
+################################################################################
+
+create-directories Ä
+	If Not "`Exists -d :bin`"
+		NewFolder :bin
+	End
+	If Not "`Exists -d :bin:PPC`"
+		NewFolder :bin:PPC
+	End
+	If Not "`Exists -d :bin:CFM-68K`"
+		NewFolder :bin:CFM-68K
+	End
+	
+################################################################################
+##
+## Build CodeWarrior projects
+##
+################################################################################
+
+build-cw-projects Ä
+	(Echo "Tell application ¶"CodeWarrior IDE 2.1¶""; ¶
+	Echo "Open ¶"{TargDir}:mac:libraries:BeforeBuild.prj¶" as alias"; ¶
+	Echo "Make Project"; ¶
+	Echo "end") | Catenate | perl :mac:RunAppleScript.pl

@@ -556,6 +556,7 @@ all-mac-files = {mac-files} {classic-glue-input} {autogeneration-sources} /Makef
 	/mac/ReadMe \
 	/mac/version.r \
 	/mac/FragmentAlias.mpw \
+	/mac/RunAppleScript.pl \
 	"/mac/Release notes" \
 	/mac/libraries/autoconf.h \
 	/mac/libraries/ChangeLog \
@@ -613,5 +614,13 @@ snapshot : autogenerate-clean
 			SetFile -a l {snapshot-root}"{snapshot-file}"
 		end
 	end
-	
+	Duplicate {TargDir}mac/Makefile.initial {snapshot-root}Makefile
 
+################################################################################
+##
+## Makefile
+##
+################################################################################
+
+Makefile :Ê/mac/Makefile.tmpl
+	perl /mac/macfile_gen.pl

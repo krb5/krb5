@@ -1,3 +1,8 @@
+Fri Aug 28 16:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl, ReadMe, Makefile.initial, RunAppleScript.pl: Added stuff to
+	automagically run AppleScriprs to build CW projects.
+
 Fri Aug 28 12:00:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile.tmpl: Removed static library targets, renamed other
