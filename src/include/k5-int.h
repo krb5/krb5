@@ -638,6 +638,7 @@ struct krb5_keytypes {
     krb5_crypt_func encrypt;
     krb5_crypt_func decrypt;
     krb5_str2key_func str2key;
+    krb5_cksumtype required_ctype;
 };
 
 struct krb5_cksumtypes {
