@@ -1,5 +1,8 @@
 Fri Aug 25 17:12:37 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* k5-int.h: Added prototypes for encode_krb5_padata_sequence and
+	        decode_krb5_padata_sequence.
+
 	* krb5.hin: Removed unused (and misleading) macros
 		KEYTYPE_IS_LOCAL, ETYPE_IS_LOCAL, CKSUMTYPE_IS_LOCAL
 

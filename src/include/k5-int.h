@@ -614,6 +614,9 @@ krb5_error_code encode_krb5_pwd_sequence
 krb5_error_code encode_krb5_pwd_data
 	KRB5_PROTOTYPE((const krb5_pwd_data *rep, krb5_data **code));
 
+krb5_error_code encode_krb5_padata_sequence
+	KRB5_PROTOTYPE((const krb5_pa_data ** rep, krb5_data **code));
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -699,6 +702,9 @@ krb5_error_code decode_krb5_pwd_sequence
 
 krb5_error_code decode_krb5_pwd_data
 	KRB5_PROTOTYPE((const krb5_data *output, krb5_pwd_data **rep));
+
+krb5_error_code decode_krb5_padata_sequence
+	KRB5_PROTOTYPE((const krb5_data *output, krb5_pa_data ***rep));
 
 /*************************************************************************
  * End of prototypes for krb5_decode.c
