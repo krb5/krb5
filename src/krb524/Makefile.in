@@ -39,14 +39,14 @@ OBJS	= conv_creds.o conv_princ.o conv_tkt.o cnv_tkt_skey.o \
 
 GENS	= krb524_err.c krb524_err.h
 
-all:: $(GENS) libkrb524.a krb524d test k524init
+all:: $(GENS) libkrb524.a krb524d krb524test k524init
 
 libkrb524.a: $(OBJS)
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
-test: libkrb524.a test.o $(DEPLIBS)
-	$(LD) -o test $(LDFLAGS) $(LDARGS) test.o $(LIBS)
+krb524test: libkrb524.a test.o $(DEPLIBS)
+	$(LD) -o krb524test $(LDFLAGS) $(LDARGS) test.o $(LIBS)
 
 krb524d: krb524d.o $(DEPLIBS)
 	$(LD) -o krb524d krb524d.o $(LDFLAGS) $(LDARGS) $(LIBS)
@@ -62,5 +62,5 @@ install::
 
 clean::
 	$(RM) libkrb524.a $(OBJS) $(GENS) core *~ *.bak #*
-	$(RM) test krb524d k524init test.o krb524d.o k524init.o
+	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o
 
