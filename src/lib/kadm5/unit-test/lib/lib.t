@@ -235,7 +235,7 @@ proc kinit { princ pass {opts ""} } {
 	global env;
         global KINIT
 
-	eval spawn $KINIT $opts $princ
+	eval spawn $KINIT -5 $opts $princ
 	expect {
 		-re {Password for .*: $}
 		    {send "$pass\n"}
@@ -262,7 +262,7 @@ proc kdestroy {} {
 	if {[info exists errorInfo]} {
 		set saveErrorInfo $errorInfo
 	}
-	catch "system $KDESTROY 2>/dev/null"
+	catch "system $KDESTROY -5 2>/dev/null"
 	if {[info exists saveErrorCode]} {
 		set errorCode $saveErrorCode
 	} elseif {[info exists errorCode]} {
