@@ -1,8 +1,0 @@
-WARNING!  The contents of this directory are Alpha-test quality at
-best.  The definition of the GSS API is still in flux, and this code
-has not really been tested due to a lack of an implementation to link
-against.
-
-Look in doc/gss/* for more information.
-
-
