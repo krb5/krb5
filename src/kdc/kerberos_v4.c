@@ -142,7 +142,6 @@ static void hang();
 #include "com_err.h"
 #include "extern.h"		/* to pick up master_princ */
 
-static krb5_error_code retval; 
 static krb5_data *response;
 
 void kerberos_v4 (struct sockaddr_in *, KTEXT);
@@ -331,7 +330,7 @@ hang()
 	   "Kerberos will wait %d seconds before dying so as not to loop init",
 		(int) pause_int);
         klog(L_KRB_PERR, buf);
-        sleep(pause_int);
+        sleep((unsigned) pause_int);
         klog(L_KRB_PERR, "Do svedania....\n");
      /* exit(1); */
     }
@@ -424,6 +423,7 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno,
     char* text;
     struct tm *tp;
     krb5_key_data *pkey;
+    krb5_error_code retval;
 
     *more = 0;
     if ( maxn > 1) {

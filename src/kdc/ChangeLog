@@ -1,3 +1,8 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* kerberos_v4.c: Get rid of file wide static krb5_error_code. Cast
+	argument to sleep to unsigned int.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc_util.c (add_to_transited): Add braces to provide unambiguous
