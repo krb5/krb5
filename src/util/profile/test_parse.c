@@ -8,19 +8,6 @@
 
 #include "prof_int.h"
 
-#if !defined(_MSDOS) && !defined(_MACINTOSH)
-#include "com_err.h"
-#else
-
-#define initialize_prof_error_table()
-char *error_message (long err) {
-	static char buf[50];
-
-	sprintf (buf, " 0x%lX (%ld)", err, err);
-	return buf;
-}
-#endif
-
 void dump_profile PROTOTYPE((struct profile_node *root, int level));
 
 int main(argc, argv)

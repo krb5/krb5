@@ -2,6 +2,9 @@
  * profile.h
  */
 
+#ifndef _KRB5_PROFILE_H
+#define _KRB5_PROFILE_H
+
 typedef struct _profile_t *profile_t;
 
 #if !defined(PROTOTYPE)
@@ -32,3 +35,4 @@ extern long profile_get_integer
 			const char *subsubname, int def_val,
 			int *ret_default));
 
+#endif /* _KRB5_PROFILE_H */
