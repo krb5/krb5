@@ -1,0 +1,24 @@
+PepyPosyRules()
+NormalLibraryObjectRule()
+
+all:: libasn1.a
+
+SRCS= \
+	KRB5-asn.py	\
+	asn1glue.c	\
+	encode.c 	\
+	decode.c
+
+OBJS= \
+	KRB5-types.o	\
+	asn1glue.o	\
+	encode.o	\
+	decode.o
+
+NormalLibraryTarget(asn1,$(OBJS))
+
+KRB5-types.c: KRB5-types.py
+
+KRB5-types.py:	KRB5-asn.py
+	$(POSY) $(POFLAGS) -o $@ KRB5-asn.py
+
