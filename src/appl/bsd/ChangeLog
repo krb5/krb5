@@ -1,3 +1,8 @@
+Tue May  2 22:12:39 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kcmd.c (kcmd()): Bug fix to jik's bug fix.  (Caused by our code
+		drift since jik's changes went in, and not sufficiently
+		careful checking of jik's patches before applying it.)
 
 Mon May 01 15:56:32 1995  Chris Provenzano
 
