@@ -224,7 +224,6 @@ item	: time {
 	| rel {
 	    yyHaveRel++;
 	}
-	| number
 	;
 
 time	: tUNUMBER tMERIDIAN {
@@ -365,33 +364,6 @@ relunit	: tUNUMBER tMINUTE_UNIT {
 	}
 	| tMONTH_UNIT {
 	    yyRelMonth += $1;
-	}
-	;
-
-number	: tUNUMBER {
-	    if (yyHaveTime && yyHaveDate && !yyHaveRel)
-		yyYear = $1;
-	    else {
-		if($1>10000) {
-		    yyHaveDate++;
-		    yyDay= ($1)%100;
-		    yyMonth= ($1/100)%100;
-		    yyYear = $1/10000;
-		}
-		else {
-		    yyHaveTime++;
-		    if ($1 < 100) {
-			yyHour = $1;
-			yyMinutes = 0;
-		    }
-		    else {
-		    	yyHour = $1 / 100;
-		    	yyMinutes = $1 % 100;
-		    }
-		    yySeconds = 0;
-		    yyMeridian = MER24;
-	        }
-	    }
 	}
 	;
 
@@ -561,39 +533,6 @@ static TABLE const TimezoneTable[] = {
     { "idle",	tZONE,     -HOUR(12) },	/* International Date Line East */
     {  NULL  }
 };
-
-/* Military timezone table. */
-static TABLE const MilitaryTable[] = {
-    { "a",	tZONE,	HOUR(  1) },
-    { "b",	tZONE,	HOUR(  2) },
-    { "c",	tZONE,	HOUR(  3) },
-    { "d",	tZONE,	HOUR(  4) },
-    { "e",	tZONE,	HOUR(  5) },
-    { "f",	tZONE,	HOUR(  6) },
-    { "g",	tZONE,	HOUR(  7) },
-    { "h",	tZONE,	HOUR(  8) },
-    { "i",	tZONE,	HOUR(  9) },
-    { "k",	tZONE,	HOUR( 10) },
-    { "l",	tZONE,	HOUR( 11) },
-    { "m",	tZONE,	HOUR( 12) },
-    { "n",	tZONE,	HOUR(- 1) },
-    { "o",	tZONE,	HOUR(- 2) },
-    { "p",	tZONE,	HOUR(- 3) },
-    { "q",	tZONE,	HOUR(- 4) },
-    { "r",	tZONE,	HOUR(- 5) },
-    { "s",	tZONE,	HOUR(- 6) },
-    { "t",	tZONE,	HOUR(- 7) },
-    { "u",	tZONE,	HOUR(- 8) },
-    { "v",	tZONE,	HOUR(- 9) },
-    { "w",	tZONE,	HOUR(-10) },
-    { "x",	tZONE,	HOUR(-11) },
-    { "y",	tZONE,	HOUR(-12) },
-    { "z",	tZONE,	HOUR(  0) },
-    { NULL }
-};
-
-
-
 
 /* ARGSUSED */
 static int
@@ -815,15 +754,6 @@ LookupWord(buff)
 	    yylval.Number = tp->value;
 	    return tp->type;
 	}
-
-    /* Military timezones. */
-    if (buff[1] == '\0' && isalpha(*buff)) {
-	for (tp = MilitaryTable; tp->name; tp++)
-	    if (strcmp(buff, tp->name) == 0) {
-		yylval.Number = tp->value;
-		return tp->type;
-	    }
-    }
 
     /* Drop out any periods and try the timezone table again. */
     for (i = 0, p = q = buff; *q; q++)
