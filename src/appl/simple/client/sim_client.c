@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "krb5.h"
+#include <krb5.h>
 #include "com_err.h"
 
 #include "simple.h"
@@ -47,10 +47,10 @@
 #define PROGNAME argv[0]
 #define HOST argv[1]
 
-void
+int
 main(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     int sock, i;
     int flags = 0;			/* flags for sendto() */
@@ -62,17 +62,15 @@ char *argv[];
     struct sockaddr_in c_sock;		/* client address */
 
     krb5_error_code retval;
-    char *c_realm;			/* local Kerberos realm */
-    char **s_realms;			/* server's Kerberos realm(s) */
-    krb5_principal server;
     krb5_data packet, inbuf;
-    krb5_checksum send_cksum;
     krb5_ccache ccdef;
-    krb5_creds creds, *new_creds;
     krb5_address local_addr, foreign_addr, *portlocal_addr;
     krb5_rcache rcache;
-    krb5_context context;
     extern krb5_deltat krb5_clockskew;
+
+    krb5_context 	  context;
+    krb5_auth_context 	* auth_context = NULL;
+    krb5_replay_data 	  replaydata;
 
     if (argc != 2 && argc != 3) {
 	fprintf(stderr, "usage: %s <hostname> [message]\n",PROGNAME);
@@ -135,66 +133,19 @@ char *argv[];
 	exit(1);
     }
 	
-    if (retval = krb5_get_default_realm(context, &c_realm)) {
-	com_err(PROGNAME, retval, "while retrieving local realm");
-	exit(1);
-    }
-    printf("Local Kerberos realm is %s\n", c_realm);
-
-    /* Get Kerberos realm of host */
-    if (retval = krb5_get_host_realm(context, full_hname, &s_realms)) {
-	com_err(PROGNAME, retval, "while getting realm for '%s'", full_hname);
-	exit(1);
-    }
-#ifdef DEBUG
-    printf("Kerberos realm #1 of %s is %s\n", HOST, s_realms[0]);
-#endif
-
     /* PREPARE KRB_AP_REQ MESSAGE */
 
-    /* compute checksum, using CRC-32 */
-    if (!(send_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
-	com_err(PROGNAME, ENOMEM, "while allocating checksum");
-	exit(1);
-    }
+    inbuf.data = HOST;
+    inbuf.length = strlen(HOST);
 
-    /* choose some random stuff to compute checksum from */
-    if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
-					 HOST,
-					 strlen(HOST),
-					 0,
-					 0, /* if length is 0, crc-32 doesn't
-					       use the seed */
-					 &send_cksum)) {
-	com_err(argv[0], retval, "while computing checksum");
-	exit(1);
-    }
-
-    /* Get credentials for server, create krb_mk_req message */
-
+    /* Get credentials for server */
     if (retval = krb5_cc_default(context, &ccdef)) {
 	com_err(PROGNAME, retval, "while getting default ccache");
 	exit(1);
     }
 
-    /* compose the server name. [0] == realm,
-       				[1] == service name (by convention),
-				[2] == FULL host name (by convention)
-				[3] == null ptr */
-
-    if (retval = krb5_build_principal(context, &server,
-				      strlen(s_realms[0]), s_realms[0],
-				      SERVICE, full_hname, 0)) {
-	com_err(PROGNAME, retval, "while setting up server principal");
-	exit(1);
-    }
-
-    if (retval = krb5_mk_req(context, server,
-			     0,		/* use default options */
-			     &send_cksum,
-			     ccdef,
-			     &packet)) {
+    if (retval = krb5_mk_req(context, &auth_context, 0, SERVICE, full_hname,
+			     &inbuf, ccdef, &packet)) {
 	com_err(PROGNAME, retval, "while preparing AP_REQ");
 	exit(1);
     }
@@ -208,12 +159,11 @@ char *argv[];
 	exit(1);
     }
     /* Send authentication info to server */
-    i = send(sock, (char *)packet.data, packet.length, flags);
-    if (i < 0)
+    if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0) 
 	com_err(PROGNAME, errno, "while sending KRB_AP_REQ message");
     printf("Sent authentication data: %d bytes\n", i);
-
     krb5_xfree(packet.data);
+
     /* PREPARE KRB_SAFE MESSAGE */
 
     /* Get my address */
@@ -234,8 +184,7 @@ char *argv[];
 	exit(1);
     }
     
-    if (retval = krb5_gen_replay_name(context, portlocal_addr, "_sim_clt",
-				      &cp)) {
+    if (retval = krb5_gen_replay_name(context,portlocal_addr,"_sim_clt",&cp)) {
 	com_err(PROGNAME, retval, "while generating replay cache name");
 	exit(1);
     }
@@ -262,65 +211,43 @@ char *argv[];
 	exit(1);
     }
 
-    /* Get session key & creds */
-    memset((char *)&creds, 0, sizeof(creds));
-    creds.server = server;
-    if (retval = krb5_cc_get_principal(context, ccdef, &creds.client)) {
-	com_err(PROGNAME, retval, "while getting my principal name");
-	exit(1);
-    }
+    /* set auth_context data */
+    krb5_auth_con_setaddrs(context, auth_context,
+                           portlocal_addr, &foreign_addr);
 
-    if (retval = krb5_get_credentials(context, 0, /* no flags */
-				      ccdef, &creds, &new_creds)) {
-	com_err(PROGNAME, retval, "while fetching credentials");
-	exit(1);
-    }
+    /* set auth_context rcache */
+    krb5_auth_con_setrcache(context, auth_context, rcache);
+
+    /* set auth_context checksum type */
+     krb5_auth_con_setcksumtype(context, auth_context, CKSUMTYPE_RSA_MD4_DES);
 
     /* Make the safe message */
     inbuf.data = argc == 3 ? argv[2] : MSG;
     inbuf.length = strlen (inbuf.data);
 
-    if (retval = krb5_mk_safe(context, &inbuf,
-			      CKSUMTYPE_RSA_MD4_DES,
-			      &new_creds->keyblock, 
-			      portlocal_addr, 
-			      &foreign_addr,
-			      0, 0,	/* no seq number or special flags */
-			      rcache,
-			      &packet)) {
+    if (retval = krb5_mk_safe(context, auth_context, &inbuf, &packet, NULL)){
 	com_err(PROGNAME, retval, "while making KRB_SAFE message");
 	exit(1);
     }
 
     /* Send it */
-    i = send(sock, (char *)packet.data, packet.length, flags);
-    if (i < 0)
+    if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0)
 	com_err(PROGNAME, errno, "while sending SAFE message");
     printf("Sent checksummed message: %d bytes\n", i);
-
     krb5_xfree(packet.data);
+
     /* PREPARE KRB_PRIV MESSAGE */
 
-
     /* Make the encrypted message */
-    if (retval = krb5_mk_priv(context, &inbuf,
-			      ETYPE_DES_CBC_CRC,
-			      &new_creds->keyblock, 
-			      portlocal_addr, 
-			      &foreign_addr,
-			      0, 0,	/* no seq number or special flags */
-			      rcache,
-			      0,	/* default ivec/don't care */
-			      &packet)) {
+    if (retval = krb5_mk_priv(context, auth_context, &inbuf, &packet, NULL)) {
 	com_err(PROGNAME, retval, "while making KRB_PRIV message");
 	exit(1);
     }
 
     /* Send it */
-    i = send(sock, (char *)packet.data, packet.length, flags);
-	    
-    if (i < 0)
+    if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0)
 	com_err(PROGNAME, errno, "while sending PRIV message");
     printf("Sent encrypted message: %d bytes\n", i);
+    krb5_xfree(packet.data);
     exit(0);
 }
