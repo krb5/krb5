@@ -51,36 +51,28 @@ krb5_fcc_resolve (id, residual)
      if (lid == NULL)
 	  return KRB5_NOMEM;
 
-     lid->ops = (krb5_cc_ops *) malloc(sizeof(krb5_cc_ops));
-     if (lid->ops == NULL) {
-	  free(lid);
-	  return KRB5_NOMEM;
-     }
-
+     lid->ops = &krb5_fcc_ops;
+     
      lid->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
      if (((krb5_fcc_data *) lid->data) == NULL) {
-	  free(lid->ops);
 	  free(lid);
 	  return KRB5_NOMEM;
      }
 
      ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(residual) + 1);
+
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
 	  free(((krb5_fcc_data *) lid->data));
-	  free(lid->ops);
 	  free(lid);
 	  return KRB5_NOMEM;
      }
 
-     /* Copy the virtual operation pointers into lid */
-     bcopy((char *) &krb5_fcc_ops, lid->ops, sizeof(krb5_cc_ops));
-
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, residual);
 
-     /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT|O_EXCL,0600);
+     /* Make sure we can open the file name */
+     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT|O_RDWR,0600);
      if (ret == -1)
 	  return errno;
      else {
