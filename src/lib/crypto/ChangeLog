@@ -1,3 +1,7 @@
+2002-06-19  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (clean): Add t_prng and t_prng.o
+
 2002-06-07  Alexandra Ellwood <lxs@mit.edu>
 	
 	* crypto_libinit.h: Changed macros so you can include

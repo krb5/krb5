@@ -160,7 +160,7 @@ t_prng$(EXEEXT): t_prng.$(OBJEXT)
 
 
 clean::
-	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o
+	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o t_prng.o t_prng
 	-$(RM) t_prng.output
 
 all-windows::
