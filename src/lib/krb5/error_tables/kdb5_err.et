@@ -32,4 +32,8 @@ ec KRB5_KDB_NOTLOCKED,		"Attempt to unlock database when not locked"
 ec KRB5_KDB_BADLOCKMODE,	"Invalid kdb lock mode"
 ec KRB5_KDB_DBNOTINITED,	"Database has not been initialized"
 ec KRB5_KDB_DBINITED,		"Database has already been initialized"
+
+ec KRB5_KDB_ILLDIRECTION,	"Bad direction for converting keys"
+
+ec KRB5_KDB_NOMASTERKEY,	"Cannot find master key record in database"
 end
