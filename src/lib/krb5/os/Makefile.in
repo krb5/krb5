@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/krb5/os
+mydir=os
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 KRB5_RUN_ENV = @KRB5_RUN_ENV@

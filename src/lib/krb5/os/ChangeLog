@@ -1,8 +1,14 @@
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
 	* lock_file.c (krb5_lock_file): Fix bug where if the fcntl-style
 		lock succeeded, we should return immediately instead of
-		trying to do flock-style locking.
+		trying to do flock-style locking.  Also check for
+		HAVE_FCNTL_H and defined(F_SETLKW) and
+		defined(F_RDLCK) instead of POSIX_FILE_LOCKS (so we
+		can get rid of a non-standard autoconf symbol.)
 
 1998-10-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
