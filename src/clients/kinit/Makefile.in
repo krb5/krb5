@@ -6,6 +6,9 @@ BUILDTOP=$(REL)$(U)$(S)$(U)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows
+##WIN32##DEFINES=-DGETOPT_LONG
+
 all-unix:: kinit
 all-windows:: $(OUTPRE)kinit.exe
 all-mac::
@@ -13,8 +16,8 @@ all-mac::
 kinit: kinit.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kinit.o $(KRB5_BASE_LIBS)
 
-$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) -out:$@ $**
+$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
 
 clean-unix::
 	$(RM) kinit.o kinit
