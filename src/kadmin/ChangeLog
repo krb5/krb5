@@ -1,3 +1,8 @@
+Thu Sep 19 08:06:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Do not build in v4server if compiling without
+		krb4. 
+
 Wed Sep 11 16:27:04 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in: no longer build import and export since they

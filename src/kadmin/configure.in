@@ -1,6 +1,10 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-dnl CONFIG_DIRS(kpasswd v5server v5client)
-CONFIG_DIRS(cli dbutil passwd ktutil server v4server v5passwdd)
+if test -z "$KRB4_LIB"; then
+v4server=""
+else
+v4server=v4server
+fi
+CONFIG_DIRS(cli dbutil passwd ktutil server $v4server v5passwdd)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE
