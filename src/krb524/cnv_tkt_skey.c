@@ -67,7 +67,8 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      krb5_enc_tkt_part *v5etkt;
      int ret, lifetime, deltatime;
      krb5_timestamp server_time;
-     krb5_address **caddr, *good_addr = 0;
+     struct sockaddr_in *sinp = (struct sockaddr_in *)saddr;
+     krb5_address kaddr;
 
      v5tkt->enc_part2 = NULL;
      if ((ret = krb5_decrypt_tkt_part(context, v5_skey, v5tkt))) {
@@ -134,27 +135,18 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	    return KRB5KRB_AP_ERR_TKT_NYV;
      }
 
-     for (caddr = v5etkt->caddrs; *caddr; caddr++) {
-       if (v5etkt->caddrs[0]->addrtype == ADDRTYPE_INET) {
-	 if (! memcmp((*caddr)->contents, &saddr->sin_addr,
-		      sizeof(saddr->sin_addr))) {
-	   good_addr = *caddr;
-	   break;
-	 }
-	 else if (! good_addr) {
-	   good_addr = *caddr;
-	 }
-       }
+     kaddr.addrtype = ADDRTYPE_INET;
+     kaddr.length = sizeof(sinp->sin_addr);
+     kaddr.contents = (krb5_octet *)&sinp->sin_addr;
+
+     if (!krb5_address_search(context, &kaddr, v5etkt->caddrs)) {
+	 if (krb524_debug)
+	     fprintf(stderr, "Invalid v5creds address information.\n");
+	 krb5_free_enc_tkt_part(context, v5etkt);
+	 v5tkt->enc_part2 = NULL;
+	 return KRB524_BADADDR;
      }
-	 
-     if (! good_addr) {
-       if (krb524_debug)
-	 fprintf(stderr, "Invalid v5creds address information.\n");
-       krb5_free_enc_tkt_part(context, v5etkt);
-       v5tkt->enc_part2 = NULL;
-       return KRB524_BADADDR;
-     }
-     
+
      if (krb524_debug)
 	printf("startime = %ld, authtime = %ld, lifetime = %ld\n",
 	       (long) v5etkt->times.starttime,
@@ -167,7 +159,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 			     pname,
 			     pinst,
 			     prealm,
-			     *((unsigned long *)good_addr->contents),
+			     *((unsigned long *)kaddr.contents),
 			     (char *) v5etkt->session->contents,
 			     lifetime,
 			     /* issue_data */
