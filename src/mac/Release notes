@@ -204,3 +204,7 @@ Changes in 1.1a3:
 
 3.0
  from tag Mac_GSSKerberos5_3_0
+
+3.1d1
+ from tag Mac_GSSKerberos5_3_1d1
+ Carbon and CWP 6 builds
