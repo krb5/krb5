@@ -63,50 +63,19 @@ const struct type_KRB5_PrincipalName *val;
 const struct type_KRB5_Realm *realm;
 register int *error;
 {
-#if 0
-    /* this code is for -h2 style ISODE structures.  However, pepsy
-       generates horribly broken when given -h2. */
-
     register krb5_principal retval;
     register int i;
-
-    /* plus one for the realm, plus one for null term */
-    retval = (krb5_principal) xcalloc(val->nelem + 2, sizeof(krb5_data *));
-					     
-    if (!retval) {
-	*error = ENOMEM;
-	return(0);
-    }
-
-    retval[0] = qbuf2krb5_data(realm, error);
-    if (!retval[0]) {
-	xfree(retval);
-	return(0);
-    }
-    for (i = 0; i < val->nelem; i++) {
-	retval[i+1] = qbuf2krb5_data(val->GeneralString[i], error);
-	if (!retval[i+1]) {
-	    krb5_free_principal(retval);
-	    return(0);
-	}
-    }
-    retval[i+1] = 0;
-    return(retval);
-#endif
-
-    register krb5_principal retval;
-    register int i;
-    register const struct type_KRB5_PrincipalName *rv;
-
-    for (i = 1, rv = val; rv->next; i++, rv = rv->next)
-	;
+    register const struct element_KRB5_6 *rv;
 
     retval = (krb5_principal) malloc(sizeof(krb5_principal_data));
-
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
     }
+
+    for (i = 1, rv = val->name__string; rv->next; i++, rv = rv->next)
+	;
+
     /* plus one for the realm */
     retval->length = i;
     retval->data = (krb5_data *)malloc(i * sizeof(krb5_data));
@@ -116,6 +85,8 @@ register int *error;
 	return 0;
     }
 
+    retval->type = val->name__type;
+
     if (qbuf_to_data(realm, krb5_princ_realm(retval))) {
 	xfree(retval->data);
 	xfree(retval);
@@ -123,7 +94,7 @@ register int *error;
 	return 0;
     }
 
-    for (i = 0, rv = val; rv; rv = rv->next, i++) 
+    for (i = 0, rv = val->name__string; rv; rv = rv->next, i++) 
 	if (qbuf_to_data(rv->GeneralString, krb5_princ_component(retval, i))) {
 	    while (--i >= 0)
 		free(krb5_princ_component(retval, i)->data);

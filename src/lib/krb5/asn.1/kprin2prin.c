@@ -46,46 +46,22 @@ krb5_principal2KRB5_PrincipalName(val, error)
 krb5_const_principal val;
 register int *error;
 {
-#if 0
-    /* this code is for -h2 style ISODE structures.  However, pepsy
-       generates horribly broken when given -h2. */
-
+    register struct type_KRB5_PrincipalName *retval = 0;
+    register struct element_KRB5_6 *namestring = 0, *rv1 = 0, *rv2;
     register int i;
-    register struct type_KRB5_PrincipalName *retval;
+    int nelem = krb5_princ_size(val);
 
-    /* count elements */
-    for (i = 0; val[i]; i++);
-
-    i--;				/* skip the realm */
-
-    retval = (struct type_KRB5_PrincipalName *)
-	xmalloc(sizeof(*retval)+max(0,i-1)*sizeof(retval->GeneralString[0]));
+    retval = (struct type_KRB5_PrincipalName *) xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
     }
-    retval->nelem = i;
-    for (i = 1; i <= retval->nelem; i++) { /* still skipping realm */
-	retval->GeneralString[i-1] = krb5_data2qbuf(val[i]);
-	if (!retval->GeneralString[i-1]) {
-	    /* clean up */
-	    retval->nelem = i-1;
-	    free_KRB5_PrincipalName(retval);
-	    *error = ENOMEM;
-	    return(0);
-	}
-    }
-    return(retval);
-
-#endif
-    register struct type_KRB5_PrincipalName *retval = 0, *rv1 = 0, *rv2;
-    register int i;
-    int nelem = krb5_princ_size(val);
-
+    
+    retval->name__type = krb5_princ_type(val);
 
     /* still skipping realm */
     for (i = 0; i < nelem; i++, rv1 = rv2) { 
-	rv2 = (struct type_KRB5_PrincipalName *) xmalloc(sizeof(*rv2));
+	rv2 = (struct element_KRB5_6 *) xmalloc(sizeof(*rv2));
 	if (!rv2) {
 	    if (retval)
 		free_KRB5_PrincipalName(retval);
@@ -95,8 +71,8 @@ register int *error;
 	if (rv1)
 	    rv1->next = rv2;
 	xbzero((char *)rv2, sizeof (*rv2));
-	if (!retval)
-	    retval = rv2;
+	if (!namestring)
+	    namestring = rv2;
 
 	rv2->GeneralString = krb5_data2qbuf(krb5_princ_component(val, i));
 	if (!rv2->GeneralString) {
@@ -107,5 +83,8 @@ register int *error;
 	    return(0);
 	}
     }
+
+    retval->name__string = namestring;
+
     return(retval);
 }

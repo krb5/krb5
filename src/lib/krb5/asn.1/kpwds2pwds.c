@@ -72,7 +72,7 @@ static char rcsid_kpwds2pwds[] =
 
 struct type_KRB5_PasswdData *
 krb5_pwd_data2KRB5_PWD__DATA(val, error)
-register krb5_pwd_data *val;
+register const krb5_pwd_data *val;
 register int *error;
 {
     register struct type_KRB5_PasswdData *retval = 0;
