@@ -1,3 +1,7 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_internal.h: Add prototype for krb5_copy_key_data_contents.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* str_conv.c (krb5_string_to_keysalts): When parsing string, allow
