@@ -202,13 +202,9 @@ krb5_gss_inquire_cred_by_mech(minor_status, cred_handle,
     OM_uint32		*acceptor_lifetime;
     gss_cred_usage_t *cred_usage;
 {
-    krb5_context	context;
     krb5_gss_cred_id_t	cred;
     OM_uint32		lifetime;
     OM_uint32		mstat;
-
-    if (GSS_ERROR(kg_get_context(minor_status, &context)))
-       return(GSS_S_FAILURE);
 
     /*
      * We only know how to handle our own creds.

@@ -1,3 +1,10 @@
+2004-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* disp_status.c (krb5_gss_display_status): Don't call
+	kg_get_context; delete local krb5_context variable.
+	* inq_cred.c (krb5_gss_inquire_cred_by_mech): Likewise.
+	* inq_names.c (krb5_gss_inquire_names_for_mech): Likewise.
+
 2004-02-26  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Don't clear
