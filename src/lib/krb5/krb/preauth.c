@@ -294,9 +294,6 @@ obtain_enc_ts_padata(context, in_padata, etype_info, def_enc_key,
     krb5_data *			scratch;
     krb5_enc_data 		enc_data;
     krb5_pa_data *		pa;
-    
-
-    enc_data.ciphertext.data = 0;
 
     retval = krb5_us_timeofday(context, &pa_enc.patimestamp, &pa_enc.pausec);
     if (retval)
@@ -305,8 +302,11 @@ obtain_enc_ts_padata(context, in_padata, etype_info, def_enc_key,
     if ((retval = encode_krb5_pa_enc_ts(&pa_enc, &scratch)) != 0)
 	return retval;
 
-    if ((retval = krb5_encrypt_data(context, def_enc_key, 0, scratch,
-				    &enc_data)))
+    enc_data.ciphertext.data = 0;
+
+    if ((retval = krb5_encrypt_helper(context, def_enc_key,
+				      KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS,
+				      scratch, &enc_data)))
 	goto cleanup;
 
     krb5_free_data(context, scratch);
