@@ -1,3 +1,11 @@
+Thu Feb 22 13:16:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (check-unix): Set LD_LIBRARY_PATH for kdb5_anadd.
+
+	* hostaddr.c (krb5_os_hostaddr): Set magic number in structure.
+
+	* full_ipadr.c (krb5_make_full_ipaddr): Set magic number in structure.
+
 Sat Feb 17 00:05:38 1996  Theodore Y. Ts'o  <tytso@pao.MIT.EDU>
 
 	* def_realm.c (krb5_get_default_realm): If the configuration file

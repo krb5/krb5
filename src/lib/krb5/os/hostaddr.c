@@ -57,6 +57,7 @@ krb5_os_hostaddr(context, name, ret_addrs)
 	    retval = ENOMEM;
 	    goto errout;
 	}
+	addrs[i]->magic = KV5M_ADDRESS;
 	addrs[i]->addrtype = hp->h_addrtype;
 	addrs[i]->length   = hp->h_length;
 	addrs[i]->contents = (unsigned char *)malloc(addrs[i]->length);

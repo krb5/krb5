@@ -48,6 +48,7 @@ krb5_make_full_ipaddr(context, adr, port, outaddr)
     if (!(retaddr = (krb5_address *)malloc(sizeof(*retaddr)))) {
 	return ENOMEM;
     }
+    retaddr->magic = KV5M_ADDRESS;
     retaddr->addrtype = ADDRTYPE_ADDRPORT;
     retaddr->length = sizeof(smushaddr)+ sizeof(smushport) +
 	2*sizeof(temptype) + 2*sizeof(templength);

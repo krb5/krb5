@@ -133,6 +133,7 @@ check-unix::
 	echo '[realms]' >> ./t_an.conf
 	echo 'r = {' >> ./t_an.conf
 	if test -r ../../../admin/aname/kdb5_anadd ; then \
+		LD_LIBRARY_PATH=$(TOPLIBD) ; export LD_LIBRARY_PATH ; \
 		../../../admin/aname/kdb5_anadd -a -n ./t_an p/i/i/i@r piii; \
 		../../../admin/aname/kdb5_anadd -a -n ./t_an p/a/b/c@r pabc; \
 		echo 'auth_to_local = DB:./t_an' >> ./t_an.conf; \
