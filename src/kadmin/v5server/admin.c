@@ -227,8 +227,10 @@ admin_merge_keys(kcontext, dbentp, unique,
 		xxx2.n_key_data = nkeys2;
 		xxx2.key_data = in2;
 		for (i=0; i<nksents; i++) {
-		    (void) key_name_to_data(&xxx1, &kslist[i], -1, &kp1);
-		    (void) key_name_to_data(&xxx2, &kslist[i], -1, &kp2);
+		    if (key_name_to_data(&xxx1, &kslist[i], -1, &kp1))
+			kp1 = (krb5_key_data *) NULL;
+		    if (key_name_to_data(&xxx2, &kslist[i], -1, &kp2))
+			kp2 = (krb5_key_data *) NULL;
 		    if (kp1 && kp2) {
 			if (kp2->key_data_kvno > kp1->key_data_kvno)
 			    kp1 = kp2;
@@ -423,7 +425,8 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 
 		/* Convert password string to key */
 		if (!(kret = key_string_to_keys(kcontext,
-						dbentp,
+						((is_pwchange) ? defaultp :
+						 dbentp),
 						&pwdata,
 						0,
 						(krb5_key_salt_tuple *) NULL,
@@ -433,20 +436,20 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
 		    num_ekeys = num_keys;
 		    kret = key_encrypt_keys(kcontext,
-					    dbentp,
+					    defaultp,
 					    &num_ekeys,
 					    key_list,
 					    &ekey_list);
 		    if (!kret) {
 			num_rkeys = (krb5_int32) dbentp->n_key_data;
 			kret = admin_merge_keys(kcontext,
-						dbentp,
+						defaultp,
 						1,
 						num_ekeys,
 						ekey_list,
 						(krb5_int32)
-						dbentp->n_key_data,
-						dbentp->key_data,
+						defaultp->n_key_data,
+						defaultp->key_data,
 						&num_rkeys,
 						&dbentp->key_data);
 			dbentp->n_key_data = (krb5_int16) num_rkeys;
@@ -457,7 +460,8 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		/* Random key */
 		DPRINT(DEBUG_OPERATION, debug_level, ("> random key\n"));
 		if (!(kret = key_random_key(kcontext,
-					    dbentp,
+					    ((is_pwchange) ? defaultp :
+					     dbentp),
 					    &num_keys,
 					    &key_list))) {
 		    
@@ -465,20 +469,20 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
 		    num_ekeys = num_keys;
 		    kret = key_encrypt_keys(kcontext,
-					    dbentp,
+					    defaultp,
 					    &num_ekeys,
 					    key_list,
 					    &ekey_list);
 		    if (!kret) {
 			num_rkeys = (krb5_int32) dbentp->n_key_data;
 			kret = admin_merge_keys(kcontext,
-						dbentp,
+						defaultp,
 						0,
 						num_ekeys,
 						ekey_list,
 						(krb5_int32)
-						dbentp->n_key_data,
-						dbentp->key_data,
+						defaultp->n_key_data,
+						defaultp->key_data,
 						&num_rkeys,
 						&dbentp->key_data);
 			dbentp->n_key_data = (krb5_int16) num_rkeys;
@@ -1431,7 +1435,7 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
 		    else {
 			DPRINT(DEBUG_OPERATION, debug_level,
 			       ("> principal %s not in database\n",
-				original));
+				arglist[0].data));
 			retval = KRB5_ADM_P_DOES_NOT_EXIST;
 		    }
 		}
@@ -1442,7 +1446,7 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
 	    else {
 		/* Principal name parse failed */
 		DPRINT(DEBUG_OPERATION, debug_level,
-		       ("> bad principal string \"%s\"\n", original));
+		       ("> bad principal string \"%s\"\n", arglist[0].data));
 		retval = KRB5_ADM_P_DOES_NOT_EXIST;
 	    }
 	}
