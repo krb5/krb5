@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <limits.h>
-
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#endif
 /* The current version of {en,de}code_krb5_enc_kdc_rep_part has a
    problem in that there's no way to know the message type (AS/TGS) of
    a krb5_enc_kdc_rep_part.  This should be fixed in the next version

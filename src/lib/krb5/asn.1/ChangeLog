@@ -1,3 +1,7 @@
+Sat Aug 13 03:40:16 1994  Mark Eichin  (eichin@perdiem)
+
+	* krbasn1.h: include stdlib.h for calloc declaration (if we can)
+
 Thu Aug 11 00:38:10 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_encode_k.c (asn1_encode_kdc_req): Add extra argument which
