@@ -27,7 +27,7 @@
 #include "des_int.h"
 
 
-#define DES3_SHA_CONFOUNDER_SIZE	sizeof(mit_des3_cblock)
+#define DES3_SHA_CONFOUNDER_SIZE	sizeof(mit_des_cblock)
 
 static krb5_error_code
 mit_des3_sha_encrypt_func
@@ -83,7 +83,7 @@ mit_des3_sha_encrypt_func(in, out, size, key, ivec)
       |confounder |   check  |   msg-seq   | pad |
       +-----------+----------+-------------+-----+
       
-      our confounder is 24 bytes
+      our confounder is 8 bytes
       our checksum is NIST_SHA_CKSUM_LENGTH
      */
     sumsize =  krb5_roundup(size + mit_des3_sha_cryptosystem_entry.pad_minimum,

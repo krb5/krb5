@@ -2,6 +2,9 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=crypto.lib
+##DOSOBJFILE=crypto.lst
+##DOSOBJFILELIST=@crypto.lst @des.lst @md4.lst @md5.lst @sha.lst @crc32.lst @os.lst
+##DOSOBJFILEDEP =crypto.lst des.lst md4.lst md5.lst sha.lst crc32.lst os.lst
 
 MAC_SUBDIRS = des sha md4 md5 crc32 os
 
@@ -47,8 +50,12 @@ shared:
 
 # FIXME, need to build the library too...
 all-mac:: $(OBJS)
+all-windows:: $(OBJFILE)
 
-all-windows:: $(OBJS)
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
 
 libcrypto.$(STEXT): $(LIBDONE)
 	@if test -f $@ ; then \
@@ -66,7 +73,7 @@ clean-unix::
 	$(RM) libcrypto.a libcrypto.stamp shared/*
 
 clean-windows::
-	$(RM) crypto.lib crypto.bak
+	$(RM) crypto.lib crypto.bak $(OBJFILE)
 
 check-unix::
 
@@ -83,7 +90,6 @@ all-windows::
 	cd ..\os
 	@echo Making in crypto\os
 	-$(MAKE) -$(MFLAGS)
-	rem BUG WITH NMAKE
 	cd ..\md5
 	@echo Making in crypto\md5
 	-$(MAKE) -$(MFLAGS)
