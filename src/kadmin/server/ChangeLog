@@ -1,3 +1,8 @@
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* schpw.c (process_chpw_request): Return KRB5_KPASSWD_BAD_VERSION
+	if the version number isn't 1.
+
 2003-03-07  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (REQUIRED_PARAMS): Remove
