@@ -33,6 +33,10 @@
 
 apiCB *gCntrlBlock = NULL;
 
+#if defined(_MSDOS) || defined(_WIN32)
+#include "winccld.h"	
+#endif
+
 #if !defined(_MSDOS) && !defined(_WIN32)
 #define CC_API_VER2
 #endif
@@ -179,6 +183,12 @@ static krb5_error_code stdcc_setup(krb5_context context,
 	return cc_err_xlate(err);
 }
 
+void krb5_stdcc_shutdown()
+{
+	if (gCntrlBlock)
+		cc_shutdown(&gCntrlBlock);
+	gCntrlBlock = 0;
+}
 
 /*
  * -- generate_new --------------------------------

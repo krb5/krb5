@@ -1,3 +1,9 @@
+1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* winccld.c, winccld.h, stdcc.c: Add files to dynamically load
+		krbcc32.dll, so that we can fall back and use the built-in
+		file ccache type if krbcc32.dll doesn't exist.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

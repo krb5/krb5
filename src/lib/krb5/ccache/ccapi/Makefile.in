@@ -13,11 +13,12 @@ CFLAGS = $(CCOPTS) $(DEFS) $(WIN_INCLUDES)
 
 STLIBOBJS 	= \
 	stdcc.o \
-	stdcc_util.o 
+	stdcc_util.o \
+	winccld.o
 
-OBJS 	= stdcc.$(OBJEXT) stdcc_util.$(OBJEXT)
+OBJS 	= stdcc.$(OBJEXT) stdcc_util.$(OBJEXT) winccld.$(OBJEXT)
 
-SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c 
+SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c $(srcdir)/winccld.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
