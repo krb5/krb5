@@ -1,7 +1,7 @@
 2000-02-06  Ken Raeburn  <raeburn@mit.edu>
 
 	Patches from Frank Cusack for helping in preauth replay
-	detection.
+	detection and spec (passwd-04 draft) compliance.
 	* asn1_k_decode.c (asn1_decode_enc_sam_response_enc): Update for
 	field name change.
 	(asn1_decode_predicted_sam_response): Handle new fields.

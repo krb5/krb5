@@ -2,7 +2,7 @@
 
 	Patches from Frank Cusack for hw preauth.
 	* k5-int.h (krb5_predicted_sam_response): Add timestamp, client
-	principal, and per-mechanism data fields.
+	principal, flags, and per-mechanism data fields.
 	(krb5_enc_sam_response_enc): Change "passcode" field to "sad".
 
 2000-02-01  Danilo Almeida  <dalmeida@mit.edu>

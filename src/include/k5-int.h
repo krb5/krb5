@@ -356,11 +356,11 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
 typedef struct _krb5_predicted_sam_response {
 	krb5_magic	magic;
 	krb5_keyblock	sam_key;
+	krb5_flags	sam_flags; /* Makes key munging easier */
 	krb5_timestamp  stime;	/* time on server, for replay detection */
 	krb5_int32      susec;
 	krb5_principal  client;
 	krb5_data       msd;	/* mechanism specific data */
-
 } krb5_predicted_sam_response;
 
 typedef struct _krb5_sam_challenge {

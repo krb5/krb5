@@ -829,12 +829,13 @@ asn1_error_code asn1_decode_predicted_sam_response(buf, val)
   setup();
   { begin_structure();
     get_field(val->sam_key,0,asn1_decode_encryption_key);
-    get_field(val->stime,1,asn1_decode_kerberos_time);
-    get_field(val->susec,2,asn1_decode_int32);
+    get_field(val->sam_flags,1,asn1_decode_sam_flags);
+    get_field(val->stime,2,asn1_decode_kerberos_time);
+    get_field(val->susec,3,asn1_decode_int32);
     alloc_field(val->client,krb5_principal_data);
-    get_field(val->client,3,asn1_decode_realm);
-    get_field(val->client,4,asn1_decode_principal_name);
-    opt_string(val->msd,5,asn1_decode_octectstring);
+    get_field(val->client,4,asn1_decode_realm);
+    get_field(val->client,5,asn1_decode_principal_name);
+    opt_string(val->msd,6,asn1_decode_octetstring);
     end_structure();
     val->magic = KV5M_PREDICTED_SAM_RESPONSE;
   }

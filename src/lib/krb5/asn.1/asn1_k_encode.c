@@ -952,11 +952,12 @@ asn1_error_code asn1_encode_predicted_sam_response(buf, val, retlen)
 {
   asn1_setup();
 
-  add_optstring(val->msd,5,asn1_encode_octetstring);
-  asn1_addfield(val->client,4,asn1_encode_principal_name);
-  asn1_addfield(val->client,3,asn1_encode_realm);
-  asn1_addfield(val->susec,2,asn1_encode_integer);
-  asn1_addfield(val->stime,1,asn1_encode_kerberos_time);
+  add_optstring(val->msd,6,asn1_encode_octetstring);
+  asn1_addfield(val->client,5,asn1_encode_principal_name);
+  asn1_addfield(val->client,4,asn1_encode_realm);
+  asn1_addfield(val->susec,3,asn1_encode_integer);
+  asn1_addfield(val->stime,2,asn1_encode_kerberos_time);
+  asn1_addfield(val->sam_flags,1,asn1_encode_sam_flags);
   asn1_addfield(&(val->sam_key),0,asn1_encode_encryption_key);
 
   asn1_makeseq();
