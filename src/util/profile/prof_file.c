@@ -28,8 +28,17 @@
 #define stat _stat
 #endif
 
-static int rw_access(filename)
-	const char *filename;
+#ifndef PROFILE_USES_PATHS
+#include <FSp_fopen.h>
+
+static OSErr GetMacOSTempFilespec (
+	const	FSSpec*	inFilespec,
+			FSSpec*	outFilespec);
+
+#endif
+
+static int rw_access(filespec)
+	profile_filespec_t *filespec;
 {
 #ifdef HAVE_ACCESS
 	if (access(filename, W_OK) == 0)
@@ -44,7 +53,11 @@ static int rw_access(filename)
 	 */
 	FILE	*f;
 
-	f = fopen(filename, "r+");
+#ifdef PROFILE_USES_PATHS
+	f = fopen(filespec, "r+");
+#else
+	f = FSp_fopen(&filespec, "r+");
+#endif
 	if (f) {
 		fclose(f);
 		return 1;
@@ -53,8 +66,8 @@ static int rw_access(filename)
 #endif
 }
 
-errcode_t profile_open_file(filename, ret_prof)
-	const char *filename;
+errcode_t profile_open_file(filespec, ret_prof)
+	profile_filespec_t filespec;
 	prf_file_t *ret_prof;
 {
 	prf_file_t	prf;
@@ -66,23 +79,28 @@ errcode_t profile_open_file(filename, ret_prof)
 	if (!prf)
 		return ENOMEM;
 	memset(prf, 0, sizeof(struct _prf_file_t));
-	len = strlen(filename)+1;
-	if (filename[0] == '~' && filename[1] == '/') {
+		
+#ifndef macintosh
+	len = strlen(filespec)+1;
+	if (filespec[0] == '~' && filespec[1] == '/') {
 		home_env = getenv("HOME");
 		if (home_env)
 			len += strlen(home_env);
 	}
-	prf->filename = malloc(len);
-	if (!prf->filename) {
+	prf->filespec = malloc(len);
+	if (!prf->filespec) {
 		free(prf);
 		return ENOMEM;
 	}
 	if (home_env) {
-		strcpy(prf->filename, home_env);
-		strcat(prf->filename, filename+1);
+		strcpy(prf->filespec, home_env);
+		strcat(prf->filespec, filespec+1);
 	} else
-		strcpy(prf->filename, filename);
+		strcpy(prf->filespec, filespec);
 	prf->magic = PROF_MAGIC_FILE;
+#else
+	prf->filespec = filespec;
+#endif
 
 	retval = profile_update_file(prf);
 	if (retval) {
@@ -126,7 +144,11 @@ errcode_t profile_update_file(prf)
 		return 0;
 #endif
 	errno = 0;
-	f = fopen(prf->filename, "r");
+#ifdef PROFILE_USES_PATHS
+	f = fopen(prf->filespec, "r");
+#else
+	f = FSp_fopen (&prf->filespec, "r");
+#endif
 	if (f == NULL) {
 		retval = errno;
 		if (retval == 0)
@@ -135,7 +157,7 @@ errcode_t profile_update_file(prf)
 	}
 	prf->upd_serial++;
 	prf->flags = 0;
-	if (rw_access(prf->filename))
+	if (rw_access(prf->filespec))
 		prf->flags |= PROFILE_FILE_RW;
 	retval = profile_parse_file(f, &prf->root);
 	fclose(f);
@@ -147,11 +169,30 @@ errcode_t profile_update_file(prf)
 	return 0;
 }
 
+#ifndef PROFILE_USES_PATHS
+OSErr GetMacOSTempFilespec (
+	const	FSSpec*	inFileSpec,
+			FSSpec*	outFileSpec)
+{
+	OSErr	err;
+	
+	err = FindFolder (inFileSpec -> vRefNum, kTemporaryFolderType,
+		kCreateFolder, &(outFileSpec -> vRefNum), &(outFileSpec -> parID));
+	if (err != noErr)
+		return err;
+		
+	BlockMoveData (&(inFileSpec -> name), &(outFileSpec -> name), StrLength (inFileSpec -> name) + 1);
+	return noErr;
+}
+#endif
+
+
 errcode_t profile_flush_file(prf)
 	prf_file_t prf;
 {
 	FILE		*f;
-	char		*new_name = 0, *old_name = 0;
+	profile_filespec_t new_file;
+	profile_filespec_t olf_file;
 	errcode_t	retval = 0;
 	
 	if (!prf || prf->magic != PROF_MAGIC_FILE)
@@ -161,18 +202,29 @@ errcode_t profile_flush_file(prf)
 		return 0;
 
 	retval = ENOMEM;
-	new_name = malloc(strlen(prf->filename) + 5);
+	
+#ifdef PROFILE_USES_PATHS
+	new_file = old_file = 0;
+	new_file = malloc(strlen(prf->filespec) + 5);
 	if (!new_name)
 		goto errout;
-	old_name = malloc(strlen(prf->filename) + 5);
+	old_file = malloc(strlen(prf->filespec) + 5);
 	if (!old_name)
 		goto errout;
 
-	sprintf(new_name, "%s.$$$", prf->filename);
-	sprintf(old_name, "%s.bak", prf->filename);
+	sprintf(new_file, "%s.$$$", prf->filespec);
+	sprintf(old_file, "%s.bak", prf->filespec);
 
 	errno = 0;
+
 	f = fopen(new_name, "w");
+#else
+	/* On MacOS, we do this by writing to a new file and then atomically
+	swapping the files with a file system call */
+	GetMacOSTempFilespec (&prf->filespec, &new_file);
+	f = FSp_fopen (&new_file, "w");
+#endif
+	
 	if (!f) {
 		retval = errno;
 		if (retval == 0)
@@ -186,27 +238,41 @@ errcode_t profile_flush_file(prf)
 		goto errout;
 	}
 
+#ifdef PROFILE_USES_PATHS
 	unlink(old_name);
-	if (rename(prf->filename, old_name)) {
+	if (rename(prf->filespec, old_name)) {
 		retval = errno;
 		goto errout;
 	}
-	if (rename(new_name, prf->filename)) {
+	if (rename(new_name, prf->filespec)) {
 		retval = errno;
 		rename(old_name, prf->filename); /* back out... */
 		goto errout;
 	}
+#else
+	{
+		OSErr err = FSpExchangeFiles (&prf->filespec, &new_file);
+		if (err != noErr) {
+			retval = ENFILE;
+			goto errout;
+		}
+		FSpDelete (&new_file);
+	}
+#endif
+
 
 	prf->flags = 0;
-	if (rw_access(prf->filename))
+	if (rw_access(prf->filespec))
 		prf->flags |= PROFILE_FILE_RW;
 	retval = 0;
 	
 errout:
+#ifdef PROFILE_USES_PATHS
 	if (new_name)
 		free(new_name);
 	if (old_name)
 		free(old_name);
+#endif
 	return retval;
 }
 
@@ -214,8 +280,10 @@ errout:
 void profile_free_file(prf)
 	prf_file_t prf;
 {
-	if (prf->filename)
-		free(prf->filename);
+#ifdef PROFILE_USES_PATHS
+	if (prf->filespec)
+		free(prf->filespec);
+#endif
 	if (prf->root)
 		profile_free_node(prf->root);
 	if (prf->comment)

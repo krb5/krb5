@@ -5,6 +5,7 @@
 #include <time.h>
 #include "com_err.h"
 #include "prof_err.h"
+#include "profile.h"
 
 #if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 #define PROTOTYPE(x) x
@@ -39,7 +40,7 @@ typedef long prf_magic_t;
 struct _prf_file_t {
 	prf_magic_t	magic;
 	char		*comment;
-	char		*filename;
+	profile_filespec_t filespec;
 	struct profile_node *root;
 	time_t		timestamp;
 	int		flags;
@@ -75,6 +76,16 @@ typedef struct _profile_t *profile_t;
 #define PROFILE_ITER_RELATIONS_ONLY	0x0004
 
 #define PROFILE_ITER_FINAL_SEEN		0x0100
+
+/*
+ * Check if a filespec is last in a list (NULL on UNIX, invalid FSSpec on MacOS
+ */
+
+#ifdef PROFILE_USES_PATHS
+#define	PROFILE_LAST_FILESPEC(x) (((x) == NULL) || ((x)[0] == NULL))
+#else
+#define PROFILE_LAST_FILESPEC(x) (((x).vRefNum == 0) && ((x).parID == 0) && ((x).name[0] == '\0'))
+#endif
 
 /* profile_parse.c */
 
@@ -164,7 +175,7 @@ errcode_t profile_rename_node
 /* prof_file.c */
 
 errcode_t profile_open_file
-	PROTOTYPE ((const char *filename, prf_file_t *ret_prof));
+	PROTOTYPE ((profile_filespec_t file, prf_file_t *ret_prof));
 
 errcode_t profile_update_file
 	PROTOTYPE ((prf_file_t profile));
@@ -178,72 +189,13 @@ void profile_free_file
 errcode_t profile_close_file
 	PROTOTYPE ((prf_file_t profile));
 
-/* prof_init.c */
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_init
-	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_init_path
-	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
-
-KRB5_DLLIMP void KRB5_CALLCONV profile_release
-	PROTOTYPE ((profile_t profile));
+/* prof_init.c -- included from profile.h */
 
 /* prof_get.c */
-
-KRB5_DLLIMP void KRB5_CALLCONV profile_free_list
-	PROTOTYPE ((char **list));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_values
-	PROTOTYPE ((profile_t profile, const char **names,
-		    char ***ret_values));
 
 errcode_t profile_get_value
 	PROTOTYPE ((profile_t profile, const char **names,
 		    const char	**ret_value));
+/* Others included from profile.h */
 	
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_string
-	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
-			const char *subsubname, const char *def_val,
-			char **ret_string));
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_integer
-	PROTOTYPE((profile_t profile, const char *name, const char *subname,
-			const char *subsubname, int def_val,
-			int *ret_default));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_relation_names
-	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_subsection_names
-	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_iterator_create
-	PROTOTYPE((profile_t profile, const char **names,
-		   int flags, void **ret_iter));
-
-KRB5_DLLIMP void KRB5_CALLCONV profile_iterator_free
-	PROTOTYPE((void **iter_p));
-	
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_iterator
-	PROTOTYPE((void **iter_p, char **ret_name, char **ret_value));
-
-KRB5_DLLIMP void KRB5_CALLCONV profile_release_string PROTOTYPE((char *str));
-
-
-/* prof_set.c */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_update_relation
-	PROTOTYPE((profile_t profile, const char **names, 
-		   const char *old_value, const char *new_value));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_clear_relation
-	PROTOTYPE((profile_t profile, const char **names));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_rename_section
-	PROTOTYPE((profile_t profile, const char **names, 
-		   const char *new_name));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_add_relation
-	PROTOTYPE((profile_t profile, const char **names, 
-		   const char *new_value));
-
-	
+/* prof_set.c -- included from profile.h */
