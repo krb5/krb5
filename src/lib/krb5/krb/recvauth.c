@@ -74,6 +74,7 @@ krb5_recvauth(/* IN */
 	krb5_data		outbuf;
 	krb5_rcache rcache;
 	krb5_octet		response;
+	krb5_data	*server_name;
 	char *cachename;
 	extern krb5_deltat krb5_clockskew;
 	static char		*rc_base = "rc_";
@@ -153,13 +154,13 @@ krb5_recvauth(/* IN */
 		problem = krb5_rc_resolve_type(&rcache,
 					       rc_type ? rc_type : "dfl");
 	cachename = NULL;
-	if (!problem && !(cachename = malloc(server[1]->length+1+
-					     strlen(rc_base))))
+	server_name = krb5_princ_component(server, 0);
+	if (!problem && !(cachename = malloc(server_name->length+1+strlen(rc_base))))
 		problem = ENOMEM;
 	if (!problem) {
 		strcpy(cachename, rc_base ? rc_base : "rc_");
-		strncat(cachename, server[1]->data, server[1]->length);
-		cachename[server[1]->length+strlen(rc_base)] = '\0';
+		strncat(cachename, server_name->data, server_name->length);
+		cachename[server_name->length+strlen(rc_base)] = '\0';
 		problem = krb5_rc_resolve(rcache, cachename);
 	}
 	if (!problem) {

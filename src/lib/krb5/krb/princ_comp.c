@@ -34,26 +34,28 @@ static char rcsid_princ_comp_c[] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif /* min */
-
 krb5_boolean
 krb5_principal_compare(princ1, princ2)
 krb5_const_principal princ1;
 krb5_const_principal princ2;
 {
-    register krb5_data * const *p1, * const *p2;
+    register int i, nelem;
 
-    for (p1 = princ1, p2 = princ2; *p1  && *p2; p1++, p2++) {
-	if ((*p1)->length != (*p2)->length)
-	    return FALSE;
-	if (memcmp((*p1)->data, (*p2)->data, (*p1)->length))
-						
+    nelem = krb5_princ_size(princ1);
+    if (nelem != krb5_princ_size(princ2))
+	return FALSE;
+
+    if (krb5_princ_realm(princ1)->length != krb5_princ_realm(princ2)->length ||
+	memcmp (krb5_princ_realm(princ1)->data, krb5_princ_realm(princ2)->data,
+		krb5_princ_realm(princ2)->length))
+	return FALSE;
+
+    for (i = 0; i < nelem; i++) {
+	register const krb5_data *p1 = krb5_princ_component(princ1, i);
+	register const krb5_data *p2 = krb5_princ_component(princ2, i);
+	if (p1->length != p2->length ||
+	    memcmp(p1->data, p2->data, p1->length))
 	    return FALSE;
     }
-    if (*p1 || *p2)			/* didn't both run out of components
-					   at once */
-	return FALSE;
     return TRUE;
 }

@@ -40,29 +40,37 @@ static char rcsid_pr_to_salt_c[] =
 
 krb5_error_code
 krb5_principal2salt(pr, ret)
-krb5_const_principal pr;
+register krb5_const_principal pr;
 krb5_data *ret;
 {
     int size, offset;
-    krb5_data * const * prp;
-    
+    int nelem;
+    register int i;
 
     if (pr == 0) {
-        ret->length = 0;
-        ret->data = 0;
-    } else {
-        for (size = 0, prp = pr; *prp; prp++)
-            size += (*prp)->length;
+	ret->length = 0;
+	ret->data = 0;
+	return 0;
+    }
 
-        ret->length = size;
-        if (!(ret->data = malloc (size+1)))
-	    return ENOMEM;
+    nelem = krb5_princ_size(pr);
 
-        for (offset=0, prp=pr; *prp; prp++)
-        {
-            memcpy(&ret->data[offset],(*prp)->data, (*prp)->length);
-            offset += (*prp)->length;
-        }
+    size = krb5_princ_realm(pr)->length;
+
+    for (i = 0; i < nelem; i++)
+	size += krb5_princ_component(pr, i)->length;
+
+    ret->length = size;
+    if (!(ret->data = malloc (size)))
+	return ENOMEM;
+
+    offset = krb5_princ_realm(pr)->length;
+    memcpy(ret->data, krb5_princ_realm(pr)->data, offset);
+
+    for (i = 0; i < nelem; i++) {
+	memcpy(&ret->data[offset], krb5_princ_component(pr, i)->data,
+	       krb5_princ_component(pr, i)->length);
+	offset += krb5_princ_component(pr, i)->length;
     }
     return 0;
 }

@@ -74,7 +74,8 @@ krb5_tkt_authent **authdat;
 	    return(retval);
 	}
     }
-    if (!(retval = krb5_get_server_rcache(server[1], &rcache))) {
+    if (!(retval = krb5_get_server_rcache(krb5_princ_component(server, 1),
+					  &rcache))) {
 	retval = krb5_rd_req_decoded(request, server,
 				     sender_addr, 0,
 				     0, 0, rcache, authdat);

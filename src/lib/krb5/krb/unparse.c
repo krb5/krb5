@@ -68,19 +68,22 @@ int	*size;
 {
 	register char *cp, *q;
 	register int i,j;
-	register int totalsize = 0;
-	int	length;
+	int	length, nelem;
+	register int totalsize = krb5_princ_realm(principal)->length + 1;
 
-	if (!principal[0] || !principal[1])
-		return KRB5_PARSE_MALFORMED;
-	for (i = 0; principal[i]; i++) {
-		cp = principal[i]->data;
-		length = principal[i]->length;
+	for (cp = krb5_princ_realm(principal)->data; *cp; cp++)
+		if (*cp == REALM_SEP  || *cp == COMPONENT_SEP ||
+		    *cp == '\\' || *cp == '\t')
+			totalsize++;
+
+	nelem = krb5_princ_size(principal);
+	for (i = 0; i < nelem; i++) {
+		cp = krb5_princ_component(principal, i)->data;
+		length = krb5_princ_component(principal, i)->length;
+		totalsize += length;
 		for (j=0; j < length; j++,cp++)
 			if (*cp == REALM_SEP || *cp == COMPONENT_SEP ||
 			    *cp == '\0' || *cp == '\\' || *cp == '\t')
-				totalsize += 2;
-			else
 				totalsize++;
 		totalsize++;	/* This is for the separator */
 	}
@@ -105,9 +108,9 @@ int	*size;
 
 	q = *name;
 	
-	for (i = 1; principal[i]; i++) {
-		cp = principal[i]->data;
-		length = principal[i]->length;
+	for (i = 0; i < nelem; i++) {
+		cp = krb5_princ_component(principal, i)->data;
+		length = krb5_princ_component(principal, i)->length;
 		for (j=0; j < length; j++,cp++) {
 			switch (*cp) {
 			case COMPONENT_SEP:
@@ -131,8 +134,8 @@ int	*size;
 	q--;			/* Back up last component separator */
 	*q++ = REALM_SEP;
 	
-	cp = principal[0]->data;
-	length = principal[0]->length;
+	cp = krb5_princ_realm(principal)->data;
+	length = krb5_princ_realm(principal)->length;
 	for (j=0; j < length; j++,cp++) {
 		switch (*cp) {
 		case COMPONENT_SEP:

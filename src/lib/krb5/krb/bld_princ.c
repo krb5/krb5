@@ -43,68 +43,62 @@ static char rcsid_bld_princ_c [] =
 
 krb5_error_code
 krb5_build_principal_va(princ, rlen, realm, ap)
-krb5_principal *princ;
+krb5_principal princ;
 int rlen;
 const char *realm;
 va_list ap;
 {
     register int i, count = 0;
     register char *next;
-    krb5_principal princ_ret;
+    char *tmpdata;
+    krb5_data *data;
 
     /* guess at an initial sufficent count of 2 pieces */
-    count = 2 + 2;		/* plus 2 for realm & null terminator */
+    count = 2;
 
     /* get space for array and realm, and insert realm */
-    princ_ret = (krb5_principal) malloc(sizeof(*princ_ret) * (count));
-    if (!princ_ret)
+    data = (krb5_data *) malloc(sizeof(krb5_data) * count);
+    if (data == 0)
 	return ENOMEM;
-    if (!(princ_ret[0] = (krb5_data *) malloc(sizeof(*princ_ret[0])))) {
-	xfree(princ_ret);
-	return ENOMEM;
-    }
-    princ_ret[0]->length = rlen;
-    princ_ret[0]->data = malloc(rlen);
-    if (!princ_ret[0]->data) {
-	xfree(princ_ret[0]);
-	xfree(princ_ret);
+    krb5_princ_set_realm_length(princ, rlen);
+    tmpdata = malloc(rlen);
+    if (!tmpdata) {
+	free (data);
 	return ENOMEM;
     }
-    memcpy(princ_ret[0]->data, realm, rlen);
+    krb5_princ_set_realm_data(princ, tmpdata);
+    memcpy(tmpdata, realm, rlen);
 
     /* process rest of components */
 
-    for (i = 1, next = va_arg(ap, char *);
+    for (i = 0, next = va_arg(ap, char *);
 	 next;
 	 next = va_arg(ap, char *), i++) {
-	if (i == count-1) {
+	if (i == count) {
 	    /* not big enough.  realloc the array */
-	    krb5_principal p_tmp;
-	    p_tmp = (krb5_principal) realloc((char *)princ_ret, sizeof(*princ_ret)*(count*2));
-	    if (!p_tmp)
-		goto free_out;
-	    princ_ret = p_tmp;
-	    count *= 2;
-	}
-	if (!(princ_ret[i] =
-	      (krb5_data *) malloc(sizeof(*princ_ret[i])))) {
-	free_out:
-	    for (i--; i >= 0; i--) {
-		xfree(princ_ret[i]->data);
-		xfree(princ_ret[i]);
+	    krb5_data *p_tmp;
+	    p_tmp = (krb5_data *) realloc((char *)data,
+					  sizeof(krb5_data)*(count*2));
+	    if (!p_tmp) {
+	    free_out:
+		    while (i-- >= 0)
+			xfree(data[i].data);
+		    xfree(data);
+		    xfree(tmpdata);
+		    return (ENOMEM);
 	    }
-	    xfree(princ_ret);
-	    return (ENOMEM);
+	    count *= 2;
+	    data = p_tmp;
 	}
-	princ_ret[i]->length = strlen(next);
-	princ_ret[i]->data = strdup(next);
-	if (!princ_ret[i]->data) {
-	    xfree(princ_ret[i]);
+
+	data[i].length = strlen(next);
+	data[i].data = strdup(next);
+	if (!data[i].data)
 	    goto free_out;
-	}
     }
-    princ_ret[i] = 0;			/* put a null as the last entry */
-    *princ = princ_ret;
+    princ->data = data;
+    princ->length = i;
+    /* Set princ->type */
     return 0;
 }
 
@@ -121,13 +115,19 @@ va_dcl
 {
     va_list ap;
     krb5_error_code retval;
+    krb5_principal pr_ret = (krb5_principal)malloc(sizeof(krb5_principal_data));
+
+    if (!pr_ret)
+	return ENOMEM;
 
 #if __STDC__ || defined(STDARG_PROTOTYPES)
     va_start(ap, realm);
 #else
     va_start(ap);
 #endif
-    retval = krb5_build_principal_va(princ, rlen, realm, ap);
+    retval = krb5_build_principal_va(pr_ret, rlen, realm, ap);
     va_end(ap);
+    if (retval == 0)
+	*princ = pr_ret;
     return retval;
 }
