@@ -1,3 +1,8 @@
+2004-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (GET_NO_PTHREAD_TSD) [!HAVE_PRAGMA_WEAK_REF]: Macro
+	result type should be pointer to tsd_block.
+
 2004-07-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (krb5int_thread_support_init): Do finish
