@@ -433,6 +433,9 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      handle->clnt = clnttcp_create(&addr, KADM, KADMVERS, &fd, 0, 0);
      if (handle->clnt == NULL) {
 	  code = KADM5_RPC_ERROR;
+#ifdef DEBUG
+	  clnt_pcreateerror("clnttcp_create");
+#endif
 	  goto error;
      }
      handle->lhandle->clnt = handle->clnt;
