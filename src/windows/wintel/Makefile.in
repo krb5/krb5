@@ -24,8 +24,8 @@ CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT) /Zi
 CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT)
 !endif
 
-##WIN32##RFLAGS  = /D$(KRB)=1 $(INCLUDES) $(KRBOPT)
-##WIN16##RFLAGS  = /nologo /D$(KRB)=1 $(INCLUDES) $(KRBOPT)
+##WIN32##RFLAGS  = /D$(KRB)=1 $(INCLUDES)
+##WIN16##RFLAGS  = /nologo /D$(KRB)=1 $(INCLUDES)
 
 
 ##### Linker
