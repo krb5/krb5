@@ -47,13 +47,13 @@
  *	TRUE is success, FALSE is failure.  Un-registers pair
  *	[prog, vers].  prot and port are ignored.
  *
- * PMAPPROC_GETPORT(struct pmap) returns (rpc_int32 unsigned).
+ * PMAPPROC_GETPORT(struct pmap) returns (u_short).
  *	0 is failure.  Otherwise returns the port number where the pair
  *	[prog, vers] is registered.  It may lie!
  *
  * PMAPPROC_DUMP() RETURNS (struct pmaplist *)
  *
- * PMAPPROC_CALLIT(unsigned, unsigned, unsigned, string<>)
+ * PMAPPROC_CALLIT(rpcprog_t, rpcvers_t, rpcproc_t, string<>)
  * 	RETURNS (port, string<>);
  * usage: encapsulatedresults = PMAPPROC_CALLIT(prog, vers, proc, encapsulatedargs);
  * 	Calls the procedure on the local machine.  If it is not registered,
@@ -65,26 +65,29 @@
  * The service supports remote procedure calls on udp/ip or tcp/ip socket 111.
  */
 
-#define PMAPPORT		((unsigned short)111)
-#define PMAPPROG		((rpc_u_int32)100000)
-#define PMAPVERS		((rpc_u_int32)2)
-#define PMAPVERS_PROTO		((rpc_u_int32)2)
-#define PMAPVERS_ORIG		((rpc_u_int32)1)
-#define PMAPPROC_NULL		((rpc_u_int32)0)
-#define PMAPPROC_SET		((rpc_u_int32)1)
-#define PMAPPROC_UNSET		((rpc_u_int32)2)
-#define PMAPPROC_GETPORT	((rpc_u_int32)3)
-#define PMAPPROC_DUMP		((rpc_u_int32)4)
-#define PMAPPROC_CALLIT		((rpc_u_int32)5)
+#ifndef GSSRPC_PMAP_PROT_H
+#define GSSRPC_PMAP_PROT_H
+GSSRPC__BEGIN_DECLS
+
+#define PMAPPORT		((u_short)111)
+#define PMAPPROG		((rpcprog_t)100000)
+#define PMAPVERS		((rpcvers_t)2)
+#define PMAPVERS_PROTO		((rpcprot_t)2)
+#define PMAPVERS_ORIG		((rpcvers_t)1)
+#define PMAPPROC_NULL		((rpcproc_t)0)
+#define PMAPPROC_SET		((rpcproc_t)1)
+#define PMAPPROC_UNSET		((rpcproc_t)2)
+#define PMAPPROC_GETPORT	((rpcproc_t)3)
+#define PMAPPROC_DUMP		((rpcproc_t)4)
+#define PMAPPROC_CALLIT		((rpcproc_t)5)
 
 struct pmap {
-	rpc_u_int32 pm_prog;
-	rpc_u_int32 pm_vers;
-	rpc_u_int32 pm_prot;
-	rpc_u_int32 pm_port;
+	rpcprog_t pm_prog;
+	rpcvers_t pm_vers;
+	rpcprot_t pm_prot;
+	rpcport_t pm_port;
 };
 
-#define xdr_pmap	gssrpc_xdr_pmap
 extern bool_t xdr_pmap(XDR *, struct pmap *);
 
 struct pmaplist {
@@ -92,5 +95,7 @@ struct pmaplist {
 	struct pmaplist *pml_next;
 };
 
-#define xdr_pmaplist	gssrpc_xdr_pmaplist
 extern bool_t xdr_pmaplist(XDR *, struct pmaplist **);
+
+GSSRPC__END_DECLS
+#endif /* !defined(GSSRPC_PMAP_PROT_H) */

@@ -60,12 +60,12 @@ struct auth_gssapi_data {
      CLIENT *clnt;
      gss_ctx_id_t context;
      gss_buffer_desc client_handle;
-     rpc_u_int32 seq_num;
+     uint32_t seq_num;
      int def_cred;
      
      /* pre-serialized ah_cred */
      unsigned char cred_buf[MAX_AUTH_BYTES];
-     rpc_u_int32 cred_len;
+     uint32_t cred_len;
 };
 #define AUTH_PRIVATE(auth) ((struct auth_gssapi_data *)auth->ah_private)
 
@@ -151,7 +151,7 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      enum clnt_stat callstat;
      struct timeval timeout;
      int bindings_failed;
-     rpc_u_int32 init_func;
+     rpcproc_t init_func;
      
      auth_gssapi_init_arg call_arg;
      auth_gssapi_init_res call_res;
@@ -344,7 +344,7 @@ next_token:
 		    goto cleanup;
 	       } else {
 		    PRINTF(("gssapi_create: got client_handle %d\n",
-			    *((rpc_u_int32 *)call_res.client_handle.value)));
+			    *((uint32_t *)call_res.client_handle.value)));
 		    
 		    GSS_DUP_BUFFER(AUTH_PRIVATE(auth)->client_handle,
 				   call_res.client_handle);
@@ -393,14 +393,14 @@ next_token:
 		    AUTH_GSSAPI_DISPLAY_STATUS(("unsealing isn",
 						*gssstat, *minor_stat)); 
 		    goto cleanup;
-	       } else if (isn_buf.length != sizeof(rpc_u_int32)) {
+	       } else if (isn_buf.length != sizeof(uint32_t)) {
 		    PRINTF(("gssapi_create: gss_unseal gave %d bytes\n",
 			    (int) isn_buf.length));
 		    goto cleanup;
 	       }
 	       
-	       AUTH_PRIVATE(auth)->seq_num = (rpc_u_int32)
-		    ntohl(*((rpc_u_int32*)isn_buf.value)); 
+	       AUTH_PRIVATE(auth)->seq_num = (uint32_t)
+		    ntohl(*((uint32_t*)isn_buf.value)); 
 	       *gssstat = gss_release_buffer(minor_stat, &isn_buf);
 	       if (*gssstat != GSS_S_COMPLETE) {
 		    AUTH_GSSAPI_DISPLAY_STATUS(("releasing unsealed isn",
@@ -412,7 +412,7 @@ next_token:
 		       AUTH_PRIVATE(auth)->seq_num));
 	       
 	       /* we no longer need these results.. */
-	       gssrpc_xdr_free(xdr_authgssapi_init_res, &call_res);
+	       xdr_free(xdr_authgssapi_init_res, &call_res);
 	  }
      } else if (call_res.signed_isn.length != 0) {
 	  PRINTF(("gssapi_create: got signed isn, can't check yet\n"));
@@ -433,7 +433,7 @@ next_token:
 			&AUTH_PRIVATE(auth)->client_handle); 
      
      PRINTF(("gssapi_create: done. client_handle %#x, isn %d\n\n",
-	     *((rpc_u_int32 *)AUTH_PRIVATE(auth)->client_handle.value),
+	     *((uint32_t *)AUTH_PRIVATE(auth)->client_handle.value),
 	     AUTH_PRIVATE(auth)->seq_num));
      
      /* don't assume the caller will want to change clnt->cl_auth */
@@ -572,7 +572,7 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
 {
      OM_uint32 minor_stat;
      gss_buffer_desc out_buf;
-     rpc_u_int32 seq_num;
+     uint32_t seq_num;
      
      if (AUTH_PRIVATE(auth)->established == TRUE)  {
 	  PRINTF(("gssapi_marshall: starting\n"));
@@ -589,8 +589,8 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
 	  auth->ah_verf.oa_base = out_buf.value;
 	  auth->ah_verf.oa_length = out_buf.length;
 	  
-	  if (! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_cred) ||
-	      ! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_verf)) {
+	  if (! xdr_opaque_auth(xdrs, &auth->ah_cred) ||
+	      ! xdr_opaque_auth(xdrs, &auth->ah_verf)) {
 	       (void) gss_release_buffer(&minor_stat, &out_buf);
 	       return FALSE;
 	  }
@@ -601,8 +601,8 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
 	  auth->ah_verf.oa_base = NULL;
 	  auth->ah_verf.oa_length = 0;
 	  
-	  if (! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_cred) ||
-	      ! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_verf)) {
+	  if (! xdr_opaque_auth(xdrs, &auth->ah_cred) ||
+	      ! xdr_opaque_auth(xdrs, &auth->ah_verf)) {
 	       return FALSE;
 	  }
      }
@@ -622,7 +622,7 @@ static bool_t auth_gssapi_validate(auth, verf)
    struct opaque_auth *verf;
 {
      gss_buffer_desc in_buf;
-     rpc_u_int32 seq_num;
+     uint32_t seq_num;
      
      if (AUTH_PRIVATE(auth)->established == FALSE) {
 	  PRINTF(("gssapi_validate: not established, noop\n"));

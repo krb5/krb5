@@ -63,7 +63,7 @@ void kadm_1(rqstp, transp)
      char *(*local)();
 
      if (rqstp->rq_cred.oa_flavor != AUTH_GSSAPI &&
-	 rqstp->rq_cred.oa_flavor != AUTH_GSSAPI_COMPAT) {
+	 rqstp->rq_cred.oa_flavor != RPCSEC_GSS) {
 	  krb5_klog_syslog(LOG_ERR, "Authentication attempt failed: %s, invalid "
 		 "RPC authentication flavor %d",
 		 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),

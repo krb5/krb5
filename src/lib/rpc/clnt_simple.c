@@ -54,10 +54,12 @@ static struct callrpc_private {
 } *callrpc_private;
 
 int
-gssrpc_callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
+callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 	char *host;
 	xdrproc_t inproc, outproc;
-	rpc_u_int32 prognum, versnum, procnum;
+	rpcprog_t prognum;
+	rpcvers_t versnum;
+	rpcproc_t procnum;
 	char *in, *out;
 {
 	register struct callrpc_private *crp = callrpc_private;
@@ -98,8 +100,8 @@ gssrpc_callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 			sizeof(server_addr.sin_addr));
 		server_addr.sin_family = AF_INET;
 		server_addr.sin_port =  0;
-		if ((crp->client = clntudp_create(&server_addr, (rpc_u_int32)prognum,
-		    (rpc_u_int32)versnum, timeout, &crp->socket)) == NULL)
+		if ((crp->client = clntudp_create(&server_addr, prognum,
+		    versnum, timeout, &crp->socket)) == NULL)
 			return ((int) rpc_createerr.cf_stat);
 		crp->valid = 1;
 		crp->oldprognum = prognum;

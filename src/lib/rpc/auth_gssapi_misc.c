@@ -86,16 +86,16 @@ bool_t xdr_authgssapi_init_res(xdrs, init_res)
 
 bool_t auth_gssapi_seal_seq(context, seq_num, out_buf)
    gss_ctx_id_t context;
-   rpc_u_int32 seq_num;
+   uint32_t seq_num;
    gss_buffer_t out_buf;
 {
      gss_buffer_desc in_buf;
      OM_uint32 gssstat, minor_stat;
-     rpc_u_int32 nl_seq_num;
+     uint32_t nl_seq_num;
      
      nl_seq_num = htonl(seq_num);
      
-     in_buf.length = sizeof(rpc_u_int32);
+     in_buf.length = sizeof(uint32_t);
      in_buf.value = (char *) &nl_seq_num;
      gssstat = gss_seal(&minor_stat, context, 0, GSS_C_QOP_DEFAULT,
 			&in_buf, NULL, out_buf);
@@ -111,11 +111,11 @@ bool_t auth_gssapi_seal_seq(context, seq_num, out_buf)
 bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
    gss_ctx_id_t context;
    gss_buffer_t in_buf;
-   rpc_u_int32 *seq_num;
+   uint32_t *seq_num;
 {
      gss_buffer_desc out_buf;
      OM_uint32 gssstat, minor_stat;
-     rpc_u_int32 nl_seq_num;
+     uint32_t nl_seq_num;
      
      gssstat = gss_unseal(&minor_stat, context, in_buf, &out_buf,
 			  NULL, NULL);
@@ -124,15 +124,15 @@ bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
 	  AUTH_GSSAPI_DISPLAY_STATUS(("unsealing sequence number",
 				      gssstat, minor_stat)); 
 	  return FALSE;
-     } else if (out_buf.length != sizeof(rpc_u_int32)) {
+     } else if (out_buf.length != sizeof(uint32_t)) {
 	  PRINTF(("gssapi_unseal_seq: unseal gave %d bytes\n",
 		  (int) out_buf.length));
 	  gss_release_buffer(&minor_stat, &out_buf);
 	  return FALSE;
      }
      
-     nl_seq_num = *((rpc_u_int32 *) out_buf.value);
-     *seq_num = (rpc_u_int32) ntohl(nl_seq_num);
+     nl_seq_num = *((uint32_t *) out_buf.value);
+     *seq_num = (uint32_t) ntohl(nl_seq_num);
      gss_release_buffer(&minor_stat, &out_buf);
      
      return TRUE;
@@ -189,7 +189,7 @@ bool_t auth_gssapi_wrap_data(major, minor, context, seq_num, out_xdrs,
 			     xdr_func, xdr_ptr)
    OM_uint32 *major, *minor;
    gss_ctx_id_t context;
-   rpc_u_int32 seq_num;
+   uint32_t seq_num;
    XDR *out_xdrs;
    bool_t (*xdr_func)();
    caddr_t xdr_ptr;
@@ -256,14 +256,14 @@ bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
 			       in_xdrs, xdr_func, xdr_ptr)
    OM_uint32 *major, *minor;
    gss_ctx_id_t context;
-   rpc_u_int32 seq_num;
+   uint32_t seq_num;
    XDR *in_xdrs;
    bool_t (*xdr_func)();
    caddr_t xdr_ptr;
 {
      gss_buffer_desc in_buf, out_buf;
      XDR temp_xdrs;
-     rpc_u_int32 verf_seq_num;
+     uint32_t verf_seq_num;
      int conf, qop;
      unsigned int length;
      
@@ -315,7 +315,7 @@ bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
      if (! (*xdr_func)(&temp_xdrs, xdr_ptr)) {
 	  PRINTF(("gssapi_unwrap_data: deserializing arguments failed\n"));
 	  gss_release_buffer(minor, &out_buf);
-	  gssrpc_xdr_free(xdr_func, xdr_ptr);
+	  xdr_free(xdr_func, xdr_ptr);
 	  XDR_DESTROY(&temp_xdrs);
 	  return FALSE;
      }

@@ -61,9 +61,9 @@ typedef struct _svc_auth_gssapi_data {
      gss_name_t client_name, server_name;
      gss_cred_id_t server_creds;
 
-     rpc_u_int32 expiration;
-     rpc_u_int32 seq_num;
-     rpc_u_int32 key;
+     uint32_t expiration;
+     uint32_t seq_num;
+     uint32_t key;
 
      SVCAUTH svcauth;
 
@@ -83,7 +83,7 @@ static void destroy_client
        (svc_auth_gssapi_data *client_data);
 static void clean_client(void), cleanup(void);
 static void client_expire
-       (svc_auth_gssapi_data *client_data, rpc_u_int32 exp);
+       (svc_auth_gssapi_data *client_data, uint32_t exp);
 static void dump_db (char *msg);
 
 struct svc_auth_ops svc_auth_gssapi_ops = {
@@ -116,7 +116,7 @@ typedef struct _client_list {
 static client_list *clients = NULL;
 
 
-enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
+enum auth_stat gssrpc__svcauth_gssapi(rqst, msg, no_dispatch)
    register struct svc_req *rqst;
    register struct rpc_msg *msg;
    bool_t *no_dispatch;     
@@ -134,7 +134,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      int i;
      enum auth_stat ret;
      OM_uint32 ret_flags;
-     rpc_u_int32 seq_num;
+     uint32_t seq_num;
 
      PRINTF(("svcauth_gssapi: starting\n"));
      
@@ -142,7 +142,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      clean_client();
 
      /* use AUTH_NONE until there is a client_handle */
-     rqst->rq_xprt->xp_auth = &svc_auth_any;
+     rqst->rq_xprt->xp_auth = &svc_auth_none;
      
      memset((char *) &call_res, 0, sizeof(call_res));
      
@@ -162,7 +162,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      if (! xdr_authgssapi_creds(&xdrs, &creds)) {
 	  PRINTF(("svcauth_gssapi: failed decoding creds\n"));
 	  LOG_MISCERR("protocol error in client credentials");
-	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
+	  xdr_free(xdr_authgssapi_creds, &creds);
 	  XDR_DESTROY(&xdrs);
 	  ret = AUTH_BADCRED;
 	  goto error;
@@ -184,7 +184,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 	  if (creds.auth_msg && rqst->rq_proc == AUTH_GSSAPI_EXIT) {
 	       PRINTF(("svcauth_gssapi: GSSAPI_EXIT, cleaning up\n"));
 	       svc_sendreply(rqst->rq_xprt, xdr_void, NULL);
-	       gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
+	       xdr_free(xdr_authgssapi_creds, &creds);
 	       cleanup();
 	       exit(0);
 	  }
@@ -222,7 +222,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 	  }
 	  
 	  PRINTF(("svcauth_gssapi: incoming client_handle %d, len %d\n", 
-		  *((rpc_u_int32 *) creds.client_handle.value),
+		  *((uint32_t *) creds.client_handle.value),
 		  (int) creds.client_handle.length));
 
 	  client_data = get_client(&creds.client_handle);
@@ -404,7 +404,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 	  minor_stat = call_res.gss_minor;
 
 	  /* done with call args */
-	  gssrpc_xdr_free(xdr_authgssapi_init_arg, &call_arg);
+	  xdr_free(xdr_authgssapi_init_arg, &call_arg);
 
 	  PRINTF(("svcauth_gssapi: accept_sec_context returned %#x\n",
 		  call_res.gss_major));
@@ -549,7 +549,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 				      &call_arg)) {
 			 PRINTF(("svcauth_gssapi: cannot decode args\n"));
 			 LOG_MISCERR("protocol error in call arguments");
-			 gssrpc_xdr_free(xdr_authgssapi_init_arg, &call_arg);
+			 xdr_free(xdr_authgssapi_init_arg, &call_arg);
 			 ret = AUTH_BADCRED;
 			 goto error;
 		    }
@@ -560,7 +560,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 							&call_arg.token);
 
 		    /* done with call args */
-		    gssrpc_xdr_free(xdr_authgssapi_init_arg, &call_arg);
+		    xdr_free(xdr_authgssapi_init_arg, &call_arg);
 		    
 		    if (gssstat != GSS_S_COMPLETE) {
 			 AUTH_GSSAPI_DISPLAY_STATUS(("processing token",
@@ -602,7 +602,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
 		  (int) creds.client_handle.length));
-	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
+	  xdr_free(xdr_authgssapi_creds, &creds);
      }
      
      PRINTF(("\n"));
@@ -612,7 +612,7 @@ error:
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
 		  (int) creds.client_handle.length));
-	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
+	  xdr_free(xdr_authgssapi_creds, &creds);
      }
      
      PRINTF(("\n"));
@@ -718,7 +718,7 @@ static svc_auth_gssapi_data *create_client()
  */
 static void client_expire(client_data, exp)
      svc_auth_gssapi_data *client_data;
-     rpc_u_int32 exp;
+     uint32_t exp;
 {
      client_data->expiration = exp;
 }
@@ -743,7 +743,7 @@ static svc_auth_gssapi_data *get_client(client_handle)
      gss_buffer_t client_handle;
 {
      client_list *c;
-     rpc_u_int32 handle;
+     uint32_t handle;
      
      memcpy(&handle, client_handle->value, 4);
      
@@ -885,14 +885,14 @@ static void clean_client()
 }
 
 /*
- * Function: _svcauth_gssapi_set_names
+ * Function: svcauth_gssapi_set_names
  *
  * Purpose: Sets the list of service names for which incoming
  * authentication requests should be honored.
  *
  * See functional specifications.
  */
-bool_t _svcauth_gssapi_set_names(names, num)
+bool_t svcauth_gssapi_set_names(names, num)
      auth_gssapi_name *names;
      int num;
 {
@@ -947,18 +947,18 @@ bool_t _svcauth_gssapi_set_names(names, num)
      return TRUE;
 
 fail:
-     _svcauth_gssapi_unset_names();
+     svcauth_gssapi_unset_names();
 
      return FALSE;
 }
 
-/* Function: _svcauth_gssapi_unset_names
+/* Function: svcauth_gssapi_unset_names
  *
  * Purpose: releases the names and credentials allocated by
- * _svcauth_gssapi_set_names
+ * svcauth_gssapi_set_names
  */
 
-void _svcauth_gssapi_unset_names()
+void svcauth_gssapi_unset_names()
 {
      int i;
      OM_uint32 minor_stat;
@@ -984,14 +984,14 @@ void _svcauth_gssapi_unset_names()
 
 
 /*
- * Function: _svcauth_gssapi_set_log_badauth_func
+ * Function: svcauth_gssapi_set_log_badauth_func
  *
  * Purpose: sets the logging function called when an invalid RPC call
  * arrives
  *
  * See functional specifications.
  */
-void _svcauth_gssapi_set_log_badauth_func
+void svcauth_gssapi_set_log_badauth_func
      (func, data)
      auth_gssapi_log_badauth_func func;
      caddr_t data;
@@ -1001,14 +1001,14 @@ void _svcauth_gssapi_set_log_badauth_func
 }
 
 /*
- * Function: _svcauth_gssapi_set_log_badverf_func
+ * Function: svcauth_gssapi_set_log_badverf_func
  *
  * Purpose: sets the logging function called when an invalid RPC call
  * arrives
  *
  * See functional specifications.
  */
-void _svcauth_gssapi_set_log_badverf_func
+void svcauth_gssapi_set_log_badverf_func
      (func, data)
      auth_gssapi_log_badverf_func func;
      caddr_t data;
@@ -1018,14 +1018,14 @@ void _svcauth_gssapi_set_log_badverf_func
 }
 
 /*
- * Function: _svcauth_gssapi_set_log_miscerr_func
+ * Function: svcauth_gssapi_set_log_miscerr_func
  *
  * Purpose: sets the logging function called when a miscellaneous
  * AUTH_GSSAPI error occurs
  *
  * See functional specifications.
  */
-void _svcauth_gssapi_set_log_miscerr_func
+void svcauth_gssapi_set_log_miscerr_func
      (func, data)
      auth_gssapi_log_miscerr_func func;
      caddr_t data;

@@ -53,15 +53,18 @@ static char sccsid[] = "@(#)svc_auth.c	2.1 88/08/07 4.0 RPCSRC; from 1.19 87/08/
  */
 
 static struct svcauthsw_type {
-     unsigned int flavor;
+     u_int flavor;
      enum auth_stat (*authenticator)(struct svc_req *, struct rpc_msg *,
 				     bool_t *);
 } svcauthsw[] = {
-     {AUTH_GSSAPI, _svcauth_gssapi},		/* AUTH_GSSAPI */
-     {AUTH_NONE, _svcauth_null},		/* AUTH_NULL */
-     {AUTH_GSSAPI_COMPAT, _svcauth_gssapi},	/* AUTH_GSSAPI_COMPAT */
-     {AUTH_UNIX, _svcauth_unix},		/* AUTH_UNIX */
-     {AUTH_SHORT, _svcauth_short},		/* AUTH_SHORT */
+     {AUTH_GSSAPI, gssrpc__svcauth_gssapi},	/* AUTH_GSSAPI */
+     {AUTH_NONE, gssrpc__svcauth_none},		/* AUTH_NONE */
+#if 0
+     {AUTH_GSSAPI_COMPAT, gssrpc__svcauth_gssapi}, /* AUTH_GSSAPI_COMPAT */
+#endif
+     {AUTH_UNIX, gssrpc__svcauth_unix},		/* AUTH_UNIX */
+     {AUTH_SHORT, gssrpc__svcauth_short},	/* AUTH_SHORT */
+     {RPCSEC_GSS, gssrpc__svcauth_gss}		/* RPCSEC_GSS */
 };
 static int svcauthnum = sizeof(svcauthsw) / sizeof(struct svcauthsw_type);
 
@@ -81,7 +84,7 @@ static int svcauthnum = sizeof(svcauthsw) / sizeof(struct svcauthsw_type);
  * rqst->rq_client_cred, the cooked credentials.
  */
 enum auth_stat
-_authenticate(rqst, msg, no_dispatch)
+gssrpc__authenticate(rqst, msg, no_dispatch)
 	register struct svc_req *rqst;
 	struct rpc_msg *msg;
         bool_t *no_dispatch;
@@ -89,7 +92,7 @@ _authenticate(rqst, msg, no_dispatch)
 	register int cred_flavor, i;
 
 	rqst->rq_cred = msg->rm_call.cb_cred;
-	rqst->rq_xprt->xp_verf.oa_flavor = _null_auth.oa_flavor;
+	rqst->rq_xprt->xp_verf.oa_flavor = gssrpc__null_auth.oa_flavor;
 	rqst->rq_xprt->xp_verf.oa_length = 0;
 	cred_flavor = rqst->rq_cred.oa_flavor;
 	*no_dispatch = FALSE;
@@ -103,14 +106,4 @@ _authenticate(rqst, msg, no_dispatch)
 	}
 	
 	return (AUTH_REJECTEDCRED);
-}
-
-enum auth_stat
-_svcauth_null(rqst, msg, no_dispatch)
-   struct svc_req *rqst;
-   struct rpc_msg *msg;
-   bool_t *no_dispatch;
-{
-     rqst->rq_xprt->xp_auth = &svc_auth_any;
-     return (AUTH_OK);
 }

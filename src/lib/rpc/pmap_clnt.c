@@ -46,10 +46,7 @@ static char sccsid[] = "@(#)pmap_clnt.c 1.37 87/08/11 Copyr 1984 Sun Micro";
 static struct timeval timeout = { 5, 0 };
 static struct timeval tottimeout = { 60, 0 };
 
-#define clnt_perror	gssrpc_clnt_perror
 void clnt_perror();
-
-#define get_myaddress	gssrpc_get_myaddress
 
 /*
  * Set a mapping between program,version and port.
@@ -57,10 +54,10 @@ void clnt_perror();
  */
 bool_t
 pmap_set(program, version, protocol, port)
-	rpc_u_int32 program;
-	rpc_u_int32 version;
-	int protocol;
-	int port;
+	rpcprog_t program;
+	rpcvers_t version;
+	rpcprot_t protocol;
+	u_int port;
 {
 	struct sockaddr_in myaddress;
 	int socket = -1;
@@ -93,8 +90,8 @@ pmap_set(program, version, protocol, port)
  */
 bool_t
 pmap_unset(program, version)
-	rpc_u_int32 program;
-	rpc_u_int32 version;
+	rpcprog_t program;
+	rpcvers_t version;
 {
 	struct sockaddr_in myaddress;
 	int socket = -1;

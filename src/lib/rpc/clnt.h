@@ -34,9 +34,10 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#ifndef _CLNT_
-#define _CLNT_
+#ifndef GSSRPC_CLNT_H
+#define GSSRPC_CLNT_H
 
+GSSRPC__BEGIN_DECLS
 /*
  * Rpc calls return an enum clnt_stat.  This should be looked at more,
  * since each implementation is required to live with this (implementation
@@ -90,12 +91,12 @@ struct rpc_err {
 		int RE_errno;		/* realated system error */
 		enum auth_stat RE_why;	/* why the auth error occurred */
 		struct {
-			rpc_u_int32 low;	/* lowest verion supported */
-			rpc_u_int32 high;	/* highest verion supported */
+			rpcvers_t low;	/* lowest verion supported */
+			rpcvers_t high;	/* highest verion supported */
 		} RE_vers;
 		struct {		/* maybe meaningful if RPC_FAILED */
-			rpc_int32 s1;
-			rpc_int32 s2;
+			int32_t s1;
+			int32_t s2;
 		} RE_lb;		/* life boot & debugging only */
 	} ru;
 #define	re_errno	ru.RE_errno
@@ -110,26 +111,27 @@ struct rpc_err {
  * Created by individual implementations, see e.g. rpc_udp.c.
  * Client is responsible for initializing auth, see e.g. auth_none.c.
  */
-typedef struct __rpc_client {
+typedef struct CLIENT {
 	AUTH	*cl_auth;			/* authenticator */
 	struct clnt_ops {
 	        /* call remote procedure */
-	        enum clnt_stat	(*cl_call)(struct __rpc_client *,
-					   rpc_u_int32, xdrproc_t, void *,
+	        enum clnt_stat	(*cl_call)(struct CLIENT *,
+					   rpcproc_t, xdrproc_t, void *,
 					   xdrproc_t, void *, 
 					   struct timeval);	
                 /* abort a call */
-		void		(*cl_abort)(struct __rpc_client *);	
+		void		(*cl_abort)(struct CLIENT *);	
                 /* get specific error code */
-		void		(*cl_geterr)(struct __rpc_client *, 
+		void		(*cl_geterr)(struct CLIENT *, 
 					     struct rpc_err *);	
                 /* frees results */
-		bool_t		(*cl_freeres)(struct __rpc_client *,
+		bool_t		(*cl_freeres)(struct CLIENT *,
 					      xdrproc_t, void *);
                 /* destroy this structure */
-		void		(*cl_destroy)(struct __rpc_client *);
+		void		(*cl_destroy)(struct CLIENT *);
                 /* the ioctl() of rpc */
-		bool_t          (*cl_control)(struct __rpc_client *, int,
+		/* XXX CITI makes 2nd arg take u_int */
+		bool_t          (*cl_control)(struct CLIENT *, int,
 					      void *);
 	} *cl_ops;
 	void			*cl_private;	/* private stuff */
@@ -147,7 +149,7 @@ typedef struct __rpc_client {
  * enum clnt_stat
  * CLNT_CALL(rh, proc, xargs, argsp, xres, resp, timeout)
  * 	CLIENT *rh;
- *	rpc_u_int32 proc;
+ *	rpcproc_t proc;
  *	xdrproc_t xargs;
  *	caddr_t argsp;
  *	xdrproc_t xres;
@@ -190,7 +192,7 @@ typedef struct __rpc_client {
  * bool_t
  * CLNT_CONTROL(cl, request, info)
  *      CLIENT *cl;
- *      unsigned int request;
+ *      u_int request;
  *      char *info;
  */
 #define	CLNT_CONTROL(cl,rq,in) ((*(cl)->cl_ops->cl_control)(cl,rq,in))
@@ -227,16 +229,16 @@ typedef struct __rpc_client {
  * and network administration.
  */
 
-#define RPCTEST_PROGRAM		((rpc_u_int32)1)
-#define RPCTEST_VERSION		((rpc_u_int32)1)
-#define RPCTEST_NULL_PROC	((rpc_u_int32)2)
-#define RPCTEST_NULL_BATCH_PROC	((rpc_u_int32)3)
+#define RPCTEST_PROGRAM		((rpcprog_t)1)
+#define RPCTEST_VERSION		((rpcvers_t)1)
+#define RPCTEST_NULL_PROC	((rpcproc_t)2)
+#define RPCTEST_NULL_BATCH_PROC	((rpcproc_t)3)
 
 /*
  * By convention, procedure 0 takes null arguments and returns them
  */
 
-#define NULLPROC ((rpc_u_int32)0)
+#define NULLPROC ((rpcproc_t)0)
 
 /*
  * Below are the client handle creation routines for the various
@@ -248,20 +250,15 @@ typedef struct __rpc_client {
  * Memory based rpc (for speed check and testing)
  * CLIENT *
  * clntraw_create(prog, vers)
- *	rpc_u_int32 prog;
- *	rpc_u_int32 vers;
+ *	rpcprog_t prog;
+ *	rpcvers_t vers;
  */
-#define clntraw_create	gssrpc_clntraw_create
-extern CLIENT *clntraw_create(rpc_u_int32, rpc_u_int32);
-
+extern CLIENT *clntraw_create(rpcprog_t, rpcvers_t);
 
 /*
  * Generic client creation routine. Supported protocols are "udp" and "tcp"
  */
-#define clnt_create	gssrpc_clnt_create
-extern CLIENT *
-clnt_create(char *, rpc_u_int32, rpc_u_int32, char *);
-
+extern CLIENT *clnt_create(char *, rpcprog_t, rpcvers_t, char *);
 
 
 /*
@@ -269,23 +266,22 @@ clnt_create(char *, rpc_u_int32, rpc_u_int32, char *);
  * CLIENT *
  * clnttcp_create(raddr, prog, vers, sockp, sendsz, recvsz)
  *	struct sockaddr_in *raddr;
- *	rpc_u_int32 prog;
- *	rpc_u_int32 version;
+ *	rpcprog_t prog;
+ *	rpcvers_t version;
  *	register int *sockp;
- *	unsigned int sendsz;
- *	unsigned int recvsz;
+ *	u_int sendsz;
+ *	u_int recvsz;
  */
-#define clnttcp_create	gssrpc_clnttcp_create
-extern CLIENT *clnttcp_create(struct sockaddr_in *, rpc_u_int32, rpc_u_int32,
-			      int *, unsigned int, unsigned int);
+extern CLIENT *clnttcp_create(struct sockaddr_in *, rpcprog_t, rpcvers_t,
+			      int *, u_int, u_int);
 
 /*
  * UDP based rpc.
  * CLIENT *
  * clntudp_create(raddr, program, version, wait, sockp)
  *	struct sockaddr_in *raddr;
- *	rpc_u_int32 program;
- *	rpc_u_int32 version;
+ *	rpcprog_t program;
+ *	rpcvers_t version;
  *	struct timeval wait;
  *	int *sockp;
  *
@@ -293,49 +289,39 @@ extern CLIENT *clnttcp_create(struct sockaddr_in *, rpc_u_int32, rpc_u_int32,
  * CLIENT *
  * clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
  *	struct sockaddr_in *raddr;
- *	rpc_u_int32 program;
- *	rpc_u_int32 version;
+ *	rpcprog_t program;
+ *	rpcvers_t version;
  *	struct timeval wait;
  *	int *sockp;
- *	unsigned int sendsz;
- *	unsigned int recvsz;
+ *	u_int sendsz;
+ *	u_int recvsz;
  */
-#define clntudp_create		gssrpc_clntudp_create
-#define clntudp_bufcreate	gssrpc_clntudp_bufcreate
-extern CLIENT *clntudp_create(struct sockaddr_in *, rpc_u_int32, 
-			      rpc_u_int32, struct timeval, int *);
-extern CLIENT *clntudp_bufcreate(struct sockaddr_in *, rpc_u_int32, 
-				 rpc_u_int32, struct timeval, int *,
-				 unsigned int, unsigned int);
+extern CLIENT *clntudp_create(struct sockaddr_in *, rpcprog_t,
+			      rpcvers_t, struct timeval, int *);
+extern CLIENT *clntudp_bufcreate(struct sockaddr_in *, rpcprog_t,
+				 rpcvers_t, struct timeval, int *,
+				 u_int, u_int);
 
-#define _rpc_dtablesize _gssrpc_rpc_dtablesize
-extern int _rpc_dtablesize(void);
 /*
  * Print why creation failed
  */
-#define clnt_pcreateerror	gssrpc_clnt_pcreateerror
-#define clnt_spcreateerror	gssrpc_clnt_spcreateerror
 void clnt_pcreateerror(char *);	/* stderr */
 char *clnt_spcreateerror(char *);	/* string */
 
 /*
  * Like clnt_perror(), but is more verbose in its output
  */ 
-#define clnt_perrno		gssrpc_clnt_perrno
-void clnt_perrno(enum clnt_stat num);	/* stderr */
+void clnt_perrno(enum clnt_stat);	/* stderr */
 
 /*
  * Print an English error message, given the client error code
  */
-#define clnt_perror		gssrpc_clnt_perror
-#define clnt_sperror		gssrpc_clnt_sperror
 void clnt_perror(CLIENT *, char *); 	/* stderr */
 char *clnt_sperror(CLIENT *, char *);	/* string */
 
 /* 
  * If a creation fails, the following allows the user to figure out why.
  */
-#define rpc_createerr gssrpc_rpc_createrr
 struct rpc_createerr {
 	enum clnt_stat cf_stat;
 	struct rpc_err cf_error; /* useful when cf_stat == RPC_PMAPFAILURE */
@@ -348,10 +334,11 @@ extern struct rpc_createerr rpc_createerr;
 /*
  * Copy error message to buffer.
  */
-#define clnt_sperrno		gssrpc_clnt_sperrno
 char *clnt_sperrno(enum clnt_stat num);	/* string */
 
 #define UDPMSGSIZE	8800	/* rpc imposed limit on udp msg size */
 #define RPCSMALLMSGSIZE	400	/* a more reasonable packet size */
 
-#endif /*!_CLNT_*/
+GSSRPC__END_DECLS
+
+#endif /* !defined(GSSRPC_CLNT_H) */

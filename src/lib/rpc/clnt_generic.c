@@ -47,8 +47,8 @@ static char sccsid[] = "@(#)clnt_generic.c 1.4 87/08/11 (C) 1987 SMI";
 CLIENT *
 clnt_create(hostname, prog, vers, proto)
 	char *hostname;
-	unsigned prog;
-	unsigned vers;
+	rpcprog_t prog;
+	rpcvers_t vers;
 	char *proto;
 {
 	struct hostent *h;

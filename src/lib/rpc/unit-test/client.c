@@ -32,7 +32,7 @@ struct auth_gssapi_data {
 
      /* pre-serialized ah_cred */
      u_char cred_buf[MAX_AUTH_BYTES];
-     rpc_int32 cred_len;
+     int32_t cred_len;
 };
 #define AUTH_PRIVATE(auth) ((struct auth_gssapi_data *)auth->ah_private)
 

@@ -36,8 +36,13 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#define RPC_MSG_VERSION		((rpc_u_int32) 2)
-#define RPC_SERVICE_PORT	((unsigned short) 2048)
+#ifndef GSSRPC_RPC_MSG_H
+#define GSSRPC_RPC_MSG_H
+
+GSSRPC__BEGIN_DECLS
+
+#define RPC_MSG_VERSION		((uint32_t) 2)
+#define RPC_SERVICE_PORT	((u_short) 2048)
 
 /*
  * Bottom up definition of an rpc message.
@@ -83,8 +88,8 @@ struct accepted_reply {
 	enum accept_stat	ar_stat;
 	union {
 		struct {
-			rpc_u_int32	low;
-			rpc_u_int32	high;
+			rpcvers_t	low;
+			rpcvers_t	high;
 		} AR_versions;
 		struct {
 			caddr_t	where;
@@ -103,8 +108,8 @@ struct rejected_reply {
 	enum reject_stat rj_stat;
 	union {
 		struct {
-			rpc_u_int32 low;
-			rpc_u_int32 high;
+			rpcvers_t low;
+			rpcvers_t high;
 		} RJ_versions;
 		enum auth_stat RJ_why;  /* why authentication did not work */
 	} ru;
@@ -129,10 +134,10 @@ struct reply_body {
  * Body of an rpc request call.
  */
 struct call_body {
-	rpc_u_int32 cb_rpcvers;	/* must be equal to two */
-	rpc_u_int32 cb_prog;
-	rpc_u_int32 cb_vers;
-	rpc_u_int32 cb_proc;
+	rpcvers_t cb_rpcvers;	/* must be equal to two */
+	rpcprog_t cb_prog;
+	rpcvers_t cb_vers;
+	rpcproc_t cb_proc;
 	struct opaque_auth cb_cred;
 	struct opaque_auth cb_verf; /* protocol specific - provided by client */
 };
@@ -141,7 +146,7 @@ struct call_body {
  * The rpc message
  */
 struct rpc_msg {
-	rpc_u_int32			rm_xid;
+	uint32_t		rm_xid;
 	enum msg_type		rm_direction;
 	union {
 		struct call_body RM_cmb;
@@ -160,7 +165,6 @@ struct rpc_msg {
  * 	XDR *xdrs;
  * 	struct rpc_msg *cmsg;
  */
-#define xdr_callmsg	gssrpc_xdr_callmsg
 extern bool_t	xdr_callmsg(XDR *, struct rpc_msg *);
 
 /*
@@ -169,7 +173,6 @@ extern bool_t	xdr_callmsg(XDR *, struct rpc_msg *);
  * 	XDR *xdrs;
  * 	struct rpc_msg *cmsg;
  */
-#define xdr_callhdr	gssrpc_xdr_callhdr
 extern bool_t	xdr_callhdr(XDR *, struct rpc_msg *);
 
 /*
@@ -178,7 +181,6 @@ extern bool_t	xdr_callhdr(XDR *, struct rpc_msg *);
  * 	XDR *xdrs;
  * 	struct rpc_msg *rmsg;
  */
-#define xdr_replymsg	gssrpc_xdr_replymsg
 extern bool_t	xdr_replymsg(XDR *, struct rpc_msg *);
 
 /*
@@ -187,15 +189,17 @@ extern bool_t	xdr_replymsg(XDR *, struct rpc_msg *);
  * 	struct rpc_msg *msg;
  * 	struct rpc_err *error;
  */
-#define _seterr_reply	_gssrpc_seterr_reply
-#define sunrpc_seterr_reply	_seterr_reply
-extern void	_seterr_reply(struct rpc_msg *, struct rpc_err *);
+/*
+ * RENAMED: should be _seterr_reply or __seterr_reply if we can use
+ * reserved namespace.
+ */
+extern void	gssrpc__seterr_reply(struct rpc_msg *, struct rpc_err *);
 
 /* XDR the MSG_ACCEPTED part of a reply message union */
-#define xdr_accepted_reply gssrpc_xdr_accepted_reply
 extern bool_t	xdr_accepted_reply(XDR *, struct accepted_reply *);
 
 /* XDR the MSG_DENIED part of a reply message union */
-#define xdr_rejected_reply gssrpc_xdr_rejected_reply
 extern bool_t	xdr_rejected_reply(XDR *, struct rejected_reply *);
+GSSRPC__END_DECLS
 
+#endif /* !defined(GSSRPC_RPC_MSG_H) */

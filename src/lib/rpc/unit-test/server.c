@@ -122,14 +122,14 @@ main(int argc, char **argv)
 	  exit(1);
      }
      
-     if (_svcauth_gssapi_set_names(names, 0) == FALSE) {
+     if (svcauth_gssapi_set_names(names, 0) == FALSE) {
 	  fprintf(stderr, "unable to set gssapi names\n");
 	  exit(1);
      }
 
-     _svcauth_gssapi_set_log_badauth_func(rpc_test_badauth, NULL);
-     _svcauth_gssapi_set_log_badverf_func(rpc_test_badverf, NULL);
-     _svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
+     svcauth_gssapi_set_log_badauth_func(rpc_test_badauth, NULL);
+     svcauth_gssapi_set_log_badverf_func(rpc_test_badverf, NULL);
+     svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
 
 #ifdef POSIX_SIGNALS
      (void) sigemptyset(&sa.sa_mask);

@@ -69,12 +69,12 @@ static SVCXPRT *xports[NOFILE];
  */
 static struct svc_callout {
 	struct svc_callout *sc_next;
-	rpc_u_int32		    sc_prog;
-	rpc_u_int32		    sc_vers;
+	rpcprog_t		    sc_prog;
+	rpcprog_t		    sc_vers;
 	void		    (*sc_dispatch)();
 } *svc_head;
 
-static struct svc_callout *svc_find(rpc_u_int32, rpc_u_int32, 
+static struct svc_callout *svc_find(rpcprog_t, rpcvers_t,
 				    struct svc_callout **);
 
 /* ***************  SVCXPRT related stuff **************** */
@@ -98,7 +98,7 @@ xprt_register(xprt)
 			mem_alloc(FD_SETSIZE * sizeof(SVCXPRT *));
 		memset(xports, 0, FD_SETSIZE * sizeof(SVCXPRT *));
 	}
-	if (sock < _gssrpc_rpc_dtablesize()) {
+	if (sock < gssrpc__rpc_dtablesize()) {
 		xports[sock] = xprt;
 		FD_SET(sock, &svc_fdset);
 		if (max_xport < sock)
@@ -123,7 +123,7 @@ xprt_unregister(xprt)
 	register int sock = xprt->xp_sock;
 
 #ifdef FD_SETSIZE
-	if ((sock < _gssrpc_rpc_dtablesize()) && (xports[sock] == xprt)) {
+	if ((sock < gssrpc__rpc_dtablesize()) && (xports[sock] == xprt)) {
 		xports[sock] = (SVCXPRT *)0;
 		FD_CLR(sock, &svc_fdset);
 		if (max_xport <= sock) {
@@ -150,8 +150,8 @@ xprt_unregister(xprt)
 bool_t
 svc_register(xprt, prog, vers, dispatch, protocol)
 	SVCXPRT *xprt;
-	rpc_u_int32 prog;
-	rpc_u_int32 vers;
+	rpcprog_t prog;
+	rpcvers_t vers;
 	void (*dispatch)();
 	int protocol;
 {
@@ -185,8 +185,8 @@ pmap_it:
  */
 void
 svc_unregister(prog, vers)
-	rpc_u_int32 prog;
-	rpc_u_int32 vers;
+	rpcprog_t prog;
+	rpcvers_t vers;
 {
 	struct svc_callout *prev;
 	register struct svc_callout *s;
@@ -199,7 +199,7 @@ svc_unregister(prog, vers)
 		prev->sc_next = s->sc_next;
 	}
 	s->sc_next = NULL_SVC;
-	mem_free((char *) s, (unsigned int) sizeof(struct svc_callout));
+	mem_free((char *) s, (u_int) sizeof(struct svc_callout));
 	/* now unregister the information with the local binder service */
 	(void)pmap_unset(prog, vers);
 }
@@ -210,8 +210,8 @@ svc_unregister(prog, vers)
  */
 static struct svc_callout *
 svc_find(prog, vers, prev)
-	rpc_u_int32 prog;
-	rpc_u_int32 vers;
+	rpcprog_t prog;
+	rpcvers_t vers;
 	struct svc_callout **prev;
 {
 	register struct svc_callout *s, *p;
@@ -347,8 +347,8 @@ svcerr_noprog(xprt)
 void  
 svcerr_progvers(xprt, low_vers, high_vers)
 	register SVCXPRT *xprt; 
-	rpc_u_int32 low_vers;
-	rpc_u_int32 high_vers;
+	rpcvers_t low_vers;
+	rpcvers_t high_vers;
 {
 	struct rpc_msg rply;
 
@@ -414,8 +414,8 @@ svc_getreqset(readfds)
 	enum xprt_stat stat;
 	struct rpc_msg msg;
 	int prog_found;
-	rpc_u_int32 low_vers;
-	rpc_u_int32 high_vers;
+	rpcvers_t low_vers;
+	rpcvers_t high_vers;
 	struct svc_req r;
 	register SVCXPRT *xprt;
 	register int sock;
@@ -453,11 +453,11 @@ svc_getreqset(readfds)
 
 				/* in case _authenticate has been replaced
 				   with an old-style version */
-				r.rq_xprt->xp_auth = &svc_auth_any;
+				r.rq_xprt->xp_auth = &svc_auth_none;
 				no_dispatch = FALSE;
 
 				/* first authenticate the message */
-				why=_authenticate(&r, &msg, &no_dispatch);
+				why=gssrpc__authenticate(&r, &msg, &no_dispatch);
 				if (why != AUTH_OK) {
 				     svcerr_auth(xprt, why);
 				     goto call_done;
@@ -467,7 +467,7 @@ svc_getreqset(readfds)
 					
 				/* now match message with a registered service*/
 				prog_found = FALSE;
-				low_vers = (rpc_u_int32) -1L;
+				low_vers = (rpcvers_t) -1L;
 				high_vers = 0;
 				for (s = svc_head; s != NULL_SVC; s = s->sc_next) {
 					if (s->sc_prog == r.rq_prog) {

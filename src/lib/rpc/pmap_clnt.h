@@ -35,6 +35,9 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
+#ifndef GSSRPC_PMAP_CLNT_H
+#define GSSRPC_PMAP_CLNT_H
+
 /*
  * Usage:
  *	success = pmap_set(program, version, protocol, port);
@@ -57,27 +60,22 @@
  *		address if the responder to the broadcast.
  */
 
-#define pmap_set	gssrpc_pmap_set
-#define pmap_unset	gssrpc_pmap_unset
-#define pmap_getmaps	gssrpc_pmap_getmaps
-#define pmap_rmtcall	gssrpc_pmap_rmtcall
-#define clnt_broadcast	gssrpc_clnt_broadcast
-#define pmap_getport	gssrpc_pmap_getport
-
-extern bool_t		pmap_set(rpc_u_int32, rpc_u_int32, int, 
-				 int);
-extern bool_t		pmap_unset(rpc_u_int32, rpc_u_int32);
+GSSRPC__BEGIN_DECLS
+extern bool_t		pmap_set(rpcprog_t, rpcvers_t, rpcprot_t, u_int);
+extern bool_t		pmap_unset(rpcprog_t, rpcvers_t);
 extern struct pmaplist	*pmap_getmaps(struct sockaddr_in *);
-enum clnt_stat		pmap_rmtcall(struct sockaddr_in *, rpc_u_int32, 
-				     rpc_u_int32, rpc_u_int32, xdrproc_t, 
+enum clnt_stat		pmap_rmtcall(struct sockaddr_in *, rpcprog_t, 
+				     rpcvers_t, rpcproc_t, xdrproc_t, 
 				     caddr_t, xdrproc_t, caddr_t, 
-				     struct timeval, rpc_u_int32 *);
+				     struct timeval, rpcport_t *);
 
 typedef bool_t (*resultproc_t)(caddr_t, struct sockaddr_in *);
 
-enum clnt_stat		clnt_broadcast(rpc_u_int32, rpc_u_int32, rpc_u_int32,
+enum clnt_stat		clnt_broadcast(rpcprog_t, rpcvers_t, rpcproc_t,
 				       xdrproc_t, caddr_t, xdrproc_t,
 				       caddr_t, resultproc_t);
-extern unsigned short		pmap_getport(struct sockaddr_in *, 
-					     rpc_u_int32, 
-					     rpc_u_int32, rpc_u_int32);
+extern u_short		pmap_getport(struct sockaddr_in *, 
+				     rpcprog_t, 
+				     rpcvers_t, rpcprot_t);
+GSSRPC__END_DECLS
+#endif /* !defined(GSSRPC_PMAP_CLNT_H) */

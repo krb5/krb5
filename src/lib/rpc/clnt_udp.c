@@ -47,6 +47,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
 #endif
 #include <netdb.h>
 #include <errno.h>
+#include <string.h>
 #include <gssrpc/pmap_clnt.h>
 #include <errno.h>
 
@@ -54,7 +55,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
 /*
  * UDP bases client side rpc operations
  */
-static enum clnt_stat	clntudp_call(CLIENT *, rpc_u_int32, xdrproc_t, void *,
+static enum clnt_stat	clntudp_call(CLIENT *, rpcproc_t, xdrproc_t, void *,
 				     xdrproc_t, void *, struct timeval);
 static void		clntudp_abort(CLIENT *);
 static void		clntudp_geterr(CLIENT *, struct rpc_err *);
@@ -85,10 +86,10 @@ struct cu_data {
 	struct timeval     cu_total;
 	struct rpc_err	   cu_error;
 	XDR		   cu_outxdrs;
-	unsigned int		   cu_xdrpos;
-	unsigned int		   cu_sendsz;
+	u_int		   cu_xdrpos;
+	u_int		   cu_sendsz;
 	char		   *cu_outbuf;
-	unsigned int		   cu_recvsz;
+	u_int		   cu_recvsz;
 	char		   cu_inbuf[1];
 };
 
@@ -111,12 +112,12 @@ struct cu_data {
 CLIENT *
 clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 	struct sockaddr_in *raddr;
-	rpc_u_int32 program;
-	rpc_u_int32 version;
+	rpcprog_t program;
+	rpcvers_t version;
 	struct timeval wait;
 	register int *sockp;
-	unsigned int sendsz;
-	unsigned int recvsz;
+	u_int sendsz;
+	u_int recvsz;
 {
 	CLIENT *cl;
 	register struct cu_data *cu = 0;
@@ -143,7 +144,7 @@ clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 
 	(void)gettimeofday(&now, (struct timezone *)0);
 	if (raddr->sin_port == 0) {
-		unsigned short port;
+		u_short port;
 		if ((port =
 		    pmap_getport(raddr, program, version, IPPROTO_UDP)) == 0) {
 			goto fooy;
@@ -180,7 +181,7 @@ clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 			goto fooy;
 		}
 		/* attempt to bind to prov port */
-		(void)gssrpc_bindresvport(*sockp, (struct sockaddr_in *)0);
+		(void)bindresvport(*sockp, (struct sockaddr_in *)0);
 		/* the sockets rpc controls are non-blocking */
 		(void)ioctl(*sockp, FIONBIO, (char *) &dontblock);
 		cu->cu_closeit = TRUE;
@@ -207,8 +208,8 @@ fooy:
 CLIENT *
 clntudp_create(raddr, program, version, wait, sockp)
 	struct sockaddr_in *raddr;
-	rpc_u_int32 program;
-	rpc_u_int32 version;
+	rpcprog_t program;
+	rpcvers_t version;
 	struct timeval wait;
 	register int *sockp;
 {
@@ -220,7 +221,7 @@ clntudp_create(raddr, program, version, wait, sockp)
 static enum clnt_stat 
 clntudp_call(cl, proc, xargs, argsp, xresults, resultsp, utimeout)
 	register CLIENT	*cl;		/* client handle */
-	rpc_u_int32		proc;		/* procedure number */
+	rpcproc_t	proc;		/* procedure number */
 	xdrproc_t	xargs;		/* xdr routine for args */
 	void *		argsp;		/* pointer to args */
 	xdrproc_t	xresults;	/* xdr routine for results */
@@ -263,7 +264,7 @@ call_again:
 	/*
 	 * the transaction is the first thing in the out buffer
 	 */
-	(*(rpc_u_int32 *)(void *)(cu->cu_outbuf))++;
+	(*(uint32_t *)(void *)(cu->cu_outbuf))++;
 	if ((! XDR_PUTLONG(xdrs, &procl)) ||
 	    (! AUTH_MARSHALL(cl->cl_auth, xdrs)) ||
 	    (! AUTH_WRAP(cl->cl_auth, xdrs, xargs, argsp)))
@@ -287,7 +288,7 @@ send_again:
 	 * some clock time to spare while the packets are in flight.
 	 * (We assume that this is actually only executed once.)
 	 */
-	reply_msg.acpted_rply.ar_verf = _null_auth;
+	reply_msg.acpted_rply.ar_verf = gssrpc__null_auth;
 	reply_msg.acpted_rply.ar_results.where = NULL;
 	reply_msg.acpted_rply.ar_results.proc = xdr_void;
 #ifdef FD_SETSIZE
@@ -299,7 +300,7 @@ send_again:
 	for (;;) {
 		readfds = mask;
 		seltimeout = cu->cu_wait;
-		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
+		switch (select(gssrpc__rpc_dtablesize(), &readfds, (fd_set *)NULL, 
 			       (fd_set *)NULL, &seltimeout)) {
 
 		case 0:
@@ -337,11 +338,11 @@ send_again:
 			cu->cu_error.re_errno = errno;
 			return (cu->cu_error.re_status = RPC_CANTRECV);
 		}
-		if (inlen < sizeof(rpc_u_int32))
+		if (inlen < sizeof(uint32_t))
 			continue;	
 		/* see if reply transaction id matches sent id */
-		if (*((rpc_u_int32 *)(void *)(cu->cu_inbuf)) != 
-		    *((rpc_u_int32 *)(void *)(cu->cu_outbuf)))
+		if (*((uint32_t *)(void *)(cu->cu_inbuf)) != 
+		    *((uint32_t *)(void *)(cu->cu_outbuf)))
 			continue;	
 		/* we now assume we have the proper reply */
 		break;
@@ -350,11 +351,11 @@ send_again:
 	/*
 	 * now decode and validate the response
 	 */
-	xdrmem_create(&reply_xdrs, cu->cu_inbuf, (unsigned int)inlen, XDR_DECODE);
+	xdrmem_create(&reply_xdrs, cu->cu_inbuf, (u_int)inlen, XDR_DECODE);
 	ok = xdr_replymsg(&reply_xdrs, &reply_msg);
 	/* XDR_DESTROY(&reply_xdrs);  save a few cycles on noop destroy */
 	if (ok) {
-		sunrpc_seterr_reply(&reply_msg, &(cu->cu_error));
+		gssrpc__seterr_reply(&reply_msg, &(cu->cu_error));
 		if (cu->cu_error.re_status == RPC_SUCCESS) {
 			if (! AUTH_VALIDATE(cl->cl_auth,
 				&reply_msg.acpted_rply.ar_verf)) {
@@ -378,7 +379,7 @@ send_again:
 		if ((reply_msg.rm_reply.rp_stat == MSG_ACCEPTED) &&
 		    (reply_msg.acpted_rply.ar_verf.oa_base != NULL)) {
 		    xdrs->x_op = XDR_FREE;
-		    (void)gssrpc_xdr_opaque_auth(xdrs,
+		    (void)xdr_opaque_auth(xdrs,
 					  &(reply_msg.acpted_rply.ar_verf));
 		} 
 	}  /* end of valid reply message */

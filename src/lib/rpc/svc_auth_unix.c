@@ -50,7 +50,7 @@ static char sccsid[] = "@(#)svc_auth_unix.c 1.28 88/02/08 Copyr 1984 Sun Micro";
  * Unix longhand authenticator
  */
 enum auth_stat
-_gssrpc_svcauth_unix(rqst, msg, dispatch)
+gssrpc__svcauth_unix(rqst, msg, dispatch)
 	register struct svc_req *rqst;
 	register struct rpc_msg *msg;
 	bool_t *dispatch;
@@ -58,25 +58,25 @@ _gssrpc_svcauth_unix(rqst, msg, dispatch)
 	register enum auth_stat stat;
 	XDR xdrs;
 	register struct authunix_parms *aup;
-	register rpc_int32 *buf;
+	register rpc_inline_t *buf;
 	struct area {
 		struct authunix_parms area_aup;
 		char area_machname[MAX_MACHINE_NAME+1];
 		int area_gids[NGRPS];
 	} *area;
-	unsigned int auth_len;
+	u_int auth_len;
 	int str_len, gid_len;
 	register int i;
 
-	rqst->rq_xprt->xp_auth = &svc_auth_any;
+	rqst->rq_xprt->xp_auth = &svc_auth_none;
 	
 	area = (struct area *) rqst->rq_clntcred;
 	aup = &area->area_aup;
 	aup->aup_machname = area->area_machname;
 	aup->aup_gids = area->area_gids;
-	auth_len = (unsigned int)msg->rm_call.cb_cred.oa_length;
+	auth_len = (u_int)msg->rm_call.cb_cred.oa_length;
 	xdrmem_create(&xdrs, msg->rm_call.cb_cred.oa_base, auth_len,XDR_DECODE);
-	buf = (rpc_int32 *) XDR_INLINE(&xdrs, auth_len);
+	buf = XDR_INLINE(&xdrs, auth_len);
 	if (buf != NULL) {
 		aup->aup_time = IXDR_GET_LONG(buf);
 		str_len = IXDR_GET_U_LONG(buf);
@@ -84,10 +84,10 @@ _gssrpc_svcauth_unix(rqst, msg, dispatch)
 			stat = AUTH_BADCRED;
 			goto done;
 		}
-		memmove(aup->aup_machname, (caddr_t)buf, (unsigned int)str_len);
+		memmove(aup->aup_machname, (caddr_t)buf, (u_int)str_len);
 		aup->aup_machname[str_len] = 0;
 		str_len = RNDUP(str_len);
-		buf += str_len / sizeof (rpc_int32);
+		buf += str_len / BYTES_PER_XDR_UNIT;
 		aup->aup_uid = IXDR_GET_LONG(buf);
 		aup->aup_gid = IXDR_GET_LONG(buf);
 		gid_len = IXDR_GET_U_LONG(buf);
@@ -130,11 +130,11 @@ done:
  */
 /*ARGSUSED*/
 enum auth_stat 
-_gssrpc_svcauth_short(rqst, msg, dispatch)
+gssrpc__svcauth_short(rqst, msg, dispatch)
 	struct svc_req *rqst;
 	struct rpc_msg *msg;
 	bool_t *dispatch;
 {
-	rqst->rq_xprt->xp_auth = &svc_auth_any;
+	rqst->rq_xprt->xp_auth = &svc_auth_none;
 	return (AUTH_REJECTEDCRED);
 }

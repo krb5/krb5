@@ -34,6 +34,6 @@ krb5_error_code process_chpw_request(krb5_context context,
 				     struct sockaddr_in *sockin, 
 				     krb5_data *req, krb5_data *rep);
 
-#ifdef __SVC_HEADER__
+#ifdef SVC_GETARGS
 void  kadm_1(struct svc_req *, SVCXPRT *);
 #endif

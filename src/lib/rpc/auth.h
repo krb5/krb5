@@ -37,9 +37,12 @@
  * is required to pass a AUTH * to routines that create rpc
  * "sessions".
  */
-
+#ifndef GSSRPC_AUTH_H
+#define GSSRPC_AUTH_H
 
 #include <gssrpc/xdr.h>
+
+GSSRPC__BEGIN_DECLS
 
 #define MAX_AUTH_BYTES	400
 #define MAXNETNAMELEN	255	/* maximum length of network user's name */
@@ -61,21 +64,25 @@ enum auth_stat {
 	 * failed locally
 	*/
 	AUTH_INVALIDRESP=6,		/* bogus response verifier */
-	AUTH_FAILED=7			/* some unknown reason */
+	AUTH_FAILED=7,			/* some unknown reason */
+	/*
+	 * RPCSEC_GSS errors
+	 */
+	RPCSEC_GSS_CREDPROBLEM = 13,
+	RPCSEC_GSS_CTXPROBLEM = 14
 };
 
 union des_block {
 #if 0 /* XXX nothing uses this, anyway */
 	struct {
-		rpc_u_int32 high;
-		rpc_u_int32 low;
+		uint32_t high;
+		uint32_t low;
 	} key;
 #endif
 	char c[8];
 };
 typedef union des_block des_block;
-#define xdr_des_block	gssrpc_xdr_des_block
-extern bool_t xdr_des_block(XDR *, des_block *);
+extern bool_t	xdr_des_block(XDR *, des_block *);
 
 /*
  * Authentication info.  Opaque to client.
@@ -83,7 +90,7 @@ extern bool_t xdr_des_block(XDR *, des_block *);
 struct opaque_auth {
 	enum_t	oa_flavor;		/* flavor of auth */
 	caddr_t	oa_base;		/* address of more auth stuff */
-	unsigned int	oa_length;		/* not to exceed MAX_AUTH_BYTES */
+	u_int	oa_length;		/* not to exceed MAX_AUTH_BYTES */
 };
 
 
@@ -92,26 +99,26 @@ struct opaque_auth {
  */
 struct rpc_msg;
 
-typedef struct __rpc_auth {
+typedef struct AUTH {
 	struct	opaque_auth	ah_cred;
 	struct	opaque_auth	ah_verf;
 	union	des_block	ah_key;
 	struct auth_ops {
-		void	(*ah_nextverf)(struct __rpc_auth *);
+		void	(*ah_nextverf)(struct AUTH *);
 	        /* nextverf & serialize */
-		int	(*ah_marshal)(struct __rpc_auth *, XDR *);
+		int	(*ah_marshal)(struct AUTH *, XDR *);
 	        /* validate varifier */
-		int	(*ah_validate)(struct __rpc_auth *,
+		int	(*ah_validate)(struct AUTH *,
 				       struct opaque_auth *);
 	        /* refresh credentials */
-		int	(*ah_refresh)(struct __rpc_auth *, struct rpc_msg *);
+		int	(*ah_refresh)(struct AUTH *, struct rpc_msg *);
 	        /* destroy this structure */
-		void	(*ah_destroy)(struct __rpc_auth *);
+		void	(*ah_destroy)(struct AUTH *);
 		/* encode data for wire */
-		int     (*ah_wrap)(struct __rpc_auth *, XDR *, 
+		int     (*ah_wrap)(struct AUTH *, XDR *, 
 				   xdrproc_t, caddr_t);
 	        /* decode data from wire */
-  	        int	(*ah_unwrap)(struct __rpc_auth *, XDR *, 
+  	        int	(*ah_unwrap)(struct AUTH *, XDR *, 
 				     xdrproc_t, caddr_t);	
 	} *ah_ops;
 	void *ah_private;
@@ -149,13 +156,13 @@ typedef struct __rpc_auth {
 #define AUTH_WRAP(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_wrap))(auth, xdrs, \
 					      xfunc, xwhere))
-#define AUTH_wrap(auth, xdrs, xfunc, xwhere)		\
+#define auth_wrap(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_wrap))(auth, xdrs, \
 					      xfunc, xwhere))
 #define AUTH_UNWRAP(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_unwrap))(auth, xdrs, \
 					      xfunc, xwhere))
-#define AUTH_unwrap(auth, xdrs, xfunc, xwhere)		\
+#define auth_unwrap(auth, xdrs, xfunc, xwhere)		\
 		((*((auth)->ah_ops->ah_unwrap))(auth, xdrs, \
 					      xfunc, xwhere))
 
@@ -165,24 +172,14 @@ typedef struct __rpc_auth {
 		((*((auth)->ah_ops->ah_destroy))(auth))
 
 
-#define _null_auth	_gssrpc_null_auth
-extern struct opaque_auth _null_auth;
+/* RENAMED: should be _null_auth if we can use reserved namespace. */
+extern struct opaque_auth gssrpc__null_auth;
 
 
 /*
  * These are the various implementations of client side authenticators.
  */
 
-/*
- * Any style authentication.  These routines can be used by any
- * authentication style that does not use the wrap/unwrap functions.
- */
-
-#define authany_wrap	gssrpc_authany_wrap
-#define authany_unwrap	gssrpc_authany_unwrap
-
-int authany_wrap(AUTH *, XDR *, xdrproc_t, caddr_t), authany_unwrap();
-	
 /*
  * Unix style authentication
  * AUTH *authunix_create(machname, uid, gid, len, aup_gids)
@@ -192,21 +189,12 @@ int authany_wrap(AUTH *, XDR *, xdrproc_t, caddr_t), authany_unwrap();
  *	int len;
  *	int *aup_gids;
  */
-#define authunix_create		gssrpc_authunix_create
-#define authunix_create_default	gssrpc_authunix_create_default
-#define authnone_create		gssrpc_authnone_create
-#define authdes_create		gssrpc_authdes_create
-
 extern AUTH *authunix_create(char *machname, int uid, int gid, int len,
 			     int *aup_gids);
 extern AUTH *authunix_create_default(void);	/* takes no parameters */
 extern AUTH *authnone_create(void);		/* takes no parameters */
 extern AUTH *authdes_create();
-
-/*
- * GSS-API style authentication:
- * see <rpc/auth_gssapi.h>
- */
+extern bool_t xdr_opaque_auth(XDR *, struct opaque_auth *);
 
 #define AUTH_NONE	0		/* no authentication */
 #define	AUTH_NULL	0		/* backward compatibility */
@@ -214,16 +202,17 @@ extern AUTH *authdes_create();
 #define	AUTH_SHORT	2		/* short hand unix style */
 #define AUTH_DES	3		/* des style (encrypted timestamps) */
 #define AUTH_GSSAPI	300001		/* GSS-API style */
+#define RPCSEC_GSS	6		/* RPCSEC_GSS */
 
+#if 0
 /*
  * BACKWARDS COMPATIBILIY!  OpenV*Secure 1.0 had AUTH_GSSAPI == 4.  We
  * need to accept this value until 1.0 is dead.
  */
+/* This conflicts with AUTH_KERB (Solaris). */
 #define AUTH_GSSAPI_COMPAT		4
+#endif
 
-/*
- * XDR an opaque authentication struct.
- */
-#define xdr_opaque_auth	   gssrpc_xdr_opaque_auth
+GSSRPC__END_DECLS
 
-extern bool_t xdr_opaque_auth (XDR *, struct opaque_auth *);
+#endif /* !defined(GSSRPC_AUTH_H) */

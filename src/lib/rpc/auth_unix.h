@@ -35,6 +35,10 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
+#ifndef GSSRPC_AUTH_UNIX_H
+#define GSSRPC_AUTH_UNIX_H
+
+GSSRPC__BEGIN_DECLS
 /*
  * The system is very weak.  The client uses no encryption for  it
  * credentials and only sends null verifiers.  The server sends backs
@@ -52,15 +56,14 @@
  * Unix style credentials.
  */
 struct authunix_parms {
-	rpc_u_int32	 aup_time;
+	uint32_t	 aup_time;
 	char	*aup_machname;
 	int	 aup_uid;
 	int	 aup_gid;
-	unsigned int	 aup_len;
+	u_int	 aup_len;
 	int	*aup_gids;
 };
 
-#define xdr_authunix_parms	gssrpc_xdr_authunix_parms
 extern bool_t xdr_authunix_parms(XDR *, struct authunix_parms *);
 
 /* 
@@ -71,3 +74,7 @@ extern bool_t xdr_authunix_parms(XDR *, struct authunix_parms *);
 struct short_hand_verf {
 	struct opaque_auth new_cred;
 };
+
+GSSRPC__END_DECLS
+
+#endif /* !defined(GSSRPC_AUTH_UNIX_H) */
