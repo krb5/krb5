@@ -167,3 +167,12 @@ in_tkt(pname,pinst)
     return(KSUCCESS);
 #endif /* TKT_SHMEM */
 }
+
+KRB5_DLLIMP int KRB5_CALLCONV
+krb_in_tkt(pname, pinst, prealm)
+    char *pname;
+    char *pinst;
+    char *prealm;
+{
+    return in_tkt(pname, pinst);
+}

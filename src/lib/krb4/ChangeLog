@@ -1,3 +1,10 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* in_tkt.c: Add krb_in_tkt() function to initialize ticket for a
+	given principal.  It is like in_tkt() but it is public and also
+	takes a realm for credentials caches that require a full
+	principal name (e.g., CCAPI).
+
 2000-07-03  Tom Yu  <tlyu@mit.edu>
 
 	* cr_tkt.c: Frob prototypes so they don't involve narrow types.
