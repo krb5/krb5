@@ -1,3 +1,13 @@
+2003-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (getaddrinfo) [_AIX]: Always overwrite sa_family
+	and sa_len fields, since sa_family at least may be non-zero *and*
+	wrong.
+	(protoname, socktypename, familyname, debug_dump_getaddrinfo_args,
+	debug_dump_error, debug_dump_error, debug_dump_addrinfos)
+	[DEBUG_ADDRINFO]: New debugging functions.
+	(fake_getaddrinfo, getaddrinfo) [DEBUG_ADDRINFO]: Use them.
+
 2003-01-08  Ezra Peisach  <epeisach@bu.edu>
 
 	* fake-addrinfo.h (freeaddrinfo): Back out 1/3/03 change. ANSI

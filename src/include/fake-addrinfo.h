@@ -365,6 +365,112 @@ struct addrinfo {
 
 #endif /* ! HAVE_GETADDRINFO */
 
+#if (!defined (HAVE_GETADDRINFO) || defined (WRAP_GETADDRINFO)) && defined(DEBUG_ADDRINFO)
+/* Some debug routines.  */
+
+static const char *protoname (int p) {
+    static char buf[30];
+
+#define X(N) if (p == IPPROTO_ ## N) return #N
+
+    X(TCP);
+    X(UDP);
+    X(ICMP);
+    X(IPV6);
+#ifdef IPPROTO_GRE
+    X(GRE);
+#endif
+    X(NONE);
+    X(RAW);
+#ifdef IPPROTO_COMP
+    X(COMP);
+#endif
+
+    sprintf(buf, " %-2d", p);
+    return buf;
+}	
+
+static const char *socktypename (int t) {
+    static char buf[30];
+    switch (t) {
+    case SOCK_DGRAM: return "DGRAM";
+    case SOCK_STREAM: return "STREAM";
+    case SOCK_RAW: return "RAW";
+    case SOCK_RDM: return "RDM";
+    case SOCK_SEQPACKET: return "SEQPACKET";
+    }
+    sprintf(buf, " %-2d", t);
+    return buf;
+}
+
+static const char *familyname (int f) {
+    static char buf[30];
+    switch (f) {
+    default:
+	sprintf(buf, "AF %d", f);
+	return buf;
+    case AF_INET: return "AF_INET";
+    case AF_INET6: return "AF_INET6";
+#ifdef AF_UNIX
+    case AF_UNIX: return "AF_UNIX";
+#endif
+    }
+}
+
+static void debug_dump_getaddrinfo_args (const char *name, const char *serv,
+					 const struct addrinfo *hint)
+{
+    const char *sep;
+    fprintf(stderr,
+	    "getaddrinfo(hostname %s, service %s,\n"
+	    "            hints { ",
+	    name ? name : "(null)", serv ? serv : "(null)");
+    if (hint) {
+	sep = "";
+#define Z(FLAG) if (hint->ai_flags & AI_##FLAG) fprintf(stderr, "%s%s", sep, #FLAG), sep = "|"
+	Z(CANONNAME);
+	Z(PASSIVE);
+#ifdef AI_NUMERICHOST
+	Z(NUMERICHOST);
+#endif
+	if (sep[0] == 0)
+	    fprintf(stderr, "no-flags");
+	if (hint->ai_family)
+	    fprintf(stderr, " %s", familyname(hint->ai_family));
+	if (hint->ai_socktype)
+	    fprintf(stderr, " SOCK_%s", socktypename(hint->ai_socktype));
+	if (hint->ai_protocol)
+	    fprintf(stderr, " IPPROTO_%s", protoname(hint->ai_protocol));
+    } else
+	fprintf(stderr, "(null)");
+    fprintf(stderr, " }):\n");
+}
+
+static void debug_dump_error (int err)
+{
+    fprintf(stderr, "error %d: %s\n", err, gai_strerror(err));
+}
+
+static void debug_dump_addrinfos (const struct addrinfo *ai)
+{
+    int count = 0;
+    fprintf(stderr, "addrinfos returned:\n");
+    while (ai) {
+	fprintf(stderr, "%p...", ai);
+	fprintf(stderr, " socktype=%s", socktypename(ai->ai_socktype));
+	fprintf(stderr, " ai_family=%s", familyname(ai->ai_family));
+	if (ai->ai_family != ai->ai_addr->sa_family)
+	    fprintf(stderr, " sa_family=%s",
+		    familyname(ai->ai_addr->sa_family));
+	fprintf(stderr, "\n");
+	ai = ai->ai_next;
+	count++;
+    }
+    fprintf(stderr, "end addrinfos returned (%d)\n");
+}
+
+#endif
+
 #if !defined (HAVE_GETADDRINFO) || defined (WRAP_GETADDRINFO)
 
 static
@@ -505,6 +611,10 @@ fake_getaddrinfo (const char *name, const char *serv,
     int port = 0, socktype;
     int flags;
     struct addrinfo template;
+
+#ifdef DEBUG_ADDRINFO
+    debug_dump_getaddrinfo_args(name, serv, hint);
+#endif
 
     if (hint != 0) {
 	if (hint->ai_family != 0 && hint->ai_family != AF_INET)
@@ -774,12 +884,17 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 #if defined(_AIX) || defined(COPY_FIRST_CANONNAME)
     struct addrinfo *ai;
 #endif
-
 #ifdef NUMERIC_SERVICE_BROKEN
     int service_is_numeric = 0;
     int service_port = 0;
     int socket_type = 0;
+#endif
 
+#ifdef DEBUG_ADDRINFO
+    debug_dump_getaddrinfo_args(name, serv, hint);
+#endif
+
+#ifdef NUMERIC_SERVICE_BROKEN
     /* AIX 4.3.3 is broken.  (Or perhaps out of date?)
 
        If a numeric service is provided, and it doesn't correspond to
@@ -803,8 +918,12 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 #endif
 
     aierr = (*gaiptr) (name, serv, hint, result);
-    if (aierr || *result == 0)
+    if (aierr || *result == 0) {
+#ifdef DEBUG_ADDRINFO
+	debug_dump_error(aierr);
+#endif
 	return aierr;
+    }
 
     /* Linux libc version 6 (libc-2.2.4.so on Debian) is broken.
 
@@ -893,6 +1012,9 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 	if (name2 != 0 && ai->ai_canonname == 0) {
 	    (*faiptr)(ai);
 	    *result = 0;
+#ifdef DEBUG_ADDRINFO
+	    debug_dump_error(EAI_MEMORY);
+#endif
 	    return EAI_MEMORY;
 	}
     }
@@ -916,12 +1038,13 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 #ifdef _AIX
     for (ai = *result; ai; ai = ai->ai_next) {
 	/* AIX 4.3.3 libc is broken.  It doesn't set the family or len
-	   fields of the sockaddr structures.  */
-	if (ai->ai_addr->sa_family == 0)
-	    ai->ai_addr->sa_family = ai->ai_family;
+	   fields of the sockaddr structures.  Usually, sa_family is
+	   zero, but I've seen it set to 1 in some cases also (maybe
+	   just leftover from previous contents of the memory
+	   block?).  So, always override what libc returned.  */
+	ai->ai_addr->sa_family = ai->ai_family;
 #ifdef HAVE_SA_LEN /* always true on AIX, actually */
-	if (ai->ai_addr->sa_len == 0)
-	    ai->ai_addr->sa_len = ai->ai_addrlen;
+	ai->ai_addr->sa_len = ai->ai_addrlen;
 #endif
     }
 #endif
@@ -931,6 +1054,10 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        - Some versions of GNU libc can lose some IPv4 addresses in
 	 certain cases when multiple IPv4 and IPv6 addresses are
 	 available.  */
+
+#ifdef DEBUG_ADDRINFO
+    debug_dump_addrinfos(*result);
+#endif
 
     return 0;
 }
