@@ -199,8 +199,8 @@ register int *error;
 }
 
 krb5_kdc_req *
-KRB5_TGS__REQ2krb5_kdc_req(val, error)
-const register struct type_KRB5_TGS__REQ *val;
+KRB5_KDC__REQ2krb5_kdc_req(val, error)
+const register struct type_KRB5_KDC__REQ *val;
 register int *error;
 {
     register krb5_kdc_req *retval;

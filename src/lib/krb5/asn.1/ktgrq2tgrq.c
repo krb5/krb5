@@ -226,14 +226,14 @@ register int *error;
     return retval;
 }
 
-struct type_KRB5_TGS__REQ *
-krb5_kdc_req2KRB5_TGS__REQ(val, error)
+struct type_KRB5_KDC__REQ *
+krb5_kdc_req2KRB5_KDC__REQ(val, error)
 const register krb5_kdc_req *val;
 register int *error;
 {
-    register struct type_KRB5_TGS__REQ *retval;
+    register struct type_KRB5_KDC__REQ *retval;
  
-    retval = (struct type_KRB5_TGS__REQ *)xmalloc(sizeof(*retval));
+    retval = (struct type_KRB5_KDC__REQ *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
@@ -250,7 +250,7 @@ register int *error;
     }
     retval->req__body = krb5_kdc_req2KRB5_KDC__REQ__BODY(val, error);
     if (!retval->req__body) {
-	free_KRB5_TGS__REQ(retval);
+	free_KRB5_KDC__REQ(retval);
 	return(0);
     }
     return(retval);

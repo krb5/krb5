@@ -41,14 +41,14 @@ static char rcsid_kekrp2ekrp_c[] =
 
 /* ISODE defines max(a,b) */
 
-struct type_KRB5_EncTGSRepPart *
-krb5_enc_kdc_rep_part2KRB5_EncTGSRepPart(val, error)
+struct type_KRB5_EncKDCRepPart *
+krb5_enc_kdc_rep_part2KRB5_EncKDCRepPart(val, error)
 const register krb5_enc_kdc_rep_part *val;
 register int *error;
 {
-    register struct type_KRB5_EncTGSRepPart *retval;
+    register struct type_KRB5_EncKDCRepPart *retval;
 
-    retval = (struct type_KRB5_EncTGSRepPart *)xmalloc(sizeof(*retval));
+    retval = (struct type_KRB5_EncKDCRepPart *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
@@ -63,7 +63,7 @@ register int *error;
     retval->last__req = krb5_last_req2KRB5_LastReq(val->last_req, error);
     if (!retval->last__req) {
     errout:
-	free_KRB5_EncTGSRepPart(retval);
+	free_KRB5_EncKDCRepPart(retval);
 	return(0);
     }
     retval->nonce = val->nonce;

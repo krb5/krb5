@@ -42,8 +42,8 @@ static char rcsid_ekrp2kekrp_c[] =
 /* ISODE defines max(a,b) */
 
 krb5_enc_kdc_rep_part *
-KRB5_EncTGSRepPart2krb5_enc_kdc_rep_part(val, error)
-const register struct type_KRB5_EncTGSRepPart *val;
+KRB5_EncKDCRepPart2krb5_enc_kdc_rep_part(val, error)
+const register struct type_KRB5_EncKDCRepPart *val;
 register int *error;
 {
     register krb5_enc_kdc_rep_part *retval;
