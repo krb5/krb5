@@ -1,3 +1,10 @@
+Fri Jun  9 18:23:58 1995    <tytso@rsx-11.mit.edu>
+
+	* sim_server.c: #include krb5.h first, to reduce size of debugging
+	        executable.
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
 
 Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
 

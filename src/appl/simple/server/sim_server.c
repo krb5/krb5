@@ -28,13 +28,13 @@
  * This program performs no useful function.
  */
 
+#include "krb5.h"
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <stdio.h>
 
-#include "krb5.h"
 #include "com_err.h"
 
 #include "simple.h"
