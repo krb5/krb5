@@ -44,6 +44,10 @@
 #define T_SRV 33
 #endif /* T_SRV */
 
+#define FAI_PREFIX krb5int
+#define FAI_IMPLEMENTATION
+#include "fake-addrinfo.h"
+
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
@@ -106,7 +110,6 @@ _krb5_use_dns_realm(context)
 
 static int get_port (const char *service, int stream, int defalt)
 {
-#ifdef HAVE_GETADDRINFO
     struct addrinfo hints = { 0 };
     struct addrinfo *ai;
     int err;
@@ -124,13 +127,6 @@ static int get_port (const char *service, int stream, int defalt)
     }
     /* Any error - don't complain, just use default.  */
     return htons (defalt);
-#else
-    struct servent *sp;
-    sp = getservbyname (service, stream ? "tcp" : "udp"); /* NOT THREAD SAFE */
-    if (sp)
-	return sp->s_port;
-    return htons (defalt);
-#endif
 }
 
 static int
@@ -176,30 +172,23 @@ add_sockaddr_to_list (struct addrlist *lp, const struct sockaddr *addr,
 		      size_t len)
 {
     struct sockaddr *copy;
+    int err;
 
 #ifdef TEST
+    char name[NI_MAXHOST];
+
     fprintf (stderr, "\tadding sockaddr family %2d, len %d", addr->sa_family,
 	     len);
-#ifdef HAVE_GETNAMEINFO
-    {
-	char name[NI_MAXHOST];
-	int err;
 
-	err = getnameinfo (addr, len, name, sizeof (name), NULL, 0,
-			   NI_NUMERICHOST | NI_NUMERICSERV);
-	if (err == 0)
-	    fprintf (stderr, "\t%s", name);
-    }
-#else
-    if (addr->sa_family == AF_INET)
-	fprintf (stderr, "\t%s",
-		 inet_ntoa (((const struct sockaddr_in *)addr)->sin_addr));
-#endif
+    err = getnameinfo (addr, len, name, sizeof (name), NULL, 0,
+		       NI_NUMERICHOST | NI_NUMERICSERV);
+    if (err == 0)
+	fprintf (stderr, "\t%s", name);
     fprintf (stderr, "\n");
 #endif
 
     if (lp->naddrs == lp->space) {
-	int err = grow_list (lp, 1);
+	err = grow_list (lp, 1);
 	if (err) {
 #ifdef TEST
 	    fprintf (stderr, "grow_list failed %d\n", err);
@@ -222,7 +211,6 @@ add_sockaddr_to_list (struct addrlist *lp, const struct sockaddr *addr,
     return 0;
 }
 
-#ifdef HAVE_GETADDRINFO
 static int translate_ai_error (int err)
 {
     switch (err) {
@@ -266,22 +254,19 @@ static void set_port_num (struct sockaddr *addr, int num)
     case AF_INET:
 	((struct sockaddr_in *)addr)->sin_port = num;
 	break;
+#ifdef KRB5_USE_INET6
     case AF_INET6:
 	((struct sockaddr_in6 *)addr)->sin6_port = num;
 	break;
+#endif
     }
 }
-#endif
 
 static int
 add_host_to_list (struct addrlist *lp, const char *hostname,
 		  int port, int secport)
 {
-#ifdef HAVE_GETADDRINFO
     struct addrinfo *addrs, *a;
-#else
-    struct hostent *hp;
-#endif
     /* Must set err to 0 for the case we return err without ever
        setting it -- !HAVE_GETADDRINFO and !hp */
     int err = 0;
@@ -291,7 +276,6 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 	     ntohs (port), ntohs (secport));
 #endif
 
-#ifdef HAVE_GETADDRINFO
     err = getaddrinfo (hostname, NULL, NULL, &addrs);
     if (err)
 	return translate_ai_error (err);
@@ -310,33 +294,6 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 	    break;
     }
     freeaddrinfo (addrs);
-#else
-    hp = gethostbyname (hostname);
-    if (hp != NULL) {
-	int i;
-	for (i = 0; hp->h_addr_list[i] != 0; i++) {
-	    struct sockaddr_in sin4;
-
-	    memset (&sin4, 0, sizeof (sin4));
-	    memcpy (&sin4.sin_addr, hp->h_addr_list[i],
-		    sizeof (sin4.sin_addr));
-	    sin4.sin_family = AF_INET;
-	    sin4.sin_port = port;
-	    err = add_sockaddr_to_list (lp, (struct sockaddr *) &sin4,
-					sizeof (sin4));
-	    if (err)
-		break;
-	    if (secport != 0) {
-		sin4.sin_port = secport;
-		err = add_sockaddr_to_list (lp, (struct sockaddr *) &sin4,
-					    sizeof (sin4));
-	    }
-
-	    if (err)
-		break;
-	}
-    }
-#endif
     return err;
 }
 
