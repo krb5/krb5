@@ -160,6 +160,7 @@ krb5_data **response;			/* filled in with a response packet */
     ticket_reply.enc_part.kvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
+    setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
 
         /* It should be noted that local policy may affect the  */
         /* processing of any of these flags.  For example, some */
@@ -217,14 +218,14 @@ krb5_data **response;			/* filled in with a response packet */
     }
     rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 
+    /* should we squelch the output renew_till to be no earlier
+       than the endtime of the ticket? XXX */
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) {
 	setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
 	enc_tkt_reply.times.renew_till =
-	    min(rtime, min(enc_tkt_reply.times.starttime +
-			   client.max_renewable_life,
-			   min(enc_tkt_reply.times.starttime +
-			       server.max_renewable_life,
-			       enc_tkt_reply.times.starttime +
+	    min(rtime, enc_tkt_reply.times.starttime +
+		       min(client.max_renewable_life,
+			   min(server.max_renewable_life,
 			       max_renewable_life_for_realm)));
     } else
 	enc_tkt_reply.times.renew_till = 0; /* XXX */
