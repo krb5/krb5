@@ -568,3 +568,16 @@ install-unix::
 krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
 	cd $(thisconfigdir) && $(SHELL) config.status krb5-config
 
+# Test to ensure that krb5-config does not spit out things like
+# $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
+check-unix:: krb5-config
+	@echo "Testing if krb5-config outputs shell variables"
+	@if `./krb5-config --libs kdb | egrep -s '\\$$'`; then \
+	   echo "Error './krb5-config --libs kdb' contains shell variables"; \
+	   exit 1; \
+	 fi
+	@if `./krb5-config --cflags | egrep -s '\\$$'`; then \
+	   echo "Error './krb5-config --cflags' contains shell variables"; \
+	   exit 1; \
+	 fi
+	@echo "krb5-config appears ok"

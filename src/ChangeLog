@@ -1,3 +1,11 @@
+2003-01-13  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (check-unix): Test to see if krb5-config outputs
+	variables that require Makefile substitutions. 
+
+	* krb5-config.in: Remore $(PURE) from output. Handle variables
+	$(RPATH_FLAG) and $(LDFLAGS).
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Require
