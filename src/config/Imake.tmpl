@@ -367,7 +367,10 @@
 #define PexCDebugFlags -g
 #endif
 #ifndef InstPgmFlags
-#define InstPgmFlags -s
+#define InstPgmFlags
+#endif
+#ifndef InstScrFlags
+#define InstScrFlags
 #endif
 #ifndef InstBinFlags
 #define InstBinFlags -m 0755
@@ -605,10 +608,11 @@
 #undef _wideprotodef
 
 #if StripInstalledPrograms
-     INSTPGMFLAGS = InstPgmFlags	/* install flags for stripping */
+     INSTPGMFLAGS = InstPgmFlags -s	/* install flags for stripping */
 #else
-     INSTPGMFLAGS = 
+     INSTPGMFLAGS = InstPgmFlags	/* install flags without stripping */
 #endif
+     INSTSCRFLAGS = InstScrFlags	/* install flags without stripping */
      INSTBINFLAGS = InstBinFlags	/* install flags for programs */
      INSTUIDFLAGS = InstUidFlags	/* install flags for setuid programs */
      INSTLIBFLAGS = InstLibFlags	/* install flags for libraries */
