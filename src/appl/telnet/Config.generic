@@ -180,6 +180,11 @@
 #    Name of "ranlib" program, set it to "NONE" if you don't
 #    have a "ranlib".
 
+ODEFS="-DKRB5 -DAUTHENTICATION"
+KRB_INC= -I../../../include
+KRB_LIBS=" $(KLIB)"
+KRB_LIBPATH=" $(DEPKLIB)"
+
 all:
 	@echo "you must specify what type of system you are on,"
 	@echo "or modify the makefile for your system."
@@ -244,22 +249,21 @@ all:
 		CC="${CC}" LCCFLAGS="-O"
 
 4.3bsd:
-	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a"${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a"${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+		DESTDIR=${DESTDIR} \
+		DEFINES=${ODEFS}" -DTERMCAP -DKLUDGELINEMODE \
 		    -DDEFAULT_IM='\"\r\n4.3BSD UNIX (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS" \
-		INCLUDES="-I.." \
-		LIB_OBJ="strdup.o setsid.o strftime.o \
+		INCLUDES=${KRB_INC}" -I.." \
+		LIB_OBJ="strdup.o setsid.o strftime.o strerror.o \
 			gettytab.o getopt.o herror.o" \
-		LIB_SRC="strdup.c setsid.c strftime.c \
+		LIB_SRC="strdup.c setsid.c strftime.c strerror.c \
 			gettytab.c getopt.c herror.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
-		VPATH=/usr/src/etc/getty \
 		LIBEXEC=${DESTDIR}/etc \
 		CC="${CC}" LCCFLAGS="-O"
 
@@ -521,14 +525,15 @@ ultrix3.1:
 
 ultrix4.0:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a"${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a"${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
-		DEFINES=${ODEFS}"-DUSE_TERMIO -DTERMCAP \
+		DESTDIR=${DESTDIR} \
+		DEFINES=${ODEFS}" -DUSE_TERMIO -DTERMCAP \
 		    -DDEFAULT_IM='\"\r\nULTRIX V4.0 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DKLUDGELINEMODE -DDIAGNOSTICS " \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strdup.o strerror.o setsid.o \
 			setenv.o strftime.o" \
 		LIB_SRC="getent.c strdup.c strerror.c setsid.c \
