@@ -1,3 +1,9 @@
+Sat Dec  5 01:14:23 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Updated windows configuration rules to work with
+		the new crypto library.  (Including bundling the correct
+		directories into kerbsrc-nt.zip)
+
 1998-11-14  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4: Add support for FreeBSD systems using ELF (and not

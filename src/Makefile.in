@@ -131,9 +131,13 @@ config-windows:: makefile-windows
 ##DOS##		include\makefile include\krb5\makefile \
 ##DOS##		lib\makefile lib\crypto\makefile \
 ##DOS##		lib\crypto\crc32\makefile lib\crypto\des\makefile \
-##DOS##		lib\crypto\sha\makefile \
+##DOS##		lib\crypto\dk\makefile lib\crypto\enc_provider\makefile \
+##DOS##		lib\crypto\hash_provider\makefile \
+##DOS##		lib\crypto\keyhash_provider\makefile \
+##DOS##		lib\crypto\raw\makefile lib\crypto\old\makefile \
+##DOS##		lib\crypto\sha1\makefile \
 ##DOS##		lib\crypto\md4\makefile lib\crypto\md5\makefile \
-##DOS##		lib\crypto\os\makefile lib\des425\makefile \
+##DOS##		lib\des425\makefile \
 ##DOS##		lib\gssapi\makefile lib\gssapi\generic\makefile \
 ##DOS##		lib\gssapi\krb5\makefile lib\gssapi\mechglue\makefile \
 ##DOS##		lib\krb4\makefile lib\krb5\makefile \
@@ -176,13 +180,23 @@ config-windows:: makefile-windows
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\des\makefile: lib\crypto\des\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\sha\makefile: lib\crypto\sha\makefile.in $(MKFDEP)
+##DOS##lib\crypto\dk\makefile: lib\crypto\dk\makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\enc_provider\makefile: lib\crypto\enc_provider\makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\hash_provider\makefile: lib\crypto\hash_provider\makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\keyhash_provider\makefile: lib\crypto\keyhash_provider\makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\sha1\makefile: lib\crypto\sha1\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\md4\makefile: lib\crypto\md4\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\md5\makefile: lib\crypto\md5\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\os\makefile: lib\crypto\os\makefile.in $(MKFDEP)
+##DOS##lib\crypto\old\makefile: lib\crypto\old\makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\raw\makefile: lib\crypto\raw\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\des425\makefile: lib\des425\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -282,8 +296,10 @@ FILES= ./* \
 	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	config/* include/* include/kerberosIV/* \
 	include/krb5/* include/krb5/stock/* include/sys/* lib/* \
-	lib/crypto/* lib/crypto/crc32/* lib/crypto/des/* \
-	lib/crypto/sha/* lib/crypto/md4/* lib/crypto/md5/* lib/crypto/os/* \
+	lib/crypto/* lib/crypto/crc32/* lib/crypto/des/* lib/crypto/dk/* \
+	lib/crypto/enc_provider/* lib/crypto/hash_provider/* \
+	lib/crypto/keyhash_provider/* lib/crypto/old/* lib/crypto/raw/* \
+	lib/crypto/sha1/* lib/crypto/md4/* lib/crypto/md5/* \
 	lib/des425/* lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
 	lib/gssapi/mechglue/* lib/krb4/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
