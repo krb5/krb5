@@ -366,7 +366,6 @@ HINSTANCE get_lib_instance()
 static int
 control(int mode)
 {
-    void ((KRB5_CALLCONV *et_func)(struct error_table *));
 #ifdef NEED_WINSOCK
     WORD wVersionRequested;
     WSADATA wsaData;
@@ -375,8 +374,6 @@ control(int mode)
 
     switch(mode) {
     case DLL_STARTUP:
-	et_func = add_error_table;
-
 #ifdef NEED_WINSOCK
 	wVersionRequested = 0x0101;		/* We need version 1.1 */
 	if ((err = WSAStartup (wVersionRequested, &wsaData)))
@@ -393,30 +390,83 @@ control(int mode)
 #ifdef KRB5
 	krb5_stdcc_shutdown();
 #endif
-	et_func = remove_error_table;
 #ifdef NEED_WINSOCK
 	WSACleanup ();
 #endif
 	break;
 
+#if defined(ENABLE_THREADS) && defined(SUPPORTLIB)
+    case DLL_THREAD_DETACH:
+	krb5int_thread_detach_hook();
+	return 0;
+#endif
+
     default:
 	return -1;
     }
 
-#ifdef KRB4
-    (*et_func)(&et_krb_error_table);
-    (*et_func)(&et_kadm_error_table);
-#endif
-#ifdef KRB5
-    (*et_func)(&et_krb5_error_table);
-    (*et_func)(&et_kv5m_error_table);
-    (*et_func)(&et_kdb5_error_table);
-    (*et_func)(&et_asn1_error_table);
-    (*et_func)(&et_prof_error_table);
-#endif
-#ifdef GSSAPI
-    (*et_func)(&et_k5g_error_table);
-    (*et_func)(&et_ggss_error_table);
+#if defined KRB5
+    switch (mode) {
+    case DLL_STARTUP:
+	profile_library_initializer__auxinit();
+	cryptoint_initialize_library__auxinit();
+	krb5int_lib_init__auxinit();
+	break;
+    case DLL_SHUTDOWN:
+	krb5int_lib_fini();
+	cryptoint_cleanup_library();
+	profile_library_finalizer();
+	break;
+    }
+#elif defined KRB4
+    switch (mode){ 
+    case DLL_STARTUP:
+      add_error_table(&et_krb_error_table);
+      add_error_table(&et_kadm_error_table);
+      break;
+    case DLL_SHUTDOWN:
+      remove_error_table(&et_krb_error_table);
+      remove_error_table(&et_kadm_error_table);
+      break;
+    }
+#elif defined GSSAPI
+    switch (mode) {
+    case DLL_STARTUP:
+	gssint_lib_init__auxinit();
+	break;
+    case DLL_SHUTDOWN:
+	gssint_lib_fini();
+	break;
+    }
+#elif defined COMERR
+    switch (mode) {
+    case DLL_STARTUP:
+	com_err_initialize__auxinit();
+	break;
+    case DLL_SHUTDOWN:
+	com_err_terminate();
+	break;
+    }
+#elif defined PROFILELIB
+    switch (mode) {
+    case DLL_STARTUP:
+	profile_library_initializer__auxinit();
+	break;
+    case DLL_SHUTDOWN:
+	profile_library_finalizer();
+	break;
+    }
+#elif defined SUPPORTLIB
+    switch (mode) {
+    case DLL_STARTUP:
+      krb5int_thread_support_init__auxinit();
+      break;
+    case DLL_SHUTDOWN:
+      krb5int_thread_support_fini();
+      break;
+    }
+#else
+# error "Don't know the init/fini functions for this library."
 #endif
 
     return 0;
@@ -438,6 +488,8 @@ BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
 	    break;
 
         case DLL_THREAD_DETACH:
+	    if (control(DLL_THREAD_DETACH))
+		return FALSE;
 	    break;
 
         case DLL_PROCESS_DETACH:

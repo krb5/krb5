@@ -28,6 +28,7 @@ clean-windows::
 ##MIT##MITLIBS=$(VS_LIB)
 ##MIT##MITFLAGS=-I$(VS_INC) /DVERSERV=1
 
+SLIBS = $(BUILDTOP)\util\support\$(OUTPRE)krb5support_32.lib
 CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
 PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
 KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
@@ -36,6 +37,7 @@ KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
 GLIBS = gssapi\$(OUTPRE)gssapi.lib
 K4LIBS = krb4\$(OUTPRE)krb4.lib
 
+SDEF = krb5support32.def
 CDEF = comerr32.def
 PDEF = xpprof32.def
 KDEF = krb5_32.def
@@ -50,25 +52,31 @@ WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib \
 WINDLLFLAGS = $(DLL_LINKOPTS) -base:0x1c000000 /DELAYLOAD:secur32.dll \
 	/DELAYLOAD:advapi32.dll /DELAY:UNLOAD /DELAY:NOBIND
 
-NO_GLUE=$(OUTPRE)no_glue.obj
+S_GLUE=$(OUTPRE)support_glue.obj
 K5_GLUE=$(OUTPRE)k5_glue.obj
 K4_GLUE=$(OUTPRE)k4_glue.obj
 GSS_GLUE=$(OUTPRE)gss_glue.obj
+COMERR_GLUE=$(OUTPRE)comerr_glue.obj
+PROF_GLUE=$(OUTPRE)prof_glue.obj
 
-CGLUE=$(NO_GLUE)
-PGLUE=$(NO_GLUE)
+SGLUE=$(S_GLUE)
+CGLUE=$(COMERR_GLUE)
+PGLUE=$(PROF_GLUE)
 KGLUE=$(K5_GLUE)
 GGLUE=$(GSS_GLUE)
 K4GLUE=$(K4_GLUE)
 
 RCFLAGS=$(CPPFLAGS) -D_WIN32 -DRES_ONLY
 
+##WIN32##SRES=$(SLIB:.lib=.res)
 ##WIN32##CRES=$(CLIB:.lib=.res)
 ##WIN32##PRES=$(PLIB:.lib=.res)
 ##WIN32##KRES=$(KLIB:.lib=.res)
 ##WIN32##GRES=$(GLIB:.lib=.res)
 ##WIN32##K4RES=$(K4LIB:.lib=.res)
 
+##WIN32##$(SRES): $(VERSIONRC)
+##WIN32##	$(RC) $(RCFLAGS) -DSUPPORT_LIB -fo $@ -r $**
 ##WIN32##$(CRES): $(VERSIONRC)
 ##WIN32##	$(RC) $(RCFLAGS) -DCE_LIB -fo $@ -r $**
 ##WIN32##$(PRES): $(VERSIONRC)
@@ -81,21 +89,30 @@ RCFLAGS=$(CPPFLAGS) -D_WIN32 -DRES_ONLY
 ##WIN32##	$(RC) $(RCFLAGS) -DGSSAPI_LIB -fo $@ -r $**
 ##WIN32##$(KRB5RC): $(VERSIONRC)
 
-##WIN32##$(CLIB): $(CDEF) $(CLIBS) $(CGLUE) $(CRES)
+##WIN32##$(SLIB): $(SDEF) $(SLIBS) $(SGLUE) $(SRES)
+##WIN32##	link $(WINDLLFLAGS) -def:$(SDEF) -out:$*.dll \
+##WIN32##	  $(SLIBS) $(SGLUE) $(SRES) $(WINLIBS)
+$(SDEF): ..\util\support\libkrb5support.exports
+	echo EXPORTS > $(SDEF).new
+	type ..\util\support\libkrb5support.exports >> $(SDEF).new
+	-$(RM) $(SDEF)
+	ren $(SDEF).new $(SDEF)
+
+##WIN32##$(CLIB): $(CDEF) $(CLIBS) $(CGLUE) $(CRES) $(SLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(CDEF) -out:$*.dll \
-##WIN32##	  $(CLIBS) $(CGLUE) $(CRES) $(WINLIBS)
+##WIN32##	  $(CLIBS) $(CGLUE) $(CRES) $(SLIB) $(WINLIBS)
 
-##WIN32##$(PLIB): $(PDEF) $(PLIBS) $(PGLUE) $(PRES) $(CLIB)
+##WIN32##$(PLIB): $(PDEF) $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(SLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(PDEF) -out:$*.dll \
-##WIN32##	  $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(WINLIBS)
+##WIN32##	  $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(SLIB) $(WINLIBS)
 
-##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS) $(DNSLIBS)
+##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS) $(DNSLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
-##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS) $(DNSLIBS) $(WINLIBS)
+##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS) $(DNSLIBS) $(WINLIBS)
 
-##WIN32##$(GLIB): $(GDEF) $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB)
+##WIN32##$(GLIB): $(GDEF) $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(SLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(GDEF) -out:$*.dll \
-##WIN32##	  $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	  $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(SLIB) $(WINLIBS)
 
 ##WIN32##$(K4LIB): $(K4DEF) $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(K4DEF) -out:$*.dll \
@@ -107,8 +124,12 @@ $(K4_GLUE): win_glue.c
 	$(CC) $(ALL_CFLAGS) /c /DKRB4=1 /Fo$@ $**
 $(GSS_GLUE): win_glue.c
 	$(CC) $(ALL_CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
-$(NO_GLUE): win_glue.c
-	$(CC) $(ALL_CFLAGS) /c /Fo$@ $**
+$(COMERR_GLUE): win_glue.c
+	$(CC) $(ALL_CFLAGS) /c /DCOMERR=1 /Fo$@ $**
+$(PROF_GLUE): win_glue.c
+	$(CC) $(ALL_CFLAGS) /c /DPROFILELIB=1 /Fo$@ $**
+$(S_GLUE): win_glue.c
+	$(CC) $(ALL_CFLAGS) /c /DSUPPORTLIB=1 /Fo$@ $**
 
 # Build Convenience
 comerr.lib: $(CLIB)

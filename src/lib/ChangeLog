@@ -1,3 +1,24 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SLIBS, SDEF, S_GLUE, COMERR_GLUE, PROF_GLUE,
+	SGLUE): New variables.
+	(NO_GLUE): Deleted.
+	(CGLUE, PGLUE): Use new separate glue files instead of no_glue.
+	(SRES) [WIN32]: New variable.
+	($(SRES), $(SLIB)) [WIN32]: New targets.
+	($(CLIB), $(PLIB), $(KLIB), $(GLIB)) [WIN32]: Depend on and link
+	against $(SLIB) too.
+	($(SDEF)): New target.  Generate Windows export list from common
+	symbol list.
+	($(COMERR_GLUE), $(PROF_GLUE), $(S_GLUE)): New targets.
+
+	* win_glue.c (control): Reference add/remove_error_table only if
+	building for krb4 library.  Add calls to library init/fini
+	functions for other libraries.  For support library, also call a
+	hook function on DLL_THREAD_DETACH.  If no recognized
+	library-specific macro is defined, don't compile.
+	(DllMain): Do call control() on DLL_THREAD_DETACH.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.
