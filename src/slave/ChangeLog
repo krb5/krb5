@@ -1,3 +1,8 @@
+Thu Sep 29 22:15:27 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kprop.c (open_connection): Use getsockname instead of
+		getpeername when getting the sender address.
+
 Thu Sep 15 12:48:21 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kpropd.c (PRS): Only report errors to syslog if the debug flag

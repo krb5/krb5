@@ -343,10 +343,10 @@ open_connection(host, fd, Errmsg)
 	       sizeof(sin.sin_addr));
 
 	socket_length = sizeof(sin);
-	if (getpeername(s, (struct sockaddr *)&sin, &socket_length) < 0) {
+	if (getsockname(s, (struct sockaddr *)&sin, &socket_length) < 0) {
 		retval = errno;
 		close(s);
-		(void) sprintf(Errmsg, "in call to getpeername");
+		(void) sprintf(Errmsg, "in call to getsockname");
 		return(retval);
 	}
 	sender_addr.addrtype = ADDRTYPE_INET;
