@@ -177,7 +177,7 @@ char *argv[];
 		"while setting up etype %d", etype);
 	exit(1);
     }
-    master_encblock.crypto_entry = krb5_csarray[etype]->system;
+    krb5_use_cstype(&master_encblock, etype);
     csentry = master_encblock.crypto_entry;
 
     if (!dbname)
