@@ -783,6 +783,9 @@ void extract_v4_srvtab(argc, argv)
     int nentries;
     krb5_boolean more;
     krb5_keyblock	key;
+    char v4_name[65];
+    char v4_inst[65];
+    char v4_realm[65];
 
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -861,23 +864,32 @@ void extract_v4_srvtab(argc, argv)
 	    exit_status++;
 	    goto cleanmost;
 	}
-    if (krb5_dbe_find_enctype(edit_context,
-			      &dbentry,
-			       ENCTYPE_DES_CBC_CRC,
-			       KRB5_KDB_SALTTYPE_V4,
-			       -1,
-			       &pkey) &&
-	(retval = krb5_dbe_find_enctype(edit_context,
-			      &dbentry,
-			       ENCTYPE_DES_CBC_CRC,
-			       -1,
-			       -1,
-			      &pkey))) {
-	com_err(argv[0], retval, "while retrieving %s", pname);
+
+	retval = krb5_524_conv_principal(edit_context, princ,
+					v4_name, v4_inst, v4_realm);
+	if (retval) {
+	    com_err(argv[0], retval, "while translating principal");
 	    exit_status++;
 	    goto cleanmost;
 	}
 
+	if (krb5_dbe_find_enctype(edit_context,
+				  &dbentry,
+				  ENCTYPE_DES_CBC_CRC,
+				  KRB5_KDB_SALTTYPE_V4,
+				  -1,
+				  &pkey) &&
+	    (retval = krb5_dbe_find_enctype(edit_context,
+					    &dbentry,
+					    ENCTYPE_DES_CBC_CRC,
+					    -1,
+					    -1,
+					    &pkey)))
+	{
+	    com_err(argv[0], retval, "while retrieving %s", pname);
+	    exit_status++;
+	    goto cleanmost;
+	}
 	
 	if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
 						  &master_encblock,
@@ -887,9 +899,11 @@ void extract_v4_srvtab(argc, argv)
 	    exit_status++;
 	    goto cleanall;
 	}
-	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
-	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.instance */
-	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */
+
+	fwrite(v4_name, strlen(v4_name) + 1, 1, fout);	/* p.name */
+	fwrite(v4_inst, strlen(v4_inst) + 1, 1, fout);	/* p.instance */
+	fwrite(v4_realm, strlen(v4_realm) + 1, 1, fout); /* p.realm */
+
         kvno = (unsigned char) dbentry.key_data[0].key_data_kvno;
         fwrite((char *)&kvno, sizeof(kvno), 1, fout);
 	fwrite((char *)key.contents, 8, 1, fout);

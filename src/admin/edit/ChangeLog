@@ -1,3 +1,8 @@
+Wed Apr 10 19:17:58 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_edit.c (extract_v4_srvtab): Translate the principal name to
+	the common V4 name.
+
 Tue Mar 19 18:00:58 1996  Richard Basch  <basch@lehman.com>
 
 	* kdb5_edit.c (extract_v4_srvtab): do not test to make sure we
