@@ -21,8 +21,8 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-#if !defined(UTMP_FILE) && defined(_UTMP_PATH)
-#define UTMP_FILE _UTMP_PATH
+#if !defined(UTMP_FILE) && defined(_PATH_UTMP)
+#define UTMP_FILE _PATH_UTMP
 #endif
 
 long pty_update_utmp (process_type, pid, username, line, host)
@@ -124,7 +124,7 @@ long pty_update_utmp (process_type, pid, username, line, host)
     tty = ttyslot();
     if (tty > 0 && (fd = open(UTMP_FILE, O_WRONLY, 0)) >= 0) {
 	(void)lseek(fd, (off_t)(tty * sizeof(struct utmp)), SEEK_SET);
-	(void)write(fd, (char *)ent, sizeof(struct utmp));
+	(void)write(fd, (char *)&ent, sizeof(struct utmp));
 	(void)close(fd);
     }
 

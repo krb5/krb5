@@ -1,3 +1,9 @@
+Tue Aug  8 22:20:33 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* update_utmp.c (UTMP_FILE): _PATH_UTMP under NetBSD, not
+		_UTMP_PATH; also fix typo (missing '&' on reference to
+		ent)
+
 Tue Aug  8 20:47:01 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* update_utmp.c (pty_update_utmp): change #ifdef NO_UT_PID to
