@@ -99,7 +99,7 @@ struct type_KRB5_EncAPRepPart *krb5_ap_rep_enc_part2KRB5_EncAPRepPart
 	PROTOTYPE((const krb5_ap_rep_enc_part *, int *));
 
 /* kasrp2kdcr.c */
-struct type_KRB5_KDC__REP *krb5_as_rep2KRB5_KDC__REP
+struct type_KRB5_AS__REP *krb5_as_rep2KRB5_KDC__REP
 	PROTOTYPE((const krb5_kdc_rep *, int *));
 
 /* kauth2auth.c */
@@ -112,15 +112,15 @@ struct type_KRB5_Checksum *krb5_checksum2KRB5_Checksum
 
 /* kdcr2kasrp.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_as_rep
-	PROTOTYPE((const struct type_KRB5_KDC__REP *, int *));
+	PROTOTYPE((const struct type_KRB5_AS__REP *, int *));
 
 /* kdcr2kkdcr.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_kdc_rep
-	PROTOTYPE((const struct type_KRB5_KDC__REP *, krb5_msgtype *, int *));
+	PROTOTYPE((const struct type_KRB5_TGS__REP *, krb5_msgtype *, int *));
 
 /* kdcr2ktgsr.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_tgs_rep
-	PROTOTYPE((const struct type_KRB5_KDC__REP *, int *));
+	PROTOTYPE((const struct type_KRB5_TGS__REP *, int *));
 
 /* kedat2edat.c */
 struct type_KRB5_EncryptedData *krb5_enc_data2KRB5_EncryptedData
@@ -139,8 +139,8 @@ struct type_KRB5_EncTicketPart *krb5_enc_tkt_part2KRB5_EncTicketPart
 	PROTOTYPE((const krb5_enc_tkt_part *, int *));
 
 /* kkdcr2kdcr.c */
-struct type_KRB5_KDC__REP *krb5_kdc_rep2KRB5_KDC__REP
-	PROTOTYPE((const register krb5_kdc_rep *,
+struct type_KRB5_TGS__REP *krb5_kdc_rep2KRB5_KDC__REP
+	PROTOTYPE((const krb5_kdc_rep *,
 		   const krb5_msgtype,
 		   int *));
 
@@ -173,7 +173,7 @@ struct type_KRB5_TGS__REQ *krb5_kdc_req2KRB5_TGS__REQ
 	PROTOTYPE((const krb5_kdc_req *, int *));
 
 /* ktgsr2kdcr.c */
-struct type_KRB5_KDC__REP *krb5_tgs_rep2KRB5_KDC__REP
+struct type_KRB5_TGS__REP *krb5_tgs_rep2KRB5_KDC__REP
 	PROTOTYPE((const krb5_kdc_rep *, int *));
 
 /* ktkt2tkt.c */
