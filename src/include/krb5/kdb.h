@@ -372,6 +372,7 @@ krb5_error_code krb5_dbe_cpw
 			int,
 			char *,
 			int,
+			krb5_boolean,
 			krb5_db_entry *));
 krb5_error_code krb5_dbe_apw
         KRB5_PROTOTYPE((krb5_context,
@@ -385,6 +386,7 @@ krb5_error_code krb5_dbe_crk
                    krb5_keyblock  *,
                    struct __krb5_key_salt_tuple *,
                    int,
+		   krb5_boolean,
                    krb5_db_entry *));
 krb5_error_code krb5_dbe_ark
         KRB5_PROTOTYPE((krb5_context,

@@ -1,5 +1,8 @@
 Tue Nov 17 15:39:32 1998  Tom Yu  <tlyu@mit.edu>
 
+	* kdb.h: Update dbe_crk and dbe_cpw to take a boolean to indicate
+	whether old keys should be retained.
+
 	* Makefile.in (autoconf.stamp): Fix up to deal with config.status
 	not being in the current directory anymore.
 
