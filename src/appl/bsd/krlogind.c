@@ -1691,7 +1691,7 @@ int len;
 	      */
 	    do {
 		cc = krb_net_read(fd, &c, 1);
-		if (cc < 0) return 0; /* read error */
+		if (cc <= 0) return 0; /* read error */
 		if (cc == 1) {
 		    if (c == 0) gotzero = 1;
 		}
