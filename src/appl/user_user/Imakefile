@@ -1,0 +1,33 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1991 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+        DEFINES = -DDEBUG
+CDEBUGFLAGS = -g
+
+SERVERSRCS = server.c
+SERVEROBJS = server.o
+
+CLIENTSRCS = client.c
+CLIENTOBJS = client.o
+
+all:: uuclient uuserver
+
+NormalProgramTarget(uuclient,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+
+NormalProgramTarget(uuserver,$(SERVEROBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+
+SaberProgramTarget(uuclient, $(CLIENTSRCS), $(CLIENTOBJS), 
+	$(DEPLIBS) $(LOCAL_LIBRARIES),)
+SaberProgramTarget(uuserver, $(SERVERSRCS), $(SERVEROBJS), 
+	$(DEPLIBS) $(LOCAL_LIBRARIES),)
+
