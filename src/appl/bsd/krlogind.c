@@ -1465,8 +1465,7 @@ recvauth(valid_checksum)
 
        if (!similar) {
 	  do_inband = 1;
-	  if (debug_port)
-	      fprintf(stderr, "DEBUG: setting do_inband\n");
+	  syslog(LOG_DEBUG, "setting do_inband");
        }
     }
 
