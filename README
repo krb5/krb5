@@ -266,6 +266,8 @@ manner.  It does NOT prevent a commercial firm from referring to the
 MIT trademarks in order to convey information (although in doing so,
 recognition of their trademark status should be given).
 
+----
+
 The following copyright and permission notice applies to the
 OpenVision Kerberos Administration system located in kadmin/create,
 kadmin/dbutil, kadmin/passwd, kadmin/server, lib/kadm5, and portions
@@ -304,6 +306,13 @@ of lib/rpc:
    and our gratitude for the valuable work which has been 
    performed by MIT and the Kerberos community.
 
+----
+
+    Portions contributed by Matt Crawford <crawdad@fnal.gov> were
+    work performed at Fermi National Accelerator Laboratory, which is
+    operated by Universities Research Association, Inc., under
+    contract DE-AC02-76CHO3000 with the U.S. Department of Energy.
+
 Acknowledgements
 ----------------
 
@@ -332,10 +341,12 @@ as testing to ensure DCE interoperability.
 Thanks to Ken Hornstein at NRL for providing many bug fixes and
 suggestions.
 
+Thanks to Matt Crawford at FNAL for bugfixes and enhancements.
+
 Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
 their many suggestions and bug fixes.
 
-Thanks to Nalin Dahyabhai and Chris Evans of RedHat for locating and
+Thanks to Nalin Dahyabhai of RedHat and Chris Evans for locating and
 providing patches for numerous buffer overruns.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
