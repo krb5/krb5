@@ -21,7 +21,7 @@ static char rcsid_util_c[] =
 #include "k5-int.h"
 #include "des.h"
 
-des_cblock_print_file(x, fp)
+void des_cblock_print_file(x, fp)
     des_cblock *x;
     FILE *fp;
 {

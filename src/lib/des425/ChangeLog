@@ -1,3 +1,12 @@
+Thu Jun  8 23:24:20 1995    <tytso@rsx-11.mit.edu>
+
+	* read_passwd.c (des_read_pw_string): Don't depend on
+		krb5_read_password(); this created a circular dependency
+		in the libraries.  This code is now duplicated in
+		des_read_pw_string.
+
+	* util.c (des_cblock_print_file): Fix -Wall nit.
+
 Mon Jun  5 21:02:37 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* quad_cksum: Convert longs to KRB_INT32 for 64 bit platforms.
