@@ -57,8 +57,24 @@ static char rcsid_an_to_ln_c[] =
  returns system errors, NOT_ENOUGH_SPACE
 */
 
-#ifdef USE_DBM_LNAME
+int krb5_lname_username_fallback = 1;
+	
 extern char *krb5_lname_file;
+
+krb5_error_code
+krb5_aname_to_localname(aname, lnsize, lname)
+	krb5_const_principal aname;
+	const int lnsize;
+	char *lname;
+{
+	struct stat statbuf;
+
+	if (!stat(krb5_lname_file,&statbuf))
+		return dbm_an_to_ln(aname, lnsize, lname);
+	if (krb5_lname_username_fallback)
+		return username_an_to_ln(aname, lnsize, lname);
+	return KRB5_LNAME_CANTOPEN;
+}
 
 /*
  * Implementation:  This version uses a DBM database, indexed by aname,
@@ -67,8 +83,8 @@ extern char *krb5_lname_file;
  * The entries in the database are normal C strings, and include the trailing
  * null in the DBM datum.size.
  */
-krb5_error_code
-krb5_aname_to_localname(aname, lnsize, lname)
+static krb5_error_code
+dbm_an_to_ln(aname, lnsize, lname)
 krb5_const_principal aname;
 const int lnsize;
 char *lname;
@@ -109,14 +125,14 @@ char *lname;
     (void) dbm_close(db);
     return retval;
 }
-#else
+
 /*
  * Implementation:  This version checks the realm to see if it is the local
  * realm; if so, and there is exactly one non-realm component to the name,
  * that name is returned as the lname.
  */
-krb5_error_code
-krb5_aname_to_localname(aname, lnsize, lname)
+static krb5_error_code
+username_an_to_ln(aname, lnsize, lname)
 krb5_const_principal aname;
 const int lnsize;
 char *lname;
@@ -125,31 +141,39 @@ char *lname;
     char *def_realm;
     int realm_length;
 
-    if (!aname[1] || aname[2]) {
-	/* no components or more than one component to non-realm part of name
-	   --no translation. */
-	return KRB5_LNAME_NOTRANS;
-    }
-
     realm_length = krb5_princ_realm(aname)->length;
     
     if (retval = krb5_get_default_realm(&def_realm)) {
 	return(retval);
     }
-
     if ((realm_length != strlen(def_realm)) ||
-	(memcmp(def_realm, krb5_princ_realm(aname)->data, realm_legth))) {
-	free(def_realm);
-	return KRB5_LNAME_NOTRANS;
-    }	
+        (memcmp(def_realm, krb5_princ_realm(aname)->data, realm_length))) {
+        free(def_realm);
+        return KRB5_LNAME_NOTRANS;
+    }
+
+    if (krb5_princ_size(aname) != 1) {
+        if (krb5_princ_size(aname) == 2 ) {
+           /* Check to see if 2nd component is the local realm. */
+           if ( strncmp(krb5_princ_component(aname,1)->data,def_realm,
+                        realm_length) ||
+                realm_length != krb5_princ_component(aname,1)->length)
+                return KRB5_LNAME_NOTRANS;
+        }
+        else
+           /* no components or more than one component to non-realm part of name
+           --no translation. */
+            return KRB5_LNAME_NOTRANS;
+    }
+
     free(def_realm);
-    strncpy(lname, aname[1]->data, min(aname[1]->length,lnsize));
-    if (lnsize < aname[1]->length+1) {
+    strncpy(lname, krb5_princ_component(aname,0)->data, 
+	    min(krb5_princ_component(aname,0)->length,lnsize));
+    if (lnsize < krb5_princ_component(aname,0)->length ) {
 	retval = KRB5_CONFIG_NOTENUFSPACE;
     } else {
-	lname[aname[1]->length] = '\0';
+	lname[krb5_princ_component(aname,0)->length] = '\0';
 	retval = 0;
     }
     return retval;
 }
-#endif
