@@ -1,3 +1,7 @@
+Wed Feb 21 23:33:18 1996  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Do not install k5-int.h
+
 Wed Jan 10 22:46:51 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Add fields for fcc_default_format and
