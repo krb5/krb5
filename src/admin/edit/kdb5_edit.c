@@ -995,6 +995,7 @@ char *argv[];
     krb5_principal newprinc;
     krb5_kvno vno;
     int		salttype = KRB5_KDB_SALTTYPE_NORMAL;
+    char	*cmdname = argv[0];
 
     if (argc > 2) {
 	    if (!strcmp(argv[1], "-onlyrealmsalt")) {
@@ -1008,28 +1009,28 @@ char *argv[];
 	    }
     }
     if (argc != 2) {
-	com_err(argv[0], 0,
+	com_err(cmdname, 0,
 		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
 	return;
     }
     if (!dbactive) {
-	    com_err(argv[0], 0, Err_no_database);
+	    com_err(cmdname, 0, Err_no_database);
 	    return;
     }
     if (!valid_master_key) {
-	    com_err(argv[0], 0, Err_no_master_msg);
+	    com_err(cmdname, 0, Err_no_master_msg);
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
-	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
 	return;
     }
     if (!(vno = princ_exists(argv[0], newprinc))) {
-	com_err(argv[0], 0, "No principal '%s' exists!", argv[1]);
+	com_err(cmdname, 0, "No principal '%s' exists!", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, vno+1, salttype);
+    enter_pwd_key(cmdname, argv[1], newprinc, newprinc, vno+1, salttype);
     krb5_free_principal(newprinc);
     return;
 }
@@ -1133,6 +1134,7 @@ OLDDECLARG(int, salttype)
 	}
 	salt.saltdata = *foo;
 	xfree(foo);
+	break;
     }
     default:
 	com_err(cmdname, 0, "Don't know how to enter salt type %d", salttype);
