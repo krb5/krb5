@@ -100,11 +100,6 @@ krb5_error_code krb5_kdb_decrypt_key
 krb5_error_code krb5_db_setup_mkey_name
 	PROTOTYPE((const char *, const char *, char **, krb5_principal *));
 
-/* XXX these belong in some config file */
-#define	KRB5_KDB_MAX_LIFE	(60*60*24) /* one day */
-#define	KRB5_KDB_MAX_RLIFE	(60*60*24*7) /* one week */
-#define	KRB5_KDB_EXPIRATION	2145830400 /* Thu Jan  1 00:00:00 2038 UTC */
-
 #define KRB5_KDB_DEF_FLAGS	(KRB5_KDB_DISALLOW_DUP_SKEY)
 
 /* XXX THIS REALLY BELONGS ELSEWHERE */
