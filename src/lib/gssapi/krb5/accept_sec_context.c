@@ -284,13 +284,13 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   goto fail;
        }
    } else {
+       major_status = krb5_gss_validate_cred(minor_status,
+					     verifier_cred_handle);
+       if (GSS_ERROR(major_status)) {
+	   code = *minor_status;
+	   goto fail;
+       }
        cred_handle = verifier_cred_handle;
-   }
-
-   major_status = krb5_gss_validate_cred(minor_status, verifier_cred_handle);
-   if (GSS_ERROR(major_status)) {
-       code = *minor_status;
-       goto fail;
    }
 
    cred = (krb5_gss_cred_id_t) cred_handle;
