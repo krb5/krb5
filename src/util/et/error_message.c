@@ -162,15 +162,23 @@ oops:
 	return(buffer);
 }
 
+
+#ifdef _MSDOS
+/*
+ * Win16 applications cannot call malloc while the DLL is being
+ * initialized...  To get around this, we pre-allocate an array
+ * sufficient to hold several error tables.
+ */
+#define PREALLOCATE_ETL 32
+static struct et_list etl[PREALLOCATE_ETL];
+static int etl_used = 0;
+#endif
+
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 add_error_table(et)
     const struct error_table FAR * et;
 {
     struct et_list *el = _et_list;
-#ifdef _MSDOS
-    static struct et_list etl[32];
-    static int etl_used = 0;
-#endif
 
     while (el) {
 	if (el->table->base == et->base)
@@ -179,12 +187,7 @@ add_error_table(et)
     }
 
 #ifdef _MSDOS
-    /*
-     * Win16 applications cannot call malloc while the DLL is being
-     * initialized...  To get around this, we pre-allocate an array
-     * sufficient to hold several error tables.
-     */
-    if (etl_used < sizeof(etl)/sizeof(struct et_list))
+    if (etl_used < PREALLOCATE_ETL)
 	el = &etl[etl_used++];
     else
 #endif
@@ -211,7 +214,10 @@ remove_error_table(et)
 		el2->next = el->next;
 	    else
 		_et_list = el->next;
-	    (void) free(el);
+#ifdef _MSDOS
+	    if ((el < etl) || (el > &etl[PREALLOCATE_ETL-1]))
+#endif
+		(void) free(el);
 	    return 0;
 	}
 	el2 = el;
