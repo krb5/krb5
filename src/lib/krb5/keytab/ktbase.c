@@ -29,11 +29,11 @@
 
 #include "k5-int.h"
 
-extern krb5_kt_ops krb5_ktf_ops;
-extern krb5_kt_ops krb5_kts_ops;
+extern const krb5_kt_ops krb5_ktf_ops;
+extern const krb5_kt_ops krb5_kts_ops;
 
 struct krb5_kt_typelist {
-    krb5_kt_ops *ops;
+    const krb5_kt_ops *ops;
     struct krb5_kt_typelist *next;
 };
 static struct krb5_kt_typelist krb5_kt_typelist_file  = {

@@ -1525,7 +1525,7 @@ struct __krb5_serializer {
 							 krb5_octet **,
 							 size_t *);
 };
-typedef struct __krb5_serializer * krb5_ser_handle;
+typedef const struct __krb5_serializer * krb5_ser_handle;
 typedef struct __krb5_serializer krb5_ser_entry;
 
 krb5_ser_handle krb5_find_serializer
@@ -1793,10 +1793,10 @@ typedef struct _krb5_kt_ops {
 		  krb5_keytab_entry *);
 
     /* Handle for serializer */
-    void * serializer;
+    const krb5_ser_entry *serializer;
 } krb5_kt_ops;
 
-extern krb5_kt_ops krb5_kt_dfl_ops;
+extern const krb5_kt_ops krb5_kt_dfl_ops;
 
 extern krb5_error_code krb5int_translate_gai_error (int);
 

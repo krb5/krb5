@@ -63,8 +63,8 @@ typedef struct _krb5_ktfile_data {
 #define KTFILEP(id) (((krb5_ktfile_data *)(id)->data)->openf)
 #define KTVERSION(id) (((krb5_ktfile_data *)(id)->data)->version)
 
-extern struct _krb5_kt_ops krb5_ktf_ops;
-extern struct _krb5_kt_ops krb5_ktf_writable_ops;
+extern const struct _krb5_kt_ops krb5_ktf_ops;
+extern const struct _krb5_kt_ops krb5_ktf_writable_ops;
 
 krb5_error_code KRB5_CALLCONV krb5_ktfile_resolve 
 	(krb5_context,
@@ -849,7 +849,7 @@ krb5_ktfile_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entr
  * krb5_ktf_ops
  */
 
-struct _krb5_kt_ops krb5_ktf_ops = {
+const struct _krb5_kt_ops krb5_ktf_ops = {
     0,
     "FILE", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktfile_resolve,
@@ -861,14 +861,14 @@ struct _krb5_kt_ops krb5_ktf_ops = {
     krb5_ktfile_end_get,
     0,
     0,
-    (void *) &krb5_ktfile_ser_entry
+    &krb5_ktfile_ser_entry
 };
 
 /*
  * krb5_ktf_writable_ops
  */
 
-struct _krb5_kt_ops krb5_ktf_writable_ops = {
+const struct _krb5_kt_ops krb5_ktf_writable_ops = {
     0,
     "WRFILE", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktfile_wresolve,
@@ -880,14 +880,14 @@ struct _krb5_kt_ops krb5_ktf_writable_ops = {
     krb5_ktfile_end_get,
     krb5_ktfile_add,
     krb5_ktfile_remove,
-    (void *) &krb5_ktfile_ser_entry
+    &krb5_ktfile_ser_entry
 };
 
 /*
  * krb5_kt_dfl_ops
  */
 
-krb5_kt_ops krb5_kt_dfl_ops = {
+const krb5_kt_ops krb5_kt_dfl_ops = {
     0,
     "FILE", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktfile_resolve,
@@ -899,7 +899,7 @@ krb5_kt_ops krb5_kt_dfl_ops = {
     krb5_ktfile_end_get,
     0,
     0,
-    (void *) &krb5_ktfile_ser_entry
+    &krb5_ktfile_ser_entry
 };
 
 /*
@@ -987,11 +987,11 @@ krb5_kt_vno krb5_kt_default_vno = KRB5_KT_DEFAULT_VNO;
 #define xfread(a, b, c, d) fread((char *)a, b, (unsigned) c, d)
 
 #ifdef ANSI_STDIO
-static char *fopen_mode_rbplus= "rb+";
-static char *fopen_mode_rb = "rb";
+static char *const fopen_mode_rbplus= "rb+";
+static char *const fopen_mode_rb = "rb";
 #else
-static char *fopen_mode_rbplus= "r+";
-static char *fopen_mode_rb = "r";
+static char *const fopen_mode_rbplus= "r+";
+static char *const fopen_mode_rb = "r";
 #endif
 
 static krb5_error_code

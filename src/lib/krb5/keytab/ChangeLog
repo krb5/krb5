@@ -1,3 +1,12 @@
+2002-10-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_ktf_ops, krb5_ktf_writable_ops): Now const.
+	Drop cast of serializer entry initializer.
+	(fopen_mode_rbplus, fopen_mode_rb): Now const.
+	* kt_srvtab.c (krb5_kts_ops): Now const.
+	* ktbase.c (krb5_ktf_ops, krb5_kts_ops): Update declarations.
+	(struct krb5_kt_typelist): Field ops now points to const.
+
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* kt_file.c, kt_srvtab.c, ktadd.c, ktbase.c, ktdefault.c,

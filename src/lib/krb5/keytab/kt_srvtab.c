@@ -54,7 +54,7 @@ typedef struct _krb5_ktsrvtab_data {
 #define KTFILENAME(id) (((krb5_ktsrvtab_data *)(id)->data)->name)
 #define KTFILEP(id) (((krb5_ktsrvtab_data *)(id)->data)->openf)
 
-extern struct _krb5_kt_ops krb5_kts_ops;
+extern const struct _krb5_kt_ops krb5_kts_ops;
 
 static krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_resolve
 	(krb5_context,
@@ -333,7 +333,7 @@ krb5_ktsrvtab_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *curs
  * krb5_kts_ops
  */
 
-struct _krb5_kt_ops krb5_kts_ops = {
+const struct _krb5_kt_ops krb5_kts_ops = {
     0,
     "SRVTAB", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktsrvtab_resolve,

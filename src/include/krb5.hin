@@ -1328,7 +1328,7 @@ typedef struct krb5_keytab_entry_st {
 struct _krb5_kt_ops;
 typedef struct _krb5_kt {	/* should move into k5-int.h */
     krb5_magic magic;
-    struct _krb5_kt_ops *ops;
+    const struct _krb5_kt_ops *ops;
     krb5_pointer data;
 } *krb5_keytab;
 #else
