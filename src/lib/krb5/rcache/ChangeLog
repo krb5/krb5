@@ -1,3 +1,9 @@
+Thu Sep 29 22:11:20 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rc_dfl.c (krb5_rc_dfl_recover): krb5_rc_io_size was being called
+		with the wrong type argument.  I have no idea how it was
+
+
 Thu Sep  8 23:34:53 1994  Theodore Y. Ts'o  (tytso@pinata)
 
 	* rc_io.c: The variables dirlen and dir were declared global, and
