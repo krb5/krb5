@@ -1,3 +1,11 @@
+Tue Mar 28 17:55:37 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Remove, conflicts with pre.in.
+	(kinit):  Link with $(CC) $(LDFLAGS), to work on the Mac.
+	* kinit.c (HAVE_PWD_H):  Use.
+	(NO_KEYTAB):  Skip keytab support if defined.
+	FIXME:  NO_KEYTAB needs to be set by configure.
+
 Fri Mar 24 14:45:00 1995    <tytso@rsx-11.mit.edu>
 
 	* kinit.c (main): Remove the call to krb5_os_localaddr() since

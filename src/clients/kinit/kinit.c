@@ -24,11 +24,13 @@
  * Initialize a credentials cache.
  */
 
-#include <stdio.h>
+#include "k5-int.h"
 #include "com_err.h"
-#include <pwd.h>
 
-#include "krb5.h"
+#include <stdio.h>
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
@@ -82,7 +84,6 @@ main(argc, argv)
     krb5_keytab keytab = NULL;
     struct passwd *pw = 0;
     int pwsize;
-    int	i;
     char password[255], *client_name, prompt[255];
 
     krb5_init_context(&kcontext);
@@ -107,6 +108,7 @@ main(argc, argv)
 	case 'f':
 	    options |= KDC_OPT_FORWARDABLE;
 	    break;
+#ifndef NO_KEYTAB
        case 'k':
 	    use_keytab = 1;
 	    break;
@@ -125,6 +127,7 @@ main(argc, argv)
 		 errflg++;
 	    }
 	    break;
+#endif
        case 'l':
 	    code = krb5_parse_lifetime(optarg, &lifetime);
 	    if (code != 0 || lifetime == 0) {
@@ -173,6 +176,7 @@ main(argc, argv)
     }
 
     if (optind != argc-1) {       /* No principal name specified */
+#ifndef NO_KEYTAB
 	 if (use_keytab) {
 	      /* Use the default host/service name */
 	      code = krb5_sname_to_principal(kcontext, NULL, NULL,
@@ -182,10 +186,13 @@ main(argc, argv)
 			   "when creating default server principal name");
 		   exit(1);
 	      }
-	 } else {
+	 } else
+#endif
+	 {
 	      /* Get default principal from cache if one exists */
 	      code = krb5_cc_get_principal(kcontext, ccache, &me);
 	      if (code) {
+#ifdef HAVE_PWD_H
 		   /* Else search passwd file for client */
 		   pw = getpwuid((int) getuid());
 		   if (pw) {
@@ -199,6 +206,10 @@ main(argc, argv)
 			"Unable to identify user from password file\n");
 			exit(1);
 		   }
+#else /* HAVE_PWD_H */
+		   fprintf(stderr, "Unable to identify user\n");
+		   exit(1);
+#endif /* HAVE_PWD_H */
 	      }
 	 }
     } /* Use specified name */	 
@@ -248,7 +259,10 @@ main(argc, argv)
     } else
 	my_creds.times.renew_till = 0;
 
-    if (!use_keytab) {
+#ifndef NO_KEYTAB
+    if (!use_keytab)
+#endif
+    {
 	 (void) sprintf(prompt,"Password for %s: ", (char *) client_name);
 
 	 pwsize = sizeof(password);
@@ -265,10 +279,12 @@ main(argc, argv)
 					      NULL, preauth, password, ccache,
 					      &my_creds, 0);
 	 memset(password, 0, sizeof(password));
+#ifndef NO_KEYTAB
     } else {
 	 code = krb5_get_in_tkt_with_keytab(kcontext, options, 0,
 					    NULL, preauth, keytab, ccache,
 					    &my_creds, 0);
+#endif
     }
     
     krb5_free_principal(kcontext, server);
