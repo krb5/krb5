@@ -2299,7 +2299,7 @@ char *adata;
 #ifdef KRB5_KRB4_COMPAT
 	static char **service=NULL;
 	char instance[INST_SZ];
-	u_long cksum;
+	KRB4_32 cksum;
 	char buf[FTP_BUFSIZ];
 	u_char out_buf[sizeof(buf)];
 #endif /* KRB5_KRB4_COMPAT */

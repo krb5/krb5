@@ -1,3 +1,8 @@
+2003-01-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (auth_data): Kerberos v4 checksum must be a 32-bit
+	value.
+
 2002-10-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* ftpcmd.y: Bison 1.75 cleanup. Essentially remove `=' before
