@@ -522,20 +522,20 @@ struct krb5_enc_provider {
     void (*keysize) (size_t *keybytes, size_t *keylength);
 
     /* cipher-state == 0 fresh state thrown away at end */
-    krb5_error_code (*encrypt) (krb5_const krb5_keyblock *key,
-				krb5_const krb5_data *cipher_state,
-				krb5_const krb5_data *input,
+    krb5_error_code (*encrypt) (const krb5_keyblock *key,
+				const krb5_data *cipher_state,
+				const krb5_data *input,
 				krb5_data *output);
 
-    krb5_error_code (*decrypt) (krb5_const krb5_keyblock *key,
-				krb5_const krb5_data *ivec,
-				krb5_const krb5_data *input,
+    krb5_error_code (*decrypt) (const krb5_keyblock *key,
+				const krb5_data *ivec,
+				const krb5_data *input,
 				krb5_data *output);
 
-    krb5_error_code (*make_key) (krb5_const krb5_data *randombits,
+    krb5_error_code (*make_key) (const krb5_data *randombits,
 				 krb5_keyblock *key);
 
-  krb5_error_code (*init_state) (krb5_const krb5_keyblock *key,
+  krb5_error_code (*init_state) (const krb5_keyblock *key,
 				 krb5_keyusage keyusage, krb5_data *out_state);
   krb5_error_code (*free_state) (krb5_data *state);
   
@@ -547,39 +547,39 @@ struct krb5_hash_provider {
     void (*block_size) (size_t *output);
 
     /* this takes multiple inputs to avoid lots of copying. */
-    krb5_error_code (*hash) (unsigned int icount, krb5_const krb5_data *input,
+    krb5_error_code (*hash) (unsigned int icount, const krb5_data *input,
 			     krb5_data *output);
 };
 
 struct krb5_keyhash_provider {
     void (*hash_size) (size_t *output);
 
-    krb5_error_code (*hash) (krb5_const krb5_keyblock *key,
+    krb5_error_code (*hash) (const krb5_keyblock *key,
 			     krb5_keyusage keyusage,
-			     krb5_const krb5_data *ivec,
-			     krb5_const krb5_data *input,
+			     const krb5_data *ivec,
+			     const krb5_data *input,
 			     krb5_data *output);
 
-    krb5_error_code (*verify) (krb5_const krb5_keyblock *key,
+    krb5_error_code (*verify) (const krb5_keyblock *key,
 			       krb5_keyusage keyusage,
-			       krb5_const krb5_data *ivec,
-			       krb5_const krb5_data *input,
-			       krb5_const krb5_data *hash,
+			       const krb5_data *ivec,
+			       const krb5_data *input,
+			       const krb5_data *hash,
 			       krb5_boolean *valid);
 };
 
-typedef void (*krb5_encrypt_length_func) (krb5_const struct krb5_enc_provider *enc,
-  krb5_const struct krb5_hash_provider *hash,
+typedef void (*krb5_encrypt_length_func) (const struct krb5_enc_provider *enc,
+  const struct krb5_hash_provider *hash,
   size_t inputlen, size_t *length);
 
-typedef krb5_error_code (*krb5_crypt_func) (krb5_const struct krb5_enc_provider *enc,
-  krb5_const struct krb5_hash_provider *hash,
-  krb5_const krb5_keyblock *key, krb5_keyusage keyusage,
-  krb5_const krb5_data *ivec, 
-  krb5_const krb5_data *input, krb5_data *output);
+typedef krb5_error_code (*krb5_crypt_func) (const struct krb5_enc_provider *enc,
+  const struct krb5_hash_provider *hash,
+  const krb5_keyblock *key, krb5_keyusage keyusage,
+  const krb5_data *ivec, 
+  const krb5_data *input, krb5_data *output);
 
-typedef krb5_error_code (*krb5_str2key_func) (krb5_const struct krb5_enc_provider *enc, krb5_const krb5_data *string,
-  krb5_const krb5_data *salt, krb5_keyblock *key);
+typedef krb5_error_code (*krb5_str2key_func) (const struct krb5_enc_provider *enc, const krb5_data *string,
+  const krb5_data *salt, krb5_keyblock *key);
 
 struct krb5_keytypes {
     krb5_enctype etype;
@@ -620,20 +620,20 @@ struct krb5_cksumtypes {
  */
 
 void krb5_nfold
-(unsigned int inbits, krb5_const unsigned char *in,
+(unsigned int inbits, const unsigned char *in,
 		unsigned int outbits, unsigned char *out);
 
 krb5_error_code krb5_hmac
-(krb5_const struct krb5_hash_provider *hash,
-		krb5_const krb5_keyblock *key, unsigned int icount,
-		krb5_const krb5_data *input, krb5_data *output);
+(const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key, unsigned int icount,
+		const krb5_data *input, krb5_data *output);
 
 /* A definition of init_state for DES based encryption systems.
  * sets up an 8-byte IV of all zeros
  */
 
 krb5_error_code krb5int_des_init_state
-(krb5_const krb5_keyblock *key, krb5_keyusage keyusage, krb5_data *new_state);
+(const krb5_keyblock *key, krb5_keyusage keyusage, krb5_data *new_state);
 
 /* 
  * normally to free a cipher_state you can just memset the length to zero and
@@ -659,27 +659,27 @@ typedef struct _krb5_cryptosystem_entry {
     krb5_magic magic;
     krb5_error_code (*encrypt_func) ( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
-					       krb5_const size_t,
+					       const size_t,
 					       krb5_encrypt_block *,
 					       krb5_pointer);
     krb5_error_code (*decrypt_func) ( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
-					       krb5_const size_t,
+					       const size_t,
 					       krb5_encrypt_block *,
 					       krb5_pointer);
     krb5_error_code (*process_key) ( krb5_encrypt_block *,
-					      krb5_const krb5_keyblock *);
+					      const krb5_keyblock *);
     krb5_error_code (*finish_key) ( krb5_encrypt_block *);
-    krb5_error_code (*string_to_key) (krb5_const krb5_encrypt_block *,
+    krb5_error_code (*string_to_key) (const krb5_encrypt_block *,
 						krb5_keyblock *,
-						krb5_const krb5_data *,
-						krb5_const krb5_data *);
-    krb5_error_code (*init_random_key) ( krb5_const krb5_encrypt_block *,
-						krb5_const krb5_keyblock *,
+						const krb5_data *,
+						const krb5_data *);
+    krb5_error_code (*init_random_key) ( const krb5_encrypt_block *,
+						const krb5_keyblock *,
 						krb5_pointer *);
-    krb5_error_code (*finish_random_key) ( krb5_const krb5_encrypt_block *,
+    krb5_error_code (*finish_random_key) ( const krb5_encrypt_block *,
 						krb5_pointer *);
-    krb5_error_code (*random_key) ( krb5_const krb5_encrypt_block *,
+    krb5_error_code (*random_key) ( const krb5_encrypt_block *,
 					      krb5_pointer,
 					      krb5_keyblock **);
     int block_length;
@@ -700,19 +700,19 @@ typedef struct _krb5_cs_table_entry {
 /* could be used in a table to find a sumtype */
 typedef krb5_error_code
 	(*SUM_FUNC) (
-		krb5_const krb5_pointer /* in */,
-		krb5_const size_t /* in_length */,
-		krb5_const krb5_pointer /* key/seed */,
-		krb5_const size_t /* key/seed size */,
+		const krb5_pointer /* in */,
+		const size_t /* in_length */,
+		const krb5_pointer /* key/seed */,
+		const size_t /* key/seed size */,
 		krb5_checksum * /* out_cksum */);
 
 typedef krb5_error_code
 	(*SUM_VERF_FUNC) (
-		krb5_const krb5_checksum * /* out_cksum */,
-		krb5_const krb5_pointer /* in */,
-		krb5_const size_t /* in_length */,
-		krb5_const krb5_pointer /* key/seed */,
-		krb5_const size_t /* key/seed size */);
+		const krb5_checksum * /* out_cksum */,
+		const krb5_pointer /* in */,
+		const size_t /* in_length */,
+		const krb5_pointer /* key/seed */,
+		const size_t /* key/seed size */);
 
 typedef struct _krb5_checksum_entry {
     krb5_magic magic;
@@ -737,8 +737,8 @@ time_t gmt_mktime (struct tm *);
 /* this helper fct is in libkrb5, but it makes sense declared here. */
 
 krb5_error_code krb5_encrypt_helper
-(krb5_context context, krb5_const krb5_keyblock *key,
-		krb5_keyusage keyusage, krb5_const krb5_data *plain,
+(krb5_context context, const krb5_keyblock *key,
+		krb5_keyusage keyusage, const krb5_data *plain,
 		krb5_enc_data *cipher);
 
 /*
@@ -832,7 +832,7 @@ typedef krb5_error_code (*krb5_preauth_obtain_proc)
 		    krb5_etype_info,
 		    krb5_keyblock *, 
 		    krb5_error_code ( * )(krb5_context,
-					  krb5_const krb5_enctype,
+					  const krb5_enctype,
 					  krb5_data *,
 					  krb5_const_pointer,
 					  krb5_keyblock **),
@@ -847,13 +847,13 @@ typedef krb5_error_code (*krb5_preauth_process_proc)
 		    krb5_kdc_req *,
 		    krb5_kdc_rep *,
 		    krb5_error_code ( * )(krb5_context,
-					  krb5_const krb5_enctype,
+					  const krb5_enctype,
 					  krb5_data *,
 					  krb5_const_pointer,
 					  krb5_keyblock **),
 		    krb5_const_pointer,
 		    krb5_error_code ( * )(krb5_context,
-					  krb5_const krb5_keyblock *,
+					  const krb5_keyblock *,
 					  krb5_const_pointer,
 					  krb5_kdc_rep * ),
 		    krb5_keyblock **,
@@ -873,7 +873,7 @@ krb5_error_code krb5_obtain_padata
     	(krb5_context,
 		krb5_pa_data **,
 		krb5_error_code ( * )(krb5_context,
-						      krb5_const krb5_enctype,
+						      const krb5_enctype,
 						      krb5_data *,
 						      krb5_const_pointer,
 						      krb5_keyblock **),
@@ -886,13 +886,13 @@ krb5_error_code krb5_process_padata
 		krb5_kdc_req *,
 		krb5_kdc_rep *,
 		krb5_error_code ( * )(krb5_context,
-						      krb5_const krb5_enctype,
+						      const krb5_enctype,
 						      krb5_data *,
 						      krb5_const_pointer,
 						      krb5_keyblock **),
 		krb5_const_pointer,
 		krb5_error_code ( * )(krb5_context,
-						      krb5_const krb5_keyblock *,
+						      const krb5_keyblock *,
 						      krb5_const_pointer,
 						      krb5_kdc_rep * ),
 		krb5_keyblock **, 	
@@ -1395,16 +1395,16 @@ krb5_error_code decode_krb5_predicted_sam_response
  */
 krb5_error_code krb5_encrypt_tkt_part
 	(krb5_context,
-		krb5_const krb5_keyblock *,
+		const krb5_keyblock *,
 		krb5_ticket * );
 
 
 krb5_error_code krb5_encode_kdc_rep
 	(krb5_context,
-		krb5_const krb5_msgtype,
-		krb5_const krb5_enc_kdc_rep_part *,
+		const krb5_msgtype,
+		const krb5_enc_kdc_rep_part *,
 		int using_subkey,
-		krb5_const krb5_keyblock *,
+		const krb5_keyblock *,
 		krb5_kdc_rep *,
 		krb5_data ** );
 
@@ -1557,9 +1557,9 @@ typedef struct _krb5int_access {
   const  struct krb5_hash_provider *md5_hash_provider;
   const struct krb5_enc_provider *arcfour_enc_provider;
   krb5_error_code (* krb5_hmac)
-  (krb5_const struct krb5_hash_provider *hash,
-   krb5_const krb5_keyblock *key, unsigned int icount,
-   krb5_const krb5_data *input, krb5_data *output);
+  (const struct krb5_hash_provider *hash,
+   const krb5_keyblock *key, unsigned int icount,
+   const krb5_data *input, krb5_data *output);
   } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \
@@ -1652,7 +1652,7 @@ typedef struct _krb5_kt_ops {
     /* routines always present */
     krb5_error_code (KRB5_CALLCONV *resolve) 
 	(krb5_context,
-		 krb5_const char *,
+		 const char *,
 		 krb5_keytab *);
     krb5_error_code (KRB5_CALLCONV *get_name) 
 	(krb5_context,

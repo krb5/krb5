@@ -1,3 +1,8 @@
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin, k5-int.h: Use const instead of krb5_const.
+	* krb5.hin (krb5_const): Deleted definition.
+
 2002-02-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* foreachaddr.c: New file, contents taken from code shared between
