@@ -109,5 +109,7 @@ register int *error;
 	    goto errout;
 	}
     }
+    if (retval == 0)
+	*error = ISODE_LOCAL_ERR_MISSING_PART;
     return(retval);
 }
