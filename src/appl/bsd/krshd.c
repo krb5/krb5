@@ -1845,12 +1845,12 @@ recvauth(netf, peersin, valid_checksum)
 				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, 0, &version);
 #else
-    status = krb5_recvauth(bsd_context, &auth_context, &netf,
-                           NULL,        /* daemon principal */
-                           0,           /* no flags */
-		           keytab,      /* normally NULL to use v5srvtab */
-		           &ticket,    /* return ticket */
-			   &version); /* application version string */
+    status = krb5_recvauth_version(bsd_context, &auth_context, &netf,
+				   NULL,        /* daemon principal */
+				   0,           /* no flags */
+				   keytab,      /* normally NULL to use v5srvtab */
+				   &ticket,    /* return ticket */
+				   &version); /* application version string */
     auth_sys = KRB5_RECVAUTH_V5;
 #endif
 
