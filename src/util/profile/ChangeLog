@@ -1,3 +1,9 @@
+Mon Mar  8 19:10:06 1999  Tom Yu  <tlyu@mit.edu>
+
+	* profile.hin: Fix prototype of profile_flush() to use long rather
+	than errcode_t to avoid breaking other stuff that includes
+	profile.h.
+
 Mon Mar  8 14:38:24 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* prof_tree.c (profile_node_iterator): Fix bug where it will loop
