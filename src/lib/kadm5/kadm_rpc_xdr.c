@@ -1,14 +1,8 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
- *
- * $Header$
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <krb5.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>

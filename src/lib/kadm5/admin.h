@@ -12,7 +12,7 @@
 #endif
      
 #include	<sys/types.h>
-#include	<rpc/rpc.h>
+#include	<gssrpc/rpc.h>
 #include	<krb5.h>
 #include	<k5-int.h>
 #include	<com_err.h>

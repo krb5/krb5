@@ -11,7 +11,7 @@
 #ifndef __ADB_H__
 #define __ADB_H__
 #include <sys/types.h>
-#include <rpc/types.h>
+#include <gssrpc/types.h>
 #include "k5-int.h"
 #include <krb5/kdb.h>
 #include <db.h>

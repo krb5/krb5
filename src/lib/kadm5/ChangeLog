@@ -1,3 +1,9 @@
+Fri Feb 13 21:33:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* admin.h:
+	* kadm_rpc.h:
+	* kadm_rpc_xdr.c: Update header locations.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
