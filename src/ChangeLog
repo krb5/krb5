@@ -1,7 +1,7 @@
 2004-07-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Fix bug in last change that caused a variable to
-	be used before set.
+	be used before set.  Check for pthread_rwlock_init.
 
 2004-07-04  Ken Raeburn  <raeburn@mit.edu>
 
