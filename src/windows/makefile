@@ -6,7 +6,7 @@ all::
 	cd cns
 	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\wintel
-	cd wintel
+	cd ..\wintel
 	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
@@ -15,7 +15,7 @@ clean::
 	cd cns
 	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in windows\wintel
-	cd wintel
+	cd ..\wintel
 	-$(MAKE) -$(MAKEFLAGS) clean
 	cd ..
 

@@ -1,3 +1,7 @@
+Mon Mar 27 23:34:58 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: fixed typo on the cd command
+
 Mon Mar 27 20:34:58 1995 Keith Vetter (keithv@fusion.com)
 
 	* makefile: makes recursively in wintel directory
