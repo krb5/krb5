@@ -80,9 +80,9 @@ gss-library-current-version							= 1
 gss-library-definition-version						= 0
 gss-library-implementation-version					= 1
 
-krb5-library-current-version						= 3
-krb5-library-definition-version						= 2
-krb5-library-implementation-version					= 3
+krb5-library-current-version						= 4
+krb5-library-definition-version						= 4
+krb5-library-implementation-version					= 4
 
 profile-library-current-version						= 0
 profile-library-definition-version					= 0
