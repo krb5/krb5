@@ -9,6 +9,9 @@ set kdestroy $KDESTROY
 
 set hostname [exec hostname]
 
+# this will initialize the database and keytab
+load_lib "helpers.exp"
+
 proc rpc_test_version {} {
 	global CLIENT
 	global SERVER

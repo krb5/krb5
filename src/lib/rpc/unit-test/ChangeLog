@@ -1,3 +1,8 @@
+2002-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* config/unix.exp (top level): Load helpers.exp here, to make
+	sure database setup happens properly.
+
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib/helpers.exp (set_from_env, expect_tcl_prompt,
