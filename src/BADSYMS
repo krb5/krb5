@@ -1,22 +1,22 @@
 ./admin/aname/configure.in: const HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
-./admin/aname/kdb5_anadd.c:
+./admin/aname/kdb5_anadd.c: "
+./admin/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./admin/convert/configure.in: const HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
 ./admin/convert/kdb5_convert.c: ODBM
 ./admin/create/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./admin/create/kdb5_create.c:
+./admin/create/kdb5_create.c: "
 ./admin/destroy/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./admin/destroy/kdb5_destroy.c:
+./admin/destroy/kdb5_destroy.c: "
 ./admin/edit/configure.in: STDC_HEADERS const HAVE_FTIME HAVE_GETCWD HAVE_TIMEZONE HAVE_ALLOCA_H HAVE_SYS_TIMEB_H HAVE_UNISTD_H HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
-./admin/edit/dump.c:
+./admin/edit/dump.c: "
 ./admin/edit/dumpv4.c: KRB5_KRB4_COMPAT
 ./admin/edit/kdb5_edit.c: __STDC__
-./admin/edit/kdb5_edit.h:
-./admin/edit/ss_wrapper.c:
-./admin/edit/tcl_wrapper.c:
+./admin/edit/kdb5_edit.h: "
+./admin/edit/ss_wrapper.c: "
+./admin/edit/tcl_wrapper.c: "
 ./admin/edit/util.c: SYSTYPE_BSD43 mips sysvimp ultrix vax
 ./admin/stash/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./admin/stash/kdb5_stash.c:
-./admin/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./admin/stash/kdb5_stash.c: "
 ./kadmin.old/client/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./kadmin.old/client/kadmin.c: HAVE_STDLIB_H MAXPATHLEN unicos61
 ./kadmin.old/client/kadmin_add.c: MACH_PASS
@@ -24,24 +24,24 @@
 ./kadmin.old/client/kadmin_cpr.c: HAVE_STDLIB_H
 ./kadmin.old/client/kadmin_cpw.c: MACH_PASS
 ./kadmin.old/client/kadmin_del.c: HAVE_STDLIB_H
-./kadmin.old/client/kadmin_done.c:
+./kadmin.old/client/kadmin_done.c: "
 ./kadmin.old/client/kadmin_inq.c: HAVE_STDLIB_H
 ./kadmin.old/client/kadmin_mod.c: HAVE_STDLIB_H
 ./kadmin.old/client/kadmin_msnd.c: HAVE_STDLIB_H MAXPATHLEN SANDIA
-./kadmin.old/kpasswd/configure.in: HAVE_GETUTENT HAVE_SETUTENT HAVE_SETUTXENT HAVE_UPDWTMP HAVE_UPDWTMPX NO_UT_EXIT NO_UT_HOST NO_UT_PID NO_UT_TYPE const HAVE_STDLIB_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
-./kadmin.old/kpasswd/kpasswd.c: MACH_PASS MAXPATHLEN SANDIA USE_STRING_H unicos61
+./kadmin.old/kpasswd/configure.in: HAVE_GETUTENT HAVE_SETUTENT HAVE_SETUTXENT HAVE_UPDWTMP HAVE_UPDWTMPX NO_UT_EXIT NO_UT_HOST NO_UT_PID NO_UT_TYPE const HAVE_STDLIB_H HAVE_STRING_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
+./kadmin.old/kpasswd/kpasswd.c: MACH_PASS MAXPATHLEN SANDIA unicos61
 ./kadmin.old/kpasswd/networked.c: DEBUG MAXHOSTNAME NOTKERBEROS _TYPES_
 ./kadmin.old/server/configure.in: TIME_WITH_SYS_TIME USE_SIGPROCMASK const HAVE_LIBNSL HAVE_LIBSOCKET
 ./kadmin.old/server/adm_adm_func.c: MACH_PASS SANDIA hpux
 ./kadmin.old/server/adm_check.c: hpux
-./kadmin.old/server/adm_extern.c:
+./kadmin.old/server/adm_extern.c: "
 ./kadmin.old/server/adm_extern.h: __ADM_EXTERN__
 ./kadmin.old/server/adm_fmt_inq.c: HAVE_SYS_TIME_H SANDIA
 ./kadmin.old/server/adm_funcs.c: SANDIA hpux
 ./kadmin.old/server/adm_kadmin.c: hpux
 ./kadmin.old/server/adm_kpasswd.c: hpux
 ./kadmin.old/server/adm_listen.c: _AIX hpux sigmask
-./kadmin.old/server/adm_msgs.c:
+./kadmin.old/server/adm_msgs.c: "
 ./kadmin.old/server/adm_nego.c: MACH_PASS SANDIA hpux
 ./kadmin.old/server/adm_network.c: ADM5_DEFAULT_PORT DEBUG OLD_SIGNALS POSIX_SIGTYPE WEXITSTATUS hpux sigmask unicos61
 ./kadmin.old/server/adm_parse.c: SANDIA SYSTYPE_BSD43 aux20 mips sysvimp unicos61
@@ -49,28 +49,47 @@
 ./kadmin.old/server/adm_server.c: LOG_AUTH SANDIA __STDC__ hpux sigmask
 ./kadmin.old/server/adm_v4_pwd.c: SANDIA
 ./kadmin.old/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./appl/bsd/configure.in: GETPGRP_ONEARG HAS_STRSAVE HAS_UTIMES HAVE_GETTOSBYNAME HAVE_GETUTENT HAVE_GRANTPT HAVE_INITGROUPS HAVE_KILLPG HAVE_LINE_PUSH HAVE_LOGWTMP HAVE_OPENPTY HAVE_PTSNAME HAVE_SETLOGIN HAVE_SETOWN HAVE_SETPRIORITY HAVE_SETRESUID HAVE_SETREUID HAVE_SETSID HAVE_SETUTENT HAVE_SETUTXENT HAVE_SHADOW HAVE_STREAMS HAVE_TTYNAME HAVE_UPDWTMP HAVE_UPDWTMPX HAVE_VFORK_H HAVE_WAITPID NEED_SYS_ERRLIST NO_UT_EXIT NO_UT_HOST NO_UT_PID NO_UT_TYPE POSIX_SETJMP POSIX_SIGNALS POSIX_TERMIOS RETSIGTYPE SETPGRP_TWOARG STDC_HEADERS USE_DIRENT_H WAIT_USES_INT const mode_t pid_t vfork HAVE_LASTLOG_H HAVE_STDLIB_H HAVE_SYS_FILIO_H HAVE_SYS_LABEL_H HAVE_SYS_PTYVAR_H HAVE_SYS_SELECT_H HAVE_SYS_SOCKIO_H HAVE_SYS_TTY_H HAVE_TTYENT_H HAVE_UNISTD_H HAVE_LIBCRYPT HAVE_LIBNSL HAVE_LIBSOCKET HAVE_LIBUTIL
-./appl/bsd/defines.h:
+./kadmin.v4/server/configure.in: HAS_STDLIB_H NEED_SYS_FCNTL_H POSIX_SIGNALS TIME_WITH_SYS_TIME WAIT_USES_INT const HAVE_SYS_TIME_H HAVE_UNISTD_H HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
+./kadmin.v4/server/acl_files.c: KRB_REALM
+./kadmin.v4/server/admin_server.c: DEBUG NOENCRYPTION POSIX_SIGTYPE _AIX sigmask
+./kadmin.v4/server/kadm_funcs.c: HESIOD NOENCRYPTION
+./kadmin.v4/server/kadm_ser_wrap.c: NOENCRYPTION
+./kadmin.v4/server/kadm_server.c: notdef
+./kadmin.v4/server/kadm_server.h: KADM_SERVER_DEFS
+./kadmin.v4/server/kadm_stream.c:
+./kadmin.v4/server/kadm_supp.c: notdef
+./kadmin.v4/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./acconfig.h: "
+./patchlevel.h: "
+./wconfig.c: "
+./appl/bsd/configure.in: GETPGRP_ONEARG HAS_STRSAVE HAS_UTIMES HAVE_GETTOSBYNAME HAVE_GETUTENT HAVE_GRANTPT HAVE_INITGROUPS HAVE_KILLPG HAVE_LINE_PUSH HAVE_LOGWTMP HAVE_OPENPTY HAVE_PTSNAME HAVE_SETLOGIN HAVE_SETLUID HAVE_SETOWN HAVE_SETPRIORITY HAVE_SETRESUID HAVE_SETREUID HAVE_SETSID HAVE_SETUTENT HAVE_SETUTXENT HAVE_SHADOW HAVE_STREAMS HAVE_TTYNAME HAVE_UPDWTMP HAVE_UPDWTMPX HAVE_VFORK_H HAVE_WAITPID NEED_SYS_ERRLIST NO_UT_EXIT NO_UT_HOST NO_UT_PID NO_UT_TYPE POSIX_SETJMP POSIX_SIGNALS POSIX_TERMIOS RETSIGTYPE SETPGRP_TWOARG STDC_HEADERS USE_DIRENT_H WAIT_USES_INT const mode_t pid_t vfork HAVE_LASTLOG_H HAVE_STDLIB_H HAVE_SYS_FILIO_H HAVE_SYS_LABEL_H HAVE_SYS_PTYVAR_H HAVE_SYS_SELECT_H HAVE_SYS_SOCKIO_H HAVE_SYS_TTY_H HAVE_TTYENT_H HAVE_UNISTD_H HAVE_LIBCRYPT HAVE_LIBNSL HAVE_LIBSOCKET HAVE_LIBUTIL
+./appl/bsd/defines.h: "
 ./appl/bsd/fieldbits.h: KRB5_FIELDBITS__
 ./appl/bsd/forward.c: KERBEROS KRB5 MAXHOSTNAMELEN
 ./appl/bsd/getdtablesize.c: _SC_OPEN_MAX
 ./appl/bsd/kcmd.c: HAVE_STRSAVE MAXPATHLEN SYSV _TYPES_ convex hpux sigmask sun tek ultrix
 ./appl/bsd/krcp.c: BUFSIZ HAVE_STRSAVE KERBEROS NOFCHMOD NOROUNDUP UCB_RCP _TYPES_ hpux lint roundup unicos61
-./appl/bsd/krlogin.c: BSD BUFSIZ CRAY HAS_STDLIB_H KERBEROS LLITOUT LPASS8 NOROUNDUP NO_WINSIZE OLD_VERSION ONOCR SA_RESTART SIGWINCH SYSV TABDLY TIOCFLUSH TIOCGLTC TIOCGWINSZ TIOCPKT_NOSTOP UCB_RLOGIN USE_TERMIO VDSUSP VLNEXT _AIX __386BSD__ __SCO__ __mips __sgi hpux lint roundup sgi sigmask solaris20 ultrix
+./appl/bsd/krlogin.c: BSD BUFSIZ CRAY KERBEROS LLITOUT LPASS8 NOROUNDUP NO_WINSIZE OLD_VERSION ONOCR SA_RESTART SIGWINCH SYSV TABDLY TIOCFLUSH TIOCGLTC TIOCGWINSZ TIOCPKT_NOSTOP UCB_RLOGIN USE_TERMIO VDSUSP VLNEXT _AIX __386BSD__ __SCO__ __mips __sgi hpux lint roundup sgi sigmask solaris20 ultrix
 ./appl/bsd/krlogind.c: ALWAYS_V5_KUSEROK BUFSIZ CRYPT DO_NOT_USE_K_LOGIN KERBEROS KRB5_KRB4_COMPAT KRB_SENDAUTH_VLEN LOGIN_PROGRAM LOG_ALL_LOGINS LOG_AUTH LOG_NDELAY LOG_OTHER_USERS LOG_REMOTE_REALM NOFCHMOD NO_WINSIZE STDERR_FILENO SunOS TIOCFLUSH TIOCNOTTY TIOCPKT TIOCPKT_NOSTOP TIOCPKT_WINDOW TIOCSCTTY TIOCSPGRP TIOCSWINSZ UT_NAMESIZE VHANG_FIRST VHANG_LAST VHANG_NO_CLOSE _AIX __SCO__ __svr4__ hpux i386 ibm032 lint min roundup solaris20 sun sysvimp ultrix vax
 ./appl/bsd/krsh.c: ATHENA BUFSIZ KERBEROS RLOGIN_PROGRAM UCB_RLOGIN UCB_RSH lint sgi
 ./appl/bsd/krshd.c: ALWAYS_V5_KUSEROK BSD BUFSIZ CRAY CRAY2 DEBUG IP_SECURITY IP_TOS KERBEROS KRB5_KRB4_COMPAT KRB_SENDAUTH_VLEN LOG_ALL_LOGINS LOG_CMD LOG_DAEMON LOG_ODELAY LOG_OTHER_USERS LOG_REMOTE_REALM MAX MIN NCARGS NO_UDB TOS_WARN __SCO__ lint sgi unicos61
-./appl/bsd/login.c: BIND_HACK CDISCARD CNUL CSTATUS CSUSP CSWTCH ECHOCTL ECHOKE HAVE_STRSAVE KRB4 LOG_ODELAY NOENCRYPTION NO_INIT_CC NTTYDISC OQUOTA QUOTAWARN SETPAG TAB3 TIOCHPCL TIOCLSET TIOCNXCL TIOCSETD UT_HOSTSIZE UT_NAMESIZE VDISCARD VDISCRD VDSUSP VEOL2 VLNEXT VREPRINT VSTATUS VSUSP VWERASE VWERSE _AIX _IBMR2 __SCO__ lint linux
+./appl/bsd/login.c: BIND_HACK CDISCARD CNUL CSTATUS CSUSP CSWTCH ECHOCTL ECHOKE HAVE_STRSAVE KRB4 LOG_ODELAY NOENCRYPTION NO_INIT_CC NTTYDISC OQUOTA QUOTAWARN SETPAG TAB3 TIOCHPCL TIOCLSET TIOCNXCL TIOCSETD UT_HOSTSIZE UT_NAMESIZE VDISCARD VDISCRD VDSUSP VEOL2 VLNEXT VREPRINT VSTATUS VSUSP VWERASE VWERSE _AIX _IBMR2 lint linux
 ./appl/bsd/loginpaths.h: LPATH MIPSEB NeXT _IBMR2 __386BSD__ __DGUX __NetBSD__ __SCO__ __alpha __m88k__ __osf__ __pyrsoft __svr4__ __ultrix hpux linux sgi solaris20 sun
 ./appl/bsd/logutil.c: EMPTY USER_PROCESS UTMP_FILE WTMP_FILE
 ./appl/bsd/rpaths.h: RPROGS_IN_USR_BIN RPROGS_IN_USR_BSD RPROGS_IN_USR_UCB RSH_IS_RCMD RSH_IS_REMSH
-./appl/bsd/setenv.c:
+./appl/bsd/setenv.c: "
+./appl/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/gss-sample/configure.in: USE_STRING_H const HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/gss-sample/gss-client.c:
 ./appl/gss-sample/gss-misc.c:
 ./appl/gss-sample/gss-server.c:
-./appl/movemail/configure.in: NEED_SYS_FCNTL_H const HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
-./appl/movemail/movemail.c: BSD F_OK HAS_STDLIB_H HESIOD KERBEROS KPOP_SERVICE KRB4 KRB5 MAIL_USE_FLOCK MAIL_USE_POP NO_STDLIB_H OUTPUT_MMDF_FORMAT POP_SNAME STRIDE USE_STRING_H XENIX __STDC__
+./appl/mailquery/configure.in: HAS_STRERROR const HAVE_STDLIB_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/mailquery/mailquery.c: HESIOD KPOP
+./appl/mailquery/pop.h: "
+./appl/mailquery/poplib.c: KPOP KPOP_SERVICE KRB4 KRB5
+./appl/movemail/configure.in: NEED_SYS_FCNTL_H const HAVE_STDLIB_H HAVE_STRING_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/movemail/movemail.c: BSD F_OK HESIOD KERBEROS KPOP_SERVICE KRB4 KRB5 MAIL_USE_FLOCK MAIL_USE_POP OUTPUT_MMDF_FORMAT POP_SNAME STRIDE XENIX
 ./appl/popper/configure.in: HAS_PATHS_H HAS_UNISTD_H HAS_VSPRINTF NEED_SYS_FCNTL_H POSIX_FILE_LOCKS WAIT_USES_INT const HAVE_STRINGS_H HAVE_LIBBSD HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/popper/pop_dele.c: DEBUG lint
 ./appl/popper/pop_dropcopy.c: DEBUG KERBEROS lint
@@ -97,60 +116,75 @@
 ./appl/popper/popper.c: KERBEROS KRB4 KRB5 STRNCASECMP lint
 ./appl/popper/popper.h: BSD MAILDIR MAXHOSTNAMELEN POP_PASSFILE POP_PVT_PASSWD
 ./appl/popper/version.h: KERBEROS KRB5
-./appl/sample/sclient/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./appl/sample/sclient/sclient.c: HAVE_STDLIB_H
-./appl/sample/sserver/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./appl/sample/sserver/sserver.c:
+./appl/sample/sclient/configure.in: const HAVE_STDLIB_H HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/sample/sclient/sclient.c:
 ./appl/sample/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/sample/sample.h: KRB5_SAMPLE__
+./appl/sample/sserver/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/sample/sserver/sserver.c: "
 ./appl/simple/client/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/simple/client/sim_client.c: DEBUG MAXHOSTNAMELEN
+./appl/simple/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/simple/simple.h: "
 ./appl/simple/server/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/simple/server/sim_server.c: DEBUG MAXHOSTNAMELEN
-./appl/simple/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./appl/simple/simple.h:
-./appl/telnet/libtelnet/configure.in: HAS_CGETENT KRB4 const HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/telnet/telnetd/configure.in: FILIO_H HAS_CGETENT HAS_GETTOS HAS_PTYVAR HAS_SAC NO_CC_T SETPGRP_TWOARG STREAMS STREAMSPTY SYSV_TERMIO TERMCAP TIME_WITH_SYS_TIME USE_TERMIO UTMPX const HAVE_VHANGUP HAVE_STRING_H HAVE_SYS_TIME_H HAVE_SYS_TTY_H HAVE_LIBNSL HAVE_LIBSOCKET HAVE_LIBUTIL
+./appl/telnet/telnetd/authenc.c: AUTHENTICATION ENCRYPTION
+./appl/telnet/telnetd/defs.h: BSD CRAY DIAGNOSTICS FD_SET HAVE_fd_set LINEMODE LOG_DAEMON LOG_ODELAY NO_SETSID PRINTOPTIONS TCSETCTTY TIOCSCTTY UNICOS5 _POSIX_VDISABLE __STDC__ __alpha __hpux
+./appl/telnet/telnetd/ext.h: AUTHENTICATION BFTPDAEMON CRAY2 DEFAULT_IM DIAGNOSTICS ENCRYPTION LINEMODE P SecurID UNICOS5 convex
+./appl/telnet/telnetd/global.c: "
+./appl/telnet/telnetd/pathnames.h: BFTPDAEMON
+./appl/telnet/telnetd/slc.c: LINEMODE
+./appl/telnet/telnetd/state.c: AUTHENTICATION CRAY2 ENCRYPTION ENV_HACK KLUDGELINEMODE LINEMODE TELOPT_ENVIRON TELOPT_NEW_ENVIRON UNICOS5
+./appl/telnet/telnetd/sys_term.c: AUTHENTICATION BFTPDAEMON CRAY CRAY2 EXTPROC KRB5 LINEMODE LOGIN_ARGS LOGIN_CAP_F LOGIN_PROGRAM LOGIN_R NEWINIT NO_LOGIN_F NO_LOGIN_H NO_LOGIN_P O_NOCTTY PARENT_DOES_UTMP SOLARIS SecurID TIOCEXT TIOCGPGRP TIOCPKT_IOCTL UNICOS5 VDISCARD VEOL VEOL2 VFLUSHO VLNEXT VREPRINT VSTART VSTATUS VSTOP VSUSP VWERASE _AIX _SC_CRAY_NPTY _SC_CRAY_SECURE_SYS __GNUC__ __hpux convex sun t_erase ultrix
+./appl/telnet/telnetd/telnetd-ktd.c: AUTHENTICATION BFTPDAEMON CRAY CRAY2 DIAGNOSTICS EAGAIN ENCRYPTION IPPROTO_IP IP_TOS KLUDGELINEMODE LINEMODE MAXHOSTNAMELEN NEWINIT NO_URGENT SIGINFO SIGTSTP SIGTTOU SO_OOBINLINE SecurID TCSIG TIOCNOTTY TIOCSCTTY UNICOS5 UNICOS50 _SC_CRAY_SECURE_SYS convex lint
+./appl/telnet/telnetd/telnetd.c: AUTHENTICATION BFTPDAEMON CRAY CRAY2 DIAGNOSTICS EAGAIN ENCRYPTION IPPROTO_IP IP_TOS KLUDGELINEMODE KRB5 LINEMODE MAXHOSTNAMELEN NEWINIT NO_URGENT SCM_SECURITY SIGINFO SIGTSTP SIGTTOU SO_OOBINLINE SO_SEC_MULTI SecurID TCSIG TIOCNOTTY TIOCSCTTY UNICOS5 UNICOS50 _SC_CRAY_SECURE_SYS convex lint
+./appl/telnet/telnetd/telnetd.h: DIAGNOSTICS
+./appl/telnet/telnetd/termstat.c: CRAY2 ENCRYPTION KLUDGELINEMODE LINEMODE TIOCSWINSZ UNICOS5
+./appl/telnet/telnetd/utility.c: AUTHENTICATION DIAGNOSTICS ENCRYPTION
+./appl/telnet/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/telnet/libtelnet/configure.in: HAS_CGETENT KRB4 const HAVE_STDLIB_H HAVE_STRING_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/telnet/libtelnet/auth-proto.h: AUTHENTICATION KRB5 P __STDC__
-./appl/telnet/libtelnet/auth.c: AUTHENTICATION KANNAN KRB5 NO_STRING_H RSA_ENCPWD SPX __STDC__
+./appl/telnet/libtelnet/auth.c: AUTHENTICATION KANNAN KRB5 RSA_ENCPWD SPX __STDC__
 ./appl/telnet/libtelnet/auth.h: P __AUTH__ __STDC__
 ./appl/telnet/libtelnet/enc-proto.h: ENCRYPTION P TELENTD __STDC__
 ./appl/telnet/libtelnet/enc_des.c: ENCRYPTION __STDC__
-./appl/telnet/libtelnet/encrypt.c: DES_ENCRYPTION ENCRYPTION NO_STRING_H __STDC__ notdef
+./appl/telnet/libtelnet/encrypt.c: DES_ENCRYPTION ENCRYPTION __STDC__ notdef
 ./appl/telnet/libtelnet/encrypt.h: ENCRYPTION
 ./appl/telnet/libtelnet/forward.c: KERBEROS KRB5
-./appl/telnet/libtelnet/genget.c:
+./appl/telnet/libtelnet/genget.c: "
 ./appl/telnet/libtelnet/getent.c: SOLARIS
 ./appl/telnet/libtelnet/getopt.c: __STDC__
-./appl/telnet/libtelnet/gettytab.c:
-./appl/telnet/libtelnet/gettytab.h:
+./appl/telnet/libtelnet/gettytab.c: "
+./appl/telnet/libtelnet/gettytab.h: "
 ./appl/telnet/libtelnet/herror.c: sun
-./appl/telnet/libtelnet/kerberos.c: ENCRYPTION NO_STRING_H __STDC__ notdef
-./appl/telnet/libtelnet/kerberos5.c: ENCRYPTION FORWARD HAVE_STDLIB_H KRB5 NO_STRING_H
+./appl/telnet/libtelnet/kerberos.c: ENCRYPTION __STDC__ notdef
+./appl/telnet/libtelnet/kerberos5.c: ENCRYPTION FORWARD KRB5
 ./appl/telnet/libtelnet/key-proto.h: P __KEY_PROTO__ __STDC__
-./appl/telnet/libtelnet/krb4encpwd.c: ENCRYPTION NO_STRING_H __STDC__ notdef
-./appl/telnet/libtelnet/mem.c: BZERO NO_STRING_H UINT_MAX __STDC__
+./appl/telnet/libtelnet/krb4encpwd.c: ENCRYPTION __STDC__ notdef
+./appl/telnet/libtelnet/mem.c: BZERO UINT_MAX __STDC__
 ./appl/telnet/libtelnet/misc-proto.h: P __MISC_PROTO__ __STDC__
 ./appl/telnet/libtelnet/misc.c: AUTHENTICATION ENCRYPTION
-./appl/telnet/libtelnet/misc.h:
-./appl/telnet/libtelnet/parsetos.c:
-./appl/telnet/libtelnet/read_password.c: NO_STRING_H RSA_ENCPWD
-./appl/telnet/libtelnet/rsaencpwd.c: NO_STRING_H RSA_ENCPWD __STDC__ notdef
+./appl/telnet/libtelnet/misc.h: "
+./appl/telnet/libtelnet/parsetos.c: "
+./appl/telnet/libtelnet/read_password.c: RSA_ENCPWD
+./appl/telnet/libtelnet/rsaencpwd.c: RSA_ENCPWD __STDC__ notdef
 ./appl/telnet/libtelnet/setenv.c: __P __STDC__
 ./appl/telnet/libtelnet/setsid.c: convex
-./appl/telnet/libtelnet/spx.c: ENCRYPTION NO_STRING_H SPX __STDC__ notdef
-./appl/telnet/libtelnet/strcasecmp.c: NO_STRING_H __STDC__
-./appl/telnet/libtelnet/strchr.c: NO_STRING_H
-./appl/telnet/libtelnet/strdup.c: NO_STRING_H __STDC__
-./appl/telnet/libtelnet/strerror.c: NO_STRING_H
-./appl/telnet/libtelnet/strftime.c: NO_STRING_H __P __STDC__ notdef
-./appl/telnet/libtelnet/strrchr.c: NO_STRING_H
-./appl/telnet/telnet/configure.in: FILIO_H HAS_CGETENT HAS_GETTOS HAS_SETUPTERM HAVE_VFORK_H KRB4 NO_CC_T POSIX_SIGNALS RETSIGTYPE STDC_HEADERS STREAMS SYSV_TERMIO TERMCAP USE_TERMIO const pid_t vfork HAVE_STDLIB_H HAVE_SYS_SELECT_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
+./appl/telnet/libtelnet/spx.c: ENCRYPTION SPX __STDC__ notdef
+./appl/telnet/libtelnet/strcasecmp.c: __STDC__
+./appl/telnet/libtelnet/strchr.c:
+./appl/telnet/libtelnet/strdup.c: __STDC__
+./appl/telnet/libtelnet/strerror.c:
+./appl/telnet/libtelnet/strftime.c: __P __STDC__ notdef
+./appl/telnet/libtelnet/strrchr.c:
+./appl/telnet/telnet/configure.in: FILIO_H HAS_CGETENT HAS_GETTOS HAS_SETUPTERM HAVE_VFORK_H KRB4 NO_CC_T POSIX_SIGNALS RETSIGTYPE STDC_HEADERS STREAMS SYSV_TERMIO TERMCAP USE_TERMIO const pid_t vfork HAVE_STDLIB_H HAVE_STRING_H HAVE_SYS_SELECT_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/telnet/telnet/authenc.c: AUTHENTICATION ENCRYPTION
 ./appl/telnet/telnet/commands.c: AUTHENTICATION CRAY ENCRYPTION ENV_HACK F_GETOWN IPPROTO_IP IP_OPTIONS IP_TOS KLUDGELINEMODE MAXHOSTNAMELEN NOT43 OLD_ENVIRON SIGINFO SIGTSTP TN3270 __STDC__ h_addr notdef sysV88 unix
 ./appl/telnet/telnet/defines.h: TN3270
-./appl/telnet/telnet/externs.h: BSD CRAY ENCRYPTION KLUDGELINEMODE NO_BSD_SETJMP NO_STRING_H P TN3270 _POSIX_VDISABLE __svr4__ sun
+./appl/telnet/telnet/externs.h: BSD CRAY ENCRYPTION KLUDGELINEMODE NO_BSD_SETJMP P TN3270 _POSIX_VDISABLE __svr4__ sun
 ./appl/telnet/telnet/fdset.h: FD_SETSIZE
-./appl/telnet/telnet/general.h:
+./appl/telnet/telnet/general.h: "
 ./appl/telnet/telnet/main.c: AUTHENTICATION CRAY ENCRYPTION FORWARD KRB5 TN3270 __STDC__ lint unix
 ./appl/telnet/telnet/network.c: ENCRYPTION
 ./appl/telnet/telnet/ring.c: ENCRYPTION MIN NO_STRING_H notdef size_t
@@ -159,51 +193,31 @@
 ./appl/telnet/telnet/telnet.c: AUTHENTICATION ENCRYPTION KLUDGELINEMODE OLD_ENVIRON TN3270 notdef unix
 ./appl/telnet/telnet/terminal.c: ENCRYPTION KLUDGELINEMODE
 ./appl/telnet/telnet/tn3270.c: NOT43 PUTCHAR TN3270 sun unix
-./appl/telnet/telnet/types.h:
+./appl/telnet/telnet/types.h: "
 ./appl/telnet/telnet/utilities.c: AUTHENTICATION ENCRYPTION ENV_HACK NOT43 OLD_ENVIRON TN3270 unix
-./appl/telnet/telnetd/configure.in: FILIO_H HAS_CGETENT HAS_GETTOS HAS_PTYVAR HAS_SAC NO_CC_T SETPGRP_TWOARG STREAMS STREAMSPTY SYSV_TERMIO TERMCAP TIME_WITH_SYS_TIME USE_TERMIO UTMPX const HAVE_VHANGUP HAVE_SYS_TIME_H HAVE_SYS_TTY_H HAVE_LIBNSL HAVE_LIBSOCKET HAVE_LIBUTIL
-./appl/telnet/telnetd/authenc.c: AUTHENTICATION ENCRYPTION
-./appl/telnet/telnetd/defs.h: BSD CRAY DIAGNOSTICS FD_SET HAVE_fd_set LINEMODE LOG_DAEMON LOG_ODELAY NO_SETSID NO_STRING_H PRINTOPTIONS TCSETCTTY TIOCSCTTY UNICOS5 _POSIX_VDISABLE __STDC__ __alpha __hpux
-./appl/telnet/telnetd/ext.h: AUTHENTICATION BFTPDAEMON CRAY2 DEFAULT_IM DIAGNOSTICS ENCRYPTION LINEMODE P SecurID UNICOS5 convex
-./appl/telnet/telnetd/global.c:
-./appl/telnet/telnetd/pathnames.h: BFTPDAEMON
-./appl/telnet/telnetd/slc.c: LINEMODE
-./appl/telnet/telnetd/state.c: AUTHENTICATION CRAY2 ENCRYPTION ENV_HACK KLUDGELINEMODE LINEMODE TELOPT_ENVIRON TELOPT_NEW_ENVIRON UNICOS5
-./appl/telnet/telnetd/sys_term.c: AUTHENTICATION BFTPDAEMON CRAY CRAY2 EXTPROC KRB5 LINEMODE LOGIN_ARGS LOGIN_CAP_F LOGIN_PROGRAM LOGIN_R NEWINIT NO_LOGIN_F NO_LOGIN_H NO_LOGIN_P O_NOCTTY PARENT_DOES_UTMP SOLARIS SecurID TIOCEXT TIOCGPGRP TIOCPKT_IOCTL UNICOS5 VDISCARD VEOL VEOL2 VFLUSHO VLNEXT VREPRINT VSTART VSTATUS VSTOP VSUSP VWERASE _SC_CRAY_NPTY _SC_CRAY_SECURE_SYS __GNUC__ __hpux convex sun t_erase ultrix
-./appl/telnet/telnetd/telnetd-ktd.c: AUTHENTICATION BFTPDAEMON CRAY CRAY2 DIAGNOSTICS EAGAIN ENCRYPTION IPPROTO_IP IP_TOS KLUDGELINEMODE LINEMODE MAXHOSTNAMELEN NEWINIT NO_URGENT SIGINFO SIGTSTP SIGTTOU SO_OOBINLINE SecurID TCSIG TIOCNOTTY TIOCSCTTY UNICOS5 UNICOS50 _SC_CRAY_SECURE_SYS convex lint
-./appl/telnet/telnetd/telnetd.c: AUTHENTICATION BFTPDAEMON CRAY CRAY2 DIAGNOSTICS EAGAIN ENCRYPTION IPPROTO_IP IP_TOS KLUDGELINEMODE KRB5 LINEMODE MAXHOSTNAMELEN NEWINIT NO_URGENT SCM_SECURITY SIGINFO SIGTSTP SIGTTOU SO_OOBINLINE SO_SEC_MULTI SecurID TCSIG TIOCNOTTY TIOCSCTTY UNICOS5 UNICOS50 _SC_CRAY_SECURE_SYS convex lint
-./appl/telnet/telnetd/telnetd.h: DIAGNOSTICS
-./appl/telnet/telnetd/termstat.c: CRAY2 ENCRYPTION KLUDGELINEMODE LINEMODE TIOCSWINSZ UNICOS5
-./appl/telnet/telnetd/utility.c: AUTHENTICATION DIAGNOSTICS ENCRYPTION
-./appl/telnet/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/user_user/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./appl/user_user/client.c: USE_STDOUT
 ./appl/user_user/server.c: DEBUG
-./appl/mailquery/configure.in: HAS_STRERROR const HAVE_STDLIB_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
-./appl/mailquery/mailquery.c: HESIOD KPOP
-./appl/mailquery/pop.h:
-./appl/mailquery/poplib.c: HAS_STDLIB_H KPOP KPOP_SERVICE KRB4 KRB5
-./appl/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./clients/kdestroy/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./clients/kdestroy/kdestroy.c: __STDC__
-./clients/ksu/configure.in: const HAVE_STDARG_H HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
-./clients/ksu/authorization.c: CMD_PATH DEBUG
-./clients/ksu/ccache.c:
-./clients/ksu/heuristic.c: PRINC_LOOK_AHEAD
-./clients/ksu/krb_auth_su.c: GET_TGT_VIA_PASSWD
-./clients/ksu/ksu.h: min
-./clients/ksu/main.c: GET_TGT_VIA_PASSWD HAS_GETUSERSHELL LOCAL_REALM LOG_AUTH LOG_NDELAY MAXHOSTNAMELEN
+./clients/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./clients/kinit/configure.in: const HAVE_PWD_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./clients/kinit/kinit.c: NO_KEYTAB
 ./clients/klist/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./clients/klist/klist.c:
-./clients/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./clients/klist/klist.c: "
+./clients/ksu/configure.in: const HAVE_GETUSERSHELL HAVE_STDARG_H HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
+./clients/ksu/authorization.c: CMD_PATH DEBUG
+./clients/ksu/ccache.c: "
+./clients/ksu/heuristic.c: PRINC_LOOK_AHEAD
+./clients/ksu/krb_auth_su.c: GET_TGT_VIA_PASSWD
+./clients/ksu/ksu.h: min
+./clients/ksu/main.c: GET_TGT_VIA_PASSWD LOCAL_REALM LOG_AUTH LOG_NDELAY MAXHOSTNAMELEN
 ./include/kerberosIV/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./include/kerberosIV/addr_comp.h: ADDR_COMP_DEFS
 ./include/kerberosIV/admin_server.h: ADMIN_SERVER_DEFS
 ./include/kerberosIV/des.h: DES_DEFS NCOMPAT
-./include/kerberosIV/des_conf.h:
-./include/kerberosIV/highc.h:
+./include/kerberosIV/des_conf.h: "
+./include/kerberosIV/highc.h: "
 ./include/kerberosIV/kadm.h: KADM_DEFS MAXHOSTNAMELEN POSIX
 ./include/kerberosIV/kdc.h: KDC_DEFS notdef
 ./include/kerberosIV/klog.h: KLOG_DEFS
@@ -212,10 +226,10 @@
 ./include/kerberosIV/krb4-proto.h: KRB5_PROVIDE_PROTOTYPES P_TYPE_ _KRB4_PROTO_H__ __STDC__
 ./include/kerberosIV/krb_conf.h: KRB_CONF_DEFS
 ./include/kerberosIV/krb_db.h: KRB_DB_DEFS
-./include/kerberosIV/krb_err.h:
-./include/kerberosIV/krbports.h:
+./include/kerberosIV/krb_err.h: "
+./include/kerberosIV/krbports.h: "
 ./include/kerberosIV/lsb_addr_cmp.h: LSBFIRST LSB_ADDR_COMP_DEFS
-./include/kerberosIV/mit-copyright.h:
+./include/kerberosIV/mit-copyright.h: "
 ./include/kerberosIV/passwd_server.h: PASSWD_SERVER_DEFS
 ./include/kerberosIV/principal.h: PRINCIPAL_DEFS
 ./include/kerberosIV/prot.h: PROT_DEFS
@@ -224,12 +238,12 @@
 ./include/krb5/GetMyIPAddr.h: __GETMYIPADDR__ __MACTCPCOMMONTYPES__
 ./include/krb5/MacTCPCommonTypes.h: __MACTCPCOMMONTYPES__ __TYPES__
 ./include/krb5/TCPPB.h: THINK_C
-./include/krb5/UDPPB.h:
+./include/krb5/UDPPB.h: "
 ./include/krb5/adm.h: KRB5_ADM_H__
 ./include/krb5/adm_defs.h: MACH_PASS SANDIA __ADM_DEFINES__ unicos61
 ./include/krb5/adm_proto.h: KRB5_ADM_PROTO_H__ KRB5_KDB5__ _WINDOWS
 ./include/krb5/asn1.h: KRB5_ASN1__
-./include/krb5/copyright.h:
+./include/krb5/copyright.h: "
 ./include/krb5/dbm.h: KRB5_DBM_COMPAT__ unicos61
 ./include/krb5/ext-proto.h: KRB5_EXT_PROTO__ _WINDOWS __STDC__
 ./include/krb5/k5-config.h: INTERFACE KRB5_AUTOCONF__ KRB5_CONFIG__ KRB5_SYSTYPES__ NEED_LOWLEVEL_IO NEED_SYSERROR NEED_WINDOWS O_BINARY SYSV _MSDOS _SIZE_T_DEFINED unicos61
@@ -251,188 +265,188 @@
 ./include/fake-stdlib.h: FD_SETSIZE SYSTEM_FIVE _WINDOWS __GNUC__ __STDC__ __mips__ __ultrix__ __vax__ abort abs hpux ibm032 memcpy memset mips ultrix vax
 ./include/k5-int.h: NEED_SOCKETS _KRB5_INT_H
 ./include/syslog.h: KERNEL KRB5_PROVIDE_PROTOTYPES _WINDOWS __STDC__ va_start
+./krb524/configure.in: RETSIGTYPE const HAVE_LIBNSL HAVE_LIBSOCKET
+./krb524/cnv_tkt_skey.c: "
+./krb524/conv_creds.c: "
+./krb524/conv_princ.c: "
+./krb524/conv_tkt.c: "
+./krb524/encode.c: "
+./krb524/getcred.c: "
+./krb524/globals.c: "
+./krb524/k524init.c: notdef
+./krb524/krb524.h: __KRB524_H__
+./krb524/krb524d.c: PROVIDE_DES_CBC_CRC
+./krb524/misc.c: "
+./krb524/sendmsg.c: _AIX
+./krb524/test.c: "
 ./kadmin/kpasswd/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./kadmin/kpasswd/kpasswd.c: LANGUAGES_SUPPORTED USE_STRING_H
+./kadmin/v5client/configure.in: const HAVE_GETCWD HAVE_RE_COMP HAVE_REGCOMP HAVE_STRPTIME HAVE_PWD_H HAVE_REGEX_H HAVE_LIBNSL HAVE_LIBSOCKET
+./kadmin/v5client/convert.c: "
+./kadmin/v5client/kadmin5.c: LANGUAGES_SUPPORTED
+./kadmin/v5client/kadmin5.h: KADMIN5_H__
+./kadmin/v5client/network.c: "
+./kadmin/v5client/ss_wrapper.c: "
 ./kadmin/v5server/configure.in: HAVE_VSPRINTF HAVE_WAITPID POSIX_SETJMP POSIX_SIGNALS WAIT_USES_INT const HAVE_SYS_SELECT_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./kadmin/v5server/admin.c: DEBUG
 ./kadmin/v5server/kadm5_defs.h: DEBUG KADM5_DEFS_H__
-./kadmin/v5server/passwd.c:
+./kadmin/v5server/passwd.c: "
 ./kadmin/v5server/proto_serv.c: LANGUAGES_SUPPORTED MIME_SUPPORTED MOTD_SUPPORTED
-./kadmin/v5server/srv_acl.c:
-./kadmin/v5server/srv_key.c:
+./kadmin/v5server/srv_acl.c: "
+./kadmin/v5server/srv_key.c: "
 ./kadmin/v5server/srv_main.c: DEBUG LANGUAGES_SUPPORTED
 ./kadmin/v5server/srv_net.c: DEBUG KRB5_USE_INET MAX_SLAVES OLD_CONFIG_FILES SOMAXCONN USE_PTHREADS
-./kadmin/v5server/srv_output.c:
-./kadmin/v5client/configure.in: const HAVE_GETCWD HAVE_RE_COMP HAVE_REGCOMP HAVE_STRPTIME HAVE_PWD_H HAVE_REGEX_H HAVE_LIBNSL HAVE_LIBSOCKET
-./kadmin/v5client/convert.c:
-./kadmin/v5client/kadmin5.c: LANGUAGES_SUPPORTED
-./kadmin/v5client/kadmin5.h: KADMIN5_H__
-./kadmin/v5client/network.c:
-./kadmin/v5client/ss_wrapper.c:
+./kadmin/v5server/srv_output.c: "
 ./kadmin/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./kdc/configure.in: POSIX_TERMIOS const HAVE_SYS_SELECT_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./kdc/dispatch.c: KRB5_KRB4_COMPAT
 ./kdc/do_as_req.c: KRB5_USE_INET KRBCONF_KDC_MODIFIES_KDB KRBCONF_VAGUE_ERRORS hpux
 ./kdc/do_tgs_req.c: KRB5_USE_INET KRB5_USE_ISODE hpux
-./kdc/extern.c:
+./kdc/extern.c: "
 ./kdc/extern.h: __KRB5_KDC_EXTERN__
 ./kdc/kdc_util.c: KRBCONF_VAGUE_ERRORS
 ./kdc/kdc_util.h: KRB5_KRB4_COMPAT __KRB5_KDC_UTIL__ min
 ./kdc/kerberos_v4.c: BACKWARD_COMPAT HAVE_STDARG_H HAVE_SYS_TIME_H KRB5_KRB4_COMPAT NOENCRYPTION TIME_WITH_SYS_TIME notdef notdef_DIE
 ./kdc/main.c: KRB5_KRB4_COMPAT POSIX_SIGTYPE
 ./kdc/network.c: KRB5_USE_INET
-./kdc/policy.c:
+./kdc/policy.c: "
 ./kdc/policy.h: __KRB5_KDC_POLICY__
-./kdc/replay.c:
-./kdc/rtest.c:
-./krb524/configure.in: RETSIGTYPE const HAVE_LIBNSL HAVE_LIBSOCKET
-./krb524/cnv_tkt_skey.c:
-./krb524/conv_creds.c:
-./krb524/conv_princ.c:
-./krb524/conv_tkt.c:
-./krb524/encode.c:
-./krb524/getcred.c:
-./krb524/globals.c:
-./krb524/k524init.c: notdef
-./krb524/krb524.h: __KRB524_H__
-./krb524/krb524d.c: PROVIDE_DES_CBC_CRC
-./krb524/misc.c:
-./krb524/sendmsg.c: _AIX
-./krb524/test.c:
+./kdc/replay.c: "
+./kdc/rtest.c: "
 ./lib/crypto/crc32/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/crypto/crc32/crc-32.h: KRB5_CRC32__
-./lib/crypto/crc32/crc.c:
-./lib/crypto/crc32/crctest.c:
+./lib/crypto/crc32/crc.c: "
+./lib/crypto/crc32/crctest.c: "
+./lib/crypto/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./lib/crypto/cryptoconf.c: PROVIDE_CRC32 PROVIDE_DES_CBC_CKSUM PROVIDE_DES_CBC_CRC PROVIDE_DES_CBC_MD5 PROVIDE_RAW_DES_CBC PROVIDE_RSA_MD4 PROVIDE_RSA_MD5 PROVIDE_SNEFRU _DES_DONE__
+./lib/crypto/des_crc.c: "
+./lib/crypto/des_md5.c: "
+./lib/crypto/raw_des.c: "
 ./lib/crypto/des/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/crypto/des/cbc_cksum.c:
-./lib/crypto/des/cs_entry.c:
+./lib/crypto/des/cbc_cksum.c: "
+./lib/crypto/des/cs_entry.c: "
 ./lib/crypto/des/des.h: DES_DEFS KRB_INT32 KRB_UINT32 NCOMPAT
 ./lib/crypto/des/des_int.h: DES_INTERNAL_DEFS FILE
-./lib/crypto/des/destest.c:
-./lib/crypto/des/f_cbc.c:
-./lib/crypto/des/f_cksum.c:
-./lib/crypto/des/f_ecb.c:
-./lib/crypto/des/f_parity.c:
-./lib/crypto/des/f_pcbc.c:
-./lib/crypto/des/f_sched.c:
-./lib/crypto/des/f_tables.c:
+./lib/crypto/des/destest.c: "
+./lib/crypto/des/f_cbc.c: "
+./lib/crypto/des/f_cksum.c: "
+./lib/crypto/des/f_ecb.c: "
+./lib/crypto/des/f_parity.c: "
+./lib/crypto/des/f_pcbc.c: "
+./lib/crypto/des/f_sched.c: "
+./lib/crypto/des/f_tables.c: "
 ./lib/crypto/des/f_tables.h: DEBUG _WINDOWS __DES_TABLES_H__ __STDC__
-./lib/crypto/des/fin_rndkey.c:
-./lib/crypto/des/finish_key.c:
-./lib/crypto/des/init_rkey.c:
-./lib/crypto/des/key_sched.c:
+./lib/crypto/des/fin_rndkey.c: "
+./lib/crypto/des/finish_key.c: "
+./lib/crypto/des/init_rkey.c: "
+./lib/crypto/des/key_sched.c: "
 ./lib/crypto/des/new_rn_key.c: min
-./lib/crypto/des/process_ky.c:
-./lib/crypto/des/random_key.c:
+./lib/crypto/des/process_ky.c: "
+./lib/crypto/des/random_key.c: "
 ./lib/crypto/des/string2key.c: min
 ./lib/crypto/des/verify.c: WINDOWS
-./lib/crypto/des/weak_key.c:
+./lib/crypto/des/weak_key.c: "
 ./lib/crypto/md4/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/crypto/md4/md4.c: KRB5_PROVIDE_PROTOTYPES _WINDOWS __STDC__
-./lib/crypto/md4/md4crypto.c:
+./lib/crypto/md4/md4crypto.c: "
 ./lib/crypto/md4/md4driver.c: __STDC__
-./lib/crypto/md4/md4glue.c:
+./lib/crypto/md4/md4glue.c: "
 ./lib/crypto/md4/rsa-md4.h: _WINDOWS __KRB5_RSA_MD4_H__ __STDC__ unicos61
 ./lib/crypto/md5/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/crypto/md5/md5.c: _WINDOWS __STDC__
-./lib/crypto/md5/md5crypto.c:
-./lib/crypto/md5/md5glue.c:
+./lib/crypto/md5/md5crypto.c: "
+./lib/crypto/md5/md5glue.c: "
 ./lib/crypto/md5/t_mddriver.c: HAVE_TEST_SUITE MD
 ./lib/crypto/os/configure.in: const HAVE_GETPID HAVE_SRAND HAVE_SRAND48 HAVE_SRANDOM HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/crypto/os/rnd_confoun.c: HAVE_SYS_TIME_H RAND_TYPE TIME_WITH_SYS_TIME
-./lib/crypto/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/crypto/cryptoconf.c: PROVIDE_CRC32 PROVIDE_DES_CBC_CKSUM PROVIDE_DES_CBC_CRC PROVIDE_DES_CBC_MD5 PROVIDE_RAW_DES_CBC PROVIDE_RSA_MD4 PROVIDE_RSA_MD5 PROVIDE_SNEFRU _DES_DONE__
-./lib/crypto/des_crc.c:
-./lib/crypto/des_md5.c:
-./lib/crypto/raw_des.c:
 ./lib/des425/configure.in: HAVE_PRAGMA_WEAK const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/des425/cksum.c:
-./lib/des425/des.c:
+./lib/des425/cksum.c: "
+./lib/des425/des.c: "
 ./lib/des425/des.h: DES_DEFS NCOMPAT
-./lib/des425/enc_dec.c:
-./lib/des425/k4_glue.c:
-./lib/des425/key_parity.c:
-./lib/des425/key_sched.c:
-./lib/des425/new_rnd_key.c:
+./lib/des425/enc_dec.c: "
+./lib/des425/k4_glue.c: "
+./lib/des425/key_parity.c: "
+./lib/des425/key_sched.c: "
+./lib/des425/new_rnd_key.c: "
 ./lib/des425/pcbc_encrypt.c: KRB_INT32 KRB_UINT32 NCOMPAT
 ./lib/des425/quad_cksum.c: DEBUG HAVE_ERRNO KRB_INT32
-./lib/des425/random_key.c:
+./lib/des425/random_key.c: "
 ./lib/des425/read_passwd.c: ECHO_PASSWORD
 ./lib/des425/str_to_key.c: DEBUG
 ./lib/des425/string2key.c: DEBUG
 ./lib/des425/unix_time.c: _MSDOS
 ./lib/des425/util.c: lint
-./lib/des425/verify.c:
-./lib/des425/weak_key.c:
+./lib/des425/verify.c: "
+./lib/des425/weak_key.c: "
 ./lib/gssapi/generic/configure.in: STDC_HEADERS const size_t HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/gssapi/generic/disp_com_err_status.c:
-./lib/gssapi/generic/disp_major_status.c:
+./lib/gssapi/generic/disp_com_err_status.c: "
+./lib/gssapi/generic/disp_major_status.c: "
 ./lib/gssapi/generic/gssapi.h: FAR INTERFACE NO_STDLIB_H PROTOTYPE _GSSAPI_H_ _MSDOS _WINDOWS __STDC__
 ./lib/gssapi/generic/gssapiP_generic.h: NEED_SOCKETS _GSSAPIP_GENERIC_H_ xfree
-./lib/gssapi/generic/gssapi_generic.c:
+./lib/gssapi/generic/gssapi_generic.c: "
 ./lib/gssapi/generic/gssapi_generic.h: _GSSAPI_GENERIC_H_
-./lib/gssapi/generic/rel_buffer.c:
-./lib/gssapi/generic/rel_oid_set.c:
-./lib/gssapi/generic/util_buffer.c:
-./lib/gssapi/generic/util_canonhost.c:
-./lib/gssapi/generic/util_dup.c:
-./lib/gssapi/generic/util_oid.c:
-./lib/gssapi/generic/util_token.c:
-./lib/gssapi/generic/util_validate.c:
-./lib/gssapi/generic/utl_nohash_validate.c:
+./lib/gssapi/generic/rel_buffer.c: "
+./lib/gssapi/generic/rel_oid_set.c: "
+./lib/gssapi/generic/util_buffer.c: "
+./lib/gssapi/generic/util_canonhost.c: "
+./lib/gssapi/generic/util_dup.c: "
+./lib/gssapi/generic/util_oid.c: "
+./lib/gssapi/generic/util_token.c: "
+./lib/gssapi/generic/util_validate.c: "
+./lib/gssapi/generic/utl_nohash_validate.c: "
+./lib/gssapi/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/gssapi/krb5/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/gssapi/krb5/accept_sec_context.c:
+./lib/gssapi/krb5/accept_sec_context.c: "
 ./lib/gssapi/krb5/acquire_cred.c: USE_STRING_H
-./lib/gssapi/krb5/compare_name.c:
-./lib/gssapi/krb5/context_time.c:
-./lib/gssapi/krb5/delete_sec_context.c:
-./lib/gssapi/krb5/disp_name.c:
-./lib/gssapi/krb5/disp_status.c:
-./lib/gssapi/krb5/get_tkt_flags.c:
+./lib/gssapi/krb5/compare_name.c: "
+./lib/gssapi/krb5/context_time.c: "
+./lib/gssapi/krb5/delete_sec_context.c: "
+./lib/gssapi/krb5/disp_name.c: "
+./lib/gssapi/krb5/disp_status.c: "
+./lib/gssapi/krb5/get_tkt_flags.c: "
 ./lib/gssapi/krb5/gssapiP_krb5.h: HAVE_SYS_TIME_H TIME_WITH_SYS_TIME _GSSAPIP_KRB5_H_ major minor
-./lib/gssapi/krb5/gssapi_krb5.c:
+./lib/gssapi/krb5/gssapi_krb5.c: "
 ./lib/gssapi/krb5/gssapi_krb5.h: _GSSAPI_KRB5_H_
 ./lib/gssapi/krb5/import_name.c: NO_PASSWORD USE_STRING_H
-./lib/gssapi/krb5/indicate_mechs.c:
-./lib/gssapi/krb5/init_sec_context.c:
-./lib/gssapi/krb5/inq_context.c:
-./lib/gssapi/krb5/inq_cred.c:
-./lib/gssapi/krb5/k5seal.c:
-./lib/gssapi/krb5/k5unseal.c:
-./lib/gssapi/krb5/krb5_gss_glue.c:
-./lib/gssapi/krb5/process_context_token.c:
-./lib/gssapi/krb5/rel_cred.c:
-./lib/gssapi/krb5/rel_name.c:
-./lib/gssapi/krb5/seal.c:
-./lib/gssapi/krb5/sign.c:
-./lib/gssapi/krb5/unseal.c:
-./lib/gssapi/krb5/util_cksum.c:
-./lib/gssapi/krb5/util_crypt.c:
-./lib/gssapi/krb5/util_seed.c:
-./lib/gssapi/krb5/util_seqnum.c:
-./lib/gssapi/krb5/verify.c:
-./lib/gssapi/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./lib/gssapi/krb5/indicate_mechs.c: "
+./lib/gssapi/krb5/init_sec_context.c: "
+./lib/gssapi/krb5/inq_context.c: "
+./lib/gssapi/krb5/inq_cred.c: "
+./lib/gssapi/krb5/k5seal.c: "
+./lib/gssapi/krb5/k5unseal.c: "
+./lib/gssapi/krb5/krb5_gss_glue.c: "
+./lib/gssapi/krb5/process_context_token.c: "
+./lib/gssapi/krb5/rel_cred.c: "
+./lib/gssapi/krb5/rel_name.c: "
+./lib/gssapi/krb5/seal.c: "
+./lib/gssapi/krb5/sign.c: "
+./lib/gssapi/krb5/unseal.c: "
+./lib/gssapi/krb5/util_cksum.c: "
+./lib/gssapi/krb5/util_crypt.c: "
+./lib/gssapi/krb5/util_seed.c: "
+./lib/gssapi/krb5/util_seqnum.c: "
+./lib/gssapi/krb5/verify.c: "
 ./lib/kdb/configure.in: const HAVE_SRAND HAVE_SRAND48 HAVE_SRANDOM HAVE_UMASK HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/kdb/decrypt_key.c:
-./lib/kdb/encrypt_key.c:
+./lib/kdb/decrypt_key.c: "
+./lib/kdb/encrypt_key.c: "
 ./lib/kdb/fetch_mkey.c: ANSI_STDIO min
-./lib/kdb/kdb_compat.h:
+./lib/kdb/kdb_compat.h: "
 ./lib/kdb/kdb_dbm.c: BERK_DB_DBM DEBUG NOFSYNC ODBM OLD_COMPAT_VERSION_1
 ./lib/kdb/kdbint.h: KRB5_KDBINT__
-./lib/kdb/setup_mkey.c:
+./lib/kdb/setup_mkey.c: "
 ./lib/kdb/store_mkey.c: ANSI_STDIO MAXPATHLEN min
-./lib/kdb/t_kdb.c:
-./lib/kdb/verify_mky.c:
+./lib/kdb/t_kdb.c: "
+./lib/kdb/verify_mky.c: "
 ./lib/krb425/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb425/425data.c: EBUG
-./lib/krb425/425error.c:
-./lib/krb425/des_sched.c:
+./lib/krb425/425error.c: "
+./lib/krb425/des_sched.c: "
 ./lib/krb425/get_cred.c: EBUG
 ./lib/krb425/get_krbhst.c: NOT_IMPLEMENTED
-./lib/krb425/get_lrealm.c:
+./lib/krb425/get_lrealm.c: "
 ./lib/krb425/get_phost.c: OLD_CRUFT
-./lib/krb425/kn_parse.c:
-./lib/krb425/kntoln.c:
+./lib/krb425/kn_parse.c: "
+./lib/krb425/kntoln.c: "
 ./lib/krb425/krb425.h: EBUG KRB5_krb425__
 ./lib/krb425/kuserok.c: F_OK MAXPATHLEN NOTOK aix unicos61
 ./lib/krb425/mk_priv.c: EBUG hpux
@@ -443,344 +457,328 @@
 ./lib/krb425/rd_priv.c: EBUG hpux
 ./lib/krb425/rd_req.c: EBUG
 ./lib/krb425/rd_safe.c: EBUG hpux
-./lib/krb425/realmhost.c:
+./lib/krb425/realmhost.c: "
 ./lib/krb425/recvauth.c: EBUG NOENCRYPTION max
 ./lib/krb425/sendauth.c: ATHENA_COMPAT EBUG NOENCRYPTION
-./lib/krb425/set_key.c:
+./lib/krb425/set_key.c: "
 ./lib/krb5/asn.1/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb5/asn.1/asn1_decode.c: HAVE_SYS_TIME_H TIME_WITH_SYS_TIME
 ./lib/krb5/asn.1/asn1_decode.h: __ASN1_DECODE_H__
-./lib/krb5/asn.1/asn1_encode.c:
+./lib/krb5/asn.1/asn1_encode.c: "
 ./lib/krb5/asn.1/asn1_encode.h: __ASN1_ENCODE_H__
-./lib/krb5/asn.1/asn1_get.c:
+./lib/krb5/asn.1/asn1_get.c: "
 ./lib/krb5/asn.1/asn1_get.h: __ASN1_GET_H__
-./lib/krb5/asn.1/asn1_k_decode.c:
+./lib/krb5/asn.1/asn1_k_decode.c: "
 ./lib/krb5/asn.1/asn1_k_decode.h: __ASN1_DECODE_KRB5_H__
-./lib/krb5/asn.1/asn1_k_encode.c:
+./lib/krb5/asn.1/asn1_k_encode.c: "
 ./lib/krb5/asn.1/asn1_k_encode.h: __ASN1_ENCODE_KRB5_H__
-./lib/krb5/asn.1/asn1_make.c:
+./lib/krb5/asn.1/asn1_make.c: "
 ./lib/krb5/asn.1/asn1_make.h: __ASN1_MAKE_H__
-./lib/krb5/asn.1/asn1_misc.c:
+./lib/krb5/asn.1/asn1_misc.c: "
 ./lib/krb5/asn.1/asn1_misc.h: __ASN1_MISC_H__
-./lib/krb5/asn.1/asn1buf.c:
+./lib/krb5/asn.1/asn1buf.c: "
 ./lib/krb5/asn.1/asn1buf.h: __ASN1BUF_H__
 ./lib/krb5/asn.1/asn1glue.h: __KRB5_GLUE_H__
-./lib/krb5/asn.1/glue2.c:
+./lib/krb5/asn.1/glue2.c: "
 ./lib/krb5/asn.1/krb5_decode.c: KRB5_MSGTYPE_STRICT
 ./lib/krb5/asn.1/krb5_encode.c: KRB5_ENCKRB5KDCREPPART_COMPAT
 ./lib/krb5/asn.1/krbasn1.h: HAS_STDLIB_H __KRBASN1_H__
 ./lib/krb5/ccache/file/configure.in: HAVE_FLOCK const HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb5/ccache/file/fcc-proto.h: KRB5_FCC_PROTO__
 ./lib/krb5/ccache/file/fcc.h: MSDOS_FILESYSTEM TKT_ROOT __KRB5_FILE_CCACHE__
-./lib/krb5/ccache/file/fcc_close.c:
-./lib/krb5/ccache/file/fcc_defops.c:
+./lib/krb5/ccache/file/fcc_close.c: "
+./lib/krb5/ccache/file/fcc_defops.c: "
 ./lib/krb5/ccache/file/fcc_destry.c: MSDOS_FILESYSTEM
 ./lib/krb5/ccache/file/fcc_errs.c: EDQUOT ELOOP ENAMETOOLONG ETXTBSY EWOULDBLOCK
-./lib/krb5/ccache/file/fcc_eseq.c:
+./lib/krb5/ccache/file/fcc_eseq.c: "
 ./lib/krb5/ccache/file/fcc_gennew.c: KRB5_USE_INET NOCHMOD NOFCHMOD _WINSOCKAPI_
-./lib/krb5/ccache/file/fcc_getnam.c:
-./lib/krb5/ccache/file/fcc_gprin.c:
+./lib/krb5/ccache/file/fcc_getnam.c: "
+./lib/krb5/ccache/file/fcc_gprin.c: "
 ./lib/krb5/ccache/file/fcc_init.c: NOCHMOD NOFCHMOD
 ./lib/krb5/ccache/file/fcc_maybe.c: KRB5_USE_INET POSIX_FILE_LOCKS _WINSOCKAPI_ sysvimp unicos61
-./lib/krb5/ccache/file/fcc_nseq.c:
+./lib/krb5/ccache/file/fcc_nseq.c: "
 ./lib/krb5/ccache/file/fcc_ops.c: _WINDOWS
-./lib/krb5/ccache/file/fcc_read.c:
-./lib/krb5/ccache/file/fcc_reslv.c:
-./lib/krb5/ccache/file/fcc_retrv.c:
-./lib/krb5/ccache/file/fcc_sflags.c:
-./lib/krb5/ccache/file/fcc_skip.c:
-./lib/krb5/ccache/file/fcc_sseq.c:
-./lib/krb5/ccache/file/fcc_store.c:
-./lib/krb5/ccache/file/fcc_test.c:
-./lib/krb5/ccache/file/fcc_write.c:
+./lib/krb5/ccache/file/fcc_read.c: "
+./lib/krb5/ccache/file/fcc_reslv.c: "
+./lib/krb5/ccache/file/fcc_retrv.c: "
+./lib/krb5/ccache/file/fcc_sflags.c: "
+./lib/krb5/ccache/file/fcc_skip.c: "
+./lib/krb5/ccache/file/fcc_sseq.c: "
+./lib/krb5/ccache/file/fcc_store.c: "
+./lib/krb5/ccache/file/fcc_test.c: "
+./lib/krb5/ccache/file/fcc_write.c: "
+./lib/krb5/ccache/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./lib/krb5/ccache/ccbase.c: "
+./lib/krb5/ccache/ccdefault.c: "
+./lib/krb5/ccache/ccdefops.c: HAVE_SYS_TYPES_H
 ./lib/krb5/ccache/stdio/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb5/ccache/stdio/scc-proto.h: KRB5_SCC_PROTO__
 ./lib/krb5/ccache/stdio/scc.h: TKT_ROOT __KRB5_FILE_CCACHE__
-./lib/krb5/ccache/stdio/scc_close.c:
-./lib/krb5/ccache/stdio/scc_defops.c:
+./lib/krb5/ccache/stdio/scc_close.c: "
+./lib/krb5/ccache/stdio/scc_defops.c: "
 ./lib/krb5/ccache/stdio/scc_destry.c: SEEK_SET
 ./lib/krb5/ccache/stdio/scc_errs.c: EDQUOT EISDIR ELOOP ENAMETOOLONG ETXTBSY EWOULDBLOCK
-./lib/krb5/ccache/stdio/scc_eseq.c:
+./lib/krb5/ccache/stdio/scc_eseq.c: "
 ./lib/krb5/ccache/stdio/scc_gennew.c: _WINDOWS __STDC__
-./lib/krb5/ccache/stdio/scc_getnam.c:
-./lib/krb5/ccache/stdio/scc_gprin.c:
-./lib/krb5/ccache/stdio/scc_init.c:
+./lib/krb5/ccache/stdio/scc_getnam.c: "
+./lib/krb5/ccache/stdio/scc_gprin.c: "
+./lib/krb5/ccache/stdio/scc_init.c: "
 ./lib/krb5/ccache/stdio/scc_maybe.c: ANSI_STDIO HAS_SETVBUF ultrix
-./lib/krb5/ccache/stdio/scc_nseq.c:
-./lib/krb5/ccache/stdio/scc_ops.c:
-./lib/krb5/ccache/stdio/scc_read.c:
-./lib/krb5/ccache/stdio/scc_reslv.c:
-./lib/krb5/ccache/stdio/scc_retrv.c:
-./lib/krb5/ccache/stdio/scc_sflags.c:
-./lib/krb5/ccache/stdio/scc_skip.c:
-./lib/krb5/ccache/stdio/scc_sseq.c:
-./lib/krb5/ccache/stdio/scc_store.c:
-./lib/krb5/ccache/stdio/scc_test.c:
-./lib/krb5/ccache/stdio/scc_write.c:
-./lib/krb5/ccache/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb5/ccache/ccbase.c:
-./lib/krb5/ccache/ccdefault.c:
-./lib/krb5/ccache/ccdefops.c: HAVE_SYS_TYPES_H
+./lib/krb5/ccache/stdio/scc_nseq.c: "
+./lib/krb5/ccache/stdio/scc_ops.c: "
+./lib/krb5/ccache/stdio/scc_read.c: "
+./lib/krb5/ccache/stdio/scc_reslv.c: "
+./lib/krb5/ccache/stdio/scc_retrv.c: "
+./lib/krb5/ccache/stdio/scc_sflags.c: "
+./lib/krb5/ccache/stdio/scc_skip.c: "
+./lib/krb5/ccache/stdio/scc_sseq.c: "
+./lib/krb5/ccache/stdio/scc_store.c: "
+./lib/krb5/ccache/stdio/scc_test.c: "
+./lib/krb5/ccache/stdio/scc_write.c: "
 ./lib/krb5/error_tables/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb5/error_tables/init_ets.c:
+./lib/krb5/error_tables/init_ets.c: "
 ./lib/krb5/free/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb5/free/f_addr.c:
-./lib/krb5/free/f_address.c:
-./lib/krb5/free/f_ap_rep.c:
-./lib/krb5/free/f_ap_req.c:
-./lib/krb5/free/f_arep_enc.c:
-./lib/krb5/free/f_auth_cnt.c:
-./lib/krb5/free/f_authdata.c:
-./lib/krb5/free/f_authent.c:
-./lib/krb5/free/f_chksum.c:
-./lib/krb5/free/f_cred.c:
-./lib/krb5/free/f_cred_cnt.c:
-./lib/krb5/free/f_cred_enc.c:
-./lib/krb5/free/f_creds.c:
-./lib/krb5/free/f_enc_kdc.c:
-./lib/krb5/free/f_enc_tkt.c:
-./lib/krb5/free/f_error.c:
-./lib/krb5/free/f_kdc_rp.c:
-./lib/krb5/free/f_kdc_rq.c:
-./lib/krb5/free/f_keyblock.c:
-./lib/krb5/free/f_last_req.c:
-./lib/krb5/free/f_padata.c:
-./lib/krb5/free/f_princ.c:
-./lib/krb5/free/f_priv.c:
-./lib/krb5/free/f_priv_enc.c:
-./lib/krb5/free/f_pwd_data.c:
-./lib/krb5/free/f_pwd_seq.c:
-./lib/krb5/free/f_safe.c:
-./lib/krb5/free/f_tckt.c:
-./lib/krb5/free/f_tckts.c:
-./lib/krb5/free/f_tgt_cred.c:
-./lib/krb5/free/f_tkt_auth.c:
+./lib/krb5/free/f_addr.c: "
+./lib/krb5/free/f_address.c: "
+./lib/krb5/free/f_ap_rep.c: "
+./lib/krb5/free/f_ap_req.c: "
+./lib/krb5/free/f_arep_enc.c: "
+./lib/krb5/free/f_auth_cnt.c: "
+./lib/krb5/free/f_authdata.c: "
+./lib/krb5/free/f_authent.c: "
+./lib/krb5/free/f_chksum.c: "
+./lib/krb5/free/f_cred.c: "
+./lib/krb5/free/f_cred_cnt.c: "
+./lib/krb5/free/f_cred_enc.c: "
+./lib/krb5/free/f_creds.c: "
+./lib/krb5/free/f_enc_kdc.c: "
+./lib/krb5/free/f_enc_tkt.c: "
+./lib/krb5/free/f_error.c: "
+./lib/krb5/free/f_kdc_rp.c: "
+./lib/krb5/free/f_kdc_rq.c: "
+./lib/krb5/free/f_keyblock.c: "
+./lib/krb5/free/f_last_req.c: "
+./lib/krb5/free/f_padata.c: "
+./lib/krb5/free/f_princ.c: "
+./lib/krb5/free/f_priv.c: "
+./lib/krb5/free/f_priv_enc.c: "
+./lib/krb5/free/f_pwd_data.c: "
+./lib/krb5/free/f_pwd_seq.c: "
+./lib/krb5/free/f_safe.c: "
+./lib/krb5/free/f_tckt.c: "
+./lib/krb5/free/f_tckts.c: "
+./lib/krb5/free/f_tgt_cred.c: "
+./lib/krb5/free/f_tkt_auth.c: "
 ./lib/krb5/keytab/file/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb5/keytab/file/ktf_add.c:
-./lib/krb5/keytab/file/ktf_close.c:
-./lib/krb5/keytab/file/ktf_defops.c:
-./lib/krb5/keytab/file/ktf_endget.c:
-./lib/krb5/keytab/file/ktf_g_ent.c:
-./lib/krb5/keytab/file/ktf_g_name.c:
-./lib/krb5/keytab/file/ktf_next.c:
-./lib/krb5/keytab/file/ktf_ops.c:
-./lib/krb5/keytab/file/ktf_remove.c:
-./lib/krb5/keytab/file/ktf_resolv.c:
-./lib/krb5/keytab/file/ktf_ssget.c:
+./lib/krb5/keytab/file/ktf_add.c: "
+./lib/krb5/keytab/file/ktf_close.c: "
+./lib/krb5/keytab/file/ktf_defops.c: "
+./lib/krb5/keytab/file/ktf_endget.c: "
+./lib/krb5/keytab/file/ktf_g_ent.c: "
+./lib/krb5/keytab/file/ktf_g_name.c: "
+./lib/krb5/keytab/file/ktf_next.c: "
+./lib/krb5/keytab/file/ktf_ops.c: "
+./lib/krb5/keytab/file/ktf_remove.c: "
+./lib/krb5/keytab/file/ktf_resolv.c: "
+./lib/krb5/keytab/file/ktf_ssget.c: "
 ./lib/krb5/keytab/file/ktf_util.c: ANSI_STDIO HAVE_ERRNO SEEK_SET notdef
-./lib/krb5/keytab/file/ktf_wops.c:
-./lib/krb5/keytab/file/ktf_wreslv.c:
+./lib/krb5/keytab/file/ktf_wops.c: "
+./lib/krb5/keytab/file/ktf_wreslv.c: "
 ./lib/krb5/keytab/file/ktfile.h: KRB5_KTFILE__
 ./lib/krb5/keytab/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb5/keytab/ktadd.c:
-./lib/krb5/keytab/ktbase.c:
-./lib/krb5/keytab/ktdefault.c:
-./lib/krb5/keytab/ktfr_entry.c:
-./lib/krb5/keytab/ktremove.c:
-./lib/krb5/keytab/read_servi.c:
+./lib/krb5/keytab/ktadd.c: "
+./lib/krb5/keytab/ktbase.c: "
+./lib/krb5/keytab/ktdefault.c: "
+./lib/krb5/keytab/ktfr_entry.c: "
+./lib/krb5/keytab/ktremove.c: "
+./lib/krb5/keytab/read_servi.c: "
 ./lib/krb5/krb/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb5/krb/addr_comp.c:
+./lib/krb5/krb/addr_comp.c: "
 ./lib/krb5/krb/addr_order.c: min
-./lib/krb5/krb/addr_srch.c:
-./lib/krb5/krb/auth_con.c:
+./lib/krb5/krb/addr_srch.c: "
+./lib/krb5/krb/auth_con.c: "
 ./lib/krb5/krb/auth_con.h: KRB5_AUTH_CONTEXT
 ./lib/krb5/krb/bld_pr_ext.c: HAVE_STDARG_H
 ./lib/krb5/krb/bld_princ.c: HAVE_STDARG_H
-./lib/krb5/krb/chk_trans.c:
+./lib/krb5/krb/chk_trans.c: "
 ./lib/krb5/krb/cleanup.h: KRB5_CLEANUP
 ./lib/krb5/krb/compat_recv.c: KRB5_KRB4_COMPAT NOENCRYPTION _MSDOS max
-./lib/krb5/krb/conv_princ.c:
+./lib/krb5/krb/conv_princ.c: "
 ./lib/krb5/krb/copy_addrs.c: HAVE_C_STRUCTURE_ASSIGNMENT
 ./lib/krb5/krb/copy_athctr.c: HAVE_C_STRUCTURE_ASSIGNMENT
 ./lib/krb5/krb/copy_auth.c: HAVE_C_STRUCTURE_ASSIGNMENT
 ./lib/krb5/krb/copy_cksum.c: HAVE_C_STRUCTURE_ASSIGNMENT
 ./lib/krb5/krb/copy_creds.c: HAVE_C_STRUCTURE_ASSIGNMENT
-./lib/krb5/krb/copy_data.c:
+./lib/krb5/krb/copy_data.c: "
 ./lib/krb5/krb/copy_key.c: HAVE_C_STRUCTURE_ASSIGNMENT
 ./lib/krb5/krb/copy_princ.c: HAVE_C_STRUCTURE_ASSIGNMENT
 ./lib/krb5/krb/copy_tick.c: HAVE_C_STRUCTURE_ASSIGNMENT
-./lib/krb5/krb/cp_key_cnt.c:
-./lib/krb5/krb/decode_kdc.c:
-./lib/krb5/krb/decrypt_tk.c:
-./lib/krb5/krb/encode_kdc.c:
-./lib/krb5/krb/encrypt_tk.c:
-./lib/krb5/krb/free_rtree.c:
+./lib/krb5/krb/cp_key_cnt.c: "
+./lib/krb5/krb/decode_kdc.c: "
+./lib/krb5/krb/decrypt_tk.c: "
+./lib/krb5/krb/encode_kdc.c: "
+./lib/krb5/krb/encrypt_tk.c: "
+./lib/krb5/krb/free_rtree.c: "
 ./lib/krb5/krb/gc_frm_kdc.c: HAVE_C_STRUCTURE_ASSIGNMENT
-./lib/krb5/krb/gc_via_tkt.c:
+./lib/krb5/krb/gc_via_tkt.c: "
 ./lib/krb5/krb/gen_seqnum.c: MIN
-./lib/krb5/krb/gen_subkey.c:
+./lib/krb5/krb/gen_subkey.c: "
 ./lib/krb5/krb/get_creds.c: HAVE_C_STRUCTURE_ASSIGNMENT
-./lib/krb5/krb/get_in_tkt.c:
-./lib/krb5/krb/in_tkt_ktb.c:
-./lib/krb5/krb/in_tkt_pwd.c:
-./lib/krb5/krb/in_tkt_sky.c:
-./lib/krb5/krb/init_ctx.c:
+./lib/krb5/krb/get_in_tkt.c: "
+./lib/krb5/krb/in_tkt_ktb.c: "
+./lib/krb5/krb/in_tkt_pwd.c: "
+./lib/krb5/krb/in_tkt_sky.c: "
+./lib/krb5/krb/init_ctx.c: "
 ./lib/krb5/krb/int-proto.h: KRB5_INT_FUNC_PROTO__
-./lib/krb5/krb/kdc_rep_dc.c:
-./lib/krb5/krb/krbconfig.c:
-./lib/krb5/krb/mk_cred.c:
-./lib/krb5/krb/mk_error.c:
-./lib/krb5/krb/mk_priv.c:
-./lib/krb5/krb/mk_rep.c:
-./lib/krb5/krb/mk_req.c:
+./lib/krb5/krb/kdc_rep_dc.c: "
+./lib/krb5/krb/krbconfig.c: "
+./lib/krb5/krb/mk_cred.c: "
+./lib/krb5/krb/mk_error.c: "
+./lib/krb5/krb/mk_priv.c: "
+./lib/krb5/krb/mk_rep.c: "
+./lib/krb5/krb/mk_req.c: "
 ./lib/krb5/krb/mk_req_ext.c: HAVE_C_STRUCTURE_ASSIGNMENT
-./lib/krb5/krb/mk_safe.c:
+./lib/krb5/krb/mk_safe.c: "
 ./lib/krb5/krb/parse.c: _WINDOWS
-./lib/krb5/krb/pr_to_salt.c:
+./lib/krb5/krb/pr_to_salt.c: "
 ./lib/krb5/krb/preauth.c: KRBCONF_SECUREID _MSDOS
-./lib/krb5/krb/princ_comp.c:
-./lib/krb5/krb/rd_cred.c:
-./lib/krb5/krb/rd_error.c:
-./lib/krb5/krb/rd_priv.c:
-./lib/krb5/krb/rd_rep.c:
-./lib/krb5/krb/rd_req.c:
+./lib/krb5/krb/princ_comp.c: "
+./lib/krb5/krb/rd_cred.c: "
+./lib/krb5/krb/rd_error.c: "
+./lib/krb5/krb/rd_priv.c: "
+./lib/krb5/krb/rd_rep.c: "
+./lib/krb5/krb/rd_req.c: "
 ./lib/krb5/krb/rd_req_dec.c: _SINGLE_HOP_ONLY
-./lib/krb5/krb/rd_safe.c:
+./lib/krb5/krb/rd_safe.c: "
 ./lib/krb5/krb/recvauth.c: SENDAUTH_DEBUG
-./lib/krb5/krb/send_tgs.c:
-./lib/krb5/krb/sendauth.c:
-./lib/krb5/krb/srv_rcache.c:
-./lib/krb5/krb/t_kerb.c:
-./lib/krb5/krb/t_walk_rtree.c:
-./lib/krb5/krb/tgtname.c:
-./lib/krb5/krb/unparse.c:
+./lib/krb5/krb/send_tgs.c: "
+./lib/krb5/krb/sendauth.c: "
+./lib/krb5/krb/srv_rcache.c: "
+./lib/krb5/krb/t_kerb.c: "
+./lib/krb5/krb/t_walk_rtree.c: "
+./lib/krb5/krb/tgtname.c: "
+./lib/krb5/krb/unparse.c: "
 ./lib/krb5/krb/walk_rtree.c: min
 ./lib/krb5/os/configure.in: POSIX_TYPES TIME_WITH_SYS_TIME const HAVE_SYS_TIME_H HAVE_UNISTD_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb5/os/DNR.c: HAVE_MACSOCK_H
 ./lib/krb5/os/an_to_ln.c: USE_DBM_LNAME _MSDOS min
 ./lib/krb5/os/ccdefname.c: HAVE_MACSOCK_H _WINDOWS
-./lib/krb5/os/def_realm.c:
-./lib/krb5/os/free_hstrl.c:
-./lib/krb5/os/free_krbhs.c:
+./lib/krb5/os/def_realm.c: "
+./lib/krb5/os/free_hstrl.c: "
+./lib/krb5/os/free_krbhs.c: "
 ./lib/krb5/os/full_ipadr.c: KRB5_USE_INET
 ./lib/krb5/os/gen_port.c: KRB5_USE_INET
-./lib/krb5/os/gen_rname.c:
+./lib/krb5/os/gen_rname.c: "
 ./lib/krb5/os/genaddrs.c: KRB5_USE_INET _WINSOCKAPI_
-./lib/krb5/os/get_krbhst.c:
+./lib/krb5/os/get_krbhst.c: "
 ./lib/krb5/os/gmt_mktime.c: HAVE_SYS_TYPES_H
 ./lib/krb5/os/hst_realm.c: MAXHOSTNAMELEN USE_STRING_H
 ./lib/krb5/os/init_os_ctx.c: _WINDOWS
 ./lib/krb5/os/krbfileio.c: HAVE_SYS_FILE_H MODULE_VERSION_ID MSDOS_FILESYSTEM NEED_SYS_FCNTL_H OPEN_MODE_NOT_TRUSTWORTHY O_BINARY apollo
-./lib/krb5/os/ktdefname.c:
+./lib/krb5/os/ktdefname.c: "
 ./lib/krb5/os/kuserok.c: _AIX _IBMR2 _MSDOS
 ./lib/krb5/os/localaddr.c: HAVE_MACSOCK_H IFF_LOOPBACK KRB5_USE_INET KRB5_USE_NS USE_AF _MSDOS
 ./lib/krb5/os/locate_kdc.c: KRB5_USE_INET
 ./lib/krb5/os/lock_file.c: HAVE_MACSOCK_H POSIX_FILE_LOCKS _MSDOS
 ./lib/krb5/os/macsock.c: ENOMEM HAVE_MACSOCK_H
 ./lib/krb5/os/mk_faddr.c: KRB5_USE_INET _WINSOCKAPI_
-./lib/krb5/os/net_read.c:
-./lib/krb5/os/net_write.c:
+./lib/krb5/os/net_read.c: "
+./lib/krb5/os/net_write.c: "
 ./lib/krb5/os/os-proto.h: KRB5_LIBOS_INT_PROTO__ KRB5_USE_INET SOCK_DGRAM
 ./lib/krb5/os/osconfig.c: USE_DBM_LNAME
 ./lib/krb5/os/port2ip.c: KRB5_USE_INET
-./lib/krb5/os/read_msg.c:
+./lib/krb5/os/read_msg.c: "
 ./lib/krb5/os/read_pwd.c: ECHO_PASSWORD _MSDOS
-./lib/krb5/os/realm_dom.c:
+./lib/krb5/os/realm_dom.c: "
 ./lib/krb5/os/sendto_kdc.c: _AIX
 ./lib/krb5/os/sn2princ.c: HAVE_SYS_PARAM_H
-./lib/krb5/os/t_std_conf.c:
+./lib/krb5/os/t_std_conf.c: "
 ./lib/krb5/os/timeofday.c: HAVE_ERRNO
-./lib/krb5/os/unlck_file.c:
+./lib/krb5/os/unlck_file.c: "
 ./lib/krb5/os/ustime.c: HAVE_MACSOCK_H _MSDOS
-./lib/krb5/os/write_msg.c:
+./lib/krb5/os/write_msg.c: "
 ./lib/krb5/posix/configure.in: HAS_PATHS_H HAS_SETSID const HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb5/posix/daemon.c: TIOCNOTTY _PATH_DEVNULL
-./lib/krb5/posix/getuid.c:
+./lib/krb5/posix/getuid.c: "
 ./lib/krb5/posix/memmove.c: HAS_SYS_TYPES_H MEMCOPY MEMMOVE USE_STRING_H
 ./lib/krb5/posix/strcasecmp.c: USE_STRING_H
-./lib/krb5/posix/strdup.c:
-./lib/krb5/posix/strerror.c:
+./lib/krb5/posix/strdup.c: "
+./lib/krb5/posix/strerror.c: "
 ./lib/krb5/posix/syslog.c: SYSV _AIX _POSIX_SOURCE _WINDOWS __STDC__ strerror
-./lib/krb5/posix/vfprintf.c:
-./lib/krb5/posix/vsprintf.c:
+./lib/krb5/posix/vfprintf.c: "
+./lib/krb5/posix/vsprintf.c: "
 ./lib/krb5/rcache/configure.in: const gid_t uid_t HAVE_LIBNSL HAVE_LIBSOCKET
 ./lib/krb5/rcache/rc_base.c: SEMAPHORE
 ./lib/krb5/rcache/rc_base.h: KRB5_RC_H
-./lib/krb5/rcache/rc_conv.c:
+./lib/krb5/rcache/rc_conv.c: "
 ./lib/krb5/rcache/rc_dfl.c: EXCESSREPS HASHSIZE NOIOSTUFF
 ./lib/krb5/rcache/rc_dfl.h: KRB5_RC_DFL_H
 ./lib/krb5/rcache/rc_io.c: EDQUOT HAVE_ERRNO KRB5_USE_INET MSDOS_FILESYSTEM NO_USERID O_BINARY RCTMPDIR _WINSOCKAPI_
 ./lib/krb5/rcache/rc_io.h: KRB5_RC_IO_H MSDOS_FILESYSTEM
-./lib/krb5/rcache/rcdef.c:
+./lib/krb5/rcache/rcdef.c: "
 ./lib/krb5/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/kadm/configure.in: HAVE_VSPRINTF const HAVE_CLOSELOG HAVE_OPENLOG HAVE_SRAND HAVE_SRAND48 HAVE_SRANDOM HAVE_STRFTIME HAVE_SYSLOG HAVE_PWD_H HAVE_STDARG_H HAVE_SYSLOG_H HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/kadm/adm_conn.c: KRB5_USE_INET OLD_CONFIG_FILES _WINDOWS
-./lib/kadm/adm_kt_dec.c:
-./lib/kadm/adm_kt_enc.c:
-./lib/kadm/adm_kw_dec.c:
-./lib/kadm/adm_kw_enc.c:
-./lib/kadm/adm_rw.c:
-./lib/kadm/logger.c: LOG_ALERT LOG_AUTH LOG_CRIT LOG_CRON LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_INFO LOG_KERN LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2 LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 LOG_LOCAL6 LOG_LOCAL7 LOG_LPR LOG_MAIL LOG_NEWS LOG_NOTICE LOG_USER LOG_UUCP LOG_WARNING MAXHOSTNAMELEN
-./lib/kadm/t_dbentry.c: RAND_TYPE notdef
-./lib/kadm/t_ktentry.c: RAND_TYPE
-./lib/kdb4/configure.in: HAS_UNISTD_H NDBM NEED_SYS_FCNTL_H POSIX_FILE_LOCKS const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/kdb4/krb_cache.c: DEBUG
-./lib/kdb4/krb_dbl.c:
-./lib/kdb4/krb_dbm.c: DEBUG NO_FSYNC
-./lib/kdb4/krb_kdb_utils.c: NOENCRYPTION
-./lib/kdb4/krb_lib.c: CACHE DEBUG NEED_SYS_TIME_H NEED_TIME_H
-./lib/kdb4/print_princ.c: NEED_TIME_H
 ./lib/krb4/configure.in:26: warning: AC_TRY_RUN called without default to allow cross compiling
 ./lib/krb4/configure.in: BITS16 BITS32 HAS_STDLIB_H HAS_UNISTD_H HAVE_SETRESUID HAVE_SETREUID HAVE_STRSAVE LSBFIRST MSBFIRST NEED_SYS_FCNTL_H POSIX_FILE_LOCKS const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/krb4/DNR.c:
-./lib/krb4/Password.c:
+sed: Missing newline at end of file ./lib/krb4/DNR.c.
+./lib/krb4/DNR.c: "
+./lib/krb4/Password.c: "
 ./lib/krb4/ad_print.c: NOENCRYPTION
-./lib/krb4/cr_auth_repl.c:
+./lib/krb4/cr_auth_repl.c: "
 ./lib/krb4/cr_ciph.c: NOENCRYPTION
 ./lib/krb4/cr_death_pkt.c: DEBUG
-./lib/krb4/cr_err_repl.c:
+./lib/krb4/cr_err_repl.c: "
 ./lib/krb4/cr_tkt.c: NOENCRYPTION
-./lib/krb4/debug.c:
+./lib/krb4/debug.c: "
 ./lib/krb4/decomp_tkt.c: KRB_CRYPT_DEBUG NOENCRYPTION notdef
 ./lib/krb4/dest_tkt.c: NO_FSYNC O_SYNC TKT_SHMEM notdef
 ./lib/krb4/err_txt.c: MULTIDIMENSIONAL_ERR_TXT
-./lib/krb4/fakeenv.c:
-./lib/krb4/fgetst.c:
+./lib/krb4/fakeenv.c: "
+./lib/krb4/fgetst.c: "
 ./lib/krb4/g_ad_tkt.c: NOENCRYPTION
-./lib/krb4/g_admhst.c:
+./lib/krb4/g_admhst.c: "
 ./lib/krb4/g_cnffile.c: ATHENA_CONF_FALLBACK
-./lib/krb4/g_cred.c:
+./lib/krb4/g_cred.c: "
 ./lib/krb4/g_in_tkt.c: DECRYPT_TKT_TYPE_DEFINED KEY_PROC_TYPE_DEFINED NOENCRYPTION
-./lib/krb4/g_krbhst.c:
-./lib/krb4/g_krbrlm.c:
+./lib/krb4/g_krbhst.c: "
+./lib/krb4/g_krbrlm.c: "
 ./lib/krb4/g_phost.c: DO_REVERSE_RESOLVE
 ./lib/krb4/g_pw_in_tkt.c: BSDUNIX CROSSMSDOS NOENCRYPTION NULL _WINDOWS __svr4__ macintosh
-./lib/krb4/g_pw_tkt.c:
+./lib/krb4/g_pw_tkt.c: "
 ./lib/krb4/g_svc_in_tkt.c: NULL
-./lib/krb4/g_tf_fname.c:
-./lib/krb4/g_tf_realm.c:
-./lib/krb4/g_tkt_svc.c:
+./lib/krb4/g_tf_fname.c: "
+./lib/krb4/g_tf_realm.c: "
+./lib/krb4/g_tkt_svc.c: "
 ./lib/krb4/gethostname.c: GETHOSTNAME
-./lib/krb4/getst.c:
+./lib/krb4/getst.c: "
 ./lib/krb4/in_tkt.c: NO_FSYNC O_SYNC TKT_SHMEM
 ./lib/krb4/klog.c: NEED_TIME_H VMS
-./lib/krb4/kname_parse.c:
-./lib/krb4/kntoln.c:
+./lib/krb4/kname_parse.c: "
+./lib/krb4/kntoln.c: "
 ./lib/krb4/kparse.c: DEBUG FALSE GTOK_TEST KVTEST PSTEST
 ./lib/krb4/kuserok.c: ATHENA_COMPAT ATHENA_OLD_KLOGIN __SCO__ hpux
 ./lib/krb4/log.c: KRB_CRYPT_DEBUG NEED_TIME_H VMS
-./lib/krb4/mac_glue.c:
-./lib/krb4/mac_store.c:
-./lib/krb4/mac_store.h:
-./lib/krb4/mac_stubs.c:
-./lib/krb4/mac_time.c:
+./lib/krb4/mac_glue.c: "
+./lib/krb4/mac_store.c: "
+./lib/krb4/mac_store.h: "
+./lib/krb4/mac_stubs.c: "
+./lib/krb4/mac_time.c: "
 ./lib/krb4/macsock.c: ENOMEM
 ./lib/krb4/memcache.c: _AIX _WINDOWS unix
-./lib/krb4/memcache.h:
+./lib/krb4/memcache.h: "
 ./lib/krb4/mk_auth.c: ATHENA_COMPAT NOENCRYPTION
-./lib/krb4/mk_err.c:
+./lib/krb4/mk_err.c: "
 ./lib/krb4/mk_preauth.c: KEY_PROC_TYPE_DEFINED NOENCRYPTION
 ./lib/krb4/mk_priv.c: NOENCRYPTION notdef
 ./lib/krb4/mk_req.c: NOENCRYPTION
 ./lib/krb4/mk_safe.c: NOENCRYPTION
-./lib/krb4/month_sname.c:
+./lib/krb4/month_sname.c: "
 ./lib/krb4/netread.c: _WINDOWS
 ./lib/krb4/netwrite.c: _WINDOWS
-./lib/krb4/one.c:
-./lib/krb4/pkt_cipher.c:
-./lib/krb4/pkt_clen.c:
+./lib/krb4/one.c: "
+./lib/krb4/pkt_cipher.c: "
+./lib/krb4/pkt_clen.c: "
 ./lib/krb4/put_svc_key.c:
-./lib/krb4/rd_err.c:
+./lib/krb4/rd_err.c: "
 ./lib/krb4/rd_preauth.c: NOENCRYPTION
 ./lib/krb4/rd_priv.c: NOENCRYPTION notdef
 ./lib/krb4/rd_req.c: KRB_CRYPT_DEBUG NOENCRYPTION lint
@@ -788,102 +786,81 @@
 ./lib/krb4/rd_svc_key.c: ATHENA_COMPAT ATHENA_OLD_SRVTAB __i960__
 ./lib/krb4/realmofhost.c: DO_REVERSE_RESOLVE
 ./lib/krb4/recvauth.c: NOENCRYPTION max
-./lib/krb4/save_creds.c:
+./lib/krb4/save_creds.c: "
 ./lib/krb4/send_to_kdc.c: DEBUG SunOS ULTRIX022
 ./lib/krb4/sendauth.c: ATHENA_COMPAT
 ./lib/krb4/setenv.c: HAVE_GETENV LIBC_SCCS lint
-./lib/krb4/stime.c:
-./lib/krb4/strcasecmp.c:
-./lib/krb4/swab.c:
+./lib/krb4/stime.c: "
+./lib/krb4/strcasecmp.c: "
+./lib/krb4/swab.c: "
 ./lib/krb4/tf_shm.c: _AIX
 ./lib/krb4/tf_util.c: LOCK_SH NEED_UTIMES TKT_SHMEM __SCO__ __svr4__
-./lib/krb4/tkt_string.c:
-./lib/krb4/unix_glue.c:
-./lib/krb4/unix_time.c:
-./lib/krb4/vmsswab.c:
-./lib/krb4/win_glue.c:
-./lib/krb4/win_store.c:
-./lib/krb4/win_time.c:
+./lib/krb4/tkt_string.c: "
+./lib/krb4/unix_glue.c: "
+./lib/krb4/unix_time.c: "
+./lib/krb4/vmsswab.c: "
+./lib/krb4/win_glue.c: "
+./lib/krb4/win_store.c: "
+./lib/krb4/win_time.c: "
+./lib/kadm/configure.in: HAVE_VSPRINTF const HAVE_CLOSELOG HAVE_OPENLOG HAVE_SRAND HAVE_SRAND48 HAVE_SRANDOM HAVE_STRFTIME HAVE_SYSLOG HAVE_PWD_H HAVE_STDARG_H HAVE_SYSLOG_H HAVE_LIBNSL HAVE_LIBSOCKET
+./lib/kadm/adm_conn.c: KRB5_USE_INET OLD_CONFIG_FILES _WINDOWS
+./lib/kadm/adm_kt_dec.c: "
+./lib/kadm/adm_kt_enc.c: "
+./lib/kadm/adm_kw_dec.c: "
+./lib/kadm/adm_kw_enc.c: "
+./lib/kadm/adm_rw.c: "
+./lib/kadm/logger.c: LOG_ALERT LOG_AUTH LOG_CRIT LOG_CRON LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_INFO LOG_KERN LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2 LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 LOG_LOCAL6 LOG_LOCAL7 LOG_LPR LOG_MAIL LOG_NEWS LOG_NOTICE LOG_USER LOG_UUCP LOG_WARNING MAXHOSTNAMELEN
+./lib/kadm/t_dbentry.c: RAND_TYPE notdef
+./lib/kadm/t_ktentry.c: RAND_TYPE
+./lib/kdb4/configure.in: HAS_UNISTD_H NDBM NEED_SYS_FCNTL_H POSIX_FILE_LOCKS const HAVE_LIBNSL HAVE_LIBSOCKET
+./lib/kdb4/krb_cache.c: DEBUG
+./lib/kdb4/krb_dbl.c: "
+./lib/kdb4/krb_dbm.c: DEBUG NO_FSYNC
+./lib/kdb4/krb_kdb_utils.c: NOENCRYPTION
+./lib/kdb4/krb_lib.c: CACHE DEBUG NEED_SYS_TIME_H NEED_TIME_H
+./lib/kdb4/print_princ.c: NEED_TIME_H
 ./lib/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./lib/glue4.c:
-./lib/win_glue.c:
+./lib/glue4.c: "
+./lib/win_glue.c: "
 ./slave/configure.in: POSIX_TERMIOS const HAVE_LIBNSL HAVE_LIBSOCKET HAVE_LIBUTIL
 ./slave/kprop.c: NEED_SYS_FCNTL_H
-./slave/kprop.h:
+./slave/kprop.h: "
 ./slave/kpropd.c: PID_FILE WEXITSTATUS
-./tests/create/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./tests/create/kdb5_mkdums.c:
 ./tests/asn.1/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./tests/asn.1/asn1buf.c:
-./tests/asn.1/asn1buf.h: __ASN1BUF_H__
 ./tests/asn.1/debug.h: __DEBUG_H__
 ./tests/asn.1/krb5_decode_test.c: ISODE_SUCKS
 ./tests/asn.1/krb5_encode_test.c: ISODE_SUCKS
-./tests/asn.1/krbasn1.h: HAS_STDLIB_H __KRBASN1_H__
-./tests/asn.1/ktest.c:
+./tests/asn.1/ktest.c: "
 ./tests/asn.1/ktest.h: __KTEST_H__
-./tests/asn.1/ktest_equal.c:
+./tests/asn.1/ktest_equal.c: "
 ./tests/asn.1/ktest_equal.h: __KTEST_EQUAL_H__
 ./tests/asn.1/trval.c: KRB5 STANDALONE
 ./tests/asn.1/utility.c: KRB5_USE_ISODE
 ./tests/asn.1/utility.h: __UTILITY_H__
 ./tests/resolve/configure.in: STDC_HEADERS const HAVE_STRCHR HAVE_SYS_PARAM_H HAVE_SYS_SOCKET_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./tests/resolve/resolve.c:
-./tests/hammer/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./tests/hammer/kdc5_hammer.c:
-./tests/hammer/pp.c:
-./tests/verify/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./tests/verify/kdb5_verify.c:
-./tests/verify/pkey.c:
-./tests/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./tests/dump.c:
-./tests/test1.c:
 ./tests/dejagnu/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./util/et/configure.in: HAS_STRERROR HDR_HAS_PERROR NEED_SYS_ERRLIST NO_YYLINENO const HAVE_STDARG_H HAVE_STDLIB_H HAVE_LIBNSL HAVE_LIBSOCKET
-./util/et/com_err.c: VARARGS _WINDOWS __STDC__ notdef
-./util/et/com_err.h: FAR INTERFACE _WINDOWS __COM_ERR_H __STDC__
-./util/et/compile_et.c: NEED_STRCASECMP lint
-./util/et/compiler.h:
-./util/et/error_message.c: _WINDOWS
-./util/et/error_table.h: KRB5_PROVIDE_PROTOTYPES _ET_H _WINDOWS __STDC__
-./util/et/et_name.c: lint
-./util/et/init_et.c:
-./util/et/internal.h: _WINDOWS __STDC__
-./util/et/mit-sipb-copyright.h:
-./util/et/test_et.c:
-./util/et/vfprintf.c:
-./util/autoconf/configure.in:
-./util/autoconf/acconfig.h:
-./util/ss/configure.in: HAS_STRDUP NEED_SYS_FCNTL_H NO_YYLINENO POSIX_SIGNALS RETSIGTYPE USE_DIRENT_H USE_SIGPROCMASK WAIT_USES_INT const HAVE_STDARG_H HAVE_STDLIB_H HAVE_LIBNSL HAVE_LIBSOCKET
-./util/ss/copyright.h:
-./util/ss/data.c:
-./util/ss/error.c: NeXT __STDC__ ibm032
-./util/ss/execute_cmd.c: __SABER__
-./util/ss/help.c:
-./util/ss/invocation.c: silly
-./util/ss/list_rqs.c: NO_FORK lint
-./util/ss/listen.c: BSD
-./util/ss/mit-sipb-copyright.h:
-./util/ss/mk_cmds.c:
-./util/ss/options.c:
-./util/ss/pager.c: NO_FORK
-./util/ss/parse.c: DEBUG
-./util/ss/prompt.c:
-./util/ss/request_tbl.c:
-./util/ss/requests.c:
-./util/ss/ss.h: __STDC__ _ss_h
-./util/ss/ss_internal.h: __GNUC__ __HIGHC__ __STDC__ _ss_ss_internal_h vax
-./util/ss/test_ss.c:
-./util/ss/utils.c:
-./util/unifdef/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./util/unifdef/unifdef.c: FFSPECIAL TESTING YES lint
+./tests/dejagnu/t_inetd.c: "
+./tests/create/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./tests/create/kdb5_mkdums.c: "
+./tests/hammer/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./tests/hammer/kdc5_hammer.c: "
+./tests/hammer/pp.c: "
+./tests/verify/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./tests/verify/kdb5_verify.c: "
+./tests/verify/pkey.c: "
+./tests/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./tests/dump.c: "
+./tests/test1.c: "
+./util/autoconf/configure.in: "
+./util/autoconf/acconfig.h: _ALL_SOURCE
 ./util/profile/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
 ./util/profile/prof_file.c: _WINDOWS
-./util/profile/prof_init.c:
+./util/profile/prof_init.c: "
 ./util/profile/prof_int.h: _MSDOS __STDC__
 ./util/profile/prof_parse.c: _WINDOWS
-./util/profile/prof_section.c:
-./util/profile/prof_tree.c:
+./util/profile/prof_section.c: "
+./util/profile/prof_tree.c: "
 ./util/profile/test_parse.c: _MSDOS
 ./util/profile/test_profile.c: _MSDOS
 ./util/berk_db/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
@@ -892,7 +869,7 @@
 ./util/berk_db/hash/configure.in: POSIX_SIGNALS SIZEOF_DATUM_DSIZE SIZEOF_DBT_SIZE const HAVE_MKSTEMP HAVE_MKTEMP HAVE_SYS_CDEFS_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./util/berk_db/hash/extern.h: HASH_STATISTICS
 ./util/berk_db/hash/hash.c: DEBUG HASH_STATISTICS LIBC_SCCS lint
-./util/berk_db/hash/hash.h:
+./util/berk_db/hash/hash.h: "
 ./util/berk_db/hash/hash_bigkey.c: DEBUG DEBUG1 HASH_STATISTICS LIBC_SCCS lint
 ./util/berk_db/hash/hash_buf.c: DEBUG DEBUG1 LIBC_SCCS PURIFY lint
 ./util/berk_db/hash/hash_func.c: LIBC_SCCS lint
@@ -901,22 +878,44 @@
 ./util/berk_db/hash/hsearch.c: LIBC_SCCS lint
 ./util/berk_db/hash/krb5_ndbm.c: LIBC_SCCS NEED_COPY lint
 ./util/berk_db/hash/ndbm.c: LIBC_SCCS lint
-./util/berk_db/hash/page.h:
-./util/berk_db/hash/search.h:
+./util/berk_db/hash/page.h: "
+./util/berk_db/hash/search.h: "
 ./util/berk_db/test/configure.in: HAVE_INDEX POSIX_SIGNALS const HAVE_SYS_CDEFS_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./util/berk_db/test/dbtest.c: MIT_notdef NOT_PORTABLE STATISTICS lint
+./util/et/configure.in: HAS_STRERROR HDR_HAS_PERROR NEED_SYS_ERRLIST NO_YYLINENO const HAVE_STDARG_H HAVE_STDLIB_H HAVE_LIBNSL HAVE_LIBSOCKET
+./util/et/com_err.c: VARARGS _WINDOWS __STDC__ notdef
+./util/et/com_err.h: FAR INTERFACE _WINDOWS __COM_ERR_H __STDC__
+./util/et/compile_et.c: NEED_STRCASECMP lint
+./util/et/compiler.h: "
+./util/et/error_message.c: _WINDOWS
+./util/et/error_table.h: KRB5_PROVIDE_PROTOTYPES _ET_H _WINDOWS __STDC__
+./util/et/et_name.c: lint
+./util/et/init_et.c: "
+./util/et/internal.h: _WINDOWS __STDC__
+./util/et/mit-sipb-copyright.h: "
+./util/et/test_et.c: "
+./util/et/vfprintf.c: "
+./util/ss/configure.in: HAS_STRDUP NEED_SYS_FCNTL_H NO_YYLINENO POSIX_SIGNALS RETSIGTYPE USE_DIRENT_H USE_SIGPROCMASK WAIT_USES_INT const HAVE_STDARG_H HAVE_STDLIB_H HAVE_LIBNSL HAVE_LIBSOCKET
+./util/ss/copyright.h: "
+./util/ss/data.c: "
+./util/ss/error.c: NeXT __STDC__ ibm032
+./util/ss/execute_cmd.c: __SABER__
+./util/ss/help.c:
+./util/ss/invocation.c: silly
+./util/ss/list_rqs.c: NO_FORK lint
+./util/ss/listen.c: BSD
+./util/ss/mit-sipb-copyright.h: "
+./util/ss/mk_cmds.c:
+./util/ss/options.c: "
+./util/ss/pager.c: NO_FORK
+./util/ss/parse.c: DEBUG
+./util/ss/prompt.c: "
+./util/ss/request_tbl.c: "
+./util/ss/requests.c: "
+./util/ss/ss.h: __STDC__ _ss_h
+./util/ss/ss_internal.h: __GNUC__ __HIGHC__ __STDC__ _ss_ss_internal_h vax
+./util/ss/test_ss.c: "
+./util/ss/utils.c:
+./util/unifdef/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
+./util/unifdef/unifdef.c: FFSPECIAL TESTING YES lint
 ./util/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./kadmin.v4/server/configure.in: HAS_STDLIB_H NEED_SYS_FCNTL_H POSIX_SIGNALS WAIT_USES_INT const HAVE_UNISTD_H HAVE_LIBDBM HAVE_LIBNDBM HAVE_LIBNSL HAVE_LIBSOCKET
-./kadmin.v4/server/acl_files.c: KRB_REALM
-./kadmin.v4/server/admin_server.c: DEBUG NOENCRYPTION POSIX_SIGTYPE _AIX sigmask
-./kadmin.v4/server/kadm_funcs.c: HAVE_SYS_TIME_H HESIOD NOENCRYPTION TIME_WITH_SYS_TIME
-./kadmin.v4/server/kadm_ser_wrap.c: NOENCRYPTION
-./kadmin.v4/server/kadm_server.c: HAVE_SYS_TIME_H TIME_WITH_SYS_TIME notdef
-./kadmin.v4/server/kadm_server.h: KADM_SERVER_DEFS
-./kadmin.v4/server/kadm_stream.c:
-./kadmin.v4/server/kadm_supp.c: notdef
-./kadmin.v4/configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./configure.in: const HAVE_LIBNSL HAVE_LIBSOCKET
-./acconfig.h:
-./patchlevel.h:
-./wconfig.c:

@@ -1,3 +1,10 @@
+Wed Jun 28 20:13:10 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Proper test for GCC. (based on autoconf test).  
+	 	If using gcc, set shlibs_ldflag and noshlibs_ldflag
+		properly for compiler. (for OSF at least - may be more
+		generic). 
+
 Wed Jun 28 17:07:08 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* aclocal.m4 (KRB_INCLUDE): Search the build directories before
