@@ -398,6 +398,11 @@ krb5_get_host_realm(context, host, realmsp)
     return 0;
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN32__)
+# ifndef EAFNOSUPPORT
+#  define EAFNOSUPPORT WSAEAFNOSUPPORT
+# endif
+#endif
 
 krb5_error_code
 krb5int_translate_gai_error (int num)

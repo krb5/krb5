@@ -1,3 +1,8 @@
+2002-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* hst_realm.c (EAFNOSUPPORT): On Windows, translate to
+	WSAEAFNOSUPPORT.
+
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* hst_realm.c (krb5int_get_fq_hostname): New function.  Use
