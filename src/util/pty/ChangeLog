@@ -1,3 +1,7 @@
+Sun Nov 12 12:44:33 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* open_ctty.c (pty_open_ctty): Remove redundant Ultrix calls to setpgrp()
+
 Sun Oct 22 03:48:37 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* update_wtmp.c (ptyint_update_wtmp): Add comments explaining why ifdefs are right.
