@@ -2,7 +2,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 26;
+	objectVersion = 30;
 	objects = {
 		00CFB46AFF6D81A212120111 = {
 			isa = PBXFileReference;
@@ -167,8 +167,8 @@
 		00CFB47BFF6EA3C312120111 = {
 			isa = PBXFrameworkReference;
 			name = CCache.framework;
-			path = ../../CCacheLib/Projects/build/CCache.framework;
-			refType = 2;
+			path = /System/Library/Frameworks/CCache.framework;
+			refType = 0;
 		};
 		00CFB47CFF6EA3C312120111 = {
 			fileRef = 00CFB47BFF6EA3C312120111;
@@ -181,6 +181,26 @@
 				);
 			};
 		};
+		012574A5FF7A9C8212120111 = {
+			isa = PBXFrameworkReference;
+			path = ComErr.framework;
+			refType = 3;
+		};
+		012574A6FF7A9C8212120111 = {
+			isa = PBXFrameworkReference;
+			path = Profile.framework;
+			refType = 3;
+		};
+		012574A7FF7A9C8212120111 = {
+			isa = PBXFrameworkReference;
+			path = Kerberos5.framework;
+			refType = 3;
+		};
+		012574A8FF7A9C8212120111 = {
+			isa = PBXFrameworkReference;
+			path = GSS.framework;
+			refType = 3;
+		};
 		174475CAFF5EEEE312120111 = {
 			isa = PBXFileReference;
 			path = GenerateErrorTables.sh;
@@ -191,6 +211,9 @@
 			buildPhases = (
 			);
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -207,18 +230,13 @@
 			name = "Error Tables";
 			productName = "Error Tables";
 			settingsToExpand = 6;
-			settingsToPassInEnvironment = 287;
+			settingsToPassInEnvironment = 25;
 			settingsToPassOnCommandLine = 280;
 			shouldUseHeadermap = 0;
 		};
-		174475CCFF5EF33612120111 = {
-			isa = PBXFrameworkReference;
-			path = ComErr.framework;
-			refType = 3;
-		};
 		174475CDFF5EF33612120111 = {
 			children = (
-				174475CCFF5EF33612120111,
+				012574A5FF7A9C8212120111,
 				174475CEFF5EF33612120111,
 				174475CFFF5EF33612120111,
 				174475D0FF5EF33612120111,
@@ -266,7 +284,10 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
+				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\"";
+				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -284,22 +305,38 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = ComErr;
-			productInstallPath = /Local/Library/Frameworks;
+			productInstallPath = /System/Library/Frameworks;
 			productName = ComErr;
-			productReference = 174475CCFF5EF33612120111;
-			productSettings = {
-				CFBundleDevelopmentRegion = English;
-				CFBundleExecutable = "";
-				CFBundleGetInfoString = "";
-				CFBundleIconFile = "";
-				CFBundleIdentifier = "";
-				CFBundleInfoDictionaryVersion = 6.0;
-				CFBundleName = "";
-				CFBundlePackageType = FMWK;
-				CFBundleShortVersionString = "";
-				CFBundleSignature = "????";
-				CFBundleVersion = 0.0.1d1;
-			};
+			productReference = 012574A5FF7A9C8212120111;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">
+<plist version=\"0.9\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string></string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string></string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.1d1</string>
+</dict>
+</plist>
+";
 			shouldUseHeadermap = 0;
 		};
 		174475D3FF5EF33612120111 = {
@@ -440,11 +477,6 @@
 				);
 			};
 		};
-		174475E1FF5EF80312120111 = {
-			isa = PBXFrameworkReference;
-			path = Profile.framework;
-			refType = 3;
-		};
 		174475E2FF5EF80312120111 = {
 			buildPhases = (
 				174475E3FF5EF80312120111,
@@ -456,9 +488,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
+				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
+				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-I$(SYMROOT)/ComErr.framework/Headers -imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -475,22 +510,38 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = Profile;
-			productInstallPath = /Local/Library/Frameworks;
+			productInstallPath = /System/Library/Frameworks;
 			productName = Profile;
-			productReference = 174475E1FF5EF80312120111;
-			productSettings = {
-				CFBundleDevelopmentRegion = English;
-				CFBundleExecutable = "";
-				CFBundleGetInfoString = "";
-				CFBundleIconFile = "";
-				CFBundleIdentifier = "";
-				CFBundleInfoDictionaryVersion = 6.0;
-				CFBundleName = "";
-				CFBundlePackageType = FMWK;
-				CFBundleShortVersionString = "";
-				CFBundleSignature = "????";
-				CFBundleVersion = 0.0.1d1;
-			};
+			productReference = 012574A6FF7A9C8212120111;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">
+<plist version=\"0.9\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string></string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string></string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.1d1</string>
+</dict>
+</plist>
+";
 			shouldUseHeadermap = 0;
 		};
 		174475E3FF5EF80312120111 = {
@@ -542,7 +593,7 @@
 		};
 		174475E8FF5EF8A512120111 = {
 			children = (
-				174475E1FF5EF80312120111,
+				012574A6FF7A9C8212120111,
 				17447603FF5EFCC612120111,
 				174475E9FF5EF8A512120111,
 				174475EAFF5EF8A512120111,
@@ -743,6 +794,9 @@
 			buildPhases = (
 			);
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -821,7 +875,7 @@
 		};
 		1744760AFF5FF8DB12120111 = {
 			children = (
-				1744760BFF5FF8DB12120111,
+				012574A7FF7A9C8212120111,
 				174476CCFF60088512120111,
 				174476CDFF60088512120111,
 				00CFB47BFF6EA3C312120111,
@@ -838,11 +892,6 @@
 			path = "";
 			refType = 2;
 		};
-		1744760BFF5FF8DB12120111 = {
-			isa = PBXFrameworkReference;
-			path = Kerberos5.framework;
-			refType = 3;
-		};
 		1744760CFF5FF8DB12120111 = {
 			buildPhases = (
 				17447611FF5FF8DB12120111,
@@ -854,9 +903,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
+				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SRCROOT)/../../CCacheLib/Headers\"";
+				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-I$(SYMROOT)/ComErr.framework/Headers -I$(SYMROOT)/Profile.framework/Headers -I$(SRCROOT)/../../CCacheLib/Headers -imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -875,22 +927,38 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = Kerberos5;
-			productInstallPath = /Local/Library/Frameworks;
+			productInstallPath = /System/Library/Frameworks;
 			productName = Kerberos5;
-			productReference = 1744760BFF5FF8DB12120111;
-			productSettings = {
-				CFBundleDevelopmentRegion = English;
-				CFBundleExecutable = "";
-				CFBundleGetInfoString = "";
-				CFBundleIconFile = "";
-				CFBundleIdentifier = "";
-				CFBundleInfoDictionaryVersion = 6.0;
-				CFBundleName = "";
-				CFBundlePackageType = FMWK;
-				CFBundleShortVersionString = "";
-				CFBundleSignature = "????";
-				CFBundleVersion = 0.0.1d1;
-			};
+			productReference = 012574A7FF7A9C8212120111;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">
+<plist version=\"0.9\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string></string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string></string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.1d1</string>
+</dict>
+</plist>
+";
 			shouldUseHeadermap = 0;
 		};
 		1744760DFF5FF8DB12120111 = {
@@ -7451,8 +7519,6 @@
 		};
 		25C77492FF52D03A12120111 = {
 			isa = PBXProject;
-			knownPlatforms = (
-			);
 			mainGroup = 25C77493FF52D03A12120111;
 			productRefGroup = 25C77493FF52D03A12120111;
 			projectDirPath = .;
@@ -7480,7 +7546,7 @@
 		};
 		5C1372E8FF6546C412120111 = {
 			children = (
-				5C1372E9FF6546C412120111,
+				012574A8FF7A9C8212120111,
 				5C1372EAFF6546C412120111,
 				5C137376FF654C0212120111,
 				5C137384FF6824DB12120111,
@@ -7500,11 +7566,6 @@
 			path = "";
 			refType = 4;
 		};
-		5C1372E9FF6546C412120111 = {
-			isa = PBXFrameworkReference;
-			path = GSS.framework;
-			refType = 3;
-		};
 		5C1372EAFF6546C412120111 = {
 			isa = PBXFrameworkReference;
 			path = Kerberos5.framework;
@@ -7521,9 +7582,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
+				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/Kerberos5.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
+				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-I$(SYMROOT)/Kerberos5.framework/Headers -I$(SYMROOT)/Profile.framework/Headers -I$(SYMROOT)/ComErr.framework/Headers -imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -7541,22 +7605,37 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = GSS;
-			productInstallPath = /Local/Library/Frameworks;
 			productName = GSS;
-			productReference = 5C1372E9FF6546C412120111;
-			productSettings = {
-				CFBundleDevelopmentRegion = English;
-				CFBundleExecutable = "";
-				CFBundleGetInfoString = "";
-				CFBundleIconFile = "";
-				CFBundleIdentifier = "";
-				CFBundleInfoDictionaryVersion = 6.0;
-				CFBundleName = "";
-				CFBundlePackageType = FMWK;
-				CFBundleShortVersionString = "";
-				CFBundleSignature = "????";
-				CFBundleVersion = 0.0.1d1;
-			};
+			productReference = 012574A8FF7A9C8212120111;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">
+<plist version=\"0.9\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string></string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string></string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.1d1</string>
+</dict>
+</plist>
+";
 			shouldUseHeadermap = 0;
 		};
 		5C1372ECFF6546C412120111 = {
