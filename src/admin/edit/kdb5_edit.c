@@ -1245,6 +1245,27 @@ void modent(argc, argv)
     char *pass, *canon;
     int one = 1, nprincs = 1, randkey = 0;
     
+    if (argc < 3) {
+      char arg[30];
+      int i;
+
+      com_err(argv[0], 0, "Too few arguments");
+      com_err(argv[0], 0, "Usage: %s [ -maxlife maxticketlifetime ]", argv[0]);
+      com_err(argv[0], 0, "         [ -expire expiredate ]");
+      com_err(argv[0], 0, "         [ -pwexpire pwexpiredate ]");
+      com_err(argv[0], 0, "         [ -pw password ]");
+      com_err(argv[0], 0, "         [ -randkey ]");
+      i=0;
+      while (!(retval = krb5_input_flag_to_string(i, arg, sizeof(arg)))) {
+	      com_err(argv[0], 0, "         [ +%-13s | -%-13s ]", arg, arg);
+	      i++;
+      }
+      com_err(argv[0], 0, "         principal");
+
+      exit_status++;
+      return;
+    }
+
     retval = krb5_parse_name(edit_context, argv[argc - 1], &kprinc);
     if (retval) {
 	com_err("modify_principal", retval, "while parsing principal");

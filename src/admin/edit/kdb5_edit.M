@@ -132,6 +132,9 @@ Extract service key table
 .IP extract_v4_srvtab,xst4  
 Extract service key table
 
+.IP modify_entry,modent
+Modify entry
+
 .IP list_db,ldb             
 List database entries
 

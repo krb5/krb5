@@ -1,3 +1,9 @@
+Sun Dec 10 11:07:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.M: Document that modent exists
+
+	* kdb5_edit.c (modent): Add usage as suggested by jhawk@mit.edu.
+
 Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
 
         * kdb5_edit.c : Remove krb5_enctype from krb5_string_to_key() args.
