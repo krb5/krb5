@@ -123,13 +123,13 @@ static const char *cpw_nochange_fmt	= "password not changed for %s";
 static const char *akt_usage_fmt	= "usage is %s principal [key:salt]+";
 static const char *akt_prompt1_fmt	= "   Enter current password for %s: ";
 static const char *akt_prompt2_fmt	= "Re-enter current password for %s: ";
-static const char *akt_succ_fmt		= "keytypes successfully added for %s";
-static const char *akt_nochange_fmt	= "keytypes not added for %s";
+static const char *akt_succ_fmt		= "enctypes successfully added for %s";
+static const char *akt_nochange_fmt	= "enctypes not added for %s";
 static const char *dkt_usage_fmt	= "usage is %s principal [key:salt[:kvno]]+";
 static const char *dkt_prompt1_fmt	= "   Enter current password for %s: ";
 static const char *dkt_prompt2_fmt	= "Re-enter current password for %s: ";
-static const char *dkt_succ_fmt		= "keytypes successfully deleted for %s";
-static const char *dkt_nochange_fmt	= "keytypes not deleted for %s";
+static const char *dkt_succ_fmt		= "enctypes successfully deleted for %s";
+static const char *dkt_nochange_fmt	= "enctypes not deleted for %s";
 static const char *dprinc_usage_fmt	= "usage is %s [%s] principal [...]";
 static const char *del_conf_fmt		= "Enter '%c' to delete principal %s: ";
 static const char del_conf_char		= 'y';
@@ -288,7 +288,7 @@ kadmin_print_entry(name, valid, dbentp)
     krb5_tl_mod_princ	*modprinc;
     krb5_timestamp	now;
     int			i;
-    char		keytype[128];
+    char		enctype[128];
     char		salttype[128];
 
     printf(db_print_header);
@@ -336,15 +336,15 @@ kadmin_print_entry(name, valid, dbentp)
 	}
     }
     for (i=0; i<dbentp->n_key_data; i++) {
-	krb5_keytype_to_string((krb5_keytype) dbentp->key_data[i].
+	krb5_enctype_to_string((krb5_enctype) dbentp->key_data[i].
 			       key_data_type[0],
-			       keytype,
-			       sizeof(keytype));
-	krb5_salttype_to_string((krb5_keytype) dbentp->key_data[i].
+			       enctype,
+			       sizeof(enctype));
+	krb5_salttype_to_string((krb5_enctype) dbentp->key_data[i].
 				key_data_type[1],
 				salttype,
 				sizeof(salttype));
-	printf(db_print_9_fmt, keytype, salttype,
+	printf(db_print_9_fmt, enctype, salttype,
 	       (int) dbentp->key_data[i].key_data_kvno);
     }
 
@@ -1076,7 +1076,7 @@ kadmin_extract_v4(argc, argv)
 						     ncomps,
 						     complist,
 						     &keytab_entry))) {
-		    if (keytab_entry.key.keytype != 1) {
+		    if (keytab_entry.key.enctype != 1) {
 			com_err(requestname, 0, xst_nodeskey_fmt, argv[i]);
 			break;
 		    }

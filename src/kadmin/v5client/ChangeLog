@@ -1,3 +1,6 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * kadmin5.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
 Mon Aug 21 17:02:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.M - Remove description of flags since this should be in a
