@@ -32,7 +32,7 @@ krb5_os_init_context(ctx)
 	krb5_os_context os_ctx;
 	krb5_error_code	retval;
 	char *name;
-	char *filenames[2];
+	const char *filenames[2];
 	
 	if (ctx->os_context)
 		return 0;
@@ -51,7 +51,7 @@ krb5_os_init_context(ctx)
 	 * including a config file from user's home directory here.
 	 */
 	name = getenv("KRB5_CONFIG");
-	filenames[0] == name ? name : DEFAULT_PROFILE_FILENAME;
+	filenames[0] = name ? name : DEFAULT_PROFILE_FILENAME;
 	filenames[1] = 0;
 
 	retval = profile_init(filenames, &ctx->profile);
