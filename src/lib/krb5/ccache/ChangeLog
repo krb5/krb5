@@ -1,3 +1,6 @@
+2002-04-2 Alexandra Ellwood <lxs@mit.edu>
+    * ccdefault.c: updated to new KLL function name
+
 2002-03-03 Alexandra Ellwood <lxs@mit.edu>
     * ccdefault.c: swapped include of KerberosLoginPrivate with k5-int.h
     to avoid problems with including CoreServices.h after profile.h and krb.h
