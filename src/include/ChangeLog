@@ -1,3 +1,9 @@
+2005-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check return type of gmtime_r, and define
+	GMTIME_R_RETURNS_INT if it returns int.  If the return type can't
+	be determined, pretend the function isn't there.
+
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (PROGRAM_EXITING) [__GNUC__ && !_WIN32 &&

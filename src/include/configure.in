@@ -98,6 +98,29 @@ if test "$ac_cv_func_getpwuid_r" = yes; then
   fi
 fi
 
+if test "$ac_cv_func_gmtime_r" = yes; then
+  AC_MSG_CHECKING([whether gmtime_r returns int])
+  AC_CACHE_VAL(krb5_cv_gmtime_r_returns_int,
+  [AC_TRY_COMPILE([#include <time.h>
+   extern int gmtime_r ();], [1;], return_int=yes, return_int=no)
+   AC_TRY_COMPILE([#include <time.h>
+   extern struct tm *gmtime_r ();], [1;], return_ptr=yes, return_ptr=no)
+   case $return_int/$return_ptr in
+     yes/no) krb5_cv_gmtime_r_returns_int=yes ;;
+     no/yes) krb5_cv_gmtime_r_returns_int=no ;;
+     *)      # Can't figure it out, punt the function.
+             ac_cv_func_gmtime_r=no ;;
+   esac])
+  if test "$ac_cv_func_gmtime_r" = no; then
+    AC_MSG_RESULT(unknown -- ignoring gmtime_r)
+  else
+    AC_MSG_RESULT($krb5_cv_gmtime_r_returns_int)
+    if test "$krb5_cv_gmtime_r_returns_int" = yes; then
+      AC_DEFINE(GMTIME_R_RETURNS_INT,1,[Define if gmtime_r returns int instead of struct tm pointer, as on old HP-UX systems.])
+    fi
+  fi
+fi
+
 AC_CHECK_FUNC(getservbyname_r,[
 ac_cv_func_getservbyname_r=yes
 if test "$ac_cv_func_getservbyname_r" = yes; then
