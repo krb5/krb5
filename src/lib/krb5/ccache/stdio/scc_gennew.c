@@ -76,7 +76,20 @@ krb5_scc_generate_new (id)
      if (!f)
 	 return krb5_scc_interpret (errno);
      else {
-	 fclose(f);
+	 krb5_int16 scc_fvno = htons(KRB5_SCC_FVNO);
+	 int errsave;
+
+	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
+	     errsave = errno;
+	     (void) fclose(f);
+	     (void) remove(((krb5_scc_data *) lid->data)->filename);
+	     return krb5_scc_interpret(errsave);
+	 }
+	 if (fclose(f) == EOF) {
+	     errsave = errno;
+	     (void) remove(((krb5_scc_data *) lid->data)->filename);
+	     return krb5_scc_interpret(errsave);
+	 }
 	 *id = lid;
 	 return KRB5_OK;
      }

@@ -37,8 +37,9 @@ krb5_scc_get_principal(id, princ)
 {
      krb5_error_code kret;
 
-     MAYBE_OPEN (id, "r");
-     fseek(((krb5_scc_data *) id->data)->file, 0, 0);
+     MAYBE_OPEN (id, SCC_OPEN_RDONLY);
+     /* skip over vno at beginning of file */
+     fseek(((krb5_scc_data *) id->data)->file, sizeof(krb5_int16), 0);
 
      kret = krb5_scc_read_principal(id, princ);
 
