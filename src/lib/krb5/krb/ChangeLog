@@ -1,5 +1,12 @@
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
+	* init_ctx.c (krb5_init_context): Document why krb5_win_ccdll_load
+	is called way early in code.  (It is because we need to have the
+	ccapi stuff loaded before trying to get the OS-specific context
+	initialization where we figure out default cache names and such.)
+
+1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
+
 	* init_ctx.c (get_profile_etype_list): Use profile_release_string
 	to free string allocated by profile_get_string.
 	(krb5_init_context): Use a real context for krb5_win_ccdll_load.

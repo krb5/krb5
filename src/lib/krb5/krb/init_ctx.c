@@ -72,6 +72,13 @@ krb5_init_context(context)
 	krb5_init_ets(ctx);
 
 #if (defined(_MSDOS) || defined(_WIN32))
+	/* 
+	 * Load the krbcc32.dll if necessary.  We do this here so that
+	 * we know to use API: later on during initialization.
+	 * The context being NULL is ok.
+	 */
+	krb5_win_ccdll_load(ctx);
+
 	/*
 	 * krb5_vercheck() is defined in win_glue.c, and this is
 	 * where we handle the timebomb and version server checks.
@@ -168,9 +175,6 @@ krb5_init_context(context)
 	ctx->fcc_default_format = tmp + 0x0500;
 	ctx->scc_default_format = tmp + 0x0500;
 
-#if (defined(_MSDOS) || defined(_WIN32))
-	krb5_win_ccdll_load(ctx);	/* Load the krbcc32.dll if necessary */
-#endif
 	*context = ctx;
 	return 0;
 
