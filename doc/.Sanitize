@@ -33,8 +33,6 @@ api
 implement
 install.texi
 kadmin
-kadmin.protocol
-kpasswd.protocol
 krb5-protocol
 old-V4-docs
 texinfo.tex
