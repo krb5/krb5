@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Destroy the contents of your credential cache.
  */
@@ -19,8 +19,6 @@ static char rcsid_klist_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <krb5/isode_err.h>
 #include <krb5/ext-proto.h>
 
 #include <com_err.h>
@@ -39,8 +37,7 @@ main(argc, argv)
     int code;
     int errflg=0;
     
-    initialize_krb5_error_table();
-    initialize_isod_error_table();
+    krb5_init_ets();
 
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;

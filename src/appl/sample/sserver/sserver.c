@@ -27,12 +27,8 @@ static char rcsid_sserver_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
-
-#include <errno.h>
 
 #include <ctype.h>
 #include <com_err.h>

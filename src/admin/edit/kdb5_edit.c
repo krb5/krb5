@@ -19,20 +19,16 @@ static char rcsid_kdb_edit_c[] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
-#include <krb5/krb5_err.h>
-#include <krb5/kdb5_err.h>
-#include <krb5/isode_err.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/config.h>
-#include <sys/param.h>			/* XXX for MAXPATHLEN */
+#include <krb5/sysincl.h>		/* for MAXPATHLEN */
+#include <krb5/ext-proto.h>
 
 #include <com_err.h>
 #include <ss/ss.h>
-#include <errno.h>
+#include <stdio.h>
 
-#include <krb5/ext-proto.h>
 
 #define REALM_SEP	'@'
 #define REALM_SEP_STR	"@"
@@ -619,7 +615,6 @@ int argc;
 char *argv[];
 {
     krb5_error_code retval;
-    krb5_keyblock *tempkey;
     krb5_principal newprinc;
     char yesno[80];
     int one = 1;

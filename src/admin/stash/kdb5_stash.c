@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Store the master database key in a file.
  */
@@ -19,17 +19,12 @@ static char rcsid_kdb_stash_c[] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
-#include <krb5/krb5_err.h>
-#include <krb5/kdb5_err.h>
-#include <krb5/isode_err.h>
-
-#include <com_err.h>
-
-#include <stdio.h>
 #include <krb5/ext-proto.h>
 #include <krb5/libos-proto.h>
+#include <krb5/sysincl.h>
 
-#include <sys/file.h>			/* for unlink() */
+#include <com_err.h>
+#include <stdio.h>
 
 extern int errno;
 

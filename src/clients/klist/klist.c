@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * List out the contents of your credential cache.
  */
@@ -19,11 +19,8 @@ static char rcsid_klist_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <krb5/isode_err.h>
 #include <krb5/ext-proto.h>
 #include <com_err.h>
-#include <errno.h>
 
 extern int optind;
 extern char *optarg;

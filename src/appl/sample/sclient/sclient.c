@@ -19,14 +19,13 @@ static char rcsid_sclient_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
-#include <errno.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 
+#include <stdio.h>
 #include <ctype.h>
 #include <com_err.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

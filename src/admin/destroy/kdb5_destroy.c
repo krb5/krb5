@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * kdb_dest(roy): destroy the named database.
  *
@@ -24,14 +24,8 @@ static char rcsid_kdb_dest_c[] =
 #include <stdio.h>
 
 #include <com_err.h>
-#include <krb5/krb5_err.h>
-#include <krb5/kdb5_err.h>
-#include <krb5/isode_err.h>
-
 #include <krb5/ext-proto.h>
-#include <sys/file.h>			/* for unlink() */
-
-#include <sys/param.h>			/* XXX for MAXPATHLEN */
+#include <krb5/sysincl.h>		/* for MAXPATHLEN */
 
 extern int errno;
 
