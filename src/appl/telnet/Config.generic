@@ -198,14 +198,14 @@ all:
 
 4.4bsd:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}" -DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
 		    -DDEFAULT_IM='\"\r\n4.4 BSD UNIX (%h) (%t)\r\n\r\r\n\r\"' \
 			-DUSE_TERMIO -DDIAGNOSTICS" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="gettytab.o" \
 		LIB_SRC="gettytab.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
@@ -215,14 +215,14 @@ all:
 
 4.3reno:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}" -DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
 	-DDEFAULT_IM='\"\r\n4.3BSD-Reno UNIX (%h) (%t)\r\n\r\r\n\r\"' \
 			-DUSE_TERMIO -DDIAGNOSTICS" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="gettytab.o" \
 		LIB_SRC="gettytab.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
@@ -233,14 +233,14 @@ all:
 4.3tahoe:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}" -DTERMCAP -DKLUDGELINEMODE \
 		 -DDEFAULT_IM='\"\r\n4.3BSD-Tahoe UNIX (%h) (%t)\r\n\r\r\n\r\"'\
 			-DDIAGNOSTICS" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="strdup.o setsid.o strftime.o gettytab.o" \
 		LIB_SRC="strdup.c setsid.c strftime.c gettytab.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
@@ -250,9 +250,9 @@ all:
 
 4.3bsd:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a"${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a"${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/bin \
 		DESTDIR=${DESTDIR} \
 		DEFINES=${ODEFS}" -DTERMCAP -DKLUDGELINEMODE \
@@ -269,10 +269,9 @@ all:
 
 unicos8.0:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet -lkrb -ldes" \
+		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a \
-				/usr/lib/libkrb.a /usr/lib/libdes.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH}
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DLINEMODE -DKLUDGELINEMODE \
@@ -282,17 +281,16 @@ unicos8.0:
 			-DDIAGNOSTICS" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o" \
 		LIB_SRC="getent.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos7.0 unicos7.C:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet -lkrb -ldes" \
+		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a \
-				/usr/lib/libkrb.a /usr/lib/libdes.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH}
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DLINEMODE -DKLUDGELINEMODE \
@@ -301,16 +299,16 @@ unicos7.0 unicos7.C:
 			-DDIAGNOSTICS" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o" \
 		LIB_SRC="getent.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos6.1:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet" \
+		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DKLUDGELINEMODE -DUSE_TERMIO -DHAS_GETTOS \
@@ -321,16 +319,16 @@ unicos6.1:
 			-DDIAGNOSTICS" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o" \
 		LIB_SRC="getent.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos6.0:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet" \
+		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DKLUDGELINEMODE -DUSE_TERMIO -DHAS_GETTOS \
@@ -341,16 +339,16 @@ unicos6.0:
 			-DDIAGNOSTICS" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o" \
 		LIB_SRC="getent.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos5.1:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lnet -lcurses -L../libtelnet -ltelnet" \
+		LIBS="-lnet -lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=sigset \
 			-DKLUDGELINEMODE -DSYSV_TERMIO -DNO_CC_T \
@@ -359,7 +357,7 @@ unicos5.1:
 			-DAUTHENTICATION -DENCRYPTION \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 5.1 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strerror.o setsid.o strftime.o" \
 		LIB_SRC="getent.c strerror.c setsid.c strftime.c" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
@@ -368,9 +366,9 @@ unicos5.1:
 
 unicos5.0:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lnet -lcurses -L../libtelnet -ltelnet" \
+		LIBS="-lnet -lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=sigset \
 			-DKLUDGELINEMODE -DSYSV_TERMIO -DNO_CC_T \
@@ -379,7 +377,7 @@ unicos5.0:
 			-DAUTHENTICATION -DENCRYPTION \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 5.0 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strerror.o setsid.o strftime.o" \
 		LIB_SRC="getent.c strerror.c setsid.c strftime.c" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
@@ -388,16 +386,16 @@ unicos5.0:
 
 sun3.5:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 			-DHAVE_fd_set \
 			-DDIAGNOSTICS \
 		   -DDEFAULT_IM='\"\r\nSunOS UNIX 3.5 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DNO_LOGIN_P" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strdup.o strerror.o setsid.o \
 			setenv.o strftime.o strcasecmp.o herror.o" \
 		LIB_SRC="getent.c strdup.c strerror.c setsid.c \
@@ -409,16 +407,16 @@ sun3.5:
 sun4.0.3c sun4.0:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DFILIO_H -DTERMCAP -DUSE_TERMIO -DNO_CC_T \
 			-DKLUDGELINEMODE \
 		   -DDEFAULT_IM='\"\r\nSunOS UNIX 4.0 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DSTREAMS -DDIAGNOSTICS \
 			" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strerror.o setsid.o setenv.o \
 				strcasecmp.o strftime.o herror.o" \
 		LIB_SRC="getent.c strerror.c setsid.c setenv.c \
@@ -429,16 +427,16 @@ sun4.0.3c sun4.0:
 
 sun4.1:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DFILIO_H -DTERMCAP -DUSE_TERMIO \
 			-DKLUDGELINEMODE -DSTREAMS \
 			-DAUTHENTICATION -DENCRYPTION \
 		   -DDEFAULT_IM='\"\r\nSunOS UNIX 4.1 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS " \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strerror.o setenv.o herror.o" \
 		LIB_SRC="getent.c strerror.c setenv.c herror.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
@@ -448,15 +446,15 @@ sun4.1:
 sol2.0:
 	make -f Makefile.generic ${WHAT} \
 		LIBS="/usr/ccs/lib/libtermcap.a ../libtelnet/libtelnet.a \
-			-lc /usr/ucblib/libucb.a -lsocket -lnsl" \
+			-lc /usr/ucblib/libucb.a -lsocket -lnsl "${KRB_LIBS} \
 		LIBPATH="/usr/ccs/lib/libtermcap.a ../libtelnet/libtelnet.a \
 			/usr/lib/libc.a /usr/ucblib/libucb.a \
-			/usr/lib/libsocket.a /usr/lib/libnsl.a" \
+			/usr/lib/libsocket.a /usr/lib/libnsl.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES="-DFILIO_H -DTERMCAP -DUSE_TERMIO \
 			-DKLUDGELINEMODE -DSTREAMS -DSTREAMSPTY \
 			-DDIAGNOSTICS -DNO_LOGIN_P -DUTMPX" \
-		INCLUDES="-I.. -I/opt/cygnus/lib/ucbinclude \
+		INCLUDES=${KRB_INC}" -I.. -I/opt/cygnus/lib/ucbinclude \
 			-I/usr/ucbinclude" \
 		LIB_OBJ="getent.o strerror.o setenv.o herror.o" \
 		LIB_SRC="getent.c strerror.c setenv.c herror.c" \
@@ -467,14 +465,14 @@ sol2.0:
 dynix3.0.12:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 		 -DDEFAULT_IM='\"\r\nDYNIX(R) V3.0.12 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS -DNO_STRING_H " \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strchr.o strrchr.o strdup.o strerror.o \
 			setsid.o setenv.o strcasecmp.o strftime.o getopt.o \
 			mem.o" \
@@ -487,15 +485,15 @@ dynix3.0.12:
 
 dynix3.0.17:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a -lseq" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a -lseq "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-			../libtelnet/libtelnet.a /usr/lib/libseq.a" \
+			../libtelnet/libtelnet.a /usr/lib/libseq.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 			-DDIAGNOSTICS -DNO_STRING_H \
 		 -DDEFAULT_IM='\"\r\nDYNIX(R) V3.0.17 (%h) (%t)\r\n\r\r\n\r\"' \
 			" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strchr.o strrchr.o strdup.o strerror.o \
 			setsid.o strftime.o mem.o" \
 		LIB_SRC="getent.c strchr.c strrchr.c strdup.c strerror.c \
@@ -506,15 +504,15 @@ dynix3.0.17:
 
 ultrix3.1:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 			-DDIAGNOSTICS -DUSE_TERMIO \
 		    -DDEFAULT_IM='\"\r\nULTRIX V3.1 (%h) (%t)\r\n\r\r\n\r\"' \
 			-YPOSIX" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o strdup.o strerror.o setenv.o \
 			strftime.o herror.o" \
 		LIB_SRC="getent.c strdup.c strerror.c setenv.c \
@@ -525,12 +523,12 @@ ultrix3.1:
 
 ultrix4.0:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a"${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a"${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DESTDIR=${DESTDIR} \
-		DEFINES=${ODEFS}" -DUSE_TERMIO -DTERMCAP \
+		DEFINES=${ODEFS}"-DUSE_TERMIO -DTERMCAP \
 		    -DDEFAULT_IM='\"\r\nULTRIX V4.0 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DKLUDGELINEMODE -DDIAGNOSTICS " \
 		INCLUDES=${KRB_INC}" -I.." \
@@ -544,15 +542,15 @@ ultrix4.0:
 next1.0:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="../libtelnet/libtelnet.a -ltermcap -lsys_s" \
+		LIBS="../libtelnet/libtelnet.a -ltermcap -lsys_s "${KRB_LIBS} \
 		LIBPATH="/lib/libc.a /lib/libsys_s.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a" \
+				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-bsd -DTERMCAP -DKLUDGELINEMODE \
 			-DDEFAULT_IM='\"\r\nNeXT 1.0 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS -DNO_STRING_H \
 			-Dgetenv=getenv_" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="strdup.o setenv.o setsid.o strftime.o \
 			strcasecmp.o gettytab.o" \
 		LIB_SRC=s"trdup.c setenv.c setsid.c strftime.c \
@@ -573,15 +571,15 @@ convex:
 	ln -s ../../rel_usr/src/lib/libc/posix/tcsetattr.c tcsetattr.c
 	ln -s ../../rel_usr/src/lib/libc/posix/tcgetattr.c tcgetattr.c
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
-		LIBPATH="../libtelnet/libtelnet.a" \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBPATH="../libtelnet/libtelnet.a "${KRB_LIBPATH} \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
 		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
 		CC="${CC}" LCCFLAGS="-g ${OPTLEV} -Dconvex" \
 		DEFINES=${ODEFS}"-DUSE_TERMIO -DLINEMODE \
 			-DDEFAULT_IM='\"\r\nConvex (%h) (%t)\r\n\r\r\n\r\"' \
 			-DDIAGNOSTICS" \
-		INCLUDES="-I.." \
+		INCLUDES=${KRB_INC}" -I.." \
 		LIB_OBJ="getent.o setsid.o strftime.o \
 			tcsetattr.o tcgetattr.o" \
 		LIB_SRC="getent.c setsid.c strftime.c \
