@@ -1,3 +1,8 @@
+Wed Nov 13 17:12:51 1996  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Explicitly set KRB5CCNAME so the user's ccache
+	doesn't get blown away.
+
 Tue Nov 12 14:59:31 1996  Tom Yu  <tlyu@mit.edu>
 
 	* init_db, save_files.sh, start_servers, start_servers_local,

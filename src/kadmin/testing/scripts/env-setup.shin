@@ -57,6 +57,7 @@ SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl; export SRVTCL
 KRB5_CONFIG=$K5ROOT/krb5.conf; export KRB5_CONFIG
 KRB5_KDC_PROFILE=$K5ROOT/kdc.conf; export KRB5_KDC_PROFILE
 KRB5_KTNAME=$K5ROOT/ovsec_adm.srvtab; export KRB5_KTNAME
+KRB5CCNAME=/tmp/krb5cc_unit-test; export KRB5CCNAME
 
 if [ "$TEST_SERVER" != "" ]; then
 	MAKE_KEYTAB="$MAKE_KEYTAB -server $TEST_SERVER"
