@@ -34,7 +34,7 @@ SaberProgramTarget(kpropd, $(SERVERSRCS), $(SERVEROBJS),
 	$(DEPLIBS) $(LOCAL_LIBRARIES),)
 
 saber-setup:
-	#setopt load_flags $(CFLAGS)
-	#load $(LOCAL_LIBRARIES)
+	/**/#setopt load_flags $(CFLAGS)
+	/**/#load $(LOCAL_LIBRARIES)
 
 DependTarget()
