@@ -202,6 +202,11 @@ krb5_error_code krb5_kt_get_name
 	PROTOTYPE((krb5_keytab,
 		   char *,
 		   int ));
+krb5_error_code krb5_tk_default_name
+	PROTOTYPE((char *,
+		   int ));
+krb5_error_code krb5_kt_default
+	PROTOTYPE((krb5_keytab * ));
 krb5_error_code krb5_kt_close
 	PROTOTYPE((krb5_keytab ));
 krb5_error_code krb5_kt_get_entry
@@ -209,6 +214,8 @@ krb5_error_code krb5_kt_get_entry
 		   krb5_principal,
 		   krb5_kvno,
 		   krb5_keytab_entry * ));
+krb5_error_code krb5_kt_free_entry
+	PROTOTYPE((krb5_keytab_entry * ));
 krb5_error_code krb5_kt_start_seq_get
 	PROTOTYPE((krb5_keytab,
 		   krb5_kt_cursor * ));
