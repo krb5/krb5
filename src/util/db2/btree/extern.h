@@ -33,6 +33,35 @@
  *	@(#)extern.h	8.11 (Berkeley) 1/9/95
  */
 
+#define __bt_close	__kdb2_bt_close
+#define __bt_cmp	__kdb2_bt_cmp
+#define __bt_crsrdel	__kdb2_bt_crsrdel
+#define __bt_defcmp	__kdb2_bt_defcmp
+#define __bt_defpfx	__kdb2_bt_defpfx
+#define __bt_delete	__kdb2_bt_delete
+#define __bt_dleaf	__kdb2_bt_deleaf
+#define __bt_fd		__kdb2_bt_fd
+#define __bt_free	__kdb2_bt_free
+#define __bt_get	__kdb2_bt_get
+#define __bt_new	__kdb2_bt_new
+#define __bt_pgin	__kdb2_bt_pgin
+#define __bt_pgout	__kdb2_bt_pgout
+#define __bt_push	__kdb2_bt_push
+#define __bt_put	__kdb2_bt_put
+#define __bt_ret	__kdb2_bt_ret
+#define __bt_search	__kdb2_bt_search
+#define __bt_seq	__kdb2_bt_seq
+#define __bt_setcur	__kdb2_bt_setcur
+#define __bt_split	__kdb2_bt_split
+#define __bt_sync	__kdb2_bt_sync
+#define __ovfl_delete	__kdb2_ovfl_delete
+#define __ovfl_get	__kdb2_ovfl_get
+#define __ovfl_put	__kdb2_ovfl_put
+#define __bt_dnpage	__kdb2_bt_dnpage
+#define __bt_dpage	__kdb2_bt_dpage
+#define __bt_dump	__kdb2_bt_dump
+#define __bt_stat	__kdb2_bt_stat
+
 int	 __bt_close __P((DB *));
 int	 __bt_cmp __P((BTREE *, const DBT *, EPG *));
 int	 __bt_crsrdel __P((BTREE *, EPGNO *));
