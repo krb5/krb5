@@ -70,6 +70,18 @@ EXPORTS
 	krb5_get_in_tkt_with_keytab
 	krb5_get_in_tkt_with_password
 	krb5_get_in_tkt_with_skey
+	krb5_get_init_creds_opt_init
+	krb5_get_init_creds_opt_set_tkt_life
+	krb5_get_init_creds_opt_set_renew_life
+	krb5_get_init_creds_opt_set_forwardable
+	krb5_get_init_creds_opt_set_proxiable
+	krb5_get_init_creds_opt_set_etype_list
+	krb5_get_init_creds_opt_set_address_list
+	krb5_get_init_creds_opt_set_preauth_list
+	krb5_get_init_creds_opt_set_salt
+	krb5_get_init_creds_password
+	krb5_get_init_creds_keytab
+	krb5_get_init_creds_opt_init
 	krb5_get_notification_message
 	krb5_init_context
 	krb5_mk_error
@@ -95,6 +107,7 @@ EXPORTS
 	krb5_unparse_name
 	krb5_unparse_name_ext
 	krb5_us_timeofday
+	krb5_get_server_rcache
 ;
 	krb5_use_enctype
 	krb5_checksum_size
@@ -140,8 +153,10 @@ EXPORTS
 	krb5_auth_con_setuseruserkey
 	krb5_auth_con_getauthenticator
 	krb5_auth_con_set_req_cksumtype
+	krb5_auth_con_setrcache
 ;
 	krb5_cc_default
+	krb5_cc_default_name
 	krb5_cc_register
 	krb5_cc_resolve
 ;
@@ -153,12 +168,13 @@ EXPORTS
 	krb5_kt_read_service_key
 	krb5_kt_remove_entry
 ;Kadm routines
-	krb5_adm_connect
-	krb5_adm_disconnect
-	krb5_free_adm_data
-	krb5_read_adm_reply
-	krb5_send_adm_cmd
+;	krb5_adm_connect
+;	krb5_adm_disconnect
+;	krb5_free_adm_data
+;	krb5_read_adm_reply
+;	krb5_send_adm_cmd
 ;
+	krb5_change_password
 ;Temporary exports (DO NOT USE)
 	decode_krb5_ticket
 	des_ecb_encrypt
@@ -183,3 +199,4 @@ EXPORTS
 	krb5_ser_keytab_init
 	krb5_ser_rcache_init
 	decode_krb5_ap_req
+	krb5_mcc_ops

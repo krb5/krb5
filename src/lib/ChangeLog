@@ -1,3 +1,12 @@
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5_32.def: Change the DLL export list to include
+		krb5_auth_con_setrcache, krb5_get_server_rcache,
+		krb5_cc_default_name, krb5_change_password,
+		krb5_mcc_ops, and all of the Cygnus
+		krb5_get_init_creds functions.  Remove the old libkadm
+		functions, as they are no longer available.
+
 Sun May 24 22:31:39 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (CLEANLIBS): Remove lib/kadm from the list of
