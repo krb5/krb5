@@ -11,10 +11,10 @@ SRCS	= ftpd.c ftpcmd.y logwtmp.c popen.c vers.c \
 	  $(srcdir)../ftp/glob.c \
 	  $(srcdir)../ftp/radix.c \
 	  $(srcdir)../ftp/secure.c \
-	  $(srcdir)../../bsd/getdtablesize.c $(SETENVSRC)
+	  $(GETDTABLESIZESRC) $(SETENVSRC)
 
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
-	  secure.o getdtablesize.o $(SETENVOBJ)
+	  secure.o $(GETDTABLESIZEOBJ) $(SETENVOBJ)
 
 KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \

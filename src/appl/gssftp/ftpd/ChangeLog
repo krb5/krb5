@@ -1,3 +1,7 @@
+Sun Jun  2 22:08:17 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in, Makefile.in: only link getdtablesize.o if needed
+
 Thu Mar 28 21:07:20 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* ftpcmd.y: Define unix for HP-UX.
