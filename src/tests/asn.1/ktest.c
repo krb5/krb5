@@ -64,6 +64,8 @@ krb5_error_code ktest_make_sample_checksum(DECLARG(krb5_checksum *, cs))
 krb5_error_code ktest_make_sample_keyblock(DECLARG(krb5_keyblock *, kb))
      OLDDECLARG(krb5_keyblock *, kb)
 {
+  kb->magic = KV5M_KEYBLOCK;
+  kb->etype = ETYPE_UNKNOWN;
   kb->keytype = 1;
   kb->length = 8;
   kb->contents = (krb5_octet*)calloc(8,sizeof(krb5_octet));
