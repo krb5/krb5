@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * admin/convert/kdb5_convert.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -29,11 +28,6 @@
  * kdb_util, kdb_edit, libkdb (v4 utilities/libraries), put into a blender,
  * and this is the result. 
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kdb5_convert_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <des.h>
 #include <krb.h>

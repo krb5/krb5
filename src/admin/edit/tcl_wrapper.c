@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * admin/edit/tcl_wrapper.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Tcl wrapper for kdb5_edit
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_tcl_wrapper_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include "kdb5_edit.h"

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * admin/create/kdb5_create.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Generate (from scratch) a Kerberos KDC database.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_create_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>

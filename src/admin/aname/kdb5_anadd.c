@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * admin/aname/kdb5_anadd.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Program to add/delete entries to/from the aname translation database.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_anadd_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>

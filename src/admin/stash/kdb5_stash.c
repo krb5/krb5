@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * admin/stash/kdb5_stash.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Store the master database key in a file.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_stash_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * admin/edit/util.c
  *
  * Copyright 1992 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -30,11 +29,6 @@
  * without express or implied warranty.
  * 
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_util_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
