@@ -1,3 +1,7 @@
+2002-03-14 Alexandra Ellwood <lxs@mit.edu>
+    * afsstring2key.c: made static data const to improve load time 
+    on Mach-O
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * afsstring2key.c: fixed warnings about types defaulting to int
     and two-dimensional array declaration without second-level braces

@@ -150,7 +150,7 @@ static void krb5_afs_encrypt PROTOTYPE((char*,long));
 /*
  * Initial permutation,
  */
-static char	IP[] = {
+static const char	IP[] = {
 	58,50,42,34,26,18,10, 2,
 	60,52,44,36,28,20,12, 4,
 	62,54,46,38,30,22,14, 6,
@@ -164,7 +164,7 @@ static char	IP[] = {
 /*
  * Final permutation, FP = IP^(-1)
  */
-static char	FP[] = {
+static const char	FP[] = {
 	40, 8,48,16,56,24,64,32,
 	39, 7,47,15,55,23,63,31,
 	38, 6,46,14,54,22,62,30,
@@ -179,14 +179,14 @@ static char	FP[] = {
  * Permuted-choice 1 from the key bits to yield C and D.
  * Note that bits 8,16... are left out: They are intended for a parity check.
  */
-static char	PC1_C[] = {
+static const char	PC1_C[] = {
 	57,49,41,33,25,17, 9,
 	 1,58,50,42,34,26,18,
 	10, 2,59,51,43,35,27,
 	19,11, 3,60,52,44,36,
 };
  
-static char	PC1_D[] = {
+static const char	PC1_D[] = {
 	63,55,47,39,31,23,15,
 	 7,62,54,46,38,30,22,
 	14, 6,61,53,45,37,29,
@@ -196,7 +196,7 @@ static char	PC1_D[] = {
 /*
  * Sequence of shifts used for the key schedule.
  */
-static char	shifts[] = {
+static const char	shifts[] = {
 	1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,
 };
  
@@ -204,14 +204,14 @@ static char	shifts[] = {
  * Permuted-choice 2, to pick out the bits from
  * the CD array that generate the key schedule.
  */
-static char	PC2_C[] = {
+static const char	PC2_C[] = {
 	14,17,11,24, 1, 5,
 	 3,28,15, 6,21,10,
 	23,19,12, 4,26, 8,
 	16, 7,27,20,13, 2,
 };
  
-static char	PC2_D[] = {
+static const char	PC2_D[] = {
 	41,52,31,37,47,55,
 	30,40,51,45,33,48,
 	44,49,39,56,34,53,
@@ -222,7 +222,7 @@ static char	PC2_D[] = {
  * The E bit-selection table.
  */
 static char	E[48];
-static char	e[] = {
+static const char	e[] = {
 	32, 1, 2, 3, 4, 5,
 	 4, 5, 6, 7, 8, 9,
 	 8, 9,10,11,12,13,
@@ -237,7 +237,7 @@ static char	e[] = {
  * P is a permutation on the selected combination
  * of the current L and key.
  */
-static char	P[] = {
+static const char	P[] = {
 	16, 7,20,21,
 	29,12,28,17,
 	 1,15,23,26,
@@ -253,7 +253,7 @@ static char	P[] = {
  * For some reason, they give a 0-origin
  * index, unlike everything else.
  */
-static char	S[8][64] = {
+static const char	S[8][64] = {
 	{14, 4,13, 1, 2,15,11, 8, 3,10, 6,12, 5, 9, 0, 7,
 	 0,15, 7, 4,14, 2,13, 1,10, 6,12,11, 9, 5, 3, 8,
 	 4, 1,14, 8,13, 6, 2,11,15,12, 9, 7, 3,10, 5, 0,
