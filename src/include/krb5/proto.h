@@ -43,6 +43,7 @@
 #define	KRB5_AP_REP	((krb5_msgtype)15) /* Response to KRB_AP_REQ_MUTUAL */
 #define	KRB5_SAFE	((krb5_msgtype)20) /* Safe application message */
 #define	KRB5_PRIV	((krb5_msgtype)21) /* Private application message */
+#define	KRB5_CRED	((krb5_msgtype)22) /* Credential forwarding message */
 #define	KRB5_ERROR	((krb5_msgtype)30) /* Error response */
 
 /* LastReq types */
