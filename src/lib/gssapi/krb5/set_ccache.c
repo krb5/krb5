@@ -3,9 +3,11 @@
 OM_uint32
 gss_krb5_ccache_name(minor_status, name, out_name)
 	OM_uint32 *minor_status;
-	const char *name, const char **out_name;
+	const char *name;
+	const char **out_name;
 {
-	krb5_context	contxt;
+	krb5_context context;
+    krb5_error_code retval;
 
 	if (GSS_ERROR(kg_get_context(minor_status, &context)))
 		return (GSS_S_FAILURE);
@@ -19,7 +21,7 @@ gss_krb5_ccache_name(minor_status, name, out_name)
 			return GSS_S_FAILURE;
 		}
 	}
-	return GSS_S_SUCCESS;
+	return GSS_S_COMPLETE;
 }
 		
 
