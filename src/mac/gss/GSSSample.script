@@ -1,0 +1,9 @@
+tell application "Finder"
+	set outputFile to (folder of (path to application "GSSSample.ppc") as string) & "GSS Sample Output"
+end tell
+
+tell application "GSSSample.ppc"
+	activate
+	Query "-port 13136 dcl.mit.edu sample@dcl.mit.edu hi"
+	save document "GSS Sample" in file outputFile
+end tell
