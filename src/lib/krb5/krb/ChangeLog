@@ -1,3 +1,13 @@
+1999-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_princ.c (sconv_list): Don't do conversion for "zephyr"
+	principal.  (Noticed by Derrick Brashear.)  Delete about a dozen
+	duplicate entries.
+
+	* str_conv.c (dt_output_donly, dt_output_dhms, dt_output_hms,
+	sftime_default_fmt): Replace char arrays with macros, so gcc can
+	do better format-string checking.
+
 1999-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (get_profile_etype_list): Update name of the des3

@@ -114,7 +114,7 @@ static const char sftime_med_fmt[]	= "%d %b %Y %T";
 static const char sftime_short_fmt[]	= "%x %X";
 static const char sftime_last_fmt[]	= "%d/%m/%Y %R";
 #endif	/* HAVE_STRFTIME */
-static const char sftime_default_fmt[]	= "%02d/%02d/%4d %02d:%02d";
+#define sftime_default_fmt		"%02d/%02d/%4d %02d:%02d"
 static const size_t sftime_default_len	= 2+1+2+1+4+1+2+1+2+1;
 
 /* Delta time strings */
@@ -130,9 +130,9 @@ static const char dtscan_minutes[]	= "%d%[m]";
 static const char dtscan_seconds[]	= "%d%[s]";
 static const char dt_day_singular[]	= "day";
 static const char dt_day_plural[]	= "days";
-static const char dt_output_donly[]	= "%d %s";
-static const char dt_output_dhms[]	= "%d %s %02d:%02d:%02d";
-static const char dt_output_hms[]	= "%d:%02d:%02d";
+#define dt_output_donly			"%d %s"
+#define dt_output_dhms			"%d %s %02d:%02d:%02d"
+#define dt_output_hms			"%d:%02d:%02d"
 
 /*
  * Lookup tables.
