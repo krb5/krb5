@@ -27,7 +27,7 @@
  * Determine platform-dependent configuration.
  */
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
 #include <win-mac.h>
 #endif
 
