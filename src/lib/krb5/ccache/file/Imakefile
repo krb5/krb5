@@ -30,11 +30,13 @@ OBJS 	= fcc_close.o fcc_destry.o fcc_eseq.o \
 	fcc_sseq.o fcc_store.o fcc_skip.o fcc_ops.o fcc_write.o \
 	fcc_sflags.o fcc_defops.o fcc_errs.o fcc_maybe.o
 
-SRCS 	= fcc_close.c fcc_destry.c fcc_eseq.c \
-	fcc_gennew.c fcc_getnam.c fcc_gprin.c fcc_init.c \
-	fcc_nseq.c fcc_read.c fcc_reslv.c fcc_retrv.c \
-	fcc_sseq.c fcc_store.c fcc_skip.c fcc_ops.c fcc_write.c \
-	fcc_sflags.c fcc_defops.c fcc_errs.c fcc_maybe.c
+SRCS 	= $(SRCDIR)fcc_close.c $(SRCDIR)fcc_destry.c $(SRCDIR)fcc_eseq.c \
+	$(SRCDIR)fcc_gennew.c $(SRCDIR)fcc_getnam.c $(SRCDIR)fcc_gprin.c \
+	$(SRCDIR)fcc_init.c $(SRCDIR)fcc_nseq.c $(SRCDIR)fcc_read.c      \
+	$(SRCDIR)fcc_reslv.c $(SRCDIR)fcc_retrv.c $(SRCDIR)fcc_sseq.c    \
+	$(SRCDIR)fcc_store.c $(SRCDIR)fcc_skip.c $(SRCDIR)fcc_ops.c      \
+	$(SRCDIR)fcc_write.c $(SRCDIR)fcc_sflags.c $(SRCDIR)fcc_defops.c \
+	$(SRCDIR)fcc_errs.c $(SRCDIR)fcc_maybe.c
 
 all:: ${OBJS}
 
