@@ -1,7 +1,5 @@
 /*
- * $Header$
- * $Source$
- * $Locker$
+ * util/et/init_et.c
  *
  * Copyright 1986, 1987, 1988 by MIT Information Systems and
  *	the MIT Student Information Processing Board.
@@ -17,10 +15,6 @@
 #define const
 #endif
 
-#ifndef	lint
-static const char rcsid_init_et_c[] =
-    "$Header$";
-#endif
 
 extern char *malloc(), *realloc();
 

@@ -1,12 +1,7 @@
 /* na2norm.c - normalize NSAPaddr */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
+ * isode/compat/na2norm.c
  */
 
 /*

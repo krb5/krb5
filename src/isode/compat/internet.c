@@ -1,12 +1,7 @@
 /* internet.c - TCP/IP abstractions */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
+ * isode/compat/internet.c
  */
 
 /*

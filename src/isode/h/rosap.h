@@ -1,26 +1,9 @@
 /* rosap.h - include file for remote operation users (RoS-USER) */
 
 /* 
- * $Header$
- *
+ * isode/h/rosap.h
  * Based on an TCP-based implementation by George Michaelson of University
  * College London.
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:29:44  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:10  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:24  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:53  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

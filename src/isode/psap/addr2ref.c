@@ -1,13 +1,7 @@
 /* addr2ref.c - manage encoded session addresses */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- * 
+ * isode/psap/addr2ref.c
  */
 
 /*

@@ -1,24 +1,7 @@
 /* prim2qb.c - presentation element to qbuf */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:33:48  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:02  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:04  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/prim2qb.c
  */
 
 /*

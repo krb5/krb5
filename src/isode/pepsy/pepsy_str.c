@@ -1,24 +1,7 @@
 /* pepy_strings.c - constant strings used in pepy */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:31:23  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/05/31 20:40:12  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:43:12  isode
- * Release 7.0
- * 
- * 
+ * isode/pepsy/pepsy_str.c
  */
 
 /*

@@ -1,23 +1,7 @@
 /* tsap.h - include file for transport users (TS-USER) */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:30:09  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:33  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:47  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:59  isode
- * Release 7.0
- * 
- * 
+ * isode/h/tsap.h
  */
 
 /*

@@ -21,6 +21,3 @@ end		return END;
 
 .		{ return (*yytext); }
 %%
-#ifndef lint
-static char rcsid_et_lex_lex_l[] = "$Header$";
-#endif

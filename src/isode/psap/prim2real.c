@@ -1,28 +1,11 @@
 /* prim2real.c - presentation element to real */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
+ * isode/psap/prim2real.c
  *
  * Contributed by Julian Onions, Nottingham University.
  * July 1989 - this stuff is awful. If you're going to use it seriously then
  * write a machine specific version rather than any attempt at portability.
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:33:50  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:04  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:04  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

@@ -1,24 +1,7 @@
 /* bit2prim.c - bit string to presentation element */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:32:23  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:36:53  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:40  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/bit2prim.c
  */
 
 /*

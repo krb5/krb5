@@ -1,24 +1,7 @@
 /* ps2pe.c - presentation stream to presentation element */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:33:58  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:10  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:06  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/ps2pe.c
  */
 
 /*

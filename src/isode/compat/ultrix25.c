@@ -1,9 +1,5 @@
 /* ultrix25.c - X.25 abstractions for Ultrix X25 */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
  *				  NOTICE
  *
@@ -17,8 +13,7 @@ static char *rcsid = "$Header$";
 
 
 /* 
- * $Header$
- *
+ * isode/compat/ultrix25.c
  * Contributed by George Michaelson, University of Queensland in Australia
  *
  *  -based on the ubcx25.c and sunlink.c modules 
@@ -26,22 +21,6 @@ static char *rcsid = "$Header$";
  *
  *   Using the example code for the Ultrix X.25 interface 
  *   written by DEC NAC here in Australia
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:28:47  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:10  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:35:06  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:23  isode
- * Release 7.0
- * 
- * 
  */
 
 /* LINTLIBRARY */

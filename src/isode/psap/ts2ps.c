@@ -1,25 +1,8 @@
 /* ts2ps.c - TSDU-backed abstraction for PStreams
  		(really just a refinement of datagram-backed PStreams) */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:35:22  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:39:14  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:28  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/ts2ps.c
  */
 
 /*

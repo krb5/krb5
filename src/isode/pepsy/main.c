@@ -1,13 +1,7 @@
 /* main.c */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- * 
+ * isode/pepsy/main.c
  */
 
 /*

@@ -1,12 +1,7 @@
 /* dgram.c - datagram (CL-mode TS) abstractions */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
+ * isode/compat/dgram.c
  */
 
 /*

@@ -1,32 +1,8 @@
 /* camtec.c - X.25, CONS abstractions for CAMTEC CCL  */
 
-#ifndef lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
- * $Header$
- *
+ * isode/compat/camtec.c
  * Contributed by Keith Ruttle, CAMTEC Electronics Ltd
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:11  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:27:01  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:15:27  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:33:34  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:17:50  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

@@ -1,23 +1,7 @@
 /* isoaddrs.h - ISODE addressing */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:29:21  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:45  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:37:58  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:45  isode
- * Release 7.0
- * 
- * 
+ * isode/h/isoaddrs.h
  */
 
 /*

@@ -1,28 +1,8 @@
 /* ppkt.h - include file for presentation providers (PS-PROVIDER) */
 
 /* 
- * $Header$
- *
+ * isode/h/ppkt.h
  * RFC1085 (LPP) support contributed by the Wollongong Group, Inc.
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:17:56  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:29:33  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:59  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:14  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:50  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

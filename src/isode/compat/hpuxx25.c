@@ -1,33 +1,10 @@
 /* hpuxx25.c - X.25 abstractions for HPUX X25/9000 */
 
-#ifndef lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
- * $Header$
- *
+ * isode/compat/hpuxx25.c
  * Contributed by John Pavel, Department of Trade and Industry/National
  * Physical Laboratory in the UK
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:14  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:27:18  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:15:46  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:33:48  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:17:54  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

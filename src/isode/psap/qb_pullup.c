@@ -1,27 +1,7 @@
 /* qb_pullup.c - "pullup" a list of qbufs */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:24:36  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:34:26  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:32  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:13  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/qb_pullup.c
  */
 
 /*

@@ -27,10 +27,6 @@
 #undef com_err
 #endif
 
-#if ! lint
-static const char rcsid[] =
-    "$Header$";
-#endif	/* ! lint */
 
 static void
 #ifdef __STDC__

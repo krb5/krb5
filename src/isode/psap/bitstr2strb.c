@@ -1,24 +1,7 @@
 /* bitstr2strb.c - bit string to string of bits */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:32:27  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:36:56  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:41  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/bitstr2strb.c
  */
 
 /*

@@ -1,24 +1,7 @@
 /* num2prim.c - integer to presentation element */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:32:49  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:37:16  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:49  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/num2prim.c
  */
 
 /*

@@ -1,8 +1,7 @@
 /*
  * make_commands.c
  *
- * $Header$
- * $Locker$
+ * util/ss/mk_cmds.c
  *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *

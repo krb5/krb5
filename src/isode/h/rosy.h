@@ -1,23 +1,7 @@
 /* rosy.h - include file for ROSY users */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:29:46  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:12  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:26  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:53  isode
- * Release 7.0
- * 
- * 
+ * isode/h/rosy.h
  */
 
 /*

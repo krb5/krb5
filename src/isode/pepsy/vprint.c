@@ -1,27 +1,7 @@
 /* vprint.c - pepy printer support */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:31:55  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.2  1994/06/03 18:43:58  eichin
- * don't declare fprintf on aix
- *
- * Revision 1.1  1994/05/31 20:40:53  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:43:20  isode
- * Release 7.0
- * 
- * 
+ * isode/pepsy/vprint.c
  */
 
 /*

@@ -1,24 +1,7 @@
 /* std2ps.c - stdio-backed abstraction for PStreams */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:34:58  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:57  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:23  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/std2ps.c
  */
 
 /*

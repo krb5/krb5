@@ -1,8 +1,7 @@
 /*
  * Listener loop for subsystem library libss.a.
  *
- *	$Header$
- *	$Locker$
+ *	util/ss/listen.c
  * 
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -17,11 +16,6 @@
 #include <sys/param.h>
 #ifdef BSD
 #include <sgtty.h>
-#endif
-
-#ifndef	lint
-static char const rcs_id[] =
-    "$Header$";
 #endif
 
 static ss_data *current_info;

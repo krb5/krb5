@@ -27,14 +27,8 @@
 	SEQUENCE/SET OF Type should have Type be an ID for nicer naming
  */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
- * $Header$
- *
- * 
+ * isode/pepsy/pepsy.c
  */
 
 /*

@@ -2,18 +2,17 @@
 /* %WARNING% */
 
 %{
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
  * $Header$
  *
  *
  * $Log$
- * Revision 1.1  1994/06/10 03:31:58  eichin
- * autoconfed isode for kerberos work
+ * Revision 1.2  1994/08/18 20:41:45  eichin
+ * stamp out rcs keywords
  *
+Revision 1.1  1994/06/10 03:31:58  eichin
+autoconfed isode for kerberos work
+
 # Revision 1.1  1994/05/31 20:40:55  eichin
 # reduced-isode release from /mit/isode/isode-subset/src
 #

@@ -1,27 +1,7 @@
 /* prim2str.c - presentation element to octet string */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:24:33  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:33:54  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:07  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:05  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/prim2str.c
  */
 
 /*

@@ -1,24 +1,7 @@
 /* pe_expunge.c - expunge a PE */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:33:28  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:37:46  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:58  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/pe_expunge.c
  */
 
 /*

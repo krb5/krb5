@@ -1,23 +1,7 @@
 /* pepsy.h */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:29:32  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:57  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:12  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:50  isode
- * Release 7.0
- * 
- * 
+ * isode/h/pepsy.h
  */
 
 /*

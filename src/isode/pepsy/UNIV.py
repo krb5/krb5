@@ -18,9 +18,6 @@
 UNIV DEFINITIONS ::=
 
 %{
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
 %}
 
 BEGIN

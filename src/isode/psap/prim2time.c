@@ -1,27 +1,7 @@
 /* prim2time.c - presentation element to time string */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:59  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:33:56  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:09  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:06  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/prim2time.c
  */
 
 /*

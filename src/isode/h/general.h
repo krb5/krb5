@@ -1,8 +1,7 @@
 /* general.h - general compatibility */
 
 /* 
- * $Header$
- *
+ * isode/h/general.h
  */
 
 /*

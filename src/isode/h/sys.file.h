@@ -1,23 +1,7 @@
 /* sys.file.h - system independent sys/file.h */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:30:00  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:25  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:39  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:57  isode
- * Release 7.0
- * 
- * 
+ * isode/h/sys.file.h
  */
 
 /*

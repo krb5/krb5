@@ -22,9 +22,6 @@
 #ifndef lint
 static const char copyright[] =
     "Copyright 1987,1988 by MIT Student Information Processing Board";
-
-static const char rcsid_compile_et_c[] =
-    "$Header$";
 #endif
 
 extern char *gensym();
@@ -301,9 +298,7 @@ int yyerror(s) char *s; {
  * specifies the terms and conditions for redistribution.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)strcasecmp.c	1.3 (Berkeley) 8/3/87";
-#endif
+/* based on @(#)strcasecmp.c	1.3 (Berkeley) 8/3/87 */
 
 /*
  * This array is designed for mapping upper and lower case letter

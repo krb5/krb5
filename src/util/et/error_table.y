@@ -74,10 +74,6 @@ description	:	QUOTED_STRING
 #include "error_table.h"
 #include "mit-sipb-copyright.h"
 
-#ifndef	lint
-static char const rcsid_error_table_y[] =
-    "$Header$";
-#endif
 
 extern FILE *hfile, *cfile;
 

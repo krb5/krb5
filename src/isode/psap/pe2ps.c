@@ -1,24 +1,7 @@
 /* pe2ps.c - presentation element to presentation stream */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:33:09  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:37:33  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:54  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/pe2ps.c
  */
 
 /*

@@ -1,10 +1,7 @@
 /* acpkt.h - include file for association control providers (AcS-PROVIDER) */
 
 /* 
- * $Header$
- *
- *
- * 
+ * isode/h/acpkt.h
  */
 
 /*

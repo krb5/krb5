@@ -1,27 +1,7 @@
 /* dfns.c */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:30:26  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:53  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:39:07  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:42:53  isode
- * Release 7.0
- * 
- * 
+ * isode/pepsy/dfns.c
  */
 
 /*

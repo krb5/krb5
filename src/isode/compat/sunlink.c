@@ -1,11 +1,7 @@
 /* sunlink.c - X.25 abstractions for SunLink X25 */
 
-#ifndef lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
- * $Header$
+ * isode/compat/sunlink.c
  *
  * Contributed by John Pavel, Department of Trade and Industry/National
  * Physical Laboratory in the UK

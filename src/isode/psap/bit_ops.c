@@ -1,27 +1,7 @@
 /* bit_opts.c - operations on bit strings */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:53  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:32:25  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:36:55  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:40  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/bit_ops.c
  */
 
 /*

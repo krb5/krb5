@@ -1,12 +1,7 @@
 /* isoaddrs.c - simple parsing of ISODE addresses */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- * 
+ * isode/compat/isoaddrs.c
  */
 
 /*

@@ -40,9 +40,7 @@ char copyright[] =
  All rights reserved.\n";
 #endif /* not lint */
 
-#ifndef lint
-static char sccsid[] = "@(#)unifdef.c	4.7 (Berkeley) 6/1/90";
-#endif /* not lint */
+/* based on @(#)unifdef.c	4.7 (Berkeley) 6/1/90 */
 
 /*
  * unifdef - remove ifdef'ed lines

@@ -1,35 +1,7 @@
 /* signals.c - signal handling */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.3  1994/06/13 21:54:50  eichin
- * rewrite linux hack so it works (should autoconf it)
- *
- * Revision 1.2  1994/06/12 23:52:02  tytso
- * Take out old linux specific hack which doesn't work anymore.
- *
- * Move isode libraries to lib subdirectory and out of the top level directory.
- *
- * Revision 1.1  1994/06/10  03:28:14  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:16:43  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:34:42  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:12  isode
- * Release 7.0
- * 
- * 
+ * isode/compat/signals.c
  */
 
 /*

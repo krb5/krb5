@@ -1,27 +1,7 @@
 /* str2qb.c - string to qbuf */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:24:41  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:35:09  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:39:05  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:25  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/str2qb.c
  */
 
 /*

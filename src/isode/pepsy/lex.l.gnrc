@@ -2,18 +2,17 @@
 /* %WARNING% */
 
 %{
-#ifndef	lint
-static char *RCSid = "$Header$";
-#endif
-
 /* 
  * $Header$
  *
  *
  * $Log$
- * Revision 1.1  1994/06/10 03:30:38  eichin
- * autoconfed isode for kerberos work
+ * Revision 1.2  1994/08/18 20:41:07  eichin
+ * stamp out rcs keywords
  *
+Revision 1.1  1994/06/10 03:30:38  eichin
+autoconfed isode for kerberos work
+
 Revision 1.1  94/06/10  03:19:06  eichin
 autoconfed isode for kerberos work
 

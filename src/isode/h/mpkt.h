@@ -1,23 +1,7 @@
 /* mpkt.h - defines the report format for management */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:29:28  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:53  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:08  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:49  isode
- * Release 7.0
- * 
- * 
+ * isode/h/mpkt.h
  */
 
 /*

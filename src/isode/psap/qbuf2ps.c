@@ -1,27 +1,7 @@
 /* qbuf2ps.c - qbuf-backed abstractions for PStreams */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:24:39  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:34:32  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:38:37  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:15  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/qbuf2ps.c
  */
 
 /*

@@ -1,24 +1,7 @@
 /* pe2text.c - write a PE thru a debug filter */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:33:16  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:37:37  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:46:55  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/pe2text.c
  */
 
 /*

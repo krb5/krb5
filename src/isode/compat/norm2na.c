@@ -1,13 +1,7 @@
 /* norm2na.c - normalize NSAPaddr to NSAP struct */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
+ * isode/compat/norm2na.c
  */
 
 /*

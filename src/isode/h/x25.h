@@ -1,26 +1,9 @@
 /* x25.h - X.25 abstractions */
 
 /*
- * $Header$
- *
+ * isode/h/x25.h
  * Contributed by John Pavel, Department of Trade and Industry/National
  * Physical Laboratory in the UK
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:30:13  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:37  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:51  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:34:00  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

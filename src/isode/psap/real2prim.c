@@ -1,17 +1,10 @@
 /* real2prim.c - real to presentation element */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
+ * isode/psap/real2prim.c
  *
  * Contributed by Julian Onions, Nottingham University.
  * July 1989 - this is awful stuff!
- *
- * $
- * 
  */
 
 /*

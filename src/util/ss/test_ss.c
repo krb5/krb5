@@ -1,37 +1,7 @@
 /*
- *------------------------------------------------------------------
- *
- * $Source$
- * $Revision$
- * $Date$
- * $State$
- * $Author$
- * $Locker$
- *
- * $Log$
- * Revision 1.1  1993/06/03 12:31:25  tytso
- * Initial revision
- *
- * Revision 1.1  1991/12/21  16:41:47  eichin
- * Initial revision
- *
- * Revision 1.1  1991/12/21  11:13:39  eichin
- * Initial revision
- *
- * Revision 1.2  89/01/25  07:52:27  raeburn
- * *** empty log message ***
- * 
- * Revision 1.1  88/01/23  15:50:26  raeburn
- * Initial revision
- *
- *
- *------------------------------------------------------------------
+ * util/ss/test_ss.c
  */
 
-#ifndef lint
-static char const rcsid_test_c[] =
-    "$Header$";
-#endif /* lint */
 
 #include <stdio.h>
 #include "ss.h"

@@ -1,14 +1,8 @@
 /* x25addr.c - X.25 level generic <-> interface address munging */
 
-#ifndef lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
- * $Header$
- *
+ * isode/compat/x25addr.c
  * Contributed by George Michaelson, Julian Onions, and John Pavel
- *
  * 
  */
 

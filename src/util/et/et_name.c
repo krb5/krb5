@@ -11,8 +11,6 @@
 #ifndef	lint
 static const char copyright[] =
     "Copyright 1987,1988 by Student Information Processing Board, Massachusetts Institute of Technology";
-static const char rcsid_et_name_c[] =
-    "$Header$";
 #endif
 
 static const char char_set[] =

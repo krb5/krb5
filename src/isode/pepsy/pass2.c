@@ -1,27 +1,7 @@
 /* pass2.c */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:30:54  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.2  1994/06/07 23:10:07  eichin
- * KLUDGE XXX static forward decl for AIX
- *
- * Revision 1.1  1994/05/31 20:39:46  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:43:03  isode
- * Release 7.0
- * 
- * 
+ * isode/pepsy/pass2.c
  */
 
 /*

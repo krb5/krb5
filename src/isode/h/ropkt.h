@@ -1,29 +1,9 @@
 /* ropkt.h - include file for remote operation providers (RoS-PROVIDER) */
 
 /* 
- * $Header$
- *
+ * isode/h/ropkt.h
  * Based on an TCP-based implementation by George Michaelson of University
  * College London.
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:16:28  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:29:42  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:18:08  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:38:22  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:52  isode
- * Release 7.0
- * 
- * 
  */
 
 /*

@@ -1,12 +1,7 @@
 /* pa2str.c - pretty-print PSAPaddr */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- * 
+ * isode/compat/pa2str.c
  */
 
 /*

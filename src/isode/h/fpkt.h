@@ -1,26 +1,7 @@
 /* fpkt.h - include file for FTAM provider (FS-PROVIDER) */
 
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 23:16:22  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:29:13  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:34  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:37:51  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:43  isode
- * Release 7.0
- * 
- * 
+ * isode/h/fpkt.h
  */
 
 /*

@@ -1,24 +1,7 @@
 /* str2prim.c - octet string to presentation element */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:35:04  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:39:02  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:24  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/str2prim.c
  */
 
 /*

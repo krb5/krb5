@@ -1,8 +1,7 @@
 /*
  * prompt.c: Routines for retrieving and setting a prompt.
  *
- * $Header$
- * $Locker$
+ * util/ss/prompt.c
  *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -12,9 +11,6 @@
 #include "copyright.h"
 #include <stdio.h>
 #include "ss_internal.h"
-
-static const char rcsid[] =
-    "$Header$";
 
 ss_set_prompt(sci_idx, new_prompt)
      int sci_idx;

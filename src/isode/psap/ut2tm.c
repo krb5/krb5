@@ -1,27 +1,7 @@
 /* ut2tm.c - time string to tm */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 21:00:04  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:35:24  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  1994/06/01 00:39:16  eichin
- * add psap too
- *
- * Revision 8.0  91/07/17  12:47:29  isode
- * Release 7.0
- * 
- * 
+ * isode/psap/ut2tm.c
  */
 
 /*

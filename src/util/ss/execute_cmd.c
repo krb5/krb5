@@ -8,10 +8,6 @@
 #include "copyright.h"
 #include <stdio.h>
 
-#ifndef lint
-static char const rcsid[] =
-    "$Header$";
-#endif
 
 /*
  * get_request(tbl, idx)

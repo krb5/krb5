@@ -1,12 +1,7 @@
 /* bridge.c - X.25 abstractions for TCP bridge to X25 */
 
-#ifndef	lint
-static char *rcsid = "$Header$";
-#endif
-
 /* 
- * $Header$
- *
+ * isode/compat/bridge.c
  * Contributed by Julian Onions, Nottingham University in the UK
  *
  */

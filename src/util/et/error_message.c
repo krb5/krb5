@@ -1,7 +1,5 @@
 /*
- * $Header$
- * $Source$
- * $Locker$
+ * util/et/error_message.c
  *
  * Copyright 1987 by the Student Information Processing Board
  * of the Massachusetts Institute of Technology
@@ -14,8 +12,6 @@
 #include "mit-sipb-copyright.h"
 #include "internal.h"
 
-static const char rcsid[] =
-    "$Header$";
 static const char copyright[] =
     "Copyright 1986, 1987, 1988 by the Student Information Processing Board\nand the department of Information Systems\nof the Massachusetts Institute of Technology";
 

@@ -1,32 +1,8 @@
 /* ubcx25.c - X.25 abstractions for UBC X25 */
 
-#ifndef lint
-static char *rcsid = "$Header$";
-#endif
-
 /*
- * $Header$
- *
+ * isode/compat/ubcx25.c
  * Contributed by Julian Onions, Nottingham University in the UK
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 22:59:15  eichin
- * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
- *
- * Revision 1.1  1994/06/10 03:28:45  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:08  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:35:04  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:22  isode
- * Release 7.0
- * 
- * 
  */
 
 /*
