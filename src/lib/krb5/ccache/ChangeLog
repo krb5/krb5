@@ -1,3 +1,7 @@
+2001-11-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefault.c: KerberosLoginInternal header moved into a separate library.
+	
 2001-06-13  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile.in: Replaced cc_* macros with functions
