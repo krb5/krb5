@@ -242,6 +242,41 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
      char *domain, *cp;
      char **full_name = 0, **cpp;
      const char *names[5];
+     void*	iterator = NULL;
+     char** v4realms = NULL;
+     
+     /* First, convert the realm, since the v4 realm is not necessarily the same as the v5 realm
+        To do that, iterate over all the realms in the config file, looking for a matching 
+        v4_realm line */
+     names [0] = "realms";
+     names [1] = NULL;
+     retval = profile_iterator_create (context -> profile, names, PROFILE_ITER_LIST_SECTION | PROFILE_ITER_SECTIONS_ONLY, &iterator);
+     while (retval == 0) {
+     	char*	realm_name = NULL;
+     	char*	dummy = NULL;
+     	retval = profile_iterator (&iterator, &realm_name, &dummy);
+     	if ((retval == 0) && (realm_name != NULL)) {
+     		names [0] = "realms";
+     		names [1] = realm_name;
+     		names [2] = "v4_realm";
+     		names [3] = NULL;
+
+     		retval = profile_get_values (context -> profile, names, &v4realms);
+     		profile_release_string (realm_name);
+     		profile_release_string (dummy);
+     		if ((retval == 0) && (v4realms != NULL) && (v4realms [0] != NULL)) {
+     			realm = v4realms [0];
+     			break;
+     		} else if (retval == PROF_NO_RELATION) {
+     			/* If it's not found, just keep going */
+     			retval = 0;
+     		}
+     	} else if ((retval == 0) && (realm_name == NULL)) {
+     		break;
+     	}
+     }
+     
+     profile_iterator_free (&iterator);
      
      if (instance) {
 	  if (instance[0] == '\0') {
@@ -289,5 +324,6 @@ not_service:
      retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
 				   instance, 0);
      profile_free_list(full_name);
+     profile_free_list(v4realms);
      return retval;
 }
