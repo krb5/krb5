@@ -1,3 +1,9 @@
+Fri Nov 15 17:52:39 1996  Jeff Bigler  <jcb@viola.cygnus.com>
+
+	* Makefile (krb425-guide): added section to make krb425 guide.
+
+	* krb425.texinfo: brought in this document from Cygnus.
+
 Fri Nov 15 00:06:53 1996  Tom Yu  <tlyu@mit.edu>
 
 	* user-guide.texinfo: Changes to put copyright page in its own

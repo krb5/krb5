@@ -1,16 +1,3 @@
-@ifset CYGNUS
-Copyright @copyright{} 1993, 1994, 1995, 1996 @value{COMPANY}.
-@iftex
-@vskip 12pt
-@hrule
-@vskip 12pt
-@end iftex
-
-@value{PRODUCT} includes documentation and software developed at the
-Massachusetts Institute of Technology, which includes this copyright
-information:
-@end ifset
-
 Copyright @copyright{} 1990, 1991, 1992, 1993, 1994, 1995, 1996 by the Massachusetts Institute of Technology. 
 
 @quotation  
@@ -29,6 +16,47 @@ used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  M.I.T. makes no
 representations about the suitability of this software for any purpose.
 It is provided ``as is'' without express or implied warranty.
+
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+
+The following copyright and permission notice applies to the
+OpenVision Kerberos Administration system located in kadmin/create,
+kadmin/dbutil, kadmin/server, lib/kadm, and portions of lib/rpc:
+
+@quotation
+Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
+     
+WARNING:  Retrieving the OpenVision Kerberos Administration system source
+code, as described below, indicates your acceptance of the following
+terms.  If you do not agree to the following terms, do not retrieve the
+OpenVision Kerberos administration system.
+     
+You may freely use and distribute the Source Code and Object Code
+compiled from it, but this Source Code is provided to you "AS IS"
+EXCLUSIVE OF ANY WARRANTY, INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES
+OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ANY OTHER
+WARRANTY, WHETHER EXPRESS OR IMPLIED.  IN NO EVENT WILL OPENVISION HAVE
+ANY LIABILITY FOR ANY LOST PROFITS, LOSS OF DATA OR COSTS OF PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, INDIRECT, OR
+CONSEQUENTIAL DAMAGES ARISING OUT OF THIS AGREEMENT, INCLUDING, WITHOUT
+LIMITATION, THOSE RESULTING FROM THE USE OF THE SOURCE CODE, OR THE
+FAILURE OF THE SOURCE CODE TO PERFORM, OR FOR ANY OTHER REASON.
+
+OpenVision retains all rights, title, and interest in the donated Source
+Code.  With respect to OpenVision's copyrights in the donated Source
+Code, OpenVision also retains rights to derivative works of the Source
+Code whether created by OpenVision or a third party.
+     
+OpenVision Technologies, Inc. has donated this Kerberos Administration
+system to MIT for inclusion in the standard Kerberos 5 distribution.
+This donation underscores our commitment to continuing Kerberos
+technology development and our gratitude for the valuable work which has
+been performed by MIT and the Kerberos community.
+@end quotation
 
 @iftex
 @vskip 12pt

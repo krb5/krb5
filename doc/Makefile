@@ -8,12 +8,6 @@ TAR=tar -chvf
 GZIP=gzip -9
 MANPS=./man2ps
 
-.PHONY: all
-all:: admin-guide-full install-guide-full user-guide-full clean-temp-ps
-
-.PHONY: admin-guide-full
-admin-guide-full:: admin-guide admin-guide-info admin-guide-html
-
 ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
 	glossary.texinfo
 ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
@@ -24,6 +18,15 @@ INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
 USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo
 USER_GUIDE_DEPS=user-guide.texinfo $(USER_GUIDE_INCLUDES)
+
+KRB425_INCLUDES=definitions.texinfo copyright.texinfo
+KRB425_DEPS=krb425.texinfo $(KRB425_INCLUDES)
+
+.PHONY: all
+all:: admin-guide-full install-guide-full user-guide-full krb425-guide-full clean-temp-ps
+
+.PHONY: admin-guide-full
+admin-guide-full:: admin-guide admin-guide-info admin-guide-html
 
 .PHONY: admin-guide
 admin-guide:: admin-guide.ps
@@ -88,6 +91,28 @@ user-guide-html:: user-guide.html
 
 user-guide.html: $(USER_GUIDE_DEPS)
 	$(HTML) user-guide.texinfo		
+
+.PHONY: krb425-guide-full
+krb425-guide-full:: krb425-guide krb425-guide-info krb425-guide-html
+
+.PHONY: krb425-guide
+krb425-guide:: krb425-guide.ps
+
+krb425-guide.ps: $(KRB425_DEPS)
+	$(DVI) krb425.texinfo
+	$(DVIPS) krb425
+
+.PHONY: krb425-guide-html
+krb425-guide-html:: krb425.html
+
+krb425.html:: $(KRB425_DEPS)
+	$(HTML) krb425.texinfo		
+
+.PHONY: krb425-guide-info
+krb425-guide-info:: krb425.info
+
+krb425.info: $(KRB425_DEPS)
+	$(INFO) krb425.texinfo
 
 .PHONY: clean
 clean:: clean-all
