@@ -1,5 +1,11 @@
 2001-01-31  Tom Yu  <tlyu@mit.edu>
 
+	* aclocal.m4 (KRB5_LIB_PARAMS): Fix up previous patch to avoid
+	ordering issues when calling sed, as well as some quoting
+	nastiness due to bugs in kadmin/testing/scripts/env_setup.shin.
+
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+
 	* aclocal.m4 (KRB5_LIB_PARAMS): Fix up Irix RUN_ENV to work around
 	LD_LIBRARY*_PATH's inability to override rpaths.
 
