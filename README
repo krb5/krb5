@@ -224,6 +224,11 @@ from 1.1.1 needs including
   compatibility library between systems with different byte orders
   would fail half the time has been fixed.
 
+* A source file under the GPL has been replaced with an equivalent
+  under the BSD license.  The file, strftime.c, was part of one of the
+  OpenVision admin system applications, and was only used on systems
+  that don't have strftime() in their C libraries.
+
 * Many bug reports are still outstanding in our database.  We are
   continuing to work on this backlog.
 
