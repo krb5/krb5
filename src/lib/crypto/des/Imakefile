@@ -24,9 +24,7 @@ OBJS=	cksum.o		\
 	key_parity.o	\
 	key_sched.o	\
 	new_rn_key.o	\
-	weak_key.o	\
-	read_password.o	\
-	quad_cksum.o
+	weak_key.o	
 
 SRCS=	cksum.c		\
 	des.c		\
@@ -43,9 +41,7 @@ SRCS=	cksum.c		\
 	key_parity.c	\
 	key_sched.c	\
 	new_rn_key.c	\
-	weak_key.c	\
-	read_password.c	\
-	quad_cksum.c
+	weak_key.c	
 
 DEFINES = $(DESDEFINES)
 
