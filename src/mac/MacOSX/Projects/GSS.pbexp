@@ -61,7 +61,9 @@
 #
 # krb5-specific CCache name	stuff
 #
-	_gss_krb5_ccache_name
+	_gss_krb5_get_tkt_flags
+    _gss_krb5_copy_ccache
+    _gss_krb5_ccache_name
 
 #
 # GSS-API object identifiers from rfc 2744
