@@ -76,7 +76,7 @@ static const char * const c_src_prolog[] = {
 };
 
 static const char * const krc_src_prolog[] = {
-    "#if defined(__STDC__) || defined(_WINDOWS)\n",
+    "#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)\n",
     "#define NOARGS void\n",
     "#else\n",
     "#define NOARGS\n",

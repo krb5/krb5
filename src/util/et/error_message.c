@@ -28,7 +28,7 @@ static char buffer[25];
 
 struct et_list * _et_list = (struct et_list *) NULL;
 
-const char * INTERFACE error_message (code)
+KRB5_DLLIMP const char * KRB5_CALLCONV error_message (code)
 long code;
 {
     int offset;
@@ -38,13 +38,17 @@ long code;
     int started = 0;
     char *cp;
 
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
 #define HAS_STRERROR 1
 /*
 ** Winsock defines errors in the range 10000-10100. These are equivalent
 ** to 10000 plus the Berkeley error numbers.
 *
 * (Does windows strerror() work right here?)
+*
+* XXX NO.  We need to do our own table lookup for Winsock error
+* messages!!!  --- TYT
+* 
 */
     if (code >= 10000 && code <= 10100)		/* Is it Winsock error? */
 	code -= 10000;				/* Turn into Berkeley errno */

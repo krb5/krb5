@@ -8,7 +8,7 @@
 #include <string.h>
 #include "mit-sipb-copyright.h"
 
-#if defined(HAVE_STDARG_H) || defined(_WINDOWS) || defined (_MACINTOSH)
+#if defined(HAVE_STDARG_H) || defined(_MSDOS) || defined(_WIN32) || defined (_MACINTOSH)
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -39,14 +39,14 @@
  * should fix up com_err.h so that it's safe to #include here 
  * directly.
  */
-#if defined(__STDC__) || defined(_WINDOWS)
-extern char const * INTERFACE error_message (long);
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
+KRB5_DLLIMP  extern char const FAR * KRB5_CALLCONV error_message (long);
 #else
-extern char * INTERFACE error_message ();
+extern char * error_message ();
 #endif
 
 static void
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
     default_com_err_proc (const char *whoami, long code, const char *fmt, va_list args)
 #else
     default_com_err_proc (whoami, code, fmt, args)
@@ -70,7 +70,7 @@ static void
     if (fmt) {
         vsprintf (errbuf + strlen (errbuf), fmt, args);
     }
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
     MessageBox (NULL, errbuf, "Kerboros", MB_ICONEXCLAMATION);
 #else
 #ifdef _MACINTOSH
@@ -155,7 +155,7 @@ Boolean		done;
 #endif
 }
 
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 typedef void (*errf) (const char *, long, const char *, va_list);
 #else
 typedef void (*errf) ();
@@ -173,12 +173,12 @@ void com_err_va (whoami, code, fmt, args)
 }
 
 #ifndef VARARGS
-void INTERFACE_C com_err (const char *whoami,
+KRB5_DLLIMP void KRB5_CALLCONV_C com_err (const char *whoami,
 	      long code,
 	      const char *fmt, ...)
 {
 #else
-void INTERFACE_C com_err (va_alist)
+KRB5_DLLIMP void KRB5_CALLCONV_C com_err (va_alist)
     va_dcl
 {
     const char *whoami, *fmt;

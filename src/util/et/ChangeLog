@@ -1,3 +1,15 @@
+Mon Jun 10 21:54:09 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* com_err.h:
+	* error_table.h: Add Windows-32 ifdefs.  Change use of
+		INTERFACE to KRB5_CALLCONV and KRB5_DLLIMP.  See
+		ChangeLog entries for src/include/krb5.hin for more
+		information.
+
+
+	* vfprintf.c, internal.h, compile_et.c, et_c.awk, com_err.c:
+	 	Change _WINDOWS to _MSDOS, and add check for _WIN32.
+
 Wed Mar 20 00:19:08 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Fix SRCS definition so that it doesn't fool
