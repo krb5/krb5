@@ -49,11 +49,11 @@
 					   syscalls; flags for open &
 					   friends */
 /* this doesn't work under solaris. Use SEEK_* instead anyway... */
-#ifndef L_SET
-#define L_SET           0       /* absolute offset */
-#define L_INCR          1       /* relative to current offset */
-#define L_XTND          2       /* relative to end of file */
-#endif /* L_SET */
+#ifndef SEEK_SET
+#define SEEK_SET        L_SET	/* absolute offset */
+#define SEEK_CUR	L_INCR	/* relative to current offset */
+#define SEEK_END	L_XTND	/* relative to end of file */
+#endif /* SEEK_SET */
 
 #ifndef FD_SET
 #define FD_SETSIZE          (sizeof (fd_set) * 8)
