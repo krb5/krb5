@@ -101,15 +101,15 @@
    "krb5/encryption.h"
  */
 
-krb5_cs_table_entry * NEAR krb5_keytype_array[] = {
-    0,				/* KEYTYPE_NULL */
-    DES_CBC_CRC_CSENTRY,	/* KEYTYPE_DES_CBC_CRC */
-    0,				/* KEYTYPE_DES_CBC_MD4 */
-    DES_CBC_MD5_CSENTRY,	/* KEYTYPE_DES_CBC_MD5 */
+krb5_cs_table_entry * NEAR krb5_enctype_array[] = {
+    0,				/* ENCTYPE_NULL */
+    DES_CBC_CRC_CSENTRY,	/* ENCTYPE_DES_CBC_CRC */
+    0,				/* ENCTYPE_DES_CBC_MD4 */
+    DES_CBC_MD5_CSENTRY,	/* ENCTYPE_DES_CBC_MD5 */
     RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
 };
 
-int krb5_max_keytype = sizeof(krb5_keytype_array)/sizeof(krb5_keytype_array[0]) - 1;
+int krb5_max_enctype = sizeof(krb5_enctype_array)/sizeof(krb5_enctype_array[0]) - 1;
 
 krb5_checksum_entry * NEAR krb5_cksumarray[] = {
     0,
