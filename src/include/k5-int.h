@@ -866,6 +866,8 @@ struct _krb5_context {
 	char	      FAR *default_realm;
 	profile_t     profile;
 	void	      FAR *db_context;
+	int		ser_ctx_count;
+	void	      FAR *ser_ctx;
 };
 
 /*
@@ -1143,4 +1145,88 @@ krb5_error_code decode_krb5_etype_info
  * End "asn1.h"
  */
 
+/*
+ * [De]Serialization Handle and operations.
+ */
+struct __krb5_serializer {
+    krb5_magic		odtype;
+    krb5_error_code	(*sizer) KRB5_NPROTOTYPE((krb5_context,
+						  krb5_pointer,
+						  size_t *));
+    krb5_error_code	(*externalizer) KRB5_NPROTOTYPE((krb5_context,
+							 krb5_pointer,
+							 krb5_octet **,
+							 size_t *));
+    krb5_error_code	(*internalizer) KRB5_NPROTOTYPE((krb5_context,
+							 krb5_pointer *,
+							 krb5_octet **,
+							 size_t *));
+};
+typedef struct __krb5_serializer * krb5_ser_handle;
+typedef struct __krb5_serializer krb5_ser_entry;
+
+krb5_ser_handle krb5_find_serializer KRB5_PROTOTYPE((krb5_context,
+						     krb5_magic));
+krb5_error_code krb5_register_serializer
+	KRB5_PROTOTYPE((krb5_context,
+			const krb5_ser_entry *));
+
+/* Determine the external size of a particular opaque structure */
+krb5_error_code krb5_size_opaque KRB5_PROTOTYPE((krb5_context,
+						 krb5_magic,
+						 krb5_pointer,
+						 size_t *));
+/* Serialize the structure into a buffer */
+krb5_error_code krb5_externalize_opaque KRB5_PROTOTYPE((krb5_context,
+							krb5_magic,
+							krb5_pointer,
+							krb5_octet **,
+							size_t *));
+/* Deserialize the structure from a buffer */
+krb5_error_code krb5_internalize_opaque KRB5_PROTOTYPE((krb5_context,
+							krb5_magic,
+							krb5_pointer *,
+							krb5_octet **,
+							size_t *));
+
+/* Serialize data into a buffer */
+krb5_error_code krb5_externalize_data KRB5_PROTOTYPE((krb5_context,
+						      krb5_pointer,
+						      krb5_octet **,
+						      size_t *));
+/*
+ * Initialization routines.
+ */
+
+/* Initialize serialization for krb5_[os_]context */
+krb5_error_code krb5_ser_context_init KRB5_PROTOTYPE((krb5_context));
+
+/* Initialize serialization for krb5_auth_context */
+krb5_error_code krb5_ser_auth_context_init KRB5_PROTOTYPE((krb5_context));
+
+/* Initialize serialization for krb5_keytab */
+krb5_error_code krb5_ser_keytab_init KRB5_PROTOTYPE((krb5_context));
+
+/* Initialize serialization for krb5_ccache */
+krb5_error_code krb5_ser_ccache_init KRB5_PROTOTYPE((krb5_context));
+
+/* Initialize serialization for krb5_rcache */
+krb5_error_code krb5_ser_rcache_init KRB5_PROTOTYPE((krb5_context));
+
+/* [De]serialize 4-byte integer */
+krb5_error_code krb5_ser_pack_int32 KRB5_PROTOTYPE((krb5_int32,
+						    krb5_octet **,
+						    size_t *));
+krb5_error_code krb5_ser_unpack_int32 KRB5_PROTOTYPE((krb5_int32 *,
+						      krb5_octet **,
+						      size_t *));
+/* [De]serialize byte string */
+krb5_error_code krb5_ser_pack_bytes KRB5_PROTOTYPE((krb5_octet *,
+						    size_t,
+						    krb5_octet **,
+						    size_t *));
+krb5_error_code krb5_ser_unpack_bytes KRB5_PROTOTYPE((krb5_octet *,
+						      size_t,
+						      krb5_octet **,
+						      size_t *));
 #endif /* _KRB5_INT_H */
