@@ -17,12 +17,18 @@ static char rcsid_timeofday_c[] =
 
 #include <krb5/copyright.h>
 
-#include <sys/time.h>			/* for timeval */
+#include <time.h>
 #include <stdio.h>			/* needed for libos-proto.h */
 
 #include <krb5/config.h>
 #include <krb5/krb5.h>
 #include <krb5/libos-proto.h>
+
+#ifdef POSIX
+#define timetype time_t
+#else
+#define timetype long
+#endif
 
 extern int errno;
 
@@ -30,13 +36,11 @@ krb5_error_code
 krb5_timeofday(timeret)
 register krb5_int32 *timeret;
 {
-    struct timeval tv;
+    timetype tval;
 
-    if (gettimeofday(&tv, (struct timezone *)0) == -1) {
-	/* failed, return errno */
+    tval = time(0);
+    if (tval == (timetype) -1)
 	return (krb5_error_code) errno;
-    }
-    *timeret = tv.tv_sec;
+    *timeret = tval;
     return 0;
-
 }
