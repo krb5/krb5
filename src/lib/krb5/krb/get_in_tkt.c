@@ -279,6 +279,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     if (retval = krb5_copy_keyblock_contents(as_reply->enc_part2->session,
 					     &creds->keyblock))
 	goto cleanup;
+    creds->keyblock.etype = as_reply->ticket->enc_part.etype;
 
     creds->times = as_reply->enc_part2->times;
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot

@@ -40,6 +40,7 @@ OBJS=	addr_comp.o	\
 	in_tkt_sky.o	\
 	kdc_rep_dc.o	\
 	krbconfig.o	\
+	mk_cred.o	\
 	mk_error.o	\
 	mk_priv.o	\
 	mk_rep.o	\
@@ -50,6 +51,7 @@ OBJS=	addr_comp.o	\
 	pr_to_salt.o	\
 	preauth.o	\
 	princ_comp.o	\
+	rd_cred.o	\
 	rd_error.o	\
 	rd_priv.o	\
 	rd_rep.o	\
@@ -100,6 +102,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/in_tkt_sky.c	\
 	$(srcdir)/kdc_rep_dc.c	\
 	$(srcdir)/krbconfig.c	\
+	$(srcdir)/mk_cred.c	\
 	$(srcdir)/mk_error.c	\
 	$(srcdir)/mk_priv.c	\
 	$(srcdir)/mk_rep.c	\
@@ -110,6 +113,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/pr_to_salt.c	\
 	$(srcdir)/preauth.c	\
 	$(srcdir)/princ_comp.c	\
+	$(srcdir)/rd_cred.c	\
 	$(srcdir)/rd_error.c	\
 	$(srcdir)/rd_priv.c	\
 	$(srcdir)/rd_rep.c	\

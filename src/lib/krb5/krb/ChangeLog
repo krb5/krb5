@@ -1,3 +1,9 @@
+Fri Nov 11 01:20:22 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* get_in_tkt (krb5_get_in_tkt): Set the encryption type of the
+		session keyblock to be the type used to encrypt the
+		ticket. 
+
 Thu Nov 10 23:56:43 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rd_rep.c (krb5_rd_rep): Set the encryption type in
