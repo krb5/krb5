@@ -1,3 +1,8 @@
+2001-10-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* ftp.c: Conditionalize declarations of some "unused variables" to
+	eliminate warnings.  ANSI-fy definitions.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c, ftp.c, ftp_var.h, glob.c, main.c, ruserpass.c, secure.c,

@@ -193,12 +193,15 @@ FILE	*cin, *cout;
 FILE	*dataconn (char *);
 
 char *
-hookup(host, port)
-	char *host;
-	int port;
+hookup(char* host, int port)
 {
 	register struct hostent *hp = 0;
-	int s, len, tos;
+	int s, len;
+#ifdef IP_TOS
+#ifdef IPTOS_LOWDELAY
+	int tos;
+#endif
+#endif
 	static char hostnamebuf[80];
 
 	memset((char *)&hisctladdr, 0, sizeof (hisctladdr));
@@ -316,8 +319,7 @@ bad:
 	return ((char *)0);
 }
 
-int login(host)
-	char *host;
+int login(char *host)
 {
 	char tmp[80];
 	char *l_user, *pass, *l_acct, *getenv(), *getlogin();
@@ -418,8 +420,7 @@ int login(host)
 }
 
 static sigtype
-cmdabort(sig)
-	int sig;
+cmdabort(int sig)
 {
 	printf("\n");
 	(void) fflush(stdout);
@@ -428,8 +429,7 @@ cmdabort(sig)
 		longjmp(ptabort,1);
 }
 
-static int secure_command(cmd)
-	char *cmd;
+static int secure_command(char* cmd)
 {
 	unsigned char in[FTP_BUFSIZ], out[FTP_BUFSIZ];
 	int length;
@@ -554,8 +554,7 @@ char *reply_parse, reply_buf[FTP_BUFSIZ], *reply_ptr;
 
 #include <ctype.h>
 
-int getreply(expecteof)
-	int expecteof;
+int getreply(int expecteof)
 {
 	register int i, c, n;
 	register int dig;
@@ -787,9 +786,7 @@ int getreply(expecteof)
 	}
 }
 
-static int empty(mask, sec)
- fd_set *mask;
-	int sec;
+static int empty(fd_set *mask, int sec)
 {
 	struct timeval t;
 
@@ -801,8 +798,7 @@ static int empty(mask, sec)
 jmp_buf	sendabort;
 
 static sigtype
-abortsend(sig)
-	int sig;
+abortsend(int sig)
 {
 
 	mflag = 0;
@@ -824,9 +820,7 @@ void secure_error(char *fmt, ...)
 
 #define HASHBYTES 1024
 
-void sendrequest(cmd, local, remote, printnames)
-	char *cmd, *local, *remote;
-	int printnames;
+void sendrequest(char *cmd, char *local, char *remote, int printnames)
 {
 	struct stat st;
 	struct timeval start, stop;
@@ -1097,8 +1091,7 @@ die:
 jmp_buf	recvabort;
 
 static sigtype
-abortrecv(sig)
-     int sig;
+abortrecv(int sig)
 {
 
 	mflag = 0;
@@ -1108,8 +1101,8 @@ abortrecv(sig)
 	longjmp(recvabort, 1);
 }
 
-void recvrequest(cmd, local, remote, lmode, printnames)
-	char *cmd, *volatile local, *remote, *lmode;
+void recvrequest(char *cmd, char *volatile local, char *remote, char *lmode,
+		 int printnames)
 {
 	FILE *volatile fout, *volatile din = 0, *popen();
 	int (*volatile closefunc)(), pclose(), fclose();
@@ -1121,7 +1114,9 @@ void recvrequest(cmd, local, remote, lmode, printnames)
 	volatile long bytes = 0, hashbytes = HASHBYTES;
 	register int c, d;
 	struct timeval start, stop;
+#ifndef NOSTBLKSIZE
 	struct stat st;
+#endif
 	off_t lseek();
 
 	is_retr = strcmp(cmd, "RETR") == 0;
@@ -1563,10 +1558,14 @@ bad:
 }
 
 FILE *
-dataconn(lmode)
-	char *lmode;
+dataconn(char *lmode)
 {
-	int s, fromlen = sizeof (hisdataaddr), tos;
+	int s, fromlen = sizeof (hisdataaddr);
+#ifdef IP_TOS
+#ifdef IPTOS_LOWDELAY
+        int tos;
+#endif
+#endif
 
 #ifndef NO_PASSIVE_MODE
 	if (passivemode)
@@ -1590,10 +1589,8 @@ dataconn(lmode)
 	return (FDOPEN_SOCKET(data, lmode));
 }
 
-static void ptransfer(direction, bytes, t0, t1)
-	char *direction;
-	long bytes;
-	struct timeval *t0, *t1;
+static void ptransfer(char *direction, long bytes,
+		      struct timeval *t0, struct timeval *t1)
 {
 	struct timeval td;
 	float s, kbs;
@@ -1618,8 +1615,8 @@ static void ptransfer(direction, bytes, t0, t1)
 		tsum->tv_sec++, tsum->tv_usec -= 1000000;
 } */
 
-static void tvsub(tdiff, t1, t0)
-	struct timeval *tdiff, *t1, *t0;
+static void tvsub(struct timeval *tdiff, struct timeval *t1,
+		  struct timeval *t0)
 {
 
 	tdiff->tv_sec = t1->tv_sec - t0->tv_sec;
@@ -1629,14 +1626,12 @@ static void tvsub(tdiff, t1, t0)
 }
 
 static sigtype
-psabort(sig)
-	int sig;
+psabort(int sig)
 {
 	abrtflag++;
 }
 
-void pswitch(flag)
-	int flag;
+void pswitch(int flag)
 {
 	sig_t oldintr;
 	static struct comvars {
@@ -1758,8 +1753,7 @@ void pswitch(flag)
 int ptabflg;
 
 static sigtype
-abortpt(sig)
-	int sig;
+abortpt(int sig)
 {
 	printf("\n");
 	(void) fflush(stdout);
@@ -1770,8 +1764,7 @@ abortpt(sig)
 }
 
 static void
-proxtrans(cmd, local, remote)
-	char *cmd, *local, *remote;
+proxtrans(char *cmd, char *local, char *remote)
 {
 	volatile sig_t oldintr;
 	volatile int secndflag = 0;
@@ -1909,8 +1902,7 @@ void reset()
 }
 
 static char *
-gunique(local)
-	char *local;
+gunique(char *local)
 {
 	static char new[MAXPATHLEN];
 	char *cp = strrchr(local, '/');
@@ -2200,8 +2192,7 @@ int do_auth()
 }
 
 void
-setpbsz(size)
-unsigned int size;
+setpbsz(unsigned int size)
 {
 	int oldverbose;
 
@@ -2227,8 +2218,7 @@ unsigned int size;
 	verbose = oldverbose;
 }
 
-static void abort_remote(din)
-FILE *din;
+static void abort_remote(FILE *din)
 {
 	char buf[FTP_BUFSIZ];
 	int nfnd;
@@ -2269,9 +2259,7 @@ FILE *din;
 }
 
 #ifdef GSSAPI
-void user_gss_error(maj_stat, min_stat, s)
-OM_uint32 maj_stat, min_stat;
-char *s;
+void user_gss_error(OM_uint32 maj_stat, OM_uint32 min_stat, char *s)
 {
 	/* a lot of work just to report the error */
 	OM_uint32 gmaj_stat, gmin_stat, msg_ctx;
@@ -2309,9 +2297,7 @@ char *s;
 	fprintf(stderr, "GSSAPI error: %s\n", s);
 }
 
-void secure_gss_error(maj_stat, min_stat, s)
-     OM_uint32 maj_stat, min_stat;
-     char *s;
+void secure_gss_error(OM_uint32 maj_stat, OM_uint32 min_stat, char *s)
 {
   user_gss_error(maj_stat, min_stat, s);
   return;
@@ -2374,4 +2360,4 @@ FILE* fdopen_socket(SOCKET s, char* mode)
 
 	return f;
 }
-#endif
+#endif /* _WIN32 */
