@@ -103,11 +103,13 @@ static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 /*static unsigned char str_name[1024] = { IAC, SB, TELOPT_AUTHENTICATION,
 					TELQUAL_NAME, };*/
 
-#define	KRB_AUTH	0		/* Authentication data follows */
-#define	KRB_REJECT	1		/* Rejected (reason might follow) */
-#define	KRB_ACCEPT	2		/* Accepted */
-#define	KRB_RESPONSE	3		/* Response for mutual auth. */
-#define KRB_FORWARD     4               /* Forwarded credentials follow */
+#define	KRB_AUTH		0	/* Authentication data follows */
+#define	KRB_REJECT		1	/* Rejected (reason might follow) */
+#define	KRB_ACCEPT		2	/* Accepted */
+#define	KRB_RESPONSE		3	/* Response for mutual auth. */
+#define KRB_FORWARD     	4       /* Forwarded credentials follow */
+#define KRB_FORWARD_ACCEPT     	5       /* Forwarded credentials accepted */
+#define KRB_FORWARD_REJECT     	6       /* Forwarded credentials rejected */
 
 static	krb5_data auth;
 	/* telnetd gets session key from here */
@@ -463,10 +465,16 @@ kerberos5_is(ap, data, cnt)
 		inbuf.length = cnt;
 		if (r = rd_and_store_for_creds(&inbuf, authdat->ticket, 
 					       UserNameRequested)) {
+		    char errbuf[128];
+		    
+		    (void) strcpy(errbuf, "Read forwarded creds failed: ");
+		    (void) strcat(errbuf, error_message(r));
+		    Data(ap, KRB_FORWARD_REJECT, errbuf, -1);
 		    if (auth_debug_mode)
 		      printf("Could not read forwarded credentials\r\n");
 		}
 		else 
+		  Data(ap, KRB_FORWARD_ACCEPT, 0, 0);
 		  if (auth_debug_mode)
 		    printf("Forwarded credentials obtained\r\n");
 		break;
@@ -550,6 +558,13 @@ kerberos5_reply(ap, data, cnt)
 		    mutual_complete = 1;
 		}
 		return;
+	case KRB_FORWARD_ACCEPT:
+		printf("[ Kerberos V5 accepted forwarded credentials ]\n");
+		return;
+	case KRB_FORWARD_REJECT:
+		printf("[ Kerberos V5 refuses forwarded credentials because %.*s ]\r\n",
+				cnt, data);
+		return;
 	default:
 		if (auth_debug_mode)
 			printf("Unknown Kerberos option %d\r\n", data[-1]);
@@ -618,6 +633,15 @@ kerberos5_printsub(data, cnt, buf, buflen)
 
 	case KRB_FORWARD:               /* Forwarded credentials follow */
 		strncpy((char *)buf, " FORWARD", buflen);
+		goto common2;
+
+	case KRB_FORWARD_ACCEPT:               /* Forwarded credentials accepted */
+		strncpy((char *)buf, " FORWARD_ACCEPT", buflen);
+		goto common2;
+
+	case KRB_FORWARD_REJECT:               /* Forwarded credentials rejected */
+					       /* (reason might follow) */
+		strncpy((char *)buf, " FORWARD_REJECT", buflen);
 		goto common2;
 
 	default:
