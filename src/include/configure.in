@@ -125,7 +125,7 @@ KRB5_AC_INET6
 dnl
 dnl If compiling with IPv6 support, test if in6addr_any functions.
 dnl Irix 6.5.16 defines it, but lacks support in the C library.
-if test $krb5_cv_inet6 = yes ; then
+if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes ; then
 AC_CACHE_CHECK([for in6addr_any definition in library], 
   krb5_cv_var_in6addr_any,
 [AC_TRY_LINK([
@@ -230,6 +230,12 @@ fi
 AC_SUBST(maybe_kerberosIV)
 dnl
 AC_C_INLINE
+AH_BOTTOM([
+#if defined(__GNUC__) && !defined(inline)
+/* Silence gcc pedantic warnings about ANSI C.  */
+# define inline __inline__
+#endif
+])
 dnl
 dnl Not used yet, but let's find out what we've got on the platforms
 dnl we're working with....
