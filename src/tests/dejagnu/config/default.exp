@@ -311,7 +311,7 @@ proc setup_kerberos_files { } {
     set conffile [open tmpdir/krb5.conf w]
     puts $conffile "\[libdefaults\]"
     puts $conffile "	default_realm = $REALMNAME"
-    puts $conffile "default_tgs_enctypes = des-cbc-md5 des-cbc-crc"
+#    puts $conffile "default_tgs_enctypes = des-cbc-md5 des-cbc-crc"
     puts $conffile ""
     puts $conffile "\[realms\]"
     puts $conffile "	$REALMNAME = \{"
