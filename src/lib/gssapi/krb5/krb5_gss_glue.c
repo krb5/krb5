@@ -38,15 +38,11 @@ gss_accept_sec_context(minor_status, context_handle, verifier_cred_handle,
      OM_uint32 *time_rec;
      gss_cred_id_t *delegated_cred_handle;
 {
-   krb5_gss_ctx_id_t * ctx;
-
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
-
-   ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
    if (!kg_context && kg_get_context())
 	   return GSS_S_FAILURE;
@@ -185,7 +181,7 @@ gss_delete_sec_context(minor_status, context_handle, output_token)
       return(GSS_S_NO_CONTEXT);
    }
 
-   ctx = (krb5_gss_ctx_id_rec *) context_handle;
+   ctx = (krb5_gss_ctx_id_rec *) *context_handle;
 
    return(krb5_gss_delete_sec_context(ctx->context, minor_status,
 				      context_handle, output_token));

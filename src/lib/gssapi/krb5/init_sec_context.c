@@ -36,7 +36,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     krb5_flags *flags;
     gss_buffer_t token;
 {
-    krb5_flags mk_req_flags;
+    krb5_flags mk_req_flags = 0;
     krb5_error_code code;
     krb5_data checksum_data;
     krb5_checksum md5;

@@ -1,3 +1,15 @@
+Sat Sep  9 00:16:34 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_gss_glue.c (gss_delete_sec_context): Add extra indirection
+		so that we actually fetch the context correctly.
+		(gss_accept_sec_context): Remove unused code.
+
+Wed Sep  6 16:12:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* init_sec_context.c (make_ap_req): Initialize mk_req_flags to
+		zero so that when we OR in flags, the result is
+		well-defined. 
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * accept_sec_context.c, init_sec_context.c, util.c : 
