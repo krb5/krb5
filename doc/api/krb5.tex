@@ -1,0 +1,43 @@
+The main functions deal with the nitty-gritty details: verifying
+tickets, creating authenticators, and the like.
+
+\begin{funcdecl}[krb5_encode_kdc_rep]{krb5_error_code}{\funcin}
+\funcarg{krb5_msgtype}{type}
+\funcarg{krb5_enc_kdc_rep_part *}{encpart}
+\funcarg{krb5_keyblock *}{client_key}
+\funcinout
+\funcarg{krb5_kdc_rep *}{dec_rep}
+\funcout
+\funcarg{krb5_data *}{enc_rep}
+\end{funcdecl}
+
+Takes KDC rep parts in \funcparam{*rep} and \funcparam{*encpart}, and
+formats it into \funcparam{*enc_rep}, using message type \funcparam{type}
+and encryption key \funcparam{client_key} and encryption type
+\funcparam{dec_rep{\ptsto}etype}.
+
+\funcparam{enc_rep{\ptsto}data} will point to  allocated storage upon
+non-error return; the caller should free it when finished.
+
+Returns system errors.
+
+\begin{funcdecl}[krb5_decode_kdc_rep]{krb5_error_code}{\funcin}
+\funcarg{krb5_data *}{enc_rep}
+\funcarg{krb5_keyblock *}{key}
+\funcarg{krb5_enctype}{etype}
+\funcout
+\funcarg{krb5_kdc_rep **}{dec_rep}
+\end{funcdecl}
+
+Takes a KDC_REP message and decrypts encrypted part using
+\funcparam{etype} and \funcparam{*key}, putting result in \funcparam{*rep}.
+The pointers in \funcparam{dec_rep}
+are all set to allocated storage which should be freed by the caller
+when finished with the response (by using \funcname{krb5_free_kdc_rep}).
+
+
+If the response isn't a KDC_REP (tgs or as), it returns an error from
+the decoding routines (usually ISODE_50_LOCAL_ERR_BADDECODE).
+
+Returns errors from encryption routines, system errors.
+

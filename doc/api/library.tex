@@ -1,0 +1,48 @@
+\documentstyle[newcen,fixunder,functions,twoside]{article}
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\evensidemargin}{-0.25in}
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9in}
+\setlength{\parskip}{.1in}
+\setlength{\parindent}{2em}
+\setlength{\textwidth}{6.25in}
+\makeindex
+\pagestyle{headings}
+\begin{document}
+\begin{center}
+{\Huge Kerberos V5 application programming library} \\
+{\Large DRAFT}
+\end{center}
+\section{libkrb5.a functions}
+This section describes the functions provided in the {\tt libkrb5.a}
+library.  The library is built from several pieces, mostly for convenience in
+programming, maintenance, and porting.
+\subsection{Main functions}
+\input{krb5.tex}
+
+\subsection{Credentials cache functions}
+\input{ccache.tex}
+
+\subsection{Replay cache functions}
+\input{rcache.tex}
+
+\subsection{Key table functions}
+\input{keytab.tex}
+
+\subsection{Operating-system specific functions}
+\input{libos.tex}
+
+\section{CRC-32 checksum functions}
+\input{crc-32.tex}
+
+\section{Principal database functions}
+
+\input{kdb.tex}
+
+\section{Encryption system interface}
+\input{encrypt.tex}
+
+\appendix
+\cleardoublepage
+\input{\jobname.ind}
+\end{document}
