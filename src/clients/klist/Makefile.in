@@ -11,8 +11,8 @@ all-windows:: $(OUTPRE)klist.exe
 all-mac::
 
 
-klist: klist.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
+klist: klist.o $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ klist.o $(KRB4COMPAT_LIBS)
 
 $(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** wsock32.lib
