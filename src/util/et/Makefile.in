@@ -81,9 +81,10 @@ install:: com_err.h
 install:: mit-sipb-copyright.h
 	$(INSTALL_DATA) $(srcdir)/mit-sipb-copyright.h $(DESTDIR)$(KRB5_INCDIR)/mit-sipb-copyright.h
 
-install:: compile_et.1
-	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/man1/compile_et.1
-
+#
+#install:: compile_et.1
+#	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/compile_et.1
+#
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
 all-unix:: libcom_err.a

@@ -1,3 +1,8 @@
+Thu Jun  8 11:26:09 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* Makefile.in (install): Don't install compile_et.1; we're not
+		installing the program, anyway.
+
 Tue Jun  6 19:45:34 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in:
