@@ -1017,6 +1017,9 @@ static kadm5_ret_t add_to_history(krb5_context context,
 	  
 	  memset(&adb->old_keys[adb->old_key_len],0,sizeof(osa_pw_hist_ent)); 
      	  adb->old_key_len++;
+	  for (i = adb->old_key_len - 1; i > adb->old_key_next; i--)
+	      adb->old_keys[i] = adb->old_keys[i - 1];
+	  memset(&adb->old_keys[adb->old_key_next],0,sizeof(osa_pw_hist_ent));
      } else if (adb->old_key_len > pol->pw_history_num-1) {
 	 /*
 	  * The policy must have changed!  Shrink the array.
@@ -1039,10 +1042,12 @@ static kadm5_ret_t add_to_history(krb5_context context,
 		 histp[i] = adb->old_keys[j];
 	     }
 	     /* Now free the ones we don't keep (the oldest ones) */
-	     for (i = 0; i < adb->old_key_len - (pol->pw_history_num - 1); i++)
+	     for (i = 0; i < adb->old_key_len - (pol->pw_history_num-1); i++) {
 		 for (j = 0; j < adb->old_keys[KADM_MOD(i)].n_key_data; j++)
 		     krb5_free_key_data_contents(context,
 				&adb->old_keys[KADM_MOD(i)].key_data[j]);
+		 free(adb->old_keys[KADM_MOD(i)].key_data);
+	     }
 	     free((void *)adb->old_keys);
 	     adb->old_keys = histp;
 	     adb->old_key_len = pol->pw_history_num - 1;
@@ -1052,10 +1057,14 @@ static kadm5_ret_t add_to_history(krb5_context context,
 	 }
      }
 
+     if (adb->old_key_next + 1 > adb->old_key_len)
+	 adb->old_key_next = 0;
+
      /* free the old pw history entry if it contains data */
      histp = &adb->old_keys[adb->old_key_next];
      for (i = 0; i < histp->n_key_data; i++)
 	  krb5_free_key_data_contents(context, &histp->key_data[i]);
+     free(histp->key_data);
      
      /* store the new entry */
      adb->old_keys[adb->old_key_next] = *pw;

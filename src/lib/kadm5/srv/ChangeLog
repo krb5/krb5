@@ -1,3 +1,11 @@
+2004-12-20  Tom Yu  <tlyu@mit.edu>
+
+	* svr_principal.c (add_to_history): Fix buffer overflow case where
+	the next pointer points into unallocated space but resizing wasn't
+	done, i.e., when someone decreases the policy history count to the
+	exact "right" number.  Fix some memory leaks.  To avoid losing
+	entries, shift some entries forward after growing the array.
+
 2003-09-02  Alexandra Ellwood  <lxs@mit.edu>
 
 	* svr_principal.c: Added Apple password server support.
