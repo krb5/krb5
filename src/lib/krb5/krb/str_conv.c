@@ -179,7 +179,11 @@ krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp)
 	 * indicated that no guarantees are made as to preserving timebuf
 	 * when parsing fails
 	 */
+#ifdef HAVE_LOCALTIME_R
+	(void) localtime_r(&now, &timebuf);
+#else
 	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
+#endif
 	if ((s = strptime(string, atime_format_table[i], &timebuf))
 	    && (s != string)) {
  	    /* See if at end of buffer - otherwise partial processing */
@@ -203,10 +207,16 @@ krb5_timestamp_to_string(krb5_timestamp timestamp, char *buffer, size_t buflen)
 {
     int ret;
     time_t timestamp2 = timestamp;
+    struct tm tmbuf;
     const char *fmt = "%c"; /* This is to get around gcc -Wall warning that 
 			       the year returned might be two digits */
 
-    ret = strftime(buffer, buflen, fmt, localtime(&timestamp2));
+#ifdef HAVE_LOCALTIME_R
+    (void) localtime_r(&timestamp2, &tmbuf);
+#else
+    memcpy(&tmbuf, localtime(&timestamp2), sizeof(tmbuf));
+#endif
+    ret = strftime(buffer, buflen, fmt, &tmbuf);
     if (ret == 0 || ret == buflen)
 	return(ENOMEM);
     return(0);
@@ -219,6 +229,7 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
     size_t i;
     size_t	ndone;
     time_t timestamp2 = timestamp;
+    struct tm tmbuf;
 
     static const char * const sftime_format_table[] = {
 	"%c",			/* Default locale-dependent date and time */
@@ -229,7 +240,11 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
     static const int sftime_format_table_nents =
 	sizeof(sftime_format_table)/sizeof(sftime_format_table[0]);
 
-    tmp = localtime(&timestamp2);
+#ifdef HAVE_LOCALTIME_R
+    tmp = localtime_r(&timestamp2, &tmbuf);
+#else
+    memcpy((tmp = &tmbuf), localtime(&timestamp2), sizeof(tmbuf));
+#endif
     ndone = 0;
     for (i=0; i<sftime_format_table_nents; i++) {
 	if ((ndone = strftime(buffer, buflen, sftime_format_table[i], tmp)))

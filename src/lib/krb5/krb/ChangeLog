@@ -1,5 +1,9 @@
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* str_conv.c (krb5_string_to_timestamp): Use localtime_r if
+	available.
+	(krb5_timestamp_to_string, krb5_timestamp_to_sfstring): Likewise.
+
 	* parse.c (krb5_parse_name): Use assert and abort, not exit.
 
 	* srv_rcache.c (krb5_get_server_rcache): Don't forget to actually
