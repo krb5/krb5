@@ -24,6 +24,7 @@
  */
 
 #include "k5-int.h"
+#include "des_int.h"
 
 /*
 	does any necessary clean-up on the eblock (such as releasing

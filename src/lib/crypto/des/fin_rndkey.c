@@ -24,6 +24,7 @@
  */
 
 #include "k5-int.h"
+#include "des_int.h"
 
 /*
         free any resources held by "seed" and assigned by init_random_key()

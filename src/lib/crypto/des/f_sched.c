@@ -12,6 +12,7 @@
  */
 #include "des.h"
 #include "k5-int.h"
+#include "des_int.h"
 
 /*
  * Permuted choice 1 tables.  These are used to extract bits
