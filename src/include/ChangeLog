@@ -1,3 +1,10 @@
+2002-04-02  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Default to KRB5_DEPRECATED=1, allowing compiler
+	command line to override.  Hide some struct definitions.  Use
+	KRB5INT_BEGIN_DECLS and KRB5INT_END_DECLS to deal with C++
+	function declarations.
+
 2002-04-01  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Move a whole bunch of stuff under KRB5_DEPRECATED or

@@ -56,6 +56,10 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
+#ifndef KRB5_DEPRECATED
+#define KRB5_DEPRECATED 1	/* Expose deprecated things for now. */
+#endif
+
 #if defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 /* Macintoh CFM-68K magic incantation */
@@ -93,9 +97,15 @@
  * end "error_def.h"
  */
 
-#ifdef __cplusplus
-extern "C" {
+#if defined(__cplusplus) && !defined(KRB5INT_BEGIN_DECLS)
+#define KRB5INT_BEGIN_DECLS	extern "C" {
+#define KRB5INT_END_DECLS	}
+#else
+#define KRB5INT_BEGIN_DECLS
+#define KRB5INT_END_DECLS
 #endif
+
+KRB5INT_BEGIN_DECLS
 
 /*
  * begin wordsize.h
@@ -1199,6 +1209,7 @@ krb5_cc_get_type (krb5_context context, krb5_ccache cache);
 struct krb5_rc_st;
 typedef struct krb5_rc_st *krb5_rcache;
 
+#if KRB5_PRIVATE
 typedef struct _krb5_donot_replay {
     krb5_magic magic;
     char *server;			/* null-terminated */
@@ -1207,7 +1218,6 @@ typedef struct _krb5_donot_replay {
     krb5_timestamp ctime;
 } krb5_donot_replay;
 
-#if KRB5_PRIVATE
 krb5_error_code krb5_rc_default 
 	(krb5_context,
 		krb5_rcache *);
@@ -1271,13 +1281,17 @@ typedef struct krb5_keytab_entry_st {
     krb5_keyblock key;		/* the secret key */
 } krb5_keytab_entry;
 
-
+#if KRB5_PRIVATE
 struct _krb5_kt_ops;
-typedef struct _krb5_kt {
+typedef struct _krb5_kt {	/* should move into k5-int.h */
     krb5_magic magic;
     struct _krb5_kt_ops *ops;
     krb5_pointer data;
 } *krb5_keytab;
+#else
+struct _krb5_kt;
+typedef struct _krb5_kt *krb5_keytab;
+#endif
 
 char * KRB5_CALLCONV
 krb5_kt_get_type (krb5_context, krb5_keytab keytab);
@@ -2468,9 +2482,7 @@ typedef krb5_int32 krb5_prompt_type;
 krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	(krb5_context context);
 
-#ifdef __cplusplus
-}
-#endif
+KRB5INT_END_DECLS
 
 /* Macintoh CFM-68K magic incantation */
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
