@@ -241,9 +241,13 @@ krb5_cv_shlibs_tail_comp=
 krb5_cv_staticlibs_enabled=yes
 krb5_cv_shlibs_enabled=])
 ])
+dnl The following lines are so that configure --help gives some global 
+dnl configuration options.
+KRB5_LIB_AUX
 AC_KRB5_TCL
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
+dnl
 if test -z "$KRB4_LIB"; then
 kadminv4=""
 krb524=""
