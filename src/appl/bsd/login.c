@@ -40,6 +40,8 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
  * login -r hostname	(for rlogind)
  * login -h hostname	(for telnetd, etc.)
  * login -f name	(for pre-authenticated login: datakit, xterm, etc.)
+ * login -F name	(for pre-authenticated login: datakit, xterm, etc.,
+ *			 allows preauthenticated login as root)
  * login -e name	(for pre-authenticated encrypted, must do term
  *			 negotiation)
  * ifdef KRB4
@@ -47,7 +49,7 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
  * login -K hostname (for Kerberos V4 rlogind with restricted access)
  * endif KRB4 
  *
- * only one of: -r -f -e -k -K
+ * only one of: -r -f -e -k -K -F
  * only one of: -r -h -k -K
  */
 
@@ -193,9 +195,9 @@ typedef void sigtype;
 typedef int sigtype;
 #endif /* POSIX */
 
-#define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag) { \
+#define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag || fflag || Fflag ) { \
 				fprintf(stderr, \
-				    "login: only one of -r, -k, -K, -e, and -f allowed.\n"); \
+				    "login: only one of -r, -k, -K, -e, -F, and -f allowed.\n"); \
 				exit(1);\
 			}
 
@@ -214,7 +216,7 @@ main(argc, argv)
 	struct group *gr;
 	register int ch, i;
 	register char *p;
-	int fflag, hflag, pflag, rflag, cnt;
+	int fflag, hflag, pflag, rflag, Fflag, cnt;
 	int kflag, Kflag, eflag;
 	int quietlog, passwd_req, ioctlval;
 	sigtype timedout();
@@ -240,6 +242,7 @@ main(argc, argv)
 	 * -p is used by getty to tell login not to destroy the environment
 	 * -r is used by rlogind to cause the autologin protocol;
  	 * -f is used to skip a second login authentication 
+ 	 * -F is used to skip a second login authentication, allows login as root 
 	 * -e is used to skip a second login authentication, but allows
 	 * 	login as root.
 	 * -h is used by other servers to pass the name of the
@@ -251,13 +254,17 @@ main(argc, argv)
 	(void)gethostname(tbuf, sizeof(tbuf));
 	domain = strchr(tbuf, '.');
 
-	fflag = hflag = pflag = rflag = kflag = Kflag = eflag = 0;
+	Fflag = fflag = hflag = pflag = rflag = kflag = Kflag = eflag = 0;
 	passwd_req = 1;
-	while ((ch = getopt(argc, argv, "feh:pr:k:K:")) != EOF)
+	while ((ch = getopt(argc, argv, "Ffeh:pr:k:K:")) != EOF)
 		switch (ch) {
 		case 'f':
 			EXCL_AUTH_TEST;
 			fflag = 1;
+			break;
+		case 'F':
+			EXCL_AUTH_TEST;
+			Fflag = 1;
 			break;
 		case 'h':
 			EXCL_HOST_TEST;
@@ -450,7 +457,7 @@ main(argc, argv)
 #endif
 
 		if (username == NULL) {
-			fflag = 0;
+			fflag = Fflag = 0;
 			getloginname();
 		}
 
@@ -472,6 +479,16 @@ main(argc, argv)
 
 			passwd_req = pwd->pw_uid == 0 ||
 			    (uid && uid != pwd->pw_uid);
+		}
+
+		/*
+		 * Allows automatic login by root.
+		 * If not invoked by root, disallow if the uid's differ.
+		 */
+
+		if (Fflag && pwd) {
+			int uid = (int) getuid();
+			passwd_req = uid && uid != pwd->pw_uid;
 		}
 
 		/*
