@@ -1,3 +1,7 @@
+2005-01-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5.h): Don't pull in autoconf SIZEOF macros.
+
 2004-12-21  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Flag krb5_principal2salt as KRB5_CALLCONV_WRONG.
