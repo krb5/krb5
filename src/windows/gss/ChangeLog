@@ -1,3 +1,7 @@
+2004-02-11  Jeffrey Altman <jaltman@mit.edu>
+
+    * gss-misc.h: Add file.  Copy from src/appl/gss-sample/
+
 2004-02-06  Jeffrey Altman <jaltman@mit.edu>
 
     * resource.h: add new component id values for replay, mutual, sequence
