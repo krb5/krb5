@@ -114,10 +114,10 @@
 #define	LOG_ODELAY	0
 #endif
 #include <ctype.h>
-#ifndef NO_STRING_H
-#include <string.h>
-#else
+#ifndef HAVE_STRING_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 
 #ifndef	USE_TERMIO
