@@ -1,3 +1,7 @@
+2002-10-23  Sam Hartman  <hartmans@mit.edu>
+
+	* spnego-asn1.h: New file.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h (DEFAULT_PWD_STRING1, DEFAULT_PWD_STRING2): Remove
