@@ -1,3 +1,11 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* authorization.c (find_first_cmd_that_exists): Change xmalloc()
+	to xcalloc() where was intented in code (two arguments to xmalloc).
+
+	* ksu.h: Provide full prototypes for xmalloc(), xrealloc(),
+	xcalloc(), and xstrdup().
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c (get_params): Change optind to optindex to prevent

@@ -246,8 +246,10 @@ extern krb5_error_code ksu_tgtname PROTOTYPE((krb5_context, const krb5_data *,
 extern char *krb5_lname_file;  /* Note: print this out just be sure
 				  that it gets set */   	    
 
-extern void *xmalloc (), *xrealloc (), *xcalloc();
-extern char *xstrdup ();
+extern void *xmalloc PROTOTYPE((size_t)), 
+    *xrealloc PROTOTYPE((void *, size_t)), 
+    *xcalloc PROTOTYPE((size_t, size_t));
+extern char *xstrdup PROTOTYPE((const char *));
 
 #ifndef HAVE_UNSETENV
 void unsetenv PROTOTYPE((char *));

@@ -517,7 +517,7 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
     }
 
     if (retbool == FALSE ){
-	err = (char *) xmalloc((80 + (max_ln+2)*i) ,sizeof(char));
+	err = (char *) xcalloc((80 + (max_ln+2)*i) ,sizeof(char));
 	strcpy(err,"Error: not found -> ");
 	for(j= 0; j < i; j ++){
 	    strcat(err, " ");
