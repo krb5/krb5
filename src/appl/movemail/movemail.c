@@ -547,7 +547,7 @@ char *host;
 #ifdef KERBEROS
     hostname = malloc(strlen(hp->h_name)+1);
     if (!hostname) {
-	    sprintf(ErrMsg, "Couldn't allocate space for hostname");
+	    sprintf(Errmsg, "Couldn't allocate space for hostname");
 	    return(NOTOK);
     }
     strcpy(hostname, hp->h_name);

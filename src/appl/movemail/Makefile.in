@@ -1,4 +1,5 @@
 CFLAGS = $(CCOPTS) -DKERBEROS -DKRB5 -DMAIL_USE_POP $(DEFS) $(LOCALINCLUDE)
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 LDFLAGS = -g
 
 OBJS = movemail.o movemail-mmdf.o
@@ -18,7 +19,7 @@ clean::
 	$(RM) movemail
 
 install::
-	cp movemail ${DESTDIR}$(CLIENT_BINDIR)/movemail
+	$(INSTALL_PROGRAM) movemail ${DESTDIR}$(CLIENT_BINDIR)/movemail
 
 movemail.o:	$(srcdir)/movemail.c
 
