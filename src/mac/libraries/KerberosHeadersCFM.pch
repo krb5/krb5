@@ -1,0 +1,24 @@
+/*
+ *	KerberosHeadersCFM.pch - Name the output file
+ */
+
+#ifdef __cplusplus
+
+	#ifdef powerc
+		#pragma precompile_target "KerberosHeadersCFMPPC++"
+	#else
+		#pragma precompile_target "KerberosHeadersCFM68K++"
+	#endif
+
+#else
+
+	#ifdef powerc
+		#pragma precompile_target "KerberosHeadersCFMPPC"
+	#else
+		#pragma precompile_target "KerberosHeadersCFM68K"
+	#endif
+
+#endif
+
+#include "KerberosHeaders.h"
+#include "MacHeaders.c"
