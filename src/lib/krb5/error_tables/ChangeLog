@@ -1,3 +1,7 @@
+Mon Dec 19 17:10:13 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5_err.et (KV5M_CONTEXT, KV5M_OS_CONTEXT): Add new error codes.
+
 Fri Nov 18 15:29:55 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_err.et (KV5M_KEYTAB_ENTRY): Add new error code
