@@ -45,4 +45,6 @@
 typedef int sigtype;
 #endif
 
+#define BSDUNIX
+
 #endif /* KRB5_OSCONF__ */
