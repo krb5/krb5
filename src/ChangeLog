@@ -1,3 +1,17 @@
+2001-05-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5-config.in: New script for providing linker and compiler
+	information for applications.
+
+	* patchlevel.h: Update to current release. Mkrel script generates
+	this in distribtions.
+
+	* configure.in: Add support for parsing patchlevel.h into a
+	useable form for krb5-config. Generate krb5-config from
+	krb5-config.in. Add KRB5_BUILD_PROGRAM for variable substitution. 
+ 
+	* Makefile.in: Add support for building and installing krb5-config.
+
 2001-05-23  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (WITH_CC, WITH_CCOPTS): Autoconf 2.50 fix. Change
