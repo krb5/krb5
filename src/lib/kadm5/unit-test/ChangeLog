@@ -1,3 +1,12 @@
+2002-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test150, test151, test153): Don't try to set
+	KRB5CCNAME; only the fact that it wasn't being done correctly
+	prevented it from causing test failures.
+
+	* lib/lib.t (kinit): If kinit reports a problem initializing the
+	credentials cache, raise an error.
+
 2002-10-18  Tom Yu  <tlyu@mit.edu>
 
 	* api.2/init-v2.exp (test106): Make regexp more forgiving of

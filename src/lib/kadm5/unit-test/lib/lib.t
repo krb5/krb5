@@ -246,6 +246,7 @@ proc kinit { princ pass {opts ""} } {
 	# the parent, which is us, to read pending data.
 
 	expect {
+		"when initializing cache" { error "kinit failed: $expect_out(buffer)" }
 		eof {}
 	}
 	wait

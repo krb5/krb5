@@ -570,7 +570,6 @@ test "init 150"
 proc test150 {} {
     global test KADM5_ADMIN_SERVICE
 
-    set env(KRB5CCNAME) /tmp/krb5cc_kadm5_init_v2
     kdestroy
     kinit testuser notathena "-S $KADM5_ADMIN_SERVICE"
     one_line_succeed_test {
@@ -586,7 +585,6 @@ test "init 151"
 proc test151 {} {
     global test KADM5_CHANGEPW_SERVICE
 
-    set env(KRB5CCNAME) /tmp/krb5cc_kadm5_init_v2
     kdestroy
     kinit testuser notathena "-S $KADM5_CHANGEPW_SERVICE"
     one_line_succeed_test {
@@ -615,7 +613,6 @@ test "init 153"
 proc test153 {} {
     global test KADM5_ADMIN_SERVICE
 
-    set env(KRB5CCNAME) /tmp/krb5cc_kadm5_init_v2
     kinit testuser notathena
     one_line_fail_test {
 	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
