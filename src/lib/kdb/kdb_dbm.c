@@ -535,7 +535,7 @@ krb5_db_entry *entry;
     }
     entry->mod_name = mod_princ;
     nextloc += strlen(nextloc)+1;	/* advance past 2nd string */
-    keysize = contents->dsize - (nextloc - contents->dptr) - sizeof(entry->key);
+    keysize = contents->dsize - (nextloc - contents->dptr);
     if (keysize <= 0) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
