@@ -180,8 +180,8 @@ int netf;
 #else /* !KERBEROS */
 
 #define ARGSTR	"RD:?"
-#define (*des_read)  read
-#define (*des_write) write
+int (*des_read)() = read;
+int (*des_write)() = write;
      
 #endif /* KERBEROS */
      
@@ -504,6 +504,42 @@ int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 #define KRB5_RECVAUTH_V4	4
 #define KRB5_RECVAUTH_V5	5
 
+krb5_sigtype
+cleanup(signumber)
+     int signumber;
+{
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+
+    (void)sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGHUP, &sa, (struct sigaction *)0);
+
+    (void)kill(-pid, SIGTERM);
+#else
+    signal(SIGINT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTERM, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGHUP, SIG_IGN);
+    
+    killpg(pid, SIGTERM);
+#endif
+    wait(0);
+    
+    pty_logwtmp(ttyn,"","");
+    syslog(LOG_INFO ,"Daemon terminated via signal %d.", signumber);
+    if (ccache)
+	krb5_cc_destroy(bsd_context, ccache);
+    exit(0);
+}
+
+
 void doit(f, fromp)
      int f;
      struct sockaddr_in *fromp;
@@ -544,7 +580,6 @@ void doit(f, fromp)
     int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
     char buf[RSHD_BUFSIZ], sig;
-    krb5_sigtype     cleanup();
     struct sockaddr_in fromaddr;
     struct sockaddr_in localaddr;
     int non_privileged = 0;
@@ -1111,17 +1146,21 @@ void doit(f, fromp)
 	    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
 	    (void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
 	    (void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
-	    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
 	    (void)sigaction(SIGHUP, &sa, (struct sigaction *)0);
 
 	    sa.sa_handler = SIG_IGN;
+	    /* SIGPIPE is a crutch that we don't need if we check 
+	       the exit status of write. */
+	    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
 	    (void)sigaction(SIGCHLD, &sa, (struct sigaction *)0);
 #else
 	    signal(SIGINT, cleanup);
 	    signal(SIGQUIT, cleanup);
 	    signal(SIGTERM, cleanup);
-	    signal(SIGPIPE, cleanup);
 	    signal(SIGHUP, cleanup);
+	    /* SIGPIPE is a crutch that we don't need if we check 
+	       the exit status of write. */
+	    signal(SIGPIPE, SIG_IGN);
 	    signal(SIGCHLD,SIG_IGN);
 #endif
 	    
@@ -1141,19 +1180,49 @@ if(port)
     FD_SET(pv[0], &readfrom);
 	    FD_SET(pw[0], &readfrom);
 	    
+	    /* read from f, write to px[1] -- child stdin */
+	    /* read from s, signal child */
+	    /* read from pv[0], write to s -- child stderr */
+	    /* read from pw[0], write to f -- child stdout */
+
 	    do {
 		ready = readfrom;
 		if (select(8*sizeof(ready), &ready, (fd_set *)0,
 			   (fd_set *)0, (struct timeval *)0) < 0) {
-		    if (errno == EINTR)
+		    if (errno == EINTR) {
 			continue;
-		    else
+		    } else {
 			break;
 		}
+		}
+
+		if (port&&FD_ISSET(pv[0], &ready)) {
+		    /* read from the child stderr, write to the net */
+		    errno = 0;
+		    cc = read(pv[0], buf, sizeof (buf));
+		    if (cc <= 0) {
+			shutdown(s, 1+1);
+			FD_CLR(pv[0], &readfrom);
+		    } else {
+			(void) (*des_write)(s, buf, cc);
+		    }
+		}
+		if (FD_ISSET(pw[0], &ready)) {
+		    /* read from the child stdout, write to the net */
+		    errno = 0;
+		    cc = read(pw[0], buf, sizeof (buf));
+		    if (cc <= 0) {
+			shutdown(f, 1+1);
+			FD_CLR(pw[0], &readfrom);
+		    } else {
+			(void) (*des_write)(f, buf, cc);
+		    }
+		}
 		if (port&&FD_ISSET(s, &ready)) {
-		    if ((*des_read)(s, &sig, 1) <= 0)
+		    /* read from the alternate channel, signal the child */
+		    if ((*des_read)(s, &sig, 1) <= 0) {
 			FD_CLR(s, &readfrom);
-		    else {
+		    } else {
 #ifdef POSIX_SIGNALS
 			sa.sa_handler = cleanup;
 			(void)sigaction(sig, &sa, (struct sigaction *)0);
@@ -1165,31 +1234,25 @@ if(port)
 		    }
 		}
 		if (FD_ISSET(f, &ready)) {
+		    /* read from the net, write to child stdin */
 		    errno = 0;
 		    cc = (*des_read)(f, buf, sizeof(buf));
 		    if (cc <= 0) {
 			(void) close(px[1]);
 			FD_CLR(f, &readfrom);
-		    } else
-			(void) write(px[1], buf, cc);
+		    } else {
+		        int wcc;
+		        wcc = write(px[1], buf, cc);
+			if (wcc == -1) {
+			  /* pipe closed, don't read any more */
+			  /* might check for EPIPE */
+			  (void) close(px[1]);
+			  FD_CLR(f, &readfrom);
+			} else if (wcc != cc) {
+			  syslog(LOG_INFO, "only wrote %d/%d to child", 
+				 wcc, cc);
 		}
-		if (port&&FD_ISSET(pv[0], &ready)) {
-		    errno = 0;
-		    cc = read(pv[0], buf, sizeof (buf));
-		    if (cc <= 0) {
-			shutdown(s, 1+1);
-			FD_CLR(pv[0], &readfrom);
-		    } else
-			(void) (*des_write)(s, buf, cc);
 		}
-		if (FD_ISSET(pw[0], &ready)) {
-		    errno = 0;
-		    cc = read(pw[0], buf, sizeof (buf));
-		    if (cc <= 0) {
-			shutdown(f, 1+1);
-			FD_CLR(pw[0], &readfrom);
-		    } else
-			(void) (*des_write)(f, buf, cc);
 		}
 	    } while ((port&&FD_ISSET(s, &readfrom)) ||
 		     FD_ISSET(f, &readfrom) ||
@@ -1421,44 +1484,6 @@ void getstr(fd, buf, cnt, err)
 	}
     } while (c != 0);
 }
-
-
-
-krb5_sigtype 
-  cleanup()
-{
-#ifdef POSIX_SIGNALS
-    struct sigaction sa;
-
-    (void)sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sa.sa_handler = SIG_IGN;
-    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
-    (void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
-    (void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
-    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
-    (void)sigaction(SIGHUP, &sa, (struct sigaction *)0);
-
-    (void)kill(-pid, SIGTERM);
-#else
-    signal(SIGINT, SIG_IGN);
-    signal(SIGQUIT, SIG_IGN);
-    signal(SIGTERM, SIG_IGN);
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
-    
-    killpg(pid, SIGTERM);
-#endif
-    wait(0);
-    
-    pty_logwtmp(ttyn,"","");
-    syslog(LOG_INFO ,"Shell process completed.");
-    if (ccache)
-	krb5_cc_destroy(bsd_context, ccache);
-    exit(0);
-}
-
-
 
 #ifdef	CRAY
 char *makejtmp(uid, gid, jid)
@@ -2018,7 +2043,7 @@ void fatal(f, msg)
 #else
         (void) ioctl(f, TIOCFLUSH, (char *)&out);
 #endif
-        cleanup();
+        cleanup(-1);
     }
     exit(1);
 }

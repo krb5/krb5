@@ -1,3 +1,24 @@
+Mon Nov 11 23:38:05 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krshd "plumbing" fixes
+
+	Tue Jun 25 19:51:07 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krshd.c (doit): ignore SIGPIPE in the child, check the return
+	status of write instead.
+	Added comments labelling the various file descriptors.
+	Cleaned up formatting somewhat.
+	Check for failure of write to child stdin pipe, and stop reading.
+	Check for output from child before checking for input from net, to
+	reduce potential for missed output.
+	(cleanup): moved before doit, to eliminate need for declaration.
+  	Added an argument, to allow reporting of what signal kshd died
+	on, and report that the daemon terminated, not the shell.
+
+	Thu Jun 20 18:54:04 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krshd.c: fix global-change typo in !KERBEROS branch.
+
 Mon Nov 11 15:00:25 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in, configure.in, krshd.c, v4rcp.M, v4rcp.c: added
