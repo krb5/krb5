@@ -1,3 +1,9 @@
+2003-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (HPUX): Fix typo.
+	(Options to Configure): Note that --with-system-db is unsupported,
+	concerning possible lossage with loading dumpfiles.
+
 2003-06-18  Tom Yu  <tlyu@mit.edu>
 
 	* dnssrv.texinfo: Add note about _kerberos-iv._udp SRV records.
