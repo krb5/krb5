@@ -1,6 +1,12 @@
 2000-10-08  Miro Jurisic  <meeroh@mit.edu>
 
 	* et_c.perl, et_h.perl: 
+        Renamed to et_c.pl and et_h.pl because the extension is used
+        as a newline separator heuristic in MacPerl parser
+
+2000-10-08  Miro Jurisic  <meeroh@mit.edu>
+
+	* et_c.perl, et_h.perl: 
         Removed #! from the first line to avoid confusing MacPerl
 
 2000-10-02  Alexandra Ellwood  <lxs@mit.edu>
