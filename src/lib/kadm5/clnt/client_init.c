@@ -322,6 +322,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 		  krb5_cc_get_type(handle->context, ccache),
 		  krb5_cc_get_name(handle->context, ccache));
      } else {
+#if 0
 	  handle->cache_name =
 	       (char *) malloc(strlen(ADM_CCACHE)+strlen("FILE:")+1);
 	  if (handle->cache_name == NULL) {
@@ -330,6 +331,14 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  }
 	  sprintf(handle->cache_name, "FILE:%s", ADM_CCACHE);
 	  mktemp(handle->cache_name + strlen("FILE:"));
+#else
+	  {
+	      static int counter = 0;
+	      handle->cache_name = malloc(sizeof("MEMORY:kadm5_")
+					  + 3*sizeof(counter));
+	      sprintf(handle->cache_name, "MEMORY:kadm5_%u", counter++);
+	  }
+#endif
      
 	  if ((code = krb5_cc_resolve(handle->context, handle->cache_name,
 				      &ccache))) 

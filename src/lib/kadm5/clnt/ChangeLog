@@ -1,3 +1,8 @@
+2002-09-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c (_kadm5_init_any): If creating a new ccache, put
+	it in memory instead of on disk.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
