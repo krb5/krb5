@@ -117,7 +117,7 @@ char *argv[];
     char *mkey_fullname;
     char defrealm[BUFSIZ];
     int keytypedone = 0;
-    krb5_enctype etype = -1;
+    krb5_enctype etype = 0xffff;
 
     initialize_krb5_error_table();
     initialize_kdb5_error_table();
@@ -160,7 +160,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (etype == -1)
+    if (etype == 0xffff)
 	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype)) {
