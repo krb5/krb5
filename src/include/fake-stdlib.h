@@ -197,7 +197,7 @@ char *malloc P((unsigned ));
 char *memccpy P((char *, char *, int , int ));
 char *memchr P((char *, int , int ));
 int memcmp P((char *, char *, int ));
-char *memcpy P((char *, char *, int ));
+char *memcpy P((char *, const char *, int ));
 char *memset P((char *, int , int ));
 char *mktemp P((char *));
 int mkstemp P((char *));
@@ -439,7 +439,7 @@ int getpw P((int , char * ));
 #ifndef SYSTEM_FIVE
 struct passwd *getpwent P((void ));
 struct passwd *getpwuid P((int ));
-struct passwd *getpwnam P((char * ));
+struct passwd *getpwnam P((const char * ));
 int endpwent P((void ));
 int setpwent P((void ));
 #endif
@@ -608,7 +608,7 @@ char *lfind P((char * , char * , unsigned * , unsigned  , int (* )(char *, char 
 char *memccpy P((char * , char * , int  , int  ));
 char *memchr P((char * , int  , int  ));
 int memcmp P((char * , char * , int  ));
-char *memcpy P((char * , char * , int  ));
+char *memcpy P((char * , const char * , int  ));
 char *memset P((char * , int  , int  ));
 int gsignal P((int  ));
 double strtod P((char * , char ** ));
