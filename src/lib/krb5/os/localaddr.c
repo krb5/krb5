@@ -280,7 +280,13 @@ get_ifconf (int s, size_t *lenp, /*@out@*/ char *buf)
     return ret;
 }
 
-#ifdef SIOCGLIFCONF /* Solaris */
+/* Solaris uses SIOCGLIFCONF to return struct lifconf which is just
+   an extended version of struct ifconf.
+
+   HP-UX 11 also appears to have SIOCGLIFCONF, but uses struct
+   if_laddrconf, and struct if_laddrreq to be used with
+   SIOCGLIFADDR.  */
+#if defined(SIOCGLIFCONF) && defined(HAVE_STRUCT_LIFCONF)
 static int
 get_lifconf (int af, int s, size_t *lenp, /*@out@*/ char *buf)
     /*@modifies *buf,*lenp@*/
@@ -454,7 +460,7 @@ foreach_localaddr (/*@null@*/ void *data,
     return 0;
 }
 
-#elif defined (SIOCGLIFNUM) /* Solaris 8 and later; Sol 7? */
+#elif defined (SIOCGLIFNUM) && defined(HAVE_STRUCT_LIFCONF) /* Solaris 8 and later; Sol 7? */
 
 int
 foreach_localaddr (/*@null@*/ void *data,

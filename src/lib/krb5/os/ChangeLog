@@ -1,3 +1,10 @@
+2004-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (get_lifconf): Define only if "struct lifconf" is
+	available.
+	(foreach_localaddr): Use get_lifconf only if "struct lifconf" is
+	available.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* genaddrs.c, localaddr.c, lock_file.c, mk_faddr.c: Don't check
