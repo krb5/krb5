@@ -801,7 +801,7 @@ do_v4_ccache(name)
 	}
 	printtime(c.issue_date);
 	fputs("  ", stdout);
-	printtime(c.issue_date + ((unsigned char) c.lifetime) * 5 * 60);
+	printtime(krb_life_to_time(c.issue_date, c.lifetime));
 	printf("  %s%s%s%s%s\n",
 	       c.service, (c.instance[0] ? "." : ""), c.instance,
 	       (c.realm[0] ? "@" : ""), c.realm);
