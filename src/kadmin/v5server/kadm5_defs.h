@@ -93,7 +93,6 @@ krb5_error_code key_init
 	KRB5_PROTOTYPE((krb5_context,
 			int,
 			int,
-			int,
 			char *,
 			int,
 			char *,

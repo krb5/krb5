@@ -1972,7 +1972,6 @@ admin_extract_key(kcontext, debug_level, ticket,
 			    ktabentry.vno = dkey_list[0].key_data_kvno;
 			    ktabentry.key.keytype =
 				dkey_list[0].key_data_type[0];
-			    ktabentry.key.etype = ETYPE_UNKNOWN;
 			    ktabentry.key.length = 
 				dkey_list[0].key_data_length[0];
 			    ktabentry.key.contents =

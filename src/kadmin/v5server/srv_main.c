@@ -38,10 +38,10 @@
 #include "kadm5_defs.h"
 
 #ifdef	LANGUAGES_SUPPORTED
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
 static const char *getopt_string =	"a:d:e:k:l:mnp:r:t:D:M:T:";
 #else	/* LANGUAGES_SUPPORTED */
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-m]\n\t[-k mkeytype] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
 static const char *getopt_string =	"a:d:e:k:mnp:r:t:D:M:T:";
 #endif	/* LANGUAGES_SUPPORTED */
 static const char *fval_not_number =	"%s: value (%s) specified for -%c is not numeric.\n";
@@ -102,7 +102,6 @@ main(argc, argv)
     int			option;
     krb5_error_code	error;
 
-    int			enc_type = -1;
     int			key_type = -1;
     int			manual_entry = 0;
     krb5_boolean	mime_enabled = 0;
@@ -160,12 +159,6 @@ main(argc, argv)
 	    break;
 	case 'd':
 	    db_file = optarg;
-	    break;
-	case 'e':
-	    if (sscanf(optarg, "%d", &enc_type) != 1) {
-		fprintf(stderr, fval_not_number, argv[0], optarg, 'e');
-		error++;
-	    }
 	    break;
 	case 'm':
 	    manual_entry++;
@@ -282,10 +275,6 @@ main(argc, argv)
 	if (rparams->realm_kadmind_port_valid)
 	    service_port = rparams->realm_kadmind_port;
 
-	/* Get the value for the encryption type */
-	if (rparams->realm_enctype_valid)
-	    enc_type = rparams->realm_enctype;
-
 	/* Get the value for the stashfile */
 	if (rparams->realm_stash_file)
 	    stash_name = strdup(rparams->realm_stash_file);
@@ -365,7 +354,6 @@ main(argc, argv)
 	 */
 	error = key_init(kcontext,
 			 debug_level,
-			 enc_type,
 			 key_type,
 			 master_key_name,
 			 manual_entry,

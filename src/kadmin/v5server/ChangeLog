@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * admin.c, kadm5_defs.h, srv_key.c, srv_main.c : Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate.
+
 Thu Aug 31 16:07:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_acl.c, kadm5_defs.h - Change operation of acl_op_permitted().  It
 		now takes another argument which is the name of the target of

@@ -54,7 +54,6 @@ static const char *key_cpw_rkeyerr_fmt = "%s: cannot make random key for %s.\n";
 static const char *key_cpw_uniqerr_fmt = "%s: database entry for %s is not unique.\n";
 static const char *key_cpw_parserr_fmt = "%s: cannot parse %s.\n";
 static const char *key_keytab_fmt = "%s: cannot resolve keytab %s (%s).\n";
-static const char *key_bad_etype_fmt = "%s: bad etype %d (%s).\n";
 static const char *key_def_realm_fmt = "%s: cannot find default realm (%s).\n";
 static const char *key_setup_mkey_fmt = "%s: cannot setup master key name (%s).\n";
 static const char *key_get_mkey_fmt = "%s: cannot retrieve master key (%s).\n";
@@ -99,7 +98,7 @@ static int		key_num_ktents = 0;
 static krb5_key_salt_tuple *key_ktents = (krb5_key_salt_tuple *) NULL;
 static int		key_ktents_inited = 0;
 static krb5_key_salt_tuple default_ktent = {
-    KEYTYPE_DES, KRB5_KDB_SALTTYPE_NORMAL
+    KEYTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_NORMAL
 };
 
 static char		*key_db_name = (char *) NULL;
@@ -319,15 +318,14 @@ key_get_admin_entry(kcontext)
 	xxx.key_data = madmin_keys;
 	if (krb5_dbe_find_keytype(kcontext,
 				  &xxx,
-				  KEYTYPE_DES,
+				  KEYTYPE_DES_CBC_MD5,
 				  -1,
 				  -1,
 				  &kdata))
 	    kdata = &madmin_keys[0];
 
 	memset(&madmin_key, 0, sizeof(krb5_keyblock));
-	madmin_key.keytype = KEYTYPE_DES;
-	madmin_key.etype = ETYPE_UNKNOWN;
+	madmin_key.keytype = KEYTYPE_DES_CBC_MD5;
 	madmin_key.length = kdata->key_data_length[0];
 	madmin_key.contents = kdata->key_data_contents[0];
     }
@@ -341,11 +339,10 @@ key_get_admin_entry(kcontext)
  * key_init()	- Initialize key context.
  */
 krb5_error_code
-key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
+key_init(kcontext, debug_level, key_type, master_key_name, manual,
 	 db_file, db_realm, kt_name, sf_name, nktent, ktents)
     krb5_context	kcontext;
     int			debug_level;
-    int			enc_type;
     int			key_type;
     char		*master_key_name;
     int			manual;
@@ -356,19 +353,17 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     krb5_int32		nktent;
     krb5_key_salt_tuple	*ktents;
 {
-    krb5_enctype 	kdc_etype;
     char		*mkey_name;
 
     krb5_error_code	kret;
-    krb5_enctype	etype;
     int			one_success;
     int 		number_of_entries;
     krb5_boolean	more_entries;
 
     key_debug_level = debug_level;
     DPRINT(DEBUG_CALLS, key_debug_level,
-	   ("* key_init(enc-type=%d, key-type=%d,\n\tmkeyname=%s, manual=%d,\n\tdb=%s,\n\trealm=%s,\n\tktab=%s)\n",
-	    enc_type, key_type,
+	   ("* key_init(key-type=%d,\n\tmkeyname=%s, manual=%d,\n\tdb=%s,\n\trealm=%s,\n\tktab=%s)\n",
+	    key_type,
 	    ((master_key_name) ? master_key_name : "(null)"),
 	    manual,
 	    ((db_file) ? db_file : "(default)"),
@@ -377,9 +372,8 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     /*
      * Figure out arguments.
      */
-    master_keyblock.keytype = ((key_type == -1) ? KEYTYPE_DES : key_type);
+    master_keyblock.keytype=((key_type == -1) ? KEYTYPE_DES_CBC_MD5 : key_type);
     mkey_name = ((!master_key_name) ? KRB5_KDB_M_NAME : master_key_name);
-    kdc_etype = ((enc_type == -1) ? DEFAULT_KDC_ETYPE : enc_type);
 
     /*
      * First, try to set up our keytab if supplied.
@@ -393,12 +387,6 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     }
     mkeytab_init = 1;
 
-    if (!valid_etype(kdc_etype)) {
-	kret = KRB5_PROG_ETYPE_NOSUPP;
-	fprintf(stderr, key_bad_etype_fmt, programname, kdc_etype,
-		error_message(kret));
-	goto leave;
-    }
     if (!db_realm) {
 	kret = krb5_get_default_realm(kcontext, &master_realm);
 	if (kret) {
@@ -406,8 +394,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 		    error_message(kret));
 	    goto leave;
 	}
-    }
-    else {
+    } else {
 	if (kret = krb5_set_default_realm(kcontext, db_realm))
 	    goto leave;
 	master_realm = (char *) malloc(strlen(db_realm)+1);
@@ -484,7 +471,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     }
     ment_init = 1;
 
-    krb5_use_cstype(kcontext, &master_encblock, kdc_etype);
+    krb5_use_keytype(kcontext, &master_encblock, master_keyblock.keytype);
 
     /* Go get the master key */
     kret = krb5_db_fetch_mkey(kcontext,
@@ -1123,7 +1110,7 @@ key_pwd_is_weak(kcontext, dbentp, string)
 			      &key_list);
     if (!kret) {
 	for (i=0; i<num_keys; i++) {
-	    if ((key_list[i].key_data_type[0] == KEYTYPE_DES) &&
+	    if ((key_list[i].key_data_type[0] == KEYTYPE_DES_CBC_MD5) &&
 		(key_list[i].key_data_length[0] == KRB5_MIT_DES_KEYSIZE) &&
 		mit_des_is_weak_key(key_list[i].key_data_contents[0])) {
 		weakness = 1;
