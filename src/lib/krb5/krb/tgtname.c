@@ -36,12 +36,12 @@ static char rcsid_tgtname_c [] =
 /* This is an internal-only function, used by krb5_get_cred_from_kdc() */
 
 krb5_error_code
-krb5_tgtname(client, server, tgtprinc)
-const krb5_data *client, *server;
+krb5_tgtname(server, client, tgtprinc)
+const krb5_data *server, *client;
 krb5_principal *tgtprinc;
 {
-    return krb5_build_principal_ext(tgtprinc, server->length, server->data,
+    return krb5_build_principal_ext(tgtprinc, client->length, client->data,
 				    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME, 
-				    client->length, client->data,
+				    server->length, server->data,
 				    0);
 }
