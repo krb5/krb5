@@ -10,12 +10,10 @@ klogind \- remote login server
 .SH SYNOPSIS
 .B klogind
 [
-.B \-kr54cpPesI
+.B \-kr54cpPe
 ]
 [
-.B \-u
-.I utmp_hostname_length
-]
+[ \fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]] ]
 .SH DESCRIPTION
 .I Klogind
 is the server for the 
@@ -134,17 +132,20 @@ size changes from the client are propagated to the pseudo terminal.
 .PP
 .I Klogind
 supports the following options to control the form of the hostname
-passed to the login program:
+passed to login(1):
 
-.IP \fB-u\ utmp_hostname_length\fP
-Set the maximum length of hostname passed to login to
-\fIutmp_hostname_length\fP bytes, including terminating nul.
-
-.IP \fB-I\fP
-Always pass a numeric IP address to login.
-
-.IP \fB-s\fP
-Don't strip the local domain off hostnames.
+.TP
+\fB\-w \fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]
+Controls the form of the remote hostname passed to login(1).
+Specifying \fBip\fP results in the numeric IP address always being
+passed to login(1).  Specifying a number, \fImaxhostlen\fP, sets the
+maximum length of the hostname passed to login(1) before it will be
+passed as a numeric IP address.  If \fImaxhostlen\fP is 0, then the
+system default, as determined by the utmp or utmpx structures, is
+used.  The \fBnostriplocal\fP and \fBstriplocal\fP options, which must
+be preceded by a comma, control whether or not the local host domain
+is stripped from the remote hostname.  By default, the equivalent of
+\fBstriplocal\fP is in effect.
 
 .PP
 .I Klogind
