@@ -1,5 +1,7 @@
 2001-08-31  Ken Raeburn  <raeburn@mit.edu>
 
+	* hostaddr.c (krb5_os_hostaddr): Don't use AI_DEFAULT.
+
 	* genaddrs.c (struct addrpair): New type.
 	(cvtaddr): New function.  Fills in krb5_address structures
 	referencing port and address parts of a sockaddr.  Converts
