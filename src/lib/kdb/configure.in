@@ -7,7 +7,6 @@ AC_PROG_INSTALL
 AC_HAVE_HEADERS(unistd.h)
 AC_CHECK_FUNCS(srand48 srand srandom umask)
 
-AC_CHECK_FUNCS(re_comp re_exec regcomp regexec)
 dnl AIX is unusual in that it wants all symbols resolved at link time
 dnl  Fortunately, it will allow us to link the kdb library now, even if
 dnl it is linked again later.

@@ -1,3 +1,8 @@
+Fri Feb 27 21:21:03 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Remove check for the regular expression functions,
+		since they aren't used in lib/kdb.
+
 Wed Feb 18 16:16:35 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
