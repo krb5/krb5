@@ -36,55 +36,79 @@ static char rcsid_sn2princ_c[] =
 #include <krb5/los-proto.h>
 #include <netdb.h>
 #include <ctype.h>
+#include <sys/param.h>
 
 krb5_error_code
 krb5_sname_to_principal(DECLARG(const char *,hostname),
 			DECLARG(const char *,sname),
-			DECLARG(krb5_boolean,canonicalize),
+			DECLARG(krb5_int32,type),
 			DECLARG(krb5_principal *,ret_princ))
 OLDDECLARG(const char *,hostname)
 OLDDECLARG(const char *,sname)
-OLDDECLARG(krb5_boolean,canonicalize)
+OLDDECLARG(krb5_int32,type)
 OLDDECLARG(krb5_principal *,ret_princ)
 {
     struct hostent *hp;
     char **hrealms, *remote_host;
     krb5_error_code retval;
     register char *cp;
+    char localname[MAXHOSTNAMELEN];
 
-    /* copy the hostname into non-volatile storage */
+    if ((type == KRB5_NT_UNKNOWN) ||
+	(type == KRB5_NT_SRV_HST)) {
 
-    if (canonicalize) {
-	if (!(hp = gethostbyname(hostname)))
-	    return KRB5_ERR_BAD_HOSTNAME;
-	remote_host = strdup(hp->h_name);
-    } else {
-	remote_host = strdup(hostname);
-    }
-    if (!remote_host)
-	return ENOMEM;
+	/* convenience hack:  if hostname is NULL, use gethostbyname() */
 
-    for (cp = remote_host; *cp; cp++)
-	if (isupper(*cp))
-	    *cp = tolower(*cp);
+	if (! hostname) {
+	    if (gethostname(localname, MAXHOSTNAMELEN))
+		return errno;
+	    hostname = localname;
+	}
 
-    if (retval = krb5_get_host_realm(remote_host, &hrealms)) {
+	/* if sname is NULL, use "host" */
+
+	if (! sname) {
+	    sname = "host";
+	}
+
+	/* copy the hostname into non-volatile storage */
+
+	if (type == KRB5_NT_SRV_HST) {
+	    if (!(hp = gethostbyname(hostname)))
+		return KRB5_ERR_BAD_HOSTNAME;
+	    remote_host = strdup(hp->h_name);
+	} else /* type == KRB5_NT_UNKNOWN */ {
+	    remote_host = strdup(hostname);
+	}
+	if (!remote_host)
+	    return ENOMEM;
+
+	if (type == KRB5_NT_SRV_HST)
+	    for (cp = remote_host; *cp; cp++)
+		if (isupper(*cp))
+		    *cp = tolower(*cp);
+
+	if (retval = krb5_get_host_realm(remote_host, &hrealms)) {
+	    free(remote_host);
+	    return retval;
+	}
+	if (!hrealms[0]) {
+	    free(remote_host);
+	    xfree(hrealms);
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	}
+
+	retval = krb5_build_principal(ret_princ, strlen(hrealms[0]),
+				      hrealms[0], sname, remote_host,
+				      (char *)0);
+
+	krb5_princ_type(*ret_princ) = type;
+
 	free(remote_host);
+	krb5_free_host_realm(hrealms);
 	return retval;
+    } else {
+	return KRB5_SNAME_UNSUPP_NAMETYPE;
     }
-    if (!hrealms[0]) {
-	free(remote_host);
-	xfree(hrealms);
-	return KRB5_ERR_HOST_REALM_UNKNOWN;
-    }
-
-    retval = krb5_build_principal(ret_princ, strlen(hrealms[0]), hrealms[0],
-				  sname, remote_host, (char *)0);
-
-    krb5_princ_type(*ret_princ) = KRB5_NT_SRV_HST;
-
-    free(remote_host);
-    krb5_free_host_realm(hrealms);
-    return retval;
 }
 
