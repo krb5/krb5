@@ -1,5 +1,9 @@
 Wed Aug 12 13:20:00 1998  Miro Jurisic <meeroh@mit.edu>
 
+	* version.r: Upped to 1.0.5b7
+
+Wed Aug 12 13:20:00 1998  Miro Jurisic <meeroh@mit.edu>
+
 	* Makefile.tmpl: Change glue targets' output folders
 
 Mon Aug 10 17:20:00 1998  Miro Jurisic <meeroh@mit.edu>
