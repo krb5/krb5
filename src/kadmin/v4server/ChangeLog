@@ -1,3 +1,8 @@
+1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kadm_server.c (krb_log): Print the year using 4 digit to avoid
+		Y2K issues.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* admin_server.c (argv): POSIX states that getopt returns -1
