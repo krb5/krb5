@@ -44,7 +44,15 @@
 
 #if defined(TEST) || defined(DEBUG)
 # define FAI_PREFIX krb5int
-# include "fake-addrinfo.h"
+# include "fake-addrinfo.c"
+#endif
+
+#ifdef TEST
+# define Tprintf(X) printf X
+# define Tperror(X) perror(X)
+#else
+# define Tprintf(X) (void) X
+# define Tperror(X) (void)(X)
 #endif
 
 /*
@@ -233,6 +241,33 @@ get_ifconf (int s, size_t *lenp, /*@out@*/ char *buf)
     return ret;
 }
 
+#ifdef SIOCGLIFCONF /* Solaris */
+static int
+get_lifconf (int af, int s, size_t *lenp, /*@out@*/ char *buf)
+    /*@modifies *buf,*lenp@*/
+{
+    int ret;
+    struct lifconf lifc;
+
+    lifc.lifc_family = af;
+    lifc.lifc_flags = 0;
+    /*@+matchanyintegral@*/
+    lifc.lifc_len = *lenp;
+    /*@=matchanyintegral@*/
+    lifc.lifc_buf = buf;
+    memset(buf, 0, *lenp);
+    /*@-moduncon@*/
+    ret = ioctl (s, SIOCGLIFCONF, (char *)&lifc);
+    if (ret)
+	Tperror ("SIOCGLIFCONF");
+    /*@=moduncon@*/
+    /*@+matchanyintegral@*/
+    *lenp = lifc.lifc_len;
+    /*@=matchanyintegral@*/
+    return ret;
+}
+#endif
+
 /* Return value is errno if internal stuff failed, otherwise zero,
    even in the case where a called function terminated the iteration.
 
@@ -295,6 +330,170 @@ foreach_localaddr (/*@null@*/ void *data,
  punt:
     freeifaddrs (ifp_head);
     return 0;
+#elif defined (SIOCGLIFNUM) /* Solaris 8 and later; Sol 7? */
+
+    /* Okay, this is kind of odd.  We have to use each of the address
+       families we care about, because with an AF_INET socket, extra
+       interfaces like hme0:1 that have only AF_INET6 addresses will
+       cause errors.  Similarly, if hme0 has more AF_INET addresses
+       than AF_INET6 addresses, we won't be able to retrieve all of
+       the AF_INET addresses if we use an AF_INET6 socket.  Since
+       neither family is guaranteed to have the greater number of
+       addresses, we should use both.
+
+       If it weren't for this little quirk, we could use a socket of
+       any type, and ask for addresses of all types.  At least, it
+       seems to work that way.  */
+
+    static const int afs[] = { AF_INET, AF_NS, AF_INET6 };
+#define N_AFS (sizeof (afs) / sizeof (afs[0]))
+    struct {
+	int af;
+	int sock;
+	void *buf;
+	size_t buf_size;
+	struct lifnum lifnum;
+    } afp[N_AFS];
+    int code, i, j;
+    int retval = 0, afidx;
+    krb5_error_code sock_err = 0;
+    struct lifreq *lifr, lifreq, *lifr2;
+
+#define FOREACH_AF() for (afidx = 0; afidx < N_AFS; afidx++)
+#define P (afp[afidx])
+
+    /* init */
+    FOREACH_AF () {
+	P.af = afs[afidx];
+	P.sock = -1;
+	P.buf = 0;
+    }
+
+    /* first pass: get raw data, discard uninteresting addresses, callback */
+    FOREACH_AF () {
+	Tprintf (("trying af %d...\n", P.af));
+	P.sock = socket (P.af, USE_TYPE, USE_PROTO);
+	if (P.sock < 0) {
+	    sock_err = SOCKET_ERROR;
+	    Tperror ("socket");
+	    continue;
+	}
+
+	P.lifnum.lifn_family = P.af;
+	P.lifnum.lifn_flags = 0;
+	P.lifnum.lifn_count = 0;
+	code = ioctl (P.sock, SIOCGLIFNUM, &P.lifnum);
+	if (code) {
+	    Tperror ("ioctl(SIOCGLIFNUM)");
+	    retval = errno;
+	    goto punt;
+	}
+
+	P.buf_size = P.lifnum.lifn_count * sizeof (struct lifreq) * 2;
+	P.buf = malloc (P.buf_size);
+	if (P.buf == NULL) {
+	    retval = errno;
+	    goto punt;
+	}
+
+	code = get_lifconf (P.af, P.sock, &P.buf_size, P.buf);
+	if (code < 0) {
+	    retval = errno;
+	    goto punt;
+	}
+
+	for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+	    lifr = (struct lifreq *)((caddr_t) P.buf+i);
+
+	    strncpy(lifreq.lifr_name, lifr->lifr_name,
+		    sizeof (lifreq.lifr_name));
+	    Tprintf (("interface %s\n", lifreq.lifr_name));
+	    /*@-moduncon@*/ /* ioctl unknown to lclint */
+	    if (ioctl (P.sock, SIOCGLIFFLAGS, (char *)&lifreq) < 0) {
+		Tperror ("ioctl(SIOCGLIFFLAGS)");
+	    skip:
+		/* mark for next pass */
+		lifr->lifr_name[0] = '\0';
+		continue;
+	    }
+	    /*@=moduncon@*/
+
+#ifdef IFF_LOOPBACK
+	    /* None of the current callers want loopback addresses.  */
+	    if (lifreq.lifr_flags & IFF_LOOPBACK) {
+		Tprintf (("  loopback\n"));
+		goto skip;
+	    }
+#endif
+	    /* Ignore interfaces that are down.  */
+	    if ((lifreq.lifr_flags & IFF_UP) == 0) {
+		Tprintf (("  down\n"));
+		goto skip;
+	    }
+
+	    /* Make sure we didn't process this address already.  */
+	    for (j = 0; j < i; j += sizeof (*lifr2)) {
+		lifr2 = (struct lifreq *)((caddr_t) P.buf+j);
+		if (lifr2->lifr_name[0] == '\0')
+		    continue;
+		if (lifr2->lifr_addr.ss_family == lifr->lifr_addr.ss_family
+		    /* Compare address info.  If this isn't good enough --
+		       i.e., if random padding bytes turn out to differ
+		       when the addresses are the same -- then we'll have
+		       to do it on a per address family basis.  */
+		    && !memcmp (&lifr2->lifr_addr, &lifr->lifr_addr,
+				sizeof (*lifr))) {
+		    Tprintf (("  duplicate addr\n"));
+		    goto skip;
+		}
+	    }
+
+	    /*@-moduncon@*/
+	    if ((*pass1fn) (data, ss2sa (&lifr->lifr_addr)))
+		goto punt;
+	    /*@=moduncon@*/
+	}
+    }
+
+    /* Did we actually get any working sockets?  */
+    FOREACH_AF ()
+	if (P.sock != -1)
+	    goto have_working_socket;
+    retval = sock_err;
+    goto punt;
+have_working_socket:
+
+    /*@-moduncon@*/
+    if (betweenfn != NULL && (*betweenfn)(data))
+	goto punt;
+    /*@=moduncon@*/
+
+    if (pass2fn)
+	FOREACH_AF ()
+	    if (P.sock >= 0) {
+		for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+		    lifr = (struct lifreq *)((caddr_t) P.buf+i);
+
+		    if (lifr->lifr_name[0] == '\0')
+			/* Marked in first pass to be ignored.  */
+			continue;
+
+		    /*@-moduncon@*/
+		    if ((*pass2fn) (data, ss2sa (&lifr->lifr_addr)))
+			goto punt;
+		    /*@=moduncon@*/
+		}
+	    }
+punt:
+    FOREACH_AF () {
+	/*@-moduncon@*/
+	closesocket(P.sock);
+	/*@=moduncon@*/
+	free (P.buf);
+    }
+
+    return retval;
+
 #else
     struct ifreq *ifr, ifreq, *ifr2;
     int s, code;
@@ -375,9 +574,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	ifr = (struct ifreq *)((caddr_t) buf+i);
 
 	strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
-#ifdef TEST
-	printf ("interface %s\n", ifreq.ifr_name);
-#endif
+	Tprintf (("interface %s\n", ifreq.ifr_name));
 	/*@-moduncon@*/ /* ioctl unknown to lclint */
 	if (ioctl (s, SIOCGIFFLAGS, (char *)&ifreq) < 0) {
 	skip:
@@ -390,17 +587,13 @@ foreach_localaddr (/*@null@*/ void *data,
 #ifdef IFF_LOOPBACK
 	/* None of the current callers want loopback addresses.  */
 	if (ifreq.ifr_flags & IFF_LOOPBACK) {
-#ifdef TEST
-	    printf ("  loopback\n");
-#endif
+	    Tprintf (("  loopback\n"));
 	    goto skip;
 	}
 #endif
 	/* Ignore interfaces that are down.  */
 	if ((ifreq.ifr_flags & IFF_UP) == 0) {
-#ifdef TEST
-	    printf ("  down\n");
-#endif
+	    Tprintf (("  down\n"));
 	    goto skip;
 	}
 
@@ -418,9 +611,7 @@ foreach_localaddr (/*@null@*/ void *data,
 		&& !memcmp (&ifr2->ifr_addr.sa_data, &ifr->ifr_addr.sa_data,
 			    (ifreq_size (*ifr)
 			     - offsetof (struct ifreq, ifr_addr.sa_data)))) {
-#ifdef TEST
-		printf ("  duplicate addr\n");
-#endif
+		Tprintf (("  duplicate addr\n"));
 		goto skip;
 	    }
 	}

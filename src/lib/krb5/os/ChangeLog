@@ -1,3 +1,14 @@
+2001-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c: Retrieve IPv6 addresses on Solaris 8.
+	(get_lifconf) [SIOCGLIFCONF]: New function.
+	(foreach_localaddr) [SIOCFLIGNUM]: New section, using new lifconf
+	and lifreq structures and related ioctls.
+	(Tprintf, Tperror): New macros.  Print stuff if TEST is defined,
+	otherwise be silent but cause same evaluations to happen.
+
+	* localaddr.c: Include fake-addrinfo.c, not fake-addrinfo.h.
+
 2001-08-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* hostaddr.c (krb5_os_hostaddr): Don't use AI_DEFAULT.
