@@ -293,8 +293,7 @@ authenticate(p, addr)
 #endif /* KRB4 */
 #ifdef KRB5
     krb5_error_code retval;
-    krb5_data aserver[3], *server[4];
-    char *remote_host, *def_realm;
+    krb5_principal server;
     register char *cp;
     struct hostent *hp;
     extern struct state     _res;
@@ -302,44 +301,20 @@ authenticate(p, addr)
 
     krb5_init_ets();
 
-    if (retval = krb5_get_default_realm(&def_realm)) {
-	pop_msg(p, POP_FAILURE, "server mis-configured, no local realm--%s",
-		error_message(retval));
-	pop_log(p, POP_WARNING,  "%s: mis-configured, no local realm--%s",
-		p->client, error_message(retval));
-	exit(-1);
-    }
 #ifdef BIND43
     /*undo some damage*/
     _res.options |= RES_DEFNAMES;
 #endif
 
-    if (!(hp = gethostbyname(p->myhost))) {
+
+    if (retval = krb5_sname_to_principal(p->myhost, "pop", TRUE, &server)) {
 	pop_msg(p, POP_FAILURE,
-		"server mis-configured, can't resolve its own name.");
-	pop_log(p, POP_WARNING, "%s: can't resolve hostname '%s'",
-		p->client, p->myhost);
+		"server mis-configured, can't get principal--%s",
+		error_message(retval));
+	pop_log(p, POP_WARNING,  "%s: mis-configured, can't get principal--%s",
+		p->client, error_message(retval));
 	exit(-1);
     }
-    /* copy the hostname into non-volatile storage */
-    remote_host = malloc(strlen(hp->h_name) + 1);
-    (void) strcpy(remote_host, hp->h_name);
-
-    /* lower-case to get name for "instance" part of service name */
-    for (cp = remote_host; *cp; cp++)
-	if (isupper(*cp))
-	    *cp = tolower(*cp);
-
-    aserver[0].length = strlen(def_realm);
-    aserver[0].data = def_realm;
-    aserver[1].length = strlen("pop");
-    aserver[1].data = "pop";
-    aserver[2].length = strlen(remote_host);
-    aserver[2].data = remote_host;
-    server[0] = &aserver[0];
-    server[1] = &aserver[1];
-    server[2] = &aserver[2];
-    server[3] = 0;
 
     if (retval = krb5_recvauth((krb5_pointer)&sock,
 			       "KPOPV1.0",
