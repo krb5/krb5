@@ -1,3 +1,9 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* f_cbc.c (krb5int_des_cbc_decrypt): Move declarations that were
+	after statements after flattening blocks is previous change.
+	* d3_cbc.c (krb5int_des3_cbc_decrypt): Likewise.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* f_cbc.c (krb5int_des_cbc_encrypt, krb5int_des_cbc_decrypt): New

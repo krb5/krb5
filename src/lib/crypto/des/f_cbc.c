@@ -156,6 +156,8 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;
+	unsigned DES_INT32 ocipherl, ocipherr;
+	unsigned DES_INT32 cipherl, cipherr;
 
 	/*
 	 * Get key pointer here.  This won't need to be reinitialized
@@ -167,8 +169,6 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
 	 * the necessity of remembering a lot more things.
 	 * Should think about this a little more...
 	 */
-	unsigned DES_INT32 ocipherl, ocipherr;
-	unsigned DES_INT32 cipherl, cipherr;
 
 	if (length <= 0)
 		return;
