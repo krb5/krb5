@@ -68,7 +68,7 @@ static krb5_error_code
 krb5_generate_authenticator (krb5_context,
 				       krb5_authenticator *, krb5_principal,
 				       krb5_checksum *, krb5_keyblock *,
-				       krb5_int32, krb5_authdata ** );
+				       krb5_ui_4, krb5_authdata ** );
 
 krb5_error_code KRB5_CALLCONV
 krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
@@ -130,7 +130,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	    goto cleanup;
     }
 
-    if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->local_subkey)) {
+    if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->send_subkey)) {
 	/* Provide some more fodder for random number code.
 	   This isn't strong cryptographically; the point here is not
 	   to guarantee randomness, but to make it less likely that multiple
@@ -145,8 +145,15 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	(void) krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_TIMING, &d);
 
 	if ((retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
-					   &(*auth_context)->local_subkey)))
+					   &(*auth_context)->send_subkey)))
 	    goto cleanup;
+	retval = krb5_copy_keyblock(context, (*auth_context)->send_subkey,
+				    &((*auth_context)->recv_subkey));
+	if (retval) {
+	    krb5_free_keyblock(context, (*auth_context)->send_subkey);
+	    (*auth_context)->send_subkey = NULL;
+	    goto cleanup;
+	}
     }
 
 
@@ -178,7 +185,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     if ((retval = krb5_generate_authenticator(context,
 					      (*auth_context)->authentp,
 					      (in_creds)->client, checksump,
-					      (*auth_context)->local_subkey,
+					      (*auth_context)->send_subkey,
 					      (*auth_context)->local_seq_number,
 					      (in_creds)->authdata)))
 	goto cleanup_cksum;
@@ -232,7 +239,7 @@ cleanup:
 }
 
 static krb5_error_code
-krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent, krb5_principal client, krb5_checksum *cksum, krb5_keyblock *key, krb5_int32 seq_number, krb5_authdata **authorization)
+krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent, krb5_principal client, krb5_checksum *cksum, krb5_keyblock *key, krb5_ui_4 seq_number, krb5_authdata **authorization)
 {
     krb5_error_code retval;
     

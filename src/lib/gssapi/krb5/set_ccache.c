@@ -38,7 +38,6 @@ gss_krb5_ccache_name(minor_status, name, out_name)
 {
 	krb5_context context;
 	krb5_error_code retval;
-	OM_uint32 foo_stat;
 	static char *oldname = NULL;
 	const char *tmpname = NULL;
 
@@ -66,6 +65,5 @@ gss_krb5_ccache_name(minor_status, name, out_name)
 		*minor_status = retval;
 		return GSS_S_FAILURE;
 	}
-	kg_release_defcred(&foo_stat);
 	return GSS_S_COMPLETE;
 }

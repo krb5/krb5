@@ -24,7 +24,30 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
-
+/*
+ * Copyright (C) 2003 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ *
+ */
 
 #define UNICODE
 #define _UNICODE
@@ -264,11 +287,11 @@ MSCredToMITCred(
     creds->times.endtime=FileTimeToUnixTime(&msticket->EndTime);
     creds->times.renew_till=FileTimeToUnixTime(&msticket->RenewUntil);
 
-    // krb5_cc_store_cred crashes downstream if creds->addresses is NULL.
-    // unfortunately, the MS interface doesn't seem to return a list of
-    // addresses as part of the credentials information. for now i'll just
-    // use krb5_os_localaddr to mock up the address list. is this sufficient?
-    krb5_os_localaddr(context, &creds->addresses);
+    /* MS Tickets are addressless.  MIT requires an empty address
+     * not a NULL list of addresses.
+     */
+    creds->addresses = (krb5_address **)malloc(sizeof(krb5_address *));
+    memset(creds->addresses, 0, sizeof(krb5_address *));
 
     MSTicketToMITTicket(msticket, context, &creds->ticket);
 }
@@ -338,7 +361,174 @@ ConcatenateUnicodeStrings(
     return ERROR_SUCCESS;
 }
 
-BOOL
+static BOOL
+get_STRING_from_registry(
+    HKEY hBaseKey,
+    char * key,
+    char * value,
+    char * outbuf,
+    DWORD  outlen
+    )
+{
+    HKEY hKey;
+    DWORD dwCount;
+    LONG rc;
+
+	if (!outbuf || outlen == 0)
+		return FALSE;
+
+    rc = RegOpenKeyExA(hBaseKey, key, 0, KEY_QUERY_VALUE, &hKey);
+    if (rc)
+        return FALSE;
+
+    dwCount = outlen;
+    rc = RegQueryValueExA(hKey, value, 0, 0, (LPBYTE) outbuf, &dwCount);
+    RegCloseKey(hKey);
+
+    return rc?FALSE:TRUE;
+}
+
+static BOOL
+GetSecurityLogonSessionData(PSECURITY_LOGON_SESSION_DATA * ppSessionData)
+{
+    NTSTATUS Status = 0;
+    HANDLE  TokenHandle;
+    TOKEN_STATISTICS Stats;
+    DWORD   ReqLen;
+    BOOL    Success;
+
+    if (!ppSessionData)
+        return FALSE;
+    *ppSessionData = NULL;
+
+    Success = OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &TokenHandle );
+    if ( !Success )
+        return FALSE;
+
+    Success = GetTokenInformation( TokenHandle, TokenStatistics, &Stats, sizeof(TOKEN_STATISTICS), &ReqLen );
+    CloseHandle( TokenHandle );
+    if ( !Success )
+        return FALSE;
+
+    Status = LsaGetLogonSessionData( &Stats.AuthenticationId, ppSessionData );
+    if ( FAILED(Status) || !ppSessionData )
+        return FALSE;
+
+    return TRUE;
+}
+
+//
+// IsKerberosLogon() does not validate whether or not there are valid tickets in the 
+// cache.  It validates whether or not it is reasonable to assume that if we 
+// attempted to retrieve valid tickets we could do so.  Microsoft does not 
+// automatically renew expired tickets.  Therefore, the cache could contain
+// expired or invalid tickets.  Microsoft also caches the user's password 
+// and will use it to retrieve new TGTs if the cache is empty and tickets
+// are requested.
+
+static BOOL
+IsKerberosLogon(VOID)
+{
+    PSECURITY_LOGON_SESSION_DATA pSessionData = NULL;
+    BOOL    Success = FALSE;
+
+    if ( GetSecurityLogonSessionData(&pSessionData) ) {
+        if ( pSessionData->AuthenticationPackage.Buffer ) {
+            WCHAR buffer[256];
+            WCHAR *usBuffer;
+            int usLength;
+
+            Success = FALSE;
+            usBuffer = (pSessionData->AuthenticationPackage).Buffer;
+            usLength = (pSessionData->AuthenticationPackage).Length;
+            if (usLength < 256)
+            {
+                lstrcpyn (buffer, usBuffer, usLength);
+                lstrcat (buffer,L"");
+                if ( !lstrcmp(L"Kerberos",buffer) )
+                    Success = TRUE;
+            }
+        }
+        LsaFreeReturnBuffer(pSessionData);
+    }
+    return Success;
+}
+
+static NTSTATUS
+ConstructTicketRequest(UNICODE_STRING DomainName, PKERB_RETRIEVE_TKT_REQUEST * outRequest,
+                       ULONG * outSize)
+{
+    NTSTATUS Status;
+    UNICODE_STRING TargetPrefix;
+    USHORT TargetSize;
+    ULONG RequestSize;
+    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest = NULL;
+
+    *outRequest = NULL;
+    *outSize = 0;
+
+    //
+    // Set up the "krbtgt/" target prefix into a UNICODE_STRING so we
+    // can easily concatenate it later.
+    //
+
+    TargetPrefix.Buffer = L"krbtgt/";
+    TargetPrefix.Length = wcslen(TargetPrefix.Buffer) * sizeof(WCHAR);
+    TargetPrefix.MaximumLength = TargetPrefix.Length;
+
+    //
+    // We will need to concatenate the "krbtgt/" prefix and the 
+    // Logon Session's DnsDomainName into our request's target name.
+    //
+    // Therefore, first compute the necessary buffer size for that.
+    //
+    // Note that we might theoretically have integer overflow.
+    //
+
+    TargetSize = TargetPrefix.Length + DomainName.Length;
+
+    //
+    // The ticket request buffer needs to be a single buffer.  That buffer
+    // needs to include the buffer for the target name.
+    //
+
+    RequestSize = sizeof(*pTicketRequest) + TargetSize;
+
+    //
+    // Allocate the request buffer and make sure it's zero-filled.
+    //
+
+    pTicketRequest = (PKERB_RETRIEVE_TKT_REQUEST) LocalAlloc(LMEM_ZEROINIT, RequestSize);
+    if (!pTicketRequest)
+        return GetLastError();
+
+    //
+    // Concatenate the target prefix with the previous reponse's
+    // target domain.
+    //
+
+    pTicketRequest->TargetName.Length = 0;
+    pTicketRequest->TargetName.MaximumLength = TargetSize;
+    pTicketRequest->TargetName.Buffer = (PWSTR) (pTicketRequest + 1);
+    Status = ConcatenateUnicodeStrings(&(pTicketRequest->TargetName),
+                                        TargetPrefix,
+                                        DomainName);
+    assert(SUCCEEDED(Status));
+    *outRequest = pTicketRequest;
+    *outSize    = RequestSize;
+    return Status;
+}
+
+//
+// #define ENABLE_PURGING
+// to allow the purging of expired tickets from LSA cache.  This is necessary
+// to force the retrieval of new TGTs.  Microsoft does not appear to retrieve
+// new tickets when they expire.  Instead they continue to accept the expired
+// tickets.  I do not want to enable purging of the LSA cache without testing
+// the side effects in a Windows domain with a machine which has been suspended,
+// removed from the network, and resumed after ticket expiration.
+//
+static BOOL
 GetMSTGT(
     HANDLE LogonHandle,
     ULONG PackageId,
@@ -352,32 +542,24 @@ GetMSTGT(
     //   bIsLsaError ==> LsaCallAuthenticationPackage() error
     //
 
-    //
-    // NOTE:
-    //
-    // The updated code leaks memory, but so does the old code.  The
-    // whole program is full of leaks.  Since it's short-lived
-    // process, it is ok.
-    //
-
     BOOL bIsLsaError = FALSE;
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
-
-    UNICODE_STRING TargetPrefix;
 
     KERB_QUERY_TKT_CACHE_REQUEST CacheRequest;
     PKERB_RETRIEVE_TKT_REQUEST pTicketRequest;
     PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
     ULONG RequestSize;
     ULONG ResponseSize;
-    USHORT TargetSize;
+#ifdef ENABLE_PURGING
+    KERB_PURGE_TKT_CACHE_REQUEST PurgeRequest;
+    int    purge_cache = 0;
+#endif /* ENABLE_PURGING */
+    int    ignore_cache = 0;
 
     CacheRequest.MessageType = KerbRetrieveTicketMessage;
     CacheRequest.LogonId.LowPart = 0;
     CacheRequest.LogonId.HighPart = 0;
-
-    pTicketResponse = NULL;
 
     Status = LsaCallAuthenticationPackage(
         LogonHandle,
@@ -389,89 +571,171 @@ GetMSTGT(
         &SubStatus
         );
 
-    if (FAILED(Status) || FAILED(SubStatus))
+    if (FAILED(Status))
     {
+        // if the call to LsaCallAuthenticationPackage failed we cannot
+        // perform any queries most likely because the Kerberos package 
+        // is not available or we do not have access
         bIsLsaError = TRUE;
         goto cleanup;
     }
 
-    if (pTicketResponse->Ticket.SessionKey.KeyType == KERB_ETYPE_DES_CBC_CRC)
-    {
-        // all done!
-        goto cleanup;
+    if (FAILED(SubStatus)) {
+        PSECURITY_LOGON_SESSION_DATA pSessionData = NULL;
+        BOOL    Success = FALSE;
+        OSVERSIONINFOEX verinfo;
+        int supported = 0;
+
+        // SubStatus 0x8009030E is not documented.  However, it appears
+        // to mean there is no TGT
+        if (SubStatus != 0x8009030E) {
+            bIsLsaError = TRUE;
+            goto cleanup;
+        }
+
+        verinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+        GetVersionEx((OSVERSIONINFO *)&verinfo);
+        supported = (verinfo.dwMajorVersion > 5) || 
+            (verinfo.dwMajorVersion == 5 && verinfo.dwMinorVersion >= 1);
+
+        // If we could not get a TGT from the cache we won't know what the
+        // Kerberos Domain should have been.  On Windows XP and 2003 Server
+        // we can extract it from the Security Logon Session Data.  However,
+        // the required fields are not supported on Windows 2000.  :(
+        if ( supported && GetSecurityLogonSessionData(&pSessionData) ) {
+            if ( pSessionData->DnsDomainName.Buffer ) {
+                Status = ConstructTicketRequest(pSessionData->DnsDomainName,
+                                                &pTicketRequest, &RequestSize);
+                if ( FAILED(Status) ) {
+                    goto cleanup;
+                }
+            } else {
+                bIsLsaError = TRUE;
+                goto cleanup;
+            }
+            LsaFreeReturnBuffer(pSessionData);
+        } else {
+            CHAR  UserDnsDomain[256];
+            WCHAR UnicodeUserDnsDomain[256];
+            UNICODE_STRING wrapper;
+            if ( !get_STRING_from_registry(HKEY_CURRENT_USER,
+                                          "Volatile Environment",
+                                          "USERDNSDOMAIN",
+                                           UserDnsDomain,
+                                           sizeof(UserDnsDomain)
+                                           ) )
+            {
+                goto cleanup;
+            }
+
+            ANSIToUnicode(UserDnsDomain,UnicodeUserDnsDomain,256);
+            wrapper.Buffer = UnicodeUserDnsDomain;
+            wrapper.Length = wcslen(UnicodeUserDnsDomain) * sizeof(WCHAR);
+            wrapper.MaximumLength = 256;
+
+            Status = ConstructTicketRequest(wrapper,
+                                             &pTicketRequest, &RequestSize);
+            if ( FAILED(Status) ) {
+                goto cleanup;
+            }
+        }
+    } else {
+#ifdef PURGE_ALL
+        purge_cache = 1;
+#else
+        switch (pTicketResponse->Ticket.SessionKey.KeyType) {
+        case KERB_ETYPE_DES_CBC_CRC:
+        case KERB_ETYPE_DES_CBC_MD4:
+        case KERB_ETYPE_DES_CBC_MD5:
+        case KERB_ETYPE_NULL:
+        case KERB_ETYPE_RC4_HMAC_NT: {
+            FILETIME Now, EndTime, LocalEndTime;
+            GetSystemTimeAsFileTime(&Now);
+            EndTime.dwLowDateTime=pTicketResponse->Ticket.EndTime.LowPart;
+            EndTime.dwHighDateTime=pTicketResponse->Ticket.EndTime.HighPart;
+            FileTimeToLocalFileTime(&EndTime, &LocalEndTime);
+            if (CompareFileTime(&Now, &LocalEndTime) >= 0) {
+#ifdef ENABLE_PURGING
+                purge_cache = 1;
+#else
+                ignore_cache = 1;
+#endif /* ENABLE_PURGING */
+                break;
+            }
+            if (pTicketResponse->Ticket.TicketFlags & KERB_TICKET_FLAGS_invalid) {
+                ignore_cache = 1;
+                break;      // invalid, need to attempt a TGT request
+            }
+            goto cleanup;   // all done
+        }
+        case KERB_ETYPE_RC4_MD4:
+        default:
+            // not supported
+            ignore_cache = 1;
+            break;
+        }
+#endif /* PURGE_ALL */
+
+        Status = ConstructTicketRequest(pTicketResponse->Ticket.TargetDomainName,
+                                        &pTicketRequest, &RequestSize);
+        if ( FAILED(Status) ) {
+            goto cleanup;
+        }
+
+        //
+        // Free the previous response buffer so we can get the new response.
+        //
+
+        if ( pTicketResponse ) {
+            memset(pTicketResponse,0,sizeof(KERB_RETRIEVE_TKT_RESPONSE));
+            LsaFreeReturnBuffer(pTicketResponse);
+            pTicketResponse = NULL;
+        }
+
+#ifdef ENABLE_PURGING
+        if ( purge_cache ) {
+            //
+            // Purge the existing tickets which we cannot use so new ones can 
+            // be requested.  It is not possible to purge just the TGT.  All
+            // service tickets must be purged.
+            //
+            PurgeRequest.MessageType = KerbPurgeTicketCacheMessage;
+            PurgeRequest.LogonId.LowPart = 0;
+            PurgeRequest.LogonId.HighPart = 0;
+            PurgeRequest.ServerName.Buffer = L"";
+            PurgeRequest.ServerName.Length = 0;
+            PurgeRequest.ServerName.MaximumLength = 0;
+            PurgeRequest.RealmName.Buffer = L"";
+            PurgeRequest.RealmName.Length = 0;
+            PurgeRequest.RealmName.MaximumLength = 0;
+            Status = LsaCallAuthenticationPackage(LogonHandle,
+                                                    PackageId,
+                                                    &PurgeRequest,
+                                                    sizeof(PurgeRequest),
+                                                    NULL,
+                                                    NULL,
+                                                    &SubStatus
+                                                    );
+        }
+#endif /* ENABLE_PURGING */
     }
-
+    
     //
-    // Set up the "krbtgt/" target prefix into a UNICODE_STRING so we
-    // can easily concatenate it later.
-    //
-
-    TargetPrefix.Buffer = L"krbtgt/";
-    TargetPrefix.Length = wcslen(TargetPrefix.Buffer) * sizeof(WCHAR);
-    TargetPrefix.MaximumLength = TargetPrefix.Length;
-
-    //
-    // We will need to concatenate the "krbtgt/" prefix and the previous
-    // response's target domain into our request's target name.
-    //
-    // Therefore, first compute the necessary buffer size for that.
-    //
-    // Note that we might theoretically have integer overflow.
-    //
-
-    TargetSize = TargetPrefix.Length +
-        pTicketResponse->Ticket.TargetDomainName.Length;
-
-    //
-    // The ticket request buffer needs to be a single buffer.  That buffer
-    // needs to include the buffer for the target name.
-    //
-
-    RequestSize = sizeof(*pTicketRequest) + TargetSize;
-
-    //
-    // Allocate the request buffer and make sure it's zero-filled.
-    //
-
-    pTicketRequest = (PKERB_RETRIEVE_TKT_REQUEST)
-        LocalAlloc(LMEM_ZEROINIT, RequestSize);
-    if (!pTicketRequest)
-    {
-        Status = GetLastError();
-        goto cleanup;
-    }
-
-    //
-    // Concatenate the target prefix with the previous reponse's
-    // target domain.
-    //
-
-    pTicketRequest->TargetName.Length = 0;
-    pTicketRequest->TargetName.MaximumLength = TargetSize;
-    pTicketRequest->TargetName.Buffer = (PWSTR) (pTicketRequest + 1);
-    Status = ConcatenateUnicodeStrings(&(pTicketRequest->TargetName),
-                                       TargetPrefix,
-                                       pTicketResponse->Ticket.TargetDomainName);
-    assert(SUCCEEDED(Status));
-
-    //
-    // Intialize the requst of the request.
+    // Intialize the request of the request.
     //
 
     pTicketRequest->MessageType = KerbRetrieveEncodedTicketMessage;
     pTicketRequest->LogonId.LowPart = 0;
     pTicketRequest->LogonId.HighPart = 0;
     // Note: pTicketRequest->TargetName set up above
-    pTicketRequest->CacheOptions = KERB_RETRIEVE_TICKET_DONT_USE_CACHE;
+#ifdef ENABLE_PURGING
+    pTicketRequest->CacheOptions = ((ignore_cache || !purge_cache) ? 
+                                     KERB_RETRIEVE_TICKET_DONT_USE_CACHE : 0L);
+#else
+    pTicketRequest->CacheOptions = (ignore_cache ? KERB_RETRIEVE_TICKET_DONT_USE_CACHE : 0L);
+#endif /* ENABLE_PURGING */
     pTicketRequest->TicketFlags = 0L;
-    pTicketRequest->EncryptionType = ENCTYPE_DES_CBC_CRC;
-
-    //
-    // Free the previous response buffer so we can get the new response.
-    //
-
-    LsaFreeReturnBuffer(pTicketResponse);
-    pTicketResponse = NULL;
+    pTicketRequest->EncryptionType = 0L;
 
     Status = LsaCallAuthenticationPackage(
         LogonHandle,
@@ -489,7 +753,57 @@ GetMSTGT(
         goto cleanup;
     }
 
- cleanup:
+    //
+    // Check to make sure the new tickets we received are of a type we support
+    //
+
+    switch (pTicketResponse->Ticket.SessionKey.KeyType) {
+    case KERB_ETYPE_DES_CBC_CRC:
+    case KERB_ETYPE_DES_CBC_MD4:
+    case KERB_ETYPE_DES_CBC_MD5:
+    case KERB_ETYPE_NULL:
+    case KERB_ETYPE_RC4_HMAC_NT:
+        goto cleanup;   // all done
+    case KERB_ETYPE_RC4_MD4:
+    default:
+        // not supported
+        break;
+    }
+
+
+    //
+    // Try once more but this time specify the Encryption Type
+    // (This will not store the retrieved tickets in the LSA cache)
+    //
+    pTicketRequest->EncryptionType = ENCTYPE_DES_CBC_CRC;
+    pTicketRequest->CacheOptions = KERB_RETRIEVE_TICKET_DONT_USE_CACHE;
+
+    if ( pTicketResponse ) {
+        memset(pTicketResponse,0,sizeof(KERB_RETRIEVE_TKT_RESPONSE));
+        LsaFreeReturnBuffer(pTicketResponse);
+        pTicketResponse = NULL;
+    }
+
+    Status = LsaCallAuthenticationPackage(
+        LogonHandle,
+        PackageId,
+        pTicketRequest,
+        RequestSize,
+        &pTicketResponse,
+        &ResponseSize,
+        &SubStatus
+        );
+
+    if (FAILED(Status) || FAILED(SubStatus))
+    {
+        bIsLsaError = TRUE;
+        goto cleanup;
+    }
+
+  cleanup:
+    if ( pTicketRequest )
+        LsaFreeReturnBuffer(pTicketRequest);
+
     if (FAILED(Status) || FAILED(SubStatus))
     {
         if (bIsLsaError)
@@ -505,9 +819,11 @@ GetMSTGT(
             ShowWinError("GetMSTGT", Status);
         }
 
-        if (pTicketResponse)
+        if (pTicketResponse) {
+            memset(pTicketResponse,0,sizeof(KERB_RETRIEVE_TKT_RESPONSE));
             LsaFreeReturnBuffer(pTicketResponse);
-
+            pTicketResponse = NULL;
+        }
         return(FALSE);
     }
 

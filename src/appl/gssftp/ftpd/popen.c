@@ -46,9 +46,6 @@ static char sccsid[] = "@(#)popen.c	5.9 (Berkeley) 2/25/91";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_VFORK_H
-#include <vfork.h>
-#endif
 #include "ftpd_var.h"
 
 /*
@@ -109,7 +106,7 @@ ftpd_popen(program, type)
 	gargv[gargc] = NULL;
 
 	iop = NULL;
-	switch(pid = vfork()) {
+	switch(pid = fork()) {
 	case -1:			/* error */
 		(void)close(pdes[0]);
 		(void)close(pdes[1]);

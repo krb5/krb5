@@ -39,8 +39,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <krb.h>
-#include "krb524.h"
+#include "os-proto.h"
 
 /*
  * krb524_sendto_kdc:
@@ -58,7 +57,7 @@
  */
 
 krb5_error_code
-krb524_sendto_kdc (context, message, realm, reply, addr, addrlen)
+krb5int_524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     krb5_context context;
     const krb5_data * message;
     const krb5_data * realm;
@@ -66,16 +65,13 @@ krb524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     struct sockaddr *addr;
     socklen_t *addrlen;
 {
+#if defined(KRB5_KRB4_COMPAT) || defined(_WIN32) /* yuck! */
     int i;
     struct addrlist al = ADDRLIST_INIT;
     struct servent *serv;
     krb5_error_code retval;
-    krb5int_access internals;
     int port;
 
-    retval = krb5int_accessor(&internals, KRB5INT_ACCESS_VERSION);
-    if (retval)
-	return retval;
     /*
      * find KDC location(s) for realm
      */
@@ -83,15 +79,14 @@ krb524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     serv = getservbyname(KRB524_SERVICE, "udp");
     port = serv ? serv->s_port : htons (KRB524_PORT);
 
-    retval = internals.krb5_locate_server(context, realm, &al, 0,
-					  "krb524_server", "_krb524",
-					  SOCK_DGRAM, port,
-					  0, PF_INET);
+    retval = krb5int_locate_server(context, realm, &al, 0,
+				   "krb524_server", "_krb524",
+				   SOCK_DGRAM, port,
+				   0, PF_INET);
     if (retval == KRB5_REALM_CANT_RESOLVE || retval == KRB5_REALM_UNKNOWN) {
 	/* Fallback heuristic: Assume krb524 port on every KDC might
 	   work.  */
-	retval = internals.krb5_locate_kdc(context, realm, &al, 0,
-					   SOCK_DGRAM, PF_INET);
+	retval = krb5_locate_kdc(context, realm, &al, 0, SOCK_DGRAM, PF_INET);
 	/*
 	 * Bash the ports numbers.
 	 */
@@ -107,8 +102,10 @@ krb524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     if (al.naddrs == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    retval = internals.sendto_udp (context, message, &al, reply, addr,
-				   addrlen);
-    internals.free_addrlist (&al);
+    retval = krb5int_sendto (context, message, &al, reply, addr, addrlen);
+    krb5int_free_addrlist (&al);
     return retval;
+#else
+    return KRB524_KRB4_DISABLED;
+#endif
 }
