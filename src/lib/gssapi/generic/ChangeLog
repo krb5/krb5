@@ -1,3 +1,9 @@
+1998-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* disp_major_status.c (display_unknown): Change to not return
+		GSS_S_CONTINUE_NEEDED, per the standard C bindings
+		specification.
+
 Wed Feb 18 16:11:15 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
