@@ -180,17 +180,6 @@ OLDDECLARG(krb5_data *, outbuf)
 	    cleanup_mesg();  
 	    return KRB5_RC_REQUIRED;
 	}
-	if (!krb5_address_compare(sender_addr, privmsg_enc_part->s_address)) {
-	    cleanup_data();
-	    cleanup_mesg();
-	    return KRB5KRB_AP_ERR_BADADDR;
-	}
-	if (recv_addr && privmsg_enc_part->r_address &&
-	    !krb5_address_compare(recv_addr, privmsg_enc_part->r_address)) {
-	    cleanup_data();
-	    cleanup_mesg();
-	    return KRB5KRB_AP_ERR_BADADDR;
-	}	    
 	if (retval = krb5_gen_replay_name(sender_addr, "_priv",
 					  &replay.client)) {
 	    cleanup_data();
@@ -216,21 +205,36 @@ OLDDECLARG(krb5_data *, outbuf)
 	    return KRB5KRB_AP_ERR_BADORDER;
 	}
 
+    if (!krb5_address_compare(sender_addr, privmsg_enc_part->s_address)) {
+	cleanup_data();
+	cleanup_mesg();
+	return KRB5KRB_AP_ERR_BADADDR;
+    }
+    
     if (privmsg_enc_part->r_address) {
-	krb5_address **our_addrs;
+	if (recv_addr) {
+	    if (!krb5_address_compare(recv_addr,
+				      privmsg_enc_part->r_address)) {
+		cleanup_data();
+		cleanup_mesg();
+		return KRB5KRB_AP_ERR_BADADDR;
+	    }
+	} else {
+	    krb5_address **our_addrs;
 	
-	if (retval = krb5_os_localaddr(&our_addrs)) {
-	    cleanup_data();
-	    cleanup_mesg();
-	    return retval;
-	}
-	if (!krb5_address_search(privmsg_enc_part->r_address, our_addrs)) {
+	    if (retval = krb5_os_localaddr(&our_addrs)) {
+		cleanup_data();
+		cleanup_mesg();
+		return retval;
+	    }
+	    if (!krb5_address_search(privmsg_enc_part->r_address, our_addrs)) {
+		krb5_free_addresses(our_addrs);
+		cleanup_data();
+		cleanup_mesg();
+		return KRB5KRB_AP_ERR_BADADDR;
+	    }
 	    krb5_free_addresses(our_addrs);
-	    cleanup_data();
-	    cleanup_mesg();
-	    return KRB5KRB_AP_ERR_BADADDR;
 	}
-	krb5_free_addresses(our_addrs);
     }
 
     /* everything is ok - return data to the user */
