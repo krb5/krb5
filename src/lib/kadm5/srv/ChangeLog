@@ -1,3 +1,9 @@
+Tue Nov 26 03:04:04 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* server_acl.c (acl_load_acl_file): Fix coredump by allowing
+ 	catchall_entry to be null, but do not reference it if it is.
+  	Thanks to marc.  [242]
+
 Mon Nov 25 17:53:20 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* server_acl.c: set acl_catchall_entry to "" instead of NULL,

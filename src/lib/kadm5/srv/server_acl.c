@@ -71,7 +71,7 @@ static int acl_debug_level = 0;
  * the case where the ACL file is not present, this entry controls what can
  * be done.
  */
-static const char *acl_catchall_entry = "";
+static const char *acl_catchall_entry = NULL;
 
 static const char *acl_line2long_msg = "%s: line %d too long, truncated\n";
 static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s\n";
@@ -276,7 +276,8 @@ char tmpbuf[10];
     }
     else {
 	com_err(acl_acl_file, errno, acl_cantopen_msg);
-	if (acl_list_head = acl_parse_line(acl_catchall_entry)) {
+	if (acl_catchall_entry &&
+	    (acl_list_head = acl_parse_line(acl_catchall_entry))) {
 	    acl_list_tail = acl_list_head;
 	}
 	else {
