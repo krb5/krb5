@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 repository=:kserver:cvs.mit.edu:/cvs/krbdev
 dodoc=t
 dosrc=t
@@ -67,6 +68,7 @@ krb5-*.*-current)
 krb5-*.*-*)
 	release=`echo $reldir|sed -e 's/krb5-//'`
 	relhead=`echo $release|sed -e 's/-.*//'`
+	reltail=`echo $release|sed -e 's/.*-//'`
 	relmajor=`echo $relhead|awk -F. '{print $1}'`
 	relminor=`echo $relhead|awk -F. '{print $2}'`
 	;;
@@ -96,16 +98,19 @@ if test $checkout = t; then
 fi
 
 if test $dosrc = t; then
-	echo "Building autoconf..."
-	(cd $reldir/src/util/autoconf
-		M4=gm4 ./configure
-		make)
-
+	if test -d $reldir/src/util/autoconf; then
+		echo "Building autoconf..."
+		(cd $reldir/src/util/autoconf
+			M4=gm4 ./configure
+			make)
+	fi
 	echo "Creating configure scripts..."
 	(cd $reldir/src; util/reconf)
 
-	echo "Cleaning src/util/autoconf..."
-	(cd $reldir/src/util/autoconf; make distclean)
+	if test -d $reldir/src/util/autoconf; then
+		echo "Cleaning src/util/autoconf..."
+		(cd $reldir/src/util/autoconf; make distclean)
+	fi
 fi
 
 echo "Editing release-specific files..."
