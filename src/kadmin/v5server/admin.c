@@ -28,8 +28,8 @@
 
 #include "k5-int.h"
 #include "kadm5_defs.h"
-#include "adm_proto.h"
 #include "adm.h"
+#include "adm_proto.h"
 
 /*
  * Data structure used to pass information in and out of krb5_db_iterate.
@@ -45,7 +45,6 @@ struct inq_context {
 };
 
 static krb5_db_entry admin_def_dbent;
-static krb5_boolean admin_def_dbent_inited = 0;
 
 static const char *admin_perm_denied_fmt = "\004ACL entry prevents %s operation by %s";
 static const char *admin_db_write_err_fmt = "\004database write failed during %s operation by %s";
@@ -71,16 +70,22 @@ extern char *programname;
  * admin_init_def_dbent()	- Initialize the default database entry.
  */
 static void
-admin_init_def_dbent()
+admin_init_def_dbent(mlife, mrlife, evalid, e, fvalid, f)
+    krb5_deltat		mlife;
+    krb5_deltat		mrlife;
+    krb5_boolean	evalid;
+    krb5_timestamp	e;
+    krb5_boolean	fvalid;
+    krb5_flags		f;
 {
     /* Zero it all out, and fill in non-zero defaults */
     memset((char *) &admin_def_dbent, 0, sizeof(admin_def_dbent));
     admin_def_dbent.kvno = 1;
-    admin_def_dbent.max_life = KRB5_KDB_MAX_LIFE;
-    admin_def_dbent.max_renewable_life = KRB5_KDB_MAX_RLIFE;
-    admin_def_dbent.expiration = KRB5_KDB_EXPIRATION;
-    admin_def_dbent.attributes = KRB5_KDB_DEF_FLAGS;
-    admin_def_dbent_inited = 1;
+    admin_def_dbent.max_life = (mlife > 0) ? mlife : KRB5_KDB_MAX_LIFE;
+    admin_def_dbent.max_renewable_life = 
+	(mrlife > 0) ? mrlife : KRB5_KDB_MAX_RLIFE;
+    admin_def_dbent.expiration = (evalid) ? e : KRB5_KDB_EXPIRATION;
+    admin_def_dbent.attributes = (fvalid) ? f : KRB5_KDB_DEF_FLAGS;
 }
 
 /*
@@ -441,10 +446,6 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 						    &pword_data,
 						    &temp)))) {
 			    krb5_db_entry	*merge;
-
-			    /* Check if the default is initialized */
-			    if (!admin_def_dbent_inited)
-				admin_init_def_dbent();
 
 			    merge = (should_exist) ?
 				&cur_dbentry : &admin_def_dbent;
@@ -1384,3 +1385,14 @@ admin_extract_key(kcontext, debug_level, ticket,
     return(retval);
 }
 
+void
+admin_init(max_life, max_renew_life, e_valid, e, f_valid, f)
+    krb5_deltat		max_life;
+    krb5_deltat		max_renew_life;
+    krb5_boolean	e_valid;
+    krb5_timestamp	e;
+    krb5_boolean	f_valid;
+    krb5_flags		f;
+{
+    admin_init_def_dbent(max_life, max_renew_life, e_valid, e, f_valid, f);
+}

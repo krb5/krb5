@@ -33,18 +33,21 @@
 #include <setjmp.h>
 #include "k5-int.h"
 #include "com_err.h"
+#include "adm.h"
 #include "adm_proto.h"
 
 #ifdef	LANGUAGES_SUPPORTED
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
 static const char *getopt_string =	"a:d:e:k:l:mnp:r:t:D:M:T:";
 #else	/* LANGUAGES_SUPPORTED */
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-p portnum] [-r realm] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
 static const char *getopt_string =	"a:d:e:k:mnp:r:t:D:M:T:";
 #endif	/* LANGUAGES_SUPPORTED */
 static const char *fval_not_number =	"%s: value (%s) specified for -%c is not numeric.\n";
 static const char *extra_params =	"%s extra paramters beginning with %s... \n";
 static const char *daemon_err =		"%s: cannot spawn and detach.\n";
+static const char *grealm_err =		"%s: cannot get default realm.\n";
+static const char *pinit_err = 		"%s: cannot open configuration file %s.\n";
 static const char *no_memory_fmt =	"%s: cannot allocate %d bytes for %s.\n";
 static const char *begin_op_msg =	"\007%s starting.";
 static const char *disp_err_fmt =	"\004dispatch error.";
@@ -108,6 +111,13 @@ main(argc, argv)
     char		*db_realm = (char *) NULL;
     char		*master_key_name = (char *) NULL;
     char		*keytab_name = (char *) NULL;
+    char		*stash_name = (char *) NULL;
+    krb5_deltat		maxlife = -1;
+    krb5_deltat		maxrlife = -1;
+    krb5_timestamp	def_expiration;
+    krb5_flags		def_flags;
+    krb5_boolean	exp_valid, flags_valid;
+    krb5_realm_params	*rparams;
 
     /* Kerberatic contexts */
     krb5_context	kcontext;
@@ -126,12 +136,14 @@ main(argc, argv)
      *			[-n]			<do not fork/disassociate>
      *			[-p portnumber]		<listen on port>
      *			[-r realmname]		<realm>
+     *			[-s stashfile]		<stashfile>
      *			[-t timeout]		<inactivity timeout>
      *			[-D debugmask]		<debug mask>
      *			[-M masterkeyname]	<name of master key>
      *			[-T keytabname]		<key table file>
      */
     error = 0;
+    exp_valid = flags_valid = FALSE;
     while ((option = getopt(argc, argv, getopt_string)) != EOF) {
 	switch (option) {
 	case 'a':
@@ -172,6 +184,9 @@ main(argc, argv)
 	    break;
 	case 'r':
 	    db_realm = optarg;
+	    break;
+	case 's':
+	    stash_name = optarg;
 	    break;
 	case 't':
 	    if (sscanf(optarg, "%d", &timeout) != 1) {
@@ -233,6 +248,62 @@ main(argc, argv)
     krb5_init_ets(kcontext);
     krb5_klog_init(kcontext, "admin_server", programname, 1);
 
+    /*
+     * Attempt to read the KDC profile.  If we do, then read appropriate values
+     * from it and supercede values supplied on the command line.
+     */
+    if (!(error = krb5_read_realm_params(kcontext,
+					 db_realm,
+					 (char *) NULL,
+					 (char *) NULL,
+					 &rparams))) {
+	/* Get the value for the database */
+	if (rparams->realm_dbname)
+	    db_file = strdup(rparams->realm_dbname);
+
+	/* Get the value for the master key name */
+	if (rparams->realm_mkey_name)
+	    master_key_name = strdup(rparams->realm_mkey_name);
+
+	/* Get the value for the master key type */
+	if (rparams->realm_keytype_valid)
+	    key_type = rparams->realm_keytype;
+
+	/* Get the value for the port */
+	if (rparams->realm_kadmind_port_valid)
+	    service_port = rparams->realm_kadmind_port;
+
+	/* Get the value for the encryption type */
+	if (rparams->realm_enctype_valid)
+	    enc_type = rparams->realm_enctype;
+
+	/* Get the value for the stashfile */
+	if (rparams->realm_stash_file)
+	    stash_name = strdup(rparams->realm_stash_file);
+
+	/* Get the value for maximum ticket lifetime. */
+	if (rparams->realm_max_life_valid)
+	    maxlife = rparams->realm_max_life;
+
+	/* Get the value for maximum renewable ticket lifetime. */
+	if (rparams->realm_max_rlife_valid)
+	    maxrlife = rparams->realm_max_rlife;
+
+	/* Get the value for the default principal expiration */
+	if (rparams->realm_expiration_valid) {
+	    def_expiration = rparams->realm_expiration;
+	    exp_valid = TRUE;
+	}
+
+	/* Get the value for the default principal flags */
+	if (rparams->realm_flags_valid) {
+	    def_flags = rparams->realm_flags;
+	    flags_valid = TRUE;
+	}
+
+	krb5_free_realm_params(kcontext, rparams);
+    }
+
     if ((signal_number =
 #if	POSIX_SETJMP
 	 sigsetjmp(terminal_jmp, 1)
@@ -273,7 +344,7 @@ main(argc, argv)
 	 */
 	error = key_init(kcontext, debug_level, enc_type, key_type,
 			 master_key_name, manual_entry, db_file, db_realm,
-			 keytab_name);
+			 keytab_name, stash_name);
 	if (!error) {
 	    error = acl_init(kcontext, debug_level, acl_file);
 	    if (!error) {
@@ -283,7 +354,12 @@ main(argc, argv)
 		    error = net_init(kcontext, debug_level, service_port);
 		    if (!error) {
 			error = proto_init(kcontext, debug_level, timeout);
-
+			admin_init(maxlife,
+				   maxrlife,
+				   exp_valid,
+				   def_expiration,
+				   flags_valid,
+				   def_flags);
 			if (error)
 			    errmsg = proto_msg;
 		    }

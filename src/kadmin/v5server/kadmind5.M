@@ -49,6 +49,9 @@ port
 .B \-r
 realm
 ] [
+.B \-s
+keystash
+] [
 .B \-t
 timeout
 ] [
@@ -87,6 +90,11 @@ Indicates that the master key name is to be entered manually.
 .IP \-e
 .B enctype
 specifies the encryption type which is to be used.
+.IP \-s
+.B keystash
+specifies the key stash file ( created by
+.I kdb5_stash(8)
+) used for automatic restart.
 .IP \-T
 .B keytab
 specifies the name of the service key table. 

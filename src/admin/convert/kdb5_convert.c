@@ -41,6 +41,8 @@ static long master_key_version;
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "adm.h"
+#include "adm_proto.h"
 #include <stdio.h>
 
 #include <netinet/in.h>			/* ntohl */
@@ -168,6 +170,8 @@ char *argv[];
     int tempdb = 0;
     char *tempdbname;
     krb5_context context;
+    char *stash_file = (char *) NULL;
+    krb5_realm_params *rparams;
 
     krb5_enctype etype = 0xffff;
 
@@ -230,6 +234,56 @@ char *argv[];
 	    usage(PROGNAME, 1);
 	    /*NOTREACHED*/
 	}
+    }
+
+    /*
+     * Attempt to read the KDC profile.  If we do, then read appropriate values
+     * from it and augment values supplied on the command line.
+     */
+    if (!(retval = krb5_read_realm_params(context,
+					  realm,
+					  (char *) NULL,
+					  (char *) NULL,
+					  &rparams))) {
+	/* Get the value for the database */
+	if (rparams->realm_dbname && !dbname)
+	    dbname = strdup(rparams->realm_dbname);
+
+	/* Get the value for the master key name */
+	if (rparams->realm_mkey_name && !mkey_name)
+	    mkey_name = strdup(rparams->realm_mkey_name);
+
+	/* Get the value for the master key type */
+	if (rparams->realm_keytype_valid && !keytypedone) {
+	    master_keyblock.keytype = rparams->realm_keytype;
+	    keytypedone++;
+	}
+
+	/* Get the value for the encryption type */
+	if (rparams->realm_enctype_valid && (etype == 0xffff))
+	    etype = rparams->realm_enctype;
+
+	/* Get the value for the stashfile */
+	if (rparams->realm_stash_file)
+	    stash_file = strdup(rparams->realm_stash_file);
+
+	/* Get the value for maximum ticket lifetime. */
+	if (rparams->realm_max_life_valid)
+	    rblock.max_life = rparams->realm_max_life;
+
+	/* Get the value for maximum renewable ticket lifetime. */
+	if (rparams->realm_max_rlife_valid)
+	    rblock.max_rlife = rparams->realm_max_rlife;
+
+	/* Get the value for the default principal expiration */
+	if (rparams->realm_expiration_valid)
+	    rblock.expiration = rparams->realm_expiration;
+
+	/* Get the value for the default principal flags */
+	if (rparams->realm_flags_valid)
+	    rblock.flags = rparams->realm_flags;
+
+	krb5_free_realm_params(context, rparams);
     }
 
 #if	defined(ODBM) || defined(KDB4_DISABLE)
@@ -315,7 +369,7 @@ master key name '%s'\n",
     }
 
     if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
-				    read_mkey, read_mkey, 0, 
+				    read_mkey, read_mkey, stash_file, 0, 
 				    &master_keyblock)) {
 	com_err(PROGNAME, retval, "while reading master key");
 	exit(1);

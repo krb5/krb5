@@ -1,4 +1,11 @@
 
+Mon Jul 17 15:02:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add KADM library.
+	* kdb5_stash.c - Change calling sequence to krb5_db_fetch_mkey().  Add
+		KDC profile reading/handling as a supplement to command line
+		arguments.
+
+
 Fri Jul 7 15:38:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
 	* configure.in - Add USE_KDB5_LIBRARY and KRB5_LIBRARIES.

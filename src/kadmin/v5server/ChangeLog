@@ -1,4 +1,17 @@
 
+Mon Jul 17 15:07:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_main.c - Add stash-file handling and supply appropriate value to
+		krb5_db_fetch_mkey().  Add KDC profile reading/handling to
+		supercede any values supplied on the command line.  Add call
+		to new admin_init() which initializes the admin module.
+	* srv_key.c - Add stash-file handling.
+	* admin.c - Add admin_init() which takes supplied per-realm defaults to
+		initialize the default database entry.
+	* kadm5_defs.h - Change PROTOTYPE to KRB5_PROTOTYPE.  Update prototype
+		for key_init and add admin_init.
+	* kadmind5.M - Add description of -s stashfile.
+
+
 Fri Jul 7 16:01:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
 	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.

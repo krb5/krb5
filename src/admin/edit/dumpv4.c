@@ -322,7 +322,7 @@ int handle_keys(arg)
     master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
     if (retval = krb5_db_fetch_mkey(edit_context, master_princ, 
 				    &master_encblock, 0,
-				    0, 0, &master_keyblock)) {
+				    0, (char *) NULL, 0, &master_keyblock)) {
 	com_err(arg->comerr_name, retval, "while reading master key");
 	exit(1);
     }

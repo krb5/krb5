@@ -298,7 +298,7 @@ key_get_admin_entry(kcontext)
  */
 krb5_error_code
 key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
-	 db_file, db_realm, kt_name)
+	 db_file, db_realm, kt_name, sf_name)
     krb5_context	kcontext;
     int			debug_level;
     int			enc_type;
@@ -308,6 +308,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     char		*db_file;
     char		*db_realm;
     char		*kt_name;
+    char		*sf_name;
 {
     krb5_enctype 	kdc_etype;
     char		*mkey_name;
@@ -439,6 +440,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 			      &master_encblock,
 			      manual,
 			      FALSE,		/* Only read once if manual */
+			      sf_name,		/* stash file */
 			      0,		/* No salt */
 			      &master_keyblock);
     if (kret) {

@@ -1,4 +1,12 @@
 
+Mon Jul 17 15:00:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add KADM library.
+	* dumpv4.c - Change calling sequence to krb5_db_fetch_mkey().
+	* kdb5_edit.c - Change calling sequence to krb5_db_fetch_mkey() which
+		uses the stash file.  Add KDC profile reading/handling as a
+		supplement to command line supplied arguments.
+
+
 Wed Jul 12 12:01:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Temporarily add --with-kdb4 option.  Default is without
 		kdb4.  Without kdb4 enables a define.  With kdb4 uses -lkdb4 and

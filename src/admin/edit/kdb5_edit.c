@@ -26,6 +26,8 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "adm.h"
+#include "adm_proto.h"
 #include <stdio.h>
 #include <time.h>
 /* timeb is part of the interface to get_date. */
@@ -78,6 +80,7 @@ static char search_instance[40];
 static int num_instance_tokens;
 static int must_be_first[2];
 static char *mkey_password = 0;
+static char *stash_file = (char *) NULL;
 
 /*
  * I can't figure out any way for this not to be global, given how ss
@@ -123,12 +126,14 @@ char *kdb5_edit_Init(argc, argv)
     int optchar;
 
     krb5_error_code retval;
-    char *dbname = DEFAULT_KDB_FILE;
+    char *dbname = (char *) NULL;
     char *defrealm;
     int keytypedone = 0;
+    int etypedone = 0;
     krb5_enctype etype = DEFAULT_KDC_ETYPE;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
+    krb5_realm_params *rparams;
 
     retval = krb5_init_context(&edit_context);
     if (retval) {
@@ -173,6 +178,7 @@ char *kdb5_edit_Init(argc, argv)
 	    break;
 	case 'e':
 	    etype = atoi(optarg);
+	    etypedone++;
 	    break;
 	case 'm':
 	    manual_mkey = TRUE;
@@ -182,6 +188,56 @@ char *kdb5_edit_Init(argc, argv)
 	    usage(progname, 1);
 	    /*NOTREACHED*/
 	}
+    }
+
+    /*
+     * Attempt to read the KDC profile.  If we do, then read appropriate values
+     * from it and augment values supplied on the command line.
+     */
+    if (!(retval = krb5_read_realm_params(edit_context,
+					  cur_realm,
+					  (char *) NULL,
+					  (char *) NULL,
+					  &rparams))) {
+	/* Get the value for the database */
+	if (rparams->realm_dbname && !dbname)
+	    dbname = strdup(rparams->realm_dbname);
+
+	/* Get the value for the master key name */
+	if (rparams->realm_mkey_name && !mkey_name)
+	    mkey_name = strdup(rparams->realm_mkey_name);
+
+	/* Get the value for the master key type */
+	if (rparams->realm_keytype_valid && !keytypedone) {
+	    master_keyblock.keytype = rparams->realm_keytype;
+	    keytypedone++;
+	}
+
+	/* Get the value for the encryption type */
+	if (rparams->realm_enctype_valid && !etypedone)
+	    etype = rparams->realm_enctype;
+
+	/* Get the value for the stashfile */
+	if (rparams->realm_stash_file)
+	    stash_file = strdup(rparams->realm_stash_file);
+
+	/* Get the value for maximum ticket lifetime. */
+	if (rparams->realm_max_life_valid)
+	    mblock.max_life = rparams->realm_max_life;
+
+	/* Get the value for maximum renewable ticket lifetime. */
+	if (rparams->realm_max_rlife_valid)
+	    mblock.max_rlife = rparams->realm_max_rlife;
+
+	/* Get the value for the default principal expiration */
+	if (rparams->realm_expiration_valid)
+	    mblock.expiration = rparams->realm_expiration;
+
+	/* Get the value for the default principal flags */
+	if (rparams->realm_flags_valid)
+	    mblock.flags = rparams->realm_flags;
+
+	krb5_free_realm_params(edit_context, rparams);
     }
 
     /* Dump creates files which should not be world-readable.  It is easiest
@@ -194,6 +250,10 @@ char *kdb5_edit_Init(argc, argv)
 		"while registering writable key table functions");
 	exit(1);
     }
+
+    /* Handle defaults */
+    if (!dbname)
+	dbname = DEFAULT_KDB_FILE;
 
     if (!keytypedone)
 	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
@@ -456,9 +516,11 @@ set_dbname_help(pname, dbname)
 	(void) krb5_db_fini(edit_context);
 	return(1);
     }
+#ifdef	notdef
     mblock.max_life = master_entry.max_life;
     mblock.max_rlife = master_entry.max_renewable_life;
     mblock.expiration = master_entry.expiration;
+#endif	/* notdef */
     /* don't set flags, master has some extra restrictions */
     mblock.mkvno = master_entry.kvno;
 
@@ -483,7 +545,8 @@ set_dbname_help(pname, dbname)
 	mkey_password = 0;
     } else if (retval = krb5_db_fetch_mkey(edit_context, master_princ, 
 					   &master_encblock, manual_mkey, 
-					   FALSE, 0, &master_keyblock)) {
+					   FALSE, stash_file,
+					   0, &master_keyblock)) {
 	com_err(pname, retval, "while reading master key");
 	com_err(pname, 0, "Warning: proceeding without master key");
 	exit_status++;
@@ -550,7 +613,8 @@ void enter_master_key(argc, argv)
 		master_keyblock.contents = NULL;
 	}
 	if (retval = krb5_db_fetch_mkey(edit_context, master_princ, &master_encblock,
-					TRUE, FALSE, 0, &master_keyblock)) {
+					TRUE, FALSE, (char *) NULL,
+					0, &master_keyblock)) {
 		com_err(pname, retval, "while reading master key");
 		exit_status++;
 		return;

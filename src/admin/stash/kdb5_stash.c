@@ -26,6 +26,8 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "adm.h"
+#include "adm_proto.h"
 #include <stdio.h>
 
 extern int errno;
@@ -54,12 +56,13 @@ char *argv[];
     extern char *optarg;
     int optchar;
     krb5_error_code retval;
-    char *dbname = DEFAULT_KDB_FILE;
+    char *dbname = (char *) NULL;
     char *realm = 0;
     char *mkey_name = 0;
     char *mkey_fullname;
     char *keyfile = 0;
     krb5_context context;
+    krb5_realm_params *rparams;
 
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
@@ -97,6 +100,43 @@ char *argv[];
 	    /*NOTREACHED*/
 	}
     }
+
+    /*
+     * Attempt to read the KDC profile.  If we do, then read appropriate values
+     * from it and augment values supplied on the command line.
+     */
+    if (!(retval = krb5_read_realm_params(context,
+					  realm,
+					  (char *) NULL,
+					  (char *) NULL,
+					  &rparams))) {
+	/* Get the value for the database */
+	if (rparams->realm_dbname && !dbname)
+	    dbname = strdup(rparams->realm_dbname);
+
+	/* Get the value for the master key name */
+	if (rparams->realm_mkey_name && !mkey_name)
+	    mkey_name = strdup(rparams->realm_mkey_name);
+
+	/* Get the value for the master key type */
+	if (rparams->realm_keytype_valid && !keytypedone) {
+	    master_keyblock.keytype = rparams->realm_keytype;
+	    keytypedone++;
+	}
+
+	/* Get the value for the stash file */
+	if (rparams->realm_stash_file && !keyfile)
+	    keyfile = strdup(rparams->realm_stash_file);
+
+	/* Get the value for the encryption type */
+	if (rparams->realm_enctype_valid && (etype == 0xffff))
+	    etype = rparams->realm_enctype;
+
+	krb5_free_realm_params(context, rparams);
+    }
+
+    if (!dbname)
+	dbname = DEFAULT_KDB_FILE;
 
     if (!keytypedone)
 	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
@@ -146,7 +186,8 @@ char *argv[];
 
     /* TRUE here means read the keyboard, but only once */
     if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
-				    TRUE, FALSE, 0, &master_keyblock)) {
+				    TRUE, FALSE, (char *) NULL,
+				    0, &master_keyblock)) {
 	com_err(argv[0], retval, "while reading master key");
 	(void) krb5_db_fini(context);
 	exit(1);

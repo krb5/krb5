@@ -88,20 +88,21 @@
 
 /* srv_key.c */
 krb5_error_code key_init
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   int,
 		   int,
 		   char *,
 		   int,
+		   char *,
 		   char *,
 		   char *,
 		   char *));
 void key_finish
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int));
 krb5_error_code key_string_to_keys
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
 		   krb5_data *,
 		   krb5_int32,
@@ -111,24 +112,24 @@ krb5_error_code key_string_to_keys
 		   krb5_data *,
 		   krb5_data *));
 krb5_error_code key_random_key
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_keyblock *));
 krb5_error_code key_encrypt_keys
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
 		   krb5_keyblock *,
 		   krb5_keyblock *,
 		   krb5_encrypted_keyblock *,
 		   krb5_encrypted_keyblock *));
 krb5_error_code key_decrypt_keys
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
 		   krb5_encrypted_keyblock *,
 		   krb5_encrypted_keyblock *,
 		   krb5_keyblock *,
 		   krb5_keyblock *));
 krb5_boolean key_pwd_is_weak
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
 		   krb5_data *,
 		   krb5_int32,
@@ -140,34 +141,34 @@ krb5_keyblock *key_admin_key();
 
 /* srv_acl.c */
 krb5_error_code acl_init
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   char *));
 void acl_finish
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int));
 krb5_boolean acl_op_permitted
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
 		   krb5_int32));
 
 /* srv_output.c */
 krb5_error_code output_init
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   char *,
 		   krb5_boolean));
 void output_finish
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int));
 krb5_boolean output_lang_supported
-	PROTOTYPE((char *));
+	KRB5_PROTOTYPE((char *));
 char *output_krb5_errmsg
-	PROTOTYPE((char *,
+	KRB5_PROTOTYPE((char *,
 		   krb5_boolean,
 		   krb5_int32));
 char *output_adm_error
-	PROTOTYPE((char *,
+	KRB5_PROTOTYPE((char *,
 		   krb5_boolean,
 		   krb5_int32,
 		   krb5_int32,
@@ -176,26 +177,26 @@ char *output_adm_error
 
 /* srv_net.c */
 krb5_error_code net_init
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_int32));
 void net_finish
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int));
 krb5_error_code net_dispatch
-	PROTOTYPE((krb5_context));
+	KRB5_PROTOTYPE((krb5_context));
 krb5_principal net_server_princ();
 
 /* proto_serv.c */
 krb5_error_code proto_init
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   int));
 void proto_finish
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int));
 krb5_error_code proto_serv
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_int32,
 		   int,
 		   void *,
@@ -203,14 +204,14 @@ krb5_error_code proto_serv
 
 /* passwd.c */
 krb5_int32 passwd_check
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_auth_context,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_int32 *));
 krb5_int32 passwd_change
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_auth_context,
 		   krb5_ticket *,
@@ -218,7 +219,7 @@ krb5_int32 passwd_change
 		   krb5_data *,
 		   krb5_int32 *));
 krb5_boolean passwd_check_npass_ok
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_principal,
 		   krb5_db_entry *,
@@ -227,52 +228,58 @@ krb5_boolean passwd_check_npass_ok
 
 /* admin.c */
 krb5_error_code admin_add_principal
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_int32,
 		   krb5_data *));
 krb5_error_code admin_delete_principal
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_data *));
 krb5_error_code admin_rename_principal
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_data *));
 krb5_error_code admin_modify_principal
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_int32,
 		   krb5_data *));
 krb5_error_code admin_change_opw
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_data *));
 krb5_error_code admin_change_orandpw
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_data *));
 krb5_error_code admin_inquire
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_int32 *,
 		   krb5_data **));
 krb5_error_code admin_extract_key
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_data *,
 		   krb5_int32 *,
 		   krb5_data **));
+void admin_init KRB5_PROTOTYPE((krb5_deltat,
+				krb5_deltat,
+				krb5_boolean,
+				krb5_timestamp,
+				krb5_boolean,
+				krb5_flags));
 #endif	/* KADM5_DEFS_H__ */
