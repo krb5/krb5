@@ -1,3 +1,14 @@
+Wed Jun 12 18:17:17 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* autoconf.texi (Output): document changes to AC_OUTPUT
+
+Tue Jun 11 23:41:10 1996  Tom Yu  <tlyu@mit.edu>
+
+	* acgeneral.m4 (AC_OUTPUT_FILES): allow for multiple files in
+		AC_OUTPUT; this is done via
+		AC_OUTPUT(outfile[:infile1[+infile2[+infile3...]]]).  The
+		source files are concatenated and substituted over.
+
 Tue May  7 13:20:33 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* acgeneral.m4: Verion 2.10 released.

@@ -817,6 +817,12 @@ separated by a colon.  For example,
 AC_OUTPUT(Makefile:templates/top.mk lib/Makefile:templates/lib.mk)
 @end example
 
+You can also generate an output file from multiple input files by
+separating the input files by a plus sign.  For example,
+@example
+AC_OUTPUT(Makefile:templates/pre.in+Makefile.in+templates/post.in)
+@end example
+
 If you pass @var{extra-cmds}, those commands will be inserted into
 @file{config.status} to be run after all its other processing.  If
 @var{init-cmds} are given, they are inserted just before
