@@ -22,7 +22,7 @@
 # or implied warranty.
 # 
 # 
-DEPLIBS = $(OSDEPLIB)
-LOCAL_LIBRARIES = $(KLIBLOC) -l$(OSLIB) $(COMERRLIB) $(DBMLIB)
+
+LOCAL_LIBRARIES = $(KLIBLOC) -l$(KRB5LIB) $(COMERRLIB) $(DBMLIB)
 
 Krb5AdminProgramTarget(kdb5_anadd)
