@@ -1,3 +1,31 @@
+2002-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* c_ustime.c: Remove various things missed in 1-2-2-branch MacOS
+	microseconds timer removal.
+
+2001-06-22  Miro Jurisic <meeroh@mit.edu>
+
+	* c_ustime.c: punted the accurate microseconds timing code because it
+	wasn't so accurate after all.
+	[pullup from 1-2-2-branch]
+
+2002-06-22  Alexandra Ellwood <lxs@mit.edu>
+
+	* init_os_ctx.c: Add CoreServices.h before k5-int.h so we don't get 
+	multiple definitions for FSSpec.  Also removed an unused variable in
+	Mac OS X code and added casts for Mac OS X code so FSSpecs are cast
+	to profile file types (code deals properly on the other side)
+
+	* timeofday.c: Added casts to remove warnings
+
+	* ccdefname.c, init_os_ctx.c, timeofday.c: Updated Mac OS X
+	headers to new framework layout and updated Mac OS macros
+
+	* read_pwd.c: Removed #defines for Mac OS X (__MACH__) because we 
+	now export krb5_read_password on Mac OS X
+
+	[pullups from 1-2-2-branch]
+
 2002-06-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_os_ctx.c: Don't include sys/ioctl.h or sys/filio.h.

@@ -51,22 +51,13 @@
 #include <DriverServices.h> /* Nanosecond timing */
 #include <CodeFragments.h>	/* Check for presence of UpTime */
 #include <Math64.h>			/* 64-bit integer math */
+#include <KerberosSupport/Utilities.h>		/* Mac time -> UNIX time conversion */
 
 /* Mac Cincludes */
 #include <string.h>
 #include <stddef.h>
 
 static krb5_int32 last_sec = 0, last_usec = 0;
-
-/* Check for availability of microseconds or better timer */
-Boolean HaveAccurateTime ();
-
-/* Convert nanoseconds to date and time */
-void AbsoluteToSecsNanosecs (
-      AbsoluteTime		eventTime,              /* Value to convert   */
-      UInt32			*eventSeconds,         /* Result goes here   */
-      UInt32			*residualNanoseconds    /* Fractional second  */
-   );
 
 /*
  * The Unix epoch is 1/1/70, the Mac epoch is 1/1/04.
@@ -101,14 +92,6 @@ getTimeZoneOffset()
 
 /* Returns the GMT in seconds (and fake microseconds) using the Unix epoch */
 
-/*
- * Note that unix timers are guaranteed that consecutive calls to timing functions will
- * always return monotonically increasing values for time; even if called within one microsecond,
- * they must increase from one call to another. We must preserve this property in this code,
- * even though Mac UpTime does not make such guarantees... (actually it does, but it measures in 
- * units that can be finer than 1 microsecond, so conversion can cause repeat microsecond values
- */
-
 krb5_error_code
 krb5_crypto_us_timeofday(seconds, microseconds)
     krb5_int32 *seconds, *microseconds;
@@ -116,34 +99,13 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     krb5_int32 sec, usec;
     time_t the_time;
 
-    GetDateTime (&the_time);
-
-    sec = the_time - 
-    	((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + 
-    	(getTimeZoneOffset() * 60 * 60));
-
-#if TARGET_CPU_PPC	    						/* Only PPC has accurate time */
-    if (HaveAccurateTime ()) {					/* Does hardware support accurate time? */
-    
-    	AbsoluteTime 	absoluteTime;
-    	UInt32			nanoseconds;
-    	
-    	absoluteTime = UpTime ();
-    	AbsoluteToSecsNanosecs (absoluteTime, &sec, &nanoseconds);
-    	
-    	usec = nanoseconds / 1000;
-    } else
-#endif /* TARGET_CPU_PPC */
-    {
-	    GetDateTime (&sec);
-	    usec = 0;
-	}
+    GetDateTime (&sec);
+    usec = 0;
 	
 	/* Fix secs to UNIX epoch */
 	
-    sec -= ((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + 
-    	(getTimeZoneOffset() * 60 * 60));
-
+	mac_time_to_unix_time (&sec);
+	
 	/* Make sure that we are _not_ repeating */
 	
 	if (sec < last_sec) {	/* Seconds should be at least equal to last seconds */
@@ -170,90 +132,6 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     return 0;
 }
 
-/* Check if we have microsecond or better timer */
-
-Boolean HaveAccurateTime ()
-{
-	static	Boolean alreadyChecked = false;
-	static	haveAccurateTime = false;
-	
-	if (!alreadyChecked) {
-		alreadyChecked = true;
-		haveAccurateTime = false;
-#if TARGET_CPU_PPC
-		if ((Ptr) UpTime != (Ptr) kUnresolvedCFragSymbolAddress) {
-			UInt32	minAbsoluteTimeDelta;
-			UInt32	theAbsoluteTimeToNanosecondNumerator;
-			UInt32	theAbsoluteTimeToNanosecondDenominator;
-			UInt32	theProcessorToAbsoluteTimeNumerator;
-			UInt32	theProcessorToAbsoluteTimeDenominator;
-
-			GetTimeBaseInfo (
-				&minAbsoluteTimeDelta,
-				&theAbsoluteTimeToNanosecondNumerator,
-				&theAbsoluteTimeToNanosecondDenominator,
-				&theProcessorToAbsoluteTimeNumerator,
-				&theProcessorToAbsoluteTimeDenominator);
-				
-			/* minAbsoluteTimeDelta is the period in which Uptime is updated, in absolute time */
-			/* We convert it to nanoseconds and compare it with .5 microsecond */
-			
-			if (minAbsoluteTimeDelta * theAbsoluteTimeToNanosecondNumerator <
-				500 * theAbsoluteTimeToNanosecondDenominator) {
-				haveAccurateTime = true;
-			}
-		}
-#endif /* TARGET_CPU_PPC */
-	}
-	
-	return haveAccurateTime;
-}
-
-/* Convert nanoseconds to date and time */
-
-void AbsoluteToSecsNanosecs (
-      AbsoluteTime		eventTime,              /* Value to convert   */
-      UInt32			*eventSeconds,         /* Result goes here   */
-      UInt32			*residualNanoseconds    /* Fractional second  */
-   )
-{
-   UInt64					eventNanoseconds;
-   UInt64					eventSeconds64;
-   static const UInt64		kTenE9 = U64SetU (1000000000);
-   static UInt64			gNanosecondsAtStart = U64SetU (0);
-
-   /*
-    * If this is the first call, compute the offset between
-    * GetDateTime and UpTime.
-    */
-   if (U64Compare (gNanosecondsAtStart, U64SetU (0)) == 0) {
-      UInt32				secondsAtStart;
-      AbsoluteTime			absoluteTimeAtStart;
-      UInt64				upTimeAtStart;
-	  UInt64				nanosecondsAtStart;
-
-      GetDateTime (&secondsAtStart);
-      upTimeAtStart = UnsignedWideToUInt64 (AbsoluteToNanoseconds (UpTime()));
-	  nanosecondsAtStart = U64SetU (secondsAtStart);
-      nanosecondsAtStart = U64Multiply (nanosecondsAtStart, kTenE9);
-      gNanosecondsAtStart = U64Subtract (nanosecondsAtStart, upTimeAtStart);
-   }
-   /*
-    * Convert the event time (UpTime value) to nanoseconds and add
-    * the local time epoch.
-    */
-   eventNanoseconds = UnsignedWideToUInt64 (AbsoluteToNanoseconds (eventTime));
-   eventNanoseconds = U64Add (gNanosecondsAtStart, eventNanoseconds);
-   /*
-    * eventSeconds = eventNanoseconds /= 10e9;
-    * residualNanoseconds = eventNanoseconds % 10e9;
-    * Finally, compute the local time (seconds) and fraction.
-    */
-   eventSeconds64 = U64Div (eventNanoseconds, kTenE9);
-   eventNanoseconds = U64Subtract (eventNanoseconds, U64Multiply (eventSeconds64, kTenE9));
-   *eventSeconds = (UInt64ToUnsignedWide (eventSeconds64)).lo;
-   *residualNanoseconds = (UInt64ToUnsignedWide (eventNanoseconds)).lo;
-}
 #elif defined(_WIN32)
 
    /* Microsoft Windows NT and 95   (32bit)  */
