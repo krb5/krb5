@@ -15,6 +15,7 @@ STLIBOBJS= \
 	addr_comp.o	\
 	addr_order.o	\
 	addr_srch.o	\
+	appdefault.o	\
 	auth_con.o	\
 	bld_pr_ext.o	\
 	bld_princ.o	\
@@ -99,6 +100,7 @@ STLIBOBJS= \
 OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)addr_order.$(OBJEXT)	\
 	$(OUTPRE)addr_srch.$(OBJEXT)	\
+	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
 	$(OUTPRE)bld_pr_ext.$(OBJEXT)	\
 	$(OUTPRE)bld_princ.$(OBJEXT)	\
@@ -183,6 +185,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_order.c	\
 	$(srcdir)/addr_srch.c	\
+	$(srcdir)/appdefault.c	\
 	$(srcdir)/auth_con.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
@@ -324,6 +327,8 @@ check-unix:: $(TEST_PROGS)
 		425_conv_principal rcmd uunet UU.NET \
 		425_conv_principal zephyr zephyr ATHENA.MIT.EDU \
 		425_conv_principal kadmin ATHENA.MIT.EDU ATHENA.MIT.EDU \
+		524_conv_principal host/e40-po.mit.edu@ATHENA.MIT.EDU \
+		524_conv_principal host/foobar.stanford.edu@stanford.edu \
 		set_realm marc@MIT.EDU CYGNUS.COM \
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out

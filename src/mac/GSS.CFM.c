@@ -21,27 +21,39 @@
  
 #include "gss_libinit.h"
 
+#ifdef macintosh
 OSErr __initializeGSS(CFragInitBlockPtr ibp);
 void __terminateGSS(void);
 
 OSErr __initializeGSS(CFragInitBlockPtr ibp)
 {
 	OSErr	err = noErr;
-	
+        
 	/* Do normal init of the shared library */
 	err = __initialize();
-	
+#else
+#define noErr	0
+void __initializeGSS(void);
+void __initializeGSS(void)
+{
+        int	err = noErr;
+#endif
+
 	/* Initialize the error tables */
 	if (err == noErr) {
 		err = gssint_initialize_library ();
 	}
-	
+
+#ifdef macintosh	
 	return err;
+#endif
 }
 
+#ifdef macintosh
 void __terminateGSS(void)
 {
 	gssint_cleanup_library ();
 
 	__terminate();
 }
+#endif

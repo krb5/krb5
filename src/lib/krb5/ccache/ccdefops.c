@@ -30,7 +30,7 @@
 
 #include "k5-int.h"
 
-#if defined(macintosh) 
+#if defined(USE_CCAPI)
 
 /*
  * Macs use the shared, memory based credentials cache

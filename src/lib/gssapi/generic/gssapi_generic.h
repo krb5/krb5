@@ -27,7 +27,7 @@
  * $Id$
  */
 
-#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C) || (TARGET_API_MAC_OSX == 1)
 #include <gssapi.h>
 #else
 #include <gssapi/gssapi.h>

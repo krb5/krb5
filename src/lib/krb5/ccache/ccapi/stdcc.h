@@ -1,6 +1,6 @@
 #include "krb5.h"
 	
-#if defined(macintosh)
+#if defined(USE_CCAPI)
 #include "CCache2.h"
 #endif
 

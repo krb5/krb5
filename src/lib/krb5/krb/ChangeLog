@@ -1,3 +1,200 @@
+2001-01-30  Tom Yu  <tlyu@mit.edu>
+
+	* preauth.c (krb5_obtain_padata): Don't dereference a NULL pointer
+	if we receive an empty ETYPE_INFO preauth. [krb5-libs/903 from
+	craziboy77@hotmail.com]
+
+	* preauth2.c (krb5_do_preauth): Don't dereference a NULL pointer
+	if we receive an empty ETYPE_INFO preauth. [krb5-libs/903 from
+	craziboy77@hotmail.com]
+
+2001-01-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Free
+	krb5_keytab_entry if call to krb5_decrypt_tkt_part()
+	fails. [krb5-libs/855 reported by guy@packeteer.com]
+
+2001-01-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* mk_safe.c (krb5_mk_safe): Only use safe_cksumtype from the
+	auth_context (derived from the config file or hardcoded default)
+	if it's suitable for the enctype of the key we're going to use.
+
+2001-01-29	Alexandra Ellwood <lxs@mit.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Fixed strncmp bug where principals 
+	which are left substrings of "changepw" were being remapped into "changepw".  
+	Added length check to if() statement.
+
+2001-01-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth2.c (pa_sam): Check for a null prompter function pointer,
+	and return an error for that case rather than crashing.
+
+2000-10-02	Alexandra Ellwood <lxs@mit.edu>
+
+	* init_ctx.c: Added #defines for Mac OS X (__MACH__) 
+
+2000-06-29  Tom Yu  <tlyu@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): NULL, not nil.
+
+2000-06-28  Miro Jurisic  <meeroh@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Fixed a memory leak
+
+2000-06-17  Miro Jurisic  <meeroh@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Fixed v4->v5 realm
+	name conversion
+
+2000-06-17  Miro Jurisic  <meeroh@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Honor v4/v5 realm name
+	differences when convertion from v4 principals to v5.
+
+2000-06-07  Tom Yu  <tlyu@mit.edu>
+
+	* get_creds.c (krb5_get_credentials): Translate KRB5_CC_NOTFOUND
+	returned from krb5_get_cred_from_kdc() if a prior call to
+	krb5_cc_retrieve_cred() returned KRB5_CC_NOT_KTYPE.
+
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* rd_priv.c (krb5_rd_priv_basic): Delete code that was incorrectly
+	doing explicit ivec chaining; c_decrypt() does it now.
+
+	* mk_priv.c (krb5_mk_priv_basic): Delete code that was incorrectly
+	doing explicit ivec chaining; c_encrypt() does it now.
+
+2000-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_in_tkt.c (krb5_get_in_tkt): If enctypes are specified, send
+	the server the intersection of that list and the supported types,
+	in the order requested.
+
+2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_ctx.c (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
+	be KRB5_CALLCONV.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* recvauth.c (krb5_recvauth_version): New routine, takes a
+	krb5_data in which to store the client's application version
+	string.
+	(recvauth_common): Renamed from krb5_recvauth, added above
+	functionality depending on extra argument values.
+	(krb5_recvauth): New stub, calls above routine with extra dummy
+	values.
+
+2000-5-19	Alexandra Ellwood <lxs@mit.edu>
+
+	* sendauth.c, fwd_tgt.c: Changed to use krb5int_cc_default.  This function 
+	supports the Kerberos Login Library and pops up a dialog if the cache does 
+	not contain valid tickets.  This is used to automatically get a tgt before
+	obtaining service tickets.  Note that this should be an internal function
+	because callers don't expect krb5_cc_default to pop up a dialog!
+	(We found this out the hard way :-)
+
+2000-05-16  Ken Raeburn  <raeburn@mit.edu>
+            Nalin Dahyabhai  <nalin@redhat.com>
+
+	* conv_princ.c (krb5_524_conv_principal): Return an error if name
+	is too long.  Use memcpy for character data since we already know
+	the length.
+
+2000-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* kfree.c: Remove unneeded "return" statements at the end of many
+	functions.
+	(krb5_free_*_content, krb5_free_*_contents,
+	krb5_free_cred_enc_part, krb5_free_pwd_sequences): Set freed
+	pointer members to null when containing structure isn't being
+	freed.
+
+2000-05-16  Tom Yu  <tlyu@mit.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Make a copy of the krb5
+	realm that is nul-terminated to avoid falling off the end of the
+	krb5 realm, which is not necessarily nul-terminated.
+
+2000-05-16  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kfree.c (krb5_free_keyblock_contents): Set contents pointer to
+	null after freeing.
+
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * Added new source file appdefault.c
+          Implements new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
+2000-05-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_kerb.c (test_524_conv_principal): New test code, to exercise
+	yesterday's code addition.
+	(main, usage): Updated.
+	* t_krb5.conf: Added stanford.edu->IR.STANFORD.EDU mapping, and a
+	test case for improperly long v4 realm names.
+	* Makefile.in (check-unix): Run 524 conversion test for some test
+	Athena and Stanford names.
+	* t_ref_kerb.out: Updated.
+
+	* init_ctx.c (init_common): Feed current-microsecond time and
+	process-id into PRNG, instead of just current-second time.
+	* mk_req_ext.c (krb5_mk_req_extended): Feed current time into
+	PRNG if a subkey will be generated.
+	* sendauth.c (krb5_sendauth): Feed local and remote addresses of
+	socket, if they can be determined, into the PRNG if a subkey will
+	be used.
+
+2000-05-11  Ken Raeburn  <raeburn@mit.edu>
+	    Booker C. Bense  <bbense@networking.stanford.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Look up v4_realm in
+	config file, in case site's krb4 realm name isn't the same as the
+	krb5 realm name.
+
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* chk_trans.c (krb5_check_transited_list): Don't overflow buffers
+	"prev" and "next".
+	* conv_princ.c (krb5_425_conv_principal): Don't overflow buffer
+	"buf".
+
+2000-04-28	Alexandra Ellwood	<lxs@mit.edu>
+
+	* gic_pwd.c (krb5_init_creds_password) added code to return to
+	login library if the password is expired (login library handles
+	this error appropriately).
+
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (krb5_free_ktypes): New routine, to free values
+	returned by krb5_get_tgs_ktypes, krb5_get_permitted_enctypes, and
+	krb5_get_default_in_tkt_ktypes.
+	(krb5_set_default_tgs_ktypes, krb5_is_permitted_enctype): Use it.
+	(get_profile_etype_list): Use passed-in enctype list if the
+	passed-in count is non-zero, instead of checking the
+	in_tkt_ktype_count value in the context.
+
+2000-04-08  Tom Yu  <tlyu@mit.edu>
+
+	* vfy_increds.c (krb5_verify_init_creds): appdefault_boolean ->
+	libdefault_boolean; it somehow got missed earlier.
+
+2000-04-07  Jeffrey Altman  <jaltman@columbia.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c
+	(krb5_get_init_creds_password) when determining whether or not to
+	retry with a "master kdc" do not retry if the return value from
+	the first attempt was KRB5_REALM_CANT_RESOLV.  Also, do not
+	overwrite the return code if the return value from the access to
+	the "master kdc" was KRB5_REALM_CANT_RESOLV.
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* init_ctx.c (init_common), gic_pwd.c (krb5_get_as_key_password,

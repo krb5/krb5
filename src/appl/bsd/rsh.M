@@ -25,6 +25,7 @@ rsh \- remote shell
 .I host
 [\fB\-l\fP \fIusername\fP] [\fB\-n\fP] [\fB\-d\fP] [\fB\-k\fP
 \fIrealm\fP] [\fB\-f\fP | \fB\-F\fP] [\fB\-x\fP]
+[\fB\-PN | \-PO\fP]
 .I command
 .SH DESCRIPTION
 .B Rsh
@@ -101,6 +102,16 @@ on the TCP sockets used for communication with the remote host.
 redirects input from the special device
 .I /dev/null
 (see the BUGS section below).
+.TP
+\fB-PN\fP
+.TP
+\fB-PO\fP
+Explicitly request new or old version of the Kerberos ``rcmd''
+protocol.  The new protocol avoids many security problems found in the
+old one, but is not interoperable with older servers.  (An
+"input/output error" and a closed connection is the most likely result
+of attempting this combination.)  If neither option is specified, some
+simple heuristics are used to guess which to try.
 .PP
 If you omit
 .IR command ,

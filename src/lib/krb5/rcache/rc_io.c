@@ -57,13 +57,11 @@ static char *dir;
 
 static void getdir()
 {
- if (!dirlen)
-  {
    if (!(dir = getenv("KRB5RCACHEDIR")))
 #if defined(_MSDOS) || defined(_WIN32)
      if (!(dir = getenv("TEMP")))
 	 if (!(dir = getenv("TMP")))
-	     dir = "C:\\";
+	     dir = "C:";
 #else
      if (!(dir = getenv("TMPDIR")))
 #ifdef RCTMPDIR
@@ -72,8 +70,7 @@ static void getdir()
        dir = "/tmp";
 #endif
 #endif
-   dirlen = strlen(dir) + 1;
-  }
+   dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1;
 }
 
 krb5_error_code krb5_rc_io_creat (context, d, fn)
@@ -245,33 +242,32 @@ krb5_error_code krb5_rc_io_move (context, new, old)
     krb5_rc_iostuff *new;
     krb5_rc_iostuff *old;
 {
+    char *fn = NULL;
+
 #if defined(_MSDOS) || defined(_WIN32)
     /*
      * Work around provided by Tom Sanfilippo to work around poor
      * Windows emulation of POSIX functions.  Rename and dup has
      * different semantics!
      */
-    char *fn = NULL;
     GETDIR;
     close(new->fd);
     unlink(new->fn);
     close(old->fd);
     if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
 	return KRB5_RC_IO_UNKNOWN;
-    if (!(fn = malloc(strlen(new->fn) - dirlen + 1)))
-	return KRB5_RC_IO_MALLOC;
-    strcpy(fn, new->fn + dirlen);
+    fn = new->fn;
+    new->fn = NULL;		/* avoid clobbering */
     krb5_rc_io_close(context, new);
     krb5_rc_io_open(context, new, fn);
     free(fn);
 #else
     if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
 	return KRB5_RC_IO_UNKNOWN;
+    fn = new->fn;
+    new->fn = NULL;		/* avoid clobbering */
     (void) krb5_rc_io_close(context, new);
-    new->fn = malloc(strlen(old->fn)+1);
-    if (new->fn == 0)
-	return ENOMEM;
-    strcpy(new->fn, old->fn);
+    new->fn = fn;
 #ifdef macintosh
     new->fd = fcntl(old->fd, F_DUPFD);
 #else
@@ -342,7 +338,8 @@ krb5_error_code krb5_rc_io_close (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
- FREE(d->fn);
+ if (d->fn != NULL)
+   FREE(d->fn);
  d->fn = NULL;
  if (close(d->fd) == -1) /* can't happen */
    return KRB5_RC_IO_UNKNOWN;

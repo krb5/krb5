@@ -1,3 +1,148 @@
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Fix up terminal modes if we're
+	interrupted. [reported by Booker Bense] [pullup from trunk]
+
+2001-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (foreach_localaddr): Increase buffer space initially
+	allocated.  Add more slop space at the end that must remain unused
+	before we stop growing the buffer.  Impose a maximum size on the
+	buffer.  Handle possibility of returned ifc_len being larger than
+	the supplied buffer.
+
+2001-01-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* changepw.c (fixup_ports): New function, uses correct level of
+	indirection for elements of socket address array.
+	(krb5_locate_kpasswd): Call fixup_ports.
+
+2001-01-24	Miro Jurisic <meeroh@mit.edu>
+
+	* c_us_time.c: Fix the sleep queue notification code to
+		avoid denying sleep requests
+
+2000-12-19	Miro Jurisic <meeroh@mit.edu>
+
+	* c_us_time.c: Fix the sleep queue notification code to
+		build with Universal Headers 3.3
+
+2000-11-29	Miro Jurisic <meeroh@mit.edu>
+
+	* c_us_time.c: Install a callback in the Mac OS sleep
+	queue to get notification of the machine coming out
+	of sleep, in order to refresh the cached uptime to
+	real time offset
+
+2000-10-28	Miro Jurisic <meeroh@mit.edu>
+
+	* c_ustime.c: Fixed epoch calculation under Mac OS 9 Carbon and Mac OS X
+
+2000-10-16	Miro Jurisic <meeroh@mit.edu>
+
+	* init_os_ctx.c: Use PreferencesLib to discover config files on Mac OS X
+
+2000-10-02	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefname.c, init_os_ctx.c, prompter.c, prompterusr.c. read_pwd.c
+        timeofday.c: Added #defines for Mac OS X (__MACH__) to mimic macintosh
+        behavior
+
+2000-09-28  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_us_time.c: Fixed Mac code to use the correct epoch
+
+2000-09-23  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_us_time.c: Added modifications to Mac OS Microseconds timing
+	to work properly under Carbon.
+
+2000-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (foreach_localaddr): Use SIOCGSIZIFCONF ioctl if
+	available to get the buffer size needed for SIOCGIFCONF, and skip
+	the silly heuristics if it returns a reasonable value.
+
+2000-06-14  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files):  
+	Return ENOENT when file is not found on MacOS (not ENFILE)
+
+2000-06-09  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files):  
+	Eliminated some dead code
+
+2000-06-09  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files):  Use Kerberos
+	Preferences library to locate the config files on Mac OS
+
+2000-05-17  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* an_to_ln.c (do_replacement):  Don't overflow buffers "in" or "out".
+	* hst_realm.c (krb5_try_realm_txt_rr):  Don't overfill "host" when
+	malformed DNS responses are received.
+
+2000-05-15  Jeffrey Altman <jaltman@columbia.edu>
+
+        * hst_realm.c (krb5_get_host_realm)
+          remove the searchlist and defaultrealm _kerberos queries
+
+2000-05-09	Alexandra Ellwood <lxs@mit.edu>
+
+	*localaddr.c: Fixed the local_addr_fallback_kludge so that it actually does something.
+	Before that the error code it was handling was blowing it away in cleanup.
+
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* ccdefname.c (get_from_os): Don't overflow buffer "name_buf".
+	* kuserok.c (krb5_kuserok): Don't overflow buffer "pbuf".
+
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.  If called functions fail, drop out of loop and
+	return nonzero.
+	(krb5_os_localaddr): Increment count of addresses to include null
+	pointer terminator.  Delete check for zero count.
+
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prompter.c (krb5int_set_prompt_types): Set to actual value
+	intead of 0.
+
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* init_os_ctx.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+	* ccdefname.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+
+2000-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (maybe_use_dns): Renamed from _krb5_use_dns.  Now
+	takes an arg to indicate a key to look up in krb5.conf, falling
+	back to "dns_fallback", and an arg indicating the default value if
+	no config file entries match.
+	(_krb5_use_dns_realm): New routine; use "dns_lookup_realm" and
+	KRB5_DNS_LOOKUP_REALM setting.
+	(_krb5_use_dns_kdc): New routine; use "dns_lookup_kdc" and
+	KRB5_DNS_LOOKUP_KDC.
+	(krb5_locate_kdc): Call _krb5_use_dns_kdc.
+	* changepw.c (krb5_locate_kpasswd): Call _krb5_use_dns_kdc.
+	* def_realm.c (krb5_get_default_realm): Call _krb5_use_dns_realm.
+	* hst_realm.c (krb5_get_host_realm): Call _krb5_use_dns_realm.
+
+2000-03-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* def_realm.c (krb5_free_default_realm): Added, use to free
+	result of krb5_get_default_realm
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c: Add krb5int_set_prompt_types() and
