@@ -46,7 +46,7 @@
 #include <sys/file.h>
 #include <fcntl.h>
 #include <sys/signal.h>
-#include <sys/syslog.h>
+#include <syslog.h>
 #include <sys/wait.h>
 #include <netdb.h>
 #include <string.h>
