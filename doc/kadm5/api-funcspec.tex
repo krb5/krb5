@@ -102,7 +102,7 @@ typedef struct _ovsec_kadm_principal_ent_t {
         krb5_timestamp mod_date;
         krb5_flags attributes;
         krb5_kvno kvno;
-        krb5_mkvno mkvno;
+        krb5_kvno mkvno;
 
         char * policy;
         u_int32 aux_attributes;
@@ -282,7 +282,7 @@ POLICY_CLR              & 0x001000 & policy & F & O
 \begin{table}[htbp]
 \begin{tabular}{@{}lclll}
 Name & Value & Field Affected & Create & Modify \\
-POLICY                  & 0x002000 & policy & M & F \\
+POLICY                  & same     & policy & M & F \\
 PW_MAX_LIFE             & 0x004000 & pw_max_life & O, infinite & O \\
 PW_MIN_LIFE             & 0x008000 & pw_min_life & O, 0 & O \\
 PW_MIN_LENGTH           & 0x010000 & pw_min_length & O, 0 & O \\
@@ -331,6 +331,9 @@ policy.
 for the current operation.
 \item[OVSEC_KADM_BAD_CLASS] The number of character classes specified
 is invalid.
+\item[OVSEC_KADM_BAD_LENGTH] The specified minimum or maximum length
+is invalid; minimum lengths must be non-negative and maximum lengths
+must be positive.
 \item[OVSEC_KADM_PASS_Q_TOOSHORT] The password does not contain enough
 characters.
 \item[OVSEC_KADM_PASS_Q_CLASS] The password must contain characters
@@ -341,6 +344,7 @@ dictionary.
 password history.
 \item[OVSEC_KADM_PASS_TOOSOON] The current password's minimum lifetime
 has not passed.
+\item[OVSEC_KADM_POLICY_REF] The named policy's refcnt is not zero.
 \end{description}
 
 \subsection{Authorization}
@@ -409,9 +413,9 @@ create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
 modify_policy & modify & Modify the attributes of a policy. \\
 get_policy & get & Retrieve a policy. \\
-free_princ & none & Free the memory associated with an
+free_princ_ent & none & Free the memory associated with an
                 ovsec_kadm_principal_ent_t. \\
-free_policy & none & Free the memory assocated with an
+free_policy_ent & none & Free the memory assocated with an
                 ovsec_kadm_policy_ent_t. \\
 get_privs & none & Return the caller's admin server privileges.
 \end{tabular}
@@ -423,16 +427,27 @@ details.}
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_create_principal(ovsec_kadm_princ_ent_t, u_int32, char *);
+ovsec_kadm_create_principal(ovsec_kadm_princ_ent_t princ, u_int32 mask,
+		char *pw, int override_qual);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: add
 
 \begin{enumerate}
+\item Determine whether password quality checks should be overriden.
+\begin{enumerate}
+\item If the POLICY bit is not set in aux_attributes, set
+override_qual to true.
+\item Otherwise, use the specified override_qual.
+\end{enumerate}
+
 \item Return OVSEC_KADM_BAD_MASK if the mask is invalid.
 \item If the named principal exists, return OVSEC_KADM_DUP.
 \item If the POLICY bit is set and the named policy does not exist,
 return OVSEC_KADM_UNK_POLICY.
+\item If override_qual is false and the password does not meet the
+quality standards, return the appropriate OVSEC_KADM_PASS_Q_* error
+code.
 \item Store the principal, set the key.  The key is generated with
 Kerberos' string-to-key function, using the salt method specified on
 the admin server's command line; see section \ref{sec:commandline}.
@@ -448,11 +463,12 @@ value, else
 \item set pw_expiration to never.
 \end{enumerate}
 \item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
-the maximum of the given value and now + pw_max_life.
+the sooner of the given value and now + pw_max_life.
 \item Otherwise, set pw_expiration to now + pw_max_life.
 \end{enumerate}
 
-\item Set last_pwd_change and mod_date to now and set mod_name to caller.
+\item Set mod_date to now and set mod_name to caller.
+\item Set last_pwd_change to never.
 \end{enumerate}
 
 RETURN CODES:
@@ -524,7 +540,7 @@ value, else
 \item set pw_expiration to never.
 \end{enumerate}
 \item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
-the maximum of the given value and last_pwd_change + pw_max_life.
+the sooner of the given value and last_pwd_change + pw_max_life.
 \item Otherwise, set pw_expiration to last_pwd_change + pw_max_life.
 \end{enumerate}
 
@@ -965,10 +981,10 @@ arguments.  It should be run on the Kerberos master server.
 \item It creates the databases ``/krb5/ovsec_adm_princ'' and
 ``/krb5/ovsec_adm_policy''.
 
-\item It creates the principal ``kadmin@LOCAL.REALM'' in the Kerberos
-database if it does not already exist, prompting the user for a
-password.  It sets the KRB5_KDB_DISALLOW_TGT_BASED bit in the
-principal's attributes field.
+\item It creates the principal ``kadmin@LOCAL.REALM'' with a random
+key in the Kerberos database if it does not already exist.  It sets
+the KRB5_KDB_DISALLOW_TGT_BASED bit in the principal's attributes
+field.
 
 \item It creates entries in the admin principal database for all
 principals already defined in the Kerberos database, but does not
@@ -982,22 +998,18 @@ principal and policy da\-ta\-ba\-ses.\footnote{We expect this program to
 have more functionality in the future.} Its command line usage is
 
 \begin{verbatim}
-ovsec_adm_edit [-dump admin|policy|both] [-restore admin|policy|both]
+ovsec_adm_edit [-dump admin|policy] [-restore admin|policy]
 \end{verbatim}
 
 If the -dump argument is specified, it dumps either the admin
-principal database, the policy database, or both to the standard
-output.  If the -restore argument is specified, it reads the principal
-database, the policy database, or both from the standard input.  For
-both operations, if both databases are involved, the admin database is
-first.
+principal database or the policy database to the standard output.  If
+the -restore argument is specified, it reads the principal database or
+the policy database from the standard input.
 
-Each database is represented by an integer in ASCII decimal
-representation indicating the number of records, followed by the
-records themselves.  Each record in the database is printed in its
-ASCII representation, separated by a tab character, with each record
-followed by a newline.  Strings that can contain spaces, tabs, or
-newlines are enclosed in double quotes.
+Each database is represented by a sequence of records.  Each record in
+the database is printed in its ASCII representation, separated by a
+tab character, with each record followed by a newline.  Strings that
+can contain spaces, tabs, or newlines are enclosed in double quotes.
 
 The fields within each record are read and written in the same order
 as they appear in the osa_princ_ent_t and osa_policy_ent_t,
@@ -1043,8 +1055,10 @@ The operations that are only performed if -p is not specified are:
 
 \begin{itemize}
 \item If a principal exists in the principal admin
-database that does not exist in the Kerberos database, it is created
-in the Kerberos database with a password specified by the user.
+database that does not exist in the Kerberos database, it is either
+created in the Kerberos database with a password specified by the
+user or removed from the principal admin database, at the user's
+option.
 
 \item If a principal references a policy that does not exist, the user
 is prompted to specify a new policy for the user or to specify that
