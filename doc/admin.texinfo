@@ -1771,7 +1771,9 @@ causes the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 causes the dump to be in the Kerberos 5 Beta 6 format (``kdb5_edit
 load_dump version 3.0'').
 @itemx -ov
-causes the dump to be in ovsec_adm_export format.
+causes the dump to be in ovsec_adm_export format.  Currently, the only
+way to preserve per-principal policy information is to use this in
+conjunction with a normal dump.
 @itemx -verbose
 causes the name of each principal and policy to be printed as it is
 dumped.
@@ -1828,6 +1830,12 @@ not be dumped:
 If you do not specify a dump file, @code{kdb5_util} will dump the
 database to the standard output.
 
+There is currently a bug where the default dump format omits the
+per-principal policy information.  In order to dump all the data
+contained in the Kerberos database, you must perform a normal dump (with
+no option flags) and an additional dump using the ``-ov'' flag to a
+different file.
+
 @node Restoring a Kerberos Database from a Dump File, Creating a Stash File, Dumping a Kerberos Database to a File, Administrating Kerberos Database Entries
 @section Restoring a Kerberos Database from a Dump File
 
@@ -1856,7 +1864,10 @@ causes the name of each principal and policy to be printed as it is
 dumped.
 @itemx -update
 causes records from the dump file to be updated in or added to the
-existing database.
+existing database.  This is useful in conjunction with an
+ovsec_adm_export format dump if you want to preserve per-principal
+policy information, since the current default format does not contain
+this data.
 @end table
 
 For example:

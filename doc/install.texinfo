@@ -1094,7 +1094,11 @@ Disable the cron job that propagates the database.
 @item
 Run your database propagation script manually, to ensure that the slaves
 all have the latest copy of the database.  (@xref{Propagate the Database
-to Each Slave KDC}.)
+to Each Slave KDC}.)  If there is a need to preserve per-principal
+policy information from the database, you should do a ``kdb5_util dump
+-ov'' in order to preserve that information and propogate that dump file
+securely by some means to the slave so that its database has the correct
+state of the per-principal policy information.
 @end enumerate
 
 On the @emph{new} master KDC:

@@ -1,3 +1,13 @@
+2000-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo: Note in multiple places that the current default
+	dump format doesn't include the per-principal policy information,
+	and some means of working around this problem.
+
+	* install.texinfo (Switching Master and Slave KDCs): Note that
+	in the process of swapping KDCs, it is necessary to do a ov format
+	dump in order to preserve per-principal policy information.
+
 2000-06-13  Tom Yu  <tlyu@mit.edu>
 
 	* install.texinfo (Upgrading Existing Kerberos V5 Installations):
