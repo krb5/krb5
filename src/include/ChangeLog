@@ -1,3 +1,12 @@
+2002-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_c_valid_enctype, krb5_c_valid_cksumtype,
+	krb5_c_is_coll_proof_cksum, krb5_c_is_keyed_cksum,
+	krb5_kt_free_entry_contents): New decls.
+	(valid_enctype, valid_cksumtype, is_coll_proof_cksum,
+	is_keyed_cksum, krb5_kt_free_entry): Conditionalize on
+	KRB5_PRIVATE.
+
 2002-04-02  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Allow override of KRB5_PRIVATE and KRB5_DEPRECATED on
