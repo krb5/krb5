@@ -1,3 +1,8 @@
+Fri May 26 21:45:50 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Create kerbsrc-nt.zip with the right filename, and
+		clean up include/krb5.h after making the Windows .zip files.
+
 Fri May 26 15:33:12 1995 Keith Vetter (keithv@fusion.com)
 
 	* wconfig.c: extended so it ignores lines beginning with '@'.
