@@ -175,4 +175,33 @@
 #define	KRB5_ADM_KT_KEY_ETYPE	4
 #define	KRB5_ADM_KT_KEY_KEY	5
 #define	KRB5_ADM_KT_NCOMPS	6
+
+/*
+ * Data structure returned by krb5_read_realm_params()
+ */
+typedef struct __krb5_realm_params {
+    char *		realm_profile;
+    char *		realm_dbname;
+    char *		realm_mkey_name;
+    char *		realm_stash_file;
+    krb5_int32		realm_kdc_pport;
+    krb5_int32		realm_kdc_sport;
+    krb5_int32		realm_kadmind_port;
+    krb5_int32		realm_keytype;
+    krb5_int32		realm_enctype;
+    krb5_deltat		realm_max_life;
+    krb5_deltat		realm_max_rlife;
+    krb5_timestamp	realm_expiration;
+    krb5_flags		realm_flags;
+    unsigned int	realm_kdc_pport_valid:1;
+    unsigned int	realm_kdc_sport_valid:1;
+    unsigned int	realm_kadmind_port_valid:1;
+    unsigned int	realm_keytype_valid:1;
+    unsigned int	realm_enctype_valid:1;
+    unsigned int	realm_max_life_valid:1;
+    unsigned int	realm_max_rlife_valid:1;
+    unsigned int	realm_expiration_valid:1;
+    unsigned int	realm_flags_valid:1;
+    unsigned int	realm_filler:7;
+} krb5_realm_params;
 #endif	/* KRB5_ADM_H__ */
