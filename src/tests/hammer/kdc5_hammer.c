@@ -238,7 +238,7 @@ main(argc, argv)
 	}
       }
     }
-    fprintf (stderr, "\n%Tried %d.  Got %d errors.\n", n_tried, errors);
+    fprintf (stderr, "\nTried %d.  Got %d errors.\n", n_tried, errors);
   }
 
        
