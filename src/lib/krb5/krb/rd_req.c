@@ -56,7 +56,7 @@ krb5_error_code (*keyproc) PROTOTYPE((krb5_pointer,
 				      krb5_principal,
 				      krb5_kvno,
 				      krb5_keyblock **));
-krb5_const_pointer keyprocarg;
+krb5_pointer keyprocarg;
 krb5_rcache rcache;
 krb5_tkt_authent *authdat;
 {
