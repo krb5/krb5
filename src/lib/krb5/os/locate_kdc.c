@@ -184,9 +184,21 @@ add_sockaddr_to_list (struct addrlist *lp, const struct sockaddr *addr,
 #ifdef TEST
     fprintf (stderr, "\tadding sockaddr family %2d, len %d", addr->sa_family,
 	     len);
+#ifdef HAVE_GETNAMEINFO
+    {
+	char name[NI_MAXHOST];
+	int err;
+
+	err = getnameinfo (addr, len, name, sizeof (name), NULL, 0,
+			   NI_NUMERICHOST | NI_NUMERICSERV);
+	if (err == 0)
+	    fprintf (stderr, "\t%s", name);
+    }
+#else
     if (addr->sa_family == AF_INET)
 	fprintf (stderr, "\t%s",
 		 inet_ntoa (((const struct sockaddr_in *)addr)->sin_addr));
+#endif
     fprintf (stderr, "\n");
 #endif
 
@@ -270,14 +282,18 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 		  int port, int secport)
 {
 #ifdef HAVE_GETADDRINFO
-    int err;
     struct addrinfo *addrs, *a;
+#else
+    struct hostent *hp;
+#endif
+    int err;
 
 #ifdef TEST
     fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname,
 	     ntohs (port), ntohs (secport));
 #endif
 
+#ifdef HAVE_GETADDRINFO
     err = getaddrinfo (hostname, NULL, NULL, &addrs);
     if (err)
 	return translate_ai_error (err);
@@ -296,20 +312,10 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 	    break;
     }
     freeaddrinfo (addrs);
-    return err;
 #else
-    /* If we don't have getaddrinfo, we're not bothering with IPv6
-       support.  */
-    int err;
-    struct hostent *hp;
-    int i;
-
-#ifdef TEST
-    fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname, port, secport);
-#endif
-
     hp = gethostbyname (hostname);
     if (hp != NULL) {
+	int i;
 	for (i = 0; hp->h_addr_list[i] != 0; i++) {
 	    struct sockaddr_in sin4;
 
@@ -332,8 +338,8 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 		break;
 	}
     }
-    return 0;
 #endif
+    return err;
 }
 
 /*

@@ -1,3 +1,12 @@
+2001-05-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (add_sockaddr_to_list) [TEST]: If getnameinfo is
+	available, use it instead of inet_ntoa to get the printable
+	address.
+	(add_host_to_list): Share declaration sections as much as
+	possible.  Propagate errors back correctly from gethostbyname
+	path.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* hst_realm.c (T_TXT): Define if not defined by header files.
