@@ -17,21 +17,22 @@
 
 /*
 Local stuff:
- krb5_auth_to_replay(krb5_tkt_authent *auth,krb5_donot_replay *rep)
+ krb5_auth_to_replay(context, krb5_tkt_authent *auth,krb5_donot_replay *rep)
   given auth, take important information and make rep; return -1 if failed
 */
 
 krb5_error_code
-krb5_auth_to_rep(auth, rep)
-krb5_tkt_authent *auth;
-krb5_donot_replay *rep;
+krb5_auth_to_rep(context, auth, rep)
+    krb5_context context;
+    krb5_tkt_authent *auth;
+    krb5_donot_replay *rep;
 {
  krb5_error_code retval;
  rep->cusec = auth->authenticator->cusec;
  rep->ctime = auth->authenticator->ctime;
- if (retval = krb5_unparse_name(auth->ticket->server,&rep->server))
+ if (retval = krb5_unparse_name(context, auth->ticket->server,&rep->server))
    return retval; /* shouldn't happen */
- if (retval = krb5_unparse_name(auth->authenticator->client,&rep->client)) {
+ if (retval = krb5_unparse_name(context, auth->authenticator->client,&rep->client)) {
      FREE(rep->server);
      return retval; /* shouldn't happen. */
  }

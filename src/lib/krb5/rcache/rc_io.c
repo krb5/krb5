@@ -57,9 +57,10 @@ static void getdir()
   }
 }
 
-krb5_error_code krb5_rc_io_creat (d, fn)
-krb5_rc_iostuff *d;
-char **fn;
+krb5_error_code krb5_rc_io_creat (context, d, fn)
+    krb5_context context;
+    krb5_rc_iostuff *d;
+    char **fn;
 {
  char *c;
  krb5_int16 rc_vno = htons(KRB5_RC_VNO);
@@ -127,8 +128,8 @@ char **fn;
 	    retval = KRB5_RC_IO_UNKNOWN; goto fail;
     }
     }
-    if ((retval = krb5_rc_io_write(d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) ||
-	(retval = krb5_rc_io_sync(d)))
+    if ((retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) ||
+	(retval = krb5_rc_io_sync(context, d)))
     {
     fail:
      (void) unlink(d->fn);
@@ -140,9 +141,10 @@ char **fn;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_open (d, fn)
-krb5_rc_iostuff *d;
-char *fn;
+krb5_error_code krb5_rc_io_open (context, d, fn)
+    krb5_context context;
+    krb5_rc_iostuff *d;
+    char *fn;
 {
  krb5_int16 rc_vno;
  krb5_error_code retval;
@@ -192,7 +194,7 @@ char *fn;
 	    goto fail;
     }
  }
-    if (retval = krb5_rc_io_read(d, (krb5_pointer) &rc_vno,  sizeof(rc_vno)))  
+    if (retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,  sizeof(rc_vno)))  
 	goto unlk;
 
 
@@ -210,22 +212,24 @@ char *fn;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_move (new, old)
-krb5_rc_iostuff *new;
-krb5_rc_iostuff *old;
+krb5_error_code krb5_rc_io_move (context, new, old)
+    krb5_context context;
+    krb5_rc_iostuff *new;
+    krb5_rc_iostuff *old;
 {
  if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
    return KRB5_RC_IO_UNKNOWN;
- (void) krb5_rc_io_close(new);
+ (void) krb5_rc_io_close(context, new);
  new->fn = old->fn;
  new->fd = old->fd;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_write (d, buf, num)
-krb5_rc_iostuff *d;
-krb5_pointer buf;
-int num;
+krb5_error_code krb5_rc_io_write (context, d, buf, num)
+    krb5_context context;
+    krb5_rc_iostuff *d;
+    krb5_pointer buf;
+    int num;
 {
  if (write(d->fd,(char *) buf,num) == -1)
    switch(errno)
@@ -242,7 +246,8 @@ int num;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_sync (d)
+krb5_error_code krb5_rc_io_sync (context, d)
+    krb5_context context;
     krb5_rc_iostuff *d;
 {
     if (fsync(d->fd) == -1) {
@@ -256,10 +261,11 @@ krb5_error_code krb5_rc_io_sync (d)
     return 0;
 }
 
-krb5_error_code krb5_rc_io_read (d, buf, num)
-krb5_rc_iostuff *d;
-krb5_pointer buf;
-int num;
+krb5_error_code krb5_rc_io_read (context, d, buf, num)
+    krb5_context context;
+    krb5_rc_iostuff *d;
+    krb5_pointer buf;
+    int num;
 {
  int count;
  if ((count = read(d->fd,(char *) buf,num)) == -1)
@@ -274,8 +280,9 @@ int num;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_close (d)
-krb5_rc_iostuff *d;
+krb5_error_code krb5_rc_io_close (context, d)
+    krb5_context context;
+    krb5_rc_iostuff *d;
 {
  FREE(d->fn);
  d->fn = NULL;
@@ -284,8 +291,9 @@ krb5_rc_iostuff *d;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_destroy (d)
-krb5_rc_iostuff *d;
+krb5_error_code krb5_rc_io_destroy (context, d)
+    krb5_context context;
+    krb5_rc_iostuff *d;
 {
  if (unlink(d->fn) == -1)
    switch(errno)
@@ -300,21 +308,23 @@ krb5_rc_iostuff *d;
  return 0;
 }
 
-krb5_error_code krb5_rc_io_mark (d)
-krb5_rc_iostuff *d;
+krb5_error_code krb5_rc_io_mark (context, d)
+    krb5_context context;
+    krb5_rc_iostuff *d;
 {
  d->mark = lseek(d->fd,0,SEEK_CUR); /* can't fail */
  return 0;
 }
 
-krb5_error_code krb5_rc_io_unmark (d)
-krb5_rc_iostuff *d;
+krb5_error_code krb5_rc_io_unmark (context, d)
+    krb5_context context;
+    krb5_rc_iostuff *d;
 {
  (void) lseek(d->fd,d->mark,SEEK_SET); /* if it fails, tough luck */
  return 0;
 }
 
-int krb5_rc_io_size (d)
+int krb5_rc_io_size (context, d)
     krb5_rc_iostuff *d;
 {
     struct stat statb;
