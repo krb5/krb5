@@ -237,9 +237,23 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
       
-    for (i = 0; i < request->netypes; i++)
-	if (valid_etype(request->etype[i]))
+    for (i = 0; i < request->netypes; i++) {
+	krb5_keytype ok_keytype;
+	
+	if (!valid_etype(request->etype[i]))
+	    continue;
+
+	if (request->etype[i] == ETYPE_DES_CBC_MD5 &&
+	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
+	    continue;
+
+	ok_keytype = krb5_csarray[request->etype[i]]->system->proto_keytype;
+
+	if (server.key.keytype == ok_keytype ||
+	    server.alt_key.keytype == ok_keytype)
 	    break;
+    }
+    
     if (i == request->netypes) {
 	/* unsupported etype */
 	    
@@ -261,8 +275,6 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     ticket_reply.server = request->server;
-    ticket_reply.enc_part.etype = useetype;
-    ticket_reply.enc_part.kvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
     setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
@@ -404,11 +416,12 @@ krb5_data **response;			/* filled in with a response packet */
        in the database) */
     if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key))
 	goto errout;
-    retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
+    retval = krb5_encrypt_tkt_part(&eblock, &encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
     if (retval)
 	goto errout;
+    ticket_reply.enc_part.kvno = server.kvno;
 
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
@@ -451,9 +464,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     reply.client = request->client;
-    /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
-    reply.enc_part.etype = useetype;
-    reply.enc_part.kvno = client.kvno;
+
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
@@ -479,7 +490,8 @@ krb5_data **response;			/* filled in with a response packet */
     if (retval = KDB_CONVERT_KEY_OUTOF_DB(&client.key, &encrypting_key))
 	goto errout;
 
-    retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart,
+    reply.enc_part.kvno = client.kvno;
+    retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart, &eblock,
 				 &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);

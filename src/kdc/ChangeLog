@@ -1,3 +1,16 @@
+Mon Nov 21 17:23:50 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_tgs_req.c (process_tgs_req):
+	* do_as_req.c (process_as_req): Use the list of encryption types
+		passed as part of the KDC request to determine which
+		encryption to use for encrypting the ticket.  The
+		encryption must be one that is supported by the KDC, as
+		well as being one which is marked as being supported by
+		the server of the ticket.  In a AS request, also use this
+		encryption for encrypting the KDC response.  In a TGS
+		request, use the encryption type of the TGT authenticator
+		to determine how to encrypt the KDC response. 
+
 Tue Nov  8 17:51:30 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* do_tgs_req.c (process_tgs_req): Use published interface to call

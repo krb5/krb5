@@ -67,6 +67,7 @@ int	is_secondary;
 krb5_data **response;			/* filled in with a response packet */
 {
     krb5_encrypt_block eblock;
+    krb5_keytype second_ticket_etype = ETYPE_UNKNOWN;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -199,9 +200,37 @@ tgt_again:
 	goto cleanup;
     }
 
-    for (i = 0; i < request->netypes; i++)
-	if (valid_etype(request->etype[i]))
+    /*
+     * If we are using user-to-user authentication, then the resulting
+     * ticket has to use the same encryption system as was used to
+     * encrypt the ticket, since that's the same encryption system
+     * that's used for the ticket session key --- and that's what we
+     * use to encrypt the ticket!
+     */
+    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
+	second_ticket_etype = request->second_ticket[st_idx]->enc_part.etype;
+	    
+    for (i = 0; i < request->netypes; i++) {
+	krb5_keytype ok_keytype;
+	
+	if (!valid_etype(request->etype[i]))
+	    continue;
+
+	if (second_ticket_etype != ETYPE_UNKNOWN &&
+	    second_ticket_etype != request->etype[i])
+	    continue;
+
+	if (request->etype[i] == ETYPE_DES_CBC_MD5 &&
+	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
+	    continue;
+
+	ok_keytype = krb5_csarray[request->etype[i]]->system->proto_keytype;
+
+	if (server.key.keytype == ok_keytype ||
+	    server.alt_key.keytype == ok_keytype)
 	    break;
+    }
+    
     if (i == request->netypes) {
 	/* unsupported etype */
 	status = "BAD_ENCRYPTION_TYPE";
@@ -220,8 +249,6 @@ tgt_again:
     }
 
     ticket_reply.server = request->server; /* XXX careful for realm... */
-    ticket_reply.enc_part.etype = useetype;
-    ticket_reply.enc_part.kvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.starttime = 0;
@@ -466,6 +493,12 @@ tgt_again:
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
+    /*
+     * If we are doing user-to-user authentication, then make sure
+     * that the client for the second ticket matches the request
+     * server, and then encrypt the ticket using the session key of
+     * the second ticket.
+     */
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
 	krb5_keyblock *st_sealing_key;
 	krb5_kvno st_srv_kvno;
@@ -500,7 +533,9 @@ tgt_again:
 		goto cleanup;
 	}
 	    
-	if (retval = krb5_encrypt_tkt_part(request->second_ticket[st_idx]->enc_part2->session,
+	ticket_reply.enc_part.kvno = 0;
+	if (retval = krb5_encrypt_tkt_part(&eblock,
+					   request->second_ticket[st_idx]->enc_part2->session,
 					   &ticket_reply)) {
 	    status = "2ND_TKT_ENCRYPT";
 	    goto cleanup;
@@ -514,7 +549,8 @@ tgt_again:
 	    goto cleanup;
 	}
 
-	retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
+	ticket_reply.enc_part.kvno = server.kvno;
+	retval = krb5_encrypt_tkt_part(&eblock, &encrypting_key, &ticket_reply);
 
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
 	krb5_xfree(encrypting_key.contents);
@@ -529,7 +565,6 @@ tgt_again:
     reply.msg_type = KRB5_TGS_REP;
     reply.padata = 0;		/* always */
     reply.client = header_ticket->enc_part2->client;
-    reply.enc_part.etype = useetype;
     reply.enc_part.kvno = 0;		/* We are using the session key */
     reply.ticket = &ticket_reply;
 
@@ -558,7 +593,7 @@ tgt_again:
     /* use the session key in the ticket, unless there's a subsession key
        in the AP_REQ */
 
-    retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart,
+    retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart, &eblock,
 				 req_authdat->authenticator->subkey ?
 				 req_authdat->authenticator->subkey :
 				 header_ticket->enc_part2->session,
