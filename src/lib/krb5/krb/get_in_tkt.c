@@ -84,6 +84,7 @@ typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
 krb5_error_code
 krb5_get_in_tkt(DECLARG(const krb5_flags, options),
 		DECLARG(krb5_address * const *, addrs),
+		DECLARG(const krb5_preauthtype, pre_auth_type),
 		DECLARG(const krb5_enctype, etype),
 		DECLARG(const krb5_keytype, keytype),
 		DECLARG(git_key_proc, key_proc),
@@ -91,9 +92,11 @@ krb5_get_in_tkt(DECLARG(const krb5_flags, options),
 		DECLARG(git_decrypt_proc, decrypt_proc),
 		DECLARG(krb5_const_pointer, decryptarg),
 		DECLARG(krb5_creds *, creds),
-		DECLARG(krb5_ccache, ccache))
+		DECLARG(krb5_ccache, ccache),
+		DECLARG(krb5_kdc_rep **, ret_as_reply))
 OLDDECLARG(const krb5_flags, options)
 OLDDECLARG(krb5_address * const *, addrs)
+OLDDECLARG(const krb5_preauthtype, pre_auth_type)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(git_key_proc, key_proc)
@@ -102,6 +105,7 @@ OLDDECLARG(git_decrypt_proc, decrypt_proc)
 OLDDECLARG(krb5_const_pointer, decryptarg)
 OLDDECLARG(krb5_creds *, creds)
 OLDDECLARG(krb5_ccache, ccache)
+OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 {
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply;
@@ -112,12 +116,44 @@ OLDDECLARG(krb5_ccache, ccache)
     krb5_keyblock *decrypt_key;
     krb5_enctype etypes[1];
     krb5_timestamp time_now;
+    krb5_pa_data	*padata;
 
+    if (ret_as_reply)
+	*ret_as_reply = 0;
+    
     request.msg_type = KRB5_AS_REQ;
 
-    /* AS_REQ has no pre-authentication. */
-    request.padata = 0;
-
+    if (pre_auth_type == KRB5_PADATA_NONE) {
+	    decrypt_key = 0;
+	    request.padata = 0;
+    } else {
+	    /*
+	     * First, we get the user's key.  We assume we will need
+	     * it for the pre-authentication.  Actually, this could
+	     * possibly not be the case, but it's usually true.
+	     */
+	    retval = (*key_proc)(keytype, &decrypt_key, keyseed, 0);
+	    if (retval)
+		    return retval;
+	    request.padata = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)
+						      * 2);
+	    if (!request.padata) {
+		krb5_free_keyblock(decrypt_key);
+		return retval;
+	    }
+	    
+	    retval = krb5_obtain_padata(pre_auth_type, creds->client,
+					creds->addresses, decrypt_key,
+					&padata);
+	    if (retval) {
+		krb5_free_keyblock(decrypt_key);
+		free(request.padata);
+		return retval;
+	    }
+	    request.padata[0] = padata;
+	    request.padata[1] = 0;
+    }
+    
     request.kdc_options = options;
     request.client = creds->client;
     request.server = creds->server;
@@ -125,8 +161,11 @@ OLDDECLARG(krb5_ccache, ccache)
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if (retval = krb5_timeofday(&time_now))
+    if (retval = krb5_timeofday(&time_now)) {
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
 	return(retval);
+    }
 
     /* XXX we know they are the same size... */
     request.nonce = (krb5_int32) time_now;
@@ -141,17 +180,25 @@ OLDDECLARG(krb5_ccache, ccache)
     request.unenc_authdata = 0;
 
     /* encode & send to KDC */
-    if (retval = encode_krb5_as_req(&request, &packet))
+    if (retval = encode_krb5_as_req(&request, &packet)) {
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
 	return(retval);
+    }
     retval = krb5_sendto_kdc(packet, krb5_princ_realm(creds->client), &reply);
     krb5_free_data(packet);
-    if (retval)
+    if (retval) {
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
 	return(retval);
+    }
 
     /* now decode the reply...could be error or as_rep */
 
     if (krb5_is_krb_error(&reply)) {
 	if (retval = decode_krb5_error(&reply, &err_reply)) {
+	    if (decrypt_key)
+		krb5_free_keyblock(decrypt_key);
 	    xfree(reply.data);
             return retval;              /* some other reply--??? */
 	}
@@ -167,20 +214,28 @@ OLDDECLARG(krb5_ccache, ccache)
 	/* XXX somehow make error msg text available to application? */
 
 	krb5_free_error(err_reply);
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
 	xfree(reply.data);
 	return retval;
     }
 
     if (!krb5_is_as_rep(&reply)) {
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
 	xfree(reply.data);
 	return KRB5KRB_AP_ERR_MSG_TYPE;
     }
     if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
 	xfree(reply.data);
 	return retval;		/* some other reply--??? */
     }
     xfree(reply.data);
     if (as_reply->msg_type != KRB5_AS_REP) {
+	if (decrypt_key)
+	    krb5_free_keyblock(decrypt_key);
         return KRB5KRB_AP_ERR_MSG_TYPE;
     }
 
@@ -260,8 +315,8 @@ OLDDECLARG(krb5_ccache, ccache)
     creds->second_ticket.data = 0;
 
     retval = encode_krb5_ticket(as_reply->ticket, &packet);
-    krb5_free_kdc_rep(as_reply);
     if (retval) {
+	krb5_free_kdc_rep(as_reply);
 	krb5_free_addresses(creds->addresses);
 	cleanup_key();
 	return retval;
@@ -271,12 +326,17 @@ OLDDECLARG(krb5_ccache, ccache)
 
     /* store it in the ccache! */
     if (retval = krb5_cc_store_cred(ccache, creds)) {
+	krb5_free_kdc_rep(as_reply);
 	/* clean up the pieces */
 	xfree(creds->ticket.data);
 	krb5_free_addresses(creds->addresses);
 	cleanup_key();
 	return retval;
     }
+    if (ret_as_reply)
+	*ret_as_reply = as_reply;
+    else
+	krb5_free_kdc_rep(as_reply);
     return 0;
 }
 
