@@ -1,0 +1,42 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) -DDEBUG
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+uuclient: client.o
+	$(CC) $(CFLAGS) -o uuclient client.o $(KLIB) $(LIBS)
+
+client.o:	$(srcdir)/client.c
+
+all:: uuclient
+
+
+clean::
+	$(RM) client.o uuclient
+
+uuserver: server.o
+	$(CC) $(CFLAGS) -o uuserver server.o $(KLIB) $(LIBS)
+
+server.o:	$(srcdir)/server.c
+
+all:: uuserver
+
+
+clean::
+	$(RM) server.o uuserver
+

@@ -1,0 +1,6 @@
+AC_INIT(configure.in)
+CONFIG_DIRS(client server)
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+CONFIG_RULES
+AC_OUTPUT(Makefile,[EXTRA_RULES])

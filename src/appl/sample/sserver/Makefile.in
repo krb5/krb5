@@ -1,0 +1,34 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+sserver: sserver.o
+	$(CC) $(CFLAGS) -o sserver sserver.o $(KLIB) $(LIBS)
+
+sserver.o:	$(srcdir)/sserver.c
+
+all:: sserver
+
+
+clean::
+	$(RM) sserver.o sserver
+
+install::
+	$(INSTALLPROG) sserver ${DESTDIR}$(SERVER_BINDIR)/sserver
+	$(INSTALLPROG) sserver.M ${DESTDIR}$(SERVER_MANDIR)/sserver.$(SERVER_MANSUFFIX)
