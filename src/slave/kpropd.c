@@ -795,9 +795,10 @@ load_database(context, kdb5_edit, database_file_name)
     char *kdb5_edit;
     char *database_file_name;
 {
-	static char	*edit_av[4];
+	static char	*edit_av[10];
 	int	error_ret, save_stderr;
 	int	child_pid;
+	int 	count;
 
 	/* <sys/param.h> has been included, so BSD will be defined on
 	   BSD systems */
@@ -818,9 +819,14 @@ load_database(context, kdb5_edit, database_file_name)
 	sprintf(request, "load_db %s %s", database_file_name, kerb_database);
 	
 	edit_av[0] = kdb5_edit;
-	edit_av[1] = "-R";	
-	edit_av[2] = request;
-	edit_av[3] = NULL;
+	count = 1;
+	if (realm) {
+		edit_av[count++] = "-r";	
+		edit_av[count++] = realm;	
+	}
+	edit_av[count++] = "-R";	
+	edit_av[count++] = request;
+	edit_av[count++] = NULL;
 
 	switch(child_pid = fork()) {
 	case -1:

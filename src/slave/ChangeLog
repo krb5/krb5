@@ -1,5 +1,8 @@
 Sat May 20 13:46:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* kpropd.c (load_database): If realm specified then invoke
+		kdb5_edit with -r option.
+
 	* kprop.M: Document -P (port) option.
 
 	* kpropd.M: Document -P (port) option.
