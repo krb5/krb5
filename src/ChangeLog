@@ -1,8 +1,11 @@
 2004-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): On AIX and OSF/1, always
-	add $PTHREAD_CFLAGS to CFLAGS for use in later tests.
-	(WITH_CC): If on AIX and not using gcc, add -qhalt=e to CFLAGS.
+	add $PTHREAD_CFLAGS to CFLAGS for use in later tests.  Clear
+	PTHREAD_CFLAGS and PTHREAD_LIBS to avoid duplicating the options
+	later.
+	(WITH_CC): If on AIX and not using gcc, add -qhalt=e and -O to
+	CFLAGS if similar options are not already present.
 
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 

@@ -151,7 +151,14 @@ if test "$enable_thread_support" = yes; then
   # AIX and Tru64 don't support weak references, and don't have
   # stub versions of the pthread code in libc.
   case "${host_os}" in
-    aix* | osf*) LIBS="$LIBS $PTHREAD_LIBS" ; CFLAGS="$CFLAGS $PTHREAD_CFLAGS" ;;
+    aix* | osf*)
+      # On these platforms, we'll always pull in the thread support.
+      LIBS="$LIBS $PTHREAD_LIBS"
+      CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+      # We don't need to sometimes add the flags we've just folded in...
+      PTHREAD_LIBS=
+      PTHREAD_CFLAGS=
+      ;;
   esac
 fi
 dnl We want to know where these routines live, so on systems with weak
@@ -574,8 +581,19 @@ else
     # Using AIX but not GCC, assume native compiler.
     # The native compiler appears not to give a nonzero exit
     # status for certain classes of errors, like missing arguments
-    # in function calls.  Let's try to fix that.
-    CFLAGS="$CFLAGS -qhalt=e"
+    # in function calls.  Let's try to fix that with -qhalt=e.
+    case "$CC $CFLAGS" in
+      *-qhalt=*) ;;
+      *) CFLAGS="$CFLAGS -qhalt=e" ;;
+    esac
+    # Also, the optimizer isn't turned on by default, which means
+    # the static inline functions get left in random object files,
+    # leading to references to pthread_mutex_lock from anything that
+    # includes k5-int.h whether it uses threads or not.
+    case "$CC $CFLAGS" in
+      *-O*) ;;
+      *) CFLAGS="$CFLAGS -O" ;;
+    esac
   fi
 fi
 ])dnl
