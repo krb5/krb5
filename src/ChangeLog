@@ -1,5 +1,7 @@
 2004-09-17  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (install-unix): Use $(INSTALL_SCRIPT) for scripts.
+
 	* aclocal.m4 (AC_LIBRARY_NET): Look for res_search() prototype,
 	then for symbol in library, in case there's symbol renaming
 	happening in the headers.  Clean up some style nits.

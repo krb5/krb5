@@ -1,3 +1,7 @@
+2004-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install): Use $(INSTALL_SCRIPT) for scripts.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadmin.M: Put space after ".B" directive.

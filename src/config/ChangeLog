@@ -1,3 +1,8 @@
+2004-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (INSTALL_SCRIPT): New variable; use to install scripts,
+	as we don't want to strip scripts.
+
 2004-08-19  Sam Hartman  <hartmans@mit.edu>
 
 	* shlib.conf: Add support for gnu hurd and for BSD kernels with

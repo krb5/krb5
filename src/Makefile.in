@@ -543,7 +543,7 @@ install-windows::
 	@if exist "$(KRB_INSTALL_DIR)\lib\krb4_32.lib" del "$(KRB_INSTALL_DIR)\lib\krb4_32.lib"
 
 install-unix:: 
-	$(INSTALL) krb5-config \
+	$(INSTALL_SCRIPT) krb5-config \
 		$(DESTDIR)$(CLIENT_BINDIR)/krb5-config
 	$(INSTALL_DATA) $(srcdir)/krb5-config.M $(DESTDIR)$(CLIENT_MANDIR)/krb5-config.1
 
