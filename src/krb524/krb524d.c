@@ -350,7 +350,7 @@ krb5_error_code do_connection(s, context)
      if (debug)
 	  printf("V5 ticket decoded\n");
      
-     if( v5tkt->server->length >= 1
+     if( krb5_princ_size(context, v5tkt->server) >= 1
 	 &&krb5_princ_component(context, v5tkt->server, 0)->length == 3
 	 &&strncmp(krb5_princ_component(context, v5tkt->server, 0)->data,
 		   "afs", 3) == 0) {

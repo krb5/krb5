@@ -1,3 +1,8 @@
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kerberos5.c (kerberos5_is): Check principal name length before
+	examining components.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.orig: Deleted.
