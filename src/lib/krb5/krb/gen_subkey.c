@@ -43,12 +43,6 @@ krb5_generate_subkey(context, key, subkey)
 
     if ((retval = krb5_init_random_key(context, &eblock, key, &random_state)))
 	return(retval);
-    *subkey = (krb5_keyblock *)malloc(sizeof(**subkey));
-    if (!*subkey) {
-	(void) krb5_finish_random_key(context, &eblock, &random_state);
-	return ENOMEM;
-    }
-	
     if ((retval = krb5_random_key(context, &eblock, random_state, subkey))) {
 	(void) krb5_finish_random_key(context, &eblock, &random_state);
 	krb5_xfree(*subkey);

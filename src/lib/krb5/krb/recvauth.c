@@ -156,17 +156,6 @@ krb5_recvauth(context, auth_context,
     	    null_server.data = "default";
     	    problem = krb5_get_server_rcache(context, &null_server, &rcache);
         }
-	if ((!problem) && krb5_rc_recover(context, rcache)) {
-	    /*
-	     * If the rc_recover() didn't work, then try
-	     * initializing the replay cache.
-	     */
-	    if ((problem = krb5_rc_initialize(context, rcache,
-					      krb5_clockskew))) {
-	        krb5_rc_close(context, rcache);
-		rcache = NULL;
-	    }
-	}
         if (!problem) 
 	    problem = krb5_auth_con_setrcache(context, *auth_context, rcache);
     }

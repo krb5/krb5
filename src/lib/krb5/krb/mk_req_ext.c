@@ -270,7 +270,6 @@ krb5_generate_authenticator(context, authent, client, cksum, key, seq_number, au
 	    return retval;
     } else
 	authent->subkey = 0;
-    authent->subkey = key;
     authent->seq_number = seq_number;
     authent->authorization_data = authorization;
 

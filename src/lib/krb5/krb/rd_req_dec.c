@@ -254,7 +254,13 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
     }
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
-    (*auth_context)->remote_subkey = (*auth_context)->authentp->subkey;
+    if ((*auth_context)->authentp->subkey) {
+	if ((retval = krb5_copy_keyblock(context,
+					 (*auth_context)->authentp->subkey,
+					 &((*auth_context)->remote_subkey))))
+	    goto cleanup;
+    } else
+	(*auth_context)->remote_subkey = 0;
     if ((retval = krb5_copy_keyblock(context, req->ticket->enc_part2->session,
 				     &((*auth_context)->keyblock))))
 	goto cleanup;

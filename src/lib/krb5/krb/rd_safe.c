@@ -141,10 +141,8 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 
     *outbuf = message->user_data;
     message->user_data.data = NULL;
-
-    krb5_free_checksum(context, his_cksum);
-    return 0;
-
+    retval = 0;
+    
 cleanup:
     krb5_free_safe(context, message);
     return retval;
@@ -268,7 +266,7 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 	
     /* everything is ok - return data to the user */
     return 0;
-
+eh
 error:;
     krb5_xfree(outbuf->data);
     return retval;

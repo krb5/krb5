@@ -1,3 +1,35 @@
+Sat Sep 16 01:23:14 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sendauth.c (krb5_sendauth): Make sure the scratch credentials
+		structure may have possible been used be freed..
+
+	* rd_safe.c (krb5_rd_safe_basic): Fall through to the cleanup code
+		at the end, to make sure the decoded message in message is
+		freed.
+
+	* rd_req_dec.c (krb5_rd_req_decoded): Use krb5_copy_keyblock to
+		copy authent->subkey to auth_context->remote_subkey.
+		Keeping them separate avoids aliasing problems.
+
+	* mk_req_ext.c (krb5_generate_authenticator): Fix memory leak.
+		Don't bash authent->subkey with key after carefully
+		copying it using krb5_copy_keyblock!
+
+	* recvauth.c (krb5_recvauth): krb5_get_server_rcache() already
+		opens the rcache; doing it again merely causes a memory leak.
+
+Fri Sep 15 17:20:08 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gen_subkey.c (krb5_generate_subkey): Eliminate memory leak.
+		krb5_init_random_key() does its own allocation of the
+		keyblock.
+
+	* gc_via_tkt.c (krb5_kdcrep2creds): Fix memory leak.
+
+	* srv_rcache.c (krb5_get_server_rcache): Fix memory leak.
+
+	* rd_safe.c (krb5_rd_safe_basic): Fix memory leak.
+
 Tue Sep 12 12:40:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* t_ser.c (ser_cksum_test): Work around an optimizer bug unser

@@ -88,6 +88,7 @@ krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
 	goto cleanup_keyblock;
 
     (*ppcreds)->ticket = *pdata;
+    free(pdata);
     return 0;
 
 cleanup_keyblock:

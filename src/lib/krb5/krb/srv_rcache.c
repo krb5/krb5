@@ -96,7 +96,8 @@ krb5_get_server_rcache(context, piece, rcptr)
     }
 
     *rcptr = rcache;
-    return 0;
+    rcache = 0;
+    retval = 0;
 
 cleanup:
     if (rcache)
