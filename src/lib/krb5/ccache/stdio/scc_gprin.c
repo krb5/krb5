@@ -49,11 +49,13 @@ krb5_scc_get_principal(context, id, princ)
      krb5_error_code kret;
 
      MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
-     /* skip over vno at beginning of file */
-     fseek(((krb5_scc_data *) id->data)->file, sizeof(krb5_int16), 0);
+
+     kret = krb5_scc_skip_header(context, id);
+     if (kret) goto done;
 
      kret = krb5_scc_read_principal(context, id, princ);
 
+done:
      MAYBE_CLOSE (context, id, kret);
      return kret;
 }

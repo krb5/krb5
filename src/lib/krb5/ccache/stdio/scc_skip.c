@@ -29,6 +29,27 @@
 #include "scc.h"
 
 krb5_error_code
+krb5_scc_skip_header(context, id)
+   krb5_context context;
+   krb5_ccache id;
+{
+     krb5_error_code kret;
+     krb5_principal princ;
+     krb5_scc_data *data = (krb5_scc_data *) id->data;
+     krb5_ui_2 scc_flen;
+
+     if (fseek(data->file, sizeof(krb5_ui_2), SEEK_SET))
+	 return errno;
+     if (data->version == KRB5_SCC_FVNO_4) {
+	 kret = krb5_scc_read_ui_2(context, id, &scc_flen);
+	 if (kret) return kret;
+	 if (fseek(data->file, scc_flen, SEEK_CUR))
+	     return errno;
+     }
+     return KRB5_OK;
+}
+
+krb5_error_code
 krb5_scc_skip_principal(context, id)
    krb5_context context;
    krb5_ccache id;
@@ -43,5 +64,3 @@ krb5_scc_skip_principal(context, id)
      krb5_free_principal(context, princ);
      return KRB5_OK;
 }
-
-     

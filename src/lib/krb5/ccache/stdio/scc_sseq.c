@@ -56,13 +56,16 @@ krb5_scc_start_seq_get(context, id, cursor)
 
      /* Make sure we start reading right after the primary principal */
      MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
-     /* skip over vno at beginning of file */
-     fseek(((krb5_scc_data *) id->data)->file, sizeof(krb5_int16), 0);
 
-     krb5_scc_skip_principal(context, id);
+     ret = krb5_scc_skip_header(context, id);
+     if (ret) goto done;
+     ret = krb5_scc_skip_principal(context, id);
+     if (ret) goto done;
+     
      fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
      *cursor = (krb5_cc_cursor) fcursor;
 
+done:
      MAYBE_CLOSE (context, id, ret);
      return(ret);
 }
