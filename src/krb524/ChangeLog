@@ -1,3 +1,6 @@
+2002-03-28 Alexandra Ellwood <lxs@mit.edu>
+    * krb524.h: Added C++ protection and Mac pragmas
+
 2002-03-1 Alexandra Ellwood <lxs@mit.edu>
     * krb524.h, cnv_tkt_skey.c, conv_creds.c, conv_princ.c, encode.c, 
     misc.c, sendmsg.c: Updated header paths on Mac OS X so that we

@@ -32,6 +32,18 @@
     #include "krb524_err.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
+#endif
+
 extern int krb524_debug;
 
 int krb524_convert_tkt_skey
@@ -81,5 +93,17 @@ void krb524_init_ets
 int krb524_send_message 
 	KRB5_PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
 		   krb5_data * reply));
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+	#pragma options align=reset
+#endif
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* __KRB524_H__ */
