@@ -20,6 +20,7 @@
  * Perform Remote Kerberos Administrative Functions
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -100,9 +101,6 @@ main(argc,argv)
     krb5_init_context(&context);
     krb5_init_ets(context);
 
-    client_name = (char *) malloc(755);
-    memset((char *) client_name, 0, sizeof(client_name));
-
     while ((option = getopt(argc, argv, "c:np:")) != EOF) {
 	switch (option) {
 	  case 'c':
@@ -123,6 +121,8 @@ main(argc,argv)
     
     if (optind < argc) {
 	/* Admin name specified on command line */
+	client_name = (char *) malloc(755);
+	memset((char *) client_name, 0, sizeof(client_name));
 	strcpy(client_name, argv[optind++]);
 	if (retval = krb5_parse_name(context, client_name, &client)) {
 	    fprintf(stderr, "Error Parsing %s\n", client_name);
@@ -141,9 +141,12 @@ main(argc,argv)
     /* At this point, both client and client_name are set up. */
 
     if (!nflag) {
+	free(client_name);
+	client_name = (char *) malloc(755);
 	strcpy(client_name, client->data[0].data);
 	strncat(client_name, "/admin@", 7);
 	strncat(client_name, client->realm.data, client->realm.length);
+	krb5_free_principal(context, client);
 	if (retval = krb5_parse_name(context, client_name, &client)) {
 	    fprintf(stderr, "Unable to Parse %s\n", client_name);
 	    usage();
@@ -300,6 +303,7 @@ main(argc,argv)
             exit(1);
 	}
 	free(inbuf.data);
+	free(msg_data.data);
 
 	valid = 0;
 	princ_name[0] = '\0';
@@ -420,6 +424,7 @@ repeat:
     if (rd_priv_resp.message)
 	free(rd_priv_resp.message);
 
+    krb5_free_principal(context, client);
     
     exit(retval);
 }
@@ -447,6 +452,7 @@ get_first_ticket(context, cache, client, my_creds)
     }
 
     if ((retval = krb5_os_localaddr(&my_addresses))) {
+	free(client_name);
 	fprintf(stderr, "Unable to Get Principals Address!\n");
 	return(1);
     }
@@ -467,6 +473,7 @@ get_first_ticket(context, cache, client, my_creds)
         fprintf(stderr, "Error %s while building client name!\n",
 		error_message(retval));
 	krb5_free_addresses(context, my_addresses);
+	free(client_name);
         return(1);
     }
     
@@ -474,6 +481,7 @@ get_first_ticket(context, cache, client, my_creds)
 
     if ((password = (char *) calloc (1, 255)) == NULL) {
         fprintf(stderr, "No Memory for Retrieving Admin Password!\n");
+	free(client_name);
         return(1);
     }
 
@@ -487,6 +495,7 @@ get_first_ticket(context, cache, client, my_creds)
                                 client_name);
 	free(password);
 	krb5_free_addresses(context, my_addresses);
+	free(client_name);
 	return(1);
     }
 
@@ -501,6 +510,7 @@ get_first_ticket(context, cache, client, my_creds)
     memset((char *) password, 0, pwsize);
     free(password);
     krb5_free_addresses(context, my_addresses);
+    free(client_name);
     
     if (retval) {
             fprintf(stderr, "\nUnable to Get Initial Credentials: %s!\n",
@@ -656,9 +666,8 @@ get_def_princ(context, client)
 	    fprintf(stderr, "root is not a valid Administrator\n!\n");
 	    usage();
 	}
-	
-	(void) krb5_cc_close(context, cache);
     }
+    (void) krb5_cc_close(context, cache);
 }
 
 usage()

@@ -127,6 +127,7 @@ kadm_add_user(context, auth_context, my_creds, local_socket,
 	    free(rd_priv_resp.message);
 	} else
 	    fprintf(stderr, "Generic error from server.\n\n");
+	free(msg_data.data);
         return(0);
     }
     
@@ -159,6 +160,8 @@ kadm_add_user(context, auth_context, my_creds, local_socket,
     inbuf.length = 2;
    
 #else
+
+    free(msg_data.data);
 
     if ((password = (char *) calloc (1, ADM_MAX_PW_LENGTH+1)) == (char *) 0) {
 	fprintf(stderr, "No Memory for allocation of password!\n");

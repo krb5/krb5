@@ -1,3 +1,12 @@
+Mon May  1 23:19:10 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+        * kadmin.c (main): Fix really broken way client and client_name
+		were being handled.  Memory was being leaked, and then
+		memory blocks which were allocated to small where then
+		overrun.
+
+	* kadmin_add.c (kadm_add_user): Fix memory leak.
+
 Sat Apr 29 12:47:55 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadmin_done.c (kadm_done): Removed unused argument to match call
