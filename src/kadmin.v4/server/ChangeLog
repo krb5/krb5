@@ -1,3 +1,6 @@
+Tue Jun 20 14:44:54 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: add tests for TIME_WITH_SYS_TIME and sys/time.h
 
 Thu Jun 15 17:52:29 EDT 1995	Paul Park	(pjpark@mit.edu)
         * Makefile.in - Change explicit library names to -l<lib> form, and
