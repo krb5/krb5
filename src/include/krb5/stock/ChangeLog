@@ -1,3 +1,8 @@
+Tue May  2 20:49:15 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* osconf.h (KRB5_ENV_KDC): add KERBEROS_SERVER environment
+	variable, both for user and testsuite convenience.
+
 Fri Apr 21 21:00:40 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* osconf.h: Add #define's for DEFAULT_PROFILE_FILENAME.  

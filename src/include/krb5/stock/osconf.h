@@ -60,6 +60,8 @@
 #define	DEFAULT_KEYTAB_NAME	"FILE:@KRB5SRVTABDIR/v5srvtab"
 #endif
 
+#define KRB5_ENV_KDC		"KERBEROS_SERVER"
+
 #define DEFAULT_KDB_FILE        "@KDB5DIR/principal"
 #define DEFAULT_ADMIN_ACL	"@KDB5DIR/admin_acl_file"
 
