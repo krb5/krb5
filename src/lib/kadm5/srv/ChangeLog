@@ -1,3 +1,16 @@
+Fri Dec  4 23:10:32 1998  Tom Yu  <tlyu@mit.edu>
+
+	* svr_principal.c (kadm5_create_principal): Modify to call
+	create_principal_3.
+	(kadm5_create_principal_3): New function including flag to keep
+	old keys and optional explicit keysalt_tuples.
+	(kadm5_chpass_principal): Modify to call chpass_principal_3.
+	(kadm5_chpass_principal_3): New function including flag to keep
+	old keys and optional explicit keysalt_tuples.
+	(kadm5_randkey_principal): Modify to call randkey_principal_3.
+	(kadm5_randkey_principal_3): New function including flag to keep
+	old keys and optional explicit keysalt_tuples.
+
 Tue Nov 17 18:20:48 1998  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (kadm5_create_principal): 

@@ -104,6 +104,17 @@ kadm5_create_principal(void *server_handle,
 			    kadm5_principal_ent_t entry, long mask,
 			    char *password)
 {
+    return
+	kadm5_create_principal_3(server_handle, entry, mask,
+				 FALSE, 0, NULL, password);
+}
+kadm5_ret_t
+kadm5_create_principal_3(void *server_handle,
+			 kadm5_principal_ent_t entry, long mask,
+			 krb5_boolean keepold,
+			 int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
+			 char *password)
+{
     krb5_db_entry		kdb;
     osa_princ_ent_rec		adb;
     kadm5_policy_ent_rec	polent;
@@ -235,11 +246,11 @@ kadm5_create_principal(void *server_handle,
     /* initialize the keys */
 
     if (ret = krb5_dbe_cpw(handle->context, &master_keyblock,
-			   handle->params.keysalts,
-			   handle->params.num_keysalts,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
 			   password,
 			   (mask & KADM5_KVNO)?entry->kvno:1,
-			   FALSE, &kdb)) {
+			   keepold, &kdb)) {
 	krb5_dbe_free_contents(handle->context, &kdb);
 	if (mask & KADM5_POLICY)
 	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);
@@ -1012,6 +1023,17 @@ kadm5_ret_t
 kadm5_chpass_principal(void *server_handle,
 			    krb5_principal principal, char *password)
 {
+    return
+	kadm5_chpass_principal_3(server_handle, principal, FALSE,
+				 0, NULL, password);
+}
+
+kadm5_ret_t
+kadm5_chpass_principal_3(void *server_handle,
+			 krb5_principal principal, krb5_boolean keepold,
+			 int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
+			 char *password)
+{
     krb5_int32			now;
     kadm5_policy_ent_rec	pol;
     osa_princ_ent_rec		adb;
@@ -1052,10 +1074,10 @@ kadm5_chpass_principal(void *server_handle,
 	 goto done;
 
     if (ret = krb5_dbe_cpw(handle->context, &master_keyblock,
-			   handle->params.keysalts,
-			   handle->params.num_keysalts,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
 			   password, 0 /* increment kvno */,
-			   FALSE, &kdb))
+			   keepold, &kdb))
 	goto done;
 
     kdb.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
@@ -1147,6 +1169,19 @@ kadm5_randkey_principal(void *server_handle,
 			krb5_keyblock **keyblocks,
 			int *n_keys)
 {
+    return
+	kadm5_randkey_principal_3(server_handle, principal,
+				  FALSE, 0, NULL,
+				  keyblocks, n_keys);
+}
+kadm5_ret_t
+kadm5_randkey_principal_3(void *server_handle,
+			krb5_principal principal,
+			krb5_boolean keepold,
+			int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
+			krb5_keyblock **keyblocks,
+			int *n_keys)
+{
     krb5_db_entry		kdb;
     osa_princ_ent_rec		adb;
     krb5_int32			now;
@@ -1172,8 +1207,9 @@ kadm5_randkey_principal(void *server_handle,
        return(ret);
 
     if (ret = krb5_dbe_crk(handle->context, &master_keyblock,
-			   handle->params.keysalts,
-			   handle->params.num_keysalts, FALSE,
+			   n_ks_tuple?n_ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?ks_tuple:handle->params.num_keysalts,
+			   keepold,
 			   &kdb))
        goto done;
 
