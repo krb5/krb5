@@ -67,6 +67,8 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_keyblock *session_key;
     krb5_keyblock encrypting_key;
     krb5_enctype useetype;
+    krb5_pa_data *padat_tmp[2], padat_local;
+
     register int i;
 
     krb5_timestamp until, rtime;
@@ -272,7 +274,53 @@ krb5_data **response;			/* filled in with a response packet */
     reply.msg_type = KRB5_AS_REP;
 
     reply.padata = 0;
-    /* XXX put in padata salting stuff here*/
+    if (client.salt_type != KRB5_KDB_SALTTYPE_NORMAL) {
+        padat_tmp[0] = &padat_local;
+        padat_tmp[1] = 0;
+ 
+        padat_tmp[0]->pa_type = KRB5_PADATA_PW_SALT;
+
+	/* WARNING: sharing substructure here, but it's not a real problem,
+	   since nothing below will "pull out the rug" */
+
+	switch (client.salt_type) {
+	    krb5_data *data_foo, data_bar;
+	case KRB5_KDB_SALTTYPE_V4:
+	    /* send an empty (V4) salt */
+	    padat_tmp[0]->contents = 0;
+	    padat_tmp[0]->length = 0;
+	    break;
+	case KRB5_KDB_SALTTYPE_NOREALM:
+	    if (retval = norealm_salt(request->client, &data_bar)) {
+		cleanup();
+		return retval;
+	    }
+	    padat_tmp[0]->length = data_bar.length;
+	    padat_tmp[0]->contents = (krb5_octet *)data_bar.data;
+	    break;
+	case KRB5_KDB_SALTTYPE_ONLYREALM:
+	    data_foo = krb5_princ_realm(request->client);
+	    padat_tmp[0]->length = data_foo->length;
+	    padat_tmp[0]->contents = (krb5_octet *)data_foo->data;
+	    break;
+	case KRB5_KDB_SALTTYPE_SPECIAL:
+	    padat_tmp[0]->length = client.salt_length;
+	    padat_tmp[0]->contents = client.salt;
+	    break;
+	}
+	reply.padata = padat_tmp;
+    }
+
+#undef cleanup
+#define cleanup() {krb5_db_free_principal(&client, 1); \
+		   memset((char *)session_key->contents, 0, \
+			  session_key->length); \
+		   free((char *)session_key->contents); \
+		   session_key->contents = 0; \
+		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
+			 ticket_reply.enc_part.ciphertext.length); \
+		   free(ticket_reply.enc_part.ciphertext.data); \
+		   if (client.salt_type == KRB5_KDB_SALTTYPE_NOREALM) xfree(padat_tmp[0]->contents);}
 
     reply.client = request->client;
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
