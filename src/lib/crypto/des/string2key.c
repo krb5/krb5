@@ -60,11 +60,11 @@ OLDDECLARG(krb5_principal, princ)
     register unsigned temp,i;
     register int j;
     register long length;
-    static unsigned char *k_p;
-    static int forward;
+    unsigned char *k_p;
+    int forward;
     register char *p_char;
-    static char k_char[64];
-    static mit_des_key_schedule key_sked;
+    char k_char[64];
+    mit_des_key_schedule key_sked;
 
 #define min(A, B) ((A) < (B) ? (A): (B))
 

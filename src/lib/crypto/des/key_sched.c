@@ -58,7 +58,7 @@ mit_des_key_sched(k,schedule)
     register i, j, n;		/* i = r10, j = r9, n = r8 */
     register unsigned int temp;	/*  r7 */
     register char *p_char;	/* r6 */
-    static key k_char;
+    key k_char;
     i = 8;
     n = 0;
     p_char = k_char;

@@ -61,9 +61,9 @@ mit_des_cbc_cksum(in,out,length,key,iv)
     unsigned long *ivec = (unsigned long *) iv;
 
     unsigned long i,j;
-    static unsigned long t_input[2];
-    static unsigned long t_output[8];
-    static unsigned char *t_in_p;
+    unsigned long t_input[2];
+    unsigned long t_output[8];
+    unsigned char *t_in_p;
 
     t_in_p = (unsigned char *) t_input;
 #ifdef MUSTALIGN

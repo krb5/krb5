@@ -237,10 +237,10 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
     register unsigned long *ivec = (unsigned long *) iv;
 
     unsigned long i,j;
-    static unsigned long t_input[2];
-    static unsigned long t_output[2];
-    static unsigned char *t_in_p;
-    static unsigned long xor_0, xor_1;
+    unsigned long t_input[2];
+    unsigned long t_output[2];
+    unsigned char *t_in_p;
+    unsigned long xor_0, xor_1;
 
     t_in_p = (unsigned char *) t_input;
     if (encrypt) {
