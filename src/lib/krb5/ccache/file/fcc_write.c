@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_write_c[] = "$Id$";
+static char rcsid_fcc_write_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
@@ -134,7 +134,7 @@ krb5_fcc_store_addr(id, addr)
 {
      krb5_error_code ret;
 
-     ret = krb5_fcc_store_int16(id, &addr->addrtype);
+     ret = krb5_fcc_store_ui_2(id, &addr->addrtype);
      CHECK(ret);
      ret = krb5_fcc_store_int(id, &addr->length);
      CHECK(ret);
@@ -173,11 +173,11 @@ krb5_fcc_store_int32(id, i)
 }
 
 krb5_error_code
-krb5_fcc_store_int16(id, i)
+krb5_fcc_store_ui_2(id, i)
    krb5_ccache id;
-   krb5_int16 *i;
+   krb5_ui_2 *i;
 {
-     return krb5_fcc_write(id, (char *) i, sizeof(krb5_int16));
+     return krb5_fcc_write(id, (char *) i, sizeof(krb5_ui_2));
 }
    
 krb5_error_code
