@@ -29,10 +29,6 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
-#ifdef macintosh
-#include <KerberosSupport/Utilities.h>
-#endif
-
 asn1_error_code asn1_encode_integer(buf, val, retlen)
      asn1buf * buf;
      const long val;

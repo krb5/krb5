@@ -1,3 +1,6 @@
+2002-03-06 Alexandra Ellwood <lxs@mit.edu>
+    * asn1_encode.c: Removed unused Mac OS 9 code
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * asn1_get.c: removed unused variable to reduce warnings
 
