@@ -1,3 +1,10 @@
+1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, configure.in: Move the responsibility for
+		generating the Makefile in this directory to the top-level
+		configure script.  The local configure.in script has been
+		deleted.
+
 Wed Feb 18 16:32:41 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

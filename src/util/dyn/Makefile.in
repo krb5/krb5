@@ -1,4 +1,7 @@
-thisconfigdir=.
+thisconfigdir=./../..
+myfulldir=util/dyn
+mydir=util/dyn
+MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 RELDIR=../util/dyn
 CFLAGS = $(CCOPTS) $(DEFS)

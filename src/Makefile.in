@@ -1,4 +1,8 @@
 thisconfigdir=.
+myfulldir=.
+mydir=.
+MY_SUBDIRS=util include lib @krb524@ kdc kadmin slave clients appl tests \
+	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
 CFLAGS = $(CCOPTS) $(DEFS)
 
@@ -123,7 +127,7 @@ config-windows:: makefile-windows
 
 ##DOS##MKFDEP= wconfig.exe config\pre.in config\post.in \
 ##DOS##	config\windows.in config\win-post.in
-##DOS##WCONFIG= .\wconfig $(WFLAGS)
+##DOS##WCONFIG= .\wconfig $(WCONFIG_FLAGS)
 
 ##DOS##makefile-windows:: $(MKFDEP) makefile \
 ##DOS##		clients\makefile clients\kdestroy\makefile \

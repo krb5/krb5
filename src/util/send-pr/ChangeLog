@@ -1,0 +1,7 @@
+1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, configure.in: Move the responsibility for
+		generating the Makefile in this directory to the top-level
+		configure script.  The local configure.in script has been
+		deleted.
+

@@ -1,4 +1,7 @@
-thisconfigdir=.
+thisconfigdir=./..
+myfulldir=lib
+mydir=lib
+MY_SUBDIRS=crypto krb5 des425 @KRB4@ krb5util kdb gssapi rpc kadm5
 BUILDTOP=$(REL)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
