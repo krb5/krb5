@@ -47,7 +47,7 @@ static krb5_cryptosystem_entry mit_des3_md5_cryptosystem_entry = {
     mit_des3_random_key,
     sizeof(mit_des_cblock),
     RSA_MD5_CKSUM_LENGTH+sizeof(mit_des_cblock),
-    3*sizeof(mit_des_cblock),
+    sizeof(mit_des3_cblock),
     ENCTYPE_DES3_CBC_MD5
     };
 
