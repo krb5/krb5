@@ -144,17 +144,22 @@ libdir/lib/**/libname.a:						@@\
             IMAKE = imake		/* assume BINDIR in path */
            DEPEND = makedepend		/* assume BINDIR in path */
         MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
-       COMPILE_ET = compile_et
-          MK_CMDS = mk_cmds
-            SSLIB = -lss
-        COMERRLIB = -lcom_err
 #else
             IMAKE = $(IMAKESRC)/imake
            DEPEND = DependCmd
         MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
-       COMPILE_ET = CompileEtCmd
-          MK_CMDS = MkCmdsCmd
-            SSLIB = SSLib
-        COMERRLIB = ComErrLib
 #endif
-
+#ifdef UseSSInstalled
+            SSLIB = -lss
+          MK_CMDS = mk_cmds
+#else
+            SSLIB = SSLib
+          MK_CMDS = MkCmdsCmd
+#endif
+#ifdef UseComErrInstalled
+        COMERRLIB = -lcom_err
+       COMPILE_ET = compile_et
+#else
+        COMERRLIB = ComErrLib
+       COMPILE_ET = CompileEtCmd
+#endif

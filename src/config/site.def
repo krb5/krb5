@@ -262,4 +262,11 @@
 #define IsodeLib /mit/isode/isode-6.0/@sys/lib/libisode.a
 #define IsodeDir /mit/isode/isode-6.0
 
-/* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc */
+/* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc
+   			  (might want to be in the architecture-specific
+			   configuration file) */
+
+#define UseSSInstalled /* -- turn on if you have the SS library &c installed */
+			
+#define UseComErrInstalled /* -- turn on if you have the com_err library
+   				 &c installed */
