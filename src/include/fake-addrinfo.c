@@ -39,6 +39,13 @@
  * fashion that it might be confused with the original M.I.T. software.  
  */
 
+/* To do, maybe:
+
+   IPv6 support for systems with working inet6 socket code but broken
+   getaddrinfo implementations?  (RH Linux 6.1 libc getaddrinfo
+   ignores AI_NUMERICHOST.  Solaris 8 doesn't appear to support
+   IPv6.)  Could use gethostbyname2 if available.  */
+
 #include "fake-addrinfo.h"
 
 #if !defined (HAVE_GETADDRINFO) || defined (BROKEN_GETADDRINFO)
@@ -209,7 +216,7 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    else
 		return EAI_FAIL; /* ?? */
 	} else {
-	    hp = gethostbyaddr (&sinp->sin_addr, sizeof (struct in_addr),
+	    hp = gethostbyaddr ((struct sockaddr *) &sinp->sin_addr, sizeof (struct in_addr),
 				sa->sa_family);
 	    if (hp == 0) {
 		if (h_errno == NO_ADDRESS && !(flags & NI_NAMEREQD)) /* ??? */

@@ -1,5 +1,8 @@
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.c (getnameinfo): Cast address argument to
+	gethostbyaddr.
+
 	* fake-addrinfo.h (AI_V4MAPPED, AI_ADDRCONFIG, AI_ALL,
 	AI_DEFAULT): Define as bogus values, since they're part of
 	getipnodeby* API, not getaddrinfo API.
