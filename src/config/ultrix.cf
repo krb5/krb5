@@ -11,7 +11,8 @@
 #define HasBsearch YES
 #define IsPOSIX YES
 #define StandardCppDefines -DPOSIX -D_POSIX_SOURCE
-#define SaberDefines -DPOSIX
+/* Saber bug doesn't allow deref through const *'s */
+#define SaberDefines -DPOSIX -Dconst=
 #define StandardDefines -YPOSIX -D_POSIX_SOURCE
 
 #ifdef VaxArchitecture

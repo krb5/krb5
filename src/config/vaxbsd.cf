@@ -6,6 +6,9 @@
 #define OSMajorVersion    4
 #define OSMinorVersion    3
 
+/* Saber bug doesn't allow deref through const *'s */
+#define SaberDefines -Dconst=
+
 #ifdef VaxArchitecture
 #define HasGcc YES
 #endif
