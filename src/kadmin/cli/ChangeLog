@@ -1,3 +1,8 @@
+Fri Jun 27 17:37:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (add_principal): Don't call kadm5_free_key_data; that's
+	Just Wrong here and was causing coredumps.
+
 Wed May 28 13:33:40 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* keytab.c (add_principal): use kadm5_free_key_data

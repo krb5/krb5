@@ -255,7 +255,11 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
      }
 
 cleanup:
-     kadm5_free_key_data(handle, &nkeys, &keys);
+     if (nkeys) {
+	  for (i = 0; i < nkeys; i++)
+	       krb5_free_keyblock_contents(context, &keys[i]);
+	  free(keys);
+     }
      if (princ)
 	  krb5_free_principal(context, princ);
 
