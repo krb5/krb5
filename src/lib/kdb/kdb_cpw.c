@@ -301,7 +301,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 		break;
 	}
 
-	if (j == i)
+	if (j < i)
 	    continue;
 
 	if (retval = krb5_dbe_create_key_data(context, db_entry)) 
