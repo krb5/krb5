@@ -188,7 +188,6 @@ krb5_rd_req_decoded_opt(context, auth_context, req, server, keytab,
     /* Hierarchical Cross-Realm */
   
     {
-    	krb5_data        lrealm;
       	krb5_data      * realm;
       	krb5_transited * trans;
   
@@ -200,12 +199,11 @@ krb5_rd_req_decoded_opt(context, auth_context, req, server, keytab,
       	 * transited are within the hierarchy between the client's realm  
       	 * and the local realm.                                        
   	 */
-      	if (trans->tr_contents.data && trans->tr_contents.data[0]) {
-            krb5_get_default_realm(context, &(lrealm.data));
-            lrealm.length = strlen(lrealm.data);
-            retval = krb5_check_transited_list(context, &(trans->tr_contents), 
-					       realm, &lrealm);
-            free(lrealm.data);
+	if (trans->tr_contents.data && trans->tr_contents.data[0]) {
+	    retval = krb5_check_transited_list(context, &(trans->tr_contents), 
+					       realm,
+					       krb5_princ_realm (context,
+								 server));
       	}
     }
 

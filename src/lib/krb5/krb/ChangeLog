@@ -1,3 +1,8 @@
+2001-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* rd_req_dec.c (krb5_rd_req_decoded_opt): Pass server realm to
+	transited-list check, not local realm, in case they're different.
+
 2001-08-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* walk_rtree.c (krb5_walk_realm_tree): Initialize slen to silence
