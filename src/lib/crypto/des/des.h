@@ -16,16 +16,22 @@
 #include "k5-int.h"
 
 #ifndef KRB_INT32
-#if (SIZEOF_LONG == 4)
-#define KRB_INT32 long
-#elif (SIZEOF_INT == 4)
+#ifdef SIZEOF_INT
+#if SIZEOF_INT >= 4
 #define KRB_INT32 int
-#elif (SIZEOF_SHORT == 4)
-#define KRB_INT32 short
 #else
-  ?== No 32 bit type available
+#define KRB_INT32 long
 #endif
-#endif /* !KRB_INT32 */
+#else /* !defined(SIZEOF_INT) */
+#include <limits.h>
+#if (UINT_MAX >= 0xffffffff)
+#define KRB_INT32 int
+#else
+#define KRB_INT32 long
+#endif
+#endif /* !defined(SIZEOF_INT) */
+#endif /* !defined(KRB_INT32) */
+
 #ifndef KRB_UINT32
 #define KRB_UINT32 unsigned KRB_INT32
 #endif

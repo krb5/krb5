@@ -1,3 +1,13 @@
+Tue Oct 14 15:35:53 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* des_int.h: Use better logic to find an appropriate type for
+ 	KRB_INT32; also don't assume that a key schedule element is
+	exactly 64 bits wide... use instead 2 * KRB_INT32, since that is
+	what the code uses internally.
+
+	* des.h: Use better logic to find an appropriate type for
+ 	KRB_INT32.
+
 Mon Oct  6 11:32:51 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* destest.c (main): Initialize context to 0 so it will not be
