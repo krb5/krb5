@@ -33,4 +33,7 @@
 #define PROVIDE_CRC32
 #define PROVIDE_DES_CBC_CKSUM
 
+#define DEFAULT_PWD_STRING1 "Enter password:"
+#define DEFAULT_PWD_STRING2 "Re-enter password for verification:"
+
 #endif /* KRB5_CONFIG__ */
