@@ -1,3 +1,13 @@
+Tue Jan 27 18:27:16 1998  Dan Winship  <danw@mit.edu>
+
+	* telnetd.c (getterminaltype): Null-terminate strings and avoid a
+	buffer overrun.
+
+	* ext.h: make terminaltype a char[] instead of a char * for
+	telnetd.c change
+
+	* state.c (suboption): redo handling of terminaltype
+
 Thu Dec  4 21:32:37 1997  Tom Yu  <tlyu@mit.edu>
 
 	* telnetd.c (doit): Fix up slave buffer length.
