@@ -17,8 +17,13 @@ static char rcsid_full_ipadr_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
+#include <krb5/osconf.h>
+
+#ifdef KRB5_USE_INET
+
 #include <krb5/ext-proto.h>
 #include <krb5/libos-proto.h>
+#include "os-proto.h"
 #include <netinet/in.h>
 
 krb5_error_code
@@ -74,3 +79,4 @@ OLDDECLARG(krb5_address **,outaddr)
     *outaddr = retaddr;
     return 0;
 }
+#endif
