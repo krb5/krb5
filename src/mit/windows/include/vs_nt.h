@@ -1,5 +1,3 @@
-#include "mitcpyrt.h"
-
 /* il 7/24/95 -- adding nt */
 
 #ifndef _vs_nt_h_

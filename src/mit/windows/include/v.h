@@ -1,4 +1,3 @@
-#include "mitcpyrt.h"
 /* v.h -- header for vlib.c */
 
 #ifndef _VERSION_INC

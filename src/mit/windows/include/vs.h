@@ -1,7 +1,4 @@
-#include "mitcpyrt.h"
-
-
- /*
+/*
  *----------------------------------------------------------------
  *
  *  $Source$
@@ -12,6 +9,10 @@
  *  $Locker$
  *
  *  $Log$
+ *  Revision 1.2  1997/04/29 10:45:02  tytso
+ *  Remove #include of "mitcpyrt.h" (since it's of dubious legal value, and
+ *  the file doesn't exist.)
+ *
  *  Revision 1.1  1997/04/17 15:25:52  tytso
  *  Add MIT's version server include files and libraries.
  *
