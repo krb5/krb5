@@ -56,6 +56,14 @@
 #include <ctype.h>
 #include "brand.c"
 
+/* The des-mdX entries are last for now, because it's easy to
+   configure KDCs to issue TGTs with des-mdX keys and then not accept
+   them.  This'll be fixed, but for better compatibility, let's prefer
+   des-crc for now.  */
+#define DEFAULT_ETYPE_LIST	\
+	"des3-cbc-sha1 " \
+	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
+
 #if (defined(_MSDOS) || defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
 extern void krb5_win_ccdll_load(krb5_context context);
@@ -113,6 +121,8 @@ init_common (context, secure)
 	retval = krb5_vercheck();
 	if (retval)
 		return retval;
+#else /* assume UNIX for now */
+	krb5int_initialize_library ();
 #endif
 
 	*context = 0;
@@ -312,9 +322,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 	krb5_error_code code;
 
 	code = profile_get_string(context->profile, "libdefaults", profstr,
-				  NULL,
-				  "des3-cbc-sha1 des-cbc-md5 des-cbc-crc",
-				  &retval);
+				  NULL, DEFAULT_ETYPE_LIST, &retval);
 	if (code)
 	    return code;
 
