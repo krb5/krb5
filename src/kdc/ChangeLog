@@ -1,3 +1,8 @@
+Sun Jun  9 23:03:06 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (finish_realm): Do not invoke krb5_finish_key if
+		encryption block is not set.
+
 Tue May  7 18:19:59 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	Thu May  2 22:52:56 1996  Mark Eichin  <eichin@cygnus.com>

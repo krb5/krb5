@@ -271,7 +271,8 @@ finish_realm(rdp)
 	    memset(rdp->realm_tgskey.contents, 0, rdp->realm_tgskey.length);
 	    free(rdp->realm_tgskey.contents);
 	}
-	krb5_finish_key(rdp->realm_context, &rdp->realm_encblock);
+	if (rdp->realm_encblock.crypto_entry)
+		krb5_finish_key(rdp->realm_context, &rdp->realm_encblock);
 	krb5_db_fini(rdp->realm_context);
 	if (rdp->realm_tgsprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
