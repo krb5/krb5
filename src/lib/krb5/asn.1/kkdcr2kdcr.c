@@ -38,6 +38,59 @@ static char rcsid_kkdcr2kdcr_c[] =
 
 #include <krb5/ext-proto.h>
 
+
+struct element_KRB5_11 *krb5_pa_data2element_KRB5_11(val, error)
+    krb5_pa_data **val;
+    int *error;
+{
+    register struct element_KRB5_11 *retval = 0, *rv1 = 0, *rv2;
+    register krb5_pa_data * const *temp;
+    register int i;
+
+
+    *error = 0;
+
+    if (val == 0) 
+	return 0;
+
+    /* count elements */
+    for (i = 0, temp = val; *temp; temp++,i++, rv1 = rv2) {
+
+	rv2 = (struct element_KRB5_11 *) xmalloc(sizeof(*rv2));
+	if (!rv2) {
+	    if (retval)
+		free_KRB5_PA__DATA(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}
+	if (rv1)
+	    rv1->next = rv2;
+	xbzero((char *)rv2, sizeof (*rv2));
+	if (!retval)
+	    retval = rv2;
+
+	rv2->PA__DATA = (struct type_KRB5_PA__DATA *)
+	    xmalloc(sizeof(*(rv2->PA__DATA)));
+	if (!rv2->PA__DATA) {
+	errout:
+	    if (retval)
+		free_KRB5_PA__DATA(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}    
+	rv2->PA__DATA->padata__type = val[i]->pa_type;
+	rv2->PA__DATA->pa__data = str2qb((char *)(val[i])->contents,
+					       (val[i])->length, 1);
+	if (!rv2->PA__DATA->pa__data) {
+	    goto errout;
+	}
+    }
+    if (retval == 0)
+	*error = ISODE_LOCAL_ERR_MISSING_PART;
+    return(retval);
+
+}
+
 struct type_KRB5_TGS__REP *
 krb5_kdc_rep2KRB5_KDC__REP(DECLARG(const register krb5_kdc_rep *,val),
 			   DECLARG(register int *,error))
@@ -57,7 +110,7 @@ OLDDECLARG(register int *,error)
     retval->msg__type = val->msg_type;
 
     if (val->padata) {
-	retval->padata = krb5_pa_data2KRB5_PA__DATA(val->padata, error);
+	retval->padata = krb5_pa_data2element_KRB5_11(val->padata, error);
 	if (*error) {
 	    goto errout;
 	}
@@ -85,4 +138,3 @@ OLDDECLARG(register int *,error)
     }
     return(retval);
 }
-
