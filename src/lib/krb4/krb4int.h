@@ -5,6 +5,9 @@
 /* ad_print.c */
 void ad_print(AUTH_DAT *x);
 
+/* fgetst.c */
+int fgetst(FILE *, char *, int);
+
 /* getst.c */
 int getst(int, char *, int);
 

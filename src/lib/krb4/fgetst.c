@@ -9,6 +9,8 @@
 
 #include "mit-copyright.h"
 #include <stdio.h>
+#include "krb.h"
+#include "krb4int.h"
 
 /*
  * fgetst takes a file descriptor, a character pointer, and a count.

@@ -1,3 +1,9 @@
+2001-07-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* fgetst.c: Include krb4int.h.
+
+	* krb4int.h: Add fgetst prototype.
+
 2001-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb4int.h: Provide prototype for krb_get_default_user and
