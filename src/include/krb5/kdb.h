@@ -18,7 +18,7 @@
 
 typedef struct _krb5_db_entry {
     krb5_principal principal;
-    krb5_keyblock key;
+    krb5_encrypted_keyblock key;
     krb5_kvno kvno;
     krb5_deltat	max_life;
     krb5_deltat	max_renewable_life;
@@ -39,6 +39,9 @@ typedef struct _krb5_db_entry {
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
+
+#define KDB_CONVERT_KEY_TO_DB(in,out) krb5_kdb_encrypt_key(&master_encblock, in, out)
+#define KDB_CONVERT_KEY_OUTOF_DB(in, out) krb5_kdb_decrypt_key(&master_encblock, in, out)
 
 /* prompts used by default when reading the KDC password from the keyboard. */
 #define KRB5_KDC_MKEY_1	"Enter KDC database master key:"
@@ -89,10 +92,10 @@ krb5_error_code krb5_db_store_mkey PROTOTYPE((char *,
 krb5_error_code krb5_kdb_encrypt_key
 	PROTOTYPE((krb5_encrypt_block *,
 		   const krb5_keyblock *,
-		   krb5_keyblock *));
+		   krb5_encrypted_keyblock *));
 krb5_error_code krb5_kdb_decrypt_key
 	PROTOTYPE((krb5_encrypt_block *,
-		   const krb5_keyblock *,
+		   const krb5_encrypted_keyblock *,
 		   krb5_keyblock *));
 krb5_error_code krb5_db_setup_mkey_name
 	PROTOTYPE((const char *, const char *, char **, krb5_principal *));

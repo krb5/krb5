@@ -234,8 +234,7 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if (retval = kdc_convert_key(&server.key, &encrypting_key,
-				 CONVERT_OUTOF_DB)) {
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
 	cleanup();
 	return retval;
     }
@@ -288,8 +287,7 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert client.key into a real key (it may be encrypted
        in the database) */
-    if (retval = kdc_convert_key(&client.key, &encrypting_key,
-				 CONVERT_OUTOF_DB)) {
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&client.key, &encrypting_key)) {
 	cleanup();
 	return retval;
     }

@@ -183,8 +183,7 @@ krb5_ticket **ticket;
     }
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if (retval = kdc_convert_key(&server.key, &encrypting_key,
-				 CONVERT_OUTOF_DB)) {
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
 	krb5_db_free_principal(&server, nprincs);
 	cleanup_apreq();
 	return retval;
@@ -269,19 +268,6 @@ krb5_ticket **ticket;
     apreq->ticket = 0;
     krb5_free_ap_req(apreq);
     return 0;
-}
-
-krb5_error_code
-kdc_convert_key(in, out, direction)
-krb5_keyblock *in, *out;
-int direction;
-{
-    if (direction == CONVERT_INTO_DB) {
-	return krb5_kdb_encrypt_key(&master_encblock, in, out);
-    } else if (direction == CONVERT_OUTOF_DB) {
-	return krb5_kdb_decrypt_key(&master_encblock, in, out);
-    } else
-	return KRB5_KDB_ILLDIRECTION;
 }
 
 /* This probably wants to be updated if you support last_req stuff */
