@@ -63,11 +63,10 @@ static krb5_error_code generate_authenticator PROTOTYPE((krb5_authenticator *,
 							 krb5_int32 ));
 
 krb5_error_code
-krb5_mk_req_extended(ap_req_options, checksum, times, kdc_options,
+krb5_mk_req_extended(ap_req_options, checksum, kdc_options,
 		     sequence, newkey, ccache, creds, authentp, outbuf)
 const krb5_flags ap_req_options;
 const krb5_checksum *checksum;
-const krb5_ticket_times *times;
 const krb5_flags kdc_options;
 krb5_int32 sequence;
 krb5_keyblock **newkey;
@@ -90,7 +89,6 @@ krb5_data *outbuf;
 
     if (!creds->ticket.length) {
 	/* go get creds */
-	creds->times = *times;		/* XXX do we need times? */
 	if (retval = krb5_get_credentials(kdc_options,
 					  ccache,
 					  creds))
