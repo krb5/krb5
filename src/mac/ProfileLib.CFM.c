@@ -16,11 +16,10 @@
  * without express or implied warranty.
  */
  
- 
-#include <CodeFragments.h>
-
 #include "profile.h"
 
+#if defined(macintosh)
+#include <CodeFragments.h>
 
 OSErr InitializeProfileLib (
 	CFragInitBlockPtr ibp);
@@ -33,17 +32,28 @@ OSErr InitializeProfileLib(
 	
 	/* Do normal init of the shared library */
 	err = __initialize(ibp);
+#else
+#define noErr	0
+void __InitializeProfileLib (void);
+void __InitializeProfileLib (void)
+{
+	int	err = noErr;
+#endif
 	
 	/* Initialize the error tables */
 	if (err == noErr) {
 	    add_error_table(&et_prof_error_table);
 	}
 	
+#if defined(macintosh)
 	return err;
+#endif
 }
 
+#if defined(macintosh)
 void TerminateProfileLib(void)
 {
     remove_error_table(&et_prof_error_table);
 	__terminate();
 }
+#endif
