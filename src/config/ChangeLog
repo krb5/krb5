@@ -1,3 +1,7 @@
+2004-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (KRB5_INCSUBDIRS): Add KRB5_INCDIR/gssrpc.
+
 2004-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (datadir, EXAMPLEDIR): Add directory for examples.
