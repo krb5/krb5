@@ -9,6 +9,7 @@
 #define HasVoidSignalReturn YES
 #define HasPutenv YES
 #define HasBsearch YES
+#define IsPOSIX YES
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
@@ -19,6 +20,8 @@
 #define HasSaberC YES
 /* #define HasGcc YES */
 #endif
+
+#define CcCmd cc -YPOSIX -D_POSIX_SOURCE
 
 /**/# platform:  $XConsortium: ultrix.cf,v 1.20 89/12/22 15:56:14 rws Exp $
 /**/# operating system:  OSName
