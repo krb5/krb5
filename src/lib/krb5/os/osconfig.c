@@ -17,6 +17,7 @@ static char rcsid_config_fn_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/osconf.h>
+#include <krb5/config.h>
 
 
 char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
@@ -33,3 +34,6 @@ int krb5_skdc_timeout_1 = SKDC_TIMEOUT_1;
 #ifdef KRB5_USE_INET
 char *krb5_kdc_udp_portname = KDC_PORTNAME;
 #endif
+
+char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;
+char *krb5_default_pwd_prompt2 = DEFAULT_PWD_STRING2;
