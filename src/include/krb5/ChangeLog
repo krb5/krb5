@@ -1,3 +1,9 @@
+Thu Feb 16 20:12:23 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in:  Use AC_HAVE_HEADER rather than AC_HEADER_CHECK.
+	(Fixes resulting #define names to HAVE_XXX rather than HAS_XXX,
+	which is not only consistent but also matches what's in sysincl.h.)
+
 Mon Feb 6 19:42:7 1995 Keith Vetter (keithv@fusion.com)
 
         * configure.in: added header checks for sys/param.h and sys/file.h.
