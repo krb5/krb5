@@ -1,3 +1,8 @@
+2000-06-21  Tom Yu  <tlyu@mit.edu>
+
+	* svc_auth_gssapi.c (_svcauth_gssapi): Missed a rename.  From
+	Nathan Neulinger.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* pmap_rmt.c (GIFCONF_BUFSIZE): New macro.
