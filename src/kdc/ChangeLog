@@ -1,3 +1,8 @@
+Fri Nov  4 17:47:46 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_as_req.c (process_as_req): Use published interface to call
+		krb5_random_key().
+
 Fri Oct 14 00:31:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* main.c (process_args): Select the cryptosystem to be used using

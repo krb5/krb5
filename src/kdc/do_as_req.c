@@ -134,6 +134,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_data salt_data;
     static krb5_principal cpw = 0;
     char *status;
+    krb5_encrypt_block eblock;
 
     register int i;
 
@@ -248,8 +249,11 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
     useetype = request->etype[i];
-
-    if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
+    krb5_use_cstype(&eblock, useetype);
+    
+    if (retval = krb5_random_key(eblock,
+				 krb5_csarray[useetype]->random_sequence,
+				 &session_key)) {
 	/* random key failed */
 	syslog(LOG_INFO, "AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
                   fromstring, cname, sname);
