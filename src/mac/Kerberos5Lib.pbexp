@@ -4,8 +4,6 @@
 # Public Kerberos v5 API
 #----------------------------------------------------
 
-        ___initializeK5
-
 # Kerberos 5
 	_krb5_build_principal
 	_krb5_build_principal_ext
@@ -189,40 +187,6 @@
 #
 # Added for 1.2:
 	_krb5_decode_ticket
-
-#----------------------------------------------------
-#   PrivateKerberos5Lib.exp
-#
-# Exports from Kerberos v5 library which are not
-# a part of the public API, but are needed by some
-# critical clients. Each call is annotated by the
-# offending client.
-#----------------------------------------------------
-
-	_krb5_size_opaque
-	_krb5_internalize_opaque
-	_krb5_externalize_opaque
-	_krb5_ser_pack_int32
-	_krb5_ser_unpack_int32
-	_krb5_ser_pack_bytes
-	_krb5_ser_unpack_bytes
-	_krb5_ser_auth_context_init
-	_krb5_ser_context_init
-	_krb5_ser_ccache_init
-	_krb5_ser_keytab_init
-	_krb5_ser_rcache_init
-	_decode_krb5_ap_req
-	_krb5_mcc_ops
-	_krb5_c_keyed_checksum_types
-	_krb5_c_random_make_octets
-	_krb5_c_encrypt
-	_krb5_c_make_checksum
-	_krb5_c_decrypt
-	_krb5_c_verify_checksum
-	_krb5_c_block_size
-	_krb5_c_checksum_length
-	_krb5_c_encrypt_length
-	_krb5int_cc_default
 
 # Added post 1.2.2
 	_krb5_cc_get_name

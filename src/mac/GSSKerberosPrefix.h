@@ -1,3 +1,4 @@
+#ifndef __ASSEMBLER__
 #include <KerberosSupport/KerberosConditionalMacros.h>
 
 #define SIZEOF_LONG		4
@@ -65,3 +66,4 @@
 #define	HAVE_REGEXEC		1
 #define	HAVE_REGCOMP		1
 #define	HAVE_SA_LEN		1
+#endif
