@@ -1,3 +1,9 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check number of arguments to getpwnam_r and
+	getpwuid_r and define some new macros if they're the
+	four-argument draft POSIX versions.
+
 2004-06-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for getpwnam_r, gmtime_r, and localtime_r.

@@ -49,6 +49,33 @@ if test "$ac_cv_func_gethostbyname_r" = yes; then
 fi
 ])
 dnl
+
+if test "$ac_cv_func_getpwnam_r" = yes; then
+  AC_MSG_CHECKING([number of arguments to getpwnam_r])
+  AC_CACHE_VAL(krb5_cv_getpwnam_r_args,
+  [AC_TRY_COMPILE([#include <pwd.h>
+   struct passwd pwx; char buf[1024];],
+   [getpwnam_r("", &pwx, buf, sizeof(buf));],
+   krb5_cv_getpwnam_r_args=4,krb5_cv_getpwnam_r_args=5)])
+  AC_MSG_RESULT($krb5_cv_getpwnam_r_args)
+  if test "$krb5_cv_getpwnam_r_args" = 4; then
+    AC_DEFINE(GETPWNAM_R_4_ARGS,1,[Define if getpwnam_r exists but takes only 4 arguments (e.g., POSIX draft 6 implementations like some Solaris releases).])
+  fi
+fi
+
+if test "$ac_cv_func_getpwuid_r" = yes; then
+  AC_MSG_CHECKING([number of arguments to getpwuid_r])
+  AC_CACHE_VAL(krb5_cv_getpwuid_r_args,
+  [AC_TRY_COMPILE([#include <pwd.h>
+   struct passwd pwx; char buf[1024];],
+   [getpwuid_r(0, &pwx, buf, sizeof(buf));],
+   krb5_cv_getpwuid_r_args=4,krb5_cv_getpwuid_r_args=5)])
+  AC_MSG_RESULT($krb5_cv_getpwuid_r_args)
+  if test "$krb5_cv_getpwuid_r_args" = 4; then
+    AC_DEFINE(GETPWUID_R_4_ARGS,1,[Define if getpwuid_r exists but takes only 4 arguments (e.g., POSIX draft 6 implementations like some Solaris releases).])
+  fi
+fi
+
 AC_CHECK_FUNC(getservbyname_r,[
 ac_cv_func_getservbyname_r=yes
 if test "$ac_cv_func_getservbyname_r" = yes; then
