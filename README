@@ -1,19 +1,19 @@
-these were the
-		   Kerberos Version 5, Release 1.1
+
+		   Kerberos Version 5, Release 1.2
 
 			    Release Notes
-which will be updated before the next release by
+
 			The MIT Kerberos Team
 
 Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in three gzipped tarfiles,
-krb5-1.1.src.tar.gz, krb5-1.1.doc.tar.gz, and krb5-1.1.crypto.tar.gz.
-The krb5-1.1.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.1.src.tar.gz contains the src/ directory and this
+krb5-1.2.src.tar.gz, krb5-1.2.doc.tar.gz, and krb5-1.2.crypto.tar.gz.
+The krb5-1.2.doc.tar.gz contains the doc/ directory and this README
+file.  The krb5-1.2.src.tar.gz contains the src/ directory and this
 README file, except for the crypto library sources, which are in
-krb5-1.1.crypto.tar.gz.
+krb5-1.2.crypto.tar.gz.
 
 Instruction on how to extract the entire distribution follow.  These
 directions assume that you want to extract into a directory called
@@ -23,21 +23,21 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.1.src.tar.gz
-	gtar zxpf krb5-1.1.crypto.tar.gz
-	gtar zxpf krb5-1.1.doc.tar.gz
+	gtar zxpf krb5-1.2.src.tar.gz
+	gtar zxpf krb5-1.2.crypto.tar.gz
+	gtar zxpf krb5-1.2.doc.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.1.src.tar.gz | tar xpf -
-	gzcat krb5-1.1.crypto.tar.gz | tar xpf -
-	gzcat krb5-1.1.doc.tar.gz | tar xpf -
+	gzcat krb5-1.2.src.tar.gz | tar xpf -
+	gzcat krb5-1.2.crypto.tar.gz | tar xpf -
+	gzcat krb5-1.2.doc.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.1/src
-and the documentation into DIST/krb5-1.1/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2/src
+and the documentation into DIST/krb5-1.2/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -73,50 +73,161 @@ krb5-bugs@mit.edu.
 Notes, Major Changes, and Known Bugs
 ------------------------------------
 
-* Triple DES support is included; however, it is only usable for
-  service keys at the moment, due to a large number of compatibility
-  issues.  For example, the GSSAPI library has some (buggy) support
-  for a triple DES session key, but it is intentionally disabled.
-  ** Do not use triple-DES in your config files except as described in
-  ** the documentation.
+* Triple DES support, for session keys as well as user or service
+  keys, should be nearly complete in this release.  Much of the work
+  that has been needed is generic multiple-cryptosystem support, so
+  the addition of another cryptosystem should be much easier.
 
-* The principal database now uses the btree backend of Berkeley DB.
-  This should result in improved KDC performance.
+  * GSSAPI support for 3DES has been added.  An Internet Draft is
+    being worked on that will describe how this works; it is not
+    currently standardized.  Some backwards-compatibility issues in
+    this area mean that enabling 3DES support must be done with
+    caution; see below.
 
-* The lib/rpc tests do not appear to work under NetBSD-1.4, for
-  reasons that are not completely clear at the moment, but probably
-  have something to do with portmapper interfacing.  This should not
-  affect other operations, such as kadmind operation.
+  * kdc.conf vs krb5.conf XXXXXXXXXXXXXXXXXXXXXXXXX
 
-* Shared library builds are under a new framework; at this point only
-  Solaris (2.x), Irix (6.5), NetBSD (1.4 i386), and possibly Linux are
-  known to work.  All other working shared library builds may be
-  figments of your imagination.
+  * doc on upgrade path? XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-* Many existing databases, especially those converted from krb4
-  original databases, may contain expiration dates in 1999.  You
-  should make sure to update these expiration dates, and also change
-  any config file entries that have two-digit years.
+* DNS support for locating KDCs is enabled by default.  DNS support
+  for looking up the realm of a host is compiled in but disabled by
+  default (due to some concerns with DNS spoofing).
 
-* Hardware preauthentication is known to be broken; this will be fixed
-  in an upcoming release.
+  We recommend that you publish your KDC information through DNS even
+  if you intend to rely on config files at your own site; otherwise,
+  sites that wish to communicate with you will have to keep their
+  config files updated with your information.  One of the goals of
+  this code is to reduce the client-side configuration maintenance
+  requirements as much as is possible, without compromising security.
 
-* krb524d now defaults to forking into the background; use
-  "krb524d -nofork" to avoid forking.
+  See the administrator's guide for information on setting up DNS
+  information for your realm.  XXXXXXXXXXXXXXXXXXXXXXXXXX
 
-* Not all reported bugs have been fixed in this release, due to time
-  constraints.  We are planning to make another release in the near
-  future with more complete triple DES support, and additional
-  bugfixes.  Many of the bugs in our database are reported against
-  what is now quite old code, or require hardware that we do not have,
-  which make them difficult to reproduce and debug.  We will work on
-  these older bugs and some externally submitted patches for the
-  following release.
+  One important effect of this for developers is that on many systems,
+  "-lresolv" must be added to the compiler command line when linking
+  Kerberos programs.
+
+  Configure-time options are available to control the inclusion of the
+  DNS code and the setting of the defaults.  Entries in krb5.conf will
+  also modify the behavior if the code has been compiled in.
+  XXXXXXXXXXXXXXXXXX details; man pages?
+  --enable-dns
+  --enable-dns-for-kdc
+  --enable-dns-for-realm
+  [libdefaults] ...
+
+* Numerous buffer-overrun problems have been found and fixed.  Many of
+  these were in locations we don't expect can be exploited in any
+  useful way (for example, overrunning a buffer of MAXPATHLEN bytes if
+  a compiled-in pathname is too long, in a program that has no special
+  privileges).  It may be possible to exploit a few of these to
+  compromise system security.
+
+* Partial support for IPv6 addresses has been added.  It can be
+  enabled or disabled at configure time with --enable-ipv6 or
+  --disable-ipv6; by default, the configure script will search for
+  certain types and macros, and enable the IPv6 code if they're found.
+  The IPv6 support at this time mostly consists of including the
+  addresses in credentials.
+
+* A security problem in login.krb5 has been fixed.  This problem was
+  only present if the krb4 compatibility code was not compiled in.
+
+* The client programs kinit, klist and kdestroy have been changed to
+  incorporate krb4 support.  New command-line options control whether
+  krb4 behavior, krb5 behavior, or both are used.
+
+* Patches from Frank Cusack for much better hardware preauth support
+  have been incorporated.
+
+* Patches from Matt Crawford extend the kadmin ACL syntax so that
+  restrictions can be imposed on what certain administrators may do to
+  certain accounts.
+
+* A KDC on a host with multiple network addresses will now respond to
+  a client from the address that the client used to contact it.  The
+  means used to implement this will however cause the KDC not to
+  listen on network addresses configured after the KDC has started.
+
+Minor changes
+-------------
+
+* The shell code for searching for the Tcl package at configure time
+  has been modified.  If a tclConfig.sh can be found, the information
+  it contains is used, otherwise the old searching method is tried.
+  Let us know if this new scheme causes any problems.
+
+* Shared library builds may work on HPUX, Rhapsody/MacOS X, and newer
+  Alpha systems now.
+
+* The Windows build will now include kvno and gss-sample.
+
+* The routine krb5_secure_config_files has been disabled.  A new
+  routine, krb5_init_secure_context, has been added in its place.
+
+* The routine decode_krb5_ticket is now being exported as
+  krb5_decode_ticket.  Any programs that used the old name (which
+  should be few) should be changed to use the new name; we will
+  probably eliminate the old name in the future.
+
+* The CCAPI-based credentials cache code has been changed to store the
+  local-clock time of issue and expiration rather than the KDC-clock
+  times.
+
+* On systems with large numbers of IP addresses, "kinit" should do a
+  better job of acquiring those addresses to put in the user's
+  credentials.
+
+* Several memory leaks in error cases in the gssrpc code have been
+  fixed.
+
+* A bug with login clobbering some internal static storage on AIX has
+  been fixed.
+
+* Per-library initialization and cleanup functions have been added,
+  for use in configurations that dynamically load and unload these
+  libraries.
+
+* Many compile-time warnings have been fixed.
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXX login.c krb5_cc_set_default_name patch
+from 1.1.1 needs including
+
+* The GSS sample programs have been updated to exercise more of the
+  API.
+
+* The telnet server should produce a more meaningful error message if
+  authentication is required but not provided.
+
+* Changes have been made to ksu to make it more difficult to use it to
+  leak information the user does not have access to.
+
+* The sample config file information for the CYGNUS.COM realm has been
+  updated, and the GNU.ORG realm has been added.
+
+* A configure-time option has been added to enable a replay cache in
+  the KDC.  We recommend its use when hardware preauthentication is
+  being used.
+
+* Some new routines have been added to the library and krb5.h.
+
+* A new routine has been added to the prompter interface to allow the
+  application to determine which of the strings prompted for is the
+  user's password, in case it is needed for other purposes.
+
+* The remote kadmin interface has been enhanced to support the
+  specification of key/salt types for a principal.
+
+* New keytab entries' key values can now be specified manually with a
+  new command in the ktutil program.
+
+* Many bug reports are still outstanding in our database.  We are
+  continuing to work on this backlog.
+
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-1999 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2000 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
