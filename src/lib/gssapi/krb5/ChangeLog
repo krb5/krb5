@@ -1,5 +1,9 @@
 2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
 
+	* gssapi_krb5.h: Unmark gss_mech_krb5 variable as an import.
+
+2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
+
 	* gssapi_krb5.h: Mark gss_mech_krb5 variable as an import.
 
 2001-07-25  Ezra Peisach  <epeisach@mit.edu>
