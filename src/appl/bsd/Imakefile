@@ -1,0 +1,70 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990,1991 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
+# 
+# Export of this software from the United States of America is assumed
+#   to require a specific license from the United States Government.
+#   It is the responsibility of any person or organization contemplating
+#   export to obtain such a license before exporting.
+# 
+# WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+# distribute this software and its documentation for any purpose and
+# without fee is hereby granted, provided that the above copyright
+# notice appear in all copies and that both that copyright notice and
+# this permission notice appear in supporting documentation, and that
+# the name of M.I.T. not be used in advertising or publicity pertaining
+# to distribution of the software without specific, written prior
+# permission.  M.I.T. makes no representations about the suitability of
+# this software for any purpose.  It is provided "as is" without express
+# or implied warranty.
+# 
+# 
+
+        DEPLIBS = $(DEPKLIB)
+#ifdef CrayArchitecture
+LOCAL_LIBRARIES = $(KLIB) -lshare  -lm -lrsc
+#else
+LOCAL_LIBRARIES = $(KLIB)
+#endif
+        DEFINES = $(APPL_BSD_DEF)
+
+CLIENTSRCS= krcp.c krlogin.c krsh.c kcmd.c logutil.c
+CLIENTOBJS= krcp.o krlogin.o krsh.o kcmd.o logutil.o
+
+#ifdef CrayArchitecture
+SERVERSRCS= krshd.c
+SERVEROBJS= krshd.o
+#else
+SERVERSRCS= krlogind.c krshd.c
+SERVEROBJS= krlogind.o krshd.o
+#endif
+
+SRCS= $(CLIENTSRCS) $(SERVERSRCS)
+
+#ifdef CrayArchitecture
+all::	rsh rcp rlogin krshd 
+#else
+all::	rsh rcp rlogin krshd krlogind
+#endif
+
+NormalProgramTarget(rsh,krsh.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallClientProgram(rsh)
+
+NormalProgramTarget(rcp,krcp.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallClientProgram(rcp)
+
+NormalProgramTarget(rlogin,krlogin.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallClientProgram(rlogin)
+
+NormalProgramTarget(krshd,krshd.o kcmd.o logutil.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+Krb5InstallServerProgram(krshd)
+
+#ifndef CrayArchitecture
+NormalProgramTarget(krlogind,krlogind.o logutil.o kcmd.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+#endif
+Krb5InstallServerProgram(krlogind)
+
+DependTarget()

@@ -1,0 +1,40 @@
+# $Source$
+# $Author$
+# $Header$
+#
+# Copyright 1989 by the Massachusetts Institute of Technology.
+#
+# For copying and distribution information,
+# please see the file <mit-copyright.h>.
+#
+# Imakefile for Kerberos admin server library.
+
+#ifdef Krb4KDCCompat
+K4LIB=-l$(DES425LIB)
+#else
+K4LIB=
+#endif
+
+SRCS = \
+	networked.c \
+	kpasswd.c
+
+OBJS = \
+	networked.o \
+	kpasswd.o
+
+ErrorTableObjectRule()
+
+all::	kpasswd
+
+NormalProgramTarget(kpasswd,$(OBJS),$(KDBDEPLIB) $(DEPKLIB), \
+	$(KDBLIB) $(K4LIB) $(KLIB) ,)
+Krb5InstallClientProgram(kpasswd)
+
+clean::
+
+depend:: 
+
+clean::
+
+DependTarget()

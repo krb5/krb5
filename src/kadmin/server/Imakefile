@@ -1,0 +1,58 @@
+# $Source$
+# $Author$
+# $Header$
+#
+# Copyright 1989 by the Massachusetts Institute of Technology.
+#
+# For copying and distribution information,
+# please see the file <mit-copyright.h>.
+#
+# Imakefile for Kerberos admin server library.
+
+#ifdef Krb4KDCCompat
+K4LIB=-l$(KRB425LIB) -l$(DES425LIB)
+#else
+K4LIB=
+#endif
+
+SRCS = \
+	adm_server.c \
+	adm_parse.c \
+	adm_network.c \
+	adm_listen.c \
+	adm_process.c \
+	adm_nego.c \
+	adm_kpasswd.c \
+	adm_kadmin.c \
+	adm_fmt_inq.c \
+	adm_adm_func.c \
+	adm_funcs.c \
+	adm_check.c \
+	adm_extern.c 
+
+OBJS = \
+	adm_server.o \
+	adm_parse.o \
+	adm_network.o \
+	adm_listen.o \
+	adm_process.o \
+	adm_nego.o \
+	adm_kpasswd.o \
+	adm_kadmin.o \
+	adm_fmt_inq.o \
+	adm_adm_func.o \
+	adm_funcs.o \
+	adm_check.o \
+	adm_extern.o
+
+ErrorTableObjectRule()
+
+all::	kadmind
+
+NormalProgramTarget(kadmind,$(OBJS),$(KDBDEPLIB) $(DEPKLIB), \
+	$(KDBLIB) $(K4LIB) $(KLIB) ,)
+Krb5InstallServerProgram(kadmind)
+
+clean::
+
+DependTarget()
