@@ -95,6 +95,12 @@ Minor changes in 1.3.1
 * [1657] krb_get_lrealm() no longer returns "ATHENA.MIT.EDU"
   inappropriately.
 
+* [1664] The crypto library no longer has bogus dependencies on
+  com_err.
+
+* [1665] krb5_init_context() no longer multiply registers error tables
+  when called more than once, preventing a memory leak.
+
 * [1666] The GSS_C_NT_* symbols are now exported from gssapi32.dll on
   Windows.
 
