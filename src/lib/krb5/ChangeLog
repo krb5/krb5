@@ -1,3 +1,8 @@
+2000-10-02  Alexandra Ellwood <lxs@mit.edu
+
+        * krb5_libinit.c: added #define for Mac OS X so
+        that krb5int_cleanup_library calls krb5_stdcc_shutdown.
+
 2000-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LIBMAJOR, LIBMINOR): Bump version.
