@@ -96,6 +96,7 @@ typedef struct {
     char *message;
 } kadmin_requests;
 
+#if 0
 static char *oper_type[] = {
 	"complete",					/* 0 */
 	"addition",					/* 1 */
@@ -104,45 +105,56 @@ static char *oper_type[] = {
 	"modification",					/* 4 */
 	"inquiry"					/* 5 */
 };
+#endif
 
 #define SKYCHANGED	0x00
 #define NSKYRCVD	0x01
 
+
+#if 0
 static char *ksrvutil_message[] = {
 	"Service Key Changed",				/* 0 */
 	"New Key and Version Received"			/* 1 */
 };
+#endif
 
 #define KADMGOOD	0x00
 #define KADMSAG		0x01
 
+#if 0
 static char *kadmind_general_response[] = {
 	"Success",					/* 0 */
 	"Service Access Granted"			/* 1 */
 };
+#endif
 
 
 #define KPASSGOOD	0x00
 #define KPASSBAD	0x01
 
+#if 0
 static char *kadmind_kpasswd_response[] = {
 	"Password Changed",				/* 0 */
 	"Password NOT Changed!"				/* 1 */
 };
+#endif
 
 #define KSRVGOOD	0x00
 #define KSRVBAD		0x01
 #define KSRVCATASTROPHE	0x02
 
+#if 0
 static char *kadmind_ksrvutil_response[] = {
 	"Service Password Change Complete",		/* 0 */
 	"One or More Service Password Change(s) Failed!",	/* 1 */
 	"Database Update Failure - Possible Catastrophe!!"	/* 2 */
 };
+#endif
 
 #define KADMGOOD	0x00
 #define KADMBAD		0x01
 
+#if 0
 static char *kadmind_kadmin_response[] = {
 	"Administrative Service Completed",		/* 0 */
 	"Principal Unknown!",				/* 1 */
@@ -154,6 +166,7 @@ static char *kadmind_kadmin_response[] = {
 	"Admin Client Not in ACL List!",			/* 7 */
 	"Database Update Failure - Possible Catastrophe!!"	/* 8 */
 };
+#endif
 
 #define KMODVNO		0x00
 #define KMODATTR	0x01
