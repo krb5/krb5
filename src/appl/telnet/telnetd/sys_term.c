@@ -1409,6 +1409,12 @@ start_login(host, autologin, name)
 	/*NOTREACHED*/
 }
 
+/*
+ * This code returns a pointer to the first element of the array and
+ * expects the same to be called with.
+ * Therefore the -1 reference is legal. 
+ */
+
 static char **
 addarg(argv, val)
 	register char **argv;
@@ -1428,14 +1434,14 @@ addarg(argv, val)
 	}
 	for (cpp = argv; *cpp; cpp++)
 		;
-	if (cpp == &argv[(int)argv[-1]]) {
+	if (cpp == &argv[(long)argv[-1]]) {
 		--argv;
-		*argv = (char *)((int)(*argv) + 10);
-		argv = (char **)realloc(argv, (int)(*argv) + 2);
+		*argv = (char *)((long)(*argv) + 10);
+		argv = (char **)realloc(argv, (long)(*argv) + 2);
 		if (argv == NULL)
 			return(NULL);
 		argv++;
-		cpp = &argv[(int)argv[-1] - 10];
+		cpp = &argv[(long)argv[-1] - 10];
 	}
 	*cpp++ = val;
 	*cpp = 0;
