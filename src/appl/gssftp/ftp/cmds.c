@@ -70,9 +70,11 @@ extern	char **ftpglob();
 extern	char *home;
 extern	char *remglob();
 extern	char *getenv();
+#ifndef HAVE_STRERROR
 #define strerror(error) (sys_errlist[error])
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
 #endif
 
 extern off_t restart_point;
@@ -126,7 +128,7 @@ setpeer(argc, argv)
 	char *argv[];
 {
 	char *host, *hookup();
-	short port;
+	unsigned short port;
 
 	if (connected) {
 		printf("Already connected to %s, use close first.\n",
@@ -182,12 +184,16 @@ setpeer(argc, argv)
 				(void) login(argv[1]);
 		}
 
-#ifndef unix
+#ifndef unix			/* XXX */
 #ifdef _AIX
 #define unix
 #endif
 
 #ifdef __hpux
+#define unix
+#endif
+
+#ifdef BSD
 #define unix
 #endif
 #endif
@@ -1049,7 +1055,8 @@ remglob(argv,doswitch)
 		return (cp);
 	}
 	if (ftemp == NULL) {
-		(void) strcpy(temp, _PATH_TMP);
+		(void) strncpy(temp, _PATH_TMP, sizeof(temp) - 1);
+		temp[sizeof(temp) - 1] = '\0';
 		(void) mktemp(temp);
 		oldverbose = verbose, verbose = 0;
 		oldhash = hash, hash = 0;
@@ -1510,7 +1517,8 @@ shell(argc, argv)
 		if (namep == NULL)
 			namep = shell;
 		(void) strcpy(shellnam,"-");
-		(void) strcat(shellnam, ++namep);
+		(void) strncat(shellnam, ++namep, sizeof(shellnam) - 1 - strlen(shellnam));
+		shellnam[sizeof(shellnam) - 1] = '\0';
 		if (strcmp(namep, "sh") != 0)
 			shellnam[0] = '+';
 		if (debug) {
@@ -1702,13 +1710,14 @@ quote1(initial, argc, argv)
 	register int i, len;
 	char buf[FTP_BUFSIZ];		/* must be >= sizeof(line) */
 
-	(void) strcpy(buf, initial);
+	(void) strncpy(buf, initial, sizeof(buf) - 1);
+	buf[sizeof(buf) - 1] = '\0';
 	if (argc > 1) {
 		len = strlen(buf);
-		len += strlen(strcpy(&buf[len], argv[1]));
+		len += strlen(strncpy(&buf[len], argv[1], sizeof(buf) - 1 - len));
 		for (i = 2; i < argc; i++) {
 			buf[len++] = ' ';
-			len += strlen(strcpy(&buf[len], argv[i]));
+			len += strlen(strncpy(&buf[len], argv[i], sizeof(buf) - 1 - len));
 		}
 	}
 	if (command(buf) == PRELIM) {

@@ -1,3 +1,9 @@
+Wed Jan 31 12:32:37 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* rlogin.exp: Use the build tree's version of krlogin instead of
+ 	using the one found in the users path that might have been used in the
+	root login.
+
 Thu Nov 14 15:20:19 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* telnet.exp: telnet may output fqdn in upper-case

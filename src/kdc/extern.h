@@ -1,7 +1,7 @@
 /*
  * kdc/extern.h
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2001 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -67,11 +67,14 @@ typedef struct __kdc_realm_data {
     krb5_deltat		realm_maxrlife;	/* Maximum renewable life for realm */
     void		*realm_kstypes;	/* Key/Salts supported for realm    */
     krb5_int32		realm_nkstypes;	/* Number of key/salts		    */
+    krb5_boolean	realm_reject_bad_transit; /* Accept unverifiable transited_realm ? */
 } kdc_realm_t;
 
 extern kdc_realm_t	**kdc_realmlist;
 extern int		kdc_numrealms;
 extern kdc_realm_t	*kdc_active_realm;
+
+kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 
 /*
  * Replace previously used global variables with the active (e.g. request's)
@@ -89,6 +92,7 @@ extern kdc_realm_t	*kdc_active_realm;
 #define	tgs_server			kdc_active_realm->realm_tgsprinc
 #define	dbm_db_name			kdc_active_realm->realm_dbname
 #define	primary_port			kdc_active_realm->realm_pport
+#define reject_bad_transit		kdc_active_realm->realm_reject_bad_transit
 
 /* various externs for KDC */
 extern krb5_data 	empty_string;	/* an empty string */

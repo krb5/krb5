@@ -150,7 +150,6 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     krb5_timestamp time_now;
     krb5_pa_data **combined_padata;
     krb5_pa_data ap_req_padata;
-    size_t enclen;
 
     /* 
      * in_creds MUST be a valid credential NOT just a partially filled in

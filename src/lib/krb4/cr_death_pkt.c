@@ -52,8 +52,9 @@ krb_create_death_packet(a_name)
     *v = (unsigned char) KRB_PROT_VERSION;
     *t = (unsigned char) AUTH_MSG_DIE;
     *t |= HOST_BYTE_ORDER;
-    (void) strcpy((char *) (pkt->dat+2),a_name);
-    pkt->length = 3 + strlen(a_name);
+    (void) strncpy((char *) (pkt->dat+2),a_name,sizeof(pkt->dat) - 3);
+    pkt->dat[sizeof(pkt->dat) - 1] = '\0';
+    pkt->length = 3 + strlen(pkt->dat+2);
     return pkt;
 }
 #endif /* DEBUG */

@@ -74,8 +74,12 @@ cns_load_registry(void)
   if (key != INVALID_HANDLE_VALUE) {
 	if (registry_string_get(key, KERBNET_HOME, &ts) == 0) {
 		cns_res.conf_override = 0;
-		strcpy(cns_res.def_confname, ts);
-		strcat(cns_res.def_confname, "\\etc\\krb5.conf");
+		cns_res.def_confname[sizeof(cns_res.def_confname) - 1];
+		strncpy(cns_res.def_confname, ts,
+		        sizeof(cns_res.def_confname) - 1);
+		strncat(cns_res.def_confname, "\\etc\\krb5.conf",
+			sizeof(cns_res.def_confname) - 1 -
+			strlen(cns_res.def_confname));
 		free(ts);
 	  }
 

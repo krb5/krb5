@@ -1,3 +1,9 @@
+2002-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* db.h: Add rename and prototype for bt_rseq(); this is a kludge
+	to avoid stuffing more things into the DB handle.
+	[pullup from trunk]
+
 Fri Feb 13 14:39:25 1998  Tom Yu  <tlyu@mit.edu>
 
 	* db-int.h: Additional renaming.

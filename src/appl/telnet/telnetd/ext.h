@@ -187,8 +187,13 @@ extern void
 	tty_setsofttab P((int)),
 	tty_tspeed P((int)),
 	willoption P((int)),
-	wontoption P((int)),
-	writenet P((unsigned char *, int));
+	wontoption P((int));
+
+extern void netprintf(const char *, ...);
+extern void netprintf_urg(const char *fmt, ...);
+extern void netprintf_noflush(const char *fmt, ...);
+extern int netwrite(const char *, size_t);
+extern void netputs(const char *);
 
 #ifdef	ENCRYPTION
 extern char	*nclearto;

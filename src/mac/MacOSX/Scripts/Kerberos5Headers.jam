@@ -1,0 +1,113 @@
+Kerberos5Prefix = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h" ;
+ErrorTableRegexp = "/^\\s*#define\\s+\\w+\(\\s+\\(-?\\d+L\\)\)|\(initialize_\\w+_error_table\\(\\)\)\\s*$/" ;
+ExtractErrorCodes = "perl -e 'while (<STDIN>) { if ($(ErrorTableRegexp)) { print; } }'" ;
+
+# CatHeader <header> : <macro name> <header.hin> <error tables>
+rule CatHeader
+{
+    NOTFILE "$(>[1])" ;
+    DEPENDS "$(1)" : "$(>[2-])" ;
+    Clean clean "$(1)" ;
+}
+actions CatHeader
+{
+    mkdir -p "$(<:D)"
+    echo "/*"                                   > "$(1)"
+    echo " * This file is auto generated."     >> "$(1)"
+    echo " * Please do not edit it."           >> "$(1)"
+    echo " */"                                 >> "$(1)"
+    echo ""                                    >> "$(1)"
+    echo "#ifndef $(>[1])"                     >> "$(1)"
+    echo ""                                    >> "$(1)"
+    echo "/* Environment dependent macros */"  >> "$(1)"
+    grep SIZEOF           "$(Kerberos5Prefix)" >> "$(1)"
+    grep HAVE_STDARG_H    "$(Kerberos5Prefix)" >> "$(1)"
+    grep HAVE_SYS_TYPES_H "$(Kerberos5Prefix)" >> "$(1)"
+    echo ""                                    >> "$(1)"
+    for header in "$(>[3-])" ; do
+        base=`basename "${header}"`
+        echo ""                                >> "$(1)"
+        echo "/* Error tables from ${base} */" >> "$(1)"
+        cat "${header}" | $(ExtractErrorCodes) >> "$(1)"
+    done
+    cat "$(>[2])"                              >> "$(1)"
+    echo "#endif /* $(>[1]) */"                >> "$(1)"
+}
+
+rule OSConf
+{
+    DEPENDS "$(1)" : "$(2)" ;
+    Clean clean "$(1)" ;
+}
+actions OSConf
+{
+    mkdir -p "$(<:D)"
+    echo "/*"                                   > "$(1)"
+    echo " * This file is auto generated."     >> "$(1)"
+    echo " * Please do not edit it."           >> "$(1)"
+    echo " */"                                 >> "$(1)"
+    echo ""                                    >> "$(1)"
+    cat "$(2)" | $(SED)	               \
+        -e 's+@KRB5RCTMPDIR+/var/tmp+' \
+        -e 's+@PREFIX+/usr+'           \
+        -e 's+@EXEC_PREFIX+/usr+'      \
+        -e 's+@LOCALSTATEDIR+/var+'    \
+        -e 's+@SYSCONFDIR+/usr/etc+'           >> "$(1)"
+}
+rule CopyHeader
+{
+    DEPENDS "$(1)" : "$(2)" ;
+    Clean clean "$(1)" ;
+
+}
+actions CopyHeader
+{
+    mkdir -p "$(<:D)"
+    cp -fRP "$(2)" "$(1)"
+}
+
+
+Intermediates = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates" ;
+IntermediateErrorTables = "$(Intermediates)/ErrorTables" ;
+IntermediateHeaders = "$(Intermediates)/Kerberos" ;
+IntermediatePrivateHeaders = "$(Intermediates)/PrivateHeaders" ;
+
+CatHeader "$(IntermediateHeaders)/profile.h" : 		"_KRB5_PROFILE_H"
+                                                    "$(SRCROOT)/../Sources/KerberosProfile/profile.hin"
+                                                    "$(IntermediateErrorTables)/prof_err.h" ;
+CatHeader "$(IntermediateHeaders)/krb5.h" : 		"KRB5_GENERAL__"
+                                                    "$(SRCROOT)/../Headers/Kerberos5/krb5.hin"
+                                                    "$(IntermediateErrorTables)/adm_err.h"
+                                                    "$(IntermediateErrorTables)/asn1_err.h"
+                                                    "$(IntermediateErrorTables)/kdb5_err.h"
+                                                    "$(IntermediateErrorTables)/krb5_err.h"
+                                                    "$(IntermediateErrorTables)/kv5m_err.h" ;
+CatHeader "$(IntermediateHeaders)/krb524.h" : 		"__KRB524_H__"
+                                                    "$(SRCROOT)/../Sources/Kerberos524/krb524.h"
+                                                    "$(IntermediateErrorTables)/krb524_err.h" ;
+CatHeader "$(IntermediateHeaders)/gssapi.h" : 		"_GSSAPI_H_"
+                                                    "$(SRCROOT)/../Sources/GSS/generic/gssapi.hin"
+                                                    "$(IntermediateErrorTables)/gssapi_err_generic.h"
+                                                    "$(IntermediateErrorTables)/gssapi_err_krb5.h" ;
+OSConf "$(IntermediatePrivateHeaders)/osconf.h" :	"$(SRCROOT)/../Headers/Kerberos5/krb5/stock/osconf.h" ;
+CopyHeader "$(IntermediateHeaders)/gssapi_generic.h" :		"$(SRCROOT)/../Sources/GSS/generic/gssapi_generic.h" ;
+CopyHeader "$(IntermediateHeaders)/gssapi_krb5.h" :			"$(SRCROOT)/../Sources/GSS/krb5/gssapi_krb5.h" ;
+CopyHeader "$(IntermediatePrivateHeaders)/autoconf.h" : 	"$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h" ;
+CopyHeader "$(IntermediateHeaders)/KerberosProfileInit.h" :	"$(SRCROOT)/../Headers/MacOSX/KerberosProfileInit.h" ;
+CopyHeader "$(IntermediateHeaders)/Kerberos5Init.h" :		"$(SRCROOT)/../Headers/MacOSX/Kerberos5Init.h" ;
+CopyHeader "$(IntermediateHeaders)/GSSInit.h" :				"$(SRCROOT)/../Headers/MacOSX/GSSInit.h" ;
+
+DEPENDS all :	"$(IntermediateHeaders)/profile.h"
+                "$(IntermediateHeaders)/krb5.h"
+                "$(IntermediateHeaders)/krb524.h"
+                "$(IntermediateHeaders)/gssapi.h"
+                "$(IntermediateHeaders)/gssapi_generic.h"
+                "$(IntermediateHeaders)/gssapi_krb5.h"
+                "$(IntermediatePrivateHeaders)/osconf.h"
+                "$(IntermediatePrivateHeaders)/autoconf.h" 
+                "$(IntermediateHeaders)/KerberosProfileInit.h"
+                "$(IntermediateHeaders)/Kerberos5Init.h"
+                "$(IntermediateHeaders)/GSSInit.h" ;
+
+DEPENDS install : all ;
+DEPENDS installhdrs : all ;

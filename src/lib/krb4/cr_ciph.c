@@ -71,6 +71,17 @@ create_ciph(c, session, service, instance, realm, life, kvno, tkt,
 
     ptr = (char *) c->dat;
 
+    if(sizeof(c->dat) / 8 < (8 +
+		             strlen(service) + 1 +
+		             strlen(instance) + 1 +
+		             strlen(realm) + 1 +
+			     1 + 1 + 1 +
+			     tkt->length + 4 +
+			     7) / 8) {
+        c->length = 0;
+        return(KFAILURE);
+    }
+
     memcpy(ptr, (char *) session, 8);
     ptr += 8;
 

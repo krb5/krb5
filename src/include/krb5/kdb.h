@@ -84,7 +84,7 @@
 #define KRB5_KDB_CREATE_BTREE		0x00000001
 #define KRB5_KDB_CREATE_HASH		0x00000002
 
-#if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32)
+#if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32) && !defined(__MACH__)
 
 /*
  * Note --- these structures cannot be modified without changing the

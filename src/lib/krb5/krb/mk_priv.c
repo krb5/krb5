@@ -93,14 +93,6 @@ krb5_mk_priv_basic(context, userdata, keyblock, replaydata, local_addr,
 				 scratch1, &privmsg.enc_part)))
 	goto clean_encpart;
 
-    /* put last block into the i_vector */
-
-    if (i_vector)
-	memcpy(i_vector,
-	       privmsg.enc_part.ciphertext.data +
-	       (privmsg.enc_part.ciphertext.length - blocksize),
-	       blocksize);
-	   
     if ((retval = encode_krb5_priv(&privmsg, &scratch2)))
         goto clean_encpart;
 

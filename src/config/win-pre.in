@@ -83,17 +83,29 @@ C=.^\
 srcdir = .
 SRCTOP = $(srcdir)\$(BUILDTOP)
 
-!if defined(KRB5_USE_DNS)
+!if defined(KRB5_USE_DNS) || defined(KRB5_USE_DNS_KDC) || defined(KRB5_USE_DNS_REALMS)
+!if defined(KRB5_NO_WSHELPER)
+DNSMSG=resolver
+!else
+DNSMSG=wshelper
+DNSFLAGS=-DWSHELPER=1
+!endif
 !if !defined(DNS_INC)
-!message Must define DNS_INC to point to wshelper includes dir!
+!message Must define DNS_INC to point to $(DNSMSG) includes dir!
 !error
 !endif
 !if !defined(DNS_LIB)
-!message Must define DNS_LIB to point to wshelper library!
+!message Must define DNS_LIB to point to $(DNSMSG) library!
 !error
 !endif
 DNSLIBS=$(DNS_LIB)
-DNSFLAGS=-I$(DNS_INC) -DKRB5_DNS_LOOKUP -DWSHELPER
+DNSFLAGS=-I$(DNS_INC) $(DNSFLAGS) -DKRB5_DNS_LOOKUP=1
+!if defined(KRB5_USE_DNS_KDC)
+DNSFLAGS=$(DNSFLAGS) -DKRB5_DNS_LOOKUP_KDC=1
+!endif
+!if defined(KRB5_USE_DNS_REALMS)
+DNSFLAGS=$(DNSFLAGS) -DKRB5_DNS_LOOKUP_REALM=1
+!endif
 !else
 DNSLIBS=
 DNSFLAGS=
@@ -105,7 +117,7 @@ DNSFLAGS=
 CC=cl
 
 PDB_OPTS=-Fd$(OUTPRE)\ -FD
-CPPFLAGS=-I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS)
+CPPFLAGS=-I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS) -DKRB5_PRIVATE=1
 CCOPTS=-nologo /W3 $(PDB_OPTS) $(DLL_FILE_DEF)
 LOPTS=-nologo -incremental:no
 

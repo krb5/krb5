@@ -32,7 +32,6 @@
 #include "k5-int.h"
 #include <stdio.h>
 #include <time.h>
-#include <syslog.h>
 #ifdef _MSDOS
 #define getpid _getpid
 #include <process.h>
@@ -172,6 +171,10 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
 	    retval = decode_krb5_etype_info(&scratch, &etype_info);
 	    if (retval)
 		return retval;
+	    if (etype_info[0] == NULL) {
+		krb5_free_etype_info(context, etype_info);
+		etype_info = NULL;
+	    }
 	}
     }
 
