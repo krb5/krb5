@@ -144,9 +144,19 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 		if (home_env == NULL) {
 		    uid_t uid;
 		    struct passwd *pw;
+#ifdef HAVE_GETPWUID_R
+		    struct passwd pwx;
+		    char pwbuf[BUFSIZ];
+#endif
 
 		    uid = getuid();
+#ifdef HAVE_GETPWUID_R
+		    if (getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf), &pw) != 0)
+			/* Probably already null, but let's make sure.  */
+			pw = NULL;
+#else
 		    pw = getpwuid(uid);
+#endif
 		    if (pw != NULL && pw->pw_dir[0] != 0)
 			home_env = pw->pw_dir;
 		}

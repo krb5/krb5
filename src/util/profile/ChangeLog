@@ -1,3 +1,9 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for getpwuid_r.
+	* prof_file.c (profile_open_file) [HAVE_PWD_H && HAVE_GETPWUID_R]:
+	Use getpwuid_r if available.
+
 2004-05-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: When generating prtest, use AC_CONFIG_FILES
