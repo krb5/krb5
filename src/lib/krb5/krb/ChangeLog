@@ -1,5 +1,8 @@
 Wed Jan 10 21:01:36 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* init_ctx.c (krb5_init_context): Added checking of profile for
+	        DCE compatability options (ccache type, and checksum type).
+
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Initialize addrs to 0 so that we
 		don't try to free stack garbage on an error.
 

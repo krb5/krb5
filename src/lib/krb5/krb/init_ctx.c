@@ -53,16 +53,34 @@ krb5_init_context(context)
 		goto cleanup;
 
 	ctx->default_realm = 0;
-	profile_get_integer(ctx->profile, "libdefaults",
-			    "clockskew", 0, 5 * 60,
-			    &tmp);
+	profile_get_integer(ctx->profile, "libdefaults", "clockskew",
+			    0, 5 * 60, &tmp);
 	ctx->clockskew = tmp;
-	ctx->kdc_req_sumtype = CKSUMTYPE_RSA_MD5;
+
+	/* DCE 1.1 and below only support CKSUMTYPE_RSA_MD4 (2)  */
+	/* DCE add checksum_type = 2 to krb5.conf */
+	profile_get_integer(ctx->profile, "libdefaults", "checksum_type", 0,
+			    CKSUMTYPE_RSA_MD5, &tmp);
+	ctx->kdc_req_sumtype = tmp;
+
 	ctx->kdc_default_options = KDC_OPT_RENEWABLE_OK;
 	profile_get_integer(ctx->profile, "libdefaults",
 			    "kdc_timesync", 0, 0,
 			    &tmp);
 	ctx->library_options = tmp ? KRB5_LIBOPT_SYNC_KDCTIME : 0;
+
+	/*
+	 * We use a default file credentials cache of 3.  See
+	 * lib/krb5/krb/ccache/file/fcc.h for a description of the
+	 * credentials cache types.
+	 *
+	 * Note: DCE 1.0.3a only supports a cache type of 1
+	 * 	DCE 1.1 supports a cache type of 2.
+	 */
+	profile_get_integer(ctx->profile, "libdefaults", "ccache_type",
+			    0, 3, &tmp);
+	ctx->fcc_default_format = tmp + 0x0500;
+	ctx->scc_default_format = tmp + 0x0500;
 
 	*context = ctx;
 	return 0;
