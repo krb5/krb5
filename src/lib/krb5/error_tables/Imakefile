@@ -22,11 +22,11 @@
 # or implied warranty.
 # 
 # 
-ETSRCS=isode_err.c kdb5_err.c krb5_err.c
+ETSRCS=isode_err.c kdb5_err.c krb5_err.c adm_err.c
 
-ETOBJS=isode_err.o kdb5_err.o krb5_err.o
+ETOBJS=isode_err.o kdb5_err.o krb5_err.o adm_err.o
 
-ETHDRS=isode_err.h kdb5_err.h krb5_err.h
+ETHDRS=isode_err.h kdb5_err.h krb5_err.h adm_err.h
 
 SRCS= $(ETSRCS) $(SRCDIR)init_ets.c
 OBJS= $(ETOBJS) init_ets.o
@@ -45,6 +45,7 @@ clean::
 CopyHeader(isode_err.h,$(EHDRDIR))
 CopyHeader(krb5_err.h,$(EHDRDIR))
 CopyHeader(kdb5_err.h,$(EHDRDIR))
+CopyHeader(adm_err.h,$(EHDRDIR))
 
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
@@ -58,3 +59,4 @@ Krb5InstallHeaders($(ETHDRS), $(KRB5_INCDIR)/krb5)
 SpecialObjectRule(isode_err.o,isode_err.c,)
 SpecialObjectRule(krb5_err.o,krb5_err.c,)
 SpecialObjectRule(kdb5_err.o,kdb5_err.c,)
+SpecialObjectRule(adm_err.o,adm_err.c,)
