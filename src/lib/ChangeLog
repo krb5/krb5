@@ -1,3 +1,8 @@
+Tue Oct 21 23:29:18 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* win_glue.c: Add checks so that code doesn't bomb out if the
+		version resource is missing a Title or Version record.
+
 Fri Aug  1 22:03:24 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in, krb5.rc, version.rc: Add support for adding a

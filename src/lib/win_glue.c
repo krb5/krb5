@@ -164,6 +164,9 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 
 	/* try a localAppTitle and then a strcpy 4/2/97 */
 
+	locAppTitle = 0;
+	locAppVer = 0;
+
 	retval = VerQueryValue(lpVersionInfo, szVerQ, &locAppTitle,
 			       &dumint);
 
@@ -172,6 +175,12 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 
 	retval = VerQueryValue(lpVersionInfo, szVerQ, &locAppVer,
 			       &dumint);
+
+	if (!locAppTitle || !locAppVer) {
+	  	/* Punt, we don't have the right version resource records */
+		*VSflag = FALSE;
+		return;
+	}
 
 	/*
 	 * We don't have a way to determine that INI file of the
