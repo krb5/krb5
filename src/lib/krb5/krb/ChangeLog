@@ -1,3 +1,9 @@
+Mon Jun 17 20:23:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* str_conv.c (krb5_string_to_timestamp): Ensure that all fields of
+		the timestamp are filled in if strptime does not fill in
+		unspecified fields.
+
 Wed Jun 12 01:10:09 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sendauth.c (krb5_sendauth): If ECCONABORTED is not defined, try

@@ -432,11 +432,17 @@ krb5_string_to_timestamp(string, timestampp)
     int i;
     int found;
     struct tm timebuf;
+    time_t now;
     char *s;
 
     found = 0;
-    memset(&timebuf, 0, sizeof(timebuf));
+    now = time((time_t *) NULL);
     for (i=0; i<atime_format_table_nents; i++) {
+        /* We reset every time throughout the loop as the manual page
+	 * indicated that no guarantees are made as to preserving timebuf
+	 * when parsing fails
+	 */
+	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
 	if ((s = strptime(string, atime_format_table[i], &timebuf))
 	    && (s != string)) {
 	    found = 1;
