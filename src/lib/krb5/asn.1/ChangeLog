@@ -1,5 +1,10 @@
 Wed Mar 20 22:43:17 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* asn1_k_decode.c: Decode pa_type in the krb5_pa_data structure as
+		a krb5_int32, since it is now type krb5_preauthtype.
+		(asn1_decode_etype_info_entry): Decode etype in the
+		krb5_etype_info_entry as krb5_enctype.
+
 	* krb5_decode.c (decode_krb5_pa_enc_ts): Fix 16 bit vs. 32bit
 		error in the encoded timestamp structure.
 

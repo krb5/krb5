@@ -603,7 +603,7 @@ asn1_error_code asn1_decode_pa_data(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->pa_type,1,asn1_decode_ui_2);
+    get_field(val->pa_type,1,asn1_decode_int32);
     get_lenfield(val->length,val->contents,2,asn1_decode_octetstring);
     end_structure();
     val->magic = KV5M_PA_DATA;
@@ -661,7 +661,7 @@ asn1_error_code asn1_decode_etype_info_entry(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->etype,0,asn1_decode_ui_4);
+    get_field(val->etype,0,asn1_decode_enctype);
     if (tagnum == 1) {
 	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
     } else {
