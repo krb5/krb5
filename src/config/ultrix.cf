@@ -49,10 +49,10 @@
 #define LintLibFlag -o
 
 #ifdef MIPSEL
-#define DesDefines -DBITS32 -DBIG -DMUSTALIGN -DLSBFIRST
+#define DesDefines -DBIG -DMUSTALIGN -DLSBFIRST
 #else
 #ifdef MIPSEB
-#define DesDefines -DBITS32 -DBIG -DMUSTALIGN -DMSBFIRST
+#define DesDefines -DBIG -DMUSTALIGN -DMSBFIRST
 #else /* not MIPSEB */
  error: you must figure out what endian your MIPS is!
 #endif /* MIPSEB */
