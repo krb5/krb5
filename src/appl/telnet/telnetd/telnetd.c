@@ -82,10 +82,6 @@ struct	socket_security ss;
 #if	defined(AUTHENTICATION)
 #include <libtelnet/auth.h>
 #include <libtelnet/auth-proto.h>
-int	auth_level = 0;
-#endif
-#if	defined(SecurID)
-int	require_SecurID = 0;
 #endif
 #ifdef ENCRYPTION
 #include <libtelnet/encrypt.h>
@@ -107,7 +103,6 @@ int	registerd_host_only = 0;
 # include <sys/ptyvar.h>
 #endif
 
-void doit P((struct sockaddr_in *));
 
 /*
  * Because of the way ptyibuf is used with streams messages, we need
@@ -133,6 +128,8 @@ char	ptyibuf[BUFSIZ], *ptyip = ptyibuf;
 char	ptyibuf2[BUFSIZ];
 
 #endif /* ! STREAMPTY */
+
+void doit P((struct sockaddr_in *));
 
 int	hostinfo = 1;			/* do we print login banner? */
 

@@ -25,7 +25,20 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(string.h arpa/nameser.h)
 AC_CHECK_HEADERS(sys/time.h sys/tty.h)
 AC_HAVE_FUNCS(vhangup)
-AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
+dnl Make our operating system-specific security checks and definitions for
+dnl login.
+dnl
+case $krb5_cv_host in
+*-*-irix*)
+     # Irix doesn't have a working granpt, and more over
+     # you can't push anything onto a pty, so telnetd really
+     # Really wants to treat it as if it doesn't have streams
+    broken_streams=yes
+;;
+esac
+if test -z "$broken_streams" ; then
+    AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
+fi
 AC_HEADER_CHECK(sac.h,AC_DEFINE(HAS_SAC))
 AC_HEADER_CHECK(sys/ptyvar.h,AC_DEFINE(HAS_PTYVAR))
 AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAS_GETTOS))

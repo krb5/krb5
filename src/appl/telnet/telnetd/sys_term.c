@@ -64,9 +64,9 @@ int	utmp_len = MAXHOSTNAMELEN;	/* sizeof(init_request.host) */
 # include <utmpx.h>
 struct	utmpx wtmp;
 # else
-# include <utmp.h>
+#include<utmp.h>
 struct	utmp wtmp;
-# endif /* UTMPX */
+#endif /*UTMPX*/
 
 int	utmp_len = sizeof(wtmp.ut_host);
 # ifndef PARENT_DOES_UTMP
@@ -1244,33 +1244,13 @@ start_login(host, autologin, name)
 	register char **argv;
 	char **addarg();
 	extern char *getenv();
-#ifdef	UTMPX
 	register int pid = getpid();
-	struct utmpx utmpx;
-#endif
+
 #ifdef SOLARIS
 	char *term;
 	char termbuf[64];
 #endif
 
-#ifdef	UTMPX
-	/*
-	 * Create utmp entry for child
-	 */
-
-	memset(&utmpx, 0, sizeof(utmpx));
-	SCPYN(utmpx.ut_user, ".telnet");
-	SCPYN(utmpx.ut_line, line + sizeof("/dev/") - 1);
-	utmpx.ut_pid = pid;
-	utmpx.ut_id[0] = 't';
-	utmpx.ut_id[1] = 'n';
-	utmpx.ut_id[2] = SC_WILDC;
-	utmpx.ut_id[3] = SC_WILDC;
-	utmpx.ut_type = LOGIN_PROCESS;
-	(void) time(&utmpx.ut_tv.tv_sec);
-	if (makeutx(&utmpx) == NULL)
-		fatal(net, "makeutx failed");
-#endif
 
 	/*
 	 * -h : pass on name of host.
@@ -1685,131 +1665,4 @@ cleantmpdir(jid, tpath, user)
 # endif /* CRAY */
 #endif	/* defined(PARENT_DOES_UTMP) && !defined(NEWINIT) */
 
-/*
- * rmut()
- *
- * This is the function called by cleanup() to
- * remove the utmp entry for this person.
- */
 
-#ifdef	UTMPX
-	void
-rmut()
-{
-	register f;
-	int found = 0;
-	struct utmp *u, *utmp;
-	int nutmp;
-	struct stat statbf;
-
-	struct utmpx *utxp, utmpx;
-
-	/*
-	 * This updates the utmpx and utmp entries and make a wtmp/x entry
-	 */
-
-	SCPYN(utmpx.ut_line, line + sizeof("/dev/") - 1);
-	utxp = getutxline(&utmpx);
-	if (utxp) {
-		utxp->ut_type = DEAD_PROCESS;
-		utxp->ut_exit.e_termination = 0;
-		utxp->ut_exit.e_exit = 0;
-		(void) time(&utmpx.ut_tv.tv_sec);
-		utmpx.ut_tv.tv_usec = 0;
-		modutx(utxp);
-	}
-	endutxent();
-}  /* end of rmut */
-#endif
-
-#if	!defined(UTMPX) && !(defined(CRAY) || defined(__hpux)) && BSD <= 43
-	void
-rmut()
-{
-	register f;
-	int found = 0;
-	struct utmp *u, *utmp;
-	int nutmp;
-	struct stat statbf;
-
-	f = open(utmpf, O_RDWR);
-	if (f >= 0) {
-		(void) fstat(f, &statbf);
-		utmp = (struct utmp *)malloc((unsigned)statbf.st_size);
-		if (!utmp)
-			syslog(LOG_ERR, "utmp malloc failed");
-		if (statbf.st_size && utmp) {
-			nutmp = read(f, (char *)utmp, (int)statbf.st_size);
-			nutmp /= sizeof(struct utmp);
-		
-			for (u = utmp ; u < &utmp[nutmp] ; u++) {
-				if (SCMPN(u->ut_line, line+5) ||
-				    u->ut_name[0]==0)
-					continue;
-				(void) lseek(f, ((long)u)-((long)utmp), L_SET);
-				SCPYN(u->ut_name, "");
-				SCPYN(u->ut_host, "");
-				(void) time(&u->ut_time);
-				(void) write(f, (char *)u, sizeof(wtmp));
-				found++;
-			}
-		}
-		(void) close(f);
-	}
-	if (found) {
-		f = open(wtmpf, O_WRONLY|O_APPEND);
-		if (f >= 0) {
-			SCPYN(wtmp.ut_line, line+5);
-			SCPYN(wtmp.ut_name, "");
-			SCPYN(wtmp.ut_host, "");
-			(void) time(&wtmp.ut_time);
-			(void) write(f, (char *)&wtmp, sizeof(wtmp));
-			(void) close(f);
-		}
-	}
-	(void) chmod(line, 0666);
-	(void) chown(line, 0, 0);
-	line[strlen("/dev/")] = 'p';
-	(void) chmod(line, 0666);
-	(void) chown(line, 0, 0);
-}  /* end of rmut */
-#endif	/* CRAY */
-
-#ifdef __hpux
-rmut (line)
-char *line;
-{
-	struct utmp utmp;
-	struct utmp *utptr;
-	int fd;			/* for /etc/wtmp */
-
-	utmp.ut_type = USER_PROCESS;
-	(void) strncpy(utmp.ut_id, line+12, sizeof(utmp.ut_id));
-	(void) setutent();
-	utptr = getutid(&utmp);
-	/* write it out only if it exists */
-	if (utptr) {
-		utptr->ut_type = DEAD_PROCESS;
-		utptr->ut_time = time((long *) 0);
-		(void) pututline(utptr);
-		/* set wtmp entry if wtmp file exists */
-		if ((fd = open(wtmpf, O_WRONLY | O_APPEND)) >= 0) {
-			(void) write(fd, utptr, sizeof(utmp));
-			(void) close(fd);
-		}
-	}
-	(void) endutent();
-
-	(void) chmod(line, 0666);
-	(void) chown(line, 0, 0);
-	line[14] = line[13];
-	line[13] = line[12];
-	line[8] = 'm';
-	line[9] = '/';
-	line[10] = 'p';
-	line[11] = 't';
-	line[12] = 'y';
-	(void) chmod(line, 0666);
-	(void) chown(line, 0, 0);
-}
-#endif

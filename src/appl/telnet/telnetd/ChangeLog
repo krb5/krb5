@@ -1,3 +1,25 @@
+Sat Mar 23 01:33:09 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* sys_term.c: Remove utmpx stuff so libpty can do it.
+	(start_login): Remove utmpx handling here as well.
+	(rmut): expunged; libpty should deal.
+
+	* configure.in : Do not use streamspty on SGIs; it really doesn't
+ 	work, even though all the interfaces are prsent.
+
+	* telnetd.c: Move prototype for doit to be global instead of
+        streams-specific.
+
+	Tue Mar 19 18:43:46 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+        For environments not supporting common storage:
+        * defs.h (P): Add definition here.
+        (line, encrypt_output, decrypt_input): Declare here.
+        * ext.h (line, encrypt_output, decrypt_input): Not here.
+        (terminaltype): Declare explicitly "extern".
+        * telnetd.c (auth_level, require_SecurID): Don't initialize here.
+
+	
 Mon Mar 18 20:29:05 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Added flags which turn on the encryption option.

@@ -309,3 +309,18 @@ typedef struct {
 
 #define his_will_wont_is_changing	my_do_dont_is_changing
 #define his_do_dont_is_changing		my_will_wont_is_changing
+
+extern char	*line;
+
+#ifndef	P
+# ifdef	__STDC__
+#  define P(x)	x
+# else
+#  define P(x)	()
+# endif
+#endif
+
+#ifdef	ENCRYPTION
+extern void	(*encrypt_output) P((unsigned char *, int));
+extern int	(*decrypt_input) P((int));
+#endif	/* ENCRYPTION */
