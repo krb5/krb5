@@ -1,0 +1,23 @@
+CFLAGS = $(CCOPTS) -DKPOP -DKRB5 $(DEFS) $(LOCALINCLUDE)
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+HESIODLIB =
+
+mailquery: mailquery.o poplib.o
+	$(CC) $(CFLAGS) -o mailquery mailquery.o poplib.o $(KLIB) $(HESIODLIB)
+
+mailquery.o:	$(srcdir)/mailquery.c
+poplib.o:	$(srcdir)/poplib.c
+
+all:: mailquery
+
+clean::
+	$(RM) mailquery.o poplib.o mailquery
+
+install::
+	cp mailquery ${DESTDIR}$(CLIENT_BINDIR)/mailquery
+	cp mailquery.M ${DESTDIR}$(CLIENT_MANDIR)/mailquery.1
+
