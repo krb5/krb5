@@ -1,3 +1,8 @@
+2002-09-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h,
+	generic/gssapi.h): Depend on all-recurse.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

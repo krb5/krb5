@@ -257,6 +257,9 @@ clean-mac::
 	$(RM) types.h types.stamp
 clean-windows::
 	$(RM) types.h types.stamp
+
+$(HDRS): includes
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

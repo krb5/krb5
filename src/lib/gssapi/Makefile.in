@@ -70,6 +70,8 @@ clean-windows::
 	cd ..
 	@echo Making clean in gssapi
 
+$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h: all-recurse
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in
