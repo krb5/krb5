@@ -1,3 +1,7 @@
+Sun Jul 19 12:00:00 1998  Marc Horowitz <marc@mit.edu>
+
+	* *.c: replace the crypto layer.
+
 Tue Mar  3 08:39:47 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (t_cksum): Do not depend on libkrb5.a, use 

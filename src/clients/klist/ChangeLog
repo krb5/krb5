@@ -1,3 +1,9 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* klist.c: add -a flag to print the ticket address, and -n flag to
+	do so without attempting resolution.  Make klist use the new api
+	for stringifying enctypes.
+
 Tue Aug 11 23:38:53 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* klist.c (do_ccache): Properly check the return value of

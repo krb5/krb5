@@ -1,3 +1,8 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* dumpv4, loadv4.c, kdb5_create.c, kdb5_stash.c, kdb5_util.c,
+	kadm5_create.c: convert to new crypto api
+
 Wed Sep 30 00:02:01 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* dump.c: Add support for changing the master key for a database

@@ -1,3 +1,15 @@
+1998-10-24  Marc Horowitz  <marc@mit.edu>
+
+	* gss-server.c (sign_server): fix the text heuristic to recognize
+		whitespace as text.
+	(main): clean up file descriptors properly after each
+		connection.
+
+	* gss-client.c (read_file): properly handle empty files
+
+	* gss-client.c: (call_server): NUL-terminate the contents
+		of non-empty files on the wire.
+	
 Wed Feb 18 15:27:32 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from BUILDTOP.  Fix up

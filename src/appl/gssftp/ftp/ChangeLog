@@ -1,3 +1,10 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* ftp.c (login): *always* encrypt the password, regardless
+	of the default command mode.
+	(do_auth): Try the new krb5 mech, and if that fails, try the
+	old one.
+
 Fri Oct  2 16:16:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* cmdtab.c: Update help message for passive mode so that it

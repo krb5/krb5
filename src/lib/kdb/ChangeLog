@@ -1,3 +1,19 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* kdb_xdr.c, kdb_cpw.c: remove the special knowledge of ENCTYPE
+	string-to-key equivalances.  the crypto api has a function for
+	this now.
+
+	* decrypt_key.c, encrypt_key.c, fetch_mkey.c, kdb_cpw.c,
+	kdb_db2.c, kdb_db2.h, kdb_dbm.c, keytab.c, verify_mky.c: change or
+	remove all the places krb5_encrypt_block was used
+	(this is mostly relevant to kdb manipulations).  It was usually
+	used to specify an enctype (which is now implied by the keyblock),
+	or to store or pass in a processed key (now the api just takes a
+	key directly, so these structures and functions do, too).  The kdb
+	key manuipulation functions also need to be made to use the new
+	api.
+
 Fri Sep 25 19:42:10 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_xdr.c (krb5_dbe_search_enctype): Re-order booleans so that

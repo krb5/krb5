@@ -1,3 +1,16 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in, accept_sec_context.c, acquire_cred.c, canon_name.c,
+	delete_sec_context.c, disp_status.c, gssapiP_krb5.h,
+	gssapi_err_krb5.et, gssapi_krb5.c, gssapi_krb5.h,
+	init_sec_context.c, inq_cred.c, inq_names.c, k5seal.c, k5unseal.c,
+	rel_oid.c, ser_sctx.c, util_cksum.c, util_crypt.c, util_seed.c,
+	util_seqnum.c, wrap_size_limit.c: convert to new crypto api.
+	Implement new krb5 v2 gssapi mechanism.
+
+	* add_cred.c, util_ctxsetup.c: New files needed to implement the
+	krb5 v2 mech.
+
 Mon Sep 21 00:32:28 1998  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Free authdat

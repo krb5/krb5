@@ -1,3 +1,8 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* gssapi.hin: define GSS_S_DUPLICATE_ELEMENT, GSS_S_NAME_NOT_MN,
+	and GSS_S_GAP_TOKEN as per gss v2 c bindings
+
 1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* oid_ops.c (generic_gss_release_oid): Recognize our own "self"

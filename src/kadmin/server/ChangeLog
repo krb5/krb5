@@ -1,3 +1,10 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* ovsec_kadmd.c: add calls to a new function
+	_svcauth_gssapi_unset_names() to clean up memory when shutting
+	down.  Use krb5_overridekeyname instead of krb5_defkeyname, so the
+	command line takes precedence over the environment.
+
 Wed Jul 22 00:28:57 1998  Geoffrey King  <gjking@mit.edu>
 
 	* ovsec_kadmd.c (main): Cast gss_nt_krb5_name to

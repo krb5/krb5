@@ -1,3 +1,7 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: add kvno
+
 Sat Jul 25 15:00:26 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* Makefile.in (LOCAL_SUBDIRS): add kvno

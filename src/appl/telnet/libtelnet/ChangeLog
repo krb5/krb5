@@ -1,3 +1,10 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* enc_des.c, kerberos.c: the ECB des functions don't exist
+	anymore, but telnet always encrypted/decrypted one block.  Convert
+	to calls to the new crypto api, with des-cbc-raw, using a single
+	block.
+
 Tue Mar  3 14:43:30 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Change test for cgetent to use HAVE_ instead

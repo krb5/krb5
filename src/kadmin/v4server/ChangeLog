@@ -1,3 +1,8 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* admin_server.c, kadm_funcs.c, kadm_ser_wrap.c, kadm_server.h:
+	convert to new crypto api
+
 Fri Jul 31 18:17:16 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_ser_wrap.c (kadm_ser_init): Remove references to

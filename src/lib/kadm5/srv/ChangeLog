@@ -1,3 +1,7 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* server_kdb.c, svr_principal.c: convert to new crypto api
+
 Sun Jul 26 18:09:55 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* Makefile.in (LIBMAJOR): bump libmajor

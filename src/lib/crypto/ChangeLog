@@ -25,6 +25,10 @@ Mon Aug 17 23:40:11 1998  Tom Yu  <tlyu@mit.edu>
 	compatibility for krb5-beta5 checksums.  Fix typos similar to
 	those corrected in k5_md4des.c.
 
+Sun Jul 19 12:00:00 1998  Marc Horowitz <marc@mit.edu>
+
+	* *.c: replace the crypto layer.
+
 Wed Apr 15 18:02:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LIB): Rename to k5crypto.

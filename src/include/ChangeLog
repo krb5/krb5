@@ -1,3 +1,15 @@
+1998-10-26  Marc Horowitz  <marc@mit.edu>
+
+	* krb5.hin: add new interfaces for new crypto API and key
+	derivation/key usage.  Add new (krb5_get_permitted_enctypes,
+	krb5_is_permitted_enctype) api for querying permitted etypes from
+	krb5.conf, and new auth_context flag
+	(KRB5_AUTH_CONTEXT_PERMIT_ALL) to override this.  Fix bug in
+	krb5_kt_get_type.
+	
+	* k5-int.h: make changes related to new crypto API and key
+	derivation/key usage
+
 Tue Sep  1 19:32:33 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Add ENCTYPE_LOCAL_DES3_HMAC_SHA1, in order to deal

@@ -1,3 +1,8 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, extern.h, kdc_preauth.c, kdc_util.c,
+	kerberos_v4.c, main.c: conver to new crypto api.
+
 Fri Sep 25 19:47:26 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (check_princ): Re-order if statements that check

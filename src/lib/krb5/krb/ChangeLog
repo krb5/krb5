@@ -1,3 +1,39 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* vfy_increds.c: rearrange the code a bit to make it more clear
+	that the logic is correct.
+
+	* str_conv.c: remove enctype and cksumtype string converstions.
+	They're in the crypto library now, since the information drops
+	right into the enctype table.
+
+	* ser_eblk.c: ifdef the whole file out, since it's not used
+	anywhere.  it should probably be deleted, but I'm not sure about
+	backward-compatibility issues yet.
+
+	* rd_req_dec.c: check the auth_context permit-all flag and
+	permitted_enctypes list, and reject the request if the policy
+	check fails.
+
+	* init_ctx.c: add code to initialize the prng.  It's not great,
+	but can be improved, and the prng is reseeded when new keys are
+	processed. Read permitted_enctypes from the krb5.conf file, and
+	provide accessor functions for it.  Make the various etype list
+	parsers share code as a side effect.
+
+	* get_creds.c: add krb5_get_{validat,renew}ed_creds functions,
+	which are part of the new init_creds api.  The prototypes were
+	already in, krb5.hin but there was no implementing code.
+
+	* auth_con.c, auth_con.h: add a list of permitted enctypes to the
+	auth_context for rd_req to check, and create accessor functions
+	for this list.
+
+	* Makefile.in, enc_helper.c: add enc_helper.c.  This provides a
+	wrapper around the conventional way the library encrypts and wraps
+	encoded asn.1 structures, so the code isn't repeated in a dozen
+	places.
+
 Wed Aug 19 17:27:51 1998  Tom Yu  <tlyu@mit.edu>
 
 	* conv_princ.c: Add some additional entries to sconv_list that

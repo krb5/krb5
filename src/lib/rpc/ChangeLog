@@ -1,3 +1,8 @@
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* svc_auth_gssapi.c, auth_gssapi.h: fix the set_name prototype,
+	add a new unset_names function
+
 Sun Jul 26 18:13:39 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* Makefile.in (LIBMAJOR): bump libmajor

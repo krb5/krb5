@@ -1,3 +1,17 @@
+1998-10-24  Marc Horowitz  <marc@mit.edu>
+
+	* login.c: update to new get_creds API
+	
+	* krlogin.c (main, oob, server_message, control), krlogind.c
+		(sendoob, protocol, recvauth): If the enctype is not
+		similar to DES, use an inband signalling protocol instead
+		of MSG_OOB data to indicate status changes.
+
+	* kcmd.c (rcmd_stream_init_krb5, v5_des_read, v5_des_write):
+		update to new crypto API.  Add ivec chaining to
+		encryption when the enctype is not similar to DES as part
+		of the new protocol.
+
 1998-10-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krshd.c (doit): Apply ghudson's patch so that rshd passes the
