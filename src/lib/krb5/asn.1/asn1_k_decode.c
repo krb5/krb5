@@ -663,7 +663,7 @@ asn1_error_code asn1_decode_etype_info_entry(buf, val)
   { begin_structure();
     get_field(val->etype,0,asn1_decode_ui_4);
     if (tagnum == 1) {
-	    get_lenfield((int) val->length,val->salt,1,asn1_decode_octetstring);
+	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
     } else {
 	    val->length = 0;
 	    val->salt = 0;
