@@ -43,7 +43,7 @@ extern krb5_flags krb5_kdc_default_options;
 
 krb5_error_code
 krb5_mk_req(server, ap_req_options, checksum, ccache, outbuf)
-const krb5_principal server;
+krb5_const_principal server;
 const krb5_flags ap_req_options;
 const krb5_checksum *checksum;
 krb5_ccache ccache;

@@ -158,7 +158,7 @@ struct type_KRB5_EncKrbPrivPart *krb5_priv_enc_part2KRB5_EncKrbPrivPart
 
 /* kprin2prin.c */
 struct type_KRB5_PrincipalName *krb5_principal2KRB5_PrincipalName
-	PROTOTYPE((const krb5_principal , int *));
+	PROTOTYPE((krb5_const_principal , int *));
 
 /* kpriv2priv.c */
 struct type_KRB5_KRB__PRIV *krb5_priv2KRB5_KRB__PRIV

@@ -27,8 +27,8 @@ static char rcsid_princ_comp_c[] =
 
 krb5_boolean
 krb5_principal_compare(princ1, princ2)
-const krb5_principal princ1;
-const krb5_principal princ2;
+krb5_const_principal princ1;
+krb5_const_principal princ2;
 {
     register krb5_data **p1, **p2;
 

@@ -56,7 +56,7 @@ extern char *krb5_lname_file;
  */
 krb5_error_code
 krb5_aname_to_localname(aname, lnsize, lname)
-const krb5_principal aname;
+krb5_const_principal aname;
 const int lnsize;
 char *lname;
 {
@@ -104,7 +104,7 @@ char *lname;
  */
 krb5_error_code
 krb5_aname_to_localname(aname, lnsize, lname)
-const krb5_principal aname;
+krb5_const_principal aname;
 const int lnsize;
 char *lname;
 {

@@ -31,7 +31,7 @@ static char rcsid_walk_rtree_c[] =
 
 krb5_error_code
 krb5_walk_realm_tree(client, server, tree)
-const krb5_principal client, server;
+krb5_const_principal client, server;
 krb5_principal **tree;
 {
     krb5_error_code retval;

@@ -42,7 +42,7 @@ static char rcsid_rd_req_sim_c[] =
 krb5_error_code
 krb5_rd_req_simple(inbuf, server, sender_addr, authdat)
 const krb5_data *inbuf;
-const krb5_principal server;
+krb5_const_principal server;
 const krb5_address *sender_addr;
 krb5_tkt_authent *authdat;
 {

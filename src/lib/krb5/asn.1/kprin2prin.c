@@ -30,7 +30,7 @@ static char rcsid_kprin2prin_c[] =
 
 struct type_KRB5_PrincipalName *
 krb5_principal2KRB5_PrincipalName(val, error)
-const krb5_principal val;
+krb5_const_principal val;
 register int *error;
 {
     register int i;

@@ -49,7 +49,7 @@ krb5_error_code
 krb5_rd_req(inbuf, server, sender_addr, fetchfrom, keyproc, keyprocarg,
 	    rcache, authdat)
 const krb5_data *inbuf;
-const krb5_principal server;
+krb5_const_principal server;
 const krb5_address *sender_addr;
 krb5_const_pointer fetchfrom;
 krb5_error_code (*keyproc) PROTOTYPE((krb5_pointer, 

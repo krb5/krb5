@@ -44,7 +44,7 @@ krb5_send_tgs(DECLARG(const krb5_flags, kdcoptions),
 	      DECLARG(const krb5_ticket_times *,timestruct),
 	      DECLARG(const krb5_enctype, etype),
 	      DECLARG(const krb5_cksumtype, sumtype),
-	      DECLARG(const krb5_principal, sname),
+	      DECLARG(krb5_const_principal, sname),
 	      DECLARG(krb5_address * const *, addrs),
 	      DECLARG(krb5_authdata * const *,authorization_data),
 	      DECLARG(const krb5_data *,second_ticket),
@@ -54,7 +54,7 @@ OLDDECLARG(const krb5_flags, kdcoptions)
 OLDDECLARG(const krb5_ticket_times *,timestruct)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_cksumtype, sumtype)
-OLDDECLARG(const krb5_principal, sname)
+OLDDECLARG(krb5_const_principal, sname)
 OLDDECLARG(krb5_address * const *, addrs)
 OLDDECLARG(krb5_authdata * const *,authorization_data)
 OLDDECLARG(const krb5_data *,second_ticket)

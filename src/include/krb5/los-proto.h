@@ -57,7 +57,7 @@ krb5_error_code krb5_get_krbhst
 krb5_error_code krb5_free_krbhst
 	PROTOTYPE((char * const * ));
 krb5_error_code krb5_aname_to_localname
-	PROTOTYPE((const krb5_principal,
+	PROTOTYPE((krb5_const_principal,
 		   const int,
 		   char * ));
 krb5_error_code krb5_get_default_realm

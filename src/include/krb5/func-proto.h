@@ -47,7 +47,7 @@ krb5_error_code krb5_send_tgs
 		   const krb5_ticket_times *,
 		   const krb5_enctype,
 		   const krb5_cksumtype,
-		   const krb5_principal,
+		   krb5_const_principal,
 		   krb5_address * const *,
 		   krb5_authdata * const *,
 		   const krb5_data *,
@@ -95,7 +95,7 @@ krb5_error_code krb5_get_in_tkt_with_skey
 		   krb5_ccache,
 		   krb5_creds * ));
 krb5_error_code krb5_mk_req
-	PROTOTYPE((const krb5_principal,
+	PROTOTYPE((krb5_const_principal,
 		   const krb5_flags,
 		   const krb5_checksum *,
 		   krb5_ccache,
@@ -111,12 +111,12 @@ krb5_error_code krb5_mk_req_extended
 		   krb5_data * ));
 krb5_error_code krb5_rd_req_simple
 	PROTOTYPE((const krb5_data *,
-		   const krb5_principal,
+		   krb5_const_principal,
 		   const krb5_address *,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_rd_req
 	PROTOTYPE((const krb5_data *,
-		   const krb5_principal,
+		   krb5_const_principal,
 		   const krb5_address *,
 		   krb5_const_pointer,
 		   krb5_error_code (* )(krb5_pointer,
@@ -128,7 +128,7 @@ krb5_error_code krb5_rd_req
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_rd_req_decoded
 	PROTOTYPE((const krb5_ap_req *,
-		   const krb5_principal,
+		   krb5_const_principal,
 		   const krb5_address *,
 		   krb5_const_pointer,
 		   krb5_error_code (* )(krb5_pointer,
@@ -184,10 +184,10 @@ krb5_error_code krb5_parse_name
 	PROTOTYPE((const char *,
 		   krb5_principal * ));
 krb5_error_code krb5_unparse_name
-	PROTOTYPE((const krb5_principal,
+	PROTOTYPE((krb5_const_principal,
 		   char ** ));
 krb5_error_code krb5_unparse_name_ext
-	PROTOTYPE((const krb5_principal,
+	PROTOTYPE((krb5_const_principal,
 		   char **,
 		   int *));
 krb5_boolean krb5_address_search
@@ -200,8 +200,8 @@ int krb5_address_order
 	PROTOTYPE((const krb5_address *,
 		   const krb5_address *));
 krb5_boolean krb5_principal_compare
-	PROTOTYPE((const krb5_principal,
-		   const krb5_principal));
+	PROTOTYPE((krb5_const_principal,
+		   krb5_const_principal));
 int krb5_fulladdr_order
 	PROTOTYPE((const krb5_fulladdr *,
 		   const krb5_fulladdr *));
@@ -215,7 +215,7 @@ krb5_error_code krb5_copy_data
     PROTOTYPE((const krb5_data *,
 	       krb5_data **));
 krb5_error_code krb5_copy_principal
-    PROTOTYPE((const krb5_principal,
+    PROTOTYPE((krb5_const_principal,
 	       krb5_principal *));
 krb5_error_code krb5_copy_addresses
     PROTOTYPE((krb5_address * const *,

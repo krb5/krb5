@@ -25,7 +25,7 @@ static char rcsid_copy_princ_c[] =
  */
 krb5_error_code
 krb5_copy_principal(inprinc, outprinc)
-const krb5_principal inprinc;
+krb5_const_principal inprinc;
 krb5_principal *outprinc;
 {
     krb5_error_code retval;

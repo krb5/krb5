@@ -26,8 +26,8 @@ krb5_error_code krb5_get_cred_via_tgt
 	       const krb5_cksumtype,
 	       krb5_creds * ));
 krb5_error_code krb5_walk_realm_tree
-    PROTOTYPE((const krb5_principal,
-	       const krb5_principal,
+    PROTOTYPE((krb5_const_principal,
+	       krb5_const_principal,
 	       krb5_principal **));
 void krb5_free_realm_tree
     PROTOTYPE((const krb5_principal *));
