@@ -1,3 +1,8 @@
+Sat May 13 08:59:38 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krshd.c (recvauth): Use krb5_auth_con_genaddrs to set the port
+		on the connection so that credential forwarding works.
+
 Tue May  9 08:17:18 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* krshd.c (main): Cast a sockaddr_in * to sockaddr * in call to

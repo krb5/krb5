@@ -495,7 +495,6 @@ doit(f, fromp)
     char *cp;
     
 #ifdef KERBEROS
-    krb5_address peeraddr;
     krb5_error_code status;
 #endif
 
@@ -694,13 +693,9 @@ doit(f, fromp)
 	hostname = malloc(strlen((char *)inet_ntoa(fromp->sin_addr)) + 1);
 	strcpy(hostname,(char *)inet_ntoa(fromp->sin_addr));
     }
-    peeraddr.addrtype = fromp->sin_family;
-    peeraddr.length = SIZEOF_INADDR;
-    peeraddr.contents = (krb5_octet *)&fromp->sin_addr;
-
 
 #ifdef KERBEROS
-    if (status = recvauth(f, fromaddr, peeraddr)) {
+    if (status = recvauth(f, fromaddr)) {
 	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
     }
@@ -1591,10 +1586,9 @@ int default_realm(principal)
 					      chars */
 
 krb5_error_code
-recvauth(netf, peersin, peeraddr)
+recvauth(netf, peersin)
      int netf;
      struct sockaddr_in peersin;
-     krb5_address peeraddr;
 {
     krb5_auth_context *auth_context = NULL;
     krb5_error_code status;
@@ -1630,7 +1624,9 @@ recvauth(netf, peersin, peeraddr)
     if (status = krb5_auth_con_init(bsd_context, &auth_context))
 	return status;
 
-    krb5_auth_con_setaddrs(bsd_context, auth_context, NULL, &peeraddr);
+    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
+	return status;
 
     status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
