@@ -18,6 +18,7 @@ Kerberos for Windows
      2.1.4     Kerberos IV Properties
      2.1.5     Kerberos V Properties
      2.2     Existing Registry Entries
+     2.3     Replacing Configuration Files
      3.	   Additional Resources
      4.	   Upgrades
      5.	   FAQ
@@ -26,8 +27,8 @@ Kerberos for Windows
 
 1.  Introduction
 
-    Beginning with Kerberos for Windows version 2.6.5 a MSI installer
-    option is available for those who wish to use Windows Installer
+    Beginning with "Kerberos for Windows" version 2.6.5, a MSI installer
+    option is available for those who wish to use "Windows Installer"
     for installing Kerberos and for organizations that wish to deploy
     Kerberos through Group Policy.
 
@@ -36,27 +37,27 @@ Kerberos for Windows
     many settings can be deployed via transforms, in an Active
     Directory environment it is advisable to deploy registry settings
     and configuration files through group policy and/or startup
-    scripts so that machines where Kerberos for Windows is already
+    scripts so that machines where "Kerberos for Windows" is already
     installed will pick up these customizations.
 
 1.1 Requirements
 
     The information in this document applies to MSI packages
-    distributed with Kerberos for Windows releases from 2.6.5 and
+    distributed with "Kerberos for Windows" releases from 2.6.5 and
     onwards or MSI packages built from corresponding source
-    releases. Not all releases support all the configuration options
+    releases.  Not all releases support all the configuration options
     documented here.
 
-    Authoring a Windows Installer transform requires additional
+    Authoring a "Windows Installer" transform requires additional
     software for editing the MSI database tables and generating the
     transform from the modified MSI package.  ORCA.EXE and MSITRAN.EXE
-    which are included in the Windows Platform SDK (Windows Installer
+    which are included in the Windows Platform SDK ("Windows Installer"
     SDK) can be used for this purpose.
 
     For reference, the schema for the MSI package is based on
     SCHEMA.MSI distributed with the Platform SDK.
 
-    For general information about Windows Installer, refer to :
+    For general information about "Windows Installer", refer to :
 
     http://msdn.microsoft.com/library/en-us/msi/setup/windows_installer_start_page.asp
 
@@ -90,7 +91,7 @@ Kerberos for Windows
        (generates kfw-transform.mst, which is the transform)
 
     Transforms have an extension of .mst.  'msitran' is a tool
-    distributed as part of the Windows Installer SDK (which in turn is
+    distributed as part of the "Windows Installer" SDK (which in turn is
     a part of the Windows Platform SDK).
 
     You can test a transform by :
@@ -111,7 +112,7 @@ Kerberos for Windows
 
 2.  Configuration Options
 
-    The logic necessary to implement all of the setttings described in
+    The logic necessary to implement all of the settings described in
     the release notes are present in the MSI.  Most of these can be
     controlled by setting the corresponding properties to the desired
     value.  Some settings may require modifying existing registry
@@ -288,6 +289,160 @@ Kerberos for Windows
     column in the 'Registry' table.  If you want to add additional
     registry keys please refer to section 3 (Additional Resources).
 
+2.3 Replacing Configuration Files
+
+    The Kerberos configuration files (krb5.ini, krb.con, krbrealm.con)
+    can be replaced by your own configuration files.  These files are
+    contained in separate MSI components so that you can disable them
+    individually.
+
+    The recommended method for replacing these files is to first
+    disable the components containing the configuration files that you
+    want to replace, and then add new components for the replacement
+    files.  This is outlined below (assuming you are using ORCA.EXE to
+    author the transform).
+
+    Note that transforms are not a good way to add a new file as an
+    embedded stream.  The method outlined here places the file in the
+    same directory as the MSI for deployment.
+
+    The walkthrough below is to add a custom 'krb5.ini' file.
+
+    1) Disable the component that contains the configuration file that
+       you want to replace.
+
+       1.1) Locate and select the 'Component' table in the 'Tables'
+            list.
+
+       1.2) In the Component table, locate the component you need to
+            change ( Ctrl-F invokes the 'Find' dialog).  The component
+            names are listed below in section 2.3.1.  For this
+            example, the component name is 'cmf_krb5_ini'.
+
+       1.3) Go to the 'Condition' column of the component.
+
+       1.4) Enter a condition that evaluates to
+            false. I.e. 'DONOTINSTALL'. (Note that an undefined
+            property always evaluates to false).
+
+       Note that you can also use this step to disable other
+       configuration files without providing replacements.
+
+    2) Add a new component containing the new configuration file.
+
+       2.1) Select the 'Component' table in the 'Tables' list.
+
+       2.2) Select 'Tables'->'Add Row' (Ctrl-R).
+
+       2.3) Enter the following :
+
+            Component     : cmf_my_krb5_ini
+	    ComponentId   : {835BAAC6-5E54-BFFE-DBCB2F240711}
+	    Directory_	  : WindowsFolder
+	    Attributes	  : 144
+	    Condition	  :
+	    KeyPath	  : fil_my_krb5_ini
+
+	    Note that the ComponentId is an uppercase GUID.  You can
+	    generate one using GUIDGEN.EXE or UUIDGEN.EXE, both of
+	    which are included in the Platform SDK.
+
+	    The Attributes value of 144 is a sum of
+	    msidbComponentAttributesPermanent (16) and
+	    msidbComponentAttributesNeverOverwrite (128).  This
+	    ensures that local modifications are not overwritten or
+	    lost during an installation or uninstallation.  These are
+	    the same settings used on the default configuration files.
+
+	    'fil_my_krb5_ini' is a key into the 'File' table which we
+	    will fill later.
+
+    3) Add a new feature to hold the new component.
+
+       3.1) Select the 'Feature' table.
+
+       3.2) Add a new row (Ctrl-R or 'Tables'->'Add Row') with the
+            following values:
+
+	    Feature       : fea_my_krb5_ini
+	    Feature_Parent: feaKfwClient
+	    Title	  :
+	    Description	  :
+	    Display	  : 0
+	    Level	  : 30
+	    Directory_	  :
+	    Attributes	  : 8
+
+	    It is important to create the new feature under the
+	    'feaKfwClient' feature, which will ensure that the
+	    configuration file will be installed when the client
+	    binaries are installed.
+
+	    Setting 'Display' to 0 will hide this feature from the
+	    feature selection dialog during an interactive
+	    installation.  A value of 30 for 'Level' allows this
+	    feature to be installed by default (on a 'Typical'
+	    installation).
+
+	    The 'Attributes' value is
+	    msidbFeatureAttributesDisallowAdvertise (8), which is set
+	    on all features in the KfW MSI.  The KfW MSI is not
+	    designed for an advertised installation.
+
+    4) Join the component and the feature.
+
+       4.1) Select the 'FeatureComponents' table.
+
+       4.2) Add a new row with the following values:
+
+	    Feature    : fea_my_krb5_ini
+	    Component  : cmf_my_krb5_ini
+
+    5) Add an entry to the 'File' table.
+
+       5.1) Select the 'File' table.
+
+       5.2) Add a new row with the following values:
+
+	    File        : fil_my_krb5_ini
+	    Component_	: cmf_my_krb5_ini
+	    FileName	: krb5.ini
+	    FileSize	: (enter file size here)
+	    ...
+	    Attributes	: 8192
+	    Sequence	: 1000
+	    (leave other fields blank)
+
+	    The 'Attributes' value is msidbFileAttributesNonCompressed
+	    (8192).  This is because we will be placing this file in
+	    the same directory as the MSI instead of embedding the
+	    file in it.  Transforms do not support updating compressed
+	    sources or adding new cabinet streams.
+
+	    Finally, the 'Sequence' value of 1000 will be used later
+	    to distinguish the file as being in a separate source
+	    location than the other files in the MSI.
+
+    6) Set a media source for the file.
+
+       6.1) Select the 'Media' table.
+
+       6.2) Add a row with the following values :
+
+	    DiskId       : 2
+	    LastSequence : 1000
+	    ...
+	    (leave other fields blank)
+
+	    The sequence number of 1000 designates this as the media
+	    source for the newly added file.
+
+2.3.1 Components for Configuration Files
+
+      krb5.ini : 'cmf_krb5_ini' (ID {C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4})
+      krb.con  : 'cmf_krb_con'  (ID {5391A051-CF14-45FF-BF64-CEE78A7A90C2})
+      krbrealm.con: 'cmf_krbrealm_con' (ID {D667B54F-1C98-43FB-87C6-0F0517623B90})
+
 ----------------------------------------------------------------------
 
 3   Additional Resources
@@ -298,7 +453,7 @@ Kerberos for Windows
     Add new features under the 'feaKfwClient' feature and set the
     'Level' column for those features to equal the 'Level' for their
     parent features for consistency.  Note that none of the features
-    in the Kerberos for Windows MSI package are designed to be
+    in the "Kerberos for Windows" MSI package are designed to be
     installed to run from 'source' or 'advertised'.  It is recommended
     that you set 'msidbFeatureAttributesFavorLocal' (0),
     'msidbFeatureAttributesFollowParent' (2) and
@@ -311,48 +466,51 @@ Kerberos for Windows
 
     It is beyond the scope of this document to provide a comprehensive
     overview of how to add new resources through a transform.  Please
-    refer to the Windows Installer documentation for details.  The
+    refer to the "Windows Installer" documentation for details.  The
     relevant section is at :
 
     http://msdn.microsoft.com/library/en-us/msi/setup/using_transforms_to_add_resources.asp
+
+    A sample walkthrough of adding a new configuration file is in
+    section 2.3.
 
 ----------------------------------------------------------------------
 
 4.  Upgrades
 
     The MSI package is designed to uninstall previous versions of
-    Kerberos for Windows during installation.  Note that it doesn't
+    "Kerberos for Windows" during installation.  Note that it doesn't
     directly upgrade an existing installation.  This is intentional
     and ensures that development releases which do not have strictly
     increasing version numbers are properly upgraded.
 
     Versions of Kerberos that are upgraded by the MSI package are :
 
-    1) Kerberos for Windows MSI package
+    1) "Kerberos for Windows" MSI package
 
        Upgrade code {61211594-AAA1-4A98-A299-757326763CC7}
        Upto current release
 
-    2) MIT Project Pismere Kerberos for Windows MSI package and MIT
-       SWRT Kerberos for Windows MSI
+    2) "MIT Project Pismere Kerberos for Windows" MSI package and 
+       "MIT SWRT Kerberos for Windows" MSI
 
        Upgrade code {83977767-388D-4DF8-BB08-3BF2401635BD}
        All versions
 
-    3) Kerberos for Windows NSIS package
+    3) "Kerberos for Windows" NSIS package
 
        All versions
 
-       Note that versions of the Kerberos for Windows NSIS package had
+       Note that versions of the "Kerberos for Windows" NSIS package had
        a bug where it couldn't be uninstalled properly in unattended
        mode.  Therefore the MSI package will not try to uninstall an
-       Kerberos for Windows NSIS package if running unattended.  This
+       "Kerberos for Windows" NSIS package if running unattended.  This
        means that group policy based deployments will fail on machines
-       that have the Kerberos for Windows NSIS package installed.
+       that have the "Kerberos for Windows" NSIS package installed.
 
     If you have used a different MSI package to install Kerberos for
     Windows and wish to upgrade it you can author rows into the
-    'Upgrade' table to have the Kerberos for Windows MSI replace these
+    'Upgrade' table to have the "Kerberos for Windows" MSI replace these
     installations for you.
 
 ----------------------------------------------------------------------

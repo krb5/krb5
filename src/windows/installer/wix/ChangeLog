@@ -1,3 +1,12 @@
+2004-09-16  Jeffrey Altman <jaltman@mit.edu>
+
+        Remove trailing slash from PATH 
+
+        Minimize Leash32.exe on startup
+
+        Update msi-deployment guide to explain how to replace
+        the configuration files in greater detail
+
 2004-09-14  Asanka Herath  <asanka@mit.edu>
 
         Change installation default of Documentation to enable it
