@@ -24,6 +24,7 @@
  * krb_realmofhost for krb425
  */
 
+#include <string.h>
 
 #include "krb425.h"
 
@@ -36,7 +37,7 @@ char *host;
 	static char ret_realm[REALM_SZ+1];
 
 
-        domain = index(host, '.');
+        domain = strchr(host, '.');
 
         /* prepare default */
         if (domain) {

@@ -28,6 +28,7 @@
 #include "krb425.h"
 
 #include <pwd.h>
+#include <string.h>
 #include <sys/param.h>
 #if defined(aix)   /* AIX needs BSD defined to some value for socket.h */
 #define _BSD 44
@@ -137,7 +138,7 @@ kuserok(kdata, luser)
 	linebuf[BUFSIZ-1] = '\0';
 	newline = NULL;
 	/* nuke the newline if it exists */
-	if (newline = index(linebuf, '\n'))
+	if (newline = strchr(linebuf, '\n'))
 	    *newline = '\0';
 	rc = kname_parse(principal, inst, realm, linebuf);
 	if (rc == KSUCCESS) {
