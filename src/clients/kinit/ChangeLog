@@ -1,3 +1,7 @@
+2001-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kinit.c (k4_kinit): Use ANSI C-style string continuation.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* kinit.c (k4_kinit): Argument to krb5_read_password takes as

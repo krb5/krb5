@@ -930,7 +930,7 @@ k4_kinit(opts, k4, ctx)
 	    fprintf(stderr, "%s: %s\n", progname, 
 		    krb_get_err_text(k_errno));
 	    if (authed_k5)
-	        fprintf(stderr, "Maybe your KDC does not support v4.  %s",
+	        fprintf(stderr, "Maybe your KDC does not support v4.  "
 			"Try the -5 option next time.\n");
 	    return 0;
 	}
