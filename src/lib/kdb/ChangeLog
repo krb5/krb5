@@ -1,3 +1,8 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_name): New function.
+	(krb5_kt_kdb_ops): Add pointer to it.
+
 2003-05-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* keytab.c (is_xrealm_tgt): Use strncmp instead of strcmp - as

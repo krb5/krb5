@@ -37,11 +37,21 @@ krb5_error_code krb5_ktkdb_close (krb5_context, krb5_keytab);
 krb5_error_code krb5_ktkdb_get_entry (krb5_context, krb5_keytab, krb5_const_principal,
 		   krb5_kvno, krb5_enctype, krb5_keytab_entry *);
 
+static krb5_error_code
+krb5_ktkdb_get_name(krb5_context context, krb5_keytab keytab,
+		    char *name, unsigned int namelen)
+{
+    if (namelen < sizeof("KDB:"))
+	return KRB5_KT_NAME_TOOLONG;
+    strcpy(name, "KDB:");
+    return 0;
+}
+
 krb5_kt_ops krb5_kt_kdb_ops = {
     0,
     "KDB", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktkdb_resolve,		/* resolve */
-    NULL,			/* get_name */
+    krb5_ktkdb_get_name,	/* get_name */
     krb5_ktkdb_close,		/* close */
     krb5_ktkdb_get_entry,	/* get */
     NULL,			/* start_seq_get */
