@@ -148,6 +148,7 @@ int win_socket_initialize();
 #define read            _read
 #define fstat           _fstat
 #define mktemp          _mktemp
+#define dup             _dup
 
 #define getpid          _getpid
 #endif
