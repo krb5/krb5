@@ -19,9 +19,9 @@ all:: all-$(WHAT)
 all-unix:: $(BUILT_HEADERS)
 
 all-windows:
-        copy stock\osconf.win osconf.h
+	copy stock\osconf.win osconf.h
 	echo /* not used in windows */ > autoconf.h
- 
+
 includes:: autoconf.h
 
 # Run a header through a preprocessor to generate an architecture/environment

@@ -1,3 +1,7 @@
+Thu Mar  9 18:29:24 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (all-windows): tabs, not spaces.
+
 Tue Mar 7 14:54:02 1995 Keith Vetter (keithv@fusion.com)
 
 	* ccache.h: added windows INTERFACE keyword to all functions.
