@@ -49,6 +49,8 @@ static char rcsid_gcfkdc_c[] =
  * returns errors, system errors.
  */
 
+extern krb5_cksumtype krb5_kdc_req_sumtype;
+
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
 
@@ -63,7 +65,8 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     krb5_principal *tgs_list, next_server;
     krb5_error_code retval;
     int nservers;
-    
+    krb5_enctype etype;
+
     /* in case we never get a TGT, zero the return */
     *tgts = 0;
 
@@ -140,17 +143,23 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	}
 	*tgts = ret_tgts;
 	for (nservers = 0; next_server; next_server++, nservers++) {
+
+	    if (!valid_keytype(tgt.keyblock.keytype)) {
+		retval = KRB5_PROG_KEYTYPE_NOSUPP;
+		goto out;
+	    }
 	    /* now get the TGTs */
 	    tgtq.times = tgt.times;
 	    tgtq.client = tgt.client;
 	    tgtq.server = next_server;
 	    tgtq.is_skey = FALSE;	
 	    tgtq.ticket_flags = tgt.ticket_flags;
+
+	    etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
 	    if (retval = krb5_get_cred_via_tgt(&tgt,
 					       flags2options(tgtq.ticket_flags),
-					       0, /* XXX etype */
-					       0, /* XXX sumtype */
-					       0, /* XXX addrs */
+					       etype,
+					       krb5_kdc_req_sumtype,
 					       &tgtq))
 		goto out;
 	    /* save tgt in return array */
@@ -161,11 +170,16 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	}
     }
     /* got/finally have tgt! */
+    if (!valid_keytype(tgt.keyblock.keytype)) {
+	retval = KRB5_PROG_KEYTYPE_NOSUPP;
+	goto out;
+    }
+    etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
+
     retval = krb5_get_cred_via_tgt(&tgt,
-				   flags2options(tgtq.ticket_flags),
-				   0, /* XXX etype */
-				   0, /* XXX sumtype */
-				   0, /* XXX addrs */
+				   flags2options(tgt.ticket_flags),
+				   etype,
+				   krb5_kdc_req_sumtype,
 				   cred);
 out:
     return retval;
