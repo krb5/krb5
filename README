@@ -42,8 +42,8 @@ and the documentation into DIST/krb5-1.2/doc.
 Building and Installing Kerberos 5
 ----------------------------------
 
-The first file you should look at is doc/install.ps; it contains the
-notes for building and installing Kerberos 5.  The info file
+The first file you should look at is doc/install-guide.ps; it contains
+the notes for building and installing Kerberos 5.  The info file
 krb5-install.info has the same information in info file format.  You
 can view this using the GNU emacs info-mode, or by using the
 standalone info file viewer from the Free Software Foundation.  This
