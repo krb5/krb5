@@ -205,7 +205,7 @@ cleanup:
 		      request.authenticator.ciphertext.length);
 	free(request.authenticator.ciphertext.data);
     }
-    if (newkey && *newkey)
+    if (retval && newkey && *newkey)
 	krb5_free_keyblock(context, *newkey);
     if (scratch) {
 	memset(scratch->data, 0, scratch->length);
