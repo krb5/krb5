@@ -39,6 +39,10 @@
 #include "kadm5_defs.h"
 #include "adm.h"
 
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
 /* linux doesn't have SOMAXCONN */
 #ifndef SOMAXCONN
 #define SOMAXCONN 5

@@ -1,3 +1,10 @@
+Tue Jun 13 11:36:52 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* srv_net.c: Include sys/select.h if it is found.
+
+	* configure.in: Check for sys/select.h; needed under AIX to define fd_set and associated macros.
+
+
 Sat Jun 10 23:04:00 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* kadm5_defs.h, passwd.c, proto_serv.c: krb5_auth_context
