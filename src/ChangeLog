@@ -2,6 +2,8 @@ Mon Sep 25 16:32:57 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
 		Makefile. 
+		(FILES): Added missing backslash at the end of one of the
+		lines, missing from the Macintosh integration.
 
 	* aclocal.m4 (MAKE_SUBDIRS, DO_SUBDIRS): MAKE_SUBDIRS now takes
 		three arguments; DO_SUBDIRS now generates target rules of
