@@ -16,7 +16,7 @@ ISODEINCM=	$(KRBINC)isode
 ISODEINC=	$(ISODEINCM)/
 
 HDIR	=	$(TOPDIR)isode/h/
-UTILDIR	=	$(TOPDIR)isode/util/
+UTILDIR	=	$(srcdir)/$(BUILDTOP)isode/util/
 INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy
@@ -131,7 +131,7 @@ str2vec.o:	$(HFILES)
 tailor.o:	$(HFILES) $(HDIR)isoaddrs.h $(HDIR)tailor.h $(HDIR)logger.h 
 		$(CC) $(CFLAGS) -DBINPATH=\"$(BINDIR)\" \
 			-DETCPATH=\"$(ETCDIR)\" -DSBINPATH=\"$(SBINDIR)\" \
-			-DLOGPATH=\"$(LOGDIR)\" -c tailor.c
+			-DLOGPATH=\"$(LOGDIR)\" -c $(srcdir)/tailor.c
 baduser.o:	$(HFILES) $(HDIR)tailor.h $(HDIR)logger.h
 chkpassword.o:	$(HFILES)
 getpassword.o:	$(HFILES)

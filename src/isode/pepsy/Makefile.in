@@ -12,8 +12,8 @@ TOPDIR = $(BUILDTOP)
 OPTIONS	=	-I. -I$(HDIR) -I$(TOPDIR)include $(PEPYPATH) $(KRBOPT)
 CFLAGS  =       $(OPTIONS) $(LOPTIONS) $(DEFS)
 
-HDIR	=	$(TOPDIR)isode/h/
-UTILDIR	=	$(TOPDIR)isode/util/
+HDIR	=	$(srcdir)/$(TOPDIR)isode/h/
+UTILDIR	=	$(srcdir)/$(BUILDTOP)isode/util/
 INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy
@@ -28,6 +28,9 @@ ISODEINCM=	$(KRBINC)isode
 ISODEINC=	$(KRBINC)isode/
 PEPSYINCM=	$(ISODEINC)pepsy
 PEPSYINC=	$(ISODEINC)pepsy/
+
+LEX = @LEX@
+LEXLIB = @LEXLIB@
 
 LIBES	=	libcompat.a
 LLIBS   =
@@ -50,7 +53,7 @@ PEPYPATH=	-DPEPYPATH -DPEPSYPATH=\".:$(PEPSYDIRM)\"
 # to prevent a lot of unnecessary re-loading
 PEPSYLIBES=	$(PSAPDIR)/sprintoid.o $(PSAPDIR)/pl_tables.o \
 		$(PSAPDIR)/oid_cmp.o $(PSAPDIR)/oid_cpy.o \
-		$(PSAPDIR)/oid_free.o ../compat/libcompat.a
+		$(PSAPDIR)/oid_free.o ../compat/libcompat.a $(LEXLIB)
 LIBES   =	$(TOPDIR)lib/libpsap.a $(TOPDIR)lib/libcompat.a
 LLIBS   =	$(TOPDIR)lib/llib-lpsap $(TOPDIR)lib/llib-lcompat
 HFILES	=	$(HDIR)psap.h \
@@ -63,7 +66,7 @@ LIBFILES=	$(DRFILES) $(SUPFILES)
 CFILES	=	enc.c dec.c fre.c prnt.c main.c util.c  \
 		vprint.c pepsy_str.c py_advise.c
 
-HFILES	=	$(HDIR)/pepsy.h test_table.h
+HFILES	=	$(TOPDIR)include/isode/pepsy.h test_table.h
 HEADERS	=	UNIV.ph UNIV-types.h
 
 OFILES	=	$(LIBFILES) main.o
@@ -113,7 +116,7 @@ xpepsy:		pepsyvrsn.o $(PEPSYLIBES)
 			pepsyvrsn.o $(PEPSYLIBES) -lm
 
 pepsy.o:	pepsy.c pepsydefs.h $(HFILES)
-		$(CC) $(CFLAGS) -c pepsy.c
+		$(CC) $(CFLAGS) -c $(srcdir)/pepsy.c
 
 
 pepsyvrsn.c:	$(PEPSY-O)
@@ -131,7 +134,7 @@ pepsy-yacc.y:	yacc.y.gnrc
 		$(UTILDIR)extract.sh PEPSY SCTRL < $? > $@
 
 pepsy_misc.o:	pepsy_misc.c pepsydefs.h
-		$(CC) $(CFLAGS) -c pepsy_misc.c
+		$(CC) $(CFLAGS) -c $(srcdir)/pepsy_misc.c
 
 lex.c:		lex.l
 		$(LEX) $(LEXFLAGS) lex.l
@@ -146,18 +149,18 @@ pepsydefs.h:	pepsydefs.h.gnrc
 pepsy.h:	pepsy.h.gnrc
 		$(UTILDIR)extract.sh PEPSY < $? > $@
 
-pass2.o:	pass2.c
-		$(CC) $(CFLAGS) -c pass2.c
-etabs.o:	etabs.c
-		$(CC) $(CFLAGS) -c etabs.c
-dtabs.o:	dtabs.c
-		$(CC) $(CFLAGS) -c dtabs.c
-ptabs.o:	ptabs.c
-		$(CC) $(CFLAGS) -c ptabs.c
-dfns.o:		dfns.c
-		$(CC) $(CFLAGS) -c dfns.c
-mod.o:		mod.c
-		$(CC) $(CFLAGS) -c mod.c
+pass2.o:	$(srcdir)/pass2.c
+		$(CC) $(CFLAGS) -c $(srcdir)/pass2.c
+etabs.o:	$(srcdir)/etabs.c
+		$(CC) $(CFLAGS) -c $(srcdir)/etabs.c
+dtabs.o:	$(srcdir)/dtabs.c
+		$(CC) $(CFLAGS) -c $(srcdir)/dtabs.c
+ptabs.o:	$(srcdir)/ptabs.c
+		$(CC) $(CFLAGS) -c $(srcdir)/ptabs.c
+dfns.o:		$(srcdir)/dfns.c
+		$(CC) $(CFLAGS) -c $(srcdir)/dfns.c
+mod.o:		$(srcdir)/mod.c
+		$(CC) $(CFLAGS) -c $(srcdir)/mod.c
 
 
 l-pepsy:	$(PEPSY-C) pepsydefs.h pepsyvrsn.c true
@@ -292,20 +295,20 @@ pep:		$(PEPFILES)
 pep-saber:	$(PEPFILES)
 		#load $(CFLAGS) (PEPFILES)
 
-main.o: 	T1-types.h test_table.h main.c
-		$(CC) $(CFLAGS) -DPRNT=1 -c main.c
+main.o: 	T1-types.h test_table.h $(srcdir)/main.c
+		$(CC) $(CFLAGS) -DPRNT=1 -c $(srcdir)/main.c
 
 enc.o:		enc.c pepsy-driver.h
-		$(CC) $(CFLAGS) -c enc.c
+		$(CC) $(CFLAGS) -c $(srcdir)/enc.c
 
 dec.o:		dec.c pepsy-driver.h
-		$(CC) $(CFLAGS) -c dec.c
+		$(CC) $(CFLAGS) -c $(srcdir)/dec.c
 
 prnt.o: 	prnt.c pepsy-driver.h
-		$(CC) $(CFLAGS) -c prnt.c
+		$(CC) $(CFLAGS) -c $(srcdir)/prnt.c
 
 util.o: 	util.c pepsy-driver.h
-		$(CC) $(CFLAGS) -c util.c
+		$(CC) $(CFLAGS) -c $(srcdir)/util.c
 
 T1_tables.o:	T1_tables.c T1-types.h UNIV-types.h
 
@@ -324,8 +327,8 @@ T3_tables.o:	T3_tables.c T3-types.h UNIV-types.h
 T3_tables.c T3-types.h:	t3.py xpepsy
 		./xpepsy -A -f -m -i pepy-refs.h t3.py
 
-prt.o:		prnt.c $(HDIR)/pepsy.h
-		$(CC) $(CFLAGS) -Dprintf=vprint -o $@ prnt.c
+prt.o:		prnt.c $(TOPDIR)include/isode/pepsy.h
+		$(CC) $(CFLAGS) -Dprintf=vprint -o $@ $(srcdir)/prnt.c
 
 
 ################################################################

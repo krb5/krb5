@@ -17,9 +17,12 @@
  *
  *
  * $Log$
- * Revision 1.2  1994/06/11 07:42:43  tlyu
- * fixed yytext declaration problem
+ * Revision 1.3  1994/06/15 01:08:19  eichin
+ * fixes for srcdir, LEX tests
  *
+Revision 1.2  1994/06/11 07:42:43  tlyu
+fixed yytext declaration problem
+
 Revision 1.1  1994/06/10  03:31:25  eichin
 autoconfed isode for kerberos work
 
@@ -394,7 +397,7 @@ extern char *yyprfdflt;
 extern int yydebug;
 extern int yylineno;
 
-#if defined(linux)
+#if defined(YYTEXT_POINTER)
 extern char *yytext;
 #else
 #ifndef	HPUX

@@ -1,6 +1,9 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+
 KRB5ROOT = @KRB5ROOT@
 KDB5DIR = $(KRB5ROOT)
 KRB5SRVTABDIR = /etc

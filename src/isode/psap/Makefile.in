@@ -17,7 +17,7 @@ ISODEINCM=	$(KRBINC)isode
 ISODEINC=	$(ISODEINCM)/
 
 HDIR	=	$(TOPDIR)isode/h/
-UTILDIR	=	$(TOPDIR)isode/util/
+UTILDIR	=	$(srcdir)/$(BUILDTOP)isode/util/
 INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy
@@ -230,10 +230,10 @@ uvec2ps.o:	$(HFILES) $(HDIR)tailor.h $(HDIR)logger.h
 psaptest:	psaptest.o $(LIBES)
 		$(LDCC) $(LDFLAGS) -o $@ psaptest.o $(LIBES) $(LSOCKET)
 
-psaptest.o:	$(HFILES) $(HDIR)tailor.h $(HDIR)logger.h psaptest.c
-		$(CC) $(CFLAGS) -c psaptest.c
+psaptest.o:	$(HFILES) $(HDIR)tailor.h $(HDIR)logger.h $(srcdir)/psaptest.c
+		$(CC) $(CFLAGS) -c $(srcdir)/psaptest.c
 
-l-psaptest:;	$(LINT) $(LFLAGS) psaptest.c llib-lpsap $(LLIBS) \
+l-psaptest:;	$(LINT) $(LFLAGS) $(srcdir)/psaptest.c llib-lpsap $(LLIBS) \
 			| grep -v "warning: possible pointer alignment problem"
 
 
@@ -245,14 +245,14 @@ hex2pe:		hex2pe.o
 		$(LDCC) $(LDFLAGS) -o $@ hex2pe.o
 
 hex2pe.o:	$(HFILES) hex2pe.c
-		$(CC) $(CFLAGS) -c hex2pe.c
+		$(CC) $(CFLAGS) -c $(srcdir)/hex2pe.c
 
 
 dec2pe:		dec2pe.o
 		$(LDCC) $(LDFLAGS) -o $@ dec2pe.o
 
 dec2pe.o:	$(HFILES) dec2pe.c
-		$(CC) $(CFLAGS) -c dec2pe.c
+		$(CC) $(CFLAGS) -c $(srcdir)/dec2pe.c
 
 
 ################################################################
