@@ -41,3 +41,5 @@ error_code PTY_OPEN_SLAVE_PUSH_FAIL, "Failed to push stream on slave side of pty
 
 
 error_code PTY_OPEN_SLAVE_REVOKEFAIL, "Failed to revoke slave side of pty"
+
+error_code PTY_UPDATE_UTMP_PROCTYPE_INVALID, "bad process type passed to pty_update_utmp"

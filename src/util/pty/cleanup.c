@@ -23,17 +23,12 @@
 
 long pty_cleanup (slave, pid, update_utmp)
     char *slave;
-    pid_t pid; /* May be zero for unknown.*/
+    int pid; /* May be zero for unknown.*/
     int update_utmp;
 {
-    struct utmp ut;
     int retval, fd;
     
-#ifndef NO_UT_PID
-    ut.ut_pid = 0;
-    ut.ut_type = DEAD_PROCESS;
-#endif
-    pty_update_utmp(&ut, "", slave, (char *)0);
+    pty_update_utmp(PTY_DEAD_PROCESS,0,  "", slave, (char *)0);
     
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);

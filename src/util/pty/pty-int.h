@@ -2,6 +2,13 @@
 #ifndef __PTY_INT_H__
 #include <pty_err.h>
 #include <sys/types.h>
+#ifdef HAVE_UTMP_H
+#include <utmp.h>
+#endif
+#ifdef HAVE_UTMPX_H
+#include <utmpx.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -87,12 +94,15 @@
 void initialize_pty_error_table(void);
 long ptyint_void_association(void);
 long ptyint_open_ctty (char *slave, int *fd);
+long ptyint_update_wtmp (struct utmp *ut);
+
 void ptyint_vhangup(void);
 #else /*__STDC__*/
 
 long ptyint_void_association();
 void ptyint_vhangup();
 void initialize_pty_error_table();
+long ptyint_update_wtmp();
 #endif /* __STDC__*/
 
 #define __PTY_INT_H__

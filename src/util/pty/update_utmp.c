@@ -21,11 +21,17 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-long pty_update_utmp (ent, username, line, host)
-    struct utmp *ent;
+#if !defined(UTMP_FILE) && defined(_UTMP_PATH)
+#define UTMP_FILE _UTMP_PATH
+#endif
+
+long pty_update_utmp (process_type, pid, username, line, host)
+    int process_type;
+    int pid;
     char *username, *line, *host;
 {
-#ifdef HAVE_SETUTENT
+    struct utmp ent;
+    #ifdef HAVE_SETUTENT
     struct utmp ut;
 #else
     struct stat statb;
@@ -40,41 +46,57 @@ long pty_update_utmp (ent, username, line, host)
 #endif
     int fd;
 
-    strncpy(ent->ut_line, line+sizeof("/dev/")-1, sizeof(ent->ut_line));
-    ent->ut_time = time(0);
+    strncpy(ent.ut_line, line+sizeof("/dev/")-1, sizeof(ent.ut_line));
+    ent.ut_time = time(0);
+#ifdef NO_UT_PID
+    ent.ut_pid = pid;
+    switch ( process_type ) {
+    case PTY_LOGIN_PROCESS:
+	ent . ut_type = LOGIN_PROCESS;
+	break;
+    case PTY_USER_PROCESS:
+	ent.ut_type = USER_PROCESS;
+	break;
+    case PTY_DEAD_PROCESS:
+	ent.ut_type = DEAD_PROCESS;
+	break;
+    default:
+	return PTY_UPDATE_UTMP_PROCTYPE_INVALID;
+    }
+#endif /*NO_UT_PID*/
 
 #ifndef NO_UT_HOST
     if (host)
-	strncpy(ent->ut_host, host, sizeof(ent->ut_host));
+	strncpy(ent.ut_host, host, sizeof(ent.ut_host));
     else
-	ent->ut_host[0] = '\0';
+	ent.ut_host[0] = '\0';
 #endif
 
 #ifndef NO_UT_PID
     tmpx = line + strlen(line)-1;
     if (*(tmpx-1) != '/') tmpx--; /* last two characters, unless it's a / */
     sprintf(utmp_id, "kl%s", tmpx);
-    strncpy(ent->ut_id, utmp_id, sizeof(ent->ut_id));
-    strncpy(ent->ut_user, username, sizeof(ent->ut_user));
+    strncpy(ent.ut_id, utmp_id, sizeof(ent.ut_id));
+    strncpy(ent.ut_user, username, sizeof(ent.ut_user));
 #else
-    strncpy(ent->ut_name, username, sizeof(ent->ut_name));
+    strncpy(ent.ut_name, username, sizeof(ent.ut_name));
 #endif
     
 #ifdef HAVE_SETUTENT
 
     utmpname(UTMP_FILE);
     setutent();
-    pututline(ent);
+    pututline(&ent);
     endutent();
 
 #if 0
     /* XXX -- NOT NEEDED ANYMORE */
 
-    if (ent->ut_type == DEAD_PROCESS) {
+    if (ent.ut_type == DEAD_PROCESS) {
 	if ((fd = open(UTMP_FILE, O_RDWR)) >= 0) {
 	    int cnt = 0;
 	    while(read(fd, (char *)&ut, sizeof(ut)) == sizeof(ut)) {
-		if (!strncmp(ut.ut_id, ent->ut_id, sizeof(ut.ut_id))) {
+		if (!strncmp(ut.ut_id, ent.ut_id, sizeof(ut.ut_id))) {
 		    (void) memset(ut.ut_host, 0, sizeof(ut.ut_host));
 		    (void) memset(ut.ut_user, 0, sizeof(ut.ut_user));
 		    (void) time(&ut.ut_time);
@@ -108,5 +130,5 @@ long pty_update_utmp (ent, username, line, host)
 
 #endif /* HAVE_SETUTENT */
 
-    return pty_update_wtmp(ent);
+    return ptyint_update_wtmp(&ent);
 }

@@ -1,5 +1,5 @@
 /*
- * pty_update_utmp: Update or create a utmp entry
+ * ptyint_update_utmp: Update or create a utmp entry
  *
  * Copyright 1995 by the Massachusetts Institute of Technology.
  *
@@ -21,7 +21,11 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-long pty_update_wtmp (ent)
+#if !defined(WTMP_FILE) && defined(_PATH_WTMP)
+#define WTMP_FILE _PATH_WTMP
+#endif
+
+long ptyint_update_wtmp (ent)
     struct utmp *ent;
     {
     struct utmp ut;

@@ -56,7 +56,7 @@ long pty_logwtmp (tty, user, host )
     strncpy(ut.ut_name, user, sizeof(ut.ut_name));
 #endif
 
-    return pty_update_wtmp(&ut);
+    return ptyint_update_wtmp(&ut);
 #endif /*HAVE_LOGWTMP*/
 }
 
