@@ -1586,7 +1586,8 @@ krb5_error_code INTERFACE krb5_timeofday
 		   krb5_int32 FAR * ));
 		 /* get all the addresses of this host */
 krb5_error_code INTERFACE krb5_os_localaddr
-	KRB5_PROTOTYPE((krb5_address FAR * FAR * FAR *));
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_address FAR * FAR * FAR *));
 krb5_error_code INTERFACE krb5_get_default_realm
 	KRB5_PROTOTYPE((krb5_context,
 		    char FAR * FAR * ));

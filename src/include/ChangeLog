@@ -1,3 +1,8 @@
+Thu Jul  6 17:19:26 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* krb5.hin: Change definition of krb5_os_localaddr to include
+		context argument.
+
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* k5-int.h disable inclusion of profile.h for macintosh build
 	* krb5.h   enable inclusion of sys/types.h on HAS_SYS_TYPES
