@@ -1,3 +1,12 @@
+2001-02-21  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for setenv, unsetenv, and getenv.  Compile
+	setenv.c if at least of these is undefined.
+
+	* setenv.c: Add conditionals for compilation of setenv, unsetenv,
+	and getenv such that they only get compiled if they don't already
+	exist.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* gettytab.c (nchktc): Don't overflow tcname if tty type name is too
