@@ -1,3 +1,8 @@
+Wed Apr  9 23:46:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* sys_term.c (start_login): Bounds check the constructed "speed"
+	passed in to login.
+
 Wed Feb 12 15:22:53 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: Fix DES425_DEPLIB
