@@ -1,3 +1,10 @@
+Wed Feb  4 14:15:20 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (process_v4): Check the length of the incoming V4
+		packet before copying it into the KTEXT_ST variable.
+		(kerberos_v4): Make sure the strings in the V4 request
+		structures aren't no longer than they are allowed to be.
+
 Wed Jan 28 08:56:07 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5kdc.M: Document V4 mode handling [krb5-kdc/464].
