@@ -16,9 +16,9 @@
 #ifndef KRB5_ERROR_DEF__
 #define KRB5_ERROR_DEF__
 
-#include "../../error_tables/krb5_err.h"
-#include "../../error_tables/kdb5_err.h"
-#include "../../error_tables/isode_err.h"
+#include "error_tables/krb5_err.h"
+#include "error_tables/kdb5_err.h"
+#include "error_tables/isode_err.h"
 #include <errno.h>
 
 #endif /* KRB5_ERROR_DEF__ */
