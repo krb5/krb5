@@ -1,3 +1,7 @@
+Mon Jul 29 11:30:24 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadmin.exp: Added back in. Rewritten to use new admin system.
+
 Tue Jul 23 23:40:05 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kadmin.exp: removed, since it was for the old admin server.
