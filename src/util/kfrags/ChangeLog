@@ -1,3 +1,8 @@
+Fri Oct 28 19:06:12 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* gcc.conf (CC_OPTS): don't set CC_OPTS until we figure out
+	quoting again.
+
 Tue Oct 18 14:38:58 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* base.conf: add "sort" since "make check" needs it.
