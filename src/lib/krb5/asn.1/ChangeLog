@@ -1,3 +1,17 @@
+Wed Mar 13 12:52:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5_decode.c (decode_krb5_ticket, decode_krb5_enc_tkt_part,
+		decode_krb5_authenticator, decode_krb5_error,
+		decode_krb5_ap_req, decode_krb5_ap_rep,
+		decode_krb5_ap_rep_enc_part, decode_krb5_safe, 
+		decode_krb5_priv, decode_krb5_enc_priv_part,
+		decode_krb5_cred, decode_krb5_enc_part): Add magic values.
+
+	* asn1_k_decode.c (asn1_decode_passwdsequence): Set magic values
+		     in structures.
+		(asn1_decode_kdc_req_body): Set magic in
+		     authorization_data if not sent OTW.
+
 Tue Feb 27 19:23:55 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_decode.c (decode_krb5_enc_tkt_part): If starttime is not

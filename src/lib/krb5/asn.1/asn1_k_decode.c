@@ -414,7 +414,7 @@ asn1_error_code asn1_decode_kdc_req_body(buf, val)
     if(tagnum == 10){
       get_field(val->authorization_data,10,asn1_decode_encrypted_data); }
     else{
-      val->authorization_data.magic = 0;
+      val->authorization_data.magic = KV5M_ENC_DATA;
       val->authorization_data.enctype = 0;
       val->authorization_data.kvno = 0;
       val->authorization_data.ciphertext.data = NULL;
@@ -690,10 +690,13 @@ asn1_error_code asn1_decode_passwdsequence(buf, val)
     alloc_field(val->passwd,krb5_data);
     get_lenfield(val->passwd->length,val->passwd->data,
 		 0,asn1_decode_charstring);
+    val->passwd->magic = KV5M_DATA;
     alloc_field(val->phrase,krb5_data);
     get_lenfield(val->phrase->length,val->phrase->data,
 		 1,asn1_decode_charstring);
+    val->phrase->magic = KV5M_DATA;
     end_structure();
+    val->magic = KV5M_PASSWD_PHRASE_ELEMENT;
   }
   cleanup();
 }

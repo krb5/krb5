@@ -180,6 +180,7 @@ krb5_error_code decode_krb5_authenticator(code, rep)
     opt_field(*((*rep)->subkey),6,asn1_decode_encryption_key);
     opt_field((*rep)->seq_number,7,asn1_decode_int32);
     opt_field((*rep)->authorization_data,8,asn1_decode_authorization_data);
+    (*rep)->magic = KV5M_AUTHENTICATOR;
     end_structure();
   }
   cleanup_manual();
@@ -211,6 +212,7 @@ krb5_error_code decode_krb5_ticket(code, rep)
     get_field((*rep)->server,1,asn1_decode_realm);
     get_field((*rep)->server,2,asn1_decode_principal_name);
     get_field((*rep)->enc_part,3,asn1_decode_encrypted_data);
+    (*rep)->magic = KV5M_TICKET;
     end_structure();
   }
   cleanup_manual();
@@ -264,6 +266,7 @@ krb5_error_code decode_krb5_enc_tkt_part(code, rep)
     opt_field((*rep)->times.renew_till,8,asn1_decode_kerberos_time);
     opt_field((*rep)->caddrs,9,asn1_decode_host_addresses);
     opt_field((*rep)->authorization_data,10,asn1_decode_authorization_data);
+    (*rep)->magic = KV5M_ENC_TKT_PART;
     end_structure();
   }
   cleanup_manual();
@@ -355,6 +358,7 @@ krb5_error_code decode_krb5_ap_req(code, rep)
     get_field(*((*rep)->ticket),3,asn1_decode_ticket);
     get_field((*rep)->authenticator,4,asn1_decode_encrypted_data);
     end_structure();
+    (*rep)->magic = KV5M_AP_REQ;
   }
   cleanup_manual();
 error_out:
@@ -385,6 +389,7 @@ krb5_error_code decode_krb5_ap_rep(code, rep)
     }
     get_field((*rep)->enc_part,2,asn1_decode_encrypted_data);
     end_structure();
+    (*rep)->magic = KV5M_AP_REP;
   }
   cleanup(free);
 }
@@ -405,6 +410,7 @@ krb5_error_code decode_krb5_ap_rep_enc_part(code, rep)
     opt_field(*((*rep)->subkey),2,asn1_decode_encryption_key);
     opt_field((*rep)->seq_number,3,asn1_decode_int32);
     end_structure();
+    (*rep)->magic = KV5M_AP_REP_ENC_PART;
   }
   cleanup_manual();
 error_out:
@@ -484,6 +490,7 @@ krb5_error_code decode_krb5_safe(code, rep)
     get_field(**rep,2,asn1_decode_krb_safe_body);
     alloc_field((*rep)->checksum,krb5_checksum);
     get_field(*((*rep)->checksum),3,asn1_decode_checksum);
+  (*rep)->magic = KV5M_SAFE;
     end_structure();
   }
   cleanup_manual();
@@ -514,6 +521,7 @@ krb5_error_code decode_krb5_priv(code, rep)
 #endif
     }
     get_field((*rep)->enc_part,3,asn1_decode_encrypted_data);
+    (*rep)->magic = KV5M_PRIV;
     end_structure();
   }
   cleanup(free);
@@ -538,6 +546,7 @@ krb5_error_code decode_krb5_enc_priv_part(code, rep)
     get_field(*((*rep)->s_address),4,asn1_decode_host_address);
     if(tagnum == 5){ alloc_field((*rep)->r_address,krb5_address); }
     opt_field(*((*rep)->r_address),5,asn1_decode_host_address);
+    (*rep)->magic = KV5M_PRIV_ENC_PART;
     end_structure();
   }
   cleanup_manual();
@@ -570,6 +579,7 @@ krb5_error_code decode_krb5_cred(code, rep)
     }
     get_field((*rep)->tickets,2,asn1_decode_sequence_of_ticket);
     get_field((*rep)->enc_part,3,asn1_decode_encrypted_data);
+    (*rep)->magic = KV5M_CRED;
     end_structure();
   }
   cleanup(free);
@@ -594,6 +604,7 @@ krb5_error_code decode_krb5_enc_cred_part(code, rep)
     opt_field(*((*rep)->s_address),4,asn1_decode_host_address);
     if(tagnum == 5){ alloc_field((*rep)->r_address,krb5_address); }
     opt_field(*((*rep)->r_address),5,asn1_decode_host_address);
+    (*rep)->magic = KV5M_CRED_ENC_PART;
     end_structure();
   }
   cleanup_manual();
@@ -640,6 +651,7 @@ krb5_error_code decode_krb5_error(code, rep)
     get_field((*rep)->server,10,asn1_decode_principal_name);
     opt_lenfield((*rep)->text.length,(*rep)->text.data,11,asn1_decode_generalstring);
     opt_lenfield((*rep)->e_data.length,(*rep)->e_data.data,12,asn1_decode_charstring);
+    (*rep)->magic = KV5M_ERROR;
     end_structure();
   }
   cleanup_manual();
@@ -683,6 +695,7 @@ krb5_error_code decode_krb5_pwd_data(code, rep)
   { begin_structure();
     get_field((*rep)->sequence_count,0,asn1_decode_int);
     get_field((*rep)->element,1,asn1_decode_sequence_of_passwdsequence);
+    (*rep)->magic = KV5M_PWD_DATA;
     end_structure (); }
   cleanup(free);
 }
