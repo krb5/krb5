@@ -1,3 +1,8 @@
+Wed Feb 12 16:17:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Remove INSTALL_VARIABLE_HACK, as it's no longer
+	needed in autoconf 2.12.
+
 Mon Feb 10 11:30:56 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Set CC_LINK_STATIC for platforms
