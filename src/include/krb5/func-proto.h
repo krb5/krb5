@@ -199,6 +199,9 @@ krb5_boolean krb5_address_compare
 		   krb5_address *));
 krb5_boolean krb5_principal_compare
 	PROTOTYPE((krb5_principal, krb5_principal));
+int krb5_fulladdr_order
+	PROTOTYPE((krb5_fulladdr *,
+		   krb5_fulladdr *));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
