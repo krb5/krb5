@@ -69,7 +69,8 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
     /* copy the plaintext around */
 
     if (alloced) {
-	memcpy(arg_output->data, output.data, plainsize);
+	memcpy(arg_output->data, output.data+blocksize+hashsize,
+	       plainsize);
     } else {
 	memmove(arg_output->data, arg_output->data+blocksize+hashsize,
 		plainsize);
