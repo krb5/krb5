@@ -70,7 +70,7 @@ krb5_fcc_start_seq_get(id, cursor)
      /* Make sure we start reading right after the primary principal */
 
      krb5_fcc_skip_principal(id);
-     fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
+     fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
 
      MAYBE_CLOSE(id, ret);

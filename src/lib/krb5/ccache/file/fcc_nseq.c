@@ -98,7 +98,7 @@ krb5_fcc_next_cred(id, cursor, creds)
      kret = krb5_fcc_read_data(id, &creds->second_ticket);
      TCHECK(kret);
      
-     fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
+     fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_CUR);
      cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
