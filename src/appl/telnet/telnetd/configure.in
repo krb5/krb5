@@ -18,6 +18,7 @@ AC_COMPILE_CHECK([cc_t],[#include <termio.h>],
 [cc_t foo;],,AC_DEFINE(NO_CC_T))
 fi
 fi
+AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
 AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAS_GETTOS))
 AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
 AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))

@@ -110,7 +110,11 @@ extern struct sysv sysv;
 #include <sys/resource.h>
 #include <sys/proc.h>
 #endif
+#ifndef linux
 #include <sys/tty.h>
+#else
+#include <linux/tty.h>
+#endif
 #ifdef	t_erase
 #undef	t_erase
 #undef	t_kill
