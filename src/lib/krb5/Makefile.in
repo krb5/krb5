@@ -90,28 +90,28 @@ all-windows::
 	cd ..
 
 clean-windows::
-	cd ASN.1
+	cd asn.1
 	@echo Making clean in krb5\asn.1
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\CCACHE
+	cd ..\ccache
 	@echo Making clean in krb5\ccache
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\error_tables
 	@echo Making clean in krb5\error_tables
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\KEYTAB
+	cd ..\keytab
 	@echo Making clean in krb5\keytab
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\KRB
+	cd ..\krb
 	@echo Making clean in krb5\krb
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\OS
+	cd ..\os
 	@echo Making clean in krb5\os
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\POSIX
+	cd ..\posix
 	@echo Making clean in krb5\posix
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\RCACHE
+	cd ..\rcache
 	@echo Making clean in krb5\rcache
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..

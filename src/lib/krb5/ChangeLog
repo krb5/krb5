@@ -1,3 +1,8 @@
+Mon May 17 14:09:28 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Make directories for clean-windows target lowercase
+		like everywhere else.
+
 Mon May 10 15:23:34 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
