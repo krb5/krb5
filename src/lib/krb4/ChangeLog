@@ -1,3 +1,7 @@
+2003-01-15  Tom Yu  <tlyu@mit.edu>
+
+	* CCache-glue.c: New file from KfM.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,
