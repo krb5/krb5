@@ -64,8 +64,13 @@ krb5_init_context(context)
 	ctx->kdc_req_sumtype = tmp;
 
 	ctx->kdc_default_options = KDC_OPT_RENEWABLE_OK;
+#ifdef _MACINTOSH
+#define DEFAULT_KDC_TIMESYNC 1
+#else
+#define DEFAULT_KDC_TIMESYNC 0
+#endif
 	profile_get_integer(ctx->profile, "libdefaults",
-			    "kdc_timesync", 0, 0,
+			    "kdc_timesync", 0, DEFAULT_KDC_TIMESYNC,
 			    &tmp);
 	ctx->library_options = tmp ? KRB5_LIBOPT_SYNC_KDCTIME : 0;
 
@@ -77,8 +82,13 @@ krb5_init_context(context)
 	 * Note: DCE 1.0.3a only supports a cache type of 1
 	 * 	DCE 1.1 supports a cache type of 2.
 	 */
+#ifdef _MACINTOSH
+#define DEFAULT_CCACHE_TYPE 4
+#else
+#define DEFAULT_CCACHE_TYPE 3
+#endif
 	profile_get_integer(ctx->profile, "libdefaults", "ccache_type",
-			    0, 3, &tmp);
+			    0, DEFAULT_CCACHE_TYPE, &tmp);
 	ctx->fcc_default_format = tmp + 0x0500;
 	ctx->scc_default_format = tmp + 0x0500;
 

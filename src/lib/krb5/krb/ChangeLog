@@ -1,5 +1,8 @@
 Thu Apr 11 21:30:23 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* init_ctx.c (krb5_init_context): On a Macintosh, turn on
+		kdc_timesync and use the v4 credentials cache by default.
+
 	* get_in_tkt.c (stash_as_reply, verify_as_reply): Move time offset
 		code from stash_as_reply to verify_as_reply, and fix it so
 		that it actually works.
