@@ -380,7 +380,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	return retval;
     }
 
-    if (retval = krb5_get_credentials(context, 0, 
+    if (retval = krb5_get_credentials(context, 0,
                                       ccache, &creds, &credsp)) {
 	com_err(prog, retval, "while getting creds for %s", hostname);
     	krb5_free_cred_contents(context, &creds);
