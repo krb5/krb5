@@ -1,3 +1,9 @@
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Drop references to .. and et
+	directories in source and build trees.
+	(depend-prerecurse): Depend on 'includes'.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

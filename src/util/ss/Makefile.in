@@ -27,7 +27,7 @@ install-unix:: install-libs
 # hard coded ../et is so com_err.h works
 # CFLAGS= -g
 # CPPFLAGS= -I${INCDIR} -I. -I.. -I../et
-LOCALINCLUDES= -I. -I$(srcdir)/ -I$(srcdir)/.. -I$(srcdir)/../et -I..
+LOCALINCLUDES= -I. -I$(srcdir)/
 
 # with ss_err.o first, ss_err.h should get rebuilt first too.  should not
 # be relying on this, though.
@@ -44,7 +44,7 @@ SRCS=	$(srcdir)/invocation.c $(srcdir)/help.c \
 	$(srcdir)/error.c $(srcdir)/prompt.c \
 	$(srcdir)/request_tbl.c $(srcdir)/list_rqs.c $(srcdir)/pager.c \
 	$(srcdir)/requests.c $(srcdir)/data.c
-depend-prerecurse:: ss_err.h
+depend-prerecurse:: ss_err.h includes
 
 std_rqs.o: std_rqs.c ss_err.h
 
