@@ -146,6 +146,10 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
    if (!use_master) {
       use_master = 1;
 
+      if (as_reply) {
+	  krb5_free_kdc_rep( context, as_reply);
+	  as_reply = NULL;
+      }
       ret2 = krb5_get_init_creds(context, creds, client, prompter, data,
 				 start_time, in_tkt_service, options,
 				 krb5_get_as_key_password, (void *) &pw0,

@@ -1,3 +1,8 @@
+2004-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Free the as reply in
+	the !use_master case  (Thanks to Lijian Liu)
+
 2004-03-09  Ken Hornstein <kenh@cmf.nrl.navy.mil>
 
 	* gic_keytab.c (krb5_get_in_tkt_with_keytab): Fix a case I missed
