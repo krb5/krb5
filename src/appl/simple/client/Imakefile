@@ -27,3 +27,6 @@ LOCAL_LIBRARIES = $(KLIB)
        INCLUDES = -I..
 
 SimpleTestProgramTarget(sim_client)
+
+DependTarget()
+
