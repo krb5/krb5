@@ -14,6 +14,7 @@ OBJS= \
 	full_ipadr.$(OBJEXT)	\
 	get_krbhst.$(OBJEXT)	\
 	gen_port.$(OBJEXT)	\
+	genaddrs.$(OBJEXT)	\
 	gen_rname.$(OBJEXT)	\
 	gmt_mktime.$(OBJEXT)	\
 	hst_realm.$(OBJEXT)	\
@@ -21,6 +22,7 @@ OBJS= \
 	krbfileio.$(OBJEXT)	\
 	ktdefname.$(OBJEXT)	\
 	kuserok.$(OBJEXT)	\
+	mk_faddr.$(OBJEXT)	\
 	localaddr.$(OBJEXT)	\
 	locate_kdc.$(OBJEXT)	\
 	lock_file.$(OBJEXT)	\
@@ -49,6 +51,7 @@ SRCS= \
 	$(srcdir)/full_ipadr.c	\
 	$(srcdir)/get_krbhst.c	\
 	$(srcdir)/gen_port.c	\
+	$(srcdir)/genaddrs.c	\
 	$(srcdir)/gen_rname.c	\
 	$(srcdir)/gmt_mktime.c	\
 	$(srcdir)/hst_realm.c	\
@@ -56,6 +59,7 @@ SRCS= \
 	$(srcdir)/krbfileio.c	\
 	$(srcdir)/ktdefname.c	\
 	$(srcdir)/kuserok.c	\
+	$(srcdir)/mk_faddr.c	\
 	$(srcdir)/localaddr.c	\
 	$(srcdir)/locate_kdc.c	\
 	$(srcdir)/lock_file.c	\

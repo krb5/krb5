@@ -42,20 +42,12 @@ krb5_error_code krb5_unpack_full_ipaddr
 	       krb5_int32 *,
 	       krb5_int16 *));
 
-#ifdef NARROW_PROTOTYPES
-krb5_error_code krb5_make_full_ipaddr
-    PROTOTYPE((krb5_context,
-	       krb5_int32,
-	       krb5_int16,
-	       krb5_address **));
-#else
 krb5_error_code krb5_make_full_ipaddr
     PROTOTYPE((krb5_context,
 	       krb5_int32,
 	       int,			/* unsigned short promotes to signed
 					   int */
 	       krb5_address **));
-#endif /* NARROW_PROTOTYPES */
 #endif /* KRB5_USE_INET */
 
 #endif /* KRB5_LIBOS_INT_PROTO__ */

@@ -1,3 +1,17 @@
+
+Tue Apr 25 21:58:23 1995  Chris Procenzano (proven@mit.edu)
+
+	* Makefile.in : Added source files mk_faddr.c and genaddrs.c.
+	* mk_faddr.c (krb5_mk_fulladdr()): Makes a full address from
+		a struct sockaddr_in.
+	* genaddrs.c (krb5_auth_con_genaddrs()) : Generate a full address
+		from the active file descriptor and place it in the 
+		auth_context for the calls mk_safe(), mk_priv(), mk_safe(), 
+		rd_cred(), rd_priv(), and rd_safe().
+	* gen_rname.c (krb5_gen_replay_name()) : Fixed to take any type of
+		krb5_address and generate a rcache name.
+	* os-proto.h (krb5_make_full_ipaddr()) : Removed prototype.
+
 Tue Apr 25 04:50:13 1995  Chris Procenzano (proven@mit.edu)
 
 	* locate_kdc.c (krb5_locate_kdc()): Pass a NUL terminated realm

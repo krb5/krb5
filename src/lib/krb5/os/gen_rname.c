@@ -31,32 +31,22 @@
 
 krb5_error_code
 krb5_gen_replay_name(context, address, uniq, string)
-    krb5_context context;
-    const krb5_address *address;
-    const char *uniq;
-    char **string;
+    krb5_context 	  context;
+    const krb5_address 	* address;
+    const char 		* uniq;
+    char 	       ** string;
 {
-#ifdef KRB5_USE_INET
-    krb5_int16 port;
-    krb5_int32 addr;
-    register krb5_error_code retval;
-    register char *tmp, *tmp2;
-    struct in_addr inaddr;
+    char * tmp;
+    int i;
 
-    if (retval = krb5_unpack_full_ipaddr(context, address, &addr, &port))
-	return retval;
-    inaddr.s_addr = addr;
-
-    tmp = inet_ntoa(inaddr);
-    tmp2 = malloc(strlen(uniq)+strlen(tmp)+1+1+5); /* 1 for NUL,
-						      1 for ,,
-						      5 for digits (65535 is max) */
-    if (!tmp2)
+    if ((*string = malloc(strlen(uniq) + (address->length * 2) + 1)) == NULL)
 	return ENOMEM;
-    (void) sprintf(tmp2, "%s%s,%u",uniq,tmp,ntohs(port));
-    *string = tmp2;
+
+    sprintf(*string, "%s", uniq);
+    tmp = (*string) + strlen(uniq);
+    for (i = 0; i < address->length; i++) {
+	sprintf(tmp, "%.2x", address->contents[i] & 0xff);
+	tmp += 2;
+    }
     return 0;
-#else
-    return KRB5_PROG_ATYPE_NOSUPP;
-#endif
 }
