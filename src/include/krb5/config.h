@@ -62,7 +62,7 @@ typedef unsigned char u_char;
 
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
-#include "autoconf.h"
+#include "krb5/autoconf.h"
 #endif
 
 #ifdef SYSV

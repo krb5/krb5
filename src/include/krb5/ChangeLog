@@ -1,3 +1,10 @@
+Tue Feb 21 17:49:41 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* config.h: get krb5/autoconf.h.
+	* Makefile.in (KRB5_HEADERS): add config.h, remove rsa-md4.h and
+	crc-32.h which aren't here anymore.
+
+=======
 Tue Feb 21 0:0:32 1995 Keith Vetter (keithv@fusion.com)
 
 	* func-proto.h: added windows INTERFACE keyword to all functions.
