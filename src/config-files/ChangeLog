@@ -1,5 +1,7 @@
 2003-05-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* kdc.conf: Delete supported and master key type specs.
+
 	* krb5.conf: Delete Athena KDC specifications.  Delete Cygnus
 	realm info.  Replace CLUB.CC.CMU.EDU info with ANDREW.CMU.EDU,
 	which has SRV records and thus doesn't need KDC specs.  Provide a
