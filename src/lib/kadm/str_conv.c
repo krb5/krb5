@@ -546,6 +546,7 @@ krb5_string_to_timestamp(string, timestampp)
     struct tm timebuf;
 
     found = 0;
+    memset(&timebuf, 0, sizeof(timebuf));
     for (i=0; i<atime_format_table_nents; i++) {
 	if (strptime(string, atime_format_table[i], &timebuf)) {
 	    found = 1;

@@ -1,4 +1,8 @@
 
+Tue Aug 8 17:35:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* str_conv.c - Fix Purify complaint.
+
+
 Mon Aug 7 17:38:45 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* keysalt.c(krb5_string_to_keysalt) - Don't do the silly whitespace
 		filling logic.  If the string has imbedded whitespace, then
