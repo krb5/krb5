@@ -194,16 +194,9 @@ kadm5_create_principal(void *server_handle,
 	else
 	    kdb.pw_expiration = 0;
     }
-    if ((mask & KADM5_PW_EXPIRATION)) {
-	if(!kdb.pw_expiration)
-	    kdb.pw_expiration = entry->pw_expiration;
-	else {
-	    if(entry->pw_expiration != 0)
-		kdb.pw_expiration = (entry->pw_expiration < kdb.pw_expiration) ?
-		    entry->pw_expiration : kdb.pw_expiration;
-	}
-    }
-
+    if ((mask & KADM5_PW_EXPIRATION))
+	 kdb.pw_expiration = entry->pw_expiration;
+    
     kdb.last_success = 0;
     kdb.last_failed = 0;
     kdb.fail_auth_count = 0;
@@ -393,98 +386,88 @@ kadm5_modify_principal(void *server_handle,
      */
 
     if ((mask & KADM5_POLICY)) {
-	ret = kadm5_get_policy(handle->lhandle, entry->policy, &npol);
-	switch(ret) {
-	case EINVAL:
-	    ret = KADM5_BAD_POLICY;
-	    break;
-	case KADM5_UNK_POLICY:
-	case KADM5_BAD_POLICY:
-	    ret =  KADM5_UNK_POLICY;
-	    goto done;
-	    break;
-	case KADM5_OK:
-	    have_npol = 1;
-	    if(adb.aux_attributes & KADM5_POLICY) {
-		if(strcmp(adb.policy, entry->policy)) {
-		    ret = kadm5_get_policy(handle->lhandle,
-					   adb.policy, &opol);
-		    switch(ret) {
-		    case EINVAL:
-		    case KADM5_BAD_POLICY:
-		    case KADM5_UNK_POLICY:
+	 /* get the new policy */
+	 ret = kadm5_get_policy(handle->lhandle, entry->policy, &npol);
+	 if (ret) {
+	      switch (ret) {
+	      case EINVAL:
+		   ret = KADM5_BAD_POLICY;
+		   break;
+	      case KADM5_UNK_POLICY:
+	      case KADM5_BAD_POLICY:
+		   ret =  KADM5_UNK_POLICY;
+		   break;
+	      }
+	      goto done;
+	 }
+	 have_npol = 1;
+
+	 /* if we already have a policy, get it to decrement the refcnt */
+	 if(adb.aux_attributes & KADM5_POLICY) {
+	      /* ... but not if the old and new are the same */
+	      if(strcmp(adb.policy, entry->policy)) {
+		   ret = kadm5_get_policy(handle->lhandle,
+					  adb.policy, &opol);
+		   switch(ret) {
+		   case EINVAL:
+		   case KADM5_BAD_POLICY:
+		   case KADM5_UNK_POLICY:
 			break;
-		    case KADM5_OK:
+		   case KADM5_OK:
 			have_opol = 1;
 			opol.policy_refcnt--;
 			break;
-	            default:
+		   default:
 			goto done;
 			break;
-		    }
-		    npol.policy_refcnt++;
-		}
-	    } else npol.policy_refcnt++;
-	    adb.aux_attributes |= KADM5_POLICY;
-	    if (adb.policy)
-		 free(adb.policy);
-	    adb.policy = strdup(entry->policy);
-	    if (npol.pw_max_life) {
-		if (ret =
-		    krb5_dbe_lookup_last_pwd_change(handle->context, &kdb,
-						    &(kdb.pw_expiration)))
-		    goto done;
-		kdb.pw_expiration += npol.pw_max_life;
-	    } else {
-		kdb.pw_expiration = 0;
-	    }
-	    break;
-	default:
-	    goto done;
-	}
-	if ((mask & KADM5_PW_EXPIRATION)) {
-	    if(kdb.pw_expiration == 0)
-		kdb.pw_expiration = entry->pw_expiration;
-	    else if(entry->pw_expiration != 0)
-		kdb.pw_expiration = (entry->pw_expiration < kdb.pw_expiration) ?
-				    entry->pw_expiration : kdb.pw_expiration;
-	}
-    }
-    if ((mask & KADM5_PW_EXPIRATION) && !(mask & KADM5_POLICY)) {
-	    if(kdb.pw_expiration == 0)
-		kdb.pw_expiration = entry->pw_expiration;
-	    else if(entry->pw_expiration != 0)
-		kdb.pw_expiration = (entry->pw_expiration < kdb.pw_expiration) ?
-				    entry->pw_expiration : kdb.pw_expiration;
+		   }
+		   npol.policy_refcnt++;
+	      }
+	 } else npol.policy_refcnt++;
+
+	 /* set us up to use the new policy */
+	 adb.aux_attributes |= KADM5_POLICY;
+	 if (adb.policy)
+	      free(adb.policy);
+	 adb.policy = strdup(entry->policy);
+
+	 /* set pw_max_life based on new policy */
+	 if (npol.pw_max_life) {
+	      if (ret = krb5_dbe_lookup_last_pwd_change(handle->context, &kdb,
+							&(kdb.pw_expiration)))
+		   goto done;
+	      kdb.pw_expiration += npol.pw_max_life;
+	 } else {
+	      kdb.pw_expiration = 0;
+	 }
     }
 
-    if ((mask & KADM5_POLICY_CLR)) {
-	if (adb.aux_attributes & KADM5_POLICY) {
-	    adb.aux_attributes &= ~KADM5_POLICY;
-	    kdb.pw_expiration = 0;
-	    ret = kadm5_get_policy(handle->lhandle, adb.policy, &opol);
-	    switch(ret) {
-	    case EINVAL:
-	    case KADM5_BAD_POLICY:
-	    case KADM5_UNK_POLICY:
-		ret = KADM5_BAD_DB;
-		goto done;
-		break;
-	    case KADM5_OK:
-		have_opol = 1;
-		if (adb.policy)
-		     free(adb.policy);
-		adb.policy = NULL;
-		opol.policy_refcnt--;
-		break;
-	    default:
-		goto done;
-		break;
-	    }
-	}
+    if ((mask & KADM5_POLICY_CLR) &&
+	(adb.aux_attributes & KADM5_POLICY)) {
+	 ret = kadm5_get_policy(handle->lhandle, adb.policy, &opol);
+	 switch(ret) {
+	 case EINVAL:
+	 case KADM5_BAD_POLICY:
+	 case KADM5_UNK_POLICY:
+	      ret = KADM5_BAD_DB;
+	      goto done;
+	      break;
+	 case KADM5_OK:
+	      have_opol = 1;
+	      if (adb.policy)
+		   free(adb.policy);
+	      adb.policy = NULL;
+	      adb.aux_attributes &= ~KADM5_POLICY;
+	      kdb.pw_expiration = 0;
+	      opol.policy_refcnt--;
+	      break;
+	 default:
+	      goto done;
+	      break;
+	 }
     }
-    if (((mask & KADM5_POLICY) ||
-	 (mask & KADM5_POLICY_CLR)) &&
+
+    if (((mask & KADM5_POLICY) || (mask & KADM5_POLICY_CLR)) &&
 	(((have_opol) &&
 	  (ret =
 	   kadm5_modify_policy_internal(handle->lhandle, &opol,
@@ -501,8 +484,8 @@ kadm5_modify_principal(void *server_handle,
 	kdb.max_life = entry->max_life;
     if ((mask & KADM5_PRINC_EXPIRE_TIME))
 	kdb.expiration = entry->princ_expire_time;
-    /* the pw_expiration logic would go here if it wasn't spread
-       all over the policy code */
+    if (mask & KADM5_PW_EXPIRATION)
+	 kdb.pw_expiration = entry->pw_expiration;
     if (mask & KADM5_MAX_RLIFE)
 	 kdb.max_renewable_life = entry->max_renewable_life;
     if (mask & KADM5_FAIL_AUTH_COUNT)
