@@ -287,13 +287,14 @@ kg2_unwrap_integ(context, minor_status, ctx, ptr, bodysize, output, qop_state)
        return(retval);
    }
 
-   if ((output->value = (void *) malloc(tmsglen)) == NULL) {
-       *minor_status = ENOMEM;
-       return(GSS_S_FAILURE);
+   if (tmsglen) {
+       if ((output->value = (void *) malloc(tmsglen)) == NULL) {
+	   *minor_status = ENOMEM;
+	   return(GSS_S_FAILURE);
+       }
+       memcpy(output->value, tmsg, tmsglen);
+       output->length = tmsglen;
    }
-
-   memcpy(output->value, tmsg, tmsglen);
-   output->length = tmsglen;
 
    if (qop_state)
        *qop_state = GSS_C_QOP_DEFAULT;
@@ -420,14 +421,15 @@ kg2_unwrap_priv(context, minor_status, ctx, ptr, bodysize, output, qop_state)
 
     tmsg = ptr;
 
-    if ((output->value = (void *) malloc(tmsglen)) == NULL) {
-	free(plain.data);
-	*minor_status = ENOMEM;
-	return(GSS_S_FAILURE);
+    if (tmsglen) {
+        if ((output->value = (void *) malloc(tmsglen)) == NULL) {
+	    free(plain.data);
+	    *minor_status = ENOMEM;
+            return(GSS_S_FAILURE);
+	}
+	memcpy(output->value, tmsg, tmsglen);
+	output->length = tmsglen;
     }
-
-    memcpy(output->value, tmsg, tmsglen);
-    output->length = tmsglen;
 
     if (qop_state)
 	*qop_state = GSS_C_QOP_DEFAULT;

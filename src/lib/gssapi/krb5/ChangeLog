@@ -1,3 +1,8 @@
+Fri Nov  6 09:19:23 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5unseal.c (kg2_unwrap_integ): Handle case of malloc(0)
+	returning NULL.
+
 1998-10-27  Marc Horowitz  <marc@mit.edu>
 
 	* Makefile.in, accept_sec_context.c, acquire_cred.c, canon_name.c,
