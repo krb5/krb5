@@ -1,3 +1,9 @@
+Wed Jan 24 13:21:37 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* import_name.c (krb5_gss_import_name): Don't assume that the
+		input_name_buffer is null terminated, when it contains a
+		string.  Fix gcc warnings.
+
 Tue Jan 23 13:01:42 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Check for stdlib.h

@@ -49,7 +49,7 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
 {
    krb5_principal princ;
    krb5_error_code code;
-   char *stringrep;
+   char *stringrep, *tmp;
 #ifndef NO_PASSWORD
    struct passwd *pw;
 #endif
@@ -62,15 +62,16 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
 
    if ((input_name_type != GSS_C_NULL_OID) &&
        g_OID_equal(input_name_type, gss_nt_service_name)) {
-      char *tmp, *service, *host;
+      char *service, *host;
 
       if ((tmp =
-	   (char *) xmalloc(strlen(input_name_buffer->value)+1)) == NULL) {
+	   (char *) xmalloc(input_name_buffer->length + 1)) == NULL) {
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
       }
 
-      strcpy(tmp, input_name_buffer->value);
+      memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
+      tmp[input_name_buffer->length] = 0;
 
       service = tmp;
       if ((host = strchr(tmp, '@')) == NULL) {
@@ -96,25 +97,34 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
 
       input = *((krb5_principal *) input_name_buffer->value);
 
-      if (code = krb5_copy_principal(context, input, &princ)) {
+      if ((code = krb5_copy_principal(context, input, &princ))) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
    } else {
       stringrep = NULL;
 
+      if ((tmp =
+	   (char *) xmalloc(input_name_buffer->length + 1)) == NULL) {
+	 *minor_status = ENOMEM;
+	 return(GSS_S_FAILURE);
+      }
+
+      memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
+      tmp[input_name_buffer->length] = 0;
+
       if ((input_name_type == GSS_C_NULL_OID) ||
 	  g_OID_equal(input_name_type, gss_nt_krb5_name) ||
 	  g_OID_equal(input_name_type, gss_nt_user_name)) {
-	 stringrep = (char *) input_name_buffer->value;
+	 stringrep = (char *) tmp;
 #ifndef NO_PASSWORD
       } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
-	 if (pw = getpwuid(*((uid_t *) input_name_buffer->value)))
+	 if ((pw = getpwuid(*((uid_t *) input_name_buffer->value))))
 	    stringrep = pw->pw_name;
 	 else
 	    *minor_status = (OM_uint32) G_NOUSER;
       } else if (g_OID_equal(input_name_type, gss_nt_string_uid_name)) {
-	 if (pw = getpwuid((uid_t) atoi(input_name_buffer->value)))
+	 if ((pw = getpwuid((uid_t) atoi(tmp))))
 	    stringrep = pw->pw_name;
 	 else
 	    *minor_status = (OM_uint32) G_NOUSER;
@@ -129,6 +139,8 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
 	 code = krb5_parse_name(context, (char *) stringrep, &princ);
       else
 	 return(GSS_S_BAD_NAME);
+      
+      xfree(tmp);
    }
 
    /* at this point, a krb5 function has been called to set princ.  code
