@@ -1,3 +1,10 @@
+Sun Nov 12 04:48:41 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* forward.c: set KRB5_DEFAULT_LIFE to 10 hours, not 8.
+	* forward.c (rd_and_store_for_creds): construct correct cache name
+	for forwarded tickets (based on tty name if available) and drop it
+	into the environment so login notices it.
+
 Mon Oct  9 23:03:48 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* kerberos5.c: make session_key a pointer, and use

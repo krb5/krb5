@@ -30,6 +30,8 @@
  
 #include "k5-int.h"
  
+extern char *line;		/* see sys_term.c */
+
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 krb5_error_code
 rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
@@ -51,7 +53,14 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
     if (retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) 
 	return(retval);
 
-    sprintf(ccname, "FILE:/tmp/krb5cc_%d", pwd->pw_uid);
+    if (*line) {
+      /* code from appl/bsd/login.c since it will do the same */
+      sprintf(ccname, "FILE:/tmp/krb5cc_%s", strrchr(line, '/')+1);
+    } else {
+     /* since default will be based on uid and we haven't changed yet */
+     sprintf(ccname, "FILE:/tmp/krb5cc_%d", pwd->pw_uid);
+    }
+    setenv(KRB5_ENV_CCNAME, ccname, 1);
 
     if (retval = krb5_cc_resolve(context, ccname, &ccache))
 	goto cleanup;
@@ -71,7 +80,7 @@ cleanup:
 }
 
 
-#define KRB5_DEFAULT_LIFE 60*60*8   /* 8 hours */
+#define KRB5_DEFAULT_LIFE 60*60*10   /* 10 hours */
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
 
