@@ -378,7 +378,6 @@
 			children = (
 				F5C2DF4A0240FA3601650119,
 				F5C2DF4B0240FA3601650119,
-				F5C2DF4C0240FA3601650119,
 				F5C2DF4D0240FA3601650119,
 				F5C2DF4E0240FA3601650119,
 				F5C2DF4F0240FA3601650119,
@@ -397,11 +396,6 @@
 		F5C2DF4B0240FA3601650119 = {
 			isa = PBXFileReference;
 			path = GSSInit.h;
-			refType = 4;
-		};
-		F5C2DF4C0240FA3601650119 = {
-			isa = PBXFileReference;
-			path = Kerberos524Init.h;
 			refType = 4;
 		};
 		F5C2DF4D0240FA3601650119 = {
@@ -4410,7 +4404,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../CredentialsCache/Headers\" \"$(SRCROOT)/../../KerberosLogin/Headers\"";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SYMROOT)/Kerberos4.intermediates\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../KerberosDES/Headers\" \"$(SRCROOT)/../../CredentialsCache/Headers\" \"$(SRCROOT)/../../KerberosLogin/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				OTHER_CPLUSPLUSFLAGS = "-fno-inline";
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
