@@ -26,6 +26,8 @@ static char rcsid_kdc_util_c[] =
 #include <krb5/ext-proto.h>
 #include <stdio.h>
 
+#include <syslog.h>
+
 /*
  * concatenate first two authdata arrays, returning an allocated replacement.
  * The replacement should be freed with krb5_free_authdata().
@@ -189,7 +191,14 @@ krb5_ticket **ticket;
 	    cleanup_apreq();
 	    return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
 	} else if (nprincs != 1) {
+	    char *sname;
+
 	    krb5_db_free_principal(&server, nprincs);
+	    if (!krb5_unparse_name(apreq->ticket->server, &sname)) {
+		syslog(LOG_ERR, "TGS_REQ: can't find key for '%s'",
+		       sname);
+		free(sname);
+	    }
 	    cleanup_apreq();
 	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
 	}
