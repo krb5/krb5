@@ -1,0 +1,77 @@
+thisconfigdir=./..
+myfulldir=lib/crypto/aes
+mydir=aes
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/..
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=aes
+##DOS##OBJFILE=..\$(OUTPRE)aes.lst
+##WIN16##LIBNAME=..\crypto.lib
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS=\
+	aescrypt.o	\
+	aestab.o	\
+	aeskey.o	\
+	aess2k.o
+
+OBJS=\
+	$(OUTPRE)aescrypt.$(OBJEXT)	\
+	$(OUTPRE)aestab.$(OBJEXT)	\
+	$(OUTPRE)aeskey.$(OBJEXT)	\
+	$(OUTPRE)aess2k.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/aescrypt.c	\
+	$(srcdir)/aestab.c	\
+	$(srcdir)/aeskey.c	\
+	$(srcdir)/aess2k.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs aes-gen
+
+includes:: depend
+
+depend:: $(SRCS)
+
+aes-gen: aes-gen.o $(OBJS)
+	$(CC) -o aes-gen aes-gen.o $(OBJS)
+
+run-aes-gen: aes-gen
+	./aes-gen > kresults.out
+
+check:: run-aes-gen
+
+aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+
+check:: run-aes-test
+run-aes-test: aes-test
+	./aes-test -k > vk.txt
+	cmp vk.txt $(srcdir)/expect-vk.txt
+	./aes-test > vt.txt
+	cmp vt.txt $(srcdir)/expect-vt.txt
+
+clean-unix:: clean-libobjs
+
+# @libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+aescrypt.so aescrypt.po $(OUTPRE)aescrypt.$(OBJEXT): aescrypt.c aesopt.h aes.h \
+  uitypes.h
+aestab.so aestab.po $(OUTPRE)aestab.$(OBJEXT): aestab.c aesopt.h aes.h \
+  uitypes.h
+aeskey.so aeskey.po $(OUTPRE)aeskey.$(OBJEXT): aeskey.c aesopt.h aes.h \
+  uitypes.h
+aess2k.so aess2k.po $(OUTPRE)aess2k.$(OBJEXT): aess2k.c aesopt.h aes.h \
+  uitypes.h
