@@ -1,3 +1,8 @@
+
+Thu Sep 07 15:06:57 1995  Chris Provenzano (proven@mit.edu)
+
+	* ktutil_funcs.c : Do appropriate magic for enctype/keytype cleanup.
+
 Thu Aug 24 19:20:26 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Added .Sanitize file.

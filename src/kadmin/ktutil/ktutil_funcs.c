@@ -255,8 +255,7 @@ krb5_error_code ktutil_read_srvtab(context, name, list)
 	if (retval)
 	    break;
 	entry->key.magic = KV5M_KEYBLOCK;
-	entry->key.etype = ETYPE_UNKNOWN;
-	entry->key.keytype = KEYTYPE_DES;
+	entry->key.enctype = ENCTYPE_DES_CBC_CRC;
 	entry->key.length = sizeof (key);
 	entry->key.contents = (krb5_octet *)malloc(sizeof (key));
 	if (!entry->key.contents) {
@@ -303,7 +302,7 @@ krb5_error_code ktutil_read_srvtab(context, name, list)
 /*
  * Writes a kt_list out to a krb4 srvtab file.  Note that it first
  * prunes the kt_list so that it won't contain any keys that are not
- * the most recent, and ignores keys that are not KEYTYPE_DES.
+ * the most recent, and ignores keys that are not ENCTYPE_DES.
  */
 krb5_error_code ktutil_write_srvtab(context, list, name)
     krb5_context context;
@@ -319,7 +318,7 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 
     /* First do heinous stuff to prune the list. */
     for (lp = list; lp; lp = lp->next) {
-	if (lp->entry->key.keytype == KEYTYPE_DES) { /* only DES keys! */
+	if (lp->entry->key.enctype == ENCTYPE_DES_CBC_CRC) {/* only DES keys! */
 	    for (lp1 = pruned; lp1; prev = lp1, lp1 = lp1->next) {
 		/* Hunt for the current principal in the pruned list */
 		if (krb5_principal_compare(context,
