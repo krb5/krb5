@@ -9,6 +9,9 @@
 #ifndef TouchCmd
 #define TouchCmd touch
 #endif
+#ifndef PerlCmd
+#define PerlCmd perl
+#endif
 #ifndef CompileEtCmd
 #define CompileEtCmd $(ETSRC)/compile_et
 #endif
@@ -101,7 +104,7 @@ AllTarget(foo/**/libname)						@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
 	$(TOUCH) foo/**/libname						@@\
-libdir/lib/**/libname.a:						@@\
+libdir/lib/**/libname.a::						@@\
 	$(ARADD) $@ objlist						@@\
 	$(TOUCH) foo/**/libname
 /* The $(RANLIB) is done at the end by the directory itself */
@@ -121,6 +124,7 @@ libdir/lib/**/libname.a:						@@\
              PEPY = PepyCmd
              POSY = PosyCmd
             TOUCH = TouchCmd
+             PERL = PerlCmd
        DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
