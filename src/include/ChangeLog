@@ -1,3 +1,8 @@
+2001-03-08 Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin: Add prototypes for krb5_auth_con_setpermetypes() and
+ 	krb5_auth_con_getpermetypes().
+
 2001-01-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (KRB5_NPROTOTYPE): Delete.

@@ -2049,6 +2049,16 @@ krb5_error_code krb5_auth_con_getrcache
 		krb5_auth_context,
 		krb5_rcache *);
 
+krb5_error_code krb5_auth_con_setpermetypes
+	(krb5_context,
+	    krb5_auth_context,
+	    const krb5_enctype *);
+
+krb5_error_code krb5_auth_con_getpermetypes
+	(krb5_context,
+	    krb5_auth_context,
+	    krb5_enctype **);
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_getauthenticator
 	(krb5_context,
 		krb5_auth_context,
