@@ -17,9 +17,12 @@ static char rcsid_unlock_file_c [] =
 
 #include <krb5/copyright.h>
 
+#include <stdio.h>
+
 #include <krb5/config.h>
 #include <krb5/base-defs.h>
 #include <krb5/libos.h>
+#include <krb5/libos-proto.h>
 
 #include <stdio.h>
 
