@@ -138,8 +138,8 @@
 				00F242BAFFB76A1512120156,
 			);
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 4;
+				DYLIB_CURRENT_VERSION = 4;
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks/ /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
@@ -236,8 +236,8 @@
 				00F242A3FFB75F1512120156,
 			);
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 4;
+				DYLIB_CURRENT_VERSION = 4;
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
@@ -314,8 +314,8 @@
 				00F242B7FFB7698D12120156,
 			);
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 4;
+				DYLIB_CURRENT_VERSION = 4;
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
@@ -393,8 +393,8 @@
 				00F242C0FFB7705612120156,
 			);
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 4;
+				DYLIB_CURRENT_VERSION = 4;
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
