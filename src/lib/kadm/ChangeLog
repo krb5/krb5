@@ -1,3 +1,8 @@
+Wed Nov  8 02:46:54 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* alt_prof.c (krb5_free_realm_params): Free the realm_kdc_ports
+		element of the structure.
+
 Fri Oct  6 00:30:16 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
