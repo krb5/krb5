@@ -1,4 +1,11 @@
 
+Thu Jul 27 15:04:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* k5-int.h - Inline or delete header files included here.  These were:
+		{asn1, dbm, ext-proto, k5-config, k5-errors, k5-sockets,
+		 libos, los-proto, mit-des, preauth, rsa-md5 and sysincl}.h
+		Also remove #defines which controlled the KDC, move these
+		definitions to kdc/configure.in.
+
 Thu Jul 27 04:27:45 1995  Chris Provenzano <proven@mit.edu)
 
 	* krb5.hin : Added #define KEYTYPE_UNKNOWN
