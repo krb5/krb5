@@ -13,7 +13,7 @@
 #ifndef	lint
 static char rcsid_mstime_c[] =
 "$Id$";
-#endif	lint
+#endif	/* lint */
 
 #include <krb5/copyright.h>
 
@@ -28,7 +28,8 @@ extern int errno;
 
 krb5_error_code
 krb5_ms_timeofday(seconds, milliseconds)
-register krb5_int32 *seconds, *milliseconds;
+register krb5_int32 *seconds;
+register krb5_int16 *milliseconds;
 {
     struct timeval tv;
 
