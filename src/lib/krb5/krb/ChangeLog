@@ -1,5 +1,8 @@
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Try with no specified enctype if
+	forwarding a specific enctype fails. l
+
 	* get_in_tkt.c (krb5_get_init_creds): Free s2kparams
 
 	* preauth2.c (krb5_do_preauth): Fix memory management
@@ -24,6 +27,18 @@
 	* gic_keytab.c (krb5_get_as_key_keytab): Add s2kparams
 
 	* gic_pwd.c (krb5_get_as_key_password): Add s2kparams support
+
+2003-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): Copy tgs_ktypes array to
+	conf_tgs_ktypes.  Clear use_conf_ktypes.
+	(krb5_free_context): Free conf_tgs_ktypes.
+	(krb5_get_tgs_ktypes): Use use_conf_ktypes to choose between
+	tgs_ktypes and conf_tgs_ktypes.
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Set use_conf_ktypes
+	in context to 1 for all operations except the acquisition of the
+	desired service ticket.
 
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
@@ -92,6 +107,11 @@
 2003-04-15  Sam Hartman  <hartmans@mit.edu>
 
 	* chpw.c (krb5int_mk_setpw_req krb5int_rd_setpw_rep): New function
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (DEFAULT_ETYPE_LIST): Add AES with 256 bits at the
+	front of the list.  No 128-bit support by defaut.
 
 2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
 

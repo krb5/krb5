@@ -12,6 +12,11 @@
 
 	* krb5.hin: Add KRB5_PADATA_ETYPE_INFO2
 
+2003-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5_context): New fields conf_tgs_ktypes,
+	conf_tgs_ktypes_count, use_conf_ktypes.
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Add krb5_auth_con_getsendsubkey,

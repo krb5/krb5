@@ -125,12 +125,12 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
     { ENCTYPE_AES128_CTS_HMAC_SHA1_96,
       "aes128-cts-hmac-sha1-96", "AES-128 CTS mode with 96-bit SHA-1 HMAC",
       &krb5int_enc_aes128, &krb5int_hash_sha1,
-      krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
+      krb5int_aes_encrypt_length, krb5int_aes_dk_encrypt, krb5int_aes_dk_decrypt,
       krb5int_aes_string_to_key },
     { ENCTYPE_AES256_CTS_HMAC_SHA1_96,
       "aes256-cts-hmac-sha1-96", "AES-256 CTS mode with 96-bit SHA-1 HMAC",
       &krb5int_enc_aes256, &krb5int_hash_sha1,
-      krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
+      krb5int_aes_encrypt_length, krb5int_aes_dk_encrypt, krb5int_aes_dk_decrypt,
       krb5int_aes_string_to_key },
 
 #ifdef ATHENA_DES3_KLUDGE

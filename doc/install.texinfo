@@ -1059,8 +1059,8 @@ kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
 kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
 klogin        @value{DefaultKloginPort}/tcp          # Kerberos authenticated rlogin
 kshell        @value{DefaultKshellPort}/tcp   cmd    # and remote shell
-kerberos-adm  @value{DefaultKamdindPort}/tcp          # Kerberos 5 admin/changepw
-kerberos-adm  @value{DefaultKamdindPort}/udp          # Kerberos 5 admin/changepw
+kerberos-adm  @value{DefaultKadmindPort}/tcp          # Kerberos 5 admin/changepw
+kerberos-adm  @value{DefaultKadmindPort}/udp          # Kerberos 5 admin/changepw
 krb5_prop     @value{DefaultKrbPropPort}/tcp          # Kerberos slave propagation
 @c kpop          1109/tcp         # Pop with Kerberos
 eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypted rlogin
