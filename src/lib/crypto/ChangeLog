@@ -1,3 +1,8 @@
+2004-04-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* libk5crypto.exports: Drop the library init/fini functions and
+	the DES tables from the export list.
+
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* libk5crypto.exports: New file.
