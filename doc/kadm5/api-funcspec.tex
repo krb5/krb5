@@ -135,8 +135,7 @@ user can still obtain ticket-granting tickets.
 this principal.
 
 \item[attributes] A bitfield of attributes for use by the KDC.  
-Note that only some are explicitly supported by \secure{}.  XXX Note:
-We really should check what all of these mean.
+Note that only some are explicitly supported by \secure{}.
 
 \begin{tabular}{clr}
 {\bf Supported} & {\bf Name} & {\bf Value} \\
@@ -151,7 +150,7 @@ X & KRB5_KDB_DISALLOW_ALL_TIX       & 0x00000040 \\
   & KRB5_KDB_REQUIRES_HW_AUTH       & 0x00000100 \\
 X & KRB5_KDB_REQUIRES_PWCHANGE      & 0x00000200 \\
   & KRB5_KDB_DISALLOW_SVR           & 0x00001000 \\
-  & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000
+X & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000
 \end{tabular}
 
 The interpretation of each bit is as follows.  For each of the bits
@@ -161,22 +160,22 @@ the option is disabled on TGS_REQ if the bit is set on the server (the
 setting of the bit on the client is irrelevant for a TGS_REQ).
 
 \begin{description}
-\item[KRB5_KDB_DISALLOW_POSTDATED]  Disables KDC_OPT_ALLOW_POSTDATE
-and KDC_OPT_POSTDATED on AS_REQ and TGS_REQ.
+\item[KRB5_KDB_DISALLOW_POSTDATED]  Disables the ALLOW_POSTDATE
+and POSTDATED KDC options on AS_REQ and TGS_REQ.
 
-\item[KRB5_KDB_DISALLOW_FORWARDABLE] Disables KDC_OPT_FORWARDABLE on
-for AS_REQ and TGS_REQ.
+\item[KRB5_KDB_DISALLOW_FORWARDABLE] Disables the FORWARDABLE KDC
+option for AS_REQ and TGS_REQ.
 
 \item[KRB5_KDB_DISALLOW_TGT_BASED] All TGS_REQ requests will fail for
 a principal with this bit set.
 
-\item[KRB5_KDB_DISALLOW_RENEWABLE] Disables KDC_OPT_RENEWABLE for
-AS_REQ and TGS_REQ.  
-
-\item[KRB5_KDB_DISALLOW_PROXIABLE] Disables KDC_OPT_PROXIABLE on
+\item[KRB5_KDB_DISALLOW_RENEWABLE] Disables the RENEWABLE KDC option for
 AS_REQ and TGS_REQ.
 
-\item[KRB5_KDB_DISALLOW_DUP_SKEY] Disables KDC_OPT_ENC_TKT_IN_SKEY on
+\item[KRB5_KDB_DISALLOW_PROXIABLE] Disables the PROXIABLE KDC option on
+AS_REQ and TGS_REQ.
+
+\item[KRB5_KDB_DISALLOW_DUP_SKEY] Disables the ENC_TKT_IN_SKEY option on
 TGS_REQ.
 
 \item[KRB5_KDB_DISALLOW_ALL_TIX] All AS_REQ requests fail if this bit
@@ -200,7 +199,9 @@ the server.
 \item[KRB5_KDB_DISALLOW_SVR] All AS_REQ and TGS_REQ request will fail
 if the server has this bit set.
 
-\item[KRB5_KDB_PWCHANGE_SERVICE] See KRB5_KDC_REQUIRES_PWCHANGE.
+\item[KRB5_KDB_PWCHANGE_SERVICE] An request from a client whose
+password has expired will succeed if this bit is set on the server.
+Also see KRB5_KDC_REQUIRES_PWCHANGE.
 \end{description}
 
 \item[mod_name] The name of the Kerberos principal that most recently
@@ -289,14 +290,16 @@ fields must be present and forbidden fields must not be present or an
 error is generated.  When creating a principal or policy, optional
 fields have a default value if they are not specified; when modifying
 a principal or policy, optional fields are unchanged if they are not
-specified.
+specified.  The values for forbidden fields are defined in the
+function semantics.
 
 The masks for principals are in table \ref{tab:princ-bits} and the
 masks for policies are in table \ref{tab:policy-bits}.  The
 OVSEC_KADM_ prefix has been removed from the Name fields.  In the
 Create and Modify fields, M means mandatory, F means forbidden, and O
 means optional.  Create fields that are optional specify the default
-value.
+value.  The notation ``K/M value'' means that the field inherits its
+value from the corresponding field in the Kerberos master principal.
 
 Note that the POLICY and POLICY_CLR bits are special.  When POLICY is
 set, the policy is assigned to the principal.  When POLICY_CLR is
@@ -320,7 +323,7 @@ MOD_TIME                & 0x000040 & mod_date & F & F \\
 MOD_NAME                & 0x000080 & mod_name & F & F \\
 KVNO                    & 0x000100 & kvno & O, 1 & O \\
 MKVNO                   & 0x000200 & mkvno & F & F \\
-AUX_ATTRIBUTES          & 0x000400 & aux_attributes & O, 0 & O \\
+AUX_ATTRIBUTES          & 0x000400 & aux_attributes & F & F \\
 POLICY                  & 0x000800 & policy & O, none & O \\
 POLICY_CLR              & 0x001000 & policy & F & O
 \end{tabular}
@@ -350,8 +353,9 @@ Several values are fixed and known through \#define's in include files.
 These are defined in <ovsec_admin/admin.h>:
 
 \begin{description}
-\item[admin service principal] ADM_PRINCIPAL (``admin'')
-\item[admin history key] HIST_PRINCIPAL (``admin/history'')
+\item[admin service principal] ADM_PRINCIPAL (``ovsec_kadm/admin'')
+\item[admin history key] HIST_PRINCIPAL (``ovsec_kadm/history'')
+\item[change password principal] CHANGEPW_PRINCIPAL (``ovsec_kadm/changepw'')
 \item[server acl file path] ACLFILE (``/krb/ovsec_admin.acl'')
 \end{description}
 
@@ -391,10 +395,7 @@ operations requiring the ``add'' privilege.
 operations requiring the ``modify'' privilege.
 \item[* OVSEC_KADM_AUTH_DELETE] Caller is not authorized to perform
 operations requiring the ``delete'' privilege.
-\item[* OVSEC_KADM_BAD_ARG] Invalid arguments would result in a memory
-error.
 \item[* OVSEC_KADM_BAD_DB] A database inconsistency was detected.
-\item[* OVSEC_KADM_MEM] Out of memory performing operation.
 \item[OVSEC_KADM_DUP] The operation would create a duplicate principal or
 policy.
 \item[OVSEC_KADM_UNK_PRINC]  The named principal does not exist.
@@ -417,13 +418,32 @@ password history.
 \item[OVSEC_KADM_PASS_TOOSOON] The current password's minimum lifetime
 has not passed.
 \item[OVSEC_KADM_POLICY_REF] The named policy's refcnt is not zero.
+\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal
+characters.
 \end{description}
 
-\subsection{Authorization}
+\subsection{Authentication and Authorization}
+\label{sec:auth}
 
-Each Admin API function requires a specific authorization to run.
-This version uses a simple named privilege system with the following
-names and meanings:
+Two Kerberos principals exist for use in communicating with the Admin
+system: ovsec_kadm/admin and ovsec_kadm/changepw.  Both principals
+have the KRB5_KDB_DISALLOW_TGT_BASED bit set in their attributes so
+that service tickets for them can only be acquired via a
+password-based (AS_REQ) request.  Additionally, ovsec_kadm/changepw
+has the KRB5_KDB_PWCHANGE_SERVICE bit set so that a principal with an
+expired password can still obtain a service ticket for it.
+
+The Admin system accepts requests that are authenticated to either
+service principal, but the set of operations that can be performed by
+a request authenticated to each service are different.  In particular,
+only the functions chpass_principal, randkey_principal, get_principal,
+and get_policy can be performed by a request authenticated to the
+ovsec_kadm/changepw service.  The function semantics describe the precise
+details.
+
+Each Admin API operation authenticated to the ovsec_kadm/admin service
+requires a specific authorization to run.  This version uses a simple
+named privilege system with the following names and meanings:
 
 \begin{description}
 \item[Get] Able to examine the attributes (NOT key data) of principals
@@ -436,14 +456,15 @@ and policies.
 Privileges are specified via an external configuration file on the
 Kerberos master server (see section \ref{sec:acls}).
 
-Each API function description identifies the privilege required to
-perform it.
+Table \ref{tab:func-overview} summarizes the authorization
+requirements of each function.  Additionally, each API function
+description identifies the privilege required to perform it.
 
 \subsection{Function Overview}
 
 The functions provided by the Admin API, and the authorization they
-require, are listed in the table below.  The ``ovsec_kadm_'' prefix
-has been removed from each function name.
+require, are listed in the table \ref{tab:func-overview}.  The
+``ovsec_kadm_'' prefix has been removed from each function name.
 
 The function semantics in the following sections omit details that are
 the same for every function.
@@ -457,8 +478,7 @@ have the required privilege.  No other information or error code is
 ever returned to an unauthorized user.
 
 \item Every function checks its arguments for NULL pointers or other
-obviously invalid values, and returns OVSEC_KADM_BAD_ARG if any are
-detected.
+obviously invalid values, and returns EINVAL if any are detected.
 
 \item Any function that performs a policy check uses the policy named
 in the principal's policy field.  If the POLICY bit is not set in the
@@ -468,6 +488,9 @@ policy, so the policy check is not performed.
 \item Unless otherwise specified, all functions return OVSEC_KADM_OK.
 \end{itemize}
 
+\begin{table}[htbp]
+\caption{Summary of functions and required authorization.}
+\label{tab:func-overview}
 \begin{tabular}{@{}llp{3.24in}}
 {\bf Function Name} & {\bf Authorization} & {\bf Operation} \\
 
@@ -491,6 +514,7 @@ free_policy_ent & none & Free the memory assocated with an
                 ovsec_kadm_policy_ent_t. \\
 get_privs & none & Return the caller's admin server privileges.
 \end{tabular}
+\end{table}
 \footnotetext[\thefootnote]{These functions also allow a principal to
 perform the operation on itself; see the function's semantics for
 details.}
@@ -677,7 +701,8 @@ ovsec_kadm_chpass_principal(krb5_principal princ, char *pw,
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
-same as the princ argument.
+same as the princ argument.  If the request is authenticated to the
+ovsec_kadm/changepw service, the modify priviledge is disregarded.
 
 Change a principal's password.  
 
@@ -746,7 +771,8 @@ return the generated key in allocated storage.  The caller must free
 the returned krb5_keyblock * with krb5_free_keyblock.
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
-same as the princ argument.
+same as the princ argument.  If the request is authenticated to the
+ovsec_kadm/changepw service, the modify priviledge is disregarded.
 
 In the description below, all the checks that can result in
 key-related errors do not apply to callers that have the modify
@@ -805,18 +831,26 @@ in the attributes field.
 KRB5_KDB_DISALLOW_ALL_TIX bit in the attributes field.
 \end{enumerate}
 
+The three steps are necessary to ensure secure creation.  Since an
+attacker might be able to guess the initial password assigned by the
+client program, the principal must be disabled until the key can be
+truly randomized.
+
 \subsection{ovsec_kadm_get_principal}
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_get_principal(krb5_principal princ, ovsec_kadm_principal_ent_t *ent);  
+ovsec_kadm_get_principal(krb5_principal princ, 
+                         ovsec_kadm_principal_ent_t *ent);  
 \end{verbatim}
 
 Return the principal's attributes in allocated memory.  The caller
 must free the returned entry with ovsec_kadm_free_principal_ent.
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
-as the princ argument.
+as the princ argument.  If the request is authenticated to the
+ovsec_kadm/changepw service, the get priviledge is disregarded.
+
 
 RETURN CODES:
 
@@ -837,6 +871,9 @@ AUTHORIZATION REQUIRED: add
 
 \begin{enumerate}
 \item Check to see if mask is valid, if not return OVSEC_KADM_BAD_MASK error.
+\item Return OVSEC_KADM_BAD_POLICY if the policy name contains illegal
+characters.
+
 \item Check to see if the policy already exists, if so return
 OVSEC_KADM_DUP error. 
 \item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
@@ -853,6 +890,7 @@ RETURN CODES:
 operation.
 \item[OVSEC_KADM_BAD_CLASS] The specified number of character classes
 is invalid.
+\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
 \end{description}
 
 \subsection{ovsec_kadm_delete_policy}
@@ -867,6 +905,8 @@ Deletes a policy.
 AUTHORIZATION REQUIRED: delete
 
 \begin{enumerate}
+\item Return OVSEC_KADM_BAD_POLICY if the policy name contains illegal
+characters.
 \item Return OVSEC_KADM_UNK_POLICY if the named policy does not exist.
 \item Return OVSEC_KADM_POLICY_REF if the named policy's refcnt is not 0.
 \item Delete policy.
@@ -875,6 +915,7 @@ AUTHORIZATION REQUIRED: delete
 RETURN CODES:
 
 \begin{description}
+\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
 \item[OVSEC_KADM_UNK_POLICY] Policy does not exist.
 \item[OVSEC_KADM_POLICY_REF] Policy is being referenced. 
 \end{description}
@@ -893,6 +934,8 @@ password is changed.
 AUTHORIZATION REQUIRED: modify
 
 \begin{enumerate}
+\item Return OVSEC_KADM_BAD_POLICY if the policy name contains illegal
+characters.
 \item Check to see if mask is legal, if not return OVSEC_KADM_BAD_MASK error.
 \item Check to see if policy exists, if not return
 OVSEC_KADM_UNK_POLICY error.
@@ -904,6 +947,7 @@ OVSEC_KADM_UNK_POLICY error.
 RETURN CODES: 
 
 \begin{description}
+\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
 \item[OVSEC_KADM_UNK_POLICY] Policy not found.
 \item[OVSEC_KADM_BAD_MASK] The mask is not valid for a modify
 operation.
@@ -915,10 +959,12 @@ is invalid.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_get_policy(char *, ovsec_kadm_policy_ent_t *); 
+ovsec_kadm_get_policy(char *policy, ovsec_kadm_policy_ent_t *ent); 
 \end{verbatim}
 
-AUTHORIZATION REQUIRED: get
+AUTHORIZATION REQUIRED: get, or the calling principal's policy being
+the same as the policy argument.  If the request is authenticated to
+the ovsec_kadm/changepw service, the get priviledge is disregarded.
 
 Return the policy's attributes in allocated memory.  The caller must
 free the returned entry with ovsec_kadm_free_policy_ent.
@@ -926,6 +972,7 @@ free the returned entry with ovsec_kadm_free_policy_ent.
 RETURN CODES: 
 
 \begin{description}
+\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
 \item[OVSEC_KADM_UNK_POLICY] Policy not found.
 \end{description}
 
@@ -990,7 +1037,7 @@ communicate with the server.
 The command line syntax of the admin server is
 
 \begin{verbatim}
-admin_server [-createsalt normal|none] [-modifysalt normal|none|keep]
+ovsec_adm_server [-createsalt normal|none] [-modifysalt normal|none|keep]
 \end{verbatim}
 
 The -createsalt and -modifysalt arguments control the type of salt
@@ -999,6 +1046,22 @@ respectively.  ``normal'' means the standard V5 salt which uses the
 principal and realm name.  ``none'' means no salt, which is compatible
 with Kerberos V4.  ``keep'' means maintain the previous salt when a
 key is changed.
+
+\subsection{Protocol and Port Number}
+
+The admin server accepts TCP Sun RPC connections.  The port number
+(which the server listens on, and which clients should use to contact
+it) is determined by a three step process:
+
+\begin{enumerate}
+\item If ovsec_kadm/tcp exists in /etc/services, the specified port
+number is used.
+
+\item Otherwise, if kerberos_adm/tcp exists in /etc/services, the
+specified port number is used.
+
+\item Otherwise, port number 752 is used.
+\end{enumerate}
 
 \subsection{Authorization ACLs}
 \label{sec:acls}
@@ -1014,28 +1077,134 @@ The format of this file is:
 \item Blank lines or lines beginning with ``\#'' are ignored.
 
 \item ACL entry lines contain two fields separated by any number of
-spaces or tabs.  The first field is a Kerberos name that can
-optionally have ``*'' as any component, and the second field is the
-privilege list.
+spaces or tabs.  The first field is a Kerberos name and the second
+field is the privilege list.
 
 \item The privilege list can contain a comma separated list of the
 words ``get'', ``add'', ``modify'', and ``delete''.
 \end{itemize}
 
 The principal named in the first field of each ACL entry has the
-privileges listed in the second field the ACL entry.  A principal
-component name of ``*'' is a wildcard and matches any single
-component; therefore, the name ``*/admin@FNORD.COM'' matches any
-two-component principal name whose second component is ``admin'' in
-the FNORD.COM realm.
+privileges listed in the second field the ACL entry.
 
 \subsection{Logging}
 
-The server will log each Admin API request.  The information logged
-will include the authentication name of the caller, the operation
-performed, the arguments to the operation, and the return value.
-Unauthorized requests will be identifiable by the OVSEC_KADM_AUTH
-error code.
+The Admin server will log various events via the syslog mechanism (see
+the syslog(3) manual page).  The level is LOG_NOTICE, the facility is
+LOG_LOCAL6, and notices are identified with the name
+``ovsec_adm_server''.
+
+In the event descriptions below, IP address refers to the originating
+remote IP address, procedure name refers to the name of the API
+function, client name refers to the authenticated name of the caller,
+service name refers to the service the client authenticated to (see
+section \ref{sec:auth}), primary argument refers to the name of the
+principal or policy affected by the call,\footnote{The first release
+only logs the primary argument, rather than logging the old and new
+values of all fields.} and status refers to the com_err string
+corresponding to the error code generated.
+
+\begin{itemize}
+\item Unsuccessfull authentication attempts (e.g.: failures during
+GSS-API context establishment).  This error occurs inside the RPC; the
+admin server is notified via a callback.
+
+\begin{verbatim}
+Authentication Failed: <IP address>, <GSS-API error strings>
+\end{verbatim}
+
+Example:  A buggy client attempts to authenticate to the admin server
+as the existing but invalid service name ``mailserver@REALM.COM'':
+
+\begin{verbatim}
+Authentication Failed: 192.231.148.11, Miscellaneous error, Wrong
+principal in request
+\end{verbatim}
+
+\item Authentication failure.  This error can occur both within the
+RPC, while parsing the RPC call header, and while arguments are
+decoded by the admin server.  It can be the result of a a garbled
+{\it or retransmitted} packet, a replay attack, a packet-modificaton
+attack, or a header/argument splicing attack.
+
+\begin{verbatim}
+Authentication failure: <procedure name>, claimed client = <client
+name>, service = <service name>, addr = <IP address>
+\end{verbatim}
+
+Example: An attacker attempts to replay a previously valid ``create
+principal'' message from jon/admin@REALM.COM:
+
+\begin{verbatim}
+Authentication failure: ovsec_kadm_create_principal, claimed client =
+jon/admin@REALM.COM, service = admin@REALM.COM, addr = 192.231.148.12
+\end{verbatim}
+
+\item Unauthorized request.  This error occurs when a properly
+authenticated caller attempts to perform an operation for which it is
+not authorized.
+
+\begin{verbatim}
+Unauthorized request: <procedure name>, <primary argument>, client =
+<client name>, service = <service name>, addr = <IP address>
+\end{verbatim}
+
+Example: An attacker cracker@REALM.COM attempts to modify the Kerberos
+master principal:
+
+\begin{verbatim}
+Unauthorized request: ovsec_kadm_modify_principal, K/M@REALM.COM,
+client = cracker@REALM.COM, service = admin@REALM.COM, addr =
+192.231.148.12
+\end{verbatim}
+
+\item Authorized requests and miscellaneous errors.  A message is
+logged when an authorized request succeeds or fails for any reason
+other than those listed above.  In the case of success, the status is
+``success''; otherwise, the status can be anything from ``no space
+left on device'' (ENOSPC) to an OVSEC_KADM error such as ``principal
+does not exist'' (OVSEC_KADM_UNK_PRINC).
+
+\begin{verbatim}
+Request: <procedure name>, <primary argument>, <status>, client =
+<client name>, service = <service name>, addr = <IP address>
+\end{verbatim}
+
+Example: jon/admin@REALM.COM creates a new principal new@REALM.COM:
+
+\begin{verbatim}
+Request: ovsec_kadm_create_principal, new@REALM.COM, success,
+client = jon/admin@REALM.COM, service = admin@REALM.COM, addr =
+192.231.148.12
+\end{verbatim}
+
+Example: A buggy client program attempts to create a principal with a
+NULL name:
+
+\begin{verbatim}
+Request: ovsec_kadm_create_principal, (null), Invalid argument, client
+= jon/admin@REALM.COM, service = admin@REALM.COM, addr =
+192.231.148.12
+\end{verbatim}
+
+Example: joe/user@REALM.COM changes its own password:
+
+\begin{verbatim}
+Request: ovsec_kadm_chpass_principal, joe/user@REALM.COM, success,
+client = joe/user@REALM.COM, server = ovsec_kadm/changepw@REALM.COM,
+addr = 192.231.148.12
+\end{verbatim}
+
+Example: jon/admin@REALM.COM attempts to get a principal that does not
+exist:
+
+\begin{verbatim}
+Request: ovsec_kadm_get_principal, does/not/exist@REALM.COM, principal
+does not exist, client = jon/admin@REALM.COM, server =
+admin@REALM.COM, addr = 192.231.148.12
+\end{verbatim}
+
+\end{itemize}
 
 \section{Tools}
 
@@ -1045,8 +1214,9 @@ operate remotely.  The tools are:
 
 \begin{description}
 \item[ovsec_adm_create] create the admin service principal, the admin
-history principal, and empty admin policy database, and an admin
-principal database with an empty entry for every exist principal.
+history principal, the admin password-changing principal, and empty
+admin policy database, and an admin principal database with an empty
+entry for every exist principal.
 \item[ovsec_adm_db_export/import] dump or load the admin policy and
 principal databases
 \item[ovsec_adm_check] check the kdc and admin databases for
