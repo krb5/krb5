@@ -1,3 +1,20 @@
+Mon Nov 21 15:30:07 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* encode_kdc.c (krb5_encode_kdc_rep): Now requires that the
+		caller pass in the encryption block to be used for
+		encrpyting the ticket.  That way, this routine doesn't
+		need to create its own encryption block.
+
+	* encrypt_tk.c (krb5_encrypt_tkt_part): Now requires that the
+		caller pass in the encryption block to be used for
+		encrpyting the ticket.  That way, this routine doesn't
+		need to create its own encryption block.
+
+Fri Nov 18 17:30:44 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* mk_req_ext.c (krb5_mk_req_extended): Encrypt the authenticator
+		using the same encryption system used to encrypt the ticket.
+
 Thu Nov 17 01:56:05 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* gc_via_tgt.c (krb5_get_cred_via_tgt): 

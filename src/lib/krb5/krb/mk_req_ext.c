@@ -107,7 +107,10 @@ krb5_data *outbuf;
     if (!valid_keytype(creds->keyblock.keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
-    etype = krb5_keytype_array[creds->keyblock.keytype]->system->proto_enctype;
+    if (creds->keyblock.etype == ETYPE_UNKNOWN)
+	etype = krb5_keytype_array[creds->keyblock.keytype]->system->proto_enctype;
+    else
+	etype = creds->keyblock.etype;
 
     if (!valid_etype(etype))
 	return KRB5_PROG_ETYPE_NOSUPP;

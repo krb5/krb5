@@ -37,7 +37,8 @@ krb5_error_code krb5_encode_ticket
 	PROTOTYPE((const krb5_ticket *,
 		   krb5_data ** ));
 krb5_error_code krb5_encrypt_tkt_part
-	PROTOTYPE((const krb5_keyblock *,
+	PROTOTYPE((krb5_encrypt_block *,
+		   const krb5_keyblock *,
 		   krb5_ticket * ));
 krb5_error_code krb5_decrypt_tkt_part
 	PROTOTYPE((const krb5_keyblock *,
@@ -307,6 +308,7 @@ void krb5_free_tkt_authent
 krb5_error_code krb5_encode_kdc_rep
 	PROTOTYPE((const krb5_msgtype,
 		   const krb5_enc_kdc_rep_part *,
+		   krb5_encrypt_block *,
 		   const krb5_keyblock *,
 		   krb5_kdc_rep *,
 		   krb5_data ** ));

@@ -46,17 +46,18 @@
 krb5_error_code
 krb5_encode_kdc_rep(DECLARG(const krb5_msgtype, type),
 		    DECLARG(const krb5_enc_kdc_rep_part *, encpart),
+		    DECLARG(krb5_encrypt_block *, eblock),
 		    DECLARG(const krb5_keyblock *, client_key),
 		    DECLARG(krb5_kdc_rep *, dec_rep),
 		    DECLARG(krb5_data **, enc_rep))
 OLDDECLARG(const krb5_msgtype, type)
 OLDDECLARG(const krb5_enc_kdc_rep_part *, encpart)
+OLDDECLARG(krb5_encrypt_block *, eblock)
 OLDDECLARG(const krb5_keyblock *, client_key)
 OLDDECLARG(krb5_kdc_rep *, dec_rep)
 OLDDECLARG(krb5_data **, enc_rep)
 {
     krb5_data *scratch;
-    krb5_encrypt_block eblock;
     krb5_error_code retval;
     krb5_enc_kdc_rep_part tmp_encpart;
 
@@ -77,7 +78,7 @@ OLDDECLARG(krb5_data **, enc_rep)
      * type correct.
      * 
      * Although note that it may be doing nothing with the message
-     * type, to be compatible with old versions of Kerberos that ways
+     * type, to be compatible with old versions of Kerberos that always
      * encode this as a TGS_REP regardly of what it really should be;
      * also note that the reason why we are passing it in a structure
      * instead of as an argument to encode_krb5_enc_kdc_rep_part (the
@@ -95,11 +96,8 @@ OLDDECLARG(krb5_data **, enc_rep)
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
 krb5_free_data(scratch); }
 
-    /* put together an eblock for this encryption */
-
-    krb5_use_cstype(&eblock, dec_rep->enc_part.etype);
     dec_rep->enc_part.ciphertext.length =
-	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
+	krb5_encrypt_size(scratch->length, eblock->crypto_entry);
     /* add padding area, and zero it */
     if (!(scratch->data = realloc(scratch->data,
 				  dec_rep->enc_part.ciphertext.length))) {
@@ -122,24 +120,26 @@ free(dec_rep->enc_part.ciphertext.data); \
 dec_rep->enc_part.ciphertext.length = 0; \
 dec_rep->enc_part.ciphertext.data = 0;}
 
-    retval = krb5_process_key(&eblock, client_key);
+    retval = krb5_process_key(eblock, client_key);
     if (retval) {
 	goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(eblock);}
 
     retval = krb5_encrypt((krb5_pointer) scratch->data,
 			      (krb5_pointer) dec_rep->enc_part.ciphertext.data,
-			      scratch->length, &eblock, 0);
+			      scratch->length, eblock, 0);
     if (retval) {
 	goto clean_prockey;
     }
 
+    dec_rep->enc_part.etype = krb5_eblock_enctype(eblock);
+
     /* do some cleanup */
     cleanup_scratch();
 
-    retval = krb5_finish_key(&eblock);
+    retval = krb5_finish_key(eblock);
     if (retval) {
 	cleanup_encpart();
 	return retval;

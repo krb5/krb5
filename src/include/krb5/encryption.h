@@ -193,6 +193,9 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define krb5_finish_random_key(eblock, ptr) (*(eblock)->crypto_entry->finish_random_key)(ptr)
 #define krb5_random_key(eblock, ptr, keyblock) (*(eblock)->crypto_entry->random_key)(eblock, ptr, keyblock)
 
+#define krb5_eblock_keytype(eblockp) ((eblockp)->crypto_entry->proto_keytype)
+#define krb5_eblock_enctype(eblockp) ((eblockp)->crypto_entry->proto_enctype)
+
 /*
  * Here's the stuff for the checksum switch:
  */

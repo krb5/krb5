@@ -1,3 +1,12 @@
+Mon Nov 21 14:43:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* func-proto.h (krb5_encode_kdc_rep, krb5_encrypt_tkt_part):
+		Change to use new function prototypes.
+
+	* encryption.h (krb5_eblock_keytype, krb5_eblock_enctype): Define
+		new macros for finding the key type and encryption type of
+		an encrypion block.
+
 Fri Nov 18 17:53:38 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb.h (KRB5_KDB_SUPPORT_DESMD5): Add new attribute which defines
