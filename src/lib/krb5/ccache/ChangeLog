@@ -1,3 +1,9 @@
+2003-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Move ##WIN32## constructs from inside
+	backslash-continued lists, as it was breaking them.  Move explicit
+	dependency information from under automatic dependencies.
+
 2003-12-11  Jeffrey Altman <jaltman@mit.edu>
 
     * Makefile.in, ccbase.c, cc_mslsa.c (new)
