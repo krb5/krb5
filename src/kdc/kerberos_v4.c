@@ -410,7 +410,11 @@ kerb_get_principal(name, inst, principal, maxn, more)
     principal->max_life = v4_time > HR21 ? HR21 : (unsigned char) v4_time;
     principal->exp_date = (unsigned long) entries.expiration;
 /*    principal->mod_date = (unsigned long) entries.mod_date; */
-    principal->kdc_key_ver = entries.mkvno;
+/* Set the master key version to 1. It's not really useful because all keys
+ * will be encrypted in the same master key version, and digging out the 
+ * actuall key version will be harder than it's worth --proven */
+/*    principal->kdc_key_ver = entries.mkvno; */
+    principal->kdc_key_ver = 1;
     principal->key_version = pkey->key_data_kvno;
     principal->attributes = 0;
 

@@ -1,3 +1,6 @@
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+        * kerberos_v4.c : Remove mkvno for krb5_db_entry
 
 Tue Dec 12 01:10:34 1995  Chris Provenzano (proven@mit.edu)
 
