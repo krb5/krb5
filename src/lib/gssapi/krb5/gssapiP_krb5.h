@@ -120,7 +120,7 @@ typedef struct _krb5_gss_ctx_id_rec {
    int established;
    int big_endian;
    krb5_auth_context auth_context;
-   const gss_OID_desc *mech_used;
+   gss_OID_desc *mech_used;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern void *kg_vdb;

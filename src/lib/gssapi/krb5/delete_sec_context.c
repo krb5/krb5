@@ -63,9 +63,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
       gss_buffer_desc empty;
       empty.length = 0; empty.value = NULL;
 
-      if (major = kg_seal(context, minor_status, *context_handle, 0,
-			  GSS_C_QOP_DEFAULT,
-			  &empty, NULL, output_token, KG_TOK_DEL_CTX))
+      if ((major = kg_seal(context, minor_status, *context_handle, 0,
+			   GSS_C_QOP_DEFAULT,
+			   &empty, NULL, output_token, KG_TOK_DEL_CTX)))
 	 return(major);
    }
 
@@ -94,6 +94,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
 
    if (ctx->auth_context)
        krb5_auth_con_free(context, ctx->auth_context);
+
+   if (ctx->mech_used)
+       gss_release_oid(minor_status, &ctx->mech_used);
    
    /* Zero out context */
    memset(ctx, 0, sizeof(*ctx));

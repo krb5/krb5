@@ -130,13 +130,27 @@ kg_get_context(minor_status, context)
    static krb5_context kg_context = NULL;
    krb5_error_code code;
 
-   if ((! kg_context) &&
-       (code = krb5_init_context(&kg_context))) {
-      *minor_status = (OM_uint32) code;
-      return GSS_S_FAILURE;
+   if (!kg_context) {
+	   if ((code = krb5_init_context(&kg_context)))
+		   goto fail;
+	   if ((code = krb5_ser_context_init(kg_context)))
+		   goto fail;
+	   if ((code = krb5_ser_auth_context_init(kg_context)))
+		   goto fail;
+	   if ((code = krb5_ser_ccache_init(kg_context)))
+		   goto fail;
+	   if ((code = krb5_ser_rcache_init(kg_context)))
+		   goto fail;
+	   if ((code = krb5_ser_keytab_init(kg_context)))
+		   goto fail;
+	   if ((code = krb5_ser_auth_context_init(kg_context)))
+	       goto fail;
    }
-
    *context = kg_context;
    *minor_status = 0;
    return GSS_S_COMPLETE;
+   
+fail:
+   *minor_status = (OM_uint32) code;
+   return GSS_S_FAILURE;
 }

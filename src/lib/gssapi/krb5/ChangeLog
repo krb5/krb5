@@ -1,3 +1,24 @@
+Sat Oct 19 00:38:22 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ser_sctx.c (kg_oid_externalize, kg_oid_internalize,
+ 		kg_oid_size): Add a GSSAPI OID magic number to the
+ 		externalized OID, so that if the OID is skipped, (it is
+ 		optional), the serialization code can resyncronize if
+ 		necessary.
+		(kg_queue_internalize, kg_queue_externalize,
+ 		kg_queue_size): New functions to externalize the gssapi
+ 		queue.
+		(kg_ctx_size, kg_ctx_exteranlize, kg_ctx_import): Changed
+ 		to include the mech_used field and to include the auth
+ 		context.
+
+	* gssapi_krb5.c (kg_get_context): Add calls to correctly
+ 		initialize the serializers needed by import and export sec
+ 		context.
+
+	* delete_sec_context.c (krb5_gss_delete_sec_context): Remember to
+		release the mech_used OID if necessary!
+
 Wed Oct 16 17:53:17 1996  Marc Horowitz  <marc@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): return an
