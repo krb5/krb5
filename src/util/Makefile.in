@@ -1,8 +1,14 @@
 thisconfigdir=./..
 myfulldir=util
 mydir=util
+##WIN32###Windows NMAKE doesn't like @ in make variable names, and on
+##WIN32### Windows we don't do the @FOO@ substitutions we do with UNIX
+##WIN32### configure scripts.  The set of subdirs to use is hard-coded
+##WIN32### below in the 'all-windows' target anyways, so just hide this.
+##WIN32##!if 0
 MY_SUBDIRS=$(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
 	profile pty db2 send-pr
+##WIN32##!endif
 BUILDTOP=$(REL)..
 
 MAYBE_ET_k5 = et

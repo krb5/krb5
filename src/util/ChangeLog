@@ -1,3 +1,8 @@
+2002-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS) [##WIN32##]: Hide variable definition
+	inside "!if 0" block.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAYBE_ET_k5, MAYBE_ET_sys, MAYBE_SS_k5,
