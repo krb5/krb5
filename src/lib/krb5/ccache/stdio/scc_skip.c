@@ -29,7 +29,7 @@ krb5_scc_skip_principal(id)
      if (kret != KRB5_OK)
 	  return kret;
 
-     krb5_free_principal(&princ);
+     krb5_free_principal(princ);
      return KRB5_OK;
 }
 
