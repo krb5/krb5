@@ -63,6 +63,8 @@ static int inited = 0;
 static char default_db_name[] = DEFAULT_DBM_FILE;
 static char *current_db_name = default_db_name;
 
+static DBM *current_db_ptr = 0;
+
 static krb5_boolean non_blocking = FALSE;
 
 static char *gen_dbsuffix PROTOTYPE((char *, char * ));
@@ -106,8 +108,8 @@ static void free_decode_princ_dbmkey PROTOTYPE((krb5_principal ));
  * There are two distinct locking protocols used.  One is designed to
  * lock against processes (the admin_server, for one) which make
  * incremental changes to the database; the other is designed to lock
- * against utilities (kdb_util, kpropd) which replace the entire
- * database in one fell swoop.
+ * against utilities (kdb5_edit, kpropd, kdb5_convert) which replace the
+ * entire database in one fell swoop.
  *
  * The first locking protocol is implemented using flock() in the 
  * krb_dbl_lock() and krb_dbl_unlock routines.
@@ -212,6 +214,16 @@ krb5_dbm_db_fini()
 
     if (!inited)
 	return KRB5_KDB_DBNOTINITED;
+
+    if (current_db_ptr) {
+	/* dbm_close returns void, but it is possible for there to be an
+	   error in close().  Possible changes to this routine: check errno
+	   on return from dbm_close(), call fsync on the database file
+	   descriptors.  */
+	dbm_close(current_db_ptr);
+	current_db_ptr = 0;
+    }
+
     if (close(dblfd) == -1)
 	retval = errno;
     else
@@ -220,6 +232,34 @@ krb5_dbm_db_fini()
     inited = 0;
     mylock = 0;
     return retval;
+}
+
+/*
+ * Open the database for update.
+ */
+krb5_error_code
+krb5_dbm_db_open_database()
+{
+  if (!inited)
+    return KRB5_KDB_DBNOTINITED;
+
+  if (!(current_db_ptr = (krb5_pointer)dbm_open(current_db_name, O_RDWR, 0600)))
+    return errno;
+
+  /* It is safe to ignore errors here because all function which write
+     to the database try again to lock.  */
+  (void) krb5_dbm_db_lock(KRB5_DBM_EXCLUSIVE);
+
+  return 0;
+}
+
+krb5_error_code
+krb5_dbm_db_close_database()
+{
+  dbm_close(current_db_ptr);
+  current_db_ptr = 0;
+  (void) krb5_dbm_db_unlock();
+  return 0;
 }
 
 /*
@@ -239,7 +279,7 @@ char *name;
 	return KRB5_KDB_DBINITED;
     if (name == NULL)
 	name = default_db_name;
-    db = dbm_open(name, 0, 0);
+    db = dbm_open(name, O_RDONLY, 0);
     if (db == NULL)
 	return errno;
     dbm_close(db);
@@ -744,30 +784,39 @@ destroy_file_suffix(dbname, suffix)
 	char		buf[BUFSIZ];
 
 	filename = gen_dbsuffix(dbname, suffix);
-	if (stat(filename, &statb)) {
-		free(filename);
-		if (errno == ENOENT)
-			return(0);
-		else
-			return(errno);
-	}
+	if (filename == 0)
+		return ENOMEM;
 	if ((fd = open(filename, O_RDWR, 0)) < 0) {
+		int retval = errno == ENOENT ? 0 : errno;
 		free(filename);
-		return(errno);
+		return retval;
+	}
+	/* fstat() will probably not fail unless using a remote filesystem
+	   (which is inappropriate for the kerberos database) so this check
+	   is mostly paranoia.  */
+	if (fstat(fd, &statb) == -1) {
+		int retval = errno;
+		free(filename);
+		return retval;
 	}
 	i = 0;
 	while (i < statb.st_size) {
 		nb = write(fd, buf, BUFSIZ);
 		if (nb < 0) {
+			int retval = errno;
 			free(filename);
-			return(errno);
+			return retval;
 		}
 		i += nb;
 	}
+	/* ??? Is fsync really needed?  I don't know of any non-networked
+	   filesystem which will discard queued writes to disk if a file
+	   is deleted after it is closed.  --jfc */
 	fsync(fd);
 	close(fd);
 
 	if (unlink(filename)) {
+		int retval = errno;
 		free(filename);
 		return(errno);
 	}
@@ -891,12 +940,17 @@ krb5_boolean *more;			/* are there more? */
 	if (retval = krb5_dbm_db_lock(KRB5_DBM_SHARED))
 	    return(retval);
 
-	db = dbm_open(current_db_name, O_RDONLY, 0600);
-	if (db == NULL) {
-	    retval = errno;
-	    (void) krb5_dbm_db_unlock();
-	    return retval;
+	if (current_db_ptr)
+	    db = current_db_ptr;
+	else {
+	    db = dbm_open(current_db_name, O_RDONLY, 0600);
+	    if (db == NULL) {
+		retval = errno;
+		(void) krb5_dbm_db_unlock();
+		return retval;
+	    }
 	}
+
 	*more = FALSE;
 
 	/* XXX deal with wildcard lookups */
@@ -912,7 +966,8 @@ krb5_boolean *more;			/* are there more? */
 	    goto cleanup;
 	else found = 1;
 
-	(void) dbm_close(db);
+	if (current_db_ptr == 0)
+	    (void) dbm_close(db);
 	(void) krb5_dbm_db_unlock();	/* unlock read lock */
 	if (krb5_dbm_db_end_read(transaction) == 0)
 	    break;
@@ -928,7 +983,8 @@ krb5_boolean *more;			/* are there more? */
     return(0);
 
  cleanup:
-    (void) dbm_close(db);
+    if (current_db_ptr == 0)
+	(void) dbm_close(db);
     (void) krb5_dbm_db_unlock();	/* unlock read lock */
     return retval;
 }
@@ -977,12 +1033,16 @@ register int *nentries;			/* number of entry structs to
     if (retval = krb5_dbm_db_lock(KRB5_DBM_EXCLUSIVE))
 	errout(retval);
 
-    db = dbm_open(current_db_name, O_RDWR, 0600);
-
-    if (db == NULL) {
-	retval = errno;
-	(void) krb5_dbm_db_unlock();
-	errout(errno);
+    if (current_db_ptr)
+	db = current_db_ptr;
+    else {
+	db = dbm_open(current_db_name, O_RDWR, 0600);
+	if (db == NULL) {
+	    retval = errno;
+	    (void) krb5_dbm_db_unlock();
+	    *nentries = 0;
+	    return retval;
+	}
     }
 
 #undef errout
@@ -1007,7 +1067,8 @@ register int *nentries;			/* number of entry structs to
 	entries++;			/* bump to next struct */
     }
 
-    (void) dbm_close(db);
+    if (current_db_ptr == 0)
+	(void) dbm_close(db);
     (void) krb5_dbm_db_unlock();		/* unlock database */
     *nentries = i;
     return (retval);
@@ -1035,12 +1096,17 @@ int *nentries;				/* how many found & deleted */
     if (retval = krb5_dbm_db_lock(KRB5_DBM_EXCLUSIVE))
 	return(retval);
 
-    db = dbm_open(current_db_name, O_RDWR, 0600);
-    if (db == NULL) {
-	retval = errno;
-	(void) krb5_dbm_db_unlock();
-	return retval;
+    if (current_db_ptr)
+	db = current_db_ptr;
+    else {
+	db = dbm_open(current_db_name, O_RDWR, 0600);
+	if (db == NULL) {
+	    retval = errno;
+	    (void) krb5_dbm_db_unlock();
+	    return retval;
+	}
     }
+
     if (retval = encode_princ_dbmkey(&key, searchfor))
 	goto cleanup;
 
@@ -1072,7 +1138,8 @@ int *nentries;				/* how many found & deleted */
     }
 
  cleanup:
-    (void) dbm_close(db);
+    if (current_db_ptr == 0)
+	(void) dbm_close(db);
     (void) krb5_dbm_db_unlock();	/* unlock write lock */
     *nentries = found;
     return retval;
@@ -1094,12 +1161,15 @@ krb5_pointer func_arg;
     if (retval = krb5_dbm_db_lock(KRB5_DBM_SHARED))
 	return retval;
 
-    db = dbm_open(current_db_name, O_RDONLY, 0600);
-
-    if (db == NULL) {
-	retval = errno;
-	(void) krb5_dbm_db_unlock();
-	return retval;
+    if (current_db_ptr)
+	db = current_db_ptr;
+    else {
+	db = dbm_open(current_db_name, O_RDONLY, 0600);
+	if (db == NULL) {
+	    retval = errno;
+	    (void) krb5_dbm_db_unlock();
+	    return retval;
+	}
     }
 
     for (key = dbm_firstkey (db); key.dptr != NULL; key = dbm_next(db, key)) {
@@ -1111,7 +1181,8 @@ krb5_pointer func_arg;
 	if (retval)
 	    break;
     }
-    (void) dbm_close(db);
+    if (current_db_ptr == 0)
+	(void) dbm_close(db);
     (void) krb5_dbm_db_unlock();
     return retval;
 }
