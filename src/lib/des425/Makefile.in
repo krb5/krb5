@@ -8,6 +8,9 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/k
 ##DOS##OBJFILEDEP=des425.lst
 ##DOS##OBJFILELIST=@des425.lst
 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
 RUN_SETUP=@KRB5_RUN_ENV@
 
 LIB=des425
@@ -72,10 +75,6 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/weak_key.c	\
 	$(srcdir)/k4_glue.c
 
-# For test programs
-EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
-DEPKLIB= $(TOPLIBD)/libcrypto.a
-
 all-unix:: all-liblinks
 all-mac:: $(OBJS)
 
@@ -84,8 +83,8 @@ all-mac:: $(OBJS)
 shared:
 	mkdir shared
 
-verify: verify.o libdes425.a $(DEPKLIB)
-	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
+verify: verify.o $(DES425_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ verify.o $(DES425_LIB) $(KRB5_BASE_LIBS)
 
 check-unix:: verify
 	$(RUN_SETUP) ./verify -z

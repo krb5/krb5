@@ -1,3 +1,10 @@
+Tue Mar  3 08:59:03 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add KRB5_BUILD_PROGRAM
+
+	* Makefile.in (verify): Use CC_LINK and proper Makefile variables
+        for library dependencies.
+
 Wed Feb 18 16:10:05 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trialing slash from thisconfigdir.  Fix up
