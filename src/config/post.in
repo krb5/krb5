@@ -144,10 +144,15 @@ Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
 	cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/Makefile
 $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 	cd $(thisconfigdir) && $(SHELL) config.status --recheck
+# autom4te.cache supposedly improves performance with multiple runs, but
+# it breaks across versions, and around MIT we've got plenty of version
+# mixing.  So nuke it.
 $(srcdir)/$(thisconfigdir)/configure: @MAINT@ $(srcdir)/$(thisconfigdir)/configure.in \
 		$(SRCTOP)/aclocal.m4
+	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 	cd $(srcdir)/$(thisconfigdir) && \
 		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
+	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	check-recurse depend-recurse Makefiles-recurse install-headers-recurse

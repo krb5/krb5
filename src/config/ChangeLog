@@ -1,3 +1,8 @@
+2005-01-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (Makefile): Nuke autom4te.cache before and after
+	autoconf runs.
+
 2004-12-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (.depend): Delete blank lines in generated file.  Don't
