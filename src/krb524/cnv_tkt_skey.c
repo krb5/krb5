@@ -27,7 +27,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <krb.h>
-#include <krb4-proto.h>
 #include "krb524.h"
 
 /* rather than copying the cmu code, these values are derived from

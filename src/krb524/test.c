@@ -31,7 +31,6 @@
 
 #include <des.h>
 #include <krb.h>
-#include <krb4-proto.h>
 #include "krb524.h"
 #include "com_err.h"
 
