@@ -1,3 +1,8 @@
+Tue Apr 25 04:50:13 1995  Chris Procenzano (proven@mit.edu)
+
+	* locate_kdc.c (krb5_locate_kdc()): Pass a NUL terminated realm
+		to profile_get_values(). 
+
 Mon Apr 24 17:20:14 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Don't deref NULL pointer

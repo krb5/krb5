@@ -52,14 +52,21 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     u_short sec_udpport = htons(KRB5_DEFAULT_SEC_PORT);
 #endif
 
+    if ((host = malloc(realm->length + 1)) == NULL) 
+	return ENOMEM;
+
+    strncpy(host, realm->data, realm->length);
+    host[realm->length] = '\0';
     hostlist = 0;
     
     realm_kdc_names[0] = "realms";
-    realm_kdc_names[1] = realm->data;
+    realm_kdc_names[1] = host;
     realm_kdc_names[2] = "kdc";
     realm_kdc_names[3] = 0;
 
     code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
+    krb5_xfree(host);
+
     if (code == PROF_NO_SECTION)
 	return KRB5_REALM_UNKNOWN;
     if (code == PROF_NO_RELATION)
