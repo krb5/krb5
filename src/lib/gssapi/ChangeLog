@@ -1,3 +1,7 @@
+Fri Jan 26 01:55:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Fix path to library from lib
+
 Wed Jan 24 21:28:04 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Remove LinkFileDir line for libgssapi as the
