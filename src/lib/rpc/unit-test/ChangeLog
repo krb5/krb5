@@ -1,5 +1,8 @@
 Mon Nov 11 20:52:27 1996  Tom Yu  <tlyu@mit.edu>
 
+	* rpc_test_setup.sh: Use a temp file rather than a here document
+	feeding into eval because Ultrix sh doesn't deal.
+
 	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.
 
 Mon Nov 11 14:22:30 1996  Tom Yu  <chaoself@avalanche-breakdown.mit.edu>
