@@ -516,7 +516,7 @@ Principal *princ;
     entry.kvno = princ->key_version;
     entry.max_life = princ->max_life * 60 * 5;
     entry.max_renewable_life = rblock.max_rlife;
-    entry.mkvno = 0;
+    entry.mkvno = 1;
     entry.expiration = princ->exp_date;
     entry.mod_date = princ->mod_date;
     entry.attributes = rblock.flags;	/* XXX is there a way to convert
@@ -576,10 +576,10 @@ struct realm_info *pblock;
 
     memset((char *) &entry, 0, sizeof(entry));
     entry.principal = princ;
-    entry.kvno = 0;
+    entry.kvno = 1;
     entry.max_life = pblock->max_life;
     entry.max_renewable_life = pblock->max_rlife;
-    entry.mkvno = 0;
+    entry.mkvno = 1;
     entry.expiration = pblock->expiration;
     entry.mod_name = &db_create_princ;
 

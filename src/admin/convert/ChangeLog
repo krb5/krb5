@@ -1,0 +1,5 @@
+Thu Sep 15 17:11:30 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_convert.c (add_principal, enter_in_v5_db):  Make the key
+		version numbers entered into the database be 1.
+
