@@ -184,6 +184,9 @@ krb5_boolean krb5_address_search
 krb5_boolean krb5_address_compare
 	PROTOTYPE((const krb5_address *,
 		   const krb5_address *));
+int krb5_address_order
+	PROTOTYPE((const krb5_address *,
+		   const krb5_address *));
 krb5_boolean krb5_principal_compare
 	PROTOTYPE((const krb5_principal,
 		   const krb5_principal));
