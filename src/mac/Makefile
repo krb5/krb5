@@ -630,9 +630,9 @@ krb5-library-common-linker-options = ¶
 	-dv {krb5-library-definition-version} ¶
 	-uv {krb5-library-implementation-version}
 
-krb5-library-linker-options-ppc-debug = {common-linker-options-debug} {krb5-library-common-linker-options}
+krb5-library-linker-options-ppc-debug = {common-linker-options-debug} {krb5-library-common-linker-options} -weaklib "DriverServicesLib"
 krb5-library-linker-options-68k-debug = {common-linker-options-debug} {krb5-library-common-linker-options}
-krb5-library-linker-options-ppc-final = {common-linker-options-final} {krb5-library-common-linker-options}
+krb5-library-linker-options-ppc-final = {common-linker-options-final} {krb5-library-common-linker-options} -weaklib "DriverServicesLib"
 krb5-library-linker-options-68k-final = {common-linker-options-final} {krb5-library-common-linker-options}
 
 krb5-globals-library-common-linker-options = ¶
