@@ -31,10 +31,10 @@ struct pwd_keyproc_arg {
  */
 
 static krb5_error_code
-pwd_keyproc(DECLARG(krb5_keytype, type),
+pwd_keyproc(DECLARG(const krb5_keytype, type),
 	    DECLARG(krb5_keyblock **, key),
 	    DECLARG(krb5_pointer, keyseed))
-OLDDECLARG(krb5_keytype, type)
+OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
 OLDDECLARG(krb5_pointer, keyseed)
 {
@@ -81,14 +81,14 @@ OLDDECLARG(krb5_pointer, keyseed)
  */
 krb5_error_code
 krb5_get_in_tkt_with_password(DECLARG(const krb5_flags, options),
-			      DECLARG(const krb5_address **, addrs),
+			      DECLARG(krb5_address * const *, addrs),
 			      DECLARG(const krb5_enctype, etype),
 			      DECLARG(const krb5_keytype, keytype),
 			      DECLARG(const char *, password),
 			      DECLARG(krb5_ccache, ccache),
 			      DECLARG(krb5_creds *, creds))
 OLDDECLARG(const krb5_flags, options)
-OLDDECLARG(const krb5_address **, addrs)
+OLDDECLARG(krb5_address * const *, addrs)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(const char *, password)
