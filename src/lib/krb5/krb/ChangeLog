@@ -1,3 +1,11 @@
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* addr_comp.c, addr_order.c, addr_srch.c, bld_pr_ext.c,
+	bld_princ.c, enc_helper.c, encrypt_tk.c, gen_seqnum.c,
+	gen_subkey.c, preauth.c: Use const instead of krb5_const.
+	* bld_pr_ext.c, bld_princ.c: Always use stdarg macros and not
+	varargs.
+
 2002-01-08  Sam Hartman  <hartmans@mit.edu>
 
 	* gen_subkey.c (krb5_generate_subkey): Label entropy sources

@@ -84,7 +84,7 @@ krb5_kt_register(context, ops)
 krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (context, name, ktid)
     krb5_context context;
-    krb5_const char *name;
+    const char *name;
     krb5_keytab *ktid;
 {
     struct krb5_kt_typelist *tlist;

@@ -29,23 +29,11 @@
 
 #include "k5-int.h"
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 krb5_error_code KRB5_CALLCONV_C
-#ifdef HAVE_STDARG_H
-krb5_build_principal_ext(krb5_context context,  krb5_principal * princ, unsigned int rlen, krb5_const char * realm, ...)
-#else
-krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
-    krb5_context context;
-    krb5_principal *princ;
-    unsigned int rlen;
-    krb5_const char *realm;
-    va_dcl
-#endif
+krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
+			 unsigned int rlen, const char * realm, ...)
 {
     va_list ap;
     register int i, count = 0;
@@ -55,11 +43,7 @@ krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
     krb5_data *princ_data;
     krb5_principal princ_ret;
 
-#ifdef HAVE_STDARG_H
     va_start(ap, realm);
-#else
-    va_start(ap);
-#endif
     /* count up */
     while (va_arg(ap, int) != 0) {
 	(void)va_arg(ap, char *);		/* pass one up */
@@ -92,11 +76,7 @@ krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
     tmpdata[rlen] = 0;
 
     /* process rest of components */
-#ifdef HAVE_STDARG_H
     va_start(ap, realm);
-#else
-    va_start(ap);
-#endif
     for (i = 0; i < count; i++) {
 	size = va_arg(ap, unsigned int);
 	next = va_arg(ap, char *);

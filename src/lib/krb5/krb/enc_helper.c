@@ -29,9 +29,9 @@
 krb5_error_code
 krb5_encrypt_helper(context, key, usage, plain, cipher)
      krb5_context context;
-     krb5_const krb5_keyblock *key;
+     const krb5_keyblock *key;
      krb5_keyusage usage;
-     krb5_const krb5_data *plain;
+     const krb5_data *plain;
      krb5_enc_data *cipher;
 {
     krb5_error_code ret;

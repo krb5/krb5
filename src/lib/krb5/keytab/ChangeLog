@@ -1,3 +1,7 @@
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktbase.c (krb5_kt_resolve): Use const instead of krb5_const.
+
 2001-10-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* ktfns.c (krb5_kt_get_type): KRB5_CALLCONV.
