@@ -1,1 +1,4 @@
 krb5-test-root
+kdc_rcache.*
+rc_kadmin_*
+rc_ovsec-137adm_*
