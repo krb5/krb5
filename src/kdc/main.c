@@ -291,6 +291,9 @@ krb5_keyblock *masterkeyblock;
     int nprincs;
     krb5_boolean more;
     krb5_db_entry server;
+#ifdef KRB4
+    extern unsigned char master_key_version;
+#endif
 
     /* set db name if appropriate */
     if (dbname && (retval = krb5_db_set_name(dbname)))
@@ -306,6 +309,26 @@ krb5_keyblock *masterkeyblock;
 	return(retval);
     }
 
+#ifdef KRB4    
+    /* get the master key, to extract the master key version number */
+    nprincs = 1;
+    if (retval = krb5_db_get_principal(masterkeyname,
+				       &server, &nprincs,
+				       &more)) {
+	return(retval);
+    }
+    if (nprincs != 1) {
+	if (nprincs)
+	    krb5_db_free_principal(&server, nprincs);
+	return(KRB5_KDB_NOMASTERKEY);
+    } else if (more) {
+	krb5_db_free_principal(&server, nprincs);
+	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    }
+    master_key_version = server.kvno;
+    krb5_db_free_principal(&server, nprincs);
+#endif
+    
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&master_encblock, masterkeyblock)) {
 	master_encblock.crypto_entry = 0;

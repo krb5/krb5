@@ -93,7 +93,8 @@ static C_Block session_key;
 static C_Block user_key;
 static C_Block service_key;
 */
-static u_char master_key_version;
+extern u_char master_key_version;
+u_char master_key_version;
 /*
 static char k_instance[INST_SZ];
 */
