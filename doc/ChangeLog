@@ -1,3 +1,8 @@
+2004-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (Solaris 9): Add section describing workaround for
+	Solaris 9 pty-close kernel bug.
+
 2003-07-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo (realms (krb5.conf)): Add description of
