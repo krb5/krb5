@@ -1,3 +1,11 @@
+Thu Sep 29 14:26:34 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1buf.c (asn1buf_remove_octetstring, asn1buf_remove_charstring): 
+		If the length is zero, don't call calloc(0,1); instead
+		return a NULL pointer.  This way, we get consistent
+		behavior even on systems where malloc(0) returns a
+		non-null pointer.
+
 Tue Sep 27 23:31:50 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_encode.c (encode_krb5_enc_kdc_rep_part): = should have been
