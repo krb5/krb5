@@ -30,6 +30,8 @@ AC_CHECK_HEADERS(sys/param.h)
 AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(macsock.h)
 AC_CHECK_HEADERS(stdarg.h)
+AC_CHECK_HEADERS(stddef.h)
+AC_CHECK_HEADERS(xom.h)
 
 AC_FUNC_CHECK([setvbuf],AC_DEFINE(HAS_SETVBUF))
 dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)

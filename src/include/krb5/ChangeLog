@@ -1,4 +1,8 @@
 
+Thu Aug 31 11:38:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add checks for stddef.h and xom.h for use by GSSAPI-V2
+
+
 Tue Aug 29 13:28:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb.h - Add prototype for krb5_ser_db_context_init().
 
