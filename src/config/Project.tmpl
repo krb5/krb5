@@ -31,7 +31,7 @@
 #define ComErrLib -lcom_err
 #endif
 #ifndef PepsyFlags
-#define PepsyFlags -f -h0 -a -s
+#define PepsyFlags -f -h0 -a -s -C
 /* -h2 breaks pepsy, ARRGH! */
 #endif
 #ifndef PepsyCmd
@@ -68,6 +68,9 @@
 #endif
 #ifndef DesDefines
 #define DesDefines YouMustFigureOutYourDesDefines
+#endif
+#ifndef Krb5Root
+#define Krb5Root	/krb5
 #endif
 
 #ifndef PepsyTarget
@@ -199,6 +202,20 @@ lib/**/libname.a: objlist						@@\
 	$(LN) ../$(CURRENT_DIR)/lib/**/libname.a $(TOP)/lib/lib/**/libname.a
 #endif /* Krb5LibraryTarget */
 
+#ifndef Krb5InstallLibrary
+#define	Krb5InstallLibrary(libname,destdir)				@@\
+install:: lib/**/libname.a						@@\
+	$(RM) destdir/lib/**/libname.a					@@\
+	$(CP) lib/**/libname.a destdir/lib/**/libname.a
+#endif
+
+#ifndef Krb5InstallHeaders
+#define	Krb5InstallHeaders(headers,destdir)				@@\
+install:: headers							@@\
+	@set -x; for f in headers ; \					@@\
+	do $(INSTALL) -c $(INSTDATFLAGS) $$f destdir/$$f ; \		@@\
+	done
+#endif
 
 /*
  * Krb5InstallManPage - generate rules to install the indicated manual page,
@@ -395,6 +412,26 @@ P_STDARG=-DUseStdarg
 #else
 P_STDARG=-UUseStdarg
 #endif
+#if HasAnsiStdio
+P_ANSI_STDIO=-DHasAnsiStdio
+#else
+P_ANSI_STDIO=-UHasAnsiStdio
+#endif
+#if UseVoid
+P_VOID=-DUseVoid
+#else
+P_VOID=-UUseVoid
+#endif
+#if UseConst
+P_CONST=-DUseConst
+#else
+P_CONST=-UUseConst
+#endif
+#if UseVolatile
+P_VOLATILE=-DUseVolatile
+#else
+P_VOLATILE=-UUseVolatile
+#endif
 
 /*
  * Default Definitions.
@@ -416,8 +453,9 @@ P_STDARG=-UUseStdarg
          ZEPHDEFS = ZephyrDefines
          ZEPHLIBS = ZephyrLibs
 #endif
+         KRB5ROOT = Krb5Root
 
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) -DUnifdefRan
        DESDEFINES = DesDefines
           TOPLIBD = $(TOP)/lib
             OSLIB = os
@@ -460,3 +498,5 @@ P_STDARG=-UUseStdarg
     CLIENT_BINDIR = ClientBindir
  CLIENT_MANSUFFIX = ClientManSuffix
     CLIENT_MANDIR = ClientMandir
+      KRB5_LIBDIR = Krb5Libdir
+      KRB5_INCDIR = Krb5Incdir
