@@ -58,13 +58,14 @@ static krb5_error_code generate_authenticator PROTOTYPE((krb5_authenticator *,
 
 krb5_error_code
 krb5_mk_req_extended(ap_req_options, checksum, times, kdc_options, ccache,
-		     creds, outbuf)
+		     creds, authentp, outbuf)
 const krb5_flags ap_req_options;
 const krb5_checksum *checksum;
 const krb5_ticket_times *times;
 const krb5_flags kdc_options;
 krb5_ccache ccache;
 krb5_creds *creds;
+krb5_authenticator *authentp;
 krb5_data *outbuf;
 {
     krb5_error_code retval;
@@ -105,6 +106,15 @@ krb5_data *outbuf;
     if (retval = generate_authenticator(&authent, creds, checksum)) {
 	cleanup_ticket();
 	return retval;
+    }
+    if (authentp) {
+	    *authentp = authent;
+	    /* Null out these fields, to prevent pointer sharing problems 
+	     * The caller won't need these fields anyway, since they were
+	     * supplied by the caller
+	     */
+	    authentp->client = NULL;
+	    authentp->checksum = NULL; 
     }
     /* encode it before encrypting */
     retval = encode_krb5_authenticator(&authent, &scratch);
@@ -187,7 +197,5 @@ const krb5_checksum *cksum;
     authent->client = creds->client;
     authent->checksum = (krb5_checksum *)cksum;
 
-    /* cmsec is unsigned, time is signed, hence the cast */
-    return(krb5_ms_timeofday(&authent->ctime, 
-			     (krb5_int16 *)&authent->cmsec));
+    return(krb5_ms_timeofday(&authent->ctime, &authent->cmsec));
 }
