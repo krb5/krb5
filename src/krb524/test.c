@@ -180,7 +180,7 @@ void krb4_print_ticket(ticket, secret_key)
 
 void krb4_print_creds(creds, secret_key)
      CREDENTIALS *creds;
-     krb5_keyblock *secret_key'
+     krb5_keyblock *secret_key;
 {
      printf("Client: %s.%s@%s\n", creds->pname, creds->pinst,
 	    creds->realm);
