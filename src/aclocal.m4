@@ -389,7 +389,7 @@ CC="$ac_cv_prog_cc"
 AC_MSG_RESULT($CC)
 AC_PROG_CC
 # maybe add -Waggregate-return, or can we assume that actually works by now?
-extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wtraditional -Wcast-qual \
+extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
  -Wcast-align -Wconversion -Wshadow -pedantic"
 if test "$GCC" = yes ; then
   AC_MSG_RESULT(adding extra warning flags for gcc)

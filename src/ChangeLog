@@ -6,6 +6,8 @@
 	AI_ADDRCONFIG, and AI_NUMERICHOST.  This should be a reasonable
 	test for conformance to certain parts of RFC2553, giving us
 	reasonable generic sockaddr/hostname processing.
+	(WITH_CC): Don't use -Wtraditional, we're always assuming ANSI
+	mode now.
 
 2000-11-01  Tom Yu  <tlyu@mit.edu>
 
