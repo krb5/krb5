@@ -540,6 +540,8 @@ extern int krb5_max_cksum;		/* max entry in array */
 /* #define	AP_OPTS_RESERVED	0x00000002 */
 #define AP_OPTS_USE_SUBKEY      0x00000001
 
+#define AP_OPTS_WIRE_MASK	0xfffffff0
+
 /* definitions for ad_type fields. */
 #define	AD_TYPE_RESERVED	0x8000
 #define	AD_TYPE_EXTERNAL	0x4000

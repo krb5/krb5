@@ -1,3 +1,7 @@
+Thu Apr 27 21:36:01 1995  Chris Provenzano  (proven@mit.edu)
+
+        * krb5.h : Added mask AP_OPTS_WIRE_MASK.
+
 Thu Apr 27 18:27:36 1995 Keith Vetter (keithv@fusion.com)
 	
 	* Makefile.in: duplicate copying the profile.h file for the PC.
