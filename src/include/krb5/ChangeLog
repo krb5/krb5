@@ -1,3 +1,11 @@
+
+Tue Jun 27 16:12:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_proto.h - Change second argument of aprof_get... routines to be
+		const char *.
+	* configure.in, k5-config.h - Reinstate KRB5_PROVIDE_PROTOTYPES.  This
+		is needed for compilers which recognize prototypes but don't
+		set __STDC__ or _WINDOWS.
+
 Thu Jun 22 16:11:07 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* k5-config.h: remove definition for KRB5_PROVIDE_PROTOTYPES
