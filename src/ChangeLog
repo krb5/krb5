@@ -1,5 +1,9 @@
 Mon Jun 27 08:21:42 1994  Tom Yu  (tlyu at dragons-lair)
 
+	* aclocal.m4: fixes to do sane quoting of arguments before
+	recursing.  This allows options to be set with values containing
+	whitespace, for instance.
+
 	* configure.in (in all relevant subdirs): move invokations of
 	CONFIG_RULES around so that they preceed anything that even
 	vaguely resembles a compile test.  This is so that $CC will get
