@@ -403,9 +403,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    if (mech_type == GSS_C_NULL_OID) {
        default_mech = 1;
        if (cred->rfc_mech) {
-	   mech_type = gss_mech_krb5;
+	   mech_type = (gss_OID) gss_mech_krb5;
        } else if (cred->prerfc_mech) {
-	   mech_type = gss_mech_krb5_old;
+	   mech_type = (gss_OID) gss_mech_krb5_old;
        } else {
 	   err = 1;
        }
@@ -494,7 +494,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  goto fail;
 
       if (default_mech) {
-	 mech_type = gss_mech_krb5;
+	 mech_type = (gss_OID) gss_mech_krb5;
       }
 
       if (generic_gss_copy_oid(minor_status, mech_type, &ctx->mech_used)

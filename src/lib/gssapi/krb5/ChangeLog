@@ -1,3 +1,9 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* accept_sec_context.c acquire_cred.c import_sec_context.c
+	init_sec_context.c inq_cred.c: Cast const gss_OID to gss_OID for
+	gssapi functions which are not speced with const in the RFC.
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* ser_sctx.c (kg_oid_internalize): Do away with local variable

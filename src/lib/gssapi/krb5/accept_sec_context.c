@@ -526,7 +526,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-   ctx->mech_used = mech_used;
+   ctx->mech_used = (gss_OID) mech_used;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
    ctx->gss_flags = KG_IMPLFLAGS(gss_flags);
