@@ -1,3 +1,51 @@
+2001-01-23  Tom Yu  <tlyu@mit.edu>
+
+	* prot_common.c: New file; contains functions to encode/decode
+	string triples for principals.
+
+	* prot_kdc.c: New file; contains encoders and decoders
+	(eventually) for the KDC's use.
+
+	* Makefile.in (OBJS, SRCS): Add prot_common.o, prot_kdc.o.
+
+	* cr_auth_repl.c: KRB4_PUT{16,32} -> KRB4_PUT{16,32}BE.
+
+	* cr_ciph.c: Include prot.h.  KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* cr_err_repl.c: KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* cr_tkt.c: KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* decomp_tkt.c: krb_strnlen -> krb4int_strnlen.
+
+	* g_ad_tkt.c: krb_strnlen -> krb4int_strnlen.  KRB4_PUT32 ->
+	KRB4_PUT32BE.  Properly skip date while parsing error.
+
+	* g_in_tkt.c: krb_strnlen -> krb4int_strnlen.  KRB4_PUT32 ->
+	KRB4_PUT32BE.  Properly skip date while parsing error.
+
+	* g_phost.c: Changes from audit.  Actually bail out instead of
+	failing silently if h->h_name is too long.
+
+	* kname_parse.c: Changes from audit.  Check overrun per character
+	processed.
+
+	* mk_auth.c: krb_strnlen -> krb4int_strnlen.  KRB4_PUT32 ->
+	KRB4_PUT32BE.  Include prot.h.
+
+	* mk_err.c: KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* mk_priv.c: KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* mk_req.c: KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* mk_safe.c: KRB4_PUT32 -> KRB4_PUT32BE.
+
+	* rd_req.c: krb_strnlen -> krb4int_strnlen.
+
+	* strnlen.c: Rename to krb4int_strnlen.  Also include prot.h,
+	which is where strnlen is declared now.
+
 2001-01-18  Tom Yu  <tlyu@mit.edu>
 
 	* g_ad_tkt.c: Fix error packet parsing.
