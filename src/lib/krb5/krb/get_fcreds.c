@@ -33,10 +33,6 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include <stdio.h>
-#ifndef _WINSOCKAPI_
-#include <pwd.h>
-#include <netdb.h>
-#endif
 
 #define KRB5_DEFAULT_LIFE 60*60*8   /* 8 hours */
 /* helper function: convert flags to necessary KDC options */

@@ -24,18 +24,12 @@
  * convenience sendauth/recvauth functions
  */
 
-
 #define NEED_SOCKETS
 #include "k5-int.h"
-
 #include "com_err.h"
 #include <errno.h>
-
 #include <stdio.h>
 #include <string.h>
-#ifndef _WINSOCKAPI_
-#include <netinet/in.h>
-#endif
 
 extern krb5_flags	krb5_kdc_default_options;
 

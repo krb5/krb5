@@ -42,10 +42,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#ifndef _WINSOCKAPI_
-#include <netinet/in.h>
-#include <sys/socket.h>
-#endif
 
 static int krb_v4_recvauth();
 

@@ -3,8 +3,8 @@
  */
 
 #include <stdio.h>
-#include "com_err.h"
 #include "k5-int.h"
+#include "com_err.h"
 
 main(argc, argv)
 	int	argc;
@@ -15,7 +15,9 @@ main(argc, argv)
 	krb5_principal *tree, *p;
 	char *name;
 	krb5_error_code	retval;
+	krb5_context context;
 	
+	krb5_init_context(&context);
 	krb5_init_ets(context);
 	
 	if (argc < 3 && argc > 4) {

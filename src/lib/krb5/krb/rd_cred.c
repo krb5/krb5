@@ -57,14 +57,20 @@ krb5_rd_cred(context, inbuf, key, creds, sender_addr, recv_addr)
 	return retval;
     }
     
-#define cleanup_credmsg() {(void)krb5_xfree(credmsg->enc_part.ciphertext.data); (void)krb5_xfree(credmsg);}
+#define cleanup_credmsg() { \
+	krb5_xfree(credmsg->enc_part.ciphertext.data); \
+	krb5_xfree(credmsg); \
+  }
 
     if (!(scratch = (krb5_data *) malloc(sizeof(*scratch)))) {
 	cleanup_credmsg();
 	return ENOMEM;
     }
 
-#define cleanup_scratch() {(void)memset(scratch->data, 0, scratch->length); (void)krb5_xfree(scratch->data);}
+#define cleanup_scratch() { \
+	(void)memset(scratch->data, 0, scratch->length); \
+	krb5_xfree(scratch->data); \
+ }
 
     if (retval = encode_krb5_ticket(credmsg->tickets[0], &scratch)) {
 	cleanup_credmsg();
@@ -132,7 +138,7 @@ krb5_rd_cred(context, inbuf, key, creds, sender_addr, recv_addr)
     }
     cleanup_scratch();
 
-#define cleanup_mesg() {(void)krb5_xfree(credmsg_enc_part);}
+#define cleanup_mesg() {krb5_xfree(credmsg_enc_part);}
 
     if (retval = krb5_timeofday(context, &currenttime)) {
 	cleanup_mesg();

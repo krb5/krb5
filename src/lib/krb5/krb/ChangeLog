@@ -1,3 +1,14 @@
+Fri Mar 17 19:48:07 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (check-mac):  Add.
+	* compat_recv.c, get_fcreds.c, recvauth.c:  Eliminate Unix socket
+	#includes, which are now handled by k5-int.h (via k5-config.h).
+	* conv_princ.c:  Rename variable "comp" to another name; "comp"
+	apparently bothers the MPW compiler...
+	* rd_cred.c:  Avoid (void) casts of void functions, for MPW.
+	* t_walk_rtree.c:  Put com_err.h after k5_int for <sys/types> stuff.
+	(main):  Declare and initialize the krb5_context that's being
+	passed to everything.
 
 Fri Mar 10 10:58:59 1995  Chris Provenzano (proven@mit.edu)
 

@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -152,6 +151,7 @@ TEST_PROGS= t_walk_rtree
 check:: check-$(WHAT)
 
 check-unix:: $(TEST_PROGS)
+check-mac:: $(TEST_PROGS)
 
 check-windows::
 

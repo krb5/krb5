@@ -108,27 +108,27 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
     char *realm;
 {
      struct krb_convert *p;
-     krb5_data *comp;
+     krb5_data *compo;
      char *c;
 
      *name = *inst = '\0';
      switch (krb5_princ_size(context, princ)) {
      case 2:
 	  /* Check if this principal is listed in the table */
-	  comp = krb5_princ_component(context, princ, 0);
+	  compo = krb5_princ_component(context, princ, 0);
 	  p = sconv_list;
 	  while (p->v4_str) {
-	       if (strncmp(p->v5_str, comp->data, comp->length) == 0) {
+	       if (strncmp(p->v5_str, compo->data, compo->length) == 0) {
 		    /* It is, so set the new name now, and chop off */
 		    /* instance's domain name if requested */
 		    strcpy(name, p->v4_str);
 		    if (p->flags & DO_REALM_CONVERSION) {
-			 comp = krb5_princ_component(context, princ, 1);
-			 c = strnchr(comp->data, '.', comp->length);
-			 if (!c || (c - comp->data) > INST_SZ - 1)
+			 compo = krb5_princ_component(context, princ, 1);
+			 c = strnchr(compo->data, '.', compo->length);
+			 if (!c || (c - compo->data) > INST_SZ - 1)
 			      return KRB5_INVALID_PRINCIPAL;
-			 strncpy(inst, comp->data, c - comp->data);
-			 inst[c - comp->data] = '\0';
+			 strncpy(inst, compo->data, c - compo->data);
+			 inst[c - compo->data] = '\0';
 		    }
 		    break;
 	       }
@@ -137,32 +137,32 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	  /* If inst isn't set, the service isn't listed in the table, */
 	  /* so just copy it. */
 	  if (*inst == '\0') {
-	       comp = krb5_princ_component(context, princ, 1);
-	       if (comp->length >= INST_SZ - 1)
+	       compo = krb5_princ_component(context, princ, 1);
+	       if (compo->length >= INST_SZ - 1)
 		    return KRB5_INVALID_PRINCIPAL;
-	       strncpy(inst, comp->data, comp->length);
-	       inst[comp->length] = '\0';
+	       strncpy(inst, compo->data, compo->length);
+	       inst[compo->length] = '\0';
 	  }
 	  /* fall through */
      case 1:
 	  /* name may have been set above; otherwise, just copy it */
 	  if (*name == '\0') {
-	       comp = krb5_princ_component(context, princ, 0);
-	       if (comp->length >= ANAME_SZ)
+	       compo = krb5_princ_component(context, princ, 0);
+	       if (compo->length >= ANAME_SZ)
 		    return KRB5_INVALID_PRINCIPAL;
-	       strncpy(name, comp->data, comp->length);
-	       name[comp->length] = '\0';
+	       strncpy(name, compo->data, compo->length);
+	       name[compo->length] = '\0';
 	  }
 	  break;
      default:
 	  return KRB5_INVALID_PRINCIPAL;
      }
 
-     comp = krb5_princ_realm(context, princ);
-     if (comp->length > REALM_SZ - 1)
+     compo = krb5_princ_realm(context, princ);
+     if (compo->length > REALM_SZ - 1)
 	  return KRB5_INVALID_PRINCIPAL;
-     strncpy(realm, comp->data, comp->length);
-     realm[comp->length] = '\0';
+     strncpy(realm, compo->data, compo->length);
+     realm[compo->length] = '\0';
 
      return 0;
 }
