@@ -33,10 +33,10 @@
 #endif
 
 krb5_error_code INTERFACE
-krb5_auth_con_genaddrs(context, auth_context, fd, flags)
+krb5_auth_con_genaddrs(context, auth_context, infd, flags)
     krb5_context 	  context;
     krb5_auth_context 	  auth_context;
-    SOCKET			  	fd;
+    int				  	infd;
     int					flags;
 {
     krb5_error_code 	  retval;
@@ -44,6 +44,7 @@ krb5_auth_con_genaddrs(context, auth_context, fd, flags)
     krb5_address	* lport;
     krb5_address	* raddr;
     krb5_address	* rport;
+    SOCKET		fd = (SOCKET) infd;
 
 #ifdef KRB5_USE_INET
     struct sockaddr_in lsaddr, rsaddr;

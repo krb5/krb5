@@ -1,3 +1,9 @@
+Mon Sep 11 17:46:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* genaddrs.c (krb5_auth_con_genaddrs): Replace function
+		declaration back to int instead of SOCKET due to prototype
+		mismatching. 
+
 Sun Sep 10 12:00:00 1995  James Mattly  <mattly@fusion.com>
 
 	* ustime.c: use the version of getTimeZoneOffset in :os:crypto: for
