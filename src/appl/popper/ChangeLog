@@ -1,5 +1,7 @@
 Tue Aug  9 16:50:08 1994  Tom Yu  (tlyu@dragons-lair)
 
+	* configure.in: check for dbm as well as ndbm
+
 	* pop_init.c: kill static version string that depended on ANSI
 	string splicing
 
