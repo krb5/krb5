@@ -1,3 +1,9 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Change AC_CONST to AC_C_CONST, AC_HEADER_EGREP to
+	AC_EGREP_HEADER, AC_HAVE_HEADERS to AC_CHECK_HEADERS. Updates to
+	autoconf 2 namespace.
+
 2000-07-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* et_c.awk: Actually define NOARGS as needed. Add prototype for
