@@ -1,3 +1,11 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Update to autoconf 2 macro names:
+	AC_FORK->AC_FUNC_VFORK, AC_CONST->AC_C_CONST, AC_HEADER_CHECK ->
+	AC_CHECK_HEADER. In addition, conditionally use internal
+	AC_PROG_ECHO_N (autoconf 2.12) or _AC_PROG_ECHO (autoconf 2.49)
+	depending on which is defined.
+
 2000-10-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* login.c (k5_get_password): Declare second argument as unsigned

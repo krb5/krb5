@@ -66,7 +66,7 @@ AC_SUBST(LOGINLIBS)
 AC_SUBST(V4RCP)
 AC_SUBST(V4RCPO)
 dnl
-AC_VFORK
+AC_FUNC_VFORK
 AC_TYPE_MODE_T
 AC_CHECK_FUNCS(isatty inet_aton gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes rmufile)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h krb4-proto.h sys/ioctl_compat.h paths.h arpa/nameser.h)
@@ -77,13 +77,14 @@ CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT
 CHECK_WAIT_TYPE
-AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
+AC_CHECK_HEADER(termios.h,AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
 CHECK_UTMP
 dnl
 dnl Check for where the BSD rlogin, rcp, and rsh programs live.
 dnl
 save_path=$PATH
-AC_PROG_ECHO_N
+ifdef([_AC_PROG_ECHO], [_AC_PROG_ECHO])
+ifdef([AC_PROG_ECHO_N], [AC_PROG_ECHO_N])
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 [PATH=/usr/athena/bin:/bin:/usr/bin:/usr/bsd:/usr/ucb],
@@ -92,7 +93,8 @@ AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
 AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
 AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
 PATH=$save_path
-AC_PROG_ECHO_N
+ifdef([_AC_PROG_ECHO], [_AC_PROG_ECHO])
+ifdef([AC_PROG_ECHO_N], [AC_PROG_ECHO_N])
 dnl
 dnl
 AC_MSG_CHECKING([streams interface])
@@ -167,7 +169,7 @@ dnl
 KRB5_CHECK_PROTOS
 dnl
 ADD_DEF(-DKERBEROS)
-AC_CONST
+AC_C_CONST
 if test "$krb5_cv_build_krb4_libs" = yes; then
 	AC_DEFINE(HAVE_KRB_GET_ERR_TEXT)
 	AC_DEFINE(HAVE_KRB_SAVE_CREDENTIALS)
