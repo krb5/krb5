@@ -1,3 +1,9 @@
+2000-09-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (check-unix): Build and exectute t_cc.
+
+	* t_cc.c: Test harness for memory, stdio and file caches. 
+
 2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
 
 	* cc_file.c, cc_stdio.c: Remove unused krb5_[fs]cc_default_name()
