@@ -74,8 +74,6 @@ extern krb5_checksum_entry
  **********************************************************************
  */
 
-#include <k5-config.h>
-
 /* Data structure for MD4 (Message Digest) computation */
 typedef struct {
   krb5_ui_4 i[2];			/* number of _bits_ handled mod 2^64 */

@@ -1,4 +1,8 @@
 
+Thu Jul 27 15:22:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* rsa-md4.h - Don't include k5-config.h.  No longer present or needed.
+
+
 Fri Jul 7 16:13:28 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add t_cksum under unix only.
 	* configure.in - Define MD4_K5BETA_COMPAT to select compatability for
