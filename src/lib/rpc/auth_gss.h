@@ -110,6 +110,7 @@ struct rpc_gss_init_res {
 #define MAXSEQ		0x80000000
 
 /* Prototypes. */
+bool_t	xdr_rpc_gss_buf		(XDR *xdrs, gss_buffer_t, u_int maxsize);
 bool_t	xdr_rpc_gss_cred	(XDR *xdrs, struct rpc_gss_cred *p);
 bool_t	xdr_rpc_gss_init_args	(XDR *xdrs, gss_buffer_desc *p);
 bool_t	xdr_rpc_gss_init_res	(XDR *xdrs, struct rpc_gss_init_res *p);

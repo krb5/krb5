@@ -1,3 +1,21 @@
+2004-06-18  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gss.h: Add prototype for xdr_rpc_gss_buf.
+
+	* authgss_prot.c (xdr_rpc_gss_buf): New function.
+	(xdr_rpc_gss_cred, xdr_rpc_gss_init_args, xdr_rpc_gss_init_res):
+	(xdr_rpc_gss_wrap_data, xdr_rpc_gss_unwrap_data): Use
+	xdr_rpc_gss_buf, to avoid passing a (size_t *) to a xdr_bytes(),
+	which expects (u_int *).
+	(xdr_rpc_gss_wrap_data): Use tmplen to avoid passing (size_t *) to
+	xdr_u_int.
+
+	* libgssrpc.exports:
+	* rename.h: Add xdr_rpc_gss_buf.
+
+	* xdr.c (xdr_enum): Fix (kind of) for 64-bit.  Still inherently
+	bogus, due to casting of (enum foo *) to (enum_t *) by callers.
+
 2004-06-17  Tom Yu  <tlyu@mit.edu>
 
 	* libgssrpc.exports: Update.

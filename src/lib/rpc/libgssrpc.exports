@@ -117,6 +117,7 @@ gssrpc_xdr_rejected_reply
 gssrpc_xdr_replymsg
 gssrpc_xdr_rmtcall_args
 gssrpc_xdr_rmtcallres
+gssrpc_xdr_rpc_gss_buf
 gssrpc_xdr_rpc_gss_cred
 gssrpc_xdr_rpc_gss_data
 gssrpc_xdr_rpc_gss_init_args

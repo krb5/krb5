@@ -347,6 +347,8 @@ xdr_enum(xdrs, ep)
 	 */
 	if (sizeof (enum sizecheck) == sizeof (long)) {
 		return (xdr_long(xdrs, (long *)ep));
+	} else if (sizeof (enum sizecheck) == sizeof (int)) {
+		return (xdr_int(xdrs, (int *)ep));
 	} else if (sizeof (enum sizecheck) == sizeof (short)) {
 		return (xdr_short(xdrs, (short *)ep));
 	} else {

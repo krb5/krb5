@@ -82,6 +82,7 @@
 
 /* auth_gss.h */
 
+#define xdr_rpc_gss_buf		gssrpc_xdr_rpc_gss_buf
 #define xdr_rpc_gss_cred	gssrpc_xdr_rpc_gss_cred
 #define xdr_rpc_gss_init_args	gssrpc_xdr_rpc_gss_init_args
 #define xdr_rpc_gss_init_res	gssrpc_xdr_rpc_gss_init_res
