@@ -232,11 +232,16 @@ short OpenOurRF(void)
 OSErr OpenResolver(char *fileName)
 {
 	short 			refnum;
+	short			saveResFile;
 	OSErr 			rc;
 	
 	if (gDNRCodePtr != nil)
 		/* resolver already loaded in */
 		return(noErr);
+		
+	/* Remember the resource file so that we do not switch current res file
+	   under the caller */
+	saveResFile = CurResFile ();
 		
 	/* open the MacTCP driver to get DNR resources. Search for it based on
 	   creator & type rather than simply file name */	
@@ -250,6 +255,7 @@ OSErr OpenResolver(char *fileName)
 	if (gDNRCodeHndl == nil)
 	{
 		/* can't open DNR */
+		UseResFile (saveResFile);
 		return(ResError());
 	}
 	
@@ -276,6 +282,8 @@ OSErr OpenResolver(char *fileName)
 		DisposeHandle(gDNRCodeHndl);
 		gDNRCodePtr = nil;
 	}
+
+	UseResFile (saveResFile);
 	return(rc);
 }
 
