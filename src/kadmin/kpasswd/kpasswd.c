@@ -75,111 +75,7 @@ struct sockaddr_in local_sin, remote_sin;
 
 krb5_creds my_creds;
 
-struct v4_pwd_keyproc_arg {
-    krb5_principal who;
-    krb5_data password;
-};
-
 extern char *krb5_default_pwd_prompt1;
-
-static krb5_error_code
-v4_pwd_keyproc(DECLARG(const krb5_keytype, type),
-	    DECLARG(krb5_keyblock **, key),
-            DECLARG(krb5_const_pointer, keyseed),
-            DECLARG(krb5_pa_data **,padata))
-OLDDECLARG(const krb5_keytype, type)
-OLDDECLARG(krb5_keyblock **, key)
-OLDDECLARG(krb5_const_pointer, keyseed)
-OLDDECLARG(krb5_pa_data **, padata)
-{
-    krb5_data salt;
-    krb5_error_code retval;
-#ifdef unicos61
-    struct v4_pwd_keyproc_arg *arg;
-#else
-    const struct v4_pwd_keyproc_arg *arg;
-#endif	/* unicos61 */
-    struct v4_pwd_keyproc_arg arg2;
-    char pwdbuf[BUFSIZ];
-    int pwsize = sizeof(pwdbuf);
-    char f_salt = 0, use_salt = 0;
-    krb5_keyblock *my_keyblock;
-    char v4_keyptr[8];
-
-    if (!valid_keytype(type))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
-
-    if (padata) {
-        krb5_pa_data **ptr;
-
-        for (ptr = padata; *ptr; ptr++)
-        {
-            if ((*ptr)->pa_type == KRB5_PADATA_PW_SALT)
-            {
-                /* use KDC-supplied salt, instead of default */
-                salt.length = (*ptr)->length;
-                salt.data = (char *)(*ptr)->contents;
-		use_salt = 1;
-                break;
-            }
-        }
-    }
-#ifdef unicos61
-    arg = (struct v4_pwd_keyproc_arg *) keyseed;
-#else
-    arg = (const struct v4_pwd_keyproc_arg *) keyseed;
-#endif	/* unicos61 */
-    if (!use_salt) {
-	/* need to use flattened principal */
-	if (retval = krb5_principal2salt(arg->who, &salt))
-	    return(retval);
-	f_salt = 1;
-    }
-
-    if (!arg->password.length) {
-	if (retval = krb5_read_password(krb5_default_pwd_prompt1,
-					0,
-					pwdbuf, &pwsize)) {
-	    if (f_salt) xfree(salt.data);
-	    return retval;
-	}
-
-	arg2 = *arg;
-        arg2.password.length = pwsize;
-        arg2.password.data = pwdbuf;
-	arg = &arg2;
-    }
-    my_keyblock = (krb5_keyblock *)malloc(sizeof(**key));
-    if (!my_keyblock) {
-	if (f_salt) xfree(salt.data);
-	if (arg != (struct v4_pwd_keyproc_arg *) keyseed) 
-		memset((char *) arg->password.data, 0, arg->password.length);
-	return(ENOMEM);
-    }    
-
-    *key = my_keyblock;
-    (*my_keyblock).keytype = type;
-    (*my_keyblock).length = 8;
-
-    if (retval = des_string_to_key(arg->password.data,
-				   v4_keyptr)) {
-	xfree(*key);
-	if (f_salt) xfree(salt.data);
-	if (arg != (struct v4_pwd_keyproc_arg *) keyseed) 
-		memset((char *)arg->password.data,0,arg->password.length);
-	return(retval);
-    }
-
-    (*my_keyblock).contents = (krb5_octet *)calloc(1,(*my_keyblock).length);
-    if (!(*my_keyblock).contents) return(ENOMEM);
-    memcpy((*my_keyblock).contents,(krb5_octet *) v4_keyptr,
-		(*my_keyblock).length);
-
-    if (f_salt) xfree(salt.data);
-    if (arg != (struct v4_pwd_keyproc_arg *) keyseed) 
-	memset((char *)arg->password.data,0,arg->password.length);
-    return(0);
-}
 
 main(argc,argv)
   int argc;
@@ -661,8 +557,6 @@ OLDDECLARG(krb5_principal, client)
     
     krb5_address **my_addresses;
 
-    struct v4_pwd_keyproc_arg keyseed;
-
     char *client_name;
     char local_realm[255];
     krb5_error_code retval;
@@ -725,43 +619,15 @@ OLDDECLARG(krb5_principal, client)
 					cache,
 					&my_creds,
 					0  ))) {
-	keyseed.password.data = (char *) old_password;
-	if (old_password)
-	    keyseed.password.length = strlen(old_password);
-	else
-	    keyseed.password.length = 0;
-	keyseed.who = my_creds.client;
-/*
-	if ( retval != KDC_ERR_KEY_EXPIRED ) {
-		 fprintf(stderr,"\nUnable to Get Initial Credentials : %s %d\n",
-                        error_message(retval),retval);
-		 return(retval);
-	}
-*/
-        if ((retval = krb5_get_in_tkt(
-			0,      /* options */
-			my_addresses,
-                        KRB5_PADATA_ENC_TIMESTAMP,	/* do preauth */
-			ETYPE_DES_CBC_CRC,
-			KEYTYPE_DES,
-			v4_pwd_keyproc,
-			(krb5_pointer) &keyseed,
-			krb5_kdc_rep_decrypt_proc,
-			0,
-			&my_creds,
-			cache,
-			0 ))) {	
-	    fprintf(stderr, "\nUnable to Get Initial Credentials : %s %d\n",
-			error_message(retval),retval);
-	    return(retval);
-	}
+	fprintf(stderr, "\nUnable to Get Initial Credentials : %s %d\n",
+		error_message(retval),retval);
     }
 
 	/* Do NOT Forget to zap password  */
     memset((char *) old_password, 0, old_pwsize);
     free(old_password);
     memset((char *) pword, 0, sizeof(pword));
-    return(0);
+    return(retval);
 }
 
 #ifdef MACH_PASS /* Machine-generated Passwords */
