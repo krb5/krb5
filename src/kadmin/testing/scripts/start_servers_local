@@ -8,6 +8,7 @@ DUMMY=${INITDB=$STESTDIR/scripts/init_db}
 DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
 DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 DUMMY=${STOP_SERVERS_LOCAL=$STESTDIR/scripts/stop_servers_local}
+DUMMY=${KRB5RCACHEDIR=$TESTDIR} ; export KRB5RCACHEDIR
 
 if [ -d /usr/tmp ]; then
 	usrtmp=/usr/tmp

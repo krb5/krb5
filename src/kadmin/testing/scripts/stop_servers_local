@@ -2,6 +2,7 @@
 
 DUMMY=${TESTDIR=$TOP/testing}
 DUMMY=${RESTORE_FILES=$TESTDIR/scripts/restore_files.sh}
+DUMMY=${KRB5RCACHEDIR=$TESTDIR}
 
 v4files=false
 while [ $# -gt 0 ] ; do
@@ -40,7 +41,10 @@ done
 
 # Destroy the kdc replay cache so we don't lose if we try to run the
 # KDC as another unix user.
-rm -f /usr/tmp/krb5kdc_rcache
+if test "x$USER" = x ; then
+  USER=$LOGNAME
+fi
+rm -f $KRB5RCACHEDIR/krb5kdc_rcache.$USER
 
 # restore saved system config files
 if $v4files; then
