@@ -182,6 +182,10 @@ krb5_error_code krb5_build_principal_va
     PROTOTYPE((krb5_principal *, int, const char *, va_list));
 #endif
 
+krb5_error_code krb5_425_conv_principal
+	PROTOTYPE((const char *name, const char *instance, const char *realm,
+		   krb5_principal *princ));
+
 /* libkt.spec */
 krb5_error_code krb5_kt_register
 	PROTOTYPE((krb5_kt_ops * ));
@@ -420,6 +424,21 @@ krb5_error_code krb5_recvauth PROTOTYPE((krb5_pointer,
 					 krb5_authenticator **));
 
 
+#ifdef NARROW_PROTOTYPES
+krb5_error_code krb5_walk_realm_tree
+    PROTOTYPE((const krb5_data *,
+	       const krb5_data *,
+	       krb5_principal **,
+	       char));
+#else
+krb5_error_code krb5_walk_realm_tree
+    PROTOTYPE((const krb5_data *,
+	       const krb5_data *,
+	       krb5_principal **,
+	       int));
+#endif
+
+#define KRB5_REALM_BRANCH_CHAR '.'
 
 #include <krb5/narrow.h>
 
