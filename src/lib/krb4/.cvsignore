@@ -3,3 +3,4 @@ krb_err.c
 kadm_err.c
 kadm_err.h
 krb_err_txt.c
+lib*.so.*

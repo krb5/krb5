@@ -9,3 +9,5 @@ test1.c
 test2.h
 test2.c
 test_et
+lib*.so.*
+et_lex.lex.c
