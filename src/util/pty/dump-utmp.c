@@ -89,11 +89,7 @@ print_ut(int all, const struct utmp *u)
 	return;
 #endif
 
-#ifdef HAVE_STRUCT_UTMP_UT_USER
-    lu = sizeof(u->ut_user);
-#else
     lu = sizeof(u->ut_name);
-#endif
     ll = sizeof(u->ut_line);
     printf("%-*.*s:", lu, lu, u->ut_name);
     printf("%-*.*s:", ll, ll, u->ut_line);
