@@ -41,8 +41,8 @@ request kadmin_cpw, "Change password",
 request kadmin_getprinc, "Get principal",
 	get_principal, getprinc;
 
-request kadmin_getprincs, "Get principals",
-	get_principals, getprincs;
+request kadmin_getprincs, "List principals",
+	list_principals, listprincs, get_principals, getprincs;
 
 request kadmin_addpol, "Add policy",
 	add_policy, addpol;
@@ -56,8 +56,8 @@ request kadmin_delpol, "Delete policy",
 request kadmin_getpol, "Get policy",
 	get_policy, getpol;
 
-request kadmin_getpols, "Get policies",
-	get_policies, getpols;
+request kadmin_getpols, "List policies",
+	list_policies, listpols, get_policies, getpols;
 
 request kadmin_getprivs, "Get privileges",
 	get_privs, getprivs;
