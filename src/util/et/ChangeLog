@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* et_h.awk: It's "const struct error_table et_" in the c file, so
+	it's now const here too.
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install-headers): build compile_et so it can be used later
