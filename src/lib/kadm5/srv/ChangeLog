@@ -1,7 +1,7 @@
 Fri Oct  4 08:40:21 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* svr_principal.c (kadm5_get_principal): Do not assume malloc(0)
-		returns non-NULL. [krb5-admin/46]
+		returns non-NULL. [krb5-admin/29]
 
 Fri Aug  2 14:07:31 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
 
