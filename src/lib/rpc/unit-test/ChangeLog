@@ -1,3 +1,8 @@
+2001-07-09  Ezra Peisach  <epeisach@mit.edu>
+
+	* rpc_test_clnt.c, rpc_test_svc.c: Include string.h for memset
+	prototype.
+
 2001-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* rpc_test_svc.c: Change rpc_test_prog_1 to

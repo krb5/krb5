@@ -1,5 +1,6 @@
 #include "rpc_test.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h> /* getenv, exit */
 #include <sys/types.h>
 #include <syslog.h>
