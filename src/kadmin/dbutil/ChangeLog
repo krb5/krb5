@@ -1,3 +1,11 @@
+Thu Jul 17 12:25:41 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* dump.c (process_k5beta_record): Change variables from char to
+		krb5_octet to match types in krb5_key_data.
+
+	* ovload.c (process_ov_principal): Change "more" variable to
+		krb5_boolean as argument to krb5_db_get_principal. 
+
 Wed Mar 12 01:19:51 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* loadv4.c (argv): Check to see if the global_param's stash file

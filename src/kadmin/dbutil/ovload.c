@@ -106,7 +106,8 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop, pol_db)
     krb5_db_entry	    kdb;
     char		    *current;
     char		    *cp;
-    int			    tmp, x, i, one, more;
+    int			    tmp, x, i, one;
+    krb5_boolean	    more;
     char		    line[LINESIZE];
 
     if (fgets(line, LINESIZE, filep) == (char *) NULL) {
@@ -180,7 +181,7 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop, pol_db)
 
     tl_data.tl_data_type = KRB5_TL_KADM_DATA;
     tl_data.tl_data_length = xdr_getpos(&xdrs);
-    tl_data.tl_data_contents = xdralloc_getdata(&xdrs);
+    tl_data.tl_data_contents = (krb5_octet *) xdralloc_getdata(&xdrs);
 
     one = 1;
     ret = krb5_db_get_principal(kcontext, princ, &kdb, &one,

@@ -1262,8 +1262,8 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop, pol_db)
 	      /* this really does look like an old key, so drop and swap */
 	      /* the *new* length is 2 bytes, LSB first, sigh. */
 	      size_t shortlen = pkey->key_data_length[0]-4+2;
-	      char *shortcopy = (krb5_octet *) malloc(shortlen);
-	      char *origdata = pkey->key_data_contents[0];
+	      krb5_octet *shortcopy = (krb5_octet *) malloc(shortlen);
+	      krb5_octet *origdata = pkey->key_data_contents[0];
 	      shortcopy[0] = origdata[3];
 	      shortcopy[1] = origdata[2];
 	      memcpy(shortcopy+2,origdata+4,shortlen-2);
@@ -1332,8 +1332,8 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop, pol_db)
 	      /* this really does look like an old key, so drop and swap */
 	      /* the *new* length is 2 bytes, LSB first, sigh. */
 	      size_t shortlen = akey->key_data_length[0]-4+2;
-	      char *shortcopy = (krb5_octet *) malloc(shortlen);
-	      char *origdata = akey->key_data_contents[0];
+	      krb5_octet *shortcopy = (krb5_octet *) malloc(shortlen);
+	      krb5_octet *origdata = akey->key_data_contents[0];
 	      shortcopy[0] = origdata[3];
 	      shortcopy[1] = origdata[2];
 	      memcpy(shortcopy+2,origdata+4,shortlen-2);
