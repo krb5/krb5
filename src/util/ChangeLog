@@ -1,5 +1,8 @@
 Fri Jun 16 14:05:03 1995  Tom Yu  (tlyu@dragons-lair)
 
+	* libupdate.sh: oops they were right to begin with; hack
+		aclocal.m4 instead.
+
 	* libupdate.sh: ARADD and ARCHIVE were backwards
 
 Thu Jun 15 18:14:46 EDT 1995	Paul Park	(pjpark@mit.edu)

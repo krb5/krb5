@@ -9,11 +9,11 @@ ARADD="@ARADD@"
 ARCHIVE="@ARCHIVE@"
 
 force=
-arcmd="$ARCHIVE"
+arcmd="$ARADD"
 if test "$1" = "--force" 
 then
 	force=yes
-	arcmd="$ARADD"
+	arcmd="$ARCHIVE"
 	shift
 fi
 
