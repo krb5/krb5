@@ -36,7 +36,7 @@ int krb5_seteuid( euid)
   return  (seteuid(euid)) ;
 #else
 # if defined(HAVE_SETRESUID)
-    return (setresuid(getuid(), euid, getuid())) ;
+    return (setresuid(getuid(), euid, geteuid())) ;
 # else
 #  if defined(HAVE_SETREUID)
     return setreuid(geteuid(), euid); 

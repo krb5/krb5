@@ -1,3 +1,9 @@
+Sun May 19 23:28:22 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* seteuid.c (krb5_seteuid): set saved uid to current effective
+ 	uid, not current real uid, so we can get back, while calling
+ 	setresuid().
+
 Sat May 18 04:41:55 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in:  Check for functions needed to seteuid.
