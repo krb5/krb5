@@ -16,6 +16,26 @@
 /*
  * des_cbc_encrypt - {en,de}crypt a stream in CBC mode
  */
+
+/*
+ * This routine performs DES cipher-block-chaining operation, either
+ * encrypting from cleartext to ciphertext, if encrypt != 0 or
+ * decrypting from ciphertext to cleartext, if encrypt == 0.
+ *
+ * The key schedule is passed as an arg, as well as the cleartext or
+ * ciphertext.  The cleartext and ciphertext should be in host order.
+ *
+ * NOTE-- the output is ALWAYS an multiple of 8 bytes long.  If not
+ * enough space was provided, your program will get trashed.
+ *
+ * For encryption, the cleartext string is null padded, at the end, to
+ * an integral multiple of eight bytes.
+ *
+ * For decryption, the ciphertext will be used in integral multiples
+ * of 8 bytes, but only the first "length" bytes returned into the
+ * cleartext.
+ */
+
 int
 mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	des_cblock *in;

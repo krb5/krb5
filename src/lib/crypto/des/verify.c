@@ -88,6 +88,16 @@ unsigned char cipher3[64] = {
 unsigned char checksum[8] = {
     0x58,0xd2,0xe7,0x7e,0x86,0x06,0x27,0x33
 };
+
+unsigned char zresult[8] = {
+    0x8c, 0xa6, 0x4d, 0xe9, 0xc1, 0xb1, 0x23, 0xa7
+};
+
+unsigned char mresult[8] = {
+    0xa3, 0x80, 0xe0, 0x2a, 0x6b, 0xe5, 0x46, 0x96
+};
+
+    
 /*
  * Can also add :
  * plaintext = 0, key = 0, cipher = 0x8ca64de9c1b123a7 (or is it a 1?)
@@ -143,7 +153,7 @@ main(argc,argv)
     /* do some initialisation */
     initialize_krb5_error_table(); 
 
-    eblock.crypto_entry = &mit_des_cryptosystem_entry;
+    krb5_use_cstype(&eblock, ETYPE_DES_CBC_CRC);
     keyblock.keytype = KEYTYPE_DES;
     keyblock.length = sizeof (mit_des_cblock);
 
@@ -168,6 +178,10 @@ main(argc,argv)
 	    com_err("des verify", retval, "can't finish zero key");
 	    exit(-1);
 	}
+	if ( memcmp((char *)cipher_text, (char *)zresult, 8) ) {
+	    printf("verify: error in zero key test\n");
+	    exit(-1);
+	}
 	exit(0);
     }
 
@@ -179,7 +193,8 @@ main(argc,argv)
 	    exit(-1);
 	}
 	printf("plaintext = 0x00 00 00 00 00 00 00 40, ");
-	printf("key = 0, cipher = 0x??\n");
+	printf("key = 0x80 01 01 01 01 01 01 01\n");
+	printf("	cipher = 0xa380e02a6be54696\n");
 	do_encrypt(input,cipher_text);
 	printf("\tcipher  = (low to high bytes)\n\t\t");
 	for (j = 0; j<=7; j++) {
@@ -189,6 +204,10 @@ main(argc,argv)
 	do_decrypt(output,cipher_text);
 	if (retval = krb5_finish_key(&eblock)) {
 	    com_err("des verify", retval, "can't finish key3");
+	    exit(-1);
+	}
+	if ( memcmp((char *)cipher_text, (char *)mresult, 8) ) {
+	    printf("verify: error in msb test\n");
 	    exit(-1);
 	}
 	exit(0);
@@ -392,3 +411,17 @@ do_decrypt(in,out)
 	}
     }
 }
+
+/*
+ * Fake out the DES library, for the purposes of testing.
+ */
+
+#include "des.h"
+
+int
+mit_des_is_weak_key(key)
+    mit_des_cblock key;
+{
+    return 0;				/* fake it out for testing */
+}
+

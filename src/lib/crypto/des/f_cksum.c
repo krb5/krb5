@@ -13,6 +13,21 @@
 #include "des.h"
 #include "f_tables.h"
 
+/*
+ * This routine performs DES cipher-block-chaining checksum operation,
+ * a.k.a.  Message Authentication Code.  It ALWAYS encrypts from input
+ * to a single 64 bit output MAC checksum.
+ *
+ * The key schedule is passed as an arg, as well as the cleartext or
+ * ciphertext. The cleartext and ciphertext should be in host order.
+ *
+ * NOTE-- the output is ALWAYS 8 bytes long.  If not enough space was
+ * provided, your program will get trashed.
+ *
+ * The input is null padded, at the end (highest addr), to an integral
+ * multiple of eight bytes.
+ */
+
 unsigned long
 mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	des_cblock *in;
