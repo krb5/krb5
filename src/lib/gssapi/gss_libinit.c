@@ -17,6 +17,11 @@ MAKE_FINI_FUNCTION(gssint_lib_fini);
 int gssint_lib_init(void)
 {
     int err;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("gssint_lib_init\n");
+#endif
+
 #if !USE_BUNDLE_ERROR_STRINGS
     add_error_table(&et_k5g_error_table);
     add_error_table(&et_ggss_error_table);
@@ -35,8 +40,15 @@ int gssint_lib_init(void)
 
 void gssint_lib_fini(void)
 {
-    if (!INITIALIZER_RAN(gssint_lib_init) || PROGRAM_EXITING())
+    if (!INITIALIZER_RAN(gssint_lib_init) || PROGRAM_EXITING()) {
+#ifdef SHOW_INITFINI_FUNCS
+	printf("gssint_lib_fini: skipping\n");
+#endif
 	return;
+    }
+#ifdef SHOW_INITFINI_FUNCS
+    printf("gssint_lib_fini\n");
+#endif
 #if !USE_BUNDLE_ERROR_STRINGS
     remove_error_table(&et_k5g_error_table);
     remove_error_table(&et_ggss_error_table);

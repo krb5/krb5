@@ -1,3 +1,8 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss_libinit.c (gssint_lib_init, gssint_lib_fini)
+	[SHOW_INITFINI_FUNCS]: Print tracing messages.
+
 2005-02-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for xom.h.  Set include_xom to a C include
