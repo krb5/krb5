@@ -1,5 +1,8 @@
 Tue Nov 12 22:07:33 1996  Tom Yu  <tlyu@mit.edu>
 
+	* init_ctx.c (krb5_init_context): Oops. Initialize kt_default_name
+ 	to NULL.
+	
 	* init_ctx.c (krb5_free_context): Free kt_default_name if it's
 	non-NULL.
 
