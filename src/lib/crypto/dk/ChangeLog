@@ -1,3 +1,12 @@
+2004-02-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* dk_decrypt.c (krb5_dk_decrypt_maybe_trunc_hmac): New argument
+	IVEC_MODE.  If clear, same old behavior.  If set, copy out next
+	to last block for CTS.
+	(krb5_dk_decrypt, krb5int_aes_dk_decrypt): Pass extra argument.
+	* dk_encrypt.c (krb5int_aes_dk_encrypt): For IV, copy out next to
+	last block for CTS.
+
 2003-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* dk_encrypt.c (krb5int_aes_dk_encrypt): Set output length
