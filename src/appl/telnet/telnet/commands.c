@@ -1689,10 +1689,9 @@ env_init()
 	extern char **environ;
 	register char **epp, *cp;
 	register struct env_lst *ep;
-	extern char *index();
 
 	for (epp = environ; *epp; epp++) {
-		if (cp = index(*epp, '=')) {
+		if (cp = strchr(*epp, '=')) {
 			*cp = '\0';
 			ep = env_define((unsigned char *)*epp,
 					(unsigned char *)cp+1);
@@ -1709,7 +1708,7 @@ env_init()
 	    && ((*ep->value == ':')
 	        || (strncmp((char *)ep->value, "unix:", 5) == 0))) {
 		char hbuf[256+1];
-		char *cp2 = index((char *)ep->value, ':');
+		char *cp2 = strchr((char *)ep->value, ':');
 
 		gethostname(hbuf, 256);
 		hbuf[256] = '\0';
