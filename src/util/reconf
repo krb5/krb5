@@ -9,6 +9,11 @@ localdirarg=
 
 autoreconf="/bin/sh $autoreconfprog"
 
+# This should prevent autoreconf -- at least, the Debian version -- from
+# running aclocal in directories with configure.in but not aclocal.m4, so
+# that we can find the top-level one via the --include option.
+ACLOCAL=true ; export ACLOCAL
+
 usage="Usage: $0 [--force] [--verbose] [--help]"
 for option
 do
