@@ -478,15 +478,6 @@ new_connection(
    /* complain if the input token is non-null */
 
    if (input_token != GSS_C_NO_BUFFER && input_token->length != 0) {
-#if 0 /* def CFX_EXERCISE */
-       if (*context_handle != GSS_C_NO_CONTEXT
-	   && ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid) {
-	   /* XXX Should check for a KRB_ERROR message that we can
-	      parse, and which contains the expected error code.  */
-	   ctx = (krb5_gss_ctx_id_t)*context_handle;
-	   goto resume_after_testing;
-       }
-#endif
        *minor_status = 0;
        return(GSS_S_DEFECTIVE_TOKEN);
    }
@@ -589,49 +580,6 @@ new_connection(
    *context_handle = (gss_ctx_id_t) ctx;
    ctx_free = 0;
 
-#if 0 /* Sigh.  We're changing the spec again.  */
-#ifdef CFX_EXERCISE
-   if (ctx->proto == 1
-       /* I think the RPC code may be broken.  Don't mess around
-	  if we're authenticating to "kadmin/whatever".  */
-       && ctx->there->data[0].data[0] != 'k'
-       /* I *know* the FTP server code is broken.  */
-       && ctx->there->data[0].data[0] != 'f'
-       ) {
-       /* Create a bogus token and return it, with status
-	  GSS_S_CONTINUE_NEEDED.  Save enough data that we can resume
-	  on the next call.  */
-       static const unsigned char hack_token[20] = {
-	   0x60, 0x12, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-	   0xf7, 0x12, 0x01, 0x02, 0x02, 0x12, 0x34, 0x68,
-	   0x65, 0x6c, 0x6c, 0x6f
-       };
-       ctx->testing_unknown_tokid = 1;
-       ctx->init_token = token;
-       token.value = malloc(20);
-       token.length = 20;
-       if (token.value == NULL) {
-	   /* Skip testing.  We'll probably die soon enough, but let's
-	      not do it because we couldn't exercise this code
-	      path.  */
-	   goto resume_after_testing;
-       }
-       memcpy(token.value, hack_token, sizeof(hack_token));
-       /* Can just fall through into the normal return path, because
-	  it'll always return GSS_S_CONTINUE_NEEDED because we're
-	  doing mutual authentication.  */
-   }
-   if (0) {
-   resume_after_testing:
-       token = ctx->init_token;
-       ctx->init_token.value = 0;
-       ctx->init_token.length = 0;
-       ctx->testing_unknown_tokid = 0;
-       ctx_free = 0;
-   }
-#endif /* CFX_EXERCISE */
-#endif /* 0 */
-
    /* compute time_rec */
    if (time_rec) {
       if ((code = krb5_timeofday(context, &now)))
@@ -715,11 +663,11 @@ mutual_auth(
    krb5_error_code code;
    krb5int_access kaccess;
 
+   major_status = GSS_S_FAILURE;
+
    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
    if (code)
        goto fail;
-
-   major_status = GSS_S_FAILURE;
 
    /* validate the context handle */
    /*SUPPRESS 29*/
@@ -949,11 +897,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    /* is this a new connection or not? */
 
    /*SUPPRESS 29*/
-   if (*context_handle == GSS_C_NO_CONTEXT
-#ifdef CFX_EXERCISE
-       || ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid
-#endif
-       ) {
+   if (*context_handle == GSS_C_NO_CONTEXT) {
       major_status = new_connection(minor_status, cred, context_handle,
 				    target_name, mech_type, req_flags,
 				    time_req, input_chan_bindings,

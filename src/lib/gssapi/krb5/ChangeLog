@@ -3,6 +3,14 @@
 	* gssapi_krb5.c (kg_vdb): Change type to g_set and initialize.
 	* gssapiP_krb5.h (kg_vdb): Declaration updated.
 
+	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Delete fields
+	init_token and testing_unknown_tokid.
+	* init_sec_context.c (new_connection): Drop support (already
+	inside "#if 0") for them.
+	(krb5_gss_init_sec_context): Drop support for
+	testing_unknown_tokid.
+	(mutual_auth): Don't let major_status be used uninitialized.
+
 2004-03-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* gssapiP_krb5.h: Add prototype for gss_krb5int_unseal_token_v3.

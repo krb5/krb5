@@ -162,9 +162,6 @@ typedef struct _krb5_gss_ctx_id_rec {
    unsigned int big_endian : 1;
    unsigned int have_acceptor_subkey : 1;
    unsigned int seed_init : 1;	/* XXX tested but never actually set */
-#ifdef CFX_EXERCISE
-   unsigned int testing_unknown_tokid : 1; /* for testing only */
-#endif
    OM_uint32 gss_flags;
    unsigned char seed[16];
    krb5_principal here;
@@ -193,9 +190,6 @@ typedef struct _krb5_gss_ctx_id_rec {
    krb5_cksumtype cksumtype;	/* for "main" subkey */
    krb5_keyblock *acceptor_subkey; /* CFX only */
    krb5_cksumtype acceptor_subkey_cksumtype;
-#ifdef CFX_EXERCISE
-    gss_buffer_desc init_token;
-#endif
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
