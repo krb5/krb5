@@ -86,7 +86,7 @@ krb5_principal princ;
 krb5_error_code
 decrypt_tgs_req(tgs_req, from)
 krb5_tgs_req *tgs_req;
-krb5_fulladdr *from;
+const krb5_fulladdr *from;
 {
     krb5_error_code retval;
     krb5_data scratch;
@@ -179,7 +179,7 @@ OLDDECLARG(krb5_keyblock **, key)
 krb5_error_code 
 kdc_process_tgs_req(request, from)
 krb5_tgs_req *request;
-krb5_fulladdr *from;
+const krb5_fulladdr *from;
 {
     register krb5_ap_req *apreq = request->header2;
     int nprincs;
@@ -282,3 +282,23 @@ int direction;
 	return KRB5_KDB_ILLDIRECTION;
 }
 
+/* This probably wants to be updated if you support last_req stuff */
+
+krb5_error_code
+fetch_last_req_info(dbentry, lrentry)
+krb5_db_entry *dbentry;
+krb5_last_req_entry ***lrentry;
+{
+    *lrentry = 0;
+    return 0;
+}
+
+
+/* XXX!  This is a temporary place-holder */
+
+krb5_error_code
+check_hot_list(ticket)
+krb5_ticket *ticket;
+{
+    return 0;
+}
