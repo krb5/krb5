@@ -1,3 +1,13 @@
+Fri Feb 13 14:39:25 1998  Tom Yu  <tlyu@mit.edu>
+
+	* db.h: Rename dbopen to avoid collision with NetBSD libc.
+
+	* db-ndbm.h: Rename lots of functions to avoid collisions with
+	native dbm implementations.
+
+	* db-int.h: Rename __hash_open to avoid potential collision with
+	NetBSD libc.
+
 Thu Aug 15 15:41:12 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* db-ndbm.h: Add prototypes for missing functions dbm_error() and

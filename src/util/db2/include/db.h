@@ -165,6 +165,7 @@ typedef struct {
 #define	__END_DECLS
 #endif
 
+#define dbopen	kdb2_dbopen
 __BEGIN_DECLS
 DB *dbopen __P((const char *, int, int, DBTYPE, const void *));
 __END_DECLS

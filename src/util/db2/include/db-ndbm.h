@@ -62,6 +62,18 @@ typedef struct {
 typedef DB DBM;
 #define	dbm_pagfno(a)	DBM_PAGFNO_NOT_AVAILABLE
 
+#define dbm_close	kdb2_dbm_close
+#define dbm_delete	kdb2_dbm_delete
+#define dbm_fetch	kdb2_dbm_fetch
+#define dbm_firstkey	kdb2_dbm_firstkey
+#define dbm_forder	kdb2_dbm_forder
+#define dbm_nextkey	kdb2_dbm_nextkey
+#define dbm_open	kdb2_dbm_open
+#define dbm_store	kdb2_dbm_store
+#define dbm_dirinfo	kdb2_dbm_dirinfo
+#define dbm_error	kdb2_dbm_error
+#define dbm_clearerr	kdb2_dbm_clearerr
+
 __BEGIN_DECLS
 void	 dbm_close __P((DBM *));
 int	 dbm_delete __P((DBM *, datum));
