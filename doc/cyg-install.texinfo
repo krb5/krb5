@@ -6,8 +6,8 @@
 @c definitions added by jcb.
 @c %**start of header
 @c guide
-@setfilename KerbNet-Install.info
-@settitle Kerb*Net Installation Guide
+@setfilename krb5-install.info
+@settitle Kerberos V5 Installation Guide
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
 @smallbook                              @c Format for 7" X 9.25" paper
@@ -64,18 +64,22 @@ This file documents how to install the @value{RELEASE} release of
 @menu
 * Introduction::                
 * Realm Configuration Decisions::  
+* Building @value{PRODUCT}::    
 * Installing @value{PRODUCT}::  
 * Support::                     
+* Bug Reporting::               
 * Files::                       
 @end menu
 
 @node Introduction, Realm Configuration Decisions, Top, Top
 @chapter Introduction
 
+@ifset CYGNUS
 Congratulations on your purchase of @value{PRODUCT}.  @value{COMPANY}
 believes @value{PRODUCT} provides the best network security available.
 Please let us know if we can be of assistance in getting your
 installation of @value{PRODUCT} set up and running.
+@end ifset
 
 @menu
 * What is Kerberos and How Does it Work?::  
@@ -181,7 +185,7 @@ Chapter four describes our problem reporting system.
 
 The appendices give sample configuration files.
 
-@node Realm Configuration Decisions, Installing @value{PRODUCT}, Introduction, Top
+@node Realm Configuration Decisions, Building @value{PRODUCT}, Introduction, Top
 @chapter Realm Configuration Decisions
 
 Before installing @value{PRODUCT}, it is necessary to consider the
@@ -226,12 +230,12 @@ Whether you need backward compatibility with Kerberos V4.
 
 Although your Kerberos realm can be any ASCII string, convention is to
 make it the same as your domain name, in upper-case letters.  For
-example, hosts in the domain @value{PRIMARYDOMAIN} would be in the
-Kerberos realm @value{PRIMARYREALM}.
+example, hosts in the domain @value{SECONDDOMAIN} would be in the
+Kerberos realm @value{SECONDREALM}.
 
 If you need multiple Kerberos realms, @value{COMPANY} recommends that
 you use descriptive names which end with your domain name, such as
-BOSTON.@value{PRIMARYREALM} and SAN_FRANCISCO.@value{PRIMARYREALM}.
+BOSTON.@value{SECONDREALM} and SAN_FRANCISCO.@value{SECONDREALM}.
 
 @node Mapping Hostnames onto Kerberos Realms, Ports for the KDC and Admin Services, Kerberos Realms, Realm Configuration Decisions
 @section Mapping Hostnames onto Kerberos Realms
@@ -321,7 +325,16 @@ parallel.  To do this, have the master KDC propagate the database to one
 set of slaves, and then have each of these slaves propagate the database
 to additional slaves.
 
-@node Installing @value{PRODUCT}, Support, Realm Configuration Decisions, Top
+@ifset MIT
+
+@node Building @value{PRODUCT}, Installing @value{PRODUCT}, Realm Configuration Decisions, Top
+@chapter Building @value{PRODUCT}
+
+@include build.texinfo
+
+@end ifset
+
+@node Installing @value{PRODUCT}, Support, Building @value{PRODUCT}, Top
 @chapter Installing @value{PRODUCT}
 
 The sections of this chapter describe procedures for installing
@@ -403,6 +416,7 @@ first few steps must be done on the master KDC.
 * Start the Kerberos Daemons::  
 @end menu
 
+@ifset CYGNUS
 @node Unpack the tar file, Edit the Configuration Files, Install the Master KDC, Install the Master KDC
 @subsubsection Unpack the tar file
 
@@ -418,6 +432,7 @@ and make it a symbolic link to @code{@value{INSTALLDIR}}, so
 you can install updates later without requiring users to change their
 paths.  This document will refer to @code{@value{ROOTDIR}} as the
 persistent directory name.
+@end ifset
 
 @node Edit the Configuration Files, Create the Database, Unpack the tar file, Install the Master KDC
 @subsubsection Edit the Configuration Files
@@ -667,6 +682,7 @@ otherwise.
 * Set Up the Slave KDCs for Database Propagation::  
 @end menu
 
+@ifset CYGNUS
 @node Copy the Software onto the Slave KDCs, Create Host Keys for the Slave KDCs, Install the Slave KDCs, Install the Slave KDCs
 @subsubsection Copy the Software onto the Slave KDCs
 
@@ -679,6 +695,7 @@ As with the master KDC, make the symbolic link to
 Once you have unpacked the tar file, replace the configuration files,
 @code{krb5.conf} (@pxref{krb5.conf}) and @code{kdc.conf}
 (@pxref{kdc.conf}) with those you edited on the master KDC.
+@end ifset
 
 @node Create Host Keys for the Slave KDCs, Extract Host Keytabs for the KDCs, Copy the Software onto the Slave KDCs, Install the Slave KDCs
 @subsubsection Create Host Keys for the Slave KDCs
@@ -1032,12 +1049,14 @@ installation of the KDCs.
 * Client Machine Configuration Files::  
 @end menu
 
+@ifset CYGNUS
 @node Unpack the tar File, Client Programs, Installing and Configuring UNIX Client Machines, Installing and Configuring UNIX Client Machines
 @subsection Unpack the tar File
 
 Install @value{PRODUCT} in @code{@value{ROOTDIR}}.  If you extract the
 tar file from the top level directory (@code{/}), the files will end up
 in this directory.
+@end ifset
 
 @node Client Programs, Client Machine Configuration Files, Unpack the tar File, Installing and Configuring UNIX Client Machines
 @subsection Client Programs
@@ -1515,15 +1534,31 @@ Finally, the keytab file and any programs run by root, including the
 @value{PRODUCT} binaries, should be kept on local disk.  The keytab file
 should be readable only by root.
 
-@node Support, Files, Installing @value{PRODUCT}, Top
+@ifset CYGNUS
+@node Support, Bug Reporting, Installing @value{PRODUCT}, Top
 @chapter Support
 
 If you have problems installing @value{PRODUCT}, please use the
 @code{send-pr} program to fill out a Problem Report.  
 
 @include send-pr.texinfo
+@end ifset
 
-@node Files,  , Support, Top
+@ifset MIT
+@node Bug Reporting, Files, Support, Top
+@chapter Bug Reporting
+
+In any complex software, there will be bugs. Please send bug reports or
+other problems you may uncover to the e-mail address
+@b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos V5
+distribution you are using, and whether you have made any private
+changes.  Bug reports that include proposed fixes are especially
+welcome.  If you do include fixes, please send them using either context
+diffs or unified diffs (using @samp{diff -c} or @samp{diff -u},
+respectively).
+@end ifset
+
+@node Files,  , Bug Reporting, Top
 @appendix Files
 
 @menu
