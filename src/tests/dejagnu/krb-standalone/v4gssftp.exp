@@ -45,16 +45,17 @@ proc start_ftp_daemon { } {
     global tmppwd
     global ftpd_spawn_id
     global ftpd_pid
+    global portbase
 
     # The -p argument tells it to accept a single connection, so we
-    # don't need to use inetd.  The 3021 is the port to listen at.
+    # don't need to use inetd.  Portbase+8 is the port to listen at.
     # We rely on KRB5_KTNAME being set to the proper keyfile as there is
     # no way to cleanly set it with the gssapi API.
     # The -U argument tells it to use an alternate ftpusers file (using
     # /dev/null will allow root to login regardless of /etc/ftpusers).
     # The -a argument requires authorization, to mitigate any
     # vulnerability introduced by circumventing ftpusers.
-    spawn $FTPD -p 3021 -a -U /dev/null -r $tmppwd/krb.conf
+    spawn $FTPD -p [expr 8 + $portbase] -a -U /dev/null -r $tmppwd/krb.conf
     set ftpd_spawn_id $spawn_id
     set ftpd_pid [exp_pid]
 
@@ -180,6 +181,7 @@ proc v4ftp_test { } {
     global ftp_save_ktname
     global ftp_save_ccname
     global des3_krbtgt
+    global portbase
 
     if {$des3_krbtgt} {
 	return
@@ -227,7 +229,7 @@ proc v4ftp_test { } {
     start_ftp_daemon
 
     # Make an ftp client connection to it.
-    spawn $FTP $hostname 3021
+    spawn $FTP $hostname [expr 8 + $portbase]
 
     expect_after {
 	timeout {

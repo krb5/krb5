@@ -120,11 +120,12 @@ proc run_client {test tkfile client} {
     global spawn_id
     global gss_server_spawn_id
     global REALMNAME
+    global portbase
 
     set env(KRB5CCNAME) $tkfile
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     verbose "spawning gssclient, identity=$client"
-    spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from $client"
+    spawn $GSSCLIENT -port [expr 8 + $portbase] $hostname gssservice@$hostname "message from $client"
     set got_client 0
     set got_server 0
     expect_after {
@@ -205,6 +206,7 @@ proc doit { } {
     global gss_server_spawn_id
     global gss_save_ccname
     global gss_save_ktname
+    global portbase
 
     # Start up the kerberos and kadmind daemons.
     if ![start_kerberos_daemons 0] {
@@ -280,7 +282,7 @@ proc doit { } {
     verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
 
     # Now start the gss-server.
-    spawn $GSSSERVER -export -logfile $tmppwd/gss-server.log -verbose -port 5556 gssservice@$hostname
+    spawn $GSSSERVER -export -logfile $tmppwd/gss-server.log -verbose -port [expr 8 + $portbase] gssservice@$hostname
     set gss_server_pid [exp_pid]
     set gss_server_spawn_id $spawn_id
     sleep 2

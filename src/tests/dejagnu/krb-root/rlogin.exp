@@ -50,6 +50,7 @@ proc start_rlogin_daemon { option } {
     global hostname
     global rlogin_spawn_id
     global krlogind_pid
+    global portbase
 
     # The -p argument tells it to accept a single connection, so we
     # don't need to use inetd.  The 3543 is the port to listen at.
@@ -57,7 +58,7 @@ proc start_rlogin_daemon { option } {
     # setup_root_shell, not a TCL variable.  The sh -c is to workaround
     # the broken controlling tty handling in hpux, and shouldn't hurt
     # anything else.
-    send -i $rlogin_spawn_id "sh -c \"$KRLOGIND -k -c -D 3543 -S \$tmppwd/srvtab -M $REALMNAME -L $LOGINKRB5 $option\" &\r"
+    send -i $rlogin_spawn_id "sh -c \"$KRLOGIND -k -c -D [expr 8 + $portbase] -S \$tmppwd/srvtab -M $REALMNAME -L $LOGINKRB5 $option\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -126,6 +127,7 @@ proc rlogin_test { } {
     global hostname
     global hostname
     global env
+    global portbase
 
     # Start up the kerberos and kadmind daemons and get a srvtab and a
     # ticket file.
@@ -141,7 +143,7 @@ proc rlogin_test { } {
     start_rlogin_daemon -k
 
     # Make an rlogin connection.
-    spawn $KRLOGIN $hostname -k $REALMNAME -D 3543
+    spawn $KRLOGIN $hostname -k $REALMNAME -D [expr 8 + $portbase]
 
     expect_after {
 	timeout {
@@ -215,7 +217,7 @@ proc rlogin_test { } {
 
     # Try an encrypted connection.
     start_rlogin_daemon -e
-    spawn $KRLOGIN $hostname -x -k $REALMNAME -D 3543
+    spawn $KRLOGIN $hostname -x -k $REALMNAME -D [expr 8 + $portbase]
 
     expect_after {
 	timeout {

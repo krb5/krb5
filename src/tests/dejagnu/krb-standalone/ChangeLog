@@ -1,3 +1,14 @@
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.exp (run_client, doit): Use portbase to compute all port
+	numbers.
+	* gssftp.exp (start_ftp_daemon, ftp_test): Likewise.
+	* rcp.exp (start_rsh_daemon, rcp_one_test): Likewise.
+	* rsh.exp (start_rsh_daemon, rsh_test): Likewise.
+	* sample.exp (start_sserver_daemon, test_sclient): Likewise.
+	* v4gssftp.exp (start_ftp_daemon, v4ftp_test): Likewise.
+	* v4krb524d.exp (start_k524_daemon): Likewise.
+
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* rcp.exp (stop_rsh_daemon): Check for any output before eof,

@@ -41,6 +41,7 @@ proc start_rsh_daemon { } {
     global tmppwd
     global krshd_spawn_id
     global krshd_pid
+    global portbase
 
     # Setup the shared library wrapper for login.krb5
     if ![file exists $tmppwd/rcp] {
@@ -49,7 +50,7 @@ proc start_rsh_daemon { } {
 
 
     # The -D argument tells it to accept a single connection, so we
-    # don't need to use inetd.  The 3544 is the port to listen at.
+    # don't need to use inetd.  The portbase+8 is the port to listen at.
     #
     # The -L ENV_SET is for the I/S Athena brokeness in dot files where
     #	LD_LIBRARY_PATH will be overridden causing the "exec csh -c rcp ..." 
@@ -57,7 +58,7 @@ proc start_rsh_daemon { } {
     #	a users shell might be sh...
     #	Later a proper fix would be to have kshd exec rcp directly
     #   shell indirection...
-    spawn $KRSHD -k -c -D 3544 -P $tmppwd -S $tmppwd/srvtab -M $REALMNAME -L ENV_SET
+    spawn $KRSHD -k -c -D [expr 8 + $portbase] -P $tmppwd -S $tmppwd/srvtab -M $REALMNAME -L ENV_SET
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 
@@ -131,6 +132,7 @@ proc rcp_one_test { testname options frompref topref } {
     global REALMNAME
     global RCP
     global tmppwd
+    global portbase
 
     send_log "rm -f $tmppwd/copy\n"
     verbose "exec rm -f $tmppwd/copy"
@@ -139,9 +141,9 @@ proc rcp_one_test { testname options frompref topref } {
     set from [format "%s%s" $frompref $tmppwd/rcp-test]
     set to [format "%s%s" $topref $tmppwd/copy]
 
-    send_log "$RCP $options -D 3544 -N -k $REALMNAME $from $to\n"
-    verbose "$RCP $options -D 3544 -N -k $REALMNAME $from $to"
-    catch "exec $RCP $options -D 3544 -N -k $REALMNAME $from $to" exec_output
+    send_log "$RCP $options -D [expr 8 + $portbase] -N -k $REALMNAME $from $to\n"
+    verbose "$RCP $options -D [expr 8 + $portbase] -N -k $REALMNAME $from $to"
+    catch "exec $RCP $options -D [expr 8 + $portbase] -N -k $REALMNAME $from $to" exec_output
 
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"

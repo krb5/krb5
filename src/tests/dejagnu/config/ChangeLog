@@ -1,3 +1,10 @@
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Set new variable portbase from $PORTBASE or
+	default.
+	(setup_kerberos_files, setup_krb5_conf, setup_kerberos_env): Use
+	portbase to select all port numbers.
+
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (passes): Add "mode=udp" to existing pass

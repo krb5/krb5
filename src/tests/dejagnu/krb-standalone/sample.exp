@@ -37,18 +37,19 @@ proc start_sserver_daemon { inetd } {
     global SSERVER
     global T_INETD
     global tmppwd
+    global portbase
 
     # if inetd = 0, then we are running stand-alone
     if !{$inetd} {
 	    # Start the sserver
-	    spawn $SSERVER -p 3964 -S $tmppwd/srvtab
+	    spawn $SSERVER -p [expr 8 + $portbase] -S $tmppwd/srvtab
 	    set sserver_pid [exp_pid]
 	    set sserver_spawn_id $spawn_id
 
 	    verbose "sserver_spawn is $sserver_spawn_id" 1
     } else {
 	    # Start the sserver
-	    spawn $T_INETD 3964 $SSERVER sserver -S $tmppwd/srvtab
+	    spawn $T_INETD [expr 8 + $portbase] $SSERVER sserver -S $tmppwd/srvtab
 	    set sserver_pid [exp_pid]
 	    set sserver_spawn_id $spawn_id
 
@@ -100,10 +101,10 @@ proc test_sclient { msg } {
     global SCLIENT
     global hostname
     global spawn_id
-
+    global portbase
 
     # Test the client
-    spawn $SCLIENT $hostname 3964
+    spawn $SCLIENT $hostname [expr 8 + $portbase]
     verbose "sclient_spawn is  $spawn_id" 1
 
     expect {

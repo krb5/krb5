@@ -1,3 +1,9 @@
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* rlogin.exp (start_rlogin_daemon, rlogin_test): Use portbase to
+	compute all port numbers.
+	* telnet.exp (start_telnet_daemon, telnet_test): Likewise.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnet.exp: Skip tests if no DES key types are enabled.

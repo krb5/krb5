@@ -42,8 +42,9 @@ proc start_k524_daemon { } {
     global k524d_spawn_id
     global k524d_pid
     global REALMNAME
+    global portbase
 
-    spawn $KRB524D -m -p 3752 -r $REALMNAME -nofork
+    spawn $KRB524D -m -p [expr 7 + $portbase] -r $REALMNAME -nofork
     set k524d_spawn_id $spawn_id
     set k524d_pid [exp_pid]
 
