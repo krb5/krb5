@@ -1,3 +1,11 @@
+2000-08-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* kprop.c, kpropd.c: Compiler warning fixes including: not
+	shadowing global variabls/functions, assignments in conditionals,
+	declaring local functions static.
+
+	* configure.in: Check for mode_t being defined. 
+
 2000-06-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: kprop does not depend on the database libraries. 
