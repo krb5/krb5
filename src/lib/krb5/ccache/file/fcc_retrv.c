@@ -27,6 +27,10 @@ static krb5_boolean times_match PROTOTYPE((const krb5_ticket_times *,
 static krb5_boolean standard_fields_match
     PROTOTYPE((const krb5_creds *,
 	       const krb5_creds *));
+
+static krb5_boolean authdata_match
+    PROTOTYPE ((krb5_authdata * const *, krb5_authdata * const *));
+
 /*
  * Effects:
  * Searches the file cred cache is for a credential matching mcreds,
@@ -81,7 +85,10 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	       times_match_exact(&mcreds->times, &fetchcreds.times))
 	      &&
 	      (! set(KRB5_TC_MATCH_TIMES) ||
-	       times_match(&mcreds->times, &fetchcreds.times)))
+	       times_match(&mcreds->times, &fetchcreds.times))
+	      &&
+	      ( ! set(KRB5_TC_MATCH_AUTHDATA) ||
+	       authdata_match(mcreds->authdata, fetchcreds.authdata)))
 	  {
 	       krb5_fcc_end_seq_get(id, &cursor);
 	       *creds = fetchcreds;
@@ -120,4 +127,31 @@ register const krb5_creds *mcreds, *creds;
 {
     return (krb5_principal_compare(mcreds->client,creds->client) &&
 	    krb5_principal_compare(mcreds->server,creds->server));
+}
+
+static krb5_boolean
+authdata_match(mdata, data)
+    register krb5_authdata * const *mdata, * const *data;
+{
+    register const krb5_authdata *mdatap, *datap;
+
+    if (mdata == data)
+      return TRUE;
+
+    if (mdata == NULL)
+	return *data == NULL;
+	
+    if (data == NULL)
+	return *mdata == NULL;
+    
+    while ((mdatap = *mdata) && (datap = *data)) {
+      if ((mdatap->ad_type != datap->ad_type) ||
+          (mdatap->length != datap->length) ||
+          (bcmp ((char *)mdatap->contents,
+		 (char *)datap->contents, mdatap->length) != 0))
+          return FALSE;
+      mdata++;
+      data++;
+    }
+    return (*mdata == NULL) && (*data == NULL);
 }

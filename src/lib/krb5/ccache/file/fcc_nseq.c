@@ -86,6 +86,8 @@ krb5_fcc_next_cred(id, cursor, creds)
      TCHECK(kret);
      kret = krb5_fcc_read_addrs(id, &creds->addresses);
      TCHECK(kret);
+     kret = krb5_fcc_read_authdata(id, &creds->authdata);
+     TCHECK(kret);
      kret = krb5_fcc_read_data(id, &creds->ticket);
      TCHECK(kret);
      kret = krb5_fcc_read_data(id, &creds->second_ticket);
@@ -112,6 +114,8 @@ lose:
 	     xfree(creds->second_ticket.data);
 	 if (creds->addresses)
 	     krb5_free_address(creds->addresses);
+	 if (creds->authdata)
+	     krb5_free_authdata(creds->authdata);
      }
      return kret;
 }

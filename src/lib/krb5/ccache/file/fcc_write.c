@@ -219,3 +219,39 @@ krb5_fcc_store_flags(id, f)
 {
      return krb5_fcc_write(id, (char *) f, sizeof(krb5_flags));
 }
+
+krb5_error_code
+krb5_fcc_store_authdata(id, a)
+    krb5_ccache id;
+    krb5_authdata **a;
+{
+    krb5_error_code ret;
+    krb5_authdata **temp;
+    krb5_int32 i, length=0;
+
+    if (a != NULL) {
+	for (temp=a; *temp; temp++)
+	    length++;
+    }
+
+    ret = krb5_fcc_store_int32(id, &length);
+    CHECK(ret);
+    for (i=0; i<length; i++) {
+	ret = krb5_fcc_store_authdatum (id, a[i]);
+	CHECK(ret);
+    }
+    return KRB5_OK;
+}
+
+krb5_error_code
+krb5_fcc_store_authdatum (id, a)
+    krb5_ccache id;
+    krb5_authdata *a;
+{
+    krb5_error_code ret;
+    ret = krb5_fcc_store_ui_2(id, &a->ad_type);
+    CHECK(ret);
+    ret = krb5_fcc_store_int32(id, &a->length);
+    CHECK(ret);
+    return krb5_fcc_write(id, a->contents, a->length);
+}

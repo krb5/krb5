@@ -311,3 +311,81 @@ krb5_fcc_read_flags(id, f)
 {
      return krb5_fcc_read(id, (krb5_pointer) f, sizeof(krb5_flags));
 }
+
+krb5_error_code
+krb5_fcc_read_authdata(id, a)
+    krb5_ccache id;
+    krb5_authdata ***a;
+{
+     krb5_error_code kret;
+     krb5_int32 length;
+     int i;
+
+     *a = 0;
+
+     /* Read the number of components */
+     kret = krb5_fcc_read_int32(id, &length);
+     CHECK(kret);
+
+     if (length == 0)
+	 return KRB5_OK;
+
+     /* Make *a able to hold length pointers to krb5_authdata structs
+      * Add one extra for a null-terminated list
+      */
+     *a = (krb5_authdata **) calloc(length+1, sizeof(krb5_authdata *));
+     if (*a == NULL)
+	  return KRB5_CC_NOMEM;
+
+     for (i=0; i < length; i++) {
+	  (*a)[i] = (krb5_authdata *) malloc(sizeof(krb5_authdata));
+	  if ((*a)[i] == NULL) {
+	      krb5_free_authdata(*a);
+	      return KRB5_CC_NOMEM;
+	  }	  
+	  kret = krb5_fcc_read_authdatum(id, (*a)[i]);
+	  CHECK(kret);
+     }
+
+     return KRB5_OK;
+ errout:
+     if (*a)
+	 krb5_free_authdata(*a);
+     return kret;
+}
+
+krb5_error_code
+krb5_fcc_read_authdatum(id, a)
+    krb5_ccache id;
+    krb5_authdata *a;
+{
+    krb5_error_code kret;
+    int ret;
+    
+    a->contents = NULL;
+
+    kret = krb5_fcc_read_ui_2(id, &a->ad_type);
+    CHECK(kret);
+    kret = krb5_fcc_read_int(id, &a->length);
+    CHECK(kret);
+    
+    a->contents = (krb5_octet *) malloc(a->length);
+    if (a->contents == NULL)
+	return KRB5_CC_NOMEM;
+    ret = read(((krb5_fcc_data *) id->data)->fd, (char *)a->contents,
+		(a->length)*sizeof(krb5_octet));
+     if (ret == -1) {
+	  xfree(a->contents);
+	  return krb5_fcc_interpret(errno);
+     }
+     if (ret != (a->length)*sizeof(krb5_octet)) {
+	  xfree(a->contents);
+	  return KRB5_CC_END;
+     }
+     return KRB5_OK;
+ errout:
+     if (a->contents)
+	 xfree(a->contents);
+     return kret;
+    
+}
