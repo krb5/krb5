@@ -3,15 +3,15 @@ LDFLAGS = -g
 
 all:: $(OBJS)
 
-ETSRCS= gssapi_generic_err.c
-ETOBJS= gssapi_generic_err.o
-ETHDRS= gssapi_generic_err.h
+ETSRCS= gssapi_err_generic.c
+ETOBJS= gssapi_err_generic.o
+ETHDRS= gssapi_err_generic.h
 
-gssapi_generic_err.o: gssapi_generic_err.c
+gssapi_err_generic.o: gssapi_err_generic.c
 
-gssapi_generic_err.h: gssapi_generic_err.et
+gssapi_err_generic.h: gssapi_err_generic.et
 
-gssapi_generic_err.c: gssapi_generic_err.et
+gssapi_err_generic.c: gssapi_err_generic.et
 
 #if HasHashLibrary
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c

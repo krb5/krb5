@@ -25,7 +25,7 @@
 
 #include "gssapi.h"
 
-#include "gssapi_generic_err.h"
+#include "gssapi_err_generic.h"
 #include <errno.h>
 #include <sys/types.h>
 #include <netinet/in.h>

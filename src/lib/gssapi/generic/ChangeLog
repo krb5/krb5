@@ -1,3 +1,12 @@
+Mon Feb 20 12:00:00 1994  Keith Vetter (keithv@fusion.com)
+
+	More DOS 8.3 renames--for files created by make
+	* gssapi_generic_err.et   => gssapi_err_generic.et
+				  => gssapi_err_generic.h
+				  => gssapi_err_generic.c
+	* gssapiP_generic.h was changed to match
+	* Makefile.in was changed to match
+
 Fri Feb  3 00:18:11 1995  John Gilmore  <gnu@cygnus.com>
 
 	Rename files for DOS 8.3 uniqueness:
