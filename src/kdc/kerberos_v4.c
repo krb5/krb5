@@ -65,6 +65,9 @@ static char rcsid_kerberos_v4_c[] =
 
 extern int errno;
 
+/* take this out when we don't need it anymore */
+int krbONE = 1;
+
 #ifdef notdef
 static struct sockaddr_in sin = {AF_INET};
 #endif

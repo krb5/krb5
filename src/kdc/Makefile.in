@@ -5,9 +5,8 @@ DEFS = @DEFS@
 LIBS = @LIBS@
 KRB4 = @KRB4@
 K4LIB = @K4LIB@
-K4INCLUDE = @K4INCLUDE@
 
-CFLAGS = -g $(DEFS) $(LOCALINCLUDE) $(K4INCLUDE)
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
 BUILDTOP=..
@@ -25,7 +24,7 @@ AWK = @AWK@
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
 
-KRB4INCLUDES=-I$(BUILDTOP)/include/kerberosIV
+KRB4INCLUDES=-I$(SRCTOP)/include/kerberosIV
 
 all::
 
