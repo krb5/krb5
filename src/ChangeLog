@@ -1,3 +1,8 @@
+Wed Jun 12 15:27:14 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4 (AC_CHECK_DBM_PROTO): Correct to use correct cache
+		variable in test.
+
 Wed Jun 12 19:41:12 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* aclocal.m4: use new AC_OUTPUT syntax for constructing

@@ -1075,7 +1075,7 @@ int $2();],
 [$2();], 
     eval krb5_cv_missing_$2_prototype=yes,
     eval krb5_cv_missing_$2_prototype=no)))
- if eval "test \"`echo '$krb5_cv_missing_'$1_prototype`\" = yes"; then
+ if eval "test \"`echo '$krb5_cv_missing_'$2_prototype`\" = yes"; then
   AC_MSG_RESULT(yes)
   $4
  else
