@@ -1,3 +1,7 @@
+2001-02-06  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Default to making a single tarball.
+
 2001-01-28  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-prerecurse): Move aix.bincmds rule to
