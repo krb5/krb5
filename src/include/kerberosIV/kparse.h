@@ -89,20 +89,18 @@ typedef struct {
 
 #define PARMCOUNT(P) (sizeof(P)/sizeof(P[0]))
 
-int fGetChar PROTOTYPE ((FILE *fp));
-int fGetParameterSet PROTOTYPE ((FILE *fp, parmtable parm[], int parmcount));
-int ParmCompare PROTOTYPE((parmtable parm[], int parmcount, char *keyword, 
-			   char *value));
+int fGetChar (FILE *fp);
+int fGetParameterSet (FILE *fp, parmtable parm[], int parmcount);
+int ParmCompare (parmtable parm[], int parmcount, char *keyword, char *value);
 
-void FreeParameterSet PROTOTYPE((parmtable parm[], int parmcount));
+void FreeParameterSet (parmtable parm[], int parmcount);
 
-int fGetKeywordValue PROTOTYPE((FILE *fp, char *keyword, int klen, 
-			       char *value, int vlen));
+int fGetKeywordValue (FILE *fp, char *keyword, int klen, char *value, int vlen);
 
-int fGetToken PROTOTYPE((FILE *fp, char *dest, int maxlen));
+int fGetToken (FILE *fp, char *dest, int maxlen);
 
-int fGetLiteral PROTOTYPE((FILE *fp));
+int fGetLiteral (FILE *fp);
 
-int fUngetChar PROTOTYPE((int ch, FILE *fp));
+int fUngetChar (int ch, FILE *fp);
 
 #endif /* KPARSE_DEFS */
