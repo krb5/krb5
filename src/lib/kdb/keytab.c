@@ -131,7 +131,7 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     krb5_boolean 	  more = 0;
     int 	 	  n = 0;
     int xrealm_tgt;
-    int similar;
+    krb5_boolean similar;
 
     if (ktkdb_ctx)
 	context = ktkdb_ctx;
