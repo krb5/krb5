@@ -165,7 +165,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
 	}
 	
 #else
-	plain_dump_principal (client);
+	plain_dump_principal (context, client);
 	fprintf(stderr,"does not have any appropriate tickets in the cache.\n");
 	return FALSE;
 	
