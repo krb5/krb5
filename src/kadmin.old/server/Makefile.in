@@ -51,7 +51,7 @@ OBJS = \
 all::	kadmind
 
 kadmind: $(KDBDEPLIB) $(OBJS) $(DEPLIBS)
-	$(CC) $(CFLAGS) -o kadmind $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
+	$(LD) $(CFLAGS) -o kadmind $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kadmind ${DESTDIR}$(SERVER_BINDIR)/kadmind

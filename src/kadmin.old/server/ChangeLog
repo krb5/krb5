@@ -1,3 +1,16 @@
+Sat Apr 29 00:24:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* adm_network.c (setup_network): Use sigaction() instead of
+		signal() to setup the signal handlers.  This means we
+		don't need to worry about System V signal semantics.
+
+Fri Apr 28 21:16:10 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* adm_server.c (kdc_com_err_proc): Free nfmt after done using it.
+
+	* Makefile.in (kadmind): Use $(LD) instead of $(CC) so that we can
+		do purify checking.
+
 Thu Apr 27 12:21:38 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (kadmind): don't reference K4LIB since we don't set

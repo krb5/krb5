@@ -427,6 +427,7 @@ kdc_com_err_proc(whoami, code, format, pvar)
 		strcat(nfmt, " ");
 		strcat(nfmt, format);
 		vsyslog(LOG_ERR, nfmt, pvar);
+		free(nfmt);
 	} else {
 		vsyslog(LOG_ERR, format, pvar);
 	}

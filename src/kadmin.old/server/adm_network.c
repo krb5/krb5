@@ -89,7 +89,9 @@ do_child()
 #endif
     int pid, i, j;
 
+#ifndef OLD_SIGNALS
     signal(SIGCHLD, do_child);
+#endif
     
     pid = wait(&status);
     if (pid < 0)
@@ -129,7 +131,22 @@ setup_network(context, prog)
     krb5_sigtype     doexit(), do_child();
     struct servent *service_servent;
     struct hostent *service_hostent;
+    int on = 1;
+#ifndef OLD_SIGNALS
+    struct sigaction new_act;
 
+    new_act.sa_handler = doexit;
+    sigemptyset(&new_act.sa_mask);
+    sigaction(SIGINT, &new_act, 0);
+    sigaction(SIGTERM, &new_act, 0);
+    sigaction(SIGHUP, &new_act, 0);
+    sigaction(SIGQUIT, &new_act, 0);
+    sigaction(SIGALRM, &new_act, 0);
+    new_act.sa_handler = SIG_IGN;
+    sigaction(SIGPIPE, &new_act, 0);
+    new_act.sa_handler = do_child;
+    sigaction(SIGCHLD, &new_act, 0);
+#else
     signal(SIGINT, doexit);
     signal(SIGTERM, doexit);
     signal(SIGHUP, doexit);
@@ -137,6 +154,7 @@ setup_network(context, prog)
     signal(SIGPIPE, SIG_IGN); /* get errors on write() */
     signal(SIGALRM, doexit);
     signal(SIGCHLD, do_child);
+#endif
  
     client_server_info.name_of_service = malloc(768);
     if (!client_server_info.name_of_service) {
@@ -241,6 +259,11 @@ setup_network(context, prog)
     fprintf(stderr, "in_addr.s_addr = %s\n", 
 		inet_ntoa( client_server_info.server_name.sin_addr ));
 #endif	/* DEBUG */
+
+    if (admin_port && admin_port != htons(ADM5_DEFAULT_PORT)) {
+	 (void) setsockopt(client_server_info.server_socket, SOL_SOCKET, 
+			   SO_REUSEADDR, (char *)&on, sizeof(on));
+     }
 
     if (bind(client_server_info.server_socket,
 		&client_server_info.server_name, 
