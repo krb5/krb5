@@ -56,7 +56,7 @@ test_3pass {pol1} {D.13: too few char classes in new password} pol1 \
 
 test_3pass {pol1} {D.14: new password in dictionary} pol1 \
 	pol111111 Discordianism Discordianism \
-	4 {New password was found in a dictionary of possible passwords and therefore may be easily guessed.  Please choose another password.  See the ovpasswd man page for help in choosing a good password.}
+	4 {New password was found in a dictionary of possible passwords and therefore may be easily guessed.  Please choose another password.  See the kpasswd man page for help in choosing a good password.}
 
 test_win {pol1} {successful change} pol1 pol111111 polAAAAAA
 # fail "successful change: XXXX password history is majorly broken"
