@@ -40,7 +40,7 @@ long ptyint_update_wtmp (ent , host, user)
     struct utmp ut;
     struct stat statb;
     int fd;
-#ifdef HAVE_SETUTXENT
+#ifdef HAVE_UPDWTMPX
     struct utmpx utx;
 
     getutmpx(ent, &utx);
@@ -54,10 +54,10 @@ long ptyint_update_wtmp (ent , host, user)
 #endif
 
 #ifdef HAVE_UPDWTMP
-#ifndef HAVE_SETUTXENT
+#ifndef HAVE_UPDWTMPX
 /* This is already performed byupdwtmpx if present.*/
     updwtmp(WTMP_FILE, ent);
-#endif /* HAVE_SETUTXENT*/
+#endif /* HAVE_UPDWTMPX*/
 #else /* HAVE_UPDWTMP */
 
     if ((fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) >= 0) {

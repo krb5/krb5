@@ -25,7 +25,7 @@ long pty_getpty (fd, slave, slavelength)
     int slavelength;
     int *fd; char *slave;
 {
-    char c;
+  char *cp;
     char *p;
     int i,ptynum;
     struct stat stb;
@@ -44,7 +44,7 @@ close(slavefd);
 #else /*HAVE_OPENPTY*/
 #ifdef HAVE__GETPTY
     /* This code is included for Irix; as of version 5.3, Irix has /dev/ptmx,
-     * but it fails to work properly; even cafter calling unlockpt,
+     * but it fails to work properly; even after calling unlockpt,
      * root gets permission denied opening the pty.
      * The code to support _getpty should be removed if Irix gets working
      * streams ptys in favor of maintaining the least needed code
@@ -113,9 +113,9 @@ close(slavefd);
 
     } else {
     
-	for (c = 'p'; c <= 's'; c++) {
+	for (cp = "pqrstuvwxyzPQRST";*cp; cp++) {
 	    sprintf(slavebuf,"/dev/ptyXX");
-	    slavebuf[strlen("/dev/pty")] = c;
+	    slavebuf[strlen("/dev/pty")] = *cp;
 	    slavebuf[strlen("/dev/ptyp")] = '0';
 	    if (stat(slavebuf, &stb) < 0)
 		break;

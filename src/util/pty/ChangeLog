@@ -1,7 +1,19 @@
+
 Thu Jun 13 22:14:24 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES
 
+
+Thu Jun 13 14:12:16 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* update_wtmp.c (ptyint_update_wtmp): Only update wtmpx if we have
+ 	updwtmpx.  This probably should be more general, but I'm not
+ 	really sure of HP caviats.
+
+	* configure.in :  check for updwtmpx
+
+	* getpty.c (pty_getpty): Actually check for 256 ptys on SunOS and
+ 	other old-style systems.
 Tue Apr 16 22:06:36 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* dump-utmp.c: New file.  Not automatically used by anything, but

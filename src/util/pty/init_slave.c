@@ -1,5 +1,5 @@
 /*
- * pty_open_slave: open slave side of terminal, clearing for use.
+ * pty_init_slave: open slave side of terminal, clearing for use.
  *
  * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  * 
