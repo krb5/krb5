@@ -1090,6 +1090,13 @@ void kadmin_modprinc(argc, argv)
 	free(canon);
 	return;
     }
+    if (pass) {
+	fprintf(stderr,
+		"modify_principal: -pw not allowed; use change_password\n");
+	krb5_free_principal(context, princ.principal);
+	free(canon);
+	return;
+    }
     retval = kadm5_modify_principal(handle, &princ, mask);
     krb5_free_principal(context, princ.principal);
     if (retval) {
