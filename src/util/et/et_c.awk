@@ -209,7 +209,7 @@ END {
 		tab_base_low, table_item_count) > outfile
 	}
 	print "" > outfile
-	print "#ifdef unix" > outfile
+	print "#if defined(unix) || defined(_AIX)" > outfile
 	print "struct et_list {" > outfile
 	print "	   struct et_list *next;" > outfile
 	print "	   const struct error_table * table;" > outfile

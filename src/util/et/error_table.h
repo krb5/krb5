@@ -16,7 +16,7 @@ struct et_list {
     const struct error_table FAR *table;
 };
 
-#ifdef unix
+#if defined(unix) || defined(_AIX)
 extern struct et_list * _et_list;
 #endif
 
