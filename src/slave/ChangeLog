@@ -1,3 +1,8 @@
+Tue Oct 22 16:42:37 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kpropd.c (PRS): munge realm of sname_to_princ when -r is
+ 	specified [krb5-admin/39]
+
 Tue Sep 10 14:19:08 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kprop.M, kpropd.M: remove ".so man1/header.doc"

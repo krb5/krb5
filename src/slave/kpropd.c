@@ -470,6 +470,11 @@ void PRS(argv)
 			"While trying to construct my service name");
 		exit(1);
 	}
+	if (realm) {
+	    (void) krb5_xfree(krb5_princ_realm(context, server)->data);
+	    krb5_princ_set_realm_length(context, server, strlen(realm));
+	    krb5_princ_set_realm_data(context, server, strdup(realm));
+	}
 	/*
 	 * Construct the name of the temporary file.
 	 */
