@@ -1,3 +1,7 @@
+Tue Jun 21 23:54:40 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* pulling SEEK_SET, etc. out to avoid redef'ing in unistd.h
+
 Tue Jun 21 00:50:46 1994  Mark W. Eichin  (eichin at mit.edu)
 
 	* sysincl.h: SEEK_SET et. al. defined in terms of L_SET et. al. if
