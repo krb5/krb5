@@ -1,3 +1,11 @@
+2000-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* krcp.c (main): Fix logic again, this time in the "success"
+	case.  If there's a problem retrieving the new-protocol subkey,
+	print a message and exit, don't fall back.
+	* krsh.c (main): Ditto; don't look at enctype to try to guess
+	protocol version.  Delete unused variable "similar".
+
 2000-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (main): Rework fallback logic.  Fall back to k4cmd

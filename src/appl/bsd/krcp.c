@@ -587,24 +587,23 @@ int main(argc, argv)
 			try_normal(orig_argv);
 #endif
 		} else {
-		    krb5_boolean similar;
 		    krb5_keyblock *key = &cred->keyblock;
 
-		    if (status = krb5_c_enctype_compare(bsd_context,
-							ENCTYPE_DES_CBC_CRC,
-							cred->keyblock.enctype,
-							&similar))
-			try_normal(orig_argv); /* doesn't return */
-
-		    if (!similar) {
+		    if (kcmd_proto == KCMD_NEW_PROTOCOL) {
 			status = krb5_auth_con_getlocalsubkey (bsd_context,
 							       auth_context,
 							       &key);
-			if ((status || !key) && encryptflag)
-			    try_normal(orig_argv);
+			if (status) {
+			    com_err (argv[0], status,
+				     "determining subkey for session");
+			    exit (1);
+			}
+			if (!key) {
+			    com_err (argv[0], 0,
+				     "no subkey negotiated for connection");
+			    exit (1);
+			}
 		    }
-		    if (key == 0)
-			key = &cred->keyblock;
 
 		    rcmd_stream_init_krb5(key, encryptflag, 0, 1, kcmd_proto);
 		}
