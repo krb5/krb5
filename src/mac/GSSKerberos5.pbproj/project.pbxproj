@@ -1377,12 +1377,8 @@
 	<string>Kerberos ComErr Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>0.0.1d1</string>
 </dict>
 </plist>
 ";
@@ -1541,12 +1537,8 @@
 	<string>Kerberos Profile Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>0.0.1d1</string>
 </dict>
 </plist>
 ";
@@ -1861,12 +1853,8 @@
 	<string>Kerberos v5 Core Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>0.0.1d1</string>
 </dict>
 </plist>
 ";
@@ -6501,12 +6489,8 @@
 	<string>Kerberos General Security Services Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>0.0.1d1</string>
 </dict>
 </plist>
 ";
@@ -8583,12 +8567,8 @@
 	<string>Kerberos v5 Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>0.0.1d1</string>
 </dict>
 </plist>
 ";
@@ -8955,12 +8935,8 @@
 	<string>Kerberos v5 Private Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>0.0.1d1</string>
 </dict>
 </plist>
 ";
