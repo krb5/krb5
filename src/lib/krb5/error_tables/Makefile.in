@@ -25,7 +25,8 @@ HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
       kv5m_err.$(OBJEXT) adm_err.$(OBJEXT) init_ets.$(OBJEXT)
 ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
-SRCS=$(ETSRCS) init_ets.c
+SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c \
+	$(srcdir)/init_ets.c
 
 all-unix:: $(HDRS) shared $(OBJS)
 all-mac:: $(OBJS)

@@ -1,3 +1,9 @@
+Sat Mar 30 22:55:26 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Inlined the list of et-build source files in
+		SRCS, so that they are correctly included in the Mac
+		build.
+
 Wed Mar 13 13:05:46 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kv5m_err.et: Add KV5M_PASSWD_PHRASE_ELEMENT
