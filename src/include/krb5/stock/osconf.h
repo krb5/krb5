@@ -35,10 +35,10 @@
 #endif
 #endif
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(WIN32)
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
 #define	DEFAULT_LNAME_FILENAME	"/aname"
-#define	DEFAULT_KEYTAB_NAME	"FILE:/v5srvtab"
+#define	DEFAULT_KEYTAB_NAME	"FILE:%s\\v5srvtab"
 #else /* !_WINDOWS */
 #define DEFAULT_PROFILE_PATH "/etc/krb5.conf:@PREFIX/lib/krb5.conf"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/v5srvtab"

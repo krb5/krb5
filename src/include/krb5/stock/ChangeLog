@@ -1,3 +1,9 @@
+Sat Feb 24 18:59:39 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* osconf.h (DEFAULT_KEYTAB_NAME): Under windows, let it be
+		%s\v5srvtab.  It will be filled in by the
+		krb5_kt_default_name with the name of windows directory.
+
 Thu Oct  5 21:45:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* osconf.h (DEFAULT_KDC_PROFILE): Change the name of the kdc
