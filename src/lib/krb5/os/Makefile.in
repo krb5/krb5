@@ -498,6 +498,12 @@ sn2princ.so sn2princ.po $(OUTPRE)sn2princ.$(OBJEXT): \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(SRCTOP)/include/fake-addrinfo.h
+thread_safe.so thread_safe.po $(OUTPRE)thread_safe.$(OBJEXT): \
+  thread_safe.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
 timeofday.so timeofday.po $(OUTPRE)timeofday.$(OBJEXT): \
   timeofday.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
