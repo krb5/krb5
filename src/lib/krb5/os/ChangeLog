@@ -1,4 +1,14 @@
 
+Fri Jun 30 14:44:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* an_to_ln.c - Add profile logic to aname_to_lname.  We can now
+		specify databases, rules and explicit mappings to convert
+		between auth name and local name.
+	* t_an_to_ln.c - Rudimentary test procedure.  Needs work to be automatic
+	* configure.in - Add --with-aname-dbm to select between Berkeley and
+		DBM aname database format.
+	* Makefile.in - Add definitions to select aname rules.
+
+
 Tue Jun 27 15:48:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* read_pwd.c(intr_routine) - Add signal name argument to signal handler
 		to conform to prototype.

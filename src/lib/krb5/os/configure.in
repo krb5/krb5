@@ -3,9 +3,24 @@ CONFIG_RULES
 dnl time checks are for timeofday.c (which gets them from osconf.h)
 dnl and gmt_mktime.c (which only gets them from here...)
 AC_TIME_WITH_SYS_TIME
-AC_HAVE_HEADERS(unistd.h sys/time.h)
+AC_HAVE_HEADERS(unistd.h sys/time.h regex.h regexp.h)
+AC_HAVE_FUNCS(re_comp regcomp)
 AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 HAS_ANSI_VOLATILE
+AC_ARG_WITH([aname-dbm],
+[  --with-aname-dbm		use native dbm for aname_to_lname database
+  --without-aname-dbm		use included version of Berkeley db (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using native dbm for aname_to_lname database)
+	DBFLAGS=
+else
+	AC_MSG_RESULT(Using Berkeley db for aname_to_lname database)
+	DBFLAGS=-DBERK_DB_DBM
+fi
+AC_SUBST(DBFLAGS)dnl
+dnl
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
 V5_AC_OUTPUT_MAKEFILE

@@ -25,50 +25,73 @@
  */
 
 #include "k5-int.h"
+#if	HAVE_REGEX_H
+#include <regex.h>
+#endif	/* HAVE_REGEX_H */
+/*
+ * Use compile(3) if no regcomp present.
+ */
+#if	!defined(HAVE_REGCOMP) && defined(HAVE_REGEXP_H)
+#define	INIT		char *sp = instring;
+#define	GETC()		(*sp++)
+#define	PEEKC()		(*sp)
+#define	UNGETC(c)	(--sp)
+#define	RETURN(c)	return(c)
+#define	ERROR(c)	
+#define	RE_BUF_SIZE	1024
+#include <regexp.h>
+#endif	/* !HAVE_REGCOMP && HAVE_REGEXP_H */
 
-#ifndef min
-#define min(a,b) ((a) > (b) ? (b) : (a))
-#endif /* min */
+#define	MAX_FORMAT_BUFFER	1024
+#ifndef	min
+#define	min(a,b)	((a>b) ? b : a)
+#endif	/* min */
 
-int krb5_lname_username_fallback = 1;
-extern char *krb5_lname_file;
-
-#ifndef _MSDOS    
-
-static krb5_error_code dbm_an_to_ln();
-static krb5_error_code username_an_to_ln();
+#ifdef	BERK_DB_DBM
+/*
+ * Use Berkeley Hashed Database code.
+ */
+extern DBM	*db_dbm_open KRB5_PROTOTYPE((char *, int, int));
+extern void	db_dbm_close KRB5_PROTOTYPE((DBM *));
+extern datum	db_dbm_fetch KRB5_PROTOTYPE((DBM *, datum));
+#define	KDBM_OPEN(db, fl, mo)	db_dbm_open(db, fl, mo)
+#define	KDBM_CLOSE(db)		db_dbm_close(db)
+#define	KDBM_FETCH(db, key)	db_dbm_fetch(db, key)
+#else	/* BERK_DB_DBM */
+/*
+ * Use standard DBM code.
+ */
+#define	KDBM_OPEN(db, fl, mo)	dbm_open(db, fl, mo)
+#define	KDBM_CLOSE(db)		dbm_close(db)
+#define	KDBM_FETCH(db, key)	dbm_fetch(db, key)
+#endif	/* BERK_DB_DBM */
 
 /*
- Converts an authentication name to a local name suitable for use by
- programs wishing a translation to an environment-specific name (e.g.
- user account name).
-
- lnsize specifies the maximum length name that is to be filled into
- lname.
- The translation will be null terminated in all non-error returns.
-
- returns system errors, NOT_ENOUGH_SPACE
-*/
-
-krb5_error_code
-krb5_aname_to_localname(context, aname, lnsize, lname)
-    krb5_context context;
-	krb5_const_principal aname;
-	const int lnsize;
-	char *lname;
+ * Find the portion of the flattened principal name that we use for mapping.
+ */
+static char *
+aname_full_to_mapping_name(fprincname)
+    char *fprincname;
 {
-	struct stat statbuf;
+    char	*atp;
+    size_t	mlen;
+    char	*mname;
 
-#ifdef USE_DBM_LNAME
-	if (!stat(krb5_lname_file,&statbuf))
-		return dbm_an_to_ln(context, aname, lnsize, lname);
-#endif
-	if (krb5_lname_username_fallback)
-		return username_an_to_ln(context, aname, lnsize, lname);
-	return KRB5_LNAME_CANTOPEN;
+    mname = (char *) NULL;
+    if (fprincname) {
+	atp = strrchr(fprincname, '@');
+	if (!atp)
+	    atp = &fprincname[strlen(fprincname)];
+	mlen = (size_t) (atp - fprincname);
+	
+	if (mname = (char *) malloc(mlen+1)) {
+	    strncpy(mname, fprincname, mlen);
+	    mname[mlen] = '\0';
+	}
+    }
+    return(mname);
 }
 
-#ifdef USE_DBM_LNAME
 /*
  * Implementation:  This version uses a DBM database, indexed by aname,
  * to generate a lname.
@@ -77,12 +100,14 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
  * null in the DBM datum.size.
  */
 static krb5_error_code
-dbm_an_to_ln(context, aname, lnsize, lname)
+db_an_to_ln(context, dbname, aname, lnsize, lname)
     krb5_context context;
+    char *dbname;
     krb5_const_principal aname;
     const int lnsize;
     char *lname;
 {
+#if	defined(BERK_DB_DBM) || !defined(_WINDOWS)
     DBM *db;
     krb5_error_code retval;
     datum key, contents;
@@ -94,13 +119,13 @@ dbm_an_to_ln(context, aname, lnsize, lname)
     key.dsize = strlen(princ_name)+1;	/* need to store the NULL for
 					   decoding */
 
-    db = dbm_open(krb5_lname_file, O_RDONLY, 0600);
+    db = KDBM_OPEN(dbname, O_RDONLY, 0600);
     if (!db) {
 	krb5_xfree(princ_name);
 	return KRB5_LNAME_CANTOPEN;
     }
 
-    contents = dbm_fetch(db, key);
+    contents = KDBM_FETCH(db, key);
 
     krb5_xfree(princ_name);
 
@@ -116,11 +141,457 @@ dbm_an_to_ln(context, aname, lnsize, lname)
 	    retval = 0;
     }
     /* can't close until we copy the contents. */
-    (void) dbm_close(db);
+    (void) KDBM_CLOSE(db);
     return retval;
+#else	/* BERK_DB_DBM && !_WINDOWS */
+    /*
+     * If we don't have support for a database mechanism, then we can't
+     * translate this now, can we?
+     */
+    return KRB5_LNAME_NOTRANS;
+#endif	/* BERK_DB_DBM && !_WINDOWS */
 }
-#endif /* USE_DBM_LNAME */
-#endif /* _MSDOS */
+
+#ifdef	AN_TO_LN_RULES
+/*
+ * Format and transform a principal name to a local name.  This is particularly
+ * useful when Kerberos principals and local user names are formatted to
+ * some particular convention.
+ *
+ * There are three parts to each rule:
+ * First part - formulate the string to perform operations on:  If not present
+ * then the string defaults to the fully flattened principal minus the realm
+ * name.  Otherwise the syntax is as follows:
+ *	"[" <ncomps> ":" <format> "]"
+ *		Where:
+ *			<ncomps> is the number of expected components for this
+ *			rule.  If the particular principal does not have this
+ *			many components, then this rule does not apply.
+ *
+ *			<format> is a string of <component> or verbatim
+ *			characters to be inserted.
+ *
+ *			<component> is of the form "$"<number> to select the
+ *			<number>th component.  <number> begins from 1.
+ *
+ * Second part - select rule validity:  If not present, then this rule may
+ * apply to all selections.  Otherwise the syntax is as follows:
+ *	"(" <regexp> ")"
+ *		Where:	<regexp> is a selector regular expression.  If this
+ *			regular expression matches the whole pattern generated
+ *			from the first part, then this rule still applies.
+ *
+ * Last part - Transform rule:  If not present, then the selection string
+ * is passed verbatim and is matched.  Otherwise, the syntax is as follows:
+ *	<rule> ...
+ *		Where:	<rule> is of the form:
+ *			"s/" <regexp> "/" <text> "/" ["g"]
+ * 
+ * In order to be able to select rule validity, the native system must support
+ * one of compile(3), re_comp(3) or regcomp(3).  In order to be able to
+ * transform (e.g. substitute), the native system must support regcomp(3) or
+ * compile(3).
+ */
+
+/*
+ * aname_do_match() 	- Does our name match the parenthesized regular
+ *			  expression?
+ * 
+ * Chew up the match portion of the regular expression and update *contextp.
+ * If no re_comp() or regcomp(), then always return a match.
+ */
+static krb5_error_code
+aname_do_match(string, contextp)
+    char	*string;
+    char	**contextp;
+{
+    krb5_error_code	kret;
+    char		*regexp, *startp, *endp;
+    size_t		regexlen;
+#if	HAVE_REGCOMP
+    regex_t		match_exp;
+    regmatch_t		match_match;
+#elif	HAVE_REGEXP_H
+    char		regexp_buffer[RE_BUF_SIZE];
+#endif	/* HAVE_REGEXP_H */
+
+    kret = 0;
+    /*
+     * Is this a match expression?
+     */
+    if (**contextp == '(') {
+	kret = KRB5_CONFIG_BADFORMAT;
+	startp = (*contextp) + 1;
+	endp = strchr(startp, ')');
+	/* Find the end of the match expression. */
+	if (endp) {
+	    regexlen = (size_t) (endp - startp);
+	    regexp = (char *) malloc((size_t) regexlen+1);
+	    kret = ENOMEM;
+	    if (regexp) {
+		strncpy(regexp, startp, regexlen);
+		regexp[regexlen] = '\0';
+		kret = KRB5_LNAME_NOTRANS;
+		/*
+		 * Perform the match.
+		 */
+#if	HAVE_REGCOMP
+		if (!regcomp(&match_exp, regexp, REG_EXTENDED) &&
+		    !regexec(&match_exp, string, 1, &match_match, 0)) {
+		    if ((match_match.rm_so == 0) &&
+			(match_match.rm_eo == strlen(string)))
+			kret = 0;
+		}
+		regfree(&match_exp);
+#elif	HAVE_REGEXP_H
+		compile(regexp,
+			regexp_buffer,
+			&regexp_buffer[RE_BUF_SIZE],
+			'\0');
+		if (step(string, regexp_buffer)) {
+		    if ((loc1 == string) &&
+			(loc2 == &string[strlen(string)]))
+			kret = 0;
+		}
+#elif	HAVE_RE_COMP
+		if (!re_comp(regexp) && re_exec(string))
+		    kret = 0;
+#else	/* HAVE_RE_COMP */
+		kret = 0;
+#endif	/* HAVE_RE_COMP */
+		free(regexp);
+	    }
+	    endp++;
+	}
+	else
+	    endp = startp;
+    }
+    *contextp = endp;
+    return(kret);
+}
+
+/*
+ * do_replacement()	- Replace the regular expression with the specified
+ * 			  replacement.
+ *
+ * If "doall" is set, it's a global replacement, otherwise, just a oneshot
+ * deal.
+ * If no regcomp() then just return the input string verbatim in the output
+ * string.
+ */
+static void
+do_replacement(regexp, repl, doall, in, out)
+    char	*regexp;
+    char	*repl;
+    int		doall;
+    char	*in;
+    char	*out;
+{
+#if	HAVE_REGCOMP
+    regex_t	match_exp;
+    regmatch_t	match_match;
+    int		matched;
+    char	*cp;
+    char	*op;
+
+    if (!regcomp(&match_exp, regexp, REG_EXTENDED)) {
+	cp = in;
+	op = out;
+	matched = 0;
+	do {
+	    if (!regexec(&match_exp, cp, 1, &match_match, 0)) {
+		if (match_match.rm_so) {
+		    strncpy(op, cp, match_match.rm_so);
+		    op += match_match.rm_so;
+		}
+		strcpy(op, repl);
+		op += strlen(repl);
+		cp += match_match.rm_eo;
+		if (!doall)
+		    strcpy(op, cp);
+		matched = 1;
+	    }
+	    else {
+		strcpy(op, cp);
+		matched = 0;
+	    }
+	} while (doall && matched);
+	regfree(&match_exp);
+    }
+#elif	HAVE_REGEXP_H
+    int		matched;
+    char	*cp;
+    char	*op;
+    char	regexp_buffer[RE_BUF_SIZE];
+    size_t	sdispl, edispl;
+
+    compile(regexp,
+	    regexp_buffer,
+	    &regexp_buffer[RE_BUF_SIZE],
+	    '\0');
+    cp = in;
+    op = out;
+    matched = 0;
+    do {
+	if (step(cp, regexp_buffer)) {
+	    sdispl = (size_t) (loc1 - cp);
+	    edispl = (size_t) (loc2 - cp);
+	    if (sdispl) {
+		strncpy(op, cp, sdispl);
+		op += sdispl;
+	    }
+	    strcpy(op, repl);
+	    op += strlen(repl);
+	    cp += edispl;
+	    if (!doall)
+		strcpy(op, cp);
+	    matched = 1;
+	}
+	else {
+	    strcpy(op, cp);
+	    matched = 0;
+	}
+    } while (doall && matched);
+#else	/* HAVE_REGEXP_H */
+    strcpy(out, in);
+#endif	/* HAVE_REGCOMP */
+}
+
+/*
+ * aname_replacer()	- Perform the specified substitutions on the input
+ *			  string and return the result.
+ *
+ * This routine enforces the "s/<pattern>/<replacement>/[g]" syntax.
+ */
+static krb5_error_code
+aname_replacer(string, contextp, result)
+    char	*string;
+    char	**contextp;
+    char	**result;
+{
+    krb5_error_code	kret;
+    char		*in;
+    char		*out;
+    char		*cp, *ep, *tp;
+    char		*rule, *repl;
+    size_t		rule_size, repl_size;
+    int			doglobal;
+
+    kret = ENOMEM;
+    *result = (char *) NULL;
+    /* Allocate the formatting buffers */
+    if ((in = (char *) malloc(MAX_FORMAT_BUFFER)) &&
+	(out = (char *) malloc(MAX_FORMAT_BUFFER))) {
+	/*
+	 * Prime the buffers.  Copy input string to "out" to simulate it
+	 * being the result of an initial iteration.
+	 */
+	strcpy(out, string);
+	in[0] = '\0';
+	kret = 0;
+	/*
+	 * Pound through the expression until we're done.
+	 */
+	for (cp = *contextp; *cp; ) {
+	    /* Skip leading whitespace */
+	    while (isspace(*cp))
+		cp++;
+
+	    /*
+	     * Find our separators.  First two characters must be "s/"
+	     * We must also find another "/" followed by another "/".
+	     */
+	    if ((cp[0] == 's') &&
+		(cp[1] == '/') &&
+		(ep = strchr(&cp[2], '/')) &&
+		(tp = strchr(&ep[1], '/'))) {
+
+		/* Figure out sizes of strings and allocate them */
+		rule_size = (size_t) (ep - &cp[2]);
+		repl_size = (size_t) (tp - &ep[1]);
+		if ((rule = (char *) malloc(rule_size+1)) &&
+		    (repl = (char *) malloc(repl_size+1))) {
+
+		    /* Copy the strings */
+		    strncpy(rule, &cp[2], rule_size);
+		    strncpy(repl, &ep[1], repl_size);
+		    rule[rule_size] = repl[repl_size] = '\0';
+
+		    /* Check for trailing "g" */
+		    doglobal = (tp[1] == 'g') ? 1 : 0;
+		    if (doglobal)
+			tp++;
+
+		    /* Swap previous in and out buffers */
+		    ep = in;
+		    in = out;
+		    out = ep;
+
+		    /* Do the replacemenbt */
+		    do_replacement(rule, repl, doglobal, in, out);
+		    free(rule);
+		    free(repl);
+
+		    /* If we have no output buffer left, this can't be good */
+		    if (strlen(out) == 0) {
+			kret = KRB5_LNAME_NOTRANS;
+			break;
+		    }
+		}
+		else {
+		    /* No memory for copies */
+		    kret = ENOMEM;
+		    break;
+		}
+	    }
+	    else {
+		/* Bad syntax */
+		kret = KRB5_CONFIG_BADFORMAT;
+		break;
+	    }
+	    /* Advance past trailer */
+	    cp = &tp[1];
+	}
+	free(in);
+	if (!kret)
+	    *result = out;
+	else
+	    free(out);
+    }
+    return(kret);
+}
+
+/*
+ * rule_an_to_ln()	- Handle aname to lname translations for RULE rules.
+ *
+ * The initial part of this routine handles the formulation of the strings from
+ * the principal name.
+ */
+static krb5_error_code
+rule_an_to_ln(context, rule, aname, lnsize, lname)
+    krb5_context		context;
+    char *			rule;
+    krb5_const_principal	aname;
+    const int			lnsize;
+    char *			lname;
+{
+    krb5_error_code	kret;
+    char		*current;
+    char		*fprincname;
+    char		*selstring;
+    int			num_comps, compind;
+    char		*cout;
+    krb5_data		*datap;
+    char		*outstring;
+
+    /*
+     * First flatten the name.
+     */
+    current = rule;
+    if (!(kret = krb5_unparse_name(context, aname, &fprincname))) {
+	/*
+	 * First part.
+	 */
+	if (*current == '[') {
+	    if (sscanf(current+1,"%d:", &num_comps) == 1) {
+		if (num_comps == aname->length) {
+		    /*
+		     * We have a match based on the number of components.
+		     */
+		    current = strchr(current, ':');
+		    selstring = (char *) malloc(MAX_FORMAT_BUFFER);
+		    if (current && selstring) {
+			current++;
+			cout = selstring;
+			/*
+			 * Plow through the string.
+			 */
+			while ((*current != ']') &&
+			       (*current != '\0')) {
+			    /*
+			     * Expand to a component.
+			     */
+			    if (*current == '$') {
+				if ((sscanf(current+1, "%d", &compind) == 1) &&
+				    (compind <= num_comps) &&
+				    (datap = krb5_princ_component(context,
+								  aname,
+								  compind-1))
+				    ) {
+				    strncpy(cout,
+					    datap->data,
+					    datap->length);
+				    cout += datap->length;
+				    *cout = '\0';
+				    current++;
+				    /* Point past number */
+				    while (isdigit(*current))
+					current++;
+				}
+				else
+				    kret = KRB5_CONFIG_BADFORMAT;
+			    }
+			    else {
+				/* Copy in verbatim. */
+				*cout = *current;
+				cout++;
+				*cout = '\0';
+				current++;
+			    }
+			}
+
+			/*
+			 * Advance past separator if appropriate.
+			 */
+			if (*current == ']')
+			    current++;
+			else
+			    kret = KRB5_CONFIG_BADFORMAT;
+
+			if (kret)
+			    free(selstring);
+		    }
+		}
+		else
+		    kret = KRB5_LNAME_NOTRANS;
+	    }
+	    else
+		kret = KRB5_CONFIG_BADFORMAT;
+	}
+	else {
+	    if (!(selstring = aname_full_to_mapping_name(fprincname)))
+		kret = ENOMEM;
+	}
+	krb5_xfree(fprincname);
+    }
+    if (!kret) {
+	/*
+	 * Second part
+	 */
+	if (*current == '(')
+	    kret = aname_do_match(selstring, &current);
+
+	/*
+	 * Third part.
+	 */
+	if (!kret) {
+	    outstring = (char *) NULL;
+	    kret = aname_replacer(selstring, &current, &outstring);
+	    if (outstring) {
+		/* Copy out the value if there's enough room */
+		if (strlen(outstring)+1 <= (size_t) lnsize)
+		    strcpy(lname, outstring);
+		else
+		    kret = KRB5_CONFIG_NOTENUFSPACE;
+		free(outstring);
+	    }
+	}
+	free(selstring);
+    }
+
+    return(kret);
+}
+#endif	/* AN_TO_LN_RULES */
 
 /*
  * Implementation:  This version checks the realm to see if it is the local
@@ -128,7 +599,7 @@ dbm_an_to_ln(context, aname, lnsize, lname)
  * that name is returned as the lname.
  */
 static krb5_error_code
-username_an_to_ln(context, aname, lnsize, lname)
+default_an_to_ln(context, aname, lnsize, lname)
     krb5_context context;
     krb5_const_principal aname;
     const int lnsize;
@@ -175,18 +646,169 @@ username_an_to_ln(context, aname, lnsize, lname)
     return retval;
 }
 
-#ifdef _MSDOS
+/*
+ Converts an authentication name to a local name suitable for use by
+ programs wishing a translation to an environment-specific name (e.g.
+ user account name).
+
+ lnsize specifies the maximum length name that is to be filled into
+ lname.
+ The translation will be null terminated in all non-error returns.
+
+ returns system errors, NOT_ENOUGH_SPACE
+*/
 
 krb5_error_code
 krb5_aname_to_localname(context, aname, lnsize, lname)
     krb5_context context;
-	krb5_const_principal aname;
-	const int lnsize;
-	char *lname;
+    krb5_const_principal aname;
+    const int lnsize;
+    char *lname;
 {
-	if (krb5_lname_username_fallback)
-		return username_an_to_ln(context, aname, lnsize, lname);
-	return KRB5_LNAME_CANTOPEN;
+    krb5_error_code	kret;
+    char		*realm;
+    char		*pname;
+    char		*mname;
+    const char		*hierarchy[5];
+    char		**mapping_values;
+    int			i, nvalid;
+    char		*cp;
+    char		*typep, *argp;
+
+    /*
+     * First get the default realm.
+     */
+    if (!(kret = krb5_get_default_realm(context, &realm))) {
+	/* Flatten the name */
+	if (!(kret = krb5_unparse_name(context, aname, &pname))) {
+	    if (mname = aname_full_to_mapping_name(pname)) {
+		/*
+		 * Search first for explicit mappings of the form:
+		 *
+		 * [realms]->realm->"auth_to_local_names"->mapping_name
+		 */
+		hierarchy[0] = "realms";
+		hierarchy[1] = realm;
+		hierarchy[2] = "auth_to_local_names";
+		hierarchy[3] = mname;
+		hierarchy[4] = (char *) NULL;
+		if (!(kret = profile_get_values(context->profile,
+						hierarchy,
+						&mapping_values))) {
+		    /* We found one or more explicit mappings. */
+		    for (nvalid=0; mapping_values[nvalid]; nvalid++);
+
+		    /* Free the other ones, just use the last one */
+		    for (i=0; i<nvalid-1; i++)
+			krb5_xfree(mapping_values[i]);
+
+		    /* Trim the value. */
+		    cp = &mapping_values[nvalid-1]
+			[strlen(mapping_values[nvalid-1])];
+		    while (isspace(*cp)) cp--;
+		    cp++;
+		    *cp = '\0';
+
+		    /* Copy out the value if there's enough room */
+		    if (strlen(mapping_values[nvalid-1])+1 <= (size_t) lnsize)
+			strcpy(lname, mapping_values[nvalid-1]);
+		    else
+			kret = KRB5_CONFIG_NOTENUFSPACE;
+
+		    /* Free residue */
+		    krb5_xfree(mapping_values[nvalid-1]);
+		    krb5_xfree(mapping_values);
+		}
+		else {
+		    /*
+		     * OK - There's no explicit mapping.  Now check for
+		     * general auth_to_local rules of the form:
+		     *
+		     * [realms]->realm->"auth_to_local"
+		     *
+		     * This can have one or more of the following kinds of
+		     * values:
+		     *	DB:<filename>	- Look up principal in aname database.
+		     *	RULE:<sed-exp>	- Formulate lname from sed-exp.
+		     *	DEFAULT		- Use default rule.
+		     * The first rule to find a match is used.
+		     */
+		    hierarchy[0] = "realms";
+		    hierarchy[1] = realm;
+		    hierarchy[2] = "auth_to_local";
+		    hierarchy[3] = (char *) NULL;
+		    if (!(kret = profile_get_values(context->profile,
+						    hierarchy,
+						    &mapping_values))) {
+			/*
+			 * Loop through all the mapping values.
+			 */
+			for (i=0; mapping_values[i]; i++) {
+			    typep = mapping_values[i];
+			    argp = strchr(typep, ':');
+			    if (argp) {
+				*argp = '\0';
+				argp++;
+			    }
+			    if (!strcmp(typep, "DB") && argp) {
+				kret = db_an_to_ln(context,
+						   argp,
+						   aname,
+						   lnsize,
+						   lname);
+				if (kret != KRB5_LNAME_NOTRANS)
+				    break;
+			    }
+			    else
+#ifdef	AN_TO_LN_RULES
+			    if (!strcmp(typep, "RULE") && argp) {
+				kret = rule_an_to_ln(context,
+						     argp,
+						     aname,
+						     lnsize,
+						     lname);
+				if (kret != KRB5_LNAME_NOTRANS)
+				    break;
+			    }
+			    else
+#endif	/* AN_TO_LN_RULES */
+			    if (!strcmp(typep, "DEFAULT") && !argp) {
+				kret = default_an_to_ln(context,
+							aname,
+							lnsize,
+							lname);
+				if (kret != KRB5_LNAME_NOTRANS)
+				    break;
+			    }
+			    else {
+				kret = KRB5_CONFIG_BADFORMAT;
+				break;
+			    }
+			}
+
+			/* We're done, clean up the droppings. */
+			for (i=0; mapping_values[i]; i++)
+			    krb5_xfree(mapping_values[i]);
+			krb5_xfree(mapping_values);
+		    }
+		    else {
+			/*
+			 * No profile relation found, try default mapping.
+			 */
+			kret = default_an_to_ln(context,
+						aname,
+						lnsize,
+						lname);
+		    }
+		}
+		free(mname);
+	    }
+	    else
+		kret = ENOMEM;
+	    krb5_xfree(pname);
+	}
+	krb5_xfree(realm);
+    }
+    return(kret);
 }
 
-#endif /* _MSDOS */

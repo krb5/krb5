@@ -1,4 +1,5 @@
-CFLAGS = $(CCOPTS) $(DEFS)
+DBFLAGS=@DBFLAGS@
+CFLAGS = $(CCOPTS) $(DEFS) $(DBFLAGS) -DAN_TO_LN_RULES
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -95,14 +96,20 @@ shared:
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
-TEST_PROGS= t_std_conf
+TEST_PROGS= t_std_conf t_an_to_ln
 
 T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
 		hst_realm.o init_os_ctx.o locate_kdc.o $(COMERRLIB) \
 		$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a
 
+T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o $(TOPLIBD)/libkrb5.a	\
+		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
+
 t_std_conf: $(T_STD_CONF_OBJS)
 	$(CC) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
+
+t_an_to_ln: $(T_AN_TO_LN_OBJS)
+	$(CC) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
 
 check:: check-$(WHAT)
 
