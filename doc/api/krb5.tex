@@ -797,8 +797,8 @@ Returns system errors, integrity errors.
 \funcarg{krb5_data *}{userdata}
 \funcarg{krb5_enctype}{etype}
 \funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_fulladdr *}{sender_addr}
-\funcarg{krb5_fulladdr *}{recv_addr}
+\funcarg{krb5_address *}{sender_addr}
+\funcarg{krb5_address *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{priv_flags}
 \funcarg{krb5_rcache}{rcache}
@@ -813,8 +813,8 @@ Formats a KRB_PRIV message into \funcparam{outbuf}.
 \funcparam{userdata} is formatted as the user data in the message.
 \funcparam{etype} specifies the encryption type; \funcparam{key}
 specifies the key for the encryption; \funcparam{sender_addr} and
-\funcparam{recv_addr} specify the full addresses (host and port) of the
-sender and receiver.
+\funcparam{recv_addr} specify the addresses of the sender and
+receiver.
 
 \funcparam{i_vector} is used as an initialization vector for the
 encryption, and if non-NULL its contents are replaced with the last
@@ -838,8 +838,8 @@ Returns system errors.
 \begin{funcdecl}{krb5_rd_priv}{krb5_error_code}{\funcin}
 \funcarg{krb5_data *}{inbuf}
 \funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_fulladdr *}{sender_addr}
-\funcarg{krb5_fulladdr *}{recv_addr}
+\funcarg{krb5_address *}{sender_addr}
+\funcarg{krb5_address *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{priv_flags}
 \funcinout
@@ -854,8 +854,8 @@ data in \funcparam{*outbuf}.
 
 \funcparam{key} specifies the key to be used for decryption of the message.
  
-\funcparam{sender_addr} and \funcparam{recv_addr} specify the full
-addresses (host and port) of the sender and receiver.
+\funcparam{sender_addr} and \funcparam{recv_addr} specify the addresses
+of the sender and receiver.
 
 \funcparam{outbuf} points to allocated storage which the caller should
 free when finished.
