@@ -109,17 +109,25 @@ krb5_context_size(kcontext, arg, sizep)
      *	nktypes*sizeof(krb5_int32)	for in_tkt_ktypes.
      *	krb5_int32			for n_tgs_ktypes*sizeof(krb5_int32)
      *	nktypes*sizeof(krb5_int32)	for tgs_ktypes.
+     *  krb5_int32			for clockskew
+     *  krb5_int32			for kdc_req_sumtype
+     *  krb5_int32			for ap_req_sumtype
+     *  krb5_int32			for safe_sumtype
+     *  krb5_int32			for kdc_default_options
+     *  krb5_int32			for library_options
+     *  krb5_int32			for profile_secure
+     * 	krb5_int32			for fcc_default_format
+     *  krb5_int32			for scc_default_format
+     *    <>				for os_context
+     *    <>				for db_context
+     *    <>				for profile
      *	krb5_int32			for trailer.
      */
     kret = EINVAL;
     if ((context = (krb5_context) arg)) {
 	/* Calculate base length */
-	required = (sizeof(krb5_int32) +
-		    sizeof(krb5_int32) +
-		    sizeof(krb5_int32) +
-		    sizeof(krb5_int32) +
+	required = (14 * sizeof(krb5_int32) +
 		    (context->in_tkt_ktype_count * sizeof(krb5_int32)) +
-		    sizeof(krb5_int32) +
 		    (context->tgs_ktype_count * sizeof(krb5_int32)));
 
 	if (context->default_realm)
@@ -170,86 +178,159 @@ krb5_context_externalize(kcontext, arg, buffer, lenremain)
     required = 0;
     bp = *buffer;
     remain = *lenremain;
-    kret = EINVAL;
-    if ((context = (krb5_context) arg)) {
-	kret = ENOMEM;
-	if (!krb5_context_size(kcontext, arg, &required) &&
-	    (required <= remain)) {
-	    /* First write our magic number */
-	    (void) krb5_ser_pack_int32(KV5M_CONTEXT, &bp, &remain);
-	    
-	    /* Now sizeof default realm */
-	    (void) krb5_ser_pack_int32((context->default_realm) ?
-				       (krb5_int32) strlen(context->
-							   default_realm) : 0,
-				       &bp, &remain);
+    context = (krb5_context) arg;
+    if (!context)
+	    return (EINVAL);
+    KRB5_VERIFY_MAGIC(context, KV5M_CONTEXT);
 
-	    /* Now default_realm bytes */
-	    if (context->default_realm)
-		(void) krb5_ser_pack_bytes((krb5_octet *) 
-					   context->default_realm,
-					   strlen(context->default_realm),
-					   &bp, &remain);
+    if ((kret = krb5_context_size(kcontext, arg, &required)))
+	return (kret);
 
-	    /* Now number of initial ticket ktypes */
-	    (void) krb5_ser_pack_int32((krb5_int32) context->in_tkt_ktype_count,
-				       &bp, &remain);
-
-	    /* Now serialize ktypes */
-	    for (i=0; i<context->in_tkt_ktype_count; i++)
-		(void) krb5_ser_pack_int32((krb5_int32) context->in_tkt_ktypes[i],
-					   &bp, &remain);
-	    kret = 0;
-
-	    /* Now number of default ktypes */
-	    (void) krb5_ser_pack_int32((krb5_int32) context->tgs_ktype_count,
-				       &bp, &remain);
-
-	    /* Now serialize ktypes */
-	    for (i=0; i<context->tgs_ktype_count; i++)
-		(void) krb5_ser_pack_int32((krb5_int32) context->tgs_ktypes[i],
-					   &bp, &remain);
-	    kret = 0;
-
-	    /* Now handle os_context, if appropriate */
-	    if (context->os_context)
-		kret = krb5_externalize_opaque(kcontext,
-					       KV5M_OS_CONTEXT,
-					       (krb5_pointer)
-					       context->os_context,
-					       &bp,
-					       &remain);
-
-	    /* Now handle database context, if appropriate */
-	    if (!kret && context->db_context)
-		kret = krb5_externalize_opaque(kcontext,
-					       KV5M_DB_CONTEXT,
-					       (krb5_pointer)
-					       context->db_context,
-					       &bp,
-					       &remain);
-
-	    /* Finally, handle profile, if appropriate */
-	    if (!kret && context->profile)
-		kret = krb5_externalize_opaque(kcontext,
-					       PROF_MAGIC_PROFILE,
-					       (krb5_pointer)
-					       context->profile,
-					       &bp,
-					       &remain);
-	    /*
-	     * If we were successful, write trailer then update the pointer and
-	     * remaining length;
-	     */
-	    if (!kret) {
-		/* Write our trailer */
-		(void) krb5_ser_pack_int32(KV5M_CONTEXT, &bp, &remain);
-		*buffer = bp;
-		*lenremain = remain;
-	    }
-	}
+    if (required > remain)
+	return (ENOMEM);
+    
+    /* First write our magic number */
+    kret = krb5_ser_pack_int32(KV5M_CONTEXT, &bp, &remain);
+    if (kret)
+	return (kret);
+    
+    /* Now sizeof default realm */
+    kret = krb5_ser_pack_int32((context->default_realm) ?
+			       (krb5_int32) strlen(context->default_realm) : 0,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+    
+    /* Now default_realm bytes */
+    if (context->default_realm) {
+	kret = krb5_ser_pack_bytes((krb5_octet *) context->default_realm,
+				   strlen(context->default_realm), 
+				   &bp, &remain);
+	if (kret)
+	    return (kret);
     }
-    return(kret);
+
+    /* Now number of initial ticket ktypes */
+    kret = krb5_ser_pack_int32((krb5_int32) context->in_tkt_ktype_count,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+    
+    /* Now serialize ktypes */
+    for (i=0; i<context->in_tkt_ktype_count; i++) {
+	kret = krb5_ser_pack_int32((krb5_int32) context->in_tkt_ktypes[i],
+				   &bp, &remain);
+	if (kret)
+	    return (kret);
+    }
+    
+    /* Now number of default ktypes */
+    kret = krb5_ser_pack_int32((krb5_int32) context->tgs_ktype_count,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+	
+    /* Now serialize ktypes */
+    for (i=0; i<context->tgs_ktype_count; i++) {
+	kret = krb5_ser_pack_int32((krb5_int32) context->tgs_ktypes[i],
+				   &bp, &remain);
+	if (kret)
+	    return (kret);
+    }
+	
+    /* Now allowable clockskew */
+    kret = krb5_ser_pack_int32((krb5_int32) context->clockskew,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+	
+    /* Now kdc_req_sumtype */
+    kret = krb5_ser_pack_int32((krb5_int32) context->kdc_req_sumtype,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+	
+    /* Now default ap_req_sumtype */
+    kret = krb5_ser_pack_int32((krb5_int32) context->default_ap_req_sumtype,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+
+    /* Now default safe_sumtype */
+    kret = krb5_ser_pack_int32((krb5_int32) context->default_safe_sumtype,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+
+    /* Now kdc_default_options */
+    kret = krb5_ser_pack_int32((krb5_int32) context->kdc_default_options,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+
+    /* Now library_options */
+    kret = krb5_ser_pack_int32((krb5_int32) context->library_options,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+	
+    /* Now profile_secure */
+    kret = krb5_ser_pack_int32((krb5_int32) context->profile_secure,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+
+    /* Now fcc_default_format */
+    kret = krb5_ser_pack_int32((krb5_int32) context->fcc_default_format,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+
+    /* Now scc_default_format */
+    kret = krb5_ser_pack_int32((krb5_int32) context->scc_default_format,
+			       &bp, &remain);
+    if (kret)
+	return (kret);
+
+    /* Now handle os_context, if appropriate */
+    if (context->os_context) {
+	kret = krb5_externalize_opaque(kcontext, KV5M_OS_CONTEXT,
+				       (krb5_pointer) context->os_context,
+				       &bp, &remain);
+	if (kret)
+	    return (kret);
+    }
+	
+    /* Now handle database context, if appropriate */
+    if (context->db_context) {
+	kret = krb5_externalize_opaque(kcontext, KV5M_DB_CONTEXT,
+				       (krb5_pointer) context->db_context,
+				       &bp, &remain);
+	if (kret)
+	    return (kret);
+    }
+
+    /* Finally, handle profile, if appropriate */
+    if (context->profile) {
+	kret = krb5_externalize_opaque(kcontext, PROF_MAGIC_PROFILE,
+				       (krb5_pointer) context->profile,
+				       &bp, &remain);
+	if (kret)
+	    return (kret);
+    }
+	
+    /*
+     * If we were successful, write trailer then update the pointer and
+     * remaining length;
+     */
+    kret = krb5_ser_pack_int32(KV5M_CONTEXT, &bp, &remain);
+    if (kret)
+	return (kret);
+    
+    *buffer = bp;
+    *lenremain = remain;
+
+    return (0);
 }
 
 /*
@@ -271,123 +352,163 @@ krb5_context_internalize(kcontext, argp, buffer, lenremain)
 
     bp = *buffer;
     remain = *lenremain;
-    kret = EINVAL;
+
     /* Read our magic number */
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
-	ibuf = 0;
-    if (ibuf == KV5M_CONTEXT) {
-	kret = ENOMEM;
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	return (EINVAL);
 
-	/* Get memory for the context */
-	if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)) &&
-	    (context = (krb5_context) malloc(sizeof(struct _krb5_context)))) {
-	    memset(context, 0, sizeof(struct _krb5_context));
+    if (ibuf != KV5M_CONTEXT)
+	return (EINVAL);
 
-	    if (!ibuf ||
-		(context->default_realm = (char *) malloc((size_t) ibuf+1))) {
-		/* Copy in the default realm */
-		if (ibuf) {
-		    (void) krb5_ser_unpack_bytes((krb5_octet *)
-						 context->default_realm,
-						 (size_t) ibuf,
-						 &bp, &remain);
-		    context->default_realm[ibuf] = '\0';
-		}
+    /* Get memory for the context */
+    context = (krb5_context) malloc(sizeof(struct _krb5_context));
+    if (!context)
+	return (ENOMEM);
+    memset(context, 0, sizeof(struct _krb5_context));
 
-		/* Get the number of in_tkt_ktypes */
-		if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
-		    /* Reduce it to a count */
-		    context->in_tkt_ktype_count = (int) ibuf;
-		    if ((context->in_tkt_ktypes = (krb5_enctype *)
-			 malloc(sizeof(krb5_enctype) *
-				(context->in_tkt_ktype_count+1)))) {
-			memset(context->in_tkt_ktypes,
-			       0,
-			       sizeof(krb5_enctype) *
-			       (context->in_tkt_ktype_count + 1));
-			for (i=0; i<context->in_tkt_ktype_count; i++) {
-			    if ((kret = krb5_ser_unpack_int32(&ibuf,
-							      &bp, &remain)))
-				break;
-			    context->in_tkt_ktypes[i] = (krb5_enctype) ibuf;
-			}
-		    }
-		}
+    /* Get the size of the default realm */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
 
-		/* Get the number of tgs_ktypes */
-		if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
-		    /* Reduce it to a count */
-		    context->tgs_ktype_count = (int) ibuf;
-		    if ((context->tgs_ktypes = (krb5_enctype *)
-			 malloc(sizeof(krb5_enctype) *
-				(context->tgs_ktype_count+1)))) {
-			memset(context->tgs_ktypes,
-			       0,
-			       sizeof(krb5_enctype) *
-			       (context->tgs_ktype_count + 1));
-			for (i=0; i<context->tgs_ktype_count; i++) {
-			    if ((kret = krb5_ser_unpack_int32(&ibuf,
-							      &bp, &remain)))
-				break;
-			    context->tgs_ktypes[i] = (krb5_enctype) ibuf;
-			}
-		    }
-		}
-
-		/* Attempt to read in the os_context */
-		if (!kret) {
-		    kret = krb5_internalize_opaque(kcontext,
-						   KV5M_OS_CONTEXT,
-						   (krb5_pointer *)
-						   &context->os_context,
-						   &bp,
-						   &remain);
-		    if ((kret == EINVAL) || (kret == ENOENT))
-			kret = 0;
-		}
-
-		/* Attempt to read in the db_context */
-		if (!kret) {
-		    kret = krb5_internalize_opaque(kcontext,
-						   KV5M_DB_CONTEXT,
-						   (krb5_pointer *)
-						   &context->db_context,
-						   &bp,
-						   &remain);
-		    if ((kret == EINVAL) || (kret == ENOENT))
-			kret = 0;
-		}
-
-		/* Attempt to read in the profile */
-		if (!kret) {
-		    kret = krb5_internalize_opaque(kcontext,
-						   PROF_MAGIC_PROFILE,
-						   (krb5_pointer *)
-						   &context->profile,
-						   &bp,
-						   &remain);
-		    if ((kret == EINVAL) || (kret == ENOENT))
-			kret = 0;
-		}
-
-		/* Finally, find the trailer */
-		if (!kret) {
-		    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-		    if (!kret && (ibuf == KV5M_CONTEXT))
-			context->magic = KV5M_CONTEXT;
-		    else
-			kret = EINVAL;
-		}
-	    }
-	    if (!kret) {
-		*buffer = bp;
-		*lenremain = remain;
-		*argp = (krb5_pointer) context;
-	    }
-	    else
-		krb5_free_context(context);
+    if (ibuf) {
+	context->default_realm = (char *) malloc((size_t) ibuf+1);
+	if (!context->default_realm) {
+	    kret = ENOMEM;
+	    goto cleanup;
 	}
+
+	kret = krb5_ser_unpack_bytes((krb5_octet *) context->default_realm,
+				     (size_t) ibuf, &bp, &remain);
+	if (kret)
+	    goto cleanup;
+	
+	context->default_realm[ibuf] = '\0';
     }
+	
+    /* Get the number of in_tkt_ktypes */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    
+    context->in_tkt_ktype_count = (int) ibuf;
+    context->in_tkt_ktypes = (krb5_enctype *) malloc(sizeof(krb5_enctype) *
+				     (context->in_tkt_ktype_count+1));
+    if (!context->in_tkt_ktypes) {
+	kret = ENOMEM;
+	goto cleanup;
+    }
+    memset(context->in_tkt_ktypes, 0, (sizeof(krb5_enctype) *
+				       (context->in_tkt_ktype_count + 1)));
+    
+    for (i=0; i<context->in_tkt_ktype_count; i++) {
+	if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	    goto cleanup;
+	context->in_tkt_ktypes[i] = (krb5_enctype) ibuf;
+    }
+
+    /* Get the number of tgs_ktypes */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    
+    context->tgs_ktype_count = (int) ibuf;
+    context->tgs_ktypes = (krb5_enctype *) malloc(sizeof(krb5_enctype) *
+				  (context->tgs_ktype_count+1));
+    if (!context->tgs_ktypes) {
+	kret = ENOMEM;
+	goto cleanup;
+    }
+    memset(context->tgs_ktypes, 0, (sizeof(krb5_enctype) *
+				    (context->tgs_ktype_count + 1)));
+    for (i=0; i<context->tgs_ktype_count; i++) {
+	if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	    goto cleanup;
+	context->tgs_ktypes[i] = (krb5_enctype) ibuf;
+    }
+
+    /* Allowable checksum */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->clockskew = (krb5_deltat) ibuf;
+    
+    /* kdc_req_sumtype */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->kdc_req_sumtype = (krb5_cksumtype) ibuf;
+    
+    /* default ap_req_sumtype */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->default_ap_req_sumtype = (krb5_cksumtype) ibuf;
+    
+    /* default_safe_sumtype */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->default_safe_sumtype = (krb5_cksumtype) ibuf;
+
+    /* kdc_default_options */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->kdc_default_options = (krb5_flags) ibuf;
+
+    /* library_options */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->library_options = (krb5_flags) ibuf;
+
+    /* profile_secure */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->profile_secure = (krb5_boolean) ibuf;
+
+    /* fcc_default_format */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->fcc_default_format = (int) ibuf;
+
+    /* scc_default_format */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+    context->scc_default_format = (int) ibuf;
+    
+    /* Attempt to read in the os_context */
+    kret = krb5_internalize_opaque(kcontext, KV5M_OS_CONTEXT,
+				   (krb5_pointer *) &context->os_context,
+				   &bp, &remain);
+    if (kret && (kret != EINVAL) && (kret != ENOENT))
+	goto cleanup;
+
+    /* Attempt to read in the db_context */
+    kret = krb5_internalize_opaque(kcontext, KV5M_DB_CONTEXT,
+				   (krb5_pointer *) &context->db_context,
+				   &bp, &remain);
+    if (kret && (kret != EINVAL) && (kret != ENOENT))
+	goto cleanup;
+    
+    /* Attempt to read in the profile */
+    kret = krb5_internalize_opaque(kcontext, PROF_MAGIC_PROFILE,
+				   (krb5_pointer *) &context->profile,
+				   &bp, &remain);
+    if (kret && (kret != EINVAL) && (kret != ENOENT))
+	goto cleanup;
+    
+    /* Finally, find the trailer */
+    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	goto cleanup;
+
+    if (ibuf != KV5M_CONTEXT) {
+	kret = EINVAL;
+	goto cleanup;
+    }
+
+    context->magic = KV5M_CONTEXT;
+    *buffer = bp;
+    *lenremain = remain;
+    *argp = (krb5_pointer) context;
+
+    return 0;
+
+cleanup:
+    if (context)
+	krb5_free_context(context);
     return(kret);
 }
 

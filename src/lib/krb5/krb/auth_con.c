@@ -42,8 +42,8 @@ krb5_auth_con_init(context, auth_context)
     (*auth_context)->auth_context_flags = 
 	    KRB5_AUTH_CONTEXT_DO_TIME |  KRB5_AUTH_CONN_INITIALIZED;
 
-    (*auth_context)->cksumtype = CKSUMTYPE_RSA_MD4_DES;
-    /* (*auth_context)->cksumtype = CKSUMTYPE_CRC32; */
+    (*auth_context)->req_cksumtype = context->default_ap_req_sumtype;
+    (*auth_context)->safe_cksumtype = context->default_safe_sumtype;
     (*auth_context)->magic = KV5M_AUTH_CONTEXT;
     return 0;
 }
@@ -220,12 +220,22 @@ krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
 }
 
 krb5_error_code
-krb5_auth_con_setcksumtype(context, auth_context, cksumtype)
+krb5_auth_con_set_req_cksumtype(context, auth_context, cksumtype)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
     krb5_cksumtype	  cksumtype;		
 {
-    auth_context->cksumtype = cksumtype;
+    auth_context->req_cksumtype = cksumtype;
+    return 0;
+}
+
+krb5_error_code
+krb5_auth_con_set_safe_cksumtype(context, auth_context, cksumtype)
+    krb5_context      	  context;
+    krb5_auth_context 	  auth_context;
+    krb5_cksumtype	  cksumtype;		
+{
+    auth_context->safe_cksumtype = cksumtype;
     return 0;
 }
 

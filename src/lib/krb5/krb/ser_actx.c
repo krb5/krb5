@@ -88,13 +88,14 @@ krb5_auth_context_size(kcontext, arg, sizep)
      *	krb5_int32		for auth_context_flags
      *	krb5_int32		for remote_seq_number
      *	krb5_int32		for local_seq_number
-     *	krb5_int32		for cksumtype
+     *	krb5_int32		for req_cksumtype
+     *	krb5_int32		for safe_cksumtype
      *	krb5_int32		for size of i_vector
      *	krb5_int32		for KV5M_AUTH_CONTEXT
      */
     kret = EINVAL;
     if ((auth_context = (krb5_auth_context) arg)) {
-	required = sizeof(krb5_int32)*7;
+	required = sizeof(krb5_int32)*8;
 
 	kret = 0;
 	/* Calculate size required by i_vector - ptooey */
@@ -220,7 +221,9 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32(auth_context->local_seq_number,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) auth_context->cksumtype,
+	    (void) krb5_ser_pack_int32((krb5_int32) auth_context->req_cksumtype,
+				       &bp, &remain);
+	    (void) krb5_ser_pack_int32((krb5_int32) auth_context->safe_cksumtype,
 				       &bp, &remain);
 
 	    /* Now figure out the number of bytes for i_vector and write it */
@@ -382,9 +385,13 @@ krb5_auth_context_internalize(kcontext, argp, buffer, lenremain)
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    auth_context->local_seq_number = ibuf;
 
-	    /* Get cksumtype */
+	    /* Get req_cksumtype */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    auth_context->cksumtype = (krb5_cksumtype) ibuf;
+	    auth_context->req_cksumtype = (krb5_cksumtype) ibuf;
+
+	    /* Get safe_cksumtype */
+	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+	    auth_context->safe_cksumtype = (krb5_cksumtype) ibuf;
 
 	    /* Get length of i_vector */
 	    (void) krb5_ser_unpack_int32(&ivlen, &bp, &remain);

@@ -1,3 +1,40 @@
+Tue May 14 02:53:42 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ser_ctx.c (krb5_context_size, krb5_context_externalize,
+	 	krb5_context_internalize): Add missing fields from the
+		serialized context: clockskew, default_kdc_req_sumtype,
+	 	default_ap_req_sumtype, default_safe_sumtype,
+	 	kdc_default_options, library_options, profile_secure,
+	 	fcc_default_format, scc_default_format.
+
+	* ser_actx.c (krb5_auth_context_size, krb5_auth_context_externalize,
+		krb5_auth_context_internalize): Serialize the two fields
+		req_cksumtype and safe_cksumtype, instead of the one
+		cksumtype field.
+
+	* mk_safe.c (krb_mk_safe): Use safe_cksumtype instead of cksumtype
+		in the auth context.
+
+	* mk_req_ext.c (krb5_mk_req_extended): Use req_cksumtype instead
+		of cksumtype in the auth context.
+
+	* init_ctx.c (krb5_init_context): Add support for new profile
+ 		relations libdefaults/tkt_lifetime,
+ 		libdefaults/kdc_req_checksum_type,
+ 		libdefaults/ap_req_cksumtype,
+ 		libdefaults/safe_checksumtype, and
+ 		libdefaults/kdc_default_options.
+
+	* auth_con.h: Remove old cksumtype element, and replace it with
+		req_cksumtype and safe_cksumtype.
+
+	* auth_con.c (krb5_auth_con_init): Initialize the req_cksumtype
+ 	 	and safe_cksumtype from the context's default
+ 	 	req_cksumtype and safe_cksumtype.
+		(krb5_auth_con_set_req_cksumtype,
+	 	krb5_auth_con_set_safe_cksumtype): New functions, to
+	 	replace old krb5_auth_con_setcksumtype
+	
 Fri May 10 18:48:38 EDT 1996  Richard Basch  <basch@lehman.com>
 
 	* init_ctx.c: Removed des3-cbc-md5 default support

@@ -209,7 +209,7 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
 
     if ((retval = krb5_mk_safe_basic(context, userdata, keyblock, &replaydata, 
 				     plocal_fulladdr, premote_fulladdr,
-				     auth_context->cksumtype, outbuf))) {
+				     auth_context->safe_cksumtype, outbuf))) {
 	CLEANUP_DONE();
 	goto error;
     }

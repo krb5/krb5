@@ -137,7 +137,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
 
     if (in_data) {
-      if ((*auth_context)->cksumtype == 0x8003) {
+      if ((*auth_context)->req_cksumtype == 0x8003) {
 	/* XXX Special hack for GSSAPI */
 	checksum.checksum_type = 0x8003;
 	checksum.length = in_data->length;
@@ -145,12 +145,12 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
       } else  {
 	/* Generate checksum, XXX What should the seed be? */
 	if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(context,
-				 (*auth_context)->cksumtype))) == NULL) {
+				 (*auth_context)->req_cksumtype))) == NULL) {
 	  retval = ENOMEM;
 	  goto cleanup;
 	}
 	if ((retval = krb5_calculate_checksum(context, 
-					      (*auth_context)->cksumtype, 
+					      (*auth_context)->req_cksumtype, 
 					      in_data->data, in_data->length,
 					      (*auth_context)->keyblock->contents,
 					      (*auth_context)->keyblock->length,
