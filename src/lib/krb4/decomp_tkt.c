@@ -80,7 +80,7 @@ decomp_ticket(tkt, flags, pname, pinstance, prealm, paddress, session,
 	setbuf(fp, keybuf);
 	fwrite(tkt->dat, 1, tkt->length, fp);
 	fclose(fp);
-	memset(keybuf, sizeof(keybuf), 0);	/* Clear the buffer */
+	memset(keybuf, 0, sizeof(keybuf));	/* Clear the buffer */
     }
 #endif
     pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
@@ -95,7 +95,7 @@ decomp_ticket(tkt, flags, pname, pinstance, prealm, paddress, session,
 	setbuf(fp, keybuf);
 	fwrite(tkt->dat, 1, tkt->length, fp);
 	fclose(fp);
-	memset(keybuf, sizeof(keybuf), 0);	/* Clear the buffer */
+	memset(keybuf, 0, sizeof(keybuf));	/* Clear the buffer */
     }
 #endif
 
