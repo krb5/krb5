@@ -1,3 +1,12 @@
+2004-08-20  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (init-test): Don't use local copy of client_init.o
+
+	* init-test.c (main): Use kadm5_init() instead of
+	ovsec_kadm_init().  Make error messages a little more
+	informative.  Use KADM5_CONFIG_NO_AUTH to test no-auth condition,
+	as the previous method was really gross.
+
 2004-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* config/unix.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which

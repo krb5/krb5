@@ -122,6 +122,7 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_MKEY_FROM_KBD	0x040000
 #define KADM5_CONFIG_KPASSWD_PORT	0x080000
 #define KADM5_CONFIG_OLD_AUTH_GSSAPI	0x100000
+#define KADM5_CONFIG_NO_AUTH		0x200000
 
 /*
  * permission bits

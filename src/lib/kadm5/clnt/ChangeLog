@@ -1,3 +1,8 @@
+2004-08-20  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Remove INIT_TEST ifdefs.  Use
+	KADM5_CONFIG_NO_AUTH to request no auth (for testing).
+
 2004-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkadm5clnt.exports: Export kadm5_get_admin_service_name.

@@ -155,9 +155,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc input_name;
      gss_name_t gss_client;
-#ifndef INIT_TEST
      gss_name_t gss_target;
-#endif
      gss_cred_id_t gss_client_creds = GSS_C_NO_CREDENTIAL;
 
      kadm5_server_handle_t handle;
@@ -474,8 +472,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      else
        ccname_orig = 0;
 
-
-#ifndef INIT_TEST
      input_name.value = full_service_name;
      input_name.length = strlen((char *)input_name.value) + 1;
      gssstat = gss_import_name(&minor_stat, &input_name,
@@ -484,7 +480,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  code = KADM5_GSS_ERROR;
 	  goto error;
      }
-#endif /* ! INIT_TEST */
 
      input_name.value = client_name;
      input_name.length = strlen((char *)input_name.value) + 1;
@@ -504,7 +499,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  goto error;
      }
      
-#ifndef INIT_TEST
      if (params_in != NULL &&
 	 (params_in->mask & KADM5_CONFIG_OLD_AUTH_GSSAPI)) {
 	  handle->clnt->cl_auth = auth_gssapi_create(handle->clnt,
@@ -519,7 +513,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 						     NULL,
 						     NULL,
 						     NULL);
-     } else {
+     } else if (params_in == NULL ||
+		!(params_in->mask & KADM5_CONFIG_NO_AUTH)) {
 	  struct rpc_gss_sec sec;
 	  sec.mech = gss_mech_krb5;
 	  sec.qop = GSS_C_QOP_DEFAULT;
@@ -529,7 +524,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 						 gss_target, &sec);
      }
      (void) gss_release_name(&minor_stat, &gss_target);
-#endif /* ! INIT_TEST */
 
      if (ccname_orig) {
 	 gssstat = gss_krb5_ccache_name(&minor_stat, ccname_orig, NULL);

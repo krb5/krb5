@@ -14,12 +14,9 @@ all:: server-setkey-test client-setkey-test
 # The client-side test programs.
 #
 
-init-test: init-test.o client_init.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o init-test init-test.o client_init.o \
+init-test: init-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o init-test init-test.o \
 		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
-
-client_init.o: $(SRCTOP)/lib/kadm5/clnt/client_init.c
-	$(CC) $(ALL_CFLAGS) -UUSE_KADM5_API_VERSION -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I$(SRCTOP)/lib/kadm5 $(SRCTOP)/lib/kadm5/clnt/client_init.c
 
 destroy-test: destroy-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o destroy-test destroy-test.o \
