@@ -43,6 +43,28 @@ AC_CHECK_SIZEOF(long)
 SIZEOF_LONG=$ac_cv_sizeof_long
 AC_SUBST(SIZEOF_LONG)
 
+AC_MSG_CHECKING([return type of setrpcent])
+AC_CACHE_VAL(k5_cv_type_setrpcent,
+[AC_TRY_COMPILE([#include <netdb.h>
+#ifdef __cplusplus
+extern "C"
+#endif
+extern void setrpcent();],
+[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])dnl
+AC_MSG_RESULT($k5_cv_type_setrpcent)
+AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent)
+dnl
+AC_MSG_CHECKING([return type of endrpcent])
+AC_CACHE_VAL(k5_cv_type_endrpcent,
+[AC_TRY_COMPILE([#include <netdb.h>
+#ifdef __cplusplus
+extern "C"
+#endif
+extern void endrpcent();],
+[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])dnl
+AC_MSG_RESULT($k5_cv_type_endrpcent)
+AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent)
+
 DECLARE_SYS_ERRLIST
 
 V5_SHARED_LIB_OBJS

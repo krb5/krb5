@@ -43,21 +43,6 @@ static  char sccsid[] = "@(#)getrpcent.c 1.9 87/08/11  Copyr 1984 Sun Micro";
 #include <string.h>
 #include <sys/socket.h>
 
-/* setrpcent is declared as int-returning in netdb.h on hpux */
-/* setrpcent is declared as int-returning in rpc/rpcent.h on Solaris */
-#if !defined(hpux) && !(defined(sun) && defined(__svr4__))
-#define SETRPCENT_TYPE void
-#else
-#define SETRPCENT_TYPE int
-#endif
-
-/* endrpcent is declared as int-returning in netdb.h on hpux */
-#ifndef hpux
-#define ENDRPCENT_TYPE void
-#else
-#define ENDRPCENT_TYPE int
-#endif
-
 /*
  * Make sure we have a definition for PROTOTYPE.
  */

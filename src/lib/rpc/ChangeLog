@@ -1,3 +1,17 @@
+Sat Aug 31 01:46:45 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* pmap_rmt.c (getbroadcastnets): Tweak conditional layout to make
+	emacs indentation code happier.
+
+	* netdb.h: Comment fix.
+
+	Tue Aug  6 18:52:47 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in, getrpcent.c: Use configure to the return types of
+	setrpcent() and getrpcent().  Also, check for struct rpcent in the
+	system <netdb.h>, and only define the structure in rpc/netdb.h if
+	it's not in the system file.
+
 Tue Aug 13 15:18:16 1996  Tom Yu  <tlyu@mit.edu>
 
 	* getrpcent.c: Add PROTOTYPE and conditionalize function

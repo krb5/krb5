@@ -199,10 +199,11 @@ getbroadcastnets(addrs, sock, buf)
 #if 0 /* this is uuuuugly */
 				addrs[i++] = inet_makeaddr(inet_netof
 #if defined(hpux) || (defined(sparc) && defined(__svr4__)) || defined(linux) || (defined(__osf__) && defined(__alpha__))
-				(sin->sin_addr), INADDR_ANY);
+							   (sin->sin_addr),
 #else /* hpux or solaris */
-				(sin->sin_addr.s_addr), INADDR_ANY);
+							   (sin->sin_addr.s_addr),
 #endif				
+							   INADDR_ANY);
 #endif
 			} else {
 				addrs[i++] = ((struct sockaddr_in*)

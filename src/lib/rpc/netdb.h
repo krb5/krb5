@@ -44,7 +44,8 @@ struct rpcent {
       char    **r_aliases;    /* alias list */
       int     r_number;       /* rpc program number */
 };
-#endif /*STRUCT_RPCENT_ALREADY_PROVIDED*/
+#endif /*STRUCT_RPCENT_IN_RPC_NETDB_H*/
+
 struct rpcent *getrpcbyname(), *getrpcbynumber(), *getrpcent();
 
 #endif
