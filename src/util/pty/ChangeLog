@@ -1,3 +1,8 @@
+2001-05-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* update_wtmp.c (ptyint_update_wtmpx): Add missing semi-colon in
+ 	code path if PTY_UTMP_E_EXIT and PTY_UTMPX_E_EXIT exist.
+
 2001-04-30  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Fix some quoting of shell variables when passing

@@ -82,7 +82,7 @@ ptyint_update_wtmpx(struct utmpx *ent)
 #if defined(PTY_UTMP_E_EXIT) && defined(PTY_UTMPX_E_EXIT)
     ut.ut_exit.PTY_UTMP_E_EXIT = ent->ut_exit.PTY_UTMPX_E_EXIT;
     ut.ut_exit.PTY_UTMP_E_TERMINATION =
-	ent->ut_exit.PTY_UTMPX_E_TERMINATION
+	ent->ut_exit.PTY_UTMPX_E_TERMINATION;
 #endif
 #endif /* !HAVE_GETUTMP */
 
