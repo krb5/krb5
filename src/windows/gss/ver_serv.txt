@@ -1,0 +1,11 @@
+
+The user provided information, along with version information about this application and the machine configuration, will be logged each time the application is launched. Recording this information will provide usage information to IS staff. This information will help us to focus our resources and serve you better in the future. This information will be treated as confidential and will only be accessible by IS staff members.
+
+If you would rather remain anonymous during this testing phase then use the "Register Anonymously" check box.
+
+To see more information about configuring the version checking part of this application please consult the local help file.
+
+We welcome comments on suggestions about this test-tracking system; please send them to testtrack@mit.edu.
+
+		Paul B. Hill
+		MIT Information Systems
