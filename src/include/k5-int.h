@@ -1952,4 +1952,7 @@ extern krb5_error_code krb5int_translate_gai_error (int);
 extern krb5_error_code
 krb5int_c_mandatory_cksumtype (krb5_context, krb5_enctype, krb5_cksumtype *);
 
+extern int krb5int_crypto_init (void);
+extern int krb5int_prng_init(void);
+
 #endif /* _KRB5_INT_H */

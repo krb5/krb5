@@ -1,3 +1,7 @@
+2004-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (krb5int_crypto_init, krb5int_prng_init): Declare.
+
 2004-05-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h: On IRIX, with threads enabled, reject gcc older
