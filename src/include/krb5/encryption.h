@@ -23,6 +23,12 @@ typedef struct _krb5_keyblock {
 					   on length */
 } krb5_keyblock;
 
+typedef struct _krb5_checksum {
+    krb5_cksumtype checksum_type;	/* checksum type */
+    octet contents[1];			/* actually can be more, depending
+					   on length */
+} krb5_checksum;
+
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
     int (*encrypt_func)(/* void *in, void *out, size_t length,
