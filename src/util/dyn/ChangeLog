@@ -1,3 +1,7 @@
+Sat Dec  6 22:50:03 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* dyn_delete.c: Include <string.h>
+
 Tue Dec 31 13:02:06 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in, Makefile.in: Update to new library build procedure.
