@@ -678,6 +678,25 @@ kill_conn(struct conn_state *conn, struct select_state *selstate, int err)
     selstate->nfds--;
 }
 
+/* Check socket for error.  */
+static int
+get_so_error(int fd)
+{
+    int e, sockerr;
+    socklen_t sockerrlen;
+
+    sockerr = 0;
+    sockerrlen = sizeof(sockerr);
+    e = getsockopt(fd, SOL_SOCKET, SO_ERROR, &sockerr, &sockerrlen);
+    if (e != 0) {
+	/* What to do now?  */
+	e = SOCKET_ERRNO;
+	dprint("getsockopt(SO_ERROR) on fd failed: %m\n", e);
+	return e;
+    }
+    return sockerr;
+}
+
 /* Return nonzero only if we're finished and the caller should exit
    its loop.  This happens in two cases: We have a complete message,
    or the socket has closed and no others are open.  */
@@ -707,35 +726,29 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	    return e == 0;
 	}
 	if (ssflags & SSF_EXCEPTION) {
-#ifdef DEBUG
-	    int sockerr;
-	    socklen_t sockerrlen;
-#endif
 	handle_exception:
-#ifdef DEBUG
-	    sockerrlen = sizeof(sockerr);
-	    e = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR,
-			   &sockerr, &sockerrlen);
-	    if (e != 0) {
-		/* What to do now?  */
-		e = SOCKET_ERRNO;
-		dprint("getsockopt(SO_ERROR) on exception fd failed: %m\n", e);
-		goto kill_conn;
-	    }
-	    /* Okay, got the error back.  Either way, kill the
-	       connection.  */
-	    e = sockerr;
-#else
-	    e = 1;		/* need only be non-zero */
-#endif
+	    e = get_so_error(conn->fd);
+	    if (e)
+		dprint("socket error on exception fd: %m", e);
+	    else
+		dprint("no socket error info available on exception fd");
 	    goto kill_conn;
 	}
 
 	/*
 	 * Connect finished -- but did it succeed or fail?
 	 * UNIX sets can_write if failed.
-	 * Try writing, I guess, and find out.
+	 * Call getsockopt to see if error pending.
+	 *
+	 * (For most UNIX systems it works to just try writing the
+	 * first time and detect an error.  But Bill Dodd at IBM
+	 * reports that some version of AIX, SIGPIPE can result.)
 	 */
+	e = get_so_error(conn->fd);
+	if (e) {
+	    dprint("socket error on write fd: %m", e);
+	    goto kill_conn;
+	}
 	conn->state = WRITING;
 	goto try_writing;
 

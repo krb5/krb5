@@ -1,3 +1,8 @@
+2004-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (get_so_error): New function.
+	(service_tcp_fd): Call it for write fds as well as exception fds.
+
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (start_connection): Close socket if connect() call
