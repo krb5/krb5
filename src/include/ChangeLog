@@ -1,5 +1,8 @@
 2004-11-16  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-int.h (struct _krb5_cc_ops): Add new function pointer field
+	get_flags.
+
 	* krb5.hin (krb5_cc_get_flags): Declare.
 
 2004-11-03  Ken Raeburn  <raeburn@mit.edu>

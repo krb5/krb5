@@ -1783,6 +1783,8 @@ struct _krb5_cc_ops {
 					    krb5_flags, krb5_creds *);
     krb5_error_code (KRB5_CALLCONV *set_flags) (krb5_context, krb5_ccache,
 					    krb5_flags);
+    krb5_error_code (KRB5_CALLCONV *get_flags) (krb5_context, krb5_ccache,
+						krb5_flags *);
 };
 
 extern const krb5_cc_ops *krb5_cc_dfl_ops;
