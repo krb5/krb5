@@ -1,3 +1,12 @@
+2004-10-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_update_file_data): When resetting flags,
+	preserve SHARED flag.
+	(scan_shared_trees_locked, scan_shared_trees_unlocked): Convert to
+	macros, so line numbers reported by assert will be useful.
+	* prof_test1 (test2): Run new test of modifications with other
+	existing open profile handles.
+
 2004-10-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* libprofile.exports: Add profile_flush_to_file.

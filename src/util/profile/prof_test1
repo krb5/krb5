@@ -1,9 +1,9 @@
 set wd [pwd]
-set p [profile_init_path $wd/test2.ini]
 set verbose 0
 
 proc test1 {} {
-    global wd p verbose
+    global wd verbose
+    set p [profile_init_path $wd/test2.ini]
     set sect {{test section 1} child_section child}
     set iter [profile_iterator_create $p $sect 0]
     set done 0
@@ -63,10 +63,51 @@ proc test1 {} {
 	puts stderr "Error: Deleting in iterator didn't get them all."
 	exit 1
     } else {
-	puts "OK: Deleting in iteration got rid of all entries."
+	puts "OK: test1: Deleting in iteration got rid of all entries."
     }
 }
 
+proc test2 {} {
+    global wd verbose
+
+    # lxs said: create A, read A, flush A, read A, create B, read B, crash
+    # (where "create" refers to the object, not the file)
+
+    if $verbose { puts "Running test2" }
+    set c [profile_init_path $wd/test2.ini]
+    # create A
+    set a [profile_init_path $wd/test2.ini]
+    if $verbose { puts "Opened profile $wd/test2.ini" }
+    # read A
+    set x [profile_get_values $a {{test section 1} foo}]
+    if $verbose { puts "Read $x from profile" }
+    if $verbose { puts "updating" }
+    exec sleep 2
+    profile_update_relation $a {{test section 1} foo} [lindex $x 0] [lindex $x 0]
+    set x [profile_get_values $a {{test section 1} foo}]
+    if $verbose { puts "Read $x from profile" }
+    # flush A
+    profile_flush $a
+    # read A again
+    set x [profile_get_values $a {{test section 1} foo}]
+    if $verbose { puts "Read $x from profile" }
+    profile_release $a
+    # create B
+    set b [profile_init_path $wd/test2.ini]
+    if $verbose { puts "Opened profile again" }
+    # read B
+    set x [profile_get_values $b {{test section 1} foo}]
+    if $verbose { puts "Read $x from profile" }
+    # read B
+    set x [profile_get_values $b {{test section 1} foo}]
+    if $verbose { puts "Read $x from profile" }
+    # If we got this far, now what?
+    profile_release $b
+    profile_release $c
+    puts "OK: test2: Modifications don't corrupt existing open handles"
+}
+
 test1
+test2
 
 exit 0

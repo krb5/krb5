@@ -66,28 +66,28 @@ void profile_library_finalizer(void)
 
 static void profile_free_file_data(prf_data_t);
 
-static void scan_shared_trees_locked(void)
-{
-    prf_data_t d;
-    k5_mutex_assert_locked(&g_shared_trees_mutex);
-    for (d = g_shared_trees; d; d = d->next) {
-	assert(d->magic == PROF_MAGIC_FILE_DATA);
-	assert((d->flags & PROFILE_FILE_SHARED) != 0);
-	assert(d->filespec[0] != 0);
-	assert(d->fslen <= 1000); /* XXX */
-	assert(d->filespec[d->fslen] == 0);
-	assert(d->fslen = strlen(d->filespec));
-    }
-}
+#define scan_shared_trees_locked()				\
+	{							\
+	    prf_data_t d;					\
+	    k5_mutex_assert_locked(&g_shared_trees_mutex);	\
+	    for (d = g_shared_trees; d; d = d->next) {		\
+		assert(d->magic == PROF_MAGIC_FILE_DATA);	\
+		assert((d->flags & PROFILE_FILE_SHARED) != 0);	\
+		assert(d->filespec[0] != 0);			\
+		assert(d->fslen <= 1000); /* XXX */		\
+		assert(d->filespec[d->fslen] == 0);		\
+		assert(d->fslen = strlen(d->filespec));		\
+	    }							\
+	}
 
-static void scan_shared_trees_unlocked(void)
-{
-    int r;
-    r = k5_mutex_lock(&g_shared_trees_mutex);
-    assert (r == 0);
-    scan_shared_trees_locked();
-    k5_mutex_unlock(&g_shared_trees_mutex);
-}
+#define scan_shared_trees_unlocked()			\
+	{						\
+	    int r;					\
+	    r = k5_mutex_lock(&g_shared_trees_mutex);	\
+	    assert (r == 0);				\
+	    scan_shared_trees_locked();			\
+	    k5_mutex_unlock(&g_shared_trees_mutex);	\
+	}
 
 static int rw_access(const_profile_filespec_t filespec)
 {
@@ -341,7 +341,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 		return retval;
 	}
 	data->upd_serial++;
-	data->flags = 0;
+	data->flags &= PROFILE_FILE_SHARED;
 	if (rw_access(data->filespec))
 		data->flags |= PROFILE_FILE_RW;
 	retval = profile_parse_file(f, &data->root);
