@@ -1,6 +1,3 @@
-@node Compiling @value{PRODUCT}
-@chapter Compiling @value{PRODUCT}
-
 @value{PRODUCT} is supplied in source form for a number of reasons:
 @itemize @bullet
 @item
@@ -8,8 +5,8 @@ You can examine the source yourself, and verify the behavior of the
 system to your satisfaction.  This is especially important with security
 software.
 @item
-You can make your own changes (of course, we recommend having us make
-the changes, so that we can support them in the future.)
+You can make your own changes.  (Of course, we recommend having us make
+the changes, so that we can include them in future releases.)
 @end itemize
 
 @value{PRODUCT} is a large package.  In order to efficiently manage
@@ -23,7 +20,7 @@ that you may be unfamilar with, and we explain them here.
 * Constructing an Install Kit::  Constructing a tar file or package
 @end menu
 
-@node Requirements, Setup, Compiling @value{PRODUCT}, Compiling @value{PRODUCT}
+@node Requirements, Setup
 @section Requirements
 
 At the very minimum, you need a Unix-like operating system with a C
@@ -47,7 +44,7 @@ part of the build process (any of the @file{Makefile}s---more
 specifically, any of the @file{configure.in} or @file{Makefile.in} files
 that generate them) you're going to need a recent version of GNU m4.
 
-@node Setup, Testing, Requirements, Compiling @value{PRODUCT}
+@node Setup, Testing, Requirements
 @section Setup
 
 We recommend a directory structure as follows:
@@ -216,7 +213,7 @@ year to change that.
 Don't enable the non-standard telnet encryption mode described above.
 @end table
 
-@node Testing, Constructing an Install Kit, Setup, Compiling @value{PRODUCT}
+@node Testing, Constructing an Install Kit, Setup
 @section Testing
 
 After running @code{make all} successfully, you should run the
@@ -243,17 +240,11 @@ the @file{tests/dejagnu} directory and running @code{runtest} with the
 @samp{-d} option, and examining the @file{dbg.log} file produced.  (This
 will not be necessary with any platform supported by @value{COMPANY}.)
 
-@node Constructing an Install Kit,  , Testing, Compiling @value{PRODUCT}
+@node Constructing an Install Kit,  , Testing
 @section Constructing an Install Kit
 
-Currently install kits are constructed by creating an install directory
-and running @code{make install DESTDIR=@var{install directory}}, then
-using @samp{tar cf} to produce a tar file.  In the future, there will be
+You can construct an install kit by creating an install directory and
+running @code{make install DESTDIR=@var{install directory}}, and then
+using @samp{tar cf} to produce a tar file.  In the future, there may be
 direct make targets to support construction of @code{tar} files and
 @sc{svr4} packages.
-
-@contents
-@c second page break makes sure right-left page alignment works right
-@c with a one-page toc, even though we don't have setchapternewpage odd.
-@c end of texinfo file
-@bye

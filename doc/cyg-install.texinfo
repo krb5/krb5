@@ -64,7 +64,7 @@ This file documents how to install the @value{RELEASE} release of
 @menu
 * Introduction::                
 * Realm Configuration Decisions::  
-* Building @value{PRODUCT}::    
+* Compiling @value{PRODUCT}::   
 * Installing @value{PRODUCT}::  
 * Support::                     
 * Bug Reporting::               
@@ -185,7 +185,7 @@ Chapter four describes our problem reporting system.
 
 The appendices give sample configuration files.
 
-@node Realm Configuration Decisions, Building @value{PRODUCT}, Introduction, Top
+@node Realm Configuration Decisions, Compiling @value{PRODUCT}, Introduction, Top
 @chapter Realm Configuration Decisions
 
 Before installing @value{PRODUCT}, it is necessary to consider the
@@ -327,14 +327,14 @@ to additional slaves.
 
 @ifset MIT
 
-@node Building @value{PRODUCT}, Installing @value{PRODUCT}, Realm Configuration Decisions, Top
-@chapter Building @value{PRODUCT}
+@node Compiling @value{PRODUCT}, Installing @value{PRODUCT}, Realm Configuration Decisions, Top
+@chapter Compiling @value{PRODUCT}
 
 @include build.texinfo
 
 @end ifset
 
-@node Installing @value{PRODUCT}, Support, Building @value{PRODUCT}, Top
+@node Installing @value{PRODUCT}, Support, Compiling @value{PRODUCT}, Top
 @chapter Installing @value{PRODUCT}
 
 The sections of this chapter describe procedures for installing
