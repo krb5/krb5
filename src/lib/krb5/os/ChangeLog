@@ -1,3 +1,7 @@
+Tue Feb  2 16:01:58 1999  Tom Yu  <tlyu@mit.edu>
+
+	* read_pwd.c: Remove reference to CPP symbol "unix".
+
 1999-01-29  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* ccdefname.c: Add a new function krb5_cc_set_default_name(),

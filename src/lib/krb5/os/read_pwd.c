@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-#if defined(unix) || defined(_AIX)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 #define DEFINED_KRB5_READ_PASSWORD
 #include <stdio.h>
 #include <errno.h>
