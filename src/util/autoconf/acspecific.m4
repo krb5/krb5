@@ -117,25 +117,27 @@ AC_DEFUN(AC_PROG_CXX,
 [AC_BEFORE([$0], [AC_PROG_CXXCPP])dnl
 AC_CHECK_PROGS(CXX, $CCC c++ g++ gcc CC cxx, gcc)
 
-# Find out if we are using GNU C++, under whatever name.
+AC_MSG_CHECKING(whether we are using GNU C++)
 AC_CACHE_VAL(ac_cv_prog_gxx,
-[cat > conftest.C <<EOF
+[dnl The semicolon is to pacify NeXT's syntax-checking cpp.
+cat > conftest.C <<EOF
 #ifdef __GNUC__
-  yes
+  yes;
 #endif
 EOF
-if ${CXX-gcc} -E conftest.C 2>&AC_FD_CC | egrep yes >/dev/null 2>&1; then
+if ${CXX-g++} -E conftest.C 2>&AC_FD_CC | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gxx=yes
 else
   ac_cv_prog_gxx=no
 fi])dnl
+AC_MSG_RESULT($ac_cv_prog_gxx)
 if test $ac_cv_prog_gxx = yes; then
   GXX=yes
   if test "${CXXFLAGS+set}" != set; then
-    AC_MSG_CHECKING(whether ${CXX-gcc} accepts -g)
+    AC_MSG_CHECKING(whether ${CXX-g++} accepts -g)
 AC_CACHE_VAL(ac_cv_prog_gxx_g,
 [echo 'void f(){}' > conftest.cc
-if test -z "`${CXX-gcc} -g -c conftest.cc 2>&1`"; then
+if test -z "`${CXX-g++} -g -c conftest.cc 2>&1`"; then
   ac_cv_prog_gxx_g=yes
 else
   ac_cv_prog_gxx_g=no
@@ -288,7 +290,7 @@ if test -z "$CXXCPP"; then
 AC_CACHE_VAL(ac_cv_prog_CXXCPP,
 [AC_LANG_SAVE[]dnl
 AC_LANG_CPLUSPLUS[]dnl
-  CXXCPP="${CXX-gcc} -E"
+  CXXCPP="${CXX-g++} -E"
   AC_TRY_CPP([#include <stdlib.h>], , CXXCPP=/lib/cpp)
   ac_cv_prog_CXXCPP="$CXXCPP"
 AC_LANG_RESTORE[]dnl
@@ -543,7 +545,7 @@ fi
 dnl Like AC_CHECK_HEADERS, except succeed only for a HEADER-FILE that
 dnl defines `DIR'.
 dnl AC_CHECK_HEADERS_DIRENT(HEADER-FILE... [, ACTION])
-AC_DEFUN(AC_CHECK_HEADERS_DIRENT,
+define(AC_CHECK_HEADERS_DIRENT,
 [for ac_hdr in $1
 do
 AC_CHECK_HEADER_DIRENT($ac_hdr,

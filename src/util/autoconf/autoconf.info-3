@@ -26,6 +26,30 @@ versions, except that this permission notice may be stated in a
 translation approved by the Foundation.
 
 
+File: autoconf.info,  Node: Run Time,  Next: Portable Shell,  Prev: Examining Libraries,  Up: Writing Tests
+
+Checking Run Time Behavior
+==========================
+
+   Sometimes you need to find out how a system performs at run time,
+such as whether a given function has a certain capability or bug.  If
+you can, make such checks when your program runs instead of when it is
+configured.  You can check for things like the machine's endianness when
+your program initializes itself.
+
+   If you really need to test for a run-time behavior while configuring,
+you can write a test program to determine the result, and compile and
+run it using `AC_TRY_RUN'.  Avoid running test programs if possible,
+because using them prevents people from configuring your package for
+cross-compiling.
+
+* Menu:
+
+* Test Programs::               Running test programs.
+* Guidelines::			General rules for writing test programs.
+* Test Functions::		Avoiding pitfalls in test programs.
+
+
 File: autoconf.info,  Node: Test Programs,  Next: Guidelines,  Up: Run Time
 
 Running Test Programs

@@ -217,6 +217,15 @@ in some cases whether they support certain features.
      but that name is obsolete because some `make' programs have a rule
      that creates `install' from it if there is no `Makefile'.
 
+     A copy of `install-sh' which you may use comes with Autoconf.  If
+     you use `AC_PROG_INSTALL', you must include either `install-sh' or
+     `install.sh' in your distribution, or `configure' will produce an
+     error message saying it can't find them--even if the system you're
+     on has a good `install' program.  This check is a safety measure
+     to prevent you from accidentally leaving that file out, which
+     would prevent your package from installing on systems that don't
+     have a BSD-compatible `install' program.
+
      If you need to use your own installation program because it has
      features not found in standard `install' programs, there is no
      reason to use `AC_PROG_INSTALL'; just put the pathname of your
@@ -828,23 +837,21 @@ File: autoconf.info,  Node: Particular Typedefs,  Next: Generic Typedefs,  Up: T
 Particular Typedef Checks
 -------------------------
 
-   These macros check for particular C typedefs.
+   These macros check for particular C typedefs in `sys/types.h' and
+`stdlib.h' (if it exists).
 
  - Macro: AC_TYPE_GETGROUPS
      Define `GETGROUPS_T' to be whichever of `gid_t' or `int' is the
      base type of the array argument to `getgroups'.
 
  - Macro: AC_TYPE_MODE_T
-     If `mode_t' is not defined in `sys/types.h', define `mode_t' to be
-     `int'.
+     If `mode_t' is not defined, define `mode_t' to be `int'.
 
  - Macro: AC_TYPE_OFF_T
-     If `off_t' is not defined in `sys/types.h', define `off_t' to be
-     `long'.
+     If `off_t' is not defined, define `off_t' to be `long'.
 
  - Macro: AC_TYPE_PID_T
-     If `pid_t' is not defined in `sys/types.h', define `pid_t' to be
-     `int'.
+     If `pid_t' is not defined, define `pid_t' to be `int'.
 
  - Macro: AC_TYPE_SIGNAL
      If `signal.h' declares `signal' as returning a pointer to a
@@ -860,12 +867,11 @@ Particular Typedef Checks
           }
 
  - Macro: AC_TYPE_SIZE_T
-     If `size_t' is not defined in `sys/types.h', define `size_t' to be
-     `unsigned'.
+     If `size_t' is not defined, define `size_t' to be `unsigned'.
 
  - Macro: AC_TYPE_UID_T
-     If `uid_t' is not defined in `sys/types.h', define `uid_t' to be
-     `int' and `gid_t' to be `int'.
+     If `uid_t' is not defined, define `uid_t' to be `int' and `gid_t'
+     to be `int'.
 
 
 File: autoconf.info,  Node: Generic Typedefs,  Prev: Particular Typedefs,  Up: Typedefs
@@ -878,8 +884,8 @@ particular test macros.
 
  - Macro: AC_CHECK_TYPE (TYPE, DEFAULT)
      If the type TYPE is not defined in `sys/types.h' or `stdlib.h' (if
-     that is present), define it to be the C (or C++) builtin type
-     DEFAULT; e.g., `short' or `unsigned'.
+     it exists), define it to be the C (or C++) builtin type DEFAULT;
+     e.g., `short' or `unsigned'.
 
 
 File: autoconf.info,  Node: Compiler Characteristics,  Next: System Services,  Prev: Typedefs,  Up: Existing Tests
@@ -1202,29 +1208,7 @@ temporarily and trying to link a small program.
           ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
      This is an obsolete version of `AC_TRY_LINK', with the addition
      that it prints `checking for ECHO-TEXT' to the standard output
-     first, if ECHO-TEXT is non-empty.
-
-
-File: autoconf.info,  Node: Run Time,  Next: Portable Shell,  Prev: Examining Libraries,  Up: Writing Tests
-
-Checking Run Time Behavior
-==========================
-
-   Sometimes you need to find out how a system performs at run time,
-such as whether a given function has a certain capability or bug.  If
-you can, make such checks when your program runs instead of when it is
-configured.  You can check for things like the machine's endianness when
-your program initializes itself.
-
-   If you really need to test for a run-time behavior while configuring,
-you can write a test program to determine the result, and compile and
-run it using `AC_TRY_RUN'.  Avoid running test programs if possible,
-because using them prevents people from configuring your package for
-cross-compiling.
-
-* Menu:
-
-* Test Programs::               Running test programs.
-* Guidelines::			General rules for writing test programs.
-* Test Functions::		Avoiding pitfalls in test programs.
+     first, if ECHO-TEXT is non-empty.  Use `AC_MSG_CHECKING' and
+     `AC_MSG_RESULT' instead to print messages (*note Printing
+     Messages::.).
 

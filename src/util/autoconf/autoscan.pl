@@ -344,7 +344,8 @@ sub output_programs
     }
     print CONF "\ndnl Checks for libraries.\n";
     foreach $word (sort keys %libraries) {
-	print CONF "AC_HAVE_LIBRARY($word)\n";
+	print CONF "dnl Replace `\main\' with a function in -l$word:\n";
+	print CONF "AC_CHECK_LIB($word, main)\n";
     }
 }
 

@@ -218,7 +218,8 @@ Running `configure' Scripts
 
    Below are instructions on how to configure a package that uses a
 `configure' script, suitable for inclusion as an `INSTALL' file in the
-package.
+package.  A plain-text version of `INSTALL' which you may use comes
+with Autoconf.
 
 * Menu:
 
@@ -772,13 +773,14 @@ Invoking autoupdate::.
    Some macros have been superseded by similar ones that do the job
 better, but are not call-compatible.  If you get warnings about calling
 obsolete macros while running `autoconf', you may safely ignore them,
-but your `configure' script will generally work better if you follow the
-advice it prints about what to replace the obsolete macros with.  In
+but your `configure' script will generally work better if you follow
+the advice it prints about what to replace the obsolete macros with.  In
 particular, the mechanism for reporting the results of tests has
-changed.  If you were using `echo' or `AC_VERBOSE', your `configure'
-script's output will look better if you switch to `AC_MSG_CHECKING' and
-`AC_MSG_RESULT'.  *Note Printing Messages::.  Those macros work best in
-conjunction with cache variables.  *Note Caching Results::.
+changed.  If you were using `echo' or `AC_VERBOSE' (perhaps via
+`AC_COMPILE_CHECK'), your `configure' script's output will look better
+if you switch to `AC_MSG_CHECKING' and `AC_MSG_RESULT'.  *Note Printing
+Messages::.  Those macros work best in conjunction with cache
+variables.  *Note Caching Results::.
 
 
 File: autoconf.info,  Node: Invoking autoupdate,  Next: Changed Results,  Prev: Changed Macros,  Up: Upgrading

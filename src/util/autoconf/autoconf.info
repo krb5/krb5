@@ -28,10 +28,10 @@ translation approved by the Foundation.
 
 Indirect:
 autoconf.info-1: 1085
-autoconf.info-2: 49802
-autoconf.info-3: 99382
-autoconf.info-4: 148397
-autoconf.info-5: 196506
+autoconf.info-2: 51012
+autoconf.info-3: 100216
+autoconf.info-4: 150192
+autoconf.info-5: 198408
 
 Tag Table:
 (Indirect)
@@ -39,114 +39,114 @@ Node: Top1085
 Node: Introduction9210
 Node: Making configure Scripts13050
 Node: Writing configure.in16115
-Node: Invoking autoscan19362
-Node: Invoking ifnames21667
-Node: Invoking autoconf23157
-Node: Invoking autoreconf24995
-Node: Setup26558
-Node: Input27444
-Node: Output29060
-Node: Makefile Substitutions31810
-Node: Preset Output Variables33392
-Node: Build Directories36630
-Node: Automatic Remaking38356
-Node: Configuration Headers40422
-Node: Header Templates42789
-Node: Invoking autoheader43968
-Node: Subdirectories47055
-Node: Default Prefix48398
-Node: Versions49802
-Node: Existing Tests51704
-Node: Alternative Programs53169
-Node: Particular Programs53833
-Node: Generic Programs59143
-Node: Libraries60820
-Node: Library Functions62649
-Node: Particular Functions63207
-Node: Generic Functions68954
-Node: Header Files70795
-Node: Particular Headers71354
-Node: Generic Headers78325
-Node: Structures79625
-Node: Typedefs81862
-Node: Particular Typedefs82366
-Node: Generic Typedefs83624
-Node: Compiler Characteristics84073
-Node: System Services86529
-Node: UNIX Variants88850
-Node: Writing Tests90869
-Node: Examining Declarations92641
-Node: Examining Syntax95107
-Node: Examining Libraries96162
-Node: Run Time98421
-Node: Test Programs99382
-Node: Guidelines101917
-Node: Test Functions103106
-Node: Portable Shell104649
-Node: Testing Values and Files106301
-Node: Multiple Cases107956
-Node: Language Choice109154
-Node: Results110712
-Node: Defining Symbols111471
-Node: Setting Output Variables114480
-Node: Caching Results116326
-Node: Cache Variable Names118228
-Node: Cache Files119777
-Node: Printing Messages121562
-Node: Writing Macros124849
-Node: Macro Definitions125468
-Node: Macro Names126573
-Node: Quoting129024
-Node: Dependencies Between Macros130926
-Node: Prerequisite Macros131558
-Node: Suggested Ordering133013
-Node: Obsolete Macros134543
-Node: Manual Configuration135767
-Node: Specifying Names136676
-Node: Canonicalizing138548
-Node: System Type Variables139862
-Node: Using System Type140609
-Node: Site Configuration141889
-Node: External Software142662
-Node: Package Options145127
-Node: Site Details147183
-Node: Transforming Names148397
-Node: Transformation Options149576
-Node: Transformation Examples150042
-Node: Transformation Rules151610
-Node: Site Defaults153019
-Node: Invoking configure156181
-Node: Basic Installation157048
-Node: Compilers and Options159370
-Node: Build Directory160012
-Node: Installation Names160713
-Node: Optional Features161631
-Node: System Type162401
-Node: Sharing Defaults163423
-Node: Operation Controls164047
-Node: Invoking config.status164911
-Node: Questions168299
-Node: Distributing168831
-Node: Why GNU m4169957
-Node: Bootstrapping170770
-Node: Why Not Imake171386
-Node: Upgrading175967
-Node: Changed File Names177488
-Node: Changed Makefiles178224
-Node: Changed Macros179304
-Node: Invoking autoupdate180518
-Node: Changed Results182109
-Node: Changed Macro Writing184211
-Node: History185474
-Node: Genesis186181
-Node: Exodus187354
-Node: Leviticus190403
-Node: Numbers191926
-Node: Deuteronomy193842
-Node: Old Macro Names196506
-Node: Environment Variable Index199555
-Node: Output Variable Index200557
-Node: Preprocessor Symbol Index204638
-Node: Macro Index209446
+Node: Invoking autoscan19815
+Node: Invoking ifnames22120
+Node: Invoking autoconf23610
+Node: Invoking autoreconf25448
+Node: Setup27768
+Node: Input28654
+Node: Output30270
+Node: Makefile Substitutions33020
+Node: Preset Output Variables34602
+Node: Build Directories37840
+Node: Automatic Remaking39566
+Node: Configuration Headers41632
+Node: Header Templates43999
+Node: Invoking autoheader45178
+Node: Subdirectories48265
+Node: Default Prefix49608
+Node: Versions51012
+Node: Existing Tests52914
+Node: Alternative Programs54379
+Node: Particular Programs55043
+Node: Generic Programs60893
+Node: Libraries62570
+Node: Library Functions64399
+Node: Particular Functions64957
+Node: Generic Functions70704
+Node: Header Files72545
+Node: Particular Headers73104
+Node: Generic Headers80075
+Node: Structures81375
+Node: Typedefs83612
+Node: Particular Typedefs84116
+Node: Generic Typedefs85316
+Node: Compiler Characteristics85759
+Node: System Services88215
+Node: UNIX Variants90536
+Node: Writing Tests92555
+Node: Examining Declarations94327
+Node: Examining Syntax96793
+Node: Examining Libraries97848
+Node: Run Time100216
+Node: Test Programs101177
+Node: Guidelines103712
+Node: Test Functions104901
+Node: Portable Shell106444
+Node: Testing Values and Files108096
+Node: Multiple Cases109751
+Node: Language Choice110949
+Node: Results112507
+Node: Defining Symbols113266
+Node: Setting Output Variables116275
+Node: Caching Results118121
+Node: Cache Variable Names120023
+Node: Cache Files121572
+Node: Printing Messages123357
+Node: Writing Macros126644
+Node: Macro Definitions127263
+Node: Macro Names128368
+Node: Quoting130819
+Node: Dependencies Between Macros132721
+Node: Prerequisite Macros133353
+Node: Suggested Ordering134808
+Node: Obsolete Macros136338
+Node: Manual Configuration137562
+Node: Specifying Names138471
+Node: Canonicalizing140343
+Node: System Type Variables141657
+Node: Using System Type142404
+Node: Site Configuration143684
+Node: External Software144457
+Node: Package Options146922
+Node: Site Details148978
+Node: Transforming Names150192
+Node: Transformation Options151371
+Node: Transformation Examples151837
+Node: Transformation Rules153405
+Node: Site Defaults154814
+Node: Invoking configure157976
+Node: Basic Installation158917
+Node: Compilers and Options161239
+Node: Build Directory161881
+Node: Installation Names162582
+Node: Optional Features163500
+Node: System Type164270
+Node: Sharing Defaults165292
+Node: Operation Controls165916
+Node: Invoking config.status166780
+Node: Questions170168
+Node: Distributing170700
+Node: Why GNU m4171826
+Node: Bootstrapping172639
+Node: Why Not Imake173255
+Node: Upgrading177836
+Node: Changed File Names179357
+Node: Changed Makefiles180093
+Node: Changed Macros181173
+Node: Invoking autoupdate182420
+Node: Changed Results184011
+Node: Changed Macro Writing186113
+Node: History187376
+Node: Genesis188083
+Node: Exodus189256
+Node: Leviticus192305
+Node: Numbers193828
+Node: Deuteronomy195744
+Node: Old Macro Names198408
+Node: Environment Variable Index201457
+Node: Output Variable Index202459
+Node: Preprocessor Symbol Index206540
+Node: Macro Index211348
 
 End Tag Table

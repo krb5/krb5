@@ -17,12 +17,13 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 usage="\
-Usage: autoreconf [-h] [--help] [-m dir] [--macrodir=dir]
-       [-l dir] [--localdir=dir] [--verbose] [--version]"
+Usage: autoreconf [-f] [-h] [--help] [-m dir] [--macrodir=dir]
+       [-l dir] [--localdir=dir] [--force] [--verbose] [--version]"
 
 localdir=
 verbose=no
 show_version=no
+force=no
 
 test -z "$AC_MACRODIR" && AC_MACRODIR=@datadir@
 
@@ -30,14 +31,14 @@ while test $# -gt 0; do
   case "$1" in 
   -h | --help | --h*)
     echo "$usage"; exit 0 ;;
-      --localdir=* | --l*=* )
-         localdir="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
-         shift ;;
-      -l | --localdir | --l*)
-         shift
-         test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
-         localdir="${1}"
-         shift ;;
+  --localdir=* | --l*=* )
+    localdir="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
+    shift ;;
+  -l | --localdir | --l*)
+    shift
+    test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
+    localdir="${1}"
+    shift ;;
   --macrodir=* | --m*=* )
     AC_MACRODIR="`echo \"$1\" | sed -e 's/^[^=]*=//'`"
     shift ;;
@@ -48,6 +49,8 @@ while test $# -gt 0; do
     shift ;;
   --verbose | --verb*)
     verbose=yes; shift ;;
+  -f | --force)
+    force=yes; shift ;;
   --version | --vers*)
     show_version=yes; shift ;;
   --)     # Stop option processing.
@@ -97,13 +100,25 @@ while read dir; do
   esac
 
   case "$localdir" in
-  "")  localdir_opt= ;;
-  /*)  localdir_opt="--localdir=$localdir" ;;
-  *)   localdir_opt="--localdir=$dots$localdir" ;;
+  "")  localdir_opt=
+       aclocal=aclocal.m4 ;;
+  /*)  localdir_opt="--localdir=$localdir"
+       aclocal=$localdir/aclocal.m4 ;;
+  *)   localdir_opt="--localdir=$dots$localdir"
+       aclocal=$dots$localdir/aclocal.m4 ;;
   esac
 
-  test $verbose = yes && echo running autoconf in $dir
-  $autoconf $macrodir_opt $localdir_opt
+  test ! -f $aclocal && aclocal=
+
+  if test $force = no && test -f configure &&
+    ls -lt configure configure.in $aclocal | sed 1q |
+      grep 'configure$' > /dev/null
+  then
+    :
+  else
+    test $verbose = yes && echo running autoconf in $dir
+    $autoconf $macrodir_opt $localdir_opt
+  fi
 
   if grep AC_CONFIG_HEADER configure.in >/dev/null; then
     template=`sed -n '/AC_CONFIG_HEADER/{
@@ -118,8 +133,15 @@ p
 q
 }' configure.in`
     if test ! -f $template || grep autoheader $template >/dev/null; then
-      test $verbose = yes && echo running autoheader in $dir
-      $autoheader $macrodir_opt $localdir_opt
+      if test $force = no && test -f $template &&
+	ls -lt $template configure.in $aclocal | sed 1q |
+	  grep "$template$" > /dev/null
+      then
+        :
+      else
+        test $verbose = yes && echo running autoheader in $dir
+        $autoheader $macrodir_opt $localdir_opt
+      fi
     fi
   fi
   )

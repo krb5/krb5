@@ -1,3 +1,13 @@
+Major changes in release 2.1:
+
+* Fix C++ problems.
+* More explanations in the manual.
+* Fix a spurious failure in the testsuite.
+* Clarify some warning messages.
+* autoreconf by default only rebuilds configure and config.h.in files
+  that are older than any of their particular input files; there is a
+  --force option to use after installing a new version of Autoconf.
+
 Thanks to everybody who's submitted changes and additions to Autoconf!
 I've incorporated many of them, and am still considering others for
 future releases -- but I didn't want to postpone this release indefinitely.

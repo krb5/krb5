@@ -30,7 +30,7 @@ File: autoconf.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
-package.  This is edition 2.0, for Autoconf version 2.0.
+package.  This is edition 2.1, for Autoconf version 2.1.
 
 * Menu:
 
@@ -405,6 +405,14 @@ functions could be affected by typedefs and libraries.
      checks for system services
      `AC_OUTPUT([FILE...])'
 
+   It is best to put each macro call on its own line in `configure.in'.
+Most of the macros don't add extra newlines; they rely on the newline
+after the macro call to terminate the commands.  This approach makes
+the generated `configure' script a little easier to read by not
+inserting lots of blank lines.  It is generally safe to set shell
+variables on the same line as a macro call, because the shell allows
+assignments without intervening newlines.
+
    When calling macros that take arguments, there must not be any blank
 space between the macro name and the open parenthesis.  Arguments can be
 more than one line long if they are enclosed within the `m4' quote
@@ -567,22 +575,38 @@ File: autoconf.info,  Node: Invoking autoreconf,  Prev: Invoking autoconf,  Up: 
 Using `autoreconf' to Update `configure' Scripts
 ================================================
 
-   If you have a lot of Autoconf-generated `configure' scripts and you
-get a new version of Autoconf, the `autoreconf' program can be handy.
-It runs `autoconf' (and `autoheader', where appropriate) repeatedly to
-remake all of the Autoconf `configure' scripts in the directory tree
-rooted at the current directory.  If you give the `--macrodir=DIR' or
-`--localdir=DIR' options, it passes them down (with relative paths
-adjusted properly).
+   If you have a lot of Autoconf-generated `configure' scripts, the
+`autoreconf' program can save you some work.  It runs `autoconf' (and
+`autoheader', where appropriate) repeatedly to remake the Autoconf
+`configure' scripts and configuration header templates in the directory
+tree rooted at the current directory.  By default, it only remakes
+those files that are older than their `configure.in' or (if present)
+`aclocal.m4'.  Since `autoheader' does not change the timestamp of its
+output file if the file wouldn't be changing, this is not necessarily
+the minimum amount of work.  If you install a new version of Autoconf,
+you can make `autoreconf' remake *all* of the files by giving it the
+`--force' option.
 
-   *Note Automatic Remaking::, for information about automatic remaking
-of `configure' scripts when their source files change.
+   If you give `autoreconf' the `--macrodir=DIR' or `--localdir=DIR'
+options, it passes them down to `autoconf' and `autoheader' (with
+relative paths adjusted properly).
+
+   *Note Automatic Remaking::, for `Makefile' rules to automatically
+remake `configure' scripts when their source files change.  That method
+handles the timestamps of configuration header templates properly, but
+does not pass `--macrodir=DIR' or `--localdir=DIR'.
 
 `autoreconf' accepts the following options:
 
 `--help'
 `-h'
      Print a summary of the command line options and exit.
+
+`--force'
+`-f'
+     Remake even `configure' scripts and configuration headers that are
+     newer than their input files (`configure.in' and, if present,
+     `aclocal.m4').
 
 `--localdir=DIR'
 `-l DIR'

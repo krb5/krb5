@@ -6,9 +6,9 @@
 @c @setchapternewpage odd
 @c %**end of header
 
-@set EDITION 2.0
-@set VERSION 2.0
-@set UPDATED October 1994
+@set EDITION 2.1
+@set VERSION 2.1
+@set UPDATED November 1994
 
 @iftex
 @finalout
@@ -488,6 +488,14 @@ checks for system services
 @end group
 @end display
 
+It is best to put each macro call on its own line in
+@file{configure.in}.  Most of the macros don't add extra newlines; they
+rely on the newline after the macro call to terminate the commands.
+This approach makes the generated @code{configure} script a little
+easier to read by not inserting lots of blank lines.  It is generally
+safe to set shell variables on the same line as a macro call, because
+the shell allows assignments without intervening newlines.
+
 When calling macros that take arguments, there must not be any blank
 space between the macro name and the open parenthesis.  Arguments can be
 more than one line long if they are enclosed within the @code{m4} quote
@@ -653,16 +661,29 @@ Print the version number of Autoconf and exit.
 @node Invoking autoreconf, , Invoking autoconf, Making configure Scripts
 @section Using @code{autoreconf} to Update @code{configure} Scripts
 
-If you have a lot of Autoconf-generated @code{configure} scripts and you
-get a new version of Autoconf, the @code{autoreconf} program can be
-handy.  It runs @code{autoconf} (and @code{autoheader}, where
-appropriate) repeatedly to remake all of the Autoconf @code{configure}
-scripts in the directory tree rooted at the current directory.  If you
-give the @samp{--macrodir=@var{dir}} or @samp{--localdir=@var{dir}}
-options, it passes them down (with relative paths adjusted properly).
+If you have a lot of Autoconf-generated @code{configure} scripts, the
+@code{autoreconf} program can save you some work.  It runs
+@code{autoconf} (and @code{autoheader}, where appropriate) repeatedly to
+remake the Autoconf @code{configure} scripts and configuration header
+templates in the directory tree rooted at the current directory.  By
+default, it only remakes those files that are older than their
+@file{configure.in} or (if present) @file{aclocal.m4}.  Since
+@code{autoheader} does not change the timestamp of its output file if
+the file wouldn't be changing, this is not necessarily the minimum
+amount of work.  If you install a new version of Autoconf, you can make
+@code{autoreconf} remake @emph{all} of the files by giving it the
+@samp{--force} option.
 
-@xref{Automatic Remaking}, for information about automatic remaking of
-@code{configure} scripts when their source files change.
+If you give @code{autoreconf} the @samp{--macrodir=@var{dir}} or
+@samp{--localdir=@var{dir}} options, it passes them down to
+@code{autoconf} and @code{autoheader} (with relative paths adjusted
+properly).
+
+@xref{Automatic Remaking}, for @file{Makefile} rules to automatically
+remake @code{configure} scripts when their source files change.  That
+method handles the timestamps of configuration header templates
+properly, but does not pass @samp{--macrodir=@var{dir}} or
+@samp{--localdir=@var{dir}}.
 
 @noindent
 @code{autoreconf} accepts the following options:
@@ -671,6 +692,12 @@ options, it passes them down (with relative paths adjusted properly).
 @item --help
 @itemx -h
 Print a summary of the command line options and exit.
+
+@item --force
+@itemx -f
+Remake even @file{configure} scripts and configuration headers that are
+newer than their input files (@file{configure.in} and, if present,
+@file{aclocal.m4}).
 
 @item --localdir=@var{dir}
 @itemx -l @var{dir}
@@ -1496,6 +1523,15 @@ speed.  Instead of @file{install-sh}, it can also use @file{install.sh},
 but that name is obsolete because some @code{make} programs have a rule
 that creates @file{install} from it if there is no @file{Makefile}.
 
+A copy of @file{install-sh} which you may use comes with Autoconf.  If
+you use @code{AC_PROG_INSTALL}, you must include either
+@file{install-sh} or @file{install.sh} in your distribution, or
+@code{configure} will produce an error message saying it can't find
+them---even if the system you're on has a good @code{install} program.
+This check is a safety measure to prevent you from accidentally leaving
+that file out, which would prevent your package from installing on
+systems that don't have a BSD-compatible @code{install} program.
+
 If you need to use your own installation program because it has
 features not found in standard @code{install} programs, there is no
 reason to use @code{AC_PROG_INSTALL}; just put the pathname of your
@@ -2253,7 +2289,8 @@ typedef check macro.
 @node Particular Typedefs, Generic Typedefs, , Typedefs
 @subsection Particular Typedef Checks
 
-These macros check for particular C typedefs.
+These macros check for particular C typedefs in @file{sys/types.h} and
+@file{stdlib.h} (if it exists).
 
 @defmac AC_TYPE_GETGROUPS
 @maindex TYPE_GETGROUPS
@@ -2265,22 +2302,19 @@ is the base type of the array argument to @code{getgroups}.
 @defmac AC_TYPE_MODE_T
 @maindex TYPE_MODE_T
 @cvindex mode_t
-If @code{mode_t} is not defined in @file{sys/types.h}, define
-@code{mode_t} to be @code{int}.
+If @code{mode_t} is not defined, define @code{mode_t} to be @code{int}.
 @end defmac
 
 @defmac AC_TYPE_OFF_T
 @maindex TYPE_OFF_T
 @cvindex off_t
-If @code{off_t} is not defined in @file{sys/types.h}, define
-@code{off_t} to be @code{long}.
+If @code{off_t} is not defined, define @code{off_t} to be @code{long}.
 @end defmac
 
 @defmac AC_TYPE_PID_T
 @maindex TYPE_PID_T
 @cvindex pid_t
-If @code{pid_t} is not defined in @file{sys/types.h}, define
-@code{pid_t} to be @code{int}.
+If @code{pid_t} is not defined, define @code{pid_t} to be @code{int}.
 @end defmac
 
 @defmac AC_TYPE_SIGNAL
@@ -2306,16 +2340,16 @@ hup_handler ()
 @defmac AC_TYPE_SIZE_T
 @maindex TYPE_SIZE_T
 @cvindex size_t
-If @code{size_t} is not defined in @file{sys/types.h}, define
-@code{size_t} to be @code{unsigned}.
+If @code{size_t} is not defined, define @code{size_t} to be
+@code{unsigned}.
 @end defmac
 
 @defmac AC_TYPE_UID_T
 @maindex TYPE_UID_T
 @cvindex uid_t
 @cvindex gid_t
-If @code{uid_t} is not defined in @file{sys/types.h}, define
-@code{uid_t} to be @code{int} and @code{gid_t} to be @code{int}.
+If @code{uid_t} is not defined, define @code{uid_t} to be @code{int} and
+@code{gid_t} to be @code{int}.
 @end defmac
 
 @node Generic Typedefs, , Particular Typedefs, Typedefs
@@ -2327,7 +2361,7 @@ test macros.
 @defmac AC_CHECK_TYPE (@var{type}, @var{default})
 @maindex CHECK_TYPE
 If the type @var{type} is not defined in @file{sys/types.h} or
-@file{stdlib.h} (if that is present), define it to be the C (or C++)
+@file{stdlib.h} (if it exists), define it to be the C (or C++)
 builtin type @var{default}; e.g., @samp{short} or @samp{unsigned}.
 @end defmac
 
@@ -2701,7 +2735,8 @@ macro uses @code{CFLAGS} or @code{CXXFLAGS}, @code{CPPFLAGS},
 @maindex COMPILE_CHECK
 This is an obsolete version of @code{AC_TRY_LINK}, with the addition that it
 prints @samp{checking for @var{echo-text}} to the standard output first,
-if @var{echo-text} is non-empty.
+if @var{echo-text} is non-empty.  Use @code{AC_MSG_CHECKING} and
+@code{AC_MSG_RESULT} instead to print messages (@pxref{Printing Messages}).
 @end defmac
 
 @node Run Time, Portable Shell, Examining Libraries, Writing Tests
@@ -4128,7 +4163,8 @@ fi
 
 Below are instructions on how to configure a package that uses a
 @code{configure} script, suitable for inclusion as an @file{INSTALL}
-file in the package.
+file in the package.  A plain-text version of @file{INSTALL} which you
+may use comes with Autoconf.
 
 @menu
 * Basic Installation::          Instructions for typical cases.
@@ -4494,15 +4530,15 @@ convert your @file{configure.in} to using the new macro names.
 
 Some macros have been superseded by similar ones that do the job better,
 but are not call-compatible.  If you get warnings about calling obsolete
-macros while running @code{autoconf}, you may safely ignore them, but your
-@code{configure} script will generally work better if you follow the
-advice it prints about what to replace the obsolete macros with.  In
+macros while running @code{autoconf}, you may safely ignore them, but
+your @code{configure} script will generally work better if you follow
+the advice it prints about what to replace the obsolete macros with.  In
 particular, the mechanism for reporting the results of tests has
-changed.  If you were using @code{echo} or @code{AC_VERBOSE}, your
-@code{configure} script's output will look better if you switch to
-@code{AC_MSG_CHECKING} and @code{AC_MSG_RESULT}.  @xref{Printing
-Messages}.  Those macros work best in conjunction with cache variables.
-@xref{Caching Results}.
+changed.  If you were using @code{echo} or @code{AC_VERBOSE} (perhaps
+via @code{AC_COMPILE_CHECK}), your @code{configure} script's output will
+look better if you switch to @code{AC_MSG_CHECKING} and
+@code{AC_MSG_RESULT}.  @xref{Printing Messages}.  Those macros work best
+in conjunction with cache variables.  @xref{Caching Results}.
 
 @node Invoking autoupdate, Changed Results, Changed Macros, Upgrading
 @section Using @code{autoupdate} to Modernize @code{configure}
