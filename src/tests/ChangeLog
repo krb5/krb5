@@ -1,3 +1,7 @@
+Wed Oct 25 11:23:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (check-unix): Run db checks before dejagnu tests. 
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * test1.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
