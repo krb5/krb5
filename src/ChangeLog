@@ -1,3 +1,7 @@
+
+Mon Aug 21 16:42:42 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change mkdir to mkdir -p.
+
 Tue Aug 15 16:19:29 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: For OSF/1 specify that the -rpath directive takes

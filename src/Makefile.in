@@ -47,7 +47,7 @@ install:: install-mkdirs
 
 install-mkdirs:
 	@for i in $(INSTALLMKDIRS); do \
-		if test -d $(DESTDIR)$$i; then :; else (set -x; mkdir $(DESTDIR)$$i); fi \
+		if test -d $(DESTDIR)$$i; then :; else (set -x; mkdir -p $(DESTDIR)$$i); fi \
 	done
 
 # install::
