@@ -1548,8 +1548,13 @@ recvauth(valid_checksum)
 	fatal (netf, "Server can't get session subkey");
     if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)
 	fatal (netf, "No session subkey sent");
-    if (key && kcmd_proto == KCMD_OLD_PROTOCOL)
+    if (key && kcmd_proto == KCMD_OLD_PROTOCOL) {
+#ifdef HEIMDAL_FRIENDLY
+	key = 0;
+#else
 	fatal (netf, "Session subkey not permitted under old kcmd protocol");
+#endif
+    }
     if (key == 0)
 	key = ticket->enc_part2->session;
 

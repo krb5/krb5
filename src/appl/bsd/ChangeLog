@@ -1,3 +1,10 @@
+2000-09-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFINES): Define HEIMDAL_FRIENDLY.
+	* krlogind.c (recvauth): Don't complain about a subkey sent for
+	KCMDV0.1 if HEIMDAL_FRIENDLY is defined, just quietly ignore it.
+	* krshd.c (recvauth): Likewise.
+
 Tue Aug  8 13:38:22 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* krlogin.c (read_wrapper): Copy from the current point and not
