@@ -85,7 +85,8 @@ OLDDECLARG(krb5_data *, outbuf)
 	if (retval = krb5_us_timeofday(&privmsg_enc_part.timestamp,
 				       &privmsg_enc_part.usec))
 	    return retval;
-    }
+    } else
+	privmsg_enc_part.timestamp = 0, privmsg_enc_part.usec = 0;
     if (priv_flags & KRB5_PRIV_DOSEQUENCE) {
 	privmsg_enc_part.seq_number = seq_number;
     } else

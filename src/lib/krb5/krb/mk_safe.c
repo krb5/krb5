@@ -80,7 +80,8 @@ OLDDECLARG(krb5_data *, outbuf)
 	    return KRB5_RC_REQUIRED;
 	if (retval = krb5_us_timeofday(&safemsg.timestamp, &safemsg.usec))
 	    return retval;
-    }
+    } else
+	safemsg.timestamp = 0, safemsg.usec = 0;
     if (safe_flags & KRB5_SAFE_DOSEQUENCE) {
 	safemsg.seq_number = seq_number;
      } else
@@ -104,16 +105,15 @@ OLDDECLARG(krb5_data *, outbuf)
 				       scratch->length); \
 			  krb5_free_data(scratch);}
 			 
-    if (!(safe_checksum.contents = (krb5_octet *)
-	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {
+    if (!(safe_checksum.contents =
+	  (krb5_octet *) malloc(krb5_checksum_size(sumtype)))) {
 	clean_scratch();
 	return ENOMEM;
     }
-    if (retval = (*(krb5_cksumarray[sumtype]->sum_func))(scratch->data,
-							 scratch->length,
-							 (krb5_pointer) key->contents,
-							 key->length,
-							 &safe_checksum)) {
+    if (retval = krb5_calculate_checksum(sumtype, scratch->data,
+					 scratch->length,
+					 (krb5_pointer) key->contents,
+					 key->length, &safe_checksum)) {
 	xfree(safe_checksum.contents);
 	clean_scratch();
 	return retval;
