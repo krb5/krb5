@@ -74,6 +74,11 @@ int main(argc, argv)
   {
     setup(krb5_keyblock,"krb5_keyblock",ktest_make_sample_keyblock);
     decode_run("encryption_key","","30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key(+ trailing [2] INTEGER)","","30 16 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key(+ trailing [2] SEQUENCE {[0] INTEGER})","","30 16 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 07 30 05 A0 03 02 01 01",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key(indefinite lengths)","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key(indefinite lengths + trailing [2] INTEGER)","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 03 02 01 01 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
+    decode_run("encryption_key(indefinite lengths + trailing [2] SEQUENCE {[0] INTEGER})","","30 80 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 80 30 80 A0 03 02 01 01 00 00 00 00 00 00",decode_krb5_encryption_key,ktest_equal_encryption_key);
   }  
   
   /****************************************************************/

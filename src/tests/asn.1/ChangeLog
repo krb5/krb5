@@ -1,3 +1,9 @@
+1999-07-03  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_decode_test.c (main): Add test cases for encryption_key in
+	order to test skipping of trailing fields in sequences, as well as
+	handling of indefinite lengths in sequences.
+
 Thu Jan 28 20:04:52 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* trval.c: Now understands krb5 structure elements.
