@@ -1,3 +1,8 @@
+1999-07-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* login.c (main): Fix typo in computing strncpy length for shell
+	name.
+
 Sat Jul 24 08:50:39 1999  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (kshd): Add $(LOGINLIBS).
