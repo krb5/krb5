@@ -1,0 +1,31 @@
+Changes between CodeWarrior Pro 2 and MITAthena MSL project:
+
+ - ÒMSL MWRuntimeLibCFM68K.mcpÓ renamed to ÒMIT RuntimeCFM68K DLL.prjÓ
+ - This document added to the project
+ - Changed settings in ÒMSL MWRuntimeLibCFM68KÓ target
+ - Added ÒMIT RuntimeCFM68K DLL.debugÓ target
+ 
+Changes to ÒMSL MWRuntimeLibCFM68KÓ target:
+
+ - Target name set to ÒMIT RuntimeCFM68K DLLÓ
+ - Output directory changed to Ò{Project Ä}::bin:Ó
+ - Set user paths to:
+ 		Ò{Project Ä}::Ó
+ 		Ò{Compiler Ä}:MacOS Support:Libraries:Runtime:Runtime CFM68K:(Sources):Ó
+ 		Ò{Compiler Ä}:MacOS Support:Libraries:Runtime:Common Sources:Ó
+ 	¥¥¥ Important: the compiler-relative paths must come after Ò{Project Ä}::Ó so that
+ 	¥¥¥ we can override original sources with our own
+ - Turned on ÒActivate BrowserÓ
+ - Changed output file name to ÒMIT RuntimeLib.68KÓ
+ - Changed output file creator to '????'
+ - Changed PPC PEF fragment name to ÒMIT_¥MITRuntimeLibÓ
+ 
+Configuration of the ÒMIT RuntimeCFM68K DLL.debugÓ target:
+
+ - Started by cloning ÒMIT RuntimeCFM68K DLLÓ target after making the above modifications
+ - Changed output file name to ÒMIT RuntimeLib.68K.debugÓ
+ - Peephole optimizer turned off
+ - CSE optimizer turned off
+ - Optimize for size turned off
+ - Generating SYM files turned on
+ - Changed PPC PEF fragment name to ÒMIT_¥MITRuntimeLib.debugÓ
