@@ -1,5 +1,7 @@
 Thu Oct 31 12:39:42 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* shared.conf: Add for compiling with shared libraries
+
 	* base.conf: Add "uname" for config.guess
 
 Tue Nov  1 20:19:17 1994  Theodore Y. Ts'o  (tytso@dcl)
