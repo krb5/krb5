@@ -395,7 +395,7 @@ int sign_server(s, server_creds)
      cp = msg_buf.value;
      if ((isprint(cp[0]) || isspace(cp[0])) &&
 	 (isprint(cp[1]) || isspace(cp[1]))) {
-	fprintf(log, "\"%s\"\n", cp);
+	fprintf(log, "\"%.*s\"\n", msg_buf.length, msg_buf.value);
      } else {
 	printf("\n");
 	print_token(&msg_buf);
