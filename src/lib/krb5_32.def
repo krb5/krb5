@@ -17,7 +17,6 @@ EXPORTS
 ; Kerberos 5
 	krb5_build_principal
 	krb5_build_principal_ext
-	krb5_copy_addr
 	krb5_copy_addresses
 	krb5_copy_authdata
 	krb5_copy_authenticator
@@ -28,44 +27,23 @@ EXPORTS
 	krb5_copy_keyblock_contents
 	krb5_copy_principal
 	krb5_copy_ticket
-	krb5_decrypt_tkt_part
-	krb5_free_address
 	krb5_free_addresses
-	krb5_free_ap_rep
 	krb5_free_ap_rep_enc_part
-	krb5_free_ap_req
 	krb5_free_authdata
 	krb5_free_authenticator
-	krb5_free_authenticator_contents
 	krb5_free_checksum
 	krb5_free_config_files
 	krb5_free_context
-	krb5_free_cred
 	krb5_free_cred_contents
-	krb5_free_cred_enc_part
 	krb5_free_creds
 	krb5_free_data
 	krb5_free_data_contents
-	krb5_free_enc_kdc_rep_part
-	krb5_free_enc_tkt_part
 	krb5_free_error
-	krb5_free_host_realm
-	krb5_free_kdc_rep
-	krb5_free_kdc_req
 	krb5_free_keyblock
 	krb5_free_keyblock_contents
-	krb5_free_last_req
-	krb5_free_pa_data
 	krb5_free_principal
-	krb5_free_priv
-	krb5_free_priv_enc_part
-	krb5_free_pwd_data
-	krb5_free_pwd_sequences
-	krb5_free_safe
 	krb5_free_tgt_creds
 	krb5_free_ticket
-	krb5_free_tickets
-	krb5_free_tkt_authent
 	krb5_free_checksum_contents
 	krb5_free_cksumtypes
 	krb5_fwd_tgt_creds
@@ -75,12 +53,12 @@ EXPORTS
 	krb5_get_default_config_files
 	krb5_get_default_realm
 	krb5_set_default_tgs_enctypes
-	krb5_get_host_realm
-	krb5_get_realm_domain
+;
 	krb5_get_in_tkt
 	krb5_get_in_tkt_with_keytab
 	krb5_get_in_tkt_with_password
 	krb5_get_in_tkt_with_skey
+;
 	krb5_get_init_creds_opt_init
 	krb5_get_init_creds_opt_set_tkt_life
 	krb5_get_init_creds_opt_set_renew_life
@@ -92,10 +70,9 @@ EXPORTS
 	krb5_get_init_creds_opt_set_salt
 	krb5_get_init_creds_password
 	krb5_get_init_creds_keytab
-	krb5_get_init_creds_opt_init
+;
 	krb5_get_validated_creds
 	krb5_get_renewed_creds
-	krb5_get_notification_message
 	krb5_init_context
 	krb5_mk_error
 	krb5_mk_priv
@@ -179,20 +156,16 @@ EXPORTS
 	krb5_auth_con_getremoteseqnumber
 	krb5_auth_con_setuseruserkey
 	krb5_auth_con_getauthenticator
-	krb5_auth_con_set_req_cksumtype
 	krb5_auth_con_setrcache
 ;
 	krb5_cc_default
 	krb5_cc_default_name
-	krb5_cc_register
 	krb5_cc_resolve
 	krb5_cc_set_default_name
 ;
 	krb5_kt_default
-	krb5_kt_register
 	krb5_kt_resolve
 	krb5_kt_add_entry
-	krb5_kt_free_entry
 	krb5_kt_read_service_key
 	krb5_kt_remove_entry
 
@@ -205,13 +178,6 @@ EXPORTS
 
 	krb5_change_password
 ;
-	krb5_write_message
-	krb5_read_message
-	krb5_net_write
-	krb5_net_read
-	krb5_encrypt
-	krb5_decrypt
-	krb5_encrypt_size
 ;
 ; Added for Kermit 95
 	krb5_address_search	; !CALLCONV
@@ -222,10 +188,12 @@ EXPORTS
 ;
 ; Added for 1.2:
 	krb5_decode_ticket
-        krb5_appdefault_string
-        krb5_appdefault_boolean
-;
+	krb5_appdefault_string
+	krb5_appdefault_boolean
+
 ; Temporary exports (DO NOT USE)
+
+; Currently required for krb4:
 	des_ecb_encrypt
 	des_new_random_key
 	des_key_sched
@@ -233,7 +201,8 @@ EXPORTS
 	des_quad_cksum
 	des_string_to_key
 	des_init_random_number_generator
-	krb5_random_confounder
+
+; Currently required to implement GSSAPI
 	krb5_size_opaque	; gssapi
 	krb5_internalize_opaque	; gssapi
 	krb5_externalize_opaque	; gssapi
@@ -246,8 +215,110 @@ EXPORTS
 	krb5_ser_ccache_init	; gssapi
 	krb5_ser_keytab_init	; gssapi
 	krb5_ser_rcache_init	; gssapi
-	decode_krb5_ap_req	; gssapi
-	krb5_mcc_ops		; gssapi
+	decode_krb5_ap_req	; gssapi (!CALLCONV)
+	krb5_mcc_ops		; gssapi (variable)
 	krb5_get_tgs_ktypes	; gssapi
 	krb5_free_ktypes	; gssapi
 	krb5int_cc_default	; gssapi
+	krb5_cc_register	; gssapi
+	krb5_auth_con_set_req_cksumtype	; gssapi
+; XXX
+	krb5_kt_free_entry	; gssapi (should use free_entry_contents)
+
+; Removed:
+;	krb5_random_confounder
+;
+;	krb5_write_message
+;	krb5_read_message
+;	krb5_net_write
+;	krb5_net_read
+;
+;
+;	krb5_copy_addr
+;	krb5_decrypt_tkt_part
+;	krb5_free_address
+;	krb5_free_ap_rep
+;	krb5_free_ap_req
+;	krb5_free_authenticator_contents
+;	krb5_free_cred
+;	krb5_free_cred_enc_part
+;	krb5_free_enc_kdc_rep_part
+;	krb5_free_enc_tkt_part
+;	krb5_free_host_realm
+;	krb5_free_kdc_rep
+;	krb5_free_kdc_req
+;	krb5_free_last_req
+;	krb5_free_pa_data
+;	krb5_free_priv
+;	krb5_free_priv_enc_part
+;	krb5_free_pwd_data
+;	krb5_free_pwd_sequences
+;	krb5_free_safe
+;	krb5_free_tickets
+;	krb5_free_tkt_authent
+;	krb5_get_host_realm
+;	krb5_get_notification_message
+;	krb5_get_realm_domain
+;	krb5_kt_register
+
+; Added:
+	krb5_build_principal_va
+	krb5_free_default_realm
+	krb5_init_keyblock
+
+;	krb5_cc_copy_creds
+;	krb5_cc_get_name
+;	krb5_cc_gen_new
+;	krb5_cc_initialize
+;	krb5_cc_destroy
+;	krb5_cc_close
+;	krb5_cc_store_cred
+;	krb5_cc_retrieve_cred
+;	krb5_cc_get_principal
+;	krb5_cc_start_seq_get
+;	krb5_cc_next_cred
+;	krb5_cc_end_seq_get
+;	krb5_cc_remove_cred
+;	krb5_cc_set_flags
+;	krb5_cc_get_type
+
+;	krb5_kt_close
+;	krb5_kt_default_name
+
+;	krb5_kt_get_type
+;	krb5_kt_get_name
+;	krb5_kt_close
+;	krb5_kt_get_entry
+;	krb5_kt_start_seq_get
+;	krb5_kt_next_entry
+;	krb5_kt_end_seq_get
+
+;	krb5_kt_default_name
+;	krb5_kt_free_entry_contents
+
+; To Add:
+;	krb5_get_profile
+;	krb5_get_time_offsets
+;	krb5_init_secure_context
+;	krb5_mk_1cred
+;	krb5_mk_ncred
+;	krb5_realm_compare
+;	krb5_recvauth_version
+;	krb5_set_default_realm
+;	krb5_set_principal_realm
+;	krb5_verify_init_creds
+;	krb5_verify_init_creds_opt_init
+;	krb5_verify_init_creds_opt_set_ap_req_nofail
+;	krb5_address_compare
+;	krb5_address_order
+;	krb5_aname_to_localname
+;	krb5_auth_con_getaddres
+;	krb5_auth_con_initivector
+;	krb5_auth_con_setports
+;	krb5_c_is_coll_proof_cksum
+;	krb5_c_is_keyed_cksum
+;	krb5_c_make_random_key
+;	krb5_c_random_seed
+;	krb5_c_string_to_key
+;	krb5_c_valid_cksumtype
+;	krb5_c_valid_enctype

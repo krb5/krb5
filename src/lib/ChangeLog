@@ -1,3 +1,8 @@
+2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: First cut at consistent exports between Windows and
+	MacOS X.  More work needs to be done.
+
 2001-11-29  Danilo Almeida  <dalmeida@mit.edu>
 
 	* gssapi32.def: Export gss_mech_krb5 as DATA.  Mark all exported
