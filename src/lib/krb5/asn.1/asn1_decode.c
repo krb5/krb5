@@ -58,14 +58,22 @@ asn1_error_code asn1_decode_integer(buf, val)
 {
   setup();
   asn1_octet o;
-  unsigned long n;
+  long n;
+  int i;
 
   tag(ASN1_INTEGER);
 
-  for(n=0; length > 0; length--){
-    retval = asn1buf_remove_octet(buf,&o);
-    if(retval) return retval;
-    n = (n<<8) + (unsigned int)o;
+  for (i = 0; i < length; i++) {
+    retval = asn1buf_remove_octet(buf, &o);
+    if (retval) return retval;
+    if (!i) {
+      n = (0x80 & o) ? -1 : 0;	/* grab sign bit */
+      if (n < 0 && length > sizeof (long))
+	return ASN1_OVERFLOW;
+      else if (length > sizeof (long) + 1) /* allow extra octet for positive */
+	return ASN1_OVERFLOW;
+    }
+    n = (n << 8) | o;
   }
   *val = n;
   cleanup();
@@ -78,13 +86,20 @@ asn1_error_code asn1_decode_unsigned_integer(buf, val)
   setup();
   asn1_octet o;
   unsigned long n;
+  int i;
 
   tag(ASN1_INTEGER);
 
-  for(n=0; length > 0; length--){
-    retval = asn1buf_remove_octet(buf,&o);
+  for (i = 0, n = 0; i < length; i++) {
+    retval = asn1buf_remove_octet(buf, &o);
     if(retval) return retval;
-    n = (n<<8) + (unsigned int)o;
+    if (!i) {
+      if (0x80 & o)
+	return ASN1_OVERFLOW;
+      else if (length > sizeof (long) + 1)
+	return ASN1_OVERFLOW;
+    }
+    n = (n << 8) | o;
   }
   *val = n;
   cleanup();
