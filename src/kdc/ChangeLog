@@ -1,3 +1,9 @@
+Mon Nov 10 20:03:14 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): If not using the reply cache,
+		properly handle a failure return from
+		krb5_rd_req_decode_anyflag().
+
 Wed Oct  8 12:20:35 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* main.c (main): Initialize kdc error table with
