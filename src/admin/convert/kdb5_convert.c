@@ -528,6 +528,8 @@ Principal *princ;
     memcpy((char *) (((long *) v4key) + 1), (char *)&(princ->key_high), 4);
     kdb_encrypt_key (v4key, v4key, master_key, master_key_schedule, DECRYPT);
 
+    v4v5key.magic = KV5M_KEYBLOCK;
+    v4v5key.etype = master_keyblock.etype;
     v4v5key.contents = (krb5_octet *)v4key;
     v4v5key.keytype = KEYTYPE_DES;
     v4v5key.length = sizeof(v4key);
