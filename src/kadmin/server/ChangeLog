@@ -1,3 +1,9 @@
+2000-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_svc.c (kadm_1): Update to include new api functions.
+
+	* ovsec_kadmd.c (log_badverf): Update proc_names.
+
 2000-02-17  Tom Yu  <tlyu@mit.edu>
 
 	* server_stubs.c: Add create_principal3_1, chpass_principal3_1,

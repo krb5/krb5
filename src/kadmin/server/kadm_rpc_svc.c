@@ -50,6 +50,12 @@ void kadm_1(rqstp, transp)
 	  dpol_arg delete_policy_1_arg;
 	  mpol_arg modify_policy_1_arg;
 	  gpol_arg get_policy_1_arg;
+	  setkey_arg setkey_principal_1_arg;
+	  setv4key_arg setv4key_principal_1_arg;
+	  cprinc3_arg create_principal3_1_arg;
+	  chpass3_arg chpass_principal3_1_arg;
+	  chrand3_arg chrand_principal3_1_arg;
+	  setkey3_arg setkey_principal3_1_arg;
      } argument;
      char *result;
      bool_t (*xdr_argument)(), (*xdr_result)();
@@ -170,6 +176,30 @@ void kadm_1(rqstp, transp)
 	  xdr_argument = xdr_u_int32;
 	  xdr_result = xdr_generic_ret;
 	  local = (char *(*)()) init_1;
+	  break;
+
+     case CREATE_PRINCIPAL3:
+	  xdr_argument = xdr_cprinc3_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) create_principal3_1;
+	  break;
+
+     case CHPASS_PRINCIPAL3:
+	  xdr_argument = xdr_chpass3_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) chpass_principal3_1;
+	  break;
+
+     case CHRAND_PRINCIPAL3:
+	  xdr_argument = xdr_chrand3_arg;
+	  xdr_result = xdr_chrand_ret;
+	  local = (char *(*)()) chrand_principal3_1;
+	  break;
+
+     case SETKEY_PRINCIPAL3:
+	  xdr_argument = xdr_setkey3_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) setkey_principal3_1;
 	  break;
 
      default:
