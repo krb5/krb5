@@ -12,4 +12,4 @@ SRCS 	= fcc_close.c fcc_destry.c fcc_eseq.c \
 	fcc_sseq.c fcc_store.c fcc_skip.c fcc_ops.c fcc_write.c \
 	fcc_sflags.c
 
-NormalLibraryTarget(fcc,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
