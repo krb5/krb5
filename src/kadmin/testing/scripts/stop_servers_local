@@ -4,9 +4,12 @@ DUMMY=${TESTDIR=$TOP/testing}
 DUMMY=${RESTORE_FILES=$TESTDIR/scripts/restore_files.sh}
 
 # If it's set, set it to true
-VERBOSE=${VERBOSE_TEST+true}
+if test x$VERBOSE_TEST = x; then
+	VERBOSE=true
 # Otherwise, set it to false
-DUMMY=${VERBOSE=false}
+else
+	VERBOSE=false
+fi
 
 v4files=false
 while [ $# -gt 0 ] ; do

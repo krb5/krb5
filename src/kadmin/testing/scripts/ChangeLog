@@ -1,3 +1,9 @@
+Tue Nov 12 14:59:31 1996  Tom Yu  <tlyu@mit.edu>
+
+	* init_db, save_files.sh, start_servers, start_servers_local,
+ 	stop_servers, stop_servers_local: Fix test of $VERBOSE_TEST so
+ 	that $VERBOSE only gets set if $VERBOSE_TEST is not empty.
+
 Mon Nov 11 14:25:15 1996  Tom Yu  <tlyu@mit.edu>
 
 	* init_db, save_files.sh, start_servers_local, stop_servers,
