@@ -1,3 +1,7 @@
+Tue Sep 12 22:06:24 1995  John Rivlin (jrivlin@fusion.com)
+
+	* Makefile.in: Added telnet to Mac file list
+
 Mon Sep 11 22:06:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Update macintosh/dos file lists

@@ -203,7 +203,7 @@ FILES= ./* \
 
 WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
-MACFILES= mac/build/* mac/kconfig/* mac/libraries/*
+MACFILES= mac/build/* mac/kconfig/* mac/libraries/* mac/telnet/*
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 
