@@ -93,10 +93,11 @@ for this reason.
 \subsection{Admin Principal, osa_princ_ent_t}
 
 The admin principal database stores records of the type
-osa_princ_ent_t, which is the subset of the ovsec_kadm_principal_ent_t
-structure that is not stored in the Kerberos database plus the
-necessary bookkeeping information.  The records are keyed by the ASCII
-representation of the principal's name, including the trailing NULL.
+osa_princ_ent_t (declared in $<$ovsec_admin/adb.h$>$), which is the
+subset of the ovsec_kadm_principal_ent_t structure that is not stored
+in the Kerberos database plus the necessary bookkeeping information.
+The records are keyed by the ASCII representation of the principal's
+name, including the trailing NULL.
 
 \begin{verbatim}
 typedef struct _osa_princ_ent_t {
@@ -133,9 +134,10 @@ encrypted in the admin/history key.  There are num_old_keys elements.
 
 \subsection{Policy, osa_policy_ent_t}
 
-The policy database stores records of the type osa_policy_ent_t, which
-is all of ovsec_kadm_policy_ent_t plus necessary bookkeeping
-information.  The records are keyed by the policy name.
+The policy database stores records of the type osa_policy_ent_t
+(declared in $<$ovsec_admin/adb.h$>$) , which is all of
+ovsec_kadm_policy_ent_t plus necessary bookkeeping information.  The
+records are keyed by the policy name.
 
 \begin{verbatim}
 typedef struct _osa_policy_ent_t {
@@ -154,7 +156,7 @@ typedef struct _osa_policy_ent_t {
 \subsection{Kerberos, krb5_db_entry}
 
 The Kerberos database stores records of type krb5_db_entry, which is
-defined in the kdb.h header file.
+defined in the $<$krb5/kdb.h$>$ header file.
 
 \begin{verbatim}
 typedef struct _krb5_encrypted_keyblock {
@@ -207,15 +209,29 @@ it does not understand.
 This section describes the database abstraction used for the admin
 principal and policy databases.  Since both databases export
 equivalent functionality, the API is only described once.  The
-character T is used to represent both ``princ'' and ``policy''.
+character T is used to represent both ``princ'' and ``policy''. The
+location of the principal database is defined by the \#define
+PRINCIPAL_DB (``/krb5/principal.db'') in $<$ovsec_admin/adb.h$>$. The
+location of the policy database is defined by the \#define POLICY_DB
+(``/krb5/policy.db'') in $<$ovsec_admin/adb.h$>$.
 
 Note that this is {\it only} a database abstraction.  All functional
 intelligence, such as maintaining policy reference counts or sanity
 checking, must be implemented above this layer.
 
+Prototypes for the osa functions are supplied in
+$<$ovsec_admin/adb.h$>$. The routines can be found (in the first
+relase) in ``stage/lib/libadb.a''. They require linking with the
+Berkely DB library (``stage/lib/libdb.a''). [Note: We needed to remove
+the dbm compatibility routines from libdb.a because we want to leave
+KDB library alone in case somebody wants to run a stock MIT KDC with
+our admin server.]
+
 The database routines use com_err for error codes.  The error code
-table name is ``kadb'' and the offsets are the same as the order
-presented here.
+table name is ``adb'' and the offsets are the same as the order
+presented here. The error table header file is
+$<$ovsec_admin/adb_err.h$>$. Callers of the OSA routines should first call
+init_adb_err_tbl() to initialize the database table.
 
 \begin{description}
 \item[OSA_ADB_OK] Operation successful.
@@ -247,7 +263,7 @@ Close an open database.
 
 \begin{verbatim}
 osa_adb_ret_t
-osa_adb_create_T(osa_adb_T_t db, ovsec_kadm_T_ent_t entry);
+osa_adb_create_T(osa_adb_T_t db, osa_T_ent_t entry);
 \end{verbatim}
 %
 Adds the entry to the database.  All fields are defined.  Returns
@@ -255,7 +271,7 @@ OSA_ADB_DUP if it already exists.
 
 \begin{verbatim}
 osa_adb_ret_t
-osa_adb_destroy_T(osa_adb_T_t db, ovsec_kadm_T_t name);
+osa_adb_destroy_T(osa_adb_T_t db, osa_T_t name);
 \end{verbatim}
 
 Removes the named entry from the database.  Returns OSA_ADB_NOENT if
@@ -263,7 +279,7 @@ it does not exist.
 
 \begin{verbatim}
 osa_adb_ret_t
-osa_adb_get_T(osa_adb_T_t db, ovsec_kadm_T_t name,
+osa_adb_get_T(osa_adb_T_t db, osa_T_t name,
         ovsec_kadm_ent_T_t *entry); 
 \end{verbatim}
 
@@ -274,7 +290,7 @@ allocated.
 
 \begin{verbatim}
 osa_adb_ret_t
-osadb_adb_put_T(osa_adb_T_t db, ovsec_kadm_T_ent_t entry);
+osadb_adb_put_T(osa_adb_T_t db, osa_T_ent_t entry);
 \end{verbatim}
 
 Modifies the existing entry named in entry.  All fields must be filled
@@ -291,7 +307,7 @@ osa_adb_get_T.
 
 \begin{verbatim}
 typedef void (*osa_adb_iter_T_func)(void *data,
-				    ovsec_kadm_T_ent_t entry);
+				    osa_T_ent_t entry);
 
 void osa_adb_iter_T(osa_adb_T_t db, osa_adb_iter_T_func func, 
 		    void *data);
