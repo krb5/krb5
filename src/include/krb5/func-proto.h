@@ -81,7 +81,8 @@ krb5_error_code krb5_get_in_tkt
 					krb5_pointer,
 					krb5_kdc_rep * ),
 		   krb5_pointer,
-		   krb5_creds * ));
+		   krb5_creds *,
+		   krb5_ccache ));
 krb5_error_code krb5_get_in_tkt_with_password
 	PROTOTYPE((krb5_flags,
 		   krb5_address **,
