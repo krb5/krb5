@@ -1,3 +1,12 @@
+2005-03-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * keyed_cksum.c: (krb5_c_is_keyed_cksum): this is a boolean 
+          function.  It should not return -1U on error.  Instead return
+          0 (false) so that the caller doesn't think it succeeded.
+
+          The only two callers are rd_safe and mk_safe.  Neither checks
+          for special cases.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* prng.c (krb5int_prng_init): Incorporate do_yarrow_init body.
