@@ -102,8 +102,9 @@ static bool_t xdralloc_putlong(xdrs, lp)
    register XDR *xdrs;
    long *lp;
 {
-     int l = htonl((rpc_u_int32) *(int *)lp);
-     
+     int l = htonl((rpc_u_int32) *lp); /* XXX need bounds checking */
+
+     /* XXX assumes sizeof(int)==4 */
      if (DynInsert((DynObject) xdrs->x_private,
 		   DynSize((DynObject) xdrs->x_private), &l,
 		   sizeof(int)) != DYN_OK)
