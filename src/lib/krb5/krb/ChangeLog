@@ -1,3 +1,7 @@
+Mon Sep  1 21:38:16 1997  Tom Yu  <tlyu@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred_basic): Fix swapped args to memset.
+
 Fri Aug 29 16:41:25 1997  Tom Yu  <tlyu@mit.edu>
 
 	* get_in_tkt.c (krb5_get_in_tkt): Move nulling out of

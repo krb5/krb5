@@ -95,7 +95,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
     if ((retval = decode_krb5_cred(pcreddata, &pcred)))
     	return retval;
 
-    memset(&encpart, sizeof(encpart), 0);
+    memset(&encpart, 0, sizeof(encpart));
 
     if ((retval = decrypt_credencdata(context, pcred, pkeyblock, &encpart)))
 	goto cleanup_cred;
