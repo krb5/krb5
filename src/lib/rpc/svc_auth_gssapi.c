@@ -833,7 +833,7 @@ done:
      
      free(client_data);
      
-#ifdef PURIFY
+#if 0 /*ifdef PURIFY*/
      purify_watch_n(client_data, sizeof(*client_data), "rw");
 #endif
 }
