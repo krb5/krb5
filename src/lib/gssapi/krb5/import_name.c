@@ -121,10 +121,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
    } else {
 #ifndef NO_PASSWORD
       uid_t uid;
-#ifdef HAVE_GETPWUID_R
       struct passwd pwx;
       char pwbuf[BUFSIZ];
-#endif
 #endif
 
       stringrep = NULL;
@@ -148,18 +146,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
       } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
 	 uid = *(uid_t *) input_name_buffer->value;
       do_getpwuid:
-#ifndef HAVE_GETPWUID_R
-	 pw = getpwuid(uid);
-#elif defined(GETPWUID_R_4_ARGS)
-	 /* old POSIX drafts */
-	 pw = getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf));
-#else
-	 /* POSIX */
-	 if (getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf), &pw) != 0)
-	     pw = NULL;
-#endif
-	 if (pw)
-	    stringrep = pw->pw_name;
+	 if (k5_getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf), &pw) == 0)
+	     stringrep = pw->pw_name;
 	 else
 	    *minor_status = (OM_uint32) G_NOUSER;
       } else if (g_OID_equal(input_name_type, gss_nt_string_uid_name)) {
