@@ -1,4 +1,10 @@
+2000-05-05  Wilfredo Sanchez <tritan@mit.edu>
+
+	* config/pre.in: Set KRB5_INCDIR from @includedir@ so configure
+	--includedir=foo works.
+
 2000-05-04  Wilfredo Sanchez <tritan@mit.edu>
+
 	* Makefile.in: kadmin server binaries install into SERVER_BINDIR
 	instead of ADMIN_BINDIR. (The default is the same for both, though
 	in BSD layouts SERVER_BINDIR should be /usr/libexec, not
