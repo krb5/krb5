@@ -1,3 +1,12 @@
+2000-02-25  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for sys/sockio.h
+
+	* network.c: Conditionally include sys/sockio.h for SIOC* if
+	necessary.
+	(process_packet): Bracket AF_INET6 branch of a switch statement
+	with an ifdef.
+
 2000-02-25  Ken Raeburn  <raeburn@mit.edu>
 	    Alec H. Peterson  <ahp@hilander.com>
 

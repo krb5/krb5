@@ -2,7 +2,7 @@ AC_INIT(main.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
-AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h)
+AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
 AC_PROG_AWK
 KRB5_AC_INET6

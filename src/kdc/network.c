@@ -40,6 +40,10 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#ifdef HAVE_SYS_SOCKIO_H
+/* for SIOCGIFCONF, etc. */
+#include <sys/sockio.h>
+#endif
 #include <sys/time.h>
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -406,11 +410,13 @@ void process_packet(port_fd, prog, portnum)
 	addr.length = 4;
 	addr.contents = (krb5_octet *) &((struct sockaddr_in *)&saddr)->sin_addr;
 	break;
+#ifdef KRB5_USE_INET6
     case AF_INET6:
 	addr.addrtype = ADDRTYPE_INET6;
 	addr.length = 16;
 	addr.contents = (krb5_octet *) &((struct sockaddr_in6 *)&saddr)->sin6_addr;
 	break;
+#endif
     default:
 	addr.addrtype = -1;
 	addr.length = 0;
