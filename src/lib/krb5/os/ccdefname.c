@@ -92,19 +92,22 @@ krb5_cc_default_name(context)
     
     if (name == 0) {
 
+/* meeroh: I have no idea why we're using HAVE_MACSOCK_H here instead of macintosh,
+	but since I am not sure it is worng I will leave it that way. */
 #ifdef HAVE_MACSOCK_H
 {
-short	vRefnum;
-long	parID;
-OSErr	theErr;
-FSSpec	krbccSpec;
-char	pathbuf[255];
+//short	vRefnum;
+//long	parID;
+//OSErr	theErr;
+//FSSpec	krbccSpec;
+//char	pathbuf[255];
 
-	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
-	FSMakeFSSpec(vRefnum, parID, "\pkrb5cc", &krbccSpec);
-	GetPathname(&krbccSpec, &pathbuf);
-	sprintf(name_buf, "STDIO:%s", pathbuf);
+//	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
+//	FSMakeFSSpec(vRefnum, parID, "\pkrb5cc", &krbccSpec);
+//	GetPathname(&krbccSpec, &pathbuf);
+//	sprintf(name_buf, "STDIO:%s", pathbuf);
 //	strcpy (name_buf, "STDIO:krb5cc");
+	strcpy (name_buf, "API:default_cache_name");
 }
 #else
 #if defined(_MSDOS) || defined(_WIN32)

@@ -1,3 +1,8 @@
+Fri Aug 21 17:37:00 1998  Miro Jurisic  <meeroh@mit.edu>
+
+	* ccdefname.c.c (krb5_cc_default_name): Changed the Mac
+			version to use CCache API by default.
+
 Thu Jul 16 09:59:34 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* changepw.c (krb5_change_password): Changes casts from char * to
