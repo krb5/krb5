@@ -46,11 +46,8 @@ krb5_data tgtname = {
 /*
  * Try no preauthentication first; then try the encrypted timestamp
  */
-int preauth_search_list[] = {
-	0,			
-	KRB5_PADATA_ENC_TIMESTAMP,
-	-1
-	};
+krb5_preauthtype preauth_list[2] = { 0, -1 };
+krb5_preauthtype * preauth_ptr = NULL;
 
 
 
@@ -384,7 +381,6 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     krb5_error_code code;
     krb5_creds my_creds;
     krb5_timestamp now;
-    int preauth_type = -1;
     int pwsize;
     int	i;
     char password[255], *client_name, prompt[255];
@@ -452,29 +448,9 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 	      return (FALSE); 
 	 }
 
-	 if (preauth_type > 0) {
-	     code = krb5_get_in_tkt_with_password(context, options->opt, 
-						  my_addresses, preauth_type,
-						  ETYPE_DES_CBC_CRC,
-						  KEYTYPE_DES,
-						  password,
-						  *ccache,
-						  &my_creds, 0);
-	 } else {
-	     for (i=0; preauth_search_list[i] >= 0; i++) {
-		 code = krb5_get_in_tkt_with_password(context, options->opt, 
-						      my_addresses,
-						      preauth_search_list[i],
-						      ETYPE_DES_CBC_CRC,
-						      KEYTYPE_DES,
-						      password,
-						      *ccache,
-						      &my_creds, 0);
-	     if (code != KRB5KDC_ERR_PREAUTH_FAILED &&
-		 code != KRB5KRB_ERR_GENERIC)
-		 break;
-	     }
-	 }
+	 code = krb5_get_in_tkt_with_password(context, options->opt, 
+					      my_addresses, NULL, preauth_ptr,
+					      password, *ccache, &my_creds, 0);
 	 memset(password, 0, sizeof(password));
 
     
