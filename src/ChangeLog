@@ -1,3 +1,14 @@
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_CHOOSE_DB): Set new variable KDB5_DB_LIB to
+	empty if using in-tree db.  It is now used to pass -ldb to link
+	commands, if needed, when linking programs with libkdb5.  DB_LIB
+	is now only used for programs that explicitly need the actual
+	libdb independently of libkdb5.
+
+	* krb5-config.in: Use $KDB5_DB_LIB instead of "-ldb" for kdb
+	libraries.
+
 2003-03-31  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Require autoconf-2.53, since 2.52 generates

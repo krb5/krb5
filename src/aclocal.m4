@@ -1506,17 +1506,22 @@ if test "x$with_system_db" = xyes ; then
   else
     DB_HEADER_VERSION=redirect
   fi
+  KDB5_DB_LIB="$DB_LIB"
 else
   DB_VERSION=k5
   AC_DEFINE(HAVE_BT_RSEQ,1,[Define if bt_rseq is available, for recursive btree traversal.])
   DB_HEADER=db.h
   DB_HEADER_VERSION=k5
+  # libdb gets sucked into libkdb
+  KDB5_DB_LIB=
+  # needed for a couple of things that need libdb for its own sake
   DB_LIB=-ldb
 fi
 AC_SUBST(DB_VERSION)
 AC_SUBST(DB_HEADER)
 AC_SUBST(DB_HEADER_VERSION)
 AC_SUBST(DB_LIB)
+AC_SUBST(KDB5_DB_LIB)
 ])
 dnl
 dnl

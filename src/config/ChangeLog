@@ -1,3 +1,10 @@
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (KDB5_DEPLIBS): Don't depend on $(DB_DEPLIB) anymore.
+	(KDB5_DB_LIB): New variable; is empty if not building with system
+	libdb.
+	(KDB5_LIBS): Use $(KDB5_DB_LIB) instead of $(DB_LIB).
+
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
 	* libobj.in: Change .c.so and .c.po rules to use ALL_CFLAGS.
