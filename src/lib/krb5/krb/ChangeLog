@@ -1,3 +1,9 @@
+Mon Aug  7 18:54:35 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* in_tkt_ktb.c (keytab_keyproc): If there is an error looking up
+		the key, make sure the keytab is closed as part of the
+		cleanup. 
+
 Fri Aug  4 22:04:08 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* conv_princ.c: Add braces to initializer to shut up gcc -Wall

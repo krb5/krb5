@@ -54,7 +54,7 @@ keytab_keyproc(context, type, salt, keyseed, key)
 {
     struct keytab_keyproc_arg * arg = (struct keytab_keyproc_arg *)keyseed;
     krb5_keyblock *realkey;
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     krb5_keytab kt_id;
     krb5_keytab_entry kt_ent;
 
@@ -72,24 +72,27 @@ keytab_keyproc(context, type, salt, keyseed, key)
     if ((retval = krb5_kt_get_entry(context, kt_id, arg->client,
 				    0, /* don't have vno available */
 				    type, &kt_ent)))
-	    return retval;
+	    goto cleanup;
 
     if ((retval = krb5_copy_keyblock(context, &kt_ent.key, &realkey))) {
 	(void) krb5_kt_free_entry(context, &kt_ent);
-	return retval;
+	goto cleanup;
     }
 	
     if (realkey->keytype != type) {
 	(void) krb5_kt_free_entry(context, &kt_ent);
 	krb5_free_keyblock(context, realkey);
-	return KRB5_PROG_ETYPE_NOSUPP;
+	retval = KRB5_PROG_ETYPE_NOSUPP;
+	goto cleanup;
     }	
 
     (void) krb5_kt_free_entry(context, &kt_ent);
+    *key = realkey;
+    
+cleanup:
     if (arg->keytab) 
 	krb5_kt_close(context, kt_id);
-    *key = realkey;
-    return 0;
+    return retval;
 }
 
 /*
