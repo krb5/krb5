@@ -54,6 +54,5 @@ krb5_free_cred_enc_part(context, val)
 	}
 	krb5_xfree(val->ticket_info);
     }
-    krb5_xfree(val);
     return;
 }
