@@ -1,3 +1,8 @@
+Sat Oct 22 10:13:25 1994    (tytso@rsx-11)
+
+	* kdb_dbm.c: Don't need to define POSIX_FILE_LOCKS; just include
+		config.h instead.
+
 Wed Oct 19 12:15:36 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: make install obey $(DESTDIR) completely
