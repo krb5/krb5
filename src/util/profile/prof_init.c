@@ -75,7 +75,7 @@ profile_init(files, ret_profile)
  */
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_init_path(filepath, ret_profile)
-	profile_filespec_list_t filelist;
+	profile_filespec_list_t filepath;
 	profile_t *ret_profile;
 {
 	int n_entries, i;
@@ -115,7 +115,7 @@ profile_init_path(filepath, ret_profile)
 	/* cap the array */
 	filenames[i] = 0;
 
-	retval = profile_init((const char **)filenames, ret_profile);
+	retval = profile_init(filenames, ret_profile);
 
 	/* count back down and free the entries */
 	while(--i >= 0) free(filenames[i]);
@@ -195,7 +195,7 @@ errcode_t profile_ser_size(unused, profile, sizep)
     for (pfp = profile->first_file; pfp; pfp = pfp->next) {
 	required += sizeof(prof_int32);
 #ifdef PROFILE_USES_PATHS
-	if (pfp->filename)
+	if (pfp->filespec)
 	    required += strlen(pfp->filespec);
 #else
 	required += sizeof (profile_filespec_t);

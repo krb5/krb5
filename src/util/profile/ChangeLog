@@ -1,3 +1,10 @@
+1999-07-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (profile_t): Delete typedef, since Miro changed
+	prof_int.h to include profile.h, which also has the typedef.
+	* prof_file.c, prof_init.c: Fix typos and missed variable and type
+	name changes from Miro's patch.
+
 1999-07-21 Miro Jurisic   <meeroh@mit.edu>
 
 	* profile.hin, prof_file.c, prof_init.c, prof_int.h:

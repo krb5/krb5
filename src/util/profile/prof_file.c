@@ -38,10 +38,10 @@ static OSErr GetMacOSTempFilespec (
 #endif
 
 static int rw_access(filespec)
-	profile_filespec_t *filespec;
+	profile_filespec_t filespec;
 {
 #ifdef HAVE_ACCESS
-	if (access(filename, W_OK) == 0)
+	if (access(filespec, W_OK) == 0)
 		return 1;
 	else
 		return 0;
@@ -122,7 +122,7 @@ errcode_t profile_update_file(prf)
 	FILE *f;
 
 #ifdef HAVE_STAT
-	if (stat(prf->filename, &st))
+	if (stat(prf->filespec, &st))
 		return errno;
 	if (st.st_mtime == prf->timestamp)
 		return 0;
@@ -192,7 +192,7 @@ errcode_t profile_flush_file(prf)
 {
 	FILE		*f;
 	profile_filespec_t new_file;
-	profile_filespec_t olf_file;
+	profile_filespec_t old_file;
 	errcode_t	retval = 0;
 	
 	if (!prf || prf->magic != PROF_MAGIC_FILE)
@@ -206,10 +206,10 @@ errcode_t profile_flush_file(prf)
 #ifdef PROFILE_USES_PATHS
 	new_file = old_file = 0;
 	new_file = malloc(strlen(prf->filespec) + 5);
-	if (!new_name)
+	if (!new_file)
 		goto errout;
 	old_file = malloc(strlen(prf->filespec) + 5);
-	if (!old_name)
+	if (!old_file)
 		goto errout;
 
 	sprintf(new_file, "%s.$$$", prf->filespec);
@@ -217,7 +217,7 @@ errcode_t profile_flush_file(prf)
 
 	errno = 0;
 
-	f = fopen(new_name, "w");
+	f = fopen(new_file, "w");
 #else
 	/* On MacOS, we do this by writing to a new file and then atomically
 	swapping the files with a file system call */
@@ -239,14 +239,14 @@ errcode_t profile_flush_file(prf)
 	}
 
 #ifdef PROFILE_USES_PATHS
-	unlink(old_name);
-	if (rename(prf->filespec, old_name)) {
+	unlink(old_file);
+	if (rename(prf->filespec, old_file)) {
 		retval = errno;
 		goto errout;
 	}
-	if (rename(new_name, prf->filespec)) {
+	if (rename(new_file, prf->filespec)) {
 		retval = errno;
-		rename(old_name, prf->filename); /* back out... */
+		rename(old_file, prf->filespec); /* back out... */
 		goto errout;
 	}
 #else
@@ -268,10 +268,10 @@ errcode_t profile_flush_file(prf)
 	
 errout:
 #ifdef PROFILE_USES_PATHS
-	if (new_name)
-		free(new_name);
-	if (old_name)
-		free(old_name);
+	if (new_file)
+		free(new_file);
+	if (old_file)
+		free(old_file);
 #endif
 	return retval;
 }

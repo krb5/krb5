@@ -66,8 +66,6 @@ struct _profile_t {
 	prf_file_t	first_file;
 };
 
-typedef struct _profile_t *profile_t;
-
 /*
  * Used by the profile iterator in prof_get.c
  */
