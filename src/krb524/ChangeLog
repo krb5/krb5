@@ -1,3 +1,7 @@
+2001-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Use new locate_server interface.
+
 2001-06-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* test.c (print_key): Pass in des_cblock* instead of char *.

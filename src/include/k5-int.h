@@ -544,14 +544,18 @@ void krb5_os_free_context (krb5_context);
 
 krb5_error_code krb5_find_config_files (void);
 
+struct addrlist {
+    struct sockaddr **addrs;
+    int naddrs;
+    int space;
+};
+#define ADDRLIST_INIT { 0, 0, 0 }
+extern void krb5int_free_addrlist (struct addrlist *);
+
 krb5_error_code
 krb5int_locate_server (krb5_context,
 		       const krb5_data *realm,
-		       /* Thing pointed to will be filled in with a
-			  pointer to a block of sockaddr pointers,
-			  with each sockaddr allocated separately
-			  (wasteful, oh well).  */
-		       struct sockaddr ***addrs, int *naddrs,
+		       struct addrlist *,
 		       /* Only meaningful for kdc, really...  */
 		       int want_masters,
 		       /* look up [realms]->$realm->$name in krb5.conf */
@@ -1566,16 +1570,16 @@ void krb5int_set_prompt_types
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 2
+#define KRB5INT_ACCESS_STRUCT_VERSION 3
 
 typedef struct _krb5int_access {
     krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
-					struct sockaddr ***, int *, int);
+					struct addrlist *, int);
     krb5_error_code (*krb5_locate_server) (krb5_context, const krb5_data *,
-					   struct sockaddr ***, int *,
-					   int,
+					   struct addrlist *, int,
 					   const char *, const char *,
 					   int, int, int);
+    void (*free_addrlist) (struct addrlist *);
     unsigned int krb5_max_skdc_timeout;
     unsigned int krb5_skdc_timeout_shift;
     unsigned int krb5_skdc_timeout_1;

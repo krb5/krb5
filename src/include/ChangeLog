@@ -1,3 +1,13 @@
+2001-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct addrlist): New type.
+	(ADDRLIST_INIT): New macro.
+	(krb5int_free_addrlist): Declare.
+	(krb5int_locate_server): Update declaration.
+	(KRB5INT_ACCESS_STRUCT_VERSION): Update to 3.
+	(struct _krb5int_access): Change locale_server prototype.  Add
+	free_addrlist function pointer field.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5-util.h: Add prototypes for krb5_compat_recvauth_version() and

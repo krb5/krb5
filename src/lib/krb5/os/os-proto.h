@@ -32,11 +32,7 @@
 
 #ifdef SOCK_DGRAM			/* XXX hack... */
 krb5_error_code krb5_locate_kdc
-    PROTOTYPE((krb5_context,
-	       const krb5_data *,
-	       struct sockaddr ***,
-	       int *,
-	       int));
+    PROTOTYPE((krb5_context, const krb5_data *, struct addrlist *, int));
 #endif
 
 #ifdef HAVE_NETINET_IN_H

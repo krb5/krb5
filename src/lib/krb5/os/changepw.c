@@ -54,27 +54,24 @@
  */
 
 static krb5_error_code
-krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
-    krb5_context context;
-    const krb5_data *realm;
-    struct sockaddr ***addr_pp;
-    int *naddrs;
+krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
+		    struct addrlist *addrlist)
 {
     krb5_error_code code;
 
-    code = krb5int_locate_server (context, realm, addr_pp, naddrs, 0,
+    code = krb5int_locate_server (context, realm, addrlist, 0,
 				  "kpasswd_server", "_kpasswd", 0,
 				  DEFAULT_KPASSWD_PORT, 0);
     if (code) {
-	code = krb5int_locate_server (context, realm, addr_pp, naddrs, 0,
+	code = krb5int_locate_server (context, realm, addrlist, 0,
 				      "admin_server", "_kerberos-adm", 1,
 				      DEFAULT_KPASSWD_PORT, 0);
 	if (!code) {
 	    /* Success with admin_server but now we need to change the
 	       port number to use DEFAULT_KPASSWD_PORT.  */
 	    int i;
-	    for ( i=0;i<*naddrs;i++ ) {
-		struct sockaddr *a = (*addr_pp)[i];
+	    for ( i=0;i<addrlist->naddrs;i++ ) {
+		struct sockaddr *a = addrlist->addrs[i];
 		if (a->sa_family == AF_INET)
 		    sa2sin (a)->sin_port = htons(DEFAULT_KPASSWD_PORT);
 	    }
@@ -100,17 +97,15 @@ krb5_change_password(context, creds, newpw, result_code,
     char *code_string;
     krb5_error_code code = 0;
     int i, addrlen;
-    struct sockaddr **addr_p;
     struct sockaddr_storage local_addr, remote_addr, tmp_addr;
-    int naddr_p;
     int cc, local_result_code, tmp_len;
     SOCKET s1 = INVALID_SOCKET, s2 = INVALID_SOCKET;
     int tried_one = 0;
+    struct addrlist al = ADDRLIST_INIT;
 
 
     /* Initialize values so that cleanup call can safely check for NULL */
     auth_context = NULL;
-    addr_p = NULL;
     memset(&chpw_req, 0, sizeof(krb5_data));
     memset(&chpw_rep, 0, sizeof(krb5_data));
     memset(&ap_req, 0, sizeof(krb5_data));
@@ -126,7 +121,7 @@ krb5_change_password(context, creds, newpw, result_code,
 
     if ((code = krb5_locate_kpasswd(context,
                                     krb5_princ_realm(context, creds->client),
-                                    &addr_p, &naddr_p)))
+				    &al)))
         goto cleanup;
 
     /* this is really obscure.  s1 is used for all communications.  it
@@ -155,16 +150,23 @@ krb5_change_password(context, creds, newpw, result_code,
 	goto cleanup;
     }
 
-    for (i=0; i<naddr_p; i++) {
+    /*
+     * This really should try fallback addresses in cases of timeouts.
+     * For now, where the MIT KDC implementation only supports one
+     * kpasswd server machine anyways, we'll only try the first IPv4
+     * address we can connect() to.  This isn't right for multi-homed
+     * servers; oh well.
+     */
+    for (i=0; i<al.naddrs; i++) {
 	fd_set fdset;
 	struct timeval timeout;
 
 	/* XXX Now the locate_ functions can return IPv6 addresses.  */
-	if (addr_p[i]->sa_family != AF_INET)
+	if (al.addrs[i]->sa_family != AF_INET)
 	    continue;
 
 	tried_one = 1;
-	if (connect(s2, addr_p[i], socklen(addr_p[i])) == SOCKET_ERROR) {
+	if (connect(s2, al.addrs[i], socklen(al.addrs[i])) == SOCKET_ERROR) {
 	    if (SOCKET_ERRNO == ECONNREFUSED || SOCKET_ERRNO == EHOSTUNREACH)
 		continue; /* try the next addr */
 
@@ -244,7 +246,7 @@ krb5_change_password(context, creds, newpw, result_code,
 	}
 
 	if ((cc = sendto(s1, chpw_req.data, (int) chpw_req.length, 0,
-			 addr_p[i], socklen(addr_p[i]))) != chpw_req.length)
+			 al.addrs[i], socklen(al.addrs[i]))) != chpw_req.length)
 	{
 	    if ((cc < 0) && ((SOCKET_ERRNO == ECONNREFUSED) ||
 			     (SOCKET_ERRNO == EHOSTUNREACH)))
@@ -316,9 +318,11 @@ krb5_change_password(context, creds, newpw, result_code,
 		goto cleanup;
 
 	    result_code_string->length = strlen(code_string);
-	    if ((result_code_string->data =
-		 (char *) malloc(result_code_string->length)) == NULL)
-		return(ENOMEM);
+	    result_code_string->data = malloc(result_code_string->length);
+	    if (result_code_string->data == NULL) {
+		code = ENOMEM;
+		goto cleanup;
+	    }
 	    strncpy(result_code_string->data, code_string, result_code_string->length);
 	}
 
@@ -339,11 +343,7 @@ cleanup:
     if (auth_context != NULL)
 	krb5_auth_con_free(context, auth_context);
 
-    if (addr_p != NULL) {
-	for (i = 0; i < naddr_p; i++)
-	    krb5_xfree (addr_p[i]);
-	krb5_xfree(addr_p);
-    }
+    krb5int_free_addrlist (&al);
 
     if (s1 != INVALID_SOCKET)
 	closesocket(s1);

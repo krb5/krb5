@@ -68,8 +68,7 @@ krb524_sendto_kdc (context, message, realm, reply)
     krb5_data * reply;
 {
     register int timeout, host, i;
-    struct sockaddr **addr;
-    int naddr;
+    struct addrlist al = ADDRLIST_INIT;
     struct servent *serv;
     int sent, nready;
     krb5_error_code retval;
@@ -90,37 +89,37 @@ krb524_sendto_kdc (context, message, realm, reply)
     serv = getservbyname(KRB524_SERVICE, "udp");
     port = serv ? serv->s_port : htons (KRB524_PORT);
 
-    retval = internals.krb5_locate_server(context, realm, &addr, &naddr, 0,
+    retval = internals.krb5_locate_server(context, realm, &al, 0,
 					  "krb524_server", "_krb524",
 					  0, port, 0);
     if (retval == KRB5_REALM_CANT_RESOLVE || retval == KRB5_REALM_UNKNOWN) {
 	/* Fallback heuristic: Assume krb524 port on every KDC might
 	   work.  */
-	retval = internals.krb5_locate_kdc(context, realm, &addr, &naddr, 0);
+	retval = internals.krb5_locate_kdc(context, realm, &al, 0);
 	/*
 	 * Bash the ports numbers.
 	 */
 	if (retval == 0)
-	    for (i = 0; i < naddr; i++) {
-		if (addr[i]->sa_family == AF_INET)
-		    sa2sin (addr[i])->sin_port = port;
+	    for (i = 0; i < al.naddrs; i++) {
+		if (al.addrs[i]->sa_family == AF_INET)
+		    sa2sin (al.addrs[i])->sin_port = port;
 	    }
     }
     if (retval)
 	return retval;
-    if (naddr == 0)
+    if (al.naddrs == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    socklist = (SOCKET *)malloc(naddr * sizeof(SOCKET));
+    socklist = (SOCKET *)malloc(al.naddrs * sizeof(SOCKET));
     if (socklist == NULL) {
-	free(addr);
+	internals.free_addrlist (&al);
 	return ENOMEM;
     }
-    for (i = 0; i < naddr; i++)
+    for (i = 0; i < al.naddrs; i++)
 	socklist[i] = INVALID_SOCKET;
 
     if (!(reply->data = malloc(internals.krb5_max_dgram_size))) {
-	free(addr);
+	internals.free_addrlist (&al);
 	free(socklist);
 	return ENOMEM;
     }
@@ -145,10 +144,11 @@ krb524_sendto_kdc (context, message, realm, reply)
      * do exponential backoff.
      */
 
-    for (timeout = internals.krb5_skdc_timeout_1; timeout < internals.krb5_max_skdc_timeout;
+    for (timeout = internals.krb5_skdc_timeout_1;
+	 timeout < internals.krb5_max_skdc_timeout;
 	 timeout <<= internals.krb5_skdc_timeout_shift) {
 	sent = 0;
-	for (host = 0; host < naddr; host++) {
+	for (host = 0; host < al.naddrs; host++) {
 	    /* send to the host, wait timeout seconds for a response,
 	       then move on. */
 	    /* cache some sockets for each host */
@@ -163,7 +163,8 @@ krb524_sendto_kdc (context, message, realm, reply)
 		 * protocol exists to support a particular socket type
 		 * within a given protocol family.
 		 */
-		socklist[host] = socket(addr[host]->sa_family, SOCK_DGRAM, 0);
+		socklist[host] = socket(al.addrs[host]->sa_family, SOCK_DGRAM,
+					0);
 		if (socklist[host] == INVALID_SOCKET)
 		    continue;		/* try other hosts */
 		/* have a socket to send/recv from */
@@ -172,12 +173,12 @@ krb524_sendto_kdc (context, message, realm, reply)
 		   socket will time out, so use connect, send, recv instead of
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
-		if (connect(socklist[host],
-			    addr[host], socklen(addr[host])) == SOCKET_ERROR)
+		if (connect(socklist[host], al.addrs[host],
+			    socklen(al.addrs[host])) == SOCKET_ERROR)
 		  continue;
 	    }
-	    if (send(socklist[host],
-		       message->data, (int) message->length, 0) != message->length)
+	    if (send(socklist[host], message->data, (int) message->length, 0)
+		!= message->length)
 	      continue;
 	retry:
 	    waitlen.tv_usec = 0;
@@ -238,13 +239,13 @@ krb524_sendto_kdc (context, message, realm, reply)
     }
     retval = KRB5_KDC_UNREACH;
  out:
-    for (i = 0; i < naddr; i++)
+    for (i = 0; i < al.naddrs; i++)
 	if (socklist[i] != INVALID_SOCKET)
 	    (void) closesocket (socklist[i]);
 #if 0
     SOCKET_CLEANUP();                           /* Done with sockets for now */
 #endif
-    free(addr);
+    internals.free_addrlist (&al);
     free(socklist);
     if (retval) {
 	free(reply->data);

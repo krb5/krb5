@@ -133,13 +133,6 @@ static int get_port (const char *service, int stream, int defalt)
 #endif
 }
 
-struct addrlist {
-    struct sockaddr **addrs;
-    int naddrs;
-    int space;
-};
-#define ADDRLIST_INIT { 0, 0, 0 }
-
 static int
 grow_list (struct addrlist *lp, int nmore)
 {
@@ -164,8 +157,10 @@ grow_list (struct addrlist *lp, int nmore)
     return 0;
 }
 
-static void
-free_list (struct addrlist *lp)
+/* Free up everything pointed to by the addrlist structure, but don't
+   free the structure itself.  */
+void
+krb5int_free_addrlist (struct addrlist *lp)
 {
     int i;
     for (i = 0; i < lp->naddrs; i++)
@@ -174,6 +169,7 @@ free_list (struct addrlist *lp)
     lp->addrs = NULL;
     lp->naddrs = lp->space = 0;
 }
+#define free_list krb5int_free_addrlist
 
 static int
 add_sockaddr_to_list (struct addrlist *lp, const struct sockaddr *addr,
@@ -516,29 +512,23 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
 #ifdef TEST
 static krb5_error_code
-krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters,
+krb5_locate_srv_conf(context, realm, name, al, get_masters,
 		     udpport, sec_udpport)
     krb5_context context;
     const krb5_data *realm;
     const char * name;
-    struct sockaddr ***addr_pp;
-    int *naddrs;
+    struct addrlist *al;
     int get_masters;
     int udpport, sec_udpport;
 {
     krb5_error_code ret;
-    struct addrlist al = ADDRLIST_INIT;
 
-    ret = krb5_locate_srv_conf_1 (context, realm, name, &al,
+    ret = krb5_locate_srv_conf_1 (context, realm, name, al,
 				  get_masters, udpport, sec_udpport);
-    if (ret) {
-	free_list (&al);
+    if (ret)
 	return ret;
-    }
-    if (al.naddrs == 0)		/* Couldn't resolve any KDC names */
+    if (al->naddrs == 0)	/* Couldn't resolve any KDC names */
 	return KRB5_REALM_CANT_RESOLVE;
-    *addr_pp = al.addrs;
-    *naddrs = al.naddrs;
     return 0;
 }
 #endif
@@ -789,15 +779,9 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 static krb5_error_code
 krb5_locate_srv_dns(const krb5_data *realm,
 		    const char *service, const char *protocol,
-		    struct sockaddr ***addr_pp, int *naddrs)
+		    struct addrlist *al)
 {
-    struct addrlist al = ADDRLIST_INIT;
-    krb5_error_code code;
-
-    code = krb5_locate_srv_dns_1 (realm, service, protocol, &al);
-    *addr_pp = al.addrs;
-    *naddrs = al.naddrs;
-    return code;
+    return krb5_locate_srv_dns_1 (realm, service, protocol, al);
 }
 #endif
 #endif /* KRB5_DNS_LOOKUP */
@@ -808,7 +792,7 @@ krb5_locate_srv_dns(const krb5_data *realm,
 
 krb5_error_code
 krb5int_locate_server (krb5_context context, const krb5_data *realm,
-		       struct sockaddr ***addr_pp, int *naddrs,
+		       struct addrlist *addrlist,
 		       int get_masters,
 		       const char *profname, const char *dnsname,
 		       int is_stream,
@@ -817,6 +801,8 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 {
     krb5_error_code code;
     struct addrlist al = ADDRLIST_INIT;
+
+    *addrlist = al;
 
     /*
      * We always try the local file first
@@ -851,18 +837,14 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 	    free_list (&al);
 	return KRB5_REALM_CANT_RESOLVE;
     }
-    *addr_pp = al.addrs;
-    *naddrs = al.naddrs;
+    *addrlist = al;
     return 0;
 }
 
 krb5_error_code
-krb5_locate_kdc(context, realm, addr_pp, naddrs, get_masters)
-    krb5_context context;
-    const krb5_data *realm;
-    struct sockaddr ***addr_pp;
-    int *naddrs;
-    int get_masters;
+krb5_locate_kdc(krb5_context context, const krb5_data *realm,
+		struct addrlist *addrlist,
+		int get_masters)
 {
     int udpport, sec_udpport;
 
@@ -874,8 +856,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, get_masters)
     if (sec_udpport == udpport)
 	sec_udpport = 0;
 
-    return krb5int_locate_server (context, realm, addr_pp, naddrs, get_masters,
-				  "kdc",
+    return krb5int_locate_server (context, realm, addrlist, get_masters, "kdc",
 				  (get_masters
 				   ? "_kerberos-master"
 				   : "_kerberos"),
