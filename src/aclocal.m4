@@ -344,7 +344,7 @@ dnl
 dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
 dnl
 define(LinkFile,[
-AC_LN_S
+AC_REQUIRE([AC_LN_S])
 AC_PUSH_MAKEFILE()dnl
 changequote({,})dnl
 
@@ -362,7 +362,7 @@ dnl LinkFileDir(../foo, blotz, ./bar) issues a:
 dnl	ln -s ../foo ./bar/blotz
 dnl
 define(LinkFileDir,[
-AC_LN_S
+AC_REQUIRE([AC_LN_S])
 AC_PUSH_MAKEFILE()dnl
 changequote({,})dnl
 
