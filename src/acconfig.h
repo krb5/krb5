@@ -7,7 +7,6 @@
    handle it on some systems.  */
 
 #undef ANSI_STDIO
-#undef HAS_VOID_TYPE
 #undef KRB5_NO_PROTOTYPES
 #undef KRB5_PROVIDE_PROTOTYPES
 #undef KRB5_NO_NESTED_PROTOTYPES
@@ -26,6 +25,9 @@
 /* Define if struct sockaddr and friends (sockaddr_in etc) have the
    sa_len field.  */
 #undef HAVE_SA_LEN
+/* Define if there is a socklen_t type; if not, size_t is probably
+   what we should use.  */
+#undef HAVE_SOCKLEN_T
 
 /* Define if MIT Project Athena default configuration should be used */
 #undef KRB5_ATHENA_COMPAT

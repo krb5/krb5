@@ -1,3 +1,7 @@
+2001-04-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Moved test for socklen_t to include directory.
+
 2001-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for sys/filio.h for FIONBIO.

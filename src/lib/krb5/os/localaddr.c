@@ -227,30 +227,6 @@ get_ifconf (int s, size_t *lenp, /*@out@*/ char *buf)
     return ret;
 }
 
-#ifndef HAVE_SOCKLEN_T
-typedef size_t socklen_t;
-#endif
-
-static size_t
-socklen (const struct sockaddr *sa)
-     /*@*/
-{
-#ifdef HAVE_SA_LEN
-    return sa->sa_len;
-#else
-    switch (sa->sa_family) {
-    case AF_INET:
-	return sizeof (struct sockaddr_in);
-#ifdef KRB5_USE_INET6
-    case AF_INET6:
-	return sizeof (struct sockaddr_in6);
-#endif
-    default:
-	return sizeof (struct sockaddr);
-    }
-#endif
-}
-
 /* Return value is errno if internal stuff failed, otherwise zero,
    even in the case where a called function terminated the iteration.
 

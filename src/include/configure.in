@@ -51,18 +51,6 @@ if test $krb5_cv_struct_prototypes = no; then
 AC_DEFINE(KRB5_NO_NESTED_PROTOTYPES)
 fi
 dnl
-dnl  Check for void type
-dnl
-AC_MSG_CHECKING([void])
-AC_CACHE_VAL(krb5_cv_has_void_type,
-[AC_TRY_COMPILE(
-[void x();], [], 
-krb5_cv_has_void_type=yes, krb5_cv_has_void_type=no)])
-AC_MSG_RESULT($krb5_cv_has_void_type)
-if test $krb5_cv_has_void_type = yes; then
-AC_DEFINE(HAS_VOID_TYPE)
-fi
-dnl
 dnl Word sizes...
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
@@ -86,6 +74,19 @@ done])dnl
 AC_MSG_RESULT($krb5_cv_sys_rcdir)
 KRB5_RCTMPDIR=$krb5_cv_sys_rcdir
 AC_SUBST(KRB5_RCTMPDIR)
+dnl
+dnl
+AC_MSG_CHECKING(for socklen_t)
+AC_CACHE_VAL(krb5_cv_has_type_socklen_t,
+[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <sys/socket.h>
+],[sizeof (socklen_t);],
+krb5_cv_has_type_socklen_t=yes,krb5_cv_has_type_socklen_t=no)])
+AC_MSG_RESULT($krb5_cv_has_type_socklen_t)
+if test $krb5_cv_has_type_socklen_t = yes; then
+    AC_DEFINE(HAVE_SOCKLEN_T)
+fi
 dnl
 dnl
 AC_ARG_ENABLE([athena],

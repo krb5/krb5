@@ -1,3 +1,8 @@
+2001-04-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* acconfig.h (HAVE_SOCKLEN_T): Add.
+	(HAS_VOID_TYPE): Delete.
+
 2001-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (unixmac): Target deleted.

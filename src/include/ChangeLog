@@ -1,3 +1,11 @@
+2001-04-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (socklen_t) [NEED_SOCKETS] [!HAVE_SOCKLEN_T]: Define as
+	typedef for size_t.
+	(socklen) [NEED_SOCKETS]: Define macro if not already defined.
+	* configure.in: Don't check for support for type "void".  Move
+	socklen_t test here from krb5 library.
+
 2001-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (adm_err.h, asn1_err.h, krb5_err.h, kv5m_err.h):

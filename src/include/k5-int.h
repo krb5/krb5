@@ -203,6 +203,28 @@ typedef unsigned char	u_char;
 
 #ifdef NEED_SOCKETS
 #include "port-sockets.h"
+
+/* Either size_t or int or unsigned int is probably right.  Under
+   SunOS 4, it looks like int is desired, according to the accept man
+   page.  */
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
+
+#if !defined (socklen)
+/* size_t socklen (struct sockaddr *) */
+/* Should this return socklen_t instead? */
+#  ifdef HAVE_SA_LEN
+#    define socklen(X) ((X)->sa_len)
+#  else
+#    ifdef KRB5_USE_INET6
+#      define socklen(X) ((X)->sa_family == AF_INET6 ? sizeof (struct sockaddr_in6) : (X)->sa_family == AF_INET ? sizeof (struct sockaddr_in) : sizeof (struct sockaddr))
+#    else
+#      define socklen(X) ((X)->sa_family == AF_INET ? sizeof (struct sockaddr_in) : sizeof (struct sockaddr))
+#    endif
+#  endif
+#endif
+
 #else
 #ifndef SOCK_DGRAM
 struct sockaddr;
