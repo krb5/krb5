@@ -1393,6 +1393,14 @@ getpty(fd,slave)
     int i,ptynum;
     struct stat stb;
 
+#ifdef HAVE_OPENPTY
+    int slavefd;
+
+    if(openpty(fd, &slavefd, slave, (struct termios *) 0,
+         (struct winsize *) 0)) return 1;
+    return 0;
+#else
+
     *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris, IRIX */
     if (*fd < 0) *fd = open("/dev/ptc", O_RDWR|O_NDELAY); /* AIX */
     if (*fd < 0) *fd = open("/dev/pty", O_RDWR|O_NDELAY); /* sysvimp */
@@ -1403,10 +1411,14 @@ getpty(fd,slave)
 	if (grantpt(*fd) || unlockpt(*fd)) return 1;
 #endif
     
+#ifdef	HAVE_TTYNAME
+	p = ttyname(*fd);
+#else
 #ifdef HAVE_PTSNAME
 	p = ptsname(*fd);
 #else
-	p = ttyname(*fd);
+	/* XXX If we don't have either what do we do */
+#endif
 #endif
 	if (p) {
 	    strcpy(slave, p);
@@ -1441,6 +1453,7 @@ getpty(fd,slave)
 	}
 	return 1;
     }
+#endif /* HAVE_OPENPTY */
 }
 
 
@@ -1511,7 +1524,6 @@ recvauth()
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
     krb5_principal server;
-    krb5_address peeraddr;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
@@ -1527,16 +1539,6 @@ recvauth()
 	exit(1);
     }
 
-#ifdef unicos61
-#define SIZEOF_INADDR  SIZEOF_in_addr
-#else
-#define SIZEOF_INADDR sizeof(struct in_addr)
-#endif
-
-    peeraddr.addrtype = peersin.sin_family;
-    peeraddr.length = SIZEOF_INADDR;
-    peeraddr.contents = (krb5_octet *)&peersin.sin_addr;
-	
     if (status = krb5_sname_to_principal(bsd_context, NULL, "host", 
 					 KRB5_NT_SRV_HST, &server)) {
 	    syslog(LOG_ERR, "parse server name %s: %s", "host",
@@ -1549,7 +1551,10 @@ recvauth()
     if (status = krb5_auth_con_init(bsd_context, &auth_context))
         return status;
  
-    krb5_auth_con_setaddrs(bsd_context, auth_context, NULL, &peeraddr);
+    /* Only need remote address for rd_cred() to verify client */
+    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR))
+	return status;
 
     if (status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
@@ -1634,8 +1639,12 @@ recvauth()
 	fatal(netf, "Error reading message");
 
     if (inbuf.length) { /* Forwarding being done, read creds */
-	if (status = rd_and_store_for_creds(bsd_context, &inbuf, ticket, 
-					    lusername))
+        if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
+	    fatal(netf, "Can't generate full address for client");
+
+	if (status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
+					    ticket, lusername))
 	    fatal(netf, "Can't get forwarded credentials");
     }
     return 0;

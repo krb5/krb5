@@ -1,3 +1,14 @@
+
+Tue Apr 25 21:23:28 1995  Chris Provenzano  (proven@mit.edu)
+
+	* forward.c (rd_and_store_for_creds()) : Rewritten to use
+		auth_context and the new krb5_rd_creds().
+	* forward.c (get_for_creds()) : New function replacing
+		krb5_get_for_creds() and uses auth_context and new
+		krb5_mk_creds() routine.
+	* kcmd.c (kcmd()): Use new get_for_creds() routine.
+	* krlogind.c (recvauth()): Use new rd_and_store_for_creds() routine.
+
 Sat Apr 22 00:42:22 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rlogind (main, doit): The variable krb5_override_default_realm
@@ -14,7 +25,31 @@ Fri Apr 21 17:18:57 1995  Mark Eichin  <eichin@cygnus.com>
 
 	rlogin testing changes from ian@cygnus.com.
 
-> Fri Mar 24 15:04:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+Fri Apr 21 17:13:48 1995  Mark Eichin  <eichin@cygnus.com>
+
+	More changes from ian@cygnus.com to support testing.
+
+Fri Apr 21 14:07:15 1995  Mark Eichin  <eichin@cygnus.com>
+
+	Added Ian's changes with minor tweaks. These are used by the testsuite.
+
+Fri Apr 07 15:46:54 1995 Chris Provenzano (proven@mit.edu)
+
+	* configure.in, krlogind.c, krsh.c, krshd.c, login.c, logutil.c.
+		A bunch of patches from Ezra to get BSD to work on
+		The Alpha that looked reasonable.
+
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * krcp.c (send_auth()): Use new calling convention for krb5_rd_req().
+
+        * krshd.c (recvauth()): Use new calling convention for 
+		krb5_compat_recvauth().
+
+        * krlogind.c (recvauth()): Use new calling convention for 
+		krb5_compat_recvauth().
+
+Fri Mar 24 15:04:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* krlogind.c (srvtab): New global variable.
 	(krb5_override_default_realm): Declare.
@@ -26,11 +61,7 @@ Fri Apr 21 17:18:57 1995  Mark Eichin  <eichin@cygnus.com>
 	(recvauth): Pass srvtab to krb5_compat_recvauth.
 	* krlogind.M: Document -S, -M, and -L.
 
-Fri Apr 21 17:13:48 1995  Mark Eichin  <eichin@cygnus.com>
-
-	More changes from ian@cygnus.com to support testing.
-
-> Fri Mar 24 15:04:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+Fri Mar 24 15:04:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* krcp.c (forcenet): New global vraiable.
 	(main): Accept -D and -N arguments.  Pass Kerberos realm to remote
@@ -50,11 +81,7 @@ Fri Apr 21 17:13:48 1995  Mark Eichin  <eichin@cygnus.com>
 	kprogdir/rcp if it exists.
 	* krshd.M: Document -P.
 
-Fri Apr 21 14:07:15 1995  Mark Eichin  <eichin@cygnus.com>
-
-	Added Ian's changes with minor tweaks. These are used by the testsuite.
-
-> Thu Mar 23 18:18:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+Thu Mar 23 18:18:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* krshd.c (ARGSTR): Add S:M:A to KERBEROS version.
 	(srvtab): New global variable.
@@ -73,16 +100,6 @@ Fri Apr 21 14:07:15 1995  Mark Eichin  <eichin@cygnus.com>
 	port.  Initialize ret_cred to NULL.
 	* krcp.c (main): Pass 0 for anyport to kcmd.
 	* krlogin.c (main): Pass 0 for anyport to kcmd.
-
-Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
-
-        * krcp.c (send_auth()): Use new calling convention for krb5_rd_req().
-
-        * krshd.c (recvauth()): Use new calling convention for 
-		krb5_compat_recvauth().
-
-        * krlogind.c (recvauth()): Use new calling convention for 
-		krb5_compat_recvauth().
 
 Thu Mar 23 23:23:25 1995  Theodore Y. Ts'o  <tytso@dcl>
 

@@ -140,11 +140,9 @@ void update_utmp(ent, username, line, host)
 void update_wtmp(ent)
     struct utmp *ent;
 {
-#ifndef HAVE_SETUTENT
     struct utmp ut;
     struct stat statb;
     int fd;
-#endif /* !HAVE_SETUTENT */
 #ifdef HAVE_SETUTXENT
     struct utmpx utx;
 
@@ -155,12 +153,6 @@ void update_wtmp(ent)
 #ifdef HAVE_UPDWTMP
     updwtmp(WTMP_FILE, ent);
 #else /* HAVE_UPDWTMP */
-#ifdef HAVE_SETUTENT
-    utmpname(WTMP_FILE);
-    setutent();
-    pututline(ent);
-    endutent();
-#else /* HAVE_SETUTENT */
 
     if ((fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) >= 0) {
 	if (!fstat(fd, &statb)) {
@@ -171,7 +163,7 @@ void update_wtmp(ent)
 	  (void)strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
 #endif
 	  (void)time(&ut.ut_time);
-#ifdef HAVE_GETUTENT
+#if defined(HAVE_GETUTENT) && defined(USER_PROCESS)
 	  if (ent->ut_name) {
 	    if (!ut.ut_pid)
 	      ut.ut_pid = getpid();
@@ -186,19 +178,22 @@ void update_wtmp(ent)
 	}
 	(void)close(fd);
     }
-#endif /* HAVE_SETUTENT */
 #endif /* HAVE_UPDWTMP */
 }
 
-void logwtmp(tty, locuser, host, loggingin)
+#ifndef HAVE_LOGWTMP
+void logwtmp(tty, locuser, host)
     char *tty;
     char *locuser;
     char *host;
-    int loggingin;
 {
     struct utmp ut;
     char *tmpx;
     char utmp_id[5];
+
+    /* Will be empty for logout */
+    int loggingin = locuser[0];
+
 
 #ifndef NO_UT_HOST
     strncpy(ut.ut_host, host, sizeof(ut.ut_host));
@@ -222,3 +217,4 @@ void logwtmp(tty, locuser, host, loggingin)
 
     update_wtmp(&ut);
 }
+#endif

@@ -53,18 +53,15 @@
 #include "krb5.h"
 
 #include "defines.h"
-     
-#ifndef MAXHOSTNAMELEN 
-#define MAXHOSTNAMELEN 64
-#endif
-     
-extern	errno;
 
-#define	START_PORT	5120	 /* arbitrary */
+
+#define START_PORT      5120     /* arbitrary */
 char *default_service = "host";
 
 extern krb5_cksumtype krb5_kdc_req_sumtype;
 extern krb5_context bsd_context;
+
+
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authopts, anyport)
@@ -272,7 +269,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         status = -1;
         goto bad2;
     }
-    
+
     status = krb5_cc_default(bsd_context, &cc);
     if (status) goto bad2;
 
@@ -288,6 +285,18 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     /* Reset internal flags; these should not be sent. */
     authopts &= (~OPTS_FORWARD_CREDS);
     authopts &= (~OPTS_FORWARDABLE_CREDS);
+
+    if (krb5_auth_con_init(bsd_context, &auth_context)) 
+	goto bad2;
+
+    if (krb5_auth_con_setflags(bsd_context, auth_context, 
+			       KRB5_AUTH_CONTEXT_RET_TIME))
+	goto bad2;
+
+    /* Only need local address for mk_cred() to send to krlogind */
+    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, s,
+			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR))
+	goto bad2;
 
    /* call Kerberos library routine to obtain an authenticator,
        pass it over the socket to the server, and obtain mutual
@@ -319,18 +328,16 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     (void) write(s, locuser, strlen(locuser)+1);
     
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
-	if (status = krb5_get_for_creds(bsd_context, 
-					krb5_kdc_req_sumtype,
+	if (status = get_for_creds(bsd_context, auth_context,
 					hp->h_name,
 					ret_cred->client,
-					&ret_cred->keyblock,
 					/* Forwardable TGT? */
 					options & OPTS_FORWARDABLE_CREDS,
 					&outbuf)) {
 	    fprintf(stderr, "kcmd: Error getting forwarded creds\n");
 	    goto bad2;
 	}
-	
+
 	/* Send forwarded credentials */
 	if (status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf))
 	  goto bad2;

@@ -82,10 +82,10 @@ char copyright[] =
 #include <ttyent.h>
 #endif
 #include <syslog.h>
+#include <stdio.h>
 #include <grp.h>
 #include <pwd.h>
 #include <setjmp.h>
-#include <stdio.h>
 #include <string.h>
 
 #ifdef HAVE_SHADOW
@@ -814,6 +814,11 @@ bad_login:
 #ifdef OQUOTA
 	quota(Q_DOWARN, pwd->pw_uid, (dev_t)-1, 0);
 #endif
+#ifdef HAVE_SETLOGIN
+	if (setlogin(pwd->pw_name) < 0)
+      	    syslog(LOG_ERR, "setlogin() failure %d",errno);
+#endif
+
 #ifdef __SCO__
 	/* this is necessary when C2 mode is enabled, but not otherwise */
 	setluid((uid_t) pwd->pw_uid);

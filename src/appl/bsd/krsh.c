@@ -58,6 +58,7 @@ char copyright[] =
 #include "krb5.h"
 #include "com_err.h"
 #include "defines.h"
+#include "ext-proto.h"
 #endif /* KERBEROS */
      
 /*
