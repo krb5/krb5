@@ -1,3 +1,8 @@
+
+Fri Jun 30 14:49:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add shared library object rule.
+	* Makefile.in - Add shared library object rules.
+
 Wed Jun 28 00:18:16 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use AC_CHECK_FUNCS and check for memmove.

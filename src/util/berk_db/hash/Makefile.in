@@ -5,6 +5,7 @@ HASH_DEBUGOPTS=
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
 
 CFLAGS = $(CCOPTS) $(DEFS) -D__DBINTERFACE_PRIVATE $(LOCALINCLUDE) $(HASH_DEBUGOPTS)
 
@@ -41,8 +42,15 @@ SRCS=	$(srcdir)/hash.c	\
 	$(srcdir)/krb5_ndbm.c	\
 	$(srcdir)/../PORT/clib/mktemp.c
 
-mktemp.o:	$(srcdir)/../PORT/clib/mktemp.c
+mktemp.o:	../PORT/clib/mktemp.c
 	$(CC) $(CFLAGS) -c $(srcdir)/../PORT/clib/mktemp.c
+@SHARED_RULE@
 
-all:: $(OBJS)
+all:: all-$(WHAT)
+
+all-unix:: shared $(OBJS)
+
+shared:
+	mkdir shared
+
 

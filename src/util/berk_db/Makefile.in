@@ -6,6 +6,10 @@ TST=if test -n "`cat DONE`" ; then
 LIB_SUBDIRS= hash
 
 LIBUPDATE= $(BUILDTOP)/util/libupdate
+SHLIB_LIBS=
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+STEXT=@STEXT@
 
 all:: all-$(WHAT)
 

@@ -1,3 +1,11 @@
+
+Fri Jun 30 14:47:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --enable-shared check for building libdb shared.
+		While we won't use libdb shared explicitly, we might as well
+		build it since we have to go through the trouble of building
+		the shared objects for libkrb5.
+	* Makefile.in - Add shared library rules.
+
 Fri Jun  9 18:59:23 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
