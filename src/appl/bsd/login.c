@@ -378,7 +378,7 @@ main(argc, argv)
 
 #if !defined(_AIX)
 	ioctlval = 0;
-#ifndef TIOCLSET
+#ifdef TIOCLSET
 /* linux, sco don't have this line discipline interface */
 	(void)ioctl(0, TIOCLSET, (char *)&ioctlval);
 #endif
