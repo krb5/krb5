@@ -1,3 +1,12 @@
+Tue Apr 30 17:51:47 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Test that regcomp actually works.
+
+	* Makefile.in (check-unix): Use $(RM).
+
+	* t_an_to_ln.c (main): Print principal name when an error is
+	detected.
+
 Thu Apr 11 22:15:44 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* ustime.c (krb5_us_timeofday): When doing the time offset

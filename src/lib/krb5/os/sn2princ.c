@@ -45,9 +45,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_error_code retval;
     register char *cp;
     char localname[MAXHOSTNAMELEN];
-    /* We cast this instead of declaring as const char* due to some compilers 
-     * which apparently get upset at reassigning the variable
-     */
+
 
     if ((type == KRB5_NT_UNKNOWN) ||
 	(type == KRB5_NT_SRV_HST)) {

@@ -4,7 +4,20 @@ dnl time checks are for timeofday.c (which gets them from osconf.h)
 dnl and gmt_mktime.c (which only gets them from here...)
 AC_TIME_WITH_SYS_TIME
 AC_HAVE_HEADERS(unistd.h sys/time.h regex.h regexp.h)
-AC_HAVE_FUNCS(re_comp regcomp)
+
+dnl regcomp is present but non-functional on Solaris 2.4
+AC_C_CROSS
+AC_MSG_CHECKING(for working regcomp)
+AC_CACHE_VAL(ac_cv_func_regcomp,[
+AC_TRY_RUN([
+#include <regex.h>
+regex_t x; regmatch_t m;
+int main() { return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0); }
+], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no)])
+AC_MSG_RESULT($ac_cv_func_regcomp)
+test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP)
+
+AC_HAVE_FUNCS(re_comp)
 AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 HAS_ANSI_VOLATILE
 AC_DEFINE(AN_TO_LN_RULES)

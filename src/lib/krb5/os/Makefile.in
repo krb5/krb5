@@ -146,7 +146,7 @@ check-unix::
 	$(KRB5_RUN_ENV) ./t_an_to_ln rul/helpme/e@r ru/123/le@r
 	KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
 	$(KRB5_RUN_ENV) ./t_an_to_ln fred/r@r barney/r@r
-	rm ./t_an.*
+	$(RM) ./t_an.*
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o

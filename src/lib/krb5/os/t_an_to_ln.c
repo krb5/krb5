@@ -25,8 +25,8 @@ main(argc, argv)
 		       programname, argv[i], sbuf);
 	    }
 	    else {
-		printf("%s: aname to lname returns %s\n", programname,
-		       error_message(kret));
+		printf("%s: aname to lname returns %s for %s\n", programname,
+		       error_message(kret), argv[i]);
 	    }
 	    krb5_free_principal(kcontext, principal);
 	}
