@@ -11,8 +11,8 @@ TERMCAPLIB	    = -ltermcap
 XINCDIR		    = /usr/X11/include
 XLIBDIR		    = /usr/X11/lib
 
-UTMP_FILE = /etc/utmp
-WTMP_FILE = /usr/adm/wtmp
+UTMP_FILE = /var/run/utmp
+WTMP_FILE = /var/log/wtmp
 
 D_NO_SETENV = -DNO_SETENV
 

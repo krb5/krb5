@@ -1,3 +1,10 @@
+1999-01-20  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* netbsd1.def (UTMP_FILE, WTMP_FILE): Update filenames to comply
+		with netbsd system.  (Not actually used by our
+		configuration system, but I'll update the file.)
+		Submitted by ghudson, [krb5-admin/522]
+
 Fri Jul 12 14:39:28 1996  Marc Horowitz  <marc@mit.edu>
 
 	* architecture: add uname test for NetBSD
