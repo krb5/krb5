@@ -1,3 +1,8 @@
+Thu Oct  6 12:41:28 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_mkdums.c (add_princ): Initialize all the fields of the
+		principal. 
+
 Thu Sep 29 22:58:05 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executable when libraries change

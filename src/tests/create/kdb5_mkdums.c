@@ -285,6 +285,7 @@ OLDDECLARG(char *, str_newprinc)
     newentry.max_renewable_life = mblock.max_rlife;
     newentry.mkvno = mblock.mkvno;
     newentry.expiration = mblock.expiration;
+    newentry.pw_expiration = mblock.expiration;
     newentry.mod_name = master_princ;
     if (retval = krb5_timeofday(&newentry.mod_date)) {
 	com_err(progname, retval, "while fetching date");
@@ -296,6 +297,10 @@ OLDDECLARG(char *, str_newprinc)
     newentry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
     newentry.salt_length = 0;
     newentry.salt = 0;
+    newentry.alt_key.length = 0;
+    newentry.alt_key.contents = 0;
+    newentry.alt_salt_length = 0;
+    newentry.alt_salt = 0;
     
     retval = krb5_db_put_principal(&newentry, &one);
     if (retval) {
