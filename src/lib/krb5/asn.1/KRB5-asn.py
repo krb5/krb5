@@ -155,28 +155,20 @@ AS-REQ ::= [APPLICATION 10] SEQUENCE {
 	msg-type[2]	INTEGER,
 	padata-type[3]	INTEGER,
 	padata[4]	OCTET STRING OPTIONAL, -- encoded AP-REQ XXX optional
-	req-body[5]	SEQUENCE {
-	 kdc-options[0]	KDCOptions,
-	 cname[1]	PrincipalName OPTIONAL, -- Used only in AS-REQ
-	 realm[2]	Realm, -- Server's realm  Also client's in AS-REQ
-	 sname[3]	PrincipalName,
-	 from[4]	KerberosTime OPTIONAL,
-	 till[5]	KerberosTime,
-	 rtime[6]	KerberosTime OPTIONAL,
-	 ctime[7]	KerberosTime,
-	 nonce[8]	INTEGER,
-	 etype[9]	INTEGER, -- EncryptionType
-	 addresses[10]	HostAddresses OPTIONAL,
-	 authorization-data[11]	AuthorizationData OPTIONAL,
-	 additional-tickets[12]	SEQUENCE OF Ticket OPTIONAL
-	}
+	req-body[5]	KDC-REQ-BODY
 }
 TGS-REQ ::= [APPLICATION 12] SEQUENCE {
 	pvno[1]	INTEGER,
 	msg-type[2]	INTEGER,
 	padata-type[3]	INTEGER,
 	padata[4]	OCTET STRING, -- encoded AP-REQ
-	req-body[5]	SEQUENCE {
+	req-body[5]	KDC-REQ-BODY
+}
+-- the preceding two sequences MUST be the same except for the
+-- APPLICATION identifier
+
+-- XXX this needs to feed back into the draft.
+KDC-REQ-BODY ::=	SEQUENCE {
 	 kdc-options[0]	KDCOptions,
 	 cname[1]	PrincipalName OPTIONAL, -- Used only in AS-REQ
 	 realm[2]	Realm, -- Server's realm  Also client's in AS-REQ
@@ -190,10 +182,7 @@ TGS-REQ ::= [APPLICATION 12] SEQUENCE {
 	 addresses[10]	HostAddresses OPTIONAL,
 	 authorization-data[11]	AuthorizationData OPTIONAL,
 	 additional-tickets[12]	SEQUENCE OF Ticket OPTIONAL
-	}
 }
--- the preceding two sequences MUST be the same except for the
--- APPLICATION identifier
 
 -- the following two sequences MUST be the same except for the
 -- APPLICATION identifier
