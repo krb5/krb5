@@ -1,0 +1,667 @@
+#
+# Extracted from old kerberos worksheet
+# Just the facts...
+# ¥ Makefiles for MPW tools are broken, MPW version 3.4 changed the libraries to link against
+# the error table compiler will not be built (.et), the files will be built on the unix side before bringover
+# 
+
+
+alias c MWC68K -w off
+alias C C
+
+directory gnu:k5mac:src:lib:
+
+# Clean a directory hierarchy of .o files
+directory gnu:k5mac:src:lib:crypto:crc32:
+set exit 0
+for i in `files -d -r` ; ¶
+	echo delete {i}"Å.o" ; ¶
+end
+set exit 1
+
+
+
+#
+# ::::util:et:libcom_err.a
+#
+cd gnu:k5mac:src:util:et:
+lib -o libcom_err.a com_err.c.o init_et.c.o error_message.c.o et_name.c.o
+
+
+#
+# util:et
+#
+directory gnu:k5mac:src:util:et:
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c com_err.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o com_err.c.o
+#JFM can't build
+#c compile_et.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o compile_et.c.o
+c error_message.c -d HAS_STRERROR -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o error_message.c.o
+c et_name.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o et_name.c.o
+c init_et.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o init_et.c.o
+#JFM can't build
+#c test_et.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o test_et.c.o
+#c vfprintf.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o vfprintf.c.o
+
+
+
+#
+# Notes on hacks to get things to work
+# ¥ Our precious mpw C compiler isn't really ansi as far as the libraries are concerned,
+#   we're missing <malloc.c>, so I'll create a dump which really includes <stdlib.h> where malloc is
+#   defined.  Lame.  Metrowerks doesn't have it either.
+#
+
+
+directory gnu:k5mac:src:lib:krb5
+open MakeFile
+
+buildprogram all
+
+# asn.1
+directory gnu:k5mac:src:lib:krb5:asn.1
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c asn1_decode.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_decode.c.c.o
+c asn1_encode.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_encode.c.c.o
+c asn1_get.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_get.c.c.o
+c asn1_k_decode.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_k_decode.c.c.o
+c asn1_k_encode.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_k_encode.c.c.o
+c asn1_make.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_make.c.c.o
+c asn1_misc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1_misc.c.c.o
+c asn1buf.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o asn1buf.c.c.o
+#JFM looks out of date, the initialization isn't correct for anyone
+#c glue2.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o glue2.c.c.o
+c krb5_decode.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o krb5_decode.c.c.o
+c krb5_encode.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o krb5_encode.c.c.o
+
+# ccache
+directory gnu:k5mac:src:lib:krb5:ccache
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c ccbase.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o ccbase.c.c.o
+c ccdefault.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o ccdefault.c.c.o
+c ccdefops.c -d _MACINTOSH -i :stdio: -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o ccdefops.c.c.o
+
+
+
+# ccache:stdio
+# none of this works
+directory gnu:k5mac:src:lib:krb5:ccache:stdio
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c scc_close.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_close.c.o
+c scc_defops.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_defops.c.o
+c scc_destry.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_destry.c.o
+c scc_errs.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_errs.c.o
+c scc_eseq.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_eseq.c.o
+c scc_gennew.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_gennew.c.o
+c scc_getnam.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_getnam.c.o
+c scc_gprin.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_gprin.c.o
+c scc_init.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_init.c.o
+c scc_maybe.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_maybe.c.o
+c scc_nseq.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_nseq.c.o
+c scc_ops.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_ops.c.o
+c scc_read.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_read.c.o
+c scc_reslv.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_reslv.c.o
+c scc_retrv.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_retrv.c.o
+c scc_sflags.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_sflags.c.o
+c scc_skip.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_skip.c.o
+c scc_sseq.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_sseq.c.o
+c scc_store.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_store.c.o
+#c scc_test.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_test.c.o
+c scc_write.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o scc_write.c.o
+
+
+
+# ccache:file
+# none of this works
+directory gnu:k5mac:src:lib:krb5:ccache:file
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i :::::include -i :::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c fcc_close.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_close.c.c.o
+c fcc_defops.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_defops.c.c.o
+c fcc_destry.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_destry.c.c.o
+c fcc_errs.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_errs.c.c.o
+c fcc_eseq.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_eseq.c.c.o
+c fcc_gennew.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_gennew.c.c.o
+c fcc_getnam.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_getnam.c.c.o
+c fcc_gprin.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_gprin.c.c.o
+c fcc_init.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_init.c.c.o
+c fcc_maybe.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_maybe.c.c.o
+c fcc_nseq.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_nseq.c.c.o
+c fcc_ops.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_ops.c.c.o
+c fcc_read.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_read.c.c.o
+c fcc_reslv.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_reslv.c.c.o
+c fcc_retrv.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_retrv.c.c.o
+c fcc_sflags.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_sflags.c.c.o
+c fcc_skip.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_skip.c.c.o
+c fcc_sseq.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_sseq.c.c.o
+c fcc_store.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_store.c.c.o
+#JFM doesn't compile, bad initializations
+#c fcc_test.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_test.c.c.o
+c fcc_write.c -d _MACINTOSH -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fcc_write.c.c.o
+
+
+
+
+# keytab
+# buildprogram all -e
+	directory gnu:k5mac:src:lib:krb5:keytab
+	c ktadd.c  -i ::::include -i ::::include:krb5 -i {CIncludes} -o tkadd.c.o
+	c ktbase.c  -i ::::include -i ::::include:krb5 -i {CIncludes} -o tkbase.c.o
+	c ktdefault.c  -i ::::include -i ::::include:krb5 -i {CIncludes} -o tkdefault.c.o
+	c ktfr_entry.c  -i ::::include -i ::::include:krb5 -i {CIncludes} -o tkfr_entry.c.o
+	c ktremove.c  -i ::::include -i ::::include:krb5 -i {CIncludes} -o tkremove.c.o
+	c read_servi.c  -i ::::include -i ::::include:krb5 -i {CIncludes} -o read_servi.c.o
+
+# keytab:file
+# buildprogram all -e
+	directory gnu:k5mac:src:lib:krb5:keytab:file
+	c ktf_add.c   -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_add.c.o
+	c ktf_close.c   -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_close.c.o
+	c ktf_defops.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_defops.c.o
+	c ktf_endget.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_endget.c.o
+	c ktf_g_ent.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_g_ent.c.o
+	c ktf_g_name.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_g_name.c.o
+	c ktf_next.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_next.c.o
+	c ktf_ops.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_ops.c.o
+	c ktf_remove.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_remove.c.o
+	c ktf_resolv.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_resolv.c.o
+	c ktf_ssget.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_ssget.c.o
+	c ktf_util.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_util.c.o
+	c ktf_wops.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_wops.c.o
+	c ktf_wreslv.c  -i :::::include -i :::::include:krb5 -i {CIncludes} -o ktf_wreslv.c.o
+
+files Å.c
+
+# krb
+#buildprogram all -e
+	directory gnu:k5mac:src:lib:krb5:krb
+
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c addr_comp.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o addr_comp.c.c.o
+c addr_order.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o addr_order.c.c.o
+c addr_srch.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o addr_srch.c.c.o
+c auth_con.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o auth_con.c.c.o
+c bld_pr_ext.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o bld_pr_ext.c.c.o
+c bld_princ.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o bld_princ.c.c.o
+c chk_trans.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o chk_trans.c.c.o
+c compat_recv.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o compat_recv.c.c.o
+c conv_princ.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o conv_princ.c.c.o
+c copy_addrs.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_addrs.c.c.o
+c copy_athctr.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_athctr.c.c.o
+c copy_auth.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_auth.c.c.o
+c copy_cksum.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_cksum.c.c.o
+c copy_creds.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_creds.c.c.o
+c copy_data.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_data.c.c.o
+c copy_key.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_key.c.c.o
+c copy_princ.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_princ.c.c.o
+c copy_tick.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o copy_tick.c.c.o
+c cp_key_cnt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o cp_key_cnt.c.c.o
+c decode_kdc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o decode_kdc.c.c.o
+c decrypt_tk.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o decrypt_tk.c.c.o
+c encode_kdc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o encode_kdc.c.c.o
+c encrypt_tk.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o encrypt_tk.c.c.o
+c faddr_ordr.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o faddr_ordr.c.c.o
+c free_rtree.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o free_rtree.c.c.o
+c gc_frm_kdc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gc_frm_kdc.c.c.o
+c gc_via_tkt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gc_via_tkt.c.c.o
+c gen_seqnum.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gen_seqnum.c.c.o
+c gen_subkey.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gen_subkey.c.c.o
+c get_creds.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o get_creds.c.c.o
+c get_in_tkt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o get_in_tkt.c.c.o
+c in_tkt_ktb.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o in_tkt_ktb.c.c.o
+c in_tkt_pwd.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o in_tkt_pwd.c.c.o
+c in_tkt_sky.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o in_tkt_sky.c.c.o
+c init_ctx.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o init_ctx.c.c.o
+c kdc_rep_dc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o kdc_rep_dc.c.c.o
+c krbconfig.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o krbconfig.c.c.o
+c mk_cred.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_cred.c.c.o
+c mk_error.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_error.c.c.o
+c mk_priv.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_priv.c.c.o
+c mk_rep.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_rep.c.c.o
+c mk_req.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_req.c.c.o
+c mk_req_ext.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_req_ext.c.c.o
+c mk_safe.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_safe.c.c.o
+c parse.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o parse.c.c.o
+c pr_to_salt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o pr_to_salt.c.c.o
+c preauth.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o preauth.c.c.o
+c princ_comp.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o princ_comp.c.c.o
+c rd_cred.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_cred.c.c.o
+c rd_error.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_error.c.c.o
+c rd_priv.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_priv.c.c.o
+c rd_rep.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_rep.c.c.o
+c rd_req.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_req.c.c.o
+c rd_req_dec.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_req_dec.c.c.o
+c rd_safe.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rd_safe.c.c.o
+c recvauth.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o recvauth.c.c.o
+c send_tgs.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o send_tgs.c.c.o
+c sendauth.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o sendauth.c.c.o
+c srv_rcache.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o srv_rcache.c.c.o
+#jfm test driver
+#c t_kerb.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o t_kerb.c.c.o
+c t_walk_rtree.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o t_walk_rtree.c.c.o
+c tgtname.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o tgtname.c.c.o
+c unparse.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o unparse.c.c.o
+c walk_rtree.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o walk_rtree.c.c.o
+
+
+
+
+
+
+#buildprogram all -e
+#JFM using a posix open function, need a posix library (Hacked system header for that)
+directory gnu:k5mac:src:lib:krb5:rcache
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c rc_base.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rc_base.c.c.o
+c rc_conv.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rc_conv.c.c.o
+c rc_dfl.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rc_dfl.c.c.o
+c rc_io.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rc_io.c.c.o
+c rcdef.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rcdef.c.c.o
+
+
+
+
+
+#buildprogram all -e
+directory gnu:k5mac:src:lib:krb5:free
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c f_addr.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_addr.c.c.o
+c f_address.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_address.c.c.o
+c f_ap_rep.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_ap_rep.c.c.o
+c f_ap_req.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_ap_req.c.c.o
+c f_arep_enc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_arep_enc.c.c.o
+c f_auth_cnt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_auth_cnt.c.c.o
+c f_authdata.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_authdata.c.c.o
+c f_authent.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_authent.c.c.o
+c f_chksum.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_chksum.c.c.o
+c f_cred.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_cred.c.c.o
+c f_cred_cnt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_cred_cnt.c.c.o
+c f_cred_enc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_cred_enc.c.c.o
+c f_creds.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_creds.c.c.o
+c f_enc_kdc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_enc_kdc.c.c.o
+c f_enc_tkt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_enc_tkt.c.c.o
+c f_error.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_error.c.c.o
+c f_kdc_rp.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_kdc_rp.c.c.o
+c f_kdc_rq.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_kdc_rq.c.c.o
+c f_keyblock.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_keyblock.c.c.o
+c f_last_req.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_last_req.c.c.o
+c f_padata.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_padata.c.c.o
+c f_princ.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_princ.c.c.o
+c f_priv.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_priv.c.c.o
+c f_priv_enc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_priv_enc.c.c.o
+c f_pwd_data.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_pwd_data.c.c.o
+c f_pwd_seq.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_pwd_seq.c.c.o
+c f_safe.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_safe.c.c.o
+c f_tckt.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_tckt.c.c.o
+c f_tckts.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_tckts.c.c.o
+c f_tgt_cred.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_tgt_cred.c.c.o
+c f_tkt_auth.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_tkt_auth.c.c.o
+
+#JFM using a posix open function, need a posix library to continue
+#buildprogram all -e
+directory gnu:k5mac:src:lib:krb5:os
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c an_to_ln.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o an_to_ln.c.c.o
+c ccdefname.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o ccdefname.c.c.o
+c def_realm.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o def_realm.c.c.o
+c DNR.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o DNR.c.c.o
+c free_hstrl.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o free_hstrl.c.c.o
+c free_krbhs.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o free_krbhs.c.c.o
+c full_ipadr.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o full_ipadr.c.c.o
+c gen_port.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gen_port.c.c.o
+c gen_rname.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gen_rname.c.c.o
+c genaddrs.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o genaddrs.c.c.o
+c get_krbhst.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o get_krbhst.c.c.o
+c gmt_mktime.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o gmt_mktime.c.c.o
+c hst_realm.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o hst_realm.c.c.o
+c init_os_ctx.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o init_os_ctx.c.c.o
+c krbfileio.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o krbfileio.c.c.o
+c ktdefname.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o ktdefname.c.c.o
+c kuserok.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o kuserok.c.c.o
+c localaddr.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o localaddr.c.c.o
+c locate_kdc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o locate_kdc.c.c.o
+c lock_file.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o lock_file.c.c.o
+c macsock.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o macsock.c.c.o
+c mk_faddr.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o mk_faddr.c.c.o
+c net_read.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o net_read.c.c.o
+c net_write.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o net_write.c.c.o
+c osconfig.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o osconfig.c.c.o
+c port2ip.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o port2ip.c.c.o
+c read_msg.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o read_msg.c.c.o
+c read_pwd.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o read_pwd.c.c.o
+c realm_dom.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o realm_dom.c.c.o
+c sendto_kdc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o sendto_kdc.c.c.o
+c sn2princ.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o sn2princ.c.c.o
+#JFM Test program
+#c t_std_conf.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o t_std_conf.c.c.o
+c timeofday.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o timeofday.c.c.o
+c unlck_file.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o unlck_file.c.c.o
+c ustime.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o ustime.c.c.o
+c write_msg.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o write_msg.c.c.o
+
+
+directory gnu:k5mac:src:lib:krb5:posix
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+#JFM fork
+#c daemon.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o daemon.c.c.o
+c getuid.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o getuid.c.c.o
+c memmove.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o memmove.c.c.o
+c strcasecmp.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o strcasecmp.c.c.o
+c strdup.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o strdup.c.c.o
+c strerror.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o strerror.c.c.o
+c syslog.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o syslog.c.c.o
+#JFM not needed, I think
+#c vfprintf.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o vfprintf.c.c.o
+#c vsprintf.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o vsprintf.c.c.o
+
+
+#
+# error tables
+#
+directory gnu:k5mac:src:lib:krb5:error_tables
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c init_ets.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o init_ets.c.o
+c krb5_err.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o krb5_err.c.o
+
+
+#
+# profile
+#
+directory gnu:k5mac:src:util:profile
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i : -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c prof_file.c -d _MACINTOSH -i : -i :::::include -i :::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o prof_file.c.o
+c prof_init.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o prof_init.c.o
+c prof_parse.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o prof_parse.c.o
+c prof_section.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o prof_section.c.o
+c prof_tree.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o prof_tree.c.o
+c test_parse.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o test_parse.c.o
+c test_profile.c -d HAVE_STDARG_H -d _MACINTOSH -i : -i :::include -i :::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o test_profile.c.o
+
+	files ::util:profile:Å.o
+
+
+
+#
+# Build the libkrb5.a
+#
+cd gnu:k5mac:src:lib:
+delete libkrb5.a
+lib -o libkrb5.a ¶
+	::util:profile:prof_file.c.o ¶
+	::util:profile:prof_init.c.o ¶
+	::util:profile:prof_parse.c.o ¶
+	::util:profile:prof_section.c.o ¶
+	::util:profile:prof_tree.c.o ¶
+	`files :krb5:ccache:stdio:Å.o` ¶
+	`files :krb5:os:Å.o` ¶
+	`files :krb5:rcache:Å.o` ¶
+	`files :krb5:free:Å.o` ¶
+	`files :krb5:error_tables:Å.o` ¶
+	`files :krb5:asn.1:Å.o` ¶
+	`files :krb5:ccache:Å.o` ¶
+	`files :krb5:ccache:file:Å.o` ¶
+	`files :krb5:keytab:Å.o` ¶
+	`files :krb5:keytab:file:Å.o` ¶
+	:krb5:krb:addr_comp.c.c.o ¶
+	:krb5:krb:addr_order.c.c.o ¶
+	:krb5:krb:addr_srch.c.c.o ¶
+	:krb5:krb:auth_con.c.c.o ¶
+	:krb5:krb:bld_pr_ext.c.c.o ¶
+	:krb5:krb:bld_princ.c.c.o ¶
+	:krb5:krb:chk_trans.c.c.o ¶
+	:krb5:krb:compat_recv.c.c.o ¶
+	:krb5:krb:conv_princ.c.c.o ¶
+	:krb5:krb:copy_addrs.c.c.o ¶
+	:krb5:krb:copy_athctr.c.c.o ¶
+	:krb5:krb:copy_auth.c.c.o ¶
+	:krb5:krb:copy_cksum.c.c.o ¶
+	:krb5:krb:copy_creds.c.c.o ¶
+	:krb5:krb:copy_data.c.c.o ¶
+	:krb5:krb:copy_key.c.c.o ¶
+	:krb5:krb:copy_princ.c.c.o ¶
+	:krb5:krb:copy_tick.c.c.o ¶
+	:krb5:krb:cp_key_cnt.c.c.o ¶
+	:krb5:krb:decode_kdc.c.c.o ¶
+	:krb5:krb:decrypt_tk.c.c.o ¶
+	:krb5:krb:encode_kdc.c.c.o ¶
+	:krb5:krb:encrypt_tk.c.c.o ¶
+	:krb5:krb:faddr_ordr.c.c.o ¶
+	:krb5:krb:free_rtree.c.c.o ¶
+	:krb5:krb:gc_frm_kdc.c.c.o ¶
+	:krb5:krb:gc_via_tkt.c.c.o ¶
+	:krb5:krb:gen_seqnum.c.c.o ¶
+	:krb5:krb:gen_subkey.c.c.o ¶
+	:krb5:krb:get_creds.c.c.o ¶
+	:krb5:krb:get_in_tkt.c.c.o ¶
+	:krb5:krb:in_tkt_ktb.c.c.o ¶
+	:krb5:krb:in_tkt_pwd.c.c.o ¶
+	:krb5:krb:in_tkt_sky.c.c.o ¶
+	:krb5:krb:init_ctx.c.c.o ¶
+	:krb5:krb:kdc_rep_dc.c.c.o ¶
+	:krb5:krb:krbconfig.c.c.o ¶
+	:krb5:krb:mk_cred.c.c.o ¶
+	:krb5:krb:mk_error.c.c.o ¶
+	:krb5:krb:mk_priv.c.c.o ¶
+	:krb5:krb:mk_rep.c.c.o ¶
+	:krb5:krb:mk_req.c.c.o ¶
+	:krb5:krb:mk_req_ext.c.c.o ¶
+	:krb5:krb:mk_safe.c.c.o ¶
+	:krb5:krb:parse.c.c.o ¶
+	:krb5:krb:pr_to_salt.c.c.o ¶
+	:krb5:krb:preauth.c.c.o ¶
+	:krb5:krb:princ_comp.c.c.o ¶
+	:krb5:krb:rd_cred.c.c.o ¶
+	:krb5:krb:rd_error.c.c.o ¶
+	:krb5:krb:rd_priv.c.c.o ¶
+	:krb5:krb:rd_rep.c.c.o ¶
+	:krb5:krb:rd_req.c.c.o ¶
+	:krb5:krb:rd_req_dec.c.c.o ¶
+	:krb5:krb:rd_safe.c.c.o ¶
+	:krb5:krb:recvauth.c.c.o ¶
+	:krb5:krb:send_tgs.c.c.o ¶
+	:krb5:krb:sendauth.c.c.o ¶
+	:krb5:krb:srv_rcache.c.c.o ¶
+	:krb5:krb:tgtname.c.c.o ¶
+	:krb5:krb:unparse.c.c.o ¶
+	:krb5:krb:walk_rtree.c.c.o ¶
+	:krb5:posix:getuid.c.c.o ¶
+	:krb5:posix:strcasecmp.c.c.o ¶
+	:krb5:posix:strdup.c.c.o ¶
+	:krb5:posix:syslog.c.c.o
+
+#jfm not sure what to do with this yet
+#	
+
+
+
+#
+# crypto
+#
+directory gnu:k5mac:src:lib:crypto
+delete Å.c.o
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i :des -i :md5 -i :md4 -i :crc32 -i :::include -i :::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c cryptoconf.c -d _MACINTOSH -i :des -i :md5 -i :md4 -i :crc32 -i :::include -i :::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o cryptoconf.c.o
+c des_crc.c -d _MACINTOSH -i :des -i :md5 -i :md4 -i :crc32 -i :::include -i :::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o des_crc.c.o
+c des_md5.c -d _MACINTOSH -i :des -i :md5 -i :md4 -i :crc32 -i :::include -i :::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o des_md5.c.o
+c raw_des.c -d _MACINTOSH -i :des -i :md5 -i :md4 -i :crc32 -i :::include -i :::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o raw_des.c.o
+
+
+#
+# crc32
+#
+directory gnu:k5mac:src:lib:crypto:crc32:
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c crc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o crc.c.o
+c crctest.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o crctest.c.o
+
+
+#
+# des
+#
+directory gnu:k5mac:src:lib:crypto:des:
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c cbc_cksum.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o cbc_cksum.c.o
+c cs_entry.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o cs_entry.c.o
+c destest.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o destest.c.o
+c f_cbc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_cbc.c.o
+c f_cksum.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_cksum.c.o
+c f_ecb.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_ecb.c.o
+c f_parity.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_parity.c.o
+c f_pcbc.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_pcbc.c.o
+c f_sched.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_sched.c.o
+c f_tables.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o f_tables.c.o
+c fin_rndkey.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o fin_rndkey.c.o
+c finish_key.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o finish_key.c.o
+c init_rkey.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o init_rkey.c.o
+c key_sched.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o key_sched.c.o
+c new_rn_key.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o new_rn_key.c.o
+c process_ky.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o process_ky.c.o
+c random_key.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o random_key.c.o
+c string2key.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o string2key.c.o
+c verify.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o verify.c.o
+c weak_key.c -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o weak_key.c.o
+
+#
+# md4
+#
+directory gnu:k5mac:src:lib:crypto:md4:
+delete Å.o
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::des -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c md4.c -d _MACINTOSH -i ::des -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md4.c.o
+c md4crypto.c -d _MACINTOSH -i ::des -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md4crypto.c.o
+c md4driver.c -d _MACINTOSH -i ::des -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md4driver.c.o
+c md4glue.c -d _MACINTOSH -i ::des -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md4glue.c.o
+
+
+#
+# md5 stuff
+#
+directory gnu:k5mac:src:lib:crypto:md5:
+delete Å.o
+for i in `files Å.c` ; ¶
+	echo c {i} -d _MACINTOSH -i ::des: -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c md5.c -d _MACINTOSH -i ::des: -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md5.c.o
+c md5crypto.c -d _MACINTOSH -i ::des: -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md5crypto.c.o
+c md5glue.c -d _MACINTOSH -i ::des: -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o md5glue.c.o
+c t_mddriver.c -d _MACINTOSH -i ::des: -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o t_mddriver.c.o
+
+
+
+#
+# os, done
+#
+directory gnu:k5mac:src:lib:crypto:os:
+delete Å.o
+for i in `files Å.c` ; ¶
+	echo c {i} -d HAVE_SRAND -d _MACINTOSH -i ::::include -i ::::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+c rnd_confoun.c -d HAVE_SRAND -d _MACINTOSH -i ::::include -i ::::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o rnd_confoun.c.o
+
+
+#
+# libcrypto
+#
+cd gnu:k5mac:src:lib:
+lib -o libcrypto.a ¶
+	`files :crypto:Å.o` ¶
+	:crypto:crc32:crc.c.o ¶
+	:crypto:des:cbc_cksum.c.o ¶
+	:crypto:des:weak_key.c.o ¶
+	:crypto:des:cs_entry.c.o ¶
+	:crypto:des:f_cbc.c.o ¶
+	:crypto:des:f_cksum.c.o ¶
+	:crypto:des:f_ecb.c.o ¶
+	:crypto:des:f_pcbc.c.o ¶
+	:crypto:des:f_sched.c.o ¶
+	:crypto:des:f_tables.c.o ¶
+	:crypto:des:f_parity.c.o ¶
+	:crypto:des:fin_rndkey.c.o ¶
+	:crypto:des:finish_key.c.o ¶
+	:crypto:des:init_rkey.c.o ¶
+	:crypto:des:key_sched.c.o ¶
+	:crypto:des:process_ky.c.o ¶
+	:crypto:des:random_key.c.o ¶
+	:crypto:des:new_rn_key.c.o ¶
+	:crypto:des:string2key.c.o ¶
+	:crypto:md4:md4.c.o ¶
+	:crypto:md4:md4crypto.c.o ¶
+	:crypto:md4:md4glue.c.o ¶
+	:crypto:md5:md5.c.o ¶
+	:crypto:md5:md5crypto.c.o ¶
+	:crypto:md5:md5glue.c.o ¶
+	`files :crypto:os:Å.o`
+
+==========================================
+# Error code compiler
+# for the ".et" files
+# punt on building the error compiler
+cd gnu:k5mac:src:util:et:
+files
+
+
+==========================================
+# kinit compilation
+#
+cd gnu:k5mac:src:clients:kinit:
+delete Å.o
+for i in `files Å.c` ; ¶
+	echo c {i} -d HAVE_SRAND -d _MACINTOSH -i :::include -i :::include:krb5 -i {CIncludes} -o {i}.o ;¶
+end
+
+	c kinit.c -d HAVE_SRAND -d _MACINTOSH -i :::include -i :::include:krb5 -i gnu:MPW:Interfaces:CIncludes: -o kinit.c.o
+	Link     -t MPST -c "MPS " -sym on ¶
+		:::lib:libkrb5.a :::lib:libcrypto.a :::util:et:libcom_err.a ¶
+		{CLibraries}"StdClib."o	¶
+		{Libraries}"Runtime."o¶
+		{Libraries}"Interface."o¶
+		-o kinit  kinit.c.o
