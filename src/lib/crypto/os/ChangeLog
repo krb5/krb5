@@ -1,3 +1,9 @@
+Fri Nov 28 21:23:42 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add AC_PROG_LN_S to deal with symlinking in
+	memmove.c.  This is a kludge, as we really should have a more sane
+	way to deal with missing posix functions.
+
 Thu Sep 25 21:53:11 1997  Tom Yu  <tlyu@mit.edu>
 
 	* c_localaddr.c: Replace KRB5_USE_INET with something more sane.
