@@ -1421,6 +1421,8 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_copy_checksum
 		krb5_checksum FAR * FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_init_ets
 	KRB5_PROTOTYPE((krb5_context));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_finish_ets
+	KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_generate_subkey
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_keyblock *, krb5_keyblock **));
