@@ -1,3 +1,11 @@
+Fri Apr 23 00:31:17 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix wrap_size
+		limit so that it correctly calculates its results, and
+		underestimates the correct size instead of overestimating
+		it, and not returning zero all the time.  (Which it used
+		to do after the March 25 fix.)
+
 Fri Mar 26 22:17:20 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* acquire_cred.c (krb5_gss_acquire_cred): Don't use strcmp to
