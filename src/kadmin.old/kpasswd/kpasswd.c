@@ -543,7 +543,7 @@ get_first_ticket(context, cache, client, my_creds)
 
     (void) sprintf(prompt,"Old password for %s: ", (char *) client_name);
 
-    if ((retval = krb5_os_localaddr(&my_addresses))) {
+    if ((retval = krb5_os_localaddr(context, &my_addresses))) {
 	fprintf(stderr, "Unable to Get Customers Address\n");
 	return(1);
     }

@@ -1,3 +1,6 @@
+Thu Jul  6 17:29:50 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* kpasswd.c (get_first_ticket): Pass context to os_localaddr.
 
 Fri Jun 30 14:37:02 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --with-dbm to select between Berkeley and
