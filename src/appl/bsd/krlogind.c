@@ -1585,15 +1585,15 @@ recvauth(valid_checksum)
 	 * principal's name. 
          */
 	strcpy(rusername, v4_kdata->pname);
-	krusername = (char *) malloc(strlen(v4_kdata->pname) + 1 +
-				     strlen(v4_kdata->pinst) + 1 +
-				     strlen(v4_kdata->prealm) + 1);
-	sprintf(krusername, "%s/%s@%s", v4_kdata->pname,
-		v4_kdata->pinst, v4_kdata->prealm);
+
+	status = krb5_425_conv_principal(bsd_context, v4_kdata->pname,
+					 v4_kdata->pinst, v4_kdata->prealm,
+					 &client);
+	if (status) return status;
+
+	status = krb5_unparse_name(bsd_context, client, &krusername);
 	
-	if (status = krb5_parse_name(bsd_context, krusername, &client))
-	  return(status);
-	return 0;
+	return status;
     }
 #endif
 
