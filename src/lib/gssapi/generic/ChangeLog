@@ -1,3 +1,10 @@
+Wed Jul 24 18:48:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* rel_buffer.c (generic_gss_release_buffer): 
+	* rel_oid_set.c (generic_gss_release_oid_set): Remove INTERFACE
+ 		keyworded; not needed (and causes problems) since we're
+ 		not exporting this function to the DLL.
+
 Tue Jul 23 16:44:50 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* util_validate.c: Only include <sys/file.h> if building with BSD_DB.

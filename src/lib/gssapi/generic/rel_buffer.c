@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32 INTERFACE
+OM_uint32
 generic_gss_release_buffer (minor_status,
 			    buffer)
      OM_uint32 *		minor_status;
