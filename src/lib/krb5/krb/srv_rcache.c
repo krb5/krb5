@@ -78,6 +78,7 @@ krb5_rcache *rcptr;
 	}
 	cachename[p++] = piece->data[i];
     }
+    cachename[p++] = '\0';
 
     if (retval = krb5_rc_resolve(rcache, cachename))
 	goto cleanup;

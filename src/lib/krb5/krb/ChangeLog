@@ -1,5 +1,8 @@
 Thu Sep 29 15:31:10 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* srv_rcache.c (krb5_get_server_rcache): cachename was not being
+		properly null-terminated.
+
 	* get_in_tkt.c (krb5_get_in_tkt): Return KRB5_IN_TKT_REALM_MISATCH
 		if the client and server realms don't match.  Return
 		KRB5_KDCREP_SKEW if the KDC reply has an unacceptible
