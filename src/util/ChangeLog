@@ -1,3 +1,22 @@
+2001-02-21  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: When generating multiple tarballs, also generate a
+	consolidated tarball.
+
+2001-02-06  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Default to making a single tarball.
+
+2001-01-28  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Move aix.bincmds rule to
+	all-prerecurse so it gets built before the subdirectories of
+	src/util.
+
+	* makeshlib.sh: Use the linker flag -berok so that unresolved
+	symbols don't turn into link-time errors for building shared libs
+	on AIX.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

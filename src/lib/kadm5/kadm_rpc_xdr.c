@@ -135,8 +135,16 @@ xdr_krb5_kvno(XDR *xdrs, krb5_kvno *objp)
 
 	tmp = '\0'; /* for purify, else xdr_u_char performs a umr */
 
-	if (xdrs->x_op == XDR_ENCODE)
+	if (xdrs->x_op == XDR_ENCODE) {
 		tmp = (unsigned char) *objp;
+#if 0
+		/* We can't change the protocol right now, so let's
+		   just reject (legitimate!) values that won't fit in
+		   our broken one-byte encoding.  */
+		if (tmp != *objp)
+		    return FALSE;
+#endif
+	}
 
 	if (!xdr_u_char(xdrs, &tmp))
 		return (FALSE);

@@ -25,9 +25,13 @@
 #include <string.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#if TARGET_OS_MAC
+#include <Kerberos/krb.h>
+#include <Kerberos/krb524.h>
+#else
 #include <krb.h>
-
 #include "krb524.h"
+#endif
 
 krb5_error_code krb524_convert_creds_plain
 KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
@@ -139,7 +143,7 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
 	  if (krb524_debug)
 	       fprintf(stderr, "v5 session keyblock length %d != C_Block size %d\n",
 		       v5creds->keyblock.length,
-		       sizeof(C_Block));
+		       (int) sizeof(C_Block));
 	  return KRB524_BADKEY;
      } else
 	  memcpy(v4creds->session, (char *) v5creds->keyblock.contents,

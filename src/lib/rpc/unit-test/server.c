@@ -14,6 +14,7 @@ static char *rcsid = "$Header$";
 #include <string.h>
 #include <signal.h>
 #include <gssrpc/rpc.h>
+#include <gssrpc/pmap_clnt.h>
 #include <arpa/inet.h>  /* inet_ntoa */
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>

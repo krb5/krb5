@@ -1,3 +1,7 @@
+2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* hash/dbm.c (kdb2_dbm_open): Don't overflow buffer "path".
+
 1999-08-15  Tom Yu  <tlyu@mit.edu>
 
 	* README.NOT.SLEEPYCAT.DB: New file; pointer to README to

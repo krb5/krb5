@@ -77,7 +77,7 @@ makeshlib: $(srcdir)/makeshlib.sh Makefile
 #
 # We only need this for AIX, but we generate it for all systems.
 #
-all-unix:: aix.bincmds
+all-prerecurse:: aix.bincmds
 
 aix.bincmds: Makefile
 	 echo libpath $(KRB5_LIBDIR):`pwd`/$(TOPLIBD):/usr/lib:/lib >aix.bincmds

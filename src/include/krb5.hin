@@ -1,7 +1,7 @@
 /*
  * include/krb5.h
  *
- * Copyright 1989,1990,1995 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990,1995,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -56,15 +56,40 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
+#ifndef KRB5_DEPRECATED
+#define KRB5_DEPRECATED 1 /* Expose deprecated things for now. */
+#endif
+
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <TargetConditionals.h>
+    #if TARGET_RT_MAC_CFM
+        #error "Use KfM 4.0 SDK headers for CFM compilation."
+    #endif
+
+	/* This is an API divergence in 1.2.3 needed for proper functioning
+	on Mac OS X. This will be reconciled in 1.3 */
+	#define KRB5_CCACHE_ACCESSOR_FUNCTIONS 1
+	#define KRB5_KEYTAB_ACCESSOR_FUNCTIONS 1
+	#ifndef KRB5_PRIVATE /* Allow e.g. build system to override */
+		#define KRB5_PRIVATE 0
+	#endif
+#else
+#if defined(_WIN32)
+	#ifndef KRB5_PRIVATE
+		#define KRB5_PRIVATE 0
+	#endif
+	#define KRB5_CCACHE_ACCESSOR_FUNCTIONS 1
+	#define KRB5_KEYTAB_ACCESSOR_FUNCTIONS 1
+#else
+	#ifndef KRB5_PRIVATE
+		#define KRB5_PRIVATE 1
+	#endif
+	#define KRB5_CCACHE_ACCESSOR_FUNCTIONS 0
+	#define KRB5_KEYTAB_ACCESSOR_FUNCTIONS 0
 #endif
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_MSDOS) || defined(_WIN32)
 #include <win-mac.h>
 #endif
 
@@ -79,6 +104,10 @@
 #define NEAR
 #endif /* !KRB5_CALLCONV */
 #endif /* !KRB5_CONFIG__ */
+
+#ifndef KRB5_CALLCONV_WRONG
+#define KRB5_CALLCONV_WRONG
+#endif
 
 #ifndef THREEPARAMOPEN
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
@@ -95,15 +124,34 @@
  * begin "error_def.h"
  */
 
-#include <profile.h>
+#if TARGET_OS_MAC
+    #include <Kerberos/profile.h>
+#else
+    #include <profile.h>
+#endif
+
 #include <errno.h>
 
 /*
  * end "error_def.h"
  */
 
-#ifdef __cplusplus
-extern "C" {
+#if defined(__cplusplus) && !defined(KRB5INT_BEGIN_DECLS)
+#define KRB5INT_BEGIN_DECLS	extern "C" {
+#define KRB5INT_END_DECLS	}
+#else
+#define KRB5INT_BEGIN_DECLS
+#define KRB5INT_END_DECLS
+#endif
+
+KRB5INT_BEGIN_DECLS
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
 #endif
 
 /*
@@ -498,7 +546,17 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG	23
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV		24
 
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_c_valid_enctype
+	KRB5_PROTOTYPE((krb5_const krb5_enctype ktype));
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_c_valid_cksumtype
+	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_c_is_coll_proof_cksum
+	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_c_is_keyed_cksum
+	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
 
+#if KRB5_PRIVATE
+/* use the above four instead */
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV valid_enctype
 	KRB5_PROTOTYPE((krb5_const krb5_enctype ktype));
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV valid_cksumtype
@@ -507,6 +565,7 @@ KRB5_DLLIMP krb5_boolean KRB5_CALLCONV is_coll_proof_cksum
 	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV is_keyed_cksum
 	KRB5_PROTOTYPE((krb5_const krb5_cksumtype ctype));
+#endif
 
 #ifdef KRB5_OLD_CRYPTO
 /*
@@ -580,6 +639,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 		krb5_const krb5_pointer in, krb5_const size_t in_length,
 		krb5_const krb5_pointer seed, krb5_const size_t seed_length));
 
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_random_confounder
 	KRB5_PROTOTYPE((size_t, krb5_pointer));
 
@@ -592,6 +652,7 @@ krb5_error_code krb5_decrypt_data
 	KRB5_PROTOTYPE((krb5_context context, krb5_keyblock *key, 
 		krb5_pointer ivec, krb5_enc_data *data, 
 		krb5_data *enc_data));
+#endif
 
 #endif /* KRB5_OLD_CRYPTO */
 
@@ -620,7 +681,7 @@ krb5_error_code krb5_decrypt_data
 /* #define	KDC_OPT_RESERVED	0x00100000 */
 /* #define	KDC_OPT_RESERVED	0x00080000 */
 /* #define	KDC_OPT_RESERVED	0x00040000 */
-/* #define	KDC_OPT_RESERVED	0x00020000 */
+#define	KDC_OPT_REQUEST_ANONYMOUS	0x00020000
 /* #define	KDC_OPT_RESERVED	0x00010000 */
 /* #define	KDC_OPT_RESERVED	0x00008000 */
 /* #define	KDC_OPT_RESERVED	0x00004000 */
@@ -632,7 +693,7 @@ krb5_error_code krb5_decrypt_data
 /* #define	KDC_OPT_RESERVED	0x00000100 */
 /* #define	KDC_OPT_RESERVED	0x00000080 */
 /* #define	KDC_OPT_RESERVED	0x00000040 */
-/* #define	KDC_OPT_RESERVED	0x00000020 */
+#define	KDC_OPT_DISABLE_TRANSITED_CHECK	0x00000020
 #define	KDC_OPT_RENEWABLE_OK		0x00000010
 #define	KDC_OPT_ENC_TKT_IN_SKEY		0x00000008
 /* #define	KDC_OPT_UNUSED		0x00000004 */
@@ -708,9 +769,9 @@ krb5_error_code krb5_decrypt_data
 #define	TKT_FLG_INITIAL			0x00400000
 #define	TKT_FLG_PRE_AUTH		0x00200000
 #define	TKT_FLG_HW_AUTH			0x00100000
-/* #define	TKT_FLG_RESERVED	0x00080000 */
-/* #define	TKT_FLG_RESERVED	0x00040000 */
-/* #define	TKT_FLG_RESERVED	0x00020000 */
+#define	TKT_FLG_TRANSIT_POLICY_CHECKED	0x00080000
+#define	TKT_FLG_OK_AS_DELEGATE		0x00040000
+#define	TKT_FLG_ANONYMOUS		0x00020000
 /* #define	TKT_FLG_RESERVED	0x00010000 */
 /* #define	TKT_FLG_RESERVED	0x00008000 */
 /* #define	TKT_FLG_RESERVED	0x00004000 */
@@ -1022,6 +1083,7 @@ typedef struct _krb5_response {
     krb5_timestamp request_time;   /* When we made the request */
 } krb5_response;
 
+#if KRB5_PRIVATE
 typedef struct _krb5_safe {
     krb5_magic magic;
     krb5_data user_data;		/* user data */
@@ -1048,6 +1110,7 @@ typedef struct _krb5_priv_enc_part {
     krb5_address FAR *s_address;	/* sender address */
     krb5_address FAR *r_address;	/* recipient address, optional */
 } krb5_priv_enc_part;
+#endif
 
 typedef struct _krb5_cred_info {
     krb5_magic magic;
@@ -1126,6 +1189,12 @@ typedef struct krb5_replay_data {
 
 typedef	krb5_pointer	krb5_cc_cursor;	/* cursor for sequential lookup */
 
+#if KRB5_CCACHE_ACCESSOR_FUNCTIONS
+struct _krb5_ccache;
+typedef struct _krb5_ccache FAR *krb5_ccache;
+struct _krb5_cc_ops;
+typedef struct _krb5_cc_ops krb5_cc_ops;
+#else 
 typedef struct _krb5_ccache {
     krb5_magic magic;
     struct _krb5_cc_ops FAR *ops;
@@ -1161,6 +1230,7 @@ typedef struct _krb5_cc_ops {
     krb5_error_code (KRB5_CALLCONV *set_flags) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_flags));
 } krb5_cc_ops;
+#endif /* KRB5_CCACHE_ACCESSOR_FUNCTIONS */
 
 /* for retrieve_cred */
 #define	KRB5_TC_MATCH_TIMES		0x00000001
@@ -1177,6 +1247,58 @@ typedef struct _krb5_cc_ops {
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
 
+#if KRB5_CCACHE_ACCESSOR_FUNCTIONS
+KRB5_DLLIMP const char FAR * KRB5_CALLCONV
+krb5_cc_get_name (krb5_context context, krb5_ccache cache);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_gen_new (krb5_context context, krb5_ccache FAR *cache);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_initialize(krb5_context context, krb5_ccache cache,
+		   krb5_principal principal);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_destroy (krb5_context context, krb5_ccache cache);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_close (krb5_context context, krb5_ccache cache);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
+		    krb5_creds FAR *creds);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_retrieve_cred (krb5_context context, krb5_ccache cache,
+		       krb5_flags flags, krb5_creds FAR *mcreds,
+		       krb5_creds FAR *creds);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_get_principal (krb5_context context, krb5_ccache cache,
+		       krb5_principal FAR *principal);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_start_seq_get (krb5_context context, krb5_ccache cache,
+		       krb5_cc_cursor FAR *cursor);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_next_cred (krb5_context context, krb5_ccache cache,
+		   krb5_cc_cursor FAR *cursor, krb5_creds FAR *creds);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_end_seq_get (krb5_context context, krb5_ccache cache,
+		     krb5_cc_cursor FAR *cursor);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_remove_cred (krb5_context context, krb5_ccache cache, krb5_flags flags,
+		     krb5_creds FAR *creds);
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_cc_set_flags (krb5_context context, krb5_ccache cache, krb5_flags flags);
+
+KRB5_DLLIMP const char * KRB5_CALLCONV
+krb5_cc_get_type (krb5_context context, krb5_ccache cache);
+#else
 #define krb5_cc_initialize(context, cache, principal)			krb5_x ((cache)->ops->init,(context, cache, principal))
 #define krb5_cc_gen_new(context, cache)					krb5_x ((*cache)->ops->gen_new,(context, cache))
 #define krb5_cc_destroy(context, cache)					krb5_x ((cache)->ops->destroy,(context, cache))
@@ -1193,6 +1315,7 @@ typedef struct _krb5_cc_ops {
 #define krb5_cc_get_type(context, cache)				((cache)->ops->prefix)
 
 extern krb5_cc_ops *krb5_cc_dfl_ops;
+#endif /* KRB5_CCACHE_ACCESSOR_FUNCTIONS */
 
 /*
  * end "ccache.h"
@@ -1202,12 +1325,18 @@ extern krb5_cc_ops *krb5_cc_dfl_ops;
  * begin "rcache.h"
  */
 
+#if KRB5_PRIVATE
 typedef struct krb5_rc_st {
     krb5_magic magic;
     struct _krb5_rc_ops FAR *ops;
     krb5_pointer data;
 } FAR *krb5_rcache;
+#else
+struct krb5_rc_st;
+typedef struct krb5_rc_st FAR *krb5_rcache;
+#endif
 
+#if KRB5_PRIVATE
 typedef struct _krb5_donot_replay {
     krb5_magic magic;
     char FAR *server;			/* null-terminated */
@@ -1275,6 +1404,7 @@ krb5_error_code krb5_auth_to_rep
 #define krb5_rc_resolve(context, id, name) krb5_x((id)->ops->resolve,(context, id, name))
 
 extern krb5_rc_ops krb5_rc_dfl_ops;
+#endif
 
 /*
  * end "rcache.h"
@@ -1298,13 +1428,17 @@ typedef struct krb5_keytab_entry_st {
     krb5_keyblock key;		/* the secret key */
 } krb5_keytab_entry;
 
-
+#if KRB5_KEYTAB_ACCESSOR_FUNCTIONS && !KRB5_PRIVATE
+/* Opaque definitions for krb5_kt_* functions */
+struct _krb5_kt;
+typedef struct _krb5_kt FAR *krb5_keytab;
+#else
+struct _krb5_kt_ops;
 typedef struct _krb5_kt {
     krb5_magic magic;
     struct _krb5_kt_ops FAR *ops;
     krb5_pointer data;
 } FAR *krb5_keytab;
-
 
 typedef struct _krb5_kt_ops {
     krb5_magic magic;
@@ -1355,7 +1489,30 @@ typedef struct _krb5_kt_ops {
     /* Handle for serializer */
     void * serializer;
 } krb5_kt_ops;
+#endif /* !KRB5_KEYTAB_ACCESSOR_FUNCTIONS || KRB5_PRIVATE */
 
+#if KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+char * KRB5_CALLCONV
+krb5_kt_get_type (krb5_context, krb5_keytab keytab);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_get_name(krb5_context context, krb5_keytab keytab, char *name,
+		 unsigned int namelen);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_close(krb5_context context, krb5_keytab keytab);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_get_entry(krb5_context context, krb5_keytab keytab,
+		  krb5_const_principal principal, krb5_kvno vno,
+		  krb5_enctype enctype, krb5_keytab_entry *entry);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_start_seq_get(krb5_context context, krb5_keytab keytab,
+		      krb5_kt_cursor *cursor);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_next_entry(krb5_context context, krb5_keytab keytab,
+		   krb5_keytab_entry *entry, krb5_kt_cursor *cursor);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
+		    krb5_kt_cursor *cursor);
+#else
 #define krb5_kt_get_type(context, keytab) ((keytab)->ops->prefix)
 #define krb5_kt_get_name(context, keytab, name, namelen) krb5_x((keytab)->ops->get_name,(context, keytab,name,namelen))
 #define krb5_kt_close(context, keytab) krb5_x((keytab)->ops->close,(context, keytab))
@@ -1363,11 +1520,12 @@ typedef struct _krb5_kt_ops {
 #define krb5_kt_start_seq_get(context, keytab, cursor) krb5_x((keytab)->ops->start_seq_get,(context, keytab, cursor))
 #define krb5_kt_next_entry(context, keytab, entry, cursor) krb5_x((keytab)->ops->get_next,(context, keytab, entry, cursor))
 #define krb5_kt_end_seq_get(context, keytab, cursor) krb5_x((keytab)->ops->end_get,(context, keytab, cursor))
-/* remove and add are functions, so that they can return NOWRITE
-   if not a writable keytab */
-
 
 extern krb5_kt_ops krb5_kt_dfl_ops;
+#endif
+
+/* remove and add are functions, so that they can return NOWRITE
+   if not a writable keytab */
 
 /*
  * end "keytab.h"
@@ -1384,6 +1542,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_init_secure_context
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_context
 	KRB5_PROTOTYPE((krb5_context));
 
+#if KRB5_PRIVATE
 krb5_error_code krb5_set_default_in_tkt_ktypes
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_enctype *));
@@ -1394,18 +1553,29 @@ krb5_error_code krb5_get_default_in_tkt_ktypes
 krb5_error_code krb5_set_default_tgs_ktypes
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_enctype *));
-krb5_error_code krb5_get_tgs_ktypes
+#endif
+
+krb5_error_code KRB5_CALLCONV krb5_set_default_tgs_enctypes
+	KRB5_PROTOTYPE((krb5_context,
+		krb5_const krb5_enctype *));
+
+#if KRB5_PRIVATE
+krb5_error_code KRB5_CALLCONV krb5_get_tgs_ktypes
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		krb5_enctype **));
 
 krb5_error_code krb5_get_permitted_enctypes
 	KRB5_PROTOTYPE((krb5_context, krb5_enctype **));
+void KRB5_CALLCONV krb5_free_ktypes
+	KRB5_PROTOTYPE ((krb5_context, krb5_enctype *));
 
 krb5_boolean krb5_is_permitted_enctype
 	KRB5_PROTOTYPE((krb5_context, krb5_enctype));
+#endif
 
 /* libkrb.spec */
+#if KRB5_PRIVATE
 krb5_error_code krb5_kdc_rep_decrypt_proc
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_keyblock *,
@@ -1436,6 +1606,7 @@ krb5_error_code krb5_get_cred_from_kdc_renew
 		krb5_creds *,
 		krb5_creds **,
 		krb5_creds *** ));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_tgt_creds
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_creds FAR * FAR* )); /* XXX too hard to do with const */
@@ -1461,6 +1632,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_credentials_renew
 		krb5_ccache,
 		krb5_creds FAR *,
 		krb5_creds FAR * FAR *));
+#if KRB5_PRIVATE
 krb5_error_code krb5_get_cred_via_tkt
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_creds *,
@@ -1468,6 +1640,7 @@ krb5_error_code krb5_get_cred_via_tkt
 		   krb5_address * krb5_const *,
 		   krb5_creds *,
 		   krb5_creds **));
+#endif
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_mk_req
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context FAR *,
@@ -1530,19 +1703,19 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_unparse_name_ext
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_set_principal_realm
 	KRB5_PROTOTYPE((krb5_context, krb5_principal, const char FAR *));
 
-krb5_boolean krb5_address_search
+krb5_boolean KRB5_CALLCONV_WRONG krb5_address_search
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_address *,
 		krb5_address * krb5_const *));
-krb5_boolean krb5_address_compare
+krb5_boolean KRB5_CALLCONV krb5_address_compare
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_address *,
 		krb5_const krb5_address *));
-int krb5_address_order
+int KRB5_CALLCONV krb5_address_order
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_address *,
 		krb5_const krb5_address *));
-krb5_boolean krb5_realm_compare
+krb5_boolean KRB5_CALLCONV krb5_realm_compare
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		krb5_const_principal));
@@ -1550,6 +1723,15 @@ KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_principal_compare
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		krb5_const_principal));
+krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
+		(krb5_context, krb5_enctype enctype,
+		size_t length, krb5_keyblock **out); 
+  		/* Initialize a new keyblock and allocate storage
+		 * for the contents of the key, which will be freed along
+		 * with the keyblock when krb5_free_keyblock is called.
+		 * It is legal to pass in a length of 0, in which
+		 * case contents are left unallocated.
+		 */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_copy_keyblock
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_keyblock FAR *,
@@ -1570,10 +1752,12 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_copy_principal
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		krb5_principal FAR *));
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_copy_addr
 	KRB5_PROTOTYPE((krb5_context,
 		const krb5_address FAR *,
 		krb5_address FAR * FAR *));
+#endif
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_copy_addresses
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_address FAR * krb5_const FAR *,
@@ -1594,6 +1778,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_copy_checksum
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_checksum FAR *,
 		krb5_checksum FAR * FAR *));
+#if KRB5_PRIVATE
 void krb5_init_ets
 	KRB5_PROTOTYPE((krb5_context));
 void krb5_free_ets
@@ -1604,6 +1789,7 @@ krb5_error_code krb5_generate_subkey
 krb5_error_code krb5_generate_seq_number
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_keyblock *, krb5_int32 *));
+#endif
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_server_rcache
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_data *, krb5_rcache *));
@@ -1613,7 +1799,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C krb5_build_principal
 	KRB5_STDARG_P((krb5_context, krb5_principal FAR *, int, krb5_const char FAR *, ...));
 #ifdef va_start
 /* XXX depending on varargs include file defining va_start... */
-krb5_error_code krb5_build_principal_va
+krb5_error_code KRB5_CALLCONV krb5_build_principal_va
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_principal, int, krb5_const char *, va_list));
 #endif
@@ -1628,6 +1814,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_524_conv_principal
 	KRB5_PROTOTYPE((krb5_context context, krb5_const krb5_principal princ, 
 		char FAR *name, char FAR *inst, char FAR *realm));
 
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_mk_chpw_req
 	KRB5_PROTOTYPE((krb5_context context, krb5_auth_context auth_context,
  			krb5_data *ap_req, char *passwd, krb5_data *packet));
@@ -1638,11 +1825,14 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_rd_chpw_rep
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_chpw_result_code_string
 	KRB5_PROTOTYPE((krb5_context context, int result_code,
 			char **result_codestr));
+#endif
 
 /* libkt.spec */
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_register
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_kt_ops FAR * ));
+#endif
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_resolve
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const char FAR *,
@@ -1654,9 +1844,15 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_default_name
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_default
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_keytab FAR * ));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_free_keytab_entry_contents
+	KRB5_PROTOTYPE((krb5_context,
+		krb5_keytab_entry FAR * ));
+#if KRB5_PRIVATE
+/* use krb5_kt_free_entry_contents instead */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_free_entry
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_keytab_entry FAR * ));
+#endif
 /* remove and add are functions, so that they can return NOWRITE
    if not a writable keytab */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_remove_entry
@@ -1667,13 +1863,14 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_add_entry
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_keytab,
 		krb5_keytab_entry FAR * ));
+#if KRB5_PRIVATE
 krb5_error_code krb5_principal2salt
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal, krb5_data *));
 krb5_error_code krb5_principal2salt_norealm
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal, krb5_data *));
-
+#endif
 /* librc.spec--see rcache.h */
 
 /* libcc.spec */
@@ -1688,8 +1885,10 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_set_default_name
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_default
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_ccache FAR *));
+#if KRB5_PRIVATE
 KRB5_DLLIMP unsigned int KRB5_CALLCONV krb5_get_notification_message
 	KRB5_PROTOTYPE((void));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_copy_creds
 	KRB5_PROTOTYPE((krb5_context context,
@@ -1698,32 +1897,43 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_copy_creds
 
 
 /* chk_trans.c */
+#if KRB5_PRIVATE
 krb5_error_code krb5_check_transited_list
-	KRB5_PROTOTYPE((krb5_context,
-		krb5_data *trans, krb5_data *realm1, krb5_data *realm2));
+	(krb5_context, const krb5_data *trans,
+	 const krb5_data *realm1, const krb5_data *realm2);
+#endif
 
 /* free_rtree.c */
+#if KRB5_PRIVATE
 void krb5_free_realm_tree
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_principal *));
+#endif
 
 /* krb5_free.c */
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_principal
 	KRB5_PROTOTYPE((krb5_context, krb5_principal ));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_authenticator
 	KRB5_PROTOTYPE((krb5_context, krb5_authenticator FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_authenticator_contents
 	KRB5_PROTOTYPE((krb5_context, krb5_authenticator FAR * ));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_addresses
 	KRB5_PROTOTYPE((krb5_context, krb5_address FAR * FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_address
 	KRB5_PROTOTYPE((krb5_context, krb5_address FAR * ));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_authdata
 	KRB5_PROTOTYPE((krb5_context, krb5_authdata FAR * FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_enc_tkt_part
 	KRB5_PROTOTYPE((krb5_context, krb5_enc_tkt_part FAR * ));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_ticket
 	KRB5_PROTOTYPE((krb5_context, krb5_ticket FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_tickets
 	KRB5_PROTOTYPE((krb5_context, krb5_ticket FAR * FAR * ));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_kdc_req
@@ -1734,12 +1944,18 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_last_req
 	KRB5_PROTOTYPE((krb5_context, krb5_last_req_entry FAR * FAR * ));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_enc_kdc_rep_part
 	KRB5_PROTOTYPE((krb5_context, krb5_enc_kdc_rep_part FAR * ));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_error
 	KRB5_PROTOTYPE((krb5_context, krb5_error FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_ap_req
 	KRB5_PROTOTYPE((krb5_context, krb5_ap_req FAR * ));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_ap_rep
 	KRB5_PROTOTYPE((krb5_context, krb5_ap_rep FAR * ));
+/*
+ * The following 3 fns were moved to k5-int.h on trunk, so are marked
+ * private here.
+ */
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_safe
 	KRB5_PROTOTYPE((krb5_context, krb5_safe FAR * ));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_priv
@@ -1748,12 +1964,15 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_priv_enc_part
 	KRB5_PROTOTYPE((krb5_context, krb5_priv_enc_part FAR * ));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_cred
 	KRB5_PROTOTYPE((krb5_context, krb5_cred FAR *));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_creds
 	KRB5_PROTOTYPE((krb5_context, krb5_creds FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_cred_contents
 	KRB5_PROTOTYPE((krb5_context, krb5_creds FAR *));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_cred_enc_part
 	KRB5_PROTOTYPE((krb5_context, krb5_cred_enc_part FAR *));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_checksum
 	KRB5_PROTOTYPE((krb5_context, krb5_checksum FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_checksum_contents
@@ -1762,16 +1981,20 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_keyblock
 	KRB5_PROTOTYPE((krb5_context, krb5_keyblock FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_keyblock_contents
 	KRB5_PROTOTYPE((krb5_context, krb5_keyblock FAR *));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pa_data
 	KRB5_PROTOTYPE((krb5_context, krb5_pa_data FAR * FAR *));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_ap_rep_enc_part
 	KRB5_PROTOTYPE((krb5_context, krb5_ap_rep_enc_part FAR *));
+#if KRB5_PRIVATE
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_tkt_authent
 	KRB5_PROTOTYPE((krb5_context, krb5_tkt_authent FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pwd_data
 	KRB5_PROTOTYPE((krb5_context, krb5_pwd_data FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pwd_sequences
 	KRB5_PROTOTYPE((krb5_context, passwd_phrase_element FAR * FAR *));
+#endif
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_data
 	KRB5_PROTOTYPE((krb5_context, krb5_data FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_data_contents
@@ -1799,6 +2022,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_default_realm
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_set_default_realm
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const char FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_default_realm
+	KRB5_PROTOTYPE((krb5_context,
+		   char FAR * ));
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_sname_to_principal
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const char FAR *,
@@ -1811,6 +2037,7 @@ krb5_change_password
 			int *result_code, krb5_data *result_code_string,
 			krb5_data *result_string));
 
+#if KRB5_PRIVATE
 #ifndef macintosh
 krb5_error_code krb5_set_config_files
 	KRB5_PROTOTYPE ((krb5_context, krb5_const char FAR * FAR *));
@@ -1822,11 +2049,13 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_config_files
 	KRB5_PROTOTYPE((char **filenames));
 
 #endif
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_profile
 	KRB5_PROTOTYPE((krb5_context, profile_t *));
 
+#if KRB5_PRIVATE
 krb5_error_code krb5_send_tgs
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_flags,
@@ -1839,7 +2068,9 @@ krb5_error_code krb5_send_tgs
 		krb5_const krb5_data *,
 		krb5_creds *,
 		krb5_response * ));
+#endif
 
+#if KRB5_DEPRECATED
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_flags,
@@ -1893,13 +2124,15 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_keytab
 		krb5_ccache,
 		krb5_creds FAR *,
 		krb5_kdc_rep FAR * FAR * ));
+#endif /* KRB5_DEPRECATED */
 
-
+#if KRB5_PRIVATE
 krb5_error_code krb5_decode_kdc_rep
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_data *,
 		krb5_const krb5_keyblock *,
 		krb5_kdc_rep ** ));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_rd_req
 	KRB5_PROTOTYPE((krb5_context,
@@ -1910,6 +2143,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_rd_req
 		krb5_flags FAR *,
 		krb5_ticket FAR * FAR *));
 
+#if KRB5_PRIVATE
 krb5_error_code krb5_rd_req_decoded
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context *,
@@ -1927,6 +2161,7 @@ krb5_error_code krb5_rd_req_decoded_anyflag
 		krb5_keytab,
 		krb5_flags *,
 		krb5_ticket **));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_kt_read_service_key
 	KRB5_PROTOTYPE((krb5_context,
@@ -1947,10 +2182,12 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_mk_priv
 		krb5_const krb5_data FAR *,
 		krb5_data FAR *,
 		krb5_replay_data FAR *));
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_register
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_cc_ops FAR *,
 		krb5_boolean ));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_sendauth 
 	KRB5_PROTOTYPE((krb5_context,
@@ -1976,13 +2213,24 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_recvauth
 		krb5_int32, 
 		krb5_keytab,
 		krb5_ticket FAR * FAR *));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_recvauth_version
+	KRB5_PROTOTYPE((krb5_context,
+		krb5_auth_context FAR *,
+		krb5_pointer,
+		krb5_principal,
+		krb5_int32, 
+		krb5_keytab,
+		krb5_ticket FAR * FAR *,
+		krb5_data FAR *));
 
+#if KRB5_PRIVATE
 krb5_error_code krb5_walk_realm_tree
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_data *,
 		krb5_const krb5_data *,
 		krb5_principal **,
 		int));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_mk_ncred
 	KRB5_PROTOTYPE((krb5_context,
@@ -2033,19 +2281,19 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_getflags
 		krb5_auth_context,
 		krb5_int32 FAR *));
 
-krb5_error_code krb5_auth_con_setaddrs
+krb5_error_code KRB5_CALLCONV_WRONG krb5_auth_con_setaddrs
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_address *,
 		krb5_address *));
 
-krb5_error_code krb5_auth_con_getaddrs
+krb5_error_code KRB5_CALLCONV krb5_auth_con_getaddrs
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_address **,
 		krb5_address **));
 
-krb5_error_code krb5_auth_con_setports
+krb5_error_code KRB5_CALLCONV krb5_auth_con_setports
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_address *,
@@ -2066,6 +2314,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_getlocalsubkey
 		krb5_auth_context,
 		krb5_keyblock FAR * FAR *));
 
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_set_req_cksumtype
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
@@ -2075,11 +2324,7 @@ krb5_error_code krb5_auth_con_set_safe_cksumtype
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_cksumtype));
-
-krb5_error_code krb5_auth_con_getcksumtype
-	KRB5_PROTOTYPE((krb5_context,
-		krb5_auth_context,
-		krb5_cksumtype *));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_getlocalseqnumber
 	KRB5_PROTOTYPE((krb5_context,
@@ -2091,10 +2336,13 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_getremoteseqnumber
 		krb5_auth_context,
 		krb5_int32 FAR *));
 
-krb5_error_code krb5_auth_con_initivector
+#if KRB5_DEPRECATED
+krb5_error_code KRB5_CALLCONV krb5_auth_con_initivector
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context));
+#endif
 
+#if KRB5_PRIVATE
 krb5_error_code krb5_auth_con_setivector
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
@@ -2104,13 +2352,14 @@ krb5_error_code krb5_auth_con_getivector
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_pointer *));
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_setrcache
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_rcache));
 
-krb5_error_code krb5_auth_con_getrcache
+krb5_error_code KRB5_CALLCONV_WRONG krb5_auth_con_getrcache
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		krb5_rcache *));
@@ -2141,7 +2390,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_read_password
 		const char FAR *,
 		char FAR *,
 		int FAR * ));
-krb5_error_code krb5_aname_to_localname
+krb5_error_code KRB5_CALLCONV krb5_aname_to_localname
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		const int,
@@ -2153,10 +2402,12 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_host_realm
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_free_host_realm
 	KRB5_PROTOTYPE((krb5_context,
 		char FAR * const FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_realm_domain
 	KRB5_PROTOTYPE((krb5_context,
 		const char *,
 		char ** ));
+#endif
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_kuserok
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_principal, const char *));
@@ -2164,6 +2415,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_genaddrs
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_auth_context,
 		int, int));
+#if KRB5_PRIVATE
 krb5_error_code krb5_gen_portaddr
 	KRB5_PROTOTYPE((krb5_context,
 		const krb5_address *,
@@ -2175,8 +2427,10 @@ krb5_error_code krb5_make_fulladdr
 		krb5_address *,
 		krb5_address *));
 
+#if KRB5_PRIVATE /* In k5-int.h on trunk */
 krb5_error_code krb5_os_hostaddr
 	KRB5_PROTOTYPE((krb5_context, const char *, krb5_address ***));
+#endif
 
 krb5_error_code krb5_set_real_time
 	KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
@@ -2184,10 +2438,13 @@ krb5_error_code krb5_set_debugging_time
 	KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
 krb5_error_code krb5_use_natural_time
 	KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_get_time_offsets
+#endif
+krb5_error_code KRB5_CALLCONV krb5_get_time_offsets
 	KRB5_PROTOTYPE((krb5_context, krb5_int32 *, krb5_int32 *));
+#if KRB5_PRIVATE
 krb5_error_code krb5_set_time_offsets
 	KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
+#endif
 
 /* str_conv.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_string_to_enctype
@@ -2384,6 +2641,25 @@ krb5_decode_ticket
 KRB5_PROTOTYPE((const krb5_data *code, 
 		krb5_ticket **rep));
 
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_appdefault_string
+KRB5_PROTOTYPE((krb5_context context,
+		const char *appname,  
+	        const krb5_data *realm,
+ 		const char *option,
+		const char *default_value,
+		char ** ret_value));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_appdefault_boolean
+KRB5_PROTOTYPE((krb5_context context,
+		const char *appname,  
+	        const krb5_data *realm,
+ 		const char *option,
+		int default_value,
+		int *ret_value));
+
+#if KRB5_PRIVATE
 /*
  * The realm iterator functions
  */
@@ -2399,6 +2675,7 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_realm_iterator_free
 
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_realm_string
 	KRB5_PROTOTYPE((krb5_context context, char *str));
+#endif
 
 /*
  * Prompter enhancements
@@ -2414,14 +2691,15 @@ typedef krb5_int32 krb5_prompt_type;
 KRB5_DLLIMP krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	KRB5_PROTOTYPE((krb5_context context));
 
-#ifdef __cplusplus
-}
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+	#pragma options align=reset
 #endif
 
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
-#endif
+KRB5INT_END_DECLS
 
 #endif /* KRB5_GENERAL__ */
 

@@ -937,27 +937,7 @@ static krb5_error_code fixup_database(context, realm)
     krb5_context context;
     char * realm;
 {
-    krb5_db_entry entry;
-    krb5_error_code retval;
-    int nprincs;
-    krb5_boolean more;
-
-    nprincs = 1;
-    if (retval = krb5_db_get_principal(context, &tgt_princ, &entry, 
-				       &nprincs, &more))
-	return retval;
-    
-    if (nprincs == 0)
-	return 0;
-    
-    entry.attributes |= KRB5_KDB_SUPPORT_DESMD5;
-    
-    retval = krb5_db_put_principal(context, &entry, &nprincs);
-    
-    if (nprincs)
-	krb5_db_free_principal(context, &entry, nprincs);
-    
-    return retval;
+    return 0;
 }
     
 #else /* KRB5_KRB4_COMPAT */

@@ -102,6 +102,7 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_creds *ncreds;
     krb5_creds **tgts;
     krb5_flags fields;
+    int not_ktype;
 
     retval = krb5_get_credentials_core(context, options, ccache, 
 				       in_creds, out_creds,
@@ -128,6 +129,11 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
 	|| options & KRB5_GC_CACHED)
 	return retval;
 
+    if (retval == KRB5_CC_NOT_KTYPE)
+	not_ktype = 1;
+    else
+	not_ktype = 0;
+
     retval = krb5_get_cred_from_kdc(context, ccache, ncreds, out_creds, &tgts);
     if (tgts) {
 	register int i = 0;
@@ -141,6 +147,21 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
 	}
 	krb5_free_tgt_creds(context, tgts);
     }
+    /*
+     * Translate KRB5_CC_NOTFOUND if we previously got
+     * KRB5_CC_NOT_KTYPE from krb5_cc_retrieve_cred(), in order to
+     * handle the case where there is no TGT in the ccache and the
+     * input enctype didn't match.  This handling is necessary because
+     * some callers, such as GSSAPI, iterate through enctypes and
+     * KRB5_CC_NOTFOUND passed through from the
+     * krb5_get_cred_from_kdc() is semantically incorrect, since the
+     * actual failure was the non-existence of a ticket of the correct
+     * enctype rather than the missing TGT.
+     */
+    if ((retval == KRB5_CC_NOTFOUND || retval == KRB5_CC_NOT_KTYPE)
+	&& not_ktype)
+	retval = KRB5_CC_NOT_KTYPE;
+
     if (!retval)
 	retval = krb5_cc_store_cred(context, ccache, *out_creds);
     return retval;
@@ -160,10 +181,8 @@ krb5_get_credentials_val_renew_core(context, options, ccache,
     int which;
 {
     krb5_error_code retval;
-    krb5_creds mcreds;
     krb5_principal tmp;
     krb5_creds **tgts = 0;
-    krb5_flags fields;
 
     switch(which) {
     case INT_GC_VALIDATE:
