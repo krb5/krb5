@@ -1,3 +1,7 @@
+2000-06-14  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y (nonguest): Return $1, not 1, if (!guest).
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
