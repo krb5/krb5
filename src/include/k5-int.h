@@ -7,10 +7,14 @@
  * John Gilmore, Cygnus Support, Sat Jan 21 22:45:52 PST 1995
  */
 
+#include "k5-config.h"
+
 #include "krb5.h"
 
-/* krb5/krb5.h includes many other krb5/*.h files too.  The ones that it
-   doesn't include, we include below.  */
+/* krb5/krb5.h includes many other .h files in the krb5 subdirectory.
+   The ones that it doesn't include, we include below.  */
+
+#include "k5-errors.h"
 
 #include "asn1.h"
 #include "copyright.h"

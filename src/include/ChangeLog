@@ -1,3 +1,13 @@
+Thu Apr 20 11:32:09 1995    <tytso@rsx-11.mit.edu>
+
+	* krb5.h, k5-int.h: Inlined the following include files, to
+		simplify the header files which actually need to be
+		installed: wordsize.h, base-defs.h, hostaddr.h,
+		fieldbits.h, proto.h, macros.h, error_def.h, safepriv.h,
+		ccache.h, rcache.h, keytab.h, func-proto.h, k5-free.h.
+		Also moved the #include of k5-config.h and k5-errors.h to
+		k5-int.h.
+
 Wed Apr 19 13:23:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.h: Added default_realm pointer to krb5_context
