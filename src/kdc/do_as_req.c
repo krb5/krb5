@@ -444,10 +444,14 @@ got_a_key:;
 
 	switch (client.key_data[0].key_data_type[1]) {
 	    krb5_data *data_foo;
+	case KRB5_KDB_SALTTYPE_NORMAL:
+	    reply.padata = (krb5_pa_data **) NULL;
+	    break;
 	case KRB5_KDB_SALTTYPE_V4:
 	    /* send an empty (V4) salt */
 	    padat_tmp[0]->contents = 0;
 	    padat_tmp[0]->length = 0;
+	    reply.padata = padat_tmp;
 	    break;
 	case KRB5_KDB_SALTTYPE_NOREALM:
 	    if ((retval = krb5_principal2salt_norealm(kdc_context, 
@@ -456,18 +460,20 @@ got_a_key:;
 		goto errout;
 	    padat_tmp[0]->contents = (krb5_octet *)salt_data.data;
 	    padat_tmp[0]->length = salt_data.length;
+	    reply.padata = padat_tmp;
 	    break;
 	case KRB5_KDB_SALTTYPE_ONLYREALM:
 	    data_foo = krb5_princ_realm(kdc_context, request->client);
 	    padat_tmp[0]->contents = (krb5_octet *)data_foo->data;
 	    padat_tmp[0]->length = data_foo->length;
+	    reply.padata = padat_tmp;
 	    break;
 	case KRB5_KDB_SALTTYPE_SPECIAL:
 	    padat_tmp[0]->contents = client.key_data[0].key_data_contents[1];
 	    padat_tmp[0]->length = client.key_data[0].key_data_length[1];
+	    reply.padata = padat_tmp;
 	    break;
 	}
-	reply.padata = padat_tmp;
     }
 
     reply.client = request->client;
