@@ -14,7 +14,9 @@ abnormally, a close routine, \funcname{krb5_kt_free_entry},  is provided
 for freeing resources, etc.  People should use the close routine when
 they are finished.
 
-\begin{funcdecl}{krb5_kt_register}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_register}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_kt_ops *}{ops}
 \end{funcdecl}
 
@@ -26,7 +28,9 @@ yet known.
 
 An error is returned if \funcparam{ops{\ptsto}prefix} is already known.
 
-\begin{funcdecl}{krb5_kt_resolve}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_resolve}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{const char *}{string_name}
 \funcout
 \funcarg{krb5_keytab *}{id}
@@ -39,7 +43,9 @@ Requires that \funcparam{string_name} be of the form ``type:residual'' and
 
 Errors: badly formatted name.
 		
-\begin{funcdecl}{krb5_kt_default_name}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_default_name}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{char *}{name}
 \funcarg{int}{namesize}
 \end{funcdecl}
@@ -50,13 +56,17 @@ If the name is shorter than \funcparam{namesize}, then the remainder of
 \funcparam{name} will be zeroed.
 
 
-\begin{funcdecl}{krb5_kt_default}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_default}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_keytab *}{id}
 \end{funcdecl}
 
-Fills in \funcparam{id} with  a handle identifying the default keytab.
+Fills in \funcparam{id} with a handle identifying the default keytab.
 
-\begin{funcdecl}{krb5_kt_read_service_key}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_read_service_key}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_pointer}{keyprocarg}
 \funcarg{krb5_principal}{principal}
 \funcarg{krb5_kvno}{vno}
@@ -64,9 +74,6 @@ Fills in \funcparam{id} with  a handle identifying the default keytab.
 \funcout
 \funcarg{krb5_keyblock **}{key}
 \end{funcdecl}
-
-This function is suitable for use as a parameter to
-\funcname{krb5_rd_req}.
 
 If \funcname{keyprocarg} is not NULL, it is taken to be a
 \datatype{char *} denoting the name of a keytab.  Otherwise, the default
@@ -81,7 +88,9 @@ the caller is finished with the key.
 
 Returns an error code if the entry is not found.
 
-\begin{funcdecl}{krb5_kt_add_entry}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_add_entry}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_keytab}{id}
 \funcarg{krb5_keytab_entry *}{entry}
 \end{funcdecl}
@@ -90,7 +99,9 @@ Calls the keytab-specific add routine \funcname{krb5_kt_add_internal}
 with the same function arguments.  If this routine is not available,
 then KRB5_KT_NOWRITE is returned.
 
-\begin{funcdecl}{krb5_kt_remove_entry}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_remove_entry}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_keytab}{id}
 \funcarg{krb5_keytab_entry *}{entry}
 \end{funcdecl}
@@ -99,7 +110,8 @@ Calls the keytab-specific remove routine
 \funcname{krb5_kt_remove_internal} with the same function arguments.
 If this routine is not available, then KRB5_KT_NOWRITE is returned.
 
-\begin{funcdecl}{krb5_kt_get_name}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_get_name}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab}{id}
 \funcout
 \funcarg{char *}{name}
@@ -112,7 +124,8 @@ the name of the keytab identified by \funcname{id}.
 If the name is shorter than \funcparam{namesize}, then \funcarg{name}
 will be null-terminated.
 
-\begin{funcdecl}{krb5_kt_close}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_close}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab}{id}
 \end{funcdecl}
 
@@ -120,10 +133,12 @@ Closes the keytab identified by \funcparam{id} and invalidates
 \funcparam{id}, and releases any other resources acquired during use of
 the key table.
 
-Requires that \funcparam{id} identifies a valid credentials cache.
+Requires that \funcparam{id} identifies a keytab.
 
-\begin{funcdecl}{krb5_kt_get_entry}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_get_entry}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab}{id}
+\funcin
 \funcarg{krb5_principal}{principal}
 \funcarg{krb5_kvno}{vno}
 \funcarg{krb5_keytype}{keytype}
@@ -131,11 +146,13 @@ Requires that \funcparam{id} identifies a valid credentials cache.
 \funcarg{krb5_keytab_entry *}{entry}
 \end{funcdecl}
 
+\begin{sloppypar}
 Searches the keytab identified by \funcparam{id} for an entry whose
 principal matches \funcparam{principal}, whose keytype matches 
 \funcparam{keytype}, and
 whose key version number matches \funcparam{vno}.  If \funcparam{vno} is
 zero, the first entry whose principal matches is returned.
+\end{sloppypar}
 
 Returns an error code if no suitable entry is found.  If an entry is
 found, the entry is returned in \funcparam{*entry}; its contents should
@@ -143,6 +160,7 @@ be deallocated by calling \funcname{krb5_kt_free_entry} when no longer
 needed.
 
 \begin{funcdecl}{krb5_kt_free_entry}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab_entry *}{entry}
 \end{funcdecl}
 
@@ -150,7 +168,8 @@ Releases all storage allocated for \funcparam{entry}, which must point
 to a structure previously filled in by \funcname{krb5_kt_get_entry} or
 \funcname{krb5_kt_next_entry}.
 
-\begin{funcdecl}{krb5_kt_start_seq_get}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_start_seq_get}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab}{id}
 \funcout
 \funcarg{krb5_kt_cursor *}{cursor}
@@ -161,7 +180,8 @@ Prepares to read sequentially every key in the keytab identified by
 \funcparam{cursor} is filled in with a cursor to be used in calls to
 \funcname{krb5_kt_next_entry}.
 
-\begin{funcdecl}{krb5_kt_next_entry}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_next_entry}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab}{id}
 \funcout
 \funcarg{krb5_keytab_entry *}{entry}
@@ -175,14 +195,15 @@ request.  If the keytab changes during the sequential get, an error is
 guaranteed.  \funcparam{*entry} should be freed after use by calling
 \funcname{krb5_kt_free_entry}.
 
-Requires that \funcparam{id} identifies a valid credentials cache.  and
+Requires that \funcparam{id} identifies a valid keytab.  and
 \funcparam{*cursor} be a cursor returned by
 \funcname{krb5_kt_start_seq_get} or a subsequent call to
 \funcname{krb5_kt_next_entry}.
 
 Errors: error code if no more cache entries or if the keytab changes.
 
-\begin{funcdecl}{krb5_kt_end_seq_get}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_kt_end_seq_get}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_keytab}{id}
 \funcarg{krb5_kt_cursor *}{cursor}
 \end{funcdecl}
@@ -190,10 +211,11 @@ Errors: error code if no more cache entries or if the keytab changes.
 Finishes sequential processing mode and invalidates \funcparam{cursor},
 which must never be re-used after this call.
 
-Requires that \funcparam{id} identifies a valid credentials cache.  and
+Requires that \funcparam{id} identifies a valid keytab  and
 \funcparam{*cursor} be a cursor returned by
 \funcname{krb5_kt_start_seq_get} or a subsequent call to
 \funcname{krb5_kt_next_entry}.
 
 May return error code if \funcparam{cursor} is invalid.
+
 

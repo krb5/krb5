@@ -3,7 +3,9 @@ specific types of credentials caches) deal with storing credentials
 (tickets, session keys, and other identifying information) in a
 semi-permanent store for later use by different programs.
 
-\begin{funcdecl}{krb5_cc_resolve}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_resolve}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{char *}{string_name}
 \funcout
 \funcarg{krb5_ccache *}{id}
@@ -15,7 +17,9 @@ the name in \funcparam{string_name}.
 Requires that \funcparam{string_name} be of the form ``type:residual'' and
 ``type'' is a type known to the library.
 
-\begin{funcdecl}{krb5_cc_generate_new}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_generate_new}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_cc_ops *}{ops}
 \funcout
 \funcarg{krb5_ccache *}{id}
@@ -25,7 +29,9 @@ Requires that \funcparam{string_name} be of the form ``type:residual'' and
 Fills in \funcparam{id} with a unique ccache identifier of a type defined by
 \funcparam{ops}.  The cache is left unopened.
 
-\begin{funcdecl}{krb5_cc_register}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_register}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_cc_ops *}{ops}
 \funcarg{krb5_boolean}{override}
 \end{funcdecl}
@@ -35,19 +41,24 @@ the set recognized by \funcname{krb5_cc_resolve}.
 If \funcparam{override} is FALSE, a ticket cache type named
 \funcparam{ops{\ptsto}prefix} must not be known.
 
-\begin{funcdecl}{krb5_cc_get_name}{char *}{\funcin}
+\begin{funcdecl}{krb5_cc_get_name}{char *}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_ccache}{id}
 \end{funcdecl}
 
 Returns the name of the ccache denoted by \funcparam{id}.
 
-\begin{funcdecl}{krb5_cc_default_name}{char *}{\funcvoid}
+\begin{funcdecl}{krb5_cc_default_name}{char *}{\funcinout}
+\funcarg{krb5_context}{context}
 \end{funcdecl}
 
 Returns the name of the default credentials cache; this may be equivalent to
 \funcnamenoparens{getenv}({\tt "KRB5CCACHE"}) with an appropriate fallback.
 
-\begin{funcdecl}{krb5_cc_default}{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_cc_default}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcout
 \funcarg{krb5_ccache *}{ccache}
 \end{funcdecl}
 
@@ -56,6 +67,7 @@ Equivalent to
 \funcparam{ccache}).
 
 \begin{funcdecl}{krb5_cc_initialize}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
 \funcin
 \funcarg{krb5_principal}{primary_principal}
@@ -69,7 +81,8 @@ Errors:  permission errors, system errors.
 
 Modifies: cache identified by \funcparam{id}.
 
-\begin{funcdecl}{krb5_cc_destroy}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_destroy}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
 \end{funcdecl}
 
@@ -83,6 +96,7 @@ it is first reinitialized using \funcname{krb5_cc_resolve} or
 Errors:  permission errors.
 
 \begin{funcdecl}{krb5_cc_close}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
 \end{funcdecl}
 
@@ -94,7 +108,9 @@ acquired during use of the credentials cache.  Requires that
 \funcname{krb5_cc_resolve} or \funcname{krb5_cc_generate_new}.
 
 
-\begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_creds *}{creds}
 \end{funcdecl}
@@ -105,7 +121,9 @@ Requires that \funcparam{id} identifies a valid credentials cache.
 
 Errors: permission errors, storage failure errors.
 
-\begin{funcdecl}{krb5_cc_retrieve_cred}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_retrieve_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_flags}{whichfields}
 \funcarg{krb5_creds *}{mcreds}
@@ -125,7 +143,9 @@ returned in \funcparam{*creds}. The credentials should be freed using
 
 Errors: error code if no matches found.
 
-\begin{funcdecl}{krb5_cc_get_principal}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_get_principal}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_principal *}{principal}
 \end{funcdecl}
@@ -138,7 +158,8 @@ should release this memory by calling \funcname{krb5_free_principal} on
 
 Requires that \funcparam{id} identifies a valid credentials cache.
 
-\begin{funcdecl}{krb5_cc_start_seq_get}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_start_seq_get}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
 \funcout
 \funcarg{krb5_cc_cursor *}{cursor}
@@ -148,7 +169,8 @@ Prepares to sequentially read every set of cached credentials.
 \funcparam{cursor} is filled in with a cursor to be used in calls to
 \funcname{krb5_cc_next_cred}.
 
-\begin{funcdecl}{krb5_cc_next_cred}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_next_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
 \funcout
 \funcarg{krb5_creds *}{creds}
@@ -165,7 +187,8 @@ Requires that \funcparam{id} identifies a valid credentials cache and
 
 Errors: error code if no more cache entries.
 
-\begin{funcdecl}{krb5_cc_end_seq_get}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_end_seq_get}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_cc_cursor *}{cursor}
 \end{funcdecl}
@@ -181,7 +204,9 @@ Requires that \funcparam{id} identifies a valid credentials cache and
 Errors: may return error code if \funcparam{*cursor} is invalid.
 
 
-\begin{funcdecl}{krb5_cc_remove_cred}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_remove_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_flags}{which}
 \funcarg{krb5_creds *}{cred}
@@ -195,12 +220,15 @@ Requires that \funcparam{id} identifies a valid credentials cache.
 Errors: returns error code if nothing matches; returns error code if
 couldn't delete.
 
-\begin{funcdecl}{krb5_cc_set_flags}{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_cc_set_flags}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_ccache}{id}
+\funcin
 \funcarg{krb5_flags}{flags}
 \end{funcdecl}
 
 Sets the flags on the cache \funcparam{id} to \funcparam{flags}.  Useful
-flags are defined in {\tt <krb5/ccache.h>}.
+flags are defined in {\tt <krb5.h>}.
+
 
 

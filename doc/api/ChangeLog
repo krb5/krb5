@@ -1,6 +1,16 @@
+Sun Apr 30 15:37:31 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rcache.tex: Update to current API specs.
+
+	* ccache.tex: Update to current API specs.
+
+	* keytab.tex: Update to current API specs.
+
+	* free.tex: Finished first version.
+
 Tue Apr 18 10:42:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
-	* intro.tex spell checked
+	* intro.tex: spell checked
 
 Tue Apr 11 14:21:21 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
