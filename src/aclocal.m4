@@ -51,6 +51,8 @@ WITH_LINKER dnl
 WITH_LDOPTS dnl
 WITH_CPPOPTS dnl
 WITH_KRB4 dnl
+CHOOSE_ET dnl
+CHOOSE_SS dnl
 dnl allow stuff in tree to access deprecated/private stuff for now
 ADD_DEF([-DKRB5_PRIVATE=1]) dnl
 ifdef([AC_PROG_CC_STDC], [AC_PROG_CC_STDC])
@@ -1409,4 +1411,56 @@ do
 	fi
   done 
 done
+])
+dnl
+dnl
+AC_DEFUN([CHOOSE_ET],[
+AC_ARG_WITH([system-com_err],
+[  --with-system-com_err       use system -lcom_err and compile_et])
+AC_MSG_CHECKING(which version of com_err to use)
+if test "$with_system_com_err" = yes ; then
+  COM_ERR_VERSION=sys
+  AC_MSG_RESULT(system)
+else
+  COM_ERR_VERSION=k5
+  AC_MSG_RESULT(krb5)
+fi
+if test $COM_ERR_VERSION = sys; then
+  # check for various functions we need
+  AC_CHECK_LIB(com_err, add_error_table, :, AC_MSG_ERROR(cannot find add_error_table in com_err library))
+  AC_CHECK_LIB(com_err, remove_error_table, :, AC_MSG_ERROR(cannot find remove_error_table in com_err library))
+  # make sure compile_et provides "et_foo" name
+  cat >> conf$$e.et <<EOF
+error_table foo
+error_code ERR_FOO, "foo"
+end
+EOF
+  AC_CHECK_PROGS(compile_et,compile_et,false)
+  if test "$compile_et" = false; then
+    AC_MSG_ERROR(cannot find compile_et)
+  fi
+  AC_CACHE_CHECK(whether compile_et is useful,krb5_cv_compile_et_useful,[
+  if compile_et conf$$e.et >/dev/null 2>&1 ; then true ; else
+    AC_MSG_ERROR(execution failed)
+  fi
+  AC_TRY_COMPILE([#include "conf$$e.h"
+      		 ],[ et_foo_error_table; ],:,
+		 [AC_MSG_ERROR(cannot use et_foo_error_table)])
+  # Anything else we need to test for?
+  rm -f conf$$e.et conf$$e.c conf$$e.h
+  krb5_cv_compile_et_useful=yes
+  ])
+fi
+AC_SUBST(COM_ERR_VERSION)
+])
+AC_DEFUN([CHOOSE_SS],[
+AC_ARG_WITH([system-ss],
+[  --with-system-ss          use system -lss and mk_cmds])
+if test "$with_system_ss" = yes ; then
+  SS_VERSION=sys
+  # check for various libraries we might need
+else
+  SS_VERSION=k5
+fi
+AC_SUBST(SS_VERSION)
 ])
