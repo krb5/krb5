@@ -1,3 +1,8 @@
+Wed Oct 22 15:03:26 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL): Rewritten for clearer
+	 	understanding. Check for libtcl7.6 and tcl/tcl.h.
+
 Mon Oct 13 10:14:06 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Add KRB5_LIB_AUX so configure --help gives info on
