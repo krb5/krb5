@@ -1,3 +1,7 @@
+
+Fri Jul 7 16:42:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add DEPLIBS, needed by shared library rule.
+
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* com_err.[ch] added _MACINTOSH conditional
 	* vsprintf.h added inclusion of stdarg.h for _MACINTSOH

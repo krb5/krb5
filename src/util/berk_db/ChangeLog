@@ -1,3 +1,7 @@
+
+Fri Jul 7 16:41:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add DEPLIBS, needed by shared library rule.
+
 Mon Jul  3 12:11:51 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* Makefile.in (libdb.a): Quiet the if statement.

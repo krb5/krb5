@@ -31,7 +31,7 @@ CFILES=	compile_et.c error_table.c error_message.c et_name.c \
 
 SRCS=$(CFILES)
 
-
+DEPLIBS=
 SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
