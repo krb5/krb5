@@ -1,3 +1,8 @@
+Tue Dec 13 15:42:50 1994    <tytso@rsx-11.mit.edu>
+
+	* scc_write.c (krb5_scc_store_addrs): If a null addresses is
+		passed in, don't core dump.
+
 Fri Nov 18 14:47:33 1994  Theodore Y. Ts'o  (tytso@dcl)
 
         * scc-proto.h, scc.h, scc_maybe.c (krb5_scc_open_file), scc_nseq.c

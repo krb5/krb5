@@ -119,9 +119,11 @@ krb5_scc_store_addrs(id, addrs)
      krb5_int32 i, length = 0;
 
      /* Count the number of components */
-     temp = addrs;
-     while (*temp++)
-	  length += 1;
+     if (addrs) {
+	temp = addrs;
+	while (*temp++)
+	     length += 1;
+     }
 
      ret = krb5_scc_store_int32(id, length);
      CHECK(ret);
