@@ -51,6 +51,7 @@ AC_FUNC_CHECK(logwtmp,AC_DEFINE(HAVE_LOGWTMP))
 AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h stdlib.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_REPLACE_FUNCS(getdtablesize)
 DECLARE_SYS_ERRLIST
+KRB5_SIGTYPE
 CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT

@@ -1,3 +1,9 @@
+Wed Jun 21 17:29:27 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* login.c: Change RETSIGTYPE to krb5_sigtype to be consistant.
+
+	* configure.in (LOGINLIBS): Add KRB5_SIGTYPE to declare krb5_sigtype.
+
 Tue Jun 20 13:00:25 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* krlogin.c: HAS_STDLIB_H -> HAVE_STDLIB_H

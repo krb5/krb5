@@ -214,7 +214,7 @@ void dolastlog(), motd();
 char * strsave();
 #endif
 
-typedef RETSIGTYPE sigtype;
+typedef krb5_sigtype sigtype;
 
 
 #define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag || fflag || Fflag ) { \
