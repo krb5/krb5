@@ -1,3 +1,6 @@
+Tue Jun 27 23:17:11 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* read_passwd.c: only use volatile if __STDC__ is 1.
 
 Tue Jun 27 15:51:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* util.c - Make #endif ansi-compliant.
