@@ -47,7 +47,8 @@ extern gss_mechanism *__gss_mechs_array;
  *  the first mechanism.
  */
 
-gss_mechanism __gss_get_mechanism (gss_OID type)
+gss_mechanism __gss_get_mechanism (type)
+     gss_OID type;
 {
     int	i;
 
