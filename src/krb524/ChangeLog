@@ -1,4 +1,8 @@
 
+Mon Aug 07 11:25:53 1995  Chris Provenzano  (proven@mitedu)
+
+	* krb524d.c: Hacks to get it to compile with new kdb format.
+
 Thu Jul 27 15:14:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb524d.c - Use the etype which is supplied in the krb5_keytype_array
 		specified by the master key type.

@@ -353,36 +353,42 @@ krb5_error_code lookup_service_key(context, p, ktype, key)
 
 /* taken from kdc/kdc_util.c, and modified somewhat */
 krb5_error_code kdc_get_server_key(context, service, key, kvno)
-   krb5_context context;
-   krb5_principal service;
-   krb5_keyblock *key;
-   krb5_kvno *kvno;
+    krb5_context context;
+    krb5_principal service;
+    krb5_keyblock *key;
+    krb5_kvno *kvno;
 {
-     krb5_error_code ret;
-     int nprincs;
-     krb5_db_entry server;
-     krb5_boolean more;
+    krb5_error_code ret;
+    int nprincs;
+    krb5_db_entry server;
+    krb5_boolean more;
+    int i, vno, ok_key;
 
-     nprincs = 1;
-     if ((ret = krb5_db_get_principal(context, service, &server, &nprincs, &more))) 
-	  return(ret);
+    nprincs = 1;
+    if ((ret = krb5_db_get_principal(context, service, &server, 
+				     &nprincs, &more))) 
+	return(ret);
      
-     if (more) {
-	  krb5_db_free_principal(context, &server, nprincs);
-	  return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-     } else if (nprincs != 1) {
-	  krb5_db_free_principal(context, &server, nprincs);
-	  return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-     }
+    if (more) {
+	krb5_db_free_principal(context, &server, nprincs);
+	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    } else if (nprincs != 1) {
+	krb5_db_free_principal(context, &server, nprincs);
+	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
 
-     /*
-      * convert server.key into a real key (it is encrypted in the
-      * database)
-      */
-     ret = krb5_kdb_decrypt_key(context, &master_encblock, &server.key, key);
-     if (kvno)
-	  *kvno = server.kvno;
-     krb5_db_free_principal(context, &server, nprincs);
-     return ret;
+    /* convert server key into a real key (it is encrypted in the database) */
+    for (vno = i = 0; i < server.n_key_data; i++) {
+	if (vno < server.key_data[i].key_data_kvno) {
+	    vno = server.key_data[i].key_data_kvno;
+	    ok_key = i;
+	}
+    }
+    ret = krb5_dbekd_decrypt_key_data(context, &master_encblock, 
+				       &server.key_data[ok_key], key, NULL);
+    krb5_db_free_principal(context, &server, nprincs);
+    if (kvno)
+	*kvno = vno;
+    return ret;
 }
 
