@@ -39,10 +39,6 @@ krb5_error_code krb5_get_default_in_tkt_etypes
 	PROTOTYPE((krb5_context,
 		   krb5_enctype **));
 
-/* This is a hack to find what needs fixing later, when we've all forgotten
- which rotuines still need fixing */
-extern krb5_context global_context;
-
 /* libkrb.spec */
 krb5_error_code krb5_kdc_rep_decrypt_proc
 	PROTOTYPE((krb5_context,
@@ -421,6 +417,9 @@ krb5_error_code INTERFACE krb5_os_localaddr
 krb5_error_code INTERFACE krb5_get_default_realm
 	PROTOTYPE((krb5_context,
 		    char FAR * FAR * ));
+krb5_error_code INTERFACE krb5_set_default_realm
+	PROTOTYPE((krb5_context,
+                   const char FAR * ));
 krb5_error_code INTERFACE krb5_sname_to_principal
         PROTOTYPE((krb5_context,
 		   const char FAR *,
