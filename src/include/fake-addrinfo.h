@@ -362,17 +362,18 @@ struct addrinfo {
 #define	AI_CANONNAME	0x02
 #undef	AI_NUMERICHOST
 #define	AI_NUMERICHOST	0x04
-/* N.B.: AI_V4MAPPED, AI_ADDRCONFIG, AI_ALL, and AI_DEFAULT are part
-   of the spec for getipnodeby*, and *not* part of the spec for
-   getaddrinfo.  Don't use them!  */
+/* RFC 2553 says these are part of the interface for getipnodebyname,
+   not for getaddrinfo.  RFC 3493 says they're part of the interface
+   for getaddrinfo, and getipnodeby* are deprecated.  Our fake
+   getaddrinfo implementation here does IPv4 only anyways.  */
 #undef	AI_V4MAPPED
-#define	AI_V4MAPPED	eeeevil!
+#define	AI_V4MAPPED	0
 #undef	AI_ADDRCONFIG
-#define	AI_ADDRCONFIG	eeeevil!
+#define	AI_ADDRCONFIG	0
 #undef	AI_ALL
-#define	AI_ALL		eeeevil!
+#define	AI_ALL		0
 #undef	AI_DEFAULT
-#define AI_DEFAULT	eeeevil!
+#define	AI_DEFAULT	(AI_V4MAPPED|AI_ADDRCONFIG)
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -560,6 +561,21 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 /* AIX 4.3.3 is based on RFC 2133; no AI_NUMERICHOST.  */
 #ifndef AI_NUMERICHOST
 # define AI_NUMERICHOST 0
+#endif
+/* Partial RFC 2553 implementations may not have AI_ADDRCONFIG and
+   friends, which RFC 3493 says are now part of the getaddrinfo
+   interface, and we'll want to use.  */
+#ifndef AI_ADDRCONFIG
+# define AI_ADDRCONFIG 0
+#endif
+#ifndef AI_V4MAPPED
+# define AI_V4MAPPED 0
+#endif
+#ifndef AI_ALL
+# define AI_ALL 0
+#endif
+#ifndef AI_DEFAULT
+# define AI_DEFAULT (AI_ADDRCONFIG|AI_V4MAPPED)
 #endif
 
 #if defined(HAVE_FAKE_GETADDRINFO) || defined(FAI_CACHE)
