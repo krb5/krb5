@@ -67,7 +67,7 @@ pmap_getmaps(address)
 	 struct sockaddr_in *address;
 {
 	struct pmaplist *head = (struct pmaplist *)NULL;
-	int socket = -1;
+	int sock = -1;
 	struct timeval minutetimeout;
 	register CLIENT *client;
 
@@ -75,7 +75,7 @@ pmap_getmaps(address)
 	minutetimeout.tv_usec = 0;
 	address->sin_port = htons(PMAPPORT);
 	client = clnttcp_create(address, PMAPPROG,
-	    PMAPVERS, &socket, 50, 500);
+	    PMAPVERS, &sock, 50, 500);
 	if (client != (CLIENT *)NULL) {
 		if (CLNT_CALL(client, PMAPPROC_DUMP, xdr_void, NULL, xdr_pmaplist,
 		    &head, minutetimeout) != RPC_SUCCESS) {
@@ -83,7 +83,7 @@ pmap_getmaps(address)
 		}
 		CLNT_DESTROY(client);
 	}
-	(void)close(socket);
+	(void)close(sock);
 	address->sin_port = 0;
 	return (head);
 }

@@ -53,13 +53,13 @@ static struct proglst {
 } *proglst;
 static void universal();
 static SVCXPRT *transp;
-static struct proglst *pl;
 
 int
 gssrpc_registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
 	char *(*progname)();
 	xdrproc_t inproc, outproc;
 {
+        struct proglst *pl;
 	
 	if (procnum == NULLPROC) {
 		(void) fprintf(stderr,
@@ -96,9 +96,9 @@ gssrpc_registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
 }
 
 static void
-universal(rqstp, transp)
+universal(rqstp, s_transp)
 	struct svc_req *rqstp;
-	SVCXPRT *transp;
+	SVCXPRT *s_transp;
 {
 	int prog, proc;
 	char *outdata;
@@ -109,7 +109,7 @@ universal(rqstp, transp)
 	 * enforce "procnum 0 is echo" convention
 	 */
 	if (rqstp->rq_proc == NULLPROC) {
-		if (svc_sendreply(transp, xdr_void, (char *)NULL) == FALSE) {
+		if (svc_sendreply(s_transp, xdr_void, (char *)NULL) == FALSE) {
 			(void) fprintf(stderr, "xxx\n");
 			exit(1);
 		}
@@ -121,22 +121,22 @@ universal(rqstp, transp)
 		if (pl->p_prognum == prog && pl->p_procnum == proc) {
 			/* decode arguments into a CLEAN buffer */
 			memset(xdrbuf, 0, sizeof(xdrbuf)); /* required ! */
-			if (!svc_getargs(transp, pl->p_inproc, xdrbuf)) {
-				svcerr_decode(transp);
+			if (!svc_getargs(s_transp, pl->p_inproc, xdrbuf)) {
+				svcerr_decode(s_transp);
 				return;
 			}
 			outdata = (*(pl->p_progname))(xdrbuf);
 			if (outdata == NULL && pl->p_outproc != xdr_void)
 				/* there was an error */
 				return;
-			if (!svc_sendreply(transp, pl->p_outproc, outdata)) {
+			if (!svc_sendreply(s_transp, pl->p_outproc, outdata)) {
 				(void) fprintf(stderr,
 				    "trouble replying to prog %d\n",
 				    pl->p_prognum);
 				exit(1);
 			}
 			/* free the decoded arguments */
-			(void)svc_freeargs(transp, pl->p_inproc, xdrbuf);
+			(void)svc_freeargs(s_transp, pl->p_inproc, xdrbuf);
 			return;
 		}
 	(void) fprintf(stderr, "never registered prog %d\n", prog);

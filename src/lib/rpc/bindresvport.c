@@ -45,9 +45,9 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
  * Bind a socket to a privileged IP port
  */
 int
-gssrpc_bindresvport(sd, sin)
+gssrpc_bindresvport(sd, sockin)
 	int sd;
-	struct sockaddr_in *sin;
+	struct sockaddr_in *sockin;
 {
 	int res;
 	static short port;
@@ -59,11 +59,11 @@ gssrpc_bindresvport(sd, sin)
 #define ENDPORT (IPPORT_RESERVED - 1)
 #define NPORTS	(ENDPORT - STARTPORT + 1)
 
-	if (sin == (struct sockaddr_in *)0) {
-		sin = &myaddr;
-		memset(sin, 0, sizeof (*sin));
-		sin->sin_family = AF_INET;
-	} else if (sin->sin_family != AF_INET) {
+	if (sockin == (struct sockaddr_in *)0) {
+		sockin = &myaddr;
+		memset(sockin, 0, sizeof (*sockin));
+		sockin->sin_family = AF_INET;
+	} else if (sockin->sin_family != AF_INET) {
 		errno = EPFNOSUPPORT;
 		return (-1);
 	}
@@ -73,11 +73,11 @@ gssrpc_bindresvport(sd, sin)
 	res = -1;
 	errno = EADDRINUSE;
 	for (i = 0; i < NPORTS && res < 0 && errno == EADDRINUSE; i++) {
-		sin->sin_port = htons(port++);
+		sockin->sin_port = htons(port++);
 		if (port > ENDPORT) {
 			port = STARTPORT;
 		}
-		res = bind(sd, (struct sockaddr *) sin,
+		res = bind(sd, (struct sockaddr *) sockin,
 			   sizeof(struct sockaddr_in));
 	}
 	return (res);

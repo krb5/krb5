@@ -1,3 +1,17 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* svc_simple.c (universal): Change transp to s_transp to not
+	shadow filewide static definition of name.
+	Move file wide definition of "pl" into respective functions.
+
+	* pmap_rmt.c: Change sin->sockin and socket->sock.
+
+	* pmap_getmaps.c, pmap_getport.c: Change socket to sock to not
+ 	shadow network function.
+
+	* bindresvport.c, clnt_generic.c: Change sin to sockin to not
+ 	shadow function declaration.
+
 2001-06-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* pmap_prot2.c (xdr_pmaplist): Ensure variable set before use. 

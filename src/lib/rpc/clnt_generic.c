@@ -53,7 +53,7 @@ clnt_create(hostname, prog, vers, proto)
 {
 	struct hostent *h;
 	struct protoent *p;
-	struct sockaddr_in sin;
+	struct sockaddr_in sockin;
 	int sock;
 	struct timeval tv;
 	CLIENT *client;
@@ -71,10 +71,10 @@ clnt_create(hostname, prog, vers, proto)
 		rpc_createerr.cf_error.re_errno = EAFNOSUPPORT; 
 		return (NULL);
 	}
-	sin.sin_family = h->h_addrtype;
-	sin.sin_port = 0;
-	memset(sin.sin_zero, 0, sizeof(sin.sin_zero));
-	memmove((char*)&sin.sin_addr, h->h_addr, sizeof(sin.sin_addr));
+	sockin.sin_family = h->h_addrtype;
+	sockin.sin_port = 0;
+	memset(sockin.sin_zero, 0, sizeof(sockin.sin_zero));
+	memmove((char*)&sockin.sin_addr, h->h_addr, sizeof(sockin.sin_addr));
 	p = getprotobyname(proto);
 	if (p == NULL) {
 		rpc_createerr.cf_stat = RPC_UNKNOWNPROTO;
@@ -86,7 +86,7 @@ clnt_create(hostname, prog, vers, proto)
 	case IPPROTO_UDP:
 		tv.tv_sec = 5;
 		tv.tv_usec = 0;
-		client = clntudp_create(&sin, prog, vers, tv, &sock);
+		client = clntudp_create(&sockin, prog, vers, tv, &sock);
 		if (client == NULL) {
 			return (NULL);
 		}
@@ -94,7 +94,7 @@ clnt_create(hostname, prog, vers, proto)
 		clnt_control(client, CLSET_TIMEOUT, &tv);
 		break;
 	case IPPROTO_TCP:
-		client = clnttcp_create(&sin, prog, vers, &sock, 0, 0);
+		client = clnttcp_create(&sockin, prog, vers, &sock, 0, 0);
 		if (client == NULL) {
 			return (NULL);
 		}

@@ -65,13 +65,13 @@ pmap_getport(address, program, version, protocol)
 	unsigned int protocol;
 {
 	unsigned short port = 0;
-	int socket = -1;
+	int sock = -1;
 	register CLIENT *client;
 	struct pmap parms;
 
 	address->sin_port = htons(PMAPPORT);
 	client = clntudp_bufcreate(address, PMAPPROG,
-	    PMAPVERS, timeout, &socket, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
+	    PMAPVERS, timeout, &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
 	if (client != (CLIENT *)NULL) {
 		parms.pm_prog = program;
 		parms.pm_vers = version;
@@ -86,7 +86,7 @@ pmap_getport(address, program, version, protocol)
 		}
 		CLNT_DESTROY(client);
 	}
-	(void)close(socket);
+	(void)close(sock);
 	address->sin_port = 0;
 	return (port);
 }

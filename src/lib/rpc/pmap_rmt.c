@@ -79,14 +79,14 @@ pmap_rmtcall(addr, prog, vers, proc, xdrargs, argsp, xdrres, resp, tout, port_pt
 	struct timeval tout;
 	rpc_u_int32 *port_ptr;
 {
-	int socket = -1;
+	int sock = -1;
 	register CLIENT *client;
 	struct rmtcallargs a;
 	struct rmtcallres r;
 	enum clnt_stat stat;
 
 	addr->sin_port = htons(PMAPPORT);
-	client = clntudp_create(addr, PMAPPROG, PMAPVERS, timeout, &socket);
+	client = clntudp_create(addr, PMAPPROG, PMAPVERS, timeout, &sock);
 	if (client != (CLIENT *)NULL) {
 		a.prog = prog;
 		a.vers = vers;
@@ -102,7 +102,7 @@ pmap_rmtcall(addr, prog, vers, proc, xdrargs, argsp, xdrres, resp, tout, port_pt
 	} else {
 		stat = RPC_FAILED;
 	}
-	(void)close(socket);
+	(void)close(sock);
 	addr->sin_port = 0;
 	return (stat);
 }
@@ -176,7 +176,7 @@ getbroadcastnets(addrs, sock, buf)
 {
 	struct ifconf ifc;
         struct ifreq ifreq, *ifr;
-	struct sockaddr_in *sin;
+	struct sockaddr_in *sockin;
         int n, i;
 
         ifc.ifc_len = GIFCONF_BUFSIZE;
@@ -196,16 +196,16 @@ getbroadcastnets(addrs, sock, buf)
                 if ((ifreq.ifr_flags & IFF_BROADCAST) &&
 		    (ifreq.ifr_flags & IFF_UP) &&
 		    ifr->ifr_addr.sa_family == AF_INET) {
-			sin = (struct sockaddr_in *)&ifr->ifr_addr;
+			sockin = (struct sockaddr_in *)&ifr->ifr_addr;
 #ifdef SIOCGIFBRDADDR   /* 4.3BSD */
 			if (ioctl(sock, SIOCGIFBRDADDR, (char *)&ifreq) < 0) {
 				addrs[i++].s_addr = INADDR_ANY;
 #if 0 /* this is uuuuugly */
 				addrs[i++] = inet_makeaddr(inet_netof
 #if defined(hpux) || (defined(sun) && defined(__svr4__)) || defined(linux) || (defined(__osf__) && defined(__alpha__))
-							   (sin->sin_addr),
+							   (sockin->sin_addr),
 #else /* hpux or solaris */
-							   (sin->sin_addr.s_addr),
+							   (sockin->sin_addr.s_addr),
 #endif				
 							   INADDR_ANY);
 #endif
@@ -215,7 +215,7 @@ getbroadcastnets(addrs, sock, buf)
 			}
 #else /* 4.2 BSD */
 			addrs[i++] = inet_makeaddr(inet_netof
-			  (sin->sin_addr.s_addr), INADDR_ANY);
+			  (sockin->sin_addr.s_addr), INADDR_ANY);
 #endif
 		}
 	}
