@@ -24,10 +24,10 @@
  * Destroy the contents of your credential cache.
  */
 
-#include <stdio.h>
-
 #include "krb5.h"
 #include "com_err.h"
+#include <string.h>
+#include <stdio.h>
 
 extern int optind;
 extern char *optarg;
