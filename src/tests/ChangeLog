@@ -1,3 +1,7 @@
+Thu Oct  6 21:41:46 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add recursive "make check"
+
 Wed Jun 29 00:26:31 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* test1.c: added call to krb5_init_ets
