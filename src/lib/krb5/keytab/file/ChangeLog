@@ -1,3 +1,8 @@
+Fri Jun  9 19:34:23 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Fri May 26 20:20:29 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in, Makefile.in: Add support for building shared libraries.
