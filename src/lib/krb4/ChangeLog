@@ -1,3 +1,8 @@
+Thu Nov  7 12:33:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* g_in_tkt.c: 
+	* sendauth.c: Fixed mangled copyright notice
+
 Thu Jun 13 22:12:57 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES

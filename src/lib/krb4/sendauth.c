@@ -1,7 +1,7 @@
 /*
  * sendauth.c
  *
- * CoKRB4_32yright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.

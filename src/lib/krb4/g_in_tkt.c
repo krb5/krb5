@@ -1,7 +1,7 @@
 /*
  * g_in_tkt.c
  *
- * CoKRB4_32yright 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1986, 1987, 1988 by the Massachusetts Institute
  * of Technology.
  *
  * For copying and distribution information, please see the file
