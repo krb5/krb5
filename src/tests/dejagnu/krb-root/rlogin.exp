@@ -12,7 +12,7 @@ if ![info exists RLOGIN] {
 }
 
 if ![info exists KRLOGIND] {
-    set KRLOGIND [findfile $objdir/../../appl/bsd/krlogind]
+    set KRLOGIND [findfile $objdir/../../appl/bsd/klogind]
 }
 
 if ![info exists LOGINKRB5] {
@@ -54,7 +54,7 @@ proc start_rlogin_daemon { option } {
     # don't need to use inetd.  The 3543 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "$KRLOGIND -K -D 3543 -S \$tmppwd/srvtab -M KRBTEST.COM -L $LOGINKRB5 $option &\r"
+    send -i $rlogin_spawn_id "$KRLOGIND -k -c -D 3543 -S \$tmppwd/srvtab -M KRBTEST.COM -L $LOGINKRB5 $option &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -134,7 +134,7 @@ proc rlogin_test { } {
     }
 
     # Start up the rlogin daemon.
-    start_rlogin_daemon -K
+    start_rlogin_daemon -k
 
     # Make an rlogin connection.
     spawn $RLOGIN $hostname -k KRBTEST.COM -D 3543
@@ -200,7 +200,7 @@ proc rlogin_test { } {
     stop_rlogin_daemon
 
     # Try an encrypted connection.
-    start_rlogin_daemon -x
+    start_rlogin_daemon -e
     spawn $RLOGIN $hostname -x -k KRBTEST.COM -D 3543
 
     expect_after {

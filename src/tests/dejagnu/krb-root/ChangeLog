@@ -1,3 +1,8 @@
+Sun Mar  3 15:42:29 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rlogin.exp: Change to execute new program name and proper
+		arguments. 
+
 Fri Nov 10 21:15:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* telnet.exp: Comment out encrypted telnet tests.
