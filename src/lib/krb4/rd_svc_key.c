@@ -166,10 +166,11 @@ read_service_key(service,instance,realm,kvno,file,key)
 				      sizeof(keytabname)-1);
     if (!retval) {
 	retval = krb5_kt_resolve(context, (char *)keytabname, &kt_id);
-	if (!retval)
+	if (!retval) {
 	    retval = krb5_kt_get_entry(context, kt_id, princ, kvno,
 				       ENCTYPE_DES_CBC_CRC, &kt_entry);
-	krb5_kt_close(context, kt_id);
+	    krb5_kt_close(context, kt_id);
+	}
 	krb5_free_principal(context, princ);
     }
     if (!retval) {

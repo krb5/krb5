@@ -1,3 +1,9 @@
+Mon Aug 10 17:51:59 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* rd_svc_key.c (read_service_key): Don't call krb5_kt_close() if 
+	krb5_kt_resolve() fails, so we don't segfault if the keytab name 
+	is invalid.
+
 Fri Aug  7 11:04:03 1998  Tom Yu  <tlyu@mit.edu>
 
 	* rd_safe.c (krb_rd_safe): Fix up call to quad_cksum().
