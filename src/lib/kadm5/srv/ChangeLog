@@ -1,3 +1,7 @@
+2003-09-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* svr_principal.c: Added Apple password server support.
+
 2003-06-13  Tom Yu  <tlyu@mit.edu>
 
 	* server_kdb.c (kdb_init_hist): Force history principal's key to
