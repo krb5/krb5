@@ -222,7 +222,6 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
 {
     krb5_tl_data        tl_data;
     krb5_error_code	code;
-    krb5_int32		tmp;
 
     tl_data.tl_data_type = KRB5_TL_MOD_PRINC;
 
