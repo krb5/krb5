@@ -1,3 +1,8 @@
+Tue Nov  8 18:03:23 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* fetch_mkey.c (krb5_db_fetch_mkey): Set the keyblock's magic
+		number and encryption type information appropriately.
+
 Sat Oct 22 10:13:25 1994    (tytso@rsx-11)
 
 	* kdb_dbm.c: Don't need to define POSIX_FILE_LOCKS; just include
