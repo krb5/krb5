@@ -372,7 +372,9 @@ main(argc, argv)
     }
     else {
 	/* Received an unhandled signal */
-	com_err(programname, 0, unh_signal_fmt, signal_number);
+#ifndef DEBUG
+	syslog(LOG_AUTH|LOG_INFO, unh_signal_fmt, signal_number);
+#endif
     }
 
     /* Now clean up after ourselves */
@@ -382,5 +384,5 @@ main(argc, argv)
     acl_finish(kcontext, debug_level);
     key_finish(kcontext, debug_level);
     krb5_xfree(kcontext);
-    return(error);
+    exit(error);
 }

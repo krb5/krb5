@@ -1,3 +1,10 @@
+Sun May 28 15:58:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* srv_main.c (main): Use exit instead of return from
+		main. Otherwise may return to a signal interrupt on
+		shutdown. 
+		On shutdown - do not output message as stdout may
+		be closed on receivers end. 
 
 Fri May 26 17:50:13 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Add KDBLIB to dependency list.
