@@ -138,4 +138,7 @@ krb5_error_code INTERFACE krb5_os_init_context
 void INTERFACE krb5_os_free_context
         PROTOTYPE((krb5_context));
 
+krb5_error_code krb5_find_config_files
+        PROTOTYPE(());
+
 #endif /* KRB5_LIBOS_PROTO__ */

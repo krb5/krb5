@@ -30,6 +30,13 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
+/* Kerberos Windows initialization file */
+#define KERBEROS_INI    "kerberos.ini"
+#define INI_FILES       "Files"
+#define INI_KRB_CONF    "krb.conf"		/* Location of krb.conf file */
+#define INI_KRB_REALMS  "krb.realms"	/* Location of krb.realms file */
+#define INI_KRB_CCACHE  "krb5cc"       /* Location of the ccache */
+
 #define KRB5_DBM_COMPAT__                       /* Don't load dbm.h */
 #define KRB5_KDB5__                             /* Don't load kdb.h */
 #define KRB5_KDB5_DBM__                         /* Don't load kdb_dbm.h */

@@ -1,3 +1,10 @@
+Tue Mar 28 19:53:09 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed to reflect deletion of stock/osconf.win.
+        * k5-config.h: added constants for reading default values
+            out of Windows ini files.
+        * los-proto.h: added new prototype for Windows ini stuff.
+
 Tue Mar 28 18:02:41 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (KRB5_HEADERS, install):  Account for file renames.
