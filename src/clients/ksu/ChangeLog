@@ -1,3 +1,8 @@
+Mon Oct  9 23:14:33 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (main): Handle case when ticket cache name does not
+		include ':'
+
 Thu Oct  5 11:23:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ksu.M: Document authorization changes.

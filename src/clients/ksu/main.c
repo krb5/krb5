@@ -374,6 +374,8 @@ char * dir_of_cc_source;
 	if (cc_source_tag == NULL){
 		cc_source_tag = krb5_cc_default_name(ksu_context);
 		cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
+		if (cc_source_tag_tmp == (char *) 1) 
+			cc_source_tag_tmp = cc_source_tag;
 	}
 	
 	/* get a handle for the cache */      
