@@ -189,6 +189,17 @@ krb5_error_code decode_generic
 		   (translator_func) KRB5_KRB__PRIV2krb5_priv, \
 		   (free_func) free_KRB5_KRB__PRIV)
 
+#define encode_krb5_enc_priv_part(req, output) \
+    encode_generic((krb5_pointer)req, output, \
+		   (encoder_func) encode_KRB5_EncKrbPrivPart, \
+		   (translator_func) krb5_priv_enc_part2KRB5_EncKrbPrivPart, \
+		   (free_func) free_KRB5_EncKrbPrivPart)
+#define decode_krb5_enc_priv_part(req, output) \
+    decode_generic((krb5_pointer)req, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_EncKrbPrivPart, \
+		   (translator_func) KRB5_EncKrbPrivPart2krb5_priv_enc_part, \
+		   (free_func) free_KRB5_EncKrbPrivPart)
+
 #define encode_krb5_error(req, output) \
     encode_generic((krb5_pointer)req, output, \
 		   (encoder_func) encode_KRB5_KRB__ERROR, \
