@@ -1,3 +1,7 @@
+2003-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* uitypes.h: Use inttypes.h if HAVE_INTTYPES_H is defined.
+
 2003-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes_s2k.c (krb5int_aes_string_to_key): Return an error if the
