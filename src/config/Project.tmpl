@@ -31,8 +31,12 @@
 #define ComErrLib -L$(TOPLIBD) -lcom_err
 #endif
 #ifndef PepsyFlags
+#ifdef ISODE7
 #define PepsyFlags -f -h0 -a -s -C
 /* -h2 breaks pepsy, ARRGH! */
+#else
+#define PepsyFlags -f -h0 -a -s
+#endif /* ISODE7 */
 #endif
 #ifndef PepsyCmd
 #define PepsyCmd pepsy
