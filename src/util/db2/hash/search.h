@@ -46,6 +46,10 @@ typedef enum {
 	FIND, ENTER
 } ACTION;
 
+#define hcreate		kdb2_hcreate
+#define hdestroy	kdb2_hdestroy
+#define hsearch		kdb2_hsearch
+
 int	 hcreate __P((unsigned int));
 void	 hdestroy __P((void));
 ENTRY	*hsearch __P((ENTRY, ACTION));

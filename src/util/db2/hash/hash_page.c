@@ -840,7 +840,7 @@ __delete_page(hashp, pagep, page_type)
 	return (mpool_delete(hashp->mp, pagep));
 }
 
-u_int8_t
+static u_int8_t
 is_bitmap_pgno(hashp, pgno)
 	HTAB *hashp;
 	db_pgno_t pgno;
@@ -1258,7 +1258,7 @@ oaddr_to_page(hashp, n)
 }
 #endif /* DEBUG */
 
-indx_t
+static indx_t
 page_to_oaddr(hashp, pgno)
 	HTAB *hashp;
 	db_pgno_t pgno;

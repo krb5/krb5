@@ -33,6 +33,39 @@
  *	@(#)extern.h	8.8 (Berkeley) 11/7/95
  */
 
+#define __add_bigpage		__kdb2_add_bigpage
+#define __add_ovflpage		__kdb2_add_ovflpage
+#define __addel			__kdb2_addel
+#define __alloc_tmp		__kdb2_alloc_tmp
+#define __big_delete		__kdb2_big_delete
+#define __big_insert		__kdb2_big_insert
+#define __big_keydata		__kdb2_big_keydata
+#define __big_return		__kdb2_big_return
+#define __call_hash		__kdb2_call_hash
+#define __cursor_creat		__kdb2_cursor_creat
+#define __delete_page		__kdb2_delete_page
+#define __delpair		__kdb2_delpair
+#define __expand_table		__kdb2_expand_table
+#define __find_bigpair		__kdb2_find_bigpair
+#define __free_ovflpage		__kdb2_free_ovflpage
+#define __get_bigkey		__kdb2_get_bigkey
+#define __get_buf		__kdb2_get_buf
+#define __get_item		__kdb2_get_item
+#define __get_item_done		__kdb2_get_item_done
+#define __get_item_first	__kdb2_get_item_first
+#define __get_item_next		__kdb2_get_item_next
+#define __get_item_reset	__kdb2_get_item_reset
+#define __get_page		__kdb2_get_page
+#define __ibitmap		__kdb2_ibitmap
+#define __log2			__kdb2_log2
+#define __new_page		__kdb2_new_page
+#define __pgin_routine		__kdb2_pgin_routine
+#define __pgout_routine		__kdb2_pgout_routine
+#define __put_buf		__kdb2_put_buf
+#define __put_page		__kdb2_put_page
+#define __reclaim_tmp		__kdb2_reclaim_tmp
+#define __split_page		__kdb2_split_page
+
 PAGE16	 *__add_bigpage __P((HTAB *, PAGE16 *, indx_t, const u_int8_t));
 PAGE16	 *__add_ovflpage __P((HTAB *, PAGE16 *));
 int32_t	  __addel __P((HTAB *, ITEM_INFO *,
