@@ -1,3 +1,8 @@
+2002-09-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo (Options to Configure): Update for new "CC=" style
+	options replacing "--with-cc=" options.
+
 2002-07-03  Ezra Peisach  <epeisach@bu.edu>
 
 	* user-guide.texinfo: Change `@end rawhtml' to `@end html' Texinfo

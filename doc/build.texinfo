@@ -246,11 +246,11 @@ KDC data files, as they will be installed in
 @code{LOCALSTATEDIR/krb5kdc}, which is by default
 @code{PREFIX/var/krb5kdc}.
 
-@item --with-cc=COMPILER
+@item CC=COMPILER
 
 Use @code{COMPILER} as the C compiler.
 
-@item --with-ccopts=FLAGS
+@item CFLAGS=FLAGS
 
 Use @code{FLAGS} as the default set of C compiler flags.
 
@@ -259,18 +259,18 @@ DECstation you are likely to lose if you pass no flags to cc; md4.c
 takes an estimated 3,469 billion years to compile if you provide neither
 the @samp{-g} flag nor the @samp{-O} flag to @samp{cc}.
 
-@item --with-cppopts=CPPOPTS 
+@item CPPFLAGS=CPPOPTS 
 
 Use @code{CPPOPTS} as the default set of C preprocessor flags.  The most
 common use of this option is to select certain @code{#define}'s for use
 with the operating system's include files.
 
-@item --with-linker=LINKER
+@item LD=LINKER
 
 Use @code{LINKER} as the default loader if it should be different from C
 compiler as specified above.
 
-@item --with-ldopts=LDOPTS
+@item LDFLAGS=LDOPTS
 
 This option allows one to specify optional arguments to be passed to the
 linker. This might be used to specify optional library paths.
@@ -355,8 +355,11 @@ the @samp{suncc} compiler with the optimizer turned on, run the configure
 script with the following options:
 
 @example
-% ./configure --with-cc=suncc --with-ccopts=-O
+% ./configure CC=suncc CFLAGS=-O
 @end example
+
+In previous releases, @code{--with-} options were used to specify the
+compiler and linker and their options.
 
 @node osconf.h, Shared Library Support, Options to Configure, Building Kerberos V5
 @section @file{osconf.h}
