@@ -103,7 +103,7 @@ unit-test-client-body: site.exp test-noauth test-destroy test-handle-client
 	-mv api.log capi.log
 	-mv api.sum capi.sum
 
-unit-test-server-body: site.exp randkey-test test-handle-server lock-test 
+unit-test-server-body: site.exp test-randkey test-handle-server lock-test 
 	$(ENV_SETUP) $(RUNTEST) --tool api RPC=0 API=$(SRVTCL) \
 		LOCKTEST=./lock-test \
 		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local
