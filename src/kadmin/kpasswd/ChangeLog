@@ -1,3 +1,8 @@
+Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
+
+        * kpasswd.c Call krb5_sendauth(), krb5_get_credentials()
+  		with new calling convention.
+
 Fri Feb 10 17:48:05 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kpasswd.c: Don't include <krb5/asn.1/encode.h>; use <krb5/asn1.h>.

@@ -67,14 +67,14 @@ static krb5_error_code adm5_init_link
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,
 		   krb5_ccache, 
-		   krb5_principal));
+		   krb5_principal,
+		   krb5_creds *));
 
 krb5_error_code print_and_choose_password 
 	PROTOTYPE((char *, krb5_data *));
 
 struct sockaddr_in local_sin, remote_sin;
 
-krb5_creds my_creds;
 
 extern char *krb5_default_pwd_prompt1;
 
@@ -114,6 +114,7 @@ main(argc,argv)
     krb5_data msg_data, inbuf;
     krb5_int32 seqno;
 
+    krb5_creds my_creds, * new_creds;
     char *new_password;
     int new_pwsize;
 
@@ -273,7 +274,7 @@ main(argc,argv)
  *	Verify User by Obtaining Initial Credentials prior to Initial Link
  */
 
-    if ((retval = get_first_ticket(context, cache, client))) {
+    if ((retval = get_first_ticket(context, cache, client, &my_creds))) {
 	goto finish;
     }
     
@@ -343,14 +344,15 @@ main(argc,argv)
 			&seqno, 
 			0,           /* don't need a subsession key */
 			&err_ret,
-			&rep_ret))) {
+			&rep_ret, NULL))) {
 	fprintf(stderr, "Error while performing sendauth: %s!\n",
 			error_message(retval));
         goto finish;
     }
 
     /* Get credentials : to use for safe and private messages */
-    if (retval = krb5_get_credentials(context, 0, cache, &my_creds)){
+    /* No need to pass my_creds because it's uninizialized. */
+    if (retval = krb5_get_credentials(context,0,cache,&my_creds,&new_creds)){
 	fprintf(stderr, "Error Obtaining Credentials: %s!\n", 
 		error_message(retval));
 	goto finish;
@@ -375,7 +377,7 @@ main(argc,argv)
 
     if ((retval = krb5_mk_priv(context, &inbuf,
 			ETYPE_DES_CBC_CRC,
-			&my_creds.keyblock, 
+			&new_creds->keyblock, 
 			&local_addr, 
 			&foreign_addr,
 			seqno,
@@ -407,7 +409,7 @@ main(argc,argv)
     }
 
     if ((retval = krb5_rd_priv(context, &inbuf,
-			&my_creds.keyblock,
+			&new_creds->keyblock,
     			&foreign_addr, 
 			&local_addr,
 			rep_ret->seq_number, 
@@ -461,7 +463,7 @@ main(argc,argv)
 
     if ((retval = krb5_mk_priv(context, &inbuf,
 			ETYPE_DES_CBC_CRC,
-			&my_creds.keyblock, 
+			&new_creds->keyblock, 
 			&local_addr, 
 			&foreign_addr,
 			seqno,
@@ -493,7 +495,7 @@ main(argc,argv)
     }
 
     if ((retval = krb5_rd_priv(context, &inbuf,
-			&my_creds.keyblock,
+			&new_creds->keyblock,
     			&foreign_addr, 
 			&local_addr,
 			rep_ret->seq_number, 
@@ -566,10 +568,11 @@ krb5_data cpwname = {
 };
 
 static krb5_error_code
-get_first_ticket(context, cache, client)
+get_first_ticket(context, cache, client, my_creds)
     krb5_context context;
     krb5_ccache cache;
     krb5_principal client;
+    krb5_creds *my_creds;
 {
     char prompt[255];			/* for the password prompt */
     char pword[ADM_MAX_PW_LENGTH+1];	/* storage for the password */
@@ -594,11 +597,11 @@ get_first_ticket(context, cache, client)
 	return(1);
     }
 
-    memset((char *) &my_creds, 0, sizeof(my_creds));
+    memset((char *) my_creds, 0, sizeof(krb5_creds));
 
-    my_creds.client = client;                           
+    my_creds->client = client;                           
  
-    if ((retval = krb5_build_principal_ext(context, &my_creds.server,
+    if ((retval = krb5_build_principal_ext(context, &my_creds->server,
                                         client->realm.length, 
 					client->realm.data,
                                         cpwname.length,		/* 6 */ 
@@ -633,7 +636,7 @@ get_first_ticket(context, cache, client)
 					my_addresses, 
 					NULL, /* Default encryption list */
                                         NULL, /* Default preauth list */
-					old_password, cache, &my_creds, 0);
+					old_password, cache, my_creds, 0);
 	
     if (retval) {
 	fprintf(stderr, "\nUnable to Get Initial Credentials : %s %d\n",
