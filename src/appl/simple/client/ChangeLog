@@ -1,3 +1,8 @@
+Wed Mar  1 16:24:21 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
 Tue Feb 28 02:01:29 1995  John Gilmore  (gnu at toad.com)
 
 	* sim_client.c:  Avoid <krb5/...> and <com_err.h> includes.

@@ -1,3 +1,8 @@
+Wed Mar  1 16:31:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
 Tue Feb 28 01:21:52 1995  John Gilmore  (gnu at toad.com)
 
 	* kprop.c, kpropd.c:  Avoid <krb5/...> includes.

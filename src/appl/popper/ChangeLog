@@ -1,3 +1,8 @@
+Wed Mar  1 11:56:31 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
 Tue Feb 28 01:54:56 1995  John Gilmore  (gnu at toad.com)
 
 	* pop_init.c, pop_pass.c, pop_user.c, mh-6.8.patch:  Avoid

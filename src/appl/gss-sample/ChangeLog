@@ -1,3 +1,8 @@
+Wed Mar  1 11:55:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
 Fri Feb  3 06:21:02 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* gss-server.c: ret_flags should be an int based on the prototype
