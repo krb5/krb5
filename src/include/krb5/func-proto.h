@@ -197,6 +197,9 @@ krb5_error_code krb5_copy_data
 krb5_error_code krb5_copy_principal
     PROTOTYPE((const krb5_principal,
 	       krb5_principal *));
+krb5_error_code krb5_copy_addresses
+    PROTOTYPE((krb5_address * const *,
+	       krb5_address ***));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
@@ -225,40 +228,7 @@ krb5_error_code krb5_kt_add_entry
 	PROTOTYPE((krb5_keytab,
 		   krb5_keytab_entry * ));
 
-/* librc.spec */
-krb5_error_code krb5_rc_initialize
-	PROTOTYPE((krb5_rcache,
-		   krb5_deltat ));
-krb5_error_code krb5_rc_recover
-	PROTOTYPE((krb5_rcache ));
-krb5_error_code krb5_rc_destroy
-	PROTOTYPE((krb5_rcache ));
-krb5_error_code krb5_rc_close
-	PROTOTYPE((krb5_rcache ));
-krb5_error_code krb5_rc_store
-	PROTOTYPE((krb5_rcache,
-		   krb5_tkt_authent *,
-		   krb5_boolean ));
-krb5_error_code krb5_rc_expunge
-	PROTOTYPE((krb5_rcache ));
-krb5_error_code krb5_rc_get_lifespan
-	PROTOTYPE((krb5_rcache,
-		   krb5_deltat * ));
-krb5_error_code krb5_rc_resolve
-	PROTOTYPE((krb5_rcache *,
-		   char * ));
-krb5_error_code krb5_rc_generate_new
-	PROTOTYPE((krb5_rcache *,
-		   krb5_rc_ops * ));
-krb5_error_code krb5_rc_register
-	PROTOTYPE((krb5_rc_ops * ));
-krb5_error_code krb5_rc_get_name
-	PROTOTYPE((krb5_rcache, char *, int ));
-char *krb5_rc_default_name
-	PROTOTYPE((void ));
-krb5_error_code krb5_rc_default
-	PROTOTYPE((krb5_rcache * ));
-
+/* librc.spec--see rcache.h */
 
 /* libcc.spec */
 krb5_error_code krb5_cc_resolve
