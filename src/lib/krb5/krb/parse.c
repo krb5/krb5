@@ -196,20 +196,21 @@ krb5_parse_name(name, nprincipal)
 		 * usual case), then just copy the sizes to the
 		 * principal structure
 		 */
-		for (i=0; i <= components; i++)
+		for (i=0; i < components; i++)
 			krb5_princ_component(principal, i)->length = fcompsize[i];
+		krb5_princ_realm(principal)->length = size;
 	}
 	/*	
 	 * Now, we need to allocate the space for the strings themselves.....
 	 */
-	tmpdata = malloc(realmsize);
+	tmpdata = malloc(realmsize+1);
 	if (tmpdata == 0) {
 		xfree(principal->data);
 		xfree(principal);
 		return ENOMEM;
 	}
 	krb5_princ_set_realm_data(principal, tmpdata);
-	for (i=0; i <= components; i++) {
+	for (i=0; i < components; i++) {
 		char *tmpdata =
 		  malloc(krb5_princ_component(principal, i)->length + 1);
 		if (!tmpdata) {
@@ -265,6 +266,7 @@ krb5_parse_name(name, nprincipal)
 	 * Alright, we're done.  Now stuff a pointer to this monstrosity
 	 * into the return variable, and let's get out of here.
 	 */
+	krb5_princ_type(principal) = KRB5_NT_PRINCIPAL;
 	*nprincipal = principal;
 	return(0);
 }
