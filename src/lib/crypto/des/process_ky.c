@@ -36,9 +36,9 @@ static char rcsid_process_ky_c[] =
  */
 
 krb5_error_code mit_des_process_key (DECLARG(krb5_encrypt_block *, eblock),
-				     DECLARG(krb5_keyblock *,keyblock))
+				     DECLARG(const krb5_keyblock *,keyblock))
 OLDDECLARG(krb5_encrypt_block *, eblock)
-OLDDECLARG(krb5_keyblock *,keyblock)
+OLDDECLARG(const krb5_keyblock *,keyblock)
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     
@@ -59,7 +59,7 @@ OLDDECLARG(krb5_keyblock *,keyblock)
 	return KRB5DES_WEAK_KEY;	/* XXX error code-weak key */
 
     default:
-	eblock->key = keyblock;
+	eblock->key = (krb5_keyblock *) keyblock;
 	eblock->priv = (krb5_pointer) schedule;
 	return 0;
     }
