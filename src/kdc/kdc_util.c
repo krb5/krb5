@@ -112,9 +112,8 @@ krb5_boolean krb5_is_tgs_principal(principal)
 }
 
 /*
- * given authentication data (provides seed for checksum), calculate checksum
- * for source data and compare to authdata checksum.  Storage for checksum
- * is provided.
+ * given authentication data (provides seed for checksum), verify checksum
+ * for source data.
  */
 static krb5_error_code
 comp_cksum(kcontext, source, ticket, his_cksum)
@@ -124,38 +123,22 @@ comp_cksum(kcontext, source, ticket, his_cksum)
     krb5_checksum 	* his_cksum;
 {
     krb5_error_code 	  retval;
-    krb5_checksum	  our_cksum;
 
-    our_cksum.checksum_type = his_cksum->checksum_type;
-    if (!valid_cksumtype(our_cksum.checksum_type)) 
+    if (!valid_cksumtype(his_cksum->checksum_type)) 
 	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
 
     /* must be collision proof */
-    if (!is_coll_proof_cksum(our_cksum.checksum_type))
+    if (!is_coll_proof_cksum(his_cksum->checksum_type))
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
-    if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(kcontext, our_cksum.checksum_type)))) 
-	return ENOMEM;
-
-    /* compute checksum */
-    if ((retval = krb5_calculate_checksum(kcontext, our_cksum.checksum_type, 
-					  source->data, source->length, 
-					  ticket->enc_part2->session->contents, 
-					  ticket->enc_part2->session->length,&our_cksum))) {
-	goto comp_cksum_cleanup;
-    }
-
-    if ((our_cksum.length != his_cksum->length) || 
-	(memcmp((char *)our_cksum.contents, (char *)his_cksum->contents,
-	       our_cksum.length))) {
+    /* verify checksum */
+    if ((retval = krb5_verify_checksum(kcontext, his_cksum->checksum_type,
+				       his_cksum,
+				       source->data, source->length, 
+				       ticket->enc_part2->session->contents, 
+				       ticket->enc_part2->session->length))) {
 	retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-	goto comp_cksum_cleanup;
     }
-    retval = 0;
-
-comp_cksum_cleanup:
-    free(our_cksum.contents);
     return retval;
 }
 
