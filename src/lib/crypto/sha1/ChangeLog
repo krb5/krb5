@@ -1,3 +1,10 @@
+2001-07-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* shs.h, shs.c, t_shs.c: Fix sha1 on Windows by renaming LONG to
+	SHS_LONG to avoid problem with LONG being signed on Windows.
+	Rename BYTE to SHS_BYTE to avoid any name colisions with Windows
+	(where BYTE and LONG are types defined in the Platform SDK).
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_shs.c: Cast arguments to match printf format. Declare main as

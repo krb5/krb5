@@ -97,15 +97,15 @@ void shsInit(shsInfo)
 
    Note that this corrupts the shsInfo->data area */
 
-static void SHSTransform KRB5_PROTOTYPE((LONG *digest, LONG *data));
+static void SHSTransform KRB5_PROTOTYPE((SHS_LONG *digest, SHS_LONG *data));
 
 static
 void SHSTransform(digest, data)
-    LONG *digest;
-    LONG *data;
+    SHS_LONG *digest;
+    SHS_LONG *data;
 {
-    LONG A, B, C, D, E;     /* Local vars */
-    LONG eData[ 16 ];       /* Expanded data */
+    SHS_LONG A, B, C, D, E;     /* Local vars */
+    SHS_LONG eData[ 16 ];       /* Expanded data */
 
     /* Set up first buffer and local data buffer */
     A = digest[ 0 ];
@@ -217,16 +217,16 @@ void SHSTransform(digest, data)
 
 void shsUpdate(shsInfo, buffer, count)
     SHS_INFO *shsInfo;
-    BYTE *buffer;
+    SHS_BYTE *buffer;
     int count;
 {
-    LONG tmp;
+    SHS_LONG tmp;
     int dataCount, canfill;
-    LONG *lp;
+    SHS_LONG *lp;
 
     /* Update bitcount */
     tmp = shsInfo->countLo;
-    shsInfo->countLo = tmp + (((LONG) count) << 3 );
+    shsInfo->countLo = tmp + (((SHS_LONG) count) << 3 );
     if ((shsInfo->countLo &= 0xffffffff) < tmp)
         shsInfo->countHi++;	/* Carry from low to high */
     shsInfo->countHi += count >> 29;
@@ -245,25 +245,25 @@ void shsUpdate(shsInfo, buffer, count)
 	       is not very efficient (computed shift amount),
 	       but it shouldn't happen often. */
 	    while (dataCount % 4 && count > 0) {
-		*lp |= (LONG) *buffer++ << ((3 - dataCount++ % 4) * 8);
+		*lp |= (SHS_LONG) *buffer++ << ((3 - dataCount++ % 4) * 8);
 		count--;
 	    }
 	    lp++;
 	}
 	while (lp < shsInfo->data + 16) {
-	    *lp = (LONG) *buffer++ << 24;
-	    *lp |= (LONG) *buffer++ << 16;
-	    *lp |= (LONG) *buffer++ << 8;
-	    *lp++ |= (LONG) *buffer++;
+	    *lp = (SHS_LONG) *buffer++ << 24;
+	    *lp |= (SHS_LONG) *buffer++ << 16;
+	    *lp |= (SHS_LONG) *buffer++ << 8;
+	    *lp++ |= (SHS_LONG) *buffer++;
 	    if ((count -= 4) < 4 && lp < shsInfo->data + 16) {
 		*lp = 0;
 		switch (count % 4) {
 		case 3:
-		    *lp |= (LONG) buffer[2] << 8;
+		    *lp |= (SHS_LONG) buffer[2] << 8;
 		case 2:
-		    *lp |= (LONG) buffer[1] << 16;
+		    *lp |= (SHS_LONG) buffer[1] << 16;
 		case 1:
-		    *lp |= (LONG) buffer[0] << 24;
+		    *lp |= (SHS_LONG) buffer[0] << 24;
 		}
 		break;
 		count = 0;
@@ -278,10 +278,10 @@ void shsUpdate(shsInfo, buffer, count)
     while (count >= SHS_DATASIZE) {
 	lp = shsInfo->data;
 	while (lp < shsInfo->data + 16) {
-	    *lp = ((LONG) *buffer++) << 24;
-	    *lp |= ((LONG) *buffer++) << 16;
-	    *lp |= ((LONG) *buffer++) << 8;
-	    *lp++ |= (LONG) *buffer++;
+	    *lp = ((SHS_LONG) *buffer++) << 24;
+	    *lp |= ((SHS_LONG) *buffer++) << 16;
+	    *lp |= ((SHS_LONG) *buffer++) << 8;
+	    *lp++ |= (SHS_LONG) *buffer++;
 	}
 	SHSTransform(shsInfo->digest, shsInfo->data);
 	count -= SHS_DATASIZE;
@@ -290,22 +290,22 @@ void shsUpdate(shsInfo, buffer, count)
     if (count > 0) {
 	lp = shsInfo->data;
 	while (count > 4) {
-	    *lp = ((LONG) *buffer++) << 24;
-	    *lp |= ((LONG) *buffer++) << 16;
-	    *lp |= ((LONG) *buffer++) << 8;
-	    *lp++ |= (LONG) *buffer++;
+	    *lp = ((SHS_LONG) *buffer++) << 24;
+	    *lp |= ((SHS_LONG) *buffer++) << 16;
+	    *lp |= ((SHS_LONG) *buffer++) << 8;
+	    *lp++ |= (SHS_LONG) *buffer++;
 	    count -= 4;
 	}
 	*lp = 0;
 	switch (count % 4) {
 	case 0:
-	    *lp |= ((LONG) buffer[3]);
+	    *lp |= ((SHS_LONG) buffer[3]);
 	case 3:
-	    *lp |= ((LONG) buffer[2]) << 8;
+	    *lp |= ((SHS_LONG) buffer[2]) << 8;
 	case 2:
-	    *lp |= ((LONG) buffer[1]) << 16;
+	    *lp |= ((SHS_LONG) buffer[1]) << 16;
 	case 1:
-	    *lp |= ((LONG) buffer[0]) << 24;
+	    *lp |= ((SHS_LONG) buffer[0]) << 24;
 	}
     }
 }
@@ -317,7 +317,7 @@ void shsFinal(shsInfo)
     SHS_INFO *shsInfo;
 {
     int count;
-    LONG *lp;
+    SHS_LONG *lp;
 
     /* Compute number of bytes mod 64 */
     count = (int) shsInfo->countLo;
@@ -328,16 +328,16 @@ void shsFinal(shsInfo)
     lp = shsInfo->data + count / 4;
     switch (count % 4) {
     case 3:
-	*lp++ |= (LONG) 0x80;
+	*lp++ |= (SHS_LONG) 0x80;
 	break;
     case 2:
-	*lp++ |= (LONG) 0x80 << 8;
+	*lp++ |= (SHS_LONG) 0x80 << 8;
 	break;
     case 1:
-	*lp++ |= (LONG) 0x80 << 16;
+	*lp++ |= (SHS_LONG) 0x80 << 16;
 	break;
     case 0:
-	*lp++ = (LONG) 0x80 << 24;
+	*lp++ = (SHS_LONG) 0x80 << 24;
     }
 
     /* at this point, lp can point *past* shsInfo->data.  If it points
