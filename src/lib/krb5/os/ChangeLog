@@ -1,9 +1,12 @@
 2000-04-04  Ken Raeburn  <raeburn@mit.edu>
 
-	* locate_kdc.c (_krb5_use_dns_realm): Renamed from _krb5_use_dns.
-	Default to 1 iff KRB5_DNS_LOOKUP_REALM.  Look up
-	"dns_lookup_realm" in krb5.conf.
-	(_krb5_use_dns_kdc): Similar function, using "dns_lookup_kdc" and
+	* locate_kdc.c (maybe_use_dns): Renamed from _krb5_use_dns.  Now
+	takes an arg to indicate a key to look up in krb5.conf, falling
+	back to "dns_fallback", and an arg indicating the default value if
+	no config file entries match.
+	(_krb5_use_dns_realm): New routine; use "dns_lookup_realm" and
+	KRB5_DNS_LOOKUP_REALM setting.
+	(_krb5_use_dns_kdc): New routine; use "dns_lookup_kdc" and
 	KRB5_DNS_LOOKUP_KDC.
 	(krb5_locate_kdc): Call _krb5_use_dns_kdc.
 	* changepw.c (krb5_locate_kpasswd): Call _krb5_use_dns_kdc.
