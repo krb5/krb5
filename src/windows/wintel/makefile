@@ -1,0 +1,104 @@
+# makefile: Constructs the kerborized telnet client
+# Works for both k4 and k5 releases.
+#
+NAME = telnet
+OBJS = telnet.obj negotiat.obj auth.obj edit.obj emul.obj \
+	font.obj intern.obj screen.obj
+
+##### Options
+DEBUG = 1
+!IF ! defined(KVERSION)
+KVERSION = 5
+!endif
+KRB 	 = KRB$(KVERSION)
+
+!if $(KVERSION) == 4
+BUILDTOP = ..
+LIBDIR 	 = $(BUILDTOP)\lib\krb
+KLIB 	 = $(LIBDIR)\kerberos.lib 
+WLIB 	 = $(LIBDIR)\winsock.lib
+INCLUDES = /I$(BUILDTOP)\include
+XOBJS    = 
+!endif
+
+!if $(KVERSION) == 5
+BUILDTOP =..\..
+LIBDIR	 = $(BUILDTOP)\lib
+KLIB	 = $(LIBDIR)\libkrb5.lib
+WLIB	 = $(LIBDIR)\winsock.lib
+INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
+	/I$(BUILDTOP)\lib\crypto\des
+XOBJS    = k5stream.obj
+!endif
+
+##### C Compiler
+CC = cl
+CFLAGS_RELEASE = /nologo /W3 /AL /GAs /Gx /O1 /DNDEBUG
+CFLAGS_DEBUG = /nologo /W3 /AL /GAs /Gx /G2 /Zi /Od /D_DEBUG /Fd"TELNET.PDB"
+!if $(DEBUG)
+CFLAGS = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
+!else
+CFLAGS = $(CFLAGS_RELEASE) $(INCLUDES) /D$(KRB)=1
+!endif
+
+##### RC Compiler
+RC = rc
+RFLAGS_RELEASE = /nologo
+RFLAGS_DEBUG = /nologo /D_DEBUG
+!if $(DEBUG)
+RFLAGS = $(RFLAGS_DEBUG) $(INCLUDES)
+!else
+RFLAGS = $(RFLAGS_RELEASE) $(INCLUDES)
+!endif
+
+##### Linker
+LINK = link	 
+LIBS = $(KLIB) $(WLIB)
+SYSLIBS = libw llibcew commdlg
+!if $(DEBUG)
+LFLAGS = /co /nol /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
+!else
+LFLAGS = /nol /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
+!endif
+
+all: makefile $(NAME).exe
+
+$(NAME).exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
+	  $(LIBS) $(SYSLIBS), $*.def
+	$(RC) $(RFLAGS) /k $*.res $@
+
+install:
+	copy telnet.exe ..\floppy
+
+clean:
+	if exist *.obj del *.obj
+	if exist *.exe del *.exe
+	if exist *.res del *.res
+        if exist *.map del *.map
+	if exist *.pdb del *.pdb
+	if exist *.err del *.err
+	if exist ..\floppy\telnet.exe del ..\floppy\telnet.exe
+
+telnet.obj: telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
+
+negotiat.obj: telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
+
+auth.obj: telopts.h telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
+
+edit.obj: screen.h
+
+emul.obj: screen.h
+
+font.obj: screen.h ini.h
+
+intern.obj: screen.h
+
+screen.obj: screen.h ini.h
+
+telnet.res: screen.h dialog.h telnet.dlg ncsa.ico terminal.ico
+
+!if $(KVERSION) == 5
+k5stream.c: k5stream.h auth.h
+!endif
+

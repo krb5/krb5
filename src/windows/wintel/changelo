@@ -1,0 +1,8 @@
+Mon Mar 27 20:18:41 1995 Keith Vetter (keithv@fusion.com)
+
+	* Initial release based upon the K4 version. 
+        * K4 streams layer is replaced with no-ops in k5stream.c
+        * only one-way authentication tested since a telnet daemon which
+           does mutual is not available.
+        * connect port is hard-wired to 13131 for now since that is the
+           port of the only available K5 telnet daemon (tsx-11.mit.edu)

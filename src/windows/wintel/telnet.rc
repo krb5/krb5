@@ -1,0 +1,26 @@
+#include <windows.h>
+#include "dialog.h"
+#include "telnet.dlg" 
+#include "screen.h"
+
+NCSA		ICON	ncsa.ico
+TERMINAL    ICON	terminal.ico
+
+ScreenMenu MENU
+BEGIN
+	POPUP "&Configure"
+	BEGIN
+		MENUITEM "&Backspace", IDM_BACKSPACE, CHECKED
+		MENUITEM "&Delete", IDM_DELETE
+		MENUITEM SEPARATOR
+		MENUITEM "&Font...", IDM_FONT
+	END
+	POPUP "&Edit"
+	BEGIN
+		MENUITEM "&Copy     Cltr+Ins",IDM_COPY
+		MENUITEM "&Paste    Shift+Ins", IDM_PASTE
+		#ifdef _DEBUG
+			MENUITEM "&Debug", IDM_DEBUG
+		#endif
+	END                            
+END

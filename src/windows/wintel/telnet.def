@@ -1,0 +1,49 @@
+; module-definition file for testdll -- used by LINK.EXE
+NAME         telnet        ; application's module name
+
+DESCRIPTION  'Sample Microsoft Windows Application'
+
+EXETYPE      WINDOWS       ; required for all Windows applications
+
+STUB         'WINSTUB.EXE' ; Generates error message if application
+               ; is run without Windows
+
+;CODE can be moved in memory and discarded/reloaded
+CODE  PRELOAD MOVEABLE 
+;DISCARDABLE
+
+;DATA must be MULTIPLE if program can be invoked more than once
+DATA  PRELOAD MOVEABLE
+
+
+HEAPSIZE     10240
+
+; All functions that will be called by any Windows routine
+; MUST be exported.
+
+EXPORTS
+    MainWndProc   @1   ; name of window processing function
+    OpenTelnetDlg @3   ; name of "Open New Telnet Connection" Dialog Function
+
+IMPORTS 
+        WINSOCK.WSAStartup
+        WINSOCK.WSACleanup
+        WINSOCK.WSAAsyncSelect
+        WINSOCK.WSAGetLastError
+        WINSOCK.WSAAsyncGetHostByName
+        WINSOCK.listen
+        WINSOCK.accept
+        WINSOCK.__wsafdisset
+        WINSOCK.socket
+        WINSOCK.bind
+        WINSOCK.gethostbyname
+        WINSOCK.getsockname
+        WINSOCK.htons
+        WINSOCK.connect
+        WINSOCK.recv
+        WINSOCK.send
+        WINSOCK.htonl
+        WINSOCK.closesocket
+        WINSOCK.select
+        WINSOCK.ioctlsocket
+        WINSOCK.getpeername
