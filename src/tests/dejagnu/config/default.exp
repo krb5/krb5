@@ -184,6 +184,9 @@ proc get_hostname { } {
     close $file
     catch "exec rm -f tmpdir/hostname" exec_output
     regexp "^\[^.\]*" $hostname localhostname
+
+    set hostname [string tolower $hostname]
+    set localhostname [string tolower $localhostname]
     verbose "hostname: $hostname; localhostname: $localhostname"
 
     return 1

@@ -1,3 +1,9 @@
+Wed May  3 22:00:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: (get_hostname): The FQDN returned by resolve needs
+		to be made lower case as the host name is entered directly
+		into the database.
+
 Mon May  1 21:32:57 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* default.exp: (get_hostname): Use tests/resolve/resolve to get
