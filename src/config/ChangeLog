@@ -1,3 +1,8 @@
+2004-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Use $(PTHREAD_CFLAGS) in
+	LDCOMBINE.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (*-*-darwin*, *-*-rhapsody*): Don't set PICFLAGS or
