@@ -289,3 +289,8 @@ Separated private and public krb5 APIs
 3.2b3
 from tag Mac_GSSKerberos5_3_2b3
 Fixed gssapi_generic.h Mac OS conditionals and synced with 1.2.3b2
+
+3.2b4
+from tag Mac_GSSKerberos5_3_2b4
+Removed the broken microsecond timing code
+Fixed prebinding on Mac OS X
