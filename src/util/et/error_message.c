@@ -231,9 +231,15 @@ oops:
 	return(buffer);
 }
 
+/*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
-add_error_table(et)
-    /*@dependent@*/ const struct error_table FAR * et;
+add_error_table(/*@dependent@*/ const struct error_table FAR * et)
+#ifndef _MSDOS
+     /*@modifies _et_list,et_list_dynamic@*/
+#else
+     /*@modifies _et_list,et_list_dynamic,etl_used,etl@*/
+#endif
+/*@=incondefs@*/
 {
     struct dynamic_et_list *del;
 
@@ -257,9 +263,15 @@ add_error_table(et)
     return 0;
 }
 
+/*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
-remove_error_table(et)
-    const struct error_table FAR * et;
+remove_error_table(const struct error_table FAR * et)
+#ifdef _MSDOS
+     /*@modifies _et_list,et_list_dynamic,etl_used,etl@*/
+#else
+     /*@modifies _et_list,et_list_dynamic@*/
+#endif
+/*@=incondefs@*/
 {
     struct dynamic_et_list **del;
     struct et_list **el;

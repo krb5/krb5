@@ -200,13 +200,10 @@ END {
 	}
 	print "" > outfile
 	print "#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)" > outfile
-	print "static struct et_list link = { 0, 0 };" > outfile
-	print "void initialize_" table_name "_error_table (void) {" > outfile
-	print "	   if (!link.table) {" > outfile
-	print "	       link.next = _et_list;" > outfile
-	print "	       link.table = &et_" table_name "_error_table;" > outfile
-	print "	       _et_list = &link;" > outfile
-	print "	   }" > outfile
+	print "void initialize_" table_name "_error_table (void)" > outfile
+	print "    /*@modifies internalState@*/" > outfile
+	print "{" > outfile
+	print "    (void) add_error_table (&et_" table_name "_error_table);" > outfile
 	print "}" > outfile
 	print "#endif" > outfile
 }

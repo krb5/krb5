@@ -45,18 +45,6 @@ struct error_table {
 	unsigned int n_msgs;
 };
 
-/* These are for INTERNAL USE ONLY!  Don't rely on them, we're trying
-   to eliminate them.  They're currently used for some internal stuff
-   in generated files.  */
-struct et_list {
-    /*@dependent@*//*@null@*/ struct et_list *next;
-    /*@dependent@*//*@null@*/ const struct error_table FAR *table;
-};
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
-/*@null@*//*@dependent@*/ extern struct et_list * _et_list;
-#endif
-/* end INTERNAL stuff */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,9 +59,11 @@ KRB5_DLLIMP extern /*@observer@*//*@dependent@*/ const char FAR * KRB5_CALLCONV 
 	(errcode_t)
        /*@modifies internalState@*/;
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
-	(/*@dependent@*/ const struct error_table FAR *);
+	(/*@dependent@*/ const struct error_table FAR *)
+       /*@modifies internalState@*/;
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
-	(const struct error_table FAR *);
+	(const struct error_table FAR *)
+       /*@modifies internalState@*/;
 
 #if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 /*

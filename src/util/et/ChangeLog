@@ -1,3 +1,19 @@
+2001-01-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* com_err.h (add_error_table, remove_error_table): Annotate as
+	modifying internal state.
+	(struct et_list, _et_list): Remove.
+
+	* error_table.h (struct et_list, _et_list): Put back here.
+
+	* error_message.c (add_error_table, remove_error_table): Annotate
+	specific modifications.  Disable inconsistent-defifition checks
+	since _et_list isn't describe in the header file but is global and
+	modified.
+
+	* et_c.awk: Make the generated initialization function simply call
+	add_error_table, and drop the static linked-list node.
+
 2001-01-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* error_message.c (add_error_table, remove_error_table): Allow
