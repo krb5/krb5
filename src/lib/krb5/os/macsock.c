@@ -12,6 +12,9 @@
 	Written by Timothy Miller for Brown University.
  */
 
+#include "k5-int.h"
+#ifdef	HAVE_MACSOCK_H
+
 /* C includes */
 #include <stddef.h>
 #include <stdlib.h>
@@ -30,10 +33,11 @@
 /* Our own include file */
 #include "macsock.h"
 
-/* Kerberos:source:lib:kerb - MacTCP headers from KClient */
+/* MacTCP headers from Apple */
 #include "MacTCPCommonTypes.h"
 #include "UDPPB.h"
 #include "AddressXlation.h"		/* MacTCP Domain name resolver decls */
+#include "GetMyIPAddr.h"		/* Like it sez... */
 
 /* This WinSock-ism is just too ugly to use everywhere.  */
 #define	SOCKET_SET_ERRNO	WSASetLastError
@@ -137,6 +141,9 @@ socket(af, type, protocol)
 	}
 	theUDP->fStream = (unsigned long)pb.udpStream;
 
+	theUDP->connect_addr.sin_family = 0;
+	theUDP->connect_addr.sin_port = 0;
+	theUDP->connect_addr.sin_addr.s_addr = 0;
 	return theUDP;
 }
 
@@ -310,7 +317,59 @@ recvfrom (theUDP, buf, len, flags, from_param, fromlen)
 	return len;
 }
 
+/* On BSD systems, a connected UDP socket will get connection
+   refused and net unreachable errors while an unconnected
+   socket will time out, so K5 uses connect, send, recv instead of
+   sendto, recvfrom.  We happily fake this too...   */
 
+int
+connect (s, to, tolen)
+	SOCKET s;
+	struct sockaddr *to;
+	int tolen;
+{
+
+	if (tolen != sizeof (struct sockaddr_in)) {
+		SOCKET_SET_ERRNO (EINVAL);
+		return SOCKET_ERROR;
+	}
+	if (to->sin_family != AF_INET) {
+		SOCKET_SET_ERRNO (EINVAL);
+		return SOCKET_ERROR;
+	}
+
+	s->connect_addr = *to;		/* Save the connect address */
+	return 0;
+}
+
+/* Receive a packet from a UDP peer.  */
+int
+recv (theUDP, buf, len, flags)
+	SOCKET theUDP;	
+	char *buf;
+	int len; 
+	int flags;
+{
+	struct sockaddr_in from;
+	int fromlen;
+
+	fromlen = sizeof(from);
+	return recvfrom (theUDP, buf, len, flags, &from, &fromlen);
+	/* We could check if the packet is from the right place, but 
+	   it isn't clear this is required, so punt.  */
+}
+
+/* Send a packet to a UDP peer.  */
+int
+send (theUDP, buf, len, flags)
+	SOCKET theUDP;
+	const char *buf;
+	const int len; 
+	int flags;
+{
+	return sendto (theUDP, buf, len, flags,
+		       &theUDP->connect_addr, sizeof(theUDP->connect_addr));
+}
 
 /*
 	Interface UNIX routine inet_ntoa with mac equivalent.
@@ -339,6 +398,7 @@ inet_ntoa(struct in_addr ina) {
 static struct hostInfo		host;
 static char *				ipaddr_ptrs[NUM_ALT_ADDRS+1];
 static struct hostent		result;
+static struct in_addr		ourAddr;
 	
 /*
    Performs a domain name resolution of host, returning an IP address for it,
@@ -435,6 +495,43 @@ DNRresultproc(struct hostInfo *hinfo, char *userdata)
 	*userdata = true;
 }
 
+/* Return a hostent filled in with my own IP address(es).   The rest of
+   the hostent is probably not useful.  */
+
+struct hostent *
+getmyipaddr ()
+{
+	SOCKET sock;
+	struct GetAddrParamBlock pb;
+	int err;
+	
+	sock = socket (AF_INET, SOCK_DGRAM, 0);
+	if (!sock)
+		return 0;
+	pb.ioCRefNum	= sock->fMacTCPRef;
+	pb.csCode		= ipctlGetAddr;
+	err = PBControl( (ParamBlockRec *) &pb, false );
+	if (err) {
+		closesocket (sock);
+		SOCKET_SET_ERRNO (EIO);
+		return 0;
+	}
+	ourAddr.s_addr = pb.ourAddress;
+
+	/* Build result in hostent structure, which we will return to caller. */
+	
+	result.h_name = 0;
+	result.h_aliases = 0;		/* We don't know about aliases.  */
+	result.h_addrtype = AF_INET;
+	result.h_length = sizeof (host.addr[0]);  /* Length of each address */
+	result.h_addr_list = ipaddr_ptrs;
+	ipaddr_ptrs[0] = (char*) ourAddr.s_addr;
+	ipaddr_ptrs[1] = 0;
+
+	return &result;
+}
+
+
 #if 0
 /* FIXME:  THIS WAS A STAB AT GETHOSTNAME, which I abandoned for lack of need,
    and since the required header files didn't seem to be handy.
@@ -482,3 +579,5 @@ DNRresultproc(struct hostInfo *hinfo, char *userdata)
 }
 
 #endif
+
+#endif /* HAVE_MACSOCK_H */

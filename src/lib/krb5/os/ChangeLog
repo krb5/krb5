@@ -1,5 +1,8 @@
 Mon Mar 27 14:16:39 1995  John Gilmore  (gnu at toad.com)
 
+	* macsock.c (connect, send, recv):  Add for K5 compatability.
+	(getmyipaddr):  Add for use in K5.
+
 	* macsock.c:  Add Mac socket support file, verbatim from K4 release.
 
 Fri Mar 24 17:58:15 1995  Theodore Y. Ts'o  (tytso@rt-11)
