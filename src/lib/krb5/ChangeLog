@@ -1,7 +1,7 @@
 2004-06-15  Ken Raeburn  <raeburn@mit.edu>
 
-	* krb5_libinit.c (krb5int_lib_init): Initialize
-	krb5int_us_time_mutex.
+	* krb5_libinit.c: Include os-proto.h.
+	(krb5int_lib_init): Initialize krb5int_us_time_mutex.
 
 	* libkrb5.exports: Drop krb5_init_ets, krb5_free_ets,
 	krb5_kt_default_vno, and krb5int_profile_shared_data.

@@ -17,6 +17,7 @@
 #include "cc-int.h"
 #include "kt-int.h"
 #include "rc-int.h"
+#include "os-proto.h"
 
 /*
  * Initialize the Kerberos v5 library.
