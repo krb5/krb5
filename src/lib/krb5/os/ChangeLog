@@ -1,3 +1,7 @@
+Thu Apr 27 13:04:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean): Remove t_std_conf.o 
+
 Tue Apr 25 21:58:23 1995  Chris Procenzano (proven@mit.edu)
 
 	* Makefile.in : Added source files mk_faddr.c and genaddrs.c.

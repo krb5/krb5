@@ -106,4 +106,4 @@ check-unix:: $(TEST_PROGS)
 	$(RM) test.out
 
 clean::
-	$(RM) $(TEST_PROGS) test.out
+	$(RM) $(TEST_PROGS) test.out t_std_conf.o
