@@ -160,6 +160,16 @@ char copyright[] =
 Key_schedule v4_schedule;
 #endif
 
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif
+
+#if defined(_PATH_NOLOGIN)
+#define NOLOGIN		_PATH_NOLOGIN
+#else
+#define NOLOGIN		"/etc/nologin"
+#endif
+
 #include "defines.h"
 
 #if HAVE_ARPA_NAMESER_H
@@ -1119,7 +1129,7 @@ void doit(f, fromp)
 	goto signout_please;
     }
     
-    if (pwd->pw_uid && !access("/etc/nologin", F_OK)) {
+    if (pwd->pw_uid && !access(NOLOGIN, F_OK)) {
 	error("Logins currently disabled.\n");
 	goto signout_please;
     }

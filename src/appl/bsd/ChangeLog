@@ -1,3 +1,9 @@
+2001-01-26  Tom Yu  <tlyu@mit.edu>
+
+	* krshd.c: Get path for NOLOGIN file from paths.h if present,
+	mirroring logic in login.c.  [patch from David MacKenzie
+	krb5-appl/913]
+
 2001-01-23  Tom Yu  <tlyu@mit.edu>
 
 	* forward.c (rd_and_store_for_creds): Overwrite any existing value
