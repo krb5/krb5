@@ -276,12 +276,12 @@ krb5_error_code krb5_rc_generate_new
 		   krb5_rc_ops * ));
 krb5_error_code krb5_rc_register
 	PROTOTYPE((krb5_rc_ops * ));
-char *krb5_rc_get_name
-	PROTOTYPE((krb5_rcache ));
+krb5_error_code krb5_rc_get_name
+	PROTOTYPE((krb5_rcache, char *, int ));
 char *krb5_rc_default_name
 	PROTOTYPE((void ));
-krb5_rcache krb5_rc_default
-	PROTOTYPE((void ));
+krb5_error_code krb5_rc_default
+	PROTOTYPE((krb5_rcache * ));
 
 
 /* libcc.spec */
