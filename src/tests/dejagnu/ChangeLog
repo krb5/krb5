@@ -1,3 +1,9 @@
+Wed Jun 21 18:13:11 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove AC_CONFIG_FRAGMENTS call, since it's no
+		longer needed.  (The aclocal.m4 V5_SET_TOPTREE handles it
+		all automatically now.)
+
 Fri Jun  9 18:58:29 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
