@@ -1,3 +1,11 @@
+2000-07-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* krcp.c: Provide format attribute for error() for versions of gcc
+	that support it.
+
+	* configure.in (LOGINLIBS): Test for crypt() in crypt library only
+	modifies LOGINLIBS.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: Remove linking of krb5util library from
