@@ -1,3 +1,9 @@
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* pager.c: Remove declaration of errno
+
+	* help.c: Remove declaration of errno
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (depend-dependencies): Was previously

@@ -284,7 +284,6 @@ listen on the admin servers port for a request
 static int
 kadm_listen()
 {
-    extern int errno;
     int found;
     int admin_fd;
     int peer_fd;

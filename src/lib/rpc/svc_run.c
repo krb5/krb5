@@ -37,7 +37,7 @@ static char sccsid[] = "@(#)svc_run.c 1.1 87/10/13 Copyr 1984 Sun Micro";
  * Wait for input, call server program.
  */
 #include <gssrpc/rpc.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 void
 svc_run()
@@ -47,7 +47,6 @@ svc_run()
 #else
       int readfds;
 #endif /* def FD_SETSIZE */
-	extern int errno;
 
 	for (;;) {
 #ifdef FD_SETSIZE

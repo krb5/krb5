@@ -12,6 +12,7 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <gssrpc/rpc.h>
 #include <sys/stat.h>
@@ -114,7 +115,6 @@ typedef struct _client_list {
 
 static client_list *clients = NULL;
 
-extern int errno;
 
 enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
    register struct svc_req *rqst;

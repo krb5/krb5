@@ -9,6 +9,7 @@
 
 #include "ss_internal.h"
 #include "copyright.h"
+#include <errno.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/file.h>
@@ -17,7 +18,6 @@
 static char MORE[] = "more";
 extern char *_ss_pager_name;
 extern char *getenv();
-extern int errno;
 
 /*
  * this needs a *lot* of work....

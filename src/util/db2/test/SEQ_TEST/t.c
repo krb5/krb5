@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern int errno;
  
 void main(int argc, char *argv[]) {
   char id1[] = {"          "}, id2[] = {"          "};

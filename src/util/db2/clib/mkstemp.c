@@ -65,7 +65,6 @@ _gettemp(path, doopen)
 	char *path;
 	register int *doopen;
 {
-	extern int errno;
 	register char *start, *trv;
 	struct stat sbuf;
 	u_int pid;

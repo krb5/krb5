@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include "krb.h"
@@ -51,7 +51,6 @@
 
 #define COR(a,b) ((a!=NULL)?(a):(b))
 
-extern int errno;
 
 #ifndef HAVE_STDLIB_H
 extern char *malloc(), *calloc();

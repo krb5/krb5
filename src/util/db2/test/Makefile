@@ -125,12 +125,12 @@ CONFIG_RELTOPDIR = ../..
 
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(CPPFLAGS) $(CFLAGS)
 CFLAGS = -g
-CPPFLAGS = -I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I$(SRCTOP)/include/krb5  -DKRB5_KRB4_COMPAT -DKRB5_PRIVATE=1
+CPPFLAGS = -I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I$(SRCTOP)/include/krb5 -I/usr/athena/include  -DKRB5_KRB4_COMPAT -DKRB5_PRIVATE=1
 DEFS = -DHAVE_CONFIG_H
 CC = /usr/gcc/bin/gcc
 LD = $(PURE) /usr/gcc/bin/gcc
 DEPLIBS = @DEPLIBS@
-LDFLAGS = 
+LDFLAGS = -L/usr/athena/lib 
 LD_UNRESOLVED_PREFIX = @LD_UNRESOLVED_PREFIX@
 LD_SHLIBDIR_PREFIX = @LD_SHLIBDIR_PREFIX@
 LDARGS = @LDARGS@
@@ -311,6 +311,13 @@ DB_DEPS		= $(DB_DEPS-k5)
 DB_DEPS-sys	=
 DB_DEPS-k5	= $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
 DB_DEPS-redirect = $(BUILDTOP)/include/db.h
+
+# Header file dependencies that might depend on whether krb4 support
+# is compiled.
+
+KRB_ERR_H_DEP	= $(BUILDTOP)/include/kerberosIV/krb_err.h
+KRB524_H_DEP	= $(BUILDTOP)/include/krb524.h
+KRB524_ERR_H_DEP= $(BUILDTOP)/include/krb524_err.h
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 

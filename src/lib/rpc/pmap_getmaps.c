@@ -56,7 +56,6 @@ static char sccsid[] = "@(#)pmap_getmaps.c 1.10 87/08/11 Copyr 1984 Sun Micro";
 #define NAMELEN 255
 #define MAX_BROADCAST_SIZE 1400
 
-extern int errno;
 
 /*
  * Get a copy of the current port maps.

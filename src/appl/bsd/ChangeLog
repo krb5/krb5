@@ -1,3 +1,7 @@
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Remove declaration of errno
+
 2003-01-03  Ezra Peisach  <epeisach@bu.edu>
 
 	* compat_recv.c (accept_a_connection): Test if IPv6 socket returns

@@ -1,3 +1,10 @@
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* svc_run.c svc_udp.c : Remove declaration of errno
+
+	* clnt_udp.c pmap_getmaps.c pmap_rmt.c svc_auth_gssapi.c: Remove
+	declaration of errno 
+
 2002-12-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* auth_gssapi_misc.c (xdr_gss_buf, auth_gssapi_wrap_data,

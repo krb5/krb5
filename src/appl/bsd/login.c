@@ -304,7 +304,7 @@ char term[64], *hostname, *username;
 char term[64], *username;
 #endif
 
-extern int errno;
+
 
 #ifdef KRB4
 #define KRB_ENVIRON	"KRBTKFILE"	/* Ticket file environment variable */

@@ -41,6 +41,7 @@
 #define const
 #include <varargs.h>
 #endif
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/file.h>
@@ -89,7 +90,6 @@ vsyslog(pri, fmt, ap)
 	const register char *fmt;
 	va_list ap;
 {
-	extern int errno;
 	register int cnt;
 	register char *p;
 	time_t now, time();

@@ -47,7 +47,6 @@
 #define TF_LCK_RETRY ((unsigned)2)	/* seconds to sleep before
 					 * retry if ticket file is
 					 * locked */
-extern int errno;
 extern int krb_debug;
 
 void tf_close();

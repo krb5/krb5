@@ -1,3 +1,9 @@
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* tf_util.c: Remove declaration of errno
+
+	* dest_tkt.c (dest_tkt): Remove declaration of errno
+
 2002-12-18  Tom Yu  <tlyu@mit.edu>
 
 	* RealmsConfig-glue.c: Fix up KRB5_CALLCONV.

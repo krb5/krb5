@@ -13,6 +13,7 @@ static char *rcsid = "$Header$";
 #include    <fcntl.h>
 #include    <sys/stat.h>
 #include    <unistd.h>
+#include <errno.h>
 #include    <kadm5/admin.h>
 #include    <stdlib.h>
 #include    <stdio.h>
@@ -27,7 +28,7 @@ static char *rcsid = "$Header$";
 static char	    **word_list = NULL;	    /* list of word pointers */
 static char	    *word_block = NULL;	    /* actual word data */
 static unsigned int word_count = 0;	    /* number of words */
-extern int	    errno;
+
 
 /*
  * Function: word_compare

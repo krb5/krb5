@@ -69,7 +69,6 @@ dest_tkt()
 {
     const char *file = TKT_FILE;
     int i,fd;
-    extern int errno;
     int ret;
     struct stat statpre, statpost;
     char buf[BUFSIZ];

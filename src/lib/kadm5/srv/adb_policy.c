@@ -13,8 +13,8 @@ static char *rcsid = "$Header$";
 #include	"adb.h"
 #include	<stdlib.h>
 #include	<string.h>
+#include <errno.h>
 
-extern	int errno;
 
 #define OPENLOCK(db, mode) \
 { \

@@ -60,7 +60,6 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #define MAX_BROADCAST_SIZE 1400
 #include <string.h>
 
-extern int errno;
 static struct timeval timeout = { 3, 0 };
 
 

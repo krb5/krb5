@@ -1,3 +1,7 @@
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* clib/mkstemp.c (_gettemp): Remove declaration of errno
+
 2002-09-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for stdint.h and inttypes.h.

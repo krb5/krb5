@@ -74,7 +74,6 @@ static struct xp_ops svcudp_op = {
 	svcudp_destroy
 };
 
-extern int errno;
 
 /*
  * kept in xprt->xp_p2

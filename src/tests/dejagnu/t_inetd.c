@@ -55,7 +55,6 @@
 
 #include "com_err.h"
 
-extern int errno;
 
 char *progname;
 

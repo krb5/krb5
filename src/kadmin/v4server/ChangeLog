@@ -1,3 +1,9 @@
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* admin_server.c (kadm_listen): Remove declaration of errno
+
+	* acl_files.c: Remove declaration of errno
+
 2002-11-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (OBJS): Remove kadm_stream.o and kadm_err.o.  Also,
