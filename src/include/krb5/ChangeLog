@@ -1,3 +1,9 @@
+2000-5-9	Alexandra Ellwood <lxs@mit.edu>
+
+	* macsock.h: local_addr_fallback_kludge now defined to magic gethostaddr function
+	in the Sockets Library, which does exactly what we want if the search domain is not
+	specified.
+
 1998-11-22  Miro Jurisic  <meeroh@.mit.edu>
 
 	* macsock.h: MacOS: only #define MACHOSTNAMELEN when not
