@@ -262,19 +262,10 @@ SS_LIB-k5	= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
 DB_LIB		= @DB_LIB@
 
-KRB5_LIB			= $(KRB5_LIB_@LIB_LINK_OPT@)
-KRB5_LIB_libopt			= -lkrb5
-KRB5_LIB_frameworkopt		= -framework Kerberos5
-
-K5CRYPTO_LIB			= $(K5CRYPTO_LIB_@LIB_LINK_OPT@)
-K5CRYPTO_LIB_libopt		= -lk5crypto
-K5CRYPTO_LIB_frameworkopt	= -framework Kerberos5Crypto
-
+KRB5_LIB			= -lkrb5
+K5CRYPTO_LIB			= -lk5crypto
 COM_ERR_LIB			= -lcom_err
-
-GSS_KRB5_LIB			= $(GSS_KRB5_LIB_@LIB_LINK_OPT@)
-GSS_KRB5_LIB_libopt		= -lgssapi_krb5
-GSS_KRB5_LIB_frameworkopt	= -framework Krb5GSSAPILib
+GSS_KRB5_LIB			= -lgssapi_krb5
 
 # KRB4_LIB is -lkrb4 if building --with-krb4
 # needs fixing if ever used on Mac OS X!

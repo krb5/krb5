@@ -1129,14 +1129,6 @@ fi],
 	SHLIBSEXT=.so.s-nobuild
 )dnl
 
-if test -n "$EXTRA_LIB_TARGETS"; then
-  LIBLIST="$LIBLIST $EXTRA_LIB_TARGETS"
-fi
-LIBLINKS="$LIBLINKS $EXTRA_LIBLINK_TARGETS"
-LIBINSTLIST="$LIBINSTLIST $EXTRA_LIBINST_TARGETS"
-AC_SUBST(EXTRA_CLEAN_TARGETS)
-AC_SUBST(EXTRA_CLEAN_LINKS)
-
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
 fi
@@ -1170,8 +1162,7 @@ krb5_cv_host=$host
 AC_SUBST(krb5_cv_host)
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([V5_SET_TOPDIR])
-. $ac_topdir/config/shlib.conf
-AC_SUBST(LIB_LINK_OPT)])
+. $ac_topdir/config/shlib.conf])
 dnl
 dnl The following was written by jhawk@mit.edu
 dnl

@@ -1,5 +1,20 @@
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* pre.in (KRB5_LIB_libopt, KRB5_LIB_frameworkopt,
+	K5CRYPTO_LIB_libopt, K5CRYPTO_LIB_frameworkopt,
+	GSS_KRB5_LIB_libopt, GSS_KRB5_LIB_frameworkopt): Variables
+	deleted.
+	(KRB5_LIB, K5CRYPTO_LIB, GSS_KRB5_LIB): Use old _libopt values.
+	* lib.in (EXTRA_CLEAN_TARGETS, EXTRA_CLEAN_LINKS): Variables
+	deleted.
+	(clean-libs, clean-liblinks): Don't depend on them.
+	(all-framework, link-framework, clean-framework,
+	clean-framework-link, install-framework): Placeholder targets
+	deleted.
+	* shlib.conf: Don't define LIB_LINK_OPT, EXTRA_LIB_TARGETS,
+	EXTRA_LIBLINK_TARGETS, EXTRA_LIBINST_TARGETS, EXTRA_CLEAN_TARGETS,
+	EXTRA_CLEAN_LINKS.
+
 	* post.in (depend-verify-et-sys, depend-verify-et-k5,
 	depend-verify-ss-sys, depend-verify-ss-k5, depend-verify-db-sys,
 	depend-verify-db-k5): New targets.  Report errors in the -sys

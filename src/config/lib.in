@@ -40,10 +40,6 @@ LIBLINKS=@LIBLINKS@
 # Set by configure; list of install targets
 LIBINSTLIST=@LIBINSTLIST@
 
-# Set by configure; list of extra targets when cleaning
-EXTRA_CLEAN_TARGETS=@EXTRA_CLEAN_TARGETS@
-EXTRA_CLEAN_LINKS=@EXTRA_CLEAN_LINKS@
-
 # Some of these should really move to pre.in, since programs will need
 # it too. (e.g. stuff that has dependencies on the libraries)
 
@@ -134,35 +130,19 @@ $(TOPLIBD)/lib$(LIB)$(PFLIBEXT): lib$(LIB)$(PFLIBEXT)
 all-libs: $(LIBLIST)
 all-liblinks: $(LIBLINKS)
 
-all-framework:
-	@echo lxs, put something here in config/lib.in for building frameworks
-	@false
-
-link-framework:
-	@echo lxs, put something here in config/lib.in for symlinking frameworks
-	@false
-
-clean-libs: $(EXTRA_CLEAN_TARGETS)
+clean-libs:
 	$(RM) lib$(LIB)$(STLIBEXT)
 	$(RM) lib$(LIB)$(SHLIBVEXT)
 	$(RM) lib$(LIB)$(SHLIBSEXT)
 	$(RM) lib$(LIB)$(SHLIBEXT)
 	$(RM) lib$(LIB)$(PFLIBEXT)
 
-clean-liblinks: $(EXTRA_CLEAN_LINKS)
+clean-liblinks:
 	$(RM) $(TOPLIBD)/lib$(LIB)$(STLIBEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(PFLIBEXT)
-
-clean-framework:
-	@echo lxs, put something here in config/lib.in for cleaning frameworks
-	@false
-
-clean-framework-link:
-	@echo lxs, put something here in config/lib.in for cleaning framework links
-	@false
 
 install-libs: $(LIBINSTLIST)
 install-static:
@@ -183,10 +163,6 @@ install-profiled:
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
 	$(INSTALL_DATA) lib$(LIB)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
-
-install-framework:
-	@echo lxs, put something here in config/lib.in for installing frameworks
-	@false
 
 Makefile: $(SRCTOP)/config/lib.in
 config.status: $(SRCTOP)/config/shlib.conf

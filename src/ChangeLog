@@ -2,6 +2,10 @@
 
 	* aclocal.m4 (KRB5_AC_CHOOSE_DB): New macro.
 	(CONFIG_RULES): Invoke it.
+	(KRB5_LIB_PARAMS): Don't substitute LIB_LINK_OPT.
+	(KRB5_LIB_AUX): Don't substitute EXTRA_CLEAN_TARGETS,
+	EXTRA_CLEAN_LINKS, and don't update LIBLIST, LIBLINKS, LIBINSTLIST
+	to add the EXTRA_ values.
 
 	* configure.in: Configure util/db2 only if we're going to use it.
 
