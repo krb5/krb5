@@ -1,3 +1,8 @@
+Mon May  1 11:29:37 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* read_passwd.c: (des_read_pw_string): Call to krb5_read_password
+		wants a pointer to the length of the buffer.
+
 Fri Apr 28 13:35:25 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* read_passwd.c (des_read_pw_string): Add des_read_pw_string,

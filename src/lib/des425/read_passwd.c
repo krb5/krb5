@@ -67,11 +67,12 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
 krb5_error_code
 des_read_pw_string/*_v4_compat_crock*/(buf, bufsize, prompt, prompt2)
     char *buf;
-    int *bufsize;
+    int bufsize;
     char *prompt;
     char *prompt2;
 {
     krb5_error_code retval;
+    int i = bufsize;
     
     if (!krb4_global_context) {
 	    retval = krb5_init_context(&krb4_global_context);
@@ -80,7 +81,7 @@ des_read_pw_string/*_v4_compat_crock*/(buf, bufsize, prompt, prompt2)
     }
 
     retval = krb5_read_password(krb4_global_context, prompt, prompt2,
-			    buf, bufsize);
+			    buf, &i);
     return retval;
 }
 
