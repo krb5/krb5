@@ -1,3 +1,8 @@
+2004-06-02  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (do_replacement): Patch from Bill Dodd to fix missing
+	braces in previous security patch.
+
 2004-06-01  Sam Hartman  <hartmans@mit.edu>
 
 	* an_to_ln.c (rule_an_to_ln): Fix buffer overflow when parsing
