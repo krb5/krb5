@@ -33,6 +33,18 @@
 progname=$0
 pts="`echo ${progname} | sed 's=[^/]*$=='`"
 
+#
+# sneak in default knowledge that this program is one level down from the
+# top of the source tree
+#
+
+case $pts in
+/*)   SRCDIR="`echo ${pts} | sed 's=[^/]*/*$=='`"
+      echo "default srcdir $SRCDIR";;
+../*) SRCDIR="`cd ${pts}/.. ; pwd`"
+      echo "default srcdir $SRCDIR";;
+esac
+
 conflib=". $pts/kfrags"
 
 THISCONF=./kbuild.temp

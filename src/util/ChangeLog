@@ -1,5 +1,9 @@
+Fri Sep 30 19:28:24 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kbuild: set SRCDIR by default from program name.
+
 Thu Sep 29 19:54:38 1994  Mark Eichin  (eichin@cygnus.com)
 
-	* util/kbuild: complete rewrite.
-	* util/kfrags: fragments of input to kbuild.
+	* kbuild: complete rewrite.
+	* kfrags: fragments of input to kbuild.
 
