@@ -1,3 +1,7 @@
+Tue Mar 7 17:26:06 1995 Keith Vetter (keithv@fusion.com)
+
+	* cryptoco.c: Added more windows syntactic sugar for segmenting.
+
 Fri Mar 3 19:15:54 1995 Keith Vetter (keithv@fusion.com)
 
 	* libcrypto.def: added 3 entry points for methods for pulling
