@@ -850,6 +850,7 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
 #else
         /* Check Supported Enctypes */
         if ( !enforce_tgs_enctypes ||
+             pTicketResponse->Ticket.SessionKey.KeyType == KERB_ETYPE_NULL ||
              krb5_is_permitted_tgs_enctype(context, NULL, pTicketResponse->Ticket.SessionKey.KeyType) ) {
             FILETIME Now, MinLife, EndTime, LocalEndTime;
             __int64  temp;

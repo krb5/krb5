@@ -1,3 +1,8 @@
+2004-07-07  Jeffrey Altman <jaltman@mit.edu>
+
+    * cc_mslsa.c:  When obtaining a TGT from MSLSA, do not ignore 
+      the cache if the requested enctype is the NULL enctype.
+
 2004-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (krb5_fcc_data): Added a mutex.
