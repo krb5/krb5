@@ -97,22 +97,18 @@ all-windows:: $(OBJS)
 shared:
 	mkdir shared
 
-COMERRLIB=$(TOPLIBD)/libcom_err.a
-
 TEST_PROGS= t_std_conf t_an_to_ln
 
 T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
-		hst_realm.o init_os_ctx.o locate_kdc.o $(COMERRLIB) \
-		$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a
+		hst_realm.o init_os_ctx.o locate_kdc.o 
 
-T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o $(TOPLIBD)/libkrb5.a	\
-		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
+T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 
-t_std_conf: $(T_STD_CONF_OBJS)
-	$(LD) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
+t_std_conf: $(T_STD_CONF_OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_std_conf $(T_STD_CONF_OBJS) $(LIBS)
 
-t_an_to_ln: $(T_AN_TO_LN_OBJS)
-	$(LD) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
+t_an_to_ln: $(T_AN_TO_LN_OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\

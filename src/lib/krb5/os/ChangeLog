@@ -1,3 +1,9 @@
+Sun Mar 17 20:42:17 1996  Ezra Peisach  <epeisach@mit.edu>
+
+        * configure.in: Add USE_ANAME, KRB5_LIBRARIES
+
+	* Makefile.in: Properly use libraries as specified by configure
+
 Wed Mar 13 13:11:49 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* t_std_conf.c: Include string.h
