@@ -1,3 +1,8 @@
+2002-09-19  Ezra Peisach  <epeisach@bu.edu>
+
+	* aclocal.m4 (K5_AC_OUTPUT, K5_GEN_MAKEFILE, K5_GEN_FILE): Rewrite
+	to use AC_CONFIG_FILES. Remove unused V5_OUTPUT_MAKEFILE.
+
 2002-09-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_CHOOSE_SS): Check that the indicated system

@@ -534,32 +534,32 @@ dnl
 dnl K5_GEN_MAKEFILE([dir, [frags]])
 dnl
 define(K5_GEN_MAKEFILE,[dnl
-ifelse($1, , x=., x="$1")
-appendlist=''
-ifelse($2, , ,[dnl
-for i in $2
-do
-	appendlist=$appendlist:$ac_config_fragdir/$i.in
-done])
-krb5_output_list="$krb5_output_list $x/Makefile:$krb5_pre_in:$x/Makefile.in$appendlist:$krb5_post_in"])dnl
+ifelse($1, ,[_K5_GEN_MAKEFILE(.,$2)],[_K5_GEN_MAKEFILE($1,$2)])
+])
+dnl
+dnl _K5_GEN_MAKEFILE(dir, [frags])
+dnl  dir must be present in this case
+dnl  Note: Be careful in quoting. 
+dnl        The ac_foreach generates the list of fragments to include
+dnl        or "" if $2 is empty
+define(_K5_GEN_MAKEFILE,[dnl
+AC_CONFIG_FILES([$1/Makefile:$krb5_pre_in:$1/Makefile.in]AC_FOREACH([FRAG], [$2], :$ac_config_fragdir/[FRAG].in)[:$krb5_post_in])
+])
 dnl
 dnl K5_GEN_FILE( <ac_output arguments> )
 dnl
-define(K5_GEN_FILE,[krb5_output_list="$krb5_output_list $1"])dnl
+define(K5_GEN_FILE,[AC_CONFIG_FILES($1)])dnl
 dnl
 dnl K5_AC_OUTPUT
+dnl    Note: Adds the variables to config.status for individual 
+dnl          Makefile generation from config.statsu
+define(K5_AC_OUTPUT,[dnl
+AC_CONFIG_COMMANDS([krb5_config_prefix], [], dnl
+ [krb5_pre_in=$krb5_pre_in
+ ac_config_fragdir=$ac_config_fragdir
+ krb5_post_in=$krb5_post_in])
+AC_OUTPUT])dnl
 dnl
-define(K5_AC_OUTPUT,[AC_OUTPUT($krb5_output_list)])dnl
-dnl
-dnl V5_OUTPUT_MAKEFILE
-dnl
-define(V5_AC_OUTPUT_MAKEFILE,
-[ifelse($1, , ac_v5_makefile_dirs=., ac_v5_makefile_dirs="$1")
-ifelse($2, , filelist="", filelist="$2")
-for x in $ac_v5_makefile_dirs; do
-  filelist="$filelist $x/Makefile:$krb5_prepend_frags:$x/Makefile.in:$krb5_append_frags"
-done
-AC_OUTPUT($filelist)])dnl
 dnl
 dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
 dnl component
@@ -709,7 +709,7 @@ AC_TRY_RUN([
 #include <regex.h>
 regex_t x; regmatch_t m;
 int main() { return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0); }
-], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no, AC_ERROR([Cannot test regcomp when cross compiling]))])
+], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no, AC_MSG_ERROR([Cannot test regcomp when cross compiling]))])
 AC_MSG_RESULT($ac_cv_func_regcomp)
 test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP,1,[Define if regcomp exists and functions])
 dnl
