@@ -1,3 +1,7 @@
+Thu Mar 2 13:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* k5-config.h: changed NEED_WINSOCK_H to NEED_SOCKETS
+
 Wed Mar 1 20:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* func-proto.h: fixed up a const attribute to krb5_send_tgs.

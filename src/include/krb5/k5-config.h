@@ -73,7 +73,7 @@ typedef unsigned char u_char;
 #define _cdecl  __cdecl
 #define _huge   __huge
 
-#ifdef NEED_WINSOCK_H
+#ifdef NEED_SOCKETS
 #include <winsock.h>
 #endif
 
