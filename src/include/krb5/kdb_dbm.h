@@ -28,14 +28,14 @@ krb5_error_code krb5_dbm_db_get_age PROTOTYPE((char *, time_t * ));
 krb5_error_code krb5_dbm_db_create PROTOTYPE((char * ));
 krb5_error_code krb5_dbm_db_rename PROTOTYPE((char *, char * ));
 krb5_error_code krb5_dbm_db_get_principal PROTOTYPE((krb5_principal,
-						     krb5_kdb_principal *,
+						     krb5_db_entry *,
 						     int *,
 						     krb5_boolean * ));
-void krb5_dbm_db_free_principal PROTOTYPE((krb5_kdb_principal *, int ));
-krb5_error_code krb5_dbm_db_put_principal PROTOTYPE((krb5_kdb_principal *,
+void krb5_dbm_db_free_principal PROTOTYPE((krb5_db_entry *, int ));
+krb5_error_code krb5_dbm_db_put_principal PROTOTYPE((krb5_db_entry *,
 						     int * ));
 krb5_error_code krb5_dbm_db_iterate
     PROTOTYPE((krb5_error_code (*) PROTOTYPE((krb5_pointer,
-					      krb5_kdb_principal *)),
+					      krb5_db_entry *)),
 	       krb5_pointer ));
 #endif /* __KRB5_KDB5_DBM__ */
