@@ -1,5 +1,13 @@
 2001-04-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (adm_err.h, asn1_err.h, krb5_err.h, kv5m_err.h):
+	Depend on corresponding error tables.  Run "make includes" in krb5
+	library code to rebuild instead of invoking awk here.
+	(all-unix): Depend on krb_err.h.
+	(krb_err.h): Depend on kerberosIV/krb_err.h; copy that file.
+	(kerberosIV/krb_err.h): Depend on all-recurse.
+	(clean-unix): Delete krb_err.h.
+
 	* k5-int.h: Always include stdlib.h and string.h; don't bother
 	testing the HAVE_ macros.
 

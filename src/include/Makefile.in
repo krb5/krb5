@@ -6,7 +6,7 @@ BUILDTOP=$(REL)$(U)
 ##DOSBUILDTOP = ..
 NO_OUTPRE=1
 
-all-unix:: krb5.h adm_err.h
+all-unix:: krb5.h adm_err.h krb_err.h
 all-mac::
 
 all-windows::
@@ -33,29 +33,24 @@ krb5.h: krb5/autoconf.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
 # Build the error table include files:
 # adm_err.h asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h
 
+adm_err.h asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h: force
+	(cd ../lib/krb5/error_tables && $(MAKE) includes)
+krb_err.h: kerberosIV/krb_err.h
+	$(RM) krb_err.h ; $(CP) kerberosIV/krb_err.h krb_err.h
+kerberosIV/krb_err.h: all-recurse
+
+.PHONY: force
+force:
+
 adm_err.h: $(SRCTOP)/lib/krb5/error_tables/adm_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=adm_err.h	\
-		$(SRCTOP)/lib/krb5/error_tables/adm_err.et
-
 asn1_err.h: $(SRCTOP)/lib/krb5/error_tables/asn1_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h	\
-		$(SRCTOP)/lib/krb5/error_tables/asn1_err.et
-
 kdb5_err.h: $(SRCTOP)/lib/krb5/error_tables/kdb5_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kdb5_err.h	\
-		$(SRCTOP)/lib/krb5/error_tables/kdb5_err.et
-
-krb5_err.h: $(SRCTOP)/lib/krb5/error_tables/krb5_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=krb5_err.h	\
-		 $(SRCTOP)/lib/krb5/error_tables/krb5_err.et
-
+krb5_err.h: $(SRCTOP)/lib/krb5/error_tables/krb5_err.et	
 kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kv5m_err.h	\
-		$(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
 
 clean-unix::
 	$(RM) krb5.h krb5_err.h kdb5_err.h kv5m_err.h \
-		asn1_err.h adm_err.h
+		asn1_err.h adm_err.h krb_err.h
 
 clean-mac::
 
