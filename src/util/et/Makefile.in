@@ -159,7 +159,7 @@ install-unix:: compile_et
 
 compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
 	$(SHELL) $(srcdir)/config_script $(srcdir)/compile_et.sh \
-		$(mydatadir) $(AWK) $(SED) > compile_et
+		"$(mydatadir)" $(AWK) $(SED) > compile_et
 	chmod 755 compile_et	
 
 rebuild: rebuild-c rebuild-h

@@ -17,8 +17,10 @@ int main()
 	printf("Msg TGT-expired is '%s'\n", error_message(KRB_MK_AP_TGTEXP));
 	printf("Msg EPERM is '%s'\n", error_message(EPERM));
 	printf("Msg FOO_ERR is '%s'\n", error_message(FOO_ERR));
+#ifdef HAVE_SYS_ERRLIST
 	printf("Msg {sys_nerr-1} is '%s'\n", error_message(sys_nerr-1));
 	printf("Msg {sys_nerr} is '%s'\n", error_message(sys_nerr));
+#endif
 	printf("Msg 0 is '%s'\n", error_message(0));
 
 	printf("With 0: tgt-expired -> %s\n", error_message(KRB_MK_AP_TGTEXP));
@@ -38,7 +40,9 @@ int main()
 
 	printf("Msg for TGT-expired is '%s'\n",
 	       error_message(KRB_MK_AP_TGTEXP));
+#ifdef HAVE_SYS_ERRLIST
 	printf("Msg {sys_nerr-1} is '%s'\n", error_message(sys_nerr-1));
+#endif
 	printf("Msg FOO_ERR is '%s'\n", error_message(FOO_ERR));
 	printf("Msg KRB_SKDC_CANT is '%s'\n",
 		    error_message(KRB_SKDC_CANT));

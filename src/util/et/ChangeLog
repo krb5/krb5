@@ -1,3 +1,7 @@
+2001-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_et.c (main): Only use sys_nerr tests if HAVE_SYS_ERRLIST.
+
 2001-01-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* com_err.h (add_error_table, remove_error_table): Annotate as
