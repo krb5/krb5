@@ -36,8 +36,6 @@ KLIBS = krb5\krb5.lib crypto\crypto.lib \
 GLIBS = gssapi\gssapi.lib
 K4LIBS = krb4\krb4.lib
 
-##DOS##CCACHE_LIB = $(SRCTOP)\windows\lib\KrbCC32.lib
-
 ##WIN16##VERLIBS=..\mit\windows\lib\vswin.lib c:\msvc\lib\ver.lib
 ##WIN32##VERLIBS=..\mit\windows\lib\vsnt.lib \
 ##WIN32##	"c:\program files\devstudio\vc\lib\version.lib"
@@ -89,7 +87,7 @@ $(PLIB): $(PLIBS) $(WLIB) $(CLIB) $(PDEF) no_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(PDEF) /out:$*.dll \
 ##WIN32##	   no_glue.obj version.res $(PLIBS) $(CLIB) $(WINLIBS)
 
-$(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC) $(CCACHE_LIB)
+$(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k5_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(PLIB) $(WINLIBS), $(KDEF)
@@ -100,7 +98,7 @@ $(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC) $(CCACHE
 ##WIN32##	   -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
 ##WIN32##	   k5_glue.obj version.res $(KRB5RC) $(MITLIBS) $(KLIBS) \
-##WIN32##          $(CCACHE_LIB) $(CLIB) $(PLIB) \
+##WIN32##          $(CLIB) $(PLIB) \
 ##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj

@@ -1,3 +1,11 @@
+1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* win_glue.c (control): Call krb5_stdcc_shutdown when detaching
+		the krb5 library.
+
+	* Makefile.in: Remove reference to the windows Krbcc32.dll
+		library, since this is now dynamically loaded.
+
 Mon Feb  8 22:08:22 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Link in the ccapi import library under windows.

@@ -38,6 +38,7 @@
 #include "kdb5_err.h"
 #include "profile.h"
 #include "adm_err.h"
+extern void krb5_stdcc_shutdown();
 #endif
 #ifdef GSSAPI
 #include "gssapi/generic/gssapi_err_generic.h"
@@ -372,10 +373,12 @@ control(int mode)
 	    return -104;			/* FIXME -- better error? */
 	}
 #endif
-
 	break;
 
     case DLL_SHUTDOWN:
+#ifdef KRB5
+	krb5_stdcc_shutdown();
+#endif
 	et_func = remove_error_table;
 #ifdef NEED_WINSOCK
 	WSACleanup ();
