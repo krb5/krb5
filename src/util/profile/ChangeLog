@@ -1,3 +1,8 @@
+2004-03-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_get.c (profile_parse_boolean): Declare first argument as
+	const char *.
+
 2004-02-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_init.c (prof_int32): If long is 4 bytes and int is not,

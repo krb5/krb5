@@ -283,7 +283,7 @@ static const char *const conf_no[] = {
 };
 
 static errcode_t
-profile_parse_boolean(char *s, int *ret_boolean)
+profile_parse_boolean(const char *s, int *ret_boolean)
 {
     const char *const *p;
     
