@@ -45,8 +45,7 @@
 #endif /* T_SRV */
 
 #define FAI_PREFIX krb5int
-#define FAI_IMPLEMENTATION
-#include "fake-addrinfo.h"
+#include "fake-addrinfo.c"
 
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
