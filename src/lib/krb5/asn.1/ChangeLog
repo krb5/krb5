@@ -1,5 +1,7 @@
 2004-08-31  Tom Yu  <tlyu@mit.edu>
 
+	* asn1buf.c: Fix denial-of-service bug.
+
 	* asn1buf.c:
 	* krb5_decode.c: Fix double-free vulnerabilities.
 

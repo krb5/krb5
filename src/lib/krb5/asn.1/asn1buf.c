@@ -140,6 +140,8 @@ asn1_error_code asn1buf_skiptail(buf, length, indef)
       return ASN1_OVERRUN;
   }
   while (nestlevel > 0) {
+    if (buf->bound - buf->next + 1 <= 0)
+      return ASN1_OVERRUN;
     retval = asn1_get_tag_indef(buf, &class, &construction, &tagnum,
 				&taglen, &tagindef);
     if (retval) return retval;
