@@ -92,8 +92,6 @@ Make "$(MakeStamp)" : "$(Makefile)" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kadmin"          : "$(IntermediateBuild)/kadmin/cli/kadmin" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kadmin.local"    : "$(IntermediateBuild)/kadmin/cli/kadmin.local" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kadmind"         : "$(IntermediateBuild)/kadmin/server/kadmind" ;
-InstallProgram "$(DSTROOT)/usr/sbin/kadmind4"        : "$(IntermediateBuild)/kadmin/v4server/kadmind4" ;
-InstallProgram "$(DSTROOT)/usr/sbin/v5passwdd"       : "$(IntermediateBuild)/kadmin/v5passwdd/v5passwdd" ;
 InstallProgram "$(DSTROOT)/usr/sbin/ktutil"          : "$(IntermediateBuild)/kadmin/ktutil/ktutil" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kdb5_util"       : "$(IntermediateBuild)/kadmin/dbutil/kdb5_util" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kprop"           : "$(IntermediateBuild)/slave/kprop" ;
