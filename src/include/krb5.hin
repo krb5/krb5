@@ -1052,6 +1052,7 @@ typedef struct _krb5_cc_ops {
 #define	KRB5_TC_MATCH_AUTHDATA		0x00000020
 #define	KRB5_TC_MATCH_SRV_NAMEONLY	0x00000040
 #define	KRB5_TC_MATCH_2ND_TKT		0x00000080
+#define	KRB5_TC_MATCH_KTYPE		0x00000100
 
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
@@ -1256,6 +1257,14 @@ krb5_error_code krb5_set_default_in_tkt_ktypes
 		   krb5_const krb5_enctype *));
 krb5_error_code krb5_get_default_in_tkt_ktypes
 	KRB5_PROTOTYPE((krb5_context,
+		   krb5_enctype **));
+
+krb5_error_code krb5_set_default_tgs_ktypes
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_const krb5_enctype *));
+krb5_error_code krb5_get_tgs_ktypes
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_const_principal,
 		   krb5_enctype **));
 
 /* libkrb.spec */
