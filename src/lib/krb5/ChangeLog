@@ -1,5 +1,8 @@
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5_libinit.c (krb5int_lib_init, krb5int_lib_fini): If
+	SHOW_INITFINI_FUNCS is defined, print tracing messages.
+
 	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): Define.
 
 2005-01-17  Jeffrey Altman <jaltman@mit.edu>

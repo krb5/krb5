@@ -31,6 +31,10 @@ int krb5int_lib_init(void)
 {
     int err;
 
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_lib_init\n");
+#endif
+
 #if !USE_BUNDLE_ERROR_STRINGS
     add_error_table(&et_krb5_error_table);
     add_error_table(&et_kv5m_error_table);
@@ -66,8 +70,14 @@ krb5_error_code krb5int_initialize_library (void)
 
 void krb5int_lib_fini(void)
 {
-    if (!INITIALIZER_RAN(krb5int_lib_init) || PROGRAM_EXITING())
+    if (!INITIALIZER_RAN(krb5int_lib_init) || PROGRAM_EXITING()) {
+	printf("krb5int_lib_fini: skipping\n");
 	return;
+    }
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_lib_fini\n");
+#endif
 
     k5_mutex_destroy(&krb5int_us_time_mutex);
 
