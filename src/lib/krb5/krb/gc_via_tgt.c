@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_gcvtgt_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
 #include <krb5/asn1.h>
@@ -130,8 +130,8 @@ OLDDECLARG(krb5_creds *, cred)
 	return KRB5_KDCREP_MODIFIED;
     }
     /* put pieces into cred-> */
-    if (retval = krb5_copy_keyblock(dec_rep->enc_part2->session,
-				    &cred->keyblock)) {
+    if (retval = krb5_copy_keyblock_contents(dec_rep->enc_part2->session,
+					     &cred->keyblock)) {
 	cleanup();
 	return retval;
     }
@@ -180,6 +180,11 @@ OLDDECLARG(krb5_creds *, cred)
 	cleanup();
 	return retval;
     }
+    if (retval = krb5_copy_principal(dec_rep->enc_part2->server,
+				     &cred->server)) {
+	cleanup();
+	return retval;
+    }
 
     if (retval = encode_krb5_ticket(dec_rep->ticket, &scratch)) {
 	cleanup();
@@ -188,7 +193,7 @@ OLDDECLARG(krb5_creds *, cred)
     }
 
     cred->ticket = *scratch;
-    free((char *)scratch);
+    xfree(scratch);
 
     krb5_free_kdc_rep(dec_rep);
     return retval;
