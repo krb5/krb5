@@ -1,3 +1,8 @@
+Tue Apr 30 15:04:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.tmpl: Added compile/link lines to build a PowerPC CFM
+ 		shared libraries.
+
 Sat Mar 30 22:45:56 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* macfiles.sh: Add the C files which were used in the MACSRCS

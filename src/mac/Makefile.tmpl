@@ -2,8 +2,13 @@ KH = /mac/libraries/
 KH68K = {KH}KerberosHeaders68K
 KHPPC = {KH}KerberosHeadersPPC
 
+GSSOBJSCFMPPC = "{MWPPCLibraries}ANSI C.PPC.Lib" \
+	{MWPPCLibraries}MWCRuntime.Lib {MWPPCLibraries}SIOUX.PPC.Lib \
+	{SharedLibraries}InterfaceLib {SharedLibraries}MathLib
+
 OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
-	-mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000
+        -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
+        -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath
 
 all : build link
 
@@ -30,6 +35,10 @@ link :
 	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
 	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
 	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
+        MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
+		-@export GSSLibrary.ppc.exp -sym fullpath \
+                -sharedata -map libgss.ppc.MAP -o GSSLibraryPPC \
+		{GSSOBJSCFMPPC} {GSSOBJSPPC}
 
 clean :
 	Delete -i {GSSOBJS68K} {GSSOBJSPPC}
