@@ -1,3 +1,15 @@
+Fri Nov 18 01:19:13 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install): add install rules for krlogind.M,
+	krshd.M, rlogin.M, rcp.M, rsh.M. (Section numbers are explicit,
+	and this should probably be changed.)
+	(from Ted Lemon <mellon@ipd.wellsfargo.com>
+
+Fri Nov 18 01:10:34 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use new macros KRB5_UTPID, KRB5_UTTYPE, and
+	KRB5_UTHOST (from epeisach).
+
 Wed Nov 16 11:45:01 1994  Richard Basch  (probe@tardis)
 
 	* krlogin.c:
