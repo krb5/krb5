@@ -7,17 +7,18 @@ Configure = "$(Sources)/configure" ;
 Makefile = "$(IntermediateBuild)/Makefile" ;
 MakeStamp = "$(IntermediateBuild)/make.stamp" ;
 
-if $(KerberosCFLAGS) != "" { 
-    KerberosCFLAGS = "CFLAGS=$(CFLAGS) -fno-common -include /usr/include/TargetConditionals.h -DUSE_PASSWORD_SERVER" ; 
-} else {
-    KerberosCFLAGS = "CFLAGS=-fno-common -include /usr/include/TargetConditionals.h -DUSE_PASSWORD_SERVER" ;
-}
+# Assemble CFLAGS
+CONFIGURE_CFLAGS = "-fno-common -include /usr/include/TargetConditionals.h -DUSE_PASSWORD_SERVER" ;
+if $(RC_CFLAGS)      != "" { CONFIGURE_CFLAGS = "$(CONFIGURE_CFLAGS) $(RC_CFLAGS)" ;      }
+if $(CFLAGS)         != "" { CONFIGURE_CFLAGS = "$(CONFIGURE_CFLAGS) $(CFLAGS)" ;         }
+if $(OTHER_CFLAGS)   != "" { CONFIGURE_CFLAGS = "$(CONFIGURE_CFLAGS) $(OTHER_CFLAGS)" ;   }
+if $(WARNING_CFLAGS) != "" { CONFIGURE_CFLAGS = "$(CONFIGURE_CFLAGS) $(WARNING_CFLAGS)" ; }
+CONFIGURE_CFLAGS = "CFLAGS=$(CONFIGURE_CFLAGS)" ;
 
-if $(KerberosLDFLAGS) != "" { 
-    KerberosLDFLAGS = "LDFLAGS=$(LDFLAGS) -Wl,-search_paths_first" ; 
-} else {
-    KerberosLDFLAGS = "LDFLAGS=-Wl,-search_paths_first" ;
-}
+# Assemble LDFLAGS
+CONFIGURE_LDFLAGS = "-Wl,-search_paths_first" ;
+if $(LDFLAGS) != "" { CONFIGURE_LDFLAGS = "$(LDFLAGS) $(CONFIGURE_LDFLAGS)" ;  }
+CONFIGURE_LDFLAGS = "LDFLAGS=$(CONFIGURE_LDFLAGS:)" ;
 
 #
 # Note: in this jam script we have separated the dependency tree from the 
@@ -45,7 +46,7 @@ rule Configure
 actions Configure
 {
     mkdir -p "$(1:D)"
-    cd "$(1:D)" && /bin/sh "$(2)" --prefix=/usr --localstatedir=/var/db "$(KerberosCFLAGS)" "$(KerberosLDFLAGS)" || rm -f "$(1)"
+    cd "$(1:D)" && /bin/sh "$(2)" --prefix=/usr --localstatedir=/var/db "$(CONFIGURE_CFLAGS)" "$(CONFIGURE_LDFLAGS)" || rm -f "$(1)"
 }
 
 # Make <stamp file> : <makefile>
