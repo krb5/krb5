@@ -16,6 +16,8 @@ LEXLIB = @LEXLIB@
 ARCHIVE = @ARCHIVE@
 RANLIB = @RANLIB@
 RM = rm -f
+CP = cp
+INSTALLFILE = cp
 
 all::
 
