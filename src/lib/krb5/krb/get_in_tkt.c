@@ -339,8 +339,10 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     krb5_xfree(packet);
 
     /* store it in the ccache! */
-    if ((retval = krb5_cc_store_cred(context, ccache, creds)))
+    if (ccache) {
+      if ((retval = krb5_cc_store_cred(context, ccache, creds)))
 	goto cred_cleanup;
+    }
 
     if (ret_as_reply) {
 	*ret_as_reply = as_reply;

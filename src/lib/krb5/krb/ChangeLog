@@ -1,3 +1,8 @@
+Fri Jun 16 22:11:21 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* get_in_tkt.c (krb5_get_in_tkt): Allow the credentials cache
+		argument to be optional; allow it to be NULL, meaning that
+		the credentials shouldn't be stored in a credentials cache.
 
 Mon Jun 12 16:49:42 1995  Chris Provenzano (proven@mit.edu)
 
