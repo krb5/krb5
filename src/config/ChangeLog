@@ -1,3 +1,9 @@
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in (DLL_FILE_DEF): Add makefile controls to set either
+		KRB5_DLL_FILE or GSS_DLL_FILE, with the default being
+		KRB5_DLL_FILE.
+
 Mon Feb  8 22:13:23 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* winexclude.sed: Add .dll and .lib files to the list of functions

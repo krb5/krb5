@@ -33,10 +33,19 @@ SRCTOP = $(srcdir)\$(BUILDTOP)
 CC=cl /nologo
 CL=
 #
+# Set the #define to indicate that we are compiling a DLL.  We default to 
+# compiling the Kerberos library
+#
+!if defined(DLL_EXP_TYPE)
+DLL_FILE_DEF=/DKRB5_DLL_FILE
+!else
+DLL_FILE_DEF=/D$(DLL_EXP_TYPE)_DLL_FILE
+!endif
+#
 # CCOPTS for DLL functions
 #
-##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 /Ld $(XTRA) /DKRB5_DLL_FILE
-##WIN32##CCOPTS=/Os /Zi /Od /W3 /MD $(XTRA) -DKRB5_DLL_FILE
+##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 /Ld $(XTRA) $(DLL_FILE_DEF)
+##WIN32##CCOPTS=/Os /Zi /Od /W3 /MD $(XTRA) $(DLL_FILE_DEF)
 #
 # CCOPTS for non-DLL compiles
 #
@@ -77,6 +86,8 @@ CVTRES = cvtres
 
 ##WIN16##CLIB=$(BUILDTOP)\lib\comerr16.lib
 ##WIN32##CLIB=$(BUILDTOP)\lib\comerr32.lib
+##WIN16##PLIB=$(BUILDTOP)\lib\xpprof16.lib
+##WIN32##PLIB=$(BUILDTOP)\lib\xpprof32.lib
 ##WIN16##KLIB=$(BUILDTOP)\lib\krb5_16.lib
 ##WIN32##KLIB=$(BUILDTOP)\lib\krb5_32.lib
 ##WIN16##GLIB=$(BUILDTOP)\lib\gssapi.lib
