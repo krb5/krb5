@@ -1,3 +1,8 @@
+Fri Apr 28 08:37:58 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* daemon.c (daemon): Lint cleanup; explicitly declare that
+		daemon() returns an int.
+
 Thu Apr 13 16:44:55 1995 Keith Vetter (keithv@fusion.com)
 
 	* syslog.c: __STDC__ conditional also checks the _WINDOWS define.

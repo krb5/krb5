@@ -44,6 +44,7 @@
 #define _PATH_DEVNULL "/dev/null"
 #endif
 
+int
 daemon(nochdir, noclose)
 	int nochdir, noclose;
 {
