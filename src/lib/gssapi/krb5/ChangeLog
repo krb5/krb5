@@ -1,5 +1,11 @@
 Wed Nov 20 19:55:29 1996  Marc Horowitz  <marc@cygnus.com>
 
+	* init_sec_context.c (make_ap_rep, krb5_gss_init_sec_context),
+ 	accept_sec_context.c (krb5_gss_accept_sec_context): fix up use of
+ 	gss flags.  under some circumstances, the context would not have
+ 	checked for replay or sequencing, even if those features were
+	requested.
+
 	* init_sec_context.c (make_ap_req), (krb5_gss_init_sec_context):
  	If delegation is requested, but forwarding the credentials fails,
 	instead of aborting the context setup, just don't forward
