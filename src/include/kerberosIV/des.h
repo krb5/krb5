@@ -53,7 +53,6 @@ KRBINT_BEGIN_DECLS
 #if TARGET_OS_MAC
 #	if defined(__MWERKS__)
 #		pragma import on
-#		pragma enumsalwaysint on
 #	endif
 #	pragma options align=mac68k
 #endif
@@ -180,6 +179,7 @@ unsigned long KRB5_CALLCONV
 des_cbc_cksum(const des_cblock *, des_cblock *, unsigned long,
 	      const des_key_schedule, const des_cblock *);
 int KRB5_CALLCONV des_string_to_key (const char *, C_Block);
+void afs_string_to_key(char *, char *, des_cblock);
 
 /* XXX ABI change: used to return krb5_error_code */
 int KRB5_CALLCONV des_read_password(des_cblock *, char *, int);
@@ -197,46 +197,7 @@ int des_is_weak_key(des_cblock);
 void des_cblock_print_file(des_cblock *, FILE *fp);
 
 #if TARGET_OS_MAC
-
-/*
- * Stuff ported from KfM follows...
- */
-
-void afs_string_to_key(char *, char *, des_cblock);
-
-/*
- * AFS string2key support; they should be considered internal, but KfM
- * exposes them.
- */
-char *des_crypt(const char *, const char *);
-char *des_fcrypt(const char *, const char *, char *);
-int des_set_key(des_cblock *, des_key_schedule);
-
-/*
- * internal used by des_read_password, but kfm exposes it
- */
-int KRB5_CALLCONV des_read_pw_string(char *, int, char *, int);
-
-void des_3cbc_encrypt(des_cblock *, des_cblock *, long, des_key_schedule, des_key_schedule, des_key_schedule, des_cblock *, int);
-void des_3ecb_encrypt(des_cblock *, des_cblock *, des_key_schedule, des_key_schedule, des_key_schedule, int);
-
-/*
- * Should be internal to crypto/des/f_sched.c, but KfM exposes it.
- */
-int make_key_sched(des_cblock *, des_key_schedule);
-
-/*
- * XXX need to implement the following three:
- */
-void des_generate_random_block(des_cblock);
-void des_set_random_generator_seed(des_cblock);
-void des_set_sequence_number(des_cblock);
-
-#endif /* TARGET_OS_MAC */
-
-#if TARGET_OS_MAC
 #	if defined(__MWERKS__)
-#		pragma enumsalwaysint reset
 #		pragma import reset
 #	endif
 #	pragma options align=reset

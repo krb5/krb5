@@ -30,18 +30,15 @@
 #ifndef	KRB_DEFS
 #define KRB_DEFS
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-#	include <TargetConditionals.h>
-#	if TARGET_RT_MAC_CFM
-#		error "Use KfM 4.0 SDK headers for CFM compilation."
-#	endif
-#endif
-
 /*
  * For MacOS, don't expose prototypes of various private functions.
  * Unfortuantely, they've leaked out everywhere else.
  */
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#	include <TargetConditionals.h>
+#	if TARGET_RT_MAC_CFM
+#		error "Use KfM 4.0 SDK headers for CFM compilation."
+#	endif
 #	ifndef KRB_PRIVATE
 #		define KRB_PRIVATE 0
 #	endif
@@ -140,6 +137,8 @@ extern const char * const krb_err_txt[MAX_KRB_ERRORS];
 #ifndef DEFAULT_TKT_LIFE		/* allow compile-time override */
 #define DEFAULT_TKT_LIFE	120	/* default lifetime for krb_mk_req */
 #endif
+
+#define		KRB_TICKET_GRANTING_TICKET	"krbtgt"
 
 /* Definition of text structure used to pass text around */
 #define		MAX_KTXT_LEN	1250
@@ -737,7 +736,12 @@ extern int krb_create_ticket(KTEXT tkt, unsigned int flags, char *pname,
 			     char *session, int life, long time_sec, 
 			     char *sname, char *sinstance, C_Block key);
 
+#endif /* KRB_PRIVATE */
+
+/* This function is used by KEYFILE above.  Do not call it directly */
 extern char * krb__get_srvtabname(const char *);
+
+#if KRB_PRIVATE
 
 extern int krb_kntoln(AUTH_DAT *, char *);
 
@@ -753,38 +757,6 @@ extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
 #endif
 
 #endif /* KRB_PRIVATE */
-
-/* FSp-glue.c */
-#if TARGET_OS_MAC && defined(__FILES__)
-int KRB5_CALLCONV FSp_krb_get_svc_in_tkt(char *, char *, char *, char *,
-					 char *, int, const FSSpec *);
-int KRB5_CALLCONV FSp_put_svc_key(const FSSpec *, char *, char *, char *,
-				  int, char *);
-int KRB5_CALLCONV FSp_read_service_key(char *, char *, char *,
-				       int, const FSSpec*, char *);
-#endif
-
-#if TARGET_OS_MAC
-/*
- * KfM krb.hin had the following, probably inherited from CNS:
- *
- *   The following functions are not part of the standard Kerberos v4
- *   API.  They were created for Mac implementation, and used by admin
- *   tools such as CNS-Config.
- */
-extern int KRB5_CALLCONV
-krb_get_num_cred(void);
-
-extern int KRB5_CALLCONV
-krb_get_nth_cred(char *, char *, char *, int);
-
-extern int KRB5_CALLCONV
-krb_delete_cred(char *, char *,char *);
-
-extern int KRB5_CALLCONV
-dest_all_tkts(void);
-
-#endif /* TARGET_OS_MAC */
 
 /*
  * krb_change_password -- merged from KfM
@@ -808,7 +780,6 @@ long win_time_get_epoch(void);
 
 #if TARGET_OS_MAC
 #	if defined(__MWERKS__)
-#		pragma enumsalwaysint reset
 #		pragma import reset
 #	endif
 #	pragma options align=reset

@@ -37,15 +37,15 @@
  * Doug Church, December 28, 1989, MIT Project Athena
  */
 
-/* for those broken Unixes without this defined... should be in sys/param.h */
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif
-
 #include <sys/types.h>
 #include "port-sockets.h"
 #include <kerberosIV/krb.h>
 #include <kerberosIV/des.h>
+
+/* for those broken Unixes without this defined... should be in sys/param.h */
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64
+#endif
 
 /* The global structures for the client and server */
 typedef struct {

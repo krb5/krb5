@@ -1,3 +1,21 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+    * des.h, krb.h: Removed deprecated KfM functions.  They will be 
+    exported but not in the headers to discourage new callers. Removed 
+    enumsalwaysint because there are no typed enums in this header.
+    
+    * des.h: Made afs_string_to_key public on all platforms. (OpenAFS 
+    folk think this is okay.)
+    
+    * krb.h, prot.h: Made KRB_TICKET_GRANTING_TICKET public and 
+    removed non-public TICKET_GRANTING_TICKET because this macro is 
+    used in lots of places by KfM, including some clients. Made 
+    krb__get_srvtabname non-private because it is used by KEYFILE.
+    
+    * kadm.h: moved definition of MAXHOSTNAMELEN below the inclusion
+    of other headers so that if it gets defined by those other 
+    headers or headers they include, we don't get a redefinition
+    error (this happens on Mac OS X). 
+
 2003-02-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (krb_err.h, kadm_err.h): Rebuild by going to

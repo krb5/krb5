@@ -35,7 +35,6 @@
 #define		KRB_PROT_VERSION 	4
 #define 	MAX_PKT_LEN		1000
 #define		MAX_TXT_LEN		1000
-#define		TICKET_GRANTING_TICKET	"krbtgt"
 
 /* Macro's to obtain various fields from a packet */
 
