@@ -1,3 +1,12 @@
+Wed Oct 30 13:18:34 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* xdr_stdio.c: Remove the #ifndef mc68000 cruft.  I'm not sure
+ 	what it was supposed to accomplish, but in both places it appeared
+ 	it was unquestionably wrong.  I suspect that the ifdef was put in
+ 	originally to optimize byte-alignment code that wasn't necessary
+ 	on the 68000.  Who knows?  Someone will complain if this isn't
+ 	right. [krb5-libs/47]
+  
 Tue Oct 29 13:03:50 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* auth_gssapi.c (auth_gssapi_create): #ifdef GSSAPI_KRB5, a null

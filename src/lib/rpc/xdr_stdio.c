@@ -108,9 +108,9 @@ xdrstdio_getlong(xdrs, lp)
 	if (fread((caddr_t)&tmp,
 		  sizeof(rpc_int32), 1, (FILE *)xdrs->x_private) != 1)
 		return (FALSE);
-#ifndef mc68000
+
 	*lp = ntohl(tmp);
-#endif
+
 	return (TRUE);
 }
 
@@ -119,10 +119,8 @@ xdrstdio_putlong(xdrs, lp)
 	XDR *xdrs;
 	long *lp;
 {
-
-#ifndef mc68000
 	rpc_int32 mycopy = htonl((rpc_int32)*lp);
-#endif
+
 	if (fwrite((caddr_t)&mycopy, sizeof(rpc_int32), 1, (FILE *)xdrs->x_private) != 1)
 		return (FALSE);
 	return (TRUE);
