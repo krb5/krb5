@@ -18,6 +18,7 @@ static char rcsid_rd_safe_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
+#include <errno.h>
 
 #include <krb5/asn1.h>
 #include <stdio.h>
@@ -110,12 +111,21 @@ krb5_data *outbuf;
 	cleanup();
 	return retval;
     }
+    message->checksum = his_cksum;
 			 
+    if (!(our_cksum.contents = (krb5_octet *)
+	  malloc(krb5_cksumarray[his_cksum->checksum_type]->checksum_length))) {
+	cleanup();
+	return ENOMEM;
+    }
+
+#undef cleanup
+#define cleanup() {krb5_free_safe(message); xfree(our_cksum.contents);}
+
     retval = (*(krb5_cksumarray[his_cksum->checksum_type]->
 		sum_func))(scratch->data,
-			   0, /* XXX? */
-			   (krb5_pointer) key->contents,
 			   scratch->length,
+			   (krb5_pointer) key->contents,
 			   key->length,
 			   &our_cksum);
     (void) bzero((char *)scratch->data, scratch->length);
@@ -126,8 +136,6 @@ krb5_data *outbuf;
 	return retval;
     }
 
-#undef cleanup
-#define cleanup() {krb5_free_safe(message); xfree(our_cksum.contents);}
 
     if (our_cksum.length != his_cksum->length ||
 	bcmp((char *)our_cksum.contents, (char *)his_cksum->contents,

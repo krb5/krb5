@@ -18,6 +18,7 @@ static char rcsid_mk_safe_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
+#include <errno.h>
 
 #include <krb5/asn1.h>
 #include <stdio.h>
@@ -94,20 +95,27 @@ OLDDECLARG(krb5_data *, outbuf)
 
 #define clean_scratch() {(void) bzero((char *)scratch->data, scratch->length); krb5_free_data(scratch);}
 			 
+    if (!(safe_checksum.contents = (krb5_octet *)
+	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {
+	clean_scratch();
+	return ENOMEM;
+    }
     if (retval = (*(krb5_cksumarray[sumtype]->sum_func))(scratch->data,
-							 0, /* XXX? */
-							 (krb5_pointer) key->contents,
 							 scratch->length,
+							 (krb5_pointer) key->contents,
 							 key->length,
 							 &safe_checksum)) {
+	xfree(safe_checksum.contents);
 	clean_scratch();
 	return retval;
     }
     safemsg.checksum = &safe_checksum;
     clean_scratch();
-    if (retval = encode_krb5_safe(&safemsg, &scratch))
+    if (retval = encode_krb5_safe(&safemsg, &scratch)) {
+	xfree(safe_checksum.contents);
 	return retval;
-
+    }
+    xfree(safe_checksum.contents);
     *outbuf = *scratch;
     free((char *)scratch);
 
