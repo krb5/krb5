@@ -10,7 +10,7 @@ LIBOBJS=@LIBOBJS@
 
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
 	login.c
-OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o $(SETENVOBJ) \
+OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o logutil.o $(SETENVOBJ) \
 	login.o $(LIBOBJS)
 
 RSH=	-DKRB_RLOGIN=\"$(PROGDIR)/rlogin\"
