@@ -58,14 +58,18 @@ void PRS(argc, argv)
 		print_constructed_length, print_skip_context,
 		print_skip_tagnum, print_context_shortcut;
 
-	while ((optchar = getopt(argc, argv, "t")) != EOF) {
+	while ((optchar = getopt(argc, argv, "tp:")) != EOF) {
 		switch(optchar) {
 		case 't':
 			do_trval = 1;
 			break;
+		case 'p':
+			sample_principal_name = optarg;
+			break;
 		case '?':
 		default:
-			fprintf(stderr, "Usage: %s [-t]\n", argv[0]);
+			fprintf(stderr, "Usage: %s [-t] [-p principal]\n",
+				argv[0]);
 			exit(1);
 		}
 	}
@@ -87,8 +91,11 @@ void main(argc, argv)
 
   PRS(argc, argv);
   
-  krb5_init_context(&test_context);
-  krb5_init_ets(test_context);
+  retval = krb5_init_context(&test_context);
+  if (retval) {
+	  com_err(argv[0], retval, "while initializing krb5");
+	  exit(1);
+  }
   
 #define setup(value,type,typestring,constructor)\
   retval = constructor(&(value));\

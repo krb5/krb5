@@ -91,6 +91,10 @@ krb5_error_code ktest_make_sample_etype_info
     KRB5_PROTOTYPE((krb5_etype_info_entry *** p));
 krb5_error_code ktest_make_sample_pa_enc_ts
 	KRB5_PROTOTYPE((krb5_pa_enc_ts *am));
+krb5_error_code ktest_make_sample_sam_challenge
+	KRB5_PROTOTYPE((krb5_sam_challenge * p));
+krb5_error_code ktest_make_sample_sam_response
+	KRB5_PROTOTYPE((krb5_sam_response * p));
 
 /*----------------------------------------------------------------------*/
 
@@ -138,5 +142,8 @@ void ktest_destroy_etype_info_entry
 	KRB5_PROTOTYPE((krb5_etype_info_entry *i));
 void ktest_destroy_etype_info
 	KRB5_PROTOTYPE((krb5_etype_info_entry **info));
+
+extern krb5_context test_context;
+extern char *sample_principal_name;
 
 #endif

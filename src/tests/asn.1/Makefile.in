@@ -21,11 +21,17 @@ trval: $(srcdir)/trval.c
 	$(CC) -o trval $(CFLAGS) -DSTANDALONE $(srcdir)/trval.c
 
 check:: krb5_decode_test krb5_encode_test
-	$(RUN_SETUP) ./krb5_decode_test
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) ./krb5_decode_test
 	$(RM) test.out
-	$(RUN_SETUP) ./krb5_encode_test > test.out
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) ./krb5_encode_test > test.out
 	cmp test.out $(srcdir)/reference_encode.out
-	$(RUN_SETUP) ./krb5_encode_test -t > test.out
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) ./krb5_encode_test -t > test.out
 	cmp test.out $(srcdir)/trval_reference.out
 	$(RM) test.out	
 

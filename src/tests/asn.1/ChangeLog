@@ -1,3 +1,20 @@
+Thu Nov 14 14:13:41 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5_encode_test.c (PRS): Add the -p option to krb5_encode_test
+		to change the sample principal value (to test encoding of
+		different krb5 principals).
+
+	* ktest.c (ktest_make_sample_principal): Use krb5_parse_principal
+ 		so that sample principal can be configured for different
+ 		purposes.
+
+	* krb5_decode_test.c (main): 
+	* krb5_encode_test.c (main): Check return value from
+		krb5_init_context to make sure it succeeded.
+
+	* Makefile.in (check): Set KRB5_CONFIG to
+	 	$(TOPSRC)/config-files/krb5.conf so that the tests work.
+
 Wed Jun  5 15:59:12 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5_decode_test.c (main): For asn1_decode_enc_kdc_rep_part,

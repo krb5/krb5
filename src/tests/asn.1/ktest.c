@@ -2,6 +2,8 @@
 #include "utility.h"
 #include <stdlib.h>
 
+char *sample_principal_name = "hftsai/extra@ATHENA.MIT.EDU";
+
 krb5_error_code ktest_make_sample_authenticator(a)
      krb5_authenticator * a;
 {
@@ -31,22 +33,8 @@ krb5_error_code ktest_make_sample_principal(p)
 {
   krb5_error_code retval;
 
-  /*if(*p == NULL){*/
-    *p = (krb5_principal)calloc(1,sizeof(krb5_principal_data));
-    if(*p == NULL) return ENOMEM;
-  /*}*/
-  retval = krb5_data_parse(&((*p)->realm),"ATHENA.MIT.EDU");
-  if(retval) return retval;
-  (*p)->type = 1;
-  (*p)->length = 2;
-  (*p)->data = (krb5_data*)calloc(2,sizeof(krb5_data));
-  if((*p)->data == NULL) return ENOMEM;
-  retval = krb5_data_parse(&((*p)->data[0]),"hftsai");
-  if(retval) return retval;
-  retval = krb5_data_parse(&((*p)->data[1]),"extra");
-  if(retval) return retval;
-
-  return 0;
+  retval = krb5_parse_name(test_context, sample_principal_name, p);
+  return retval;
 }
 
 krb5_error_code ktest_make_sample_checksum(cs)
