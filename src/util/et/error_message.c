@@ -94,6 +94,17 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 	}
 
 #if defined(_MSDOS) || defined(_WIN32)
+	/*
+	 * WinSock errors exist in the 10000 and 11000 ranges
+	 * but might not appear if WinSock is not initialized
+	 */
+	if (code < 12000) {
+		table_num = 0;
+		offset = code;
+		divisor = 10000;
+	}
+#endif
+#ifdef _WIN32	
 	{
 		LPVOID msgbuf;
 
@@ -140,7 +151,6 @@ oops:
 		*cp++ = ' ';
 	}
 	while (divisor > 1) {
-	    fprintf(stderr, "divisor %d, offset %d\n", divisor, offset);
 	    if (started || offset >= divisor) {
 		*cp++ = '0' + offset / divisor;
 		offset %= divisor;
@@ -148,7 +158,6 @@ oops:
 	    }
 	    divisor /= 10;
 	}
-	fprintf(stderr, "divisor %d, offset %d\n", divisor, offset);
 	*cp++ = '0' + offset;
 	*cp = '\0';
 	return(buffer);
