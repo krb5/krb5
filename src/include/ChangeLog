@@ -1,3 +1,11 @@
+2004-07-14  Jeffrey Altman <jaltman@mit.edu>
+
+    * k5-int.h: define for WIN32 the macro krb5int_zap_data to 
+      utilize the Win32 API SecureZeroMemory which is guaranteed
+      by Microsoft not to be optimized out by the compiler.
+      Both memset and ZeroMemory will be optimized out by the 
+      compiler when possible.
+
 2004-07-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (k5_call_init_function) [DELAY_INITIALIZER]
@@ -24,6 +32,7 @@
 	* fake-addrinfo.h (in6addr_any): If we need to define a static
 	copy, rename it with a macro first.
 
+>>>>>>> 1.444
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h: Test HAVE_PTHREAD instead of HAVE_PTHREAD_H.
