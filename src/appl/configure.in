@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
-CONFIG_DIRS(telnet sample simple bsd popper movemail user_user)
+CONFIG_DIRS(sample simple user_user)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 CONFIG_RULES
