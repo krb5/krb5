@@ -58,7 +58,7 @@ void *global_server_handle;
  * it also restricts us to linking against the Kv5 GSS-API library.
  * Since this is *k*admind, that shouldn't be a problem.
  */
-extern 	char *krb5_defkeyname;
+extern 	char *krb5_overridekeyname;
 
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
 		      htons(addr.sin_port));
 	  }
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close();
 	  exit(1);
      }
      memset(&addr, 0, sizeof(addr));
@@ -380,9 +380,10 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     /* XXX krb5_defkeyname is an internal library global and should
-        go away */
-     krb5_defkeyname = params.admin_keytab;
+     /* XXX krb5_overridekeyname is an internal library global and should
+        go away.  This is an awful hack. */
+
+     krb5_overridekeyname = params.admin_keytab;
 
      /*
       * Try to acquire creds for the old OV services as well as the
