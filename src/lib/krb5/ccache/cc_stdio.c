@@ -82,36 +82,33 @@ end-of-file versus other errors.
  */
 #include "k5-int.h"
 
-krb5_error_code krb5_scc_close 
+krb5_error_code KRB5_CALLCONV krb5_scc_close
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-char *krb5_scc_default_name 
-	PROTOTYPE((krb5_context));
-
-krb5_error_code krb5_scc_destroy 
+krb5_error_code KRB5_CALLCONV krb5_scc_destroy
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-krb5_error_code krb5_scc_end_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_scc_end_seq_get
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor ));
 
-krb5_error_code krb5_scc_generate_new 
+krb5_error_code KRB5_CALLCONV krb5_scc_generate_new
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache *id ));
 
-char *krb5_scc_get_name 
+char * KRB5_CALLCONV krb5_scc_get_name
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-krb5_error_code krb5_scc_get_principal 
+krb5_error_code KRB5_CALLCONV krb5_scc_get_principal
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal *princ ));
 
-krb5_error_code krb5_scc_initialize 
+krb5_error_code KRB5_CALLCONV krb5_scc_initialize 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal princ ));
@@ -124,7 +121,7 @@ krb5_error_code krb5_scc_open_file
 		   krb5_ccache,
 		   int));
 
-krb5_error_code krb5_scc_next_cred 
+krb5_error_code KRB5_CALLCONV krb5_scc_next_cred 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
@@ -180,24 +177,24 @@ krb5_error_code krb5_scc_read_authdatum
 		   krb5_ccache, 
 		   krb5_authdata*));
 
-krb5_error_code krb5_scc_resolve 
+krb5_error_code KRB5_CALLCONV krb5_scc_resolve 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache *id , 
 		   const char *residual ));
 
-krb5_error_code krb5_scc_retrieve 
+krb5_error_code KRB5_CALLCONV krb5_scc_retrieve 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags whichfields , 
 		   krb5_creds *mcreds , 
 		   krb5_creds *creds ));
 
-krb5_error_code krb5_scc_start_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_scc_start_seq_get 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor ));
 
-krb5_error_code krb5_scc_store 
+krb5_error_code KRB5_CALLCONV krb5_scc_store 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_creds *creds ));
@@ -208,7 +205,7 @@ krb5_error_code krb5_scc_skip_principal
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-krb5_error_code krb5_scc_set_flags 
+krb5_error_code KRB5_CALLCONV krb5_scc_set_flags 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags flags ));
@@ -1416,6 +1413,7 @@ krb5_scc_skip_principal(context, id)
  * permission errors
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_initialize(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -1454,6 +1452,7 @@ krb5_scc_initialize(context, id, princ)
  * associated with the cache.
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_close(context, id)
    krb5_context context;
    krb5_ccache id;
@@ -1488,7 +1487,9 @@ krb5_scc_close(context, id)
  * Errors:
  * system errors
  */
-krb5_error_code krb5_scc_destroy(context, id)
+krb5_error_code
+KRB5_CALLCONV
+krb5_scc_destroy(context, id)
    krb5_context context;
    krb5_ccache id;
 {
@@ -1588,6 +1589,7 @@ krb5_error_code krb5_scc_destroy(context, id)
  * permission errors
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_resolve (context, id, residual)
    krb5_context context;
    krb5_ccache *id;
@@ -1645,6 +1647,7 @@ krb5_scc_resolve (context, id, residual)
  * system errors
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_start_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;
@@ -1695,6 +1698,7 @@ done:
  * system errors
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_next_cred(context, id, cursor, creds)
    krb5_context context;
    krb5_ccache id;
@@ -1776,6 +1780,7 @@ lose:
  */
 /* ARGSUSED */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_end_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;
@@ -1807,6 +1812,7 @@ extern krb5_cc_ops krb5_scc_ops;
  * system errors (from open)
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_generate_new (context, id)
    krb5_context context;
    krb5_ccache *id;
@@ -1904,6 +1910,7 @@ err_out:
  * The name of the file cred cache id.
  */
 char *
+KRB5_CALLCONV
 krb5_scc_get_name (context, id)
    krb5_context context;
    krb5_ccache id;
@@ -1925,6 +1932,7 @@ krb5_scc_get_name (context, id)
  * KRB5_CC_NOMEM
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_get_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -1944,7 +1952,8 @@ done:
      return kret;
 }
 
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
+KRB5_CALLCONV
 krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
    krb5_context context;
    krb5_ccache id;
@@ -1968,6 +1977,7 @@ krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
  * storage failure errors
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_store(context, id, creds)
    krb5_context context;
    krb5_ccache id;
@@ -2023,6 +2033,7 @@ lose:
  * Sets the operational flags of id to flags.
  */
 krb5_error_code
+KRB5_CALLCONV
 krb5_scc_set_flags(context, id, flags)
    krb5_context context;
    krb5_ccache id;

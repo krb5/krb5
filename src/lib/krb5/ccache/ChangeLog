@@ -1,5 +1,12 @@
 2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
 
+	* cc_file.c, cc_stdio.c: Remove unused krb5_[fs]cc_default_name()
+	prototype.
+
+	* cc_stdio.c: Fix calling convention for op functions.
+
+	* ccfns.c (krb5_cc_get_type): Fix calling convention.
+
 	* Makefile.in: Change ${CC} and ${OBJS} to $(CC) and $(OBJS) so
 	nmake does not freak out.
 

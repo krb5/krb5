@@ -95,9 +95,6 @@ fcc_nseq.c and fcc_read don't check return values a lot.
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_close
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-char * krb5_fcc_default_name 
-        KRB5_PROTOTYPE((krb5_context));
-
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_destroy 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
