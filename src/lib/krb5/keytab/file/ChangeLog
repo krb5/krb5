@@ -1,5 +1,9 @@
 Tue Oct  4 16:20:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* ktf_get_en.c (krb5_ktfile_get_entry): Fix to compare using
+		new_entry instead of cur_entry.  (Bug made in modification
+		on Sep 28th).  Don't free cur_entry twice on errors.
+
         * ktfile.h
 	* ktf_wreslv.c (krb5_ktfile_wresolve):
 	* ktf_resolv.c (krb5_ktf_resolv): Resolv's first argument is now a

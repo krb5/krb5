@@ -54,11 +54,13 @@ OLDDECLARG(krb5_keytab_entry *, entry)
      * is exited with a break statement.
      */
     cur_entry.principal = 0;
+    cur_entry.vno = 0;
+    cur_entry.key.contents = 0;
     while (TRUE) {
 	if (kerror = krb5_ktfileint_read_entry(id, &new_entry))
 	    break;
 
-	if (krb5_principal_compare(principal, cur_entry.principal)) {
+	if (krb5_principal_compare(principal, new_entry.principal)) {
 		if (kvno == IGNORE_VNO) {
 			if (cur_entry.vno < new_entry.vno) {
 				krb5_kt_free_entry(&cur_entry);
@@ -76,14 +78,11 @@ OLDDECLARG(krb5_keytab_entry *, entry)
 	if (kerror == KRB5_KT_END)
 	    kerror = KRB5_KT_NOTFOUND;
 	(void) krb5_ktfileint_close(id);
-	if (cur_entry.principal)
-		krb5_kt_free_entry(&cur_entry);
+	krb5_kt_free_entry(&cur_entry);
 	return kerror;
     }
     if ((kerror = krb5_ktfileint_close(id)) != 0) {
 	krb5_kt_free_entry(&cur_entry);
-	if (cur_entry.principal)
-		krb5_kt_free_entry(&cur_entry);
 	return kerror;
     }
     *entry = cur_entry;
