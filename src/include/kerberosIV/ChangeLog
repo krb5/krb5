@@ -1,3 +1,13 @@
+Fri Apr 28 08:24:23 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* conf.h, conf-*.h: Removed.  We don't need them anymore,
+		we're using autoconf!  (And things like MSBFIRST AND
+		LSBFIRST aren't needed anyway, since the CNS V4
+		library figures this all out dynamically anyway.)
+
+	* krb4-proto.h: Don't define the functions found in getenv.o or
+		setenv.o.  Declare krb_stime() instead of stime().
+
 Thu Apr 27 17:12:30 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb.h: add _fmemcpy, _fstrncpy, and far_fputs from cc-unix.h also.

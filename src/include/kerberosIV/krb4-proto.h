@@ -105,8 +105,10 @@ int krb_get_tf_fullname P_TYPE_((char *, char *, char *, char *));
 /* get_tf_realm.c */
 int krb_get_tf_realm P_TYPE_((char *, char *));
 
+#if 0    
 /* getopt.c */
 int getopt P_TYPE_((int , char **, char *));
+#endif
 
 /* getrealm.c */
 char *krb_realmofhost P_TYPE_((char *));
@@ -205,14 +207,16 @@ int send_to_kdc P_TYPE_((KTEXT , KTEXT , char *));
 int krb_sendauth P_TYPE_((long , int , KTEXT , char *, char *, char *, u_long , MSG_DAT *, CREDENTIALS *, Key_schedule , struct sockaddr_in *, struct sockaddr_in *, char *));
 int krb_sendsvc P_TYPE_((int , char *));
 
+#ifdef 0    
 /* setenv.c */
 /* int setenv P_TYPE_((char *, char *, int )); -- is also in telnetd/local-proto.h */
 void unsetenv P_TYPE_((char *));
 char *getenv P_TYPE_((char *));
 char *_findenv P_TYPE_((char *, int *));
+#endif
 
 /* stime.c */
-char *stime P_TYPE_((long *));
+char *krb_stime P_TYPE_((long *));
 
 /* tf_shm.c */
 int krb_shm_create P_TYPE_((char *));
