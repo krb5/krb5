@@ -1,3 +1,10 @@
+Fri Dec  6 00:53:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* v4rcp.c: Extend the platform-specific braindamage so that
+ 		FreeBSD works.  This whole file is eventually going to
+ 		need serious rototilling to make it even vaguely correct.
+		[PR #284]
+
 Fri Dec  6 00:02:25 1996  Tom Yu  <tlyu@mit.edu>
 
 	* loginpaths.h: Add catch-all entries for LPATH and RPATH in case
