@@ -1,21 +1,5 @@
-BUILDTOP=@BUILDTOP@
-SUBDIRS = @SUBDIRS@
-
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)
 
@@ -24,8 +8,3 @@ all:: $(OBJS)
 OBJS=	md5.o md5glue.o md5crypto.o
 
 SRCS=	$(srcdir)/md5.c $(srcdir)/md5glue.c $(srcdir)/md5crypto.c
-
-
-clean::
-	$(RM) $(OBJS)
-

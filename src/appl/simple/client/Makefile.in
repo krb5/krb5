@@ -1,18 +1,6 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
- 
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
-KRB5ROOT = @KRB5ROOT@
- 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-SRCTOP = $(srcdir)/$(BUILDTOP)
-TOPLIBD = $(BUILDTOP)/lib
 ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=

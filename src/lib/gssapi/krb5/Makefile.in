@@ -1,23 +1,5 @@
-BUILDTOP=@BUILDTOP@
-SUBDIRS = @SUBDIRS@
-
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-AWK = @AWK@
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)
 
@@ -105,7 +87,3 @@ clean::
 depend:: $(ETSRCS)
 
 includes:: 
-
-clean::
-	$(RM) $(OBJS)
-

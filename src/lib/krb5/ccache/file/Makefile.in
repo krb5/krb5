@@ -1,24 +1,7 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-RM = rm -f
-CP = cp
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
-
 all:: $(OBJS)
-
-clean::
-	$(RM) $(OBJS)
 
 OBJS 	= fcc_close.o fcc_destry.o fcc_eseq.o \
 	fcc_gennew.o fcc_getnam.o fcc_gprin.o fcc_init.o \

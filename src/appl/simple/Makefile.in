@@ -1,16 +1,2 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
-
 CFLAGS = $(CCOPTS)
 LDFLAGS = -g
-
-SUBDIRS = @SUBDIRS@
-
-
-

@@ -1,11 +1,3 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
- 
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
 ASN1_HDRS=@ASN1_HDRS@
 ASN1_OBJS=@ASN1_OBJS@
 ASN1_SRCS=@ASN1_SRCS@
@@ -13,12 +5,6 @@ BOGUS=@BOGUS@
  
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-AWK = @AWK@
-
 
 EHDRDIR=$(BUILDTOP)/include/krb5
 
@@ -43,6 +29,3 @@ $(BOGUS)::
 
 clean::
 	$(RM) $(HDRS) $(ETSRCS)
-
-clean::
-	$(RM) $(OBJS)

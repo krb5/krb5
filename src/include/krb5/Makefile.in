@@ -1,34 +1,5 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-CC = @CC@
-CCOPTS = @CCOPTS@
-LEX = @LEX@
-LEXLIB = @LEXLIB@
-
-KRB5ROOT = @KRB5ROOT@
 KDB5DIR = $(KRB5ROOT)
 KRB5SRVTABDIR = /etc
-
-KRB5MANROOT = $(KRB5ROOT)/man
-ADMIN_BINDIR = $(KRB5ROOT)/admin
-SERVER_BINDIR = $(KRB5ROOT)/sbin
-CLIENT_BINDIR = $(KRB5ROOT)/bin
-ADMIN_MANDIR = $(KRB5MANROOT)/man8
-SERVER_MANDIR = $(KRB5MANROOT)/man8
-CLIENT_MANDIR = $(KRB5MANROOT)/man1
-FILE_MANDIR = $(KRB5MANROOT)/man5
-KRB5_LIBDIR = $(KRB5ROOT)/lib
-KRB5_INCDIR = $(KRB5ROOT)/include
-KRB5_INCSUBDIRS = \
-	$(KRB5_INCDIR)/krb5 \
-	$(KRB5_INCDIR)/asn.1 \
-	$(KRB5_INCDIR)/kerberosIV
-
-RM = rm -f
-
-CP = cp
 
 KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 		error_def.h errors.h ext-proto.h fieldbits.h \

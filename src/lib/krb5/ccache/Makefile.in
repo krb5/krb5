@@ -1,21 +1,5 @@
-BUILDTOP=@BUILDTOP@
-SUBDIRS = @SUBDIRS@
-
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)
 
@@ -26,6 +10,3 @@ OBJS=	ccbase.o \
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c
-
-clean::
-	$(RM) $(OBJS)

@@ -1,24 +1,5 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
-
-all:: $(OBJS)
-
-clean::
-	$(RM) $(OBJS)
 
 OBJS 	= scc_close.o scc_destry.o scc_eseq.o \
 	scc_gennew.o scc_getnam.o scc_gprin.o scc_init.o \
@@ -34,6 +15,8 @@ SRCS 	= $(srcdir)/scc_close.c $(srcdir)/scc_destry.c $(srcdir)/scc_eseq.c \
 	$(srcdir)/scc_write.c $(srcdir)/scc_sflags.c $(srcdir)/scc_defops.c \
 	$(srcdir)/scc_errs.c $(srcdir)/scc_maybe.c
 
+
+all:: $(OBJS)
 
 test: ${OBJS} scc_test.o
 	${CC} -o test ${OBJS} scc_test.o

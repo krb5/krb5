@@ -1,16 +1,10 @@
-BUILDTOP=@BUILDTOP@
 ###############################################################################
 #   Instructions to Make, for compilation of UNIX compatibility library
 ###############################################################################
 
-srcdir = @srcdir@
-VPATH = @srcdir@
-
 TOPDIR = $(BUILDTOP)/
 
 OPTIONS	=	-I. -I$(HDIR) -I$(ISODEINC) $(PEPYPATH) $(KRBOPT)
-CC = @CC@
-CCOPTS = @CCOPTS@
 CFLAGS  =       $(CCOPTS) $(OPTIONS) $(LOPTIONS) 
 
 KRBINC	=	$(TOPDIR)include/

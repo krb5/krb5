@@ -1,15 +1,9 @@
-BUILDTOP=@BUILDTOP@
 ###############################################################################
 #   Instructions to Make, for compilation of ISODE header files
 ###############################################################################
-srcdir = @srcdir@
-VPATH = @srcdir@
-
 TOPDIR = $(BUILDTOP)/
 
 OPTIONS	=	-I. -I$(HDIR) $(PEPYPATH) $(KRBOPT)
-CC = @CC@
-CCOPTS = @CCOPTS@
 CFLAGS  =       $(CCOPTS) $(OPTIONS) $(LOPTIONS) 
 
 HDIR	=	$(TOPDIR)isode/h/

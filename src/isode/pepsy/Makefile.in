@@ -1,13 +1,6 @@
-BUILDTOP=@BUILDTOP@
 ###############################################################################
 #   Instructions to Make, for compilation of ISODE PEPSY process
 ###############################################################################
-
-srcdir = @srcdir@
-VPATH = @srcdir@
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
 
 TOPDIR = $(BUILDTOP)/
 

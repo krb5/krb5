@@ -1,15 +1,6 @@
-srcdir = @srcdir@
-VPATH = @srcdir@
- 
-DEFS = @DEFS@
-LIBS = @LIBS@
- 
 CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-BUILDTOP=../..
-SRCTOP = $(srcdir)/$(BUILDTOP)
-TOPLIBD = $(BUILDTOP)/lib
 ISODELIB=$(TOPLIBD)/libisode.a
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
