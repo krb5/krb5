@@ -34,13 +34,6 @@
 
 #include <stdio.h>
 
-#ifdef _POSIX_VERSION
- /* Is there a better way to decide whether or not we should use flock */
- /* vs. fcntl.  Example: broken SunOS tmpfs.... */
-#define POSIX_FILE_LOCKS
-#endif
-
-
 #ifdef POSIX_FILE_LOCKS
 #include <errno.h>
 #include <fcntl.h>

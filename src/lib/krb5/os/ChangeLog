@@ -1,3 +1,9 @@
+Mon Oct 31 17:04:08 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* lock_file.c: Back out POSIX_FILE_LOCKS change.  (Should be
+		depending on autoconf.h to supply this #define if
+		necessary.) 
+
 Thu Oct 13 17:24:31 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* configure.in: Add ISODE_DEFS

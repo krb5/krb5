@@ -44,12 +44,6 @@ int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 #include <krb5/los-proto.h>
 #include <stdio.h>
 
-#ifdef _POSIX_VERSION
- /* Is there a better way to decide whether or not we should use flock */
- /* vs. fcntl.  Example: broken SunOS tmpfs.... */
-#define POSIX_FILE_LOCKS
-#endif
-
 #ifdef POSIX_FILE_LOCKS
 #ifndef unicos61
 #include <fcntl.h>
