@@ -79,7 +79,7 @@ $c2n{'9'} = 62;
 $c2n{'_'} = 63;
 
 line: while (<>) {
-    chomp;	# strip record separator
+    chop;	# strip record separator
     @Fld = split($FS, $_, 9999);
     if (/^#/) {
 	next line;
@@ -264,19 +264,15 @@ else {
 
       '#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)');
 &Pick('>', $outfile) &&
-    (print $fh 'static struct et_list link = { 0, 0 };');
+    (print $fh 'void initialize_' . $table_name . '_error_table (void)');
 &Pick('>', $outfile) &&
-    (print $fh 'void initialize_' . $table_name . '_error_table (void) {');
+    (print $fh '    /*@modifies internalState@*/');
 &Pick('>', $outfile) &&
-    (print $fh '	   if (!link.table) {');
+    (print $fh '{');
 &Pick('>', $outfile) &&
-    (print $fh '	       link.next = _et_list;');
-&Pick('>', $outfile) &&
-    (print $fh '	       link.table = &et_' . $table_name . '_error_table;');
-&Pick('>', $outfile) &&
-    (print $fh '	       _et_list = &link;');
-&Pick('>', $outfile) &&
-    (print $fh '	   }');
+    (print $fh '    (void) add_error_table (&et_' . $table_name .
+
+      '_error_table);');
 &Pick('>', $outfile) &&
     (print $fh '}');
 &Pick('>', $outfile) &&
