@@ -1,3 +1,7 @@
+Fri Apr 10 22:52:41 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add CHECK_SETJMP and CHECK_SIGNALS.
+
 Wed Feb 18 15:28:07 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
