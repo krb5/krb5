@@ -1,3 +1,8 @@
+Tue Sep 26 02:31:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* adm_conn.c (kadm_get_creds): zero out creds->server after
+	freeing it to protect later attempts.
+
 Fri Sep 29 17:06:18 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* logger.c: #ifdef the entire file so it's not built under Windows.

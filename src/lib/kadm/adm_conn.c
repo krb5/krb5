@@ -283,8 +283,10 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
 
  cleanup:
     if (kret) {
-	if (creds->server)
+	if (creds->server) {
 	    krb5_free_principal(kcontext, creds->server);
+	    creds->server = 0;
+	}
     }
     if (my_addresses)
 	krb5_free_addresses(kcontext, my_addresses);
