@@ -1,5 +1,0 @@
-debug   - debugging information
-info    - logs connections
-notice  - errors (ie: locked maildrop, broken pipe)
-warning - authentication/authorization errors
-error   - bigger errors (ie: no resources)
