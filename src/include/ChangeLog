@@ -1,3 +1,253 @@
+2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
+
+	* k5-int.h (krb5_os_context) 
+        Removed default_ccprincipal field from krb5_context
+
+2004-01-04 Jeffrey Altman <jaltman@mit.edu>
+
+    * win-mac.h: conditionally define strcasecmp/strncasecmp macros 
+      only if they do not already exist.
+
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Include stdio.h.
+
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * k5-int.h: add new functions to krb5int_access for use by gssapi
+
+2003-12-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (SIZE_MAX): Provide default definition if stdint.h
+	doesn't define it.
+
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+  * win-mac.h: source code written to the C99 standard assumes there
+    are standard definitions for the MAX sizes of C types including
+    size_t.  The MAX preprocessor variables are declared in limits.h
+    but limits.h is not included by any of the other header files.
+    We will therefore include it via win-mac.h.  We must also add a
+    declaration of SIZE_MAX (for size_t) because Microsoft does not
+    provide one.  
+
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+  * k5-platform.h: apply casts (unsigned char) to the assignments from
+    64-bit ints to unsigned char fields to avoid warnings 
+
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_AUTH_CONTEXT_USE_SUBKEY): New macro.
+
+	* k5-int.h (struct krb5_keytypes): Added field required_ctype.
+	(krb5int_c_mandatory_cksumtype): New declaration.
+	(krb5int_generate_and_set_subkey): Declare.
+	(memset) [__GNUC__ && __GLIBC__]: Undef, to reduce compilation
+	warnings in zap() macro with volatile pointer.
+
+	* k5-platform.h: New header file.  Manages inline-function and
+	64-bit support, in platform-specific ways.
+	* fake-addrinfo.h: Include k5-platform.h.
+	(inline): Don't define here.
+	* k5-int.h: Include k5-platform.h.
+	(krb5_ui_8, krb5_int64): New typedefs.
+	(krb5_ser_pack_int64, krb5_ser_unpack_int64): New function decls.
+
+2003-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Add prototypes for decode_krb5_safe_with_body and
+	encode_krb5_safe_with_body.
+
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (WRAP_GETADDRINFO, COPY_FIRST_CANONNAME): Don't
+	define on Linux unless HAVE_GETADDRINFO is defined, for libc5
+	compatibility.
+
+2003-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* foreachaddr.c (foreach_localaddr) [HAVE_IFADDRS_H]: Skip over
+	any returned data structure with a NULL ifa_addr field.
+
+2003-07-31  Jeffrey Altman  <jaltman@mit.edu>
+
+	* krb5.hin: krb5_get_host_realm and krb5_free_host_realm should
+	not be labeled as KRB5_PRIVATE.  They are required for many
+	applications including OpenAFS and UMich's Kx509.  1.2.8 had them
+	public but the change was never reflected on the trunk.
+
+2003-07-22  Alexandra Ellwood  <lxs@mit.edu>
+
+        * fake-addrinfo.h: Don't use broken getaddrinfo on Mac OS X
+
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (krb5int_zap_data, zap): New macros; call memset with
+	volatile cast for now.
+
+2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
+
+        * krb5_32.def: Export krb5_principal2salt.
+
+2003-07-09  Alexandra Ellwood  <lxs@mit.edu>
+
+        * krb5.hin: Export krb5_get_permitted_enctypes and 
+        krb5_set_real_time for Samba.
+
+2003-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct krb5_cksumtypes): Add new field trunc_size.
+
+2003-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: krb524_init_ets() takes one argument.
+
+2003-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct srv_dns_entry): Declare.
+	(krb5int_make_srv_query_realm, krb5int_free_srv_dns_data):
+	Declare.
+	(struct _krb5int_access): Add make_srv_query_realm and
+	free_srv_dns_data fields.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5int_access): Add locate_server back in.
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (KRB524_SERVICE, KRB524_PORT): Moved here...
+	* krb5.h: ...from here.
+	(krb5_524_convert_creds): Renamed from krb524_convert_creds_kdc,
+	fixed calling convention spec.
+	(krb524_convert_creds_kdc, krb524_init_ets) [KRB5_DEPRECATED]: New
+	macros.
+
+	* Makefile.in (clean-windows): Remove new "timestamp" file when
+	cleaning up.
+
+2003-05-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin: Sequence number of krb5_replay_data should be unsigned.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5.h): Include krb524_err.h.
+	(krb524_err.h): Depend on rebuild-error-tables like krb5_err.h and
+	friends.  Add a null command to cause make to recheck the
+	timestamp on the files possibly updated.
+	(clean-unix): Get rid of it.
+	* k5-int.h (KRb5INT_ACCESS_STRUCT_VERSION): Update to 7.
+	(struct ktext) [!defined(ANAME_SZ)]: Declare forward.
+	(krb5int_access): Delete krb5_locate_kdc, krb5_locate_server,
+	krb5_max_dgram_size and timeout fields.  Add krb_life_to_time,
+	krb_time_to_life, and krb524_encode_v4tkt function pointer
+	fields.  Reorder fields, and add comments.
+	(krb5int_krb_life_to_time, krb5int_krb_time_to_life,
+	krb5int_encode_v4tkt, krb5int_524_sendto_kdc): Declare.
+	* krb5.hin (KRB524_SERVICE, KRB524_PORT): New macros.
+	(struct credentials): Declare forward.
+	(krb524_convert_creds_kdc): Declare.
+
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Add prototype for krb5int_auth_con_chkseqnum.
+
+	* krb5.hin: Default KRB5_DEPRECATED to 0.  Default KRB5_PRIVATE to
+	0 on all platforms.
+
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: krb5int_populate_gic_opt returns void
+
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Prototype krb5int_populate_gic_opt
+
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Sequence numbers are now unsigned.
+
+	* krb5.hin: Sequence numbers are now unsigned.
+
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_KPASSWD_ACCESSDENIED): New macro.
+	(KRB5_KPASSWD_BAD_VERSION, KRB5_KPASSWD_INITIAL_FLAG_NEEDED): New
+	macros.
+
+2003-05-13  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add krb5int_copy_data_contents
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add prototype for krb5_c_string_to_key_with_params
+
+	* k5-int.h: Add s2kparams to krb5_gic_get_as_key_fct
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add KRB5_PADATA_ETYPE_INFO2
+
+2003-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5_context): New fields conf_tgs_ktypes,
+	conf_tgs_ktypes_count, use_conf_ktypes.
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Add krb5_auth_con_getsendsubkey,
+	krb5_auth_con_getrecvsubkey, krb5_auth_con_setsendsubkey,
+	krb5_auth_con_setrecvsubkey.  Mark krb5_auth_con_getlocalsubkey
+	and krb5_auth_con_getremotesubkey as deprecated.
+
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add s2kparams to 
+	krb5_etype_info_entry
+	Add encode_etype_info2 and decode_etype_info2
+
+2003-05-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h (inet_ntop) [!_WIN32 && !HAVE_MACSOCK_H]: Define
+	as a macro if not provided by the OS.
+
+2003-04-17  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add encode_krb5_setpw_req
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add krb5_set_password
+	Move krb5*_chpw internals to k5int.h
+
+	* k5-int.h: Add prototypes for set-password helper functions
+
+2003-04-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (getaddrinfo) [NUMERIC_SERVICE_BROKEN]:
+	Overwrite the port number only if a numeric service port was
+	supplied.
+
+2003-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (COPY_FIRST_CANONNAME) [_AIX]: Define.
+	(GET_HOST_BY_NAME) [_AIX]: New version for AIX version of
+	gethostbyname_r.
+	(getaddrinfo) [NUMERIC_SERVICE_BROKEN]: Use "discard" as a dummy
+	service name instead of none at all.  Don't check for unsigned
+	value less than zero.
+	(getaddrinfo) [COPY_FIRST_CANONNAME]: Set any ai_canonname fields
+	other than the first one to null.
+
+2003-03-18  Alexandra Ellwood  <lxs@mit.edu>
+
+    * configure.in: Use KRB5_AC_NEED_BIND_8_COMPAT to check for bind 9
+    and higher.  When bind 9 is present, BIND_8_COMPAT needs to be 
+    defined to get bind 8 types.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     
     * krb5.h: Removed enumsalwaysint because there are no typed

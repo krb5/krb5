@@ -1,3 +1,8 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* quad_cksum.c, t_pcbc.c, t_quad.c, verify.c: Don't declare errno
+	or errmsg.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * mac_des_glue.c, des.c, enc_dec.c, key_sched.c, str_to_key.c: 

@@ -1,3 +1,9 @@
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * options.c, cnsres5.rc, cns.h, cns_reg.c cns_reg.h, cns.c:
+      Add checkbox for requesting "no addresses" if it is not
+      specified in the krb5.ini file.
+
 2003-02-25  Tom Yu  <tlyu@mit.edu>
 
 	* kpasswd.c (k5_change_password): Don't pass a NULL pointer to

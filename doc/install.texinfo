@@ -374,7 +374,7 @@ first few steps must be done on the master KDC.
 * Create the Database::         
 * Add Administrators to the Acl File::  
 * Add Administrators to the Kerberos Database::  
-* Create a kadmind Keytab::     
+* Create a kadmind Keytab (optional)::  
 * Start the Kerberos Daemons::  
 @end menu
 
@@ -516,7 +516,7 @@ filename should match the value you have set for ``acl_file'' in your
 
 @include kadm5acl.texinfo
 
-@node Add Administrators to the Kerberos Database, Create a kadmind Keytab, Add Administrators to the Acl File, Install the Master KDC
+@node Add Administrators to the Kerberos Database, Create a kadmind Keytab (optional), Add Administrators to the Acl File, Install the Master KDC
 @subsubsection Add Administrators to the Kerberos Database
 
 Next you need to add administrative principals to the Kerberos database.
@@ -551,17 +551,18 @@ kadmin.local:}
 
 
 
-@node Create a kadmind Keytab, Start the Kerberos Daemons, Add Administrators to the Kerberos Database, Install the Master KDC
-@subsubsection Create a kadmind Keytab
+@node Create a kadmind Keytab (optional), Start the Kerberos Daemons, Add Administrators to the Kerberos Database, Install the Master KDC
+@subsubsection Create a kadmind Keytab (optional)
 
-The kadmind keytab is the key that kadmind will use to decrypt
-administrators' Kerberos tickets to determine whether or not it should
-give them access to the database.  You need to create the kadmin keytab
-with entries for the principals @code{kadmin/admin} and
+The kadmind keytab is the key that the legacy admininstration daemons
+@code{kadmind4} and @code{v5passwdd} will use to decrypt
+administrators' or clients' Kerberos tickets to determine whether or
+not they should have access to the database.  You need to create the
+kadmin keytab with entries for the principals @code{kadmin/admin} and
 @code{kadmin/changepw}.  (These principals are placed in the Kerberos
 database automatically when you create it.)  To create the kadmin
-keytab, run @code{kadmin.local} and use the @code{ktadd} command, as in
-the following example.  (The line beginning with @result{} is a
+keytab, run @code{kadmin.local} and use the @code{ktadd} command, as
+in the following example.  (The line beginning with @result{} is a
 continuation of the previous line.):
 
 @smallexample
@@ -593,7 +594,7 @@ The filename you use must be the one specified in your @code{kdc.conf}
 file.
 
 @need 2000
-@node Start the Kerberos Daemons,  , Create a kadmind Keytab, Install the Master KDC
+@node Start the Kerberos Daemons,  , Create a kadmind Keytab (optional), Install the Master KDC
 @subsubsection Start the Kerberos Daemons on the Master KDC
 
 At this point, you are ready to start the Kerberos daemons on the Master
@@ -973,7 +974,7 @@ On the @emph{new} master KDC:
 
 @enumerate
 @item
-Create a database keytab.  (@xref{Create a kadmind Keytab}.)
+Create a database keytab.  (@xref{Create a kadmind Keytab (optional)}.)
 
 @item
 Start the @code{kadmind} daemon.  (@xref{Start the Kerberos Daemons}.)
@@ -1059,8 +1060,8 @@ kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
 kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
 klogin        @value{DefaultKloginPort}/tcp          # Kerberos authenticated rlogin
 kshell        @value{DefaultKshellPort}/tcp   cmd    # and remote shell
-kerberos-adm  @value{DefaultKamdindPort}/tcp          # Kerberos 5 admin/changepw
-kerberos-adm  @value{DefaultKamdindPort}/udp          # Kerberos 5 admin/changepw
+kerberos-adm  @value{DefaultKadmindPort}/tcp          # Kerberos 5 admin/changepw
+kerberos-adm  @value{DefaultKadmindPort}/udp          # Kerberos 5 admin/changepw
 krb5_prop     @value{DefaultKrbPropPort}/tcp          # Kerberos slave propagation
 @c kpop          1109/tcp         # Pop with Kerberos
 eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypted rlogin

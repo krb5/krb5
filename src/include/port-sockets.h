@@ -153,6 +153,21 @@ typedef struct iovec sg_buf;
 #define SHUTDOWN_WRITE	1
 #define SHUTDOWN_BOTH	2
 
+#ifndef HAVE_INET_NTOP
+#define inet_ntop(AF,SRC,DST,CNT)					    \
+    ((AF) == AF_INET							    \
+     ? ((CNT) < 16							    \
+	? (SOCKET_SET_ERRNO(ENOSPC), NULL)				    \
+	: (sprintf((DST), "%d.%d.%d.%d",				    \
+		   ((const unsigned char *)(const void *)(SRC))[0] & 0xff,  \
+		   ((const unsigned char *)(const void *)(SRC))[1] & 0xff,  \
+		   ((const unsigned char *)(const void *)(SRC))[2] & 0xff,  \
+		   ((const unsigned char *)(const void *)(SRC))[3] & 0xff), \
+	   (DST)))							    \
+     : (SOCKET_SET_ERRNO(EAFNOSUPPORT), NULL))
+#define HAVE_INET_NTOP
+#endif
+
 #endif /* HAVE_MACSOCK_H */
 
 #endif /* _WIN32 */

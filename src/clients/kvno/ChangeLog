@@ -1,3 +1,14 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* kvno.M: Update usage.
+
+	* kvno.c (xusage): Update usage message.
+
+2004-08-20  Jeffrey Altman <jaltman@mit.edu>
+
+        * kvno.c: Add -c ccache command line option
+                  use krb5_free_unparsed_name() instead of free()
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

@@ -1,0 +1,21 @@
+2004-09-16  Jeffrey Altman <jaltman@mit.edu>
+
+        Remove trailing slash from PATH 
+
+        Minimize Leash32.exe on startup
+
+        Update msi-deployment guide to explain how to replace
+        the configuration files in greater detail
+
+2004-09-14  Asanka Herath  <asanka@mit.edu>
+
+        Change installation default of Documentation to enable it
+
+2004-09-12  Asanka Herath  <asanka@mit.edu>
+
+        Updates to Wix installer to satisfy the needs of MIT SWRT
+        Add msi-deployment-guide.txt
+
+2004-08-20  Asanka Herath  <asanka@mit.edu>
+
+        New WiX 2.0 MSI for KFW

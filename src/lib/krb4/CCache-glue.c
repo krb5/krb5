@@ -68,11 +68,7 @@ static void UpdateDefaultCache (void);
 /*
  * Name of the default cache
  */
-char*			gDefaultCacheName = NULL;
-char			gDefaultName[ANAME_SZ];
-char			gDefaultInstance[INST_SZ];
-char			gDefaultRealm[REALM_SZ];
-Boolean			gHaveDefaultPrincipal = false;
+char* gDefaultCacheName = NULL;
 
 /*
  * Initialize credentials cache
@@ -329,44 +325,13 @@ krb_get_cred (
 	if (strncmp (service, KRB_TICKET_GRANTING_TICKET, ANAME_SZ) == 0) {
 		OSStatus	err;
 		char		*cacheName;
-		KLPrincipal	defaultPrincipal = nil;
 		KLPrincipal	outPrincipal;
 		
-		if (gHaveDefaultPrincipal) {
-			err = KLCreatePrincipalFromTriplet (gDefaultName, gDefaultInstance, gDefaultRealm, &defaultPrincipal);
-			if (err != klNoErr)
-				defaultPrincipal = nil;
-		}
-					
-		err = __KLInternalAcquireInitialTicketsForCache (defaultPrincipal, NULL, TKT_FILE, 
-                                                        kerberosVersion_V4, &outPrincipal, &cacheName);
-		if (defaultPrincipal != nil)
-			KLDisposePrincipal (defaultPrincipal);
+		err = __KLInternalAcquireInitialTicketsForCache (TKT_FILE, kerberosVersion_V4, NULL, 
+                                                                 &outPrincipal, &cacheName);
 
-		if (err == noErr) {
-			char*	newName = nil;
-			char*	newInstance = nil;
-			char*	newRealm = nil;
-		
-			gHaveDefaultPrincipal = false;
-			err = KLGetTripletFromPrincipal (outPrincipal, &newName, &newInstance, &newRealm);
-			if (err == noErr) {
-				// If this isn't a valid krb4 principal, don't store it or track the cache name
-				if ((strlen (newName) < ANAME_SZ) && (strlen (newInstance) < INST_SZ) && 
-														(strlen (newRealm) < REALM_SZ)) {
-					strcpy (gDefaultName, newName);
-					strcpy (gDefaultInstance, newInstance);
-					strcpy (gDefaultRealm, newRealm);
-					krb_set_tkt_string (cacheName);		// Tickets for the krb4 principal went here
-					
-					gHaveDefaultPrincipal = true;
-				}
-				
-				KLDisposeString (newName);
-				KLDisposeString (newInstance);
-				KLDisposeString (newRealm);
-			}
-			
+		if (err == klNoErr) {
+                	krb_set_tkt_string (cacheName);		// Tickets for the krb4 principal went here
 			KLDisposeString (cacheName);	
 			KLDisposePrincipal (outPrincipal);
 		} else {
@@ -498,7 +463,6 @@ krb_set_tkt_string (
 		gDefaultCacheName = malloc (strlen (val) + 1);
 		if (gDefaultCacheName != NULL)
 			strcpy (gDefaultCacheName, val);
-		gHaveDefaultPrincipal = false;
 	}
 }
 

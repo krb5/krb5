@@ -90,6 +90,7 @@ if((var) == NULL) clean_return(ENOMEM)
   construction = t2.construction;		\
   tagnum = t2.tagnum;				\
   indef = t2.indef;				\
+  taglen = t2.length;				\
 }
 
 #define get_eoc()						\
@@ -107,6 +108,7 @@ if((var) == NULL) clean_return(ENOMEM)
 
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()\
+unsigned int taglen;\
 asn1buf subbuf;\
 int seqindef;\
 int indef;\
@@ -181,8 +183,10 @@ get_lenfield_body(len,var,decoder)
 #define cleanup(cleanup_routine)\
    return 0; \
 error_out: \
-   if (rep && *rep) \
+   if (rep && *rep) { \
 	cleanup_routine(*rep); \
+	*rep = NULL; \
+   } \
    return retval;
 
 #define cleanup_none()\
@@ -219,7 +223,7 @@ krb5_error_code decode_krb5_authenticator(const krb5_data *code, krb5_authentica
     get_field((*rep)->ctime,5,asn1_decode_kerberos_time);
     if(tagnum == 6){ alloc_field((*rep)->subkey,krb5_keyblock); }
     opt_field(*((*rep)->subkey),6,asn1_decode_encryption_key);
-    opt_field((*rep)->seq_number,7,asn1_decode_int32);
+    opt_field((*rep)->seq_number,7,asn1_decode_seqnum);
     opt_field((*rep)->authorization_data,8,asn1_decode_authorization_data);
     (*rep)->magic = KV5M_AUTHENTICATOR;
     end_structure();
@@ -231,6 +235,7 @@ error_out:
       free_field(*rep,checksum);
       free_field(*rep,client);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -252,7 +257,7 @@ krb5_error_code decode_krb5_ticket(const krb5_data *code, krb5_ticket **rep)
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO;
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO);
     }
     alloc_field((*rep)->server,krb5_principal_data);
     get_field((*rep)->server,1,asn1_decode_realm);
@@ -266,6 +271,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,server);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -318,6 +324,7 @@ error_out:
       free_field(*rep,session);
       free_field(*rep,client);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -401,6 +408,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,ticket);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -440,7 +448,7 @@ krb5_error_code decode_krb5_ap_rep_enc_part(const krb5_data *code, krb5_ap_rep_e
     get_field((*rep)->cusec,1,asn1_decode_int32);
     if(tagnum == 2){ alloc_field((*rep)->subkey,krb5_keyblock); }
     opt_field(*((*rep)->subkey),2,asn1_decode_encryption_key);
-    opt_field((*rep)->seq_number,3,asn1_decode_int32);
+    opt_field((*rep)->seq_number,3,asn1_decode_seqnum);
     end_structure();
     (*rep)->magic = KV5M_AP_REP_ENC_PART;
   }
@@ -449,6 +457,7 @@ error_out:
   if (rep && *rep) {
       free_field(*rep,subkey);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -494,8 +503,26 @@ krb5_error_code decode_krb5_kdc_req_body(const krb5_data *code, krb5_kdc_req **r
   cleanup(free);
 }
 
-krb5_error_code decode_krb5_safe(const krb5_data *code, krb5_safe **rep)
+/*
+ * decode_krb5_safe_with_body
+ *
+ * Like decode_krb5_safe(), but grabs the encoding of the
+ * KRB-SAFE-BODY as well, in case re-encoding would produce a
+ * different encoding.  (Yes, we're using DER, but there's this
+ * annoying problem with pre-1.3.x code using signed sequence numbers,
+ * which we permissively decode and cram into unsigned 32-bit numbers.
+ * When they're re-encoded, they're no longer negative if they started
+ * out negative, so checksum verification fails.)
+ *
+ * This does *not* perform any copying; the returned pointer to the
+ * encoded KRB-SAFE-BODY points into the input buffer.
+ */
+krb5_error_code decode_krb5_safe_with_body(
+  const krb5_data *code,
+  krb5_safe **rep,
+  krb5_data *body)
 {
+  krb5_data tmpbody;
   setup();
   alloc_field(*rep,krb5_safe);
   clear_field(rep,checksum);
@@ -511,19 +538,39 @@ krb5_error_code decode_krb5_safe(const krb5_data *code, krb5_safe **rep)
       if(msg_type != KRB5_SAFE) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
+    /*
+     * Gross kludge to extract pointer to encoded safe-body.  Relies
+     * on tag prefetch done by next_tag().  Don't handle indefinite
+     * encoding, as it's too much work.
+     */
+    if (!indef) {
+      tmpbody.length = taglen;
+      tmpbody.data = subbuf.next;
+    } else {
+      tmpbody.length = 0;
+      tmpbody.data = NULL;
+    }
     get_field(**rep,2,asn1_decode_krb_safe_body);
     alloc_field((*rep)->checksum,krb5_checksum);
     get_field(*((*rep)->checksum),3,asn1_decode_checksum);
   (*rep)->magic = KV5M_SAFE;
     end_structure();
   }
+  if (body != NULL)
+    *body = tmpbody;
   cleanup_manual();
 error_out:
   if (rep && *rep) {
       free_field(*rep,checksum);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
+}
+
+krb5_error_code decode_krb5_safe(const krb5_data *code, krb5_safe **rep)
+{
+  return decode_krb5_safe_with_body(code, rep, NULL);
 }
 
 krb5_error_code decode_krb5_priv(const krb5_data *code, krb5_priv **rep)
@@ -561,7 +608,7 @@ krb5_error_code decode_krb5_enc_priv_part(const krb5_data *code, krb5_priv_enc_p
     get_lenfield((*rep)->user_data.length,(*rep)->user_data.data,0,asn1_decode_charstring);
     opt_field((*rep)->timestamp,1,asn1_decode_kerberos_time);
     opt_field((*rep)->usec,2,asn1_decode_int32);
-    opt_field((*rep)->seq_number,3,asn1_decode_int32);
+    opt_field((*rep)->seq_number,3,asn1_decode_seqnum);
     alloc_field((*rep)->s_address,krb5_address);
     get_field(*((*rep)->s_address),4,asn1_decode_host_address);
     if(tagnum == 5){ alloc_field((*rep)->r_address,krb5_address); }
@@ -575,6 +622,7 @@ error_out:
       free_field(*rep,r_address);
       free_field(*rep,s_address);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -629,6 +677,7 @@ error_out:
       free_field(*rep,r_address);
       free_field(*rep,s_address);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -674,6 +723,7 @@ error_out:
       free_field(*rep,server);
       free_field(*rep,client);
       free(*rep);
+      *rep = NULL;
   }
   return retval;
 }
@@ -743,6 +793,21 @@ krb5_error_code decode_krb5_etype_info(const krb5_data *code, krb5_etype_info_en
   if(retval) clean_return(retval);
   cleanup_none();		/* we're not allocating anything here */
 }
+
+krb5_error_code decode_krb5_etype_info2(const krb5_data *code, krb5_etype_info_entry ***rep)
+{
+    setup_buf_only();
+    *rep = 0;
+    retval = asn1_decode_etype_info2(&buf,rep, 0);
+    if (retval == ASN1_BAD_ID) {
+	retval = asn1buf_wrap_data(&buf,code);
+	if(retval) clean_return(retval);
+	retval = asn1_decode_etype_info2(&buf, rep, 1);
+    }
+    if(retval) clean_return(retval);
+    cleanup_none();		/* we're not allocating anything here */
+}
+
 
 krb5_error_code decode_krb5_enc_data(const krb5_data *code, krb5_enc_data **rep)
 {

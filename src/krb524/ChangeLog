@@ -1,3 +1,104 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c: Fix double-free vulnerabilities.
+
+2003-09-02  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Apply patch from Cesar
+	Garcia to fix lifetime computation.
+
+2003-08-11  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Call krb_create_ticket
+	instead of local version.  Remove local version of
+	krb_create_ticket.  This file no longer gets included into a
+	krb524 library, so accessing internal functions isn't that big of
+	an issue anymore.
+
+2003-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.c (krb524_convert_creds_kdc, krb524_init_ets): Mark as
+	KRB5_CALLCONV_WRONG.
+	(krb524_init_ets): Takes a krb5_context.
+
+2003-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.c: Fix copyright notice.
+
+2003-06-05  Jeffery Altman  <jaltman@mit.edu>
+
+	* Makefile.in: Build krb524.dll on Windows.
+
+	* krb524.c: New file; stub for Windows krb524.dll.
+
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (main): Remove debugging printf.
+
+2003-05-29  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb524d.h: removed invalid Mac pragmas
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (main): Call krb5_524_convert_creds instead of
+	krb524_convert_creds_kdc.
+
+	* Makefile.in ($(OUTPRE)k524init.exe): Don't depend on K524DEP.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c, encode.c, globals.c, sendmsg.c: Deleted.  Contents
+	added to krb5 library.
+	* getcred.c, misc.c: Deleted.
+	* krb524.h: Library declarations moved to krb5.hin and k5-int.h.
+	Remainder renamed to krb524d.h.
+	* krb524_err.et: Moved to lib/krb5/error_tables.
+	* cnv_tkt_skey.c: Include krb524d.h, not krb524.h.
+	(krb524d_debug): Define new variable.  Replace all references to
+	krb524_debug.
+	* conv_princ.c: Don't include krb524.h.
+	* k524init.c: Don't include krb524.h.
+	(main): Don't call krb524_init_ets.
+	* krb524d.c: Include krb524d.h, not krb524.h.
+	(encode_v4tkt): New function pointer variable.
+	(main): Initialize it using krb5int_accessor.
+	* test.c: Don't include krb524.h.
+	(main): Don't set krb524_debug, and don't call krb524_init_ets.
+	* Makefile.in: Don't pull in library makefile fragments.
+	(LIB, LIBMAJOR, LIBMINOR, RELDIR): Deleted.
+	(KRB524_DEPLIB, KRB524_LIB, STOBJLISTS, STLIBOBJS): Deleted.
+	(GENS, KRB524_HDR, KRB524_ERR_HDR): Deleted.
+	(SRCS): Remove deleted/moved files.
+	(all-unix): Don't depend on $(GENS) on includes.
+	(includes, all-windows): Don't depend on headers.
+	($(KRB524_HDR), $(KRB524_ERR_HDR)): Delete rules.
+	(all-windows): Comment out dependency on $(K524LIB) for now.
+	(CLIENT_OBJS, SERVER_OBJS): New variables.
+	(krb524test, krb524d, k524init): Don't use KRB524_*LIB, just
+	KRB5_*LIB.  Use *_OBJS lists.
+	(install-unix, clean-unix, clean-windows): Don't install or clean
+	libs or headers.
+	(krb524_err.c): Target deleted.
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* krb524d.c (do_connection): Use krb5_princ_size rather than
+	direct structure field access.
+
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* krb524d.c (handle_classic_v4): Do not support 3des enctypes as
+	they are insecure.  Also, by default do not allow krb4
+	cross-realm.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Don't support 3des tickets
+
+2003-03-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Extract source IP
+	address in its proper size, not as 'long'.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     * cnv_tkt_skey.c, conv_creds.c, conv_princ.c, encode.c, sendmsg.c: 
       Removed Mac-specific includes.
