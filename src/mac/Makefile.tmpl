@@ -1,302 +1,566 @@
-SHLIBSRC = /mac/initGSSK5shlib.c
-SHLIBOBJ68KCFM = /bin/CFM-68K/initGSSK5shlib.c.CFM68.o
-SHLIBOBJPPC = /bin/PPC/initGSSK5shlib.c.PPC.o
+INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/
+
+################################################################################
+##
+## Creating build directories
+##
+################################################################################
+
+create-directories :
+	If Not "`Exists -d /bin`"
+		NewFolder /bin
+	End
+	If Not "`Exists -d /bin/68K`"
+		NewFolder /bin/68K
+	End
+	If Not "`Exists -d /bin/PPC`"
+		NewFolder /bin/PPC
+	End
+	If Not "`Exists -d /bin/CFM-68K`"
+		NewFolder /bin/CFM-68K
+	End
+	
+################################################################################
+##
+## Autogenerating header and source files
+##
+################################################################################
+
+AUTOGEN_H_FROM_ET = /util/et/et_h.perl
+AUTOGEN_C_FROM_ET = /util/et/et_c.perl
+
+AUTOGEN_OUTPUT = 	/include/asn1_err.h /include/kdb5_err.h /include/krb5_err.h \
+	/include/kv5m_err.h /include/adm_err.h \
+	/lib/gssapi/generic/gssapi_err_generic.h \
+	/lib/gssapi/krb5/gssapi_err_krb5.h \
+	/lib/krb5/error_tables/asn1_err.c /lib/krb5/error_tables/kdb5_err.c \
+	/lib/krb5/error_tables/krb5_err.c /lib/krb5/error_tables/kv5m_err.c \
+	/lib/krb5/error_tables/adm_err.c /lib/gssapi/generic/gssapi_err_generic.c \
+	/lib/gssapi/krb5/gssapi_err_krb5.c \
+	/include/krb5.h /util/profile/profile.h \
+	/include/profile.h /include/krb5/osconf.h /lib/gssapi/generic/gssapi.h \
+	/include/autoconf.h
+
+
+autogenerate-files : {AUTOGEN_OUTPUT}
+autogenerate-clean  :
+	for output_file in {AUTOGEN_OUTPUT}
+		if "`Exists {output_file}`"
+			SetFile -a l {output_file}
+			Delete {output_file}
+		end
+	end
+
+################################################################################
+#
+# com_err header files
+#
+################################################################################
+
+/include/asn1_err.h : /lib/krb5/error_tables/asn1_err.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/include/asn1_err.h" < "/lib/krb5/error_tables/asn1_err.et"
+
+/include/kdb5_err.h : /lib/krb5/error_tables/kdb5_err.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/include/kdb5_err.h" < "/lib/krb5/error_tables/kdb5_err.et"
+
+/include/krb5_err.h : /lib/krb5/error_tables/krb5_err.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/include/krb5_err.h" < "/lib/krb5/error_tables/krb5_err.et"
+
+/include/kv5m_err.h : /lib/krb5/error_tables/kv5m_err.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/include/kv5m_err.h" < "/lib/krb5/error_tables/kv5m_err.et"
+
+/include/adm_err.h : /lib/krb5/error_tables/adm_err.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/include/adm_err.h" < "/lib/krb5/error_tables/adm_err.et"
+	
+/lib/gssapi/generic/gssapi_err_generic.h : /lib/gssapi/generic/gssapi_err_generic.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/lib/gssapi/generic/gssapi_err_generic.h" < "/lib/gssapi/generic/gssapi_err_generic.et"
+	
+/lib/gssapi/krb5/gssapi_err_krb5.h : /lib/gssapi/krb5/gssapi_err_krb5.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/lib/gssapi/krb5/gssapi_err_krb5.h" < "/lib/gssapi/krb5/gssapi_err_krb5.et"
+
+/util/profile/prof_err.h : /util/profile/prof_err.et
+	perl {AUTOGEN_H_FROM_ET} outfile="/util/profile/prof_err.h" < "/util/profile/prof_err.et"
+
+################################################################################
+#
+# com_err source files
+#
+################################################################################
+
+/lib/krb5/error_tables/asn1_err.c : /lib/krb5/error_tables/asn1_err.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/krb5/error_tables/asn1_err.c" < "/lib/krb5/error_tables/asn1_err.et"
+
+/lib/krb5/error_tables/kdb5_err.c : /lib/krb5/error_tables/kdb5_err.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/krb5/error_tables/kdb5_err.c" < "/lib/krb5/error_tables/kdb5_err.et"
+
+/lib/krb5/error_tables/krb5_err.c : /lib/krb5/error_tables/krb5_err.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/krb5/error_tables/krb5_err.c" < "/lib/krb5/error_tables/krb5_err.et"
+
+/lib/krb5/error_tables/kv5m_err.c : /lib/krb5/error_tables/kv5m_err.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/krb5/error_tables/kv5m_err.c" < "/lib/krb5/error_tables/kv5m_err.et"
+
+/lib/krb5/error_tables/adm_err.c : /lib/krb5/error_tables/adm_err.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/krb5/error_tables/adm_err.c" < "/lib/krb5/error_tables/adm_err.et"
+
+/lib/gssapi/generic/gssapi_err_generic.c : /lib/gssapi/generic/gssapi_err_generic.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/gssapi/generic/gssapi_err_generic.c" < "/lib/gssapi/generic/gssapi_err_generic.et"
+
+/lib/gssapi/krb5/gssapi_err_krb5.c : /lib/gssapi/krb5/gssapi_err_krb5.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/lib/gssapi/krb5/gssapi_err_krb5.c" < "/lib/gssapi/krb5/gssapi_err_krb5.et"
+
+/util/profile/prof_err.c : /util/profile/prof_err.et
+	perl {AUTOGEN_C_FROM_ET} outfile="/util/profile/prof_err.c" < "/util/profile/prof_err.et"
+
+################################################################################
+#
+# other files
+#
+################################################################################
+
+/include/krb5.h : /include/krb5.hin /include/krb5_err.h /include/kdb5_err.h /include/kv5m_err.h /include/asn1_err.h
+	Catenate /include/krb5.hin /include/krb5_err.h /include/kdb5_err.h /include/kv5m_err.h /include/asn1_err.h > /include/krb5.h
+	
+/util/profile/profile.h : /util/profile/profile.hin /util/profile/prof_err.h
+	Catenate /util/profile/profile.hin /util/profile/prof_err.h > /util/profile/profile.h
+	
+/include/profile.h : /util/profile/profile.h
+	Duplicate -y /util/profile/profile.h /include/profile.h
+
+/include/krb5/osconf.h : /include/krb5/stock/osconf.h
+	Duplicate -y /include/krb5/stock/osconf.h /include/krb5/osconf.h
+
+/lib/gssapi/generic/gssapi.h : /lib/gssapi/generic/gssapi.hin
+	Duplicate -y /lib/gssapi/generic/gssapi.hin /lib/gssapi/generic/gssapi.h
+	
+/include/autoconf.h : /mac/libraries/autoconf.h
+	Duplicate -y /mac/libraries/autoconf.h /include/autoconf.h
+
+################################################################################
+##
+## Shared library specific sources (initialization and termination)
+##
+################################################################################
+
+#
+# GSS library
+#
+
+GSSSHLIBSRC = /mac/GSS.CFM.c
+GSSSHLIBOBJ68KCFM = /bin/CFM-68K/GSS.CFM.c.CFM68.o
+GSSSHLIBOBJPPC = /bin/PPC/GSS.CFM.c.PPC.o
+
+#
+# Krb5 library
+#
+
+K5SHLIBSRC = /mac/K5.CFM.c
+K5SHLIBOBJ68KCFM = /bin/CFM-68K/K5.CFM.c.CFM68.o
+K5SHLIBOBJPPC = /bin/PPC/K5.CFM.c.PPC.o
+
+#
+# TestTrack
+#
+
+TTSRC = /mac/TestTrack/ShlibTestTrack.c
+TTOBJ68KCFM = /bin/CFM-68K/ShlibTestTrack.c.CFM68.o
+TTOBJPPC = /bin/PPC/ShlibTestTrack.c.PPC.o
+
+################################################################################
+##
+## Precompiled header files
+##
+################################################################################
 
 KH = /mac/libraries/
 KH68K = {KH}KerberosHeaders68K
 KHCFM-68K = {KH}KerberosHeadersCFM-68K
 KHPPC = {KH}KerberosHeadersPPC
 
-GSSRTLCFM68K = "{MW68KLibraries}MSL C.CFM68K Fa(4i_8d).Lib" \
-	"{MW68KLibraries}MSL SIOUX.CFM68K.Lib" \
-	"{SharedLibraries}InterfaceLib" \
-	"{MW68KLibraries}MSL MWCFM68KRuntime.Lib" \
-	"{MW68KLibraries}MathLibCFM68K (4i_8d).Lib"
+################################################################################
+##
+## Runtime libraries
+##
+################################################################################
 
-GSSRTLCFMPPC = "{MWPPCLibraries}MSL C.PPC.Lib" \
-	"{MWPPCLibraries}MSL SIOUX.PPC.Lib" \
-	"{MWPPCLibraries}MSL RuntimePPC.Lib" \
+GSSRTLCFM68K = "MSL C.CFM68K.DLL" \
+	"MSL RuntimeCFM68K.DLL" \
+	"{MW68KLibraries}MSL ShLibRuntimeCFM68K.Lib" \
+	"{SharedLibraries}InterfaceLib" \
+	"{MW68KLibraries}MathLibCFM68K (4i_8d).Lib"
+GSSRTLCFMPPC = "MSL C.PPC.DLL" \
+	"MSL RuntimePPC.DLL" \
+	"{MWPPCLibraries}MSL ShLibRuntime.Lib" \
 	"{SharedLibraries}InterfaceLib" \
 	"{SharedLibraries}MathLib"
-
+K5RTLCFM68K = "MSL C.CFM68K.DLL" \
+	"MSL RuntimeCFM68K.DLL" \
+	"{MW68KLibraries}MSL ShLibRuntimeCFM68K.Lib" \
+	"{SharedLibraries}InterfaceLib" \
+	"{MW68KLibraries}MathLibCFM68K (4i_8d).Lib"
+K5RTLCFMPPC = "MSL C.PPC.DLL" \
+	"MSL RuntimePPC.DLL" \
+	"{MWPPCLibraries}MSL ShLibRuntime.Lib" \
+	"{SharedLibraries}InterfaceLib" \
+	"{SharedLibraries}MathLib"
 OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
         -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
-        -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath
+        -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath \
+		-model farData
 
-all : build build-shlibglue link
+################################################################################
+##
+## General rules
+##
+################################################################################
 
+all : autogenerate-files build build-gss-shlibglue build-k5-shlibglue build-testtrack link
 libs : {KH68K} {KHPPC} {GSSOBJS68K} {GSSOBJS68KCFM} {GSSOBJSPPC} link
-
 build : build-PPC build-68K build-68KCFM
 
+################################################################################
+##
+## Compilation rules
+##
+################################################################################
 
-#build-68K : {KH68K}
-#	MWC68K {OPTIONS} -o "/bin/68K/" -prefix {KH68K} -model far {SRCS}
-
-#need to know if GSSOBJS68K includes all of the results of compiling SRCS
 build-68K : {GSSOBJS68K} {K5OBJS68K}
-
 /bin/68K/ : {SRCDIRS}
-
 .c.68K.o : .c {KH68K}
 	MWC68K {OPTIONS} -o {TargDir}{Default}.c.68K.o -prefix {KH68K} -model far {DepDir}{Default}.c
 
-
-#build-68KCFM : {KHCFM-68K} 
-#	MWC68K {OPTIONS} -o "/bin/CFM-68K/" -prefix {KHCFM-68K} \
-#		-model cfmflat {SRCS}
-
 build-68KCFM : {GSSOBJS68KCFM} {K5OBJS68KCFM}
-
 /bin/CFM-68K/ : {SRCDIRS}
-
-#we need a different suffix for CFM-68K!!!
-#.c.68K.o : .c {KHCFM-68K}
-#	MWC68K {OPTIONS} -o {TargDir} -prefix {KHCFM-68K} \
-#		-model cfmflat {DepDir}{Default}.c
-#this plus redoing {GSSOBJS68KCFM} and {KRB5OBJ68KCFM} will fix the suffix conflict, I think
 .c.CFM68.o : .c {KHCFM-68K}
 	MWC68K {OPTIONS} -o {TargDir}{Default}.c.CFM68.o -prefix {KHCFM-68K} \
 		-model cfmflat {DepDir}{Default}.c
 
-
-#build-PPC : {KHPPC}
-#	MWCPPC {OPTIONS} -o "/bin/PPC/" -prefix {KHPPC} {SRCS}
-
 build-PPC : {GSSOBJSPPC} {K5OBJSPPC}
-
-# without this, default rules don't work across directories
 /bin/PPC/ : {SRCDIRS}
-
 .c.PPC.o : .c {KHPPC}
 	MWCPPC {OPTIONS} -o {TargDir}{Default}.c.PPC.o -prefix {KHPPC} {DepDir}{Default}.c
 
+################################################################################
+##
+## Shared library initialization routines and TestTrack
+##
+################################################################################
 
-#build-shlibglue : {KHCFM-68K} {KHPPC}
-#	MWC68K {OPTIONS} -o "/bin/CFM-68K/" -prefix {KHCFM-68K} -model cfmflat {SHLIBSRC}
-#	MWCPPC {OPTIONS} -o "/bin/PPC/" -prefix {KHPPC} {SHLIBSRC}
+build-gss-shlibglue : {GSSSHLIBOBJ68KCFM} {GSSSHLIBOBJPPC}
+{GSSSHLIBOBJ68KCFM} : {GSSSHLIBSRC} {KHCFM-68K}
+	MWC68K {OPTIONS} -o {GSSSHLIBOBJ68KCFM} -prefix {KHCFM-68K} -model cfmflat {GSSSHLIBSRC}
+{GSSSHLIBOBJPPC} : {GSSSHLIBSRC} {KHPPC}
+	MWCPPC {OPTIONS} -o {GSSSHLIBOBJPPC} -prefix {KHPPC} {GSSSHLIBSRC}
 
-build-shlibglue : {SHLIBOBJ68KCFM} {SHLIBOBJPPC}
+build-k5-shlibglue : {K5SHLIBOBJ68KCFM} {K5SHLIBOBJPPC}
+{K5SHLIBOBJ68KCFM} : {K5SHLIBSRC} {KHCFM-68K}
+	MWC68K {OPTIONS} -o {K5SHLIBOBJ68KCFM} -prefix {KHCFM-68K} -model cfmflat {K5SHLIBSRC}
+{K5SHLIBOBJPPC} : {K5SHLIBSRC} {KHPPC}
+	MWCPPC {OPTIONS} -o {K5SHLIBOBJPPC} -prefix {KHPPC} {K5SHLIBSRC}
 
-{SHLIBOBJ68KCFM} : {SHLIBSRC} {KHCFM-68K}
-	MWC68K {OPTIONS} -o {SHLIBOBJ68KCFM} -prefix {KHCFM-68K} -model cfmflat {SHLIBSRC}
-{SHLIBOBJPPC} : {SHLIBSRC} {KHPPC}
-	MWCPPC {OPTIONS} -o {SHLIBOBJPPC} -prefix {KHPPC} {SHLIBSRC}
+build-testtrack : {TTOBJ68KCFM} {TTOBJPPC}
+{TTOBJ68KCFM} : {TTSRC} {KHCFM-68K}
+	MWC68K {OPTIONS} -o {TTOBJ68KCFM} -prefix {KHCFM-68K} -model cfmflat {TTSRC}
+{TTOBJPPC} : {TTSRC} {KHPPC}
+	MWCPPC {OPTIONS} -o {TTOBJPPC} -prefix {KHPPC} {TTSRC}
 
-#.c.68K.o : .c
-#	MWC68K {DepDir}{Default}.c {OPTIONS} -prefix {KH68K} -model far 
-#.c.PPC.o : .c
-#	MWCPPC {DepDir}{Default}.c {OPTIONS} -prefix {KHPPC} 
+################################################################################
+##
+## Precompiled headers
+##
+################################################################################
 	
 {KH68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWC68K {KH}KerberosHeaders.pch -precompile {KH68K} {OPTIONS} -i {KH}
-
 {KHCFM-68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWC68K {KH}KerberosHeaders.pch -precompile {KHCFM-68K} {OPTIONS} \
 		-i {KH} -model cfmflat
-
 {KHPPC} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWCPPC {KH}KerberosHeaders.pch -precompile {KHPPC} {OPTIONS} -i {KH}
 
+################################################################################
+##
+## Private version of MSL (different fragment name)
+##
+################################################################################
+
+private-msl : "MSL C.PPC.DLL" "MSL C.CFM68K.DLL" "MSL RuntimePPC.DLL" "MSL RuntimeCFM68K.DLL"
+
+"MSL C.PPC.DLL" : "{MWPPCLibraries}MSL C.PPC.DLL"
+	Duplicate "{MWPPCLibraries}MSL C.PPC.DLL" "MSL C.PPC.DLL"
+	MergeFragment -c -n "MIT_*MITCLib" -t 'pwpc' -x "MSL C.PPC.DLL"
+
+"MSL RuntimePPC.DLL" : "{MWPPCLibraries}MSL RuntimePPC.DLL"
+	Duplicate "{MWPPCLibraries}MSL RuntimePPC.DLL" "MSL RuntimePPC.DLL"
+	MergeFragment -c -n "MIT_*MITRuntimeLib" -t 'pwpc' -x "MSL RuntimePPC.DLL"
+
+"MSL C.CFM68K.DLL" : "{MW68KLibraries}MSL C.CFM68K.DLL"
+	Duplicate "{MW68KLibraries}MSL C.CFM68K.DLL" "MSL C.CFM68K.DLL"
+	MergeFragment -c -n "MIT_*MITCLib" -t 'm68k' -x "MSL C.CFM68K.DLL"
+
+"MSL RuntimeCFM68K.DLL" : "{MW68KLibraries}MSL MWRuntimeLibCFM68K"
+	Duplicate "{MW68KLibraries}MSL MWRuntimeLibCFM68K" "MSL RuntimeCFM68K.DLL"
+	MergeFragment -c -n "MIT_*MITRuntimeLib" -t 'm68k' -x "MSL RuntimeCFM68K.DLL"
+
+################################################################################
+##
+## Linking
+##
+################################################################################
+
 link : link-68K link-68KCFM link-PPC link-CFMFAT
 
-
-#link-68K :
-#	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
-#	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
-#	Rez "/mac/version.r" -a -o libkrb5.68K
-#	Rez "/mac/version.r" -a -o libgss.68K
+################################################################################
+##
+## 68 libraries
+##
+################################################################################
 
 link-68K : libkrb5.68K libgss.68K
 
-libkrb5.68K libkrb5.68K.MAP :: {K5OBJS68K}
+#
+#	static 68K krb5 library
+#
+
+libkrb5.68K libkrb5.68K.MAP :: autogenerate-files {K5OBJS68K}
 	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
 libkrb5.68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o libkrb5.68K
-	
-libgss.68K libgss.68K.MAP :: {GSSOBJS68K} 
+
+#
+#	static GSS krb5 library
+#
+
+libgss.68K libgss.68K.MAP :: autogenerate-files {GSSOBJS68K} 
 	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
 libgss.68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o libgss.68K
 
+################################################################################
+##
+## CFM-68K libraries
+##
+################################################################################
 
-#link-68KCFM :
-#	MWLink68K -xm library -model CFMflatdf -o libkrb5.CFM-68K {K5OBJS68KCFM}
-#	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
-#		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym fullpath \
-#		-map libgss.68K.MAP -o GSSLibrary68K \
-#		-init "__initializeGSSK5glue" -term "__terminateGSSK5glue" \
-#		{GSSRTLCFM68K} {GSSOBJS68KCFM} {SHLIBOBJ68KCFM}
-#	Rez "/mac/version.r" -a -o GSSLibrary68K
+link-68KCFM : K5Library68K GSSLibrary68K
 
-link-68KCFM : libkrb5.CFM-68K GSSLibrary68K
-
-libkrb5.CFM-68K :: {K5OBJS68KCFM}
-	MWLink68K -xm library -model CFMflatdf -o libkrb5.CFM-68K {K5OBJS68KCFM}
-libkrb5.CFM-68K :: /mac/version.r
-	Rez "/mac/version.r" -a -o libkrb5.CFM-68K
+#
+#	shared CFM-68K krb5 library
+#
 	
-GSSLibrary68K GSSLibrary68K.MAP :: /mac/GSSLibrary.exp {GSSRTLCFM68K} {GSSOBJS68KCFM} {SHLIBOBJ68KCFM}
+K5Library68K K5Library68K.MAP :: autogenerate-files /mac/K5Library.exp {K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
+	MWLink68K -xm sharedlibrary -name K5Library -m "" \
+		-model cfmflat -@export "/mac/K5Library.exp" -sym fullpath \
+		-map K5Library68K.MAP -o K5Library68K \
+		-init "__initializeK5" -term "__terminateK5" \
+		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib68K" \
+		{K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
+K5Library68K :: /mac/version.r
+	Rez "/mac/version.r" -a -o K5Library68K
+
+#
+#	shared CFM-68K GSS library
+#
+
+GSSLibrary68K GSSLibrary68K.MAP :: autogenerate-files  K5Library68K /mac/GSSLibrary.exp {GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM}
 	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
 		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym fullpath \
 		-map GSSLibrary68K.MAP -o GSSLibrary68K \
-		-init "__initializeGSSK5glue" -term "__terminateGSSK5glue" \
-		{GSSRTLCFM68K} {GSSOBJS68KCFM} {SHLIBOBJ68KCFM}
+		-init "__initializeGSS" -term "__terminateGSS" \
+		{GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM} K5Library68K
 GSSLibrary68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o GSSLibrary68K
 
+################################################################################
+##
+## PPC libraries
+##
+################################################################################
 
-#link-PPC :
-#	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
-#	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
-#	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
-#		-@export "/mac/GSSLibrary.exp" -sym fullpath -init "__initialize" \
-#		-term "__terminate" -map libgss.ppc.MAP -o GSSLibraryPPC \
-#		-init "__initializeGSSK5glue" -term "__terminateGSSK5glue" \
-#		{GSSRTLCFMPPC} {GSSOBJSPPC} {SHLIBOBJPPC}
-#	Rez "/mac/version.r" -a -o libkrb5.PPC
-#	Rez "/mac/version.r" -a -o libgss.PPC
-#	Rez "/mac/version.r" -a -o GSSLibraryPPC
+link-PPC : libkrb5.PPC K5LibraryPPC libgss.PPC GSSLibraryPPC
 
-link-PPC : libkrb5.PPC libgss.PPC GSSLibraryPPC
+#
+#	PPC krb5 libraries
+#		static PPC krb5 library
+#
 
-libkrb5.PPC libkrb5.PPC.MAP :: {K5OBJSPPC}
+libkrb5.PPC libkrb5.PPC.MAP :: autogenerate-files {K5OBJSPPC}
 	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
 libkrb5.PPC :: /mac/version.r
 	Rez "/mac/version.r" -a -o libkrb5.PPC
-	
-libgss.PPC libgss.PPC.MAP :: {GSSOBJSPPC}
+
+#	
+#		shared PPC krb5 library
+#
+
+K5LibraryPPC K5LibraryPPC.MAP :: autogenerate-files  /mac/K5Library.exp {K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
+	MWLinkPPC -sharedlibrary -name K5Library -m "" \
+		-@export "/mac/K5Library.exp" -sym fullpath -init "__initializeK5" \
+		-term "__terminateK5" \
+		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
+		-map K5LibraryPPC.MAP -o K5LibraryPPC \
+		{K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
+K5LibraryPPC :: /mac/version.r
+	Rez "/mac/version.r" -a -o K5LibraryPPC
+
+#
+#	PPC GSS libraries
+#
+
+#
+#		static PPC GSS library
+#
+
+libgss.PPC libgss.PPC.MAP :: autogenerate-files {GSSOBJSPPC}
 	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
 libgss.PPC :: /mac/version.r
 	Rez "/mac/version.r" -a -o libgss.PPC
-	
-GSSLibraryPPC GSSLibraryPPC.MAP :: /mac/GSSLibrary.exp {GSSRTLCFMPPC} {GSSOBJSPPC} {SHLIBOBJPPC}
+#
+#		shared PPC GSS library
+#
+
+GSSLibraryPPC GSSLibraryPPC.MAP :: autogenerate-files K5LibraryPPC /mac/GSSLibrary.exp {GSSRTLCFMPPC} {GSSOBJSPPC} {GSSSHLIBOBJPPC}
 	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
-		-@export "/mac/GSSLibrary.exp" -sym fullpath -init "__initialize" \
-		-term "__terminate" -map GSSLibraryPPC.MAP -o GSSLibraryPPC \
-		-init "__initializeGSSK5glue" -term "__terminateGSSK5glue" \
-		{GSSRTLCFMPPC} {GSSOBJSPPC} {SHLIBOBJPPC}
+		-@export "/mac/GSSLibrary.exp" -sym fullpath -init "__initializeGSS" \
+		-term "__terminateGSS" -map GSSLibraryPPC.MAP -o GSSLibraryPPC \
+		{GSSRTLCFMPPC} {GSSOBJSPPC} {GSSSHLIBOBJPPC} K5LibraryPPC
 GSSLibraryPPC :: /mac/version.r
 	Rez "/mac/version.r" -a -o GSSLibraryPPC
 
-
-#link-CFMFAT :
-#	Duplicate -y GSSLibraryPPC GSSLib
-#	MergeFragment GSSLibrary68K GSSLib
+################################################################################
+##
+## Fat libraries
+##
+################################################################################
 
 link-CFMFAT : GSSLib
 
-GSSLib : GSSLibraryPPC GSSLibrary68K
-	Duplicate -y GSSLibraryPPC GSSLib
+GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
+	Delete -i GSSLib
+	MergeFragment GSSLibraryPPC GSSLib
 	MergeFragment GSSLibrary68K GSSLib
+	MergeFragment K5LibraryPPC GSSLib
+	MergeFragment K5Library68K GSSLib
+	MergeFragment "MSL C.PPC.DLL" -t 'pwpc' GSSLib
+	MergeFragment "MSL C.CFM68K.DLL" -t 'm68k' GSSLib
+	MergeFragment "MSL RuntimePPC.DLL" -t 'pwpc' GSSLib
+	MergeFragment "MSL RuntimeCFM68K.DLL" -t 'm68k' GSSLib
+	
+##
+## Clean targets
+##
 
-
-# K5OBJS's are currently all included with GSSOBJ's, but deleting twice 
-#	doesn't hurt anything and eventually we hope to seperate them.
-clean :
+clean : autogenerate-clean
 	Delete -i {GSSOBJS68K} {GSSOBJSPPC} {GSSOBJS68KCFM} \
 		{K5OBJS68K} {K5OBJSPPC} {K5OBJS68KCFM} \
 		{KH68K} {KHPPC} {KHCFM-68K} \
-		{SHLIBOBJ68KCFM} {SHLIBOBJPPC}
-
-clean-mit :
-	Delete -i {GSSOBJ68KCFM-TT} {GSSOBJPPC-TT}
+		{GSSSHLIBOBJ68KCFM} {GSSSHLIBOBJPPC} \
+		{K5SHLIBOBJ68KCFM} {K5SHLIBOBJPPC}
+# clean-mit :
+# 	Delete -i {GSSOBJ68KCFM-TT} {GSSOBJPPC-TT}
 	
-# ---------------------------------------
-# MIT TestTrack version related commands
-# ---------------------------------------
-SRCS-TT = /mac/TestTrack/mitTestTrackGlue.c
-#GSSOBJS68KCFM-TT = /bin/CFM-68K/mitTestTrackGlue.c.68k.o -weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_¥TestTrackLib68K"
-GSSOBJ68KCFM-TT = /bin/CFM-68K/mitTestTrackGlue.c.68K.o
-#GSSOBJSPPC-TT = /bin/PPC/mitTestTrackGlue.c.PPC.o -weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_¥TestTrackLib"
-GSSOBJPPC-TT = /bin/PPC/mitTestTrackGlue.c.PPC.o
-INCLUDES-TT = -i /mac/TestTrack/ 
+################################################################################
+##
+## MIT specific (TestTrack) versions
+## We are not building these right now because we folded TestTrack into
+## main library, weak-linked
+##
+################################################################################
 
-OPTIONS-TT = {INCLUDES-TT} {INCLUDES} -enum int -opt all -strings pool -mapcr \
-        -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
-        -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath
+#
+# TestTrack sources
+#
 
-all-mit : build-testtrack link-testtrack
+# SRCS-TT = /mac/TestTrack/mitTestTrackGlue.c
 
-build-testtrack : build-68KCFM build-PPC build-testtrackglue
+#
+# TestTrack objects
+#
 
+# GSSOBJ68KCFM-TT = /bin/CFM-68K/mitTestTrackGlue.c.68K.o
+# GSSOBJPPC-TT = /bin/PPC/mitTestTrackGlue.c.PPC.o
 
-#build-testtrackglue : {KHCFM-68K} {KHPPC}
-#	MWC68K {OPTIONS-TT} -o "/bin/CFM-68K/" -prefix {KHCFM-68K} \
-#		-model cfmflat {SRCS-TT}
-#	MWCPPC {OPTIONS-TT} -o "/bin/PPC/" -prefix {KHPPC} {SRCS-TT}
+#
+# TestTrack includes
+#
 
-build-testtrackglue : {GSSOBJ68KCFM-TT} {GSSOBJPPC-TT}
+# INCLUDES-TT = -i /mac/TestTrack/ 
 
-{GSSOBJ68KCFM-TT} : {SRCS-TT} {KHCFM-68K}
-	MWC68K {OPTIONS-TT} -o {GSSOBJ68KCFM-TT} -prefix {KHCFM-68K} \
-		-model cfmflat {SRCS-TT}
+#
+# TestTrack compiler options
+#
 
-{GSSOBJPPC-TT} : {SRCS-TT} {KHPPC}
-	MWCPPC {OPTIONS-TT} -o "/bin/PPC/" -prefix {KHPPC} {SRCS-TT}
+# OPTIONS-TT = {INCLUDES-TT} {INCLUDES} -enum int -opt all -strings pool -mapcr \
+#         -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
+#         -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath
 
+################################################################################
+##
+## TestTrack rules
+##
+################################################################################
 
-link-testtrack : link-68KCFM-TT link-PPC-TT link-CFMFAT-TT
+# all-mit : build-testtrack link-testtrack
 
+# build-testtrack : build-68KCFM build-PPC build-testtrackglue
 
-#link-68KCFM-TT :
-#	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
-#		-model cfmflat -@export "/mac/GSSLibrary.TT.exp" \
-#		-init "__initializeTTglue" -term "__terminateTTglue" \
-#	        -sym fullpath -map libgss.68K.MAP -o GSSLibraryMIT.68K \
-#		{GSSRTLCFM68K} {GSSOBJS68KCFM-TT} {GSSOBJS68KCFM}
-#	Rez "/mac/version.r" -a -o GSSLibraryMIT.68K
+# build-testtrackglue : {GSSOBJ68KCFM-TT} {GSSOBJPPC-TT}
+# {GSSOBJ68KCFM-TT} : {SRCS-TT} {KHCFM-68K}
+# 	MWC68K {OPTIONS-TT} -o {GSSOBJ68KCFM-TT} -prefix {KHCFM-68K} \
+# 		-model cfmflat {SRCS-TT}
+# {GSSOBJPPC-TT} : {SRCS-TT} {KHPPC}
+# 	MWCPPC {OPTIONS-TT} -o "/bin/PPC/" -prefix {KHPPC} {SRCS-TT}
 
-link-68KCFM-TT : GSSLibraryMIT.68K
+################################################################################
+##
+## TestTrack linking
+##
+################################################################################
 
-GSSLibraryMIT.68K GSSLibraryMIT.68K.MAP :: /mac/GSSLibrary.TT.exp {GSSRTLCFM68K} {GSSOBJ68KCFM-TT} /mac/TestTrack/MITAthenaLib {GSSOBJS68KCFM}
-	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
-		-model cfmflat -@export "/mac/GSSLibrary.TT.exp" \
-		-init "__initializeTTglue" -term "__terminateTTglue" \
-		-sym fullpath -map GSSLibraryMIT.68K.MAP -o GSSLibraryMIT.68K \
-		{GSSRTLCFM68K} \
-		{GSSOBJ68KCFM-TT} -weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_¥TestTrackLib68K" \
-		{GSSOBJS68KCFM}
+# link-testtrack : link-68KCFM-TT link-PPC-TT link-CFMFAT-TT
 
-GSSLibraryMIT.68K :: /mac/version.r
-	Rez "/mac/version.r" -a -o GSSLibraryMIT.68K
+################################################################################
+## 
+## CFM-68K TestTrack
+##
+################################################################################
 
-#   old timebomb information
-#	Rez "/mac/SAP/GSSforSAP.r" -a -o GSSLibrarySAP.68K
+# link-68KCFM-TT : GSSLibraryMIT.68K
+# GSSLibraryMIT.68K GSSLibraryMIT.68K.MAP :: /mac/GSSLibrary.TT.exp {GSSRTLCFM68K} {GSSOBJ68KCFM-TT} /mac/TestTrack/MITAthenaLib {GSSOBJS68KCFM}
+# 	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
+# 		-model cfmflat -@export "/mac/GSSLibrary.TT.exp" \
+# 		-init "__initializeTTglue" -term "__terminateTTglue" \
+# 		-sym fullpath -map GSSLibraryMIT.68K.MAP -o GSSLibraryMIT.68K \
+# 		{GSSRTLCFM68K} \
+# 		{GSSOBJ68KCFM-TT} -weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib68K" \
+# 		{GSSOBJS68KCFM}
+# GSSLibraryMIT.68K :: /mac/version.r
+# 	Rez "/mac/version.r" -a -o GSSLibraryMIT.68K
 
+################################################################################
+##
+## PPC TestTrack
+##
+################################################################################
 
-#link-PPC-TT :
-#	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
-#		-@export "/mac/GSSLibrary.TT.exp" \
-#		-init "__initializeTTglue" -term "__terminateTTglue" \
-#	        -sym fullpath -map libgss.PPC.MAP -o GSSLibraryMIT.PPC \
-#		{GSSRTLCFMPPC} {GSSOBJSPPC-SAP} {GSSOBJSPPC}
-#	Rez "/mac/version.r" -a -o GSSLibraryMIT.PPC
+# link-PPC-TT : GSSLibraryMIT.PPC
+# GSSLibraryMIT.PPC GSSLibraryMIT.PPC.MAP :: /mac/GSSLibrary.TT.exp {GSSRTLCFMPPC} {GSSOBJPPC-TT} /mac/TestTrack/MITAthenaLib {GSSOBJSPPC}
+# 	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
+# 		-@export "/mac/GSSLibrary.TT.exp" \
+# 		-init "__initializeTTglue" -term "__terminateTTglue" \
+# 	        -sym fullpath -map GSSLibraryMIT.PPC.MAP -o GSSLibraryMIT.PPC \
+# 		{GSSRTLCFMPPC} \
+# 		{GSSOBJPPC-TT} -weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
+# 		{GSSOBJSPPC}
+# GSSLibraryMIT.PPC :: /mac/version.r
+# 	Rez "/mac/version.r" -a -o GSSLibraryMIT.PPC
 
-link-PPC-TT : GSSLibraryMIT.PPC
+################################################################################
+##
+## Fat TestTrack
+##
+################################################################################
 
-GSSLibraryMIT.PPC GSSLibraryMIT.PPC.MAP :: /mac/GSSLibrary.TT.exp {GSSRTLCFMPPC} {GSSOBJPPC-TT} /mac/TestTrack/MITAthenaLib {GSSOBJSPPC}
-	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
-		-@export "/mac/GSSLibrary.TT.exp" \
-		-init "__initializeTTglue" -term "__terminateTTglue" \
-	        -sym fullpath -map GSSLibraryMIT.PPC.MAP -o GSSLibraryMIT.PPC \
-		{GSSRTLCFMPPC} \
-		{GSSOBJPPC-TT} -weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_¥TestTrackLib" \
-		{GSSOBJSPPC}
-
-GSSLibraryMIT.PPC :: /mac/version.r
-	Rez "/mac/version.r" -a -o GSSLibraryMIT.PPC
-
-#	old timebomb information
-#	Rez "/mac/SAP/GSSforSAP.r" -a -o GSSLibrarySAP.PPC
-	
-	
-#link-CFMFAT-TT : 
-#	Duplicate -y GSSLibraryMIT.68K GSSLibMIT
-#	MergeFragment GSSLibraryMIT.PPC GSSLibMIT
-
-link-CFMFAT-TT : GSSLibMIT
-
-GSSLibMIT : GSSLibraryMIT.68K GSSLibraryMIT.PPC
-	Duplicate -y GSSLibraryMIT.68K GSSLibMIT
-	MergeFragment GSSLibraryMIT.PPC GSSLibMIT
+# link-CFMFAT-TT : GSSLibMIT
+# GSSLibMIT : GSSLibraryMIT.68K GSSLibraryMIT.PPC
+# 	Duplicate -y GSSLibraryMIT.68K GSSLibMIT
+# 	MergeFragment GSSLibraryMIT.PPC GSSLibMIT
