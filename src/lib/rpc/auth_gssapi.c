@@ -158,7 +158,7 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      struct sockaddr_in laddr, raddr;
      enum clnt_stat callstat;
      struct timeval timeout;
-     int init_func;
+     int init_func, bindings_failed;
      
      auth_gssapi_init_arg call_arg;
      auth_gssapi_init_res call_res;
@@ -207,6 +207,7 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
 
      /* start by trying latest version */
      call_arg.version = 4;
+     bindings_failed = 0;
 
 try_new_version:
      /* set state for initial call to init_sec_context */
@@ -229,7 +230,7 @@ try_new_version:
 	  mech_type = gss_mech_krb5_old;
 #endif
 
-     if (call_arg.version >= 3) {
+     if (!bindings_failed && call_arg.version >= 3) {
 	  if (clnt_control(clnt, CLGET_LOCAL_ADDR, &laddr) == FALSE) {
 	       PRINTF(("gssapi_create: CLGET_LOCAL_ADDR failed"));
 	       goto cleanup;
@@ -337,6 +338,11 @@ next_token:
 	       AUTH_GSSAPI_DISPLAY_STATUS(("in response from server",
 					   call_res.gss_major,
 					   call_res.gss_minor));
+	       if (GSS_ERROR(call_res.gss_major) == GSS_S_BAD_BINDINGS
+		   && call_arg.version > 2) {
+		    call_arg.version = 2;
+		    goto try_new_version;
+	       }
 	       goto cleanup;
 	  }
 	  
