@@ -1,8 +1,6 @@
 PepyPosyRules()
 NormalLibraryObjectRule()
 
-all:: libasn1.a
-
 SRCS= \
 	KRB5-asn.py	\
 	asn1glue.c	\
@@ -15,7 +13,7 @@ OBJS= \
 	encode.o	\
 	decode.o
 
-NormalLibraryTarget(asn1,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
 KRB5-types.c: KRB5-types.py
 
