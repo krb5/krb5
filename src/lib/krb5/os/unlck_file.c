@@ -10,10 +10,10 @@
  * libos: krb5_lock_file routine
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char rcsid_unlock_file_c [] =
 "$Id$";
-#endif	/* lint */
+#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 

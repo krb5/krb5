@@ -10,7 +10,7 @@
  * libos: krb5_read_password for BSD 4.3
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char rcsid_read_pwd_c[] =
 "$Id$";
 #endif	/* lint */
