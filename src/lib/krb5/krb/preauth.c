@@ -160,6 +160,10 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
 
     for (pa = preauth_to_use, size=0; *pa; pa++, size++) {
 	if ((*pa)->pa_type == KRB5_PADATA_ETYPE_INFO) {
+	    /* XXX use the first one.  Is there another way to disambiguate? */
+	    if (etype_info)
+		continue;
+
 	    scratch.length = (*pa)->length;
 	    scratch.data = (char *) (*pa)->contents;
 	    retval = decode_krb5_etype_info(&scratch, &etype_info);
@@ -219,6 +223,8 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
     }
 
 cleanup:
+    if (etype_info)
+	krb5_free_etype_info(context, etype_info);
     if (f_salt)
 	krb5_xfree(salt.data);
     if (send_pa_list)
