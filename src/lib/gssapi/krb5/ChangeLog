@@ -1,3 +1,6 @@
+Sun Sep 24 10:39:13 1995  John Rivlin (jrivlin@fusion.com)
+	* gssapiP_krb5.h: Fixed kb_seal_size prototype
+
 Wed Sep 13 10:39:13 1995 Keith Vetter (keithv@fusion.com)
 
 	* acquire_.c: changed int to size_t.
