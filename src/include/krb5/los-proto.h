@@ -48,17 +48,25 @@ int krb5_net_write
 krb5_error_code krb5_os_localaddr
 	PROTOTYPE((krb5_address ***));
 krb5_error_code krb5_sendto_kdc
-	PROTOTYPE((krb5_data *,
-		   krb5_data *,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_data *,
 		   krb5_data * ));
 krb5_error_code krb5_get_krbhst
-	PROTOTYPE((krb5_data *,
+	PROTOTYPE((const krb5_data *,
 		   char *** ));
 krb5_error_code krb5_free_krbhst
 	PROTOTYPE((char ** ));
 krb5_error_code krb5_aname_to_localname
-	PROTOTYPE((krb5_principal,
-		   int,
+	PROTOTYPE((const krb5_principal,
+		   const int,
 		   char * ));
+krb5_error_code krb5_get_default_realm
+	PROTOTYPE((const int,
+		   char * ));
+krb5_error_code krb5_get_host_realm
+	PROTOTYPE((const char *,
+		   char *** ));
+krb5_error_code krb5_free_host_realm
+	PROTOTYPE((char * const * ));
 
 #endif /* KRB5_LIBOS_PROTO__ */
