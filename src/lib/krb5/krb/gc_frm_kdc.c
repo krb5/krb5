@@ -87,8 +87,8 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     memset((char *)&tgtq, 0, sizeof(tgtq));
     tgtq.client = cred->client;
 
-    if (retval = krb5_tgtname(krb5_princ_realm(cred->client),
-			      krb5_princ_realm(cred->server), &tgtq.server))
+    if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
+			      krb5_princ_realm(cred->client), &tgtq.server))
 	return retval;
 
     /* try to fetch it directly */
