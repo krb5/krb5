@@ -246,7 +246,7 @@ n_found = 0;
  * local IP address, courtesy of Windows Socket Network Programming,
  * by Robert Quinn
  */
-#if defined(_MSDOS) || !defined(_WIN32)
+#if defined(_MSDOS) || defined(_WIN32)
 static struct hostent *local_addr_fallback_kludge()
 {
 	static struct hostent	host;
