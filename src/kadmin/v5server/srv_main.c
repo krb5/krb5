@@ -35,6 +35,7 @@
 #include "com_err.h"
 #include "adm.h"
 #include "adm_proto.h"
+#include "kadm5_defs.h"
 
 #ifdef	LANGUAGES_SUPPORTED
 static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
@@ -118,6 +119,8 @@ main(argc, argv)
     krb5_flags		def_flags;
     krb5_boolean	exp_valid, flags_valid;
     krb5_realm_params	*rparams;
+    krb5_int32		realm_num_keysalts;
+    krb5_key_salt_tuple	*realm_keysalts;
 
     /* Kerberatic contexts */
     krb5_context	kcontext;
@@ -144,6 +147,8 @@ main(argc, argv)
      */
     error = 0;
     exp_valid = flags_valid = FALSE;
+    realm_keysalts = (krb5_key_salt_tuple *) NULL;
+    realm_num_keysalts = 0;
     while ((option = getopt(argc, argv, getopt_string)) != EOF) {
 	switch (option) {
 	case 'a':
@@ -301,6 +306,18 @@ main(argc, argv)
 	    flags_valid = TRUE;
 	}
 
+	/* Clone the value of the keysalt array */
+	if (realm_num_keysalts = rparams->realm_num_keysalts) {
+	    if (realm_keysalts =
+		(krb5_key_salt_tuple *) malloc(realm_num_keysalts *
+					       sizeof(krb5_key_salt_tuple))) {
+		memcpy(realm_keysalts, rparams->realm_keysalts,
+		       (realm_num_keysalts * sizeof(krb5_key_salt_tuple)));
+	    }
+	    else
+		realm_num_keysalts = 0;
+	}
+
 	krb5_free_realm_params(kcontext, rparams);
     }
 
@@ -342,9 +359,18 @@ main(argc, argv)
 	/*
 	 * Initialize our modules.
 	 */
-	error = key_init(kcontext, debug_level, enc_type, key_type,
-			 master_key_name, manual_entry, db_file, db_realm,
-			 keytab_name, stash_name);
+	error = key_init(kcontext,
+			 debug_level,
+			 enc_type,
+			 key_type,
+			 master_key_name,
+			 manual_entry,
+			 db_file,
+			 db_realm,
+			 keytab_name,
+			 stash_name, 
+			 realm_num_keysalts,
+			 realm_keysalts);
 	if (!error) {
 	    error = acl_init(kcontext, debug_level, acl_file);
 	    if (!error) {
@@ -379,9 +405,7 @@ main(argc, argv)
 	    /*
 	     * We've successfully initialized here.
 	     */
-#ifndef	DEBUG
 	    com_err(programname, 0, begin_op_msg, server_name_msg);
-#endif	/* DEBUG */
 
 	    /*
 	     * net_dispatch() only returns when we're done for some reason.
