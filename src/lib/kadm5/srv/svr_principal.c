@@ -238,7 +238,8 @@ kadm5_create_principal(void *server_handle,
 			   handle->params.keysalts,
 			   handle->params.num_keysalts,
 			   password,
-			   (mask & KADM5_KVNO)?entry->kvno:1, &kdb)) {
+			   (mask & KADM5_KVNO)?entry->kvno:1,
+			   FALSE, &kdb)) {
 	krb5_dbe_free_contents(handle->context, &kdb);
 	if (mask & KADM5_POLICY)
 	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);
@@ -1053,7 +1054,8 @@ kadm5_chpass_principal(void *server_handle,
     if (ret = krb5_dbe_cpw(handle->context, &master_keyblock,
 			   handle->params.keysalts,
 			   handle->params.num_keysalts,
-			   password, 0 /* increment kvno */, &kdb))
+			   password, 0 /* increment kvno */,
+			   FALSE, &kdb))
 	goto done;
 
     kdb.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
@@ -1171,7 +1173,7 @@ kadm5_randkey_principal(void *server_handle,
 
     if (ret = krb5_dbe_crk(handle->context, &master_keyblock,
 			   handle->params.keysalts,
-			   handle->params.num_keysalts,
+			   handle->params.num_keysalts, FALSE,
 			   &kdb))
        goto done;
 
