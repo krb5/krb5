@@ -1,3 +1,11 @@
+2005-01-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * cp_key_cnt.c, copy_princ.c:
+          prevent krb5_copy_principal() and krb5_copy_keyblock() from
+          calling malloc(0).  On platforms in which malloc(0) returns   
+          NULL, these functions will return an ENOMEM error the way
+          they were written.  
+
 2005-01-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* parse.c (krb5_parse_name): Don't cache the default realm name.
