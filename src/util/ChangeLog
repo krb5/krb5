@@ -1,3 +1,9 @@
+2001-10-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* def-check.pl: New file.  Not currently used by any automatic
+	processes.  Checks krb5.hin against krb5_32.def for consistency;
+	might work with other .h/.def files but hasn't been tested.
+
 2001-10-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* depfix.sed: Change "foo.o" to "$(OUTPRE)foo.$(OBJEXT)" so that
@@ -6,7 +12,7 @@
 2001-09-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* depgen.sed: New file.
-	* depfix.sed: Remove /foo/../ sequences, looping til no more.
+	* depfix.sed: Remove /foo/../ sequences, looping 'til no more.
 
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
