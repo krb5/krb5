@@ -125,7 +125,7 @@ config-windows:: makefile-windows
 	-$(MAKE) -$(MAKEFLAGS)
 	cd ..
 
-makefile-windows:: wconfig.c config\pre.in config\post.in \
+makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		include\makefile.in include\krb5\makefile.in \
 		lib\makefile.in lib\crypto\makefile.in \
 		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
@@ -143,8 +143,6 @@ makefile-windows:: wconfig.c config\pre.in config\post.in \
 		lib\krb5\rcache\makefile.in \
 		util\et\makefile.in util\profile\makefile.in
 	type makefile.in >makefile
-	SET CL=/nologo
-	$(CC) /AL wconfig.c
 	.\wconfig config <include\makefile.in >include\makefile
 	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
 	.\wconfig config <lib\makefile.in >lib\makefile
@@ -175,6 +173,10 @@ makefile-windows:: wconfig.c config\pre.in config\post.in \
 	.\wconfig config <util\profile\makefile.in >util\profile\makefile
 	config\rm.bat wconfig.obj msvc.pdb
 
+wconfig.exe: wconfig.c
+	SET CL=/nologo
+	$(CC) /AL wconfig.c
+
 clean-windows::
 	@echo Making clean in include
 	cd include
@@ -194,7 +196,7 @@ clean-windows::
 	cd ..
 	@echo Making clean in root
 	config\rm.bat *.obj msvc.pdb *.err wconfig.obj wconfig.exe
-
+ 
 #
 # Renames DOS 8.3 filenames back to their proper, longer names.
 #
