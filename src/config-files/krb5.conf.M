@@ -69,7 +69,7 @@ Contains subsections keyed by Kerberos realm names which describe
 where to find the Kerberos servers for a particular realm, and other
 realm-specific information.
 
-.IP [domain_realm]
+.IP [domain_name]
 Contains relations which map subdomains and domain names to Kerberos
 realm names.  This is used by programs to determine what realm a host
 should be in, given its fully qualified domain name.
@@ -93,7 +93,7 @@ following sections.
 .SH LIBDEFAULTS SECTION
 The following relations are defined in the [libdefaults] section:
 
-.IP default_domain 
+.IP default_realm
 This relation identifies the default realm to be used in a client
 host's Kerberos activity.
 
