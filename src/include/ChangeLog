@@ -1,3 +1,8 @@
+2002-06-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h [!_WIN32 && !HAVE_MACSOCK_H]: Include
+	krb5/autoconf.h, to get HAVE_SYS_UIO_H.
+
 2002-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for sys/uio.h.

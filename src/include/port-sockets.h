@@ -72,6 +72,8 @@ int win_socket_initialize();
 #include "macsock.h"		/* Macintosh sockets emulation library */
 #else  /* ! HAVE_MACSOCK_H */	/* Sockets stuff for Unix machines */
 
+#include "krb5/autoconf.h"
+
 #include <sys/types.h>
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
 #include <arpa/inet.h>		/* For inet_ntoa */
