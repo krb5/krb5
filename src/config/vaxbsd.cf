@@ -52,8 +52,8 @@
 #define AwkCmd gawk
 
 #if HasGcc
-#define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
-#define MakeDependFlags -D__STDC__ -I/mit/gnu/vaxlib/gcc-include
+#define DependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
+#define DependFlags -D__STDC__ -I/mit/gnu/vaxlib/gcc-include
 #ifndef CcCmd
 #ifdef UltrixCrossCompile
 #define CcCmd gcc -b vax-bsd -pedantic -fpcc-struct-return -Wall -Dunix -Dvax
