@@ -364,7 +364,37 @@ errcode_t profile_iterator(iter_p, ret_name, ret_value)
 	void	**iter_p;
 	char **ret_name, **ret_value;
 {
-	return profile_node_iterator(iter_p, 0, ret_name, ret_value);
+	char *name, *value;
+	errcode_t	retval;
+	
+	retval = profile_node_iterator(iter_p, 0, &name, &value);
+	if (retval)
+		return retval;
+
+	if (ret_name) {
+		if (name) {
+			*ret_name = malloc(strlen(name)+1);
+			if (!*ret_name)
+				return ENOMEM;
+			strcpy(*ret_name, name);
+		} else
+			*ret_name = 0;
+	}
+	if (ret_value) {
+		if (value) {
+			*ret_value = malloc(strlen(value)+1);
+			if (!*ret_value) {
+				if (ret_name) {
+					free(*ret_name);
+					*ret_name = 0;
+				}
+				return ENOMEM;
+			}
+			strcpy(*ret_value, value);
+		} else
+			*ret_value = 0;
+	}
+	return 0;
 }
 
 void profile_release_string(str)

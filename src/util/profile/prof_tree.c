@@ -206,7 +206,7 @@ int profile_is_node_final(node)
  *
  * The returned character string in value points to the stored
  * character string in the parse string.  Before this string value is
- * returned to a calling application (profile_find_node_relatioon is not an
+ * returned to a calling application (profile_find_node_relation is not an
  * exported interface), it should be strdup()'ed.
  */
 errcode_t profile_find_node_relation(section, name, state, ret_name, value)
@@ -430,6 +430,13 @@ void profile_node_iterator_free(iter_p)
 	*iter_p = 0;
 }
 
+/*
+ * Note: the returned character strings in ret_name and ret_value
+ * points to the stored character string in the parse string.  Before
+ * this string value is returned to a calling application
+ * (profile_node_iterator is not an exported interface), it should be
+ * strdup()'ed.
+ */
 errcode_t profile_node_iterator(iter_p, ret_node, ret_name, ret_value)
 	void	**iter_p;
 	struct profile_node	**ret_node;
