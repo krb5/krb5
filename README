@@ -69,15 +69,22 @@ Notes:
   requests have not been incorporated.  We have focussed mainly on
   important security fixes and usability fixes.
 
-* The lists following are known to be INCOMPLETE; they will be updated
-  prior to final release.
-
 Major Changes:
+
+* Certain problems with shared library builds have been eliminated or
+  reduced on Linux and HP-UX.
 
 * Various bugs in single-DES enctype similarity have been fixed; the
   1.0.x behavior of treating all single-DES enctype as equivalent has
   been restored for now.  This may go away in a future release.  Note
   that SUPPORT_DESMD5 will be treated as always false for now.
+
+* The KDC will now log a number of enctype parameters associated with
+  KDC requests, in order to allow easier debugging of enctype-related
+  problems.
+
+* A client will no longer attempt obtain a forwarded TGT with a
+  session key enctype that the target server won't understand.
 
 * Triple-DES should work on Windows now.  The SHA-1 implementation had
   a Windows-specific bug preventing it from working in most cases.
@@ -85,7 +92,8 @@ Major Changes:
 * Various bugs in pty handling have been fixed.
 
 * Bogus utmp files with garbage characters in their names should not
-  get created on Solaris.
+  get created on Solaris.  Also, utmp/wtmp handling code has been
+  mostly rewritten, eliminating numerous bugs.
 
 * Potential buffer-overrun problems and null-pointer dereferences have
   been fixed in ftpd, telnetd, login.krb5, and SHA-1.  The first three
@@ -109,7 +117,8 @@ Major Changes:
   can still prevent such tickets from being issued.  This checking is
   controlled by a per-realm flag, and is enabled by default.
 
-* The rlogin server should no longer hang on AIX systems.
+* On AIX systems, the rlogin server should no longer hang when
+  control-C is pressed.
 
 * New databases will be created in btree format by default.  We
   believe the btree code to be less buggy than the hash format code we
@@ -119,6 +128,13 @@ Major Changes:
 
 Known Bugs:
 
+* There may be problems with running a KDC on 64-bit platforms
+  (environments where size_t and long are wider than 32 bits, such as
+  alpha/Tru64, or Solaris/SPARC in SPARCv9 mode, for example), as
+  indicated by the util/db2 tests not passing.  These problems may
+  also extend to the rpc library, which may prevent the kadmin
+  protocol from functioning.  These are being investigated.
+
 * ETYPE_INFO preauthentication data returned from the KDC are not
   sorted in the order requested by the client.  This may result in
   preauthentication failure when encrypted timestamp preauthentication
@@ -127,19 +143,20 @@ Known Bugs:
 
 * The gssftp daemon and client, when running in krb4 mode, are
   inconsistent with respect to port numbers passed to the
-  {mk,rd}_{priv,safe} functinos.  As a result, there is a small but
+  {mk,rd}_{priv,safe} functions.  As a result, there is a small but
   nonzero probability that krb4 ftp with client and server on the same
   IP address will fail with a "Time is out of bounds" error.  This
   includes the tests/dejagnu test suite, which tests the krb4 ftp
   functionality.  The probability of this occuring seems to be less
   than 50%.
 
-* Compilation on Solaris (SPARC) with the SunSoft compiler in 64-bit
-  mode appears to produce some broken executables.  The db2 btree
-  tests fail, which means a KDC built this way may fail also.  Compile
-  in 32-bit mode only for now.  (We are not aware of similar problems
-  on the Alpha, so this is quite possibly not a generic 64-bit
-  problem.)
+* The gss-sample test application suite is known to not communicate
+  with the gss-sample suite in 1.1.x and earlier releases.  This is
+  the result of changes to increase functionality; fixes to allow for
+  backwards compatibility will occur in a later release.
+
+* BSD/OS 4.x may have some problems compiling.  These are being
+  investigated.
 
 Notes, Major Changes, and Known Bugs for 1.2.2
 ----------------------------------------------
@@ -497,10 +514,10 @@ Thanks to Christopher Thompson and Marcus Watts for discovering the
 ftpd security bug.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Danilo Almeida, Jay Berkenbilt, Richard Basch, John
-Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt Hancher, Sam
-Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Miroslav Jurisic,
-Barry Jaspan, Geoffrey King, John Kohl, Peter Litwack, Scott McGuire,
-Kevin Mitchell, Cliff Neuman, Paul Park, Ezra Peisach, Chris
-Provenzano, Ken Raeburn, Jon Rochlis, Jeff Schiller, Brad Thompson,
-Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
+past and present: Danilo Almeida, Jay Berkenbilt, Richard Basch, Mitch
+Berger, John Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt
+Hancher, Sam Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Miroslav
+Jurisic, Barry Jaspan, Geoffrey King, John Kohl, Peter Litwack, Scott
+McGuire, Kevin Mitchell, Cliff Neuman, Paul Park, Ezra Peisach, Chris
+Provenzano, Ken Raeburn, Jon Rochlis, Jeff Schiller, Jen Selby, Brad
+Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
