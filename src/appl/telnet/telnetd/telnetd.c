@@ -153,7 +153,7 @@ extern void usage P((void));
  */
 char valid_opts[] = {
 	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'U',
-	'u', ':', 'i', 'N',
+	'w',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif
@@ -443,6 +443,27 @@ main(argc, argv)
 			auth_disable_name(optarg);
 			break;
 #endif	/* AUTHENTICATION */
+		case 'w':
+			if (!strcmp(optarg, "ip"))
+				always_ip = 1;
+			else {
+				char *cp;
+				cp = strchr(optarg, ',');
+				if (cp == NULL)
+					maxhostlen = atoi(optarg);
+				else if (*(++cp)) {
+					if (!strcmp(cp, "striplocal"))
+						stripdomain = 1;
+					else if (!strcmp(cp, "nostriplocal"))
+						stripdomain = 0;
+					else {
+						usage();
+					}
+					*(--cp) = '\0';
+					maxhostlen = atoi(optarg);
+				}
+			}
+			break;
 		case 'u':
 			maxhostlen = atoi(optarg);
 			break;
@@ -661,7 +682,8 @@ usage()
 #ifdef	AUTHENTICATION
 	fprintf(stderr, " [-X auth-type]");
 #endif
-	fprintf(stderr, " [-u utmp_hostname_length] [-U]");
+	fprintf(stderr, " [-u utmp_hostname_length] [-U]\n");
+	fprintf(stderr, " [-w [ip|maxhostlen[,[no]striplocal]]]\n");
 	fprintf(stderr, " [port]\n");
 	exit(1);
 }
