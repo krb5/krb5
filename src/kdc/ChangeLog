@@ -1,3 +1,11 @@
+Mon Jan  4 23:50:45 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in (withval): Conditinalize ATHENA_DES3_KLUDGE on
+	--enable-athena.
+
+	* main.c (initialize_realms): Kludge to disable
+	des3-marc-hmac-sha1 from the command line.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

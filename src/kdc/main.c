@@ -609,6 +609,10 @@ initialize_realms(kcontext, argc, argv)
     char                *v4mode = 0;
 #endif
     extern char *optarg;
+#ifdef ATHENA_DES3_KLUDGE
+    extern struct krb5_keytypes krb5_enctypes_list[];
+    extern int krb5_enctypes_length;
+#endif
 
     if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
 	hierarchy[0] = "kdcdefaults";
@@ -631,7 +635,7 @@ initialize_realms(kcontext, argc, argv)
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:")) != -1) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n4:3")) != -1) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
@@ -681,6 +685,19 @@ initialize_realms(kcontext, argc, argv)
 	    v4mode = strdup(optarg);
 #endif
 	    break;
+	case '3':
+#ifdef ATHENA_DES3_KLUDGE
+	    if (krb5_enctypes_list[krb5_enctypes_length-1].etype
+		!= ENCTYPE_LOCAL_DES3_HMAC_SHA1) {
+		fprintf(stderr,
+			"internal inconsistency in enctypes_list"
+			" while disabling\n"
+			"des3-marc-hmac-sha1 enctype\n");
+		exit(1);
+	    }
+	    krb5_enctypes_length--;
+	    break;
+#endif
 	case '?':
 	default:
 	    usage(argv[0]);
