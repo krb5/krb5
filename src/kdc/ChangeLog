@@ -1,3 +1,10 @@
+2004-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (setup_a_tcp_listener): Try to turn the IPV6_V6ONLY
+	socket option on, not off, and do it before calling bind.
+	(setup_tcp_listener_ports): Don't do it here any more.
+	(setup_udp_port): Ignore AF_DLI addresses.
+
 2004-03-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (delete_fd): Free pointed-to data after removing it

@@ -362,6 +362,18 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
     if (setreuseaddr(sock, 1) < 0)
 	com_err(data->prog, errno,
 		"Cannot enable SO_REUSEADDR on fd %d", sock);
+#ifdef KRB5_USE_INET6
+    if (addr->sa_family == AF_INET6) {
+#ifdef IPV6_V6ONLY
+	if (setv6only(sock, 1))
+	    com_err(data->prog, errno, "setsockopt(IPV6_V6ONLY,1) failed");
+	else
+	    com_err(data->prog, 0, "setsockopt(IPV6_V6ONLY,1) worked");
+#else
+	krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
+#endif /* IPV6_V6ONLY */
+    }
+#endif /* KRB5_USE_INET6 */
     if (bind(sock, addr, socklen(addr)) == -1) {
 	com_err(data->prog, errno,
 		"Cannot bind TCP server socket on %s", paddr(addr));
@@ -435,14 +447,6 @@ setup_tcp_listener_ports(struct socksetup *data)
 	    s6 = setup_a_tcp_listener(data, (struct sockaddr *)&sin6);
 	    if (s6 < 0)
 		return -1;
-#ifdef IPV6_V6ONLY
-	    if (setv6only(s6, 0))
-		com_err(data->prog, errno, "setsockopt(IPV6_V6ONLY,0) failed");
-	    else
-		com_err(data->prog, 0, "setsockopt(IPV6_V6ONLY,0) worked");
-#else
-	    krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
-#endif
 
 	    s4 = setup_a_tcp_listener(data, (struct sockaddr *)&sin4);
 #endif /* KRB5_USE_INET6 */
@@ -513,6 +517,10 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
 #endif
 #ifdef AF_LINK /* some BSD systems, AIX */
     case AF_LINK:
+	return 0;
+#endif
+#ifdef AF_DLI /* Direct Link Interface - DEC Ultrix/OSF1 link layer? */
+    case AF_DLI:
 	return 0;
 #endif
     default:
