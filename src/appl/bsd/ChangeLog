@@ -1,3 +1,8 @@
+Sat May 16 16:07:42 1998  Tom Yu  <tlyu@mit.edu>
+
+	* login.c: Replace strcpy with strncpy in places.  Add nul
+	termination to some existing invocations of strncpy.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Add a check for the header file krb4-proto.h.
