@@ -1,0 +1,107 @@
+.\" $Source$
+.\" $Author$
+.\" $Id$
+.\" Copyright 1992 by the Massachusetts Institute of Technology.
+.\"
+.\" Export of this software from the United States of America is assumed
+.\"   to require a specific license from the United States Government.
+.\"   It is the responsibility of any person or organization contemplating
+.\"   export to obtain such a license before exporting.
+.\" 
+.\" WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+.\" distribute this software and its documentation for any purpose and
+.\" without fee is hereby granted, provided that the above copyright
+.\" notice appear in all copies and that both that copyright notice and
+.\" this permission notice appear in supporting documentation, and that
+.\" the name of M.I.T. not be used in advertising or publicity pertaining
+.\" to distribution of the software without specific, written prior
+.\" permission.  M.I.T. makes no representations about the suitability of
+.\" this software for any purpose.  It is provided "as is" without express
+.\" or implied warranty.
+.\" 
+.\"
+.TH KPROPD 8 "Kerberos Version 5.0" "MIT Project Athena"
+.SH NAME
+kpropd \- Kerberos V5 slave KDC update server
+.SH SYNOPSIS
+.B kprop
+[
+.B \-r
+.I realm
+] [
+.B \-f
+.I slave_dumpfile
+] [
+.B \-F
+.I principal_database
+] [
+.B \-p
+.I kdb5_edit_prog
+] [
+.B \-d
+] [
+.B \-S
+] 
+.I slave_host
+.br
+.SH DESCRIPTION
+.I kpropd 
+is the server which accepts connections from the 
+.IR kprop (8)
+program.  
+.I kpropd 
+accepts the dumped KDC database and places it in a file, and then runs 
+.IR kdb5_edit (8)
+to load the dumped database into the active database which is used by 
+.IR krb5kdc (8).
+Thus, the master Kerberos server can use 
+.IR kprop (8)
+to propagate its database to the slave slavers.  Upon a successful download 
+of the KDC database file, the slave Kerberos server will have an
+up-to-date KDC database. 
+.PP
+The
+.B \-r
+.I realm
+option specifies the realm of the master server; by default the realm
+returned by 
+.IR krb5_default_local_realm (3)
+is used.
+.PP
+The
+.B \-f
+.I file
+option specifies the filename where the dumped principal database file
+is to be stored; by default the dumped database file is KPROPD_DEFAULT_FILE
+(normally /krb5/from_master).
+.PP
+The 
+.B \-p
+option allows the user to specify the pathname to the 
+.IR kdb5_edit (8)
+program; by default the pathname used is KPROPD_DEFAULT_KDB5_EDIT
+(normally /krb5/bin/kdb5_edit).
+.PP
+The
+.B \-S
+option turns on standalone mode.  Normally, kpropd is invoked out of
+.IR inetd (8)
+and so it expects a network connection to be passed to it from
+.I inetd (8).
+If the 
+.B \-S 
+option is specified, kpropd will put itself into the background, and
+wait for connections to the KPROP_SERVICE port (normally krb5_prop).
+.PP
+The
+.B \-d
+option turns on debug mode.  In this mode, if the 
+.B \-S 
+option is selected, 
+.I kpropd
+will not detach itself from the current job and run in the background.
+Instead, it will run in the foreground and print out debugging
+messages during the database propagation.
+.SH SEE ALSO
+kprop(8), kdb5_edit(8), krb5kdc(8), inetd(8)
+
