@@ -98,23 +98,19 @@
   *retlen = sum;\
   return 0
 
-asn1_error_code asn1_encode_ui_4(DECLARG(asn1buf *, buf),
-				 DECLARG(const krb5_ui_4, val),
-				 DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const krb5_ui_4, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_ui_4(buf, val, retlen)
+     asn1buf * buf;
+     const /*krb5_ui_4*/int val;
+     int *retlen;
 {
   return asn1_encode_unsigned_integer(buf,val,retlen);
 }
 
 
-asn1_error_code asn1_encode_msgtype(DECLARG(asn1buf *, buf),
-				    DECLARG(const krb5_msgtype, val),
-				    DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const krb5_msgtype, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_msgtype(buf, val, retlen)
+     asn1buf * buf;
+     const /*krb5_msgtype*/int val;
+     int * retlen;
 {
   switch(val){
   case KRB5_AS_REQ:

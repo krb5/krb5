@@ -2,6 +2,9 @@
 #include "asn1_decode.h"
 #include "asn1_get.h"
 #include <time.h>
+#ifdef USE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #define setup()\
 asn1_error_code retval;\
@@ -172,10 +175,25 @@ asn1_error_code asn1_decode_generaltime(DECLARG(asn1buf *, buf),
   ts.tm_isdst = -1;
   t = mktime(&ts);
   if(t == -1) return ASN1_BAD_TIMEFORMAT;
+
+#ifdef HAVE_GMTOFF
   t += ts.tm_gmtoff;		/* Convert back to UTC timezone */
-                                /* !!!WARNING!!! tm_gmtoff is non-ANSI,
-				   although it should exist in both
-				   BSD and SYSV. */
+#else
+  {
+    struct tm zg, zl;
+    time_t zero = 24*60*60;	/* miss the year boundary */
+    long delta;
+
+    zl = *localtime(&zero);
+    zg = *gmtime(&zero);
+
+    delta = (zl.tm_sec + 60*(zl.tm_min+60*(zl.tm_hour + 24*zl.tm_yday)))
+      - (zg.tm_sec + 60*(zg.tm_min+60*(zg.tm_hour + 24*zg.tm_yday)));
+
+    t += delta;
+  }
+#endif
+
   *val = t;
   cleanup();
 }

@@ -1,4 +1,18 @@
-Fri Jul  1 13:03:39 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+Fri Jul  1 13:03:39 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* asn1_encode_k.c (asn1_encode_msgtype): comment out krb5_msgtype
+	decl of val arg, use int (to match prototype in header.) Throw out
+	OLDDECLARG, DECLARG, and use old-style definition to match style
+	of the rest of the code.
+	(asn1_encode_ui_4): comment out krb5_ui_4 decl of val arg, use int
+	(to match prototype in header.) Also rewrote definition header.
+
+	* asn1_decode.c (asn1_decode_generaltime): tm_gmtoff is *not* in
+	System V either. The only portable way to find the delta is to
+	subtract gmtime from localtime at a fixed point (epoch+24hours is
+	an easy way to simplify the arithmetic.)
+	HAVE_GMTOFF: might someday be defined, but for now merely labels
+	what the code original did/was intended to do.
 
 	* configure.in: redo "autoconf frobbage" since the old way didn't
 	work with srcdir. Now, AC_OUTPUT generates all three Makefiles,
