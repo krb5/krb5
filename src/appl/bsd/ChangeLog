@@ -1,3 +1,9 @@
+Mon Jan 30 07:58:16 1995  Chris Provenzano (proven@mit.edu)
+
+	* Removed all #include <krb5/crc-32.h> 
+
+	* Removed krb5_enctype argument passed to krb5_get_for_creds()
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h

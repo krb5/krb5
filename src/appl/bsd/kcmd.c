@@ -349,7 +349,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     (void) write(s, locuser, strlen(locuser)+1);
     
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
-	if (status = krb5_get_for_creds(bsd_context, ETYPE_DES_CBC_CRC,
+	if (status = krb5_get_for_creds(bsd_context, 
 					krb5_kdc_req_sumtype,
 					hp->h_name,
 					ret_cred->client,

@@ -66,7 +66,6 @@ char copyright[] =
 #ifdef KERBEROS
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
-#include <krb5/crc-32.h>
 #include <krb5/mit-des.h>
 #include <krb5/los-proto.h>
 
