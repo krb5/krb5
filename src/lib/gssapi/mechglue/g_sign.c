@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_sign (minor_status,
           context_handle,
           qop_req,
@@ -77,7 +77,7 @@ gss_buffer_t		msg_token;
     return(GSS_S_NO_CONTEXT);
 }
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_get_mic (minor_status,
           context_handle,
           qop_req,

@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_context_time (minor_status,
                   context_handle,
                   time_rec)

@@ -170,14 +170,16 @@ static int rc_store(context, id, rep)
  return CMP_HOHUM;
 }
 
-char * krb5_rc_dfl_get_name(context, id)
+char * KRB5_CALLCONV
+krb5_rc_dfl_get_name(context, id)
     krb5_context context;
     krb5_rcache id;
 {
  return ((struct dfl_data *) (id->data))->name;
 }
 
-krb5_error_code krb5_rc_dfl_get_span(context, id, lifespan)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_get_span(context, id, lifespan)
     krb5_context context;
     krb5_rcache id;
     krb5_deltat *lifespan;
@@ -186,7 +188,8 @@ krb5_error_code krb5_rc_dfl_get_span(context, id, lifespan)
  return 0;
 }
 
-krb5_error_code krb5_rc_dfl_init(context, id, lifespan)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_init(context, id, lifespan)
     krb5_context context;
 krb5_rcache id;
 krb5_deltat lifespan;
@@ -232,7 +235,8 @@ krb5_error_code krb5_rc_dfl_close_no_free(context, id)
  return 0;
 }
 
-krb5_error_code krb5_rc_dfl_close(context, id)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_close(context, id)
     krb5_context context;
     krb5_rcache id;
 {
@@ -241,7 +245,8 @@ krb5_error_code krb5_rc_dfl_close(context, id)
     return 0;
 }
 
-krb5_error_code krb5_rc_dfl_destroy(context, id)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_destroy(context, id)
     krb5_context context;
 krb5_rcache id;
 {
@@ -252,7 +257,8 @@ krb5_rcache id;
  return krb5_rc_dfl_close(context, id);
 }
 
-krb5_error_code krb5_rc_dfl_resolve(context, id, name)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_resolve(context, id, name)
     krb5_context context;
     krb5_rcache id;
     char *name;
@@ -385,7 +391,8 @@ errout:
     
 
 
-krb5_error_code krb5_rc_dfl_recover(context, id)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_recover(context, id)
     krb5_context context;
 krb5_rcache id;
 {
@@ -497,7 +504,8 @@ krb5_rc_io_store (context, t, rep)
     return ret;
 }
 
-krb5_error_code krb5_rc_dfl_store(context, id, rep)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_store(context, id, rep)
     krb5_context context;
 krb5_rcache id;
 krb5_donot_replay *rep;
@@ -533,7 +541,8 @@ krb5_donot_replay *rep;
  return 0;
 }
 
-krb5_error_code krb5_rc_dfl_expunge(context, id)
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_expunge(context, id)
     krb5_context context;
 krb5_rcache id;
 {

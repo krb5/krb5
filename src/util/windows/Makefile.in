@@ -1,0 +1,16 @@
+BUILDTOP = ..\..
+
+CFLAGS 	 = $(COPTS) $(INCLUDES)
+
+##WIN16##LFLAGS	 = /nologo /nod /nopackcode
+##WIN32##LFLAGS	 = /nologo /nod
+
+##WIN32##all-windows:: libecho.exe
+
+libecho.exe: libecho.c
+
+install-windows::
+
+clean-windows::
+	$(RM) *.res *.map *.obj *.exe
+

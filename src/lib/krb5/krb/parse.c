@@ -60,11 +60,11 @@
  * May the fleas of a thousand camels infest the ISO, they who think
  * that arbitrarily large multi-component names are a Good Thing.....
  */
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_parse_name(context, name, nprincipal)
     	krb5_context context;
-	const char	*name;
-	krb5_principal	*nprincipal;
+	const char	FAR *name;
+	krb5_principal	FAR *nprincipal;
 {
 	register const char	*cp;
 	register char	*q;

@@ -1,6 +1,9 @@
 TST=if test -n "`cat DONE`" ; then
 
 ##DOSBUILDTOP = ..\..
+##DOSLIBNAME=gssapi.lib
+##DOSOBJFILELIST=@generic.lst @krb5.lst
+##DOSOBJFILEDEP=generic.lst krb5.lst
 
 MAC_SUBDIRS = generic krb5
 
@@ -19,7 +22,6 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 all-unix::
-
 all-mac::
 
 libgssapi_krb5.$(STEXT): $(LIBDONE)

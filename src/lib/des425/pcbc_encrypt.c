@@ -18,7 +18,7 @@
 /* 
  * copy of include/des.h to avoid collision with local one
  */
-#include "autoconf.h"
+#include "krb5.h"
 
 #ifndef KRB_INT32
 #if (SIZEOF_LONG == 4)

@@ -31,10 +31,10 @@
  * the credentials structures 
  */
 
-void INTERFACE
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_cred_contents(context, val)
     krb5_context context;
-    krb5_creds *val;
+    krb5_creds FAR *val;
 {
     if (val->client)
 	krb5_free_principal(context, val->client);

@@ -27,11 +27,7 @@
  * $Id$
  */
 
-#if (defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH))
-#include <k5-int.h>
-#else
 #include <krb5.h>
-#endif
 #include <memory.h>
 
 /* work around sunos braindamage */

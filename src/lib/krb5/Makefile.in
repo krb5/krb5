@@ -1,4 +1,7 @@
 ##DOSBUILDTOP = ..\..
+##DOSLIBNAME=krb5.lib
+##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst free.lst keytab.lst krb.lst os.lst posix.lst rcache.lst
+##DOSOBJFILELIST=@asn1.lst @ccache.lst @err_tbls.lst @free.lst @keytab.lst @krb.lst @os.lst @posix.lst @rcache.lst
 
 ANAME_DBDEP=@ANAME_DBDEP@
 ANAME_DBLIB=@ANAME_DBLIB@
@@ -28,7 +31,6 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 all-unix::
-
 all-windows::
 
 libkrb5.$(STEXT): $(LIBDONE)
@@ -47,62 +49,62 @@ clean-windows::
 	$(RM) krb5.lib krb5.bak
 
 all-windows::
-	cd ASN.1
-	@echo Making in lib\asn.1
+	cd asn.1
+	@echo Making in krb5\asn.1
 	-$(MAKE) -$(MFLAGS)
-	cd ..\CCACHE
-	@echo Making in lib\ccache
+	cd ..\ccache
+	@echo Making in krb5\ccache
 	-$(MAKE) -$(MFLAGS)
 	cd ..\error_tables
-	@echo Making in lib\error_tables
+	@echo Making in krb5\error_tables
 	-$(MAKE) -$(MFLAGS)
-	cd ..\FREE
-	@echo Making in lib\free
+	cd ..\free
+	@echo Making in krb5\free
 	-$(MAKE) -$(MFLAGS)
-	cd ..\KEYTAB
-	@echo Making in lib\keytab
+	cd ..\keytab
+	@echo Making in krb5\keytab
 	-$(MAKE) -$(MFLAGS)
-	cd ..\KRB
-	@echo Making in lib\krb
+	cd ..\krb
+	@echo Making in krb5\krb
 	-$(MAKE) -$(MFLAGS)
-	cd ..\OS
-	@echo Making in lib\os
+	cd ..\os
+	@echo Making in krb5\os
 	-$(MAKE) -$(MFLAGS)
-	cd ..\POSIX
-	@echo Making in lib\posix
+	cd ..\posix
+	@echo Making in krb5\posix
 	-$(MAKE) -$(MFLAGS)
-	cd ..\RCACHE
-	@echo Making in lib\rcache
+	cd ..\rcache
+	@echo Making in krb5\rcache
 	-$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
 	cd ASN.1
-	@echo Making clean in lib\asn.1
+	@echo Making clean in krb5\asn.1
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\CCACHE
-	@echo Making clean in lib\ccache
+	@echo Making clean in krb5\ccache
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\error_tables
-	@echo Making clean in lib\error_tables
+	@echo Making clean in krb5\error_tables
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\FREE
-	@echo Making clean in lib\free
+	@echo Making clean in krb5\free
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\KEYTAB
-	@echo Making clean in lib\keytab
+	@echo Making clean in krb5\keytab
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\KRB
-	@echo Making clean in lib\krb
+	@echo Making clean in krb5\krb
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\OS
-	@echo Making clean in lib\os
+	@echo Making clean in krb5\os
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\POSIX
-	@echo Making clean in lib\posix
+	@echo Making clean in krb5\posix
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\RCACHE
-	@echo Making clean in lib\rcache
+	@echo Making clean in krb5\rcache
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally

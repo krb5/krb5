@@ -602,17 +602,17 @@ kadm_get_auth(kcontext, ctxp, local, remote)
  *	free auth_context
  *	close socket.
  */
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
 		 ccachep, ccname, tlife)
     krb5_context	kcontext;	/* Context handle	(In ) */
-    char		*user;		/* User specified	(In ) */
-    char		*prompt;	/* Old password prompt	(In ) */
-    char		*opassword;	/* Old Password		(I/O) */
-    int			*sockp;		/* Socket for conn.	(Out) */
-    krb5_auth_context	*ctxp;		/* Auth context		(Out) */
-    krb5_ccache		*ccachep;	/* Credentials cache	(I/O) */
-    char		*ccname;	/* Cred cache name	(In ) */
+    char		FAR *user;	/* User specified	(In ) */
+    char		FAR *prompt;	/* Old password prompt	(In ) */
+    char		FAR *opassword;	/* Old Password		(I/O) */
+    int			FAR *sockp;	/* Socket for conn.	(Out) */
+    krb5_auth_context	FAR *ctxp;	/* Auth context		(Out) */
+    krb5_ccache		FAR *ccachep;	/* Credentials cache	(I/O) */
+    char		FAR *ccname;	/* Cred cache name	(In ) */
     krb5_timestamp	tlife;		/* Ticket lifetime	(In ) */
 {
     krb5_error_code	kret;
@@ -745,10 +745,10 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
  * If ccache is supplied, then it is destroyed.  Otherwise, the ccache is
  * the caller's responsibility to close.
  */
-void INTERFACE
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_adm_disconnect(kcontext, socketp, auth_context, ccache)
     krb5_context	kcontext;
-    int			*socketp;
+    int			FAR *socketp;
     krb5_auth_context	auth_context;
     krb5_ccache		ccache;
 {

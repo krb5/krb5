@@ -77,11 +77,11 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_host_realm(context, host, realmsp)
     krb5_context context;
-    const char *host;
-    char ***realmsp;
+    const char FAR *host;
+    char FAR * FAR * FAR *realmsp;
 {
     char **retrealms;
     char *default_realm, *realm, *cp;

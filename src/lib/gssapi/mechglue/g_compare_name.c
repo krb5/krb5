@@ -37,7 +37,7 @@
    (((o1)->length == (o2)->length) && \
     (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_compare_name (minor_status,
                   name1,
                   name2,

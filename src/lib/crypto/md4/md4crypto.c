@@ -28,18 +28,6 @@
 #include "rsa-md4.h"
 #include "des_int.h"	/* we cheat a bit and call it directly... */
 
-/* Windows needs to these prototypes for the assignment below */
-
-krb5_error_code
-krb5_md4_crypto_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
-    krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
-
-krb5_error_code
-krb5_md4_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
-	size_t in_length, krb5_pointer seed, size_t seed_length));
-
-static mit_des_cblock zero_ivec = { 0 };
-
 /*
  * In Kerberos V5 Beta 5 and previous releases the RSA-MD4-DES implementation
  * did not follow RFC1510.  The folowing definitions control the compatibility
@@ -55,6 +43,37 @@ static mit_des_cblock zero_ivec = { 0 };
  */
 #define MD4_K5BETA_COMPAT
 #define MD4_K5BETA_COMPAT_DEF
+
+
+/* Windows needs to these prototypes for the assignment below */
+
+#ifdef MD4_K5BETA_COMPAT
+krb5_error_code
+krb5_md4_crypto_compat_sum_func PROTOTYPE((
+	krb5_const krb5_pointer in,
+	krb5_const size_t in_length,
+	krb5_const krb5_pointer seed,
+	krb5_const size_t seed_length,
+	krb5_checksum *outcksum));
+#endif
+
+krb5_error_code
+krb5_md4_crypto_sum_func PROTOTYPE((
+	krb5_const krb5_pointer in,
+	krb5_const size_t in_length,
+	krb5_const krb5_pointer seed,
+	krb5_const size_t seed_length,
+	krb5_checksum *outcksum));
+
+krb5_error_code
+krb5_md4_crypto_verify_func PROTOTYPE((
+	krb5_const krb5_checksum FAR *cksum,
+	krb5_const krb5_pointer in,
+	krb5_const size_t in_length,
+	krb5_const krb5_pointer seed,
+	krb5_const size_t seed_length));
+
+static mit_des_cblock zero_ivec = { 0 };
 
 static void
 krb5_md4_calculate_cksum(md4ctx, confound, confound_length, in, in_length)
@@ -78,11 +97,11 @@ krb5_md4_calculate_cksum(md4ctx, confound, confound_length, in, in_length)
  */
 krb5_error_code
 krb5_md4_crypto_compat_sum_func(in, in_length, seed, seed_length, outcksum)
-krb5_pointer in;
-size_t in_length;
-krb5_pointer seed;
-size_t seed_length;
-krb5_checksum FAR *outcksum;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer seed;
+    krb5_const size_t seed_length;
+    krb5_checksum FAR *outcksum;
 {
     krb5_octet outtmp[OLD_RSA_MD4_DES_CKSUM_LENGTH];
     krb5_octet *input = (krb5_octet *)in;
@@ -131,11 +150,11 @@ krb5_checksum FAR *outcksum;
  */
 krb5_error_code
 krb5_md4_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
-krb5_pointer in;
-size_t in_length;
-krb5_pointer seed;
-size_t seed_length;
-krb5_checksum FAR *outcksum;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer seed;
+    krb5_const size_t seed_length;
+    krb5_checksum FAR *outcksum;
 {
     krb5_octet outtmp[NEW_RSA_MD4_DES_CKSUM_LENGTH];
     mit_des_cblock	tmpkey;
@@ -195,11 +214,11 @@ krb5_checksum FAR *outcksum;
 
 krb5_error_code
 krb5_md4_crypto_verify_func(cksum, in, in_length, seed, seed_length)
-krb5_checksum FAR *cksum;
-krb5_pointer in;
-size_t in_length;
-krb5_pointer seed;
-size_t seed_length;
+    krb5_const krb5_checksum FAR *cksum;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer seed;
+    krb5_const size_t seed_length;
 {
     krb5_octet outtmp[NEW_RSA_MD4_DES_CKSUM_LENGTH];
     mit_des_cblock	tmpkey;

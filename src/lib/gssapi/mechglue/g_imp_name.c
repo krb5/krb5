@@ -35,7 +35,7 @@
 #include <string.h>
 #include <errno.h>
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_import_name(minor_status,
                 input_name_buffer,
                 input_name_type,

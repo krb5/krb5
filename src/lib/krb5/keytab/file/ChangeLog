@@ -1,3 +1,12 @@
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* ktf_add.c, ktf_close.c, ktf_g_ent.c, ktf_g_name.c, ktf_next.c,
+	ktf_remove.c, ktf_resolv.c, ktf_ssget.c, ktf_wreslv.c, ktfile.h
+		Change the functions declarations to include FAR pointers
+		and KRB5_CALLCONV so that they can be utilized by a DLL.
+	
 Tue Nov 19 17:06:59 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* ktf_g_ent.c (krb5_ktfile_get_entry): return KRB5_KT_KVNONOTFOUND

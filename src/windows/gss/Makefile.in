@@ -1,51 +1,59 @@
 # makefile: Constructs the Kerberos for Windows ticket manager
 # Works for both k4 and k5 releases.
 #
-NAME 	 = gss
 OBJS 	 = gss.obj gss-client.obj gss-misc.obj
+##WIN32##XOBJS	= resource.obj
 
 ##### Options
 DEBUG 	 = 1
 BUILDTOP =..\..
-LIBDIR	 = $(BUILDTOP)\lib
-GLIB	 = $(LIBDIR)\gssapi.lib
-WLIB	 = $(LIBDIR)\winsock.lib
+##WIN16##WLIB	 = $(BUILDTOP)\lib\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 
 ##### C Compiler
-CC 	 = cl
-CFLAGS_RELEASE = /nologo /W3 /AL /GAs /Gy /G2 /Zp /O2 /DNDEBUG=1
-CFLAGS_DEBUG   = /nologo /W3 /AL /GAs /Gy /G2 /Zp /O2 /Od /Zi
 !if $(DEBUG)
-CFLAGS 	 = $(CFLAGS_DEBUG) $(INCLUDES)
+CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /Zi
 !else
-CFLAGS 	 = $(CFLAGS_RELEASE) $(INCLUDES)
+CFLAGS 	 = $(CCOPTS2) $(INCLUDES)
 !endif
 
 ##### RC Compiler
-RC 	 = rc
-##WIN16##RFLAGS 	 = /nologo $(INCLUDES)
+##WIN16##RFLAGS 	 = /nologo /D$(KRB)=1 $(INCLUDES)
 ##WIN32##RFLAGS 	 = $(INCLUDES)
+
 
 ##### Linker
 LINK 	 = link
 LIBS 	 = $(GLIB) $(WLIB)
-SYSLIBS  = libw llibcew
+##WIN16##SYSLIBS  = libw llibcew
+##WIN32##SYSLIBS  = libc.lib kernel32.lib wsock32.lib user32.lib \
+##WIN32##	gdi32.lib comdlg32.lib
 !if $(DEBUG)
-LFLAGS 	 = /co /nologo /nod /nopackcode /map:full
+##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
+##WIN32##LFLAGS = /nologo /nod /debug
 !else
-LFLAGS 	 = /nologo /nod /nopackcode
+##WIN16##LFLAGS = /nologo /nod /nopackcode
+##WIN32##LFLAGS = /nologo /nod
 !endif
 
-all:: makefile $(NAME).exe
+all:: makefile gss.exe
 
-$(NAME).exe: $*.def $*.res $(OBJS) $(LIBS)
-	$(LINK) $(LFLAGS) $(OBJS), $@, $*.map, $(LIBS) $(SYSLIBS), $*.def
-	$(RC) $(RFLAGS) /k $*.res $@
+gss.exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+##WIN16##	$(LINK) $(LFLAGS) $(OBJS), $@, $*.map, \
+##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
+##WIN16##	$(RC) $(RFLAGS) /k $*.res $@
+##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
+##WIN32##	  $(LIBS) $(SYSLIBS)
 
-$(OBJS) $(NAME).res: gss.h
+##WIN32##gss.res: gss.rc
+##WIN32##	$(RC) $(RFLAGS) /r $*.rc
 
-install:
+##WIN32##resource.obj: gss.res
+##WIN32##	$(CVTRES) /nologo /out:$@ gss.res
+
+$(OBJS) gss.res: gss.h
+
+install::
 	copy gss.exe ..\floppy
 
 clean:: 

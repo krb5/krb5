@@ -4,20 +4,28 @@
 /* Windows needs to these prototypes for the assignment below */
 
 krb5_error_code
-krb5_md5_sum_func PROTOTYPE((krb5_pointer in, size_t in_length,
-    krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
+krb5_md5_sum_func PROTOTYPE((
+	krb5_const krb5_pointer in,
+	krb5_const size_t in_length,
+	krb5_const krb5_pointer seed,
+	krb5_const size_t seed_length,
+	krb5_checksum FAR *outcksum));
 
 krb5_error_code
-krb5_md5_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
-	size_t in_length, krb5_pointer seed, size_t seed_length));
+krb5_md5_verify_func PROTOTYPE((
+	krb5_const krb5_checksum FAR *cksum,
+	krb5_const krb5_pointer in,
+	krb5_const size_t in_length,
+	krb5_const krb5_pointer seed,
+	krb5_const size_t seed_length));
 
 krb5_error_code
 krb5_md5_sum_func(in, in_length, seed, seed_length, outcksum)
-krb5_pointer in;
-size_t in_length;
-krb5_pointer seed;
-size_t seed_length;
-krb5_checksum FAR *outcksum;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer seed;
+    krb5_const size_t seed_length;
+    krb5_checksum FAR *outcksum;
 {
     krb5_octet *input = (krb5_octet *)in;
     krb5_MD5_CTX working;
@@ -40,11 +48,11 @@ krb5_checksum FAR *outcksum;
 
 krb5_error_code
 krb5_md5_verify_func(cksum, in, in_length, seed, seed_length)
-krb5_checksum FAR *cksum;
-krb5_pointer in;
-size_t in_length;
-krb5_pointer seed;
-size_t seed_length;
+    krb5_const krb5_checksum FAR *cksum;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer seed;
+    krb5_const size_t seed_length;
 {
     krb5_octet *input = (krb5_octet *)in;
     krb5_MD5_CTX working;

@@ -32,12 +32,12 @@
 #include <netinet/in.h>
 #endif
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_auth_con_genaddrs(context, auth_context, infd, flags)
-    krb5_context 	  context;
-    krb5_auth_context 	  auth_context;
-    int				  	infd;
-    int					flags;
+    krb5_context 	context;
+    krb5_auth_context 	auth_context;
+    int		  	infd;
+    int			flags;
 {
     krb5_error_code 	  retval;
     krb5_address	* laddr;

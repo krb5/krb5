@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\crypto.lib
+##DOSMYNAME=os
+##DOSOBJFILE=..\os.lst
+##WIN16##LIBNAME=..\crypto.lib
 
 LIBOBJS = @LIBOBJS@
 
@@ -15,10 +17,13 @@ OBJS= $(COBJS) $(LIBOBJS)
 SRCS=	rnd_confoun.c c_localaddr.c c_ustime.c
 
 all-unix:: shared $(OBJS)
-
 all-mac:: $(OBJS)
+all-windows:: $(OBJFILE)
 
-all-windows: $(COBJS)
+##DOS$(OBJFILE): $(COBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared
@@ -39,3 +44,4 @@ clean-unix::
 clean-mac::
 	$(RM) shared/*
 clean-windows::
+	$(RM) $(OBJFILE)

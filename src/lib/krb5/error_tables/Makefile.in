@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOSMYNAME=error_tables
+##DOSOBJFILE=..\err_tbls.lst
+##WIN16##LIBNAME=..\krb5.lib
 
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 
@@ -30,8 +32,12 @@ SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c \
 
 all-unix:: $(HDRS) shared $(OBJS)
 all-mac:: $(OBJS)
+all-windows:: $(OBJFILE)
 
-all-windows:: $(OBJS)
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared

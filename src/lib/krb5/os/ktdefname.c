@@ -30,10 +30,10 @@
 
 extern char *krb5_defkeyname;
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_kt_default_name(context, name, namesize)
     krb5_context context;
-    char *name;
+    char FAR *name;
     int namesize;
 {
     char *cp = 0;

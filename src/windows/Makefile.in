@@ -1,7 +1,9 @@
+##DOSBUILDTOP=..
+
 #
 # Makefile that recurses into cns subdirectory.
 #
-all::
+all-windows::
 	@echo Making in windows\cns
 	cd cns
 	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
@@ -11,9 +13,12 @@ all::
 	@echo Making in windows\gss
 	cd ..\gss
 	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+##WIN32##	@echo Making in windows\gina
+##WIN32##	cd ..\gina
+##WIN32##	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
-clean::
+clean-windows::
 	@echo Making clean in windows\cns
 	cd cns
 	-$(MAKE) -$(MAKEFLAGS) clean
@@ -23,5 +28,7 @@ clean::
 	@echo Making clean in windows\gss
 	cd ..\gss
 	-$(MAKE) -$(MAKEFLAGS) clean
+##WIN32##	@echo Making clean in windows\gina
+##WIN32##	cd ..\gina
+##WIN32##	-$(MAKE) -$(MAKEFLAGS) clean
 	cd ..
-

@@ -27,6 +27,8 @@
  * echoing.
  */
 
+#if defined(unix)
+
 #include "des.h"
 #include <stdio.h>
 #include <errno.h>
@@ -178,3 +180,8 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     return ok;
 }
 
+#else /* !unix */
+/*
+ * These are all just dummy functions to make the rest of the library happy...
+ */
+#endif /* unix */

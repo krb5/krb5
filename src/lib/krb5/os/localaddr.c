@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr(context, addr)
     krb5_context context;
-    krb5_address ***addr;
+    krb5_address FAR * FAR * FAR *addr;
 {
     return krb5_crypto_os_localaddr(addr);
 }

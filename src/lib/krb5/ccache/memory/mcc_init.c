@@ -40,7 +40,7 @@
  */
 void krb5_mcc_free KRB5_PROTOTYPE((krb5_context context, krb5_ccache id));
 
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_initialize(context, id, princ)
    krb5_context context;
    krb5_ccache id;

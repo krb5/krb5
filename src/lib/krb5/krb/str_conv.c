@@ -367,10 +367,10 @@ strptime(buf, format, tm)
  *
  * These routines return 0 for success, EINVAL for invalid entry.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_string_to_enctype(string, enctypep)
-    char		* string;
-    krb5_enctype	* enctypep;
+    char		FAR * string;
+    krb5_enctype	FAR * enctypep;
 {
     int i;
     int found;
@@ -386,10 +386,10 @@ krb5_string_to_enctype(string, enctypep)
     return((found) ? 0 : EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_string_to_salttype(string, salttypep)
-    char	* string;
-    krb5_int32	* salttypep;
+    char	FAR * string;
+    krb5_int32	FAR * salttypep;
 {
     int i;
     int found;
@@ -405,10 +405,10 @@ krb5_string_to_salttype(string, salttypep)
     return((found) ? 0 : EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_string_to_cksumtype(string, cksumtypep)
-    char		* string;
-    krb5_cksumtype	* cksumtypep;
+    char		FAR * string;
+    krb5_cksumtype	FAR * cksumtypep;
 {
     int i;
     int found;
@@ -424,10 +424,10 @@ krb5_string_to_cksumtype(string, cksumtypep)
     return((found) ? 0 : EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_string_to_timestamp(string, timestampp)
-    char		* string;
-    krb5_timestamp	* timestampp;
+    char		FAR * string;
+    krb5_timestamp	FAR * timestampp;
 {
     int i;
     int found;
@@ -454,10 +454,10 @@ krb5_string_to_timestamp(string, timestampp)
     return((found) ? 0 : EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_string_to_deltat(string, deltatp)
-    char	* string;
-    krb5_deltat	* deltatp;
+    char	FAR * string;
+    krb5_deltat	FAR * deltatp;
 {
     int i;
     int found;
@@ -502,10 +502,10 @@ krb5_string_to_deltat(string, deltatp)
  * These routines return 0 for success, EINVAL for invalid parameter, ENOMEM
  * if the supplied buffer/length will not contain the output.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_enctype_to_string(enctype, buffer, buflen)
     krb5_enctype	enctype;
-    char		* buffer;
+    char		FAR * buffer;
     size_t		buflen;
 {
     int i;
@@ -529,10 +529,10 @@ krb5_enctype_to_string(enctype, buffer, buflen)
 	return(EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_salttype_to_string(salttype, buffer, buflen)
     krb5_int32	salttype;
-    char	* buffer;
+    char	FAR * buffer;
     size_t	buflen;
 {
     int i;
@@ -556,10 +556,10 @@ krb5_salttype_to_string(salttype, buffer, buflen)
 	return(EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_cksumtype_to_string(cksumtype, buffer, buflen)
     krb5_cksumtype	cksumtype;
-    char		* buffer;
+    char		FAR * buffer;
     size_t		buflen;
 {
     int i;
@@ -583,10 +583,10 @@ krb5_cksumtype_to_string(cksumtype, buffer, buflen)
 	return(EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_string(timestamp, buffer, buflen)
     krb5_timestamp	timestamp;
-    char		* buffer;
+    char		FAR * buffer;
     size_t		buflen;
 {
 #if	HAVE_STRFTIME
@@ -605,12 +605,12 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
 #endif	/* HAVE_STRFTIME */
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     krb5_timestamp	timestamp;
-    char		* buffer;
+    char		FAR * buffer;
     size_t		buflen;
-    char		* pad;
+    char		FAR * pad;
 {
     struct tm	*tmp;
     size_t i;
@@ -640,10 +640,10 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     return((ndone) ? 0 : ENOMEM);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_deltat_to_string(deltat, buffer, buflen)
     krb5_deltat	deltat;
-    char	* buffer;
+    char	FAR * buffer;
     size_t	buflen;
 {
     int			days, hours, minutes, seconds;

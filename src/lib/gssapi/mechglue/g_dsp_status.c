@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_display_status (minor_status,
                     status_value,
                     status_type,

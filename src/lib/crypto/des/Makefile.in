@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\crypto.lib
+##DOSMYNAME=des
+##DOSOBJFILE=..\des.lst
+##WIN16##LIBNAME=..\crypto.lib
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.$(LIBEXT)
 
@@ -62,11 +64,14 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/u_rn_key.c
 
 
-all:: $(OBJS)
+all-unix:: $(OBJS) shared
+all-mac:: $(OBJS) shared
+all-windows:: $(OBJFILE)
 
-all-unix:: shared
-all-mac:: shared
-all-windows::
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared
@@ -109,3 +114,4 @@ clean-unix::
 clean-mac::
 	$(RM) shared/*
 clean-windows::
+	$(RM) $(OBJFILE)

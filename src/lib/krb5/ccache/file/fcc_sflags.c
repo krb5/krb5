@@ -39,7 +39,7 @@
  * Effects:
  * Sets the operational flags of id to flags.
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_fcc_set_flags(context, id, flags)
    krb5_context context;
    krb5_ccache id;

@@ -1,17 +1,13 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic -DUSE_AUTOCONF_H
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\gssapi.$(LIBEXT)
+##DOSMYNAME=krb5
+##DOSOBJFILE = ..\krb5.lst
+##WIN16##LIBNAME=..\gssapi.lib
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
-
-all-unix:: shared $(OBJS)
-
-all-mac:: shared $(OBJS)
-
-all-windows:: $(OBJS)
 
 shared:
 	mkdir shared
@@ -20,14 +16,13 @@ ETSRCS= gssapi_err_krb5.c
 ETOBJS= gssapi_err_krb5.$(OBJEXT)
 ETHDRS= gssapi_err_krb5.h
 
-gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c
+gssapi_err_krb5.o: gssapi_err_krb5.c
 	$(CC) $(CFLAGS) -c $*.c
+
 @SHARED_RULE_LOCAL@
-##WIN16##	$(LIBCMD) $(PAGESIZE) /nologo $(LIBNAME) -+$@;
-##WIN32##	$(LIBCMD) /out:$(LIBNAME) /nologo $@
 
+gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c
 gssapi_err_krb5.h: gssapi_err_krb5.et
-
 gssapi_err_krb5.c: gssapi_err_krb5.et
 
 SRCS = \
@@ -115,9 +110,14 @@ HDRS= $(ETHDRS)
 EHDRDIR=$(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= gssapi_krb5.h
 
-all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
-all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
-all-windows:: win-include $(SRCS) $(HDRS) $(OBJS)
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj >$(OBJFILE)
+
+all-unix:: shared $(SRCS) $(HDRS) includes $(OBJS)
+all-mac:: shared $(SRCS) $(HDRS) includes $(OBJS)
+all-windows:: win-include $(SRCS) $(HDRS) $(OBJS) $(OBJFILE)
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
@@ -130,7 +130,7 @@ clean-mac::
 	$(RM) $(ETHDRS) $(ETSRCS) shared/*
 
 clean-windows::
-	$(RM) $(EHDRDIR)\gssapi_krb5.h
+	$(RM) $(EHDRDIR)\gssapi_krb5.h $(OBJFILE)
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 install::

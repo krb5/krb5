@@ -1,3 +1,16 @@
+Sun Feb  2 20:57:15 1997  Richard Basch  <basch@lehman.com>
+
+	* serialize.c: Added FAR declarations to pointer arguments for
+		all functions declared as KRB5_DLLIMP.
+
+Thu Jan 30 21:44:37 1997  Richard Basch  <basch@lehman.com>
+
+	* crypto_glue.c:
+		Export more crypto-layer functions:
+		krb5_encrypt, krb5_decrypt, krb5_eblock_enctype,
+		krb5_process_key, krb5_finish_key, krb5_string_to_key,
+		krb5_init_random_key, krb5_finish_random_key, krb5_random_key
+
 Mon Dec 23 17:20:03 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (SRCS): Add brand.c to the SRCS line so that the
@@ -15,6 +28,20 @@ Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
  		Windows timebomb checking; this call returns an error
 		code, which is returned to the user if the timebomb should
 		be activated.
+
+Thu Nov 21 14:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* auth_con.c bld_pr_ext.c conv_princ.c copy_addrs.c copy_athctr.c
+	copy_auth.c copy_cksum.c copy_creds.c copy_data.c copy_key.c
+	copy_princ.c copy_tick.c cp_key_cnt.c decrypt_tk.c fwd_tgt.c
+	gc_via_tkt.c get_creds.c get_in_tkt.c in_tkt_ktb.c in_tkt_pwd.c
+	in_tkt_sky.c init_ctx.c mk_cred.c mk_error.c mk_priv.c mk_rep.c
+	mk_req.c mk_req_ext.c mk_safe.c parse.c princ_comp.c rd_cred.c
+	rd_error.c rd_priv.c rd_rep.c rd_req.c rd_safe.c recvauth.c
+	sendauth.c str_conv.c unparse.c valid_times.c
+		DLL export various functions (see lib/krb5.def for full list)
 
 Thu Nov 21 13:54:01 1996  Ezra Peisach  <epeisach@mit.edu>
 

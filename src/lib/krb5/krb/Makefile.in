@@ -2,7 +2,9 @@ CFLAGS = $(CCOPTS) $(DEFS)
 RUN_SETUP = @KRB5_RUN_ENV@
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOSMYNAME=krb
+##DOSOBJFILE=..\$(MYNAME).lst
+##WIN16##LIBNAME=..\krb5.lib
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -26,6 +28,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	copy_princ.$(OBJEXT)	\
 	copy_tick.$(OBJEXT)	\
 	cp_key_cnt.$(OBJEXT)	\
+	crypto_glue.$(OBJEXT)	\
 	decode_kdc.$(OBJEXT)	\
 	decrypt_tk.$(OBJEXT)	\
 	encode_kdc.$(OBJEXT)	\
@@ -100,6 +103,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/copy_princ.c	\
 	$(srcdir)/copy_tick.c	\
 	$(srcdir)/cp_key_cnt.c	\
+	$(srcdir)/crypto_glue.c	\
 	$(srcdir)/decode_kdc.c	\
 	$(srcdir)/decrypt_tk.c	\
 	$(srcdir)/encode_kdc.c	\
@@ -157,7 +161,12 @@ SRCS=	$(srcdir)/addr_comp.c	\
 
 all-unix:: shared $(OBJS)
 all-mac:: shared $(OBJS)
-all-windows:: $(OBJS)
+all-windows:: $(OBJFILE)
+
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared
@@ -222,3 +231,4 @@ clean-unix::
 clean-mac::
 	$(RM) shared/*
 clean-windows::
+	$(RM) $(OBJFILE)

@@ -27,10 +27,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_authenticator_contents(context, val)
     krb5_context context;
-    krb5_authenticator *val;
+    krb5_authenticator FAR *val;
 {
     if (val->checksum)
 	krb5_free_checksum(context, val->checksum);

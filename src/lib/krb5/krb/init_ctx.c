@@ -31,7 +31,7 @@
 extern krb5_error_code krb5_vercheck();
 #endif
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_init_context(context)
 	krb5_context *context;
 {
@@ -139,7 +139,7 @@ cleanup:
 	return retval;
 }
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_context(ctx)
 	krb5_context	ctx;
 {

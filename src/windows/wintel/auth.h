@@ -2,24 +2,27 @@
  * Implements Kerberos 4 authentication and ecryption
  */
 
-void auth_parse(
-	kstream ks,
-	unsigned char *parsedat,
-	int end_sub);
+#ifndef WINTEL_AUTH_H
+#define WINTEL_AUTH_H
 
-int INTERFACE auth_init(
-	kstream str,
-	kstream_ptr data);
+void auth_parse(kstream, unsigned char *, int);
 
-void INTERFACE auth_destroy(
-	kstream str);
+int auth_init(kstream, kstream_ptr);
 
-int INTERFACE auth_encrypt(
-	struct kstream_data_block *out,
-	struct kstream_data_block *in,
-	kstream str);
+void auth_destroy(kstream);
 
-int INTERFACE auth_decrypt(
-	struct kstream_data_block *out,
-	struct kstream_data_block *in,
-	kstream str);
+int auth_encrypt(struct kstream_data_block *, struct kstream_data_block *,
+		 kstream);
+
+int auth_decrypt(struct kstream_data_block *, struct kstream_data_block *,
+		 kstream);
+
+extern BOOL forward_flag;
+extern BOOL forwardable_flag;
+extern BOOL forwarded_tickets;
+
+#ifdef ENCRYPTION
+extern BOOL encrypt_flag;
+#endif
+
+#endif /* WINTEL_AUTH_H */

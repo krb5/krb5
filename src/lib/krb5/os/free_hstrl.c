@@ -31,10 +31,10 @@
  Frees the storage taken by a realm list returned by krb5_get_local_realm.
  */
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_free_host_realm(context, realmlist)
     krb5_context context;
-    char * const *realmlist;
+    char FAR * const FAR *realmlist;
 {
     /* same format, so why duplicate code? */
     return krb5_free_krbhst(context, realmlist);

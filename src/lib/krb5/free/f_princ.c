@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_principal(context, val)
     krb5_context context;
     krb5_principal val;

@@ -225,13 +225,13 @@ cleanup_cred:
  * This functions takes as input an KRB_CRED message, validates it, and
  * outputs the nonce and an array of the forwarded credentials.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_rd_cred(context, auth_context, pcreddata, pppcreds, outdata)
     krb5_context          context;
     krb5_auth_context     auth_context;
-    krb5_data 		* pcreddata;       
-    krb5_creds        *** pppcreds;
-    krb5_replay_data  	* outdata;
+    krb5_data 		FAR * pcreddata;       
+    krb5_creds        FAR * FAR * FAR * pppcreds;
+    krb5_replay_data  	FAR * outdata;
 {
     krb5_error_code       retval;
     krb5_keyblock       * keyblock;

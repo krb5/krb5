@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32 INTERFACE 
+OM_uint32 KRB5_CALLCONV 
 gss_delete_sec_context (minor_status,
                         context_handle,
                         output_token)

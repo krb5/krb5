@@ -195,7 +195,7 @@ krb5_os_init_context(ctx)
 	return retval;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_set_config_files(ctx, filenames)
 	krb5_context ctx;
 	const char **filenames;
@@ -214,7 +214,7 @@ krb5_set_config_files(ctx, filenames)
 	return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_secure_config_files(ctx)
 	krb5_context ctx;
 {

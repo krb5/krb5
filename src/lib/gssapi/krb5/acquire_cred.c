@@ -50,7 +50,6 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
    krb5_principal princ;
    krb5_keytab kt;
    krb5_keytab_entry entry;
-   krb5_kt_cursor cur;
 
    *output_princ = NULL;
    cred->keytab = NULL;

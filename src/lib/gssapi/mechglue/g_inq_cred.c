@@ -34,7 +34,7 @@
 #include <string.h>
 #include <time.h>
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_inquire_cred(minor_status,
                  cred_handle,
                  name,
@@ -159,7 +159,7 @@ gss_OID_set *		mechanisms;
     return(GSS_S_COMPLETE);
 }
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 			 initiator_lifetime, acceptor_lifetime, cred_usage)
     OM_uint32		*minor_status;

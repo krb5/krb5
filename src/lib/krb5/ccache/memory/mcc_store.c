@@ -23,7 +23,7 @@
  * system errors
  * storage failure errors
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_store(context, id, creds)
    krb5_context context;
    krb5_ccache id;

@@ -34,11 +34,11 @@
 
  returns system errors
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_mk_error(context, dec_err, enc_err)
     krb5_context context;
-    const krb5_error *dec_err;
-    krb5_data *enc_err;
+    const krb5_error FAR *dec_err;
+    krb5_data FAR *enc_err;
 {
     krb5_error_code retval;
     krb5_data *new_enc_err;

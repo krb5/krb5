@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_enc_tkt_part(context, val)
     krb5_context context;
-    krb5_enc_tkt_part *val;
+    krb5_enc_tkt_part FAR *val;
 {
     if (val->session)
 	krb5_free_keyblock(context, val->session);

@@ -34,7 +34,7 @@
 #endif
 #include <string.h>
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_export_sec_context(minor_status,
                        context_handle,
                        interprocess_token)

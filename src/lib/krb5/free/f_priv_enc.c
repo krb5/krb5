@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_priv_enc_part(context, val)
     krb5_context context;
-    register krb5_priv_enc_part *val;
+    register krb5_priv_enc_part FAR *val;
 {
     if (val->user_data.data)
 	krb5_xfree(val->user_data.data);

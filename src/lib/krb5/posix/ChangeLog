@@ -1,3 +1,12 @@
+Tue Feb  4 15:54:11 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Only build sscanf for Win16
+	* sscanf.c: Export sscanf in Windows DLL
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
 Mon Jun 10 21:51:35 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* syslog.c: Change _WINDOWS to _MSDOS, and add check for _WIN32.

@@ -40,7 +40,7 @@
  * system errors
  * KRB5_CC_NOMEM
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_get_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;

@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_last_req(context, val)
     krb5_context context;
-    krb5_last_req_entry **val;
+    krb5_last_req_entry FAR * FAR *val;
 {
     register krb5_last_req_entry **temp;
 

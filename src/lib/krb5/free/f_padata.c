@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_pa_data(context, val)
     krb5_context context;
-    krb5_pa_data **val;
+    krb5_pa_data FAR * FAR *val;
 {
     register krb5_pa_data **temp;
 

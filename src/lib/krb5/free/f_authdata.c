@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_authdata(context, val)
     krb5_context context;
-krb5_authdata **val;
+    krb5_authdata FAR * FAR *val;
 {
     register krb5_authdata **temp;
 

@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOSMYNAME=ccache
+##DOSOBJFILE=..\$(MYNAME).lst
+##WIN16##LIBNAME=..\krb5.lib
 
 MAC_SUBDIRS = file stdio
 
@@ -22,11 +24,19 @@ SRCS=	$(srcdir)/ccbase.c \
 all-unix:: shared $(OBJS) 
 
 all-mac:: $(OBJS) 
-all-windows:: $(OBJS) 
-	cd FILE
-	@echo Making in ccache\file
-	-$(MAKE) -$(MFLAGS)
-	cd ..
+all-windows:: subdirs $(OBJFILE) 
+
+##DOSsubdirs:: file\file.lst
+##DOSfile\file.lst::
+##DOS	cd file
+##DOS	@echo Making in krb5\ccache\file
+##DOS	-$(MAKE) -$(MFLAGS)
+##DOS	cd ..
+
+##DOS$(OBJFILE): $(OBJS) file\file.lst
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj file\*.obj > $(OBJFILE)
 
 shared: 
 	mkdir shared
@@ -36,8 +46,9 @@ clean-unix::
 
 clean-mac:
 clean-windows::
-	cd FILE
-	@echo Making clean in ccache\file
+	cd file
+	@echo Making clean in krb5\ccache\file
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
-	@echo Making clean locally
+	@echo Making clean in krb5\ccache
+	$(RM) $(OBJFILE)

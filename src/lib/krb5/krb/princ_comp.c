@@ -43,7 +43,7 @@ krb5_realm_compare(context, princ1, princ2)
     return TRUE;
 }
 
-krb5_boolean
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV
 krb5_principal_compare(context, princ1, princ2)
     krb5_context context;
     krb5_const_principal princ1;

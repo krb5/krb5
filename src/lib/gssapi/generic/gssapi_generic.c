@@ -53,7 +53,7 @@ static gss_OID_desc oids[] = {
    {10, "\052\206\110\206\367\022\001\002\001\004"},
 };
 
-gss_OID gss_nt_user_name = oids+0;
-gss_OID gss_nt_machine_uid_name = oids+1;
-gss_OID gss_nt_string_uid_name = oids+2;
-gss_OID gss_nt_service_name = oids+3;
+KRB5_DLLIMP gss_OID gss_nt_user_name = oids+0;
+KRB5_DLLIMP gss_OID gss_nt_machine_uid_name = oids+1;
+KRB5_DLLIMP gss_OID gss_nt_string_uid_name = oids+2;
+KRB5_DLLIMP gss_OID gss_nt_service_name = oids+3;

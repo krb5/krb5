@@ -208,7 +208,7 @@ krb5_rcache_internalize(kcontext, argp, buffer, lenremain)
 /*
  * Register the rcache serializer.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_ser_rcache_init(kcontext)
     krb5_context	kcontext;
 {

@@ -1,29 +1,28 @@
-#include "k5-int.h"
 #include "shs.h"
 
 krb5_error_code
 krb5_sha_sum_func
-	PROTOTYPE((krb5_pointer		in,
-		   size_t		in_length,
-		   krb5_pointer		seed,
-		   size_t		seed_length,
-		   krb5_checksum	*outcksum));
+	PROTOTYPE((krb5_const krb5_pointer	in,
+		   krb5_const size_t		in_length,
+		   krb5_const krb5_pointer	seed,
+		   krb5_const size_t		seed_length,
+		   krb5_checksum		FAR *outcksum));
 
 krb5_error_code
 krb5_sha_verify_func
-	PROTOTYPE((krb5_checksum	FAR *cksum,
-		   krb5_pointer		in,
-		   size_t		in_length,
-		   krb5_pointer		seed,
-		   size_t		seed_length));
+	PROTOTYPE((krb5_const krb5_checksum	FAR *cksum,
+		   krb5_const krb5_pointer	in,
+		   krb5_const size_t		in_length,
+		   krb5_const krb5_pointer	seed,
+		   krb5_const size_t		seed_length));
 
 krb5_error_code
 krb5_sha_sum_func(in, in_length, seed, seed_length, outcksum)
-	krb5_pointer	in;
-	size_t		in_length;
-	krb5_pointer	seed;
-	size_t		seed_length;
-	krb5_checksum	*outcksum;
+	krb5_const krb5_pointer	in;
+	krb5_const size_t	in_length;
+	krb5_const krb5_pointer	seed;
+	krb5_const size_t	seed_length;
+	krb5_checksum		FAR *outcksum;
 {
     krb5_octet *input = (krb5_octet *)in;
     SHS_INFO working;
@@ -47,11 +46,11 @@ krb5_sha_sum_func(in, in_length, seed, seed_length, outcksum)
 
 krb5_error_code
 krb5_sha_verify_func(cksum, in, in_length, seed, seed_length)
-	krb5_checksum	FAR *cksum;
-	krb5_pointer	in;
-	size_t		in_length;
-	krb5_pointer	seed;
-	size_t		seed_length;
+	krb5_const krb5_checksum	FAR *cksum;
+	krb5_const krb5_pointer		in;
+	krb5_const size_t		in_length;
+	krb5_const krb5_pointer		seed;
+	krb5_const size_t		seed_length;
 {
     krb5_octet *input = (krb5_octet *)in;
     SHS_INFO working;

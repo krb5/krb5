@@ -1,3 +1,15 @@
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* f_addr.c f_address.c f_ap_rep.c f_ap_req.c f_arep_enc.c 
+	f_auth_cnt.c f_authdata.c f_authent.c f_chksum.c f_cred.c
+	f_cred_cnt.c f_cred_enc.c f_creds.c f_enc_kdc.c f_enc_tkt.c
+	f_error.c f_kdc_rp.c f_kdc_rq.c f_keyblock.c f_last_req.c
+	f_padata.c f_princ.c f_priv.c f_priv_enc.c f_pwd_data.c
+	f_pwd_seq.c f_safe.c f_tckt.c f_tckts.c f_tkt_auth.c
+		DLL export free routines in krb5.h
+
 Fri Aug  2 14:03:44 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
 
 	* f_keyblock.c (krb5_free_keyblock_contents): added

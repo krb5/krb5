@@ -1,0 +1,77 @@
+;----------------------------------------------------
+;   GSSAPI.DEF - GSSAPI.DLL module definition file
+;----------------------------------------------------
+
+;LIBRARY		GSSAPI
+DESCRIPTION	'Base Generic Security Service API'
+EXETYPE		WINDOWS
+CODE		PRELOAD MOVEABLE DISCARDABLE
+DATA		PRELOAD MOVEABLE SINGLE
+HEAPSIZE	8192
+
+EXPORTS
+	WEP					@1001 RESIDENTNAME
+	LibMain					@1002
+;
+	gss_acquire_cred
+	gss_release_cred
+	gss_init_sec_context
+	gss_accept_sec_context
+	gss_process_context_token
+	gss_delete_sec_context
+	gss_context_time
+	gss_sign
+	gss_verify
+	gss_seal
+	gss_unseal
+	gss_display_status
+	gss_indicate_mechs
+	gss_compare_name
+	gss_display_name
+	gss_import_name
+	gss_release_name
+	gss_release_buffer
+	gss_release_oid_set
+	gss_inquire_cred
+;
+; GSS-API v2  additional credential calls
+;
+	gss_add_cred
+	gss_inquire_cred_by_mech
+;
+; GSS-API v2  additional context-level calls
+;
+	gss_inquire_context
+	gss_wrap_size_limit
+	gss_export_sec_context
+	gss_import_sec_context
+;
+; GSS-API v2  additional calls for OID and OID_set operations
+;
+	gss_release_oid
+	gss_create_empty_oid_set
+	gss_add_oid_set_member
+	gss_test_oid_set_member
+	gss_oid_to_str
+	gss_str_to_oid
+;
+; GSS-API v2  renamed message protection calls
+;
+	gss_wrap
+	gss_unwrap
+	gss_get_mic
+	gss_verify_mic
+;
+; GSS-API v2  future extensions
+;
+	gss_inquire_names_for_mech
+;	gss_inquire_mechs_for_name
+;	gss_canonicalize_name
+;	gss_export_name
+;
+; GSS-API variables
+;
+	gss_nt_user_name
+	gss_nt_machine_uid_name
+	gss_nt_string_uid_name
+	gss_nt_service_name

@@ -43,7 +43,7 @@ extern krb5_cc_ops krb5_mcc_ops;
  *              krb5_ccache.  id is undefined.
  * system errors (from open)
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_generate_new (context, id)
    krb5_context context;
    krb5_ccache *id;

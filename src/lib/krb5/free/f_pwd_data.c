@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_pwd_data(context, val)
     krb5_context context;
-krb5_pwd_data *val;
+    krb5_pwd_data FAR *val;
 {
     if (val->element)
 	krb5_free_pwd_sequences(context, val->element);

@@ -633,7 +633,7 @@ krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
 /*
  * Register the context serializers.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_ser_context_init(kcontext)
     krb5_context	kcontext;
 {

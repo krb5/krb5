@@ -37,8 +37,8 @@ int shsTestLevel;
     /* Compare the returned digest and required values */
     for( i = 0; i < 5; i++ )
         if( shsInfo->digest[ i ] != shsTestResults[ shsTestLevel ][ i ] )
-            return( ERROR );
-    return( OK );
+            return( -1 );
+    return( 0 );
 }
 
 main()
@@ -59,11 +59,11 @@ main()
     shsInit( &shsInfo );
     shsUpdate( &shsInfo, ( BYTE * ) "abc", 3 );
     shsFinal( &shsInfo );
-    if( compareSHSresults( &shsInfo, 0 ) == ERROR )
+    if( compareSHSresults( &shsInfo, 0 ) == -1 )
         {
         putchar( '\n' );
         puts( "SHS test 1 failed" );
-        exit( ERROR );
+        exit( -1 );
         }
 #ifdef NEW_SHS
     puts( "passed, result= A9993E364706816ABA3E25717850C26C9CD0D89D" );
@@ -75,11 +75,11 @@ main()
     shsInit( &shsInfo );
     shsUpdate( &shsInfo, ( BYTE * ) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 56 );
     shsFinal( &shsInfo );
-    if( compareSHSresults( &shsInfo, 1 ) == ERROR )
+    if( compareSHSresults( &shsInfo, 1 ) == -1 )
         {
         putchar( '\n' );
         puts( "SHS test 2 failed" );
-        exit( ERROR );
+        exit( -1 );
         }
 #ifdef NEW_SHS
     puts( "passed, result= 84983E441C3BD26EBAAE4AA1F95129E5E54670F1" );
@@ -92,11 +92,11 @@ main()
     for( i = 0; i < 15625; i++ )
         shsUpdate( &shsInfo, ( BYTE * ) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 64 );
     shsFinal( &shsInfo );
-    if( compareSHSresults( &shsInfo, 2 ) == ERROR )
+    if( compareSHSresults( &shsInfo, 2 ) == -1 )
         {
         putchar( '\n' );
         puts( "SHS test 3 failed" );
-        exit( ERROR );
+        exit( -1 );
         }
 #ifdef NEW_SHS
     puts( "passed, result= 34AA973CD4C4DAA4F61EEB2BDBAD27316534016F" );
@@ -116,5 +116,5 @@ main()
 #endif
 
     puts( "\nAll SHS tests passed" );
-    exit( OK );
+    exit( 0 );
 }

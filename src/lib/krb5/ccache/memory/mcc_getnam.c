@@ -35,7 +35,7 @@
  * Returns:
  * The name of the file cred cache id.
  */
-char * INTERFACE
+char * KRB5_CALLCONV
 krb5_mcc_get_name (context, id)
    krb5_context context;
    krb5_ccache id;

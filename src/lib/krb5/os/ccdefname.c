@@ -83,7 +83,7 @@ OSErr		err;
 #endif
 
 
-char *
+KRB5_DLLIMP char FAR * KRB5_CALLCONV
 krb5_cc_default_name(context)
     krb5_context context;
 {

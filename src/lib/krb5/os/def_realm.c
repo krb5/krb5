@@ -44,10 +44,10 @@
 extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_default_realm(context, lrealm)
     krb5_context context;
-    char **lrealm;
+    char FAR * FAR *lrealm;
 {
     char *realm;
     char *cp;
@@ -79,7 +79,7 @@ krb5_get_default_realm(context, lrealm)
     return(0);
 }
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_set_default_realm(context, lrealm)
     krb5_context context;
     const char *lrealm;

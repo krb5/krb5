@@ -64,7 +64,7 @@ krb5_change_cache (void) {
     return 0;
 }
 
-unsigned int INTERFACE
+KRB5_DLLIMP unsigned int KRB5_CALLCONV
 krb5_get_notification_message (void) {
     static unsigned int message = 0;
 
@@ -80,7 +80,7 @@ krb5_change_cache ()
 {
     return 0;
 }
-unsigned int INTERFACE
+unsigned int
 krb5_get_notification_message ()
 {
     return 0;

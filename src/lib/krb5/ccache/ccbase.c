@@ -26,7 +26,6 @@
 
 #include "k5-int.h"
 
-extern krb5_cc_ops *krb5_cc_dfl_ops;
 struct krb5_cc_typelist
  {
   krb5_cc_ops *ops;
@@ -39,10 +38,10 @@ static struct krb5_cc_typelist *cc_typehead = 0;
  * If override is set, replace any existing ccache with that type tag
  */
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_cc_register(context, ops, override)
    krb5_context context;
-   krb5_cc_ops *ops;
+   krb5_cc_ops FAR *ops;
    krb5_boolean override;
 {
     struct krb5_cc_typelist *t;
@@ -73,7 +72,7 @@ krb5_cc_register(context, ops, override)
  * particular cache type.
  */
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve (context, name, cache)
    krb5_context context;
    char *name;

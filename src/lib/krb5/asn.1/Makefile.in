@@ -1,7 +1,9 @@
 CFLAGS=$(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOSMYDIR=asn.1
+##DOSOBJFILE=..\asn1.lst
+##WIN16##LIBNAME=..\krb5.lib
 
 EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 
@@ -35,7 +37,12 @@ OBJS= \
 
 all-unix:: shared $(OBJS)
 all-mac::  $(OBJS)
-all-windows:: $(OBJS)
+all-windows:: $(OBJFILE)
+
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYDIR)\ *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared
@@ -47,4 +54,4 @@ clean-mac::
 	$(RM) $(OBJS)
 
 clean-windows::
-	$(RM) *.obj
+	$(RM) $(OBJFILE)

@@ -1,3 +1,11 @@
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* rc_dfl.c, rc_dfl.h: Win32/DLL calling conventions for rcache
+		functions.  (Most rcache routines are still not exported
+		pending an API review).
+
 Mon Nov 18 15:25:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* rc_dfl.c: Apply jik's fix to allow the expunging of the replay

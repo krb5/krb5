@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOSMYNAME=keytab
+##DOSOBJFILE=..\$(MYNAME).lst
+##WIN16##LIBNAME=..\krb5.lib
 
 MAC_SUBDIRS = file
 
@@ -30,11 +32,19 @@ shared:
 
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
-all-windows:: $(OBJS)
-	cd file
-	@echo Making in keytab\file
-	-$(MAKE) -$(MFLAGS)
-	cd ..
+all-windows:: subdirs $(OBJFILE)
+
+##DOSsubdirs:: file\file.lst
+##DOSfile\file.lst::
+##DOS	cd file
+##DOS	@echo Making in krb5\keytab\file
+##DOS	-$(MAKE) -$(MFLAGS)
+##DOS	cd ..
+
+##DOS$(OBJFILE): $(OBJS) file\file.lst
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj file\*.obj > $(OBJFILE)
 
 clean-unix::
 	$(RM) shared/*
@@ -42,8 +52,9 @@ clean-unix::
 clean-mac::
 clean-windows::
 	cd file
-	@echo Making clean in keytab\file
+	@echo Making clean in krb5\keytab\file
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
-	@echo Making clean locally
+	@echo Making clean in krb5\keytab
+	$(RM) $(OBJFILE)
 

@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\gssapi.$(LIBEXT)
+##DOSMYNAME=generic
+##DOSOBJFILE=..\generic.lst
+##WIN16##LIBNAME=..\gssapi.lib
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -18,17 +20,21 @@ ETHDRS= gssapi_err_generic.h
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 
-HDRS=	$(EHDRDIR)/gssapi.h \
-	$(EHDRDIR)/gssapi_generic.h
+HDRS=	$(EHDRDIR)$(S)gssapi.h \
+	$(EHDRDIR)$(S)gssapi_generic.h
+
+$(EHDRDIR)$(S)gssapi.h: gssapi.h
+	$(CP) gssapi.h $@
+$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h
+	$(CP) $(srcdir)$(S)gssapi_generic.h $@
+
+gssapi_err_generic.o: gssapi_err_generic.c
+	$(CC) $(CFLAGS) -c $*.c
+
+@SHARED_RULE_LOCAL@
 
 gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
-	$(CC) $(CFLAGS) -c $*.c
-@SHARED_RULE_LOCAL@
-##WIN16##	$(LIBCMD) $(PAGESIZE) /nologo $(LIBNAME) -+$@;
-##WIN32##	$(LIBCMD) /out:$(LIBNAME) /nologo $@
-
 gssapi_err_generic.h: gssapi_err_generic.et
-
 gssapi_err_generic.c: gssapi_err_generic.et
 
 gssapi.h: gssapi.hin
@@ -83,22 +89,22 @@ OBJS = \
 	util_validate.$(OBJEXT) \
 	gssapi_err_generic.$(OBJEXT)
 
-$(OBJS): $(HDRS) $(ETHDRS)
-
 EXPORTED_HEADERS= gssapi_generic.h
 EXPORTED_BUILT_HEADERS= gssapi.h
 
-all-unix:: shared $(SRCS) $(ETHDRS) $(OBJS)
+$(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
 
+all-unix:: shared $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
 all-mac:: $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
+all-windows:: win-include $(HDRS) $(OBJFILE)
 
-all-windows:: $(SRCS) $(ETHDRS) win-include
-all-windows:: $(OBJS)
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
-	copy gssapi.h $(EHDRDIR)
-	copy gssapi_generic.h $(EHDRDIR)
 
 unixmac: $(SRCS) $(ETHDRS)
 
@@ -109,7 +115,7 @@ clean-mac::
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/*
 
 clean-windows::
-	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
+	$(RM) $(HDRS) $(OBJFILE)
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)

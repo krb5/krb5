@@ -49,7 +49,7 @@ extern krb5_cc_ops krb5_mcc_ops;
  *              krb5_ccache.  id is undefined.
  * permission errors
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_resolve (context, id, residual)
    krb5_context context;
    krb5_ccache *id;

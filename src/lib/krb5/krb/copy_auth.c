@@ -53,11 +53,11 @@ krb5_authdata **outad;
 /*
  * Copy an authdata array, with fresh allocation.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_copy_authdata(context, inauthdat, outauthdat)
     krb5_context context;
-krb5_authdata * const * inauthdat;
-krb5_authdata ***outauthdat;
+    krb5_authdata FAR * const FAR * inauthdat;
+    krb5_authdata FAR * FAR * FAR *outauthdat;
 {
     krb5_error_code retval;
     krb5_authdata ** tempauthdat;

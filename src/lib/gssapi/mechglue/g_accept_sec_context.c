@@ -33,7 +33,7 @@
 #include <string.h>
 #include <errno.h>
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_accept_sec_context (minor_status,
                         context_handle,
                         verifier_cred_handle,

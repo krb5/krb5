@@ -198,14 +198,14 @@ cleanup:
  * This functions takes as input an array of krb5_credentials, and
  * outputs an encoded KRB_CRED message suitable for krb5_rd_cred
  */
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
 
     krb5_context 	  context;
     krb5_auth_context	  auth_context;
-    krb5_creds 	       ** ppcreds;
-    krb5_data 	       ** ppdata;
-    krb5_replay_data  	* outdata;
+    krb5_creds 	       FAR * FAR * ppcreds;
+    krb5_data 	       FAR * FAR * ppdata;
+    krb5_replay_data  	FAR * outdata;
 {
     krb5_address * premote_fulladdr = NULL;
     krb5_address * plocal_fulladdr = NULL;
@@ -346,13 +346,13 @@ error:
 /*
  * A convenience function that calls krb5_mk_ncred.
  */
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_mk_1cred(context, auth_context, pcreds, ppdata, outdata)
     krb5_context 	  context;
     krb5_auth_context	  auth_context;
-    krb5_creds 		* pcreds;
-    krb5_data 	       ** ppdata;
-    krb5_replay_data  	* outdata;
+    krb5_creds 		FAR * pcreds;
+    krb5_data 	       FAR * FAR * ppdata;
+    krb5_replay_data  	FAR * outdata;
 {
     krb5_error_code retval;
     krb5_creds **ppcreds;

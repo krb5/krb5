@@ -1,19 +1,120 @@
-Sat Dec 21 03:13:02 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+Sun Feb  2 11:22:57 1997  Richard Basch  <basch@lehman.com>
 
-	* krb5.def: New file, copied from cns.def, with Cygnus'isms #ifdef'ed
-		out.
-	* cns.c: Removed text "Contacting Cygnus Support for support" from
-		the "about" box.
-	* Makefile.in: Change name of cns.exe to be krb5.exe (CNS is a
-		Cygnus trademark)
+	* cns.c (k5_name_from_ccache):
+		Declare variable as (char FAR *) to match
+		krb5_unparse_name prototype
 
-Sat Nov 23 00:26:44 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+	* Makefile.in: Build using CCOPTS2, not COPTS (win16)
 
-	* Makefile.in (KLIB): Change krb516.dll to krb5_16.dll.  [PR#204]
+Fri Dec 20 10:28:59 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
-Wed Nov 20 18:32:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+	* krb5.def: New file, modelled after krbnet.def
 
-	* Makefile.in (KLIB): Change libkrb5.dll to be krb516.dll
+	* cns.h, cns.c, krbini.h, cnsres5.c, Makefile: remove
+		Cygnus/KerbNet(tm) name from MIT distribution
+
+Fri Aug  9 03:41:52 1996  Michael Graff  <explorer@cygnus.com>
+
+	* Makefile.in: rename executable to kerbnet.exe
+
+	* cns.def: rename to kerbnet.def
+
+Wed Aug  7 14:25:34 1996  Michael Graff  <explorer@lenin.cygnus.com>
+
+	* Makefile.in: Build kerbnet, not cns.exe
+	
+	* cns.c:
+	* cns.h:
+	* cnsres5.rc:
+	* krbini.h:  Help file is kerbnet.hlp, program name is kerb*net.
+
+	* cns.def: rename to kerbnet.def.
+
+Sat Aug 3 13:58:20 1996  Jeff Bigler  <jcb@cygnus.com>
+
+	* cns-help.hpj, cns-help.doc, cns-help.hlp:  added help files.
+	The cns-help.hpj is a RoboHelp help project.  RoboHelp requires
+	cns-help.doc, which is a Microsoft Word document, and it creates
+	cns-help.hlp, which is the actual help file.
+
+	* Makefile.in:  added line to install section to install help
+	file.
+
+Thu Jul 25 13:52:04 1996    <explorer@lenin.cygnus.com>
+
+	* options.c (opts_command): Display a warning message when changing
+	the location of the krb.conf file, since the KRB5 libraries
+	will have opened it and tucked it away in krb5_context->profile,
+	which we as a client don't have access to.
+
+Wed Aug  7 18:03:16 1996  Jeff Bigler  <jcb@viola.cygnus.com>
+
+	* kerbnet.hpj:  new help project (RoboHelp)
+	* kerbnet.doc:  help file (Microsoft Word document)
+	* kerbnet.hlp:  new help file (Windows help file)
+
+Wed Jul 24 06:12:24 1996  Michael Graff  <explorer@lenin.cygnus.com>
+
+	* Makefile.in: Build cnsres[45].rc into executable, depending on
+	if we're compiling for V4 or V5.
+
+	* cns.rc: remove, no longer needed. cnsres[45].rc replace this,
+	and allow GUI editors for editing the .rc files.
+
+	* kpasswd.c: make this work for V5
+	
+	* options.c:
+	* cns.c:
+	* cnsres5.rc:
+	* krbini.h:  Add forwardable option to options menu
+
+Tue Jul 16 12:42:48 1996  Michael Graff  <explorer@lenin.cygnus.com>
+
+	* options.c:
+	* password.c:  Split parts of cns.c into these files.  Each deals
+	with the respective dialogs.
+
+	* debug.c:
+	* heap.c:  Added to aid in debugging.
+
+Wed Jul 10 18:01:03 1996  Michael Graff  <explorer@kechara.flame.org>
+
+	* cns.c: Remove the quick hacks mentioned below.
+
+Thu Jul 25 13:52:04 1996    <explorer@lenin.cygnus.com>
+
+	* options.c (opts_command): Display a warning message when changing
+	the location of the krb.conf file, since the KRB5 libraries
+	will have opened it and tucked it away in krb5_context->profile,
+	which we as a client don't have access to.
+
+Fri Jun 28 19:29:14 1996  Michael Graff  <explorer@zhaneel.flame.org>
+
+	* cns.c: Really quick hacks to disable some features that just
+	plain don't work correctly.  The "cns" client has some flavor of
+	memory problems (malloc/free) that needs to be tracked down.
+
+	* cnsres5.rc: reload this using a dialog editor.  Add clickbox
+	for "ticket options" of "forwardable"
+
+Wed Jun 26 14:58:23 1996  Michael Graff  <explorer@zhaneel.flame.org>
+
+	* cns.h kpasswd.c:  formatting change, including changing
+ 	// to /* */
+
+	* Makefile.in: update some of the WIN32 entries for debugging.
+	Also make resouce.obj only a dependancy for WIN32 builds.
+
+	* cns.c tktlist.h tktlist.c:  Rewrite to use the message functions
+	from <windowsx.h>, included in VC 2.0 and above.  This makes most
+ 	of the details of 16- vs 32-bit hidden to the code.  (Disgusting
+	magic happens in <windowsx.h>)
+
+Tue Jun 25 13:57:59 1996  Michael Graff  <explorer@zhaneel.flame.org>
+
+	* Makefile.in: Fix to work for WIN32 native compiles.  Many
+	changes; some should be put into common files (win-post.in or
+	windows.in?)
 
 Wed Jun 12 00:20:08 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 

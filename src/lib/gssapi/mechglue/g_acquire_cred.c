@@ -378,7 +378,7 @@ error_out:
     return(status);
 }
 
-/* V2 INTERFACE */
+/* V2 KRB5_CALLCONV */
 KRB5_DLLIMP OM_uint32 KRB5_CALLCONV
 gss_add_cred(minor_status, input_cred_handle,
 		  desired_name, desired_mech, cred_usage,

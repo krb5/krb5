@@ -8,18 +8,58 @@
 #ifndef	KWIN_DEFS
 #define KWIN_DEFS
 
+#ifndef RC_INVOKED
+
+#ifdef KRB4
+#define	DEFINE_SOCKADDR
+#include "mit-copyright.h"
+#include "krb.h"
+#include "kadm.h"
+#include "org.h"
+#endif
+
+#ifdef KRB5
+#include "winsock.h"
+#include "krb5.h"
+#include "krbini.h"
+#include "com_err.h"
+
+#define DEFAULT_TKT_LIFE    120             /* In 5 minute units */
+#define ANAME_SZ	        40
+#define	REALM_SZ	        40
+#define	SNAME_SZ	        40
+#define	INST_SZ		        40
+#define MAX_KPW_LEN	        128
+/* include space for '.' and '@' */
+#define	MAX_K_NAME_SZ	    (ANAME_SZ + INST_SZ + REALM_SZ + 2)
+#ifdef CYGNUS
+#define ORGANIZATION        "Cygnus Support - (415) 903-1400"
+#endif
+#define CREDENTIALS         char
+#endif
+
+/*
+ * Constants
+ */
+#define BLOCK_MAX_SEC 30	       /* Blocking timeout duration */
+#define KWIN_UPDATE_PERIOD 30000       /* Every 30 seconds update the screen */
+#define TIME_BUFFER	300	       /* Pop-up time buffer in seconds */
+#define WM_KWIN_SETNAME (WM_USER+100)  /* Sets the name fields in the dialog */
+
+#endif /* RC_INVOKED */
+
 /*
  * Menu items
  */
 #define FILE_MENU_ITEMS 3
 #define FILE_MENU_MAX_LOGINS 5
 #define IDM_KWIN 1000
-	#define IDM_OPTIONS 1001
-	#define IDM_EXIT 1002
-	#define IDM_FIRST_LOGIN 1003
+#define   IDM_OPTIONS 1001
+#define   IDM_EXIT 1002
+#define   IDM_FIRST_LOGIN 1003
 
-	#define IDM_HELP_INDEX 1020
-	#define IDM_ABOUT 1021
+#define   IDM_HELP_INDEX 1020
+#define   IDM_ABOUT 1021
 
 /*
  * Accelerator
@@ -30,74 +70,82 @@
  * Dialog and dialog item ids
  */
 #define KWIN_DIALOG_CLASS "KERBEROS"	/* class for kerberos dialog */
-#define KWIN_DIALOG_NAME "Kerberos"		/* name for kerberos dialog */
+#ifdef CYGNUS
+#define KWIN_DIALOG_NAME "KerbNet"	/* name for kerberos dialog */
+#else
+#define KWIN_DIALOG_NAME "Krb5"		/* name for kerberos dialog */
+#endif
+	
+#define ID_KWIN 100			/* the main kerberos dialog */
+#define IDD_KWIN_FIRST 101
+#define   IDD_TICKET_LIST_TITLE 101
+#define   IDD_TICKET_LIST 102
 
-#define ID_KWIN 100						/* the main kerberos dialog */
-	#define IDD_KWIN_FIRST 101
-		#define IDD_TICKET_LIST_TITLE 101
-		#define IDD_TICKET_LIST 102
+#ifdef KRB4
 
-   #ifdef KRB4
+#define IDD_MIN_TITLE 103
+#define   IDD_LOGIN_NAME_TITLE 103
+#define   IDD_LOGIN_INSTANCE_TITLE 104
+#define   IDD_LOGIN_REALM_TITLE 105
+#define   IDD_LOGIN_PASSWORD_TITLE 106
+#define IDD_MAX_TITLE 106
 
-      #define IDD_MIN_TITLE 103
-		   #define IDD_LOGIN_NAME_TITLE 103
-		   #define IDD_LOGIN_INSTANCE_TITLE 104
-		   #define IDD_LOGIN_REALM_TITLE 105
-		   #define IDD_LOGIN_PASSWORD_TITLE 106
-	   #define IDD_MAX_TITLE 106
+#define IDD_MIN_EDIT 107
+#define   IDD_LOGIN_NAME 107
+#define   IDD_LOGIN_INSTANCE 108
+#define   IDD_LOGIN_REALM 109
+#define   IDD_LOGIN_PASSWORD 110
+#define IDD_MAX_EDIT 110
 
-	   #define IDD_MIN_EDIT 107
-		   #define IDD_LOGIN_NAME 107
-		   #define IDD_LOGIN_INSTANCE 108
-		   #define IDD_LOGIN_REALM 109
-		   #define IDD_LOGIN_PASSWORD 110
-	   #define IDD_MAX_EDIT 110
+#endif
 
-   #endif
+#ifdef KRB5
 
-   #ifdef KRB5
+#define IDD_MIN_TITLE 103
+#define   IDD_LOGIN_NAME_TITLE 103
+#define   IDD_LOGIN_PASSWORD_TITLE 104
+#define   IDD_LOGIN_REALM_TITLE 105
+#define IDD_MAX_TITLE 105
 
-	   #define IDD_MIN_TITLE 103
-		   #define IDD_LOGIN_NAME_TITLE 103
-		   #define IDD_LOGIN_PASSWORD_TITLE 104
-		   #define IDD_LOGIN_REALM_TITLE 105
-	   #define IDD_MAX_TITLE 105
+#define IDD_MIN_EDIT 107
+#define   IDD_LOGIN_NAME 107
+#define   IDD_LOGIN_PASSWORD 108
+#define   IDD_LOGIN_REALM 109
+#define IDD_MAX_EDIT 109
 
-	   #define IDD_MIN_EDIT 107
-		   #define IDD_LOGIN_NAME 107
-		   #define IDD_LOGIN_PASSWORD 108
-		   #define IDD_LOGIN_REALM 109
-	   #define IDD_MAX_EDIT 109
+#endif
 
-   #endif
+#define IDD_MIN_BUTTON 111
+#define   IDD_CHANGE_PASSWORD 111
+#define   IDD_TICKET_DELETE 112
+#define   IDD_LOGIN 113
+#define   IDD_MAX_BUTTON 113
+#define IDD_PASSWORD_CR2 114            /* For better cr handling */
 
-	#define IDD_MIN_BUTTON 111
-		#define IDD_CHANGE_PASSWORD 111
-		#define IDD_TICKET_DELETE 112
-		#define IDD_LOGIN 113
-	#define IDD_MAX_BUTTON 113
-	#define IDD_PASSWORD_CR2 114                 // For better cr handling
-
-	#define IDD_KWIN_LAST 114
+#define IDD_KWIN_LAST 114
 
 
 #define ID_PASSWORD 200
-	#define IDD_PASSWORD_NAME 204
-	#define IDD_PASSWORD_INSTANCE 205
-	#define IDD_PASSWORD_REALM 206
-	#define IDD_OLD_PASSWORD 207
-	#define IDD_NEW_PASSWORD1 208
-	#define IDD_NEW_PASSWORD2 209
-	#define IDD_PASSWORD_CR 210
+#define   IDD_PASSWORD_NAME 204
+#define   IDD_PASSWORD_INSTANCE 205
+#define   IDD_PASSWORD_REALM 206
+#define   IDD_OLD_PASSWORD 207
+#define   IDD_NEW_PASSWORD1 208
+#define   IDD_NEW_PASSWORD2 209
+#define   IDD_PASSWORD_CR 210
 
 
 #define ID_OPTS 300
-	#define IDD_CONF 301
-	#define IDD_REALMS 302
-	#define IDD_LIFETIME 303
-	#define IDD_BEEP 304
-	#define IDD_ALERT 305
-   #define IDD_CCACHE 306
+#define   IDD_CONF 301
+#define   IDD_REALMS 302
+#define   IDD_LIFETIME 303
+#define   IDD_CCACHE 304
+#define   IDD_ACTIONS 310
+#define     IDD_BEEP 311
+#define     IDD_ALERT 312
+#define   IDD_TKOPT 320
+#define   IDD_FORWARDABLE 321
+
 /*
  * Dialog dimensions
  */
@@ -133,37 +181,55 @@
 
 #ifndef RC_INVOKED
 
+extern BOOL isblocking;
+extern HFONT hfontdialog;
+extern HINSTANCE hinstance;
+extern BOOL alert;
+extern BOOL beep;
+
+extern char confname[];
+
 #ifdef KRB5
-	extern krb5_context k5_context;
-	extern krb5_ccache k5_ccache;
+extern krb5_context k5_context;
+extern krb5_ccache k5_ccache;
+extern char ccname[];
+extern BOOL forwardable;
 #endif
 
 /*
  * Prototypes
  */
 
-static void kwin_init_name (HWND hwnd, char *fullname);
-void kwin_set_default_focus (HWND hwnd);
+/* in cns.c */
+
+void kwin_init_name(HWND, char *);
+void kwin_set_default_focus(HWND);
 time_t kwin_get_epoch(void);
 
-#ifdef KRB5
-   static krb5_error_code k5_dest_tkt (void);
-   static int k5_get_num_cred (int verbose);
-   static int k5_kname_parse (char *name, char *realm, char *fullname);
-   static int k5_get_lrealm (char *realm);
-   static krb5_error_code k5_init_ccache (krb5_ccache *ccache);
-   static int k5_name_from_ccache (krb5_ccache k5_ccache);
-	krb5_error_code k5_change_password (
-		krb5_context context,
-		char *user,
-		char *realm,
-	   char *old_password,
-	   char *new_password,
-		char **text);
+/* in options.c */
+BOOL opts_initdialog(HWND, HWND, LPARAM);
+void opts_command(HWND, int, HWND, UINT);
+BOOL CALLBACK opts_dlg_proc(HWND, UINT, WPARAM, LPARAM);
+BOOL opts_dialog(HWND);
 
+/* in password.c */
+BOOL change_password(HWND, char *, char *, char *, char *, char *);
+void password_command(HWND, int, HWND, UINT);
+BOOL password_initdialog(HWND, HWND, LPARAM);
+BOOL CALLBACK password_dlg_proc(HWND, UINT, WPARAM, LPARAM);
+BOOL password_dialog(HWND);
+
+#ifdef KRB5
+krb5_error_code k5_dest_tkt(void);
+int k5_get_num_cred(int);
+int k5_kname_parse(char *, char *, char *);
+krb5_error_code k5_init_ccache(krb5_ccache *);
+int k5_name_from_ccache(krb5_ccache);
+krb5_error_code k5_change_password(krb5_context, char *, char *, char *,
+				   char *, char **);
 #endif
 
-HICON kwin_get_icon(time_t expiration);
+HICON kwin_get_icon(time_t);
 
 #endif /* RC_INVOKED */
 

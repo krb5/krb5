@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_tgt_creds(context, tgts)
     krb5_context context;
-    krb5_creds **tgts;
+    krb5_creds FAR * FAR *tgts;
 {
     register krb5_creds **tgtpp;
     for (tgtpp = tgts; *tgtpp; tgtpp++)

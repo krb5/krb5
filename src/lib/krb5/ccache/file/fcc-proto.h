@@ -127,7 +127,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_flags flags ));
 
 /* fcc_ops.c */
-extern krb5_cc_ops krb5_cc_file_ops;
+KRB5_DLLIMP extern krb5_cc_ops krb5_cc_file_ops;
 krb5_error_code krb5_change_cache
    KRB5_PROTOTYPE((void));
 

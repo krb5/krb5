@@ -26,13 +26,13 @@ LIBS = ../et/libcom_err.$(LIBEXT)
 
 install::
 
-all-max:: all-unix
+all-mac:: all-unix
 all-unix:: shared includes libprofile.a test_parse test_profile
 
 shared:
 	mkdir shared
 
-all-windows: $(OBJS)
+all-windows:: $(OBJS)
 
 awk-windows:
 	$(AWK) -f $(BUILDTOP)/util/et/et_h.awk outfile=prof_err.h prof_err.et

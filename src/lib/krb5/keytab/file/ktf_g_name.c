@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "ktfile.h"
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_ktfile_get_name(context, id, name, len)
     krb5_context context;
   krb5_keytab id;

@@ -40,7 +40,7 @@
  * and invalidates the cursor (it must never be used after this call).
  */
 /* ARGSUSED */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_fcc_end_seq_get(context, id, cursor)
    krb5_context context;
    krb5_ccache id;

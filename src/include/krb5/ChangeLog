@@ -1,3 +1,9 @@
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in:
+		all-windows needed :: not :
+		clean up various generated files on all platforms, not just unix
+
 Wed Oct 30 18:55:21 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (LOCALSTATEDIR): Add localstatedir a and sysconfidr

@@ -29,46 +29,46 @@
 #define KRB5_MCC_PROTO__
 
 /* mcc_close.c */
-krb5_error_code INTERFACE krb5_mcc_close
+krb5_error_code KRB5_CALLCONV krb5_mcc_close
 	PROTOTYPE((krb5_context, krb5_ccache id ));
 
 /* mcc_destry.c */
-krb5_error_code INTERFACE krb5_mcc_destroy 
+krb5_error_code KRB5_CALLCONV krb5_mcc_destroy 
 	PROTOTYPE((krb5_context, krb5_ccache id ));
 
 /* mcc_eseq.c */
-krb5_error_code INTERFACE krb5_mcc_end_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_mcc_end_seq_get 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
 
 /* mcc_gennew.c */
-krb5_error_code INTERFACE krb5_mcc_generate_new 
+krb5_error_code KRB5_CALLCONV krb5_mcc_generate_new 
 	PROTOTYPE((krb5_context, krb5_ccache *id ));
 
 /* mcc_getnam.c */
-char * INTERFACE krb5_mcc_get_name 
+char * KRB5_CALLCONV krb5_mcc_get_name 
 	PROTOTYPE((krb5_context, krb5_ccache id ));
 
 /* mcc_gprin.c */
-krb5_error_code INTERFACE krb5_mcc_get_principal 
+krb5_error_code KRB5_CALLCONV krb5_mcc_get_principal 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
 
 /* mcc_init.c */
-krb5_error_code INTERFACE krb5_mcc_initialize 
+krb5_error_code KRB5_CALLCONV krb5_mcc_initialize 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal princ ));
 
 /* mcc_nseq.c */
-krb5_error_code INTERFACE krb5_mcc_next_cred 
+krb5_error_code KRB5_CALLCONV krb5_mcc_next_cred 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
 		   krb5_creds *creds ));
 
 /* mcc_reslv.c */
-krb5_error_code INTERFACE krb5_mcc_resolve 
+krb5_error_code KRB5_CALLCONV krb5_mcc_resolve 
 	PROTOTYPE((krb5_context, krb5_ccache *id , char *residual ));
 
 /* mcc_retrv.c */
-krb5_error_code INTERFACE krb5_mcc_retrieve 
+krb5_error_code KRB5_CALLCONV krb5_mcc_retrieve 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags whichfields , 
@@ -76,15 +76,15 @@ krb5_error_code INTERFACE krb5_mcc_retrieve
 		   krb5_creds *creds ));
 
 /* mcc_sseq.c */
-krb5_error_code INTERFACE krb5_mcc_start_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_mcc_start_seq_get 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
 
 /* mcc_store.c */
-krb5_error_code INTERFACE krb5_mcc_store 
+krb5_error_code KRB5_CALLCONV krb5_mcc_store 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_creds *creds ));
 
 /* mcc_sflags.c */
-krb5_error_code INTERFACE krb5_mcc_set_flags 
+krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_flags flags ));
 
 /* mcc_ops.c */

@@ -12,7 +12,7 @@
 
 #include "k5-int.h"
 
-#ifndef _MSDOS
+#if !defined(_MSDOS) && !defined(_WIN32)
 #include <sys/time.h>
 
 krb5_ui_4
@@ -27,8 +27,25 @@ unix_time_gmt_unixsec (usecptr)
 	return now.tv_sec;
 }
 
-#else /* _MSDOS */
+#endif /* !_MSDOS && !_WIN32 */
 
+#ifdef _WIN32
+#include <time.h>
+
+krb5_ui_4
+unix_time_gmt_unixsec (usecptr)
+    krb5_ui_4 *usecptr;
+{
+    time_t gmt;
+
+    time(&gmt);
+    if (usecptr)
+	*usecptr = gmt;
+    return gmt;
+}
+#endif /* _WIN32 */
+
+#ifdef MSDOS
 /*
  * Originally written by John Gilmore, Cygnus Support, May '94.
  * Public Domain.

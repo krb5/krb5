@@ -1,3 +1,12 @@
+Thu Jan 30 21:42:50 1997  Richard Basch  <basch@lehman.com>
+
+	* md5crypto.c md5glue.c:
+		Change functions to take const args where possible
+
+Thu Nov 21 00:58:04 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: Win32 build
+
 Wed Jun 12 00:11:34 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* rsa-md5.h:

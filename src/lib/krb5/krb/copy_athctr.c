@@ -26,11 +26,11 @@
 
 #include "k5-int.h"
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_copy_authenticator(context, authfrom, authto)
     krb5_context context;
-const krb5_authenticator *authfrom;
-krb5_authenticator **authto;
+    const krb5_authenticator FAR *authfrom;
+    krb5_authenticator FAR *FAR *authto;
 {
     krb5_error_code retval;
     krb5_authenticator *tempto;

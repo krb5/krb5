@@ -1,65 +1,191 @@
 ;----------------------------------------------------
-;   KRB5_16.DEF - KRB5_16.DLL module definition file
+;   KRB5.DEF - KRB5.DLL module definition file
 ;----------------------------------------------------
 
-LIBRARY   	KRB5_16
-DESCRIPTION 	'DLL for Kerberos 5'
-EXETYPE   	WINDOWS
-CODE      	PRELOAD MOVEABLE DISCARDABLE
-DATA      	PRELOAD MOVEABLE SINGLE
-HEAPSIZE  	8192
+LIBRARY		KRB5_16
+DESCRIPTION	'DLL for Kerberos 5'
+EXETYPE		WINDOWS
+CODE		PRELOAD MOVEABLE DISCARDABLE
+DATA		PRELOAD MOVEABLE SINGLE
+HEAPSIZE	8192
 
 EXPORTS
-	WEP                                     @1001 RESIDENTNAME
-	LIBMAIN                         	@1002
-	GSS_ACQUIRE_CRED			@1
-	GSS_RELEASE_CRED			@2
-	GSS_INIT_SEC_CONTEXT			@3
-	GSS_ACCEPT_SEC_CONTEXT			@4
-	GSS_PROCESS_CONTEXT_TOKEN		@5
-	GSS_DELETE_SEC_CONTEXT			@6
-	GSS_CONTEXT_TIME			@7
-	GSS_SIGN				@8
-	GSS_VERIFY				@9
-	GSS_SEAL				@10
-	GSS_UNSEAL				@11
-	GSS_DISPLAY_STATUS			@12
-	GSS_INDICATE_MECHS			@13
-	GSS_COMPARE_NAME			@14
-	GSS_DISPLAY_NAME			@15
-	GSS_IMPORT_NAME				@16
-	GSS_RELEASE_NAME			@17
-	GSS_RELEASE_BUFFER			@18
-	GSS_RELEASE_OID_SET			@19
-	GSS_INQUIRE_CRED			@20
+	WEP					@1001 RESIDENTNAME
+	LibMain					@1002
 ; Kerberos 5
+	_krb5_build_principal
 	_krb5_build_principal_ext
-	KRB5_CC_DEFAULT
-	KRB5_FREE_ADDRESSES
-	KRB5_FREE_AP_REP_ENC_PART
-	KRB5_FREE_CRED_CONTENTS
-	KRB5_FREE_CREDS
-	KRB5_FREE_PRINCIPAL
-	KRB5_GET_CREDENTIALS
-	KRB5_GET_DEFAULT_REALM
-	KRB5_GET_IN_TKT_WITH_PASSWORD
-	KRB5_GET_NOTIFICATION_MESSAGE
-	KRB5_INIT_CONTEXT
-	KRB5_INIT_ETS
-	KRB5_MK_REQ_EXTENDED
-	KRB5_OS_LOCALADDR
-	KRB5_PARSE_NAME
-	KRB5_RD_REP
-	KRB5_SNAME_TO_PRINCIPAL
-	KRB5_TIMEOFDAY
-	KRB5_US_TIMEOFDAY
-	KRB5_UNPARSE_NAME
+	krb5_copy_addr
+	krb5_copy_addresses
+	krb5_copy_authdata
+	krb5_copy_authenticator
+	krb5_copy_checksum
+	krb5_copy_creds
+	krb5_copy_data
+	krb5_copy_keyblock
+	krb5_copy_keyblock_contents
+	krb5_copy_principal
+	krb5_copy_ticket
+	krb5_decrypt_tkt_part
+	krb5_free_address
+	krb5_free_addresses
+	krb5_free_ap_rep
+	krb5_free_ap_rep_enc_part
+	krb5_free_ap_req
+	krb5_free_authdata
+	krb5_free_authenticator
+	krb5_free_authenticator_contents
+	krb5_free_checksum
+	krb5_free_context
+	krb5_free_cred
+	krb5_free_cred_contents
+	krb5_free_cred_enc_part
+	krb5_free_creds
+	krb5_free_enc_kdc_rep_part
+	krb5_free_enc_tkt_part
+	krb5_free_error
+	krb5_free_host_realm
+	krb5_free_kdc_rep
+	krb5_free_kdc_req
+	krb5_free_keyblock
+	krb5_free_keyblock_contents
+	krb5_free_last_req
+	krb5_free_pa_data
+	krb5_free_principal
+	krb5_free_priv
+	krb5_free_priv_enc_part
+	krb5_free_pwd_data
+	krb5_free_pwd_sequences
+	krb5_free_safe
+	krb5_free_tgt_creds
+	krb5_free_ticket
+	krb5_free_tickets
+	krb5_free_tkt_authent
+	krb5_fwd_tgt_creds
+	krb5_get_credentials
+	krb5_get_default_realm
+	krb5_get_host_realm
+	krb5_get_in_tkt
+	krb5_get_in_tkt_with_keytab
+	krb5_get_in_tkt_with_password
+	krb5_get_in_tkt_with_skey
+	krb5_get_notification_message
+	krb5_init_context
+	krb5_init_ets
+	krb5_mk_error
+	krb5_mk_priv
+	krb5_mk_rep
+	krb5_mk_req
+	krb5_mk_req_extended
+	krb5_mk_safe
+	krb5_os_localaddr
+	krb5_parse_name
+	krb5_principal_compare
+	krb5_rd_cred
+	krb5_rd_error
+	krb5_rd_priv
+	krb5_rd_rep
+	krb5_rd_req
+	krb5_rd_safe
+	krb5_recvauth
+	krb5_sendauth
+	krb5_sname_to_principal
+	krb5_timeofday
+	krb5_unparse_name
+	krb5_unparse_name_ext
+	krb5_us_timeofday
+;
+	krb5_use_enctype
+	krb5_checksum_size
+	krb5_encrypt_size
+	krb5_calculate_checksum
+	krb5_verify_checksum
+	krb5_eblock_enctype
+;
+	krb5_decrypt
+	krb5_encrypt
+	krb5_string_to_key
+	krb5_process_key
+	krb5_finish_key
+	krb5_init_random_key
+	krb5_finish_random_key
+	krb5_random_key
+;
+	krb5_425_conv_principal
+	krb5_524_conv_principal
+;
+	krb5_cksumtype_to_string
+	krb5_deltat_to_string
+	krb5_enctype_to_string
+	krb5_salttype_to_string
+	krb5_string_to_cksumtype
+	krb5_string_to_deltat
+	krb5_string_to_enctype
+	krb5_string_to_salttype
+	krb5_string_to_timestamp
+	krb5_timestamp_to_sfstring
+	krb5_timestamp_to_string
+;
+	krb5_auth_con_free
+	krb5_auth_con_genaddrs
+	krb5_auth_con_getflags
+	krb5_auth_con_getkey
+	krb5_auth_con_getlocalsubkey
+	krb5_auth_con_getremotesubkey
+	krb5_auth_con_init
+	krb5_auth_con_setflags
+	krb5_auth_con_getlocalseqnumber
+	krb5_auth_con_getremoteseqnumber
+	krb5_auth_con_setuseruserkey
+	krb5_auth_con_getauthenticator
+	krb5_auth_con_set_req_cksumtype
+;
+	krb5_cc_default
+	krb5_cc_register
+	krb5_cc_resolve
+;
+	krb5_kt_default
+	krb5_kt_register
+	krb5_kt_resolve
+	krb5_kt_add_entry
+	krb5_kt_free_entry
+	krb5_kt_read_service_key
+	krb5_kt_remove_entry
 ;Kadm routines
-	KRB5_ADM_CONNECT
-	KRB5_ADM_DISCONNECT
-	KRB5_FREE_ADM_DATA
-	KRB5_READ_ADM_REPLY
-	KRB5_SEND_ADM_CMD
+	krb5_adm_connect
+	krb5_adm_disconnect
+	krb5_free_adm_data
+	krb5_read_adm_reply
+	krb5_send_adm_cmd
 ;Com_err routines
-        _com_err
-        ERROR_MESSAGE
+	_com_err
+	error_message
+	et_init
+	et_shutdown
+	et_add_error_table
+	et_error_message
+	_et_com_err
+	_et_com_err_va
+	et_set_hook
+	__et_list
+;
+;Temporary exports (DO NOT USE)
+	_sscanf
+	_decode_krb5_ticket
+	des_ecb_encrypt
+	des_new_random_key
+	des_key_sched
+	des_set_random_generator_seed
+	krb5_random_confounder
+	krb5_size_opaque
+	krb5_internalize_opaque
+	krb5_externalize_opaque
+	krb5_ser_pack_int32
+	krb5_ser_unpack_int32
+	krb5_ser_pack_bytes
+	krb5_ser_unpack_bytes
+	krb5_ser_auth_context_init
+	krb5_ser_context_init
+	krb5_ser_ccache_init
+	krb5_ser_keytab_init
+	krb5_ser_rcache_init

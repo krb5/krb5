@@ -38,7 +38,7 @@ krb5_pointer des425_random_state = 0;
  *        to be a weak des key.  Des_generate_random_block is used to
  *        provide the random bits.
  */
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 des_new_random_key(key)
     mit_des_cblock key;
 {
@@ -102,7 +102,7 @@ des_init_random_number_generator(key)
  * Requires: key is a valid des key.  I.e., has correct parity and is not a
  *           weak des key.
  */
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 des_set_random_generator_seed(key)
     mit_des_cblock key;
 {

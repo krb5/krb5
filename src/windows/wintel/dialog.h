@@ -6,6 +6,15 @@
 #define TEL_MANUALCONFIGURE         203
 #define TEL_OK                      204
 #define TEL_CANCEL                  206
+#define IDC_FORWARD                 207
+#define IDC_FORWARDFORWARD          208
+#define IDC_ENCRYPT                 210
+#define TEL_CONNECT_USERID          211
+
+#define IDM_SEND_IP                 800
+#define IDM_SEND_AYT                801
+#define IDM_SEND_ABORT              802
+
 #define CON_SESSIONNAME             302
 #define CON_WINDOWTITLE             304
 #define CON_COLUMNS132              305
@@ -21,8 +30,11 @@
 #define CONFIGDLG                   300
 #define CON_SCRLBCK                 317
 #define CON_NUMLINES                318
+
 #define PRINTQUEUE                  400
+
 #define IDM_PRINTQUEUE              500
+
 #define TEL_PUSH1                   601
 #define TEL_PUSH2                   602
 #define TEL_PUSH3                   603

@@ -95,7 +95,7 @@ krb5_copy_enc_tkt_part(context, partfrom, partto)
     return 0;
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_copy_ticket(context, from, pto)
     krb5_context context;
     const krb5_ticket *from;

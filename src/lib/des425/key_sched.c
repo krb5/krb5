@@ -48,7 +48,7 @@
 #include <stdio.h>
 #include "des.h"
 
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 des_key_sched(k,schedule)
     register mit_des_cblock k;	/* r11 */
     mit_des_key_schedule schedule;

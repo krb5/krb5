@@ -32,13 +32,13 @@
 #include <sys/param.h>
 #endif
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_context context;
-    const char * hostname;
-    const char * sname;
+    const char FAR * hostname;
+    const char FAR * sname;
     krb5_int32 type;
-    krb5_principal * ret_princ;
+    krb5_principal FAR * ret_princ;
 {
     struct hostent *hp;
     char **hrealms, *realm, *remote_host;

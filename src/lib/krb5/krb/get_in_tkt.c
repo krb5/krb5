@@ -361,21 +361,21 @@ make_preauth_list(context, ptypes, ret_list)
 
 #define MAX_IN_TKT_LOOPS 16
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
-    krb5_address * const * addrs;
-    krb5_enctype * ktypes;
-    krb5_preauthtype * ptypes;
+    krb5_address FAR * const FAR * addrs;
+    krb5_enctype FAR * ktypes;
+    krb5_preauthtype FAR * ptypes;
     git_key_proc key_proc;
     krb5_const_pointer keyseed;
     git_decrypt_proc decrypt_proc;
     krb5_const_pointer decryptarg;
-    krb5_creds * creds;
+    krb5_creds FAR * creds;
     krb5_ccache ccache;
-    krb5_kdc_rep ** ret_as_reply;
+    krb5_kdc_rep FAR * FAR * ret_as_reply;
 {
     krb5_error_code	retval;
     krb5_timestamp	time_now;

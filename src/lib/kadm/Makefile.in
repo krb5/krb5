@@ -2,6 +2,8 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=kadm.lib
+##DOSOBJFILE=kadm.lst
+
 RUN_SETUP=@KRB5_RUN_ENV@
 BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_dec.$(OBJEXT)	\
@@ -35,12 +37,15 @@ SRCS=	$(srcdir)/adm_conn.c	\
 #	$(srcdir)/adm_kw_enc.c
 
 
-all:: $(BASE_OBJS) 
-
-all-unix:: $(DB_OBJS) $(UNIX_OBJS)
+all-unix:: $(BASE_OBJS) $(DB_OBJS) $(UNIX_OBJS)
 all-unix:: libkadm.a
-all-mac:: $(DB_OBJS)
-all-windows::
+all-mac:: $(BASE_OBJS) $(DB_OBJS)
+all-windows:: $(OBJFILE)
+
+##DOS$(OBJFILE): $(BASE_OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
 
 libkadm.a: $(OBJS) $(UNIX_OBJS)
 	$(RM) $@
@@ -56,7 +61,7 @@ clean-unix::
 clean-mac::
 	$(RM) libkadm.$(LIBEXT)
 clean-windows::
-	$(RM) kadm.lib kadm.bak
+	$(RM) kadm.lib kadm.bak $(OBJFILE)
 
 #
 # t_dbentry

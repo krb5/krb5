@@ -1,3 +1,13 @@
+Thu Nov 21 00:58:04 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: Win32 build
+
+	* c_ustime.c: The Win32 time calculation is different from DOS'
+		so the DOS version shouldn't be trying to use the same
+		part of the ifdef.
+
+	* rnd_confoun.c: Fix function declaration (win32)
+
 Wed Jun 12 00:12:52 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* c_ustime.c: Fix WIN32 to be _WIN32

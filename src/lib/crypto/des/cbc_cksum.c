@@ -44,18 +44,25 @@
 */
 
 static krb5_error_code mit_des_cbc_checksum
-    PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum FAR * ));
+    PROTOTYPE((krb5_const krb5_pointer,
+	       krb5_const size_t,
+	       krb5_const krb5_pointer,
+	       krb5_const size_t,
+	       krb5_checksum FAR * ));
 
 static krb5_error_code mit_des_cbc_verf_cksum
-    PROTOTYPE ((krb5_checksum FAR *, krb5_pointer, size_t, krb5_pointer,
-                size_t ));
+    PROTOTYPE ((krb5_const krb5_checksum FAR *,
+		krb5_const krb5_pointer,
+		krb5_const size_t,
+		krb5_const krb5_pointer,
+                krb5_const size_t ));
 
 static krb5_error_code
 mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
-    krb5_pointer in;
-    size_t in_length;
-    krb5_pointer key;
-    size_t key_size;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer key;
+    krb5_const size_t key_size;
     krb5_checksum FAR * cksum;
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
@@ -95,11 +102,11 @@ mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
     
 static krb5_error_code
 mit_des_cbc_verf_cksum(cksum, in, in_length, key, key_size)
-    krb5_checksum FAR * cksum;
-    krb5_pointer in;
-    size_t in_length;
-    krb5_pointer key;
-    size_t key_size;
+    krb5_const krb5_checksum FAR * cksum;
+    krb5_const krb5_pointer in;
+    krb5_const size_t in_length;
+    krb5_const krb5_pointer key;
+    krb5_const size_t key_size;
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     mit_des_cblock	contents;

@@ -26,82 +26,25 @@
 /*
  * Determine platform-dependent configuration.
  */
+
 #if defined(_MSDOS) || defined(_WIN32)
-
-#ifdef _MSDOS
-	/* Windows 16 definition */
-
-#define GSS_SIZEOF_INT      2
-#define GSS_SIZEOF_SHORT    2
-#define GSS_SIZEOF_LONG     4
-
-#ifndef FAR
-#define FAR	_far
-#define NEAR	_near
+#include <win-mac.h>
 #endif
-
-#ifndef KRB5_CALLCONV
-#define KRB5_CALLCONV __far __export __pascal
-#define KRB5_CALLCONV_C __far __export __cdecl
-#define KRB5_DLLIMP
-#define INTERFACE   KRB5_CALLCONV
-#define INTERFACE_C KRB5_CALLCONV_C
-#endif /* !KRB5_CALLCONV */
-	
-#else
-	/* Windows 32 specific definitions */
-#define GSS_SIZEOF_INT      4
-#define GSS_SIZEOF_SHORT    2
-#define GSS_SIZEOF_LONG     4
-
-#ifndef KRB5_CALLCONV
-#ifdef KRB5_DLL_FILE
-#define KRB5_DECLSPEC dllexport
-#else
-#define KRB5_DECLSPEC dllimport
-#endif
-#define KRB5_DLLIMP __declspec(KRB5_DECLSPEC)
-#define KRB5_CALLCONV __stdcall
-#define KRB5_CALLCONV_C __cdecl
-#define INTERFACE   KRB5_DLLIMP KRB5_CALLCONV
-#define INTERFACE_C KRB5_DLLIMP KRB5_CALLCONV_C
-#endif /* !KRB5_CALLCONV */
-
-#include <windows.h>
-#endif
-
-#ifndef _SIZE_T_DEFINED
-typedef unsigned int size_t;
-#define _SIZE_T_DEFINED
-#endif /* _SIZE_T_DEFINED */
-
-#ifndef _UID_T_DEFINED
-typedef unsigned int uid_t;
-#define _UID_T_DEFINED
-#endif
-#else /* _MSDOS_ */
 
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
-#define INTERFACE
-#define INTERFACE_C
+#endif
+
+#ifndef FAR
 #define FAR
 #define NEAR
-#endif /* !KRB5_CALLCONV */
+#endif
 
 #define	GSS_SIZEOF_INT		SIZEOF_INT
 #define	GSS_SIZEOF_LONG		SIZEOF_LONG
 #define	GSS_SIZEOF_SHORT	SIZEOF_SHORT
-#endif /* _MSDOS */
-
-#ifndef FAR
-#define FAR
-#endif
-#ifndef NEAR
-#define NEAR
-#endif
 
 /*
  * Make sure we have a definition for PROTOTYPE.

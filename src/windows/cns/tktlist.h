@@ -16,20 +16,12 @@
 /*
  * Prototypes
  */
-BOOL ticket_init_list(
-	HWND hwnd);
+BOOL ticket_init_list(HWND);
 
-void ticket_destroy(
-	HWND hwnd);
+void ticket_destroy(HWND);
 
-LONG ticket_measureitem(
-	HWND hwnd,
-	WPARAM wparam,
-	LPARAM lparam);
+void ticket_measureitem(HWND, MEASUREITEMSTRUCT *);
 
-LONG ticket_drawitem(
-	HWND hwnd,
-	WPARAM wparam,
-	LPARAM lparam);
+void ticket_drawitem(HWND, const DRAWITEMSTRUCT *);
 
 #endif

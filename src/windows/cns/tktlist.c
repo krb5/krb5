@@ -10,10 +10,12 @@
  */
 
 #if !defined(KRB5) && !defined(KRB4)
-	#define KRB5 1
+#define KRB5 1
 #endif
 
 #include <windows.h>
+#include <windowsx.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include <malloc.h>
@@ -21,24 +23,23 @@
 #include <time.h>
 
 #ifdef KRB4
-	#include "mit-copyright.h"
-	#include "kerberos.h"
+#include "mit-copyright.h"
+#include "kerberos.h"
 #endif
 
 #ifdef KRB5
-	#include "winsock.h"
-	#include "krb5.h"
-    #include "com_err.h"
+#include "winsock.h"
+#include "krb5.h"
+#include "com_err.h"
 
-	#define DEFAULT_TKT_LIFE 120
-	#define 	ANAME_SZ	40
-	#define		REALM_SZ	40
-	#define		SNAME_SZ	40
-	#define		INST_SZ		40
-	#define 	MAX_KPW_LEN	128
-	/* include space for '.' and '@' */
-	#define		MAX_K_NAME_SZ	(ANAME_SZ + INST_SZ + REALM_SZ + 2)
-	#define ORGANIZATION "Cygnus Support"
+#define DEFAULT_TKT_LIFE 120
+#define 	ANAME_SZ	40
+#define		REALM_SZ	40
+#define		SNAME_SZ	40
+#define		INST_SZ		40
+#define 	MAX_KPW_LEN	128
+/* include space for '.' and '@' */
+#define		MAX_K_NAME_SZ	(ANAME_SZ + INST_SZ + REALM_SZ + 2)
 #endif
 
 #include "cns.h"
@@ -48,13 +49,13 @@
  * Ticket information for a list line
  */
 typedef struct {
-	BOOL ticket;		/* TRUE if this is a real ticket */
-    time_t issue_time;	/* time_t of issue */
-	long lifetime;		/* Lifetime for ticket in 5 minute intervals */
-	char buf[0];		/* String to display */
+  BOOL ticket;		/* TRUE if this is a real ticket */
+  time_t issue_time;	/* time_t of issue */
+  long lifetime;		/* Lifetime for ticket in 5 minute intervals */
+  char buf[0];		/* String to display */
 } TICKETINFO, *LPTICKETINFO;
 
-/*+
+/*
  * Function: Returns a standard ctime date with day of week and year
  *	removed.
  *
@@ -64,22 +65,22 @@ typedef struct {
  * Returns: A pointer to the adjusted time value.
  */
 static char *
-short_date (long t) {
-	static char buf[26 - 4];
-	char *p;
+short_date (long t)
+{
+  static char buf[26 - 4];
+  char *p;
 
-	p = ctime(&t);
-	assert(p != NULL);
+  p = ctime(&t);
+  assert(p != NULL);
 
-	strcpy (buf, p + 4);
-	buf[12] = '\0';
+  strcpy (buf, p + 4);
+  buf[12] = '\0';
 
-	return buf;
+  return buf;
+}
 
-} /* short_date */
 
-
-/*++
+/*+
  * Function: Initializes and populates the ticket list with all existing
  * 	Kerberos tickets.
  *
@@ -89,170 +90,165 @@ short_date (long t) {
  * Returns: Number of elements in the list or -1 on error
  */
 int
-ticket_init_list (
-	HWND hwnd)
+ticket_init_list (HWND hwnd)
 {
-	int ncred;
-	LRESULT rc;
-	int l;
-	LPTICKETINFO lpinfo;
-    char buf[26+2 + 26+2 + ANAME_SZ+1 + INST_SZ+1 + REALM_SZ + 22];
-	#ifdef KRB4
-		int i;
-		time_t expiration;
-		char service[ANAME_SZ];
-		char instance[INST_SZ];
-		char realm[REALM_SZ];
-		CREDENTIALS c;
-	#endif
-	#ifdef KRB5
-		krb5_cc_cursor cursor;
-		krb5_error_code code;
-		krb5_creds c;
-        krb5_flags flags;
-        char *sname;                            /* Name of the service */
-        char *flags_string(krb5_creds *cred);
-	#endif
+  int ncred;
+  LRESULT rc;
+  int l;
+  LPTICKETINFO lpinfo;
+  char buf[26+2 + 26+2 + ANAME_SZ+1 + INST_SZ+1 + REALM_SZ + 22];
+#ifdef KRB4
+  int i;
+  time_t expiration;
+  char service[ANAME_SZ];
+  char instance[INST_SZ];
+  char realm[REALM_SZ];
+  CREDENTIALS c;
+#endif
+#ifdef KRB5
+  krb5_cc_cursor cursor;
+  krb5_error_code code;
+  krb5_creds c;
+  krb5_flags flags;
+  char *sname;                            /* Name of the service */
+  char *flags_string(krb5_creds *cred);
+#endif
 
-	SendMessage(hwnd, WM_SETREDRAW, FALSE, 0);
+  SetWindowRedraw(hwnd, FALSE);
 
-	rc = SendMessage(hwnd, LB_GETCOUNT, 0, 0);
-	assert(rc != LB_ERR);
+  rc = ListBox_GetCount(hwnd);
+  assert(rc != LB_ERR);
 
-	if (rc > 0)
-		ticket_destroy(hwnd);
+  if (rc > 0)
+    ticket_destroy(hwnd);
 
-	while (--rc >= 0)
-		SendMessage(hwnd, LB_DELETESTRING, (WPARAM) rc, 0);
+  while (--rc >= 0)
+    ListBox_DeleteString(hwnd, rc);
 
-	#ifdef KRB4
+#ifdef KRB4
+  ncred = krb_get_num_cred();
+  for (i = 1; i <= ncred; i++) {
+    krb_get_nth_cred(service, instance, realm, i);
+    krb_get_cred(service, instance, realm, &c);
+    strcpy(buf, " ");
+    strcat(buf, short_date(c.issue_date - kwin_get_epoch()));
+    expiration = c.issue_date - kwin_get_epoch() + (long) c.lifetime * 5L * 60L;
+    strcat (buf, "      ");
+    strcat(buf, short_date(expiration));
+    strcat (buf, "      ");
+    l = strlen(buf);
+    sprintf(&buf[l], "%s%s%s%s%s (%d)",
+	    c.service, (c.instance[0] ? "." : ""), c.instance,
+	    (c.realm[0] ? "@" : ""), c.realm, c.kvno);
+    l = strlen(buf);
 
-		ncred = krb_get_num_cred();
-		for (i = 1; i <= ncred; i++) {
-			krb_get_nth_cred(service, instance, realm, i);
-			krb_get_cred(service, instance, realm, &c);
-			strcpy(buf, " ");
-			strcat(buf, short_date(c.issue_date - kwin_get_epoch()));
-			expiration = c.issue_date - kwin_get_epoch() + (long) c.lifetime * 5L * 60L;
-            strcat (buf, "      ");
-			strcat(buf, short_date(expiration));
-            strcat (buf, "      ");
-			l = strlen(buf);
-	  		sprintf(&buf[l], "%s%s%s%s%s (%d)",
-		 		c.service, (c.instance[0] ? "." : ""), c.instance,
-		 		(c.realm[0] ? "@" : ""), c.realm, c.kvno);
-			l = strlen(buf);
+    lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);
+    assert(lpinfo != NULL);
 
-			lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);
-			assert(lpinfo != NULL);
+    if (lpinfo == NULL)
+      return -1;
 
-			if (lpinfo == NULL)
-				return -1;
+    lpinfo->ticket = TRUE;
+    lpinfo->issue_time = c.issue_date - kwin_get_epoch(); /* back to system time */
+    lpinfo->lifetime = (long) c.lifetime * 5L * 60L;
+    strcpy(lpinfo->buf, buf);
 
-			lpinfo->ticket = TRUE;
-			lpinfo->issue_time = c.issue_date - kwin_get_epoch(); /* back to system time */
-			lpinfo->lifetime = (long) c.lifetime * 5L * 60L;
-			strcpy(lpinfo->buf, buf);
+    rc = ListBox_AddItemData(hwnd, lpinfo);
+    assert(rc >= 0);
 
-			rc = SendMessage(hwnd, LB_ADDSTRING, 0, (LPARAM) lpinfo);
-			assert(rc >= 0);
+    if (rc < 0)
+      return -1;
+  }
 
-			if (rc < 0)
-				return -1;
-		}
+#endif
+  
+#ifdef KRB5
+  
+  ncred = 0;
+  flags = 0;
+  if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
+    if (code != KRB5_FCC_NOFILE) {
+      return -1;
+    }
+  } else {
+    if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
+      return -1;
+    }
+    while (1) {
+      code = krb5_cc_next_cred(k5_context, k5_ccache, &cursor, &c);
+      if (code != 0)
+	break;
+      
+      ncred++;
+      strcpy (buf, "  ");
+      strcat (buf, short_date (c.times.starttime - kwin_get_epoch()));
+      strcat (buf, "      ");
+      strcat (buf, short_date (c.times.endtime - kwin_get_epoch()));
+      strcat (buf, "      ");
+      
+      /* Add ticket service name and realm */
+      code = krb5_unparse_name (k5_context, c.server, &sname);
+      if (code) {
+	com_err (NULL, code, "while unparsing server name");
+	break;
+      }
+      strcat (buf, sname);
 
-	#endif
-
-	#ifdef KRB5
-
-		ncred = 0;
-        flags = 0;
-        if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
-            if (code != KRB5_FCC_NOFILE) {
-                return -1;
-            }
-        } else {
-            if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
-                return -1;
-            }
-
-		    while (1) {
-    			code = krb5_cc_next_cred(k5_context, k5_ccache, &cursor, &c);
-	    		if (code != 0)
-		    		break;
-
-    			ncred++;
-                strcpy (buf, "  ");
-                strcat (buf, short_date (c.times.starttime - kwin_get_epoch()));
-                strcat (buf, "      ");
-                strcat (buf, short_date (c.times.endtime - kwin_get_epoch()));
-                strcat (buf, "      ");
-
-                /* Add ticket service name and realm */
-                code = krb5_unparse_name (k5_context, c.server, &sname);
-                if (code) {
-                    com_err (NULL, code, "while unparsing server name");
-                    break;
-                }
-                strcat (buf, sname);
-                free (sname);
-                strcat (buf, flags_string (&c)); /* Add flag info */
-
-		    	l = strlen(buf);
-			    lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);
-    			assert(lpinfo != NULL);
-        
-		    	if (lpinfo == NULL)
-    				return -1;
-
-	    		lpinfo->ticket = TRUE;
-    			lpinfo->issue_time = c.times.starttime - kwin_get_epoch();
-    			lpinfo->lifetime = c.times.endtime - c.times.starttime;
-    			strcpy(lpinfo->buf, buf);
-
-    			rc = SendMessage(hwnd, LB_ADDSTRING, 0, (LPARAM) lpinfo);
-    			assert(rc >= 0);
-
-	    		if (rc < 0)
-    				return -1;
-    		}
-
-            if (code == KRB5_CC_END) {               /* End of ccache */
-                if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
-                    return -1;
-                }
-                flags = KRB5_TC_OPENCLOSE;          /* turns on OPENCLOSE mode */
-                if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
-                    return -1;
-                }
-            } else {
-                return -1;
-            }
-        }
-	#endif
-
-	if (ncred <= 0) {
-		strcpy(buf, " No Tickets");
-		lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + strlen(buf) + 1);
-		assert(lpinfo != NULL);
-
-		if (lpinfo == NULL)
-			return -1;
-
-		lpinfo->ticket = FALSE;
-		strcpy (lpinfo->buf, buf);
-		rc = SendMessage(hwnd, LB_ADDSTRING, 0, (LPARAM) lpinfo);
-		assert(rc >= 0);
-	}
-
-	SendMessage(hwnd, WM_SETREDRAW, TRUE, 0);
-
-	return ncred;
-
-} /* ticket_init_list */
+      strcat (buf, flags_string (&c)); /* Add flag info */
+      
+      l = strlen(buf);
+      lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);
+      assert(lpinfo != NULL);
+      
+      if (lpinfo == NULL)
+	return -1;
+      
+      lpinfo->ticket = TRUE;
+      lpinfo->issue_time = c.times.starttime - kwin_get_epoch();
+      lpinfo->lifetime = c.times.endtime - c.times.starttime;
+      strcpy(lpinfo->buf, buf);
+      
+      rc = ListBox_AddItemData(hwnd, lpinfo);
+      assert(rc >= 0);
+      
+      if (rc < 0)
+	return -1;
+    }
+    if (code == KRB5_CC_END) {               /* End of ccache */
+      if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
+	return -1;
+      }
+      flags = KRB5_TC_OPENCLOSE;          /* turns on OPENCLOSE mode */
+      if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
+	return -1;
+      }
+    } else {
+      return -1;
+    }
+  }
+#endif
+  
+  if (ncred <= 0) {
+    strcpy(buf, " No Tickets");
+    lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + strlen(buf) + 1);
+    assert(lpinfo != NULL);
+    
+    if (lpinfo == NULL)
+      return -1;
+    
+    lpinfo->ticket = FALSE;
+    strcpy (lpinfo->buf, buf);
+    rc = ListBox_AddItemData(hwnd, lpinfo);
+    assert(rc >= 0);
+  }
+  
+  SetWindowRedraw(hwnd, TRUE);
+  
+  return ncred;
+}
 
 
-/*+
+/*
  * Function: Destroy the ticket list.  Make sure to delete all
  *	ticket entries created during ticket initialization.
  *
@@ -261,171 +257,151 @@ ticket_init_list (
  */
 void
 ticket_destroy (
-	HWND hwnd)
+		HWND hwnd)
 {
-	int i;
-	int n;
-	LRESULT rc;
+  int i;
+  int n;
+  LRESULT rc;
 
-	n = (int) SendMessage(hwnd, LB_GETCOUNT, 0, 0);
+  n = ListBox_GetCount(hwnd);
 
-	for (i = 0; i < n; i++) {
-		rc = SendMessage(hwnd, LB_GETITEMDATA, i, 0);
-		assert(rc != LB_ERR);
+  for (i = 0; i < n; i++) {
+    rc = ListBox_GetItemData(hwnd, i);
+    assert(rc != LB_ERR);
 
-		if (rc != LB_ERR)
-			free ((void *) rc);
-	}
+    if (rc != LB_ERR)
+      free ((void *) rc);
+  }
+}
 
-} /* ticket_destroy */
 
-
-/*+
+/*
  * Function: Respond to the WM_MEASUREITEM message for the ticket list
- * 	by setting each list item up at 1/4" hight.
- *
- * Parameters:
- * 	hwnd - the window handle of the ticket window.
- *
- * 	wparam - control id of the ticket list.
- *
- * 	lparam - pointer to the MEASUREITEMSTRUCT.
- *
- * Returns: TRUE if message process, FALSE otherwise.
+ * 	by setting each list item up at 1/4 inch hight.
  */
-LONG
-ticket_measureitem (
-	HWND hwnd,
-	WPARAM wparam,
-	LPARAM lparam)
+void
+ticket_measureitem(HWND hwnd, MEASUREITEMSTRUCT *lpmi)
 {
-	int logpixelsy;
-	LPMEASUREITEMSTRUCT lpmi;
-	HDC hdc;
+  int logpixelsy;
+  HDC hdc;
 
-	lpmi = (LPMEASUREITEMSTRUCT) lparam;
-	hdc = GetDC(HWND_DESKTOP);
-	logpixelsy = GetDeviceCaps(hdc, LOGPIXELSY);
-	ReleaseDC(HWND_DESKTOP, hdc);
-	lpmi->itemHeight = logpixelsy / 4;	/* 1/4 inch */
+  if (lpmi->CtlID != IDD_TICKET_LIST)
+    return;
 
-	return TRUE;
-
-} /* ticket_measureitem */
+  hdc = GetDC(HWND_DESKTOP);
+  logpixelsy = GetDeviceCaps(hdc, LOGPIXELSY);
+  ReleaseDC(HWND_DESKTOP, hdc);
+  lpmi->itemHeight = logpixelsy / 4;	/* 1/4 inch */
+}
 
 
-/*+
+/*
  * Function: Respond to the WM_DRAWITEM message for the ticket list
  * 	by displaying a single list item.
- *
- * Parameters:
- * 	hwnd - the window handle of the ticket window.
- *
- * 	wparam - control id of the ticket list.
- *
- * 	lparam - pointer to the DRAWITEMSTRUCT.
- *
- * Returns: TRUE if message process, FALSE otherwise.
  */
-LONG ticket_drawitem(
-	HWND hwnd,
-	WPARAM wparam,
-	LPARAM lparam)
+void
+ticket_drawitem(HWND hwnd, const DRAWITEMSTRUCT *lpdi)
 {
-	LPDRAWITEMSTRUCT lpdi;
-	BOOL rc;
-	COLORREF bkcolor;
-	HBRUSH hbrush;
-	UINT textheight;
-	UINT alignment;
-	int left, top;
-	BOOL b;
-	LPTICKETINFO lpinfo;
-	HICON hicon;
-	#if 0
-		COLORREF textcolor;
-		COLORREF orgbkcolor;
-		COLORREF orgtextcolor;
-	#endif
+  BOOL rc;
+  COLORREF bkcolor;
+  HBRUSH hbrush;
+  UINT textheight;
+  UINT alignment;
+  int left, top;
+  BOOL b;
+  LPTICKETINFO lpinfo;
+  HICON hicon;
+#if 0
+  COLORREF textcolor;
+  COLORREF orgbkcolor;
+  COLORREF orgtextcolor;
+#endif
+  SIZE Size;
 
-	lpdi = (LPDRAWITEMSTRUCT) lparam;
-	lpinfo = (LPTICKETINFO) lpdi->itemData;
+  if (lpdi->CtlID != IDD_TICKET_LIST)
+    return;
 
-	if (lpdi->itemAction == ODA_FOCUS)
-		return TRUE;
+  lpinfo = (LPTICKETINFO) lpdi->itemData;
 
-	#if 0
-		if (lpdi->itemState & ODS_SELECTED) {
-			textcolor = GetSysColor(COLOR_HIGHLIGHTTEXT);
-			bkcolor = GetSysColor(COLOR_HIGHLIGHT);
+  if (lpdi->itemAction == ODA_FOCUS)
+    return;
 
-			orgtextcolor = SetTextColor(lpdi->hDC, textcolor);
-    		assert(textcolor != 0x80000000);
+#if 0
+  if (lpdi->itemState & ODS_SELECTED) {
+    textcolor = GetSysColor(COLOR_HIGHLIGHTTEXT);
+    bkcolor = GetSysColor(COLOR_HIGHLIGHT);
 
-			orgbkcolor = SetBkColor(lpdi->hDC, bkcolor);
-    		assert(bkcolor != 0x80000000);
-		}
-		else
-	#endif
+    orgtextcolor = SetTextColor(lpdi->hDC, textcolor);
+    assert(textcolor != 0x80000000);
 
-	bkcolor = GetBkColor(lpdi->hDC);
-	hbrush = CreateSolidBrush(bkcolor);
-	assert(hbrush != NULL);
+    orgbkcolor = SetBkColor(lpdi->hDC, bkcolor);
+    assert(bkcolor != 0x80000000);
+  }
+  else
+#endif
 
-	FillRect(lpdi->hDC, &(lpdi->rcItem), hbrush);
-	DeleteObject(hbrush);
+    bkcolor = GetBkColor(lpdi->hDC);
+  hbrush = CreateSolidBrush(bkcolor);
+  assert(hbrush != NULL);
 
-	/*
-	 * Display the appropriate icon
-	 */
-	if (lpinfo->ticket) {
-		hicon = kwin_get_icon(lpinfo->issue_time + lpinfo->lifetime);
-		left = lpdi->rcItem.left - (32 - ICON_WIDTH) / 2;
-		top = lpdi->rcItem.top;
-		top += (lpdi->rcItem.bottom - lpdi->rcItem.top - 32) / 2;
+  FillRect(lpdi->hDC, &(lpdi->rcItem), hbrush);
+  DeleteObject(hbrush);
 
-		b = DrawIcon(lpdi->hDC, left, top, hicon);
-		assert(b);
-	}
+  /*
+   * Display the appropriate icon
+   */
+  if (lpinfo->ticket) {
+    hicon = kwin_get_icon(lpinfo->issue_time + lpinfo->lifetime);
+    left = lpdi->rcItem.left - (32 - ICON_WIDTH) / 2;
+    top = lpdi->rcItem.top;
+    top += (lpdi->rcItem.bottom - lpdi->rcItem.top - 32) / 2;
 
-	/*
-	 * Display centered string
-	 */
-	textheight = HIWORD(GetTextExtent(lpdi->hDC, "X", 1));
-	alignment = SetTextAlign(lpdi->hDC, TA_TOP | TA_LEFT);
+    b = DrawIcon(lpdi->hDC, left, top, hicon);
+    assert(b);
+  }
 
-	if (lpinfo->ticket)
-		left = lpdi->rcItem.left + ICON_WIDTH;
-	else
-		left = lpdi->rcItem.left;
+  /*
+   * Display centered string
+   */
+#ifdef _WIN32
+  GetTextExtentPoint32(lpdi->hDC, "X", 1, &Size);
+#else
+  GetTextExtentPoint(lpdi->hDC, "X", 1, &Size);
+#endif
 
-	top = lpdi->rcItem.top;
-	top += (lpdi->rcItem.bottom - lpdi->rcItem.top - textheight) / 2;
-	rc = TextOut(lpdi->hDC, left, top, (LPSTR) lpinfo->buf,
-			strlen((LPSTR) lpinfo->buf));
-	assert(rc);
+  textheight = Size.cy;
 
-	alignment = SetTextAlign(lpdi->hDC, alignment);
+  alignment = SetTextAlign(lpdi->hDC, TA_TOP | TA_LEFT);
 
-	#if 0
-		if (lpdi->itemState & ODS_SELECTED) {
-			textcolor = SetTextColor(lpdi->hDC, orgtextcolor);
-	    	assert(textcolor != 0x80000000);
+  if (lpinfo->ticket)
+    left = lpdi->rcItem.left + ICON_WIDTH;
+  else
+    left = lpdi->rcItem.left;
 
-			bkcolor = SetBkColor(lpdi->hDC, orgbkcolor);
-	    	assert(bkcolor != 0x80000000);
-		}
+  top = lpdi->rcItem.top;
+  top += (lpdi->rcItem.bottom - lpdi->rcItem.top - textheight) / 2;
+  rc = TextOut(lpdi->hDC, left, top, (LPSTR) lpinfo->buf,
+	       strlen((LPSTR) lpinfo->buf));
+  assert(rc);
 
-	#endif
+  alignment = SetTextAlign(lpdi->hDC, alignment);
 
-	return TRUE;
+#if 0
+  if (lpdi->itemState & ODS_SELECTED) {
+    textcolor = SetTextColor(lpdi->hDC, orgtextcolor);
+    assert(textcolor != 0x80000000);
 
-} /* ticket_drawitem */
+    bkcolor = SetBkColor(lpdi->hDC, orgbkcolor);
+    assert(bkcolor != 0x80000000);
+  }
+
+#endif
+}
 
 
 #ifdef KRB5
 
-/*+
+/*
  * 
  * Flags_string
  * 
@@ -434,39 +410,39 @@ LONG ticket_drawitem(
  */
 char *
 flags_string(krb5_creds *cred) {
-    static char buf[32];
-    int i = 0;
+  static char buf[32];
+  int i = 0;
 
-    buf[i++] = ' ';    
-    buf[i++] = '(';    
-    if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
-        buf[i++] = 'F';
-    if (cred->ticket_flags & TKT_FLG_FORWARDED)
-        buf[i++] = 'f';
-    if (cred->ticket_flags & TKT_FLG_PROXIABLE)
-        buf[i++] = 'P';
-    if (cred->ticket_flags & TKT_FLG_PROXY)
-        buf[i++] = 'p';
-    if (cred->ticket_flags & TKT_FLG_MAY_POSTDATE)
-        buf[i++] = 'D';
-    if (cred->ticket_flags & TKT_FLG_POSTDATED)
-        buf[i++] = 'd';
-    if (cred->ticket_flags & TKT_FLG_INVALID)
-        buf[i++] = 'i';
-    if (cred->ticket_flags & TKT_FLG_RENEWABLE)
-        buf[i++] = 'R';
-    if (cred->ticket_flags & TKT_FLG_INITIAL)
-        buf[i++] = 'I';
-    if (cred->ticket_flags & TKT_FLG_HW_AUTH)
-        buf[i++] = 'H';
-    if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
-        buf[i++] = 'A';
+  buf[i++] = ' ';    
+  buf[i++] = '(';    
+  if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
+    buf[i++] = 'F';
+  if (cred->ticket_flags & TKT_FLG_FORWARDED)
+    buf[i++] = 'f';
+  if (cred->ticket_flags & TKT_FLG_PROXIABLE)
+    buf[i++] = 'P';
+  if (cred->ticket_flags & TKT_FLG_PROXY)
+    buf[i++] = 'p';
+  if (cred->ticket_flags & TKT_FLG_MAY_POSTDATE)
+    buf[i++] = 'D';
+  if (cred->ticket_flags & TKT_FLG_POSTDATED)
+    buf[i++] = 'd';
+  if (cred->ticket_flags & TKT_FLG_INVALID)
+    buf[i++] = 'i';
+  if (cred->ticket_flags & TKT_FLG_RENEWABLE)
+    buf[i++] = 'R';
+  if (cred->ticket_flags & TKT_FLG_INITIAL)
+    buf[i++] = 'I';
+  if (cred->ticket_flags & TKT_FLG_HW_AUTH)
+    buf[i++] = 'H';
+  if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
+    buf[i++] = 'A';
 
-    buf[i++] = ')';    
-    buf[i] = '\0';
-    if (i <= 3)
-        buf[0] = '\0';
-    return(buf);
+  buf[i++] = ')';    
+  buf[i] = '\0';
+  if (i <= 3)
+    buf[0] = '\0';
+  return(buf);
 }
 
 #endif /* KRB5 */

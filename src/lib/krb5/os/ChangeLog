@@ -1,3 +1,13 @@
+Thu Nov 21 11:55:16 EST 1996	Richard Basch	<basch@lehman.com>
+
+	* Makefile.in: win32 build
+
+	* ccdefname.c, def_realm.c, free_hstrl.c, genaddrs.c, hst_realm.c,
+	init_os_ctx.c, ktdefname.c, localaddr.c, sn2princ.c, timeofday.c,
+	ustime.c
+		DLL export several more common functions (see lib/krb5.def
+		for the full list of functions exported)
+
 Wed Nov 13 02:53:31 1996  Tom Yu  <tlyu@mit.edu>
 
 	* osconfig.c: Add warning re: global variables.

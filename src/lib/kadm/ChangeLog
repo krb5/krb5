@@ -1,3 +1,10 @@
+Thu Nov 21 00:58:04 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: Win32 build
+	* adm_conn.c, adm_rw.c:
+		DLL export krb5_adm_connect, krb5_adm_disconnect,
+		krb5_free_adm_data, krb5_send_adm_cmd, krb5_read_adm_reply
+
 Tue Sep 24 13:25:50 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Eliminate extra files not needed for Macintosh and

@@ -1,0 +1,36 @@
+##DOSBUILDTOP=..\..
+
+OBJS=	ginastub.$(OBJEXT)
+
+DEBUG=1
+
+INCLUDES = -I$(BUILDTOP)\include
+
+WINLIBS = advapi32.lib comctl32.lib \
+	libc.lib kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib
+
+#comctl32.lib msvcrt.lib advapi32.lib gdi32.lib comdlg32.lib winspool.lib
+
+WINDLLFLAGS = /nodefaultlib /incremental:no /pdb:none /release \
+	/nologo /align:0x1000 /base:0x1c000000 /dll /debug
+
+##WIN32##!if defined(DEBUG)
+##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE -DDBG
+##WIN32##!else
+##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE
+##WIN32##!endif
+
+all-windows::
+##WIN32##all-windows:: kgina.dll
+
+clean-windows::
+	$(RM) kgina.dll
+
+kgina.dll: $(OBJS) $(KLIB)
+	link $(WINDLLFLAGS) -def:gina.def -out:$*.dll \
+	   $** $(WINLIBS)
+
+ginastub.obj: ginastub.h
+
+#gina.res: res.rc
+#	$(RC) $(RFLAGS) -r -fo $@ res.rc

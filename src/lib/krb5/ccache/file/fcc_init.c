@@ -40,7 +40,7 @@
  * system errors
  * permission errors
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_fcc_initialize(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -51,8 +51,8 @@ krb5_fcc_initialize(context, id, princ)
 
      MAYBE_OPEN(context, id, FCC_OPEN_AND_ERASE);
 
-#ifdef NOFCHMOD
-#ifndef NOCHMOD
+#ifndef HAVE_FCHMOD
+#ifdef HAVE_CHMOD
      reti = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
 #endif
 #else

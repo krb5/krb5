@@ -34,7 +34,7 @@
 #endif
 #include <string.h>
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_display_name (minor_status,
                   input_name,
                   output_name_buffer,

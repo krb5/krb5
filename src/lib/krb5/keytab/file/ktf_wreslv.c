@@ -28,7 +28,7 @@
 #include "k5-int.h"
 #include "ktfile.h"
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_ktfile_wresolve(context, name, id)
     krb5_context context;
   const char *name;

@@ -57,7 +57,7 @@ krb5_encrypt_tkt_part(context, srv_key, dec_ticket)
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
 krb5_free_data(context, scratch); }
 
-    krb5_use_enctype(kdc_context, &eblock, srv_key->enctype);
+    krb5_use_enctype(context, &eblock, srv_key->enctype);
 
     dec_ticket->enc_part.ciphertext.length =
 	krb5_encrypt_size(scratch->length, eblock.crypto_entry);

@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_seal (minor_status,
           context_handle,
           conf_req_flag,
@@ -83,7 +83,7 @@ gss_buffer_t		output_message_buffer;
     return(GSS_S_NO_CONTEXT);
 }
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_wrap (minor_status,
           context_handle,
           conf_req_flag,
@@ -109,7 +109,7 @@ gss_buffer_t		output_message_buffer;
 /*
  * New for V2
  */
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 		    qop_req, req_output_size, max_input_size)
     OM_uint32		*minor_status;

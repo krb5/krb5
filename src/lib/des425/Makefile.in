@@ -1,7 +1,11 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
 
 ##DOSBUILDTOP = ..\..
-##DOSLIBNAME=libdes425.lib
+##DOSLIBNAME=des425.lib
+##DOSOBJFILE=des425.lst
+##DOSOBJFILEDEP=des425.lst
+##DOSOBJFILELIST=@des425.lst
+
 RUN_SETUP=@KRB5_RUN_ENV@
 
 .c.o:
@@ -17,7 +21,7 @@ OBJS=	cksum.$(OBJEXT)		\
 	pcbc_encrypt.$(OBJEXT)	\
 	quad_cksum.$(OBJEXT)	\
 	random_key.$(OBJEXT)	\
-	read_passwd.$(OBJEXT) \
+	read_passwd.$(OBJEXT)	\
 	str_to_key.$(OBJEXT)	\
 	unix_time.$(OBJEXT)     \
 	util.$(OBJEXT)		\
@@ -34,7 +38,7 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/quad_cksum.c	\
 	$(srcdir)/random_key.c	\
 	$(srcdir)/read_passwd.c \
-	$(srcdir)/str_to_key.c \
+	$(srcdir)/str_to_key.c	\
 	$(srcdir)/unix_time.c   \
 	$(srcdir)/util.c	\
 	$(srcdir)/weak_key.c	\
@@ -57,7 +61,12 @@ DEPKLIB= $(TOPLIBD)/libcrypto.a
 
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
-all-windows:: $(OBJS)
+all-windows:: $(OBJFILE)
+
+##DOS$(OBJFILE): $(OBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared
@@ -80,6 +89,7 @@ clean-unix::
 
 clean-mac::
 clean-windows::
+	$(RM) des425.lib des425.bak $(OBJFILE)
 
 libdes425.$(STEXT): $(OBJS)
 	$(RM) $@

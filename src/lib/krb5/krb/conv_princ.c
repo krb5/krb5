@@ -102,13 +102,13 @@ static char *strnchr(s, c, n)
 /* XXX This calls for a new error code */
 #define KRB5_INVALID_PRINCIPAL KRB5_LNAME_BADFORMAT
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_524_conv_principal(context, princ, name, inst, realm)
     krb5_context context;
     const krb5_principal princ;
-    char *name;
-    char *inst;
-    char *realm;
+    char FAR *name;
+    char FAR *inst;
+    char FAR *realm;
 {
      const struct krb_convert *p;
      krb5_data *compo;
@@ -170,13 +170,13 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
      return 0;
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_425_conv_principal(context, name, instance, realm, princ)
    krb5_context context;
-   const char	*name;
-   const char	*instance;
-   const char	*realm;
-   krb5_principal	*princ;
+   const char	FAR *name;
+   const char	FAR *instance;
+   const char	FAR *realm;
+   krb5_principal	FAR *princ;
 {
      const struct krb_convert *p;
      char buf[256];		/* V4 instances are limited to 40 characters */

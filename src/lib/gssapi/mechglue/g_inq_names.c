@@ -29,7 +29,7 @@
 #include "mglueP.h"
 
 /* Last argument new for V2 */
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_inquire_names_for_mech(minor_status, mechanism, name_types)
 
 OM_uint32 *	minor_status;

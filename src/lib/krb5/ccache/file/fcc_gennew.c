@@ -53,7 +53,7 @@ extern krb5_cc_ops krb5_fcc_ops;
  * 		krb5_ccache.  id is undefined.
  * system errors (from open)
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_fcc_generate_new (context, id)
    krb5_context context;
    krb5_ccache *id;
@@ -111,8 +111,8 @@ krb5_fcc_generate_new (context, id)
 	  int errsave, cnt;
 
 	  /* Ignore user's umask, set mode = 0600 */
-#ifdef NOFCHMOD
-#ifndef NOCHMOD
+#ifndef HAVE_FCHMOD
+#ifdef HAVE_CHMOD
 	  chmod(((krb5_fcc_data *) lid->data)->filename, S_IRUSR | S_IWUSR);
 #endif
 #else

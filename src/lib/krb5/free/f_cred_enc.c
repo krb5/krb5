@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void 
+KRB5_DLLIMP void KRB5_CALLCONV 
 krb5_free_cred_enc_part(context, val)
     krb5_context context;
-    register krb5_cred_enc_part *val;
+    register krb5_cred_enc_part FAR *val;
 {
     register krb5_cred_info **temp;
     

@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #endif
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_release_buffer (minor_status,
 		    buffer)
 

@@ -52,7 +52,7 @@ krb5_mcc_free(context, id)
  * Errors:
  * none
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_destroy(context, id)
    krb5_context context;
    krb5_ccache id;

@@ -5,8 +5,8 @@
 #include <stdarg.h>
 
 #ifdef KRB5
-	#include "krb5.h"
-	#include "k5stream.h"
+#include "krb5.h"
+#include "k5stream.h"
 #endif
 
 #include "dialog.h"
@@ -22,21 +22,20 @@ extern char szUserName[64];
 extern char szHostName[64];
 
 #ifdef KRB5
-   extern krb5_context k5_context;
+extern krb5_context k5_context;
 #endif
 
-extern void parse(
-	CONNECTION *con,
-	unsigned char *st,
-	int cnt);
+extern void parse(CONNECTION *, unsigned char *, int);
 
-extern void send_naws(
-	CONNECTION *con);
+extern void send_naws(CONNECTION *);
 
 extern char strTmp[1024];
 
 #define DEF_WIDTH 80
 #define DEF_HEIGHT 24
 
-#endif /* TELNET_H_INC */
+#ifdef DEBUG
+void hexdump(char *, unsigned char *, int);
+#endif
 
+#endif /* TELNET_H_INC */

@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_kdc_rep(context, val)
     krb5_context context;
-krb5_kdc_rep *val;
+    krb5_kdc_rep FAR *val;
 {
     if (val->padata)
 	krb5_free_pa_data(context, val->padata);

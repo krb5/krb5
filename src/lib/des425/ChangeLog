@@ -1,3 +1,11 @@
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* des.c, des.h, key_sched.c, new_rnd_key.c, pcbc_encrypt.c,
+	read_passwd.c, unix_time.c:
+		DLL export various functions (mostly for wintel)
+
 Mon Nov 18 20:39:02 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Set shared library version to 1.0. [krb5-libs/201]

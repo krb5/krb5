@@ -87,13 +87,13 @@ krb5_get_credentials_core(context, options, ccache, in_creds, out_creds,
     return 0;
 }
 
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
     krb5_ccache ccache;
-    krb5_creds *in_creds;
-    krb5_creds **out_creds;
+    krb5_creds FAR *in_creds;
+    krb5_creds FAR * FAR *out_creds;
 {
     krb5_error_code retval;
     krb5_creds mcreds;
@@ -195,7 +195,7 @@ krb5_get_credentials_val_renew_core(context, options, ccache,
     return retval;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
@@ -208,7 +208,7 @@ krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
 					       INT_GC_VALIDATE));
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_credentials_renew(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;

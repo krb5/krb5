@@ -15,34 +15,34 @@
 
 extern krb5_rc_ops krb5_rc_dfl_ops; /* initialized to the following */
 
-krb5_error_code krb5_rc_dfl_init 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_init 
     	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   krb5_deltat));
-krb5_error_code krb5_rc_dfl_recover 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_recover 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache)); 
-krb5_error_code krb5_rc_dfl_destroy 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_destroy 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code krb5_rc_dfl_close 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_close 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code krb5_rc_dfl_store 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_store 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   krb5_donot_replay *));
-krb5_error_code krb5_rc_dfl_expunge 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_expunge 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code krb5_rc_dfl_get_span 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_get_span 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   krb5_deltat *));
-char * krb5_rc_dfl_get_name 
+char * KRB5_CALLCONV krb5_rc_dfl_get_name 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code krb5_rc_dfl_resolve 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_resolve 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   char *));

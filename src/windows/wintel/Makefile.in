@@ -1,106 +1,65 @@
-# makefile: Constructs the kerborized telnet client
+# Makefile for the Kerberos for Windows telnet client
 # Works for both k4 and k5 releases.
 #
-NAME 	 = telnet
-OBJS 	 = $(NAME).obj negotiat.obj auth.obj edit.obj emul.obj \
-		font.obj intern.obj screen.obj
+OBJS 	 = telnet.obj negotiat.obj auth.obj edit.obj emul.obj \
+	   font.obj intern.obj screen.obj encrypt.obj genget.obj
 
 ##### Options
 DEBUG 	 = 1
 !IF ! defined(KVERSION)
+KRBOPT=-DFORWARD -DAUTHENTICATION -DENCRYPTION -DDES_ENCRYPTION
 KVERSION = 5
 !endif
 KRB 	 = KRB$(KVERSION)
 
-!if $(KVERSION) == 4
-BUILDTOP = ..
-LIBDIR 	 = $(BUILDTOP)\lib\krb
-KLIB 	 = $(LIBDIR)\kerberos.lib 
-WLIB 	 = $(LIBDIR)\winsock.lib
-INCLUDES = /I$(BUILDTOP)\include
-XOBJS    = 
-!endif
+###WIN16##WLIB	 = $(BUILDTOP)\lib\winsock.lib
 
-!if $(KVERSION) == 5
 BUILDTOP =..\..
-LIBDIR	 = $(BUILDTOP)\lib
-KLIB	 = $(LIBDIR)\krb5_16.lib
-WLIB	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
-	/I$(BUILDTOP)\lib\crypto\des
-XOBJS    = k5stream.obj
+	   /I$(BUILDTOP)\lib\crypto\des
+##WIN16##XOBJS    = k5stream.obj
+##WIN32##XOBJS    = resource.obj k5stream.obj enc_des.obj
+
+!if defined(DEBUG)
+CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT) /Zi
+!else
+CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT)
 !endif
 
-##### C Compiler
-CC 	 = cl
-CFLAGS_RELEASE = /nologo /W3 /AL /GAs /G2 /Zp /O2 /DNDEBUG=1
-CFLAGS_DEBUG   = /nologo /W3 /AL /GAs /G2 /Zp /O2 /Od /Zi
-!if $(DEBUG)
-CFLAGS 	 = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
-!else
-CFLAGS 	 = $(CFLAGS_RELEASE) $(INCLUDES) /D$(KRB)=1
-!endif
+#RFLAGS 	 = /D$(KRB)=1 $(INCLUDES) $(KRBOPT)
+RFLAGS 	 = -D$(KRB)=1 $(KRBOPT)
 
-##### RC Compiler
-RC 	 = rc
-##WIN16##RFLAGS_RELEASE = /nologo /DNDEBUG
-##WIN16##RFLAGS_DEBUG   = /nologo
-##WIN32##RFLAGS_RELEASE = /DNDEBUG
-##WIN32##RFLAGS_DEBUG   = 
-!if $(DEBUG)
-RFLAGS 	 = $(RFLAGS_DEBUG) $(INCLUDES)
-!else
-RFLAGS   = $(RFLAGS_RELEASE) $(INCLUDES)
-!endif
 
 ##### Linker
-LINK 	 = link	 
+LINK 	 = link
 LIBS 	 = $(KLIB) $(WLIB)
-SYSLIBS  = libw llibcew commdlg
-!if $(DEBUG)
-LFLAGS   = /co /nologo /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
+##WIN16##SYSLIBS  = libw llibcew
+##WIN32##SYSLIBS  = libc.lib kernel32.lib wsock32.lib user32.lib gdi32.lib \
+##WIN32##	  comdlg32.lib
+!if defined(DEBUG)
+##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
+##WIN32##LFLAGS = /nologo /nod /debug
 !else
-LFLAGS   = /nologo /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
+##WIN16##LFLAGS = /nologo /nod /nopackcode
+##WIN32##LFLAGS	= /nologo /nod
 !endif
 
-all:: makefile $(NAME).exe
+all:: makefile telnet.exe
 
-$(NAME).exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
-	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
-	  $(LIBS) $(SYSLIBS), $*.def
-	$(RC) $(RFLAGS) /k $*.res $@
+telnet.exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+##WIN16##	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
+##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
+##WIN16##	$(RC) $(RFLAGS) /k telnet.rc $@
+##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
+##WIN32##	  $(LIBS) $(SYSLIBS)
 
-install:
-	copy $(NAME).exe ..\floppy
+##WIN32##telnet.res: telnet.rc
+##WIN32##	$(RC) $(RFLAGS) /r $*.rc
+##WIN32##resource.obj: telnet.res
+##WIN32##	$(CVTRES) /nologo /out:resource.obj telnet.res
 
-clean::
-	if exist *.obj del *.obj
-	if exist *.exe del *.exe
-	if exist *.res del *.res
-        if exist *.map del *.map
-	if exist *.pdb del *.pdb
-	if exist *.err del *.err
-	if exist ..\floppy\$(NAME).exe del ..\floppy\$(NAME).exe
+install::
+	copy telnet.exe $(DESTDIR)
 
-telnet.obj: telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
-
-negotiat.obj: telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
-
-auth.obj: telopts.h telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
-
-edit.obj: screen.h
-
-emul.obj: screen.h
-
-font.obj: screen.h ini.h
-
-intern.obj: screen.h
-
-screen.obj: screen.h ini.h
-
-telnet.res: screen.h dialog.h telnet.dlg ncsa.ico terminal.ico
-
-!if $(KVERSION) == 5
-k5stream.c: k5stream.h auth.h
-!endif
-
+clean:: 
+	$(RM) *.exe *.res *.map

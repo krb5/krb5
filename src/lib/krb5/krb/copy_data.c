@@ -29,11 +29,11 @@
 /*
  * Copy a data structure, with fresh allocation.
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_copy_data(context, indata, outdata)
     krb5_context context;
-    const krb5_data *indata;
-    krb5_data **outdata;
+    const krb5_data FAR *indata;
+    krb5_data FAR * FAR *outdata;
 {
     krb5_data *tempdata;
 

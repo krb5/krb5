@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_unseal (minor_status,
             context_handle,
             input_message_buffer,
@@ -80,7 +80,7 @@ int *			qop_state;
     return(GSS_S_NO_CONTEXT);
 }
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_unwrap (minor_status,
             context_handle,
             input_message_buffer,

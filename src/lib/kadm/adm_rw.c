@@ -68,11 +68,11 @@ kadm_copyout_int32(outint, cp)
 /*
  * krb5_free_adm_data()	- Free data blocks allocated by read_adm... routines.
  */
-void INTERFACE
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_adm_data(kcontext, ncomp, datap)
     krb5_context	kcontext;
     krb5_int32		ncomp;
-    krb5_data		*datap;
+    krb5_data		FAR *datap;
 {
     int i;
     
@@ -96,13 +96,13 @@ krb5_free_adm_data(kcontext, ncomp, datap)
  *		.
  *		.
  */
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to write to	(In ) */
     krb5_auth_context	ctx;		/* Auth context		(In ) */
-    krb5_int32			nargs;		/* Number of arguments	(In ) */
-    krb5_data		*arglist;	/* Components to write	(In ) */
+    krb5_int32		nargs;		/* Number of arguments	(In ) */
+    krb5_data		FAR *arglist;	/* Components to write	(In ) */
 {
     int	writebufsize;
     int i;
@@ -412,14 +412,14 @@ krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
  * It is the caller's responsibility to free the memory allocated for
  * the read in component list.
  */
-krb5_error_code INTERFACE
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to read from	(In ) */
     krb5_auth_context	ctx;		/* Auth context		(In ) */
-    krb5_int32		*cmd_stat;	/* Command status	(Out) */
-    krb5_int32		*ncomps;	/* # of reply components(Out) */
-    krb5_data		**complist;	/* List of components	(Out) */
+    krb5_int32		FAR *cmd_stat;	/* Command status	(Out) */
+    krb5_int32		FAR *ncomps;	/* # of reply components(Out) */
+    krb5_data		FAR * FAR *complist;	/* List of components (Out) */
 {
     krb5_data		read_data;
     krb5_error_code	ret;

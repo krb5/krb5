@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_addresses(context, val)
     krb5_context context;
-    krb5_address **val;
+    krb5_address FAR * FAR *val;
 {
     register krb5_address **temp;
 

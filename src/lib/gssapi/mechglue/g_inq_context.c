@@ -32,7 +32,7 @@
 #endif
 
 /* Last argument new for V2 */
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_inquire_context(
 	    minor_status,
 	    context_handle,

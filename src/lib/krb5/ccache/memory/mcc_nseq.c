@@ -46,7 +46,7 @@
  * Errors:
  * system errors
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_mcc_next_cred(context, id, cursor, creds)
    krb5_context context;
    krb5_ccache id;

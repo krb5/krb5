@@ -60,9 +60,9 @@ You need a random number generator!
 /*
  * Generate a random confounder
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_random_confounder(size, fillin)
-int size;
+size_t size;
 krb5_pointer fillin;
 {
     static int seeded = 0;

@@ -67,14 +67,14 @@ typedef struct des_ks_struct bit_64;
  * Windows needs everything prototyped because we're exporting all the fuctions.
  */
 void des_cbc_cksum();
-int des_ecb_encrypt();
+KRB5_DLLIMP int KRB5_CALLCONV des_ecb_encrypt();
 int des_cbc_encrypt();
 void des_fixup_key_parity();
 int des_check_key_parity();
-int des_key_sched();
-int des_new_random_key();
+KRB5_DLLIMP int KRB5_CALLCONV des_key_sched();
+KRB5_DLLIMP int KRB5_CALLCONV des_new_random_key();
 void des_init_random_number_generator();
-void des_set_random_generator_seed();
+KRB5_DLLIMP void KRB5_CALLCONV des_set_random_generator_seed();
 void des_set_sequence_number();
 void des_generate_random_block();
 int des_pcbc_encrypt();

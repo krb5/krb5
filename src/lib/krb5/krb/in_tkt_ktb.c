@@ -105,18 +105,18 @@ cleanup:
  returns system errors, encryption errors
 
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes, pre_auth_types, 
 			    keytab, ccache, creds, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
-    krb5_address * const * addrs;
-    krb5_enctype * ktypes;
-    krb5_preauthtype * pre_auth_types;
+    krb5_address FAR * const FAR * addrs;
+    krb5_enctype FAR * ktypes;
+    krb5_preauthtype FAR * pre_auth_types;
     const krb5_keytab keytab;
     krb5_ccache ccache;
-    krb5_creds * creds;
-    krb5_kdc_rep ** ret_as_reply;
+    krb5_creds FAR * creds;
+    krb5_kdc_rep FAR *FAR * ret_as_reply;
 {
     struct keytab_keyproc_arg arg;
 

@@ -40,7 +40,7 @@ extern long FAR PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
 #define TAB_SPACES 8
 #define SPACE 32
 #define ALERT 0x21
-#define MAX_LINE_WIDTH 256 /* not restricted to 1 byte */
+#define MAX_LINE_WIDTH 512 /* not restricted to 1 byte */
 
 typedef struct SCREENLINE {
 	struct SCREENLINE *next;
@@ -63,32 +63,32 @@ typedef struct SCREEN {
 	int type;
 	int width;
 	int height;
-	int maxlines;       // Maximum number of scrollback lines
-	int numlines;       // Current number of scrollback lines
-	int savelines;      // Save lines off top?
-	int ESscroll;       // Scroll screen when ES received
-	int attrib;         // current attribute
-	int x;              // current cursor position
-	int y;              // current cursor position
-	int Oldx;           // internally used to redraw cursor
+	int maxlines;       /* Maximum number of scrollback lines */
+	int numlines;       /* Current number of scrollback lines */
+	int savelines;      /* Save lines off top? */
+	int ESscroll;       /* Scroll screen when ES received */
+	int attrib;         /* current attribute */
+	int x;              /* current cursor position */
+	int y;              /* current cursor position */
+	int Oldx;           /* internally used to redraw cursor */
 	int Oldy;
-	int Px;             // saved cursor pos and attribute
+	int Px;             /* saved cursor pos and attribute */
 	int Py;
 	int Pattrib;
-	int VSIDC;          // Insert/Delete character mode 0=draw line
-	int DECAWM;         // AutoWrap mode 0=off
-	BOOL bWrapPending;	// AutoWrap mode is on - wrap on next character
-	int DECCKM;         // Cursor key mode
-	int DECPAM;         // keyPad Application mode
-	int IRM;            // Insert/Replace mode
-	int escflg;         // Current Escape level        
-	int top;            // Vertical bounds of screen
+	int VSIDC;          /* Insert/Delete character mode 0=draw line */
+	int DECAWM;         /* AutoWrap mode 0=off */
+	BOOL bWrapPending;  /* AutoWrap mode is on - wrap on next character */
+	int DECCKM;         /* Cursor key mode */
+	int DECPAM;         /* keyPad Application mode */
+	int IRM;            /* Insert/Replace mode */
+	int escflg;         /* Current Escape level */      
+	int top;            /* Vertical bounds of screen */
 	int bottom;
 	int parmptr;
-	int cxChar;         // Width of the current font
-	int cyChar;         // Height of the current font
+	int cxChar;         /* Width of the current font */
+	int cyChar;         /* Height of the current font */
 	BOOL bAlert;
-	int parms[6];       // Ansi Params
+	int parms[6];       /* Ansi Params */
 	LOGFONT lf;
 	HFONT hSelectedFont;
 	HFONT hSelectedULFont;
@@ -104,12 +104,12 @@ typedef struct CONFIG {
 	int type;
 	int height;
 	int width;
-	int maxlines;       // Maximum number of scrollback lines
+	int maxlines;       /* Maximum number of scrollback lines */
 	int backspace;
-	int ESscroll;       // Scroll screen when ES received
-	int VSIDC;          // Insert/Delete character mode 0=draw line
-	int DECAWM;         // AutoWrap mode 0=off
-	int IRM;            // Insert/Replace mode
+	int ESscroll;       /* Scroll screen when ES received */
+	int VSIDC;          /* Insert/Delete character mode 0=draw line */
+	int DECAWM;         /* AutoWrap mode 0=off */
+	int IRM;            /* Insert/Replace mode */
 } CONFIG;
 
 #define TELNET_SCREEN   0
@@ -119,6 +119,10 @@ typedef struct CONFIG {
 #define IDM_BACKSPACE   101
 #define IDM_DELETE      102
 #define IDM_ABOUT       103
+#define IDM_HELP_INDEX  104
+#define IDM_EXIT        105
+
+#define HELP_FILE "ktelnet.hlp"
 
 #define IDM_COPY        200
 #define IDM_PASTE       201

@@ -29,17 +29,17 @@
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
 
 /* Get a TGT for use at the remote host */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 		   forwardable, outbuf)
     krb5_context context;
     krb5_auth_context auth_context;
-    char *rhost;
+    char FAR *rhost;
     krb5_principal client;
     krb5_principal server;
     krb5_ccache cc;
     int forwardable;      /* Should forwarded TGT also be forwardable? */
-    krb5_data *outbuf;
+    krb5_data FAR *outbuf;
 {
     krb5_replay_data replaydata;
     krb5_data * scratch = 0;
@@ -143,6 +143,3 @@ errout:
     krb5_free_cred_contents(context, &tgt);
     return retval;
 }
-
-
-

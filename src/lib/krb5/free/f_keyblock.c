@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_keyblock_contents(context, key)
      krb5_context context;
-     register krb5_keyblock *key;
+     register krb5_keyblock FAR *key;
 {
      if (key->contents) {
 	  memset(key->contents, 0, key->length);
@@ -38,10 +38,10 @@ krb5_free_keyblock_contents(context, key)
      return;
 }
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_keyblock(context, val)
     krb5_context context;
-    register krb5_keyblock *val;
+    register krb5_keyblock FAR *val;
 {
     krb5_free_keyblock_contents(context, val);
     krb5_xfree(val);

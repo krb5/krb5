@@ -1,21 +1,20 @@
 #ifndef _SHS_DEFINED
 
-#include <krb5.h>
+#include <k5-int.h>
 
 #define _SHS_DEFINED
 
 /* Some useful types */
 
 typedef krb5_octet	BYTE;
+
+/* Old DOS/Windows compilers are case-insensitive */
+#if !defined(_MSDOS) && !defined(_WIN32)
 typedef krb5_ui_4	LONG;
+#endif
 
-/* Exit status of functions. */
-
-#define OK      0
-#define ERROR   -1
 
 /* Define the following to use the updated SHS implementation */
-
 #define NEW_SHS         /**/
 
 /* The SHS block size and message digest sizes, in bytes */

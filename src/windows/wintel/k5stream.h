@@ -15,38 +15,43 @@
 #ifndef K5STREAM_H
 #define K5STREAM_H
 
-typedef struct {                                /* Object we pass around */
-    int fd;                                     /* Open socket descriptor */
+typedef struct kstream_int {                    /* Object we pass around */
+  int fd;                                       /* Open socket descriptor */
+  int (*encrypt)(struct kstream_data_block *, /* output */
+		 struct kstream_data_block *, /* input */
+		 struct kstream *kstream);
+  int (*decrypt)(struct kstream_data_block *, /* output */
+		 struct kstream_data_block *, /* input */
+		 struct kstream *kstream);
 } *kstream;
 
 typedef void *kstream_ptr;                      /* Data send on the kstream */
 
 struct kstream_data_block {
-    kstream_ptr ptr;
-    size_t length;
+  kstream_ptr ptr;
+  size_t length;
 };
 
 struct kstream_crypt_ctl_block {
-    int (INTERFACE *encrypt) (
-      struct kstream_data_block *, /* output -- written */
-		struct kstream_data_block *, /* input */
-		kstream str);
-    int (INTERFACE *decrypt) (
-      struct kstream_data_block *, /* output -- written */
-      struct kstream_data_block *, /* input */
-      kstream str);
-    int (INTERFACE *init) (kstream str, kstream_ptr data);
-    void (INTERFACE *destroy) (kstream str);
+  int (*encrypt)(struct kstream_data_block *, /* output */
+		 struct kstream_data_block *, /* input */
+		 kstream);
+  int (*decrypt)(struct kstream_data_block *, /* output */
+		 struct kstream_data_block *, /* input */
+		 kstream);
+  int (*init)(kstream, kstream_ptr);
+  void (*destroy)(kstream);
 };
 
 
 /* Prototypes */
 
-int kstream_destroy (kstream);
-void kstream_set_buffer_mode (kstream, int);
-kstream kstream_create_from_fd (int fd,
-				const struct kstream_crypt_ctl_block __far *ctl,
-				kstream_ptr data);
-int kstream_write (kstream, void __far *, size_t);
+int kstream_destroy(kstream);
+void kstream_set_buffer_mode(kstream, int);
+kstream kstream_create_from_fd(int fd,
+			       const struct kstream_crypt_ctl_block FAR *,
+			       kstream_ptr);
+int kstream_write(kstream, void FAR *, size_t);
+int kstream_read(kstream, void FAR *, size_t);
 
 #endif /* K5STREAM_H */

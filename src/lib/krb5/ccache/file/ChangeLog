@@ -1,3 +1,16 @@
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* configure.in: Test for chmod and fchmod (not on Windows)
+
+	* fcc-proto.h, fcc_close.c, fcc_destry.c, fcc_eseq.c, fcc_gennew.c,
+	fcc_getnam.c, fcc_gprin.c, fcc_init.c, fcc_nseq.c, fcc_ops.c,
+	fcc_reslv.c, fcc_retrv.c, fcc_sflags.c, fcc_sseq.c, fcc_store.c:
+		Changed the calling conventions of the internal ccache
+		functions to comply with the new function calling
+		conventions of the ccache dispatch functions (win16/win32)
+
 Thu Aug 15 16:46:00 1996  Tom Yu  <tlyu@mit.edu>
 
 	* fcc_retrv.c (flags_match): Add parens to def'n of flags_match to

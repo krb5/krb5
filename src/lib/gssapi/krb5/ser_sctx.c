@@ -25,6 +25,7 @@
 /*
  * ser_sctx.c - Handle [de]serialization of GSSAPI security context.
  */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
 
 /*

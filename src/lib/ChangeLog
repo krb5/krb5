@@ -1,3 +1,25 @@
+Tue Feb  4 15:52:34 1997  Richard Basch  <basch@lehman.com>
+
+	* gssapi16.def: Declare the library name (win16)
+
+	* krb5_16.def krb5_32.def: New ComErr interface definitions
+
+	* krb5_32.def: Remove unsupported statements (EXETYPE, RESIDENTNAME)
+
+Sun Feb  2 11:22:24 1997  Richard Basch  <basch@lehman.com>
+
+	* krb5_16.def: Need to declare the library name
+
+Thu Jan 30 21:27:07 1997  Richard Basch  <basch@lehman.com>
+
+	* krb5_16.def krb5_32.def: 
+		Export krb5_decrypt, krb5_encrypt,
+		krb5_string_to_key, krb5_process_key, krb5_finish_key,
+		krb5_init_random_key, krb5_finish_random_key,
+		krb5_random_key, krb5_eblock_enctype
+	* Makefile.in
+		Win32 - Link against MSVCRT.LIB (runtime library)
+
 Sat Dec 21 01:23:48 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* win_glue.c: Change the timebomb to be June 1, 1997.  Make the

@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_ticket(context, val)
     krb5_context context;
-    krb5_ticket *val;
+    krb5_ticket FAR *val;
 {
     if (val->server)
 	krb5_free_principal(context, val->server);

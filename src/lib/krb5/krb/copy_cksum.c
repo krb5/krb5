@@ -26,11 +26,11 @@
 
 #include "k5-int.h"
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_copy_checksum(context, ckfrom, ckto)
     krb5_context context;
-    const krb5_checksum *ckfrom;
-    krb5_checksum **ckto;
+    const krb5_checksum FAR *ckfrom;
+    krb5_checksum FAR * FAR *ckto;
 {
     krb5_checksum *tempto;
 

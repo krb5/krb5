@@ -28,7 +28,7 @@
 
 #include "mglueP.h"
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_process_context_token (minor_status,
                            context_handle,
                            token_buffer)

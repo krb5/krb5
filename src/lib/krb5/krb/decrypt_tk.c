@@ -35,11 +35,11 @@
 
 */
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_decrypt_tkt_part(context, srv_key, ticket)
     krb5_context context;
-    const krb5_keyblock *srv_key;
-    register krb5_ticket *ticket;
+    const krb5_keyblock FAR *srv_key;
+    register krb5_ticket FAR *ticket;
 {
     krb5_enc_tkt_part *dec_tkt_part;
     krb5_encrypt_block eblock;

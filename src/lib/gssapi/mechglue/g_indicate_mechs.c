@@ -38,7 +38,7 @@ extern gss_mechanism *__gss_mechs_array;
 static gss_OID_set_desc	supported_mechs_desc; 
 static gss_OID_set supported_mechs = NULL;
 
-OM_uint32 INTERFACE
+OM_uint32 KRB5_CALLCONV
 gss_indicate_mechs (minor_status,
                     mech_set)
 

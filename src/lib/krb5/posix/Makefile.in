@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\krb5.lib
+##DOSMYNAME=posix
+##DOSOBJFILE=..\$(MYNAME).lst
+##WIN16##LIBNAME=..\krb5.lib
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -13,7 +15,15 @@ OBJS = setenv.$(OBJEXT)	@LIBOBJS@
 
 all-unix:: shared $(OBJS)
 all-mac: $(OBJS)
-all-windows:: syslog.obj sscanf.obj
+all-windows:: $(OBJFILE)
+
+##WIN16##$(OBJFILE): syslog.obj sscanf.obj
+##WIN16##	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+
+##WIN32##$(OBJFILE): syslog.obj
+##WIN32##	$(RM) $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(MYNAME)\ *.obj > $(OBJFILE)
 
 shared:
 	mkdir shared
@@ -23,5 +33,5 @@ clean-unix::
 
 clean-mac::
 clean-windows::
-
+	$(RM) $(OBJFILE)
 

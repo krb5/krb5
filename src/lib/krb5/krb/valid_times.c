@@ -33,7 +33,8 @@
  * field in a krb5_ticket.
  */
 
-krb5_error_code krb5_validate_times(context, times)
+krb5_error_code
+krb5_validate_times(context, times)
 	krb5_context		context;
 	krb5_ticket_times *	times;
 {

@@ -26,10 +26,10 @@
 
 #include "k5-int.h"
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_ap_rep(context, val)
     krb5_context context;
-    register krb5_ap_rep *val;
+    register krb5_ap_rep FAR *val;
 {
     if (val->enc_part.ciphertext.data)
 	krb5_xfree(val->enc_part.ciphertext.data);
