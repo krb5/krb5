@@ -70,7 +70,7 @@ krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
     (*ppcreds)->magic = KV5M_CREDS;
 
     (*ppcreds)->authdata = NULL;   			/* not used */
-    (*ppcreds)->is_skey = 0;    			/* not used */
+    (*ppcreds)->is_skey = psectkt->length != 0;
 
     if (pkdcrep->enc_part2->caddrs) {
 	if ((retval = krb5_copy_addresses(context, pkdcrep->enc_part2->caddrs,

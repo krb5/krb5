@@ -1,3 +1,9 @@
+Sun Jan 21 23:32:53 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* gc_via_tkt.c (krb5_kdcrep2creds): Set is_skey so get_creds won't
+		break trying to match is_skey in the ccache.  This way we
+		won't end up with many copies of user-to-user tickets.
+
 Fri Jan 19 23:16:17 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* mk_req.c (krb5_mk_req): krb5_get_credentials does not take
