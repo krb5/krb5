@@ -6,15 +6,13 @@
 	objects = {
 		00CFB46AFF6D81A212120111 = {
 			isa = PBXFileReference;
-			name = krb5_libinit.c;
-			path = ../lib/krb5/krb5_libinit.c;
-			refType = 2;
+			path = krb5_libinit.c;
+			refType = 4;
 		};
 		00CFB46BFF6D81A212120111 = {
 			isa = PBXFileReference;
-			name = krb5_libinit.h;
-			path = ../lib/krb5/krb5_libinit.h;
-			refType = 2;
+			path = krb5_libinit.h;
+			refType = 4;
 		};
 		00CFB46CFF6D81A212120111 = {
 			fileRef = 00CFB46BFF6D81A212120111;
@@ -43,9 +41,8 @@
 		};
 		00CFB46EFF6D85D612120111 = {
 			isa = PBXFileReference;
-			name = util_canonhost.c;
-			path = ../lib/gssapi/generic/util_canonhost.c;
-			refType = 2;
+			path = util_canonhost.c;
+			refType = 4;
 		};
 		00CFB46FFF6D85D612120111 = {
 			fileRef = 00CFB46EFF6D85D612120111;
@@ -86,33 +83,28 @@
 				00CFB476FF6EA33F12120111,
 			);
 			isa = PBXGroup;
-			name = ccapi;
-			path = "";
+			path = ccapi;
 			refType = 4;
 		};
 		00CFB473FF6EA33F12120111 = {
 			isa = PBXFileReference;
-			name = stdcc.c;
-			path = ../lib/krb5/ccache/ccapi/stdcc.c;
-			refType = 2;
+			path = stdcc.c;
+			refType = 4;
 		};
 		00CFB474FF6EA33F12120111 = {
 			isa = PBXFileReference;
-			name = stdcc.h;
-			path = ../lib/krb5/ccache/ccapi/stdcc.h;
-			refType = 2;
+			path = stdcc.h;
+			refType = 4;
 		};
 		00CFB475FF6EA33F12120111 = {
 			isa = PBXFileReference;
-			name = stdcc_util.c;
-			path = ../lib/krb5/ccache/ccapi/stdcc_util.c;
-			refType = 2;
+			path = stdcc_util.c;
+			refType = 4;
 		};
 		00CFB476FF6EA33F12120111 = {
 			isa = PBXFileReference;
-			name = stdcc_util.h;
-			path = ../lib/krb5/ccache/ccapi/stdcc_util.h;
-			refType = 2;
+			path = stdcc_util.h;
+			refType = 4;
 		};
 		00CFB477FF6EA33F12120111 = {
 			fileRef = 00CFB474FF6EA33F12120111;
@@ -237,41 +229,40 @@
 		174475CDFF5EF33612120111 = {
 			children = (
 				012574A5FF7A9C8212120111,
+				4E933A40FF828AEA12120111,
 				174475CEFF5EF33612120111,
 				174475CFFF5EF33612120111,
 				174475D0FF5EF33612120111,
 				174475D1FF5EF33612120111,
 				174475DDFF5EF35112120111,
 				174475DFFF5EF78012120111,
+				4E933A44FF82905F12120111,
+				4E933A45FF82905F12120111,
 			);
 			isa = PBXGroup;
 			name = ComErr;
-			path = "";
+			path = ../util/et;
 			refType = 2;
 		};
 		174475CEFF5EF33612120111 = {
 			isa = PBXFileReference;
-			name = com_err.c;
-			path = ../util/et/com_err.c;
-			refType = 2;
+			path = com_err.c;
+			refType = 4;
 		};
 		174475CFFF5EF33612120111 = {
 			isa = PBXFileReference;
-			name = error_message.c;
-			path = ../util/et/error_message.c;
-			refType = 2;
+			path = error_message.c;
+			refType = 4;
 		};
 		174475D0FF5EF33612120111 = {
 			isa = PBXFileReference;
-			name = et_name.c;
-			path = ../util/et/et_name.c;
-			refType = 2;
+			path = et_name.c;
+			refType = 4;
 		};
 		174475D1FF5EF33612120111 = {
 			isa = PBXFileReference;
-			name = init_et.c;
-			path = ../util/et/init_et.c;
-			refType = 2;
+			path = init_et.c;
+			refType = 4;
 		};
 		174475D2FF5EF33612120111 = {
 			buildPhases = (
@@ -284,6 +275,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/../util/et/et.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\"";
@@ -354,7 +346,7 @@
 		174475D5FF5EF33612120111 = {
 			buildActionMask = 2147483647;
 			files = (
-				174475E0FF5EF78012120111,
+				4E933A41FF828AEA12120111,
 			);
 			isa = PBXResourcesBuildPhase;
 			name = "Bundle Resources";
@@ -442,9 +434,8 @@
 		};
 		174475DDFF5EF35112120111 = {
 			isa = PBXFileReference;
-			name = com_err.h;
-			path = ../util/et/com_err.h;
-			refType = 2;
+			path = com_err.h;
+			refType = 4;
 		};
 		174475DEFF5EF35112120111 = {
 			fileRef = 174475DDFF5EF35112120111;
@@ -462,20 +453,8 @@
 		};
 		174475DFFF5EF78012120111 = {
 			isa = PBXFileReference;
-			name = compile_et;
-			path = ../util/et/compile_et;
-			refType = 2;
-		};
-		174475E0FF5EF78012120111 = {
-			fileRef = 174475DFFF5EF78012120111;
-			isa = PBXBuildFile;
-			settings = {
-				INCLUDED_OSS = (
-					MACOS,
-					WINDOWS,
-					PDOUNIX,
-				);
-			};
+			path = compile_et;
+			refType = 4;
 		};
 		174475E2FF5EF80312120111 = {
 			buildPhases = (
@@ -488,13 +467,14 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/../util/profile/profile.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = "-init ___InitializeProfileLib";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -558,6 +538,7 @@
 		174475E4FF5EF80312120111 = {
 			buildActionMask = 2147483647;
 			files = (
+				4E933A43FF828B8612120111,
 			);
 			isa = PBXResourcesBuildPhase;
 			name = "Bundle Resources";
@@ -572,6 +553,7 @@
 				174475F3FF5EF8A512120111,
 				174475F4FF5EF8A512120111,
 				174475FAFF5EF9C012120111,
+				61622FDDFF8535E112120111,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -595,6 +577,8 @@
 			children = (
 				012574A6FF7A9C8212120111,
 				17447603FF5EFCC612120111,
+				61622FDCFF8535E112120111,
+				4E933A42FF828B8512120111,
 				174475E9FF5EF8A512120111,
 				174475EAFF5EF8A512120111,
 				174475EBFF5EF8A512120111,
@@ -608,44 +592,38 @@
 			);
 			isa = PBXGroup;
 			name = Profile;
-			path = "";
+			path = ../util/profile;
 			refType = 2;
 		};
 		174475E9FF5EF8A512120111 = {
 			isa = PBXFileReference;
-			name = prof_file.c;
-			path = ../util/profile/prof_file.c;
-			refType = 2;
+			path = prof_file.c;
+			refType = 4;
 		};
 		174475EAFF5EF8A512120111 = {
 			isa = PBXFileReference;
-			name = prof_get.c;
-			path = ../util/profile/prof_get.c;
-			refType = 2;
+			path = prof_get.c;
+			refType = 4;
 		};
 		174475EBFF5EF8A512120111 = {
 			isa = PBXFileReference;
-			name = prof_init.c;
-			path = ../util/profile/prof_init.c;
-			refType = 2;
+			path = prof_init.c;
+			refType = 4;
 		};
 		174475ECFF5EF8A512120111 = {
 			isa = PBXFileReference;
-			name = prof_parse.c;
-			path = ../util/profile/prof_parse.c;
-			refType = 2;
+			path = prof_parse.c;
+			refType = 4;
 		};
 		174475EDFF5EF8A512120111 = {
 			isa = PBXFileReference;
-			name = prof_set.c;
-			path = ../util/profile/prof_set.c;
-			refType = 2;
+			path = prof_set.c;
+			refType = 4;
 		};
 		174475EEFF5EF8A512120111 = {
 			isa = PBXFileReference;
-			name = prof_tree.c;
-			path = ../util/profile/prof_tree.c;
-			refType = 2;
+			path = prof_tree.c;
+			refType = 4;
 		};
 		174475EFFF5EF8A512120111 = {
 			fileRef = 174475E9FF5EF8A512120111;
@@ -733,21 +711,18 @@
 		};
 		174475F5FF5EF9C012120111 = {
 			isa = PBXFileReference;
-			name = prof_err.c;
-			path = ../util/profile/prof_err.c;
-			refType = 2;
+			path = prof_err.c;
+			refType = 4;
 		};
 		174475F6FF5EF9C012120111 = {
 			isa = PBXFileReference;
-			name = prof_err.h;
-			path = ../util/profile/prof_err.h;
-			refType = 2;
+			path = prof_err.h;
+			refType = 4;
 		};
 		174475F7FF5EF9C012120111 = {
 			isa = PBXFileReference;
-			name = prof_int.h;
-			path = ../util/profile/prof_int.h;
-			refType = 2;
+			path = prof_int.h;
+			refType = 4;
 		};
 		174475F8FF5EF9C012120111 = {
 			fileRef = 174475F6FF5EF9C012120111;
@@ -825,9 +800,8 @@
 		};
 		174475FFFF5EFBEA12120111 = {
 			isa = PBXFileReference;
-			name = profile.h;
-			path = ../util/profile/profile.h;
-			refType = 2;
+			path = profile.h;
+			refType = 4;
 		};
 		17447600FF5EFBEA12120111 = {
 			isa = PBXTargetDependency;
@@ -879,6 +853,8 @@
 				174476CCFF60088512120111,
 				174476CDFF60088512120111,
 				00CFB47BFF6EA3C312120111,
+				61622FDAFF85346F12120111,
+				61622FD1FF82A36412120111,
 				174476B8FF5FFFA512120111,
 				174476B9FF5FFFA512120111,
 				174476BDFF6001C412120111,
@@ -903,13 +879,14 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SRCROOT)/../../CCacheLib/Headers\"";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = "-init ___initializeK5";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -1041,6 +1018,7 @@
 		17447612FF5FF8DB12120111 = {
 			buildActionMask = 2147483647;
 			files = (
+				61622FD2FF82A36412120111,
 			);
 			isa = PBXResourcesBuildPhase;
 			name = "Bundle Resources";
@@ -1348,6 +1326,7 @@
 				00CFB46DFF6D81A212120111,
 				00CFB479FF6EA33F12120111,
 				00CFB47AFF6EA33F12120111,
+				61622FDBFF85346F12120111,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -1414,181 +1393,153 @@
 			);
 			isa = PBXGroup;
 			name = crypto;
-			refType = 4;
+			path = ../lib/crypto;
+			refType = 2;
 		};
 		17447617FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = block_size.c;
-			path = ../lib/crypto/block_size.c;
-			refType = 2;
+			path = block_size.c;
+			refType = 4;
 		};
 		17447618FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = checksum_length.c;
-			path = ../lib/crypto/checksum_length.c;
-			refType = 2;
+			path = checksum_length.c;
+			refType = 4;
 		};
 		17447619FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = cksumtypes.c;
-			path = ../lib/crypto/cksumtypes.c;
-			refType = 2;
+			path = cksumtypes.c;
+			refType = 4;
 		};
 		1744761AFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = cksumtypes.h;
-			path = ../lib/crypto/cksumtypes.h;
-			refType = 2;
+			path = cksumtypes.h;
+			refType = 4;
 		};
 		1744761BFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = cksumtype_to_string.c;
-			path = ../lib/crypto/cksumtype_to_string.c;
-			refType = 2;
+			path = cksumtype_to_string.c;
+			refType = 4;
 		};
 		1744761CFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = coll_proof_cksum.c;
-			path = ../lib/crypto/coll_proof_cksum.c;
-			refType = 2;
+			path = coll_proof_cksum.c;
+			refType = 4;
 		};
 		1744761DFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = crypto_libinit.c;
-			path = ../lib/crypto/crypto_libinit.c;
-			refType = 2;
+			path = crypto_libinit.c;
+			refType = 4;
 		};
 		1744761EFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = crypto_libinit.h;
-			path = ../lib/crypto/crypto_libinit.h;
-			refType = 2;
+			path = crypto_libinit.h;
+			refType = 4;
 		};
 		1744761FFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = decrypt.c;
-			path = ../lib/crypto/decrypt.c;
-			refType = 2;
+			path = decrypt.c;
+			refType = 4;
 		};
 		17447620FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = encrypt.c;
-			path = ../lib/crypto/encrypt.c;
-			refType = 2;
+			path = encrypt.c;
+			refType = 4;
 		};
 		17447621FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = encrypt_length.c;
-			path = ../lib/crypto/encrypt_length.c;
-			refType = 2;
+			path = encrypt_length.c;
+			refType = 4;
 		};
 		17447622FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = enctype_compare.c;
-			path = ../lib/crypto/enctype_compare.c;
-			refType = 2;
+			path = enctype_compare.c;
+			refType = 4;
 		};
 		17447623FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = enctype_to_string.c;
-			path = ../lib/crypto/enctype_to_string.c;
-			refType = 2;
+			path = enctype_to_string.c;
+			refType = 4;
 		};
 		17447624FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = etypes.c;
-			path = ../lib/crypto/etypes.c;
-			refType = 2;
+			path = etypes.c;
+			refType = 4;
 		};
 		17447625FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = etypes.h;
-			path = ../lib/crypto/etypes.h;
-			refType = 2;
+			path = etypes.h;
+			refType = 4;
 		};
 		17447626FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = hmac.c;
-			path = ../lib/crypto/hmac.c;
-			refType = 2;
+			path = hmac.c;
+			refType = 4;
 		};
 		17447627FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = keyed_checksum_types.c;
-			path = ../lib/crypto/keyed_checksum_types.c;
-			refType = 2;
+			path = keyed_checksum_types.c;
+			refType = 4;
 		};
 		17447628FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = keyed_cksum.c;
-			path = ../lib/crypto/keyed_cksum.c;
-			refType = 2;
+			path = keyed_cksum.c;
+			refType = 4;
 		};
 		17447629FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = make_checksum.c;
-			path = ../lib/crypto/make_checksum.c;
-			refType = 2;
+			path = make_checksum.c;
+			refType = 4;
 		};
 		1744762AFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = make_random_key.c;
-			path = ../lib/crypto/make_random_key.c;
-			refType = 2;
+			path = make_random_key.c;
+			refType = 4;
 		};
 		1744762BFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = nfold.c;
-			path = ../lib/crypto/nfold.c;
-			refType = 2;
+			path = nfold.c;
+			refType = 4;
 		};
 		1744762CFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = old_api_glue.c;
-			path = ../lib/crypto/old_api_glue.c;
-			refType = 2;
+			path = old_api_glue.c;
+			refType = 4;
 		};
 		1744762DFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = prng.c;
-			path = ../lib/crypto/prng.c;
-			refType = 2;
+			path = prng.c;
+			refType = 4;
 		};
 		1744762EFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = string_to_cksumtype.c;
-			path = ../lib/crypto/string_to_cksumtype.c;
-			refType = 2;
+			path = string_to_cksumtype.c;
+			refType = 4;
 		};
 		1744762FFF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = string_to_enctype.c;
-			path = ../lib/crypto/string_to_enctype.c;
-			refType = 2;
+			path = string_to_enctype.c;
+			refType = 4;
 		};
 		17447630FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = string_to_key.c;
-			path = ../lib/crypto/string_to_key.c;
-			refType = 2;
+			path = string_to_key.c;
+			refType = 4;
 		};
 		17447631FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = valid_cksumtype.c;
-			path = ../lib/crypto/valid_cksumtype.c;
-			refType = 2;
+			path = valid_cksumtype.c;
+			refType = 4;
 		};
 		17447632FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = valid_enctype.c;
-			path = ../lib/crypto/valid_enctype.c;
-			refType = 2;
+			path = valid_enctype.c;
+			refType = 4;
 		};
 		17447633FF5FFA3A12120111 = {
 			isa = PBXFileReference;
-			name = verify_checksum.c;
-			path = ../lib/crypto/verify_checksum.c;
-			refType = 2;
+			path = verify_checksum.c;
+			refType = 4;
 		};
 		17447634FF5FFA3A12120111 = {
 			children = (
@@ -1596,9 +1547,8 @@
 				1744765DFF5FFBE212120111,
 			);
 			isa = PBXGroup;
-			name = crc32;
-			path = "";
-			refType = 2;
+			path = crc32;
+			refType = 4;
 		};
 		17447635FF5FFA3A12120111 = {
 			children = (
@@ -1617,9 +1567,8 @@
 				1744766AFF5FFBE212120111,
 			);
 			isa = PBXGroup;
-			name = des;
-			path = "";
-			refType = 2;
+			path = des;
+			refType = 4;
 		};
 		17447636FF5FFA3A12120111 = {
 			children = (
@@ -1631,9 +1580,8 @@
 				17447670FF5FFBE212120111,
 			);
 			isa = PBXGroup;
-			name = dk;
-			path = "";
-			refType = 2;
+			path = dk;
+			refType = 4;
 		};
 		17447637FF5FFA3A12120111 = {
 			children = (
@@ -1642,9 +1590,8 @@
 				17447673FF5FFBE212120111,
 			);
 			isa = PBXGroup;
-			name = enc_provider;
-			path = "";
-			refType = 2;
+			path = enc_provider;
+			refType = 4;
 		};
 		17447638FF5FFA3A12120111 = {
 			children = (
@@ -1655,9 +1602,8 @@
 				17447678FF5FFBE212120111,
 			);
 			isa = PBXGroup;
-			name = hash_provider;
-			path = "";
-			refType = 2;
+			path = hash_provider;
+			refType = 4;
 		};
 		17447639FF5FFA3A12120111 = {
 			children = (
@@ -1667,9 +1613,8 @@
 				17447699FF5FFC2C12120111,
 			);
 			isa = PBXGroup;
-			name = keyhash_provider;
-			path = "";
-			refType = 2;
+			path = keyhash_provider;
+			refType = 4;
 		};
 		1744763AFF5FFA3A12120111 = {
 			children = (
@@ -1677,9 +1622,8 @@
 				1744769FFF5FFF5B12120111,
 			);
 			isa = PBXGroup;
-			name = md4;
-			path = "";
-			refType = 2;
+			path = md4;
+			refType = 4;
 		};
 		1744763BFF5FFA3A12120111 = {
 			children = (
@@ -1687,9 +1631,8 @@
 				174476A1FF5FFF5B12120111,
 			);
 			isa = PBXGroup;
-			name = md5;
-			path = "";
-			refType = 2;
+			path = md5;
+			refType = 4;
 		};
 		1744763CFF5FFA3A12120111 = {
 			children = (
@@ -1699,9 +1642,8 @@
 				174476A5FF5FFF5B12120111,
 			);
 			isa = PBXGroup;
-			name = old;
-			path = "";
-			refType = 2;
+			path = old;
+			refType = 4;
 		};
 		1744763DFF5FFA3A12120111 = {
 			children = (
@@ -1710,9 +1652,8 @@
 				174476A8FF5FFF5B12120111,
 			);
 			isa = PBXGroup;
-			name = raw;
-			path = "";
-			refType = 2;
+			path = raw;
+			refType = 4;
 		};
 		1744763EFF5FFA3A12120111 = {
 			children = (
@@ -1720,9 +1661,8 @@
 				174476AAFF5FFF5B12120111,
 			);
 			isa = PBXGroup;
-			name = sha1;
-			path = "";
-			refType = 2;
+			path = sha1;
+			refType = 4;
 		};
 		1744763FFF5FFA3A12120111 = {
 			fileRef = 1744761AFF5FFA3A12120111;
@@ -2123,177 +2063,148 @@
 		};
 		1744765CFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = crc32.c;
-			path = ../lib/crypto/crc32/crc32.c;
-			refType = 2;
+			path = crc32.c;
+			refType = 4;
 		};
 		1744765DFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = "crc-32.h";
-			path = "../lib/crypto/crc32/crc-32.h";
-			refType = 2;
+			path = "crc-32.h";
+			refType = 4;
 		};
 		1744765EFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = afsstring2key.c;
-			path = ../lib/crypto/des/afsstring2key.c;
-			refType = 2;
+			path = afsstring2key.c;
+			refType = 4;
 		};
 		1744765FFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = d3_cbc.c;
-			path = ../lib/crypto/des/d3_cbc.c;
-			refType = 2;
+			path = d3_cbc.c;
+			refType = 4;
 		};
 		17447660FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = d3_kysched.c;
-			path = ../lib/crypto/des/d3_kysched.c;
-			refType = 2;
+			path = d3_kysched.c;
+			refType = 4;
 		};
 		17447661FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = des_int.h;
-			path = ../lib/crypto/des/des_int.h;
-			refType = 2;
+			path = des_int.h;
+			refType = 4;
 		};
 		17447662FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = f_cbc.c;
-			path = ../lib/crypto/des/f_cbc.c;
-			refType = 2;
+			path = f_cbc.c;
+			refType = 4;
 		};
 		17447663FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = f_cksum.c;
-			path = ../lib/crypto/des/f_cksum.c;
-			refType = 2;
+			path = f_cksum.c;
+			refType = 4;
 		};
 		17447664FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = f_parity.c;
-			path = ../lib/crypto/des/f_parity.c;
-			refType = 2;
+			path = f_parity.c;
+			refType = 4;
 		};
 		17447665FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = f_sched.c;
-			path = ../lib/crypto/des/f_sched.c;
-			refType = 2;
+			path = f_sched.c;
+			refType = 4;
 		};
 		17447666FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = f_tables.c;
-			path = ../lib/crypto/des/f_tables.c;
-			refType = 2;
+			path = f_tables.c;
+			refType = 4;
 		};
 		17447667FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = f_tables.h;
-			path = ../lib/crypto/des/f_tables.h;
-			refType = 2;
+			path = f_tables.h;
+			refType = 4;
 		};
 		17447668FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = key_sched.c;
-			path = ../lib/crypto/des/key_sched.c;
-			refType = 2;
+			path = key_sched.c;
+			refType = 4;
 		};
 		17447669FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = string2key.c;
-			path = ../lib/crypto/des/string2key.c;
-			refType = 2;
+			path = string2key.c;
+			refType = 4;
 		};
 		1744766AFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = weak_key.c;
-			path = ../lib/crypto/des/weak_key.c;
-			refType = 2;
+			path = weak_key.c;
+			refType = 4;
 		};
 		1744766BFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = checksum.c;
-			path = ../lib/crypto/dk/checksum.c;
-			refType = 2;
+			path = checksum.c;
+			refType = 4;
 		};
 		1744766CFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = derive.c;
-			path = ../lib/crypto/dk/derive.c;
-			refType = 2;
+			path = derive.c;
+			refType = 4;
 		};
 		1744766DFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = dk.h;
-			path = ../lib/crypto/dk/dk.h;
-			refType = 2;
+			path = dk.h;
+			refType = 4;
 		};
 		1744766EFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = dk_decrypt.c;
-			path = ../lib/crypto/dk/dk_decrypt.c;
-			refType = 2;
+			path = dk_decrypt.c;
+			refType = 4;
 		};
 		1744766FFF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = dk_encrypt.c;
-			path = ../lib/crypto/dk/dk_encrypt.c;
-			refType = 2;
+			path = dk_encrypt.c;
+			refType = 4;
 		};
 		17447670FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = stringtokey.c;
-			path = ../lib/crypto/dk/stringtokey.c;
-			refType = 2;
+			path = stringtokey.c;
+			refType = 4;
 		};
 		17447671FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = des.c;
-			path = ../lib/crypto/enc_provider/des.c;
-			refType = 2;
+			path = des.c;
+			refType = 4;
 		};
 		17447672FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = des3.c;
-			path = ../lib/crypto/enc_provider/des3.c;
-			refType = 2;
+			path = des3.c;
+			refType = 4;
 		};
 		17447673FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = enc_provider.h;
-			path = ../lib/crypto/enc_provider/enc_provider.h;
-			refType = 2;
+			path = enc_provider.h;
+			refType = 4;
 		};
 		17447674FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = hash_crc32.c;
-			path = ../lib/crypto/hash_provider/hash_crc32.c;
-			refType = 2;
+			path = hash_crc32.c;
+			refType = 4;
 		};
 		17447675FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = hash_md4.c;
-			path = ../lib/crypto/hash_provider/hash_md4.c;
-			refType = 2;
+			path = hash_md4.c;
+			refType = 4;
 		};
 		17447676FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = hash_md5.c;
-			path = ../lib/crypto/hash_provider/hash_md5.c;
-			refType = 2;
+			path = hash_md5.c;
+			refType = 4;
 		};
 		17447677FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = hash_provider.h;
-			path = ../lib/crypto/hash_provider/hash_provider.h;
-			refType = 2;
+			path = hash_provider.h;
+			refType = 4;
 		};
 		17447678FF5FFBE212120111 = {
 			isa = PBXFileReference;
-			name = hash_sha1.c;
-			path = ../lib/crypto/hash_provider/hash_sha1.c;
-			refType = 2;
+			path = hash_sha1.c;
+			refType = 4;
 		};
 		17447679FF5FFBE212120111 = {
 			fileRef = 1744765DFF5FFBE212120111;
@@ -2685,27 +2596,23 @@
 		};
 		17447696FF5FFC2C12120111 = {
 			isa = PBXFileReference;
-			name = descbc.c;
-			path = ../lib/crypto/keyhash_provider/descbc.c;
-			refType = 2;
+			path = descbc.c;
+			refType = 4;
 		};
 		17447697FF5FFC2C12120111 = {
 			isa = PBXFileReference;
-			name = k5_md4des.c;
-			path = ../lib/crypto/keyhash_provider/k5_md4des.c;
-			refType = 2;
+			path = k5_md4des.c;
+			refType = 4;
 		};
 		17447698FF5FFC2C12120111 = {
 			isa = PBXFileReference;
-			name = k5_md5des.c;
-			path = ../lib/crypto/keyhash_provider/k5_md5des.c;
-			refType = 2;
+			path = k5_md5des.c;
+			refType = 4;
 		};
 		17447699FF5FFC2C12120111 = {
 			isa = PBXFileReference;
-			name = keyhash_provider.h;
-			path = ../lib/crypto/keyhash_provider/keyhash_provider.h;
-			refType = 2;
+			path = keyhash_provider.h;
+			refType = 4;
 		};
 		1744769AFF5FFC2C12120111 = {
 			fileRef = 17447699FF5FFC2C12120111;
@@ -2762,81 +2669,68 @@
 		};
 		1744769EFF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = md4.c;
-			path = ../lib/crypto/md4/md4.c;
-			refType = 2;
+			path = md4.c;
+			refType = 4;
 		};
 		1744769FFF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = "rsa-md4.h";
-			path = "../lib/crypto/md4/rsa-md4.h";
-			refType = 2;
+			path = "rsa-md4.h";
+			refType = 4;
 		};
 		174476A0FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = md5.c;
-			path = ../lib/crypto/md5/md5.c;
-			refType = 2;
+			path = md5.c;
+			refType = 4;
 		};
 		174476A1FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = "rsa-md5.h";
-			path = "../lib/crypto/md5/rsa-md5.h";
-			refType = 2;
+			path = "rsa-md5.h";
+			refType = 4;
 		};
 		174476A2FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = des_stringtokey.c;
-			path = ../lib/crypto/old/des_stringtokey.c;
-			refType = 2;
+			path = des_stringtokey.c;
+			refType = 4;
 		};
 		174476A3FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = old.h;
-			path = ../lib/crypto/old/old.h;
-			refType = 2;
+			path = old.h;
+			refType = 4;
 		};
 		174476A4FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = old_decrypt.c;
-			path = ../lib/crypto/old/old_decrypt.c;
-			refType = 2;
+			path = old_decrypt.c;
+			refType = 4;
 		};
 		174476A5FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = old_encrypt.c;
-			path = ../lib/crypto/old/old_encrypt.c;
-			refType = 2;
+			path = old_encrypt.c;
+			refType = 4;
 		};
 		174476A6FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = raw.h;
-			path = ../lib/crypto/raw/raw.h;
-			refType = 2;
+			path = raw.h;
+			refType = 4;
 		};
 		174476A7FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = raw_decrypt.c;
-			path = ../lib/crypto/raw/raw_decrypt.c;
-			refType = 2;
+			path = raw_decrypt.c;
+			refType = 4;
 		};
 		174476A8FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = raw_encrypt.c;
-			path = ../lib/crypto/raw/raw_encrypt.c;
-			refType = 2;
+			path = raw_encrypt.c;
+			refType = 4;
 		};
 		174476A9FF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = shs.c;
-			path = ../lib/crypto/sha1/shs.c;
-			refType = 2;
+			path = shs.c;
+			refType = 4;
 		};
 		174476AAFF5FFF5B12120111 = {
 			isa = PBXFileReference;
-			name = shs.h;
-			path = ../lib/crypto/sha1/shs.h;
-			refType = 2;
+			path = shs.h;
+			refType = 4;
 		};
 		174476ABFF5FFF5B12120111 = {
 			fileRef = 174476A1FF5FFF5B12120111;
@@ -3119,7 +3013,7 @@
 			);
 			isa = PBXGroup;
 			name = krb5;
-			path = "";
+			path = ../lib/krb5;
 			refType = 2;
 		};
 		174476C4FF60076112120111 = {
@@ -3137,9 +3031,8 @@
 				174476D8FF60088512120111,
 			);
 			isa = PBXGroup;
-			name = error_tables;
-			path = "";
-			refType = 2;
+			path = error_tables;
+			refType = 4;
 		};
 		174476C5FF60076112120111 = {
 			children = (
@@ -3165,9 +3058,8 @@
 				174476ECFF60088512120111,
 			);
 			isa = PBXGroup;
-			name = asn.1;
-			path = "";
-			refType = 2;
+			path = asn.1;
+			refType = 4;
 		};
 		174476C6FF60076112120111 = {
 			children = (
@@ -3183,9 +3075,8 @@
 				1744786FFF60323212120111,
 			);
 			isa = PBXGroup;
-			name = ccache;
-			path = "";
-			refType = 2;
+			path = ccache;
+			refType = 4;
 		};
 		174476C7FF60076112120111 = {
 			children = (
@@ -3199,9 +3090,8 @@
 				174476EEFF60088512120111,
 			);
 			isa = PBXGroup;
-			name = keytab;
-			path = "";
-			refType = 2;
+			path = keytab;
+			refType = 4;
 		};
 		174476C8FF60076112120111 = {
 			children = (
@@ -3294,9 +3184,8 @@
 				1744779CFF60261D12120111,
 			);
 			isa = PBXGroup;
-			name = krb;
-			path = "";
-			refType = 2;
+			path = krb;
+			refType = 4;
 		};
 		174476C9FF60076112120111 = {
 			children = (
@@ -3311,9 +3200,8 @@
 				17447806FF60269512120111,
 			);
 			isa = PBXGroup;
-			name = rcache;
-			path = "";
-			refType = 2;
+			path = rcache;
+			refType = 4;
 		};
 		174476CAFF60076112120111 = {
 			children = (
@@ -3360,18 +3248,16 @@
 				17447839FF60313B12120111,
 			);
 			isa = PBXGroup;
-			name = os;
-			path = "";
-			refType = 2;
+			path = os;
+			refType = 4;
 		};
 		174476CBFF60076112120111 = {
 			children = (
 				17447870FF60323212120111,
 			);
 			isa = PBXGroup;
-			name = posix;
-			path = "";
-			refType = 2;
+			path = posix;
+			refType = 4;
 		};
 		174476CCFF60088512120111 = {
 			isa = PBXFrameworkReference;
@@ -3387,189 +3273,158 @@
 		};
 		174476CEFF60088512120111 = {
 			isa = PBXFileReference;
-			name = adm_err.c;
-			path = ../lib/krb5/error_tables/adm_err.c;
-			refType = 2;
+			path = adm_err.c;
+			refType = 4;
 		};
 		174476CFFF60088512120111 = {
 			isa = PBXFileReference;
-			name = adm_err.h;
-			path = ../lib/krb5/error_tables/adm_err.h;
-			refType = 2;
+			path = adm_err.h;
+			refType = 4;
 		};
 		174476D0FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_err.c;
-			path = ../lib/krb5/error_tables/asn1_err.c;
-			refType = 2;
+			path = asn1_err.c;
+			refType = 4;
 		};
 		174476D1FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_err.h;
-			path = ../lib/krb5/error_tables/asn1_err.h;
-			refType = 2;
+			path = asn1_err.h;
+			refType = 4;
 		};
 		174476D2FF60088512120111 = {
 			isa = PBXFileReference;
-			name = init_ets.c;
-			path = ../lib/krb5/error_tables/init_ets.c;
-			refType = 2;
+			path = init_ets.c;
+			refType = 4;
 		};
 		174476D3FF60088512120111 = {
 			isa = PBXFileReference;
-			name = kdb5_err.c;
-			path = ../lib/krb5/error_tables/kdb5_err.c;
-			refType = 2;
+			path = kdb5_err.c;
+			refType = 4;
 		};
 		174476D4FF60088512120111 = {
 			isa = PBXFileReference;
-			name = kdb5_err.h;
-			path = ../lib/krb5/error_tables/kdb5_err.h;
-			refType = 2;
+			path = kdb5_err.h;
+			refType = 4;
 		};
 		174476D5FF60088512120111 = {
 			isa = PBXFileReference;
-			name = krb5_err.c;
-			path = ../lib/krb5/error_tables/krb5_err.c;
-			refType = 2;
+			path = krb5_err.c;
+			refType = 4;
 		};
 		174476D6FF60088512120111 = {
 			isa = PBXFileReference;
-			name = krb5_err.h;
-			path = ../lib/krb5/error_tables/krb5_err.h;
-			refType = 2;
+			path = krb5_err.h;
+			refType = 4;
 		};
 		174476D7FF60088512120111 = {
 			isa = PBXFileReference;
-			name = kv5m_err.c;
-			path = ../lib/krb5/error_tables/kv5m_err.c;
-			refType = 2;
+			path = kv5m_err.c;
+			refType = 4;
 		};
 		174476D8FF60088512120111 = {
 			isa = PBXFileReference;
-			name = kv5m_err.h;
-			path = ../lib/krb5/error_tables/kv5m_err.h;
-			refType = 2;
+			path = kv5m_err.h;
+			refType = 4;
 		};
 		174476D9FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1buf.c;
-			path = ../lib/krb5/asn.1/asn1buf.c;
-			refType = 2;
+			path = asn1buf.c;
+			refType = 4;
 		};
 		174476DAFF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1buf.h;
-			path = ../lib/krb5/asn.1/asn1buf.h;
-			refType = 2;
+			path = asn1buf.h;
+			refType = 4;
 		};
 		174476DBFF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_decode.c;
-			path = ../lib/krb5/asn.1/asn1_decode.c;
-			refType = 2;
+			path = asn1_decode.c;
+			refType = 4;
 		};
 		174476DCFF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_decode.h;
-			path = ../lib/krb5/asn.1/asn1_decode.h;
-			refType = 2;
+			path = asn1_decode.h;
+			refType = 4;
 		};
 		174476DDFF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_encode.c;
-			path = ../lib/krb5/asn.1/asn1_encode.c;
-			refType = 2;
+			path = asn1_encode.c;
+			refType = 4;
 		};
 		174476DEFF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_encode.h;
-			path = ../lib/krb5/asn.1/asn1_encode.h;
-			refType = 2;
+			path = asn1_encode.h;
+			refType = 4;
 		};
 		174476DFFF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_get.c;
-			path = ../lib/krb5/asn.1/asn1_get.c;
-			refType = 2;
+			path = asn1_get.c;
+			refType = 4;
 		};
 		174476E0FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_get.h;
-			path = ../lib/krb5/asn.1/asn1_get.h;
-			refType = 2;
+			path = asn1_get.h;
+			refType = 4;
 		};
 		174476E1FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1glue.h;
-			path = ../lib/krb5/asn.1/asn1glue.h;
-			refType = 2;
+			path = asn1glue.h;
+			refType = 4;
 		};
 		174476E2FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_k_decode.c;
-			path = ../lib/krb5/asn.1/asn1_k_decode.c;
-			refType = 2;
+			path = asn1_k_decode.c;
+			refType = 4;
 		};
 		174476E3FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_k_decode.h;
-			path = ../lib/krb5/asn.1/asn1_k_decode.h;
-			refType = 2;
+			path = asn1_k_decode.h;
+			refType = 4;
 		};
 		174476E4FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_k_encode.c;
-			path = ../lib/krb5/asn.1/asn1_k_encode.c;
-			refType = 2;
+			path = asn1_k_encode.c;
+			refType = 4;
 		};
 		174476E5FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_k_encode.h;
-			path = ../lib/krb5/asn.1/asn1_k_encode.h;
-			refType = 2;
+			path = asn1_k_encode.h;
+			refType = 4;
 		};
 		174476E6FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_make.c;
-			path = ../lib/krb5/asn.1/asn1_make.c;
-			refType = 2;
+			path = asn1_make.c;
+			refType = 4;
 		};
 		174476E7FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_make.h;
-			path = ../lib/krb5/asn.1/asn1_make.h;
-			refType = 2;
+			path = asn1_make.h;
+			refType = 4;
 		};
 		174476E8FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_misc.c;
-			path = ../lib/krb5/asn.1/asn1_misc.c;
-			refType = 2;
+			path = asn1_misc.c;
+			refType = 4;
 		};
 		174476E9FF60088512120111 = {
 			isa = PBXFileReference;
-			name = asn1_misc.h;
-			path = ../lib/krb5/asn.1/asn1_misc.h;
-			refType = 2;
+			path = asn1_misc.h;
+			refType = 4;
 		};
 		174476EAFF60088512120111 = {
 			isa = PBXFileReference;
-			name = krb5_decode.c;
-			path = ../lib/krb5/asn.1/krb5_decode.c;
-			refType = 2;
+			path = krb5_decode.c;
+			refType = 4;
 		};
 		174476EBFF60088512120111 = {
 			isa = PBXFileReference;
-			name = krb5_encode.c;
-			path = ../lib/krb5/asn.1/krb5_encode.c;
-			refType = 2;
+			path = krb5_encode.c;
+			refType = 4;
 		};
 		174476ECFF60088512120111 = {
 			isa = PBXFileReference;
-			name = krbasn1.h;
-			path = ../lib/krb5/asn.1/krbasn1.h;
-			refType = 2;
+			path = krbasn1.h;
+			refType = 4;
 		};
 		174476EDFF60088512120111 = {
 			children = (
@@ -3591,9 +3446,8 @@
 				17447725FF6024DB12120111,
 			);
 			isa = PBXGroup;
-			name = file;
-			path = "";
-			refType = 2;
+			path = file;
+			refType = 4;
 		};
 		174476EEFF60088512120111 = {
 			children = (
@@ -3609,9 +3463,8 @@
 				17447745FF60261D12120111,
 			);
 			isa = PBXGroup;
-			name = srvtab;
-			path = "";
-			refType = 2;
+			path = srvtab;
+			refType = 4;
 		};
 		174476EFFF60088512120111 = {
 			fileRef = 174476CFFF60088512120111;
@@ -4026,135 +3879,113 @@
 		};
 		17447710FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktadd.c;
-			path = ../lib/krb5/keytab/ktadd.c;
-			refType = 2;
+			path = ktadd.c;
+			refType = 4;
 		};
 		17447711FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktbase.c;
-			path = ../lib/krb5/keytab/ktbase.c;
-			refType = 2;
+			path = ktbase.c;
+			refType = 4;
 		};
 		17447712FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktdefault.c;
-			path = ../lib/krb5/keytab/ktdefault.c;
-			refType = 2;
+			path = ktdefault.c;
+			refType = 4;
 		};
 		17447713FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktfr_entry.c;
-			path = ../lib/krb5/keytab/ktfr_entry.c;
-			refType = 2;
+			path = ktfr_entry.c;
+			refType = 4;
 		};
 		17447714FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktremove.c;
-			path = ../lib/krb5/keytab/ktremove.c;
-			refType = 2;
+			path = ktremove.c;
+			refType = 4;
 		};
 		17447715FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = read_servi.c;
-			path = ../lib/krb5/keytab/read_servi.c;
-			refType = 2;
+			path = read_servi.c;
+			refType = 4;
 		};
 		17447716FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_add.c;
-			path = ../lib/krb5/keytab/file/ktf_add.c;
-			refType = 2;
+			path = ktf_add.c;
+			refType = 4;
 		};
 		17447717FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_close.c;
-			path = ../lib/krb5/keytab/file/ktf_close.c;
-			refType = 2;
+			path = ktf_close.c;
+			refType = 4;
 		};
 		17447718FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_defops.c;
-			path = ../lib/krb5/keytab/file/ktf_defops.c;
-			refType = 2;
+			path = ktf_defops.c;
+			refType = 4;
 		};
 		17447719FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_endget.c;
-			path = ../lib/krb5/keytab/file/ktf_endget.c;
-			refType = 2;
+			path = ktf_endget.c;
+			refType = 4;
 		};
 		1744771AFF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_g_ent.c;
-			path = ../lib/krb5/keytab/file/ktf_g_ent.c;
-			refType = 2;
+			path = ktf_g_ent.c;
+			refType = 4;
 		};
 		1744771BFF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_g_name.c;
-			path = ../lib/krb5/keytab/file/ktf_g_name.c;
-			refType = 2;
+			path = ktf_g_name.c;
+			refType = 4;
 		};
 		1744771CFF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktfile.h;
-			path = ../lib/krb5/keytab/file/ktfile.h;
-			refType = 2;
+			path = ktfile.h;
+			refType = 4;
 		};
 		1744771DFF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_next.c;
-			path = ../lib/krb5/keytab/file/ktf_next.c;
-			refType = 2;
+			path = ktf_next.c;
+			refType = 4;
 		};
 		1744771EFF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_ops.c;
-			path = ../lib/krb5/keytab/file/ktf_ops.c;
-			refType = 2;
+			path = ktf_ops.c;
+			refType = 4;
 		};
 		1744771FFF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_remove.c;
-			path = ../lib/krb5/keytab/file/ktf_remove.c;
-			refType = 2;
+			path = ktf_remove.c;
+			refType = 4;
 		};
 		17447720FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_resolv.c;
-			path = ../lib/krb5/keytab/file/ktf_resolv.c;
-			refType = 2;
+			path = ktf_resolv.c;
+			refType = 4;
 		};
 		17447721FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_ssget.c;
-			path = ../lib/krb5/keytab/file/ktf_ssget.c;
-			refType = 2;
+			path = ktf_ssget.c;
+			refType = 4;
 		};
 		17447722FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_util.c;
-			path = ../lib/krb5/keytab/file/ktf_util.c;
-			refType = 2;
+			path = ktf_util.c;
+			refType = 4;
 		};
 		17447723FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_wops.c;
-			path = ../lib/krb5/keytab/file/ktf_wops.c;
-			refType = 2;
+			path = ktf_wops.c;
+			refType = 4;
 		};
 		17447724FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ktf_wreslv.c;
-			path = ../lib/krb5/keytab/file/ktf_wreslv.c;
-			refType = 2;
+			path = ktf_wreslv.c;
+			refType = 4;
 		};
 		17447725FF6024DB12120111 = {
 			isa = PBXFileReference;
-			name = ser_ktf.c;
-			path = ../lib/krb5/keytab/file/ser_ktf.c;
-			refType = 2;
+			path = ser_ktf.c;
+			refType = 4;
 		};
 		17447726FF6024DB12120111 = {
 			fileRef = 1744771CFF6024DB12120111;
@@ -4463,585 +4294,488 @@
 		};
 		1744773CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_close.c;
-			path = ../lib/krb5/keytab/srvtab/kts_close.c;
-			refType = 2;
+			path = kts_close.c;
+			refType = 4;
 		};
 		1744773DFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_endget.c;
-			path = ../lib/krb5/keytab/srvtab/kts_endget.c;
-			refType = 2;
+			path = kts_endget.c;
+			refType = 4;
 		};
 		1744773EFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_g_ent.c;
-			path = ../lib/krb5/keytab/srvtab/kts_g_ent.c;
-			refType = 2;
+			path = kts_g_ent.c;
+			refType = 4;
 		};
 		1744773FFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_g_name.c;
-			path = ../lib/krb5/keytab/srvtab/kts_g_name.c;
-			refType = 2;
+			path = kts_g_name.c;
+			refType = 4;
 		};
 		17447740FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_next.c;
-			path = ../lib/krb5/keytab/srvtab/kts_next.c;
-			refType = 2;
+			path = kts_next.c;
+			refType = 4;
 		};
 		17447741FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_ops.c;
-			path = ../lib/krb5/keytab/srvtab/kts_ops.c;
-			refType = 2;
+			path = kts_ops.c;
+			refType = 4;
 		};
 		17447742FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_resolv.c;
-			path = ../lib/krb5/keytab/srvtab/kts_resolv.c;
-			refType = 2;
+			path = kts_resolv.c;
+			refType = 4;
 		};
 		17447743FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ktsrvtab.h;
-			path = ../lib/krb5/keytab/srvtab/ktsrvtab.h;
-			refType = 2;
+			path = ktsrvtab.h;
+			refType = 4;
 		};
 		17447744FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_ssget.c;
-			path = ../lib/krb5/keytab/srvtab/kts_ssget.c;
-			refType = 2;
+			path = kts_ssget.c;
+			refType = 4;
 		};
 		17447745FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kts_util.c;
-			path = ../lib/krb5/keytab/srvtab/kts_util.c;
-			refType = 2;
+			path = kts_util.c;
+			refType = 4;
 		};
 		17447746FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = addr_comp.c;
-			path = ../lib/krb5/krb/addr_comp.c;
-			refType = 2;
+			path = addr_comp.c;
+			refType = 4;
 		};
 		17447747FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = addr_order.c;
-			path = ../lib/krb5/krb/addr_order.c;
-			refType = 2;
+			path = addr_order.c;
+			refType = 4;
 		};
 		17447748FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = addr_srch.c;
-			path = ../lib/krb5/krb/addr_srch.c;
-			refType = 2;
+			path = addr_srch.c;
+			refType = 4;
 		};
 		17447749FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = appdefault.c;
-			path = ../lib/krb5/krb/appdefault.c;
-			refType = 2;
+			path = appdefault.c;
+			refType = 4;
 		};
 		1744774AFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = auth_con.c;
-			path = ../lib/krb5/krb/auth_con.c;
-			refType = 2;
+			path = auth_con.c;
+			refType = 4;
 		};
 		1744774BFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = auth_con.h;
-			path = ../lib/krb5/krb/auth_con.h;
-			refType = 2;
+			path = auth_con.h;
+			refType = 4;
 		};
 		1744774CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = bld_pr_ext.c;
-			path = ../lib/krb5/krb/bld_pr_ext.c;
-			refType = 2;
+			path = bld_pr_ext.c;
+			refType = 4;
 		};
 		1744774DFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = bld_princ.c;
-			path = ../lib/krb5/krb/bld_princ.c;
-			refType = 2;
+			path = bld_princ.c;
+			refType = 4;
 		};
 		1744774EFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = chk_trans.c;
-			path = ../lib/krb5/krb/chk_trans.c;
-			refType = 2;
+			path = chk_trans.c;
+			refType = 4;
 		};
 		1744774FFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = chpw.c;
-			path = ../lib/krb5/krb/chpw.c;
-			refType = 2;
+			path = chpw.c;
+			refType = 4;
 		};
 		17447750FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = cleanup.h;
-			path = ../lib/krb5/krb/cleanup.h;
-			refType = 2;
+			path = cleanup.h;
+			refType = 4;
 		};
 		17447751FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = conv_princ.c;
-			path = ../lib/krb5/krb/conv_princ.c;
-			refType = 2;
+			path = conv_princ.c;
+			refType = 4;
 		};
 		17447752FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_addrs.c;
-			path = ../lib/krb5/krb/copy_addrs.c;
-			refType = 2;
+			path = copy_addrs.c;
+			refType = 4;
 		};
 		17447753FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_athctr.c;
-			path = ../lib/krb5/krb/copy_athctr.c;
-			refType = 2;
+			path = copy_athctr.c;
+			refType = 4;
 		};
 		17447754FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_auth.c;
-			path = ../lib/krb5/krb/copy_auth.c;
-			refType = 2;
+			path = copy_auth.c;
+			refType = 4;
 		};
 		17447755FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_cksum.c;
-			path = ../lib/krb5/krb/copy_cksum.c;
-			refType = 2;
+			path = copy_cksum.c;
+			refType = 4;
 		};
 		17447756FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_creds.c;
-			path = ../lib/krb5/krb/copy_creds.c;
-			refType = 2;
+			path = copy_creds.c;
+			refType = 4;
 		};
 		17447757FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_data.c;
-			path = ../lib/krb5/krb/copy_data.c;
-			refType = 2;
+			path = copy_data.c;
+			refType = 4;
 		};
 		17447758FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_key.c;
-			path = ../lib/krb5/krb/copy_key.c;
-			refType = 2;
+			path = copy_key.c;
+			refType = 4;
 		};
 		17447759FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_princ.c;
-			path = ../lib/krb5/krb/copy_princ.c;
-			refType = 2;
+			path = copy_princ.c;
+			refType = 4;
 		};
 		1744775AFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = copy_tick.c;
-			path = ../lib/krb5/krb/copy_tick.c;
-			refType = 2;
+			path = copy_tick.c;
+			refType = 4;
 		};
 		1744775BFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = cp_key_cnt.c;
-			path = ../lib/krb5/krb/cp_key_cnt.c;
-			refType = 2;
+			path = cp_key_cnt.c;
+			refType = 4;
 		};
 		1744775CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = decode_kdc.c;
-			path = ../lib/krb5/krb/decode_kdc.c;
-			refType = 2;
+			path = decode_kdc.c;
+			refType = 4;
 		};
 		1744775DFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = decrypt_tk.c;
-			path = ../lib/krb5/krb/decrypt_tk.c;
-			refType = 2;
+			path = decrypt_tk.c;
+			refType = 4;
 		};
 		1744775EFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = deltat.c;
-			path = ../lib/krb5/krb/deltat.c;
-			refType = 2;
+			path = deltat.c;
+			refType = 4;
 		};
 		1744775FFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = enc_helper.c;
-			path = ../lib/krb5/krb/enc_helper.c;
-			refType = 2;
+			path = enc_helper.c;
+			refType = 4;
 		};
 		17447760FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = encode_kdc.c;
-			path = ../lib/krb5/krb/encode_kdc.c;
-			refType = 2;
+			path = encode_kdc.c;
+			refType = 4;
 		};
 		17447761FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = encrypt_tk.c;
-			path = ../lib/krb5/krb/encrypt_tk.c;
-			refType = 2;
+			path = encrypt_tk.c;
+			refType = 4;
 		};
 		17447762FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = free_rtree.c;
-			path = ../lib/krb5/krb/free_rtree.c;
-			refType = 2;
+			path = free_rtree.c;
+			refType = 4;
 		};
 		17447763FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = fwd_tgt.c;
-			path = ../lib/krb5/krb/fwd_tgt.c;
-			refType = 2;
+			path = fwd_tgt.c;
+			refType = 4;
 		};
 		17447764FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gc_frm_kdc.c;
-			path = ../lib/krb5/krb/gc_frm_kdc.c;
-			refType = 2;
+			path = gc_frm_kdc.c;
+			refType = 4;
 		};
 		17447765FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gc_via_tkt.c;
-			path = ../lib/krb5/krb/gc_via_tkt.c;
-			refType = 2;
+			path = gc_via_tkt.c;
+			refType = 4;
 		};
 		17447766FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gen_seqnum.c;
-			path = ../lib/krb5/krb/gen_seqnum.c;
-			refType = 2;
+			path = gen_seqnum.c;
+			refType = 4;
 		};
 		17447767FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gen_subkey.c;
-			path = ../lib/krb5/krb/gen_subkey.c;
-			refType = 2;
+			path = gen_subkey.c;
+			refType = 4;
 		};
 		17447768FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = get_creds.c;
-			path = ../lib/krb5/krb/get_creds.c;
-			refType = 2;
+			path = get_creds.c;
+			refType = 4;
 		};
 		17447769FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = get_in_tkt.c;
-			path = ../lib/krb5/krb/get_in_tkt.c;
-			refType = 2;
+			path = get_in_tkt.c;
+			refType = 4;
 		};
 		1744776AFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gic_keytab.c;
-			path = ../lib/krb5/krb/gic_keytab.c;
-			refType = 2;
+			path = gic_keytab.c;
+			refType = 4;
 		};
 		1744776BFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gic_opt.c;
-			path = ../lib/krb5/krb/gic_opt.c;
-			refType = 2;
+			path = gic_opt.c;
+			refType = 4;
 		};
 		1744776CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = gic_pwd.c;
-			path = ../lib/krb5/krb/gic_pwd.c;
-			refType = 2;
+			path = gic_pwd.c;
+			refType = 4;
 		};
 		1744776DFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = init_ctx.c;
-			path = ../lib/krb5/krb/init_ctx.c;
-			refType = 2;
+			path = init_ctx.c;
+			refType = 4;
 		};
 		1744776EFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = in_tkt_ktb.c;
-			path = ../lib/krb5/krb/in_tkt_ktb.c;
-			refType = 2;
+			path = in_tkt_ktb.c;
+			refType = 4;
 		};
 		1744776FFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = in_tkt_pwd.c;
-			path = ../lib/krb5/krb/in_tkt_pwd.c;
-			refType = 2;
+			path = in_tkt_pwd.c;
+			refType = 4;
 		};
 		17447770FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = in_tkt_sky.c;
-			path = ../lib/krb5/krb/in_tkt_sky.c;
-			refType = 2;
+			path = in_tkt_sky.c;
+			refType = 4;
 		};
 		17447771FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = "int-proto.h";
-			path = "../lib/krb5/krb/int-proto.h";
-			refType = 2;
+			path = "int-proto.h";
+			refType = 4;
 		};
 		17447772FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kdc_rep_dc.c;
-			path = ../lib/krb5/krb/kdc_rep_dc.c;
-			refType = 2;
+			path = kdc_rep_dc.c;
+			refType = 4;
 		};
 		17447773FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = kfree.c;
-			path = ../lib/krb5/krb/kfree.c;
-			refType = 2;
+			path = kfree.c;
+			refType = 4;
 		};
 		17447774FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_cred.c;
-			path = ../lib/krb5/krb/mk_cred.c;
-			refType = 2;
+			path = mk_cred.c;
+			refType = 4;
 		};
 		17447775FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_error.c;
-			path = ../lib/krb5/krb/mk_error.c;
-			refType = 2;
+			path = mk_error.c;
+			refType = 4;
 		};
 		17447776FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_priv.c;
-			path = ../lib/krb5/krb/mk_priv.c;
-			refType = 2;
+			path = mk_priv.c;
+			refType = 4;
 		};
 		17447777FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_rep.c;
-			path = ../lib/krb5/krb/mk_rep.c;
-			refType = 2;
+			path = mk_rep.c;
+			refType = 4;
 		};
 		17447778FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_req.c;
-			path = ../lib/krb5/krb/mk_req.c;
-			refType = 2;
+			path = mk_req.c;
+			refType = 4;
 		};
 		17447779FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_req_ext.c;
-			path = ../lib/krb5/krb/mk_req_ext.c;
-			refType = 2;
+			path = mk_req_ext.c;
+			refType = 4;
 		};
 		1744777AFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = mk_safe.c;
-			path = ../lib/krb5/krb/mk_safe.c;
-			refType = 2;
+			path = mk_safe.c;
+			refType = 4;
 		};
 		1744777BFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = parse.c;
-			path = ../lib/krb5/krb/parse.c;
-			refType = 2;
+			path = parse.c;
+			refType = 4;
 		};
 		1744777CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = preauth.c;
-			path = ../lib/krb5/krb/preauth.c;
-			refType = 2;
+			path = preauth.c;
+			refType = 4;
 		};
 		1744777DFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = preauth2.c;
-			path = ../lib/krb5/krb/preauth2.c;
-			refType = 2;
+			path = preauth2.c;
+			refType = 4;
 		};
 		1744777EFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = princ_comp.c;
-			path = ../lib/krb5/krb/princ_comp.c;
-			refType = 2;
+			path = princ_comp.c;
+			refType = 4;
 		};
 		1744777FFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = pr_to_salt.c;
-			path = ../lib/krb5/krb/pr_to_salt.c;
-			refType = 2;
+			path = pr_to_salt.c;
+			refType = 4;
 		};
 		17447780FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_cred.c;
-			path = ../lib/krb5/krb/rd_cred.c;
-			refType = 2;
+			path = rd_cred.c;
+			refType = 4;
 		};
 		17447781FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_error.c;
-			path = ../lib/krb5/krb/rd_error.c;
-			refType = 2;
+			path = rd_error.c;
+			refType = 4;
 		};
 		17447782FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_priv.c;
-			path = ../lib/krb5/krb/rd_priv.c;
-			refType = 2;
+			path = rd_priv.c;
+			refType = 4;
 		};
 		17447783FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_rep.c;
-			path = ../lib/krb5/krb/rd_rep.c;
-			refType = 2;
+			path = rd_rep.c;
+			refType = 4;
 		};
 		17447784FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_req.c;
-			path = ../lib/krb5/krb/rd_req.c;
-			refType = 2;
+			path = rd_req.c;
+			refType = 4;
 		};
 		17447785FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_req_dec.c;
-			path = ../lib/krb5/krb/rd_req_dec.c;
-			refType = 2;
+			path = rd_req_dec.c;
+			refType = 4;
 		};
 		17447786FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = rd_safe.c;
-			path = ../lib/krb5/krb/rd_safe.c;
-			refType = 2;
+			path = rd_safe.c;
+			refType = 4;
 		};
 		17447787FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = recvauth.c;
-			path = ../lib/krb5/krb/recvauth.c;
-			refType = 2;
+			path = recvauth.c;
+			refType = 4;
 		};
 		17447788FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = sendauth.c;
-			path = ../lib/krb5/krb/sendauth.c;
-			refType = 2;
+			path = sendauth.c;
+			refType = 4;
 		};
 		17447789FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = send_tgs.c;
-			path = ../lib/krb5/krb/send_tgs.c;
-			refType = 2;
+			path = send_tgs.c;
+			refType = 4;
 		};
 		1744778AFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_actx.c;
-			path = ../lib/krb5/krb/ser_actx.c;
-			refType = 2;
+			path = ser_actx.c;
+			refType = 4;
 		};
 		1744778BFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_adata.c;
-			path = ../lib/krb5/krb/ser_adata.c;
-			refType = 2;
+			path = ser_adata.c;
+			refType = 4;
 		};
 		1744778CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_addr.c;
-			path = ../lib/krb5/krb/ser_addr.c;
-			refType = 2;
+			path = ser_addr.c;
+			refType = 4;
 		};
 		1744778DFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_auth.c;
-			path = ../lib/krb5/krb/ser_auth.c;
-			refType = 2;
+			path = ser_auth.c;
+			refType = 4;
 		};
 		1744778EFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_cksum.c;
-			path = ../lib/krb5/krb/ser_cksum.c;
-			refType = 2;
+			path = ser_cksum.c;
+			refType = 4;
 		};
 		1744778FFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_ctx.c;
-			path = ../lib/krb5/krb/ser_ctx.c;
-			refType = 2;
+			path = ser_ctx.c;
+			refType = 4;
 		};
 		17447790FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_eblk.c;
-			path = ../lib/krb5/krb/ser_eblk.c;
-			refType = 2;
+			path = ser_eblk.c;
+			refType = 4;
 		};
 		17447791FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = serialize.c;
-			path = ../lib/krb5/krb/serialize.c;
-			refType = 2;
+			path = serialize.c;
+			refType = 4;
 		};
 		17447792FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_key.c;
-			path = ../lib/krb5/krb/ser_key.c;
-			refType = 2;
+			path = ser_key.c;
+			refType = 4;
 		};
 		17447793FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = ser_princ.c;
-			path = ../lib/krb5/krb/ser_princ.c;
-			refType = 2;
+			path = ser_princ.c;
+			refType = 4;
 		};
 		17447794FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = set_realm.c;
-			path = ../lib/krb5/krb/set_realm.c;
-			refType = 2;
+			path = set_realm.c;
+			refType = 4;
 		};
 		17447795FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = srv_rcache.c;
-			path = ../lib/krb5/krb/srv_rcache.c;
-			refType = 2;
+			path = srv_rcache.c;
+			refType = 4;
 		};
 		17447796FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = str_conv.c;
-			path = ../lib/krb5/krb/str_conv.c;
-			refType = 2;
+			path = str_conv.c;
+			refType = 4;
 		};
 		17447797FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = tgtname.c;
-			path = ../lib/krb5/krb/tgtname.c;
-			refType = 2;
+			path = tgtname.c;
+			refType = 4;
 		};
 		17447798FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = unparse.c;
-			path = ../lib/krb5/krb/unparse.c;
-			refType = 2;
+			path = unparse.c;
+			refType = 4;
 		};
 		17447799FF60261D12120111 = {
 			isa = PBXFileReference;
-			name = valid_times.c;
-			path = ../lib/krb5/krb/valid_times.c;
-			refType = 2;
+			path = valid_times.c;
+			refType = 4;
 		};
 		1744779AFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = vfy_increds.c;
-			path = ../lib/krb5/krb/vfy_increds.c;
-			refType = 2;
+			path = vfy_increds.c;
+			refType = 4;
 		};
 		1744779BFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = vic_opt.c;
-			path = ../lib/krb5/krb/vic_opt.c;
-			refType = 2;
+			path = vic_opt.c;
+			refType = 4;
 		};
 		1744779CFF60261D12120111 = {
 			isa = PBXFileReference;
-			name = walk_rtree.c;
-			path = ../lib/krb5/krb/walk_rtree.c;
-			refType = 2;
+			path = walk_rtree.c;
+			refType = 4;
 		};
 		1744779DFF60261D12120111 = {
 			fileRef = 17447743FF60261D12120111;
@@ -6391,57 +6125,48 @@
 		};
 		174477FEFF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_base.c;
-			path = ../lib/krb5/rcache/rc_base.c;
-			refType = 2;
+			path = rc_base.c;
+			refType = 4;
 		};
 		174477FFFF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_base.h;
-			path = ../lib/krb5/rcache/rc_base.h;
-			refType = 2;
+			path = rc_base.h;
+			refType = 4;
 		};
 		17447800FF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_conv.c;
-			path = ../lib/krb5/rcache/rc_conv.c;
-			refType = 2;
+			path = rc_conv.c;
+			refType = 4;
 		};
 		17447801FF60269512120111 = {
 			isa = PBXFileReference;
-			name = rcdef.c;
-			path = ../lib/krb5/rcache/rcdef.c;
-			refType = 2;
+			path = rcdef.c;
+			refType = 4;
 		};
 		17447802FF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_dfl.c;
-			path = ../lib/krb5/rcache/rc_dfl.c;
-			refType = 2;
+			path = rc_dfl.c;
+			refType = 4;
 		};
 		17447803FF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_dfl.h;
-			path = ../lib/krb5/rcache/rc_dfl.h;
-			refType = 2;
+			path = rc_dfl.h;
+			refType = 4;
 		};
 		17447804FF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_io.c;
-			path = ../lib/krb5/rcache/rc_io.c;
-			refType = 2;
+			path = rc_io.c;
+			refType = 4;
 		};
 		17447805FF60269512120111 = {
 			isa = PBXFileReference;
-			name = rc_io.h;
-			path = ../lib/krb5/rcache/rc_io.h;
-			refType = 2;
+			path = rc_io.h;
+			refType = 4;
 		};
 		17447806FF60269512120111 = {
 			isa = PBXFileReference;
-			name = ser_rc.c;
-			path = ../lib/krb5/rcache/ser_rc.c;
-			refType = 2;
+			path = ser_rc.c;
+			refType = 4;
 		};
 		17447807FF60269512120111 = {
 			fileRef = 174477FFFF60269512120111;
@@ -6562,249 +6287,208 @@
 		};
 		17447811FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = an_to_ln.c;
-			path = ../lib/krb5/os/an_to_ln.c;
-			refType = 2;
+			path = an_to_ln.c;
+			refType = 4;
 		};
 		17447812FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = ccdefname.c;
-			path = ../lib/krb5/os/ccdefname.c;
-			refType = 2;
+			path = ccdefname.c;
+			refType = 4;
 		};
 		17447813FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = changepw.c;
-			path = ../lib/krb5/os/changepw.c;
-			refType = 2;
+			path = changepw.c;
+			refType = 4;
 		};
 		17447814FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = c_ustime.c;
-			path = ../lib/krb5/os/c_ustime.c;
-			refType = 2;
+			path = c_ustime.c;
+			refType = 4;
 		};
 		17447815FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = def_realm.c;
-			path = ../lib/krb5/os/def_realm.c;
-			refType = 2;
+			path = def_realm.c;
+			refType = 4;
 		};
 		17447816FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = free_hstrl.c;
-			path = ../lib/krb5/os/free_hstrl.c;
-			refType = 2;
+			path = free_hstrl.c;
+			refType = 4;
 		};
 		17447817FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = free_krbhs.c;
-			path = ../lib/krb5/os/free_krbhs.c;
-			refType = 2;
+			path = free_krbhs.c;
+			refType = 4;
 		};
 		17447818FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = full_ipadr.c;
-			path = ../lib/krb5/os/full_ipadr.c;
-			refType = 2;
+			path = full_ipadr.c;
+			refType = 4;
 		};
 		17447819FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = genaddrs.c;
-			path = ../lib/krb5/os/genaddrs.c;
-			refType = 2;
+			path = genaddrs.c;
+			refType = 4;
 		};
 		1744781AFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = gen_port.c;
-			path = ../lib/krb5/os/gen_port.c;
-			refType = 2;
+			path = gen_port.c;
+			refType = 4;
 		};
 		1744781BFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = gen_rname.c;
-			path = ../lib/krb5/os/gen_rname.c;
-			refType = 2;
+			path = gen_rname.c;
+			refType = 4;
 		};
 		1744781CFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = get_krbhst.c;
-			path = ../lib/krb5/os/get_krbhst.c;
-			refType = 2;
+			path = get_krbhst.c;
+			refType = 4;
 		};
 		1744781DFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = gmt_mktime.c;
-			path = ../lib/krb5/os/gmt_mktime.c;
-			refType = 2;
+			path = gmt_mktime.c;
+			refType = 4;
 		};
 		1744781EFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = hostaddr.c;
-			path = ../lib/krb5/os/hostaddr.c;
-			refType = 2;
+			path = hostaddr.c;
+			refType = 4;
 		};
 		1744781FFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = hst_realm.c;
-			path = ../lib/krb5/os/hst_realm.c;
-			refType = 2;
+			path = hst_realm.c;
+			refType = 4;
 		};
 		17447820FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = init_os_ctx.c;
-			path = ../lib/krb5/os/init_os_ctx.c;
-			refType = 2;
+			path = init_os_ctx.c;
+			refType = 4;
 		};
 		17447821FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = krbfileio.c;
-			path = ../lib/krb5/os/krbfileio.c;
-			refType = 2;
+			path = krbfileio.c;
+			refType = 4;
 		};
 		17447822FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = ktdefname.c;
-			path = ../lib/krb5/os/ktdefname.c;
-			refType = 2;
+			path = ktdefname.c;
+			refType = 4;
 		};
 		17447823FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = kuserok.c;
-			path = ../lib/krb5/os/kuserok.c;
-			refType = 2;
+			path = kuserok.c;
+			refType = 4;
 		};
 		17447824FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = localaddr.c;
-			path = ../lib/krb5/os/localaddr.c;
-			refType = 2;
+			path = localaddr.c;
+			refType = 4;
 		};
 		17447825FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = locate_kdc.c;
-			path = ../lib/krb5/os/locate_kdc.c;
-			refType = 2;
+			path = locate_kdc.c;
+			refType = 4;
 		};
 		17447826FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = lock_file.c;
-			path = ../lib/krb5/os/lock_file.c;
-			refType = 2;
+			path = lock_file.c;
+			refType = 4;
 		};
 		17447827FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = mk_faddr.c;
-			path = ../lib/krb5/os/mk_faddr.c;
-			refType = 2;
+			path = mk_faddr.c;
+			refType = 4;
 		};
 		17447828FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = net_read.c;
-			path = ../lib/krb5/os/net_read.c;
-			refType = 2;
+			path = net_read.c;
+			refType = 4;
 		};
 		17447829FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = net_write.c;
-			path = ../lib/krb5/os/net_write.c;
-			refType = 2;
+			path = net_write.c;
+			refType = 4;
 		};
 		1744782AFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = osconfig.c;
-			path = ../lib/krb5/os/osconfig.c;
-			refType = 2;
+			path = osconfig.c;
+			refType = 4;
 		};
 		1744782BFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = "os-proto.h";
-			path = "../lib/krb5/os/os-proto.h";
-			refType = 2;
+			path = "os-proto.h";
+			refType = 4;
 		};
 		1744782CFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = port2ip.c;
-			path = ../lib/krb5/os/port2ip.c;
-			refType = 2;
+			path = port2ip.c;
+			refType = 4;
 		};
 		1744782DFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = prompter.c;
-			path = ../lib/krb5/os/prompter.c;
-			refType = 2;
+			path = prompter.c;
+			refType = 4;
 		};
 		1744782EFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = promptusr.c;
-			path = ../lib/krb5/os/promptusr.c;
-			refType = 2;
+			path = promptusr.c;
+			refType = 4;
 		};
 		1744782FFF60313B12120111 = {
 			isa = PBXFileReference;
-			name = read_msg.c;
-			path = ../lib/krb5/os/read_msg.c;
-			refType = 2;
+			path = read_msg.c;
+			refType = 4;
 		};
 		17447830FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = read_pwd.c;
-			path = ../lib/krb5/os/read_pwd.c;
-			refType = 2;
+			path = read_pwd.c;
+			refType = 4;
 		};
 		17447831FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = realm_dom.c;
-			path = ../lib/krb5/os/realm_dom.c;
-			refType = 2;
+			path = realm_dom.c;
+			refType = 4;
 		};
 		17447832FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = realm_iter.c;
-			path = ../lib/krb5/os/realm_iter.c;
-			refType = 2;
+			path = realm_iter.c;
+			refType = 4;
 		};
 		17447833FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = sendto_kdc.c;
-			path = ../lib/krb5/os/sendto_kdc.c;
-			refType = 2;
+			path = sendto_kdc.c;
+			refType = 4;
 		};
 		17447834FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = sn2princ.c;
-			path = ../lib/krb5/os/sn2princ.c;
-			refType = 2;
+			path = sn2princ.c;
+			refType = 4;
 		};
 		17447835FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = timeofday.c;
-			path = ../lib/krb5/os/timeofday.c;
-			refType = 2;
+			path = timeofday.c;
+			refType = 4;
 		};
 		17447836FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = toffset.c;
-			path = ../lib/krb5/os/toffset.c;
-			refType = 2;
+			path = toffset.c;
+			refType = 4;
 		};
 		17447837FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = unlck_file.c;
-			path = ../lib/krb5/os/unlck_file.c;
-			refType = 2;
+			path = unlck_file.c;
+			refType = 4;
 		};
 		17447838FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = ustime.c;
-			path = ../lib/krb5/os/ustime.c;
-			refType = 2;
+			path = ustime.c;
+			refType = 4;
 		};
 		17447839FF60313B12120111 = {
 			isa = PBXFileReference;
-			name = write_msg.c;
-			path = ../lib/krb5/os/write_msg.c;
-			refType = 2;
+			path = write_msg.c;
+			refType = 4;
 		};
 		1744783AFF60313B12120111 = {
 			fileRef = 1744782BFF60313B12120111;
@@ -7379,45 +7063,38 @@
 		};
 		17447864FF60323212120111 = {
 			isa = PBXFileReference;
-			name = ccbase.c;
-			path = ../lib/krb5/ccache/ccbase.c;
-			refType = 2;
+			path = ccbase.c;
+			refType = 4;
 		};
 		17447865FF60323212120111 = {
 			isa = PBXFileReference;
-			name = cccopy.c;
-			path = ../lib/krb5/ccache/cccopy.c;
-			refType = 2;
+			path = cccopy.c;
+			refType = 4;
 		};
 		17447866FF60323212120111 = {
 			isa = PBXFileReference;
-			name = ccdefault.c;
-			path = ../lib/krb5/ccache/ccdefault.c;
-			refType = 2;
+			path = ccdefault.c;
+			refType = 4;
 		};
 		17447867FF60323212120111 = {
 			isa = PBXFileReference;
-			name = ccdefops.c;
-			path = ../lib/krb5/ccache/ccdefops.c;
-			refType = 2;
+			path = ccdefops.c;
+			refType = 4;
 		};
 		1744786BFF60323212120111 = {
 			isa = PBXFileReference;
-			name = cc_retr.c;
-			path = ../lib/krb5/ccache/cc_retr.c;
-			refType = 2;
+			path = cc_retr.c;
+			refType = 4;
 		};
 		1744786FFF60323212120111 = {
 			isa = PBXFileReference;
-			name = ser_cc.c;
-			path = ../lib/krb5/ccache/ser_cc.c;
-			refType = 2;
+			path = ser_cc.c;
+			refType = 4;
 		};
 		17447870FF60323212120111 = {
 			isa = PBXFileReference;
-			name = setenv.c;
-			path = ../lib/krb5/posix/setenv.c;
-			refType = 2;
+			path = setenv.c;
+			refType = 4;
 		};
 		17447873FF60323212120111 = {
 			fileRef = 17447870FF60323212120111;
@@ -7544,27 +7221,71 @@
 			isa = PBXGroup;
 			refType = 4;
 		};
+		4E933A40FF828AEA12120111 = {
+			isa = PBXFileReference;
+			path = et.pbexp;
+			refType = 4;
+		};
+		4E933A41FF828AEA12120111 = {
+			fileRef = 4E933A40FF828AEA12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		4E933A42FF828B8512120111 = {
+			isa = PBXFileReference;
+			path = profile.pbexp;
+			refType = 4;
+		};
+		4E933A43FF828B8612120111 = {
+			fileRef = 4E933A42FF828B8512120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		4E933A44FF82905F12120111 = {
+			isa = PBXFileReference;
+			path = et_c.awk;
+			refType = 4;
+		};
+		4E933A45FF82905F12120111 = {
+			isa = PBXFileReference;
+			path = et_h.awk;
+			refType = 4;
+		};
 		5C1372E8FF6546C412120111 = {
 			children = (
 				012574A8FF7A9C8212120111,
 				5C1372EAFF6546C412120111,
 				5C137376FF654C0212120111,
 				5C137384FF6824DB12120111,
+				61622FDEFF88D9AF12120111,
+				61622FD8FF85304012120111,
 				5C1372F4FF65475012120111,
 				5C1372F5FF65475012120111,
+				5C1372FCFF654A8C12120111,
 				5C137379FF659EB012120111,
 				5C13737BFF65A0CC12120111,
 				5C13737FFF65A41212120111,
 				00CFB470FF6D8BB312120111,
-				5C1372FCFF654A8C12120111,
 				5C137382FF67F12E12120111,
 				5C1372F6FF65475012120111,
 				5C1372F7FF65475012120111,
 			);
 			isa = PBXGroup;
 			name = GSS;
-			path = "";
-			refType = 4;
+			path = ../lib/gssapi;
+			refType = 2;
 		};
 		5C1372EAFF6546C412120111 = {
 			isa = PBXFrameworkReference;
@@ -7582,13 +7303,14 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/GSSLibrary.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/Kerberos5.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = "-init ___initializeGSS";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -7675,6 +7397,7 @@
 		5C1372EFFF6546C412120111 = {
 			buildActionMask = 2147483647;
 			files = (
+				61622FD9FF85304012120111,
 			);
 			isa = PBXResourcesBuildPhase;
 			name = "Bundle Resources";
@@ -7741,6 +7464,7 @@
 				5C137371FF654A8C12120111,
 				5C137375FF654AE912120111,
 				00CFB46FFF6D85D612120111,
+				61622FDFFF88D9AF12120111,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -7775,15 +7499,13 @@
 		};
 		5C1372F4FF65475012120111 = {
 			isa = PBXFileReference;
-			name = gss_libinit.c;
-			path = ../lib/gssapi/gss_libinit.c;
-			refType = 2;
+			path = gss_libinit.c;
+			refType = 4;
 		};
 		5C1372F5FF65475012120111 = {
 			isa = PBXFileReference;
-			name = gss_libinit.h;
-			path = ../lib/gssapi/gss_libinit.h;
-			refType = 2;
+			path = gss_libinit.h;
+			refType = 4;
 		};
 		5C1372F6FF65475012120111 = {
 			children = (
@@ -7806,8 +7528,7 @@
 				5C13730AFF654A8C12120111,
 			);
 			isa = PBXGroup;
-			name = generic;
-			path = "";
+			path = generic;
 			refType = 4;
 		};
 		5C1372F7FF65475012120111 = {
@@ -7859,7 +7580,7 @@
 				5C137335FF654A8C12120111,
 			);
 			isa = PBXGroup;
-			name = krb5;
+			path = krb5;
 			refType = 4;
 		};
 		5C1372F8FF65475012120111 = {
@@ -7889,363 +7610,303 @@
 		};
 		5C1372FAFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = disp_com_err_status.c;
-			path = ../lib/gssapi/generic/disp_com_err_status.c;
-			refType = 2;
+			path = disp_com_err_status.c;
+			refType = 4;
 		};
 		5C1372FBFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = disp_major_status.c;
-			path = ../lib/gssapi/generic/disp_major_status.c;
-			refType = 2;
+			path = disp_major_status.c;
+			refType = 4;
 		};
 		5C1372FCFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi.h;
-			path = ../lib/gssapi/gssapi.h;
-			refType = 2;
+			path = gssapi.h;
+			refType = 4;
 		};
 		5C1372FDFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi_err_generic.c;
-			path = ../lib/gssapi/generic/gssapi_err_generic.c;
-			refType = 2;
+			path = gssapi_err_generic.c;
+			refType = 4;
 		};
 		5C1372FEFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi_err_generic.h;
-			path = ../lib/gssapi/generic/gssapi_err_generic.h;
-			refType = 2;
+			path = gssapi_err_generic.h;
+			refType = 4;
 		};
 		5C1372FFFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi_generic.c;
-			path = ../lib/gssapi/generic/gssapi_generic.c;
-			refType = 2;
+			path = gssapi_generic.c;
+			refType = 4;
 		};
 		5C137300FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi_generic.h;
-			path = ../lib/gssapi/generic/gssapi_generic.h;
-			refType = 2;
+			path = gssapi_generic.h;
+			refType = 4;
 		};
 		5C137301FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = oid_ops.c;
-			path = ../lib/gssapi/generic/oid_ops.c;
-			refType = 2;
+			path = oid_ops.c;
+			refType = 4;
 		};
 		5C137302FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = rel_buffer.c;
-			path = ../lib/gssapi/generic/rel_buffer.c;
-			refType = 2;
+			path = rel_buffer.c;
+			refType = 4;
 		};
 		5C137303FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = rel_oid_set.c;
-			path = ../lib/gssapi/generic/rel_oid_set.c;
-			refType = 2;
+			path = rel_oid_set.c;
+			refType = 4;
 		};
 		5C137304FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_buffer.c;
-			path = ../lib/gssapi/generic/util_buffer.c;
-			refType = 2;
+			path = util_buffer.c;
+			refType = 4;
 		};
 		5C137305FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_dup.c;
-			path = ../lib/gssapi/generic/util_dup.c;
-			refType = 2;
+			path = util_dup.c;
+			refType = 4;
 		};
 		5C137306FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_oid.c;
-			path = ../lib/gssapi/generic/util_oid.c;
-			refType = 2;
+			path = util_oid.c;
+			refType = 4;
 		};
 		5C137307FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_ordering.c;
-			path = ../lib/gssapi/generic/util_ordering.c;
-			refType = 2;
+			path = util_ordering.c;
+			refType = 4;
 		};
 		5C137308FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_set.c;
-			path = ../lib/gssapi/generic/util_set.c;
-			refType = 2;
+			path = util_set.c;
+			refType = 4;
 		};
 		5C137309FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_token.c;
-			path = ../lib/gssapi/generic/util_token.c;
-			refType = 2;
+			path = util_token.c;
+			refType = 4;
 		};
 		5C13730AFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_validate.c;
-			path = ../lib/gssapi/generic/util_validate.c;
-			refType = 2;
+			path = util_validate.c;
+			refType = 4;
 		};
 		5C13730BFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = accept_sec_context.c;
-			path = ../lib/gssapi/krb5/accept_sec_context.c;
-			refType = 2;
+			path = accept_sec_context.c;
+			refType = 4;
 		};
 		5C13730CFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = acquire_cred.c;
-			path = ../lib/gssapi/krb5/acquire_cred.c;
-			refType = 2;
+			path = acquire_cred.c;
+			refType = 4;
 		};
 		5C13730DFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = add_cred.c;
-			path = ../lib/gssapi/krb5/add_cred.c;
-			refType = 2;
+			path = add_cred.c;
+			refType = 4;
 		};
 		5C13730EFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = canon_name.c;
-			path = ../lib/gssapi/krb5/canon_name.c;
-			refType = 2;
+			path = canon_name.c;
+			refType = 4;
 		};
 		5C13730FFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = compare_name.c;
-			path = ../lib/gssapi/krb5/compare_name.c;
-			refType = 2;
+			path = compare_name.c;
+			refType = 4;
 		};
 		5C137310FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = context_time.c;
-			path = ../lib/gssapi/krb5/context_time.c;
-			refType = 2;
+			path = context_time.c;
+			refType = 4;
 		};
 		5C137311FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = copy_ccache.c;
-			path = ../lib/gssapi/krb5/copy_ccache.c;
-			refType = 2;
+			path = copy_ccache.c;
+			refType = 4;
 		};
 		5C137312FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = delete_sec_context.c;
-			path = ../lib/gssapi/krb5/delete_sec_context.c;
-			refType = 2;
+			path = delete_sec_context.c;
+			refType = 4;
 		};
 		5C137313FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = disp_name.c;
-			path = ../lib/gssapi/krb5/disp_name.c;
-			refType = 2;
+			path = disp_name.c;
+			refType = 4;
 		};
 		5C137314FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = disp_status.c;
-			path = ../lib/gssapi/krb5/disp_status.c;
-			refType = 2;
+			path = disp_status.c;
+			refType = 4;
 		};
 		5C137315FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = duplicate_name.c;
-			path = ../lib/gssapi/krb5/duplicate_name.c;
-			refType = 2;
+			path = duplicate_name.c;
+			refType = 4;
 		};
 		5C137316FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = export_name.c;
-			path = ../lib/gssapi/krb5/export_name.c;
-			refType = 2;
+			path = export_name.c;
+			refType = 4;
 		};
 		5C137317FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = export_sec_context.c;
-			path = ../lib/gssapi/krb5/export_sec_context.c;
-			refType = 2;
+			path = export_sec_context.c;
+			refType = 4;
 		};
 		5C137318FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = get_tkt_flags.c;
-			path = ../lib/gssapi/krb5/get_tkt_flags.c;
-			refType = 2;
+			path = get_tkt_flags.c;
+			refType = 4;
 		};
 		5C137319FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi_krb5.c;
-			path = ../lib/gssapi/krb5/gssapi_krb5.c;
-			refType = 2;
+			path = gssapi_krb5.c;
+			refType = 4;
 		};
 		5C13731AFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = gssapi_krb5.h;
-			path = ../lib/gssapi/krb5/gssapi_krb5.h;
-			refType = 2;
+			path = gssapi_krb5.h;
+			refType = 4;
 		};
 		5C13731BFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = import_name.c;
-			path = ../lib/gssapi/krb5/import_name.c;
-			refType = 2;
+			path = import_name.c;
+			refType = 4;
 		};
 		5C13731CFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = import_sec_context.c;
-			path = ../lib/gssapi/krb5/import_sec_context.c;
-			refType = 2;
+			path = import_sec_context.c;
+			refType = 4;
 		};
 		5C13731DFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = indicate_mechs.c;
-			path = ../lib/gssapi/krb5/indicate_mechs.c;
-			refType = 2;
+			path = indicate_mechs.c;
+			refType = 4;
 		};
 		5C13731EFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = init_sec_context.c;
-			path = ../lib/gssapi/krb5/init_sec_context.c;
-			refType = 2;
+			path = init_sec_context.c;
+			refType = 4;
 		};
 		5C13731FFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = inq_context.c;
-			path = ../lib/gssapi/krb5/inq_context.c;
-			refType = 2;
+			path = inq_context.c;
+			refType = 4;
 		};
 		5C137320FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = inq_cred.c;
-			path = ../lib/gssapi/krb5/inq_cred.c;
-			refType = 2;
+			path = inq_cred.c;
+			refType = 4;
 		};
 		5C137321FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = inq_names.c;
-			path = ../lib/gssapi/krb5/inq_names.c;
-			refType = 2;
+			path = inq_names.c;
+			refType = 4;
 		};
 		5C137322FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = k5seal.c;
-			path = ../lib/gssapi/krb5/k5seal.c;
-			refType = 2;
+			path = k5seal.c;
+			refType = 4;
 		};
 		5C137323FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = k5unseal.c;
-			path = ../lib/gssapi/krb5/k5unseal.c;
-			refType = 2;
+			path = k5unseal.c;
+			refType = 4;
 		};
 		5C137324FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = krb5_gss_glue.c;
-			path = ../lib/gssapi/krb5/krb5_gss_glue.c;
-			refType = 2;
+			path = krb5_gss_glue.c;
+			refType = 4;
 		};
 		5C137325FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = process_context_token.c;
-			path = ../lib/gssapi/krb5/process_context_token.c;
-			refType = 2;
+			path = process_context_token.c;
+			refType = 4;
 		};
 		5C137326FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = rel_cred.c;
-			path = ../lib/gssapi/krb5/rel_cred.c;
-			refType = 2;
+			path = rel_cred.c;
+			refType = 4;
 		};
 		5C137327FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = rel_name.c;
-			path = ../lib/gssapi/krb5/rel_name.c;
-			refType = 2;
+			path = rel_name.c;
+			refType = 4;
 		};
 		5C137328FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = rel_oid.c;
-			path = ../lib/gssapi/krb5/rel_oid.c;
-			refType = 2;
+			path = rel_oid.c;
+			refType = 4;
 		};
 		5C137329FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = seal.c;
-			path = ../lib/gssapi/krb5/seal.c;
-			refType = 2;
+			path = seal.c;
+			refType = 4;
 		};
 		5C13732AFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = ser_sctx.c;
-			path = ../lib/gssapi/krb5/ser_sctx.c;
-			refType = 2;
+			path = ser_sctx.c;
+			refType = 4;
 		};
 		5C13732BFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = set_ccache.c;
-			path = ../lib/gssapi/krb5/set_ccache.c;
-			refType = 2;
+			path = set_ccache.c;
+			refType = 4;
 		};
 		5C13732CFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = sign.c;
-			path = ../lib/gssapi/krb5/sign.c;
-			refType = 2;
+			path = sign.c;
+			refType = 4;
 		};
 		5C13732DFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = unseal.c;
-			path = ../lib/gssapi/krb5/unseal.c;
-			refType = 2;
+			path = unseal.c;
+			refType = 4;
 		};
 		5C13732EFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_cksum.c;
-			path = ../lib/gssapi/krb5/util_cksum.c;
-			refType = 2;
+			path = util_cksum.c;
+			refType = 4;
 		};
 		5C13732FFF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_crypt.c;
-			path = ../lib/gssapi/krb5/util_crypt.c;
-			refType = 2;
+			path = util_crypt.c;
+			refType = 4;
 		};
 		5C137330FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_ctxsetup.c;
-			path = ../lib/gssapi/krb5/util_ctxsetup.c;
-			refType = 2;
+			path = util_ctxsetup.c;
+			refType = 4;
 		};
 		5C137331FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_seed.c;
-			path = ../lib/gssapi/krb5/util_seed.c;
-			refType = 2;
+			path = util_seed.c;
+			refType = 4;
 		};
 		5C137332FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = util_seqnum.c;
-			path = ../lib/gssapi/krb5/util_seqnum.c;
-			refType = 2;
+			path = util_seqnum.c;
+			refType = 4;
 		};
 		5C137333FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = val_cred.c;
-			path = ../lib/gssapi/krb5/val_cred.c;
-			refType = 2;
+			path = val_cred.c;
+			refType = 4;
 		};
 		5C137334FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = verify.c;
-			path = ../lib/gssapi/krb5/verify.c;
-			refType = 2;
+			path = verify.c;
+			refType = 4;
 		};
 		5C137335FF654A8C12120111 = {
 			isa = PBXFileReference;
-			name = wrap_size_limit.c;
-			path = ../lib/gssapi/krb5/wrap_size_limit.c;
-			refType = 2;
+			path = wrap_size_limit.c;
+			refType = 4;
 		};
 		5C137336FF654A8C12120111 = {
 			fileRef = 5C1372FCFF654A8C12120111;
@@ -9083,15 +8744,13 @@
 		};
 		5C137372FF654AE812120111 = {
 			isa = PBXFileReference;
-			name = gssapi_err_krb5.c;
-			path = ../lib/gssapi/krb5/gssapi_err_krb5.c;
-			refType = 2;
+			path = gssapi_err_krb5.c;
+			refType = 4;
 		};
 		5C137373FF654AE812120111 = {
 			isa = PBXFileReference;
-			name = gssapi_err_krb5.h;
-			path = ../lib/gssapi/krb5/gssapi_err_krb5.h;
-			refType = 2;
+			path = gssapi_err_krb5.h;
+			refType = 4;
 		};
 		5C137374FF654AE912120111 = {
 			fileRef = 5C137373FF654AE812120111;
@@ -9120,9 +8779,8 @@
 		};
 		5C137376FF654C0212120111 = {
 			isa = PBXFrameworkReference;
-			name = ComErr.framework;
-			path = build/ComErr.framework;
-			refType = 4;
+			path = ComErr.framework;
+			refType = 3;
 		};
 		5C137377FF654C0212120111 = {
 			isa = PBXTargetDependency;
@@ -9267,140 +8925,118 @@
 				5C13739DFF682C2F12120111,
 			);
 			isa = PBXGroup;
-			name = file;
+			path = file;
 			refType = 4;
 		};
 		5C137388FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc.h;
-			path = ../lib/krb5/ccache/file/fcc.h;
-			refType = 2;
+			path = fcc.h;
+			refType = 4;
 		};
 		5C137389FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_close.c;
-			path = ../lib/krb5/ccache/file/fcc_close.c;
-			refType = 2;
+			path = fcc_close.c;
+			refType = 4;
 		};
 		5C13738AFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_defops.c;
-			path = ../lib/krb5/ccache/file/fcc_defops.c;
-			refType = 2;
+			path = fcc_defops.c;
+			refType = 4;
 		};
 		5C13738BFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_destry.c;
-			path = ../lib/krb5/ccache/file/fcc_destry.c;
-			refType = 2;
+			path = fcc_destry.c;
+			refType = 4;
 		};
 		5C13738CFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_errs.c;
-			path = ../lib/krb5/ccache/file/fcc_errs.c;
-			refType = 2;
+			path = fcc_errs.c;
+			refType = 4;
 		};
 		5C13738DFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_eseq.c;
-			path = ../lib/krb5/ccache/file/fcc_eseq.c;
-			refType = 2;
+			path = fcc_eseq.c;
+			refType = 4;
 		};
 		5C13738EFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_gennew.c;
-			path = ../lib/krb5/ccache/file/fcc_gennew.c;
-			refType = 2;
+			path = fcc_gennew.c;
+			refType = 4;
 		};
 		5C13738FFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_getnam.c;
-			path = ../lib/krb5/ccache/file/fcc_getnam.c;
-			refType = 2;
+			path = fcc_getnam.c;
+			refType = 4;
 		};
 		5C137390FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_gprin.c;
-			path = ../lib/krb5/ccache/file/fcc_gprin.c;
-			refType = 2;
+			path = fcc_gprin.c;
+			refType = 4;
 		};
 		5C137391FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_init.c;
-			path = ../lib/krb5/ccache/file/fcc_init.c;
-			refType = 2;
+			path = fcc_init.c;
+			refType = 4;
 		};
 		5C137392FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_maybe.c;
-			path = ../lib/krb5/ccache/file/fcc_maybe.c;
-			refType = 2;
+			path = fcc_maybe.c;
+			refType = 4;
 		};
 		5C137393FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_nseq.c;
-			path = ../lib/krb5/ccache/file/fcc_nseq.c;
-			refType = 2;
+			path = fcc_nseq.c;
+			refType = 4;
 		};
 		5C137394FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_ops.c;
-			path = ../lib/krb5/ccache/file/fcc_ops.c;
-			refType = 2;
+			path = fcc_ops.c;
+			refType = 4;
 		};
 		5C137395FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = "fcc-proto.h";
-			path = "../lib/krb5/ccache/file/fcc-proto.h";
-			refType = 2;
+			path = "fcc-proto.h";
+			refType = 4;
 		};
 		5C137396FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_read.c;
-			path = ../lib/krb5/ccache/file/fcc_read.c;
-			refType = 2;
+			path = fcc_read.c;
+			refType = 4;
 		};
 		5C137397FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_reslv.c;
-			path = ../lib/krb5/ccache/file/fcc_reslv.c;
-			refType = 2;
+			path = fcc_reslv.c;
+			refType = 4;
 		};
 		5C137398FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_retrv.c;
-			path = ../lib/krb5/ccache/file/fcc_retrv.c;
-			refType = 2;
+			path = fcc_retrv.c;
+			refType = 4;
 		};
 		5C137399FF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_sflags.c;
-			path = ../lib/krb5/ccache/file/fcc_sflags.c;
-			refType = 2;
+			path = fcc_sflags.c;
+			refType = 4;
 		};
 		5C13739AFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_skip.c;
-			path = ../lib/krb5/ccache/file/fcc_skip.c;
-			refType = 2;
+			path = fcc_skip.c;
+			refType = 4;
 		};
 		5C13739BFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_sseq.c;
-			path = ../lib/krb5/ccache/file/fcc_sseq.c;
-			refType = 2;
+			path = fcc_sseq.c;
+			refType = 4;
 		};
 		5C13739CFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_store.c;
-			path = ../lib/krb5/ccache/file/fcc_store.c;
-			refType = 2;
+			path = fcc_store.c;
+			refType = 4;
 		};
 		5C13739DFF682C2F12120111 = {
 			isa = PBXFileReference;
-			name = fcc_write.c;
-			path = ../lib/krb5/ccache/file/fcc_write.c;
-			refType = 2;
+			path = fcc_write.c;
+			refType = 4;
 		};
 		5C1373B3FF68306D12120111 = {
 			fileRef = 5C137388FF682C2F12120111;
@@ -9724,104 +9360,88 @@
 				5C1373D9FF683B8012120111,
 			);
 			isa = PBXGroup;
-			name = memory;
+			path = memory;
 			refType = 4;
 		};
 		5C1373CAFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc.h;
-			path = ../lib/krb5/ccache/memory/mcc.h;
-			refType = 2;
+			path = mcc.h;
+			refType = 4;
 		};
 		5C1373CBFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_close.c;
-			path = ../lib/krb5/ccache/memory/mcc_close.c;
-			refType = 2;
+			path = mcc_close.c;
+			refType = 4;
 		};
 		5C1373CCFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_destry.c;
-			path = ../lib/krb5/ccache/memory/mcc_destry.c;
-			refType = 2;
+			path = mcc_destry.c;
+			refType = 4;
 		};
 		5C1373CDFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_eseq.c;
-			path = ../lib/krb5/ccache/memory/mcc_eseq.c;
-			refType = 2;
+			path = mcc_eseq.c;
+			refType = 4;
 		};
 		5C1373CEFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_gennew.c;
-			path = ../lib/krb5/ccache/memory/mcc_gennew.c;
-			refType = 2;
+			path = mcc_gennew.c;
+			refType = 4;
 		};
 		5C1373CFFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_getnam.c;
-			path = ../lib/krb5/ccache/memory/mcc_getnam.c;
-			refType = 2;
+			path = mcc_getnam.c;
+			refType = 4;
 		};
 		5C1373D0FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_gprin.c;
-			path = ../lib/krb5/ccache/memory/mcc_gprin.c;
-			refType = 2;
+			path = mcc_gprin.c;
+			refType = 4;
 		};
 		5C1373D1FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_init.c;
-			path = ../lib/krb5/ccache/memory/mcc_init.c;
-			refType = 2;
+			path = mcc_init.c;
+			refType = 4;
 		};
 		5C1373D2FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_nseq.c;
-			path = ../lib/krb5/ccache/memory/mcc_nseq.c;
-			refType = 2;
+			path = mcc_nseq.c;
+			refType = 4;
 		};
 		5C1373D3FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_ops.c;
-			path = ../lib/krb5/ccache/memory/mcc_ops.c;
-			refType = 2;
+			path = mcc_ops.c;
+			refType = 4;
 		};
 		5C1373D4FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = "mcc-proto.h";
-			path = "../lib/krb5/ccache/memory/mcc-proto.h";
-			refType = 2;
+			path = "mcc-proto.h";
+			refType = 4;
 		};
 		5C1373D5FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_reslv.c;
-			path = ../lib/krb5/ccache/memory/mcc_reslv.c;
-			refType = 2;
+			path = mcc_reslv.c;
+			refType = 4;
 		};
 		5C1373D6FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_retrv.c;
-			path = ../lib/krb5/ccache/memory/mcc_retrv.c;
-			refType = 2;
+			path = mcc_retrv.c;
+			refType = 4;
 		};
 		5C1373D7FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_sflags.c;
-			path = ../lib/krb5/ccache/memory/mcc_sflags.c;
-			refType = 2;
+			path = mcc_sflags.c;
+			refType = 4;
 		};
 		5C1373D8FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_sseq.c;
-			path = ../lib/krb5/ccache/memory/mcc_sseq.c;
-			refType = 2;
+			path = mcc_sseq.c;
+			refType = 4;
 		};
 		5C1373D9FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = mcc_store.c;
-			path = ../lib/krb5/ccache/memory/mcc_store.c;
-			refType = 2;
+			path = mcc_store.c;
+			refType = 4;
 		};
 		5C1373DAFF683B8012120111 = {
 			children = (
@@ -9849,140 +9469,118 @@
 				5C1373F0FF683B8012120111,
 			);
 			isa = PBXGroup;
-			name = stdio;
+			path = stdio;
 			refType = 4;
 		};
 		5C1373DBFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc.h;
-			path = ../lib/krb5/ccache/stdio/scc.h;
-			refType = 2;
+			path = scc.h;
+			refType = 4;
 		};
 		5C1373DCFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_close.c;
-			path = ../lib/krb5/ccache/stdio/scc_close.c;
-			refType = 2;
+			path = scc_close.c;
+			refType = 4;
 		};
 		5C1373DDFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_defops.c;
-			path = ../lib/krb5/ccache/stdio/scc_defops.c;
-			refType = 2;
+			path = scc_defops.c;
+			refType = 4;
 		};
 		5C1373DEFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_destry.c;
-			path = ../lib/krb5/ccache/stdio/scc_destry.c;
-			refType = 2;
+			path = scc_destry.c;
+			refType = 4;
 		};
 		5C1373DFFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_errs.c;
-			path = ../lib/krb5/ccache/stdio/scc_errs.c;
-			refType = 2;
+			path = scc_errs.c;
+			refType = 4;
 		};
 		5C1373E0FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_eseq.c;
-			path = ../lib/krb5/ccache/stdio/scc_eseq.c;
-			refType = 2;
+			path = scc_eseq.c;
+			refType = 4;
 		};
 		5C1373E1FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_gennew.c;
-			path = ../lib/krb5/ccache/stdio/scc_gennew.c;
-			refType = 2;
+			path = scc_gennew.c;
+			refType = 4;
 		};
 		5C1373E2FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_getnam.c;
-			path = ../lib/krb5/ccache/stdio/scc_getnam.c;
-			refType = 2;
+			path = scc_getnam.c;
+			refType = 4;
 		};
 		5C1373E3FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_gprin.c;
-			path = ../lib/krb5/ccache/stdio/scc_gprin.c;
-			refType = 2;
+			path = scc_gprin.c;
+			refType = 4;
 		};
 		5C1373E4FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_init.c;
-			path = ../lib/krb5/ccache/stdio/scc_init.c;
-			refType = 2;
+			path = scc_init.c;
+			refType = 4;
 		};
 		5C1373E5FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_maybe.c;
-			path = ../lib/krb5/ccache/stdio/scc_maybe.c;
-			refType = 2;
+			path = scc_maybe.c;
+			refType = 4;
 		};
 		5C1373E6FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_nseq.c;
-			path = ../lib/krb5/ccache/stdio/scc_nseq.c;
-			refType = 2;
+			path = scc_nseq.c;
+			refType = 4;
 		};
 		5C1373E7FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_ops.c;
-			path = ../lib/krb5/ccache/stdio/scc_ops.c;
-			refType = 2;
+			path = scc_ops.c;
+			refType = 4;
 		};
 		5C1373E8FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = "scc-proto.h";
-			path = "../lib/krb5/ccache/stdio/scc-proto.h";
-			refType = 2;
+			path = "scc-proto.h";
+			refType = 4;
 		};
 		5C1373E9FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_read.c;
-			path = ../lib/krb5/ccache/stdio/scc_read.c;
-			refType = 2;
+			path = scc_read.c;
+			refType = 4;
 		};
 		5C1373EAFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_reslv.c;
-			path = ../lib/krb5/ccache/stdio/scc_reslv.c;
-			refType = 2;
+			path = scc_reslv.c;
+			refType = 4;
 		};
 		5C1373EBFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_retrv.c;
-			path = ../lib/krb5/ccache/stdio/scc_retrv.c;
-			refType = 2;
+			path = scc_retrv.c;
+			refType = 4;
 		};
 		5C1373ECFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_sflags.c;
-			path = ../lib/krb5/ccache/stdio/scc_sflags.c;
-			refType = 2;
+			path = scc_sflags.c;
+			refType = 4;
 		};
 		5C1373EDFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_skip.c;
-			path = ../lib/krb5/ccache/stdio/scc_skip.c;
-			refType = 2;
+			path = scc_skip.c;
+			refType = 4;
 		};
 		5C1373EEFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_sseq.c;
-			path = ../lib/krb5/ccache/stdio/scc_sseq.c;
-			refType = 2;
+			path = scc_sseq.c;
+			refType = 4;
 		};
 		5C1373EFFF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_store.c;
-			path = ../lib/krb5/ccache/stdio/scc_store.c;
-			refType = 2;
+			path = scc_store.c;
+			refType = 4;
 		};
 		5C1373F0FF683B8012120111 = {
 			isa = PBXFileReference;
-			name = scc_write.c;
-			path = ../lib/krb5/ccache/stdio/scc_write.c;
-			refType = 2;
+			path = scc_write.c;
+			refType = 4;
 		};
 		5C1373F1FF683B8012120111 = {
 			fileRef = 5C1373CAFF683B8012120111;
@@ -10492,6 +10090,95 @@
 		};
 		5C137416FF683B8012120111 = {
 			fileRef = 5C1373F0FF683B8012120111;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		61622FD1FF82A36412120111 = {
+			isa = PBXFileReference;
+			path = Kerberos5Lib.pbexp;
+			refType = 4;
+		};
+		61622FD2FF82A36412120111 = {
+			fileRef = 61622FD1FF82A36412120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		61622FD8FF85304012120111 = {
+			isa = PBXFileReference;
+			path = GSSLibrary.pbexp;
+			refType = 2;
+		};
+		61622FD9FF85304012120111 = {
+			fileRef = 61622FD8FF85304012120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		61622FDAFF85346F12120111 = {
+			isa = PBXFileReference;
+			path = K5.CFM.c;
+			refType = 4;
+		};
+		61622FDBFF85346F12120111 = {
+			fileRef = 61622FDAFF85346F12120111;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		61622FDCFF8535E112120111 = {
+			isa = PBXFileReference;
+			path = ProfileLib.CFM.c;
+			refType = 2;
+		};
+		61622FDDFF8535E112120111 = {
+			fileRef = 61622FDCFF8535E112120111;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		61622FDEFF88D9AF12120111 = {
+			isa = PBXFileReference;
+			path = GSS.CFM.c;
+			refType = 2;
+		};
+		61622FDFFF88D9AF12120111 = {
+			fileRef = 61622FDEFF88D9AF12120111;
 			isa = PBXBuildFile;
 			settings = {
 				ATTRIBUTES = (
