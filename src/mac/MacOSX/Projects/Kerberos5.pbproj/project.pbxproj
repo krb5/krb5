@@ -4586,6 +4586,7 @@
 				A1AB1FAB05DDC47800526345,
 				A1AB1FAC05DDC47800526345,
 				A1AB1FAD05DDC47800526345,
+				A1D256F206A713A600A9EC13,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6598,6 +6599,46 @@
 			path = Kerberos5Prefix.h;
 			refType = 4;
 			sourceTree = "<group>";
+		};
+		A1D256EA06A7139700A9EC13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D256ED06A713A600A9EC13 = {
+			children = (
+				A1D256EE06A713A600A9EC13,
+				A1D256F106A713A600A9EC13,
+			);
+			isa = PBXGroup;
+			path = support;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D256EE06A713A600A9EC13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D256F106A713A600A9EC13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = threads.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D256F206A713A600A9EC13 = {
+			fileRef = A1D256F106A713A600A9EC13;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		A1F1429E067E5BD500A82808 = {
 			fileEncoding = 30;
@@ -13699,19 +13740,12 @@
 		};
 		F51736C803F1B65B01120114 = {
 			children = (
-				F51736DD03F1B65B01120114,
+				A1D256EA06A7139700A9EC13,
 				F51737AF03F1B65B01120114,
+				A1D256ED06A713A600A9EC13,
 			);
 			isa = PBXGroup;
 			path = util;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F51736DD03F1B65B01120114 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text;
-			path = ChangeLog;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -14201,8 +14235,6 @@
 			sourceTree = "<group>";
 		};
 		F5CFD370022D854401120112 = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -14215,8 +14247,6 @@
 			name = Development;
 		};
 		F5CFD371022D854401120112 = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
