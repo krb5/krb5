@@ -1030,8 +1030,8 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 }
 #endif
 
-#if defined(HAVE_FAKE_GETADDRINFO) || defined(NEED_FAKE_GETNAMEINFO)
 #include <errno.h>
+#if defined(HAVE_FAKE_GETADDRINFO) || defined(NEED_FAKE_GETNAMEINFO)
 
 static inline
 char *gai_strerror (int code)
