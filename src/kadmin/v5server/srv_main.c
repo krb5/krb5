@@ -64,7 +64,11 @@ static const char *key_msg =		"key and database";
 static const char *server_name_msg =	"Kerberos V5 administrative server";
 
 char *programname = (char *) NULL;
-static jmp_buf	terminal_jmp;
+#if	POSIX_SETJMP
+static sigjmp_buf	terminal_jmp;
+#else	/* POSIX_SETJMP */
+static jmp_buf		terminal_jmp;
+#endif	/* POSIX_SETJMP */
 
 static void
 usage(prog)

@@ -109,7 +109,11 @@ static int		net_slaves_active = 0;
 static int		net_max_slaves = 0;
 static net_slave_info	*net_slave_table = (net_slave_info *) NULL;
 
-static jmp_buf	shutdown_jmp;
+#if	POSIX_SETJMP
+static sigjmp_buf	shutdown_jmp;
+#else	/* POSIX_SETJMP */
+static jmp_buf		shutdown_jmp;
+#endif	/* POSIX_SETJMP */
 
 extern char *programname;
 

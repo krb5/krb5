@@ -52,7 +52,11 @@ extern char *programname;
 
 static int	proto_proto_timeout = -1;
 static int	proto_debug_level = 0;
-static jmp_buf	timeout_jmp;
+#if	POSIX_SETJMP
+static sigjmp_buf	timeout_jmp;
+#else	/* POSIX_SETJMP */
+static jmp_buf		timeout_jmp;
+#endif	/* POSIX_SETJMP */
 
 static krb5_sigtype
 proto_alarmclock(signo)
