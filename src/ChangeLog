@@ -1,3 +1,8 @@
+Fri Dec 30 17:05:12 1994  Richard Basch  (probe@tardis)
+
+	* aclocal.m4
+	  	CHECK_UTMP needs to #include <sys/types.h> for its tests
+
 Tue Dec 27 06:10:13 1994  Richard Basch  (probe@tardis)
 
 	* aclocal.m4

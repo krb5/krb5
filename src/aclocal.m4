@@ -557,7 +557,8 @@ define(CHECK_UTMP,[
 AC_MSG_CHECKING([ut_pid in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_pid,
 [AC_TRY_COMPILE(
-[#include <utmp.h>],
+[#include <sys/types.h>
+#include <utmp.h>],
 [struct utmp ut; ut.ut_pid;],
 krb5_cv_struct_ut_pid=yes, krb5_cv_struct_ut_pid=no)])
 AC_MSG_RESULT($krb5_cv_struct_ut_pid)
@@ -567,7 +568,8 @@ fi
 AC_MSG_CHECKING([ut_type in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_type,
 [AC_TRY_COMPILE(
-[#include <utmp.h>],
+[#include <sys/types.h>
+#include <utmp.h>],
 [struct utmp ut; ut.ut_type;],
 krb5_cv_struct_ut_type=yes, krb5_cv_struct_ut_type=no)])
 AC_MSG_RESULT($krb5_cv_struct_ut_type)
@@ -577,7 +579,8 @@ fi
 AC_MSG_CHECKING([ut_host in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_host,
 [AC_TRY_COMPILE(
-[#include <utmp.h>],
+[#include <sys/types.h>
+#include <utmp.h>],
 [struct utmp ut; ut.ut_host;],
 krb5_cv_struct_ut_host=yes, krb5_cv_struct_ut_host=no)])
 AC_MSG_RESULT($krb5_cv_struct_ut_host)
@@ -587,7 +590,8 @@ fi
 AC_MSG_CHECKING([ut_exit in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_exit,
 [AC_TRY_COMPILE(
-[#include <utmp.h>],
+[#include <sys/types.h>
+#include <utmp.h>],
 [struct utmp ut; ut.ut_exit;],
 krb5_cv_struct_ut_exit=yes, krb5_cv_struct_ut_exit=no)])
 AC_MSG_RESULT($krb5_cv_struct_ut_exit)
