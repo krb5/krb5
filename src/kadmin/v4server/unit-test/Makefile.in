@@ -2,7 +2,15 @@
 # $Id$
 #
 
-check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+check:: check-@DO_TEST@
+
+check-::
+	@echo "+++"
+	@echo "+++ WARNING: kadmin/v4server unit tests not run."
+	@echo "+++ Either Athena compatibility, tcl, runtest, or Perl is unavailable."
+	@echo "+++"
+
+check-ok unit-test:: unit-test-setup unit-test-body unit-test-cleanup
 
 unit-test-setup::
 	$(ENV_SETUP) $(START_SERVERS_LOCAL) -v4files -kdcport 750 -keysalt des-cbc-crc:v4

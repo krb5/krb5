@@ -1,3 +1,10 @@
+Sat Feb 22 15:12:17 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Do not run test suite unless Athena compatibility
+		is specified as well as tcl, Perl, runtest.
+
+	* Makefile.in (check): Do not run tests unless really setup to do so.
+
 Mon Nov 11 20:51:58 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.

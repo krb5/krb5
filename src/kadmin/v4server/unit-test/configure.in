@@ -1,4 +1,18 @@
 AC_INIT(getpid.sh)
 CONFIG_RULES
 AC_CANONICAL_HOST
+ath_compat=
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration],
+ath_compat=compat,)
+
+dnl The following are tests for the presence of programs required for testing 
+AC_CHECK_PROG(RUNTEST,runtest,runtest)
+AC_CHECK_PROG(PERL,perl,perl)
+AC_KRB5_TCL	
+if test "$ath_compat" = compat -a "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
+ 	DO_TEST=ok
+fi
+AC_SUBST(DO_TEST) 
+dnl
 V5_AC_OUTPUT_MAKEFILE
