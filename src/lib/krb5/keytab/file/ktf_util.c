@@ -51,7 +51,13 @@ static char rcsid_ktf_util_c[] =
 #include <krb5/los-proto.h>
 
 #include "ktfile.h"
-#include <netinet/in.h>			/* XXX ip only? */
+#include <krb5/osconf.h>
+
+#ifdef KRB5_USE_INET
+#include <netinet/in.h>
+#else
+ #error find some way to use net-byte-order file version numbers.
+#endif
 
 #define KRB5_KT_VNO	0x0501		/* krb5, keytab v 1 */
 
@@ -69,8 +75,7 @@ int mode;
     krb5_int16 kt_vno = htons(KRB5_KT_VNO);
     int writevno = 0;
 
-/* XXX temp hack on vax */
-#if defined(__STDC__) && !defined(vax)
+#if defined(__STDC__)
     KTFILEP(id) = fopen(KTFILENAME(id),
 			(mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
 #else
@@ -80,7 +85,11 @@ int mode;
     if (!KTFILEP(id)) {
 	if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
 	    /* try making it first time around */
+#if defined(__STDC__)
+	    KTFILEP(id) = fopen(KTFILENAME(id), "ab+");
+#else
 	    KTFILEP(id) = fopen(KTFILENAME(id), "a+");
+#endif
 	    if (!KTFILEP(id))
 		return errno;
 	    writevno = 1;
@@ -151,7 +160,7 @@ krb5_keytab id;
     krb5_error_code kerror;
 
     if (!KTFILEP(id))
-	return 0;			/* XXX? ordering */
+	return 0;
     kerror = krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
     (void) fclose(KTFILEP(id));
     KTFILEP(id) = 0;
@@ -178,14 +187,14 @@ krb5_keytab_entry **entrypp;
     if (!xfread(&count, sizeof(count), 1, KTFILEP(id)))
 	return KRB5_KT_END;
     if (!count || (count < 0))
-	return KRB5_KT_END;		/* XXX */
+	return KRB5_KT_END;
     if (!(ret_entry->principal = (krb5_data **)calloc(count+1, sizeof(krb5_data *))))
 	return ENOMEM;
     for (i = 0; i < count; i++) {
 	if (!xfread(&princ_size, sizeof(princ_size), 1, KTFILEP(id)))
 	    return KRB5_KT_END;
 	if (!princ_size || (princ_size < 0))
-	    return KRB5_KT_END;		/* XXX */
+	    return KRB5_KT_END;
 
 	if (!(ret_entry->principal[i] = (krb5_data *)malloc(sizeof(krb5_data))))
 	    return ENOMEM;
@@ -207,7 +216,7 @@ krb5_keytab_entry **entrypp;
     if (!xfread(&count, sizeof(count), 1, KTFILEP(id)))
 	return KRB5_KT_END;
     if (!count || (count < 0))
-	return KRB5_KT_END;		/* XXX */
+	return KRB5_KT_END;
     ret_entry->key.length = count;
     if (!(ret_entry->key.contents = (krb5_octet *)malloc(count)))
 	return ENOMEM;
