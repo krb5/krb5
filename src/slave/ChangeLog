@@ -1,3 +1,7 @@
+2001-01-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* kpropd.c (load_database): Initialize save_stderr variable.
+
 2001-01-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* kprop.h (KPROP_CKSUMTYPE): Delete unused macro.

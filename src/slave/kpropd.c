@@ -904,7 +904,7 @@ load_database(context, kdb_util, database_file_name)
     char *database_file_name;
 {
 	static char	*edit_av[10];
-	int	error_ret, save_stderr;
+	int	error_ret, save_stderr = -1;
 	int	child_pid;
 	int 	count;
 
