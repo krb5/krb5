@@ -50,20 +50,15 @@ char copyright[] =
  * The configuration is done either by command-line arguments passed by 
  * inetd, or by the name of the daemon. If command-line arguments are
  * present, they  take priority. The options are:
- * -k and -K means check .k5login (using krb5_kuserok).
- * -r and -R means check .rhosts  (using ruserok).
+ * -k means trust krb4 or krb5
+* -5 means trust krb5
+* -4 means trust krb4
+ * -r means trust .rhosts  (using ruserok).
  * -p and -P means prompt for password.
- * The difference between upper and lower case is as follows:
- *    If lower case -r or -k, then as long as one of krb5_kuserok or 
- * ruserok passes, allow login without password. If the -p option is
- * passed with -r or -k, then if both checks fail, allow login but
- * only after password verification. 
- *    If uppercase -R or -K, then those checks must be passed,
- * regardless of other checks, else no login with or without password.
  *    If the -P option is passed, then the password is verified in 
  * addition to all other checks. If -p is not passed with -k or -r,
  * and both checks fail, then login permission is denied.
- *    -x and -e means use encryption.
+ *    - -e means use encryption.
  *
  *    If no command-line arguments are present, then the presence of the 
  * letters kKrRexpP in the program-name before "logind" determine the 
@@ -246,9 +241,9 @@ krb5_context bsd_context;
 
 krb5_keytab keytab = NULL;
 
-#define ARGSTR	"rRkKeExXpPD:S:M:L:?"
+#define ARGSTR	"rk54cepPD:S:M:L:?"
 #else /* !KERBEROS */
-#define ARGSTR	"rRpPD:?"
+#define ARGSTR	"rpPD:?"
 #define (*des_read)  read
 #define (*des_write) write
 #endif /* KERBEROS */
@@ -298,8 +293,20 @@ void	fatal(), fatalperror(), doit(), usage(), do_krb_login();
 int	princ_maps_to_lname(), default_realm();
 krb5_sigtype	cleanup();
 
-int must_pass_rhosts = 0, must_pass_k5 = 0, must_pass_one = 0;
+/* There are two authentication related masks:
+   * auth_ok and auth_sent.
+* The auth_ok mask is the oring of authentication systems any one
+* of which can be used.  
+* The auth_sent mask is the oring of one or more authentication/authorization
+* systems that succeeded.  If the anding
+* of these two masks is true, then authorization is successful.
+*/
+#define AUTH_KRB4 (0x1)
+#define AUTH_KRB5 (0x2)
+#define AUTH_RHOSTS (0x4)
+int auth_ok = 0, auth_sent = 0;
 int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
+int checksum_required = 0;
 
 main(argc, argv)
      int argc;
@@ -313,6 +320,7 @@ main(argc, argv)
     int debug_port = 0;
     int fd;
 #ifdef KERBEROS
+int valid_checksum;
     krb5_error_code status;
 #endif
     
@@ -371,22 +379,28 @@ pty_init();
     while ((ch = getopt(argc, argv, ARGSTR)) != EOF)
       switch (ch) {
 	case 'r':         
-	  must_pass_one = 1; /* If just 'r', any one check must succeed */
-	  break;
-	case 'R':         /* If 'R', must pass .rhosts check*/
-	  must_pass_rhosts = 1;
-	  if (must_pass_one)
-	    must_pass_one = 0;
+	auth_ok |= AUTH_RHOSTS;
 	  break;
 #ifdef KERBEROS
 	case 'k':
-	  must_pass_one = 1; /* If just 'k', any one check must succeed */
-	  break;
-	case 'K':         /* If 'K', must pass .k5login check*/
-	  must_pass_k5 = 1;
-	  if (must_pass_one)
-	    must_pass_one = 0;
-	  break;
+#ifdef KRB5_KRB4_COMPAT
+	auth_ok |= (AUTH_KRB5|AUTH_KRB4);
+#else
+	auth_ok |= AUTH_KRB5;
+#endif /* KRB5_KRB4_COMPAT*/
+	break;
+	
+      case '5':
+	  auth_ok |= AUTH_KRB5;
+	break;
+      case 'c':
+	checksum_required = 1;
+	break;
+#ifdef KRB5_KRB4_COMPAT
+      case '4':
+	auth_ok |= AUTH_KRB4;
+	break;
+#endif
 #ifdef CRYPT
 	case 'x':         /* Use encryption. */
 	case 'X':
@@ -471,7 +485,7 @@ pty_init();
 #ifdef STDERR_FILENO
 	     fatal(STDERR_FILENO, "Can't get peer name of remote host", 1);
 #else
-	     fatal(3, "Can't get peer name of remote host", 1);
+	     fatal(2, "Can't get peer name of remote host", 1);
 #endif
 	 }
 	 fd = 0;
@@ -480,6 +494,10 @@ pty_init();
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE,
 		   (const char *) &on, sizeof (on)) < 0)
       syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
+    if (auth_ok == 0) {
+      syslog(LOG_CRIT, "No authentication systems were enabled; all connections will be refused.");
+      fatal(fd, "All authentication systems disabled; connection refused.");
+    }
     
     doit(fd, &from);
 }
@@ -552,13 +570,13 @@ int syncpipe[2];
       fatal(f, "Permission denied - Malformed from address\n");
     
 #ifdef KERBEROS
-    if (must_pass_k5 || must_pass_one) {
+
 	/* setup des buffers */
-	desinbuf.data = des_inbuf;
-	desoutbuf.data = des_outbuf;    /* Set up des buffers */
-    }
+    desinbuf.data = des_inbuf;
+    desoutbuf.data = des_outbuf;    /* Set up des buffers */
+
     /* Must come from privileged port when .rhosts is being looked into */
-    if ((must_pass_rhosts || must_pass_one) 
+    if ((auth_ok&AUTH_RHOSTS) 
 	&& (fromp->sin_port >= IPPORT_RESERVED ||
 	    fromp->sin_port < IPPORT_RESERVED/2))
       non_privileged = 1;
@@ -1043,10 +1061,10 @@ do_krb_login(host)
 {
     krb5_error_code status;
     struct passwd *pwd;
-    int	passed_krb, passed_rhosts;
     char *msg_fail;
+int valid_checksum;
 
-    passed_krb = passed_rhosts = 0;
+
 
     if (getuid()) {
 	exit(1);
@@ -1054,7 +1072,7 @@ do_krb_login(host)
 
     /* Check authentication. This can be either Kerberos V5, */
     /* Kerberos V4, or host-based. */
-    if (status = recvauth()) {
+    if (status = recvauth(&valid_checksum)) {
 	if (ticket)
 	  krb5_free_ticket(bsd_context, ticket);
 	if (status != 255)
@@ -1074,50 +1092,55 @@ do_krb_login(host)
   }
 #endif
     
-    if (must_pass_k5 || must_pass_one) {
+
 #if (defined(ALWAYS_V5_KUSEROK) || !defined(KRB5_KRB4_COMPAT))
 	/* krb5_kuserok returns 1 if OK */
 	if (client && krb5_kuserok(bsd_context, client, lusername))
-	    passed_krb++;
+	  auth_sent |= ((auth_sys == KRB5_RECVAUTH_V4)?AUTH_KRB4:AUTH_KRB5);
 #else
 	if (auth_sys == KRB5_RECVAUTH_V4) {
 	    /* kuserok returns 0 if OK */
 	    if (!kuserok(v4_kdata, lusername))
-		passed_krb++;
+	      auth_sent |= AUTH_KRB4;
 	} else {
 	    /* krb5_kuserok returns 1 if OK */
 	    if (client && krb5_kuserok(bsd_context, client, lusername))
-		passed_krb++;
+	      auth_sent |= AUTH_KRB5;
 	}
 #endif
-    }
+
     
-    /*  The kerberos authenticated request must pass ruserok also
-	if asked for. */
-    
-    if (!must_pass_k5 &&
-	(must_pass_rhosts || (!passed_krb && must_pass_one))) {
+/* See if we pass .rhosts.*/
+    if (auth_ok&AUTH_RHOSTS) {
 	/* Cannot check .rhosts unless connection from a privileged port. */
-	if (non_privileged) 
-	  fatal(netf, "Permission denied - Connection from bad port");
-
-	pwd = (struct passwd *) getpwnam(lusername);
-	if (pwd &&
-	    !ruserok(rhost_name, pwd->pw_uid == 0, rusername, lusername))
-	    passed_rhosts++;
+	if (!non_privileged) {
+	    pwd = (struct passwd *) getpwnam(lusername);
+	    if (pwd &&
+		!ruserok(rhost_name, pwd->pw_uid == 0, rusername, lusername))
+		auth_sent |= AUTH_RHOSTS;
+	}
     }
 
-    if ((must_pass_k5 && passed_krb) ||
-	(must_pass_rhosts && passed_rhosts) ||
-	(must_pass_one && (passed_krb || passed_rhosts)))
-	    return;
+    if (checksum_required) {
+	if ((auth_sent&AUTH_KRB5)&&(!valid_checksum)) {
+	    syslog(LOG_WARNING, "Client did not supply required checksum.");
+	
+	    fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
+    }
+    else {
+	syslog(LOG_WARNING, "Checksums are only required for v5 clients; other clients cannot produce initial authenticator checksums.");
+    }
+      }
+    if 
+(auth_ok&auth_sent) /* This should be bitwise.*/
+	return;
     
     if (ticket)
 	krb5_free_ticket(bsd_context, ticket);
 
     msg_fail =  (char *) malloc( strlen(krusername) + strlen(lusername) + 80 );
     if (!msg_fail)
-	fatal(netf, "User is not authorized to login to specified account");
+    fatal(netf, "User is not authorized to login to specified account");
     sprintf(msg_fail, "User %s is not authorized to login to account %s",
 	    krusername, lusername);
     fatal(netf, msg_fail);
@@ -1386,10 +1409,10 @@ void usage()
 {
 #ifdef KERBEROS
     syslog(LOG_ERR, 
-	   "usage: klogind [-rRkKxpP] [-D port] or [r/R][k/K][x/e][p/P]logind");
+	   "usage: klogind [-rke45pP] [-D port] or [r/R][k/K][x/e][p/P]logind");
 #else
     syslog(LOG_ERR, 
-	   "usage: rlogind [-rRpP] [-D port] or [r/R][p/P]logind");
+	   "usage: rlogind [-rpP] [-D port] or [r/R][p/P]logind");
 #endif
 }
 
@@ -1440,7 +1463,8 @@ int default_realm(principal)
 					      chars */
 
 krb5_error_code
-recvauth()
+recvauth(valid_checksum)
+int *valid_checksum;
 {
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
@@ -1451,7 +1475,8 @@ recvauth()
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
-
+    krb5_authenticator *authenticator;
+*valid_checksum = 0;
     len = sizeof(laddr);
     if (getsockname(netf, (struct sockaddr *)&laddr, &len)) {
 	    exit(1);
@@ -1510,6 +1535,41 @@ recvauth()
 
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
+    if (status = krb5_auth_con_getauthenticator(bsd_context, auth_context, &authenticator))
+      return status;
+    
+    if (authenticator->checksum) {
+	struct sockaddr_in adr;
+	int adr_length = sizeof(adr);
+      char * chksumbuf = (char *) malloc(strlen(term)+strlen(lusername)+32);
+	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
+    return errno;
+      if (chksumbuf == 0)
+    goto error_cleanup;
+
+      sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
+      strcat(chksumbuf,term);
+      strcat(chksumbuf,lusername);
+
+      if ( status = krb5_verify_checksum(bsd_context,
+					 authenticator->checksum->checksum_type,
+					 authenticator->checksum,
+					 chksumbuf, strlen(chksumbuf),
+					 				       ticket->enc_part2->session->contents, 
+				       ticket->enc_part2->session->length))
+	goto error_cleanup;
+
+ error_cleanup:
+krb5_xfree(chksumbuf);
+      if (status) {
+	krb5_free_authenticator(bsd_context, authenticator);
+	return status;
+      }
+	*valid_checksum = 1;
+}
+    krb5_free_authenticator(bsd_context, authenticator);
+
+
 
 #ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {

@@ -1,8 +1,35 @@
+Wed Jan 24 00:34:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (install): Install as kshd and klogind not krshd and
+ 	krlogind.
+
+	* krshd.c (main): Use krlogind-style options (-54kce)
+
+	* krlogind.c (main): Change option parsing  to support new format.
+	(do_krb_login): Use auth_ok and auth_sent masks instead of passed_*
+
+Tue Jan 23 18:10:55 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krshd.c (recvauth): Use the correct username in strlen call for
+        allocating chksumbuf.
+
+	* krlogind.c (recvauth): Code to copy checksum verification code.
+
+
+Mon Jan 22 15:14:11 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krshd.c (recvauth): Update to expect port in checksum.
+
+	* kcmd.c (kcmd): Include port in string of checksumed data to
+ 	distinguish between encrypted and unencrypted rlogin.
+
+
 Mon Jan 22 18:14:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krcp.c: Use KRB5_STDARG_P.
 
 	* configure.in: Add KRB5_CHECK_PROTOS for prototyps definitions.
+
 
 Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
