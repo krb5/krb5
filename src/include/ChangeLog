@@ -1,3 +1,9 @@
+2002-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for sys/uio.h.
+	* port-sockets.h [!_WIN32 && !HAVE_MACSOCK_H]: Include sys/uio.h
+	if available, to get struct iovec.
+
 2002-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* port-sockets.h (sg_buf): New typedef name for OS-specific

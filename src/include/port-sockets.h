@@ -80,6 +80,9 @@ int win_socket_initialize();
 #include <sys/socket.h>		/* For SOCK_*, AF_*, etc */
 #include <sys/time.h>		/* For struct timeval */
 #include <net/if.h>		/* For struct ifconf, for localaddr.c */
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>		/* For struct iovec, for sg_buf */
+#endif
 
 /*
  * Compatability with WinSock calls on MS-Windows...
