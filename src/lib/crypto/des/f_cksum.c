@@ -47,7 +47,7 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	 * Initialize left and right with the contents of the initial
 	 * vector.
 	 */
-	ip = (const unsigned char *)ivec;
+	ip = ivec;
 	GET_HALF_BLOCK(left, ip);
 	GET_HALF_BLOCK(right, ip);
 
@@ -55,7 +55,7 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	 * Suitably initialized, now work the length down 8 bytes
 	 * at a time.
 	 */
-	ip = (const unsigned char *)in;
+	ip = in;
 	len = length;
 	while (len > 0) {
 		/*
@@ -111,7 +111,7 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	 * Done.  Left and right have the checksum.  Put it into
 	 * the output.
 	 */
-	op = (unsigned char *)out;
+	op = out;
 	PUT_HALF_BLOCK(left, op);
 	PUT_HALF_BLOCK(right, op);
 

@@ -24,13 +24,10 @@
 #include "des_int.h"
 
 int
-mit_des3_key_sched(key,key_sched)
-    mit_des3_cblock key;
-    mit_des3_key_schedule key_sched;
+mit_des3_key_sched(k,schedule)
+    mit_des3_cblock k;
+    mit_des3_key_schedule schedule;
 {
-    mit_des_cblock *k = (mit_des_cblock *)key;
-    mit_des_key_schedule *schedule = (mit_des_key_schedule *)key_sched;
-    
     make_key_sched(k[0],schedule[0]);
     make_key_sched(k[1],schedule[1]);
     make_key_sched(k[2],schedule[2]);

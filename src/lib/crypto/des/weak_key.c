@@ -78,7 +78,7 @@ mit_des_is_weak_key(key)
     const mit_des_cblock *weak_p = weak;
 
     for (i = 0; i < (sizeof(weak)/sizeof(mit_des_cblock)); i++) {
-	if (!memcmp((char *)weak_p++,(char *)key,sizeof(mit_des_cblock)))
+	if (!memcmp(weak_p++,key,sizeof(mit_des_cblock)))
 	    return 1;
     }
 

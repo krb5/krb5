@@ -64,7 +64,7 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		 * Initialize left and right with the contents of the initial
 		 * vector.
 		 */
-		ip = (const unsigned char *)ivec;
+		ip = ivec;
 		GET_HALF_BLOCK(left, ip);
 		GET_HALF_BLOCK(right, ip);
 
@@ -72,8 +72,8 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		 * Suitably initialized, now work the length down 8 bytes
 		 * at a time.
 		 */
-		ip = (unsigned char *)in;
-		op = (unsigned char *)out;
+		ip = *in;
+		op = *out;
 		while (length > 0) {
 			/*
 			 * Get more input, xor it in.  If the length is
@@ -143,15 +143,15 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		/*
 		 * Prime the old cipher with ivec.
 		 */
-		ip = (const unsigned char *)ivec;
+		ip = ivec;
 		GET_HALF_BLOCK(ocipherl, ip);
 		GET_HALF_BLOCK(ocipherr, ip);
 
 		/*
 		 * Now do this in earnest until we run out of length.
 		 */
-		ip = (unsigned char *)in;
-		op = (unsigned char *)out;
+		ip = *in;
+		op = *out;
 		for (;;) {		/* check done inside loop */
 			/*
 			 * Read a block from the input into left and

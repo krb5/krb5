@@ -230,13 +230,13 @@ make_key_sched(key, schedule)
 		/*
 		 * Need a pointer for the keys and a temporary DES_INT32
 		 */
-		register unsigned char *k;
+		const unsigned char *k;
 		register unsigned DES_INT32 tmp;
 
 		/*
 		 * Fetch the key into something we can work with
 		 */
-		k = (unsigned char *)key;
+		k = key;
 
 		/*
 		 * The first permutted choice gives us the 28 bits for C0 and

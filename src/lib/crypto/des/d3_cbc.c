@@ -32,21 +32,22 @@ mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	const mit_des_cblock FAR *in;
 	mit_des_cblock FAR *out;
 	unsigned long length;
-	mit_des_key_schedule ks1, ks2, ks3;
-	mit_des_cblock ivec;
+	const mit_des_key_schedule ks1, ks2, ks3;
+	const mit_des_cblock ivec;
 	int encrypt;
 {
     register unsigned DES_INT32 left, right;
     register unsigned DES_INT32 temp;
-    register unsigned DES_INT32 *kp1, *kp2, *kp3;
-    register unsigned char *ip, *op;
+    const unsigned DES_INT32 *kp1, *kp2, *kp3;
+    const unsigned char *ip;
+    unsigned char *op;
 
     /*
      * Get key pointer here.  This won't need to be reinitialized
      */
-    kp1 = (unsigned DES_INT32 *)ks1;
-    kp2 = (unsigned DES_INT32 *)ks2;
-    kp3 = (unsigned DES_INT32 *)ks3;
+    kp1 = (const unsigned DES_INT32 *)ks1;
+    kp2 = (const unsigned DES_INT32 *)ks2;
+    kp3 = (const unsigned DES_INT32 *)ks3;
 
     /*
      * Deal with encryption and decryption separately.
@@ -56,7 +57,7 @@ mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	 * Initialize left and right with the contents of the initial
 	 * vector.
 	 */
-	ip = (unsigned char *)ivec;
+	ip = ivec;
 	GET_HALF_BLOCK(left, ip);
 	GET_HALF_BLOCK(right, ip);
 
@@ -64,8 +65,8 @@ mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	 * Suitably initialized, now work the length down 8 bytes
 	 * at a time.
 	 */
-	ip = (unsigned char *)in;
-	op = (unsigned char *)out;
+	ip = *in;
+	op = *out;
 	while (length > 0) {
 	    /*
 	     * Get more input, xor it in.  If the length is
@@ -130,15 +131,15 @@ mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	/*
 	 * Prime the old cipher with ivec.
 	 */
-	ip = (unsigned char *)ivec;
+	ip = ivec;
 	GET_HALF_BLOCK(ocipherl, ip);
 	GET_HALF_BLOCK(ocipherr, ip);
 
 	/*
 	 * Now do this in earnest until we run out of length.
 	 */
-	ip = (unsigned char *)in;
-	op = (unsigned char *)out;
+	ip = *in;
+	op = *out;
 	for (;;) {		/* check done inside loop */
 	    /*
 	     * Read a block from the input into left and

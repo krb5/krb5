@@ -217,6 +217,7 @@ krb5_error_code mit_des_combine_subkeys
 int mit_des_pcbc_encrypt ();
 
 /* f_sched.c */
+#define make_key_sched mit_des_make_key_sched
 int make_key_sched (mit_des_cblock, mit_des_key_schedule);
 
 
@@ -248,13 +249,13 @@ extern int mit_des3_ecb_encrypt
 /* d3_cbc.c */
 extern int mit_des3_cbc_encrypt
 	(const mit_des_cblock FAR *in,
-		   mit_des_cblock FAR *out,
-		   unsigned long length,
-		   mit_des_key_schedule ks1,
-		   mit_des_key_schedule ks2,
-		   mit_des_key_schedule ks3,
-		   mit_des_cblock ivec,
-		   int encrypt);
+	 mit_des_cblock FAR *out,
+	 unsigned long length,
+	 const mit_des_key_schedule ks1,
+	 const mit_des_key_schedule ks2,
+	 const mit_des_key_schedule ks3,
+	 const mit_des_cblock ivec,
+	 int encrypt);
 
 /* d3_procky.c */
 extern krb5_error_code mit_des3_process_key
