@@ -376,15 +376,23 @@ void shsFinal(shsInfo)
 	*lp++ = (LONG) 0x80 << 24;
     }
 
-    if (lp > shsInfo->data + 14) {
-	/* Pad out to 64 bytes if not enough room for length words */
-	*lp = 0;
+    /* at this point, lp can point *past* shsInfo->data.  If it points
+       there, just Transform and reset.  If it points to the last
+       element, set that to zero.  This pads out to 64 bytes if not
+       enough room for length words */
+
+    if (lp == shsInfo->data + 15)
+	*lp++ = 0;
+
+    if (lp == shsInfo->data + 16) {
 	SHSTransform(shsInfo->digest, shsInfo->data);
 	lp = shsInfo->data;
     }
+
     /* Pad out to 56 bytes */
     while (lp < shsInfo->data + 14)
 	*lp++ = 0;
+
     /* Append length in bits and transform */
     *lp++ = shsInfo->countHi;
     *lp++ = shsInfo->countLo;
