@@ -1500,7 +1500,8 @@ recvauth(valid_checksum)
          * Assume it to be the same as the first component of the
 	 * principal's name. 
          */
-	strcpy(rusername, v4_kdata->pname);
+	strncpy(rusername, v4_kdata->pname, sizeof(rusername) - 1);
+	rusername[sizeof(rusername) - 1] = '\0';
 
 	status = krb5_425_conv_principal(bsd_context, v4_kdata->pname,
 					 v4_kdata->pinst, v4_kdata->prealm,

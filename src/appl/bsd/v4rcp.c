@@ -783,11 +783,20 @@ void sink(argc, argv)
 			size = size * 10 + (*cp++ - '0');
 		if (*cp++ != ' ')
 			SCREWUP("size not delimited");
-		if (targisdir)
-			(void) sprintf(nambuf, "%s%s%s", targ,
-			    *targ ? "/" : "", cp);
-		else
-			(void) strcpy(nambuf, targ);
+		if (targisdir) {
+			if (strlen(targ) + strlen(cp) + 1 < sizeof(nambuf)) {
+				(void) sprintf(nambuf, "%s%s%s", targ,
+				    *targ ? "/" : "", cp);
+			} else {
+				SCREWUP("target directory name too long");
+			}
+		} else {
+		    if (strlen(targ) + 1 < sizeof(nambuf))
+			(void) strncpy(nambuf, targ, sizeof(nambuf)-1);
+		    else
+			SCREWUP("target pathname too long");
+		}
+		nambuf[sizeof(nambuf)-1] = '\0';
 		exists = stat(nambuf, &stb) == 0;
 		if (cmdbuf[0] == 'D') {
 			if (exists) {

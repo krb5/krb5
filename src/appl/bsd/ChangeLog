@@ -1,3 +1,11 @@
+2000-05-19  Nalin Dahyabhai  <nalin@redhat.com>
+	    Ken Raeburn  <raeburn@mit.edu>
+
+	* krcp.c (sink): bail if the target directory/file name is too long
+	* krlogind.c (recvauth, krb4 compat): truncate user name if the
+	principal's root would be too long to be valid
+	* v4rcp.c (sink): bail if the target directory/file name is too long
+
 2000-05-18  Tom Yu  <tlyu@mit.edu>
 
 	* krshd.c: Shuffle inclusion of defines.h so that some krb5
