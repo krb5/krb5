@@ -61,10 +61,10 @@ int krb524_convert_tkt
 /* encode.c */
 
 int encode_v4tkt
-	KRB5_PROTOTYPE((KTEXT_ST *v4tkt, char *buf, int *encoded_len));
+	KRB5_PROTOTYPE((KTEXT_ST *v4tkt, char *buf, unsigned int *encoded_len));
 
 int decode_v4tkt
-	KRB5_PROTOTYPE((KTEXT_ST *v4tkt, char *buf, int *encoded_len));
+	KRB5_PROTOTYPE((KTEXT_ST *v4tkt, char *buf, unsigned int *encoded_len));
 
 
 /* misc.c */

@@ -166,7 +166,7 @@ krb524_sendto_kdc (context, message, realm, reply)
 		  continue;
 	    }
 	    if (send(socklist[host],
-		       message->data, message->length, 0) != message->length)
+		       message->data, (int) message->length, 0) != message->length)
 	      continue;
 	retry:
 	    waitlen.tv_usec = 0;
@@ -185,7 +185,7 @@ krb524_sendto_kdc (context, message, realm, reply)
 		    goto out;
 		}
 		if ((cc = recv(socklist[host],
-			       reply->data, reply->length, 0)) == SOCKET_ERROR)
+			       reply->data, (int) reply->length, 0)) == SOCKET_ERROR)
 		  {
 		    /* man page says error could be:
 		       EBADF: won't happen

@@ -263,7 +263,7 @@ krb5_error_code do_connection(s, context)
      msgdata.length = MSGSIZE;
 
      saddrlen = sizeof(struct sockaddr);
-     ret = recvfrom(s, msgdata.data, msgdata.length, 0, &saddr, &saddrlen);
+     ret = recvfrom(s, msgdata.data, (int) msgdata.length, 0, &saddr, &saddrlen);
      if (ret < 0) {
        /* if recvfrom fails, we probably don't have a valid saddr to 
 	  use for the reply, so don't even try to respond. */
@@ -361,7 +361,7 @@ error:
 
 write_msg:
      if (ret)
-	  (void) sendto(s, msgdata.data, msgdata.length, 0, &saddr, saddrlen);
+	  (void) sendto(s, msgdata.data, (int) msgdata.length, 0, &saddr, saddrlen);
      else
 	  if (sendto(s, msgdata.data, msgdata.length, 0, &saddr, saddrlen)<0)
 	       ret = errno;

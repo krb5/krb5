@@ -41,12 +41,12 @@
  * the wheel is hidden.
  */
 
-int  encode_v4tkt KRB5_PROTOTYPE((KTEXT_ST *, char *, int *)),
+int  encode_v4tkt KRB5_PROTOTYPE((KTEXT_ST *, char *, unsigned int *)),
      encode_ktext KRB5_PROTOTYPE((char **, int *, KTEXT_ST *)),
      encode_bytes KRB5_PROTOTYPE((char **, int *, char *, int)),
      encode_int32 KRB5_PROTOTYPE((char **, int *, krb5_int32 *));
 
-int  decode_v4tkt KRB5_PROTOTYPE((KTEXT_ST *, char *, int *)),
+int  decode_v4tkt KRB5_PROTOTYPE((KTEXT_ST *, char *, unsigned int *)),
      decode_ktext KRB5_PROTOTYPE((char **, int *, KTEXT_ST *)),
      decode_bytes KRB5_PROTOTYPE((char **, int *, char *, int)),
      decode_int32 KRB5_PROTOTYPE((char **, int *, krb5_int32 *));
@@ -79,7 +79,7 @@ int encode_int32(out, outlen, v)
 int encode_v4tkt(v4tkt, buf, encoded_len)
      KTEXT_ST *v4tkt;
      char *buf;
-     int *encoded_len;
+     unsigned int *encoded_len;
 {
      int buflen, ret;
 
@@ -129,7 +129,7 @@ int decode_int32(out, outlen, v)
 int decode_v4tkt(v4tkt, buf, encoded_len)
      KTEXT_ST *v4tkt;
      char *buf;
-     int *encoded_len;
+     unsigned int *encoded_len;
 {
      int buflen, ret;
 

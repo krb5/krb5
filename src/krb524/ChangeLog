@@ -1,3 +1,14 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* encode.c, krb524.h: encode_v4tkt() and decode_v4tkt() now take
+	unsigned int * lengths.
+
+	* krb524d.c (do_connection): Cast length fields in recvfrom() and
+	sendto() calls to int.
+
+	* sendmsg.c (krb524_sendto_kdc): Cast length fields in recv() and
+	send() calls to int.
+
 2000-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* conv_creds.c (krb524_convert_creds_plain): Use time_to_life()
