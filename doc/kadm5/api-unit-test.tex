@@ -552,6 +552,15 @@ are specified to server-side init.}
 \Status{Implemented}
 }
 
+\numtest{116}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Two calls to init with clients having different privileges
+succeedes, and both clients maintain their correct privileges.}
+\Priority{Bug fix}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
 \numtest{150}{
 \Version{KADM5_API_VERSION_2}
 \Reason{init_with_creds works when given an open ccache with a valid
