@@ -1,3 +1,8 @@
+Wed Apr 5 16:29:25 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5_err.et: added KRB5_REALM_CANT_RESOLVE for more precise 
+           handling of not finding KDC.
+
 Fri Mar 31 16:06:21 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in (BUILDTOP2, etc): Back out previous change so that

@@ -235,7 +235,7 @@ position_dialog (
 		x + cx < 0 ||
 		y + cy < 0)
 		center_dialog(hwnd);
-	else
+    else
 		MoveWindow(hwnd, x, y, cx, cy, TRUE);
 
 } /* position_dialog */
@@ -492,12 +492,45 @@ change_password (
 #endif
 
 #ifdef KRB5     /* FIXME */
-    MessageBox (NULL, "Changing passwords is not yet implemented", "", MB_ICONEXCLAMATION);
-	return TRUE;
+    char *msg;                                  // Message string
+    krb5_error_code code;                       // Return value
+
+    krb5_error_code //FIXME INTERFACE
+    krb5_change_password(
+	   krb5_context context,
+	   char *user,
+	   char *realm,
+	   char *old_password,
+	   char *new_password,
+       char **text);
+
+    code = krb5_change_password (k5_context, name, realm, oldpw, newpw, &msg);
+
+    if (msg != NULL) {
+        MessageBox (NULL, msg, NULL, MB_ICONEXCLAMATION);
+        //WHO FREES THIS SPACE??? free (msg);
+    } else if (code)
+        com_err (NULL, code, "while changing password.");
+
+	return (code == 0);
 #endif
 
 } /* change_password */
-
+/*+*/
+#ifdef KRB5
+krb5_error_code //FIXME INTERFACE
+krb5_change_password(
+    krb5_context context,
+	char *user,
+	char *realm,
+	char *old_password,
+	char *new_password,
+    char **text)
+{
+    *text = "Changing passwords is not yet implemented";
+    return -1;
+}
+#endif /* KRB5 */
 /*+
  * Function: Process WM_COMMAND messages for the password dialog.
  *
@@ -1847,6 +1880,7 @@ kwin_command (
 	HMENU hmenu;
 	char menuitem[MAX_K_NAME_SZ + 3];
 	char copyright[128];
+	int id;
 	#ifdef KRB4
         char instance[INST_SZ];
         int lifetime;
@@ -1859,6 +1893,7 @@ kwin_command (
 		krb5_creds creds;
 		krb5_principal server;
 		krb5_timestamp now;
+        krb5_int32 sec, usec;
 	#endif
 
 	#ifdef KRB4
@@ -1885,6 +1920,8 @@ kwin_command (
 	}
 
 	EnableWindow(GetDlgItem(hwnd, IDD_LOGIN), blogin);
+    id = (blogin) ? IDD_LOGIN : IDD_PASSWORD_CR2;
+    SendMessage(hwnd, DM_SETDEFID, id, 0);
 
 	if (HIWORD(lparam) != BN_CLICKED && HIWORD(lparam) != 0 && HIWORD(lparam) != 1)
 		return FALSE;
@@ -1913,6 +1950,18 @@ kwin_command (
 		PostQuitMessage(0);
 
 		return TRUE;
+
+    case IDD_PASSWORD_CR2:                      // Make CR == TAB
+		id = GetDlgCtrlID(GetFocus());
+		assert(id != 0);
+
+		if (id == IDD_MAX_EDIT)
+			PostMessage(hwnd, WM_NEXTDLGCTL,
+				GetDlgItem(hwnd, IDD_MIN_EDIT), MAKELONG(1, 0));
+		else
+			PostMessage(hwnd, WM_NEXTDLGCTL, 0, 0);
+
+        return TRUE;
 
 	case IDD_LOGIN:
 		if (isblocking)
@@ -1964,8 +2013,14 @@ kwin_command (
 		    	creds.client = principal;
 	    		creds.server = server;
 
-                code = krb5_timeofday(k5_context, &now);
+                //code = krb5_timeofday(k5_context, &now);
+                //if (code) break;
+                code = krb5_us_timeofday(k5_context, &sec, &usec);
                 if (code) break;
+//if (labs(now-sec) > 60*60) {            // Off by more than an hour
+//    MessageBox (NULL, "DEBUG: timeofday != us_timeofday", NULL, 0);
+//    now = sec;
+//}
                 creds.times.starttime = 0;
     			creds.times.endtime = now + 60L * lifetime;
 	    		creds.times.renew_till = 0;

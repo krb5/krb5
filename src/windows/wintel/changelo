@@ -1,3 +1,8 @@
+Wed Apr 5 16:18:30 1995 Keith Vetter (keithv@fusion.com)
+
+	* screen.c, screen.h, dialog.h, telnet.rc: added an about 
+           box with version number.
+
 Fri Mar 31 16:24:52 1995 Keith Vetter (keithv@fusion.com)
 
 	* telnet.c, wt-proto.h: added command line option to set port number

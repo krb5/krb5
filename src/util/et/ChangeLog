@@ -1,3 +1,7 @@
+Wed Apr 5 16:25:35 1995 Keith Vetter (keithv@fusion.com)
+
+	* com_err.h: added FAR to pointers in prototypes.
+
 Wed Mar 29 08:56:47 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in:  Fix up Mac makefile.

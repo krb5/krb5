@@ -1,4 +1,3 @@
-#define IDM_ABOUT 100
 #define IDM_SHOWCONSOLE 700
 
 #define IDM_OPENTELNETDLG           200

@@ -28,7 +28,7 @@
 #define KRB5_FUNC_PROTO__
 
 krb5_error_code INTERFACE krb5_init_context
-	PROTOTYPE((krb5_context *));
+	PROTOTYPE((krb5_context FAR *));
 void INTERFACE krb5_free_context
 	PROTOTYPE((krb5_context));
 
@@ -80,8 +80,8 @@ krb5_error_code INTERFACE krb5_get_credentials
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   krb5_ccache,
-		   krb5_creds *,
-		   krb5_creds **));
+		   krb5_creds FAR *,
+		   krb5_creds FAR * FAR *));
 krb5_error_code	INTERFACE krb5_get_for_creds
 	PROTOTYPE((krb5_context,
 		   const krb5_cksumtype,
@@ -101,20 +101,20 @@ krb5_error_code INTERFACE krb5_mk_req
 		   krb5_data * ));
 krb5_error_code INTERFACE krb5_mk_req_extended
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context **,
+		   krb5_auth_context FAR * FAR *,
 		   const krb5_flags,
-		   krb5_data *,
-		   krb5_creds *,
-		   krb5_data * ));
+		   krb5_data FAR *,
+		   krb5_creds FAR *,
+		   krb5_data FAR * ));
 krb5_error_code INTERFACE krb5_mk_rep
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context *,
 		   krb5_data *));
 krb5_error_code INTERFACE krb5_rd_rep
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
-		   const krb5_data *,
-		   krb5_ap_rep_enc_part **));
+		   krb5_auth_context FAR *,
+		   const krb5_data FAR *,
+		   krb5_ap_rep_enc_part FAR * FAR *));
 krb5_error_code INTERFACE krb5_mk_error
 	PROTOTYPE((krb5_context,
 		   const krb5_error *,
@@ -137,12 +137,12 @@ krb5_error_code INTERFACE krb5_rd_priv
 		   krb5_replay_data *));
 krb5_error_code INTERFACE krb5_parse_name
 	PROTOTYPE((krb5_context,
-		   const char *,
-		   krb5_principal * ));
+		   const char FAR *,
+		   krb5_principal FAR * ));
 krb5_error_code INTERFACE krb5_unparse_name
 	PROTOTYPE((krb5_context,
 		   krb5_const_principal,
-		   char ** ));
+		   char FAR * FAR * ));
 krb5_error_code INTERFACE krb5_unparse_name_ext
 	PROTOTYPE((krb5_context,
 		   krb5_const_principal,
@@ -222,7 +222,7 @@ krb5_error_code INTERFACE krb5_get_server_rcache
     	PROTOTYPE((krb5_context,
 		   const krb5_data *, krb5_rcache *));
 krb5_error_code INTERFACE_C krb5_build_principal_ext
-    	STDARG_P((krb5_context, krb5_principal *, int, const char *, ...));
+    	STDARG_P((krb5_context, krb5_principal FAR *, int, const char FAR *, ...));
 krb5_error_code INTERFACE_C krb5_build_principal
     	STDARG_P((krb5_context, krb5_principal *, int, const char *, ...));
 #ifdef va_start
@@ -298,7 +298,7 @@ char * INTERFACE krb5_cc_default_name
 	PROTOTYPE((krb5_context));
 krb5_error_code INTERFACE krb5_cc_default
 	PROTOTYPE((krb5_context,
-		   krb5_ccache *));
+		   krb5_ccache FAR *));
 unsigned int INTERFACE krb5_get_notification_message
    PROTOTYPE((void));
 
@@ -324,7 +324,7 @@ void INTERFACE krb5_free_authenticator_contents
 		   krb5_authenticator * ));
 void INTERFACE krb5_free_addresses
 	PROTOTYPE((krb5_context,
-		   krb5_address ** ));
+		   krb5_address FAR * FAR * ));
 void INTERFACE krb5_free_address
 	PROTOTYPE((krb5_context,
 		   krb5_address * ));
@@ -378,10 +378,10 @@ void INTERFACE krb5_free_cred
          krb5_cred *));
 void INTERFACE krb5_free_creds
 	PROTOTYPE((krb5_context,
-		   krb5_creds *));
+		   krb5_creds FAR *));
 void INTERFACE krb5_free_cred_contents
 	PROTOTYPE((krb5_context,
-		   krb5_creds *));
+		   krb5_creds FAR *));
 void INTERFACE krb5_free_cred_enc_part
    PROTOTYPE((krb5_context,
          krb5_cred_enc_part *));
@@ -396,7 +396,7 @@ void INTERFACE krb5_free_pa_data
 		   krb5_pa_data **));
 void INTERFACE krb5_free_ap_rep_enc_part
 	PROTOTYPE((krb5_context,
-		   krb5_ap_rep_enc_part *));
+		   krb5_ap_rep_enc_part FAR *));
 void INTERFACE krb5_free_tkt_authent
 	PROTOTYPE((krb5_context,
 		   krb5_tkt_authent *));
@@ -408,15 +408,25 @@ void INTERFACE krb5_free_pwd_sequences
          passwd_phrase_element **));
 
 /* From krb5/os but needed but by the outside world */
+krb5_error_code INTERFACE krb5_us_timeofday
+	PROTOTYPE((krb5_context,
+		   krb5_int32 FAR *,
+		   krb5_int32 FAR * ));
 krb5_error_code INTERFACE krb5_timeofday
 	PROTOTYPE((krb5_context,
-		   krb5_int32 * ));
+		   krb5_int32 FAR * ));
 		 /* get all the addresses of this host */
 krb5_error_code INTERFACE krb5_os_localaddr
-	PROTOTYPE((krb5_address ***));
+	PROTOTYPE((krb5_address FAR * FAR * FAR *));
 krb5_error_code INTERFACE krb5_get_default_realm
 	PROTOTYPE((krb5_context,
-		    char ** ));
+		    char FAR * FAR * ));
+krb5_error_code INTERFACE krb5_sname_to_principal
+        PROTOTYPE((krb5_context,
+		   const char FAR *,
+                   const char FAR *,
+                   krb5_int32,
+                   krb5_principal FAR *));
 
 /* Only put things which don't have pointers to the narrow types in this
    section */
@@ -468,13 +478,13 @@ krb5_error_code INTERFACE krb5_get_in_tkt
 krb5_error_code INTERFACE krb5_get_in_tkt_with_password
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
-		   krb5_address * const *,
-		   krb5_enctype *,
-		   krb5_preauthtype *,
-		   const char *,
+		   krb5_address FAR * const FAR *,
+		   krb5_enctype FAR *,
+		   krb5_preauthtype FAR *,
+		   const char FAR *,
 		   krb5_ccache,
-		   krb5_creds *,
-		   krb5_kdc_rep ** ));
+		   krb5_creds FAR *,
+		   krb5_kdc_rep FAR * FAR * ));
 
 krb5_error_code INTERFACE krb5_get_in_tkt_with_skey
 	PROTOTYPE((krb5_context,
@@ -678,8 +688,6 @@ krb5_error_code INTERFACE krb5_auth_con_getremotesubkey
    PROTOTYPE((krb5_context,
          krb5_auth_context *,
          krb5_keyblock **));
-
-
 
 #define KRB5_REALM_BRANCH_CHAR '.'
 

@@ -57,7 +57,7 @@ typedef krb5_error_code	krb5_magic;
 typedef struct _krb5_data {
     krb5_magic magic;
     int length;
-    char *data;
+    char FAR *data;
 } krb5_data;
 
 /* make const & volatile available without effect */
@@ -70,11 +70,11 @@ typedef struct _krb5_data {
 #endif
 
 #if defined(__STDC__) || defined(HAS_VOID_TYPE)
-typedef	void * krb5_pointer;
-typedef void const * krb5_const_pointer;
+typedef	void FAR * krb5_pointer;
+typedef void const FAR * krb5_const_pointer;
 #else
-typedef char * krb5_pointer;
-typedef char const * krb5_const_pointer;
+typedef char FAR * krb5_pointer;
+typedef char const FAR * krb5_const_pointer;
 #endif
 
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
@@ -98,12 +98,12 @@ typedef char const * krb5_const_pointer;
 typedef struct krb5_principal_data {
     krb5_magic magic;
     krb5_data realm;
-    krb5_data *data;		/* An array of strings */
+    krb5_data FAR *data;		/* An array of strings */
     krb5_int32 length;
     krb5_int32 type;
 } krb5_principal_data;
 
-typedef	krb5_principal_data *krb5_principal;
+typedef	krb5_principal_data FAR * krb5_principal;
 
 /*
  * Per V5 spec on definition of principal types
@@ -123,7 +123,7 @@ typedef	krb5_principal_data *krb5_principal;
 #define KRB5_NT_UID		5
 
 /* constant version thereof: */
-typedef const krb5_principal_data *krb5_const_principal;
+typedef const krb5_principal_data FAR *krb5_const_principal;
 
 #define krb5_princ_realm(context, princ) (&(princ)->realm)
 #define krb5_princ_set_realm(context, princ,value) ((princ)->realm = *(value))

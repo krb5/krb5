@@ -97,33 +97,34 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	    switch (hp->h_addrtype) {
 #ifdef KRB5_USE_INET
 	    case AF_INET:
-		if (udpport)		/* must have gotten a port # */
-		for (j=0; hp->h_addr_list[j]; j++) {
-		    sin_p = (struct sockaddr_in *) &addr_p[out++];
-		    memset ((char *)sin_p, 0, sizeof(struct sockaddr));
-		    sin_p->sin_family = hp->h_addrtype;
-		    sin_p->sin_port = udpport;
-		    memcpy((char *)&sin_p->sin_addr,
-			   (char *)hp->h_addr_list[j],
-			   sizeof(struct in_addr));
-		    if (out >= count) {
-			count *= 2;
-			addr_p = (struct sockaddr *)
-			    realloc ((char *)addr_p,
-				     sizeof(struct sockaddr) * count);
-		    }
-		    if (sec_udpport) {
-			addr_p[out] = addr_p[out-1];
-			sin_p = (struct sockaddr_in *) &addr_p[out++];
-			sin_p->sin_port = sec_udpport;
-			if (out >= count) {
+		if (udpport) {		/* must have gotten a port # */
+		    for (j=0; hp->h_addr_list[j]; j++) {
+		        sin_p = (struct sockaddr_in *) &addr_p[out++];
+		        memset ((char *)sin_p, 0, sizeof(struct sockaddr));
+		        sin_p->sin_family = hp->h_addrtype;
+		        sin_p->sin_port = udpport;
+		        memcpy((char *)&sin_p->sin_addr,
+			       (char *)hp->h_addr_list[j],
+			       sizeof(struct in_addr));
+		        if (out >= count) {
 			    count *= 2;
 			    addr_p = (struct sockaddr *)
-				    realloc ((char *)addr_p,
-					     sizeof(struct sockaddr) * count);
-			}
+			        realloc ((char *)addr_p,
+				         sizeof(struct sockaddr) * count);
+		        }
+		        if (sec_udpport) {
+			    addr_p[out] = addr_p[out-1];
+			    sin_p = (struct sockaddr_in *) &addr_p[out++];
+			    sin_p->sin_port = sec_udpport;
+			    if (out >= count) {
+			        count *= 2;
+			        addr_p = (struct sockaddr *)
+				        realloc ((char *)addr_p,
+					         sizeof(struct sockaddr) * count);
+			    }
+		        }
 		    }
-		}
+                }
 		break;
 #endif
 	    default:
@@ -134,11 +135,12 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	hostlist[i] = 0;
     }
     free ((char *)hostlist);
-				/*
-				 * XXX need to distinguish between
-				 * "can't resolve KDC name" and
-				 * "can't find any KDC names"
-				 */
+
+    if (out == 0) {     /* Couldn't resolve any KDC names */
+        free (addr_p);
+        return KRB5_REALM_CANT_RESOLVE;
+    }
+
     *addr_pp = addr_p;
     *naddrs = out;
     return 0;

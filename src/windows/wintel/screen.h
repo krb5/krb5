@@ -127,6 +127,7 @@ typedef struct CONFIG {
 #define IDM_FONT        100
 #define IDM_BACKSPACE   101
 #define IDM_DELETE      102
+#define IDM_ABOUT       103
 
 #define IDM_COPY        200
 #define IDM_PASTE       201

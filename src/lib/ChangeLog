@@ -1,3 +1,7 @@
+Wed Apr 5 16:27:53 1995 Keith Vetter (keithv@fusion.com)
+
+	* libkrb5.def: added krb5_us_timeofday to export list
+
 Fri Mar 31 16:15:59 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in, configure.in: Move the dependency which causes

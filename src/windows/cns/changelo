@@ -1,3 +1,12 @@
+Wed Apr 5 16:01:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.h, cns.rc, cns.c: GUI changes: re-order and resize
+           edit boxes, add hidden button for better CR handling.
+        * cns.c: used krb5_us_timeofday instead of krb5_timeofday
+           for timezone/clock skew fix (not tested by tytso yet).
+        * cns.c: added password changing stub with correct interface.
+        * cns.def: changed kwin to cns as the name of the program.
+
 Fri Mar 31 16:47:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.c: realms file was not getting saved properly.

@@ -1,3 +1,13 @@
+Wed Apr 5 16:32:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* get_krbh.c: better error handling--old return values were 
+           being overwritten.
+        * locate_kdc.c: added new error code KRB5_REALM_CANT_RESOLVE for
+           when we have realm names but can't find their addresses.
+           Also, fixed up indenting of an if clause.
+        * sendto_kdc.c: added winsock init/destroy calls because some
+            PC tcp/ip stacks seem to need it.
+
 Fri Mar 31 16:30:03 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* realm_dom.c (krb5_get_realm_domain): Don't indent #ifdef's!

@@ -85,7 +85,6 @@ krb5_sendto_kdc (context, message, realm, reply)
     socklist = (SOCKET *)malloc(naddr * sizeof(SOCKET));
     if (socklist == NULL) {
 	krb5_xfree(addr);
-	krb5_xfree(socklist);
 	return ENOMEM;
     }
     for (i = 0; i < naddr; i++)
@@ -97,6 +96,13 @@ krb5_sendto_kdc (context, message, realm, reply)
 	return ENOMEM;
     }
     reply->length = krb5_max_dgram_size;
+
+    if (SOCKET_INITIALIZE()) {  /* PC needs this for some tcp/ip stacks */
+	krb5_xfree(addr);
+	krb5_xfree(socklist);
+	free(reply->data);
+        return SOCKET_ERRNO;
+    }
 
     /*
      * do exponential backoff.
@@ -197,6 +203,7 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     retval = KRB5_KDC_UNREACH;
  out:
+    SOCKET_CLEANUP();                           /* Done with sockets for now */
     for (i = 0; i < naddr; i++)
 	if (socklist[i] != INVALID_SOCKET)
 	    (void) closesocket (socklist[i]);

@@ -2,7 +2,7 @@
 #include <commdlg.h>
 #include <stdlib.h>
 #include <string.h>
-#include "screen.h"
+#include "telnet.h"
 #include "ini.h"
 
 extern char *cInvertedArray;
@@ -758,6 +758,19 @@ LPARAM lParam;                  /* additional information          */
             break;
         case IDM_PASTE:
             Edit_Paste(hWnd);
+            break;
+    	case IDM_ABOUT:
+	        #ifdef KRB4
+        		strcpy(strTmp, "        Kerberos 4 for Windows\n");
+            #endif
+            #ifdef KRB5
+                strcpy(strTmp, "        Kerberos 5 for Windows\n");
+            #endif
+            strcat(strTmp, "\n                Version 1.00\n\n");
+            strcat(strTmp, "          For support, contact:\n");
+            strcat(strTmp, "Cygnus Support");
+            strcat(strTmp, " - (415) 903-1400");
+            MessageBox(NULL, strTmp, "Kerberos", MB_OK);
             break;
 #ifdef _DEBUG
 		case IDM_DEBUG:

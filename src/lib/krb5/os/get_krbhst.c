@@ -85,7 +85,10 @@ krb5_get_krbhst(context, realm, hostlist)
     else {
 	retval = 0;
 	rethlist = (char **)calloc(hlsize, sizeof (*rethlist));
-	for (;;) {
+        if (rethlist == NULL)
+            retval = ENOMEM;
+
+	while (retval == 0) {
 	    if (fgets(filebuf, sizeof(filebuf), config_file) == NULL)
 		break;
 	    if (strncmp(filebuf, realm->data, realm->length))
@@ -144,7 +147,8 @@ krb5_get_krbhst(context, realm, hostlist)
     if (hlindex == 0) {
 	krb5_xfree(rethlist);
 	rethlist = 0;
-	retval = KRB5_REALM_UNKNOWN;
+        if (retval == 0)
+	    retval = KRB5_REALM_UNKNOWN;
     }
     *hostlist = rethlist;
 

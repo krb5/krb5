@@ -50,10 +50,6 @@ krb5_error_code INTERFACE krb5_unlock_file
 	PROTOTYPE((krb5_context,
 		   FILE *,
 		   char * ));
-krb5_error_code INTERFACE krb5_us_timeofday
-	PROTOTYPE((krb5_context,
-		   krb5_int32 *,
-		   krb5_int32 * ));
 int INTERFACE krb5_net_read
 	PROTOTYPE((krb5_context,
 		   int ,
@@ -124,13 +120,6 @@ krb5_error_code INTERFACE krb5_write_message
 	PROTOTYPE((krb5_context,
 		   krb5_pointer, 
 		   krb5_data *));
-
-krb5_error_code INTERFACE krb5_sname_to_principal
-        PROTOTYPE((krb5_context,
-		   const char *,
-                   const char *,
-                   krb5_int32,
-                   krb5_principal *));
 
 krb5_error_code INTERFACE krb5_os_init_context
         PROTOTYPE((krb5_context));

@@ -1,3 +1,11 @@
+Wed Apr 5 16:41:41 1995 Keith Vetter (keithv@fusion.com)
+
+	* los-proto.h, func-proto.h: moved krb5_us_timeofday and 
+           krb5_sname_to_principal from the former to the latter.
+        * base-def.h: added FAR to pointer types for the PC.
+        * func-proto.h: added FAR to pointer types in prototypes but
+           only for functions which are exported.
+
 Fri Mar 31 19:34:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: defined dup to _dup for STDC stuff on Windows
