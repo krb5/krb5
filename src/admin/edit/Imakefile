@@ -25,7 +25,7 @@
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(SSLIB)
 OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o
-SRCS= kdb5_edit.c kdb5_ed_ct.c util.o dump.c
+SRCS= kdb5_edit.c kdb5_ed_ct.c util.c dump.c
 
 all:: kdb5_edit
 
