@@ -15,16 +15,12 @@ static char rcsid_unlock_file_c [] =
 "$Id$";
 #endif	/* lint */
 
-#include <krb5/copyright.h>
-
 #include <stdio.h>
 
-#include <krb5/config.h>
-#include <krb5/base-defs.h>
+#include <krb5/copyright.h>
+#include <krb5/krb5.h>
 #include <krb5/libos.h>
 #include <krb5/libos-proto.h>
-
-#include <stdio.h>
 
 krb5_error_code
 krb5_unlock_file(filep)
