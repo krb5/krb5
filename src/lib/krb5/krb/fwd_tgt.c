@@ -21,9 +21,9 @@
  * or implied warranty.
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include <memory.h>
-#include <netdb.h>
 
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
