@@ -169,15 +169,17 @@ krb5_tkt_authent **authdat;
 	goto cleanup;
     }
 
-    tktauthent->ticket = req->ticket;	/* only temporarily...allocated
-					   below */
 
     /* only check rcache if sender has provided one---some services
        may not be able to use replay caches (such as datagram servers) */
     if (rcache) {
 	krb5_donot_replay rep;
 
-	if (retval = krb5_auth_to_rep(tktauthent, &rep))
+	tktauthent->ticket = req->ticket;	/* Temporary; allocated below */
+	retval = krb5_auth_to_rep(tktauthent, &rep);
+	tktauthent->ticket = 0;			/* Don't allow cleanup to free
+						   original ticket.  */
+	if (retval)
 	    goto cleanup;
 	retval = krb5_rc_store(rcache, &rep);
 	xfree(rep.server);
@@ -185,7 +187,6 @@ krb5_tkt_authent **authdat;
 	if (retval)
 	    goto cleanup;
     }
-    tktauthent->ticket = 0;
 
     /* if starttime is not in ticket, then treat it as authtime */
     if (req->ticket->enc_part2->times.starttime != 0)
