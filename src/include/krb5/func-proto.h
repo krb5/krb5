@@ -209,7 +209,11 @@ krb5_error_code krb5_kt_remove_entry
 krb5_error_code krb5_kt_add_entry
 	PROTOTYPE((krb5_keytab id,
 		   krb5_keytab_entry *entry ));
-
+krb5_error_code krb5_kt_read_service_key
+	PROTOTYPE((krb5_pointer keyprocarg,
+		   krb5_principal principal,
+		   krb5_kvno vno,
+		   krb5_keyblock **key));
 
 /* librc.spec */
 krb5_error_code krb5_rc_initialize
