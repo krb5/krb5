@@ -131,6 +131,13 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
     if (kerror)
 	goto error;
 
+    /*
+     * Coerce the enctype of the output keyblock in case we got an
+     * inexact match on the enctype; this behavior will go away when
+     * the key storage architecture gets redesigned for 1.3.
+     */
+    entry->key.enctype = enctype;
+
     kerror = krb5_copy_principal(context, principal, &entry->principal);
     if (kerror)
 	goto error;
