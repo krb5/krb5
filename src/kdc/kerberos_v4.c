@@ -104,7 +104,7 @@ static Principal a_name_data;	/* for requesting user */
 static Principal s_name_data;	/* for services requested */
 static C_Block session_key;
 
-static char log_text[128];
+static char log_text[512];
 static char *lt;
 static int more;
 
@@ -168,6 +168,12 @@ krb5_data **resp;
     KTEXT_ST v4_pkt;
     char *lrealm;
 
+    /* Check if disabled completely */
+    if (kdc_v4 == KDC_V4_NONE) {
+	(void) klog(L_KRB_PERR, "Disabled KRB V4 request");
+	return KRB5KDC_ERR_BAD_PVNO;
+    }
+
     if ((retval = krb5_timeofday(kdc_context, (krb5_timestamp *) &kerb_time.tv_sec)))
         return(retval);
 
@@ -190,6 +196,10 @@ krb5_data **resp;
     /* convert v5 packet structure to v5's.
      * this copy is gross, but necessary:
      */
+    if (pkt->length > MAX_KTXT_LEN) {
+	    (void) klog(L_KRB_PERR, "V4 request too long.");
+	    return KRB5KRB_ERR_FIELD_TOOLONG;
+    }
     v4_pkt.length = pkt->length;
     memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
@@ -448,6 +458,21 @@ kerb_get_principal(name, inst, principal, maxn, more)
     *more = (int) more5 || (nprinc > maxn);
     return( nprinc);
 }
+
+static void str_length_check(str, max_size)
+	char 	*str;
+	int	max_size;
+{
+	int	i;
+	char	*cp;
+
+	for (i=0, cp = str; i < max_size-1; i++, cp++) {
+		if (*cp == 0)
+			return;
+	}
+	*cp = 0;
+}
+
 void
 kerberos_v4(client, pkt)
     struct sockaddr_in *client;
@@ -528,8 +553,11 @@ kerberos_v4(client, pkt)
 
 	    /* set up and correct for byte order and alignment */
 	    req_name_ptr = (char *) pkt_a_name(pkt);
+	    str_length_check(req_name_ptr, ANAME_SZ);
 	    req_inst_ptr = (char *) pkt_a_inst(pkt);
+	    str_length_check(req_inst_ptr, INST_SZ);
 	    req_realm_ptr = (char *) pkt_a_realm(pkt);
+	    str_length_check(req_realm_ptr, REALM_SZ);
 	    memcpy(&req_time_ws, pkt_time_ws(pkt), sizeof(req_time_ws));
 	    /* time has to be diddled */
 	    if (swap_bytes) {
@@ -540,7 +568,9 @@ kerberos_v4(client, pkt)
 	    req_life = (u_long) (*ptr++);
 
 	    service = ptr;
+	    str_length_check(service, SNAME_SZ);
 	    instance = ptr + strlen(service) + 1;
+	    str_length_check(instance, INST_SZ);
 
 	    rpkt = &rpkt_st;
 
@@ -672,7 +702,9 @@ kerberos_v4(client, pkt)
 	    req_life = (u_long) (*ptr++);
 
 	    service = ptr;
+	    str_length_check(service, SNAME_SZ);
 	    instance = ptr + strlen(service) + 1;
+	    str_length_check(instance, INST_SZ);
 
 	    klog(L_APPL_REQ, "APPL Request %s.%s@%s on %s for %s.%s",
 	     ad->pname, ad->pinst, ad->prealm,

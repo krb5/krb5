@@ -1,3 +1,10 @@
+Wed Feb  4 14:15:20 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (process_v4): Check the length of the incoming V4
+		packet before copying it into the KTEXT_ST variable.
+		(kerberos_v4): Make sure the strings in the V4 request
+		structures aren't no longer than they are allowed to be.
+
 Fri Jan 16 03:33:50 1998  Tom Yu  <tlyu@mit.edu>
 
 	* do_tgs_req.c: Add some explicit settings of errcode so that the
