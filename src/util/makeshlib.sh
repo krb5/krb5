@@ -16,6 +16,15 @@ liblist=$1; shift
 ldflags=$1; shift
 
 case $host in
+*-*-netbsd*)
+	FILES=`for i
+	do
+		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" -e "s;^$i/shared/\$;;" $i/DONE
+	done`
+	echo ld -Bshareable $ldflags -o $library $FILES $libdirfl $liblist
+	ld -Bshareable $ldflags -o $library $FILES $libdirfl $liblist
+	stat=$?
+	;;
 *-*-solaris*)
 	FILES=`for i 
 	do

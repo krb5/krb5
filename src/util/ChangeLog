@@ -1,3 +1,7 @@
+Tue Jul  4 02:11:56 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* makeshlib.sh: Add support for NetBSD shared libraries.
+
 Sun Jul  2 20:42:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* makeshlib.sh (ldflags): Adapt AIX case to work with Gcc.
