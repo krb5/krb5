@@ -4,9 +4,9 @@
  *	$Id$
  */
 
-#ifndef lint
+#if !defined(lint) && !defined(SABER)
 static char rcsid_md4_c[] = "$Id$";
-#endif /* lint */
+#endif	/* !lint & !SABER */
 
 /*
  **********************************************************************
