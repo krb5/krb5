@@ -143,10 +143,11 @@ krb_prof_get_nth(
     }
     if (result == KSUCCESS) {
 	/* Return error rather than truncating. */
+	/* Don't strncpy because retlen is a guess for some callers */
 	if (strlen(value) >= retlen)
 	    result = KFAILURE;
 	else
-	    strncpy(ret, value, retlen);
+	    strcpy(ret, value, retlen);
     }
 cleanup:
     if (name != NULL)
