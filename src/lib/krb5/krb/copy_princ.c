@@ -41,7 +41,7 @@ krb5_principal *outprinc;
     for (nelems = 0; inprinc[nelems]; nelems++)
 	if (retval = krb5_copy_data(inprinc[nelems], &tempprinc[nelems])) {
 	    krb5_free_principal(tempprinc);
-	    return ENOMEM;
+	    return retval;
 	}
 
     *outprinc = tempprinc;
