@@ -49,6 +49,7 @@ VERIFYOBJ = verify.o
 
 DESTESTOBJ = destest.o
 
+all::
 depend:: des.c $(SRCS)
 
 NormalLibraryTarget(des,$(OBJS))
