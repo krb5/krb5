@@ -130,7 +130,12 @@ char *kdb5_edit_Init(argc, argv)
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
 
-    krb5_init_context(&edit_context);
+    retval = krb5_init_context(&edit_context);
+    if (retval) {
+	    fprintf(stderr, "krb5_init_context failed with error #%ld\n",
+		    retval);
+	    exit(1);
+    }
     krb5_init_ets(edit_context);
 
     if (strrchr(argv[0], '/'))

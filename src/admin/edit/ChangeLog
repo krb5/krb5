@@ -1,3 +1,8 @@
+Mon May  1 13:36:41 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_edit.c (kdb5_edit_Init): Check the return code from
+		kdb5_init_context().
+
 Fri Apr 28 18:04:26 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (LOCAL_LIBRARIES): put KRB4_LIB inside KLIB, and put
