@@ -103,6 +103,8 @@
 #ifdef MipsArchitecture
 #define	ArCmd ar cru
 #define LintLibFlag -o
+#undef HasNdbm
+#define HasNdbm NO
 #endif
 
 /* General */
@@ -247,4 +249,10 @@
 #define DefaultCDebugFlags DebuggableCDebugFlags
 #endif
 #define ExtraLoadFlags -Z
+#endif
+
+#if HasNdbm
+#define DbmLib
+#else
+#define DbmLib -ldbm
 #endif
