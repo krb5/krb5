@@ -10,7 +10,8 @@
 
 #ifndef __COM_ERR_H
 
-#ifdef UseStdarg
+/* Imake needs this -- oh well */
+#ifdef __STDC__
 #define STDARG_PROTOTYPES
 #endif
 
