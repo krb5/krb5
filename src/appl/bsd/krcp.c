@@ -30,6 +30,10 @@ char copyright[] =
      /*
       * rcp
       */
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/param.h>
 #ifndef _TYPES_
 #include <sys/types.h>
@@ -1343,7 +1347,7 @@ void
     krb5_auth_context *auth_context = NULL;
     
     if (config_file) {
-    	char * filenames[2];
+    	const char * filenames[2];
     	filenames[1] = NULL;
     	filenames[0] = config_file;
     	if (status = krb5_set_config_files(bsd_context, filenames))

@@ -21,6 +21,9 @@
 
 /* derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88 */
      
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>

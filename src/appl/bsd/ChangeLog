@@ -1,3 +1,15 @@
+Tue May  9 08:17:18 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* krshd.c (main): Cast a sockaddr_in * to sockaddr * in call to
+		accept. 
+
+	* kcmd.c: Add <stdlib.h>
+
+	* krcp.c: Add <stdlib.h>.
+
+Sat May  6 18:12:37 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krcp.c (answer_auth): Added const declaration to filenames.
 
 Fri May 05 09:16:16 1995  Chris Provenzano (proven@mit.edu)
 

@@ -393,7 +393,7 @@ main(argc, argv)
 	    exit(2);
 	}
 	
-	if ((fd = accept(s, &from, &fromlen)) < 0) {
+	if ((fd = accept(s, (struct sockaddr *) &from, &fromlen)) < 0) {
 	    fprintf(stderr, "Error in accept: %s\n", strerror(errno));
 	    exit(2);
 	}
