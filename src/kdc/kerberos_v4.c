@@ -977,4 +977,6 @@ hang()
     }
 }
 #endif /* BACKWARD_COMPAT */
+#else	/* KRB5_KRB4_COMPAT */
+#include "k5-int.h"
 #endif /* KRB5_KRB4_COMPAT */
