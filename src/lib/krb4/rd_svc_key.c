@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "k5-int.h"
+
 extern char *krb__get_srvtabname();
 
 /*
@@ -119,7 +121,69 @@ int read_service_key(service,instance,realm,kvno,file,key)
     char *file;                 /* Filename */
     char *key;                  /* Pointer to key to be filled in */
 {
-    return get_service_key(service,instance,realm,&kvno,file,key);
+    int kret;
+    
+#ifdef KRB4_USE_KEYTAB
+    krb5_error_code retval;
+    krb5_context context;
+    krb5_principal princ;
+    krb5_keytab kt_id;
+    krb5_keytab_entry kt_entry;
+    char sname[ANAME_SZ+1];
+    char sinst[INST_SZ+1];
+    char srealm[REALM_SZ+1];
+    char keytabname[MAX_KEYTAB_NAME_LEN + 1];	/* + 1 for NULL termination */
+#endif
+
+    kret = get_service_key(service,instance,realm,&kvno,file,key);
+
+#ifdef KRB4_USE_KEYTAB
+    if (! kret)
+	return KSUCCESS;
+
+    krb5_init_context(&context);
+    krb5_init_ets(context);
+
+    if (!strcmp(instance, "*")) {
+	retval = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
+					 &princ);
+	if (!retval) {
+	    retval = krb5_524_conv_principal(context, princ,
+					     sname, sinst, srealm);
+	    krb5_free_principal(context, princ);
+	}
+	if (!retval)
+	    instance = sinst;
+    }
+    
+    retval = krb5_425_conv_principal(context,
+				     service,
+				     instance,
+				     realm,
+				     &princ);
+    if (!retval)
+	retval = krb5_kt_default_name(context, (char *)keytabname,
+				      sizeof(keytabname)-1);
+    if (!retval) {
+	retval = krb5_kt_resolve(context, (char *)keytabname, &kt_id);
+	if (!retval)
+	    retval = krb5_kt_get_entry(context, kt_id, princ, kvno,
+				       ENCTYPE_DES_CBC_CRC, &kt_entry);
+	krb5_kt_close(context, kt_id);
+	krb5_free_principal(context, princ);
+    }
+    if (!retval) {
+	if (kt_entry.key.length == sizeof(C_Block)) {
+	    (void) memcpy(key, kt_entry.key.contents, sizeof(C_Block));
+	} else {
+	    retval = KRB5_BAD_KEYSIZE;
+	}
+	krb5_kt_free_entry(context, &kt_entry);
+    }
+    krb5_free_context(context);
+#endif
+    
+    return (retval ? kret : KSUCCESS);
 }
 
 /* kvno is passed by reference, so that if it is zero, and we find a match,

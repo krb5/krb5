@@ -38,6 +38,7 @@ if test $ac_cv_sizeof_int = 2; then
 else
 	AC_DEFINE(BITS32)
 fi
+AC_DEFINE(KRB4_USE_KEYTAB)
 AC_HAVE_FUNCS(strsave seteuid setreuid setresuid)
 ET_RULES
 V5_SHARED_LIB_OBJS

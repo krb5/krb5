@@ -1,3 +1,15 @@
+Wed Apr 10 19:18:57 1996  Richard Basch  <basch@lehman.com>
+
+	* rd_svc_key.c (read_service_key): First try to read the V4
+	service key from the V4 srvtab, and if it fails, try the keytab.
+	A * instance will be translated into the default instance component
+	(usually the FQDN of the local hostname).
+
+Fri Mar 29 16:45:00 1996  Richard Basch  <basch@lehman.com>
+
+	* rd_svc_key.c, configure.in: Try to read the V4 service key from a
+		V5 keytab.
+
 Tue Mar 19 11:23:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* tf_util.c (tf_get_cred): Issue date is written out as a long,
