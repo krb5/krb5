@@ -1,3 +1,8 @@
+Tue Oct 14 15:40:46 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump major version due to possible
+ 	change in type sizes.
+
 Sat Feb 22 18:55:52 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in

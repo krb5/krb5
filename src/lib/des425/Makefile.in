@@ -9,7 +9,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/k
 RUN_SETUP=@KRB5_RUN_ENV@
 
 LIB=des425
-LIBMAJOR=1
+LIBMAJOR=2
 LIBMINOR=0
 RELDIR=des425
 # Depends on libcrypto and libkrb5
