@@ -46,49 +46,6 @@ static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
 						   int,
 						   krb5_data *, 
 						   krb5_data **));
-/*
- * This routine is called to verify the preauthentication information
- * for a V5 request.  Client contains information about the principal
- * from the database. Padata contains pre-auth info received from
- * the network.
- *
- * Returns 0 if the pre-authentication is valid, non-zero to indicate
- * an error code of some sort.
- */
-
-static krb5_error_code
-check_padata (client, src_addr, padata, pa_id, flags)
-    krb5_db_entry  *client;
-    krb5_address **src_addr;
-    krb5_pa_data **padata;
-    int *pa_id;			/* Unique id which can be used for replay
-				   of padata. */
-    int *flags;
-{
-    krb5_error_code retval;
-    krb5_keyblock tmpkey;
-    int i;
-
-    /* 	Extract a client key from master key */
-    retval = 0;
-    for (i = 0; i < client->n_key_data; i++) {
-	if ((retval = krb5_dbekd_decrypt_key_data(kdc_context,
-						  &master_encblock,
-						  &client->key_data[i],
-						  &tmpkey, NULL))) {
-	    krb5_klog_syslog(LOG_ERR,"AS_REQ: Unable to extract client key: %s",
-	       		     error_message(retval));
-	    return retval;
-	}
-        retval = krb5_verify_padata(kdc_context, *padata, client->princ,
-				    src_addr, &tmpkey, pa_id, flags);
-        memset((char *)tmpkey.contents, 0, tmpkey.length);
-        krb5_xfree(tmpkey.contents);
-	if (!retval) 
-	    break;
-    }
-    return retval;
-}
 
 /*ARGSUSED*/
 krb5_error_code
@@ -205,33 +162,18 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
       
-    for (i = 0; i < request->nktypes; i++) {
-	if (!valid_enctype(request->ktype[i]))
-	    continue;
-
-	if (request->ktype[i] == ENCTYPE_DES_CBC_MD5 &&
-	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
-	    continue;
-
-	/*
-	 * Find the server key of the appropriate type.  If we could specify
-	 * a kvno, it would be supplied here.
-	 */
-	if (!krb5_dbe_find_enctype(kdc_context, &server, request->ktype[i],
-				   -1,		/* Ignore salttype */
-				   -1,		/* Get highest kvno */
-				   &server_key))
-	    goto got_a_key;
+    /*
+     * Select the keytype for the ticket session key.
+     */
+    if ((useenctype = select_session_keytype(kdc_context, &server,
+					     request->nktypes,
+					     request->ktype)) == 0) {
+	/* unsupported ktype */
+	status = "BAD_ENCRYPTION_TYPE";
+	errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
+	goto errout;
     }
-    
-    /* unsupported ktype */
-    status = "BAD_ENCRYPTION_TYPE";
-    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
-    goto errout;
-
-got_a_key:;
-    useenctype = request->ktype[i];
-    krb5_use_enctype(kdc_context, &eblock, request->ktype[i]);
+    krb5_use_enctype(kdc_context, &eblock, useenctype);
     
     if ((errcode = krb5_random_key(kdc_context, &eblock,
 				  krb5_enctype_array[useenctype]->random_sequence,
@@ -318,8 +260,7 @@ got_a_key:;
      * Check the preauthentication if it is there.
      */
     if (request->padata) {
-	errcode = check_padata(&client,request->addresses,
-			      request->padata, &pa_id, &pa_flags);
+	errcode = check_padata(kdc_context, &client, request, &enc_tkt_reply);
 	if (errcode) {
 #ifdef KRBCONF_KDC_MODIFIES_KDB
 	    /*
@@ -342,13 +283,6 @@ got_a_key:;
 #endif
 	    goto errout;
 	} 
-	setflag(enc_tkt_reply.flags, TKT_FLG_PRE_AUTH);
-	/*
-	 * If pa_type is one in which additional hardware authentication
-	 * was performed set TKT_FLG_HW_AUTH too.
-	 */
-	if (pa_flags & KRB5_PREAUTH_FLAGS_HARDWARE)
-            setflag(enc_tkt_reply.flags, TKT_FLG_HW_AUTH);
     }
 
     /*
@@ -365,16 +299,31 @@ got_a_key:;
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
+    /*
+     * Find the server key
+     */
+    if ((errcode = krb5_dbe_find_enctype(kdc_context, &server,
+					 -1, /* ignore keytype */
+					 -1,		/* Ignore salttype */
+					 0,		/* Get highest kvno */
+					 &server_key))) {
+	status = "FINDING_SERVER_KEY";
+	goto errout;
+    }
+
     /* convert server.key into a real key (it may be encrypted
        in the database) */
     if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
-				      	      server_key,
-					       &encrypting_key, NULL))) {
+					       server_key, &encrypting_key,
+					       NULL))) {
 	status = "DECRYPT_SERVER_KEY";
 	goto errout;
     }
-    errcode = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, 
-				   &ticket_reply);
+    if ((encrypting_key.enctype == ENCTYPE_DES_CBC_CRC) &&
+	(isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5)))
+	encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
+	
+    errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
     if (errcode) {
@@ -385,19 +334,16 @@ got_a_key:;
 
     /*
      * Find the appropriate client key.  We search in the order specified
-     * by the key/salt list.
+     * by request keytype list.
      */
     client_key = (krb5_key_data *) NULL;
-    for (i=0; i<kdc_active_realm->realm_nkstypes; i++) {
-	krb5_key_salt_tuple	*kslist;
+    for (i = 0; i < request->nktypes; i++) {
+	useenctype = request->ktype[i];
+	if (!valid_enctype(useenctype))
+	    continue;
 
-	kslist = (krb5_key_salt_tuple *) kdc_active_realm->realm_kstypes;
-	if (!krb5_dbe_find_enctype(kdc_context,
-				   &client,
-				   kslist[i].ks_enctype,
-				   kslist[i].ks_salttype,
-				   -1,
-				   &client_key))
+	if (!krb5_dbe_find_enctype(kdc_context, &client, useenctype, -1,
+				   0, &client_key))
 	    break;
     }
     if (!(client_key)) {
@@ -486,11 +432,12 @@ got_a_key:;
 
     /* convert client.key_data into a real key */
     if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
-				      	      client_key,
-					       &encrypting_key, NULL))) {
+					       client_key, &encrypting_key,
+					       NULL))) {
 	status = "DECRYPT_CLIENT_KEY";
 	goto errout;
     }
+    encrypting_key.enctype = useenctype;
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
 				  &eblock, &encrypting_key,  &reply, response);

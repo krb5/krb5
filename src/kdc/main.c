@@ -254,11 +254,22 @@ finish_realm(rdp)
 	free(rdp->realm_mpname);
     if (rdp->realm_stash)
 	free(rdp->realm_stash);
+    if (rdp->realm_ports)
+	free(rdp->realm_ports);
+    if (rdp->realm_kstypes)
+	free(rdp->realm_kstypes);
     if (rdp->realm_context) {
 	if (rdp->realm_mprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_mprinc);
-	if (rdp->realm_mkey.length && rdp->realm_mkey.contents)
-	    krb5_free_keyblock(rdp->realm_context, &rdp->realm_mkey);
+	if (rdp->realm_mkey.length && rdp->realm_mkey.contents) {
+	    memset(rdp->realm_mkey.contents, 0, rdp->realm_mkey.length);
+	    free(rdp->realm_mkey.contents);
+	}
+	if (rdp->realm_tgskey.length && rdp->realm_tgskey.contents) {
+	    memset(rdp->realm_tgskey.contents, 0, rdp->realm_tgskey.length);
+	    free(rdp->realm_tgskey.contents);
+	}
+	krb5_finish_key(rdp->realm_context, &rdp->realm_encblock);
 	krb5_db_fini(rdp->realm_context);
 	if (rdp->realm_tgsprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
@@ -872,6 +883,7 @@ char *argv[];
     krb5_klog_syslog(LOG_INFO, "shutting down");
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
+    krb5_free_context(kcontext);
     return errout;
 }
 

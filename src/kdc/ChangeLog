@@ -1,3 +1,25 @@
+Wed Nov  8 02:57:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_util.c (): Added new helper functions
+		dbentry_has_key_for_enctype(), dbentry_supports_enctype(),
+		and select_session_keytype().
+
+	* kdc_preauth.c: Added support for the ENC_TIMESTAMP
+		preauthentication scheme.
+
+	* do_tgs_req.c (process_tgs_req): Fixed the keytype/enctype
+		selection criteria for the server key, and the ticket
+		session key.
+
+	* do_as_req.c (process_as_req): Added calls to the kdc
+		preauthentication verification routines.  Fixed the
+		keytype/enctype selection criteria for the client key, the
+		server key, and the ticket session key.
+
+	* main.c (finish_realm): Make sure all parts of the realm
+		structure are freed properly.
+		(main): Free the kcontext krb5_context.
+
 Fri Oct  6 00:07:49 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc_preauth.c (get_preauth_hint_list): Fix missing indirection

@@ -1229,3 +1229,91 @@ const char **status;
     
     return 0;
 }
+
+/*
+ * This function returns 1 if the dbentry has a key for a specified
+ * keytype, and 0 if not.
+ */
+int
+dbentry_has_key_for_enctype(context, client, enctype)
+    krb5_context	context;
+    krb5_db_entry *	client;
+    krb5_enctype	enctype;
+{
+    krb5_error_code	retval;
+    krb5_key_data	*datap;
+
+    retval = krb5_dbe_find_enctype(context, client, enctype,
+				   -1, 0, &datap);
+    if (retval)
+	return 0;
+    else
+	return 1;
+}
+
+/*
+ * This function returns 1 if the entity referenced by this
+ * structure can support the a particular encryption system, and 0 if
+ * not.
+ *
+ * XXX eventually this information should be looked up in the
+ * database.  Since it isn't, we use some hueristics and attribute
+ * options bits for now.
+ */
+int
+dbentry_supports_enctype(context, client, enctype)
+    krb5_context	context;
+    krb5_db_entry *	client;
+    krb5_enctype	enctype;
+{
+    /*
+     * If it's DES_CBC_MD5, there's a bit in the attribute mask which
+     * checks to see if we support it.
+     *
+     * In theory everything's supposed to support DES_CBC_MD5, but
+     * that's not the reality....
+     */
+    if (enctype == ENCTYPE_DES_CBC_MD5)
+	return isflagset(client->attributes, KRB5_KDB_SUPPORT_DESMD5);
+
+    /*
+     * XXX we assume everything can understand DES_CBC_CRC
+     */
+    if (enctype == ENCTYPE_DES_CBC_CRC)
+	return 1;
+    
+    /*
+     * If we have a key for the encryption system, we assume it's
+     * supported.
+     */
+    return dbentry_has_key_for_enctype(context, client, enctype);
+}
+
+/*
+ * This function returns the keytype which should be selected for the
+ * session key.  It is based on the ordered list which the user
+ * requested, and what the KDC and the application server can support.
+ */
+krb5_enctype
+select_session_keytype(context, server, nktypes, ktype)
+    krb5_context	context;
+    krb5_db_entry *	server;
+    int			nktypes;
+    krb5_enctype	*ktype;
+{
+    int		i;
+    
+    for (i = 0; i < nktypes; i++) {
+	if (!valid_enctype(ktype[i]))
+	    continue;
+
+	if (dbentry_supports_enctype(context, server, ktype[i]))
+	    return (ktype[i]);
+    }
+    return 0;
+}
+
+
+   
+    
+    

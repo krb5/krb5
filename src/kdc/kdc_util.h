@@ -73,6 +73,22 @@ int validate_tgs_request PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
 int fetch_asn1_field PROTOTYPE((unsigned char *, unsigned int, unsigned int,
 				 krb5_data *));
 
+int
+dbentry_has_key_for_enctype PROTOTYPE((krb5_context context,
+				       krb5_db_entry *client,
+				       krb5_enctype enctype));
+    
+int
+dbentry_supports_enctype PROTOTYPE((krb5_context context,
+				    krb5_db_entry *client,
+				    krb5_enctype enctype));
+
+krb5_enctype
+select_session_keytype PROTOTYPE((krb5_context context,
+				  krb5_db_entry *server,
+				  int nktypes,
+				  krb5_enctype *ktypes));
+
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,

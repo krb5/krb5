@@ -63,7 +63,6 @@ krb5_data **response;			/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
     krb5_encrypt_block eblock;
-    krb5_enctype second_ticket_ktype = ENCTYPE_UNKNOWN;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -80,6 +79,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_keyblock *session_key = 0;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
+    krb5_key_data  *server_key;
     char *cname = 0, *sname = 0, *tmp = 0, *fromstring = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
 /*    krb5_address *noaddrarray[1]; */
@@ -87,7 +87,6 @@ krb5_data **response;			/* filled in with a response packet */
     int	errcode, errcode2;
     register int i;
     int firstpass = 1;
-    int ok_key_data = 0;
     const char	*status = 0;
     
     retval = decode_krb5_tgs_req(pkt, &request);
@@ -181,7 +180,7 @@ tgt_again:
 	goto cleanup;
     }
 
-    if ((retval = krb5_timeofday(kdc_context, &kdc_time))) {
+    if ((errcode = krb5_timeofday(kdc_context, &kdc_time))) {
 	status = "TIME_OF_DAY";
 	goto cleanup;
     }
@@ -195,48 +194,72 @@ tgt_again:
     }
 
     /*
-     * If we are using user-to-user authentication, then the resulting
-     * ticket has to use the same encryption system as was used to
-     * encrypt the ticket, since that's the same encryption system
-     * that's used for the ticket session key --- and that's what we
-     * use to encrypt the ticket!
+     * We pick the session keytype here....
+     * 
+     * Some special care needs to be taken in the user-to-user
+     * case, since we don't know what keytypes the application server
+     * which is doing user-to-user authentication can support.  We
+     * know that it at least must be able to support the encryption
+     * type of the session key in the TGT, since otherwise it won't be
+     * able to decrypt the U2U ticket!  So we use that in preference
+     * to anything else.
      */
-    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
-	second_ticket_ktype = request->second_ticket[st_idx]->enc_part.enctype;
-	    
-    for (i = 0; i < request->nktypes; i++) {
-	krb5_enctype ok_enctype;
+    useenctype = 0;
+    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
+	krb5_keyblock *	st_sealing_key;
+	krb5_kvno 	st_srv_kvno;
+	krb5_enctype	etype;
+
+	/*
+	 * Get the key for the second ticket, and decrypt it.
+	 */
+	if ((errcode = kdc_get_server_key(request->second_ticket[st_idx],
+					 &st_sealing_key,
+					 &st_srv_kvno))) {
+	    status = "2ND_TKT_SERVER";
+	    goto cleanup;
+	}
+	errcode = krb5_decrypt_tkt_part(kdc_context, st_sealing_key,
+				       request->second_ticket[st_idx]);
+	krb5_free_keyblock(kdc_context, st_sealing_key);
+	if (errcode) {
+	    status = "2ND_TKT_DECRYPT";
+	    goto cleanup;
+	}
 	
-	if (!valid_enctype(request->ktype[i]))
-	    continue;
+	etype = request->second_ticket[st_idx]->enc_part2->session->enctype;
+	if (!valid_enctype(etype)) {
+	    status = "BAD_ETYPE_IN_2ND_TKT";
+	    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
+	    goto cleanup;
+	}
+	
+	for (i = 0; i < request->nktypes; i++) {
+	    if (request->ktype[i] == etype) {
+		useenctype = etype;
+		break;
+	    }
+	}
+    }
 
-	if (second_ticket_ktype != ENCTYPE_UNKNOWN &&
-	    second_ticket_ktype != request->ktype[i])
-	    continue;
-
-	if (request->ktype[i] == ENCTYPE_DES_CBC_MD5 &&
-	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
-	    continue;
-
-	ok_enctype = request->ktype[i];
-
-        for (ok_key_data = 0; ok_key_data < server.n_key_data; ok_key_data++)
-            if (server.key_data[ok_key_data].key_data_type[0] == ok_enctype)
-                goto got_a_key;
+    /*
+     * Select the keytype for the ticket session key.
+     */
+    if ((useenctype == 0) &&
+	(useenctype = select_session_keytype(kdc_context, &server,
+					     request->nktypes,
+					     request->ktype)) == 0) {
+	/* unsupported ktype */
+	status = "BAD_ENCRYPTION_TYPE";
+	errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
+	goto cleanup;
     }
     
-    /* unsupported ktype */
-    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
-    status = "BAD_ENCRYPTION_TYPE";
-    goto cleanup;
-
-got_a_key:;
-    useenctype = request->ktype[i];
     krb5_use_enctype(kdc_context, &eblock, useenctype);
-    retval = krb5_random_key(kdc_context, &eblock, 
+    errcode = krb5_random_key(kdc_context, &eblock, 
 			     krb5_enctype_array[useenctype]->random_sequence,
 			     &session_key);
-    if (retval) {
+    if (errcode) {
 	/* random key failed */
 	status = "RANDOM_KEY_FAILED";
 	goto cleanup;
@@ -399,7 +422,7 @@ got_a_key:;
 	    goto cleanup;
 	}
 	/* do any necessary key pre-processing */
-	if ((retval = krb5_process_key(kdc_context, &eblock,
+	if ((errcode = krb5_process_key(kdc_context, &eblock,
 				      header_ticket->enc_part2->session))) {
 	    status = "AUTH_PROCESS_KEY";
 	    free(scratch.data);
@@ -407,7 +430,7 @@ got_a_key:;
 	}
 
 	/* call the encryption routine */
-	if ((retval = krb5_decrypt(kdc_context, (krb5_pointer) request->authorization_data.ciphertext.data,
+	if ((errcode = krb5_decrypt(kdc_context, (krb5_pointer) request->authorization_data.ciphertext.data,
 				  (krb5_pointer) scratch.data,
 				  scratch.length, &eblock, 0))) {
 	    status = "AUTH_ENCRYPT_FAIL";
@@ -415,20 +438,20 @@ got_a_key:;
 	    free(scratch.data);
 	    goto cleanup;
 	}
-	if ((retval = krb5_finish_key(kdc_context, &eblock))) {
+	if ((errcode = krb5_finish_key(kdc_context, &eblock))) {
 	    status = "AUTH_FINISH_KEY";
 	    free(scratch.data);
 	    goto cleanup;
 	}
 	/* scratch now has the authorization data, so we decode it */
-	retval = decode_krb5_authdata(&scratch, &(request->unenc_authdata));
+	errcode = decode_krb5_authdata(&scratch, &(request->unenc_authdata));
 	free(scratch.data);
-	if (retval) {
+	if (errcode) {
 	    status = "AUTH_DECODE";
 	    goto cleanup;
 	}
 
-	if ((retval =
+	if ((errcode =
 	     concat_authorization_data(request->unenc_authdata,
 				       header_ticket->enc_part2->authorization_data, 
 				       &enc_tkt_reply.authorization_data))) {
@@ -470,7 +493,7 @@ got_a_key:;
 	enc_tkt_transited.tr_contents.data = 0;
 	enc_tkt_transited.tr_contents.length = 0;
 	enc_tkt_reply.transited = enc_tkt_transited;
-	if ((retval =
+	if ((errcode =
 	     add_to_transited(&header_ticket->enc_part2->transited.tr_contents,
 			      &enc_tkt_reply.transited.tr_contents,
 			      header_ticket->server,
@@ -491,32 +514,13 @@ got_a_key:;
      * the second ticket.
      */
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
-	krb5_keyblock *st_sealing_key;
-	krb5_kvno st_srv_kvno;
-
-	if ((retval = kdc_get_server_key(request->second_ticket[st_idx],
-					 &st_sealing_key,
-					 &st_srv_kvno))) {
-	    status = "2ND_TKT_SERVER";
-	    goto cleanup;
-	}
-
-	/* decrypt the ticket */
-	retval = krb5_decrypt_tkt_part(kdc_context, st_sealing_key,
-				       request->second_ticket[st_idx]);
-	krb5_free_keyblock(kdc_context, st_sealing_key);
-	if (retval) {
-	    status = "2ND_TKT_DECRYPT";
-	    goto cleanup;
-	}
-
 	/*
 	 * Make sure the client for the second ticket matches
 	 * requested server.
 	 */
 	if (!krb5_principal_compare(kdc_context, request->server,
 				    request->second_ticket[st_idx]->enc_part2->client)) {
-		if ((retval = krb5_unparse_name(kdc_context,
+		if ((errcode = krb5_unparse_name(kdc_context,
 						request->second_ticket[st_idx]->enc_part2->client,
 						&tmp)))
 			tmp = 0;
@@ -530,7 +534,7 @@ got_a_key:;
 	ticket_reply.enc_part.enctype =
 		request->second_ticket[st_idx]->enc_part2->session->enctype;
 	krb5_use_enctype(kdc_context, &eblock, ticket_reply.enc_part.enctype);
-	if ((retval = krb5_encrypt_tkt_part(kdc_context, &eblock,
+	if ((errcode = krb5_encrypt_tkt_part(kdc_context, 
 					    request->second_ticket[st_idx]->enc_part2->session,
 					    &ticket_reply))) {
 	    status = "2ND_TKT_ENCRYPT";
@@ -538,25 +542,35 @@ got_a_key:;
 	}
 	st_idx++;
     } else {
-	/* convert server.key into a real key (it may be encrypted
-	   in the database) */
-    	if ((retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock,
-                                      		  &server.key_data[ok_key_data],
-                                      		  &encrypting_key, NULL))) {
-	    status = "CONV_KEY";
+	/*
+	 * Find the server key
+	 */
+	if ((errcode = krb5_dbe_find_enctype(kdc_context, &server,
+					     -1, /* ignore keytype */
+					     -1, /* Ignore salttype */
+					     0,		/* Get highest kvno */
+					     &server_key))) {
+	    status = "FINDING_SERVER_KEY";
 	    goto cleanup;
 	}
-
-	ticket_reply.enc_part.kvno = server.key_data[ok_key_data].key_data_kvno;
-	ticket_reply.enc_part.enctype = useenctype;
-	krb5_use_enctype(kdc_context, &eblock, ticket_reply.enc_part.enctype);
-	retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, 
-				       &ticket_reply);
-
+	/* convert server.key into a real key (it may be encrypted
+	 *        in the database) */
+	if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context,
+						   &master_encblock, 
+						   server_key, &encrypting_key,
+						   NULL))) {
+	    status = "DECRYPT_SERVER_KEY";
+	    goto cleanup;
+	}
+	if ((encrypting_key.enctype == ENCTYPE_DES_CBC_CRC) &&
+	    (isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5)))
+	    encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
+	ticket_reply.enc_part.kvno = server_key->key_data_kvno;
+	errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
+					&ticket_reply);
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
 	krb5_xfree(encrypting_key.contents);
-
-	if (retval) {
+	if (errcode) {
 	    status = "TKT_ENCRYPT";
 	    goto cleanup;
 	}
@@ -598,11 +612,11 @@ got_a_key:;
 		    header_ticket->enc_part2->session->enctype;
     krb5_use_enctype(kdc_context, &eblock, reply.enc_part.enctype);
 
-    retval = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
+    errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
 				 &eblock, subkey ? subkey :
 				 header_ticket->enc_part2->session,
 				 &reply, response);
-    if (retval) {
+    if (errcode) {
 	status = "ENCODE_KDC_REP";
     } else {
 	status = "ISSUE";
