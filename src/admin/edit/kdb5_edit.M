@@ -42,7 +42,7 @@ program.
 The
 .B \-r
 .I realm
-option specifies the realm for which the database should be created;
+option specifies the realm of the database;
 by default the realm returned by
 .IR krb5_default_local_realm (3)
 is used.
@@ -50,29 +50,28 @@ is used.
 The
 .B \-d
 .I dbname
-option specifies the name under which the principal database is to be
-created; by default the database is in DEFAULT_DBM_FILE (normally
-/krb5/principal).
+option specifies the name under which the principal database is stored;
+by default the database is in DEFAULT_DBM_FILE (defined in <krb5/osconf.h>).
 .PP
 The
 .B \-k
 .I keytype
 option specifies the key type (as an ascii representation of a decimal
-number) of the master key in the database; the default is KEYTYPE_DES.
+number) of the master key in the database; the default is
+DEFAULT_KDC_KEYTYPE (defined in <krb5/osconf.h>).
 .PP
 The
 .B \-M
 .I mkeyname
 option specifies the principal name for the master key in the database;
-the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
+the default is KRB5_KDB_M_NAME (defined in <krb5/kdb.h>).
 .PP
 The
 .B \-e
 .I enctype
 option specifies the encryption type (as an ascii representation of a decimal
 number) to be used when placing entries in
-the database; the default is the default encryption type for the master
-keytype.
+the database; the default is DEFAULT_KDC_ETYPE (defined in <krb5/osconf.h>).
 .PP
 The
 .B \-m
