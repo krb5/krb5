@@ -667,6 +667,10 @@ testWIX:
   
 ;Run the uninstaller
 uninstMSI1:
+  Call GetWindowsVersion
+  Pop $R0
+  StrCmp $R0 "2000" uninstMSI1_2000
+
   ClearErrors
   ExecWait 'MSIEXEC /x{FD5B1F41-81BB-4BBC-9F7E-4B971660AE1A} /passive /promptrestart'
 
@@ -680,7 +684,22 @@ uninstMSI1:
   Call RestartRequired
   Pop $R1
   StrCmp $R1 "1" Restart DoNotRestart
+  
+uninstMSI1_2000:
+  ClearErrors
+  ExecWait 'MSIEXEC /x{FD5B1F41-81BB-4BBC-9F7E-4B971660AE1A}'
 
+  IfErrors no_remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+
+  Push $R1
+  Call RestartRequired
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
+  
 testSWRT:
   ClearErrors
   ReadRegStr $R0 HKLM \
@@ -696,8 +715,27 @@ testSWRT:
   
 ;Run the uninstaller
 uninstMSI2:
+  Call GetWindowsVersion
+  Pop $R0
+  StrCmp $R0 "2000" uninstMSI2_2000
+
   ClearErrors
   ExecWait 'MSIEXEC /x{61211594-AAA1-4A98-A299-757326763CC7} /passive /promptrestart'
+
+  IfErrors no_remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+
+  Push $R1
+  Call RestartRequired
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
+
+uninstMSI2_2000:
+  ClearErrors
+  ExecWait 'MSIEXEC /x{61211594-AAA1-4A98-A299-757326763CC7}'
 
   IfErrors no_remove_uninstaller
     ;You can either use Delete /REBOOTOK in the uninstaller or add some code
@@ -725,6 +763,10 @@ testPismere:
   
 ;Run the uninstaller
 uninstPismere:
+  Call GetWindowsVersion
+  Pop $R0
+  StrCmp $R0 "2000" uninstPismere_2000
+
   ClearErrors
   ExecWait 'MSIEXEC /x{83977767-388D-4DF8-BB08-3BF2401635BD} /passive /promptrestart'
 
@@ -739,6 +781,20 @@ uninstPismere:
   Pop $R1
   StrCmp $R1 "1" Restart DoNotRestart
 
+uninstPismere_2000:
+  ClearErrors
+  ExecWait 'MSIEXEC /x{83977767-388D-4DF8-BB08-3BF2401635BD}'
+
+  IfErrors no_remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+
+  Push $R1
+  Call RestartRequired
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
 
 
 Restart:

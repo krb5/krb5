@@ -1,3 +1,10 @@
+2004-09-17  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi:
+   The version of MSIEXEC which ships with Windows 2000 does
+   not accept the /passive and /promptreboot command line
+   options.  On Windows 2000 only, do not specify them.
+
 2004-09-13  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw-fixed.nsi:
