@@ -1,3 +1,10 @@
+2002-03-03  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Patch from Steven
+	Michaud <smch@midway.uchicago.edu>  to accept encrypted or
+	unencrypted credentials.  This is important because Heimdal (and
+	sometimes Microsoft) send encrypted credentials.
+
 2001-11-18  Sam Hartman  <hartmans@mit.edu>
 
 	* init_sec_context.c (get_credentials): Override

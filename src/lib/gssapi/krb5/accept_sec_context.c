@@ -79,8 +79,9 @@
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
-rd_and_store_for_creds(context, inbuf, out_cred)
+rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     krb5_context context;
+    krb5_auth_context auth_context;
     krb5_data *inbuf;
     krb5_gss_cred_id_t *out_cred;
 {
@@ -89,16 +90,40 @@ rd_and_store_for_creds(context, inbuf, out_cred)
     krb5_ccache ccache = NULL;
     krb5_gss_cred_id_t cred = NULL;
     extern krb5_cc_ops krb5_mcc_ops;
-    krb5_auth_context auth_context = NULL;
+    krb5_auth_context new_auth_ctx = NULL;
+	krb5_int32 flags_org;
 
-    if ((retval = krb5_auth_con_init(context, &auth_context)))
-	return(retval);
+	if (retval = krb5_auth_con_getflags(context, auth_context, &flags_org))
+		return retval;
+	krb5_auth_con_setflags(context, auth_context,
+			       KRB5_AUTH_CONTEXT_DO_SEQUENCE);
 
-    krb5_auth_con_setflags(context, auth_context,
-			   KRB5_AUTH_CONTEXT_DO_SEQUENCE);
-
-    if ((retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL))) 
-	goto cleanup;
+	/* By the time krb5_rd_cred is called here (after krb5_rd_req has been */
+	/* called in krb5_gss_accept_sec_context), the "keyblock" field of */
+	/* auth_context contains a pointer to the session key, and the */
+	/* "remote_subkey" field might contain a session subkey.  Either of */
+	/* these (the "remote_subkey" if it isn't NULL, otherwise the */
+	/* "keyblock") might have been used to encrypt the encrypted part of */
+	/* the KRB_CRED message that contains the forwarded credentials.  (The */
+	/* Java Crypto and Security Implementation from the DSTC in Australia */
+	/* always uses the session key.  But apparently it never negotiates a */
+	/* subkey, so this code works fine against a JCSI client.)  Up to the */
+	/* present, though, GSSAPI clients linked against the MIT code (which */
+	/* is almost all GSSAPI clients) don't encrypt the KRB_CRED message at */
+	/* all -- at this level.  So if the first call to krb5_rd_cred fails, */
+	/* we should call it a second time with another auth context freshly */
+	/* created by krb5_auth_con_init.  All of its keyblock fields will be */
+	/* NULL, so krb5_rd_cred will assume that the KRB_CRED message is */
+	/* unencrypted.  (The MIT code doesn't actually send the KRB_CRED */
+	/* message in the clear -- the "authenticator" whose "checksum" ends up */
+	/* containing the KRB_CRED message does get encrypted.) */
+	if (krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) {
+		if (retval = krb5_auth_con_init(context, &new_auth_ctx))
+			goto cleanup;
+		krb5_auth_con_setflags(context, new_auth_ctx, 0);
+		if (retval = krb5_rd_cred(context, new_auth_ctx, inbuf, &creds, NULL))
+			goto cleanup;
+		}
 
     /* Lots of kludging going on here... Some day the ccache interface
        will be rewritten though */
@@ -161,8 +186,10 @@ cleanup:
     if (out_cred)
 	*out_cred = cred; /* return credential */
 
-    if (auth_context)
-	krb5_auth_con_free(context, auth_context);
+	if (new_auth_ctx)
+		krb5_auth_con_free(context, new_auth_ctx);
+
+	krb5_auth_con_setflags(context, auth_context, flags_org);
 
     return retval;
 }
@@ -502,7 +529,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 		   /* store the delegated credential */
 
-		   code = rd_and_store_for_creds(context, &option,
+		   code = rd_and_store_for_creds(context, auth_context, &option,
 						 (delegated_cred_handle) ?
 						 &deleg_cred : NULL);
 		   if (code) {
