@@ -70,6 +70,9 @@ krb5_unparse_name_ext(context, principal, name, size)
 	krb5_int32 nelem;
 	register unsigned int totalsize = 0;
 
+	if (!principal)
+		return KRB5_PARSE_MALFORMED;
+
 	cp = krb5_princ_realm(context, principal)->data;
 	length = krb5_princ_realm(context, principal)->length;
 	totalsize += length;

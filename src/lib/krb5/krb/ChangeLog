@@ -1,3 +1,8 @@
+2002-08-01  Tom Yu  <tlyu@mit.edu>
+
+	* unparse.c (krb5_unparse_name_ext): Error out if passed a NULL
+	pointer.  Patch from Mark Levinson; fixes [krb5-admin/1140].
+
 2002-06-26  Ezra Peisach  <epeisach@bu.edu>
 
 	* appdefault.c (conf_boolean): Change variable from char ** to
