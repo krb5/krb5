@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * osconf.h : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Mon Jul 17 15:05:42 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* osconf.h - Add DEFAULT_KEYFILE_STUB which puts the stashfile in
 		the kdc directory instead of the root.  Also, change the
