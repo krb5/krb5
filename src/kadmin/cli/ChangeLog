@@ -1,3 +1,7 @@
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.M: Update to reflect new -e and -keepold flags.
+
 2000-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadmin.c (kadmin_startup): Don't pass keytab_name to printf if
