@@ -1,3 +1,7 @@
+1999-03-14  Miro Jurisic  <meeroh@mit.edu>
+
+	* win-mac.h: Fixed GSS_DLLIMP for the Mac
+
 1999-03-11  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* win-mac.h: Define GSS_DLLIMP to be __declspec(dllimport) or

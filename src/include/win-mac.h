@@ -227,6 +227,7 @@ HINSTANCE get_lib_instance(void);
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
+#define GSS_DLLIMP
 #ifndef FAR
 #define FAR
 #endif
