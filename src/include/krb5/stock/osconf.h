@@ -58,7 +58,7 @@
 #define	DEFAULT_CONFIG_FILENAME	"@KRB5ROOT/krb.conf"
 #define	DEFAULT_TRANS_FILENAME	"@KRB5ROOT/krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"@KRB5ROOT/aname"
-#define	DEFAULT_KEYTAB_NAME	"FILE:@KRB5ROOT/v5srvtab"
+#define	DEFAULT_KEYTAB_NAME	"FILE:@KRB5SRVTABDIR/v5srvtab"
 
 #define DEFAULT_KDB_FILE        "@KDB5DIR/principal"
 #define DEFAULT_ADMIN_ACL	"@KDB5DIR/admin_acl_file"
@@ -80,7 +80,7 @@
 #define RCTMPDIR	"/usr/tmp"	/* directory to store replay caches */
 
 #define KRB5_PATH_TTY	"/dev/tty"
-#define KRB5_PATH_LOGIN	"@KRB5ROOT/sbin/login.krb"
+#define KRB5_PATH_LOGIN	"@KRB5ROOT/sbin/login.krb5"
 #define KRB5_PATH_RLOGIN "@KRB5ROOT/bin/rlogin"
 
 #endif /* KRB5_OSCONF__ */
