@@ -240,6 +240,7 @@ main(argc, argv)
   }
 
        
+#include <krb5/widen.h>
 krb5_error_code get_server_key(DECLARG(krb5_pointer,keyprocarg),
 			       DECLARG(krb5_principal,princ),
 			       DECLARG(krb5_kvno,vno),
@@ -248,6 +249,7 @@ OLDDECLARG(krb5_pointer,keyprocarg)
 OLDDECLARG(krb5_principal,princ)
 OLDDECLARG(krb5_kvno,vno)
 OLDDECLARG(krb5_keyblock **,key)
+#include <krb5/narrow.h>
 {
   krb5_data pwd, salt;
   char *princ_str, *at;

@@ -1,3 +1,8 @@
+Tue Oct  4 17:24:36 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_hammer.c (get_server_key): Add widen.h and narrow.h around
+		declaration to make argument types be widened.
+
 Fri Sep 30 22:08:45 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdc_hammer.c: Add placeholder for magic number

@@ -40,6 +40,7 @@ struct skey_keyproc_arg {
  * "keyseed" is actually a krb5_keyblock *, or NULL if we should fetch
  * from system area.
  */
+#include <krb5/widen.h>
 static krb5_error_code
 skey_keyproc(DECLARG(const krb5_keytype, type),
 	     DECLARG(krb5_keyblock **, key),
@@ -49,6 +50,7 @@ OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
 OLDDECLARG(krb5_const_pointer, keyseed)
 OLDDECLARG(krb5_pa_data **,padata)
+#include <krb5/narrow.h>
 {
     krb5_keyblock *realkey;
     const struct skey_keyproc_arg *arg;

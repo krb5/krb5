@@ -1,3 +1,10 @@
+Tue Oct  4 16:29:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* in_tkt_sky.c (skey_keyproc):
+	* in_tkt_pwd.c (pwd_keyproc): Add widen.h and narrow.h includes
+		around pwd_keyproc, so that the keyproc input arguments
+		are appropriately widened.
+
 Fri Sep 30 21:58:15 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* preauth.c (preauth_systems): Add placeholder for magic number

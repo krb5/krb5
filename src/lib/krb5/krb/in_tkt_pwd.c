@@ -40,6 +40,7 @@ extern char *krb5_default_pwd_prompt1;
  * key-producing procedure for use by krb5_get_in_tkt_with_password.
  */
 
+#include <krb5/widen.h>
 static krb5_error_code
 pwd_keyproc(DECLARG(const krb5_keytype, type),
 	    DECLARG(krb5_keyblock **, key),
@@ -49,6 +50,7 @@ OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
 OLDDECLARG(krb5_const_pointer, keyseed)
 OLDDECLARG(krb5_pa_data **,padata)
+#include <krb5/narrow.h>
 {
     krb5_data salt;
     krb5_error_code retval;
