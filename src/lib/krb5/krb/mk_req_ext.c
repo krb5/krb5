@@ -185,8 +185,8 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
     /* put together an eblock for this encryption */
 
-    krb5_use_enctype(context, &eblock, request.ticket->enc_part.enctype);
-    request.authenticator.enctype = request.ticket->enc_part.enctype;
+    krb5_use_enctype(context, &eblock, in_creds->keyblock.enctype);
+    request.authenticator.enctype = in_creds->keyblock.enctype;
     request.authenticator.kvno = 0;
     request.authenticator.ciphertext.length =
 	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
