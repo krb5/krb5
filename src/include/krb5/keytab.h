@@ -61,5 +61,13 @@ typedef struct _krb5_kt_ops {
 	krb5_error_code (*remove) PROTOTYPE((krb5_keytab,
 					     krb5_keytab_entry *));
 } krb5_kt_ops;
+#define krb5_kt_get_name(keytab, name, namelen) (*(keytab)->ops->get_name)(keytab,name,namelen)
+#define krb5_kt_close(keytab) (*(keytab)->ops->close)(keytab)
+#define krb5_kt_get_entry(keytab, principal, vno, entry) (*(keytab)->ops->get)(keytab, principal, vno, entry)
+#define krb5_kt_start_seq_get(keytab, cursor) (*(keytab)->ops->start_seq_get)(keytab, cursor)
+#define krb5_kt_next_entry(keytab, entry, cursor) (*(keytab)->ops->get_next)(keytab, entry, cursor)
+#define krb5_kt_end_seq_get(keytab, cursor) (*(keytab)->ops->end_get)(keytab, cursor)
+/* remove and add are functions, so that they can return NOWRITE
+   if not a writable keytab */
 
 #endif /* KRB5_KEYTAB__ */
