@@ -128,6 +128,7 @@ typedef int krb5_sigtype;
 #define BITS64
 #endif
 
+/* SPLIT-HERE */
 #ifdef SYSV
 /* Change srandom and random to use rand and srand */
 /* Taken from the Sandia changes.  XXX  We should really just include */

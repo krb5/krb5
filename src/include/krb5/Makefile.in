@@ -18,7 +18,7 @@ KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 		narrow.h proto.h rcache.h rsa-md4.h safepriv.h \
 		sysincl.h widen.h wordsize.h
 
-all:: autoconf.h
+all:: autoconf.h osconf.h config.h
 
 includes:: autoconf.h
 
@@ -48,10 +48,19 @@ PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
 		  -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+" \
 		  -e "/UnifdefRan/,/SPLIT-HERE/d"
 
-OSCONFSRC = $(srcdir)/stock/osconf.h $(srcdir)/stock/osauto.h
+OSCONFSRC = $(srcdir)/stock/osauto.h $(srcdir)/stock/osconf.h
 
 osconf.h: $(OSCONFSRC)
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
 	if cmp -s osconf.new osconf.h ; then true; \
 	else $(RM) osconf.h ; $(CP) osconf.new osconf.h ; fi
+
+CONF_REPLACE = -e "/UnifdefRan/,/SPLIT-HERE/d"
+
+CONFSRC = $(srcdir)/stock/confauto.h $(srcdir)/stock/config.h
+
+config.h: $(CONFSRC)
+	cat $(CONFSRC) | sed $(CONF_REPLACE) > config.new
+	if cmp -s config.new config.h ; then true; \
+	else $(RM) config.h ; $(CP) config.new config.h ; fi
 
