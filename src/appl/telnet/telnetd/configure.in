@@ -59,5 +59,7 @@ if test $krb5_cv_sys_setpgrp_two = yes; then
   AC_DEFINE(SETPGRP_TWOARG)
 fi
 dnl
+KRB5_NEED_PROTO([#include <stdlib.h>],unsetenv,1)
+KRB5_NEED_PROTO([#include <stdlib.h>],setenv,1)
 KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

@@ -216,3 +216,9 @@ extern struct {
 extern int	needtermstat;
 #endif
 
+#ifdef NEED_UNSETENV_PROTO
+extern void unsetenv(const char *);
+#endif
+#ifdef NEED_SETENV_PROTO
+extern void setenv(const char *, const char *, int);
+#endif
