@@ -1,3 +1,9 @@
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Patch from Sun to reorganize
+	code and make sure that even for md5 the database order is
+	preserved. 
+
 2003-04-02  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_preauth.c (get_etype_info): Avoid infinite loop if request

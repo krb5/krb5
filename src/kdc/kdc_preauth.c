@@ -528,6 +528,49 @@ cleanup:
     return retval;
 }
 
+static krb5_error_code
+_make_etype_info_entry(context, request, client_key, etype, entry)
+    krb5_context 		context;
+    krb5_kdc_req *		request;
+    krb5_key_data *		client_key;
+    const krb5_enctype		etype;
+    krb5_etype_info_entry **	entry;
+{
+    krb5_data			salt;
+    krb5_etype_info_entry *	tmp_entry; 
+    krb5_error_code		retval;
+
+    if ((tmp_entry = malloc(sizeof(krb5_etype_info_entry))) == NULL)
+       return ENOMEM;
+
+    salt.data = 0;
+
+    tmp_entry->magic = KV5M_ETYPE_INFO_ENTRY;
+    tmp_entry->etype = etype;
+    tmp_entry->length = KRB5_ETYPE_NO_SALT;
+    tmp_entry->salt = 0;
+    tmp_entry->s2kparams.data = NULL;
+    tmp_entry->s2kparams.length = 0;
+    retval = get_salt_from_key(context, request->client,
+			       client_key, &salt);
+    if (retval)
+	goto fail;
+
+    if (salt.length >= 0) {
+	tmp_entry->length = salt.length;
+	tmp_entry->salt = (unsigned char *) salt.data;
+	salt.data = 0;
+    }
+    *entry = tmp_entry;
+    return 0;
+
+fail:
+    if (tmp_entry)
+	free(tmp_entry);
+    if (salt.data)
+	free(salt.data);
+    return retval;
+}
 /*
  * This function returns the etype information for a particular
  * client, to be passed back in the preauth list in the KRB_ERROR
@@ -541,13 +584,11 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
     krb5_etype_info_entry **	entry = 0;
     krb5_key_data		*client_key;
     krb5_error_code		retval;
-    krb5_data			salt;
     krb5_data *			scratch;
     krb5_enctype		db_etype;
     int 			i = 0;
     int 			start = 0;
-
-    salt.data = 0;
+    int				seen_des = 0;
 
     entry = malloc((client->n_key_data * 2 + 1) * sizeof(krb5_etype_info_entry *));
     if (entry == NULL)
@@ -562,53 +603,50 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 	if (retval)
 	    goto cleanup;
 	db_etype = client_key->key_data_type[0];
-	if (db_etype == ENCTYPE_DES_CBC_MD4 || db_etype == ENCTYPE_DES_CBC_MD5)
-	    db_etype = ENCTYPE_DES_CBC_CRC;
+	if (db_etype == ENCTYPE_DES_CBC_MD4)
+	    db_etype = ENCTYPE_DES_CBC_MD5;
 	
-	while (1) {
-	    if (!request_contains_enctype(context,
-					  request, db_etype)) {
-	      if (db_etype == ENCTYPE_DES_CBC_CRC) {
-		  db_etype = ENCTYPE_DES_CBC_MD5;
-		  continue;
-	      }
-                else break;
-            }
-
-	    if ((entry[i] = malloc(sizeof(krb5_etype_info_entry))) == NULL) {
-		retval = ENOMEM;
+	if (request_contains_enctype(context, request, db_etype)) {
+	    if ((retval = _make_etype_info_entry(context, request, client_key,
+			    db_etype, &entry[i])) != 0) {
 		goto cleanup;
 	    }
 	    entry[i+1] = 0;
-	    entry[i]->magic = KV5M_ETYPE_INFO_ENTRY;
-	    entry[i]->etype = db_etype;
-	    entry[i]->length = KRB5_ETYPE_NO_SALT;
-	    entry[i]->salt = 0;
-	    retval = get_salt_from_key(context, request->client,
-				       client_key, &salt);
-	    if (retval)
-		goto cleanup;
-	    if (salt.length >= 0 && salt.length != SALT_TYPE_NO_LENGTH) {
-		entry[i]->length = salt.length;
-		entry[i]->salt = salt.data;
-		salt.data = 0;
-	    }
 	    i++;
-	    /*
-	     * If we have a DES_CRC key, it can also be used as a
-	     * DES_MD5 key.
-	     */
-	    if (db_etype == ENCTYPE_DES_CBC_CRC)
-		db_etype = ENCTYPE_DES_CBC_MD5;
-	    else
+	}
+
+	/* 
+	 * If there is a des key in the kdb, try the "similar" enctypes,
+	 * avoid duplicate entries. 
+	 */
+	if (!seen_des) {
+	    switch (db_etype) {
+	    case ENCTYPE_DES_CBC_MD5:
+		db_etype = ENCTYPE_DES_CBC_CRC;
 		break;
+	    case ENCTYPE_DES_CBC_CRC:
+		db_etype = ENCTYPE_DES_CBC_MD5;
+		break;
+	    default:
+		continue;
+
+	    }
+	    if (request_contains_enctype(context, request, db_etype)) {
+		if ((retval = _make_etype_info_entry(context, request,
+				client_key, db_etype, &entry[i])) != 0) {
+		    goto cleanup;
+		}
+		entry[i+1] = 0;
+		i++;
+	    }
+	    seen_des++;
 	}
     }
     retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry,
 				    &scratch);
     if (retval)
 	goto cleanup;
-    pa_data->contents = scratch->data;
+    pa_data->contents = (unsigned char *)scratch->data;
     pa_data->length = scratch->length;
     free(scratch);
 
@@ -617,8 +655,6 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 cleanup:
     if (entry)
 	krb5_free_etype_info(context, entry);
-    if (salt.data)
-	free(salt.data);
     return retval;
 }
 
