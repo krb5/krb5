@@ -78,7 +78,8 @@ kv5m_err.so kv5m_err.po $(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c $(COM_ERR_DEPS)
 krb524_err.so krb524_err.po $(OUTPRE)krb524_err.$(OBJEXT): krb524_err.c $(COM_ERR_DEPS)
 init_ets.so init_ets.po $(OUTPRE)init_ets.$(OBJEXT): init_ets.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h
 
