@@ -1,5 +1,8 @@
 Sat Mar 25 14:42:37 1995  Tom Yu  (tlyu@dragons-lair)
 
+	* scc_maybe.c (krb5_scc_open_file): fixed typo (extra & in
+	reference to fvno_bytes)
+
 	* scc_gennew.c: Ultrix cc (and K&R compilers) doesn't deal with
 	automatic aggregate initialization, so fixed scc_fvno usage.
 
