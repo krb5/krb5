@@ -1,10 +1,14 @@
 
+Mon Aug 07 11:22:57 1995   Chris Provenzano (proven@mit.edu)
+
+	* kdb.h : Add prototypes for krb5_dbe_{en,de}code_last_pwd_change(),
+		krb5_dbe_{apw,cpw,ark,crk}(),
+
 Fri Aug 4 16:10:34 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_proto.h - Add prototype definitions for new libkadm functions in
 		keysalt.c dealing with key/salt tuples.
 	* kdb.h - Add encode/decode macros for integers for use between kdb
 		modules.
-
 
 Thu Aug 03 12:19:52 1995   Chris Provenzano (proven@mit.edu)
 

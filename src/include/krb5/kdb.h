@@ -93,9 +93,9 @@ typedef struct _krb5_db_entry_new {
 #define	KRB5_KDB_MAGIC_NUMBER		0xdbdbdbdb
 #define KRB5_KDB_V1_BASE_LENGTH		42
   
-struct tl_data_1 {
+typedef struct tl_data_1 {
     krb5_timestamp 	  last_pwd_change; 	/* Last time passwd changed */
-};
+} krb5_tl_last_change;
 
 #define KRB5_TL_LAST_PWD_CHANGE		0x0001
 
@@ -266,6 +266,14 @@ krb5_error_code krb5_dbe_decode_mod_princ_data
 	KRB5_PROTOTYPE((krb5_context,
     		   krb5_db_entry *,
     		   krb5_tl_mod_princ  **));
+krb5_error_code krb5_dbe_encode_last_pwd_change
+	KRB5_PROTOTYPE((krb5_context,
+    		   krb5_tl_last_change *,
+    		   krb5_db_entry *));
+krb5_error_code krb5_dbe_decode_last_pwd_change
+	KRB5_PROTOTYPE((krb5_context,
+    		   krb5_db_entry *,
+    		   krb5_tl_last_change *));
 int krb5_encode_princ_dbmkey
 	KRB5_PROTOTYPE((krb5_context,
     		   datum  *,
@@ -293,10 +301,29 @@ struct __krb5_key_salt_tuple;
 krb5_error_code krb5_dbe_cpw
         KRB5_PROTOTYPE((krb5_context,
                    krb5_encrypt_block  *,
-                   krb5_db_entry       *,
                    struct __krb5_key_salt_tuple *,
                    int,
-                   char *));
+                   char *,
+                   krb5_db_entry *));
+krb5_error_code krb5_dbe_apw
+        KRB5_PROTOTYPE((krb5_context,
+                   krb5_encrypt_block  *,
+                   struct __krb5_key_salt_tuple *,
+                   int,
+                   char *,
+                   krb5_db_entry *));
+krb5_error_code krb5_dbe_crk
+        KRB5_PROTOTYPE((krb5_context,
+                   krb5_encrypt_block  *,
+                   struct __krb5_key_salt_tuple *,
+                   int,
+                   krb5_db_entry *));
+krb5_error_code krb5_dbe_ark
+        KRB5_PROTOTYPE((krb5_context,
+                   krb5_encrypt_block  *,
+                   struct __krb5_key_salt_tuple *,
+                   int,
+                   krb5_db_entry *));
  
 #define KRB5_KDB_DEF_FLAGS	0
 
