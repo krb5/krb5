@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "cksumtypes.h"
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_checksum_length(context, cksumtype, length)
      krb5_context context;
      krb5_cksumtype cksumtype;

@@ -58,7 +58,7 @@ static unsigned char *random_state;
 #define NEWSTATE (KEYCONTENTS+keylength)
 #define ALLSTATESIZE (keybytes+blocksize*2+keylength+keybytes+blocksize)
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data)
 {
     unsigned char *fold_input;
@@ -93,7 +93,7 @@ krb5_c_random_seed(krb5_context context, krb5_data *data)
     return(0);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
     krb5_error_code ret;

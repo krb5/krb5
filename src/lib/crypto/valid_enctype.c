@@ -27,7 +27,8 @@
 #include "k5-int.h"
 #include "etypes.h"
 
-krb5_boolean valid_enctype(etype)
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV
+valid_enctype(etype)
      krb5_enctype etype;
 {
     int i;

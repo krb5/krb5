@@ -46,7 +46,7 @@ static int etype_match(e1, e2)
 	   (krb5_enctypes_list[i1].enc == krb5_enctypes_list[i2].enc));
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_keyed_checksum_types(context, enctype, count, cksumtypes)
      krb5_context context;
      krb5_enctype enctype;
@@ -83,7 +83,7 @@ krb5_c_keyed_checksum_types(context, enctype, count, cksumtypes)
     return(0);
 }
 
-void
+KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_cksumtypes(context, val)
     krb5_context context;
     krb5_cksumtype FAR * val;

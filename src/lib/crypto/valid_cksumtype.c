@@ -27,7 +27,8 @@
 #include "k5-int.h"
 #include "cksumtypes.h"
 
-krb5_boolean valid_cksumtype(ctype)
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV
+valid_cksumtype(ctype)
      krb5_cksumtype ctype;
 {
     int i;
