@@ -34,6 +34,8 @@
 #include <sys/socket.h>
 #include "kdc_util.h"
 
+#if 0 /* if we really need this, put it into socket-utils.h or fake-addrinfo.h */
+
 #ifndef HAVE_INET_NTOP
 char *
 inet_ntop (int family, const void *address, char *buf, size_t bufsiz)
@@ -73,6 +75,8 @@ inet_ntop (int family, const void *address, char *buf, size_t bufsiz)
     }
     return buf;
 }
+#endif
+
 #endif
 
 void

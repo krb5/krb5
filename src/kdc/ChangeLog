@@ -1,3 +1,8 @@
+2002-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* sock2p.c (inet_ntop): Disable definition; it should be provided
+	by the socket support header files.
+
 2002-06-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* dispatch.c (dispatch): Remove arg "portnum"; update callers.
