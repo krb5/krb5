@@ -185,7 +185,7 @@ the following are based on variables in krb5/src/include/kerberosIV/krbports.h
 
 @comment krb5/src/lib/krb5/krb/get_in_tkt.c
 @set DefaultRenewLifetime 0
-@set DefaultNoaddresses not set @comment _krb5_conf_boolean defaults to no
+@set DefaultNoaddresses set
 @set DefaultForwardable not set
 @set DefaultProxiable not set
 
