@@ -1,3 +1,7 @@
+2001-12-03	Miro Jurisic <meeroh@mit.edu>
+
+	* krb5_libinit.c: punted the Mac OS 9 sleep notification code
+
 2001-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LIBMINOR): Bump due to changes in error tables.

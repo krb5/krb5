@@ -1,3 +1,8 @@
+2001-12-03	Miro Jurisic <meeroh@mit.edu>
+
+	* c_ustime.c: punted the accurate microseconds timing code because it
+	wasn't so accurate after all.
+
 2000-11-27	Alexandra Ellwood <lxs@mit.edu>
 
 	* read_pwd.c: Removed #defines for Mac OS X (__MACH__) because we 
