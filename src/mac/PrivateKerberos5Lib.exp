@@ -1,0 +1,32 @@
+#----------------------------------------------------
+#   PrivateKerberos5Lib.exp
+#
+# Exports from Kerberos v5 library which are not
+# a part of the public API, but are needed by some
+# critical clients. Each call is annotated by the
+# offending client.
+#----------------------------------------------------
+
+	krb5_size_opaque					# GSSAPI
+	krb5_internalize_opaque				# GSSAPI
+	krb5_externalize_opaque				# GSSAPI
+	krb5_ser_pack_int32					# GSSAPI
+	krb5_ser_unpack_int32				# GSSAPI
+	krb5_ser_pack_bytes					# GSSAPI
+	krb5_ser_unpack_bytes				# GSSAPI
+	krb5_ser_auth_context_init			# GSSAPI
+	krb5_ser_context_init				# GSSAPI
+	krb5_ser_ccache_init				# GSSAPI
+	krb5_ser_keytab_init				# GSSAPI
+	krb5_ser_rcache_init				# GSSAPI
+	decode_krb5_ap_req					# GSSAPI
+	krb5_mcc_ops						# GSSAPI
+	krb5_c_keyed_checksum_types 		# GSSAPI
+	krb5_c_random_make_octets			# GSSAPI
+	krb5_c_encrypt						# GSSAPI
+	krb5_c_make_checksum				# GSSAPI
+	krb5_c_decrypt						# GSSAPI
+	krb5_c_verify_checksum				# GSSAPI
+	krb5_c_block_size					# GSSAPI
+	krb5_c_checksum_length				# GSSAPI
+	krb5_c_encrypt_length				# GSSAPI
