@@ -4,8 +4,6 @@
 
 #include "MIT Kerberos.r"
 
-type 'CCIª' as 'STR ';
-
 resource 'hfdr' (-5696, purgeable) {
 	HelpMgrVersion,
 	hmDefaultOptions,
@@ -21,7 +19,7 @@ resource 'hfdr' (-5696, purgeable) {
 	}
 };
 
-resource 'CCIª' (128, purgeable) {
+data 'CCIª' (128, purgeable) {
 	"A shared library which provides Kerberos v5, "
 	"Generic Security Services (GSS), and DES services."
 };
