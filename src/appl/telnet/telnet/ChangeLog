@@ -1,3 +1,7 @@
+Fri Jun 16 09:18:42 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: "install::" to shut up gmake
+
 
 Thu Jun 15 17:41:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and

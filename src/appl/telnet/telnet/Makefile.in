@@ -48,7 +48,7 @@ telnet:	$(OBJS) $(DEPKLIB) ../libtelnet/libtelnet.a
 clean::
 	$(RM) telnet
 
-install:
+install::
 	$(INSTALL_PROGRAM) telnet $(DESTDIR)$(CLIENT_BINDIR)/telnet
 	$(INSTALL_DATA) $(srcdir)/telnet.1 ${DESTDIR}$(CLIENT_MANDIR)/telnet.1
 	$(INSTALL_DATA) $(srcdir)/tmac.doc ${DESTDIR}$(CLIENT_MANDIR)/tmac.doc
