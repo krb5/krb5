@@ -79,7 +79,6 @@
 	krb5_get_init_creds_opt_set_salt
 	krb5_get_init_creds_password
 	krb5_get_init_creds_keytab
-	krb5_get_init_creds_opt_init
 	krb5_get_validated_creds
 	krb5_get_renewed_creds
 	krb5_get_notification_message
