@@ -1,3 +1,9 @@
+2003-06-05  Tom Yu  <tlyu@mit.edu>
+
+	* procedures.txt: New file.  Draft of current procedures.
+	Currently mostly contains a few email messages from Sam.  More
+	clarification should follow later.
+
 2003-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* definitions.texinfo (DefaultCcacheType, DefaultKDCTimesync,
