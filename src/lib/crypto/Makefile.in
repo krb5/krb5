@@ -3,10 +3,11 @@ myfulldir=lib/crypto
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 LOCAL_SUBDIRS=crc32 des dk enc_provider hash_provider keyhash_provider \
-	md4 md5 old raw sha1 arcfour
+	md4 md5 old raw sha1 arcfour yarrow
 LOCALINCLUDES = -I$(srcdir)/enc_provider \
 	-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider \
-	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk -I$(srcdir)/arcfour
+	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk -I$(srcdir)/arcfour \
+	-I$(srcdir)/yarrow -I$(srcdir)/sha1
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -18,7 +19,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 ##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst
 
 MAC_SUBDIRS = crc32 des dk enc_provider hash_provider keyhash_provider \
-	md4 md5 old raw sha1 arcfour
+	md4 md5 old raw sha1 arcfour yarrow
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -122,6 +123,7 @@ RELDIR=crypto
 STOBJLISTS=crc32/OBJS.ST des/OBJS.ST dk/OBJS.ST enc_provider/OBJS.ST \
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST md4/OBJS.ST \
 	md5/OBJS.ST old/OBJS.ST raw/OBJS.ST sha1/OBJS.ST arcfour/OBJS.ST \
+	yarrow/OBJS.ST \
 	OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target
@@ -141,7 +143,7 @@ libcrypto.lib:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix:: t_nfold t_encrypt
+check-unix:: t_nfold t_encrypt t_prng
 	$(RUN_SETUP) ./t_nfold
 	$(RUN_SETUP) ./t_encrypt
 
@@ -150,6 +152,10 @@ t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 
 t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lk5crypto -lcom_err
+
+t_prng$(EXEEXT): t_prng.$(OBJEXT) 
+	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err
+
 
 clean::
 	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o

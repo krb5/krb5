@@ -33,7 +33,8 @@
 #include "enc_provider.h"
 #include "assert.h"
 
-int krb5int_yarrow_cipher_init
+int
+krb5int_yarrow_cipher_init
 (CIPHER_CTX *ctx,
  unsigned const char * key)
 {
@@ -43,8 +44,10 @@ int krb5int_yarrow_cipher_init
   krb5_data randombits;
   enc->keysize (&keybytes, &keylength);
   assert (keybytes == CIPHER_KEY_SIZE);
-  if (ctx->key.contents)
-    krb5_free_keyblock_contents (0, &ctx->key);
+  if (ctx->key.contents) {
+    memset (ctx->key.contents, 0, ctx->key.length);
+    free (ctx->key.contents);
+  }
   ctx->key.contents = (void *) malloc  (keylength);
   ctx->key.length = keylength;
   if (ctx->key.contents == NULL)
@@ -53,7 +56,9 @@ int krb5int_yarrow_cipher_init
   randombits.length = keybytes;
   ret = enc->make_key (&randombits, &ctx->key);
   if (ret) {
-    krb5_free_keyblock_contents (0, &ctx->key);
+    memset (ctx->key.contents, 0, ctx->key.length);
+    free(ctx->key.contents);
+    ctx->key.contents = NULL;
     return (YARROW_FAIL);
   }
   return (YARROW_OK);

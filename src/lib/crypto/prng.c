@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ * Copyright (C) 2001 by the Massachusetts Institute of Technology.
  * All rights reserved.
+ *
  * 
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
@@ -13,150 +13,104 @@
  * without fee is hereby granted, provided that the above copyright
  * notice appear in all copies and that both that copyright notice and
  * this permission notice appear in supporting documentation, and that
- * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  FundsXpress makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "k5-int.h"
 #include "enc_provider.h"
+#include <assert.h>
 
-/* This random number generator is a feedback generator based on a
-   block cipher.  It uses triple-DES by default now, but can be
-   changed, since everything uses it abstractly.
+#include "yarrow.h"
+static Yarrow_CTX y_ctx;
+static int inited=0;
 
-   As new seed data comes in, the old state is folded with the new
-   seed into new state.  Each time random bytes are requested, the
-   seed is used as a key and cblock, and the encryption is used as the
-   output.  The output is fed back as new seed data, as described
-   above.  */
+/* Helper function to estimate entropy based on sample length
+ * and where it comes from.
+ */
 
-static const struct krb5_enc_provider *const enc = &krb5int_enc_des3;
-
-/* XXX state.  Should it be in krb5_context? */
-
-static int inited = 0;
-static size_t blocksize, keybytes, keylength;
-static unsigned int random_count;
-/* keybytes | state-block | encblock | key | new-keybytes | new-state-block */
-static unsigned char *random_state; 
-#define STATE (random_state)
-#define STATEKEY (STATE)
-#define STATEBLOCK (STATEKEY+keybytes)
-#define STATESIZE (keybytes+blocksize)
-#define OUTPUT (STATE)
-#define OUTPUTSIZE (STATESIZE+blocksize)
-#define RANDBLOCK (STATEBLOCK+blocksize)
-#define KEYCONTENTS (RANDBLOCK+blocksize)
-#define NEWSTATE (KEYCONTENTS+keylength)
-#define ALLSTATESIZE (keybytes+blocksize*2+keylength+keybytes+blocksize)
+static size_t
+entropy_estimate (unsigned int randsource, size_t length)
+{
+  switch (randsource) {
+  case KRB5_C_RANDSOURCE_OLDAPI:
+    return (4*length);
+  case KRB5_C_RANDSOURCE_OSRAND:
+    return (8*length);
+  case KRB5_C_RANDSOURCE_TRUSTEDPARTY:
+    return (4*length);
+  case KRB5_C_RANDSOURCE_TIMING:return (2);
+  case KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL:
+    return (0);
+  default:
+    abort();
+  }
+return (0);
+}
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_seed(krb5_context context, krb5_data *data)
+krb5_c_random_add_entropy (krb5_context context, unsigned int randsource,
+			   const krb5_data *data)
 {
-    unsigned char *fold_input;
+  int yerr;
 
-    if (inited == 0) {
-	/* This does a bunch of malloc'ing up front, so that
-	   generating random keys doesn't have to malloc, so it can't
-	   fail.  Seeding still malloc's, but that's less common.  */
+  if (inited == 0) {
+    unsigned i;
+    yerr = krb5int_yarrow_init (&y_ctx, NULL);
+    if ((yerr != YARROW_OK) && (yerr != YARROW_NOT_SEEDED))
+      return (KRB5_CRYPTO_INTERNAL);
+      
 
-	enc->block_size(&blocksize);
-	enc->keysize(&keybytes, &keylength);
-	if ((random_state = (unsigned char *) malloc(ALLSTATESIZE)) == NULL)
-	    return(ENOMEM);
-	random_count = 0;
-	inited = 1;
-
-	krb5_nfold(data->length*8, (unsigned char *) data->data,
-		   STATESIZE*8, STATE);
-
-	return(0);
+    for (i=0; i < KRB5_C_RANDSOURCE_MAX; i++ ) {
+      unsigned  source_id;
+      if (krb5int_yarrow_new_source (&y_ctx, &source_id) != YARROW_OK )
+	return KRB5_CRYPTO_INTERNAL;
+      assert (source_id == i);
     }
-
-    if ((fold_input =
-	 (unsigned char *) malloc(data->length+STATESIZE)) == NULL)
-	return(ENOMEM);
-
-    memcpy(fold_input, data->data, data->length);
-    memcpy(fold_input+data->length, STATE, STATESIZE);
-
-    krb5_nfold((data->length+STATESIZE)*8, fold_input,
-	       STATESIZE*8, STATE);
-    free(fold_input);
-    return(0);
+    inited=1;
+      
+  }
+  yerr = krb5int_yarrow_input (&y_ctx, randsource,
+			       data->data, data->length,
+			       entropy_estimate (randsource, data->length));
+  if (yerr != YARROW_OK)
+    return (KRB5_CRYPTO_INTERNAL);
+  return (0);
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_seed
+(krb5_context context, krb5_data *data)
+{
+  return (krb5_c_random_add_entropy (context,  KRB5_C_RANDSOURCE_OLDAPI, data));
+}
+
+
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
-    krb5_error_code ret;
-    krb5_data data1, data2;
-    krb5_keyblock key;
-    int bytes;
-
-    if (inited == 0) {
-	/* I need some entropy.  I'd use the current time and pid, but
-	   that could cause portability problems.  And besides, as an
-	   entropy source, the quality just sucks.  */
-	abort();
+    int yerr;
+    assert (inited);
+    yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
+    if (yerr == YARROW_NOT_SEEDED) {
+      yerr = krb5int_yarrow_reseed (&y_ctx, YARROW_SLOW_POOL);
+      if (yerr == YARROW_OK)
+	yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
     }
-
-    bytes = 0;
-
-    while (bytes < data->length) {
-	if (random_count == 0) {
-	    /* set up random krb5_data, and key to be filled in */
-	    data1.length = keybytes;
-	    data1.data = (char *) STATEKEY;
-	    key.length = keylength;
-	    key.contents = KEYCONTENTS;
-
-	    /* fill it in */
-	    if ((ret = ((*(enc->make_key))(&data1, &key))))
-		return(ret);
-
-	    /* encrypt the block */
-	    data1.length = blocksize;
-	    data1.data = (char *) STATEBLOCK;
-	    data2.length = blocksize;
-	    data2.data = (char *) RANDBLOCK;
-	    if ((ret = ((*(enc->encrypt))(&key, NULL, &data1, &data2))))
-		return(ret);
-
-	    /* Fold the new output back into the state.  */
-
-	    krb5_nfold(OUTPUTSIZE*8, OUTPUT, STATESIZE*8, NEWSTATE);
-	    memcpy(STATE, NEWSTATE, STATESIZE);
-
-	    random_count = blocksize;
-	}
-
-	if ((data->length - bytes) <= random_count) {
-	    memcpy(data->data + bytes, RANDBLOCK+(blocksize-random_count),
-		   data->length - bytes);
-	    random_count -= (data->length - bytes);
-	    break;
-	}
-
-	memcpy(data->data + bytes, RANDBLOCK+(blocksize - random_count),
-	       random_count);
-
-	bytes += random_count;
-	random_count = 0;
-    }
-
+    if ( yerr != YARROW_OK)
+      return (KRB5_CRYPTO_INTERNAL);
     return(0);
 }
 
 void prng_cleanup (void)
 {
-	if (inited) free (random_state);
+  if (inited) krb5int_yarrow_final (&y_ctx);
 	inited = 0;
 }

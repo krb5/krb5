@@ -1,3 +1,18 @@
+2001-11-15  Sam Hartman  <hartmans@mit.edu>
+
+	* t_prng.c: New file for PRNG tests
+
+	* prng.c (krb5_c_random_seed): Deprecated in favor of
+	krb5_c_random_add_entropy 
+
+2001-11-14  Sam Hartman  <hartmans@mit.edu>
+
+	* prng.c :  adapt to yarrow
+
+2001-11-09  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in Makefile.in: Generate makefile for yarrow
+
 2001-11-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* state.c (krb5_c_init_state, krb5_c_free_state): Use

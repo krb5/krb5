@@ -353,6 +353,27 @@ typedef struct _krb5_enc_data {
 #define CKSUMTYPE_HMAC_SHA1_DES3	0x000c
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
+/* The following are entropy source designations. Whenever
+ * krb5_C_random_add_entropy is called, one of these source  ids is passed
+ * in.  This  allows the library  to better estimate bits of
+ * entropy in the sample and to keep track of what sources of entropy have
+ * contributed enough entropy.  Sources marked internal MUST NOT be
+ * used by applications outside the Kerberos library
+*/
+
+enum {
+  KRB5_C_RANDSOURCE_OLDAPI = 0, /*calls to krb5_C_RANDOM_SEED (INTERNAL)*/
+  KRB5_C_RANDSOURCE_OSRAND = 1, /* /dev/random or equivalent (internal)*/
+  KRB5_C_RANDSOURCE_TRUSTEDPARTY = 2, /* From KDC or other trusted party*/
+  /*This source should be used carefully; data in this category
+   * should be from a third party trusted to give random bits
+   * For example keys issued by the KDC in the application server.
+   */
+  KRB5_C_RANDSOURCE_TIMING = 3, /* Timing of operations*/
+  KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL = 4, /*Protocol data possibly from attacker*/
+  KRB5_C_RANDSOURCE_MAX = 5 /*Do not use; maximum source ID*/
+};
+
 #ifndef krb5_roundup
 /* round x up to nearest multiple of y */
 #define krb5_roundup(x, y) ((((x) + (y) - 1)/(y))*(y))
@@ -405,11 +426,33 @@ krb5_error_code KRB5_CALLCONV
     (krb5_context context, krb5_enctype enctype,
 		    krb5_keyblock *k5_random_key);
 
+/* Register a new entropy sample  with the PRNG. may cause
+* the PRNG to be reseeded, although this is not guaranteed.  See previous randsource definitions
+* for information on how each source should be used.
+*/
+krb5_error_code KRB5_CALLCONV
+	krb5_c_random_add_entropy
+(krb5_context context, unsigned int  randsource_id, const krb5_data *data);
+
+
 krb5_error_code KRB5_CALLCONV
     krb5_c_random_make_octets
     (krb5_context context, krb5_data *data);
 
+/*
+* Collect entropy from the OS if possible. strong requests that as strong 
+* of a source of entropy  as available be used.  Setting strong may 
+* increase the probability of blocking and should not  be used for normal 
+* applications.  Good uses include seeding the PRNG for kadmind
+* and realm setup.
+* If successful is non-null, then successful is set to 1 if the OS provided
+* entropy else zero.
+*/
 krb5_error_code KRB5_CALLCONV
+krb5_c_random_os_entropy
+(krb5_context context, int strong, int *success);
+
+/*deprecated*/ krb5_error_code KRB5_CALLCONV
     krb5_c_random_seed
     (krb5_context context, krb5_data *data);
 

@@ -1,3 +1,12 @@
+2001-11-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin:  Add krb5_c_random_add_entropy and
+	krb5_c_random_os_entropy 
+
+2001-11-14  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Added definitions of random sources 
+
 2001-11-06  Sam Hartman  <hartmans@tir-na-nogth.mit.edu>
 
 	* k5-int.h: Add krb5int_des_init_state and krb5int_default_free_state

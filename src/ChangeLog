@@ -1,3 +1,7 @@
+2001-11-16  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (FILES): Add lib/crypto/yarrow
+
 2001-10-29  Jeff Altman   <jaltman@columbia.edu>
 
         * Makefile.in - Windows configuration for src/lib/crypto/arcfour
