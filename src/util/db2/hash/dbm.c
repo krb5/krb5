@@ -68,20 +68,20 @@ static DBM *__cur_db;
 static void no_open_db __P((void));
 
 int
-dbminit(file)
+kdb2_dbminit(file)
 	char *file;
 {
 	if (__cur_db != NULL)
-		(void)dbm_close(__cur_db);
-	if ((__cur_db = dbm_open(file, O_RDWR|O_BINARY, 0)) != NULL)
+		(void)kdb2_dbm_close(__cur_db);
+	if ((__cur_db = kdb2_dbm_open(file, O_RDWR|O_BINARY, 0)) != NULL)
 		return (0);
-	if ((__cur_db = dbm_open(file, O_RDONLY|O_BINARY, 0)) != NULL)
+	if ((__cur_db = kdb2_dbm_open(file, O_RDONLY|O_BINARY, 0)) != NULL)
 		return (0);
 	return (-1);
 }
 
 datum
-fetch(key)
+kdb2_fetch(key)
 	datum key;
 {
 	datum item;
@@ -91,11 +91,11 @@ fetch(key)
 		item.dptr = 0;
 		return (item);
 	}
-	return (dbm_fetch(__cur_db, key));
+	return (kdb2_dbm_fetch(__cur_db, key));
 }
 
 datum
-firstkey()
+kdb2_firstkey()
 {
 	datum item;
 
@@ -104,11 +104,11 @@ firstkey()
 		item.dptr = 0;
 		return (item);
 	}
-	return (dbm_firstkey(__cur_db));
+	return (kdb2_dbm_firstkey(__cur_db));
 }
 
 datum
-nextkey(key)
+kdb2_nextkey(key)
 	datum key;
 {
 	datum item;
@@ -118,29 +118,29 @@ nextkey(key)
 		item.dptr = 0;
 		return (item);
 	}
-	return (dbm_nextkey(__cur_db));
+	return (kdb2_dbm_nextkey(__cur_db));
 }
 
 int
-delete(key)
+kdb2_delete(key)
 	datum key;
 {
 	if (__cur_db == NULL) {
 		no_open_db();
 		return (-1);
 	}
-	return (dbm_delete(__cur_db, key));
+	return (kdb2_dbm_delete(__cur_db, key));
 }
 
 int
-store(key, dat)
+kdb2_store(key, dat)
 	datum key, dat;
 {
 	if (__cur_db == NULL) {
 		no_open_db();
 		return (-1);
 	}
-	return (dbm_store(__cur_db, key, dat, DBM_REPLACE));
+	return (kdb2_dbm_store(__cur_db, key, dat, DBM_REPLACE));
 }
 
 static void
@@ -155,7 +155,7 @@ no_open_db()
  *	 NULL on failure
  */
 DBM *
-dbm_open(file, flags, mode)
+kdb2_dbm_open(file, flags, mode)
 	const char *file;
 	int flags, mode;
 {
@@ -178,7 +178,7 @@ dbm_open(file, flags, mode)
  *	Nothing.
  */
 void
-dbm_close(db)
+kdb2_dbm_close(db)
 	DBM *db;
 {
 	(void)(db->close)(db);
@@ -190,7 +190,7 @@ dbm_close(db)
  *	NULL on failure
  */
 datum
-dbm_fetch(db, key)
+kdb2_dbm_fetch(db, key)
 	DBM *db;
 	datum key;
 {
@@ -221,7 +221,7 @@ dbm_fetch(db, key)
  *	NULL on failure
  */
 datum
-dbm_firstkey(db)
+kdb2_dbm_firstkey(db)
 	DBM *db;
 {
 	int status;
@@ -247,7 +247,7 @@ dbm_firstkey(db)
  *	NULL on failure
  */
 datum
-dbm_nextkey(db)
+kdb2_dbm_nextkey(db)
 	DBM *db;
 {
 	int status;
@@ -273,7 +273,7 @@ dbm_nextkey(db)
  *	<0 failure
  */
 int
-dbm_delete(db, key)
+kdb2_dbm_delete(db, key)
 	DBM *db;
 	datum key;
 {
@@ -301,7 +301,7 @@ dbm_delete(db, key)
  *	 1 if DBM_INSERT and entry exists
  */
 int
-dbm_store(db, key, content, flags)
+kdb2_dbm_store(db, key, content, flags)
 	DBM *db;
 	datum key, content;
 	int flags;
@@ -322,7 +322,7 @@ dbm_store(db, key, content, flags)
 }
 
 int
-dbm_error(db)
+kdb2_dbm_error(db)
 	DBM *db;
 {
 	HTAB *hp;
@@ -332,7 +332,7 @@ dbm_error(db)
 }
 
 int
-dbm_clearerr(db)
+kdb2_dbm_clearerr(db)
 	DBM *db;
 {
 	HTAB *hp;
@@ -343,7 +343,7 @@ dbm_clearerr(db)
 }
 
 int
-dbm_dirfno(db)
+kdb2_dbm_dirfno(db)
 	DBM *db;
 {
 	return(((HTAB *)db->internal)->fp);

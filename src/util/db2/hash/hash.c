@@ -94,7 +94,7 @@ u_int32_t hash_accesses, hash_collisions, hash_expansions, hash_overflows,
 /* OPEN/CLOSE */
 
 extern DB *
-__hash_open(file, flags, mode, info, dflags)
+__kdb2_hash_open(file, flags, mode, info, dflags)
 	const char *file;
 	int32_t flags, mode, dflags;
 	const HASHINFO *info;	/* Special directives for create */

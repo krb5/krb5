@@ -1,3 +1,14 @@
+Fri Feb 13 14:37:47 1998  Tom Yu  <tlyu@mit.edu>
+
+	* hash/hash.c (__kdb2_hash_open): Rename to avoid potential
+ 	collision with NetBSD libc.
+
+	* hash/dbm.c: Rename lots of functions to avoid colliding with
+	native dbm implementations.
+
+	* db/db.c (kdb2_dbopen): Rename to avoid colliding with NetBSD
+	libc.
+
 Wed Jan 21 10:17:34 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* btree/bt_open.c: Added O_BINARY for __CYGWIN32__.

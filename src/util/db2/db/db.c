@@ -45,7 +45,7 @@ static char sccsid[] = "@(#)db.c	8.4 (Berkeley) 2/21/94";
 #include "db-int.h"
 
 DB *
-dbopen(fname, flags, mode, type, openinfo)
+kdb2_dbopen(fname, flags, mode, type, openinfo)
 	const char *fname;
 	int flags, mode;
 	DBTYPE type;
