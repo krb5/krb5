@@ -175,15 +175,17 @@ const krb5_fulladdr *from;
 krb5_data *pkt;
 krb5_tkt_authent **ret_authdat;
 {
-    krb5_ap_req *apreq;
+    krb5_ap_req *apreq = 0;
     krb5_tkt_authent *authdat, *nauthdat;
     struct kparg who;
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     krb5_checksum our_cksum;
-    krb5_data *scratch, scratch1, scratch2;
+    krb5_data *scratch = 0, scratch1, scratch2;
     krb5_pa_data **tmppa;
     krb5_boolean local_client = TRUE;
     krb5_enc_tkt_part *ticket_enc;
+
+    our_cksum.contents = 0;
 
     if (!request->padata)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -200,12 +202,9 @@ krb5_tkt_authent **ret_authdat;
     if (retval = decode_krb5_ap_req(&scratch2, &apreq))
 	return retval;
 
-    /* the caller will free the ticket when cleaning up */
-#define cleanup_apreq() {apreq->ticket = 0; krb5_free_ap_req(apreq);}
-
     if (!(authdat = (krb5_tkt_authent *)malloc(sizeof(*authdat)))) {
-	krb5_free_ap_req(apreq);
-	return ENOMEM;
+	retval = ENOMEM;
+	goto cleanup;
     }
     memset((char *)authdat, 0, sizeof(*authdat));
     authdat->ticket = apreq->ticket;
@@ -213,15 +212,17 @@ krb5_tkt_authent **ret_authdat;
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
-        cleanup_apreq();
-	return KRB5KDC_ERR_POLICY;
+	retval = KRB5KDC_ERR_POLICY;
+	apreq->ticket = 0;		/* Caller will free the ticket */
+	goto cleanup;
     }
 
-    if (retval = kdc_get_server_key(apreq->ticket, &who.key,
+    if (retval = kdc_get_server_key(authdat->ticket, &who.key,
 				    &who.kvno)) {
-	cleanup_apreq();
-	return retval;
+	apreq->ticket = 0;		/* Caller will free the ticket */
+	goto cleanup;
     }
+
     /* If the "server" principal in the ticket is not something
        in the local realm, then we must refuse to service the request
        if the client claims to be from the local realm.
@@ -249,15 +250,16 @@ krb5_tkt_authent **ret_authdat;
     krb5_free_keyblock(who.key);
 
     if (retval) {
-        cleanup_apreq();
-	return(retval);
+	apreq->ticket = 0;		/* Caller will free the ticket */
+	goto cleanup;
     }
 
-    xfree(authdat);			/* it gets re-assigned, so we nuke
-					   it now */
-    /* no longer need to protect the ticket in apreq, since authdat gets a
-       separate copy */
-#undef cleanup_apreq
+    /*
+     * no longer need to protect the ticket in apreq, since
+     * authdat is about to get nuked --- it's going to get reassigned.
+     */
+    xfree(authdat);
+
     authdat = nauthdat;
     *ret_authdat = authdat;
     ticket_enc = authdat->ticket->enc_part2;
@@ -271,47 +273,54 @@ krb5_tkt_authent **ret_authdat;
 	if (tkt_realm->length != tgs_realm->length ||
 	    memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
 	    /* someone in a foreign realm claiming to be local */
-	    krb5_free_ap_req(apreq);
-	    return KRB5KDC_ERR_POLICY;
+	    retval = KRB5KDC_ERR_POLICY;
+	    goto cleanup;
 	}
     }
     our_cksum.checksum_type = authdat->authenticator->checksum->checksum_type;
     if (!valid_cksumtype(our_cksum.checksum_type)) {
-	krb5_free_ap_req(apreq);
-	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
+	retval = KRB5KDC_ERR_SUMTYPE_NOSUPP;
+	goto cleanup;
     }	
     /* must be collision proof */
     if (!is_coll_proof_cksum(our_cksum.checksum_type)) {
-	krb5_free_ap_req(apreq);
-	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+	retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
+	goto cleanup;
     }
 
-    /* check application checksum vs. tgs request */
     if (!(our_cksum.contents = (krb5_octet *)
 	  malloc(krb5_checksum_size(our_cksum.checksum_type)))) {
-	krb5_free_ap_req(apreq);
-	return ENOMEM; /* XXX cktype nosupp */
+	retval = ENOMEM;
+	goto cleanup;
     }
 
-    /* we try checksumming the req-body two different ways: first 
-       try encoding using our local asn.1 library.  If that fails,
-       then reach into the raw asn.1 stream (if available), and checksum
-       that directly. */
-    if (retval = encode_krb5_kdc_req_body(request, &scratch)) {
-	krb5_free_ap_req(apreq);
-        xfree(our_cksum.contents);
-	return retval; /* XXX should be in kdc range */
+    /*
+     * Check application checksum vs. tgs request
+     * 	 
+     * We try checksumming the req-body two different ways: first we
+     * try reaching into the raw asn.1 stream (if available), and
+     * checksum that directly; if that failes, then we try encoding
+     * using our local asn.1 library.
+     */
+    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    if (pkt && (fetch_asn1_field(pkt->data, 1, 4, &scratch1) >= 0)) {
+	retval = comp_cksum(our_cksum.checksum_type, &scratch1, authdat,
+			    &our_cksum);
     }
-    if ((retval = comp_cksum(our_cksum.checksum_type, scratch, authdat, &our_cksum)) && (pkt)) {
-	if (fetch_asn1_field(pkt->data, 1, 4, &scratch1) < 0) {
-	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY; 
-	} else {
-            retval = comp_cksum(our_cksum.checksum_type, &scratch1, authdat, &our_cksum);
+    if (retval) {
+	if (retval = encode_krb5_kdc_req_body(request, &scratch)) 
+	    goto cleanup;	 /* XXX retval should be in kdc range */
+	retval = comp_cksum(our_cksum.checksum_type, scratch, authdat,
+			    &our_cksum);
     }
-    }
-    krb5_free_ap_req(apreq); 
-    krb5_free_data(scratch);
+    
     xfree(our_cksum.contents);
+    
+cleanup:
+    if (apreq)
+	krb5_free_ap_req(apreq);
+    if (scratch)
+	krb5_free_data(scratch);
     return retval;
 }
 
@@ -943,7 +952,7 @@ char **status;
     /* Check to see if server has expired */
     if (server.expiration && server.expiration < kdc_time) {
 	*status = "SERVICE EXPIRED";
-	    return(KDC_ERR_SERVICE_EXP);
+	return(KDC_ERR_SERVICE_EXP);
     }
 
     /*
@@ -1085,12 +1094,22 @@ char **status;
 	return(KRB_AP_ERR_TKT_EXPIRED);
     }
     
-    /* Make sure second ticket was provided for ENC_TKT_IN_SKEY */
+    /*
+     * Checks for ENC_TKT_IN_SKEY:
+     *
+     * (1) Make sure the second ticket exists
+     * (2) Make sure it is a ticket granting ticket
+     */
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
 	if (!request->second_ticket ||
 	    !request->second_ticket[st_idx]) {
 	    *status = "NO_2ND_TKT";
 	    return(KDC_ERR_BADOPTION);
+	}
+	if (!krb5_principal_compare(request->second_ticket[st_idx]->server,
+				    tgs_server)) {
+		*status = "2ND_TKT_NOT_TGS";
+		return(KDC_ERR_POLICY);
 	}
 	st_idx++;
     }
