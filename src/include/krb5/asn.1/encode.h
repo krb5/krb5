@@ -52,17 +52,30 @@
 		   KRB5_AS__REQ2krb5_as_req, \
 		   free_KRB5_AS__REQ)
 
-#define encode_krb5_kdc_rep(req, error) \
+#define encode_krb5_as_rep(req, error) \
     encode_generic(req, error, \
 		   encode_KRB5_KDC__REP, \
-		   krb5_kdc_rep2KRB5_KDC__REP, \
+		   krb5_as_rep2KRB5_KDC__REP, \
 		   free_KRB5_KDC__REP)
-#define decode_krb5_kdc_rep(req, error) \
+#define decode_krb5_as_rep(req, error) \
     (krb5_kdc_rep *) \
     decode_generic(req, error, \
 		   decode_KRB5_KDC__REP, \
-		   KRB5_KDC__REP2krb5_kdc_rep, \
+		   KRB5_KDC__REP2krb5_as_rep, \
 		   free_KRB5_KDC__REP)
+
+#define encode_krb5_tgs_rep(req, error) \
+    encode_generic(req, error, \
+		   encode_KRB5_KDC__REP, \
+		   krb5_tgs_rep2KRB5_KDC__REP, \
+		   free_KRB5_KDC__REP)
+#define decode_krb5_tgs_rep(req, error) \
+    (krb5_kdc_rep *) \
+    decode_generic(req, error, \
+		   decode_KRB5_KDC__REP, \
+		   KRB5_KDC__REP2krb5_tgs_rep, \
+		   free_KRB5_KDC__REP)
+
 
 #define encode_krb5_ap_req(req, error) \
     encode_generic(req, error, \
