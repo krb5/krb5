@@ -90,7 +90,7 @@ krb5int_cc_default(context, ccache)
 			err = krb5_unparse_name (context, desiredKrb5Principal, &desiredName);
 			if (!err) {
 				err = KLCreatePrincipalFromString (desiredName, 
-								kerberosPrincipal_V5, &desiredPrincipal);
+								kerberosVersion_V5, &desiredPrincipal);
 				krb5_free_unparsed_name (context, desiredName);
 				if (err != klNoErr)
 					desiredPrincipal = nil;
