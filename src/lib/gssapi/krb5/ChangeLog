@@ -1,3 +1,9 @@
+2000-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_sec_context.c (get_credentials): Don't check each enctype
+	against a list from the krb5 library; instead, just try to use it,
+	and go on to the next if the error code indicates we can't use it.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_krb5.h (KG_USAGE_SEQ): New value.

@@ -99,9 +99,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 {
     krb5_error_code	code;
     krb5_creds 		in_creds;
-    krb5_enctype *senctypes = 0;
     int i;
-    int found_supported_enctype;
     
     memset((char *) &in_creds, 0, sizeof(krb5_creds));
 
@@ -112,34 +110,18 @@ static krb5_error_code get_credentials(context, cred, server, now,
     in_creds.times.endtime = endtime;
 
     in_creds.keyblock.enctype = 0;
-    code = krb5_get_tgs_ktypes (context,
-				/* unused! */ cred->princ,
-				&senctypes);
-    if (code)
-	goto cleanup;
 
-    found_supported_enctype = 0;
     for (i = 0; enctypes[i]; i++) {
-	int j;
-	for (j = 0; senctypes[j]; j++)
-	    if (enctypes[i] == senctypes[j])
-		break;
-	if (senctypes[j] == 0)
-	    continue;
-	found_supported_enctype = 1;
 	in_creds.keyblock.enctype = enctypes[i];
 	code = krb5_get_credentials(context, 0, cred->ccache, 
 				    &in_creds, out_creds);
-	if (code == 0)
-	    break;
 	if (code == KRB5_CC_NOT_KTYPE)
 	    continue;
+	if (code != 0)
+	    break;
     }
     if (enctypes[i] == 0) {
-	if (found_supported_enctype)
-	    return code;
-	else
-	    return KRB5_CONFIG_ETYPE_NOSUPP;
+	return KRB5_CONFIG_ETYPE_NOSUPP;
     }
 
     /*
@@ -153,8 +135,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
     
 cleanup:
-    if (senctypes)
-	krb5_free_ktypes (context, senctypes);
     if (in_creds.client)
 	    krb5_free_principal(context, in_creds.client);
     if (in_creds.server)
