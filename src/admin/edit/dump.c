@@ -132,29 +132,28 @@ void dump_db(argc, argv)
 void update_ok_file (file_name)
      char *file_name;
 {
-    /* handle slave locking/failure stuff */
-    char *file_ok;
-    int fd;
-    static char ok[]=".dump_ok";
+	/* handle slave locking/failure stuff */
+	char *file_ok;
+	int fd;
+	static char ok[]=".dump_ok";
 
-    if ((file_ok = (char *)malloc(strlen(file_name) + strlen(ok) + 1))
-	== NULL) {
-	fprintf(stderr, "%s: out of memory.\n", progname);
-	(void) fflush (stderr);
-	perror ("malloc");
-	exit (1);
-    }
-    strcpy(file_ok, file_name);
-    strcat(file_ok, ok);
-    if ((fd = open(file_ok, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
-	fprintf(stderr, "Error creating 'ok' file, '%s'", file_ok);
-	perror("");
-	(void) fflush (stderr);
-	exit (1);
-    }
-    free(file_ok);
-    close(fd);
-    return;
+	if ((file_ok = (char *)malloc(strlen(file_name) + strlen(ok) + 1))
+	    == NULL) {
+		com_err(progname, ENOMEM,
+			"while allocating filename for update_ok_file");
+		return;
+	}
+	strcpy(file_ok, file_name);
+	strcat(file_ok, ok);
+	if ((fd = open(file_ok, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
+		com_err(progname, errno, "while creating 'ok' file, '%s'",
+			file_ok);
+		free(file_ok);
+		return;
+	}
+	free(file_ok);
+	close(fd);
+	return;
 }
 
 void load_db(argc, argv)
