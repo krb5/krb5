@@ -54,7 +54,7 @@ extern int mit_des_debug;
 static krb5_error_code
 mit_des_encrypt_f(DECLARG(krb5_const_pointer, in),
 		  DECLARG(krb5_pointer, out),
-		  DECLARG(const_size_t, size),
+		  DECLARG(const size_t, size),
 		  DECLARG(krb5_encrypt_block *, key),
 		  DECLARG(krb5_pointer, ivec))
 OLDDECLARG(krb5_const_pointer, in)
@@ -109,7 +109,7 @@ OLDDECLARG(krb5_pointer, ivec)
     cksum.contents = contents; 
 
     if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
-                  sum_func)(in,
+                  sum_func)((krb5_pointer) in,
                             sumsize,
                             (krb5_pointer)key->key->contents,
                             sizeof(mit_des_cblock),
