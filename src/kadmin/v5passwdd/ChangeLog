@@ -1,3 +1,13 @@
+2000-05-24  Ken Raeburn  <raeburn@mit.edu>
+	    Ezra Peisach  <epeisach@mit.edu>
+
+	* proto_serv.c (proto_serv): Don't overflow err_str.  Pass data
+	pointer and not a krb5_data to sprintf.  Remove unused variable
+	adm_errmsg.  Remove unused label done.  Declare variable
+	mime_setting only if MIME_SUPPORTED is defined.  Make variables
+	db_opened and kret volatile.
+	(proto_fmt_reply_msg): Unused variable deleted.
+
 2000-05-23  Tom Yu  <tlyu@mit.edu>
 
 	* kadm5_defs.h: Add argument for length of error string.

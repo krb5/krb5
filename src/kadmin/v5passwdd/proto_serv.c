@@ -52,7 +52,6 @@ static const char *proto_rd_cmd_msg = "\004%d: cannot read administrative protoc
 static const char *proto_db_open_msg = "\004%d: cannot open database";
 static const char *proto_db_close_msg = "\004%d: cannot close database";
 static const char *proto_wr_reply_msg = "\004%d: cannot write administrative protocol reply";
-static const char *proto_fmt_reply_msg = "\004%d: cannot format administrative protocol reply";
 extern char *programname;
 
 static int	proto_proto_timeout = -1;
@@ -109,7 +108,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     void		*sv_p;
     void		*cl_p;
 {
-    krb5_error_code	kret;
+    volatile krb5_error_code	kret;
     struct sockaddr_in	*cl_addr;
     struct sockaddr_in	*sv_addr;
 
@@ -127,12 +126,14 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 #endif	/* POSIX_SIGNALS */
 
     char		*curr_lang = (char *) NULL;
+#ifdef MIME_SUPPORTED
     krb5_boolean	mime_setting = 0;
+#endif
 
     krb5_int32		num_args;
     krb5_data		*arglist;
 
-    krb5_boolean	db_opened;
+    volatile krb5_boolean	db_opened;
 
     cl_addr = (struct sockaddr_in *) cl_p;
     sv_addr = (struct sockaddr_in *) sv_p;
@@ -286,6 +287,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	 */
 	while (1) {
 	    krb5_int32	cmd_error;
+	    /* If this size changed, change the sprintf below */
 	    char	err_str[1024];
 	    krb5_int32	cmd_repl_ncomps;
 	    krb5_data	*cmd_repl_complist;
@@ -733,7 +735,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			   ("> %d:UNKNOWN command %s\n", my_id,
 			  arglist[0].data));
 		    cmd_error = KRB5_ADM_CMD_UNKNOWN;
-		    sprintf(err_str, "Command %s not supported.", arglist[0]);
+		    sprintf(err_str, "Command %-.900s not supported", arglist[0].data); /* XXX Knows size of err_str.  */
 		}
 	    }
 	    else {
@@ -771,7 +773,6 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 		}
 	    }
 	    else {
-		char		*adm_errmsg;
 		krb5_data	reply_comps;
 
 		reply_comps.data = err_str;
@@ -859,7 +860,6 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	key_close_db(kcontext);
     close(cl_sock);
 
- done:
     DPRINT(DEBUG_CALLS, proto_debug_level, ("X proto_serv() = %d\n", kret));
     return(kret);
 }
