@@ -27,71 +27,20 @@
 #include "k5-int.h"
 
 #ifdef macintosh
-static CInfoPBRec	theCatInfo;
-static	char		*FileBuffer;
-static	int			indexCount;
-static FSSpec		theWorkingFile;
-
-static char*
-GetDirName(short vrefnum, long dirid, char *dststr)
+OSErr
+GetMacProfileFileSpec (FSSpec* outFileSpec, StringPtr inName)
 {
-CInfoPBRec	theCatInfo;
-FSSpec		theParDir;
-char		str[37];
-char		*curstr;
-OSErr		err;
-	// Get info on the directory itself, it's name and it's parent
-	theCatInfo.dirInfo.ioCompletion		= NULL;
-	theCatInfo.dirInfo.ioNamePtr		= (StringPtr) str;
-	theCatInfo.dirInfo.ioVRefNum		= vrefnum;
-	theCatInfo.dirInfo.ioFDirIndex		= -1;
-	theCatInfo.dirInfo.ioDrDirID		= dirid;
-	err = PBGetCatInfoSync(&theCatInfo);
-
-	// If I'm looking at the root directory and I've tried going up once
-	// start returning down the call chain
-	if (err != noErr || (dirid == 2 && theCatInfo.hFileInfo.ioFlParID == 2))
-		return dststr;
-
-	// Construct a file spec for the parent
-	curstr = GetDirName(theCatInfo.dirInfo.ioVRefNum, theCatInfo.hFileInfo.ioFlParID, dststr);
-
-	// Copy the pascal string to the end of a C string
-	BlockMoveData(&str[1], curstr, str[0]);
-	curstr += str[0];
-	*curstr++ = ':';
+	OSErr err;
 	
-	// return a pointer to the end of the string (for someone below to append to)
-	return curstr;
-}
+	err = FindFolder (kOnSystemDisk, kPreferencesFolderType, kCreateFolder,
+		&(outFileSpec -> vRefNum) , &(outFileSpec -> parID));
+	
+	if (err == noErr) {
+		BlockMoveData (inName, &(outFileSpec -> name), strlen (inName) + 1);
+		c2pstr (&(outFileSpec -> name));
+	}
 
-static void
-GetPathname(FSSpec *theFile, char *dststr)
-{
-FSSpec		theParDir;
-char		*curstr;
-OSErr		err;
-
-	// Start crawling up the directory path recursivly
-	curstr = GetDirName(theFile->vRefNum, theFile->parID, dststr);
-	BlockMoveData(&theFile->name[1], curstr, theFile->name[0]);
-	curstr += theFile->name[0];
-	*curstr = 0;
-}
-
-char*
-GetMacProfilePathName(Str255 filename)
-{
-short	vRefnum;
-long	parID;
-OSErr	theErr;
-FSSpec	krbSpec;
-char	pathbuf[255];
-
-	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
-	FSMakeFSSpec(vRefnum, parID, filename, &krbSpec);
-	GetPathname(&krbSpec, &pathbuf);
-	return strdup(pathbuf);
+	return err;
 }
 #endif /* macintosh */
 
@@ -229,30 +178,44 @@ get_from_registry(
 #endif /* _MSDOS || _WIN32 */
 
 static void
-free_filenames(filenames)
-	char **filenames;
+free_filespecs(files)
+	profile_filespec_t *files;
 {
+#ifndef macintosh
     char **cp;
 
-    if (filenames == 0)
+    if (files == 0)
         return;
     
-    for (cp = filenames; *cp; cp++)
+    for (cp = files; *cp; cp++)
 	free(*cp);
-    free(filenames);
+#endif
+    free(files);
 }
 
 static krb5_error_code
-os_get_default_config_files(pfilenames, secure)
-	char ***pfilenames;
+os_get_default_config_files(pfiles, secure)
+	profile_filespect** pfiles;
 	krb5_boolean secure;
 {
-    char **filenames;
+    profile_filespec_t* files;
 #ifdef macintosh
-    filenames = malloc(3 * sizeof(char *));
-    filenames[0] = GetMacProfilePathName("\pkrb Configuration");
-    filenames[1] = GetMacProfilePathName("\pkrb5.ini");
-    filenames[2] = 0;
+    files = malloc(3 * sizeof(FSSpec));
+    if (files != 0) {
+		OSErr err = GetMacProfileFileSpec(&(files [0]), "\pkrb Configuration");
+		if (err == noErr) {
+			err = GetMacProfileFileSpec( &(files [1]), "\pkrb5.ini");
+		}
+		files[2].vRefNum = 0;
+		files[2].parID = 0;
+		files[2].name[0] = '\0';
+		if (err != noErr) {
+			free (files);
+			return ENFILE;
+		}
+	} else {
+		return ENOMEM;
+	}
 #else /* !macintosh */
 #if defined(_MSDOS) || defined(_WIN32)
     krb5_error_code retval = 0;
@@ -356,17 +319,17 @@ os_init_paths(ctx, secure)
 	krb5_boolean secure;
 {
     krb5_error_code	retval = 0;
-    char **filenames = 0;
+    profile_filespec_t *files = 0;
 
     ctx->profile_secure = secure;
 
-    retval = os_get_default_config_files(&filenames, secure);
+    retval = os_get_default_config_files(&files, secure);
 
     if (!retval)
-        retval = profile_init(filenames, &ctx->profile);
+        retval = profile_init(files, &ctx->profile);
 
-    if (filenames)
-        free_filenames(filenames);
+    if (files)
+        free_filespecs(files);
 
     if (retval)
         ctx->profile = 0;
@@ -419,6 +382,8 @@ krb5_os_init_context(ctx)
 	return retval;
 }
 
+#ifndef macintosh
+
 krb5_error_code
 krb5_set_config_files(ctx, filenames)
 	krb5_context ctx;
@@ -453,6 +418,8 @@ krb5_free_config_files(filenames)
 {
     free_filenames(filenames);
 }
+
+#endif /* macintosh */
 
 krb5_error_code
 krb5_secure_config_files(ctx)
