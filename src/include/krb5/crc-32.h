@@ -11,7 +11,7 @@
  * Definitions for the CRC-32 checksum
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
 #ifndef __KRB5_CRC32__
 #define __KRB5_CRC32__

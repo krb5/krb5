@@ -12,7 +12,7 @@
  * version 5.
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
 #ifndef __KRB5_FIELDBITS__
 #define __KRB5_FIELDBITS__
