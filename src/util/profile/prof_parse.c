@@ -64,7 +64,7 @@ static errcode_t parse_std_line(line, state)
 	
 	if (*line == 0)
 		return 0;
-	if (line[0] == ';')
+	if (line[0] == ';' || line[0] == '#')
 		return 0;
 	strip_line(line);
 	cp = skip_over_blanks(line);
