@@ -1,3 +1,8 @@
+Mon Jan  9 19:27:55 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* display_name.c (krb5_gss_display_name): gss_display_name()
+		should return a name type OID, not a mechanism OID.
+
 Tue Oct  4 16:40:45 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* accept_security_context.c (rd_req_keyproc): Add widen.h and

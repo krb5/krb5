@@ -57,6 +57,6 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
 
    *minor_status = 0;
    if (output_name_type)
-      *output_name_type = (gss_OID) gss_mech_krb5;
+      *output_name_type = (gss_OID) gss_nt_krb5_name;
    return(GSS_S_COMPLETE);
 }
