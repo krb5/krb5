@@ -41,6 +41,8 @@ extern int optind;
 extern char *optarg;
 int show_flags = 0;
 char *progname;
+char *defname;
+time_t now;
 
 void
 show_credential PROTOTYPE((krb5_creds *));
@@ -63,6 +65,8 @@ main(argc, argv)
 
     krb5_init_ets();
 
+    time(&now);
+    
     if (strrchr(argv[0], '/'))
 	progname = strrchr(argv[0], '/')+1;
     else
@@ -123,13 +127,12 @@ main(argc, argv)
 	com_err(progname, code, "while retrieving principal name");
 	exit(1);
     }
-    if (code = krb5_unparse_name(princ, &name)) {
+    if (code = krb5_unparse_name(princ, &defname)) {
 	com_err(progname, code, "while unparsing principal name");
 	exit(1);
     }
     printf("Ticket cache: %s\nDefault principal: %s\n",
-	   krb5_cc_get_name(cache), name);
-    free(name);
+           krb5_cc_get_name(cache), defname);
     if (code = krb5_cc_start_seq_get(cache, &cur)) {
 	com_err(progname, code, "while starting to retrieve tickets");
 	exit(1);
@@ -197,13 +200,27 @@ register krb5_creds *cred;
     putchar(')');
 }
 
+void printtime(tv)
+    time_t tv;
+{
+    struct tm *stime;
+    stime = localtime((time_t *)&tv);
+    
+    printf("%02d/%02d/%02d:%02d:%02d:%02d",
+           stime->tm_year,
+           stime->tm_mon + 1,
+           stime->tm_mday,
+           stime->tm_hour,
+           stime->tm_min,
+           stime->tm_sec);
+}
+
 void
 show_credential(cred)
 register krb5_creds *cred;
 {
     krb5_error_code retval;
     char *name, *sname;
-    struct tm *stime;
 
     retval = krb5_unparse_name(cred->client, &name);
     if (retval) {
@@ -216,35 +233,25 @@ register krb5_creds *cred;
 	free(name);
 	return;
     }
+    if (strcmp(name, defname) == 0) {
+        printf("S: %s\n\t", sname);
+    } else {
     printf("C: %s\tS: %s\n\t", name, sname);
+    }
 
     if (!cred->times.starttime)
 	cred->times.starttime = cred->times.authtime;
-    stime = localtime((time_t *)&cred->times.starttime);
-    printf("valid %02d/%02d/%02d:%02d:%02d:%02d to ",
-	   stime->tm_year,
-	   stime->tm_mon + 1,
-	   stime->tm_mday,
-	   stime->tm_hour,
-	   stime->tm_min,
-	   stime->tm_sec);
-    stime = localtime((time_t *)&cred->times.endtime);
-    printf("%02d/%02d/%02d:%02d:%02d:%02d",
-	   stime->tm_year,
-	   stime->tm_mon + 1,
-	   stime->tm_mday,
-	   stime->tm_hour,
-	   stime->tm_min,
-	   stime->tm_sec);
+
+    if (cred->times.endtime < now) {
+        printf("EXPIRED; was ");
+    }
+    printf("valid ");
+    printtime(cred->times.starttime);
+    printf(" to ");
+    printtime(cred->times.endtime);
     if (cred->times.renew_till) {
-	stime = localtime((time_t *)&cred->times.renew_till);
-	printf("\n\trenew until %02d/%02d/%02d:%02d:%02d:%02d",
-	       stime->tm_year,
-	       stime->tm_mon + 1,
-	       stime->tm_mday,
-	       stime->tm_hour,
-	       stime->tm_min,
-	       stime->tm_sec);
+        printf("\n\trenew until ");
+        printtime(cred->times.renew_till);
     }
     if (show_flags) {
 	fputs("\n\t",stdout);
