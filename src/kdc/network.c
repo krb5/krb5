@@ -95,7 +95,8 @@ const char *prog;
 	    faddr.address = &addr;
 	    addr.addrtype = ADDRTYPE_INET;
 	    addr.length = 4;
-	    addr.contents = (krb5_octet *) &saddr.sin_addr; /* XXX net order or host order? */
+	    /* this address is in net order */
+	    addr.contents = (krb5_octet *) &saddr.sin_addr;
 	    if (retval = dispatch(&request, &faddr, &response)) {
 		com_err(prog, retval, "while dispatching");
 		continue;
