@@ -126,7 +126,7 @@ fi])
 dnl
 dnl check for sigmask/sigprocmask -- CHECK_SIGPROCMASK
 dnl
-define(CHECK_SIGPROCMASK,[
+AC_DEFUN(CHECK_SIGPROCMASK,[
 AC_MSG_CHECKING([for use of sigprocmask])
 AC_CACHE_VAL(krb5_cv_func_sigprocmask_use,
 [AC_TRY_LINK([#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
@@ -139,18 +139,18 @@ if test $krb5_cv_func_sigprocmask_use = yes; then
 fi
 ])dnl
 dnl
-define(AC_PROG_ARCHIVE, [AC_CHECK_PROG(ARCHIVE, ar, ar cqv, false)])dnl
-define(AC_PROG_ARCHIVE_ADD, [AC_CHECK_PROG(ARADD, ar, ar cruv, false)])dnl
+AC_DEFUN(AC_PROG_ARCHIVE, [AC_CHECK_PROG(ARCHIVE, ar, ar cqv, false)])dnl
+AC_DEFUN(AC_PROG_ARCHIVE_ADD, [AC_CHECK_PROG(ARADD, ar, ar cruv, false)])dnl
 dnl
 dnl check for <dirent.h> -- CHECK_DIRENT
 dnl (may need to be more complex later)
 dnl
-define(CHECK_DIRENT,[
+AC_DEFUN(CHECK_DIRENT,[
 AC_CHECK_HEADER(dirent.h,AC_DEFINE(USE_DIRENT_H,1,[Define if you have dirent.h functionality]))])dnl
 dnl
 dnl check if union wait is defined, or if WAIT_USES_INT -- CHECK_WAIT_TYPE
 dnl
-define(CHECK_WAIT_TYPE,[
+AC_DEFUN(CHECK_WAIT_TYPE,[
 AC_MSG_CHECKING([if argument to wait is int *])
 AC_CACHE_VAL(krb5_cv_struct_wait,
 dnl Test for prototype clash - if there is none - then assume int * works
@@ -173,7 +173,7 @@ fi
 dnl
 dnl check for POSIX signal handling -- CHECK_SIGNALS
 dnl
-define(CHECK_SIGNALS,[
+AC_DEFUN(CHECK_SIGNALS,[
 AC_CHECK_FUNC(sigprocmask,
 AC_MSG_CHECKING(for sigset_t and POSIX_SIGNALS)
 AC_CACHE_VAL(krb5_cv_type_sigset_t,
@@ -190,7 +190,7 @@ dnl
 dnl check for signal type
 dnl
 dnl AC_RETSIGTYPE isn't quite right, but almost.
-define(KRB5_SIGTYPE,[
+AC_DEFUN(KRB5_SIGTYPE,[
 AC_MSG_CHECKING([POSIX signal handlers])
 AC_CACHE_VAL(krb5_cv_has_posix_signals,
 [AC_TRY_COMPILE(
@@ -217,7 +217,7 @@ AC_DEFINE_UNQUOTED(krb5_sigtype, $stype, [Define krb5_sigtype to type of signal 
 dnl
 dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
 dnl
-define(CHECK_SETJMP,[
+AC_DEFUN(CHECK_SETJMP,[
 AC_CHECK_FUNC(sigsetjmp,
 AC_MSG_CHECKING(for sigjmp_buf)
 AC_CACHE_VAL(krb5_cv_struct_sigjmp_buf,
@@ -251,7 +251,7 @@ if test $ac_cv_func_getaddrinfo = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 dnl
-AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])
+AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])dnl
 AC_ARG_ENABLE([ipv6],
 [  --enable-ipv6           enable IPv6 support
   --disable-ipv6          disable IPv6 support
@@ -296,7 +296,7 @@ KRB5_AC_CHECK_TYPE_WITH_HEADERS(struct sockaddr_storage, [
 dnl
 dnl
 AC_DEFUN(KRB5_AC_CHECK_INET6,[
-AC_REQUIRE([KRB5_AC_CHECK_SOCKADDR_STORAGE])
+AC_REQUIRE([KRB5_AC_CHECK_SOCKADDR_STORAGE])dnl
 AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
 dnl NetBSD and Linux both seem to have gotten get*info but not getipnodeby*
@@ -332,7 +332,7 @@ dnl
 dnl K5_AC_CHECK_FILE(FILE, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 AC_DEFUN(K5_AC_CHECK_FILE,
-[AC_REQUIRE([AC_PROG_CC])
+[AC_REQUIRE([AC_PROG_CC])dnl
 dnl Do the transliteration at runtime so arg 1 can be a shell variable.
 ac_safe=`echo "$1" | sed 'y%./+-%__p_%'`
 AC_MSG_CHECKING([for $1])
@@ -361,7 +361,7 @@ dnl
 dnl K5_AC_CHECK_FILES(FILE... [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 AC_DEFUN(K5_AC_CHECK_FILES,
-[AC_REQUIRE([AC_PROG_CC])
+[AC_REQUIRE([AC_PROG_CC])dnl
 for ac_file in $1
 do
 K5_AC_CHECK_FILE($ac_file,
@@ -374,7 +374,7 @@ done
 dnl
 dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
-define(WITH_KRB4,[
+AC_DEFUN(WITH_KRB4,[
 AC_ARG_WITH([krb4],
 [  --without-krb4          don't include Kerberos V4 backwards compatibility
   --with-krb4             use V4 libraries included with V5 (default)
@@ -477,7 +477,7 @@ dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
 AC_DEFUN(WITH_CCOPTS,[
-AC_REQUIRE([KRB5_INIT_CCOPTS])
+AC_REQUIRE([KRB5_INIT_CCOPTS])dnl
 AC_ARG_WITH([ccopts],
 	    AC_HELP_STRING(--with-ccopts=CCOPTS, deprecated; use CFLAGS=...),
 	    AC_MSG_ERROR(option --with-ccopts is deprecated; use CFLAGS=...))])
@@ -500,13 +500,13 @@ AC_ARG_WITH([cppopts],
 dnl
 dnl arbitrary DEFS -- ADD_DEF(value)
 dnl
-define(ADD_DEF,[
+AC_DEFUN(ADD_DEF,[
 CPPFLAGS="[$]CPPFLAGS "'$1'
 ])dnl
 dnl
 dnl local includes are used -- KRB_INCLUDE
 dnl
-define(KRB_INCLUDE,[
+AC_DEFUN(KRB_INCLUDE,[
 CPPFLAGS='-I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I$(SRCTOP)/include/krb5'" $CPPFLAGS"
 ])dnl
 dnl
@@ -533,7 +533,7 @@ AC_CACHE_VAL(krb5_cv_type_yylineno,
 dnl
 dnl K5_GEN_MAKEFILE([dir, [frags]])
 dnl
-define(K5_GEN_MAKEFILE,[dnl
+AC_DEFUN(K5_GEN_MAKEFILE,[dnl
 ifelse($1, ,[_K5_GEN_MAKEFILE(.,$2)],[_K5_GEN_MAKEFILE($1,$2)])
 ])
 dnl
@@ -542,18 +542,18 @@ dnl  dir must be present in this case
 dnl  Note: Be careful in quoting. 
 dnl        The ac_foreach generates the list of fragments to include
 dnl        or "" if $2 is empty
-define(_K5_GEN_MAKEFILE,[dnl
+AC_DEFUN(_K5_GEN_MAKEFILE,[dnl
 AC_CONFIG_FILES([$1/Makefile:$krb5_pre_in:$1/Makefile.in]AC_FOREACH([FRAG], [$2], :$ac_config_fragdir/[FRAG].in)[:$krb5_post_in])
 ])
 dnl
 dnl K5_GEN_FILE( <ac_output arguments> )
 dnl
-define(K5_GEN_FILE,[AC_CONFIG_FILES($1)])dnl
+AC_DEFUN(K5_GEN_FILE,[AC_CONFIG_FILES($1)])dnl
 dnl
 dnl K5_AC_OUTPUT
 dnl    Note: Adds the variables to config.status for individual 
 dnl          Makefile generation from config.statsu
-define(K5_AC_OUTPUT,[dnl
+AC_DEFUN(K5_AC_OUTPUT,[dnl
 AC_CONFIG_COMMANDS([krb5_config_prefix], [], dnl
  [krb5_pre_in=$krb5_pre_in
  ac_config_fragdir=$ac_config_fragdir
@@ -562,7 +562,7 @@ AC_OUTPUT])dnl
 dnl
 dnl V5_AC_OUTPUT_MAKEFILE
 dnl
-define(V5_AC_OUTPUT_MAKEFILE,
+AC_DEFUN(V5_AC_OUTPUT_MAKEFILE,
 [ifelse($1, , [_V5_AC_OUTPUT_MAKEFILE(.,$2)],[_V5_AC_OUTPUT_MAKEFILE($1,$2)])])
 dnl
 define(_V5_AC_OUTPUT_MAKEFILE,
@@ -593,7 +593,7 @@ dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
 dnl
-define(CHECK_UTMP,[
+AC_DEFUN(CHECK_UTMP,[
 AC_MSG_CHECKING([ut_pid in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_pid,
 [AC_TRY_COMPILE(
@@ -647,7 +647,7 @@ dnl
 dnl WITH_NETLIB
 dnl 
 dnl
-define(WITH_NETLIB,[
+AC_DEFUN(WITH_NETLIB,[
 AC_ARG_WITH([netlib],
 AC_HELP_STRING([--with-netlib=LIBS], use user defined resolver library),
 [  if test "$withval" = yes -o "$withval" = no ; then
@@ -709,7 +709,7 @@ dnl 				compile/step
 dnl
 dnl
 AC_DEFUN(KRB5_AC_NEED_LIBGEN,[
-AC_REQUIRE([AC_PROG_CC])
+AC_REQUIRE([AC_PROG_CC])dnl
 dnl
 dnl regcomp is present but non-functional on Solaris 2.4
 dnl
@@ -746,7 +746,7 @@ dnl				support functions
 dnl
 AC_DEFUN(KRB5_AC_REGEX_FUNCS,[
 AC_CHECK_FUNCS(re_comp re_exec regexec)
-AC_REQUIRE([KRB5_AC_NEED_LIBGEN])
+AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
 ])dnl
 dnl
 dnl AC_KRB5_TCL_FIND_CONFIG (uses tcl_dir)
@@ -964,9 +964,9 @@ dnl
 dnl Pull in the necessary stuff to create the libraries.
 
 AC_DEFUN(KRB5_BUILD_LIBRARY,
-[AC_REQUIRE([KRB5_LIB_AUX])
-AC_REQUIRE([AC_PROG_LN_S])
-AC_REQUIRE([AC_PROG_RANLIB])
+[AC_REQUIRE([KRB5_LIB_AUX])dnl
+AC_REQUIRE([AC_PROG_LN_S])dnl
+AC_REQUIRE([AC_PROG_RANLIB])dnl
 AC_CHECK_PROG(AR, ar, ar, false)
 # add frag for building libraries
 define([krb5_append_frags],[$ac_config_fragdir/lib.in:]krb5_append_frags)
@@ -990,9 +990,12 @@ dnl KRB5_BUILD_LIBRARY_STATIC
 dnl
 dnl Force static library build.
 
-define(KRB5_BUILD_LIBRARY_STATIC,
+AC_DEFUN(KRB5_AC_FORCE_STATIC,[dnl
+AC_BEFORE([$0],[KRB5_LIB_AUX])dnl
+krb5_force_static=yes])
+AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
 dnl Use define rather than AC_DEFUN to avoid ordering problems.
-[krb5_force_static=yes
+[AC_REQUIRE([KRB5_AC_FORCE_STATIC])dnl
 KRB5_BUILD_LIBRARY
 # If we're only building static libraries, they're for build-time use only,
 # so don't install.
@@ -1005,9 +1008,9 @@ dnl Like KRB5_BUILD_LIBRARY, but adds in explicit dependencies in the
 dnl generated shared library.
 
 AC_DEFUN(KRB5_BUILD_LIBRARY_WITH_DEPS,
-[AC_REQUIRE([KRB5_LIB_AUX])
-AC_REQUIRE([AC_PROG_LN_S])
-AC_REQUIRE([AC_PROG_RANLIB])
+[AC_REQUIRE([KRB5_LIB_AUX])dnl
+AC_REQUIRE([AC_PROG_LN_S])dnl
+AC_REQUIRE([AC_PROG_RANLIB])dnl
 AC_CHECK_PROG(AR, ar, ar, false)
 # add frag for building libraries
 define([krb5_append_frags],[$ac_config_fragdir/lib.in:]krb5_append_frags)
@@ -1030,7 +1033,7 @@ dnl
 dnl Pull in the necessary stuff to build library objects.
 
 AC_DEFUN(KRB5_BUILD_LIBOBJS,
-[AC_REQUIRE([KRB5_LIB_AUX])
+[AC_REQUIRE([KRB5_LIB_AUX])dnl
 # add frag for building library objects
 define([krb5_append_frags],[$ac_config_fragdir/libobj.in:]krb5_append_frags)
 AC_SUBST(OBJLISTS)
@@ -1046,8 +1049,8 @@ dnl
 dnl Set variables to build a program.
 
 AC_DEFUN(KRB5_BUILD_PROGRAM,
-[AC_REQUIRE([KRB5_LIB_AUX])
-AC_REQUIRE([KRB5_AC_NEED_LIBGEN])
+[AC_REQUIRE([KRB5_LIB_AUX])dnl
+AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
 AC_SUBST(CC_LINK)
 AC_SUBST(DEPLIBEXT)])
 
@@ -1057,7 +1060,7 @@ dnl
 dnl Set up environment for running dynamic execuatbles out of build tree
 
 AC_DEFUN(KRB5_RUN_FLAGS,
-[AC_REQUIRE([KRB5_LIB_AUX])
+[AC_REQUIRE([KRB5_LIB_AUX])dnl
 KRB5_RUN_ENV="$RUN_ENV"
 AC_SUBST(KRB5_RUN_ENV)])
 
@@ -1067,7 +1070,7 @@ dnl
 dnl Parse configure options related to library building.
 
 AC_DEFUN(KRB5_LIB_AUX,
-[AC_REQUIRE([KRB5_LIB_PARAMS])
+[AC_REQUIRE([KRB5_LIB_PARAMS])dnl
 # Check whether to build static libraries.
 AC_ARG_ENABLE([static],
 [  --disable-static        don't build static libraries], ,
@@ -1174,11 +1177,11 @@ dnl
 dnl Determine parameters related to libraries, e.g. various extensions.
 
 AC_DEFUN(KRB5_LIB_PARAMS,
-[AC_REQUIRE([AC_CANONICAL_HOST])
+[AC_REQUIRE([AC_CANONICAL_HOST])dnl
 krb5_cv_host=$host
 AC_SUBST(krb5_cv_host)
-AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([V5_SET_TOPDIR])
+AC_REQUIRE([AC_PROG_CC])dnl
+AC_REQUIRE([V5_SET_TOPDIR])dnl
 . $ac_topdir/config/shlib.conf])
 dnl
 dnl The following was written by jhawk@mit.edu

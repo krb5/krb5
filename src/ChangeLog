@@ -1,9 +1,19 @@
 2002-10-11  Ken Raeburn  <raeburn@mit.edu>
 
-	* aclocal.m4 (CONFIG_RULES): Comment out code looking for the
-	in-tree version of autoconf that we deleted.
+	* aclocal.m4: Use dnl after all AC_REQUIRE invocations.
+	(CONFIG_RULES): Comment out code looking for the in-tree version
+	of autoconf that we deleted.
 	(WITH_CC_DEPRECATED_ARG): New macro.
 	(WITH_CC): Require it, and AC_PROG_CC.
+	(KRB5_AC_FORCE_STATIC): New macro.  Warn if invoked after
+	KRB5_LIB_AUX.
+	(KRB5_BUILD_LIBRARY_STATIC): Require it.
+	(CHECK_SIGPROCMASK, AC_PROG_ARCHIVE, AC_PROG_ARCHIVE_ADD,
+	CHECK_DIRENT, CHECK_WAIT_TYPE, CHECK_SIGNALS, KRB5_SIGTYPE,
+	CHECK_SETJMP, WITH_KRB4, ADD_DEF, KRB_INCLUDE, K5_GEN_MAKEFILE,
+	_K5_GEN_MAKEFILE, K5_GEN_FILE, K5_AC_OUTPUT,
+	V5_AC_OUTPUT_MAKEFILE, CHECK_UTMP, WITH_NETLIB,
+	KRB5_BUILD_LIBRARY_STATIC): Define using AC_DEFUN.
 
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
