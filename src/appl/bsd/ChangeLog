@@ -1,6 +1,10 @@
 Wed Jul 27 12:52:04 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
+	* login.c: HAVE_TTYENT_H.
+	* configure.in: add ttyent.h to HEADERS test.
+
 	* krshd.c: HAVE_SYS_LABEL_H, which seems to be SunOS 4 specific.
+	* krlogind.c: ditto.
 	* configure.in: test for add sys/label.h to HEADERS test.
 
 	* krcp.c (rsource): USE_DIRENT_H.

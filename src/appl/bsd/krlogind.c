@@ -122,7 +122,8 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <errno.h>
 #include <pwd.h>
      
-#ifdef sun
+#ifdef HAVE_SYS_LABEL_H
+/* only SunOS 4? */
 #include <sys/label.h>
 #include <sys/audit.h>
 #include <pwdadj.h>

@@ -4,10 +4,6 @@
  *	$Id$
  */
 
-#ifndef lint
-static char rcsid_login_c[] = "$Id$";
-#endif lint
-
 /*
  * Copyright (c) 1980, 1987, 1988 The Regents of the University of California.
  * All rights reserved.
@@ -72,9 +68,9 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #endif
 
 #include <errno.h>
-#ifndef NOTTYENT
+#ifdef HAVE_TTYENT_H
 #include <ttyent.h>
-#endif /* NOTTYENT */
+#endif
 #include <syslog.h>
 #include <grp.h>
 #include <pwd.h>
