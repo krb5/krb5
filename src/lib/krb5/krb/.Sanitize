@@ -35,7 +35,6 @@ bld_pr_ext.c
 bld_princ.c
 chk_trans.c
 cleanup.h
-compat_recv.c
 configure
 configure.in
 conv_princ.c
@@ -54,6 +53,7 @@ decrypt_tk.c
 encode_kdc.c
 encrypt_tk.c
 free_rtree.c
+fwd_tgt.c
 gc_frm_kdc.c
 gc_via_tkt.c
 gen_seqnum.c
@@ -66,7 +66,6 @@ in_tkt_sky.c
 init_ctx.c
 int-proto.h
 kdc_rep_dc.c
-krbconfig.c
 mk_cred.c
 mk_error.c
 mk_priv.c
@@ -99,12 +98,15 @@ ser_key.c
 ser_princ.c
 serialize.c
 srv_rcache.c
+str_conv.c
 t_walk_rtree.c
 t_kerb.c
 t_krb5.conf
 t_ref_kerb.out
+t_ser.c
 tgtname.c
 unparse.c
+valid_times.c
 walk_rtree.c
 
 Things-to-lose:

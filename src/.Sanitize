@@ -32,14 +32,12 @@ acconfig.h
 aclocal.m4
 admin
 appl
-autotools
 clients
 config
 config-files
 configure
 configure.in
 include
-isode
 kadmin
 kadmin.v4
 kdc

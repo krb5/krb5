@@ -29,6 +29,7 @@ README
 Makefile.in
 configure.in
 cleanup.c
+dump-utmp.c
 getpty.c
 init_slave.c
 libpty.h

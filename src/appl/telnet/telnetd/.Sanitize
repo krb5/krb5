@@ -46,6 +46,8 @@ telnetd.8
 telnetd.c
 telnetd.h
 termstat.c
+termio-tn.c
+termios-tn.c
 utility.c
 
 Things-to-lose:

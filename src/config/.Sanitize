@@ -39,6 +39,8 @@ ren2long
 ren2long.awk
 rm.bat
 windows.in
+win-post.in
+winexclude.sed
 
 Things-to-lose:
 

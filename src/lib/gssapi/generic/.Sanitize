@@ -38,7 +38,10 @@ gssapi_generic.h
 util_buffer.c
 util_canonhost.c
 util_dup.c
+util_localhost.c
 util_oid.c
+util_ordering.c
+util_set.c
 util_token.c
 util_validate.c
 utl_nohash_validate.c

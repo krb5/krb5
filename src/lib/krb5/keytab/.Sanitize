@@ -28,6 +28,7 @@ ChangeLog
 Makefile.in
 configure
 configure.in
+db
 file
 ktadd.c
 ktbase.c

@@ -41,6 +41,7 @@ f_cred.c
 f_cred_cnt.c
 f_cred_enc.c
 f_creds.c
+f_einfo.c
 f_enc_kdc.c
 f_enc_tkt.c
 f_error.c

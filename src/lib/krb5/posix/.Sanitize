@@ -31,6 +31,8 @@ configure.in
 daemon.c
 getuid.c
 memmove.c
+setenv.c
+sscanf.c
 strcasecmp.c
 strdup.c
 strerror.c

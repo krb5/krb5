@@ -27,11 +27,8 @@ Things-to-keep:
 .rconf
 AddressXlation.h
 ChangeLog
-GetMyIPAddr.h
-MacTCPCommonTypes.h
+MacTCP.h
 Makefile.in
-TCPPB.h
-UDPPB.h
 adm.h
 adm_defs.h
 adm_proto.h
@@ -41,6 +38,7 @@ configure
 configure.in
 copyright.h
 kdb.h
+kdb_dbc.h
 kdb_dbm.h
 macsock.h
 stock

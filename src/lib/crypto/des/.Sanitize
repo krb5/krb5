@@ -28,10 +28,10 @@ Things-to-keep:
 ChangeLog
 FUNCTIONS
 Makefile.in
+afsstring2key.c
 cbc_cksum.c
 configure
 configure.in
-cs_entry.c
 d3_cbc.c
 d3_ecb.c
 d3_kysched.c
@@ -56,13 +56,13 @@ finish_key.c
 init_rkey.c
 key_sched.c
 keytest.data
-new_rn_key.c
 process_ky.c
 random_key.c
 string2key.c
 t_random.c
 t_verify.c
 u_nfold.c
+u_rn_key.c
 weak_key.c
 
 Things-to-lose:

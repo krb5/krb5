@@ -42,10 +42,10 @@ kadm
 kdb
 kdb4
 krb4
-krb425
 krb5
 krb5.saber.source
 krb5.saber.warnings
+krb5util
 libkrb5.def
 win_glue.c
 winsock.def

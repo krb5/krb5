@@ -40,6 +40,7 @@ gen_port.c
 gen_rname.c
 get_krbhst.c
 gmt_mktime.c
+hostaddr.c
 hst_realm.c
 init_os_ctx.c
 krbfileio.c
@@ -54,6 +55,7 @@ net_read.c
 net_write.c
 os-proto.h
 osconfig.c
+promptusr.c
 port2ip.c
 read_msg.c
 read_pwd.c
@@ -65,6 +67,7 @@ timeofday.c
 t_std_conf.c
 t_an_to_ln.c
 td_krb5.conf
+toffset.c
 unlck_file.c
 ustime.c
 write_msg.c

@@ -33,6 +33,7 @@ create
 dejagnu
 dump.c
 hammer
+misc
 resolve
 test1.c
 verify

@@ -35,12 +35,13 @@ getdtablesize.c
 kcmd.c
 krcp.c
 krlogin.c
-krlogind.M
+klogind.M
 krlogind.c
 krsh.c
-krshd.M
+kshd.M
 krshd.c
 login.c
+login.M
 loginpaths.h
 rcp.M
 rlogin.M
