@@ -1,5 +1,12 @@
 Thu Feb 12 16:38:14 1998  Tom Yu  <tlyu@mit.edu>
 
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Add lots of
+	explicit assignments to major_status to ensure that we actually
+	return an error when we mean to.  This was previously preventing
+	gssrpc authentication with the old ovsec_kadm interface from
+	working because the gssrpc server side functions were failing to
+	loop over a set of supplied credentials.
+
 	* init_sec_context.c: KLUDGE!! Add global variable
 	krb5_gss_dbg_client_expcreds to allow the client library to send
 	expired credentials for testing and debugging purposes.

@@ -313,8 +313,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        return(GSS_S_FAILURE);
    }
    if ((code = krb5_rd_req(context, &auth_context, &ap_req, cred->princ,
-			  cred->keytab, NULL, &ticket)))
-	   goto fail;
+			   cred->keytab, NULL, &ticket))) {
+       major_status = GSS_S_FAILURE;
+       goto fail;
+   }
 
    krb5_auth_con_getauthenticator(context, auth_context, &authdat);
 
@@ -359,22 +361,25 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    TREAD_INT(ptr, tmp, bigend);
 
    if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
-      ptr = (unsigned char *) authdat->checksum->contents;
-      bigend = 1;
+       ptr = (unsigned char *) authdat->checksum->contents;
+       bigend = 1;
 
-      TREAD_INT(ptr, tmp, bigend);
+       TREAD_INT(ptr, tmp, bigend);
 
-      if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
-	 code = KG_BAD_LENGTH;
-	 goto fail;
-      }
+       if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
+	   major_status = GSS_S_FAILURE;
+	   code = KG_BAD_LENGTH;
+	   goto fail;
+       }
    }
 
    /* at this point, bigend is set according to the initiator's byte order */
 
    if ((code = kg_checksum_channel_bindings(context, input_chan_bindings, &md5,
-					    bigend))) 
-	   goto fail;
+					    bigend))) {
+       major_status = GSS_S_BAD_BINDINGS;
+       goto fail;
+   }
 
    TREAD_STR(ptr, ptr2, md5.length);
    if (memcmp(ptr2, md5.contents, md5.length) != 0) {
@@ -417,8 +422,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 		       call to rd_and_store_for_creds() and clear its flags */
 
 		    if ((code = krb5_auth_con_init(context,
-						   &auth_context_cred)))
-			    goto fail;
+						   &auth_context_cred))) {
+			major_status = GSS_S_FAILURE;
+			goto fail;
+		    }
 
 		    krb5_auth_con_setflags(context, auth_context_cred, 0);
 
@@ -448,8 +455,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if ((ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(krb5_gss_ctx_id_rec)))
        == NULL) {
-	   code = ENOMEM;
-	   goto fail;
+       major_status = GSS_S_FAILURE;
+       code = ENOMEM;
+       goto fail;
    }
 
    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
@@ -459,6 +467,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    ctx->gss_flags = KG_IMPLFLAGS(gss_flags);
    ctx->seed_init = 0;
    ctx->big_endian = bigend;
+
+   major_status = GSS_S_FAILURE;
 
    /* Intern the ctx pointer so that delete_sec_context works */
    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
