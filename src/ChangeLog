@@ -1,3 +1,7 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: build/clean/install/etc kcpytkt,kdeltkt,ms2mit
+
 2004-11-19  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_PRIOCNTL_HACK): Check for Solaris patch
