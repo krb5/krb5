@@ -1,3 +1,8 @@
+Mon Oct  7 15:46:47 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (HAVE_RUNTEST): Renamed from RUNTEST as
+		config/pre.in now defines.
+
 Sun Apr  7 23:03:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add KRB5_RUN_FLAGS

@@ -1,16 +1,16 @@
-RUNTEST = @RUNTEST@
+HAVE_RUNTEST = @RUNTEST@
 RUNTESTFLAGS =
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
 
 all install::
 
-check:: check-$(RUNTEST)
+check:: check-$(HAVE_RUNTEST)
 
 check-::
 	@echo "Dejagnu is not installed on this system. No tests run."
 
 check-runtest:: t_inetd site.exp
-	$(RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
+	$(HAVE_RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
 
 CFLAGS = $(CCOPTS) $(DEFS)
 
