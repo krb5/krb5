@@ -12,7 +12,6 @@
  * Encryption interface-related declarations
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_ENCRYPTION__
 #define KRB5_ENCRYPTION__

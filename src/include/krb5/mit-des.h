@@ -3,7 +3,8 @@
  * $Author$
  * $Id$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -11,7 +12,6 @@
  * MIT Data Encryption Standard software implementation declarations.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_MIT_DES__
 #define KRB5_MIT_DES__

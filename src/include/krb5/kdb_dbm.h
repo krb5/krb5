@@ -3,7 +3,8 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -11,7 +12,6 @@
  * KDC Database interface definitions.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_KDB5_DBM__
 #define KRB5_KDB5_DBM__

@@ -4,6 +4,7 @@
  * $Id$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -11,7 +12,6 @@
  * DBM/NDBM include file; deals with converting old-style to new-style.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_DBM_COMPAT__
 #define KRB5_DBM_COMPAT__

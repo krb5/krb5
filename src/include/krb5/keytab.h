@@ -4,6 +4,7 @@
  * $Id$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -11,7 +12,6 @@
  * Keytab definitions.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_KEYTAB__
 #define KRB5_KEYTAB__
