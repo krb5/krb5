@@ -87,14 +87,18 @@ SRCS = \
 LIB_SUBDIRS= .
 LIBDONE= DONE
 #
-# Depends on libcrypto and KRB4_CRYPTO_LIB, expect one unresolved symbol:
+# Depends on libcrypto and KRB4_CRYPTO_LIB,
 #	_et_list.
+# Depends on libkrb5, expect to find
+#	krb5_init_context, krb5_free_context, profile_get_values
 #
 KRB4_CRYPTO_LIBS=@KRB4_CRYPTO_LIB@
 DEPKRB4_LIBS=@DEPKRB4_CRYPTO_LIB@
+KRB5_VER=@KRB5_SH_VERS@
 CRYPTO_VER=@CRYPTO_SH_VERS@
-DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER)
-SHLIB_LIBS=$(KRB4_CRYPTO_LIBS) -lcrypto -lcom_err
+DEPLIBS=$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) \
+	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER)
+SHLIB_LIBS=-lkrb5 $(KRB4_CRYPTO_LIBS) -lcrypto -lcom_err
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ 
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 

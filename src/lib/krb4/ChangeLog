@@ -1,3 +1,9 @@
+Tue Dec  5 20:53:40 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Shared library depends on krb5 library now.
+
+	* configure.in: Pass krb5 library version number to Makefile.
+
 Wed Nov 15 20:38:38 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* tf_util.c (emul_flock): initialize f to a copy of a static
