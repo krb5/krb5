@@ -1,3 +1,8 @@
+Fri Mar 10 18:32:22 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kcmd.c (kcmd): Initialize ret_cred to zero so that in case of an
+		error, we don't try to free stack garbage.
+
 Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
 
         * kcmd.c (kcmd()) Use new calling convention for krb5_sendauth().

@@ -88,7 +88,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     long oldmask;
 #endif
     struct sockaddr_in sin, from, local_laddr;
-    krb5_creds *get_cred, *ret_cred;
+    krb5_creds *get_cred, *ret_cred = 0;
     char c;
     int lport = START_PORT;
     struct hostent *hp;
