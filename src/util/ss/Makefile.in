@@ -110,7 +110,6 @@ ct.tab.c ct.tab.h: ct.y
 all:: libss.a
 
 libss.a: $(OBJS)
-	if test -f $@; then $(RM) $@.bak; $(MV) $@ $@.bak; else :; fi
 	$(ARCHIVE) $@ $(OBJS)
 	$(RANLIB) $@
 
