@@ -1,3 +1,8 @@
+2004-02-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix calculation
+	for confidential CFX tokens.
+
 2004-02-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ser_sctx.c (kg_oid_externalize): Check for errors.
