@@ -2374,7 +2374,6 @@ char *adata;
 		gss_name_t client;
 		int ret_flags;
 		int rad_len;
-		struct gss_channel_bindings_struct chan;
 		gss_buffer_desc name_buf;
 		gss_name_t server_name;
 		OM_uint32 acquire_maj, acquire_min, accept_maj, accept_min,
@@ -2388,14 +2387,6 @@ char *adata;
 		char **gservice;
 		struct hostent *hp;
 
-		chan.initiator_addrtype = GSS_C_AF_INET;
-		chan.initiator_address.length = 4;
-		chan.initiator_address.value = &his_addr.sin_addr.s_addr;
-		chan.acceptor_addrtype = GSS_C_AF_INET;
-		chan.acceptor_address.length = 4;
-		chan.acceptor_address.value = &ctrl_addr.sin_addr.s_addr;
-		chan.application_data.length = 0;
-		chan.application_data.value = 0;
 
 		kerror = radix_encode(adata, gout_buf, &length, 1);
 		if (kerror) {
@@ -2453,7 +2444,7 @@ char *adata;
 							    &gcontext, /* context_handle */
 							    server_creds, /* verifier_cred_handle */
 							    &tok, /* input_token */
-							    &chan, /* channel bindings */
+							    GSS_C_NO_CHANNEL_BINDINGS, /* channel bindings */
 							    &client, /* src_name */
 							    &mechid, /* mech_type */
 							    &out_tok, /* output_token */
