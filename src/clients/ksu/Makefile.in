@@ -30,5 +30,5 @@ clean::
 	$(RM) ksu
 
 install::
-	$(INSTALL_PROGRAM) ksu ${DESTDIR}$(CLIENT_BINDIR)/ksu
+	$(INSTALL_SETUID) ksu ${DESTDIR}$(CLIENT_BINDIR)/ksu
 	$(INSTALL_DATA) ksu.1 ${DESTDIR}$(CLIENT_MANDIR)/ksu.1
