@@ -1,3 +1,8 @@
+Wed Sep 14 22:20:46 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kadmin_add.c (kadm_add_user): removed a duplicated
+		free(inbuf.data) call.
+
 Sat Jul 16 02:47:38 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* kadmin.c (get_first_ticket): change error code to match

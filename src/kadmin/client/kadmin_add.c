@@ -262,7 +262,6 @@ char *principal;
     
     decode_kadmind_reply(msg_data, &rd_priv_resp);
 
-    free(inbuf.data);
     free(msg_data.data);
 
     retval = print_status_message(&rd_priv_resp,
