@@ -82,6 +82,12 @@ asn1_error_code asn1buf_insert_octet
 /* requires  *buf is allocated
    effects   Inserts o into the buffer *buf, expanding the buffer if
              necessary.  Returns ENOMEM memory is exhausted. */
+#if __GNUC__ >= 2
+#define asn1buf_insert_octet(BUF,O) 					\
+  (asn1buf_ensure_space ((BUF),1)					\
+   ? /* leave this empty -- gcc returns value of first operand */	\
+   : (*(BUF)->next++ = (O), 0))
+#endif
 
 asn1_error_code asn1buf_insert_octetstring
 	PROTOTYPE((asn1buf *buf, const int len, const asn1_octet *s));
@@ -105,6 +111,10 @@ asn1_error_code asn1buf_remove_octet
    effects   Returns *buf's current octet in *o and advances to
               the next octet.
 	     Returns ASN1_OVERRUN if *buf has already been exhuasted. */
+#define asn1buf_remove_octet(buf,o) \
+  (((buf)->next > (buf)->bound) \
+   ? ASN1_OVERRUN \
+   : ((*(o) = (asn1_octet)(*(((buf)->next)++))),0))
 
 asn1_error_code asn1buf_remove_octetstring
 	PROTOTYPE((asn1buf *buf, const int len, asn1_octet **s));
@@ -155,11 +165,20 @@ int asn1buf_size
 /* requires  *buf has been created and not destroyed
    effects   Returns the total size 
 	PROTOTYPE((in octets) of buf's octet buffer. */
+#define asn1buf_size(buf) \
+  (((buf) == NULL || (buf)->base == NULL) \
+   ? 0 \
+   : ((buf)->bound - (buf)->base + 1))
 
 int asn1buf_free
 	PROTOTYPE((const asn1buf *buf));
 /* requires  *buf is allocated
    effects   Returns the number of unused, allocated octets in *buf. */
+#define asn1buf_free(buf) \
+  (((buf) == NULL || (buf)->base == NULL) \
+   ? 0 \
+   : ((buf)->bound - (buf)->next + 1))
+
 
 asn1_error_code asn1buf_ensure_space
 	PROTOTYPE((asn1buf *buf, const int amount));
@@ -168,9 +187,14 @@ asn1_error_code asn1buf_ensure_space
    effects  If buf has less than amount octets of free space, then it is
             expanded to have at least amount octets of free space.
             Returns ENOMEM memory is exhausted. */
+#define asn1buf_ensure_space(buf,amount) \
+  ((asn1buf_free(buf) < (amount)) \
+   ? (asn1buf_expand((buf), (amount)-asn1buf_free(buf))) \
+   : 0)
+
 
 asn1_error_code asn1buf_expand
-	PROTOTYPE((asn1buf *buf, const int inc));
+	PROTOTYPE((asn1buf *buf, int inc));
 /* requires  *buf is allocated
    modifies  *buf
    effects   Expands *buf by allocating space for inc more octets.
@@ -180,5 +204,6 @@ int asn1buf_len
 	PROTOTYPE((const asn1buf *buf));
 /* requires  *buf is allocated
    effects   Returns the length of the encoding in *buf. */
+#define asn1buf_len(buf)	((buf)->next - (buf)->base)
 
 #endif

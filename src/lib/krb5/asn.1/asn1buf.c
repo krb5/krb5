@@ -54,7 +54,7 @@
 asn1_error_code asn1buf_create(buf)
      asn1buf ** buf;
 {
-  *buf = (asn1buf*)calloc(1,sizeof(asn1buf));
+  *buf = (asn1buf*)malloc(sizeof(asn1buf));
   if (*buf == NULL) return ENOMEM;
   (*buf)->base = NULL;
   (*buf)->bound = NULL;
@@ -105,6 +105,9 @@ asn1_error_code asn1buf_destroy(buf)
   return 0;
 }
 
+#ifdef asn1buf_insert_octet
+#undef asn1buf_insert_octet
+#endif
 asn1_error_code asn1buf_insert_octet(buf, o)
      asn1buf * buf;
      const int o;
@@ -148,6 +151,7 @@ asn1_error_code asn1buf_insert_charstring(buf, len, s)
   return 0;
 }
 
+#undef asn1buf_remove_octet
 asn1_error_code asn1buf_remove_octet(buf, o)
      asn1buf * buf;
      asn1_octet * o;
@@ -169,7 +173,7 @@ asn1_error_code asn1buf_remove_octetstring(buf, len, s)
       *s = 0;
       return 0;
   }
-  *s = (asn1_octet*)calloc(len,sizeof(asn1_octet));
+  *s = (asn1_octet*)malloc(len*sizeof(asn1_octet));
   if (*s == NULL)
       return ENOMEM;
   for(i=0; i<len; i++)
@@ -190,7 +194,7 @@ asn1_error_code asn1buf_remove_charstring(buf, len, s)
       *s = 0;
       return 0;
   }
-  *s = (char*)calloc(len,sizeof(char));
+  *s = (char*)malloc(len*sizeof(char));
   if (*s == NULL) return ENOMEM;
   for(i=0; i<len; i++)
     (*s)[i] = (char)(buf->next)[i];
@@ -230,7 +234,7 @@ asn1_error_code asn12krb5_buf(buf, code)
   (*code)->data = NULL;
   (*code)->length = 0;
   (*code)->length = asn1buf_len(buf);
-  (*code)->data = (char*)calloc(((*code)->length)+1,sizeof(char));
+  (*code)->data = (char*)malloc((((*code)->length)+1)*sizeof(char));
   for(i=0; i < (*code)->length; i++)
     ((*code)->data)[i] = (buf->base)[((*code)->length)-i-1];
   ((*code)->data)[(*code)->length] = '\0';
@@ -248,11 +252,11 @@ asn1_error_code asn1buf_unparse(buf, s)
 {
   if(*s != NULL) free(*s);
   if(buf == NULL){
-    *s = calloc(sizeof("<NULL>")+1, sizeof(char));
+    *s = malloc(sizeof("<NULL>"));
     if(*s == NULL) return ENOMEM;
     strcpy(*s,"<NULL>");
   }else if(buf->base == NULL){
-    *s = calloc(sizeof("<EMPTY>")+1, sizeof(char));
+    *s = malloc(sizeof("<EMPTY>"));
     if(*s == NULL) return ENOMEM;
     strcpy(*s,"<EMPTY>");
   }else{
@@ -279,18 +283,18 @@ asn1_error_code asn1buf_hex_unparse(buf, s)
   if(*s != NULL) free(*s);
 
   if(buf == NULL){
-    *s = calloc(sizeof("<NULL>")+1, sizeof(char));
+    *s = malloc(sizeof("<NULL>"));
     if(*s == NULL) return ENOMEM;
     strcpy(*s,"<NULL>");
   }else if(buf->base == NULL){
-    *s = calloc(sizeof("<EMPTY>")+1, sizeof(char));
+    *s = malloc(sizeof("<EMPTY>"));
     if(*s == NULL) return ENOMEM;
     strcpy(*s,"<EMPTY>");
   }else{
     int length = asn1buf_len(buf);
     int i;
 
-    *s = calloc(3*length, sizeof(char));
+    *s = malloc(3*length);
     if(*s == NULL) return ENOMEM;
     for(i = length-1; i >= 0; i--){
       (*s)[3*(length-i-1)] = hexchar(((buf->base)[i]&0xF0)>>4);
@@ -305,6 +309,7 @@ asn1_error_code asn1buf_hex_unparse(buf, s)
 /****************************************************************/
 /* Private Procedures */
 
+#undef asn1buf_size
 int asn1buf_size(buf)
      const asn1buf * buf;
 {
@@ -312,6 +317,7 @@ int asn1buf_size(buf)
   return buf->bound - buf->base + 1;
 }
 
+#undef asn1buf_free
 int asn1buf_free(buf)
      const asn1buf * buf;
 {
@@ -319,6 +325,7 @@ int asn1buf_free(buf)
   else return buf->bound - buf->next + 1;
 }
 
+#undef asn1buf_ensure_space
 asn1_error_code asn1buf_ensure_space(buf, amount)
      asn1buf * buf;
      const int amount;
@@ -333,7 +340,7 @@ asn1_error_code asn1buf_ensure_space(buf, amount)
 
 asn1_error_code asn1buf_expand(buf, inc)
      asn1buf * buf;
-     const int inc;
+     int inc;
 {
 #define STANDARD_INCREMENT 200
   int next_offset = buf->next - buf->base;
@@ -341,22 +348,21 @@ asn1_error_code asn1buf_expand(buf, inc)
   if(buf->base == NULL) bound_offset = -1;
   else bound_offset = buf->bound - buf->base;
 
+  if (inc < STANDARD_INCREMENT)
+    inc = STANDARD_INCREMENT;
+
   if (buf->base == NULL)
-    buf->base = malloc((asn1buf_size(buf)+(inc>STANDARD_INCREMENT ?
-					   inc : STANDARD_INCREMENT))
-		       * sizeof(asn1_octet));
+    buf->base = malloc((asn1buf_size(buf)+inc) * sizeof(asn1_octet));
   else
     buf->base = realloc(buf->base,
-			(asn1buf_size(buf)+(inc>STANDARD_INCREMENT ?
-					    inc : STANDARD_INCREMENT))
-			* sizeof(asn1_octet));
+			(asn1buf_size(buf)+inc) * sizeof(asn1_octet));
   if(buf->base == NULL) return ENOMEM;
-  buf->bound = (buf->base) + bound_offset + (inc > STANDARD_INCREMENT ?
-					   inc : STANDARD_INCREMENT);
+  buf->bound = (buf->base) + bound_offset + inc;
   buf->next = (buf->base) + next_offset;
   return 0;
 }
 
+#undef asn1buf_len
 int asn1buf_len(buf)
      const asn1buf * buf;
 {

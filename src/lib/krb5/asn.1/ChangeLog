@@ -1,3 +1,30 @@
+Thu Jul 31 15:38:10 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+        * asn1buf.h (asn1buf_remove_octet, asn1buf_size, asn1buf_free,
+        asn1buf_ensure_space, asn1buf_len): Add macro versions.
+        (asn1buf_insert_octet) [__GNUC__ >= 2]: Ditto, using a GNU C
+        extension.
+        * asn1buf.c (asn1buf_remove_octet, asn1buf_size, asn1buf_free,
+        asn1buf_ensure_space, asn1buf_len, asn1buf_insert_octet): Undef
+        macros before defining as functions.
+	[Kerbnet changes made by raeburn@cygnus.com]
+
+Thu Jul 31 12:34:43 1997  Ezra Peisach  <epeisach@mit.edu>
+
+        * asn1buf.h (asn1buf_expand): Remove "const" from int arg in
+        prototype.
+
+        * asn1buf.c (asn1buf_remove_charstring, asn1buf_create,
+        asn1buf_remove_octetstring, asn12krb5_buf): Call malloc instead of
+        calloc.
+        (asn1buf_unparse, asn1buf_hex_unparse): Ditto.  Also don't
+        allocate extra byte, since sizeof(STRING) does count the trailing
+        null.
+        (asn1buf_expand): Adjust bound based on increment 
+        value used, not value specified by caller.
+
+	[Kerbnet changes made by raeburn@cygnus.com]
+
 Thu Jul 31 11:17:06 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (SRCS): Add / after $(srcdir) in SRCS line.
