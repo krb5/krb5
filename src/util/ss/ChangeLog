@@ -1,3 +1,10 @@
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* test_ss.c (main): Change usage of ss_listen to agree with 
+	prototype.
+
+	* ss.h: Add prototype for ss_listen()
+
 2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* help.c (ss_help): Don't overflow buffers "buffer" or "buf".

@@ -52,9 +52,11 @@ char *ss_name();
 #ifdef __STDC__
 void ss_error (int, long, char const *, ...);
 void ss_perror (int, long, char const *);
+int ss_listen (int);
 #else
 void ss_error ();
 void ss_perror ();
+int ss_listen ();
 #endif
 void ss_abort_subsystem();
 extern ss_request_table ss_std_requests;

@@ -13,7 +13,6 @@ extern ss_request_table test_cmds;
 
 static char def_subsystem_name[5] = "test";
 static char version [4] = "1.0";
-extern void ss_listen();
 
 int main(argc, argv)
     int argc;
@@ -85,7 +84,7 @@ int main(argc, argv)
 	    ss_perror(sci_idx, code, initial_request);
     }
     if (!quit || code)
-	(void) ss_listen (sci_idx, &code);
+	code =  ss_listen (sci_idx);
     exit(0);
 }
 
