@@ -30,4 +30,6 @@ int readstream_termios(cmd, ibuf, vstop, vstart, ixon)
   return -1;
 }
 
+#else
+int silence_warnings_about_empty_source_file_termios = 42;
 #endif /* STREAMSPTY */

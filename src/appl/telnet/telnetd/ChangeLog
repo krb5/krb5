@@ -1,3 +1,8 @@
+2001-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* termio-tn.c, termios-tn.c: Define dummy variables if STREAMSPTY
+	isn't defined, to silence compiler complaints about empty files.
+
 2001-08-02  Tom Yu  <tlyu@mit.edu>
 
 	* authenc.c (net_write): Rewrite in terms of netwrite().
