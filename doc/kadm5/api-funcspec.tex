@@ -15,7 +15,7 @@
 \def\v#1{\verb+#1+}
 
 \title{Kerberos Administration System \\
-	Functional Specifications\thanks{\rcsId}}
+        Functional Specifications\thanks{\rcsId}}
 \author{Barry Jaspan}
 
 \begin{document}
@@ -25,7 +25,68 @@
 
 {\setlength{\parskip}{0pt}\tableofcontents}
 
-\section{Policies and Password Quality}
+%\section{Multi-realm Operation}
+%
+%The behavior of any function when called with a principal name that is
+%not in the host's local realm is currently undefined.
+%
+\section{Admin API functional specification}
+
+This section describes the Admin API that can be used to maintain
+principals and policies.  It describes the data structures used for
+each function and the interpretation of each data type field, the
+semantics of each API function, and the possible return codes.
+
+The Admin API is intended to be used by remote clients using an RPC
+interface.  It is implemented by the admin server running on the
+Kerberos master server.  It is also be possible for a program running
+on the Kerberos master server to use the Admin API directly, without
+going through the admin server.
+
+\subsection{Versions of the API}
+
+The versions of this API and a brief description of the changes for
+each are:
+
+\begin{description}
+\item[KADM5_API_VERSION_1] Also called OVSEC_KADM_API_VERSION_1.  The
+initial version of this API, written by OpenVision Technologies and
+donated to MIT for including in the public release.
+
+\item[KADM5_API_VERSION_2] This version contains the initial changes
+necessary to make the OpenVision administration system work with the
+mid-1996 MIT version of Kerberos 5.  Changes include
+\begin{enumerate}
+\item Renaming of the API from OVSEC_KADM to KADM5.  Most everything
+has been renamed in one way or another, including functions, header
+files, and data structures.  Where possible, the old OVSEC_KADM names
+have been left behind for compatibility with version 1.  The
+OVSEC_KADM name compatibility has not been extended to new
+functionality in this version and will not be extended to future
+versions.
+
+\item The kadm5_init functions now take a structure of parameters
+instead of just a realm name, allowing the calling program to specify
+non-default values for various configuration options.  See section
+\ref{sec:configparams} for details.
+
+\item The KADM5 API has been extended to support new features of the
+Kerberos database, including multiple encryption and salt types per
+principal.  See section \ref{sec:keys} for details.
+
+\item kadm5_get_principal now allows a principal's keys to be
+retrieved {\it by local clients only}.  This is necessary in order for
+the kadm5 API to provide the primary Kerberos database interface.
+
+\item The KADM5 authorization system has been completely changed.  XXX
+Function semantics still refer only to the old method.
+
+\item The functions kadm5_flush, kadm5_get_principals, and
+kadm5_get_policies have been added.
+\end{enumerate}
+\end{description}
+
+\subsection{Policies and Password Quality}
 
 The Admin API Password Quality mechanism provides the following
 controls.  Note that two strings are defined to be ``significantly
@@ -52,53 +113,6 @@ generated from the passwords, not on the passwords themselves.
 users; a password that is not significantly different from every word
 in the dictionary will not be accepted.
 \end{itemize}
-
-%\section{Multi-realm Operation}
-%
-%The behavior of any function when called with a principal name that is
-%not in the host's local realm is currently undefined.
-%
-\section{Admin API requirements}
-
-\subsection{Versioning}
-
-The API will include a versioning system aimed at meeting the
-following requirements:
-\begin{description}
-\item[R1] Admin API client applications will be source-code
-	compatible, whenever possible, with newer versions of the
-	Admin API. {\bf [high]}
-\item[R2] Admin API client applications will be object-code and
-	shared-library compatible, whenever possible, with newer
-	versions of the Admin API. {\bf [low]}
-\item[R3] Admin API client applications will be protocol compatible,
-	whenever possible, with newer versions of the Admin server.
-	I.e., a statically linked Admin API client application will be
-	able to talk to an Admin server from a later version of
-	Secure. {\bf [medium]}
-\item[R4] Admin API client applications will be protocol compatible,
-	whenever possible, with older versions of the Admin server.
-	{\bf [lower than low]}
-\item[R5] Changes to the Admin API structures or protocol will,
-	whenever possible, require only localized changes to the Admin
-	server source code and Admin API library implementation. {\bf
-	[medium]}
-\end{description}
-The present implementation meets requirements R1, R2, and R3, and
-partially meets requirement R5.  Requirement R4 is not addressed.
-
-\section{Admin API functional specification}
-
-This section describes the Admin API that can be used to maintain
-principals and policies.  It describes the data structures used for
-each function and the interpretation of each data type field, the
-semantics of each API function, and the possible return codes.
-
-The Admin API is intended to be used by remote clients using an RPC
-interface.  It is implemented by the admin server running on the
-Kerberos master server.  It may also be possible for a program running
-on the Kerberos master server to use the Admin API directly, without
-going through the admin server.
 
 \subsection{Data Structures}
 
@@ -137,6 +151,15 @@ typedef struct _kadm5_principal_ent_t {
 
         char * policy;
         u_int32 aux_attributes;
+
+        krb5_deltat max_renewable_life;
+        krb5_timestamp last_success;
+        krb5_timestamp last_failed;
+        krb5_kvno fail_auth_count;
+        krb5_int16 n_key_data;
+        krb5_int16 n_tl_data;
+        krb5_tl_data *tl_data;
+        krb5_key_data *key_data;
 } kadm5_principal_ent_rec, *kadm5_principal_ent_t;
 \end{verbatim}
 \caption{Definition of kadm5_principal_ent_t.}
@@ -182,7 +205,9 @@ X & KRB5_KDB_DISALLOW_ALL_TIX       & 0x00000040 \\
   & KRB5_KDB_REQUIRES_HW_AUTH       & 0x00000100 \\
 X & KRB5_KDB_REQUIRES_PWCHANGE      & 0x00000200 \\
   & KRB5_KDB_DISALLOW_SVR           & 0x00001000 \\
-X & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000
+X & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000 \\
+  & KRB5_KDB_SUPPORT_DESMD5         & 0x00004000 \\
+  & KRB5_KDB_NEW_PRINC              & 0x00008000
 \end{tabular}
 
 The interpretation of each bit is as follows.  For each of the bits
@@ -234,6 +259,17 @@ if the server has this bit set.
 \item[KRB5_KDB_PWCHANGE_SERVICE] An request from a client whose
 password has expired will succeed if this bit is set on the server.
 Also see KRB5_KDC_REQUIRES_PWCHANGE.
+
+\item[KRB5_KDB_SUPPORT_DESMD5] An AS_REQ for a principal with this bit
+set and an encrytion type of ENCTYPE_DES_CBC_CRC causes the encryption
+type ENCTYPE_DES_CBC_MD5 to be used instead.  XXX Why set this bit
+instead of just changing the service principal's enctype?
+
+\item[KRB5_KDB_NEW_PRINC] If this bit is set, the principal is still
+being ``created'' and the administration system should allow
+administrators with ``add'' priviledge to modify it.  This bit was
+created for use by a different Kerberos administration system that was
+never completed, and is not presently used.
 \end{description}
 
 \item[mod_name] The name of the Kerberos principal that most recently
@@ -253,14 +289,59 @@ of the policy controlling this principal.
 \item[aux_attributes]  A bitfield of flags for use by the
 administration system.  Currently, the only valid flag is POLICY, and
 it indicates whether or not the principal has a policy enforced on it.
+
+\item[max_renewable_life] The maximum renewable lifetime of any
+Kerberos ticket issued to or for this principal.  This field only
+exists in KADM5_API_VERSION_2.
+
+\item[last_success] The KDC time of the last successful AS_REQ.  This
+is only updated if KRBCONF_KDC_MODIFIES_KDB is defined during
+compilation of the KDC.  This field only exists in
+KADM5_API_VERSION_2.
+
+\item[last_failed] The KDC time of the last failed AS_REQ.  This is
+only updated if KRBCONF_KDC_MODIFIES_KDB is defined during compilation
+of the KDC.  This field only exists in KADM5_API_VERSION_2.
+
+\item[fail_auth_count] The number of consecutive failed AS_REQs.  When
+this number reaches KRB5_MAX_FAIL_COUNT, the KRB5_KDC_DISALLOW_ALL_TIX
+is set on the principal.  This is only updated if
+KRBCONF_KDC_MODIFIES_KDB is defined during compilation.  This field
+only exists in KADM5_API_VERSION_2.
+
+\item[n_tl_data] The number of elements in the \v{tl_data} linked
+list.  This field only exists in KADM5_API_VERSION_2.
+
+\item[n_key_data] The number of elements in the \v{key_data}
+array. This field only exists in KADM5_API_VERSION_2.
+
+\item[tl_data] A linked list of tagged data.  Each element is of type
+krb5_tl_data:
+\begin{verbatim}
+typedef struct _krb5_tl_data {
+    struct _krb5_tl_data* tl_data_next;
+    krb5_int16            tl_data_type;         
+    krb5_int16            tl_data_length;       
+    krb5_octet          * tl_data_contents;     
+} krb5_tl_data;
+\end{verbatim}
+All currently defined tagged data types are supported directly by the
+kadm5 API, so none of the them provided in this list.  Any new tagged
+data types defined in the future will be provided, however.
+
+\item[key_data] An array of the principal's keys.  The keys contained
+in this array are the principal's {\it actual Kerberos keys}, not
+encrypted in the Kerberos master key as with the libkdb interface.
+See section \ref{sec:keys} for a discussion of the krb5_key_data
+structure.
 \end{description}
 
 \subsubsection{Policies, kadm5_policy_ent_t}
 \label{sec:policy-fields}
 
 If the POLICY bit is set in aux_attributes, the \v{policy} name field
-in the kadm5_principal_ent_t structure refers to a password
-policy entry defined in a \v{kadm5_policy_ent_t}.
+in the kadm5_principal_ent_t structure refers to a password policy
+entry defined in a \v{kadm5_policy_ent_t}.
 
 \begin{verbatim}
 typedef struct _kadm5_policy_ent_t {
@@ -311,43 +392,156 @@ password to its current value.
 A policy cannot be deleted unless this number is zero.
 \end{description}
 
-\subsubsection{Create/Modify Masks}
+\subsubsection{Configuration parameters}
+\label{sec:configparams}
+
+The KADM5 API acquires configuration information from the Kerberos
+configuration file (/etc/krb5.conf) and from the KDC configuration
+file (XXX/kdc.conf).  The remote clients libraries use the following
+variables: XXX.  The local clients libraries use the following
+variables: XXX.  The administration server and administration
+utilities (kadmin_create, etc.) may use other variables as defined in
+their functional specifications (XXX).
+
+In KADM5_API_VERSION_2, the configuration parameters used by the KADM5
+API can be controlled by the caller by providing a kadm5_config_params
+structure to kadm5_init:
+%
+\begin{verbatim}
+typedef struct _kadm5_config_params {
+        u_int32 mask;
+        char *realm;
+        char *realm_profile;
+        char *realm_dbname;
+        char *realm_adbname;
+        char *realm_mkey_name;
+        char *realm_stash_file;
+        char *realm_kdc_ports;
+        char *realm_acl_file;
+        char *realm_adb_lockfile;
+        krb5_int32 realm_kadmind_port;
+        krb5_enctype realm_enctype;
+        krb5_deltat realm_max_life;
+        krb5_deltat realm_max_rlife;
+        krb5_timestamp realm_expiration;
+        krb5_flags realm_flags;
+        krb5_key_salt_tuple *realm_keysalts;
+        krb5_int32 realm_num_keysalts;
+
+        /* these are all replaced by the mask */
+        unsigned int realm_kadmind_port_valid:1;
+        unsigned int realm_enctype_valid:1;
+        unsigned int realm_max_life_valid:1;
+        unsigned int realm_max_rlife_valid:1;
+        unsigned int realm_expiration_valid:1;
+        unsigned int realm_flags_valid:1;
+        unsigned int realm_filler:7;
+} kadm5_config_params;
+\end{verbatim}
+%
+\begin{description}
+\item[mask] XXX document all the fields! (once I decide which ones
+will actually be used)
+\end{description}
+
+\subsubsection{Principal keys}
+\label{sec:keys}
+
+In KADM5_API_VERSION_1, all principals had a single key.  The
+encryption method was always DES, and the salt type was determined
+outside the API (by command-line options to the administration
+server).
+
+In KADM5_API_VERSION_2, principals can have multiple keys, each with
+its own encryption and salt type.  Each time a principal's key is
+changed with kadm5_create_principal, kadm5_chpass_principal or
+kadm5_randkey_principal, a key entry for each encryption and salt type
+tuple specified in the configuration parameters is added.  There is no
+provision for specifying encryption and salt type information on a
+per-principal basis; in a future version, this will probably be part
+of the admin policy.  There is also presently no provision for keeping
+multiple key versions for a single principal active in the database.
+
+A single key is represented by a krb5_key_data:
+%
+\begin{verbatim}
+typedef struct _krb5_key_data {
+    krb5_int16            key_data_ver;         /* Version */
+    krb5_int16            key_data_kvno;        /* Key Version */
+    krb5_int16            key_data_type[2];     /* Array of types */
+    krb5_int16            key_data_length[2];   /* Array of lengths */
+    krb5_octet          * key_data_contents[2]; /* Array of pointers */
+} krb5_key_data;
+\end{verbatim}
+%
+\begin{description}
+\item[key_data_ver] The verion number of the structure.  Versions 1
+and 2 are currently defined.  If key_data_ver is 1 then the key is
+either a random key (not requiring a salt) or the salt is the normal
+v5 salt which is the same as the realm and therefore doesn't need to
+be saved in the database.
+
+\item[key_data_kvno] The key version number of this key.
+
+\item[key_data_type] The first element is the enctype of this key.  In
+a version 2 structure, the second element is the salttype of this key.
+The legal encryption types are defined in $<$krb5.h$>$.  The legal
+salt types are defined in $<$k5-int.h$>$.
+
+\item[key_data_length] The first element is length this key.  In a
+version 2 structure, the second element is length of the salt for this
+key.
+
+\item[key_data_contents] The first element is the content of this key.
+In a version 2 structure, the second element is the contents of the
+salt for this key.
+\end{description}
+
+\subsubsection{Field masks}
 \label{sec:masks}
 
-The API functions for creating and modifying principals and policies
-allow for a relevant subset of the fields of the
-kadm5_principal_ent_t and kadm5_policy_ent_t to be specified
-or changed.  The chosen fields are determined by a bitmask that is
-passed to the relevant function.  Each API function has different
-rules for which mask values can be specified, and can specify whether
-a given mask value is mandatory, optional, or forbidden.  Mandatory
-fields must be present and forbidden fields must not be present or an
-error is generated.  When creating a principal or policy, optional
-fields have a default value if they are not specified; when modifying
-a principal or policy, optional fields are unchanged if they are not
-specified.  The values for forbidden fields are defined in the
-function semantics.
+The API functions for creating, retrieving, and modifying principals
+and policies allow for a relevant subset of the fields of the
+kadm5_principal_ent_t and kadm5_policy_ent_t to be specified or
+changed.  The chosen fields are determined by a bitmask that is passed
+to the relevant function.  Each API function has different rules for
+which mask values can be specified, and can specify whether a given
+mask value is mandatory, optional, or forbidden.  Mandatory fields
+must be present and forbidden fields must not be present or an error
+is generated.  When creating a principal or policy, optional fields
+have a default value if they are not specified.  When modifying a
+principal or policy, optional fields are unchanged if they are not
+specified.  When retrieving a principal, optional fields are simply
+not provided if they are not specified; not specifying undeeded fields
+for retrieval may improve efficiency.  The values for forbidden fields
+are defined in the function semantics.
 
 The masks for principals are in table \ref{tab:princ-bits} and the
 masks for policies are in table \ref{tab:policy-bits}.  They are
-defined in $<$kadm5/admin.h$>$. The
-KADM5_ prefix has been removed from the Name fields.  In the
-Create and Modify fields, M means mandatory, F means forbidden, and O
-means optional.  Create fields that are optional specify the default
-value.  The notation ``K/M value'' means that the field inherits its
-value from the corresponding field in the Kerberos master principal.
+defined in $<$kadm5/admin.h$>$. The KADM5_ prefix has been removed
+from the Name fields.  In the Create and Modify fields, M means
+mandatory, F means forbidden, and O means optional.  Create fields
+that are optional specify the default value.  The notation ``K/M
+value'' means that the field inherits its value from the corresponding
+field in the Kerberos master principal, for KADM5_API_VERSION_1, and
+from the configuration parameters for KADM5_API_VERSION_2.
+
+All masks for principals are optional for retrevial, {\it except} that
+the KEY_DATA mask is illegal when specified by a remote client; for
+details, see the function semantics for kadm5_get_principal.
 
 Note that the POLICY and POLICY_CLR bits are special.  When POLICY is
 set, the policy is assigned to the principal.  When POLICY_CLR is
 specified, the policy is unassigned to the principal and as a result
 no policy controls the principal.
 
-If the principal has a policy assigned, the POLICY bit is set in
-aux_attributes.
+For convenience, the mask KADM5_PRINCIPAL_NORMAL_MASK contains all of
+the principal masks {\it except} KADM5_KEY_DATA and KADM5_TL_DATA, and
+the mask KADM5_POLICY_NORMAL_MASK contains all of the policy masks.
 
 \begin{table}[htbp]
 \begin{tabular}{@{}lclll}
-{\bf Name} & {\bf Value} & {\bf Field Affected} & {\bf Create} & 
+{\bf Name} & {\bf Value} & {\bf Fields Affected} & {\bf Create} & 
         {\bf Modify} \\
 PRINCIPAL               & 0x000001 & principal & M & F \\
 PRINC_EXPIRE_TIME       & 0x000002 & princ_expire_time & O, K/M value & O \\
@@ -361,9 +555,15 @@ KVNO                    & 0x000100 & kvno & O, 1 & O \\
 MKVNO                   & 0x000200 & mkvno & F & F \\
 AUX_ATTRIBUTES          & 0x000400 & aux_attributes & F & F \\
 POLICY                  & 0x000800 & policy & O, none & O \\
-POLICY_CLR              & 0x001000 & policy & F & O
+POLICY_CLR              & 0x001000 & policy & F & O \\
+MAX_RLIFE               & 0x002000 & max_renewable_life & O, K/M value & O \\
+LAST_SUCCESS            & 0x004000 & last_success & F & O \\
+LAST_FAILED             & 0x008000 & last_failed & F & O \\
+FAIL_AUTH_COUNT         & 0x010000 & fail_auth_count & F & O \\
+KEY_DATA                & 0x020000 & n_key_data, key_data & F & F \\
+TL_DATA                 & 0x040000 & n_tl_data, tl_data & F & F
 \end{tabular}
-\caption{Mask bits for creating/modifying principals.}
+\caption{Mask bits for creating, retrieving, and modifying principals.}
 \label{tab:princ-bits}
 \end{table}
 
@@ -384,24 +584,29 @@ REF_COUNT               & 0x080000 & pw_refcnt & F & F
 
 \subsection{Constants, Header Files, Libraries}
 
-All of the files decribed in this section are rooted off of the
-``install'' directory in the build tree.  In the product distribution,
-they are simply included in the ``include'' and ``lib''
-subdirectories, as appropriate.
-
 $<$kadm5/admin.h$>$ includes a number of required header files,
 including RPC, Kerberos 5, com_err, and admin com_err
 defines.  It contains prototypes for all kadm5 routines mentioned
 below, as well as all Admin API data structures, type definitions and
-defines mentioned in this document.  The defines and their values
-contained in the file include the following (whose KADM5_
-prefixes have been removed):
+defines mentioned in this document.  
+
+Before \v{\#include}ing $<$kadm5/admin.h$>$, the programmer can
+\v{\#define} the version symbol that the program will use, such as
+KADM5_API_VERSION_2.  This will ensure that the correct functional
+protoypes and data structures are defined.  If no version symbol is
+defined, the most recent version supported by the header files will be
+used.
+
+Some of the defines and their values contained in $<$kadm5/admin.h$>$
+include the following (whose KADM5_ prefixes have been removed):
 \begin{description}
 \item[admin service principal] ADMIN_SERVICE (``kadmin/admin'')
 \item[admin history key] HIST_PRINCIPAL (``kadmin/history'')
 \item[change password principal] CHANGEPW_SERVICE (``kadmin/changepw'')
-\item[server acl file path] ACLFILE (``/krb5/ovsec_adm.acl'')
-\item[dictionary] WORDFILE (``/krb5/kadmind.dict'')
+\item[server acl file path] ACLFILE (``/krb5/ovsec_adm.acl'').  In
+KADM5_API_VERSION 2, this is controlled by configuration parameters.
+\item[dictionary] WORDFILE (``/krb5/kadmind.dict'').    In
+KADM5_API_VERSION 2, this is controlled by configuration parameters.
 \end{description}
 
 KADM5 errors are described in $<$kadm5/kadm_err.h$>$, which
@@ -411,18 +616,19 @@ The locations of the admin policy and principal databases, as well as
 defines and type definitions for the databases, are defined in
 $<$kadm5/adb.h$>$.  Some of the defines in that file are:
 \begin{description}
-\item[admin policy database] POLICY_DB (``/krb5/kadm5_policy.db'')
-\item[admin principal database] PRINCIPAL_DB (``/krb5/ovsec_principal.db'')
+\item[admin policy database] POLICY_DB (``/krb5/kadm5_policy.db'').    In
+KADM5_API_VERSION 2, this is controlled by configuration parameters.
+\item[admin principal database] PRINCIPAL_DB
+(``/krb5/ovsec_principal.db'').  In KADM5_API_VERSION 2, this is
+controlled by configuration parameters.
 \end{description}
 
-Client applications will link against libadmclnt.a and server programs
-against libadmsrv.a.\footnote{In Secure 1.0, client applications
-linked against libclient.a and libcommon.a, and server applications
-linked against libsrv.a and libcommon.a.}  Client applications must
-also link against: libgssapi_krb5.a, libkrb5.a, libcrypto.a,
-librpclib.a, libcom_err.a, libdyn.a, and libdb.a.  Server applications
-must also link against: libkdb5.a, libkrb5.a, libcrypto.a, libdb.a,
-librpclib.a, libcom_err.a, and libdyn.a.
+Client applications will link against libkadm5clnt.a and server
+programs against libkadm5srv.a.  Client applications must also link
+against: libgssapi_krb5.a, libkrb5.a, libcrypto.a, librpclib.a,
+libcom_err.a, and libdyn.a.  Server applications must also link
+against: libkdb5.a, libkrb5.a, libcrypto.a, librpclib.a, libcom_err.a,
+and libdyn.a.
 
 \subsection{Error Codes}
 
@@ -469,8 +675,7 @@ mismatch
 \item[KADM5_BAD_CLASS] Invalid number of character classes
 \item[KADM5_BAD_LENGTH] Invalid password length
 \item[KADM5_BAD_POLICY] Illegal policy name
-\item[KADM5_BAD_PRINCIPAL] Illegal principal name (XXX use krb5
-error code?)
+\item[KADM5_BAD_PRINCIPAL] Illegal principal name.
 \item[KADM5_BAD_AUX_ATTR] Invalid auxillary attributes
 \item[KADM5_BAD_HISTORY] Invalid password history count
 \item[KADM5_BAD_MIN_PASS_LIFE] Password minimum life is greater
@@ -490,7 +695,7 @@ expired
 \item[* KADM5_BAD_STRUCT_VERSION] Programmer error!  Bad API structure version
 \item[* KADM5_OLD_STRUCT_VERSION] API structure version specified by application is no longer supported (to fix, recompile application against current Admin API header files and libraries)
 \item[* KADM5_NEW_STRUCT_VERSION] API structure version specified by application is unknown to libraries (to fix, obtain current Admin API header files and libraries and recompile application)
-\item[* KADM5_BAD_API_VERSION] Programmer error!  Bad API version
+\item[* KADM5_BAD_API_VERION] Programmer error!  Bad API version
 \item[* KADM5_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries (to fix, update application to adhere to current API version and recompile)
 \item[* KADM5_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server (to fix, update application to adhere to current API version and recompile)
 \item[* KADM5_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries (to fix, obtain current Admin API header files and libraries and recompile application)
@@ -502,6 +707,8 @@ Admin Server)
 
 \subsection{Authentication and Authorization}
 \label{sec:auth}
+
+XXX Everything about server authorization has changed in version 2!
 
 Two Kerberos principals exist for use in communicating with the Admin
 system: kadmin/admin and kadmin/changepw.  Both principals
@@ -617,6 +824,8 @@ details.}
 
 \subsection{kadm5_init_*}
 
+In KADM5_API_VERSION 1:
+
 \begin{verbatim}
 kadm5_ret_t kadm5_init_with_password(char *client_name, char *pass,
                                  char *service_name, char *realm,
@@ -637,6 +846,31 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
                                  void **server_handle)
 \end{verbatim}
 
+In KADM5_API_VERSION 2:
+
+\begin{verbatim}
+kadm5_ret_t kadm5_init_with_password(char *client_name, char *pass,
+                                 char *service_name,
+                                 kadm5_config_params *realm_params,
+                                 unsigned long struct_version,
+                                 unsigned long api_version,
+                                 void **server_handle)
+
+kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
+                                 char *service_name,
+                                 kadm5_config_params *realm_params,
+                                 unsigned long struct_version,
+                                 unsigned long api_version,
+                                 void **server_handle)
+
+kadm5_ret_t kadm5_init(char *client_name, char *pass,
+                                 char *service_name,
+                                 kadm5_config_params *realm_params,
+                                 unsigned long struct_version,
+                                 unsigned long api_version,
+                                 void **server_handle)
+\end{verbatim}
+
 AUTHORIZATION REQUIRED: none
 
 NOTE: kadm5_init is an obsolete provided for backwards
@@ -645,6 +879,15 @@ compatibility.  It is identical to kadm5_init_with_password.
 These three functions open a connection to the kadm5 library and
 initialize any neccessary state information.  They behave differently
 when called from local and remote clients.  
+
+In KADM5_API_VERSION_2, these functions take a kadm5_config_params
+structure instead of a realm name as an argument.  The semantics are
+similar: if a NULL pointer is passed for the realm_params argument,
+the default realm and default parameters for that realm, as specified
+in the krb5 configuration file (e.g. /etc/krb5.conf) are used.  If a
+realm_params structure is provided, the fields that are set override
+the default values.  See section \ref{sec:configparams} for a
+discussion of configuration parameters.
 
 For remote clients, the semantics are:
 
@@ -811,9 +1054,7 @@ return KADM5_UNK_POLICY.
 \item If KADM5_POLICY bit is set in aux_attributes check to see if
 the password does not meets quality standards, return the appropriate
 KADM5_PASS_Q_* error code if it fails.
-\item Store the principal, set the key.  The key is generated with
-Kerberos' string-to-key function, using the salt method specified on
-the admin server's command line; see section \ref{sec:commandline}.
+\item Store the principal, set the key; see section \ref{sec:keys}.
 \item If the POLICY bit is set, increment the named policy's reference
 count by one.
 
@@ -984,7 +1225,8 @@ AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
 kadmin/changepw service, the modify privilege is disregarded.
 
-Change a principal's password.  
+Change a principal's password.   See section \ref{sec:keys} for a
+description of how the keys are determined.
 
 This function enforces password policy and dictionary checks.  If the new
 password specified is in the password dictionary, and the policy bit is set
@@ -1146,8 +1388,9 @@ password history.
 life. 
 \end{description}
 
-
 \subsection{kadm5_randkey_principal}
+
+In KADM5_API_VERSION_1:
 
 \begin{verbatim}
 kadm5_ret_t
@@ -1155,13 +1398,24 @@ kadm5_randkey_principal(void *server_handle, krb5_principal princ,
                              krb5_keyblock **new_key)
 \end{verbatim}
 
+In KADM5_API_VERSION_2:
+
+\begin{verbatim}
+kadm5_ret_t
+kadm5_randkey_principal(void *server_handle, krb5_principal princ,
+                        krb5_int16 *n_key_data, krb5_key_data *key_data)
+\end{verbatim}
+
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
 kadmin/changepw service, the modify privilege is disregarded.
 
 Generate and assign a new random key to the named principal, and
-return the generated key in allocated storage.  The caller must free
-the returned krb5_keyblock * with krb5_free_keyblock.
+return the generated key in allocated storage.  See section
+\ref{sec:keys} for a description of how the keys are chosen.  In
+KADM5_API_VERSION_1, the caller must free the returned krb5_keyblock *
+with krb5_free_keyblock.  In KADM5_API_VERSION_2, the caller must free
+the returned krb5_key_data array kadm5_free_key_data.
 
 If the principal's POLICY bit is set in aux_attributes and the caller does
 not have modify privilege , compliance with the password minimum life
@@ -1218,25 +1472,46 @@ truly randomized.
 
 \subsection{kadm5_get_principal}
 
+In KADM5_API_VERSION_1:
+
 \begin{verbatim}
 kadm5_ret_t
 kadm5_get_principal(void *server_handle, krb5_principal princ, 
                          kadm5_principal_ent_t *ent);  
 \end{verbatim}
 
-Return the principal's attributes in allocated memory.  The caller
-must free the returned entry with kadm5_free_principal_ent.
-If an error is returned entry is set to NULL.
+In KADM5_API_VERSION_2:
+
+\begin{verbatim}
+kadm5_ret_t
+kadm5_get_principal(void *server_handle, krb5_principal princ, 
+                         kadm5_principal_ent_t *ent, u_int32 mask);  
+\end{verbatim}
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
 as the princ argument.  If the request is authenticated to the
 kadmin/changepw service, the get privilege is disregarded.
 
+Return the principal's attributes in allocated memory.  In
+KADM5_API_VERSION_2, only the fields specified in the mask are
+returned.  Typically, a caller will specify the mask
+KADM5_PRINCIPAL_NORMAL_MASK, which includes all the fields {\it
+except} key_data and tl_data to improve time and memory efficiency.  A
+caller that wants key_data and tl_data can bitwise-OR those masks onto
+NORMAL_MASK.  The caller must free the returned entry with
+kadm5_free_principal_ent.  If an error is returned entry is set to
+NULL.
+
+The function behaves differently for local and remote clients.  For
+remote clients, the KEY_DATA mask is illegal and results in a
+KADM5_BAD_MASK error.
 
 RETURN CODES:
 
 \begin{description}
 \item[KADM5_UNK_PRINC] Principal does not exist.
+\item[KADM5_BAD_MASK] The mask is not valid for a get operation.
+
 \end{description}
 
 \subsection{kadm5_get_principals}
@@ -1445,6 +1720,17 @@ void kadm5_free_name_list(void *server_handle,
 Free the memory that was allocated by kadm5_get_principals or
 kadm5_get_policies.  names and count must be a matched pair of
 values returned from one of those two functions.
+
+\subsection{kadm5_free_key_data}
+
+\begin{verbatim}
+void kadm5_free_key_data(void *server_handle, krb5_key_data
+                         krb5_int16 *n_key_data, krb5_key_data *key_data)
+\end{verbatim}
+
+Free the memory that was allocated by kadm5_randkey_principal.
+n_key_data and key_data must be a matched pair of values returned from
+that function.
 
 \subsection{kadm5_get_privs}
 
