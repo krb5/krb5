@@ -228,7 +228,7 @@ proc doit { } {
 
     # Use kadmin to add a key for us.
     if ![add_kerberos_key gsstest3 0] {
-	perror "faild to set up gsstest3 key"
+	perror "failed to set up gsstest3 key"
     }
 
     # Use kadmin to add a service key for us.
