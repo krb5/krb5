@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include "stdcc.h"
+#include "k5-int.h"
 
 /* from fcc-proto.h */
 KRB5_DLLIMP extern krb5_cc_ops krb5_fcc_ops;
@@ -45,6 +46,8 @@ static int LoadFuncs(const char* dll_name, FUNC_INFO fi[],
     }
 
     if (!(h = LoadLibrary(dll_name))) {
+	/* Get error for source debugging purposes. */
+	error = (int)GetLastError();
 	return LF_NODLL;
     }
 

@@ -37,6 +37,7 @@
 #endif
 
 krb5_error_code
+KRB5_CALLCONV
 krb5_build_principal_va(context, princ, rlen, realm, ap)
     krb5_context context;
     krb5_principal princ;

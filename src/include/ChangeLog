@@ -1,3 +1,159 @@
+2002-04-05 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: Conditionalize KRB5_CALLCONV_WRONG separately
+    because gssapi.h defines KRB5_CALLCONV but doesn't need
+    KRB5_CALLCONV_WRONG
+
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-mac.h: Add KRB5_CALLCONV_WRONG.
+
+	* krb5.hin: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.  Add KRB5_CALLCONV_WRONG.  Fix up various calling
+	conventions.  For Win32, add KT an CC accessors and default to not
+	PRIVATE.
+
+2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin: Make krb5_build_principal_va() KRB5_CALLCONV.
+
+2002-04-03 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: When KRB5_KEYTAB_ACCESSOR_FUNCTIONS is defined, 
+    we still need actual definitions for krb5_kt_ops, etc defined 
+    because krb5_kt_register uses it as a type.  
+    Updated macros to define krb5_kt_ops when KRB5_PRIVATE is 1.
+    Also added a call to KRB5INT_BEGIN_DECLS so there isn't
+    a dangling }; in krb5.h when compiling C++
+    * k5-int.h: Added krb5_kt_dfl_ops for KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+
+2002-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_c_valid_enctype, krb5_c_valid_cksumtype,
+	krb5_c_is_coll_proof_cksum, krb5_c_is_keyed_cksum,
+	krb5_kt_free_entry_contents): New decls.
+	(valid_enctype, valid_cksumtype, is_coll_proof_cksum,
+	is_keyed_cksum, krb5_kt_free_entry): Conditionalize on
+	KRB5_PRIVATE.
+
+2002-04-02  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Allow override of KRB5_PRIVATE and KRB5_DEPRECATED on
+	compiler command line.  Make KRB5INT_BEGIN_DECLS and
+	KRB5INT_END_DECLS macros for C++ to keep indentation happy.  Make
+	krb5_{enc_priv_part,priv,safe} private.  Make most of rcache
+	functions and structs private.  Hide keytab structs if
+	KRB5_KEYTAB_ACCESSOR_FUNCTIONS is true.
+	(krb5_auth_con_getcksumtype): Remove declaration for unimplemented
+	function.
+
+2002-04-02  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Merge krb5_init_keyblock from mainline
+
+2002-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Move a whole bunch of stuff under KRB5_DEPRECATED or
+	KRB5_PRIVATE as a first pass for cleaning up the API.  [merge from
+	trunk] Note that KRB5_DEPRECATED=1 by default, and KRB5_PRIVATE=1
+	on all but MacOS X.
+
+2000-04-01  Miro Jurisic  <meeroh@mit.edu>
+    * krb5.hin: Conditionalized krb5_kt_* macros vs. functions with
+        KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+
+2002-03-28 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: Conditionalized pragmas for Metrowerks
+
+2002-03-07 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: Added check for CFM compiles.  Removed dependency on 
+    PRAGMA_* macros.
+
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: Updated Mac OS X headers to new framework layout
+    * k5-int.h: Removed conditionals now defined in prefix files
+    and updated header paths
+
+2001-12-19  Miro Jurisic  <meeroh@mit.edu>
+	* win-mac.h: Fixed EFBIG #define
+
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* krb5.hin, k5-int.h: Condintionally use cc_* macros or functions
+	* krb5.hin: Changed KerberosConditionalMacros.h to
+	KerberosSupport.h
+	* k5-int.h: Rearranged the #ifdef macintosh section to
+	work on Mac OS 9 and X
+	* win-mac.h, k5-int.h, krb5.hin: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+        
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (TKT_FLG_TRANSIT_POLICY_CHECKED,
+	TKT_FLG_OK_AS_DELEGATE, TKT_FLG_ANONYMOUS): New macros.
+	(KDC_OPT_REQUEST_ANONYMOUS, KDC_OPT_DISABLE_TRANSITED_CHECK):
+	Likewise.
+	(krb5_check_transited_list): Pointed-to krb5_data structures are
+	now all const.
+
+2000-10-16  Miro Jurisic  <meeroh@mit.edu>
+
+	* win-mac.h: #include <KerberosConditionalMacros.h> on Mac OS
+        
+2000-10-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb5-int.h: Added warning comment about #define macintosh
+        
+2000-09-19  Miro Jurisic  <meeroh@mit.edu>
+
+	* win-mac.h: Put #include <fcntl.h> back in
+
+2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
+	be KRB5_CALLCONV.
+
+	* k5-int.h (krb5int_cc_default): Fix linkage to be consistent with
+	code.  (Note: We should dump KRB5_DLLIMP.)
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_recvauth_version): Declare.
+
+2000-5-19	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5-int.h: Added krb5int_cc_default.  This function supports the 
+	Kerberos Login Library and pops up a dialog if the cache does not
+	contain valid tickets.  This is used to automatically get a tgt before
+	obtaining service tickets.  Note that this should be an internal function
+	because callers don't expect krb5_cc_default to pop up a dialog!
+	(We found this out the hard way :-)
+
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5.hin -- Added prototypes for new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin: Declare krb5_free_ktypes.
+
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5-int.h: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+	* win-mac.h: Set up the macintosh build to use KerberosLogin.
+
+2000-03-25  Miro Jurisic  <meeroh@mit.edu>
+
+	* k5-int.h: Fixed protos for krb5_locate_srv_* (naddrs is int*)
+
+2000-03-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* krb5.hin: Add krb5_free_default_realm
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin: Add krb5_get_prompt_types() and related defs..

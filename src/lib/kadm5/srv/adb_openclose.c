@@ -24,27 +24,29 @@ struct _locklist {
 osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
 				int magic)
 {
-     FILE *lf;
+     int lf;
      DB *db;
-     HASHINFO info;
+     BTREEINFO btinfo;
      
-     memset(&info, 0, sizeof(info));
-     info.hash = NULL;
-     info.bsize = 256;
-     info.ffactor = 8;
-     info.nelem = 25000;
-     info.lorder = 0;
-     db = dbopen(filename, O_RDWR | O_CREAT | O_EXCL, 0600, DB_HASH, &info);
+     memset(&btinfo, 0, sizeof(btinfo));
+     btinfo.flags = 0;
+     btinfo.cachesize = 0;
+     btinfo.psize = 4096;
+     btinfo.lorder = 0;
+     btinfo.minkeypage = 0;
+     btinfo.compare = NULL;
+     btinfo.prefix = NULL;
+     db = dbopen(filename, O_RDWR | O_CREAT | O_EXCL, 0600, DB_BTREE, &btinfo);
      if (db == NULL)
 	  return errno;
      if (db->close(db) < 0)
 	  return errno;
 
      /* only create the lock file if we successfully created the db */
-     lf = fopen(lockfilename, "w+");
-     if (lf == NULL)
+     lf = THREEPARAMOPEN(lockfilename, O_RDWR | O_CREAT | O_EXCL, 0600);
+     if (lf == -1)
 	  return errno;
-     (void) fclose(lf);
+     (void) close(lf);
      
      return OSA_ADB_OK;
 }
@@ -128,6 +130,13 @@ osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
      db->info.nelem = 25000;
      db->info.lorder = 0;
 
+     db->btinfo.flags = 0;
+     db->btinfo.cachesize = 0;
+     db->btinfo.psize = 4096;
+     db->btinfo.lorder = 0;
+     db->btinfo.minkeypage = 0;
+     db->btinfo.compare = NULL;
+     db->btinfo.prefix = NULL;
      /*
       * A process is allowed to open the same database multiple times
       * and access it via different handles.  If the handles use
@@ -333,7 +342,7 @@ osa_adb_ret_t osa_adb_get_lock(osa_adb_db_t db, int mode)
 
 osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
 {
-     int ret;
+     int ret, fd;
      
      if (!db->lock->lockcnt)		/* lock already unlocked */
 	  return OSA_ADB_NOTLOCKED;
@@ -341,8 +350,9 @@ osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
      if (--db->lock->lockcnt == 0) {
 	  if (db->lock->lockmode == OSA_ADB_PERMANENT) {
 	       /* now we need to create the file since it does not exist */
-	       if ((db->lock->lockfile = fopen(db->lock->filename,
-					       "w+")) == NULL)
+               fd = THREEPARAMOPEN(db->lock->filename,O_RDWR | O_CREAT | O_EXCL,
+                                   0600);
+	       if ((db->lock->lockfile = fdopen(fd, "w+")) == NULL)
 		    return OSA_ADB_NOLOCKFILE;
 	  } else if (ret = krb5_lock_file(db->lock->context,
 					  fileno(db->lock->lockfile),
@@ -362,14 +372,23 @@ osa_adb_ret_t osa_adb_open_and_lock(osa_adb_princ_t db, int locktype)
      if (ret != OSA_ADB_OK)
 	  return ret;
      
-     db->db = dbopen(db->filename, O_RDWR, 0600, DB_HASH, &db->info);
-     if (db->db == NULL) {
+     db->db = dbopen(db->filename, O_RDWR, 0600, DB_BTREE, &db->btinfo);
+     if (db->db != NULL)
+	  return OSA_ADB_OK;
+     switch (errno) {
+#ifdef EFTYPE
+     case EFTYPE:
+#endif
+     case EINVAL:
+	  db->db = dbopen(db->filename, O_RDWR, 0600, DB_HASH, &db->info);
+	  if (db->db != NULL)
+	       return OSA_ADB_OK;
+     default:
 	  (void) osa_adb_release_lock(db);
-	  if(errno == EINVAL)
+	  if (errno == EINVAL)
 	       return OSA_ADB_BAD_DB;
 	  return errno;
      }
-     return OSA_ADB_OK;
 }
 
 osa_adb_ret_t osa_adb_close_and_unlock(osa_adb_princ_t db)

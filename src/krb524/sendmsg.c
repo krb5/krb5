@@ -40,11 +40,16 @@
 #include <sys/select.h>
 #endif
 
+#if TARGET_OS_MAC
+#include <Kerberos/krb.h>
+#include <Kerberos/krb524.h>
+#else
 #include <krb.h>
 #include "krb524.h"
+#endif
 
 /* For krb5_locate_kdc() */
-#include <k5-int.h>
+#include "k5-int.h"
 
 /*
  * krb524_sendto_kdc:

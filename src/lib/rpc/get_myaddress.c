@@ -81,7 +81,7 @@ get_myaddress(addr)
 	struct sockaddr_in *addr;
 {
 	int s;
-	char buf[BUFSIZ];
+	char buf[256 * sizeof (struct ifconf)];
 	struct ifconf ifc;
 	struct ifreq ifreq, *ifr;
 	int len;

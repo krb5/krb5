@@ -1,3 +1,9 @@
+2000-08-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (KRB4_RUNTESTFLAGS): Set from configure.in and pass
+	to runtest if krb4 compatibility is enabled.
+	[pullup from trunk]
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

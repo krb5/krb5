@@ -1,7 +1,7 @@
 #include "krb5.h"
 	
-#if defined(macintosh)
-#include "CCache2.h"
+#if TARGET_OS_MAC
+#include <Kerberos/CredentialsCache2.h>
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -23,6 +23,8 @@ typedef struct _stdccCacheData {
 
 
 /* function protoypes  */
+
+void krb5_stdcc_shutdown(void);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_close
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
