@@ -17,7 +17,7 @@ AppendRule([install-unix::	libkrb5.[$](SHEXT)
 ])dnl
 if test -n "$krb5_cv_staticlibs_enabled" ; then
 	LinkFileDir(../libkrb5.[$](STEXT), libkrb5.[$](STEXT), ./krb5)
-        AppendRule([install:: 
+        AppendRule([install-unix:: 
 	[$](INSTALL_DATA) libkrb5.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)/libkrb5.[$](STEXT)
 	[$](RANLIB) [$](DESTDIR)[$](KRB5_LIBDIR)/libkrb5.[$](STEXT)]) 
 	AppendRule([all-unix:: ../libkrb5.[$](STEXT)])
