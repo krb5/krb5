@@ -127,7 +127,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-m] [-k masterkeytype] [-M masterkeyname]\n", name);
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterkeytype] [-M masterkeyname]\n", name);
     return;
 }
 
@@ -141,12 +141,14 @@ char **argv;
     int keytypedone = 0;
     char *db_realm = 0;
     char *mkey_name = 0;
+    char *rcname = 0;
     char lrealm[BUFSIZ];
     krb5_error_code retval;
 
     extern char *optarg;
+    extern krb5_deltat krb5_clockskew;
 
-    while ((c = getopt(argc, argv, "r:d:mM:k:")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    db_realm = optarg;
@@ -164,6 +166,9 @@ char **argv;
 	    master_keyblock.keytype = atoi(optarg);
 	    keytypedone++;
 	    break;
+	case 'R':
+	    rcname = optarg;
+	    break;
 	case '?':
 	default:
 	    usage(argv[0]);
@@ -179,31 +184,61 @@ char **argv;
 	}
 	db_realm = lrealm;
     }
+
     if (!mkey_name)
 	mkey_name = KRB5_KDB_M_NAME;
 
     if (!keytypedone)
 	master_keyblock.keytype = KEYTYPE_DES;
 
+    if (!rcname)
+	rcname = KDCRCACHE;
+    if (retval = krb5_rc_resolve_full(&kdc_rcache, rcname)) {
+	com_err(argv[0], retval, "while resolving replay cache '%s'", rcname);
+	exit(1);
+    }
+    if ((retval = krb5_rc_recover(kdc_rcache)) &&
+	(retval = krb5_rc_initialize(kdc_rcache, krb5_clockskew))) {
+	com_err(argv[0], retval, "while initializing replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
+	exit(1);
+    }
     /* assemble & parse the master key name */
 
     if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, (char **) 0,
 					 &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
+	(void) krb5_rc_close(kdc_rcache);
 	exit(1);
     }
 
 #ifdef PROVIDE_DES_CBC_CRC
     master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
 #else
-#error You gotta figure out what cryptosystem to use in the KDC.
+error(You gotta figure out what cryptosystem to use in the KDC);
 #endif
 
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
 				    FALSE, /* only read it once, if at all */
 				    &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
+	(void) krb5_rc_close(kdc_rcache);
 	exit(1);
+    }
+
+    return;
+}
+
+void
+finish_args(prog)
+char *prog;
+{
+    krb5_error_code retval;
+    if (retval = krb5_rc_close(kdc_rcache)) {
+	com_err(prog, retval, "while closing replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
     }
     return;
 }
@@ -307,13 +342,14 @@ char *argv[];
 
     setup_signal_handlers();
 
-
     if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
-	com_err(argv[0], retval, ": cannot initialize database");
+	com_err(argv[0], retval, "while initializing database");
+	finish_args(argv[0]);
 	exit(1);
     }
     if (retval = setup_network(argv[0])) {
 	com_err(argv[0], retval, "while initializing network");
+	finish_args(argv[0]);
 	exit(1);
     }
     syslog(LOG_INFO, "commencing operation");
@@ -330,6 +366,7 @@ char *argv[];
 	errout++;
     }
     syslog(LOG_INFO, "shutting down");
+    finish_args(argv[0]);
     exit(errout);
 }
 
