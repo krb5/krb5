@@ -1,0 +1,13 @@
+DEPLIBS = $(KDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(SSLIB)
+OBJS= kdb5_edit.o kdb5_ed_ct.o
+SRCS= kdb5_edit.c kdb5_ed_ct.c
+
+all:: kdb5_edit
+
+CmdTableObjectRule()
+
+# needed until we run makedepend
+kdb5_ed_ct.o: kdb5_ed_ct.c
+
+NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
