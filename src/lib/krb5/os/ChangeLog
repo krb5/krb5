@@ -1,3 +1,8 @@
+1999-08-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Use multiple addresses, if
+	present, on Mac and Windows.
+
 1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
 
 	* changepw.c (krb5_change_password):
