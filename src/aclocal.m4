@@ -286,7 +286,7 @@ dnl
 dnl check for signal type
 dnl
 dnl AC_RETSIGTYPE isn't quite right, but almost.
-define(KRB5_SIGTYPE,
+define(KRB5_SIGTYPE,[
 AC_MSG_CHECKING([POSIX signal handlers])
 AC_CACHE_VAL(krb5_cv_has_posix_signals,
 [AC_TRY_COMPILE(
@@ -306,7 +306,7 @@ else
   else
      AC_DEFINE(krb5_sigtype, int)
   fi
-fi)dnl
+fi])dnl
 dnl
 dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
 dnl
