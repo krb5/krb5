@@ -32,6 +32,7 @@ static char rcsid_sendto_kdc_c[] =
 
 #include <stdio.h>
 #include <krb5/libos-proto.h>
+#include "os-proto.h"
 
 /*
  * send the formatted request 'message' to a KDC for realm 'realm' and
@@ -85,7 +86,7 @@ OLDDECLARG(krb5_data *, reply)
      * do exponential backoff.
      */
 
-    for (timeout = 1; timeout < MAXTIMEOUT; timeout <<=TIMEOUT_SHIFT) {
+    for (timeout = 1; timeout < MAX_TIMEOUT; timeout <<=TIMEOUT_SHIFT) {
 	sent = 0;
 	for (host = 0; host < naddr; host++) {
 	    /* send to the host, wait timeout seconds for a response,
