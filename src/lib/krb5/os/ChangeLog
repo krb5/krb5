@@ -1,3 +1,8 @@
+2000-04-29  Jeffrey Altman <jaltman@columbia.edu>
+
+        * hst_realm.c (krb5_get_host_realm)
+          remove the searchlist and defaultrealm _kerberos queries
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c (krb5int_set_prompt_types): Set to actual value
