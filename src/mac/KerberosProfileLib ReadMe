@@ -1,4 +1,4 @@
-KerberosProfileLib implements the Kerberos profile API, used for reading and writing
+KerberosProfileLib implements the Kerberos 5 profile API, used for reading and writing
 Kerberos configuration files. See profile.h for API documentation.
 
 Note that you should rarely, if ever, use profile_init or profile_init_path. You 
