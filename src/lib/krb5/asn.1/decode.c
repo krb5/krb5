@@ -29,9 +29,9 @@ krb5_error_code
 krb5_decode_generic(input, output, decoder, translator, free_translation)
 const krb5_data *input;
 register krb5_pointer *output;
-int (*decoder) PROTOTYPE((PE, int, int, char *, krb5_pointer));
-krb5_pointer (*translator) PROTOTYPE((krb5_pointer, int * ));
-void (*free_translation) PROTOTYPE((krb5_pointer ));
+decoder_func decoder;
+translator_func translator;
+free_func free_translation;
 {
     krb5_pointer isode_temp;
     PE pe;
