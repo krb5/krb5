@@ -81,6 +81,7 @@
 #    endif
 #  else /* !_MSC_VER */
 #    define KRB5_DLLIMP
+#    define GSS_DLLIMP
 #  endif
 #  define KRB5_CALLCONV __stdcall
 #  define KRB5_CALLCONV_C __cdecl
