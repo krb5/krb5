@@ -344,3 +344,31 @@ cleanup:
 	end_list(&values, 0);
 	return retval;
 }
+
+errcode_t profile_iterator_create(profile, names, flags, ret_iter)
+	profile_t	profile;
+	const char	**names;
+	int		flags;
+	void		**ret_iter;
+{
+	return profile_node_iterator_create(profile, names, flags, ret_iter);
+}
+
+void profile_iterator_free(iter_p)
+	void	**iter_p;
+{
+	profile_node_iterator_free(iter_p);
+}
+
+errcode_t profile_iterator(iter_p, ret_name, ret_value)
+	void	**iter_p;
+	char **ret_name, **ret_value;
+{
+	return profile_node_iterator(iter_p, 0, ret_name, ret_value);
+}
+
+void profile_release_string(str)
+	char *str;
+{
+	free(str);
+}

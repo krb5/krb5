@@ -1,3 +1,8 @@
+1998-12-04  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_get.c: Add new public profile_iterator functions for
+		iterating over values found in the profile file.
+
 1998-11-17  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* prof_get.c (profile_get_values): If there are no relations

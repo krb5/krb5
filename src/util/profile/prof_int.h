@@ -62,14 +62,13 @@ struct _profile_t {
 typedef struct _profile_t *profile_t;
 
 /*
- * Used by the profile node iterator in prof_tre.c
+ * Used by the profile iterator in prof_get.c
  */
 #define PROFILE_ITER_LIST_SECTION	0x0001
 #define PROFILE_ITER_SECTIONS_ONLY	0x0002
 #define PROFILE_ITER_RELATIONS_ONLY	0x0004
 
 #define PROFILE_ITER_FINAL_SEEN		0x0100
-
 
 /* profile_parse.c */
 
@@ -181,3 +180,13 @@ errcode_t profile_get_relation_names
 errcode_t profile_get_subsection_names
 	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 
+errcode_t profile_iterator_create
+	PROTOTYPE((profile_t profile, const char **names,
+		   int flags, void **ret_iter));
+
+void profile_iterator_free PROTOTYPE((void **iter_p));
+	
+errcode_t profile_iterator
+	PROTOTYPE((void **iter_p, char **ret_name, char **ret_value));
+
+void profile_release_string PROTOTYPE((char *str));

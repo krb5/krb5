@@ -531,5 +531,3 @@ get_new_file:
 		*ret_value = p->value;
 	return 0;
 };
-
-
