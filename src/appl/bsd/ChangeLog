@@ -1,22 +1,21 @@
 Wed Dec 28 14:59:58 1994  Richard Basch  (probe@tardis)
 
-	* logutil.c
-	  	Corrected arguments for the utmpx routines.
+	* login.c
+	  	Changed uid_type to uid_t, gid_type to gid_t
+		Added shadow password support
+		Always use cfset*speed when POSIX_TERMIOS is defined
 
 	* configure.in
 		Changed the PATH for looking for BSD r* commands
 		Use AC_TRY_LINK instead of AC_TRY_COMPILE for the setenv test.
 		Cache results of compile/link tests.
 		Added shadow password support.
-
-Wed Dec 28 13:12:02 1994  Richard Basch  (probe@tardis)
-
-	* configure.in
 	  	Don't bother checking for sys/stream.h; done elsewhere
 		Look for the function ptsname.
 
 	* logutil.c
 	  	Search to the proper position in the utmp/utmpx files.
+	  	Corrected arguments for the utmpx routines.
 
 	* krlogind.c
 	  	Revamped the tty setup routines.
