@@ -1,3 +1,8 @@
+Fri Mar 24 14:38:06 1995    <tytso@rsx-11.mit.edu>
+
+	* adm_network.c (setup_network): If /etc/services doesn't have the
+		administration port, use a compiled in port.
+
 Thu Mar  2 12:24:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
