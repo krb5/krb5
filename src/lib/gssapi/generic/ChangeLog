@@ -1,4 +1,4 @@
-2000-10-11  Alexandra Ellwood <lxs@mit.edu>
+2000-09-11  Alexandra Ellwood <lxs@mit.edu>
         * gssapi_generic.h: Added check for Mac OS X includes.  This will
         not break autoconf-style builds because they do not include
         ConditionalMacros.h.
