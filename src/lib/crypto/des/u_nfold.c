@@ -36,7 +36,6 @@
  */
 
 #include "k5-int.h"
-#include <assert.h>
 
 #define ROTATE_VALUE 13
 
@@ -93,7 +92,6 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 
 	j = outlen-1;
 	while (k) {
-	    assert(j >= 0);
 	    k += outbuf[j];
 	    outbuf[j--] = k & 0xff;
 	    k >>= 8;
