@@ -77,9 +77,30 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
     if (retval)
       goto errout;
     if (session_key) {
-      enctype = session_key->enctype;
-      krb5_free_keyblock (context, session_key);
-      session_key = NULL;
+	enctype = session_key->enctype;
+	krb5_free_keyblock (context, session_key);
+	session_key = NULL;
+    } else if (server) { /* must server be non-NULL when rhost is given? */
+	/* Try getting credentials to see what the remote side supports.
+	   Not bulletproof, just a heuristic.  */
+	krb5_creds in, *out = 0;
+	memset (&in, 0, sizeof(in));
+
+	retval = krb5_copy_principal (context, server, &in.server);
+	if (retval)
+	    goto punt;
+	retval = krb5_copy_principal (context, client, &in.client);
+	if (retval)
+	    goto punt;
+	retval = krb5_get_credentials (context, 0, cc, &in, &out);
+	if (retval)
+	    goto punt;
+	/* Got the credentials.  Okay, now record the enctype and
+	   throw them away.  */
+	enctype = out->keyblock.enctype;
+	krb5_free_creds (context, out);
+    punt:
+	krb5_free_cred_contents (context, &in);
     }
     
     retval = krb5_os_hostaddr(context, rhost, &addrs);
