@@ -1,5 +1,8 @@
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* password_to_key.c (mit_passwd_to_key, afs_passwd_to_key):
+	Comment out pragmas not recognized by gcc or cl.
+
 	* gethostname.c, getst.c, kadm_net.c, klog.c, kparse.c: Include
 	krb5/autoconf.h.
 	* kuserok.c, log.c, memcache.c, mk_preauth.c, netread.c: Ditto.

@@ -80,9 +80,11 @@ mit_passwd_to_key(
     char	*passwd,
     C_Block	key)
 {
+#if 0 /* what system? */
 #pragma unused(user)
 #pragma unused(instance)
 #pragma unused(realm)
+#endif
 
     if (passwd) {
         des_string_to_key(passwd, key);
@@ -132,8 +134,10 @@ afs_passwd_to_key(
     char	*passwd,
     C_Block	key)
 {
+#if 0 /* what system? */
 #pragma unused(user)
 #pragma unused(instance)
+#endif
 
     if (passwd) {
         afs_string_to_key(passwd, realm, key);
