@@ -144,7 +144,9 @@ krb5_tkt_authent *tktauthent;
     tktauthent->ticket = req->ticket;	/* only temporarily...allocated
 					   below */
 
-    if ((retval = krb5_rc_store(rcache, tktauthent))) {
+    /* only check rcache if sender has provided one---some services
+       may not be able to use replay caches (such as datagram servers) */
+    if (rcache && (retval = krb5_rc_store(rcache, tktauthent))) {
 	tktauthent->ticket = 0;
 	clean_authenticator();
 	return retval;
