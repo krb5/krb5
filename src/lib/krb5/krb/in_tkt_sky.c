@@ -83,7 +83,6 @@ OLDDECLARG(krb5_pa_data **,padata)
     else
 	retval = krb5_copy_keyblock(&kt_ent.key, &realkey);
     if (retval) {
-	krb5_xfree(realkey);
 	cleanup();
 	return retval;
     }
