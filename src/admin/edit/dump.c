@@ -193,6 +193,7 @@ void load_db(argc, argv)
 	int	load_error = 0;
 	int	lineno = 0;
 	int	stype, slength;
+	int	align;
 	char	buf[64];	/* Must be longer than ld_vers */
 	
 	if (argc != 3) {
@@ -249,14 +250,14 @@ void load_db(argc, argv)
 			break;
 		if (!(name = malloc(name_len+1))) {
 			com_err(argv[0], errno,
-				"While allocating speace for name");
+				"While allocating space for name");
 			load_error++;
 			break;
 		}
 		if (!(mod_name = malloc(mod_name_len+1))) {
 			free(name);
 			com_err(argv[0], errno,
-				"While allocating speace for name");
+				"While allocating space for name");
 			load_error++;
 			break;
 		}
@@ -270,17 +271,18 @@ void load_db(argc, argv)
 			free(name);
 			free(mod_name);
 			com_err(argv[0], errno,
-				"While allocating speace for name");
+				"While allocating space for name");
 			load_error++;
 			break;
 		}
 		for (i=0; i<entry.key.length; i++) {
-			if (fscanf(f,"%02x", entry.key.contents+i) != 1) {
+			if (fscanf(f,"%02x", &align) != 1) {
 				fprintf(stderr, "Couldn't parse line #%d\n",
 					lineno);
 				load_error++;
 				break;
 			}
+			entry.key.contents[i] = align;
 		}
 		if (fscanf(f, "\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t%u\t",
 			   &entry.kvno, &entry.max_life,
@@ -301,19 +303,20 @@ void load_db(argc, argv)
 				free(mod_name);
 				xfree(entry.key.contents);
 				com_err(argv[0], errno,
-					"While allocating speace for the salt");
+					"While allocating space for the salt");
 				load_error++;
 				break;
 			}
 		} else
 			entry.salt = 0;
 		for (i=0; i <entry.salt_length; i++) {
-			if (fscanf(f, "%02x", entry.salt+i) != 1) {
+			if (fscanf(f, "%02x", &align) != 1) {
 				fprintf(stderr, "Couldn't parse line #%d\n",
 					lineno);
 				load_error++;
 				break;
 			}
+			entry.salt[i] = align;
 		}
 		if (((ch = fgetc(f)) != ';') || ((ch = fgetc(f)) != '\n')) {
 			fprintf(stderr, "Ignoring trash at end of entry: ");
