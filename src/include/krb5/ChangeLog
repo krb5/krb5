@@ -1,3 +1,11 @@
+
+Fri Nov 03 04:37:56 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm.h : Constant changes for the new kadmin code.
+	* kdb.h : Added attribute bit KRB5_KDB_NEW_PRINC. This will 
+		allow kadmin administrators with add acls to modify a
+		principal until this bit is cleared. 
+
 Fri Oct  6 21:58:05 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
