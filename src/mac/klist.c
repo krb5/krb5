@@ -818,7 +818,10 @@ do_v4_ccache(name)
             }
             printtime(creds4 -> issue_date);
             fputs("  ", stdout);
-            printtime(krb_life_to_time(creds4 -> issue_date, creds4 -> lifetime));
+            
+            /* ccapi_version_4 compensates for long lifetimes so we just add here: */
+            printtime(creds4 -> issue_date + creds4 -> lifetime);
+            
             printf("  %s%s%s%s%s\n", creds4 -> service, (creds4 -> service_instance[0] ? "." : ""), 
                         creds4 -> service_instance, (creds4 -> realm[0] ? "@" : ""), creds4 -> realm);
         }
