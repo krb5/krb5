@@ -1609,8 +1609,8 @@ krb5_error_code INTERFACE krb5_sname_to_principal
                    krb5_int32,
                    krb5_principal FAR *));
 
-/* Only put things which don't have pointers to the narrow types in this
-   section */
+krb5_error_code INTERFACE krb5_set_config_files
+	PROTOTYPE ((krb5_context, char **));
 
 krb5_error_code krb5_encode_kdc_rep
 	PROTOTYPE((krb5_context,
