@@ -8,7 +8,7 @@
 
 @set EDITION pre-BETA 5
 @set VERSION pre-BETA 5
-@set UPDATED January 1995
+@set UPDATED March 3, 1995
 
 @ignore
 @iftex
@@ -108,6 +108,7 @@ This is edition @value{EDITION}, for Kerberos V5 version @value{VERSION}.
 @c is:
 @c
 @c @node New Section Name
+
 @c @section New Section Name
 @c
 @c M-x texinfo-every-node-update will take care of calculating the
@@ -201,6 +202,11 @@ Installing the KDC
 * Inter-realm Kerberos Operation::  
 * The Administration Server::   
 * Testing the Kerberos Server::  
+
+Setting up Slave Kerberos Servers
+
+* Kerberos Slave Database Propagation::  
+* Installing a Slave Server::   
 
 A Sample Application
 
@@ -1145,6 +1151,43 @@ starting itself.
 
 @node Setting up Slave Kerberos Servers, Inter-realm Kerberos Operation, Starting the Kerberos Server, Installing the KDC
 @subsection Setting up Slave Kerberos Servers
+
+Slave Kerberos servers allow clients to be able to get Kerberos tickets
+even when the Master server is not available.  Users will not be able to
+change their passwords --- changes can only be made to database on the
+Master server; however, users will be able to authenticate to
+application servers, which is critically important in a distributed
+client-server environment.
+
+@menu
+* Kerberos Slave Database Propagation::  
+* Installing a Slave Server::   
+@end menu
+
+@node Kerberos Slave Database Propagation, Installing a Slave Server, Setting up Slave Kerberos Servers, Setting up Slave Kerberos Servers
+@subsubsection Kerberos Slave Database Propagation
+
+In order to propagate the Kerberos database from the Master server to
+the slaves, the @samp{kprop} and @samp{kpropd} client/server programs
+are used.  Periodically, the Master server will dump the Kerberos
+database out into an ASCII format, using the @samp{kdb5_edit} program.
+The master server will then run @samp{kprop} to prograte the dumped
+database file to each slave server.  
+
+On the slave server, the @samp{kpropd} program is invoked out of
+@samp{/etc/inetd} server.  After @samp{kprop} and @samp{kpropd} have
+mutually authenticated with one another, and @samp{kpropd} is satisfied
+with the identity of the Master server, then the dumped ASCII database
+is transferred to the slave server in an encrypted fashion.  After the
+database is transfered, @samp{kpropd} will then run @samp{kdb5_edit}
+with the appropriate arguments in order to undump the database into a
+usable form by the KDC on the slave server.
+
+@node Installing a Slave Server,  , Kerberos Slave Database Propagation, Setting up Slave Kerberos Servers
+@subsubsection Installing a Slave Server
+
+@b{To be written.}
+
 
 @node Inter-realm Kerberos Operation, The Administration Server, Setting up Slave Kerberos Servers, Installing the KDC
 @subsection Inter-realm Kerberos Operation
