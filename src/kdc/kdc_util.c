@@ -444,10 +444,10 @@ krb5_principal server;
 
     if(*otrans == ',') otrans++;
 	       
-    if (realm_compare(realm, client))
+    if(strcmp(krb5_princ_realm(client)->data,realm) == 0)
 	added = 1;
 
-    if(realm_compare(realm, server))
+    if(strcmp(krb5_princ_realm(server)->data,realm) == 0)
 	added = 1;
 
     while(*current) {
