@@ -6,6 +6,8 @@ DEFINES=-I$(srcdir)/../../include/kerberosIV
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+EHDRDIR=$(BUILDTOP)$(S)include
+
 OBJS	= \
 	cr_auth_repl.$(OBJEXT) \
 	cr_ciph.$(OBJEXT) \
@@ -154,7 +156,7 @@ install:: install-$(WHAT)
 # We want *library* compiler options...
 DBG=$(DBG_LIB)
 
-all-unix:: $(LIBNAME) krb_err.h
+all-unix:: $(LIBNAME) krb_err.h includes
 
 # comp_et_depend(krb_err)
 krb_err.h:: krb_err.et
@@ -165,12 +167,11 @@ depend:: krb_err.h
 
 depend:: $(CODE) 
 
-krb_err.h::
-	-if cmp krb_err.h ../../include/krb_err.h >/dev/null 2>&1; then \
-		echo ; \
+includes:: krb_err.h
+	if cmp krb_err.h $(EHDRDIR)/krb_err.h >/dev/null 2>&1; then :; \
 	else \
-		$(RM) ../../include/krb_err.h ; \
-		$(CP) krb_err.h ../../include/krb_err.h; \
+		(set -x; $(RM) $(EHDRDIR)/krb_err.h; \
+		$(CP) krb_err.h $(EHDRDIR)/krb_err.h) \
 	fi
 
 #install-unix::
@@ -178,8 +179,6 @@ krb_err.h::
 
 
 DEFINES=$(FALLBACK) $(OLD_SRVTAB) $(OLD_KLOGIN) -I$(srcdir)/../../include/kerberosIV
-
-all-unix:: krb_err.h
 
 $(LIBNAME): $(OBJS)
 	$(RM) $@

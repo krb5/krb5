@@ -1,3 +1,10 @@
+Thu May  4 10:03:22 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: new includes target to install krb_err.h in
+		$(BUILDTOP)/include; includes depends on krb_err.h.
+		Previously, it was attempting to install a header that had
+		not yet been generated!
+
 Tue May  2 09:30:50 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove krb_err.h from the include
