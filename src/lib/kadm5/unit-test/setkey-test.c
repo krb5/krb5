@@ -2,6 +2,22 @@
 #include <krb5.h>
 #include <kadm5/admin.h>
 
+#if	HAVE_SRAND48
+#define	RAND()		lrand48()
+#define	SRAND(a)	srand48(a)
+#define	RAND_TYPE	long
+#elif	HAVE_SRAND
+#define	RAND()		rand()
+#define	SRAND(a)	srand(a)
+#define	RAND_TYPE	int
+#elif	HAVE_SRANDOM
+#define	RAND()		random()
+#define	SRAND(a)	srandom(a)
+#define	RAND_TYPE	long
+#else	/* no random */
+need a random number generator
+#endif	/* no random */
+
 krb5_keyblock test1[] = {
      0, ENCTYPE_DES_CBC_CRC, 0, 0,
      -1,
@@ -107,7 +123,7 @@ main(int argc, char **argv)
   }
 
   /* these pw's don't need to be secure, just different every time */
-  srandom(getpid() ^ time(0));
+  SRAND((RAND_TYPE)time((void *) NULL));
   pwdata.data = pw;
   pwdata.length = sizeof(pw);
   
@@ -127,7 +143,7 @@ main(int argc, char **argv)
 
        for (encnum = 0; testp[encnum].magic != -1; encnum++) {
 	    for (i = 0; i < sizeof(pw); i++)
-		 pw[i] = (random() % 26) + '0'; /* XXX */
+		 pw[i] = (RAND() % 26) + '0'; /* XXX */
 
 	    krb5_use_enctype(context, &eblock, testp[encnum].enctype);
 	    if (ret = krb5_string_to_key(context, &eblock, &testp[encnum],

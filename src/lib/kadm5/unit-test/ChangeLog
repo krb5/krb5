@@ -1,3 +1,8 @@
+Mon May  5 17:11:44 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* setkey-test.c, configure.in: add rules to test for correct
+ 	random()-equivlant function
+
 Mon Mar 31 17:39:52 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* Makefile.in, setkey-test.c: add support for setkey
