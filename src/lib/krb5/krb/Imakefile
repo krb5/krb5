@@ -15,6 +15,7 @@ OBJS=	addr_comp.o	\
 	f_tgt_cred.o	\
 	faddr_ordr.o	\
 	gc_via_tgt.o	\
+	gc_frm_kdc.o	\
 	get_creds.o	\
 	get_in_tkt.o	\
 	in_tkt_pwd.o	\
@@ -51,6 +52,7 @@ SRCS=	addr_comp.c	\
 	f_tgt_cred.c	\
 	faddr_ordr.c	\
 	gc_via_tgt.c	\
+	gc_frm_kdc.c	\
 	get_creds.c	\
 	get_in_tkt.c	\
 	in_tkt_pwd.c	\
