@@ -8,7 +8,6 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: kdestroy
 all-windows:: $(OUTPRE)kdestroy.exe
-all-mac::
 
 kdestroy: kdestroy.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kdestroy.o $(KRB4COMPAT_LIBS)

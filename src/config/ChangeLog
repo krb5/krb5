@@ -1,3 +1,8 @@
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* mac-config.README, mac-config.cache, mac-mf.sed, mac-post.in,
+	mac-pre.in: Files deleted.
+
 2004-06-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (AUTOCONF, AUTOHEADER): Always set to autoconf and

@@ -261,8 +261,6 @@ types.stamp: $(srcdir)/types.hin config.status
 
 clean-unix::
 	$(RM) types.h types.stamp
-clean-mac::
-	$(RM) types.h types.stamp
 clean-windows::
 	$(RM) types.h types.stamp
 

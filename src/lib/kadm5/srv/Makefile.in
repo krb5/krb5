@@ -87,7 +87,6 @@ clean-unix::
 
 check-windows::
 
-clean-mac::
 clean-windows::
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs

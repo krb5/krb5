@@ -76,7 +76,6 @@ FILES=	$(SRCS) $(MKCMDSFILES) $(HFILES) \
 
 all-unix::	mk_cmds ct_c.awk ct_c.sed includes # libss_p.a lint
 all-unix:: all-liblinks
-all-mac::
 all-windows::  all-unix
 
 dist:	archives

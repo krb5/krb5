@@ -1,3 +1,7 @@
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MACSRCS): Don't set.
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* daemon.c: Moved to util/apputils.

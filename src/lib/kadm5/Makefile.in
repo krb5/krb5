@@ -101,7 +101,6 @@ check-windows::
 
 clean-unix:: clean-libobjs
 
-clean-mac::
 clean-windows::
 
 # @libobj_frag@

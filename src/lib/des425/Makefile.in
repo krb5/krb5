@@ -75,7 +75,6 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/weak_key.c
 
 all-unix:: all-liblinks
-all-mac:: $(OBJS)
 
 ##DOS##LIBOBJS = $(OBJS)
 

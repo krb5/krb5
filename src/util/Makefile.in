@@ -18,8 +18,6 @@ MAYBE_ET_sys =
 MAYBE_SS_sys =
 MAYBE_DB_sys =
 
-MAC_SUBDIRS = profile et
-
 editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
 HOST_TYPE=@HOST_TYPE@
 HAVE_GCC=@HAVE_GCC@
@@ -30,7 +28,6 @@ DL_COMPILE_TAIL=@DL_COMPILE_TAIL@
 
 all-recurse:
 all-unix:: $(FAKEPREFIX)/lib
-all-mac::
 
 $(FAKEPREFIX)/lib:
 	$(SRCTOP)/config/mkinstalldirs $(FAKEPREFIX) && ln -s `pwd`/../lib $(FAKEPREFIX)

@@ -1,3 +1,7 @@
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-mac): Target deleted.
+
 2003-08-01  Tom Yu  <tlyu@mit.edu>
 
 	* kinit.c (main): Apply patch from Stephen Grau to correctly

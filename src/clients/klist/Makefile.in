@@ -8,8 +8,6 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: klist
 all-windows:: $(OUTPRE)klist.exe
-all-mac::
-
 
 klist: klist.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ klist.o $(KRB4COMPAT_LIBS)

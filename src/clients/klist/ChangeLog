@@ -1,3 +1,7 @@
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-mac): Target deleted.
+
 2003-07-27  Sam Hartman  <hartmans@mit.edu>
 
 	* klist.M : Note that -s can return non-zero if credentials are

@@ -1,3 +1,7 @@
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-mac, clean-mac): Targets deleted.
+
 2004-06-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(srcdir)/krb5/autoconf.stmp): Always use

@@ -8,8 +8,6 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 
 STLIBOBJS= # empty... @LIBOBJS@
-MACSRCS = getuid.c strcasecmp.c strdup.c
-
 OBJS = # empty... @LIBOBJS@
 
 all-unix:: all-libobjs

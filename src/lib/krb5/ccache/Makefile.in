@@ -19,8 +19,6 @@ LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 ##WIN32##MSLSA_OBJ = $(OUTPRE)cc_mslsa.$(OBJEXT)
 ##WIN32##MSLSA_SRC = $(srcdir)/cc_mslsa.c
 
-MAC_SUBDIRS = ccapi
-
 STLIBOBJS= \
 	ccbase.o \
 	cccopy.o \

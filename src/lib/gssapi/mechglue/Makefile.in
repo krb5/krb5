@@ -91,8 +91,6 @@ all:: all-$(WHAT)
 
 all-unix:: shared includes $(OBJS)
 
-all-mac:: shared includes $(OBJS)
-
 all-windows:: includes $(OBJS)
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 	copy mechglue.h $(EHDRDIR)
@@ -113,9 +111,6 @@ libgssapi.$(STEXT): $(OBJS)
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) shared/*
-
-clean-mac::
 	$(RM) shared/*
 
 clean-windows::

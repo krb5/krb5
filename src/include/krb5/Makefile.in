@@ -15,7 +15,6 @@ ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
 BUILT_HEADERS = osconf.h
 
 all-unix:: autoconf.h $(BUILT_HEADERS)
-all-mac:: $(BUILT_HEADERS)
 all-windows:: autoconf.h $(BUILT_HEADERS)
 
 ##DOS##autoconf.h: ..\win-mac.h
@@ -68,7 +67,5 @@ clean::
 
 clean-unix::
 	$(RM) $(ET_HEADERS) autoconf.h autoconf.stamp
-clean-mac::
-	$(RM) osconf.h autoconf.h autoconf.stamp
 clean-windows::
 	$(RM) osconf.h autoconf.h autoconf.stamp

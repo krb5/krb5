@@ -10,8 +10,6 @@ LOCAL_SUBDIRS= generic krb5
 
 ##DOS##DLL_EXP_TYPE=GSS
 
-MAC_SUBDIRS = generic krb5
-
 LOCALINCLUDES = -Igeneric -I$(srcdir)/generic -Ikrb5 -I$(srcdir)/krb5
 STLIBOBJS=\
 	gss_libinit.o

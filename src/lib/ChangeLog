@@ -1,3 +1,8 @@
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MAC_SUBDIRS): Don't set.
+	(all-mac, clean-mac): Targets deleted.
+
 2004-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* exports.crypto, exports.des425, exports.kdb5, exports.krb5:

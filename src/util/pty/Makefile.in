@@ -70,12 +70,6 @@ depend::  pty_err.h
 #install:: libpty.h
 #	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
 
-clean-mac::
-	$(RM) libpty.a
-	$(RM) $(LIBOBJS)
-
-## 
-
 includes:: libpty.h
 	if cmp $(srcdir)/libpty.h \
 	$(BUILDTOP)/include/libpty.h >/dev/null 2>&1; then :; \
@@ -93,8 +87,6 @@ clean-unix::
 
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs clean-files
-
-clean-mac:: clean-files
 
 clean-files::
 	rm -f *~ \#* *.bak \

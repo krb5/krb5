@@ -8,7 +8,6 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: kvno
 all-windows:: $(OUTPRE)kvno.exe
-all-mac::
 
 kvno: kvno.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kvno.o $(KRB4COMPAT_LIBS)

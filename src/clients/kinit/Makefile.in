@@ -11,7 +11,6 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: kinit
 all-windows:: $(OUTPRE)kinit.exe
-all-mac::
 
 kinit: kinit.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kinit.o $(KRB4COMPAT_LIBS)

@@ -28,9 +28,6 @@ EXTRADEPSRCS=\
 ##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)kh_pro.lst @$(OUTPRE)yarrow.lst @$(OUTPRE)aes.lst
 ##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst $(OUTPRE)aes.lst
 
-MAC_SUBDIRS = crc32 des dk enc_provider hash_provider keyhash_provider \
-	md4 md5 old raw sha1 arcfour yarrow
-
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
