@@ -1276,23 +1276,25 @@ if (ccache)
     }
     sprintf(path, "PATH=%s:%s", kprogdir, path_rest);
     envinit[PATHENV] = path;
-/* If we have KRB5CCNAME set, then copy into the
- * child's environment.  This can't really have
- * a fixed position because tz may or may not be set.
- */
+
+    /* If we have KRB5CCNAME set, then copy into the
+     * child's environment.  This can't really have
+     * a fixed position because tz may or may not be set.
+     */
     if (getenv("KRB5CCNAME")) {
 	int i;
 	char *buf = (char *)malloc(strlen(getenv("KRB5CCNAME"))
 					  +strlen("KRB5CCNAME=")+1);
-					  if (buf) {
-sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
-
-for (i = 0; envinit[i]; i++);
-envinit[i] =buf;
-					  }
-	/* If we do anything else, make sure there is space in the array.
-	 */
+	if (buf) {
+	    sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+	    
+	    for (i = 0; envinit[i]; i++);
+	    envinit[i] =buf;
+	}
     }
+
+    /* XXX - If we do anything else, make sure there is space in the array. */
+
     environ = envinit;
     
 #ifdef KERBEROS
