@@ -51,8 +51,15 @@ extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 extern krb5_boolean dbactive;
 extern FILE *scriptfile;
 
-static krb5_key_salt_tuple ks_tuple_rnd_def[] = {{ ENCTYPE_DES_CBC_CRC, 0 }};
-static int ks_tuple_rnd_def_count = 1;
+/*
+ * XXX  This realy should be configured from kdc.conf
+ */
+static krb5_key_salt_tuple ks_tuple_rnd_def[] =
+	{{ ENCTYPE_DES_CBC_CRC, 0 },
+	 { ENCTYPE_DES_CBC_MD5, 0 },
+	 { ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_V4}};
+	 { ENCTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_V4}};
+static int ks_tuple_rnd_def_count = 4;
 
 static void
 enter_rnd_key(argc, argv, entry)

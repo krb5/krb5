@@ -1,3 +1,10 @@
+Fri Sep 15 14:21:25 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cpw.c: Add DES_CBC_MD5 and DES_CBC_CRC with the V4 salt as
+		default key/salt tuples to be added.  (Once proven's DES_*
+		folding code is implemented, we can shorten this list.)
+		Eventually, this list should be read in from kdc.conf.
+
 Thu Sep  7 20:41:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* loadv4.c (load_v4db): Provide a dummy routine if krb4
