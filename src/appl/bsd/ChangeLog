@@ -1,3 +1,8 @@
+Fri Nov 22 15:46:46 1996  unknown  <bjaspan@mit.edu>
+
+	* kcmd.c (kcmd): use sizeof instead of h_length to determine
+ 	number of bytes of addr to copy from DNS response [krb5-misc/211]
+
 Thu Nov 14 14:30:28 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* krcp.c: don't print our own error message if kcmd returns -1 (it

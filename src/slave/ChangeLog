@@ -1,3 +1,9 @@
+Fri Nov 22 15:52:07 1996  unknown  <bjaspan@mit.edu>
+
+	* kprop.c (open_connection): use sizeof instead of h_length to
+ 	determine number of bytes of addr to copy from DNS response
+ 	[krb5-misc/211]
+
 Thu Nov  7 15:18:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kprop.c (main): 

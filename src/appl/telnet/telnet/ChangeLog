@@ -1,3 +1,9 @@
+Fri Nov 22 15:48:57 1996  unknown  <bjaspan@mit.edu>
+
+	* commands.c (sourceroute): use sizeof instead of h_length to
+ 	determine number of bytes of addr to copy from DNS response
+ 	[krb5-misc/211]
+
 Thu Nov 14 14:25:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sys_bsd.c(intr): Added checks to intr_waiting and intr_happened

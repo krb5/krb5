@@ -2454,9 +2454,10 @@ tn(argc, argv)
 		sin.sin_family = host->h_addrtype;
 #if	defined(h_addr)		/* In 4.3, this is a #define */
 		memcpy((caddr_t)&sin.sin_addr,
-				host->h_addr_list[0], host->h_length);
+		       host->h_addr_list[0], sizeof(sin.sin_addr));
 #else	/* defined(h_addr) */
-		memcpy((caddr_t)&sin.sin_addr, host->h_addr, host->h_length);
+		memcpy((caddr_t)&sin.sin_addr, host->h_addr, 
+		       sizeof(sin.sin_addr)); 
 #endif	/* defined(h_addr) */
 		strncpy(_hostname, host->h_name, sizeof(_hostname));
 		_hostname[sizeof(_hostname)-1] = '\0';
@@ -2546,9 +2547,9 @@ tn(argc, argv)
 		perror((char *)0);
 		host->h_addr_list++;
 		memcpy((caddr_t)&sin.sin_addr, 
-			host->h_addr_list[0], host->h_length);
+			host->h_addr_list[0], sizeof(sin.sin_addr));
 		memcpy((caddr_t)&hostaddr,
-			host->h_addr_list[0], host->h_length);
+		       host->h_addr_list[0], sizeof(sin.sin_addr));
 		(void) NetClose(net);
 		continue;
 	    }
@@ -3055,9 +3056,10 @@ sourceroute(arg, cpp, lenp)
 		} else if (host = gethostbyname(cp)) {
 #if	defined(h_addr)
 			memcpy((caddr_t)&sin_addr,
-				host->h_addr_list[0], host->h_length);
+				host->h_addr_list[0], sizeof(sin_addr));
 #else
-			memcpy((caddr_t)&sin_addr, host->h_addr, host->h_length);
+			memcpy((caddr_t)&sin_addr, host->h_addr, 
+			       sizeof(sin_addr));
 #endif
 		} else {
 			*cpp = cp;
