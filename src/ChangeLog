@@ -1,3 +1,7 @@
+Thu Apr 20 17:55:50 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (.ct.c): use $(RM) instead of plain rm.
+
 Thu Apr 20 12:45:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: bug that makefiles were always being reconfigured.

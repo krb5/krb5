@@ -225,7 +225,7 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 
 .ct.c:
 	@if [ $< != $}{*.ct ]; then \
-		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && rm $}{*.ct) || exit 1; \
+		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && $(RM) $}{*.ct) || exit 1; \
 	else \
 		(set -x; $(MAKE_COMMANDS) $}{*.ct) || exit 1; \
 	fi
