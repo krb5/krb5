@@ -100,14 +100,13 @@ char *argv[];
 
     krb5_error_code retval;
     char *dbname = 0;
-    char defrealm[BUFSIZ];
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
     register krb5_cryptosystem_entry *csentry;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     int num_to_create;
     char principal_string[BUFSIZ];
-    char *suffix;
+    char *suffix = 0;
     int depth;
 
     krb5_init_ets();
@@ -159,7 +158,7 @@ char *argv[];
 	}
     }
 
-    if (!(num_to_create && principal_string[0])) usage(progname, 1);
+    if (!(num_to_create && suffix)) usage(progname, 1);
 
 
     if (retval = krb5_kt_register(&krb5_ktf_writable_ops)) {
