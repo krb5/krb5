@@ -500,9 +500,9 @@ $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.c: $(AC) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
 
-lib$(S)krb4$(S)krb_err_txt.c: lib$(S)krb4$(S)krb_err.et
-	$(AWK) -f lib$(S)krb4$(S)et_errtxt.awk outfile=$@ \
-		lib$(S)krb4$(S)krb_err.et
+lib/krb4/krb_err_txt.c: lib/krb4/krb_err.et
+	$(AWK) -f lib/krb4/et_errtxt.awk outfile=$@ \
+		lib/krb4/krb_err.et
 
 KRBHDEP = $(INC)krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
 	$(INC)kv5m_err.h $(INC)asn1_err.h

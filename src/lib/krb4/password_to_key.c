@@ -72,8 +72,13 @@ key_proc_type *krb_get_keyprocs (key_proc_type keyproc)
     }
 }
 
-int mit_passwd_to_key(char *user, char *instance, char *realm,
-                      char *passwd, C_Block key)
+int KRB5_CALLCONV
+mit_passwd_to_key(
+    char	*user,
+    char	*instance,
+    char	*realm,
+    char	*passwd,
+    C_Block	key)
 {
 #pragma unused(user)
 #pragma unused(instance)
@@ -92,8 +97,13 @@ int mit_passwd_to_key(char *user, char *instance, char *realm,
 }
 
 /* So we can use a v4 kinit against a v5 kdc with no krb4 salted key */
-int krb5_passwd_to_key(char *user, char *instance, char *realm,
-                      char *passwd, C_Block key)
+int KRB5_CALLCONV
+krb5_passwd_to_key(
+    char	*user,
+    char	*instance,
+    char	*realm,
+    char	*passwd,
+    C_Block	key)
 {
     if (user && instance && realm && passwd) {
         unsigned int len = MAX_K_NAME_SZ + strlen(passwd) + 1;
@@ -109,8 +119,13 @@ int krb5_passwd_to_key(char *user, char *instance, char *realm,
     return -1;
 }
 
-int afs_passwd_to_key(char *user, char *instance, char *realm,
-                      char *passwd, C_Block key)
+int KRB5_CALLCONV
+afs_passwd_to_key(
+    char	*user,
+    char	*instance,
+    char	*realm,
+    char	*passwd,
+    C_Block	key)
 {
 #pragma unused(user)
 #pragma unused(instance)

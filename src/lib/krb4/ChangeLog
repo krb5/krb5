@@ -1,5 +1,11 @@
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
+	* password_to_key.c (mit_passwd_to_key, krb5_passwd_to_key) 
+	(afs_passwd_to_key): Fix to have KRB5_CALLCONV.
+
+	* krb4int.h (mit_passwd_to_key, krb5_passwd_to_key):
+	(afs_passwd_to_key): Fix prototypes to have KRB5_CALLCONV.
+
 	* CCache-glue.c (krb4int_save_credentials_addr): Renamed from
 	krb_save_credentials().
 	(krb_save_credentials): Implement in terms of
