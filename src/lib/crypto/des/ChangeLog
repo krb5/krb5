@@ -1,3 +1,8 @@
+Sat May 18 02:02:59 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* u_nfold.c (mit_des_n_fold): Fix memory leak.  Free tempbuf
+		before returning.
+
 Tue May 14 18:59:38 1996  Richard Basch  <basch@lehman.com>
 
 	* des_int.h: the cs_entry routines in cbc_cksum.c are now static.

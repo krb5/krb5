@@ -92,6 +92,8 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 	}
 	bytes += inlen;
     } while (bytes % outlen);
+
+    free(tempbuf);
     
     return 0;
 }
