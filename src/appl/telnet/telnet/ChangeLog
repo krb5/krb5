@@ -1,5 +1,12 @@
 2001-07-02  Ezra Peisach  <epeisach@mit.edu>
 
+	* commands.c: Remove prototypes for EncryptAutoEnc(),
+	EncryptAuthDec(), EcnryptDebug(), EncryptVerbose() as they exists
+	in enc-proto.h in libtelnet.
+
+
+2001-07-02  Ezra Peisach  <epeisach@mit.edu>
+
 	* commands.c: Declare sourceroute() static.
 
 2001-07-01  Ezra Peisach  <epeisach@mit.edu>

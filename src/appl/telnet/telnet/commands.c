@@ -655,12 +655,6 @@ static int togglehelp P((void));
 #if	defined(AUTHENTICATION)
 extern int auth_togdebug P((int));
 #endif
-#ifdef	ENCRYPTION
-extern int EncryptAutoEnc P((int));
-extern int EncryptAutoDec P((int));
-extern int EncryptDebug P((int));
-extern int EncryptVerbose P((int));
-#endif	/* ENCRYPTION */
 
 struct togglelist {
     char	*name;		/* name of toggle */
