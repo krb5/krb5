@@ -359,9 +359,15 @@ dnl K5_GEN_FILE( <ac_output arguments> )
 dnl
 define(K5_GEN_FILE,[krb5_output_list="$krb5_output_list $1"])dnl
 dnl
+dnl K5_AC_OUTPUT
+dnl
+define(K5_AC_OUTPUT,[AC_OUTPUT($krb5_output_list)])dnl
+dnl
 dnl K5_OUTPUT_FILES
 dnl
-define(K5_OUTPUT_FILES,[AC_OUTPUT($krb5_output_list)])dnl
+dnl This is for compatibility purposes, and is deprecated...
+dnl
+define(K5_OUTPUT_FILES,[K5_AC_OUTPUT])dnl
 dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
