@@ -19,7 +19,7 @@ world::
 	make ${MFLAGS} depend
 	make ${MFLAGS} all
 
-SUBDIRS = include lib kdc admin clients appl
+SUBDIRS = include lib kdc admin slave clients appl tests
 LNINSTALLDIRS = 
 
 MakeSubdirs($(SUBDIRS))
