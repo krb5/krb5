@@ -25,11 +25,7 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
   if (key->length != 16)
     return (KRB5_BAD_MSIZE);
 
-  /* handle the salt...
-     We really don't salt our key, else it won't work with MSFT, but
-     handle it anyway
-  */
-  saltlen=salt?salt->length:0;
+  /* We ignore salt per the Microsoft spec*/
 
   /* compute the space needed for the new string.
      Since the password must be stored in unicode, we need to increase
@@ -39,16 +35,14 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
      thes user's password is in ascii.
   */
   slen = ((string->length)>128)?128:string->length;
-  len=(slen)*2 + saltlen;
+  len=(slen)*2;
 
   copystr = malloc((size_t) len);
   if (copystr == NULL)
     return ENOMEM;
 
-  /* make the string.  start by creating the unicode version of the password
-     then copy the salt to the end of the string */
+  /* make the string.  start by creating the unicode version of the password*/
   asctouni(copystr, string->data, slen );
-  memcpy(copystr+(slen*2), salt->data, saltlen);
 
   /* the actual MD4 hash of the data */
   krb5_MD4Init(&md4_context);
@@ -65,7 +59,7 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
 #endif /* 0 */
 
   /* Zero out the data behind us */
-  bzero(copystr, len);
-  bzero(&md4_context, sizeof(md4_context));
+  memset (copystr, 0, len);
+  memset(&md4_context, 0, sizeof(md4_context));
   return 0;
 }

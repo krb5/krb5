@@ -1,5 +1,8 @@
 2001-10-19  Sam Hartman  <hartmans@mit.edu>
 
+	* string_to_key.c (krb5_arcfour_string_to_key): Ignore salt
+	(krb5_arcfour_string_to_key): Use memset not bzero
+
 	* arcfour.c (krb5_arcfour_decrypt): Return error if salt cannot be allocated
 	(krb5_arcfour_encrypt): Only memset bits of key to known value on export-grade crypto
 
