@@ -1,3 +1,8 @@
+Thu Sep  7 18:07:56 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* scc_gennew.c (krb5_scc_generate_new): don't use automatic
+	aggregate initialization.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * scc_read.c, scc_write.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
