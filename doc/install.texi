@@ -84,7 +84,19 @@ This is edition @value{EDITION}, for Kerberos V5 version @value{VERSION}.
 
 @end ifinfo
 
-@c The master menu, created with texinfo-master-menu, goes here.
+@c The master menu is updated using emacs19's M-x texinfo-all-menus-update
+@c function.  Don't forget to run M-x texinfo-every-node-update after
+@c you add a new section or subsection, or after you've rearranged the
+@c order of sections or subsections.  Also, don't forget to add an @node
+@c comand before each @section or @subsection!  All you need to enter
+@c is:
+@c
+@c @node New Section Name
+@c @section New Section Name
+@c
+@c M-x texinfo-every-node-update will take care of calculating the
+@c node's forward and back pointers.
+@c
 
 @menu
 * Introduction::                
@@ -105,14 +117,16 @@ How Kerberos Works: A Schematic Description
 
 Building Kerberos
 
-* Build Requirements::          
-* Unpacking the Sources::       
-* Doing the Build::             
-* Testing the Build::           
-* Configure options::           
-* Operating System Incompatibilities::  
-* Compile-time configuration files::  
-* Using Autoconf::              
+* Build Requirements::          How much disk space, etc. you need to
+                                           build Kerberos.
+* Unpacking the Sources::       Preparing the source tree.
+* Doing the Build::             Compiling Kerberos.
+* Testing the Build::           Making sure Kerberos built correctly.
+* Configure options::           Options to the configuration script.
+* OS Incompatibilities::        Special cases to watch for.
+* Configuration .h files::      Kerberos V5's header files.
+* Using Autoconf::              Modifying Kerberos V5's 
+                                            configuration scripts.
 
 Doing the Build
 
@@ -128,7 +142,7 @@ Operating System Incompatibilities
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
 
-Compile-time configuration files
+Configuration header files
 
 * osconf.h::                    
 * config.h::                    
@@ -359,14 +373,16 @@ V5 much simpler to build for most people, and reduce the amount of
 effort required in porting Kerberos V5 to a new platform.
 
 @menu
-* Build Requirements::          
-* Unpacking the Sources::       
-* Doing the Build::             
-* Testing the Build::           
-* Configure options::           
-* Operating System Incompatibilities::  
-* Compile-time configuration files::  
-* Using Autoconf::              
+* Build Requirements::          How much disk space, etc. you need to
+                                           build Kerberos.
+* Unpacking the Sources::       Preparing the source tree.
+* Doing the Build::             Compiling Kerberos.
+* Testing the Build::           Making sure Kerberos built correctly.
+* Configure options::           Options to the configuration script.
+* OS Incompatibilities::        Special cases to watch for.
+* Configuration .h files::      Kerberos V5's header files.
+* Using Autoconf::              Modifying Kerberos V5's 
+                                            configuration scripts.
 @end menu
 
 @node Build Requirements, Unpacking the Sources, Building Kerberos, Building Kerberos
@@ -480,7 +496,7 @@ run them, simply type
 
 while in the top-level build directory.
 
-@node Configure options, Operating System Incompatibilities, Testing the Build, Building Kerberos
+@node Configure options, OS Incompatibilities, Testing the Build, Building Kerberos
 @section Configure options
 
 There are a number of options to Configure which you can use to control
@@ -522,7 +538,7 @@ library should be found (@file{/KRB4DIR/lib}).
 
 @end table
 
-@node Operating System Incompatibilities, Compile-time configuration files, Configure options, Building Kerberos
+@node OS Incompatibilities, Configuration .h files, Configure options, Building Kerberos
 @section Operating System Incompatibilities
 
 This section details operating system incompatibilties with Kerberos V5
@@ -538,7 +554,7 @@ send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
 * Solaris 2.X::                 
 @end menu
 
-@node Ultrix 4.2/3, Alpha OSF/1 V2.0, Operating System Incompatibilities, Operating System Incompatibilities
+@node Ultrix 4.2/3, Alpha OSF/1 V2.0, OS Incompatibilities, OS Incompatibilities
 @subsection Ultrix 4.2/3
 
 On the MIPS platform, md4.c and md5.c can not be compiled with the
@@ -546,7 +562,7 @@ optimizer set at level 1.  (Either -O or -g will work; leaving ccopts
 null won't.)  The optimizer isn't hung; it just takes an exponentially
 long time.  Calculations estimate around 4 billion years....
 
-@node Alpha OSF/1 V2.0, BSDI, Ultrix 4.2/3, Operating System Incompatibilities
+@node Alpha OSF/1 V2.0, BSDI, Ultrix 4.2/3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0
 
 md4.c can not be compiled with the optimizer on.  (This could possibly
@@ -555,14 +571,14 @@ rather remarkable.)
 
 (Reported by Marc Kenig)
 
-@node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0, Operating System Incompatibilities
+@node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0, OS Incompatibilities
 @subsection BSDI
 
 BSDI reportedly has a bad sed which causes it to go into an infinite
 loop during the build.  The workaround is to get a sed from somewhere
 else, such as GNU.
 
-@node Solaris versions 2.0 through 2.3, Solaris 2.X, BSDI, Operating System Incompatibilities
+@node Solaris versions 2.0 through 2.3, Solaris 2.X, BSDI, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
 
 The @code{gethostbyname()} routine is broken; it does not return a fully
@@ -599,7 +615,7 @@ name first.  Example:
 
 @end enumerate
 
-@node Solaris 2.X,  , Solaris versions 2.0 through 2.3, Operating System Incompatibilities
+@node Solaris 2.X,  , Solaris versions 2.0 through 2.3, OS Incompatibilities
 @subsection Solaris 2.X
 
 You *must* compile Kerberos V5 *without* the UCB compatibility libraries.  
@@ -611,8 +627,8 @@ Alternatively you can place the @code{-i} option on the cc line.  So you
 can put @code{--with-ccopts=-i} on the configure line.  (Thanks to Dan
 Nessett for this suggestion.)
 
-@node Compile-time configuration files, Using Autoconf, Operating System Incompatibilities, Building Kerberos
-@section Compile-time configuration files
+@node Configuration .h files, Using Autoconf, OS Incompatibilities, Building Kerberos
+@section Configuration header files
 
 There are two configuration files which you may wish to edit to control
 various compile-time parameters in the Kerberos distribution.
@@ -622,7 +638,7 @@ various compile-time parameters in the Kerberos distribution.
 * config.h::                    
 @end menu
 
-@node osconf.h, config.h, Compile-time configuration files, Compile-time configuration files
+@node osconf.h, config.h, Configuration .h files, Configuration .h files
 @subsection @file{osconf.h}
 
 This file is found in @file{include/krb5/stock/osconf.h}.
@@ -667,7 +683,7 @@ The directory which stores replay caches.
 
 @end table
 
-@node config.h,  , osconf.h, Compile-time configuration files
+@node config.h,  , osconf.h, Configuration .h files
 @subsection @file{config.h}
 
 This file is located in @file{include/krb5/stock/config.h}.
@@ -692,7 +708,7 @@ frequently.
 
 @end table
 
-@node Using Autoconf,  , Compile-time configuration files, Building Kerberos
+@node Using Autoconf,  , Configuration .h files, Building Kerberos
 @section Using Autoconf
 
 (If you are not a developer, you can skip this section.)
@@ -872,7 +888,7 @@ which should be appened to the /etc/services file.
 The following files should be installed on all machines which are
 running Kerberos, either as a client, a KDC, or an application server:
 
-@itemize
+@itemize @bullet
 @item @file{/krb5/bin/kinit}
 @item @file{/krb5/bin/kdestroy}
 @item @file{/krb5/bin/klist}
@@ -1057,15 +1073,11 @@ The programs are rudimentary.
 When they have been installed (the installation procedure is described
 in detail later), they work as follows:
 
-@itemize
+@itemize @bullet
 
-The user starts @samp{sclient} and provides as arguments
+@item The user starts @samp{sclient} and provides as arguments
 to the command the name of the server machine and an optional port on
 which to contact the server.
-For instance:
-@example
-% @b{/u1/krb5/build/appl/sample/sclient/sclient tsx-11.mit.edu}
-@end example
 
 @item @samp{sclient} contacts the server machine and
 authenticates the user to @samp{sserver}.
@@ -1078,6 +1090,7 @@ to authenticate to @samp{sserver}.
 
 @item @samp{sclient} displays the server's message on the user's
 terminal screen.
+
 @end itemize
 
 @menu
