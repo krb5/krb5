@@ -124,7 +124,7 @@ off_t	restart_point = 0;
 extern char *sys_errlist[];
 #endif
 
-extern int errno;
+extern int connected;
 
 #define herror()	printf("unknown host\n")
 
