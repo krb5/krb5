@@ -287,7 +287,7 @@ do_encrypt(in,out)
     unsigned char *out;
 {
     for (i =1; i<=nflag; i++) {
-	des_ecb_encrypt(in,out,KS,1);
+	des_ecb_encrypt((unsigned long *) in, (unsigned long *)out, KS, 1);
 	if (des_debug) {
 	    printf("\nclear %s\n",in);
 	    for (j = 0; j<=7; j++)
@@ -306,7 +306,7 @@ do_decrypt(in,out)
     /* try to invert it */
 {
     for (i =1; i<=nflag; i++) {
-	des_ecb_encrypt(out,in,KS,0);
+	des_ecb_encrypt((unsigned long *) out, (unsigned long *)in,KS,0);
 	if (des_debug) {
 	    printf("clear %s\n",in);
 	    for (j = 0; j<=7; j++)

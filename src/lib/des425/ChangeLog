@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* verify.c (do_decrypt, do_encrypt): Cast argument to
+ 	des_ecb_encrypt to unsigned long *.
+
 2001-05-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* des.c (des_ecb_encrypt): Do not use a variable named "encrypt".
