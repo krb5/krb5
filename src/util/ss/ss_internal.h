@@ -105,6 +105,7 @@ int ss_execute_line();
 char **ss_parse();
 ss_abbrev_info *ss_abbrev_initialize PROTOTYPE((char *, int *));
 void ss_page_stdin();
+int ss_pager_create();
 
 extern ss_data **_ss_table;
 extern char *ss_et_msgs[];

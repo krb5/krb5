@@ -172,4 +172,5 @@ int ss_quit(argc, argv, sci_idx, infop)
     pointer infop;
 {
     ss_abort_subsystem(sci_idx, 0);
+    return 0;
 }

@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "ss_internal.h"
 
+void
 ss_set_prompt(sci_idx, new_prompt)
      int sci_idx;
      char *new_prompt;

@@ -1,3 +1,21 @@
+Mon Mar 30 11:30:00 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ss_internal.h: Add ss_pager_create prototype.
+
+	* ss.h: Add ss_list_requests prototype.
+
+	* request_tbl.c (ss_add_request_table, ss_delete_request_table):
+        Declare function types as void.
+
+	* prompt.c (ss_set_prompt): Declare function as void.
+
+	* listen.c (ss_quit): Int function should return a value.
+
+	* list_rqs.c (ss_list_requests): Fix arguments to match proper
+        prototype for a ss type handler.
+
+	* execute_cmd.c (ss_execute_command): Declare as returning int
+
 Wed Feb 18 16:35:55 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

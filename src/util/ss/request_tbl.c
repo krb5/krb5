@@ -9,6 +9,7 @@
 
 #define ssrt ss_request_table	/* for some readable code... */
 
+void
 ss_add_request_table(sci_idx, rqtbl_ptr, position, code_ptr)
 	int sci_idx;
 	ssrt *rqtbl_ptr;
@@ -41,6 +42,7 @@ ss_add_request_table(sci_idx, rqtbl_ptr, position, code_ptr)
 	*code_ptr = 0;
 }
 
+void
 ss_delete_request_table(sci_idx, rqtbl_ptr, code_ptr)
      int sci_idx;
      ssrt *rqtbl_ptr;
