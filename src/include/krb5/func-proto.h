@@ -54,7 +54,6 @@ krb5_error_code krb5_mk_req
 krb5_error_code krb5_mk_req_extended
 	PROTOTYPE((const krb5_flags,
 		   const krb5_checksum *,
-		   const krb5_ticket_times *,
 		   const krb5_flags,
 		   krb5_int32,
 		   krb5_keyblock **,
