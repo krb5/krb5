@@ -1,5 +1,8 @@
 Sat Apr 29 00:09:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* srv_rcache.c (krb5_get_server_rcache): Fix fencepost error which
+		caused an access beyond the allocated memory of piece->data.
+
 	* rd_priv.c (krb5_rd_priv_basic): Call krb5_free_priv_enc_part to free 
 		the entire privenc_msg structure.
 

@@ -49,7 +49,7 @@ krb5_get_server_rcache(context, piece, rcptr)
     if (retval) goto cleanup;
 
     len = piece->length + 3 + 1;
-    for (i = 0; i <= piece->length; i++) {
+    for (i = 0; i < piece->length; i++) {
 	if (piece->data[i] == '\\')
 	    len++;
 	else if (!isgraph(piece->data[i]))
