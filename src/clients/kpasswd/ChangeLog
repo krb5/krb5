@@ -1,3 +1,8 @@
+Wed Feb 18 15:43:41 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing whitespace from thisconfigdir.  Fix
+	up BUILDTOP for new conventions.
+
 Thu Feb 12 08:37:00 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

@@ -1,3 +1,8 @@
+Wed Feb 18 15:37:20 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Thu Feb 12 10:23:28 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Remove obsolete USE_KRB4_LIBRARY macro

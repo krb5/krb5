@@ -1,3 +1,8 @@
+Wed Feb 18 15:30:10 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Fri Feb 13 22:23:34 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ftpd.c: Applied lxs's changes to make ftpd safe for systems

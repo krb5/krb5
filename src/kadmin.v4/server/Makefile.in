@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV -I.

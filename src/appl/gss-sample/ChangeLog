@@ -1,3 +1,8 @@
+Wed Feb 18 15:27:32 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from BUILDTOP.  Fix up
+	BUILDTOP for new conventions.
+
 Sat Feb 14 10:33:20 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Remove USE_ANAME

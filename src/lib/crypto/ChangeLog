@@ -1,3 +1,8 @@
+Wed Feb 18 16:05:11 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Fri Feb 13 15:19:37 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define LOCAL_SUBDIRS to recurse into the

@@ -1,3 +1,10 @@
+Wed Feb 18 16:31:21 1998  Tom Yu  <tlyu@mit.edu>
+
+	* send-pr/Makefile.in: Remove trialing slash from thisconfigdir.
+	Fix up BUILDTOP for new conventions.
+
+	* Makefile.in (thisconfigdir): Remove trailing slash.
+
 Mon Feb  2 16:16:45 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5
 
 LIB=kadm5clnt

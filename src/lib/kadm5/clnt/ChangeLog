@@ -1,3 +1,8 @@
+Wed Feb 18 16:14:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Fri Feb 13 21:30:34 1998  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c:

@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -30,13 +30,13 @@ $(CLI): $(CLI_OBJS) $(COMMON_OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 install::
 	for f in v5passwd; do \
-	  $(INSTALL_PROGRAM) $(C)$$f \
+	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)$(S)`echo $$f|sed '$(transform)'`; \
 	  $(INSTALL_DATA) $(srcdir)$(S)$$f.M \
 		${DESTDIR}$(CLIENT_MANDIR)$(S)`echo $$f|sed '$(transform)'`.1; \
 	done
 	for f in v5passwdd; do \
-	  $(INSTALL_PROGRAM) $(C)$$f \
+	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(SERVER_BINDIR)$(S)`echo $$f|sed '$(transform)'`; \
 	done
 

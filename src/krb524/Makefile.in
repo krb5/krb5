@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)
 # Copyright 1994 by OpenVision Technologies, Inc.
 # 
 # Permission to use, copy, modify, distribute, and sell this software

@@ -1,5 +1,5 @@
-thisconfigdir=./../
-BUILDTOP=$(U)$(U)$(U)
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
 ##DOS##BUILDTOP = ..\..\..

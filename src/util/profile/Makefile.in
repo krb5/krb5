@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOS##BUILDTOP = ..\..
 ##DOS##OBJFILE=profile.lst
 ##DOS##LIBNAME=profile.lib

@@ -1,2 +1,2 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)

@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)
 ##DOSBUILDTOP = ..
 
 all-unix:: krb5.h adm_err.h
@@ -71,4 +71,4 @@ clean-windows::
 	@echo Making clean in include
 
 install:: krb5.h
-	$(INSTALL_DATA) $(C)krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
+	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h

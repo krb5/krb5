@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)
 LOCAL_SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu
 
 CFLAGS = $(CCOPTS)

@@ -1,3 +1,7 @@
+Wed Feb 18 16:04:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (thisconfigdir): Remove trailing slash.
+
 Thu Feb 12 21:58:56 1998  Tom Yu  <tlyu@mit.edu>
 
 	* sendmsg.c: Explicitly include k5-int.h in order to get proper

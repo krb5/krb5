@@ -1,3 +1,8 @@
+Wed Feb 18 16:19:12 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Thu Feb 12 16:17:46 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add commented out AC_OUTPUT to force autoreconf to

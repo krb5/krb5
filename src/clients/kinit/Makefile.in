@@ -1,5 +1,5 @@
-thisconfigdir=./../
-BUILDTOP=$(U)$(U)
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOS##BUILDTOP=..\..
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
@@ -16,7 +16,7 @@ kinit: kinit.o $(KRB5_BASE_DEPLIBS)
 
 ##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 ##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
-  
+
 ##WIN32##all-windows:: kinit.exe
 ##WIN32##kinit.exe: kinit.obj $(BUILDTOP)\util\windows\getopt.obj $(KLIB) $(CLIB)
 ##WIN32##	link /nologo /out:$@ $**

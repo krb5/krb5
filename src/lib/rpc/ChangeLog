@@ -1,3 +1,8 @@
+Wed Feb 18 16:26:19 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Fri Feb 13 20:57:49 1998  Tom Yu  <tlyu@mit.edu>
 
 	* auth.h: Renames.

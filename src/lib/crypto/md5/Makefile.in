@@ -1,5 +1,5 @@
-thisconfigdir=./../
-BUILDTOP=$(U)$(U)$(U)
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 
 ##DOS##BUILDTOP = ..\..\..
@@ -29,7 +29,7 @@ t_cksum: t_cksum.o $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a
 
 check-unix:: t_mddriver t_cksum
 	$(RUN_SETUP) $(C)t_mddriver -x
-	$(RUN_SETUP)  $(C)t_cksum "this is a test"
+	$(RUN_SETUP) $(C)t_cksum "this is a test"
 
 check-windows:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x

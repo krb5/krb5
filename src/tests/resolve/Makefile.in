@@ -1,5 +1,5 @@
-thisconfigdir=./../
-BUILDTOP=$(U)$(U)
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

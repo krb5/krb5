@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
 KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
 all-unix:: krb_err.h
@@ -14,4 +14,4 @@ install::
 	done
 
 install:: krb_err.h
-	$(INSTALL_DATA) $(C)krb_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kerberosIV$(S)krb_err.h
+	$(INSTALL_DATA) krb_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kerberosIV$(S)krb_err.h

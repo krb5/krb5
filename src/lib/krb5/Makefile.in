@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=krb5.lib
 ##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst keytab.lst krb.lst os.lst posix.lst rcache.lst

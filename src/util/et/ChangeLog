@@ -1,3 +1,8 @@
+Wed Feb 18 16:33:07 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Wed Jan 28 17:54:57 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in, Makefile.in: Remove CopySrcHeader from

@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 # derived from the original Makefile.generic
 #
 # Copyright (c) 1991 The Regents of the University of California.

@@ -1,5 +1,5 @@
-thisconfigdir=./
-BUILDTOP=$(U)$(U)
+thisconfigdir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
 LOCAL_SUBDIRS = client server
 
 CFLAGS = $(CCOPTS)

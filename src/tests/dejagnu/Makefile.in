@@ -1,5 +1,5 @@
-thisconfigdir=./../
-BUILDTOP=$(U)$(U)
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)
 HAVE_RUNTEST = @RUNTEST@
 RUNTESTFLAGS =
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
