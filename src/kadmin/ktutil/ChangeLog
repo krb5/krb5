@@ -1,3 +1,9 @@
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* ktutil.c (ktutil_list): Remove variable set but not used. Also,
+	do not assume that sizeof(time_t) is 32 bits.
+
+2003-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktutil_funcs.c (ktutil_write_srvtab): When keeping only
 	highest-numbered kvno, with some heuristics to deal with
