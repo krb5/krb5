@@ -30,6 +30,8 @@
 /* Saber bug doesn't allow deref through const *'s */
 #define SaberDefines -DPOSIX -Dconst=
 #define StandardDefines -YPOSIX -D_POSIX_SOURCE
+/* makedepend won't understand -YPOSIX also implies -DPOSIX... */
+#define MakeDependFlags -DPOSIX
 
 #define DefaultCDebugFlags OptimizedCDebugFlags
 
