@@ -1,3 +1,7 @@
+Tue Aug 22 11:43:14 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4gssftp.exp: New tests for the krb4 compatible interface to gssftp. 
+
 2000-08-08  Ezra Peisach  <epeisach@engrailed.mit.edu>
 
 	* v4standalone.exp: New set of tests for basic V4 functionality.
