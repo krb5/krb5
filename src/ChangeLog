@@ -1,3 +1,9 @@
+Mon Feb 13 23:39:21 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* aclocal.m4 (WITH_LINKER): Add a new configure production which
+		allows a special linker to be specified.  Useful for
+		running programs like Purify, etc.		
+
 Thu Feb 9 15:42:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* acconfig.h: added HAS_SYS_FILE_H & HAS_SYS_PARAM_H for Windows

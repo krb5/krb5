@@ -139,6 +139,7 @@ dnl drop in standard configure rebuild rules -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
 WITH_CC dnl
+WITH_LINKER dnl
 WITH_CPPOPTS dnl
 AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
@@ -342,6 +343,17 @@ CC=$withval,
 if test -z "$CC" ; then CC=cc; fi
 [AC_MSG_RESULT(CC defaults to $CC)])dnl
 AC_SUBST([CC])])dnl
+dnl
+dnl set $(LD) from --with-linker=value
+dnl
+define(WITH_LINKER,[
+AC_ARG_WITH([linker],
+[  --with-linker=LINKER      select linker to use],
+AC_MSG_RESULT(LD=$withval)
+LD=$withval,
+if test -z "$LD" ; then LD=$CC; fi
+[AC_MSG_RESULT(LD defaults to $LD)])dnl
+AC_SUBST([LD])])dnl
 dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
