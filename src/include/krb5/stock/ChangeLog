@@ -1,4 +1,10 @@
 
+Mon Jul 17 15:05:42 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* osconf.h - Add DEFAULT_KEYFILE_STUB which puts the stashfile in
+		the kdc directory instead of the root.  Also, change the
+		default ETYPE to DES_CBC_MD5 now that it works.
+
+
 Thu Jun 22 11:53:47 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* osconf.h - Add DEFAULT_KDC_PROFILE and KDC_PROFILE_ENV for KDC
 		profile location.

@@ -46,6 +46,7 @@
 #endif /* _WINDOWS  */
 
 #define DEFAULT_KDB_FILE        "@PREFIX/lib/krb5kdc/principal"
+#define	DEFAULT_KEYFILE_STUB	"@PREFIX/lib/krb5kdc/.k5."
 #define KRB5_DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/krb5_adm.acl"
 /* Used by old admin server */
 #define	DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/kadm_old.acl"
@@ -54,7 +55,7 @@
 #define	DEFAULT_KDC_PROFILE	"@PREFIX/lib/krb5kdc/kdc.prof"
 #define	KDC_PROFILE_ENV		"KRB5_KDC_PROFILE"
 
-#define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
+#define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_MD5
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
 #define KDCRCACHE		"dfl:krb5kdc_rcache"
 
