@@ -1325,6 +1325,8 @@ void freeaddrinfo (struct addrinfo *ai)
 
 #if defined(KRB5_USE_INET6) && defined(NEED_INSIXADDR_ANY) 
 /* If compiling with IPv6 support and C library does not define in6addr_any */
+#undef in6addr_any
+#define in6addr_any krb5int_in6addr_any
 static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 

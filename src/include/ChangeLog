@@ -4,6 +4,9 @@
 	krb5_cv_inet6 when deciding whether to test for in6addr_any.  If
 	gcc is in use, suppress pedantic warnings about "inline".
 
+	* fake-addrinfo.h (in6addr_any): If we need to define a static
+	copy, rename it with a macro first.
+
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h: Test HAVE_PTHREAD instead of HAVE_PTHREAD_H.
