@@ -52,6 +52,7 @@ typedef struct _krb5_cc_ops {
 #define	KRB5_TC_MATCH_FLAGS		0x00000004
 #define	KRB5_TC_MATCH_TIMES_EXACT	0x00000008
 #define	KRB5_TC_MATCH_FLAGS_EXACT	0x00000010
+#define	KRB5_TC_MATCH_AUTHDATA		0x00000020
 
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
