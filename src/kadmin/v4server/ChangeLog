@@ -1,3 +1,8 @@
+Thu Sep 26 17:54:33 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* admin_server.c (process_client): allow keytab to be specified on
+ 	command line; default is still wrong
+
 Mon Sep 23 15:36:41 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* configure.in: add unit-test subdir

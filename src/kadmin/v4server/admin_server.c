@@ -66,6 +66,11 @@ admin_params prm;		/* The command line parameters struct */
 char prog[32];			/* WHY IS THIS NEEDED??????? */
 char *progname = prog;
 char *acldir = DEFAULT_ACL_DIR;
+#ifdef OVSEC_KADM
+char *keytab = "FILE:/krb5/ovsec_adm.srvtab";
+#else
+char *keytab = NULL;
+#endif
 char krbrlm[REALM_SZ];
 extern Kadm_Server server_parm;
 krb5_context kadm_context;
@@ -113,7 +118,7 @@ char *argv[];
     memset(krbrlm, 0, sizeof(krbrlm));
 
     fascist_cpw = 1;		/* by default, enable fascist mode */
-    while ((c = getopt(argc, argv, "Df:hnd:a:r:FN")) != EOF)
+    while ((c = getopt(argc, argv, "Df:hnd:a:r:FNk:")) != EOF)
 	switch(c) {
 	case 'D':
 	    debug++;
@@ -147,7 +152,10 @@ char *argv[];
 	case 'r':
 	    (void) strncpy(krbrlm, optarg, sizeof(krbrlm) - 1);
 	    break;
-	case 'h':			/* get help on using admin_server */
+        case 'k':
+	    keytab = optarg;
+	    break;
+        case 'h':			/* get help on using admin_server */
 	default:
 	    printf("Usage: admin_server [-h] [-n] [-F] [-N] [-r realm] [-d dbname] [-f filename] [-a acldir]\n");
 	    exit(-1);			/* failure */
@@ -302,8 +310,10 @@ kadm_listen()
 	 }
     }
     if (bind(admin_fd, (struct sockaddr *)&server_parm.admin_addr,
-	     sizeof(struct sockaddr_in)) < 0)
-	return KADM_NO_BIND;
+	     sizeof(struct sockaddr_in)) < 0) {
+	 syslog(LOG_ERR, "bind: %m");
+	 return KADM_NO_BIND;
+    }
     (void) listen(admin_fd, 1);
     FD_ZERO(&mask);
     FD_SET(admin_fd, &mask);
@@ -383,7 +393,6 @@ void process_client(fd, who)
     int status;
 
 #ifdef OVSEC_KADM
-#define OVSEC_KADM_SRVTAB 		"FILE:/krb5/ovsec_adm.srvtab"
     char *service_name;
 
     service_name = (char *) malloc(strlen(server_parm.sname) +
@@ -397,7 +406,7 @@ void process_client(fd, who)
 	    server_parm.sinst, server_parm.krbrlm);
 
     retval = ovsec_kadm_init_with_skey(service_name,
-				       OVSEC_KADM_SRVTAB,
+				       keytab,
 				       OVSEC_KADM_ADMIN_SERVICE, krbrlm,
 				       OVSEC_KADM_STRUCT_VERSION,
 				       OVSEC_KADM_API_VERSION_1,
