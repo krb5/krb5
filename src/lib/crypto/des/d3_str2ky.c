@@ -107,20 +107,16 @@ const krb5_data FAR * salt;
 
     /* Now, CBC encrypt with itself */
     (void) mit_des3_key_sched(*((mit_des3_cblock *)key), ks);
-    (void) mit_des3_cbc_encrypt((mit_des_cblock *)key,
-				(mit_des_cblock *)key,
-				keyblock->length,
+    (void) mit_des3_cbc_encrypt(key, key, keyblock->length,
 				((mit_des_key_schedule *)ks)[0],
 				((mit_des_key_schedule *)ks)[1],
 				((mit_des_key_schedule *)ks)[2],
 				zero_ivec, TRUE);
-    (void) mit_des3_cbc_encrypt((mit_des_cblock *)key,
-				(mit_des_cblock *)key,
-				keyblock->length,
+    (void) mit_des3_cbc_encrypt(key, key, keyblock->length,
 				((mit_des_key_schedule *)ks)[0],
 				((mit_des_key_schedule *)ks)[1],
 				((mit_des_key_schedule *)ks)[2],
-				zero_ivec, TRUE);
+				key[2], TRUE);
 
     /* erase key_sked */
     memset((char *)ks, 0, sizeof(ks));
