@@ -1,6 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = .
+##DOS##BUILDTOP = .
 
 SRCS =  
 HDRS = 
@@ -12,8 +12,11 @@ all-unix::
 all-mac::
 
 all-windows:: makefile-windows
+	@echo Making in util\windows
+	cd util\windows
+	-$(MAKE) -$(MAKEFLAGS)
 	@echo Making in include
-	cd include
+	cd ..\..\include
 	-$(MAKE) -$(MAKEFLAGS) 
 	@echo Making in util\et
 	cd ..\util\et
@@ -113,67 +116,116 @@ config-windows:: makefile-windows
 	-$(MAKE) -$(MAKEFLAGS)
 	cd ..
 
-makefile-windows:: wconfig.exe config\pre.in config\post.in \
-		include\makefile.in include\krb5\makefile.in \
-		lib\makefile.in lib\crypto\makefile.in \
-		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
-		lib\crypto\sha\makefile.in \
-		lib\crypto\md4\makefile.in lib\crypto\md5\makefile.in \
-		lib\crypto\os\makefile.in lib\des425\makefile.in \
-		lib\gssapi\makefile.in lib\gssapi\generic\makefile.in \
-		lib\gssapi\krb5\makefile.in lib\gssapi\mechglue\makefile.in \
-		lib\krb5\makefile.in \
-		lib\krb5\asn.1\makefile.in lib\krb5\ccache\makefile.in \
-		lib\krb5\ccache\file\makefile.in \
-		lib\krb5\ccache\stdio\makefile.in \
-		lib\krb5\error_tables\makefile.in \
-		lib\krb5\free\makefile.in lib\krb5\keytab\makefile.in \
-		lib\krb5\keytab\file\makefile.in lib\krb5\krb\makefile.in \
-		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
-		lib\krb5\rcache\makefile.in \
-		util\et\makefile.in util\profile\makefile.in \
-		windows\cns\Makefile.in windows\gss\Makefile.in \
-		windows\wintel\Makefile.in
-	.\wconfig config <makefile.in >makefile
-	.\wconfig config <include\makefile.in >include\makefile
-	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
-	.\wconfig config <lib\makefile.in >lib\makefile
-	.\wconfig config <lib\crypto\makefile.in >lib\crypto\makefile
-	.\wconfig config <lib\crypto\crc32\makefile.in >lib\crypto\crc32\makefile
-	.\wconfig config <lib\crypto\des\makefile.in >lib\crypto\des\makefile
-	.\wconfig config <lib\crypto\sha\makefile.in >lib\crypto\sha\makefile
-	.\wconfig config <lib\crypto\md4\makefile.in >lib\crypto\md4\makefile
-	.\wconfig config <lib\crypto\md5\makefile.in >lib\crypto\md5\makefile
-	.\wconfig config <lib\crypto\os\makefile.in >lib\crypto\os\makefile
-	.\wconfig config <lib\des425\makefile.in >lib\des425\makefile
-	.\wconfig config <lib\gssapi\makefile.in >lib\gssapi\makefile
-	.\wconfig config <lib\gssapi\generic\makefile.in >lib\gssapi\generic\makefile
-	.\wconfig config <lib\gssapi\mechglue\makefile.in >lib\gssapi\mechglue\makefile
-	.\wconfig config <lib\gssapi\krb5\makefile.in >lib\gssapi\krb5\makefile
-	.\wconfig config <lib\kadm\makefile.in >lib\kadm\makefile
-	.\wconfig config <lib\krb5\makefile.in >lib\krb5\makefile
-	.\wconfig config <lib\krb5\asn.1\makefile.in >lib\krb5\asn.1\makefile
-	.\wconfig config <lib\krb5\ccache\makefile.in >lib\krb5\ccache\makefile
-	.\wconfig config <lib\krb5\ccache\file\makefile.in >lib\krb5\ccache\file\makefile
-	.\wconfig config <lib\krb5\ccache\stdio\makefile.in >lib\krb5\ccache\stdio\makefile
-	.\wconfig config <lib\krb5\error_tables\makefile.in >lib\krb5\error_tables\makefile
-	.\wconfig config <lib\krb5\free\makefile.in >lib\krb5\free\makefile
-	.\wconfig config <lib\krb5\keytab\makefile.in >lib\krb5\keytab\makefile
-	.\wconfig config <lib\krb5\keytab\file\makefile.in >lib\krb5\keytab\file\makefile
-	.\wconfig config <lib\krb5\krb\makefile.in >lib\krb5\krb\makefile
-	.\wconfig config <lib\krb5\os\makefile.in >lib\krb5\os\makefile
-	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
-	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
-	.\wconfig config <util\et\makefile.in >util\et\makefile
-	.\wconfig config <util\profile\makefile.in >util\profile\makefile
-	.\wconfig < windows\cns\Makefile.in > windows\cns\Makefile
-	.\wconfig < windows\gss\Makefile.in > windows\gss\Makefile
-	.\wconfig < windows\wintel\Makefile.in > windows\wintel\Makefile
-	config\rm.bat wconfig.obj msvc.pdb
+##DOS##MKFDEP= wconfig.exe config\pre.in config\post.in \
+##DOS##	config\windows.in config\win-post.in
 
-wconfig.exe: wconfig.c
-	SET CL=/nologo
-	$(CC) /AL wconfig.c
+##DOS##makefile-windows:: $(MKFDEP) makefile \
+##DOS##		include\makefile include\krb5\makefile \
+##DOS##		lib\makefile lib\crypto\makefile \
+##DOS##		lib\crypto\crc32\makefile lib\crypto\des\makefile \
+##DOS##		lib\crypto\sha\makefile \
+##DOS##		lib\crypto\md4\makefile lib\crypto\md5\makefile \
+##DOS##		lib\crypto\os\makefile lib\des425\makefile \
+##DOS##		lib\gssapi\makefile lib\gssapi\generic\makefile \
+##DOS##		lib\gssapi\krb5\makefile lib\gssapi\mechglue\makefile \
+##DOS##		lib\kadm\makefile lib\krb5\makefile \
+##DOS##		lib\krb5\asn.1\makefile lib\krb5\ccache\makefile \
+##DOS##		lib\krb5\ccache\file\makefile \
+##DOS##		lib\krb5\ccache\stdio\makefile \
+##DOS##		lib\krb5\error_tables\makefile \
+##DOS##		lib\krb5\free\makefile lib\krb5\keytab\makefile \
+##DOS##		lib\krb5\keytab\file\makefile lib\krb5\krb\makefile \
+##DOS##		lib\krb5\os\makefile lib\krb5\posix\makefile \
+##DOS##		lib\krb5\rcache\makefile \
+##DOS##		util\et\makefile util\profile\makefile \
+##DOS##		util\windows\makefile \
+##DOS##		windows\Makefile \
+##DOS##		windows\cns\Makefile windows\gina\Makefile \
+##DOS##		windows\gss\Makefile windows\wintel\Makefile
+##DOS##	config\rm.bat wconfig.obj msvc.pdb
+
+##DOS##makefile: makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <makefile.in >makefile
+##DOS##include\makefile: include\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <include\makefile.in >include\makefile
+##DOS##include\krb5\makefile: include\krb5\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
+##DOS##lib\makefile: lib\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\makefile.in >lib\makefile
+##DOS##lib\crypto\makefile: lib\crypto\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\makefile.in >lib\crypto\makefile
+##DOS##lib\crypto\crc32\makefile: lib\crypto\crc32\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\crc32\makefile.in >lib\crypto\crc32\makefile
+##DOS##lib\crypto\des\makefile: lib\crypto\des\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\des\makefile.in >lib\crypto\des\makefile
+##DOS##lib\crypto\sha\makefile: lib\crypto\sha\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\sha\makefile.in >lib\crypto\sha\makefile
+##DOS##lib\crypto\md4\makefile: lib\crypto\md4\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\md4\makefile.in >lib\crypto\md4\makefile
+##DOS##lib\crypto\md5\makefile: lib\crypto\md5\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\md5\makefile.in >lib\crypto\md5\makefile
+##DOS##lib\crypto\os\makefile: lib\crypto\os\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\crypto\os\makefile.in >lib\crypto\os\makefile
+##DOS##lib\des425\makefile: lib\des425\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\des425\makefile.in >lib\des425\makefile
+##DOS##lib\gssapi\makefile: lib\gssapi\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\gssapi\makefile.in >lib\gssapi\makefile
+##DOS##lib\gssapi\generic\makefile: lib\gssapi\generic\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\gssapi\generic\makefile.in >lib\gssapi\generic\makefile
+##DOS##lib\gssapi\mechglue\makefile: lib\gssapi\mechglue\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\gssapi\mechglue\makefile.in >lib\gssapi\mechglue\makefile
+##DOS##lib\gssapi\krb5\makefile: lib\gssapi\krb5\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\gssapi\krb5\makefile.in >lib\gssapi\krb5\makefile
+##DOS##lib\kadm\makefile: lib\kadm\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\kadm\makefile.in >lib\kadm\makefile
+##DOS##lib\krb4\makefile: lib\krb4\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb4\makefile.in >lib\krb4\makefile
+##DOS##lib\krb5\makefile: lib\krb5\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\makefile.in >lib\krb5\makefile
+##DOS##lib\krb5\asn.1\makefile: lib\krb5\asn.1\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\asn.1\makefile.in >lib\krb5\asn.1\makefile
+##DOS##lib\krb5\ccache\makefile: lib\krb5\ccache\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\ccache\makefile.in >lib\krb5\ccache\makefile
+##DOS##lib\krb5\ccache\file\makefile: lib\krb5\ccache\file\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\ccache\file\makefile.in >lib\krb5\ccache\file\makefile
+##DOS##lib\krb5\ccache\stdio\makefile: lib\krb5\ccache\stdio\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\ccache\stdio\makefile.in >lib\krb5\ccache\stdio\makefile
+##DOS##lib\krb5\error_tables\makefile: lib\krb5\error_tables\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\error_tables\makefile.in >lib\krb5\error_tables\makefile
+##DOS##lib\krb5\free\makefile: lib\krb5\free\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\free\makefile.in >lib\krb5\free\makefile
+##DOS##lib\krb5\keytab\makefile: lib\krb5\keytab\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\keytab\makefile.in >lib\krb5\keytab\makefile
+##DOS##lib\krb5\keytab\file\makefile: lib\krb5\keytab\file\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\keytab\file\makefile.in >lib\krb5\keytab\file\makefile
+##DOS##lib\krb5\krb\makefile: lib\krb5\krb\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\krb\makefile.in >lib\krb5\krb\makefile
+##DOS##lib\krb5\os\makefile: lib\krb5\os\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\os\makefile.in >lib\krb5\os\makefile
+##DOS##lib\krb5\posix\makefile: lib\krb5\posix\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
+##DOS##lib\krb5\rcache\makefile: lib\krb5\rcache\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
+##DOS##util\et\makefile: util\et\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <util\et\makefile.in >util\et\makefile
+##DOS##util\profile\makefile: util\profile\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <util\profile\makefile.in >util\profile\makefile
+##DOS##util\windows\makefile: util\windows\makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <util\windows\makefile.in >util\windows\makefile
+##DOS##windows\Makefile:  windows\Makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <windows\Makefile.in >windows\Makefile
+##DOS##windows\cns\Makefile:  windows\cns\Makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <windows\cns\Makefile.in >windows\cns\Makefile
+##DOS##windows\gina\Makefile:  windows\gina\Makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <windows\gina\Makefile.in >windows\gina\Makefile
+##DOS##windows\gss\Makefile:  windows\gss\Makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <windows\gss\Makefile.in >windows\gss\Makefile
+##DOS##windows\wintel\Makefile:  windows\wintel\Makefile.in $(MKFDEP)
+##DOS##	.\wconfig config <windows\wintel\Makefile.in >windows\wintel\Makefile
+
+##DOS##wconfig.exe: wconfig.c
+##DOS##	SET CL=/nologo
+##DOS##	$(CC) /AL wconfig.c
 
 clean-windows::
 	@echo Making clean in include
@@ -212,15 +264,15 @@ FILES= ./* \
 	lib/crypto/crc32/* lib/crypto/des/* lib/crypto/sha/* lib/crypto/md4/* \
 	lib/crypto/md5/* lib/crypto/os/* lib/des425/* lib/gssapi/* \
 	lib/gssapi/generic/* lib/gssapi/krb5/* lib/gssapi/mechglue/* \
-	lib/kadm/* lib/krb425/* \
+	lib/kadm/* lib/krb4/* lib/krb425/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
 	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
-	util/profile/*
+	util/profile/* util/windows/*
 
-WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
+WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/* windows/gina/*
 
 MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
 	mac/gss-sample/* mac/SAP/* config/* include/* include/krb5/* \
@@ -229,17 +281,33 @@ MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 
-CLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
-	lib/krb5/error_tables/asn1_err.c lib/krb5/error_tables/kdb5_err.c \
-	lib/krb5/error_tables/krb5_err.c lib/krb5/error_tables/kv5m_err.c \
-	lib/krb5/error_tables/adm_err.c \
-	include/asn1_err.h include/kdb5_err.h \
-	include/krb5_err.h include/kv5m_err.h \
-	include/adm_err.h include/profile.h include/krb5.h \
-	include/krb5/osconf.h \
-	lib/gssapi/generic/gssapi_err_generic.[ch] \
-	lib/gssapi/krb5/gssapi_err_krb5.[ch] winfile.list macfile.list \
-	lib/gssapi/generic/gssapi.h
+#
+# Part of building the PC release has to be done on Unix. This includes
+# anything the requires awk.
+#
+AH  = util/et/et_h.awk
+AC  = util/et/et_c.awk
+INC = include/
+ET  = lib/krb5/error_tables/
+GG  = lib/gssapi/generic/
+GK  = lib/gssapi/krb5/
+PR  = util/profile/
+
+ETOUT =	$(INC)asn1_err.h $(ET)asn1_err.c \
+	$(INC)kdb5_err.h $(ET)kdb5_err.c \
+	$(INC)krb5_err.h $(ET)krb5_err.c \
+	$(INC)kv5m_err.h $(ET)kv5m_err.c \
+	$(INC)adm_err.h $(ET)adm_err.c \
+	$(PR)prof_err.h $(PR)prof_err.c \
+	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
+	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c
+
+HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
+
+CLEANUP= $(ETOUT) $(HOUT) \
+	include/profile.h include/krb5/osconf.h \
+	winfile.list macfile.list \
+
 
 kerbsrc.win: kerbsrc.zip
 
@@ -257,7 +325,7 @@ Makefile.sav:
 	rm -f Makefile.sav
 	mv Makefile Makefile.sav
 	cat config/windows.in Makefile.in config/win-post.in | \
-		sed -e 's/^##DOS//' > Makefile
+		sed -e 's/^##DOS##//' -e 's/^##DOS//' > Makefile
 
 kerbsrc.zip: Makefile.sav awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
@@ -322,38 +390,55 @@ kerbsrc.mac.tar: awk-windows-mac macfile.list mac-bin-dirs Macfile
 	rm -f include/autoconf.h Makefile macsrc* macfile.maclist
 	mv Makefile.sav Makefile
 
-#
-# Part of building the PC release has to be done on Unix. This includes
-# anything the requires awk.
-#
-AH  = util/et/et_h.awk
-AC  = util/et/et_c.awk
-INC = include/
-ET  = lib/krb5/error_tables/
-GG  = lib/gssapi/generic/
-GK  = lib/gssapi/krb5/
-PR  = util/profile/
 
-awk-windows-mac:
-	gawk -f $(AH) outfile=$(INC)asn1_err.h $(ET)asn1_err.et
-	gawk -f $(AH) outfile=$(INC)kdb5_err.h $(ET)kdb5_err.et
-	gawk -f $(AH) outfile=$(INC)krb5_err.h $(ET)krb5_err.et
-	gawk -f $(AH) outfile=$(INC)kv5m_err.h $(ET)kv5m_err.et
-	gawk -f $(AH) outfile=$(INC)adm_err.h $(ET)adm_err.et
-	cat $(INC)/krb5.hin $(INC)/krb5_err.h $(INC)/kdb5_err.h \
-		$(INC)/kv5m_err.h $(INC)/asn1_err.h > $(INC)/krb5.h
-	gawk -f $(AC) outfile=$(ET)asn1_err.c $(ET)asn1_err.et
-	gawk -f $(AC) outfile=$(ET)kdb5_err.c $(ET)kdb5_err.et
-	gawk -f $(AC) outfile=$(ET)krb5_err.c $(ET)krb5_err.et
-	gawk -f $(AC) outfile=$(ET)kv5m_err.c $(ET)kv5m_err.et
-	gawk -f $(AC) outfile=$(ET)adm_err.c $(ET)adm_err.et
-	gawk -f $(AH) outfile=$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.et
-	gawk -f $(AC) outfile=$(GG)gssapi_err_generic.c $(GG)gssapi_err_generic.et
-	gawk -f $(AH) outfile=$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.et
-	gawk -f $(AC) outfile=$(GK)gssapi_err_krb5.c $(GK)gssapi_err_krb5.et
-	gawk -f $(AH) outfile=$(PR)prof_err.h $(PR)prof_err.et
-	gawk -f $(AC) outfile=$(PR)prof_err.c $(PR)prof_err.et
-	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
-	cp $(PR)profile.h include/profile.h
-	cp $(INC)/krb5/stock/osconf.h $(INC)/krb5
-	cp $(GG)gssapi.hin $(GG)gssapi.h
+$(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
+	gawk -f $(AH) outfile=$@ $(ET)asn1_err.et
+$(INC)kdb5_err.h: $(AH) $(ET)kdb5_err.et
+	gawk -f $(AH) outfile=$@ $(ET)kdb5_err.et
+$(INC)krb5_err.h: $(AH) $(ET)krb5_err.et
+	gawk -f $(AH) outfile=$@ $(ET)krb5_err.et
+$(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
+	gawk -f $(AH) outfile=$@ $(ET)kv5m_err.et
+$(INC)adm_err.h: $(AH) $(ET)adm_err.et
+	gawk -f $(AH) outfile=$@ $(ET)adm_err.et
+$(PR)prof_err.h: $(AH) $(PR)prof_err.et
+	gawk -f $(AH) outfile=$@ $(PR)prof_err.et
+$(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
+	gawk -f $(AH) outfile=$@ $(GG)gssapi_err_generic.et
+$(GK)gssapi_err_krb5.h: $(AH) $(GK)gssapi_err_krb5.et
+	gawk -f $(AH) outfile=$@ $(GK)gssapi_err_krb5.et
+
+$(ET)asn1_err.c: $(AC) $(ET)asn1_err.et
+	gawk -f $(AC) outfile=$@ $(ET)asn1_err.et
+$(ET)kdb5_err.c: $(AC) $(ET)kdb5_err.et
+	gawk -f $(AC) outfile=$@ $(ET)kdb5_err.et
+$(ET)krb5_err.c: $(AC) $(ET)krb5_err.et
+	gawk -f $(AC) outfile=$@ $(ET)krb5_err.et
+$(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
+	gawk -f $(AC) outfile=$@ $(ET)kv5m_err.et
+$(ET)adm_err.c: $(AC) $(ET)adm_err.et
+	gawk -f $(AC) outfile=$@ $(ET)adm_err.et
+$(PR)prof_err.c: $(AC) $(PR)prof_err.et
+	gawk -f $(AC) outfile=$@ $(PR)prof_err.et
+$(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
+	gawk -f $(AC) outfile=$@ $(GG)gssapi_err_generic.et
+$(GK)gssapi_err_krb5.c: $(AC) $(GK)gssapi_err_krb5.et
+	gawk -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
+
+KRBHDEP = $(INC)krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
+	$(INC)kv5m_err.h $(INC)asn1_err.h
+
+$(INC)krb5.h: $(KRBHDEP)
+	$(RM) $@
+	cat $(KRBHDEP) > $@
+$(PR)profile.h: $(PR)profile.hin $(PR)prof_err.h
+	$(RM) $@
+	cat $(PR)profile.hin $(PR)prof_err.h > $@
+$(GG)gssapi.h: $(GG)gssapi.hin
+	$(RM) $@
+	cat $(GG)gssapi.hin > $@
+
+awk-windows-mac: $(ETOUT) $(HOUT)
+
+clean-windows-mac:
+	$(RM) $(CLEANUP)

@@ -1,3 +1,8 @@
+Mon Feb  3 00:11:37 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in:
+		awk-windows-mac: Only rebuild based on what has changed
+
 Mon Dec 30 13:39:46 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4: Add AC_PREREQ(2.12) as we now require autoconf 2.12.
