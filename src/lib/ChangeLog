@@ -1,3 +1,14 @@
+2003-12-13  Jeffrey Altman <jaltman@mit.edu>
+   
+        * krb4_32.def: Remove exports from KfM not yet compiled in KfW
+            krb_ad_tkt, krb_pw_tkt, kuserok, tkt_string, FSp_xxx
+        
+        * krb5_32.def: Add exports of private functions necessary for 
+            building new gssapi32.dll:
+              krb5int_c_mandatory_cksumtype   ; PRIVATE GSSAPI k5-int.h
+              krb5_ser_pack_int64             ; PRIVATE GSSAPI k5-int.h
+              krb5_ser_unpack_int64           ; PRIVATE GSSAPI k5-int.h
+
 2003-12-11  Jeffrey Altman <jaltman@mit.edu>
 
         * Makefile.in: Add secur32.lib to libraries necessary to build 
