@@ -1,0 +1,69 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/mit-copyright.h>.
+ *
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char des_prc_key_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+#include <krb5/copyright.h>
+
+#include <sys/errno.h>
+
+#include <krb5/krb5.h>
+#include <krb5/des.h>
+#include <krb5/ext-proto.h>
+#include <krb5/krb5_err.h>
+
+extern int des_key_sched();
+/*
+        does any necessary key preprocessing (such as computing key
+                schedules for DES).
+        eblock->crypto_entry must be set by the caller; the other elements
+        of eblock are to be assigned by this function.
+        [in particular, eblock->key must be set by this function if the key
+        is needed in raw form by the encryption routine]
+
+        The caller may not move or reallocate "keyblock" before calling
+        finish_key on "eblock"
+
+        returns: errors
+ */
+
+krb5_error_code process_key (DECLARG(krb5_encrypt_block *, eblock),
+				    DECLARG(krb5_keyblock *,keyblock))
+OLDDECLARG(krb5_encrypt_block *, eblock)
+OLDDECLARG(krb5_keyblock *,keyblock)
+{
+    struct des_ks_struct       *schedule;      /* pointer to key schedules */
+    
+    if (keyblock->length != sizeof (des_cblock))
+	return KRB5_BAD_KEYSIZE;	/* XXX error code-bad key size */
+
+    if ( !(schedule = (struct des_ks_struct *) malloc(sizeof(des_key_schedule))) )
+        return ENOMEM;
+#define cleanup() { free( (char *) schedule); }
+
+    switch (des_key_sched (keyblock->contents, schedule)) {
+    case -1:
+	cleanup();
+	return KRB5DES_BAD_KEYPAR;	/* XXX error code-bad key parity */
+
+    case -2:
+	cleanup();
+	return KRB5DES_WEAK_KEY;	/* XXX error code-weak key */
+
+    default:
+	eblock->key = keyblock;
+	eblock->priv = (krb5_pointer) schedule;
+	return 0;
+    }
+}

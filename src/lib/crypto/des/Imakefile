@@ -1,0 +1,82 @@
+NormalLibraryObjectRule()
+
+OBJS=	cksum.o		\
+	des.o		\
+	des_cbc_cksum.o	\
+	des_cs_ent.o	\
+	des_enc_dec.o	\
+	des_fin_key.o	\
+	des_fnr_key.o	\
+	des_inr_key.o	\
+	des_prc_key.o	\
+	des_ran_key.o	\
+	des_st2_key.o	\
+	key_parity.o	\
+	key_sched.o	\
+	new_rnd_key.o	\
+	weak_key.o
+
+SRCS=	cksum.c		\
+	des.c		\
+	des_cs_ent.c	\
+	des_cbc_cksum.c	\
+	des_enc_dec.c	\
+	des_fin_key.c	\
+	des_fnr_key.c	\
+	des_inr_key.c	\
+	des_prc_key.c	\
+	des_ran_key.c	\
+	des_st2_key.c	\
+	key_parity.c	\
+	key_sched.c	\
+	new_rnd_key.c	\
+	weak_key.c
+
+VERIFYOBJ = verify.o
+
+NormalLibraryTarget(des,$(OBJS))
+
+EXTRA_LIBRARIES = $(TOP)/error_tables/libkrberrs.a
+
+NormalProgramTarget(verify, $(VERIFYOBJ), libdes.a, libdes.a, -lcom_err)
+
+NormalProgramTarget(make_e, make_e.o, misc.o, misc.o, )
+
+NormalProgramTarget(make_fp, make_fp.o, misc.o, misc.o, )
+
+fp.c: make_fp
+	./make_fp fp.c
+
+NormalProgramTarget(make_ip, make_ip.o, misc.o, misc.o, )
+
+ip.c: make_ip
+	./make_ip ip.c
+
+NormalProgramTarget(make_key_perm, make_key_perm.o, misc.o, misc.o, )
+
+key_perm.h: make_key_perm
+	./make_key_perm key_perm.h
+
+NormalProgramTarget(make_odd, make_odd.o, misc.o, misc.o, )
+
+odd.h: make_odd
+	./make_odd odd.h
+
+NormalProgramTarget(make_p, make_p.o, misc.o, misc.o, )
+
+p.c: make_p
+	./make_p p.c
+
+NormalProgramTarget(make_p_table, make_p_table.o, misc.o, misc.o, )
+
+p_table.h: make_p_table
+	./make_p_table p_table.h
+
+NormalProgramTarget(make_s, make_s.o, misc.o, misc.o, )
+
+NormalProgramTarget(make_s_table, make_s_table.o, misc.o, misc.o, )
+
+s_table.h: make_s_table
+	./make_s_table s_table.h
+
+NormalLintTarget($(SRCS))
