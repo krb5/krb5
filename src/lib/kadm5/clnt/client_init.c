@@ -429,11 +429,14 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
       */
 
      /* use the kadm5 cache */
-     ccname_orig = getenv("KRB5CCNAME");
+     gssstat = gss_krb5_ccache_name(&minor_stat, handle->cache_name,
+				    &ccname_orig);
+     if (gssstat != GSS_S_COMPLETE) {
+	 code = KADM5_GSS_ERROR;
+	 goto error;
+     }
      if (ccname_orig)
 	  ccname_orig = strdup(ccname_orig);
-     
-     (void) krb5_setenv("KRB5CCNAME", handle->cache_name, 1);
 
 #ifndef INIT_TEST
      input_name.value = full_service_name;
@@ -494,11 +497,19 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 #endif /* ! INIT_TEST */
 
      if (ccname_orig) {
-	  (void) krb5_setenv("KRB5CCNAME", ccname_orig, 1);
-	  free(ccname_orig);
-     } else
-	  (void) krb5_unsetenv("KRB5CCNAME");
-
+	 gssstat = gss_krb5_ccache_name(&minor_stat, ccname_orig, NULL);
+	 if (gssstat) {
+	     code = KADM5_GSS_ERROR;
+	     goto error;
+	 }
+	 free(ccname_orig);
+     } else {
+	 gssstat = gss_krb5_ccache_name(&minor_stat, NULL, NULL);
+	 if (gssstat) {
+	     code = KADM5_GSS_ERROR;
+	     goto error;
+	 }
+     }
      
      if (handle->clnt->cl_auth == NULL) {
 	  code = KADM5_GSS_ERROR;
