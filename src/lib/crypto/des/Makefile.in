@@ -8,11 +8,22 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.$(LIBEXT)
 KLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 
-OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c \
+FSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c \
 	$(srcdir)/f_sched.c $(srcdir)/f_ecb.c $(srcdir)/f_parity.c \
 	$(srcdir)/f_tables.c
 
-OTHEROBJS=f_cbc.$(OBJEXT) f_cksum.$(OBJEXT) f_sched.$(OBJEXT) f_ecb.$(OBJEXT) f_parity.$(OBJEXT) f_tables.$(OBJEXT)
+FOBJS=f_cbc.$(OBJEXT) f_cksum.$(OBJEXT) f_sched.$(OBJEXT) f_ecb.$(OBJEXT) f_parity.$(OBJEXT) f_tables.$(OBJEXT)
+
+D3SRCS=$(srcdir)/d3_cbc.c $(srcdir)/d3_ecb.c $(srcdir)/d3_kysched.c \
+	$(srcdir)/d3_procky.c $(srcdir)/d3_rndky.c $(srcdir)/d3_str2ky.c \
+	$(srcdir)/u_nfold.c
+
+D3OBJS=d3_cbc.$(OBJEXT) d3_ecb.$(OBJEXT) d3_kysched.$(OBJEXT) \
+	d3_procky.$(OBJEXT) d3_rndky.$(OBJEXT) d3_str2ky.$(OBJEXT) \
+	u_nfold.$(OBJEXT)
+
+OTHERSRCS= $(FSRCS) $(D3SRCS)
+OTHEROBJS= $(FOBJS) $(D3OBJS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
