@@ -18,10 +18,12 @@ static char rcsid_main_c[] =
 #include <krb5/copyright.h>
 
 #include <stdio.h>
-#include <syslog.h>
-#ifdef notdef
-#include <varargs.h>			/* XXX ansi? */
+#ifdef __STDC__
+#include <stdarg.h>
+#else
+#include <varargs.h>
 #endif
+#include <sys/syslog.h>
 #include <signal.h>
 #include <errno.h>
 
@@ -46,16 +48,25 @@ static char rcsid_main_c[] =
 #include "extern.h"
 #include "kdc5_err.h"
 
-#ifdef notdef
-/* need to sort out varargs stuff */
 static void
+#ifdef __STDC__
+kdc_com_err_proc(const char *whoami, long code, const char * format, ...)
+#else
 kdc_com_err_proc(whoami, code, format, va_alist)
-char *whoami;
-long code;
-char *format;
-va_dcl
+	const char *whoami;
+	long code;
+	const char *format;
+	va_dcl
+#endif
 {
     /* XXX need some way to do this better... */
+    va_list pvar;
+    extern void vfprintf PROTOTYPE((FILE *, const char *, va_list));
+#ifdef __STDC__
+    va_start(pvar, format);
+#else
+    va_start(pvar);
+#endif
 
     if (whoami) {
         fputs(whoami, stderr);
@@ -66,18 +77,31 @@ va_dcl
         fputs(" ", stderr);
     }
     if (format) {
-        fprintf (stderr, format, va_alist);
+        vfprintf (stderr, format, pvar);
     }
     putc('\n', stderr);
     /* should do this only on a tty in raw mode */
     putc('\r', stderr);
     fflush(stderr);
+    if (format) {
+	/* now need to frob the format a bit... */
+	if (code) {
+	    char *nfmt;
+	    nfmt = malloc(strlen(format)+strlen(error_message(code))+2);
+	    strcpy(nfmt, error_message(code));
+	    strcat(nfmt, " ");
+	    strcat(nfmt, format);
+	    vsyslog(LOG_ERR, nfmt, pvar);
+	} else
+	    vsyslog(LOG_ERR, format, pvar);
+    } else {
+	if (code)
+	    syslog(LOG_ERR, "%s", error_message(code));
+    }
 
-    syslog(LOG_ERR, format, va_alist);
-
+    va_end(pvar);
     return;
 }
-#endif
 
 void
 setup_com_err()
@@ -87,9 +111,7 @@ setup_com_err()
     initialize_kdc5_error_table();
     initialize_isod_error_table();
 
-#ifdef notdef
     (void) set_com_err_hook(kdc_com_err_proc);
-#endif
     return;
 }
 
@@ -188,6 +210,7 @@ char **argv;
 #endif
 
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
+				    FALSE, /* only read it once, if at all */
 				    &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
 	exit(1);
@@ -288,12 +311,12 @@ char *argv[];
 
     setup_com_err();
 
+    openlog(argv[0], LOG_CONS|LOG_NDELAY|LOG_PID, LOG_LOCAL6); /* XXX */
+
     process_args(argc, argv);		/* includes reading master key */
 
     setup_signal_handlers();
 
-    openlog(argv[0], LOG_CONS|LOG_NDELAY, LOG_LOCAL6); /* XXX */
-    syslog(LOG_INFO, "commencing operation");
 
     if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
 	com_err(argv[0], retval, ": cannot initialize database");
@@ -303,6 +326,7 @@ char *argv[];
 	com_err(argv[0], retval, "while initializing network");
 	exit(1);
     }
+    syslog(LOG_INFO, "commencing operation");
     if (retval = listen_and_process(argv[0])){
 	com_err(argv[0], retval, "while processing network requests");
 	errout++;
