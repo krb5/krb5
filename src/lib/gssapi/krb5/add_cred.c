@@ -182,8 +182,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	new_cred->rfc_mech = cred->rfc_mech;
 	new_cred->tgt_expire = cred->tgt_expire;
 
-	if (code = krb5_copy_principal(context, cred->princ,
-				       &new_cred->princ)) {
+	code = krb5_copy_principal(context, cred->princ, &new_cred->princ);
+	if (code) {
 	    free(new_cred);
 
 	    *minor_status = code;
@@ -204,9 +204,10 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    ktboth[sizeof(ktboth) - 1] = '\0';
 	    strncat(ktboth, ":", sizeof(ktboth) - 1 - strlen(ktboth));
 
-	    if (code = krb5_kt_get_name(context, cred->keytab,
-					ktboth+strlen(ktboth),
-					sizeof(ktboth)-strlen(ktboth))) {
+	    code = krb5_kt_get_name(context, cred->keytab, 
+				    ktboth+strlen(ktboth),
+				    sizeof(ktboth)-strlen(ktboth));
+	    if (code) {
 		krb5_free_principal(context, new_cred->princ);
 		free(new_cred);
 
@@ -214,7 +215,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		return(GSS_S_FAILURE);
 	    }
 
-	    if (code = krb5_kt_resolve(context, ktboth, &new_cred->keytab)) {
+	    code = krb5_kt_resolve(context, ktboth, &new_cred->keytab);
+	    if (code) {
 		krb5_free_principal(context, new_cred->princ);
 		free(new_cred);
 
@@ -263,7 +265,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    strncat(ccboth, ":", sizeof(ccboth) - 1 - strlen(ccboth));
 	    strncat(ccboth, ccname, sizeof(ccboth) - 1 - strlen(ccboth));
 
-	    if (code = krb5_cc_resolve(context, ccboth, &new_cred->ccache)) {
+	    code = krb5_cc_resolve(context, ccboth, &new_cred->ccache);
+	    if (code) {
 		if (new_cred->rcache)
 		    krb5_rc_close(context, new_cred->rcache);
 		if (new_cred->keytab)
