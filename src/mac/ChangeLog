@@ -1,3 +1,6 @@
+Fri Sep 8 15:50:00 1998  Miro Jurisic <meeroh@mit.edu>
+	* CFMGlue.c: Added check for Code Fragment Manager
+
 Fri Aug 28 16:30:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile.tmpl, ReadMe, Makefile.initial, RunAppleScript.pl: Added stuff to

@@ -1,4 +1,6 @@
 #include <CodeFragments.h>
+#include <Gestalt.h>
+#include <Errors.h>
 
 // Private function prototypes
 
@@ -6,6 +8,8 @@ static OSErr Find_Symbol(
 	Ptr* pSymAddr,
 	Str255 pSymName,
 	ProcInfoType pProcInfo);
+
+static pascal Boolean HaveCFM(void);
 
 static pascal OSErr GetSystemArchitecture(OSType *archType);
 
@@ -40,6 +44,13 @@ static pascal OSErr GetSystemArchitecture(OSType *archType)
 	return tOSErr;
 }
 
+static pascal Boolean HaveCFM(void)
+{
+	long response;
+	return ( (Gestalt (gestaltCFMAttr, &response) == noErr) &&
+				(((response >> gestaltCFMPresent) & 1) != 0));
+}
+
 static OSErr Find_Symbol(
 	Ptr* pSymAddr,
 	Str255 pSymName,
@@ -60,6 +71,12 @@ static OSErr Find_Symbol(
 		sOSErr = GetSystemArchitecture(&sArchType); // determine architecture
 		if (sOSErr != noErr)
 		return sOSErr; // OOPS!
+	}
+	
+	if (!HaveCFM()) {
+		// If we don't have CFM68K, return a reasonable-looking error.
+		sOSErr = cfragLibConnErr;
+		return sOSErr;
 	}
 
 	if (sArchType == kMotorola68KCFragArch) // ...for CFM68K
