@@ -131,6 +131,9 @@ extern errcode_t profile_close_file
 errcode_t profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
+errcode_t profile_init_path
+	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
+
 extern void profile_release
 	PROTOTYPE ((profile_t profile));
 

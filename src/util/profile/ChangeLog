@@ -1,3 +1,15 @@
+Tue Sep 26 20:00:28 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* prof_init.c (profile_init_path): takes a single string entry
+	that has pathnames seperated by colons, and splits it into
+	file names for profile_init. No provision for quoting colons in
+	pathnames, but shells don't solve that either.
+
+Tue Sep 26 19:23:59 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* prof_init.c (profile_init): handle multiple input files by
+	grabbing the first one that doesn't return ENOENT.
+
 Mon Sep 25 16:42:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the

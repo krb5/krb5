@@ -40,6 +40,10 @@ errcode_t profile_init(filenames, ret_profile)
 
 	for (fn = filenames; *fn; fn++) {
 		retval = profile_open_file(*fn, &new_file);
+		/* if this file is missing, skip to the next */
+		if (retval == ENOENT) {
+			continue;
+		}
 		if (retval) {
 			profile_release(profile);
 			return retval;
@@ -49,10 +53,68 @@ errcode_t profile_init(filenames, ret_profile)
 		else
 			profile->first_file = new_file;
 		last = new_file;
+		/* since we actually got something, don't loop again */
+		/* (at least until we understand what multiple files mean) */
+		break;
+	}
+	/* if the last file was missing, they all were, so report such */
+	if (retval == ENOENT) {
+		profile_release(profile);
+		return retval;
 	}
 	*ret_profile = profile;
 	return 0;
 }
+
+errcode_t profile_init_path(filepath, ret_profile)
+	const char *filepath;
+	profile_t *ret_profile;
+{
+	int n_entries, i;
+	int ent_len;
+	char *s, *t;
+	char **filenames;
+	errcode_t retval;
+
+	/* count the distinct filename components */
+	for(s = filepath, n_entries = 1; *s; s++) {
+		if (*s == ':')
+			n_entries++;
+	}
+	
+	/* the array is NULL terminated */
+	filenames = (char**) malloc((n_entries+1) * sizeof(char*));
+	if (filenames == 0)
+		return ENOMEM;
+
+	/* measure, copy, and skip each one */
+	for(s = filepath, i=0; (t = strchr(s, ':')) || (t=s+strlen(s)); s=t+1, i++) {
+		ent_len = t-s;
+		filenames[i] = (char*) malloc(ent_len + 1);
+		if (filenames[i] == 0) {
+			/* if malloc fails, free the ones that worked */
+			while(--i >= 0) free(filenames[i]);
+			return ENOMEM;
+		}
+		strncpy(filenames[i], s, ent_len);
+		filenames[i][ent_len] = 0;
+		if (*t == 0) {
+			i++;
+			break;
+		}
+	}
+	/* cap the array */
+	filenames[i] = 0;
+
+	retval = profile_init(filenames, ret_profile);
+
+	/* count back down and free the entries */
+	while(--i >= 0) free(filenames[i]);
+	free(filenames);
+
+	return retval;
+}
+
 
 void profile_release(profile)
 	profile_t	profile;
