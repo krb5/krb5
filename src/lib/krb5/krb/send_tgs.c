@@ -139,7 +139,7 @@ OLDDECLARG(krb5_response *,rep)
 				       &ap_checksum,
 				       0, /* don't need times */
 				       0L, /* don't need kdc_options for this */
-				       0, /* XXX no ccache */
+				       0, /* no ccache--already have creds */
 				       usecred,
 				       0, /* don't need authenticator */
 				       &tgsreq.padata)) {
