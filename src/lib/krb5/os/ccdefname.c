@@ -84,7 +84,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 	char *prefix = krb5_cc_dfl_ops->prefix;
 	int len;
 
-	if (get_from_registry(name_buf, name_size) == 0)
+	if (get_from_registry(name_buf, name_size) != 0)
 		return 0;
 
 	if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
