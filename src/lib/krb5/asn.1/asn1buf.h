@@ -78,7 +78,7 @@ asn1_error_code INTERFACE asn1buf_destroy
 /* effects   Deallocates **buf, sets *buf to NULL. */
 
 asn1_error_code INTERFACE asn1buf_insert_octet
-	PROTOTYPE((asn1buf *buf, const asn1_octet o));
+	PROTOTYPE((asn1buf *buf, const int o));
 /* requires  *buf is allocated
    effects   Inserts o into the buffer *buf, expanding the buffer if
              necessary.  Returns ENOMEM memory is exhausted. */

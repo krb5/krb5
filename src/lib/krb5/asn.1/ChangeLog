@@ -1,3 +1,9 @@
+Fri Mar 10 15:39:24 1995  Theodore Y. Ts'o  (tytso@kenmore)
+
+	* asn1buf.c. asn1buf.h (asn1buf_insert_octet): Make the second
+		argument of asn1buf_insert_octet be an int, instead of
+		asn1_octet.  ANSI C narrow types screws us again....
+
 Tue Mar 7 21:40:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed library name for the PC.

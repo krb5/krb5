@@ -103,7 +103,7 @@ asn1_error_code INTERFACE asn1buf_destroy(buf)
 
 asn1_error_code INTERFACE asn1buf_insert_octet(buf, o)
      asn1buf * buf;
-     const asn1_octet o;
+     const int o;
 {
   asn1_error_code retval;
 
