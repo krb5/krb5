@@ -1,7 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..
-##DOS!include $(BUILDTOP)\config\windows.in
+##DOSVERS_DIR = \vers
 
 MAC_SUBDIRS = crypto krb5 gssapi kadm
 
@@ -39,7 +39,7 @@ lib-windows: winsock.lib libkrb5.lib gssapi.lib
 gssapi.lib:: gssapi.dll
 	implib /nologo gssapi.lib gssapi.dll
 
-gssapi.dll:: $(GLIB) $(LIBS) gssapi.def
+gssapi.dll:: $(GLIB) $(LIBS) gssapi.def win_glue.obj
 	link /co /seg:400 /noe /nod /nol win_glue, gssapi.dll, gssapi.map, \
 	   $(LIBS) ldllcew libw oldnames, gssapi.def
 	rc /nologo /p /k gssapi.dll
@@ -51,6 +51,15 @@ libkrb5.dll:: $(LIBS) libkrb5.def win_glue.obj
 	link /co /seg:400 /noe /nod /nol win_glue, libkrb5.dll, libkrb5.map, \
 	   $(LIBS) ldllcew libw oldnames, libkrb5.def
 	rc /nologo /p /k libkrb5.dll
+
+sap_glue.obj: win_glue.c
+        $(CC) $(CFLAGS) -DSAP_VERSERV -I$(VERS_DIR) /c \
+		/Fosap_glue.obj win_glue.c
+
+sapkrb5.dll:: $(GLIB) $(LIBS) gssapi.def sap_glue.obj
+	link /co /seg:400 /noe /nod /nol sap_glue, sapkrb5.dll, sapkrb5.map, \
+	   $(LIBS) $(VERS_DIR)/vswin.lib ldllcew libw oldnames, sapkrb5.def
+	rc /nologo /p /k sapkrb5.dll
 
 winsock.lib:  winsock.def
 	implib /nologo winsock.lib winsock.def

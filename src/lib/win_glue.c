@@ -20,6 +20,65 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
+#ifdef SAP_VERSERV
+#define VERSERV
+#define APP_TITLE "KRB5-SAP"
+#define APP_VER "3.0c"
+#define APP_INI "krb5sap.ini"
+#endif
+
+#ifdef VERSERV
+#define WINDOWS
+#include <vs.h>
+#include <v.h>
+
+/*
+ * Use the version server to give us some control on distribution and usage
+ * We're going to test track as well
+ */
+static int CallVersionServer(app_title, app_version, app_ini, code_cover)
+	char FAR *app_title;
+	char FAR *app_version;
+	char FAR *app_ini;
+	char FAR *code_cover
+{
+	VS_Request vrequest;
+	VS_Status  vstatus;
+
+	SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+	vrequest = VSFormRequest(app_title, app_ver, app_ini,
+				 code_cover, NULL, V_CHECK_AND_LOG);
+
+	SetCursor(LoadCursor(NULL, IDC_ARROW));
+	/*
+	 * If the user presses cancel when registering the test
+	 * tracker, we'll let them continue.
+	 */
+	if (ReqStatus(vrequest) == V_E_CANCEL) {
+		VSDestroyRequest(vrequest);
+		return 0;
+	}
+	vstatus = VSProcessRequest(vrequest);
+	/*
+	 * Only complain periodically, if the test tracker isn't
+	 * working... 
+	 */
+	if (v_complain(vstatus, app_ini)) {
+		WinVSReportRequest(vrequest, NULL, 
+				   "Version Server Status Report");
+	}                 					  
+	if (vstatus == V_REQUIRED) {
+		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		VSDestroyRequest(vrequest);
+		return( -1 );
+	}
+	VSDestroyRequest(vrequest);
+	return (0);
+}   
+
+#endif
+
 int
 win_socket_initialize()
 {
@@ -49,6 +108,11 @@ WORD wDataSeg;
 WORD cbHeap;
 LPSTR CmdLine;
 {
+#ifdef SAP_VERSERV
+   if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
+	   PostQuitMessage(0);
+#endif
+	
     win_socket_initialize ();
     return 1;
 }

@@ -1,3 +1,14 @@
+Mon Jun 10 23:40:48 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (lib-windows): Add production rule for sapkrb5.dll.
+		Don't include config/windows.in, since that's included
+		by wconfig.
+
+	* win_glue.c: Add a quick hack for krb5-SAP so that we call
+		the version server --- this is conditionalized on
+		SAP_VERSERV, which is only defined when we build
+		sapkrb5.dll.
+
 Sat Jun  8 09:58:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Remove kdb4 library building
