@@ -46,7 +46,7 @@ krb5_data **response;
 	    krb5_free_kdc_req(as_req);
 	}
     } else if (pkt->data[0] == 4)		/* XXX old version */
-	return(process_v4(pkt));
+	return(process_v4(pkt, from, response));
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
     return retval;

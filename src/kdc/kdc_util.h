@@ -67,7 +67,7 @@ krb5_error_code closedown_network PROTOTYPE((const char *));
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
 #define realm_of_tgt(ticket) krb5_princ_realm(ticket->server)
-#define process_v4(foo)	KRB5KRB_AP_ERR_BADVERSION
+#define process_v4(foo,bar,foobar)	KRB5KRB_AP_ERR_BADVERSION
 
 #ifndef	min
 #define	min(a, b)	((a) < (b) ? (a) : (b))
