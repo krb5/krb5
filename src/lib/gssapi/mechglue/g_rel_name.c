@@ -60,7 +60,7 @@ gss_name_t *		input_name;
 	return GSS_S_BAD_NAME;
 
     if (union_name->name_type)
-	    generic_gss_release_oid(minor_status, &union_name->name_type);
+	    gss_release_oid(minor_status, &union_name->name_type);
     
     free(union_name->external_name->value);
     free(union_name->external_name);
@@ -68,7 +68,7 @@ gss_name_t *		input_name;
     if (union_name->mech_type) {
 	    __gss_release_internal_name(minor_status, union_name->mech_type,
 					&union_name->mech_name);
-	    generic_gss_release_oid(minor_status, &union_name->mech_type);
+	    gss_release_oid(minor_status, &union_name->mech_type);
     }
 
     free(union_name);

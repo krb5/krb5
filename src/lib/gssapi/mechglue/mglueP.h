@@ -343,6 +343,13 @@ PROTOTYPE((OM_uint32 *, gss_OID, gss_name_t,
 OM_uint32 __gss_release_internal_name
 PROTOTYPE((OM_uint32 *, gss_OID, gss_name_t *));
 
+OM_uint32 __gss_convert_name_to_union_name
+PROTOTYPE((OM_uint32 *,		/* minor_status */
+	   gss_mechanism,	/* mech */
+	   gss_name_t,		/* internal_name */
+	   gss_name_t *		/* external_name */
+	   ));
+
 OM_uint32 generic_gss_release_oid
 PROTOTYPE( (OM_uint32 *,	/* minor_status */
 	    gss_OID *		/* oid */

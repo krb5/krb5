@@ -1,3 +1,45 @@
+Sat Feb 24 16:19:30 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_mechname.c (gss_add_mech_name_type): Only mark a name-type as
+		being non-mechanism-specific if the mechanism doesn't
+		match the type currently associated with the name-type.
+
+	* g_init_sec_context.c (gss_init_security_context): If we are
+		using a mechanism-specific name, use the
+		mechanism-specific name directly, instead of calling
+		__gss_internal_import() on the external form of the name.
+		If the mechanism_type is unspecified, use the type of the
+		mechanism-specific name.  If the mechanism_type is
+		specified, it must match the type of the supplied name.
+
+	* g_acquire_cred.c (gss_acquire_cred): If we are acquiring
+		credentials for a mechanism-specific name, use the name
+		directly, instead of doing an __gss_internal_import() on
+		the name.  Also, if the desired_mechanisms oid is NULL,
+		default to using the mechanism-type of the
+		mechanism-specific name.
+
+	* g_compare_name.c (gss_compare_name): Add logic for comparing
+		mechanism-specific names.
+
+	* g_accept_sec_context.c (gss_accept_sec_context): Use
+		__gss_convert_name_to_union_name() to take the gss_name_t
+		returned by the mechanism accept_sec_context(), and
+		convert it into a mechanism-specific union name.
+
+	* g_inquire_context.c (gss_inquire_context):  Removed local static
+		function convert_name_to_union_name(), and changed
+		references to it use the generalized
+		__gss_convert_name_to_union_name() call.
+
+	* g_glue.c (__gss_convert_name_to_union_name): New function which
+		takes gss_name_t returned by a particular mechanism, and
+		converts it into a gss_union_name.
+
+	* g_rel_oid_set.c (gss_release_oid_set): Manually free the oids in
+		an OID set, since the containing structure is allocated as
+		an array.
+
 Sat Feb 24 12:21:03 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* mglueP.h (gss_config): Change int fields to OM_uint32 to match

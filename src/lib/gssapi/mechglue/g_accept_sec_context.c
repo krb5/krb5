@@ -63,9 +63,6 @@ gss_cred_id_t *		delegated_cred_handle;
     gss_union_cred_t	union_cred;
     gss_cred_id_t	input_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_name_t		internal_name;
-    gss_buffer_desc	external_name_desc;
-    gss_buffer_t	external_name = &external_name_desc;
-    gss_OID		name_type;
     gss_OID_desc	token_mech_type_desc;
     gss_OID		token_mech_type = &token_mech_type_desc;
     gss_mechanism	mech;
@@ -169,64 +166,17 @@ gss_cred_id_t *		delegated_cred_handle;
 	     * then call gss_import_name() to create
 	     * the union name struct cast to src_name
 	     */
-
-	    if(src_name != NULL && status == GSS_S_COMPLETE) {
-		temp_status = __gss_display_internal_name (
-						     &temp_minor_status,
-						     &mech->mech_type,
-						     internal_name,
-						     external_name,
-						     &name_type);
-
+	    if (src_name != NULL && status == GSS_S_COMPLETE) {
+		temp_status = __gss_convert_name_to_union_name(
+		       &temp_minor_status, mech, internal_name, src_name);
 		if (temp_status != GSS_S_COMPLETE) {
-			
-		    /*
-		     * this should never happen, since we just got
-		     * the name from the mechanism gss_accept_sec_context
-		     * call. However, things that can't happen often do.
-		     */
 		    if (minor_status)
 			*minor_status = temp_minor_status;
-		    gss_release_buffer(
-				       &temp_minor_status,
-				       output_token);
+		    gss_release_buffer(&temp_minor_status, output_token);
 		    __gss_release_internal_name(&temp_minor_status,
-					  &mech->mech_type,
-					  &internal_name);
-		    return(GSS_S_FAILURE);
+					  &mech->mech_type, &internal_name);
+		    return (temp_status);
 		}
-
-		/* now create the union name */
-
-		temp_status = gss_import_name(
-					      &temp_minor_status,
-					      external_name,
-					      name_type,
-					      src_name);
-
-		if(temp_status != GSS_S_COMPLETE) {
-		    if (minor_status)
-			*minor_status = temp_minor_status;
-		    gss_release_buffer(
-				       &temp_minor_status,
-				       output_token);
-		    __gss_release_internal_name(
-					  &temp_minor_status,
-					  &mech->mech_type,
-					  &internal_name);
-		    gss_release_buffer(
-				       &temp_minor_status,
-				       external_name);
-		    return(GSS_S_FAILURE);
-		}
-
-		__gss_release_internal_name(
-				      &temp_minor_status,
-				      &mech->mech_type,
-				      &internal_name);
-		gss_release_buffer(
-				   &temp_minor_status,
-				   external_name);
 	    }
 
 	if(*context_handle == GSS_C_NO_CONTEXT)
@@ -237,3 +187,4 @@ gss_cred_id_t *		delegated_cred_handle;
     
     return(GSS_S_BAD_MECH);
 }
+

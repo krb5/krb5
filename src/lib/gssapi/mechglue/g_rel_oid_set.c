@@ -52,7 +52,7 @@ gss_OID_set *		set;
 
     for (index=0; index<(*set)->count; index++) {
       oid = &(*set)->elements[index];
-      gss_release_oid(&temp_minor, &oid);
+      free(oid->elements);
     }
     free((*set)->elements);
     free(*set);

@@ -32,6 +32,10 @@
 #endif
 #include <string.h>
 
+#define g_OID_equal(o1,o2) \
+   (((o1)->length == (o2)->length) && \
+    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
+
 OM_uint32
 gss_init_sec_context (minor_status,
                       claimant_cred_handle,
@@ -73,6 +77,16 @@ OM_uint32 FAR *		time_rec;
 
     if (context_handle == NULL)
 	return GSS_S_NO_CONTEXT;
+
+    union_name = (gss_union_name_t) target_name;
+
+    /*
+     * If mech_type is NULL, and the target_name is
+     * mechanism-specific, then set it to the mech_type of
+     * target_name.
+     */
+    if ((mech_type == GSS_C_NULL_OID) && union_name->mech_type)
+	mech_type = union_name->mech_type;
     
     /*
      * obtain the gss mechanism information for the requested
@@ -86,19 +100,21 @@ OM_uint32 FAR *		time_rec;
     if (mech_type == GSS_C_NULL_OID)
 	mech_type = &mech->mech_type;
 
-    /* 
-     * Get the internal name for the mechanism requested from 
-     * the supplied target name.
+    /*
+     * If target_name is mechanism_specific, then it must match the
+     * mech_type that we're about to use.  Otherwise, do an import on
+     * the external_name form of the target name.
      */
-
-    union_name = (gss_union_name_t) target_name;
-    
-    if ((temp_status = __gss_import_internal_name (
-					     minor_status,
-					     mech_type,
-					     union_name,
-					     &internal_name)))
-	return (GSS_S_BAD_NAME);
+    if (union_name->mech_type) {
+	if (!g_OID_equal(union_name->mech_type, mech_type))
+	    return (GSS_S_BAD_MECH);
+	internal_name = union_name->mech_name;
+    } else {
+	if ((temp_status = __gss_import_internal_name(minor_status, mech_type,
+						      union_name,
+						      &internal_name)))
+	    return (GSS_S_BAD_NAME);
+    }
 
     /*
      * if context_handle is GSS_C_NO_CONTEXT, allocate a union context
@@ -156,16 +172,10 @@ OM_uint32 FAR *		time_rec;
     } else
 	status = GSS_S_BAD_BINDINGS;
 
-    temp_status = __gss_release_internal_name(
-					&temp_minor_status,
-					mech_type,
-					&internal_name);
-	    
-    if (temp_status != GSS_S_COMPLETE) {
-	if (minor_status)
-	    *minor_status = temp_minor_status;
-	return(GSS_S_BAD_NAME);
+    if (!union_name->mech_type) {
+	(void) __gss_release_internal_name(&temp_minor_status,
+					   mech_type, &internal_name);
     }
-    
+
     return(status);
 }

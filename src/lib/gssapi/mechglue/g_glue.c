@@ -27,6 +27,8 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <errno.h>
+
 extern gss_mechanism *__gss_mechs_array;
 
 /*
@@ -210,3 +212,68 @@ gss_name_t	*internal_name;
 }
 
 
+/*
+ * This function converts an internal gssapi name to a union gssapi
+ * name.  Note that internal_name should be considered "consumed" by
+ * this call, whether or not we return an error.
+ */
+OM_uint32 __gss_convert_name_to_union_name(minor_status, mech,
+					   internal_name, external_name)
+    OM_uint32 *minor_status;
+    gss_mechanism	mech;
+    gss_name_t	internal_name;
+    gss_name_t	*external_name;
+{
+    OM_uint32 major_status,tmp;
+    gss_union_name_t union_name;
+
+    union_name = (gss_union_name_t) malloc (sizeof(gss_union_name_desc));
+    if (!union_name) {
+	    *minor_status = ENOMEM;
+	    goto allocation_failure;
+    }
+    union_name->mech_type = 0;
+    union_name->mech_name = internal_name;
+    union_name->name_type = 0;
+    union_name->external_name = 0;
+
+    major_status = generic_gss_copy_oid(minor_status, &mech->mech_type,
+					&union_name->mech_type);
+    if (major_status != GSS_S_COMPLETE)
+	goto allocation_failure;
+
+    union_name->external_name =
+	(gss_buffer_t) malloc(sizeof(gss_buffer_desc));
+    if (!union_name->external_name) {
+	    *minor_status = ENOMEM;
+	    goto allocation_failure;
+    }
+	
+    major_status = mech->gss_display_name(mech->context, minor_status,
+					  internal_name,
+					  union_name->external_name,
+					  &union_name->name_type);
+    if (major_status != GSS_S_COMPLETE)
+	goto allocation_failure;
+
+    *external_name =  union_name;
+    return (GSS_S_COMPLETE);
+
+allocation_failure:
+    if (union_name) {
+	if (union_name->external_name) {
+	    if (union_name->external_name->value)
+		free(union_name->external_name->value);
+	    free(union_name->external_name);
+	}
+	if (union_name->name_type)
+	    gss_release_oid(&tmp, &union_name->name_type);
+	if (union_name->mech_name)
+	    __gss_release_internal_name(minor_status, union_name->mech_type,
+					&union_name->mech_name);
+	if (union_name->mech_type)
+	    gss_release_oid(&tmp, &union_name->mech_type);
+	free(union_name);
+    }
+    return (major_status);
+}

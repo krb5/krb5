@@ -44,6 +44,10 @@
 static void solaris_initialize (void);
 #endif /* USE_SOLARIS_SHARED_LIBRARIES */
 
+#define g_OID_equal(o1,o2) \
+   (((o1)->length == (o2)->length) && \
+    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
+
 extern gss_mechanism krb5_gss_initialize();
 
 static int _gss_initialized = 0;
@@ -60,8 +64,10 @@ gss_mechanism *__gss_mechs_array = NULL;
 static OM_uint32
 add_mechanism (gss_mechanism mech, int replace)
 {
-    gss_mechanism *temp_array;
-    int i;
+    gss_mechanism *	temp_array;
+    gss_OID_set		mech_names;
+    OM_uint32		minor_status, major_status;
+    unsigned int 	i;
 
     if (mech == NULL)
 	return GSS_S_COMPLETE;
@@ -81,19 +87,16 @@ add_mechanism (gss_mechanism mech, int replace)
      * entry for this OID
      */
     for (i=0; __gss_mechs_array[i]->mech_type.length != 0; i++) {
-      if ((__gss_mechs_array[i]->mech_type.length == 
-						mech->mech_type.length) &&
-	    (memcmp (__gss_mechs_array[i]->mech_type.elements, 
-		     mech->mech_type.elements,
-		     mech->mech_type.length) == 0)) {
+	if (!g_OID_equal(&__gss_mechs_array[i]->mech_type,
+			 &mech->mech_type))
+	    continue;
 
-	    /* We found a match.  Replace it? */
-	    if (!replace)
-		return GSS_S_FAILURE;
+	/* We found a match.  Replace it? */
+	if (!replace)
+	    return GSS_S_FAILURE;
 
-	    __gss_mechs_array[i] = mech;
-	    return GSS_S_COMPLETE;
-	}
+	__gss_mechs_array[i] = mech;
+	return GSS_S_COMPLETE;
     }
 
     /* we didn't find it -- add it to the end of the __gss_mechs_array */
@@ -107,6 +110,20 @@ add_mechanism (gss_mechanism mech, int replace)
     temp_array[i] = &null_mech;
 
     __gss_mechs_array = temp_array;
+
+    /*
+     * OK, now let's register all of the name types this mechanism
+     * knows how to deal with.
+     */
+    major_status = gss_inquire_names_for_mech(&minor_status, &mech->mech_type,
+					      &mech_names);
+    if (major_status != GSS_S_COMPLETE)
+	return (GSS_S_COMPLETE);
+    for (i=0; i < mech_names->count; i++) {
+	gss_add_mech_name_type(&minor_status, &mech_names->elements[i],
+			       &mech->mech_type);
+    }
+    (void) gss_release_oid_set(&minor_status, &mech_names);
 
     return GSS_S_COMPLETE;
 }

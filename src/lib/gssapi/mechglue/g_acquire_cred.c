@@ -32,6 +32,10 @@
 #endif
 #include <string.h>
 
+#define g_OID_equal(o1,o2) \
+   (((o1)->length == (o2)->length) && \
+    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
+
 OM_uint32
 gss_acquire_cred(minor_status,
                  desired_name,
@@ -52,9 +56,9 @@ gss_OID_set *		actual_mechs;
 OM_uint32 *		time_rec;
 
 {
-    OM_uint32		status, temp_status,
-    temp_minor_status, temp_time_rec = ~0;
-    int			i, j, creds_acquired = 0;
+    OM_uint32		status, temp_minor_status, temp_time_rec = ~0;
+    unsigned int	i, j, creds_acquired = 0;
+    int			k;
     gss_union_name_t	union_name;
     gss_name_t		internal_name;
     gss_union_cred_t	creds;
@@ -98,12 +102,17 @@ OM_uint32 *		time_rec;
     union_name = (gss_union_name_t) desired_name;
     
     /*
-     * if desired_mechs equals GSS_C_NULL_OID_SET, set it to the
-     * first entry in the mechs_array.
+     * if desired_mechs equals GSS_C_NULL_OID_SET, then pick an
+     * appropriate default.
      */
-    
     if(desired_mechs == GSS_C_NULL_OID_SET) {
-	if ((mech = __gss_get_mechanism (NULL)) == NULL)
+	/*
+	 * If union_name->mech_type is NULL then we get the default
+	 * mechanism; otherwise, we get the mechanism for the
+	 * mechanism-specific name.
+	 */
+	mech = __gss_get_mechanism(union_name->mech_type);
+	if (mech == NULL)
 	    return (GSS_S_BAD_MECH);
 
 	desired_mechs = &default_OID_set;
@@ -111,7 +120,7 @@ OM_uint32 *		time_rec;
 	default_OID_set.elements = &default_OID;
 	default_OID.length = mech->mech_type.length;
 	default_OID.elements = mech->mech_type.elements;
-    }	
+    }
     
     /*
      * Now allocate the creds returned array. There is one element
@@ -128,63 +137,59 @@ OM_uint32 *		time_rec;
      * creds_returned->available as 1 and call the mechanism
      * specific gss_acquire_cred(), placing the returned cred in
      * creds_returned->cred. If not, mark creds_returned->available as
-     * 0.  */
-    
-    for(j=0; j < desired_mechs->count; j++) {
-
+     * 0.
+     */
+    status = GSS_S_BAD_MECH;
+    for (j=0; j < desired_mechs->count; j++) {
 	creds_returned[j].available = 0;
 
 	mech = __gss_get_mechanism (&desired_mechs->elements[j]);
-	if (mech && mech->gss_acquire_cred) {
-
-	    /*
-	     * we first have to import the external name in
-	     * union_name so it can be used in the
-	     * gss_acquire_cred() call.
-	     */
-
-	    if ((status = __gss_import_internal_name(
-					       minor_status,
-					       &mech->mech_type,
-					       union_name,
-					       &internal_name))) {
-		status = GSS_S_BAD_NAME;
+	if (!mech || !mech->gss_acquire_cred)
+	    continue;
+	/*
+	 * If this is a mechanism-specific name, then only use the
+	 * mechanism of the name.
+	 */
+	if (union_name->mech_type && !g_OID_equal(union_name->mech_type,
+						  &mech->mech_type))
+	    continue;
+	/*
+	 * If this is not a mechanism-specific name, then we need to
+	 * do an import the external name in union_name first.
+	 */
+	if (!union_name->mech_type) {
+	    if (__gss_import_internal_name(&temp_minor_status,
+					   &mech->mech_type,
+					   union_name, &internal_name)) {
 		continue;
 	    }
-				
-	    status = mech->gss_acquire_cred(
-					    mech->context,
-					    minor_status,
-					    internal_name,
-					    time_req,
-					    desired_mechs,
-					    cred_usage,
-					    &creds_returned[j].cred,
-					    NULL,
-					    &temp_time_rec);
+	} else
+	    internal_name = union_name->mech_name;
 
-	    if ((temp_status = __gss_release_internal_name(
-						     &temp_minor_status,
-						     &mech->mech_type,
-						     &internal_name))) {
-		/* Not much we can do here, really... Just keep on going */
-		;
+	status = mech->gss_acquire_cred(mech->context, minor_status,
+					internal_name, time_req,
+					desired_mechs, cred_usage,
+					&creds_returned[j].cred,
+					NULL, &temp_time_rec);
+	/* 
+	 * Add this into the creds_returned structure, if we got
+	 * a good credential for this mechanism.
+	 */
+	if (status == GSS_S_COMPLETE) {
+	    if (time_rec) {
+		*time_rec = *time_rec > temp_time_rec ?
+		    temp_time_rec : *time_rec;
+		temp_time_rec = *time_rec;
 	    }
 
-	    /* 
-	     * Add this into the creds_returned structure, if we got
-	     * a good credential for this mechanism.
-	     */
-	    if(status == GSS_S_COMPLETE) {
-		if (time_rec) {
-		    *time_rec = *time_rec > temp_time_rec ?
-			temp_time_rec : *time_rec;
-		    temp_time_rec = *time_rec;
-		}
-
-		creds_returned[j].available = 1;
-		creds_acquired++;
-	    }	
+	    creds_returned[j].available = 1;
+	    creds_acquired++;
+	}
+	
+	if (!union_name->mech_type) {
+	    (void) __gss_release_internal_name(&temp_minor_status,
+					       &mech->mech_type,
+					       &internal_name);
 	}
     }
     
@@ -194,10 +199,9 @@ OM_uint32 *		time_rec;
      * no credentials found, return an error. Also, allocate the
      * actual_mechs data.
      */
-    
-    if(creds_acquired == 0) {
+    if (creds_acquired == 0) {
 	free (creds_returned);
-	return(GSS_S_BAD_MECH);
+	return (status);
     }
     
     creds = (gss_union_cred_t) malloc(sizeof(gss_union_cred_desc));
@@ -227,7 +231,7 @@ OM_uint32 *		time_rec;
     
     j = 0;
     
-    for(i=0; i<desired_mechs->count; i++) {
+    for (i=0; i<desired_mechs->count; i++) {
 	if(creds_returned[i].available) {
 
 	    creds->mechs_array[j].length =
@@ -275,9 +279,10 @@ OM_uint32 *		time_rec;
 	
 	/* This really shouldn't ever fail, but just in case.... */
 
-	for(i=0; i < creds->count; i++) {
-	    free(creds->mechs_array[i].elements);
-	    if (actual_mechs) free((*actual_mechs)->elements[i].elements);
+	for (k=0; k < creds->count; k++) {
+	    free(creds->mechs_array[k].elements);
+	    if (actual_mechs)
+		free((*actual_mechs)->elements[k].elements);
 	}
 	
 	if (actual_mechs) {

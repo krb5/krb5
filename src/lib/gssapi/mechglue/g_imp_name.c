@@ -116,6 +116,11 @@ gss_name_t *		output_name;
     if (major_status != GSS_S_COMPLETE)
 	goto allocation_failure;
 
+    /*
+     * See if this is a mechanism-specific name.  If so, let's import
+     * it now so we can get any error messages, and to avoid trouble
+     * later...
+     */
     mech = gss_find_mechanism_from_name_type(input_name_type);
     if (mech) {
 	major_status = generic_gss_copy_oid(minor_status, mech,
