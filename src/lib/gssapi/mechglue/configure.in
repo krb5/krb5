@@ -13,7 +13,7 @@ case $host in
      *-*-aix*) # don't build libgssapi.a on AIX
        ;;
      *)
-       V5_MAKE_SHARED_LIB(libgssapi,0.1,.., ./mechglue)
+       V5_MAKE_SHARED_LIB(libgssapi,1.0,.., ./mechglue)
        AppendRule([install:: libgssapi.[$](LIBEXT)
 	       [$](INSTALL_DATA) libgssapi.[$](LIBEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libgssapi.[$](LIBEXT)])
        LinkFileDir([$](TOPLIBD)/libgssapi.[$](LIBEXT),libgssapi.[$](LIBEXT),./gssapi/mechglue)

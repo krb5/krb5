@@ -122,5 +122,5 @@ fi
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
 DO_SUBDIRS
-V5_MAKE_SHARED_LIB(libcrypto,0.1,.., ./crypto)
+V5_MAKE_SHARED_LIB(libcrypto,1.0,.., ./crypto)
 V5_AC_OUTPUT_MAKEFILE
