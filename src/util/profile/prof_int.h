@@ -3,6 +3,7 @@
  */
 
 #include <time.h>
+#include "com_err.h"
 #include "prof_err.h"
 
 #if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
@@ -29,19 +30,19 @@
 #define NO_SYS_STAT_H
 #endif
 
-typedef long errcode_t;
+typedef long prf_magic_t;
 
 /*
  * This is the structure which stores the profile information for a
  * particular configuration file.
  */
 struct _prf_file_t {
-	errcode_t	magic;
-	char	*comment;
-	char	*filename;
+	prf_magic_t	magic;
+	char		*comment;
+	char		*filename;
 	struct profile_node *root;
-	time_t	timestamp;
-	int	flags;
+	time_t		timestamp;
+	int		flags;
 	struct _prf_file_t *next;
 };
 
@@ -53,7 +54,7 @@ typedef struct _prf_file_t *prf_file_t;
  * configuration file(s)
  */
 struct _profile_t {
-	errcode_t	magic;
+	prf_magic_t	magic;
 	prf_file_t	first_file;
 };
 
@@ -64,7 +65,7 @@ typedef struct _profile_t *profile_t;
  * returned to the user when a section is searched.
  */
 struct _profile_section_t {
-	errcode_t	magic;
+	prf_magic_t	magic;
 	int		top_lvl:1, top_lvl_search:1;
 	char		*name;
 	void		*state;
@@ -135,10 +136,10 @@ extern errcode_t profile_close_file
 
 /* prof_init.c */
 
-errcode_t profile_init
+extern errcode_t profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
-errcode_t profile_init_path
+extern errcode_t profile_init_path
 	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
 
 extern void profile_release

@@ -1,3 +1,9 @@
+Fri Feb  7 18:56:57 1997  Richard Basch  <basch@lehman.com>
+
+	* prof_int.h:
+		Include com_err.h rather than redefining errcode_t
+		Structure element "magic" should not be errcode_t
+
 Wed Feb  5 20:18:33 1997  Richard Basch  <basch@lehman.com>
 
 	* profile.hin: Do not process the contents of profile.h
