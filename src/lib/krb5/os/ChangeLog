@@ -1,3 +1,8 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+	* init_os_ctx.c: Removed use of FSSpecs because these cause serious
+	performance problems on Mac OS X.  We now search paths the same way
+	the rest of the Unix platforms do.
+	
 2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* toffset.c (krb5_get_time_offsets), an_to_ln.c
