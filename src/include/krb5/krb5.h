@@ -40,8 +40,7 @@ typedef struct _krb5_ticket_times {
 typedef struct _krb5_authdata {
     krb5_authdatatype ad_type;
     int length;
-    krb5_octet contents[1];		/* actually can be more, depending
-					   on length */
+    krb5_octet *contents;
 } krb5_authdata;
 
 typedef struct _krb5_enc_tkt_part {
@@ -63,6 +62,8 @@ typedef struct _krb5_ticket {
     krb5_kvno skvno;			/* server kvno */
     krb5_data enc_part;			/* encrypted encoding,
 					   see above for hidden contents */
+    krb5_enc_tkt_part *enc_part2;	/* ptr to decrypted version, if
+					   available */
 } krb5_ticket;
 
 /* the unencrypted version */
@@ -131,6 +132,7 @@ typedef struct _krb5_kdc_rep {
     krb5_kvno ckvno;			/* client key version */
     krb5_ticket *ticket;		/* ticket */
     krb5_data enc_part;			/* encrypted part */
+    krb5_enc_kdc_rep_part *enc_part2;	/* unencrypted version, if available */
 } krb5_kdc_rep;
 
 /* error message structure */
@@ -166,6 +168,11 @@ typedef struct _krb5_response {
     krb5_data *response;
 } krb5_response;
 
+typedef struct _krb5_tgs_req_enc_part {
+    krb5_authdata **authorization_data;	/* auth data */
+    krb5_ticket *second_ticket;		/* second ticket */
+} krb5_tgs_req_enc_part;
+
 typedef struct _krb5_tgs_req {
     krb5_ap_req *header;		/* AP-REQ */
     krb5_flags kdc_options;		/* requested options */
@@ -177,12 +184,9 @@ typedef struct _krb5_tgs_req {
     krb5_principal server;		/* server's principal identifier */
     krb5_address **addresses;		/* array of ptrs to addresses */
     krb5_data enc_part;			/* (optional) encrypted part */
+    krb5_tgs_req_enc_part *enc_part2;	/* ptr to decrypted version, if
+					   available */
 } krb5_tgs_req;
-
-typedef struct _krb5_tgs_req_enc_part {
-    krb5_authdata **authorization_data;	/* auth data */
-    krb5_ticket *second_ticket;		/* second ticket */
-} krb5_tgs_req_enc_part;
 
 typedef struct _krb5_safe {
     krb5_data user_data;		/* user data */
