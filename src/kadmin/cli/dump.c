@@ -108,6 +108,7 @@ static const char dfile_err_fmt[] = "%s: cannot open %s (%s)\n";
 static const char oldoption[] = "-old";
 static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
+static const char hashoption[] = "-hash";
 static const char dump_tmptrail[] = "~";
 
 /* Can't use krb5_dbe_find_enctype because we have a */
@@ -1309,7 +1310,7 @@ restore_dump(programname, context, dumpfile, f, verbose)
 
 /*
  * Usage is
- * load_db [-old] [-verbose] [-update] filename dbname
+ * load_db [-old] [-verbose] [-update] [-hash] filename dbname
  */
 void
 load_db(argc, argv)
@@ -1332,6 +1333,7 @@ load_db(argc, argv)
 						       int));
     const char		* restore_name;
     int			update, verbose;
+    krb5_int32		crflags;
     int			aindex;
 
     /*
@@ -1346,6 +1348,7 @@ load_db(argc, argv)
     restore_name = standard_fmt_name;
     update = 0;
     verbose = 0;
+    crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
     dbname_tmp = (char *) NULL;
     for (aindex = 1; aindex < argc; aindex++) {
@@ -1359,6 +1362,8 @@ load_db(argc, argv)
 	else if (!strcmp(argv[aindex], updateoption)) {
 	    update = 1;
 	}
+	else if (!strcmp(argv[aindex], hashoption)) {
+	    crflags = KRB5_KDB_CREATE_HASH;
 	else
 	    break;
     }
@@ -1405,7 +1410,7 @@ load_db(argc, argv)
 	/*
 	 * Create the new database if not an update restoration.
 	 */
-	if (update || !(kret = krb5_db_create(context, dbname_tmp))) {
+	if (update || !(kret = krb5_db_create(context, dbname_tmp, crflags))) {
 	    /*
 	     * Point ourselves at it.
 	     */
@@ -1448,7 +1453,7 @@ load_db(argc, argv)
 	     */
 	    if (!update) {
 		if (exit_status) {
-		    if ((kret = kdb5_db_destroy(context, dbname))) {
+		    if ((kret = krb5_db_destroy(context, dbname))) {
 			fprintf(stderr, dbdelerr_fmt,
 				programname, dbname_tmp, error_message(kret));
 			exit_status++;

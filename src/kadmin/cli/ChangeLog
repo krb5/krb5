@@ -1,3 +1,7 @@
+Fri Jul 25 15:45:24 1997  Tom Yu  <tlyu@mit.edu>
+
+	* dump.c: Update to new kdb API.
+
 Fri Jun 27 17:37:07 1997  Tom Yu  <tlyu@mit.edu>
 
 	* keytab.c (add_principal): Don't call kadm5_free_key_data; that's
