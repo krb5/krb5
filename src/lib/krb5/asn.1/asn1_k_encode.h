@@ -222,6 +222,27 @@ asn1_error_code asn1_encode_passwdsequence
 	PROTOTYPE((asn1buf *buf, const passwd_phrase_element *val, int *retlen));
 
 asn1_error_code asn1_encode_sequence_of_passwdsequence
-	PROTOTYPE((asn1buf *buf, const passwd_phrase_element **val, int *retlen));
+	PROTOTYPE((asn1buf *buf, const passwd_phrase_element **val,
+	int *retlen));
+
+asn1_error_code asn1_encode_sam_flags
+	PROTOTYPE((asn1buf * buf, const krb5_flags val, int *retlen));
+
+asn1_error_code asn1_encode_sam_challenge
+	PROTOTYPE((asn1buf *buf, const krb5_sam_challenge * val, int *retlen));
+
+asn1_error_code asn1_encode_sam_key
+	PROTOTYPE((asn1buf *buf, const krb5_sam_key *val, int *retlen));
+
+asn1_error_code asn1_encode_enc_sam_response_enc
+	PROTOTYPE((asn1buf *buf, const krb5_enc_sam_response_enc *val,
+		   int *retlen));
+
+asn1_error_code asn1_encode_sam_response
+	PROTOTYPE((asn1buf *buf, const krb5_sam_response *val, int *retlen));
+
+asn1_error_code asn1_encode_predicted_sam_response
+	PROTOTYPE((asn1buf *buf, const krb5_predicted_sam_response *val, 
+		   int *retlen));
 
 #endif

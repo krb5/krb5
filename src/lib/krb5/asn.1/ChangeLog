@@ -1,3 +1,9 @@
+Wed Jun 12 14:25:11 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* asn1_k_encode.h, asn1_k_decode.h: Add prototypes for the SAM
+	 	encoding and decoding functions, which are necessary for
+	 	the Win32 port (and a good idea in general).
+
 Wed Jun  5 15:37:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* asn1_k_decode.c (asn1_decode_enc_kdc_rep_part): If starttime is

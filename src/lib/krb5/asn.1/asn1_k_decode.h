@@ -88,6 +88,8 @@ asn1_error_code asn1_decode_ui_4
 	PROTOTYPE((asn1buf *buf, krb5_ui_4 *val));
 asn1_error_code asn1_decode_kerberos_time
 	PROTOTYPE((asn1buf *buf, krb5_timestamp *val));
+asn1_error_code asn1_decode_sam_flags
+	PROTOTYPE((asn1buf *buf, krb5_flags *val));
 
 /* structures */
 asn1_error_code asn1_decode_realm
@@ -132,12 +134,20 @@ asn1_error_code asn1_decode_krb_cred_info
 	PROTOTYPE((asn1buf *buf, krb5_cred_info *val));
 asn1_error_code asn1_decode_pa_data
 	PROTOTYPE((asn1buf *buf, krb5_pa_data *val));
-
 asn1_error_code asn1_decode_passwdsequence
 	PROTOTYPE((asn1buf *buf, passwd_phrase_element *val));
-
 asn1_error_code asn1_decode_etype_info_entry
 	PROTOTYPE((asn1buf *buf, krb5_etype_info_entry *val));
+asn1_error_code asn1_decode_sam_challenge
+	PROTOTYPE((asn1buf *buf, krb5_sam_challenge *val));
+asn1_error_code asn1_decode_enc_sam_key
+	PROTOTYPE((asn1buf *buf, krb5_sam_key *val));
+asn1_error_code asn1_decode_enc_sam_response_enc
+	PROTOTYPE((asn1buf *buf, krb5_enc_sam_response_enc *val));
+asn1_error_code asn1_decode_sam_response
+	PROTOTYPE((asn1buf *buf, krb5_sam_response *val));
+asn1_error_code asn1_decode_predicted_sam_response
+	PROTOTYPE((asn1buf *buf, krb5_predicted_sam_response *val));
 
 /* arrays */
 asn1_error_code asn1_decode_authorization_data
