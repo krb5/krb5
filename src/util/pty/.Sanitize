@@ -28,6 +28,7 @@ ChangeLog
 README
 Makefile.in
 configure.in
+configure
 cleanup.c
 dump-utmp.c
 getpty.c
