@@ -230,6 +230,7 @@ admin_merge_keys(kcontext, dbentp, unique,
 		xxx2.n_key_data = nkeys2;
 		xxx2.key_data = in2;
 		for (i=0; i<nksents; i++) {
+		    kp1 = 0; kp2 = 0;
 		    (void) krb5_dbe_find_enctype(kcontext,
 						 &xxx1,
 						 kslist[i].ks_enctype,
@@ -318,11 +319,9 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
     krb5_boolean	is_pwchange;
 {
     krb5_error_code	kret = 0;
-#ifndef	USE_KDB5_CPW
     krb5_int32		num_keys, num_ekeys, num_rkeys;
     krb5_key_data	*key_list;
     krb5_key_data	*ekey_list;
-#endif	/* USE_KDB5_CPW */
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_merge_dbentries()\n"));
 
     /*
@@ -331,141 +330,139 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
      * 	and that we don't have a password and the random-password option.
      */
     kret = EINVAL;
-#ifndef	USE_KDB5_CPW
     num_keys = num_ekeys = num_rkeys = 0;
     key_list = (krb5_key_data *) NULL;
     ekey_list = (krb5_key_data *) NULL;
-#endif	/* USE_KDB5_CPW */
-    if (dbentp->princ &&
-	(!password || ((valid & KRB5_ADM_M_RANDOMKEY) == 0))) {
-
-	/*
-	 * Now fill in unsupplied values from defaults.
-	 */
-	if ((valid & KRB5_ADM_M_MAXLIFE) == 0)
-	    dbentp->max_life = defaultp->max_life;
-	if ((valid & KRB5_ADM_M_MAXRENEWLIFE) == 0)
-	    dbentp->max_renewable_life = defaultp->max_renewable_life;
-	if ((valid & KRB5_ADM_M_EXPIRATION) == 0)
-	    dbentp->expiration = defaultp->expiration;
-	if ((valid & KRB5_ADM_M_PWEXPIRATION) == 0)
-	    dbentp->pw_expiration = defaultp->pw_expiration;
-	if ((valid & KRB5_ADM_M_FLAGS) == 0)
-	    dbentp->attributes = defaultp->attributes;
-
-	/*
-	 * Now fill in un-suppliable values from our data.
-	 */
-	dbentp->last_success = defaultp->last_success;
-	dbentp->last_failed = defaultp->last_failed;
-	dbentp->fail_auth_count = defaultp->fail_auth_count;
-	dbentp->len = defaultp->len;
-	kret = 0;
-
-	/*
-	 * Update last password change (if appropriate) and modification
-	 * date and principal.
-	 */
-	if (!(kret = key_update_tl_attrs(kcontext,
-					 dbentp,
-					 who,
-					 (password || is_pwchange)))) {
-
-#ifndef	USE_KDB5_CPW
-	    /* See if this is a random key or not */
-	    if (password) {
-		krb5_data		pwdata;
-
-		DPRINT(DEBUG_OPERATION, debug_level, ("> string-to-key\n"));
-		/*
-		 * Now handle string-to-key and salt.
-		 */
-		pwdata.data = password;
-		pwdata.length = strlen(password);
-
-		/* Convert password string to key */
-		if (!(kret = key_string_to_keys(kcontext,
-						((is_pwchange) ? defaultp :
-						 dbentp),
-						&pwdata,
-						0,
-						(krb5_key_salt_tuple *) NULL,
-						&num_keys,
-						&key_list))) {
-		    /* Encrypt the keys */
-		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
-		    num_ekeys = num_keys;
-		    kret = key_encrypt_keys(kcontext,
-					    defaultp,
-					    &num_ekeys,
-					    key_list,
-					    &ekey_list);
-		    if (!kret) {
-			num_rkeys = (krb5_int32) dbentp->n_key_data;
-			kret = admin_merge_keys(kcontext,
-						defaultp,
-						1,
-						num_ekeys,
-						ekey_list,
-						(krb5_int32)
-						defaultp->n_key_data,
-						defaultp->key_data,
-						&num_rkeys,
-						&dbentp->key_data);
-			dbentp->n_key_data = (krb5_int16) num_rkeys;
-		    }
-		}
-	    }
-	    else {
-		/* Random key */
-		DPRINT(DEBUG_OPERATION, debug_level, ("> random key\n"));
-		if (!(kret = key_random_key(kcontext,
-					    ((is_pwchange) ? defaultp :
-					     dbentp),
-					    &num_keys,
-					    &key_list))) {
-		    
-		    /* Encrypt the keys */
-		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
-		    num_ekeys = num_keys;
-		    kret = key_encrypt_keys(kcontext,
-					    defaultp,
-					    &num_ekeys,
-					    key_list,
-					    &ekey_list);
-		    if (!kret) {
-			num_rkeys = (krb5_int32) dbentp->n_key_data;
-			kret = admin_merge_keys(kcontext,
-						defaultp,
-						0,
-						num_ekeys,
-						ekey_list,
-						(krb5_int32)
-						defaultp->n_key_data,
-						defaultp->key_data,
-						&num_rkeys,
-						&dbentp->key_data);
-			dbentp->n_key_data = (krb5_int16) num_rkeys;
-		    }
-		}
-	    }
-#endif	/* USE_KDB5_CPW */
-
-	    /*
-	     * Finally, if this is a password change, clear the password-change
-	     * required bit.
-	     */
-	    if (password || is_pwchange)
-		dbentp->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
-	}
+    if (!dbentp->princ) {
+      DPRINT(DEBUG_OPERATION, debug_level, ("> no principal supplied???"));
+      goto bailout;
     }
+    if (password && (valid & KRB5_ADM_M_RANDOMKEY)) {
+      DPRINT(DEBUG_OPERATION, debug_level, ("> password and randomkey???"));
+      goto bailout;
+    }
+    /*
+     * Now fill in unsupplied values from defaults.
+     */
+    if ((valid & KRB5_ADM_M_MAXLIFE) == 0)
+      dbentp->max_life = defaultp->max_life;
+    if ((valid & KRB5_ADM_M_MAXRENEWLIFE) == 0)
+      dbentp->max_renewable_life = defaultp->max_renewable_life;
+    if ((valid & KRB5_ADM_M_EXPIRATION) == 0)
+      dbentp->expiration = defaultp->expiration;
+    if ((valid & KRB5_ADM_M_PWEXPIRATION) == 0)
+      dbentp->pw_expiration = defaultp->pw_expiration;
+    if ((valid & KRB5_ADM_M_FLAGS) == 0)
+      dbentp->attributes = defaultp->attributes;
 
-#ifndef	USE_KDB5_CPW
+    /*
+     * Now fill in un-suppliable values from our data.
+     */
+    dbentp->last_success = defaultp->last_success;
+    dbentp->last_failed = defaultp->last_failed;
+    dbentp->fail_auth_count = defaultp->fail_auth_count;
+
+    dbentp->len = defaultp->len;
+    kret = 0;
+
+    /*
+     * Update last password change (if appropriate) and modification
+     * date and principal.
+     */
+    kret = key_update_tl_attrs(kcontext, dbentp, who, 
+			       (password || is_pwchange));
+    if (kret) {
+      DPRINT(DEBUG_OPERATION, debug_level, ("> update_tl_attrs FAILED???"));
+      goto bailout;
+    }
+    /* See if this is a random key or not */
+    if (password) {
+      krb5_data		pwdata;
+      DPRINT(DEBUG_OPERATION, debug_level, ("> string-to-key\n"));
+      /*
+       * Now handle string-to-key and salt.
+       */
+      pwdata.data = password;
+      pwdata.length = strlen(password);
+
+      /* Convert password string to key */
+      kret = key_string_to_keys(kcontext, ((is_pwchange) ? defaultp : dbentp),
+				&pwdata, 0, (krb5_key_salt_tuple *) NULL,
+				&num_keys, &key_list);
+      if (kret) {
+	DPRINT(DEBUG_OPERATION, debug_level, ("> pw true, key_string_to_keys FAILED???"));
+	goto bailout2;
+      }
+      /* Encrypt the keys */
+      DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
+      num_ekeys = num_keys;
+      kret = key_encrypt_keys(kcontext, defaultp, &num_ekeys, 
+			      key_list, &ekey_list);
+      if (kret) {
+	DPRINT(DEBUG_OPERATION, debug_level, ("> pw true, key_encrypt_keys FAILED???"));
+	goto bailout2;
+      }
+
+      num_rkeys = (krb5_int32) dbentp->n_key_data;
+      kret = admin_merge_keys(kcontext, defaultp,
+			      1,
+			      num_ekeys, ekey_list,
+			      (krb5_int32) defaultp->n_key_data,
+			      defaultp->key_data,
+			      &num_rkeys, &dbentp->key_data);
+      dbentp->n_key_data = (krb5_int16) num_rkeys;
+
+    } else if (valid & KRB5_ADM_M_RANDOMKEY) {
+      /* Random key */
+      DPRINT(DEBUG_OPERATION, debug_level, ("> random key\n"));
+      kret = key_random_key(kcontext, ((is_pwchange) ? defaultp : dbentp),
+			    &num_keys, &key_list);
+      if (kret) {
+	DPRINT(DEBUG_OPERATION, debug_level, ("> pw false, key_random_key FAILED???"));
+	goto bailout2;
+      }
+
+      /* Encrypt the keys */
+      DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
+      num_ekeys = num_keys;
+      kret = key_encrypt_keys(kcontext, defaultp, &num_ekeys, key_list,
+			      &ekey_list);
+      if (kret) {
+	DPRINT(DEBUG_OPERATION, debug_level, ("> pw false, key_encrypt_keys FAILED???"));
+	goto bailout2;
+      }
+      num_rkeys = (krb5_int32) dbentp->n_key_data;
+      kret = admin_merge_keys(kcontext, defaultp,
+			      0,
+			      num_ekeys, ekey_list,
+			      (krb5_int32) defaultp->n_key_data,
+			      defaultp->key_data,
+			      &num_rkeys, &dbentp->key_data);
+      dbentp->n_key_data = (krb5_int16) num_rkeys;
+    } else {
+      DPRINT(DEBUG_OPERATION, debug_level, ("> simple modify\n"));
+      kret = admin_merge_keys(kcontext, defaultp,
+			      0, /* only one list, so don't need unique */
+			      0, 0, /* no keys in one list */
+			      (krb5_int32) defaultp->n_key_data,
+			      defaultp->key_data,
+			      &num_rkeys, &dbentp->key_data);
+      dbentp->n_key_data = (krb5_int16) num_rkeys;
+    }
+  bailout2:
+    
+    /*
+     * Finally, if this is a password change, clear the password-change
+     * required bit.
+     */
+    if (password || is_pwchange)
+      dbentp->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
+
+  bailout:
     if (key_list)
 	key_free_key_data(key_list, num_keys);
     if (ekey_list)
 	key_free_key_data(ekey_list, num_ekeys);
-#endif	/* USE_KDB5_CPW */
     DPRINT(DEBUG_CALLS, debug_level, ("X admin_merge_dbentries()=%d\n", kret));
     return(kret);
 }
@@ -502,13 +499,15 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
     char		*new_password;
     krb5_int32		operation;
     const char		*op_msg;
-#ifdef	USE_KDB5_CPW
-    krb5_int32		n_keysalts;
-    krb5_key_salt_tuple	*keysalts;
-#endif	/* USE_KDB5_CPW */
 #ifdef	DEBUG
     char		*dbg_op_msg;
 #endif	/* DEBUG */
+    int		how_many;
+    krb5_boolean	more;
+    krb5_data	pword_data;
+    krb5_int32	temp;
+    krb5_db_entry	*merge;
+    int		nument;
 
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("* admin_add_modify(%s)\n", arglist[0].data));
@@ -531,20 +530,17 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 	    dbg_op_msg = (supp_pwd) ? "CHANGE PASSWORD" :
 		"CHANGE RANDOM PASSWORD";
 #endif	/* DEBUG */
-	}
-	else {
+	} else {
 	    operation = ACL_MODIFY_PRINCIPAL;
 	    op_msg = admin_modify_principal_text;
 #ifdef	DEBUG
 	    dbg_op_msg = "MODIFY PRINCIPAL";
 #endif	/* DEBUG */
 	}
-    }
-    else {
+    } else {
 	if (pwd_supplied) {
 	    return(KRB5_ADM_SYSTEM_ERROR);
-	}
-	else {
+	} else {
 	    operation = ACL_ADD_PRINCIPAL;
 	    op_msg = admin_add_principal_text;
 #ifdef	DEBUG
@@ -554,303 +550,174 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
     }
 
     /* Get the identity of our client */
-    if (!(kret = admin_client_identity(kcontext,
-				       debug_level,
-				       ticket,
-				       &client,
-				       &client_name))) {
-
-	/* See if this client can perform this operation. */
-	if (acl_op_permitted(kcontext, client, operation, arglist[0].data)) {
-
-	    /* Parse the specified principal name */
-	    if (!(kret = krb5_parse_name(kcontext,
-					 arglist[0].data,
-					 &principal))) {
-		int		how_many;
-		krb5_boolean	more;
-
-		how_many = 1;
-
-		/* Try to get the entry */
-		kret = krb5_db_get_principal(kcontext,
-					     principal,
-					     &cur_dbentry,
-					     &how_many,
-					     &more);
-
-		/*
-		 * If we're modifying, there'd better be an entry.
-		 * If we're adding, there'd better not be an entry.
-		 */
-		if (!kret &&
-		    ((should_exist && how_many) ||
-		     (!should_exist && !how_many))) {
-
-		    /* We need to have a principal */
-		    new_dbentry.princ = principal;
-
-		    /*
-		     * Parse the argument list and make sure that only valid
-		     * options are set.
-		     */
-		    if (!(kret = krb5_adm_proto_to_dbent(kcontext,
-							 nargs-1,
-							 &arglist[1],
-							 &valid_mask,
-							 &new_dbentry,
-							 &new_password)) &&
-			((valid_mask & ~KRB5_ADM_M_SET_VALID) == 0)) {
-			krb5_data	pword_data;
-			krb5_int32	temp;
-
-			pword_data.data = (pwd_supplied) ? supp_pwd :
-			    new_password;
-			pword_data.length = (pword_data.data) ? 
-			    strlen(pword_data.data) : 0;
-
-			/*
-			 * Check viability of options specified.  One
-			 * of the following must be true:
-			 *	1) randomkey was specified and no password.
-			 *	2) randomkey is not specified and there
-			 *	   is a password to change/set and it is
-			 *	   is suitable.
-			 *	3) randomkey is not specified and there is
-			 *	   no password to change and this is
-			 *	   is a modify entry request.
-			 *
-			 * Check the suitability of the new password, if
-			 * one was supplied.
-			 */
-			if (((valid_mask & KRB5_ADM_M_RANDOMKEY) &&
-			     !pword_data.data)
-			    ||
-			    (!(valid_mask & KRB5_ADM_M_RANDOMKEY) &&
-			     ((!pword_data.data && should_exist)||
-			      passwd_check_npass_ok(kcontext,
-						    debug_level,
-						    new_dbentry.princ,
-						    &new_dbentry,
-						    &pword_data,
-						    &temp)))) {
-			    krb5_db_entry	*merge;
-
-			    merge = (should_exist) ?
-				&cur_dbentry : &admin_def_dbent;
-
-			    /* Merge the specified entries with the defaults */
-			    if (!(kret = admin_merge_dbentries(kcontext,
-							       debug_level,
-							       client,
-							       merge,
-							       valid_mask,
-							       &new_dbentry,
-							       pword_data.data,
-							       pwd_supplied))
-#ifdef	USE_KDB5_CPW
-				&&
-				!(kret = key_dbent_to_keysalts(&new_dbentry,
-							       &n_keysalts,
-							       &keysalts))
-#endif	/* USE_KDB5_CPW */
-				) {
-#ifdef	USE_KDB5_CPW
-				/*
-				 * Determine if this is a random key or not.
-				 */
-				if ((valid_mask & KRB5_ADM_M_RANDOMKEY) ||
-				    (!pword_data.data && should_exist))	{
-				    /* Random key */
-				    /*
-				     * Determine if this is a change or a
-				     * create operation.
-				     */
-				    if (should_exist) {
-					new_dbentry.key_data =
-					    cur_dbentry.key_data;
-					new_dbentry.n_key_data =
-					    cur_dbentry.n_key_data;
-					cur_dbentry.key_data =
-					    (krb5_key_data *) NULL;
-					cur_dbentry.n_key_data = 0;
-					kret = krb5_dbe_crk(kcontext,
-							    key_master_encblock(),
-							    keysalts,
-							    n_keysalts,
-							    &new_dbentry);
-				    }
-				    else
-					kret = krb5_dbe_ark(kcontext,
-							    key_master_encblock(),
-							    keysalts,
-							    n_keysalts,
-							    &new_dbentry);
-				}
-				else {
-				    if (should_exist) {
-					new_dbentry.key_data =
-					    cur_dbentry.key_data;
-					new_dbentry.n_key_data =
-					    cur_dbentry.n_key_data;
-					cur_dbentry.key_data =
-					    (krb5_key_data *) NULL;
-					cur_dbentry.n_key_data = 0;
-					kret = krb5_dbe_cpw(kcontext,
-							    key_master_encblock(),
-							    keysalts,
-							    n_keysalts,
-							    pword_data.data,
-							    &new_dbentry);
-				    }
-				    else
-					kret = krb5_dbe_apw(kcontext,
-							    key_master_encblock(),
-							    keysalts,
-							    n_keysalts,
-							    pword_data.data,
-							    &new_dbentry);
-				}
-				krb5_xfree(keysalts);
-				if (!kret) {
-#endif	/* USE_KDB5_CPW */
-				int nument = 1;
-
-				/* Write the entry. */
-				kret = krb5_db_put_principal(kcontext,
-							     &new_dbentry,
-							     &nument);
-				if (kret || (nument != 1)) {
-				    /* Ultimate failure */
-				    com_err(programname, kret,
-					    admin_db_write_err_fmt,
-					    op_msg,
-					    client_name);
-				    DPRINT(DEBUG_OPERATION, debug_level,
-					   ("> db write failed for %s\n",
-					    dbg_op_msg));
-				    retval = KRB5_ADM_SYSTEM_ERROR;
-				}
-				else {
-				    /* Ultimate success */
-				    com_err(programname, 0,
-					    admin_db_success_fmt,
-					    op_msg,
-					    arglist[0].data,
-					    client_name);
-				}
-#ifdef	USE_KDB5_CPW
-			        }
-				else {
-				    /*
-				     * Couldn't use the apw/cpw/ark/crk
-				     */
-				    DPRINT(DEBUG_PROTO, debug_level,
-					   ("= password set failed for %s\n",
-					    dbg_op_msg));
-				    retval = KRB5_ADM_SYSTEM_ERROR;
-				}
-#endif	/* USE_KDB5_CPW */
-
-				/*
-				 * Clean up droppings from
-				 * admin_merge_dbentries
-				 */
-			    }
-			    else {
-				/* Option merge failed */
-				DPRINT(DEBUG_PROTO, debug_level,
-				       ("= option merge failed for %s\n",
-					dbg_op_msg));
-				retval = KRB5_ADM_BAD_OPTION;
-			    }
-			}
-			else {
-			    /* Password was not suitable or conflicts */
-			    if (valid_mask & KRB5_ADM_M_RANDOMKEY) {
-				DPRINT(DEBUG_PROTO, debug_level,
-				       ("= conflicting options for %s\n",
-					dbg_op_msg));
-				retval = KRB5_ADM_BAD_OPTION;
-			    }
-			    else {
-				DPRINT(DEBUG_PROTO, debug_level,
-				       ("= bad password for %s\n",
-					dbg_op_msg));
-				retval = KRB5_ADM_PW_UNACCEPT;
-			    }
-			}
-
-			/* Clean up droppings from krb5_adm_proto_to_dbent */
-			if (new_password)
-			    krb5_xfree(new_password);
-		    }
-		    else {
-			/* Argument list parse failed or bad options */
-			DPRINT(DEBUG_PROTO, debug_level,
-			       ("= argument list bad for %s\n", dbg_op_msg));
-			retval = KRB5_ADM_BAD_OPTION;
-		    }
-		    if (should_exist)
-			krb5_db_free_principal(kcontext, &cur_dbentry, 1);
-		    krb5_db_free_principal(kcontext, &new_dbentry, 1);
-		    principal = (krb5_principal) NULL;
-		}
-		else {
-		    /* Database entry failed or yielded unexpected results */
-		    if (kret) {
-			DPRINT(DEBUG_OPERATION, debug_level,
-			       ("> database read error\n"));
-			com_err(programname, kret,
-				admin_db_read_err_fmt,
-				op_msg,
-				client_name);
-			retval = KRB5_ADM_SYSTEM_ERROR;
-		    }
-		    else {
-			if (should_exist) {
-			    DPRINT(DEBUG_OPERATION, debug_level,
-				   ("> principal %s not in database\n",
-				    arglist[0].data));
-			    retval = KRB5_ADM_P_DOES_NOT_EXIST;
-			}
-			else {
-			    DPRINT(DEBUG_OPERATION, debug_level,
-				   ("> principal %s already in database\n",
-				    arglist[0].data));
-			    retval = KRB5_ADM_P_ALREADY_EXISTS;
-			}
-		    }
-		}
-
-		/* Clean up from krb5_parse_name (If left over) */
-		if (principal)
-		    krb5_free_principal(kcontext, principal);
-	    }
-	    else {
-		/* Principal name parse failed */
-		DPRINT(DEBUG_OPERATION, debug_level,
-		       ("> bad principal string \"%s\"\n", arglist[0].data));
-		retval = (should_exist) ? KRB5_ADM_P_DOES_NOT_EXIST :
-		    KRB5_ADM_BAD_OPTION;
-	    }
-	}
-	else {
-	    /* ACL check failed */
-	    com_err(programname, 0, admin_perm_denied_fmt,
-		    op_msg, arglist[0].data, client_name);
-	    retval = KRB5_ADM_NOT_AUTHORIZED;
-	}
-
-	/* Clean up admin_client_identity droppings */
-	krb5_xfree(client_name);
-	krb5_free_principal(kcontext, client);
-    }
-    else {
+    kret = admin_client_identity(kcontext, debug_level, ticket,
+				 &client, &client_name);
+    if (kret) {
 	/* We really choked here. */
 	com_err(programname, kret, admin_no_cl_ident_fmt, op_msg);
 	retval = KRB5_ADM_SYSTEM_ERROR;
+	goto bailout;
     }
+
+    /* See if this client can perform this operation. */
+    if (!acl_op_permitted(kcontext, client, operation, arglist[0].data)) {
+      /* ACL check failed */
+      com_err(programname, 0, admin_perm_denied_fmt,
+	      op_msg, arglist[0].data, client_name);
+      retval = KRB5_ADM_NOT_AUTHORIZED;
+      goto bailout2;
+    }
+
+    /* Parse the specified principal name */
+    kret = krb5_parse_name(kcontext, arglist[0].data, &principal);
+    if (kret)  {
+      /* Principal name parse failed */
+      DPRINT(DEBUG_OPERATION, debug_level,
+	     ("> bad principal string \"%s\"\n", arglist[0].data));
+      retval = (should_exist) ? KRB5_ADM_P_DOES_NOT_EXIST :
+	KRB5_ADM_BAD_OPTION;
+      goto bailout2;
+    }
+
+    how_many = 1;
+    /* Try to get the entry */
+    kret = krb5_db_get_principal(kcontext, principal, &cur_dbentry,
+				 &how_many, &more);
+
+    /*
+     * If we're modifying, there'd better be an entry.
+     * If we're adding, there'd better not be an entry.
+     */
+    if (kret) {
+      /* Database entry failed or yielded unexpected results */
+      DPRINT(DEBUG_OPERATION, debug_level, ("> database read error\n"));
+      com_err(programname, kret,
+	      admin_db_read_err_fmt, op_msg, client_name);
+      retval = KRB5_ADM_SYSTEM_ERROR;
+      goto bailout3;
+    }
+    if (should_exist && !how_many) {
+      DPRINT(DEBUG_OPERATION, debug_level, 
+	     ("> principal %s not in database\n", arglist[0].data));
+      retval = KRB5_ADM_P_DOES_NOT_EXIST;
+      goto bailout3;
+    }
+    if (!should_exist && how_many) {
+      DPRINT(DEBUG_OPERATION, debug_level,
+	     ("> principal %s already in database\n", arglist[0].data));
+      retval = KRB5_ADM_P_ALREADY_EXISTS;
+      goto bailout3;
+    }
+
+    /* We need to have a principal */
+    /* new_dbentry.princ = principal; */
+    krb5_copy_principal(kcontext, principal, &(new_dbentry.princ));
+      
+    /*
+     * Parse the argument list and make sure that only valid
+     * options are set.
+     */
+    kret = krb5_adm_proto_to_dbent(kcontext,
+				   nargs-1, &arglist[1], &valid_mask,
+				   &new_dbentry, &new_password);
+    if (kret ||	(valid_mask & ~KRB5_ADM_M_SET_VALID)) {
+      /* Argument list parse failed or bad options */
+      DPRINT(DEBUG_PROTO, debug_level,
+	     ("= argument list bad for %s\n", dbg_op_msg));
+      retval = KRB5_ADM_BAD_OPTION;
+      goto bailout4;
+    }
+    
+    pword_data.data = (pwd_supplied) ? supp_pwd : new_password;
+    pword_data.length = (pword_data.data) ? strlen(pword_data.data) : 0;
+	
+    /*
+     * Check viability of options specified.  One
+     * of the following must be true:
+     *	1) randomkey was specified and no password.
+     *	2) randomkey is not specified and there
+     *	   is a password to change/set and it is
+     *	   is suitable.
+     *	3) randomkey is not specified and there is
+     *	   no password to change and this is
+     *	   is a modify entry request.
+     *
+     * Check the suitability of the new password, if
+     * one was supplied.
+     */
+
+    if ((valid_mask & KRB5_ADM_M_RANDOMKEY) && pword_data.data) {
+      /* claimed random key but gave a password */
+      DPRINT(DEBUG_PROTO, debug_level, 
+	     ("= conflicting options for %s\n", dbg_op_msg));
+      retval = KRB5_ADM_BAD_OPTION;
+      goto bailout5;
+    }
+    if (!(valid_mask & KRB5_ADM_M_RANDOMKEY)
+	&& pword_data.data
+	&& !passwd_check_npass_ok(kcontext, debug_level,
+				  new_dbentry.princ, &new_dbentry,
+				  &pword_data, &temp)
+	) {
+      DPRINT(DEBUG_PROTO, debug_level,
+	     ("= bad password for %s\n", dbg_op_msg));
+      retval = KRB5_ADM_PW_UNACCEPT;
+      goto bailout5;
+    }
+	  
+    merge = (should_exist) ? &cur_dbentry : &admin_def_dbent;
+	  
+    /* Merge the specified entries with the defaults */
+    kret = admin_merge_dbentries(kcontext, debug_level,
+				 client, merge, valid_mask,
+				 &new_dbentry, pword_data.data,
+				 pwd_supplied);
+    if (kret) { /* Option merge failed */
+      DPRINT(DEBUG_PROTO, debug_level,
+	     ("= option merge failed for %s\n", dbg_op_msg));
+      retval = KRB5_ADM_BAD_OPTION;
+      goto bailout5;
+    } 
+    nument = 1;
+			       
+    /* Write the entry. */
+    kret = krb5_db_put_principal(kcontext, &new_dbentry, &nument);
+    if (kret || (nument != 1)) {
+      /* Ultimate failure */
+      com_err(programname, kret, admin_db_write_err_fmt, op_msg, client_name);
+      DPRINT(DEBUG_OPERATION, debug_level,
+	     ("> db write failed for %s\n", dbg_op_msg));
+      retval = KRB5_ADM_SYSTEM_ERROR;
+    } else {
+      /* Ultimate success */
+      com_err(programname, 0, admin_db_success_fmt, 
+	      op_msg, arglist[0].data, client_name);
+    }
+    
+  bailout5:	
+    /* Clean up droppings from krb5_adm_proto_to_dbent */
+    if (new_password) {
+      krb5_xfree(new_password);
+      new_password = 0;
+    }
+       
+  bailout4:
+    if (should_exist)
+      krb5_db_free_principal(kcontext, &cur_dbentry, 1);
+    krb5_db_free_principal(kcontext, &new_dbentry, 1);
+    principal = (krb5_principal) NULL;
+    
+  bailout3:
+    /* Clean up from krb5_parse_name (If left over) */
+    if (principal)
+      krb5_free_principal(kcontext, principal);
+    
+  bailout2:
+    /* Clean up admin_client_identity droppings */
+    krb5_xfree(client_name);
+    krb5_free_principal(kcontext, client);
+
+  bailout:
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X admin_add_modify() = %d\n", retval));
     return(retval);
@@ -1614,8 +1481,8 @@ admin_add_principal(kcontext, debug_level, ticket, nargs, arglist)
 			      ticket,
 			      nargs,
 			      arglist,
-			      0,
-			      0,
+			      0, /* should exist */
+			      0, /* passwd supplied */
 			      (char *) NULL);
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X admin_add_principal() = %d\n", retval));
@@ -1692,8 +1559,8 @@ admin_modify_principal(kcontext, debug_level, ticket, nargs, arglist)
 			      ticket,
 			      nargs,
 			      arglist,
-			      1,
-			      0,
+			      1, /* should exist */
+			      0, /* passwd supplied */
 			      (char *) NULL);
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X admin_modify_principal() = %d\n", retval));
@@ -1719,8 +1586,8 @@ admin_change_opwd(kcontext, debug_level, ticket, principal, password)
 			      ticket,
 			      1,
 			      principal,
-			      1,
-			      1,
+			      1, /* should exist */
+			      1, /* passwd supplied */
 			      password->data);
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X admin_change_opw() = %d\n", retval));
@@ -1745,8 +1612,8 @@ admin_change_orandpwd(kcontext, debug_level, ticket, principal)
 			      ticket,
 			      1,
 			      principal,
-			      1,
-			      1,
+			      1, /* should exist */
+			      1, /* passwd supplied */
 			      (char *) NULL);
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X admin_change_orandpw() = %d\n", retval));

@@ -1,3 +1,43 @@
+Wed Feb 21 21:26:50 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* srv_main.c (xprintf): handle VARARGS.
+
+Sun Feb 18 00:08:02 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* admin.c (admin_merge_dbentries): rewrite for readability, and
+	fix the year old bug of modify randomizing the password field.
+	(admin_add_modify): rewrite for readability.
+
+Fri Feb  9 20:11:50 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* srv_net.c (net_init): gethostbyname doesn't use errno,
+	compensate by using KRB5_ERR_BAD_HOSTNAME.
+
+Tue Dec 12 19:14:51 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* admin.c (admin_merge_dbentries): new argument mod_only, to
+	distinguish between add and modify.
+	(admin_add_modify): new argument mod_only, to distinguish between
+	add and modify (and pass through to admin_merge_dbentries.)
+	(admin_add_principal, admin_modify_principal, admin_change_opwd,
+	admin_change_orandpw): pass flag indicating modify or add.
+
+Tue Sep 26 22:51:25 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* admin.c (admin_add_modify): copy, don't just assign, principals
+	to avoid double-freeing. Zero out "contents" and mod_name fields
+	after freeing, likewise. Free cur_dbentry and new_dbentry properly.
+
+Tue Sep 26 02:56:41 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* srv_acl.c (acl_free_entries): jump the ae_next link *before*
+	freeing the item so we don't lose it.
+
+Tue Sep 26 02:28:35 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* admin.c (admin_merge_dbentries): copy who into dbentp->mod_name
+	because callers will free it after successful use.
+
 Wed Sep 13 22:08:56 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* srv_key.c (key_string2key_keysalt and key_randomkey_keysalt):

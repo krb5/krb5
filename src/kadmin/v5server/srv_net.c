@@ -492,7 +492,7 @@ net_init(kcontext, debug_level, port)
 	goto done;
     }
     if (!(our_hostent = gethostbyname(our_host_name))) {
-	kret = errno;
+	kret = KRB5_ERR_BAD_HOSTNAME; /* perhaps put h_errno in the msg */
 	fprintf(stderr, net_no_hostent_fmt, programname, error_message(kret));
 	goto done;
     }

@@ -44,7 +44,7 @@
 #define	DEBUG_CALLS	128
 #define	DEBUG_NOSLAVES	256
 #ifdef	DEBUG
-#define	DPRINT(l1, cl, al)	if ((cl & l1) != 0) printf al
+#define	DPRINT(l1, cl, al)	if ((cl & l1) != 0) xprintf al
 #else	/* DEBUG */
 #define	DPRINT(l1, cl, al)
 #endif	/* DEBUG */

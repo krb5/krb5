@@ -31,6 +31,12 @@
 #include <stdio.h>
 #include <sys/signal.h>
 #include <setjmp.h>
+#if defined(HAVE_STDARG_H) || defined(_WINDOWS) || defined (_MACINTOSH)
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#define VARARGS
+#endif
 #include "k5-int.h"
 #include "com_err.h"
 #include "adm.h"
@@ -91,6 +97,42 @@ unhandled_signal(signo)
 #endif	/* POSIX_SETJMP */
     /* NOTREACHED */
 }
+
+#ifdef DEBUG
+#ifndef VARARGS
+void xprintf(const char *str, ...)
+{
+#else
+void xprintf(va_alist)
+  va_dcl
+{
+  const char *str;
+#endif
+  va_list pvar;
+  FILE* xfd;
+  static opened = 0;
+  time_t t = time(0);
+
+#ifdef VARARGS
+  va_start (pvar);
+  str = va_arg (pvar, const char *);
+#else
+  va_start(pvar, str);
+#endif
+  xfd = fopen("kadmind5-xprintf.log","a");
+  if (!xfd) perror("xfd");
+  else {
+    if (!opened) {
+      opened = 1;
+      fprintf(xfd, "starting log pid %d time %s\n", getpid(), ctime(&t));
+    }
+    vfprintf(xfd,str,pvar);
+    fflush(xfd);
+    fclose(xfd);
+  }
+  va_end(pvar);
+}
+#endif /* DEBUG */
 
 int
 main(argc, argv)
