@@ -238,9 +238,9 @@ initparse(struct krb5int_dns_state *ds)
 	len = dn_expand(ds->ansp, (unsigned char *)ds->ansp + ds->anslen,
 			p, host, sizeof(host));
 #endif
-	if (len < 0 || !INCR_OK(ds->ansp, ds->anslen, p, len))
+	if (len < 0 || !INCR_OK(ds->ansp, ds->anslen, p, len + 4))
 	    return -1;
-	p += len;
+	p += len + 4;
     }
     ds->ptr = p;
     ds->nanswers = nanswers;
@@ -269,13 +269,14 @@ krb5int_dns_nextans(struct krb5int_dns_state *ds,
 
     while (ds->nanswers--) {
 #if HAVE_DN_SKIPNAME
-	len = dn_skipname(ds->ansp, (unsigned char *)ds->ansp + ds->anslen);
+	len = dn_skipname(p, (unsigned char *)ds->ansp + ds->anslen);
 #else
 	len = dn_expand(ds->ansp, (unsigned char *)ds->ansp + ds->anslen,
 			p, host, sizeof(host));
 #endif
 	if (len < 0 || !INCR_OK(ds->ansp, ds->anslen, p, len))
 	    return -1;
+	p += len;
 	SAFE_GETUINT16(ds->ansp, ds->anslen, p, 2, ntype, out);
 	/* Also skip 4 bytes of TTL */
 	SAFE_GETUINT16(ds->ansp, ds->anslen, p, 6, nclass, out);
@@ -291,6 +292,7 @@ krb5int_dns_nextans(struct krb5int_dns_state *ds,
 	    ds->ptr = p + rdlen;
 	    return 0;
 	}
+	p += rdlen;
     }
     return 0;
 out:

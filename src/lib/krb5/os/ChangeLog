@@ -1,3 +1,10 @@
+2004-10-19  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c (initparse): Skip query type and class when we lack
+	ns_initparse().
+	(krb5int_dns_nextans) [!HAVE_NS_INITPARSE]: Pass correct pointer
+	to dn_skipname().  Actually skip the RR name.
+
 2004-10-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (TEST_PROGS): Add t_locate_kdc.
