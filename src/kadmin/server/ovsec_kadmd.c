@@ -948,7 +948,7 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
      gss_buffer_desc client, server;
      gss_OID gss_type;
      char *a;
-     rpc_u_int32 proc;
+     rpcproc_t proc;
      int i;
      const char *procname;
 

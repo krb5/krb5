@@ -1,3 +1,7 @@
+2004-06-26  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c (log_badverf): Fix a missed rpc_u_int32.
+
 2004-06-25  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (log_badverf): Use rpcproc_t instead of
