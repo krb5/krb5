@@ -93,6 +93,27 @@
 #define max(x,y) ((x) > (y) ? (x) : (y))
 #endif
 
+/*
+ * xxx The following function is very confusing to read and probably
+ * is buggy.  It should be documented better.  Here is what I've
+ * learned about it doing a quick bug fixing walk through.  The
+ * function takes a client and server realm name and returns the set
+ * of realms (in a field called tree) that you need to get tickets in
+ * in order to get from the source realm to the destination realm.  It
+ * takes a realm separater character (normally ., but presumably there
+ * for all those X.500 realms) .  There are two modes it runs in: the
+ * ANL krb5.confmode and the hierarchy mode.  The ANL mode is
+ * fairly obvious.  The hierarchy mode looks for common components in
+ * both the client and server realms.  In general, the pointer scp and
+ * ccp are used to walk through the client and server realms.  The
+ * com_sdot and com_cdot pointers point to (I think) the beginning of
+ * the common part of the realm names.  I.E. strcmp(com_cdot,
+ * com_sdot) ==0 is roughly an invarient.  However, there are cases
+ * where com_sdot and com_cdot are set to point before the start of
+ * the client or server strings.  I think this only happens when there
+ * are no common components.  --hartmans 2002/03/14
+ */
+
 krb5_error_code
 krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
     krb5_context context;
@@ -115,6 +136,10 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	char *cap_client, *cap_server;
 	char **cap_nodes;
         krb5_error_code cap_code;
+#endif
+	if (!(client->data &&server->data))
+	  return KRB5_NO_TKT_IN_RLM;
+#ifdef CONFIGURABLE_AUTHENTICATION_PATH
 	if ((cap_client = (char *)malloc(client->length + 1)) == NULL)
 		return ENOMEM;
 	strncpy(cap_client, client->data, client->length);

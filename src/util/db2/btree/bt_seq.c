@@ -1,3 +1,27 @@
+/*
+ * Copyright (C) 2002 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+
 /*-
  * Copyright (c) 1990, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
@@ -487,4 +511,390 @@ __bt_setcur(t, pgno, index)
 	t->bt_cursor.pg.pgno = pgno;
 	t->bt_cursor.pg.index = index;
 	F_SET(&t->bt_cursor, CURS_INIT);
+}
+
+/* Recursive descent cursor. */
+typedef struct rcursor_ {
+	CURSOR	cursor;
+	size_t	ssize;
+	EPGNO	*stack;
+	EPGNO	*sp;
+} RCURSOR;
+#define RCURSOR_MINSS	64
+
+static int	 bt_rcinit(void **);
+static void	 bt_rcdestroy(void **);
+static int	 bt_rcpush(RCURSOR *, db_pgno_t, u_int);
+static EPGNO	*bt_rcpop(RCURSOR *);
+static void	 bt_rcclr(RCURSOR *);
+static int	 bt_rcgrowstk(RCURSOR *);
+static int	 bt_rseqset(BTREE *, EPG *, DBT *, RCURSOR *, int);
+static int	 bt_rseqadv(BTREE *, EPG *, RCURSOR *, int);
+
+static int
+bt_rcinit(curs)
+	void **curs;
+{
+	RCURSOR *rc;
+
+	rc = *curs = malloc(sizeof(RCURSOR));
+	if (rc == NULL) {
+		errno = ENOMEM;
+		return RET_ERROR;
+	}
+	memset(rc, 0, sizeof(*rc));
+
+	rc->ssize = RCURSOR_MINSS;
+	rc->stack = malloc(rc->ssize * sizeof(EPGNO));
+	if (rc->stack == NULL) {
+		free(rc);
+		errno = ENOMEM;
+		return RET_ERROR;
+	}
+	bt_rcclr(rc);
+	return RET_SUCCESS;
+}
+
+static void
+bt_rcdestroy(curs)
+	void **curs;
+{
+	RCURSOR *rc;
+
+	rc = *curs;
+	free(rc->stack);
+	free(rc);
+	*curs = NULL;
+}
+
+static int
+bt_rcpush(rc, p, i)
+	RCURSOR *rc;
+	db_pgno_t p;
+	u_int i;
+{
+	int status;
+
+	rc->sp->pgno = p;
+	rc->sp->index = i;
+	if (++rc->sp > rc->stack + rc->ssize) {
+		status = bt_rcgrowstk(rc);
+		if (status != RET_SUCCESS)
+			return status;
+	}
+	return RET_SUCCESS;
+}
+
+static EPGNO *
+bt_rcpop(rc)
+	RCURSOR *rc;
+{
+	return (rc->sp == rc->stack) ? NULL : --rc->sp;
+}
+
+static void
+bt_rcclr(rc)
+	RCURSOR *rc;
+{
+	rc->sp = rc->stack;
+}
+
+static int
+bt_rcgrowstk(rc)
+	RCURSOR *rc;
+{
+	size_t osize;
+	EPGNO *e;
+
+	osize = rc->ssize;
+	rc->ssize *= 2;
+	e = realloc(rc->stack, rc->ssize * sizeof(EPGNO));
+	if (e == NULL) {
+		rc->ssize = osize;
+		errno = ENOMEM;
+		return RET_ERROR;
+	}
+	rc->stack = e;
+	return RET_SUCCESS;
+}
+
+/*
+ * bt_rseq --
+ *	Like __bt_seq but does recursive descent tree traversal
+ *	instead of using the prev/next pointers.
+ */
+int
+bt_rseq(dbp, key, data, curs, flags)
+	const DB *dbp;
+	DBT *key, *data;
+	void **curs;
+	u_int flags;
+{
+	RCURSOR *rc;
+	BTREE *t;
+	EPG e;
+	int status;
+
+	t = dbp->internal;
+
+	/* Toss any page pinned across calls. */
+	if (t->bt_pinned != NULL) {
+		mpool_put(t->bt_mp, t->bt_pinned, 0);
+		t->bt_pinned = NULL;
+	}
+
+	if (curs == NULL) {
+		errno = EINVAL;
+		return RET_ERROR;
+	}
+	if (*curs == NULL) {
+		status = bt_rcinit(curs);
+		if (status != RET_SUCCESS)
+			return RET_ERROR;
+	}
+	rc = *curs;
+
+	/*
+	 * If scan unitialized as yet, or starting at a specific record, set
+	 * the scan to a specific key.  Both bt_rseqset and bt_rseqadv pin
+	 * the page the cursor references if they're successful.
+	 */
+	switch (flags) {
+	case R_NEXT:
+	case R_PREV:
+		if (F_ISSET(&rc->cursor, CURS_INIT)) {
+			status = bt_rseqadv(t, &e, rc, flags);
+			break;
+		}
+		/* FALLTHROUGH */
+	case R_FIRST:
+	case R_LAST:
+	case R_CURSOR:
+		status = bt_rseqset(t, &e, key, rc, flags);
+		break;
+	default:
+		errno = EINVAL;
+		return (RET_ERROR);
+	}
+
+	if (status == RET_SUCCESS) {
+		status =
+		    __bt_ret(t, &e, key, &t->bt_rkey, data, &t->bt_rdata, 0);
+
+		/*
+		 * If the user is doing concurrent access, we copied the
+		 * key/data, toss the page.
+		 */
+		if (F_ISSET(t, B_DB_LOCK))
+			mpool_put(t->bt_mp, e.page, 0);
+		else
+			t->bt_pinned = e.page;
+	} else if (status == RET_SPECIAL)
+		bt_rcdestroy(curs);
+	return (status);
+}
+
+/*
+ * bt_rseqset --
+ *	Set the sequential scan to a specific key.
+ *
+ * Parameters:
+ *	t:	tree
+ *	ep:	storage for returned key
+ *	key:	key for initial scan position
+ *	rc:	recursion cursor
+ *	flags:	R_CURSOR, R_FIRST, R_LAST, R_NEXT, R_PREV
+ *
+ * Side effects:
+ *	Pins the page the cursor references.
+ *	Updates rc's stack and cursor.
+ *
+ * Returns:
+ *	RET_ERROR, RET_SUCCESS or RET_SPECIAL if there's no next key.
+ */
+static int
+bt_rseqset(t, ep, key, rc, flags)
+	BTREE *t;
+	EPG *ep;
+	DBT *key;
+	RCURSOR *rc;
+	int flags;
+{
+	PAGE *h;
+	db_pgno_t pg;
+	int status;
+
+	/*
+	 * Find the first, last or specific key in the tree and point the
+	 * cursor at it.  The cursor may not be moved until a new key has
+	 * been found.
+	 */
+	switch (flags) {
+	case R_CURSOR:		/* Not implemented. */
+		errno = EINVAL;
+		return RET_ERROR;
+	case R_FIRST:				/* First record. */
+	case R_NEXT:
+		bt_rcclr(rc);
+		/* Walk down the left-hand side of the tree. */
+		for (pg = P_ROOT;;) {
+			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+				return (RET_ERROR);
+
+			/* Check for an empty tree. */
+			if (NEXTINDEX(h) == 0) {
+				mpool_put(t->bt_mp, h, 0);
+				return (RET_SPECIAL);
+			}
+
+			if (h->flags & (P_BLEAF | P_RLEAF))
+				break;
+			pg = GETBINTERNAL(h, 0)->pgno;
+			status = bt_rcpush(rc, h->pgno, 0);
+			mpool_put(t->bt_mp, h, 0);
+			if (status != RET_SUCCESS)
+				return status;
+		}
+		ep->page = h;
+		ep->index = 0;
+		break;
+	case R_LAST:				/* Last record. */
+	case R_PREV:
+		bt_rcclr(rc);
+		/* Walk down the right-hand side of the tree. */
+		for (pg = P_ROOT;;) {
+			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+				return (RET_ERROR);
+
+			/* Check for an empty tree. */
+			if (NEXTINDEX(h) == 0) {
+				mpool_put(t->bt_mp, h, 0);
+				return (RET_SPECIAL);
+			}
+
+			if (h->flags & (P_BLEAF | P_RLEAF))
+				break;
+			pg = GETBINTERNAL(h, NEXTINDEX(h) - 1)->pgno;
+			status = bt_rcpush(rc, h->pgno, NEXTINDEX(h) - 1);
+			mpool_put(t->bt_mp, h, 0);
+			if (status != RET_SUCCESS)
+				return status;
+		}
+		ep->page = h;
+		ep->index = NEXTINDEX(h) - 1;
+		break;
+	}
+	rc->cursor.pg.pgno = ep->page->pgno;
+	rc->cursor.pg.index = ep->index;
+	F_CLR(&rc->cursor, CURS_ACQUIRE | CURS_AFTER | CURS_BEFORE);
+	F_SET(&rc->cursor, CURS_INIT);
+	return (RET_SUCCESS);
+}
+
+/*
+ * bt_rseqadvance --
+ *	Advance the sequential scan.
+ *
+ * Parameters:
+ *	t:	tree
+ *	ep:	return page
+ *	rc:	recursion cursor
+ *	flags:	R_NEXT, R_PREV
+ *
+ * Side effects:
+ *	Pins the page the new key/data record is on.
+ *	Updates rc's stack and cursor.
+ *
+ * Returns:
+ *	RET_ERROR, RET_SUCCESS or RET_SPECIAL if there's no next key.
+ */
+static int
+bt_rseqadv(t, ep, rc, flags)
+	BTREE *t;
+	EPG *ep;
+	RCURSOR *rc;
+	int flags;
+{
+	CURSOR *c;
+	PAGE *h;
+	indx_t idx;
+	db_pgno_t pg;
+	int status;
+	EPGNO *e;
+
+	/*
+	 * There are a couple of states that we can be in.  The cursor has
+	 * been initialized by the time we get here, but that's all we know.
+	 */
+	c = &rc->cursor;
+
+	/* Get the page referenced by the cursor. */
+	if ((h = mpool_get(t->bt_mp, c->pg.pgno, 0)) == NULL)
+		return (RET_ERROR);
+
+	/*
+ 	 * Find the next/previous record in the tree and point the cursor at
+	 * it.  The cursor may not be moved until a new key has been found.
+	 */
+	switch (flags) {
+	case R_NEXT:			/* Next record. */
+		idx = c->pg.index;
+		while (++idx == NEXTINDEX(h)) {
+			/* Crawl up if we hit the right edge. */
+			e = bt_rcpop(rc);
+			mpool_put(t->bt_mp, h, 0);
+			if (e == NULL) /* Hit the right edge of root. */
+				return RET_SPECIAL;
+			idx = e->index;
+			pg = e->pgno;
+			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+				return (RET_ERROR);
+		}
+		while (!(h->flags & (P_BLEAF | P_RLEAF))) {
+			/* Crawl down the left until we hit a leaf. */
+			status = bt_rcpush(rc, h->pgno, idx);
+			pg = GETBINTERNAL(h, idx)->pgno;
+			mpool_put(t->bt_mp, h, 0);
+			if (status != RET_SUCCESS)
+				return status;
+			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+				return (RET_ERROR);
+			idx = 0;
+		}
+		break;
+	case R_PREV:			/* Previous record. */
+		idx = c->pg.index;
+		while (!idx) {
+			/* Crawl up if we hit the left edge. */
+			e = bt_rcpop(rc);
+			mpool_put(t->bt_mp, h, 0);
+			if (e == NULL) /* Hit the left edge of root. */
+				return RET_SPECIAL;
+			idx = e->index;
+			pg = e->pgno;
+			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+				return (RET_ERROR);
+		}
+		idx--;
+		while (!(h->flags & (P_BLEAF | P_RLEAF))) {
+			/* Crawl down the right until we hit a leaf. */
+			status = bt_rcpush(rc, h->pgno, idx);
+			pg = GETBINTERNAL(h, idx)->pgno;
+			mpool_put(t->bt_mp, h, 0);
+			if (status != RET_SUCCESS)
+				return status;
+			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+				return (RET_ERROR);
+			idx = NEXTINDEX(h) - 1;
+		}
+		break;
+	}
+
+	ep->page = h;
+	ep->index = idx;
+	c->pg.pgno = h->pgno;
+	c->pg.index = idx;
+	F_CLR(c, CURS_ACQUIRE | CURS_AFTER | CURS_BEFORE);
+	F_SET(c, CURS_INIT);
+	return (RET_SUCCESS);
 }

@@ -1,3 +1,56 @@
+2002-02-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_krb5_kvno): Disable previous change.
+
+2002-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_krb5_kvno): Return an error if the key
+	version number won't fit in the one-byte encoding we currently
+	use.
+
+2001-10-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* str_conv.c (krb5_string_to_keysalts): When parsing string, allow
+	for extra separator characters (like spaces) between keysalts.
+	[pullup 1.7->1.8 from trunk]
+
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.h (krb5_realm_params): Add fields realm_reject_bad_transit
+	and realm_reject_bad_transit_valid; delete field realm_filler.
+	* alt_prof.c (string_to_boolean, krb5_aprof_get_boolean): New
+	functions.
+	(krb5_read_realm_params): Parse "reject_bad_transit" value as
+	boolean and save it.
+
+2001-09-07  Tom Yu  <tlyu@mit.edu>
+
+	* adb.h: Add btinfo. [pullup from trunk]
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Include des3 in supported
+	enctypes by default.
+
+2000-05-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Use 1024 for
+	hard-coded length, to match existing callers.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* admin.h: Add a length parameter to kadm5_chpass_principal_util().
+	* admin_internal.h: Add a length parameter to
+	_kadm5_chpass_principal_util().
+	* chpass_util.c (_kadm5_chpass_principal_util): Add a length parameter,
+	and use it to avoid overflowing "msg_ret".
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Adjust for new
+	parameter in kadm5_chpass_principal_util().
+
+2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* logger.c (klog_com_err_proc): Don't overflow buffer "outbuf".
+
 2000-02-26  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_xdr.c (xdr_cprinc3_arg): Don't XDR the nonexistent
