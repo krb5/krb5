@@ -91,7 +91,7 @@ static char des_inbuf[2*RCMD_BUFSIZ];	 /* needs to be > largest read size */
 static char des_outpkt[2*RCMD_BUFSIZ+4]; /* needs to be > largest write size */
 static krb5_data desinbuf;
 static krb5_data desoutbuf;
-static krb5_keyblock keyblock;		 /* key for encrypt/decrypt */
+static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
 static int (*input)();
 static int (*output)();
 static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
@@ -789,7 +789,8 @@ static int v5_des_read(fd, buf, len)
     int cc;
     unsigned char c;
     krb5_error_code ret;
-    krb5_data cipher, plain;
+    krb5_data plain;
+    krb5_enc_data cipher;
     
     if (nstored >= len) {
 	memcpy(buf, store_ptr, len);
@@ -823,7 +824,7 @@ static int v5_des_read(fd, buf, len)
     if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
     rd_len = (rd_len << 8) | c;
 
-    if (ret = krb5_encrypt_length(bsd_context, keyblock->enctype,
+    if (ret = krb5_c_encrypt_length(bsd_context, keyblock->enctype,
 				  rd_len, &net_len)) {
 	errno = ret;
 	return(-1);
@@ -840,8 +841,9 @@ static int v5_des_read(fd, buf, len)
 	return(-1);
     }
 
-    cipher.length = net_len;
-    cipher.data = desinbuf.data;
+    cipher.enctype = ENCTYPE_UNKNOWN;
+    cipher.ciphertext.length = net_len;
+    cipher.ciphertext.data = desinbuf.data;
     plain.length = sizeof(storage);
     plain.data = storage;
 
@@ -877,17 +879,21 @@ static int v5_des_write(fd, buf, len)
 {
     unsigned char *len_buf = (unsigned char *) des_outpkt;
     krb5_data plain;
+    krb5_enc_data cipher;
 
     plain.data = buf;
     plain.length = len;
 
-    desoutbuf.length = sizeof(des_outpkt)-4;
+    cipher.ciphertext.length = sizeof(des_outpkt)-4;
+    cipher.ciphertext.data = desoutbuf.data;
 
-    if (krb5_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE, 0,
-		      &plain, &desoutbuf)) {
+    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE, 0,
+		       &plain, &cipher)) {
 	errno = EIO;
 	return(-1);
     }
+
+    desoutbuf.length = cipher.ciphertext.length;
 
     len_buf[0] = (len & 0xff000000) >> 24;
     len_buf[1] = (len & 0xff0000) >> 16;
