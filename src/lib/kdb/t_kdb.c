@@ -310,7 +310,7 @@ add_principal(kcontext, principal, eblock, key, rseed)
 
     kret = krb5_db_put_principal(kcontext, &dbent, &nentries);
     if ((!kret) && (nentries != 1))
-	kret = KRB5KRB_ERR_GENERIC;
+	kret = KRB5_KDB_UK_SERROR;
  out:
     krb5_dbe_free_contents(kcontext, &dbent);
     return(kret);
@@ -389,7 +389,7 @@ find_principal(kcontext, principal, docompare)
 				     &how_many, &more))
 	return(kret);
     if (how_many == 0) 
-	return(KRB5KRB_ERR_GENERIC);
+	return(KRB5_KDB_NOENTRY);
 
     if (kret = krb5_dbe_decode_mod_princ_data(kcontext, &dbent, &mod_princ)) {
 	krb5_db_free_principal(kcontext, &dbent, how_many);
@@ -438,7 +438,7 @@ delete_principal(kcontext, principal)
 
 int
 do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
-	   db_type)
+	   db_type, ptest)
     char	*db;
     int		passes;
     int		verbose;
@@ -448,6 +448,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     int		save_db;
     int		dontclean;
     enum dbtype	db_type;
+    int		ptest;
 {
     krb5_error_code	kret;
     krb5_context	kcontext;
@@ -883,6 +884,120 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     if (kret)
 	fprintf(stderr, "%s: error while %s %s%s(%s)\n",
 		programname, op, linkage, oparg, error_message(kret));
+
+    if (!kret && ptest) {
+	int	nper;
+	pid_t	children[32], child;
+	int	nprocs, existat, i, j, fd;
+
+	nprocs = ptest + 1;
+	if (nprocs > 32)
+	    nprocs = 32;
+
+	nper = passes / nprocs;
+	unlink("./test.lock");
+	for (i=0; i<nprocs; i++) {
+	    child = fork();
+	    if (child == 0) {
+		/* Child */
+		int base;
+		krb5_context	ccontext;
+		struct stat stbuf;
+
+		while (stat("./test.lock", &stbuf) == -1)
+		krb5_init_context(&ccontext);
+		krb5_init_ets(ccontext);
+		switch (db_type) {
+		case DB_BERKELEY:
+		    if (kret = kdb5_db_set_dbops(ccontext, &berkeley_dispatch))
+			exit(1);
+		    break;
+		case DB_DBM:
+		    if (kret = kdb5_db_set_dbops(ccontext, &dbm_dispatch))
+			exit(1);
+		    break;
+		case DB_DEFAULT:
+		    break;
+		default:
+		    exit(1);
+		    break;
+		}
+		if ((kret = krb5_db_set_name(ccontext, db)) ||
+		    (kret = krb5_db_init(ccontext)))
+		    exit(1);
+		base = i*nper;
+		for (j=0; j<nper; j++) {
+		    if ((kret = add_principal(ccontext,
+					      playback_principal(base+j),
+					      &master_encblock,
+					      &stat_kb,
+					      rseed))) {
+			fprintf(stderr,
+				"%d: (%d,%d) Failed add of %s with %s\n",
+				getpid(), i, j, playback_name(base+j),
+				error_message(kret));
+			break;
+		    }
+		    if (verbose > 4)
+			fprintf(stderr, "*A[%d](%s)\n", getpid(),
+				playback_name(base+j));
+		}   
+		for (j=0; (j<nper) && (!kret); j++) {
+		    if ((kret = find_principal(ccontext,
+					       playback_principal(base+j),
+					       &master_encblock,
+					       &stat_kb,
+					       rseed))) {
+			fprintf(stderr,
+				"%d: (%d,%d) Failed lookup of %s with %s\n",
+				getpid(), i, j, playback_name(base+j),
+				error_message(kret));
+			break;
+		    }
+		    if (verbose > 4)
+			fprintf(stderr, "-S[%d](%s)\n", getpid(),
+				playback_name(base+j));
+		}   
+		for (j=0; (j<nper) && (!kret); j++) {
+		    if ((kret = delete_principal(ccontext,
+						 playback_principal(base+j),
+						 &master_encblock,
+						 &stat_kb,
+						 rseed))) {
+			fprintf(stderr,
+				"%d: (%d,%d) Failed delete of %s with %s\n",
+				getpid(), i, j, playback_name(base+j),
+				error_message(kret));
+			break;
+		    }
+		    if (verbose > 4)
+			fprintf(stderr, "XD[%d](%s)\n", getpid(),
+				playback_name(base+j));
+		}
+		krb5_db_fini(ccontext);
+		krb5_free_context(ccontext);
+		exit((kret) ? 1 : 0);
+	    }
+	    else
+		children[i] = child;
+	}
+	fd = open("./test.lock", O_CREAT|O_RDWR|O_EXCL, 0666);
+	close(fd);
+	sleep(1);
+	unlink("./test.lock");
+	for (i=0; i<nprocs; i++) {
+	    if (waitpid(children[i], &existat, 0) == children[i]) {
+		if (verbose) 
+		    fprintf(stderr, "%d finished with %d\n", children[i],
+			    existat);
+		if (existat)
+		    kret = KRB5KRB_ERR_GENERIC;
+	    }
+	    else
+		fprintf(stderr, "Wait for %d failed\n", children[i]);
+	}
+    }
+
     free_principals(kcontext, passes);
     if (db_open)
 	(void) krb5_db_fini(kcontext);
@@ -942,7 +1057,7 @@ main(argc, argv)
     extern char	*optarg;
 
     int		do_time, do_random, num_passes, check_cont, verbose, error;
-    int		save_db, dont_clean;
+    int		save_db, dont_clean, do_ptest;
     enum dbtype	db_type;
     char	*db_name;
 
@@ -962,9 +1077,10 @@ main(argc, argv)
     dont_clean = 0;
     db_type = DB_DEFAULT;
     error = 0;
+    do_ptest = 0;
 
     /* Parse argument list */
-    while ((option = getopt(argc, argv, "cd:n:orstvDO")) != EOF) {
+    while ((option = getopt(argc, argv, "cd:n:oprstvDO")) != EOF) {
 	switch (option) {
 	case 'c':
 	    check_cont = 1;
@@ -978,6 +1094,9 @@ main(argc, argv)
 			programname, optarg, option);
 		error++;
 	    }
+	    break;
+	case 'p':
+	    do_ptest++;
 	    break;
 	case 'r':
 	    do_random = 1;
@@ -1006,7 +1125,7 @@ main(argc, argv)
 	}
     }
     if (error)
-	fprintf(stderr, "%s: usage is %s [-crstv] [-d <dbname>] [-n <num>]\n",
+	fprintf(stderr, "%s: usage is %s [-cprstv] [-d <dbname>] [-n <num>]\n",
 		programname, programname);
     else
 	error = do_testing(db_name,
@@ -1017,7 +1136,9 @@ main(argc, argv)
 			   check_cont,
 			   save_db,
 			   dont_clean,
-			   db_type);
+			   db_type,
+			   do_ptest);
     return(error);
 }
+
 
