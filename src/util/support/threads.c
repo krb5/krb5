@@ -117,30 +117,36 @@ static void thread_termination(void *);
 
 static void thread_termination (void *tptr)
 {
-    int i, pass, none_found;
-    struct tsd_block *t = tptr;
-
-    /* Make multiple passes in case, for example, a libkrb5 cleanup
-       function wants to print out an error message, which causes
-       com_err to allocate a thread-specific buffer, after we just
-       freed up the old one.
-
-       Shouldn't actually happen, if we're careful, but check just in
-       case.  */
-
-    pass = 0;
-    none_found = 0;
-    while (pass < 4 && !none_found) {
-	none_found = 1;
-	for (i = 0; i < K5_KEY_MAX; i++) {
-	    if (destructors_set[i] && destructors[i] && t->values[i]) {
-		void *v = t->values[i];
-		t->values[i] = 0;
-		(*destructors[i])(v);
-		none_found = 0;
-	    }
-	}
-    }
+    int err = k5_mutex_lock(&key_lock);
+    if (err == 0) {
+        int i, pass, none_found;
+        struct tsd_block *t = tptr;
+        
+        /* Make multiple passes in case, for example, a libkrb5 cleanup
+            function wants to print out an error message, which causes
+            com_err to allocate a thread-specific buffer, after we just
+            freed up the old one.
+            
+            Shouldn't actually happen, if we're careful, but check just in
+            case.  */
+        
+        pass = 0;
+        none_found = 0;
+        while (pass < 4 && !none_found) {
+            none_found = 1;
+            for (i = 0; i < K5_KEY_MAX; i++) {
+                if (destructors_set[i] && destructors[i] && t->values[i]) {
+                    void *v = t->values[i];
+                    t->values[i] = 0;
+                    (*destructors[i])(v);
+                    none_found = 0;
+                }
+            }
+        }
+        free (t);
+        err = k5_mutex_unlock(&key_lock);
+   }
+    
     /* remove thread from global linked list */
 }
 

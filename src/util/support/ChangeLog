@@ -1,3 +1,11 @@
+2005-03-20  Alexandra Ellwood  <lxs@mit.edu>
+
+	* threads.c (thread_termination): Free array of pointers
+	to thread-specific data (t) on thread termination.  Use
+	existing mutex to prevent the deletion of the array from
+	interfering with the global list of thread specific data
+	(used for library termination).
+
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (k5_key_delete) [pthread case]: Reset flags and
