@@ -275,9 +275,9 @@ name_matches(name, arglist)
 }
 
 static krb5_error_code
-find_keytype(dbentp, keytype, salttype, kentp)
+find_enctype(dbentp, enctype, salttype, kentp)
     krb5_db_entry	*dbentp;
-    krb5_keytype	keytype;
+    krb5_enctype	enctype;
     krb5_int32		salttype;
     krb5_key_data	**kentp;
 {
@@ -288,7 +288,7 @@ find_keytype(dbentp, keytype, salttype, kentp)
     maxkvno = -1;
     datap = (krb5_key_data *) NULL;
     for (i=0; i<dbentp->n_key_data; i++) {
-	if ((dbentp->key_data[i].key_data_type[0] == keytype) &&
+	if ((dbentp->key_data[i].key_data_type[0] == enctype) &&
 	    ((dbentp->key_data[i].key_data_type[1] == salttype) ||
 	     (salttype < 0))) {
 	    maxkvno = dbentp->key_data[i].key_data_kvno;
@@ -397,12 +397,12 @@ dump_k5beta_iterator(ptr, entry)
 	/*
 	 * Find the 'primary' key and the 'alternate' key.
 	 */
-	if ((retval = find_keytype(entry,
-				   KEYTYPE_DES_CBC_CRC,
+	if ((retval = find_enctype(entry,
+				   ENCTYPE_DES_CBC_CRC,
 				   KRB5_KDB_SALTTYPE_NORMAL,
 				   &pkey)) &&
-	    (retval = find_keytype(entry,
-				   KEYTYPE_DES_CBC_CRC,
+	    (retval = find_enctype(entry,
+				   ENCTYPE_DES_CBC_CRC,
 				   KRB5_KDB_SALTTYPE_V4,
 				   &akey))) {
 	    fprintf(stderr, nokeys_err, arg->programname, name);

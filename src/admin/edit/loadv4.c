@@ -90,7 +90,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k enctype]\n\
 \t[-M mkeyname] -f inputfile\n",
 	    who);
     return;
@@ -142,7 +142,7 @@ char *argv[];
     char *mkey_name = 0;
     char *mkey_fullname;
     char *defrealm;
-    int keytypedone = 0;
+    int enctypedone = 0;
     int v4manual = 0;
     int read_mkey = 0;
     int tempdb = 0;
@@ -183,11 +183,11 @@ char *argv[];
 	    verbose = 1;
 	}
 	else if (!strcmp(argv[op_ind], "-k") && ((argc - op_ind) >= 2)) {
-	    if (!krb5_string_to_keytype(argv[op_ind+1],
-					&master_keyblock.keytype))
-		keytypedone++;
+	    if (!krb5_string_to_enctype(argv[op_ind+1],
+					&master_keyblock.enctype))
+		enctypedone++;
 	    else
-		com_err(argv[0], 0, "%s is an invalid keytype",
+		com_err(argv[0], 0, "%s is an invalid enctype",
 			argv[op_ind+1]);
 	    op_ind++;
 	}
@@ -229,9 +229,9 @@ char *argv[];
 	    mkey_name = strdup(rparams->realm_mkey_name);
 
 	/* Get the value for the master key type */
-	if (rparams->realm_keytype_valid && !keytypedone) {
-	    master_keyblock.keytype = rparams->realm_keytype;
-	    keytypedone++;
+	if (rparams->realm_enctype_valid && !enctypedone) {
+	    master_keyblock.enctype = rparams->realm_enctype;
+	    enctypedone++;
 	}
 
 	/* Get the value for the stashfile */
@@ -262,16 +262,16 @@ char *argv[];
 	return;
     }
 
-    if (!keytypedone)
-	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
+    if (!enctypedone)
+	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
-    if (!valid_keytype(master_keyblock.keytype)) {
+    if (!valid_enctype(master_keyblock.enctype)) {
 	com_err(PROGNAME, KRB5_PROG_KEYTYPE_NOSUPP,
-		"while setting up keytype %d", master_keyblock.keytype);
+		"while setting up enctype %d", master_keyblock.enctype);
 	return;
     }
 
-    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
+    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
 
     /* If the user has not requested locking, don't modify an existing database. */
     if (! tempdb) {
@@ -530,7 +530,7 @@ Principal *princ;
 
     v4v5key.magic = KV5M_KEYBLOCK;
     v4v5key.contents = (krb5_octet *)v4key;
-    v4v5key.keytype = KEYTYPE_DES_CBC_CRC;
+    v4v5key.enctype = ENCTYPE_DES_CBC_CRC;
     v4v5key.length = sizeof(v4key);
 
     retval = krb5_dbe_create_key_data(context, &entry);

@@ -334,7 +334,7 @@ int handle_keys(arg)
 	exit(1);
     }
 
-    krb5_use_keytype(edit_context, &master_encblock, DEFAULT_KDC_KEYTYPE);
+    krb5_use_enctype(edit_context, &master_encblock, DEFAULT_KDC_ENCTYPE);
     if (retval = krb5_db_fetch_mkey(edit_context, master_princ, 
 				    &master_encblock, 0,
 				    0, (char *) NULL, 0, &master_keyblock)) {
@@ -367,7 +367,7 @@ handle_one_key(arg, v5master, v5key, v4key)
 	return retval;
 
     /* v4v5key.contents = (krb5_octet *)v4key; */
-    /* v4v5key.keytype = KEYTYPE_DES; */
+    /* v4v5key.enctype = ENCTYPE_DES; */
     /* v4v5key.length = sizeof(v4key); */
 
     memcpy(v4key, v5plainkey.contents, sizeof(des_cblock));
