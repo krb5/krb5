@@ -39,7 +39,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-	krb5_context kcontext;
+    krb5_context kcontext;
     int c;
     krb5_ccache cache = NULL;
     char *cache_name = NULL;
@@ -47,6 +47,7 @@ main(argc, argv)
     int errflg=0;
     int quiet = 0;	
     
+    krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
 
     if (strrchr(argv[0], '/'))

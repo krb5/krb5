@@ -1,3 +1,17 @@
+Fri Feb 10 18:46:17 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove ISODE cruft.  Use $(LIBS) so that
+		libsocket can be pulled in if necessary.
+
+	* kdestroy.c (main): Call krb5_init_context to initialize the
+		context. 
+
+	* configure.in: Add check for libsocket and libnsl (sigh).
+		krb5_init_ctx drags in cryptoconf.c, which drags in enough
+		of the crypto library that socket() gets called.  We should
+		to fix this eventually to make klist smaller, but the fix
+		will be subtle.
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
     * Added krb5_context to all krb5_routines

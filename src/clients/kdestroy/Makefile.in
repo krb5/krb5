@@ -1,7 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
@@ -10,7 +9,7 @@ KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 
 kdestroy: kdestroy.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o kdestroy kdestroy.o $(KLIB)
+	$(CC) $(CFLAGS) -o kdestroy kdestroy.o $(KLIB) $(LIBS)
 
 kdestroy.o:	$(srcdir)/kdestroy.c
 
