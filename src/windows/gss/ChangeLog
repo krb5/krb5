@@ -1,3 +1,14 @@
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * resource.h: new file containing new ui component id values
+    
+    * gss.rc: new user interface definition
+
+    * gss.h, gss-misc.c, gss-client.c: Updates to support new UI and 
+      corrections to add compatibility with the Unix gss-server
+
+    * Makefile: add linkage to comctl32.lib
+
 2002-06-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SYSLIBS): Use ws2_32.lib instead of wsock32.lib.
