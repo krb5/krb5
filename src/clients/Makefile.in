@@ -1,11 +1,11 @@
 ##WIN32##all-windows::
-##WIN32##	@echo Making all in clients\kinit
-##WIN32##	cd kinit
-##WIN32##	-$(MAKE) -$(MAKEFLAGS)
 ##WIN32##	@echo Making all in clients\klist
-##WIN32##	cd ..\klist
+##WIN32##	cd klist
 ##WIN32##	-$(MAKE) -$(MAKEFLAGS)
 ##WIN32##	@echo Making all in clients\kdestroy
 ##WIN32##	cd ..\kdestroy
 ##WIN32##	-$(MAKE) -$(MAKEFLAGS)
+###WIN32##	@echo Making all in clients\kinit
+###WIN32##	cd ..\kinit
+###WIN32##	-$(MAKE) -$(MAKEFLAGS)
 ##WIN32##	cd ..
