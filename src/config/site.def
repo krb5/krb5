@@ -104,9 +104,17 @@
 #endif
 
 /* The -Z flag is a special loader flag at Athena to unmap page zero on
-   some architectures that normally allow p0 references, e.g. VAX BSD. */
+   some architectures that normally allow p0 references, e.g. VAX BSD.
+
+   -T0x400000 has a similar effect on AIX 1.2
+
+   Symbolic debugging is difficult on RT and PS/2 when this option is used. */
 #ifndef UltrixArchitecture
+#if defined(AIXArchitecture) && OSMajorVersion == 1
+#define	ExtraLoadFlags -T0x400000
+#else
 #define ExtraLoadFlags -Z
+#endif
 #endif
 
 #ifndef DefaultCDebugFlags
