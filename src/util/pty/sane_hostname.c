@@ -26,24 +26,9 @@
 #include "libpty.h"
 #include <arpa/inet.h>
 
-#ifdef HAVE_GETNAMEINFO
-static size_t
-sockaddrlen (const struct sockaddr *addr)
-{
-#ifdef HAVE_SA_LEN
-    return addr->sa_len;
-#else
-    if (addr->sa_family == AF_INET)
-	return sizeof (struct sockaddr_in);
-#ifdef KRB5_USE_INET6
-    if (addr->sa_family == AF_INET6)
-	return sizeof (struct sockaddr_in6);
-#endif
-    /* unknown address family */
-    return 0;
-#endif
-}
-#endif
+#include "socket-utils.h"
+#define FAI_PREFIX krb5int_pty
+#include "fake-addrinfo.c"
 
 static void
 downcase (char *s)
@@ -52,37 +37,12 @@ downcase (char *s)
 	*s = tolower ((int) *s);
 }
 
-static long
-do_ntoa(const struct sockaddr *addr, size_t hostlen, char **out)
-{
-#ifdef HAVE_GETNAMEINFO
-    char addrbuf[NI_MAXHOST];
-    if (getnameinfo (addr, sockaddrlen (addr), addrbuf, sizeof (addrbuf),
-		     (char *)0, 0, NI_NUMERICHOST) == 0)
-	strncpy(*out, addrbuf, hostlen);
-    else
-	strncpy(*out, "??", hostlen);
-#else
-    if (addr->sa_family == AF_INET)
-	strncpy(*out, inet_ntoa(((const struct sockaddr_in *)addr)->sin_addr),
-		hostlen);
-    else
-	strncpy(*out, "??", hostlen);
-#endif
-    (*out)[hostlen - 1] = '\0';
-    return 0;
-}
-
 long
 pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
 		       int strip_ldomain, int always_ipaddr, char **out)
 {
-#ifdef HAVE_GETNAMEINFO
     struct addrinfo *ai;
     char addrbuf[NI_MAXHOST];
-#else
-    struct hostent *hp;
-#endif
 #ifdef HAVE_STRUCT_UTMP_UT_HOST
     struct utmp ut;
 #else
@@ -94,7 +54,7 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
 
     *out = NULL;
     if (maxlen && maxlen < 16)
-	/* assume they meant 16, otherwise IP addr won't fit */
+	/* assume they meant 16, otherwise IPv4 addr won't fit */
 	maxlen = 16;
 #ifdef HAVE_STRUCT_UTMP_UT_HOST
     ut_host_len = sizeof (ut.ut_host);
@@ -107,16 +67,21 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
     if (*out == NULL)
 	return ENOMEM;
 
-    if (always_ipaddr)
-#ifdef HAVE_GETNAMEINFO
+    if (always_ipaddr) {
+	char addrbuf[NI_MAXHOST];
     use_ipaddr:
-#endif
-	return do_ntoa(addr, ut_host_len, out);
+	if (getnameinfo (addr, socklen (addr), addrbuf, sizeof (addrbuf),
+			 (char *)0, 0, NI_NUMERICHOST) == 0)
+	    strncpy(*out, addrbuf, ut_host_len);
+	else
+	    strncpy(*out, "??", ut_host_len);
+	(*out)[ut_host_len - 1] = '\0';
+	return 0;
+    }
 
-#ifdef HAVE_GETNAMEINFO
     /* If we didn't want to chop off the local domain, this would be
        much simpler -- just a single getnameinfo call and a strncpy.  */
-    if (getnameinfo(addr, sockaddrlen (addr), addrbuf, sizeof (addrbuf),
+    if (getnameinfo(addr, socklen (addr), addrbuf, sizeof (addrbuf),
 		    (char *) NULL, 0, NI_NAMEREQD) != 0)
 	goto use_ipaddr;
     downcase (addrbuf);
@@ -142,37 +107,7 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
     }
     strncpy(*out, addrbuf, ut_host_len);
     (*out)[ut_host_len - 1] = '\0';
-#else /* old gethostbyaddr interface; how quaint :-) */
-    if (addr->sa_family == AF_INET)
-	hp = gethostbyaddr((const char *)&((const struct sockaddr_in *)addr)->sin_addr,
-			   sizeof (struct in_addr), addr->sa_family);
-    else
-	hp = NULL;
-    if (hp == NULL) {
-	return do_ntoa(addr, ut_host_len, out);
-    }
-    strncpy(*out, hp->h_name, ut_host_len);
-    (*out)[ut_host_len - 1] = '\0';
-    downcase (*out);
-
-    if (strip_ldomain) {
-	(void) gethostname(lhost, sizeof (lhost));
-	hp = gethostbyname(lhost);
-	if (hp != NULL) {
-	    strncpy(lhost, hp->h_name, sizeof (lhost));
-	    domain = strchr(lhost, '.');
-	    if (domain != NULL) {
-		downcase (domain);
-		cp = strstr(*out, domain);
-		if (cp != NULL)
-		    *cp = '\0';
-	    }
-	}
-    }
-#endif
-
-    if (strlen(*out) >= maxlen) {
-	return do_ntoa(addr, ut_host_len, out);
-    }
+    if (strlen(*out) >= maxlen)
+	goto use_ipaddr;
     return 0;
 }
