@@ -1,5 +1,3 @@
-SUBDIRS = @SUBDIRS@
-
 srcdir = @srcdir@
 VPATH = @srcdir@
 
