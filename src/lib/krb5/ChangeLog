@@ -2,8 +2,9 @@
 
 	* krb5_libinit.c (initialized): Variable deleted, all references
 	removed.
-	(krb5int_lib_init): Initialize error tables here.
+	(krb5int_lib_init): Initialize error tables here, including k524.
 	(krb5int_initialize_library): Don't do it here.
+	(krb5int_lib_fini): Remove k524 error table too.
 
 2004-05-27  Ezra Peisach  <epeisach@mit.edu>
 

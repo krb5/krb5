@@ -35,6 +35,7 @@ int krb5int_lib_init(void)
     add_error_table(&et_kv5m_error_table);
     add_error_table(&et_kdb5_error_table);
     add_error_table(&et_asn1_error_table);
+    add_error_table(&et_k524_error_table);
 #endif
 
     err = krb5int_rc_finish_init();
@@ -77,6 +78,7 @@ void krb5int_lib_fini(void)
     remove_error_table(&et_kv5m_error_table);
     remove_error_table(&et_kdb5_error_table);
     remove_error_table(&et_asn1_error_table);
+    remove_error_table(&et_k524_error_table);
 #endif
 }
 
