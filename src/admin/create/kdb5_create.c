@@ -214,8 +214,8 @@ master key name '%s'\n",
     printf("It is important that you NOT FORGET this password.\n");
     fflush(stdout);
 
-    /* TRUE here means read the keyboard */
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE,
+    /* TRUE here means read the keyboard, and do it twice */
+    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE, TRUE,
 				    &master_keyblock)) {
 	com_err(argv[0], retval, "while reading master key");
 	exit(1);
