@@ -179,6 +179,7 @@ subsection define the properties of that particular realm.  For example:
 			mit = mit.edu
 			lithium = lithium.lcs.mit.edu
 		}
+		v4_realm = LCS.MIT.EDU
 	}
 .in -1i
 .fi
@@ -207,6 +208,13 @@ This subsection allows the administrator to configure exceptions to the
 default_domain mapping rule.  It contains V4 instances (the tag name)
 which should be translated to some specific hostname (the tag value) as
 the second component in a Kerberos V5 principal name.
+
+.IP v4_realm
+This relation is used by the krb524 library routines when converting 
+a V5 principal name to a V4 principal name. It is used when V4 realm
+name and the V5 realm are not the same, but still share the same 
+principal names and passwords. The tag value is the Kerberos V4 realm 
+name. 
 
 .SH DOMAIN_REALM SECTION
 
@@ -396,8 +404,6 @@ would look like this:
 	TEST.ANL.GOV = {
 		NERSC.GOV = ANL.GOV
 		NERSC.GOV = ES.NET
-	}
-	
 	}
 .in -1i
 .fi

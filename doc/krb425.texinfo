@@ -140,6 +140,14 @@ This subsection allows the administrator to configure exceptions to the
 default_domain mapping rule.  It contains V4 instances (tag name) which
 should be translated to some specific hostname (tag value) as the second
 component in a Kerberos V5 principal name.
+
+@itemx v4_realm
+This relation allows the administrator to configure a different
+realm name to be used when converting V5 principals to V4
+ones.  This should only be used when running separate V4 and V5
+realms, with some external means of password sychronization
+between the realms.
+
 @end table
 
 @node kdc.conf,  , krb5.conf, Configuration Files

@@ -1,3 +1,7 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb425.texinfo (libdefaults): Add description of v4_realm.
+
 1999-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* copyright.texinfo: Update copyright again.
