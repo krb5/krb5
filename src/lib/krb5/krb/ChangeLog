@@ -1,3 +1,11 @@
+2005-01-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * cp_key_cnt.c, copy_princ.c:
+          prevent krb5_copy_principal() and krb5_copy_keyblock() from
+          calling malloc(0).  On platforms in which malloc(0) returns   
+          NULL, these functions will return an ENOMEM error the way
+          they were written.  
+
 2005-01-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Free credentials
