@@ -93,7 +93,7 @@
 /* This controls which encryption routines libcrypto will provide */
 #define PROVIDE_DES_CBC_MD5
 #define PROVIDE_DES_CBC_CRC
-#define PROVIDE_RAW_DES_CBC
+#define PROVIDE_DES_CBC_RAW
 #define PROVIDE_DES_CBC_CKSUM
 #define PROVIDE_CRC32
 #define PROVIDE_RSA_MD4
@@ -213,14 +213,10 @@ typedef unsigned int size_t;
 #include <fcntl.h>
 #endif
 
-/* This controls which encryption routines libcrypto will provide */
-#define PROVIDE_DES_CBC_MD5
-#define PROVIDE_DES_CBC_CRC
-#define PROVIDE_RAW_DES_CBC
-#define PROVIDE_DES_CBC_CKSUM
-#define PROVIDE_CRC32
-#define PROVIDE_RSA_MD4
-#define PROVIDE_RSA_MD5
+/*
+ * Which encryption routines libcrypto will provide is controlled by
+ * mac/libraries/KerberosHeaders.h.
+ */
 
 /* there is no <stat.h> for mpw */
 typedef unsigned long	mode_t;

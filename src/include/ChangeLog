@@ -1,3 +1,10 @@
+Tue Apr 30 14:51:55 1996    <tytso@rsts-11.mit.edu>
+
+	* k5-int.h: Fix Windows definition of PROVIDE_DES_CBC_RAW so that
+		the raw DES cryptosystem is properly included.  Removed
+		Macintosh definitions of PROVIDE_* since that is done in
+		mac/libaries/KerberosHeaders.h.
+
 Thu Apr 11 23:50:24 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin (krb5_x, krb5_xc): Fix wrapper macros so they don't
