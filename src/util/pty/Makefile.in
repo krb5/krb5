@@ -82,6 +82,3 @@ pty_err.o: pty_err.c
 
 pty_err.h:: pty_err.et
 pty_err.c:: pty_err.et
-
-depend::  et_lex.lex.c
-
