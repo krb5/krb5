@@ -1,3 +1,9 @@
+Mon Jun 24 09:37:26 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_file.c, prof_init.c, prof_parse.c, prof_section.c,
+		prof_tree.c, test_parse.c, test_profile.c, configure.in:
+		Only include stdlib.h if it's available.
+
 Thu Jun 13 22:13:51 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES
