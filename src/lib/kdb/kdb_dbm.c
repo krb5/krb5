@@ -38,6 +38,7 @@ extern int errno;
 
 static int dblfd = -1;
 static int mylock = 0;
+static int lockmode = 0;
 static int inited = 0;
 
 static char default_db_name[] = DEFAULT_DBM_FILE;
@@ -234,7 +235,7 @@ time_t *age;
     if (!okname)
 	return ENOMEM;
     if (stat (okname, &st) < 0)
-	*age = 0;
+	*age = -1;
     else
 	*age = st.st_mtime;
 
@@ -543,9 +544,10 @@ int mode;
 {
     int flock_mode;
 
-    if (mylock)				/* Detect lock call when lock already
-					 * locked */
-	return KRB5_KDB_RECURSIVELOCK;
+    if (mylock && (lockmode >= mode)) {
+	    mylock++;		/* No need to upgrade lock, just return */
+	    return(0);
+    }
 
     switch (mode) {
     case KRB5_DBM_EXCLUSIVE:
@@ -557,6 +559,7 @@ int mode;
     default:
 	return KRB5_KDB_BADLOCKMODE;
     }
+    lockmode = mode;
     if (non_blocking)
 	flock_mode |= LOCK_NB;
     
@@ -572,9 +575,10 @@ krb5_dbm_db_unlock()
     if (!mylock)		/* lock already unlocked */
 	return KRB5_KDB_NOTLOCKED;
 
-    if (flock(dblfd, LOCK_UN) < 0)
-	return errno;
-    mylock = 0;
+    if (--mylock) {
+	    if (flock(dblfd, LOCK_UN) < 0)
+		    return errno;
+    }
     return 0;
 }
 
