@@ -1,8 +1,9 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DOSDEFS)
+##DOS##BUILDTOP = ..\..
+##DOS##OBJFILE=profile.lst
+##DOS##LIBNAME=profile.lib
+##DOS##DOSDEFS=-DHAVE_STDLIB_H
 
-##DOSBUILDTOP = ..\..
-##DOSLIBNAME=profile.lib
-##DOSDOSDEFS=-DHAVE_STDLIB_H
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DOSDEFS)
 
 LOCALINCLUDE=-I. -I$(srcdir)/../et
 
@@ -35,7 +36,13 @@ STOBJLISTS=OBJS.ST
 all-unix:: includes test_parse test_profile
 all-unix:: all-libs
 
-all-windows:: $(OBJS)
+all-windows:: $(OBJFILE)
+
+##DOS$(OBJFILE): $(LIBOBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
+
 
 awk-windows:
 	$(AWK) -f $(BUILDTOP)/util/et/et_h.awk outfile=prof_err.h prof_err.et
