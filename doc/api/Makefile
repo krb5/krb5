@@ -18,7 +18,20 @@ library.ps: library.dvi
 library.ind: library.idx
 	index library.idx
 
+library.idx: 
+	touch library.ind
+	latex library.tex
+	rm library.ind
+
+clean:
+	rm -f *.toc *.log *.idx *.ind *.aux
+
+really-clean: clean
+	rm -f *.dvi *.ps
+
+
 library.dvi:  $(LIBTEX) $(STYLES)
+
 
 .tex.dvi:
 	latex $*

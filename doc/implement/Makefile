@@ -15,6 +15,18 @@ implement.ps: implement.dvi
 implement.ind: implement.idx
 	index implement.idx
 
+implement.idx: 
+	touch implement.ind
+	latex implement.tex
+	rm implement.ind
+
+clean:
+	rm -f *.toc *.log *.idx *.ind *.aux
+
+really-clean: clean
+	rm -f *.dvi *.ps
+
+
 implement.dvi:  $(LIBTEX) $(STYLES)
 
 .tex.dvi:
