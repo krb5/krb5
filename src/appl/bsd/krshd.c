@@ -535,9 +535,8 @@ int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 #define KRB5_RECVAUTH_V4	4
 #define KRB5_RECVAUTH_V5	5
 
-static krb5_sigtype
-cleanup(signumber)
-     int signumber;
+static void
+ignore_signals()
 {
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -561,6 +560,13 @@ cleanup(signumber)
     
     killpg(pid, SIGTERM);
 #endif
+}
+
+static krb5_sigtype
+cleanup(signumber)
+     int signumber;
+{
+    ignore_signals();
     wait(0);
     
     pty_logwtmp(ttyn,"","");
@@ -1302,13 +1308,14 @@ void doit(f, fromp)
 			} else if (wcc != cc) {
 			  syslog(LOG_INFO, "only wrote %d/%d to child", 
 				 wcc, cc);
-		}
-		}
+			}
+		    }
 		}
 	    } while ((port&&FD_ISSET(s, &readfrom)) ||
 		     FD_ISSET(f, &readfrom) ||
 		     (port&&FD_ISSET(pv[0], &readfrom) )||
 		     FD_ISSET(pw[0], &readfrom));
+	    ignore_signals();
 #ifdef KERBEROS
 	    syslog(LOG_INFO ,
 		   "Shell process completed.");
