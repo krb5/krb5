@@ -89,7 +89,7 @@ main(argc, argv)
     krb5_keytab keytab = NULL;
     struct passwd *pw = 0;
     int pwsize;
-    char password[255], *client_name, prompt[255];
+    char password[255], *client_name, prompt[1024];
 
     code = krb5_init_context(&kcontext);
     if (code) {
@@ -280,7 +280,7 @@ main(argc, argv)
 	      exit(1);
 	 }
     } else {
-	 if (code = krb5_parse_name(kcontext, service_name, &server)) {
+	 if ((code = krb5_parse_name(kcontext, service_name, &server))) {
 	      com_err(argv[0], code, "while parsing service name %s",
 		      service_name);
 	      exit(1);
@@ -331,7 +331,8 @@ main(argc, argv)
     if (!use_keytab)
 #endif
     {
-	 (void) sprintf(prompt,"Password for %s: ", (char *) client_name);
+	 (void) sprintf(prompt, "Password for %.*s: ",
+			sizeof(prompt)-32, (char *) client_name);
 
 	 pwsize = sizeof(password);
 

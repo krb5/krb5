@@ -1,3 +1,8 @@
+Thu May 29 19:39:08 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kinit.c (main): Fix bug where kinit would core dump if given a
+		really long principal name.
+
 Tue Feb 25 00:29:46 1997  Richard Basch  <basch@lehman.com>
 
 	* kinit.c: Moved krb5_read_password back into the library (win32)
