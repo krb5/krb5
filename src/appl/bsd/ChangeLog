@@ -1,3 +1,10 @@
+Thu Mar 23 23:23:25 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (krshd): Move $(K4LIB) after $(KLIB) so that if
+		we're using des425, the V5 crypto library can be picked up.
+
+	* configure.in: Use the correct path to find libdes425
+
 Thu Mar 23 20:22:57 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* logutil.c (update_wtmp): initialize ut from ent the way the V4

@@ -52,7 +52,7 @@ install::
 	$(INSTALL_DATA) $(srcdir)/rlogin.M ${DESTDIR}$(CLIENT_MANDIR)/rlogin.1
 
 krshd: krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(CC) $(CFLAGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(K4LIB) $(KLIB) $(LIBS)
+	$(CC) $(CFLAGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(K4LIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krshd $(DESTDIR)$(SERVER_BINDIR)/krshd
