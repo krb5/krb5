@@ -231,4 +231,10 @@ error_code KRB5_BAD_MSIZE,		"Message size is incompatible with encryption type"
 error_code KRB5_CC_TYPE_EXISTS,		"Credentials cache type is already registered."
 error_code KRB5_KT_TYPE_EXISTS,		"Key table type is already registered."
 
+error_code KRB5_CC_IO,			"Credentials cache I/O operation failed XXX"
+error_code KRB5_FCC_PERM,		"Credentials cache file permissions incorrect"
+error_code KRB5_FCC_NOFILE,		"No credentials cache file found"
+error_code KRB5_FCC_INTERNAL,		"Internal file credentials cache error"
+error_code KRB5_CC_NOMEM,		"No more memory to allocate (in credentials cache code)"
+
 end
