@@ -1,12 +1,51 @@
-ISODEMAKEFILE = @ISODEMAKEFILE@
+BUILDTOP=@BUILDTOP@
+srcdir = @srcdir@
+VPATH = @srcdir@
 
-all::
-	echo making all in $(CURRENT_DIR)
-	$(MAKE) $(MFLAGS) -f $(ISODEMAKEFILE) CCOPTS="$(CCOPTS)" CC="$(CC)" \
-		CURRENT_DIR=$(CURRENT_DIR) all
+CFLAGS=$(CCOPTS) $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+
+PEPSY = @PEPSY@
+PSYFLAGS = @PSYFLAGS@
+
+KRB5ROOT = @KRB5ROOT@
+
+KRB5_INCDIR = $(KRB5ROOT)/include
+
+all:: $(OBJS)
+
+SRCTOP=$(srcdir)/$(BUILDTOP)
+
+EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
+
+SRCS= \
+	$(srcdir)asn1_decode.c\
+	$(srcdir)asn1_k_decode.c\
+	$(srcdir)asn1_ncode.c\
+	$(srcdir)asn1_get.c\
+	$(srcdir)asn1_make.c\
+	$(srcdir)asn1buf.c\
+	$(srcdir)krb5_decode.c\
+	$(srcdir)krb5_encode.c\
+	$(srcdir)asn1_k_encode.c\
+	$(srcdir)asn1_misc.c
+
+OBJS= \
+	asn1_decode.o\
+	asn1_k_decode.o\
+	asn1_encode.o\
+	asn1_get.o\
+	asn1_make.o\
+	asn1buf.o\
+	krb5_decode.o\
+	krb5_encode.o\
+	asn1_k_encode.o\
+	asn1_misc.o
 
 clean::
-	echo making clean in $(CURRENT_DIR)
-	$(MAKE) $(MFLAGS) -f $(ISODEMAKEFILE) CCOPTS="$(CCOPTS)" CC="$(CC)" \
-		CURRENT_DIR=$(CURRENT_DIR) clean
+	$(RM) $(OBJS)
 

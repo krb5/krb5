@@ -22,7 +22,6 @@
  */
 
 #include "asn1_k_encode.h"
-#include "krb5_encode.h"
 #include "asn1_make.h"
 #include "asn1_encode.h"
 

@@ -1,3 +1,22 @@
+Fri Feb 10 15:30:45 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* asn1_k_encode.c: Remove #include of krb5_encode.h (it's not
+	        needed).
+
+	* krb5_encode.h:
+	* krb5_decode.h: These files removed; their contents have been
+		poured into include/krb5/asn1.h.
+
+	* Makefile.isode.in: Removed.
+
+	* process.perl: Removed (isode cruft).
+
+	* Makefile.sane.in: Removed; contents moved to Makefile.in
+
+	* configure.in: 
+	* Makefile.in: Removed isode croft.  (Makefile.in was
+		Makefile.sane.in) 
+
 Fri Feb  3 01:02:43 1995  John Gilmore  <gnu@cygnus.com>
 
 	* asn1_decode_k.c => asn1_k_decode.c
