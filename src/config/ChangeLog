@@ -1,3 +1,18 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (config.status): Change target to be in $thisconfigdir
+	rather than local.
+	(osf1.exports): Create a temporary file then rename into place.
+	Add options for library init/fini symbols, handling multiple
+	values.
+
+	* shlib.conf (case alpha*-dec-osf*): Don't handle init/fini
+	symbols here.
+	(case mips-sgi-irix*): Handle multiple init/fini symbols.  Always
+	set $initfini before it gets used.
+	(case *-*-solaris*, not gcc): Handle multiple init/fini symbols.
+	(case *-*-aix*): Handle multiple fini symbols.
+
 2005-01-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (Makefile): Nuke autom4te.cache before and after
