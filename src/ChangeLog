@@ -1,3 +1,8 @@
+2004-08-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_PRAGMA_WEAK_REF): Fix to work with AIX
+	compiler when optimizing.
+
 2004-08-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): Check for

@@ -1672,7 +1672,7 @@ AC_DEFUN([KRB5_AC_PRAGMA_WEAK_REF],
 [AC_CACHE_CHECK([whether pragma weak references are supported],
 krb5_cv_pragma_weak_ref,
 [AC_TRY_LINK([#pragma weak flurbl
-extern int flurbl(void);],[if (&flurbl != 0) return 1;],
+extern int flurbl(void);],[if (&flurbl != 0) return flurbl();],
 krb5_cv_pragma_weak_ref=yes,krb5_cv_pragma_weak_ref=no)])
 if test $krb5_cv_pragma_weak_ref = yes ; then
   AC_DEFINE(HAVE_PRAGMA_WEAK_REF,1,[Define if #pragma weak references work])
