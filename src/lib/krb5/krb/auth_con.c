@@ -38,6 +38,8 @@ krb5_auth_con_init(krb5_context context, krb5_auth_context *auth_context)
 
     (*auth_context)->req_cksumtype = context->default_ap_req_sumtype;
     (*auth_context)->safe_cksumtype = context->default_safe_sumtype;
+    (*auth_context) -> checksum_func = NULL;
+    (*auth_context)->checksum_func_data = NULL;
     (*auth_context)->magic = KV5M_AUTH_CONTEXT;
     return 0;
 }
@@ -334,4 +336,26 @@ krb5_auth_con_getpermetypes(krb5_context context, krb5_auth_context auth_context
     memcpy(newpe, auth_context->permitted_etypes, i*sizeof(krb5_enctype));
 
     return(0);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_set_checksum_func( krb5_context context,
+				 krb5_auth_context  auth_context,
+				 krb5_mk_req_checksum_func func,
+				 void *data)
+{
+  auth_context->checksum_func = func;
+  auth_context->checksum_func_data = data;
+  return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_get_checksum_func( krb5_context context,
+				 krb5_auth_context auth_context,
+				 krb5_mk_req_checksum_func *func,
+				 void **data)
+{
+  *func = auth_context->checksum_func;
+  *data = auth_context->checksum_func_data;
+  return 0;
 }

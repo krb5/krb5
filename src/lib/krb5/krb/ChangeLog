@@ -1,3 +1,16 @@
+2003-01-06  Sam Hartman  <hartmans@mit.edu>
+
+	* mk_req_ext.c (krb5_mk_req_extended): Inf no in_data is provided
+	but krb5_auth_con_set_checksum_func has been called, then use that
+	callback to generate the in_data.
+
+	* auth_con.c (krb5_auth_con_init): Initialize checksum_func fields
+	(krb5_auth_con_set_checksum_func):  new function-- set the mk_req
+	checksum function 
+	(krb5_auth_con_get_checksum_func): return the same
+
+	* auth_con.h: Add checksum_func and checksum_func_data
+
 2002-12-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* t_kerb.c: Include string.h for strcmp prototype.

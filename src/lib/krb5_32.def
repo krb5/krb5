@@ -181,6 +181,8 @@ EXPORTS
 	krb5_auth_con_getauthenticator
 	krb5_auth_con_set_req_cksumtype
 	krb5_auth_con_setrcache
+krb5_auth_con_set_checksum_func
+krb5_auth_con_get_checksum_func
 ;
 	krb5_cc_default
 	krb5_cc_default_name
