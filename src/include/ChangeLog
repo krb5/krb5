@@ -1,3 +1,11 @@
+Fri Jun  9 18:43:20 1995    <tytso@rsx-11.mit.edu>
+
+	* krb5.hin: Remove definition of the krb5_fulladdr structure, and
+		the prototype for the unused function krb5_fulladdr_order.
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
+		recurse down subdirectories.
 
 Fri Jun 9 12:02:02 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in(all-unix) : Add adm_err.h build target since it's not 

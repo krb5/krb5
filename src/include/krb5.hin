@@ -257,12 +257,6 @@ typedef struct _krb5_address {
 /* macros to determine if a type is a local type */
 #define ADDRTYPE_IS_LOCAL(addrtype) (addrtype & 0x8000)
 
-/* implementation-specific stuff: */
-typedef struct _krb5_fulladdr {
-    krb5_address FAR * address;
-    krb5_address FAR * port;
-} krb5_fulladdr;
-
 /*
  * end "hostaddr.h"
  */
@@ -1338,10 +1332,6 @@ krb5_boolean krb5_principal_compare
 	PROTOTYPE((krb5_context,
 		   krb5_const_principal,
 		   krb5_const_principal));
-int krb5_fulladdr_order
-	PROTOTYPE((krb5_context,
-		   const krb5_fulladdr *,
-		   const krb5_fulladdr *));
 krb5_error_code krb5_copy_keyblock
     	PROTOTYPE((krb5_context,
 		   const krb5_keyblock *,
