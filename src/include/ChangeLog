@@ -1,3 +1,11 @@
+Wed Mar 20 22:55:50 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.hin (krb5_pa_data): Change type of pa_type field in
+		krb5_pa_data to be krb5_preauthtype, for consistency's
+		sake.  Added prototype for krb5_copy_addr().  Change type
+		of etype in krb5_etype_info_entry to be krb5_enctype, for
+		consistency's sake.
+
 Sat Feb 24 21:46:13 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (all-windows): hpux make doesn't grok $@, so I'm

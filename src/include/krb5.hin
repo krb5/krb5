@@ -818,7 +818,7 @@ typedef struct _krb5_last_req_entry {
 /* pre-authentication data */
 typedef struct _krb5_pa_data {
     krb5_magic magic;
-    krb5_ui_2  pa_type;
+    krb5_preauthtype  pa_type;
     int length;
     krb5_octet FAR *contents;
 } krb5_pa_data;
@@ -1414,6 +1414,8 @@ krb5_error_code krb5_copy_principal
     	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const_principal,
 	       krb5_principal *));
+krb5_error_code krb5_copy_addr
+	KRB5_PROTOTYPE((krb5_context, const krb5_address *, krb5_address **));
 krb5_error_code krb5_copy_addresses
     	KRB5_PROTOTYPE((krb5_context,
 		   krb5_address * krb5_const *,

@@ -509,7 +509,7 @@ typedef struct _krb5_alt_method {
  */
 typedef struct _krb5_etype_info_entry {
 	krb5_magic	magic;
-	krb5_int32	etype;
+	krb5_enctype	etype;
 	int		length;
 	krb5_octet	*salt;
 } krb5_etype_info_entry;
