@@ -1,3 +1,9 @@
+2001-01-12  Tom Yu  <tlyu@mit.edu>
+
+	* sane_hostname.c: Switch off of KRB5_USE_INET6 instead of
+	AF_INET6, which may be defined without a corresponding struct
+	sockaddr_in6.
+
 2000-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname, do_ntoa): Pass address

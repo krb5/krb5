@@ -2,7 +2,8 @@
  * pty_make_sane_hostname: Make a sane hostname from an IP address.
  * This returns allocated memory!
  * 
- * Copyright 1999,2000 by the Massachusetts Institute of Technology.
+ * Copyright 1999, 2000, 2001 by the Massachusetts Institute of
+ * Technology.
  *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
@@ -33,7 +34,7 @@ sockaddrlen (const struct sockaddr *addr)
 #else
     if (addr->sa_family == AF_INET)
 	return sizeof (struct sockaddr_in);
-#ifdef AF_INET6
+#ifdef KRB5_USE_INET6
     if (addr->sa_family == AF_INET6)
 	return sizeof (struct sockaddr_in6);
 #endif
