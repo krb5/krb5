@@ -162,7 +162,7 @@ char *argv[];
     }
 
     if (!keytypedone)
-	master_keyblock.keytype = KEYTYPE_DES;
+	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
 
     if (!valid_keytype(master_keyblock.keytype)) {
 	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
@@ -171,7 +171,7 @@ char *argv[];
     }
 
     if (etype == 0xffff)
-	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
+	etype = DEFAULT_KDC_ETYPE;
 
     if (!valid_etype(etype)) {
 	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
