@@ -150,7 +150,7 @@ tkt_test_1()
 	com_err("tkt_test_1", 0, "wrong session key length");
 	return;
     }
-    if (bcmp(nsess->contents, key_two, 8) != 0) {
+    if (memcmp(nsess->contents, key_two, 8) != 0) {
 	com_err("tkt_test_1", 0, "wrong session key contents");
 	return;
     }
