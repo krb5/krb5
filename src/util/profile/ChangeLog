@@ -1,10 +1,16 @@
+2002-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c (conf_yes, conf_no): Entries now point to const.
+	(profile_parse_boolean): Updated type of 'p' correspondingly.
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in: Support install-headers
 
 2002-10-03  Sam Hartman  <hartmans@mit.edu>
 
-	* Makefile.in :  Move test_* from all to check targets. so that com_err is not needed on mac.
+	* Makefile.in :  Move test_* from all to check targets. so that
+	com_err is not needed on mac.
 
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
