@@ -1,3 +1,9 @@
+2001-10-11  Mitchell Berger  <mitchb@mit.edu>
+
+	* ftpd.M: Remove improper formatting from the .SH NAME section, as it
+	was reported to cause windex generation problems and was inconsistent
+	with all the other man pages.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd_var.h, secure.h: Make prototypes unconditional.
