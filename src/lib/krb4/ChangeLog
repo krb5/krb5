@@ -1,3 +1,20 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+	* configure.in: Remove KRB5_POSIX_LOCKS test.
+
+	* win_store.c (krb__get_srvtabname): 
+	* g_cnffile.c: Use krb5__krb4_context instead of init'ing and
+		free'ing a krb5_context each time we need to read data
+		from the configuration file.  We also define
+		krb5__krb4_context in g_cnnfile.c, since it's a likely
+		that any use of the krb4 library will pull in that file.
+
+	* tf_util.c (tf_init): Use krb5_lock_file instead of trying to
+		roll our own flock emulation.
+
 Wed Aug 12 18:32:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* rd_req.c (krb_set_key): Nuke the krb5_keyblock if it's set.
