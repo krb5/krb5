@@ -29,7 +29,7 @@ DONE	* make DES-MD5 default, fall back to DES-CRC
 	* krb5_get_in_tkt_with_keytab needs to pass local ktypes in AS_REQ.
 		It should only be requesting ktypes for which there are
 		local keytab entries.
-	* DES_CBC_* are not being properly treated.
+DONE	* DES_CBC_* are not being properly treated.
 		Requesting one type does not always return a key of the
 		same type (even if there is another DES key in the db).
 
