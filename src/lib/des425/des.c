@@ -36,7 +36,7 @@ des_ecb_encrypt(clear, cipher, schedule, enc)
     const mit_des_key_schedule schedule;
     int enc;		/* 0 ==> decrypt, else encrypt */
 {
-    const static des_cblock iv;
+    static const des_cblock iv;
 
     return (mit_des_cbc_encrypt((const des_cblock *) clear,
 				(des_cblock *) cipher,
