@@ -50,7 +50,7 @@ struct mblock {
 void add_key PROTOTYPE((char * const *, const krb5_principal,
 			const krb5_keyblock *, krb5_kvno));
 void enter_rnd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
-void enter_pwd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
+void enter_pwd_key PROTOTYPE((char **, const krb5_principal, const krb5_principal, krb5_kvno));
 
 int set_dbname_help PROTOTYPE((char *, char *));
 
@@ -244,7 +244,34 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv, newprinc, 0);
+    enter_pwd_key(argv, newprinc, newprinc, 0);
+    krb5_free_principal(newprinc);
+    return;
+}
+
+void
+add_v4_key(argc, argv)
+int argc;
+char *argv[];
+{
+    krb5_error_code retval;
+    krb5_principal newprinc;
+
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (princ_exists(argv[0], newprinc)) {
+	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    enter_pwd_key(argv, newprinc, 0, 0);
     krb5_free_principal(newprinc);
     return;
 }
@@ -704,7 +731,35 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv, newprinc, vno);
+    enter_pwd_key(argv, newprinc, newprinc, vno);
+    krb5_free_principal(newprinc);
+    return;
+}
+
+void
+change_v4_key(argc, argv)
+int argc;
+char *argv[];
+{
+    krb5_error_code retval;
+    krb5_principal newprinc;
+    krb5_kvno vno;
+
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (!(vno = princ_exists(argv[0], newprinc))) {
+	com_err(argv[0], 0, "No principal '%s' exists!", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    enter_pwd_key(argv, newprinc, 0, vno);
     krb5_free_principal(newprinc);
     return;
 }
@@ -712,9 +767,11 @@ char *argv[];
 void
 enter_pwd_key(DECLARG(char **, argv),
 	      DECLARG(const krb5_principal, princ),
+	      DECLARG(const krb5_principal, string_princ),
 	      DECLARG(krb5_kvno, vno))
 OLDDECLARG(char **, argv)
 OLDDECLARG(const krb5_principal, princ)
+OLDDECLARG(const krb5_principal, string_princ)
 OLDDECLARG(krb5_kvno, vno)
 {
     krb5_error_code retval;
@@ -736,7 +793,7 @@ OLDDECLARG(krb5_kvno, vno)
 	      string_to_key)(master_keyblock.keytype,
 			     &tempkey,
 			     &pwd,
-			     princ);
+			     string_princ);
     bzero(password, sizeof(password)); /* erase it */
     if (retval) {
 	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
