@@ -39,6 +39,7 @@
 #define	KDC_ERR_ETYPE_NOSUPP		14 /* No support for encryption type */
 #define KDC_ERR_SUMTYPE_NOSUPP		15 /* No support for checksum type */
 #define KDC_ERR_PADATA_TYPE_NOSUPP	16 /* No support for padata type */
+#define KDC_ERR_TRTYPE_NOSUPP		17 /* No support for transited type */
 
 /* Application errors */
 #define	KRB_AP_ERR_BAD_INTEGRITY 31	/* Decrypt integrity check failed */
@@ -56,8 +57,17 @@
 #define	KRB_AP_ERR_BADKEYVER	44	/* Key version is not available */
 #define	KRB_AP_ERR_NOKEY	45	/* Service key not available */
 #define	KRB_AP_ERR_MUT_FAIL	46	/* Mutual authentication failed */
+#define KRB_AP_ERR_BADDIRECTION	47 	/* Incorrect message direction */
+#define KRB_AP_ERR_METHOD	48 	/* Alternative authentication */
+					/* method required */
+#define KRB_AP_ERR_BADSEQ	49 	/* Incorrect sequence numnber */
+					/* in message */
+#define KRB_AP_ERR_INAPP_CKSUM	50	/* Inappropriate type of */
+					/* checksum in message */
 
 /* other errors */
-#define	KRB_ERR_FIELD_TOOLONG	50	/* Field is too long for impl. */
+#define KRB_ERR_GENERIC		60 	/* Generic error (description */
+					/* in e-text) */
+#define	KRB_ERR_FIELD_TOOLONG	61	/* Field is too long for impl. */
 
 #endif /* KRB5_ERRORS__ */
