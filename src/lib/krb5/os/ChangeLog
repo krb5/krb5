@@ -18,6 +18,15 @@
 	* prompter.c (krb5int_set_prompt_types): Set to actual value
 	intead of 0.
 
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* init_os_ctx.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+	* ccdefname.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+
 2000-04-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (maybe_use_dns): Renamed from _krb5_use_dns.  Now
@@ -32,6 +41,11 @@
 	* changepw.c (krb5_locate_kpasswd): Call _krb5_use_dns_kdc.
 	* def_realm.c (krb5_get_default_realm): Call _krb5_use_dns_realm.
 	* hst_realm.c (krb5_get_host_realm): Call _krb5_use_dns_realm.
+
+2000-03-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* def_realm.c (krb5_free_default_realm): Added, use to free
+	result of krb5_get_default_realm
 
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 

@@ -24,7 +24,8 @@
  * or implied warranty.
  * 
  *
- * krb5_get_default_realm() function.
+ * krb5_get_default_realm(), krb5_set_default_realm(),
+ * krb5_free_default_realm() functions.
  */
 
 #include "k5-int.h"
@@ -201,4 +202,12 @@ krb5_set_default_realm(context, lrealm)
     strcpy(context->default_realm, lrealm);
     return(0);
 
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_default_realm(context, lrealm)
+	krb5_context context;
+	char FAR* lrealm;
+{
+	free (lrealm);
 }
