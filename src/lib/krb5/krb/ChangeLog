@@ -1,3 +1,9 @@
+2001-01-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* mk_safe.c (krb5_mk_safe): Only use safe_cksumtype from the
+	auth_context (derived from the config file or hardcoded default)
+	if it's suitable for the enctype of the key we're going to use.
+
 2001-01-29	Alexandra Ellwood <lxs@mit.edu>
 
 	* conv_princ.c (krb5_524_conv_principal): Fixed strncmp bug where principals 
