@@ -68,7 +68,7 @@ OLDDECLARG(krb5_response *,rep)
     krb5_ticket *sec_ticket = 0;
     krb5_ticket *sec_ticket_arr[2];
 
-    bzero((char *)&tgsreq, sizeof(tgsreq));
+    memset((char *)&tgsreq, 0, sizeof(tgsreq));
 
     tgsreq.kdc_options = kdcoptions;
     tgsreq.server = (krb5_principal) sname;

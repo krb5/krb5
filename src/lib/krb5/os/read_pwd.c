@@ -95,10 +95,10 @@ int *size_return;
     if (setjmp(pwd_jump)) {
 	/* interrupted */
 	if (readin_string) {
-	    (void) bzero(readin_string, *size_return);
+	    (void) memset(readin_string, 0, *size_return);
 	    free(readin_string);
 	}
-	(void) bzero(return_pwd, *size_return);
+	(void) memset(return_pwd, 0, *size_return);
 	cleanup(KRB5_LIBOS_PWDINTR);
     }
     /* save intrfunc */
@@ -107,12 +107,12 @@ int *size_return;
     /* put out the prompt */
     (void) fputs(prompt,stdout);
     (void) fflush(stdout);
-    (void) bzero(return_pwd, *size_return);
+    (void) memset(return_pwd, 0, *size_return);
 
     if (fgets(return_pwd, *size_return, stdin) == NULL) {
 	/* error */
 	(void) putchar('\n');
-	(void) bzero(return_pwd, *size_return);
+	(void) memset(return_pwd, 0, *size_return);
 	cleanup(KRB5_LIBOS_CANTREADPWD);
     }
     (void) putchar('\n');
@@ -132,15 +132,15 @@ int *size_return;
 	(void) fflush(stdout);
 	readin_string = malloc(*size_return);
 	if (!readin_string) {
-	    (void) bzero(return_pwd, *size_return);
+	    (void) memset(return_pwd, 0, *size_return);
 	    cleanup(ENOMEM);
 	}
-	(void) bzero(readin_string, *size_return);
+	(void) memset(readin_string, 0, *size_return);
 	if (fgets(readin_string, *size_return, stdin) == NULL) {
 	    /* error */
 	    (void) putchar('\n');
-	    (void) bzero(readin_string, *size_return);
-	    (void) bzero(return_pwd, *size_return);
+	    (void) memset(readin_string, 0, *size_return);
+	    (void) memset(return_pwd, 0, *size_return);
 	    free(readin_string);
 	    cleanup(KRB5_LIBOS_CANTREADPWD);
 	}
@@ -155,12 +155,12 @@ int *size_return;
 	    
 	/* compare */
 	if (strncmp(return_pwd, readin_string, *size_return)) {
-	    (void) bzero(readin_string, *size_return);
-	    (void) bzero(return_pwd, *size_return);
+	    (void) memset(readin_string, 0, *size_return);
+	    (void) memset(return_pwd, 0, *size_return);
 	    free(readin_string);
 	    cleanup(KRB5_LIBOS_BADPWDMATCH);
 	}
-	(void) bzero(readin_string, *size_return);
+	(void) memset(readin_string, 0, *size_return);
 	free(readin_string);
     }
     

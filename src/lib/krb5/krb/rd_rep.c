@@ -83,7 +83,8 @@ krb5_ap_rep_enc_part *repl;
 	(void) krb5_finish_key(&eblock);
 	goto errout;
     }
-#define clean_scratch() {bzero(scratch.data, scratch.length); free(scratch.data);}
+#define clean_scratch() {memset(scratch.data, 0, scratch.length); \
+free(scratch.data);}
     /* finished with the top-level encoding of the ap_rep */
     krb5_free_ap_rep(reply);
     if (retval = krb5_finish_key(&eblock)) {

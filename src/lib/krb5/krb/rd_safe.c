@@ -140,7 +140,7 @@ krb5_data *outbuf;
 			   (krb5_pointer) key->contents,
 			   key->length,
 			   &our_cksum);
-    (void) bzero((char *)scratch->data, scratch->length);
+    (void) memset((char *)scratch->data, 0, scratch->length);
     krb5_free_data(scratch);
     
     if (retval) {

@@ -127,7 +127,8 @@ krb5_data *outbuf;
 	return(retval);
     }
 
-#define cleanup_scratch() { (void) bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
+#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
+krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
@@ -144,7 +145,7 @@ krb5_data *outbuf;
 	retval = ENOMEM;
 	goto clean_ticket;
     }
-    bzero(scratch->data + scratch->length,
+    memset(scratch->data + scratch->length, 0,
 	  request.authenticator.ciphertext.length - scratch->length);
     if (!(request.authenticator.ciphertext.data =
 	  malloc(request.authenticator.ciphertext.length))) {
@@ -153,7 +154,7 @@ krb5_data *outbuf;
     }
 
 #define cleanup_encpart() {\
-(void) bzero(request.authenticator.ciphertext.data, \
+(void) memset(request.authenticator.ciphertext.data, 0,\
 	     request.authenticator.ciphertext.length); \
 free(request.authenticator.ciphertext.data); \
 request.authenticator.ciphertext.length = 0; \

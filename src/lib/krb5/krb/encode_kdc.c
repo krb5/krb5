@@ -66,7 +66,8 @@ OLDDECLARG(krb5_data **, enc_rep)
 	return retval;
     }
 
-#define cleanup_scratch() { (void) bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
+#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
+krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
@@ -80,7 +81,7 @@ OLDDECLARG(krb5_data **, enc_rep)
 	xfree(scratch);
 	return ENOMEM;
     }
-    bzero(scratch->data + scratch->length,
+    memset(scratch->data + scratch->length, 0,
 	  dec_rep->enc_part.ciphertext.length - scratch->length);
     if (!(dec_rep->enc_part.ciphertext.data =
 	  malloc(dec_rep->enc_part.ciphertext.length))) {
@@ -89,7 +90,7 @@ OLDDECLARG(krb5_data **, enc_rep)
     }
 
 #define cleanup_encpart() { \
-(void) bzero(dec_rep->enc_part.ciphertext.data, \
+(void) memset(dec_rep->enc_part.ciphertext.data, 0, \
 	     dec_rep->enc_part.ciphertext.length); \
 free(dec_rep->enc_part.ciphertext.data); \
 dec_rep->enc_part.ciphertext.length = 0; \

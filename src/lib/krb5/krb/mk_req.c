@@ -54,11 +54,11 @@ krb5_data *outbuf;
 
     /* obtain ticket & session key */
 
-    bzero((char *)&creds, sizeof(creds));
+    memset((char *)&creds, 0, sizeof(creds));
     creds.server = (krb5_principal) server;
     if (retval = krb5_cc_get_principal(ccache, &creds.client))
 	return(retval);
-    /* creds.times.endtime = 0; -- bzero takes care of this
+    /* creds.times.endtime = 0; -- memset 0 takes care of this
      				   zero means "as long as possible" */
     /* creds.keyblock.keytype = 0; -- as well as this.
        				      zero means no session keytype

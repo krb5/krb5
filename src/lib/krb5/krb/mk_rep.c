@@ -62,7 +62,8 @@ krb5_data *outbuf;
     if (retval = encode_krb5_ap_rep_enc_part(repl, &scratch))
 	return retval;
 
-#define cleanup_scratch() { (void) bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
+#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
+krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
@@ -79,7 +80,7 @@ krb5_data *outbuf;
 	xfree(scratch);
 	return ENOMEM;
     }
-    bzero(scratch->data + scratch->length,
+    memset(scratch->data + scratch->length, 0,
 	  reply.enc_part.ciphertext.length - scratch->length);
     if (!(reply.enc_part.ciphertext.data =
 	  malloc(reply.enc_part.ciphertext.length))) {
@@ -88,7 +89,7 @@ krb5_data *outbuf;
     }
 
 #define cleanup_encpart() {\
-(void) bzero(reply.enc_part.ciphertext.data, \
+(void) memset(reply.enc_part.ciphertext.data, 0,\
 	     reply.enc_part.ciphertext.length); \
 free(reply.enc_part.ciphertext.data); \
 reply.enc_part.ciphertext.length = 0; reply.enc_part.ciphertext.data = 0;}

@@ -68,7 +68,8 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
 	free(scratch.data);
 	return retval;
     }
-#define clean_scratch() {bzero(scratch.data, scratch.length); free(scratch.data);}
+#define clean_scratch() {memset(scratch.data, 0, scratch.length); \
+free(scratch.data);}
     if (retval = krb5_finish_key(&eblock)) {
 	clean_scratch();
 	return retval;

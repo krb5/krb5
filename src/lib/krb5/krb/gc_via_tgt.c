@@ -112,7 +112,7 @@ OLDDECLARG(krb5_creds *, cred)
 	return retval;
 #undef cleanup
 #define cleanup() {\
-	bzero((char *)dec_rep->enc_part2->session->contents,\
+	memset((char *)dec_rep->enc_part2->session->contents, 0,\
 	      dec_rep->enc_part2->session->length);\
 		  krb5_free_kdc_rep(dec_rep); }
 
@@ -128,12 +128,12 @@ OLDDECLARG(krb5_creds *, cred)
 	cleanup();
 	return retval;
     }
-    bzero((char *)dec_rep->enc_part2->session->contents,
+    memset((char *)dec_rep->enc_part2->session->contents, 0,
 	  dec_rep->enc_part2->session->length);
 
 #undef cleanup
 #define cleanup() {\
-	bzero((char *)cred->keyblock.contents, cred->keyblock.length);\
+	memset((char *)cred->keyblock.contents, 0, cred->keyblock.length);\
 		  krb5_free_kdc_rep(dec_rep); }
 
     cred->times = dec_rep->enc_part2->times;

@@ -45,7 +45,7 @@ krb5_creds *creds;
     krb5_creds mcreds;
     krb5_flags fields;
 
-    bzero((char *)&mcreds, sizeof(mcreds));
+    memset((char *)&mcreds, 0, sizeof(mcreds));
     mcreds.server = creds->server;
     mcreds.client = creds->client;
     mcreds.times.endtime = creds->times.endtime;
