@@ -1,3 +1,7 @@
+Tue Mar 30 23:59:15 1999  Tom Yu  <tlyu@mit.edu>
+
+	* termios-tn.c: Include termio.h under AIX due to brokenness.
+
 Wed Feb 24 20:12:10 1999  Tom Yu  <tlyu@mit.edu>
 
 	* telnetd.8: Resync manpage.
