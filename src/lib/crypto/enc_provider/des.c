@@ -48,7 +48,6 @@ k5_des_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 	       krb5_const krb5_data *input, krb5_data *output, int encrypt)
 {
     mit_des_key_schedule schedule;
-    int ret;
 
     /* key->enctype was checked by the caller */
 
@@ -61,7 +60,7 @@ k5_des_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
     if (input->length != output->length)
 	return(KRB5_BAD_MSIZE);
 
-    switch (ret = mit_des_key_sched(key->contents, schedule)) {
+    switch (mit_des_key_sched(key->contents, schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
     case -2:

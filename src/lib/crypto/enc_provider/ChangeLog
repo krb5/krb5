@@ -1,3 +1,7 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* des.c, des3.c: Remove unused variables.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.c (mit_des_zeroblock): Now const, and using C default
