@@ -1,3 +1,8 @@
+
+Tue Aug 29 14:23:16 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add checks for size of short, int and long.
+	* prof_init.c - Add routines to serialize profile context.
+
 Tue Aug 15 17:17:40 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* prof_parse.c (strip_line,parse_line): Declare as static.
