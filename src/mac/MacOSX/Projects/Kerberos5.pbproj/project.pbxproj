@@ -1755,6 +1755,12 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		A14E78E90725B12A00A025E3 = {
+			fileRef = F517327003F1B65901120114;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		A166BCC3040D36F8004AA618 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -3201,7 +3207,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../Sources/mac/MacOSX/Headers/Kerberos5Prefix.h;
-				HEADER_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../Sources/lib/crypto/des $(SRCROOT)/../Sources/include $(SRCROOT)/../Sources/include/krb5 $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include  $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include/krb5";
 				LIBRARY_STYLE = STATIC;
 				PRODUCT_NAME = KerberosDES;
 				REZ_EXECUTABLE = YES;
@@ -3226,6 +3232,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1AB1DEF05DDC40100526345,
+				A14E78E90725B12A00A025E3,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3377,7 +3384,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../Sources/mac/MacOSX/Headers/Kerberos5Prefix.h;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../Common/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../Common/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos $(SRCROOT)/../Sources/include $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include/krb5";
 				LIBRARY_STYLE = STATIC;
 				PRODUCT_NAME = KerberosProfile;
 				REZ_EXECUTABLE = YES;
@@ -3524,7 +3531,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../Sources/mac/MacOSX/Headers/Kerberos5Prefix.h;
-				HEADER_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/ErrorTables $(SRCROOT)/../../Common/Headers $(SRCROOT)/../../KerberosErrors/Headers $(SRCROOT)/../../KerberosDebug/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos $(SRCROOT)/../../CredentialsCache/Headers $(SRCROOT)/../../CredentialsCache/Headers/Kerberos $(SRCROOT)/../../KerberosLogin/Headers $(SRCROOT)/../../KerberosLogin/Headers/Kerberos";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../Sources/include $(SRCROOT)/../Sources/include/krb5 $(SRCROOT)/../Sources/include/kerberosIV $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include/krb5 $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/ErrorTables $(SRCROOT)/../../Common/Headers $(SRCROOT)/../../KerberosErrors/Headers $(SRCROOT)/../../KerberosDebug/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos $(SRCROOT)/../../CredentialsCache/Headers $(SRCROOT)/../../CredentialsCache/Headers/Kerberos $(SRCROOT)/../../KerberosLogin/Headers $(SRCROOT)/../../KerberosLogin/Headers/Kerberos";
 				LIBRARY_STYLE = STATIC;
 				PRODUCT_NAME = Kerberos4;
 				REZ_EXECUTABLE = YES;
@@ -3985,7 +3992,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../Sources/mac/MacOSX/Headers/Kerberos5Prefix.h;
-				HEADER_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(SRCROOT)/../Sources/include $(SRCROOT)/../../KerberosErrors/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos $(SRCROOT)/../../CredentialsCache/Headers $(SRCROOT)/../../CredentialsCache/Headers/Kerberos $(SRCROOT)/../../KerberosLogin/Headers $(SRCROOT)/../../KerberosLogin/Headers/Kerberos";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../Sources/ $(SRCROOT)/../Sources/include $(SRCROOT)/../Sources/include/krb5 $(SRCROOT)/../Sources/lib/crypto/aes $(SRCROOT)/../Sources/lib/crypto  $(SRCROOT)/../Sources/lib/crypto/arcfour  $(SRCROOT)/../Sources/lib/crypto/enc_provider $(SRCROOT)/../Sources/lib/crypto/crc32 $(SRCROOT)/../Sources/lib/crypto/des $(SRCROOT)/../Sources/lib/crypto/dk $(SRCROOT)/../Sources/lib/crypto/hash_provider $(SRCROOT)/../Sources/lib/crypto/keyhash_provider $(SRCROOT)/../Sources/lib/crypto/md4 $(SRCROOT)/../Sources/lib/crypto/md5 $(SRCROOT)/../Sources/lib/crypto/old $(SRCROOT)/../Sources/lib/crypto/raw $(SRCROOT)/../Sources/lib/crypto/sha1 $(SRCROOT)/../Sources/lib/crypto/yarrow $(SRCROOT)/../Sources/lib/krb5/os $(SRCROOT)/../Sources/lib/krb5/keytab $(SRCROOT)/../Sources/lib/krb5/rcache $(SRCROOT)/../Sources/lib/krb5/ccache $(SRCROOT)/../Sources/lib/krb5/ccache/ccapi $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include/krb5 $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/ErrorTables $(SRCROOT)/../Sources/include $(SRCROOT)/../../KerberosErrors/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos $(SRCROOT)/../../CredentialsCache/Headers $(SRCROOT)/../../CredentialsCache/Headers/Kerberos $(SRCROOT)/../../KerberosLogin/Headers $(SRCROOT)/../../KerberosLogin/Headers/Kerberos";
 				LIBRARY_STYLE = STATIC;
 				PRODUCT_NAME = Kerberos5;
 				REZ_EXECUTABLE = YES;
@@ -6138,7 +6145,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../Sources/mac/MacOSX/Headers/Kerberos5Prefix.h;
-				HEADER_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(SRCROOT)/../../KerberosErrors/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../Sources/include $(SRCROOT)/../Sources/include/krb5 $(SRCROOT)/../Sources/lib/gssapi $(SRCROOT)/../Sources/lib/gssapi/krb5 $(SRCROOT)/../Sources/lib/gssapi/generic $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/ErrorTables $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include/krb5 $(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates/include/gssapi $(SRCROOT)/../../KerberosErrors/Headers $(SRCROOT)/../../KerberosErrors/Headers/Kerberos";
 				LIBRARY_STYLE = STATIC;
 				PRODUCT_NAME = GSS;
 				REZ_EXECUTABLE = YES;
