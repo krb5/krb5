@@ -75,7 +75,7 @@ main(argc, argv)
 	    options |= KDC_OPT_RENEWABLE;
 	    break;
         case 'u':
-	    options |= KDC_OPT_DUPLICATE_SKEY;
+	    options |= KDC_OPT_ENC_TKT_IN_SKEY;
 	    break;
 	case 'p':
 	    options |= KDC_OPT_PROXIABLE;
