@@ -42,7 +42,7 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
 ;Configuration
 
   ;General
-  SetCompressor bzip2
+  SetCompressor lzma
 !ifndef DEBUG
   OutFile "MITKerberosForWindows.exe"
 !else
@@ -57,6 +57,7 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
   !define KFW_PRODUCT_NAME "${PROGRAM_NAME}"
   !define KFW_REGKEY_ROOT  "Software\MIT\Kerberos\"
   CRCCheck force
+  !define REPLACEDLL_NOREGISTER
 
   ;Folder selection page
   InstallDir "$PROGRAMFILES\MIT\Kerberos"      ; Install to shorter path
@@ -77,6 +78,7 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
   !define KFW_INSTALL_DIR "${KFW_TARGETDIR}\install"
   !define SYSTEMDIR   "$%SystemRoot%\System32" 
  
+
 ;--------------------------------
 ;Modern UI Configuration
 
@@ -153,6 +155,9 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
   ;Only useful for BZIP2 compression
   !insertmacro MUI_RESERVEFILE_LANGDLL
   
+;--------------------------------
+; Load Macros
+!include "utils.nsi"
 
 ;--------------------------------
 ;Installer Sections
@@ -178,33 +183,34 @@ Section "KfW Client" secClient
 
    ; Do client components
   SetOutPath "$INSTDIR\bin"
-  File "${KFW_BIN_DIR}\aklog.exe"
-  File "${KFW_BIN_DIR}\comerr32.dll"
-  File "${KFW_BIN_DIR}\gss.exe"
-  File "${KFW_BIN_DIR}\gss-client.exe"
-  File "${KFW_BIN_DIR}\gss-server.exe"
-  File "${KFW_BIN_DIR}\gssapi32.dll"
-  File "${KFW_BIN_DIR}\k524init.exe"
-  File "${KFW_BIN_DIR}\kclnt32.dll"
-  File "${KFW_BIN_DIR}\kdestroy.exe"
-  File "${KFW_BIN_DIR}\kinit.exe"
-  File "${KFW_BIN_DIR}\klist.exe"
-  File "${KFW_BIN_DIR}\kvno.exe"
-  File "${KFW_BIN_DIR}\krb5_32.dll"
-  File "${KFW_BIN_DIR}\krb524.dll"
-  File "${KFW_BIN_DIR}\krbcc32.dll"
-  File "${KFW_BIN_DIR}\krbcc32s.exe"
-  File "${KFW_BIN_DIR}\krbv4w32.dll"
-  File "${KFW_BIN_DIR}\leash32.exe"
-!ifdef OLDHELP
-  File "${KFW_BIN_DIR}\leash32.hlp"
-!else
-  File "${KFW_BIN_DIR}\leash32.chm"
-!endif
-  File "${KFW_BIN_DIR}\leashw32.dll"
-  File "${KFW_BIN_DIR}\ms2mit.exe"
-  File "${KFW_BIN_DIR}\wshelp32.dll"
-  File "${KFW_BIN_DIR}\xpprof32.dll"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\aklog.exe"           "$INSTDIR\bin\aklog.exe"         "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\comerr32.dll"        "$INSTDIR\bin\comerr32.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss.exe"             "$INSTDIR\bin\gss.exe"           "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-client.exe"      "$INSTDIR\bin\gss-client.exe"    "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-server.exe"      "$INSTDIR\bin\gss-server.exe"    "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gssapi32.dll"        "$INSTDIR\bin\gssapi32.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k524init.exe"        "$INSTDIR\bin\k524init.exe"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kclnt32.dll"         "$INSTDIR\bin\kclnt32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdestroy.exe"        "$INSTDIR\bin\kdestroy.exe"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kinit.exe"           "$INSTDIR\bin\kinit.exe"         "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\klist.exe"           "$INSTDIR\bin\klist.exe"         "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kpasswd.exe"         "$INSTDIR\bin\kpasswd.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kvno.exe"            "$INSTDIR\bin\kvno.exe"          "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5_32.dll"         "$INSTDIR\bin\krb5_32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb524.dll"          "$INSTDIR\bin\krb524.dll"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbv4w32.dll"        "$INSTDIR\bin\krbv4w32.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leash32.exe"         "$INSTDIR\bin\leash32.exe"       "$INSTDIR"
+!ifdef OLDHELP                                                                 
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leash32.hlp"         "$INSTDIR\bin\leash32.hlp"       "$INSTDIR"
+!else                                                                          
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leash32.chm"         "$INSTDIR\bin\leash32.chm"       "$INSTDIR"
+!endif                                                                         
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw32.dll"        "$INSTDIR\bin\leashw32.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\wshelp32.dll"        "$INSTDIR\bin\wshelp32.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\xpprof32.dll"        "$INSTDIR\bin\xpprof32.dll"      "$INSTDIR"
   
 !ifdef DEBUG
   File "${KFW_BIN_DIR}\aklog.pdb"
@@ -218,6 +224,7 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\kdestroy.pdb"
   File "${KFW_BIN_DIR}\kinit.pdb"
   File "${KFW_BIN_DIR}\klist.pdb"
+  File "${KFW_BIN_DIR}\kpasswd.pdb"
   File "${KFW_BIN_DIR}\kvno.pdb"
   File "${KFW_BIN_DIR}\krb5_32.pdb"
   File "${KFW_BIN_DIR}\krb524.pdb"
@@ -231,83 +238,83 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\xpprof32.pdb"
 
 !IFDEF CL_1310
-   File "${SYSTEMDIR}\msvcr71d.dll"
-   File "${SYSTEMDIR}\msvcr71d.pdb"
-   File "${SYSTEMDIR}\msvcp71d.dll"
-   File "${SYSTEMDIR}\msvcp71d.pdb"
-   File "${SYSTEMDIR}\mfc71d.dll"
-   File "${SYSTEMDIR}\mfc71d.pdb"
-   File "${SYSTEMDIR}\MFC71CHS.DLL"
-   File "${SYSTEMDIR}\MFC71CHT.DLL"
-   File "${SYSTEMDIR}\MFC71DEU.DLL"
-   File "${SYSTEMDIR}\MFC71ENU.DLL"
-   File "${SYSTEMDIR}\MFC71ESP.DLL"
-   File "${SYSTEMDIR}\MFC71FRA.DLL"
-   File "${SYSTEMDIR}\MFC71ITA.DLL"
-   File "${SYSTEMDIR}\MFC71JPN.DLL"
-   File "${SYSTEMDIR}\MFC71KOR.DLL"
-!ELSE
-!IFDEF CL_1300
-   File "${SYSTEMDIR}\msvcr70d.dll"
-   File "${SYSTEMDIR}\msvcr70d.pdb"
-   File "${SYSTEMDIR}\msvcp70d.dll"
-   File "${SYSTEMDIR}\msvcp70d.pdb"
-   File "${SYSTEMDIR}\mfc70d.dll"
-   File "${SYSTEMDIR}\mfc70d.pdb"
-   File "${SYSTEMDIR}\MFC70CHS.DLL"
-   File "${SYSTEMDIR}\MFC70CHT.DLL"
-   File "${SYSTEMDIR}\MFC70DEU.DLL"
-   File "${SYSTEMDIR}\MFC70ENU.DLL"
-   File "${SYSTEMDIR}\MFC70ESP.DLL"
-   File "${SYSTEMDIR}\MFC70FRA.DLL"
-   File "${SYSTEMDIR}\MFC70ITA.DLL"
-   File "${SYSTEMDIR}\MFC70JPN.DLL"
-   File "${SYSTEMDIR}\MFC70KOR.DLL"
-!ELSE
-   File "${SYSTEMDIR}\mfc42d.dll"
-   File "${SYSTEMDIR}\mfc42d.pdb"
-   File "${SYSTEMDIR}\msvcp60d.dll"
-   File "${SYSTEMDIR}\msvcp60d.pdb"
-   File "${SYSTEMDIR}\msvcrtd.dll"
-   File "${SYSTEMDIR}\msvcrtd.pdb"
-!ENDIF
-!ENDIF
-!ELSE
-!IFDEF CL_1310
-   File "${SYSTEMDIR}\mfc71.dll"
-   File "${SYSTEMDIR}\msvcr71.dll"
-   File "${SYSTEMDIR}\msvcp71.dll"
-   File "${SYSTEMDIR}\MFC71CHS.DLL"
-   File "${SYSTEMDIR}\MFC71CHT.DLL"
-   File "${SYSTEMDIR}\MFC71DEU.DLL"
-   File "${SYSTEMDIR}\MFC71ENU.DLL"
-   File "${SYSTEMDIR}\MFC71ESP.DLL"
-   File "${SYSTEMDIR}\MFC71FRA.DLL"
-   File "${SYSTEMDIR}\MFC71ITA.DLL"
-   File "${SYSTEMDIR}\MFC71JPN.DLL"
-   File "${SYSTEMDIR}\MFC71KOR.DLL"
-!ELSE
-!IFDEF CL_1300
-   File "${SYSTEMDIR}\mfc70.dll"
-   File "${SYSTEMDIR}\msvcr70.dll"
-   File "${SYSTEMDIR}\msvcp70.dll"
-   File "${SYSTEMDIR}\MFC70CHS.DLL"
-   File "${SYSTEMDIR}\MFC70CHT.DLL"
-   File "${SYSTEMDIR}\MFC70DEU.DLL"
-   File "${SYSTEMDIR}\MFC70ENU.DLL"
-   File "${SYSTEMDIR}\MFC70ESP.DLL"
-   File "${SYSTEMDIR}\MFC70FRA.DLL"
-   File "${SYSTEMDIR}\MFC70ITA.DLL"
-   File "${SYSTEMDIR}\MFC70JPN.DLL"
-   File "${SYSTEMDIR}\MFC70KOR.DLL"
-!ELSE
-   File "${SYSTEMDIR}\mfc42.dll"
-   File "${SYSTEMDIR}\msvcp60.dll"
-   File "${SYSTEMDIR}\msvcrt.dll"
-!ENDIF
-!ENDIF
-!ENDIF
-   File "${SYSTEMDIR}\psapi.dll"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr71d.dll"    "$INSTDIR\bin\msvcr71d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcr71d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp71d.dll"    "$INSTDIR\bin\msvcp71d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcp71d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc71d.dll"      "$INSTDIR\bin\mfc71d.dll"    "$INSTDIR"
+  File "${SYSTEMDIR}\mfc71d.pdb"                                             
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71CHS.DLL"    "$INSTDIR\bin\MFC71CHS.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71CHT.DLL"    "$INSTDIR\bin\MFC71CHT.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71DEU.DLL"    "$INSTDIR\bin\MFC71DEU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71ENU.DLL"    "$INSTDIR\bin\MFC71ENU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71ESP.DLL"    "$INSTDIR\bin\MFC71ESP.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71FRA.DLL"    "$INSTDIR\bin\MFC71FRA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71ITA.DLL"    "$INSTDIR\bin\MFC71ITA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71JPN.DLL"    "$INSTDIR\bin\MFC71JPN.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71KOR.DLL"    "$INSTDIR\bin\MFC71KOR.DLL"  "$INSTDIR"
+!ELSE                                                                   
+!IFDEF CL_1300                                                          
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr70d.dll"    "$INSTDIR\bin\msvcr70d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcr70d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp70d.dll"    "$INSTDIR\bin\msvcp70d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcp70d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc70d.dll"      "$INSTDIR\bin\mfc70d.dll"    "$INSTDIR"
+  File "${SYSTEMDIR}\mfc70d.pdb"                                             
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70CHS.DLL"    "$INSTDIR\bin\MFC70CHS.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70CHT.DLL"    "$INSTDIR\bin\MFC70CHT.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70DEU.DLL"    "$INSTDIR\bin\MFC70DEU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70ENU.DLL"    "$INSTDIR\bin\MFC70ENU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70ESP.DLL"    "$INSTDIR\bin\MFC70ESP.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70FRA.DLL"    "$INSTDIR\bin\MFC70FRA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70ITA.DLL"    "$INSTDIR\bin\MFC70ITA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70JPN.DLL"    "$INSTDIR\bin\MFC70JPN.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70KOR.DLL"    "$INSTDIR\bin\MFC70KOR.DLL"  "$INSTDIR"
+!ELSE                                                                   
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc42d.dll"      "$INSTDIR\bin\mfc42d.dll"    "$INSTDIR"
+  File "${SYSTEMDIR}\mfc42d.pdb"                                             
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp60d.dll"    "$INSTDIR\bin\msvcp60d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcp60d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcrtd.dll"     "$INSTDIR\bin\msvcrtd.dll"   "$INSTDIR"
+  File "${SYSTEMDIR}\msvcrtd.pdb"                                            
+!ENDIF                                                                  
+!ENDIF                                                                  
+!ELSE                                                                   
+!IFDEF CL_1310                                                          
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc71.dll"       "$INSTDIR\bin\mfc71.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr71.dll"     "$INSTDIR\bin\msvcr71.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp71.dll"     "$INSTDIR\bin\msvcp71.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71CHS.DLL"    "$INSTDIR\bin\MFC71CHS.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71CHT.DLL"    "$INSTDIR\bin\MFC71CHT.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71DEU.DLL"    "$INSTDIR\bin\MFC71DEU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71ENU.DLL"    "$INSTDIR\bin\MFC71ENU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71ESP.DLL"    "$INSTDIR\bin\MFC71ESP.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71FRA.DLL"    "$INSTDIR\bin\MFC71FRA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71ITA.DLL"    "$INSTDIR\bin\MFC71ITA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71JPN.DLL"    "$INSTDIR\bin\MFC71JPN.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71KOR.DLL"    "$INSTDIR\bin\MFC71KOR.DLL"  "$INSTDIR"
+!ELSE                                                                   
+!IFDEF CL_1300                                                          
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc70.dll"       "$INSTDIR\bin\mfc70.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr70.dll"     "$INSTDIR\bin\msvcr70.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp70.dll"     "$INSTDIR\bin\msvcp70.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70CHS.DLL"    "$INSTDIR\bin\MFC70CHS.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70CHT.DLL"    "$INSTDIR\bin\MFC70CHT.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70DEU.DLL"    "$INSTDIR\bin\MFC70DEU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70ENU.DLL"    "$INSTDIR\bin\MFC70ENU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70ESP.DLL"    "$INSTDIR\bin\MFC70ESP.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70FRA.DLL"    "$INSTDIR\bin\MFC70FRA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70ITA.DLL"    "$INSTDIR\bin\MFC70ITA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70JPN.DLL"    "$INSTDIR\bin\MFC70JPN.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70KOR.DLL"    "$INSTDIR\bin\MFC70KOR.DLL"  "$INSTDIR"
+!ELSE                                                                   
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc42.dll"       "$INSTDIR\bin\mfc42.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp60.dll"     "$INSTDIR\bin\msvcp60.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcrt.dll"      "$INSTDIR\bin\msvcrt.dll"    "$INSTDIR"
+!ENDIF                                                                  
+!ENDIF                                                                  
+!ENDIF                                                                  
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\psapi.dll"       "$INSTDIR\bin\psapi.dll"     "$INSTDIR"
    
   ; Do WINDOWSDIR components
   ;SetOutPath "$WINDOWSDIR"
@@ -848,6 +855,7 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kdestroy.exe"
    Delete /REBOOTOK "$INSTDIR\bin\kinit.exe"
    Delete /REBOOTOK "$INSTDIR\bin\klist.exe"   
+   Delete /REBOOTOK "$INSTDIR\bin\kpasswd.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.dll"  
@@ -876,6 +884,7 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kdestroy.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\kinit.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\klist.pdb"   
+   Delete /REBOOTOK "$INSTDIR\bin\kpasswd.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.pdb"  
