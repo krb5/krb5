@@ -1,3 +1,9 @@
+Wed Jul  8 01:32:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kadm_ser_wrap.c (kadm_ser_init): Use krb5_425_conv_principal
+		instead of krb5_build_principal to create the changepw
+		sprinc principal.
+
 Fri Jul  3 18:17:48 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (build_pwfile): Add rule to build the build_pwfile

@@ -65,12 +65,9 @@ kadm_ser_init(inter, realm)
     (void) strcpy(server_parm.sname, PWSERV_NAME);
     (void) strcpy(server_parm.sinst, KRB_MASTER);
     (void) strcpy(server_parm.krbrlm, realm);
-    if (krb5_build_principal(kadm_context,
-			     &server_parm.sprinc,
-			     strlen(realm),
-			     realm,
-			     PWSERV_NAME,
-			     KRB_MASTER, 0))
+    if (krb5_425_conv_principal(kadm_context, server_parm.sname,
+				server_parm.sinst, server_parm.krbrlm,
+				&server_parm.sprinc))
 	return KADM_NO_MAST;
     server_parm.admin_fd = -1;
     /* setting up the addrs */
