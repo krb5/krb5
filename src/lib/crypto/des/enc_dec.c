@@ -40,15 +40,53 @@ static char rcsid_enc_dec_c[] =
 extern int mit_des_debug;
 #endif
 
+/*
+	encrypts "size" bytes at "in", storing result in "out".
+	"eblock" points to an encrypt block which has been initialized
+	by process_key().
 
-krb5_error_code mit_des_encrypt_func(DECLARG(krb5_pointer, in),
+	"out" must be preallocated by the caller to contain sufficient
+	storage to hold the output; the macro krb5_encrypt_size() can
+	be used to compute this size.
+	
+	returns: errors
+*/
+static krb5_error_code
+mit_des_encrypt_f(DECLARG(krb5_const_pointer, in),
+		  DECLARG(krb5_pointer, out),
+		  DECLARG(const_size_t, size),
+		  DECLARG(krb5_encrypt_block *, key),
+		  DECLARG(krb5_pointer, ivec))
+OLDDECLARG(krb5_const_pointer, in)
+OLDDECLARG(krb5_pointer, out)
+OLDDECLARG(const size_t, size)
+OLDDECLARG(krb5_encrypt_block *, key)
+OLDDECLARG(krb5_pointer, ivec)
+{
+    krb5_octet	*iv;
+    
+    if ( ivec == 0 )
+	iv = key->key->contents;
+    else
+	iv = (krb5_octet *)ivec;
+
+    /* XXX should check that key sched is valid here? */
+    return (mit_des_cbc_encrypt((krb5_octet *)in, 
+			    (krb5_octet *)out,
+			    size, 
+			    (struct mit_des_ks_struct *)key->priv, 
+			    iv,
+			    MIT_DES_ENCRYPT));
+}    
+
+krb5_error_code mit_des_encrypt_func(DECLARG(krb5_const_pointer, in),
 				     DECLARG(krb5_pointer, out),
-				     DECLARG(size_t, size),
+				     DECLARG(const size_t, size),
 				     DECLARG(krb5_encrypt_block *, key),
 				     DECLARG(krb5_pointer, ivec))
-OLDDECLARG(krb5_pointer, in)
+OLDDECLARG(krb5_const_pointer, in)
 OLDDECLARG(krb5_pointer, out)
-OLDDECLARG(size_t, size)
+OLDDECLARG(const size_t, size)
 OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
@@ -56,7 +94,7 @@ OLDDECLARG(krb5_pointer, ivec)
     krb5_octet 	contents[CRC32_CKSUM_LENGTH];
     char 	*p, *endinput;
     int sumsize;
-    krb5_error_code retval, mit_des_encrypt_f();
+    krb5_error_code retval;
 
 /*    if ( size < sizeof(mit_des_cblock) )
 	return KRB5_BAD_MSIZE; */
@@ -84,51 +122,54 @@ OLDDECLARG(krb5_pointer, ivec)
 }
 
 /*
-	encrypts "size" bytes at "in", storing result in "out".
+
+	decrypts "size" bytes at "in", storing result in "out".
 	"eblock" points to an encrypt block which has been initialized
 	by process_key().
 
 	"out" must be preallocated by the caller to contain sufficient
-	storage to hold the output; the macro krb5_encrypt_size() can
-	be used to compute this size.
-	
+	storage to hold the output; this is guaranteed to be no more than
+	the input size.
+
 	returns: errors
-*/
-krb5_error_code mit_des_encrypt_f(DECLARG(krb5_pointer, in),
-				  DECLARG(krb5_pointer, out),
-				  DECLARG(size_t, size),
-				  DECLARG(krb5_encrypt_block *, key),
-				  DECLARG(krb5_pointer, ivec))
-OLDDECLARG(krb5_pointer, in)
+
+ */
+static krb5_error_code
+mit_des_decrypt_f(DECLARG(krb5_const_pointer, in),
+		  DECLARG(krb5_pointer, out),
+		  DECLARG(const size_t, size),
+		  DECLARG(krb5_encrypt_block *, key),
+		  DECLARG(krb5_pointer, ivec))
+OLDDECLARG(krb5_const_pointer, in)
 OLDDECLARG(krb5_pointer, out)
-OLDDECLARG(size_t, size)
+OLDDECLARG(const size_t, size)
 OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
     krb5_octet	*iv;
-    
+
     if ( ivec == 0 )
 	iv = key->key->contents;
     else
 	iv = (krb5_octet *)ivec;
 
     /* XXX should check that key sched is valid here? */
-    return (mit_des_cbc_encrypt((krb5_octet *)in, 
-			    (krb5_octet *)out,
-			    size, 
-			    (struct mit_des_ks_struct *)key->priv, 
-			    iv,
-			    MIT_DES_ENCRYPT));
+    return (mit_des_cbc_encrypt ((krb5_octet *)in, 
+			     (krb5_octet *)out, 
+			     size, 
+			     (struct mit_des_ks_struct *)key->priv, 
+			     iv,
+			     MIT_DES_DECRYPT));
 }    
 
-krb5_error_code mit_des_decrypt_func(DECLARG(krb5_pointer, in),
+krb5_error_code mit_des_decrypt_func(DECLARG(krb5_const_pointer, in),
 				     DECLARG(krb5_pointer, out),
-				     DECLARG(size_t, size),
+				     DECLARG(const size_t, size),
 				     DECLARG(krb5_encrypt_block *, key),
 				     DECLARG(krb5_pointer, ivec))
-OLDDECLARG(krb5_pointer, in)
+OLDDECLARG(krb5_const_pointer, in)
 OLDDECLARG(krb5_pointer, out)
-OLDDECLARG(size_t, size)
+OLDDECLARG(const size_t, size)
 OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
@@ -136,7 +177,7 @@ OLDDECLARG(krb5_pointer, ivec)
     krb5_octet 	contents_prd[CRC32_CKSUM_LENGTH];
     krb5_octet  contents_get[CRC32_CKSUM_LENGTH];
     char 	*p;
-    krb5_error_code   retval, mit_des_decrypt_f();
+    krb5_error_code   retval;
 
     if ( size < sizeof(mit_des_cblock) )
 	return KRB5_BAD_MSIZE;
@@ -162,46 +203,6 @@ OLDDECLARG(krb5_pointer, ivec)
 
     return 0;
 }
-
-/*
-
-	decrypts "size" bytes at "in", storing result in "out".
-	"eblock" points to an encrypt block which has been initialized
-	by process_key().
-
-	"out" must be preallocated by the caller to contain sufficient
-	storage to hold the output; this is guaranteed to be no more than
-	the input size.
-
-	returns: errors
-
- */
-krb5_error_code mit_des_decrypt_f(DECLARG(krb5_pointer, in),
-				  DECLARG(krb5_pointer, out),
-				  DECLARG(size_t, size),
-				  DECLARG(krb5_encrypt_block *, key),
-				  DECLARG(krb5_pointer, ivec))
-OLDDECLARG(krb5_pointer, in)
-OLDDECLARG(krb5_pointer, out)
-OLDDECLARG(size_t, size)
-OLDDECLARG(krb5_encrypt_block *, key)
-OLDDECLARG(krb5_pointer, ivec)
-{
-    krb5_octet	*iv;
-
-    if ( ivec == 0 )
-	iv = key->key->contents;
-    else
-	iv = (krb5_octet *)ivec;
-
-    /* XXX should check that key sched is valid here? */
-    return (mit_des_cbc_encrypt ((krb5_octet *)in, 
-			     (krb5_octet *)out, 
-			     size, 
-			     (struct mit_des_ks_struct *)key->priv, 
-			     iv,
-			     MIT_DES_DECRYPT));
-}    
 /*
  * This routine performs DES cipher-block-chaining operation, either
  * encrypting from cleartext to ciphertext, if encrypt != 0 or
