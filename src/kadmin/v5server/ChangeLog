@@ -1,4 +1,17 @@
 
+Fri May 12 16:06:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin.c	- Change for Ultrix: howmany->how_many because howmany
+			  is a macro used to count how many elements in an
+			  array.
+	* kadm5_defs.h, srv_net.c
+			- Use DEBUG_NOSLAVES to determine when to create a
+			  new slave for handling connections.  Also, change
+			  max slaves to 2*SOMAXCONN and reduce sleep wait to
+			  2 seconds.
+	* configure.in, proto_serv.c, srv_acl.c, srv_main.c, srv_net.c
+			- Use POSIX signals/setjmp/longjmp when present.
+
+
 Thu May 11 12:20:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_key.c	- Defer setting keyb and encb init flags until we
 			  have successfully verified the master key.  Avoids
