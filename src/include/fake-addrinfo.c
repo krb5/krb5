@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2002 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -47,6 +47,13 @@
    IPv6.)  Could use gethostbyname2 if available.  */
 
 #include "fake-addrinfo.h"
+
+#if !defined(_XOPEN_SOURCE_EXTENDED) && !defined(HAVE_MACSOCK_H) && !defined(_WIN32)
+/* Hack for HPUX, to get h_errno.  */
+# define _XOPEN_SOURCE_EXTENDED 1
+# include <netdb.h>
+# undef _XOPEN_SOURCE_EXTENDED
+#endif
 
 void fixup_addrinfo (struct addrinfo *ai)
 {
@@ -263,7 +270,8 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    else
 		return EAI_FAIL; /* ?? */
 	} else {
-	    hp = gethostbyaddr ((struct sockaddr *) &sinp->sin_addr, sizeof (struct in_addr),
+	    hp = gethostbyaddr ((const char *) &sinp->sin_addr,
+				sizeof (struct in_addr),
 				sa->sa_family);
 	    if (hp == 0) {
 		if (h_errno == NO_ADDRESS && !(flags & NI_NAMEREQD)) /* ??? */

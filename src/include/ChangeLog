@@ -1,3 +1,11 @@
+2002-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (_XOPEN_SOURCE_EXTENDED): Define if not defined,
+	and if not Mac or Windows, for duration of inclusion of netdb.h.
+	This gets us the h_errno declaration on HP-UX.
+	(getnameinfo): Cast gethostbyaddr pointer arg to char *, not
+	sockaddr *.
+
 2002-02-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Always check for FAI_PREFIX, not just when fake
