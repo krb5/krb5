@@ -792,7 +792,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    return(0);
 }
 
-static pa_types_t pa_types[] = {
+static const pa_types_t pa_types[] = {
     {
 	KRB5_PADATA_PW_SALT,
 	pa_salt,
@@ -839,7 +839,7 @@ krb5_do_preauth(krb5_context context,
     krb5_data scratch;
     krb5_etype_info etype_info = NULL;
     krb5_error_code ret;
-    static int paorder[] = { PA_INFO, PA_REAL };
+    static const int paorder[] = { PA_INFO, PA_REAL };
     int realdone;
 
     if (in_padata == NULL) {

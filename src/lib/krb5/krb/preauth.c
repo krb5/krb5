@@ -83,7 +83,7 @@ static krb5_error_code obtain_sam_padata
 	 krb5_kdc_req *,
 	 krb5_pa_data **);
 
-static krb5_preauth_ops preauth_systems[] = {
+static const krb5_preauth_ops preauth_systems[] = {
     {
 	KV5M_PREAUTH_OPS,
 	KRB5_PADATA_ENC_TIMESTAMP,
@@ -116,7 +116,7 @@ static krb5_preauth_ops preauth_systems[] = {
 };
 
 static krb5_error_code find_pa_system
-    (krb5_preauthtype type, krb5_preauth_ops **Preauth_proc);
+    (krb5_preauthtype type, const krb5_preauth_ops **Preauth_proc);
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
@@ -138,7 +138,7 @@ krb5_error_code krb5_obtain_padata(krb5_context context, krb5_pa_data **preauth_
     krb5_pa_data **		pa;
     krb5_pa_data **		send_pa_list;
     krb5_pa_data **		send_pa;
-    krb5_preauth_ops 		*ops;
+    const krb5_preauth_ops	*ops;
     krb5_keyblock *		def_enc_key = 0;
     krb5_enctype 		enctype;
     krb5_data 			salt;
@@ -240,7 +240,7 @@ krb5_error_code
 krb5_process_padata(krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *as_reply, git_key_proc key_proc, krb5_const_pointer keyseed, git_decrypt_proc decrypt_proc, krb5_keyblock **decrypt_key, krb5_creds *creds, krb5_int32 *do_more)
 {
     krb5_error_code		retval = 0;
-    krb5_preauth_ops * 		ops;
+    const krb5_preauth_ops * 	ops;
     krb5_pa_data **		pa;
     krb5_int32			done = 0;
     
@@ -350,9 +350,9 @@ process_pw_salt(krb5_context context, krb5_pa_data *padata, krb5_kdc_req *reques
 }
     
 static krb5_error_code
-find_pa_system(krb5_preauthtype type, krb5_preauth_ops **preauth)
+find_pa_system(krb5_preauthtype type, const krb5_preauth_ops **preauth)
 {
-    krb5_preauth_ops *ap = preauth_systems;
+    const krb5_preauth_ops *ap = preauth_systems;
     
     while ((ap->type != -1) && (ap->type != type))
 	ap++;

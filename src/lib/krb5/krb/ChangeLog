@@ -1,3 +1,11 @@
+2002-10-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_in_tkt.c (conf_yes, conf_no): Now const.  References
+	updated.
+	* preauth.c (preauth_systems): Now const.  References updated.
+	* preauth2.c (pa_types): Now const.
+	(krb5_do_preauth): Local array paorder now const.
+
 2002-10-28  Sam Hartman  <hartmans@mit.edu>
 
 	* gic_keytab.c (krb5_get_init_creds_keytab): Don't allow failure

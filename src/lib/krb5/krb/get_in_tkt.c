@@ -591,12 +591,12 @@ cleanup:
    is yet. */
 
 /* XXX Duplicating this is annoying; try to work on a better way.*/
-static const char *conf_yes[] = {
+static const char *const conf_yes[] = {
     "y", "yes", "true", "t", "1", "on",
     0,
 };
 
-static const char *conf_no[] = {
+static const char *const conf_no[] = {
     "n", "no", "false", "nil", "0", "off",
     0,
 };
@@ -604,7 +604,7 @@ static const char *conf_no[] = {
 int
 _krb5_conf_boolean(const char *s)
 {
-    const char **p;
+    const char *const *p;
 
     for(p=conf_yes; *p; p++) {
 	if (!strcasecmp(*p,s))
