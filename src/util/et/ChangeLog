@@ -1,3 +1,35 @@
+Tue Feb  4 15:59:01 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in com_err.h error_table.h et_c.awk error_message.c
+		Corrected various declarations for Windows build
+
+Wed Jan 29 17:32:23 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add rules to build test_et (for testing!)
+
+	* com_err.h, error_table.h: Fixed up varargs/stdargs declarations
+		Move definition of struct error_table into com_err.h, and 
+		define first draft of the V2 API.  Removed the Windows
+		specific declarations from error_table.h, since it's now
+		safe to 
+
+	* com_err.c, error_message.c, init_et.c, et_name.c: Added new
+		V2 API's.  Cleaned up C code.  
+
+	* test_et.c: Added new test case for error code 0
+
+	* et_c.awk: Added __far for Windows 16 pointer.
+
+	* internal.h: File removed, no longer used.
+
+	* error_table.y: Add #include the header file "com_err.h"
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+	* com_err.h error_table.h init_et.c internal.h
+		Win32 support
+
 Mon Nov 18 20:37:19 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Set shared library version to 1.0. [krb5-libs/201]

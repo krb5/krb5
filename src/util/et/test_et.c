@@ -16,6 +16,7 @@ main()
 	printf("Msg FOO_ERR is '%s'\n", error_message(FOO_ERR));
 	printf("Msg {sys_nerr-1} is '%s'\n", error_message(sys_nerr-1));
 	printf("Msg {sys_nerr} is '%s'\n", error_message(sys_nerr));
+	printf("Msg 0 is '%s'\n", error_message(0));
 
 	printf("With 0: tgt-expired -> %s\n", error_message(KRB_MK_AP_TGTEXP));
 

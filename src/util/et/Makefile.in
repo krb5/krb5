@@ -3,6 +3,8 @@ SED = sed
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=comerr.lib
+##DOSXTRA=
+##DOSOBJFILE=comerr.lst
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -14,7 +16,10 @@ INSTALLFILE = cp
 
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
-LIBOBJS= error_message.o et_name.o init_et.o com_err.o
+LIBOBJS=com_err.$(OBJEXT) \
+	error_message.$(OBJEXT) \
+	et_name.$(OBJEXT) \
+	init_et.$(OBJEXT)
 # for et_lex.lex.c include in error_table.y
 LOCALINCLUDE=-I. -I$(srcdir)
 
@@ -29,6 +34,17 @@ FILES=	Makefile et_name.c error_message.c compile_et.c \
 #	init_et.c com_err.c
 SRCS= error_message.c et_name.c init_et.c com_err.c
 
+#
+# Warning flags
+#
+# Uncomment WFLAGS if you want really anal GCC warning messages
+#
+#
+WFLAGS=		-ansi -D_POSIX_SOURCE -pedantic \
+			-Wall -Wwrite-strings -Wpointer-arith \
+			-Wcast-qual -Wcast-align -Wtraditional \
+			-Wstrict-prototypes -Wmissing-prototypes \
+			-Wnested-externs -Winline -DNO_INLINE_FUNCS -Wshadow 
 
 DEPLIBS=
 SHLIB_LIBS=
@@ -36,8 +52,13 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 STEXT=@STEXT@
 
-all-windows: com_err.obj error_message.obj et_name.obj
+all-windows:: $(OBJFILE)
 	copy com_err.h $(BUILDTOP)\include
+
+##DOS$(OBJFILE): $(LIBOBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
 
 #
 # what to build...
@@ -46,7 +67,26 @@ all-windows: com_err.obj error_message.obj et_name.obj
 #
 # rules
 #
-error_table.o: et_lex.lex.c
+error_table.c: et_lex.lex.c 
+
+error_table.c: $(srcdir)/error_table.y
+
+error_table.o: error_table.c et_lex.lex.c
+	$(CC) $(CFLAGS) -c error_table.c
+
+et_lex.lex.o: et_lex.lex.c
+	$(CC) $(CFLAGS) -c et_lex.lex.c
+
+test1.o: test1.c
+	$(CC) $(CFLAGS) -c test1.c
+
+test2.o: test2.c
+	$(CC) $(CFLAGS) -c test2.c
+
+test_et.o: test1.h test2.h
+
+test_et: test_et.o test1.o test2.o $(LIBOBJS)
+	$(CC) -o test_et test_et.o test1.o test2.o $(LIBOBJS)
 
 # solaris make loses on com_err.c but not on init_et.c, but this helps
 com_err.o: com_err.c
