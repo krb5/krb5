@@ -660,20 +660,22 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       strcpy(exp, current+1);
     }
     else if ((current[0] == '/') && (prev[0] == '/')) {
-      strcpy(exp, prev);
+      strncpy(exp, prev, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
       if (strlen(exp) + strlen(current) + 1 >= MAX_REALM_LN) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(exp, current);
+      strncat(exp, current, sizeof(exp) - 1 - strlen(exp));
     }
     else if (current[clst] == '.') {
-      strcpy(exp, current);
-      if (strlen(exp) + strlen(current) + 1 >= MAX_REALM_LN) {
+      strncpy(exp, current, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
+      if (strlen(exp) + strlen(prev) + 1 >= MAX_REALM_LN) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(exp, prev);
+      strncat(exp, prev, sizeof(exp) - 1 - strlen(exp));
     }
     else {
       strcpy(exp, current);
@@ -718,11 +720,12 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       if ((next[nlst] != '.') && (next[0] != '/') &&
           (pl = subrealm(exp, realm))) {
         added = TRUE;
+	current[sizeof(current) - 1] = '\0';
 	if (strlen(current) + (pl>0?pl:-pl) + 2 >= MAX_REALM_LN) {
 	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	  goto fail;
 	}
-        strcat(current, ",");
+        strncat(current, ",", sizeof(current) - 1 - strlen(current));
         if (pl > 0) {
           strncat(current, realm, pl);
         }
@@ -762,19 +765,22 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 	      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	      goto fail;
 	    }
-	    strcat(current, " ");
+	    strncat(current, " ", sizeof(current) - 1 - strlen(current));
+	    current[sizeof(current) - 1] = '\0';
           }
 	  if (strlen(current) + strlen(realm) + 1 >= MAX_REALM_LN) {
 	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	    goto fail;
 	  }
-          strcat(current, realm);
+          strncat(current, realm, sizeof(current) - 1 - strlen(current));
+	  current[sizeof(current) - 1] = '\0';
         }
 	if (strlen(current) + (pl>0?pl:-pl) + 2 >= MAX_REALM_LN) {
 	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	  goto fail;
 	}
-        strcat(current,",");
+        strncat(current,",", sizeof(current) - 1 - strlen(current));
+	current[sizeof(current) - 1] = '\0';
         if (pl > 0) {
           strncat(current, exp, pl);
         }

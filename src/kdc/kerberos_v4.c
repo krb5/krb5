@@ -968,7 +968,7 @@ kerb_err_reply(client, pkt, err, string)
     static char e_msg[128];
 
     strcpy(e_msg, "\nKerberos error -- ");
-    strcat(e_msg, string);
+    strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
     krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
