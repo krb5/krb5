@@ -32,8 +32,8 @@ get_all_princ_from_file - retrieves all principal names
 			from file pointed to by fp.                  
 
 *******************************************************************/
-void close_time();
-krb5_boolean find_str_in_list();
+static void close_time PROTOTYPE((int, FILE *, int, FILE *));
+static krb5_boolean find_str_in_list PROTOTYPE((char **, char *));
 
 krb5_error_code get_all_princ_from_file (fp, plist)
     FILE *fp;
@@ -278,7 +278,7 @@ get_authorized_princ_names(luser, cmd, princ_list)
     return 0;
 }
 
-void close_time(k5users_flag, users_fp, k5login_flag, login_fp)
+static void close_time(k5users_flag, users_fp, k5login_flag, login_fp)
     int k5users_flag;
     FILE *users_fp;
     int k5login_flag;
@@ -290,7 +290,7 @@ void close_time(k5users_flag, users_fp, k5login_flag, login_fp)
 
 }
 
-krb5_boolean find_str_in_list(list , elm)
+static krb5_boolean find_str_in_list(list , elm)
     char **list;
     char *elm;
 {

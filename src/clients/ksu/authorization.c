@@ -27,9 +27,11 @@
 
 #include "ksu.h"
 
-static krb5_error_code _dbm_an_to_ln();
-static krb5_error_code _username_an_to_ln();
-static void auth_cleanup();
+static krb5_error_code _dbm_an_to_ln PROTOTYPE((krb5_context, 
+		     krb5_const_principal, const int, char *));
+static krb5_error_code _username_an_to_ln PROTOTYPE((krb5_context,
+		     krb5_const_principal, const int, char *, char *));
+static void auth_cleanup PROTOTYPE((int, FILE *, int, FILE *, char *));
 
 krb5_boolean fowner(fp, uid)
     FILE *fp;
@@ -185,7 +187,7 @@ krb5_error_code krb5_authorization(context, principal, luser, local_realm_name,
 #endif
 
 	if (!stat(krb5_lname_file, &statbuf)){
-		if ((! _dbm_an_to_ln(principal, strlen(princname), kuser)) &&
+		if ((! _dbm_an_to_ln(context, principal, strlen(princname), kuser)) &&
 	 			     (strcmp(kuser, luser) == 0)){
 			retbool = TRUE; /* found the right one in db */
 		}

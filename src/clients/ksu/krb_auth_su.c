@@ -499,7 +499,7 @@ krb5_error_code retval;
 }
 
 
-static time_t convtime();
+static time_t convtime PROTOTYPE((char *));
 
 krb5_error_code
 krb5_parse_lifetime (time, len)
@@ -574,6 +574,7 @@ convtime(p)
         return (r);
 }
 
+#if 0
 krb5_error_code get_tgt_via_login_list(context, server, cc, k5login_plist,
 				       client, got_it)
     krb5_context context;
@@ -643,6 +644,7 @@ krb5_error_code retval =0;
 
 	return 0;
 }
+#endif
 
 /**********************************************************************
 returns the principal that is closes to client. plist contains

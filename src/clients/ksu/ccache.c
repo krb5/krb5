@@ -35,7 +35,6 @@ copies the default cache into the secondary cache,
 
 ************************************************************************/
 
-krb5_boolean compare_creds();     
 void show_credential();
 
 /* modifies only the cc_other, the algorithm may look a bit funny,

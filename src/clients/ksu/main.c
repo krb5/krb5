@@ -37,10 +37,9 @@ int quiet = 0;
 /***********/
 
 #define _DEF_CSH "/bin/csh" 
-int set_env_var();  
-void sweep_up();
-char * ontty();
-void init_auth_names();
+static int set_env_var PROTOTYPE((char *, char *));
+static void sweep_up PROTOTYPE((krb5_context, int, krb5_ccache));
+static char * ontty PROTOTYPE((void));
 #ifdef HAVE_STDARG_H
 void print_status( const char *fmt, ...);
 #else
@@ -172,7 +171,7 @@ char * dir_of_cc_source;
 	switch (option) {
 	case 'r':
 	    options.opt |= KDC_OPT_RENEWABLE;
-	    retval = krb5_parse_lifetime(ksu_context, optarg, &options.rlife);
+	    retval = krb5_parse_lifetime(optarg, &options.rlife);
 	    if (retval != 0 || options.rlife == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
 		errflg++;
@@ -204,7 +203,7 @@ char * dir_of_cc_source;
 	    quiet =1;
 	    break;
         case 'l':
-	    retval = krb5_parse_lifetime(ksu_context, optarg, &options.lifetime);
+	    retval = krb5_parse_lifetime(optarg, &options.lifetime);
 	    if (retval != 0 || options.lifetime == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
 		errflg++;
@@ -421,7 +420,7 @@ char * dir_of_cc_source;
 		}else{
 	  		fprintf(stderr,
 			       "GET_best_princ_for_target result-best principal ");
-			plain_dump_principal (client);
+			plain_dump_principal (ksu_context, client);
 			fprintf(stderr,"\n");
 		}
 	}
@@ -563,7 +562,7 @@ char * dir_of_cc_source;
 
 					fprintf(stderr,
 					"Could not get a tgt for ");    
-					plain_dump_principal (client);
+					plain_dump_principal (ksu_context, client);
 					fprintf(stderr, "\n");    
 					
 				}
@@ -863,7 +862,7 @@ char *getusershell();
 						  
 #endif /* HAVE_GETUSERSHELL */
 
-char * ontty()
+static char * ontty()
 {
 char *p, *ttyname();
 static char buf[MAXPATHLEN + 4];
@@ -875,7 +874,7 @@ static char buf[MAXPATHLEN + 4];
 }
 
 
-int set_env_var(name, value)
+static int set_env_var(name, value)
     char *name;
     char *value;
 {
@@ -890,7 +889,7 @@ char * env_var_buf;
 
 }
 
-void sweep_up(context, use_source_cache, cc)
+static void sweep_up(context, use_source_cache, cc)
     krb5_context context;
     int use_source_cache;
     krb5_ccache cc;

@@ -1,3 +1,17 @@
+Tue Jul 11 11:10:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (main): Remove extraneous argument to call to
+		krb5_parse_lifetime. Add context argument to call to
+		plain_dump_principal. 
+
+	* authorization.c, heuristic.c, krb_auth_su.c: Add prototypes
+		for static functions. Add missing arguments to
+		_dbm_an_to_ln call. 
+
+	* ccache.c: Remove prototype declaration of function now defined
+		in ksu.h
+
+	* ksu.h: Add full prototypes for all functions in program.
 
 Fri Jul 7 15:55:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit library handling and LDFLAGS.
