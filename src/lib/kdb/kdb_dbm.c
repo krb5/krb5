@@ -884,7 +884,7 @@ krb5_dbm_db_rename(context, from, to)
 	 * files must exist because krb5_dbm_db_lock, called below,
 	 * will fail otherwise.
 	 */
-	db = KDBM_OPEN(db_ctx, to, O_RDWR|O_CREAT|O_EXCL, 0600); 
+	db = KDBM_OPEN(db_ctx, to, O_RDWR|O_CREAT, 0600); 
 	if (db == NULL) {
 	     retval = errno;
 	     goto errout;
