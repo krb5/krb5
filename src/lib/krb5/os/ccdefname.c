@@ -28,9 +28,9 @@ char *krb5_cc_default_name()
     
     if (name == 0) {
 	if (name_buf == 0)
-	    name_buf = malloc (30);
+	    name_buf = malloc (35);
 	
-	sprintf(name_buf, "/tmp/krb5cc_%d", getuid());
+	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 	name = name_buf;
     }
     return name;
