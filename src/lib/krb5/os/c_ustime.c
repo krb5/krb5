@@ -27,7 +27,7 @@
 #define	NEED_SOCKETS
 #include "k5-int.h"
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 
 /* We're a Macintosh -- do Mac time things.  */
 
