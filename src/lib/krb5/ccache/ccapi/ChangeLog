@@ -1,3 +1,24 @@
+2000-05-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* stdcc_util.c (dupK5toCC): Remove unused variables.
+
+	* stdcc_util.c: Reindent to krb5 coding style.  Remove whitespace
+	at end of lines.  Replace C++ comments with C comments.
+
+	* stdcc_util.h: Replace C++ comments with C comments.
+
+	* winccld.h: Define CC_API_VER2 for all Windows code using ccapi.
+	Update dynamic loading declarations to use CC_API_VER2.
+
+	* winccld.h: Do not define or try to load cc_lock_request, which is
+	not actually used anywhere in the code.
+
+	* stdcc.c: Define CC_API_VER2 if not defined rather than just if
+	not Windows.
+
+	* winccld.c (LoadFuncs): Get error on DLL load failure even though
+	we do not use it in case we are doing source-level debugging.
+
 2000-05-04  Miro Jurisic  <meeroh@mit.edu>
 
 	* stdcc_util.c (dupCCtoK5, dupK5toCC): 

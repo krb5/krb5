@@ -40,7 +40,7 @@ apiCB *gCntrlBlock = NULL;
 #include "winccld.h"	
 #endif
 
-#if !defined(_MSDOS) && !defined(_WIN32)
+#ifndef CC_API_VER2
 #define CC_API_VER2
 #endif
 

@@ -45,6 +45,8 @@ static int LoadFuncs(const char* dll_name, FUNC_INFO fi[],
     }
 
     if (!(h = LoadLibrary(dll_name))) {
+	/* Get error for source debugging purposes. */
+	error = (int)GetLastError();
 	return LF_NODLL;
     }
 
