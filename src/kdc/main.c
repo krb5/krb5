@@ -34,6 +34,7 @@ static char rcsid_main_c[] =
 #include <krb5/krb5_err.h>
 #include <krb5/isode_err.h>
 #include <krb5/kdb5_err.h>
+#include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
 
 #include "kdc_util.h"
@@ -125,7 +126,6 @@ char **argv;
     char lrealm[BUFSIZ];
     krb5_error_code retval;
 
-    extern int optind;
     extern char *optarg;
 
     while (c = getopt(argc, argv, "r:d:mM:k:")) {
@@ -261,9 +261,12 @@ closedown_db()
  exit
  */
 
+/* This void is a bit bogus, but it's necessary to prevent some compilers from
+   complaining about a no-value return path from a non-void function. */
+void
 main(argc, argv)
 int argc;
-char **argv;
+char *argv[];
 {
     krb5_error_code retval;
 
