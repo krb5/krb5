@@ -1,3 +1,8 @@
+Tue Mar 12 23:46:26 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gss-server.c (timeval_subtract): Use old-style function
+	definition.
+
 Sun Mar  3 12:14:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gss-server.c (test_import_export_context): Add second argument

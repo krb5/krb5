@@ -479,8 +479,8 @@ int server_establish_context(s, server_creds, context, client_name)
      return 0;
 }
 
-static float timeval_subtract(struct timeval *tv1,
-					 struct timeval *tv2)
+static float timeval_subtract(tv1, tv2)
+	struct timeval *tv1, *tv2;
 {
 	return ((tv1->tv_sec - tv2->tv_sec) +
 		((float) (tv1->tv_usec - tv2->tv_usec)) / 1000000);
