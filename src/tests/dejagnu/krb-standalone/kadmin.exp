@@ -746,6 +746,16 @@ proc kadmin_test { } {
 	    || ![kadmin_delete testprinc1/instance]} {
 	return
     }
+    # now test modify changes.
+    if {![kadmin_add testuser testpw] \
+            || ![kinit testuser testpw 0] \
+	    || ![kdestroy] \
+	    || ![kadmin_modify testuser maxlife=2500] \
+	    || ![kinit testuser testpw 0] \
+	    || ![kdestroy] \
+	    || ![kadmin_delete testuser]} {
+	return
+    }
 
     verbose "kadmin_test succeeded"
 }

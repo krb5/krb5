@@ -1,3 +1,7 @@
+Wed Dec 13 15:28:17 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kadmin.exp: test that kadmin_modify doesn't corrupt key entries.
+
 Sat Oct  7 08:02:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* sample.exp: Make changes to deal with NetBSD expect. Similar to
