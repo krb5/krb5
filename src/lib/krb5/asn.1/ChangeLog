@@ -1,3 +1,11 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_decode.c (asn1_decode_generaltime): If the input string is
+	the magic UNIX time zero, bypass all the arithmetic and return 0.
+	* asn1_encode.c (asn1_encode_generaltime): If the input time
+	value is the UNIX epoch, use a hardcoded string instead of doing
+	the math.
+
 2003-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_k_encode.c (asn1_encode_krb_saved_safe_body): New function;

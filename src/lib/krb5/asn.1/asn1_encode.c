@@ -226,28 +226,35 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
 {
   asn1_error_code retval;
   struct tm *gtime;
-  char s[16];
+  char s[16], *sp;
   unsigned int length, sum=0;
   time_t gmt_time = val;
 
-  gtime = gmtime(&gmt_time);
-
   /*
    * Time encoding: YYYYMMDDhhmmssZ
-   *
-   * Sanity check this just to be paranoid, as gmtime can return NULL,
-   * and some bogus implementations might overrun on the sprintf.
    */
-  if (gtime == NULL ||
-      gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
-      gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
-      gtime->tm_min > 59 || gtime->tm_sec > 59)
-    return ASN1_BAD_GMTIME;
-  sprintf(s, "%04d%02d%02d%02d%02d%02dZ",
-	  1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
-	  gtime->tm_hour, gtime->tm_min, gtime->tm_sec);
+  if (gmt_time == 0) {
+      sp = "19700101000000Z";
+  } else {
 
-  retval = asn1buf_insert_charstring(buf,15,s);
+      /*
+       * Sanity check this just to be paranoid, as gmtime can return NULL,
+       * and some bogus implementations might overrun on the sprintf.
+       */
+      gtime = gmtime(&gmt_time);
+
+      if (gtime == NULL ||
+	  gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
+	  gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
+	  gtime->tm_min > 59 || gtime->tm_sec > 59)
+	  return ASN1_BAD_GMTIME;
+      sprintf(s, "%04d%02d%02d%02d%02d%02dZ",
+	      1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
+	      gtime->tm_hour, gtime->tm_min, gtime->tm_sec);
+      sp = s;
+  }
+
+  retval = asn1buf_insert_charstring(buf,15,sp);
   if(retval) return retval;
   sum = 15;
 
