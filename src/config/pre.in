@@ -235,6 +235,10 @@ KADM_COMM_DEPLIBS	= $(GSSRPC_DEPLIBS) $(KDB5_DEPLIBS) $(GSSRPC_DEPLIBS)
 KADMSRV_DEPLIBS		= $(KADMSRV_DEPLIB) $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS)
 KADMCLNT_DEPLIBS	= $(KADMCLNT_DEPLIB) $(KADM_COMM_DEPLIBS)
 
+# Header file dependencies we might override someday.
+# See util/depfix.sed.
+COM_ERR_DEPS  	= $(BUILDTOP)/include/com_err.h
+
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
 # GEN_LIB is -lgen if needed for regexp

@@ -1,5 +1,7 @@
 2002-06-15  Ken Raeburn  <raeburn@mit.edu>
 
+	* pre.in (COM_ERR_DEPS): New variable.
+
 	* post.in (clean-unix): Delete .d files.
 
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
