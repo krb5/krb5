@@ -184,7 +184,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
      * Set the db_name based on configuration before calling
      * krb5_db_init, so it will get used.
      */
-    if (ret = krb5_dbm_db_set_name(handle->context,
+    if (ret = krb5_db_set_name(handle->context,
 				   handle->params.dbname)) {
 	 free(handle);
 	 return(ret);
@@ -311,7 +311,7 @@ kadm5_ret_t kadm5_flush(void *server_handle)
 	  * Set the db_name based on configuration before calling
 	  * krb5_db_init, so it will get used.
 	  */
-	 (ret = krb5_dbm_db_set_name(handle->context,
+	 (ret = krb5_db_set_name(handle->context,
 				     handle->params.dbname)) ||
 	 (ret = krb5_db_init(handle->context)) ||
 	 (ret = adb_policy_close(handle)) ||

@@ -1,3 +1,10 @@
+Fri Jul 25 15:37:08 1997  Tom Yu  <tlyu@mit.edu>
+
+	* server_init.c: Change a few calls to align with the new kdb
+	API.
+
+	* Makefile.in: Bump version.
+
 Tue Jul  1 02:32:49 1997  Tom Yu  <tlyu@mit.edu>
 
 	* server_acl.h: Fix ACL_ALL_MASK to include ACL_SETKEY.
