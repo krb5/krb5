@@ -20,8 +20,14 @@
 # With one arg, create a configure script on standard output from
 # the given template file.
 
-usage="Usage: autoconf [-h] [--help] [-m dir] [--macrodir=dir] 
+usage="Usage: autoconf [-h] [--help] [-m dir] [--macrodir=dir]
+		[--recur] [--topdir=dir]
                 [-v] [--version] [template-file]" 
+
+# Note that for now, the only arguments passed down by --recur are:
+#    --macrodir (-m) (modified if needed)
+#    --topdir        (modified or synthesized if needed)
+# They're the only ones that make sense.
 
 # NLS nuisances.
 # These must not be set unconditionally because not all systems understand
@@ -38,6 +44,8 @@ case "${M4}" in
 esac
 
 tmpout=/tmp/acout.$$
+recur=false
+set_topdir="-DAC_TOPDIR="
 
 print_version=
 while test $# -gt 0 ; do
@@ -52,10 +60,23 @@ while test $# -gt 0 ; do
          test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
          AC_MACRODIR="${1}"
          shift ;;
+      z--topdir=* )
+         AC_TOPDIR="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
+	 set_topdir="-DAC_TOPDIR=${AC_TOPDIR}"
+         shift ;;
+      z--topdir ) 
+         shift
+         test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
+         AC_TOPDIR="${1}"
+	 set_topdir="-DAC_TOPDIR=${AC_TOPDIR}"
+         shift ;;
       z-v | z--version | z--v* )
          print_version="-DAC_PRINT_VERSION"
          infile=/dev/null tmpout=/dev/null
          shift ;;
+      z--recur )
+	 recur=true
+	 shift ;;
       z-- )     # Stop option processing
         shift; break ;;
       z- )	# Use stdin as input.
@@ -90,9 +111,11 @@ MACROFILES="${AC_MACRODIR}/acgeneral.m4 ${AC_MACRODIR}/acspecific.m4"
 test -r ${AC_MACRODIR}/aclocal.m4 \
    && MACROFILES="${MACROFILES} ${AC_MACRODIR}/aclocal.m4"
 test -r aclocal.m4 && MACROFILES="${MACROFILES} aclocal.m4"
+test -r ${AC_TOPDIR}/aclocal.m4 && MACROFILES="${MACROFILES} ${AC_TOPDIR}/aclocal.m4"
 MACROFILES="${print_version} ${MACROFILES}"
 
-$M4 $MACROFILES $infile > $tmpout || { st=$?; rm -f $tmpin $tmpout; exit $st; }
+# echo "running: $M4 $set_topdir $MACROFILES $infile"
+$M4 $set_topdir $MACROFILES $infile > $tmpout || { st=$?; rm -f $tmpin $tmpout; exit $st; }
 
 test -n "$print_version" && exit 0
 
@@ -117,4 +140,37 @@ case $# in
 esac
 
 rm -f $tmpout
+
+case $0 in
+  /*)  autoconf=$0 ;;
+  */*) autoconf=../$0 ;;
+  *)   autoconf=$0 ;;
+esac
+# echo "autoconf=$autoconf"
+
+case $AC_TOPDIR in
+  "")  topdown=.. ;;
+  /*)  topdown=$AC_TOPDIR ;;
+  *)   topdown=../$AC_TOPDIR ;;
+esac
+# echo "topdown=$topdown"
+
+case $macrodir in
+  "")  macdown= ;;
+  /*)  macdown=--macrodir=$macrodir ;;
+  *)   macdown=--macrodir=../$macrodir ;;
+esac
+# echo "macdown=$macdown"
+
+if $recur ; then
+  for i in *; do
+    if [ -d $i ] ; then
+      if [ -r $i/configure.in ] ; then
+        echo "cd $i; $autoconf --recur --topdir=$topdown $macdown"
+        (cd $i; $autoconf --recur --topdir=$topdown $macdown)
+      fi
+    fi
+  done
+fi
+
 exit $status
