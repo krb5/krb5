@@ -132,6 +132,7 @@ OLDDECLARG(krb5_data *, reply)
 	    if (send(socklist[addr[host].sa_family],
 		       message->data, message->length, 0) != message->length)
 	      continue;
+	retry:
 	    waitlen.tv_usec = 0;
 	    waitlen.tv_sec = timeout;
 	    FD_ZERO(&readable);
@@ -143,7 +144,7 @@ OLDDECLARG(krb5_data *, reply)
 				&waitlen)) {
 		if (nready == -1) {
 		    if (errno == EINTR)
-			continue;
+			goto retry;
 		    retval = errno;
 		    goto out;
 		}
