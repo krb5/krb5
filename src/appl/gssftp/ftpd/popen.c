@@ -58,6 +58,8 @@ static char sccsid[] = "@(#)popen.c	5.9 (Berkeley) 2/25/91";
 static int *pids;
 static int fds;
 
+#define MAX_ARGV	100
+#define MAX_GARGV	1000
 
 FILE *
 ftpd_popen(program, type)
@@ -66,7 +68,7 @@ ftpd_popen(program, type)
 	register char *cp;
 	FILE *iop;
 	int argc, gargc, pdes[2], pid;
-	char **pop, *argv[100], *gargv[1000], *vv[2];
+	char **pop, *argv[MAX_ARGV], *gargv[MAX_GARGV], *vv[2];
 	extern char **ftpglob(), **copyblk();
 
 	if (*type != 'r' && *type != 'w' || type[1])
@@ -83,10 +85,12 @@ ftpd_popen(program, type)
 		return(NULL);
 
 	/* break up string into pieces */
-	for (argc = 0, cp = program;; cp = NULL)
+	for (argc = 0, cp = program; argc < MAX_ARGV - 1; cp = NULL)
 		if (!(argv[argc++] = strtok(cp, " \t\n")))
 			break;
-	for (argc = 0; argv[argc]; argc++) argv[argc] = strdup(argv[argc]);
+	argv[MAX_ARGV-1] = NULL;
+	for (argc = 0; argv[argc]; argc++)
+		argv[argc] = strdup(argv[argc]);
 
 	/* glob each piece */
 	gargv[0] = argv[0];
@@ -97,7 +101,7 @@ ftpd_popen(program, type)
 			pop = copyblk(vv);
 		}
 		argv[argc] = (char *)pop;		/* save to free later */
-		while (*pop && gargc < 1000)
+		while (*pop && gargc < MAX_GARGV)
 			gargv[gargc++] = *pop++;
 	}
 	gargv[gargc] = NULL;
