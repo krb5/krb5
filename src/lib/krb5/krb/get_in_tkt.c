@@ -161,8 +161,8 @@ OLDDECLARG(krb5_ccache, ccache)
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot
 					   be encrypted in skey */
     creds->ticket_flags = as_reply->enc_part2->flags;
-    if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
-				     &cred->addresses)) {
+    if (retval = krb5_copy_addresses(as_reply->enc_part2->caddrs,
+				     &creds->addresses)) {
 	cleanup_key();
 	return retval;
     }
