@@ -1,3 +1,7 @@
+2004-11-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_ktfile_wresolve): Initialize mutex here too.
+
 2004-11-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* kt_file.c (struct _krb5_ktfile_data): Add mutex and buffer.
