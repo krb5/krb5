@@ -77,7 +77,18 @@ krb5_ktkdb_close(context, kt)
      krb5_context context;
      krb5_keytab kt;
 {
-  /* no state outstanding... */
+  /*
+   * This routine is responsible for freeing all memory allocated 
+   * for this keytab.  There are no system resources that need
+   * to be freed nor are there any open files.
+   *
+   * This routine should undo anything done by krb5_ktkdb_resolve().
+   */
+
+  krb5_xfree(kt->data);
+  kt->ops = 0;
+  krb5_xfree(kt);
+
   return 0;
 }
 

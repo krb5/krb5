@@ -1,3 +1,8 @@
+Tue Jun 11 19:27:22 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* keytab.c (krb5_ktkdb_close): Free memory allocated by
+		krb5_ktkdb_resolve. 
+
 Mon May 20 18:02:07 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdb_dbm.c (krb5_dbm_db_create): Remove vestigal ODBM support.
