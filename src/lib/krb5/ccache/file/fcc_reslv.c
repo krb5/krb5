@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_resolve_c[] = "$Id$";
+static char fcc_reslve_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
@@ -55,7 +55,7 @@ krb5_fcc_resolve (id, residual)
      
      lid->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
      if (((krb5_fcc_data *) lid->data) == NULL) {
-	  free(lid);
+	  xfree(lid);
 	  return KRB5_NOMEM;
      }
 
@@ -63,12 +63,14 @@ krb5_fcc_resolve (id, residual)
 	  malloc(strlen(residual) + 1);
 
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
-	  free(((krb5_fcc_data *) lid->data));
-	  free(lid);
+	  xfree(((krb5_fcc_data *) lid->data));
+	  xfree(lid);
 	  return KRB5_NOMEM;
      }
 
-     ((krb5_fcc_data *) lid->data)->flags = 0;
+     /* default to open/close on every trn */
+     ((krb5_fcc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
+     ((krb5_fcc_data *) lid->data)->fd = -1;
      
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, residual);
