@@ -27,32 +27,25 @@ Things-to-keep:
 .rconf
 ChangeLog
 Makefile.in
-README
 configure
 configure.in
 mcc-proto.h
 mcc.h
 mcc_close.c
-mcc_defops.c
 mcc_destry.c
-mcc_errs.c
 mcc_eseq.c
 mcc_gennew.c
 mcc_getnam.c
 mcc_gprin.c
 mcc_init.c
-mcc_maybe.c
 mcc_nseq.c
 mcc_ops.c
-mcc_read.c
 mcc_reslv.c
 mcc_retrv.c
 mcc_sflags.c
-mcc_skip.c
 mcc_sseq.c
 mcc_store.c
 mcc_test.c
-mcc_write.c
 
 Things-to-lose:
 

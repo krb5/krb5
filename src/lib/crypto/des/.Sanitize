@@ -36,7 +36,6 @@ d3_cbc.c
 d3_ecb.c
 d3_kysched.c
 d3_procky.c
-d3_rndky.c
 d3_str2ky.c
 des.h
 des_int.h

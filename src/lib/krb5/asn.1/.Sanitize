@@ -48,7 +48,6 @@ asn1buf.h
 asn1glue.h
 configure
 configure.in
-glue2.c
 krb5_decode.c
 krb5_encode.c
 krbasn1.h
