@@ -1,3 +1,7 @@
+2002-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (unix): Define if BSD is defined.
+
 2001-11-30  Tom Yu  <tlyu@mit.edu>
 
 	* glob.c (execbrc): Fix some fencepost errors.  Don't copy

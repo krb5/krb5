@@ -199,11 +199,8 @@ void setpeer(argc, argv)
 		}
 
 #ifndef unix
-#ifdef _AIX
-#define unix
-#endif
-
-#ifdef __hpux
+/* sigh */
+#if defined(_AIX) || defined(__hpux) || defined(BSD)
 #define unix
 #endif
 #endif
