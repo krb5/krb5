@@ -30,8 +30,17 @@
 
 #include <stdio.h>
 
-/* POSIX_* are auto-magically defined in <krb5/config.h> at source
-   configuration time. */
+#if HAVE_UNISTD_H
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+          
+#ifdef _POSIX_VERSION
+ /* Is there a better way to decide whether or not we should use flock */
+ /* vs. fcntl.  Example: broken SunOS tmpfs.... */
+#define POSIX_FILE_LOCKS
+#endif
+
 
 #ifdef POSIX_FILE_LOCKS
 #include <errno.h>
