@@ -1,3 +1,7 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * string2key.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Thu Aug 24 18:51:53 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
