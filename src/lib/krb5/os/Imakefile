@@ -2,7 +2,6 @@ NormalLibraryObjectRule()
 
 OBJS= \
 	an_to_ln.o	\
-	config.o	\
 	def_realm.o	\
 	defname.o	\
 	free_krbhs.o	\
@@ -15,6 +14,7 @@ OBJS= \
 	mstime.o	\
 	net_read.o	\
 	net_write.o	\
+	osconfig.o	\
 	read_pwd.o	\
 	sendto_kdc.o	\
 	timeofday.o	\
@@ -22,7 +22,6 @@ OBJS= \
 
 SRCS= \
 	an_to_ln.c	\
-	config.c	\
 	def_realm.c	\
 	defname.c	\
 	free_krbhs.c	\
@@ -35,6 +34,7 @@ SRCS= \
 	mstime.c	\
 	net_read.c	\
 	net_write.c	\
+	osconfig.c	\
 	read_pwd.c	\
 	sendto_kdc.c	\
 	timeofday.c	\
