@@ -66,8 +66,12 @@ krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
       return(GSS_S_FAILURE);
    }
 
-   if ((lifetime = cred->tgt_expire - now) < 0)
-      lifetime = 0;
+   if (cred->tgt_expire > 0) {
+       if ((lifetime = cred->tgt_expire - now) < 0)
+	   lifetime = 0;
+   }
+   else
+       lifetime = GSS_C_INDEFINITE;
 
    if (name) {
       if (code = krb5_copy_principal(context, cred->princ, &ret_name)) {
