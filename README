@@ -63,13 +63,16 @@ Major changes in 1.3.3
 ----------------------
 
 * [2277] In sendto_kdc, a socket leak on connection failure was fixed.
-  Reported by Bill Dodd.
+  Thanks to Bill Dodd.
 
 * [2284] Fixed accept_sec_context to use a replay cache in the
   GSS_C_NO_CREDENTIAL case.  Reported by Cesar Garcia.
 
 * [2384] A memory leak in the TCP handling code in the KDC has been
   fixed.  Thanks to Will Fiveash.
+
+* [2426] Fixed a spurious SIGPIPE that happened in the TCP sendto_kdc
+  code on AIX.  Thanks to Bill Dodd.
 
 * [2430] Fixed a crash in the MSLSA ccache.
 
