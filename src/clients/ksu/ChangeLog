@@ -1,3 +1,8 @@
+2001-10-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* main.c (main): Do not pass LOG_AUTH facility into openlog() as a
+	logopt.
+
 2001-10-18  Ken Raeburn  <raeburn@mit.edu>
 
 	Don't crash if .k[5]login file ownership is wrong.  Patch from

@@ -152,7 +152,7 @@ main (argc, argv)
 #ifndef LOG_AUTH /* 4.2 syslog */
     openlog(prog_name, LOG_PID|LOG_NDELAY);
 #else
-    openlog(prog_name, LOG_PID | LOG_AUTH | LOG_NDELAY, LOG_AUTH);
+    openlog(prog_name, LOG_PID | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
     
       
