@@ -1,3 +1,9 @@
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * gss-misc.c (read_all): Add call to select() so we don't block forever
+
+    * gss-server.c (main): Add missing "export" parameter to second sign_server()
+
 2003-01-08  Sam Hartman  <hartmans@mit.edu>
 
 	* gss-misc.c (recv_token): Support reading 0 token flags as part of length
