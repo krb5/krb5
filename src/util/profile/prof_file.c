@@ -316,6 +316,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 	errcode_t retval;
 #ifdef HAVE_STAT
 	struct stat st;
+	unsigned long frac;
 #ifdef STAT_ONCE_PER_SECOND
 	time_t now;
 #endif
@@ -342,7 +343,18 @@ errcode_t profile_update_file_data(prf_data_t data)
 #ifdef STAT_ONCE_PER_SECOND
 	data->last_stat = now;
 #endif
-	if (st.st_mtime == data->timestamp && data->root != NULL) {
+#if defined HAVE_STRUCT_STAT_ST_MTIMENSEC
+	frac = st.st_mtimensec;
+#elif defined HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
+	frac = st.st_mtimespec.tv_nsec;
+#elif defined HAVE_STRUCT_STAT_ST_MTIM_TV_USEC
+	frac = st.st_mtim.tv_usec;
+#else
+	frac = 0;
+#endif
+	if (st.st_mtime == data->timestamp
+	    && frac == data->frac_ts
+	    && data->root != NULL) {
 	    k5_mutex_unlock(&data->lock);
 	    return 0;
 	}
@@ -387,6 +399,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 	assert(data->root != NULL);
 #ifdef HAVE_STAT
 	data->timestamp = st.st_mtime;
+	data->frac_ts = frac;
 #endif
 	k5_mutex_unlock(&data->lock);
 	return 0;

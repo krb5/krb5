@@ -42,6 +42,7 @@ struct _prf_data_t {
 	time_t		last_stat;
 #endif
 	time_t		timestamp; /* time tree was last updated from file */
+	unsigned long	frac_ts;   /* fractional part of timestamp, if any */
 	int		flags;	/* r/w, dirty */
 	int		upd_serial; /* incremented when data changes */
 	char		*comment;
