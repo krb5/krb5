@@ -26,7 +26,6 @@
 #include <string.h>
 #include "com_err.h"
 #include "error_table.h"
-#include "k5-thread.h"
 #include "k5-platform.h"
 
 #if defined(_WIN32)
@@ -49,6 +48,9 @@ int com_err_initialize(void)
 {
     int err;
     err = k5_mutex_finish_init(&et_list_lock);
+    if (err)
+	return err;
+    err = k5_mutex_finish_init(&com_err_hook_lock);
     if (err)
 	return err;
     err = k5_key_register(K5_KEY_COM_ERR, free);
@@ -332,4 +334,9 @@ remove_error_table(const struct error_table * et)
 	}
     k5_mutex_unlock(&et_list_lock);
     return ENOENT;
+}
+
+int com_err_finish_init()
+{
+    return CALL_INIT_FUNCTION(com_err_initialize);
 }

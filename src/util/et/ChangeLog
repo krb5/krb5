@@ -1,3 +1,16 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* com_err.c: Include stdlib.h.
+	(com_err_hook_lock): New mutex.
+	(com_err_lock_hook_handle): New function.
+	(com_err_va, set_com_err_hook, reset_com_err_hook): Call
+	com_err_finish_init, and grab the lock.
+	* error_message.c: Don't include k5-thread.h.
+	(com_err_finish_init): New function.
+	(com_err_initialize): Initialize the new mutex.
+	* error_table.h: Include k5-thread.h.
+	(com_err_hook_lock, com_err_finish_init): Declare.
+
 2004-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* error_message.c (terminated): New variable.

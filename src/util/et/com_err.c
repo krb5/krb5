@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "com_err.h"
 #include "error_table.h"
@@ -30,6 +31,7 @@
 #endif
 
 static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
+k5_mutex_t com_err_hook_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 static void default_com_err_proc (const char *whoami, errcode_t code,
 				  const char *fmt, va_list ap)
@@ -89,10 +91,32 @@ void KRB5_CALLCONV com_err_va(const char *whoami,
 			      const char *fmt,
 			      va_list ap)
 {
-	if (!com_err_hook)
-		default_com_err_proc(whoami, code, fmt, ap);
-	else
-	  (com_err_hook)(whoami, code, fmt, ap);
+    int err;
+    et_old_error_hook_func p;
+
+    err = com_err_finish_init();
+    if (err)
+	goto best_try;
+    err = k5_mutex_lock(&com_err_hook_lock);
+    if (err)
+	goto best_try;
+    p = com_err_hook ? com_err_hook : default_com_err_proc;
+    (*p)(whoami, code, fmt, ap);
+    k5_mutex_unlock(&com_err_hook_lock);
+
+best_try:
+    /* Yikes.  Our library initialization failed or we couldn't lock
+       the lock we want.  We could be in trouble.  Gosh, we should
+       probably print an error message.  Oh, wait.  That's what we're
+       trying to do.  In fact, if we're losing on initialization here,
+       there's a good chance it has to do with failed initialization
+       of the caller.  */
+    if (!com_err_hook)
+	default_com_err_proc(whoami, code, fmt, ap);
+    else
+	(com_err_hook)(whoami, code, fmt, ap);
+    assert(err == 0);
+    abort();
 }
 
 
@@ -108,19 +132,37 @@ void KRB5_CALLCONV_C com_err(const char *whoami,
 }
 
 #if !(defined(_WIN32))
+/* Make a separate function because the assert invocations below
+   use the macro expansion on some platforms, which may be insanely
+   long and incomprehensible.  */
+static int com_err_lock_hook_handle(void)
+{
+    return k5_mutex_lock(&com_err_hook_lock);
+}
+
 et_old_error_hook_func set_com_err_hook (et_old_error_hook_func new_proc)
 {
-	et_old_error_hook_func x = com_err_hook;
+	et_old_error_hook_func x;
 
+	/* Broken initialization?  What can we do?  */
+	assert(com_err_finish_init() == 0);
+	assert(com_err_lock_hook_handle() == 0);
+	x = com_err_hook;
 	com_err_hook = new_proc;
+	k5_mutex_unlock(&com_err_hook_lock);
 	return x;
 }
 
 et_old_error_hook_func reset_com_err_hook ()
 {
-	et_old_error_hook_func x = com_err_hook;
-    
+	et_old_error_hook_func x;
+
+	/* Broken initialization?  What can we do?  */
+	assert(com_err_finish_init() == 0);
+	assert(com_err_lock_hook_handle() == 0);
+	x = com_err_hook;
 	com_err_hook = NULL;
+	k5_mutex_unlock(&com_err_hook_lock);
 	return x;
 }
 #endif
