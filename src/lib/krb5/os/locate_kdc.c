@@ -820,12 +820,16 @@ krb5_locate_kdc(krb5_context context, const krb5_data *realm,
     int udpport, sec_udpport;
 
     udpport = get_port (KDC_PORTNAME, 0, KRB5_DEFAULT_PORT);
-    sec_udpport = get_port (KDC_SECONDARY_PORTNAME, 0,
-			    (udpport == htons (KRB5_DEFAULT_PORT)
-			     ? KRB5_DEFAULT_SEC_PORT
-			     : KRB5_DEFAULT_PORT));
-    if (sec_udpport == udpport)
+    if (socktype == SOCK_STREAM)
 	sec_udpport = 0;
+    else {
+	sec_udpport = get_port (KDC_SECONDARY_PORTNAME, 0,
+				(udpport == htons (KRB5_DEFAULT_PORT)
+				 ? KRB5_DEFAULT_SEC_PORT
+				 : KRB5_DEFAULT_PORT));
+	if (sec_udpport == udpport)
+	    sec_udpport = 0;
+    }
 
     return krb5int_locate_server (context, realm, addrlist, get_masters, "kdc",
 				  (get_masters

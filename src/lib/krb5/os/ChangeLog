@@ -3,6 +3,7 @@
 	* locate_kdc.c (krb5int_grow_addrlist): Renamed from grow_list,
 	now external.
 	(grow_list): New macro.
+	(krb5_locate_kdc): Don't look up kerberos-sec for TCP service.
 
 	* sendto_kdc.c (MAX_PASS, dprint): New macros.
 	(krb5int_debug_fprint, merge_addrlists): New function.
