@@ -1,3 +1,8 @@
+Sat Feb  3 22:37:55 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* network.c (add_port): sunos realloc doesn't handle a NULL
+	pointer, so protect with a macro.
+
 Sat Feb 10 02:46:27 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* main.c (initialize_realms): look for [kdc] profile=path for

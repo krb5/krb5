@@ -49,6 +49,8 @@ static int max_udp_ports = 0;
 static fd_set select_fds;
 static int select_nfds;
 
+#define safe_realloc(p,n) ((p)?(realloc(p,n)):(malloc(n)))
+
 static krb5_error_code add_port(port)
      u_short port;
 {
@@ -64,12 +66,12 @@ static krb5_error_code add_port(port)
     
     if (n_udp_ports >= max_udp_ports) {
 	new_max = max_udp_ports + 10;
-	new_fds = realloc(udp_port_fds, new_max * sizeof(int));
+	new_fds = safe_realloc(udp_port_fds, new_max * sizeof(int));
 	if (new_fds == 0)
 	    return ENOMEM;
 	udp_port_fds = new_fds;
 
-	new_ports = realloc(udp_port_nums, new_max * sizeof(u_short));
+	new_ports = safe_realloc(udp_port_nums, new_max * sizeof(u_short));
 	if (new_ports == 0)
 	    return ENOMEM;
 	udp_port_nums = new_ports;
@@ -80,7 +82,7 @@ static krb5_error_code add_port(port)
     udp_port_nums[n_udp_ports++] = port;
     return 0;
 }
-
+#undef safe_realloc
 
 krb5_error_code
 setup_network(prog)
