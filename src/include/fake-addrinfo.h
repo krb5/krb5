@@ -940,8 +940,7 @@ void freeaddrinfo (struct addrinfo *ai)
 {
 #ifdef COPY_FIRST_CANONNAME
     if (ai) {
-	if (ai->ai_canonname)
-	    free(ai->ai_canonname);
+      free(ai->ai_canonname);
 	ai->ai_canonname = 0;
 	(*faiptr)(ai);
     }

@@ -1,3 +1,8 @@
+2003-01-08  Ezra Peisach  <epeisach@bu.edu>
+
+	* fake-addrinfo.h (freeaddrinfo): Back out 1/3/03 change. ANSI
+	does not require it.
+
 2003-01-08  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.hin :  Move KRB5_CALLCONV specifier for
