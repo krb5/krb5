@@ -4,6 +4,18 @@ Wed Apr 10 20:24:49 1996  Richard Basch  <basch@lehman.com>
 	statements.  Also, rather than computing the default host key,
 	let the library routine do it.
 
+Sun Mar 31 16:48:29 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* main.c (main): Handle suspend/fg properly.
+
+Fri Mar 29 23:35:53 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* ccache.c main.c: Remove krb5_ccache_refresh(). All this functionality
+	is is done in the krb5_ccache_copy(), and the way refresh() was
+	implemented it was generating a new ccache owner by root (ksu is suid)
+	over the old ccache, thereby making it possible that programs 
+	accessing the ccache during this time would fail.
+
 Wed Mar 13 17:45:11 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Use AC_HEADER_STDARG.
