@@ -85,6 +85,12 @@
 #  endif
 #  define KRB5_CALLCONV __stdcall
 #  define KRB5_CALLCONV_C __cdecl
+
+/* Use this to mark an incorrect calling convention that has been
+   "immortalized" because it was incorrectly exported in a previous
+   release */
+#  define KRB5_CALLCONV_WRONG KRB5_CALLCONV_C
+
 #  define KRB5_EXPORTVAR
 #endif /* !KRB5_CALLCONV */
 

@@ -1,3 +1,13 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-mac.h: Add KRB5_CALLCONV_WRONG.
+
+	* krb5.hin: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.  Add KRB5_CALLCONV_WRONG.  Fix up various calling
+	conventions.  For Win32, add KT an CC accessors and default to not
+	PRIVATE.
+
 2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin: Make krb5_build_principal_va() KRB5_CALLCONV.
