@@ -12,14 +12,15 @@
 
 #define	krb5_sigtype		void
 
-#define USE_CCAPI
-#define USE_LOGIN_LIBRARY
-#define NO_PASSWORD
+#define USE_CCAPI			1
+#define USE_LOGIN_LIBRARY	1
+#define NO_PASSWORD			1
 
 #define HAVE_SRAND		1
 #define HAVE_LABS		1
 
 #define HAVE_NETINET_IN_H	1
+#define HAVE_ARPA_INET_H	1
 #define HAVE_SYS_STAT_H		1
 #define	HAVE_SYS_PARAM_H	1
 #define	HAVE_UNISTD_H		1
@@ -31,6 +32,7 @@
 #define	HAVE_REGEXP_H		1
 #define	HAVE_FCNTL_H		1
 #define	HAVE_MEMORY_H		1
+#define HAVE_PWD_H			1
 
 #define	HAVE_STAT		1
 #define	HAVE_ACCESS		1
