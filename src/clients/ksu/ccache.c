@@ -269,8 +269,6 @@ int chunk_count = 1;
 }
 
 
-extern krb5_deltat krb5_clockskew;
-
 krb5_error_code krb5_check_exp(context, tkt_time)
     krb5_context context;
     krb5_ticket_times tkt_time;
@@ -283,14 +281,14 @@ krb5_timestamp currenttime;
 	}	
 	if (auth_debug){
 		fprintf(stderr,"krb5_check_exp: the krb5_clockskew is %d \n",
-			krb5_clockskew);
+			context->clockskew);
 
 		fprintf(stderr,"krb5_check_exp: currenttime - endtime %d \n",
 	(currenttime - tkt_time.endtime )); 
 		
 	}
 
-	if (currenttime - tkt_time.endtime > krb5_clockskew){ 
+	if (currenttime - tkt_time.endtime > context->clockskew){ 
 		retval = KRB5KRB_AP_ERR_TKT_EXPIRED ;
 		return retval;
 	}

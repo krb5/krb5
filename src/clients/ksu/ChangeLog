@@ -1,3 +1,8 @@
+Wed Nov  8 17:54:11 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* ccache.c (krb5_check_exp): Change use of krb5_clockskew to be
+	        context->clockskew.
+
 Mon Oct  9 23:14:33 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* main.c (main): Handle case when ticket cache name does not
