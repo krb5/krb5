@@ -1,3 +1,12 @@
+
+Tue Aug 29 13:26:22 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* k5-int.h - Add ser_ctx[_count] to krb5_context.  This keeps track
+		of registered serializers.  Add serializer definitions and
+		prototypes.
+	* krb5.hin - Add priv_size to krb5_encrypt_block.  This indicates the
+		size of the private data.  Add pointer to keytab ops for
+		serializer handle.
+
 Mon Aug 28 15:58:14 1995    <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Added two new data structures: krb5_alt_method and
