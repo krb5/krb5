@@ -1,3 +1,7 @@
+Mon Aug 12 11:36:57 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* init_db: use kdb5_util instead of kdb5_create
+
 Fri Jul 12 14:48:20 1996  Marc Horowitz  <marc@mit.edu>
 
 	* stop_servers_local (true, false): use the path to find these,
