@@ -56,6 +56,8 @@
 #define	KG_TOK_WRAP_MSG		0x0201
 #define KG_TOK_DEL_CTX		0x0102
 
+#define KRB5_GSS_FOR_CREDS_OPTION 1
+
 /** internal types **/
 
 typedef krb5_principal krb5_gss_name_t;
