@@ -229,10 +229,17 @@ int v5_des_read(), v5_des_write();
 #include "com_err.h"
      
 #define SECURE_MESSAGE  "This rlogin session is using DES encryption for all data transmissions.\r\n"
-
-int (*des_read)(), (*des_write)();
+/*
+ * Note that the encrypted rlogin packets take the form of a four-byte
+ *length followed by encrypted data.  On writing the data out, a significant
+ * performance penalty is suffered (at least one RTT per character, two if we
+ * are waiting for a shell to echo) by writing the data separately from the 
+ * length.  So, unlike the input buffer, which just contains the output
+ * data, the output buffer represents the entire packet.
+ */
+ int (*des_read)(), (*des_write)();
 char des_inbuf[2*RLOGIND_BUFSIZ]; /* needs to be > largest read size */
-char des_outbuf[2*RLOGIND_BUFSIZ];/* needs to be > largest write size */
+char des_outpkt[2*RLOGIND_BUFSIZ+4];/* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 
@@ -553,7 +560,7 @@ int syncpipe[2];
 
 	/* setup des buffers */
     desinbuf.data = des_inbuf;
-    desoutbuf.data = des_outbuf;    /* Set up des buffers */
+    desoutbuf.data = des_outpkt+4;    /* Set up des buffers */
 
     /* Must come from privileged port when .rhosts is being looked into */
     if ((auth_ok&AUTH_RHOSTS) 
@@ -1312,14 +1319,14 @@ v5_des_write(fd, buf, len)
      char *buf;
      int len;
 {
-    unsigned char len_buf[4];
+  unsigned char *len_buf = (unsigned char *) des_outpkt;
     
     if (!do_encrypt)
       return(write(fd, buf, len));
     
     
     desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outbuf)){
+    if (desoutbuf.length > sizeof(des_outpkt)-4){
 	syslog(LOG_ERR,"Write size problem.");
 	return(-1);
     }
@@ -1336,8 +1343,8 @@ v5_des_write(fd, buf, len)
     len_buf[1] = (len & 0xff0000) >> 16;
     len_buf[2] = (len & 0xff00) >> 8;
     len_buf[3] = (len & 0xff);
-    (void) write(fd, len_buf, 4);
-    if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
+
+    if (write(fd, des_outpkt,desoutbuf.length+4) != desoutbuf.length+4){
 	syslog(LOG_ERR,"Could not write out all data.");
 	return(-1);
     }
@@ -1710,7 +1717,7 @@ char *buf;
 int len;
 {
 	static char garbage_buf[8];
-	unsigned char len_buf[4];
+	unsigned char *len_buf = (unsigned char *) des_outpkt;
 
 	if (!do_encrypt)
 		return(write(fd, buf, len));
@@ -1738,7 +1745,7 @@ int len;
 		(void) memcpy(garbage_buf + 8 - len, buf, len);
 	}
 	(void) pcbc_encrypt((len < 8) ? garbage_buf : buf,
-			    des_outbuf,
+			    des_outpkt+4,
 			    (len < 8) ? 8 : len,
 			    v4_schedule,
 			    v4_kdata->session,
@@ -1750,8 +1757,7 @@ int len;
 	len_buf[1] = (len & 0xff0000) >> 16;
 	len_buf[2] = (len & 0xff00) >> 8;
 	len_buf[3] = (len & 0xff);
-	(void) write(fd, len_buf, 4);
-	(void) write(fd, des_outbuf, roundup(len,8));
+	(void) write(fd, des_outpkt, roundup(len,8)+4);
 	return(len);
 }
 

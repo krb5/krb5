@@ -1,3 +1,11 @@
+Mon Sep  2 12:03:53 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krlogind.c rlogin.c (v5_des_write): Write out length plus
+ 	encrypted data as one packet; this reduces latency by one RTT for
+ 	interactive traffic with kernels that support schemes similar to
+ 	RFC896, and reduces the number of packets with most other TCP
+ 	stacks.
+
 Sat Aug 10 16:22:34 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* krcp.c (source): Cast stb.st_size to a long before printing it.

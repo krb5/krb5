@@ -138,10 +138,18 @@ char copyright[] =
 #include "com_err.h"
 #include "defines.h"
      
-#define RLOGIN_BUFSIZ 4096
-     
+#define RLOGIN_BUFSIZ 5120
+     /*
+ * Note that the encrypted rlogin packets take the form of a four-byte
+ *length followed by encrypted data.  On writing the data out, a significant
+ * performance penalty is suffered (at least one RTT per character, two if we
+ * are waiting for a shell to echo) by writing the data separately from the 
+ * length.  So, unlike the input buffer, which just contains the output
+ * data, the output buffer represents the entire packet.
+ */
+
 char des_inbuf[2*RLOGIN_BUFSIZ];       /* needs to be > largest read size */
-char des_outbuf[2*RLOGIN_BUFSIZ];      /* needs to be > largest write size */
+char des_outpkt[2*RLOGIN_BUFSIZ+4];      /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
 
@@ -467,7 +475,7 @@ main(argc, argv)
     krb5_init_context(&bsd_context);
     krb5_init_ets(bsd_context);
     desinbuf.data = des_inbuf;
-    desoutbuf.data = des_outbuf;	/* Set up des buffers */
+    desoutbuf.data = des_outpkt+4;	/* Set up des buffers */
 #endif
 
 
@@ -1691,35 +1699,36 @@ int des_write(fd, buf, len)
      char *buf;
      int len;
 {
-    unsigned char len_buf[4];
+  unsigned char *len_buf = (unsigned char *) des_outpkt;
     
-    if (!encrypt_flag)
+  if (!encrypt_flag)
       return(write(fd, buf, len));
     
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outbuf)){
-	fprintf(stderr,"Write size problem.\n");
-	return(-1);
-    }
-    if (( krb5_encrypt(bsd_context, (krb5_pointer)buf,
-		       desoutbuf.data,
-		       len,
-		       &eblock,
-		       0))){
-	fprintf(stderr,"Write encrypt problem.\n");
-	return(-1);
-    }
     
+    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
+    if (desoutbuf.length > sizeof(des_outpkt)-4){
+      	fprintf(stderr,"Write size problem.\n");
+	return(-1);
+    }
+    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf,
+		      desoutbuf.data,
+		      len,
+		      &eblock,
+		      0))){
+      	fprintf(stderr,"Write encrypt problem.\n");
+	return(-1);
+    }
+
     len_buf[0] = (len & 0xff000000) >> 24;
     len_buf[1] = (len & 0xff0000) >> 16;
     len_buf[2] = (len & 0xff00) >> 8;
     len_buf[3] = (len & 0xff);
-    (void) write(fd, len_buf, 4);
-    if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
-	fprintf(stderr,"Could not write out all data.\n");
+
+    if (write(fd, des_outpkt,desoutbuf.length+4) != desoutbuf.length+4){
+      fprintf(stderr,"Could not write out all data\n");
 	return(-1);
     }
-    else return(len); 
+    else return(len);
 }
 
 
