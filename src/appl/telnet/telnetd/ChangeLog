@@ -1,8 +1,13 @@
+Thu Apr 15 17:02:49 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: Fix typo in test below; fixed name of the autoconf
+		cache variable which indicates if sys/streams.h exists.
+
 1999-04-13    <tytso@rsts-11.mit.edu>
 
 	* configure.in: Check for setupterm() in libncurses in addition to
 		libcurses.  Only set STREAMSPTY if both grantpt and
-		sys/stremas.h exists.  (Will be needed for Linux/Redhat 6.0)
+		sys/streams.h exists.  (Will be needed for Linux/Redhat 6.0)
 
 Wed Mar 31 00:05:58 1999  Tom Yu  <tlyu@mit.edu>
 

@@ -45,7 +45,7 @@ case $krb5_cv_host in
      broken_streams=yes
      ;;
 esac
-if test -z "$broken_streams" -a "$ac_cv_header_sys_stream" = yes; then
+if test -z "$broken_streams" -a "$ac_cv_header_sys_stream_h" = yes; then
     AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
 fi
 AC_MSG_CHECKING([if setpgrp takes two arguments])
