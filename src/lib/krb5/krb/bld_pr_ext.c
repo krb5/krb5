@@ -19,14 +19,14 @@ static char rcsid_bld_princ_c [] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
 
 krb5_error_code
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 krb5_build_principal_ext(krb5_principal *princ, int rlen,
 			 const char *realm, ...)
 #else
@@ -42,7 +42,7 @@ va_dcl
     register char *next;
     krb5_principal princ_ret;
 
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
     va_start(ap, realm);
 #else
     va_start(ap);
@@ -74,7 +74,7 @@ va_dcl
     memcpy(princ_ret[0]->data, realm, rlen);
 
     /* process rest of components */
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
     va_start(ap, realm);
 #else
     va_start(ap);
