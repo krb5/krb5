@@ -1,3 +1,10 @@
+2002-07-31  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_err.et: Add KADM5_MISSING_KRB5_CONF_PARAMS, indicating a
+	problem with krb5.conf.  This prevents confusing users who look
+	for kdc.conf trouble rather than krb5.conf trouble, which is what
+	they should be looking at on a kadm5 client.
+
 2002-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_admhst.c: Deleted.
