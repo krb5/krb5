@@ -1,6 +1,12 @@
 /*
- * $Source$ $Header:
- * krb_conf.h,v 1.4 87/11/24 03:05:16 raeburn Exp $ 
+ * $Source$
+ * $Author$
+ * $Header$ 
+ *
+ * Copyright 1988 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <mit-copyright.h>.
  *
  * This file contains configuration information for the Kerberos library
  * which is machine specific; currently, this file contains
