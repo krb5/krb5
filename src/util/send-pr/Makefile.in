@@ -28,8 +28,6 @@ install:: all
 	if [ -d $(ADMIN_BINDIR) ]; then true ; else mkdir $(ADMIN_BINDIR) ; fi
 	cp send-pr $(ADMIN_BINDIR)/$(sendprname)
 	chmod 755 $(ADMIN_BINDIR)/$(sendprname)
-	cp install-sid $(ADMIN_BINDIR)
-	chmod 755 $(ADMIN_BINDIR)/install-sid
 	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
 	if [ -d $(datadir)/gnats ] ; then true ; else mkdir $(datadir)/gnats ; fi
 	cp $(srcdir)/categories $(datadir)/gnats/mit
