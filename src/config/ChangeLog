@@ -1,3 +1,13 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Pull changes from krb5-1-1 branch: a) Make is so
+	that all C flags are the same and so that the only difference
+	between EXE and DLL builds are the DLL_LINKOPTS and EXE_LINKOPTS
+	linker options.  b) Fix DNS error messages to wshelper instead of
+	version server.  c) Fix DNS flags it does not try to depend on mit
+	dir.  Define NULL so we can do directory existence checks via the
+	shell under both NT and 9x.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
