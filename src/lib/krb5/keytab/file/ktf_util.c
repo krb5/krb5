@@ -67,16 +67,9 @@ static char rcsid_ktf_util_c[] =
 #include "ktfile.h"
 #include <krb5/osconf.h>
 
-#ifdef KRB5_USE_INET
-#include <netinet/in.h>
-#else
- #error find some way to use net-byte-order file version numbers.
-#endif
-
-#define KRB5_KT_VNO	0x0501		/* krb5, keytab v 1 */
-
-#define xfwrite(a, b, c, d) fwrite((char *)a, b, c, d)
-#define xfread(a, b, c, d) fread((char *)a, b, c, d)
+/* keytab version 1 didn't do byte swapping correctly; call this version 2
+   so old files will be recognized as old instead of badly formatted. */
+#define KRB5_KT_VNO	0x0502		/* krb5, keytab v 2 */
 
 extern int errno;
 
@@ -85,71 +78,87 @@ krb5_ktfileint_open(id, mode)
 krb5_keytab id;
 int mode;
 {
+    register FILE *fp;
     krb5_error_code kerror;
-    krb5_int16 kt_vno = htons(KRB5_KT_VNO);
     int writevno = 0;
-
-#if defined(__STDC__)
-    KTFILEP(id) = fopen(KTFILENAME(id),
-			(mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
+#ifdef POSIX_TYPES
+    mode_t omask;
 #else
-    KTFILEP(id) = fopen(KTFILENAME(id),
-			(mode == KRB5_LOCKMODE_EXCLUSIVE) ? "r+" : "r");
+    int omask;
 #endif
-    if (!KTFILEP(id)) {
+
+    /* Make sure nobody else can read the new file.  It might be better
+       to use open with mode 600 followed by fdopen on UNIX systems.  */
+    omask = umask(066);
+
+#ifdef ANSI_STDIO
+    fp = fopen(KTFILENAME(id),
+	       (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
+#else
+    fp = fopen(KTFILENAME(id),
+	       (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "r+" : "r");
+#endif
+    if (!fp) {
 	if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
 	    /* try making it first time around */
-#if defined(__STDC__)
-	    KTFILEP(id) = fopen(KTFILENAME(id), "ab+");
+#ifdef ANSI_STDIO
+	    fp = fopen(KTFILENAME(id), "ab+");
 #else
-	    KTFILEP(id) = fopen(KTFILENAME(id), "a+");
+	    fp = fopen(KTFILENAME(id), "a+");
 #endif
-	    if (!KTFILEP(id))
+	    if (!fp) {
+		(void) umask (omask);
 		return errno;
+	    }
 	    writevno = 1;
-	} else				/* some other error */
+	} else {			/* some other error */
+	    (void) umask (omask);
 	    return errno;
+	}
     }
-    if (kerror = krb5_lock_file(KTFILEP(id), KTFILENAME(id),
-				mode)) {
-	(void) fclose(KTFILEP(id));
-	KTFILEP(id) = 0;
+    (void) umask (omask);
+
+    if (kerror = krb5_lock_file(fp, KTFILENAME(id), mode)) {
+	(void) fclose(fp);
 	return kerror;
     }
-    /* assume ANSI or BSD-style stdio */
-    setbuf(KTFILEP(id), NULL);
 
     /* get the vno and verify it */
     if (writevno) {
-	if (!xfwrite(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
-	    kerror = errno;
-	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
-	    (void) fclose(KTFILEP(id));
-	    return kerror;
+	/* Write a version number, MSB first. */
+	if (putc((KRB5_KT_VNO >> 8), fp) == EOF || putc(KRB5_KT_VNO, fp) == EOF) {
+	    (void) krb5_unlock_file(fp, KTFILENAME(id));
+	    (void) fclose(fp);
+	    return KRB5_KT_IOERR;
 	}
     } else {
-	/* gotta verify it instead... */
-	if (!xfread(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
-	    kerror = errno;
-	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
-	    (void) fclose(KTFILEP(id));
+	int c1, c2;
+
+	/* Verify version number. */
+	c1 = getc(fp);
+	c2 = getc(fp);
+
+	if (c1 == EOF || c2 == EOF) {
+	    kerror = feof(fp) ? KRB5_KT_END : KRB5_KT_IOERR;
+	    (void) krb5_unlock_file(fp, KTFILENAME(id));
+	    (void) fclose(fp);
 	    return kerror;
 	}
-	if (kt_vno != ntohs(KRB5_KT_VNO)) {
-	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
-	    (void) fclose(KTFILEP(id));
+	if ((c1 << 8) + c2 != KRB5_KT_VNO) {
+	    (void) krb5_unlock_file(fp, KTFILENAME(id));
+	    (void) fclose(fp);
 	    return KRB5_KEYTAB_BADVNO;
 	}
     }
     /* seek to the end for writers */
     if (mode == KRB5_LOCKMODE_EXCLUSIVE) {
-	if (fseek(KTFILEP(id), 0, 2)) {
-	    kerror = errno;
-	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
-	    (void) fclose(KTFILEP(id));
-	    return kerror;
+	if (fseek(fp, 0, 2)) {
+	    (void) krb5_unlock_file(fp, KTFILENAME(id));
+	    (void) fclose(fp);
+	    return KRB5_KT_IOERR;
 	}
     }
+    KTFILEP(id) = fp;
     return 0;
 }
 
@@ -181,65 +190,151 @@ krb5_keytab id;
     return kerror;
 }
 
+/* Keytab file format.  This is not documented anywhere and is not known
+   outside this file.
+
+   Each entry in the file contains:
+
+   prinicipal name:
+     2 byte count of number of components in name
+        component:
+	  2 byte count of number of bytes
+	  data
+   1 byte key version number
+   2 byte key type
+   4 byte key length
+   key data
+
+   The write file function could do range checking on 2 byte quantities,
+   but doesn't.  Values greater than 2 ^ 15 are unlikely.
+*/
+
 krb5_error_code
-krb5_ktfileint_read_entry(id, entrypp)
+krb5_ktfileint_read_entry(id, entryp)
 krb5_keytab id;
-krb5_keytab_entry **entrypp;
+krb5_keytab_entry **entryp;
 {
-    register krb5_keytab_entry *ret_entry;
-    krb5_int16 count;
-    krb5_int16 princ_size;
-    register int i;
+  krb5_keytab_entry *entry;
+  register FILE *fp = KTFILEP(id);
+  int i;	/* index into principal component array; failure cleanup
+		   code uses this to determine how much to free */
+		   
+  int count;
+  int size;
+  int c1, c2;
+  krb5_error_code error;
 
-    if (!(ret_entry = (krb5_keytab_entry *)calloc(1, sizeof(*ret_entry))))
-	return ENOMEM;
+  entry = (krb5_keytab_entry *)malloc (sizeof (krb5_keytab_entry));
+  if (entry == 0)
+    return ENOMEM;
 
+  /* Read a character at a time to avoid any problems with byte order. */
+  c1 = getc(fp);
+  c2 = getc(fp);
+  if (c1 == EOF || c2 == EOF)
+    return KRB5_KT_END;
 
-    /* deal with guts of parsing... */
+  count = (c1 << 8) + c2;
 
-    /* first, int16 with #princ components */
-    if (!xfread(&count, sizeof(count), 1, KTFILEP(id)))
-	return KRB5_KT_END;
-    if (!count || (count < 0))
-	return KRB5_KT_END;
-    if (!(ret_entry->principal = (krb5_data **)calloc(count+1, sizeof(krb5_data *))))
-	return ENOMEM;
-    for (i = 0; i < count; i++) {
-	if (!xfread(&princ_size, sizeof(princ_size), 1, KTFILEP(id)))
-	    return KRB5_KT_END;
-	if (!princ_size || (princ_size < 0))
-	    return KRB5_KT_END;
+  if (!(entry->principal = (krb5_data **)malloc((count+1) * sizeof(krb5_data *))))
+    return ENOMEM;
 
-	if (!(ret_entry->principal[i] = (krb5_data *)malloc(sizeof(krb5_data))))
-	    return ENOMEM;
-	ret_entry->principal[i]->length = princ_size;
-	ret_entry->principal[i]->data = malloc(princ_size);
-	if (!ret_entry->principal[i]->data)
-	    return ENOMEM;
-	if (!xfread(ret_entry->principal[i]->data, sizeof(char), princ_size,
-		    KTFILEP(id)))
-	    return KRB5_KT_END;
+  for (i = 0; i < count; i++)
+    {
+      krb5_data *princ;
+
+      princ = (krb5_data *)malloc(sizeof (krb5_data));
+      if (princ == 0)
+	{
+	  error = ENOMEM;
+	  goto fail;
+	}
+
+      c1 = getc(fp);
+      c2 = getc(fp);
+      if (c1 == EOF || c2 == EOF)
+	{
+	  free(princ);
+	  error = KRB5_KT_END;
+	  goto fail;
+	}
+
+      size = (c1 << 8) + c2;
+
+      princ->length = size;
+      if ((princ->data = malloc (size)) == 0)
+	{
+	  free (princ);
+	  error = ENOMEM;
+	  goto fail;
+	}
+      if (fread(princ->data, 1, size, fp) != size)
+	{
+	  free (princ);
+	  free (princ->data);
+	  error = KRB5_KT_END;
+	  goto fail;
+	}
+      entry->principal[i] = princ;
     }
-    if (!xfread(&ret_entry->vno, sizeof(ret_entry->vno), 1, KTFILEP(id)))
-	return KRB5_KT_END;
-    /* key type */
-    if (!xfread(&ret_entry->key.keytype, sizeof(ret_entry->key.keytype), 1,
-		KTFILEP(id)))
-	return KRB5_KT_END;
-    /* key contents */
-    if (!xfread(&count, sizeof(count), 1, KTFILEP(id)))
-	return KRB5_KT_END;
-    if (!count || (count < 0))
-	return KRB5_KT_END;
-    ret_entry->key.length = count;
-    if (!(ret_entry->key.contents = (krb5_octet *)malloc(count)))
-	return ENOMEM;
-    if (!xfread(ret_entry->key.contents, sizeof(krb5_octet), count,
-		KTFILEP(id)))
-	return KRB5_KT_END;
 
-    *entrypp = ret_entry;
-    return 0;
+  entry->principal[count] = 0;
+
+  /* key version number: 1 byte */
+  c1 = getc(fp);
+  if (c1 == EOF)
+    {
+      error = KRB5_KT_END;
+      goto fail;
+    }
+  entry->vno = c1;
+  /* keyblock: keytype (2), length (4), contents */
+  c1 = getc(fp);
+  c2 = getc(fp);
+  if (c1 == EOF || c2 == EOF)
+    {
+      error = KRB5_KT_END;
+      goto fail;
+    }
+  entry->key.keytype = (c1 << 8) | c2;
+  c1 = getc(fp);
+  c2 = getc(fp);
+  if (c1 == EOF || c2 == EOF)
+    {
+      error = KRB5_KT_END;
+      goto fail;
+    }
+  size = (c1 << 24) + (c2 << 16);
+  c1 = getc(fp);
+  c2 = getc(fp);
+  if (c1 == EOF || c2 == EOF)
+    {
+      error = KRB5_KT_END;
+      goto fail;
+    }
+  size += (c1 << 8) + c2;
+
+  entry->key.length = size;
+  if ((entry->key.contents = (krb5_octet *)malloc(size)) == 0)
+    {
+      error = ENOMEM;
+      goto fail;
+    }
+
+  if (fread((char *)entry->key.contents, 1, size, fp) != size)
+    {
+      free(entry->key.contents);
+      error = KRB5_KT_END;
+      goto fail;
+    }
+  *entryp = entry;
+  return 0;
+
+ fail:
+  while(--i >= 0)
+    free(entry->principal[i]);
+  free(entry->principal);
+  return error;
 }
 
 krb5_error_code
@@ -247,51 +342,62 @@ krb5_ktfileint_write_entry(id, entry)
 krb5_keytab id;
 krb5_keytab_entry *entry;
 {
-    krb5_data **princp;
-    krb5_int16 count, size;
-    krb5_error_code retval = 0;
-    char iobuf[BUFSIZ];
+  register FILE *fp = KTFILEP(id);
+  int count, size;
+  krb5_error_code retval = 0;
+  krb5_data **princp;
+  char c1, c2;
 
-    setbuf(KTFILEP(id), iobuf);
+  /* Do all I/O and check for error once at the end.  This function isn't
+     expensive, and errors should be rare. */
 
-    /* count up principal components */
-    for (count = 0, princp = entry->principal; *princp; princp++, count++);
+  /* count up principal components */
+  for (count = 0, princp = entry->principal; *princp; princp++, count++);
 
-    if (!xfwrite(&count, sizeof(count), 1, KTFILEP(id))) {
-    abend:
-	setbuf(KTFILEP(id), 0);
-	return KRB5_KT_IOERR;
-    }
+  /* 2 byte count of number of components in name, MSB first. */
 
-    for (princp = entry->principal; *princp; princp++) {
-	size = (*princp)->length;
-	if (!xfwrite(&size, sizeof(size), 1, KTFILEP(id))) {
-	    goto abend;
-	}
-	if (!xfwrite((*princp)->data, sizeof(char), size, KTFILEP(id))) {
-	    goto abend;
-	}
-    }
-    if (!xfwrite(&entry->vno, sizeof(entry->vno), 1, KTFILEP(id))) {
-	goto abend;
-    }
-    if (!xfwrite(&entry->key.keytype, sizeof(entry->key.keytype), 1,
-		 KTFILEP(id))) {
-	goto abend;
-    }
-    size = entry->key.length;
-    if (!xfwrite(&size, sizeof(size), 1, KTFILEP(id))) {
-	goto abend;
-    }
-    if (!xfwrite(entry->key.contents, sizeof(krb5_octet), size, KTFILEP(id))) {
-	memset(iobuf, 0, sizeof(iobuf));
-	setbuf(KTFILEP(id), 0);
-	return KRB5_KT_IOERR;
-    }	
-    if (fflush(KTFILEP(id)) == EOF)
-	retval = errno;
+  c2 = count;
+  c1 = count >> 8;
 
-    (void) memset(iobuf, 0, sizeof(iobuf));
-    setbuf(KTFILEP(id), 0);
-    return retval;
+  putc(c1, fp);
+  putc(c2, fp);
+
+  for (princp = entry->principal; *princp; princp++)
+    {
+      size = (*princp)->length;
+
+      c2 = size;
+      c1 = size >> 8;
+
+      putc(c1, fp);
+      putc(c2, fp);
+
+      fwrite((*princp)->data, 1, size, fp);
+    }
+  /* Version number is one byte. */
+  putc(entry->vno, fp);
+
+  /* Key type is 2 bytes. */
+  c2 = entry->key.keytype;
+  c1 = entry->key.keytype >> 8;
+
+  putc(c1, fp);
+  putc(c2, fp);
+
+  size = entry->key.length;
+
+  c1 = size >> 24;
+  c2 = size >> 16;
+  putc(c1, fp);
+  putc(c2, fp);
+  c1 = size >> 8;
+  c2 = size;
+  putc(c1, fp);
+  putc(c2, fp);
+
+  fwrite((char *)entry->key.contents, 1, size, fp);
+
+  if (fflush(fp) == EOF || ferror(fp))
+    return KRB5_KT_IOERR;
+  return 0;
 }
