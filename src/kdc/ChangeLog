@@ -1,3 +1,7 @@
+
+Fri May 26 17:50:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Define KDBDEPLIB.
+
 Sat May 20 22:28:52 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kerberos_v4.c: Port to OSF/1. (change longs to KRB4_32)

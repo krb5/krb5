@@ -6,6 +6,7 @@ LDFLAGS = -g
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBDEPLIB=$(TOPLIBD)/libkdb5.a 
 
 KLIB = $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
