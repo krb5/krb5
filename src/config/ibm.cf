@@ -2,18 +2,16 @@
  * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
  */
 
-#define OSName            4.3bsd
+#define OSName            AOS 4.3
 #define OSMajorVersion    4
 #define OSMinorVersion    3
 
-#ifdef VaxArchitecture
-#define HasGcc YES
-#endif
+#define HasGcc NO
 
 #define HasVoidSignalReturn NO
 #define HasSaberC YES
 
-#ifdef VaxArchitecture
-#define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
-#endif
-
+/* HC lies */
+#define StandardCppDefines -U__STDC__
+#define SaberDefines
+#define StandardDefines -U__STDC__
