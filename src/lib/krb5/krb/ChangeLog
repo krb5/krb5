@@ -1,3 +1,7 @@
+2000-06-28  Miro Jurisic  <meeroh@mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Fixed a memory leak
+
 2000-06-17  Miro Jurisic  <meeroh@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): Fixed v4->v5 realm
