@@ -839,9 +839,9 @@ void extract_v4_srvtab(argc, argv)
 	}
 
 	
-if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
+	if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
 						  &master_encblock,
-					  &pkey,
+					          pkey,
 						  &key, NULL))) {
 	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
 	    exit_status++;

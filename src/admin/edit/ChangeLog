@@ -1,3 +1,8 @@
+Tue Feb 13 16:08:07 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (extract_v4_srvtab): krb5_dbekd_decrypt_key_data
+		takes krb5_key_data *, not **.
+
 Tue Jan 30 18:28:57 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* dump.c (load_db): dbrenerr_fmt prints "from" first, so pass it
