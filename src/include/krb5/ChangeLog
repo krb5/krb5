@@ -1,7 +1,7 @@
 Thu Apr 16 23:50:08 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Search for /var/tmp first when determining rcache
-	directory.
+	directory. [krb5-libs/548]
 
 Wed Feb 18 15:52:36 1998  Tom Yu  <tlyu@mit.edu>
 
