@@ -1,4 +1,5 @@
-KRB4 = @KRB4@
+KRB4_LIB = @KRB4_LIB@
+KDB4_LIB = @KDB4_LIB@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
@@ -8,8 +9,6 @@ DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
-K4LIB=@K4LIB@
-
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
@@ -17,7 +16,7 @@ DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DB
 
 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(K4LIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(KDB4_LIB) $(KRB4_LIB)
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
 OBJS= kdb5_edit.o \

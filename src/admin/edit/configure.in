@@ -14,12 +14,5 @@ AC_HAVE_FUNCS(getcwd)
 SS_RULES
 KRB_INCLUDE
 WITH_KRB4
-AC_ARG_WITH([krb4],
-[  --with-krb4=KRB4DIR     build with Kerberos V4 backwards compatibility],
-ADD_DEF(-DKRB4)
-K4LIB='$(KRB4)/lib/libkdb.a $(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a',
-echo "warning: no krb4 backwards compatibility support"
-K4LIB=)
-AC_SUBST(K4LIB)
 WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE

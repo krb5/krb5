@@ -1,3 +1,9 @@
+Thu Apr 27 13:47:23 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCAL_LIBRARIES): use KRB4_LIB and KDB4_LIB
+	directly.
+	* configure.in: just use WITH_KRB4.
+
 Wed Apr 19 13:59:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb5_edit.c (kdb5_edit_Init): If a default realm is specified
