@@ -9,6 +9,10 @@
 	(krb5int_yarrow_final): Hold the lock until after clearing the
 	Yarrow context data.
 
+2005-01-13  Ezra Peisach  <epeisach@mit.edu>
+
+	* yarrow.c: Declare yarrow_gate_locked static before first use.
+
 2004-11-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* yarrow.c (yarrow_input_maybe_locking): Renamed from
