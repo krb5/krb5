@@ -372,7 +372,7 @@ krb5-globals-files = \
 #
 	
 Kerberos5GlobalsLib.PPC Krb5GlobalsLib.PPC.MAP :: "/mac/libraries/Kerberos v5 Globals/Krb5Globals.exp" {krb5-globals-obj-ppc} {krb5-globals-data-ppc}
-	MWLinkPPC -sharedlibrary -name Krb5GlobalsLib.PPC -m "" \
+	MWLinkPPC -sharedlibrary -name "MIT_*Krb5GlobalsLib.PPC" -m "" \
 		-@export "/mac/libraries/Kerberos v5 Globals/Krb5Globals.exp" -sym on \
 		-init "__initialize_Kerberos5GlobalsLib" \
 		-term "__terminate_Kerberos5GlobalsLib" \
@@ -380,7 +380,7 @@ Kerberos5GlobalsLib.PPC Krb5GlobalsLib.PPC.MAP :: "/mac/libraries/Kerberos v5 Gl
 		{krb5-globals-obj-ppc} {standard-libraries-ppc} {ccache-ppc} {krb5-globals-data-ppc}
 
 Kerberos5GlobalsLib.PPC.debug Krb5GlobalsLib.PPC.debug.MAP :: "/mac/libraries/Kerberos v5 Globals/Krb5Globals.exp" {krb5-globals-obj-ppc} {krb5-globals-data-ppc}
-	MWLinkPPC -sharedlibrary -name Krb5GlobalsLib.PPC.debug -m "" \
+	MWLinkPPC -sharedlibrary -name "MIT_*Krb5GlobalsLib.PPC.debug" -m "" \
 		-@export "/mac/libraries/Kerberos v5 Globals/Krb5Globals.exp" -sym on \
 		-init "__initialize_Kerberos5GlobalsLib" \
 		-term "__terminate_Kerberos5GlobalsLib" \
