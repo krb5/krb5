@@ -1,0 +1,8 @@
+Changes in 1.1a3:
+ no static libraries
+ no CNS config
+ metaproject to build C and runtime libs
+ fragment aliases
+ debugging and non-debugging versions of shared libraries
+ 
+Yes, the release notes will be better written in next revision.

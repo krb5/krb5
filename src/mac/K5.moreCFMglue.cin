@@ -1,0 +1,7 @@
+#include <K5.CFMglue.h>
+
+Boolean KerberosV5LibraryIsPresent ()
+{
+	Ptr	symAddr;
+	return (Find_Symbol (&symAddr, "\pkrb5_get_credentials", krb5_get_credentials_ProcInfo)) == noErr;
+}

@@ -1,0 +1,6 @@
+/* Include prototypes for glue functions */
+#include <krb5.h>
+#include <des_int.h>
+
+/* Hardcode library fragment name here */
+#define kLibraryName "\pK5Library"

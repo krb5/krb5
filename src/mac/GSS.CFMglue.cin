@@ -1,0 +1,5 @@
+/* Include prototypes for glue functions */
+#include <gssapi.h>
+
+/* Hardcode library fragment name here */
+#define kLibraryName "\pGSSLibrary"

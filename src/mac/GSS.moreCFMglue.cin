@@ -1,0 +1,7 @@
+#include <GSS.CFMglue.h>
+
+Boolean GSSAPILibraryIsPresent ()
+{
+	Ptr	symAddr;
+	return (Find_Symbol (&symAddr, "\pgss_init_sec_context", gss_init_sec_context_ProcInfo)) == noErr;
+}
