@@ -1,3 +1,8 @@
+2004-01-30  Alexandra Ellwood  <lxs@mit.edu>
+
+    * prof-int.h: prof-int.h should include pthread.h when USE_PTHREADS 
+    is defined.
+
 2003-12-14 Jeffrey Altman <jaltman@mit.edu>
 
    * all files: move prof-int.h to be the first include file
