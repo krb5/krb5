@@ -215,7 +215,7 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
 	/* From v4 g_in_tkt.c: This used to be
 	   switch (pkt_msg_type(rpkt) & ~1) {
 	   but SCO 3.2v4 cc compiled that incorrectly.  */
-	t_switch = reply.data[1]
+	t_switch = reply.data[1];
 	t_switch &= ~1;
 
 	if (reply.data[0] == V4_KRB_PROT_VERSION
