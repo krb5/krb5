@@ -1,3 +1,13 @@
+
+Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
+
+	* krb5.h (krb5_fulladdr) : Change port to be of type krb5_address.
+	* krb5.h (krb5_auth_con_genaddrs()) : Added flags for new routine.
+	* krb5.h (krb5_get_for_creds()) : Removed prototype.
+	* krb5.h (krb5_get_cred_via_tkt()) : Added prototype.
+	* krb5.h (krb5_mk_ncred(), krb5_mk_1cred(), krb5_rd_cred()):
+		Updated prototype to include auth_context.
+
 Fri Apr 21 08:58:50 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* krb5.h: krb5_princ_aref() doesn't work, and isn't used anywhere.

@@ -245,11 +245,11 @@ typedef struct _krb5_address {
 } krb5_address;
 
 /* per Kerberos v5 protocol spec */
-#define	ADDRTYPE_INET	0x0002
-#define	ADDRTYPE_CHAOS	0x0005
-#define	ADDRTYPE_XNS	0x0006
-#define	ADDRTYPE_ISO	0x0007
-#define ADDRTYPE_DDP	0x0010
+#define	ADDRTYPE_INET		0x0002
+#define	ADDRTYPE_CHAOS		0x0005
+#define	ADDRTYPE_XNS		0x0006
+#define	ADDRTYPE_ISO		0x0007
+#define ADDRTYPE_DDP		0x0010
 /* not yet in the spec... */
 #define ADDRTYPE_ADDRPORT	0x0100
 #define ADDRTYPE_IPPORT		0x0101
@@ -259,9 +259,8 @@ typedef struct _krb5_address {
 
 /* implementation-specific stuff: */
 typedef struct _krb5_fulladdr {
-    krb5_address FAR *address;
-    unsigned long port;			/* port, for some address types.
-					   large enough for most protos? */
+    krb5_address FAR * address;
+    krb5_address FAR * port;
 } krb5_fulladdr;
 
 /*
@@ -958,6 +957,12 @@ typedef struct krb5_replay_data {
     krb5_int32          seq; 
 } krb5_replay_data;
 
+/* flags for krb5_auth_con_genaddrs() */
+#define KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR           0x00000001
+#define KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR          0x00000002
+#define KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR      0x00000004
+#define KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR     0x00000008
+
 /*
  * end "safepriv.h"
  */
@@ -1254,15 +1259,14 @@ krb5_error_code INTERFACE krb5_get_credentials
 		   krb5_ccache,
 		   krb5_creds FAR *,
 		   krb5_creds FAR * FAR *));
-krb5_error_code krb5_get_for_creds
-	PROTOTYPE((krb5_context,
-		   const krb5_cksumtype,
-		   char *,
-		   krb5_principal,
-		   krb5_keyblock *,
-		   int,
-		   krb5_data * ));
-krb5_error_code krb5_mk_req
+krb5_error_code INTERFACE krb5_get_cred_via_tkt
+        PROTOTYPE((krb5_context,
+                   krb5_creds *,
+                   const krb5_flags,
+                   krb5_address * const *,
+                   krb5_creds *,
+                   krb5_creds **));
+krb5_error_code INTERFACE krb5_mk_req
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context **,
 		   const krb5_flags,
@@ -1765,14 +1769,19 @@ krb5_error_code krb5_walk_realm_tree
 	       krb5_principal **,
 	       int));
 
-krb5_error_code krb5_mk_cred
+krb5_error_code INTERFACE krb5_mk_ncred
     	PROTOTYPE((krb5_context,
-                   krb5_kdc_rep *,
-                   krb5_enctype,
-                   krb5_keyblock *,
-                   krb5_address *,
-                   krb5_address *,
-                   krb5_data *));
+                   krb5_auth_context *,
+                   krb5_creds **,
+                   krb5_data **,
+                   krb5_replay_data *));
+
+krb5_error_code INTERFACE krb5_mk_1cred
+        PROTOTYPE((krb5_context,
+                   krb5_auth_context *,
+                   krb5_creds *,
+                   krb5_data **,
+                   krb5_replay_data *));
 
 krb5_error_code krb5_auth_con_init
 	PROTOTYPE((krb5_context,
