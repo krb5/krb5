@@ -1,4 +1,9 @@
 
+Mon Aug 21 17:02:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.M - Remove description of flags since this should be in a
+		common manpage.
+
+
 Tue Aug 8 17:27:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5_ct.ct - Add add_key_type and del_key_type to add/delete a
 		particular key/salt pair.

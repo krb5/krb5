@@ -187,46 +187,8 @@ Specifies the expiration date and time of the principal.
 .I pwexpiration=<date>
 Specifies the expiration date and time of the principal's password.
 .TP i
-.I [+/-]postdateable
-Specifies that tickets for this principal [are/are not] postdateable.
-.TP i
-.I [+/-]forwardable
-Specifies that tickets for this principal [are/are not] forwardable.
-.TP i
-.I [+/-]tgt-based
-Specifies that TGT-based requests for this principal [are/are not] allowed.
-.TP i
-.I [+/-]renewable
-Specifies that tickets for this principal [are/are not] renewable.
-.TP i
-.I [+/-]proxiable
-Specifies that tickets for this principal [are/are not] proxiable.
-.TP i
-.I [+/-]dup-skey
-Specifies that tickets issued by this service [may/may not] be encrypted
-using the session key instead of the private key.
-.TP i
-.I [+/-]allow-tickets
-Specifies that tickets for this principal [are/are not] allowed.
-.TP i
-.I [+/-]preauth
-Specifies that preauthorization [is/is not] required for this principal.
-.TP i
-.I [+/-]hwauth
-Specifies that hardware preauthorization [is/is not] required for this
-principal.
-.TP i
-.I [+/-]pwchange
-Specifies that a password change [is/is not] required for this principal.
-.TP i
-.I [+/-]service
-Specifies that this principal [is/is not] allowed to be a service.
-.TP i
-.I [+/-]pwservice
-Specifies that this principal [is/is not] the password changing service.
-.TP i
-.I [+/-]md5
-Specifies that DES MD5 [is/is not] supported for this principal.
+.I [+/-]<flag-value>
+Selects a particular flag value.
 .PP
 .SH SEE ALSO
 kadmind5(8), kpasswd(1)
