@@ -93,6 +93,7 @@ void kadmin_keytab_add(int argc, char **argv)
      int code, num, i;
 
      argc--; argv++;
+     quiet = 0;
      while (argc) {
 	  if (strncmp(*argv, "-k", 2) == 0) {
 	       argc--; argv++;
@@ -153,6 +154,7 @@ void kadmin_keytab_remove(int argc, char **argv)
      int code;
 
      argc--; argv++;
+     quiet = 0;
      while (argc) {
 	  if (strncmp(*argv, "-k", 2) == 0) {
 	       argc--; argv++;
@@ -238,9 +240,9 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
 	  }
 
 	  if (!quiet)
-	       printf("%s: Entry for principal %s with kvno %d, "
+	       printf("Entry for principal %s with kvno %d, "
 		      "encryption type %s added to keytab %s.\n",
-		      whoami, princ_str, princ_rec.kvno,
+		      princ_str, princ_rec.kvno,
 		      etype_string(keys[i].enctype), keytab_str);
      }
 
@@ -358,8 +360,8 @@ int remove_principal(char *keytab_str, krb5_keytab keytab, char
 
 	       did_something++;
 	       if (!quiet)
-		    printf("%s: Entry for principal %s with kvno %d "
-			   "removed from keytab %s.\n", whoami,
+		    printf("Entry for principal %s with kvno %d "
+			   "removed from keytab %s.\n", 
 			   princ_str, entry.vno, keytab_str);
 	  }
 	  krb5_kt_free_entry(context, &entry);
