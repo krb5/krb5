@@ -582,17 +582,18 @@ tags::									@@\
  */
 #ifndef ImakeDependency
 #ifdef UseImakeInstalled
-#define ImakeDependency(target) /**/
+#define ImakeDependency(target) 					@@\
+target:: Imakefile
 #else
 #define ImakeDependency(target)						@@\
-target:: $(IMAKE)							@@\
-									@@\
 $(IMAKE):								@@\
 	@(cd $(IMAKESRC); if [ -f Makefile ]; then \			@@\
 	echo "checking $@ in $(IMAKESRC) first..."; $(MAKE) all; else \	@@\
 	echo "bootstrapping $@ from Makefile.ini in $(IMAKESRC) first..."; \	@@\
 	$(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS=$(BOOTSTRAPCFLAGS); fi; \	@@\
-	echo "okay, continuing in $(CURRENT_DIR)")
+	echo "okay, continuing in $(CURRENT_DIR)")			@@\
+									@@\
+target:: $(IMAKE) Imakefile
 #endif /* UseImakeInstalled */
 #endif /* ImakeDependency */
 
@@ -605,8 +606,6 @@ $(IMAKE):								@@\
 #ifndef BuildMakefileTarget
 #define	BuildMakefileTarget(imakefile,imakeflags)			@@\
 ImakeDependency(Makefile)						@@\
-									@@\
-Makefile:: 								@@\
 	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) imakeflags -s Makefile.new @@\
 	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f Makefile ]; then \					@@\
