@@ -1,3 +1,11 @@
+2000-08-08  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* default.exp: Create krb.conf and krb.realms files for v4
+	compatibility. Set KRBTKFILE environment variable. Add
+	v4_compatible_enctype() proc to test if krb4 tests are being run
+	and if the current encryption type being tested is compatible with
+	V4.  Added v4kinit() proc.
+
 2000-08-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp: Protect Quote quotation marks in multipass variable

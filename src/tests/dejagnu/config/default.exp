@@ -95,7 +95,7 @@ if ![info exists KEY] {
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
-catch "exec rm -f tmpdir/db.ok tmpdir/srvtab tmpdir/krb5.conf tmpdir/kdc.conf tmpdir/cpw_srvtab"
+catch "exec rm -f tmpdir/db.ok tmpdir/srvtab tmpdir/krb5.conf tmpdir/kdc.conf tmpdir/cpw_srvtab tmpdir/krb.realms tmpdir/krb.conf"
 
 # Put the installed kerberos directories on PATH.
 # This needs to be fixed for V5.
@@ -380,6 +380,8 @@ proc setup_kerberos_files { } {
 	if [info exists default_tgt_enctypes] {
 	    puts $conffile "default_tgs_enctypes = $default_tgs_enctypes"
 	}
+	puts $conffile "	krb4_config = $tmppwd/krb.conf"
+	puts $conffile "	krb4_realms = $tmppwd/krb.realms"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
@@ -440,6 +442,22 @@ proc setup_kerberos_files { } {
 	close $aclfile
     }
 
+    # Create krb.conf file
+    if ![file exists tmpdir/krb.conf] {
+	set conffile [open tmpdir/krb.conf w]
+	puts $conffile "$REALMNAME"
+	puts $conffile "$REALMNAME $hostname:3088 admin server"
+	close $conffile
+    }
+
+    # Create krb.realms file
+    if ![file exists tmpdir/krb.realms] {
+	set conffile [open tmpdir/krb.realms w]
+	puts $conffile ".$domain = $REALMNAME"
+	puts $conffile "$domain = $REALMNAME"
+	close $conffile
+    }
+
     set last_passname_conf $multipass_name
     return 1
 }
@@ -490,6 +508,10 @@ proc setup_kerberos_env { } {
     # Direct the Kerberos programs at a local ticket file.
     set env(KRB5CCNAME) $tmppwd/tkt
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+
+    # Direct the Kerberos programs at a local ticket file.
+    set env(KRBTKFILE) $tmppwd/tkt
+    verbose "KRBTKFILE=$env(KRBTKFILE)"
 
     # Direct the Kerberos server at a cache file stored in the
     # temporary directory.
@@ -1293,6 +1315,66 @@ proc kinit { name pass standalone } {
 
     if {$standalone} {
 	pass "kinit"
+    }
+
+    return 1
+}
+
+
+# v4_compatible_enctype
+# Returns 1 if v4 testing is enabled this passes encryption types are compatable with kerberos 4 work
+proc v4_compatible_enctype {} {
+    global supported_enctypes
+    global KRB4
+
+    if ![info exists KRB4] {
+	return 0;
+    }
+
+    if { $KRB4 && [string first des-cbc-crc:v4 "$supported_enctypes"] >= 0} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+# kinit
+# Use kinit to get a ticket.  If the argument is non-zero, call pass
+# at relevant points.  Returns 1 on success, 0 on failure.
+
+proc v4kinit { name pass standalone } {
+    global REALMNAME
+    global KINIT
+    global spawn_id
+
+    # Use kinit to get a ticket.
+	#
+	# For now always get forwardable tickets. Later when we need to make
+	# tests that distiguish between forwardable tickets and otherwise
+	# we should but another option to this proc. --proven
+	#
+    spawn $KINIT -4 $name@$REALMNAME
+    expect {
+	"Password for $name@$REALMNAME:" {
+	    verbose "v4kinit started"
+	}
+	timeout {
+	    fail "v4kinit"
+	    return 0
+	}
+	eof {
+	    fail "v4kinit"
+	    return 0
+	}
+    }
+    send "$pass\r"
+    expect eof
+    if ![check_exit_status kinit] {
+	return 0
+    }
+
+    if {$standalone} {
+	pass "v4kinit"
     }
 
     return 1
