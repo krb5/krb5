@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Header$
+ * include/kerberosIV/conf-bsdtahoe.h
  *
  * Copyright 1989, 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

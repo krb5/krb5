@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * include/kerberosIV/krb4-proto.h
  *
  * Copyright 1991, 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

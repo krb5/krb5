@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Header$ 
+ * include/kerberosIV/des.h
  *
  * Copyright 1987, 1988, 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

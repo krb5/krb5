@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Header$
+ * include/kerberosIV/klog.h
  *
  * Copyright 1988, 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

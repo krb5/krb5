@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * include/krb5/ext-proto.h
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

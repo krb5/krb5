@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * include/krb5/ccache.h
  *
  * Copyright 1989,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

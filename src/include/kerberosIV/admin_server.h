@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Header$
+ * include/kerberosIV/admin_server.h
  *
  * Copyright 1987-1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

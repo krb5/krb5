@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Header$
+ * include/kerberosIV/conf-bsd386i.h
  *
  * Copyright 1989-1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

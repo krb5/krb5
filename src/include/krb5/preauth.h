@@ -1,5 +1,6 @@
 /*
- * $Author$
+ * include/krb5/preauth.h
+ *
  * (Originally written by Glen Machin at Sandia Labs.)
  *
  * Copyright 1992 by the Massachusetts Institute of Technology.

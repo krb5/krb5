@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * include/krb5/base-defs.h
  *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

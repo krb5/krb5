@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Header$
+ * include/kerberosIV/conf-bsdibm032.h
  *
  * Copyright 1988, 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

@@ -1,8 +1,5 @@
-
 /*
- * $Source$
- * $Author$
- * $Header$
+ * include/kerberosIV/prot.h
  *
  * Copyright 1985-1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

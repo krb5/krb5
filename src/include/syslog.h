@@ -18,9 +18,7 @@
  */
 
 /*
- * RCS Info	
- *	$Header$
- *	$Locker$
+ *	include/syslog.h
  */
 
 /*

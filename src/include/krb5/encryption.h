@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * include/krb5/encryption.h
  *
  * Copyright 1989,1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
