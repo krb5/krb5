@@ -1,0 +1,6 @@
+adb_err.h
+adb_err.c
+chpass_util_strings.h
+chpass_util_strings.c
+kadm_err.h
+kadm_err.c

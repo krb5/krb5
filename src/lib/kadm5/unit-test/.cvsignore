@@ -1,0 +1,10 @@
+init-test
+destroy-test
+client-handle-test
+client-iter-test
+randkey-test
+server-handle-test
+lock-test
+server-iter-test
+server-setkey-test
+client-setkey-test
