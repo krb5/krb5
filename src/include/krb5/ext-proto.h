@@ -33,4 +33,6 @@ extern char *getenv();
 #include <strings.h>
 #endif
 
+extern char *strdup PROTOTYPE((const char *));
+
 #endif /* KRB5_EXT_PROTO__ */
