@@ -281,7 +281,6 @@ add_princ(context, str_newprinc)
     	pwd.length = strlen(princ_name);
     	pwd.data = princ_name;  /* must be able to regenerate */
     	if (retval = krb5_string_to_key(context, &master_encblock, 
-				        master_keyblock.enctype, 
 				        &key, &pwd, &salt)) {
 	    com_err(progname,retval,"while converting password to key for '%s'",
 		    princ_name);
@@ -361,8 +360,7 @@ char *dbname;
 	    return(1);
 	}
 	if (retval = krb5_string_to_key(test_context, &master_encblock, 
-				    master_keyblock.enctype, &master_keyblock, 
-				    &pwd, &scratch)) {
+				    &master_keyblock, &pwd, &scratch)) {
 	    com_err(pname, retval,
 		    "while transforming master key from password");
 	    return(1);
