@@ -1,3 +1,9 @@
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  On Windows, improve the treat drive letter
+      prefix string as a FILE: keytab change to work if the
+      default keytab type was changed to not be of type FILE:
+
 2004-04-08  Jeffrey Altman <jaltman@mit.edu>
 
     * ktbase.c:  Restore the thread safety fixes

@@ -119,14 +119,27 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
 
     pfxlen = cp - name;
 
-    resid = name + pfxlen + 1;
+#if defined(_WIN32)
+    if ( pfxlen == 1 && isalpha(name[0]) ) {
+        /* We found a drive letter not a prefix - use FILE: */
+        pfx = strdup("FILE:");
+        if (!pfx)
+            return ENOMEM;
 
-    pfx = malloc (pfxlen+1);
-    if (!pfx)
-        return ENOMEM;
+        resid = name;
+    } else {
+#endif
+        resid = name + pfxlen + 1;
 
-    memcpy (pfx, name, pfxlen);
-    pfx[pfxlen] = '\0';
+        pfx = malloc (pfxlen+1);
+        if (!pfx)
+            return ENOMEM;
+
+        memcpy (pfx, name, pfxlen);
+        pfx[pfxlen] = '\0';
+#if defined(_WIN32)
+    }
+#endif
 
     *cache = (krb5_ccache) 0;
 

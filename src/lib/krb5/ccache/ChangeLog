@@ -1,6 +1,14 @@
 2004-04-13  Jeffrey Altman <jaltman@mit.edu>
 
     * ccbase.c:
+      On Windows, if there is a ccache name provided without
+      a prefix but which appears to start with a drive letter,
+      treat it as a FILE: ccache instead of failing with a
+      ccache type unknown error.
+     
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ccbase.c:
       krb5_cc_resolve() defines a function pointer ccresolver
       which must be of type KRB5_CALLCONV
 
