@@ -240,7 +240,6 @@ add_princ(context, str_newprinc)
 
     /* Add basic data */
     newentry.len = KRB5_KDB_V1_BASE_LENGTH;
-    newentry.mkvno = mblock.mkvno;
     newentry.attributes = mblock.flags;
     newentry.max_life = mblock.max_life;
     newentry.max_renewable_life = mblock.max_rlife;
