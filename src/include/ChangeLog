@@ -1,3 +1,9 @@
+Wed Apr 29 10:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: duplicated the file copying stuff from 
+           ..\gssapi\generic so that all the copying stuff can be
+           found in one place.
+
 Thu Apr 20 11:32:09 1995    <tytso@rsx-11.mit.edu>
 
 	* krb5.h, k5-int.h: Inlined the following include files, to

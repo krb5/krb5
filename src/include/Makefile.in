@@ -8,6 +8,9 @@ all-mac::
 
 all-windows::
 	copy $(BUILDTOP)\util\et\com_err.h .
+	if not exist gssapi\nul mkdir gssapi
+	copy $(BUILDTOP)\lib\gssapi\generic\gssapi.h gssapi
+	copy $(BUILDTOP)\lib\gssapi\generic\gssapi_generic.h gssapi
 	cd krb5
 	@echo Making in include\krb5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
@@ -20,6 +23,8 @@ clean-mac::
 
 clean-windows::
 	$(RM) com_err.h
+	$(RM) gssapi\gssapi.h gssapi\gssapi_generic.h
+	if exist gssapi\nul rmdir gssapi
 	cd krb5
 	@echo Making clean in include\krb5
 	-$(MAKE) -$(MFLAGS) clean
