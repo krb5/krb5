@@ -57,7 +57,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       requested, use the default sn2princ output */
 
    if (desired_name == GSS_C_NO_NAME) {
-      if (code = krb5_sname_to_principal(NULL, NULL, KRB5_NT_SRV_HST,
+      if (code = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
 					 &princ)) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
