@@ -62,7 +62,9 @@ gss_mechanism *__gss_mechs_array = NULL;
  */
 
 static OM_uint32
-add_mechanism (gss_mechanism mech, int replace)
+add_mechanism (mech, replace)
+     gss_mechanism mech;
+     int replace;
 {
     gss_mechanism *	temp_array;
     gss_OID_set		mech_names;
@@ -128,7 +130,7 @@ add_mechanism (gss_mechanism mech, int replace)
     return GSS_S_COMPLETE;
 }
 
-void gss_initialize (void)
+void gss_initialize ()
 {
     gss_mechanism mech;
 
@@ -175,7 +177,7 @@ void gss_initialize (void)
  * load, load them, and then load the mechanism defitions in
  * and add the mechanisms
  */
-static void solaris_initialize (void)
+static void solaris_initialize ()
 {
     char buffer[BUFSIZ], *filename, *symname, *endp;
     FILE *conffile;
