@@ -9,7 +9,7 @@ SED = sed
 
 LIB=pty
 LIBMAJOR=1
-LIBMINOR=0
+LIBMINOR=1
 
 STLIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
 	update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o \

@@ -1,6 +1,6 @@
 Thu Feb 11 22:24:03 1999  Tom Yu  <tlyu@mit.edu>
 
-	* Makefile.in: Add sane_hostname.{o,c}
+	* Makefile.in: Add sane_hostname.{o,c}; bump minor version.
 
 	* libpty.h: Add prototype for make_sane_hostname.
 
