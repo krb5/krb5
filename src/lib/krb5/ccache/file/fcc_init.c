@@ -34,7 +34,7 @@
  *
  * Effects:
  * Creates/refreshes the file cred cache id.  If the cache exists, its
- * contents ae destroyed.
+ * contents are destroyed.
  *
  * Errors:
  * system errors
