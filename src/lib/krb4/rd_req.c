@@ -268,7 +268,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
 #endif
     key_sched(ad->session,seskey_sched);
     pcbc_encrypt((C_Block *)req_id->dat,(C_Block *)req_id->dat,
-                 (long) req_id->length, seskey_sched,ad->session,DES_DECRYPT);
+                 (long) req_id->length, seskey_sched,&ad->session,DES_DECRYPT);
 #ifdef KRB_CRYPT_DEBUG
     if (krb_ap_req_debug) log("Done.");
 #endif

@@ -174,7 +174,7 @@ krb_mk_req(authent,service,instance,realm,checksum)
     /* Encrypt the request ID using the session key */
     key_sched(cr.session,key_s);
     pcbc_encrypt((C_Block *)req_id->dat,(C_Block *)req_id->dat,
-                 (long) req_id->length,key_s,(C_Block *) cr.session,1);
+                 (long) req_id->length,key_s, &cr.session,1);
     /* clean up */
     memset((char *) key_s, 0, sizeof(key_s));
 #endif /* NOENCRYPTION */

@@ -1,3 +1,17 @@
+Wed Nov 19 00:01:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* rd_safe.c (krb_rd_safe): Fix up call to quad_cksum.
+
+	* mk_priv.c (krb_mk_priv): Fix up call to pcbc_encrypt.
+
+	* mk_safe.c (krb_mk_safe): Fix up call to quad_cksum.
+
+Tue Nov 18 23:49:01 1997  Tom Yu  <tlyu@mit.edu>
+
+	* mk_req.c (krb_mk_req): Fix up call to pcbc_encrypt.
+
+	* rd_req.c (krb_rd_req): Fix up call to pcbc_encrypt.
+
 Tue Oct 21 09:02:51 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kparse.c: Include stdlib.h if present (for malloc prototyp)

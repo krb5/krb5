@@ -142,7 +142,8 @@ krb_mk_safe(in,out,length,key,sender,receiver)
     memset((char*) big_cksum, 0, sizeof(big_cksum));
 #else /* Do encryption */
     /* calculate the checksum of length, timestamps, and input data */
-    cksum = quad_cksum(q, (u_char *)big_cksum, p-q, 2, key);
+    cksum = quad_cksum(q, (unsigned KRB4_32 *)big_cksum,
+		       p-q, 2, (C_Block *)&key);
 #endif /* NOENCRYPTION */
     DEB (("\ncksum = %u",cksum));
 

@@ -198,7 +198,7 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
 #ifndef NOENCRYPTION
     /* pcbc encrypt, pad as needed, use key as ivec */
     pcbc_encrypt((C_Block *) q,(C_Block *) q, (long) (p-q), schedule,
-                 key, ENCRYPT);
+                 (C_Block *)&key, ENCRYPT);
 #endif /* NOENCRYPTION */
 
     return (q - out + c_length);        /* resulting size */
