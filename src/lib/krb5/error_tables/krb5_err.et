@@ -169,4 +169,8 @@ error_code KRB5_CC_UNKNOWN_TYPE,	"Unknown credential cache type"
 error_code KRB5_CC_NOTFOUND,		"Matching credential not found"
 error_code KRB5_CC_END,			"End of credential cache reached"
 
+error_code KRB5_NO_TKT_SUPPLIED,	"Request did not supply a ticket"
+
+error_code KRB5KRB_AP_WRONG_PRINC,		"Wrong principal in request"
+error_code KRB5KRB_AP_ERR_TKT_INVALID,	"Ticket has invalid flag set"
 end
