@@ -1,5 +1,8 @@
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* socket-utils.h (struct krb5int_sockaddr_storage): Add some extra
+	space.
+
 	* Makefile.in ($(srcdir)/krb5/autoconf.stmp): Since autoheader
 	doesn't change the target file if the contents wouldn't be
 	altered, touch an auxiliary timestamp file to avoid re-running

@@ -62,7 +62,11 @@ typedef int socklen_t;
 
 /* XXX should only be done if sockaddr_storage not found */
 #ifndef KRB5_USE_INET6
-struct krb5int_sockaddr_storage { struct sockaddr_in s; };
+struct krb5int_sockaddr_storage {
+    struct sockaddr_in s;
+    /* Plenty of slop just in case we get an ipv6 address anyways.  */
+    long extra[16];
+};
 #define sockaddr_storage krb5int_sockaddr_storage
 #endif
 
