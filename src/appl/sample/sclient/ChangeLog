@@ -1,0 +1,5 @@
+Wed Sep 28 23:09:00 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when library chages.
+
+

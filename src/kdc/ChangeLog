@@ -1,3 +1,7 @@
+Thu Sep 29 00:03:59 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when library changes.
+
 Wed Sep 21 17:40:56 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdc_util.c, kdc_util.h (realm_compare): Change realm_compare so

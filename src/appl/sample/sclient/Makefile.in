@@ -3,13 +3,13 @@ LDFLAGS = -g
 
 ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
-sclient: sclient.o
+sclient: sclient.o $(DEPKLIB)
 	$(CC) $(CFLAGS) -o sclient sclient.o $(KLIB) $(LIBS)
 
 sclient.o:	$(srcdir)/sclient.c
