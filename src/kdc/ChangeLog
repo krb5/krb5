@@ -1,3 +1,8 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: For consistency, check for both DISALLOW_ALL_TIX
+	and DISALLOW_SVR when looking up services.
+
 2002-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (setup_port): Ignore AF_LINK addresses.  Log address
