@@ -4,6 +4,10 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@
 
+SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_encode_test.c \
+	$(srcdir)/ktest.c $(srcdir)/ktest_equal.c $(srcdir)/utility.c \
+	$(srcdir)/trval.c
+
 all:: krb5_encode_test krb5_decode_test trval
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1

@@ -1,3 +1,7 @@
+Sun Aug 17 14:26:19 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(srcdir).
+
 Thu Mar 20 16:50:10 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Remove AC_PROG_INSTALL.
