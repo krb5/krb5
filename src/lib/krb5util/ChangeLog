@@ -1,3 +1,8 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* compat_recv.c (krb5_compat_recvauth_version): Variant of
+	krb5_compat_recvauth, similar to krb5_recvauth_version.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
