@@ -2,6 +2,11 @@
  * generic imake template
  */
 
+/**/# $Source$
+/**/# $Author$
+/**/# $Id$
+/**/#
+
 /**/###########################################################################
 /**/# Makefile generated from IMAKE_TEMPLATE and INCLUDE_IMAKEFILE
 /**/# $XConsortium: Imake.tmpl,v 1.77 89/12/18 17:01:37 jim Exp $
@@ -59,8 +64,8 @@
 #endif
 
 #if defined(vax) && !defined(UltrixArchitecture)
-#define MacroIncludeFile <bsd.cf>
-#define MacroFile bsd.cf
+#define MacroIncludeFile <vaxbsd.cf>
+#define MacroFile vaxbsd.cf
 #undef vax
 #define VaxArchitecture
 #endif

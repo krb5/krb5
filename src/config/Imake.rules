@@ -1,3 +1,8 @@
+/**/# $Source$
+/**/# $Author$
+/**/# $Id$
+/**/#
+
 /**/###########################################################################
 /**/# Imake rules for building libraries, programs, scripts, and data files
 /**/# rules:  $XConsortium: Imake.rules,v 1.67 89/12/18 17:14:15 jim Exp $
