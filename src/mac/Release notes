@@ -119,3 +119,8 @@ Changes in 1.1a3:
  removed "K5Library alias"
  removed com_err exports from krb5 lib
  fixed win-mac.h redefinition of size_t
+ 
+2.5a2 - Friday, August 6, 1999 1:40:00 PM
+ fixed huge profile memory leak
+ fixed memory leak in krb5_stdcc_destroy
+ added traceback tables to PPC versions
