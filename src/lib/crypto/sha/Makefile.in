@@ -1,0 +1,43 @@
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=sha
+##DOS##OBJFILE=..\sha.lst
+##WIN16##LIBNAME=..\crypto.lib
+
+STLIBOBJS=shs.o hmac_sha.o sha_crypto.o sha_glue.o
+
+OBJS=	shs.$(OBJEXT)		\
+	hmac_sha.$(OBJEXT)	\
+	sha_crypto.$(OBJEXT)	\
+	sha_glue.$(OBJEXT)
+
+SRCS=	$(srcdir)/shs.c		\
+	$(srcdir)/hmac_sha.c	\
+	$(srcdir)/sha_crypto.c	\
+	$(srcdir)/sha_glue.c
+
+
+##DOS##LIBOBJS = $(OBJS)
+
+
+all-unix:: all-libobjs
+
+t_shs: t_shs.o shs.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o t_shs t_shs.o shs.o
+
+t_shs.exe:
+	$(CC) $(CFLAGS2) -o t_shs.exe t_shs.c shs.c
+
+check-unix:: t_shs
+	$(C)t_shs -x
+
+check-windows:: t_shs$(EXEEXT)
+	$(C)t_shs$(EXEEXT) -x
+
+clean:: 
+	$(RM) t_shs$(EXEEXT) t_shs.$(OBJEXT)
+
+clean-unix:: clean-libobjs

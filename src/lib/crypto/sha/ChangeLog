@@ -1,0 +1,89 @@
+Wed Feb 18 16:09:05 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Fri Feb 13 15:20:54 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (thisconfigdir), configure.in: Point the
+ 		configuration directory at our parent, and remove our
+		local configure.in
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Tue Oct 28 16:37:18 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* shs.c, sha_glue.c, hmac_sha.c: Fix to deal with LONG wider than
+	32 bits.
+
+	* t_shs.c: Print out the actual and expected values on error.
+
+Sat Feb 22 18:52:09 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
+Thu Jan 30 21:31:39 1997  Richard Basch  <basch@lehman.com>
+
+	* sha_crypto.c sha_glue.c:
+		Declare the functions to take const args where possible
+		Remove extra includes
+
+	* sha_crypto.c: Function prototypes did not match function names.
+
+Thu Nov 21 00:58:04 EST 1996	Richard Basch	<basch@lehman.com>
+
+	* Makefile.in: Win32 build fixed
+
+Sun Dec 29 21:56:35 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to use new library build procedure.
+
+Wed Aug 28 17:40:53 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* shs.c: Only include sys/types.h if present.
+
+	* configure.in: Check for sys/types.h
+
+Thu Jun 13 10:54:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* hmac_sha.c: Include string.h for memcpy prototype
+
+Sat Jun  8 07:44:35 1996  Ezra Peisach  (epeisach@mit.edu)
+
+	* shs.c (longReverse): Test for big vs little endian failed for
+		little endian machines.
+
+Thu Jun  6 15:43:26 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* shs.c (longReverse): Don't use htonl(); it doesn't exist under
+		Windows.  Instead do the test by casting a pointer to an
+		integer to a char *.
+
+Mon May 20 17:15:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* t_shs.c (main): Don't do timing tests; it takes too long!
+
+Tue May 14 17:09:36 1996  Richard Basch  <basch@lehman.com>
+
+	* .Sanitize: reflect current files
+	* Makefile.in: added hmac-sha
+	* hmac_sha.c: implement HMAC-SHA
+	* sha_crypto.c: use hmac-sha
+	* sha_glue.c: sanity check the passed in checksum length
+	* shs.h: replaced sha-des3 with hmac-sha
+
+Fri May 10 11:19:53 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* shs.c (longReverse): Remove extraneous \.
+		(expand): Start #define in first column.
+
+Fri May 10 01:19:18 1996  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in configure.in t_shs.c sha_glue.c sha_crypto.c shs.c shs.h:
+	Initial check-in of the functions to support the NIST FIPS 180
+	SHA algorithm.  Provide interfaces for cksum-sha, cksum-sha-des3.
+	(enctype-des3-sha is also being defined)
