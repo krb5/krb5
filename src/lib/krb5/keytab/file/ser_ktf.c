@@ -297,7 +297,7 @@ krb5_ktf_keytab_internalize(kcontext, argp, buffer, lenremain)
 #if	SIZEOF_LONG == 4
 				    fpos = foffbuf[0];
 #else	/* SIZEOF_LONG == 4 */
-				    fpos = foffbuf[0] | (foffbuf[1] << 32);
+				    fpos = foffbuf[0] | ((long) foffbuf[1] << 32);
 #endif	/* SIZEOF_LONG == 4 */
 				    fseek(KTFILEP(keytab), fpos, SEEK_SET);
 				}
