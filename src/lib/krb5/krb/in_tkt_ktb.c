@@ -90,7 +90,7 @@ keytab_keyproc(context, type, salt, keyseed, key)
     *key = realkey;
     
 cleanup:
-    if (arg->keytab) 
+    if (! arg->keytab) 
 	krb5_kt_close(context, kt_id);
     return retval;
 }
