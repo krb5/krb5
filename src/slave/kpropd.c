@@ -63,7 +63,7 @@ static char *kprop_version = KPROP_PROT_VERSION;
 char	*progname;
 int     debug = 0;
 char	*srvtab = 0;
-int	standalone;
+int	standalone = 0;
 
 krb5_principal	server;		/* This is our server principal name */
 krb5_principal	client;		/* This is who we're talking to */
@@ -78,6 +78,7 @@ char	*kerb_database = KPROPD_DEFAULT_KRB_DB;
 int		database_fd;
 krb5_address	sender_addr;
 krb5_address	receiver_addr;
+short 		port = 0;
 
 void	PRS
 	PROTOTYPE((char**));
@@ -116,6 +117,7 @@ static void usage()
 		"\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n",
 		progname);
 	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_edit_pathname]\n");
+	fprintf(stderr, "\t[-P port]\n");
 	exit(1);
 }
 
@@ -145,14 +147,18 @@ void do_standalone()
 		com_err(progname, errno, "while obtaining socket");
 		exit(1);
 	}
-	sp = getservbyname(KPROP_SERVICE, "tcp");
-	if (sp == NULL) {
-		com_err(progname, 0, "%s/tcp: unknown service", KPROP_SERVICE);
-		exit(1);
-	}
 	memset((char *) &sin,0, sizeof(sin));
+	if(!port) {
+		sp = getservbyname(KPROP_SERVICE, "tcp");
+		if (sp == NULL) {
+			com_err(progname, 0, "%s/tcp: unknown service", KPROP_SERVICE);
+			exit(1);
+		}
+		sin.sin_port = sp->s_port;
+	} else {
+		sin.sin_port = port;
+	}
 	sin.sin_family = AF_INET;
-	sin.sin_port = sp->s_port;
 	if ((ret = bind(finet, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
 	    if (debug) {
 		int on = 1;
@@ -373,6 +379,15 @@ void PRS(argv)
 						usage();
 					word = 0;
 					break;
+				case 'P':
+					if (*word)
+						port = htons(atoi(word));
+					else
+						port = htons(atoi(*argv++));
+					if (!port)
+						usage();
+					word = 0;
+					break;
 				case 'r':
 					if (*word)
 						realm = word;
@@ -464,6 +479,7 @@ kerberos_authenticate(context, fd, clientp, sin)
     krb5_ticket		* ticket;
     struct sockaddr_in	  r_sin;
     int			  sin_length;
+    krb5_keytab		  keytab = NULL;
 
     /*
      * Set recv_addr and send_addr
@@ -515,8 +531,15 @@ kerberos_authenticate(context, fd, clientp, sin)
 	exit(1);
     }
 
+    if (srvtab) {
+	if (retval = krb5_kt_resolve(context, srvtab, &keytab)) {
+	  syslog(LOG_ERR, "Error in krb5_kt_resolve: %s", error_message(retval));
+	  exit(1);
+	}
+    }
+
     if (retval = krb5_recvauth(context, &auth_context, (void *) &fd,
-			       kprop_version, server, 0, NULL, &ticket)){
+			       kprop_version, server, 0, keytab, &ticket)){
 	syslog(LOG_ERR, "Error in krb5_recvauth: %s", error_message(retval));
 	exit(1);
     }

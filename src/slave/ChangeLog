@@ -1,3 +1,22 @@
+Sat May 20 13:46:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kprop.M: Document -P (port) option.
+
+	* kpropd.M: Document -P (port) option.
+
+	* kprop.h: KPROPD_DEFAULT_KDB5_EDIT was pointing to wrong place.
+
+Mon May 15 13:11:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kpropd.c (recv_database): Use krb5_int32 for over the wire
+	database length. 
+	(kerberos_authenticate): Make keytab support work
+
+	* kprop.c (PRS): Add support for keytab and port specification.
+	(xmit_database): Use krb5_int32 for length of database to go over
+		the wire. 
+	(kerberos_authenticate): Add krb5_auth_setaddrs call
+
 Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
 
         * kpropd.c: (krb5_recvauth()): No longer needs the rc_type arg.

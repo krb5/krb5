@@ -41,7 +41,10 @@ kpropd \- Kerberos V5 slave KDC update server
 .B \-d
 ] [
 .B \-S
-] 
+] [
+.B \-P
+.I port
+]
 .br
 .SH DESCRIPTION
 .I kpropd 
@@ -115,6 +118,13 @@ option is selected,
 will not detach itself from the current job and run in the background.
 Instead, it will run in the foreground and print out debugging
 messages during the database propagation.
+.PP
+The 
+.B \-P
+option allows for an alternate port number for 
+.I kpropd
+to listen on. This is only useful if the program is run in standalone
+mode. 
 .SH SEE ALSO
 kprop(8), kdb5_edit(8), krb5kdc(8), inetd(8)
 

@@ -51,9 +51,11 @@ static char *kprop_version = KPROP_PROT_VERSION;
 
 char	*progname = 0;
 int     debug = 0;
+char	*srvtab = 0;
 char	*slave_host;
 char	*realm = 0;
 char	*file = KPROP_DEFAULT_FILE;
+short	port = 0;
 
 krb5_principal	my_principal;		/* The Kerberos principal we'll be */
 				/* running under, initialized in */
@@ -89,7 +91,7 @@ void	update_last_prop_file
 
 static void usage()
 {
-	fprintf(stderr, "\nUsage: %s [-r realm] [-f file] [-d] slave_host\n\n",
+	fprintf(stderr, "\nUsage: %s [-r realm] [-f file] [-d] [-P port] [-s srvtab] slave_host\n\n",
 		progname);
 	exit(1);
 }
@@ -167,6 +169,24 @@ void PRS(context, argv)
 				case 'd':
 					debug++;
 					break;
+				case 'P':
+					if (*word)
+						port = htons(atoi(word));
+					else
+						port = htons(atoi(*argv++));
+					if (!port)
+						usage();
+					word = 0;
+					break;
+				case 's':
+					if (*word)
+						srvtab = word;
+					else
+						srvtab = *argv++;
+					if (!srvtab)
+						usage();
+					word = 0;
+					break;
 				default:
 					usage();
 				}
@@ -192,6 +212,7 @@ void get_tickets(context)
 	struct hostent *hp;
 	krb5_error_code retval;
 	static char tkstring[] = "/tmp/kproptktXXXXXX";
+	krb5_keytab keytab = NULL;
 
 	/*
 	 * Figure out what tickets we'll be using to send stuff
@@ -270,8 +291,15 @@ void get_tickets(context)
 		com_err(progname, retval, "While copying client principal");
 		exit(1);
 	}
+	if (srvtab) {
+		if (retval = krb5_kt_resolve(context, srvtab, &keytab)) {
+			com_err(progname, retval, "while resolving keytab");
+			exit(1);
+		}
+	}
+
 	retval = krb5_get_in_tkt_with_keytab(context, 0, 0, NULL,
-					     NULL, NULL, ccache, &creds, 0);
+					     NULL, keytab, ccache, &creds, 0);
 	if (retval) {
 		com_err(progname, retval, "while getting initial ticket\n");
 		exit(1);
@@ -306,16 +334,19 @@ open_connection(host, fd, Errmsg)
 		*fd = -1;
 		return(0);
 	}
-	sp = getservbyname(KPROP_SERVICE, "tcp");
-	if (sp == 0) {
-		(void) strcpy(Errmsg, KPROP_SERVICE);
-		(void) strcat(Errmsg, "/tcp: unknown service");
-		*fd = -1;
-		return(0);
-	}
 	sin.sin_family = hp->h_addrtype;
 	memcpy((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
-	sin.sin_port = sp->s_port;
+	if(!port) {
+		sp = getservbyname(KPROP_SERVICE, "tcp");
+		if (sp == 0) {
+			(void) strcpy(Errmsg, KPROP_SERVICE);
+			(void) strcat(Errmsg, "/tcp: unknown service");
+			*fd = -1;
+			return(0);
+		}
+		sin.sin_port = sp->s_port;
+	} else
+		sin.sin_port = port;
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	
 	if (s < 0) {
@@ -372,6 +403,12 @@ void kerberos_authenticate(context, auth_context, fd, me, new_creds)
 
     krb5_auth_con_setflags(context, *auth_context, 
 			   KRB5_AUTH_CONTEXT_DO_SEQUENCE);
+
+    if (retval = krb5_auth_con_setaddrs(context, *auth_context, &sender_addr,
+				        &receiver_addr)) {
+	com_err(progname, retval, "in krb5_auth_con_setaddrs");
+	exit(1);
+    }
 
 	if (retval = krb5_sendauth(context, auth_context, (void *)&fd, 
 				   kprop_version, me, creds.server,
@@ -507,7 +544,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd, database_size)
     int	database_fd;
     int	database_size;
 {
-	int	send_size, sent_size, n;
+	krb5_int32	send_size, sent_size, n;
 	krb5_data	inbuf, outbuf;
 	char		buf[KPROP_BUFSIZ];
 	krb5_error_code	retval;

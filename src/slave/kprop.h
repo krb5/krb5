@@ -30,7 +30,7 @@
 #define KPROP_DEFAULT_FILE "/krb5/slave_datatrans"
 #define KPROPD_DEFAULT_FILE "/krb5/from_master"
 #define KPROP_CKSUMTYPE CKSUMTYPE_RSA_MD4_DES
-#define KPROPD_DEFAULT_KDB5_EDIT "/krb5/bin/kdb5_edit"
+#define KPROPD_DEFAULT_KDB5_EDIT "/krb5/admin/kdb5_edit"
 #define KPROPD_DEFAULT_KRB_DB "/krb5/principal"
 #define KPROPD_ACL_FILE "/krb5/kpropd.acl"
 

@@ -33,6 +33,13 @@ kprop \- propagate a Kerberos V5 principal database to a slave server
 .I file
 ] [
 .B \-d
+] [
+.B \-P
+.I port
+] [
+] [
+.B \-s
+.I srvtab
 ] 
 .I slave_host
 .br
@@ -63,5 +70,12 @@ The
 option the filename where the dumped principal database file is to be
 found; by default the dumped database file is KPROP_DEFAULT_FILE
 (normally /krb5/slave_datatrans).
+.PP
+The
+.B \-P
+.I port
+option allows one to override the default port to contact the 
+.I kpropd
+server on the remote host.
 .SH SEE ALSO
 kpropd(8), kdb5_edit(8), krb5kdc(8)
