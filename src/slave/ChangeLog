@@ -1,5 +1,7 @@
 Thu Sep 29 22:15:27 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: Relink executable if libraries change.
+
 	* kprop.c (open_connection): Use getsockname instead of
 		getpeername when getting the sender address.
 

@@ -7,6 +7,7 @@ DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 all::
 
