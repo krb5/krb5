@@ -1,3 +1,11 @@
+Wed Mar 22 11:28:08 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: put back '##DOSLIBNAME' since it makes the .c.obj rule
+	   put the object file into that library.
+	* Makefile.in: strange nmake error 'missing ) on macro invocation' 
+	   which only appeared intermitantly and only when invoked 
+           recursively. Fixed (I hope) by interchanging some lines.
+
 Thu Mar 16 21:10:37 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (CFLAGS):  Avoid continuation line that starts with

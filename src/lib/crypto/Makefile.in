@@ -1,6 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$(srcdir)/md5
 
 ##DOSBUILDTOP = ..\..
+##DOSLIBNAME=crypto.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 TST=if test -n "`cat DONE`" ; then
@@ -61,11 +62,11 @@ all-windows::
 	cd ..\md4
 	@echo Making in crypto\md4
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
-	cd ..\md5
-	@echo Making in crypto\md5
-	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\os
 	@echo Making in crypto\os
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..\md5
+	@echo Making in crypto\md5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
