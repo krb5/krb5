@@ -50,7 +50,7 @@
 
    Do NOT install this file.  */
 
-/* for HAVE_SOCKLEN_T, KRB5_USE_INET6, HAVE_SA_LEN */
+/* for HAVE_SOCKLEN_T, KRB5_USE_INET6, etc */
 #include "krb5/autoconf.h"
 
 /* Either size_t or int or unsigned int is probably right.  Under
@@ -61,7 +61,7 @@ typedef int socklen_t;
 #endif
 
 /* XXX should only be done if sockaddr_storage not found */
-#ifndef KRB5_USE_INET6
+#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
 struct krb5int_sockaddr_storage {
     struct sockaddr_in s;
     /* Plenty of slop just in case we get an ipv6 address anyways.  */
