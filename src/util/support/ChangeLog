@@ -1,0 +1,7 @@
+2004-05-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* New directory.
+	* Makefile.in: New file.
+	* threads.c: New file.  Thread-specific data support.
+	* fake-addrinfo.c: New file.  Placeholder.
+
