@@ -1,3 +1,8 @@
+
+	* ktutil_funcs.c (ktutil_write_srvtab): When keeping only
+	highest-numbered kvno, with some heuristics to deal with
+	wrap-around at 256.
+
 2002-03-02  Sam Hartman  <hartmans@mit.edu>
 
 	* ktutil_funcs.c (ktutil_write_srvtab): Set umask to 077 to avoid

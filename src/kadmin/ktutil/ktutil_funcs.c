@@ -504,9 +504,18 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 		lp1 = prev->next;
 	    }
 	    lp1->entry = lp->entry;
-	} else if (lp1->entry->vno < lp->entry->vno)
-	    /* Check if lp->entry is newer kvno; if so, update */
-	    lp1->entry = lp->entry;
+	} else {
+	    /* This heuristic should be roughly the same as in the
+	       keytab-reading code in libkrb5.  */
+	    int offset = 0;
+	    if (lp1->entry->vno > 240 || lp->entry->vno > 240) {
+		offset = 128;
+	    }
+#define M(X) (((X) + offset) % 256)
+	    if (M(lp1->entry->vno) < M(lp->entry->vno))
+		/* Check if lp->entry is newer kvno; if so, update */
+		lp1->entry = lp->entry;
+	}
     }
     umask(0077); /*Changing umask for all of ktutil is OK
 		  * We don't ever write out anything that should use
