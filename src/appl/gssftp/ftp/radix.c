@@ -13,9 +13,9 @@ int radix_encode(inbuf, outbuf, len, decode)
 unsigned char inbuf[], outbuf[];
 int *len, decode;
 {
-	int i,j,D;
+	int i,j,D = 0;
 	char *p;
-	unsigned char c;
+	unsigned char c = 0;
 
 	if (decode) {
 		for (i=0,j=0; inbuf[i] && inbuf[i] != pad; i++) {

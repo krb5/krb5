@@ -1,3 +1,7 @@
+2002-04-11  Sam Hartman  <hartmans@mit.edu>
+
+	* radix.c : Initialize c and D to suppress warning; code was already correct
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* ftp.c: Include Winsock 2 instead of Winsock.
