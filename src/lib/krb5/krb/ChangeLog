@@ -1,5 +1,7 @@
 2002-01-08  Sam Hartman  <hartmans@mit.edu>
 
+	* gen_subkey.c (krb5_generate_subkey): Label entropy sources
+
 	* init_ctx.c (init_common): Use /dev/urandom if present for random data
 
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>

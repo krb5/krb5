@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/gen_subkey.c
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 1991, 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -40,7 +40,7 @@ krb5_generate_subkey(context, key, subkey)
 
     seed.length = key->length;
     seed.data = key->contents;
-    if ((retval = krb5_c_random_seed(context, &seed)))
+    if ((retval = krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
 	return(retval);
 
     if ((*subkey = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))) == NULL)
