@@ -30,22 +30,23 @@ asn1_error_code asn1_make_etag(buf, class, tagnum, in_len, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_tagnum tagnum;
-     const int in_len;
-     int * retlen;
+     const unsigned int in_len;
+     unsigned int * retlen;
 {
   return asn1_make_tag(buf,class,CONSTRUCTED,tagnum,in_len,retlen);
 }
+
 
 asn1_error_code asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_construction construction;
      const asn1_tagnum tagnum;
-     const int in_len;
-     int * retlen;
+     const unsigned int in_len;
+     unsigned int * retlen;
 {
   asn1_error_code retval;
-  int sumlen=0, length;
+  unsigned int sumlen=0, length;
 
   if(tagnum > ASN1_TAGNUM_MAX) return ASN1_OVERFLOW;
 
@@ -62,8 +63,8 @@ asn1_error_code asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
 
 asn1_error_code asn1_make_length(buf, in_len, retlen)
      asn1buf * buf;
-     const int in_len;
-     int * retlen;
+     const unsigned int in_len;
+     unsigned int * retlen;
 {
   asn1_error_code retval;
 
@@ -94,7 +95,7 @@ asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
      const asn1_class class;
      const asn1_construction construction;
      const asn1_tagnum tagnum;
-     int * retlen;
+     unsigned int * retlen;
 {
   asn1_error_code retval;
 
@@ -129,11 +130,11 @@ asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
 
 asn1_error_code asn1_make_sequence(buf, seq_len, retlen)
      asn1buf * buf;
-     const int seq_len;
-     int * retlen;
+     const unsigned int seq_len;
+     unsigned int * retlen;
 {
   asn1_error_code retval;
-  int len, sum=0;
+  unsigned int len, sum=0;
 
   retval = asn1_make_length(buf,seq_len,&len);
   if(retval) return retval;
@@ -148,11 +149,11 @@ asn1_error_code asn1_make_sequence(buf, seq_len, retlen)
 
 asn1_error_code asn1_make_set(buf, set_len, retlen)
      asn1buf * buf;
-     const int set_len;
-     int * retlen;
+     const unsigned int set_len;
+     unsigned int * retlen;
 {
   asn1_error_code retval;
-  int len, sum=0;
+  unsigned int len, sum=0;
 
   retval = asn1_make_length(buf,set_len,&len);
   if(retval) return retval;
@@ -167,7 +168,7 @@ asn1_error_code asn1_make_set(buf, set_len, retlen)
 
 asn1_error_code asn1_make_string(buf, length, string, retlen)
      asn1buf * buf;
-     const int length;
+     const unsigned int length;
      const char * string;
      int * retlen;
 {

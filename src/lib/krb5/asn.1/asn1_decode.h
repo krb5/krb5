@@ -66,11 +66,11 @@ asn1_error_code asn1_decode_null
 	PROTOTYPE((asn1buf *buf));
 
 asn1_error_code asn1_decode_octetstring
-	PROTOTYPE((asn1buf *buf, int *retlen, asn1_octet **val));
+	PROTOTYPE((asn1buf *buf, unsigned int *retlen, asn1_octet **val));
 asn1_error_code asn1_decode_generalstring
-	PROTOTYPE((asn1buf *buf, int *retlen, char **val));
+	PROTOTYPE((asn1buf *buf, unsigned int *retlen, char **val));
 asn1_error_code asn1_decode_charstring
-	PROTOTYPE((asn1buf *buf, int *retlen, char **val));
+	PROTOTYPE((asn1buf *buf, unsigned int *retlen, char **val));
 /* Note: A charstring is a special hack to account for the fact that
          krb5 structures store some OCTET STRING values in krb5_octet
 	 arrays and others in krb5_data structures 

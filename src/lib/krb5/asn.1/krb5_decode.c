@@ -51,7 +51,7 @@ asn1_tagnum tagnum;\
 setup_no_tagnum()
 
 #define setup()\
-int length;\
+unsigned int length;\
 setup_no_length()
 
 /* helper macros for cleanup */

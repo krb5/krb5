@@ -78,7 +78,7 @@ asn1_error_code asn1buf_wrap_data(buf, code)
 asn1_error_code asn1buf_imbed(subbuf, buf, length, indef)
      asn1buf * subbuf;
      const asn1buf * buf;
-     const int length;
+     const unsigned int length;
      const int indef;
 {
   subbuf->base = subbuf->next = buf->next;
@@ -95,7 +95,7 @@ asn1_error_code asn1buf_sync(buf, subbuf, lasttag, length)
      asn1buf * buf;
      asn1buf * subbuf;
      const asn1_tagnum lasttag;
-     const int length;
+     const unsigned int length;
 {
   asn1_error_code retval;
 
@@ -124,13 +124,14 @@ asn1_error_code asn1buf_skiptail(buf)
   asn1_class class;
   asn1_construction construction;
   asn1_tagnum tagnum;
-  int taglen;
+  unsigned int taglen;
   int nestlevel;
 
   nestlevel = 1;
   while (nestlevel > 0) {
     retval = asn1_get_tag(buf, &class, &construction, &tagnum, &taglen);
     if (retval) return retval;
+    buf->next += taglen;
     if (construction == CONSTRUCTED && taglen == 0)
       nestlevel++;
     if (tagnum == ASN1_TAGNUM_CEILING)
@@ -159,7 +160,7 @@ asn1_error_code asn1buf_insert_octet(buf, o)
 {
   asn1_error_code retval;
 
-  retval = asn1buf_ensure_space(buf,1);
+  retval = asn1buf_ensure_space(buf,1U);
   if(retval) return retval;
   *(buf->next) = (char)o;
   (buf->next)++;
@@ -168,7 +169,7 @@ asn1_error_code asn1buf_insert_octet(buf, o)
 
 asn1_error_code asn1buf_insert_octetstring(buf, len, s)
      asn1buf * buf;
-     const int len;
+     const unsigned int len;
      const krb5_octet * s;
 {
   asn1_error_code retval;
@@ -183,7 +184,7 @@ asn1_error_code asn1buf_insert_octetstring(buf, len, s)
 
 asn1_error_code asn1buf_insert_charstring(buf, len, s)
      asn1buf * buf;
-     const int len;
+     const unsigned int len;
      const char * s;
 {
   asn1_error_code retval;
@@ -208,7 +209,7 @@ asn1_error_code asn1buf_remove_octet(buf, o)
 
 asn1_error_code asn1buf_remove_octetstring(buf, len, s)
      asn1buf * buf;
-     const int len;
+     const unsigned int len;
      asn1_octet ** s;
 {
   int i;
@@ -229,7 +230,7 @@ asn1_error_code asn1buf_remove_octetstring(buf, len, s)
 
 asn1_error_code asn1buf_remove_charstring(buf, len, s)
      asn1buf * buf;
-     const int len;
+     const unsigned int len;
      char ** s;
 {
   int i;
@@ -309,7 +310,7 @@ asn1_error_code asn1buf_unparse(buf, s)
     if(*s == NULL) return ENOMEM;
     strcpy(*s,"<EMPTY>");
   }else{
-    int length = asn1buf_len(buf);
+    unsigned int length = asn1buf_len(buf);
     int i;
 
     *s = calloc(length+1, sizeof(char));
@@ -340,7 +341,7 @@ asn1_error_code asn1buf_hex_unparse(buf, s)
     if(*s == NULL) return ENOMEM;
     strcpy(*s,"<EMPTY>");
   }else{
-    int length = asn1buf_len(buf);
+    unsigned int length = asn1buf_len(buf);
     int i;
 
     *s = malloc(3*length);
@@ -377,11 +378,11 @@ int asn1buf_free(buf)
 #undef asn1buf_ensure_space
 asn1_error_code asn1buf_ensure_space(buf, amount)
      asn1buf * buf;
-     const int amount;
+     const unsigned int amount;
 {
-  int free = asn1buf_free(buf);
-  if(free < amount){
-    asn1_error_code retval = asn1buf_expand(buf, amount-free);
+  int avail = asn1buf_free(buf);
+  if(avail < amount){
+    asn1_error_code retval = asn1buf_expand(buf, amount-avail);
     if(retval) return retval;
   }
   return 0;
@@ -389,7 +390,7 @@ asn1_error_code asn1buf_ensure_space(buf, amount)
 
 asn1_error_code asn1buf_expand(buf, inc)
      asn1buf * buf;
-     int inc;
+     unsigned int inc;
 {
 #define STANDARD_INCREMENT 200
   int next_offset = buf->next - buf->base;

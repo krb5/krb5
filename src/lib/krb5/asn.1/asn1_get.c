@@ -32,7 +32,7 @@ asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
      asn1_class * class;
      asn1_construction * construction;
      asn1_tagnum * tagnum;
-     int * retlen;
+     unsigned int * retlen;
      int * indef;
 {
   asn1_error_code retval;
@@ -62,7 +62,7 @@ asn1_get_tag(buf, class, construction, tagnum, retlen)
      asn1_class *class;
      asn1_construction *construction;
      asn1_tagnum *tagnum;
-     int *retlen;
+     unsigned int *retlen;
 {
   int indef;
 
@@ -71,7 +71,7 @@ asn1_get_tag(buf, class, construction, tagnum, retlen)
 
 asn1_error_code asn1_get_sequence(buf, retlen, indef)
      asn1buf * buf;
-     int * retlen;
+     unsigned int * retlen;
      int * indef;
 {
   asn1_error_code retval;
@@ -128,7 +128,7 @@ asn1_error_code asn1_get_id(buf, class, construction, tagnum)
 
 asn1_error_code asn1_get_length(buf, retlen, indef)
      asn1buf * buf;
-     int * retlen;
+     unsigned int * retlen;
      int * indef;
 {
   asn1_error_code retval;

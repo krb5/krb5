@@ -33,7 +33,7 @@ int asn1buf_free
 
 
 asn1_error_code asn1buf_ensure_space
-	PROTOTYPE((asn1buf *buf, const int amount));
+	PROTOTYPE((asn1buf *buf, const unsigned int amount));
 /* requires  *buf is allocated
    modifies  *buf
    effects  If buf has less than amount octets of free space, then it is
@@ -46,7 +46,7 @@ asn1_error_code asn1buf_ensure_space
 
 
 asn1_error_code asn1buf_expand
-	PROTOTYPE((asn1buf *buf, int inc));
+	PROTOTYPE((asn1buf *buf, unsigned int inc));
 /* requires  *buf is allocated
    modifies  *buf
    effects   Expands *buf by allocating space for inc more octets.
@@ -111,7 +111,8 @@ asn1_error_code asn1buf_wrap_data
 	     Returns ASN1_MISSING_FIELD if code is empty. */
 
 asn1_error_code asn1buf_imbed
-	PROTOTYPE((asn1buf *subbuf, const asn1buf *buf, const int length,
+	PROTOTYPE((asn1buf *subbuf, const asn1buf *buf, 
+		   const unsigned int length,
 		   const int indef));
 /* requires  *subbuf and *buf are allocated
    effects   *subbuf becomes a sub-buffer of *buf.  *subbuf begins
@@ -122,7 +123,7 @@ asn1_error_code asn1buf_imbed
 
 asn1_error_code asn1buf_sync
 	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, const asn1_tagnum lasttag,
-		   const int length));
+		   const unsigned int length));
 /* requires  *subbuf is a sub-buffer of *buf, as created by asn1buf_imbed.
              lasttag is a pointer to the last tagnumber read.
    effects   Synchronizes *buf's current position to match that of *subbuf. */
@@ -149,7 +150,7 @@ extern __inline__ asn1_error_code asn1buf_insert_octet(buf, o)
 {
   asn1_error_code retval;
 
-  retval = asn1buf_ensure_space(buf,1);
+  retval = asn1buf_ensure_space(buf,1U);
   if(retval) return retval;
   *(buf->next) = (char)o;
   (buf->next)++;
@@ -158,7 +159,7 @@ extern __inline__ asn1_error_code asn1buf_insert_octet(buf, o)
 #endif
 
 asn1_error_code asn1buf_insert_octetstring
-	PROTOTYPE((asn1buf *buf, const int len, const asn1_octet *s));
+	PROTOTYPE((asn1buf *buf, const unsigned int len, const asn1_octet *s));
 /* requires  *buf is allocated
    modifies  *buf
    effects   Inserts the contents of s (an octet array of length len)
@@ -166,7 +167,7 @@ asn1_error_code asn1buf_insert_octetstring
 	     Returns ENOMEM if memory is exhausted. */
 
 asn1_error_code asn1buf_insert_charstring
-	PROTOTYPE((asn1buf *buf, const int len, const char *s));
+	PROTOTYPE((asn1buf *buf, const unsigned int len, const char *s));
 /* requires  *buf is allocated
    modifies  *buf
    effects   Inserts the contents of s (a character array of length len)
@@ -185,7 +186,7 @@ asn1_error_code asn1buf_remove_octet
    : ((*(o) = (asn1_octet)(*(((buf)->next)++))),0))
 
 asn1_error_code asn1buf_remove_octetstring
-	PROTOTYPE((asn1buf *buf, const int len, asn1_octet **s));
+	PROTOTYPE((asn1buf *buf, const unsigned int len, asn1_octet **s));
 /* requires  *buf is allocated
    effects   Removes the next len octets of *buf and returns them in **s.
 	     Returns ASN1_OVERRUN if there are fewer than len unread octets
@@ -193,7 +194,7 @@ asn1_error_code asn1buf_remove_octetstring
 	     Returns ENOMEM if *s could not be allocated. */
 
 asn1_error_code asn1buf_remove_charstring
-	PROTOTYPE((asn1buf *buf, const int len,
+	PROTOTYPE((asn1buf *buf, const unsigned int len,
 					  char **s));
 /* requires  *buf is allocated
    effects   Removes the next len octets of *buf and returns them in **s.

@@ -42,7 +42,7 @@ asn1_error_code retval;\
 asn1_class class;\
 asn1_construction construction;\
 asn1_tagnum tagnum;\
-int length
+unsigned int length
 
 #define tag(type)\
 retval = asn1_get_tag(buf,&class,&construction,&tagnum,&length);\
@@ -110,7 +110,7 @@ asn1_error_code asn1_decode_unsigned_integer(buf, val)
 
 asn1_error_code asn1_decode_octetstring(buf, retlen, val)
      asn1buf * buf;
-     int * retlen;
+     unsigned int * retlen;
      asn1_octet ** val;
 {
   setup();
@@ -123,7 +123,7 @@ asn1_error_code asn1_decode_octetstring(buf, retlen, val)
 
 asn1_error_code asn1_decode_charstring(buf, retlen, val)
      asn1buf * buf;
-     int * retlen;
+     unsigned int * retlen;
      char ** val;
 {
   setup();
@@ -137,7 +137,7 @@ asn1_error_code asn1_decode_charstring(buf, retlen, val)
 
 asn1_error_code asn1_decode_generalstring(buf, retlen, val)
      asn1buf * buf;
-     int * retlen;
+     unsigned int * retlen;
      char ** val;
 {
   setup();

@@ -34,7 +34,7 @@ asn1_error_code retval;\
 asn1_class class;\
 asn1_construction construction;\
 asn1_tagnum tagnum;\
-int length,taglen
+unsigned int length,taglen
 
 #define unused_var(x) if(0) x=0
 
@@ -106,7 +106,7 @@ if(retval) return retval
 #define sequence_of(buf)\
 int size=0;\
 asn1buf seqbuf;\
-int length;\
+unsigned int length;\
 int indef;\
 retval = asn1_get_sequence(buf,&length,&indef);\
 if(retval) return retval;\
@@ -373,7 +373,7 @@ asn1_error_code asn1_decode_ticket(buf, val)
      krb5_ticket * val;
 {
   setup();
-  int applen;
+  unsigned int applen;
   apptag(1);
   { begin_structure();
     { krb5_kvno vno;
@@ -652,7 +652,7 @@ asn1_error_code asn1_decode_last_req_entry(buf, val)
 #ifdef KRB5_GENEROUS_LR_TYPE
     /* If we are only a single byte wide and negative - fill in the
        other bits */
-    if((val->lr_type & 0xffffff80) == 0x80) val->lr_type |= 0xffffff00;
+    if((val->lr_type & 0xffffff80U) == 0x80) val->lr_type |= 0xffffff00U;
 #endif
   }
   cleanup();
@@ -691,7 +691,7 @@ asn1_error_code asn1_decode_etype_info_entry(buf, val)
     if (tagnum == 1) {
 	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
     } else {
-	    val->length = -1;
+	    val->length = KRB5_ETYPE_NO_SALT;
 	    val->salt = 0;
     }
     end_structure();

@@ -1,3 +1,42 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1buf.h: Lengths are now unsigned int for
+	asn1buf_ensure_space(), asn1buf_expand(), asn1buf_imbed(),
+	asn1buf_sync(), asn1buf_insert_octetstring(),
+	asn1buf_insert_charstring(), asn1_remove_octetstring(),
+	asn1buf_remove_charstring(),
+
+	* krb5_decode.c, krb5_encode.c: Length fields are unsigned ints. 
+	
+	* asn1_make.c, asn1_make.h: Prototypes changed to use an unsigned
+	int * in_len and retlen for: asn1_make_etag(), asn1_make_tag(),
+	asn1_make_sequence(), asn1_make_set(), asn1_make_string(),
+	asn1_make_length(), asn1_make_id().
+
+	* asn1_k_encode.h, asn1_k_encode.c: Change length fields to
+	unsigned ints for all functions.
+	(asn1_encode_etype_info_entry): Test for KRB5_ETYPE_NO_SALT
+	instead of -1.
+	
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Use a length of
+	KRB5_ETYPE_NO_SALT to indicate the optional salt not being
+	present. (instead of -1).
+	(setup): Length is now unsigned int.
+
+	* asn1_get.c, asn1_get.h: Change retlent to unsigned int * for
+	asn1_get_tag(), asn1_get_tag_indef(), asn1_get_sequence,
+	asn1_get_length().
+
+	* asn1_encode.c, asn1_encode.h: Change retlen to unsigned int *
+	for asn1_encode_integer(), asn1_encode_unsigned_integer(),
+	asn1_encode_octetstring(), asn1_encode_charstring(),
+	asn1_encode_printable_string(), asn1_encode_ia5string(),
+	asn1_encode_generaltime(), asn1_encode_generalstring()
+
+	* asn1_decode.c, asn1_decode.h: Change retlen to unsigned int *
+	for asn1_decode_octetstring(), asn1_decode_generalstring(),
+	asn1_decode_charstring(),
+
 2000-09-26  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_get.c (asn1_get_tag_indef): Fix to not deref random garbage
