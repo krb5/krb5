@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1989,1990 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_lsrq2klsrq_c[] =
 "$Id$";
 #endif	/* lint || saber */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
 /*#include <time.h> */
@@ -67,7 +67,7 @@ register int *error;
 #endif
     register krb5_last_req_entry **retval;
     register int i;
-    register struct type_KRB5_LastReq *rv;
+    register const struct type_KRB5_LastReq *rv;
 
     for (i = 0, rv = val; rv; i++, rv = rv->next)
 	;

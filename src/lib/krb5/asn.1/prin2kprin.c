@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1989,1990 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_prin2kprin_c[] =
 "$Id$";
 #endif	/* lint || saber */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
 /*#include <time.h> */
@@ -66,7 +66,7 @@ register int *error;
 
     register krb5_principal retval;
     register int i;
-    register struct type_KRB5_PrincipalName *rv;
+    register const struct type_KRB5_PrincipalName *rv;
 
     for (i = 1, rv = val; rv->next; i++, rv = rv->next)
 	;
