@@ -527,6 +527,11 @@ P_NESTPROTO=-DNoNestedPrototypes
 #else
 P_NESTPROTO=-UNoNestedPrototypes
 #endif
+#ifdef Krb4ApplCompat
+P_KRB4_COMPAT=-DKrb4Compat
+#else
+P_KRB4_COMPAT=-UKrb4Compat
+#endif
 
 /*
  * Default Definitions.
@@ -555,7 +560,7 @@ P_NESTPROTO=-UNoNestedPrototypes
           KDB5DIR = Kdb5Dir
     KRB5SRVTABDIR = Krb5Srvtabdir
 
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) $(P_UNISTD) $(P_NESTPROTO) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) $(P_UNISTD) $(P_NESTPROTO) $(P_KRB4_COMPAT) -DUnifdefRan
   PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
 		    -e "s+@KDB5DIR+$(KDB5DIR)+" \
 		    -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+"
