@@ -1,3 +1,8 @@
+Wed Jul 24 18:34:33 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* ovsec_kadmd.c (main): Put the #ifdef SO_REUSEADDR at the
+		beginning of the line to avoid cpp breakage.
+
 Wed Jul 24 14:28:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (CFLAGS): Use $(LD) instead of $(CC) for linking.

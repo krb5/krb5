@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     #ifdef SO_REUSEADDR
+#ifdef SO_REUSEADDR
      /* the old admin server turned on SO_REUSEADDR for non-default
 	port numbers.  this was necessary, on solaris, for the tests
 	to work.  jhawk argues that the debug and production modes
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 	     exit(1);
 	 }
      }
-     #endif
+#endif /* SO_REUSEADDR */
      if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 	  int oerrno = errno;
 	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
