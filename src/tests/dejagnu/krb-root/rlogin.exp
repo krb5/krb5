@@ -197,6 +197,11 @@ proc rlogin_test { } {
 	    pass $testname
 	}
     }
+    # This last expect seems useless, but without it the rlogin process
+    # sometimes hangs on HP-UX, in a tcsetattr call with TCSADRAIN.
+    expect {
+        "\r" { }
+    }
 
     expect_after
 

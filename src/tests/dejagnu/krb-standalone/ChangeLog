@@ -1,3 +1,10 @@
+Mon Nov 11 20:54:37 1996  Mark Eichin  <eichin@cygnus.com>
+	Tue Sep 17 19:19:56 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gssapi.exp (doit): Add more info to first set of "gssclient3"
+	failure messages.  Drain client-side output in gssclient3 tests
+	also, to prevent hanging on HP-UX.
+
 Wed Nov  6 20:31:52 1996  Tom Yu  <tlyu@mit.edu>
 
 	* gssftp.exp: Check for "foo: No such file or directory" in

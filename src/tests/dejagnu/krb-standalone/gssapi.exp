@@ -350,28 +350,33 @@ proc doit { } {
     expect_after {
 	-i $gss_server_spawn_id
 	timeout {
-	    fail gssclient3
+	    fail "gssclient3 (server timeout)"
 	    catch "expect_after"
 	    return
 	}
 	eof {
-	    fail gssclient3
+	    fail "gssclient3 (server eof)"
 	    catch "expect_after"
 	    return
 	}
     }
     expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\""
+    # Drain some output from the verbose client side.  Otherwise, this
+    # test sometimes fails under HP-UX.
+    expect -i $spawn_id "\"gsstest3@KRBTEST.COM\" to \"gssservice"
+    expect -i $spawn_id "Mechanism { * } supports * name"
+
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
     catch "expect_after"
     expect_after {
 	-i $spawn_id
 	timeout {
-	    fail gssclient3
+	    fail "gssclient3 (timeout)"
 	    catch "expect_after"
 	    return
 	}
 	eof {
-	    fail gssclient3
+	    fail "gssclient3 (eof)"
 	    catch "expect_after"
 	    return
 	}
@@ -379,7 +384,7 @@ proc doit { } {
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
     if ![check_exit_status gssclient3] {
-	fail gssclient3
+	fail "gssclient3 (exit status)"
 	return
     }
     pass gssclient3
@@ -534,6 +539,12 @@ proc doit { } {
 	}
     }
     expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\""
+
+    # Drain some output from the verbose client side.  Otherwise, this
+    # test sometimes fails under HP-UX.
+    expect -i $spawn_id "\"gsstest3@KRBTEST.COM\" to \"gssservice"
+    expect -i $spawn_id "Mechanism { * } supports * name"
+
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
     catch "expect_after"
     expect_after {

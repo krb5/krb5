@@ -1,3 +1,21 @@
+Mon Nov 11 20:52:27 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dejagnu: set env(TERM) dumb, find ktutil
+
+	Tue Sep 17 20:58:43 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* default.exp: Set terminal type to "dumb" to avoid interference
+	from "resize".
+
+	Tue Sep  3 02:27:40 1996  Mark W. Eichin  <eichin@kitten.gen.ma.us>
+
+	* default.exp: find a path to ktutil, for the v4 tests.
+
+	Wed Jun 12 12:56:10 1996  Mark W. Eichin  <eichin@kitten.gen.ma.us>
+
+	* default.exp (setup_kerberos_files): set default_domain, so v4
+	tests work.
+
 Sun Nov 10 09:48:58 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp (setup_wrapper): Set KRB5_CONFIG in script.

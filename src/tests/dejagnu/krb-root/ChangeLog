@@ -1,3 +1,10 @@
+Mon Nov 11 20:53:38 1996  Mark Eichin  <eichin@cygnus.com>
+	Tue Sep 17 18:30:57 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* rlogin.exp: In first rlogin test, drain last \r from rlogin
+	session to prevent rlogin from hanging in tcsetattr(TCSADRAIN)
+	call.
+
 Mon May  6 11:44:18 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* telnet.exp: Use a wrapper script for login.krb5 to setup shared

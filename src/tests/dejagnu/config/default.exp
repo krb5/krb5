@@ -13,6 +13,7 @@
 
 set timeout 100
 set stty_init {erase \^h kill \^u}
+set env(TERM) dumb
 
 # We do everything in a temporary directory.
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
@@ -99,6 +100,10 @@ if ![info exists KADMIN_LOCAL] {
 
 if ![info exists KINIT] {
     set KINIT [findfile $objdir/../../clients/kinit/kinit]
+}
+
+if ![info exists KTUTIL] {
+    set KTUTIL [findfile $objdir/../../kadmin/ktutil/ktutil]
 }
 
 if ![info exists RESOLVE] {
@@ -309,6 +314,7 @@ proc setup_kerberos_files { } {
     puts $conffile "	$REALMNAME = \{"
     puts $conffile "		kdc = $hostname:3088"
     puts $conffile "		admin_server = $hostname:3750"
+    puts $conffile "		default_domain = $domain"
     puts $conffile "	\}"
     puts $conffile ""
     puts $conffile "\[domain_realm\]"
