@@ -24,7 +24,6 @@ static char rcsid_kinit_c [] =
 #include <krb5/libos-proto.h>
 
 #include <com_err.h>
-#include <stdio.h>
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
