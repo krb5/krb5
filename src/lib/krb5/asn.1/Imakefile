@@ -20,10 +20,10 @@ SRCS= \
 	aprp2kaprp.c	\
 	aprq2kaprq.c	\
 	arep2karep.c	\
-	asrq2kasrq.c	\
 	auth2kauth.c	\
 	cvt_flags.c	\
 	ck2kck.c	\
+	edat2kedat.c	\
 	ekrp2kekrp.c	\
 	enck2kkey.c	\
 	err2kerr.c	\
@@ -36,12 +36,12 @@ SRCS= \
 	kaprq2aprq.c	\
 	karep2arep.c	\
 	kasrp2kdcr.c	\
-	kasrq2asrq.c	\
 	kauth2auth.c	\
 	kck2ck.c	\
 	kdcr2kasrp.c	\
 	kdcr2kkdcr.c	\
 	kdcr2ktgsr.c	\
+	kedat2edat.c	\
 	kekrp2ekrp.c	\
 	kerr2err.c	\
 	ketpt2etpt.c	\
@@ -51,7 +51,6 @@ SRCS= \
 	kprep2prep.c	\
 	kprin2prin.c	\
 	kpriv2priv.c	\
-	krtrq2rtrq.c	\
 	ksafe2safe.c	\
 	ktgrq2tgrq.c	\
 	ktgsr2kdcr.c	\
@@ -62,7 +61,6 @@ SRCS= \
 	prin2kprin.c	\
 	priv2kpriv.c	\
 	qbuf2data.c	\
-	rtrq2krtrq.c	\
 	safe2ksafe.c	\
 	tgrq2ktgrq.c	\
 	tkt2ktkt.c	\
@@ -79,10 +77,10 @@ OBJS= \
 	aprp2kaprp.o	\
 	aprq2kaprq.o	\
 	arep2karep.o	\
-	asrq2kasrq.o	\
 	auth2kauth.o	\
 	cvt_flags.o	\
 	ck2kck.o	\
+	edat2kedat.o	\
 	ekrp2kekrp.o	\
 	enck2kkey.o	\
 	err2kerr.o	\
@@ -95,12 +93,12 @@ OBJS= \
 	kaprq2aprq.o	\
 	karep2arep.o	\
 	kasrp2kdcr.o	\
-	kasrq2asrq.o	\
 	kauth2auth.o	\
 	kck2ck.o	\
 	kdcr2kasrp.o	\
 	kdcr2kkdcr.o	\
 	kdcr2ktgsr.o	\
+	kedat2edat.o	\
 	kekrp2ekrp.o	\
 	kerr2err.o	\
 	ketpt2etpt.o	\
@@ -110,7 +108,6 @@ OBJS= \
 	kprep2prep.o	\
 	kprin2prin.o	\
 	kpriv2priv.o	\
-	krtrq2rtrq.o	\
 	ksafe2safe.o	\
 	ktgrq2tgrq.o	\
 	ktgsr2kdcr.o	\
@@ -121,7 +118,6 @@ OBJS= \
 	prin2kprin.o	\
 	priv2kpriv.o	\
 	qbuf2data.o	\
-	rtrq2krtrq.o	\
 	safe2ksafe.o	\
 	tgrq2ktgrq.o	\
 	tkt2ktkt.o	\
