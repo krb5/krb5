@@ -12,15 +12,11 @@
 \setlength{\parskip}{.7\baselineskip}
 \setlength{\parindent}{0pt}
 
-\def\secure{OV*Secure}
 \def\v#1{\verb+#1+}
 
-\title{OV*Secure Admin \\ Functional Specifications\thanks{\rcsId} \\
-\it{Openvision Confidential}}
+\title{Kerberos Administration System \\
+	Functional Specifications\thanks{\rcsId}}
 \author{Barry Jaspan}
-
-\pagestyle{myheadings}
-\markboth{OPENVISION CONFIDENTIAL}{OPENVISION CONFIDENTIAL}
 
 \begin{document}
 
@@ -106,18 +102,17 @@ going through the admin server.
 
 \subsection{Data Structures}
 
-This section describes the data structures used by the Admin API that
-are unique to \secure{}.  They are defined in $<$ovsec_admin/admin.h$>$.
+This section describes the data structures used by the Admin API.
+They are defined in $<$kadm5/admin.h$>$.
 
-\subsubsection{Principals, ovsec_kadm_principal_ent_t}
+\subsubsection{Principals, kadm5_principal_ent_t}
 \label{sec:principal-structure}
 
-A Kerberos principal entry is represented by a
-ovsec_kadm_principal_ent_t.  It contains a subset of the information
-stored in the master Kerberos database as well as the additional
-information maintained by \secure{}.  In the current version, the only
-additional information is the principal's policy and the
-aux_attributes flags.
+A Kerberos principal entry is represented by a kadm5_principal_ent_t.
+It contains a subset of the information stored in the master Kerberos
+database as well as the additional information maintained by the admin
+system.  In the current version, the only additional information is
+the principal's policy and the aux_attributes flags.
 
 The principal may or may not have a policy enforced on it.  If the
 POLICY bit (see section \ref{sec:masks}) is set in aux_attributes, the
@@ -127,7 +122,7 @@ value of the policy field is undefined.
 
 \begin{figure}[htbp]
 \begin{verbatim}
-typedef struct _ovsec_kadm_principal_ent_t {
+typedef struct _kadm5_principal_ent_t {
         krb5_principal principal;
 
         krb5_timestamp princ_expire_time;
@@ -142,13 +137,13 @@ typedef struct _ovsec_kadm_principal_ent_t {
 
         char * policy;
         u_int32 aux_attributes;
-} ovsec_kadm_principal_ent_rec, *ovsec_kadm_principal_ent_t;
+} kadm5_principal_ent_rec, *kadm5_principal_ent_t;
 \end{verbatim}
-\caption{Definition of ovsec_kadm_principal_ent_t.}
+\caption{Definition of kadm5_principal_ent_t.}
 \label{fig:princ-t}
 \end{figure}
 
-The fields of an ovsec_kadm_principal_ent_t are interpreted as
+The fields of an kadm5_principal_ent_t are interpreted as
 follows.
 
 \begin{description}
@@ -172,7 +167,7 @@ the attributes field.
 this principal.
 
 \item[attributes] A bitfield of attributes for use by the KDC.  
-Note that only some are explicitly supported by \secure{}.
+Note that only some are explicitly supported by the admin system.
 
 \begin{tabular}{clr}
 {\bf Supported} & {\bf Name} & {\bf Value} \\
@@ -260,15 +255,15 @@ administration system.  Currently, the only valid flag is POLICY, and
 it indicates whether or not the principal has a policy enforced on it.
 \end{description}
 
-\subsubsection{Policies, ovsec_kadm_policy_ent_t}
+\subsubsection{Policies, kadm5_policy_ent_t}
 \label{sec:policy-fields}
 
 If the POLICY bit is set in aux_attributes, the \v{policy} name field
-in the ovsec_kadm_principal_ent_t structure refers to a password
-policy entry defined in a \v{ovsec_kadm_policy_ent_t}.
+in the kadm5_principal_ent_t structure refers to a password
+policy entry defined in a \v{kadm5_policy_ent_t}.
 
 \begin{verbatim}
-typedef struct _ovsec_kadm_policy_ent_t {
+typedef struct _kadm5_policy_ent_t {
         char *policy;
 
         u_int32 pw_min_life;
@@ -277,10 +272,10 @@ typedef struct _ovsec_kadm_policy_ent_t {
         u_int32 pw_min_classes;
         u_int32 pw_history_num;
         u_int32 policy_refcnt;
-} ovsec_kadm_policy_ent_rec, *ovsec_kadm_policy_ent_t;
+} kadm5_policy_ent_rec, *kadm5_policy_ent_t;
 \end{verbatim}
 
-The fields of an ovsec_kadm_policy_ent_t are interpreted as follows.
+The fields of an kadm5_policy_ent_t are interpreted as follows.
 Note that a policy's values only apply to a principal using that
 policy.
 
@@ -321,7 +316,7 @@ A policy cannot be deleted unless this number is zero.
 
 The API functions for creating and modifying principals and policies
 allow for a relevant subset of the fields of the
-ovsec_kadm_principal_ent_t and ovsec_kadm_policy_ent_t to be specified
+kadm5_principal_ent_t and kadm5_policy_ent_t to be specified
 or changed.  The chosen fields are determined by a bitmask that is
 passed to the relevant function.  Each API function has different
 rules for which mask values can be specified, and can specify whether
@@ -335,8 +330,8 @@ function semantics.
 
 The masks for principals are in table \ref{tab:princ-bits} and the
 masks for policies are in table \ref{tab:policy-bits}.  They are
-defined in $<$ovsec_admin/admin.h$>$. The
-OVSEC_KADM_ prefix has been removed from the Name fields.  In the
+defined in $<$kadm5/admin.h$>$. The
+KADM5_ prefix has been removed from the Name fields.  In the
 Create and Modify fields, M means mandatory, F means forbidden, and O
 means optional.  Create fields that are optional specify the default
 value.  The notation ``K/M value'' means that the field inherits its
@@ -394,29 +389,29 @@ All of the files decribed in this section are rooted off of the
 they are simply included in the ``include'' and ``lib''
 subdirectories, as appropriate.
 
-$<$ovsec_admin/admin.h$>$ includes a number of required header files,
-including RPC, Kerberos 5, com_err, and \secure{} admin com_err
-defines.  It contains prototypes for all ovsec_kadm routines mentioned
+$<$kadm5/admin.h$>$ includes a number of required header files,
+including RPC, Kerberos 5, com_err, and admin com_err
+defines.  It contains prototypes for all kadm5 routines mentioned
 below, as well as all Admin API data structures, type definitions and
 defines mentioned in this document.  The defines and their values
-contained in the file include the following (whose OVSEC_KADM_
+contained in the file include the following (whose KADM5_
 prefixes have been removed):
 \begin{description}
-\item[admin service principal] ADMIN_SERVICE (``ovsec_adm/admin'')
-\item[admin history key] HIST_PRINCIPAL (``ovsec_adm/history'')
-\item[change password principal] CHANGEPW_SERVICE (``ovsec_adm/changepw'')
+\item[admin service principal] ADMIN_SERVICE (``kadmin/admin'')
+\item[admin history key] HIST_PRINCIPAL (``kadmin/history'')
+\item[change password principal] CHANGEPW_SERVICE (``kadmin/changepw'')
 \item[server acl file path] ACLFILE (``/krb5/ovsec_adm.acl'')
-\item[dictionary] WORDFILE (``/krb5/ovsec_adm.dict'')
+\item[dictionary] WORDFILE (``/krb5/kadmind.dict'')
 \end{description}
 
-OVSEC_KADM errors are described in $<$ovsec_admin/kadm_err.h$>$, which
-is included by $<$ovsec_admin/admin.h$>$.
+KADM5 errors are described in $<$kadm5/kadm_err.h$>$, which
+is included by $<$kadm5/admin.h$>$.
 
 The locations of the admin policy and principal databases, as well as
 defines and type definitions for the databases, are defined in
-$<$ovsec_admin/adb.h$>$.  Some of the defines in that file are:
+$<$kadm5/adb.h$>$.  Some of the defines in that file are:
 \begin{description}
-\item[admin policy database] POLICY_DB (``/krb5/ovsec_policy.db'')
+\item[admin policy database] POLICY_DB (``/krb5/kadm5_policy.db'')
 \item[admin principal database] PRINCIPAL_DB (``/krb5/ovsec_principal.db'')
 \end{description}
 
@@ -442,78 +437,77 @@ has no other side effect.
 The Admin system will use \v{com_err} for error codes.  Note that this
 means \v{com_err} codes may be returned from functions that the admin
 routines call (e.g. the kerberos library). Callers should not expect
-that only OVSEC errors will be returned.  The Admin system error code
-table name will be ``ovk'', and the offsets will be the same as the
+that only KADM5 errors will be returned.  The Admin system error code
+table name will be ``kadm'', and the offsets will be the same as the
 order presented here. As mentioned above, the error table include file
-will be $<$ovsec_admin/kadm_err.h$>$.
+will be $<$kadm5/kadm_err.h$>$.
 
 Note that these error codes are also used as protocol error code
 constants and therefore must not change between product releases.
 Additional codes should be added at the end of the list, not in the
-middle.  The integer value of OVSEC_KADM_FAILURE is 43787520; the
+middle.  The integer value of KADM5_FAILURE is 43787520; the
 remaining values are assigned in sequentially increasing order.
 
 \begin{description}
-\item[* OVSEC_KADM_FAILURE] Operation failed for unspecified reason
-\item[* OVSEC_KADM_AUTH_GET] Operation requires ``get'' privilege
-\item[* OVSEC_KADM_AUTH_ADD] Operation requires ``add'' privilege
-\item[* OVSEC_KADM_AUTH_MODIFY] Operation requires ``modify'' privilege
-\item[* OVSEC_KADM_AUTH_DELETE] Operation requires ``delete'' privilege
-\item[* OVSEC_KADM_AUTH_INSUFFICIENT] Insufficient authorization for
+\item[* KADM5_FAILURE] Operation failed for unspecified reason
+\item[* KADM5_AUTH_GET] Operation requires ``get'' privilege
+\item[* KADM5_AUTH_ADD] Operation requires ``add'' privilege
+\item[* KADM5_AUTH_MODIFY] Operation requires ``modify'' privilege
+\item[* KADM5_AUTH_DELETE] Operation requires ``delete'' privilege
+\item[* KADM5_AUTH_INSUFFICIENT] Insufficient authorization for
 operation
-\item[* OVSEC_KADM_BAD_DB] Database inconsistency detected
-\item[OVSEC_KADM_DUP] Principal or policy already exists
-\item[OVSEC_KADM_RPC_ERROR] Communication failure with server
-\item[OVSEC_KADM_NO_SRV] No administration server found for realm
-\item[OVSEC_KADM_BAD_HIST_KEY] Password history principal key version
+\item[* KADM5_BAD_DB] Database inconsistency detected
+\item[KADM5_DUP] Principal or policy already exists
+\item[KADM5_RPC_ERROR] Communication failure with server
+\item[KADM5_NO_SRV] No administration server found for realm
+\item[KADM5_BAD_HIST_KEY] Password history principal key version
 mismatch
-\item[OVSEC_KADM_NOT_INIT] Connection to server not initialized
-\item[OVSEC_KADM_UNK_PRINC]  Principal does not exist
-\item[OVSEC_KADM_UNK_POLICY] Policy does not exist
-\item[OVSEC_KADM_BAD_MASK] Invalid field mask for operation
-\item[OVSEC_KADM_BAD_CLASS] Invalid number of character classes
-\item[OVSEC_KADM_BAD_LENGTH] Invalid password length
-\item[OVSEC_KADM_BAD_POLICY] Illegal policy name
-\item[OVSEC_KADM_BAD_PRINCIPAL] Illegal principal name (XXX use krb5
+\item[KADM5_NOT_INIT] Connection to server not initialized
+\item[KADM5_UNK_PRINC]  Principal does not exist
+\item[KADM5_UNK_POLICY] Policy does not exist
+\item[KADM5_BAD_MASK] Invalid field mask for operation
+\item[KADM5_BAD_CLASS] Invalid number of character classes
+\item[KADM5_BAD_LENGTH] Invalid password length
+\item[KADM5_BAD_POLICY] Illegal policy name
+\item[KADM5_BAD_PRINCIPAL] Illegal principal name (XXX use krb5
 error code?)
-\item[OVSEC_KADM_BAD_AUX_ATTR] Invalid auxillary attributes
-\item[OVSEC_KADM_BAD_HISTORY] Invalid password history count
-\item[OVSEC_KADM_BAD_MIN_PASS_LIFE] Password minimum life is greater
+\item[KADM5_BAD_AUX_ATTR] Invalid auxillary attributes
+\item[KADM5_BAD_HISTORY] Invalid password history count
+\item[KADM5_BAD_MIN_PASS_LIFE] Password minimum life is greater
 then password maximum life
-\item[OVSEC_KADM_PASS_Q_TOOSHORT] Password is too short
-\item[OVSEC_KADM_PASS_Q_CLASS] Password does not contain enough
+\item[KADM5_PASS_Q_TOOSHORT] Password is too short
+\item[KADM5_PASS_Q_CLASS] Password does not contain enough
 character classes
-\item[OVSEC_KADM_PASS_Q_DICT] Password is in the password dictionary
-\item[OVSEC_KADM_PASS_REUSE] Cannot resuse password
-\item[OVSEC_KADM_PASS_TOOSOON] Current password's minimum life has not
+\item[KADM5_PASS_Q_DICT] Password is in the password dictionary
+\item[KADM5_PASS_REUSE] Cannot resuse password
+\item[KADM5_PASS_TOOSOON] Current password's minimum life has not
 expired
-\item[OVSEC_KADM_POLICY_REF] Policy is in use
-\item[OVSEC_KADM_INIT] Connection to server already initialized
-\item[OVSEC_KADM_BAD_PASSWORD] Incorrect password
-\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change protected principal
-\item[* OVSEC_KADM_BAD_SERVER_HANDLE] Programmer error!  Bad Admin server handle
-\item[* OVSEC_KADM_BAD_STRUCT_VERSION] Programmer error!  Bad API structure version
-\item[* OVSEC_KADM_OLD_STRUCT_VERSION] API structure version specified by application is no longer supported (to fix, recompile application against current OpenV*Secure Admin API header files and libraries)
-\item[* OVSEC_KADM_NEW_STRUCT_VERSION] API structure version specified by application is unknown to libraries (to fix, obtain current OpenV*Secure Admin API header files and libraries and recompile application)
-\item[* OVSEC_KADM_BAD_API_VERSION] Programmer error!  Bad API version
-\item[* OVSEC_KADM_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries (to fix, update application to adhere to current API version and recompile)
-\item[* OVSEC_KADM_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server (to fix, update application to adhere to current API version and recompile)
-\item[* OVSEC_KADM_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries (to fix, obtain current OpenV*Secure Admin API header files and libraries and recompile application)
-\item[* OVSEC_KADM_NEW_SERVER_API_VERSION] API version specified by
+\item[KADM5_POLICY_REF] Policy is in use
+\item[KADM5_INIT] Connection to server already initialized
+\item[KADM5_BAD_PASSWORD] Incorrect password
+\item[KADM5_PROTECT_PRINCIPAL] Cannot change protected principal
+\item[* KADM5_BAD_SERVER_HANDLE] Programmer error!  Bad Admin server handle
+\item[* KADM5_BAD_STRUCT_VERSION] Programmer error!  Bad API structure version
+\item[* KADM5_OLD_STRUCT_VERSION] API structure version specified by application is no longer supported (to fix, recompile application against current Admin API header files and libraries)
+\item[* KADM5_NEW_STRUCT_VERSION] API structure version specified by application is unknown to libraries (to fix, obtain current Admin API header files and libraries and recompile application)
+\item[* KADM5_BAD_API_VERSION] Programmer error!  Bad API version
+\item[* KADM5_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries (to fix, update application to adhere to current API version and recompile)
+\item[* KADM5_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server (to fix, update application to adhere to current API version and recompile)
+\item[* KADM5_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries (to fix, obtain current Admin API header files and libraries and recompile application)
+\item[* KADM5_NEW_SERVER_API_VERSION] API version specified by
 application is unknown to server (to fix, obtain and install newest
-OpenV*Secure Admin Server)
-\item[OVSEC_KADM_SECURE_PRINC_MISSING] Database error! Required
-OpenV*Secure principal missing
+Admin Server)
+\item[KADM5_SECURE_PRINC_MISSING] Database error! Required principal missing
 \end{description}
 
 \subsection{Authentication and Authorization}
 \label{sec:auth}
 
 Two Kerberos principals exist for use in communicating with the Admin
-system: ovsec_adm/admin and ovsec_adm/changepw.  Both principals
+system: kadmin/admin and kadmin/changepw.  Both principals
 have the KRB5_KDB_DISALLOW_TGT_BASED bit set in their attributes so
 that service tickets for them can only be acquired via a
-password-based (AS_REQ) request.  Additionally, ovsec_adm/changepw
+password-based (AS_REQ) request.  Additionally, kadmin/changepw
 has the KRB5_KDB_PWCHANGE_SERVICE bit set so that a principal with an
 expired password can still obtain a service ticket for it.
 
@@ -522,10 +516,10 @@ service principal, but the sets of operations that can be performed by
 a request authenticated to each service are different.  In particular,
 only the functions chpass_principal, randkey_principal, get_principal,
 and get_policy can be performed by a request authenticated to the
-ovsec_adm/changepw service.  The function semantics descriptions below
+kadmin/changepw service.  The function semantics descriptions below
 give the precise details.
 
-Each Admin API operation authenticated to the ovsec_adm/admin service
+Each Admin API operation authenticated to the kadmin/admin service
 requires a specific authorization to run.  This version uses a simple
 named privilege system with the following names and meanings:
 
@@ -553,7 +547,7 @@ description identifies the privilege required to perform it.
 
 The functions provided by the Admin API, and the authorization they
 require, are listed in the table \ref{tab:func-overview}.  The
-``ovsec_kadm_'' prefix has been removed from each function name.
+``kadm5_'' prefix has been removed from each function name.
 
 The function semantics in the following sections omit details that are
 the same for every function.
@@ -562,7 +556,7 @@ the same for every function.
 \item The effects of every function are atomic.
 
 \item Every function performs an authorization check and returns
-the appropriate OVSEC_KADM_AUTH_* error code if the caller does not
+the appropriate KADM5_AUTH_* error code if the caller does not
 have the required privilege.  No other information or error code is
 ever returned to an unauthorized user.
 
@@ -574,7 +568,7 @@ in the principal's policy field.  If the POLICY bit is not set in the
 principal's aux_attributes field, however, the principal has no
 policy, so the policy check is not performed.
 
-\item Unless otherwise specified, all functions return OVSEC_KADM_OK.
+\item Unless otherwise specified, all functions return KADM5_OK.
 \end{itemize}
 
 \begin{table}[htbp]
@@ -584,13 +578,13 @@ policy, so the policy check is not performed.
 \\
 {\bf Function Name} & {\bf Authorization} & {\bf Operation} \\
 
-init & none & Open a connection with the ovsec_kadm library.  OBSOLETE
+init & none & Open a connection with the kadm5 library.  OBSOLETE
 but still provided---use init_with_password instead. \\
-init_with_password & none & Open a connection with the ovsec_kadm
+init_with_password & none & Open a connection with the kadm5
 library using a password to obtain initial credentials. \\
-init_with_skey & none & Open a connection with the ovsec_kadm library
+init_with_skey & none & Open a connection with the kadm5 library
 using the keytab entry to obtain initial credentials. \\
-destroy & none & Close the connection with the ovsec_kadm library. \\
+destroy & none & Close the connection with the kadm5 library. \\
 flush & none & Flush all database changes to disk; no-op when called
 remotely. \\
 create_principal & add & Create a new principal. \\
@@ -611,9 +605,9 @@ modify_policy & modify & Modify the attributes of a policy. \\
 get_policy & get & Retrieve a policy. \\
 get_policies & get & Retrieve some or all policy names. \\
 free_principal_ent & none & Free the memory associated with an
-                ovsec_kadm_principal_ent_t. \\
+                kadm5_principal_ent_t. \\
 free_policy_ent & none & Free the memory associated with an
-                ovsec_kadm_policy_ent_t. \\
+                kadm5_policy_ent_t. \\
 get_privs & none & Return the caller's admin server privileges.
 \end{tabular}
 \end{table}
@@ -621,22 +615,22 @@ get_privs & none & Return the caller's admin server privileges.
 perform the operation on itself; see the function's semantics for
 details.}
 
-\subsection{ovsec_kadm_init_*}
+\subsection{kadm5_init_*}
 
 \begin{verbatim}
-ovsec_kadm_ret_t ovsec_kadm_init_with_password(char *client_name, char *pass,
+kadm5_ret_t kadm5_init_with_password(char *client_name, char *pass,
                                  char *service_name, char *realm,
                                  unsigned long struct_version,
                                  unsigned long api_version,
                                  void **server_handle)
 
-ovsec_kadm_ret_t ovsec_kadm_init_with_skey(char *client_name, char *keytab,
+kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
                                  char *service_name, char *realm,
                                  unsigned long struct_version,
                                  unsigned long api_version,
                                  void **server_handle)
 
-ovsec_kadm_ret_t ovsec_kadm_init(char *client_name, char *pass,
+kadm5_ret_t kadm5_init(char *client_name, char *pass,
                                  char *service_name, char *realm,
                                  unsigned long struct_version,
                                  unsigned long api_version,
@@ -645,10 +639,10 @@ ovsec_kadm_ret_t ovsec_kadm_init(char *client_name, char *pass,
 
 AUTHORIZATION REQUIRED: none
 
-NOTE: ovsec_kadm_init is an obsolete provided for backwards
-compatibility.  It is identical to ovsec_kadm_init_with_password.
+NOTE: kadm5_init is an obsolete provided for backwards
+compatibility.  It is identical to kadm5_init_with_password.
 
-These three functions open a connection to the ovsec_kadm library and
+These three functions open a connection to the kadm5 library and
 initialize any neccessary state information.  They behave differently
 when called from local and remote clients.  
 
@@ -665,8 +659,8 @@ system.
 Kerberos principal.  If client_name does not include a realm, the
 default realm of the local host is used
 \item The ticket's service is service_name@realm.  service_name must
-be one of the constants OVSEC_KADM_ADMIN_SERVICE or
-OVSEC_KADM_CHANGEPW_SERVICE.
+be one of the constants KADM5_ADMIN_SERVICE or
+KADM5_CHANGEPW_SERVICE.
 \item If realm is NULL, client_name's realm is used.
 
 \item For init_with_password, the ticket is decoded with the password
@@ -690,16 +684,16 @@ the caller are valid and known to the library.
 for this connection, to be used in all subsequent API calls.
 \end{enumerate}
 
-The caller should always specify OVSEC_KADM_STRUCT_VERSION for the
+The caller should always specify KADM5_STRUCT_VERSION for the
 struct_version argument, a valid and supported API version constant
 for the api_version argument (currently, theonly valid API version
-constant is OVSEC_KADM_API_VERSION_1), and a valid pointer in which
+constant is KADM5_API_VERSION_1), and a valid pointer in which
 the server handle will be stored.
 
 Local clients, running on the KDC, may be useful. For now this is will
 most likely be used for testing, but could in the future be the basis
 for a command-line system that works both remotely and on the KDC
-machine.  If any ovsec_kadm_init_* is invoked locally its semantics are:
+machine.  If any kadm5_init_* is invoked locally its semantics are:
 
 \begin{enumerate}
 \item Initializes all the com_err error tables used by the Admin
@@ -726,25 +720,25 @@ The service_name argument is not used.
 RETURN CODES: 
 
 \begin{description}
-\item[OVSEC_KADM_NO_SRV] No Admin server can be found for the
+\item[KADM5_NO_SRV] No Admin server can be found for the
 specified realm.
 
-\item[OVSEC_KADM_RPC_ERROR] The RPC connection to the server cannot be
+\item[KADM5_RPC_ERROR] The RPC connection to the server cannot be
 initiated.
 
-\item[OVSEC_KADM_BAD_PASSWORD] Incorrect password.
+\item[KADM5_BAD_PASSWORD] Incorrect password.
 
-\item[OVSEC_KADM_SECURE_PRINC_MISSING] The principal
-OVSEC_KADM_ADMIN_SERVICE or OVSEC_KADM_CHANGEPW_SERVICE does not
+\item[KADM5_SECURE_PRINC_MISSING] The principal
+KADM5_ADMIN_SERVICE or KADM5_CHANGEPW_SERVICE does not
 exist.  This is a special-case replacement return code for ``Server
 not found in database'' for these required principals.
 
 \end{description}
 
-\subsection{ovsec_kadm_flush}
+\subsection{kadm5_flush}
 
 \begin{verbatim}
-ovsec_kadm_ret_t ovsec_kadm_flush(void *server_handle)
+kadm5_ret_t kadm5_flush(void *server_handle)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: none
@@ -758,17 +752,17 @@ database with krb5_db_fini() and krb5_db_init(), and closes and
 reopens the Admin policy database with adb_policy_close() and
 adb_policy_open().  Although it is unlikely, any other these functions
 could return errors; in that case, this function calls
-ovsec_kadm_destroy and returns the error code.  Therefore, if
-ovsec_kadm_flush does not return OVSEC_KADM_OK, the connection to the
+kadm5_destroy and returns the error code.  Therefore, if
+kadm5_flush does not return KADM5_OK, the connection to the
 Admin server has been terminated and, in principle, the databases
 might be corrupt.
 
 For remote clients, the function is a no-op.
 
-\subsection{ovsec_kadm_destroy}
+\subsection{kadm5_destroy}
 
 \begin{verbatim}
-ovsec_kadm_ret_t ovsec_kadm_destroy(void *server_handle)
+kadm5_ret_t kadm5_destroy(void *server_handle)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: none
@@ -781,7 +775,7 @@ For remote clients, the semantics are:
 
 \begin{enumerate}
 \item Destroy the temporary credential cache created by
-ovsec_kadm_init.
+kadm5_init.
 
 \item Tear down the GSS-API context negotiated with the server.
 
@@ -797,12 +791,12 @@ associated with server_handle after erasing its magic number.
 
 RETURN CODES:
 
-\subsection{ovsec_kadm_create_principal}
+\subsection{kadm5_create_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_create_principal(void *server_handle,
-                            ovsec_kadm_principal_ent_t princ, u_int32 mask,
+kadm5_ret_t
+kadm5_create_principal(void *server_handle,
+                            kadm5_principal_ent_t princ, u_int32 mask,
                             char *pw);
 \end{verbatim}
 
@@ -810,13 +804,13 @@ AUTHORIZATION REQUIRED: add
 
 \begin{enumerate}
 
-\item Return OVSEC_KADM_BAD_MASK if the mask is invalid.
-\item If the named principal exists, return OVSEC_KADM_DUP.
+\item Return KADM5_BAD_MASK if the mask is invalid.
+\item If the named principal exists, return KADM5_DUP.
 \item If the POLICY bit is set and the named policy does not exist,
-return OVSEC_KADM_UNK_POLICY.
-\item If OVSEC_KADM_POLICY bit is set in aux_attributes check to see if
+return KADM5_UNK_POLICY.
+\item If KADM5_POLICY bit is set in aux_attributes check to see if
 the password does not meets quality standards, return the appropriate
-OVSEC_KADM_PASS_Q_* error code if it fails.
+KADM5_PASS_Q_* error code if it fails.
 \item Store the principal, set the key.  The key is generated with
 Kerberos' string-to-key function, using the salt method specified on
 the admin server's command line; see section \ref{sec:commandline}.
@@ -843,25 +837,25 @@ the sooner of the given value and now + pw_max_life.
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_BAD_MASK] The field mask is invalid for a create
+\item[KADM5_BAD_MASK] The field mask is invalid for a create
 operation.
-\item[OVSEC_KADM_DUP] Principal already exists.
-\item[OVSEC_KADM_UNK_POLICY] Policy named in entry does not exist.
-\item[OVSEC_KADM_PASS_Q_*] Specified password does not meet policy
+\item[KADM5_DUP] Principal already exists.
+\item[KADM5_UNK_POLICY] Policy named in entry does not exist.
+\item[KADM5_PASS_Q_*] Specified password does not meet policy
 standards.
 \end{description}
 
-\subsection{ovsec_kadm_delete_principal}
+\subsection{kadm5_delete_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_delete_principal(void *server_handle, krb5_principal princ);
+kadm5_ret_t
+kadm5_delete_principal(void *server_handle, krb5_principal princ);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: delete 
 
 \begin{enumerate}
-\item Return OVSEC_KADM_UNK_PRINC if the principal does not exist.
+\item Return KADM5_UNK_PRINC if the principal does not exist.
 \item If the POLICY bit is set in aux_attributes, decrement the named
 policy's reference count by one.
 \item Delete principal.
@@ -870,19 +864,19 @@ policy's reference count by one.
 RETURN CODES: 
 
 \begin{description}
-\item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
+\item[KADM5_UNK_PRINC] Principal does not exist.
 \end{description}
 
-\subsection{ovsec_kadm_modify_principal}
+\subsection{kadm5_modify_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_modify_principal(void *server_handle,
-                            ovsec_kadm_principal_ent_t princ, u_int32 mask);
+kadm5_ret_t
+kadm5_modify_principal(void *server_handle,
+                            kadm5_principal_ent_t princ, u_int32 mask);
 \end{verbatim}
 
 Modify the attributes of the principal named in
-ovsec_kadm_principal_ent_t. This does not allow the principal to be
+kadm5_principal_ent_t. This does not allow the principal to be
 renamed or for its password to be changed.
 
 AUTHORIZATION REQUIRED: modify
@@ -896,10 +890,10 @@ principal must change its password away from its initial value
 sometime within the first week.
 
 \begin{enumerate}
-\item Return OVSEC_KADM_UNK_PRINC if the principal does not exist.
-\item Return OVSEC_KADM_BAD_MASK if the mask is invalid.
+\item Return KADM5_UNK_PRINC if the principal does not exist.
+\item Return KADM5_BAD_MASK if the mask is invalid.
 \item If POLICY bit is set but the new policy does not exist, return
-OVSEC_KADM_UNK_POLICY.
+KADM5_UNK_POLICY.
 \item If either the POLICY or POLICY_CLR bits are set, update the
 corresponding bits in aux_attributes.
 
@@ -931,18 +925,18 @@ the sooner of the given value and last_pwd_change + pw_max_life.
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_UNK_PRINC] Entry does not exist.
-\item[OVSEC_KADM_BAD_MASK] The mask is not valid for a modify
+\item[KADM5_UNK_PRINC] Entry does not exist.
+\item[KADM5_BAD_MASK] The mask is not valid for a modify
 operation.
-\item[OVSEC_KADM_UNK_POLICY] The POLICY bit is set but the new
+\item[KADM5_UNK_POLICY] The POLICY bit is set but the new
 policy does not exist.
 \end{description}
 
-\subsection{ovsec_kadm_rename_principal}
+\subsection{kadm5_rename_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_rename_principal(void *server_handle, krb5_principal source,
+kadm5_ret_t
+kadm5_rename_principal(void *server_handle, krb5_principal source,
                             krb5_principal target);
 \end{verbatim}
 
@@ -950,8 +944,8 @@ AUTHORIZATION REQUIRED: add and delete
 
 \begin{enumerate}
 \item Check to see if source principal exists, if not return
-OVSEC_KADM_UNK_PRINC error. 
-\item Check to see if target exists, if so return OVSEC_KADM_DUP error.
+KADM5_UNK_PRINC error. 
+\item Check to see if target exists, if so return KADM5_DUP error.
 \item Create the new principal named target, then delete the old
 principal named source.  All of target's fields will be the same as
 source's fields, except that mod_name and mod_date will be updated to
@@ -974,27 +968,27 @@ password without error.
 RETURN CODES: 
 
 \begin{description}
-\item[OVSEC_KADM_UNK_PRINC] Source principal does not exist.
-\item[OVSEC_KADM_DUP] Target principal already exist.
+\item[KADM5_UNK_PRINC] Source principal does not exist.
+\item[KADM5_DUP] Target principal already exist.
 \end{description}
 
-\subsection{ovsec_kadm_chpass_principal}
+\subsection{kadm5_chpass_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_chpass_principal(void *server_handle, krb5_principal princ,
+kadm5_ret_t
+kadm5_chpass_principal(void *server_handle, krb5_principal princ,
                             char *pw);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-ovsec_adm/changepw service, the modify privilege is disregarded.
+kadmin/changepw service, the modify privilege is disregarded.
 
 Change a principal's password.  
 
 This function enforces password policy and dictionary checks.  If the new
 password specified is in the password dictionary, and the policy bit is set
-OVSEC_KADM_PASS_DICT is returned.  If the principal's POLICY bit is set in
+KADM5_PASS_DICT is returned.  If the principal's POLICY bit is set in
 aux_attributes, compliance with each of the named policy fields is verified
 and an appropriate error code is returned if verification fails.
 
@@ -1002,19 +996,19 @@ Note that the policy checks are only be performed if the POLICY bit is
 set in the principal's aux_attributes field.
 
 \begin{enumerate}
-\item Make sure principal exists, if not return OVSEC_KADM_UNK_PRINC error.
+\item Make sure principal exists, if not return KADM5_UNK_PRINC error.
 \item If caller does not have modify privilege, (now - last_pwd_change) $<$
 pw_min_life, and the KRB5_KDB_REQUIRES_PWCHANGE bit is not set in the
-principal's attributes, return OVSEC_KADM_PASS_TOOSOON.
-\item If the principal your are trying to change is ovsec_adm/history
-return OVSEC_KADM_PROTECT_PRINCIPAL.
+principal's attributes, return KADM5_PASS_TOOSOON.
+\item If the principal your are trying to change is kadmin/history
+return KADM5_PROTECT_PRINCIPAL.
 \item If the password does not meet the quality
-standards, return the appropriate OVSEC_KADM_PASS_Q_* error code.
+standards, return the appropriate KADM5_PASS_Q_* error code.
 \item Convert password to key.  The key is generated with
 Kerberos' string-to-key function, using the salt method specified on
 the admin server's command line; see section \ref{sec:commandline}.
 \item If the new key is in the principal's password history, return
-OVSEC_KADM_PASS_REUSE.
+KADM5_PASS_REUSE.
 \item Store old key in history.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
@@ -1030,30 +1024,30 @@ caller.
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
-\item[OVSEC_KADM_PASS_Q_*] Requested password does not meet quality
+\item[KADM5_UNK_PRINC] Principal does not exist.
+\item[KADM5_PASS_Q_*] Requested password does not meet quality
 standards. 
-\item[OVSEC_KADM_PASS_REUSE] Requested password is in user's
+\item[KADM5_PASS_REUSE] Requested password is in user's
 password history. 
-\item[OVSEC_KADM_PASS_TOOSOON] Current password has not reached minimum life
-\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change the password of a special principal
+\item[KADM5_PASS_TOOSOON] Current password has not reached minimum life
+\item[KADM5_PROTECT_PRINCIPAL] Cannot change the password of a special principal
 \end{description}
 
 
-\subsection{ovsec_kadm_chpass_principal_util}
+\subsection{kadm5_chpass_principal_util}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_chpass_principal_util(void *server_handle, krb5_principal princ,
+kadm5_ret_t
+kadm5_chpass_principal_util(void *server_handle, krb5_principal princ,
                                  char *new_pw, char **pw_ret,
                                  char *msg_ret);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-ovsec_adm/changepw service, the modify privilege is disregarded.
+kadmin/changepw service, the modify privilege is disregarded.
 
-This function is a wrapper around ovsec_kadm_chpass_principal. It can
+This function is a wrapper around kadm5_chpass_principal. It can
 read a new password from a user, change a principal's password, and
 return detailed error messages.  msg_ret should point to a char buffer
 in the caller's space of sufficient length for the error messages
@@ -1062,8 +1056,8 @@ new password to the caller if pw_ret is non-NULL.
 
 \begin{enumerate}
 \item If new_pw is NULL, this routine will prompt the user for the new
-password (using the strings specified by OVSEC_KADM_PW_FIRST_PROMPT and
-OVSEC_KADM_PW_SECOND_PROMPT) and read (without echoing) the password input.
+password (using the strings specified by KADM5_PW_FIRST_PROMPT and
+KADM5_PW_SECOND_PROMPT) and read (without echoing) the password input.
 Since it is likely that this will simply call krb5_read_password only
 terminal-based applications will make use of the password reading
 functionality. If the passwords don't match the string ``New passwords do
@@ -1078,7 +1072,7 @@ return the error code returned by krb5_read_password.
 point to a static buffer containing the password.  If pw_ret is non-NULL
 and the password was supplied, set *pw_ret to the supplied password.
 
-\item Call ovsec_kadm_chpass_principal with princ, and new_pw.
+\item Call kadm5_chpass_principal with princ, and new_pw.
 
 \item If successful copy the string specified by CHPASS_UTIL_PASSWORD_CHANGED
 into msg_ret and return zero.
@@ -1088,7 +1082,7 @@ followed by a newline and ``Password not changed.'' into msg_ret
 filling in the parameters from the principal's policy information. If
 the policy information cannot be obtained copy the generic message if
 one is specified below. Return the error code from
-ovsec_kadm_chpass_principal.
+kadm5_chpass_principal.
 
 Detailed messages:
 \begin{description}
@@ -1135,7 +1129,7 @@ administrator.
 \item For other errors copy the string ``$<$com_err message$>$
 occurred while trying to change password.'' following by a blank line
 and ``Password not changed.'' into msg_ret. Return the error code
-returned by ovsec_kadm_chpass_principal.
+returned by kadm5_chpass_principal.
 \end{enumerate}
 
 
@@ -1143,27 +1137,27 @@ RETURN CODES:
 
 \begin{description}
 \item[KRB5_LIBOS_BADPWDMATCH] Typed new passwords did not match.
-\item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
-\item[OVSEC_KADM_PASS_Q_*] Requested password does not meet quality
+\item[KADM5_UNK_PRINC] Principal does not exist.
+\item[KADM5_PASS_Q_*] Requested password does not meet quality
 standards. 
-\item[OVSEC_KADM_PASS_REUSE] Requested password is in user's
+\item[KADM5_PASS_REUSE] Requested password is in user's
 password history. 
-\item[OVSEC_KADM_PASS_TOOSOON] Current password has not reached minimum
+\item[KADM5_PASS_TOOSOON] Current password has not reached minimum
 life. 
 \end{description}
 
 
-\subsection{ovsec_kadm_randkey_principal}
+\subsection{kadm5_randkey_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_randkey_principal(void *server_handle, krb5_principal princ,
+kadm5_ret_t
+kadm5_randkey_principal(void *server_handle, krb5_principal princ,
                              krb5_keyblock **new_key)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.  If the request is authenticated to the
-ovsec_adm/changepw service, the modify privilege is disregarded.
+kadmin/changepw service, the modify privilege is disregarded.
 
 Generate and assign a new random key to the named principal, and
 return the generated key in allocated storage.  The caller must free
@@ -1175,12 +1169,12 @@ specified by the policy is verified and an appropriate error code is returned
 if verification fails. 
 
 \begin{enumerate}
-\item If the principal does not exist, return OVSEC_KADM_UNK_PRINC.
+\item If the principal does not exist, return KADM5_UNK_PRINC.
 \item If caller does not have modify privilege, (now - last_pwd_change) $<$
 pw_min_life, and the KRB5_KDB_REQUIRES_PWCHANGE bit is not set in the
-principal's attributes, return OVSEC_KADM_PASS_TOOSOON.
-\item If the principal you are trying to change is ovsec_adm/history return
-OVSEC_KADM_PROTECT_PRINCIPAL.
+principal's attributes, return KADM5_PASS_TOOSOON.
+\item If the principal you are trying to change is kadmin/history return
+KADM5_PROTECT_PRINCIPAL.
 \item Store old key in history.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
@@ -1195,10 +1189,10 @@ caller.
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
-\item[OVSEC_KADM_PASS_TOOSOON] The minimum lifetime for the current
+\item[KADM5_UNK_PRINC] Principal does not exist.
+\item[KADM5_PASS_TOOSOON] The minimum lifetime for the current
 key has not expired.
-\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change the password of a special
+\item[KADM5_PROTECT_PRINCIPAL] Cannot change the password of a special
 principal
 \end{description}
 
@@ -1207,13 +1201,13 @@ principal with a random key.  The steps to perform the operation
 securely are
 
 \begin{enumerate}
-\item Create the principal with ovsec_kadm_create_principal with a
+\item Create the principal with kadm5_create_principal with a
 random password string and with the KRB5_KDB_DISALLOW_ALL_TIX bit set
 in the attributes field.
 
-\item Randomize the principal's key with ovsec_kadm_randkey_principal.
+\item Randomize the principal's key with kadm5_randkey_principal.
 
-\item Call ovsec_kadm_modify_principal to reset the
+\item Call kadm5_modify_principal to reset the
 KRB5_KDB_DISALLOW_ALL_TIX bit in the attributes field.
 \end{enumerate}
 
@@ -1222,34 +1216,34 @@ attacker might be able to guess the initial password assigned by the
 client program, the principal must be disabled until the key can be
 truly randomized.
 
-\subsection{ovsec_kadm_get_principal}
+\subsection{kadm5_get_principal}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_get_principal(void *server_handle, krb5_principal princ, 
-                         ovsec_kadm_principal_ent_t *ent);  
+kadm5_ret_t
+kadm5_get_principal(void *server_handle, krb5_principal princ, 
+                         kadm5_principal_ent_t *ent);  
 \end{verbatim}
 
 Return the principal's attributes in allocated memory.  The caller
-must free the returned entry with ovsec_kadm_free_principal_ent.
+must free the returned entry with kadm5_free_principal_ent.
 If an error is returned entry is set to NULL.
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
 as the princ argument.  If the request is authenticated to the
-ovsec_adm/changepw service, the get privilege is disregarded.
+kadmin/changepw service, the get privilege is disregarded.
 
 
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
+\item[KADM5_UNK_PRINC] Principal does not exist.
 \end{description}
 
-\subsection{ovsec_kadm_get_principals}
+\subsection{kadm5_get_principals}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_get_principals(void *server_handle, char *exp,
+kadm5_ret_t
+kadm5_get_principals(void *server_handle, char *exp,
                           char ***princs, int *count)
 \end{verbatim}
 
@@ -1262,7 +1256,7 @@ principal names that match the expression exp are retrieved.
 \v{princs} is filled in with a pointer to a NULL-terminated array of
 strings, and \v{count} is filled in with the number of principal names
 in the array.  \v{princs} must be freed with a call to
-\v{ovsec_kadm_free_name_list}.
+\v{kadm5_free_name_list}.
 
 All characters in the expression match themselves except ``?'' which
 matches any single character, ``*'' which matches any number of
@@ -1271,12 +1265,12 @@ character of ``chars''. Any character which follows a ``$\backslash$''
 matches itself exactly, and a ``$\backslash$'' cannot be the last
 character in the string.
 
-\subsection{ovsec_kadm_create_policy}
+\subsection{kadm5_create_policy}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_create_policy(void *server_handle,
-                         ovsec_kadm_policy_ent_t policy, u_int32 mask); 
+kadm5_ret_t
+kadm5_create_policy(void *server_handle,
+                         kadm5_policy_ent_t policy, u_int32 mask); 
 \end{verbatim}
 
 Create a new policy.
@@ -1284,14 +1278,14 @@ Create a new policy.
 AUTHORIZATION REQUIRED: add
 
 \begin{enumerate}
-\item Check to see if mask is valid, if not return OVSEC_KADM_BAD_MASK error.
-\item Return OVSEC_KADM_BAD_POLICY if the policy name contains illegal
+\item Check to see if mask is valid, if not return KADM5_BAD_MASK error.
+\item Return KADM5_BAD_POLICY if the policy name contains illegal
 characters.
 
 \item Check to see if the policy already exists, if so return
-OVSEC_KADM_DUP error. 
+KADM5_DUP error. 
 \item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
-3, 4, or 5, return OVSEC_KADM_BAD_CLASS.
+3, 4, or 5, return KADM5_BAD_CLASS.
 \item Create a new policy setting the appropriate fields determined
 by the mask.
 \end{enumerate}
@@ -1299,19 +1293,19 @@ by the mask.
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_DUP] Policy already exists
-\item[OVSEC_KADM_BAD_MASK] The mask is not valid for a create
+\item[KADM5_DUP] Policy already exists
+\item[KADM5_BAD_MASK] The mask is not valid for a create
 operation.
-\item[OVSEC_KADM_BAD_CLASS] The specified number of character classes
+\item[KADM5_BAD_CLASS] The specified number of character classes
 is invalid.
-\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
+\item[KADM5_BAD_POLICY] The policy name contains illegal characters.
 \end{description}
 
-\subsection{ovsec_kadm_delete_policy}
+\subsection{kadm5_delete_policy}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_delete_policy(void *server_handle, char *policy);
+kadm5_ret_t
+kadm5_delete_policy(void *server_handle, char *policy);
 \end{verbatim}
 
 Deletes a policy.
@@ -1319,27 +1313,27 @@ Deletes a policy.
 AUTHORIZATION REQUIRED: delete
 
 \begin{enumerate}
-\item Return OVSEC_KADM_BAD_POLICY if the policy name contains illegal
+\item Return KADM5_BAD_POLICY if the policy name contains illegal
 characters.
-\item Return OVSEC_KADM_UNK_POLICY if the named policy does not exist.
-\item Return OVSEC_KADM_POLICY_REF if the named policy's refcnt is not 0.
+\item Return KADM5_UNK_POLICY if the named policy does not exist.
+\item Return KADM5_POLICY_REF if the named policy's refcnt is not 0.
 \item Delete policy.
 \end{enumerate}
 
 RETURN CODES:
 
 \begin{description}
-\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
-\item[OVSEC_KADM_UNK_POLICY] Policy does not exist.
-\item[OVSEC_KADM_POLICY_REF] Policy is being referenced. 
+\item[KADM5_BAD_POLICY] The policy name contains illegal characters.
+\item[KADM5_UNK_POLICY] Policy does not exist.
+\item[KADM5_POLICY_REF] Policy is being referenced. 
 \end{description}
 
-\subsection{ovsec_kadm_modify_policy}
+\subsection{kadm5_modify_policy}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_modify_policy(void *server_handle,
-                         ovsec_kadm_policy_ent_t policy, u_int32 mask);
+kadm5_ret_t
+kadm5_modify_policy(void *server_handle,
+                         kadm5_policy_ent_t policy, u_int32 mask);
 \end{verbatim}
 
 Modify an existing policy.  Note that modifying a policy has no affect
@@ -1349,55 +1343,55 @@ password is changed.
 AUTHORIZATION REQUIRED: modify
 
 \begin{enumerate}
-\item Return OVSEC_KADM_BAD_POLICY if the policy name contains illegal
+\item Return KADM5_BAD_POLICY if the policy name contains illegal
 characters.
-\item Check to see if mask is legal, if not return OVSEC_KADM_BAD_MASK error.
+\item Check to see if mask is legal, if not return KADM5_BAD_MASK error.
 \item Check to see if policy exists, if not return
-OVSEC_KADM_UNK_POLICY error.
+KADM5_UNK_POLICY error.
 \item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
-3, 4, or 5, return OVSEC_KADM_BAD_CLASS.
+3, 4, or 5, return KADM5_BAD_CLASS.
 \item Update the fields specified in the mask.
 \end{enumerate}
 
 RETURN CODES: 
 
 \begin{description}
-\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
-\item[OVSEC_KADM_UNK_POLICY] Policy not found.
-\item[OVSEC_KADM_BAD_MASK] The mask is not valid for a modify
+\item[KADM5_BAD_POLICY] The policy name contains illegal characters.
+\item[KADM5_UNK_POLICY] Policy not found.
+\item[KADM5_BAD_MASK] The mask is not valid for a modify
 operation.
-\item[OVSEC_KADM_BAD_CLASS] The specified number of character classes
+\item[KADM5_BAD_CLASS] The specified number of character classes
 is invalid.
 \end{description}
 
-\subsection{ovsec_kadm_get_policy}
+\subsection{kadm5_get_policy}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_get_policy(void *server_handle, char *policy,
-                      ovsec_kadm_policy_ent_t *ent); 
+kadm5_ret_t
+kadm5_get_policy(void *server_handle, char *policy,
+                      kadm5_policy_ent_t *ent); 
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: get, or the calling principal's policy being
 the same as the policy argument.  If the request is authenticated to
-the ovsec_adm/changepw service, the get privilege is disregarded.
+the kadmin/changepw service, the get privilege is disregarded.
 If an error is returned entry is set to NULL.
 
 Return the policy's attributes in allocated memory.  The caller must
-free the returned entry with ovsec_kadm_free_policy_ent.
+free the returned entry with kadm5_free_policy_ent.
 
 RETURN CODES: 
 
 \begin{description}
-\item[OVSEC_KADM_BAD_POLICY] The policy name contains illegal characters.
-\item[OVSEC_KADM_UNK_POLICY] Policy not found.
+\item[KADM5_BAD_POLICY] The policy name contains illegal characters.
+\item[KADM5_UNK_POLICY] Policy not found.
 \end{description}
 
-\subsection{ovsec_kadm_get_policies}
+\subsection{kadm5_get_policies}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_get_policies(void *server_handle, char *exp,
+kadm5_ret_t
+kadm5_get_policies(void *server_handle, char *exp,
                           char ***pols, int *count)
 \end{verbatim}
 
@@ -1410,7 +1404,7 @@ principal names that match the expression exp are retrieved.  \v{pols}
 is filled in with a pointer to a NULL-terminated array of strings, and
 \v{count} is filled in with the number of principal names in the
 array.  \v{pols} must be freed with a call to
-\v{ovsec_kadm_free_name_list}.
+\v{kadm5_free_name_list}.
 
 All characters in the expression match themselves except ``?'' which
 matches any single character, ``*'' which matches any number of
@@ -1419,44 +1413,44 @@ character of ``chars''. Any character which follows a ``$\backslash$''
 matches itself exactly, and a ``$\backslash$'' cannot be the last
 character in the string.
 
-\subsection{ovsec_kadm_free_principal_ent, _policy_ent}
+\subsection{kadm5_free_principal_ent, _policy_ent}
 
 \begin{verbatim}
-void ovsec_kadm_free_principal_ent(void *server_handle,
-                                   ovsec_kadm_principal_ent_t princ);
+void kadm5_free_principal_ent(void *server_handle,
+                                   kadm5_principal_ent_t princ);
 \end{verbatim}
 
 Free the memory that was allocated by a call to
-ovsec_kadm_get_principal.  If the argument is NULL, the function
+kadm5_get_principal.  If the argument is NULL, the function
 returns succesfully.
 
 AUTHORIZATION REQUIRED: none (local operation)
 
 \begin{verbatim}
-void ovsec_kadm_free_policy_ent(ovsec_kadm_policy_ent_t policy);
+void kadm5_free_policy_ent(kadm5_policy_ent_t policy);
 \end{verbatim}
 
-Free memory that was allocated by a call to ovsec_kadm_get_policy.  If
+Free memory that was allocated by a call to kadm5_get_policy.  If
 the argument is NULL, the function returns succesfully.
 
 AUTHORIZATION REQUIRED: none (local operation)
 
-\subsection{ovsec_kadm_free_name_list}
+\subsection{kadm5_free_name_list}
 
 \begin{verbatim}
-void ovsec_kadm_free_name_list(void *server_handle,
+void kadm5_free_name_list(void *server_handle,
                                char **names, int *count);
 \end{verbatim}
 
-Free the memory that was allocated by ovsec_kadm_get_principals or
-ovsec_kadm_get_policies.  names and count must be a matched pair of
+Free the memory that was allocated by kadm5_get_principals or
+kadm5_get_policies.  names and count must be a matched pair of
 values returned from one of those two functions.
 
-\subsection{ovsec_kadm_get_privs}
+\subsection{kadm5_get_privs}
 
 \begin{verbatim}
-ovsec_kadm_ret_t
-ovsec_kadm_get_privs(void *server_handle, u_int32 *privs);
+kadm5_ret_t
+kadm5_get_privs(void *server_handle, u_int32 *privs);
 \end{verbatim}
 
 Return the caller's admin server privileges in the integer pointed to
@@ -1469,15 +1463,15 @@ The returned value is a bitmask indicating the caller's privileges:
 
 \begin{tabular}{llr}
 {\bf Privilege} & {\bf Symbol} & {\bf Value} \\
-Get & OVSEC_KADM_PRIV_GET & 0x01 \\
-Add & OVSEC_KADM_PRIV_ADD & 0x02 \\
-Modify & OVSEC_KADM_PRIV_MODIFY & 0x04 \\
-Delete & OVSEC_KADM_PRIV_DELETE & 0x08
+Get & KADM5_PRIV_GET & 0x01 \\
+Add & KADM5_PRIV_ADD & 0x02 \\
+Modify & KADM5_PRIV_MODIFY & 0x04 \\
+Delete & KADM5_PRIV_DELETE & 0x08
 \end{tabular}
 
 There is no guarantee that a caller will have a privilege indicated by
 this function for any length of time; applications using this function
-must still be prepared to handle all possible OVSEC_KADM_AUTH_* error
+must still be prepared to handle all possible KADM5_AUTH_* error
 codes.
 
 \section{Server}
@@ -1524,7 +1518,7 @@ The admin server accepts TCP Sun RPC connections.  The port number
 it) is determined by a three step process:
 
 \begin{enumerate}
-\item If ovsec_kadm/tcp exists in /etc/services, the specified port
+\item If kadm5/tcp exists in /etc/services, the specified port
 number is used.
 
 \item Otherwise, if kerberos_adm/tcp exists in /etc/services, the
@@ -1536,12 +1530,12 @@ specified port number is used.
 \subsection{Key Table, Authorization ACLs}
 \label{sec:acls}
 
-The admin server's keytable is stored in /krb5/ovsec_adm.srvtab.  It
-contains entries for the principals OVSEC_KADM_ADMIN_SERVICE and
-OVSEC_KADM_CHANGEPW_SERVICE.
+The admin server's keytable is stored in /krb5/kadmin.srvtab.  It
+contains entries for the principals KADM5_ADMIN_SERVICE and
+KADM5_CHANGEPW_SERVICE.
 
 The admin server will use a simple ACL mechanism to grant privileges
-to principals.  The file OVSEC_KADM_ACLFILE will contain a
+to principals.  The file KADM5_ACLFILE will contain a
 list of principals and their privileges.  It is read at start-up, and
 can only be reread by restarting the admin server.
 
@@ -1643,7 +1637,7 @@ Example: An attacker attempts to replay a previously valid ``create
 principal'' message from jon/admin@REALM.COM:
 
 \begin{verbatim}
-WARNING! Forged/garbled request: ovsec_kadm_create_principal, claimed
+WARNING! Forged/garbled request: kadm5_create_principal, claimed
 client = jon/admin@REALM.COM, service = admin@REALM.COM, addr =
 192.231.148.12
 \end{verbatim}
@@ -1661,7 +1655,7 @@ Example: An attacker cracker@REALM.COM attempts to modify the Kerberos
 master principal:
 
 \begin{verbatim}
-Unauthorized request: ovsec_kadm_modify_principal, K/M@REALM.COM,
+Unauthorized request: kadm5_modify_principal, K/M@REALM.COM,
 client = cracker@REALM.COM, service = admin@REALM.COM, addr =
 192.231.148.12
 \end{verbatim}
@@ -1670,8 +1664,8 @@ client = cracker@REALM.COM, service = admin@REALM.COM, addr =
 logged when an authorized request succeeds or fails for any reason
 other than those listed above.  In the case of success, the status is
 ``success''; otherwise, the status can be anything from ``no space
-left on device'' (ENOSPC) to an OVSEC_KADM error such as ``principal
-does not exist'' (OVSEC_KADM_UNK_PRINC).
+left on device'' (ENOSPC) to an KADM5 error such as ``principal
+does not exist'' (KADM5_UNK_PRINC).
 
 \begin{verbatim}
 Request: <procedure name>, <primary argument>, <status>, client =
@@ -1681,7 +1675,7 @@ Request: <procedure name>, <primary argument>, <status>, client =
 Example: jon/admin@REALM.COM creates a new principal new@REALM.COM:
 
 \begin{verbatim}
-Request: ovsec_kadm_create_principal, new@REALM.COM, success,
+Request: kadm5_create_principal, new@REALM.COM, success,
 client = jon/admin@REALM.COM, service = admin@REALM.COM, addr =
 192.231.148.12
 \end{verbatim}
@@ -1690,7 +1684,7 @@ Example: A buggy client program attempts to create a principal with a
 NULL name:
 
 \begin{verbatim}
-Request: ovsec_kadm_create_principal, (null), Invalid argument, client
+Request: kadm5_create_principal, (null), Invalid argument, client
 = jon/admin@REALM.COM, service = admin@REALM.COM, addr =
 192.231.148.12
 \end{verbatim}
@@ -1698,8 +1692,8 @@ Request: ovsec_kadm_create_principal, (null), Invalid argument, client
 Example: joe/user@REALM.COM changes its own password:
 
 \begin{verbatim}
-Request: ovsec_kadm_chpass_principal, joe/user@REALM.COM, success,
-client = joe/user@REALM.COM, server = ovsec_adm/changepw@REALM.COM,
+Request: kadm5_chpass_principal, joe/user@REALM.COM, success,
+client = joe/user@REALM.COM, server = kadmin/changepw@REALM.COM,
 addr = 192.231.148.12
 \end{verbatim}
 
@@ -1707,7 +1701,7 @@ Example: jon/admin@REALM.COM attempts to get a principal that does not
 exist:
 
 \begin{verbatim}
-Request: ovsec_kadm_get_principal, does/not/exist@REALM.COM, principal
+Request: kadm5_get_principal, does/not/exist@REALM.COM, principal
 does not exist, client = jon/admin@REALM.COM, server =
 admin@REALM.COM, addr = 192.231.148.12
 \end{verbatim}
@@ -1717,7 +1711,7 @@ admin@REALM.COM, addr = 192.231.148.12
 \subsection{Password Dictionary}
 
 The Admin server's password dictionary is stored in
-OVSEC_KADM_WORDFILE.  It is read once when the server starts.  It
+KADM5_WORDFILE.  It is read once when the server starts.  It
 contains a list of entries, separated by newlines.  An entry may
 include any character except a newline and NULL, including spaces.
 The dictionary does not need to be sorted.
