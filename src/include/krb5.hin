@@ -322,7 +322,6 @@ typedef struct _krb5_encrypt_block {
 					   this.  it was a pointer, but it
 					   doesn't have to be.  gross. */
     krb5_keyblock FAR *key;
-    krb5_int32 priv_size;		/* Size of private data */
 } krb5_encrypt_block;
 #endif
 
