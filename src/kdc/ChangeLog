@@ -1,3 +1,18 @@
+2001-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req: Treat SUPPORT_DESMD5 as if it were
+	always cleared.
+
+	* do_tgs_req.c (process_tgs_req): Treat SUPPORT_DESMD5 as if it
+	were always cleared.
+
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (select_session_keytype): Don't issue session key
+	enctype that is not in permitted_enctypes.
+	(dbentry_supports_enctype): For now, always treat SUPPORT_DESMD5
+	as if it were cleared.
+
 2001-10-12  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_util.c (ktypes2str): New function; construct a string

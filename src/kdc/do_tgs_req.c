@@ -584,9 +584,6 @@ tgt_again:
 	    status = "DECRYPT_SERVER_KEY";
 	    goto cleanup;
 	}
-	if ((encrypting_key.enctype == ENCTYPE_DES_CBC_CRC) &&
-	    (isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5)))
-	    encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
 	errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
 					&ticket_reply);
 	krb5_free_keyblock_contents(kdc_context, &encrypting_key);

@@ -1418,13 +1418,14 @@ dbentry_supports_enctype(context, client, enctype)
 {
     /*
      * If it's DES_CBC_MD5, there's a bit in the attribute mask which
-     * checks to see if we support it.
+     * checks to see if we support it.  For now, treat it as always
+     * clear.
      *
      * In theory everything's supposed to support DES_CBC_MD5, but
      * that's not the reality....
      */
     if (enctype == ENCTYPE_DES_CBC_MD5)
-	return isflagset(client->attributes, KRB5_KDB_SUPPORT_DESMD5);
+	return 0;
 
     /*
      * XXX we assume everything can understand DES_CBC_CRC
@@ -1456,6 +1457,9 @@ select_session_keytype(context, server, nktypes, ktype)
     
     for (i = 0; i < nktypes; i++) {
 	if (!valid_enctype(ktype[i]))
+	    continue;
+
+	if (!krb5_is_permitted_enctype(context, ktype[i]))
 	    continue;
 
 	if (dbentry_supports_enctype(context, server, ktype[i]))
