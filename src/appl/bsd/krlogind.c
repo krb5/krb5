@@ -80,7 +80,7 @@ char copyright[] =
  *              instead  of the accompanying login.krb5. In that case,
  *              the remote user's name must be present in the local
  *              .rhosts file, regardless of any options specified.
- *   SERVE_V4 - Define this if v4 rlogin clients are also to be served.
+ *   KRB5_KRB4_COMPAT - Define this if v4 rlogin clients are also to be served.
  *   ALWAYS_V5_KUSEROK - Define this if you want .k5login to be
  *              checked even for v4 clients (instead of .klogin).
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
@@ -100,6 +100,16 @@ char copyright[] =
 #define LOG_REMOTE_REALM
 #define CRYPT
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef __SCO__
+#include <sys/unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -108,16 +118,7 @@ char copyright[] =
 #include <sys/wait.h>
 #include <sys/file.h>
 #include <ctype.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef __SCO__
-#include <sys/unistd.h>
-#endif
-     
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include <pwd.h>
@@ -130,44 +131,48 @@ char copyright[] =
 #endif
      
 #include <signal.h>
+
 #ifdef hpux
 #include <sys/ptyio.h>
 #endif
-     
 #ifdef sysvimp
 #include <compat.h>
-#define STREAMS
+#endif
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
+#ifdef HAVE_STREAMS
+#include <sys/stream.h>
 #include <sys/stropts.h>
 #endif
-     
+
 #ifdef POSIX_TERMIOS
 #include <termios.h>
 #else
-#ifdef SYSV
-#define USE_TERMIO
-#endif
-     
-#ifdef USE_TERMIO
-#include <termio.h>
-#else
 #include <sgtty.h>
-#endif /* USE_TERMIO */
-#endif /* POSIX_TERMIOS */
+#endif
      
 #include <netdb.h>
 #include <syslog.h>
 #include <string.h>
 #include <sys/param.h>
 #include <utmp.h>
+
+#ifdef HAVE_UTXENT
+#include <utmpx.h>
+#endif
      
 #ifdef HAVE_SYS_TTY_H
 #include <sys/tty.h>
 #endif
 
-#ifdef HAVE_STREAMS
-/* but solaris actually uses packet mode, so the real macros are needed too */
+#ifdef HAVE_SYS_PTYVAR_H
+/* Solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
 #endif
+
 
 #ifndef TIOCPKT_NOSTOP
 /* These values are over-the-wire protocol, *not* local values */
@@ -175,7 +180,6 @@ char copyright[] =
 #define TIOCPKT_DOSTOP          0x20
 #define TIOCPKT_FLUSHWRITE      0x02
 #endif
-
 
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
@@ -639,19 +643,7 @@ void doit(f, fromp)
 #ifdef POSIX_TERMIOS
 	    struct termios new_termio;
 #else
-#ifdef USE_TERMIO
-	    struct termio b;
-# define TIOCGETP TCGETA
-# define TIOCSETP TCSETA
-# ifdef MIN
-#  undef MIN
-# endif
-# define        MIN     1
-# define        TIME    0
-	    
-#else
 	    struct sgttyb b;
-#endif /* USE_TERMIO */
 #endif /* POSIX_TERMIOS */
 #ifdef SYSV
 	    (void) setpgrp();
@@ -661,7 +653,7 @@ void doit(f, fromp)
 	    if (t < 0)
 	      fatalperror(f, line);
 #endif
-#ifdef STREAMS
+#if defined(HAVE_STREAMS) && (defined(HAVE_LINE_PUSH) || defined(sun))
 	    while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
 #endif
 	    /* Under Ultrix 3.0, the pgrp of the slave pty terminal
@@ -691,10 +683,21 @@ void doit(f, fromp)
 	    pid = 0;			/*reset pid incase exec fails*/
 #endif /* !sysv || sysvimp */
 	    
-#ifdef STREAMS
+#ifdef HAVE_STREAMS
+#ifdef HAVE_LINE_PUSH
 	    if (line_push(t) < 0)
-	      fatalperror(f, "IPUSH",errno);
-#endif
+		fatalperror(f, "IPUSH",errno);
+#else
+#ifdef sun
+	    if (ioctl(t, I_PUSH, "ptem") < 0)
+		fatalperror(f, "IPUSH-ptem",errno);
+	    if (ioctl(t, I_PUSH, "ldterm") < 0)
+		fatalperror(f, "IPUSH-ldterm",errno);
+	    if (ioctl(t, I_PUSH, "ttcompat") < 0)
+		fatalperror(f, "IPUSH-ttcompat",errno);
+#endif /* sun */
+#endif /* HAVE_LINE_PUSH */
+#endif /* HAVE_STREAMS */
 #ifdef POSIX_TERMIOS
 	    tcgetattr(t,&new_termio);
 	    new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
@@ -707,18 +710,7 @@ void doit(f, fromp)
 	    tcsetattr(t,TCSANOW,&new_termio);
 #else
 	    (void)ioctl(t, TIOCGETP, &b);
-#ifdef USE_TERMIO
-	    /* The key here is to just turn off echo */
-	    b.c_iflag &= ~(ICRNL|IUCLC);
-	    b.c_iflag |= IXON;
-	    b.c_cflag |= CS8;
-	    b.c_lflag |= ICANON|ISIG;
-	    b.c_lflag &= ~(ECHO);
-	    b.c_cc[VMIN] = MIN;
-	    b.c_cc[VTIME] = TIME;
-#else
 	    b.sg_flags = RAW|ANYP;
-#endif /* USE_TERMIO */
 	    (void)ioctl(t, TIOCSETP, &b);
 #endif /* POSIX_TERMIOS */
 	    /*
@@ -777,6 +769,44 @@ void doit(f, fromp)
 		     "login by %s (%s@%s) as %s\n",
 		     krusername ? krusername : "", rusername,
 		     rhost_name, lusername); 
+	}
+#endif
+
+#ifdef HAVE_UTENT
+	{
+	    int tmpx;
+	    char utmp_id[5];
+	    struct utmp ent;
+#ifdef HAVE_UTXENT
+	    struct utmpx entx;
+#endif
+	    strcpy(ent.ut_user, "rlogin");
+	    strcpy(ent.ut_line, line+sizeof("/dev/")-1);
+
+	    sscanf(line, "/dev/pts/%d", &tmpx);
+	    sprintf(utmp_id, "kl%02d", tmpx);
+	    strncpy(ent.ut_id, utmp_id, sizeof(ent.ut_id));
+
+	    ent.ut_pid = getpid;
+	    ent.ut_type = LOGIN_PROCESS;
+	    ent.ut_time = time(0);
+
+#ifdef HAVE_UTXENT
+	    getutmpx(&ent, &entx);
+	    setutxent();
+	    pututxline(&entx);
+	    endutxent();
+	    updwtmpx(WTMPX_FILE, &ent);
+#endif
+	    utmpname(UTMP_FILE);
+	    setutent();
+	    pututline(&ent);
+	    endutent();
+
+	    utmpname(WTMP_FILE);
+	    setutent();
+	    pututline(&ent);
+	    endutent();
 	}
 #endif
 	
@@ -934,43 +964,41 @@ protocol(f, p)
     send(f, oobdata, 1, MSG_OOB);	/* indicate new rlogin */
 #endif
     for (;;) {
-	int ibits, obits, ebits;
-	
-	ibits = 0;
-	obits = 0;
+	fd_set ibits, obits, ebits;
+
+	FD_ZERO(&ibits);
+	FD_ZERO(&obits);
+	FD_ZERO(&ebits);
+
 	if (fcc)
-	  obits |= (1<<p);
+	    FD_SET(p, &obits);
 	else
-	  ibits |= (1<<f);
+	    FD_SET(f, &ibits);
 	if (pcc >= 0)
-	  if (pcc)
-	    obits |= (1<<f);
-	  else
-	    ibits |= (1<<p);
-	ebits = (1<<p);
+	    if (pcc)
+		FD_SET(f, &obits);
+	    else
+		FD_SET(p, &ibits);
+	FD_SET(p, &ebits);
+	
 	if (select(16, &ibits, &obits, &ebits, 0) < 0) {
 	    if (errno == EINTR)
 	      continue;
 	    fatalperror(f, "select");
 	}
-	if (ibits == 0 && obits == 0 && ebits == 0) {
-	    /* shouldn't happen... */
-	    sleep(5);
-	    continue;
-	}
 #define	pkcontrol(c)	((c)&(TIOCPKT_FLUSHWRITE|TIOCPKT_NOSTOP|TIOCPKT_DOSTOP))
-	if (ebits & (1<<p)) {
+	if (FD_ISSET(p, &ebits)) {
 	    cc = read(p, &cntl, 1);
 	    if (cc == 1 && pkcontrol(cntl)) {
 		cntl |= oobdata[0];
 		send(f, &cntl, 1, MSG_OOB);
 		if (cntl & TIOCPKT_FLUSHWRITE) {
 		    pcc = 0;
-		    ibits &= ~(1<<p);
+		    FD_CLR(p, &ibits);
 		}
 	    }
 	}
-	if (ibits & (1<<f)) {
+	if (FD_ISSET(f, &ibits)) {
 	    fcc = (*des_read)(f, fibuf, sizeof (fibuf));
 	    if (fcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	      fcc = 0;
@@ -1001,7 +1029,7 @@ protocol(f, p)
 	    }
 	}
 	
-	if ((obits & (1<<p)) && fcc > 0) {
+	if (FD_ISSET(p, &obits) && fcc > 0) {
 	    cc = write(p, fbp, fcc);
 	    if (cc > 0) {
 		fcc -= cc;
@@ -1009,7 +1037,7 @@ protocol(f, p)
 	    }
 	}
 	
-	if (ibits & (1<<p)) {
+	if (FD_ISSET(p, &ibits)) {
 	    pcc = read(p, pibuf, sizeof (pibuf));
 	    pbp = pibuf;
 	    if (pcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
@@ -1026,7 +1054,7 @@ protocol(f, p)
 		pcc = 0;
 	    }
 	}
-	if ((obits & (1<<f)) && pcc > 0) {
+	if (FD_ISSET(f, &obits) && pcc > 0) {
 	    cc = (*des_write)(f, pbp, pcc);
 	    if (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 		/* also shouldn't happen */
@@ -1066,7 +1094,7 @@ krb5_sigtype cleanup()
     
     (void)chmod(line, 0666);
     (void)chown(line, 0, 0);
-#ifndef STREAMS
+#ifndef HAVE_STREAMS
     *p = 'p';
     (void)chmod(line, 0666);
     (void)chown(line, 0, 0);
@@ -1386,7 +1414,7 @@ getpty(fd,slave)
     char c;
     int i,ptynum;
     struct stat stb;
-#ifdef STREAMS
+#ifdef HAVE_STREAMS
 #ifdef sysvimp
     *fd = open("/dev/pty", O_RDWR|O_NDELAY);
 #else

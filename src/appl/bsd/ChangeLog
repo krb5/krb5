@@ -1,3 +1,16 @@
+Tue Dec 27 06:15:42 1994  Richard Basch  (probe@tardis)
+
+	* krlogind.c
+		Use the file descriptor macros (eg. FD_SET) to handle fd arrays
+		Change #ifdef STREAMS to #ifdef HAVE_STREAMS
+		Started to add SYS-V utmp handling
+		Ripped out the old termio code.
+		Include <unistd.h> and <stdlib.h> where available.
+
+	* configure.in
+		Combined KRB5_UT* macros into CHECK_UTMP, with more checks.
+		Changed obsolete AC_COMPILE_CHECK to use newer macros.
+
 Mon Dec 26 13:51:20 1994  Richard Basch  (probe@tardis)
 
 	* Makefile.in
