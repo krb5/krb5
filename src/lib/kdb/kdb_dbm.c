@@ -493,7 +493,7 @@ krb5_db_entry *entry;
     if ((nextloc + strlen(nextloc)+1 >= contents->dptr + contents->dsize)
 	|| (retval = krb5_parse_name(nextloc, &mod_princ))) {
 	krb5_free_principal(princ);
-	(void) bzero((char *) entry, sizeof(*entry));
+	(void) memset((char *) entry, 0, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
     }
     entry->mod_name = mod_princ;
@@ -502,13 +502,13 @@ krb5_db_entry *entry;
     if (keysize <= 0) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
-	(void) bzero((char *) entry, sizeof(*entry));
+	(void) memset((char *) entry, 0, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
     }
     if (!(entry->key.contents = (unsigned char *)malloc(keysize))) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
-	(void) bzero((char *) entry, sizeof(*entry));
+	(void) memset((char *) entry, 0, sizeof(*entry));
 	return ENOMEM;
     }
     (void) memcpy((char *)entry->key.contents, nextloc, keysize);
@@ -516,7 +516,7 @@ krb5_db_entry *entry;
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
 	free((char *)entry->key.contents);
-	(void) bzero((char *) entry, sizeof(*entry));
+	(void) memset((char *) entry, 0, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
     }	
     return 0;
@@ -527,12 +527,12 @@ free_decode_princ_contents(entry)
 krb5_db_entry *entry;
 {
     /* erase the key */
-    bzero((char *)entry->key.contents, entry->key.length);
+    memset((char *)entry->key.contents, 0, entry->key.length);
     free((char *)entry->key.contents);
 
     krb5_free_principal(entry->principal);
     krb5_free_principal(entry->mod_name);
-    (void) bzero((char *)entry, sizeof(*entry));
+    (void) memset((char *)entry, 0, sizeof(*entry));
     return;
 }
 
@@ -906,7 +906,7 @@ int *nentries;				/* how many found & deleted */
 	if (retval = decode_princ_contents(&contents, &entry))
 	    goto cleankey;
 	found = 1;
-	bzero((char *)entry.key.contents, entry.key.length);
+	memset((char *)entry.key.contents, 0, entry.key.length);
 	if (retval = encode_princ_contents(&contents2, &entry))
 	    goto cleancontents;
 
