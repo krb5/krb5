@@ -341,7 +341,7 @@ typedef struct _krb5_enc_data {
 #endif
 
 #ifdef __cplusplus
-#extern "C" {
+extern "C" {
 #endif
 
 /*
@@ -1085,7 +1085,7 @@ typedef struct _krb5_rc_ops {
 } krb5_rc_ops;
 
 #ifdef __cplusplus
-#extern "C" {
+extern "C" {
 #endif
 
 krb5_error_code krb5_rc_default 
@@ -1231,7 +1231,7 @@ extern krb5_kt_ops krb5_kt_dfl_ops;
  */
 
 #ifdef __cplusplus
-#extern "C" {
+extern "C" {
 #endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_init_context

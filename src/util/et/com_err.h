@@ -69,7 +69,7 @@ struct error_table {
 };
 
 #ifdef __cplusplus
-#extern "C" {
+extern "C" {
 #endif
 
 KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
