@@ -1,3 +1,11 @@
+2004-07-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_none.c: New file.
+	* Makefile.in (SRCS, STLIBOBJS, OBJS): Build it.
+	* rc-int.h (krb5_rc_none_ops): Declare.
+	* rc_base.c (none): New variable.
+	(krb5_rc_typelist_dfl): Add it into the linked list.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_io.c: Don't check for macsock.h.
