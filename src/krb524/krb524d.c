@@ -229,6 +229,7 @@ void cleanup_and_exit(ret, context)
 	  (void) kadm5_destroy(handle);
      }
      if (use_keytab && kt) krb5_kt_close(context, kt);
+     krb5_klog_close(context);
      krb5_free_context(context);
      exit(ret);
 }

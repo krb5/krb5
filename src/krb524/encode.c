@@ -43,19 +43,19 @@
 
 int  encode_v4tkt (KTEXT_ST *, char *, unsigned int *),
      encode_ktext (char **, int *, KTEXT_ST *),
-     encode_bytes (char **, int *, char *, int),
+     encode_bytes (char **, int *, char *, unsigned int),
      encode_int32 (char **, int *, krb5_int32 *);
 
 int  decode_v4tkt (KTEXT_ST *, char *, unsigned int *),
      decode_ktext (char **, int *, KTEXT_ST *),
-     decode_bytes (char **, int *, char *, int),
+     decode_bytes (char **, int *, char *, unsigned int),
      decode_int32 (char **, int *, krb5_int32 *);
 
 int encode_bytes(out, outlen, in, len)
      char **out;
      int *outlen;
      char *in;
-     int len;
+     unsigned int len;
 {
      if (len > *outlen)
 	  return KRB524_ENCFULL;
@@ -102,7 +102,7 @@ int decode_bytes(out, outlen, in, len)
      char **out;
      int *outlen;
      char *in; 
-     int len;
+     unsigned int len;
 {
      if (len > *outlen)
 	  return KRB524_DECEMPTY;

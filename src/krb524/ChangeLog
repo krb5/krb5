@@ -1,3 +1,10 @@
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c (cleanup_and_exit): Call krb5_klog_close().
+
+	* encode.c (encode_bytes, decode_bytes): Make length field
+	unsigned to clean up unsigned/signed warnings.
+
 2001-10-10  Ken Raeburn  <raeburn@mit.edu>
 	    Danilo Almeida  <dalmeida@mit.edu>
 
