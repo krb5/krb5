@@ -24,9 +24,8 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-long pty_getpty (fd, slave, slavelength)
-    int slavelength;
-    int *fd; char *slave;
+long
+ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
 {
 #if !defined(HAVE__GETPTY) && !defined(HAVE_OPENPTY)
     char *cp;
@@ -79,7 +78,8 @@ long pty_getpty (fd, slave, slavelength)
     if (*fd >= 0) {
 
 #if defined(HAVE_GRANTPT)&&defined(HAVE_STREAMS)
-	if (grantpt(*fd) || unlockpt(*fd)) return PTY_GETPTY_STREAMS;
+	if (do_grantpt)
+	    if (grantpt(*fd) || unlockpt(*fd)) return PTY_GETPTY_STREAMS;
 #endif
     
 #ifdef HAVE_PTSNAME
@@ -141,4 +141,10 @@ long pty_getpty (fd, slave, slavelength)
     }
 #endif /*HAVE__GETPTY*/
 #endif /* HAVE_OPENPTY */
+}
+
+long
+pty_getpty(int *fd, char *slave, int slavelength)
+{
+    return ptyint_getpty_ext(fd, slave, slavelength, 1);
 }

@@ -1,3 +1,21 @@
+2001-05-15  Tom Yu  <tlyu@mit.edu>
+
+	* getpty.c: Make pty_getpty() into ptyint_getpty_ext(), which has
+	an extra argument that determines whether to call grantpt() and
+	unlockpt() on systems that support it.  The new pty_getpty() will
+	simply call the extended version.  This is to support some
+	wackiness needed by pty_paranoia.c tests.
+
+	* pty-int.h: Add prototype for ptyint_getpty_ext().
+
+	* pty_paranoia.c: Add rant about ptys and quirks therein.  Needs
+	to be updated somewhat.  Add some more paranoia for the case where
+	we actually succeed in opening the slave of a closed master and
+	then succeed in opening the same master.  This program will get
+	rewritten at some point to actually see what things result in EOFs
+	and under what conditions data will actually get passed between
+	master and slave.
+
 2001-05-10  Tom Yu  <tlyu@mit.edu>
 
 	* pty_paranoia.c: New file; do many paranoid checks about ctty

@@ -102,6 +102,7 @@ extern void getutmpx (const struct utmp *, struct utmpx *);
 /* Internal functions */
 long ptyint_void_association(void);
 long ptyint_open_ctty (char *slave, int *fd);
+long ptyint_getpty_ext(int *, char *, int, int);
 #ifdef HAVE_SETUTXENT
 long ptyint_update_wtmpx(struct utmpx *utx);
 #endif
