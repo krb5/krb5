@@ -47,7 +47,7 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
 {
     krb5_replay_data replaydata;
     krb5_data * scratch = 0;
-    krb5_address **addrs = 0;
+    krb5_address **addrs = NULL;
     krb5_error_code retval;
     krb5_creds creds, tgt;
     krb5_creds *pcreds;
@@ -73,6 +73,11 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
 	free_rhost = 1;
 	memcpy(rhost, server->data[1].data, server->data[1].length);
 	rhost[server->data[1].length] = '\0';
+    }
+    if (cc == 0) {
+      if ((retval = krb5int_cc_default(context, &cc)))
+	goto errout;
+      close_cc = 1;
     }
     retval = krb5_auth_con_getkey (context, auth_context, &session_key);
     if (retval)
@@ -103,10 +108,6 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     punt:
 	krb5_free_cred_contents (context, &in);
     }
-    
-    retval = krb5_os_hostaddr(context, rhost, &addrs);
-    if (retval)
-	goto errout;
 
     if ((retval = krb5_copy_principal(context, client, &creds.client)))
 	goto errout;
@@ -121,12 +122,6 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
 					   0)))
 	goto errout;
 	
-    if (cc == 0) {
-	if ((retval = krb5int_cc_default(context, &cc)))
-	    goto errout;
-	close_cc = 1;
-    }
-
     /* fetch tgt directly from cache */
     retval = krb5_cc_retrieve_cred (context, cc, KRB5_TC_SUPPORTED_KTYPES,
 				    &creds, &tgt);
@@ -142,6 +137,12 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     if (!tgt.ticket.length) {
 	retval = KRB5_NO_TKT_SUPPLIED;
 	goto errout;
+    }
+    
+    if (tgt.addresses && *tgt.addresses) {
+	retval = krb5_os_hostaddr(context, rhost, &addrs);
+	if (retval)
+	    goto errout;
     }
     
     creds.keyblock.enctype = enctype;

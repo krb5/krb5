@@ -1,3 +1,9 @@
+2002-09-11  Sam Hartman  <hartmans@mit.edu>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds):  If our initial tickets don't
+	have addresses, neither should forwarded tickets.  Also, noticed
+	that cc was being used before initialized in some cases; fixed.
+
 2002-09-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* addr_comp.c, addr_order.c, addr_srch.c, appdefault.c,
