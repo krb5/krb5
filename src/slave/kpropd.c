@@ -73,7 +73,7 @@ char	*realm = NULL;		/* Our realm */
 char	*file = KPROPD_DEFAULT_FILE;
 char	*temp_file_name;
 char	*kdb5_util = KPROPD_DEFAULT_KDB5_UTIL;
-char	*kerb_database = KPROPD_DEFAULT_KRB_DB;
+char	*kerb_database = NULL;
 char	*acl_file_name = KPROPD_ACL_FILE;
 
 int		database_fd;
@@ -835,8 +835,10 @@ load_database(context, kdb5_util, database_file_name)
 		edit_av[count++] = realm;	
 	}
 	edit_av[count++] = "load";
-	edit_av[count++] = "-d";
-	edit_av[count++] = kerb_database;
+	if (kerb_database) {
+		edit_av[count++] = "-d";
+		edit_av[count++] = kerb_database;
+	}
 	edit_av[count++] = database_file_name;
 	edit_av[count++] = NULL;
 
