@@ -1501,13 +1501,19 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 					    &in_buf, &conf_state,
 					    &out_buf);
 			if (maj_stat != GSS_S_COMPLETE) {
+#if 0
+/* Don't setup an infinite loop */
 				/* generally need to deal */
 				secure_gss_error(maj_stat, min_stat,
 					       (level==PROT_P)?
 						 "gss_seal ENC didn't complete":
 						 "gss_seal MIC didn't complete");
+#endif /* 0 */
 			} else if ((level == PROT_P) && !conf_state) {
+#if 0
+/* Don't setup an infinite loop */
 				secure_error("GSSAPI didn't encrypt message");
+#endif /* 0 */
 			} else {
 				memcpy(out, out_buf.value, 
 				       length=out_buf.length);

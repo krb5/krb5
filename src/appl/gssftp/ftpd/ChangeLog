@@ -1,3 +1,9 @@
+Thu Feb 25 23:31:37 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (reply): Don't call secure_gss_error() or secure_error()
+	from within reply() to avoid setting up an infinite
+	loop. [krb5-appl/684]
+
 Thu Feb 18 18:34:23 1999  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add check for setluid() in libsecurity.
