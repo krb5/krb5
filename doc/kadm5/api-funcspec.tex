@@ -676,7 +676,9 @@ for this connection, to be used in all subsequent API calls.
 
 The caller should always specify OVSEC_KADM_STRUCT_VERSION for the
 struct_version argument, a valid and supported API version constant
-for the api_version argument (currently, theonly valid API version
+for the api_version argument (the version of the API specified in this
+document is OVSEC_KADM_API_VERSION_2; currently, the only other valid
+API version
 constant is OVSEC_KADM_API_VERSION_1), and a valid pointer in which
 the server handle will be stored.
 
@@ -1112,7 +1114,7 @@ life.
 \begin{verbatim}
 ovsec_kadm_ret_t
 ovsec_kadm_randkey_principal(void *server_handle, krb5_principal princ,
-                             krb5_keyblock **new_key)
+                             krb5_keyblock **new_key, krb5_kvno *new_kvno)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
@@ -1122,6 +1124,9 @@ ovsec_adm/changepw service, the modify privilege is disregarded.
 Generate and assign a new random key to the named principal, and
 return the generated key in allocated storage.  The caller must free
 the returned krb5_keyblock * with krb5_free_keyblock.
+
+if new_kvno is non-null, the key version number of the new key is
+returned in it.
 
 If the principal's POLICY bit is set in aux_attributes and the caller does
 not have modify privilege , compliance with the password minimum life
