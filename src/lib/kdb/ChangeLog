@@ -1,0 +1,6 @@
+Fri Jul 15 14:54:10 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* kdb_dbm.c (krb5_dbm_db_end_update): Change use of utimes() to
+	the POSIX utime() function.
+
+

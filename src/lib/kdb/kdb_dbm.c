@@ -36,10 +36,8 @@ static char rcsid_krb_dbm_c[] =
 #include <krb5/sysincl.h>
 #include <stdio.h>
 #include <errno.h>
-
-#if (defined(mips) && defined(SYSTYPE_BSD43)) || defined(aix)
-#include <sys/time.h>
-#endif
+#include <sys/types.h>
+#include <utime.h>
 
 #if defined (POSIX_FILE_LOCKS) && !defined(unicos61)
 #include <fcntl.h>
@@ -381,16 +379,14 @@ time_t age;
 	retval = errno;
     else {
 	struct stat st;
-	struct timeval tv[2];
+	struct utimbuf times;
 	/* only set the time if the new file is "newer" than
 	   "age" */
 	if ((fstat (fd, &st) == 0) && (st.st_mtime <= age)) {
-	    tv[0].tv_sec = st.st_atime;
-	    tv[0].tv_usec = 0;
-	    tv[1].tv_sec = age;		/* mod time */
-	    tv[1].tv_usec = 0;
+	    times.actime = st.st_atime;
+	    times.modtime = age;
 	    /* set the mod timetimes.. */
-	    utimes (new_okname, tv);
+	    utime(new_okname, &times);
 #ifndef NOFSYNC
 	    fsync(fd);
 #endif
