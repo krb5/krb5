@@ -63,46 +63,26 @@ struct sockaddr_in *receiver;
 	    return(-1);
 	}
 
-	if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
-	    if (!(r = krb5_rc_resolve_type(&rcache, "dfl"))) {
-		char *cachename;
-		extern krb5_deltat krb5_clockskew;
-		char *insender;
-
-		insender = inet_ntoa(sender->sin_addr);
-
-		if (cachename = calloc(1, strlen(insender)+1+3)) {
-		    strcpy(cachename, "rc_");
-		    strcat(cachename, insender);
-
-		    if (!(r = krb5_rc_resolve(rcache, cachename))) {
-			if (!((r = krb5_rc_recover(rcache)) &&
-			      (r = krb5_rc_initialize(rcache,
-						      krb5_clockskew)))) {
-			    r = krb5_mk_safe(&inbuf,
-					     CKSUMTYPE_RSA_MD4_DES,
-					     &keyb,
-					     saddr2, &raddr,
-					     0,	/* no sequence number */
-					     0,	/* default flags (none) */
-					     rcache,
-					     &out5);
-			    krb5_rc_close(rcache);
-			}
-		    }
-		    free(cachename);
-		} else
-		    r = ENOMEM;
-	    }
-	    xfree(rcache);
-	} else {
+	if (r = krb5_get_server_rcache(inet_ntoa(sender->sin_addr),
+				       &rcache)) {
 	    krb5_free_addr(saddr2);
 #ifdef	EBUG
-	    ERROR(ENOMEM);
+	    ERROR(r);
 #endif
 	    return(-1);
 	}
+	r = krb5_mk_safe(&inbuf,
+			 CKSUMTYPE_RSA_MD4_DES,
+			 &keyb,
+			 saddr2, &raddr,
+			 0,		/* no sequence number */
+			 0,		/* default flags (none) */
+			 rcache,
+			 &out5);
+	krb5_rc_close(rcache);
+	xfree(rcache);
 	krb5_free_addr(saddr2);
+
 	if (r) {
 #ifdef	EBUG
 		ERROR(r);

@@ -37,6 +37,7 @@ MSG_DAT *msg;
 	krb5_error_code r;
 	char sa[4], ra[4];
 	krb5_rcache rcache;
+	char *cachename;
 
 	keyb.keytype = KEYTYPE_DES;
 	keyb.length = sizeof(des_cblock);
@@ -63,39 +64,32 @@ MSG_DAT *msg;
 #endif
 	    return(krb425error(r));
 	}
-	if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
-	    if (!(r = krb5_rc_resolve_type(&rcache, "dfl"))) {
-		char *cachename;
-		extern krb5_deltat krb5_clockskew;
-		char *insender = inet_ntoa(sender->sin_addr);
-
-		if (cachename = calloc(1, strlen(insender)+1+4+5)) {
-		    /* 1 for NUL, 4 for rc_., 5 for digits of port
+	if (cachename = calloc(1, strlen(inet_ntoa(sender->sin_addr)+1+1+5)))
+	    /* 1 for NUL, 1 for ., 5 for digits of port
 		       (unsigned 16bit, no greater than 65535) */
-		    sprintf(cachename, "rc_%s.%u", insender,
-			    ntohs(receiver->sin_port));
-
-		    if (!(r = krb5_rc_resolve(rcache, cachename))) {
-			if (!((r = krb5_rc_recover(rcache)) &&
-			      (r = krb5_rc_initialize(rcache,
-						      krb5_clockskew)))) {
-			    r = krb5_rd_priv(&inbuf, &keyb, saddr2, &raddr,
-					     0, 0, 0, rcache, &out);
-			    krb5_rc_close(rcache);
-			}
-		    }
-		    free(cachename);
-		} else
-		    r = ENOMEM;
-	    }
-	    xfree(rcache);
-	} else {
-	    krb5_free_addr(saddr2);
+	    sprintf(cachename, "%s.%u", inet_ntoa(sender->sin_addr),
+		    ntohs(receiver->sin_port));
+	else {
 #ifdef	EBUG
 	    ERROR(ENOMEM);
 #endif
 	    return(krb425error(ENOMEM));
 	}
+	    
+	if (r = krb5_get_server_rcache(cachename,
+				       &rcache)) {
+	    krb5_free_addr(saddr2);
+#ifdef	EBUG
+	    ERROR(r);
+#endif
+	    return(-1);
+	}
+	free(cachename);
+	r = krb5_rd_priv(&inbuf, &keyb, saddr2, &raddr,
+			 0, 0, 0, rcache, &out);
+	krb5_rc_close(rcache);
+	xfree(rcache);
+
 	krb5_free_addr(saddr2);
 
 	if (r) {
