@@ -54,7 +54,9 @@ kdc_com_err_proc(whoami, code, format, pvar)
 {
     /* XXX need some way to do this better... */
 
-    extern int vfprintf PROTOTYPE((FILE *, const char *, va_list));
+#ifndef __STDC__
+    extern int vfprintf();
+#endif
 
     if (whoami) {
         fputs(whoami, stderr);
