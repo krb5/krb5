@@ -1,6 +1,4 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" lib/kadm/krb5strings.M
 .\" Copyright 1995 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may
