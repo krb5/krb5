@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1988 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1988, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)ring.c	5.3 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)ring.c	8.1 (Berkeley) 6/6/93";
 #endif /* not lint */
 
 /*
@@ -112,9 +112,9 @@ Ring *ring;
 
     ring->top = ring->bottom+ring->size;
 
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
     ring->clearto = 0;
-#endif
+#endif	/* ENCRYPTION */
 
     return 1;
 }
@@ -185,7 +185,7 @@ ring_consumed(ring, count)
 		(ring_subtract(ring, ring->mark, ring->consume) < count)) {
 	ring->mark = 0;
     }
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
     if (ring->consume < ring->clearto &&
 		ring->clearto <= ring->consume + count)
 	ring->clearto = 0;
@@ -193,7 +193,7 @@ ring_consumed(ring, count)
 		ring->bottom <= ring->clearto &&
 		ring->bottom + ((ring->consume + count) - ring->top))
 	ring->clearto = 0;
-#endif
+#endif	/* ENCRYPTION */
     ring->consume = ring_increment(ring, ring->consume, count);
     ring->consumetime = ++ring_clock;
     /*
@@ -325,7 +325,7 @@ ring_consume_data(ring, buffer, count)
 }
 #endif
 
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
     void
 ring_encrypt(ring, encryptor)
     Ring *ring;
@@ -359,4 +359,4 @@ ring_clearto(ring)
     else
 	ring->clearto = 0;
 }
-#endif
+#endif	/* ENCRYPTION */

@@ -30,7 +30,7 @@ static char *rcsid_forward_c =
 /* General-purpose forwarding routines. These routines may be put into */
 /* libkrb5.a to allow widespread use */ 
 
-#if defined(KERBEROS) || defined(KRB5)
+#if defined(KRB5) && defined(FORWARD)
 #include <stdio.h>
 #include <pwd.h>
 #include <netdb.h>
@@ -613,4 +613,4 @@ const krb5_address *recv_addr;    /* optional */
 #undef cleanup_mesg
 }
 
-#endif /* KERBEROS */
+#endif /* defined(KRB5) && defined(FORWARD) */

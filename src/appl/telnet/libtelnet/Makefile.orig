@@ -22,9 +22,10 @@
 #
 # Everything happens in ../Makefile.config and Makefile.generic
 #
+SHELL=/bin/sh
 
 all:
-	@-if [ -f ../Config.local ]; \
+	@-if test -f ../Config.local; \
 	then \
 		echo make -f ../Config.local WHAT=${WHAT} CC="${CC}"; \
 		make -f ../Config.local WHAT=${WHAT} CC="${CC}"; \
@@ -34,7 +35,7 @@ all:
 	fi
 
 .DEFAULT:
-	@-if [ -f ../Config.local ]; \
+	@-if test -f ../Config.local; \
 	then \
 		echo make -f ../Config.local WHAT=${WHAT} CC="${CC}" $@; \
 		make -f ../Config.local WHAT=${WHAT} CC="${CC}" $@; \

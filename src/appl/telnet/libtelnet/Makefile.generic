@@ -21,14 +21,15 @@
 
 LIB=    libtelnet.a
 SRCS=   auth.c encrypt.c genget.c \
-	misc.c enc_des.c \
+	misc.c kerberos.c kerberos5.c forward.c spx.c enc_des.c \
+	rsaencpwd.c krb4encpwd.c read_password.c \
 	setenv.c getent.c strdup.c strcasecmp.c \
 	strchr.c strrchr.c strftime.c strerror.c \
-	kerberos5.c forward.c \
 	${LIB_SRC}
 
 OBJS=   auth.o encrypt.o genget.o \
-	misc.o enc_des.o kerberos5.o forward.o \
+	misc.o kerberos.o kerberos5.o forward.o spx.o enc_des.o \
+	rsaencpwd.o krb4encpwd.o read_password.o \
 	${LIB_OBJ}
 
 TELNET_H= ../arpa/telnet.h
@@ -40,8 +41,6 @@ ${LIB}: ${OBJS}
 	${AR} ${ARFLAGS} ${LIB} `lorder ${OBJS} | tsort`
 	@if [ ${RANLIB} != NONE ]; \
 		then echo ${RANLIB} ${LIB}; ${RANLIB} ${LIB}; fi
-
-install:
 
 clean cleandir:
 	rm -f *.o ${LIB} core a.out

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1988, 1990 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1988, 1990, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)terminal.c	5.4 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)terminal.c	8.1 (Berkeley) 6/6/93";
 #endif /* not lint */
 
 #include <arpa/telnet.h>
@@ -207,7 +207,7 @@ setconnmode(force)
 {
 #ifdef	ENCRYPTION
     static int enc_passwd = 0;
-#endif
+#endif	/* ENCRYPTION */
     register int newmode;
 
     newmode = getconnmode()|(force?MODE_FORCE:0);
@@ -227,7 +227,7 @@ setconnmode(force)
 	    enc_passwd = 0;
 	}
     }
-#endif
+#endif	/* ENCRYPTION */
 
 }
 

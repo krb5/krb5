@@ -1,6 +1,6 @@
 /*-
- * Copyright (c) 1991 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1991, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,10 +32,12 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)enc_des.c	5.2 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)enc_des.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
-#if defined(AUTHENTICATION) && defined(ENCRYPTION) && defined(DES_ENCRYPTION)
+#ifdef	ENCRYPTION
+# ifdef	AUTHENTICATION
+#  ifdef DES_ENCRYPTION
 #include <arpa/telnet.h>
 #include <stdio.h>
 #ifdef	__STDC__
@@ -110,10 +112,10 @@ struct keyidlist {
 
 void fb64_stream_iv P((Block, struct stinfo *));
 void fb64_init P((struct fb *));
-int fb64_start P((struct fb *, int, int));
+static int fb64_start P((struct fb *, int, int));
 int fb64_is P((unsigned char *, int, struct fb *));
 int fb64_reply P((unsigned char *, int, struct fb *));
-void fb64_session P((Session_Key *, int, struct fb *));
+static void fb64_session P((Session_Key *, int, struct fb *));
 void fb64_stream_key P((Block, struct stinfo *));
 int fb64_keyid P((int, unsigned char *, int *, struct fb *));
 
@@ -368,7 +370,7 @@ fb64_reply(data, cnt, fbp)
 		if (state == FAILED)
 			state = IN_PROGRESS;
 		state &= ~NO_RECV_IV;
-		encrypt_send_keyid(DIR_ENCRYPT, "\0", 1, 1);
+		encrypt_send_keyid(DIR_ENCRYPT, (unsigned char *)"\0", 1, 1);
 		break;
 
 	case FB64_IV_BAD:
@@ -717,4 +719,6 @@ ofb64_decrypt(data)
 
 	return(data ^ stp->str_feed[index]);
 }
-#endif
+#  endif /* DES_ENCRYPTION */
+# endif	/* AUTHENTICATION */
+#endif	/* ENCRYPTION */

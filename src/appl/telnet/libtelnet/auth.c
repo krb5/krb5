@@ -1,6 +1,6 @@
 /*-
- * Copyright (c) 1991 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1991, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,13 +32,13 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)auth.c	5.3 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)auth.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
 /*
  * Copyright (C) 1990 by the Massachusetts Institute of Technology
  *
- * Export of this software from the United States of America may
+ * Export of this software from the United States of America may 
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
@@ -136,7 +136,7 @@ Authenticator authenticators[] = {
 				kerberos5_reply,
 				kerberos5_status,
 				kerberos5_printsub },
-# endif
+# endif	/* ENCRYPTION */
 	{ AUTHTYPE_KERBEROS_V5, AUTH_WHO_CLIENT|AUTH_HOW_ONE_WAY,
 				kerberos5_init,
 				kerberos5_send,
@@ -154,7 +154,7 @@ Authenticator authenticators[] = {
 				kerberos4_reply,
 				kerberos4_status,
 				kerberos4_printsub },
-# endif
+# endif	/* ENCRYPTION */
 	{ AUTHTYPE_KERBEROS_V4, AUTH_WHO_CLIENT|AUTH_HOW_ONE_WAY,
 				kerberos4_init,
 				kerberos4_send,

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1989 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1989, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,7 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)ext.h	5.8 (Berkeley) 12/18/92
+ *	@(#)ext.h	8.1 (Berkeley) 6/4/93
  */
 
 /*
@@ -119,6 +119,7 @@ extern void
 	init_termbuf P((void)),
 	interrupt P((void)),
 	localstat P((void)),
+	flowstat P((void)),
 	netclear P((void)),
 	netflush P((void)),
 #ifdef DIAGNOSTICS
@@ -155,7 +156,9 @@ extern void
 extern int
 	end_slc P((unsigned char **)),
 	getnpty P((void)),
-	getpty P((void)),
+#ifndef convex
+	getpty P((int *)),
+#endif
 	login_tty P((int)),
 	spcset P((int, cc_t *, cc_t **)),
 	stilloob P((int)),
@@ -188,11 +191,11 @@ extern void
 	wontoption P((int)),
 	writenet P((unsigned char *, int));
 
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 extern void	(*encrypt_output) P((unsigned char *, int));
 extern int	(*decrypt_input) P((int));
 extern char	*nclearto;
-#endif
+#endif	/* ENCRYPTION */
 
 
 /*
@@ -209,6 +212,7 @@ extern struct {
 	ttypesubopt,		/* ttype subopt is received */
 	tspeedsubopt,		/* tspeed subopt is received */
 	environsubopt,		/* environ subopt is received */
+	oenvironsubopt,		/* old environ subopt is received */
 	xdisplocsubopt,		/* xdisploc subopt is received */
 	baseline,		/* time started to do timed action */
 	gotDM;			/* when did we last see a data mark */

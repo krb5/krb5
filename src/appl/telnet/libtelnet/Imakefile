@@ -23,18 +23,37 @@
 # Everything happens in ../Makefile.config and Makefile.generic
 #
 
+AUTH_DEF=-DAUTHENTICATION -DKRB5 -DFORWARD -DLOGIN_CAP_F -DLOGIN_PROGRAM=KRB5_PATH_LOGIN
+AUTH_INC=-I../../../include 
+AUTH_LIB=$(KLIB)
+AUTH_LIBPATH=$(DEPKLIB); 
+
 all:
 	@-if [ -f ../Config.local ]; \
 	then \
 		echo make -f ../Config.local WHAT="" CC="${CC}" \
-			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)"; \
+			AUTH_DEF="$(AUTH_DEF)" \
+			AUTH_INC="$(AUTH_INC)" \
+			AUTH_LIB="$(AUTH_LIB)" \
+			AUTH_LIBPATH="$(AUTH_LIBPATH)"; \
 		make -f ../Config.local WHAT="" CC="${CC}" \
-			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)"; \
+			AUTH_DEF="$(AUTH_DEF)" \
+			AUTH_INC="$(AUTH_INC)" \
+			AUTH_LIB="$(AUTH_LIB)" \
+			AUTH_LIBPATH="$(AUTH_LIBPATH)"; \
 	else \
 		echo make -f ../Config.generic WHAT="" CC="${CC}" \
-			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)" $(TELNET_OPSYS); \
+			AUTH_DEF="$(AUTH_DEF)" \
+			AUTH_INC="$(AUTH_INC)" \
+			AUTH_LIB="$(AUTH_LIB)" \
+			AUTH_LIBPATH="$(AUTH_LIBPATH)" \
+			$(TELNET_OPSYS); \
 		make -f ../Config.generic WHAT="" CC="${CC}" \
-			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)" $(TELNET_OPSYS); \
+			AUTH_DEF="$(AUTH_DEF)" \
+			AUTH_INC="$(AUTH_INC)" \
+			AUTH_LIB="$(AUTH_LIB)" \
+			AUTH_LIBPATH="$(AUTH_LIBPATH)" \
+			$(TELNET_OPSYS); \
 	fi
 
 Makefiles::

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1989 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1989, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)termstat.c	5.12 (Berkeley) 1/19/93";
+static char sccsid[] = "@(#)termstat.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
 #include "telnetd.h"
@@ -165,25 +165,7 @@ localstat()
 	/*
 	 * Check for changes to flow control if client supports it.
 	 */
-	if (his_state_is_will(TELOPT_LFLOW)) {
-		if (tty_flowmode() != flowmode) {
-			flowmode = tty_flowmode();
-			(void) sprintf(nfrontp, "%c%c%c%c%c%c",
-					IAC, SB, TELOPT_LFLOW,
-					flowmode ? LFLOW_ON : LFLOW_OFF,
-					IAC, SE);
-			nfrontp += 6;
-		}
-		if (tty_restartany() != restartany) {
-			restartany = tty_restartany();
-			(void) sprintf(nfrontp, "%c%c%c%c%c%c",
-					IAC, SB, TELOPT_LFLOW,
-					restartany ? LFLOW_RESTART_ANY
-						   : LFLOW_RESTART_XON,
-					IAC, SE);
-			nfrontp += 6;
-		}
-	}
+	flowstat();
 
 	/*
 	 * Check linemode on/off state
@@ -199,7 +181,7 @@ localstat()
 		tty_setlinemode(uselinemode);
 	}
 
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	/*
 	 * If the terminal is not echoing, but editing is enabled,
 	 * something like password input is going to happen, so
@@ -217,7 +199,7 @@ localstat()
 			enc_passwd = 0;
 		}
 	}
-#endif
+#endif	/* ENCRYPTION */
 
 	/*
 	 * Do echo mode handling as soon as we know what the
@@ -368,6 +350,34 @@ done:
 }  /* end of localstat */
 #endif	/* LINEMODE */
 
+/*
+ * flowstat
+ *
+ * Check for changes to flow control
+ */
+	void
+flowstat()
+{
+	if (his_state_is_will(TELOPT_LFLOW)) {
+		if (tty_flowmode() != flowmode) {
+			flowmode = tty_flowmode();
+			(void) sprintf(nfrontp, "%c%c%c%c%c%c",
+					IAC, SB, TELOPT_LFLOW,
+					flowmode ? LFLOW_ON : LFLOW_OFF,
+					IAC, SE);
+			nfrontp += 6;
+		}
+		if (tty_restartany() != restartany) {
+			restartany = tty_restartany();
+			(void) sprintf(nfrontp, "%c%c%c%c%c%c",
+					IAC, SB, TELOPT_LFLOW,
+					restartany ? LFLOW_RESTART_ANY
+						   : LFLOW_RESTART_XON,
+					IAC, SE);
+			nfrontp += 6;
+		}
+	}
+}
 
 /*
  * clientstat

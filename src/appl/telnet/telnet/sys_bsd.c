@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1988, 1990 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1988, 1990, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)sys_bsd.c	5.3 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)sys_bsd.c	8.1 (Berkeley) 6/6/93";
 #endif /* not lint */
 
 /*
@@ -61,6 +61,10 @@ static char sccsid[] = "@(#)sys_bsd.c	5.3 (Berkeley) 12/18/92";
 #define	SIG_FUNC_RET	void
 #else
 #define	SIG_FUNC_RET	int
+#endif
+
+#ifdef	SIGINFO
+extern SIG_FUNC_RET ayt_status();
 #endif
 
 int
@@ -174,12 +178,12 @@ extern int kludgelinemode;
  *	1	Do add this character
  */
 
+extern void xmitAO(), xmitEL(), xmitEC(), intp(), sendbrk();
+
     int
 TerminalSpecialChars(c)
     int	c;
 {
-    void xmitAO(), xmitEL(), xmitEC(), intp(), sendbrk();
-
     if (c == termIntChar) {
 	intp();
 	return 0;
@@ -607,18 +611,18 @@ TerminalNewMode(f)
 
     if (f != -1) {
 #ifdef	SIGTSTP
-	static SIG_FUNC_RET susp();
+	SIG_FUNC_RET susp();
 #endif	/* SIGTSTP */
 #ifdef	SIGINFO
-	static SIG_FUNC_RET ayt();
-#endif	SIGINFO
+	SIG_FUNC_RET ayt();
+#endif
 
 #ifdef	SIGTSTP
 	(void) signal(SIGTSTP, susp);
 #endif	/* SIGTSTP */
 #ifdef	SIGINFO
 	(void) signal(SIGINFO, ayt);
-#endif	SIGINFO
+#endif
 #if	defined(USE_TERMIO) && defined(NOKERNINFO)
 	tmp_tc.c_lflag |= NOKERNINFO;
 #endif
@@ -662,7 +666,7 @@ TerminalNewMode(f)
 	SIG_FUNC_RET ayt_status();
 
 	(void) signal(SIGINFO, ayt_status);
-#endif	SIGINFO
+#endif
 #ifdef	SIGTSTP
 	(void) signal(SIGTSTP, SIG_DFL);
 	(void) sigsetmask(sigblock(0) & ~(1<<(SIGTSTP-1)));
@@ -806,7 +810,7 @@ NetSetPgrp(fd)
  */
 
     /* ARGSUSED */
-    static SIG_FUNC_RET
+    SIG_FUNC_RET
 deadpeer(sig)
     int sig;
 {
@@ -815,7 +819,7 @@ deadpeer(sig)
 }
 
     /* ARGSUSED */
-    static SIG_FUNC_RET
+    SIG_FUNC_RET
 intr(sig)
     int sig;
 {
@@ -828,7 +832,7 @@ intr(sig)
 }
 
     /* ARGSUSED */
-    static SIG_FUNC_RET
+    SIG_FUNC_RET
 intr2(sig)
     int sig;
 {
@@ -845,7 +849,7 @@ intr2(sig)
 
 #ifdef	SIGTSTP
     /* ARGSUSED */
-    static SIG_FUNC_RET
+    SIG_FUNC_RET
 susp(sig)
     int sig;
 {
@@ -858,7 +862,7 @@ susp(sig)
 
 #ifdef	SIGWINCH
     /* ARGSUSED */
-    static SIG_FUNC_RET
+    SIG_FUNC_RET
 sendwin(sig)
     int sig;
 {
@@ -870,7 +874,7 @@ sendwin(sig)
 
 #ifdef	SIGINFO
     /* ARGSUSED */
-    static SIG_FUNC_RET
+    SIG_FUNC_RET
 ayt(sig)
     int sig;
 {
@@ -1109,7 +1113,7 @@ process_rings(netin, netout, netex, ttyin, ttyout, poll)
 	}
 	settimer(didnetreceive);
 #else	/* !defined(SO_OOBINLINE) */
-	c = recv(net, netiring.supply, canread, 0);
+	c = recv(net, (char *)netiring.supply, canread, 0);
 #endif	/* !defined(SO_OOBINLINE) */
 	if (c < 0 && errno == EWOULDBLOCK) {
 	    c = 0;

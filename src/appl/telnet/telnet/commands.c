@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1988, 1990 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1988, 1990, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)commands.c	5.8 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)commands.c	8.1 (Berkeley) 6/6/93";
 #endif /* not lint */
 
 #if	defined(unix)
@@ -69,7 +69,7 @@ static char sccsid[] = "@(#)commands.c	5.8 (Berkeley) 12/18/92";
 
 #if !defined(CRAY) && !defined(sysV88)
 #include <netinet/in_systm.h>
-# if (defined(tahoe) || defined(hp300)) && !defined(ultrix)
+# if (defined(vax) || defined(tahoe) || defined(hp300)) && !defined(ultrix)
 # include <machine/endian.h>
 # endif /* vax */
 #endif /* !defined(CRAY) && !defined(sysV88) */
@@ -381,7 +381,6 @@ send_esc()
 send_docmd(name)
     char *name;
 {
-    void send_do();
     return(send_tncmd(send_do, "do", name));
 }
 
@@ -389,21 +388,18 @@ send_docmd(name)
 send_dontcmd(name)
     char *name;
 {
-    void send_dont();
     return(send_tncmd(send_dont, "dont", name));
 }
     static int
 send_willcmd(name)
     char *name;
 {
-    void send_will();
     return(send_tncmd(send_will, "will", name));
 }
     static int
 send_wontcmd(name)
     char *name;
 {
-    void send_wont();
     return(send_tncmd(send_wont, "wont", name));
 }
 
@@ -623,12 +619,12 @@ static int togglehelp P((void));
 #if	defined(AUTHENTICATION)
 extern int auth_togdebug P((int));
 #endif
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 extern int EncryptAutoEnc P((int));
 extern int EncryptAutoDec P((int));
 extern int EncryptDebug P((int));
 extern int EncryptVerbose P((int));
-#endif
+#endif	/* ENCRYPTION */
 
 struct togglelist {
     char	*name;		/* name of toggle */
@@ -661,7 +657,7 @@ static struct togglelist Togglelist[] = {
 		0,
 		     "print authentication debugging information" },
 #endif
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
     { "autoencrypt",
 	"automatic encryption of data stream",
 	    EncryptAutoEnc,
@@ -682,12 +678,12 @@ static struct togglelist Togglelist[] = {
 	    EncryptDebug,
 		0,
 		    "print encryption debugging information" },
-#endif
+#endif	/* ENCRYPTION */
     { "skiprc",
 	"don't read ~/.telnetrc file",
 	    0,
 		&skiprc,
-		    "read ~/.telnetrc file" },
+		    "skip reading of ~/.telnetrc file" },
     { "binary",
 	"sending and receiving of binary data",
 	    togbinary,
@@ -1300,9 +1296,9 @@ display(argc, argv)
 	}
     }
 /*@*/optionstatus();
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
     EncryptStatus();
-#endif
+#endif	/* ENCRYPTION */
     return 1;
 #undef	doset
 #undef	dotog
@@ -1434,6 +1430,8 @@ shell(argc, argv)
     }
     return 1;
 }
+#else	/* !defined(TN3270) */
+extern int shell();
 #endif	/* !defined(TN3270) */
 
     /*VARARGS*/
@@ -1452,7 +1450,7 @@ bye(argc, argv)
 	resettermname = 1;
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION)
 	auth_encrypt_connect(connected);
-#endif
+#endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
 	/* reset options */
 	tninit();
 #if	defined(TN3270)
@@ -1578,6 +1576,9 @@ extern void
 	env_export P((unsigned char *)),
 	env_unexport P((unsigned char *)),
 	env_send P((unsigned char *)),
+#if defined(OLD_ENVIRON) && defined(ENV_HACK)
+	env_varval P((unsigned char *)),
+#endif
 	env_list P((void));
 static void
 	env_help P((void));
@@ -1594,6 +1595,10 @@ struct envlist EnvList[] = {
     { "send",	"Send an environment variable", env_send,	1 },
     { "list",	"List the current environment variables",
 						env_list,	0 },
+#if defined(OLD_ENVIRON) && defined(ENV_HACK)
+    { "varval", "Reverse VAR and VALUE (auto, right, wrong, status)",
+						env_varval,    1 },
+#endif
     { "help",	0,				env_help,		0 },
     { "?",	"Print help information",	env_help,		0 },
     { 0 },
@@ -1797,7 +1802,11 @@ env_send(var)
 {
 	register struct env_lst *ep;
 
-        if (my_state_is_wont(TELOPT_ENVIRON)) {
+        if (my_state_is_wont(TELOPT_NEW_ENVIRON)
+#ifdef	OLD_ENVIRON
+	    && my_state_is_wont(TELOPT_OLD_ENVIRON)
+#endif
+		) {
 		fprintf(stderr,
 		    "Cannot send '%s': Telnet ENVIRON option not enabled\n",
 									var);
@@ -1854,6 +1863,44 @@ env_getvalue(var)
 		return(ep->value);
 	return(NULL);
 }
+
+#if defined(OLD_ENVIRON) && defined(ENV_HACK)
+	void
+env_varval(what)
+	unsigned char *what;
+{
+	extern int old_env_var, old_env_value, env_auto;
+	int len = strlen((char *)what);
+
+	if (len == 0)
+		goto unknown;
+
+	if (strncasecmp((char *)what, "status", len) == 0) {
+		if (env_auto)
+			printf("%s%s", "VAR and VALUE are/will be ",
+					"determined automatically\n");
+		if (old_env_var == OLD_ENV_VAR)
+			printf("VAR and VALUE set to correct definitions\n");
+		else
+			printf("VAR and VALUE definitions are reversed\n");
+	} else if (strncasecmp((char *)what, "auto", len) == 0) {
+		env_auto = 1;
+		old_env_var = OLD_ENV_VALUE;
+		old_env_value = OLD_ENV_VAR;
+	} else if (strncasecmp((char *)what, "right", len) == 0) {
+		env_auto = 0;
+		old_env_var = OLD_ENV_VAR;
+		old_env_value = OLD_ENV_VALUE;
+	} else if (strncasecmp((char *)what, "wrong", len) == 0) {
+		env_auto = 0;
+		old_env_var = OLD_ENV_VALUE;
+		old_env_value = OLD_ENV_VAR;
+	} else {
+unknown:
+		printf("Unknown \"varval\" command. (\"auto\", \"right\", \"wrong\", \"status\")\n");
+	}
+}
+#endif
 
 #if	defined(AUTHENTICATION)
 /*
@@ -1931,7 +1978,7 @@ auth_cmd(argc, argv)
 }
 #endif
 
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 /*
  * The ENCRYPT command.
  */
@@ -2044,7 +2091,7 @@ encrypt_cmd(argc, argv)
 			argc > 1 ? argv[3] : 0,
 			argc > 2 ? argv[4] : 0));
 }
-#endif
+#endif	/* ENCRYPTION */
 
 #if	defined(unix) && defined(TN3270)
     static void
@@ -2073,7 +2120,9 @@ filestuff(fd)
 	perror("fcntl");
 	return;
     }
+#ifdef notdef
     printf("\tFlags are 0x%x: %s\n", res, decodeflags(res));
+#endif
 }
 #endif /* defined(unix) && defined(TN3270) */
 
@@ -2109,9 +2158,9 @@ status(argc, argv)
 	    printf("%s character echo\n", (mode&MODE_ECHO) ? "Local" : "Remote");
 	    if (my_want_state_is_will(TELOPT_LFLOW))
 		printf("%s flow control\n", (mode&MODE_FLOW) ? "Local" : "No");
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	    encrypt_display();
-#endif
+#endif	/* ENCRYPTION */
 	}
     } else {
 	printf("No connection.\n");
@@ -2160,6 +2209,8 @@ ayt_status()
 }
 #endif
 
+unsigned long inet_addr();
+
     int
 tn(argc, argv)
     int argc;
@@ -2168,7 +2219,7 @@ tn(argc, argv)
     register struct hostent *host = 0;
     struct sockaddr_in sin;
     struct servent *sp = 0;
-    unsigned long temp, inet_addr();
+    unsigned long temp;
     extern char *inet_ntoa();
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     char *srp = 0, *strrchr();
@@ -2295,7 +2346,7 @@ tn(argc, argv)
 	    }
 	} else {
 #if	!defined(htons)
-	    u_short htons();
+	    u_short htons P((unsigned short));
 #endif	/* !defined(htons) */
 	    sin.sin_port = htons(sin.sin_port);
 	}
@@ -2366,7 +2417,7 @@ tn(argc, argv)
 	connected++;
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION)
 	auth_encrypt_connect(connected);
-#endif
+#endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
     } while (connected == 0);
     cmdrc(hostp, hostname);
     if (autologin && user == NULL) {
@@ -2414,9 +2465,9 @@ static char
 #if	defined(AUTHENTICATION)
 	authhelp[] =	"turn on (off) authentication ('auth ?' for more)",
 #endif
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	encrypthelp[] =	"turn on (off) encryption ('encrypt ?' for more)",
-#endif
+#endif	/* ENCRYPTION */
 #if	defined(unix)
 	zhelp[] =	"suspend telnet",
 #endif	/* defined(unix) */
@@ -2445,9 +2496,9 @@ static Command cmdtab[] = {
 #if	defined(AUTHENTICATION)
 	{ "auth",	authhelp,	auth_cmd,	0 },
 #endif
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	{ "encrypt",	encrypthelp,	encrypt_cmd,	0 },
-#endif
+#endif	/* ENCRYPTION */
 #if	defined(unix)
 	{ "z",		zhelp,		suspend,	0 },
 #endif	/* defined(unix) */

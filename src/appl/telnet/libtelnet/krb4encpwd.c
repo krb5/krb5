@@ -1,6 +1,6 @@
 /*-
- * Copyright (c) 1992 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1992, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)krb4encpwd.c	5.1 (Berkeley) 1/20/93";
+static char sccsid[] = "@(#)krb4encpwd.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
 
@@ -112,9 +112,9 @@ static	KTEXT_ST auth;
 static	char name[ANAME_SZ];
 static	char user_passwd[ANAME_SZ];
 static	AUTH_DAT adat = { 0 };
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 static Block	session_key	= { 0 };
-#endif
+#endif	/* ENCRYPTION */
 static Schedule sched;
 static char  challenge[REALM_SZ];
 
@@ -255,7 +255,7 @@ krb4encpwd_is(ap, data, cnt)
 
 		/*
 		 * If we are doing mutual authentication, get set up to send
-		 * the challange, and verify it when the response comes back.
+		 * the challenge, and verify it when the response comes back.
 		 */
 
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {

@@ -52,7 +52,9 @@ static char sccsid[] = "@(#)main.c	5.5 (Berkeley) 12/18/92";
 #define OPTS_FORWARD_CREDS           0x00000002
 #define OPTS_FORWARDABLE_CREDS       0x00000001
 
+#if 0
 #define FORWARD
+#endif
 
 /*
  * Initialize variables.

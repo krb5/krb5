@@ -1,6 +1,6 @@
 /*-
- * Copyright (c) 1992 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1992, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)rsaencpwd.c	5.1 (Berkeley) 1/20/93";
+static char sccsid[] = "@(#)rsaencpwd.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
 
@@ -252,7 +252,7 @@ rsaencpwd_is(ap, data, cnt)
 
 		/*
 		 * If we are doing mutual authentication, get set up to send
-		 * the challange, and verify it when the response comes back.
+		 * the challenge, and verify it when the response comes back.
 		 */
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_ONE_WAY) {
 		  register int i;

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1988, 1990 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1988, 1990, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,7 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)externs.h	5.4 (Berkeley) 12/18/92
+ *	@(#)externs.h	8.1 (Berkeley) 6/6/93
  */
 
 #ifndef	BSD
@@ -44,17 +44,25 @@
 #define BSD 43
 #endif
 
-#if (BSD > 43 || defined(SYSV_TERMIO)) && !defined(USE_TERMIO)
-# define USE_TERMIO
+#ifndef	USE_TERMIO
+# if BSD > 43 || defined(SYSV_TERMIO)
+#  define USE_TERMIO
+# endif
 #endif
 
 #include <stdio.h>
 #include <setjmp.h>
+#if defined(CRAY) && !defined(NO_BSD_SETJMP)
+#include <bsdsetjmp.h>
+#endif
 #ifndef	FILIO_H
 #include <sys/ioctl.h>
 #else
 #include <sys/filio.h>
 #endif
+#ifdef CRAY
+# include <errno.h>
+#endif /* CRAY */
 #ifdef	USE_TERMIO
 # ifndef	VINTR
 #  ifdef SYSV_TERMIO
@@ -91,7 +99,9 @@ typedef unsigned char cc_t;
 
 #define	SUBBUFSIZE	256
 
+#ifndef CRAY
 extern int errno;		/* outside this world */
+#endif /* !CRAY */
 
 #if	!defined(P)
 # ifdef	__STDC__
@@ -152,10 +162,10 @@ extern char
     wont[],
     options[],		/* All the little options */
     *hostname;		/* Who are we connected to? */
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 extern void (*encrypt_output) P((unsigned char *, int));
 extern int (*decrypt_input) P((int));
-#endif
+#endif	/* ENCRYPTION */
 
 /*
  * We keep track of each side of the option negotiation.
@@ -252,6 +262,12 @@ extern void
     upcase P((char *)),
     willoption P((int)),
     wontoption P((int));
+
+extern void
+    send_do P((int, int)),
+    send_dont P((int, int)),
+    send_will P((int, int)),
+    send_wont P((int, int));
 
 extern void
     lm_will P((unsigned char *, int)),
@@ -461,5 +477,5 @@ extern int
     settranscom P((int, char**));
 
 extern void
-    inputAvailable P((void));
+    inputAvailable P((int));
 #endif	/* defined(TN3270) */

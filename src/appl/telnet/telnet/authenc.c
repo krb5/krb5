@@ -1,6 +1,6 @@
 /*-
- * Copyright (c) 1991 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1991, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,10 +32,10 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)authenc.c	5.2 (Berkeley) 12/18/92";
+static char sccsid[] = "@(#)authenc.c	8.1 (Berkeley) 6/6/93";
 #endif /* not lint */
 
-#if	defined(ENCRYPTION) || defined(AUTHENTICATION)
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION)
 #include <sys/types.h>
 #include <arpa/telnet.h>
 #include <libtelnet/encrypt.h>
@@ -64,12 +64,12 @@ net_write(str, len)
 	void
 net_encrypt()
 {
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 	if (encrypt_output)
 		ring_encrypt(&netoring, encrypt_output);
 	else
 		ring_clearto(&netoring);
-#endif
+#endif	/* ENCRYPTION */
 }
 
 	int
@@ -108,4 +108,4 @@ telnet_gets(prompt, result, length, echo)
 	TerminalNewMode(om);
 	return(res);
 }
-#endif
+#endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */

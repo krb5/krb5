@@ -1,24 +1,53 @@
 /*
- * Copyright (c) 1987 Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1987, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
- * Redistribution and use in source and binary forms are permitted
- * provided that the above copyright notice and this paragraph are
- * duplicated in all such forms and that any documentation,
- * advertising materials, and other materials related to such
- * distribution and use acknowledge that the software was developed
- * by the University of California, Berkeley.  The name of the
- * University may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid1[] = "@(#)setenv.c	5.3 (Berkeley) 5/16/90";
-static char sccsid2[] = "@(#)getenv.c	5.6 (Berkeley) 5/16/90";
+static char sccsid1[] = "@(#)setenv.c	8.1 (Berkeley) 6/4/93";
+static char sccsid2[] = "@(#)getenv.c	8.1 (Berkeley) 6/4/93";
 #endif /* LIBC_SCCS and not lint */
+
+#ifndef __STDC__
+#define const
+#endif
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+#ifndef	__P
+#define __P(x)	()
+#endif
+char *__findenv __P((const char *, int *)); 
 
 /*
  * setenv --
@@ -26,56 +55,54 @@ static char sccsid2[] = "@(#)getenv.c	5.6 (Berkeley) 5/16/90";
  *	"value".  If rewrite is set, replace any current value.
  */
 setenv(name, value, rewrite)
-	register char *name, *value;
+	register const char *name;
+	register const char *value;
 	int rewrite;
 {
-	extern char **environ, *malloc();
+	extern char **environ;
 	static int alloced;			/* if allocated space before */
-	register char *C;
+	register char *c;
 	int l_value, offset;
-	static char *_findenv();
 
 	if (*value == '=')			/* no `=' in value */
 		++value;
 	l_value = strlen(value);
-	if ((C = _findenv(name, &offset))) {	/* find if already exists */
+	if ((c = __findenv(name, &offset))) {	/* find if already exists */
 		if (!rewrite)
-			return(0);
-		if (strlen(C) >= l_value) {	/* old larger; copy over */
-			while (*C++ = *value++);
-			return(0);
+			return (0);
+		if (strlen(c) >= l_value) {	/* old larger; copy over */
+			while (*c++ = *value++);
+			return (0);
 		}
-	}
-	else {					/* create new slot */
-		register int	cnt;
-		register char	**P;
+	} else {					/* create new slot */
+		register int cnt;
+		register char **p;
 
-		for (P = environ, cnt = 0; *P; ++P, ++cnt);
+		for (p = environ, cnt = 0; *p; ++p, ++cnt);
 		if (alloced) {			/* just increase size */
 			environ = (char **)realloc((char *)environ,
-			    (sizeof(char *) * (cnt + 2)));
+			    (size_t)(sizeof(char *) * (cnt + 2)));
 			if (!environ)
-				return(-1);
+				return (-1);
 		}
 		else {				/* get new space */
 			alloced = 1;		/* copy old entries into it */
-			P = (char **)malloc((sizeof(char *) *
-			    (cnt + 2)));
-			if (!P)
-				return(-1);
-			bcopy(environ, P, cnt * sizeof(char *));
-			environ = P;
+			p = (char **)malloc((size_t)(sizeof(char *) * (cnt + 2)));
+			if (!p)
+				return (-1);
+			bcopy(environ, p, cnt * sizeof(char *));
+			environ = p;
 		}
-		environ[cnt + 1] = 0;
+		environ[cnt + 1] = NULL;
 		offset = cnt;
 	}
-	for (C = name; *C && *C != '='; ++C);	/* no `=' in name */
+	for (c = (char *)name; *c && *c != '='; ++c);	/* no `=' in name */
 	if (!(environ[offset] =			/* name + `=' + value */
-	    malloc(((int)(C - name) + l_value + 2))))
-		return(-1);
-	for (C = environ[offset]; (*C = *name++) && *C != '='; ++C);
-	for (*C++ = '='; *C++ = *value++;);
-	return(0);
+	    malloc((size_t)((int)(c - name) + l_value + 2))))
+		return (-1);
+	for (c = environ[offset]; (*c = *name++) && *c != '='; ++c);
+	for (*c++ = '='; *c++ = *value++;);
+	return (0);
 }
 
 /*
@@ -84,16 +111,15 @@ setenv(name, value, rewrite)
  */
 void
 unsetenv(name)
-	char	*name;
+	const char *name;
 {
 	extern char **environ;
-	register char **P;
+	register char **p;
 	int offset;
-	static char *_findenv();
 
-	while (_findenv(name, &offset))		/* if set multiple times */
-		for (P = &environ[offset];; ++P)
-			if (!(*P = *(P + 1)))
+	while (__findenv(name, &offset))	/* if set multiple times */
+		for (p = &environ[offset];; ++p)
+			if (!(*p = *(p + 1)))
 				break;
 }
 
@@ -103,36 +129,39 @@ unsetenv(name)
  */
 char *
 getenv(name)
-	char *name;
+	const char *name;
 {
 	int offset;
-	static char *_findenv();
 
-	return(_findenv(name, &offset));
+	return (__findenv(name, &offset));
 }
 
 /*
- * _findenv --
+ * __findenv --
  *	Returns pointer to value associated with name, if any, else NULL.
  *	Sets offset to be the offset of the name/value combination in the
  *	environmental array, for use by setenv(3) and unsetenv(3).
  *	Explicitly removes '=' in argument name.
  */
 static char *
-_findenv(name, offset)
-	register char *name;
+__findenv(name, offset)
+	register const char *name;
 	int *offset;
 {
 	extern char **environ;
 	register int len;
-	register char **P, *C;
+	register const char *np;
+	register char **p, *c;
 
-	for (C = name, len = 0; *C && *C != '='; ++C, ++len);
-	for (P = environ; *P; ++P)
-		if (!strncmp(*P, name, len))
-			if (*(C = *P + len) == '=') {
-				*offset = P - environ;
-				return(++C);
-			}
-	return(0);
+	if (name == NULL || environ == NULL)
+		return (NULL);
+	for (np = name; *np && *np != '='; ++np)
+		continue;
+	len = np - name;
+	for (p = environ; (c = *p) != NULL; ++p)
+		if (strncmp(c, name, len) == 0 && c[len] == '=') {
+			*offset = p - environ;
+			return (c + len + 1);
+		}
+	return (NULL);
 }

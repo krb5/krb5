@@ -82,8 +82,6 @@ static char sccsid[] = "@(#)kerberos5.c	8.1 (Berkeley) 6/4/93";
 #include <netdb.h>
 #include <ctype.h>
 
-#define FORWARD	/* Do credentials forwarding.... */
-
 /* kerberos 5 include files (ext-proto.h) will get an appropriate stdlib.h
    and string.h/strings.h */
  
@@ -132,7 +130,7 @@ static	krb5_authenticator authenticator;
 
 #define Voidptr krb5_pointer
 
-Block	session_key;
+krb5_keyblock	session_key;
 
 	static int
 Data(ap, type, d, c)
@@ -178,6 +176,7 @@ kerberos5_init(ap, server)
 		str_data[3] = TELQUAL_REPLY;
 	else
 		str_data[3] = TELQUAL_IS;
+	memset(&session_key, 0, sizeof(session_key));
         krb5_init_ets();
 	return(1);
 }
@@ -240,7 +239,8 @@ kerberos5_send(ap)
 
 	if (r = krb5_get_credentials(krb5_kdc_default_options, ccache, &creds)) {
 		if (auth_debug_mode) {
-			printf("Kerberos V5: failure on credentials(%d)\r\n",r);
+			printf("Kerberos V5: failure on credentials(%s)\r\n",
+			       error_message(r));
 		}
 		krb5_free_cred_contents(&creds);
 		return(0);
@@ -262,19 +262,19 @@ kerberos5_send(ap)
 	authenticator.subkey = 0;
 
 #ifdef	ENCRYPTION
+	if (session_key.contents)
+	    free(session_key.contents);
 	if (newkey) {
 	    /* keep the key in our private storage, but don't use it
 	       yet---see kerberos5_reply() below */
 	    if (newkey->keytype != KEYTYPE_DES) {
 		if (creds.keyblock.keytype == KEYTYPE_DES)
 		    /* use the session key in credentials instead */
-		    memcpy((char *)session_key,
-			   (char *)creds.keyblock.contents, sizeof(Block));
+		    krb5_copy_keyblocks_contents(&creds, &session_key);
 		else
 		    /* XXX ? */;
 	    } else {
-		memcpy((char *)session_key, (char *)newkey->contents,
-		       sizeof(Block));
+		krb5_copy_keyblocks_contents(newkey, &session_key);
 	    }
 	    krb5_free_keyblock(newkey);
 	}
@@ -385,19 +385,23 @@ kerberos5_is(ap, data, cnt)
 		free(name);
 	    	if (authdat->authenticator->subkey &&
 		    authdat->authenticator->subkey->keytype == KEYTYPE_DES) {
-		    bcopy((Voidptr )authdat->authenticator->subkey->contents,
-			  (Voidptr )session_key, sizeof(Block));
+		    if (session_key.contents)
+			free(session_key.contents);
+		    krb5_copy_keyblock_contents(authdat->authenticator->subkey,
+					   &session_key);
 		} else if (authdat->ticket->enc_part2->session->keytype ==
 			   KEYTYPE_DES) {
-		    bcopy((Voidptr )authdat->ticket->enc_part2->session->contents,
-			  (Voidptr )session_key, sizeof(Block));
+		    if (session_key.contents)
+			free(session_key.contents);
+		    krb5_copy_keyblock_contents(authdat->ticket->enc_part2->session,
+					   &session_key);
 		} else
 		    break;
 		
 #ifdef ENCRYPTION
 		skey.type = SK_DES;
 		skey.length = 8;
-		skey.data = session_key;
+		skey.data = session_key.contents;
 		encrypt_session_key(&skey, 1);
 #endif
 		break;
@@ -435,7 +439,9 @@ kerberos5_reply(ap, data, cnt)
 	unsigned char *data;
 	int cnt;
 {
+#ifdef ENCRYPTION
         Session_Key skey;
+#endif
 	static int mutual_complete = 0;
 
 	if (cnt-- < 1)
@@ -472,16 +478,17 @@ kerberos5_reply(ap, data, cnt)
 		    krb5_ap_rep_enc_part *reply;
 		    krb5_data inbuf;
 		    krb5_error_code r;
-		    krb5_keyblock tmpkey;
 
 		    inbuf.length = cnt;
 		    inbuf.data = (char *)data;
 
-		    tmpkey.keytype = KEYTYPE_DES;
-		    tmpkey.contents = session_key;
-		    tmpkey.length = sizeof(Block);
-
-		    if (r = krb5_rd_rep(&inbuf, &tmpkey, &reply)) {
+		    if (!session_key.contents) {
+			printf("[ Mutual authentication failed: no session key ]\n");
+			auth_send_retry();
+			return;
+		    }
+			
+		    if (r = krb5_rd_rep(&inbuf, &session_key, &reply)) {
 			printf("[ Mutual authentication failed: %s ]\n",
 			       error_message(r));
 			auth_send_retry();
@@ -497,7 +504,7 @@ kerberos5_reply(ap, data, cnt)
 #ifdef	ENCRYPTION
 			skey.type = SK_DES;
 			skey.length = 8;
-			skey.data = session_key;
+			skey.data = session_key.contents;
 			encrypt_session_key(&skey, 0);
 #endif	/* ENCRYPTION */
 		    mutual_complete = 1;
@@ -627,7 +634,7 @@ kerberos5_forward(ap)
 	return;
     }
 
-    if (r = krb5_sname_to_principal(RemoteHostName, "host", 1,
+    if (r = krb5_sname_to_principal(RemoteHostName, "host", KRB5_NT_SRV_HST,
 				    &local_creds->server)) {
 	if (auth_debug_mode) 
 	  printf("Kerberos V5: could not build server name - %s\r\n",

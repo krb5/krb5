@@ -1,6 +1,6 @@
 /*-
- * Copyright (c) 1992 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1992, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
  */
 
 #ifndef lint
-static char sccsid[] = "@(#)spx.c	5.1 (Berkeley) 1/20/93";
+static char sccsid[] = "@(#)spx.c	8.1 (Berkeley) 6/4/93";
 #endif /* not lint */
 
 #ifdef	SPX
@@ -98,11 +98,11 @@ static unsigned char str_name[1024] = { IAC, SB, TELOPT_AUTHENTICATION,
 #define	SPX_REJECT	1		/* Rejected (reason might follow) */
 #define SPX_ACCEPT	2		/* Accepted */
 
-#if	defined(ENCRYPTION)
+#ifdef	ENCRYPTION
 static Block	session_key	= { 0 };
-#endif
+#endif	/* ENCRYPTION */
 static Schedule sched;
-static Block	challange	= { 0 };
+static Block	challenge	= { 0 };
 
 
 /*******************************************************************/
@@ -432,7 +432,7 @@ spx_reply(ap, data, cnt)
 		printf("[ SPX accepts you ]\n");
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 			/*
-			 * Send over the encrypted challange.
+			 * Send over the encrypted challenge.
 		 	 */
 		  input_token.value = (char *) data;
 		  input_token.length = cnt;

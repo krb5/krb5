@@ -74,11 +74,21 @@
 #	KRB5		Enable Kerberos Version 5 Authentication code
 #			in libtelnet/libtelnet.a
 #
-#	SIMPLE_AUTH
+#	SPX		Enable SPX authentication code in.
+#			libtelnet/libtelnet.a
+#
+#	RSA_ENCPWD
+#
+#	KRB4_ENCPWD
+#
 #
 #	DES_ENCRYPTION	Enable DES encryption/decryption, requires
 #			getting a the initial key from Kerberos.  This
 #			works with both Kerberos Version 4 and 5.
+#
+#	ENV_HACK	Turn on code to recognize and allow
+#			interoperability with systems that have their
+#			definitions for ENV_VALUE and ENV_VAR reversed.
 #
 #    LOCAL SYSYTEM PARAMATERS
 #
@@ -110,8 +120,44 @@
 #
 #	NO_STRING_H	If you don't have <string.h>, but have <strings.h>
 #
+#	LOGIN_PROGRAM=	Specifies the login program to use.  By default,
+#			it is /bin/login, or whatever is specified by 
+#			_PATH_LOGIN in <paths.h>
+#
 #	NO_LOGIN_P	If /bin/login doesn't understand the "-p"
 #			(preserve environment) option.
+#
+#	LOGIN_ARGS	if /bin/login understands environment variables
+#			after the login name.  Only used if NO_LOGIN_P
+#			is defined.
+#
+#	NO_LOGIN_F	If /bin/login doesn't understand the "-f" option.
+#			Only used if AUTHENTICATION is defined.
+#
+#	LOGIN_CAP_F	If /bin/login understands the "-F" option (which
+#			works like "-f", but root logins are allowed).
+#			Only used if NO_LOGIN_F is not defined.
+#
+#	LOGIN_R		This says that /bin/login understands the "-r host"
+#			option.  Only used if NO_LOGIN_F is defined (and
+#			the system supports the TIOCSTI ioctl).
+#
+#	LOGIN_HOST	Only applies if LOGIN_R is defined.  This
+#			specifies the hostname to be passed to "login -r"
+#			for successfully authenticated logins.  This
+#			defaults to "localhost" (don't forget to include
+#			the quotes, e.g. -DLOGIN_HOST=\"localhost\").
+#
+#			It can also be set to host (-DLOGIN_HOST=host)
+#			to have the real hostname passed to "/bin/login -r".
+#			  NOTE: If you do this, then anyone that wants to
+#				allow authenticated login access will have
+#				to add those remote hosts to their .rhosts,
+#				which sort of defeats the whole purpose of
+#				authenticated login... 
+#
+#	NO_BSD_SETJMP	For UNICOS releases prior to 7.0.  Turns off
+#			the inclusion of <bsdsetjmp.h>.
 #
 #	STREAMS		If the system has streams; causes <sys/stream.h>
 #			to be included instead of <sys/tty.h>
@@ -126,6 +172,14 @@
 #	UTMPX		System has /etc/utmpx as well as /etc/utmp.
 #			Use makeutx and modutx to update utmp/x and wtmp/x.
 #			Appropriate for SVr4 derivatives.
+#
+#	HAS_CGETENT	If your system has the cgetent() and cgetstr()
+#			routines.  This is a 4.4BSD feature, that
+#			eliminates grabbing the getty gettytab.c source.
+#			You need to include getent.o on the LIB_OBJ
+#			line if this is defined.
+#
+#	OLD_ENVIRON	Support for the old environment option.
 
 # LIB_OBJ=
 #    This is a list of object files that are needed but are not in
@@ -140,9 +194,8 @@
 #	    getopt.o		If you don't have getopt(3)
 #	    herror.o		If you don't have herror(3)
 #	    gettytab.o		If you can get gettytab.c from getty source.
-#	    getent.o		If you can't get gettytab.c
-#	    kerberos.o		If you have Kerberos Version 4
-#	    kerberos5.o		If you have Kerberos Version 5
+#	    getent.o		If you can't get gettytab.c (or have
+#				HAS_CGETENT defined...)
 #	    mem.o		If you don't have mem*(3) routines.
 
 # LIB_SRC=
@@ -180,49 +233,54 @@
 #    Name of "ranlib" program, set it to "NONE" if you don't
 #    have a "ranlib".
 
-ODEFS="-DKRB5 -DAUTHENTICATION"
-KRB_INC= -I../../../include
-KRB_LIBS=" $(KLIB)"
-KRB_LIBPATH=" $(DEPKLIB)"
-
 all:
-	@echo "you must specify what type of system you are on,"
-	@echo "or modify the makefile for your system."
+	@echo "You must specify what type of system you are on,"
+	@echo "or setup a Config.local file for your system."
 	@echo "Known system types are:"
-	@echo " 4.4bsd 4.3reno 4.3tahoe 4.3bsd"
-	@echo " unicos5.0 unicos5.1 unicos6.0 unicos6.1 unicos7.0 unicos8.0"
-	@echo " sun3.5 sun4.0 sun4.0.3c sun4.1 sol2.0"
+	@echo
+	@echo " 4.4bsd 4.3reno 4.4bsd.auth 4.3reno.auth 4.3tahoe 4.3bsd"
+	@echo " bsdi1.0 bsdi1.0.auth"
+	@echo " unicos8.1 unicos8.0 unicos7.C unicos7.0"
+	@echo " unicos8.1.auth unicos8.0.auth unicos7.0.auth"
+	@echo " unicos7.C.auth unicos7.0.des.auth"
+	@echo " unicos6.1 unicos6.0 unicos5.1 unicos5.0"
+	@echo " sun3.5 sun4.0.3c sun4.0 sun4.1 sun4.1.auth"
+	@echo " solaris2.2 solaris2.2.auth"
 	@echo " dynix3.0.12 dynix3.0.17"
-	@echo " ultrix3.1 ultrix4.0"
+	@echo " ultrix3.1 ultrix4.0 ultrix4.1 ultrix4.3 ultrix4.3.auth"
+	@echo " irix4.0.1"
+	@echo " hpux8.0"
 	@echo " next1.0"
+	@echo " convex"
 
 4.4bsd:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
-		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/usr/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}" -DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
 		    -DDEFAULT_IM='\"\r\n4.4 BSD UNIX (%h) (%t)\r\n\r\r\n\r\"' \
-			-DUSE_TERMIO -DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
-		LIB_OBJ="gettytab.o" \
-		LIB_SRC="gettytab.c" \
+			-DUSE_TERMIO -DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON \
+			-DHAS_CGETENT" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
-		VPATH=/usr/src/libexec/getty \
 		LIBEXEC=${DESTDIR}/usr/libexec \
 		CC="${CC}" LCCFLAGS="-O"
 
 4.3reno:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a ${AUTH_LIB}" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}" -DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
 	-DDEFAULT_IM='\"\r\n4.3BSD-Reno UNIX (%h) (%t)\r\n\r\r\n\r\"' \
-			-DUSE_TERMIO -DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DUSE_TERMIO -DDIAGNOSTICS -DENV_HACK \
+			-DOLD_ENVIRON ${AUTH_DEF}" \
+		INCLUDES="-I.. ${AUTH_INC}" \
 		LIB_OBJ="gettytab.o" \
 		LIB_SRC="gettytab.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
@@ -230,17 +288,24 @@ all:
 		LIBEXEC=${DESTDIR}/usr/libexec \
 		CC="${CC}" LCCFLAGS="-O"
 
+
+4.4bsd.auth 4.3reno.auth:
+	make -f ../Config.generic `basename $@ .auth` WHAT=${WHAT} \
+		AUTH_LIB="-lkrb -ldes" \
+		AUTH_LIBPATH="/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		AUTH_DEF="-DAUTHENTICATION -DENCRYPTION -DKRB4 -DDES_ENCRYPTION"
+
 4.3tahoe:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/bin \
-		DEFINES=${ODEFS}" -DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 		 -DDEFAULT_IM='\"\r\n4.3BSD-Tahoe UNIX (%h) (%t)\r\n\r\r\n\r\"'\
-			-DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
 		LIB_OBJ="strdup.o setsid.o strftime.o gettytab.o" \
 		LIB_SRC="strdup.c setsid.c strftime.c gettytab.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
@@ -249,115 +314,195 @@ all:
 		CC="${CC}" LCCFLAGS="-O"
 
 4.3bsd:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/bin \
-		DESTDIR=${DESTDIR} \
-		DEFINES=${ODEFS}" -DTERMCAP -DKLUDGELINEMODE \
+		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 		    -DDEFAULT_IM='\"\r\n4.3BSD UNIX (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
-		LIB_OBJ="strdup.o setsid.o strftime.o strerror.o \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
+		LIB_OBJ="strdup.o setsid.o strftime.o \
 			gettytab.o getopt.o herror.o" \
-		LIB_SRC="strdup.c setsid.c strftime.c strerror.c \
+		LIB_SRC="strdup.c setsid.c strftime.c \
 			gettytab.c getopt.c herror.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		VPATH=/usr/src/etc/getty \
 		LIBEXEC=${DESTDIR}/etc \
 		CC="${CC}" LCCFLAGS="-O"
 
-unicos8.0:
+bsdi1.0:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
+		LIBS="-lutil -ltermcap ../libtelnet/libtelnet.a ${AUTH_LIB}" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+			../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-DLINEMODE -DTERMCAP -DKLUDGELINEMODE \
+	-DDEFAULT_IM='\"\r\nBSDI BSD/386 1.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DUSE_TERMIO -DDIAGNOSTICS -DENV_HACK \
+			-DOLD_ENVIRON ${AUTH_DEF}" \
+		INCLUDES="-I.. ${AUTH_INC}" \
+		LIB_OBJ="gettytab.o" \
+		LIB_SRC="gettytab.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		VPATH=/usr/src/libexec/getty \
+		LIBEXEC=${DESTDIR}/usr/libexec \
+		CC="${CC}" LCCFLAGS="-O"
+
+bsdi1.0.auth:
+	make -f ../Config.generic `basename $@ .auth` WHAT=${WHAT} \
+		AUTH_LIB="-lkrb -ldes" \
+		AUTH_LIBPATH="/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		AUTH_DEF="-DAUTHENTICATION -DENCRYPTION -DKRB4 -DDES_ENCRYPTION"
+		AUTH_INC=-I/usr/include/kerberosIV
+
+unicos8.1:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet ${AUTH_LIB}" \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH}
+				../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DLINEMODE -DKLUDGELINEMODE \
-			-DSYSV_TERMIO -DHAS_GETTOS \
-			-D_ANSI_PROTO \
-		  -DDEFAULT_IM='\"\r\nCray UNICOS 8.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
+			-DSYSV_TERMIO -DHAS_GETTOS ${AUTH_DEF} \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 8.1 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES=${KRB_INC}" -I.." \
+		INCLUDES="-I.. ${AUTH_INC}" \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
+
+unicos8.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet ${AUTH_LIB}" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
+			-DLINEMODE -DKLUDGELINEMODE \
+			-DSYSV_TERMIO -DHAS_GETTOS ${AUTH_DEF} \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 8.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		INCLUDES="-I.. ${AUTH_INC}" \
 		LIB_OBJ="getent.o" \
 		LIB_SRC="getent.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
-unicos7.0 unicos7.C:
+unicos7.C:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
+		LIBS="-lcurses -L../libtelnet -ltelnet ${AUTH_LIB}" \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH}
+				../libtelnet/libtelnet.a ${AUTH_LIBPATH}"\
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
+			-DLINEMODE -DKLUDGELINEMODE \
+			-DSYSV_TERMIO -DHAS_GETTOS ${AUTH_DEF} \
+		  -DDEFAULT_IM='\"\r\nCray UNICOS 7.C (%h) (%t)\r\n\r\r\n\r\"' \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		AR=bld ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		INCLUDES="-I.. ${AUTH_INC}" \
+		LIB_OBJ="getent.o" \
+		LIB_SRC="getent.c" \
+		CC="${CC}" LCCFLAGS="-O"
+
+
+unicos7.0:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-lcurses -L../libtelnet -ltelnet -lkrb" \
+		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
+				../libtelnet/libtelnet.a /usr/lib/libkrb.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DLINEMODE -DKLUDGELINEMODE \
 			-DSYSV_TERMIO -DHAS_GETTOS \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 7.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES=${KRB_INC}" -I.." \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o" \
 		LIB_SRC="getent.c" \
 		CC="${CC}" LCCFLAGS="-O"
+
+# As of UNICOS 7.0.5.2, there is no longer a /usr/lib/libdes.a
+# If you still have a /usr/lib/libdes.a, use the "unicos7.0.des.auth"
+# target instead of "unicos7.0.auth".
+
+unicos8.1.auth unicos8.0.auth unicos7.0.auth:
+	make -f ../Config.generic `basename $@ .auth` WHAT=${WHAT} \
+		AUTH_LIB=-lkrb AUTH_LIBPATH=/usr/lib/libkrb.a \
+		AUTH_INC=-I/usr/include/krb \
+		AUTH_DEF="-DAUTHENTICATION -DENCRYPTION -DKRB4 -DDES_ENCRYPTION"
+
+unicos7.C.auth unicos7.0.des.auth:
+	make -f ../Config.generic `basename $@ .des.auth` WHAT=${WHAT} \
+		AUTH_LIB="-lkrb -ldes" \
+		AUTH_LIBPATH="/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		AUTH_INC=-I/usr/include/krb \
+		AUTH_DEF="-DAUTHENTICATION -DENCRYPTION -DKRB4 -DDES_ENCRYPTION"
 
 unicos6.1:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
+		LIBS="-lcurses -L../libtelnet -ltelnet" \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DKLUDGELINEMODE -DUSE_TERMIO -DHAS_GETTOS \
 			-DLINEMODE -DSYSV_TERMIO -DNEWINIT \
-			-DNO_LOGIN_F -DNO_LOGIN_P \
-			-DAUTHENTICATION -DENCRYPTION \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_BSD_SETJMP \
+			-DLOGIN_ARGS \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 6.1 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES=${KRB_INC}" -I.." \
-		LIB_OBJ="getent.o" \
-		LIB_SRC="getent.c" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o parsetos.o" \
+		LIB_SRC="getent.c parsetos.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos6.0:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
+		LIBS="-lcurses -L../libtelnet -ltelnet" \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=bsdsignal \
 			-DKLUDGELINEMODE -DUSE_TERMIO -DHAS_GETTOS \
 			-DLINEMODE -DSYSV_TERMIO -DNEWINIT \
-			-DNO_LOGIN_F -DNO_LOGIN_P \
-			-DAUTHENTICATION -DENCRYPTION \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_BSD_SETJMP \
+			-DLOGIN_ARGS \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 6.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/etc \
-		INCLUDES=${KRB_INC}" -I.." \
-		LIB_OBJ="getent.o" \
-		LIB_SRC="getent.c" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o parsetos.o" \
+		LIB_SRC="getent.c parsetos.c" \
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos5.1:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lnet -lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
+		LIBS="-lnet -lcurses -L../libtelnet -ltelnet" \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=sigset \
 			-DKLUDGELINEMODE -DSYSV_TERMIO -DNO_CC_T \
 			-DUNICOS5 -DLINEMODE -DSYSV_TERMIO \
-			-DNEWINIT -DNO_LOGIN_F -DNO_LOGIN_P \
-			-DAUTHENTICATION -DENCRYPTION \
+			-DNEWINIT -DNO_LOGIN_F -DNO_LOGIN_P -DNO_BSD_SETJMP \
+			-DLOGIN_ARGS \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 5.1 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strerror.o setsid.o strftime.o" \
 		LIB_SRC="getent.c strerror.c setsid.c strftime.c" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
@@ -365,19 +510,20 @@ unicos5.1:
 		CC="${CC}" LCCFLAGS="-O"
 
 unicos5.0:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-lnet -lcurses -L../libtelnet -ltelnet "${KRB_LIBS} \
+		LIBS="-lnet -lcurses -L../libtelnet -ltelnet" \
 		LIBPATH="/lib/libc.a /usr/lib/libcurses.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-Dvfork=fork -Dsignal=sigset \
 			-DKLUDGELINEMODE -DSYSV_TERMIO -DNO_CC_T \
 			-DUNICOS5 -DUNICOS50 -DLINEMODE -DSYSV_TERMIO \
-			-DNEWINIT -DNO_LOGIN_F -DNO_LOGIN_P \
-			-DAUTHENTICATION -DENCRYPTION \
+			-DNEWINIT -DNO_LOGIN_F -DNO_LOGIN_P -DNO_BSD_SETJMP \
+			-DLOGIN_ARGS \
 		  -DDEFAULT_IM='\"\r\nCray UNICOS 5.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strerror.o setsid.o strftime.o" \
 		LIB_SRC="getent.c strerror.c setsid.c strftime.c" \
 		AR=bld ARFLAGS=cq RANLIB=NONE \
@@ -385,17 +531,18 @@ unicos5.0:
 		CC="${CC}" LCCFLAGS="-O"
 
 sun3.5:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 			-DHAVE_fd_set \
-			-DDIAGNOSTICS \
+			-DDIAGNOSTICS  -DENV_HACK -DOLD_ENVIRON \
 		   -DDEFAULT_IM='\"\r\nSunOS UNIX 3.5 (%h) (%t)\r\n\r\r\n\r\"' \
 			-DNO_LOGIN_P" \
-		INCLUDES=${KRB_INC}" -I.." \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strdup.o strerror.o setsid.o \
 			setenv.o strftime.o strcasecmp.o herror.o" \
 		LIB_SRC="getent.c strdup.c strerror.c setsid.c \
@@ -407,16 +554,16 @@ sun3.5:
 sun4.0.3c sun4.0:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DFILIO_H -DTERMCAP -DUSE_TERMIO -DNO_CC_T \
 			-DKLUDGELINEMODE \
 		   -DDEFAULT_IM='\"\r\nSunOS UNIX 4.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DSTREAMS -DDIAGNOSTICS \
+			-DSTREAMS -DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON \
 			" \
-		INCLUDES=${KRB_INC}" -I.." \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strerror.o setsid.o setenv.o \
 				strcasecmp.o strftime.o herror.o" \
 		LIB_SRC="getent.c strerror.c setsid.c setenv.c \
@@ -427,52 +574,63 @@ sun4.0.3c sun4.0:
 
 sun4.1:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a ${AUTH_LIB}" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+			../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DFILIO_H -DTERMCAP -DUSE_TERMIO \
 			-DKLUDGELINEMODE -DSTREAMS \
-			-DAUTHENTICATION -DENCRYPTION \
 		   -DDEFAULT_IM='\"\r\nSunOS UNIX 4.1 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS " \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON ${AUTH_DEF}" \
+		INCLUDES="-I.. ${AUTH_INC}" \
 		LIB_OBJ="getent.o strerror.o setenv.o herror.o" \
 		LIB_SRC="getent.c strerror.c setenv.c herror.c" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
 		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
 		CC="${CC}" LCCFLAGS="-O"
 
-sol2.0:
+sun4.1.auth:
+	make -f ../Config.generic `basename $@ .auth` WHAT=${WHAT} \
+		AUTH_LIB="-lkrb -ldes" \
+		AUTH_LIBPATH="/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		AUTH_DEF="-DAUTHENTICATION -DENCRYPTION -DKRB4 -DDES_ENCRYPTION"
+
+sol2.2 solaris2.2:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="/usr/ccs/lib/libtermcap.a ../libtelnet/libtelnet.a \
-			-lc /usr/ucblib/libucb.a -lsocket -lnsl "${KRB_LIBS} \
-		LIBPATH="/usr/ccs/lib/libtermcap.a ../libtelnet/libtelnet.a \
+		LIBS="-ltermlib ../libtelnet/libtelnet.a" \
+		LIBPATH="/usr/ccs/lib/libtermlib.a ../libtelnet/libtelnet.a \
 			/usr/lib/libc.a /usr/ucblib/libucb.a \
-			/usr/lib/libsocket.a /usr/lib/libnsl.a "${KRB_LIBPATH} \
+			/usr/lib/libsocket.a /usr/lib/libnsl.a" \
 		DEST=${DESTDIR}/usr/ucb \
-		DEFINES="-DFILIO_H -DTERMCAP -DUSE_TERMIO \
-			-DKLUDGELINEMODE -DSTREAMS -DSTREAMSPTY \
-			-DDIAGNOSTICS -DNO_LOGIN_P -DUTMPX" \
-		INCLUDES=${KRB_INC}" -I.. -I/opt/cygnus/lib/ucbinclude \
-			-I/usr/ucbinclude" \
+		DEFINES="-DFILIO_H -DUSE_TERMIO -DKLUDGELINEMODE \
+			-DSTREAMS -DSTREAMSPTY -DDIAGNOSTICS -DSOLARIS \
+			-DENV_HACK -DOLD_ENVIRON -DNO_LOGIN_P -DUTMPX \
+	-DDEFAULT_IM='\"\r\n\r\nUNIX(r) System V Release 4.0 (%h)\r\n\r\n\"' \
+			-DLOGIN_ARGS" \
+		INCLUDES="-I.. -I/usr/ucbinclude" \
 		LIB_OBJ="getent.o strerror.o setenv.o herror.o" \
 		LIB_SRC="getent.c strerror.c setenv.c herror.c" \
-		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		AR=ar ARFLAGS=cq RANLIB=NONE \
 		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
 		CC="${CC}" LCCFLAGS="-O"
+
+sol2.2.auth solaris2.2.auth:
+	make -f ../Config.generic `basename $@ .auth` WHAT=${WHAT} \
+		AUTH_LIB="-lkrb" AUTH_LIBPATH="/usr/lib/libkrb.a" \
+		AUTH_INC=-I/usr/include/kerberos \
+		AUTH_DEF="-DAUTHENTICATION -DKRB4"
 
 dynix3.0.12:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
 		 -DDEFAULT_IM='\"\r\nDYNIX(R) V3.0.12 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS -DNO_STRING_H " \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON -DNO_STRING_H " \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strchr.o strrchr.o strdup.o strerror.o \
 			setsid.o setenv.o strcasecmp.o strftime.o getopt.o \
 			mem.o" \
@@ -485,15 +643,15 @@ dynix3.0.12:
 
 dynix3.0.17:
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a -lseq "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a -lseq" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-			../libtelnet/libtelnet.a /usr/lib/libseq.a "${KRB_LIBPATH} \
+			../libtelnet/libtelnet.a /usr/lib/libseq.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
-			-DDIAGNOSTICS -DNO_STRING_H \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON -DNO_STRING_H \
 		 -DDEFAULT_IM='\"\r\nDYNIX(R) V3.0.17 (%h) (%t)\r\n\r\r\n\r\"' \
 			" \
-		INCLUDES=${KRB_INC}" -I.." \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strchr.o strrchr.o strdup.o strerror.o \
 			setsid.o strftime.o mem.o" \
 		LIB_SRC="getent.c strchr.c strrchr.c strdup.c strerror.c \
@@ -503,16 +661,18 @@ dynix3.0.17:
 		CC="${CC}" LCCFLAGS="-O"
 
 ultrix3.1:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-DTERMCAP -DKLUDGELINEMODE \
-			-DDIAGNOSTICS -DUSE_TERMIO \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_LOGIN_H \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON -DUSE_TERMIO \
 		    -DDEFAULT_IM='\"\r\nULTRIX V3.1 (%h) (%t)\r\n\r\r\n\r\"' \
 			-YPOSIX" \
-		INCLUDES=${KRB_INC}" -I.." \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strdup.o strerror.o setenv.o \
 			strftime.o herror.o" \
 		LIB_SRC="getent.c strdup.c strerror.c setenv.c \
@@ -522,16 +682,18 @@ ultrix3.1:
 		CC="${CC}" LCCFLAGS="-O"
 
 ultrix4.0:
+	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
 		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a" \
 		DEST=${DESTDIR}/usr/ucb \
-		DESTDIR=${DESTDIR} \
 		DEFINES=${ODEFS}"-DUSE_TERMIO -DTERMCAP \
 		    -DDEFAULT_IM='\"\r\nULTRIX V4.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DKLUDGELINEMODE -DDIAGNOSTICS " \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DKLUDGELINEMODE -DDIAGNOSTICS \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_LOGIN_H \
+			-DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o strdup.o strerror.o setsid.o \
 			setenv.o strftime.o" \
 		LIB_SRC="getent.c strdup.c strerror.c setsid.c \
@@ -539,18 +701,97 @@ ultrix4.0:
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
 		LIBEXEC=${DESTDIR}/usr/etc \
 		CC="${CC}" LCCFLAGS="-O"
+
+ultrix4.1:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DUSE_TERMIO -DTERMCAP \
+		    -DDEFAULT_IM='\"\r\nULTRIX V4.1 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DKLUDGELINEMODE -DDIAGNOSTICS \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_LOGIN_H \
+			-DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o strdup.o" \
+		LIB_SRC="getent.c strdup.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+ultrix4.3:
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a ${AUTH_LIB}" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
+		DEST=${DESTDIR}/usr/ucb \
+		DEFINES=${ODEFS}"-DUSE_TERMIO -DTERMCAP \
+		    -DDEFAULT_IM='\"\r\nULTRIX V4.3 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DKLUDGELINEMODE -DDIAGNOSTICS \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_LOGIN_H \
+			-DENV_HACK -DOLD_ENVIRON ${AUTH_DEF}" \
+		INCLUDES="-I.. ${AUTH_INC}" \
+		LIB_OBJ="getent.o strdup.o" \
+		LIB_SRC="getent.c strdup.c" \
+		AR=ar ARFLAGS=cq RANLIB=ranlib \
+		LIBEXEC=${DESTDIR}/usr/etc \
+		CC="${CC}" LCCFLAGS="-g"
+
+ultrix4.3.auth:
+	make -f ../Config.generic `basename $@ .auth` WHAT=${WHAT} \
+		AUTH_LIB="-lkrb -ldes" \
+		AUTH_LIBPATH="/usr/lib/libkrb.a /usr/lib/libdes.a" \
+		AUTH_DEF="-DAUTHENTICATION -DKRB4"
+
+irix4.0.1:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermlib ../libtelnet/libtelnet.a" \
+		LIBPATH="/usr/lib/libc.a /usr/lib/libtermlib.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-Dvfork=fork -DUSE_TERMIO \
+		    -DDEFAULT_IM='\"\r\n\r\nIRIX System V.3 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DNO_LOGIN_F -DNO_LOGIN_P \
+			-DDIAGNOSTICS " \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o setenv.o" \
+		LIB_SRC="getent.c setenv.c" \
+		AR=ar ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
+hpux8.0:
+	@echo $@ is untested... it may or may not work..."
+	make -f Makefile.generic ${WHAT} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="/lib/libc.a /usr/lib/libtermcap.a \
+				../libtelnet/libtelnet.a" \
+		DEST=${DESTDIR}/usr/bin \
+		DEFINES=${ODEFS}"-Dvfork=fork -DUSE_TERMIO \
+		    -DDEFAULT_IM='\"\r\n\r\nHP-UX 8.0 (%h) (%t)\r\n\r\r\n\r\"' \
+			-DNO_LOGIN_F -DNO_LOGIN_P -DNO_LOGIN_H \
+			-DDIAGNOSTICS -DLOGIN_ARGS" \
+		INCLUDES="-I.." \
+		LIB_OBJ="getent.o setenv.o" \
+		LIB_SRC="getent.c setenv.c" \
+		AR=ar ARFLAGS=cq RANLIB=NONE \
+		LIBEXEC=${DESTDIR}/etc \
+		CC="${CC}" LCCFLAGS="-O"
+
 next1.0:
 	@echo $@ is untested... it may or may not work..."
 	make -f Makefile.generic ${WHAT} \
-		LIBS="../libtelnet/libtelnet.a -ltermcap -lsys_s "${KRB_LIBS} \
+		LIBS="../libtelnet/libtelnet.a -ltermcap -lsys_s ${AUTH_LIB}" \
 		LIBPATH="/lib/libc.a /lib/libsys_s.a /usr/lib/libtermcap.a \
-				../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+				../libtelnet/libtelnet.a ${AUTH_LIBPATH}" \
 		DEST=${DESTDIR}/usr/ucb \
 		DEFINES=${ODEFS}"-bsd -DTERMCAP -DKLUDGELINEMODE \
 			-DDEFAULT_IM='\"\r\nNeXT 1.0 (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS -DNO_STRING_H \
-			-Dgetenv=getenv_" \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON \
+			-DNO_STRING_H -Dgetenv=getenv_ ${AUTH_DEF}" \
+		INCLUDES="-I.. ${AUTH_INC}" \
 		LIB_OBJ="strdup.o setenv.o setsid.o strftime.o \
 			strcasecmp.o gettytab.o" \
 		LIB_SRC=s"trdup.c setenv.c setsid.c strftime.c \
@@ -571,15 +812,15 @@ convex:
 	ln -s ../../rel_usr/src/lib/libc/posix/tcsetattr.c tcsetattr.c
 	ln -s ../../rel_usr/src/lib/libc/posix/tcgetattr.c tcgetattr.c
 	make -f Makefile.generic ${WHAT} \
-		LIBS="-ltermcap ../libtelnet/libtelnet.a "${KRB_LIBS} \
-		LIBPATH="../libtelnet/libtelnet.a "${KRB_LIBPATH} \
+		LIBS="-ltermcap ../libtelnet/libtelnet.a" \
+		LIBPATH="../libtelnet/libtelnet.a" \
 		AR=ar ARFLAGS=cq RANLIB=ranlib \
 		LIBEXEC=${DESTDIR}/usr/etc/in.telnetd \
 		CC="${CC}" LCCFLAGS="-g ${OPTLEV} -Dconvex" \
 		DEFINES=${ODEFS}"-DUSE_TERMIO -DLINEMODE \
 			-DDEFAULT_IM='\"\r\nConvex (%h) (%t)\r\n\r\r\n\r\"' \
-			-DDIAGNOSTICS" \
-		INCLUDES=${KRB_INC}" -I.." \
+			-DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON" \
+		INCLUDES="-I.." \
 		LIB_OBJ="getent.o setsid.o strftime.o \
 			tcsetattr.o tcgetattr.o" \
 		LIB_SRC="getent.c setsid.c strftime.c \
