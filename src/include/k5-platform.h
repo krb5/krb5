@@ -240,15 +240,16 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 	 : (abort(),0))
 # define INITIALIZER_RAN(NAME)	(JOIN2(NAME,__ran).did_run == 3 && JOIN2(NAME, __ran).error == 0)
 
-#elif defined(USE_LINKER_INIT_OPTION)
+#elif defined(USE_LINKER_INIT_OPTION) || defined(_WIN32)
 
-/* Run initializer at load time, via linker magic.  */
+/* Run initializer at load time, via linker magic, or in the
+   case of WIN32, win_glue.c hard-coded knowledge.  */
 typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define MAKE_INIT_FUNCTION(NAME)		\
 	static k5_init_t JOIN2(NAME, __ran)	\
 		= { 0, 2 };			\
 	static int NAME(void);			\
-	void JOIN2(NAME, __auxinit)		\
+	void JOIN2(NAME, __auxinit)()		\
 	{					\
 	    JOIN2(NAME, __ran).error = NAME();	\
 	    JOIN2(NAME, __ran).did_run = 3;	\
@@ -273,7 +274,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 
 
-#ifdef USE_LINKER_FINI_OPTION
+#if defined(USE_LINKER_FINI_OPTION) || defined(_WIN32)
 /* If we're told the linker option will be used, it doesn't really
    matter what compiler we're using.  Do it the same way
    regardless.  */
@@ -281,7 +282,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define MAKE_FINI_FUNCTION(NAME)	\
 	void NAME(void)
 
-#elif defined(__GNUC__) && !defined(_WIN32) && defined(DESTRUCTOR_ATTR_WORKS)
+#elif defined(__GNUC__) && defined(DESTRUCTOR_ATTR_WORKS)
 /* If we're using gcc, if the C++ support works, the compiler should
    build executables and shared libraries that support the use of
    static constructors and destructors.  The C compiler supports a

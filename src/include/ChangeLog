@@ -1,5 +1,10 @@
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-platform.h (MAKE_INIT_FUNCTION, CALL_INIT_FUNCTION,
+	INITIALIZER_RAN): Use the linker-driven version for Windows.  The
+	auxinit function definition needs an argument list.
+	(MAKE_FINI_FUNCTION): Likewise.
+
 	* win-mac.h (HAVE_STRERROR, SYS_ERRLIST_DECLARED): Define.
 
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
