@@ -54,6 +54,8 @@
 #define HasGcc NO
 #endif
 
+/* The -Z flag is a special loader flag at Athena to unmap page zero on
+   some architectures that normally allow p0 references, e.g. VAX BSD. */
 #ifndef UltrixArchitecture
 #define ExtraLoadFlags -Z
 #endif
@@ -72,11 +74,19 @@
 #define DbmLib -ldbm
 #endif
 
-#define PepyCmd $(ISODE)/@sys/bin/pepy
-#define PosyCmd $(ISODE)/@sys/bin/posy
+/* define IsodeLib to be what you pass to the loader to find the ISODE
+   library.  This might want to be -lisode if you have it installed.
+   IsodeDir is put into the 'make' variable ISODE. */
 
 #define IsodeLib /mit/isode/isode-6.0/@sys/lib/libisode.a
 #define IsodeDir /mit/isode/isode-6.0
+
+/* Re-define PepyCmd and PosyCmd if pepy & posy aren't in your search
+   path. */
+
+#define PepyCmd $(ISODE)/@sys/bin/pepy
+#define PosyCmd $(ISODE)/@sys/bin/posy
+
 
 #define UseSSInstalled /* -- turn on if you have the SS library &c installed */
 			
