@@ -1,3 +1,8 @@
+Mon Oct  6 12:07:19 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* set_realm.c (krb5_set_principal_realm): Allocate extra byte for
+	        \0 after realm.
+
 Mon Sep  1 21:38:16 1997  Tom Yu  <tlyu@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred_basic): Fix swapped args to memset.

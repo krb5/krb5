@@ -36,7 +36,7 @@ krb5_set_principal_realm(context, principal, realm)
 		return -EINVAL;
 
 	length = strlen(realm);
-	newrealm = malloc(length);
+	newrealm = malloc(length+1); /* Include room for the null */
 	if (!newrealm)
 		return -ENOMEM;
 	strcpy(newrealm, realm);
