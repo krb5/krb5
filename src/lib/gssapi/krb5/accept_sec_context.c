@@ -474,21 +474,31 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 	   i = authdat->checksum->length - 24;
 
-	   while(i>0) {
+	   while (i >= 4) {
 
 	       TREAD_INT16(ptr, option_id, bigend);
+
+	       TREAD_INT16(ptr, option.length, bigend);
+
+	       i -= 4;
+
+	       /* have to use ptr2, since option.data is wrong type and
+		  macro uses ptr as both lvalue and rvalue */
+
+	       if (i < option.length || option.length < 0) {
+		   code = KG_BAD_LENGTH;
+		   major_status = GSS_S_FAILURE;
+		   goto fail;
+	       }
+
+	       TREAD_STR(ptr, ptr2, bigend);
+	       option.data = (char FAR *) ptr2;
+
+	       i -= option.length;
 
 	       switch(option_id) {
 
 	       case KRB5_GSS_FOR_CREDS_OPTION:
-
-		   TREAD_INT16(ptr, option.length, bigend);
-
-		   /* have to use ptr2, since option.data is wrong type and
-		      macro uses ptr as both lvalue and rvalue */
-
-		   TREAD_STR(ptr, ptr2, bigend);
-		   option.data = (char FAR *) ptr2;
 
 		   /* store the delegated credential */
 
@@ -499,8 +509,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 		       major_status = GSS_S_FAILURE;
 		       goto fail;
 		   }
-
-		   i -= option.length + 4;
 
 		   gss_flags |= GSS_C_DELEG_FLAG; /* got a delegation */
 
