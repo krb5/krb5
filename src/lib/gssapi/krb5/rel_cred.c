@@ -34,8 +34,10 @@ krb5_gss_release_cred(minor_status, cred_handle)
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
 
-   if (*cred_handle == GSS_C_NO_CREDENTIAL)
-      return(kg_release_defcred(minor_status));
+   if (*cred_handle == GSS_C_NO_CREDENTIAL) {
+      *minor_status = 0;
+      return(GSS_S_COMPLETE);
+   }
 
    if (! kg_delete_cred_id(*cred_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;

@@ -1,3 +1,7 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for sys/time.h and time.h.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of

@@ -146,8 +146,8 @@
 #define KRB4_USE_KEYTAB              1
 #define KRB5                         1
 #define KRB524_PRIVATE               1
-#define KRB5_DNS_LOOKUP              0
-#define KRB5_DNS_LOOKUP_KDC          0
+#define KRB5_DNS_LOOKUP              1
+#define KRB5_DNS_LOOKUP_KDC          1
 #define KRB5_KRB4_COMPAT             1
 #define KRB5_PRIVATE                 1
 #define krb5_sigtype                 void

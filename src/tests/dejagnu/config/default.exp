@@ -54,6 +54,44 @@ if 0 {
     }
 }
 
+# Hack around Solaris 9 kernel race condition that causes last output
+# from a pty to get dropped.
+if { $PRIOCNTL_HACK } {
+    catch {exec priocntl -s -c FX -m 30 -p 30 -i pid [getpid]}
+    rename spawn oldspawn
+    proc spawn { args } {
+	upvar 1 spawn_id spawn_id
+	set newargs {}
+	set inflags 1
+	set eatnext 0
+	foreach arg $args {
+	    if { $arg == "-ignore" \
+		     || $arg == "-open" \
+		     || $arg == "-leaveopen" } {
+		lappend newargs $arg
+		set eatnext 1
+		continue
+	    }
+	    if [string match "-*" $arg] {
+		lappend newargs $arg
+		continue
+	    }
+	    if { $eatnext } {
+		set eatnext 0
+		lappend newargs $arg
+		continue
+	    }
+	    if { $inflags } {
+		set inflags 0
+		set newargs [concat $newargs {priocntl -e -c FX -p 0}]
+	    }
+	    lappend newargs $arg
+	}
+	set pid [eval oldspawn $newargs]
+	return $pid
+    }
+}
+
 # The des.des3-tgt.no-kdc-des3 pass will fail if the KDC doesn't
 # constrain ticket key enctypes to those in permitted_enctypes.  It
 # does this by not putting des3 in the permitted_enctypes, while
@@ -84,6 +122,39 @@ set passes {
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
 	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
 	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
+    }
+    {
+	aes
+	des3_krbtgt=0
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des-cbc-crc}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des-cbc-crc}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des-cbc-crc}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES + DES enctypes"]}
+    }
+    {
+	aes-des3
+	des3_krbtgt=0
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES + DES enctypes"]}
+    }
+    {
+	des3-aes
+	des3_krbtgt=1
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES + DES enctypes, DES3 TGT"]}
     }
     {
 	des-v4
@@ -203,31 +274,30 @@ set unused_passes {
 	all-enctypes
 	des3_krbtgt=1
 	{supported_enctypes=\
-	rijndael256-hmac-sha1:normal rijndael192-hmac-sha1:normal rijndael128-hmac-sha1:normal \
-	serpent256-hmac-sha1:normal serpent192-hmac-sha1:norealm serpent128-hmac-sha1:normal \
-	twofish256-hmac-sha1:normal twofish192-hmac-sha1:norealm twofish128-hmac-sha1:normal \
+	aes256-cts-hmac-sha1-96:normal aes256-cts-hmac-sha1-96:norealm \
+	aes128-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:norealm \
 	des3-cbc-sha1:normal des3-cbc-sha1:none \
 	des-cbc-md5:normal des-cbc-md4:normal des-cbc-crc:normal \
 	des-cbc-md5:v4 des-cbc-md4:v4 des-cbc-crc:v4 \
 	}
 	{kdc_supported_enctypes=\
-	rijndael256-hmac-sha1:normal rijndael192-hmac-sha1:normal rijndael128-hmac-sha1:normal \
-	serpent256-hmac-sha1:normal serpent192-hmac-sha1:norealm serpent128-hmac-sha1:normal \
-	twofish256-hmac-sha1:normal twofish192-hmac-sha1:norealm twofish128-hmac-sha1:normal \
 	des3-cbc-sha1:normal des3-cbc-sha1:none \
 	des-cbc-md5:normal des-cbc-md4:normal des-cbc-crc:normal \
 	des-cbc-md5:v4 des-cbc-md4:v4 des-cbc-crc:v4 \
 	}
 	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
     }
+    # This won't work for anything using GSSAPI until it gets AES support.
     {
-	aes
+	aes-only
 	des3_krbtgt=0
-	{supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal}
-	{kdc_supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal}
-	{default_tgs_enctypes=rijndael256-hmac-sha1 des-cbc-crc}
-	{default_tkt_enctypes=rijndael256-hmac-sha1 des-cbc-crc}
-	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES only, no DES or DES3 support"]}
     }
 }
 #	{supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal }
@@ -346,7 +416,7 @@ if ![info exists RLOGIN] {
 }
 
 if ![info exists RLOGIN_FLAGS] {
-    set RLOGIN_FLAGS ""
+    set RLOGIN_FLAGS "-x"
 }
 
 # We use a couple of variables to hold shell prompts which may be
@@ -692,7 +762,6 @@ proc setup_kerberos_files { } {
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		admin_database_name = $tmppwd/adb"
 	puts $conffile "		admin_database_lockfile = $tmppwd/adb.lock"
-	puts $conffile "		admin_keytab = $tmppwd/admin-keytab"
 	puts $conffile "		key_stash_file = $tmppwd/stash"
 	puts $conffile "		acl_file = $tmppwd/acl"
 	puts $conffile "		kadmind_port = 3750"
@@ -936,83 +1005,6 @@ proc restore_kerberos_env { } {
 	catch "unset env(KERBEROS_SERVER)"
     }
 
-}
-
-# setup_kadmind_srvtab
-# A procedure to build the srvtab for kadmind5 so that kadmin5 and it
-# may successfully communicate.
-# Returns 1 on success, 0 on failure.
-proc setup_kadmind_srvtab {  } {
-    global REALMNAME
-    global KADMIN_LOCAL
-    global KEY
-    global tmppwd
-
-    catch "exec rm -f $tmppwd/admin-keytab"
-    envstack_push
-    setup_kerberos_env kdc
-    spawn $KADMIN_LOCAL -r $REALMNAME
-    envstack_pop
-    catch expect_after
-    expect_after {
-	-re "(.*)\r\nkadmin.local:  " {
-	    fail "kadmin.local admin-keytab (unmatched output: $expect_out(1,string)"
-	    catch "exec rm -f $tmppwd/admin-keytab"
-	    catch "expect_after"
-	    return 0
-	}
-	timeout {
-	    fail "kadmin.local admin-keytab (timeout)"
-	    catch "exec rm -f $tmppwd/admin-keytab"
-	    catch "expect_after"
-	    return 0
-	}
-	eof {
-	    fail "kadmin.local admin-keytab (eof)"
-	    catch "exec rm -f $tmppwd/admin-keytab"
-	    catch "expect_after"
-	    return 0
-	}
-    }
-    expect "kadmin.local:  "
-    send "xst -k admin-new-srvtab kadmin/admin\r"
-    expect "xst -k admin-new-srvtab kadmin/admin\r\n"
-    expect -re ".*Entry for principal kadmin/admin.* added to keytab WRFILE:admin-new-srvtab."
-    expect "kadmin.local:  "
-
-    catch "exec mv -f admin-new-srvtab changepw-new-srvtab" exec_output
-    if ![string match "" $exec_output] {
-	verbose -log "$exec_output"
-	perror "can't mv admin-new-srvtab"
-	catch expect_after
-	return 0
-    }
-
-    send "xst -k changepw-new-srvtab kadmin/changepw\r"
-    expect "xst -k changepw-new-srvtab kadmin/changepw\r\n"
-    expect -re ".*Entry for principal kadmin/changepw.* added to keytab WRFILE:changepw-new-srvtab."
-    expect "kadmin.local:  "
-    send "quit\r"
-    expect eof
-    catch expect_after
-    if ![check_exit_status "kadmin.local admin-keytab"] {
-	catch "exec rm -f $tmppwd/admin-keytab"
-	perror "kadmin.local admin-keytab exited abnormally"
-	return 0
-    }
-
-    catch "exec mv -f changepw-new-srvtab $tmppwd/admin-keytab" exec_output
-    if ![string match "" $exec_output] {
-	verbose -log "$exec_output"
-	perror "can't mv new admin-keytab"
-	return 0
-    }
-
-    # Make the srvtab file globally readable in case we are using a
-    # root shell and the srvtab is NFS mounted.
-    catch "exec chmod a+r $tmppwd/admin-keytab"
-
-    return 1
 }
 
 # setup_kerberos_db
@@ -1270,12 +1262,7 @@ proc setup_kerberos_db { standalone } {
 	    }
 	}
     }
-    # XXX should deal with envstack inside setup_kadmind_srvtab too
-    set ret [setup_kadmind_srvtab]
     envstack_pop
-    if !$ret {
-	return 0
-    }
 
     # create the admin database lock file
     catch "exec touch $tmppwd/adb.lock"
@@ -1336,8 +1323,10 @@ proc start_kerberos_daemons { standalone } {
     set tailf_pid [exp_pid]
 
     set markstr "===MARK $tailf_pid [exec date] ==="
+    sleep 2
     set f [open $kdc_lfile a]
     puts $f $markstr
+    flush $f
     close $f
 
     expect {
@@ -1345,6 +1334,8 @@ proc start_kerberos_daemons { standalone } {
 	-ex "$markstr\r\n" { }
 	-re "\[^\r\n\]*\r\n" { exp_continue }
 	timeout {
+	    verbose -log "tail $kdc_lfile output:"
+	    verbose -log [exec tail $kdc_lfile]
 	    if {$standalone} {
 		verbose -log "tail -f timed out ($timeout sec) looking for mark in kdc log"
 		fail "krb5kdc"
@@ -1369,6 +1360,23 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	-re "commencing operation\r\n" { }
+	-re "krb5kdc: \[a-zA-Z\]* - Cannot bind server socket to \[ 0-9a-fA-F:.\]*\r\n" {
+	    verbose -log "warning: $expect_out(0,string)"
+	    exp_continue
+	}
+	"no sockets set up?" {
+	    if {$standalone} {
+		verbose -log "krb5kdc startup failed to bind listening sockets"
+		fail "krb5kdc"
+	    } else {
+		perror "krb5kdc startup failed to bind listening sockets"
+	    }
+	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
+	    return 0
+	}
 	timeout {
 	    if {$standalone} {
 		verbose -log "krb5kdc startup timed out"
@@ -1413,6 +1421,7 @@ proc start_kerberos_daemons { standalone } {
     set tailf_pid [exp_pid]
 
     set markstr "===MARK $tailf_pid [exec date] ==="
+    sleep 2
     set f [open $kadmind_lfile a]
     puts $f $markstr
     close $f
@@ -1455,7 +1464,7 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	"Seeding random number" exp_continue
-	"cannont initialize network" {
+	"cannot initialize network" {
 	    if {$standalone} {
 		verbose -log "kadmind failed network init"
 		fail "kadmind"
@@ -1588,7 +1597,7 @@ proc add_kerberos_key { kkey standalone } {
 		break
 	    }
 	}
-	expect "Enter password:"
+	expect -re "assword\[^\r\n\]*: *"
 	send "adminpass$KEY\r"
 	expect "Enter password for principal \"$kkey@$REALMNAME\":"
 	send "$kkey"
@@ -1650,7 +1659,7 @@ proc add_random_key { kkey standalone } {
 		break
 	    }
 	}
-	expect "Enter password:"
+	expect -re "assword\[^\r\n\]*: *"
 	send "adminpass$KEY\r"
 	expect {
 	    "Principal \"$kkey@$REALMNAME\" created" { }
@@ -2029,6 +2038,7 @@ proc v4kinit { name pass standalone } {
     global REALMNAME
     global KINIT
     global spawn_id
+    global des3_krbtgt
 
     # Use kinit to get a ticket.
 	#
@@ -2052,10 +2062,20 @@ proc v4kinit { name pass standalone } {
     }
     send "$pass\r"
     expect eof
-    if ![check_exit_status kinit] {
-	return 0
+    if {$des3_krbtgt == 0} {
+	if ![check_exit_status v4kinit] {
+	    return 0
+	}
+    } else {
+	# Fail if kinit is successful with a des3 TGT.
+	set status_list [wait -i $spawn_id]
+	set testname v4kinit
+	verbose "wait -i $spawn_id returned $status_list ($testname)"
+	if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 1 } {
+	    verbose -log "exit status: $status_list"
+	    fail "$testname (exit status)"
+	}
     }
-
     if {$standalone} {
 	pass "v4kinit"
     }
@@ -2234,14 +2254,30 @@ proc setup_root_shell { testname } {
     set rlogin_pid [exp_pid]
     set old_timeout $timeout
     set timeout 300
+    set got_refused 0
 
     expect {
 	-re {connect to address [0-9a-fA-F.:]*: Connection refused} {
 	    note $expect_out(buffer)
+	    set got_refused 1
 	    exp_continue
 	}
-	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
+	-re "word:|erberos rlogin failed|ection refused|ection reset by peer|not authorized" {
 	    note "$testname test requires ability to rlogin as root"
+	    unsupported "$testname"
+	    set timeout $old_timeout
+	    stop_root_shell
+	    return 0
+	}
+	"Cannot assign requested address" {
+	    note "$testname: rlogin as root 'cannot assign requested address'"
+	    unsupported "$testname"
+	    set timeout $old_timeout
+	    stop_root_shell
+	    return 0
+	}
+	-re "usage: rlogin|illegal option -- x|invalid option -- x" {
+	    note "$testname: rlogin doesn't like command-line flags"
 	    unsupported "$testname"
 	    set timeout $old_timeout
 	    stop_root_shell
@@ -2257,7 +2293,17 @@ proc setup_root_shell { testname } {
 	    return 0
 	}
 	eof {
-	    perror "eof from rlogin $hostname -l root"
+	    if {$got_refused} {
+		# reported some errors, continued, and failed
+		note "$testname test requires ability to log in as root"
+		unsupported $testname
+	    } else {
+		# unknown problem?
+#		perror "eof from rlogin $hostname -l root"
+		note "eof (and unrecognized messages?) from rlogin $hostname -l root"
+		note "$testname test requires ability to log in as root"
+		unsupported $testname
+	    }
 	    stop_root_shell
 	    set timeout $old_timeout
 	    catch "expect_after"
@@ -2501,9 +2547,9 @@ proc krb_exit { } {
 # helpful sometimes for debugging the test suite
 proc spawn_xterm { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME} {
 	global $i
-	set env($i) [set $i]
+	if [info exists $i] { set env($i) [set $i] }
     }
     exec "xterm"
 }

@@ -119,10 +119,6 @@
 #define vaxtohs(x) two_bytes_vax_to_nets(((const unsigned char *)(x)))
 
 /* Externals */
-extern char *errmsg();
-#ifndef HAVE_ERRNO
-extern int errno;
-#endif
 extern int des_debug;
 
 /*** Routines ***************************************************** */

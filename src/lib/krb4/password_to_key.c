@@ -90,7 +90,7 @@ mit_passwd_to_key(
         des_string_to_key(passwd, key);
     } else {
 #if !(defined(_WIN32) || defined(USE_LOGIN_LIBRARY))
-        des_read_password((des_cblock *)key, "Password: ", 0);
+        des_read_password((des_cblock *)key, "Password", 0);
 #else
         return (-1);
 #endif
@@ -143,7 +143,7 @@ afs_passwd_to_key(
         afs_string_to_key(passwd, realm, key);
     } else {
 #if !(defined(_WIN32) || defined(USE_LOGIN_LIBRARY))
-        des_read_password((des_cblock *)key, "Password: ", 0);
+        des_read_password((des_cblock *)key, "Password", 0);
 #else
         return (-1);
 #endif
