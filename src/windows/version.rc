@@ -13,8 +13,8 @@
 
 /* we're going to stamp all the DLLs with the same version number */
 
-#define K5_FILE_VERSION "1.0\0"
-#define K5_PRODUCT_VERSION 1, 0
+#define K5_PRODUCT_VERSION_STRING "1.0.6\0"
+#define K5_PRODUCT_VERSION        1, 0, 6, 0
 
 #define K5_COPYRIGHT "Copyright (C) 1997 by the Massachusetts Institute of Technology\0"
 #define K5_COMPANY_NAME "Massachusetts Institute of Technology.\0"
@@ -88,7 +88,7 @@
 #define K5_INTERNAL_NAME "sapkrb5\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "sapkrb15.dll\0"
+#define K5_ORIGINAL_NAME "sapkrb16.dll\0"
 #else
 #define K5_ORIGINAL_NAME "sapkrb32.dll\0"
 #endif
@@ -149,12 +149,12 @@ BEGIN
 	BEGIN
 	    VALUE "CompanyName",        K5_COMPANY_NAME
 	    VALUE "FileDescription",	K5_DESCRIPTION
-	    VALUE "FileVersion",	K5_FILE_VERSION
+	    VALUE "FileVersion",	K5_PRODUCT_VERSION_STRING
 	    VALUE "InternalName",	K5_INTERNAL_NAME
 	    VALUE "LegalTrademarks",	"\0"
 	    VALUE "OriginalFilename",	K5_ORIGINAL_NAME
 	    VALUE "ProductName",	K5_ORIGINAL_NAME
-	    VALUE "ProductVersion",	K5_FILE_VERSION
+	    VALUE "ProductVersion",	K5_PRODUCT_VERSION_STRING
 
 	    VALUE "LegalCopyright",	K5_COPYRIGHT
 	END
