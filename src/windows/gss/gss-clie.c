@@ -123,6 +123,8 @@ call_server (char *host, u_short port, char *service_name, char *msg)
         return -1;
     }
     (void) gss_release_buffer(&min_stat, &out_buf);
+
+    closesocket(s);
 	 
     return 0;
 }
