@@ -24,10 +24,9 @@
 #if !defined(WTMP_FILE) && defined(_PATH_WTMP)
 #define WTMP_FILE _PATH_WTMP
 #endif
-
-/* if it is *still* missing, assume SunOS */
-#ifndef WTMP_FILE
-#define	WTMP_FILE	"/usr/adm/wtmp"
+/* Other cases go here as necessary; else use /usr/adm/wtmp*/
+#ifndef PATH_WTMP
+#define PATH_WTMP "/usr/adm/wtmp"
 #endif
 
 long ptyint_update_wtmp (ent)
@@ -65,8 +64,9 @@ long ptyint_update_wtmp (ent)
 #ifdef EMPTY
 	    ut.ut_type = EMPTY;
 #else
-	    ut.ut_type = 0;
-#endif
+	    ut.ut_type = DEAD_PROCESS; /* For Linux brokenness*/
+#endif	    
+
 	  }
 #endif
 	    if (write(fd, (char *)&ut, sizeof(struct utmp)) !=
@@ -76,4 +76,6 @@ long ptyint_update_wtmp (ent)
 	(void)close(fd);
     }
 #endif /* HAVE_UPDWTMP */
+    return 0; /* no current failure cases; file not found is not failure!*/
+    
 }
