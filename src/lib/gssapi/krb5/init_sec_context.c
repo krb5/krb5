@@ -37,7 +37,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     krb5_principal server;
     krb5_timestamp *endtime;
     gss_channel_bindings_t chan_bindings;
-    OM_uint32 req_flags;
+    OM_uint32 *req_flags;
     krb5_flags *flags;
     gss_OID mech_type;
     gss_buffer_t token;
@@ -74,8 +74,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 
     /* build the checksum field */
 
-    if(*flags && GSS_C_DELEG_FLAG) {
-
+    if (req_flags & GSS_C_DELEG_FLAG) {
 	/* first get KRB_CRED message, so we know its length */
 
 	/* clear the time check flag that was set in krb5_auth_con_init() */
@@ -83,20 +82,27 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 	krb5_auth_con_setflags(context, *auth_context,
 			       con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
 
-	if ((code = krb5_fwd_tgt_creds(context, *auth_context, 0,
+	code = krb5_fwd_tgt_creds(context, *auth_context, 0,
 				  cred->princ, server, cred->ccache, 1,
-				  &credmsg)))
-	    return(code);
+				  &credmsg);
 
 	/* turn KRB5_AUTH_CONTEXT_DO_TIME back on */
 	krb5_auth_con_setflags(context, *auth_context, con_flags);
 
-	if(credmsg.length+28 > KRB5_INT16_MAX) {
-            krb5_xfree(credmsg.data);
-	    return(KRB5KRB_ERR_FIELD_TOOLONG);
-	}
+	if (code) {
+	    /* don't fail here; just don't accept/do the delegation
+               request */
+	    *req_flags &= ~GSS_C_DELEG_FLAG;
 
-	checksum_data.length = 28+credmsg.length;
+	    checksum_data.length = 24;
+	} else {
+	    if (credmsg.length+28 > KRB5_INT16_MAX) {
+		krb5_xfree(credmsg.data);
+		return(KRB5KRB_ERR_FIELD_TOOLONG);
+	    }
+
+	    checksum_data.length = 28+credmsg.length;
+	}
     } else {
 	checksum_data.length = 24;
     }
@@ -352,7 +358,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       if ((code = make_ap_req(context, &(ctx->auth_context), cred, 
 			      ctx->there, &ctx->endtime, input_chan_bindings, 
-			      req_flags, &ctx->krb_flags, mech_type, &token))) {
+			      &req_flags, &ctx->krb_flags, mech_type,
+			      &token))) {
 	 krb5_free_principal(context, ctx->here);
 	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
