@@ -1,3 +1,7 @@
+Tue Sep 10 14:18:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb5kdc.M: remove ".so man1/header.doc"
+
 Fri Aug 23 14:22:45 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* kerberos_v4.c (check_princ): Assume an expiration date of zero means never expire.

@@ -19,8 +19,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.so man1/header.doc
-.TH SCLIENT 1 \*h
+.TH SCLIENT 1
 .SH NAME
 sclient \- sample Kerberos version 5 client
 .SH SYNOPSIS

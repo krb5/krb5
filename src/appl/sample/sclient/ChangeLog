@@ -1,3 +1,7 @@
+Tue Sep 10 14:09:01 1996  Tom Yu  <tlyu@mit.edu>
+
+	* sclient.M: remove ".so man1/header.doc"
+
 Mon Sep 18 05:05:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* sclient.c (main): Set the default service name to SAMPLE_SERVICE.

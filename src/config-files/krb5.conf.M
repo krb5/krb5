@@ -16,7 +16,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.TH KRB5.CONF 5 "Kerberos Version 5.0" "MIT Project Athena"
+.TH KRB5.CONF 5
 .SH NAME
 krb5.conf \- Kerberos configuration file
 .SH DESCRIPTION

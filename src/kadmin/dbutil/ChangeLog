@@ -1,3 +1,9 @@
+Tue Sep 10 14:16:40 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_edit.M: remove extra args from .TH
+
+	* kdb5_util.M: remove ".so man1/header.doc"
+
 Mon Sep  9 11:06:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* loadv4.c: Don't call get_config_params again, since it's not

@@ -1,3 +1,7 @@
+Tue Sep 10 14:10:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.8: remove ".so man1/header.doc"
+
 Mon Aug 19 23:22:55 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* state.c (envvarok): Don't allow the environment variable

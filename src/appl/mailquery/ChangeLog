@@ -1,3 +1,6 @@
+Tue Sep 10 14:08:06 1996  Tom Yu  <tlyu@mit.edu>
+
+	* mailquery.M: remove ".so man1/header.doc"
 
 Fri Jul 7 15:43:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling.

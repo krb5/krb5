@@ -18,8 +18,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.so man1/header.doc
-.TH KRB5KDC 8 \*h
+.TH KRB5KDC 8
 .SH NAME
 krb5kdc \- Kerberos V5 KDC
 .SH SYNOPSIS

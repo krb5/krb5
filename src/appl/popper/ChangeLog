@@ -1,3 +1,7 @@
+Tue Sep 10 14:08:36 1996  Tom Yu  <tlyu@mit.edu>
+
+	* popper.M: remove ".so man1/header.doc"
+
 Wed Aug 21 19:39:11 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* mh-6.8.patch: Ken Hornstein <kenh@cmf.nrl.navy.mil> contributed

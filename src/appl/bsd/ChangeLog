@@ -1,3 +1,8 @@
+Tue Sep 10 14:03:53 1996  Tom Yu  <tlyu@mit.edu>
+
+	* klogind.M, kshd.M, login.M, rcp.M, rlogin.M, rsh.M: remove ".so
+	 	man1/header.doc"
+
 Fri Sep  6 13:22:46 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* login.M: Document that login_krb4_convert is off by default.

@@ -4,8 +4,7 @@
 .\"
 .\"	@(#)rlogind.8c	6.3 (Berkeley) 5/24/86
 .\"
-.so man1/header.doc
-.TH KLOGIND 8C \*h
+.TH KLOGIND 8C
 .SH NAME
 klogind \- remote login server
 .SH SYNOPSIS

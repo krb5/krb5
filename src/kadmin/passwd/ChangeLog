@@ -1,3 +1,7 @@
+Tue Sep 10 14:17:45 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.M: remove ".so man1/header.doc"
+
 Sat Sep  7 02:13:32 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
 
 	* Makefile.in (install): Fix BINDIR to be CLIENT_BINDIR

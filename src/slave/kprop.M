@@ -19,8 +19,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.so man1/header.doc
-.TH KPROP 8 \*h
+.TH KPROP 8
 .SH NAME
 kprop \- propagate a Kerberos V5 principal database to a slave server
 .SH SYNOPSIS

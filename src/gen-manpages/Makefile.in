@@ -2,5 +2,4 @@ all::
 
 install::
 	$(INSTALL_DATA) $(srcdir)/kerberos.M ${DESTDIR}$(CLIENT_MANDIR)/kerberos.1
-	$(INSTALL_DATA) $(srcdir)/header.doc ${DESTDIR}$(CLIENT_MANDIR)/header.doc
 	$(INSTALL_DATA) $(srcdir)/k5login.M ${DESTDIR}$(FILE_MANDIR)/.k5login.5

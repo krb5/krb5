@@ -18,8 +18,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.so man1/header.doc
-.TH KINIT 1 \*h
+.TH KINIT 1
 .SH NAME
 kinit \- obtain and cache Kerberos ticket-granting ticket
 .SH SYNOPSIS

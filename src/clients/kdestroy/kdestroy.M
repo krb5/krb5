@@ -18,8 +18,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.so man1/header.doc
-.TH KDESTROY 1 \*h
+.TH KDESTROY 1
 .SH NAME
 kdestroy \- destroy Kerberos tickets
 .SH SYNOPSIS

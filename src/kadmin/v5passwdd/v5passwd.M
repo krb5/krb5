@@ -19,7 +19,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH V5PASSWD 1 "Kerberos Version 5.0" "MIT Project Athena"
+.TH V5PASSWD 1
 .SH NAME
 v5passwd \- change a user's Kerberos password
 .SH SYNOPSIS

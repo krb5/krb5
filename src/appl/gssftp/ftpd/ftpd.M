@@ -31,8 +31,7 @@
 .\"
 .\"     @(#)ftpd.8	6.9 (Berkeley) 3/16/91
 .\" "
-.so man1/header.doc
-.TH FTPD 8 \*h
+.TH FTPD 8
 .SH NAME
 .B ftpd
 \-

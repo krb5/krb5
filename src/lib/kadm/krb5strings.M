@@ -18,7 +18,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH KRB5STRINGS 3 "Kerberos Version 5.0" "MIT Project Athena"
+.TH KRB5STRINGS 3
 .SH NAME
 krb5strings \- String representations of Kerberos V5 internal data.
 .SH KEY TYPES

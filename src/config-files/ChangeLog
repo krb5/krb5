@@ -1,3 +1,7 @@
+Tue Sep 10 14:35:53 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kdc.conf.M, krb5.conf.M: remove extra args from .TH
+
 Fri Jul 26 14:05:42 1996  Marc Horowitz  <marc@mit.edu>
 
 	* kdc.conf: added acl_file to prototype

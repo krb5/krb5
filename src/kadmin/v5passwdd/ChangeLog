@@ -1,3 +1,7 @@
+Tue Sep 10 14:37:23 1996  Tom Yu  <tlyu@mit.edu>
+
+	* v5passwd.M: remove extra args to .TH
+
 Sun Aug 18 18:29:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Compile v5passwd - the old passwd changing client. 

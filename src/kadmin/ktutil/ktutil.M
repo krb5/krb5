@@ -1,5 +1,4 @@
-.so man1/header.doc
-.TH KTUTIL 8 \*h
+.TH KTUTIL 8
 .SH NAME
 ktutil \- Kerberos keytab file maintenance utility
 .SH SYNOPSIS

@@ -1,5 +1,4 @@
-.so man1/header.doc
-.TH KADMIN 8 \*h
+.TH KADMIN 8
 .SH NAME
 kadmin \- Kerberos V5 database administration program
 .SH SYNOPSYS

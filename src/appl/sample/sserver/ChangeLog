@@ -1,3 +1,7 @@
+Tue Sep 10 14:09:19 1996  Tom Yu  <tlyu@mit.edu>
+
+	* sserver.M: remove ".so man1/header.doc"
+
 Sat Sep 16 00:21:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sserver.c (main): Allow the user to specify the service instance

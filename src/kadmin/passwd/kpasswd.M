@@ -18,8 +18,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.so man1/header.doc
-.TH KPASSWD 1 \*h
+.TH KPASSWD 1
 .SH NAME
 kpasswd \- change a user's Kerberos password
 .SH SYNOPSIS

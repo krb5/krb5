@@ -17,8 +17,7 @@
 .\"
 .\"	@(#)rsh.1	6.2 (Berkeley) 9/20/88
 .\" "
-.so man1/header.doc
-.TH RSH 1 \*h
+.TH RSH
 .SH NAME
 rsh \- remote shell
 .SH SYNOPSIS

@@ -1,3 +1,7 @@
+Tue Sep 10 14:19:08 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kprop.M, kpropd.M: remove ".so man1/header.doc"
+
 Mon Aug 12 14:33:31 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kpropd.c: rework to use kdb5_util instead of kdb5_edit; don't

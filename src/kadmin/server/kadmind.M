@@ -1,5 +1,4 @@
-.so man1/header.doc
-.TH KADMIND(8 \*h
+.TH KADMIND 8
 .SH NAME
 kadmind \- KADM5 administration server
 .SH SYNOPSIS

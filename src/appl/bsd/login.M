@@ -1,7 +1,6 @@
 .\"	login.1
 .\"
-.so man1/header.doc
-.TH LOGIN 8C \*h
+.TH LOGIN 8C
 .SH NAME
 login.krb5 \- kerberos enhanced login program
 .SH SYNOPSIS

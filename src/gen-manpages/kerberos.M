@@ -3,8 +3,7 @@
 .\" For copying and distribution information,
 .\" please see the file <mit-copyright.h>.
 .\" "
-.so man1/header.doc
-.TH KERBEROS 1 \*h
+.TH KERBEROS 1
 .SH NAME
 kerberos \- introduction to the Kerberos system
 .SH DESCRIPTION

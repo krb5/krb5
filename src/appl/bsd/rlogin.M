@@ -17,8 +17,7 @@
 .\"
 .\"	@(#)rlogin.1	6.9 (Berkeley) 9/19/88
 .\" "
-.so man1/header.doc
-.TH RLOGIN 1 \*h
+.TH RLOGIN 1
 .SH NAME
 rlogin \- remote login
 .SH SYNOPSIS

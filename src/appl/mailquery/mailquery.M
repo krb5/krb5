@@ -15,8 +15,7 @@
 .\"
 .\" $Id
 .\"
-.so man1/header.doc
-.TH mailquery 1 \*h
+.TH mailquery 1
 .SH NAME
 mailquery \- queries a pop server about how much mail is available
 .SH SYNTAX

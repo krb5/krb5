@@ -1,3 +1,7 @@
+Tue Sep 10 14:37:47 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb5strings.M: remove extra args to .TH
+
 Thu Jun 13 22:12:21 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES

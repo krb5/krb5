@@ -1,3 +1,7 @@
+Tue Sep 10 14:07:36 1996  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.M: remove ".so man1/header.doc"
+
 Mon Jul 29 22:37:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Determine sizeof short, int, long for secure.c

@@ -18,8 +18,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.so man1/header.doc
-.TH SSERVER 8 \*h
+.TH SSERVER 8
 .SH NAME
 sserver \- sample Kerberos version 5 server
 .SH SYNOPSIS

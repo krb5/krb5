@@ -10,8 +10,7 @@
 .\"
 .\" @(#)@(#)popper.8	2.3    2.3    (CCS)   4/2/91     Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n
 .\" "
-.so man1/header.doc
-.TH popper 8 \*h
+.TH popper 8
 .UC 6
 .ad
 .SH NAME

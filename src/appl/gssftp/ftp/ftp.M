@@ -31,8 +31,7 @@
 .\"
 .\"	@(#)ftp.1	6.18 (Berkeley) 7/30/91
 .\" "
-.so man1/header.doc
-.TH FTP 1 \*h
+.TH FTP 1
 .SH NAME
 ftp \- ARPANET file transfer program
 .SH SYNOPSIS

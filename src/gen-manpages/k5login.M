@@ -1,5 +1,4 @@
-.so man1/header.doc
-.TH .K5LOGIN 5 \*h
+.TH .K5LOGIN 5
 .SH NAME
 .k5login \- Kerberos V5 acl file for host access.
 .SH DESCRIPTION

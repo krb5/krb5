@@ -4,8 +4,7 @@
 .\"
 .\"	@(#)rshd.8c	6.3 (Berkeley) 5/24/86
 .\"
-.so man1/header.doc
-.TH KRSHD 8C \*h
+.TH KRSHD 8C
 .SH NAME
 kshd \- kerberized remote shell server
 .SH SYNOPSIS

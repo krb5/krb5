@@ -23,8 +23,7 @@
 .\"
 .\" KSU was writen by:  Ari Medvinsky, ari@isi.edu
 .\" "
-.so man1/header.doc
-.TH KSU 1 \*h
+.TH KSU 1
 .SH NAME
 ksu \- Kerberized super-user    	
 .SH SYNOPSIS

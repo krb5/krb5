@@ -19,8 +19,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.so man1/header.doc
-.TH KPROPD 8 \*h
+.TH KPROPD 8
 .SH NAME
 kpropd \- Kerberos V5 slave KDC update server
 .SH SYNOPSIS

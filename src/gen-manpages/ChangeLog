@@ -1,3 +1,9 @@
+Tue Sep 10 14:22:14 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install): don't install header.doc
+
+	* k5login.M, kerberos.M: remove ".so man1/header.doc"
+
 Tue Aug 27 16:38:29 1996  Jeff Bigler  <jcb@viola.cygnus.com>
 
 	* Makefile.in (install): Added line to install .k5login man page.

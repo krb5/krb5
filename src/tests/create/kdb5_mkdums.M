@@ -19,8 +19,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.so man1/header.doc
-.TH KDB5_MKDUMS 8 \*h
+.TH KDB5_MKDUMS 8
 .SH NAME
 kdb5_mkdums \- create a new Kerberos V5 principal database
 .SH SYNOPSIS

@@ -16,7 +16,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\"
-.TH KDC.CONF 5 "Kerberos Version 5.0" "MIT Project Athena"
+.TH KDC.CONF 5
 .SH NAME
 kdc.conf \- Kerberos V5 KDC configuration file
 .SH DESCRIPTION

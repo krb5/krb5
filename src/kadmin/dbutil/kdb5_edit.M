@@ -19,7 +19,7 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH KDB5_EDIT 8 "Kerberos Version 5.0" "MIT Project Athena"
+.TH KDB5_EDIT 8
 .SH NAME
 kdb5_edit \- edit a Kerberos V5 principal database
 .SH SYNOPSIS

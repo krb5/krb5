@@ -1,3 +1,7 @@
+Tue Sep 10 14:20:09 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_mkdums.M: remove ".so man1/header.doc"
+
 Thu May  2 21:17:27 1996  Richard Basch  <basch@lehman.com>
 
 	* kdb5_mkdums.c: fixed various abstraction violations where the

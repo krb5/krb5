@@ -17,8 +17,7 @@
 .\"
 .\"	@(#)rcp.1	6.6 (Berkeley) 9/20/88
 .\"
-.so man1/header.doc
-.TH RCP 1 \*h
+.TH RCP 1
 .SH NAME
 rcp \- remote file copy
 .SH SYNOPSIS

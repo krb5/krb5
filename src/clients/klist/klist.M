@@ -18,8 +18,7 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.so man1/header.doc
-.TH KLIST 1 \*h
+.TH KLIST 1
 .SH NAME
 klist \- list cached Kerberos tickets
 .SH SYNOPSIS
