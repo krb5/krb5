@@ -193,7 +193,8 @@ krb5_deltat lifespan;
 #ifndef NOIOSTUFF
  if (retval = krb5_rc_io_creat(&t->d,&t->name))
    return retval;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan)))
+ if (krb5_rc_io_write(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan))
+     || krb5_rc_io_sync(&t->d))
    return KRB5_RC_IO;
 #endif
  return 0;
@@ -256,6 +257,73 @@ char *name;
  return 0;
 }
 
+void krb5_rc_free_entry (rep)
+    krb5_donot_replay **rep;
+{
+    krb5_donot_replay *rp = *rep;
+    
+    *rep = NULL;
+    if (rp) 
+    {
+	if (rp->client)
+	    free(rp->client);
+
+	if (rp->server)
+	    free(rp->server);
+	rp->client = NULL;
+	rp->server = NULL;
+	free(rp);
+    }
+}
+
+krb5_error_code krb5_rc_io_fetch(t, rep, maxlen) 
+    struct dfl_data *t;
+    krb5_donot_replay *rep;
+    int maxlen;
+{
+    int len;
+    krb5_error_code retval;
+    
+    retval = krb5_rc_io_read (&t->d, (krb5_pointer) &len, sizeof(len));
+    if (retval) 
+	return retval;
+    
+    if ((len <= 0) || (len >= maxlen))
+	return KRB5_RC_IO_EOF;
+
+    rep->client = malloc (len);
+    if (!rep->client)
+	return KRB5_RC_MALLOC;
+    
+    retval = krb5_rc_io_read (&t->d, (krb5_pointer) rep->client, len);
+    if (retval) 
+	return retval;
+    
+    retval = krb5_rc_io_read (&t->d, (krb5_pointer) &len, sizeof(len));
+    if (retval) 
+	return retval;
+    
+    if ((len <= 0) || (len >= maxlen))
+	return KRB5_RC_IO_EOF;
+
+    rep->server = malloc (len);
+    if (!rep->server)
+	return KRB5_RC_MALLOC;
+    
+    retval = krb5_rc_io_read (&t->d, (krb5_pointer) rep->server, len);
+    if (retval) 
+	return retval;
+    
+    retval = krb5_rc_io_read (&t->d, (krb5_pointer) &rep->cusec, sizeof(rep->cusec));
+    if (retval)
+	return retval;
+    
+    retval = krb5_rc_io_read (&t->d, (krb5_pointer) &rep->ctime, sizeof(rep->ctime));
+    return retval;
+}
+    
+
+
 krb5_error_code krb5_rc_dfl_recover(id)
 krb5_rcache id;
 {
@@ -267,86 +335,105 @@ krb5_rcache id;
  int i;
  krb5_donot_replay *rep;
  krb5_error_code retval;
+    int max_size;
 
  if (retval = krb5_rc_io_open(&t->d,t->name))
    return retval;
+ 
+    max_size = krb5_rc_io_size(t);
+ 
+    rep = NULL;
  if (krb5_rc_io_read(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan))) {
-     krb5_rc_io_close(&t->d);
-     return KRB5_RC_IO;
+	retval = KRB5_RC_IO;
+	goto io_fail;
  }
 
  /* now read in each auth_replay and insert into table */
  for (;;)
   {
-#define FREE1 FREE(rep);
-#define FREE2 {FREE(rep->client); FREE(rep);}
-#define FREE3 {FREE(rep->server); FREE(rep->client); FREE(rep);}
-#define CLOSE krb5_rc_io_close(&t->d);
-
+	rep = NULL;
    if (krb5_rc_io_mark(&t->d)) {
-     krb5_rc_io_close(&t->d);
-     return KRB5_RC_IO;
+	    retval = KRB5_RC_IO;
+	    goto io_fail;
    }
+	
    if (!(rep = (krb5_donot_replay *) malloc(sizeof(krb5_donot_replay)))) {
-     CLOSE;
-     return KRB5_RC_MALLOC;
-   }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) &i,sizeof(i)))
-    {
-     case KRB5_RC_IO_EOF: FREE1; goto end_loop;
-     case 0: break; default: FREE1; CLOSE; return KRB5_RC_IO; break;
+	    retval = KRB5_RC_MALLOC;
+	    goto io_fail;
     }
-   if (!(rep->client = malloc(i)))
-    { FREE1; CLOSE; return KRB5_RC_MALLOC; }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) rep->client,i))
+	rep->client = NULL;
+	rep->server = NULL;
+	
+	retval = krb5_rc_io_fetch (t, rep, max_size);
+
+	if (retval == KRB5_RC_IO_EOF)
+	    break;
+	else if (retval != 0)
+	    goto io_fail;
+
+	
+	if (alive(rep,t->lifespan) == CMP_EXPIRED) 
     {
-     case KRB5_RC_IO_EOF: FREE2; goto end_loop;
-     case 0: break; default: FREE2; CLOSE; return KRB5_RC_IO; break;
+	    krb5_rc_free_entry(&rep);
+	    continue;
     }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) &i,sizeof(i)))
-    {
-     case KRB5_RC_IO_EOF: FREE2; goto end_loop;
-     case 0: break; default: FREE2; CLOSE; return KRB5_RC_IO; break;
-    }
-   if (!(rep->server = malloc(i)))
-    { FREE2; CLOSE; return KRB5_RC_MALLOC; }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) rep->server,i))
-    {
-     case KRB5_RC_IO_EOF: FREE3; goto end_loop;
-     case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
-    }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) &rep->cusec,sizeof(rep->cusec))) 
-    {
-     case KRB5_RC_IO_EOF: FREE3; goto end_loop;
-     case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
-    }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) &rep->ctime,sizeof(rep->ctime)))
-    {
-     case KRB5_RC_IO_EOF: FREE3; goto end_loop;
-     case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
-    }
-   if (alive(rep,t->lifespan) != CMP_EXPIRED) {
+
      if (store(id,rep) == CMP_MALLOC) {/* can't be a replay */
-       CLOSE; 
-       return KRB5_RC_MALLOC; 
+	    retval = KRB5_RC_MALLOC; goto io_fail;
      } 
      /* store() copies the server & client fields to make sure they don't get
-	stomped on by other callers, so we need to free them */
+	 * stomped on by other callers, so we need to free them */
      FREE(rep->server);
      FREE(rep->client);
-   } else FREE3;			/* don't need it anymore, punt! */
+	rep = NULL;
  }
- end_loop: krb5_rc_io_unmark(&t->d);
+ end_loop:
+    retval = 0;
+    krb5_rc_io_unmark(&t->d);
 /* An automatic expunge here could remove the need for mark/unmark but
-would be inefficient. */
- return 0;
+     * would be inefficient. */
+ io_fail:
+    krb5_rc_free_entry(&rep);
+    if (retval)
+	krb5_rc_io_close(&t->d);
+    return retval;
+ 
 #endif
+}
+
+krb5_error_code krb5_rc_io_store (t, rep)
+    struct dfl_data *t;
+    krb5_donot_replay *rep;
+{
+    int clientlen, serverlen, len;
+    char *buf, *ptr;
+    unsigned long ret;
+
+    clientlen = strlen (rep->client) + 1;
+    serverlen = strlen (rep->server) + 1;
+    len = sizeof(clientlen) + clientlen + sizeof(serverlen) + serverlen +
+	sizeof(rep->cusec) + sizeof(rep->ctime);
+    buf = malloc (len);
+    if (buf == 0)
+	return KRB5_RC_MALLOC;
+    ptr = buf;
+    memcpy(ptr, &clientlen, sizeof(clientlen)); ptr += sizeof(clientlen);
+    memcpy(ptr, rep->client, clientlen); ptr += clientlen;
+    memcpy(ptr, &serverlen, sizeof(serverlen)); ptr += sizeof(serverlen);
+    memcpy(ptr, rep->server, serverlen); ptr += serverlen;
+    memcpy(ptr, &rep->cusec, sizeof(rep->cusec)); ptr += sizeof(rep->cusec);
+    memcpy(ptr, &rep->ctime, sizeof(rep->ctime)); ptr += sizeof(rep->ctime);
+
+    ret = krb5_rc_io_write(&t->d, buf, len);
+    free(buf);
+    return ret;
 }
 
 krb5_error_code krb5_rc_dfl_store(id, rep)
 krb5_rcache id;
 krb5_donot_replay *rep;
 {
+    unsigned long ret;
  struct dfl_data *t = (struct dfl_data *)id->data;
  int i;
 
@@ -360,24 +447,22 @@ krb5_donot_replay *rep;
    default: /* wtf? */ ;
   }
 #ifndef NOIOSTUFF
- i = strlen(rep->client) + 1;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) &i,sizeof(i)))
-   return KRB5_RC_IO;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) rep->client,i))
-   return KRB5_RC_IO;
- i = strlen(rep->server) + 1;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) &i,sizeof(i)))
-   return KRB5_RC_IO;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) rep->server,i))
-   return KRB5_RC_IO;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) &rep->cusec,sizeof(rep->cusec)))
-   return KRB5_RC_IO;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) &rep->ctime,sizeof(rep->ctime)))
-   return KRB5_RC_IO;
+    ret = krb5_rc_io_store (t, rep);
+    if (ret)
+	return ret;
 #endif
  /* Shall we automatically expunge? */
  if (t->nummisses > t->numhits + EXCESSREPS)
+    {
    return krb5_rc_dfl_expunge(id);
+    }
+#ifndef NOIOSTUFF
+    else
+    {
+	if (krb5_rc_io_sync(&t->d))
+	    return KRB5_RC_IO;
+    }
+#endif
  return 0;
 }
 
@@ -437,21 +522,11 @@ krb5_rcache id;
    return KRB5_RC_IO;
  for (q = t->a;q;q = q->na)
   {
-   i = strlen(q->rep.client) + 1;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) &i,sizeof(i)))
-     return KRB5_RC_IO;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) q->rep.client,i))
-     return KRB5_RC_IO;
-   i = strlen(q->rep.server) + 1;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) &i,sizeof(i)))
-     return KRB5_RC_IO;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) q->rep.server,i))
-     return KRB5_RC_IO;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) &q->rep.cusec,sizeof(q->rep.cusec)))
-     return KRB5_RC_IO;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) &q->rep.ctime,sizeof(q->rep.ctime)))
+	if (krb5_rc_io_store (&tmp, &q->rep))
      return KRB5_RC_IO;
   }
+    if (krb5_rc_io_sync(&t->d))
+	return KRB5_RC_IO;
  if (krb5_rc_io_move(&t->d,&tmp))
    return KRB5_RC_IO;
 #endif

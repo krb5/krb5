@@ -26,6 +26,7 @@ static char rcsid_rc_io_c[] =
 #include "rc_io.h"
 #include <krb5/sysincl.h>
 #include <krb5/osconf.h>
+#include <sys/stat.h>
 
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
@@ -83,7 +84,7 @@ char **fn;
  else
   {
       /* %d is max 11 digits (-, 10 digits of 32-bit number)
-	 11 + /krb5_RC + aaa = 24, +6 for slop */
+	 * 11 + /krb5_RC + aaa = 24, +6 for slop */
    if (!(d->fn = malloc(30 + dirlen)))
      return KRB5_RC_IO_MALLOC;
    if (fn)
@@ -109,24 +110,36 @@ char **fn;
      (void) strcpy(*fn,d->fn + dirlen);
   }
  if (d->fd == -1)
+    {
    switch(errno)
     {
-     case EBADF: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
-     case EFBIG: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+	case EFBIG: 
 #ifdef EDQUOT
-     case EDQUOT: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+	case EDQUOT:
 #endif
-     case ENOSPC: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
-     case EIO: FREE(d->fn); return KRB5_RC_IO_IO; break;
-     case EPERM: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     case EACCES: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     case EROFS: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     case EEXIST: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     default: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
+	case ENOSPC: 
+	    retval = KRB5_RC_IO_SPACE; 
+	    goto fail;
+	case EIO: 
+	    retval = KRB5_RC_IO_IO; goto fail;
+
+	case EPERM: 
+	case EACCES: 
+	case EROFS: 
+	case EEXIST: 
+	    retval = KRB5_RC_IO_PERM; goto fail;
+
+	default: 
+	    retval = KRB5_RC_IO_UNKNOWN; goto fail;
     }
- if (retval = krb5_rc_io_write(d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) {
+    }
+    if ((retval = krb5_rc_io_write(d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) ||
+	(retval = krb5_rc_io_sync(d)))
+    {
+    fail:
      (void) unlink(d->fn);
      FREE(d->fn);
+	d->fn = NULL;
      (void) close(d->fd);
      return retval;
  }
@@ -152,7 +165,7 @@ char *fn;
 
      me = getuid();
      /* must be owned by this user, to prevent some security problems with
-	other users modifying replay cache stufff */
+	 * other users modifying replay cache stufff */
      if ((statb.st_uid != me) || ((statb.st_mode & S_IFMT) != S_IFREG)) {
 	 FREE(d->fn);
 	 return KRB5_RC_IO_PERM;
@@ -162,30 +175,44 @@ char *fn;
  if (d->fd == -1) {
    switch(errno)
     {
-     case EBADF: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
-     case EFBIG: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+	case EFBIG: 
 #ifdef EDQUOT
-     case EDQUOT: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+	case EDQUOT:
 #endif
-     case ENOSPC: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
-     case EIO: FREE(d->fn); return KRB5_RC_IO_IO; break;
-     case EPERM: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     case EACCES: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     case EROFS: FREE(d->fn); return KRB5_RC_IO_PERM; break;
-     default: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
+	case ENOSPC:
+	    retval = KRB5_RC_IO_SPACE; 
+	    goto fail;
+
+	case EIO: 
+	    retval = KRB5_RC_IO_IO; 
+	    goto fail;
+
+	case EPERM: 
+	case EACCES:
+	case EROFS: 
+	    retval = KRB5_RC_IO_PERM; 
+	    goto fail;
+
+	    default: 
+	    retval = KRB5_RC_IO_UNKNOWN; 
+	    goto fail;
     }
  }
- if (retval = krb5_rc_io_read(d, (krb5_pointer) &rc_vno,  sizeof(rc_vno))) {
+    if (retval = krb5_rc_io_read(d, (krb5_pointer) &rc_vno,  sizeof(rc_vno)))  
+	goto unlk;
+
+
+    if (ntohs(rc_vno) != KRB5_RC_VNO) 
+    {
+	retval = KRB5_RCACHE_BADVNO;
+    unlk:
+	unlink(d->fn);
+    fail:
      (void) close(d->fd);
      FREE(d->fn); 
+	d->fn = NULL;
      return retval;
  }
- if (ntohs(rc_vno) != KRB5_RC_VNO) {
-     (void) close(d->fd);
-     FREE(d->fn); 
-     return KRB5_RCACHE_BADVNO;
- }
-
  return 0;
 }
 
@@ -218,14 +245,21 @@ int num;
      case EIO: return KRB5_RC_IO_IO; break;
      default: return KRB5_RC_IO_UNKNOWN; break;
     }
- if (fsync(d->fd) == -1)
-   switch(errno)
-    {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; break;
-     case EIO: return KRB5_RC_IO_IO; break;
-     default: return KRB5_RC_IO_UNKNOWN; break;
-    }
  return 0;
+}
+
+krb5_error_code krb5_rc_io_sync (d)
+    krb5_rc_iostuff *d;
+{
+    if (fsync(d->fd) == -1) {
+      switch(errno)
+      {
+      case EBADF: return KRB5_RC_IO_UNKNOWN; break;
+      case EIO: return KRB5_RC_IO_IO; break;
+      default: return KRB5_RC_IO_UNKNOWN; break;
+      }
+    }
+    return 0;
 }
 
 krb5_error_code krb5_rc_io_read (d, buf, num)
@@ -250,6 +284,7 @@ krb5_error_code krb5_rc_io_close (d)
 krb5_rc_iostuff *d;
 {
  FREE(d->fn);
+ d->fn = NULL;
  if (close(d->fd) == -1) /* can't happen */
    return KRB5_RC_IO_UNKNOWN;
  return 0;
@@ -284,3 +319,15 @@ krb5_rc_iostuff *d;
  (void) lseek(d->fd,d->mark,L_SET); /* if it fails, tough luck */
  return 0;
 }
+
+int krb5_rc_io_size (d)
+    krb5_rc_iostuff *d;
+{
+    struct stat statb;
+    
+    if (fstat (d->fd, &statb) == 0)
+	return statb.st_size;
+    else
+	return 0;
+}
+    
