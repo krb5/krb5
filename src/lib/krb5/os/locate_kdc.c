@@ -86,7 +86,7 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
 		if (udpport)		/* must have gotten a port # */
 		for (j=0; hp->h_addr_list[j]; j++) {
 		    sin_p = (struct sockaddr_in *) &addr_p[out++];
-		    memset ((char *)sin_p, sizeof(struct sockaddr), 0);
+		    memset ((char *)sin_p, 0, sizeof(struct sockaddr));
 		    sin_p->sin_family = hp->h_addrtype;
 		    sin_p->sin_port = udpport;
 		    memcpy((char *)&sin_p->sin_addr,
