@@ -1,3 +1,7 @@
+Fri Feb  3 07:50:14 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* adm_v4_pwd.c: Don't use BITS64, use SIZEOF_LONG
+
 Wed Feb 01 22:05:35 1995  Chris Provenzano (proven@mit.edu)
 
 	* adm_process.c, adm_extern.h (cpw_keyproc()) Added 

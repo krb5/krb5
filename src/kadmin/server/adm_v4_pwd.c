@@ -422,7 +422,7 @@ int maxlen;                     /* maximum length of st */
 {
     u_long temp = 0;            /* to hold the net order short */
 
-#ifdef BITS64
+#if (SIZEOF_LONG == 4)
     if (loc + 4 > maxlen)
 	return(-1);
     (void) memcpy((char *) &temp + 4, (char *) ((u_long)st + (u_long)loc), 4);
