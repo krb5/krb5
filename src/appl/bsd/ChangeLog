@@ -1,3 +1,10 @@
+2000-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (try_convert524): Add use_ccache argument.  Handle case
+	where we have gotten v5 creds via password being entered and don't
+	crash in that case, since previous code was assuming that v5 creds
+	were always being provided.  Adapted from patch by Bob Basch.
+
 2000-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* krcp.c (main): Fix logic again, this time in the "success"

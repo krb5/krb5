@@ -816,7 +816,7 @@ void doit(f, fromp)
 				    stripdomain, always_ip,
 				    &rhost_sane);
     if (retval)
-        fatalperror(2, "failed make_sane_hostname");
+        fatalperror(f, "failed make_sane_hostname");
     if (passwd_req)
         execl(login_program, "login", "-p", "-h", rhost_sane,
           lusername, 0);
@@ -826,8 +826,9 @@ void doit(f, fromp)
 #else /* USE_LOGIN_F */
 	execl(login_program, "login", "-r", rhost_sane, 0);
 #endif /* USE_LOGIN_F */
-	
-	fatalperror(2, login_program);
+	syslog(LOG_ERR, "failed exec of %s: %s",
+	       login_program, error_message(errno));
+	fatalperror(f, login_program);
 	/*NOTREACHED*/
     } /* if (pid == 0) */
 
