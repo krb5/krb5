@@ -1,3 +1,9 @@
+2000-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_decode_test.c (main): Add new test cases for indefinite
+	length ticket and as_rep.  Fix up calls to decode_run() to have
+	the modifier be in the description parameter.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktest.c (ktest_make_sample_etype_info): Use KRB5_ETYPE_NO_SALT
