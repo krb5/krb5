@@ -390,7 +390,7 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
 		return FALSE;
 	    }
 
-	    out_path = (char *) xcalloc( MAXPATHLEN, sizeof (char));
+	    out_path = (char *) xmalloc(strlen(tc) + strlen(fcmd) + 2);
 	    sprintf(out_path,"%s/%s",tc, fcmd );
 
 	    tmp_fcmd[i] = out_path;
@@ -506,12 +506,14 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
     }
 
     if (retbool == FALSE ){
-	err = (char *) xcalloc((80 +max_ln*i) ,sizeof(char));
-	sprintf(err,"Error: not found -> ");
+	err = (char *) xmalloc((80 + (max_ln+2)*i) ,sizeof(char));
+	strcpy(err,"Error: not found -> ");
 	for(j= 0; j < i; j ++){
-	    sprintf(err,"%s %s ", err, fcmd_arr[j]);
+	    strcat(err, " ");
+	    strcat(err, fcmd_arr[j]);
+	    strcat(err, " ");
 	}
-	sprintf(err,"%s\n", err);
+	strcat(err, "\n");
 	*err_out = err;
     }
 

@@ -614,7 +614,7 @@ char * dir_of_cc_source;
 
 		/* Run authorization as target.*/
 		if (krb5_seteuid(target_uid)) {
-		  com_err(prog_name, errno, "whiel switching to target for authorization check");
+		  com_err(prog_name, errno, "while switching to target for authorization check");
 		    sweep_up(ksu_context, use_source_cache, cc_target);
 		  exit(1);
 		}
@@ -890,8 +890,13 @@ char *p, *ttyname();
 static char buf[MAXPATHLEN + 4];
 
        buf[0] = 0;
-       if ((p = ttyname(STDERR_FILENO)))
+       if ((p = ttyname(STDERR_FILENO))) {
+	   if (strlen (p) > MAXPATHLEN) {
+	       fprintf (stderr, "terminal name %s too long\n", p);
+	       exit (1);
+	   }
 	   sprintf(buf, " on %s", p);
+       }
        return (buf);
 }
 

@@ -444,8 +444,11 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     } else
 	my_creds.times.renew_till = 0;
 
-
-	 (void) sprintf(prompt,"Kerberos password for %s: ", (char *) client_name);
+	 (void) sprintf(prompt,"Kerberos password for %s: ", client_name);
+	 if (strlen (client_name) + 80 > sizeof (password)) {
+	     fprintf (stderr, "principal name %s too long\n", client_name);
+	     return FALSE;
+	 }
 
 	 pwsize = sizeof(password);
 
