@@ -164,15 +164,18 @@ char copyright[] =
 #include <sys/tty.h>
 #endif
 
-#ifndef HAVE_SYS_PTYVAR_H
+#ifdef HAVE_STREAMS
+/* but solaris actually uses packet mode, so the real macros are needed too */
+#include <sys/ptyvar.h>
+#endif
+
+#ifndef TIOCPKT_NOSTOP
 /* These values are over-the-wire protocol, *not* local values */
 #define TIOCPKT_NOSTOP          0x10
 #define TIOCPKT_DOSTOP          0x20
 #define TIOCPKT_FLUSHWRITE      0x02
-#else
-/* but solaris actually uses packet mode, so the real macros are needed too */
-#include <sys/ptyvar.h>
 #endif
+
 
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
