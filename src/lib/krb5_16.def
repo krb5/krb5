@@ -90,6 +90,7 @@ EXPORTS
 	krb5_rd_rep
 	krb5_rd_req
 	krb5_rd_safe
+	krb5_read_password
 	krb5_recvauth
 	krb5_sendauth
 	krb5_sname_to_principal
