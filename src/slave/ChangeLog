@@ -1,3 +1,8 @@
+Thu Aug  4 15:15:00 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in:
+	* kpropd.c: include <sgtty.h> only if POSIX_TERMIOS is not defined
+
 Sat Jul 16 00:01:41 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* kpropd.c (do_standalone): Replace detach_process() with call to

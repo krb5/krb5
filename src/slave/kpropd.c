@@ -40,7 +40,9 @@ static char rcsid_kpropd_c[] =
 #include <sys/file.h>
 #include <signal.h>
 #include <string.h>
+#ifndef POSIX_TERMIOS
 #include <sgtty.h>
+#endif
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>
