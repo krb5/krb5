@@ -1,3 +1,7 @@
+2002-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* sim_client.c: Include errno.h.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* sim_client.c: Make prototypes unconditional.
