@@ -68,7 +68,7 @@ char *argv[];
     }
 
     /* clear out the structure first */
-    (void) bzero((char *)&sin, sizeof(sin));
+    (void) memset((char *)&sin, 0, sizeof(sin));
 
     /* find the port number for knetd */
     sp = getservbyname(SAMPLE_SERVICE, "tcp");
