@@ -41,6 +41,7 @@
 #define krb5_dbm_db_iterate krb5_db_iterate
 #define krb5_dbm_db_lock krb5_db_lock
 #define krb5_dbm_db_unlock krb5_db_unlock
+#define krb5_dbm_db_set_lockmode krb5_db_set_lockmode
 
 /* libkdb.spec */
 krb5_error_code krb5_dbm_db_set_name PROTOTYPE((char * ));
