@@ -1,3 +1,7 @@
+2004-05-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Generate a makefile in util/support.
+
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (CONFIG_RULES): Invoke KRB5_LIB_PARAMS and

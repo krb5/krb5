@@ -150,4 +150,4 @@ dnl fi
 
 AC_CONFIG_SUBDIRS(kadmin clients appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
-V5_AC_OUTPUT_MAKEFILE(. util util/send-pr lib kdc slave krb524 config-files gen-manpages)
+V5_AC_OUTPUT_MAKEFILE(. util util/support util/send-pr lib kdc slave krb524 config-files gen-manpages)
