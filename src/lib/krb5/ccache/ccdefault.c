@@ -116,8 +116,4 @@ krb5int_cc_default(context, ccache)
 #endif
 
     return krb5_cc_default (context, ccache);
-}    retval = krb5_cc_resolve(context, krb5_cc_default_name(context), ccache);
-    if (!retval && ccache && !os_ctx->default_ccprincipal) {
-    	/* We got a ccache... remember what principal is associated with it */
-    		os_ctx->default_ccprincipal = 0;
-    }
+}
