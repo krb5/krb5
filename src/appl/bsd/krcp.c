@@ -126,16 +126,11 @@ struct buffer {
 
 #define	NULLBUF	(struct buffer *) 0
   
-#ifdef HAVE_STDARG_H
-void 	error KRB5_STDARG_P((char *fmt, ...))
+void 	error (char *fmt, ...)
 #if !defined (__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
        __attribute__ ((__format__ (__printf__, 1, 2)))
 #endif
      ;
-#else
-/*VARARGS*/
-void	error KRB5_STDARG_P((char *, va_list));
-#endif
 
 #define	ga()	 	(void) rcmd_stream_write(rem, "", 1, 0)
 

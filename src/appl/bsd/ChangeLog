@@ -1,3 +1,7 @@
+2001-01-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krcp.c (error): Always declare with ellipsis.
+
 2001-01-13  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in: Force SunOS to not use termios.
