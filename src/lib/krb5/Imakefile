@@ -51,3 +51,5 @@ SRCS =	\
 MakeSubdirs($(SUBDIRS))
 
 AdditiveLibraryTarget(krb5,$(OBJS))
+
+RanlibLibraryTarget(des5)
