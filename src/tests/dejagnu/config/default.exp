@@ -1387,7 +1387,7 @@ proc start_kerberos_daemons { standalone } {
     set tailf_spawn_id $spawn_id
     set tailf_pid [exp_pid]
 
-    set markstr "===MARK $tailf_pid [exec date] ==="
+    set markstr "===MARK $tailf_pid [clock format [clock seconds]] ==="
     sleep 2
     set f [open $kdc_lfile a]
     puts $f $markstr
@@ -1484,7 +1484,7 @@ proc start_kerberos_daemons { standalone } {
     set tailf_spawn_id $spawn_id
     set tailf_pid [exp_pid]
 
-    set markstr "===MARK $tailf_pid [exec date] ==="
+    set markstr "===MARK $tailf_pid [clock format [clock seconds]] ==="
     sleep 2
     set f [open $kadmind_lfile a]
     puts $f $markstr

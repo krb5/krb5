@@ -1,3 +1,8 @@
+2005-01-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Format date internally
+	rather than running "date".
+
 2004-06-17  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (setup_krb5_conf): Default to not using SRV records
