@@ -1,3 +1,13 @@
+2004-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y (getline): Merge Athena change to reject MICed
+	password.
+
+	* ftpd.M: Document '-E'.
+
+	* ftpd.c (main): Merge Athena's '-E' changes to prohibit
+	unencrypted passwords.
+
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (ftpd): Use UTIL_LIB.
