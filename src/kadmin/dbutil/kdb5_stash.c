@@ -38,16 +38,6 @@ extern kadm5_config_params global_params;
 
 extern int exit_status;
 
-static void
-usage(who, status)
-char *who;
-int status;
-{
-    fprintf(stderr, "usage: %s [-f keyfile]\n", who);
-    exit_status++; return; 
-}
-
-
 void
 kdb5_stash(argc, argv)
 int argc;
@@ -86,7 +76,7 @@ char *argv[];
 	    break;
 	case '?':
 	default:
-	    usage(argv[0], 1);
+	    usage();
 	    return;
 	}
     }

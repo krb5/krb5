@@ -51,7 +51,7 @@ char *str_ENCRYPT_KEY =
 	"while calling encrypt key for %s."; /* principal name */
 
 char *str_PUT_PRINC =
-	"while calling storing %s in Kerberos database.";  /* principal name */
+	"while storing %s in Kerberos database.";  /* principal name */
 
 char *str_CREATING_POLICY_DB = "while creating/opening admin policy database.";
 

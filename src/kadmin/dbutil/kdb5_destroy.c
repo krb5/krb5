@@ -40,14 +40,6 @@ extern kadm5_config_params global_params;
 char *yes = "yes\n";			/* \n to compare against result of
 					   fgets */
 
-static void
-usage(who, status)
-    char *who;
-    int status;
-{
-    fprintf(stderr, "usage: %s [-f]\n", who);
-}
-
 void
 kdb5_destroy(argc, argv)
     int argc;
@@ -79,7 +71,7 @@ kdb5_destroy(argc, argv)
 	    break;
 	case '?':
 	default:
-	    usage(argv[0], 1);
+	    usage();
 	    return;
 	    /*NOTREACHED*/
 	}

@@ -49,21 +49,19 @@ krb5_context util_context;
 osa_adb_policy_t policy_db;
 kadm5_config_params global_params;
 
-/*
- * Script input, specified by -s.
- */
-FILE *scriptfile = (FILE *) NULL;
-
-static void
-usage(who, status)
-    char *who;
-    int status;
+usage()
 {
-    fprintf(stderr,
-	    "usage: %s [-d dbpathname ] [-r realmname] [-R request ]\n",
-	    who);
-    fprintf(stderr, "\t [-k enctype] [-M mkeyname] [-f stashfile]\n");
-    exit(status);
+     fprintf(stderr, "Usage: "
+	   "kdb5_util cmd [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
+	     "\t         [-m] [cmd options]\n"
+	     "\tcreate	[-s]\n"
+	     "\tdestroy	[-f]\n"
+	     "\tstash	[-f keyfile]\n"
+	     "\tdump	[-old] [-ov] [-b6] [-verbose] [filename	[princs...]]\n"
+	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
+	     "\tdump_v4	[filename]\n"
+	     "\tload_v4	[-t] [-n] [-K] [-f] inputfile\n");
+     exit(1);
 }
 
 krb5_keyblock master_keyblock;
@@ -77,14 +75,55 @@ char *progname;
 krb5_boolean manual_mkey = FALSE;
 krb5_boolean dbactive = FALSE;
 
-char *kdb5_util_Init(argc, argv)
+int kdb5_create(int, char **);
+int kdb5_destroy(int, char **);
+int kdb5_stash(int, char **);
+int dump_db(int, char **);
+int load_db(int, char **);
+int dump_v4db(int, char **);
+int load_v4db(int, char **);
+   
+typedef int (*cmd_func)(int, char **);
+
+struct _cmd_table {
+     char *name;
+     cmd_func func;
+     int opendb;
+} cmd_table[] = {
+     "create", kdb5_create, 0,
+     "destroy", kdb5_destroy, 1,
+     "stash", kdb5_stash, 1,
+     "dump", dump_db, 1,
+     "load", load_db, 0,
+     "dump_v4", dump_v4db, 1,
+     "load_v4", load_v4db, 0,
+     NULL, NULL, 0,
+};
+
+struct _cmd_table *cmd_lookup(name)
+   char *name;
+{
+     struct _cmd_table *cmd = cmd_table;
+     while (cmd->name) {
+	  if (strcmp(cmd->name, name) == 0)
+	       return cmd;
+	  else
+	       cmd++;
+     }
+     
+     return NULL;
+}
+
+#define ARG_VAL (--argc > 0 ? optarg = *(++argv) : (usage(), NULL))
+     
+int main(argc, argv)
     int argc;
     char *argv[];
 {
-    extern char *optarg;	
-    int optchar;
+    struct _cmd_table *cmd = NULL;
+    char *optarg, **cmd_argv;	
+    int cmd_argc;
     krb5_error_code retval;
-    char *request = NULL;
 
     retval = krb5_init_context(&util_context);
     if (retval) {
@@ -95,26 +134,25 @@ char *kdb5_util_Init(argc, argv)
     krb5_init_ets(util_context);
     initialize_adb_error_table();
 
-    if (strrchr(argv[0], '/'))
-	argv[0] = strrchr(argv[0], '/')+1;
+    progname = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);
 
-    progname = argv[0];
-
-    while ((optchar = getopt(argc, argv, "P:d:a:r:R:k:M:e:ms:f:")) != EOF) {
-	switch(optchar) {
-        case 'P':		/* Only used for testing!!! */
+    cmd_argv = (char **) malloc(sizeof(char *)*argc);
+    if (cmd_argv == NULL) {
+	 com_err(progname, ENOMEM, "while creating sub-command arguments");
+	 exit(1);
+    }
+    memset(cmd_argv, 0, sizeof(char *)*argc);
+    cmd_argc = 1;
+	 
+    argv++; argc--;
+    while (*argv) {
+       if (strcmp(*argv, "-P") == 0 && ARG_VAL) {
 	    mkey_password = optarg;
 	    manual_mkey = TRUE;
-	    break;
-	case 'd':
+       } else if (strcmp(*argv, "-d") == 0 && ARG_VAL) {
 	    global_params.dbname = optarg;
 	    global_params.mask |= KADM5_CONFIG_DBNAME;
-	    break;
-       case 'a':
-	    global_params.admin_dbname = optarg;
-	    global_params.mask |= KADM5_CONFIG_ADBNAME;
-	    break;
-	case 'r':
+       } else if (strcmp(*argv, "-r") == 0 && ARG_VAL) {
 	    global_params.realm = optarg;
 	    global_params.mask |= KADM5_CONFIG_REALM;
 	    /* not sure this is really necessary */
@@ -123,43 +161,35 @@ char *kdb5_util_Init(argc, argv)
 		 com_err(progname, retval, "while setting default realm name");
 		 exit(1);
 	    }
-	    break;
-        case 'R':
-	    request = optarg;
-	    break;
-	case 'k':
+       } else if (strcmp(*argv, "-k") == 0 && ARG_VAL) {
 	    if (krb5_string_to_enctype(optarg, &global_params.enctype))
 		 com_err(argv[0], 0, "%s is an invalid enctype", optarg);
-	    global_params.mask |= KADM5_CONFIG_ENCTYPE;
-	    break;
-	case 'M':			/* master key name in DB */
+	    else
+		 global_params.mask |= KADM5_CONFIG_ENCTYPE;
+       } else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
 	    global_params.mkey_name = optarg;
 	    global_params.mask |= KADM5_CONFIG_MKEY_NAME;
-	    break;
-	case 'm':
+       } else if (strcmp(*argv, "-f") == 0 && ARG_VAL) {
+	    global_params.stash_file = optarg;
+	    global_params.mask |= KADM5_CONFIG_STASH_FILE;
+       } else if (strcmp(*argv, "-m") == 0) {
 	    manual_mkey = TRUE;
 	    global_params.mkey_from_kbd = 1;
 	    global_params.mask |= KADM5_CONFIG_MKEY_FROM_KBD;
-	    break;
-	case 's':
-	    /* Open the script file */
-	    if (!(scriptfile = fopen(optarg, "r"))) {
-		com_err(argv[0], errno, "while opening script file %s",
-			optarg);
-		exit(1);
-	    }
-	    break;
-	case 'f':
-	    global_params.stash_file = optarg;
-	    global_params.mask |= KADM5_CONFIG_STASH_FILE;
-	    break;
-	case '?':
-	default:
-	    usage(progname, 1);
-	    /*NOTREACHED*/
-	}
+       } else if (cmd_lookup(*argv) != NULL) {
+	    if (cmd_argv[0] == NULL)
+		 cmd_argv[0] = *argv;
+	    else
+		 usage();
+       } else {
+	    cmd_argv[cmd_argc++] = *argv;
+       }
+       argv++; argc--;
     }
 
+    if (cmd_argv[0] == NULL)
+	 usage();
+    
     if (retval = kadm5_get_config_params(util_context, NULL, NULL,
 					 &global_params, &global_params)) {
 	 com_err(argv[0], retval, "while retreiving configuration parameters");
@@ -168,9 +198,7 @@ char *kdb5_util_Init(argc, argv)
 
     /*
      * Dump creates files which should not be world-readable.  It is
-     * easiest to do a single umask call here; any shells run by the
-     * ss command interface will have umask = 77 but that is not a
-     * serious problem.
+     * easiest to do a single umask call here.
      */
     (void) umask(077);
 
@@ -190,11 +218,12 @@ char *kdb5_util_Init(argc, argv)
 			 master_keyblock.enctype);
     }
 
+    cmd = cmd_lookup(cmd_argv[0]);
+    if (cmd->opendb && open_db_and_mkey())
+	 return exit_status;
 
-    open_db_and_mkey();
-
-    exit_status = 0;	/* It's OK if we get errors in open_db_and_mkey */
-    return request;
+    (*cmd->func)(cmd_argc, cmd_argv);
+    return exit_status;
 }
 
 #if 0

@@ -85,6 +85,7 @@ typedef struct _dump_version {
      char *name;
      char *header;
      int updateonly;
+     int create_kadm5_princs;
      dump_func dump_princ;
      osa_adb_iter_policy_func dump_policy;
      load_func load_record;
@@ -94,6 +95,7 @@ dump_version old_version = {
      "Kerberos version 5 old format",
      "kdb5_edit load_dump version 2.0\n",
      0,
+     1,
      dump_k5beta_iterator,
      NULL,
      process_k5beta_record,
@@ -102,6 +104,7 @@ dump_version beta6_version = {
      "Kerberos version 5 beta 6 format",
      "kdb5_edit load_dump version 3.0\n",
      0,
+     1,
      dump_k5beta6_iterator,
      NULL,
      process_k5beta6_record,
@@ -110,6 +113,7 @@ dump_version beta7_version = {
      "Kerberos version 5",
      "kdb5_util load_dump version 4\n",
      0,
+     0,
      dump_k5beta7_princ,
      dump_k5beta7_policy,
      process_k5beta7_record,
@@ -117,6 +121,7 @@ dump_version beta7_version = {
 dump_version ov_version = {
      "OpenV*Secure V1.0",
      "OpenV*Secure V1.0\t",
+     1,
      1,
      dump_ov_princ,
      dump_k5beta7_policy,
@@ -185,7 +190,6 @@ static const char read_ktypelen[] = "key data type and length";
 static const char read_econtents[] = "extra data contents";
 static const char k5beta_fmt_name[] = "Kerberos version 5 old format";
 static const char standard_fmt_name[] = "Kerberos version 5 format";
-static const char lusage_err_fmt[] = "%s: usage is %s [%s] [%s] [%s] filename dbname [admin_dbname]\n";
 static const char no_name_mem_fmt[] = "%s: cannot get memory for temporary name\n";
 static const char ctx_err_fmt[] = "%s: cannot initialize Kerberos context\n";
 static const char stdin_name[] = "standard input";
@@ -904,8 +908,8 @@ dump_db(argc, argv)
     }
 
     /*
-     * Attempt to open the database.  The policy database only has to
-     * be opened if we try a dump that uses it.
+     * Make sure the database is open.  The policy database only has
+     * to be opened if we try a dump that uses it.
      */
     if (!dbactive || (dump->dump_policy != NULL && policy_db == NULL)) {
 	com_err(argv[0], 0, Err_no_database);
@@ -966,7 +970,7 @@ dump_db(argc, argv)
 		     error_message(kret));
 	     exit_status++;
 	}
-	if (ofile && !exit_status) {
+	if (ofile && ofile != stdout && !exit_status) {
 	     fclose(f);
 	     update_ok_file(ofile);
 	}
@@ -1843,8 +1847,7 @@ restore_dump(programname, kcontext, dumpfile, f, verbose, dump, pol_db)
 }
 
 /*
- * Usage is
- * load_db [-old] [-verbose] [-update] filename dbname
+ * Usage: load_db [-old] [-ov] [-b6] [-verbose] [-update] filename
  */
 void
 load_db(argc, argv)
@@ -1874,7 +1877,8 @@ load_db(argc, argv)
     if (strrchr(programname, (int) '/'))
 	programname = strrchr(argv[0], (int) '/') + 1;
     dumpfile = (char *) NULL;
-    dbname = (char *) NULL;
+    dbname = global_params.dbname;
+    adbname = global_params.admin_dbname;
     load = NULL;
     update = 0;
     verbose = 0;
@@ -1886,6 +1890,8 @@ load_db(argc, argv)
 	     load = &old_version;
 	else if (!strcmp(argv[aindex], b6option))
 	     load = &beta6_version;
+	else if (!strcmp(argv[aindex], ovoption))
+	     load = &ov_version;
 	else if (!strcmp(argv[aindex], verboseoption))
 	    verbose = 1;
 	else if (!strcmp(argv[aindex], updateoption))
@@ -1893,16 +1899,12 @@ load_db(argc, argv)
 	else
 	    break;
     }
-    if ((argc - aindex) != 2 && (argc - aindex) != 3) {
-	fprintf(stderr, lusage_err_fmt, argv[0], argv[0],
-		oldoption, verboseoption, updateoption);
-	exit_status++;
+    if ((argc - aindex) != 1) {
+	usage();
 	return;
     }
-
     dumpfile = argv[aindex];
-    dbname = argv[aindex+1];
-    adbname = argv[aindex+2];
+
     if (!(dbname_tmp = (char *) malloc(strlen(dbname)+
 				       strlen(dump_tmptrail)+1))) {
 	fprintf(stderr, no_name_mem_fmt, argv[0]);
@@ -1976,13 +1978,6 @@ load_db(argc, argv)
 	      if (dumpfile) fclose(f);
 	      return;
 	 }
-
-	 if (load->dump_policy == NULL && adbname != NULL) {
-	      fprintf(stderr, lusage_err_fmt, argv[0], argv[0],
-		      oldoption, verboseoption, updateoption);
-	      exit_status++;
-	      return;
-	 }
     }
     if (load->updateonly && !update) {
 	 fprintf(stderr, "%s: dump version %s can only be loaded in "
@@ -1992,30 +1987,14 @@ load_db(argc, argv)
     }
 
     /*
-     * Cons up config params for new policy database.  Use adbname if
-     * specified, otherwise let the policy dbname key off the dbname.
-     * However, after the name is retrieved, if we are not in update
-     * mode change the actual file name to a temp name that we'll
+     * Cons up params for the new databases.  If we are not in update
+     * mode change the actual file name to temp names that we'll
      * rename later (but use the correct lock file).
      */
     newparams = global_params;
-    newparams.mask &= ~(KADM5_CONFIG_ADBNAME | KADM5_CONFIG_ADB_LOCKFILE);
-    newparams.dbname = dbname;
-    newparams.mask |= KADM5_CONFIG_DBNAME;
-    if (adbname) {
-	 newparams.admin_dbname = adbname;
-	 newparams.mask |= KADM5_CONFIG_ADBNAME;
-    }
-    if (kret = kadm5_get_config_params(kcontext, NULL, NULL, &newparams,
-				       &newparams)) {
-	 fprintf(stderr, "%s while retrieiving configuration "
-		 "parameters.\n", error_message(kret));
-	 if (dumpfile) fclose(f);
-	 exit_status++;
-	 return;
-    }
     adbname_real = newparams.admin_dbname;
     if (! update) {
+	 newparams.dbname = dbname_tmp;
 	 newparams.admin_dbname = (char *) malloc(strlen(adbname_real) +
 						  strlen(dump_tmptrail) + 1);
 	 strcpy(newparams.admin_dbname, adbname_real);
@@ -2031,7 +2010,7 @@ load_db(argc, argv)
      */
     if (!update && (kret = krb5_db_create(kcontext, dbname_tmp))) {
 	 fprintf(stderr, dbcreaterr_fmt,
-		 programname, dbname, error_message(kret));
+		 programname, dbname_tmp, error_message(kret));
 	 exit_status++;
 	 kadm5_free_config_params(kcontext, &newparams);
 	 if (dumpfile) fclose(f);
@@ -2045,16 +2024,7 @@ load_db(argc, argv)
 	 if (dumpfile) fclose(f);
 	 return;
     }
-    if (!update && (load != &beta7_version) &&
-	(kret = kadm5_create_magic_princs(&newparams, kcontext))) {
-	 fprintf(stderr, "%s: %s while creating KADM5 principals\n",
-		 programname, error_message(kret));
-	 exit_status++;
-	 kadm5_free_config_params(kcontext, &newparams);
-	 if (dumpfile) fclose(f);
-	 return;
-    }
-	 
+
     /*
      * Point ourselves at the new databases.
      */
@@ -2107,6 +2077,14 @@ load_db(argc, argv)
 		 programname, error_message(kret));
 	 exit_status++;
     }
+
+    if (!update && load->create_kadm5_princs &&
+	(kret = kadm5_create_magic_princs(&newparams, kcontext))) {
+	 /* error message printed by create_magic_princs */
+	 exit_status++;
+    }
+    
+    /* close policy db below */
 
 error:
     /*
@@ -2183,13 +2161,10 @@ error:
 	 fclose(f);
     }
 
-    if (adbname_real) {
-	 if (adbname_real != newparams.admin_dbname) {
-	      free(newparams.admin_dbname);
-	      newparams.admin_dbname = adbname_real;
-	 }
-	 kadm5_free_config_params(kcontext, &newparams);
+    if (adbname_real && adbname_real != newparams.admin_dbname) {
+	 free(newparams.admin_dbname);
     }
+
     if (dbname_tmp)
 	 free(dbname_tmp);
     krb5_free_context(kcontext);

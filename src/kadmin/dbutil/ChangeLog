@@ -1,3 +1,8 @@
+Mon Aug  5 14:36:47 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
+
+	* all files: reworked for non-ss usage; kdb5_util_ct.ct and
+        ss_wrapper.c are now obsolete
+
 Thu Aug  1 14:34:51 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
 
 	* dump.c, kadm5_create.c, kdb5_create.c: create policy database

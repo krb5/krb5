@@ -88,17 +88,6 @@ static krb5_error_code fixup_database PROTOTYPE((krb5_context, char *));
 	
 static int create_local_tgt = 0;
 
-static void
-usage(who, status)
-char *who;
-int status;
-{
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k enctype]\n\
-\t[-M mkeyname] -f inputfile\n",
-	    who);
-    return;
-}
-
 static krb5_keyblock master_keyblock;
 static krb5_principal master_princ;
 static krb5_encrypt_block master_encblock;
@@ -145,7 +134,6 @@ char *argv[];
     char *mkey_name = 0;
     char *mkey_fullname;
     char *defrealm;
-    int enctypedone = 0;
     int v4manual = 0;
     int read_mkey = 0;
     int tempdb = 0;
@@ -167,19 +155,11 @@ char *argv[];
     persist = 1;
     op_ind = 1;
     while (persist && (op_ind < argc)) {
-	if (!strcmp(argv[op_ind], "-d") && ((argc - op_ind) >= 2)) {
-	    dbname = argv[op_ind+1];
-	    op_ind++;
-	}
-	else if (!strcmp(argv[op_ind], "-T")) {
+	if (!strcmp(argv[op_ind], "-T")) {
 	    create_local_tgt = 1;
 	}
 	else if (!strcmp(argv[op_ind], "-t")) {
 	    tempdb = 1;
-	}
-	else if (!strcmp(argv[op_ind], "-r") && ((argc - op_ind) >= 2)) {
-	    realm = argv[op_ind+1];
-	    op_ind++;
 	}
 	else if (!strcmp(argv[op_ind], "-K")) {
 	    read_mkey = 1;
@@ -187,25 +167,12 @@ char *argv[];
 	else if (!strcmp(argv[op_ind], "-v")) {
 	    verbose = 1;
 	}
-	else if (!strcmp(argv[op_ind], "-k") && ((argc - op_ind) >= 2)) {
-	    if (!krb5_string_to_enctype(argv[op_ind+1],
-					&master_keyblock.enctype))
-		enctypedone++;
-	    else
-		com_err(argv[0], 0, "%s is an invalid enctype",
-			argv[op_ind+1]);
-	    op_ind++;
-	}
-	else if (!strcmp(argv[op_ind], "-M") && ((argc - op_ind) >= 2)) {
-	    mkey_name = argv[op_ind+1];
-	    op_ind++;
-	}
 	else if (!strcmp(argv[op_ind], "-n")) {
 	    v4manual++;
 	}
 	else if (!strcmp(argv[op_ind], "-f") && ((argc - op_ind) >= 2)) {
 	    if (v4dbname) {
-		usage(PROGNAME, 1);
+		usage();
 		return;
 	    }
 	    v4dumpfile = argv[op_ind+1];
@@ -216,59 +183,20 @@ char *argv[];
 	op_ind++;
     }
 
-    /*
-     * Attempt to read the KDC profile.  If we do, then read appropriate values
-     * from it and augment values supplied on the command line.
-     */
-    if (!(retval = krb5_read_realm_params(context,
-					  realm,
-					  (char *) NULL,
-					  (char *) NULL,
-					  &rparams))) {
-	/* Get the value for the database */
-	if (rparams->realm_dbname && !dbname)
-	    dbname = strdup(rparams->realm_dbname);
-
-	/* Get the value for the master key name */
-	if (rparams->realm_mkey_name && !mkey_name)
-	    mkey_name = strdup(rparams->realm_mkey_name);
-
-	/* Get the value for the master key type */
-	if (rparams->realm_enctype_valid && !enctypedone) {
-	    master_keyblock.enctype = rparams->realm_enctype;
-	    enctypedone++;
-	}
-
-	/* Get the value for the stashfile */
-	if (rparams->realm_stash_file)
-	    stash_file = strdup(rparams->realm_stash_file);
-
-	/* Get the value for maximum ticket lifetime. */
-	if (rparams->realm_max_life_valid)
-	    rblock.max_life = rparams->realm_max_life;
-
-	/* Get the value for maximum renewable ticket lifetime. */
-	if (rparams->realm_max_rlife_valid)
-	    rblock.max_rlife = rparams->realm_max_rlife;
-
-	/* Get the value for the default principal expiration */
-	if (rparams->realm_expiration_valid)
-	    rblock.expiration = rparams->realm_expiration;
-
-	/* Get the value for the default principal flags */
-	if (rparams->realm_flags_valid)
-	    rblock.flags = rparams->realm_flags;
-
-	krb5_free_realm_params(context, rparams);
-    }
+    realm = global_params.realm;
+    dbname = global_params.dbname;
+    mkey_name = global_params.mkey_name;
+    master_keyblock.enctype = global_params.enctype;
+    stash_file = strdup(global_params.stash_file);
+    rblock.max_life = global_params.max_life;
+    rblock.max_rlife = global_params.max_rlife;
+    rblock.expiration = global_params.expiration;
+    rblock.flags = global_params.flags;
 
     if (!v4dumpfile) {
-	usage(PROGNAME, 1);
+	usage();
 	return;
     }
-
-    if (!enctypedone)
-	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
     if (!valid_enctype(master_keyblock.enctype)) {
 	com_err(PROGNAME, KRB5_PROG_KEYTYPE_NOSUPP,

@@ -1,7 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS) -DKDB4_DISABLE -I. $(LOCALINCLUDE) @KRB4_INCLUDES@ 
 
 PROG = kdb5_util
-OBJS	= kdb5_util.o kdb5_util_ct.o dump.o dumpv4.o loadv4.o ss_wrapper.o \
+OBJS	= kdb5_util.o dump.o dumpv4.o loadv4.o \
 	kdb5_create.o kadm5_create.o string_table.o kdb5_stash.o \
 	kdb5_destroy.o ovload.o import_err.o strtok.o
 
@@ -9,8 +9,6 @@ all:: $(PROG)
 
 $(PROG): $(OBJS) $(DEPLIBS)
 	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
-
-kdb5_util_ct.o: kdb5_util_ct.c
 
 import_err.c import_err.h: $(srcdir)/import_err.et
 

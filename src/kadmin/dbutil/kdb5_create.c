@@ -121,12 +121,6 @@ extern osa_adb_policy_t policy_db;
 extern kadm5_config_params global_params;
 extern krb5_context util_context;
 
-static void usage()
-{
-    fprintf(stderr, "usage: %s [-s]\n", progname);
-    exit_status++;
-}
-
 void kdb5_create(argc, argv)
    int argc;
    char *argv[];
@@ -313,14 +307,7 @@ master key name '%s'\n",
     }
     if (!do_stash) unlink(global_params.stash_file);
 
-    /* now open the database */
-    open_db_and_mkey();
-
-    exit_status = 0;	/* It's OK if we get errors in open_db_and_mkey */
-                        /* We do not have the key stashed in the database! */
-
     return;
-
 }
 
 static krb5_error_code
