@@ -32,6 +32,7 @@ typedef struct __kdc_realm_data {
      */
     char *		realm_name;	/* Realm name			    */
     krb5_context	realm_context;	/* Context to be used for realm	    */
+    char *		realm_profile;	/* Profile file for this realm	    */
     /*
      * Database per-realm data.
      */
@@ -52,6 +53,7 @@ typedef struct __kdc_realm_data {
      */
     krb5_encrypt_block	realm_encblock;	/* Per-realm master encryption block*/
     krb5_int32		realm_pport;	/* Per-realm primary KDC port.	    */
+    krb5_int32		realm_sport;	/* Per-realm secondary KDC port.    */
     /*
      * Per-realm parameters.
      */

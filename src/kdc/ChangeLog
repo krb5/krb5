@@ -1,3 +1,18 @@
+
+Wed Jul 12 12:19:44 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Reorganize KDC profile handling so that the hierarchy for
+		locating per-realm data is [realms]->realm->tag.  Add
+		[kdcdefaults] section with primary_ports and secondary_ports
+		to list ports to listen on.  Consolidate all port location here
+		from network.c.  Add -s flag and change meaning of -p flag to
+		be the default if none specified in KDC or Kerberos profile.
+	* network.c - Open list of primary ports and then per-realm ports.
+		Handle secondary ports just like primary ports except that
+		bind failures are only warnings.  Support more than one
+		secondary port.
+	* extern,kdc_util.h - Add supporting definitions.
+	* krb5kdc.M - update description of -p and add description of -s.
+
 Tue Jul 11 07:35:12 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kerberos_v4.c: Add prototype for set_tgtkey

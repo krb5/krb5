@@ -95,7 +95,9 @@ krb5_error_code kdc_initialize_rcache PROTOTYPE((krb5_context, char *));
 
 /* network.c */
 krb5_error_code listen_and_process PROTOTYPE((const char *));
-krb5_error_code setup_network PROTOTYPE((const char *));
+krb5_error_code setup_network PROTOTYPE((const char *,
+					 int *,
+					 int *));
 krb5_error_code closedown_network PROTOTYPE((const char *));
 void process_packet PROTOTYPE((int, const char *, int));
 

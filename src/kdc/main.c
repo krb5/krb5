@@ -27,6 +27,7 @@
 #include <syslog.h>
 #include <signal.h>
 #include <errno.h>
+#include <netdb.h>
 
 #include "com_err.h"
 #include "k5-int.h"
@@ -54,6 +55,180 @@ static char *kdc_current_rcname = (char *) NULL;
 static int rkey_init_done = 0;
 
 #define	KRB5_KDC_MAX_REALMS	32
+
+/*
+ * Get port information for a realm.  The precedence is:
+ *	[realms]-><realm>-><name> in profile (if our hostname and has a port)
+ *	defport
+ *	/etc/services entry matching <service>
+ */
+static krb5_int32
+get_realm_port(ctx, realm, name, defport, service)
+    krb5_context	ctx;
+    char		*realm;
+    char		*name;
+    krb5_int32		defport;
+    char		*service;
+{
+    krb5_error_code	kret;
+    char		our_host_name[MAXHOSTNAMELEN];
+    struct hostent	*our_hostent;
+    struct servent	*our_servent;
+    krb5_int32		retval;
+    krb5_boolean	found;
+
+    /*
+     * Some preliminaries here.  Get our hostname and our host entry.
+     */
+    found = 0;
+    if (!gethostname(our_host_name, sizeof(our_host_name)) &&
+	(our_hostent = gethostbyname(our_host_name))) {
+	const char	*hierarchy[4];
+	char		**hostlist;
+
+	hostlist = (char **) NULL;
+	hierarchy[0] = "realms";
+	hierarchy[1] = realm;
+	hierarchy[2] = name;
+	hierarchy[3] = (char *) NULL;
+	if (!(kret = profile_get_values(ctx->profile, hierarchy, &hostlist))) {
+	    int		hi;
+	    char	*cport;
+	    char	*cp;
+	    int		ai;
+	    krb5_int32	pport;
+
+	    cport = (char *) NULL;
+	    for (hi=0; hostlist[hi]; hi++) {
+		/*
+		 * This knows a little too much about the format of profile
+		 * entries.  Shouldn't it just be some sort of tuple?
+		 *
+		 * The form is assumed to be:
+		 *	<name> = <hostname>[:<portname>[<whitespace>]]
+		 */
+		pport = -1;
+		cp = strchr(hostlist[hi], ' ');
+		if (cp)
+		    *cp = '\0';
+		cp = strchr(hostlist[hi], '\t');
+		if (cp)
+		    *cp = '\0';
+		cport = strchr(hostlist[hi], ':');
+		if (cport) {
+		    *cport = '\0';
+		    cport++;
+		    if (sscanf(cport, "%d", &pport) == 1) {
+			pport = -1;
+		    }
+		}
+		/*
+		 * We've stripped away the crud.  Now check to see if the
+		 * profile entry matches our hostname.  If so, then this
+		 * is the one to use.  Additionally, check the host alias
+		 * list.
+		 */
+		if (!strcmp(hostlist[hi], our_hostent->h_name)) {
+		    if (pport != -1) {
+			retval = pport;
+			found = 1;
+		    }
+		}
+		else {
+		    for (ai=0; our_hostent->h_aliases[ai]; ai++) {
+			if (!strcmp(hostlist[hi],
+				    our_hostent->h_aliases[ai])) {
+			    if (pport != -1) {
+				retval = pport;
+				found = 1;
+			    }
+			    break;
+			}
+		    }
+		}
+	    }
+	    krb5_xfree(hostlist);
+	}
+    }
+    /*
+     * If we didn't find an entry in the profile, then use the default.
+     * If it's no good, then attempt to find it in /etc/services.
+     */
+    if (!found) {
+	retval = defport;
+	/* Get the service entry out of /etc/services */
+	if (retval <= 0) {
+	    if (our_servent = getservbyname(service, "udp"))
+		retval = ntohs(our_servent->s_port);
+	}
+    }
+    return(retval);
+}
+
+/*
+ * Convert a string of the form <int>[,<int>]* to a list of ints.
+ */
+static int *
+string2intlist(string)
+    char	*string;
+{
+    int		nints, i;
+    char	*cp;
+    int		*intlist;
+
+    for ((nints=1, cp=string); *cp; cp++)
+	if (*cp == ',')
+	    nints++;
+    if (intlist = (int *) malloc((nints+1) * sizeof(int))) {
+	cp = string;
+	for (i=0; i<nints; i++) {
+	    if (sscanf(cp, "%d", &intlist[i]) != 1) {
+		free(intlist);
+		intlist = (int *) NULL;
+		break;
+	    }
+	    while ((*cp != ',') && (*cp != '\0'))
+		cp++;
+	    cp++;
+	}
+	if (intlist)
+	    intlist[nints] = -1;
+    }
+    return(intlist);
+}
+
+/*
+ * Get default portlists.
+ */
+static void
+get_default_portlists(aprof, plistp, slistp)
+    krb5_pointer	aprof;
+    int			**plistp;
+    int			**slistp;
+{
+    int		*plist;
+    int		*slist;
+    const char	*hierarchy[3];
+    char	*liststring;
+
+    plist = slist = (int *) NULL;
+    if (aprof) {
+	hierarchy[0] = "kdcdefaults";
+	hierarchy[1] = "primary_ports";
+	hierarchy[2] = (char *) NULL;
+	if (!krb5_aprof_get_string(aprof, hierarchy, TRUE, &liststring)) {
+	    plist = string2intlist(liststring);
+	    krb5_xfree(liststring);
+	}
+	hierarchy[1] = "secondary_ports";
+	if (!krb5_aprof_get_string(aprof, hierarchy, TRUE, &liststring)) {
+	    slist = string2intlist(liststring);
+	    krb5_xfree(liststring);
+	}
+    }
+    *plistp = plist;
+    *slistp = slist;
+}
 
 /*
  * initialize the replay cache.
@@ -161,7 +336,7 @@ finish_realm(rdp)
  */
 static krb5_error_code
 init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
-		 def_keytype, def_port, def_enctype, def_manual)
+		 def_keytype, def_port, def_sport, def_enctype, def_manual)
     char		*progname;
     kdc_realm_t		*rdp;
     krb5_pointer	altp;
@@ -170,6 +345,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
     char		*def_mpname;
     krb5_keytype	def_keytype;
     krb5_int32		def_port;
+    krb5_int32		def_sport;
     krb5_enctype	def_enctype;
     krb5_boolean	def_manual;
 {
@@ -189,12 +365,40 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
     if (realm) {
 	rdp->realm_name = realm;
 	if (!(kret = krb5_init_context(&rdp->realm_context))) {
-	    hierarchy[0] = realm;
-	    hierarchy[1] = "database_name";
-	    hierarchy[2] = (char *) NULL;
+	    hierarchy[0] = "realms";
+	    hierarchy[1] = realm;
+	    hierarchy[2] = "profile";
+	    hierarchy[3] = (char *) NULL;
+	    /*
+	     * Before any more per-realm initialization goes on, get the 
+	     * per-realm profile, if any.
+	     */
+	    if (altp && !(kret = krb5_aprof_get_string(altp,
+						       hierarchy,
+						       TRUE,
+						       &rdp->realm_profile))) {
+		const char *filenames[2];
+
+		/*
+		 * XXX - this knows too much about contexts.
+		 */
+		filenames[0] = rdp->realm_profile;
+		filenames[1] = (char *) NULL;
+		if (rdp->realm_context->profile)
+		    profile_release(rdp->realm_context->profile);
+		if (kret = profile_init(filenames,
+					&rdp->realm_context->profile)) {
+		    com_err(progname, kret,
+			    "while loading profile %s for realm %s",
+			    rdp->realm_profile, realm);
+		    goto whoops;
+		}
+	    }
+
 	    /*
 	     * Attempt to get the real value for the database file.
 	     */
+	    hierarchy[2] = "database_name";
 	    if (!altp || (kret = krb5_aprof_get_string(altp,
 						       hierarchy,
 						       TRUE,
@@ -205,7 +409,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	    /*
 	     * Attempt to get the real value for the master key name.
 	     */
-	    hierarchy[1] = "master_key_name";
+	    hierarchy[2] = "master_key_name";
 	    if (!altp || (kret = krb5_aprof_get_string(altp,
 						       hierarchy,
 						       TRUE,
@@ -216,7 +420,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	    /*
 	     * Attempt to get the real value for the master key type.
 	     */
-	    hierarchy[1] = "master_key_type";
+	    hierarchy[2] = "master_key_type";
 	    if (!altp || (kret = krb5_aprof_get_int32(altp,
 						      hierarchy,
 						      TRUE,
@@ -229,17 +433,37 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	    /*
 	     * Attempt to get the real value for the primary port.
 	     */
-	    hierarchy[1] = "port";
+	    hierarchy[2] = "port";
 	    if (!altp || (kret = krb5_aprof_get_int32(altp,
 						      hierarchy,
 						      TRUE,
-						      &rdp->realm_pport)))
-		rdp->realm_pport = (def_port) ? def_port : KRB5_DEFAULT_PORT;
+						      &rdp->realm_pport))) {
+		rdp->realm_pport = get_realm_port(rdp->realm_context,
+						  realm,
+						  "kdc",
+						  def_port,
+						  KDC_PORTNAME);
+	    }
+
+	    /*
+	     * Attempt to get the real value for the secondary port.
+	     */
+	    hierarchy[2] = "secondary_port";
+	    if (!altp || (kret = krb5_aprof_get_int32(altp,
+						      hierarchy,
+						      TRUE,
+						      &rdp->realm_sport))) {
+		rdp->realm_sport = get_realm_port(rdp->realm_context,
+						  realm,
+						  "v4kdc",
+						  def_sport,
+						  KDC_SECONDARY_PORTNAME);
+	    }
 
 	    /*
 	     * Attempt to get the real value for the encryption type.
 	     */
-	    hierarchy[1] = "encryption_type";
+	    hierarchy[2] = "encryption_type";
 	    if (!altp || (kret = krb5_aprof_get_int32(altp,
 						      hierarchy,
 						      TRUE,
@@ -256,7 +480,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	    /*
 	     * Attempt to get the real value for the stash file.
 	     */
-	    hierarchy[1] = "key_stash_file";
+	    hierarchy[2] = "key_stash_file";
 	    if (!altp || (kret = krb5_aprof_get_string(altp,
 						       hierarchy,
 						       TRUE,
@@ -268,7 +492,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	    /*
 	     * Attempt to get the real value for the maximum ticket life.
 	     */
-	    hierarchy[1] = "max_life";
+	    hierarchy[2] = "max_life";
 	    if (!altp || (kret = krb5_aprof_get_deltat(altp,
 						       hierarchy,
 						       TRUE,
@@ -279,7 +503,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	     * Attempt to get the real value for the maximum renewable ticket
 	     * life.
 	     */
-	    hierarchy[1] = "max_renewable_life";
+	    hierarchy[2] = "max_renewable_life";
 	    if (!altp || (kret = krb5_aprof_get_deltat(altp,
 						       hierarchy,
 						       TRUE,
@@ -570,15 +794,16 @@ initialize_realms(kcontext, altp, argc, argv)
     krb5_enctype	kdc_etype = DEFAULT_KDC_ETYPE;
     kdc_realm_t		*rdatap;
     krb5_boolean	manual = FALSE;
-    krb5_int32		pport;
+    krb5_int32		pport, sport;
 
     extern char *optarg;
 
+    pport = sport = -1;
     /*
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:n")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:s:n")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
@@ -591,6 +816,7 @@ initialize_realms(kcontext, altp, argc, argv)
 					    mkey_name,
 					    mkeytype,
 					    pport,
+					    sport,
 					    kdc_etype,
 					    manual)) {
 			fprintf(stderr,"%s: cannot initialize realm %s\n",
@@ -623,6 +849,9 @@ initialize_realms(kcontext, altp, argc, argv)
 	case 'p':
 	    pport = atoi(optarg);
 	    break;
+	case 's':
+	    sport = atoi(optarg);
+	    break;
 	case 'e':
 	    kdc_etype = atoi(optarg);
 	    break;
@@ -652,6 +881,7 @@ initialize_realms(kcontext, altp, argc, argv)
 				    mkey_name,
 				    mkeytype,
 				    pport,
+				    sport,
 				    kdc_etype,
 				    manual)) {
 		fprintf(stderr,"%s: cannot initialize realm %s\n",
@@ -720,6 +950,7 @@ char *argv[];
     krb5_error_code	retval;
     krb5_context	kcontext;
     krb5_pointer	alt_profile;
+    int			*primaries, *secondaries;
     int errout = 0;
 
     if (strrchr(argv[0], '/'))
@@ -732,6 +963,7 @@ char *argv[];
     }
     memset((char *) kdc_realmlist, 0,
 	   (size_t) (sizeof(kdc_realm_t *) * KRB5_KDC_MAX_REALMS));
+    primaries = secondaries = (int *) NULL;
 
     /*
      * A note about Kerberos contexts: This context, "kcontext", is used
@@ -754,11 +986,16 @@ char *argv[];
      */
     initialize_realms(kcontext, alt_profile, argc, argv);
 
+    /*
+     * Get the default port lists.
+     */
+    get_default_portlists(alt_profile, &primaries, &secondaries);
+
     if (alt_profile)
 	krb5_aprof_finish(alt_profile);
     setup_signal_handlers();
 
-    if ((retval = setup_network(argv[0]))) {
+    if ((retval = setup_network(argv[0], primaries, secondaries))) {
 	com_err(argv[0], retval, "while initializing network");
 	finish_realms(argv[0]);
 	return 1;
@@ -780,6 +1017,10 @@ char *argv[];
     krb5_klog_syslog(LOG_INFO, "shutting down");
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
+    if (primaries)
+	free(primaries);
+    if (secondaries)
+	free(secondaries);
     return errout;
 }
 

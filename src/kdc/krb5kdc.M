@@ -38,6 +38,9 @@ krb5kdc \- Kerberos V5 KDC
 .B \-p
 .I portnum
 ] [
+.B \-s
+.I portnum
+] [
 .B \-m
 ] [
 .B \-r
@@ -78,9 +81,22 @@ the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
 The
 .B \-p
 .I portnum
-option specifies the UDP port number which the KDC should listen on for
-requests.  If none is specified, then the value in /etc/services is used,
-with an ultimate default value of KRB5_DEFAULT_PORT, or 88.
+option specifies the default UDP port number which the KDC should listen on for
+Kerberos version 5 requests.  This value is used when no port is specified in
+the KDC profile and when no port is specified in the Kerberos configuration
+file.
+If no value is available, then the value in /etc/services for service
+"kerberos" is used.
+.PP
+The
+.B \-s
+.I portnum
+option specifies the default UDP port number which the KDC should listen on for
+Kerberos version 4 requests.  This value is used when no port is specified in
+the kdc profile and when no port is specified in the Kerberos configuration
+file.
+If no value is available, then the value in /etc/services for service
+"kerberos-sec" is used.
 .PP
 The
 .B \-m
