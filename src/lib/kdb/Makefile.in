@@ -10,11 +10,11 @@ LIB=kdb5
 LIBMAJOR=2
 LIBMINOR=0
 RELDIR=kdb
-# Depends on libcrypto and libkrb5
+# Depends on libk5crypto and libkrb5
 SHLIB_EXPDEPS = \
-	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcom_err  -lcrypto
+SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 

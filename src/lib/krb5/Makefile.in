@@ -45,9 +45,9 @@ STOBJLISTS= \
 
 RELDIR=krb5
 SHLIB_EXPDEPS = \
-	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libcom_err$(SHLIBEXT)
-SHLIB_EXPLIBS=-lcrypto -lcom_err @GEN_LIB@
+SHLIB_EXPLIBS=-lk5crypto -lcom_err @GEN_LIB@
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 

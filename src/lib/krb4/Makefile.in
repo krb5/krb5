@@ -11,11 +11,18 @@ LIB=krb4
 LIBMAJOR=1
 LIBMINOR=0
 RELDIR=krb4
-# Depends on libcrypto and libkrb5
+
+# Depends on libk5crypto, libkrb5, KRB4_CRYPTO_LIB and _et_list...
+# Depends on libkrb5, expect to find
+#	krb5_init_context, krb5_free_context, profile_get_values
+#
+KRB4_CRYPTO_LIBS=-ldes425
+
 SHLIB_EXPDEPS = \
-	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libdes425$(SHLIBEXT) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcom_err  -ldes425 -lcrypto
+SHLIB_EXPLIBS=-lkrb5 -lcom_err -ldes425 -lk5crypto
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
@@ -94,19 +101,6 @@ SRCS = \
 
 STLIBOBJS  = $(OBJS)
 STOBJLISTS=OBJS.ST
-
-
-# Depends on libcrypto, libkrb5, KRB4_CRYPTO_LIB and _et_list...
-# Depends on libkrb5, expect to find
-#	krb5_init_context, krb5_free_context, profile_get_values
-#
-KRB4_CRYPTO_LIBS=-ldes425
-DEPKRB4_LIBS=	$(TOPLIBD)/libdes425$(SHLIBEXT) 
-SHLIB_EXPDEPS = $(DEPKRB4_LIBS) \
-	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
-	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_DIRS=-L$(TOPLIBD)
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 #
 # These objects implement the time computation routines.

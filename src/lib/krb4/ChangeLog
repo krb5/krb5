@@ -1,3 +1,8 @@
+Wed Apr 15 18:07:00 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): 
+	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
+
 Thu Apr  9 18:44:16 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (includes): The header is krb_err.h, not

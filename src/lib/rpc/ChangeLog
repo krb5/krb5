@@ -1,3 +1,8 @@
+Wed Apr 15 18:07:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): 
+	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
+
 Mon Apr  6 19:44:51 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in (includes): Don't mkdir unless the directory doesn't

@@ -12,10 +12,10 @@ STOBJLISTS=OBJS.ST
 SHLIB_EXPDEPS= \
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
-	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libcom_err$(SHLIBEXT) \
 	$(TOPLIBD)/libdyn$(SHLIBEXT)
-SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err -ldyn
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=rpc

@@ -1,3 +1,8 @@
+Wed Apr 15 18:07:20 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): 
+	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
+
 Fri Feb 27 23:15:28 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (SHLIB_EXPLIBS): Replace @SHLIB_GEN@ with @GEN_LIB@

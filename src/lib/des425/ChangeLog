@@ -1,3 +1,8 @@
+Wed Apr 15 18:03:43 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): 
+	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
+
 Tue Mar  3 08:59:03 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add KRB5_BUILD_PROGRAM

@@ -14,9 +14,9 @@ LIBMINOR=1
 STOBJLISTS=generic/OBJS.ST krb5/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
-	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libcom_err$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcrypto -lcom_err
+SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=gssapi
