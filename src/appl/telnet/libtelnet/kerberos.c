@@ -72,14 +72,6 @@
 #include "auth.h"
 #include "misc.h"
 
-int kerberos4_cksum P((unsigned char *, int));
-int krb_mk_req P((KTEXT, char *, char *, char *, u_long));
-int krb_rd_req P((KTEXT, char *, char *, u_long, AUTH_DAT *, char *));
-int krb_kntoln P((AUTH_DAT *, char *));
-int krb_get_cred P((char *, char *, char *, CREDENTIALS *));
-int krb_get_lrealm P((char *, int));
-int kuserok P((AUTH_DAT *, char *));
-
 extern auth_debug_mode;
 
 static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
@@ -196,7 +188,7 @@ kerberos4_send(ap)
 		printf("Kerberos V4: no realm for %s\r\n", RemoteHostName);
 		return(0);
 	}
-	if (r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0L)) {
+	if (r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0)) {
 		printf("mk_req failed: %s\r\n", krb_err_txt[r]);
 		return(0);
 	}

@@ -63,7 +63,6 @@
 #include <stdio.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
-#include <krb5/crc-32.h>
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 #include <com_err.h>
@@ -177,8 +176,6 @@ kerberos5_init(ap, server)
 kerberos5_send(ap)
 	Authenticator *ap;
 {
-	krb5_checksum ksum;
-	krb5_octet sum[CRC32_CKSUM_LENGTH];
 	krb5_error_code r;
 	krb5_ccache ccache;
 	krb5_creds creds;		/* telnet gets session key from here */
@@ -189,11 +186,6 @@ kerberos5_send(ap)
 	krb5_keyblock *newkey = 0;
 #endif	/* ENCRYPTION */
 
-	ksum.checksum_type = CKSUMTYPE_CRC32;
-	ksum.contents = sum;
-	ksum.length = sizeof(sum);
-	memset((Voidptr )sum, 0, sizeof(sum));
-	
         if (!UserNameRequested) {
                 if (auth_debug_mode) {
                         printf("Kerberos V5: no user name supplied\r\n");
@@ -240,7 +232,8 @@ kerberos5_send(ap)
 	else
 	    ap_opts = 0;
 	    
-	r = krb5_mk_req_extended(telnet_context, ap_opts, &ksum, 
+	r = krb5_mk_req_extended(telnet_context, ap_opts,
+				 (krb5_checksum *) NULL,
 				 krb5_kdc_default_options, 0,
 #ifdef	ENCRYPTION
 				 &newkey,
@@ -662,7 +655,7 @@ kerberos5_forward(ap)
 	return;
     }
 
-    if (r = krb5_get_for_creds(telnet_context, ETYPE_DES_CBC_CRC,
+    if (r = krb5_get_for_creds(telnet_context,
 			       krb5_kdc_req_sumtype,
 			       RemoteHostName,
 			       local_creds->client,

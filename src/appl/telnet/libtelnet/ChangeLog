@@ -1,3 +1,15 @@
+Thu Feb  2 02:56:50 1995  John Gilmore  <gnu@cygnus.com>
+
+	* forward.c:  Remove unused #include <krb5/crc-32.h>.
+	* kerberos5.c (kerberos5_send):  Remove code for sending a checksum
+	of a zero-byte string; we can just send no checksum at all.  This
+	eliminates dependency on <krb5/crc-32.h>.
+	(kerberos5_forward):  Remove extra parameter to krb5_get_for_creds,
+	probably accidentally inserted during context changes -- which don't
+	seem to be here in the ChangeLog.
+	* kerberos.c:  Remove prototypes for krb4 functions, since
+	some of them are wrong with CNS (u_long vs. KRB_INT32 conflicts).
+
 Fri Nov 18 15:19:26 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kerberos5.c (kerberos5_init): Initialize magic variable and
