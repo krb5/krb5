@@ -15,6 +15,7 @@ AC_COMPILE_CHECK([POSIX file locking -- structs and flags],
 [struct flock f; 1+F_SETLK;], 
 AC_DEFINE(POSIX_FILE_LOCKS)))
 
+AC_HAVE_HEADERS(strings.h)
 AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
 AC_HEADER_CHECK(paths.h,AC_DEFINE(HAS_PATHS_H))
 

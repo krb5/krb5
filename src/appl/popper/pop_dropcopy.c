@@ -7,7 +7,7 @@
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
 static char SccsId[] = "@(#)pop_dropcopy.c	2.6  4/3/91";
-#endif not lint
+#endif
 
 #include <errno.h>
 #include <stdio.h>
@@ -18,7 +18,11 @@ static char SccsId[] = "@(#)pop_dropcopy.c	2.6  4/3/91";
 #include <fcntl.h>
 #endif
 #include <sys/types.h>
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <pwd.h>

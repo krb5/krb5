@@ -7,12 +7,16 @@
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
 static char SccsId[] = "@(#)pop_dropinfo.c	2.1  3/18/91";
-#endif not lint
+#endif
 
 #include <errno.h>
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/stat.h>
 #include <sys/file.h>
 #include "popper.h"
