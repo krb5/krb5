@@ -1,3 +1,7 @@
+Sat Nov  9 10:49:36 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Re-arrange to deal with compiling without krb4 support. [148]
+
 Wed Nov  6 11:32:36 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* login.c (destroy_tickets): Just use global kcontext instead

@@ -1688,7 +1688,8 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 		  syslog(LOG_ERR,
 			 "%s while retrieiving V5 initial ticket for copy",
 			 error_message(retval));
-		  goto skip_ccache_rewrite;
+	     skip_ccache_rewrite: rewrite_ccache = 0;
+
 	     }
 	     krb5_free_principal(kcontext, mcreds.server);
 	}
@@ -1702,7 +1703,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 		  syslog(LOG_ERR,
 			 "%s while retrieving V4 initial ticket for copy",
 			 error_message(retval));
-	     skip_ccache_rewrite: rewrite_ccache = 0;
+	      rewrite_ccache = 0;
 	     
 	     }
 	}
