@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* kpasswd_strings.et: Remove trailing colon, as new implementation

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
 2002-12-09  Sam Hartman  <hartmans@mit.edu>
 
 	* misc.h: Fix prototypes for *_wrapper_3 to be consistent with

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
 2003-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* svc_run.c svc_udp.c : Remove declaration of errno

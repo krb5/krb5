@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-prerecurse): Change double colons to single

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov, config.mk/*: Deleted.
+
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
@@ -29,6 +33,13 @@
 	LOCAL_INCLUDES such that one can override CFLAGS from the command
 	line without losing CPP search patchs and defines. Some associated
 	Makefile cleanup.
+
+1999-01-20  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* config.mk/netbsd1.def (UTMP_FILE, WTMP_FILE): Update filenames to comply
+		with netbsd system.  (Not actually used by our
+		configuration system, but I'll update the file.)
+		Submitted by ghudson, [krb5-admin/522]
 
 Tue Jan 12 18:26:04 1999  Tom Yu  <tlyu@mit.edu>
 
@@ -105,10 +116,18 @@ Fri Jul 12 14:38:30 1996  Marc Horowitz  <marc@mit.edu>
 	* configure.in (CONFIG_DIRS): ktutil is still useful
  	functionality; add it back to the build.
 
+	* config.mk/architecture: add uname test for NetBSD
+	* config.mk/netbsd1.def: added
+
 Wed Jul 10 16:27:11 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in: kdbkeys is no longer necessary.
 	* configure.in (CONFIG_DIRS): added dbutil
+
+Mon Jul  8 16:39:36 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* config.mk/template, config.mk/site.def, config.mk/rules: Add
+	SITEMAKEFILES to specify -f Makefile.ov, add .ct default rule.
 
 Thu Aug 24 19:21:14 1995  Theodore Y. Ts'o  <tytso@dcl>
 

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
 2002-12-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_db (qualname): If "kdb5_util create" fails, exit.

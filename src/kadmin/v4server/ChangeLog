@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
 2003-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* admin_server.c (kadm_listen): Remove declaration of errno
