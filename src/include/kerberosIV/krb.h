@@ -346,6 +346,78 @@ typedef struct msg_dat MSG_DAT;
 #define krb4_swab32(val)	((((val)>>24)&0xFF) | (((val)>>8)&0xFF00) | \
 				  (((val)<<8)&0xFF0000) | ((val)<<24))
 
+/*
+ * Macros to encode integers into buffers in big-endian order.  These
+ * take a parameter that is a moving pointer of type (unsigned char *)
+ * into the buffer, and assume that the caller has already
+ * bounds-checked.
+ */
+#define KRB4_PUT32(p, val)				\
+do {							\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 24) & 0xff;	\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 16) & 0xff;	\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+} while (0)
+
+#define KRB4_PUT16(p, val)				\
+do {							\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+} while (0)
+
+/*
+ * Macros to get integers from a buffer.  These take a parameter that
+ * is a moving pointer of type (unsigned char *) into the buffer, and
+ * assume that the caller has already bounds-checked.  In addition,
+ * they assume that val is an unsigned type; ANSI leaves the semantics
+ * of unsigned -> signed conversion as implementation-defined, so it's
+ * unwise to depend on such.
+ */
+#define KRB4_GET32BE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++ << 24;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+    (val) |= (unsigned KRB4_32)*(p)++;		\
+} while (0)
+
+#define KRB4_GET32LE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++;		\
+    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 24;	\
+} while(0)
+
+#define KRB4_GET32(val, p, le)			\
+do {						\
+    if (le)					\
+	KRB4_GET32LE((val), (p));		\
+    else					\
+	KRB4_GET32BE((val), (p));		\
+} while (0)
+
+#define KRB4_GET16BE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++ << 8;	\
+    (val) |= (unsigned KRB4_32)*(p)++;		\
+} while (0)
+
+#define KRB4_GET16LE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++;		\
+    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+} while (0)
+
+#define KRB4_GET16(val, p, le)			\
+do {						\
+    if (le)					\
+	KRB4_GET16LE((val), (p));		\
+    else					\
+	KRB4_GET16BE((val), (p));		\
+} while (0)
+
 /* Kerberos ticket flag field bit definitions */
 #define K_FLAG_ORDER    0       /* bit 0 --> lsb */
 #define K_FLAG_1                /* reserved */
@@ -671,6 +743,10 @@ KRB5_DLLIMP void KRB5_CALLCONV tf_close PROTOTYPE((void));
 /* unix_time.c */
 KRB5_DLLIMP unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec 
         PROTOTYPE((unsigned KRB4_32 *));
+
+/* strnlen.c */
+extern int KRB5_CALLCONV krb_strnlen
+	PROTOTYPE((const char *, int));
 
 /*
  * Internal prototypes

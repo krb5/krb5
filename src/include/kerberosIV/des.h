@@ -40,6 +40,9 @@
 #endif
 #include <win-mac.h>
 #endif
+#ifdef __STDC__
+#include <limits.h>
+#endif
 
 /* Windows declarations */
 #ifndef KRB5_CALLCONV
@@ -54,12 +57,25 @@
 #define NEAR
 #endif
 
-#ifndef __alpha
-#define KRB4_32	long
-#else
-#define KRB4_32	int
-#endif
-
+#ifndef KRB4_32
+#ifdef SIZEOF_INT
+#if SIZEOF_INT >= 4
+#define KRB4_32 int
+#else  /* !(SIZEOF_INT >= 4) */
+#define KRB4_32 long
+#endif /* !(SIZEOF_INT >= 4) */
+#else  /* !defined(SIZEOF_INT) */
+#ifdef __STDC__
+#if INT_MAX >= 0x7fffffff
+#define KRB4_32 int
+#else  /* !(INT_MAX >= 0x7ffffff) */
+#define KRB4_32 long
+#endif /* !(INT_MAX >= 0x7ffffff) */
+#else  /* !defined(__STDC__) */
+#define KRB4_32 long		/* worst case */
+#endif /* !defined(__STDC__) */
+#endif /* !defined(SIZEOF_INT) */
+#endif /* !defined(KRB4_32) */
 
 #ifndef PROTOTYPE
 #if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
@@ -69,28 +85,13 @@
 #endif
 #endif
 
-
-
 typedef unsigned char des_cblock[8];	/* crypto-block size */
 
 /* Key schedule */
 /* Ick.  We need this in here unfortunately... */
 #ifndef DES_INT32
-#ifdef SIZEOF_INT
-#if SIZEOF_INT >= 4
-#define DES_INT32 int
-#else
-#define DES_INT32 long
+#define DES_INT32 KRB4_32
 #endif
-#else /* !defined(SIZEOF_INT) */
-#include <limits.h>
-#if (UINT_MAX >= 0xffffffff)
-#define DES_INT32 int
-#else
-#define DES_INT32 long
-#endif
-#endif /* !defined(SIZEOF_INT) */
-#endif /* !defined(DES_INT32) */
 
 typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
 
