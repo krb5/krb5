@@ -245,6 +245,7 @@ void load_db(argc, argv)
 	}
 	for (;;) {
 		int nitems;
+		unsigned int tmp1, tmp2;
 
 		lineno++;
 		memset((char *)&entry, 0, sizeof(entry));
@@ -269,12 +270,17 @@ void load_db(argc, argv)
 			load_error++;
 			break;
 		}
-		if (fscanf(f, "%s\t%d\t%d\t", name, &entry.key.keytype,
+		if (fscanf(f, "%s\t%d\t%d\t", name, &tmp1,
 			   &entry.key.length) != 3) {
 			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
 			load_error++;
 			break;
 		}
+		/* keytype is probably a short, but might not be.
+		   To avoid problems with scanf, read into a variable of
+		   known type then copy the value.  */
+		entry.key.keytype = tmp1;
+
 		if (!(entry.key.contents = (krb5_octet *) malloc(entry.key.length+1))) {
 			free(name);
 			free(mod_name);
@@ -293,8 +299,8 @@ void load_db(argc, argv)
 			entry.key.contents[i] = align;
 		}
 		if (fscanf(f, "\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t%u\t",
-			   &entry.kvno, &entry.max_life,
-			   &entry.max_renewable_life, &entry.mkvno,
+			   &tmp1, &entry.max_life,
+			   &entry.max_renewable_life, &tmp2,
 			   &entry.expiration, mod_name, &entry.mod_date,
 			   &entry.attributes, &stype,
 			   &slength) != 10) {
@@ -303,6 +309,8 @@ void load_db(argc, argv)
 			load_error++;
 			break;
 		}
+		entry.kvno = tmp1;
+		entry.mkvno = tmp2;
 		entry.salt_type = stype;
 		entry.salt_length = slength;
 		if (slength) {
