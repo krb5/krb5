@@ -70,7 +70,7 @@ const krb5_checksum *checksum;
 const krb5_ticket_times *times;
 const krb5_flags kdc_options;
 krb5_int32 sequence;
-krb5_keyblock *newkey;
+krb5_keyblock **newkey;
 krb5_ccache ccache;
 krb5_creds *creds;
 krb5_authenticator *authentp;
@@ -111,8 +111,16 @@ krb5_data *outbuf;
 	return(retval);
 
 #define cleanup_ticket() krb5_free_ticket(request.ticket)
-    if (retval = generate_authenticator(&authent, creds, checksum, newkey,
+    if (newkey) {
+	if (retval = krb5_generate_subkey(&creds->keyblock, newkey)) {
+	    cleanup_ticket();
+	    return retval;
+	}
+    }
+#define cleanup_key() {if (newkey) krb5_free_keyblock(*newkey);}
+    if (retval = generate_authenticator(&authent, creds, checksum, *newkey,
 					sequence)) {
+	cleanup_key();
 	cleanup_ticket();
 	return retval;
     }
@@ -128,6 +136,7 @@ krb5_data *outbuf;
     /* encode it before encrypting */
     retval = encode_krb5_authenticator(&authent, &scratch);
     if (retval) {
+	cleanup_key();
 	cleanup_ticket();
 	return(retval);
     }
@@ -202,6 +211,7 @@ request.authenticator.ciphertext.data = 0;}
  clean_scratch:
     cleanup_scratch();
  clean_ticket:
+    cleanup_key();
     cleanup_ticket();
 
     return retval;
