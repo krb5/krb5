@@ -1,3 +1,8 @@
+Fri Feb 21 12:00:53 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* aclocal.m4 (CC_LINK_SHARED): Linux doesn't understand -R; use
+		"-bWl,-rpath -Wl,$(PROG_RPATH)" instead.
+
 Sun Feb 16 21:17:11 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Build krb4 library under win16/win32
