@@ -1069,6 +1069,7 @@ ovsec_kadm_get_principal(krb5_principal princ,
 
 Return the principal's attributes in allocated memory.  The caller
 must free the returned entry with ovsec_kadm_free_principal_ent.
+If an error is returned entry is set to NULL.
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
 as the princ argument.  If the request is authenticated to the
@@ -1188,6 +1189,7 @@ ovsec_kadm_get_policy(char *policy, ovsec_kadm_policy_ent_t *ent);
 AUTHORIZATION REQUIRED: get, or the calling principal's policy being
 the same as the policy argument.  If the request is authenticated to
 the ovsec_kadm/changepw service, the get privilege is disregarded.
+If an error is returned entry is set to NULL.
 
 Return the policy's attributes in allocated memory.  The caller must
 free the returned entry with ovsec_kadm_free_policy_ent.
