@@ -569,7 +569,7 @@ kerberos_v4(client, pkt)
 	    memset(session_key, 0, sizeof(C_Block));
 #else
 	    /* random session key */
-	    random_key(session_key);
+	    des_new_random_key(session_key);
 #endif
 
 	    /* unseal server's key from master key */
@@ -709,7 +709,7 @@ kerberos_v4(client, pkt)
 	    memset(session_key, 0, sizeof(C_Block));
 #else
 	    /* random session key */
-	    random_key(session_key);
+	    des_new_random_key(session_key);
 #endif
 
 	    krb_create_ticket(tk, k_flags, ad->pname, ad->pinst,

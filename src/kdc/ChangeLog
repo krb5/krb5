@@ -1,3 +1,9 @@
+Tue Feb 20 16:50:59 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kerberos_v4.c (kerberos_v4): Use strong random number generator
+
+	* main.c (main): Initialize Kerberos V4's random number generator.
+
 Sat Jan 27 00:53:41 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* network.c (setup_network): strtol is good enough for port

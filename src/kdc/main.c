@@ -887,6 +887,9 @@ char *argv[];
 	finish_realms(argv[0]);
 	return 1;
     }
+#ifdef KRB5_KRB4_COMPAT
+    des_init_random_number_generator(master_keyblock.contents);
+#endif
     if (!nofork && daemon(0, 0)) {
 	com_err(argv[0], errno, "while detaching from tty");
 	finish_realms(argv[0]);
