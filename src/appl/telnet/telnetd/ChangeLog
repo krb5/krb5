@@ -1,4 +1,36 @@
+Fri Aug  4 20:22:28 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* sys_term.c (getptyslave): Select terminal settings more likely
+        to work.
+	(cleanup): Pass pid to cleanup so it can killpg if necessary.
+
+Tue Aug  1 11:28:55 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* telnetd.c (doit): Use pty_getpty.
+
+	* Makefile.in (LOCAL_LIBRARIES): Add -lpty
+
+	* sys_term.c (startslave): Use pty_update_utmp.  Export slave's
+        pid so it's global for pty_cleanup.  Use pipe to synchronize so
+        that slave is opened before parent writes.
+	(cleanopen): removed in favor of pty_open_slave
+	(login_tty): Don't set controlling terminal; libpty does this.  Just dup2 the terminals.
+	(getpty): removed.
+
+	(getptyslave): Use libpty.
+
+	* telnetd-ktd.c: Use libpty.
+
+Tue Jul 11 11:32:56 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
 Sat Jul 29 04:40:04 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+
+	* telnetd-ktd.c (doit): Remove special casing of Convex PTY
+        handling here.  There isn't enough code here for me to understand
+        what to do on a Convex system, so if it breaks, it should be
+        special cased in a more-appropriate manner.
+
 
 	* configure.in: Don't link with -lkadm.
 

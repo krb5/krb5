@@ -40,6 +40,7 @@
 #define LOGIN_PROGRAM _PATH_LOGIN
 #endif
 
+#include <libpty.h>
 #if	defined(AUTHENTICATION)
 #include <libtelnet/auth.h>
 #endif
@@ -490,130 +491,12 @@ char *line = Xline;
 char *myline = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 #endif	/* CRAY */
 
-	int
-getpty(ptynum)
-int *ptynum;
-{
-	register int p;
-#ifdef	STREAMSPTY
-	int t;
-	char *ptsname();
 
-	p = open("/dev/ptmx", 2);
-	if (p > 0) {
-		grantpt(p);
-		unlockpt(p);
-		strcpy(line, ptsname(p));
-		return(p);
-	}
-
-#else	/* ! STREAMSPTY */
-#ifdef _AIX
-	if((p = open("/dev/ptc", 2)) != -1 ){
-	  strcpy(line, ttyname(p));
-	  chown( line, 0, 0);
-	  chmod (line, 0600 );
-	  return (p);
-	}
-	#else /*_AIX*/
-#ifndef CRAY
-	register char *cp, *p1, *p2;
-	register int i;
-#if defined(sun) && defined(TIOCGPGRP) && BSD < 199207
-	int dummy;
-#endif
-
-#ifndef	__hpux
-	(void) sprintf(line, "/dev/ptyXX");
-	p1 = &line[8];
-	p2 = &line[9];
-#else
-	(void) sprintf(line, "/dev/ptym/ptyXX");
-	p1 = &line[13];
-	p2 = &line[14];
-#endif
-
-	for (cp = "pqrstuvwxyzPQRST"; *cp; cp++) {
-		struct stat stb;
-
-		*p1 = *cp;
-		*p2 = '0';
-		/*
-		 * This stat() check is just to keep us from
-		 * looping through all 256 combinations if there
-		 * aren't that many ptys available.
-		 */
-		if (stat(line, &stb) < 0)
-			break;
-		for (i = 0; i < 16; i++) {
-			*p2 = "0123456789abcdef"[i];
-			p = open(line, 2);
-			if (p > 0) {
-#ifndef	__hpux
-				line[5] = 't';
-#else
-				for (p1 = &line[8]; *p1; p1++)
-					*p1 = *(p1+1);
-				line[9] = 't';
-#endif
-				chown(line, 0, 0);
-				chmod(line, 0600);
-#if defined(sun) && defined(TIOCGPGRP) && BSD < 199207
-				if (ioctl(p, TIOCGPGRP, &dummy) == 0
-				    || errno != EIO) {
-					chmod(line, 0666);
-					close(p);
-					line[5] = 'p';
-				} else
-#endif /* defined(sun) && defined(TIOCGPGRP) && BSD < 199207 */
-					return(p);
-			}
-		}
-	}
-#else	/* CRAY */
-	extern lowpty, highpty;
-	struct stat sb;
-
-	for (*ptynum = lowpty; *ptynum <= highpty; (*ptynum)++) {
-		(void) sprintf(myline, "/dev/pty/%03d", *ptynum);
-		p = open(myline, 2);
-		if (p < 0)
-			continue;
-		(void) sprintf(line, "/dev/ttyp%03d", *ptynum);
-		/*
-		 * Here are some shenanigans to make sure that there
-		 * are no listeners lurking on the line.
-		 */
-		if(stat(line, &sb) < 0) {
-			(void) close(p);
-			continue;
-		}
-		if(sb.st_uid || sb.st_gid || sb.st_mode != 0600) {
-			chown(line, 0, 0);
-			chmod(line, 0600);
-			(void)close(p);
-			p = open(myline, 2);
-			if (p < 0)
-				continue;
-		}
-		/*
-		 * Now it should be safe...check for accessability.
-		 */
-		if (access(line, 6) == 0)
-			return(p);
-		else {
-			/* no tty side to pty so skip it */
-			(void) close(p);
-		}
-	}
-#endif	/* CRAY */
-#endif /*_AIX*/
-#endif	/* STREAMSPTY */
-	return(-1);
-}
 #endif	/* convex */
 
-#ifdef	LINEMODE
+static char
+int slavepid = 0;
+
 /*
  * tty_flowmode()	Find out if flow control is enabled or disabled.
  * tty_linemode()	Find out if linemode (external processing) is enabled.
@@ -1051,7 +934,8 @@ extern void utmp_sig_notify P((int));
 	int
 getptyslave()
 {
-	register int t = -1;
+     int t = -1;
+     long retval;
 
 #if	!defined(CRAY) || !defined(NEWINIT)
 # ifdef	LINEMODE
@@ -1074,41 +958,16 @@ getptyslave()
 	waslm = tty_linemode();
 # endif
 
-
-	/*
-	 * Make sure that we don't have a controlling tty, and
-	 * that we are the session (process group) leader.
-	 */
-# ifdef	TIOCNOTTY
-	t = open(_PATH_TTY, O_RDWR);
-	if (t >= 0) {
-		(void) ioctl(t, TIOCNOTTY, (char *)0);
-		(void) close(t);
-	}
-# endif
-
-
-# ifdef PARENT_DOES_UTMP
-	/*
-	 * Wait for our parent to get the utmp stuff to get done.
-	 */
-	utmp_sig_wait();
-# endif
-
-	t = cleanopen(line);
-	if (t < 0)
+	if ( (retval = pty_open_slave (line, &t)) < 0 )
+	    {
+		com_err(retval, "telnetd", "while opening slave terminal");
 		fatalperror(net, line);
+	    }
 
 #ifdef  STREAMSPTY
 #ifdef	USE_TERMIO
 	ttyfd = t;
 #endif
-	if (ioctl(t, I_PUSH, "ptem") < 0) 
-		fatal(net, "I_PUSH ptem");
-	if (ioctl(t, I_PUSH, "ldterm") < 0)
-		fatal(net, "I_PUSH ldterm");
-	if (ioctl(t, I_PUSH, "ttcompat") < 0)
-		fatal(net, "I_PUSH ttcompat");
 	if (ioctl(pty, I_PUSH, "pckt") < 0)
 		fatal(net, "I_PUSH pckt");
 #endif
@@ -1152,9 +1011,10 @@ getptyslave()
 #  ifndef	OXTABS
 #   define OXTABS	0
 #  endif
-	termbuf.c_lflag |= ECHO;
-	termbuf.c_oflag |= ONLCR|OXTABS;
-	termbuf.c_iflag |= ICRNL;
+	termbuf.c_lflag |= ECHO|ICANON|IEXTEN|ISIG;
+	termbuf.c_oflag |= ONLCR|OXTABS|OPOST;
+	termbuf.c_iflag |= ICRNL|IGNPAR;
+termbuf.c_cflag |= HUPCL;
 	termbuf.c_iflag &= ~IXOFF;
 # endif /* defined(USE_TERMIO) && !defined(CRAY) && (BSD <= 43) */
 	tty_rspeed((def_rspeed > 0) ? def_rspeed : 9600);
@@ -1190,108 +1050,7 @@ getptyslave()
 #ifndef	O_NOCTTY
 #define	O_NOCTTY	0
 #endif
-/*
- * Open the specified slave side of the pty,
- * making sure that we have a clean tty.
- */
-	int
-cleanopen(line)
-	char *line;
-{
-	register int t;
-#if	defined(_SC_CRAY_SECURE_SYS)
-	struct secstat secbuf;
-#endif	/* _SC_CRAY_SECURE_SYS */
 
-#ifndef STREAMSPTY
-	/*
-	 * Make sure that other people can't open the
-	 * slave side of the connection.
-	 */
-	(void) chown(line, 0, 0);
-	(void) chmod(line, 0600);
-#endif
-
-# if (!defined(CRAY) && (BSD > 43))||defined(_AIX)
-	(void) revoke(line);
-# endif
-#if	defined(_SC_CRAY_SECURE_SYS)
-	if (secflag) {
-		if (secstat(line, &secbuf) < 0)
-			return(-1);
-		if (setulvl(secbuf.st_slevel) < 0)
-			return(-1);
-		if (setucmp(secbuf.st_compart) < 0)
-			return(-1);
-	}
-#endif	/* _SC_CRAY_SECURE_SYS */
-
-	t = open(line, O_RDWR|O_NOCTTY);
-
-#if	defined(_SC_CRAY_SECURE_SYS)
-	if (secflag) {
-		if (setulvl(sysv.sy_minlvl) < 0)
-			return(-1);
-		if (setucmp(0) < 0)
-			return(-1);
-	}
-#endif	/* _SC_CRAY_SECURE_SYS */
-
-	if (t < 0)
-		return(-1);
-
-	/*
-	 * Hangup anybody else using this ttyp, then reopen it for
-	 * ourselves.
-	 */
-# if !(defined(CRAY) || defined(__hpux)) && (BSD <= 43) && !defined(STREAMSPTY)
-	(void) signal(SIGHUP, SIG_IGN);
-#ifdef HAVE_VHANGUP
-	vhangup();
-#endif
-	(void) signal(SIGHUP, SIG_DFL);
-	t = open(line, O_RDWR|O_NOCTTY);
-	if (t < 0)
-		return(-1);
-# endif
-# if	defined(CRAY) && defined(TCVHUP)
-	{
-		register int i;
-		(void) signal(SIGHUP, SIG_IGN);
-		(void) ioctl(t, TCVHUP, (char *)0);
-		(void) signal(SIGHUP, SIG_DFL);
-		setpgrp();
-
-#if		defined(_SC_CRAY_SECURE_SYS)
-		if (secflag) {
-			if (secstat(line, &secbuf) < 0)
-				return(-1);
-			if (setulvl(secbuf.st_slevel) < 0)
-				return(-1);
-			if (setucmp(secbuf.st_compart) < 0)
-				return(-1);
-		}
-#endif		/* _SC_CRAY_SECURE_SYS */
-
-		i = open(line, O_RDWR);
-
-#if		defined(_SC_CRAY_SECURE_SYS)
-		if (secflag) {
-			if (setulvl(sysv.sy_minlvl) < 0)
-				return(-1);
-			if (setucmp(0) < 0)
-				return(-1);
-		}
-#endif		/* _SC_CRAY_SECURE_SYS */
-
-		if (i < 0)
-			return(-1);
-		(void) close(t);
-		t = i;
-	}
-# endif	/* defined(CRAY) && defined(TCVHUP) */
-	return(t);
-}
 #endif	/* !defined(CRAY) || !defined(NEWINIT) */
 
 #if BSD <= 43
@@ -1300,40 +1059,6 @@ cleanopen(line)
 login_tty(t)
 	int t;
 {
-	if (setsid() < 0) {
-#ifdef ultrix
-		/*
-		 * The setsid() may have failed because we
-		 * already have a pgrp == pid.  Zero out
-		 * our pgrp and try again...
-		 */
-		if ((setpgrp(0, 0) < 0) || (setsid() < 0))
-#endif
-			fatalperror(net, "setsid()");
-	}
-# ifdef	TIOCSCTTY
-	if (ioctl(t, TIOCSCTTY, (char *)0) < 0)
-		fatalperror(net, "ioctl(sctty)");
-#  if defined(CRAY)
-	/*
-	 * Close the hard fd to /dev/ttypXXX, and re-open through
-	 * the indirect /dev/tty interface.
-	 */
-	close(t);
-	if ((t = open("/dev/tty", O_RDWR)) < 0)
-		fatalperror(net, "open(/dev/tty)");
-#  endif
-# else
-	/*
-	 * We get our controlling tty assigned as a side-effect
-	 * of opening up a tty device.  But on BSD based systems,
-	 * this only happens if our process group is zero.  The
-	 * setsid() call above may have set our pgrp, so clear
-	 * it out before opening the tty...
-	 */
-	(void) setpgrp(0, 0);
-	close(open(line, O_RDWR));
-# endif
 	if (t != 0)
 		(void) dup2(t, 0);
 	if (t != 1)
@@ -1357,6 +1082,7 @@ char *gen_id = "fe";
  * is necessary to startup the login process on the slave side of the pty.
  */
 
+
 /* ARGSUSED */
 	void
 startslave(host, autologin, autoname)
@@ -1364,6 +1090,7 @@ startslave(host, autologin, autoname)
 	int autologin;
 	char *autoname;
 {
+int syncpipe[2];
 	register int i;
 #ifdef	NEWINIT
 	extern char *ptyip;
@@ -1372,6 +1099,9 @@ startslave(host, autologin, autoname)
 	register int n;
 #endif	/* NEWINIT */
 
+if ( pipe(syncpipe) < 0 ) 
+    fatal(net, "failed getting synchronization pipe");
+    
 #if	defined(AUTHENTICATION)
 	if (!autoname || !autoname[0])
 		autologin = 0;
@@ -1383,51 +1113,40 @@ startslave(host, autologin, autoname)
 #endif
 
 #ifndef	NEWINIT
-# ifdef	PARENT_DOES_UTMP
-	utmp_sig_init();
-# endif	/* PARENT_DOES_UTMP */
 
 	if ((i = fork()) < 0)
 		fatalperror(net, "fork");
 	if (i) {
-# ifdef PARENT_DOES_UTMP
-		/*
-		 * Cray parent will create utmp entry for child and send
-		 * signal to child to tell when done.  Child waits for signal
-		 * before doing anything important.
-		 */
-		register int pid = i;
-		void sigjob P((int));
+char c;
 
-		setpgrp();
-		utmp_sig_reset();		/* reset handler to default */
+		void sigjob P((int));
+slavepid = i; /* So we can clean it up later */
+#ifdef	CRAY
+		(void) signal(WJSIGNAL, sigjob);
+#endif
+
+		/* Wait for child before writing to parent side of pty.*/
+		read(syncpipe[0], &c, 1);
+		close(syncpipe[0]);
+		close(syncpipe[1]);
+		
+			} else {
 		/*
 		 * Create utmp entry for child
 		 */
 		(void) time(&wtmp.ut_time);
 		wtmp.ut_type = LOGIN_PROCESS;
-		wtmp.ut_pid = pid;
-		SCPYN(wtmp.ut_user, "LOGIN");
-		SCPYN(wtmp.ut_host, host);
-		SCPYN(wtmp.ut_line, line + sizeof("/dev/") - 1);
-#ifndef	__hpux
-		SCPYN(wtmp.ut_id, wtmp.ut_line+3);
-#else
-		SCPYN(wtmp.ut_id, wtmp.ut_line+7);
-#endif
-		pututline(&wtmp);
-		endutent();
-		if ((i = open(wtmpf, O_WRONLY|O_APPEND)) >= 0) {
-			(void) write(i, (char *)&wtmp, sizeof(struct utmp));
-			(void) close(i);
-		}
-#ifdef	CRAY
-		(void) signal(WJSIGNAL, sigjob);
-#endif
-		utmp_sig_notify(pid);
-# endif	/* PARENT_DOES_UTMP */
-	} else {
+		wtmp.ut_pid = getpid();
+
+
+pty_update_utmp (&wtmp, "LOGIN", line, host);
 		getptyslave(autologin);
+
+/* Notify our parent we're ready to continue.*/
+		write(syncpipe[1],"y",1);
+		close(syncpipe[0]);
+		close(syncpipe[1]);
+		
 		start_login(host, autologin, autoname);
 		/*NOTREACHED*/
 	}
@@ -1776,81 +1495,10 @@ addarg(argv, val)
 cleanup(sig)
 	int sig;
 {
-#ifndef	PARENT_DOES_UTMP
-# if (BSD > 43) || defined(convex)
-	char *p;
-
-	p = line + sizeof("/dev/") - 1;
-	if (logout(p))
-		logwtmp(p, "", "");
-	(void)chmod(line, 0666);
-	(void)chown(line, 0, 0);
-	*p = 'p';
-	(void)chmod(line, 0666);
-	(void)chown(line, 0, 0);
+    pty_cleanup(line,slavepid,1);
+    
 	(void) shutdown(net, 2);
 	exit(1);
-# else
-	void rmut();
-
-	rmut();
-#ifdef HAVE_VHANGUP
-	vhangup();	/* XXX */
-#endif
-	(void) shutdown(net, 2);
-	exit(1);
-# endif
-#else	/* PARENT_DOES_UTMP */
-# ifdef	NEWINIT
-	(void) shutdown(net, 2);
-	exit(1);
-# else	/* NEWINIT */
-#  ifdef CRAY
-	static int incleanup = 0;
-	register int t;
-
-	/*
-	 * 1: Pick up the zombie, if we are being called
-	 *    as the signal handler.
-	 * 2: If we are a nested cleanup(), return.
-	 * 3: Try to clean up TMPDIR.
-	 * 4: Fill in utmp with shutdown of process.
-	 * 5: Close down the network and pty connections.
-	 * 6: Finish up the TMPDIR cleanup, if needed.
-	 */
-	if (sig == SIGCHLD)
-		while (waitpid(-1, 0, WNOHANG) > 0)
-			;	/* VOID */
-	t = sigblock(sigmask(SIGCHLD));
-	if (incleanup) {
-		sigsetmask(t);
-		return;
-	}
-	incleanup = 1;
-	sigsetmask(t);
-	if (secflag) {
-		/*
-		 *	We need to set ourselves back to a null
-		 *	label to clean up.
-		 */
-
-		setulvl(sysv.sy_minlvl);
-		setucmp((long)0);
-	}
-
-	t = cleantmp(&wtmp);
-	setutent();	/* just to make sure */
-#  endif /* CRAY */
-	rmut(line);
-	close(pty);
-	(void) shutdown(net, 2);
-#  ifdef CRAY
-	if (t == 0)
-		cleantmp(&wtmp);
-#  endif /* CRAY */
-	exit(1);
-# endif	/* NEWINT */
-#endif	/* PARENT_DOES_UTMP */
 }
 
 #if defined(PARENT_DOES_UTMP) && !defined(NEWINIT)

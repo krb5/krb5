@@ -44,6 +44,7 @@ char copyright[] =
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 #include <sys/sysv.h>
+#include <libpty.h>
 #include <sys/secdev.h>
 int	secflag;
 char	tty_dev[16];
@@ -690,25 +691,11 @@ doit(who)
 	/*
 	 * Find an available pty to use.
 	 */
-#ifndef	convex
-	pty = getpty();
+	if ( (retval = pty_getpty(&pty, line, sizeof(line)) < 0 ) {
+	    com_err(retval, "telnetd", "");
+	    
 	if (pty < 0)
 		fatal(net, "All network ports in use");
-#else
-	for (;;) {
-		char *lp;
-		extern char *line, *getpty();
-
-		if ((lp = getpty()) == NULL)
-			fatal(net, "Out of ptys");
-
-		if ((pty = open(lp, 2)) >= 0) {
-			strcpy(line,lp);
-			line[5] = 't';
-			break;
-		}
-	}
-#endif
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
@@ -760,13 +747,9 @@ doit(who)
 	/*
 	 * Start up the login process on the slave side of the terminal
 	 */
-#ifndef	convex
-	startslave(host, level, user_name);
 
+	startslave(host, level, user_name);
 	telnet(net, pty);  /* begin server processing */
-#else
-	telnet(net, pty, host);
-#endif
 	/*NOTREACHED*/
 }  /* end of doit */
 

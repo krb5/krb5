@@ -51,6 +51,8 @@ static char copyright[] =
 # undef _SC_CRAY_SECURE_SYS
 #endif
 
+#include <libpty.h>
+#include <com_err.h>
 #if	defined(_SC_CRAY_SECURE_SYS)
 #include <sys/sysv.h>
 #include <sys/secdev.h>
@@ -830,29 +832,18 @@ doit(who)
 	int level;
 	int ptynum;
 	char user_name[256];
-
+long retval;
 	/*
 	 * Find an available pty to use.
 	 */
-#ifndef	convex
-	pty = getpty(&ptynum);
-	if (pty < 0)
-		fatal(net, "All network ports in use");
-#else
-	for (;;) {
-		char *lp;
-		extern char *line, *getpty();
+pty_init();
+	
 
-		if ((lp = getpty()) == NULL)
-			fatal(net, "Out of ptys");
-
-		if ((pty = open(lp, 2)) >= 0) {
-			strcpy(line,lp);
-			line[5] = 't';
-			break;
-		}
-	}
-#endif
+	if ((retval = pty_getpty(&pty, line, 20)) != 0 )
+	    {
+		fatal(net, error_message(retval));
+	    }
+	
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
@@ -860,7 +851,7 @@ doit(who)
 	 */
 	if (secflag) {
 		char slave_dev[16];
-
+/*xxx This code needs to be fixed to work without ptynum; I don't understand why they don't currently use line, so I don't really know how to fix.*/
 		sprintf(tty_dev, "/dev/pty/%03d", ptynum);
 		if (setdevs(tty_dev, &dv) < 0)
 		 	fatal(net, "cannot set pty security");
