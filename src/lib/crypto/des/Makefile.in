@@ -21,7 +21,6 @@ OBJS=	afsstring2key.$(OBJEXT) \
 	process_ky.$(OBJEXT)	\
 	random_key.$(OBJEXT)	\
 	string2key.$(OBJEXT)	\
-	afsstring2key.$(OBJEXT)	\
 	new_rn_key.$(OBJEXT)	\
 	key_sched.$(OBJEXT)	\
 	weak_key.$(OBJEXT)	\
@@ -48,7 +47,6 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/process_ky.c	\
 	$(srcdir)/random_key.c	\
 	$(srcdir)/string2key.c	\
-	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/new_rn_key.c	\
 	$(srcdir)/key_sched.c	\
 	$(srcdir)/weak_key.c	\
