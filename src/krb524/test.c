@@ -46,7 +46,7 @@ void do_local (krb5_creds *, krb5_keyblock *),
 static 
 void print_key(msg, key)
      char *msg;
-     char *key;
+     des_cblock *key;
 {
      printf("%s: ", msg);
      C_Block_print(key);
@@ -84,7 +84,7 @@ void krb5_print_keyblock(msg, key)
      printf("%s: Keytype: %d\n", msg, key->enctype);
      printf("%s: Length: %d\n", msg, key->length);
      printf("%s: Key: ", msg);
-     C_Block_print(key->contents);
+     C_Block_print((des_cblock *) key->contents);
      printf("\n");
 }
 
@@ -142,7 +142,9 @@ void krb5_print_creds(context, creds, secret_key)
      krb5_print_times("Times", &creds->times);
      printf("is_skey: %s\n", creds->is_skey ? "True" : "False");
      printf("Flags: 0x%08x\n", creds->ticket_flags);
+#if 0
      krb5_print_addrs(creds->addresses);
+#endif
      krb5_print_ticket(context, &creds->ticket, secret_key);
      /* krb5_print_ticket(context, &creds->second_ticket, secret_key); */
 }
@@ -177,11 +179,11 @@ void krb4_print_ticket(ticket, secret_key)
      }
      printf("Ticket: Client: %s.%s@%s\n", pname, pinst, prealm);
      printf("Ticket: Service: %s.%s\n", sname, sinst);
-     printf("Ticket: Address: %08lx\n", addr);
+     printf("Ticket: Address: %08lx\n", (long) addr);
      print_key("Ticket: Session Key", (char *) session_key);
      printf("Ticket: Lifetime: %d\n", life);
-     printf("Ticket: Issue Date: %ld, %s", issue_time, ctime((time_t *)
-							     &issue_time));
+     printf("Ticket: Issue Date: %ld, %s", (long) issue_time, 
+	    ctime((time_t *) &issue_time));
 }
 
 static

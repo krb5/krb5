@@ -1,3 +1,10 @@
+2001-06-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* test.c (print_key): Pass in des_cblock* instead of char *.
+	(krb5_print_keyblock): Cast argument to C_Block_print to des_cblock *. 
+	(krb4_print_ticket): For printf formats expecting a long, cast
+	arguments as such.
+
 2001-06-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for unistd.h.
