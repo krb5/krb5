@@ -1,5 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
+##DOSBUILDTOP = .
+
 SRCS =  
 HDRS = 
 
@@ -126,7 +128,9 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\krb5\keytab\file\makefile.in lib\krb5\krb\makefile.in \
 		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
 		lib\krb5\rcache\makefile.in \
-		util\et\makefile.in util\profile\makefile.in
+		util\et\makefile.in util\profile\makefile.in \
+		windows\cns\Makefile.in windows\gss\Makefile.in \
+		windows\wintel\Makefile.in
 	.\wconfig config <makefile.in >makefile
 	.\wconfig config <include\makefile.in >include\makefile
 	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
@@ -159,6 +163,9 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
 	.\wconfig config <util\et\makefile.in >util\et\makefile
 	.\wconfig config <util\profile\makefile.in >util\profile\makefile
+	.\wconfig < windows\cns\Makefile.in > windows\cns\Makefile
+	.\wconfig < windows\gss\Makefile.in > windows\gss\Makefile
+	.\wconfig < windows\wintel\Makefile.in > windows\wintel\Makefile
 	config\rm.bat wconfig.obj msvc.pdb
 
 wconfig.exe: wconfig.c
@@ -245,7 +252,8 @@ macfile.list:
 Makefile.sav:
 	rm -f Makefile.sav
 	mv Makefile Makefile.sav
-	cat config/windows.in Makefile.in config/win-post.in > Makefile
+	cat config/windows.in Makefile.in config/win-post.in | \
+		sed -e 's/^##DOS//' > Makefile
 
 kerbsrc.zip: Makefile.sav awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
