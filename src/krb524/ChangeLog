@@ -1,6 +1,7 @@
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use $(srcdir).
+	(../include/krb524_err.h): Force build of "includes".
 
 2001-08-08    <epeisach@mit.edu>
 

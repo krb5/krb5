@@ -100,6 +100,8 @@ includes:: krb524.h krb524_err.h
 			$(BUILDTOP)/include/krb524_err.h) ; \
 	fi
 
+../include/krb524_err.h: includes
+
 all-windows:: $(KRB524_HDR) $(OUTPRE)krb524.lib $(OUTPRE)k524init.exe
 
 krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
