@@ -30,9 +30,9 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	4) Launch MPW.
 
 	5) Set directory in MPW to the top level of Kerberos 5 distribution
-	   (e.g. "GSS-Kerberos5-1.0.5").
+	   (e.g. "GSS-Kerberos5").
 
-	6) Build target "all" in MPW.
+	6) Build target "prebuild" in MPW.
 		This will create a new Makefile, and launch your CodeWarrior IDE to build
 		some CodeWarrior projects. You may be asked to locate CodeWarrior IDE.
 	    

@@ -17,7 +17,7 @@ CodeWarrior_Projects = :mac:Libraries:Metrowerks:{CodeWarrior_Version}:
 CodeWarrior_Project = "`Directory`mac:libraries:CodeWarrior Dependencies:{CodeWarrior_Version}.prj"
 
 
-all Ä create-directories build-cw-projects build-makefile
+prebuild Ä create-directories build-cw-projects build-makefile
 
 ################################################################################
 ##
@@ -54,6 +54,7 @@ create-directories Ä
 build-cw-projects Ä
 		(Echo "with timeout of 1200 seconds"; ¶
 		Echo "Tell application ¶"{CodeWarrior_IDE}¶""; ¶
+		Echo "Activate"; ¶
 		Echo "Open ¶"{CodeWarrior_Project}¶" as alias"; ¶
 		Echo "Make Project"; ¶
 		Echo "end"; ¶
