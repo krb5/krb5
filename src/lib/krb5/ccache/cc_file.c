@@ -104,7 +104,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id ));
 
-KRB5_DLLIMP char * KRB5_CALLCONV krb5_fcc_get_name 
+KRB5_DLLIMP const char * KRB5_CALLCONV krb5_fcc_get_name 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal 
@@ -1841,7 +1841,7 @@ err_out:
  * Returns:
  * The name of the file cred cache id.
  */
-char * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_fcc_get_name (context, id)
    krb5_context context;
    krb5_ccache id;

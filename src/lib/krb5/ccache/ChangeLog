@@ -1,3 +1,13 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* ser_cc.c (krb5_ccache_externalize): Use krb5_cc_get_name instead
+	of krb5_rc_get_name on credential cache.
+
+	* cc_file.c (krb5_fcc_get_name): 
+	* cc_stdio.c (krb5_scc_get_name): 
+	* cc_memory.c (krb5_mcc_get_name): 
+	* ccfns.c (krb5_cc_get_name): Declare as returning const char *.
+
 2000-09-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* cc_file.c ccbase.c, cc_stdio.c, cc_retr.c, cc_memory.c: More

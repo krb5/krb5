@@ -83,7 +83,7 @@ krb5_ccache_size(kcontext, arg, sizep)
 	 * The ccache name is formed as follows:
 	 *	<prefix>:<name>
 	 */
-	required += strlen(krb5_rc_get_name(kcontext, ccache));
+	required += strlen(krb5_cc_get_name(kcontext, ccache));
 
 	kret = 0;
 	*sizep += required;
@@ -108,7 +108,7 @@ krb5_ccache_externalize(kcontext, arg, buffer, lenremain)
     size_t		remain;
     char		*ccname;
     size_t		namelen;
-    char		*fnamep;
+    const char		*fnamep;
 
     required = 0;
     bp = *buffer;
@@ -124,7 +124,7 @@ krb5_ccache_externalize(kcontext, arg, buffer, lenremain)
 	    /* Calculate the length of the name */
 	    namelen = (ccache->ops && ccache->ops->prefix) ?
 		strlen(ccache->ops->prefix)+1 : 0;
-	    fnamep = krb5_rc_get_name(kcontext, ccache);
+	    fnamep = krb5_cc_get_name(kcontext, ccache);
 	    namelen += (strlen(fnamep)+1);
 
 	    if ((ccname = (char *) malloc(namelen))) {

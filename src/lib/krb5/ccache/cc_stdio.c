@@ -99,7 +99,7 @@ krb5_error_code KRB5_CALLCONV krb5_scc_generate_new
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache *id ));
 
-char * KRB5_CALLCONV krb5_scc_get_name
+const char * KRB5_CALLCONV krb5_scc_get_name
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
@@ -1916,7 +1916,7 @@ err_out:
  * Returns:
  * The name of the file cred cache id.
  */
-char *
+const char *
 KRB5_CALLCONV
 krb5_scc_get_name (context, id)
    krb5_context context;

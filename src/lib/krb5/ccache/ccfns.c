@@ -30,7 +30,7 @@
 
 #include "k5-int.h"
 
-char FAR * KRB5_CALLCONV
+const char FAR * KRB5_CALLCONV
 krb5_cc_get_name (krb5_context context, krb5_ccache cache)
 {
     return cache->ops->get_name(context, cache);
