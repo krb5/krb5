@@ -1,3 +1,8 @@
+2001-02-27	Alexandra Ellwood <lxs@mit.edu>
+
+	* et_c.awk, et_c.pl, et_h.awk, et_h.pl: Updated Mac OS #defines 
+	and #includes for new header layout and Mac OS X frameworks
+
 2000-10-08  Miro Jurisic  <meeroh@mit.edu>
 
 	* et_c.perl, et_h.perl: 
