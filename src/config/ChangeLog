@@ -2,6 +2,10 @@ Mon Feb 20 15:48:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* windows.in: changed API to INTERFACE        
 
+Mon Feb 13 23:40:11 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in: Add line for $(LD)
+
 Mon Feb 6 19:33:57 1995 Keith Vetter (keithv@fusion.com)
 
 	* pre.in: Added macros for directory syntax, filename extensions 
