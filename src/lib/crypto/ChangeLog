@@ -1,3 +1,11 @@
+2002-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* valid_enctype.c (krb5_c_valid_enctype): New name on old
+	function, with old name kept as an alias (wrapper).
+	* keyed_cksum.c (krb5_c_is_keyed_cksum): Likewise.
+	* valid_cksumtype.c (krb5_c_valid_cksumtype): Likewise.
+	* coll_proof_cksum.c (krb5_c_is_coll_proof_cksum): Likewise.
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * crypto_libinit.h: Changed macros so you can include crypto_libinit.h
     and krb5_libinit.h at the same time
