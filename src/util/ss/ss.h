@@ -53,10 +53,12 @@ char *ss_name();
 void ss_error (int, long, char const *, ...);
 void ss_perror (int, long, char const *);
 int ss_listen (int);
+int ss_create_invocation(char *, char *, char *, ss_request_table *, int *);
 #else
 void ss_error ();
 void ss_perror ();
 int ss_listen ();
+int ss_create_invocation();
 #endif
 void ss_abort_subsystem();
 extern ss_request_table ss_std_requests;

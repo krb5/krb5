@@ -3,7 +3,7 @@
 	* test_ss.c (main): Change usage of ss_listen to agree with 
 	prototype.
 
-	* ss.h: Add prototype for ss_listen()
+	* ss.h: Add prototype for ss_listen() and ss_create_invocation()
 
 2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
 
