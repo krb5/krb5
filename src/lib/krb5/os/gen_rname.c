@@ -31,7 +31,7 @@ static char rcsid_gen_rname_c[] =
 
 krb5_error_code
 krb5_gen_replay_name(address, uniq, string)
-krb5_address *address;
+const krb5_address *address;
 const char *uniq;
 char **string;
 {

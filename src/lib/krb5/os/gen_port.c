@@ -24,8 +24,8 @@ static char rcsid_gen_port_c[] =
 
 krb5_error_code
 krb5_gen_portaddr(addr, ptr, outaddr)
-krb5_address *addr;
-krb5_pointer ptr;
+const krb5_address *addr;
+krb5_const_pointer ptr;
 krb5_address **outaddr;
 {
 #ifdef KRB5_USE_INET

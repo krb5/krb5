@@ -28,7 +28,7 @@ static char rcsid_port2ip_c[] =
 
 krb5_error_code
 krb5_unpack_full_ipaddr(inaddr, adr, port)
-krb5_address *inaddr;
+const krb5_address *inaddr;
 krb5_int32 *adr;
 krb5_int16 *port;
 {

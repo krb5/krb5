@@ -24,7 +24,7 @@ krb5_error_code krb5_locate_kdc
 
 #ifdef KRB5_USE_INET
 krb5_error_code krb5_unpack_full_ipaddr
-    PROTOTYPE((krb5_address *,
+    PROTOTYPE((const krb5_address *,
 	       krb5_int32 *,
 	       krb5_int16 *));
 
