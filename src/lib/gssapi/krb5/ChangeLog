@@ -1,3 +1,8 @@
+Wed Oct  9 18:02:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_krb5.c: Definition of gss_nt_krb5_name was incorrect;
+		someone was being a bonehead.
+
 Wed Aug 28 17:45:55 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* util_cksum.c (kg_checksum_channel_bindings): Fix stupid bug;

@@ -64,7 +64,7 @@ static const gss_OID_desc oids[] = {
 
 const gss_OID_desc * const gss_mech_krb5_old = oids+0;
 const gss_OID_desc * const gss_mech_krb5 = oids+1;
-const gss_OID_desc * const gss_nt_krb5_name = oids+1;
+const gss_OID_desc * const gss_nt_krb5_name = oids+2;
 const gss_OID_desc * const gss_nt_krb5_principal = oids+3;
 
 static const gss_OID_set_desc oidsets[] = {
