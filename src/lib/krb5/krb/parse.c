@@ -35,13 +35,18 @@ static char rcsid_parse_c [] =
  * string, then the rest of the string after it represents the realm name.
  * Otherwise the local realm name is used.
  * 
- * returns system errors XXX
+ * error return:
+ *	KRB5_PARSE_MALFORMED	badly formatted string
+ *
+ * also returns system errors:
+ *	ENOMEM	malloc failed/out of memory
+ *
+ * get_default_realm() is called; it may return other errors.
  */
 
 #define REALM_SEP	'@'
 #define	COMPONENT_SEP	'/'
 #define QUOTECHAR	'\\'
-#define	MAXRLMSZ	256		/* XXX! */
 
 #define FCOMPNUM	2
 
