@@ -22,7 +22,18 @@ static char rcsid_lock_file_c [] =
 #include <krb5/libos.h>
 
 #include <stdio.h>
+#ifdef POSIX
+#include <errno.h>
+#include <fcntl.h>
+#define SHARED_LOCK	F_RDLCK
+#define EXCLUSIVE_LOCK	F_WRLCK
+#define UNLOCK_LOCK	F_UNLCK
+#else
 #include <sys/file.h>
+#define SHARED_LOCK	LOCK_SH
+#define EXCLUSIVE_LOCK	LOCK_EX
+#define UNLOCK_LOCK	LOCK_UN
+#endif
 
 #include <sys/types.h>
 #include <krb5/ext-proto.h>
@@ -36,22 +47,51 @@ FILE *filep;
 char *pathname;
 int mode;
 {
-    int flock_flag = -1;
+#ifdef POSIX
+    int lock_cmd = F_SETLKW;
+    struct flock lock_arg;
+#define lock_flag lock_arg.l_type
+    lock_flag = -1;
+#else
+    int lock_flag = -1;
+#endif
 
     switch (mode & ~KRB5_LOCKMODE_DONTBLOCK) {
     case KRB5_LOCKMODE_SHARED:
-	flock_flag = LOCK_SH;
+	lock_flag = SHARED_LOCK;
+	break;
     case KRB5_LOCKMODE_EXCLUSIVE:
-	flock_flag = LOCK_EX;
+	lock_flag = EXCLUSIVE_LOCK;
+	break;
     case KRB5_LOCKMODE_UNLOCK:
-	flock_flag = LOCK_UN;
+	lock_flag = UNLOCK_LOCK;
+	break;
     }
-    if (flock_flag == -1)
-	return(KRB5_LIBOS_BADLOCKFLAG);
-    if (mode & KRB5_LOCKMODE_DONTBLOCK)
-	flock_flag |= LOCK_NB;
 
-    if (flock(fileno(filep), flock_flag) == -1)
+    if (lock_flag == -1)
+	return(KRB5_LIBOS_BADLOCKFLAG);
+
+    if (mode & KRB5_LOCKMODE_DONTBLOCK) {
+#ifdef POSIX
+	lock_cmd = F_SETLK;
+#else
+	lock_flag |= LOCK_NB;
+#endif
+    }
+
+#ifdef POSIX
+    lock_arg.l_whence = 0;
+    lock_arg.l_start = 0;
+    lock_arg.l_len = 0;
+    if (fcntl(fileno(filep), lock_cmd, &lock_arg) == -1) {
+	if (errno == EACCES || errno == EAGAIN)	/* see POSIX/IEEE 1003.1-1988,
+						   6.5.2.4 */
+	    return(EAGAIN);
 	return(errno);
+    }
+#else
+    if (flock(fileno(filep), lock_flag) == -1)
+	return(errno);
+#endif
     return 0;
 }
