@@ -57,13 +57,15 @@ krb5_authdata ***output;
 	    /* now walk & copy */
 	    retdata[i] = (krb5_authdata *)malloc(sizeof(*retdata[i]));
 	    if (!retdata[i]) {
-		/* XXX clean up */
+		krb5_free_authdata(retdata);
 		return ENOMEM;
 	    }
 	    *retdata[i] = **ptr;
 	    if (!(retdata[i]->contents =
 		  (krb5_octet *)malloc(retdata[i]->length))) {
-		/* XXX clean up */
+		xfree(retdata[i]);
+		retdata[i] = 0;
+		krb5_free_authdata(retdata);
 		return ENOMEM;
 	    }
 	    memcpy((char *) retdata[i]->contents,
@@ -153,21 +155,6 @@ krb5_ticket **ticket;
 
     /* the caller will free the ticket when cleaning up */
 #define cleanup_apreq() {apreq->ticket = 0; krb5_free_ap_req(apreq);}
-
-#ifdef notdef
-    /* XXX why copy here? */
-    krb5_free_data(request->server[0]);
-    if (retval = krb5_copy_data(apreq->ticket->server[0],
-				  &request->server[0])) {
-	register krb5_data **foo;
-	request->server[0] = 0;
-	for (foo = &request->server[1]; *foo; foo++)
-	    krb5_free_data(*foo);
-	/* XXX mem leak plugged? */
-	cleanup_apreq();
-	return retval;
-    }
-#endif
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
@@ -308,7 +295,7 @@ krb5_ticket **ticket;
 	xfree(our_cksum.contents);
 	krb5_free_data(scratch);
 	cleanup_apreq();
-	return KRB5KRB_AP_ERR_BAD_INTEGRITY; /* XXX wrong code? */
+	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
     }
     krb5_free_data(scratch);
     xfree(our_cksum.contents);
