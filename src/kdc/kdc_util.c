@@ -367,9 +367,9 @@ kdc_get_server_key(ticket, key, kvno)
 	    krb5_key_salt_tuple *kslist;
 
 	    kslist = (krb5_key_salt_tuple *) kdc_active_realm->realm_kstypes;
-	    if (!krb5_dbe_find_keytype(kdc_context,
+	    if (!krb5_dbe_find_enctype(kdc_context,
 				       &server,
-				       kslist[i].ks_keytype,
+				       kslist[i].ks_enctype,
 				       -1,
 				       -1,
 				       &server_key))

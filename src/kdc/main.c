@@ -342,13 +342,13 @@ finish_realm(rdp)
  */
 static krb5_error_code
 init_realm(progname, rdp, realm, def_dbname, def_mpname,
-		 def_keytype, def_port, def_sport, def_manual)
+		 def_enctype, def_port, def_sport, def_manual)
     char		*progname;
     kdc_realm_t		*rdp;
     char		*realm;
     char		*def_dbname;
     char		*def_mpname;
-    krb5_keytype	def_keytype;
+    krb5_enctype	def_enctype;
     krb5_int32		def_port;
     krb5_int32		def_sport;
     krb5_boolean	def_manual;
@@ -395,12 +395,12 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		    KRB5_KDB_M_NAME;
 
 	    /* Handle master key type */
-	    if (rparams && rparams->realm_keytype_valid)
-		rdp->realm_mkey.keytype =
-		    (krb5_keytype) rparams->realm_keytype;
+	    if (rparams && rparams->realm_enctype_valid)
+		rdp->realm_mkey.enctype =
+		    (krb5_enctype) rparams->realm_enctype;
 	    else
-		rdp->realm_mkey.keytype = (def_keytype) ? def_keytype :
-		    KEYTYPE_DES_CBC_CRC;
+		rdp->realm_mkey.enctype = (def_enctype) ? def_enctype :
+		    ENCTYPE_DES_CBC_CRC;
 
 	    /* Handle KDC port */
 	    if (rparams && rparams->realm_kdc_pport_valid)
@@ -453,7 +453,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		 */
 		if ((kslist = (krb5_key_salt_tuple *)
 		     malloc(sizeof(krb5_key_salt_tuple)))) {
-		    kslist->ks_keytype = KEYTYPE_DES_CBC_CRC;
+		    kslist->ks_enctype = ENCTYPE_DES_CBC_CRC;
 		    kslist->ks_salttype = KRB5_KDB_SALTTYPE_NORMAL;
 		    rdp->realm_kstypes = kslist;
 		    rdp->realm_nkstypes = 1;
@@ -494,8 +494,8 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	    }
 
 	    /* Select the specified encryption type */
-	    krb5_use_keytype(rdp->realm_context, &rdp->realm_encblock, 
-			     rdp->realm_mkey.keytype);
+	    krb5_use_enctype(rdp->realm_context, &rdp->realm_encblock, 
+			     rdp->realm_mkey.enctype);
 
 	    /*
 	     * Get the master key.
@@ -570,9 +570,9 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		 */
 		kdata = (krb5_key_data *) NULL;
 		for (i=0; i<nkslist; i++) {
-		    if ((kret = krb5_dbe_find_keytype(rdp->realm_context,
+		    if ((kret = krb5_dbe_find_enctype(rdp->realm_context,
 						      &db_entry,
-						      kslist[i].ks_keytype,
+						      kslist[i].ks_enctype,
 						      -1,
 						      -1,
 						      &kdata)))
@@ -639,9 +639,9 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		 */
 		kdata = (krb5_key_data *) NULL;
 		for (i=0; i<nkslist; i++) {
-		    if ((kret = krb5_dbe_find_keytype(rdp->realm_context,
+		    if ((kret = krb5_dbe_find_enctype(rdp->realm_context,
 						      &db_entry,
-						      kslist[i].ks_keytype,
+						      kslist[i].ks_enctype,
 						      -1,
 						      -1,
 						      &kdata)))
@@ -669,21 +669,21 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		}
 	    }
 	    if (!rkey_init_done) {
-		krb5_keytype keytype;
+		krb5_enctype enctype;
 		/*
 		 * If all that worked, then initialize the random key
 		 * generators.
 		 */
-		for (keytype = 0; keytype <= krb5_max_keytype; keytype++) {
-		    if (krb5_keytype_array[keytype]) {
-			if ((kret = (*krb5_keytype_array[keytype]->system->
+		for (enctype = 0; enctype <= krb5_max_enctype; enctype++) {
+		    if (krb5_enctype_array[enctype]) {
+			if ((kret = (*krb5_enctype_array[enctype]->system->
 				     init_random_key)
 			     (&rdp->realm_mkey,
-			      &krb5_keytype_array[keytype]->random_sequence))) {
+			      &krb5_enctype_array[enctype]->random_sequence))) {
 			    com_err(progname, kret, 
-				    "while setting up random key generator for keytype %d--keytype disabled",
-				    keytype);
-			    krb5_keytype_array[keytype] = 0;
+				    "while setting up random key generator for enctype %d--enctype disabled",
+				    enctype);
+			    krb5_enctype_array[enctype] = 0;
 			}
 		    }
 		}
@@ -732,7 +732,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterkeytype] [-M masterkeyname] [-p port] [-n]\n", name);
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-n]\n", name);
     return;
 }
 
@@ -748,7 +748,7 @@ initialize_realms(kcontext, argc, argv)
     char		*rcname = KDCRCACHE;
     char		*lrealm;
     krb5_error_code	retval;
-    krb5_keytype	mkeytype = KEYTYPE_DES_CBC_CRC;
+    krb5_enctype	menctype = ENCTYPE_DES_CBC_CRC;
     kdc_realm_t		*rdatap;
     krb5_boolean	manual = FALSE;
     krb5_int32		pport, sport;
@@ -766,7 +766,7 @@ initialize_realms(kcontext, argc, argv)
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
 		if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 		    if ((retval = init_realm(argv[0], rdatap, optarg, db_name,
-					     mkey_name, mkeytype, pport, sport,
+					     mkey_name, menctype, pport, sport,
 					     manual))) {
 			fprintf(stderr,"%s: cannot initialize realm %s\n",
 				argv[0], optarg);
@@ -789,9 +789,9 @@ initialize_realms(kcontext, argc, argv)
 	case 'n':
 	    nofork++;			/* don't detach from terminal */
 	    break;
-	case 'k':			/* keytype for master key */
-	    if (krb5_string_to_keytype(optarg, &mkeytype))
-		com_err(argv[0], 0, "invalid keytype %s", optarg);
+	case 'k':			/* enctype for master key */
+	    if (krb5_string_to_enctype(optarg, &menctype))
+		com_err(argv[0], 0, "invalid enctype %s", optarg);
 	    break;
 	case 'R':
 	    rcname = optarg;
@@ -821,7 +821,7 @@ initialize_realms(kcontext, argc, argv)
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 	    if ((retval = init_realm(argv[0], rdatap, lrealm, db_name,
-				     mkey_name, mkeytype, pport, sport,
+				     mkey_name, menctype, pport, sport,
 				     manual))) {
 		fprintf(stderr,"%s: cannot initialize realm %s\n",
 			argv[0], lrealm);

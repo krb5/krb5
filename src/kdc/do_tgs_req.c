@@ -63,7 +63,7 @@ krb5_data **response;			/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
     krb5_encrypt_block eblock;
-    krb5_keytype second_ticket_ktype = KEYTYPE_UNKNOWN;
+    krb5_enctype second_ticket_ktype = ENCTYPE_UNKNOWN;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -83,7 +83,7 @@ krb5_data **response;			/* filled in with a response packet */
     char *cname = 0, *sname = 0, *tmp = 0, *fromstring = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
 /*    krb5_address *noaddrarray[1]; */
-    krb5_keytype usekeytype;
+    krb5_enctype useenctype;
     int	errcode, errcode2;
     register int i;
     int firstpass = 1;
@@ -210,26 +210,26 @@ tgt_again:
      * use to encrypt the ticket!
      */
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
-	second_ticket_ktype = request->second_ticket[st_idx]->enc_part.keytype;
+	second_ticket_ktype = request->second_ticket[st_idx]->enc_part.enctype;
 	    
     for (i = 0; i < request->nktypes; i++) {
-	krb5_keytype ok_keytype;
+	krb5_enctype ok_enctype;
 	
-	if (!valid_keytype(request->ktype[i]))
+	if (!valid_enctype(request->ktype[i]))
 	    continue;
 
-	if (second_ticket_ktype != KEYTYPE_UNKNOWN &&
+	if (second_ticket_ktype != ENCTYPE_UNKNOWN &&
 	    second_ticket_ktype != request->ktype[i])
 	    continue;
 
-	if (request->ktype[i] == KEYTYPE_DES_CBC_MD5 &&
+	if (request->ktype[i] == ENCTYPE_DES_CBC_MD5 &&
 	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
 	    continue;
 
-	ok_keytype = request->ktype[i];
+	ok_enctype = request->ktype[i];
 
         for (ok_key_data = 0; ok_key_data < server.n_key_data; ok_key_data++)
-            if (server.key_data[ok_key_data].key_data_type[0] == ok_keytype)
+            if (server.key_data[ok_key_data].key_data_type[0] == ok_enctype)
                 goto got_a_key;
     }
     
@@ -239,10 +239,10 @@ tgt_again:
     goto cleanup;
 
 got_a_key:;
-    usekeytype = request->ktype[i];
-    krb5_use_keytype(kdc_context, &eblock, usekeytype);
+    useenctype = request->ktype[i];
+    krb5_use_enctype(kdc_context, &eblock, useenctype);
     retval = krb5_random_key(kdc_context, &eblock, 
-			     krb5_keytype_array[usekeytype]->random_sequence,
+			     krb5_enctype_array[useenctype]->random_sequence,
 			     &session_key);
     if (retval) {
 	/* random key failed */
@@ -390,15 +390,15 @@ got_a_key:;
 	krb5_data scratch;
 
 	/* decrypt the authdata in the request */
-	if (!valid_keytype(request->authorization_data.keytype)) {
+	if (!valid_enctype(request->authorization_data.enctype)) {
 	    status = "BAD_AUTH_ETYPE";
 	    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
 	    goto cleanup;
 	}
 	/* put together an eblock for this encryption */
 
-	krb5_use_keytype(kdc_context, &eblock,
-			 request->authorization_data.keytype);
+	krb5_use_enctype(kdc_context, &eblock,
+			 request->authorization_data.enctype);
 
 	scratch.length = request->authorization_data.ciphertext.length;
 	if (!(scratch.data =
@@ -535,9 +535,9 @@ got_a_key:;
 	}
 	    
 	ticket_reply.enc_part.kvno = 0;
-	ticket_reply.enc_part.keytype =
-		request->second_ticket[st_idx]->enc_part2->session->keytype;
-	krb5_use_keytype(kdc_context, &eblock, ticket_reply.enc_part.keytype);
+	ticket_reply.enc_part.enctype =
+		request->second_ticket[st_idx]->enc_part2->session->enctype;
+	krb5_use_enctype(kdc_context, &eblock, ticket_reply.enc_part.enctype);
 	if ((retval = krb5_encrypt_tkt_part(kdc_context, &eblock,
 					    request->second_ticket[st_idx]->enc_part2->session,
 					    &ticket_reply))) {
@@ -556,8 +556,8 @@ got_a_key:;
 	}
 
 	ticket_reply.enc_part.kvno = server.key_data[ok_key_data].key_data_kvno;
-	ticket_reply.enc_part.keytype = usekeytype;
-	krb5_use_keytype(kdc_context, &eblock, ticket_reply.enc_part.keytype);
+	ticket_reply.enc_part.enctype = useenctype;
+	krb5_use_enctype(kdc_context, &eblock, ticket_reply.enc_part.enctype);
 	retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, 
 				       &ticket_reply);
 
@@ -602,9 +602,9 @@ got_a_key:;
     /* use the session key in the ticket, unless there's a subsession key
        in the AP_REQ */
 
-    reply.enc_part.keytype = subkey ? subkey->keytype :
-		    header_ticket->enc_part2->session->keytype;
-    krb5_use_keytype(kdc_context, &eblock, reply.enc_part.keytype);
+    reply.enc_part.enctype = subkey ? subkey->enctype :
+		    header_ticket->enc_part2->session->enctype;
+    krb5_use_enctype(kdc_context, &eblock, reply.enc_part.enctype);
 
     retval = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
 				 &eblock, subkey ? subkey :

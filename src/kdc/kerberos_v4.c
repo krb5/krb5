@@ -387,9 +387,9 @@ kerb_get_principal(name, inst, principal, maxn, more)
         return(nprinc);
     } 
 
-    if (krb5_dbe_find_keytype(kdc_context,
+    if (krb5_dbe_find_enctype(kdc_context,
 			       &entries,
-			       KEYTYPE_DES_CBC_CRC,
+			       ENCTYPE_DES_CBC_CRC,
 			       KRB5_KDB_SALTTYPE_V4,
 			       -1,
 			       &pkey)) {
