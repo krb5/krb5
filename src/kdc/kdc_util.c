@@ -292,7 +292,7 @@ krb5_ticket **ticket;
 
 /* This probably wants to be updated if you support last_req stuff */
 
-static krb5_last_req_entry nolrentry = { 0, 0 }; /* type 0 is not used...? XXX */
+static krb5_last_req_entry nolrentry = { KRB5_LRQ_NONE, 0 };
 static krb5_last_req_entry *nolrarray[] = { &nolrentry, 0 };
 
 krb5_error_code

@@ -524,7 +524,7 @@ tgt_again:
     reply_encpart.times.authtime = kdc_time;
 
 
-    nolrentry.lr_type = 0;		/* XXX 0 is unused?  cf. kdc_util.c */
+    nolrentry.lr_type = KRB5_LRQ_NONE;
     nolrentry.value = 0;
     nolrarray[0] = &nolrentry;
     nolrarray[1] = 0;
