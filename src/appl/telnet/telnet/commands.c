@@ -1142,14 +1142,14 @@ dolmmode(bit, on)
     return 1;
 }
 
-    static int
+static int
 tel_setmode(bit)
     int bit;
 {
     return dolmmode(bit, 1);
 }
 
-    static int
+static int
 tel_clearmode(bit)
     int bit;
 {
