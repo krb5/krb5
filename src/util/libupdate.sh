@@ -2,7 +2,7 @@
 #
 # libupdate: Update a library based on a file of object files.
 #
-# Usage: libupdate <library> <object filelist> <directory> 
+# Usage: libupdate <library> <object filelist> <directories> 
 #
 
 ARADD="@ARADD@"
@@ -22,19 +22,23 @@ case "$1" in
 esac
 library=$1
 oblist=$2
-dir=$3
+shift
+shift
+for dir do
+	oblists="$oblists${oblists+ }$dir/$oblist"
+done
 
 stamp=`echo $library | sed -e 's/.a$/.stamp/'`
 
 if test "$force" != yes -a -f $stamp && \
-   ls -lt $stamp $oblist | sed 1q | grep $stamp$ > /dev/null || \
-   test -z "`cat $oblist`"
+   ls -lt $stamp $oblists | sed 1q | grep $stamp$ > /dev/null || \
+   test -z "`cat $oblists`"
 then
 	exit 0
 fi
 
-echo "Updating library $library from $oblist"
+echo "Updating library $library from $oblists"
 
 $rmcmd
-$arcmd $library `cat $oblist | \
-		sed -e "s;^\([^ ]*\);$dir/\1;g" -e "s; \([^ ]*\); $dir/\1;g"`
+$arcmd $library `for dir do (cd $dir; cat $oblist | \
+		sed -e "s;^\([^ ]*\);$dir/\1;g" -e "s; \([^ ]*\); $dir/\1;g") done`
