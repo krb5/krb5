@@ -28,7 +28,7 @@ clean-mac::
 
 clean-windows::
 	$(RM) gssapi.lib gssapi.bak
-	
+
 all-windows::
 	cd generic
 	@echo Making in gssapi\generic

@@ -1,3 +1,7 @@
+Tue May  2 21:42:32 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: nuke spurious whitespace in blank line
+
 Wed Apr 26 14:39:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: passed wrong macro on the recursive makes.
