@@ -1,3 +1,13 @@
+Thu Apr 11 21:45:21 1996  Richard Basch  <basch@lehman.com>
+
+	* forward.c (rd_and_store_for_creds): If we are going to use a
+	ttyname based credentials file, at least compute it in a saner
+	fashion (strip the /dev/ and translate remaining /'s into _, so
+	the cache name looks like krb5cc_pts_4 instead of krb5cc_4).
+
+	* kerberos5.c (kerberos5_cleanup): Cleanup the credentials cache
+	that we may have created and destroy the context.
+
 Mon Mar 18 20:56:37 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kerberos5.c (kerberos5_send): Send in as input the

@@ -61,7 +61,7 @@
 #ifdef	KRB5
 #include <arpa/telnet.h>
 #include <stdio.h>
-#include "krb5.h"
+#include "k5-int.h"
 #include "com_err.h"
 #include <netdb.h>
 #include <ctype.h>
@@ -178,6 +178,28 @@ kerberos5_init(ap, server)
         krb5_init_ets(telnet_context);
 	return(1);
 }
+
+void
+kerberos5_cleanup()
+{
+    krb5_error_code retval;
+    krb5_ccache ccache;
+    char *ccname;
+    
+    if (telnet_context == 0)
+	return;
+
+    ccname = getenv(KRB5_ENV_CCNAME);
+    if (ccname) {
+	retval = krb5_cc_resolve(telnet_context, ccname, &ccache);
+	if (!retval)
+	    retval = krb5_cc_destroy(telnet_context, ccache);
+    }
+
+    krb5_free_context(telnet_context);
+    telnet_context = 0;
+}
+
 
 	int
 kerberos5_send(ap)
