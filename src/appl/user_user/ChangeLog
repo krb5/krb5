@@ -1,3 +1,6 @@
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+        * client.c: (krb5_recvauth()): No longer needs the rc_type arg.
 
 Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
 

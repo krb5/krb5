@@ -237,7 +237,7 @@ char *argv[];
     free(reply.data);
 #else
     retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&s, "???",
-			 0, /* server */, NULL, 0, NULL, &ticket);
+			 0, /* server */, 0, NULL, &ticket);
 #endif
 
   if (retval) {
