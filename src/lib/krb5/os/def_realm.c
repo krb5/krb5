@@ -76,7 +76,7 @@ krb5_get_default_realm(context, lrealm)
                                      "default_realm", 0, 0,
                                      &realm);
 
-        if (!retval) {
+        if (!retval && realm) {
             context->default_realm = malloc(strlen(realm) + 1);
             if (!context->default_realm) {
                 profile_release_string(realm);
