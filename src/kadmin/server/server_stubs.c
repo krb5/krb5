@@ -683,8 +683,8 @@ chpass_principal_1(chpass_arg *arg, struct svc_req *rqstp)
     }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
-	 ret.code = chpass_principal_wrapper((void *)handle, arg->princ,
-					     arg->pass);
+	 ret.code = chpass_principal_wrapper_3((void *)handle, arg->princ,
+					       FALSE, 0, NULL, arg->pass);
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
 			 ACL_CHANGEPW, arg->princ, NULL)) {
@@ -744,8 +744,11 @@ chpass_principal3_1(chpass3_arg *arg, struct svc_req *rqstp)
     }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
-	 ret.code = chpass_principal_wrapper((void *)handle, arg->princ,
-					     arg->pass);
+	 ret.code = chpass_principal_wrapper_3((void *)handle, arg->princ,
+					       arg->keepold,
+					       arg->n_ks_tuple,
+					       arg->ks_tuple,
+					       arg->pass);
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
 			 ACL_CHANGEPW, arg->princ, NULL)) {
@@ -991,8 +994,8 @@ chrand_principal_1(chrand_arg *arg, struct svc_req *rqstp)
     }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
-	 ret.code = randkey_principal_wrapper((void *)handle,
-					      arg->princ, &k, &nkeys); 
+	 ret.code = randkey_principal_wrapper_3((void *)handle, arg->princ,
+						FALSE, 0, NULL, &k, &nkeys);
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
 			 ACL_CHANGEPW, arg->princ, NULL)) {
@@ -1067,8 +1070,11 @@ chrand_principal3_1(chrand3_arg *arg, struct svc_req *rqstp)
     }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
-	 ret.code = randkey_principal_wrapper((void *)handle,
-					      arg->princ, &k, &nkeys); 
+	 ret.code = randkey_principal_wrapper_3((void *)handle, arg->princ,
+						arg->keepold,
+						arg->n_ks_tuple,
+						arg->ks_tuple,
+						&k, &nkeys);
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
 			 ACL_CHANGEPW, arg->princ, NULL)) {
