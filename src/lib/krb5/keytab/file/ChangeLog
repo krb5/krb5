@@ -1,3 +1,8 @@
+Mon Sep 15 15:15:33 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktfile.h, ktf_g_ent.c (krb5_ktfile_get_entry): Incoming principal
+	        is krb5_const_principal.
+
 Sat Feb 22 22:27:53 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in
