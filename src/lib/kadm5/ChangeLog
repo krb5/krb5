@@ -1,3 +1,8 @@
+Mon Oct 21 16:29:11 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* server_internal.h (ALL_PRINC_MASK): add KADM5_TL_DATA and
+ 	KADM5_KEY_DATA to ALL_PRINC_MASK [krb5-admin/20]
+
 Fri Oct 18 15:44:14 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadm_rpc_xdr.c, misc_free.c, server_internal.h: include stdlib.h
