@@ -105,11 +105,11 @@ extern int mit_des_ecb_encrypt
 
 /* enc_dec.c */
 extern krb5_error_code mit_des_encrypt_func
-    PROTOTYPE(( krb5_pointer, krb5_pointer, size_t, krb5_encrypt_block *,
-	       krb5_pointer ));
+    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
+	       krb5_encrypt_block *, krb5_pointer ));
 extern krb5_error_code mit_des_decrypt_func
-    PROTOTYPE(( krb5_pointer, krb5_pointer, size_t, krb5_encrypt_block *,
-	       krb5_pointer ));
+    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
+	       krb5_encrypt_block *, krb5_pointer ));
 extern krb5_error_code mit_des_cbc_encrypt
     PROTOTYPE((krb5_octet *, krb5_octet *, long, mit_des_key_schedule,
 	       krb5_octet *, int));
@@ -124,7 +124,7 @@ extern krb5_error_code mit_des_finish_key
 
 /* init_rkey.c */
 extern krb5_error_code mit_des_init_random_key
-    PROTOTYPE(( krb5_keyblock *,  krb5_pointer *));
+    PROTOTYPE(( const krb5_keyblock *,  krb5_pointer *));
 
 /* key_parity.c */
 extern void mit_des_fixup_key_parity PROTOTYPE((mit_des_cblock ));
@@ -156,7 +156,8 @@ extern krb5_error_code mit_des_random_key
 
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
-    PROTOTYPE((krb5_keytype, krb5_keyblock *, krb5_data *, krb5_principal ));
+    PROTOTYPE((const krb5_keytype, krb5_keyblock *, const krb5_data *,
+	       krb5_const_principal ));
 
 /* weak_key.c */
 extern int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));

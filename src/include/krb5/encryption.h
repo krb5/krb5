@@ -54,12 +54,12 @@ typedef struct _krb5_cryptosystem_entry {
 					       krb5_encrypt_block *,
 					       krb5_pointer));
     krb5_error_code (*process_key) PROTOTYPE((krb5_encrypt_block *,
-					      const krb5_keyblock *));
+					      krb5_keyblock *));
     krb5_error_code (*finish_key) PROTOTYPE((krb5_encrypt_block *));
     krb5_error_code (*string_to_key) PROTOTYPE((const krb5_keytype,
 						krb5_keyblock *,
 						const krb5_data *,
-						const krb5_principal));
+						krb5_const_principal));
     krb5_error_code  (*init_random_key) PROTOTYPE((const krb5_keyblock *,
 						   krb5_pointer *));
     krb5_error_code  (*finish_random_key) PROTOTYPE((krb5_pointer *));

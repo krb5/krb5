@@ -43,14 +43,14 @@ extern int des_debug;
 	returns: errors
  */
 
-krb5_error_code mit_des_string_to_key (DECLARG(krb5_keytype, keytype),
+krb5_error_code mit_des_string_to_key (DECLARG(const krb5_keytype, keytype),
 				       DECLARG(krb5_keyblock *,keyblock),
-				       DECLARG(krb5_data *,data),
-				       DECLARG(krb5_principal, princ))
-OLDDECLARG(krb5_keytype, keytype)
+				       DECLARG(const krb5_data *,data),
+				       DECLARG(krb5_const_principal, princ))
+OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(krb5_keyblock *,keyblock)
-OLDDECLARG(krb5_data *,data)
-OLDDECLARG(krb5_principal, princ)
+OLDDECLARG(const krb5_data *,data)
+OLDDECLARG(krb5_const_principal, princ)
 {
     char copystr[512];
 

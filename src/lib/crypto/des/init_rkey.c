@@ -28,9 +28,9 @@ static char rcsid_init_rkey_c[] =
         sequence information.
  */
 
-krb5_error_code mit_des_init_random_key (DECLARG(krb5_keyblock *,seedblock),
+krb5_error_code mit_des_init_random_key (DECLARG(const krb5_keyblock *,seedblock),
 					 DECLARG(krb5_pointer *,seed))
-OLDDECLARG(krb5_keyblock *,seedblock)
+OLDDECLARG(const krb5_keyblock *,seedblock)
 OLDDECLARG(krb5_pointer *,seed)
 {
     mit_des_random_key_seed * p_seed;
