@@ -150,7 +150,7 @@ Makefile: $(srcdir)/Makefile.in config.status $(SRCTOP)/config/pre.in $(SRCTOP)/
 config.status: $(srcdir)/configure
 	$(SHELL) config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
-	cd $(srcdir); autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
+	cd $(srcdir); $(SRCTOP)/util/autoconf/autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
 ]
 AC_DIVERT_POP()dnl
 ])dnl

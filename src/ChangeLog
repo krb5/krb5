@@ -1,3 +1,8 @@
+Fri Mar 31 21:27:13 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* aclocal.m4: Use the local autoconf when rebuilding the configure
+		script. 
+
 Tue Mar 28 18:55:12 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in:  Fix up Mac build process somewhat.  Not complete.
