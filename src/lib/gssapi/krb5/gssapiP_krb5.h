@@ -198,7 +198,7 @@ typedef struct _krb5_gss_ctx_id_rec {
 #endif
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
-extern void *kg_vdb;
+extern g_set kg_vdb;
 
 /* helper macros */
 

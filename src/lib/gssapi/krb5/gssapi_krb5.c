@@ -124,7 +124,7 @@ const gss_OID_set_desc * const gss_mech_set_krb5 = oidsets+0;
 const gss_OID_set_desc * const gss_mech_set_krb5_old = oidsets+1;
 const gss_OID_set_desc * const gss_mech_set_krb5_both = oidsets+2;
 
-void *kg_vdb = NULL;
+g_set kg_vdb = G_SET_INIT;
 static char *kg_ccache_name = NULL;
 
 /** default credential support */

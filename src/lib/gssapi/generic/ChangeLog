@@ -4,6 +4,16 @@
 	non-_elt versions.
 	* util_set.c, util_validate.c: Uses updated.
 
+	* gssapiP_generic.h (g_set): New struct type.
+	(G_SET_INIT): New macro.
+	* util_validate.c (g_save, g_validate, g_delete): Change first
+	argument to take a g_set * rather than void **; use the address of
+	the void pointer from the structure.
+	(g_save_name, g_save_cred_id, g_save_ctx_id, g_validate_name,
+	g_validate_cred_id, g_validate_ctx_id, g_delete_name,
+	g_delete_cred_id, g_delete_ctx_id): Updated first argument type.
+	* gssapiP_generic.h: Declarations updated.
+
 2004-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* util_ordering.c (g_queue_externalize, g_queue_internalize):

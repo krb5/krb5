@@ -35,6 +35,7 @@
 #endif
 #include <fcntl.h>
 #include <limits.h>
+
 #ifdef HAVE_BSD_DB
 #include <sys/file.h>
 #include <db.h>
@@ -55,7 +56,7 @@ typedef struct _vkey {
 /* All these functions return 0 on failure, and non-zero on success */
 
 static int g_save(db, type, ptr)
-     void **db;
+     g_set *db;
 #ifdef HAVE_BSD_DB
      int type;
 #else
@@ -64,7 +65,7 @@ static int g_save(db, type, ptr)
      void *ptr;
 {
 #ifdef HAVE_BSD_DB
-   DB **vdb = (DB **) db;
+   DB **vdb = (DB **) &db->data;
    vkey vk;
    DBT key;
 
@@ -79,7 +80,7 @@ static int g_save(db, type, ptr)
 
    return((*((*vdb)->put))(*vdb, &key, &dbtone, 0) == 0);
 #else
-   g_set_elt *gs = (g_set_elt *) db;
+   g_set_elt *gs = (g_set_elt *) &db->data;
 
    if (!*gs)
       if (g_set_init(gs))
@@ -90,7 +91,7 @@ static int g_save(db, type, ptr)
 }
 
 static int g_validate(db, type, ptr)
-     void **db;
+     g_set *db;
 #ifdef HAVE_BSD_DB
      int type;
 #else
@@ -99,7 +100,7 @@ static int g_validate(db, type, ptr)
      void *ptr;
 {
 #ifdef HAVE_BSD_DB
-   DB **vdb = (DB **) db;
+   DB **vdb = (DB **) &db->data;
    vkey vk;
    DBT key, value;
 
@@ -118,7 +119,7 @@ static int g_validate(db, type, ptr)
    return((value.size == sizeof(one)) &&
 	  (*((int *) value.data) == one));
 #else
-   g_set_elt *gs = (g_set_elt *) db;
+   g_set_elt *gs = (g_set_elt *) &db->data;
    void *value;
 
    if (!*gs)
@@ -132,7 +133,7 @@ static int g_validate(db, type, ptr)
 }
 
 static int g_delete(db, type, ptr)
-     void **db;
+     g_set *db;
 #ifdef HAVE_BSD_DB
      int type;
 #else
@@ -141,7 +142,7 @@ static int g_delete(db, type, ptr)
      void *ptr;
 {
 #ifdef HAVE_BSD_DB
-   DB **vdb = (DB **) db;
+   DB **vdb = (DB **) &db->data;
    vkey vk;
    DBT key;
 
@@ -156,7 +157,7 @@ static int g_delete(db, type, ptr)
 
    return((*((*vdb)->del))(*vdb, &key, 0) == 0);
 #else
-   g_set_elt *gs = (g_set_elt *) db;
+   g_set_elt *gs = (g_set_elt *) &db->data;
 
    if (!*gs)
       return(0);
@@ -173,19 +174,19 @@ static int g_delete(db, type, ptr)
 /* save */
 
 int g_save_name(vdb, name)
-     void **vdb;
+     g_set *vdb;
      gss_name_t *name;
 {
    return(g_save(vdb, V_NAME, (void *) name));
 }
 int g_save_cred_id(vdb, cred)
-     void **vdb;
+     g_set *vdb;
      gss_cred_id_t *cred;
 {
    return(g_save(vdb, V_CRED_ID, (void *) cred));
 }
 int g_save_ctx_id(vdb, ctx)
-     void **vdb;
+     g_set *vdb;
      gss_ctx_id_t *ctx;
 {
    return(g_save(vdb, V_CTX_ID, (void *) ctx));
@@ -194,19 +195,19 @@ int g_save_ctx_id(vdb, ctx)
 /* validate */
 
 int g_validate_name(vdb, name)
-     void **vdb;
+     g_set *vdb;
      gss_name_t *name;
 {
    return(g_validate(vdb, V_NAME, (void *) name));
 }
 int g_validate_cred_id(vdb, cred)
-     void **vdb;
+     g_set *vdb;
      gss_cred_id_t *cred;
 {
    return(g_validate(vdb, V_CRED_ID, (void *) cred));
 }
 int g_validate_ctx_id(vdb, ctx)
-     void **vdb;
+     g_set *vdb;
      gss_ctx_id_t *ctx;
 {
    return(g_validate(vdb, V_CTX_ID, (void *) ctx));
@@ -215,19 +216,19 @@ int g_validate_ctx_id(vdb, ctx)
 /* delete */
 
 int g_delete_name(vdb, name)
-     void **vdb;
+     g_set *vdb;
      gss_name_t *name;
 {
    return(g_delete(vdb, V_NAME, (void *) name));
 }
 int g_delete_cred_id(vdb, cred)
-     void **vdb;
+     g_set *vdb;
      gss_cred_id_t *cred;
 {
    return(g_delete(vdb, V_CRED_ID, (void *) cred));
 }
 int g_delete_ctx_id(vdb, ctx)
-     void **vdb;
+     g_set *vdb;
      gss_ctx_id_t *ctx;
 {
    return(g_delete(vdb, V_CTX_ID, (void *) ctx));
