@@ -1,3 +1,8 @@
+2003-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_flush_file_data) [_WIN32]: Don't call
+	sync.
+
 2003-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h (SHARE_TREE_DATA): Define only on Mac.

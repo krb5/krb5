@@ -319,7 +319,9 @@ errcode_t profile_flush_file_data(data)
 	    /* Couldn't make the hard link, so there's going to be a
 	       small window where data->filespec does not refer to
 	       either version.  */
+#ifndef _WIN32
 	    sync();
+#endif
 	    if (rename(data->filespec, old_file)) {
 		retval = errno;
 		goto errout;
