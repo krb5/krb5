@@ -51,14 +51,14 @@ krb5_fcc_next_cred(id, cursor, creds)
      krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
 
-#ifdef OPENCLOSE
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
-     if (ret < 0)
-	  return errno;
-     ((krb5_fcc_data *) id->data)->fd = ret;
-#endif
+     if (OPENCLOSE(id)) {
+	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
+	  if (ret < 0)
+	       return errno;
+	  ((krb5_fcc_data *) id->data)->fd = ret;
+     }
 
-     fcursor = (krb5_fcc_cursor *) cursor;
+     fcursor = (krb5_fcc_cursor *) *cursor;
 
      ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, L_SET);
      if (ret < 0)

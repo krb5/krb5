@@ -35,46 +35,46 @@ extern krb5_cc_ops krb5_fcc_ops;
  */
 krb5_error_code
 krb5_fcc_generate_new (id)
-   krb5_ccache id;
-   
+   krb5_ccache *id;
 {
+     krb5_ccache lid;
      int ret;
      char scratch[100];  /* XXX Is this large enough */
      
      /* Allocate memory */
-     id = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
-     if (id == NULL)
+     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
+     if (lid == NULL)
 	  return KRB5_NOMEM;
+
+     lid->ops = &krb5_fcc_ops;
 
      sprintf(scratch, "%sXXXXXX", TKT_ROOT);
      mktemp(scratch);
 
-     id->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
-     if (((krb5_fcc_data *) id->data) == NULL) {
-	  free(id);
+     lid->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
+     if (((krb5_fcc_data *) lid->data) == NULL) {
+	  free(lid);
 	  return KRB5_NOMEM;
      }
 
-     ((krb5_fcc_data *) id->data)->filename = (char *)
+     ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(scratch) + 1);
-     if (((krb5_fcc_data *) id->data)->filename == NULL) {
-	  free(((krb5_fcc_data *) id->data));
-	  free(id);
+     if (((krb5_fcc_data *) lid->data)->filename == NULL) {
+	  free(((krb5_fcc_data *) lid->data));
+	  free(lid);
 	  return KRB5_NOMEM;
      }
 
      /* Set up the filename */
-     strcpy(((krb5_fcc_data *) id->data)->filename, scratch);
-
-     /* Copy the virtual operation pointers into id */
-     bcopy((char *) &krb5_fcc_ops, id->ops, sizeof(krb5_cc_ops));
+     strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT| O_EXCL,0600);
+     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT| O_EXCL,0600);
      if (ret == -1)
 	  return ret;
      else {
 	  close(ret);
+	  *id = lid;
 	  return KRB5_OK;
      }
 }

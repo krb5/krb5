@@ -37,7 +37,8 @@ krb5_fcc_initialize(id, princ)
 {
      int ret;
 
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_TRUNC | O_RDWR, 0);
+     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_TRUNC |
+		O_RDWR, 0);
      if (ret < 0)
 	  return errno;
      ((krb5_fcc_data *) id->data)->fd = ret;
@@ -48,9 +49,8 @@ krb5_fcc_initialize(id, princ)
 
      krb5_fcc_store_principal(id, princ);
 
-#ifdef OPENCLOSE
-     close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     if (OPENCLOSE(id))
+	  close(((krb5_fcc_data *) id->data)->fd);
 
      return KRB5_OK;
 }

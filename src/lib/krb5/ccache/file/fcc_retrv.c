@@ -78,7 +78,7 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	      (! set(KRB5_TC_MATCH_TIMES) ||
 	       times_match(mcreds->times, creds->times)))
 	  {
-	       krb5_fcc_end_seq_get(id, cursor);
+	       krb5_fcc_end_seq_get(id, &cursor);
 	       return KRB5_OK;
 	  }
 

@@ -40,12 +40,13 @@ krb5_fcc_store(id, creds)
      krb5_error_code ret;
 
      /* Make sure we are writing to the end of the file */
-#ifdef OPENCLOSE
-     ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
-					     filename, O_RDWR|O_APPEND, 0);
-     if (((krb5_fcc_data *) id->data)->fd < 0)
-	  return errno;
-#endif
+     if (OPENCLOSE(id)) {
+	  ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)
+						  ->filename,
+						  O_RDWR | O_APPEND, 0);
+	  if (((krb5_fcc_data *) id->data)->fd < 0)
+	       return errno;
+     }
 
      ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, L_XTND);
      if (ret < 0)
@@ -61,6 +62,8 @@ krb5_fcc_store(id, creds)
      TCHECK(ret);
      ret = krb5_fcc_store_bool(id, &creds->is_skey);
      TCHECK(ret);
+     ret = krb5_fcc_store_flags(id, &creds->ticket_flags);
+     TCHECK(ret);
      ret = krb5_fcc_store_data(id, &creds->ticket);
      TCHECK(ret);
      ret = krb5_fcc_store_data(id, &creds->second_ticket);
@@ -68,9 +71,8 @@ krb5_fcc_store(id, creds)
 
 lose:
           
-#ifdef OPENCLOSE
-     close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     if (OPENCLOSE(id))
+	  close(((krb5_fcc_data *) id->data)->fd);
 
      return ret;
 #undef TCHECK

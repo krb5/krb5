@@ -123,7 +123,7 @@ krb5_fcc_store_int32(id, i)
    krb5_ccache id;
    krb5_int32 *i;
 {
-     return krb5_fcc_write(id, i, sizeof(krb5_int32));
+     return krb5_fcc_write(id, (char *) i, sizeof(krb5_int32));
 }
    
 krb5_error_code
@@ -131,7 +131,7 @@ krb5_fcc_store_keytype(id, k)
    krb5_ccache id;
    krb5_keytype *k;
 {
-     return krb5_fcc_write(id, k, sizeof(krb5_keytype));
+     return krb5_fcc_write(id, (char *) k, sizeof(krb5_keytype));
 }
    
 krb5_error_code
@@ -139,7 +139,7 @@ krb5_fcc_store_int(id, i)
    krb5_ccache id;
    int *i;
 {
-     return krb5_fcc_write(id, i, sizeof(int));
+     return krb5_fcc_write(id, (char *) i, sizeof(int));
 }
    
 krb5_error_code
@@ -147,7 +147,7 @@ krb5_fcc_store_bool(id, b)
    krb5_ccache id;
    krb5_boolean *b;
 {
-     return krb5_fcc_write(id, b, sizeof(krb5_boolean));
+     return krb5_fcc_write(id, (char *) b, sizeof(krb5_boolean));
 }
    
 krb5_error_code
@@ -155,8 +155,13 @@ krb5_fcc_store_times(id, t)
    krb5_ccache id;
    krb5_ticket_times *t;
 {
-     return krb5_fcc_write(id, t, sizeof(krb5_ticket_times));
+     return krb5_fcc_write(id, (char *) t, sizeof(krb5_ticket_times));
 }
    
-
-     
+krb5_error_code
+krb5_fcc_store_flags(id, f)
+   krb5_ccache id;
+   krb5_flags *f;
+{
+     return krb5_fcc_write(id, (char *) f, sizeof(krb5_flags));
+}

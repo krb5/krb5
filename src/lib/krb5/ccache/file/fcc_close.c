@@ -25,26 +25,14 @@ static char fcc_resolve_c[] = "$Id$";
  * Effects:
  * Closes the file cache, invalidates the id, and frees any resources
  * associated with the cache.
- *
- * Errors:
- * system errors
- * permission errors
  */
 krb5_error_code
 krb5_fcc_close(id)
    krb5_ccache id;
 {
-     int ret;
-
-#ifdef OPENCLOSE
-#else
-     close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     if (OPENCLOSE(id))
+	 close(((krb5_fcc_data *) id->data)->fd);
      
-     ret = unlink(((krb5_fcc_data *) id->data)->filename);
-     if (ret < 0)
-	  return errno;
-
      free(((krb5_fcc_data *) id->data)->filename);
      free(((krb5_fcc_data *) id->data));
      free(id);

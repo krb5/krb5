@@ -22,18 +22,23 @@
 #include "fcc-os.h"
 
 /* XXX Until I find out the right #define for this.. XXX */
-#define KRB5_OK 0
-#define KRB5_NOMEM 1
-#define KRB5_NOTFOUND 2
+#define KRB5_OK -1000
+#define KRB5_NOMEM -1001
+#define KRB5_NOTFOUND -1002
+#define KRB5_EOF -1003
 #define KRB5_FCC_MAXLEN 100
 
 #ifndef TKT_ROOT
 #define TKT_ROOT "/tmp/tkt"
 #endif
 
+/* macros to make checking flags easier */
+#define OPENCLOSE(id) (((krb5_fcc_data *)id->data)->flags & KRB5_TC_OPENCLOSE)
+
 typedef struct _krb5_fcc_data {
      char *filename;
      int fd;
+     krb5_flags flags;
 } krb5_fcc_data;
 
 /* An off_t can be arbitrarily complex */

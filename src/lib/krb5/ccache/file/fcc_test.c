@@ -36,7 +36,7 @@ krb5_creds test_creds = {
      {
 	  1,
 	  1,
-	  "1"
+	  (unsigned char *) "1"
      },
      {
 	  1111,
@@ -72,3 +72,42 @@ void init_test_cred()
      test_creds.server[1] = &server2;
      test_creds.server[2] = NULL;
 }
+
+#define CHECK(kret,msg) \
+     if (kret != KRB5_OK) {\
+	  printf("%s returned %d\n", msg, kret);\
+     };
+						   
+void fcc_test()
+{
+     krb5_ccache id;
+     krb5_creds creds;
+     krb5_error_code kret;
+     krb5_cc_cursor cursor;
+
+     init_test_cred();
+
+     kret = krb5_fcc_resolve(&id, "/tmp/tkt_test");
+     CHECK(kret, "resolve");
+     kret = krb5_fcc_initialize(id, test_creds.client);
+     CHECK(kret, "initialize");
+     kret = krb5_fcc_store(id, &test_creds);
+     CHECK(kret, "store");
+
+     kret = krb5_fcc_start_seq_get(id, &cursor);
+     CHECK(kret, "start_seq_get");
+     kret = 0;
+     while (kret != KRB5_EOF) {
+	  printf("Calling next_cred\n");
+	  kret = krb5_fcc_next_cred(id, &cursor, &creds);
+	  CHECK(kret, "next_cred");
+     }
+     kret = krb5_fcc_end_seq_get(id, &cursor);
+     CHECK(kret, "end_seq_get");
+
+     kret = krb5_fcc_destroy(id);
+     CHECK(kret, "destroy");
+     kret = krb5_fcc_close(id);
+     CHECK(kret, "close");
+}
+

@@ -36,20 +36,20 @@ krb5_fcc_get_principal(id, princ)
    krb5_principal *princ;
 {
      krb5_error_code kret;
-#ifdef OPENCLOSE
-     ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
-					     filename, O_RDONLY, 0);
-     if (((krb5_fcc_data *) id->data)->fd < 0)
-	  return errno;
-#else
-     lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
-#endif
+
+     if (OPENCLOSE(id)) {
+	  ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)
+						  ->filename, O_RDONLY, 0);
+	  if (((krb5_fcc_data *) id->data)->fd < 0)
+	       return errno;
+     }
+     else
+	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 
      kret = krb5_fcc_read_principal(id, princ);
 
-#ifdef OPENCLOSE
-     close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     if (OPENCLOSE(id))
+	  close(((krb5_fcc_data *) id->data)->fd);
 
      return kret;
 }

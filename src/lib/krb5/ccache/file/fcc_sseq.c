@@ -44,22 +44,21 @@ krb5_fcc_start_seq_get(id, cursor)
 	  return KRB5_NOMEM;
 
      /* Make sure we start reading right after the primary principal */
-#ifdef OPENCLOSE
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
-     if (ret < 0)
-	  return errno;
-     ((krb5_fcc_data *) id->data)->fd = ret;
-#else
-     lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
-#endif
+     if (OPENCLOSE(id)) {
+	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
+	  if (ret < 0)
+	       return errno;
+	  ((krb5_fcc_data *) id->data)->fd = ret;
+     }
+     else
+	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 
      krb5_fcc_skip_principal(id);
      fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
-     *cursor = (krb5_cc_cursor *) fcursor;
+     *cursor = (krb5_cc_cursor) fcursor;
 
-#ifdef OPENCLOSE
-     close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     if (OPENCLOSE(id))
+	  close(((krb5_fcc_data *) id->data)->fd);
 
      return KRB5_OK;
 }

@@ -35,12 +35,10 @@ krb5_fcc_end_seq_get(id, cursor)
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
-#ifdef OPENCLOSE
-#else
-     close(((krb5_fcc_data *) id->data)->fd);
-#endif
+     if (OPENCLOSE(id))
+	  close(((krb5_fcc_data *) id->data)->fd);
 
-     free((krb5_fcc_cursor *) cursor);
+     free((krb5_fcc_cursor *) *cursor);
 
      return KRB5_OK;
 }

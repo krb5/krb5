@@ -33,14 +33,15 @@ krb5_error_code krb5_fcc_destroy(id)
      char zeros[BUFSIZ];
      int ret, i;
      
-#ifdef OPENCLOSE
-     ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
-					     filename, O_RDWR, 0);
-     if (((krb5_fcc_data *) id->data)->fd < 0)
-	  return errno;
-#else
-     lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
-#endif
+     if (OPENCLOSE(id)) {
+	  ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)
+						  ->filename, O_RDWR, 0);
+	  if (((krb5_fcc_data *) id->data)->fd < 0)
+	       return errno;
+     }
+     else
+	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
+
      ret = unlink(((krb5_fcc_data *) id->data)->filename);
      if (ret < 0)
 	 return errno;
