@@ -24,28 +24,26 @@ static char rcsid_gcvtgt_c[] =
 #include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
-
-static krb5_flags
-creds_to_kdcoptions(creds)
-krb5_creds *creds;
-{
-    krb5_flags result;
-
-    /* XXX this is a hack; we don't necessarily want all these! */
-    result = creds->ticket_flags & KDC_TKT_COMMON_MASK;
-    result |= KDC_OPT_RENEWABLE_OK;
-    return result;
-}
+#include "int-proto.h"
 
 krb5_error_code
-krb5_get_cred_via_tgt (tgt, cred)
-    krb5_creds *tgt;		/* IN */
-    krb5_creds *cred;		/* IN OUT */
+krb5_get_cred_via_tgt (DECLARG(krb5_creds *, tgt),
+		       DECLARG(krb5_flags, kdcoptions),
+		       DECLARG(krb5_enctype, etype),
+		       DECLARG(krb5_cksumtype, sumtype),
+		       DECLARG(krb5_address **, addrs),
+		       DECLARG(krb5_creds *, cred))
+OLDDECLARG(krb5_creds *, tgt)
+OLDDECLARG(krb5_flags, kdcoptions)
+OLDDECLARG(krb5_enctype, etype)
+OLDDECLARG(krb5_cksumtype, sumtype)
+OLDDECLARG(krb5_address **, addrs)
+OLDDECLARG(krb5_creds *, cred)
 {
     krb5_tgs_req tgsreq;
     krb5_real_tgs_req realreq;
     krb5_error_code retval;
-    krb5f_principal tempprinc;
+    krb5_principal tempprinc;
     krb5_data *scratch, reply;
     krb5_checksum ap_checksum;
     krb5_kdc_rep *dec_rep;
@@ -71,35 +69,37 @@ krb5_get_cred_via_tgt (tgt, cred)
 
     bzero((char *)&realreq, sizeof(realreq));
 
-    realreq.kdc_options = creds_to_kdcoptions(cred);
+    realreq.kdc_options = kdcoptions;
     realreq.from = cred->times.starttime;
     realreq.till = cred->times.endtime;
     realreq.rtime = cred->times.renew_till;
     
     if (retval = krb5_timeofday(&realreq.ctime))
 	return(retval);
-    realreq.etype = xxx;
+    realreq.etype = etype;
     realreq.server = cred->server;
-    realreq.addresses = xxx;
+    realreq.addresses = addrs;
     /* enc_part & enc_part2 are left blank for the moment. */
 
     if (retval = encode_krb5_real_tgs_req(&realreq, &scratch))
 	return(retval);
 
     /* xxx choose a checksum type */
-    if (retval = (*(krb5_cksumarray[xxx]->sum_func))(scratch->data,
-						     0, /* XXX? */
-						     (krb5_pointer) cred->keyblock.contents,
-						     scratch->length,
-						     cred->keyblock.length,
-						     &ap_checksum)) {
+    if (retval = (*(krb5_cksumarray[sumtype]->
+		    sum_func))(scratch->data,
+			       0, /* XXX? */
+			       (krb5_pointer) cred->keyblock.contents,
+			       scratch->length,
+			       cred->keyblock.length,
+			       &ap_checksum)) {
 	krb5_free_data(scratch);
 	return retval;
     }
     tgsreq.tgs_request = *scratch;
     xfree(scratch);
 
-#define cleanup() {(void) free(tgsreq.tgs_request.data);}
+#define cleanup() {(void) free((char *)tgsreq.tgs_request.data); \
+		   (void) free((char *)ap_checksum.contents);}
 
     /*
      * Now get an ap_req.
@@ -138,7 +138,7 @@ krb5_get_cred_via_tgt (tgt, cred)
     /* we expect *reply to be either an error or a proper reply */
     if (retval = krb5_decode_kdc_rep(&reply,
 				     &tgt->keyblock,
-				     xxx, /* enctype */
+				     realreq.etype, /* enctype */
 				     &dec_rep)) {
 	if (decode_krb5_error(&reply, &err_reply)) {
 	    cleanup();
@@ -160,11 +160,11 @@ krb5_get_cred_via_tgt (tgt, cred)
 
     if (!krb5_principal_compare(dec_rep->client, tgt->client)) {
 	cleanup();
-	return XXX_MODIFIED;
+	return KRB5_KDCREP_MODIFIED;
     }
     /* put pieces into cred-> */
-    if (retval = xxx_copy_keyblock(dec_rep->enc_part2->session,
-				   &cred->keyblock)) {
+    if (retval = krb5_copy_keyblock(dec_rep->enc_part2->session,
+				    &cred->keyblock)) {
 	cleanup();
 	return retval;
     }
@@ -172,8 +172,12 @@ krb5_get_cred_via_tgt (tgt, cred)
     /* check compatibility here first ? XXX */
     cred->ticket_flags = dec_rep->enc_part2->flags;
     cred->is_skey = FALSE;
-    retval = xxx_copy_ticket(dec_rep->ticket, &cred->ticket);
 
+    retval = krb5_encode_ticket(dec_rep->ticket, &scratch);
+    if (!retval) {
+	cred->ticket = *scratch;
+	free((char *)scratch);
+    }
     cleanup();
     return retval;
 }

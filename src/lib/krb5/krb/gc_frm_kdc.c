@@ -19,6 +19,11 @@ static char rcsid_gcfkdc_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
+#include <krb5/krb5_err.h>
+#include <errno.h>
+
+#include <krb5/ext-proto.h>
+#include "int-proto.h"
 
 /*
  * Retrieve credentials for principal creds->client,
@@ -29,7 +34,8 @@ static char rcsid_gcfkdc_c[] =
  * TGT credentials obtained in the process of contacting the KDC are
  * returned in an array of credentials; tgts is filled in to point to an
  * array of pointers to credential structures (if no TGT's were used, the
- * pointer is zeroed).
+ * pointer is zeroed).  TGT's may be returned even if no useful end ticket
+ * was obtained.
  * 
  * The returned credentials are NOT cached.
  *
@@ -43,6 +49,9 @@ static char rcsid_gcfkdc_c[] =
  * returns errors, system errors.
  */
 
+/* helper function: convert flags to necessary KDC options */
+#define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
+
 krb5_error_code
 krb5_get_cred_from_kdc (ccache, cred, tgts)
     krb5_ccache ccache;
@@ -50,15 +59,20 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     krb5_creds ***tgts;
 {
     krb5_creds tgt, tgtq;
+    krb5_creds **ret_tgts = 0;
+    krb5_principal *tgs_list, next_server;
     krb5_error_code retval;
+    int nservers;
     
+    /* in case we never get a TGT, zero the return */
+    tgts = 0;
+
     /*
      * we know that the desired credentials aren't in the cache yet.
      *
      * To get them, we first need a tgt for the realm of the server.
+     * first, we see if we have such a TGT in cache.
      */
-
-    /* first, we see if we have a shortcut path to the server's realm. */
     
     /*
      * look for ticket with:
@@ -74,9 +88,10 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 
     if (retval = krb5_tgtname(cred->server, cred->client, &tgtq.server))
 	return retval;
-    /* go find it.. */
+
+    /* try to fetch it directly */
     retval = krb5_cc_retrieve_cred (ccache,
-				    KRB5_CF_CLIENT|KRB5_CF_SERVER,
+				    0,	/* default is client & server */
 				    &tgtq,
 				    &tgt);
     krb5_free_principal(tgtq.server);
@@ -84,11 +99,71 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     if (retval != 0) {
 	if (retval != KRB5_CC_NOTFOUND)
 	    goto out;
-	/* nope; attempt to get tgt */
+	/* don't have the right TGT in the cred cache.  Time to iterate
+	   across realms to get the right TGT. */
+
+	/* get a list of realms to consult */
+	retval = krb5_walk_realm_tree(cred->client, cred->server, &tgs_list);
+	if (retval)
+	    goto out;
+	/* walk the list BACKWARDS until we find a cached
+	   TGT, then move forward obtaining TGTs until we get the last
+	   TGT needed */
+	for (next_server = tgs_list[0]; next_server; next_server++);
+	nservers = next_server - tgs_list[0];
+	next_server--;
+
+	/* next_server now points to the last TGT */
+	for (; next_server >= tgs_list[0]; next_server--) {
+	    tgtq.server = next_server;
+	    retval = krb5_cc_retrieve_cred (ccache,
+					    0, /* default is client & server */
+					    &tgtq,
+					    &tgt);
+	    if (retval) {
+		if (retval != KRB5_CC_NOTFOUND) {
+		    krb5_free_realm_tree(tgs_list);
+		    goto out;
+		}
+		continue;
+	    }
+	    next_server++;
+	    break;			/* found one! */
+	}
+	/* allocate storage for TGT pointers. */
+	ret_tgts = (krb5_creds **)calloc(nservers+1, sizeof(krb5_creds));
+	if (!ret_tgts) {
+	    retval = ENOMEM;
+	    goto out;
+	}
+	for (nservers = 0; next_server; next_server++, nservers++) {
+	    /* now get the TGTs */
+	    tgtq.times = tgt.times;
+	    tgtq.client = tgt.client;
+	    tgtq.server = next_server;
+	    tgtq.is_skey = FALSE;	
+	    tgtq.ticket_flags = tgt.ticket_flags;
+	    if (retval = krb5_get_cred_via_tgt(&tgt,
+					       flags2options(tgtq.ticket_flags),
+					       0, /* XXX etype */
+					       0, /* XXX sumtype */
+					       0, /* XXX addrs */
+					       &tgtq))
+		goto out;
+	    /* save tgt in return array */
+	    if (retval = krb5_copy_cred(&tgtq, &ret_tgts[nservers]))
+		goto out;
+	    /* XXX need to clean up stuff pointed to by tgtq? */
+	    tgt = tgtq;
+	}
     }
-    /* got tgt! */
-    retval = krb5_get_cred_via_tgt(&tgt, cred);
+    /* got/finally have tgt! */
+    retval = krb5_get_cred_via_tgt(&tgt,
+				   flags2options(tgtq.ticket_flags),
+				   0, /* XXX etype */
+				   0, /* XXX sumtype */
+				   0, /* XXX addrs */
+				   cred);
 out:
-    /* XXX what about tgts? */
     return retval;
 }
