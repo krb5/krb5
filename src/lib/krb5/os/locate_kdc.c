@@ -503,6 +503,7 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
 }
 #endif
 
+#ifdef KRB5_DNS_LOOKUP
 static krb5_error_code
 krb5_locate_srv_dns_1 (const krb5_data *realm,
 		       const char *service,
@@ -557,6 +558,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
     krb5int_free_srv_dns_data(head);
     return code;
 }
+#endif
 
 /*
  * Wrapper function for the two backends
