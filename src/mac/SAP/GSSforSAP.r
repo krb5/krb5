@@ -77,9 +77,8 @@ resource 'ALRT' (135, nonpurgeable) {
 		OK, visible, sound1,
 		/* [4] */
 		OK, visible, sound1
-	}
-	/****** Extra bytes follow... ******/
-	/* $"0000"                                               /* .. */
+	},
+	alertPositionParentWindowScreen
 };
 
 resource 'ALRT' (136, nonpurgeable) {
@@ -94,9 +93,8 @@ resource 'ALRT' (136, nonpurgeable) {
 		OK, visible, sound1,
 		/* [4] */
 		OK, visible, sound1
-	}
-	/****** Extra bytes follow... ******/
-	/* $"0000"                                               /* .. */
+	},
+	alertPositionParentWindowScreen
 };
 
 resource 'actb' (136) {
