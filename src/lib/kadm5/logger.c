@@ -24,6 +24,9 @@
 
 #if !defined(_MSDOS)
 
+/* KADM5 wants non-syslog log files to contain syslog-like entries */
+#define VERBOSE_LOGS
+
 /*
  * logger.c	- Handle logging functions for those who want it.
  */
@@ -665,8 +668,9 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 	log_control.log_entries = &def_log_entry;
 	log_control.log_entries->log_type = K_LOG_SYSLOG;
 	log_control.log_entries->log_2free = (krb5_pointer) NULL;
-	log_control.log_entries->lsu_facility = LOG_AUTH;
+	log_facility = log_control.log_entries->lsu_facility = LOG_AUTH;
 	log_control.log_entries->lsu_severity = LOG_ERR;
+	do_openlog = 1;
 	log_control.log_nentries = 1;
     }
     if (log_control.log_nentries) {
