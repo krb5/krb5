@@ -1,3 +1,8 @@
+Thu Jan 29 20:15:30 1998  Dan Winship  <danw@mit.edu>
+
+	* krb5.hin: fix #define of krb5_cc_gen_new (takes a krb5_ccache *,
+	not a krb5_ccache)
+
 Sat Dec  6 02:20:11 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Add constants and prototypes for the Cygnus password

@@ -1032,7 +1032,7 @@ typedef struct _krb5_cc_ops {
 #define KRB5_TC_OPENCLOSE		0x00000001
 
 #define krb5_cc_initialize(context, cache, principal) krb5_x((cache)->ops->init,(context, cache, principal))
-#define krb5_cc_gen_new(context, cache) krb5_x((cache)->ops->gen_new,(context, cache))
+#define krb5_cc_gen_new(context, cache) krb5_x((*cache)->ops->gen_new,(context, cache))
 #define krb5_cc_destroy(context, cache) krb5_x((cache)->ops->destroy,(context, cache))
 #define krb5_cc_close(context, cache) krb5_x((cache)->ops->close,(context, cache))
 #define krb5_cc_store_cred(context, cache, creds) krb5_x((cache)->ops->store,(context, cache, creds))
