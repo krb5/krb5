@@ -2378,7 +2378,6 @@ tn(argc, argv)
 
     if (connected) {
 	printf("?Already connected to %s\r\n", hostname);
-	setuid(getuid());
 	return 0;
     }
     if (argc < 2) {
@@ -2419,7 +2418,6 @@ tn(argc, argv)
 	}
     usage:
 	printf("usage: %s [-l user] [-a] host-name [port]\r\n", cmd);
-	setuid(getuid());
 	return 0;
     }
     if (hostp == 0)
@@ -2434,11 +2432,9 @@ tn(argc, argv)
 	temp = sourceroute(hostp, &srp, &srlen);
 	if (temp == 0) {
 	    herror(srp);
-	    setuid(getuid());
 	    return 0;
 	} else if (temp == -1) {
 	    printf("Bad source route option: %s\r\n", hostp);
-	    setuid(getuid());
 	    return 0;
 	} else {
 	    sin.sin_addr.s_addr = temp;
@@ -2468,7 +2464,6 @@ tn(argc, argv)
 		hostname = _hostname;
 	    } else {
 		herror(hostp);
-	        setuid(getuid());
 		return 0;
 	    }
 	}
@@ -2489,7 +2484,6 @@ tn(argc, argv)
 		sin.sin_port = sp->s_port;
 	    else {
 		printf("%s: bad port number\r\n", portp);
-	        setuid(getuid());
 		return 0;
 	    }
 	} else {
@@ -2500,7 +2494,6 @@ tn(argc, argv)
 	    sp = getservbyname("telnet", "tcp");
 	    if (sp == 0) {
 		fprintf(stderr, "telnet: tcp/telnet: unknown service\n");
-	        setuid(getuid());
 		return 0;
 	    }
 	    sin.sin_port = sp->s_port;
@@ -2510,7 +2503,6 @@ tn(argc, argv)
     printf("Trying %s...\r\n", inet_ntoa(sin.sin_addr));
     do {
 	net = socket(AF_INET, SOCK_STREAM, 0);
-	setuid(getuid());
 	if (net < 0) {
 	    perror("telnet: socket");
 	    return 0;
