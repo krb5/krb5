@@ -74,17 +74,22 @@ make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
    /* fill in the necessary fields in creds */
 
    memset((char *) &creds, 0, sizeof(creds));
-   creds.client = cred->princ;
-   creds.server = server;
-
+   if (code = krb5_copy_principal(cred->princ, &creds.client))
+       return code;
+   if (code = krb5_copy_principal(server, &creds.server)) {
+       krb5_free_cred_contents(&creds);
+       return code;
+   }
    creds.times.endtime = *endtime;
 
    /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
    if (code = krb5_mk_req_extended(do_mutual?AP_OPTS_MUTUAL_REQUIRED:0,
 				   &checksum, 0, 0, subkey, cred->ccache,
-				   &creds, &authent, &ap_req))
-      return(code);
+				   &creds, &authent, &ap_req)) {
+       krb5_free_cred_contents(&creds);
+       return(code);
+   }
 
    /* store the interesting stuff from creds and authent */
    *endtime = creds.times.endtime;
@@ -92,11 +97,6 @@ make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
    *seqnum = authent.seq_number;
 
    /* free stuff which was created */
-
-   /* XXXX There's a bug in krb5 here, but I have no clue what it is.
-      This is a workaround. */
-   if (creds.client == cred->princ)
-      creds.client = NULL;
 
    krb5_free_cred_contents(&creds);
 
