@@ -1,3 +1,8 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* copy_addrs.c (krb5_copy_addresses): Cleanup unsigned vs signed
+	warnings as arguments to malloc().
+
 Tue Sep 26 13:00:54 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): Call profile_free_list

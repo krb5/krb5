@@ -64,7 +64,7 @@ krb5_copy_addresses(context, inaddr, outaddr)
 {
     krb5_error_code retval;
     krb5_address ** tempaddr;
-    register int nelems = 0;
+    register unsigned int nelems = 0;
 
     if (!inaddr) {
 	    *outaddr = 0;
@@ -104,7 +104,7 @@ krb5_append_addresses(context, inaddr, outaddr)
     krb5_error_code retval;
     krb5_address ** tempaddr;
     krb5_address ** tempaddr2;
-    register int nelems = 0;
+    register unsigned int nelems = 0;
     register int norigelems = 0;
 
     if (!inaddr)
