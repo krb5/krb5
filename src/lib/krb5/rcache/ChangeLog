@@ -1,3 +1,11 @@
+2001-01-17  Tom Yu  <tlyu@mit.edu>
+
+	* rc_io.c (krb5_rc_io_creat): Fudge for dirlen including trailing
+	NUL character.
+	(krb5_rc_io_move): When renaming OLD to NEW, don't copy the
+	filename.  This was causing temporary files to get leaked.
+	(krb5_rc_io_close): Don't FREE if d->fn is NULL.
+
 2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* rc_io.c (getdir): Don't check dirlen again, the call sites
