@@ -191,11 +191,7 @@ errcode_t profile_get_first_values(profile, names, ret_values)
     void		*state;
     char		*value;
     struct string_list values;
-    const char		**cpp;
-    char			*dummyvalue;
     char			*secname;
-    const char			*mynames[3];
-    
 
     if (profile == 0)
 	return PROF_NO_PROFILE;

@@ -11,6 +11,13 @@
 #define PROTOTYPE(x) ()
 #endif
 
+#if defined(_MSDOS)
+/* From k5-config.h */
+#define SIZEOF_INT      2
+#define SIZEOF_SHORT    2
+#define SIZEOF_LONG     4
+#endif 
+
 #if defined(_MACINTOSH)
 #define NO_SYS_TYPES_H
 #define NO_SYS_STAT_H
@@ -104,6 +111,10 @@ extern errcode_t profile_get_node_parent
 extern errcode_t profile_delete_node_relation
 	PROTOTYPE ((struct profile_node *section, const char *name));
 
+extern errcode_t profile_find_node_name
+	PROTOTYPE ((struct profile_node *section, void **state,
+		    char **ret_name));
+
 /* prof_file.c */
 
 extern errcode_t profile_open_file
@@ -134,8 +145,3 @@ extern errcode_t profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));
-
-
-
-
-

@@ -1,3 +1,10 @@
+Fri Sep 22 19:51:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* prof_int.h: added SIZEOF defines for the PC, and added missing
+		prototype for profile_find_node_name()
+
+	* prof_init.c (profile_get_first_values): Remove unused variables.
+
 Mon Sep 11 15:30:52 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* prof_parse.c (dump_profile_to_file): Convert C+ comment to
