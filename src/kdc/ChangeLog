@@ -1,3 +1,21 @@
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+	    Alec H. Peterson  <ahp@hilander.com>
+
+	* configure.in: Invoke KRB5_SOCKADDR_SA_LEN.
+
+	* network.c: Include <sys/ioctl.h>, <syslog.h>, <net/if.h>.
+	(foreach_localaddr): New function, copied from
+	lib/krb5/os/localaddr.c.  Tweaked to not exclude loopback
+	interface.
+	(NEED_SOCKETS): Define before including k5-int.h.
+	(n_sockets): New variable.
+	(setup_port): New function; creates listening udp ports given an
+	address.
+	(setup_network): Call foreach_localaddr to set up listening
+	sockets on each local address, so we can always respond from the
+	receiving address.
+	(listen_and_process): Use n_sockets as upper bound of loop.
+
 2000-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* kerberos_v4.c (v4_klog): Don't treat the formatted text as a
