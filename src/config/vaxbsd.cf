@@ -38,7 +38,7 @@
 #if HasGcc
 #define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
 #ifndef CcCmd
-#define CcCmd gcc -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall -DNO_STDLIB_H
 #define STDCTopIncludes -I$(TOP)/include/stdc-incl
 #endif
 #endif
