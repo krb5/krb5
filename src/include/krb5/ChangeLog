@@ -1,3 +1,8 @@
+Fri Dec 23 22:29:43 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5.h (krb5_cred): Add enc_part2 member which may point to the
+		unecrypted version, if it's available.
+
 Mon Dec 19 21:53:33 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.h (krb5_context): Add new typdef for krb5_context.

@@ -265,12 +265,6 @@ typedef struct _krb5_priv_enc_part {
     krb5_address *r_address;		/* recipient address, optional */
 } krb5_priv_enc_part;
 
-typedef struct _krb5_cred {
-    krb5_magic magic;
-    krb5_ticket **tickets;		/* tickets */
-    krb5_enc_data enc_part;		/* encrypted part */
-} krb5_cred;
-
 typedef struct _krb5_cred_info {
     krb5_magic magic;
     krb5_keyblock* session;             /* session key used to encrypt */
@@ -292,6 +286,13 @@ typedef struct _krb5_cred_enc_part {
     krb5_address *r_address;            /* recipient address, optional */
     krb5_cred_info **ticket_info;
 } krb5_cred_enc_part;    
+
+typedef struct _krb5_cred {
+    krb5_magic magic;
+    krb5_ticket **tickets;		/* tickets */
+    krb5_enc_data enc_part;		/* encrypted part */
+    krb5_cred_enc_part *enc_part2; 	/* unencrypted version, if available*/
+} krb5_cred;
 
 /* these need to be here so the typedefs are available for the prototypes */
 #include <krb5/safepriv.h>
