@@ -1,3 +1,8 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdb5_verify.c (main): Make sure buffer "principal_string" is
+	properly terminated.
+
 2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kdb5_verify.c (main): Don't overflow buffer "tmp".

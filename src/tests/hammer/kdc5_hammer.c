@@ -169,7 +169,8 @@ main(argc, argv)
 	    depth = atoi(optarg);       /* how deep to go */
 	    break;
 	case 'p':                       /* prefix name to check */
-	    strcpy(prefix, optarg);
+	    strncpy(prefix, optarg, sizeof(prefix) - 1);
+	    prefix[sizeof(prefix) - 1] = '\0';
 	    break;
        case 'n':                        /* how many to check */
 	    num_to_check = atoi(optarg);

@@ -130,7 +130,8 @@ char *argv[];
 	    mkey_password = optarg;
 	    break;
 	case 'p':                       /* prefix name to create */
-	    strcpy(principal_string, optarg);
+	    strncpy(principal_string, optarg, sizeof(principal_string) - 1);
+	    principal_string[sizeof(principal_string) - 1] = '\0';
 	    suffix = principal_string + strlen(principal_string);
 	    break;
 	case 'n':                        /* how many to create */

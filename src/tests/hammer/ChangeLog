@@ -1,3 +1,7 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc5_hammer.c (main): Make sure buffer 'prefix' is null-terminated.
+
 2000-05-08  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
 
