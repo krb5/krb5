@@ -13,9 +13,10 @@ OBJS=	addr_comp.o	\
 	encode_tkt.o	\
 	encrypt_tk.o	\
 	f_tgt_cred.o	\
+	free_rtree.o	\
 	faddr_ordr.o	\
-	gc_via_tgt.o	\
 	gc_frm_kdc.o	\
+	gc_via_tgt.o	\
 	get_creds.o	\
 	get_in_tkt.o	\
 	in_tkt_pwd.o	\
@@ -35,7 +36,8 @@ OBJS=	addr_comp.o	\
 	rd_req_dec.o	\
 	rd_safe.o	\
 	send_tgs.o	\
-	unparse.o
+	unparse.o	\
+	walk_rtree.o
 
 SRCS=	addr_comp.c	\
 	addr_srch.c	\
@@ -50,9 +52,10 @@ SRCS=	addr_comp.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
 	f_tgt_cred.c	\
+	free_rtree.c	\
 	faddr_ordr.c	\
-	gc_via_tgt.c	\
 	gc_frm_kdc.c	\
+	gc_via_tgt.c	\
 	get_creds.c	\
 	get_in_tkt.c	\
 	in_tkt_pwd.c	\
@@ -72,6 +75,7 @@ SRCS=	addr_comp.c	\
 	rd_req_dec.c	\
 	rd_safe.c	\
 	send_tgs.c	\
-	unparse.c
+	unparse.c	\
+	walk_rtree.c
 
 NormalLibraryTarget(krb,$(OBJS))
