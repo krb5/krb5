@@ -1,5 +1,9 @@
 Wed Nov  2 20:39:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: We're probably not going to be building in the
+		top-level directory, but even so, the CFLAGS should
+		include $(DEFS).
+
 	* aclocal.m4: Don't recursively pass the CPPOPTS makefile variable
 		down to subdirectories.
 

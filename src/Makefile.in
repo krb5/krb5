@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS)
+CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
 prefix = /usr/local
