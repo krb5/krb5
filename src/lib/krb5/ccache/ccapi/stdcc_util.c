@@ -32,7 +32,7 @@ int copyCCDataArrayToK5(cc_creds *ccCreds, krb5_creds *v5Creds, char whichArray)
 		
 			krb5_address 	**addrPtr, *addr;
 			cc_data			**dataPtr, *data;
-			UInt32			numRecords = 0;
+			unsigned int		numRecords = 0;
 			
 			/* Allocate the array of pointers: */
 			for (dataPtr = ccCreds->addresses; *dataPtr != NULL; numRecords++, dataPtr++) {}
@@ -70,7 +70,7 @@ int copyCCDataArrayToK5(cc_creds *ccCreds, krb5_creds *v5Creds, char whichArray)
 		} else {
 			krb5_authdata 	**authPtr, *auth;
 			cc_data			**dataPtr, *data;
-			UInt32			numRecords = 0;
+			unsigned int		numRecords = 0;
 			
 			/* Allocate the array of pointers: */
 			for (dataPtr = ccCreds->authdata; *dataPtr != NULL; numRecords++, dataPtr++) {}
@@ -118,7 +118,7 @@ int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray)
 		
 			krb5_address 	**addrPtr, *addr;
 			cc_data			**dataPtr, *data;
-			UInt32			numRecords = 0;
+			unsigned int			numRecords = 0;
 			
 			/* Allocate the array of pointers: */
 			for (addrPtr = v5Creds->addresses; *addrPtr != NULL; numRecords++, addrPtr++) {}
@@ -155,7 +155,7 @@ int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray)
 		} else {
 			krb5_authdata 	**authPtr, *auth;
 			cc_data			**dataPtr, *data;
-			UInt32			numRecords = 0;
+			unsigned int			numRecords = 0;
 			
 			/* Allocate the array of pointers: */
 			for (authPtr = v5Creds->authdata; *authPtr != NULL; numRecords++, authPtr++) {}

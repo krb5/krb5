@@ -1,3 +1,11 @@
+2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
+
+	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+
+          Changed all references to the type UInt32 to unsigned int
+          since UInt32 is not a standard type on Unix or Win32    
+
 2000-03-24  Alexandra Ellwood  <lxs@mit.edu>
 
 	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
