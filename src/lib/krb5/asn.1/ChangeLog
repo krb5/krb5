@@ -1,3 +1,21 @@
+1999-07-03  Tom Yu  <tlyu@mit.edu>
+
+	* asn1buf.h: New prototpyes for asn1buf_sync() and
+	asn1buf_skiptail().
+
+	* asn1buf.c (asn1buf_sync): Fix to deal with
+	constructed-indefinite encodings with trailing fields.  As a
+	result, this requires that the most recently read tag number be
+	passed in.
+	(asn1buf_skiptail): New helper function to skip trailing fields in
+	a constructed-indefinite encoding.
+
+	* krb5_decode.c (end_structure): Hack to deal with changed
+	asn1buf_sync().
+
+	* asn1_k_decode.c (end_structure, end_sequence_of): Hack to deal
+	with changed asn1buf_sync().
+
 1999-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.c (asn1buf_sync): Interim fix for DCE compat problem

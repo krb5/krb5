@@ -119,10 +119,17 @@ asn1_error_code asn1buf_imbed
 	      that case, ASN1_OVERRUN is returned)  *subbuf's current
 	      position starts at the beginning of *subbuf. */
 
-void asn1buf_sync
-	PROTOTYPE((asn1buf *buf, asn1buf *subbuf));
+asn1_error_code asn1buf_sync
+	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, asn1_tagnum lasttag));
 /* requires  *subbuf is a sub-buffer of *buf, as created by asn1buf_imbed.
+             lasttag is a pointer to the last tagnumber read.
    effects   Synchronizes *buf's current position to match that of *subbuf. */
+
+asn1_error_code asn1buf_skiptail
+	PROTOTYPE((asn1buf *buf));
+/* requires  *buf is a subbuffer used in a decoding of a
+             constructed indefinite sequence.
+   effects   skips trailing fields. */
 
 asn1_error_code asn1buf_destroy
 	PROTOTYPE((asn1buf **buf));

@@ -56,7 +56,7 @@ if(class != APPLICATION || construction != CONSTRUCTED ||\
 #define get_field_body(var,decoder)\
 retval = decoder(&subbuf,&(var));\
 if(retval) return retval;\
-if(!taglen) next_tag();\
+if(!taglen) { next_tag(); }\
 next_tag()
 
 #define get_field(var,tagexpect,decoder)\
@@ -73,7 +73,7 @@ else var = optvalue
 #define get_lenfield_body(len,var,decoder)\
 retval = decoder(&subbuf,&(len),&(var));\
 if(retval) return retval;\
-if(!taglen) next_tag();\
+if(!taglen) { next_tag(); }\
 next_tag()
 
 #define get_lenfield(len,var,tagexpect,decoder)\
@@ -98,7 +98,8 @@ if(retval) return retval;\
 next_tag()
 
 #define end_structure()\
-asn1buf_sync(buf,&subbuf)
+retval = asn1buf_sync(buf,&subbuf,tagnum);\
+if(retval) return retval
 
 #define sequence_of(buf)\
 int size=0;\
@@ -110,7 +111,8 @@ retval = asn1buf_imbed(&seqbuf,buf,length);\
 if(retval) return retval
 
 #define end_sequence_of(buf)\
-asn1buf_sync(buf,&seqbuf)
+retval = asn1buf_sync(buf,&seqbuf,ASN1_TAGNUM_CEILING);\
+if(retval) return retval
 
 #define cleanup()\
 return 0

@@ -52,6 +52,7 @@
 #include "asn1buf.h"
 #undef ASN1BUF_OMIT_INLINE_FUNCS
 #include <stdio.h>
+#include "asn1_get.h"
 
 asn1_error_code asn1buf_create(buf)
      asn1buf ** buf;
@@ -89,19 +90,51 @@ asn1_error_code asn1buf_imbed(subbuf, buf, length)
   return 0;
 }
 
-void asn1buf_sync(buf, subbuf)
+asn1_error_code asn1buf_sync(buf, subbuf, lasttag)
      asn1buf * buf;
      asn1buf * subbuf;
+     asn1_tagnum lasttag;
 {
+  asn1_error_code retval;
+
   if (subbuf->bound != buf->bound) {
     buf->next = subbuf->bound + 1;
   } else {
     /*
-     * indefinite length; this will suck
-     * XXX - need to skip fields somehow
+     * indefinite length:
+     *
+     * Note that asn1_get_tag() returns ASN1_TAGNUM_CEILING
+     * for an EOC encoding.
      */
+    if (lasttag != ASN1_TAGNUM_CEILING) {
+      retval = asn1buf_skiptail(subbuf);
+      if (retval) return retval;
+    }
     buf->next = subbuf->next;
   }
+  return 0;
+}
+
+asn1_error_code asn1buf_skiptail(buf)
+     asn1buf *buf;
+{
+  asn1_error_code retval;
+  asn1_class class;
+  asn1_construction construction;
+  asn1_tagnum tagnum;
+  int taglen;
+  int nestlevel;
+
+  nestlevel = 1;
+  while (nestlevel > 0) {
+    retval = asn1_get_tag(buf, &class, &construction, &tagnum, &taglen);
+    if (retval) return retval;
+    if (construction == CONSTRUCTED && taglen == 0)
+      nestlevel++;
+    if (tagnum == ASN1_TAGNUM_CEILING)
+      nestlevel--;
+  }
+  return 0;
 }
 
 asn1_error_code asn1buf_destroy(buf)
