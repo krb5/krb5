@@ -28,3 +28,5 @@ LOCAL_LIBRARIES = $(KLIB)
            SRCS = sim_server.c
 
 SimpleTestProgramTarget(sim_server)
+
+DependTarget()
