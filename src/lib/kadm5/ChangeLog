@@ -1,3 +1,8 @@
+Wed Nov  6 10:20:36 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kadm_err.et: New error codes for KADM5_MISSING_CONF_PARAMS and 
+		KADM5_BAD_SERVER_NAME.
+
 Mon Nov  4 21:16:01 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* alt_prof.c (krb5_aprof_init): If the user specifies the config
