@@ -22,7 +22,7 @@ static char rcsid_rnd_counfoun_c[] =
 /*
  * Generate a random confounder
  */
-krb5_ui_4
+krb5_confounder
 krb5_random_confounder PROTOTYPE((void))
 {
     static int seeded = 0;
@@ -36,5 +36,5 @@ krb5_random_confounder PROTOTYPE((void))
     }
     /* this only gives us 31 random buts, but so what ? */
     retval = random();
-    return (krb5_ui_4) retval;
+    return (krb5_confounder) retval;
 }
