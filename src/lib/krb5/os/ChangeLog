@@ -1,3 +1,8 @@
+Wed Apr 26 16:00:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* Add adm_conn.c - module to provide a connection to an administrative
+	  (kpasswd/kadmin) server.
+
 Wed Apr 27 11:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* osconfig.c: krb5_find_config_files only used for OLD_CONFIG_FILES.
