@@ -1,3 +1,8 @@
+2001-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_int.h: Provide prototypes for profile_ser_size,
+	profile_ser_externalize, profile_ser_internalize.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* test_profile.c: Include <string.h> for strcmp() prototype.

@@ -188,6 +188,14 @@ errcode_t profile_close_file
 	PROTOTYPE ((prf_file_t profile));
 
 /* prof_init.c -- included from profile.h */
+errcode_t profile_ser_size
+        PROTOTYPE ((const char *, profile_t, size_t *));
+
+errcode_t profile_ser_externalize
+        PROTOTYPE ((const char *, profile_t, unsigned char **, size_t *));
+
+errcode_t profile_ser_internalize
+        PROTOTYPE ((const char *, profile_t *, unsigned char **, size_t *));
 
 /* prof_get.c */
 
