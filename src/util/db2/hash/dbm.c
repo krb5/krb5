@@ -49,6 +49,14 @@ static char sccsid[] = "@(#)dbm.c	8.6 (Berkeley) 11/7/95";
 #include "db-ndbm.h"
 #include "hash.h"
 
+/* If the two size fields of datum and DBMT are not equal, then
+ * casting between structures will result in stack garbage being
+ * transfered. Has been observed for DEC Alpha OSF, but will handle
+ *  the general case.
+ */
+
+#define NEED_COPY
+
 /*
  *
  * This package provides dbm and ndbm compatible interfaces to DB.
@@ -189,7 +197,17 @@ dbm_fetch(db, key)
 	datum retval;
 	int status;
 
+#ifdef NEED_COPY
+	DBT k, r;
+
+	k.data = key.dptr;
+	k.size = key.dsize;
+	status = (db->get)(db, &k, &r, 0);
+	retval.dptr = r.data;
+	retval.dsize = r.size;
+#else
 	status = (db->get)(db, (DBT *)&key, (DBT *)&retval, 0);
+#endif
 	if (status) {
 		retval.dptr = NULL;
 		retval.dsize = 0;
@@ -209,7 +227,15 @@ dbm_firstkey(db)
 	int status;
 	datum retdata, retkey;
 
+#ifdef NEED_COPY
+	DBT k, r;
+
+	status = (db->seq)(db, &k, &r, R_FIRST);
+	retkey.dptr = k.data;
+	retkey.dsize = k.size;
+#else
 	status = (db->seq)(db, (DBT *)&retkey, (DBT *)&retdata, R_FIRST);
+#endif
 	if (status)
 		retkey.dptr = NULL;
 	return (retkey);
@@ -227,7 +253,15 @@ dbm_nextkey(db)
 	int status;
 	datum retdata, retkey;
 
+#ifdef NEED_COPY
+	DBT k, r;
+
+	status = (db->seq)(db, &k, &r, R_NEXT);
+	retkey.dptr = k.data;
+	retkey.dsize = k.size;
+#else
 	status = (db->seq)(db, (DBT *)&retkey, (DBT *)&retdata, R_NEXT);
+#endif
 	if (status)
 		retkey.dptr = NULL;
 	return (retkey);
@@ -245,7 +279,15 @@ dbm_delete(db, key)
 {
 	int status;
 
+#ifdef NEED_COPY
+	DBT k;
+
+	k.data = key.dptr;
+	k.size = key.dsize;
+	status = (db->del)(db, &k, 0);
+#else
 	status = (db->del)(db, (DBT *)&key, 0);
+#endif
 	if (status)
 		return (-1);
 	else
@@ -264,8 +306,19 @@ dbm_store(db, key, content, flags)
 	datum key, content;
 	int flags;
 {
+#ifdef NEED_COPY
+	DBT k, c;
+
+	k.data = key.dptr;
+	k.size = key.dsize;
+	c.data = content.dptr;
+	c.size = content.dsize;
+	return ((db->put)(db, &k, &c,
+	    (flags == DBM_INSERT) ? R_NOOVERWRITE : 0));
+#else
 	return ((db->put)(db, (DBT *)&key, (DBT *)&content,
 	    (flags == DBM_INSERT) ? R_NOOVERWRITE : 0));
+#endif
 }
 
 int

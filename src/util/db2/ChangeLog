@@ -1,3 +1,8 @@
+Tue Jul 23 16:08:43 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* hash/dbm.c: Copy elements from the datum to an internal
+	DBT. Handles case of differences in size of size fields.
+
 Fri Jun 21 00:07:57 1996  Marc Horowitz  <marc@mit.edu>
 
 	* hash/dbm.c (delete, store): dbm_rdonly() doesn't exist on some
