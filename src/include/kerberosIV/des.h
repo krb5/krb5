@@ -78,15 +78,29 @@
 #endif /* !defined(SIZEOF_INT) */
 #endif /* !defined(KRB4_32) */
 
-typedef unsigned char des_cblock[8];	/* crypto-block size */
-
 /* Key schedule */
 /* Ick.  We need this in here unfortunately... */
 #ifndef DES_INT32
 #define DES_INT32 KRB4_32
 #endif
 
+/*
+ *
+ * NOTE WELL:
+ *
+ * This section must be kept in sync with lib/crypto/des/des_int.h,
+ * until we get around to actually combining them at the source level.
+ * We can't right now, because both the Mac and Windows platforms are
+ * using their own versions of krb4 des.h, and that's the one that
+ * would have to have the definitions because we install it under UNIX.
+ *
+ */
+#ifndef KRB5INT_DES_TYPES_DEFINED
+#define KRB5INT_DES_TYPES_DEFINED
+typedef unsigned char des_cblock[8];	/* crypto-block size */
 typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
+#endif
+/* end sync */
 
 #define DES_KEY_SZ 	(sizeof(des_cblock))
 #define DES_ENCRYPT	1

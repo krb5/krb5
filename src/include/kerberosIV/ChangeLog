@@ -1,3 +1,10 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.h (des_cblock, des_key_schedule): Separate definitions into
+	a block with a comment indicating lib/crypto/des/des_int.h needs
+	to be kept in sync.  Use macro KRB5INT_DES_TYPES_DEFINED to avoid
+	duplication.
+
 2001-04-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.h: Include stdio.h.
