@@ -1,3 +1,8 @@
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* server_acl.c (acl_get_line): Patch from Matt Crawford to permit
+	line continuation by ending a line with a backslash.
+
 2000-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (kadm5_setkey_principal_3): New function.

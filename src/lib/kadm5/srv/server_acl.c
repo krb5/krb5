@@ -87,34 +87,56 @@ static const char *acl_cantopen_msg = "%s while opening ACL file %s";
 
 /*
  * acl_get_line()	- Get a line from the ACL file.
+ *			Lines ending with \ are continued on the next line
  */
 static char *
 acl_get_line(fp, lnp)
     FILE	*fp;
-    int		*lnp;
+    int		*lnp;		/* caller should set to 1 before first call */
 {
     int		i, domore;
+    static int	line_incr = 0;
     static char acl_buf[BUFSIZ];
 
+    *lnp += line_incr;
+    line_incr = 0;
     for (domore = 1; domore && !feof(fp); ) {
-	/* Copy in the line */
-	for (i=0;
-	     ((i<BUFSIZ) &&
-	      (!feof(fp)) &&
-	      ((acl_buf[i] = fgetc(fp)) != '\n'));
-	     i++);
-
-	/* Check if we exceeded our buffer size */
-	if ((i == BUFSIZ) && (!feof(fp)) && (acl_buf[i] != '\n')) {
-	    krb5_klog_syslog(LOG_ERR, acl_line2long_msg, acl_acl_file, *lnp);
-	    while (fgetc(fp) != '\n');
-	    i--;
+	/* Copy in the line, with continuations */
+	for (i=0; ((i < sizeof acl_buf) && !feof(fp)); i++ ) {
+	    acl_buf[i] = fgetc(fp);
+	    if (acl_buf[i] == (char)EOF) {
+		if (i > 0 && acl_buf[i-1] == '\\')
+		    i--;
+		break;		/* it gets nulled-out below */
+	    }
+	    else if (acl_buf[i] == '\n') {
+		if (i == 0 || acl_buf[i-1] != '\\')
+		    break;	/* empty line or normal end of line */
+		else {
+		    i -= 2;	/* back up over "\\\n" and continue */
+		    line_incr++;
+		}
+	    }
 	}
-		acl_buf[i] = '\0';
+	/* Check if we exceeded our buffer size */
+	if (i == sizeof acl_buf && (i--, !feof(fp))) {
+	    int	c1 = acl_buf[i], c2;
+
+	    krb5_klog_syslog(LOG_ERR, acl_line2long_msg, acl_acl_file, *lnp);
+	    while ((c2 = fgetc(fp)) != EOF) {
+		if (c2 == '\n') {
+		    if (c1 != '\\')
+			break;
+		    line_incr++;
+		}
+		c1 = c2;
+	    }
+	}
+	acl_buf[i] = '\0';
 	if (acl_buf[0] == (char) EOF)	/* ptooey */
 	    acl_buf[0] = '\0';
 	else
-	    (*lnp)++;
+	    line_incr++;
 	if ((acl_buf[0] != '#') && (acl_buf[0] != '\0'))
 	    domore = 0;
     }
