@@ -51,14 +51,14 @@ krb5_derive_key(enc, inkey, outkey, in_constant)
 	return(ENOMEM);
 
     if ((outblockdata = (unsigned char *) malloc(blocksize)) == NULL) {
-	return(ENOMEM);
 	free(inblockdata);
+	return(ENOMEM);
     }
 
     if ((rawkey = (unsigned char *) malloc(keybytes)) == NULL) {
-	return(ENOMEM);
 	free(outblockdata);
 	free(inblockdata);
+	return(ENOMEM);
     }
 
     inblock.data = inblockdata;

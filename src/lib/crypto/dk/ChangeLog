@@ -1,3 +1,9 @@
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* derive.c (krb5_derive_key): If memory allocation fails, release
+	other allocated blocks before returning, instead of trying to
+	release them after returning.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* checksum.c (krb5_dk_make_checksum): enc_providers are now
