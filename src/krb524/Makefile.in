@@ -45,6 +45,8 @@ KRB524_LIB	= libkrb524.a
 ##WIN32##K4LIB=$(USE_ALTERNATE_KRB4_LIB)
 ##WIN32##!endif
 
+K524LIB = $(OUTPRE)krb524.lib
+K524DEP = $(K524LIB)
 K524DEF = krb524.def
 WINLIBS = kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib \
 	version.lib advapi32.lib gdi32.lib
@@ -74,6 +76,18 @@ STLIBOBJS = \
 	$(OUTPRE)krb524_err.$(OBJEXT) \
 	$(OUTPRE)libinit.$(OBJEXT)
 
+##WIN32##!ifdef KRB524_STATIC_HACK
+LPREFIX=..\lib
+K5_GLUE=$(LPREFIX)\$(OUTPRE)k5_glue.obj
+KLIBS = $(LPREFIX)\krb5\$(OUTPRE)krb5.lib \
+	$(LPREFIX)\crypto\$(OUTPRE)crypto.lib \
+	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
+	$(LPREFIX)\des425\$(OUTPRE)des425.lib
+KLIB=$(KLIBS) $(DNSLIBS) $(K5_GLUE) $(CLIB)
+STLIBOBJS=$(STLIBOBJS:libinit=globals)
+K524DEP=$(STLIBOBJS)
+##WIN32##!endif
+
 GENS	= krb524_err.c krb524_err.h
 
 KRB524_HDR=$(BUILDTOP)$(S)include$(S)krb524.h
@@ -102,7 +116,7 @@ includes:: krb524.h krb524_err.h
 
 ../include/krb524_err.h: includes
 
-all-windows:: $(KRB524_HDR) $(OUTPRE)krb524.lib $(OUTPRE)k524init.exe
+all-windows:: $(KRB524_HDR) $(K524LIB) $(OUTPRE)k524init.exe
 
 krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
@@ -113,12 +127,11 @@ krb524d: krb524d.o $(KADMSRV_DEPLIBS) $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 k524init: k524init.o  $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o k524init k524init.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)krb524.lib: $(STLIBOBJS) $(K4LIB) $(KLIB)
+$(K524LIB): $(STLIBOBJS) $(K4LIB) $(KLIB)
 	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
 
-$(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
-	link $(EXE_LINKOPTS) -out:$@ $** $(KLIB) $(K4LIB) $(WINLIBS) $(CLIB)\
-        $(OUTPRE)krb524.lib
+$(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(K524DEP) $(KLIB) $(K4LIB) $(CLIB) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
+	link $(EXE_LINKOPTS) -out:$@ $** $(WINLIBS)
 
 install-unix:: install-libs
 	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
