@@ -1280,42 +1280,9 @@ dnl
 dnl =============================================================
 dnl Internal function for testing for getpeername prototype
 dnl
-AC_DEFUN([TRY_PEER_INT],[
-krb5_lib_var=`echo "$1 $2" | sed 'y% ./+-*%___p_p%'`
-AC_MSG_CHECKING([if getpeername() takes arguments $1 and $2])
-AC_CACHE_VAL(krb5_cv_getpeername_proto$krb5_lib_var,
-[
-AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/socket.h>
-extern int getpeername(int, $1, $2);
-],,eval "krb5_cv_getpeername_proto$krb5_lib_var=yes", 
-   eval "krb5_cv_getpeername_proto$krb5_lib_var=no")])
-if eval "test \"`echo '$krb5_cv_getpeername_proto'$krb5_lib_var`\" = yes"; then
-	AC_MSG_RESULT(yes)
-	peer_set=yes
-	res1=`echo "$1" | tr -d '*' | sed -e 's/ *$//'`
-	res2=`echo "$2" | tr -d '*' | sed -e 's/ *$//'`
-	AC_DEFINE_UNQUOTED([GETPEERNAME_ARG2_TYPE],$res1)
-	AC_DEFINE_UNQUOTED([GETPEERNAME_ARG3_TYPE],$res2)
-else
-	AC_MSG_RESULT(no)
-fi
-])
-dnl
-dnl Determines the types of the second and third arguments to getpeername()
-dnl Note: It is possible that noe of the combinations will work and the
-dnl code must deal
 AC_DEFUN([KRB5_GETPEERNAME_ARGS],[
-peer_set=no
-for peer_arg1 in "struct sockaddr *" "void *"
-do
-  for peer_arg2 in "size_t *" "int *" "socklen_t *"
-  do
-	if test $peer_set = no; then
-	  TRY_PEER_INT($peer_arg1, $peer_arg2)
-	fi
-  done 
-done
+AC_DEFINE([GETPEERNAME_ARG2_TYPE],GETSOCKNAME_ARG2_TYPE)
+AC_DEFINE([GETPEERNAME_ARG3_TYPE],GETSOCKNAME_ARG3_TYPE)
 ])
 dnl
 dnl =============================================================
@@ -1343,9 +1310,8 @@ else
 fi
 ])
 dnl
-dnl Determines the types of the second and third arguments to getsockname()
-dnl Note: It is possible that noe of the combinations will work and the
-dnl code must deal
+dnl Determines the types of the second and third arguments to getsockname().
+dnl
 AC_DEFUN([KRB5_GETSOCKNAME_ARGS],[
 sock_set=no
 for sock_arg1 in "struct sockaddr *" "void *"
@@ -1357,6 +1323,13 @@ do
 	fi
   done 
 done
+if test "$sock_set" = no; then
+  AC_MSG_NOTICE(assuming struct sockaddr and socklen_t for getsockname args)
+  res1=`echo "struct sockaddr *" | tr -d '*' | sed -e 's/ *$//'`
+  AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG2_TYPE],$res1)
+  res2=`echo "socklen_t *" | tr -d '*' | sed -e 's/ *$//'`
+  AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG3_TYPE],$res2)
+fi
 ])
 dnl
 dnl

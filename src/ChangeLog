@@ -1,3 +1,11 @@
+2004-02-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (TRY_PEER_INT): Deleted.
+	(KRB5_GETPEERNAME_ARGS): Map the getpeername arg types to the
+	corresponding getsockname arg types.
+	(KRB5_GETSOCKNAME_ARGS): If nothing matches, assume struct
+	sockaddr and socklen_t.
+
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_PRIOCNTL_HACK): Set PRIOCNTL_HACK=1 on
