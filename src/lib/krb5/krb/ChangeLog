@@ -1,3 +1,8 @@
+Tue Apr  8 10:31:30 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sendauth.c (krb5_sendauth): Don't free credspout if it is to be
+		returned in out_creds (#PR 357)
+
 Thu Nov 21 13:54:01 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* recvauth.c (krb5_recvauth): If there is an error, and the server
