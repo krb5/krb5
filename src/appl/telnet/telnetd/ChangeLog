@@ -1,0 +1,4 @@
+Mon Jul 25 02:35:16 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: check for utmpx
+
