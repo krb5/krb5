@@ -28,9 +28,12 @@ s/  */ /g
 s;^\([a-zA-Z0-9_\-]*\).o:;$(OUTPRE)\1.$(OBJEXT):;
 
 # delete system-specific or compiler-specific files from list
+# (the last two are pathnames used at MIT -- if you have a local
+#  gcc installation in some odd place, you may need to customize this)
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
 s;/mit/cygnus[^ ]* ;;g
+s;/mit/gnu/[^ ]* ;;g
 
 # remove foo/../ sequences
 :dotdot

@@ -1,3 +1,7 @@
+2002-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.sed: Ignore header files under /mit/gnu/.
+
 2002-04-25  Ezra Peisach  <epeisach@bu.edu>
 
 	* reconf: Only for autoreconf 2.53, create a private copy of
