@@ -142,6 +142,9 @@ struct gss_checksum_data {
     krb5_data checksum_data;
 };
 
+#ifdef CFX_EXERCISE
+#include "../../krb5/krb/auth_con.h"
+#endif
 static krb5_error_code KRB5_CALLCONV
 make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 		   void *cksum_data, krb5_data **out)
@@ -151,6 +154,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     unsigned char *ptr;
     struct gss_checksum_data *data = cksum_data;
     krb5_data credmsg;
+    int junk;
+
     data->checksum_data.data = 0;
     credmsg.data = 0;
     /* build the checksum field */
@@ -188,6 +193,20 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     } else {
 	data->checksum_data.length = 24;
     }
+#ifdef CFX_EXERCISE
+    if (data->ctx->auth_context->keyblock->enctype == 18) {
+	srand(time(0) ^ getpid());
+	/* Our ftp client code stupidly assumes a base64-encoded
+	   version of the token will fit in 10K, so don't make this
+	   too big.  */
+	junk = rand() & 0xff;
+    } else
+	junk = 0;
+#else
+    junk = 0;
+#endif
+
+    data->checksum_data.length += junk;
 
     /* now allocate a buffer to hold the checksum data and
        (maybe) KRB_CRED msg */
@@ -216,6 +235,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 	/* free credmsg data */
 	krb5_free_data_contents(context, &credmsg);
     }
+    if (junk)
+	memset(ptr, 'i', junk);
     *out = &data->checksum_data;
     return 0;
 }
@@ -564,6 +585,7 @@ new_connection(
    *context_handle = (gss_ctx_id_t) ctx;
    ctx_free = 0;
 
+#if 0 /* Sigh.  We're changing the spec again.  */
 #ifdef CFX_EXERCISE
    if (ctx->proto == 1
        /* I think the RPC code may be broken.  Don't mess around
@@ -603,7 +625,8 @@ new_connection(
        ctx->testing_unknown_tokid = 0;
        ctx_free = 0;
    }
-#endif
+#endif /* CFX_EXERCISE */
+#endif /* 0 */
 
    /* compute time_rec */
    if (time_rec) {
