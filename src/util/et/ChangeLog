@@ -8,8 +8,7 @@
 	varargs.h support.
 
 	* com_err.h: Get rid of old 68k-Mac pragmas.
-	(GSS_DLLIMP, KRB5_EXPORTVAR, HAVE_STDARG_H, ET_P, NEAR,
-	ET_STDARG_P, ET_VARARGS): Don't define.
+	(HAVE_STDARG_H, ET_P, ET_STDARG_P, ET_VARARGS): Don't define.
 	(struct et_list, _et_list): Declare, with annotations.
 	* error_table.h (struct et_list, _et_list): Don't declare here.
 

@@ -20,10 +20,17 @@
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
+/* We don't use these, but since we're using the Kerberos ones, we
+   need to either provide all the ones the Kerberos and GSSAPI headers
+   will use, or not define KRB5_CALLCONV, since that's the only one
+   they test.  */
+#define GSS_DLLIMP
+#define KRB5_EXPORTVAR
 #endif
 
 #ifndef FAR
 #define FAR
+#define NEAR
 #endif
 
 #include <stdarg.h>
