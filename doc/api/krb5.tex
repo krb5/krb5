@@ -438,6 +438,9 @@ Returns system errors, encryption errors, replay errors.
 Parses a KRB_AP_REQ message, returning its contents.
 
 \funcparam{server} specifies the expected server's name for the ticket.
+If \funcparam{server} is NULL, then any server name will be accepted if
+the appropriate key can be found, and the caller should verify that the
+server principal matches some trust criterion.
 
 \funcparam{sender_addr} specifies the address(es) expected to be present
 in the ticket.
