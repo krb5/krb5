@@ -1,3 +1,7 @@
+1999-07-27  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (GetMacProfileFileSpec): removed bogus string conversion
+
 1999-07-26  Miro Jurisic  <meeroh@mit.edu>
 
 	* c_ustime.c (krb5_crypto_us_timeofday): Merged in changes from the

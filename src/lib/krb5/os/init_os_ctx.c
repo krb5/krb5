@@ -37,7 +37,6 @@ GetMacProfileFileSpec (FSSpec* outFileSpec, StringPtr inName)
 	
 	if (err == noErr) {
 		BlockMoveData (inName, &(outFileSpec -> name), strlen (inName) + 1);
-		c2pstr (&(outFileSpec -> name));
 	}
 
 	return err;
