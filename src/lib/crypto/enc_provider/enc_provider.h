@@ -29,5 +29,5 @@
 extern const struct krb5_enc_provider krb5int_enc_des;
 extern const struct krb5_enc_provider krb5int_enc_des3;
 extern const struct krb5_enc_provider krb5int_enc_arcfour;
-
-
+extern const struct krb5_enc_provider krb5int_enc_aes128;
+extern const struct krb5_enc_provider krb5int_enc_aes256;

@@ -166,7 +166,12 @@ static krb5_error_code
 krb5int_aes_init_state (const krb5_keyblock *key, krb5_keyusage usage,
 			krb5_data *state)
 {
-    abort();
+    state->length = 16;
+    state->data = (void *) malloc(16);
+    if (state->data == NULL)
+	return ENOMEM;
+    memset(state->data, 0, state->length);
+    return 0;
 }
 
 const struct krb5_enc_provider krb5int_enc_aes128 = {

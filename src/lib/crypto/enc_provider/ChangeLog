@@ -1,3 +1,9 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (krb5int_aes_init_state): Implement.
+	* enc_provider.h (krb5int_enc_aes128, krb5int_enc_aes256):
+	Declare.
+
 2003-02-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes.c: New file.
