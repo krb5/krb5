@@ -4,12 +4,10 @@ KRB5SRVTABDIR = /etc
 ##DOSBUILDTOP = ..\..
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-KRB5_HEADERS = adm.h adm_proto.h \
-		asn1.h base-defs.h ccache.h k5-config.h encryption.h \
-		error_def.h k5-errors.h ext-proto.h fieldbits.h \
-		k5-free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
-		keytab.h libos.h los-proto.h macros.h mit-des.h \
-		proto.h rcache.h safepriv.h sysincl.h wordsize.h
+KRB5_HEADERS = adm.h adm_proto.h asn1.h ext-proto.h k5-config.h k5-errors.h \
+		kdb.h kdb_dbm.h libos.h los-proto.h mit-des.h preauth.h \
+		rsa-md5.h sysincl.h winsock.h
+
 # these are installed here for the build from lib/krb5/error_tables but 
 # also need to be in the installed tree
 ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h

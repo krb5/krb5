@@ -1,3 +1,7 @@
+Wed Apr 26 10:41:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Reflect current list of headers to be installed.
+
 Thu Apr 20 11:35:07 1995    <tytso@rsx-11.mit.edu>
 
 	* k5-config.h, configure.in: Remove support for HAS_ANSI_CONST
