@@ -303,10 +303,10 @@ int main(argc, argv)
 #ifndef LOG_ODELAY /* 4.2 syslog */
     openlog(progname, LOG_PID);
 #else
-#ifndef LOG_DAEMON
-#define LOG_DAEMON 0
+#ifndef LOG_AUTH
+#define LOG_AUTH 0
 #endif
-    openlog(progname, LOG_PID | LOG_ODELAY, LOG_DAEMON);	
+    openlog(progname, LOG_PID | LOG_ODELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
     
 #ifdef KERBEROS
@@ -1962,8 +1962,8 @@ recvauth(netfd, peersin, valid_checksum)
 
     {
 	krb5_keyblock *key;
-	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
-						&key);
+	status = krb5_auth_con_getrecvsubkey (bsd_context, auth_context,
+					      &key);
 	if (status)
 	    fatal (netfd, "Server can't get session subkey");
 	if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)

@@ -108,6 +108,13 @@ krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
     if (!ret) {
 	cksum->magic = KV5M_CHECKSUM;
 	cksum->checksum_type = cksumtype;
+	if (krb5_cksumtypes_list[i].trunc_size) {
+	    krb5_octet *trunc;
+	    cksum->length = krb5_cksumtypes_list[i].trunc_size;
+	    trunc = (krb5_octet *) realloc(cksum->contents, cksum->length);
+	    if (trunc)
+		cksum->contents = trunc;
+	}
     }
 
 cleanup:

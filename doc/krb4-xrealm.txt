@@ -1,0 +1,143 @@
+The following text was taken from the patchkit disabling cross-realm
+authentication and triple-DES in krb4.
+
+PATCH KIT DESCRIPTION
+=====================
+
+** FLAG DAY REQUIRED **
+
+One of the things we decided to do (and must do for security reasons)
+was drop support for the 3DES krb4 TGTs.  Unfortunately the current
+code will only accept 3DES TGTs if it issues 3DES TGTs.  Since the new
+code issues only DES TGTs, the old code will not understand its v4
+TGTs if the site has a 3DES key available for the krbtgt principal.
+The new code will understand and accept both DES and 3DES v4 TGTs.
+
+So, the easiest upgrade option is to deploy the code on all KDCs at
+once, being sure to deploy it on the master KDC last.  Under this
+scenario, a brief window exists where slaves may be able to issue
+tickets that the master will not understand.  However, the slaves will
+understand tickets issued by the master throughout the upgrade.
+
+An alternate and more annoying upgrade strategy exists.  At least one
+max TGT life time before the upgrade, the TGT key can be changed to be
+a single-des key.  Since we support adding a new TGT key while
+preserving the old one, this does not create an interruption in
+service.  Since no 3DES key is available then both the old and new
+code will issue and accept DES v4 TGTs.  After the upgrade, the TGT
+key can again be rekeyed to add 3DES keys.  This does require two TGT
+key changes and creates a window where DES is used for the v5 TGT, but
+creates no window in which slaves will issue TGTs the master cannot
+accept.
+
+* What the patch does
+=====================
+
+1) Kerberos 4 cross-realm authentication is disabled by default.  A
+   "-X" switch is added to both krb524d and krb5kdc to enable v4
+   cross-realm.  This switch logs a note that a security hole has been
+   opened in the KDC log.  We said while designing the patch, that we
+   were going to try to allow per-realm configuration; because of a
+   design problem in the kadm5 library, we could not do this without
+   bumping the ABI version of that library.  We are unwilling to bump
+   an ABI version in a security patch release to get that feature, so
+   the configuration of v4 cross-realm is a global switch.
+
+2) Code responsible for v5 TGTs has been changed to require that the
+   enctype of the ticket service key be the same as the enctype that
+   would currently be issued for that kvno.  This means that even if a
+   service has multiple keys, you cannot use a weak key to fake the
+   KDC into accepting tickets for that service.  If you have a non-DES
+   TGT key, this separates keys used for v4 and v5.  We actually relax
+   this requirement for cross-realm TGT keys (which in the new code
+   are only used for v5) because we cannot guarantee other Kerberos
+   implementations will choose keys the same way.
+
+3) We no longer issue 3DES v4 tickets either in the KDC or krb524d.
+   We add code to accept either DES or 3DES tickets for v4.  None of
+   the attacks discovered so far can be implemented given a KDC that
+   accepts but does not issue 3DES tickets, so we believe that leaving
+   this functionality in as compatibility for a version or two is
+   reasonable.  Note however that the attacks described do allow
+   successful attackers to print future tickets, so sites probably
+   want to rekey important keys after installing this update.  Note
+   also that even if issuance of 3DES v4 tickets has been disabled,
+   outstanding tickets may be used to perform the 3DES cut-and-paste
+   attack.
+
+* Test Cases
+============
+
+This code is difficult to test for two reasons.  First, you need a
+cross-realm  relationship between two KDCs.  Secondly, you need a KDC
+that will issue 3DES v4 tickets even though the code  with the patch
+applied can no longer do this.
+
+I propose to meet these requirements by setting up a cross-realm 3DES
+key between  a realm I control and the test environment.  In order to
+provide concrete examples of what I plan to test with the automated
+tests,  I assume a shared key between a realm PREPATCH.KRBTEST.COM and the
+test realm PATCH.
+
+In all of the following tests  I assume the following configuration.
+A principal v4test@PREPATCH.KRBTEST.COM exists with known password and
+without requiring preauthentication.  The PREPATCH.KRBTEST.COM KDC will
+issue v4 tickets for this principal.  A principal test@PATCH exists
+with known password and without requiring preauthentication.    A
+principal service@PATCH exists.  The TGT for the PATCH realm has a
+3des and des key.  The shared TGT keys between PATCH and
+PREPATCH.KRBTEST.COM are identical in both directions (required for v4) and
+support both 3DES and DES keys.
+
+1) Run krb524d and krb5kdc for PATCH with no special options using a
+   krb5.conf without permitted_enctypes (fully permissive).
+
+
+A) Get v4 tickets as v4test@PREPATCH.KRBTEST.COM.  Confirm that  kvno -4
+service@PATCH  fails with an unknown principal error and logs an error
+about cross-realm being denied to the PATCH KDC log. This confirms
+that v4 cross-realm is not accepted.
+
+B) Get v5 tickets as v4test@PREPATCH.KRBTEST.COM.  Confirm that krb524init
+-p service@PATCH fails with a prohibited by policy  error, but that
+klist -5 includes a ticket for service@PATCH.  This confirms that v5
+cross-realm works but the krb524d denies converting such a ticket into
+a cross-realm ticket. Note that the krb524init currently in the
+mainline source tree will not be useful for this test because the
+client denies cross-realm for the simple reason that the v4 ticket
+file format is not flexible enough to support it.  The krb524init in
+the  1.2.x release is useful for this test.
+
+
+2) Restart the krb5kdc and krb524d for PATCH with the -X option
+   enabling v4 cross-realm.
+
+A) Confirm that the security warning is written to kdc.log.
+
+B) Get v4 tickets as v4test@PREPATCH.KRBTEST.COM.  Confirm that kvno -4
+service@PATCH works and leaves a service@PATCH ticket in the cache.
+This confirms that v4 cross-realm works in the KDC.  It also  confirms
+that the KDC can accept 3DES v4 TGTs.  The code path for decrypting a
+TGT is the same for the local realm and for foreign realms, so I don't
+see a need to test local 3DES TGTs in an automated manner although I
+did test it manually.
+
+C) Get v5 tickets as v4test@PREPATCH.KRBTEST.COM.  Confirm that krb524init
+-p service@PATCH works.    This confirms that krb524d will issue
+cross-realm tickets.  They're completely useless because the v4 ticket
+file can't represent them, but that's not our problem today.
+
+3) Start the kdc and krb524d with a krb5.conf that  includes
+   permitted_enctypes only listing des-cbc-crc.  Get tickets as
+   test@PATCH.  Restart the KDC  and confirm that kvno service fails
+   logging an error about permitted enctypes.  This confirms that if
+   you manage to obtain a ticket of the wrong enctype it will not be
+   accepted later.
+
+These tests do not check to make sure that  3DES tickets are not
+issued by the v4 code.  I'm fairly certain that is true as I've
+physically remove the calls to the routine that generates 3DES tickets
+from the code in both the KDC and krb524d.  These tests also do not
+check to make sure that  cross-realm TGTs are not required to follow
+the strict enctype policy.  I've tested that manually  but don't know
+how to test that without  significantly complicating the test setup.
