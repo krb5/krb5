@@ -209,7 +209,7 @@ krb5_keytab_entry *entry;
 	goto abend;
     }
     if (!xfwrite(entry->key.contents, sizeof(krb5_octet), size, KTFILEP(id))) {
-	bzero(iobuf, sizeof(iobuf));
+	memset(iobuf, 0, sizeof(iobuf));
 	setbuf(KTFILEP(id), 0);
 	return KRB5_KT_IOERR;
     }	

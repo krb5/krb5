@@ -51,7 +51,7 @@ krb5_fcc_next_cred(id, cursor, creds)
      krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
 
-     bzero((char *)creds, sizeof(*creds));
+     memset((char *)creds, 0, sizeof(*creds));
 
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);

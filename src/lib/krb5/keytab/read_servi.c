@@ -60,7 +60,7 @@ OLDDECLARG(krb5_keyblock **, key)
 					   sizeof(keytabname) - 1))!= KSUCCESS)
 	    return (kerror);
     } else {
-	bzero(keytabname, sizeof(keytabname));
+	memset(keytabname, 0, sizeof(keytabname));
 	(void) strncpy(keytabname, (char *)keyprocarg, 
 		       sizeof(keytabname) - 1);
     }

@@ -65,7 +65,7 @@ krb5_error_code krb5_fcc_destroy(id)
      /* XXX This may not be legal XXX */
      size = (unsigned long) buf.st_size;
 
-     bzero(zeros, BUFSIZ);
+     memset(zeros, 0, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
 	  if (write(((krb5_fcc_data *) id->data)->fd, zeros, BUFSIZ) < 0) {
 	      ret = krb5_fcc_interpret(errno);
