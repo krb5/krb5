@@ -1,3 +1,19 @@
+2003-01-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* compat_recv.c: Include sys/select.h and port-sockets.h.
+	(krb5_compat_recvauth_version): Only attempt krb4 authentication
+	if the source address is an IPv4 one.
+	(accept_a_connection): New function, derived from old krshd.c.
+	Listen on IPv6 as well as IPv4, if possible.
+	* krshd.c (main): Call accept_a_connection.  Change fromlen to a
+	socklen_t.
+	(doit): Initialize s.  Change length passed to getsockname to a
+	socklen_t.
+	(recvauth): Change len to socklen_t.  Cast peer IPv4 address
+	before calling krb5_compat_recvauth_version.
+	* defines.h: Include port-sockets.h.
+	(accept_a_connection): Declare.
+
 2002-12-06  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Quote the argument to AC_CHECK_HEADER. Autoconf

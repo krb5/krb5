@@ -281,7 +281,8 @@ int main(argc, argv)
 #if defined(BSD) && BSD+0 >= 43
     struct linger linger;
 #endif
-    int on = 1, fromlen;
+    int on = 1;
+    socklen_t fromlen;
     struct sockaddr_storage from;
     extern int opterr, optind;
     extern char *optarg;
@@ -426,49 +427,19 @@ int main(argc, argv)
     
     fromlen = sizeof (from);
 
-    if (debug_port) {
-	int s;
-	struct sockaddr_in sock_in;
-	
-	if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
-	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
-	    exit(2);
-	}
-	
-	memset((char *) &sock_in, 0,sizeof(sock_in));
-	sock_in.sin_family = AF_INET;
-	sock_in.sin_port = htons(debug_port);
-	sock_in.sin_addr.s_addr = INADDR_ANY;
-	
-	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
-			  (char *)&on, sizeof(on));
-
-	if ((bind(s, (struct sockaddr *) &sock_in, sizeof(sock_in))) < 0) {
-	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
-	    exit(2);
-	}
-	
-	if ((listen(s, 5)) < 0) {
-	    fprintf(stderr, "Error in listen: %s\n", strerror(errno));
-	    exit(2);
-	}
-	
-	if ((fd = accept(s, (struct sockaddr *) &from, &fromlen)) < 0) {
-	    fprintf(stderr, "Error in accept: %s\n", strerror(errno));
-	    exit(2);
-	}
-	
-	close(s);
-    } else {
+    if (debug_port)
+	fd = accept_a_connection(debug_port, (struct sockaddr *)&from,
+				 &fromlen);
+    else {
 	if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
 	    fprintf(stderr, "%s: ", progname);
 	    perror("getpeername");
 	    _exit(1);
 	}
-	
+
 	fd = 0;
     }
-    
+
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
 		   sizeof (on)) < 0)
 	syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
@@ -632,7 +603,7 @@ void doit(f, fromp)
     long packet_compart;            /* Packet compartments */
 #endif  /* CRAY */
     
-    int s;
+    int s = -1;
     char hostname[NI_MAXHOST];
     char *sane_host;
     char hostaddra[NI_MAXHOST];
@@ -663,11 +634,11 @@ void doit(f, fromp)
 #endif /* IP_TOS */
     
     { 
-      int sin_len = sizeof (localaddr);
-      if (getsockname(f, (struct sockaddr*)&localaddr, &sin_len) < 0) {
-	perror("getsockname");
-	exit(1);
-      }
+	socklen_t sin_len = sizeof (localaddr);
+	if (getsockname(f, (struct sockaddr*)&localaddr, &sin_len) < 0) {
+	    perror("getsockname");
+	    exit(1);
+	}
     }
 
 #ifdef POSIX_SIGNALS
@@ -1799,7 +1770,7 @@ recvauth(netfd, peersin, valid_checksum)
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in laddr;
-    int len;
+    socklen_t len;
     krb5_data inbuf;
 #ifdef KRB5_KRB4_COMPAT
     char v4_instance[INST_SZ];	/* V4 Instance */
@@ -1866,7 +1837,7 @@ recvauth(netfd, peersin, valid_checksum)
 				  0, 		/* v4_opts */
 				  "rcmd", 	/* v4_service */
 				  v4_instance, 	/* v4_instance */
-				  peersin, 	/* foreign address */
+				  (struct sockaddr_in *)peersin, /* foreign address */
 				  &laddr, 	/* our local address */
 				  "", 		/* use default srvtab */
 
@@ -1882,7 +1853,6 @@ recvauth(netfd, peersin, valid_checksum)
 				   &version); /* application version string */
     auth_sys = KRB5_RECVAUTH_V5;
 #endif
-
     if (status) {
 	if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*

@@ -93,3 +93,8 @@ krb5_compat_recvauth_version(krb5_context, krb5_auth_context *,
 			     char *, krb5_ticket **, krb5_int32*, 
 			     AUTH_DAT **,  Key_schedule, krb5_data *);
 #endif
+
+#include "port-sockets.h"
+
+int accept_a_connection (int debug_port, struct sockaddr *from,
+			 socklen_t *fromlenp);

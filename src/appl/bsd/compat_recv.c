@@ -251,7 +251,8 @@ krb5_compat_recvauth_version(context, auth_context,
 		return((retval < 0) ? errno : ECONNABORTED);
 
 #ifdef KRB5_KRB4_COMPAT
-	if (!strncmp(vers.vers, KRB_V4_SENDAUTH_VERS, 4)) {
+	if (v4_faddr->sin_family == AF_INET
+	    && !strncmp(vers.vers, KRB_V4_SENDAUTH_VERS, 4)) {
 		/*
 		 * We must be talking to a V4 sendauth; read in the
 		 * rest of the version string and make sure.
@@ -456,3 +457,118 @@ mutual_fail:
 }
 #endif
 #endif
+
+#include <sys/select.h>
+#include "port-sockets.h"
+
+int
+accept_a_connection (int debug_port, struct sockaddr *from,
+		     socklen_t *fromlenp)
+{
+    int n, s, fd, s4 = -1, s6 = -1, on = 1;
+    fd_set sockets;
+
+    FD_ZERO(&sockets);
+
+#ifdef KRB5_USE_INET6
+    {
+	struct sockaddr_in6 sock_in6;
+
+	if ((s = socket(AF_INET6, SOCK_STREAM, PF_UNSPEC)) < 0) {
+	    if (errno == EPROTONOSUPPORT)
+		goto skip_ipv6;
+	    fprintf(stderr, "Error in socket(INET6): %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	memset((char *) &sock_in6, 0,sizeof(sock_in6));
+	sock_in6.sin6_family = AF_INET6;
+	sock_in6.sin6_port = htons(debug_port);
+	sock_in6.sin6_addr = in6addr_any;
+
+	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			  (char *)&on, sizeof(on));
+
+	if ((bind(s, (struct sockaddr *) &sock_in6, sizeof(sock_in6))) < 0) {
+	    fprintf(stderr, "Error in bind(INET6): %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	if ((listen(s, 5)) < 0) {
+	    fprintf(stderr, "Error in listen(INET6): %s\n", strerror(errno));
+	    exit(2);
+	}
+	s6 = s;
+	FD_SET(s, &sockets);
+    skip_ipv6:
+	;
+    }
+#endif
+
+    {
+	struct sockaddr_in sock_in;
+
+	if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
+	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	memset((char *) &sock_in, 0,sizeof(sock_in));
+	sock_in.sin_family = AF_INET;
+	sock_in.sin_port = htons(debug_port);
+	sock_in.sin_addr.s_addr = INADDR_ANY;
+
+	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			  (char *)&on, sizeof(on));
+
+	if ((bind(s, (struct sockaddr *) &sock_in, sizeof(sock_in))) < 0) {
+	    if (s6 >= 0 && errno == EADDRINUSE)
+		goto try_ipv6_only;
+	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	if ((listen(s, 5)) < 0) {
+	    fprintf(stderr, "Error in listen: %s\n", strerror(errno));
+	    exit(2);
+	}
+	s4 = s;
+	FD_SET(s, &sockets);
+    try_ipv6_only:
+	;
+    }
+    if (s4 == -1 && s6 == -1) {
+	fprintf(stderr, "No valid sockets established, exiting\n");
+	exit(2);
+    }
+    n = select(((s4 < s6) ? s6 : s4) + 1, &sockets, 0, 0, 0);
+    if (n < 0) {
+	fprintf(stderr, "select error: %s\n", strerror(errno));
+	exit(2);
+    } else if (n == 0) {
+	fprintf(stderr, "internal error? select returns 0\n");
+	exit(2);
+    }
+    if (s6 != -1 && FD_ISSET(s6, &sockets)) {
+	if (s4 != -1)
+	    close(s4);
+	s = s6;
+    } else if (FD_ISSET(s4, &sockets)) {
+	if (s6 != -1)
+	    close(s6);
+	s = s4;
+    } else {
+	fprintf(stderr,
+		"internal error? select returns positive, "
+		"but neither fd available\n");
+	exit(2);
+    }
+
+    if ((fd = accept(s, from, fromlenp)) < 0) {
+	fprintf(stderr, "Error in accept: %s\n", strerror(errno));
+	exit(2);
+    }
+
+    close(s);
+    return fd;
+}
