@@ -1,3 +1,8 @@
+Fri Oct  3 02:26:45 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix up site.exp generation to reduce the quoting
+	lossage somewhat.
+
 Sun Aug 17 14:26:57 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (SRCS): Add $(SRCS) line.
