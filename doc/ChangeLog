@@ -1,11 +1,14 @@
 2002-06-18  Ken Raeburn  <raeburn@mit.edu>
 
-	* implementor.texinfo (IPv6 Support): New chapter.
+	* implementor.texinfo: Don't use @smallbook.
+	(IPv6 Support): New chapter.
 	(Socket API): New placeholder chapter.
-	(Local Addresses): Specify more precisely the IRIX version we use
-	at MIT.
+	(Local Addresses, Host Address Lookup): Specify more precisely the
+	IRIX version we use at MIT.
 	(Thread Safety): Delete quoted email, since we don't actually have
 	this API yet.  Refer people to the mailing list archives.
+	(Operating System Notes for Shared Libraries): Add an introduction
+	mentioning why we can't use libtool.
 
 	* copyright.texinfo: Update copyright year.
 

@@ -8,7 +8,7 @@
 @settitle Kerberos V5 Installation Guide
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
-@smallbook                              @c Format for 7" X 9.25" paper
+@c @smallbook                              @c Format for 7" X 9.25" paper
 @c %**end of header
 
 @paragraphindent 0
@@ -340,7 +340,7 @@ records for each of the addresses is looked up and stored in the
 is, both of which are wrong.
 
 @item IRIX
-No known bugs here, but as of IRIX 6.5, the version we're using at
+No known bugs here, but as of IRIX 6.5.7, the version we're using at
 MIT, these functions had not been implemented.
 
 @item NetBSD
@@ -460,6 +460,10 @@ will hardwire a path to the installed destination.
 @node Operating System Notes for Shared Libraries,  , Shared Library Theory, Shared Libraries
 @section Operating System Notes for Shared Libraries
 
+It would be nice to let some external package like GNU @code{libtool}
+handle all of this for us, but the last time we tried it,
+@code{libtool} was too slow, and didn't handle everything we need.
+So, for now, we deal with it all manually.
 
 @menu
 * NetBSD Shared Library Support::  
