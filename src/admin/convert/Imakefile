@@ -23,7 +23,12 @@
 # 
 # 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) -lkdb -lkrb -ldes425
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(KDB4LIB) $(KRB4LIB)
 INCLUDES=-I$(TOP)/include/kerberosIV
 
+#ifdef Krb4KDCCompat
 Krb5AdminProgramTarget(kdb5_convert)
+#else
+all::
+	echo "Not defined to use Kerberos V4 backwards compatibility"
+#endif
