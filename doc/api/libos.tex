@@ -171,33 +171,26 @@ These functions all relate to disk based I/O.
 
 \begin{funcdecl}{krb5_lock_file}{krb5_error_code}{\funcin}
 \funcarg{krb5_context}{context}
-\funcarg{FILE *}{filep}
-\funcarg{char *}{pathname}
+\funcarg{in}{fd}
 \funcarg{int}{mode}
 \end{funcdecl}
 
 Attempts to lock the file in the given \funcparam{mode}; returns 0 for a
 successful lock, or an error code otherwise.
 
-The caller should arrange that both \funcparam{filep} and
-\funcparam{pathname} refer to the same
-file.  The implementation may use whichever is more convenient.
+The caller should arrange for the file referred by \funcparam{fd} to be
+opened in such a way as to allow the required lock.
 
 Modes are given in {\tt <krb5/libos.h>}
 
-
 \begin{funcdecl}{krb5_unlock_file}{krb5_error_code}{\funcin}
 \funcarg{krb5_context}{context}
-\funcarg{FILE *}{filep}
-\funcarg{char *}{pathname}
+\funcarg{int}{fd}
 \end{funcdecl}
 
 Attempts to (completely) unlock the file.  Returns 0 if successful,
 or an error code otherwise.
 
-The caller should arrange that both \funcparam{filep} and
-\funcparam{pathname} refer to the same file.  The implementation may
-use whichever is more convenient.
 
 \begin{funcdecl}{krb5_create_secure_file}{krb5_error_code}{\funcin}
 \funcarg{krb5_context}{context}
