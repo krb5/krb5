@@ -1,4 +1,12 @@
 
+Tue May 16 13:58:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in	- Check for srand48, srand and srandom along with
+			  network libraries.
+	* t_ktentry.c, t_dbentry.c - Use available random number generator
+			  and also make sure memory is freed so we don't
+			  chew up memory in tester.
+
+
 Tue May 16 13:19:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* t_dbentry.c	- Change isset to is_a_set to keep Ultrix happy.  Also
 			  correctly calculate the length of the standard pwd.

@@ -30,10 +30,32 @@
 #include "adm.h"
 #include "adm_proto.h"
 
+#if	HAVE_SRAND48
+#define	SRAND	srand48
+#define	RAND	lrand48
+#define	RAND_TYPE	long
+#endif	/* HAVE_SRAND48 */
+
+#if	!defined(RAND_TYPE) && defined(HAVE_SRAND)
+#define	SRAND	srand
+#define	RAND	rand
+#define	RAND_TYPE	int
+#endif	/* !defined(RAND_TYPE) && defined(HAVE_SRAND) */
+
+#if	!defined(RAND_TYPE) && defined(HAVE_SRANDOM)
+#define	SRAND	srandom
+#define	RAND	random
+#define	RAND_TYPE	long
+#endif	/* !defined(RAND_TYPE) && defined(HAVE_SRANDOM) */
+
+#if	!defined(RAND_TYPE)
+There is no random number generator.
+#endif	/* !defined(RAND_TYPE) */
+
 /*
  * Generate a random event that has an a/b chance of succeeding
  */
-#define	RANDOM_EVENT(a,b)	((random() % b) < a)
+#define	RANDOM_EVENT(a,b)	((RAND() % b) < a)
 /* Define probabilities of generating each attribute type */
 #define	PASSWORD_EVENT		RANDOM_EVENT(3,5)
 #define	KVNO_EVENT		RANDOM_EVENT(2,5)
@@ -93,12 +115,12 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do password on set */
     if (isrand) {
 	if (PASSWORD_EVENT) {
-	    pwlen = 9 + (random() % 56);
+	    pwlen = 9 + (RAND() % 56);
 	    *pwdp = (char *) malloc(pwlen);
 	    for (i=0; i<pwlen-1; i++) {
-		(*pwdp)[i] = random() % 128;
+		(*pwdp)[i] = RAND() % 128;
 		while (!isalnum((int) (*pwdp)[i]))
-		    (*pwdp)[i] = random() % 128;
+		    (*pwdp)[i] = RAND() % 128;
 	    }
 	    (*pwdp)[pwlen-1] = '\0';
 	    *validp |= KRB5_ADM_M_PASSWORD;
@@ -115,7 +137,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do kvno */
     if (isrand) {
 	if (KVNO_EVENT) {
-	    dbentp->kvno = random();
+	    dbentp->kvno = RAND();
 	    *validp |= KRB5_ADM_M_KVNO;
 	}
     }
@@ -127,7 +149,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do maxlife */
     if (isrand) {
 	if (MAXLIFE_EVENT) {
-	    dbentp->max_life = random();
+	    dbentp->max_life = RAND();
 	    *validp |= KRB5_ADM_M_MAXLIFE;
 	}
     }
@@ -139,7 +161,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do maxrenewlife */
     if (isrand) {
 	if (MAXRENEWLIFE_EVENT) {
-	    dbentp->max_renewable_life = random();
+	    dbentp->max_renewable_life = RAND();
 	    *validp |= KRB5_ADM_M_MAXRENEWLIFE;
 	}
     }
@@ -151,7 +173,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do expiration */
     if (isrand) {
 	if (EXPIRATION_EVENT) {
-	    dbentp->expiration = random();
+	    dbentp->expiration = RAND();
 	    *validp |= KRB5_ADM_M_EXPIRATION;
 	}
     }
@@ -163,7 +185,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do pw_expiration */
     if (isrand) {
 	if (PWEXPIRATION_EVENT) {
-	    dbentp->pw_expiration = random();
+	    dbentp->pw_expiration = RAND();
 	    *validp |= KRB5_ADM_M_PWEXPIRATION;
 	}
     }
@@ -180,7 +202,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do flags */
     if (isrand) {
 	if (FLAGS_EVENT) {
-	    dbentp->attributes = random();
+	    dbentp->attributes = RAND();
 	    *validp |= KRB5_ADM_M_FLAGS;
 	}
     }
@@ -192,8 +214,8 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do salts */
     if (isrand) {
 	if (SALT_EVENT) {
-	    dbentp->salt_type = (random() % 1);
-	    dbentp->alt_salt_type = (random() % 1);
+	    dbentp->salt_type = (RAND() % 1);
+	    dbentp->alt_salt_type = (RAND() % 1);
 	    *validp |= KRB5_ADM_M_SALTTYPE;
 	}
     }
@@ -205,7 +227,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do mkvno */
     if (isrand) {
 	if (MKVNO_EVENT) {
-	    dbentp->mkvno = random();
+	    dbentp->mkvno = RAND();
 	    *validp |= KRB5_ADM_M_MKVNO;
 	}
     }
@@ -219,7 +241,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do lastpwchange */
     if (isrand) {
 	if (LASTPWCHANGE_EVENT) {
-	    dbentp->last_pwd_change = random();
+	    dbentp->last_pwd_change = RAND();
 	    *validp |= KRB5_ADM_M_LASTPWCHANGE;
 	}
     }
@@ -233,7 +255,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do lastsuccess */
     if (isrand) {
 	if (LASTSUCCESS_EVENT) {
-	    dbentp->last_success = random();
+	    dbentp->last_success = RAND();
 	    *validp |= KRB5_ADM_M_LASTSUCCESS;
 	}
     }
@@ -247,7 +269,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do lastfailed */
     if (isrand) {
 	if (LASTFAILED_EVENT) {
-	    dbentp->last_failed = random();
+	    dbentp->last_failed = RAND();
 	    *validp |= KRB5_ADM_M_LASTFAILED;
 	}
     }
@@ -261,7 +283,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do failcount */
     if (isrand) {
 	if (FAILCOUNT_EVENT) {
-	    dbentp->fail_auth_count = random();
+	    dbentp->fail_auth_count = RAND();
 	    *validp |= KRB5_ADM_M_FAILCOUNT;
 	}
     }
@@ -291,7 +313,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     /* Do mod_date */
     if (isrand) {
 	if (MODDATE_EVENT) {
-	    dbentp->mod_date = random();
+	    dbentp->mod_date = RAND();
 	    *validp |= KRB5_ADM_M_MODDATE;
 	}
     }
@@ -304,7 +326,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
 
     if (is_set) {
 	/* Only 25% may fail at most */
-	if (isrand && ((random() % 100) < 75)) {
+	if (isrand && ((RAND() % 100) < 75)) {
 	    *validp &= KRB5_ADM_M_SET_VALID;
 	}
 #ifdef	notdef
@@ -315,7 +337,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     }
     else {
 	/* Only 25% may fail at most */
-	if (isrand && ((random() % 100) < 75))
+	if (isrand && ((RAND() % 100) < 75))
 	    *validp &= KRB5_ADM_M_GET_VALID;
 	*expectp = ((*validp & ~KRB5_ADM_M_GET_VALID) != 0) ? 1 : 0;
     }
@@ -704,7 +726,7 @@ do_test(pname, verbose, isrand, is_a_set, title, passno)
 	kret = ENOMEM;
     }
 
-    krb5_xfree(kcontext);
+    krb5_free_context(kcontext);
     if (verbose) {
 	printf("* End %s ", title);
 	if (isrand)
@@ -740,7 +762,7 @@ main(argc, argv)
     programname = argv[0];
 
     now = time((time_t *) NULL);
-    srandom((unsigned) now);
+    SRAND((RAND_TYPE) now);
     while ((option = getopt(argc, argv, "r:v")) != EOF) {
 	switch (option) {
 	case 'r':

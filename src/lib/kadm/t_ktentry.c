@@ -30,6 +30,28 @@
 #include "adm.h"
 #include "adm_proto.h"
 
+#if	HAVE_SRAND48
+#define	SRAND	srand48
+#define	RAND	lrand48
+#define	RAND_TYPE	long
+#endif	/* HAVE_SRAND48 */
+
+#if	!defined(RAND_TYPE) && defined(HAVE_SRAND)
+#define	SRAND	srand
+#define	RAND	rand
+#define	RAND_TYPE	int
+#endif	/* !defined(RAND_TYPE) && defined(HAVE_SRAND) */
+
+#if	!defined(RAND_TYPE) && defined(HAVE_SRANDOM)
+#define	SRAND	srandom
+#define	RAND	random
+#define	RAND_TYPE	long
+#endif	/* !defined(RAND_TYPE) && defined(HAVE_SRANDOM) */
+
+#if	!defined(RAND_TYPE)
+There is no random number generator.
+#endif	/* !defined(RAND_TYPE) */
+
 /*
  * Generate a principal name.
  */
@@ -51,16 +73,16 @@ gen_princname(isrand)
 	    compsize[i] = 0;
 	    complist[i] = (char *) NULL;
 	}
-	ncomps = 2 + (random() % 7);
+	ncomps = 2 + (RAND() % 7);
 	totsize = 0;
 	for (i=0; i<ncomps; i++) {
-	    compsize[i] = 1 + (random() % 32);
+	    compsize[i] = 1 + (RAND() % 32);
 	    complist[i] = (char *) malloc(compsize[i]+1);
 	    if (complist[i]) {
 		for (j=0; j<compsize[i]; j++) {
-		    (complist[i])[j] = random() % 128;
+		    (complist[i])[j] = RAND() % 128;
 		    while (!isalnum((int) (complist[i])[j]))
-			(complist[i])[j] = random() % 128;
+			(complist[i])[j] = RAND() % 128;
 		}
 		(complist[i])[compsize[i]] = '\0';
 		totsize += (compsize[i] + 1);
@@ -106,12 +128,12 @@ gen_key(ktentp, isrand)
 	size_t keylen;
 	int i;
 
-	keylen = 4 + (random() % 64);
+	keylen = 4 + (RAND() % 64);
 	ktentp->key.contents = (krb5_octet *) malloc(keylen);
 	if (ktentp->key.contents) {
 	    ktentp->key.length = keylen;
 	    for (i=0; i<keylen; i++)
-		ktentp->key.contents[i] = random() & 255;
+		ktentp->key.contents[i] = RAND() & 255;
 	}
     }
     else {
@@ -139,8 +161,9 @@ gen_ktent(kcontext, ktentp, isrand)
 				      princname,
 				      &ktentp->principal)
 	) {
-	ktentp->vno = (isrand) ? random() : 1;
+	ktentp->vno = (isrand) ? RAND() : 1;
 	gen_key(ktentp, isrand);
+	free(princname);
     }
 }
 
@@ -293,9 +316,13 @@ do_test(pname, verbose, isrand, title, passno)
 	/* Cleanup */
 	if (in_ktent->principal)
 	    krb5_free_principal(kcontext, in_ktent->principal);
+	if (in_ktent->key.contents)
+	    free(in_ktent->key.contents);
 	free(in_ktent);
 	if (out_ktent->principal)
 	    krb5_free_principal(kcontext, out_ktent->principal);
+	if (out_ktent->key.contents)
+	    free(out_ktent->key.contents);
 	free(out_ktent);
     }
     else {
@@ -303,7 +330,7 @@ do_test(pname, verbose, isrand, title, passno)
 	kret = ENOMEM;
     }
 
-    krb5_xfree(kcontext);
+    krb5_free_context(kcontext);
     if (verbose) {
 	printf("* End %s ", title);
 	if (isrand)
@@ -339,7 +366,7 @@ main(argc, argv)
     programname = argv[0];
 
     now = time((time_t *) NULL);
-    srandom((unsigned) now);
+    SRAND((RAND_TYPE) now);
     while ((option = getopt(argc, argv, "r:v")) != EOF) {
 	switch (option) {
 	case 'r':
