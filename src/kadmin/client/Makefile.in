@@ -18,6 +18,8 @@ SSLIB=$(BUILDTOP)/util/ss/libss.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 
+RM = rm -f
+
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
@@ -60,4 +62,8 @@ install::
 	$(INSTALLPROG) kadmin.M ${DESTDIR}$(CLIENT_MANDIR)/kadmin.$(CLIENT_MANSUFFIX)
 
 clean::
+	$(RM) kadmin
+
+clean::
+	$(RM) $(OBJS)
 

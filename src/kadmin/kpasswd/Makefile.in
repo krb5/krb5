@@ -18,6 +18,8 @@ SSLIB=$(BUILDTOP)/util/ss/libss.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 
+RM = rm -f
+
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
@@ -44,5 +46,8 @@ install::
 	$(INSTALLPROG) kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.$(CLIENT_MANSUFFIX)
 
 clean::
+	$(RM) kpasswd
 
+clean::
+	$(RM) $(OBJS)
 

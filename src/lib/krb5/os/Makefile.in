@@ -79,3 +79,6 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
+clean::
+	$(RM) $(OBJS)
+

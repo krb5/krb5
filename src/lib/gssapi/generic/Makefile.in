@@ -85,3 +85,6 @@ includes::
 
 depend:: $(ETSRCS)
 
+clean::
+	$(RM) $(OBJS)
+

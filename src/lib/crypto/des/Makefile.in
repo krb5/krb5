@@ -85,3 +85,6 @@ destest: destest.o libdes.o
 clean::
 	$(RM) destest
 
+clean::
+	$(RM) $(OBJS)
+

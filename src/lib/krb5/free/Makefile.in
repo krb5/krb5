@@ -85,3 +85,5 @@ SRCS=	\
 	$(srcdir)/f_cred.c	\
 	$(srcdir)/f_cred_enc.c
 
+clean::
+	$(RM) $(OBJS)

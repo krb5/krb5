@@ -52,3 +52,9 @@ install::
 	$(INSTALLPROG) kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd
 	$(INSTALLPROG) kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.$(SERVER_MANSUFFIX)
 
+clean::
+	$(RM) $(OBJS)
+
+clean::
+	$(RM) kprop kpropd
+

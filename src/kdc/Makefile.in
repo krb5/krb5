@@ -79,3 +79,6 @@ install::
 clean::
 	$(RM) kdc5_err.h kdc5_err.c
 
+clean::
+	$(RM) $(OBJS)
+

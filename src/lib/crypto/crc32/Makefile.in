@@ -28,3 +28,7 @@ SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
 crctest: crctest.o $(OBJS)
 	$(RM) crctest
 	$(CC) -o $@ crctest.o $(LDFLAGS) $(OBJS)
+
+clean::
+	$(RM) $(OBJS)
+

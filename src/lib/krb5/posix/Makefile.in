@@ -21,3 +21,6 @@ all:: $(OBJS)
 
 OBJS = @LIBOBJS@
 
+clean::
+	$(RM) $(OBJS)
+

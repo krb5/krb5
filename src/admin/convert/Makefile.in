@@ -20,6 +20,8 @@ KDBLIB=$(TOPLIBD)/libkdb5.a
 KDB4LIB=$(KRB4)/lib/libkdb.a
 KRB4LIB=$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a
 
+RM = rm -f
+
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
@@ -37,3 +39,10 @@ kdb5_convert: kdb5_convert.o $(DEPLIBS)
 install::
 	$(INSTALLPROG) kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert
 	$(INSTALLPROG) kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.$(ADMIN_MANSUFFIX)
+
+clean::
+	$(RM) $(OBJS)
+
+clean::
+	$(RM) kdb5_convert
+

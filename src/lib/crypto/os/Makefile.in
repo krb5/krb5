@@ -39,3 +39,6 @@ memmove.c: ../../krb5/posix/memmove.c
 
 
 
+clean::
+	$(RM) $(OBJS)
+

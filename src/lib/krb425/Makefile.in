@@ -87,3 +87,7 @@ install:: libkrb425.a
 	$(RM) $(KRB5_LIBDIR)/lib/libkrb425.a
 	$(CP) libkrb425.a $(KRB5_LIBDIR)/lib/libkrb425.a
 	$(RANLIB) $(KRB5_LIBDIR)/lib/libkrb425.a
+
+clean::
+	$(RM) $(OBJS)
+

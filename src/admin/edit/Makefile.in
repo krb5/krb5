@@ -18,6 +18,8 @@ SSLIB=$(BUILDTOP)/util/ss/libss.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 
+RM = rm -f
+
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
@@ -47,4 +49,11 @@ clean::
 	$(RM) kdb5_ed_ct.c
 
 depend:: kdb5_ed_ct.c
+
+clean::
+	$(RM) $(OBJS)
+
+clean::
+	$(RM) kdb5_edit
+
 

@@ -37,3 +37,6 @@ SRCS=	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/read_servi.c
 
+clean::
+	$(RM) $(OBJS)
+

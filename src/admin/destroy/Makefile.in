@@ -17,6 +17,8 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 
+RM = rm -f
+
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
@@ -33,3 +35,9 @@ kdb5_destroy: kdb5_destroy.o $(DEPLIBS)
 install::
 	$(INSTALLPROG) kdb5_destroy ${DESTDIR}$(ADMIN_BINDIR)/kdb5_destroy
 	$(INSTALLPROG) kdb5_destroy.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_destroy.$(ADMIN_MANSUFFIX)
+
+clean::
+	$(RM) $(OBJS)
+
+clean::
+	$(RM) kdb5_destroy

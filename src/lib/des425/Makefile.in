@@ -71,3 +71,7 @@ install:: libdes425.a
 	$(RM) $(KRB5_LIBDIR)/lib/libdes425.a
 	$(CP) libdes425.a $(KRB5_LIBDIR)/lib/libdes425.a
 	$(RANLIB) $(KRB5_LIBDIR)/lib/libdes425.a
+
+clean::
+	$(RM) $(OBJS)
+

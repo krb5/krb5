@@ -54,3 +54,7 @@ install:: libkdb5.a
 	$(RM) $(KRB5_LIBDIR)/lib/libkdb5.a
 	$(CP) libkdb5.a $(KRB5_LIBDIR)/lib/libkdb5.a
 	$(RANLIB) $(KRB5_LIBDIR)/lib/libkdb5.a
+
+clean::
+	$(RM) $(OBJS)
+

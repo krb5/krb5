@@ -26,3 +26,6 @@ OBJS=	md4.o md4glue.o md4crypto.o
 SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
 
 
+clean::
+	$(RM) $(OBJS)
+
