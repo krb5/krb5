@@ -1,3 +1,7 @@
+Fri Jul 25 15:24:41 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Bump version due to et changes.
+
 Sat Feb 22 01:37:03 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
 	* Makefile.in (LIBMINOR): Bump minor version
