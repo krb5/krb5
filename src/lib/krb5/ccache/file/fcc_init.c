@@ -40,13 +40,18 @@ krb5_fcc_initialize(id, princ)
      ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_TRUNC |
 		O_RDWR, 0);
      if (ret < 0)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      ((krb5_fcc_data *) id->data)->fd = ret;
 
      ret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
-     if (ret == -1)
-	  return ret;
-
+     if (ret == -1) {
+	 ret = krb5_fcc_interpret(errno);
+	 if (OPENCLOSE(id)) {
+	     close(((krb5_fcc_data *)id->data)->fd);
+	     ((krb5_fcc_data *) id->data)->fd = -1;
+	 }
+	 return ret;
+     }
      krb5_fcc_store_principal(id, princ);
 
      if (OPENCLOSE(id)) {
