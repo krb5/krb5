@@ -1,3 +1,8 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * des_int.h: Added prototype for mit_afs_crypt which is used by
+    the deprecated KfM des_crypt function. 
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* des_int.h (krb5_raw_des_cst_entry, krb5_des_crc_cst_entry,

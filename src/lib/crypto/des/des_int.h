@@ -111,6 +111,8 @@ extern krb5_error_code mit_afs_string_to_key
 	(krb5_keyblock *keyblock,
 		   const krb5_data *data,
 		   const krb5_data *salt);
+extern char *mit_afs_crypt
+    (const char *pw, const char *salt, char *iobuf);
 
 /* f_cksum.c */
 extern unsigned long mit_des_cbc_cksum
