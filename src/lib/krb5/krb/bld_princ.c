@@ -16,38 +16,14 @@ static char rcsid_bld_princ_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-
 #ifdef __STDC__
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
 
-krb5_error_code
-#ifdef __STDC__
-krb5_build_principal(krb5_principal *princ, int rlen, const char *realm, ...)
-#else
-krb5_build_principal(princ, rlen, realm, va_alist)
-krb5_principal *princ;
-int rlen;
-const char *realm;
-va_dcl
-#endif
-{
-    va_list ap;
-    krb5_error_code retval;
-
-#ifdef __STDC__
-    va_start(ap, realm);
-#else
-    va_start(ap);
-#endif
-    retval = krb5_build_principal_va(princ, realm, ap);
-    va_end(ap);
-    return retval;
-}
+#include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 
 krb5_error_code
 krb5_build_principal_va(princ, rlen, realm, ap)
@@ -114,4 +90,28 @@ va_list ap;
     princ_ret[i] = 0;			/* put a null as the last entry */
     *princ = princ_ret;
     return 0;
+}
+
+krb5_error_code
+#ifdef __STDC__
+krb5_build_principal(krb5_principal *princ, int rlen, const char *realm, ...)
+#else
+krb5_build_principal(princ, rlen, realm, va_alist)
+krb5_principal *princ;
+int rlen;
+const char *realm;
+va_dcl
+#endif
+{
+    va_list ap;
+    krb5_error_code retval;
+
+#ifdef __STDC__
+    va_start(ap, realm);
+#else
+    va_start(ap);
+#endif
+    retval = krb5_build_principal_va(princ, rlen, realm, ap);
+    va_end(ap);
+    return retval;
 }
