@@ -261,8 +261,9 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
 
 	 sprintf(banner, "%.*s%s%.*s.  Please try again.\n",
 		 (int) code_string.length, code_string.data,
-		 result_string.length?": ":"",
-		 (int) result_string.length, result_string.data);
+		 result_string.length ? ": " : "",
+		 (int) result_string.length,
+		 result_string.data ? result_string.data : "");
 
 	 krb5_xfree(code_string.data);
 	 krb5_xfree(result_string.data);

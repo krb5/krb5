@@ -1,3 +1,8 @@
+2003-02-25  Tom Yu  <tlyu@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Don't pass a NULL
+	pointer to sprintf().
+
 2003-02-14  Sam Hartman  <hartmans@mit.edu>
 
 	* preauth2.c (krb5_do_preauth): Sort incoming etype info based on

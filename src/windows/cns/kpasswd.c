@@ -82,7 +82,8 @@ k5_change_password(HWND hwnd, krb5_context context, char *user, char *realm,
 		sprintf(*text, "%.*s%s%.*s",
 			result_code_string.length, result_code_string.data,
 			(result_string.length ? ": " : ""),
-			result_string.length, result_string.data);
+			result_string.length,
+			result_string.data ? result_string.data : "");
 	}
 
 	return 0;

@@ -1,3 +1,8 @@
+2003-02-25  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.c (k5_change_password): Don't pass a NULL pointer to
+	sprintf().
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* cns.h: Don't define DEFINE_SOCKADDR.

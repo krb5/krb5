@@ -135,7 +135,8 @@ int main(int argc, char *argv[])
       printf("%.*s%s%.*s\n",
 	     (int) result_code_string.length, result_code_string.data,
 	     result_string.length?": ":"",
-	     (int) result_string.length, result_string.data);
+	     (int) result_string.length,
+	     result_string.data ? result_string.data : "");
       exit(2);
    }
 
