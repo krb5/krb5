@@ -200,7 +200,7 @@ kerberos4_init(ap, server)
 }
 
 char dst_realm_buf[REALM_SZ], *dest_realm = NULL;
-int dst_realm_sz = REALM_SZ;
+unsigned int dst_realm_sz = REALM_SZ;
 
 	int
 kerberos4_send(ap)
@@ -627,7 +627,8 @@ kerberos4_status(ap, kname, level)
 	void
 kerberos4_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
-	int cnt, buflen;
+	int cnt;
+	unsigned int buflen;
 {
 	char lbuf[32];
 	register int i;

@@ -67,7 +67,7 @@ auth_encrypt_init(local, remote, name, server)
 
 	void
 auth_encrypt_user(name)
-	char *name;
+	const char *name;
 {
 	extern char *strdup();
 

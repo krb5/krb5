@@ -361,7 +361,8 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-        if (!auth_sendname(UserNameRequested, strlen(UserNameRequested))) {
+        if (!auth_sendname((unsigned char *) UserNameRequested, 
+			   (int) strlen(UserNameRequested))) {
                 if (auth_debug_mode)
                         printf("telnet: Not enough room for user name\r\n");
                 return(0);
@@ -744,7 +745,8 @@ kerberos5_status(ap, name, level)
 	void
 kerberos5_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
-	int cnt, buflen;
+	int cnt;
+	unsigned int buflen;
 {
 	char lbuf[32];
 	register int i;

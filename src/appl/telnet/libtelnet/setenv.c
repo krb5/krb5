@@ -61,6 +61,7 @@ setenv(name, value, rewrite)
 	extern char **environ;
 	static int alloced;			/* if allocated space before */
 	register char *c;
+	const char *c2;
 	int l_value, offset;
 
 	if (*value == '=')			/* no `=' in value */
@@ -95,9 +96,9 @@ setenv(name, value, rewrite)
 		environ[cnt + 1] = NULL;
 		offset = cnt;
 	}
-	for (c = (char *)name; *c && *c != '='; ++c);	/* no `=' in name */
+	for (c2 = name; *c2 && *c2 != '='; ++c2);	/* no `=' in name */
 	if (!(environ[offset] =			/* name + `=' + value */
-	    malloc((size_t)((int)(c - name) + l_value + 2))))
+	    malloc((size_t)((int)(c2 - name) + l_value + 2))))
 		return (-1);
 	for (c = environ[offset]; (*c = *name++) && *c != '='; ++c);
 	for (*c++ = '='; (*c++ = *value++););
@@ -153,7 +154,7 @@ __findenv(name, offset)
 	int *offset;
 {
 	extern char **environ;
-	register int len;
+	register unsigned int len;
 	register const char *np;
 	register char **p, *c;
 

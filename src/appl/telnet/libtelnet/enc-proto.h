@@ -90,7 +90,7 @@ int EncryptStopOutput (void);
 int EncryptStatus (void);
 int EncryptVerbose (int);
 void encrypt_send_support (void);
-void encrypt_send_keyid (int, unsigned char *, int, int);
+void encrypt_send_keyid (int, unsigned char *, unsigned int, int);
 int net_write (unsigned char *, int);
 void encrypt_gen_printsub (unsigned char *, int, unsigned char *, int);
 void encrypt_printsub (unsigned char *, int, unsigned char *, int);

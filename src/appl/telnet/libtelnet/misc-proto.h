@@ -60,7 +60,7 @@
 #define	__MISC_PROTO__
 
 void auth_encrypt_init (char *, char *, char *, int);
-void auth_encrypt_user (char *);
+void auth_encrypt_user (const char *);
 void auth_encrypt_connect (int);
 void printd (const unsigned char *, int);
 

@@ -5,7 +5,7 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_REPLACE_FUNCS([strcasecmp strdup setsid strerror strftime getopt herror parsetos])
 AC_CHECK_FUNCS(setenv unsetenv getenv gettosbyname cgetent)
-AC_CHECK_HEADERS(stdlib.h string.h)
+AC_CHECK_HEADERS(stdlib.h string.h unistd.h)
 if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
   || test $ac_cv_func_getenv = no; then
   SETENVSRC=setenv.c

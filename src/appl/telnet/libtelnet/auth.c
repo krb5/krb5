@@ -518,7 +518,7 @@ auth_name(data, cnt)
 	savename[cnt] = '\0';	/* Null terminate */
 	if (auth_debug_mode)
 		printf(">>>%s: Got NAME [%s]\r\n", Name, savename);
-	auth_encrypt_user(savename);
+	auth_encrypt_user((const char *)savename);
 }
 
 	int
@@ -613,7 +613,8 @@ auth_debug(mode)
 	void
 auth_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
-	int cnt, buflen;
+	int cnt;
+	unsigned int buflen;
 {
 	Authenticator *ap;
 
@@ -626,7 +627,8 @@ auth_printsub(data, cnt, buf, buflen)
 	void
 auth_gen_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
-	int cnt, buflen;
+	int cnt;
+	unsigned int buflen;
 {
 	register unsigned char *cp;
 	unsigned char tbuf[16];

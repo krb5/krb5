@@ -26,6 +26,9 @@
 #if defined(KERBEROS) || defined(KRB5)
 #include <stdio.h>
 #include <netdb.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
  
 #include "krb5.h"
 #include <errno.h>

@@ -1,3 +1,22 @@
+2002-11-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* enc-proto.h, enc_des.c, encrypt.c: Unsigned/signed cleanups.
+
+	* forward.c: Include unistd.h if present on machine.
+
+	* misc-proto.h misc.c (auth_encrypt_user): Declare argument as
+	const.
+
+	* auth.c: Cast argument auth_encrypt_user. auth_gen_printsub() and
+	auth_printsub() take unsigned int as buffer length.
+
+	* auth.h, auth-proto.h, kerberos.c, kerberos5.c, spx.c:
+	auth_gen_printsub(), auth_printsub(), kerberos4_printsub(),
+	kerberos5_printsub(), spx_printsub() take unsigned int as length
+	argument.
+
+	* configure.in: Check for unistd.h
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

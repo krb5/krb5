@@ -730,26 +730,26 @@ encrypt_request_start(data, cnt)
 
 static unsigned char str_keyid[(MAXKEYLEN*2)+5] = { IAC, SB, TELOPT_ENCRYPT };
 
-static void encrypt_keyid (struct key_info *kp, unsigned char *, int);
+static void encrypt_keyid (struct key_info *kp, unsigned char *, unsigned int);
 		
 void encrypt_enc_keyid(keyid, len)
 	unsigned char *keyid;
 	int len;
 {
-	encrypt_keyid(&ki[1], keyid, len);
+	encrypt_keyid(&ki[1], keyid, (unsigned) len);
 }
 
 void encrypt_dec_keyid(keyid, len)
 	unsigned char *keyid;
 	int len;
 {
-	encrypt_keyid(&ki[0], keyid, len);
+	encrypt_keyid(&ki[0], keyid, (unsigned) len);
 }
 
 static void encrypt_keyid(kp, keyid, len)
 	struct key_info *kp;
 	unsigned char *keyid;
-	int len;
+	unsigned int len;
 {
 	Encryptions *ep;
 	int dir = kp->dir;
@@ -769,7 +769,8 @@ static void encrypt_keyid(kp, keyid, len)
 		if (ep->keyid)
 			(void)(*ep->keyid)(dir, kp->keyid, &kp->keylen);
 
-	} else if ((len != kp->keylen) || (memcmp(keyid, kp->keyid, len) != 0)) {
+	} else if ((len != kp->keylen) || 
+		   (memcmp(keyid, kp->keyid, len) != 0)) {
 		/*
 		 * Length or contents are different
 		 */
@@ -785,14 +786,14 @@ static void encrypt_keyid(kp, keyid, len)
 		return;
 	}
 
-	encrypt_send_keyid(dir, kp->keyid, kp->keylen, 0);
+	encrypt_send_keyid(dir, kp->keyid, (unsigned) kp->keylen, 0);
 }
 
 	void
 encrypt_send_keyid(dir, keyid, keylen, saveit)
 	int dir;
 	unsigned char *keyid;
-	int keylen;
+	unsigned int keylen;
 	int saveit;
 {
 	unsigned char *strp;

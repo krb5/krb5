@@ -531,7 +531,8 @@ spx_status(ap, name, level)
 	void
 spx_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
-	int cnt, buflen;
+	int cnt;
+	unsigned int buflen;
 {
 	char lbuf[32];
 	register int i;

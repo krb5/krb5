@@ -584,7 +584,7 @@ cfb64_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
 	int cnt, buflen;
 {
-	fb64_printsub(data, cnt, buf, buflen, "CFB64");
+	fb64_printsub(data, cnt, buf, buflen, (unsigned char *) "CFB64");
 }
 
 	void
@@ -592,7 +592,7 @@ ofb64_printsub(data, cnt, buf, buflen)
 	unsigned char *data, *buf;
 	int cnt, buflen;
 {
-	fb64_printsub(data, cnt, buf, buflen, "OFB64");
+	fb64_printsub(data, cnt, buf, buflen, (unsigned char *) "OFB64");
 }
 
 	void
