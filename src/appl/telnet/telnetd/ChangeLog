@@ -1,3 +1,8 @@
+2002-01-18  Tom Yu  <tlyu@mit.edu>
+
+	* ext.h: Make stdarg prototypes unconditional, to avoid annoying
+	mostly-ANSI compilers that don't define __STDC__.
+
 2001-10-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnetd.c (valid_opts): Note that 'w' takes a parameter.
