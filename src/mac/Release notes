@@ -184,3 +184,8 @@ Changes in 1.1a3:
 3.0a2
  from tag Mac_GSSKerberos5_3_0a2
  no changes on the Mac side
+
+3.0b1
+ from tag Mac_GSSKerberos5_3_0b1
+ Kerberos5Lib now uses PreferencesLib
+ fixed get_credentials [BZ 323]
