@@ -36,6 +36,9 @@
 #if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32)
 #define USE_RANDOM_DEVICE
 #include <sys/ioctl.h> /* for FIONBIO */
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>		/* Solaris needs this */
+#endif
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)

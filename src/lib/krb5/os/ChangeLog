@@ -1,3 +1,7 @@
+2001-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* init_os_ctx.c: Get sys/ioctl.h for Solaris to get FIONBIO.
+
 2001-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_os_ctx.c: If not Mac or Windows, define USE_RANDOM_DEVICE
