@@ -1,7 +1,14 @@
 Thu Apr 27 01:09:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* krcp.c (answer_auth): Should not call krb5_cc_close after
+		krb5_cc_destroy. (encrypted rcp failed).
+
+	* krlogind.c (main): -S option was not getting a keytab. (passing
+		a char * to krb5_compat_recvauth).
+
 	* krshd.c (recvauth): extract the client principal from ticket
 		before calling krb5_kuserok on a NULL principal.
+		(main): -S option was not getting a keytab (passing a char *).
 
 	* krcp.c: (main): Missing htons on port number when specified on
 		command line.

@@ -245,7 +245,7 @@ krb5_authenticator      *kdata;
 krb5_ticket     *ticket = 0;
 krb5_context bsd_context;
 
-char *srvtab = NULL;
+krb5_keytab keytab = NULL;
 
 #define ARGSTR	"rRkKeExXpPD:S:M:L:?"
 #else /* !KERBEROS */
@@ -314,6 +314,9 @@ main(argc, argv)
     char *options;
     int debug_port = 0;
     int fd;
+#ifdef KERBEROS
+    krb5_error_code status;
+#endif
     
     progname = *argv;
     
@@ -393,7 +396,11 @@ main(argc, argv)
 	  break;
 #endif
 	case 'S':
-	  srvtab = optarg;
+	  if (status = krb5_kt_resolve(bsd_context, optarg, &keytab)) {
+		  com_err(progname, status, "while resolving srvtab file %s",
+			  optarg);
+		  exit(2);
+	  }
 	  break;
 	case 'M':
 	  krb5_set_default_realm(bsd_context, optarg);
@@ -1572,7 +1579,7 @@ recvauth()
 				  server, 	/* Specify daemon principal */
 				  0, 		/* default rc_type */
 				  0, 		/* no flags */
-				  srvtab, /* normally NULL to use v5srvtab */
+				  keytab, /* normally NULL to use v5srvtab */
 
 				  do_encrypt ? KOPT_DO_MUTUAL : 0, /*v4_opts*/
 				  "rcmd", 	/* v4_service */

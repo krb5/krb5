@@ -176,6 +176,7 @@ char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_context bsd_context;
 char *srvtab = NULL;
+krb5_keytab keytab = NULL;
 
 void fatal();
 int v5_des_read();
@@ -246,6 +247,9 @@ main(argc, argv)
     int i;
     int fd;
     int debug_port = 0;
+#ifdef KERBEROS
+    krb5_error_code status;
+#endif
 
 #ifdef CRAY
     secflag = sysconf(_SC_CRAY_SECURE_SYS);
@@ -323,7 +327,11 @@ main(argc, argv)
 	  break;
 
 	case 'S':
-	  srvtab = optarg;
+	  if (status = krb5_kt_resolve(bsd_context, optarg, &keytab)) {
+		  com_err(progname, status, "while resolving srvtab file %s",
+			  optarg);
+		  exit(2);
+	  }
 	  break;
 
 	case 'M':
@@ -1629,7 +1637,7 @@ recvauth(netf, peersin, peeraddr)
 				  server, /* Specify daemon principal */
 				  0, 		/* default rc_type */
 				  0, 		/* no flags */
-				  srvtab, /* normally NULL to use v5srvtab */
+				  keytab, /* normally NULL to use v5srvtab */
 				  0, 		/* v4_opts */
 				  "rcmd", 	/* v4_service */
 				  v4_instance, 	/* v4_instance */

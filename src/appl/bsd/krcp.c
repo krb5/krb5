@@ -1324,13 +1324,11 @@ void
     
     if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)){
 	krb5_cc_destroy(bsd_context, cc);
-	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     
     if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server)){
 	krb5_cc_destroy(bsd_context, cc);
-	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     krb5_xfree(pname_data.data);
@@ -1338,7 +1336,6 @@ void
     if (status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
 				      &creds, &new_creds)){
 	krb5_cc_destroy(bsd_context, cc);
-	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
 
@@ -1346,11 +1343,9 @@ void
 			  	      AP_OPTS_USE_SESSION_KEY,
 				      NULL, new_creds, &msg)) {
 	krb5_cc_destroy(bsd_context, cc);
-	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     krb5_cc_destroy(bsd_context, cc);
-    krb5_cc_close(bsd_context, cc);
     status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg);
     krb5_xfree(msg.data);
     if (status){
