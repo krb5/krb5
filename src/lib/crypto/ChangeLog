@@ -1,3 +1,9 @@
+Thu Oct  5 21:32:33 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cryptoconf.c: Change types of krb5_max_enctype and
+		krb5_max_cksumtype to be krb5_enctype and krb5_cksumtype,
+		to fix some gcc -Wall flames.
+
 Mon Oct  2 10:34:12 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in (V5_MAKE_SHARED_LIB): Change for version 0.1 of

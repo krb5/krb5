@@ -109,7 +109,7 @@ krb5_cs_table_entry * NEAR krb5_enctype_array[] = {
     RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
 };
 
-int krb5_max_enctype = sizeof(krb5_enctype_array)/sizeof(krb5_enctype_array[0]) - 1;
+krb5_enctype krb5_max_enctype = sizeof(krb5_enctype_array)/sizeof(krb5_enctype_array[0]) - 1;
 
 krb5_checksum_entry * NEAR krb5_cksumarray[] = {
     0,
@@ -123,6 +123,6 @@ krb5_checksum_entry * NEAR krb5_cksumarray[] = {
     MD5_DES_CKENTRY		/* CKSUMTYPE_RSA_MD5_DES */
 };
 
-int krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
+krb5_cksumtype krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
 
 #undef _DES_DONE__
