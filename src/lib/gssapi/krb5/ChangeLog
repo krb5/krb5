@@ -1,3 +1,8 @@
+Tue Jul 23 22:35:53 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapiP_krb5.h: Must include k5-int.h on Windows and Macintosh
+		builds. 
+
 Thu Jul 18 19:48:48 1996  Marc Horowitz  <marc@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context),
