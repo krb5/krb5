@@ -40,6 +40,7 @@
 #define	DEBUG_ACL	32
 #define	DEBUG_PROTO	64
 #define	DEBUG_CALLS	128
+#define	DEBUG_NOSLAVES	256
 #ifdef	DEBUG
 #define	DPRINT(l1, cl, al)	if ((cl & l1) != 0) printf al
 #else	/* DEBUG */
