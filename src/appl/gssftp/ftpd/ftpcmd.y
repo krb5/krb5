@@ -96,14 +96,7 @@ extern gss_ctx_id_t gcontext;
 #endif
 
 #ifndef NBBY
-#ifdef linux
 #define NBBY 8
-#endif
-#ifdef __pyrsoft
-#ifdef MIPSEB
-#define NBBY 8
-#endif
-#endif
 #endif
 
 static struct sockaddr_in host_port;
@@ -124,6 +117,7 @@ extern	int ccc_ok;
 extern	int timeout;
 extern	int maxtimeout;
 extern  int pdata;
+extern	int authlevel;
 extern	char hostname[], remotehost[];
 extern	char proctitle[];
 extern	char *globerr;
@@ -1150,6 +1144,18 @@ getline(s, n, iop)
 	    }
 #endif /* GSSAPI */
 	    /* Other auth types go here ... */
+
+	    /* A password should never be MICed, but the CNS ftp
+	     * client and the pre-6/98 Krb5 client did this if you
+	     * authenticated but didn't encrypt.
+	     */
+	    if (authlevel && mic && !strncmp(s, "PASS", 4)) {
+	    	lreply(530, "There is a problem with your ftp client. Password refused.");
+		reply(530, "Enable encryption before logging in, or update your ftp program.");
+		*s = 0;
+		return s;
+	    }
+
 	}
 #if defined KRB5_KRB4_COMPAT || defined GSSAPI	/* or other auth types */
 	else {	/* !auth_type */

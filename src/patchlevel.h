@@ -53,6 +53,6 @@
 #define KRB5_MAJOR_RELEASE 1
 #define KRB5_MINOR_RELEASE 4
 #define KRB5_PATCHLEVEL 0
-#define KRB5_RELTAIL "prerelease"
+#define KRB5_RELTAIL "beta4"
 /* #undef KRB5_RELDATE */
-/* #undef KRB5_RELTAG */
+#define KRB5_RELTAG "krb5-1-4-beta4"

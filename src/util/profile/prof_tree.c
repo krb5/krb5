@@ -466,17 +466,27 @@ errcode_t profile_node_iterator(void **iter_p, struct profile_node **ret_node,
 	 * If the file has changed, then the node pointer is invalid,
 	 * so we'll have search the file again looking for it.
 	 */
+	if (iter->file) {
+	    retval = k5_mutex_lock(&iter->file->data->lock);
+	    if (retval)
+		return retval;
+	}
 	if (iter->node && (iter->file->data->upd_serial != iter->file_serial)) {
 		iter->flags &= ~PROFILE_ITER_FINAL_SEEN;
 		skip_num = iter->num;
 		iter->node = 0;
 	}
-	if (iter->node && iter->node->magic != PROF_MAGIC_NODE)
+	if (iter->node && iter->node->magic != PROF_MAGIC_NODE) {
+	    if (iter->file)
+		k5_mutex_unlock(&iter->file->data->lock);
 	    return PROF_MAGIC_NODE;
+	}
 get_new_file:
 	if (iter->node == 0) {
 		if (iter->file == 0 ||
 		    (iter->flags & PROFILE_ITER_FINAL_SEEN)) {
+			if (iter->file)
+			    k5_mutex_unlock(&iter->file->data->lock);
 			profile_node_iterator_free(iter_p);
 			if (ret_node)
 				*ret_node = 0;
@@ -486,10 +496,18 @@ get_new_file:
 				*ret_value =0;
 			return 0;
 		}
+		k5_mutex_unlock(&iter->file->data->lock);
 		if ((retval = profile_update_file(iter->file))) {
 		    if (retval == ENOENT || retval == EACCES) {
 			/* XXX memory leak? */
 			iter->file = iter->file->next;
+			if (iter->file) {
+			    retval = k5_mutex_lock(&iter->file->data->lock);
+			    if (retval) {
+				profile_node_iterator_free(iter_p);
+				return retval;
+			    }
+			}
 			skip_num = 0;
 			retval = 0;
 			goto get_new_file;
@@ -497,6 +515,11 @@ get_new_file:
 			profile_node_iterator_free(iter_p);
 			return retval;
 		    }
+		}
+		retval = k5_mutex_lock(&iter->file->data->lock);
+		if (retval) {
+		    profile_node_iterator_free(iter_p);
+		    return retval;
 		}
 		iter->file_serial = iter->file->data->upd_serial;
 		/*
@@ -518,7 +541,15 @@ get_new_file:
 				iter->flags |= PROFILE_ITER_FINAL_SEEN;
 		}
 		if (!section) {
+			k5_mutex_unlock(&iter->file->data->lock);
 			iter->file = iter->file->next;
+			if (iter->file) {
+			    retval = k5_mutex_lock(&iter->file->data->lock);
+			    if (retval) {
+				profile_node_iterator_free(iter_p);
+				return retval;
+			    }
+			}
 			skip_num = 0;
 			goto get_new_file;
 		}
@@ -546,11 +577,20 @@ get_new_file:
 	}
 	iter->num++;
 	if (!p) {
+		k5_mutex_unlock(&iter->file->data->lock);
 		iter->file = iter->file->next;
+		if (iter->file) {
+		    retval = k5_mutex_lock(&iter->file->data->lock);
+		    if (retval) {
+			profile_node_iterator_free(iter_p);
+			return retval;
+		    }
+		}
 		iter->node = 0;
 		skip_num = 0;
 		goto get_new_file;
 	}
+	k5_mutex_unlock(&iter->file->data->lock);
 	if ((iter->node = p->next) == NULL)
 		iter->file = iter->file->next;
 	if (ret_node)

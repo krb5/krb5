@@ -1,3 +1,14 @@
+2004-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi:
+    Add "Debug Symbols" as a new category.  It defaults to on
+    in debug builds and off in release builds.
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi
+    Add kcpytkt.exe, kdeltkt.exe, k5sprt32.dll, mit2ms.exe
+
 2004-09-17  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw-fixed.nsi:

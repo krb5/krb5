@@ -1,3 +1,20 @@
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5.hin: add prototype for krb5_is_thread_safe
+
+2004-12-21  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Flag krb5_principal2salt as KRB5_CALLCONV_WRONG.
+
+2004-12-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (KRB5INT_ACCESS_STRUCT_VERSION): Bump to 9.
+	(struct _krb5int_access): Add function pointer field use_dns_kdc.
+
+2004-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Include errno.h earlier.
+
 2004-10-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (return_after_yield, k5_mutex_lock) [__GNUC__]: Add
