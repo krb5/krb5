@@ -376,9 +376,11 @@ cleanup:
 void krb5int_populate_gic_opt (
     krb5_context context, krb5_get_init_creds_opt *opt,
     krb5_flags options, krb5_address * const *addrs, krb5_enctype *ktypes,
-    krb5_preauthtype *pre_auth_types)
+    krb5_preauthtype *pre_auth_types, krb5_creds *creds)
 {
   int i;
+  krb5_int32 starttime;
+
     krb5_get_init_creds_opt_init(opt);
     if (addrs)
       krb5_get_init_creds_opt_set_address_list(opt, (krb5_address **) addrs);
@@ -398,8 +400,11 @@ void krb5int_populate_gic_opt (
     if (options&KDC_OPT_PROXIABLE)
 	krb5_get_init_creds_opt_set_proxiable(opt, 1);
     else krb5_get_init_creds_opt_set_proxiable(opt, 0);
-    
-
+    if (creds && creds->times.endtime) {
+        krb5_timeofday(context, &starttime);
+        if (creds->times.starttime) starttime = creds->times.starttime;
+        krb5_get_init_creds_opt_set_tkt_life(opt, creds->times.endtime - starttime);
+    }
 }
 
 /*
@@ -451,7 +456,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     }
     krb5int_populate_gic_opt(context, &opt,
 			     options, addrs, ktypes,
-			     pre_auth_types);
+			     pre_auth_types, creds);
     retval = krb5_unparse_name( context, creds->server, &server);
     if (retval)
       return (retval);

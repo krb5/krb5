@@ -1,3 +1,8 @@
+2004-04-16  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: krb5int_populate_gic_opt now takes credentials  so it
+	can get lifetime related options out of them 
+
 2004-04-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5int_prng_cleanup): Declare.

@@ -158,7 +158,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     
     krb5int_populate_gic_opt(context, &opt,
 			     options, addrs, ktypes,
-			     pre_auth_types);
+			     pre_auth_types, creds);
     if (arg_keytab == NULL) {
 	retval = krb5_kt_default(context, &keytab);
 	if (retval)

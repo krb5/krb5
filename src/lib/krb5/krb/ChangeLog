@@ -1,3 +1,10 @@
+2004-04-16  Sam Hartman  <hartmans@mit.edu>
+
+
+	* gic_pwd.c (krb5int_populate_gic_opt): Take credentials and populate lifetime options based on them.
+
+	* gic_keytab.c gic_pwd.c :  update callers
+
 2004-04-15  Sam Hartman  <hartmans@mit.edu>
 
 	* gic_pwd.c (krb5_get_init_creds_password): Free the as reply in
