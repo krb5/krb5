@@ -406,7 +406,7 @@ void krb5int_thread_support_fini (void)
 }
 
 #ifdef DEBUG_THREADS_STATS
-void
+void KRB5_CALLCONV
 k5_mutex_lock_update_stats(k5_debug_mutex_stats *m,
 			   k5_mutex_stats_tmp startwait)
 {
@@ -427,7 +427,7 @@ k5_mutex_lock_update_stats(k5_debug_mutex_stats *m,
   m->lockwait.valsqsum += tdiff2;
 }
 
-void
+void KRB5_CALLCONV
 krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m)
 {
   k5_debug_time_t now = get_current_time();
@@ -458,7 +458,7 @@ get_stddev(struct k5_timediff_stats sp, int count)
   return sqrt(rho_squared);
 }
 
-void
+void KRB5_CALLCONV
 krb5int_mutex_report_stats(k5_mutex_t *m)
 {
   char *p;
@@ -499,16 +499,19 @@ krb5int_mutex_report_stats(k5_mutex_t *m)
 /* On Windows, everything defined in the export list must be defined.
    The UNIX systems where we're using the export list don't seem to
    care.  */
-void
+#undef krb5int_mutex_lock_update_stats
+void KRB5_CALLCONV
 krb5int_mutex_lock_update_stats(k5_debug_mutex_stats *m,
 				k5_mutex_stats_tmp startwait)
 {
 }
-void
+#undef krb5int_mutex_unlock_update_stats
+void KRB5_CALLCONV
 krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m)
 {
 }
-void
+#undef krb5int_mutex_report_stats
+void KRB5_CALLCONV
 krb5int_mutex_report_stats(k5_mutex_t *m)
 {
 }

@@ -1,3 +1,12 @@
+2005-01-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (k5_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats):
+	Define as KRB5_CALLCONV.
+	(krb5int_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats)
+	[_WIN32]: Undef macros before defining functions.
+
 2005-01-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (krb5int_mutex_lock_update_stats,
