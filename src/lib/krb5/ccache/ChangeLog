@@ -1,3 +1,7 @@
+2002-01-29  Tom Yu  <tlyu@mit.edu>
+
+	* ccdefault.c: Add terminal newline.  Fixes [krb5-build/1041].
+
 2001-11-16  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch: LoginLib #include changes
 	
