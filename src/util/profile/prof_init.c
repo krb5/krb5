@@ -56,10 +56,13 @@ errcode_t profile_init(filenames, ret_profile)
 			profile->first_file = new_file;
 		last = new_file;
 	}
-	/* if the last file was missing, they all were, so report such */
-	if (retval == ENOENT) {
+	/*
+	 * If last is still null after the loop, then all the files were
+	 * missing, so return the appropriate error.
+	 */
+	if (!last) {
 		profile_release(profile);
-		return retval;
+		return ENOENT;
 	}
 	*ret_profile = profile;
 	return 0;

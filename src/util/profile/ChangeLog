@@ -1,3 +1,9 @@
+1998-11-05  Geoffrey King  <gjking@mit.edu>
+
+	* prof_init.c (profile_init): Fix a problem whereby if the last
+		pathname in a list of pathnames was nonexistent, an
+		error would be returned that they were all nonexistent.
+
 1998-11-03  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Added prof_get.c to the list of files to be compiled.
