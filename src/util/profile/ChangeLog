@@ -1,3 +1,7 @@
+2004-10-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* libprofile.exports: Add profile_flush_to_file.
+
 2004-10-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (write_data_to_file): New function, split out from
