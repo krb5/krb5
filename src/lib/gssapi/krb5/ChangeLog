@@ -1,3 +1,20 @@
+1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* k5unseal.c (kg_unseal):  Clean up lint warnings.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Don't return
+		an error token if we can't provide the server name to the
+		KRB5 error structure (because cred isn't initialized).
+
+	* gssapi_krb5.c, gssapi_krb5.h: Export the oid of static
+		arrays as krb5_gss_oid_array since it's needed by
+		gss_import_sec_context.
+
+	* import_sec_context.c: Fix up the OID of the mechanism in the
+		imported security context so that we use the static
+		OID if at all possible.  This is needed since
+		gss_inquire_context() must return a static OID.
+
 Sun May 24 21:57:03 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* import_name.c (krb5_gss_import_name): Fix typo which caused

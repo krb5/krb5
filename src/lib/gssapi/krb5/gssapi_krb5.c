@@ -53,24 +53,25 @@
  * except the last in each value's encoding.
  */
 
-static const gss_OID_desc oids[] = {
+const gss_OID_desc krb5_gss_oid_array[] = {
    /* this is the unofficial, wrong OID */
    {5, "\053\005\001\005\002"},
    /* this is the official, rfc-specified OID */
    {9, "\052\206\110\206\367\022\001\002\002"},
    {10, "\052\206\110\206\367\022\001\002\002\001"},
    {10, "\052\206\110\206\367\022\001\002\002\002"},
+   { 0, 0 }
 };
 
-const gss_OID_desc * const gss_mech_krb5_old = oids+0;
-const gss_OID_desc * const gss_mech_krb5 = oids+1;
-const gss_OID_desc * const gss_nt_krb5_name = oids+2;
-const gss_OID_desc * const gss_nt_krb5_principal = oids+3;
+const gss_OID_desc * const gss_mech_krb5_old = krb5_gss_oid_array+0;
+const gss_OID_desc * const gss_mech_krb5 = krb5_gss_oid_array+1;
+const gss_OID_desc * const gss_nt_krb5_name = krb5_gss_oid_array+2;
+const gss_OID_desc * const gss_nt_krb5_principal = krb5_gss_oid_array+3;
 
 static const gss_OID_set_desc oidsets[] = {
-   {1, (gss_OID) oids+0},
-   {1, (gss_OID) oids+1},
-   {2, (gss_OID) oids+0},
+   {1, (gss_OID) krb5_gss_oid_array+0},
+   {1, (gss_OID) krb5_gss_oid_array+1},
+   {2, (gss_OID) krb5_gss_oid_array+0},
 };
 
 const gss_OID_set_desc * const gss_mech_set_krb5_old = oidsets+0;

@@ -39,6 +39,8 @@ extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
 extern const gss_OID_desc * const gss_nt_krb5_name;
 extern const gss_OID_desc * const gss_nt_krb5_principal;
 
+extern const gss_OID_desc krb5_gss_oid_array[];
+
 #define gss_krb5_nt_general_name	gss_nt_krb5_name
 #define gss_krb5_nt_principal		gss_nt_krb5_principal
 #define gss_krb5_nt_service_name	gss_nt_service_name
