@@ -39,8 +39,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if TARGET_OS_MAC
+#include <Kerberos/krb.h>
+#include <Kerberos/krb524.h>
+#else
 #include <krb.h>
 #include "krb524.h"
+#endif
 
 /*
  * krb524_sendto_kdc:

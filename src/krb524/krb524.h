@@ -26,8 +26,39 @@
 #define KRB524_SERVICE "krb524"
 #define KRB524_PORT 4444
 
-#include "krb524_err.h"
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <TargetConditionals.h>
+    #include <Kerberos/krb5.h>
+    #include <Kerberos/krb.h>
+    #ifndef KRB524_PRIVATE /* Allow e.g. build system to override */
+		#define KRB524_PRIVATE 0
+	#endif
+#else
+    #include "krb524_err.h"
+	#ifndef KRB524_PRIVATE
+		#define KRB524_PRIVATE 1
+	#endif
+#endif	
 
+#if defined(__cplusplus) && !defined(KRB524INT_BEGIN_DECLS)
+#define KRB524INT_BEGIN_DECLS	extern "C" {
+#define KRB524INT_END_DECLS	}
+#else
+#define KRB524INT_BEGIN_DECLS
+#define KRB524INT_END_DECLS
+#endif
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
+#endif
+
+KRB524INT_BEGIN_DECLS
+
+#if KRB524_PRIVATE
 extern int krb524_debug;
 
 int krb524_convert_tkt_skey
@@ -47,11 +78,13 @@ int krb524_convert_princs
 int krb524_convert_creds_addr
 	(krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds, struct sockaddr *saddr);
+#endif /* KRB524_PRIVATE */
 
 int krb524_convert_creds_kdc
 	(krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds);
 
+#if KRB524_PRIVATE
 /* conv_tkt.c */
 
 int krb524_convert_tkt
@@ -77,5 +110,16 @@ void krb524_init_ets
 int krb524_sendto_kdc
         (krb5_context context, const krb5_data * message, 
 	 const krb5_data * realm, krb5_data * reply);
+#endif /* KRB524_PRIVATE */
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+	#pragma options align=reset
+#endif
+
+KRB524INT_END_DECLS
 
 #endif /* __KRB524_H__ */
