@@ -29,6 +29,7 @@
 
 #include "des_int.h"
 #include "des.h"
+#undef mit_des_cbc_encrypt
 
 int
 des_cbc_encrypt(in,out,length,key,iv,enc)

@@ -1,5 +1,6 @@
 #include "des_int.h"
 #include "des.h"
+#undef mit_des3_cbc_encrypt
 
 /* These functions are exported on KfM for ABI compatibility with
  * older versions of the library.  They have been pulled from the headers

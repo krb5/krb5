@@ -1,3 +1,9 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c (mit_des_cbc_encrypt): Undef before use.
+	* enc_dec.c (mit_des_cbc_encrypt): Likewise.
+	* mac_des_glue.c (mit_des3_cbc_encrypt): Likewise.
+
 2003-04-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* quad_cksum.c, t_pcbc.c, t_quad.c, verify.c: Don't declare errno

@@ -28,6 +28,7 @@
 
 #include "des_int.h"
 #include "des.h"
+#undef mit_des_cbc_encrypt
 
 int KRB5_CALLCONV
 des_ecb_encrypt(clear, cipher, schedule, enc)
