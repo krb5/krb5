@@ -1,3 +1,7 @@
+Mon Feb 17 19:29:27 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Define K4LIB as the krb4 library
+
 Fri Feb 14 22:02:33 1997  Richard Basch  <basch@lehman.com>
 
 	* windows.in: Define CLIB as the ComErr library (now separate lib)
