@@ -31,10 +31,13 @@ krb5_const_principal princ2;
 {
     register krb5_data * const *p1, * const *p2;
 
-    for (p1 = princ1, p2 = princ2; *p1  && *p2; p1++, p2++)
-	if (memcmp((*p1)->data, (*p2)->data, min((*p1)->length,
-						 (*p2)->length)))
+    for (p1 = princ1, p2 = princ2; *p1  && *p2; p1++, p2++) {
+	if ((*p1)->length != (*p2)->length)
 	    return FALSE;
+	if (memcmp((*p1)->data, (*p2)->data, (*p1)->length))
+						
+	    return FALSE;
+    }
     if (*p1 || *p2)			/* didn't both run out of components
 					   at once */
 	return FALSE;
