@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <setjmp.h>
 #include <sys/wait.h>
-#include <signal.h>
+#include <sys/signal.h>
 #ifdef	USE_PTHREADS
 #include <pthread.h>
 #endif	/* USE_PTHREADS */
@@ -491,7 +491,7 @@ net_init(kcontext, debug_level)
     bind_tries = 0;
     do {
 	if (bind(net_listen_socket,
-		 &net_server_addr,
+		 (struct sockaddr *) &net_server_addr,
 		 sizeof(net_server_addr)) < 0) {
 	    kret = errno;
 	    if (errno != EADDRINUSE) {
