@@ -1,3 +1,7 @@
+2004-09-03  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.5-beta1.
+
 2004-06-11  Tom Yu  <tlyu@mit.edu>
 
 	* version.rc: krb5-1.3.4 final.

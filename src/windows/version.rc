@@ -5,7 +5,7 @@
  * BEGIN COMMON VERSION INFO for GSS and Kerberos version resources
  */
 
-// #define PRE_RELEASE
+#define PRE_RELEASE
 
 #ifdef PRE_RELEASE
 #define BETA_STR  " beta 1"
@@ -23,8 +23,8 @@
 
 /* we're going to stamp all the DLLs with the same version number */
 
-#define K5_PRODUCT_VERSION_STRING "1.3.4" BETA_STR "\0"
-#define K5_PRODUCT_VERSION        1, 3, 4, 0
+#define K5_PRODUCT_VERSION_STRING "1.3.5" BETA_STR "\0"
+#define K5_PRODUCT_VERSION        1, 3, 5, 0
 
 #define K5_COPYRIGHT "Copyright (C) 1997-2004 by the Massachusetts Institute of Technology\0"
 #define K5_COMPANY_NAME "Massachusetts Institute of Technology.\0"
