@@ -268,7 +268,7 @@ COMERRLIB=$(TOPLIBD)/libcom_err.a
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 	free_rtree.o bld_pr_ext.o 
 
-T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o
+T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o 

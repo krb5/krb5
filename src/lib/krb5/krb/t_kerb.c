@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,6 +15,22 @@
 
 #include "com_err.h"
 
+void test_string_to_timestamp(ctx, time)
+	krb5_context ctx;
+	char *time;
+{
+    krb5_timestamp	timestamp;
+    time_t		t;
+    krb5_error_code	retval;
+
+    retval = krb5_string_to_timestamp(time, &timestamp);
+    if (retval) {
+	com_err("krb5_string_to_timestamp", retval, 0);
+	return;
+    }
+    t = (time_t) timestamp;
+    printf("Parsed time was %s", ctime(&t));
+}
 
 void test_425_conv_principal(ctx, name, inst, realm)
     krb5_context ctx;
@@ -116,6 +133,7 @@ void usage(progname)
 		progname, progname);
 	fprintf(stderr, "\t%s parse_name <name>\n", progname);
 	fprintf(stderr, "\t%s set_realm <name> <realm>\n", progname);
+	fprintf(stderr, "\t%s string_to_timestamp <time>\n", progname);
 	exit(1);
 }
 
@@ -164,6 +182,10 @@ main(argc, argv)
 		  if (!argc) usage(progname);
 		  realm = *argv;
 		  test_set_realm(ctx, name, realm);
+	  } else if (strcmp(*argv, "string_to_timestamp") == 0) {
+		  argc--; argv++;
+		  if (!argc) usage(progname);
+		  test_string_to_timestamp(ctx, *argv);
 	  }
 	  else
 	      usage(progname);
