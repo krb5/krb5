@@ -23,8 +23,6 @@ ec KRB5_KDB_NOENTRY,		"No such entry in the database"
 ec KRB5_KDB_ILL_WILDCARD,	"Illegal use of wildcard"
 
 ec KRB5_KDB_DB_INUSE,		"Database is locked or in use--try again later"
+
+ec KRB5_KDB_DB_CHANGED,		"Database was modified during read"
 end
-
-end
-
-
