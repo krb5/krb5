@@ -1,3 +1,9 @@
+Thu Feb 23 19:52:35 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* kdb5_edit.c: add struct timeb and sys/timeb includes from
+	getdate.y.
+	(ftime): new function, in case we don't HAVE_FTIME.
+
 Tue Feb 14 17:55:47 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* kdb5_edit.c: add modent

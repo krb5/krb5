@@ -36,7 +36,22 @@
 #include <com_err.h>
 #include <stdio.h>
 #include <time.h>
+/* timeb is part of the interface to get_date. */
+#if defined(HAVE_SYS_TIMEB_H)
 #include <sys/timeb.h>
+#else
+/*
+** We use the obsolete `struct timeb' as part of our interface!
+** Since the system doesn't have it, we define it here;
+** our callers must do likewise.
+*/
+struct timeb {
+    time_t		time;		/* Seconds since the epoch	*/
+    unsigned short	millitm;	/* Field not used		*/
+    short		timezone;	/* Minutes west of GMT		*/
+    short		dstflag;	/* Field not used		*/
+};
+#endif /* defined(HAVE_SYS_TIMEB_H) */
 
 #include "kdb5_edit.h"
 
@@ -1792,3 +1807,19 @@ quit()
     }
     return 0;
 }
+
+#ifndef HAVE_FTIME
+ftime(tp)
+	register struct timeb *tp;
+{
+	struct timeval t;
+	struct timezone tz;
+
+	if (gettimeofday(&t, &tz) < 0)
+		return (-1);
+	tp->time = t.tv_sec;
+	tp->millitm = t.tv_usec / 1000;
+	tp->timezone = tz.tz_minuteswest;
+	tp->dstflag = tz.tz_dsttime;
+}
+#endif
