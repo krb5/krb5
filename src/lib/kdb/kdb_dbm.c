@@ -243,7 +243,7 @@ krb5_dbm_db_open_database()
   if (!inited)
     return KRB5_KDB_DBNOTINITED;
 
-  if (!(current_db_ptr = (krb5_pointer)dbm_open(current_db_name, O_RDWR, 0600)))
+  if (!(current_db_ptr = (DBM *)dbm_open(current_db_name, O_RDWR, 0600)))
     return errno;
 
   /* It is safe to ignore errors here because all function which write
