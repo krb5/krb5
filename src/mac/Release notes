@@ -260,3 +260,7 @@ Changes in 1.1a3:
  added gssapi_generic.h to the public headers for GSS.framework
  added kinit, klist, kdestroy, kpasswd command line tools
  added kerberosIV directory to /usr/include headers
+
+3.1b2
+ from tag Mac_GSSKerberos5_3_1b2
+ changes to jam files for Mac OS X build integration
