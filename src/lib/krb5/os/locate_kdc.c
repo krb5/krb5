@@ -20,6 +20,8 @@ static char rcsid_locate_kdc_c[] =
 #include <krb5/osconf.h>
 
 #include <krb5/ext-proto.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -28,7 +30,7 @@ static char rcsid_locate_kdc_c[] =
 #define KRB5_UDP_PORT	htons(8973)	/* XXX */
 #endif
 #include <netdb.h>
-
+#include "os-proto.h"
 
 /*
  * returns count of number of addresses found
