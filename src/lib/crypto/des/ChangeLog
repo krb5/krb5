@@ -1,5 +1,14 @@
 2004-02-17  Ken Raeburn  <raeburn@mit.edu>
 
+	* f_tables.h (DES_DO_ENCRYPT, DES_DO_DECRYPT): Allocate temporary
+	variable locally instead of taking the extra argument.
+	* d3_cbc.c (krb5int_des3_cbc_encrypt): Don't pass the extra
+	argument, and delete the automatic variable.
+	(krb5int_des3_cbc_decrypt): Likewise.
+	* f_cbc.c (krb5int_des_cbc_encrypt, krb5int_des_cbc_decrypt):
+	Likewise.
+	* f_cksum.c (mit_des_cbc_cksum): Likewise.
+
 	* afsstring2key.c (krb5_afs_encrypt): Drop EDFLAG as an argument,
 	make it local instead, since we always pass 0.
 	(afs_crypt): Call changed.

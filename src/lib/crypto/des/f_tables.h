@@ -200,33 +200,35 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * at each stage of the encryption, so that by comparing the output to
  * a known good machine, the location of the first error can be found.
  */
-#define	DES_DO_ENCRYPT(left, right, temp, kp) \
+#define	DES_DO_ENCRYPT(left, right, kp) \
 	do { \
 		register int i; \
+		register unsigned DES_INT32 temp1; \
 		DEB (("do_encrypt %8lX %8lX \n", left, right)); \
-		DES_INITIAL_PERM((left), (right), (temp)); \
+		DES_INITIAL_PERM((left), (right), (temp1)); \
 		DEB (("  after IP %8lX %8lX\n", left, right)); \
 		for (i = 0; i < 8; i++) { \
-			DES_SP_ENCRYPT_ROUND((left), (right), (temp), (kp)); \
+			DES_SP_ENCRYPT_ROUND((left), (right), (temp1), (kp)); \
 			DEB (("  round %2d %8lX %8lX \n", i*2, left, right)); \
-			DES_SP_ENCRYPT_ROUND((right), (left), (temp), (kp)); \
+			DES_SP_ENCRYPT_ROUND((right), (left), (temp1), (kp)); \
 			DEB (("  round %2d %8lX %8lX \n", 1+i*2, left, right)); \
 		} \
-		DES_FINAL_PERM((left), (right), (temp)); \
+		DES_FINAL_PERM((left), (right), (temp1)); \
 		(kp) -= (2 * 16); \
 		DEB (("  after FP %8lX %8lX \n", left, right)); \
 	} while (0)
 
-#define	DES_DO_DECRYPT(left, right, temp, kp) \
+#define	DES_DO_DECRYPT(left, right, kp) \
 	do { \
 		register int i; \
-		DES_INITIAL_PERM((left), (right), (temp)); \
+		register unsigned DES_INT32 temp2; \
+		DES_INITIAL_PERM((left), (right), (temp2)); \
 		(kp) += (2 * 16); \
 		for (i = 0; i < 8; i++) { \
-			DES_SP_DECRYPT_ROUND((left), (right), (temp), (kp)); \
-			DES_SP_DECRYPT_ROUND((right), (left), (temp), (kp)); \
+			DES_SP_DECRYPT_ROUND((left), (right), (temp2), (kp)); \
+			DES_SP_DECRYPT_ROUND((right), (left), (temp2), (kp)); \
 		} \
-		DES_FINAL_PERM((left), (right), (temp)); \
+		DES_FINAL_PERM((left), (right), (temp2)); \
 	} while (0)
 
 /*

@@ -54,7 +54,6 @@ krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
 			 const mit_des_cblock ivec)
 {
     register unsigned DES_INT32 left, right;
-    register unsigned DES_INT32 temp;
     const unsigned DES_INT32 *kp1, *kp2, *kp3;
     const unsigned char *ip;
     unsigned char *op;
@@ -119,9 +118,9 @@ krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
 	/*
 	 * Encrypt what we have
 	 */
-	DES_DO_ENCRYPT(left, right, temp, kp1);
-	DES_DO_DECRYPT(left, right, temp, kp2);
-	DES_DO_ENCRYPT(left, right, temp, kp3);
+	DES_DO_ENCRYPT(left, right, kp1);
+	DES_DO_DECRYPT(left, right, kp2);
+	DES_DO_ENCRYPT(left, right, kp3);
 
 	/*
 	 * Copy the results out
@@ -141,7 +140,6 @@ krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
 			 const mit_des_cblock ivec)
 {
     register unsigned DES_INT32 left, right;
-    register unsigned DES_INT32 temp;
     const unsigned DES_INT32 *kp1, *kp2, *kp3;
     const unsigned char *ip;
     unsigned char *op;
@@ -189,9 +187,9 @@ krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
 	/*
 	 * Decrypt this.
 	 */
-	DES_DO_DECRYPT(left, right, temp, kp3);
-	DES_DO_ENCRYPT(left, right, temp, kp2);
-	DES_DO_DECRYPT(left, right, temp, kp1);
+	DES_DO_DECRYPT(left, right, kp3);
+	DES_DO_ENCRYPT(left, right, kp2);
+	DES_DO_DECRYPT(left, right, kp1);
 
 	/*
 	 * Xor with the old cipher to get plain

@@ -37,7 +37,6 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	const krb5_octet *ivec;
 {
 	register unsigned DES_INT32 left, right;
-	register unsigned DES_INT32 temp;
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;
@@ -104,7 +103,7 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 		 * Encrypt what we have
 		 */
 		kp = (const unsigned DES_INT32 *)schedule;
-		DES_DO_ENCRYPT(left, right, temp, kp);
+		DES_DO_ENCRYPT(left, right, kp);
 	}
 
 	/*
