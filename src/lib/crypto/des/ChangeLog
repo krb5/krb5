@@ -1,3 +1,7 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_verify.c: Get rid of global variables i,j.
+
 2001-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* string2key.c (mit_des_string_to_key_int): Construct a krb5_data

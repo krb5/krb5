@@ -91,7 +91,6 @@ unsigned char default_ivec[8] = {
 };
 unsigned char *ivec;
 unsigned char zero_key[8] = {1,1,1,1,1,1,1,1}; /* just parity bits */
-int i,j;
 
 unsigned char cipher1[8] = {
     0x25,0xdd,0xac,0x3e,0x96,0x17,0x64,0x67
@@ -133,6 +132,7 @@ main(argc,argv)
     int	 in_length, retval;
     void do_encrypt();
     void do_decrypt();
+    int i, j;
 
 #ifdef WINDOWS
     /* Set screen window buffer to infinite size -- MS default is tiny.  */
@@ -358,6 +358,7 @@ do_encrypt(in,out)
     char *in;
     char *out;
 {
+    int i, j;
     for (i =1; i<=nflag; i++) {
 	mit_des_cbc_encrypt((const mit_des_cblock *)in,
 			    (mit_des_cblock *)out,
@@ -382,6 +383,7 @@ do_decrypt(in,out)
     char *in;
     /* try to invert it */
 {
+    int i, j;
     for (i =1; i<=nflag; i++) {
 	mit_des_cbc_encrypt((const mit_des_cblock *)out,
 			    (mit_des_cblock *)in,
