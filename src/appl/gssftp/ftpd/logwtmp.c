@@ -44,9 +44,17 @@ static char sccsid[] = "@(#)logwtmp.c	5.7 (Berkeley) 2/25/91";
 #include <unistd.h>
 #include <string.h>
 
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif
+
 #ifdef WTMP_FILE
 #define WTMPFILE WTMP_FILE
-#endif
+#else
+#ifdef _PATH_WTMP
+#define WTMPFILE _PATH_WTMP
+#endif 	/* _PATH_WTMP  */
+#endif	/* WTMP_FILE */
 
 #ifndef WTMPFILE
 #define	WTMPFILE	"/usr/adm/wtmp"
