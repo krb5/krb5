@@ -1,3 +1,7 @@
+Fri Oct 28 19:18:40 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* ranlib.conf: new file. some svr4 need ranlib too.
+
 Fri Oct 28 19:06:12 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* gcc.conf (CC_OPTS): don't set CC_OPTS until we figure out
