@@ -56,27 +56,31 @@ krb5_copy_principal(context, inprinc, outprinc)
     for (i = 0; i < nelems; i++) {
 	int len = krb5_princ_component(context, inprinc, i)->length;
 	krb5_princ_component(context, tempprinc, i)->length = len;
-	if ((krb5_princ_component(context, tempprinc, i)->data = malloc(len)) == 0) {
+	if (((krb5_princ_component(context, tempprinc, i)->data =
+	      malloc(len)) == 0) && len) {
 	    while (--i >= 0)
 		free(krb5_princ_component(context, tempprinc, i)->data);
 	    free (tempprinc->data);
 	    free (tempprinc);
 	    return ENOMEM;
 	}
-	memcpy(krb5_princ_component(context, tempprinc, i)->data,
-	       krb5_princ_component(context, inprinc, i)->data, len);
+	if (len)
+	    memcpy(krb5_princ_component(context, tempprinc, i)->data,
+		   krb5_princ_component(context, inprinc, i)->data, len);
     }
 
     tempprinc->realm.data =
 	    malloc(tempprinc->realm.length = inprinc->realm.length);
-    if (!tempprinc->realm.data) {
+    if (!tempprinc->realm.data && tempprinc->realm.length) {
 	    for (i = 0; i < nelems; i++)
 		    free(krb5_princ_component(context, tempprinc, i)->data);
 	    free(tempprinc->data);
 	    free(tempprinc);
 	    return ENOMEM;
     }
-    memcpy(tempprinc->realm.data, inprinc->realm.data, inprinc->realm.length);
+    if (tempprinc->realm.length)
+	memcpy(tempprinc->realm.data, inprinc->realm.data,
+	       inprinc->realm.length);
     
     *outprinc = tempprinc;
     return 0;

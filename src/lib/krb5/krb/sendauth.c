@@ -72,6 +72,9 @@ krb5_sendauth(context, auth_context,
 	int			len;
 	krb5_ccache		use_ccache = 0;
 
+	if (error)
+	    *error = 0;
+
 	/*
 	 * First, send over the length of the sendauth version string;
 	 * then, we send over the sendauth version.  Next, we send

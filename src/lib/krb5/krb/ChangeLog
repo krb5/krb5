@@ -1,3 +1,12 @@
+Fri Apr 14 15:05:51 1995    <tytso@rsx-11.mit.edu>
+
+	* sendauth.c (krb5_sendauth): initialize error return parameter
+
+	* copy_princ.c (krb5_copy_principal): Fix bug where
+		krb5_copy_principal can fail if it is asked to copy a
+		principal with a zero-length component on a system where
+		malloc(0) returns null. 
+
 Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.[ch]: removed unneeded INTERFACE from non-api functions.
