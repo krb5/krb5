@@ -24,6 +24,7 @@
  */
 
 #include "k5-int.h"
+#include <ctype.h>
 
 krb5_error_code INTERFACE
 krb5_init_context(context)
@@ -251,9 +252,13 @@ krb5_get_tgs_ktypes(context, princ, ktypes)
 	
 	sp = retval;
 	j = 0;
-	for (i = 0; i < count; i++) {
+	i = 1;
+	while (1) {
 	    if (! krb5_string_to_enctype(sp, &old_ktypes[j]))
 		j++;
+
+	    if (i++ >= count)
+		break;
 
 	    /* skip to next token */
 	    while (*sp) sp++;

@@ -1,3 +1,18 @@
+Tue Jan  9 22:04:09 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): New function which handles all
+		of the dirty work of forwarding TGT's.
+
+	* rd_cred.c (krb5_rd_cred_basic): Clean up memory allocation
+		discpline to remove memory leaks.
+
+	* mk_cred.c (krb5_mk_ncred_basic, krb5_mk_ncred, krb5_mk_1cred):
+		Clean up memory allocation discpline to remove memory
+		leaks.
+
+	* init_ctx.c (krb5_get_tgs_ktypes): Clean up parsing of the etype
+		list.  Don't overrun the string containing the etype list.
+
 Wed Jan  3 21:32:59 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rd_cred.c (krb5_rd_cred_basic): When the keyblock is NULL,

@@ -120,7 +120,6 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
 {
     krb5_cred_enc_part 	  credenc;
     krb5_error_code	  retval;
-    char 		* tmp;
     int			  i;
 
     credenc.magic = KV5M_CRED_ENC_PART;
@@ -136,59 +135,56 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
 		malloc((size_t) (sizeof(krb5_cred_info *) * (nppcreds + 1)))) == NULL) {
         return ENOMEM;
     }
-    if ((tmp = (char *)malloc((size_t) (sizeof(krb5_cred_info) * nppcreds))) == NULL) {
-	retval = ENOMEM;
-	goto cleanup_info;
-    }
-    memset(tmp, 0, (size_t) (sizeof(krb5_cred_info) * nppcreds));
-
+    memset(credenc.ticket_info, 0, sizeof(krb5_cred_info *) * (nppcreds + 1));
+    
     /*
      * For each credential in the list, initialize a cred info
      * structure and copy the ticket into the ticket list.
      */
     for (i = 0; i < nppcreds; i++) {
-    	credenc.ticket_info[i] = (krb5_cred_info *)tmp + i;
-
+    	credenc.ticket_info[i] = malloc(sizeof(krb5_cred_info));
+	if (credenc.ticket_info[i] == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+	credenc.ticket_info[i+1] = NULL;
+	
         credenc.ticket_info[i]->magic = KV5M_CRED_INFO;
         credenc.ticket_info[i]->times = ppcreds[i]->times;
         credenc.ticket_info[i]->flags = ppcreds[i]->ticket_flags;
 
     	if ((retval = decode_krb5_ticket(&ppcreds[i]->ticket, 
 					 &pcred->tickets[i])))
-	    goto cleanup_info_ptrs;
+	    goto cleanup;
 
 	if ((retval = krb5_copy_keyblock(context, &ppcreds[i]->keyblock,
 					 &credenc.ticket_info[i]->session)))
-            goto cleanup_info_ptrs;
+            goto cleanup;
 
         if ((retval = krb5_copy_principal(context, ppcreds[i]->client,
 					  &credenc.ticket_info[i]->client)))
-            goto cleanup_info_ptrs;
+            goto cleanup;
 
       	if ((retval = krb5_copy_principal(context, ppcreds[i]->server,
 					  &credenc.ticket_info[i]->server)))
-            goto cleanup_info_ptrs;
+            goto cleanup;
 
       	if ((retval = krb5_copy_addresses(context, ppcreds[i]->addresses,
 					  &credenc.ticket_info[i]->caddrs)))
-            goto cleanup_info_ptrs;
+            goto cleanup;
     }
 
     /*
      * NULL terminate the lists.
      */
-    credenc.ticket_info[i] = NULL;
     pcred->tickets[i] = NULL;
 
     /* encrypt the credential encrypted part */
     retval = encrypt_credencpart(context, &credenc, keyblock,
 				 &pcred->enc_part);
 
-cleanup_info_ptrs:
-    free(tmp);
-
-cleanup_info:
-    free(credenc.ticket_info);
+cleanup:
+    krb5_free_cred_enc_part(context, &credenc);
     return retval;
 }
 
@@ -207,11 +203,19 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     krb5_data 	       ** ppdata;
     krb5_replay_data  	* outdata;
 {
+    krb5_address * premote_fulladdr = NULL;
+    krb5_address * plocal_fulladdr = NULL;
+    krb5_address remote_fulladdr;
+    krb5_address local_fulladdr;
     krb5_error_code 	  retval;
     krb5_keyblock	* keyblock;
     krb5_replay_data      replaydata;
     krb5_cred 		* pcred;
     int			  ncred;
+
+    local_fulladdr.contents = 0;
+    remote_fulladdr.contents = 0;
+    memset(&replaydata, 0, sizeof(krb5_replay_data));
 
     if (ppcreds == NULL) {
     	return KRB5KRB_AP_ERR_BADADDR;
@@ -224,12 +228,14 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
 
     if ((pcred = (krb5_cred *)malloc(sizeof(krb5_cred))) == NULL) 
         return ENOMEM;
+    memset(pcred, 0, sizeof(krb5_cred));
 
     if ((pcred->tickets 
       = (krb5_ticket **)malloc(sizeof(krb5_ticket *) * (ncred + 1))) == NULL) {
 	retval = ENOMEM;
 	free(pcred);
     }
+    memset(pcred->tickets, 0, sizeof(krb5_ticket *) * (ncred +1));
 
     /* Get keyblock */
     if ((keyblock = auth_context->local_subkey) == NULL) 
@@ -247,19 +253,12 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
         /* Need a better error */
         return KRB5_RC_REQUIRED;
 
-    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
-        (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
-        if ((retval = krb5_us_timeofday(context, &replaydata.timestamp,
-					&replaydata.usec)))
-            return retval;
-        if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
-            outdata->timestamp = replaydata.timestamp;
-            outdata->usec = replaydata.usec;
-        }
-        if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
-            outdata->timestamp = replaydata.timestamp;
-            outdata->usec = replaydata.usec;
-        }
+    if ((retval = krb5_us_timeofday(context, &replaydata.timestamp,
+				    &replaydata.usec)))
+	return retval;
+    if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
+	outdata->timestamp = replaydata.timestamp;
+	outdata->usec = replaydata.usec;
     }
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
         (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
@@ -271,23 +270,13 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
         }
     }
 
-{
-    krb5_address * premote_fulladdr = NULL;
-    krb5_address * plocal_fulladdr = NULL;
-    krb5_address remote_fulladdr;
-    krb5_address local_fulladdr;
-    CLEANUP_INIT(2);
-
     if (auth_context->local_addr) {
     	if (auth_context->local_port) {
-            if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
-                                 	      auth_context->local_port, 
-					      &local_fulladdr))) {
-            	CLEANUP_PUSH(local_fulladdr.contents, free);
-	    	plocal_fulladdr = &local_fulladdr;
-            } else {
-                goto error;
-            }
+            if ((retval = krb5_make_fulladdr(context, auth_context->local_addr,
+					     auth_context->local_port, 
+					     &local_fulladdr)))
+		goto error;
+	    plocal_fulladdr = &local_fulladdr;
 	} else {
             plocal_fulladdr = auth_context->local_addr;
         }
@@ -295,15 +284,11 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
 
     if (auth_context->remote_addr) {
     	if (auth_context->remote_port) {
-            if (!(retval = krb5_make_fulladdr(context,auth_context->remote_addr,
+            if ((retval = krb5_make_fulladdr(context,auth_context->remote_addr,
                                  	      auth_context->remote_port, 
-					      &remote_fulladdr))){
-                CLEANUP_PUSH(remote_fulladdr.contents, free);
-	        premote_fulladdr = &remote_fulladdr;
-            } else {
-                CLEANUP_DONE();
-                goto error;
-            }
+					      &remote_fulladdr)))
+		goto error;
+	    premote_fulladdr = &remote_fulladdr;
 	} else {
             premote_fulladdr = auth_context->remote_addr;
         }
@@ -313,12 +298,8 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     if ((retval = krb5_mk_ncred_basic(context, ppcreds, ncred, keyblock,
 				      &replaydata, plocal_fulladdr, 
 				      premote_fulladdr, pcred))) {
-	CLEANUP_DONE();
 	goto error;
     }
-
-    CLEANUP_DONE();
-}
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
@@ -342,12 +323,16 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     retval = encode_krb5_cred(pcred, ppdata);
 
 error:
+    if (local_fulladdr.contents)
+	free(local_fulladdr.contents);
+    if (remote_fulladdr.contents)
+	free(remote_fulladdr.contents);
+    krb5_free_cred(context, pcred);
+
     if (retval) {
 	if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) 
 	 || (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE))
             auth_context->local_seq_number--;
-	free(pcred->tickets);
-	free(pcred);
     }
     return retval;
 }
@@ -375,9 +360,10 @@ krb5_mk_1cred(context, auth_context, pcreds, ppdata, outdata)
     ppcreds[0] = pcreds;
     ppcreds[1] = NULL;
 
-    if ((retval = krb5_mk_ncred(context, auth_context, ppcreds,
-				ppdata, outdata)))
-	free(ppcreds);
+    retval = krb5_mk_ncred(context, auth_context, ppcreds,
+			   ppdata, outdata);
+    
+    free(ppcreds);
     return retval;
 }
 

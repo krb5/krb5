@@ -95,6 +95,8 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
     if ((retval = decode_krb5_cred(pcreddata, &pcred)))
     	return retval;
 
+    memset(&encpart, sizeof(encpart), 0);
+
     if ((retval = decrypt_credencdata(context, pcred, pkeyblock, &encpart)))
 	goto cleanup_cred;
 
@@ -147,6 +149,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
         retval = ENOMEM;
         goto cleanup_cred;
     }
+    (*pppcreds)[0] = NULL;
 
     /*
      * For each credential, create a strcture in the list of
@@ -163,6 +166,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
         }
 
         (*pppcreds)[i] = pcur;
+        (*pppcreds)[i+1] = 0;
         pinfo = encpart.ticket_info[i++];
         memset(pcur, 0, sizeof(krb5_creds));
 
@@ -204,11 +208,11 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
 
 cleanup:
     if (retval)
-	while (i >= 0)
-	    free((*pppcreds)[i--]);
+	krb5_free_tgt_creds(context, *pppcreds);
 
 cleanup_cred:
     krb5_free_cred(context, pcred);
+    krb5_free_cred_enc_part(context, &encpart);
 
     return retval;
 }

@@ -30,6 +30,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	encode_kdc.$(OBJEXT)	\
 	encrypt_tk.$(OBJEXT)	\
 	free_rtree.$(OBJEXT)	\
+	fwd_tgt.$(OBJEXT)	\
 	gc_frm_kdc.$(OBJEXT)	\
 	gc_via_tkt.$(OBJEXT)	\
 	gen_seqnum.$(OBJEXT)	\
@@ -102,6 +103,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/encode_kdc.c	\
 	$(srcdir)/encrypt_tk.c	\
 	$(srcdir)/free_rtree.c	\
+	$(srcdir)/fwd_tgt.c	\
 	$(srcdir)/gc_frm_kdc.c	\
 	$(srcdir)/gc_via_tkt.c	\
 	$(srcdir)/gen_seqnum.c	\
