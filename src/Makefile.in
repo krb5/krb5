@@ -132,6 +132,7 @@ WINMAKEFILES=Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
 	include\Makefile include\krb5\Makefile \
+	krb524\Makefile \
 	lib\Makefile lib\crypto\Makefile \
 	lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
 	lib\crypto\dk\Makefile lib\crypto\enc_provider\Makefile \
@@ -185,6 +186,8 @@ WINMAKEFILES=Makefile \
 ##DOS##include\Makefile: include\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\krb5\Makefile: include\krb5\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##krb524\Makefile: krb524\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\Makefile: lib\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -314,7 +317,7 @@ FILES= ./* \
 	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	clients/kpasswd/* \
 	config/* include/* include/kerberosIV/* \
-	include/krb5/* include/krb5/stock/* include/sys/* lib/* \
+	include/krb5/* include/krb5/stock/* include/sys/* krb524/* lib/* \
 	lib/crypto/* lib/crypto/crc32/* lib/crypto/des/* lib/crypto/dk/* \
 	lib/crypto/enc_provider/* lib/crypto/hash_provider/* \
 	lib/crypto/keyhash_provider/* lib/crypto/old/* lib/crypto/raw/* \

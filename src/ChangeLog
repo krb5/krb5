@@ -1,6 +1,7 @@
 2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
 
-	* Makefile.in: Add ms2mit.
+	* Makefile.in: Add ms2mit and krb524 Makefile creation to Windows
+	build preparation.
 
 2000-07-14  Ken Raeburn  <raeburn@mit.edu>
 
