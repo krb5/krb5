@@ -26,14 +26,14 @@
 
 #include "k5-int.h"
 
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
 
 krb5_error_code INTERFACE_C
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 krb5_build_principal_ext(krb5_context context,  krb5_principal * princ, int rlen, const char * realm, ...)
 #else
 krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
@@ -51,7 +51,7 @@ krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
     krb5_data *princ_data;
     krb5_principal princ_ret;
 
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
     va_start(ap, realm);
 #else
     va_start(ap);
@@ -88,7 +88,7 @@ krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
     tmpdata[rlen] = 0;
 
     /* process rest of components */
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
     va_start(ap, realm);
 #else
     va_start(ap);

@@ -1,3 +1,8 @@
+Sat Mar 18 18:58:02 1995  John Gilmore  (gnu at toad.com)
+
+	* bld_pr_ext.c, bld_princ.c:  Replace STDARG_PROTOTYPES with
+	HAVE_STDARG_H for consistency.
+
 Fri Mar 17 19:48:07 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (check-mac):  Add.

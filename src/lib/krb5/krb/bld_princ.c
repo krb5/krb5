@@ -24,10 +24,10 @@
  * Build a principal from a list of strings
  */
 
-/* Need <krb5/config.h> for STDARG_PROTOTYPES */
+/* Need <krb5/k5-config.h> for HAVE_STDARG_H */
 #include "k5-int.h"
 
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -97,7 +97,7 @@ krb5_build_principal_va(context, princ, rlen, realm, ap)
 }
 
 krb5_error_code INTERFACE_C
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 krb5_build_principal(krb5_context context,  krb5_principal * princ, int rlen,
     const char * realm, ...)
 #else
@@ -116,7 +116,7 @@ krb5_build_principal(context, princ, rlen, realm, va_alist)
     if (!pr_ret)
 	return ENOMEM;
 
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
     va_start(ap, realm);
 #else
     va_start(ap);
