@@ -1,8 +1,6 @@
 AC_INIT(tcl_kadm5.c)
-WITH_CCOPTS
 CONFIG_RULES
 AC_PROG_INSTALL
-KRB_INCLUDE
 dnl Test for tcl
 AC_KRB5_TCL	
 if test "$TCL_LIB" != "" ;  then

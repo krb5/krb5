@@ -1,5 +1,7 @@
 Thu Nov  7 16:16:38 1996  Tom Yu  <tlyu@mit.edu>
 
+	* configure.in: Remove spurious KRB_INCLUDE and WITH_CCOPTS.
+
 	* Makefile.in (server.o): Fix typo in previous checkin.
 
 Wed Nov  6 16:12:26 1996  Tom Yu <tlyu@mit.edu>

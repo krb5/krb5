@@ -1,7 +1,5 @@
 AC_INIT(init-test.c)
-WITH_CCOPTS
 CONFIG_RULES
-KRB_INCLUDE
 dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)

@@ -1,3 +1,7 @@
+Thu Nov  7 20:53:45 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove spurious WITH_CCOPTS and KRB_INCLUDE.
+
 Thu Nov  7 13:09:33 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* tcl_kadm5.c: don't assume tl_data_contents is null-terminated,

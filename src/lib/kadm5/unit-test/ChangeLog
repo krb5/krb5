@@ -1,3 +1,7 @@
+Thu Nov  7 20:54:24 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove spurious WITH_CCOPTS and KRB_INCLUDE.
+
 Thu Nov  7 13:02:28 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* api.2/init-v2.exp: update tests for new init error codes and

@@ -1,3 +1,7 @@
+Thu Nov  7 20:52:39 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove spurious WITH_CCOPTS and KRB_INCLUDE.
+
 Fri Nov  1 11:52:52 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.c (kadmin_cpw): fix typo [krb5-admin/139]
