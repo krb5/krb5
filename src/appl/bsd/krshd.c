@@ -870,7 +870,7 @@ doit(f, fromp)
 
 #ifdef KERBEROS
     if (must_pass_k5 || must_pass_one) {
-#ifdef ALWAYS_V5_KUSEROK
+#if (defined(ALWAYS_V5_KUSEROK) || !defined(KRB5_KRB4_COMPAT))
 	if (!krb5_kuserok(client,locuser)) {
 	    syslog(LOG_ERR ,
 		   "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",

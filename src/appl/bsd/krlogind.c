@@ -107,7 +107,9 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
  */
 #define LOG_REMOTE_REALM
 #define CRYPT
+#ifdef KRB5_KRB4_COMPAT
 #define SERVE_V4
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -1061,8 +1063,14 @@ do_krb_login(host)
     /* OK we have authenticated this user - now check authorization. */
     /* The Kerberos authenticated programs must use krb5_kuserok or kuserok*/
     
+#ifdef SERVE_V4
+    if (auth_sys == KRB5_RECVAUTH_V4) {
+	  fatal(netf, "This server does not support Kerberos V4");
+  }
+#endif
+    
     if (must_pass_k5 || must_pass_one) {
-#ifdef ALWAYS_V5_KUSEROK
+#if (defined(ALWAYS_V5_KUSEROK) || !defined(SERVE_V4))
 	/* krb5_kuserok returns 1 if OK */
 	if (client && krb5_kuserok(client, lusername))
 	    passed_krb++;
@@ -1458,6 +1466,7 @@ recvauth()
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
 
+#ifdef SERVE_V4
     if (auth_sys == KRB5_RECVAUTH_V4) {
 
 	des_read  = v4_des_read;
@@ -1478,6 +1487,7 @@ recvauth()
 	  return(status);
 	return 0;
     }
+#endif
 
     /* Must be V5  */
 	
