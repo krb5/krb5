@@ -54,7 +54,7 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
     code = krb5int_locate_server (context, realm, addrlist, 0,
 				  "kpasswd_server", "_kpasswd", 0,
 				  DEFAULT_KPASSWD_PORT, 0, 0);
-    if (code) {
+    if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
 	code = krb5int_locate_server (context, realm, addrlist, 0,
 				      "admin_server", "_kerberos-adm", 1,
 				      DEFAULT_KPASSWD_PORT, 0, 0);

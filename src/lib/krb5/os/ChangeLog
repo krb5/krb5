@@ -1,3 +1,29 @@
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (make_srv_query_realm): Punt if strdup fails.
+	Always return what data we can, even if memory allocation or other
+	problems prevent us from returning more.
+	(krb5_locate_srv_dns_1): Always return what data we can.  Fix
+	memory leak.  Free up temporary storage as quickly as possible,
+	while building up address list to return.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* accessor.c (krb5int_accessor): Initialize restored locate_server
+	field.
+
+	* locate_kdc.c (struct srv_dns_entry): Move to top level.
+	(make_srv_query_realm): Separate from krb5_locate_srv_dns_1; just
+	do query and return results.
+	(krb5_locate_srv_dns_1): Call it, and build addlist entries.
+	Check for one RR with a target of ".", and return an error.
+	(krb5_locate_srv_dns): Deleted.
+
+	* t_locate_kdc.c (main): Call krb5_locate_srv_dns_1.
+
+	* changepw.c (krb5_locate_kpasswd): Check specifically for certain
+	errors before using fallback heuristics.
+
 2003-06-03  Alexandra Ellwood  <lxs@mit.edu>
 
         * init_os_ctx.c: Included header to get __KLAllowHomeDirectoryAccess().

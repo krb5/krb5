@@ -1647,6 +1647,10 @@ typedef struct _krb5int_access {
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
     /* service location and communication */
+    krb5_error_code (*locate_server) (krb5_context, const krb5_data *,
+				      struct addrlist *, int,
+				      const char *, const char *,
+				      int, int, int, int);
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, krb5_data *reply,
 				   struct sockaddr *, socklen_t *);
