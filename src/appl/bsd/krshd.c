@@ -1230,11 +1230,15 @@ if (ccache)
 	    
 	    exit(0);
 	}
+#if defined(HAVE_SETSID)&&(!defined(ULTRIX))
+	setsid();
+#else
 #ifdef SETPGRP_TWOARG
 	setpgrp(0, getpid());
 #else
 	setpgrp();
-#endif
+#endif /*setpgrp_twoarg*/
+#endif /*HAVE_SETSID*/
 	(void) close(s);
 	(void) close(f);
 	(void) close(pw[0]);

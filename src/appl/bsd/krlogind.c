@@ -181,9 +181,6 @@ char copyright[] =
 #include <sys/filio.h>
 #endif
 
-#ifndef SETPGRP_TWOARG
-#define setpgrp(a,b) setpgrp()
-#endif
 
 #ifndef HAVE_KILLPG
 #define killpg(pid, sig) kill(-(pid), (sig))
@@ -789,11 +786,6 @@ int syncpipe[2];
     signal(SIGTSTP, SIG_IGN);
 #endif
 
-#ifdef hpux
-    setpgrp2(0, 0);
-#else
-    setpgrp(0, 0);
-#endif
     
 #ifdef DO_NOT_USE_K_LOGIN
     /* Pass down rusername and lusername to login. */
@@ -1046,9 +1038,10 @@ void fatalperror(f, msg)
      char *msg;
 {
     char buf[512];
+#ifdef NEED_SYS_ERRLIST
     extern int sys_nerr;
     extern char *sys_errlist[];
-    
+#endif    
     if ((unsigned)errno < sys_nerr)
       (void) sprintf(buf, "%s: %s", msg, sys_errlist[errno]);
     else
