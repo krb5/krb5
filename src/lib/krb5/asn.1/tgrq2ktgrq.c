@@ -108,7 +108,7 @@ register int *error;
 	/* plus one for null terminator */
 	aticks = (krb5_ticket **) xcalloc(tptr->nelem + 1,
 					  sizeof(*aticks));
-	for (i = 0; i < tptr->nelem; i++) {
+	for (i = 0; (i < tptr->nelem) && tptr->Ticket[i]; i++) {
 	    aticks[i] = KRB5_Ticket2krb5_ticket(tptr->Ticket[i], error);
 	    if (!aticks[i]) {
 		while (i >= 0) {
