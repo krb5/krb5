@@ -34,6 +34,7 @@
 #include "adm_proto.h"
 #include "com_err.h"
 #include <stdio.h>
+#include <ctype.h>
 #ifdef	HAVE_SYSLOG_H
 #include <syslog.h>
 #endif	/* HAVE_SYSLOG_H */

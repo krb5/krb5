@@ -1,3 +1,7 @@
+Tue Oct  7 07:48:12 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c: Include ctype.h for isspace definition.
+
 Tue Jul  1 02:31:07 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc.h, kadm_rpc_xdr.c: Add support for setv4key.
