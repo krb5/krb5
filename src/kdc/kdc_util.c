@@ -312,7 +312,44 @@ krb5_ticket *ticket;
     return 0;
 }
 
+
 #define MAX_REALM_LN 500
+
+
+/* 
+ * subrealm - determine if r2 is a subrealm of r1
+ *
+ *            SUBREALM takes two realms, r1 and r2, and 
+ *            determines if r2 is a subrealm of r1.   
+ *            r2 is a subrealm of r1 if (r1 is a prefix
+ *            of r2 AND r1 and r2 begin with a /) or if 
+ *            (r1 is a suffix of r2 and neither r1 nor r2
+ *            begin with a /).
+ *
+ * RETURNS:   If r2 is a subrealm, and r1 is a prefix, the number
+ *            of characters in the suffix of r2 is returned as a
+ *            negative number.
+ *
+ *            If r2 is a subrealm, and r1 is a suffix, the number
+ *            of characters in the prefix of r2 is returned as a
+ *            positive number.
+ *
+ *            If r2 is not a subrealm, SUBREALM returns 0.
+ */
+static  int
+subrealm(r1,r2)
+char	*r1;
+char	*r2;
+{
+    int	l1,l2;
+    l1 = strlen(r1);
+    l2 = strlen(r2);
+    if(l2 <= l1) return(0);
+    if((*r1 == '/') && (*r2 == '/') && (strncmp(r1,r2,l1) == 0)) return(l1-l2);
+    if((*r1 != '/') && (*r2 != '/') && (strncmp(r1,r2+l2-l1,l1) == 0))
+	return(l2-l1);
+    return(0);
+}
 
 /*
  * add_to_transited  Adds the name of the realm which issued the
@@ -369,25 +406,9 @@ krb5_ticket *ticket;
  *        This procedure will not yet use the null subfield notation,
  *        and it will get confused if it sees it.
  *
+ *        This procedure does not check for quoted commas in realm
+ *        names.
  */
-
-/* subrealm takes two realms, r1 and r2,  and determines if r2    */
-/* is a subrealm of r1.  Keep in mind that the name of a subrealm */
-/* is a superstring of its parent and vice versa.  If a subrealm, */
-/* then the number of charcters that form the prefix in r2 is     */
-/* returned.  Otherwise subrealm returns 0.                       */
-static  int
-subrealm(r1,r2)
-char	*r1;
-char	*r2;
-{
-    int	l1,l2;
-    l1 = strlen(r1);
-    l2 = strlen(r2);
-    if (l2 <= l1) return(0);
-    if (strcmp(r1,r2+l2-l1)  != 0) return(0);
-    return(l2-l1);
-}
 
 krb5_error_code 
 add_to_transited(tgt_trans,new_trans,tgs,client,server)
@@ -418,8 +439,11 @@ krb5_principal server;
 
     new_trans->data = trans;
 
-    strcpy(prev,krb5_princ_realm(client)->data);
+    /* For the purpose of appending, the realm preceding the first */
+    /* relam in the transited field is considered the null realm   */
+    strcpy(prev,"");
 
+    /***** In next statement, need to keep reading if the , was quoted *****/
     /* read field into current */
     retval = sscanf(otrans,"%[^,]",current);
 
@@ -438,11 +462,20 @@ krb5_principal server;
 
 	/* figure out expanded form of current name */
 	clst = strlen(current) - 1;
-	strcpy(exp,current);
-	if(current[clst] == '.') {
+	if(current[0] == ' ') {
+	    strcpy(exp,current+1);
+	}
+	else if((current[0] == '/') && (prev[0] == '/')) {
+	    strcpy(exp,prev);
+	    strcat(exp,current);
+	}
+	else if(current[clst] == '.') {
+	    strcpy(exp,current);
 	    strcat(exp,prev);
 	}
+	else strcpy(exp,current);
 
+	/***** next statement, need to keep reading if the , was quoted *****/
 	/* read field into next */
 	retval = sscanf(otrans,"%[^,]",next);
 
@@ -462,37 +495,45 @@ krb5_principal server;
 	/* If we still have to insert the new realm */
 	if(added == 0) {
 	    /* Is the next field compressed?  If not, and if the new */
-	    /* realm is a superstring of the current realm, compress */
+	    /* realm is a subrealm of the current realm, compress    */
 	    /* the new realm, and insert immediately following the   */
 	    /* current one.  Note that we can not do this if the next*/
 	    /* field is already compressed since it would mess up    */
 	    /* what has already been done.  In most cases, this is   */
 	    /* not a problem becase the realm to be added will be a  */
-	    /* superstring of the next field too, and we will catch  */
+	    /* subrealm of the next field too, and we will catch     */
 	    /* it in a future iteration.                             */
-	    if((next[nlst] != '.') && (pl = subrealm(exp,realm))) {
+	    if((next[nlst] != '.') && (next[0] != '/') && 
+	       (pl = subrealm(exp,realm))) {
 		added = 1;
 		strcat(current,",");
-		strncat(current,realm,pl);
+		if(pl > 0) strncat(current,realm,pl);
+		else strncat(current,realm+strlen(realm)+pl,-pl);
 	    }
-
-	    /* Whether or not the next field is compressed, if the   */
-	    /* realm to be added is a substring of the current field,*/
-	    /* then the current field can be compressed.  First the  */
-	    /* realm to be added must be compressed relative to the  */
-	    /* previous field (of possible), and then the current    */
-	    /* field compressed relative to the new realm.  Note that*/
-	    /* if the realm to be added is also a substring of the   */
-	    /* previous realm, it would have been added earlier, and */
-	    /* we would not reach this step this time around.        */
+	    /* Whether or not the next field is compressed, if the    */
+	    /* realm to be added is a superrealm of the current realm,*/
+	    /* then the current realm can be compressed.  First the   */
+	    /* realm to be added must be compressed relative to the   */
+	    /* previous realm (if possible), and then the current     */
+	    /* realm compressed relative to the new realm.  Note that */
+	    /* if the realm to be added is also a superrealm of the   */
+	    /* previous realm, it would have been added earlier, and  */
+	    /* we would not reach this step this time around.         */
 	    else if(pl = subrealm(realm,exp)) {
 		added = 1;
 		*current = '\0';
 		pl1 = subrealm(prev,realm);
-		if(pl1) strncat(current,realm,subrealm(prev,realm));
-		else strcat(current,realm);
+		if(pl1) {
+		    if(pl1 > 0) strncat(current,realm,pl1);
+		    else strncat(current,realm+strlen(realm)+pl1,-pl1);
+		}
+		else { /* If not a subrealm */
+		    if((realm[0] == '/') && prev[0]) strcat(current," ");
+		    strcat(current,realm);
+		}
 		strcat(current,",");
-		strncat(current,exp,pl);
+		if(pl > 0) strncat(current,exp,pl);
+		else strncat(current,exp+strlen(exp)+pl,-pl);
 	    }
 	}
 
@@ -506,9 +547,9 @@ krb5_principal server;
 
     if(added == 0) {
 	if(new_trans->length != 0) strcat(trans,",");
+	if((realm[0] == '/') && trans[0]) strcat(trans," ");
 	strcat(trans,realm);
 	new_trans->length = strlen(trans) + 1;
     }
     return 0;
 }
-
