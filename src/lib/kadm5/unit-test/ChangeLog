@@ -1,3 +1,9 @@
+2001-11-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* api.2/init-v2.exp: For test 101 failure, change port number 1 -
+	which is used by tcpmux under Irix, to 4 - which is unassigned by
+	IANA.
+
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
 	* api.0/init.exp: Silly typo fixed.
