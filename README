@@ -228,12 +228,14 @@ Appreciation Time!!!!  There are far too many people to try to thank
 them all; many people have contributed to the development of Kerberos
 V5.  This is only a partial listing....
 
+Thanks to Paul Vixie and the Internet Software Consortium for funding
+the work of Barry Jaspan.  This funding was invaluable for the OV
+administration server integration, as well as the 1.0 release
+preparation process.
+
 Thanks to John Linn, Scott Foote, and all of the folks at OpenVision
 Technologies, Inc., who donated their administration server for use in
 the MIT release of Kerberos.
-
-Thanks to Paul Vixie and the Internet Software Consortium for
-supporting the OV administration server integration work as well as 
 
 Thanks to Jeff Bigler, Mark Eichin, Marc Horowitz, Nancy Gilman, Ken
 Raeburn, and all of the folks at Cygnus Support, who provided
