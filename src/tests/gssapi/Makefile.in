@@ -6,7 +6,7 @@ DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS= t_imp_name.c
+SRCS= $(srcdir)/t_imp_name.c
 
 OBJS= t_imp_name.o
 
@@ -17,4 +17,12 @@ t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 clean::
 	$(RM) t_imp_name
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+t_imp_name.o: t_imp_name.c $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h
 

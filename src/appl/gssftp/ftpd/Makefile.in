@@ -74,3 +74,33 @@ popen.o: $(srcdir)/popen.c
 vers.o: $(srcdir)/vers.c
 
 # NOPOSTFIX
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+ftpd.o: ftpd.c $(SRCTOP)/appl/gssftp/arpa/ftp.h $(SRCTOP)/appl/gssftp/arpa/telnet.h \
+  $(SRCTOP)/include/syslog.h pathnames.h $(BUILDTOP)/include/libpty.h \
+  $(SRCTOP)/include/k5-util.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb524.h \
+  $(BUILDTOP)/include/krb524_err.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  ftpd_var.h secure.h
+ftpcmd.o: ftpcmd.c $(SRCTOP)/appl/gssftp/arpa/ftp.h \
+  $(SRCTOP)/include/syslog.h ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/appl/gssftp/arpa/telnet.h
+popen.o: popen.c ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h
+vers.o: vers.c
+glob.o: $(srcdir)/../ftp/glob.c $(SRCTOP)/appl/gssftp/ftp/ftp_var.h
+radix.o: $(srcdir)/../ftp/radix.c $(SRCTOP)/appl/gssftp/ftp/ftp_var.h
+secure.o: $(srcdir)/../ftp/secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h secure.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/appl/gssftp/arpa/ftp.h
+getdtablesize.o: $(srcdir)/../../bsd/getdtablesize.c
+

@@ -69,3 +69,30 @@ radix.o: $(srcdir)/radix.c
 secure.o: $(srcdir)/secure.c
 
 # NOPOSTFIX
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+cmds.o: cmds.c $(SRCTOP)/include/port-sockets.h $(SRCTOP)/appl/gssftp/arpa/ftp.h \
+  ftp_var.h pathnames.h
+cmdtab.o: cmdtab.c ftp_var.h
+domacro.o: domacro.c ftp_var.h
+ftp.o: ftp.c $(SRCTOP)/appl/gssftp/arpa/ftp.h $(SRCTOP)/appl/gssftp/arpa/telnet.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h ftp_var.h secure.h
+getpass.o: getpass.c ftp_var.h
+glob.o: glob.c ftp_var.h
+main.o: main.c ftp_var.h $(SRCTOP)/appl/gssftp/arpa/ftp.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h
+radix.o: radix.c ftp_var.h
+ruserpass.o: ruserpass.c ftp_var.h
+secure.o: secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h secure.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/appl/gssftp/arpa/ftp.h
+

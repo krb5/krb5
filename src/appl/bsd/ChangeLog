@@ -1,3 +1,7 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Use $(srcdir).
+
 2001-07-23  Ezra Peisach  <epeisach@mit.edu>
 
 	* setenv.c (setenv): Include stdlib.h for malloc prototypes. 

@@ -44,3 +44,10 @@ runenv.vals: runenv.vars
 site.exp: runenv.vals
 	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+t_inetd.o: t_inetd.c $(BUILDTOP)/include/com_err.h
+

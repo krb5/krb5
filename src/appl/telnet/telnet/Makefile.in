@@ -33,9 +33,9 @@ ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS=	authenc.c commands.c main.c network.c ring.c \
-	sys_bsd.c telnet.c terminal.c \
-	utilities.c $(GETOPT_SRC)
+SRCS=	$(srcdir)/authenc.c $(srcdir)/commands.c $(srcdir)/main.c $(srcdir)/network.c $(srcdir)/ring.c \
+	$(srcdir)/sys_bsd.c $(srcdir)/telnet.c $(srcdir)/terminal.c \
+	$(srcdir)/utilities.c $(GETOPT_SRC)
 ALLHC=	$(SRCS) \
 	defines.h externs.h fdset.h general.h \
 	ring.h types.h
@@ -70,3 +70,39 @@ telnet.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)
 terminal.o: externs.h ring.h types.h $(ARPA_TELNET)
 tn3270.o: defines.h externs.h fdset.h general.h ring.h $(ARPA_TELNET)
 utilities.o: defines.h externs.h fdset.h general.h ring.h $(ARPA_TELNET)
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+authenc.o: authenc.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  $(SRCTOP)/appl/telnet/libtelnet/encrypt.h $(SRCTOP)/appl/telnet/libtelnet/enc-proto.h \
+  $(SRCTOP)/appl/telnet/libtelnet/misc.h $(SRCTOP)/appl/telnet/libtelnet/misc-proto.h \
+  general.h ring.h externs.h defines.h types.h
+commands.o: commands.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  general.h ring.h externs.h defines.h types.h $(SRCTOP)/appl/telnet/libtelnet/auth.h \
+  $(SRCTOP)/appl/telnet/libtelnet/auth-proto.h $(SRCTOP)/appl/telnet/libtelnet/encrypt.h \
+  $(SRCTOP)/appl/telnet/libtelnet/enc-proto.h $(SRCTOP)/appl/telnet/libtelnet/misc-proto.h \
+  $(SRCTOP)/include/fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/port-sockets.h
+main.o: main.c $(SRCTOP)/appl/telnet/libtelnet/auth.h \
+  $(SRCTOP)/appl/telnet/libtelnet/auth-proto.h $(SRCTOP)/appl/telnet/libtelnet/encrypt.h \
+  $(SRCTOP)/appl/telnet/libtelnet/enc-proto.h ring.h \
+  externs.h defines.h
+network.o: network.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  ring.h defines.h externs.h fdset.h
+ring.o: ring.c ring.h general.h
+sys_bsd.o: sys_bsd.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  ring.h fdset.h defines.h externs.h types.h
+telnet.o: telnet.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  ring.h defines.h externs.h types.h general.h $(SRCTOP)/appl/telnet/libtelnet/auth.h \
+  $(SRCTOP)/appl/telnet/libtelnet/auth-proto.h $(SRCTOP)/appl/telnet/libtelnet/encrypt.h \
+  $(SRCTOP)/appl/telnet/libtelnet/enc-proto.h $(SRCTOP)/appl/telnet/libtelnet/misc-proto.h
+terminal.o: terminal.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  ring.h externs.h types.h $(SRCTOP)/appl/telnet/libtelnet/encrypt.h \
+  $(SRCTOP)/appl/telnet/libtelnet/enc-proto.h
+utilities.o: utilities.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  general.h fdset.h ring.h defines.h externs.h $(SRCTOP)/appl/telnet/libtelnet/auth.h \
+  $(SRCTOP)/appl/telnet/libtelnet/auth-proto.h $(SRCTOP)/appl/telnet/libtelnet/encrypt.h \
+  $(SRCTOP)/appl/telnet/libtelnet/enc-proto.h
+

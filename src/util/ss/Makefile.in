@@ -43,9 +43,8 @@ SRCS=	$(srcdir)/invocation.c $(srcdir)/help.c \
 	$(srcdir)/execute_cmd.c $(srcdir)/listen.c $(srcdir)/parse.c \
 	$(srcdir)/error.c $(srcdir)/prompt.c \
 	$(srcdir)/request_tbl.c $(srcdir)/list_rqs.c $(srcdir)/pager.c \
-	$(srcdir)/requests.c $(srcdir)/data.c \
-	ss_err.h
-# ss_err.h here, so that make depend catches it.
+	$(srcdir)/requests.c $(srcdir)/data.c
+depend-prerecurse:: ss_err.h
 
 std_rqs.o: std_rqs.c ss_err.h
 

@@ -85,3 +85,19 @@ LCLINTOPTS=+posixlib \
 
 do-lclint: $(SRCS)
 	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) $(SRCS) $(srcdir)/test.c
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+dyn_create.o: dyn_create.c dynP.h dyn.h
+dyn_put.o: dyn_put.c dynP.h dyn.h
+dyn_debug.o: dyn_debug.c dynP.h dyn.h
+dyn_delete.o: dyn_delete.c dynP.h dyn.h
+dyn_size.o: dyn_size.c dynP.h dyn.h
+dyn_append.o: dyn_append.c dynP.h dyn.h
+dyn_realloc.o: dyn_realloc.c dynP.h dyn.h
+dyn_paranoid.o: dyn_paranoid.c dynP.h dyn.h
+dyn_insert.o: dyn_insert.c dynP.h dyn.h
+dyn_initzero.o: dyn_initzero.c dynP.h dyn.h
+

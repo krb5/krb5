@@ -22,3 +22,10 @@ install::
 clean::
 	$(RM) resolve
 
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+resolve.o: resolve.c
+

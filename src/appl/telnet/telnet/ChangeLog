@@ -1,3 +1,7 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Use $(srcdir).
+
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* commands.c: Include netdb.h and fake-addrinfo.c.

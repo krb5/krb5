@@ -18,3 +18,14 @@ install::
 clean::
 	$(RM) kdb5_mkdums.o kdb5_mkdums
 
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+kdb5_mkdums.o: kdb5_mkdums.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
+
