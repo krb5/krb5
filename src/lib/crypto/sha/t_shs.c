@@ -32,12 +32,24 @@ static int compareSHSresults(shsInfo, shsTestLevel)
 SHS_INFO *shsInfo;
 int shsTestLevel;
 {
-    int i;
+    int i, fail = 0;
 
     /* Compare the returned digest and required values */
     for( i = 0; i < 5; i++ )
         if( shsInfo->digest[ i ] != shsTestResults[ shsTestLevel ][ i ] )
-            return( -1 );
+	    fail = 1;
+    if (fail) {
+	printf("\nExpected: ");
+	for (i = 0; i < 5; i++) {
+	    printf("%8.8lx ", shsTestResults[shsTestLevel][i]);
+	}
+	printf("\nGot:      ");
+	for (i = 0; i < 5; i++) {
+	    printf("%8.8lx ", shsInfo->digest[i]);
+	}
+	printf("\n");
+	return( -1 );
+    }
     return( 0 );
 }
 

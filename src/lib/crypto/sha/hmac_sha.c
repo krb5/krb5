@@ -16,19 +16,28 @@ hmac_sha(text, text_len, key, key_len, digest)
     krb5_octet k_ipad[PAD_SZ];	/* inner padding - key XORd with ipad */
     krb5_octet k_opad[PAD_SZ];	/* outer padding - key XORd with opad */
     int i;
+    krb5_octet *cp;
+    LONG *lp;
  
     /* sanity check parameters */
     if (!text || !key || !digest)
 	/* most heinous, probably should log something */
 	return EINVAL;
 
-    /* if key is longer than 64 bytes reset it to key=MD5(key) */
+    /* if key is longer than 64 bytes reset it to key=SHA(key) */
     if (key_len > sizeof(k_ipad)) {
 	shsInit(&context);
 	shsUpdate(&context, key, key_len);
 	shsFinal(&context);
 
-	memcpy(digest, context.digest, SHS_DIGESTSIZE);
+	cp = digest;
+	lp = context.digest;
+	while (cp < digest + SHS_DIGESTSIZE) {
+	    *cp++ = (*lp >> 24) & 0xff;
+	    *cp++ = (*lp >> 16) & 0xff;
+	    *cp++ = (*lp >> 8) & 0xff;
+	    *cp++ = *lp++ & 0xff;
+	}
 	key = digest;
 	key_len = SHS_DIGESTSIZE;
     }
@@ -62,7 +71,14 @@ hmac_sha(text, text_len, key, key_len, digest)
     shsUpdate(&context, text, text_len);
     shsFinal(&context);
 
-    memcpy(digest, context.digest, SHS_DIGESTSIZE);
+    cp = digest;
+    lp = context.digest;
+    while (cp < digest + SHS_DIGESTSIZE) {
+	*cp++ = (*lp >> 24) & 0xff;
+	*cp++ = (*lp >> 16) & 0xff;
+	*cp++ = (*lp >> 8) & 0xff;
+	*cp++ = *lp++ & 0xff;
+    }
     
     /*
      * perform outer SHA
@@ -72,7 +88,14 @@ hmac_sha(text, text_len, key, key_len, digest)
     shsUpdate(&context, digest, SHS_DIGESTSIZE);
     shsFinal(&context);
 
-    memcpy(digest, context.digest, SHS_DIGESTSIZE);
+    cp = digest;
+    lp = context.digest;
+    while (cp < digest + SHS_DIGESTSIZE) {
+	*cp++ = (*lp >> 24) & 0xff;
+	*cp++ = (*lp >> 16) & 0xff;
+	*cp++ = (*lp >> 8) & 0xff;
+	*cp++ = *lp++ & 0xff;
+    }
 
     return 0;
 }

@@ -33,7 +33,7 @@
 
 /* 32-bit rotate left - kludged with shifts */
 
-#define ROTL(n,X)  ( ( ( X ) << n ) | ( ( X ) >> ( 32 - n ) ) )
+#define ROTL(n,X)  (((X) << (n)) & 0xffffffff | ((X) >> (32 - n)))
 
 /* The initial expanding function.  The hash function is defined over an
    80-word expanded input array W, where the first 16 are copies of the input
@@ -71,7 +71,8 @@
    the next 20 values from the W[] array each time */
 
 #define subRound(a, b, c, d, e, f, k, data) \
-    ( e += ROTL( 5, a ) + f( b, c, d ) + k + data, b = ROTL( 30, b ) )
+    ( e += ROTL( 5, a ) + f( b, c, d ) + k + data, \
+      e &= 0xffffffff, b = ROTL( 30, b ) )
 
 /* Initialize the SHS values */
 
@@ -112,7 +113,7 @@ void SHSTransform(digest, data)
     C = digest[ 2 ];
     D = digest[ 3 ];
     E = digest[ 4 ];
-    memcpy( eData, data, SHS_DATASIZE );
+    memcpy(eData, data, sizeof (eData));
 
     /* Heavy mangling, in 4 sub-rounds of 20 interations each. */
     subRound( A, B, C, D, E, f1, K1, eData[  0 ] );
@@ -201,10 +202,15 @@ void SHSTransform(digest, data)
 
     /* Build message digest */
     digest[ 0 ] += A;
+    digest[ 0 ] &= 0xffffffff;
     digest[ 1 ] += B;
+    digest[ 1 ] &= 0xffffffff;
     digest[ 2 ] += C;
+    digest[ 2 ] &= 0xffffffff;
     digest[ 3 ] += D;
+    digest[ 3 ] &= 0xffffffff;
     digest[ 4 ] += E;
+    digest[ 4 ] &= 0xffffffff;
 }
 
 /* When run on a little-endian CPU we need to perform byte reversal on an
@@ -250,47 +256,93 @@ void shsUpdate(shsInfo, buffer, count)
     int count;
 {
     LONG tmp;
-    int dataCount;
+    int dataCount, canfill;
+    LONG *lp;
 
     /* Update bitcount */
     tmp = shsInfo->countLo;
-    if ( ( shsInfo->countLo = tmp + ( ( LONG ) count << 3 ) ) < tmp )
-        shsInfo->countHi++;             /* Carry from low to high */
+    shsInfo->countLo = tmp + (((LONG) count) << 3 );
+    if ((shsInfo->countLo &= 0xffffffff) < tmp)
+        shsInfo->countHi++;	/* Carry from low to high */
     shsInfo->countHi += count >> 29;
 
     /* Get count of bytes already in data */
-    dataCount = ( int ) ( tmp >> 3 ) & 0x3F;
+    dataCount = (int) (tmp >> 3) & 0x3F;
 
     /* Handle any leading odd-sized chunks */
-    if( dataCount )
-        {
-        BYTE *p = ( BYTE * ) shsInfo->data + dataCount;
+    if (dataCount) {
+	lp = shsInfo->data + dataCount / 4;
+	canfill = (count >= dataCount);
+	dataCount = SHS_DATASIZE - dataCount;
 
-        dataCount = SHS_DATASIZE - dataCount;
-        if( count < dataCount )
-            {
-            memcpy( p, buffer, count );
-            return;
-            }
-        memcpy( p, buffer, dataCount );
-        longReverse( shsInfo->data, SHS_DATASIZE );
-        SHSTransform( shsInfo->digest, shsInfo->data );
-        buffer += dataCount;
-        count -= dataCount;
-        }
+	if (dataCount % 4) {
+	    /* Fill out a full 32 bit word first if needed -- this
+	       is not very efficient (computed shift amount),
+	       but it shouldn't happen often. */
+	    while (dataCount % 4 && count > 0) {
+		*lp |= (LONG) *buffer++ << ((3 - dataCount++ % 4) * 8);
+		count--;
+	    }
+	    lp++;
+	}
+	while (lp < shsInfo->data + 16) {
+	    *lp = (LONG) *buffer++ << 24;
+	    *lp |= (LONG) *buffer++ << 16;
+	    *lp |= (LONG) *buffer++ << 8;
+	    *lp++ |= (LONG) *buffer++;
+	    if ((count -= 4) < 4 && lp < shsInfo->data + 16) {
+		*lp = 0;
+		switch (count % 4) {
+		case 3:
+		    *lp |= (LONG) buffer[2] << 8;
+		case 2:
+		    *lp |= (LONG) buffer[1] << 16;
+		case 1:
+		    *lp |= (LONG) buffer[0] << 24;
+		}
+		break;
+		count = 0;
+	    }
+	}
+	if (canfill) {
+	    SHSTransform(shsInfo->digest, shsInfo->data);
+	}
+    }
 
     /* Process data in SHS_DATASIZE chunks */
-    while( count >= SHS_DATASIZE )
-        {
-        memcpy( shsInfo->data, buffer, SHS_DATASIZE );
-        longReverse( shsInfo->data, SHS_DATASIZE );
-        SHSTransform( shsInfo->digest, shsInfo->data );
-        buffer += SHS_DATASIZE;
-        count -= SHS_DATASIZE;
-        }
+    while (count >= SHS_DATASIZE) {
+	lp = shsInfo->data;
+	while (lp < shsInfo->data + 16) {
+	    *lp = ((LONG) *buffer++) << 24;
+	    *lp |= ((LONG) *buffer++) << 16;
+	    *lp |= ((LONG) *buffer++) << 8;
+	    *lp++ |= (LONG) *buffer++;
+	}
+	SHSTransform(shsInfo->digest, shsInfo->data);
+	count -= SHS_DATASIZE;
+    }
 
-    /* Handle any remaining bytes of data. */
-    memcpy( shsInfo->data, buffer, count );
+    if (count > 0) {
+	lp = shsInfo->data;
+	while (count > 4) {
+	    *lp = ((LONG) *buffer++) << 24;
+	    *lp |= ((LONG) *buffer++) << 16;
+	    *lp |= ((LONG) *buffer++) << 8;
+	    *lp++ |= (LONG) *buffer++;
+	    count -= 4;
+	}
+	*lp = 0;
+	switch (count % 4) {
+	case 0:
+	    *lp |= ((LONG) buffer[3]);
+	case 3:
+	    *lp |= ((LONG) buffer[2]) << 8;
+	case 2:
+	    *lp |= ((LONG) buffer[1]) << 16;
+	case 1:
+	    *lp |= ((LONG) buffer[0]) << 24;
+	}
+    }
 }
 
 /* Final wrapup - pad to SHS_DATASIZE-byte boundary with the bit pattern
@@ -300,39 +352,41 @@ void shsFinal(shsInfo)
     SHS_INFO *shsInfo;
 {
     int count;
+    LONG *lp;
     BYTE *dataPtr;
 
     /* Compute number of bytes mod 64 */
-    count = ( int ) shsInfo->countLo;
-    count = ( count >> 3 ) & 0x3F;
+    count = (int) shsInfo->countLo;
+    count = (count >> 3) & 0x3F;
 
     /* Set the first char of padding to 0x80.  This is safe since there is
        always at least one byte free */
-    dataPtr = ( BYTE * ) shsInfo->data + count;
-    *dataPtr++ = 0x80;
+    lp = shsInfo->data + count / 4;
+    switch (count % 4) {
+    case 3:
+	*lp++ |= (LONG) 0x80;
+	break;
+    case 2:
+	*lp++ |= (LONG) 0x80 << 8;
+	break;
+    case 1:
+	*lp++ |= (LONG) 0x80 << 16;
+	break;
+    case 0:
+	*lp++ = (LONG) 0x80 << 24;
+    }
 
-    /* Bytes of padding needed to make 64 bytes */
-    count = SHS_DATASIZE - 1 - count;
-
-    /* Pad out to 56 mod 64 */
-    if( count < 8 )
-        {
-        /* Two lots of padding:  Pad the first block to 64 bytes */
-        memset( dataPtr, 0, count );
-        longReverse( shsInfo->data, SHS_DATASIZE );
-        SHSTransform( shsInfo->digest, shsInfo->data );
-
-        /* Now fill the next block with 56 bytes */
-        memset( shsInfo->data, 0, SHS_DATASIZE - 8 );
-        }
-    else
-        /* Pad block to 56 bytes */
-        memset( dataPtr, 0, count - 8 );
-
+    if (lp > shsInfo->data + 14) {
+	/* Pad out to 64 bytes if not enough room for length words */
+	*lp = 0;
+	SHSTransform(shsInfo->digest, shsInfo->data);
+	lp = shsInfo->data;
+    }
+    /* Pad out to 56 bytes */
+    while (lp < shsInfo->data + 14)
+	*lp++ = 0;
     /* Append length in bits and transform */
-    shsInfo->data[ 14 ] = shsInfo->countHi;
-    shsInfo->data[ 15 ] = shsInfo->countLo;
-
-    longReverse( shsInfo->data, SHS_DATASIZE - 8 );
-    SHSTransform( shsInfo->digest, shsInfo->data );
+    *lp++ = shsInfo->countHi;
+    *lp++ = shsInfo->countLo;
+    SHSTransform(shsInfo->digest, shsInfo->data);
 }

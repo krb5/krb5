@@ -1,3 +1,10 @@
+Tue Oct 28 16:37:18 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* shs.c, sha_glue.c, hmac_sha.c: Fix to deal with LONG wider than
+	32 bits.
+
+	* t_shs.c: Print out the actual and expected values on error.
+
 Sat Feb 22 18:52:09 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in

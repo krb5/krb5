@@ -25,6 +25,8 @@ krb5_sha_sum_func(in, in_length, seed, seed_length, outcksum)
 	krb5_checksum		FAR *outcksum;
 {
     krb5_octet *input = (krb5_octet *)in;
+    krb5_octet *cp;
+    LONG *lp;
     SHS_INFO working;
 
     if (outcksum->length < SHS_DIGESTSIZE)
@@ -37,9 +39,14 @@ krb5_sha_sum_func(in, in_length, seed, seed_length, outcksum)
     outcksum->checksum_type = CKSUMTYPE_NIST_SHA;
     outcksum->length = SHS_DIGESTSIZE;
 
-    memcpy((char *)outcksum->contents,
-	   (char *)&working.digest[0],
-	   outcksum->length);
+    cp = outcksum->contents;
+    lp = working.digest;
+    while (lp < working.digest + 16) {
+	*cp++ = (*lp >> 24) & 0xff;
+	*cp++ = (*lp >> 16) & 0xff;
+	*cp++ = (*lp >> 8) & 0xff;
+	*cp++ = (*lp++) & 0xff;
+    }
     memset((char *)&working, 0, sizeof(working));
     return 0;
 }
@@ -55,6 +62,8 @@ krb5_sha_verify_func(cksum, in, in_length, seed, seed_length)
     krb5_octet *input = (krb5_octet *)in;
     SHS_INFO working;
     krb5_error_code retval;
+    int i;
+    krb5_octet *cp;
 
     if (cksum->checksum_type != CKSUMTYPE_NIST_SHA)
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
@@ -66,10 +75,14 @@ krb5_sha_verify_func(cksum, in, in_length, seed, seed_length)
     shsFinal(&working);
 
     retval = 0;
-    if (memcmp((char *) cksum->contents,
-	       (char *) &working.digest[0],
-	       cksum->length))
-	retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    for (i = 0, cp = cksum->contents; i < 5; i++, cp += 4) {
+	if (working.digest[i] !=
+	    (LONG) cp[0] << 24 | (LONG) cp[1] << 16 |
+	    (LONG) cp[2] << 8 | (LONG) cp[3]) {
+	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	    break;
+	}
+    }
     memset((char *) &working, 0, sizeof(working));
     return retval;
 }
