@@ -48,6 +48,9 @@
 
 #include "foreachaddr.c"
 
+static krb5_error_code
+get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile);
+
 #ifdef TEST
 
 static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)

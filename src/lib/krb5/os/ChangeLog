@@ -1,3 +1,8 @@
+2002-07-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* localaddr.c (get_localaddrs): Add prototype before being used
+	for static function.
+
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* sn2princ.c: Include fake-addrinfo.h.
