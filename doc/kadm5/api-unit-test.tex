@@ -1429,8 +1429,8 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \Reason{Rejects null policy argument.}
 }
 
-\numtes{29}{
-\Reason{Rejects change pw_min_life greater than pw_max_life.}
+\numtest{29}{
+\Reason{Rejects pw_min_life greater than pw_max_life.}
 }
 
 
@@ -1601,7 +1601,7 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \Reason{Rejects null policy argument.}
 }
 
-\numtes{29}{
+\numtest{29}{
 \Reason{Rejects change which makes pw_min_life greater than
 	pw_max_life.}
 }
@@ -1715,8 +1715,9 @@ memory freed by this function is really freed.
 \Reason{Null princ succeeds.}
 }
 
-\numtes{2}{
+\numtest{2}{
 \Reason{Non-null princ succeeds.}
+}
 
 
 \section{ovsec_kadm_free_policy_ent}
@@ -1730,7 +1731,7 @@ memory freed by this function is really freed.
 }
 
 \numtest{2}{
-\reason{Non-null policy succeeds.}
+\Reason{Non-null policy succeeds.}
 }
 
 
