@@ -68,7 +68,6 @@ kg_oid_internalize(kcontext, argp, buffer, lenremain)
     krb5_octet		**buffer;
     size_t		*lenremain;
 {
-     krb5_error_code	kret;
      gss_OID oid;
      krb5_int32 ibuf;
      krb5_octet		*bp;
@@ -78,7 +77,7 @@ kg_oid_internalize(kcontext, argp, buffer, lenremain)
      remain = *lenremain;
 
      /* Read in and check our magic number */
-     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	return (EINVAL);
 
      if (ibuf != KV5M_GSS_OID)
@@ -98,7 +97,7 @@ kg_oid_internalize(kcontext, argp, buffer, lenremain)
 				  oid->length, &bp, &remain);
      
      /* Read in and check our trailing magic number */
-     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	return (EINVAL);
 
      if (ibuf != KV5M_GSS_OID)

@@ -1,3 +1,8 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* ser_sctx.c (kg_oid_internalize): Do away with local variable
+	that was set but never used.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Cleanup
