@@ -26,7 +26,6 @@
  */
 
 #include "k5-int.h"
-#include "kdbint.h"
 
 /* these are available to other funcs, and the pointers may be reassigned */
 
@@ -53,12 +52,13 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 #endif
 
 krb5_error_code
-krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
+krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, key)
     krb5_context context;
     krb5_principal mname;
     krb5_encrypt_block * eblock;
     krb5_boolean fromkeyboard;
     krb5_boolean twice;
+    char *keyfile;
     krb5_data * salt;
     krb5_keyblock * key;
 {
@@ -108,9 +108,9 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
 	(void) strcat(defkeyfile, "");
 	
 #ifdef ANSI_STDIO
-	if (!(kf = fopen(defkeyfile, "rb")))
+	if (!(kf = fopen((keyfile) ? keyfile : defkeyfile, "rb")))
 #else
-	if (!(kf = fopen(defkeyfile, "r")))
+	if (!(kf = fopen((keyfile) ? keyfile : defkeyfile, "r")))
 #endif
 	    return KRB5_KDB_CANTREAD_STORED;
 	if (fread((krb5_pointer) &keytype, 2, 1, kf) != 1) {

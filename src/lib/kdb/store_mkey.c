@@ -28,7 +28,6 @@
 
 #include <errno.h>
 #include "k5-int.h"
-#include "kdbint.h"
 
 /* Just in case sysincl.h didn't get it */
 

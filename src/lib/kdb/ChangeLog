@@ -1,3 +1,10 @@
+
+Mon Jul 17 15:17:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* fetch_mkey.c - Remove inclusion of kdbint.h and add handling of
+		stash file argument.
+	* store_mkey.c - Remove inclusion of kdbint.h.  The default name of
+		the stash file is in osconf.h now.
+
 Sat Jul  8 22:37:14 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb_dbm.c (kdb5_kdbm_db_create): Make sure the dbm context is
