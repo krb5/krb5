@@ -1,6 +1,8 @@
 NormalLibraryObjectRule()
 
-OBJS=	decode_kdc.o	\
+OBJS=	addr_comp.o	\
+	addr_srch.o	\
+	decode_kdc.o	\
 	decode_tkt.o	\
 	decrypt_tk.o	\
 	def_realm.o	\
@@ -19,9 +21,13 @@ OBJS=	decode_kdc.o	\
 	parse.o		\
 	princ_comp.o	\
 	rd_error.o	\
+	rd_req.o	\
+	rd_req_dec.o	\
 	unparse.o
 
-SRCS=	decode_kdc.c	\
+SRCS=	addr_comp.c	\
+	addr_srch.c	\
+	decode_kdc.c	\
 	decode_tkt.c	\
 	decrypt_tk.c	\
 	def_realm.c	\
@@ -40,6 +46,8 @@ SRCS=	decode_kdc.c	\
 	parse.c		\
 	princ_comp.c	\
 	rd_error.c	\
+	rd_req.c	\
+	rd_req_dec.c	\
 	unparse.c
 
 NormalLibraryTarget(krb,$(OBJS))
