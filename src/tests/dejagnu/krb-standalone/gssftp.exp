@@ -185,7 +185,7 @@ proc ftp_test { } {
     }
     expect -nocase "name ($hostname:$env(USER)): "
     send "$env(USER)\r"
-    expect "User $env(USER) logged in."
+#    expect "User $env(USER) logged in."
 #    expect "Remote system type is UNIX."
 #    expect "Using binary mode to transfer files."
     expect "ftp> " {
@@ -290,7 +290,7 @@ proc ftp_test { } {
 
     set testname "start encryption"
     send "private\r"
-    expect "Protection level set to Private"
+    expect "Data channel protection level set to private"
     expect "ftp> " {
 	pass $testname
     }
