@@ -1,3 +1,7 @@
+2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* init_ctx.c (DEFAULT_ETYPE_LIST): Include aes128-cts
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_in_tkt.c (get_in_tkt_enctypes): Now const.
