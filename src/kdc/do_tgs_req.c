@@ -97,8 +97,7 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     }
     
-    if (request->etype > max_cryptosystem ||
-	!csarray[request->etype]->system) {
+    if (!valid_etype(request->etype)) {
 	/* unsupported etype */
 
 	cleanup();
@@ -197,7 +196,7 @@ krb5_data **response;			/* filled in with a response packet */
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
 
-    if (isset(request->kdc_options, KDC_OPT_POSTDATED) ||
+    if (isset(request->kdc_options, KDC_OPT_DUPLICATE_SKEY) ||
 	isset(request->kdc_options, KDC_OPT_REUSE_SKEY))
 	set(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
     if (isset(request->kdc_options, KDC_OPT_VALIDATE)) {

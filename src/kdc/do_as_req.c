@@ -101,8 +101,7 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     }
 
-    if (request->etype > max_cryptosystem || request->etype < 0 ||
-	!csarray[request->etype]) {
+    if (!valid_etype(request->etype)) {
 	/* unsupported etype */
 
 	cleanup();
