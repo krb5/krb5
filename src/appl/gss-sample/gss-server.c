@@ -27,6 +27,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <sys/time.h>
+#include <time.h>
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -37,9 +39,12 @@ int send_token();
 int recv_token();
 void display_status();
 
+extern FILE *display_file;
+FILE *log;
+
 usage()
 {
-     fprintf(stderr, "Usage: gss-server [-port port] service_name\n");
+     fprintf(stderr, "Usage: gss-server [-port port] [-inetd] [-logfile file] service_name\n");
      exit(1);
 }
 
@@ -50,13 +55,26 @@ main(argc, argv)
      char *service_name;
      u_short port = 4444;
      int s;
+     int do_inetd = 0;
 
+     log = stdout;
      argc--; argv++;
      while (argc) {
 	  if (strcmp(*argv, "-port") == 0) {
 	       argc--; argv++;
 	       if (!argc) usage();
 	       port = atoi(*argv);
+	  } else if (strcmp(*argv, "-inetd") == 0) {
+	      do_inetd = 1;
+	  } else if (strcmp(*argv, "-logfile") == 0) {
+	      argc--; argv++;
+	      if (!argc) usage();
+	      log = fopen(*argv, "a");
+	      display_file = log;
+	      if (!log) {
+		  perror(*argv);
+		  exit(1);
+	      }
 	  } else
 	       break;
 	  argc--; argv++;
@@ -66,8 +84,14 @@ main(argc, argv)
 
      service_name = *argv;
 
-     if ((s = create_socket(port)) < 0)
-	  exit(1);
+     if (do_inetd == 0) {
+	 if ((s = create_socket(port)) < 0)
+	     exit(1);
+     } else {
+	 s = -1;
+	 close(1);
+	 close(2);
+     }
 
      if (sign_server(s, service_name) < 0)
 	  exit(1);
@@ -124,7 +148,9 @@ int create_socket(port)
  *
  * Arguments:
  *
- * 	s		(r) a TCP socket on which to listen for connections
+ * 	s		(r) a TCP socket on which to listen for connections.
+ * 			If s is -1, then assume that we were started out of 
+ * 			inetd and use file descriptor 0.
  * 	service_name	(r) the ASCII name of the GSS-API service to
  * 			establish a context as
  *
@@ -152,23 +178,29 @@ int sign_server(s, service_name)
      gss_ctx_id_t context;
      OM_uint32 maj_stat, min_stat;
      int s2;
+     time_t	now;
      
      if (server_acquire_creds(service_name, &server_creds) < 0)
 	  return -1;
      
      while (1) {
-	  /* Accept a TCP connection */
-	  if ((s2 = accept(s, NULL, 0)) < 0) {
-	       perror("accepting connection");
-	       exit(1);
-	  }
+	  if (s >= 0) {
+	       /* Accept a TCP connection */
+	      if ((s2 = accept(s, NULL, 0)) < 0) {
+		    perror("accepting connection");
+		    exit(1);
+	       }
+	  } else 
+	       s2 = 0;
 
 	  /* Establish a context with the client */
 	  if (server_establish_context(s2, server_creds, &context,
 				       &client_name) < 0)
 	       break;
 	  
-	  printf("Accepted connection: \"%s\"\n", client_name.value);
+	  time(&now);
+	  fprintf(log, "Accepted connection: \"%s\" at %s", 
+		  client_name.value, ctime(&now));
 	  (void) gss_release_buffer(&min_stat, &client_name);
 
 	  /* Receive the sealed message token */
@@ -185,7 +217,7 @@ int sign_server(s, service_name)
 
 	  (void) gss_release_buffer(&min_stat, &xmit_buf);
 
-	  printf("Received message: \"%s\"\n", msg_buf.value);
+	  fprintf(log, "Received message: \"%s\"\n", msg_buf.value);
 
 	  /* Produce a signature block for the message */
 	  maj_stat = gss_sign(&min_stat, context, GSS_C_QOP_DEFAULT,
@@ -214,6 +246,11 @@ int sign_server(s, service_name)
 
 	  /* Close TCP connection */
 	  close(s2);
+
+	  fflush(log);
+
+	  if (s < 0)
+	       break;
      }
 
      /*NOTREACHED*/
@@ -333,7 +370,7 @@ int server_establish_context(s, server_creds, context, client_name)
 
 	  if (send_tok.length != 0) {
 	       if (send_token(s, &send_tok) < 0) {
-		    fprintf(stderr, "failure sending token\n");
+		    fprintf(log, "failure sending token\n");
 		    return -1;
 	       }
 

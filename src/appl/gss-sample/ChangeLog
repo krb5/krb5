@@ -1,3 +1,15 @@
+Fri Apr 28 15:30:00 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-server.c (main, sign_server): Make changes to allow
+		gss-server to be fired out of inetd.  New options: -inetd
+		and -logfile.  The -logfile allows the output of
+		gss-server to be redirected to a file.
+
+	* gss-misc.c (send_token, recv_token, display_status_1): Add
+	        support for -logfile option.  If the external FILE
+		*display_file is set, redirect error messages to
+		display_file instead of stderr.
+
 Wed Apr 26 17:17:22 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use AC_CONST since we don't learn it from the krb5

@@ -32,6 +32,8 @@
 
 static void display_status_1();
 
+FILE *display_file = NULL;
+
 /*
  * Function: send_token
  *
@@ -56,6 +58,9 @@ int send_token(s, tok)
 {
      int len, ret;
 
+     if (display_file == 0)
+	 display_file = stderr;
+
      len = htonl(tok->length);
 
      ret = write(s, (char *) &len, 4);
@@ -63,7 +68,8 @@ int send_token(s, tok)
 	  perror("sending token length");
 	  return -1;
      } else if (ret != 4) {
-	  fprintf(stderr, "sending token length: %d of %d bytes written\n", 
+	  fprintf(display_file, 
+		  "sending token length: %d of %d bytes written\n", 
 		  ret, 4);
 	  return -1;
      }
@@ -73,7 +79,8 @@ int send_token(s, tok)
 	  perror("sending token data");
 	  return -1;
      } else if (ret != tok->length) {
-	  fprintf(stderr, "sending token data: %d of %d bytes written\n", 
+	  fprintf(display_file, 
+		  "sending token data: %d of %d bytes written\n", 
 		  ret, tok->length);
 	  return -1;
      }
@@ -108,12 +115,16 @@ int recv_token(s, tok)
 {
      int ret;
 
+     if (display_file == 0)
+	 display_file = stderr;
+
      ret = read(s, (char *) &tok->length, 4);
      if (ret < 0) {
 	  perror("reading token length");
 	  return -1;
      } else if (ret != 4) {
-	  fprintf(stderr, "reading token length: %d of %d bytes read\n", 
+	  fprintf(display_file, 
+		  "reading token length: %d of %d bytes read\n", 
 		  ret, 4);
 	  return -1;
      }
@@ -121,7 +132,8 @@ int recv_token(s, tok)
      tok->length = ntohl(tok->length);
      tok->value = (char *) malloc(tok->length);
      if (tok->value == NULL) {
-	  fprintf(stderr, "Out of memory allocating token data\n");
+	  fprintf(display_file, 
+		  "Out of memory allocating token data\n");
 	  return -1;
      }
 
@@ -131,7 +143,8 @@ int recv_token(s, tok)
 	  free(tok->value);
 	  return -1;
      } else if (ret != tok->length) {
-	  fprintf(stderr, "sending token data: %d of %d bytes written\n", 
+	  fprintf(display_file, 
+		  "sending token data: %d of %d bytes written\n", 
 		  ret, tok->length);
 	  free(tok->value);
 	  return -1;
