@@ -463,8 +463,7 @@ krb5int_cm_call_select (const struct select_state *in,
 	   out->max,
 	   &out->rfds, &out->wfds, &out->xfds, out->max,
 	   timo);
-    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds,
-		   &out->end_time);
+    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, timo);
     e = SOCKET_ERRNO;
 
     dprint("select returns %d", *sret);
