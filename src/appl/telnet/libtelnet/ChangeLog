@@ -1,3 +1,8 @@
+2002-03-14  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos5.c kerberos.c  (Data): Don't overflow
+	buffer. [telnet/1073] 
+
 2002-03-13  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Do not explicitly add getent.o and setenv.o to

@@ -97,7 +97,7 @@ static void kerberos5_forward(Authenticator *);
 
 #endif	/* FORWARD */
 
-static unsigned char str_data[2048] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
+static unsigned char str_data[8192] = {IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V5, };
 /*static unsigned char str_name[1024] = { IAC, SB, TELOPT_AUTHENTICATION,
 					TELQUAL_NAME, };*/
@@ -138,6 +138,7 @@ Data(ap, type, d, c)
 {
         unsigned char *p = str_data + 4;
 	unsigned char *cd = (unsigned char *)d;
+	size_t spaceleft = sizeof(str_data)-4;
 
 	if (c == -1)
 		c = strlen((char *)cd);
@@ -153,9 +154,17 @@ Data(ap, type, d, c)
 	*p++ = ap->type;
 	*p++ = ap->way;
 	*p++ = type;
+	spaceleft -= 3;
         while (c-- > 0) {
-                if ((*p++ = *cd++) == IAC)
-                        *p++ = IAC;
+if ((*p++ = *cd++) == IAC) {
+*p++ = IAC;
+spaceleft--;
+}
+if (--spaceleft <= 4) {
+errno = ENOMEM;
+return -1;
+}
+
         }
         *p++ = IAC;
         *p++ = SE;
