@@ -1,3 +1,14 @@
+Sat Oct 22 09:54:50 1994    (tytso@rsx-11)
+
+	* list_rqs.c (ss_list_requests): 
+	* listen.c (ss_listen): 
+	* configure.in: Add AC_RETSIGTYPE to get proper return type for
+		signal hanlders.
+
+Fri Oct 21 21:07:16 1994    (tytso@rsx-11)
+
+	* Makefile.in (SED): Don't specify an explicit pathname for sed.
+
 Tue Oct 11 12:41:40 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Don't rm the awk and sed scripts during a make clean!

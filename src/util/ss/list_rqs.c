@@ -34,7 +34,7 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
     FILE *output;
     int fd;
     int mask;
-    int (*func)();
+    RETSIGTYPE (*func)();
 #ifndef WAIT_USES_INT
     union wait waitb;
 #else

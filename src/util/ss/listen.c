@@ -21,7 +21,7 @@
 static ss_data *current_info;
 static jmp_buf listen_jmpb;
 
-static int print_prompt()
+static RETSIGTYPE print_prompt()
 {
 #ifdef BSD
     /* put input into a reasonable mode */
@@ -37,7 +37,7 @@ static int print_prompt()
     (void) fflush(stdout);
 }
 
-static int listen_int_handler()
+static RETSIGTYPE listen_int_handler()
 {
     putc('\n', stdout);
     longjmp(listen_jmpb, 1);
@@ -47,9 +47,9 @@ int ss_listen (sci_idx)
     int sci_idx;
 {
     register char *cp;
-    register int (*sig_cont)();
+    register RETSIGTYPE (*sig_cont)();
     register ss_data *info;
-    int (*sig_int)(), (*old_sig_cont)();
+    RETSIGTYPE (*sig_int)(), (*old_sig_cont)();
     char input[BUFSIZ];
     char buffer[BUFSIZ];
     char *end = buffer;
@@ -59,7 +59,7 @@ int ss_listen (sci_idx)
     ss_data *old_info = current_info;
     
     current_info = info = ss_info(sci_idx);
-    sig_cont = (int (*)())0;
+    sig_cont = (RETSIGTYPE (*)())0;
     info->abort = 0;
     mask = sigblock(sigmask(SIGINT));
     memcpy(old_jmpb, listen_jmpb, sizeof(jmp_buf));

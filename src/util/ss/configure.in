@@ -15,6 +15,7 @@ CHECK_DIRENT
 CHECK_FCNTL
 CHECK_WAIT_TYPE
 CHECK_SIGPROCMASK
+AC_RETSIGTYPE
 CHECK_STDARG
 CopySrcHeader(ss.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
