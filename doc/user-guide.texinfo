@@ -1,7 +1,7 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
 @c guide
-@setfilename kerberos-user.info
+@setfilename krb5-user.info
 @settitle Kerberos V5 UNIX User's Guide
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
@@ -55,12 +55,12 @@ This file describes how to use the @value{PRODUCT} client programs.
 
 @menu
 * Introduction::                
-* @value{PRODUCT} Tutorial::    
-* @value{PRODUCT} Reference::   
+* Kerberos V5 Tutorial::        
+* Kerberos V5 Reference::       
 * Kerberos Glossary::           
 @end menu
 
-@node Introduction, @value{PRODUCT} Tutorial, Top, Top
+@node Introduction, Kerberos V5 Tutorial, Top, Top
 @chapter Introduction
 
 @value{PRODUCT} is based on the Kerberos V5 authentication system
@@ -161,7 +161,7 @@ the machine @code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}} would be in
 the realm @code{@value{PRIMARYREALM}}.
 @end itemize
 
-@node @value{PRODUCT} Tutorial, @value{PRODUCT} Reference, Introduction, Top
+@node Kerberos V5 Tutorial, Kerberos V5 Reference, Introduction, Top
 @chapter @value{PRODUCT} Tutorial
 
 This tutorial is intended to familiarize you with the @value{PRODUCT}
@@ -185,13 +185,13 @@ see one of these, substitute your username, hostname, or domain name
 accordingly.
 
 @menu
-* Setting Up to Use @value{PRODUCT}::  
+* Setting Up to Use Kerberos V5::  
 * Ticket Management::           
 * Password Management::         
-* @value{PRODUCT} Applications::  
+* Kerberos V5 Applications::    
 @end menu
 
-@node Setting Up to Use @value{PRODUCT}, Ticket Management, @value{PRODUCT} Tutorial, @value{PRODUCT} Tutorial
+@node Setting Up to Use Kerberos V5, Ticket Management, Kerberos V5 Tutorial, Kerberos V5 Tutorial
 @section Setting Up to Use @value{PRODUCT}
 
 Your system administrator will have installed the @value{PRODUCT}
@@ -206,7 +206,7 @@ directories @code{/bin} and @code{/usr/bin} so you will get the
 @value{PRODUCT} network programs, rather than the standard UNIX
 versions, when you type their command names.
 
-@node Ticket Management, Password Management, Setting Up to Use @value{PRODUCT}, @value{PRODUCT} Tutorial
+@node Ticket Management, Password Management, Setting Up to Use Kerberos V5, Kerberos V5 Tutorial
 @section Ticket Management
 
 On many systems, Kerberos is built into the login program, and you get
@@ -524,7 +524,7 @@ shell%}
 @vfil
 @end iftex
 @need 2000
-@node Password Management, @value{PRODUCT} Applications, Ticket Management, @value{PRODUCT} Tutorial
+@node Password Management, Kerberos V5 Applications, Ticket Management, Kerberos V5 Tutorial
 @section Password Management
 
 Your password is the only way Kerberos has of verifying your identity.
@@ -737,7 +737,7 @@ having to type the root password over the network.
 @end iftex
 @need 2000
 
-@node @value{PRODUCT} Applications,  , Password Management, @value{PRODUCT} Tutorial
+@node Kerberos V5 Applications,  , Password Management, Kerberos V5 Tutorial
 @section @value{PRODUCT} Applications
 
 @value{PRODUCT} is a @dfn{single-sign-on} system.  This means that you
@@ -768,7 +768,7 @@ programs with the Kerberos features added.
 * ksu::                         
 @end menu
 
-@node Overview of Additional Features, telnet, @value{PRODUCT} Applications, @value{PRODUCT} Applications
+@node Overview of Additional Features, telnet, Kerberos V5 Applications, Kerberos V5 Applications
 @subsection Overview of Additional Features
 
 The @value{PRODUCT} @dfn{network programs} are those programs that
@@ -796,7 +796,7 @@ functions added in the @value{PRODUCT} package.
 @vfil
 @end iftex
 @need 2000
-@node telnet, rlogin, Overview of Additional Features, @value{PRODUCT} Applications
+@node telnet, rlogin, Overview of Additional Features, Kerberos V5 Applications
 @subsection telnet
 
 The @value{PRODUCT} @code{telnet} command works exactly like the
@@ -916,7 +916,7 @@ destroys them when it exits.  The full set of options to @value{PRODUCT}
 @vfil
 @end iftex
 @need 2000
-@node rlogin, FTP, telnet, @value{PRODUCT} Applications
+@node rlogin, FTP, telnet, Kerberos V5 Applications
 @subsection rlogin
 
 @need 1000
@@ -1014,7 +1014,7 @@ destroys them when it exits.  The full set of options to @value{PRODUCT}
 @vfil
 @end iftex
 @need 2000
-@node FTP, rsh, rlogin, @value{PRODUCT} Applications
+@node FTP, rsh, rlogin, Kerberos V5 Applications
 @subsection FTP
 
 @need 1000
@@ -1078,7 +1078,7 @@ in the Reference section of this manual.  (@pxref{FTP Reference})
 @vfil
 @end iftex
 @need 2000
-@node rsh, rcp, FTP, @value{PRODUCT} Applications
+@node rsh, rcp, FTP, Kerberos V5 Applications
 @subsection rsh
 
 @need 1000
@@ -1136,7 +1136,7 @@ destroys them when it exits.  The full set of options to @value{PRODUCT}
 @vfil
 @end iftex
 @need 2000
-@node rcp, ksu, rsh, @value{PRODUCT} Applications
+@node rcp, ksu, rsh, Kerberos V5 Applications
 @subsection rcp
 
 @need 1000
@@ -1171,7 +1171,7 @@ Reference})
 @vfil
 @end iftex
 @need 2000
-@node ksu,  , rcp, @value{PRODUCT} Applications
+@node ksu,  , rcp, Kerberos V5 Applications
 @subsection ksu
 
 The @value{PRODUCT} @code{ksu} program replaces the standard UNIX su
@@ -1349,7 +1349,7 @@ after @samp{-a} to the target shell.
 The full set of options to @value{PRODUCT} @code{ksu} are discussed
 in the Reference section of this manual.  (@pxref{ksu Reference})
 
-@node @value{PRODUCT} Reference, Kerberos Glossary, @value{PRODUCT} Tutorial, Top
+@node Kerberos V5 Reference, Kerberos Glossary, Kerberos V5 Tutorial, Top
 @chapter @value{PRODUCT} Reference
 
 This section will include copies of the manual pages for the
@@ -1409,7 +1409,7 @@ M-x manual-entry @emph{command}
 * krdist Reference::            
 @end menu
 
-@node kinit Reference, klist Reference, @value{PRODUCT} Reference, @value{PRODUCT} Reference
+@node kinit Reference, klist Reference, Kerberos V5 Reference, Kerberos V5 Reference
 @section kinit Reference
 
 @iftex
@@ -1425,7 +1425,7 @@ M-x manual-entry @emph{command}
 Type @kbd{M-x manual-entry kinit} to read this manual page.
 @end ifinfo
 
-@node klist Reference, kdestroy Reference, kinit Reference, @value{PRODUCT} Reference
+@node klist Reference, kdestroy Reference, kinit Reference, Kerberos V5 Reference
 @section klist Reference
 
 @iftex
@@ -1437,7 +1437,7 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 Type @kbd{M-x manual-entry klist} to read this manual page.
 @end ifinfo
 
-@node kdestroy Reference, kpasswd Reference, klist Reference, @value{PRODUCT} Reference
+@node kdestroy Reference, kpasswd Reference, klist Reference, Kerberos V5 Reference
 @section kdestroy Reference
 
 @iftex
@@ -1449,7 +1449,7 @@ Type @kbd{M-x manual-entry klist} to read this manual page.
 Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @end ifinfo
 
-@node kpasswd Reference, telnet Reference, kdestroy Reference, @value{PRODUCT} Reference
+@node kpasswd Reference, telnet Reference, kdestroy Reference, Kerberos V5 Reference
 @section kpasswd Reference
 
 @iftex
@@ -1461,7 +1461,7 @@ Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @end ifinfo
 
-@node telnet Reference, rlogin Reference, kpasswd Reference, @value{PRODUCT} Reference
+@node telnet Reference, rlogin Reference, kpasswd Reference, Kerberos V5 Reference
 @section telnet Reference
 
 @iftex
@@ -1509,7 +1509,7 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 Type @kbd{M-x manual-entry telnet} to read this manual page.
 @end ifinfo
 
-@node rlogin Reference, FTP Reference, telnet Reference, @value{PRODUCT} Reference
+@node rlogin Reference, FTP Reference, telnet Reference, Kerberos V5 Reference
 @section rlogin Reference
 
 @iftex
@@ -1525,7 +1525,7 @@ Type @kbd{M-x manual-entry telnet} to read this manual page.
 Type @kbd{M-x manual-entry rlogin} to read this manual page.
 @end ifinfo
 
-@node FTP Reference, rsh Reference, rlogin Reference, @value{PRODUCT} Reference
+@node FTP Reference, rsh Reference, rlogin Reference, Kerberos V5 Reference
 @section FTP Reference
 
 @iftex
@@ -1565,7 +1565,7 @@ Type @kbd{M-x manual-entry rlogin} to read this manual page.
 Type @kbd{M-x manual-entry FTP} to read this manual page.
 @end ifinfo
 
-@node rsh Reference, rcp Reference, FTP Reference, @value{PRODUCT} Reference
+@node rsh Reference, rcp Reference, FTP Reference, Kerberos V5 Reference
 @section rsh Reference
 
 @iftex
@@ -1581,7 +1581,7 @@ Type @kbd{M-x manual-entry FTP} to read this manual page.
 Type @kbd{M-x manual-entry rsh} to read this manual page.
 @end ifinfo
 
-@node rcp Reference, ksu Reference, rsh Reference, @value{PRODUCT} Reference
+@node rcp Reference, ksu Reference, rsh Reference, Kerberos V5 Reference
 @section rcp Reference
 
 @iftex
@@ -1597,7 +1597,7 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end ifinfo
 
-@node ksu Reference, krdist Reference, rcp Reference, @value{PRODUCT} Reference
+@node ksu Reference, krdist Reference, rcp Reference, Kerberos V5 Reference
 @section ksu Reference
 
 @iftex
@@ -1625,7 +1625,7 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 Type @kbd{M-x manual-entry ksu} to read this manual page.
 @end ifinfo
 
-@node krdist Reference,  , ksu Reference, @value{PRODUCT} Reference
+@node krdist Reference,  , ksu Reference, Kerberos V5 Reference
 @section krdist Reference
 
 @iftex
@@ -1661,7 +1661,7 @@ Type @kbd{M-x manual-entry ksu} to read this manual page.
 Type @kbd{M-x manual-entry krdist} to read this manual page.
 @end ifinfo
 
-@node Kerberos Glossary,  , @value{PRODUCT} Reference, Top
+@node Kerberos Glossary,  , Kerberos V5 Reference, Top
 @appendix Kerberos Glossary
 
 @include glossary.texinfo

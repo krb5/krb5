@@ -1,7 +1,7 @@
 @c Set the "MIT" flag for the MIT edition; set the "CYGNUS" flag for
 @c the Cygnus edition.
-@set MIT
 @clear CYGNUS
+@set MIT
 @set ADMINUSER joeadmin
 @set COMPANY MIT
 @set KDCSERVER kerberos
@@ -24,7 +24,7 @@
 @set INSTALLDIR /usr/@value{LCPRODUCT}
 @set PREVINSTALLDIR @value{INSTALLDIR}
 @set ROOTDIR /usr/@value{LCPRODUCT}
-@set BINDIR @value{ROOTDIR}/bin
+@set BINDIR /usr/@value{LCPRODUCT}/bin
 @set SECONDDOMAIN fubar.org
 @set SECONDREALM FUBAR.ORG
 @set UPDATED @today

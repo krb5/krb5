@@ -1,3 +1,6 @@
+If you have problems installing @value{PRODUCT}, please use the
+@code{send-pr} program to fill out a Problem Report.  
+
 The @code{send-pr} program is installed in the directory
 @code{@value{ROOTDIR}/bin}.
 

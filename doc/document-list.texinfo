@@ -1,3 +1,6 @@
+This document is one piece of the document set for @value{PRODUCT}.  The
+documents, and their intended audiences, are:
+
 @itemize @bullet
 @item
 @b{@value{PRODUCT} Installation Guide}:  a concise guide for installing

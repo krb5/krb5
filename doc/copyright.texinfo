@@ -1,3 +1,4 @@
+@ifset CYGNUS
 Copyright @copyright{} 1993, 1994, 1995, 1996 @value{COMPANY}.
 @iftex
 @vskip 12pt
@@ -8,6 +9,7 @@ Copyright @copyright{} 1993, 1994, 1995, 1996 @value{COMPANY}.
 @value{PRODUCT} includes documentation and software developed at the
 Massachusetts Institute of Technology, which includes this copyright
 information:
+@end ifset
 
 Copyright @copyright{} 1995 by the Massachusetts Institute of Technology. 
 

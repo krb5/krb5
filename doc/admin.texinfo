@@ -55,30 +55,20 @@ installation.
 @c M-x texinfo-every-node-update will take care of calculating the
 @c node's forward and back pointers.
 @c
+@c ---------------------------------------------------------------------
 
 @menu
 * Introduction::                
 * How Kerberos Works::          
 * Administrating Kerberos Database Entries::  
 * Application Servers::         
-* Updates::                     
 * Backups of Secure Hosts::     
-* Support::                     
 * Bug Reporting::               
 * Appendix::                    
 @end menu
 
-@c ---------------------------------------------------------------------
-
 @node Introduction, How Kerberos Works, Top, Top
 @chapter Introduction
-
-@ifset CYGNUS
-Congratulations on your purchase of @value{PRODUCT}.  @value{COMPANY}
-believes @value{PRODUCT} provides the best network security available.
-Please let us know if we can be of assistance in getting your
-installation of @value{PRODUCT} set up and running.
-@end ifset
 
 @menu
 * Why Should I use Kerberos?::  
@@ -387,7 +377,6 @@ uses that service ticket to authenticate to KADM5.
 * Restoring a Kerberos Database from a Dump File::  
 * Creating a Stash File::       
 * Creating and Destroying a Kerberos Database::  
-* The KDC Logs::                
 @end menu
 
 @node Kadmin Options, Date Format, Administrating Kerberos Database Entries, Administrating Kerberos Database Entries
@@ -436,24 +425,29 @@ argument.  The date can appear in a wide variety of formats, such as:
 
 @smallexample
 @group
-1 month ago
-2 hours ago
-400000 seconds ago
-last year
-this Monday
-next Monday
+"15 minutes"
+"7 days"
+"1 month"
+"2 hours"
+"400000 seconds"
+"next year"
+"this Monday"
+"next Monday"
 yesterday
 tomorrow
 now
-second Monday
-a fortnight ago
-3/31/92 10:00:07 PST
-January 23, 1987 10:05pm
-22:00 GMT
+"second Monday"
+fortnight
+"3/31/92 10:00:07 PST"
+"January 23, 1987 10:05pm"
+"22:00 GMT"
 @end group
 @end smallexample
 
-All of these are case-insensitive.  The following is a list of all of
+Note that if the date specification contains spaces, you must enclose it
+in double quotes.  Note also that you cannot use a number without a
+unit.  (I.e., ``"60 seconds"'' is correct, but ``60'' is incorrect.)
+All keywords are case-insensitive.  The following is a list of all of
 the allowable keywords.
 
 @table @b
@@ -480,12 +474,6 @@ zones.  A complete listing appears in @ref{kadmin Time Zones}.
 @item 12-hour Time Delimiters
 am, pm
 @end table
-
-@menu
-* Principals::                  
-* Policies::                    
-* The KDC Logs::                
-@end menu
 
 @node Principals, Policies, Date Format, Administrating Kerberos Database Entries
 @section Principals
@@ -532,7 +520,7 @@ For example, suppose you wanted to view the attributes of the principals
 @group
 @b{shell%} kadmin
 @b{kadmin:} getprinc @value{RANDOMUSER1}/root
-@b{Principal: @value{RANDOMUSER1}/admin@@@value{PRIMARYREALM}
+@b{Principal: @value{RANDOMUSER1}/root@@@value{PRIMARYREALM}
 Key version: 3
 Maximum life: 1 day 00:00:00
 Maximum renewable life: 7 days 00:00:00
@@ -557,7 +545,7 @@ the fields as a quoted, tab-separated string.  For example:
 @b{kadmin:} getprinc -terse systest
 @b{systest@@@value{PRIMARYREALM}	3	86400	604800	1
 785926535	753241234	785900000
-@value{RANDOMUSER1}/admin@@@value{PRIMARYREALM}	786100034	0
+@value{ADMINUSER}/admin@@@value{PRIMARYREALM}	786100034	0
 0
 kadmin:}
 @end group
@@ -967,12 +955,12 @@ For example:
 
 @smallexample
 @group
-@b{kadmin:} renprinc tlyutest test0
+@b{kadmin:} renprinc test test0
 @b{Are you sure you want to rename the principal
 "test@@@value{PRIMARYREALM}" to
-"test2@@@value{PRIMARYREALM}"? (yes/no):} yes
+"test0@@@value{PRIMARYREALM}"? (yes/no):} yes
 @b{Principal "test@@@value{PRIMARYREALM}" renamed to
-"test2@@@value{PRIMARYREALM}".
+"test0@@@value{PRIMARYREALM}".
 Make sure that you have removed "test@@@value{PRIMARYREALM}" from
 all ACLs before reusing.
 kadmin:}
@@ -1300,7 +1288,7 @@ kdb5_util: Warning: proceeding without master key}
 If you do not specify a stash file, @code{kdb5_util} will stash the key
 in the file specified in your @code{kdc.conf} file.
 
-@node Creating and Destroying a Kerberos Database, The KDC Logs, Creating a Stash File, Administrating Kerberos Database Entries
+@node Creating and Destroying a Kerberos Database,  , Creating a Stash File, Administrating Kerberos Database Entries
 @section Creating and Destroying a Kerberos Database
 
 If you need to create a new Kerberos database, use the @code{kdb5_util}
@@ -1336,13 +1324,13 @@ It is important that you NOT FORGET this password.}
 @end smallexample
 
 @ignore
-@node The KDC Logs,  , Creating and Destroying a Kerberos Database, Administrating Kerberos Database Entries
-@section The KDC Logs
+@c @node The KDC Logs,  , Creating and Destroying a Kerberos Database, Administrating Kerberos Database Entries
+@c @section The KDC Logs
 
 This will have to wait until the next release.  *sigh*
 @end ignore
 
-@node Application Servers, Updates, Administrating Kerberos Database Entries, Top
+@node Application Servers, Backups of Secure Hosts, Administrating Kerberos Database Entries, Top
 @chapter Application Servers
 
 If you need to install the @value{PRODUCT} programs on an application
@@ -1358,7 +1346,6 @@ the KDCs.
 * Clock Skew::                  
 * Getting DNS Information Correct::  
 * Configuring Your Firewall to Work With @value{PRODUCT}::  
-* Enabling Users to Connect from Off-Site::  
 @end menu
 
 @node Keytabs, Clock Skew, Application Servers, Application Servers
@@ -1555,7 +1542,7 @@ If you telnet to the host with a fresh credentials cache (ticket file),
 and then @code{klist}, the host's service principal should be
 @i{host/fully-qualified-hostname@@REALM_NAME}.
 
-@node Configuring Your Firewall to Work With @value{PRODUCT}, Enabling Users to Connect from Off-Site, Getting DNS Information Correct, Application Servers
+@node Configuring Your Firewall to Work With @value{PRODUCT},  , Getting DNS Information Correct, Application Servers
 @section Configuring Your Firewall to Work With @value{PRODUCT}
 
 If you need off-site users to be able to get Kerberos tickets in your
@@ -1639,70 +1626,13 @@ from @code{ftp.livingston.com}, in the location:
 Security}, by David Curry, is also a good starting point.
 
 @ignore
-@node Enabling Users to Connect from Off-Site,  , Configuring Your Firewall to Work With @value{PRODUCT}, Application Servers
-@section Enabling Users to Connect from Off-Site
+@c @node Enabling Users to Connect from Off-Site,  , Configuring Your Firewall to Work With @value{PRODUCT}, Application Servers
+@c @section Enabling Users to Connect from Off-Site
 
 This will have to wait until the next release.  *sigh*
 @end ignore
 
-@ifset CYGNUS
-@node Updates, Backups of Secure Hosts, Application Servers, Top
-@chapter Updates
-
-Because the directory into which @value{PRODUCT} installs itself
-contains the release name, it is easy to install a new release of
-@value{PRODUCT}, and to de-install an old one.  If you have a problem
-with a new release, it is equally easy to revert to the earlier release.
-These procedures will also work if you are updating from any other
-version of Kerberos V5.
-
-@menu
-* Updating KDCs::               
-* Updating Application Servers::  
-@end menu
-
-@node Updating KDCs, Updating Application Servers, Updates, Updates
-@section Updating KDCs
-
-To update a KDC from an earlier version of @value{PRODUCT} or of
-Kerberos V5, you need to do the following:
-
-@enumerate
-@item
-Install the new software.
-@item
-Copy your @code{kdc.conf} file and stash file from the old installation
-to the new one.  For example, if you were upgrading from @value{PRODUCT}
-version @value{PREVRELEASE} to version @value{RELEASE}, you would have
-to copy these files from the directory @value{PREVINSTALLDIR} to the
-directory @value{INSTALLDIR}.  Be sure the new copy of the stash file
-has the correct name.  (The default is @code{.k5stash}, unless you have
-specified something different in your @code{kdc.conf} file.)
-@item
-Create a dump of the old database, using whichever old command you used
-with that release (@i{e.g.,} the @code{kdb5_dump} command).
-@item
-Load the dumpfile into the new database in the new location, using the
-@code{kdb5_util} @code{load} command.  Be sure to give @code{load}
-the argument for the correct dump format.
-@item
-Change any symbolic links you have (@i{e.g.},
-@code{/usr/@value{LCPRODUCT}}) so that they point to the new
-installation.
-@end enumerate
-@c Reference to upgrading from Kerberos V4 document, once it's written.
-
-@node Updating Application Servers,  , Updating KDCs, Updates
-@section Updating Clients and Application Servers
-
-To update a client or application server, you need only to install the
-new release and change any symbolic links to point to the new programs.
-Other than any functionality changes in the programs, the upgrade should
-be completely user-transparent.
-@c Reference to upgrading from Kerberos V4 document, once it's written.
-@end ifset
-
-@node Backups of Secure Hosts, Support, Updates, Top
+@node Backups of Secure Hosts, Bug Reporting, Application Servers, Top
 @chapter Backups of Secure Hosts
 
 When you back up a secure host, you should exclude the host's keytab
@@ -1738,26 +1668,7 @@ network.)  Then if your database becomes corrupted, you can load the
 most recent dump onto the master KDC.  (@xref{Restoring a Kerberos
 Database from a Dump File}.)
 
-@ifset CYGNUS
-@node Support, Bug Reporting, Backups of Secure Hosts, Top
-@chapter Support
-
-@menu
-* Supported Functionalities::   
-* Using sendpr::                
-@end menu
-
-@node Supported Functionalities, Using sendpr, Support, Support
-@section Supported Functionalities
-
-@node Using sendpr,  , Supported Functionalities, Support
-@section Using sendpr
-
-@include send-pr.texinfo
-@end ifset
-
-@ifset MIT
-@node Bug Reporting, Appendix, Support, Top
+@node Bug Reporting, Appendix, Backups of Secure Hosts, Top
 @chapter Bug Reporting
 
 In any complex software, there will be bugs. Please send bug reports or
@@ -1768,7 +1679,6 @@ changes.  Bug reports that include proposed fixes are especially
 welcome.  If you do include fixes, please send them using either context
 diffs or unified diffs (using @samp{diff -c} or @samp{diff -u},
 respectively).
-@end ifset
 
 @node Appendix,  , Bug Reporting, Top
 @appendix Appendix

@@ -1,7 +1,5 @@
 \input texinfo @c -*-texinfo-*-
 @c
-@c NOTE: add /bin/login and xdm to client machine section
-@c
 @c Note: the above texinfo file must include the "doubleleftarrow"
 @c definitions added by jcb.
 @c %**start of header
@@ -33,7 +31,9 @@
 @page
 @vskip 0pt plus 1filll
 
+@iftex
 @include copyright.texinfo
+@end iftex
 @end titlepage
 
 @node Top, Introduction, (dir), (dir)
@@ -44,6 +44,7 @@ This file documents how to install the @value{RELEASE} release of
 @value{PRODUCT}.
 
 @include copyright.texinfo
+
 @end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
@@ -61,30 +62,22 @@ This file documents how to install the @value{RELEASE} release of
 @c node's forward and back pointers.
 @c
 @c ---------------------------------------------------------------------
+
 @menu
 * Introduction::                
 * Realm Configuration Decisions::  
-* Compiling @value{PRODUCT}::   
-* Installing @value{PRODUCT}::  
-* Support::                     
-* Bug Reporting::               
+* Building Kerberos V5::        
+* Installing Kerberos V5::      
+* Bug Reports for Kerberos V5::  
 * Files::                       
 @end menu
 
 @node Introduction, Realm Configuration Decisions, Top, Top
 @chapter Introduction
 
-@ifset CYGNUS
-Congratulations on your purchase of @value{PRODUCT}.  @value{COMPANY}
-believes @value{PRODUCT} provides the best network security available.
-Please let us know if we can be of assistance in getting your
-installation of @value{PRODUCT} set up and running.
-@end ifset
-
 @menu
 * What is Kerberos and How Does it Work?::  
 * Why Should I use Kerberos?::  
-* @value{PRODUCT} Documentation::  
 * Please Read the Documentation::  
 * Overview of This Guide::      
 @end menu
@@ -106,7 +99,7 @@ The TGT, which expires at a specified time, permits the client to obtain
 additional tickets, which give permission for specific services.  The
 requesting and granting of these additional tickets is user-transparent.
 
-@node Why Should I use Kerberos?, @value{PRODUCT} Documentation, What is Kerberos and How Does it Work?, Introduction
+@node Why Should I use Kerberos?, Please Read the Documentation, What is Kerberos and How Does it Work?, Introduction
 @section Why Should I use Kerberos?
 
 Since Kerberos negotiates authenticated, and optionally encrypted,
@@ -117,15 +110,9 @@ security breaches in industry happen from @i{inside} firewalls,
 @value{PRODUCT} from @value{COMPANY} will play a vital role in the
 security of your network.
 
-@node @value{PRODUCT} Documentation, Please Read the Documentation, Why Should I use Kerberos?, Introduction
-@section @value{PRODUCT} Documentation
-
-This document is one piece of the document set for @value{PRODUCT}.  The
-documents, and their intended audiences, are:
-
 @include document-list.texinfo
 
-@node Please Read the Documentation, Overview of This Guide, @value{PRODUCT} Documentation, Introduction
+@node Please Read the Documentation, Overview of This Guide, Why Should I use Kerberos?, Introduction
 @section Please Read the Documentation
 
 As with any software package that uses a centrallized database, the
@@ -185,7 +172,7 @@ Chapter four describes our problem reporting system.
 
 The appendices give sample configuration files.
 
-@node Realm Configuration Decisions, Compiling @value{PRODUCT}, Introduction, Top
+@node Realm Configuration Decisions, Building Kerberos V5, Introduction, Top
 @chapter Realm Configuration Decisions
 
 Before installing @value{PRODUCT}, it is necessary to consider the
@@ -325,16 +312,12 @@ parallel.  To do this, have the master KDC propagate the database to one
 set of slaves, and then have each of these slaves propagate the database
 to additional slaves.
 
-@ifclear CYGNUS
-
-@node Compiling @value{PRODUCT}, Installing @value{PRODUCT}, Realm Configuration Decisions, Top
-@chapter Compiling @value{PRODUCT}
+@node Building Kerberos V5, Installing Kerberos V5, Realm Configuration Decisions, Top
+@chapter Building @value{PRODUCT}
 
 @include build.texinfo
 
-@end ifclear
-
-@node Installing @value{PRODUCT}, Support, Compiling @value{PRODUCT}, Top
+@node Installing Kerberos V5, Bug Reports for Kerberos V5, Building Kerberos V5, Top
 @chapter Installing @value{PRODUCT}
 
 The sections of this chapter describe procedures for installing
@@ -365,12 +348,10 @@ UNIX Application Servers
 @menu
 * Installing KDCs::             
 * Installing and Configuring UNIX Client Machines::  
-* Installing and Configuring Windows Client Machines::  
-* Installing and Configuring Macintosh Client Machines::  
 * UNIX Application Servers::    
 @end menu
 
-@node Installing KDCs, Installing and Configuring UNIX Client Machines, Installing @value{PRODUCT}, Installing @value{PRODUCT}
+@node Installing KDCs, Installing and Configuring UNIX Client Machines, Installing Kerberos V5, Installing Kerberos V5
 @section Installing KDCs
 
 The Key Distribution Centers (KDCs) issue Kerberos tickets.  Each KDC
@@ -407,7 +388,6 @@ couple of times between the master KDC and each of the slave KDCs.  The
 first few steps must be done on the master KDC.
 
 @menu
-* Unpack the tar file::         
 * Edit the Configuration Files::  
 * Create the Database::         
 * Add Administrators to the Acl File::  
@@ -416,25 +396,7 @@ first few steps must be done on the master KDC.
 * Start the Kerberos Daemons::  
 @end menu
 
-@ifset CYGNUS
-@node Unpack the tar file, Edit the Configuration Files, Install the Master KDC, Install the Master KDC
-@subsubsection Unpack the tar file
-
-Unpack the tar file on each KDC.  Because of some specifications that
-are compiled into the software, you must install @value{PRODUCT} in the
-directory @code{@value{INSTALLDIR}}.  If you extract the tar file from
-the top-level directory (@code{/}), the files will end up in this
-directory.  Installation into other locations is not supported in this
-release, but is planned for future releases.
-
-@value{COMPANY} recommends that you choose a persistent directory name,
-and make it a symbolic link to @code{@value{INSTALLDIR}}, so
-you can install updates later without requiring users to change their
-paths.  This document will refer to @code{@value{ROOTDIR}} as the
-persistent directory name.
-@end ifset
-
-@node Edit the Configuration Files, Create the Database, Unpack the tar file, Install the Master KDC
+@node Edit the Configuration Files, Create the Database, Install the Master KDC, Install the Master KDC
 @subsubsection Edit the Configuration Files
 
 Modify the configuration files, @code{/etc/krb5.conf}
@@ -470,7 +432,7 @@ words that can be found in a dictionary, any common or popular name,
 especially a famous person (or cartoon character), your username in any
 form (@i{e.g.}, forward, backward, repeated twice, @i{etc.}), and any of
 the sample keys that appear in this manual.  One example of a key which
-would be good if it did not appear in this manual is ``CSiys4K5!'',
+would be good if it did not appear in this manual is ``MITiys4K5!'',
 which represents the sentence ``@value{COMPANY} is your source for
 Kerberos 5!''  (It's the first letter of each word, substituting the
 numeral ``4'' for the word ``for'', and includes the punctuation mark at
@@ -675,29 +637,14 @@ one of the slaves, you should perform each of these steps on the master
 KDC as well as the slave KDCs, unless these instructions specify
 otherwise.
 
+
 @menu
-* Copy the Software onto the Slave KDCs::  
 * Create Host Keys for the Slave KDCs::  
 * Extract Host Keytabs for the KDCs::  
 * Set Up the Slave KDCs for Database Propagation::  
 @end menu
 
-@ifset CYGNUS
-@node Copy the Software onto the Slave KDCs, Create Host Keys for the Slave KDCs, Install the Slave KDCs, Install the Slave KDCs
-@subsubsection Copy the Software onto the Slave KDCs
-
-Unpack the tar file on each slave KDC as you did on the master.  Once
-again, note that you must install @value{PRODUCT} in the directory
-@code{@value{INSTALLDIR}}.  If you extract the tar file from the
-top-level directory (@code{/}), the files will end up in this directory.
-As with the master KDC, make the symbolic link to
-@code{@value{INSTALLDIR}} with the persistent name you chose earlier.
-Once you have unpacked the tar file, replace the configuration files,
-@code{krb5.conf} (@pxref{krb5.conf}) and @code{kdc.conf}
-(@pxref{kdc.conf}) with those you edited on the master KDC.
-@end ifset
-
-@node Create Host Keys for the Slave KDCs, Extract Host Keytabs for the KDCs, Copy the Software onto the Slave KDCs, Install the Slave KDCs
+@node Create Host Keys for the Slave KDCs, Extract Host Keytabs for the KDCs, Install the Slave KDCs, Install the Slave KDCs
 @subsubsection Create Host Keys for the Slave KDCs
 
 Each KDC needs a host principal in the Kerberos database.  You can enter
@@ -1037,48 +984,37 @@ this, you'll need to change the @code{krb5.conf} file on every client
 machine in your Kerberos realm.)
 @end enumerate
 
-@node Installing and Configuring UNIX Client Machines, Installing and Configuring Windows Client Machines, Installing KDCs, Installing @value{PRODUCT}
+@node Installing and Configuring UNIX Client Machines, UNIX Application Servers, Installing KDCs, Installing Kerberos V5
 @section Installing and Configuring UNIX Client Machines
 
 Client machine installation is much more straightforward than
 installation of the KDCs.
 
 @menu
-* Unpack the tar File::         
 * Client Programs::             
 * Client Machine Configuration Files::  
 @end menu
 
-@ifset CYGNUS
-@node Unpack the tar File, Client Programs, Installing and Configuring UNIX Client Machines, Installing and Configuring UNIX Client Machines
-@subsection Unpack the tar File
-
-Install @value{PRODUCT} in @code{@value{ROOTDIR}}.  If you extract the
-tar file from the top level directory (@code{/}), the files will end up
-in this directory.
-@end ifset
-
-@node Client Programs, Client Machine Configuration Files, Unpack the tar File, Installing and Configuring UNIX Client Machines
+@node Client Programs, Client Machine Configuration Files, Installing and Configuring UNIX Client Machines, Installing and Configuring UNIX Client Machines
 @subsection Client Programs
 
 The Kerberized client programs are @code{login.krb5}, @code{rlogin},
-@code{telnet}, @code{ftp}, @code{rcp}, @code{rsh}, @code{xdm},
-@code{kinit}, @code{klist}, @code{kdestroy}, @code{kpasswd}, @code{ksu},
+@code{telnet}, @code{ftp}, @code{rcp}, @code{rsh}, @code{kinit},
+@code{klist}, @code{kdestroy}, @code{kpasswd}, @code{ksu},
 @c @code{krb524init}, 
 and @code{krdist}.  All of these programs are in the directory
-@code{@value{ROOTDIR}/bin}, except for @code{login.krb5} and @code{xdm},
-which are in @code{@value{ROOTDIR}/sbin}.
+@code{@value{ROOTDIR}/bin}, except for @code{login.krb5} which is in
+@code{@value{ROOTDIR}/sbin}.
 
 You will probably want to have your users put @code{@value{ROOTDIR}/bin}
 ahead of @code{/bin} and @code{/usr/bin} in their paths, so they will by
 default get the @value{PRODUCT} versions of @code{rlogin},
 @code{telnet}, @code{ftp}, @code{rcp}, and @code{rsh}.
 
-@value{COMPANY} recommends that you use @code{login.krb5}, and
-@value{PRODUCT} @code{xdm} in place of @code{/bin/login} and ordinary
-@code{xdm}, to give your users a single-sign-on system.  You will need
-to make sure your users know to use their Kerberos passwords when they
-log in.  
+@value{COMPANY} recommends that you use @code{login.krb5} in place of
+@code{/bin/login} to give your users a single-sign-on system.  You will
+need to make sure your users know to use their Kerberos passwords when
+they log in.
 
 You will also need to educate your users to use the ticket management
 programs @code{kinit},
@@ -1089,118 +1025,6 @@ programs @code{kinit},
 non-Kerberos counterparts
 @c @code{from}
 @code{su}, @code{passwd}, and @code{rdist}.
-
-@menu
-* Configuring the X Display Manager (Xdm)::  
-* Additional Xdm Configuration for AIX Machines::  
-@end menu
-
-@node Configuring the X Display Manager (Xdm), Additional Xdm Configuration for AIX Machines, Client Programs, Client Programs
-@subsubsection Configuring the X Display Manager (Xdm)
-
-You will need to edit the @code{xdm} configuration files slightly, based
-on your installation.  The files are in the directory
-@code{@value{ROOTDIR}/lib/X11/xdm}.  You will need to add a line of the
-following form to the file @code{Xservers} in that directory:
-
-@smallexample
-:0 local /usr/bin/X11/X :0
-@end smallexample
-
-@noindent
-Replace @code{/usr/bin/X11/X} with the path to your X server, and
-@samp{:0} with the actual display name, if different.
-
-If you will be having @code{xdm} manage multiple displays, you will need
-to add lines to the @code{xdm-config} file for those displays.  The
-following lines are shipped in the file, for display @samp{:0}:
-
-@smallexample
-@group
-DisplayManager._0.authorize:    true
-DisplayManager._0.setup:        @value{ROOTDIR}/lib/X11/xdm/Xsetup_0
-DisplayManager._0.startup:      @value{ROOTDIR}/lib/X11/xdm/GiveConsole
-DisplayManager._0.reset:        @value{ROOTDIR}/lib/X11/xdm/TakeConsole
-@end group
-@end smallexample
-
-The @samp{_0} in these lines translates to display @samp{:0}.  Add
-equivalent lines for other displays.  Replace the @samp{_0} with the
-other display names, substituting underscores (@samp{_}) for the
-@samp{:} and @samp{.} characters.
-
-@node Additional Xdm Configuration for AIX Machines,  , Configuring the X Display Manager (Xdm), Client Programs
-@subsubsection Additional Xdm Configuration for AIX Machines
-
-If you have machines running AIX, you will need to do some additional
-configuration.  Also note that under AIX, multiple non-network logins
-(on the console or via a serial port) will all use the same ticket file.
-
-For AIX, the line in the @code{Xservers} file described above needs the
-@code{-force} option, as in the following example:
-
-@smallexample
-:0 local /usr/lpp/X11/bin/X -force :0
-@end smallexample
-
-@noindent
-Again, replace @code{/usr/lpp/X11/bin/X} with the correct path for your
-X server, and @samp{:0} with the actual display name, if different.
-
-Also, you need to make the following changes to files in the directory
-@code{/etc/security}.
-
-In the file @code{login.cfg}, you need to add the following lines under
-the ``Authentication methods'' section
-
-@smallexample
-@group
-@value{CPRODUCT}:
-        program = @value{ROOTDIR}/sbin/login-auth
-@end group
-@end smallexample
-
-In the file @code{/etc/security/user}, add the following lines, under
-the @samp{default:} heading:
-
-@smallexample
-@group
-auth1 = @value{CPRODUCT}
-auth2 = none
-SYSTEM = NONE
-@end group
-@end smallexample
-
-@noindent
-You can comment out any previous values for @code{auth1}, @code{auth2},
-and @code{SYSTEM} using the @samp{*} character.
-
-Additionally, assuming you want to allow root to log in to the machine
-locally (instead of using Kerberos), you also need to add the following
-lines to the @samp{root:} section of @code{/etc/security/user}:
-
-@smallexample
-@group
-auth1 = SYSTEM
-SYSTEM = "compat"
-@end group
-@end smallexample
-
-@noindent
-You will also need to do the same for any other user who needs to log in
-locally.
-
-Note that if Kerberos authentication succeeds, but the native login
-program is unable to log the user in (@i{e.g.}, if it can't find the
-user's shell), the ticket file may not be destroyed.
-
-You may also want to edit the @code{/etc/environment} and/or
-@code{/etc/TIMEZONE} files to get any desired variables into the user's
-environment.
-
-Finally, because the AIX login program does not destroy tickets
-automatically upon completion, users need to put the @code{kdestroy}
-command in their @code{.logout} files.  
 
 @node Client Machine Configuration Files,  , Client Programs, Installing and Configuring UNIX Client Machines
 @subsection Client Machine Configuration Files
@@ -1247,123 +1071,7 @@ to switch the port number for @code{kerberos} to 750 and create a
 @code{kerberos-sec} service (tcp and udp) on port 88, so the Kerberos
 V4 KDC(s) will continue to work properly.
 
-@node Installing and Configuring Windows Client Machines, Installing and Configuring Macintosh Client Machines, Installing and Configuring UNIX Client Machines, Installing @value{PRODUCT}
-@section Installing and Configuring Windows Client Machines
-
-@value{PRODUCT} for Windows includes a GUI ticket management program
-(called @code{@value{CPRODUCT}}), a GUI telnet program, and a
-command-line telnet program that runs from within the @samp{Command
-Prompt}.  The command-line program is included because encryption and
-ticket forwarding are not available for the GUI program in this release.
-The GUI programs are available for Windows 3.1, Windows95, and Windows
-NT.  The command-line program is available only for Windows95 and
-Windows NT.
-
-@menu
-* Install the Executables::     
-* Install the @code{krb5.conf} file::  
-* Install an @code{\etc\passwd} file::  
-* Check the Clock and Time Zone::  
-* Create the Directory @code{\tmp}::  
-* Set the Ticket File Location::  
-@end menu
-
-@node Install the Executables, Install the @code{krb5.conf} file, Installing and Configuring Windows Client Machines, Installing and Configuring Windows Client Machines
-@subsection Install the Executables
-
-To install the ticket management program and the GUI telnet program,
-simply run the @code{setup} program and answer the questions.  To
-install the command-line telnet program, copy the @code{telnet.exe} and
-@code{cygwin.dll} programs into the directory of your choice.
-
-@node Install the @code{krb5.conf} file, Install an @code{\etc\passwd} file, Install the Executables, Installing and Configuring Windows Client Machines
-@subsection Install the @code{krb5.conf} file
-
-Install the same @code{krb5.conf} file (@xref{krb5.conf}) you use on
-your UNIX client machines.  The GUI programs will accept any path and
-filename for the configuration file; however, the command-line telnet
-program requires that the file be @code{\etc\krb5.conf}.  Once you have
-installed the file, run the @code{@value{CPRODUCT}} program and enter
-the path and filename into the @samp{Configuration File} box under the
-@samp{Options} menu (under @samp{File}).
-
-@node Install an @code{\etc\passwd} file, Check the Clock and Time Zone, Install the @code{krb5.conf} file, Installing and Configuring Windows Client Machines
-@subsection Install an @code{\etc\passwd} file
-
-@need 1100
-For the command-line telnet program, you need to install an
-@code{\etc\passwd} file containing the usernames of the users who will
-be running the program.  Each username must on its own line, with a
-colon at the end, as in the following example:
-
-@smallexample
-@group
-@value{RANDOMUSER1}:
-@value{RANDOMUSER2}:
-cbrown:
-@end group
-@end smallexample
-
-@node Check the Clock and Time Zone, Create the Directory @code{\tmp}, Install an @code{\etc\passwd} file, Installing and Configuring Windows Client Machines
-@subsection Check the Clock and Time Zone
-
-Make sure the clock and time zone are set correctly, and that the time
-is within the maximum clock skew of the KDC.  The default maximum clock
-skew is five minutes.
-
-@node Create the Directory @code{\tmp}, Set the Ticket File Location, Check the Clock and Time Zone, Installing and Configuring Windows Client Machines
-@subsection Create the Directory @code{\tmp}
-
-If you are using the command-line telnet program, make sure the
-directory @code{\tmp} exists, since this is where it needs the default
-ticket files need to be stored.
-
-@node Set the Ticket File Location,  , Create the Directory @code{\tmp}, Installing and Configuring Windows Client Machines
-@subsection Set the Ticket File Location
-
-From the @code{@value{CPRODUCT}} program, enter the path and filename
-for the ticket file location into the @samp{Credentials Cache Location}
-box under the @samp{Options} menu.  Again, the GUI programs will accept
-any path and filename; however, the command-line telnet program requires
-that this be @code{\tmp\krb5cc_0}.
-
-@node Installing and Configuring Macintosh Client Machines, UNIX Application Servers, Installing and Configuring Windows Client Machines, Installing @value{PRODUCT}
-@section Installing and Configuring Macintosh Client Machines
-
-@value{PRODUCT} for the Macintosh includes a GUI ticket management program
-(called @code{@value{CPRODUCT} config}) and a GUI telnet program.
-
-@menu
-* Unpack the Executables::      
-* Set Up your Configuration::   
-* Set the Clock and Time Zone::  
-@end menu
-
-@node Unpack the Executables, Set Up your Configuration, Installing and Configuring Macintosh Client Machines, Installing and Configuring Macintosh Client Machines
-@subsection Unpack the Executables
-
-To install the @code{@value{CPRODUCT} config} program and the
-@code{telnet} program, simply unpack the archive and answer the
-questions.  Then move the programs into the folder of your choice.
-
-@node Set Up your Configuration, Set the Clock and Time Zone, Unpack the Executables, Installing and Configuring Macintosh Client Machines
-@subsection Set Up your Configuration
-
-To set up your configuration, run the @code{@value{CPRODUCT} config}
-program and enter the information from your site's @code{krb5.conf}
-file.  Enter the hostname or IP address and realm for each KDC under the
-Server section.  If the KDC is an admin server, check the ``Admin
-server'' box.  Enter any domain/realm mappings in the Domain/Hostname
-section.
-
-@node Set the Clock and Time Zone,  , Set Up your Configuration, Installing and Configuring Macintosh Client Machines
-@subsection Set the Clock and Time Zone
-
-Make sure the clock and time zone are set correctly, and that the time
-is within the maximum clock skew of the KDC.  The default maximum clock
-skew is five minutes.
-
-@node UNIX Application Servers,  , Installing and Configuring Macintosh Client Machines, Installing @value{PRODUCT}
+@node UNIX Application Servers,  , Installing and Configuring UNIX Client Machines, Installing Kerberos V5
 @section UNIX Application Servers
 
 An application server is a host that provides one or more services over
@@ -1534,31 +1242,11 @@ Finally, the keytab file and any programs run by root, including the
 @value{PRODUCT} binaries, should be kept on local disk.  The keytab file
 should be readable only by root.
 
-@ifset CYGNUS
-@node Support, Bug Reporting, Installing @value{PRODUCT}, Top
-@chapter Support
+@node Bug Reports for Kerberos V5, Files, Installing Kerberos V5, Top
+@chapter Bug Reports for @value{PRODUCT}
+@include bug-report.texinfo
 
-If you have problems installing @value{PRODUCT}, please use the
-@code{send-pr} program to fill out a Problem Report.  
-
-@include send-pr.texinfo
-@end ifset
-
-@ifset MIT
-@node Bug Reporting, Files, Support, Top
-@chapter Bug Reporting
-
-In any complex software, there will be bugs. Please send bug reports or
-other problems you may uncover to the e-mail address
-@b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos V5
-distribution you are using, and whether you have made any private
-changes.  Bug reports that include proposed fixes are especially
-welcome.  If you do include fixes, please send them using either context
-diffs or unified diffs (using @samp{diff -c} or @samp{diff -u},
-respectively).
-@end ifset
-
-@node Files,  , Bug Reporting, Top
+@node Files,  , Bug Reports for Kerberos V5, Top
 @appendix Files
 
 @menu
