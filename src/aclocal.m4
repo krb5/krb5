@@ -757,6 +757,8 @@ AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_MSG_CHECKING(for tclConfig.sh)
 if test -r "$tcl_dir/lib/tclConfig.sh" ; then
   tcl_conf="$tcl_dir/lib/tclConfig.sh"
+elif test -r "$tcl_dir/tclConfig.sh" ; then
+  tcl_conf="$tcl_dir/tclConfig.sh"
 else
   tcl_conf=
   lib="$tcl_dir/lib"
@@ -930,6 +932,18 @@ if test "$with_tcl" = no ; then
   true
 elif test "$with_tcl" = yes -o "$with_tcl" = try ; then
   tcl_dir=/usr
+  if test ! -r /usr/lib/tclConfig.sh; then
+    cat >> conftest <<\EOF
+puts "tcl_dir=$tcl_library"
+EOF
+    if tclsh conftest >conftest.out 2>/dev/null; then
+      if grep tcl_dir= conftest.out >/dev/null 2>&1; then
+        t=`sed s/tcl_dir=// conftest.out`
+        tcl_dir=$t
+      fi
+    fi # tclsh ran script okay
+  rm -f conftest conftest.out
+  fi # no /usr/lib/tclConfig.sh
 else
   tcl_dir=$with_tcl
 fi

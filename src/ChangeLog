@@ -1,3 +1,11 @@
+2004-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Look for tclConfig.sh in
+	the specified directory if it's not in a "lib" subdirectory.
+	(AC_KRB5_TCL): If no pathname is supplied and tclConfig.sh isn't
+	found in /usr/lib, try running a script under tclsh to see if it
+	can supply the pathname for tclConfig.sh.
+
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Integrate config commands from kdc, krb524, and
