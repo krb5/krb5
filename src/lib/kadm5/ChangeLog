@@ -1,3 +1,8 @@
+2001-06-21  Mitchell Berger  <mitchb@mit.edu>
+
+	* server_internal.h: Removed incgen argument from prototype of
+	kdb_put_entry_internal.
+
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
 	* adb.h: Forward declaration of struct _kadm5_server_handle_t added
@@ -22,11 +27,22 @@
 	* kadm_rpc_xdr.c: Added new functions xdr_getgeneration_arg and
 	xdr_getgeneration_ret.
 
+2001-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (krb5_klog_init) [HAVE_SYSLOG]: Loop over an array of
+	syslog facility names rather than open-coding each check.  Add
+	"authpriv" and "ftp" names.
+
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
 	* server_internal.h: Added prototypes for kdb_put_entry_internal and
 	kdb_update_generation_number.
 
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
+	* server_internal.h: Add prototype for kdb_iter_entry().
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* alt_prof.c (krb5_read_realm_params): Cast argument to isspace()
 	to int.
