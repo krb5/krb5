@@ -1,3 +1,9 @@
+Sun Mar 16 21:20:00 1997  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c: Don't assume dbm_db_get_mkey() and dbe_find_enctype
+	won't error out.  Also, some gcc -Wall warning
+	cleanups. [krb5-kdc/361]
+
 Mon Nov 18 20:40:12 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Set shared library version to 1.0. [krb5-libs/201]
