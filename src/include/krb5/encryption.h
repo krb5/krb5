@@ -127,8 +127,8 @@ typedef struct _krb5_checksum_entry {
 #define	CKSUMTYPE_RSA_MD4	0x0002
 #define	CKSUMTYPE_RSA_MD4_DES	0x0003
 #define	CKSUMTYPE_DESCBC	0x0004
-/* des-mac */
 /* des-mac-k */
+/* rsa-md4-des-k */
 #define	CKSUMTYPE_RSA_MD5	0x0007
 #define	CKSUMTYPE_RSA_MD5_DES	0x0008
 

@@ -60,8 +60,10 @@
 #define KDC_ERR_CLIENT_NOTYET		21 /* C not yet valid */
 #define KDC_ERR_SERVICE_NOTYET		22 /* S not yet valid */
 #define KDC_ERR_KEY_EXP			23 /* Password has expired */
-#define KDC_PREAUTH_FAILED		24 /* Preauthentication failed */
-#define KDC_SERVER_NOMATCH		25 /* Requested server and */
+#define KDC_ERR_PREAUTH_FAILED		24 /* Preauthentication failed */
+#define KDC_ERR_PREAUTH_REQUIRED	25 /* Additional preauthentication */
+					   /* required */
+#define KDC_ERR_SERVER_NOMATCH		26 /* Requested server and */
 					   /* ticket don't match*/
 /* Application errors */
 #define	KRB_AP_ERR_BAD_INTEGRITY 31	/* Decrypt integrity check failed */

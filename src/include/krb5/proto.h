@@ -71,7 +71,8 @@
 #define KRB5_PADATA_ENC_TIMESTAMP       5  /* timestamp encrypted in key */
 #define KRB5_PADATA_ENC_SECURID         6  /* SecurId passcode */
 #define KRB5_PADATA_SESAME		7  /* Sesame project */
-
+#define KRB5_PADATA_OSF_DCE		8  /* OSF DCE */
+    
 /* Reserved for SPX pre-authentication. */
 #define KRB5_PADATA_DASS		16
 
@@ -83,5 +84,6 @@
 
 /* authorization data types */
 #define	KRB5_AUTHDATA_OSF_DCE	64
+#define KRB5_AUTHDATA_SESAME	65
 
 #endif /* KRB5_PROTO__ */
