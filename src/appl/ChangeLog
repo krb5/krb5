@@ -1,3 +1,7 @@
+2004-07-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use KRB5_AC_INET6.
+
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCAL_SUBDIRS): Renamed from MY_SUBDIRS.
