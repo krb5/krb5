@@ -82,9 +82,9 @@ Notes, Major Changes, and Known Bugs
     being worked on that will describe how this works; it is not
     currently standardized.  Some backwards-compatibility issues in
     this area mean that enabling 3DES support must be done with
-    caution; see below.
-
-  * doc on upgrade path? XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    caution; service keys that are used for GSSAPI must not be updated
+    to 3DES until the services themselves are upgraded to support 3DES
+    under GSSAPI.
 
 * DNS support for locating KDCs is enabled by default.  DNS support
   for looking up the realm of a host is compiled in but disabled by
@@ -107,8 +107,6 @@ Notes, Major Changes, and Known Bugs
   Configure-time options are available to control the inclusion of the
   DNS code and the setting of the defaults.  Entries in krb5.conf will
   also modify the behavior if the code has been compiled in.
-  XXXXXXXXXXXXXXXXXX details; man pages?
-  [libdefaults] ...
 
 * Numerous buffer-overrun problems have been found and fixed.  Many of
   these were in locations we don't expect can be exploited in any
