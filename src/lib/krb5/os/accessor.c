@@ -44,6 +44,9 @@ krb5int_accessor(internals, version)
     internals_temp.krb5_skdc_timeout_shift = krb5_skdc_timeout_shift;
     internals_temp.krb5_skdc_timeout_1 = krb5_skdc_timeout_1;
     internals_temp.krb5_max_dgram_size = krb5_max_dgram_size;
+    internals_temp.krb5_hmac = krb5_hmac;
+    internals_temp.md5_hash_provider = &krb5int_hash_md5;
+    internals_temp.arcfour_enc_provider = &krb5int_enc_arcfour;
     *internals = internals_temp;
     return 0;
   }

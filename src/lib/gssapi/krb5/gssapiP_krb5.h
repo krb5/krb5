@@ -108,14 +108,14 @@ enum sgn_alg {
   SGN_ALG_MD2_5                 = 0x0001,
   SGN_ALG_DES_MAC               = 0x0002,
   SGN_ALG_3			= 0x0003, /* not published */
-  SGN_ALG_HMAC_MD5              = 0x0011, /* microsoft w2k; no support */
+  SGN_ALG_HMAC_MD5              = 0x0011, /* microsoft w2k;  */
   SGN_ALG_HMAC_SHA1_DES3_KD     = 0x0004
 };
 enum seal_alg {
   SEAL_ALG_NONE            = 0xffff,
   SEAL_ALG_DES             = 0x0000,
   SEAL_ALG_1		   = 0x0001, /* not published */
-  SEAL_ALG_MICROSOFT_RC4   = 0x0010, /* microsoft w2k; no support */
+  SEAL_ALG_MICROSOFT_RC4   = 0x0010, /* microsoft w2k;  */
   SEAL_ALG_DES3KD          = 0x0002
 };
 
@@ -248,6 +248,11 @@ krb5_error_code kg_encrypt (krb5_context context,
 				      krb5_pointer in,
 				      krb5_pointer out,
 				      int length);
+krb5_error_code
+kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
+		    const unsigned char *kd_data, size_t kd_data_len,
+		    const unsigned char *input_buf, size_t input_len,
+		    unsigned char *output_buf);
 
 krb5_error_code kg_decrypt (krb5_context context,
 				      krb5_keyblock *key,  int usage,

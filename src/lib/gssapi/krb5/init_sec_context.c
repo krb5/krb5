@@ -353,6 +353,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 #if 1
      ENCTYPE_DES3_CBC_SHA1,
 #endif
+     ENCTYPE_ARCFOUR_HMAC,
      ENCTYPE_DES_CBC_CRC,
      ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4,
      0
@@ -565,6 +566,20 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 		  goto fail;
 	      }
 	      break;
+	  case ENCTYPE_ARCFOUR_HMAC:
+	    ctx->signalg = SGN_ALG_HMAC_MD5 ;
+	    ctx->cksum_size = 8;
+	    ctx->sealalg = SEAL_ALG_MICROSOFT_RC4 ;
+
+	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
+	      if (code)
+		  goto fail;
+	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
+	      if (code) {
+		  krb5_free_keyblock (context, ctx->enc);
+		  goto fail;
+	      }
+	      break;	    
 #if 0
 	  case ENCTYPE_DES3_CBC_MD5:
 	      enctype = ENCTYPE_DES3_CBC_RAW;

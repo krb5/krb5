@@ -628,6 +628,20 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        }
 
        break;
+	  case ENCTYPE_ARCFOUR_HMAC:
+	    ctx->signalg = SGN_ALG_HMAC_MD5 ;
+	    ctx->cksum_size = 8;
+	    ctx->sealalg = SEAL_ALG_MICROSOFT_RC4 ;
+
+	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
+	      if (code)
+		  goto fail;
+	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
+	      if (code) {
+		  krb5_free_keyblock (context, ctx->enc);
+		  goto fail;
+	      }
+	      break;	    
 
    default:
        code = KRB5_BAD_ENCTYPE;

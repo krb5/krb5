@@ -1,4 +1,5 @@
 /*
+  * Copyright2001 by the Massachusetts Institute of Technology.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
@@ -50,6 +51,7 @@
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
+#include <assert.h>
 
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
    conf_state is only valid if SEAL. */
@@ -85,6 +87,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     krb5_int32 seqnum;
     OM_uint32 retval;
     size_t sumlen;
+    krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
     if (toktype == KG_TOK_SEAL_MSG) {
 	message_buffer->length = 0;
@@ -125,7 +128,9 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     if ((ctx->sealalg == SEAL_ALG_NONE && signalg > 1) ||
 	(ctx->sealalg == SEAL_ALG_1 && signalg != SGN_ALG_3) ||
 	(ctx->sealalg == SEAL_ALG_DES3KD &&
-	 signalg != SGN_ALG_HMAC_SHA1_DES3_KD)) {
+	 signalg != SGN_ALG_HMAC_SHA1_DES3_KD)||
+	(ctx->sealalg == SEAL_ALG_MICROSOFT_RC4 &&
+	signalg != SGN_ALG_HMAC_MD5)) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
@@ -133,8 +138,11 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     switch (signalg) {
     case SGN_ALG_DES_MAC_MD5:
     case SGN_ALG_MD2_5:
+    case SGN_ALG_HMAC_MD5:
 	cksum_len = 8;
-	break;
+	if (toktype != KG_TOK_SEAL_MSG)
+	  sign_usage = 15;
+	    break;
     case SGN_ALG_3:
 	cksum_len = 16;
 	break;
@@ -151,6 +159,12 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
     /* get the token parameters */
 
+    if ((code = kg_get_seq_num(context, ctx->seq, ptr+14, ptr+6, &direction,
+			       &seqnum))) {
+	*minor_status = code;
+	return(GSS_S_BAD_SIG);
+    }
+
     /* decode the message, if SEAL */
 
     if (toktype == KG_TOK_SEAL_MSG) {
@@ -159,10 +173,36 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 		*minor_status = ENOMEM;
 		return(GSS_S_FAILURE);
 	    }
+	    if (ctx->enc->enctype == ENCTYPE_ARCFOUR_HMAC) {
+	      unsigned char bigend_seqnum[4];
+	      krb5_keyblock *enc_key;
+	      int i;
+	      bigend_seqnum[0] = (seqnum>>24) & 0xff;
+	      bigend_seqnum[1] = (seqnum>>16) & 0xff;
+	      bigend_seqnum[2] = (seqnum>>8) & 0xff;
+	      bigend_seqnum[3] = seqnum & 0xff;
+	      code = krb5_copy_keyblock (context, ctx->enc, &enc_key);
+	      if (code)
+		{
+		  xfree(plain);
+		  *minor_status = code;
+		  return(GSS_S_FAILURE);
+		}
 
-	    if ((code = kg_decrypt(context, ctx->enc, KG_USAGE_SEAL, NULL,
-				   ptr+14+cksum_len, plain, tmsglen))) {
-		xfree(plain);
+	      assert (enc_key->length == 16);
+	      for (i = 0; i <= 15; i++)
+		((char *) enc_key->contents)[i] ^=0xf0;
+	      code = kg_arcfour_docrypt (enc_key, 0,
+					 &bigend_seqnum[0], 4, 
+					 ptr+14+cksum_len, tmsglen,
+					 plain);
+	      krb5_free_keyblock (context, enc_key);
+	    } else {
+	      code = kg_decrypt(context, ctx->enc, KG_USAGE_SEAL, NULL,
+				ptr+14+cksum_len, plain, tmsglen);
+		}
+	    if (code) {
+	      		xfree(plain);
 		*minor_status = code;
 		return(GSS_S_FAILURE);
 	    }
@@ -205,11 +245,13 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     switch (signalg) {
     case SGN_ALG_DES_MAC_MD5:
     case SGN_ALG_MD2_5:
-    case SGN_ALG_HMAC_MD5:
     case SGN_ALG_DES_MAC:
     case SGN_ALG_3:
 	md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
 	break;
+    case SGN_ALG_HMAC_MD5:
+      md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
+      break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
 	md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
 	break;
@@ -249,7 +291,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	plaind.length = 8 + (ctx->big_endian ? token.length : plainlen);
 	plaind.data = data_ptr;
 	code = krb5_c_make_checksum(context, md5cksum.checksum_type,
-				    ctx->seq, KG_USAGE_SIGN,
+				    ctx->seq, sign_usage,
 				    &plaind, &md5cksum);
 	xfree(data_ptr);
 
@@ -316,7 +358,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	plaind.data = data_ptr;
 	krb5_free_checksum_contents(context, &md5cksum);
 	code = krb5_c_make_checksum(context, md5cksum.checksum_type,
-				    ctx->seq, KG_USAGE_SIGN,
+				    ctx->seq, sign_usage,
 				    &plaind, &md5cksum);
 	xfree(data_ptr);
 
@@ -337,6 +379,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	return(GSS_S_DEFECTIVE_TOKEN);
 
     case SGN_ALG_HMAC_SHA1_DES3_KD:
+    case SGN_ALG_HMAC_MD5:
 	/* compute the checksum of the message */
 
 	/* 8 = bytes of token body to be checksummed according to spec */
@@ -361,7 +404,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	plaind.length = 8 + (ctx->big_endian ? token.length : plainlen);
 	plaind.data = data_ptr;
 	code = krb5_c_make_checksum(context, md5cksum.checksum_type,
-				    ctx->seq, KG_USAGE_SIGN,
+				    ctx->seq, sign_usage,
 				    &plaind, &md5cksum);
 	xfree(data_ptr);
 
@@ -372,7 +415,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	    return(GSS_S_FAILURE);
 	}
 
-	code = memcmp(md5cksum.contents, ptr+14, md5cksum.length);
+	code = memcmp(md5cksum.contents, ptr+14, cksum_len);
 	break;
     }
 
@@ -412,14 +455,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     }
 
     /* do sequencing checks */
-
-    if ((code = kg_get_seq_num(context, ctx->seq, ptr+14, ptr+6, &direction,
-			       &seqnum))) {
-	if (toktype == KG_TOK_SEAL_MSG)
-	    xfree(token.value);
-	*minor_status = code;
-	return(GSS_S_BAD_SIG);
-    }
 
     if ((ctx->initiate && direction != 0xff) ||
 	(!ctx->initiate && direction != 0)) {

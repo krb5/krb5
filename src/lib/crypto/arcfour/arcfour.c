@@ -55,6 +55,8 @@ case 7:				/* tgs-req authenticator */
     return 11;
   case 12:			/* app-rep encrypted part */
     return 12;
+  case 23: /* sign wrap token*/
+    return 13;
   default:
       return usage;
 }

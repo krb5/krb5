@@ -1,3 +1,39 @@
+2001-10-25  Sam Hartman  <hartmans@mit.edu>
+
+	* k5unseal.c (kg_unseal_v1): same here.
+
+	* k5seal.c (make_seal_token_v1): Factor out usage type we claim
+	for signatures so we can do something different for  hmac-md5.
+	Microsoft uses a different usage number for  mic tokens and wrap  tokens.
+
+	* k5unseal.c (kg_unseal_v1):  Add arcfour checksum and decrypt support
+
+	* util_seqnum.c (kg_get_seq_num): support arcfour_hmac
+
+	* k5unseal.c (kg_unseal_v1): Get the sequence number before
+	decrypting the token so we can use it to decrypt arcfour 
+
+	* gssapiP_krb5.h util_crypt.c:  New function kg_arcfour_docrypt
+
+	* util_seqnum.c (kg_make_seq_num): Add rc4 support
+
+	* k5seal.c (make_seal_token_v1): Simplify logic significantly.
+	Don't worry so much about only allocating memory we use; allocate
+	a full token all the time  and only decide not to copy in data at
+	the last moment.  This significantly simplifies the control flow,
+	giving better testing coverage and allowing better reasoning about
+	the code. Add arcfour-hmac support
+
+	* util_crypt.c (kg_confounder_size): Special case arcfour to return 8
+
+2001-10-24  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Support rc4 enctype
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Support rc4 enctype
+
+	* gssapiP_krb5.h: Remove claim we don't support Microsoft sign alg
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_krb5.h, gssapi_krb5.h, k5mech.c: Make prototypes
@@ -1487,3 +1523,7 @@ Wed Aug 17 15:47:26 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 	* gssapi_krb5.c: Fixed OID for the krb5 mechanism.  (Transcription
 	error.) 
 
+
+
+
+	

@@ -623,6 +623,14 @@ krb5_error_code krb5_hmac
 		krb5_const krb5_keyblock *key, unsigned int icount,
 		krb5_const krb5_data *input, krb5_data *output);
 
+/* 
+ * These declarations are here, so both krb5 and k5crypto
+ * can get to them.
+ * krb5 needs to get to them so it can  make them available to libgssapi.
+ */
+extern const struct krb5_enc_provider krb5int_enc_arcfour;
+extern const struct krb5_hash_provider krb5int_hash_md5;
+
 
 #ifdef KRB5_OLD_CRYPTO
 /* old provider api */
@@ -1512,7 +1520,7 @@ void krb5int_set_prompt_types
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 3
+#define KRB5INT_ACCESS_STRUCT_VERSION 4
 
 typedef struct _krb5int_access {
     krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
@@ -1526,7 +1534,13 @@ typedef struct _krb5int_access {
     unsigned int krb5_skdc_timeout_shift;
     unsigned int krb5_skdc_timeout_1;
     unsigned int krb5_max_dgram_size;
-} krb5int_access;
+  const  struct krb5_hash_provider *md5_hash_provider;
+  const struct krb5_enc_provider *arcfour_enc_provider;
+  krb5_error_code (* krb5_hmac)
+  (krb5_const struct krb5_hash_provider *hash,
+   krb5_const krb5_keyblock *key, unsigned int icount,
+   krb5_const krb5_data *input, krb5_data *output);
+  } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \
     (((krb5_int32)((sizeof(krb5int_access) & 0xFFFF) | \

@@ -1,4 +1,5 @@
 /*
+  * Copyright2001 by the Massachusetts Institute of Technology.
  * Copyright 1993 by OpenVision Technologies, Inc.
  * 
  * Permission to use, copy, modify, distribute, and sell this software
@@ -21,6 +22,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include "k5-int.h"
 
 /*
  * $Id$
@@ -37,15 +39,27 @@ kg_make_seq_num(context, key, direction, seqnum, cksum, buf)
 {
    unsigned char plain[8];
 
-   plain[0] = (unsigned char) (seqnum&0xff);
-   plain[1] = (unsigned char) ((seqnum>>8)&0xff);
-   plain[2] = (unsigned char) ((seqnum>>16)&0xff);
-   plain[3] = (unsigned char) ((seqnum>>24)&0xff);
-
    plain[4] = direction;
    plain[5] = direction;
    plain[6] = direction;
    plain[7] = direction;
+   if (key->enctype == ENCTYPE_ARCFOUR_HMAC ) {
+     /* Yes, Microsoft used big-endian sequence number.*/
+     plain[0] = (seqnum>>24) & 0xff;
+     plain[1] = (seqnum>>16) & 0xff;
+     plain[2] = (seqnum>>8) & 0xff;
+     plain[3] = seqnum & 0xff;
+     return kg_arcfour_docrypt (key, 0, 
+				cksum, 8,
+				&plain[0], 8,
+				buf);
+     
+   }
+     
+   plain[0] = (unsigned char) (seqnum&0xff);
+   plain[1] = (unsigned char) ((seqnum>>8)&0xff);
+   plain[2] = (unsigned char) ((seqnum>>16)&0xff);
+   plain[3] = (unsigned char) ((seqnum>>24)&0xff);
 
    return(kg_encrypt(context, key, KG_USAGE_SEQ, cksum, plain, buf, 8));
 }
@@ -61,7 +75,14 @@ krb5_error_code kg_get_seq_num(context, key, cksum, buf, direction, seqnum)
    krb5_error_code code;
    unsigned char plain[8];
 
-   code = kg_decrypt(context, key, KG_USAGE_SEQ, cksum, buf, plain, 8);
+   if (key->enctype == ENCTYPE_ARCFOUR_HMAC) {
+     code = kg_arcfour_docrypt (key, 0,
+				cksum, 8,
+				buf, 8,
+				plain);
+   } else {
+     code = kg_decrypt(context, key, KG_USAGE_SEQ, cksum, buf, plain, 8);
+   }
    if (code)
       return(code);
 
@@ -71,11 +92,14 @@ krb5_error_code kg_get_seq_num(context, key, cksum, buf, direction, seqnum)
       return((krb5_error_code) KG_BAD_SEQ);
 
    *direction = plain[4];
-
-   *seqnum = ((plain[0]) |
+   if (key->enctype == ENCTYPE_ARCFOUR_HMAC) {
+     *seqnum = (plain[3]|(plain[2]<<8) | (plain[1]<<16)| (plain[0]<<24));
+   } else {
+     *seqnum = ((plain[0]) |
 	      (plain[1]<<8) |
 	      (plain[2]<<16) |
 	      (plain[3]<<24));
+   }
 
    return(0);
 }

@@ -1,3 +1,11 @@
+2001-10-24  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add  declaration for  arcfour enc_provider and  md5
+	hash_provider  so we can get to these indirectly from libgssapi.
+	Ick.  This is an evil hack but somewhat less evil than  having raw
+	enctypes. 
+	Add above to krb5int_access along with krb5_hmac function
+
 2001-10-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use of AC_DEFINE modified to include third
