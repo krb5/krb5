@@ -1,3 +1,4 @@
 AC_INIT(configure.in)
+WITH_CCOPTS
 AC_SET_BUILDTOP
 AC_OUTPUT(Makefile,[EXTRA_RULES])

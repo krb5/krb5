@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+WITH_CCOPTS
 AC_SET_BUILDTOP
 AC_WITH([krb4],convert=convert,convert=)
 CONFIG_DIRS(create destroy edit stash aname $convert)

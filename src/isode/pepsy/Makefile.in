@@ -6,6 +6,7 @@ BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
 DEFS = @DEFS@
+CCOPTS = @CCOPTS@
 
 TOPDIR = $(BUILDTOP)/
 

@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+WITH_CCOPTS
 AC_SET_BUILDTOP
 CONFIG_DIRS(sample simple user_user)
 MAKE_SUBDIRS("making",all)

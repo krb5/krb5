@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+WITH_CCOPTS
 AC_SET_BUILDTOP
 UsePepsy
 CONFIG_RULES

@@ -3,6 +3,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
  
 DEFS = @DEFS@
+CCOPTS = @CCOPTS@
 LIBS = @LIBS@
  
 CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG
