@@ -81,7 +81,7 @@ va_list ap;
 					  sizeof(krb5_data)*(count*2));
 	    if (!p_tmp) {
 	    free_out:
-		    while (i-- >= 0)
+		    while (--i >= 0)
 			xfree(data[i].data);
 		    xfree(data);
 		    xfree(tmpdata);
