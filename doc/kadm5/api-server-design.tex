@@ -234,7 +234,10 @@ function whose first argument was a short in one version and a pointer
 in the next might fail if it simply typed-casted the argument.  In
 that case, the function would have to written to take variable
 arguments (i.e. use $<$stdarg.h$>$) and extract them from the stack
-based on the API version.
+based on the API version.  Alternatively, a separate function for each
+API version could be defined, and $<$kadm5/admin.h$>$ could be written
+to \v{#define} the exported function name based on the value of
+USE_KADM5_API_VERSION.
 
 In the current system, it turns out, that isn't necessary, and future
 implementors should take try to ensure that no version has semantics
@@ -245,7 +248,7 @@ appropriate version and then have separate code paths to handle each
 one correctly.  kadm5_get_principal, in svr_principal.c, is a good
 example.  In VERSION_1, it took the address of a pointer to a
 kadm5_principal_ent_t to fill in with a pointer to allocated memory;
-in VERSION_1, it takes a pointer to a structure to fill in, and a mask
+in VERSION_2, it takes a pointer to a structure to fill in, and a mask
 of which fields in that structure should be filled in.  Also, the
 contents of the kadm5_principal_ent_t changed slightly between the two
 versions.  kadm5_get_principal handles versioning as follows
@@ -276,6 +279,17 @@ entry structure into the VERSION_1 entry structure, and then writes
 the address of the newly allocated memory into address specified by
 the original entry argument which it had previously saved away.
 \end{enumerate}
+
+There is another complication involved in a function re-interpreting
+the number of arguments it receives at compile time---it cannot assign
+any value to an argument for which the client did not pass a value.
+For example, a VERSION_1 client only passes three arguments to
+kadm5_get_principal.  If the implementation of kadm5_get_principal
+notices that the caller is VERSION_1 and therefore assigns its fourth
+argument, mask, to a value that mimics the VERSION_1 behavior, it may
+inadvertently overwrite data on its caller's stack.  This problem can
+be avoided simply by using a true local variable in such cases,
+instead of treating an unpassed argument as a local variable.
 
 \subsection{XDR functions}
 
