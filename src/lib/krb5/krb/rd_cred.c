@@ -184,11 +184,19 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context, krb5_data *pc
         return KRB5_RC_REQUIRED;
 
 
+/* If decrypting with the first keyblock we try fails, perhaps the
+ * credentials are stored in the session key so try decrypting with
+    * that.
+*/
     if ((retval = krb5_rd_cred_basic(context, pcreddata, keyblock,
 				     &replaydata, pppcreds))) {
-      return retval;
+	if ((retval = krb5_rd_cred_basic(context, pcreddata,
+					 auth_context->keyblock,
+					 &replaydata, pppcreds))) {
+	    return retval;
     }
-
+    }
+    
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
         krb5_timestamp currenttime;
@@ -231,8 +239,10 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context, krb5_data *pc
     }
 
 error:;
-    if (retval)
-    	krb5_xfree(*pppcreds);
+    if (retval) {
+    	krb5_free_tgt_creds(context, *pppcreds);
+	*pppcreds = NULL;
+    }
     return retval;
 }
 

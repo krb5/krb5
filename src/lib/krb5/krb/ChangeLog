@@ -1,3 +1,14 @@
+2003-02-11  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred): Free creds using krb5_free_tgt_creds
+	and make sure they are set to null in case of  error.
+
+2003-02-07  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred): Allow the tickets to be encrypted the
+	session key as well as the  subsession key; for GSSAPI this tends
+	to be what happens.
+
 2003-02-04  Sam Hartman  <hartmans@mit.edu>
 
 	* get_in_tkt.c (krb5_get_init_creds): Default to addressless tickets
