@@ -60,8 +60,7 @@ char *argv[];
     krb5_error_code retval;
     char *c_realm;			/* local Kerberos realm */
     char **s_realms;			/* server's Kerberos realm(s) */
-    krb5_data scontents[3], *server[4];	/* a krb5_principal is really a
-					   krb5_data *[] */
+    krb5_principal server;
     krb5_data packet, inbuf;
     krb5_checksum send_cksum;
     krb5_ccache ccdef;
@@ -178,16 +177,12 @@ char *argv[];
 				[2] == FULL host name (by convention)
 				[3] == null ptr */
 
-    scontents[0].length = strlen(s_realms[0]);
-    scontents[0].data = s_realms[0];
-    scontents[1].length = strlen(SERVICE);
-    scontents[1].data = SERVICE;
-    scontents[2].length = strlen(full_hname);
-    scontents[2].data = full_hname;
-    server[0] = &scontents[0];
-    server[1] = &scontents[1];
-    server[2] = &scontents[2];
-    server[3] = 0;
+    if (retval = krb5_build_principal(&server,
+				      strlen(s_realms[0]), s_realms[0],
+				      SERVICE, full_hname, 0)) {
+	com_err(PROGNAME, retval, "while setting up server principal");
+	exit(1);
+    }
 
     if (retval = krb5_mk_req(server,
 			     0,		/* use default options */
@@ -274,6 +269,8 @@ char *argv[];
 	com_err(PROGNAME, retval, "while fetching credentials");
 	exit(1);
     }
+
+    krb5_free_principal(server);
 
     /* Make the safe message */
     inbuf.data = argc == 3 ? argv[2] : MSG;
