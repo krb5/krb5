@@ -1,3 +1,7 @@
+Sat Jul 16 09:16:33 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: hopefully make dbm libs dtrt
+
 Sat Jul 16 01:59:02 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* do_as_req.c: Sanitie error return codes
