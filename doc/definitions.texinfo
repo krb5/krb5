@@ -146,7 +146,7 @@ krb5/src/appl/bsd/login.c
 the following defaults should be consistent with the values set in
 krb5/src/kdc/kerberos_v4
 @end ignore
-@set DefaultV4Mode nopreauth
+@set DefaultV4Mode  none
 @comment KDC_V4_DEFAULT_MODE
 
 @ignore
