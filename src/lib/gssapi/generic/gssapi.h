@@ -127,13 +127,9 @@ typedef unsigned long gss_uint32;
 
 #ifdef	OM_STRING
 /*
- * We have included the xom.h header file.  Verify that OM_uint32 is defined
- * correctly.
+ * We have included the xom.h header file.  Use the definition for
+ * OM_object identifier.
  */
-#if sizeof(gss_uint32) != sizeof(OM_uint32)
-/**/#error Incompatible definition of OM_uint32 from xom.h
-#endif
-
 typedef OM_object_identifier	gss_OID_desc, *gss_OID;
 #else	/* OM_STRING */
 /*

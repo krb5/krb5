@@ -1,3 +1,8 @@
+Wed Jan 10 21:31:42 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h: Remove #if statement that used sizeof(xxx), since that
+		won't work for most C compilers/C preprocessors!
+
 Thu Jan  4 21:33:38 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapiP_generic.h (TWRITE_INT16, TREAD_INT16): Added new macros
