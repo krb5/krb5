@@ -67,8 +67,8 @@ main(argc, argv)
 
     krb5_init_ets();
 
-    if (rindex(argv[0], '/'))
-	argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
 
     while ((option = getopt(argc, argv, "rpl:c:")) != EOF) {
 	switch (option) {

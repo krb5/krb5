@@ -57,8 +57,8 @@ char *argv[];
     initialize_kdb5_error_table();
     initialize_isod_error_table();
 
-    if (rindex(argv[0], '/'))
-	argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
 
     while ((optchar = getopt(argc, argv, "d:")) != EOF) {
 	switch(optchar) {

@@ -63,8 +63,8 @@ char *argv[];
     int keytypedone = 0;
     krb5_enctype etype = -1;
 
-    if (rindex(argv[0], '/'))
-	argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
 
     initialize_krb5_error_table();
     initialize_kdb5_error_table();

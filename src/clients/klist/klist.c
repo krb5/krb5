@@ -46,8 +46,8 @@ main(argc, argv)
     initialize_isod_error_table();
 
 
-    if (rindex(argv[0], '/'))
-	argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
 
     while ((c = getopt(argc, argv, "fc:")) != EOF) {
 	switch (c) {
