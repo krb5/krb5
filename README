@@ -5,18 +5,58 @@ THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
+Files are copyright MIT, Cygnus Support, OpenVision, Oracle, Sun Soft,
+and others.  
+
+The following copyright and permission notice applies to the
+OpenVision Kerberos Administration system located in kadmin/create,
+kadmin/dbutil, kadmin/server, lib/kadm, and portions of lib/rpc:
+
+   Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
+     
+   WARNING: Retrieving the OpenVision Kerberos Administration system 
+   source code, as described below, indicates your acceptance of the 
+   following terms.  If you do not agree to the following terms, do not 
+   retrieve the OpenVision Kerberos administration system.
+     
+   You may freely use and distribute the Source Code and Object Code 
+   compiled from it, but this Source Code is provided to you "AS IS" 
+   EXCLUSIVE OF ANY WARRANTY, INCLUDING, WITHOUT LIMITATION, ANY 
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR 
+   ANY OTHER WARRANTY, WHETHER EXPRESS OR IMPLIED.  IN NO EVENT WILL 
+   OPENVISION HAVE ANY LIABILITY FOR ANY LOST PROFITS, LOSS OF DATA OR 
+   COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY 
+   SPECIAL, INDIRECT, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THIS 
+   AGREEMENT, INCLUDING, WITHOUT LIMITATION, THOSE RESULTING FROM THE USE 
+   OF THE SOURCE CODE, OR THE FAILURE OF THE SOURCE CODE TO PERFORM, OR 
+   FOR ANY OTHER REASON.
+
+   OpenVision retains all rights, title, and interest in the donated
+   Source Code.  With respect to OpenVision's copyrights in the donated
+   Source Code, OpenVision also retains rights to derivative works
+   of the Source Code whether created by OpenVision or a third party.
+     
+   OpenVision Technologies, Inc. has donated this Kerberos 
+   Administration system to MIT for inclusion in the standard 
+   Kerberos 5 distribution.  This donation underscores our 
+   commitment to continuing Kerberos technology development 
+   and our gratitude for the valuable work which has been 
+   performed by MIT and the Kerberos community. 
+
+
 
 Now, with that out of the way, let me point you to a few things:
 
-The file doc/HOW_TO_BUILD gives instructions on how to start build
-Kerberos.  More complete building and installation instructions can be
-found in the doc/install.texi.  (A postscript file is provided for
-your convenience.)
+The first file you should look at is doc/install.ps; it contains the
+notes for building and installing Kerberos 5.  The info file
+krb5-install.info has the same information in info file format.  You
+can view this using the GNU emacs info-mode, or by using the
+standalone info file viewer from the Free Software Foundation.
 
-The file doc/TREE-GRAPH is a graphical representation of the source
-directory tree you should receive with this distribution.
-
-The file doc/SOURCE-TREE describes what's in each directory.
+Other good files to look at are admin-guide.ps and user-guide.ps,
+which contain the system administrator's guide, and the user's guide,
+respectively.  They are also available as info files
+kerberos-admin.info and krb5-user.info, respectively.
 
 >>									     <<
 >> Please report any problems/bugs/comments to 'krb5-bugs@athena.mit.edu'    <<
@@ -28,43 +68,30 @@ Appreciation Time!!!!  There are far too many people to try to thank
 them all; many people have contributed to the development of Kerberos
 V5.  This is only a partial listing....  
 
-Thanks to Mark Eichin at Cygnus for writing the new autoconf
-configuration system, for making the code much more portable, and for
-serving as pre-release testers.
+Thanks to John Linn, Scott Foote, and all of the folks at OpenVision
+Technologies, Inc., who donated their administration server for use in
+the MIT release of Kerberos.
 
-Thanks to Marc Horowitz, Barry Jaspan, and Jonathan Kamens (and
-others) at Openvision, Inc. for providing us with an GSS-API library,
-for serving as pre-release testers, and for finding and fixing many
-bugs.
+Thanks to Paul Vixie and the Internet Software Consortium for
+supporting the OV administration server integration work.
 
-Thanks to Cybersafe for providing patches to fix bugs with inter-realm
-authentication.  
+Thanks to Jeff Bigler, Mark Eichin, Mark Horowitz, Nancy Gilman, Ken
+Raeburn, and all of the folks at Cygnus Support, who provided
+innumerable bug fixes and portability enhancements to the Kerberos V5
+tree.  Thanks especially ot Jeff Bigler, for the new user and system
+administrator's documentation.
 
-Thanks to Ari Medivnsky and Cliff Neuman for writing a ksu client.
+Thanks to Doug Engert from ANL for providing many bug fixes, as well
+as testing to ensure DCE interoperability.
 
-Thanks to Jim Miller from Suite Software for contributing many detailed
-bug reports, most of them by doing desk checks over the code!
-
-Thanks to Prasad Upasani from ISI for porting the Berkeley
-rlogin/rsh/rcp suite and for testing out our distribution on the Sun.
-
-Thanks to Glenn Machin and Bill Wrahe from Sandia National Labs for
-contributing the old kadmin server, plus lots of bugfixes.
-
-Thanks to Bill Sommerfeld from HP for commenting on early Kerberos
-interface drafts, suggesting improvements in later coding interfaces,
-and finding and fixing many bugs.
-
-Thanks to Paul Borman from Cray for writing the Kerberos v4 to v5 glue
-layer and the Kerberos v5 subroutines for telnet.  
-
-Thanks to Dan Bernstein, for providing the replay cache code.  
+Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
+their many suggestions and bug fixes.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Richard Basch, Jay Berkenbilt, John Carr, Don Davis,
-Nancy Gilman, Barry Jaspan, John Kohl, Cliff Neuman, Paul Park, Ezra 
-Peisach, Chris Provenzano, Jon Rochlis, Jeff Schiller, Ted Ts'o, Tom Yu.
-
+past and present: Jay Berkenbilt, John Carr, Don Davis, Nancy Gilman,
+Sam Hartman, Marc Horowitz, Barry Jaspan, John Kohl, Cliff Neuman,
+Kevin Mitchell, Paul Park, Chris Provenzano, Jon Rochlis, Jeff
+Schiller, Harry Tsai, Ted Ts'o, Tom Yu.
 
 Note:
 
