@@ -1,3 +1,14 @@
+Thu Apr 27 14:36:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCALINCLUDE): get kerberosIV headers for login.c
+	(login.krb): link against krb4 libs.
+	* configure.in: check AC_CONST so it works.
+
+Thu Apr 27 13:54:21 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use WITH_KRB4 as-is.
+	* Makefile.in (krshd, krlogind): use KRB4_LIB directly.
+
 Thu Apr 27 01:09:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krcp.c (answer_auth): Should not call krb5_cc_close after

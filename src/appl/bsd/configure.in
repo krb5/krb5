@@ -60,13 +60,6 @@ AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
 AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
 PATH=$save_path
 dnl
-AC_ARG_WITH([krb4],[include Kerberos V4 support],
-ADD_DEF(-DKRB5_KRB4_COMPAT)
-K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a',
-echo "warning: no krb4 backwards compatibility support"
-K4LIB=)
-AC_SUBST(K4LIB)
-dnl
 dnl
 AC_MSG_CHECKING([streams interface])
 AC_CACHE_VAL(krb5_cv_has_streams,
@@ -144,4 +137,5 @@ fi
 dnl
 dnl
 ADD_DEF(-DKERBEROS)
+AC_CONST
 V5_AC_OUTPUT_MAKEFILE
