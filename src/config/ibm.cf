@@ -68,6 +68,8 @@
 #define	HasPosixTermios		YES
 #define	HasPosixFileLocks	YES
 #define	HasPosixTypes		YES
+#define	HasStrdup		YES
+#define	HasVfprintf		YES
 
 #define	HasInet			YES
 /* There is a compiler bug on the PS/2 running AIX 1.2.1:
